@@ -585,6 +585,6 @@
 	    - Separat OscilGenUI din ADnoteUI
 	    - Inceput sa scriu modulul de sinteza PADnote
 19 Iun 2004 - Adaugat modul liniar de controller bandwidth si modificat modul liniar la controllerul modulation wheel
-
+	    - Adaugata modulatia in frecventa la OsciGen
 
 

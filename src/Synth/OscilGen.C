@@ -50,6 +50,7 @@ OscilGen::~OscilGen(){
 void OscilGen::defaults(){
     oldbasefunc=0;oldbasepar=64;oldhmagtype=0;oldwaveshapingfunction=0;oldwaveshaping=64,oldnormalizemethod=0;
     oldbasefuncmodulation=0;oldharmonicshift=0;oldbasefuncmodulationpar1=0;oldbasefuncmodulationpar2=0;oldbasefuncmodulationpar3=0;
+    oldmodulation=0;oldmodulationpar1=0;oldmodulationpar2=0;oldmodulationpar3=0;
     for (int i=0;i<MAX_AD_HARMONICS;i++){
 	hmag[i]=0.0;
 	hphase[i]=0.0;
@@ -67,6 +68,11 @@ void OscilGen::defaults(){
     Pbasefuncmodulationpar1=64;
     Pbasefuncmodulationpar2=64;
     Pbasefuncmodulationpar3=32;
+
+    Pmodulation=0;
+    Pmodulationpar1=64;
+    Pmodulationpar2=64;
+    Pmodulationpar3=32;
 
     Pwaveshapingfunction=0;
     Pwaveshaping=64;
@@ -289,7 +295,7 @@ void OscilGen::oscilfilter(){
     for (int i=1;i<OSCIL_SIZE/2;i++){
 	REALTYPE gain=1.0;
 	switch(Pfiltertype){
-	    case 1: gain=pow(1.0-par*par*par,i);//lp
+	    case 1: gain=pow(1.0-par*par*par*0.99,i);//lp
 		    break;
 	    case 2: gain=1.0-pow(1.0-par*par,i+1);//hp1
 		    break;
@@ -396,6 +402,86 @@ void OscilGen::waveshape(){
     fft->smps2freqs(oscilFFTfreqs,NULL);//perform FFT
 };
 
+
+/* 
+ * Do the Frequency Modulation of the Oscil
+ */
+void OscilGen::modulation(){
+    int i;
+
+    oldmodulation=Pmodulation;
+    oldmodulationpar1=Pmodulationpar1;
+    oldmodulationpar2=Pmodulationpar2;
+    oldmodulationpar3=Pmodulationpar3;
+    if (Pmodulation==0) return;
+
+
+    REALTYPE modulationpar1=Pmodulationpar1/127.0,
+	     modulationpar2=Pmodulationpar2/127.0,
+	     modulationpar3=Pmodulationpar3/127.0;
+
+    switch(Pmodulation){
+        case 1:modulationpar1=(pow(2,modulationpar1*5.0)-1.0)/10.0;
+	       modulationpar3=floor((pow(2,modulationpar3*5.0)-1.0));
+	       if (modulationpar3<0.9999) modulationpar3=-1.0;
+	    break;
+        case 2:modulationpar1=(pow(2,modulationpar1*5.0)-1.0)/10.0;
+	       modulationpar3=1.0+floor((pow(2,modulationpar3*5.0)-1.0));
+    	    break;
+	case 3:modulationpar1=(pow(2,modulationpar1*7.0)-1.0)/10.0;
+	       modulationpar3=0.01+(pow(2,modulationpar3*16.0)-1.0)/10.0;
+	    break;
+    };	
+
+    oscilFFTfreqs[0]=0.0;//remove the DC
+    //reduce the amplitude of the freqs near the nyquist
+    for (i=1;i<OSCIL_SIZE/8;i++) {
+	REALTYPE tmp=i/(OSCIL_SIZE/8.0);
+	oscilFFTfreqs[OSCIL_SIZE/2+i-1]*=tmp;
+	oscilFFTfreqs[OSCIL_SIZE/2-i+1]*=tmp;
+    };
+    fft->freqs2smps(oscilFFTfreqs,NULL);
+    //now the oscilFFTfreqs contains *time-domain data* of samples
+    //I don't want to allocate another array for this
+
+    int extra_points=2;
+    REALTYPE *in=new REALTYPE[OSCIL_SIZE+extra_points];
+
+    //Normalize
+    REALTYPE max=0.0;
+    for (i=0;i<OSCIL_SIZE;i++) 
+	if (max<fabs(oscilFFTfreqs[i])) max=fabs(oscilFFTfreqs[i]);
+    if (max<0.00001) max=1.0;
+    max=1.0/max;for (i=0;i<OSCIL_SIZE;i++) in[i]=oscilFFTfreqs[i]*max;
+    for (i=0;i<extra_points;i++) in[i+OSCIL_SIZE]=oscilFFTfreqs[i]*max;
+    
+    //Do the modulation
+    for (i=0;i<OSCIL_SIZE;i++) {
+	REALTYPE t=i*1.0/OSCIL_SIZE;
+
+	switch(Pmodulation){
+	    case 1:t=t*modulationpar3+sin((t+modulationpar2)*2.0*PI)*modulationpar1;//rev
+		break;
+	    case 2:t=t+sin((t*modulationpar3+modulationpar2)*2.0*PI)*modulationpar1;//sine
+		break;
+	    case 3:t=t+pow((1.0-cos((t+modulationpar2)*2.0*PI))*0.5,modulationpar3)*modulationpar1;//power
+		break;
+	};
+	
+	t=(t-floor(t))*OSCIL_SIZE;
+	
+	int poshi=(int) t;
+	REALTYPE poslo=t-floor(t);
+
+	oscilFFTfreqs[i]=in[poshi]*(1.0-poslo)+in[poshi+1]*poslo;
+    };
+
+    delete(in);
+    fft->smps2freqs(oscilFFTfreqs,NULL);//perform FFT
+};
+
+
+
 /* 
  * Adjust the spectrum
  */
@@ -485,8 +571,7 @@ void OscilGen::shiftharmonics(){
 void OscilGen::prepare(){
    int i,j,k;
    REALTYPE a,b,c,d,hmagnew;
-
-   
+  
    if ((oldbasepar!=Pbasefuncpar)||(oldbasefunc!=Pcurrentbasefunc)||
 	(oldbasefuncmodulation!=Pbasefuncmodulation)||
         (oldbasefuncmodulationpar1!=Pbasefuncmodulationpar1)||
@@ -538,6 +623,8 @@ void OscilGen::prepare(){
 
    if (Pharmonicshiftfirst!=0)  shiftharmonics();
 
+
+
    if (Pfilterbeforews==0){
         waveshape();
 	oscilfilter();
@@ -546,6 +633,7 @@ void OscilGen::prepare(){
         waveshape();
     };
 
+   modulation();
    spectrumadjust();
    if (Pharmonicshiftfirst==0)  shiftharmonics();
 
@@ -669,6 +757,12 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
         (oldbasefuncmodulationpar1!=Pbasefuncmodulationpar1)||
 	(oldbasefuncmodulationpar2!=Pbasefuncmodulationpar2)||
 	(oldbasefuncmodulationpar3!=Pbasefuncmodulationpar3)) 
+	    oscilprepared=0;
+
+    if ((oldmodulation!=Pmodulation)||
+        (oldmodulationpar1!=Pmodulationpar1)||
+	(oldmodulationpar2!=Pmodulationpar2)||
+	(oldmodulationpar3!=Pmodulationpar3)) 
 	    oscilprepared=0;
 
     if (oldharmonicshift!=Pharmonicshift+Pharmonicshiftfirst*256) oscilprepared=0;
@@ -1047,6 +1141,11 @@ void OscilGen::add2XML(XMLwrapper *xml){
     xml->addpar("base_function_modulation_par2",Pbasefuncmodulationpar2);
     xml->addpar("base_function_modulation_par3",Pbasefuncmodulationpar3);
 
+    xml->addpar("modulation",Pmodulation);
+    xml->addpar("modulation_par1",Pmodulationpar1);
+    xml->addpar("modulation_par2",Pmodulationpar2);
+    xml->addpar("modulation_par3",Pmodulationpar3);
+
     xml->addpar("wave_shaping",Pwaveshaping);
     xml->addpar("wave_shaping_function",Pwaveshapingfunction);
 
@@ -1113,6 +1212,10 @@ void OscilGen::getfromXML(XMLwrapper *xml){
     Pbasefuncmodulationpar2=xml->getpar127("base_function_modulation_par2",Pbasefuncmodulationpar2);
     Pbasefuncmodulationpar3=xml->getpar127("base_function_modulation_par3",Pbasefuncmodulationpar3);
 
+    Pmodulation=xml->getpar127("modulation",Pmodulation);
+    Pmodulationpar1=xml->getpar127("modulation_par1",Pmodulationpar1);
+    Pmodulationpar2=xml->getpar127("modulation_par2",Pmodulationpar2);
+    Pmodulationpar3=xml->getpar127("modulation_par3",Pmodulationpar3);
 
     Pwaveshaping=xml->getpar127("wave_shaping",Pwaveshaping);
     Pwaveshapingfunction=xml->getpar127("wave_shaping_function",Pwaveshapingfunction);

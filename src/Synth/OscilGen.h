@@ -76,7 +76,7 @@ class OscilGen{
 	unsigned char Pbasefuncpar;//the parameter of the base function
 	
 	unsigned char Pbasefuncmodulation;//what modulation is applied to the basefunc
-	unsigned char Pbasefuncmodulationpar1,Pbasefuncmodulationpar2,Pbasefuncmodulationpar3;//the parameter of the base functions
+	unsigned char Pbasefuncmodulationpar1,Pbasefuncmodulationpar2,Pbasefuncmodulationpar3;//the parameter of the base function modulation
 
 	/*the Randomness:
 	  64=no randomness
@@ -96,6 +96,10 @@ class OscilGen{
 	unsigned char Padaptiveharmonics;//the adaptive harmonics status (off=0,on=1)
 	unsigned char Padaptiveharmonicsbasefreq;//the base frequency of the adaptive harmonic (30..3000Hz)
 	unsigned char Padaptiveharmonicspower;//the strength of the effect (0=off,100=full)
+
+	unsigned char Pmodulation;//what modulation is applied to the oscil
+	unsigned char Pmodulationpar1,Pmodulationpar2,Pmodulationpar3;//the parameter of the parameters
+
 	
     private:
 	
@@ -116,9 +120,13 @@ class OscilGen{
 	//Shift the harmonics
 	void shiftharmonics();
     
+	//Do the oscil modulation stuff
+	void modulation();
+
 	//Do the adaptive harmonic stuff
 	void adaptiveharmonic(REALTYPE *freqs,REALTYPE freq);
 	
+		
         //Base function saveto/loadfrom quantised data
 	void savebasefuncQ();
 	void loadbasefuncQ();
@@ -141,6 +149,7 @@ class OscilGen{
 	//Internal Data
 	unsigned char oldbasefunc,oldbasepar,oldhmagtype,oldwaveshapingfunction,oldwaveshaping,oldnormalizemethod;
 	int oldfilterpars,oldsapars,oldbasefuncmodulation,oldbasefuncmodulationpar1,oldbasefuncmodulationpar2,oldbasefuncmodulationpar3,oldharmonicshift;
+	int oldmodulation,oldmodulationpar1,oldmodulationpar2,oldmodulationpar3;
 	/*
 	  The frequencies of wavefroms are stored like this:
 	  c[0],c[1],....,c[OSCIL_SIZE/2],s[OSCIL_SIZE/2-1],...,s[2],s[1]
