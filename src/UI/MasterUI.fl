@@ -1133,7 +1133,7 @@ bankui->show();}
         }
         Fl_Slider partpanning {
           label Pan
-          callback {master->part[npart]->setPpanning((int) o->value());} selected
+          callback {master->part[npart]->setPpanning((int) o->value());}
           xywh {185 95 70 15} type {Horz Knob} box FLAT_BOX maximum 127 step 1 value 64
           code0 {o->value(master->part[npart]->Ppanning);}
         }
@@ -1663,11 +1663,15 @@ pthread_mutex_lock(&master->mutex);
 pthread_mutex_unlock(&master->mutex);
 master->applyparameters();
 
+npartcounter->value(1);
 refresh_master_ui();
+updatepanel();
 if (result>=0) setfilelabel(filename);
 
+
 if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not a zynaddsubfx parameters file.");
-      else if (result<0) fl_alert("Error: Could not load the file.");} {}
+      else if (result<0) fl_alert("Error: Could not load the file.");} {selected
+    }
   }
   Function {do_save_master()} {} {
     code {char *filename;

@@ -730,4 +730,6 @@
 	    - Adaugat un icon la ZynAddSubFX
 10 Oct 2004 - Si controllerul de Resonance se aplica la toate item-urile din kit
 12 Oct 2004 - Corectata o eroare care facea ca butoanele Addpoint si Delpoint de la Envelope sa nu fie afisate
+16 Oct 2004 - Corectata o eroare care facea ca partUI-ul sa nu se actualizeze intotdeauna cand incarcam un instrument
+
 	    
