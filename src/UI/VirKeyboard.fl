@@ -1,12 +1,12 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0105 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
 
 decl {//License: GNU GPL version 2} {} 
 
-decl {\#include <stdlib.h>} {selected public
+decl {\#include <stdlib.h>} {public
 } 
 
 decl {\#include <FL/fl_draw.H>} {public
@@ -209,7 +209,7 @@ class VirKeyboard {} {
       label {Virtual Keyboard - ZynAddSubFX}
       callback {relaseallkeys();
 virkeyboardwindow->hide();}
-      xywh {46 407 650 130} hide
+      xywh {118 534 650 130} type Double hide
     } {
       Fl_Box virkeys {
         label Keyboard
@@ -232,14 +232,6 @@ virkeys->keyoct2=(int) o->value();
 virkeys->take_focus();}
         tooltip {keys "zsxdcvgbh..." octave} xywh {380 110 45 15} type Simple labelsize 10 align 4 when 6 minimum 0 maximum 5 step 1 textfont 1 textsize 10
         code0 {o->value(virkeys->keyoct2);}
-      }
-      Fl_Counter {} {
-        label {Ch.}
-        callback {relaseallkeys();
-virkeys->midich=(int) o->value();
-virkeys->take_focus();}
-        tooltip {Midi Channel} xywh {30 100 55 20} type Simple labelsize 12 align 4 when 6 minimum 0 maximum 15 step 1 textfont 1 textsize 12
-        code0 {o->value(virkeys->midich);}
       }
       Fl_Value_Slider {} {
         label Vel
@@ -367,6 +359,15 @@ pitchwheelroller->do_callback();}
         code0 {o->value(virkeys->rndvelocity);}
         class WidgetPDial
       }
+      Fl_Choice partrcv {
+        label {MIDI Ch.}
+        callback {relaseallkeys();
+virkeys->midich=(int) o->value();
+virkeys->take_focus();} open selected
+        tooltip {Send to Midi Channel} xywh {15 105 65 20} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+        code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Chn%d",i+1);if (i!=9) o->add(nrstr); else o->add("Drum10");};}
+        code1 {o->value(virkeys->midich);}
+      } {}
     }
   }
   Function {VirKeyboard(Master *master_)} {} {

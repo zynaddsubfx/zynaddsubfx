@@ -169,14 +169,13 @@ delete(ADnoteVoiceListItem);} {}
   decl {Master *master;} {}
 } 
 
-class ADvoiceUI {open : {public Fl_Group}
+class ADvoiceUI {: {public Fl_Group}
 } {
-  Function {make_window()} {open
-  } {
+  Function {make_window()} {} {
     Fl_Window ADnoteVoiceParameters {
       label Voice
-      xywh {67 162 765 525} type Double
-      class Fl_Group visible
+      xywh {67 162 765 525} type Double hide
+      class Fl_Group
     } {
       Fl_Group voiceparametersgroup {
         xywh {0 0 765 525} box THIN_UP_BOX color 48
@@ -216,33 +215,22 @@ o->redraw();}
 if (k<0) k+=1024;
 pars->VoicePar[nvoice].PFMCoarseDetune = k+
    (pars->VoicePar[nvoice].PFMCoarseDetune/1024)*1024;}
-                tooltip {Coarse Detune} xywh {540 270 60 15} labelsize 11 align 1 minimum -64 maximum 63 step 1 textfont 1 textsize 12
+                tooltip {Coarse Detune} xywh {685 270 60 15} labelsize 11 align 1 minimum -64 maximum 63 step 1 textfont 1 textsize 12
                 code0 {int k=pars->VoicePar[nvoice].PFMCoarseDetune%1024;}
                 code1 {if (k>=512) k-=1024;}
                 code2 {o->value(k);}
                 code3 {o->lstep(10);}
               }
-              Fl_Text_Display {} {
-                xywh {600 270 50 15} labelsize 12 textsize 12
-              }
               Fl_Counter {} {
-                label Oct
+                label Octave
                 callback {int k=(int) o->value();
 if (k<0) k+=16;
 pars->VoicePar[nvoice].PFMCoarseDetune = k*1024+
    pars->VoicePar[nvoice].PFMCoarseDetune%1024;}
-                tooltip Octave xywh {660 270 45 15} type Simple labelsize 10 align 5 minimum -8 maximum 7 step 1 textfont 1 textsize 12
+                tooltip Octave xywh {625 270 45 15} type Simple labelsize 10 align 1 minimum -8 maximum 7 step 1 textfont 1 textsize 12
                 code0 {int k=pars->VoicePar[nvoice].PFMCoarseDetune/1024;}
                 code1 {if (k>=8) k-=16;}
                 code2 {o->value(k);}
-              }
-              Fl_Counter {} {
-                label Type
-                callback {pars->VoicePar[nvoice].PFMDetuneType=(int) o->value();
-fmdetunevalueoutput->do_callback();}
-                tooltip {The way of how the detune is computed (0 for Default)} xywh {710 270 40 15} type Simple labelsize 10 align 5 minimum 0 maximum 127 step 1 textfont 1 textsize 12
-                code0 {o->bounds(0,N_DETUNE_TYPES);}
-                code1 {o->value(pars->VoicePar[nvoice].PFMDetuneType);}
               }
               Fl_Slider {} {
                 callback {pars->VoicePar[nvoice].PFMDetune=(int)o->value()+8192;
@@ -256,6 +244,14 @@ fmdetunevalueoutput->do_callback();}
                 xywh {540 245 45 13} labelsize 8 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 8
                 code0 {o->value(getdetune(pars->VoicePar[nvoice].PFMDetuneType,0,pars->VoicePar[nvoice].PFMDetune));}
               }
+              Fl_Choice {} {
+                label {Detune Type}
+                callback {pars->VoicePar[nvoice].PFMDetuneType=(int) o->value();
+fmdetunevalueoutput->do_callback();} open
+                xywh {540 270 75 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+                code0 {o->add("Default");o->add("L35cents");o->add("L10cents");o->add("E100cents");o->add("E1200cents");}
+                code1 {o->value(pars->VoicePar[nvoice].PFMDetuneType);}
+              } {}
             }
             Fl_Group {} {
               label {Mod.AMPLITUDE}
@@ -341,26 +337,27 @@ if ((int) o->value() != 0) {
 voiceFMparametersgroup->redraw();} open
                 xywh {560 390 75 15} down_box BORDER_BOX labelsize 10 textfont 1 textsize 10
                 code0 {o->add("Internal");}
-                code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"ExtFM.%2d",i);o->add(tmp);};}
+                code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"ExtM.%2d",i);o->add(tmp);};}
                 code3 {o->value(pars->VoicePar[nvoice].PextFMoscil+1);}
               } {}
             }
-            Fl_Counter {} {
-              label {Ext. Mod.}
-              callback {pars->VoicePar[nvoice].PFMVoice=(int)o->value();
-if ((int) o->value() != -1) {
+            Fl_Choice {} {
+              label {External Mod.}
+              callback {pars->VoicePar[nvoice].PFMVoice=(int)o->value()-1;
+if ((int) o->value() != 0) {
     modoscil->deactivate();
     modfrequency->deactivate();
 } else { 
     modoscil->activate();
     modfrequency->activate();
 };
-voiceFMparametersgroup->redraw();}
-              tooltip {External Modulator voice ( -1 for internal)} xywh {640 40 70 20} type Simple align 5 minimum -1 maximum 127 step 1 value -1 textfont 1
-              code0 {o->bounds(-1,nvoice-1);}
-              code1 {o->value(pars->VoicePar[nvoice].PFMVoice);}
-              code2 {if ((int) o->value() != -1) {modoscil->deactivate();modfrequency->deactivate();}}
-            }
+voiceFMparametersgroup->redraw();} open selected
+              xywh {635 40 85 20} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+              code0 {o->add("OFF");}
+              code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"ExtMod.%2d",i);o->add(tmp);};}
+              code2 {o->value(pars->VoicePar[nvoice].PFMVoice+1);}
+              code3 {if ((int) o->value() != 0) {modoscil->deactivate();modfrequency->deactivate();}}
+            } {}
           }
           Fl_Choice {} {
             label {Type:}
@@ -433,23 +430,15 @@ o->redraw();}
               code0 {o->value(pars->VoicePar[nvoice].PFreqLfoEnabled);}
             }
             Fl_Counter {} {
-              label Oct
+              label Octave
               callback {int k=(int) o->value();
 if (k<0) k+=16;
 pars->VoicePar[nvoice].PCoarseDetune = k*1024+
    pars->VoicePar[nvoice].PCoarseDetune%1024;}
-              tooltip Octave xywh {480 315 45 20} type Simple labelsize 10 align 4 minimum -8 maximum 7 step 1 textfont 1 textsize 12
+              tooltip Octave xywh {470 270 45 15} type Simple labelsize 10 align 1 minimum -8 maximum 7 step 1 textfont 1 textsize 12
               code0 {int k=pars->VoicePar[nvoice].PCoarseDetune/1024;}
               code1 {if (k>=8) k-=16;}
               code2 {o->value(k);}
-            }
-            Fl_Counter {} {
-              label Type
-              callback {pars->VoicePar[nvoice].PDetuneType=(int) o->value();
-detunevalueoutput->do_callback();}
-              tooltip {The way of how the detune is computed (0 for Default)} xywh {485 340 40 15} type Simple labelsize 10 align 4 minimum 0 maximum 127 step 1 textfont 1 textsize 12
-              code0 {o->bounds(0,N_DETUNE_TYPES);}
-              code1 {o->value(pars->VoicePar[nvoice].PDetuneType);}
             }
             Fl_Counter {} {
               label {Coarse Det.}
@@ -457,14 +446,11 @@ detunevalueoutput->do_callback();}
 if (k<0) k+=1024;
 pars->VoicePar[nvoice].PCoarseDetune = k+
    (pars->VoicePar[nvoice].PCoarseDetune/1024)*1024;}
-              tooltip {Coarse Detune} xywh {465 270 60 20} labelsize 11 align 1 minimum -64 maximum 63 step 1 textfont 1 textsize 12
+              tooltip {Coarse Detune} xywh {455 340 60 20} labelsize 11 align 1 minimum -64 maximum 63 step 1 textfont 1 textsize 12
               code0 {int k=pars->VoicePar[nvoice].PCoarseDetune%1024;}
               code1 {if (k>=512) k-=1024;}
               code2 {o->value(k);}
               code3 {o->lstep(10);}
-            }
-            Fl_Text_Display {} {
-              xywh {465 290 60 15} labelsize 12 textsize 12
             }
             Fl_Slider {} {
               callback {pars->VoicePar[nvoice].PDetune=(int)o->value()+8192;
@@ -495,6 +481,14 @@ if (x==0) fixedfreqetdial->deactivate();
               code1 {if (pars->VoicePar[nvoice].Pfixedfreq==0) o->deactivate();}
               class WidgetPDial
             }
+            Fl_Choice {} {
+              label {Detune Type}
+              callback {pars->VoicePar[nvoice].PDetuneType=(int) o->value();
+detunevalueoutput->do_callback();} open
+              xywh {450 305 75 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+              code0 {o->add("Default");o->add("L35cents");o->add("L10cents");o->add("E100cents");o->add("E1200cents");}
+              code1 {o->value(pars->VoicePar[nvoice].PDetuneType);}
+            } {}
           }
           Fl_Group voiceoscil {
             xywh {80 375 445 145} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
@@ -543,7 +537,7 @@ if ((int) o->value() != 0) {
 };
 
 voiceparametersgroup->redraw();
-voiceonbutton->redraw();} open selected
+voiceonbutton->redraw();} open
             xywh {5 455 65 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
             code0 {o->add("Internal");}
             code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"Ext.%2d",i);o->add(tmp);};}
@@ -771,38 +765,27 @@ class ADnoteUI {} {
           class EnvelopeUI
         } {}
         Fl_Counter {} {
-          label Oct
+          label Octave
           callback {int k=(int) o->value();
 if (k<0) k+=16;
 pars->GlobalPar.PCoarseDetune = k*1024+
    pars->GlobalPar.PCoarseDetune%1024;}
-          tooltip Octave xywh {480 320 45 20} type Simple labelsize 10 align 4 minimum -8 maximum 7 step 1 textfont 1 textsize 12
+          tooltip Octave xywh {470 275 45 15} type Simple labelsize 10 align 1 minimum -8 maximum 7 step 1 textfont 1 textsize 12
           code0 {int k=pars->GlobalPar.PCoarseDetune/1024;}
           code1 {if (k>=8) k-=16;}
           code2 {o->value(k);}
         }
         Fl_Counter {} {
-          label Type
-          callback {pars->GlobalPar.PDetuneType=(int) o->value();
-detunevalueoutput->do_callback();}
-          tooltip {The way of how the detune is computed (Default)} xywh {485 345 40 15} type Simple labelsize 10 align 4 minimum 1 maximum 127 step 1 textfont 1 textsize 12
-          code0 {o->bounds(1,N_DETUNE_TYPES);}
-          code1 {o->value(pars->GlobalPar.PDetuneType);}
-        }
-        Fl_Counter {} {
-          label {C.det}
+          label {Coarse det.}
           callback {int k=(int) o->value();
 if (k<0) k+=1024;
 pars->GlobalPar.PCoarseDetune = k+
    (pars->GlobalPar.PCoarseDetune/1024)*1024;}
-          tooltip {Coarse Detune} xywh {465 270 60 20} labelsize 10 align 5 minimum -64 maximum 63 step 1 textfont 1 textsize 12
+          tooltip {Coarse Detune} xywh {455 345 60 20} labelsize 10 align 5 minimum -64 maximum 63 step 1 textfont 1 textsize 12
           code0 {int k=pars->GlobalPar.PCoarseDetune%1024;}
           code1 {if (k>=512) k-=1024;}
           code2 {o->value(k);}
           code3 {o->lstep(10);}
-        }
-        Fl_Text_Display {} {
-          xywh {465 290 60 15} labelsize 12 textsize 12
         }
         Fl_Group {} {
           label {Frequency LFO} open
@@ -822,6 +805,14 @@ detunevalueoutput->do_callback();}
           xywh {12 275 45 15} labelsize 10 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 10
           code0 {o->value(getdetune(pars->GlobalPar.PDetuneType,0,pars->GlobalPar.PDetune));}
         }
+        Fl_Choice {} {
+          label {Detune Type}
+          callback {pars->GlobalPar.PDetuneType=(int) o->value()+1;
+detunevalueoutput->do_callback();} open
+          xywh {450 315 75 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+          code0 {o->add("L35cents");o->add("L10cents");o->add("E100cents");o->add("E1200cents");}
+          code1 {o->value(pars->GlobalPar.PDetuneType-1);}
+        } {}
       }
       Fl_Group {} {
         label AMPLITUDE

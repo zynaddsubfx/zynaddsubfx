@@ -90,7 +90,7 @@ class PartKitItem {: {public Fl_Group}
   Function {make_window()} {private
   } {
     Fl_Window partkititem {
-      private xywh {149 528 590 27} type Double hide
+      private xywh {4 556 590 27} type Double hide
       class Fl_Group
     } {
       Fl_Group partkititemgroup {
@@ -171,14 +171,13 @@ if (part->kit[n].Psubenabled!=0) subeditbutton->activate();
           code0 {o->value(part->kit[n].Psubenabled);}
           code1 {if (n==0) o->hide();}
         }
-        Fl_Counter sentdoeffectcounter {
-          callback {if (o->value()>=0.0) part->kit[n].Psendtoparteffect=(int)o->value();
-    else part->kit[n].Psendtoparteffect=127;}
-          xywh {535 0 45 15} type Simple minimum -1 maximum 128 step 1
-          code0 {o->bounds(-1,NUM_PART_EFX);}
-          code1 {o->value(part->kit[n].Psendtoparteffect);}
-          code2 {if (part->kit[n].Psendtoparteffect==127) o->value(-1);}
-        }
+        Fl_Choice sendtoeffect {
+          callback {if (o->value()!=0) part->kit[n].Psendtoparteffect=(int)o->value()-1;
+    else part->kit[n].Psendtoparteffect=127;} open
+          xywh {540 0 45 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+          code0 {o->add("OFF");char nrstr[10]; for(int i=0;i<NUM_PART_EFX;i++){sprintf(nrstr,"FX%d",i+1);o->add(nrstr);};}
+          code1 {o->value(part->kit[n].Psendtoparteffect+1);if (part->kit[n].Psendtoparteffect==127) o->value(0);}
+        } {}
       }
       Fl_Check_Button enabledcheck {
         label 01
@@ -218,7 +217,9 @@ adcheck->value(part->kit[n].Padenabled);
 adcheck->do_callback();
 subcheck->value(part->kit[n].Psubenabled);
 subcheck->do_callback();
-sentdoeffectcounter->value(part->kit[n].Psendtoparteffect);
+
+sendtoeffect->value(part->kit[n].Psendtoparteffect+1);
+if (part->kit[n].Psendtoparteffect==127) sendtoeffect->value(0);
 
 this->redraw();} {
       callback {int answer=1;
@@ -260,7 +261,7 @@ class PartUI {: {public Fl_Group,PartUI_}
   Function {make_window()} {private
   } {
     Fl_Window partgroup {
-      private xywh {107 561 385 180} type Double hide
+      private xywh {107 533 385 180} type Double hide
       class Fl_Group
     } {
       Fl_Group partgroupui {
@@ -406,8 +407,8 @@ maxkcounter->do_callback();}
           label KLmt
           callback {int val=0;
 val=atoi(o->text());
-part->setkeylimit(val);} open
-          tooltip {Key Limit} xywh {210 155 60 20} down_box BORDER_BOX labelsize 10 align 8 textfont 1 textsize 10
+part->setkeylimit(val);} open selected
+          tooltip {Key Limit} xywh {210 155 50 20} down_box BORDER_BOX labelsize 10 align 8 textfont 1 textsize 10
         } {}
       }
       Fl_Check_Button {} {
@@ -776,7 +777,7 @@ if (part->Pkitmode==0) {
         code0 {o->value(part->Pdrummode);}
       }
       Fl_Box {} {
-        label {FX.}
+        label {FX.r.}
         xywh {545 0 30 15} labelfont 1 labelsize 12 align 18
       }
     }

@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0105 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -38,7 +38,7 @@ class SUBnoteharmonic {: {public Fl_Group}
   Function {make_window()} {private
   } {
     Fl_Window harmonic {
-      xywh {329 403 90 225} hide
+      xywh {329 403 90 225} type Double hide
       class Fl_Group
     } {
       Fl_Slider mag {
@@ -96,10 +96,11 @@ delete(harmonic);} {}
 } 
 
 class SUBnoteUI {} {
-  Function {make_window()} {} {
+  Function {make_window()} {selected
+  } {
     Fl_Window SUBparameters {
       label {SUBsynth Parameters}
-      xywh {4 225 735 390} hide
+      xywh {4 225 735 390} type Double hide
     } {
       Fl_Scroll {} {
         xywh {5 140 435 245} type HORIZONTAL box THIN_UP_BOX
@@ -222,23 +223,15 @@ freqsettingsui->redraw();}
           code0 {o->value(pars->PFreqEnvelopeEnabled);}
         }
         Fl_Counter {} {
-          label Oct
+          label Octave
           callback {int k=(int) o->value();
 if (k<0) k+=16;
 pars->PCoarseDetune = k*1024+
    pars->PCoarseDetune%1024;}
-          tooltip Octave xywh {680 95 45 20} type Simple labelsize 10 align 4 minimum -8 maximum 7 step 1 textfont 1 textsize 12
+          tooltip Octave xywh {670 50 45 15} type Simple labelsize 10 align 1 minimum -8 maximum 7 step 1 textfont 1 textsize 12
           code0 {int k=pars->PCoarseDetune/1024;}
           code1 {if (k>=8) k-=16;}
           code2 {o->value(k);}
-        }
-        Fl_Counter {} {
-          label Type
-          callback {pars->PDetuneType=(int) o->value();
-detunevalueoutput->do_callback();}
-          tooltip {The way of how the detune is computed} xywh {685 120 40 15} type Simple labelsize 10 align 4 minimum 1 maximum 127 step 1 textfont 1 textsize 12
-          code0 {o->bounds(1,N_DETUNE_TYPES);}
-          code1 {o->value(pars->PDetuneType);}
         }
         Fl_Counter {} {
           label {Coarse Det.}
@@ -246,14 +239,11 @@ detunevalueoutput->do_callback();}
 if (k<0) k+=1024;
 pars->PCoarseDetune = k+
    (pars->PCoarseDetune/1024)*1024;}
-          tooltip {Coarse Detune} xywh {665 50 60 20} labelsize 11 align 1 minimum -64 maximum 63 step 1 textfont 1 textsize 12
+          tooltip {Coarse Detune} xywh {655 115 60 20} labelsize 11 align 1 minimum -64 maximum 63 step 1 textfont 1 textsize 12
           code0 {int k=pars->PCoarseDetune%1024;}
           code1 {if (k>=512) k-=1024;}
           code2 {o->value(k);}
           code3 {o->lstep(10);}
-        }
-        Fl_Text_Display {} {
-          xywh {665 70 60 15} labelsize 12 textsize 12
         }
         Fl_Slider {} {
           callback {pars->PDetune=(int)o->value()+8192;
@@ -284,6 +274,14 @@ if (x==0) fixedfreqetdial->deactivate();
           code1 {if (pars->Pfixedfreq==0) o->deactivate();}
           class WidgetPDial
         }
+        Fl_Choice {} {
+          label {Detune Type}
+          callback {pars->PDetuneType=(int) o->value()+1;
+detunevalueoutput->do_callback();} open
+          xywh {655 85 70 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+          code0 {o->add("L35cents");o->add("L10cents");o->add("E100cents");o->add("E1200cents");}
+          code1 {o->value(pars->PDetuneType-1);}
+        } {}
       }
       Fl_Check_Button {} {
         label Stereo
@@ -350,7 +348,7 @@ bandwidthsettingsui->redraw();}
           class EnvelopeUI
         } {}
         Fl_Group {} {
-          label {SUBsynthl - Filter} open selected
+          label {SUBsynthl - Filter} open
           xywh {445 170 275 75} box FLAT_BOX color 50 align 144
           code0 {o->init(pars->GlobalFilter,&pars->PGlobalFilterVelocityScale,&pars->PGlobalFilterVelocityScaleFunction);}
           class FilterUI
