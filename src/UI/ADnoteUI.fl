@@ -288,8 +288,8 @@ delete(harmonic);} {}
 class ADOscilEditor {} {
   Function {make_window()} {} {
     Fl_Window osceditUI {
-      label {ADsynth Oscillator Editor} selected
-      xywh {17 85 750 590} type Double hide
+      label {ADsynth Oscillator Editor}
+      xywh {96 94 750 590} type Double hide
     } {
       Fl_Group oscildisplaygroup {
         xywh {15 5 360 300} box ENGRAVED_FRAME
@@ -486,6 +486,8 @@ if (autoclearbutton->value()){
    oscil->Phmag[0]=127;
 
    oscil->Pharmonicshift=0;
+   harmonicshiftcounter->value(0);
+
    h[0]->mag->value(0);
    wshbutton->value(0);
    wshbutton->do_callback();
@@ -505,7 +507,7 @@ pthread_mutex_unlock(&master->mutex);
 
 oscildisplaygroup->redraw();
 basefuncdisplaygroup->redraw();
-oldosc->redraw();}
+oldosc->redraw();} selected
         tooltip {Use this Oscillator as base function} xywh {15 310 85 20} box THIN_UP_BOX labelfont 1 labelsize 12
       }
       Fl_Button {} {
