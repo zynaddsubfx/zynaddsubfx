@@ -566,5 +566,7 @@
 	    - Merge partial playerul
 26 Mai 2004 - Playerul merge bine cu un canal midi (rezolvata problema cu timing-ul)
 03 Iun 2004 - Adaugata partea de play speed la interfata
+06 Iun 2004 - Adaugata functia sigmoid la distorsionare
+
 
 

@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0200 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -161,7 +161,7 @@ delete (effwindow);} {}
   }
   Function {make_null_window()} {} {
     Fl_Window effnullwindow {
-      xywh {287 379 380 95} box PLASTIC_UP_BOX color 221 labelfont 1 hide
+      xywh {287 379 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Text_Display {} {
@@ -172,7 +172,7 @@ delete (effwindow);} {}
   }
   Function {make_reverb_window()} {} {
     Fl_Window effreverbwindow {
-      xywh {328 433 380 95} box PLASTIC_UP_BOX color 221 labelfont 1 hide
+      xywh {328 433 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Text_Display {} {
@@ -339,7 +339,7 @@ eff->seteffectpar(11,x);}
   }
   Function {make_echo_window()} {} {
     Fl_Window effechowindow {
-      xywh {82 542 380 95} box PLASTIC_UP_BOX color 221 labelfont 1 hide
+      xywh {82 542 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Choice {} {
@@ -444,7 +444,7 @@ cbwidget->do_callback();}
   }
   Function {make_chorus_window()} {} {
     Fl_Window effchoruswindow {
-      xywh {210 263 380 95} box PLASTIC_UP_BOX color 221 labelfont 1 hide
+      xywh {210 263 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Choice {} {
@@ -594,7 +594,7 @@ cbwidget->do_callback();}
   }
   Function {make_phaser_window()} {} {
     Fl_Window effphaserwindow {
-      xywh {277 263 380 95} box PLASTIC_UP_BOX color 221 labelfont 1 hide
+      xywh {277 263 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Choice {} {
@@ -729,7 +729,7 @@ cbwidget->do_callback();}
   }
   Function {make_alienwah_window()} {} {
     Fl_Window effalienwahwindow {
-      xywh {230 283 380 95} box PLASTIC_UP_BOX color 221 labelfont 1 hide
+      xywh {230 283 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Choice {} {
@@ -849,8 +849,8 @@ cbwidget->do_callback();}
     }
   }
   Function {make_distorsion_window()} {} {
-    Fl_Window effdistorsionwindow {selected
-      xywh {87 411 380 95} box PLASTIC_UP_BOX color 221 labelfont 1 hide
+    Fl_Window effdistorsionwindow {
+      xywh {87 411 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Choice {} {
@@ -997,6 +997,10 @@ cbwidget->do_callback();}
           label Pow2
           xywh {85 85 100 20} labelfont 1 labelsize 10
         }
+        menuitem {} {
+          label Sgm
+          xywh {95 95 100 20} labelfont 1 labelsize 10
+        }
       }
       Fl_Check_Button {} {
         label {Neg.}
@@ -1020,7 +1024,7 @@ cbwidget->do_callback();}
   }
   Function {make_eq_window()} {} {
     Fl_Window effeqwindow {
-      xywh {248 307 380 95} box PLASTIC_UP_BOX color 221 labelfont 1 hide
+      xywh {248 307 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Choice {} {

@@ -239,7 +239,7 @@ void Distorsion::changepar(int npar,unsigned char value){
 		break;
 	case 4: Plevel=value;
 		break;
-	case 5: if (value>12) value=12;//this must be increased if more distorsion types are added
+	case 5: if (value>13) value=13;//this must be increased if more distorsion types are added
 		Ptype=value;
 		break;
 	case 6: if (value>1) value=1;

@@ -507,7 +507,7 @@ pthread_mutex_unlock(&master->mutex);
 
 oscildisplaygroup->redraw();
 basefuncdisplaygroup->redraw();
-oldosc->redraw();} selected
+oldosc->redraw();}
         tooltip {Use this Oscillator as base function} xywh {15 310 85 20} box THIN_UP_BOX labelfont 1 labelsize 12
       }
       Fl_Button {} {
@@ -549,7 +549,7 @@ oldosc->redraw();}
           callback {oscil->Pwaveshapingfunction=(int) o->value();
 basefuncdisplaygroup->redraw();
 oscildisplaygroup->redraw();
-oldosc->redraw();}
+oldosc->redraw();} open
           tooltip {Waveshaping function} xywh {175 310 55 20} down_box BORDER_BOX labelsize 10 textsize 10
           code0 {o->value(oscil->Pwaveshapingfunction);}
         } {
@@ -608,6 +608,10 @@ oldosc->redraw();}
           menuitem {} {
             label Pow2
             xywh {95 95 100 20} labelfont 1 labelsize 10
+          }
+          menuitem {} {
+            label Sgm selected
+            xywh {90 90 100 20} labelfont 1 labelsize 10
           }
         }
         Fl_Value_Slider {} {
@@ -704,7 +708,7 @@ oldosc->redraw();}
           code0 {for (int i=0;i<MAX_AD_HARMONICS;i++){h[i]=new ADOscilharmonic(0,0,20,o->h(),"");h[i]->init(oscil,i,oscildisplaygroup,oldosc,master);}}
         } {}
       }
-      Fl_Group basefuncmodulation {open
+      Fl_Group basefuncmodulation {
         xywh {615 278 115 25} box ENGRAVED_BOX
         code0 {if ((oscil->Pcurrentbasefunc==0)||(oscil->Pcurrentbasefunc==127)) basefuncmodulation->deactivate();}
       } {

@@ -195,6 +195,17 @@ void waveshapesmps(int n,REALTYPE *smps,unsigned char type,unsigned char drive){
 				else smps[i]=-2.0;
 		};
 		break;
+	case 14:ws=pow(ws,5.0)*80.0+0.0001;//sigmoid
+		if (ws>10.0) tmpv=0.5;
+		    else tmpv=0.5-1.0/(exp(ws)+1.0);
+		for (i=0;i<n;i++) {
+		    REALTYPE tmp=smps[i]*ws;
+		    if (tmp<-10.0) tmp=-10.0;
+			else if (tmp>10.0) tmp=10.0;
+		    tmp=0.5-1.0/(exp(tmp)+1.0);
+		    smps[i]=tmp/tmpv;
+		};
+		break;
 	//update to Distorsion::changepar (Ptype max) if there is added more waveshapings functions
     };
 
