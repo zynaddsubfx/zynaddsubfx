@@ -43,58 +43,9 @@ OldBank::OldBank(){
     
     struct stat statbuf;
 
-    char bankcfg[1000];//hope the filename is shorter than that :)
-#if defined(OS_WINDOWS)
-    strcpy(bankcfg,"zynaddsubfx_usedbank");
-#endif
-#if defined(OS_LINUX)
-    strcpy(bankcfg,getenv("HOME"));
-    strcat(bankcfg,"/.zynaddsubfx_usedbank");
-#endif
-    
-    int result=stat(bankcfg,&statbuf);
-    if (result==0){
-	char *fn=new char [statbuf.st_size+2];
-	for (int i=0;i<statbuf.st_size;i++) fn[i]=0;
-	int file=open(bankcfg,O_RDONLY,00444+00222);
-        if (file!=-1){
-	    read(file,fn,statbuf.st_size);
-	    loadfilebank(fn);
-	};
-	close(file);
-	delete(fn);
-    } else {
-    
-    result=1;
-#if defined(OS_LINUX)
-    result=stat("/usr/local/share/zynaddsubfx/default.bnk_zyn",&statbuf);
-    if (result==0) loadfilebank("/usr/local/share/zynaddsubfx/default.bnk_zyn");
-	else {
-	    result=stat("/usr/share/zynaddsubfx/default.bnk_zyn",&statbuf);
-	    if (result==0) loadfilebank("/usr/share/zynaddsubfx/default.bnk_zyn");
-	};
-#endif	
-    if (result!=0) loadfilebank("default.bnk_zyn");
-    };
 };
 
 OldBank::~OldBank(){
-    if (bankfilename==NULL) return;
-
-    char bankcfg[1000];//hope the filename is shorter than that :)
-#if defined(OS_WINDOWS)
-    strcpy(bankcfg,"zynaddsubfx_usedbank");
-#endif
-#if defined(OS_LINUX)
-    strcpy(bankcfg,getenv("HOME"));
-    strcat(bankcfg,"/.zynaddsubfx_usedbank");
-#endif
-
-    int file=open(bankcfg,O_CREAT|O_WRONLY|O_TRUNC,00444+00222);
-    if (file!=-1){
-        write(file,bankfilename,strlen(bankfilename)+1);
-        close(file);
-    };
     savefile();
 };
 

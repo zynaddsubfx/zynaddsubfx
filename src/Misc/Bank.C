@@ -27,6 +27,12 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+
+
 Bank::Bank(){
     memset(defaultinsname,0,PART_MAX_NAME_LEN);
     snprintf(defaultinsname,PART_MAX_NAME_LEN,"%s"," ");
@@ -36,16 +42,77 @@ Bank::Bank(){
 	ins[i].filename=NULL;
     };
     dirname=NULL;
-
     clearbank();
 
-    loadbank("bank_xml");
+
+    char bankcfg[1000];//hope the filename is shorter than that :)
+#if defined(OS_WINDOWS)
+    strcpy(bankcfg,"zynaddsubfx_usedbank");
+#endif
+#if defined(OS_LINUX)
+    strcpy(bankcfg,getenv("HOME"));
+    strcat(bankcfg,"/.zynaddsubfx_usedbank");
+#endif
+    
+
+    struct stat statbuf;
+    int result=stat(bankcfg,&statbuf);
+    if (result==0){
+	char *fn=new char [statbuf.st_size+2];
+	for (int i=0;i<statbuf.st_size;i++) fn[i]=0;
+	int file=open(bankcfg,O_RDONLY,00444+00222);
+        if (file!=-1){
+	    read(file,fn,statbuf.st_size);
+	    
+	    loadbank(fn);
+	};
+	close(file);
+	delete(fn);
+    } else {
+    
+    result=1;
+#if defined(OS_LINUX)
+    result=stat("/usr/local/share/zynaddsubfx/default_bank",&statbuf);
+    if (result==0) loadbank("/usr/local/share/zynaddsubfx/default_bank");
+	else {
+	    result=stat("/usr/share/zynaddsubfx/default_bank",&statbuf);
+	    if (result==0) loadbank("/usr/share/zynaddsubfx/default_bank");
+	};
+#endif	
+    if (result!=0) loadbank("default_bank");
+    };
+
+
+
+//    loadbank("bank_xml");
+
+
+
     
     bankfiletitle=dirname;
 
 };
 
 Bank::~Bank(){
+    //**************//
+    char bankcfg[1000];//hope the filename is shorter than that :)
+#if defined(OS_WINDOWS)
+    strcpy(bankcfg,"zynaddsubfx_usedbank");
+#endif
+#if defined(OS_LINUX)
+    strcpy(bankcfg,getenv("HOME"));
+    strcat(bankcfg,"/.zynaddsubfx_usedbank");
+#endif
+
+    int file=open(bankcfg,O_CREAT|O_WRONLY|O_TRUNC,00444+00222);
+    if (file!=-1){
+        write(file,dirname,strlen(dirname)+1);
+        close(file);
+    };
+    //**************//
+
+
+
     clearbank();
 };
 
