@@ -34,11 +34,15 @@
 #include <errno.h>
 */
 Bank::Bank(){
+    memset(defaultinsname,0,PART_MAX_NAME_LEN);
+    snprintf(defaultinsname,PART_MAX_NAME_LEN,"%s"," ");
+        
     for (int i=0;i<BANK_SIZE;i++){
 	ins[i].used=false;
-	memset(ins[i].name,0,PART_MAX_NAME_LEN+1);
 	ins[i].filename=NULL;
     };
+
+    clearbank();
 
     loadbank("bank_xml");
 
@@ -183,7 +187,9 @@ int Bank::addtobank(int pos, const char *filename, const char* name){
     deletefrombank(pos);
     
     ins[pos].used=true;
-    snprintf(ins[pos].name,PART_MAX_NAME_LEN,name);
+    snprintf(ins[pos].name,PART_MAX_NAME_LEN,"%s",name);
+
+    snprintf(tmpinsname[pos],PART_MAX_NAME_LEN+10,"%d. %s",pos,name);
 
     int len=strlen(filename);
     ins[pos].filename=new char[len+1];
@@ -200,5 +206,8 @@ void Bank::deletefrombank(int pos){
 	delete (ins[pos].filename);
 	ins[pos].filename=NULL;
     };
+    
+    memset(tmpinsname[pos],0,PART_MAX_NAME_LEN+20);
+    
 };
 

@@ -338,7 +338,7 @@ class PartUI {: {public Fl_Group,PartUI_}
           callback {int event=Fl::event_button();
 if (event==FL_RIGHT_MOUSE){
    const char *tmp=fl_input("Instrument name:",(const char *)part->Pname);
-   if (tmp!=NULL) snprintf((char *)part->Pname,PART_MAX_NAME_LEN,tmp);
+   if (tmp!=NULL) snprintf((char *)part->Pname,PART_MAX_NAME_LEN,"%s",tmp);
 } else {
   if (event==FL_LEFT_MOUSE) bankui->show();
        else infowin->show();

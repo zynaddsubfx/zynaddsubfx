@@ -221,7 +221,7 @@ int OldBank::loadfile(){
 	//get the name
 	unsigned char namesize;
 	read (file,&namesize,1);
-	memset(&ins[ni].name[0],0,PART_MAX_NAME_LEN);
+	memset(&ins[ni].name[0],0,PART_MAX_NAME_LEN);//????????
 	read (file,&ins[ni].name[0],namesize);
 	//get the data
 	unsigned int datasize;

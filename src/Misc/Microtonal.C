@@ -295,8 +295,8 @@ int Microtonal::loadscl(const char *filename){
     //loads the short description
     if (loadline(file,&tmp[0])!=0) return(2);
     for (int i=0;i<500;i++) if (tmp[i]<32) tmp[i]=0;
-    snprintf((char *) Pname,MICROTONAL_MAX_NAME_LEN,"%s\0",tmp);
-    snprintf((char *) Pcomment,MICROTONAL_MAX_NAME_LEN,"%s\0",tmp);
+    snprintf((char *) Pname,MICROTONAL_MAX_NAME_LEN,"%s",tmp);
+    snprintf((char *) Pcomment,MICROTONAL_MAX_NAME_LEN,"%s",tmp);
     //loads the number of the notes
     if (loadline(file,&tmp[0])!=0) return(2);
     int nnotes=MAX_OCTAVE_SIZE;

@@ -57,6 +57,8 @@ class Bank{
     
 	void clearbank();
     
+	char defaultinsname[PART_MAX_NAME_LEN];
+	char tmpinsname[BANK_SIZE][PART_MAX_NAME_LEN+20];//this keeps the numbered names
     
 	struct{
 	    bool used;

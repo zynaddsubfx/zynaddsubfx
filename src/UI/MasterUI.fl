@@ -1187,7 +1187,7 @@ updatepanel();}
   }
   Function {setfilelabel(const char *filename)} {} {
     code {if (filename!=NULL) snprintf(&masterwindowlabel[0],100,"%s - ZynAddSubFX",fl_filename_name(filename));
-  else snprintf(&masterwindowlabel[0],100,"ZynAddSubFX (c)2002-2003 Nasca O. Paul");
+  else snprintf(&masterwindowlabel[0],100,"%s","ZynAddSubFX (c)2002-2003 Nasca O. Paul");
 masterwindowlabel[99]='\\0';
 masterwindow->label(&masterwindowlabel[0]);} {}
   }

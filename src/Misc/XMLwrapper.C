@@ -303,7 +303,7 @@ void XMLwrapper::getparstr(char *name,char *par,int maxstrlen){
     if (node->child==NULL) return;
     if (node->child->type!=MXML_OPAQUE) return;
     
-    snprintf(par,maxstrlen,node->child->value.element.name);
+    snprintf(par,maxstrlen,"%s",node->child->value.element.name);
     
 };
 

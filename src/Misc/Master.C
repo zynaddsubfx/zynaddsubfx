@@ -706,8 +706,8 @@ void Master::exportbankasxmldirectory(const char *directory){
 	oldbank.loadfromslot(slot,&slbuf);
 	slbuf.changemode(0);
 	tmppart->saveloadbuf(&slbuf,1);
-	snprintf((char *)tmppart->kit[0].Pname,PART_MAX_NAME_LEN,oldbank.getname(slot));
-	snprintf((char *)tmppart->Pname,PART_MAX_NAME_LEN,oldbank.getname(slot));
+	snprintf((char *)tmppart->kit[0].Pname,PART_MAX_NAME_LEN,"%s",oldbank.getname(slot));
+	snprintf((char *)tmppart->Pname,PART_MAX_NAME_LEN,"%s",oldbank.getname(slot));
 	if (oldbank.emptyslot(slot)) continue;
 	
 	snprintf(nostr,10,"%4d",slot+1);
