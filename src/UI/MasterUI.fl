@@ -2,7 +2,7 @@
 version 1.0200 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2003 Nasca Octavian Paul} {} 
+decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
 
 decl {//License: GNU GPL version 2} {} 
 
@@ -1059,7 +1059,7 @@ panelwindow->show();}
       xywh {629 278 330 210} type Double hide
     } {
       Fl_Box {} {
-        label {Copyright (c) 2002-2003 Nasca O. Paul}
+        label {Copyright (c) 2002-2004 Nasca O. Paul}
         xywh {5 35 320 25} labeltype EMBOSSED_LABEL labelsize 18 align 16
       }
       Fl_Box {} {
@@ -1187,7 +1187,7 @@ updatepanel();}
   }
   Function {setfilelabel(const char *filename)} {} {
     code {if (filename!=NULL) snprintf(&masterwindowlabel[0],100,"%s - ZynAddSubFX",fl_filename_name(filename));
-  else snprintf(&masterwindowlabel[0],100,"%s","ZynAddSubFX (c)2002-2003 Nasca O. Paul");
+  else snprintf(&masterwindowlabel[0],100,"%s","ZynAddSubFX (c)2002-2004 Nasca O. Paul");
 masterwindowlabel[99]='\\0';
 masterwindow->label(&masterwindowlabel[0]);} {}
   }

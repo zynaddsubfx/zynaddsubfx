@@ -2,7 +2,7 @@
   ZynAddSubFX - a software synthesizer
  
   Config.C - Configuration file functions
-  Copyright (C) 2003 Nasca Octavian Paul
+  Copyright (C) 2003-2004 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify
@@ -121,7 +121,7 @@ void Config::readConfig(char *filename){
 	if (sscanf(line,"%s = %s",par,val)!=2) continue;//bad line
 	if ((strlen(par)<1)|| (strlen(val)<1)) continue;//empty parameter/value
 	
-	printf("%s\n",val);
+//	printf("%s\n",val);
 
 
 	int intvalue=0;

@@ -2,7 +2,7 @@
   ZynAddSubFX - a software synthesizer
  
   Sequencer.C - The Sequencer
-  Copyright (C) 2003 Nasca Octavian Paul
+  Copyright (C) 2003-2004 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify

@@ -2,7 +2,7 @@
   ZynAddSubFX - a software synthesizer
  
   Buffer.h - A buffer used to save/load parameters
-  Copyright (C) 2002-2003 Nasca Octavian Paul
+  Copyright (C) 2002-2004 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify

@@ -2,7 +2,7 @@
   ZynAddSubFX - a software synthesizer
 
   main.c  -  Main file of the synthesizer
-  Copyright (C) 2002-2003 Nasca Octavian Paul
+  Copyright (C) 2002-2004 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify
@@ -283,7 +283,7 @@ void exitprogram(){
 #ifndef VSTAUDIOOUT
 int main(int argc, char *argv[]){
     int loadfile=0,noui=0;
-    fprintf(stderr,"%s","\nZynAddSubFX - Copyright (c) 2002-2003 Nasca Octavian Paul\n");
+    fprintf(stderr,"%s","\nZynAddSubFX - Copyright (c) 2002-2004 Nasca Octavian Paul\n");
     fprintf(stderr,"%s","This program is free software (GNU GPL v.2) and \n    it comes with ABSOLUTELY NO WARRANTY.\n\n");
 #ifdef OS_LINUX
     if (argc==1) fprintf(stderr,"%s","Try 'zynaddsubfx --help' for command-line options.\n");
