@@ -181,9 +181,11 @@ class PADnoteUI {} {
       xywh {184 106 535 450} type Double hide
     } {
       Fl_Tabs {} {
+        callback {if (o->value()!=harmonicstructuregroup) applybutton->hide();
+	else applybutton->show();} selected
         xywh {0 0 535 395}
       } {
-        Fl_Group {} {
+        Fl_Group harmonicstructuregroup {
           label {Harmonic Structure}
           xywh {0 20 535 375} box ENGRAVED_BOX
         } {
@@ -351,7 +353,7 @@ cbwidget->do_callback();}
               label Size
               callback {pars->Php.width=(int) o->value();
 hprofile->redraw();
-cbwidget->do_callback();} selected
+cbwidget->do_callback();}
               xywh {65 115 20 20} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
               code0 {o->value(pars->Php.width);}
               class WidgetPDial
