@@ -573,5 +573,5 @@
 	    - Se cauta bancile si in '/usr/share/zynaddsubfx/banks' si '/usr/local/share/zynaddsubfx/banks'
 	    - Corectata o eroare la filter la OscilGen care filtra diferit componentele sin si cos
 	    - Adaugat posibilitatea de swap la instrumentele din bank
-
+14 Iun 2004 - Adaugat __DATE__ si __TIME__ sa stiu cand s-a compilat
 

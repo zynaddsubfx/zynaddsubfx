@@ -311,6 +311,7 @@ void exitprogram(){
 int main(int argc, char *argv[]){
     int loadfile=0,noui=0;
     fprintf(stderr,"%s","\nZynAddSubFX - Copyright (c) 2002-2004 Nasca Octavian Paul\n");
+    fprintf(stderr,"Compiled: %s %s\n",__DATE__,__TIME__);
     fprintf(stderr,"%s","This program is free software (GNU GPL v.2) and \n    it comes with ABSOLUTELY NO WARRANTY.\n\n");
 #ifdef OS_LINUX
     if (argc==1) fprintf(stderr,"%s","Try 'zynaddsubfx --help' for command-line options.\n");

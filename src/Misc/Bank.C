@@ -385,7 +385,7 @@ void Bank::swapslot(unsigned int n1, unsigned int n2){
 	char *tmpfilename=ins[n2].filename;
 	
 	ins[n2]=ins[n1];
-	ins[n1].name=tmp.name;
+	strcpy(ins[n1].name,tmp.name);
 	ins[n1].filename=tmpfilename;
     };
     
