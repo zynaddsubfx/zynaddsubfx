@@ -564,6 +564,6 @@
 25 Mar 2004 - Continuat partea de analiza midi
 28 Mar 2004 - Scris partea de incarcat fisier midi 	    
 	    - Merge partial playerul
-	    
+26 Mai 2004 - Playerul merge bine cu un canal midi (rezolvata problema cu timing-ul)
 
 

@@ -109,6 +109,7 @@ int Sequencer::getevent(char ntrack,int *midich, int *type,int *par1, int *par2)
     if (nextevent[ntrack].ev.type==-1) return(-1);
 //    printf("********************************\n");    
 
+    //sa pun aici o protectie. a.i. daca distanta dintre timpul curent si eveliment e prea mare (>1sec) sa elimin nota
 
     if (ntrack==1) printf("_ %f %.2f  (%d)\n",nextevent[ntrack].time,playtime[ntrack].abs,nextevent[ntrack].ev.par2);
 

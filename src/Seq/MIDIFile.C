@@ -311,7 +311,7 @@ unsigned int MIDIFile::convertdt(unsigned int dt){
     double result=dt;
     printf("DT=%d\n",dt);
 
-    return((int) (result*5.0));
+    return((int) (result*15.0));
 };
 
 
