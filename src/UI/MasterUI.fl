@@ -367,7 +367,8 @@ panellistitemgroup->redraw();} {}
   decl {BankUI *bankui;} {}
 } 
 
-class MasterUI {} {
+class MasterUI {selected
+} {
   Function {make_window()} {} {
     Fl_Window masterwindow {
       label zynaddsubfx
@@ -1642,6 +1643,7 @@ simplesyseffsend->value(master->Psysefxvol[nsyseff][npart]);} {}
 	master->defaults();
        pthread_mutex_unlock(&master->mutex);
 	
+       npartcounter->value(1);
        refresh_master_ui();
 
 };
@@ -1670,8 +1672,7 @@ if (result>=0) setfilelabel(filename);
 
 
 if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not a zynaddsubfx parameters file.");
-      else if (result<0) fl_alert("Error: Could not load the file.");} {selected
-    }
+      else if (result<0) fl_alert("Error: Could not load the file.");} {}
   }
   Function {do_save_master()} {} {
     code {char *filename;
