@@ -258,9 +258,9 @@ void Microtonal::texttomapping(const char *text){
 	int tmp=0;
 	if (sscanf(lin,"%d",&tmp)==0) tmp=-1;
 	if (tmp<-1) tmp=-1;
-	tmp=Pmapping[tx];
+	Pmapping[tx]=tmp;
 	
-	if ((tx++)>127) tx=127;
+	if ((tx++)>127) break;
     };
     delete [] lin;
     

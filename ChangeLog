@@ -754,3 +754,8 @@
 15 Ian 2005 - Corectata o eroare la controllerul bandwidth care facea ca sa ajunga la valoarea 0 si sa dea peste cap SUBsynth
 22 Ian 2005 - Inceput sa scriu suportul pt. DSSI
 27 Ian 2005 - Corectata eroare care facea ca in cazul in care sunt 2 banci cu acelasi nume (sau aceeasi bank root dir sa fie selectat de 2 ori) sa produca confuzie
+03 Feb 2005 - Inceput sa scriu la Microtonal ca sa se faca butonul apply de culoare rosie cand se schimba ceva
+06 Feb 2005 - Facuta o mica modificare care interzice punera notelor "0" in dump si alta modificare care mareste nr. de octave calculate la PADsynth
+	    - Renuntat sa fac modificarea la Microtonal inceputa din 03 Feb, pentru ca nu am gasit cum pot schimba culoarea butonului automat cand modific un text
+07 Feb 2005 - Corectata o eroare care facea ca la microtonal mapping sa nu se calculeze corect (adica sa se stocheze valoarea corecta)
+    
