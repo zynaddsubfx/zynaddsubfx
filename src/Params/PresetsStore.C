@@ -89,18 +89,22 @@ void PresetsStore::rescanforpresets(char *type){
     for (int i=0;i<MAX_BANK_ROOT_DIRS;i++){
 	if (config.cfg.presetsDirList[i]==NULL) continue;
 	char *dirname=config.cfg.presetsDirList[i];
-	//de continuat aici
 	DIR *dir=opendir(dirname);
 	if (dir==NULL) continue;
 	struct dirent *fn;
 	while((fn=readdir(dir))){
 	    const char *filename=fn->d_name;
 	    if (strstr(filename,ftype)==NULL) continue;
+	    
+	    
 	    presets[presetk].file=new char [MAX_STRING_SIZE];
 	    presets[presetk].name=new char [MAX_STRING_SIZE];
-	    snprintf(presets[presetk].file,MAX_STRING_SIZE,"%s%s",dirname,filename);
+	    char tmpc=dirname[strlen(dirname)-1];
+	    char *tmps="/";
+	    if ((tmpc=='/')||(tmpc=='\\')) tmps="";
+	    snprintf(presets[presetk].file,MAX_STRING_SIZE,"%s%s%s",dirname,tmps,filename);
 	    snprintf(presets[presetk].name,MAX_STRING_SIZE,"%s",filename);
-	    
+
 	    char *tmp=strstr(presets[presetk].name,ftype);
 	    if (tmp!=NULL) tmp[0]='\0';
 	    presetk++; if (presetk>=MAX_PRESETS) return;
@@ -127,7 +131,12 @@ void PresetsStore::copypreset(XMLwrapper *xml,char *type, const char *name){
 	tmpfilename[i]='_';
     };
     
-    snprintf(filename,MAX_STRING_SIZE,"%s%s.%s.xpz",config.cfg.presetsDirList[0],name,type);
+    char *dirname=config.cfg.presetsDirList[0];
+    char tmpc=dirname[strlen(dirname)-1];
+    char *tmps="/";
+    if ((tmpc=='/')||(tmpc=='\\')) tmps="";
+
+    snprintf(filename,MAX_STRING_SIZE,"%s%s%s.%s.xpz",dirname,tmps,name,type);
     
     xml->saveXMLfile(filename);
 };

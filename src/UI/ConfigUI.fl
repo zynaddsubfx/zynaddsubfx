@@ -42,7 +42,7 @@ o->hide();}
         xywh {5 5 500 305}
       } {
         Fl_Group {} {
-          label {Main settings}
+          label {Main settings} selected
           xywh {5 25 500 285}
         } {
           Fl_Group {} {
@@ -307,7 +307,7 @@ presetbrowse->add(dirname);}
           Fl_Button removepresetbutton {
             label {Remove preset dir...}
             callback {if (presetbrowse->value()!=0) {
-   presetbrowse->remove(rootsbrowse->value());
+   presetbrowse->remove(presetbrowse->value());
 };
 activatebutton_presetdir(false);}
             xywh {105 265 80 35} box THIN_UP_BOX align 128
@@ -373,8 +373,7 @@ for (int i=0;i<MAX_BANK_ROOT_DIRS;i++){
 for (int n=0;n<rootsbrowse->size();n++){ 
      config.cfg.bankRootDirList[n]=new char [MAX_STRING_SIZE];
      strncpy(config.cfg.bankRootDirList[n],rootsbrowse->text(n+1),MAX_STRING_SIZE);
-};} {selected
-    }
+};} {}
   }
   Function {readpresetcfg()} {} {
     code {presetbrowse->clear();
