@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0105 
+version 1.0106 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -333,7 +333,7 @@ pars->changed=true;} open
   }
   Function {make_formant_window()} {} {
     Fl_Window formantparswindow {
-      label {Formant Filter Parameters} selected
+      label {Formant Filter Parameters}
       xywh {47 301 700 205} type Double hide
     } {
       Fl_Group {} {
@@ -537,7 +537,29 @@ qdial->value(pars->Pq);
 freqtrdial->value(pars->Pfreqtrack);
 gaindial->value(pars->Pgain);
 
-stcounter->value(pars->Pstages);} {}
+stcounter->value(pars->Pstages);
+
+int categ=pars->Pcategory;
+if ((categ==0)||(categ==2)) {
+	if (categ==0) {
+           analogfiltertypechoice->show();
+           svfiltertypechoice->hide();
+        } else {
+           svfiltertypechoice->show();
+           analogfiltertypechoice->hide();
+        };
+	editbutton->hide();
+        formantparswindow->hide();
+        cfreqdial->label("C.freq");
+} else {
+	analogfiltertypechoice->hide();
+	svfiltertypechoice->hide();
+	editbutton->show();
+        cfreqdial->label("BS.pos");
+};
+
+filterparamswindow->redraw();} {selected
+    }
   }
   Function {init(FilterParams *filterpars_,unsigned char *velsnsamp_,unsigned char *velsns_)} {} {
     code {pars=filterpars_;
@@ -580,25 +602,7 @@ update_formant_window();} {}
 };
 pars->Pcategory=newcat;
 
-if ((newcat==0)||(newcat==2)) {
-	if (newcat==0) {
-           analogfiltertypechoice->show();
-           svfiltertypechoice->hide();
-        } else {
-           svfiltertypechoice->show();
-           analogfiltertypechoice->hide();
-        };
-	editbutton->hide();
-        formantparswindow->hide();
-        cfreqdial->label("C.freq");
-} else {
-	analogfiltertypechoice->hide();
-	svfiltertypechoice->hide();
-	editbutton->show();
-        cfreqdial->label("BS.pos");
-};
-
-filterparamswindow->redraw();} {}
+refresh();} {}
   }
   Function {use_for_dynamic_filter()} {} {
     code {freqtrdial->deactivate();
