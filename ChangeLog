@@ -743,5 +743,6 @@
 05 Dec 2004 - Corectata o eroare care facea ca functiile getChunk si setChunk sa fie supraincarcate in loc de suprascrise (dar nu am testat)
 	    - Corectata o eroare care returna gresit la canDo in vst (netestat)
 17 Dec 2004 - Inceput sa folosesc Dvorak pt. VK
+18 Dec 2004 - Continuat putin la VK
 
 	    
