@@ -27,11 +27,9 @@
 #include "../globals.h"
 #include "../Effects/EffectMgr.h"
 #include "Part.h"
-#include "../Misc/Buffer.h"
 #include "../Output/Recorder.h"
 #include "Microtonal.h"
 
-#include "OldBank.h"
 #include "Bank.h"
 #include "Dump.h"
 #include "../Seq/Sequencer.h"
@@ -43,9 +41,6 @@ class Master{
 	Master();
 	~Master();
 
-	void saveloadbuf(Buffer *buf);	
-	void exportbankasxmldirectory(const char *bankfilename);
-	
 	//saves all settings to a XML file
 	//returns 0 for ok  or <0 if there is an error
 	int saveXML(char *filename);
@@ -126,7 +121,6 @@ class Master{
 	
 	//other objects 
 	Microtonal microtonal;
-	OldBank oldbank;
 	Bank bank;
 	
 	FFTwrapper *fft;

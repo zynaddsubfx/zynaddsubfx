@@ -55,7 +55,6 @@ class Part{
       /* The synthesizer part output */      
       void ComputePartSmps();//Part output
 	
-      void saveloadbuf(Buffer *buf,int instrumentonly);
       //instrumentonly: 0 - save all, 1 - save only instrumnet, 2 - save only instrument without the name(used in bank)
 
 
@@ -75,9 +74,6 @@ class Part{
       void getfromXML(XMLwrapper *xml);
       void getfromXMLinstrument(XMLwrapper *xml);
 
-
-      void saveloadbufkititem(Buffer *buf,unsigned char item,int saveitem0);
-    
       void cleanup();
 
 //      ADnoteParameters *ADPartParameters;
@@ -128,7 +124,7 @@ class Part{
       REALTYPE *partoutl;//Left channel output of the part
       REALTYPE *partoutr;//Right channel output of the part
 
-      REALTYPE *partfxinputl[NUM_PART_EFX+1],*partfxinputr[NUM_PART_EFX+1];//Left and right signal that pass thru part effects; partfxinputl/r[NUM_PART_EFX] is for "no effect" buffer
+      REALTYPE *partfxinputl[NUM_PART_EFX+1],*partfxinputr[NUM_PART_EFX+1];//Left and right signal that pass thru part effects; partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
 
       enum NoteStatus{KEY_OFF,KEY_PLAYING,KEY_RELASED_AND_SUSTAINED,KEY_RELASED};
 

@@ -25,23 +25,12 @@
 
 #include <pthread.h>
 #include "../globals.h"
-#include "Buffer.h"
 #include "Microtonal.h"
 #include "../DSP/FFTwrapper.h"
 #include "Config.h"
 
 //Velocity Sensing function
 extern REALTYPE VelF(REALTYPE velocity,unsigned char scaling);
-
-//Buffer used for Save/Load
-extern Buffer slbuf; 
-
-//the buffer used as clipboard
-extern Buffer clipboardbuf;
-
-extern int savebufferfile(Buffer *buf,const char *filename,int overwrite,int whatIsave);
-extern int loadbufferfile(Buffer *buf,const char *filename,int whatIload);
-//whatIsave and whatIload are 0 for Master,1 Voice,2 for Microtonal...
 
 bool fileexists(char *filename);
 

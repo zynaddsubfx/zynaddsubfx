@@ -241,66 +241,6 @@ void EffectMgr::setdryonly(bool value){
     dryonly=value;
 };
 
-
-/*
- * Save or load the parameters to/from the buffer
- */
-void EffectMgr::saveloadbuf(Buffer *buf){
-    unsigned char npar,p,n,tmp;
-
-#ifdef DEBUG_BUFFER
-    fprintf(stderr,"%s","\n( EffectPparameters) \n");
-#endif    
-
-    tmp=0xfe;
-    buf->rwbyte(&tmp);//if tmp!=0xfe error
-    
-
-    for (n=0x80;n<0xf0;n++){
-	if (buf->getmode()==0) {
-	    buf->rwbyte(&npar);
-	    n=0;//force a loop until the end of parameters (0xff)
-	} else npar=n;
-
-	if (npar==0xff) break;
-
-	switch (npar){
-	    case 0x80:	p=geteffect();
-			buf->rwbytepar(n,&p);
-			if (buf->getmode()==0) {
-			    changeeffect(p);
-			    for (n=0;n<128;n++){
-				seteffectpar_nolock(n,0);
-			    };
-			};
-			break;
-	    case 0x81:	if (buf->getmode()!=0) {
-			    for (unsigned char np=0;np<0x7f;np++){
-				p=geteffectpar(np);
-				if (p==0) continue;//do not save parameters if they are zero
-				buf->rwbyte(&npar);
-				buf->rwbyte(&np); 
-				buf->rwbyte(&p);
-			    };
-			} else {
-			    unsigned char np;
-			    buf->rwbyte(&np);
-			    buf->rwbyte(&p);
-			    seteffectpar_nolock(np,p);
-			};
-			break;
-	    case 0x82:	if (efx!=NULL) buf->rwbytepar(n,&(efx->Ppreset));
-			break;
-	};
-    };
-
-    
-    if (buf->getmode()!=0) {
-	unsigned char tmp=0xff;
-	buf->rwbyte(&tmp);
-    };
-};
-
 void EffectMgr::add2XML(XMLwrapper *xml){
     xml->addpar("type",geteffect());
 

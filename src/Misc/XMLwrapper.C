@@ -84,7 +84,7 @@ XMLwrapper::XMLwrapper(){
     node=root=mxmlNewElement(tree,"ZynAddSubFX-data");
         
     mxmlElementSetAttr(root,"version-major","1");
-    mxmlElementSetAttr(root,"version-minor","0");
+    mxmlElementSetAttr(root,"version-minor","1");
 
     //make the empty branch that will contain the information parameters
     info=addparams0("INFORMATION");

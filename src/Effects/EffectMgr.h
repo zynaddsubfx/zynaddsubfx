@@ -34,7 +34,6 @@
 #include "Distorsion.h"
 #include "EQ.h"
 #include "DynamicFilter.h"
-#include "../Misc/Buffer.h"
 #include "../Misc/XMLwrapper.h"
 #include "../Params/FilterParams.h"
 #include "../Params/Presets.h"
@@ -44,8 +43,6 @@ class EffectMgr:public Presets{
     public:
 	EffectMgr(int insertion_,pthread_mutex_t *mutex_);
 	~EffectMgr();
-
-	void saveloadbuf(Buffer *buf);
 
 	void add2XML(XMLwrapper *xml);
 	void defaults();

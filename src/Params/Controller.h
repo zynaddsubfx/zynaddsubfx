@@ -25,7 +25,6 @@
 #define CONTROLLER_H
 
 #include "../globals.h"
-#include "../Misc/Buffer.h"
 #include "../Misc/XMLwrapper.h"
 
 class Controller{
@@ -33,7 +32,6 @@ class Controller{
 	Controller();
 	~Controller();
 	void resetall();
-	void saveloadbuf(Buffer *buf);
 
         void add2XML(XMLwrapper *xml);
 	void defaults();

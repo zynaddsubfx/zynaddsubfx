@@ -35,11 +35,6 @@ int SAMPLE_RATE=44100;
 int SOUND_BUFFER_SIZE=256;
 int OSCIL_SIZE=512;
 
-Buffer slbuf;//the Buffer used for save/load parameters to/from disk
-
-Buffer masterdefaultsbuf;//this is used to store all parameters at start of program and reload when I need to clear all data (eg. before loading master parameters)
-Buffer instrumentdefaultsbuf;//this is used to store all instrument parameters at start of program and reload when I need to clear all data (eg. before loading instrument parameters)
-Buffer clipboardbuf;//buffer used for the clipboard
 
 Config config;
 REALTYPE *denormalkillbuf;
@@ -94,104 +89,6 @@ REALTYPE getdetune(unsigned char type,unsigned short int coarsedetune,unsigned s
     return(det);
 };
 
-
-
-
-/*
- * Save buffer to file
- */
-int savebufferfile(Buffer *buf,const char *filename,int overwrite,int whatIsave){
-    unsigned char *data=NULL;
-    int n,file=0;
-    
-    n=buf->getsize();
-    data=new unsigned char[n+1];
-    buf->getalldata(n,data);
-    
-    if (overwrite==0) file=open(filename,O_CREAT|O_EXCL|O_WRONLY|O_BINARY,00444+00222);
-	    else file=open(filename,O_CREAT|O_WRONLY|O_TRUNC|O_BINARY,00444+00222);//overwrite if the file exists
-    if (file==-1) {
-	if (errno==EEXIST) return(1);//file exists already
-	    else return(2);//Access Denied or any other problem
-    };
-
-    //Save the id.
-    char id[2]; id[0]='N';id[1]='P';
-    write(file,&id,2);
-
-    //Save the format descriptor (for future formats)
-    unsigned char type=whatIsave,//what the data represents? ( Master/Effect/Voice 0x00..0x0f)
-		  coding=0;//the encoding (Raw, 7 bit encoding,compressed) (0x00..0x07)
-    unsigned char fmt=type+coding*0x10; //0x00..0x7f
-    write(file,&fmt,1);
-    
-    //Save the CRC or 0 for no CRC
-    unsigned CRC=0;//todo, if I do the CRC I do: crc=1+crc % 127;!
-    write (file,&CRC,1);
-    
-    //Save the data
-    int result=write(file,data,n);
-    if (result== -1) return(2);
-    close(file);
-        
-    delete (data);
-    return(0);//OK
-};
-
-/*
- * Load the buffer from the file
- */
-int loadbufferfile(Buffer *buf,const char *filename,int whatIload){
-    int n=512,file=0,result,i;
-    unsigned char b=0;    
-    unsigned char *data=new unsigned char[n];
-
-    buf->resetbuffer();
-    buf->changemode(1);
-    
-    file=open(filename,O_RDONLY|O_BINARY,00444+00222);
-    
-    if (file==-1) {
-	return(2);//Access Denied or any other problem
-    };
-
-    //Load the id.
-    char id[2];
-    read(file,&id,2);
-    if ((id[0]!='N')||(id[1]!='P')) {
-	close(file);
-	return(3);//invalid data
-    };
-    
-    //Load the format descriptor 
-    unsigned char fmt; //0x00..0x7f
-    read(file,&fmt,1);
-    unsigned char type=fmt%0x10;
-    if (type!=whatIload){
-	close(file);
-	return(4);//the data is loaded as something wrong (eg. a master is loaded as a instrument)
-    };
-//  coding=fmt/0x10;
-
-    //load the crc
-    unsigned char CRC; //0x00..0x7f
-    read(file,&CRC,1);
-//    if (CRC!=0){};CHECK IF IT IS OK
-
-    //Load the data
-    do {
-	result=read(file,data,n);
-	for (i=0;i<result;i++){
-	    b=data[i];
-	    buf->rwbyte(&b);//I need to write the data to a buffer and process it according to a format
-	};
-    } while (result!=0);
-    
-    if (result== -1) return(2);
-    close(file);
-    delete(data);
-    return(0);//OK
-};
 
 bool fileexists(char *filename){
     struct stat tmp;

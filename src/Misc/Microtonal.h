@@ -24,7 +24,6 @@
 #define MICROTONAL_H
 
 #include "../globals.h"
-#include "Buffer.h"
 #include "XMLwrapper.h"
 
 #define MAX_OCTAVE_SIZE 128
@@ -85,8 +84,6 @@ class Microtonal{
 	void texttomapping(const char *text);
 	unsigned char *Pname;
 	unsigned char *Pcomment;
-
-	void saveloadbuf(Buffer *buf);
 
     	void add2XML(XMLwrapper *xml);
     	void getfromXML(XMLwrapper *xml);

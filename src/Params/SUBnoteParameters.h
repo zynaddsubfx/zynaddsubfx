@@ -24,7 +24,6 @@
 #define SUB_NOTE_PARAMETERS_H
 
 #include "../globals.h"
-#include "../Misc/Buffer.h"
 #include "../Misc/XMLwrapper.h"
 #include "EnvelopeParams.h"
 #include "FilterParams.h"
@@ -34,8 +33,6 @@ class SUBnoteParameters:public Presets{
     public:
 	SUBnoteParameters();
 	~SUBnoteParameters();
-
-	void saveloadbuf(Buffer *buf);
 
 	void add2XML(XMLwrapper *xml);
 	void defaults();

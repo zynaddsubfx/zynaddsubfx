@@ -24,7 +24,6 @@
 #define ENVELOPE_PARAMS_H
 
 #include "../globals.h"
-#include "../Misc/Buffer.h"
 #include "../Misc/XMLwrapper.h"
 #include "Presets.h"
 
@@ -41,11 +40,9 @@ class EnvelopeParams:public Presets{
 	void ADSRinit_filter(char A_val,char A_dt,char D_val,char D_dt,char R_dt,char R_val);
 	void ASRinit_bw(char A_val,char A_dt,char R_val,char R_dt);
 	void converttofree();
-        void saveloadbuf(Buffer *buf);
 
 	void add2XML(XMLwrapper *xml);
 	void defaults();
-
 	void getfromXML(XMLwrapper *xml);
 
 	REALTYPE getdt(char i);

@@ -39,8 +39,6 @@ class Resonance:public Presets{
 	void interpolatepeaks(int type);
 	void randomize(int type);
 
-	void saveloadbuf(Buffer *buf);
-
 	void add2XML(XMLwrapper *xml);
 	void defaults();
 	void getfromXML(XMLwrapper *xml);

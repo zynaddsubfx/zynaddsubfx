@@ -265,9 +265,6 @@ class ADnoteParameters:public Presets{
 	void add2XML(XMLwrapper *xml);
         void getfromXML(XMLwrapper *xml);
 
-	void saveloadbuf(Buffer *buf);
-	void saveloadbufvoice(Buffer *buf,unsigned char nvoice);
-
     private:
 	void defaults(int n);//n is the nvoice
 

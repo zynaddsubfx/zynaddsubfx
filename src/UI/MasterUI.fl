@@ -378,7 +378,7 @@ if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
       xywh {188 182 390 465} type Double hide
       code0 {setfilelabel(NULL);} non_modal
     } {
-      Fl_Menu_Bar mastermenu {
+      Fl_Menu_Bar mastermenu {selected
         xywh {0 0 690 25}
       } {
         submenu {} {
@@ -470,42 +470,6 @@ updatepanel();}
             xywh {10 10 100 20} divider
           }
           menuitem {} {
-            label {Open MAS_ZYN...}
-            callback {const char *filename;
-filename=fl_file_chooser("Open:","(*.mas_zyn)",NULL,0);
-if (filename==NULL) return;
-int result=loadbufferfile(&slbuf,filename,0);
-if (result==0) {
-       setfilelabel(filename);
-       slbuf.changemode(0);
-       delete microtonalui;
-       pthread_mutex_lock(&master->mutex);
-
-       //clear all parameters, first
-
-       master->defaults();
-
-       //load the data
-       master->saveloadbuf(&slbuf);
-       pthread_mutex_unlock(&master->mutex);
-
-       npartcounter->do_callback();
-       syseffnocounter->do_callback();
-       inseffnocounter->do_callback();
-       masterkeyshiftcounter->value(master->Pkeyshift-64);
-       mastervolumedial->value(master->Pvolume);    
-       globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);   
-       microtonalui=new MicrotonalUI(&master->microtonal);
-       nrpnbutton->value(master->ctl.NRPN.receive);
-       updatesendwindow();
-} else {
-	if (result==4) fl_alert("Error: Could not load the file\\nbecause it is not a master file.");
-           else fl_alert("Error: Could not load the file.");   
-};
-updatepanel();}
-            xywh {10 10 100 20} divider
-          }
-          menuitem {} {
             label {&Load Scale Settings...}
             callback {char *filename;
 filename=fl_file_chooser("Open:","({*.xsz})",NULL,0);
@@ -558,29 +522,6 @@ updatepanel();}
             label {Show Scale Settings...}
             callback {microtonalui->show();}
             xywh {0 0 100 20} divider
-          }
-          menuitem {} {
-            label {&Load SCL_ZYN...}
-            callback {const char *filename;
-filename=fl_file_chooser("Load:","(*.scl_zyn)",NULL,0);
-if (filename==NULL) return;
-int result=loadbufferfile(&slbuf,filename,2);
-if (result==0) {
-       delete microtonalui;   
-
-       slbuf.changemode(0);
-       pthread_mutex_lock(&master->mutex);
-       master->microtonal.defaults();
-       master->microtonal.saveloadbuf(&slbuf);
-       pthread_mutex_unlock(&master->mutex);         
-
-       microtonalui=new MicrotonalUI(&master->microtonal);
-
-     } else {
-	if (result==4) fl_alert("Error: Could not load the file\\nbecause it is not a scale file.");
-           else fl_alert("Error: Could not load the file.");   
-     };}
-            xywh {45 45 100 20} divider
           }
           menuitem {} {
             label {&Settings...}
@@ -668,32 +609,6 @@ updatepanel();}
             xywh {20 20 100 20} divider
           }
           menuitem {} {
-            label {Load INS_ZYN Instrument...}
-            callback {const char *filename;
-filename=fl_file_chooser("Load:","(*.ins_zyn)",NULL,0);
-if (filename==NULL) return;
-int result=loadbufferfile(&slbuf,filename,1);
-if (result==0) {
-       slbuf.changemode(0);
-       pthread_mutex_lock(&master->mutex);
-       int npart=(int)npartcounter->value();
-
-       //clear all instrument parameters, first
-         master->part[npart]->defaultsinstrument();
-
-       //load the instr. parameters
-       master->part[npart]->saveloadbuf(&slbuf,1);
-       pthread_mutex_unlock(&master->mutex);
-       npartcounter->do_callback();
-     } else {
-	if (result==4) fl_alert("Error: Could not load the file\\nbecause it is not an instrument file.");
-           else fl_alert("Error: Could not load the file.");   
-     };
-
-updatepanel();}
-            xywh {20 20 100 20}
-          }
-          menuitem {} {
             label {Show Instrument &Bank...}
             callback {bankui->show();}
             xywh {0 0 100 20} divider
@@ -778,7 +693,7 @@ pthread_mutex_unlock(&master->mutex);}
         xywh {0 80 390 160}
       } {
         Fl_Group {} {
-          label {System Effects} open selected
+          label {System Effects} open
           xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25
         } {
           Fl_Counter syseffnocounter {

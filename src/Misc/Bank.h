@@ -35,7 +35,6 @@
 #define MAX_NUM_BANKS 400
 
 
-
 class Bank{
     public:
 	Bank();

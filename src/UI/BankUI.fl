@@ -81,15 +81,14 @@ refresh();} {}
 if (*nselected==nslot) color(6);
 
 
-label(bank->getnamenumbered(nslot));} {selected
-    }
+label(bank->getnamenumbered(nslot));} {}
   }
   decl {int *what,*whatslot,nslot,highlight, *nselected;} {}
   decl {void (BankProcess_:: *fnc)(void);} {}
   decl {BankProcess_ *bp;} {}
 } 
 
-class BankUI {: {public BankProcess_}
+class BankUI {selected : {public BankProcess_}
 } {
   Function {make_window()} {} {
     Fl_Window bankuiwindow {
@@ -184,18 +183,6 @@ refreshmainwindow();}
         callback {config.cfg.BankUIAutoClose=(int) o->value();}
         tooltip {automatically close the bank window if the instrument is loaded} xywh {705 529 60 15} down_box DOWN_BOX labelsize 10
         code0 {o->value(config.cfg.BankUIAutoClose);}
-      }
-      Fl_Button {} {
-        label {IMPORT from bnk_zyn}
-        callback {const char *filename;
-filename=fl_file_chooser("Convert Bank from bnk_zyn file:","(*.bnk_zyn)",NULL,0);
-if (filename==NULL) return;
-
-master->exportbankasxmldirectory(filename);
-
-
-refreshmainwindow();}
-        xywh {515 530 105 40} box PLASTIC_UP_BOX color 175 labelfont 1 labelsize 15 labelcolor 0 align 128
       }
       Fl_Choice banklist {
         callback {int n=o->value();

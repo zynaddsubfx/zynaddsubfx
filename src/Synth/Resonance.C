@@ -194,65 +194,6 @@ void Resonance::sendcontroller(MidiControllers ctl,REALTYPE par){
 };
 
 
-/*
- * Save or load the parameters to/from the buffer
- */
-void Resonance::saveloadbuf(Buffer *buf){
-    unsigned char npar,n,tmp;
-
-#ifdef DEBUG_BUFFER
-    fprintf(stderr,"\n( Resonance parameters) \n");
-#endif    
-
-    tmp=0xfe;
-    buf->rwbyte(&tmp);//if tmp!=0xfe error
-
-
-    for (n=0x80;n<0xf0;n++){
-	if (buf->getmode()==0) {
-	    buf->rwbyte(&npar);
-	    n=0;//force a loop until the end of parameters (0xff)
-	} else npar=n;
-	if (npar==0xff) break;
-	
-	switch(npar){
-	    //Resonance parameters
-	    case 0x80:	buf->rwbytepar(n,&Penabled);
-			break;
-	    case 0x81:	buf->rwbytepar(n,&PmaxdB);
-			break;
-	    case 0x82:	buf->rwbytepar(n,&Pcenterfreq);
-			break;
-	    case 0x83:	buf->rwbytepar(n,&Poctavesfreq);
-			break;
-	    case 0x85:	buf->rwbytepar(n,&Pprotectthefundamental);
-			break;
-	    case 0xA0:	if (buf->getmode()!=0){
-    			    if ((buf->getminimal()==0) || (Penabled!=0)){
-				unsigned short int tmp2=N_RES_POINTS;
-				buf->rwbyte(&npar);
-				buf->rwword(&tmp2);
-				for (int i=0;i<N_RES_POINTS;i++) buf->rwbyte(&Prespoints[i]);
-			    };
-			} else {
-			    unsigned short int tmp2;
-			    buf->rwword(&tmp2);
-			    for (int i=0;i<tmp2;i++) 
-			      if (i<N_RES_POINTS) buf->rwbyte(&Prespoints[i]);
-			    	else buf->rwbyte(&tmp);
-			      
-			    
-			};
-			break;
-	};
-    };
-
-    
-    if (buf->getmode()!=0) {
-	unsigned char tmp=0xff;
-	buf->rwbyte(&tmp);
-    };
-};
 
 
 void Resonance::add2XML(XMLwrapper *xml){

@@ -64,58 +64,6 @@ void LFOParams::defaults(){
     Pstretch=64;
 };
 
-/*
- * Save or load the parameters to/from the buffer
- */
-void LFOParams::saveloadbuf(Buffer *buf){
-    unsigned char npar,n,tmp;
-
-#ifdef DEBUG_BUFFER
-    fprintf(stderr,"\n( LFO parameters) \n");
-#endif    
-
-    tmp=0xfe;
-    buf->rwbyte(&tmp);//if tmp!=0xfe error
-
-    unsigned char freq=(int) (Pfreq*127.0);
-
-    for (n=0x80;n<0xf0;n++){
-	if (buf->getmode()==0) {
-	    buf->rwbyte(&npar);
-	    n=0;//force a loop until the end of parameters (0xff)
-	} else npar=n;
-	if (npar==0xff) break;
-	
-	switch(npar){
-	    //LFO parameters
-	    case 0x80:	buf->rwbytepar(n,&freq);
-			break;
-	    case 0x81:	buf->rwbytepar(n,&Pintensity);
-			break;
-	    case 0x82:	buf->rwbytepar(n,&Pstartphase);
-			break;
-	    case 0x83:	buf->rwbytepar(n,&PLFOtype);
-			break;
-	    case 0x84:	buf->rwbytepar(n,&Prandomness);
-			break;
-	    case 0x85:	buf->rwbytepar(n,&Pdelay);
-			break;
-	    case 0x86:	buf->rwbytepar(n,&Pcontinous);
-			break;
-	    case 0x87:	buf->rwbytepar(n,&Pfreqrand);
-			break;
-	    case 0x88:	buf->rwbytepar(n,&Pstretch);
-			break;
-	};
-    };
-
-    Pfreq=freq/127.0;
-    
-    if (buf->getmode()!=0) {
-	unsigned char tmp=0xff;
-	buf->rwbyte(&tmp);
-    };
-};
 
 void LFOParams::add2XML(XMLwrapper *xml){
     xml->addparreal("freq",Pfreq);

@@ -24,7 +24,6 @@
 #define FILTER_PARAMS_H
 
 #include "../globals.h"
-#include "../Misc/Buffer.h"
 #include "../Misc/XMLwrapper.h"
 #include "Presets.h"
 
@@ -32,7 +31,6 @@ class FilterParams:public Presets{
     public:
 	FilterParams(unsigned char Ptype_,unsigned char Pfreq,unsigned char Pq_);
 	~FilterParams();
-        void saveloadbuf(Buffer *buf);
 
 	void add2XML(XMLwrapper *xml);
 	void add2XMLsection(XMLwrapper *xml,int n);

@@ -24,7 +24,6 @@
 #define OSCIL_GEN_H
 
 #include "../globals.h"
-#include "../Misc/Buffer.h"
 #include "../Misc/XMLwrapper.h"
 #include "Resonance.h"
 #include "../DSP/FFTwrapper.h"  
@@ -49,8 +48,6 @@ class OscilGen:public Presets{
 	void getspectrum(int n,REALTYPE *spc,int what);//what=0 pt. oscil,1 pt. basefunc
         void getcurrentbasefunction(REALTYPE *smps);
 	void useasbase();//convert oscil to base function
-
-        void saveloadbuf(Buffer *buf);
 
     	void add2XML(XMLwrapper *xml);
 	void defaults();
@@ -135,10 +132,6 @@ class OscilGen:public Presets{
 	void adaptiveharmonic(REALTYPE *freqs,REALTYPE freq);
 	
 		
-        //Base function saveto/loadfrom quantised data
-	void savebasefuncQ();
-	void loadbasefuncQ();
-	       
     	//Basic/base functions (Functiile De Baza)
 	REALTYPE basefunc_pulse(REALTYPE x,REALTYPE a);
 	REALTYPE basefunc_saw(REALTYPE x,REALTYPE a);
