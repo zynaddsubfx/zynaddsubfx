@@ -599,7 +599,7 @@ void ADnoteParameters::getfromXMLsection(XMLwrapper *xml,int n){
 	    
 	    if (xml->enterbranch("MODULATOR")){
     		VoicePar[nvoice].PFMDetune=xml->getpar("detune",VoicePar[nvoice].PFMDetune,0,16383);
-    		VoicePar[nvoice].PFMCoarseDetune=xml->getpar127("coarse_detune",VoicePar[nvoice].PFMCoarseDetune);
+    		VoicePar[nvoice].PFMCoarseDetune=xml->getpar("coarse_detune",VoicePar[nvoice].PFMCoarseDetune,0,16383);
     		VoicePar[nvoice].PFMDetuneType=xml->getpar127("detune_type",VoicePar[nvoice].PFMDetuneType);
 
 		VoicePar[nvoice].PFMFreqEnvelopeEnabled=xml->getparbool("freq_envelope_enabled",VoicePar[nvoice].PFMFreqEnvelopeEnabled);
