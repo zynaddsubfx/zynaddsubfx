@@ -732,5 +732,6 @@
 12 Oct 2004 - Corectata o eroare care facea ca butoanele Addpoint si Delpoint de la Envelope sa nu fie afisate
 16 Oct 2004 - Corectata o eroare care facea ca partUI-ul sa nu se actualizeze intotdeauna cand incarcam un instrument
 20 Oct 2004 - Corectata o mica eroare asemanetoare cu cea din 16 Oct, dar care afecta meniul new
+07 Nov 2004 - Corectata o mica eroare care facea ca sa nu se incarce corect instrumentele in linia de comanda (-l)
 
 	    

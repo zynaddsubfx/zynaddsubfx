@@ -462,6 +462,9 @@ int main(int argc, char *argv[]){
 	if (tmp<0) {
 	    fprintf(stderr,"ERROR:Could not load file  %s .\n",loadfile);
 	    exit(1);
+	} else {
+	    master->applyparameters();
+	    if (noui==0) ui->refresh_master_ui();
 	};
     };
 
