@@ -41,6 +41,10 @@ class Master{
 	Master();
 	~Master();
 	void saveloadbuf(Buffer *buf);	
+	
+	//saves all settings to a XML file
+	//returns 0 for ok, 1 if there is a existing file or -1 if there is an error
+	int saveXML(char *filename);
 
 	//Midi IN
 	void NoteOn(unsigned char chan,unsigned char note,unsigned char velocity);

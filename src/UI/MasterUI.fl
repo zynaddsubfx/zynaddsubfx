@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0200 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2003 Nasca Octavian Paul} {} 
@@ -248,7 +248,7 @@ class Panellistitem {: {public Fl_Group}
   Function {make_window()} {private
   } {
     Fl_Window panellistitem {
-      private xywh {315 213 70 260} hide
+      private xywh {315 213 70 260} type Double hide
       class Fl_Group
     } {
       Fl_Group panellistitemgroup {
@@ -371,9 +371,9 @@ class MasterUI {} {
 fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
-\#endif}
-      xywh {149 197 390 465} hide
-      code0 {setfilelabel(NULL);} non_modal
+\#endif} selected
+      xywh {149 197 390 465} type Double
+      code0 {setfilelabel(NULL);} non_modal visible
     } {
       Fl_Menu_Bar mastermenu {
         xywh {0 0 690 25}
@@ -383,7 +383,23 @@ if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
           xywh {0 0 100 20}
         } {
           menuitem {} {
-            label {&New Master...}
+            label {&Save All As XML (NOT IMPLEMENTED)...}
+            callback {char *filename;
+\#define EXT ".xml"
+filename=fl_file_chooser("Save:","(*"EXT")",NULL,0);
+if (filename==NULL) return;
+filename=fl_filename_setext(filename,EXT);
+\#undef EXT
+
+pthread_mutex_lock(&master->mutex);
+master->saveXML(filename);
+pthread_mutex_unlock(&master->mutex);
+
+updatepanel();}
+            xywh {10 10 100 20} divider
+          }
+          menuitem {} {
+            label {&New (erase all)...}
             callback {if (fl_ask("Clear *ALL* the parameters ?")){
        delete microtonalui;
 
@@ -408,7 +424,7 @@ updatepanel();}
             xywh {20 20 100 20}
           }
           menuitem {} {
-            label {&Open Master...}
+            label {&Open...}
             callback {const char *filename;
 filename=fl_file_chooser("Open:","(*.mas_zyn)",NULL,0);
 if (filename==NULL) return;
@@ -443,7 +459,7 @@ updatepanel();}
             xywh {10 10 100 20}
           }
           menuitem {} {
-            label {&Save Master As...}
+            label {&Save All As...}
             callback {char *filename;
 \#define EXT ".mas_zyn"
 filename=fl_file_chooser("Save:","(*"EXT")",NULL,0);
@@ -877,7 +893,7 @@ inseffectui->redraw();}
         callback {microtonalui->show();}
         xywh {330 80 56 19} box PLASTIC_UP_BOX color 231 labeltype ENGRAVED_LABEL labelfont 1
       }
-      Fl_Group {} {selected
+      Fl_Group {} {
         xywh {172 30 117 45} box ENGRAVED_BOX
       } {
         Fl_Button recordbutton {
@@ -976,7 +992,7 @@ panelwindow->show();}
     }
     Fl_Window aboutwindow {
       label {Copyright...}
-      xywh {629 278 330 210} hide
+      xywh {629 278 330 210} type Double hide
     } {
       Fl_Box {} {
         label {Copyright (c) 2002-2003 Nasca O. Paul}
@@ -1003,7 +1019,7 @@ GNU General Public License for details.}
     }
     Fl_Window syseffsendwindow {
       label {System Effects Send}
-      xywh {171 234 120 250} hide resizable
+      xywh {171 234 120 250} type Double hide resizable
     } {
       Fl_Scroll {} {open
         xywh {0 45 120 170} box FLAT_BOX resizable
@@ -1022,7 +1038,7 @@ GNU General Public License for details.}
     }
     Fl_Window swapeffwindow {
       label {Swap/Copy effect}
-      xywh {581 329 205 100} hide modal
+      xywh {581 329 205 100} type Double hide modal
     } {
       Fl_Counter swapwitheffectcounter {
         label {Swap with effect/Copy to:}
@@ -1069,7 +1085,7 @@ swapeffwindow->hide();}
     }
     Fl_Window panelwindow {
       label {ZynAddSubFX Panel}
-      xywh {4 20 632 635} hide
+      xywh {4 20 632 635} type Double hide
     } {
       Fl_Scroll {} {open
         xywh {0 5 570 310} type HORIZONTAL box THIN_UP_BOX

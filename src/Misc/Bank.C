@@ -33,9 +33,10 @@
 
 Bank::Bank(){
     bankfilename=NULL;bankfiletitle=NULL;lock=1;
+    memset(&defaultinsname,0,PART_MAX_NAME_LEN);
     snprintf(defaultinsname,PART_MAX_NAME_LEN,"%s"," ");
     for (int i=0;i<128;i++){
-	ins[i].name[0]='\0';
+	memset(&ins[i].name[0],0,PART_MAX_NAME_LEN);
 	ins[i].size=0;
 	ins[i].data=NULL;
     };
@@ -111,7 +112,8 @@ char *Bank::getname (unsigned char ninstrument){
  */
 char *Bank::getnamenumbered (unsigned char ninstrument){
     if (ninstrument>=128) return(&tmpinsname[0][0]);
-    snprintf(&tmpinsname[ninstrument][0],PART_MAX_NAME_LEN+10,"%d. %s\0",ninstrument+1,getname(ninstrument));
+    memset(&tmpinsname[ninstrument][0],0,PART_MAX_NAME_LEN+15);
+    snprintf(&tmpinsname[ninstrument][0],PART_MAX_NAME_LEN,"%d. %s",ninstrument+1,getname(ninstrument));
     return(&tmpinsname[ninstrument][0]);
 };
 
@@ -173,6 +175,7 @@ void Bank::loadfromslot(unsigned char ninstrument,Buffer *buf){
  */
 int Bank::loadfile(){
     int file;
+
     file=open(bankfilename,O_RDONLY|O_BINARY,00444+00222);
     if (file==-1) return(2);//something went wrong (access denied,..etc.)
 
@@ -218,6 +221,7 @@ int Bank::loadfile(){
 	//get the name
 	unsigned char namesize;
 	read (file,&namesize,1);
+	memset(&ins[ni].name[0],0,PART_MAX_NAME_LEN);
 	read (file,&ins[ni].name[0],namesize);
 	//get the data
 	unsigned int datasize;

@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0200 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2003 Nasca Octavian Paul} {} 
@@ -34,7 +34,7 @@ class BankProcess_ {} {
   }
 } 
 
-class BankSlot {: {public Fl_Button,BankProcess_}
+class BankSlot {open : {public Fl_Button,BankProcess_}
 } {
   Function {BankSlot(int x,int y, int w, int h, const char *label=0):Fl_Button(x,y,w,h,label)} {} {
     code {what=NULL;
@@ -55,7 +55,8 @@ int tmp=Fl_Button::handle(event);
 if ((*what!=0) && Fl::event_inside(this)) (bp->*fnc)();
 return(tmp);} {}
   }
-  Function {init(int nslot_, int *what_, int *whatslot_,void (BankProcess_:: *fnc_)(void),BankProcess_ *bp_,Bank *bank_)} {} {
+  Function {init(int nslot_, int *what_, int *whatslot_,void (BankProcess_:: *fnc_)(void),BankProcess_ *bp_,Bank *bank_)} {open
+  } {
     code {nslot=nslot_;
 what=what_;
 whatslot=whatslot_;
@@ -67,10 +68,16 @@ align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE|FL_ALIGN_CLIP);
 highlight=0;
 refresh();} {}
   }
-  Function {refresh()} {} {
+  Function {refresh()} {open
+  } {
     code {if (bank->emptyslot(nslot)) color(46);
     else color(51);
-label(bank->getnamenumbered(nslot));} {}
+
+
+//printf("%s\\n",bank->getnamenumbered(nslot));
+
+label(bank->getnamenumbered(nslot));} {selected
+    }
   }
   decl {int *what,*whatslot,nslot,highlight;} {}
   decl {void (BankProcess_:: *fnc)(void);} {}
@@ -82,7 +89,7 @@ class BankUI {: {public BankProcess_}
   Function {make_window()} {} {
     Fl_Window bankuiwindow {
       label Bank
-      xywh {16 205 770 430} hide
+      xywh {16 205 770 430} type Double hide
       code0 {o->label(bank->bankfiletitle);}
       code1 {if (bank->bankfiletitle==NULL) o->label ("Choose a bank to use by pressing the 'Load/Use Bank from file...' button or choose 'New Bank...' to make a new bank.");}
     } {
@@ -275,8 +282,7 @@ if ((what==1)&&(mode==3)&&(!bank->emptyslot(slot))){//Clears the slot
           bank->clearslot(slot);
           bs[slot]->refresh();
       };
-};} {selected
-    }
+};} {}
   }
   Function {refreshmainwindow()} {} {
     code {bankuiwindow->label(bank->bankfiletitle);

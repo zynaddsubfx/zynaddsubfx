@@ -411,11 +411,13 @@ int main(int argc, char *argv[]){
     pthread_create(&thr2,NULL,thread2,NULL);
 #endif
 
-/* not working....yet.
+/*It is not working and I don't know why
 //drop the suid-root permisions
 #if !(defined(JACKAUDIOOUT)||defined(PAAUDIOOUT)||defined(VSTAUDIOOUT)|| (defined (WINMIDIIN)) )
-    setuid(getuid());
-    seteuid(getuid());
+      setuid(getuid());
+      seteuid(getuid());
+//      setreuid(getuid(),getuid());
+//      setregid(getuid(),getuid());
 #endif
 */
     if (noui==0) pthread_create(&thr3,NULL,thread3,NULL);

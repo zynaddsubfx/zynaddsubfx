@@ -22,6 +22,8 @@
 */
 
 #include "Master.h"
+#include "XMLwrapper.h"
+
 #include <stdio.h>
 
 
@@ -689,6 +691,23 @@ void Master::saveloadbuf(Buffer *buf){
     };
 };
 
+
+
+
+int Master::saveXML(char *filename){
+
+    //sa pun aici un test daca exista fisierul
+
+    XMLwrapper *xml;
+    xml=new XMLwrapper();
+    
+    
+    
+    
+    xml->saveXMLfile(filename,0);
+    delete (xml);
+    return(0);
+};
 
 
 

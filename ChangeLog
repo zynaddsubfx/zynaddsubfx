@@ -508,4 +508,15 @@
 15 Dec 2003 - Corectata o mica eroare la ADnoteParameters (lipseau niste break-uri la salvarea/incarcarea parametrilor)
 16 Dec 2003 - Eroarea cu break-urile se dovedeste a fi o eroare majora :( ; adica corectarea ei, necesita resalvarea tuturor instrumentelor
 	    - Am revenit la suportul vechi de JACK, dar cel nou este disponiblil ca JACK_RT (nefunctional inca)
-	    
+17 Dec 2003 - Inceput sa restucturez Part-ul (am adaugat clasele Instrument,InstrumentParams) - programul nu mai este compatibil cu versiunile anterioare
+	    - RMS normalize este prestabilit la OscilGen
+18 Dec 2003 - Continuat de restructurat Part-ul
+
+*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *
+
+01 Feb 2003 - Revenit la versiunea din 16 Dec. 2003
+	    - Pus iarasi RMS normalize prestabilit la OscilGen
+	    - M-am razgandit ;) nu mai restructurez part-ul; mai bine pun acolo o functie separata pentru salvari/incarcari par instrumente
+	    - Inceput sa adaug suportul XML
+02 Feb 2003 - Corectata o eroare care facea ca numele la instrumentele din bank sa fie aratate gresit (nu era pus un \0 )
+	    - Continuat suportul de XML

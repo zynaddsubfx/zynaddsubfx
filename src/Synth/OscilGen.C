@@ -50,7 +50,7 @@ OscilGen::OscilGen(FFTwrapper *fft_,Resonance *res_){
     Pbasefuncpar=64;
     Pwaveshapingfunction=0;
     Pwaveshaping=64;
-    Pnormalizemethod=0;
+    Pnormalizemethod=1;
     Pfiltertype=0;
     Pfilterpar=64;
     Pfilterbeforews=0;
