@@ -69,15 +69,15 @@ align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE|FL_ALIGN_CLIP);
 highlight=0;
 refresh();} {}
   }
-  Function {refresh()} {open
-  } {
+  Function {refresh()} {} {
     code {if (bank->emptyslot(nslot)) color(46);
     else color(51);
 
-if (*nselected==nslot) color(80);
+if (*nselected==nslot) color(6);
 
 
-label(bank->getnamenumbered(nslot));} {}
+label(bank->getnamenumbered(nslot));} {selected
+    }
   }
   decl {int *what,*whatslot,nslot,highlight, *nselected;} {}
   decl {void (BankProcess_:: *fnc)(void);} {}
@@ -86,12 +86,13 @@ label(bank->getnamenumbered(nslot));} {}
 
 class BankUI {: {public BankProcess_}
 } {
-  Function {make_window()} {} {
+  Function {make_window()} {open
+  } {
     Fl_Window bankuiwindow {
-      label Bank selected
-      xywh {4 64 785 575} type Double hide
+      label Bank
+      xywh {4 64 785 575} type Double
       code0 {o->label(bank->bankfiletitle);}
-      code1 {if (bank->bankfiletitle==NULL) o->label ("Choose a bank to use by pressing the 'Load/Use Bank from file...' button or choose 'New Bank...' to make a new bank.");}
+      code1 {if (bank->bankfiletitle==NULL) o->label ("Choose a bank to use by pressing the 'Load/Use Bank from file...' button or choose 'New Bank...' to make a new bank.");} visible
     } {
       Fl_Button {} {
         label Close

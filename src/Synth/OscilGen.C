@@ -49,7 +49,7 @@ OscilGen::~OscilGen(){
 
 void OscilGen::defaults(){
     oldbasefunc=0;oldbasepar=64;oldhmagtype=0;oldwaveshapingfunction=0;oldwaveshaping=64,oldnormalizemethod=0;
-    oldbasefuncmodulation=0;oldharmonicshift=0;
+    oldbasefuncmodulation=0;oldharmonicshift=0;oldbasefuncmodulationpar1=0;oldbasefuncmodulationpar2=0;
     for (int i=0;i<MAX_AD_HARMONICS;i++){
 	hmag[i]=0.0;
 	hphase[i]=0.0;
