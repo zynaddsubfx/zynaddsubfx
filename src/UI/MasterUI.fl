@@ -379,8 +379,7 @@ class MasterUI {open
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
-      xywh {206 42 390 465} type Double hide
-      code0 {setfilelabel(NULL);} non_modal
+      xywh {555 26 390 465} type Double hide non_modal
     } {
       Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
@@ -391,86 +390,17 @@ if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
         } {
           menuitem {} {
             label {&New (erase all)...}
-            callback {if (fl_ask("Clear *ALL* the parameters ?")){
-       delete microtonalui;
-
-       pthread_mutex_lock(&master->mutex);
-	master->defaults();
-       pthread_mutex_unlock(&master->mutex);
-
-       npartcounter->do_callback();
-       syseffnocounter->do_callback();
-       inseffnocounter->do_callback();
-       masterkeyshiftcounter->value(master->Pkeyshift-64);
-       mastervolumedial->value(master->Pvolume);       
-       globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);
-       microtonalui=new MicrotonalUI(&master->microtonal);
-       updatesendwindow();
-       setfilelabel(NULL);
-};
-
-updatepanel();}
+            callback {do_new_master();}
             xywh {20 20 100 20}
           }
           menuitem {} {
             label {&Open Parameters...}
-            callback {char *filename;
-filename=fl_file_chooser("Open:","({*.xmz})",NULL,0);
-if (filename==NULL) return;
-
-
-pthread_mutex_lock(&master->mutex);
-  //clear all parameters
-  master->defaults();
-
-  //load the data
-  int result=master->loadXML(filename);
-pthread_mutex_unlock(&master->mutex);
-master->applyparameters();
-
-npartcounter->do_callback();
-syseffnocounter->do_callback();
-inseffnocounter->do_callback();
-masterkeyshiftcounter->value(master->Pkeyshift-64);
-mastervolumedial->value(master->Pvolume);    
-globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);   
-microtonalui=new MicrotonalUI(&master->microtonal);
-nrpnbutton->value(master->ctl.NRPN.receive);
-globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);
-updatesendwindow();
-
-updatepanel();
-if (result>=0) setfilelabel(filename);
-
-if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not a zynaddsubfx parameters file.");
-      else if (result<0) fl_alert("Error: Could not load the file.");}
+            callback {do_load_master();}
             xywh {20 20 100 20}
           }
           menuitem {} {
             label {&Save All Parameters...}
-            callback {char *filename;
-int result=0;
-
-filename=fl_file_chooser("Save:","({*.xmz})",NULL,0);
-if (filename==NULL) return;
-filename=fl_filename_setext(filename,".xmz");
-
-result=fileexists(filename);
-if (result) {
-    result=0;
-   if (!fl_ask("The file exists. \\nOverwrite it?")) return;
-       
-};
-
-
-pthread_mutex_lock(&master->mutex);
-result=master->saveXML(filename);
-pthread_mutex_unlock(&master->mutex);
-
-if (result<0) fl_alert("Error: Could not save the file.");
-
-
-updatepanel();}
+            callback {do_save_master();}
             xywh {10 10 100 20} divider
           }
           menuitem {} {
@@ -1077,6 +1007,44 @@ updatepanel();}
         xywh {575 570 55 25} box THIN_UP_BOX
       }
     }
+    Fl_Window selectuiwindow {
+      label {User Interface mode}
+      callback {*exitprogram=1;}
+      xywh {16 297 434 254} type Double hide
+    } {
+      Fl_Box {} {
+        label {Welcome to ZynAddSubFX}
+        xywh {5 5 425 40} labeltype SHADOW_LABEL labelfont 1 labelsize 33
+      }
+      Fl_Box {} {
+        label {Please choose the interface mode:}
+        xywh {10 50 265 25} labelfont 1 labelsize 16
+      }
+      Fl_Button {} {
+        label Expert
+        callback {masterwindow->show();
+selectuiwindow->hide();}
+        xywh {10 165 100 35} box PLASTIC_UP_BOX color 229 labelfont 1 labelsize 20
+      }
+      Fl_Box {} {
+        label {.. if you have used ZynAddSubFX before, or you like to have full controll to all parameters.}
+        xywh {110 165 310 35} labelfont 1 labelsize 13 align 144
+      }
+      Fl_Button {} {
+        label Beginner
+        callback {simplemasterwindow->show();
+selectuiwindow->hide();}
+        xywh {10 80 100 65} box PLASTIC_UP_BOX color 238 labelfont 1 labelsize 20
+      }
+      Fl_Box {} {
+        label {..if you are a beginner, you prefer using presets or you prefer to use simpler user interfaces. Most functionality of ZynAddSubFX will be hidden in this mode to make simple the learning/using it.}
+        xywh {110 75 320 75} labelfont 1 labelsize 13 align 144
+      }
+      Fl_Box {} {
+        label {You can switch the interface modes anytime you want.}
+        xywh {40 215 345 25} box BORDER_BOX color 51 labelfont 1 labelsize 13 align 144
+      }
+    }
     Fl_Window simplemasterwindow {
       label ZynAddSubFX
       callback {\#ifdef VSTAUDIOOUT
@@ -1084,58 +1052,48 @@ updatepanel();}
     masterwindow->iconize();
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
-\#endif} selected
-      xywh {36 111 603 370} type Double visible
+\#endif} open selected
+      xywh {20 184 600 335} type Double visible
     } {
       Fl_Group simplelistitemgroup {
-        private xywh {10 35 200 240} box ENGRAVED_BOX
+        private xywh {140 60 200 155} box ENGRAVED_BOX
         code0 {if (master->part[npart]->Penabled==0) o->deactivate();}
       } {
-        Fl_Group {} {
-          xywh {155 65 20 175} box ENGRAVED_FRAME
-        } {
-          Fl_Box {} {
-            label {V U}
-            xywh {155 65 20 175} box FLAT_BOX color 0 selection_color 75 labelcolor 55 align 128
-            code0 {o->init(master,npart);}
-            class VUMeter
-          }
-        }
         Fl_Button partname {
-          label {  }
+          label {Click here to load a instrument}
           callback {if ((int)bankui->cbwig->value()!=(npart+1)){
    bankui->cbwig->value(npart+1);
    bankui->cbwig->do_callback();
 };
 bankui->show();}
-          xywh {15 42 160 18} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 10 align 208
+          xywh {160 72 160 18} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 10 align 208
         }
         Fl_Slider partpanning {
           label Pan
           callback {master->part[npart]->setPpanning((int) o->value());}
-          xywh {20 135 55 15} type {Horz Knob} box FLAT_BOX minimum 127 maximum 0 step 1 value 127
+          xywh {250 105 65 15} type {Horz Knob} box FLAT_BOX minimum 127 maximum 0 step 1 value 64
           code0 {o->value(master->part[npart]->Ppanning);}
         }
         Fl_Choice partrcv {
           label {Midi Channel Receive}
           callback {master->part[npart]->Prcvchn=(int) o->value();} open
-          tooltip {receive from Midi channel} xywh {15 172 75 18} down_box BORDER_BOX labelsize 13 align 130 textfont 1
+          tooltip {receive from Midi channel} xywh {155 157 75 18} down_box BORDER_BOX labelsize 13 align 130 textfont 1
           code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Ch%d",i+1);if (i!=9) o->add(nrstr); else o->add("Dr10");};}
           code1 {o->value(master->part[npart]->Prcvchn);}
         } {}
         Fl_Dial partvolume {
           callback {master->part[npart]->setPvolume((int) o->value());}
-          xywh {30 70 40 40} maximum 127 step 1
+          xywh {160 115 30 30} maximum 127 step 1
           code0 {o->value(master->part[npart]->Pvolume);}
           class WidgetPDial
         }
         Fl_Box {} {
           label Volume
-          xywh {20 110 60 15}
+          xywh {155 95 60 15}
         }
       }
       Fl_Check_Button partenabled {
-        label 01
+        label Enabled
         callback {pthread_mutex_lock(&master->mutex);
  master->partonoff(npart,(int) o->value());
 pthread_mutex_unlock(&master->mutex);
@@ -1150,32 +1108,32 @@ if ((int) o->value()==0) simplelistitemgroup->deactivate();
 };
 
 o->redraw();}
-        private xywh {10 10 45 20} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 24
-        code0 {char tmp[10];snprintf(tmp,10,"%d",npart+1);o->label(strdup(tmp));}
+        private xywh {250 40 85 20} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 24
+        code0 {//char tmp[10];snprintf(tmp,10,"%d",npart+1);o->label(strdup(tmp));}
         code1 {o->value(master->part[npart]->Penabled);}
       }
       Fl_Box virkeys {
         label Keyboard
-        xywh {10 285 590 80} box FLAT_BOX color 17
+        xywh {5 215 590 80} box BORDER_BOX color 17
         code0 {o->init(master);}
         class VirKeys
       }
       Fl_Group {} {
-        xywh {215 90 255 185} box ENGRAVED_BOX
+        xywh {340 30 255 185} box ENGRAVED_BOX
       } {
         Fl_Tabs {} {
-          xywh {220 95 245 175} align 18
+          xywh {345 35 245 175} align 18
         } {
           Fl_Group {} {
             label {System Effects}
-            xywh {220 115 245 155} box ENGRAVED_FRAME labelfont 1 align 18
+            xywh {345 55 245 155} box ENGRAVED_FRAME labelfont 1 align 18
           } {
             Fl_Counter simplesyseffnocounter {
               label {Sys.Effect No.}
               callback {nsyseff=(int) o->value()-1;
 simplesysefftype->value(master->sysefx[nsyseff]->geteffect());
 simplesyseffectui->refresh(master->sysefx[nsyseff]);}
-              xywh {225 135 80 20} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
+              xywh {350 75 80 20} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
               code0 {o->bounds(1,NUM_SYS_EFX);}
               code1 {o->value(nsyseff+1);}
             }
@@ -1185,7 +1143,7 @@ simplesyseffectui->refresh(master->sysefx[nsyseff]);}
 master->sysefx[nsyseff]->changeeffect((int) o->value());
 pthread_mutex_unlock(&master->mutex);
 simplesyseffectui->refresh(master->sysefx[nsyseff]);}
-              xywh {390 140 70 15} down_box BORDER_BOX labelsize 11 align 5
+              xywh {515 80 70 15} down_box BORDER_BOX labelsize 11 align 5
               code0 {o->value(master->sysefx[nsyseff]->geteffect());}
             } {
               menuitem {} {
@@ -1226,10 +1184,10 @@ simplesyseffectui->refresh(master->sysefx[nsyseff]);}
               }
             }
             Fl_Group simplesyseffectuigroup {
-              xywh {225 155 235 95} box FLAT_BOX color 48
+              xywh {350 95 235 95} box FLAT_BOX color 48
             } {
               Fl_Group simplesyseffectui {
-                xywh {225 155 234 95}
+                xywh {350 95 234 95}
                 code0 {o->init(master->sysefx[nsyseff]);}
                 class SimpleEffUI
               } {}
@@ -1237,19 +1195,19 @@ simplesyseffectui->refresh(master->sysefx[nsyseff]);}
             Fl_Button {} {
               label {Send to...}
               callback {syseffsendwindow->show();}
-              xywh {310 135 75 20} box THIN_UP_BOX labelfont 1 labelsize 12
+              xywh {435 75 75 20} box THIN_UP_BOX labelfont 1 labelsize 12
             }
             Fl_Button {} {
               label P
               callback {pthread_mutex_lock(&master->mutex);
 presetsui->paste(master->sysefx[nsyseff],simplesyseffectui);
 pthread_mutex_unlock(&master->mutex);}
-              xywh {435 125 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+              xywh {560 65 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
             }
           }
           Fl_Group {} {
             label {Insertion Effects}
-            xywh {220 115 245 155} box ENGRAVED_FRAME labelfont 1 align 18 hide
+            xywh {345 55 245 155} box ENGRAVED_FRAME labelfont 1 align 18 hide
           } {
             Fl_Counter simpleinseffnocounter {
               label {Ins.Effect No.}
@@ -1267,7 +1225,7 @@ if (master->Pinsparts[ninseff]!=-1) {
  	simpleinseffectui->deactivate();
         simpleinseffectuigroup->deactivate();
 };}
-              xywh {225 135 80 20} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
+              xywh {350 75 80 20} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
               code0 {o->bounds(1,NUM_INS_EFX);}
               code1 {o->value(ninseff+1);}
             }
@@ -1278,7 +1236,7 @@ master->insefx[ninseff]->changeeffect((int) o->value());
 pthread_mutex_unlock(&master->mutex);
 simpleinseffectui->refresh(master->insefx[ninseff]);
 simpleinseffectui->show();}
-              xywh {390 140 70 15} down_box BORDER_BOX labelsize 11 align 5
+              xywh {515 80 70 15} down_box BORDER_BOX labelsize 11 align 5
               code0 {o->value(master->insefx[ninseff]->geteffect());}
               code1 {if (master->Pinsparts[ninseff]== -1) o->deactivate();}
             } {
@@ -1320,10 +1278,10 @@ simpleinseffectui->show();}
               }
             }
             Fl_Group simpleinseffectuigroup {
-              xywh {225 155 234 95} box FLAT_BOX color 48
+              xywh {350 95 234 95} box FLAT_BOX color 48
             } {
               Fl_Group simpleinseffectui {
-                xywh {225 155 234 95}
+                xywh {350 95 234 95}
                 code0 {o->init(master->insefx[ninseff]);}
                 code1 {if (master->Pinsparts[ninseff]== -1) o->deactivate();}
                 class SimpleEffUI
@@ -1342,7 +1300,7 @@ if ((int) o->value()==1){
     simpleinseffectui->activate();
 };
 master->insefx[ninseff]->cleanup();} open
-              xywh {310 135 80 20} down_box BORDER_BOX labelfont 1 labelsize 10 align 5 textsize 10
+              xywh {435 75 80 20} down_box BORDER_BOX labelfont 1 labelsize 10 align 5 textsize 10
               code0 {o->add("Master Out");o->add("Off");}
               code1 {char tmp[50]; for (int i=0;i<NUM_MIDI_PARTS;i++) {sprintf(tmp,"Part %2d",i+1);o->add(tmp);};}
               code3 {o->value(master->Pinsparts[ninseff]+2);}
@@ -1352,48 +1310,140 @@ master->insefx[ninseff]->cleanup();} open
               callback {pthread_mutex_lock(&master->mutex);
 presetsui->paste(master->insefx[ninseff],simpleinseffectui);
 pthread_mutex_unlock(&master->mutex);}
-              xywh {435 125 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+              xywh {560 65 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
             }
           }
         }
       }
-    }
-    Fl_Window selectuiwindow {
-      label {User Interface mode}
-      callback {*exitprogram=1;}
-      xywh {16 297 434 254} type Double hide
-    } {
-      Fl_Box {} {
-        label {Welcome to ZynAddSubFX}
-        xywh {5 5 425 40} labeltype SHADOW_LABEL labelfont 1 labelsize 33
+      Fl_Group {} {
+        xywh {5 300 590 30} box ENGRAVED_FRAME
+      } {
+        Fl_Box {} {
+          label {VU-Meter}
+          xywh {5 300 590 30} box FLAT_BOX color 48 selection_color 75
+          code0 {o->init(master,-1);}
+          class VUMeter
+        }
       }
-      Fl_Box {} {
-        label {Please choose the interface mode:}
-        xywh {10 50 265 25} labelfont 1 labelsize 16
+      Fl_Dial simplemastervolumedial {
+        label {Master Volume}
+        callback {master->setPvolume((int) o->value());}
+        tooltip {Master Volume} xywh {20 65 40 40} box ROUND_UP_BOX labelfont 1 labelsize 12 align 130 maximum 127 step 1
+        code0 {o->value(master->Pvolume);}
+        class WidgetPDial
+      }
+      Fl_Counter simplemasterkeyshiftcounter {
+        label {Master KeyShift}
+        callback {master->setPkeyshift((int) o->value()+64);}
+        xywh {25 140 90 20} labelsize 12 minimum -64 maximum 64 step 1
+        code0 {o->lstep(12);}
+        code1 {o->value(master->Pkeyshift-64);}
       }
       Fl_Button {} {
-        label Expert
-        callback {masterwindow->show();
-selectuiwindow->hide();}
-        xywh {10 165 100 35} box PLASTIC_UP_BOX color 229 labelfont 1 labelsize 20
-      }
-      Fl_Box {} {
-        label {.. if you have used ZynAddSubFX before, or you like to have full controll to all parameters.}
-        xywh {110 165 310 35} labelfont 1 labelsize 13 align 144
+        label {Stop ALL sounds!}
+        callback {virkeyboard->relaseallkeys();
+pthread_mutex_lock(&master->mutex);
+master->shutup=1;
+pthread_mutex_unlock(&master->mutex);}
+        xywh {5 179 130 31} box PLASTIC_UP_BOX color 231 labelfont 1
       }
       Fl_Button {} {
-        label Beginner
-        callback {simplemasterwindow->show();
-selectuiwindow->hide();}
-        xywh {10 80 100 65} box PLASTIC_UP_BOX color 238 labelfont 1 labelsize 20
+        label Reset
+        callback {simpleglobalfinedetuneslider->value(64.0);
+simpleglobalfinedetuneslider->do_callback();}
+        tooltip {Master fine detune reset} xywh {90 60 45 15} box THIN_UP_BOX labelfont 1 labelsize 12 align 128
       }
-      Fl_Box {} {
-        label {..if you are a beginner, you prefer using presets or you prefer to use simpler user interfaces. Most functionality of ZynAddSubFX will be hidden in this mode to make simple the learning/using it.}
-        xywh {110 75 320 75} labelfont 1 labelsize 13 align 144
+      Fl_Dial simpleglobalfinedetuneslider {
+        label {Fine Detune}
+        callback {master->microtonal.Pglobalfinedetune=(int) o->value();}
+        tooltip {global fine detune} xywh {95 80 30 30} box ROUND_UP_BOX labelsize 12 align 130 maximum 127 step 1 value 64
+        code0 {o->value(master->microtonal.Pglobalfinedetune);}
+        class WidgetPDial
       }
-      Fl_Box {} {
-        label {You can switch the interface modes anytime you want.}
-        xywh {40 215 345 25} box BORDER_BOX color 51 labelfont 1 labelsize 13 align 144
+      Fl_Counter {} {
+        label Part
+        callback {npartcounter->value(o->value());
+npart=(int) o->value()-1;
+
+simplerefresh();}
+        tooltip {The part number} xywh {170 40 70 20} type Simple labelfont 1 align 4 minimum 0 maximum 127 step 1 value 1 textfont 1
+        code0 {o->bounds(1,NUM_MIDI_PARTS);}
+        code1 {bankui->init(o);}
+      }
+      Fl_Menu_Bar {} {open
+        xywh {0 0 690 25}
+      } {
+        submenu {} {
+          label {&File} open
+          xywh {10 10 100 20}
+        } {
+          menuitem {} {
+            label {&New (erase all)...}
+            callback {do_new_master();}
+            xywh {30 30 100 20}
+          }
+          menuitem {} {
+            label {&Open Parameters...}
+            callback {do_load_master();}
+            xywh {30 30 100 20}
+          }
+          menuitem {} {
+            label {&Save All Parameters...}
+            callback {do_save_master();}
+            xywh {20 20 100 20} divider
+          }
+          menuitem {} {
+            label {&Settings...}
+            callback {configui->show();}
+            xywh {35 35 100 20} divider
+          }
+          menuitem {} {
+            label {&Copyright...}
+            callback {aboutwindow->show();}
+            xywh {25 25 100 20} divider
+          }
+          menuitem {} {
+            label {E&xit}
+            callback {masterwindow->do_callback();}
+            xywh {20 20 100 20}
+          }
+        }
+        submenu {} {
+          label {&Instrument} open
+          xywh {20 20 100 20}
+        } {
+          menuitem {} {
+            label {&Open Instrument...}
+            callback {const char *filename;
+filename=fl_file_chooser("Load:","({*.xiz})",NULL,0);
+if (filename==NULL) return;
+
+
+pthread_mutex_lock(&master->mutex);
+//  int npart=(int)npartcounter->value()-1;
+
+  //clear all instrument parameters, first
+  master->part[npart]->defaultsinstrument();
+
+  //load the instr. parameters
+  int result=master->part[npart]->loadXMLinstrument(filename);
+
+pthread_mutex_unlock(&master->mutex);
+master->part[npart]->applyparameters();
+
+npartcounter->do_callback();
+updatepanel();
+
+if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an instrument file.");
+      else if (result<0) fl_alert("Error: Could not load the file.");}
+            xywh {40 40 100 20}
+          }
+          menuitem {} {
+            label {Show Instrument &Bank...}
+            callback {bankui->show();}
+            xywh {10 10 100 20} divider
+          }
+        }
       }
     }
   }
@@ -1402,18 +1452,21 @@ selectuiwindow->hide();}
   for (int neff2=neff1+1;neff2<NUM_SYS_EFX;neff2++)
     syseffsend[neff1][neff2]->value(master->Psysefxsend[neff1][neff2]);} {}
   }
-  Function {setfilelabel(const char *filename)} {} {
+  Function {setfilelabel(const char *filename)} {open
+  } {
     code {if (filename!=NULL) snprintf(&masterwindowlabel[0],100,"%s - ZynAddSubFX",fl_filename_name(filename));
   else snprintf(&masterwindowlabel[0],100,"%s","ZynAddSubFX (c)2002-2004 Nasca O. Paul");
 masterwindowlabel[99]='\\0';
-masterwindow->label(&masterwindowlabel[0]);} {}
+masterwindow->label(&masterwindowlabel[0]);
+simplemasterwindow->label(&masterwindowlabel[0]);} {}
   }
   Function {updatepanel()} {} {
     code {for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
   panellistitem[npart]->refresh();
 };} {}
   }
-  Function {MasterUI(Master *master_,int *exitprogram_)} {} {
+  Function {MasterUI(Master *master_,int *exitprogram_)} {open
+  } {
     code {master=master_;
 exitprogram=exitprogram_;
 ninseff=0;
@@ -1432,7 +1485,7 @@ sequi=new SeqUI(master);
 
 make_window();
 presetsui=new PresetsUI();
-
+setfilelabel(NULL);
 swapefftype=0;} {}
   }
   Function {~MasterUI()} {} {
@@ -1451,15 +1504,13 @@ delete (sequi);
 
 delete(presetsui);} {}
   }
-  Function {showUI()} {open
-  } {
+  Function {showUI()} {} {
     code {if (true) selectuiwindow->show();
 
 
 //masterwindow->show();} {}
   }
-  Function {simplerefresh()} {open
-  } {
+  Function {simplerefresh()} {} {
     code {partenabled->value(master->part[npart]->Penabled);
 if (master->part[npart]->Penabled!=0) simplelistitemgroup->activate();
      else simplelistitemgroup->deactivate();
@@ -1469,13 +1520,90 @@ partpanning->value(master->part[npart]->Ppanning);
 partrcv->value(master->part[npart]->Prcvchn);
 
 partname->label((char *)master->part[npart]->Pname);
-
+/*
 if ((int)bankui->cbwig->value()!=(npart+1))
    simplelistitemgroup->color(fl_rgb_color(160,160,160));
 else 
    simplelistitemgroup->color(fl_rgb_color(50,190,240));
-
+*/
 simplelistitemgroup->redraw();} {}
+  }
+  Function {do_new_master()} {open
+  } {
+    code {if (fl_ask("Clear *ALL* the parameters ?")){
+       delete microtonalui;
+
+       pthread_mutex_lock(&master->mutex);
+	master->defaults();
+       pthread_mutex_unlock(&master->mutex);
+	
+       refresh_master_ui();
+
+};
+
+updatepanel();} {}
+  }
+  Function {do_load_master()} {open
+  } {
+    code {char *filename;
+filename=fl_file_chooser("Open:","({*.xmz})",NULL,0);
+if (filename==NULL) return;
+
+
+pthread_mutex_lock(&master->mutex);
+  //clear all parameters
+  master->defaults();
+
+  //load the data
+  int result=master->loadXML(filename);
+pthread_mutex_unlock(&master->mutex);
+master->applyparameters();
+
+refresh_master_ui();
+if (result>=0) setfilelabel(filename);
+
+if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not a zynaddsubfx parameters file.");
+      else if (result<0) fl_alert("Error: Could not load the file.");} {}
+  }
+  Function {do_save_master()} {} {
+    code {char *filename;
+int result=0;
+
+filename=fl_file_chooser("Save:","({*.xmz})",NULL,0);
+if (filename==NULL) return;
+filename=fl_filename_setext(filename,".xmz");
+
+result=fileexists(filename);
+if (result) {
+    result=0;
+   if (!fl_ask("The file exists. \\nOverwrite it?")) return;
+       
+};
+
+
+pthread_mutex_lock(&master->mutex);
+result=master->saveXML(filename);
+pthread_mutex_unlock(&master->mutex);
+
+if (result<0) fl_alert("Error: Could not save the file.");
+
+
+updatepanel();} {}
+  }
+  Function {refresh_master_ui()} {open
+  } {
+    code {npartcounter->do_callback();
+syseffnocounter->do_callback();
+inseffnocounter->do_callback();
+masterkeyshiftcounter->value(master->Pkeyshift-64);
+mastervolumedial->value(master->Pvolume);    
+globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);   
+microtonalui=new MicrotonalUI(&master->microtonal);
+nrpnbutton->value(master->ctl.NRPN.receive);
+globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);
+updatesendwindow();
+
+updatepanel();} {}
   }
   decl {Master *master;} {}
   decl {MicrotonalUI *microtonalui;} {}
