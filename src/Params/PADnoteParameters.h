@@ -60,6 +60,8 @@ class PADnoteParameters{
 		unsigned char par1;
 		unsigned char freq;
 	    }modulator;
+	    
+	    unsigned char width;//the width of the resulting function after the modulation
 	    struct{//the amplitude multiplier of the harmonic profile
 		unsigned char mode;
 		unsigned char type;

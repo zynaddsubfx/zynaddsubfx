@@ -230,11 +230,11 @@ cbwidget->do_callback();}
               class WidgetPDial
             }
             Fl_Dial {} {
-              label Stretch
+              label Str
               callback {pars->Php.modulator.par1=(int) o->value();
 hprofile->redraw();
 cbwidget->do_callback();}
-              xywh {20 115 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
+              xywh {15 115 20 20} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
               code0 {o->value(pars->Php.modulator.par1);}
               class WidgetPDial
             }
@@ -243,7 +243,7 @@ cbwidget->do_callback();}
               callback {pars->Php.modulator.freq=(int) o->value();
 hprofile->redraw();
 cbwidget->do_callback();}
-              xywh {55 115 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
+              xywh {40 115 20 20} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
               code0 {o->value(pars->Php.modulator.freq);}
               class WidgetPDial
             }
@@ -331,7 +331,7 @@ cbwidget->do_callback();}
               callback {pars->Php.onehalf=o->value();
 hprofile->redraw();
 cbwidget->do_callback();}
-              xywh {15 143 75 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
+              xywh {10 143 80 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
               code0 {o->value(pars->Php.onehalf);}
             } {
               menuitem {} {
@@ -346,6 +346,15 @@ cbwidget->do_callback();}
                 label {Lower Half}
                 xywh {35 35 100 20} labelfont 1 labelsize 10
               }
+            }
+            Fl_Dial {} {
+              label Size
+              callback {pars->Php.width=(int) o->value();
+hprofile->redraw();
+cbwidget->do_callback();} selected
+              xywh {65 115 20 20} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
+              code0 {o->value(pars->Php.width);}
+              class WidgetPDial
             }
           }
           Fl_Group {} {
@@ -835,7 +844,7 @@ o->color(FL_GRAY);}
       }
       Fl_Button {} {
         label Close
-        callback {padnotewindow->hide();} selected
+        callback {padnotewindow->hide();}
         xywh {300 405 195 40} box THIN_UP_BOX labelsize 20
       }
     }

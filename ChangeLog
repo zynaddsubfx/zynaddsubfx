@@ -662,4 +662,4 @@
 	    - Corectata o eroare care facea ca sample-ul la PADnote sa nu fie ales in functie de frecventa reala de baza (cu detune)
 	    - Mutat functiile de waveshaping in Distorsion.C/.h
 27 Iul 2004 - Corectata o eroare foarte suparatoare care bloca uneori calculatorul
-	    
+	    - Adaugat inca un nou parametru la PADsynth la base function	    

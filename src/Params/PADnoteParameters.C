@@ -68,9 +68,10 @@ PADnoteParameters::~PADnoteParameters(){
 void PADnoteParameters::defaults(){
     Php.base.type=0;
     Php.base.par1=80;
+    Php.freqmult=0;
     Php.modulator.par1=0;
     Php.modulator.freq=30;
-    Php.freqmult=0;
+    Php.width=127;
     Php.amp.type=0;
     Php.amp.mode=0;
     Php.amp.par1=80;
@@ -152,11 +153,25 @@ REALTYPE PADnoteParameters::getprofile(REALTYPE *smp,int size){
     REALTYPE modpar1=pow(Php.modulator.par1/127.0,4.0)*5.0/sqrt(modfreq);
     REALTYPE amppar1=pow(2.0,pow(Php.amp.par1/127.0,2.0)*10.0)-0.999;
     REALTYPE amppar2=(1.0-Php.amp.par2/127.0)*0.998+0.001;
-    
+    REALTYPE width=pow(150.0/(Php.width+22.0),2.0);
+
     for (int i=0;i<size*supersample;i++){
+	bool makezero=false;    
 	REALTYPE x=i*1.0/(size*(REALTYPE) supersample);
 
 	REALTYPE origx=x;
+    
+	//do the sizing (width)
+	x=(x-0.5)*width+0.5;
+	if (x<0.0) {
+	    x=0.0; 
+	    makezero=true;
+	} else {
+	    if (x>1.0) {
+		x=1.0;
+		makezero=true;
+	    };
+	};
 
 	//compute the full profile or one half
 	switch(Php.onehalf){
@@ -165,13 +180,16 @@ REALTYPE PADnoteParameters::getprofile(REALTYPE *smp,int size){
 	    case 2:x=x*0.5;
 		break;
 	};	
-	
+
 	REALTYPE x_before_freq_mult=x;
-    
+
+	//do the frequency multiplier
 	x*=freqmult;
-	//do the modulation of the profile
+
+	//do the modulation of the profile 
 	x+=sin(x_before_freq_mult*3.1415926*modfreq)*modpar1;
 	x=fmod(x+1000.0,1.0)*2.0-1.0;
+
 
 	//this is the base function of the profile
 	REALTYPE f;
@@ -183,9 +201,11 @@ REALTYPE PADnoteParameters::getprofile(REALTYPE *smp,int size){
 	    default:f=exp(-(x*x)*basepar);
 		break;
 	};
+	if (makezero) f=0.0;
 	
 	REALTYPE amp=1.0;
 	origx=origx*2.0-1.0;
+
 	//compute the amplitude multiplier
 	switch(Php.amp.type){
 	    case 1:amp=exp(-(origx*origx)*10.0*amppar1);
@@ -210,6 +230,7 @@ REALTYPE PADnoteParameters::getprofile(REALTYPE *smp,int size){
 		    break;
 	    };
 	};
+
 	smp[i/supersample]+=finalsmp/supersample;
     };    
 
@@ -437,7 +458,7 @@ void PADnoteParameters::applyparameters(bool lockmutex){
     };
     delete(fft);
     
-    //delete the additional samples that might exists and are not usefull
+    //delete the additional samples that might exists and are not useful
     for (int i=samplemax;i<PAD_MAX_SAMPLES;i++) deletesample(i);
     
 };
@@ -454,6 +475,7 @@ void PADnoteParameters::add2XML(XMLwrapper *xml){
 	xml->addpar("frequency_multiplier",Php.freqmult);
 	xml->addpar("modulator_par1",Php.modulator.par1);
 	xml->addpar("modulator_frequency",Php.modulator.freq);
+	xml->addpar("width",Php.width);
 	xml->addpar("amplitude_multiplier_type",Php.amp.type);
 	xml->addpar("amplitude_multiplier_mode",Php.amp.mode);
 	xml->addpar("amplitude_multiplier_par1",Php.amp.par1);
@@ -548,6 +570,7 @@ void PADnoteParameters::getfromXML(XMLwrapper *xml){
 	Php.freqmult=xml->getpar127("frequency_multiplier",Php.freqmult);
 	Php.modulator.par1=xml->getpar127("modulator_par1",Php.modulator.par1);
 	Php.modulator.freq=xml->getpar127("modulator_frequency",Php.modulator.freq);
+	Php.width=xml->getpar127("width",Php.width);
 	Php.amp.type=xml->getpar127("amplitude_multiplier_type",Php.amp.type);
 	Php.amp.mode=xml->getpar127("amplitude_multiplier_mode",Php.amp.mode);
 	Php.amp.par1=xml->getpar127("amplitude_multiplier_par1",Php.amp.par1);

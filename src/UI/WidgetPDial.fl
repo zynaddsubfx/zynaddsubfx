@@ -25,7 +25,7 @@ class WidgetPDial {: {public Fl_Dial}
   }
   Function {handle(int event)} {return_type int
   } {
-    code {double dragsize,v;
+    code {double dragsize,v,min=minimum(),max=maximum();
 int my;
 
 switch (event){
@@ -35,10 +35,11 @@ case FL_DRAG:
 
      dragsize=200.0;
      if (Fl::event_state(FL_BUTTON1)==0) dragsize*=10;
-     v=oldvalue+my/dragsize*(maximum()-minimum());
-     if (v<minimum()) v=minimum();
-        else if (v>maximum()) v=maximum();
-     
+     v=oldvalue+my/dragsize*(max-min);
+     if (v<min) v=min;
+        else if (v>max) v=max;
+
+     //printf("%d   %g    %g\\n",my,v,oldvalue);     
      value(v);
      value_damage();
      if (this->when()!=0) do_callback();
