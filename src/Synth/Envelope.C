@@ -122,7 +122,6 @@ REALTYPE Envelope::envout(){
 
     t+=inct;
     if (t>=1.0){
-        
 	if (currentpoint>=envpoints-1) envfinish=1;
 	    else currentpoint++;
 	t=0.0;
