@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0105 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -70,8 +70,7 @@ return((int) ((1.0-env->Penvval[n]/127.0)*ly));} {}
   }
   Function {getnearest(int x,int y)} {return_type int
   } {
-    code {
-x-=5;y-=5;
+    code {x-=5;y-=5;
 
 int nearestpoint=0;
 int nearestval=1000000;//a big value
@@ -202,13 +201,14 @@ class EnvelopeUI {: {public Fl_Group}
     code {envwindow->hide();
 hide();
 freemodeeditwindow->hide();
-delete (envwindow);
-delete (freemodeeditwindow);} {}
+//delete (envwindow);
+delete (freemodeeditwindow);} {selected
+    }
   }
   Function {make_freemode_edit_window()} {} {
     Fl_Window freemodeeditwindow {
       label Envelope
-      xywh {132 455 575 180} hide
+      xywh {132 455 575 180} type Double hide
     } {
       Fl_Box freeedit {
         label Envelope
@@ -320,7 +320,7 @@ envfree->redraw();}
   }
   Function {make_ADSR_window()} {} {
     Fl_Window envADSR {
-      xywh {440 55 205 70} color 50 labelfont 1 hide
+      xywh {440 55 205 70} type Double color 50 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Group {} {
@@ -388,7 +388,7 @@ freeedit->redraw();}
   }
   Function {make_ASR_window()} {} {
     Fl_Window envASR {
-      xywh {433 172 210 70} hide
+      xywh {433 172 210 70} type Double hide
       class Fl_Group
     } {
       Fl_Group {} {
@@ -450,11 +450,11 @@ freeedit->redraw();}
   }
   Function {make_ADSRfilter_window()} {} {
     Fl_Window envADSRfilter {
-      xywh {406 296 275 70} color 50 labelfont 1 hide
+      xywh {406 296 275 70} type Double color 50 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Group {} {
-        label {Filter Envelope} selected
+        label {Filter Envelope}
         xywh {0 0 275 70} box PLASTIC_UP_BOX color 223 labeltype ENGRAVED_LABEL labelsize 11 align 17
       } {
         Fl_Dial {} {
@@ -528,7 +528,7 @@ freeedit->redraw();}
   }
   Function {make_ASRbw_window()} {} {
     Fl_Window envASRbw {
-      xywh {431 279 210 70} hide
+      xywh {431 279 210 70} type Double hide
       class Fl_Group
     } {
       Fl_Group {} {
@@ -590,7 +590,7 @@ freeedit->redraw();}
   }
   Function {make_free_window()} {} {
     Fl_Window envfree {
-      xywh {289 383 205 70} color 50 labelfont 1 hide resizable
+      xywh {289 383 205 70} type Double color 50 labelfont 1 hide resizable
       class Fl_Group
     } {
       Fl_Group envfreegroup {

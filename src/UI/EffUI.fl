@@ -159,15 +159,15 @@ class EffUI {: {public Fl_Group}
 filterwindow=NULL;} {}
   }
   Function {~EffUI()} {} {
-    code {effnullwindow->hide();delete (effnullwindow);
-effreverbwindow->hide();delete (effreverbwindow);
-effechowindow->hide();delete (effechowindow);
-effchoruswindow->hide();delete (effchoruswindow);
-effphaserwindow->hide();delete (effphaserwindow);
-effalienwahwindow->hide();delete (effalienwahwindow);
-effdistorsionwindow->hide();delete (effdistorsionwindow);
-effeqwindow->hide();delete (effeqwindow);
-effdynamicfilterwindow->hide();delete (effdynamicfilterwindow);
+    code {effnullwindow->hide();//delete (effnullwindow);
+effreverbwindow->hide();//delete (effreverbwindow);
+effechowindow->hide();//delete (effechowindow);
+effchoruswindow->hide();//delete (effchoruswindow);
+effphaserwindow->hide();//delete (effphaserwindow);
+effalienwahwindow->hide();//delete (effalienwahwindow);
+effdistorsionwindow->hide();//delete (effdistorsionwindow);
+effeqwindow->hide();//delete (effeqwindow);
+effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);
 
 if (filterwindow!=NULL){
 	filterwindow->hide();

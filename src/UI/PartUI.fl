@@ -76,7 +76,7 @@ end();} {}
   }
   Function {~PartSysEffSend()} {} {
     code {syseffsend->hide();
-delete(syseffsend);} {}
+//delete(syseffsend);} {}
   }
   decl {Master *master;} {}
   decl {int neff;} {}
@@ -265,7 +265,7 @@ end();} {}
   }
   Function {~PartKitItem()} {} {
     code {partkititem->hide();
-delete(partkititem);} {}
+//delete(partkititem);} {}
   }
   decl {Part *part;} {}
   decl {int n;} {}
@@ -274,7 +274,7 @@ delete(partkititem);} {}
   decl {PartUI_ *partui;} {}
 } 
 
-class PartUI {: {public Fl_Group,PartUI_}
+class PartUI {open : {public Fl_Group,PartUI_}
 } {
   Function {make_window()} {private
   } {
@@ -1115,13 +1115,14 @@ if ((engine==0)&&(adnoteui!=NULL)) adnoteui->ADnoteGlobalParameters->show();
 if ((engine==1)&&(subnoteui!=NULL)) subnoteui->SUBparameters->show();
 if ((engine==2)&&(adnoteui!=NULL)) padnoteui->padnotewindow->show();} {}
   }
-  Function {~PartUI()} {} {
+  Function {~PartUI()} {open
+  } {
     code {if (adnoteui!=NULL) delete (adnoteui);
 if (subnoteui!=NULL) delete (subnoteui);
 if (padnoteui!=NULL) delete (padnoteui);
 
 partgroup->hide();
-delete(partgroup);
+//delete(partgroup);
 
 ctlwindow->hide();
 delete(ctlwindow);

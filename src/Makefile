@@ -1,7 +1,7 @@
 include Makefile.inc
 
 ifneq ($(MAKECMDGOALS),debug)
-  CXXFLAGS= -O6 
+  CXXFLAGS= -O6 -Wall
 else 
   CXXFLAGS= -O0 -ggdb -Wall -Wpointer-arith -Wstrict-prototypes
 endif

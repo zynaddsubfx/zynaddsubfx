@@ -666,8 +666,9 @@
 	    - Nu se mai arata butonul de apply parameters la PADsynth cand nu este necesar	    
 	    - Eliminate blocarile de cateva secunde din threadul de sunet in momentul cand se incarca un nou instrument care contine parametrii PADsynth
 	    - Adaugata schimbarea titlului ferestrei principale la load XML
-28 Iul 2004 - Modificat modul cum este stocat lista de banci root dir
+29 Iul 2004 - Modificat modul cum este stocat lista de banci root dir
 	    - Gasita o eroare care facea ca sa se stearga denormalkillbuffer inaintea lui master
-	    
+30 Iul 2004 - Gasite si corectate o gramada de erori (eu stergeam elemente din ferestre si fltk le stergea din nou)
+
 
 

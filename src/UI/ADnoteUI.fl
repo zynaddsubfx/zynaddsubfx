@@ -161,7 +161,7 @@ ADnoteVoiceListItem->redraw();} {}
   }
   Function {~ADvoicelistitem()} {} {
     code {ADnoteVoiceListItem->hide();
-delete(ADnoteVoiceListItem);} {}
+//delete(ADnoteVoiceListItem);} {}
   }
   decl {ADnoteParameters *pars;} {}
   decl {int nvoice;} {}
@@ -312,7 +312,7 @@ o->redraw();}
 int nv=nvoice;
 if (pars->VoicePar[nvoice].PextFMoscil>=0) nv=pars->VoicePar[nvoice].PextFMoscil;
 
-oscedit=new OscilEditor(pars->VoicePar[nv].FMSmp,fmoscil,NULL,master);} selected
+oscedit=new OscilEditor(pars->VoicePar[nv].FMSmp,fmoscil,NULL,master);}
                 xywh {700 370 55 15} box THIN_UP_BOX labelfont 1 labelsize 12
                 code0 {if (pars->VoicePar[nvoice].PextFMoscil>=0) o->labelcolor(FL_BLUE);}
               }
@@ -737,7 +737,8 @@ hide();
 if (oscedit!=NULL) {
     delete(oscedit);
 };
-delete (ADnoteVoiceParameters);} {}
+//delete (ADnoteVoiceParameters);} {selected
+    }
   }
   decl {int nvoice;} {}
   decl {ADnoteParameters *pars;} {}

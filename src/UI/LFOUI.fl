@@ -41,7 +41,8 @@ class LFOUI {: {public Fl_Group}
   Function {~LFOUI()} {} {
     code {lfoui->hide();
 hide();
-delete (lfoui);} {}
+//delete (lfoui);} {selected
+    }
   }
   Function {make_window()} {} {
     Fl_Window lfoui {

@@ -96,8 +96,7 @@ delete(harmonic);} {}
 } 
 
 class SUBnoteUI {} {
-  Function {make_window()} {selected
-  } {
+  Function {make_window()} {} {
     Fl_Window SUBparameters {
       label {SUBsynth Parameters}
       xywh {4 225 735 390} type Double hide
@@ -371,9 +370,10 @@ globalfiltergroup->redraw();}
 make_window();} {}
   }
   Function {~SUBnoteUI()} {} {
-    code {for (int i=0;i<MAX_SUB_HARMONICS;i++) delete (h[i]);
+    code {//for (int i=0;i<MAX_SUB_HARMONICS;i++) delete (h[i]);
 SUBparameters->hide();
-delete(SUBparameters);} {}
+delete(SUBparameters);} {selected
+    }
   }
   decl {SUBnoteParameters *pars;} {}
   decl {SUBnoteharmonic *h[MAX_SUB_HARMONICS];} {}

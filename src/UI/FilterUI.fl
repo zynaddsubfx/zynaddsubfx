@@ -158,8 +158,9 @@ nvowel=0;nformant=0;nseqpos=0;} {}
     code {filterui->hide();
 formantparswindow->hide();
 hide();
-delete (filterui);
-delete (formantparswindow);} {}
+//delete (filterui);
+delete (formantparswindow);} {selected
+    }
   }
   Function {make_window()} {} {
     Fl_Window filterui {
@@ -568,8 +569,7 @@ wvknob->when(0);
 formant_freq_dial->when(0);
 formant_q_dial->when(0);
 formant_amp_dial->when(0);
-strchdial->when(0);} {selected
-    }
+strchdial->when(0);} {}
   }
   decl {FilterParams *pars;} {}
   decl {unsigned char *velsnsamp,*velsns;} {}

@@ -103,12 +103,18 @@ Config::Config(){
 
 	cfg.bankRootDirList[4]=new char[MAX_STRING_SIZE];
 	sprintf(cfg.bankRootDirList[4],"../banks");
+
+	cfg.bankRootDirList[5]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.bankRootDirList[5],"banks");
 #else
 	cfg.bankRootDirList[0]=new char[MAX_STRING_SIZE];
 	sprintf(cfg.bankRootDirList[0],"./");
 
 	cfg.bankRootDirList[1]=new char[MAX_STRING_SIZE];
 	sprintf(cfg.bankRootDirList[1],"../banks");
+
+	cfg.bankRootDirList[2]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.bankRootDirList[2],"banks");
 #endif
     };
 };
@@ -128,7 +134,7 @@ Config::~Config(){
 
 void Config::clearbankrootdirlist(){
     for (int i=0;i<MAX_BANK_ROOT_DIRS;i++) {
-	if (cfg.bankRootDirList[i]=NULL) delete(cfg.bankRootDirList[i]);
+	if (cfg.bankRootDirList[i]==NULL) delete(cfg.bankRootDirList[i]);
 	cfg.bankRootDirList[i]=NULL;
     };
 };
