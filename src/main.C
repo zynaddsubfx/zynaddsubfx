@@ -553,7 +553,7 @@ VSTSynth::VSTSynth (audioMasterCallback audioMaster):AudioEffectX(audioMaster,1,
     setUniqueID('zasfx');
     canProcessReplacing();
 //    hasVu(false);
-//   hasClip(false);
+//    hasClip(false);
 
     isSynth(true);
     
@@ -597,13 +597,15 @@ VSTSynth::~VSTSynth(){
 
 long VSTSynth::processEvents(VstEvents *events){
     for (int i=0;i<events->numEvents;i++){
+
+      //debug stuff
 //      FILE *a=fopen("events","a");
 //      fprintf(a,"%lx\n",events->events[i]->type);
 //      fflush(a);fclose(a);
 
 	if ((events->events[i])->type != kVstMidiType) continue;
 	VstMidiEvent *ev= (VstMidiEvent*) events->events[i];
-	char *data=ev->midiData;
+	unsigned char *data= (unsigned char *)ev->midiData;
 	int status=data[0]/16;
 	int cmdchan=data[0]&0x0f;
 	int cntl;	
@@ -624,6 +626,8 @@ long VSTSynth::processEvents(VstEvents *events){
 	pthread_mutex_unlock(&vmaster->mutex);
 	
     };
+
+return(1);
 };
 #endif
 

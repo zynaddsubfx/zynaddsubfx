@@ -52,3 +52,8 @@ bool VSTSynth::getProductString(char *txt){
 	return(true);
 };
 
+void VSTSynth::resume(){
+	wantEvents();
+};
+
+

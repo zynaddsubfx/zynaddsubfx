@@ -677,4 +677,6 @@
 02 Aug 2004 - Am pus din nou schimbarea schedule-ului la valoare corecta (l-am scos dintr-o greseala)
 04 Aug 2004 - Am corectat niste erori la VST
 	    - Merge VST, dar nu intotdeauna stabil (merge stabil pe vsthost.exe)
+	    - Corectata eroare care facea ca sa nu mearga MIDI
+	    
 

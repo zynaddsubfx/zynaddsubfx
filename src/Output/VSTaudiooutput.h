@@ -41,9 +41,12 @@ class VSTSynth:public AudioEffectX{
 	virtual long int canDo(char *txt);
 	virtual bool getVendorString(char *txt);
 	virtual bool getProductString(char *txt);
-	
+	virtual void resume();
+		
+
 	MasterUI *ui;
 	int Pexitprogram;
+
         Master *vmaster;
 	pthread_t thr;
 };
