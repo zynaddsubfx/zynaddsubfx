@@ -105,7 +105,10 @@ class OscilGen:public Presets{
 	void newrandseed(unsigned int randseed);
 	
 	bool ADvsPAD;//if it is used by ADsynth or by PADsynth
-	
+
+	static REALTYPE *tmpsmps;//this array stores some termporary data and it has SOUND_BUFFER_SIZE elements
+	static FFTFREQS outoscilFFTfreqs;
+
     private:
 	
 	REALTYPE hmag[MAX_AD_HARMONICS],hphase[MAX_AD_HARMONICS];//the magnituides and the phases of the sine/nonsine harmonics
@@ -129,7 +132,7 @@ class OscilGen:public Presets{
 	void modulation();
 
 	//Do the adaptive harmonic stuff
-	void adaptiveharmonic(REALTYPE *freqs,REALTYPE freq);
+	void adaptiveharmonic(FFTFREQS f,REALTYPE freq);
 	
 		
     	//Basic/base functions (Functiile De Baza)
@@ -151,18 +154,12 @@ class OscilGen:public Presets{
 	unsigned char oldbasefunc,oldbasepar,oldhmagtype,oldwaveshapingfunction,oldwaveshaping;
 	int oldfilterpars,oldsapars,oldbasefuncmodulation,oldbasefuncmodulationpar1,oldbasefuncmodulationpar2,oldbasefuncmodulationpar3,oldharmonicshift;
 	int oldmodulation,oldmodulationpar1,oldmodulationpar2,oldmodulationpar3;
-	/*
-	  The frequencies of wavefroms are stored like this:
-	  c[0],c[1],....,c[OSCIL_SIZE/2],s[OSCIL_SIZE/2-1],...,s[2],s[1]
-	  c[N] is the cosine component and the s[N] is the sine component in the frequency domain
-	  This way of storing of frequencies is similar to the FFTW package.
-	*/
-	REALTYPE *basefuncFFTfreqs;//Base Function Frequencies
-	REALTYPE *oscilFFTfreqs;//Oscillator Frequencies - this is different than the hamonics set-up by the user, it may contains time-domain data if the antialiasing is turned off
+
+
+	FFTFREQS basefuncFFTfreqs;//Base Function Frequencies
+	FFTFREQS oscilFFTfreqs;//Oscillator Frequencies - this is different than the hamonics set-up by the user, it may contains time-domain data if the antialiasing is turned off
 	int oscilprepared;//1 if the oscil is prepared, 0 if it is not prepared and is need to call ::prepare() before ::get()
-	REALTYPE *outoscilFFTfreqs;
 	
-	unsigned short int *basefuncFFTfreqsQ;
 	Resonance *res;	
 	
 	unsigned int randseed;

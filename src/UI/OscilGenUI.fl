@@ -89,7 +89,6 @@ max=max*1.05;
 
 if (this->active_r()) fl_color(this->parent()->selection_color());
     else fl_color(this->parent()->color());
-if ((ANTI_ALIAS==0)&&(oscbase==0)) fl_color(this->parent()->color());
 fl_line_style(FL_DOT);
 
 for (i=1;i<maxdb/10;i++){

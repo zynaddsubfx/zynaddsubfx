@@ -28,6 +28,13 @@
 //What float type I use for internal sampledata
 #define REALTYPE float
 
+struct FFTFREQS{
+    REALTYPE *s,*c;//sine and cosine components
+};
+
+extern void newFFTFREQS(FFTFREQS *f,int size);
+extern void deleteFFTFREQS(FFTFREQS *f);
+
 // Sampling rate
 extern int SAMPLE_RATE;
 
@@ -48,7 +55,6 @@ extern int SOUND_BUFFER_SIZE;
  * Increase this => CPU requirements gets high (only at start of the note)
  */
 extern int OSCIL_SIZE;
-
 
 /*
  * The number of harmonics of additive synth
@@ -88,13 +94,6 @@ extern int OSCIL_SIZE;
  * The poliphony (notes)
  */
 #define POLIPHONY 60
-
-/*
- * The antialiasing and other parameters that depents on IFFT on each
- * note on command(see OscilGen). 1 for enabled and 0 for disabled
- */
-#define ANTI_ALIAS 1
-
 
 /*
  * Number of system effects

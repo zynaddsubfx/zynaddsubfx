@@ -240,6 +240,9 @@ void initprogram(){
     denormalkillbuf=new REALTYPE [SOUND_BUFFER_SIZE];
     for (int i=0;i<SOUND_BUFFER_SIZE;i++) denormalkillbuf[i]=(RND-0.5)*1e-16;
     
+    OscilGen::tmpsmps=new REALTYPE[OSCIL_SIZE];
+    newFFTFREQS(&OscilGen::outoscilFFTfreqs,OSCIL_SIZE/2);
+    
     master=new Master();
     master->swaplr=swaplr;
 
@@ -302,6 +305,12 @@ void exitprogram(){
 
 //    pthread_mutex_unlock(&master->mutex);
     delete(denormalkillbuf);
+    delete(OscilGen::tmpsmps);
+    deleteFFTFREQS(&OscilGen::outoscilFFTfreqs);
+
+
+
+
 };
 
 #ifdef OS_WINDOWS

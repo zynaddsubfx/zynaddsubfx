@@ -52,42 +52,42 @@ FFTwrapper::~FFTwrapper(){
 /*
  * do the Fast Fourier Transform
  */
-void FFTwrapper::smps2freqs(REALTYPE *smps,REALTYPE *freqs){
+void FFTwrapper::smps2freqs(REALTYPE *smps,FFTFREQS freqs){
 #ifdef FFTW_VERSION_2
     for (int i=0;i<fftsize;i++) tmpfftdata1[i]=smps[i];
-    if (freqs==NULL) {
-	    rfftw_one(planfftw,tmpfftdata1,NULL);
-    	    for (int i=0;i<fftsize;i++) smps[i]=tmpfftdata1[i];
-	} else { 
-	    rfftw_one(planfftw,tmpfftdata1,tmpfftdata2);
-	    for (int i=0;i<fftsize;i++) freqs[i]=tmpfftdata2[i];
-	};
+    rfftw_one(planfftw,tmpfftdata1,tmpfftdata2);
+    for (int i=0;i<fftsize/2;i++) {
+	freqs.c[i]=tmpfftdata2[i];
+	freqs.s[i]=tmpfftdata2[fftsize-1-i];
+    };
 #else
     for (int i=0;i<fftsize;i++) tmpfftdata1[i]=smps[i];
     fftw_execute(planfftw);
-    if (freqs==NULL) for (int i=0;i<fftsize;i++) smps[i]=tmpfftdata1[i];
-	else for (int i=0;i<fftsize;i++) freqs[i]=tmpfftdata1[i];
+    for (int i=0;i<fftsize/2;i++) {
+	freqs.c[i]=tmpfftdata1[i];
+	freqs.s[i]=tmpfftdata1[fftsize-1-i];
+    };
 #endif
 };
 
 /*
  * do the Inverse Fast Fourier Transform
  */
-void FFTwrapper::freqs2smps(REALTYPE *freqs,REALTYPE *smps){
+void FFTwrapper::freqs2smps(FFTFREQS freqs,REALTYPE *smps){
 #ifdef FFTW_VERSION_2
-    for (int i=0;i<fftsize;i++) tmpfftdata1[i]=freqs[i];
-    if (smps==NULL) {
-	    rfftw_one(planfftw_inv,tmpfftdata1,NULL);
-	    for (int i=0;i<fftsize;i++) freqs[i]=tmpfftdata1[i];
-	} else {
-	    rfftw_one(planfftw_inv,tmpfftdata1,tmpfftdata2);
-	    for (int i=0;i<fftsize;i++) smps[i]=tmpfftdata2[i];
-	};
+    for (int i=0;i<fftsize/2;i++) {
+	tmpfftdata1[i]=freqs.c[i];
+	tmpfftdata1[fftsize-1-i]=freqs.s[i];
+    };
+    rfftw_one(planfftw_inv,tmpfftdata1,tmpfftdata2);
+    for (int i=0;i<fftsize;i++) smps[i]=tmpfftdata2[i];
 #else
-    for (int i=0;i<fftsize;i++) tmpfftdata2[i]=freqs[i];
+    for (int i=0;i<fftsize/2;i++) {
+	tmpfftdata2[i]=freqs.c[i];
+	tmpfftdata2[fftsize-1-i]=freqs.s[i];
+    };
     fftw_execute(planfftw_inv);
-    if (smps==NULL) for (int i=0;i<fftsize;i++) freqs[i]=tmpfftdata2[i];
-	else for (int i=0;i<fftsize;i++) smps[i]=tmpfftdata2[i];
+    for (int i=0;i<fftsize;i++) smps[i]=tmpfftdata2[i];
 #endif
 
 };

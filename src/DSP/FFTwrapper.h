@@ -48,8 +48,8 @@ class FFTwrapper{
     public:
 	FFTwrapper(int fftsize_);
 	~FFTwrapper();
-	void smps2freqs(REALTYPE *smps,REALTYPE *freqs);
-	void freqs2smps(REALTYPE *freqs,REALTYPE *smps);
+	void smps2freqs(REALTYPE *smps,FFTFREQS freqs);
+	void freqs2smps(FFTFREQS freqs,REALTYPE *smps);
     private:
 	int fftsize;
 	fftw_real *tmpfftdata1,*tmpfftdata2;

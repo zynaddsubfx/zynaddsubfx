@@ -734,4 +734,5 @@
 20 Oct 2004 - Corectata o mica eroare asemanetoare cu cea din 16 Oct, dar care afecta meniul new
 07 Nov 2004 - Corectata o mica eroare care facea ca sa nu se incarce corect instrumentele in linia de comanda (-l)
 14 Nov 2004 - Nu mai verific in bank daca este un director sau fisier simplu, pt. ca poate sa aiba probleme
+28 Nov 2004 - Curatat codul la OscilGen (acum datele sunt stocate mai bine si nu in functie de biblioteca FFTW)
 	    

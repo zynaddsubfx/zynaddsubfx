@@ -468,6 +468,8 @@ void PADnoteParameters::applyparameters(bool lockmutex){
     
     //prepare a BIG FFT stuff
     FFTwrapper *fft=new FFTwrapper(samplesize);
+    FFTFREQS fftfreqs;
+    newFFTFREQS(&fftfreqs,samplesize/2);
     
     REALTYPE adj[samplemax];//this is used to compute frequency relation to the base frequency
     for (int nsample=0;nsample<samplemax;nsample++) adj[nsample]=(Pquality.oct+1.0)*(REALTYPE)nsample/samplemax;
@@ -484,10 +486,10 @@ void PADnoteParameters::applyparameters(bool lockmutex){
 	newsample.smp[0]=0.0;
 	for (int i=1;i<spectrumsize;i++){//makes the phases as random
 	    REALTYPE phase=RND*6.29;
-	    newsample.smp[i]=spectrum[i]*cos(phase);
-	    newsample.smp[samplesize-i]=spectrum[i]*sin(phase);
+	    fftfreqs.c[i]=spectrum[i]*cos(phase);
+	    fftfreqs.s[i]=spectrum[i]*sin(phase);
 	};
-	fft->freqs2smps(newsample.smp,newsample.smp);//that's all; here is the only ifft for the whole sample; no windows are used :-)
+	fft->freqs2smps(fftfreqs,newsample.smp);//that's all; here is the only ifft for the whole sample; no windows are used ;-)
 	
 
         //normalize(rms)
@@ -518,6 +520,7 @@ void PADnoteParameters::applyparameters(bool lockmutex){
 	newsample.smp=NULL;
     };
     delete(fft);
+    deleteFFTFREQS(&fftfreqs);
     
     //delete the additional samples that might exists and are not useful
     for (int i=samplemax;i<PAD_MAX_SAMPLES;i++) deletesample(i);

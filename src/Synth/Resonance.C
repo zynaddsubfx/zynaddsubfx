@@ -57,7 +57,7 @@ void Resonance::setpoint(int n,unsigned char p){
 /*
  * Apply the resonance to FFT data
  */
-void Resonance::applyres(int n,REALTYPE *fftdata,REALTYPE freq){
+void Resonance::applyres(int n,FFTFREQS fftdata,REALTYPE freq){
     if (Penabled==0) return;//if the resonance is disabled
     REALTYPE sum=0.0,
 	     l1=log(getfreqx(0.0)*ctlcenter),
@@ -80,8 +80,8 @@ void Resonance::applyres(int n,REALTYPE *fftdata,REALTYPE freq){
 	
 	if ((Pprotectthefundamental!=0)&&(i==1)) y=1.0;
 	
-        fftdata[i]*=y;
-        fftdata[OSCIL_SIZE-i]*=y;
+        fftdata.c[i]*=y;
+        fftdata.s[i]*=y;
     };    
 };
 
