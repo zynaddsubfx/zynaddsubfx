@@ -379,11 +379,11 @@ class MasterUI {open
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
-      xywh {366 172 390 465} type Double
+      xywh {287 45 390 465} type Double
       code0 {setfilelabel(NULL);} non_modal visible
     } {
       Fl_Menu_Bar mastermenu {
-        xywh {0 0 690 25}
+        xywh {-5 0 690 25}
       } {
         submenu {} {
           label {&File}
@@ -584,7 +584,7 @@ npartcounter->do_callback();
 updatepanel();
 
 if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an instrument file.");
-      else if (result<0) fl_alert("Error: Could not load the file.");} selected
+      else if (result<0) fl_alert("Error: Could not load the file.");}
             xywh {30 30 100 20}
           }
           menuitem {} {
@@ -1077,6 +1077,54 @@ updatepanel();}
         xywh {575 570 55 25} box THIN_UP_BOX
       }
     }
+    Fl_Window selectuiwindow {
+      label {User Interface mode}
+      callback {*exitprogram=1;} selected
+      xywh {16 297 434 254} type Double visible
+    } {
+      Fl_Box {} {
+        label {Welcome to ZynAddSubFX}
+        xywh {5 5 425 40} labeltype SHADOW_LABEL labelfont 1 labelsize 33
+      }
+      Fl_Box {} {
+        label {Please choose the interface mode:}
+        xywh {10 50 265 25} labelfont 1 labelsize 16
+      }
+      Fl_Button {} {
+        label Expert
+        callback {masterwindow->show();
+selectuiwindow->hide();}
+        xywh {10 165 100 35} box PLASTIC_UP_BOX color 229 labelfont 1 labelsize 20
+      }
+      Fl_Box {} {
+        label {.. if you have used ZynAddSubFX before, or you like to have full controll to all parameters.}
+        xywh {110 165 310 35} labelfont 1 labelsize 13 align 144
+      }
+      Fl_Button {} {
+        label Beginner
+        callback {simplemasterwindow->show();
+selectuiwindow->hide();}
+        xywh {10 80 100 65} box PLASTIC_UP_BOX color 238 labelfont 1 labelsize 20
+      }
+      Fl_Box {} {
+        label {..if you are a beginner, you prefer using presets or you prefer to use simpler user interfaces. Most functionality of ZynAddSubFX will be hidden in this mode to make simple the learning/using it.}
+        xywh {110 75 320 75} labelfont 1 labelsize 13 align 144
+      }
+      Fl_Box {} {
+        label {You can switch the interface modes anytime you want.}
+        xywh {40 215 345 25} box BORDER_BOX color 51 labelfont 1 labelsize 13 align 144
+      }
+    }
+    Fl_Window simplemasterwindow {
+      label ZynAddSubFX
+      callback {\#ifdef VSTAUDIOOUT
+//fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
+    masterwindow->iconize();
+\#else
+if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
+\#endif} open
+      xywh {31 194 821 511} type Double visible
+    } {}
   }
   Function {updatesendwindow()} {} {
     code {for (int neff1=0;neff1<NUM_SYS_EFX;neff1++) 
@@ -1131,6 +1179,13 @@ delete (configui);
 delete (sequi);
 
 delete(presetsui);} {}
+  }
+  Function {showUI()} {open
+  } {
+    code {if (true) selectuiwindow->show();
+
+
+//masterwindow->show();} {}
   }
   decl {Master *master;} {}
   decl {MicrotonalUI *microtonalui;} {}

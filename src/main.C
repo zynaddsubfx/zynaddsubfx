@@ -167,7 +167,7 @@ void *thread2(void *arg){
  
  
 void *thread3(void *arg){
-    ui->masterwindow->show();
+    ui->showUI();
     while (Pexitprogram==0) Fl::wait();
     return(0);
 };
@@ -521,7 +521,7 @@ void *thread(void *arg){
     fflush(a);fclose(a);
 */
 
-    vs->ui->masterwindow->show();
+    vs->ui->showUI();
 
 /*    a=fopen("aaaa1","a");
     fprintf(a,"%lx %lx %lx\n",vs,vs->ui,vs->vmaster);
