@@ -63,14 +63,21 @@ MasterUI *ui;
 pthread_t thr1,thr2,thr3,thr4;
 Master *master;
 int swaplr=0;//1 for left-right swapping
+bool usejackit=false;
 
 #ifdef JACKAUDIOOUT
 #include "Output/JACKaudiooutput.h"
-#elif JACK_RTAUDIOOUT
+#endif
+
+#ifdef JACK_RTAUDIOOUT
 #include "Output/JACKaudiooutput.h"
-#elif PAAUDIOOUT
+#endif
+
+#ifdef PAAUDIOOUT
 #include "Output/PAaudiooutput.h"
-#elif OSSAUDIOOUT
+#endif
+
+#ifdef OSSAUDIOOUT
 #include "Output/OSSaudiooutput.h"
 OSSaudiooutput *audioout;
 #endif
@@ -120,9 +127,10 @@ void *thread1(void *arg){
 #endif
 
 /*
- * Wave output thread (if is not compiled for JACK, Portaudio and VST)
+ * Wave output thread (for OSS AUDIO out)
  */
-#if !(defined(JACKAUDIOOUT)||defined(JACK_RTAUDIOOUT)||defined(PAAUDIOOUT)||defined(VSTAUDIOOUT))
+#if defined(OSSAUDIOOUT)
+//!(defined(JACKAUDIOOUT)||defined(JACK_RTAUDIOOUT)||defined(PAAUDIOOUT)||defined(VSTAUDIOOUT))
 
 void *thread2(void *arg){
     REALTYPE outputl[SOUND_BUFFER_SIZE];
@@ -235,13 +243,26 @@ void initprogram(){
     master=new Master();
     master->swaplr=swaplr;
 
-#ifdef OSSAUDIOOUT
-    audioout=new OSSaudiooutput();
-#elif JACKAUDIOOUT
+#if defined(JACKAUDIOOUT)
+    if (usejackit) {
+	bool tmp=JACKaudiooutputinit(master);
+#if defined(OSSAUDIOOUT)
+	if (!tmp) printf("\nUsing OSS instead.\n");
+#else
+	if (!tmp) exit(1);
+#endif
+	usejackit=tmp;
+    };
+#endif
+#if defined(OSSAUDIOOUT)
+    if (!usejackit) audioout=new OSSaudiooutput();
+	else audioout=NULL;
+#endif
+
+#ifdef JACK_RTAUDIOOUT
     JACKaudiooutputinit(master);
-#elif JACK_RTAUDIOOUT
-    JACKaudiooutputinit(master);
-#elif PAAUDIOOUT
+#endif
+#ifdef PAAUDIOOUT
     PAaudiooutputinit(master);
 #endif 
 
@@ -266,7 +287,7 @@ void exitprogram(){
     delete(audioout);
 #endif
 #ifdef JACKAUDIOOUT
-    JACKfinish();
+    if (usejackit) JACKfinish();
 #endif
 #ifdef JACK_RTAUDIOOUT
     JACKfinish();
@@ -310,7 +331,9 @@ void exitprogram(){
 #ifndef VSTAUDIOOUT
 int main(int argc, char *argv[]){
     int noui=0;
-
+#ifdef JACKAUDIOOUT
+    usejackit=true;//use jack by default
+#endif
     fprintf(stderr,"%s","\nZynAddSubFX - Copyright (c) 2002-2004 Nasca Octavian Paul\n");
     fprintf(stderr,"Compiled: %s %s\n",__DATE__,__TIME__);
     fprintf(stderr,"%s","This program is free software (GNU GPL v.2) and \n    it comes with ABSOLUTELY NO WARRANTY.\n\n");
@@ -335,6 +358,7 @@ int main(int argc, char *argv[]){
 	{"dump",2,NULL,'D'},
 	{"swap",2,NULL,'S'},
 	{"no-gui",2,NULL,'U'},
+	{"not-use-jack",2,NULL,'A'},
 	{"help",2,NULL,'h'},
 	{0,0,0,0}
     };
@@ -346,10 +370,10 @@ int main(int argc, char *argv[]){
     
     while (1){
 #ifdef OS_LINUX
-	opt=getopt_long(argc,argv,"l:r:b:o:hSDU",opts,&option_index);
+	opt=getopt_long(argc,argv,"l:r:b:o:hSDUA",opts,&option_index);
 	char *optarguments=optarg;
 #else
-	opt=getopt(argc,argv,"l:r:b:o:hSDU",&option_index);
+	opt=getopt(argc,argv,"l:r:b:o:hSDUA",&option_index);
 	char *optarguments=&winoptarguments[0];
 #endif 
 
@@ -360,6 +384,13 @@ int main(int argc, char *argv[]){
 	    case 'h':exitwithhelp=1;
 		     break;
 	    case 'U':noui=1;
+		     break;
+	    case 'A':
+#ifdef JACKAUDIOOUT
+#ifdef OSSAUDIOOUT
+		     usejackit=false;
+#endif
+#endif
 		     break;
 	    case 'l':tmp=0;
 	             if (optarguments!=NULL) {
@@ -411,6 +442,9 @@ int main(int argc, char *argv[]){
 	fprintf(stderr,"%s","  -S , --swap\t\t\t\t swap Left <--> Right\n");
 	fprintf(stderr,"%s","  -D , --dump\t\t\t\t Dumps midi note ON/OFF commands\n");
 	fprintf(stderr,"%s","  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n");
+#ifdef JACKAUDIOOUT
+	fprintf(stderr,"%s","  -A , --not-use-jack\t\t\t Use OSS/ALSA instead of JACK\n");
+#endif
 #ifdef OS_WINDOWS
 	fprintf(stderr,"%s","\nWARNING: On Windows systems, only short comandline parameters works.\n");
 	fprintf(stderr,"%s","  eg. instead '--buffer-size=512' use '-b 512'\n");
@@ -435,8 +469,9 @@ int main(int argc, char *argv[]){
     pthread_create(&thr1,NULL,thread1,NULL);
 #endif
 
-#if !(defined(JACKAUDIOOUT)||defined(JACK_RTAUDIOOUT)||defined(PAAUDIOOUT)||defined(VSTAUDIOOUT))
-    pthread_create(&thr2,NULL,thread2,NULL);
+#ifdef OSSAUDIOOUT
+//!(defined(JACKAUDIOOUT)||defined(JACK_RTAUDIOOUT)||defined(PAAUDIOOUT)||defined(VSTAUDIOOUT))
+    if (!usejackit) pthread_create(&thr2,NULL,thread2,NULL);
 #endif
 
 /*It is not working and I don't know why

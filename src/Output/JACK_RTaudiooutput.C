@@ -50,7 +50,7 @@ pthread_mutex_t zyn_thread_lock=PTHREAD_MUTEX_INITIALIZER;
 pthread_t bthr;
 
 
-void JACKaudiooutputinit(Master *master_){
+bool JACKaudiooutputinit(Master *master_){
     jackmaster=master_;
     jackclient=0;
     char tmpstr[100];
@@ -73,7 +73,7 @@ void JACKaudiooutputinit(Master *master_){
 
     if (jackclient==0) {
 	fprintf(stderr,"\nERROR: Cannot make a jack client (possible reasons: JACK server is not running or jackd is launched by root and zynaddsubfx by another user.).\n\n\n");
-	exit(1);
+	return(false);
     };
 
     fprintf(stderr,"Internal SampleRate   = %d\nJack Output SampleRate= %d\n",SAMPLE_RATE,jack_get_sample_rate(jackclient));
@@ -91,7 +91,7 @@ void JACKaudiooutputinit(Master *master_){
 
     if (jack_activate(jackclient)){
 	fprintf(stderr,"Cannot activate jack client\n");
-	exit(1);
+	return(false);
     };
 
     pthread_create(&bthr,NULL,thread_blocked,NULL);
@@ -100,6 +100,8 @@ void JACKaudiooutputinit(Master *master_){
     jack_connect(jackclient,jack_port_name(outport_left),"alsa_pcm:out_1");
     jack_connect(jackclient,jack_port_name(outport_right),"alsa_pcm:out_2");
      */
+     
+     return(true);
 };
 
 void *thread_blocked(void *arg){

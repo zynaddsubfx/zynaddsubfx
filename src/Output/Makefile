@@ -2,6 +2,10 @@ include ../Makefile.inc
 
 objects=Recorder.o 
 
+ifeq ($(AUDIOOUT),OSS_AND_JACK)
+objects+=OSSaudiooutput.o JACKaudiooutput.o
+endif
+
 ifeq ($(AUDIOOUT),JACK)
 objects+=JACKaudiooutput.o
 endif

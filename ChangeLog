@@ -719,6 +719,7 @@
 	    - Adaugat installer pt. windows (cu NSIS)
 29 Sep 2004 - Inceput sa scriu interfata utilizator pt. incepatori
 30 Sep 2004 - Terminat de scris interfata utilizator pt. incepatori si se selecteaza la pornire modul dorit
-
+	    - Adaugata posibilitatea de a compila cu suport jack si oss simultan si sa se aleaga runtime ce doresc (jack/oss)
+	    
 	    
 

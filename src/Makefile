@@ -6,7 +6,13 @@ else
   CXXFLAGS= -O0 -ggdb -Wall -Wpointer-arith -Wstrict-prototypes
 endif
 
-CXXFLAGS += -DOS_$(OS_PORT) -D$(MIDIIN)MIDIIN -D$(AUDIOOUT)AUDIOOUT -DFFTW_VERSION_$(FFTW_VERSION) -DASM_F2I_$(ASM_F2I) `fltk-config --cflags` 
+CXXFLAGS += -DOS_$(OS_PORT) -D$(MIDIIN)MIDIIN -DFFTW_VERSION_$(FFTW_VERSION) -DASM_F2I_$(ASM_F2I) `fltk-config --cflags` 
+
+ifeq ($(AUDIOOUT),OSS_AND_JACK)
+    CXXFLAGS += -DOSSAUDIOOUT -DJACKAUDIOOUT 
+else
+    CXXFLAGS += -D$(AUDIOOUT)AUDIOOUT 
+endif
 
 export CXXFLAGS
 LIBS= -lm  `fltk-config --ldflags` -lmxml -lz
@@ -35,6 +41,11 @@ ifeq ($(OS_PORT),WINDOWS)
 LIBS+= -lwinmm
 endif
 
+
+ifeq ($(AUDIOOUT),OSS_AND_JACK) 
+CXXFLAGS += `pkg-config --cflags jack`
+LIBS+= `pkg-config --libs jack`
+endif
 
 ifeq ($(AUDIOOUT),JACK) 
 CXXFLAGS += `pkg-config --cflags jack`

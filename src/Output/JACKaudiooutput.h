@@ -38,7 +38,7 @@
 
 
 
-void JACKaudiooutputinit(Master *master_);
+bool JACKaudiooutputinit(Master *master_);
 void JACKfinish();
 
 #endif
