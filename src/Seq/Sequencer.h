@@ -24,6 +24,7 @@
 #define SEQUENCER_H
 
 #include "../globals.h"
+#include "MIDIFile.h"
 
 class Sequencer{
     public:
@@ -39,7 +40,9 @@ class Sequencer{
 	//it returns 0 if there are no more notes for the current time
 	//or -1 if there is no note
 	int getevent(char chan, int *type,int *par1, int *par2);
-	
+
+	//returns 0 if ok or -1 if there is a error loading file
+	int importmidifile(char *filename);	
 	
 	//UI controlling functions
 	void startrec();
@@ -48,10 +51,12 @@ class Sequencer{
 	void startplay();
 	void stopplay();
 	
-	int rec,play;
+
+	int rec,play;	
 	
     private:
-
+    
+	MIDIFile midifile;
 
     /* Events */
     struct event{

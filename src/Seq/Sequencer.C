@@ -57,6 +57,13 @@ Sequencer::~Sequencer(){
     };
 };
 
+
+int Sequencer::importmidifile(char *filename){
+    return(0);
+};
+
+
+
 void Sequencer::recordnote(char chan, char note, char vel){
     if (rec==0) return;
     if (chan>=NUM_MIDI_CHANNELS) return;
@@ -125,6 +132,7 @@ void Sequencer::stopplay(){
     if (play==0) return;
     play=0;
 };
+
 
 /************** Player stuff ***************/
 
