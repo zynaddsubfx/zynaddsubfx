@@ -289,7 +289,7 @@ class ADOscilEditor {} {
   Function {make_window()} {} {
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor}
-      xywh {41 111 750 590} hide
+      xywh {121 91 750 590} hide
     } {
       Fl_Group oscildisplaygroup {
         xywh {15 5 360 300} box ENGRAVED_FRAME
@@ -308,7 +308,7 @@ class ADOscilEditor {} {
           callback {oscil->Prand=(int)o->value()+64;
 oscildisplaygroup->redraw();
 oldosc->redraw();}
-          tooltip {Oscilator Phase Randomness: smaller than 0 is "group", larger than 0 is for each harmonic} xywh {180 285 175 10} type {Horz Knob} box FLAT_BOX labelsize 10 align 5 minimum -64 maximum 63 step 1
+          tooltip {Oscilator Phase Randomness: smaller than 0 is "group", larger than 0 is for each harmonic} xywh {150 285 100 10} type {Horz Knob} box FLAT_BOX labelsize 10 align 5 minimum -64 maximum 63 step 1
           code0 {o->value(oscil->Prand-64);}
         }
         Fl_Group {} {open
@@ -316,6 +316,35 @@ oldosc->redraw();}
           code0 {ADSpectrum *spc=new ADSpectrum(o->x(),o->y(),o->w(),o->h(),"");}
           code1 {spc->init(oscil,0,master);}
         } {}
+        Fl_Group {} {
+          xywh {256 277 115 25} box ENGRAVED_BOX
+        } {
+          Fl_Choice {} {
+            label {H.rnd}
+            callback {oscil->Pamprandtype=(int) o->value();} selected
+            tooltip {Harmonic Amplitude Randomness} xywh {291 282 50 15} down_box BORDER_BOX labelsize 10 textsize 10
+            code0 {o->value(oscil->Pamprandtype);}
+          } {
+            menuitem {} {
+              label None
+              xywh {60 60 100 20} labelfont 1 labelsize 10
+            }
+            menuitem {} {
+              label Pow
+              xywh {70 70 100 20} labelfont 1 labelsize 10
+            }
+            menuitem {} {
+              label Sin
+              xywh {80 80 100 20} labelfont 1 labelsize 10
+            }
+          }
+          Fl_Dial {} {
+            callback {oscil->Pamprandpower=(int) o->value();}
+            tooltip {Oscillator's spectrum adjust parameter} xywh {348 280 18 18} maximum 127 step 1
+            code0 {o->value(oscil->Pamprandpower);}
+            class WidgetPDial
+          }
+        }
       }
       Fl_Box {} {
         label {Base Func.}
@@ -1434,7 +1463,7 @@ class ADnoteUI {} {
   Function {make_window()} {private
   } {
     Fl_Window ADnoteGlobalParameters {
-      label {ADsynth Global Parameters of the Instrument} selected
+      label {ADsynth Global Parameters of the Instrument}
       xywh {112 194 535 405} hide
     } {
       Fl_Group {} {

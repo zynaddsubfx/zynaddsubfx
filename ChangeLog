@@ -502,3 +502,4 @@
 01 Dec 2003 - Am facut niste mici modificari ca urmare a unui bug-report
 05 Dec 2003 - Facute cateva modificari la jack
 08 Dec 2003 - Inceput sa incerc sa fac rt-safe sub jack, dar in stadiul actual suportul jack este nefunctional
+11 Dec 2003 - Adaugat aleatorism la amplitudinile armonicelor

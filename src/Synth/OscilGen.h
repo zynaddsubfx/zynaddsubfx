@@ -79,6 +79,8 @@ class OscilGen{
 	unsigned char Pfiltertype,Pfilterpar;
 	unsigned char Pfilterbeforews;
 	unsigned char Psatype,Psapar;//spectrum adjust
+
+	unsigned char Pamprandpower, Pamprandtype;
 	
 	REALTYPE hmag[MAX_AD_HARMONICS],hphase[MAX_AD_HARMONICS];//the magnituides and the phases of the sine/nonsine harmonics
 	//this is public because I get it from interface and show to the user

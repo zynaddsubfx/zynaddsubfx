@@ -56,6 +56,9 @@ OscilGen::OscilGen(FFTwrapper *fft_,Resonance *res_){
     Pfilterbeforews=0;
     Psatype=0;
     Psapar=64;
+
+    Pamprandpower=64;
+    Pamprandtype=0;
     
     basefuncFFTfreqsQ=NULL;
     basefuncFFTfreqs=NULL;
@@ -509,8 +512,33 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
 	};
     };
 
+    //Harmonic Amplitude Randomness
+    if (freqHz>0.1) {
+	REALTYPE power=Pamprandpower/127.0;
+	REALTYPE normalize=1.0/(1.2-power);
+	switch (Pamprandtype){
+	    case 1: power=power*2.0-0.5;
+		    power=pow(15.0,power);
+		    for (i=1;i<nyquist-1;i++){
+    	    		REALTYPE amp=pow(RND,power)*normalize;
+			outoscilFFTfreqs[i]*=amp;
+			outoscilFFTfreqs[OSCIL_SIZE-i]*=amp;
+		    };
+		    break;
+	    case 2: power=power*2.0-0.5;
+		    power=pow(15.0,power)*2.0;
+		    REALTYPE rndfreq=2*PI*RND;
+		    for (i=1;i<nyquist-1;i++){
+    	    		REALTYPE amp=pow(fabs(sin(i*rndfreq)),power)*normalize;
+			outoscilFFTfreqs[i]*=amp;
+			outoscilFFTfreqs[OSCIL_SIZE-i]*=amp;
+		    };
+		    break;
+	};	
+    };
+
+
     if ((freqHz>0.1)&&(resonance!=0)) res->applyres(nyquist-1,outoscilFFTfreqs,freqHz);
-    
     fft->freqs2smps(outoscilFFTfreqs,smps);
 
     for (i=0;i<OSCIL_SIZE;i++) smps[i]*=0.25;//correct the amplitude
@@ -754,6 +782,11 @@ void OscilGen::saveloadbuf(Buffer *buf){
 	    case 0x8C:	buf->rwbytepar(n,&Psatype);
 			break;
 	    case 0x8D:	buf->rwbytepar(n,&Psapar);
+			break;
+	    case 0x8E:	buf->rwbytepar(n,&Pamprandtype);
+			break;
+	    case 0x8F:	buf->rwbytepar(n,&Pamprandpower);
+			break;
 	};
     };
 
