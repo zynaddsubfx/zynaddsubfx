@@ -328,8 +328,7 @@ delete(harmonic);} {}
   decl {Master *master;} {}
 } 
 
-class OscilEditor {open
-} {
+class OscilEditor {} {
   Function {make_window()} {} {
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor}

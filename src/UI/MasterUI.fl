@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0200 
+version 1.0105 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -372,10 +372,10 @@ fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. P
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
-      xywh {448 226 390 465} type Double hide
+      xywh {337 199 390 465} type Double hide
       code0 {setfilelabel(NULL);} non_modal
     } {
-      Fl_Menu_Bar mastermenu {selected
+      Fl_Menu_Bar mastermenu {
         xywh {0 0 690 25}
       } {
         submenu {} {
@@ -769,7 +769,7 @@ pthread_mutex_unlock(&master->mutex);}
         xywh {0 80 390 160}
       } {
         Fl_Group {} {
-          label {System Effects}
+          label {System Effects} selected
           xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25
         } {
           Fl_Counter syseffnocounter {
@@ -864,28 +864,13 @@ swapeffwindow->show();}
           Fl_Counter inseffnocounter {
             label {Ins.Effect No.}
             callback {ninseff=(int) o->value();
-insefftype->value(master->insefx[ninseff]->geteffect());
+insefftype->value(master->insefx[ninseff]->geteffect()-2);
 insefftype->do_callback();
-inseffpart->value(master->Pinsparts[ninseff]);
+inseffpart->value(master->Pinsparts[ninseff]-2);
 inseffpart->do_callback();}
             xywh {5 120 80 20} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 127 step 1 textfont 1
             code0 {o->bounds(0,NUM_INS_EFX-1);}
             code1 {o->value(ninseff);}
-          }
-          Fl_Counter inseffpart {
-            label {Eff.Part}
-            callback {master->Pinsparts[ninseff]=(int) o->value();
-if ((int) o->value()==-1){
-    inseffectuigroup->deactivate();
-    insefftype->deactivate();
-    master->insefx[ninseff]->cleanup();
-} else {
-    inseffectuigroup->activate();
-    insefftype->activate();
-};}
-            tooltip {Part where the effect is applied, -1 for disable,  -2 to apply the effect to master} xywh {90 125 65 15} type Simple labelsize 11 align 5 minimum 0 maximum 127 step 1
-            code0 {o->bounds(-2,NUM_MIDI_PARTS-1);}
-            code1 {o->value(master->Pinsparts[ninseff]);}
           }
           Fl_Choice insefftype {
             label EffType
@@ -945,6 +930,22 @@ inseffectui->redraw();}
               class EffUI
             } {}
           }
+          Fl_Choice inseffpart {
+            label {Insert To.}
+            callback {master->Pinsparts[ninseff]=(int) o->value()-2;
+if ((int) o->value()==1){
+    inseffectuigroup->deactivate();
+    insefftype->deactivate();
+    master->insefx[ninseff]->cleanup();
+} else {
+    inseffectuigroup->activate();
+    insefftype->activate();
+};} open
+            xywh {95 120 80 20} down_box BORDER_BOX labelfont 1 labelsize 10 align 5 textsize 10
+            code0 {o->add("Master Out");o->add("Off");}
+            code1 {char tmp[50]; for (int i=0;i<NUM_MIDI_PARTS;i++) {sprintf(tmp,"Part %2d",i);o->add(tmp);};}
+            code3 {o->value(master->Pinsparts[ninseff]+2);}
+          } {}
         }
       }
       Fl_Button {} {

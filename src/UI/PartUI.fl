@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0200 
+version 1.0105 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -260,7 +260,7 @@ class PartUI {: {public Fl_Group,PartUI_}
   Function {make_window()} {private
   } {
     Fl_Window partgroup {
-      private xywh {149 400 385 180} type Double hide
+      private xywh {44 244 385 180} type Double hide
       class Fl_Group
     } {
       Fl_Group partgroupui {
@@ -277,16 +277,9 @@ class PartUI {: {public Fl_Group,PartUI_}
         Fl_Counter {} {
           label KeyShift
           callback {part->Pkeyshift=(int) o->value()+64;}
-          xywh {195 40 90 20} labelsize 12 minimum -64 maximum 64 step 1
+          xywh {195 45 90 20} labelsize 12 align 1 minimum -64 maximum 64 step 1
           code0 {o->lstep(12);}
           code1 {o->value(part->Pkeyshift-64);}
-        }
-        Fl_Counter {} {
-          label {Chn.Rcv.}
-          callback {part->Prcvchn=(int) o->value();}
-          tooltip {receive from Midi channel} xywh {295 40 85 20} type Simple labelfont 1 labelsize 12 minimum 0 maximum 127 step 1
-          code0 {o->bounds(0,NUM_MIDI_CHANNELS-1);}
-          code1 {o->value(part->Prcvchn);}
         }
         Fl_Scroll {} {open
           xywh {166 91 125 60} box ENGRAVED_FRAME labelfont 1 labelsize 10 align 21
@@ -375,12 +368,6 @@ if (part->Pminkey>part->Pmaxkey) o->textcolor(FL_RED);
           tooltip {Enable/Disable the portamento} xywh {115 155 85 20} down_box DOWN_BOX labelfont 1 labelsize 12
           code0 {o->value(part->ctl.portamento.portamento);}
         }
-        Fl_Counter keylimitcounter {
-          label {K.lmt.}
-          callback {part->setkeylimit((int) o->value());}
-          tooltip {Key Limit (max notes that are alowed to play in this part)} xywh {205 155 70 20} type Simple labelfont 1 labelsize 10 align 8 minimum 0 maximum 127 step 1
-          code0 {o->value(part->Pkeylimit);}
-        }
         Fl_Button {} {
           label {Edit instrument}
           callback {instrumenteditwindow->show();}
@@ -408,6 +395,20 @@ maxkcounter->value(127);
 maxkcounter->do_callback();}
           tooltip {reset the minimum key to 0 and maximum key to 127} xywh {330 155 15 12} box THIN_UP_BOX labelfont 1 labelsize 10
         }
+        Fl_Choice {} {
+          label {MIDI Chn.Rcv.}
+          callback {part->Prcvchn=(int) o->value();} open
+          tooltip {receive from Midi channel} xywh {310 45 70 20} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+          code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"%d",i+1);if (i!=9) o->add(nrstr); else o->add("10Drums");};}
+          code1 {o->value(part->Prcvchn);}
+        } {}
+        Fl_Choice keylimitlist {
+          label KLmt
+          callback {int val=0;
+val=atoi(o->text());
+part->setkeylimit(val);} open
+          tooltip {Key Limit} xywh {210 155 60 20} down_box BORDER_BOX labelsize 10 align 8 textfont 1 textsize 10
+        } {}
       }
       Fl_Check_Button {} {
         label Enabled
@@ -1014,7 +1015,25 @@ partgroup->show();
 end();
 
 
-//if (config.ui.showinstrumentinfo!=0) instrumenteditwindow->show();} {selected
+//if (config.ui.showinstrumentinfo!=0) instrumenteditwindow->show();
+
+int klimits[]={1,2,3,4,5,6,7,8,9,10,15,20,30,50,100,0};
+
+keylimitlist->add("OFF");
+int k=0;
+int val=-1;
+char tmp[10];
+while (klimits[k]!=0){
+	sprintf(tmp,"%d",klimits[k]);
+	keylimitlist->add(tmp);
+	if ((val==-1)){
+		if (klimits[k]>part->Pkeylimit) val=k;
+	};
+	k++;
+};
+
+if (val==-1) val=k;
+keylimitlist->value(val);} {selected
     }
   }
   Function {showparameters(int kititem,int engine)} {} {
