@@ -584,6 +584,7 @@
 18 Iun 2004 - Incercata interpolarea cubica dar am vazut ca nu merita pentru ca OSCIL_SIZE e suficient de mare si pentru o interpolare liniara
 	    - Separat OscilGenUI din ADnoteUI
 	    - Inceput sa scriu modulul de sinteza PADnote
+19 Iun 2004 - Adaugat modul liniar de controller bandwidth si modificat modul liniar la controllerul modulation wheel
 
 
 

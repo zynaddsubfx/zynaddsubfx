@@ -98,6 +98,7 @@ class Controller{
 	int data;
 	REALTYPE relbw;
 	unsigned char depth;
+	unsigned char exponential;
     } bandwidth;
 
     struct {//Modulation Wheel

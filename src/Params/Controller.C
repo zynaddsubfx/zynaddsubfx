@@ -39,6 +39,7 @@ void Controller::defaults(){
     filtercutoff.depth=64;
     filterq.depth=64;
     bandwidth.depth=64;
+    bandwidth.exponential=0;
     modwheel.depth=80;
     modwheel.exponential=0;
     fmamp.receive=1;
@@ -118,13 +119,21 @@ void Controller::setfilterq(int value){
 
 void Controller::setbandwidth(int value){
     bandwidth.data=value;
-    bandwidth.relbw=pow(25.0,(value-64.0)/64.0*(bandwidth.depth/64.0));
+    if (bandwidth.exponential==0) {
+	    REALTYPE tmp=pow(25.0,pow(bandwidth.depth/127.0,1.5))-1.0;
+	    if ((value<64)&&(bandwidth.depth>=64)) tmp=1.0;
+	    bandwidth.relbw=(value/64.0-1.0)*tmp+1.0;
+	    if (bandwidth.relbw<0.0) bandwidth.relbw=0.0;
+    } else {
+	bandwidth.relbw=pow(25.0,(value-64.0)/64.0*(bandwidth.depth/64.0));
+    };
 };
 
 void Controller::setmodwheel(int value){
     modwheel.data=value;
     if (modwheel.exponential==0) {
 	    REALTYPE tmp=pow(25.0,pow(modwheel.depth/127.0,1.5)*2.0)/25.0;
+	    if ((value<64)&&(modwheel.depth>=64)) tmp=1.0;
 	    modwheel.relmod=(value/64.0-1.0)*tmp+1.0;
 	    if (modwheel.relmod<0.0) modwheel.relmod=0.0;
 	} else modwheel.relmod=pow(25.0,(value-64.0)/64.0*(modwheel.depth/80.0));
