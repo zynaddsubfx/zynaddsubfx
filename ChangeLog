@@ -716,6 +716,8 @@
 	    - La VST, daca incerc sa inchid fereastra principala, se minimizeaza	    
 	    - Eliminate setarile cu indice '0' (zero) 
 28 Sep 2004 - Adaugata salvarea tuturor parametrilor in hostul VST (trebuie testat)
-	    - Inceput sa lucrez la installer pt. windows cu NSIS
+	    - Adaugat installer pt. windows (cu NSIS)
+29 Sep 2004 - Inceput sa scriu interfata utilizator pt. incepatori
+
 	    
 
