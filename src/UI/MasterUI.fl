@@ -270,8 +270,8 @@ class Panellistitem {: {public Fl_Group}
         }
         Fl_Button partname {
           label {  }
-          callback {if ((int)bankui->cbwig->value()!=npart){
-   bankui->cbwig->value(npart);
+          callback {if ((int)bankui->cbwig->value()!=(npart+1)){
+   bankui->cbwig->value(npart+1);
    bankui->cbwig->do_callback();
 };
 bankui->show();}
@@ -290,8 +290,8 @@ bankui->show();}
         }
         Fl_Button {} {
           label edit
-          callback {if ((int)bankui->cbwig->value()!=npart){
-   bankui->cbwig->value(npart);
+          callback {if ((int)bankui->cbwig->value()!=(npart+1)){
+   bankui->cbwig->value(npart+1);
    bankui->cbwig->do_callback();
 };}
           xywh {15 235 40 20} box PLASTIC_UP_BOX labelsize 10
@@ -312,13 +312,13 @@ pthread_mutex_unlock(&master->mutex);
 if ((int) o->value()==0) panellistitemgroup->deactivate();
   else {
     panellistitemgroup->activate();
-    if ((int)bankui->cbwig->value()!=npart){
-       bankui->cbwig->value(npart);
+    if ((int)bankui->cbwig->value()!=(npart+1)){
+       bankui->cbwig->value(npart+1);
        bankui->cbwig->do_callback();
     };
 };
 
-o->redraw();} selected
+o->redraw();}
         private xywh {5 0 45 20} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 24
         code0 {char tmp[10];snprintf(tmp,10,"%d",npart+1);o->label(strdup(tmp));}
         code1 {o->value(master->part[npart]->Penabled);}
@@ -339,7 +339,8 @@ make_window();
 panellistitem->show();
 end();} {}
   }
-  Function {refresh()} {} {
+  Function {refresh()} {open
+  } {
     code {partenabled->value(master->part[npart]->Penabled);
 if (master->part[npart]->Penabled!=0) panellistitemgroup->activate();
      else panellistitemgroup->deactivate();
@@ -350,7 +351,7 @@ partrcv->value(master->part[npart]->Prcvchn);
 
 partname->label((char *)master->part[npart]->Pname);
 
-if ((int)bankui->cbwig->value()!=npart)
+if ((int)bankui->cbwig->value()!=(npart+1))
    panellistitemgroup->color(fl_rgb_color(160,160,160));
 else 
    panellistitemgroup->color(fl_rgb_color(50,190,240));
@@ -376,7 +377,7 @@ class MasterUI {} {
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
-      xywh {188 182 390 465} type Double hide
+      xywh {366 172 390 465} type Double hide
       code0 {setfilelabel(NULL);} non_modal
     } {
       Fl_Menu_Bar mastermenu {
@@ -695,7 +696,7 @@ pthread_mutex_unlock(&master->mutex);}
       } {
         Fl_Group {} {
           label {System Effects} open
-          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25
+          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 18 align 25
         } {
           Fl_Counter syseffnocounter {
             label {Sys.Effect No.}
@@ -781,7 +782,7 @@ pthread_mutex_unlock(&master->mutex);}
         }
         Fl_Group {} {
           label {Insertion Effects}
-          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25 hide
+          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 18 align 25 hide
         } {
           Fl_Counter inseffnocounter {
             label {Ins.Effect No.}
@@ -966,7 +967,7 @@ partui->redraw();
 o->redraw();
 npart=nval;
 
-updatepanel();}
+updatepanel();} selected
         tooltip {The part number} xywh {5 247 70 23} type Simple labelfont 1 minimum 0 maximum 127 step 1 value 1 textfont 1
         code0 {o->bounds(1,NUM_MIDI_PARTS);}
         code1 {bankui->init(o);}
@@ -1044,7 +1045,7 @@ GNU General Public License for details.}
     }
     Fl_Window panelwindow {
       label {ZynAddSubFX Panel}
-      xywh {4 20 630 635} type Double hide
+      xywh {72 60 630 635} type Double hide
     } {
       Fl_Scroll {} {open
         xywh {0 5 570 310} type HORIZONTAL box THIN_UP_BOX
