@@ -223,7 +223,8 @@ mode=1;} {}
   Function {~BankUI()} {return_type virtual
   } {
     code {bankuiwindow->hide();
-delete(bankuiwindow);} {}
+delete(bankuiwindow);} {selected
+    }
   }
   Function {show()} {} {
     code {bankuiwindow->show();} {}
@@ -298,8 +299,7 @@ if (mode==4){//swap
         bs[slot]->refresh();
     };
 };
-if (mode!=4) refreshmainwindow();} {selected
-    }
+if (mode!=4) refreshmainwindow();} {}
   }
   Function {refreshmainwindow()} {} {
     code {bankuiwindow->label(bank->bankfiletitle);

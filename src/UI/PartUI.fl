@@ -703,7 +703,7 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
       }
       Fl_Check_Button bypasseff {
         label bypass
-        callback {part->Pefxbypass[ninseff]=(((int)o->value())!=0);} selected
+        callback {part->Pefxbypass[ninseff]=(((int)o->value())!=0);}
         tooltip {if the effect is not used (is bypassed)} xywh {90 110 60 15} down_box DOWN_BOX labelsize 12
         code0 {int x=part->Pefxbypass[ninseff];o->value(x);}
       }
@@ -1133,7 +1133,8 @@ instrumentkitlist->hide();
 delete(instrumentkitlist);
 
 instrumenteditwindow->hide();
-delete(instrumenteditwindow);} {}
+delete(instrumenteditwindow);} {selected
+    }
   }
   decl {Part *part;} {}
   decl {Master *master;} {}

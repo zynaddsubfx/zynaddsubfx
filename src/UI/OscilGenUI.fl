@@ -125,9 +125,8 @@ for (i=0;i<n;i++){
 
 class PSlider {: {public Fl_Slider}
 } {
-  Function {PSlider(int x,int y, int w, int h, const char *label=0):Fl_Slider(x,y,w,h,label)} {open
-  } {}
-  Function {handle(int event)} {open return_type int
+  Function {PSlider(int x,int y, int w, int h, const char *label=0):Fl_Slider(x,y,w,h,label)} {} {}
+  Function {handle(int event)} {return_type int
   } {
     code {int X=x(),Y=y(),W=w(),H=h();
 
@@ -236,7 +235,7 @@ for (i=1;i<lx;i++){
 
 class Oscilharmonic {: {public Fl_Group}
 } {
-  Function {make_window()} {open private
+  Function {make_window()} {private
   } {
     Fl_Window harmonic {
       private xywh {421 154 90 225} type Double hide
@@ -324,8 +323,7 @@ phase->value(oscil->Phphase[n]);
 if (oscil->Phmag[n]==64) mag->selection_color(0);
     else mag->selection_color(222);} {}
   }
-  Function {~Oscilharmonic()} {open
-  } {
+  Function {~Oscilharmonic()} {} {
     code {harmonic->hide();
 //delete(harmonic);} {}
   }
@@ -336,10 +334,11 @@ if (oscil->Phmag[n]==64) mag->selection_color(0);
   decl {Master *master;} {}
 } 
 
-class OscilEditor {} {
+class OscilEditor {selected
+} {
   Function {make_window()} {} {
     Fl_Window osceditUI {
-      label {ADsynth Oscillator Editor} selected
+      label {ADsynth Oscillator Editor}
       xywh {4 91 745 590} type Double hide
       code0 {if (oscil->ADvsPAD) o->label("PADsynth Harmonic Content Editor");}
     } {

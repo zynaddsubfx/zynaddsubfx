@@ -86,13 +86,13 @@ make_window();
 harmonic->show();
 end();} {}
   }
-  decl {SUBnoteParameters *pars;} {}
-  decl {int n;} {}
   Function {~SUBnoteharmonic()} {} {
     code {harmonic->hide();
 hide();
-delete(harmonic);} {}
+//delete(harmonic);} {}
   }
+  decl {SUBnoteParameters *pars;} {}
+  decl {int n;} {}
 } 
 
 class SUBnoteUI {} {

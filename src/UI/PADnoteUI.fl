@@ -182,7 +182,7 @@ class PADnoteUI {} {
     } {
       Fl_Tabs {} {
         callback {if (o->value()!=harmonicstructuregroup) applybutton->hide();
-	else applybutton->show();} selected
+	else applybutton->show();}
         xywh {0 0 535 395}
       } {
         Fl_Group harmonicstructuregroup {
@@ -863,7 +863,8 @@ make_window();} {}
 delete(resui);
 
 padnotewindow->hide();
-delete(padnotewindow);} {}
+delete(padnotewindow);} {selected
+    }
   }
   decl {PADnoteParameters *pars;} {public
   }
