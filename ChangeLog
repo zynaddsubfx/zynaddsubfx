@@ -695,6 +695,7 @@
 	    - Corectata o eroare care facea ca instrumentul sa fie incarcat la fiecare salvare in banca
 	    - Tipurile de lfo sunt compatibile intre ele la clipboard
 19 Aug 2004 - Corectata o mica eroare la XMLwrapper care facea ca sa se salveze fortat toti parametrii (chiar si cei nefolositi)
+	    - Adaugata partea de salvare/incarcare a listei directoarelor unde se afla presetarile
 	    
 	    
 	    
