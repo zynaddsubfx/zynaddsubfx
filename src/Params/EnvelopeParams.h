@@ -45,6 +45,8 @@ class EnvelopeParams{
 	void add2XML(XMLwrapper *xml);
 	void defaults();
 
+	void getfromXML(XMLwrapper *xml);
+
 	REALTYPE getdt(char i);
 
        /* Parametrii MIDI */

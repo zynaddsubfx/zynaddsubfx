@@ -742,7 +742,7 @@ void Master::add2XML(XMLwrapper *xml){
     
     xml->beginbranch("SYSTEM_EFFECTS");
 	for (int nefx=0;nefx<NUM_SYS_EFX;nefx++){
-	    xml->beginbranch("SYSEFFECT",nefx);
+	    xml->beginbranch("SYSTEM_EFFECT",nefx);
 		xml->beginbranch("EFFECT");
 		    sysefx[nefx]->add2XML(xml);
 		xml->endbranch();
@@ -766,7 +766,7 @@ void Master::add2XML(XMLwrapper *xml){
 
     xml->beginbranch("INSERTION_EFFECTS");
 	for (int nefx=0;nefx<NUM_INS_EFX;nefx++){
-	    xml->beginbranch("INSEFFECT",nefx);
+	    xml->beginbranch("INSERTION_EFFECT",nefx);
 		xml->addpar("part",Pinsparts[nefx]);
 
 		xml->beginbranch("EFFECT");
@@ -811,30 +811,69 @@ int Master::loadXML(char *filename){
 };
 
 void Master::getfromXML(XMLwrapper *xml){
-    if (xml->enterbranch("MASTER")){
-	Pvolume=xml->getpar127("volume",Pvolume);
-	Pkeyshift=xml->getpar127("key_shift",Pkeyshift);
-	ctl.NRPN.receive=xml->getparbool("nrpn_receive",ctl.NRPN.receive);
-	
-	
-	for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
-	    if (xml->enterbranch("PART",npart)==0) continue;
-		part[npart]->getfromXML(xml);
-	    xml->exitbranch();
-	};
+    if (xml->enterbranch("MASTER")==0) return;
 
-/*	if (xml->enterbranch("MICROTONAL")){
-	    //
-	    xml->exitbranch();
-	};
+    setPvolume(xml->getpar127("volume",Pvolume));
+    setPkeyshift(xml->getpar127("key_shift",Pkeyshift));
+    ctl.NRPN.receive=xml->getparbool("nrpn_receive",ctl.NRPN.receive);
 	
-	
-	etc.
-	
-	
-*/	
+    
+    for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
+	if (xml->enterbranch("PART",npart)==0) continue;
+    	part[npart]->getfromXML(xml);
 	xml->exitbranch();
     };
+
+    if (xml->enterbranch("MICROTONAL")){
+        microtonal.getfromXML(xml);
+        xml->exitbranch();
+    };
+	
+	
+	
+    if (xml->enterbranch("SYSTEM_EFFECTS")){
+	for (int nefx=0;nefx<NUM_SYS_EFX;nefx++){
+	    if (xml->enterbranch("SYSTEM_EFFECT",nefx)==0) continue;
+		if (xml->enterbranch("EFFECT")){
+		    sysefx[nefx]->getfromXML(xml);
+		    xml->exitbranch();
+		};
+
+		for (int partefx=0;partefx<NUM_MIDI_PARTS;partefx++){
+		    if (xml->enterbranch("VOLUME",partefx)==0) continue;
+		    setPsysefxvol(partefx,nefx,xml->getpar127("vol",Psysefxvol[partefx][nefx]));
+		    xml->exitbranch();    
+		};
+
+		for (int tonefx=nefx+1;tonefx<NUM_SYS_EFX;tonefx++){
+		    if (xml->enterbranch("SENDTO",tonefx)==0) continue;
+		    setPsysefxsend(nefx,tonefx,xml->getpar127("send_vol",Psysefxsend[nefx][tonefx]));
+		    xml->exitbranch();    
+		};
+	    xml->exitbranch();
+	};
+	xml->exitbranch();
+    };
+
+
+    if (xml->enterbranch("INSERTION_EFFECTS")){
+	for (int nefx=0;nefx<NUM_INS_EFX;nefx++){
+	
+	    if (xml->enterbranch("INSERTION_EFFECT",nefx)==0) continue;
+		Pinsparts[nefx]=xml->getpar("part",Pinsparts[nefx],-1,NUM_MIDI_PARTS);
+
+		if (xml->enterbranch("EFFECT")){
+		    insefx[nefx]->getfromXML(xml);
+		    xml->exitbranch();
+		};
+	    xml->exitbranch();
+
+	};
+	
+	xml->exitbranch();
+    };
+	
+	
 };
 
 

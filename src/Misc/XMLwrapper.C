@@ -54,7 +54,7 @@ XMLwrapper::XMLwrapper(){
     node=root=mxmlNewElement(tree,"ZynAddSubFX-data");
     
     mxmlElementSetAttr(root,"version-major","0");
-    mxmlElementSetAttr(root,"version-minor","1");
+    mxmlElementSetAttr(root,"version-minor","2");
     
     //save zynaddsubfx specifications
     beginbranch("BASE_PARAMETERS");
@@ -135,6 +135,12 @@ void XMLwrapper::endbranch(){
 int XMLwrapper::loadXMLfile(char *filename){
     if (tree!=NULL) mxmlDelete(tree);
     tree=NULL;
+
+    memset(&parentstack,0,sizeof(parentstack));
+    memset(&values,0,sizeof(values));
+
+    stackpos=0;
+
     
     FILE *file=fopen(filename,"r");
     if (file==NULL) return(-1);
@@ -176,6 +182,7 @@ int XMLwrapper::enterbranch(char *name,int id){
     snprintf(tmpstr,TMPSTR_SIZE,"%d",id);
     node=mxmlFindElement(peek(),peek(),name,"id",tmpstr,MXML_DESCEND_FIRST);
     if (node==NULL) return(0);
+
     push(node);
     return(1);
 };
@@ -237,6 +244,24 @@ void XMLwrapper::getparstr(char *name,char *par,int maxstrlen){
     
 };
 
+REALTYPE XMLwrapper::getparreal(char *name,REALTYPE defaultpar){
+    node=mxmlFindElement(peek(),peek(),"par_real","name",name,MXML_DESCEND_FIRST);
+    if (node==NULL) return(defaultpar);
+
+    const char *strval=mxmlElementGetAttr(node,"value");
+    if (strval==NULL) return(defaultpar);
+    
+    return(str2real(strval));
+};
+
+REALTYPE XMLwrapper::getparreal(char *name,REALTYPE defaultpar,REALTYPE min,REALTYPE max){
+    REALTYPE result=getparreal(name,defaultpar);
+    
+    if (result<min) result=min;
+	else if (result>max) result=max;
+    return(result);
+};
+
 
 /** Private members **/
 
@@ -253,6 +278,12 @@ char *XMLwrapper::real2str(REALTYPE x){
 int XMLwrapper::str2int(const char *str){
     if (str==NULL) return(0);
     int result=strtol(str,NULL,10);
+    return(result);
+};
+
+REALTYPE XMLwrapper::str2real(const char *str){
+    if (str==NULL) return(0.0);
+    REALTYPE result=strtod(str,NULL);
     return(result);
 };
 
@@ -286,6 +317,8 @@ void XMLwrapper::push(mxml_node_t *node){
     stackpos++;
     parentstack[stackpos]=node;
     
+//    printf("push %d - %s\n",stackpos,node->value.element.name);
+    
 };
 mxml_node_t *XMLwrapper::pop(){
     if (stackpos<=0) {
@@ -294,6 +327,9 @@ mxml_node_t *XMLwrapper::pop(){
     };
     mxml_node_t *node=parentstack[stackpos];
     parentstack[stackpos]=NULL;
+
+//    printf("pop %d - %s\n",stackpos,node->value.element.name);
+
     stackpos--;
     return(node);
 };

@@ -873,4 +873,64 @@ void OscilGen::add2XML(XMLwrapper *xml){
 };
 
 
+void OscilGen::getfromXML(XMLwrapper *xml){
+
+    Phmagtype=xml->getpar127("harmonic_mag_type",Phmagtype);
+    Pnormalizemethod=xml->getpar127("normalize_method",Pnormalizemethod);
+
+    Pcurrentbasefunc=xml->getpar127("base_function",Pcurrentbasefunc);
+    Pbasefuncpar=xml->getpar127("base_function_par",Pbasefuncpar);
+
+    Pwaveshaping=xml->getpar127("wave_shaping",Pwaveshaping);
+    Pwaveshapingfunction=xml->getpar127("wave_shaping_function",Pwaveshapingfunction);
+
+    Pfiltertype=xml->getpar127("filter_type",Pfiltertype);
+    Pfilterpar=xml->getpar127("filter_par",Pfilterpar);
+    Pfilterbeforews=xml->getpar127("filter_before_wave_shaping",Pfilterbeforews);
+
+    Psatype=xml->getpar127("spectrum_adjust_type",Psatype);
+    Psapar=xml->getpar127("spectrum_adjust_par",Psapar);
+
+    Prand=xml->getpar127("rand",Prand);
+    Pamprandtype=xml->getpar127("amp_rand_type",Pamprandtype);
+    Pamprandpower=xml->getpar127("amp_rand_power",Pamprandpower);
+
+    if (xml->enterbranch("HARMONICS")){
+	for (int n=0;n<MAX_AD_HARMONICS;n++){
+	    if (xml->enterbranch("HARMONIC",n+1)==0) continue;
+		Phmag[n]=xml->getpar127("mag",Phmag[n]);
+		Phphase[n]=xml->getpar127("phase",Phphase[n]);
+	    xml->exitbranch();
+	};
+     xml->exitbranch();
+    };
+    
+    if (Pcurrentbasefunc!=0) changebasefunction();
+    
+    
+    if (xml->enterbranch("BASE_FUNCTION")){
+	    for (int i=1;i<OSCIL_SIZE/2;i++){
+		if (xml->enterbranch("BF_HARMONIC",i)){
+			basefuncFFTfreqs[i]=xml->getparreal("cos",0.0);
+			basefuncFFTfreqs[OSCIL_SIZE-i]=xml->getparreal("sin",0.0);
+		    xml->exitbranch();
+		};
+
+
+	    };
+	xml->exitbranch();
+
+	REALTYPE max=0.0;
+
+	basefuncFFTfreqs[0]=0.0;
+	for (int i=0;i<OSCIL_SIZE;i++) if (max<fabs(basefuncFFTfreqs[i])) max=fabs(basefuncFFTfreqs[i]);
+	if (max<0.00000001) max=1.0;
+
+	for (int i=0;i<OSCIL_SIZE;i++) if (basefuncFFTfreqs[i]) basefuncFFTfreqs[i]/=max;
+    };
+
+
+};
+
+
 

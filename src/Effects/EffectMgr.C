@@ -261,5 +261,24 @@ void EffectMgr::add2XML(XMLwrapper *xml){
     xml->endbranch();
 };
 
+void EffectMgr::getfromXML(XMLwrapper *xml){
+    changeeffect(xml->getpar127("type",geteffect()));
+
+    if ((efx==NULL)||(geteffect()==0)) return;
+    
+    efx->Ppreset=xml->getpar127("preset",efx->Ppreset);
+
+    if (xml->enterbranch("EFFECT_PARAMETERS")){
+	for (int n=0;n<128;n++){
+	    if (xml->enterbranch("par_no",n)==0) continue;
+
+	    int par=geteffectpar(n);
+	    seteffectpar_nolock(n,xml->getpar127("par",par));
+	    xml->exitbranch();
+	};
+	xml->exitbranch();
+    };
+};
+
 
 

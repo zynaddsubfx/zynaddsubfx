@@ -260,6 +260,8 @@ class ADnoteParameters{
 	void add2XML(XMLwrapper *xml);
 	void defaults();
 
+        void getfromXML(XMLwrapper *xml);
+
 	void saveloadbuf(Buffer *buf);
 	void saveloadbufvoice(Buffer *buf,unsigned char nvoice);
 
@@ -270,6 +272,7 @@ class ADnoteParameters{
 	FFTwrapper *fft;	
 
 	void add2XMLvoice(XMLwrapper *xml,int nvoice);
+        void getfromXMLvoice(XMLwrapper *xml,int nvoice);
 };
 
 #endif

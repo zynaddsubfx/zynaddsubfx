@@ -240,6 +240,33 @@ void EnvelopeParams::add2XML(XMLwrapper *xml){
 
 
 
+void EnvelopeParams::getfromXML(XMLwrapper *xml){
+    Pfreemode=xml->getparbool("free_mode",Pfreemode);    
+    Penvpoints=xml->getpar127("env_points",Penvpoints);
+    Penvsustain=xml->getpar127("env_sustain",Penvsustain);
+    Penvstretch=xml->getpar127("env_stretch",Penvstretch);
+    Pforcedrelease=xml->getparbool("forced_release",Pforcedrelease);
+    Plinearenvelope=xml->getparbool("linear_envelope",Plinearenvelope);
+
+    PA_dt=xml->getpar127("A_dt",PA_dt);
+    PD_dt=xml->getpar127("D_dt",PD_dt);
+    PR_dt=xml->getpar127("R_dt",PR_dt);
+    PA_val=xml->getpar127("A_val",PA_val);
+    PD_val=xml->getpar127("D_val",PD_val);
+    PS_val=xml->getpar127("S_val",PS_val);
+    PR_val=xml->getpar127("R_val",PR_val);
+
+    for (int i=0;i<Penvpoints;i++){
+        if (xml->enterbranch("POINT",i)==0) continue;
+	    if (i!=0) Penvdt[i]=xml->getpar127("dt",Penvdt[i]);
+	    Penvval[i]=xml->getpar127("val",Penvval[i]);
+	xml->exitbranch();
+    };
+    
+    if (!Pfreemode) converttofree();
+};
+
+
 void EnvelopeParams::defaults(){
     Penvstretch=Denvstretch;
     Pforcedrelease=Dforcedrelease;

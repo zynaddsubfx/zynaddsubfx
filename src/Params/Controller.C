@@ -311,18 +311,18 @@ void Controller::saveloadbuf(Buffer *buf){
 void Controller::add2XML(XMLwrapper *xml){
     xml->addpar("pitchwheel_bendrange",pitchwheel.bendrange);
 
-    xml->addpar("expression_receive",expression.receive);
+    xml->addparbool("expression_receive",expression.receive);
     xml->addpar("panning_depth",panning.depth);
     xml->addpar("filter_cutoff_depth",filtercutoff.depth);
     xml->addpar("filter_q_depth",filterq.depth);
     xml->addpar("bandwidth_depth",bandwidth.depth);
     xml->addpar("mod_wheel_depth",modwheel.depth);
-    xml->addpar("mod_wheel_exponential",modwheel.exponential);
-    xml->addpar("fm_amp_receive",fmamp.receive);
-    xml->addpar("volume_receive",volume.receive);
-    xml->addpar("sustain_receive",sustain.receive);
+    xml->addparbool("mod_wheel_exponential",modwheel.exponential);
+    xml->addparbool("fm_amp_receive",fmamp.receive);
+    xml->addparbool("volume_receive",volume.receive);
+    xml->addparbool("sustain_receive",sustain.receive);
 
-    xml->addpar("portamento_receive",portamento.receive);
+    xml->addparbool("portamento_receive",portamento.receive);
     xml->addpar("portamento_time",portamento.time);
     xml->addpar("portamento_pitchthresh",portamento.pitchthresh);
     xml->addpar("portamento_pitchthreshtype",portamento.pitchthreshtype);
@@ -331,6 +331,31 @@ void Controller::add2XML(XMLwrapper *xml){
 
     xml->addpar("resonance_center_depth",resonancecenter.depth);
     xml->addpar("resonance_bandwidth_depth",resonancebandwidth.depth);
+};
+
+void Controller::getfromXML(XMLwrapper *xml){
+    pitchwheel.bendrange=xml->getpar127("pitchwheel_bendrange",pitchwheel.bendrange);
+
+    expression.receive=xml->getparbool("expression_receive",expression.receive);
+    panning.depth=xml->getpar127("panning_depth",panning.depth);
+    filtercutoff.depth=xml->getpar127("filter_cutoff_depth",filtercutoff.depth);
+    filterq.depth=xml->getpar127("filter_q_depth",filterq.depth);
+    bandwidth.depth=xml->getpar127("bandwidth_depth",bandwidth.depth);
+    modwheel.depth=xml->getpar127("mod_wheel_depth",modwheel.depth);
+    modwheel.exponential=xml->getparbool("mod_wheel_exponential",modwheel.exponential);
+    fmamp.receive=xml->getparbool("fm_amp_receive",fmamp.receive);
+    volume.receive=xml->getparbool("volume_receive",volume.receive);
+    sustain.receive=xml->getparbool("sustain_receive",sustain.receive);
+
+    portamento.receive=xml->getparbool("portamento_receive",portamento.receive);
+    portamento.time=xml->getpar127("portamento_time",portamento.time);
+    portamento.pitchthresh=xml->getpar127("portamento_pitchthresh",portamento.pitchthresh);
+    portamento.pitchthreshtype=xml->getpar127("portamento_pitchthreshtype",portamento.pitchthreshtype);
+    portamento.portamento=xml->getpar127("portamento_portamento",portamento.portamento);
+    portamento.updowntimestretch=xml->getpar127("portamento_updowntimestretch",portamento.updowntimestretch);
+
+    resonancecenter.depth=xml->getpar127("resonance_center_depth",resonancecenter.depth);
+    resonancebandwidth.depth=xml->getpar127("resonance_bandwidth_depth",resonancebandwidth.depth);
 };
 
 

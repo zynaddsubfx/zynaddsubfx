@@ -35,8 +35,8 @@ class LFOParams{
       void saveloadbuf(Buffer *buf);
       
       void add2XML(XMLwrapper *xml);
-      
-      void defaults();//reset parameters to the default parameters
+      void defaults();
+      void getfromXML(XMLwrapper *xml);
       
     /* Parametrii MIDI */
       unsigned char Pfreq;      // frequency

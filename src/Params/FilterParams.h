@@ -35,6 +35,7 @@ class FilterParams{
 
 	void add2XML(XMLwrapper *xml);
 	void defaults();
+	void getfromXML(XMLwrapper *xml);
 
 
 	REALTYPE getfreq();

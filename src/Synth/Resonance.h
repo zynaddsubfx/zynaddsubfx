@@ -42,6 +42,8 @@ class Resonance{
 
 	void add2XML(XMLwrapper *xml);
 	void defaults();
+	void getfromXML(XMLwrapper *xml);
+
 
 	REALTYPE getfreqpos(REALTYPE freq);
 	REALTYPE getfreqx(REALTYPE x);

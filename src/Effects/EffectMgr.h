@@ -46,6 +46,7 @@ class EffectMgr{
 
 	void add2XML(XMLwrapper *xml);
 	void defaults();
+	void getfromXML(XMLwrapper *xml);
 
 	void out(REALTYPE *smpsl,REALTYPE *smpsr);
 

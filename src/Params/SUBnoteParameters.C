@@ -209,7 +209,6 @@ void SUBnoteParameters::saveloadbuf(Buffer *buf){
 
 
 void SUBnoteParameters::add2XML(XMLwrapper *xml){
-
     xml->addpar("num_stages",Pnumstages);
     xml->addpar("harmonic_mag_type",Phmagtype);
     xml->addpar("start",Pstart);
@@ -260,7 +259,7 @@ void SUBnoteParameters::add2XML(XMLwrapper *xml){
 	};
     xml->endbranch();
 
-    xml->beginbranch("FREQUENCY_PARAMETERS");
+    xml->beginbranch("FILTER_PARAMETERS");
 	xml->addparbool("enabled",PGlobalFilterEnabled);
 	if (PGlobalFilterEnabled!=0){
 	    xml->beginbranch("FILTER");
@@ -275,6 +274,78 @@ void SUBnoteParameters::add2XML(XMLwrapper *xml){
 	    xml->endbranch();
 	};
     xml->endbranch();
+};
+
+void SUBnoteParameters::getfromXML(XMLwrapper *xml){
+    Pnumstages=xml->getpar127("num_stages",Pnumstages);
+    Phmagtype=xml->getpar127("harmonic_mag_type",Phmagtype);
+    Pstart=xml->getpar127("start",Pstart);
+    
+    if (xml->enterbranch("HARMONICS")){
+	for (int i=0;i<MAX_SUB_HARMONICS;i++){
+	    if (xml->enterbranch("HARMONIC",i)==0) continue;
+		Phmag[i]=xml->getpar127("mag",Phmag[i]);
+		Phrelbw[i]=xml->getpar127("relbw",Phrelbw[i]);
+	    xml->exitbranch();
+	};
+	xml->exitbranch();
+    };
+
+    if (xml->enterbranch("AMPLITUDE_PARAMETERS")){
+	Pstereo=xml->getparbool("stereo",Pstereo);
+	PVolume=xml->getpar127("volume",PVolume);
+	PPanning=xml->getpar127("panning",PPanning);
+	PAmpVelocityScaleFunction=xml->getpar127("velocity_sensing",PAmpVelocityScaleFunction);
+	if (xml->enterbranch("AMPLITUDE_ENVELOPE")){
+	    AmpEnvelope->getfromXML(xml);
+	    xml->exitbranch();
+	};
+	xml->exitbranch();
+    };
+
+    if (xml->enterbranch("FREQUENCY_PARAMETERS")){
+	Pfixedfreq=xml->getparbool("fixed_freq",Pfixedfreq);
+	PfixedfreqET=xml->getpar127("fixed_freq_et",PfixedfreqET);
+
+	PDetune=xml->getpar("detune",PDetune,0,16383);
+	PCoarseDetune=xml->getpar127("coarse_detune",PCoarseDetune);
+	PDetuneType=xml->getpar127("detune_type",PDetuneType);
+
+	Pbandwidth=xml->getpar127("bandwidth",Pbandwidth);
+	Pbwscale=xml->getpar127("bandwidth_scale",Pbwscale);
+
+	PFreqEnvelopeEnabled=xml->getparbool("freq_envelope_enabled",PFreqEnvelopeEnabled);
+	if (xml->enterbranch("FREQUENCY_ENVELOPE")){
+	    FreqEnvelope->getfromXML(xml);
+	    xml->exitbranch();
+	};
+
+	PBandWidthEnvelopeEnabled=xml->getparbool("band_width_envelope_enabled",PBandWidthEnvelopeEnabled);
+	if (xml->enterbranch("BANDWIDTH_ENVELOPE")){
+	    BandWidthEnvelope->getfromXML(xml);
+	    xml->exitbranch();
+	};
+    
+        xml->exitbranch();
+    };
+    
+    if (xml->enterbranch("FILTER_PARAMETERS")){
+	PGlobalFilterEnabled=xml->getparbool("enabled",PGlobalFilterEnabled);
+	if (xml->enterbranch("FILTER")){
+	    GlobalFilter->getfromXML(xml);
+	    xml->exitbranch();
+	};
+
+	PGlobalFilterVelocityScaleFunction=xml->getpar127("filter_velocity_sensing",PGlobalFilterVelocityScaleFunction);
+	PGlobalFilterVelocityScale=xml->getpar127("filter_velocity_sensing_amplitude",PGlobalFilterVelocityScale);
+
+	if (xml->enterbranch("FILTER_ENVELOPE")){
+	    GlobalFilterEnvelope->getfromXML(xml);
+	    xml->exitbranch();
+	};
+	
+	xml->exitbranch();
+    };
 };
 
 

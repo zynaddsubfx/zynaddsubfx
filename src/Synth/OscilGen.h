@@ -53,6 +53,7 @@ class OscilGen{
 
     	void add2XML(XMLwrapper *xml);
 	void defaults();
+	void getfromXML(XMLwrapper *xml);
 
 	//Parameters
 			

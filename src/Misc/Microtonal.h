@@ -89,6 +89,7 @@ class Microtonal{
 	void saveloadbuf(Buffer *buf);
 
     	void add2XML(XMLwrapper *xml);
+    	void getfromXML(XMLwrapper *xml);
 
     private:
 	int linetotunings(unsigned int nline,const char *line);

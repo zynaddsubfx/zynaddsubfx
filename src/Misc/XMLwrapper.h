@@ -99,6 +99,10 @@ class XMLwrapper{
 	int getparbool(char *name,int defaultpar);
 
 	void getparstr(char *name,char *par,int maxstrlen);
+	REALTYPE getparreal(char *name,REALTYPE defaultpar);
+	REALTYPE getparreal(char *name,REALTYPE defaultpar,REALTYPE min,REALTYPE max);
+
+
     private:
 	mxml_node_t *tree;//all xml data
 	mxml_node_t *root;//xml data used by zynaddsubfx
@@ -123,6 +127,7 @@ class XMLwrapper{
 	char *real2str(REALTYPE x);
 	
 	int str2int(const char *str);
+	REALTYPE str2real(const char *str);
 	
 	char tmpstr[TMPSTR_SIZE];	
 	
@@ -130,6 +135,7 @@ class XMLwrapper{
 	//this is used to store the parents
 	mxml_node_t *parentstack[STACKSIZE];
 	int stackpos;
+
 	
 	void push(mxml_node_t *node);
 	mxml_node_t *pop();

@@ -93,6 +93,7 @@ void Part::defaults(){
     Pveloffs=64;
     Pkeylimit=15;
     defaultsinstrument();
+    ctl.defaults();
 };
 
 void Part::defaultsinstrument(){
@@ -952,40 +953,43 @@ void Part::add2XMLinstrument(XMLwrapper *xml){
 	xml->addpar("type",info.Ptype);
     xml->endbranch();
     
-    xml->addpar("kit_mode",Pkitmode);
-    xml->addparbool("drum_mode",Pdrummode);
     
-    for (int i=0;i<NUM_KIT_ITEMS;i++){
-	xml->beginbranch("INSTRUMENT_KIT_ITEM",i);
-	    xml->addparbool("enabled",kit[i].Penabled);
-	    if (kit[i].Penabled!=0) {
-		xml->addparstr("name",(char *)kit[i].Pname);
+    xml->beginbranch("INSTRUMENT_KIT");
+	xml->addpar("kit_mode",Pkitmode);
+	xml->addparbool("drum_mode",Pdrummode);
 
-		xml->addpar("muted",kit[i].Pmuted);
-		xml->addpar("min_key",kit[i].Pminkey);
-		xml->addpar("max_key",kit[i].Pmaxkey);
+	for (int i=0;i<NUM_KIT_ITEMS;i++){
+	    xml->beginbranch("INSTRUMENT_KIT_ITEM",i);
+		xml->addparbool("enabled",kit[i].Penabled);
+		if (kit[i].Penabled!=0) {
+		    xml->addparstr("name",(char *)kit[i].Pname);
+
+		    xml->addparbool("muted",kit[i].Pmuted);
+		    xml->addpar("min_key",kit[i].Pminkey);
+		    xml->addpar("max_key",kit[i].Pmaxkey);
 	    
-		xml->addpar("send_to_instrument_effect",kit[i].Psendtoparteffect);
+		    xml->addpar("send_to_instrument_effect",kit[i].Psendtoparteffect);
 
-		xml->addpar("ad_enabled",kit[i].Padenabled);
-		if ((kit[i].Padenabled!=0)&&(kit[i].adpars!=NULL)){
-		    xml->beginbranch("ADD_SYNTH_PARAMETERS");
-			kit[i].adpars->add2XML(xml);
-		    xml->endbranch();
-		};
+		    xml->addparbool("add_enabled",kit[i].Padenabled);
+		    if ((kit[i].Padenabled!=0)&&(kit[i].adpars!=NULL)){
+			xml->beginbranch("ADD_SYNTH_PARAMETERS");
+			    kit[i].adpars->add2XML(xml);
+			xml->endbranch();
+		    };
 
-		xml->addpar("sub_enabled",kit[i].Psubenabled);
-		if ((kit[i].Psubenabled!=0)&&(kit[i].subpars!=NULL)){
-		    xml->beginbranch("SUB_SYNTH_PARAMETERS");
-		    kit[i].subpars->add2XML(xml);
-		    xml->endbranch();
-		};
+		    xml->addparbool("sub_enabled",kit[i].Psubenabled);
+		    if ((kit[i].Psubenabled!=0)&&(kit[i].subpars!=NULL)){
+			xml->beginbranch("SUB_SYNTH_PARAMETERS");
+			kit[i].subpars->add2XML(xml);
+			xml->endbranch();
+		    };
 		
-	    };
-	xml->endbranch();
-    };
+		};
+	    xml->endbranch();
+	};
+    xml->endbranch();
     
-    xml->beginbranch("EFFECTS");    
+    xml->beginbranch("INSTRUMENT_EFFECTS");    
     for (int nefx=0;nefx<NUM_PART_EFX;nefx++){
 	xml->beginbranch("INSTRUMENT_EFFECT",nefx);
 	    xml->beginbranch("EFFECT");
@@ -1052,35 +1056,71 @@ void Part::getfromXMLinstrument(XMLwrapper *xml){
 	xml->getparstr("comments",(char *)info.Pcomments,MAX_INFO_TEXT_SIZE);
 	info.Ptype=xml->getpar("type",info.Ptype,0,16);
 	
-	xml->endbranch();
+	xml->exitbranch();
+    };
+
+    if (xml->enterbranch("INSTRUMENT_KIT")){
+	Pkitmode=xml->getpar127("kit_mode",Pkitmode);
+	Pdrummode=xml->getparbool("drum_mode",Pdrummode);
+
+	for (int i=0;i<NUM_KIT_ITEMS;i++){
+	    if (xml->enterbranch("INSTRUMENT_KIT_ITEM",i)==0) continue;
+		setkititemstatus(i,xml->getparbool("enabled",kit[i].Penabled));
+		if (kit[i].Penabled==0) {
+		    xml->exitbranch();
+		    continue;
+		};
+		
+		xml->getparstr("name",(char *)kit[i].Pname,PART_MAX_NAME_LEN);
+
+		kit[i].Pmuted=xml->getparbool("muted",kit[i].Pmuted);
+		kit[i].Pminkey=xml->getpar127("min_key",kit[i].Pminkey);
+		kit[i].Pmaxkey=xml->getpar127("max_key",kit[i].Pmaxkey);
+	    
+		kit[i].Psendtoparteffect=xml->getpar127("send_to_instrument_effect",kit[i].Psendtoparteffect);
+
+		kit[i].Padenabled=xml->getparbool("add_enabled",kit[i].Padenabled);
+
+
+	    	if (xml->enterbranch("ADD_SYNTH_PARAMETERS")){
+		    kit[i].adpars->getfromXML(xml);
+		    xml->exitbranch();
+		};
+
+		kit[i].Psubenabled=xml->getparbool("sub_enabled",kit[i].Psubenabled);
+		if (xml->enterbranch("SUB_SYNTH_PARAMETERS")){
+		    kit[i].subpars->getfromXML(xml);
+		    xml->exitbranch();
+		};
+
+		xml->exitbranch();
+	};
+        
+	xml->exitbranch();
     };
 
     
-    
-    
-    //!!!!!!!!!!!continui de aici
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    if (xml->enterbranch("INSTRUMENT_EFFECTS")){
+	for (int nefx=0;nefx<NUM_PART_EFX;nefx++){
+	    if (xml->enterbranch("INSTRUMENT_EFFECT",nefx)==0) continue;
+		if (xml->enterbranch("EFFECT")){
+		    partefx[nefx]->getfromXML(xml);
+		    xml->exitbranch();
+		};
+
+	    xml->getpar("route",Pefxroute[nefx],0,NUM_PART_EFX);
+
+	    xml->exitbranch();
+	};
+	xml->exitbranch();
+    };    
 };
 
 void Part::getfromXML(XMLwrapper *xml){
     Penabled=xml->getparbool("enabled",Penabled);
 
-    Pvolume=xml->getpar127("volume",Pvolume);    
-    Ppanning=xml->getpar127("panning",Ppanning);
+    setPvolume(xml->getpar127("volume",Pvolume));
+    setPpanning(xml->getpar127("panning",Ppanning));
 
     Pminkey=xml->getpar127("min_key",Pminkey);
     Pmaxkey=xml->getpar127("max_key",Pmaxkey);
@@ -1094,14 +1134,16 @@ void Part::getfromXML(XMLwrapper *xml){
     Ppolymode=xml->getparbool("poly_mode",Ppolymode);
     Pkeylimit=xml->getpar127("key_limit",Pkeylimit);
 
+
     if (xml->enterbranch("INSTRUMENT")){
 	getfromXMLinstrument(xml);
         xml->exitbranch();
     };
     
-    xml->enterbranch("CONTROLLER");
-//	ctl.(xml);
-    xml->exitbranch();
+    if (xml->enterbranch("CONTROLLER")){
+	ctl.getfromXML(xml);
+	xml->exitbranch();
+    };
 
 };
 

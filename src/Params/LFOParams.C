@@ -115,4 +115,14 @@ void LFOParams::add2XML(XMLwrapper *xml){
     xml->addparbool("continous",Pcontinous);
 };
 
+void LFOParams::getfromXML(XMLwrapper *xml){
+    Pfreq=xml->getpar127("freq",Pfreq);
+    Pintensity=xml->getpar127("intensity",Pintensity);
+    Pstartphase=xml->getpar127("start_phase",Pstartphase);
+    PLFOtype=xml->getpar127("lfo_type",PLFOtype);
+    Prandomness=xml->getpar127("randomness_amplitude",Prandomness);
+    Pfreqrand=xml->getpar127("randomness_frequency",Pfreqrand);
+    Pdelay=xml->getpar127("delay",Pdelay);
+    Pcontinous=xml->getparbool("continous",Pcontinous);
+};
 
