@@ -230,8 +230,11 @@ delete(bankuiwindow);} {}
   }
   Function {show()} {} {
     code {bankuiwindow->show();
-simplesetmode(config.cfg.UserInterfaceMode==2);} {selected
-    }
+simplesetmode(config.cfg.UserInterfaceMode==2);} {}
+  }
+  Function {hide()} {selected
+  } {
+    code {bankuiwindow->hide();} {}
   }
   Function {init(Fl_Valuator *cbwig_)} {} {
     code {cbwig=cbwig_;
@@ -334,7 +337,7 @@ for (int i=1;i<MAX_NUM_BANKS;i++) {
   }
   Function {simplesetmode(bool beginnerui)} {} {
     code {readbutton->value(1);
-mode=0;
+mode=1;
 removeselection();
 if (beginnerui) modeselect->hide();
 	else modeselect->show();} {}

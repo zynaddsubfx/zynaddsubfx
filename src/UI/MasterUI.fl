@@ -368,8 +368,7 @@ panellistitemgroup->redraw();} {}
 } 
 
 class MasterUI {} {
-  Function {make_window()} {selected
-  } {
+  Function {make_window()} {} {
     Fl_Window masterwindow {
       label zynaddsubfx
       callback {\#ifdef VSTAUDIOOUT
@@ -1069,7 +1068,7 @@ config.cfg.UserInterfaceMode=2;}
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
-      xywh {20 184 600 335} type Double hide
+      xywh {135 383 600 335} type Double hide
     } {
       Fl_Menu_Bar {} {
         xywh {0 0 690 25}
@@ -1183,7 +1182,7 @@ bankui->show();}
           callback {virkeys->relaseallkeys(0);
 master->part[npart]->Prcvchn=(int) o->value();
 virkeys->midich=(int) o->value();} open
-          tooltip {receive from Midi channel} xywh {140 157 75 18} down_box BORDER_BOX labelsize 13 align 130 textfont 1
+          tooltip {receive from Midi channel} xywh {140 157 65 18} down_box BORDER_BOX labelsize 11 align 130 textfont 1
           code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Ch%d",i+1);if (i!=9) o->add(nrstr); else o->add("Dr10");};}
           code1 {o->value(master->part[npart]->Prcvchn);}
         } {}
@@ -1208,7 +1207,7 @@ virkeys->midich=(int) o->value();} open
           callback {master->part[npart]->Pminkey=(int) o->value();
 if (master->part[npart]->Pminkey>master->part[npart]->Pmaxkey) o->textcolor(FL_RED);
  else o->textcolor(FL_BLACK);}
-          tooltip {Minimum key (that the part receives NoteOn messages)} xywh {245 158 40 15} type Simple labelfont 1 labelsize 10 minimum 0 maximum 127 step 1 textsize 10
+          tooltip {Minimum key (that the part receives NoteOn messages)} xywh {210 158 40 15} type Simple labelfont 1 labelsize 10 minimum 0 maximum 127 step 1 textsize 10
           code0 {o->value(master->part[npart]->Pminkey);}
         }
         Fl_Counter simplemaxkcounter {
@@ -1217,7 +1216,7 @@ if (master->part[npart]->Pminkey>master->part[npart]->Pmaxkey) o->textcolor(FL_R
 
 if (master->part[npart]->Pminkey>master->part[npart]->Pmaxkey) o->textcolor(FL_RED);
  else o->textcolor(FL_BLACK);}
-          tooltip {Maximum key (that the part receives NoteOn messages)} xywh {290 158 40 15} type Simple labelfont 1 labelsize 10 minimum 0 maximum 127 step 1 textsize 10
+          tooltip {Maximum key (that the part receives NoteOn messages)} xywh {255 158 40 15} type Simple labelfont 1 labelsize 10 minimum 0 maximum 127 step 1 textsize 10
           code0 {o->value(master->part[npart]->Pmaxkey);}
         }
         Fl_Button {} {
@@ -1225,14 +1224,14 @@ if (master->part[npart]->Pminkey>master->part[npart]->Pmaxkey) o->textcolor(FL_R
           callback {if (master->part[npart]->lastnote>=0) simpleminkcounter->value(master->part[npart]->lastnote);
 simpleminkcounter->do_callback();
 simplemaxkcounter->do_callback();}
-          tooltip {set the minimum key to the last pressed key} xywh {265 188 15 12} box THIN_UP_BOX labelsize 10
+          tooltip {set the minimum key to the last pressed key} xywh {230 188 15 12} box THIN_UP_BOX labelsize 10
         }
         Fl_Button {} {
           label M
           callback {if (master->part[npart]->lastnote>=0) simplemaxkcounter->value(master->part[npart]->lastnote);
 simplemaxkcounter->do_callback();
 simpleminkcounter->do_callback();}
-          tooltip {set the maximum key to the last pressed key} xywh {295 188 15 12} box THIN_UP_BOX labelsize 10
+          tooltip {set the maximum key to the last pressed key} xywh {260 188 15 12} box THIN_UP_BOX labelsize 10
         }
         Fl_Button {} {
           label R
@@ -1240,7 +1239,7 @@ simpleminkcounter->do_callback();}
 simpleminkcounter->do_callback();
 simplemaxkcounter->value(127);
 simplemaxkcounter->do_callback();}
-          tooltip {reset the minimum key to 0 and maximum key to 127} xywh {280 188 15 12} box THIN_UP_BOX labelfont 1 labelsize 10
+          tooltip {reset the minimum key to 0 and maximum key to 127} xywh {245 188 15 12} box THIN_UP_BOX labelfont 1 labelsize 10
         }
         Fl_Counter simplepartkeyshiftcounter {
           label KeyShift
@@ -1248,6 +1247,15 @@ simplemaxkcounter->do_callback();}
           xywh {240 120 90 20} labelsize 12 minimum -64 maximum 64 step 1
           code0 {o->lstep(12);}
           code1 {o->value(master->part[npart]->Pkeyshift-64);}
+        }
+        Fl_Dial simplesyseffsend {
+          callback {master->setPsysefxvol(npart,nsyseff,(int) o->value());}
+          xywh {300 160 30 30} maximum 127 step 1
+          class WidgetPDial
+        }
+        Fl_Box {} {
+          label Effect
+          xywh {295 190 40 15}
         }
       }
       Fl_Check_Button partenabled {
@@ -1290,7 +1298,8 @@ o->redraw();}
               label {Sys.Effect No.}
               callback {nsyseff=(int) o->value()-1;
 simplesysefftype->value(master->sysefx[nsyseff]->geteffect());
-simplesyseffectui->refresh(master->sysefx[nsyseff]);}
+simplesyseffectui->refresh(master->sysefx[nsyseff]);
+simplerefresh();}
               xywh {350 75 80 20} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
               code0 {o->bounds(1,NUM_SYS_EFX);}
               code1 {o->value(nsyseff+1);}
@@ -1509,12 +1518,12 @@ pthread_mutex_unlock(&master->mutex);}
         label Reset
         callback {simpleglobalfinedetuneslider->value(64.0);
 simpleglobalfinedetuneslider->do_callback();}
-        tooltip {Master fine detune reset} xywh {70 95 50 10} box THIN_UP_BOX labelfont 1 labelsize 12 align 128
+        tooltip {Master fine detune reset} xywh {70 32 50 10} box THIN_UP_BOX labelfont 1 labelsize 12 align 128
       }
       Fl_Dial simpleglobalfinedetuneslider {
         label {Fine Detune}
         callback {master->microtonal.Pglobalfinedetune=(int) o->value();}
-        tooltip {global fine detune} xywh {80 35 30 30} box ROUND_UP_BOX labelsize 12 align 130 maximum 127 step 1 value 64
+        tooltip {global fine detune} xywh {80 45 30 30} box ROUND_UP_BOX labelsize 12 align 130 maximum 127 step 1 value 64
         code0 {o->value(master->microtonal.Pglobalfinedetune);}
         class WidgetPDial
       }
@@ -1623,7 +1632,8 @@ simplepartportamento->value(master->part[npart]->ctl.portamento.portamento);
 simpleminkcounter->value(master->part[npart]->Pminkey);
 simplemaxkcounter->value(master->part[npart]->Pmaxkey);
 
-simplepartkeyshiftcounter->value(master->part[npart]->Pkeyshift-64);} {}
+simplepartkeyshiftcounter->value(master->part[npart]->Pkeyshift-64);
+simplesyseffsend->value(master->Psysefxvol[nsyseff][npart]);} {}
   }
   Function {do_new_master()} {} {
     code {if (fl_ask("Clear *ALL* the parameters ?")){
@@ -1712,7 +1722,11 @@ simpleinseffnocounter->do_callback();
 simplemasterkeyshiftcounter->value(master->Pkeyshift-64);
 simplemastervolumedial->value(master->Pvolume);    
 simpleglobalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);
-virkeys->midich=master->part[npart]->Prcvchn;} {}
+virkeys->midich=master->part[npart]->Prcvchn;
+
+simplerefresh();
+bankui->hide();} {selected
+    }
   }
   decl {Master *master;} {}
   decl {MicrotonalUI *microtonalui;} {}

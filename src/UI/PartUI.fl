@@ -319,7 +319,7 @@ if (event==FL_RIGHT_MOUSE){
   if (event==FL_LEFT_MOUSE) bankui->show();
        else instrumenteditwindow->show();
 };} selected
-          tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the instrument information} xywh {195 5 185 20} box PLASTIC_THIN_DOWN_BOX down_box FLAT_BOX color 247 labelfont 1 labelsize 12 align 84
+          tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the instrument information} xywh {195 5 185 20} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 12 align 84
           code0 {o->label((char *)part->Pname);}
         }
         Fl_Box {} {

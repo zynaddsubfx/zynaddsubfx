@@ -1436,7 +1436,7 @@ effeqwindow->hide();//delete (effeqwindow);
 effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);} {}
   }
   Function {make_null_window()} {} {
-    Fl_Window effnullwindow {selected
+    Fl_Window effnullwindow {
       xywh {539 150 233 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
@@ -1845,7 +1845,7 @@ refresh(eff);}
   }
   Function {make_distorsion_window()} {} {
     Fl_Window effdistorsionwindow {
-      xywh {258 305 232 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
+      xywh {257 432 230 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Choice distp {
@@ -1973,12 +1973,131 @@ refresh(eff);}
   }
   Function {make_eq_window()} {} {
     Fl_Window effeqwindow {
-      xywh {258 307 231 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
+      xywh {258 307 230 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Text_Display {} {
         label EQ
-        xywh {165 10 15 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+        xywh {170 5 15 25} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+      }
+      Fl_Counter bandcounter {
+        label Band
+        callback {eqband=(int) o->value();
+int npb=eqband*5+10;
+
+int type=eff->geteffectpar(npb);
+typechoice->value(type);
+
+if (type>6) gaindial->activate();
+ else gaindial->deactivate();
+
+if (type==0) bandgroup->deactivate();
+else bandgroup->activate();
+
+int freq=eff->geteffectpar(npb+1);
+freqdial->value(freq);
+
+int gain=eff->geteffectpar(npb+2);
+gaindial->value(gain);
+
+int q=eff->geteffectpar(npb+3);
+qdial->value(q);
+
+int dbl=eff->geteffectpar(npb+4);
+stagescounter->value(dbl);}
+        tooltip {Band no.} xywh {85 15 45 15} type Simple labelfont 1 labelsize 12 align 1 minimum 0 maximum 1 step 1 textfont 1 textsize 12
+        code0 {o->bounds(0,MAX_EQ_BANDS-1);}
+      }
+      Fl_Group bandgroup {
+        xywh {5 5 75 85} box ENGRAVED_FRAME
+        code0 {if (eff->geteffectpar(10)==0) o->deactivate();}
+      } {
+        Fl_Dial freqdial {
+          label Freq
+          callback {int np=eqband*5+11;
+eff->seteffectpar(np,(int) o->value());
+eqgraph->redraw();}
+          xywh {10 10 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 when 3 maximum 127
+          class WidgetPDial
+        }
+        Fl_Dial gaindial {
+          label Gain
+          callback {int np=eqband*5+12;
+eff->seteffectpar(np,(int) o->value());
+eqgraph->redraw();}
+          xywh {45 10 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 when 3 maximum 127 step 1
+          class WidgetPDial
+        }
+        Fl_Dial qdial {
+          label Q
+          callback {int np=eqband*5+13;
+eff->seteffectpar(np,(int) o->value());
+eqgraph->redraw();}
+          xywh {10 50 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 when 3 maximum 127
+          class WidgetPDial
+        }
+        Fl_Counter stagescounter {
+          label Stages
+          callback {int np=eqband*5+14;
+eff->seteffectpar(np,(int) o->value());
+eqgraph->redraw();}
+          tooltip {Additional filter stages} xywh {40 55 30 15} type Simple labelfont 1 labelsize 10 minimum 1 maximum 127 step 1 textfont 1 textsize 12
+          code0 {o->bounds(0,MAX_FILTER_STAGES-1);}
+        }
+      }
+      Fl_Choice typechoice {
+        label Type
+        callback {int np=eqband*5+10;
+eff->seteffectpar(np,(int) o->value());
+bandcounter->do_callback();
+eqgraph->redraw();}
+        tooltip Type xywh {135 15 40 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 1 when 6 textsize 10
+      } {
+        menuitem {} {
+          label OFF
+          xywh {10 10 100 20} labelfont 1 labelsize 10
+        }
+        menuitem {} {
+          label Lp1
+          xywh {20 20 100 20} labelfont 1 labelsize 10
+        }
+        menuitem {} {
+          label Hp1
+          xywh {30 30 100 20} labelfont 1 labelsize 10
+        }
+        menuitem {} {
+          label Lp2
+          xywh {40 40 100 20} labelfont 1 labelsize 10
+        }
+        menuitem {} {
+          label Hp2
+          xywh {50 50 100 20} labelfont 1 labelsize 10
+        }
+        menuitem {} {
+          label Bp2
+          xywh {60 60 100 20} labelfont 1 labelsize 10
+        }
+        menuitem {} {
+          label N2
+          xywh {70 70 100 20} labelfont 1 labelsize 10
+        }
+        menuitem {} {
+          label Pk
+          xywh {90 90 100 20} labelfont 1 labelsize 10
+        }
+        menuitem {} {
+          label LSh
+          xywh {80 80 100 20} labelfont 1 labelsize 10
+        }
+        menuitem {} {
+          label HSh
+          xywh {90 90 100 20} labelfont 1 labelsize 10
+        }
+      }
+      Fl_Box eqgraph {
+        xywh {85 35 140 55} box BORDER_BOX color 178
+        code0 {o->init(eff);}
+        class EQGraph
       }
     }
   }
@@ -2082,7 +2201,8 @@ effdynamicfilterwindow->position(px,py);
 
 refresh(eff);} {}
   }
-  Function {refresh(EffectMgr *eff_)} {} {
+  Function {refresh(EffectMgr *eff_)} {open
+  } {
     code {eff=eff_;
 this->hide();
 
@@ -2152,6 +2272,16 @@ switch(eff->geteffect()){
 	effdistorsionwindow->show();
         break;
      case 7:
+	bandcounter->value(eqband);
+	bandcounter->do_callback();
+	typechoice->value(eff->geteffectpar(10));
+	eqgraph->redraw();
+	freqdial->value(eff->geteffectpar(11));
+	gaindial->value(eff->geteffectpar(12));
+	if (eff->geteffectpar(10)<6) gaindial->deactivate();
+	qdial->value(eff->geteffectpar(13));
+	stagescounter->value(eff->geteffectpar(14));
+        eqgraph->init(eff);
 	effeqwindow->show();
         break;
      case 8:
@@ -2169,7 +2299,8 @@ switch(eff->geteffect()){
             break; 
 };
 
-this->show();} {}
+this->show();} {selected
+    }
   }
   Function {refresh()} {} {
     code {refresh(eff);} {}
