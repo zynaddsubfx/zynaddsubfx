@@ -372,8 +372,8 @@ fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. P
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
-      xywh {188 182 390 465} type Double hide
-      code0 {setfilelabel(NULL);} non_modal
+      xywh {188 182 390 465} type Double
+      code0 {setfilelabel(NULL);} non_modal visible
     } {
       Fl_Menu_Bar mastermenu {
         xywh {0 0 690 25}
@@ -433,7 +433,7 @@ globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);
 updatesendwindow();
 
 updatepanel();
-
+if (result>=0) setfilelabel(filename);
 
 if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not a zynaddsubfx parameters file.");
       else if (result<0) fl_alert("Error: Could not load the file.");} selected
