@@ -27,7 +27,7 @@
 #include "XMLwrapper.h"
 #include "Part.h"
 
-#define BANK_SIZE 128
+#define BANK_SIZE 160
 
 /*
  * The max. number of banks that are used
@@ -42,7 +42,7 @@ class Bank{
 	~Bank();
 	char *getname(unsigned int ninstrument);
 	char *getnamenumbered(unsigned int ninstrument);
-	void setname(unsigned int ninstrument,const char *newname);
+	void setname(unsigned int ninstrument,const char *newname,int newslot);//if newslot==-1 then this is ignored, else it will be put on that slot
 	
 	//returns 0 if the slot is not empty or 1 if the slot is empty
 	int emptyslot(unsigned int ninstrument);
@@ -51,8 +51,9 @@ class Bank{
 	void savetoslot(unsigned int ninstrument,Part *part);
 	void loadfromslot(unsigned int ninstrument,Part *part);
 
+	void swapslot(unsigned int n1,unsigned int n2);
+
 	int loadbank(const char *bankdirname);
-//	int savebank(const char *newbankfilename,int overwrite);
 	int newbank(const char *newbankdirname);
 	
 	char *bankfiletitle; //this is shown on the UI of the bank (the title of the window)

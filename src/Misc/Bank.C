@@ -150,14 +150,15 @@ char *Bank::getnamenumbered (unsigned int ninstrument){
 /*
  * Changes the name of an instrument (and the filename)
  */
-void Bank::setname(unsigned int ninstrument,const char *newname){
+void Bank::setname(unsigned int ninstrument,const char *newname,int newslot){
     if (emptyslot(ninstrument)) return;
     
     char newfilename[1000+1],tmpfilename[100+1];
     
     memset(newfilename,0,1001);
     memset(tmpfilename,0,101);
-    snprintf(tmpfilename,100,"%4d-%s",ninstrument+1,newname);
+    if (newslot>=0) snprintf(tmpfilename,100,"%4d-%s",newslot+1,newname);
+	else snprintf(tmpfilename,100,"%4d-%s",ninstrument+1,newname);
     
     //add the zeroes at the start of filename
     for (int i=0;i<4;i++) if (tmpfilename[i]==' ') tmpfilename[i]='0';
@@ -176,6 +177,7 @@ void Bank::setname(unsigned int ninstrument,const char *newname){
     snprintf(newfilename,1000,"%s/%s.xmlz",dirname,tmpfilename);
 
     rename(ins[ninstrument].filename,newfilename);
+    snprintf(ins[ninstrument].filename,PART_MAX_NAME_LEN,"%s",newfilename);
     snprintf(ins[ninstrument].name,PART_MAX_NAME_LEN,"%s",&tmpfilename[5]);
     
 };
@@ -253,7 +255,7 @@ void Bank::loadfromslot(unsigned int ninstrument,Part *part){
     
     part->defaultsinstrument();
 
-   // printf("load:  %s\n",ins[ninstrument].filename);
+//    printf("load:  %s\n",ins[ninstrument].filename);
     
     part->loadXMLinstrument(ins[ninstrument].filename);
     
@@ -354,6 +356,26 @@ int Bank::newbank(const char *newbankdirname){
  */
 int Bank::locked(){
     return(dirname==NULL);
+};
+
+/*
+ * Swaps a slot with another
+ */
+void Bank::swapslot(unsigned int n1, unsigned int n2){
+    if ((n1==n2)||(locked())) return;
+    if (emptyslot(n1)&&(emptyslot(n2))) return;
+    if (emptyslot(n1)){//change n1 to n2 in order to make
+	int tmp=n2;n2=n1;n1=tmp;
+    };
+    
+    if (emptyslot(n2)){//this is just a movement from slot1 to slot2
+	setname(n1,getname(n1),n2);
+	ins[n2]=ins[n1];
+	ins[n1].used=false;
+	ins[n1].name[0]='\0';
+	ins[n1].filename=NULL;
+    };
+    
 };
 
 /*
