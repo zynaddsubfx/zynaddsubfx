@@ -132,7 +132,7 @@ bool XMLwrapper::checkfileinformation(char *filename){
     if (root==NULL) {
 	delete(xmldata);
 	mxmlDelete(tree);
-	tree=NULL;
+	node=root=tree=NULL;
 	return(false);
     };
 
@@ -142,7 +142,7 @@ bool XMLwrapper::checkfileinformation(char *filename){
     if (root==NULL){
 	delete(xmldata);
 	mxmlDelete(tree);
-	tree=NULL;
+	node=root=tree=NULL;
 	return(false);
     };
     
@@ -151,7 +151,7 @@ bool XMLwrapper::checkfileinformation(char *filename){
     exitbranch();
     if (tree!=NULL) mxmlDelete(tree);
     delete(xmldata);
-    tree=NULL;
+    node=root=tree=NULL;
 
     return(true);
 };

@@ -1,0 +1,2 @@
+1) Sometimes when working with banks it crash - don't know why - I tested even with valgrind and I couldn't find out where is the problem (a double delete??)
+2) If the same directory is selected twice on bank roots or preset dir., the same files are shown twice and bad things can happen - I must solve this by comparing the directories (they can me relative directories and absolute dirs.)

@@ -1,3 +1,14 @@
+2.0.0 (27 Aug 2004)
+	- VST version works (there are some issues/bugs but it works)
+	- Added a advanced Clipboard and Preset module - now is possible to add user preset LFOs,Envelopes, Effects, Oscillators, Resonances, Filters, etc.
+	- Completely removed the *.MAS_ZYN formats (masters, instruments,etc) support; use 2.0.0pre1 and 2.0.0pre2 to convert
+	- Corrected a error to pitch bend on VST plugin (thanks to Krzysztof Korpiela)
+	- Impoved the PADsynth module
+	- Because the PADsynth module takes a time to load, the instrument that contains such modules are shown in different colors
+	- Bugfixes 
+	- Other
+	
+	
 2.0.0_pre2 (31 Iul 2004)
 	- Updated the XMLwrapper to mxml-2.0
 	- Many bugfixes
