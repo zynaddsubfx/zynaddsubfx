@@ -83,12 +83,14 @@ Config::Config(){
     cfg.currentBankDir=new char[MAX_STRING_SIZE];
     sprintf(cfg.currentBankDir,"./testbnk");
     
+    for (int i=0;i<MAX_BANK_ROOT_DIRS;i++) cfg.presetsDirList[i]=NULL;
     
     char filename[MAX_STRING_SIZE];
     getConfigFileName(filename,MAX_STRING_SIZE);
     readConfig(filename);
     if (cfg.bankRootDirList[0]==NULL){
 #if defined(OS_LINUX)
+	//banks
         cfg.bankRootDirList[0]=new char[MAX_STRING_SIZE];
 	sprintf(cfg.bankRootDirList[0],"~/banks");
 
@@ -106,7 +108,9 @@ Config::Config(){
 
 	cfg.bankRootDirList[5]=new char[MAX_STRING_SIZE];
 	sprintf(cfg.bankRootDirList[5],"banks");
+	
 #else
+	//banks
 	cfg.bankRootDirList[0]=new char[MAX_STRING_SIZE];
 	sprintf(cfg.bankRootDirList[0],"./");
 
@@ -115,8 +119,42 @@ Config::Config(){
 
 	cfg.bankRootDirList[2]=new char[MAX_STRING_SIZE];
 	sprintf(cfg.bankRootDirList[2],"banks");
+	
 #endif
     };
+
+    if (cfg.presetsDirList[0]==NULL){
+#if defined(OS_LINUX)
+	//presets
+	cfg.presetsDirList[0]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.presetsDirList[0],"./");
+
+	cfg.presetsDirList[1]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.presetsDirList[1],"../presets");
+
+	cfg.presetsDirList[2]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.presetsDirList[2],"presets");
+	
+        cfg.presetsDirList[3]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.presetsDirList[3],"/usr/share/zynaddsubfx/presets");
+
+	cfg.presetsDirList[4]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.presetsDirList[4],"/usr/local/share/zynaddsubfx/presets");
+	
+#else
+	//presets
+	cfg.presetsDirList[0]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.presetsDirList[0],"./");
+
+	cfg.presetsDirList[1]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.presetsDirList[1],"../presets");
+
+	cfg.presetsDirList[2]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.presetsDirList[2],"presets");
+#endif
+    };
+
+
 };
 
 Config::~Config(){
@@ -139,6 +177,12 @@ void Config::clearbankrootdirlist(){
     };
 };
 
+void Config::clearpresetsdirlist(){
+    for (int i=0;i<MAX_BANK_ROOT_DIRS;i++) {
+	if (cfg.presetsDirList[i]==NULL) delete(cfg.presetsDirList[i]);
+	cfg.presetsDirList[i]=NULL;
+    };
+};
 
 void Config::readConfig(char *filename){
     XMLwrapper *xmlcfg=new XMLwrapper();
@@ -166,7 +210,15 @@ void Config::readConfig(char *filename){
 	      xmlcfg->getparstr("bank_root",cfg.bankRootDirList[i],MAX_STRING_SIZE);
 	     xmlcfg->exitbranch();
 	    };
-	//xmlcfg->getparstr("bank_root_list",cfg.bankRootDirList,MAX_STRING_SIZE);
+	};
+
+	//get preset root dirs
+	for (int i=0;i<MAX_BANK_ROOT_DIRS;i++){
+	    if (xmlcfg->enterbranch("PRESETSROOT",i)){
+	      cfg.presetsDirList[i]=new char[MAX_STRING_SIZE];
+	      xmlcfg->getparstr("presets_root",cfg.presetsDirList[i],MAX_STRING_SIZE);
+	     xmlcfg->exitbranch();
+	    };
 	};
 
 	//linux stuff
@@ -209,6 +261,12 @@ void Config::saveConfig(char *filename){
 	for (int i=0;i<MAX_BANK_ROOT_DIRS;i++) if (cfg.bankRootDirList[i]!=NULL) {
 	    xmlcfg->beginbranch("BANKROOT",i);
 	     xmlcfg->addparstr("bank_root",cfg.bankRootDirList[i]);
+	    xmlcfg->endbranch();
+	};
+
+	for (int i=0;i<MAX_BANK_ROOT_DIRS;i++) if (cfg.presetsDirList[i]!=NULL) {
+	    xmlcfg->beginbranch("PRESETSROOT",i);
+	     xmlcfg->addparstr("presets_root",cfg.presetsDirList[i]);
 	    xmlcfg->endbranch();
 	};
 

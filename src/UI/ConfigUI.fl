@@ -287,18 +287,61 @@ activatebutton_rootdir(true);}
             code0 {o->deactivate();}
           }
         }
+        Fl_Group {} {
+          label {Presets dirs}
+          xywh {5 25 500 285} hide
+        } {
+          Fl_Browser presetbrowse {
+            callback {activatebutton_presetdir(o->value()!=0);}
+            xywh {15 35 485 220} type Hold
+          }
+          Fl_Button {} {
+            label {Add preset directory...}
+            callback {const char *dirname;
+dirname=fl_dir_chooser("Add a preset directory :",NULL,0);
+if (dirname==NULL) return;
+
+presetbrowse->add(dirname);}
+            xywh {15 265 80 35} box THIN_UP_BOX align 128
+          }
+          Fl_Button removepresetbutton {
+            label {Remove preset dir...}
+            callback {if (presetbrowse->value()!=0) {
+   presetbrowse->remove(rootsbrowse->value());
+};
+activatebutton_presetdir(false);}
+            xywh {105 265 80 35} box THIN_UP_BOX align 128
+            code0 {o->deactivate();}
+          }
+          Fl_Button makedefaultpresetbutton {
+            label {Make default}
+            callback {int n=presetbrowse->value();
+
+if (n!=0) {
+   presetbrowse->move(1,n);
+   presetbrowse->value(1);
+   presetbrowse->redraw();
+};
+activatebutton_presetdir(true);}
+            xywh {190 265 80 35} box THIN_UP_BOX align 128
+            code0 {o->deactivate();}
+          }
+        }
       }
       Fl_Button {} {
         label Close
         callback {configwindow->hide();
-writebankcfg();}
+writebankcfg();
+writepresetcfg();}
         xywh {200 315 105 20} box THIN_UP_BOX
       }
     }
   }
-  Function {ConfigUI()} {} {
+  Function {ConfigUI()} {selected
+  } {
     code {make_window();
-readbankcfg();} {}
+readbankcfg();
+readpresetcfg();} {}
   }
   Function {activatebutton_rootdir(bool active)} {} {
     code {if (active) {
@@ -307,6 +350,15 @@ readbankcfg();} {}
 }else{
 	removerootdirbutton->deactivate();
 	makedefaultrootdirbutton->deactivate();
+};} {}
+  }
+  Function {activatebutton_presetdir(bool active)} {} {
+    code {if (active) {
+	removepresetbutton->activate();
+	makedefaultpresetbutton->activate();
+}else{
+	removepresetbutton->deactivate();
+	makedefaultpresetbutton->deactivate();
 };} {}
   }
   Function {readbankcfg()} {} {
@@ -322,8 +374,22 @@ for (int i=0;i<MAX_BANK_ROOT_DIRS;i++){
 for (int n=0;n<rootsbrowse->size();n++){ 
      config.cfg.bankRootDirList[n]=new char [MAX_STRING_SIZE];
      strncpy(config.cfg.bankRootDirList[n],rootsbrowse->text(n+1),MAX_STRING_SIZE);
-};} {selected
-    }
+};} {}
+  }
+  Function {readpresetcfg()} {} {
+    code {presetbrowse->clear();
+
+for (int i=0;i<MAX_BANK_ROOT_DIRS;i++){
+  if (config.cfg.presetsDirList[i]!=NULL) presetbrowse->add(config.cfg.presetsDirList[i]);
+};} {}
+  }
+  Function {writepresetcfg()} {} {
+    code {config.clearpresetsdirlist();
+
+for (int n=0;n<presetbrowse->size();n++){ 
+     config.cfg.presetsDirList[n]=new char [MAX_STRING_SIZE];
+     strncpy(config.cfg.presetsDirList[n],presetbrowse->text(n+1),MAX_STRING_SIZE);
+};} {}
   }
   Function {getsamplerateorder()} {return_type int
   } {
