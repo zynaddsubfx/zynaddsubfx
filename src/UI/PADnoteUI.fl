@@ -210,11 +210,20 @@ for (int i=0;i<lx;i++){
   }
 } 
 
-class PADnoteUI {: {public PresetsUI_}
+class PADnoteUI {open : {public PresetsUI_}
 } {
-  Function {make_window()} {} {
+  Function {PADnoteUI(PADnoteParameters *parameters,Master *master_)} {open
+  } {
+    code {pars=parameters;
+master=master_;
+oscui=NULL;
+resui=new ResonanceUI(pars->resonance);
+make_window();} {}
+  }
+  Function {make_window()} {open
+  } {
     Fl_Window padnotewindow {
-      label {PAD synth Parameters}
+      label {PAD synth Parameters} selected
       xywh {76 165 535 450} type Double hide
     } {
       Fl_Tabs {} {
@@ -405,7 +414,7 @@ cbwidget->do_callback();}
           Fl_Button {} {
             label Change
             callback {if (oscui!=NULL) delete (oscui);
-oscui=new OscilEditor(pars->oscilgen,osc,cbwidget,master);}
+oscui=new OscilEditor(pars->oscilgen,osc,cbwidget,applybutton,master);}
             xywh {375 270 60 20} box THIN_UP_BOX labelfont 1 labelsize 12
           }
           Fl_Box cbwidget {
@@ -419,7 +428,7 @@ applybutton->redraw();}
             label Resonance
             callback {resui->resonancewindow->redraw();
 resui->resonancewindow->show();
-resui->setcbwidget(cbwidget);}
+resui->setcbwidget(cbwidget,applybutton);}
             xywh {375 225 80 20} box THIN_UP_BOX
           }
           Fl_Dial bwdial {
@@ -626,7 +635,7 @@ cbwidget->do_callback();}
           Fl_Choice qoct {
             label {no.oct}
             callback {pars->Pquality.oct=(int) o->value();
-cbwidget->do_callback();} selected
+cbwidget->do_callback();}
             xywh {480 155 45 20} down_box BORDER_BOX labelsize 12 align 5 textsize 12
             code0 {o->value(pars->Pquality.oct);}
           } {
@@ -935,7 +944,15 @@ hprofile->redraw();}
       Fl_Button applybutton {
         label {Apply Changes}
         callback {pars->applyparameters(true);
-o->color(FL_GRAY);}
+o->color(FL_GRAY);
+if (oscui!=NULL) {
+	oscui->applybutton->color(FL_GRAY);
+	oscui->applybutton->redraw();
+};
+if (resui!=NULL) {
+	resui->applybutton->color(FL_GRAY);
+	resui->applybutton->redraw();
+};}
         xywh {45 405 185 40} box THIN_UP_BOX labelfont 1 labelsize 23
         code0 {o->color(FL_RED);}
       }
@@ -955,13 +972,6 @@ o->color(FL_GRAY);}
         xywh {270 430 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
       }
     }
-  }
-  Function {PADnoteUI(PADnoteParameters *parameters,Master *master_)} {} {
-    code {pars=parameters;
-master=master_;
-oscui=NULL;
-resui=new ResonanceUI(pars->resonance);
-make_window();} {}
   }
   Function {refresh()} {} {
     code {volume->value(pars->PVolume);

@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0105 
+version 1.0106 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -36,7 +36,8 @@ class ResonanceGraph {: {public Fl_Box}
 } {
   Function {ResonanceGraph(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
     code {respar=NULL;
-cbwidget=NULL;} {}
+cbwidget=NULL;
+applybutton=NULL;} {}
   }
   Function {init(Resonance *respar_,Fl_Value_Output *khzvalue_,Fl_Value_Output *dbvalue_)} {} {
     code {respar=respar_;
@@ -158,13 +159,22 @@ if ((event==FL_PUSH)||(event==FL_DRAG)){
 
 if (event==FL_RELEASE) {
 	oldx=-1;
-	if (cbwidget!=NULL) cbwidget->do_callback();
+	if (cbwidget!=NULL) {
+		cbwidget->do_callback();
+		if (applybutton!=NULL) {
+			applybutton->color(FL_RED);
+			applybutton->redraw();
+
+		};
+	};
 };
 
-return(1);} {}
+return(1);} {selected
+    }
   }
-  Function {setcbwidget(Fl_Widget *cbwidget)} {} {
-    code {this->cbwidget=cbwidget;} {}
+  Function {setcbwidget(Fl_Widget *cbwidget,Fl_Widget *applybutton)} {} {
+    code {this->cbwidget=cbwidget;
+this->applybutton=applybutton;} {}
   }
   decl {Fl_Value_Output *khzvalue;} {}
   decl {Fl_Value_Output *dbvalue;} {}
@@ -172,7 +182,7 @@ return(1);} {}
   decl {int oldx,oldy;} {}
   decl {REALTYPE khzval;} {public
   }
-  decl {Fl_Widget *cbwidget;} {}
+  decl {Fl_Widget *cbwidget,*applybutton;} {}
 } 
 
 class ResonanceUI {: PresetsUI_
@@ -180,7 +190,7 @@ class ResonanceUI {: PresetsUI_
   Function {make_window()} {} {
     Fl_Window resonancewindow {
       label Resonance
-      xywh {45 259 780 305} type Double hide
+      xywh {45 259 780 305} type Double visible
     } {
       Fl_Value_Output khzvalue {
         label kHz
@@ -201,7 +211,7 @@ class ResonanceUI {: PresetsUI_
       Fl_Button {} {
         label Close
         callback {resonancewindow->hide();}
-        xywh {690 270 84 27} box THIN_UP_BOX
+        xywh {690 283 84 17} box THIN_UP_BOX
       }
       Fl_Button {} {
         label Zero
@@ -321,22 +331,41 @@ redrawPADnoteApply();}
         callback {presetsui->paste(respar,this);}
         xywh {655 275 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
       }
+      Fl_Button applybutton {
+        label Apply
+        callback {applybutton->color(FL_GRAY);
+applybutton->redraw();
+if (cbapplywidget!=NULL) {
+	cbapplywidget->do_callback();
+	cbapplywidget->color(FL_GRAY);
+	cbapplywidget->redraw();
+};}
+        xywh {690 265 85 15} box THIN_UP_BOX labelfont 1 labelsize 12
+      }
     }
   }
   Function {ResonanceUI(Resonance *respar_)} {} {
     code {respar=respar_;
 cbwidget=NULL;
-make_window();} {}
+cbapplywidget=NULL;
+make_window();
+applybutton->hide();} {}
   }
   Function {~ResonanceUI()} {} {
     code {resonancewindow->hide();} {}
   }
   Function {redrawPADnoteApply()} {} {
-    code {if (cbwidget!=NULL) cbwidget->do_callback();} {}
+    code {if (cbwidget!=NULL) {
+	cbwidget->do_callback();
+	applybutton->color(FL_RED);
+	applybutton->redraw();
+};} {}
   }
-  Function {setcbwidget(Fl_Widget *cbwidget)} {} {
+  Function {setcbwidget(Fl_Widget *cbwidget,Fl_Widget *cbapplywidget)} {} {
     code {this->cbwidget=cbwidget;
-rg->setcbwidget(cbwidget);} {}
+this->cbapplywidget=cbapplywidget;
+rg->setcbwidget(cbwidget,applybutton);
+applybutton->show();} {}
   }
   Function {refresh()} {} {
     code {redrawPADnoteApply();
@@ -354,11 +383,10 @@ octavesfreq->value(respar->Poctavesfreq);
 
 p1st->value(respar->Pprotectthefundamental);
 
-rg->redraw();} {selected
-    }
+rg->redraw();} {}
   }
   decl {Resonance *respar;} {public
   }
   decl {ResonanceGraph *rg;} {}
-  decl {Fl_Widget *cbwidget;} {}
+  decl {Fl_Widget *cbwidget,*cbapplywidget;} {}
 } 

@@ -243,7 +243,7 @@ fmdetunevalueoutput->do_callback();}
               }
               Fl_Value_Output fmdetunevalueoutput {
                 label Detune
-                callback {o->value(getdetune((pars->VoicePar[nvoice].PFMDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PFMDetuneType),0,pars->VoicePar[nvoice].PFMDetune));} selected
+                callback {o->value(getdetune((pars->VoicePar[nvoice].PFMDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PFMDetuneType),0,pars->VoicePar[nvoice].PFMDetune));}
                 xywh {540 245 45 13} labelsize 8 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 8
                 code0 {o->value(getdetune((pars->VoicePar[nvoice].PFMDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PFMDetuneType),0,pars->VoicePar[nvoice].PFMDetune));}
                 code1 {//o->value(getdetune(pars->VoicePar[nvoice].PFMDetuneType,0,pars->VoicePar[nvoice].PFMDetune));}
@@ -316,7 +316,7 @@ o->redraw();}
 int nv=nvoice;
 if (pars->VoicePar[nvoice].PextFMoscil>=0) nv=pars->VoicePar[nvoice].PextFMoscil;
 
-oscedit=new OscilEditor(pars->VoicePar[nv].FMSmp,fmoscil,NULL,master);}
+oscedit=new OscilEditor(pars->VoicePar[nv].FMSmp,fmoscil,NULL,NULL,master);} selected
                 xywh {700 370 55 15} box THIN_UP_BOX labelfont 1 labelsize 12
                 code0 {if (pars->VoicePar[nvoice].PextFMoscil>=0) o->labelcolor(FL_BLUE);}
               }
@@ -507,7 +507,7 @@ detunevalueoutput->do_callback();} open
 int nv=nvoice;
 if (pars->VoicePar[nvoice].Pextoscil>=0) nv=pars->VoicePar[nvoice].Pextoscil;
 
-oscedit=new OscilEditor(pars->VoicePar[nv].OscilSmp,voiceoscil,NULL,master);}
+oscedit=new OscilEditor(pars->VoicePar[nv].OscilSmp,voiceoscil,NULL,NULL,master);}
             xywh {5 475 65 20} box THIN_UP_BOX labelfont 1 labelsize 12
             code0 {if (pars->VoicePar[nvoice].Pextoscil>=0) o->labelcolor(FL_BLUE);}
           }
@@ -753,7 +753,7 @@ if (oscedit!=NULL) {
 
 class ADnoteUI {: {public PresetsUI_}
 } {
-  Function {make_window()} {open private
+  Function {make_window()} {private
   } {
     Fl_Window ADnoteGlobalParameters {
       label {ADsynth Global Parameters of the Instrument}

@@ -772,6 +772,7 @@
 	    - Adaugata afisajul RMS la VU-meter
 06 Mar 2005 - Facute cateva mici modificari referitoare in special la warning-uri    
 	    - Corectata o mica eroare care facea ca la un Paste sa nu se actulizeze unii parametrii ai filtrului in interfata
+12 Mar 2005 - Imbunatatiri la interfata PADsynth, adica se poate da "apply" direct din OscilGenUI sau ResonanceUI
 
 
 
