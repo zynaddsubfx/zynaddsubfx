@@ -90,6 +90,9 @@ class OscilGen{
 	unsigned char Psatype,Psapar;//spectrum adjust
 
 	unsigned char Pamprandpower, Pamprandtype;//amplitude randomness
+	int Pharmonicshift;//how the harmonics are shifted
+	int Pharmonicshiftfirst;//if the harmonic shift is done before waveshaping and filter
+	
     private:
 	
 	REALTYPE hmag[MAX_AD_HARMONICS],hphase[MAX_AD_HARMONICS];//the magnituides and the phases of the sine/nonsine harmonics
@@ -106,6 +109,9 @@ class OscilGen{
 	//Adjust the spectrum
 	void spectrumadjust();
 	
+	//Shift the harmonics
+	void shiftharmonics();
+    
         //Base function saveto/loadfrom quantised data
 	void savebasefuncQ();
 	void loadbasefuncQ();
@@ -126,7 +132,7 @@ class OscilGen{
 
 	//Internal Data
 	unsigned char oldbasefunc,oldbasepar,oldhmagtype,oldwaveshapingfunction,oldwaveshaping,oldnormalizemethod;
-	int oldfilterpars,oldsapars,oldbasefuncmodulation,oldbasefuncmodulationpar1,oldbasefuncmodulationpar2;
+	int oldfilterpars,oldsapars,oldbasefuncmodulation,oldbasefuncmodulationpar1,oldbasefuncmodulationpar2,oldharmonicshift;
 	/*
 	  The frequencies of wavefroms are stored like this:
 	  c[0],c[1],....,c[OSCIL_SIZE/2],s[OSCIL_SIZE/2-1],...,s[2],s[1]

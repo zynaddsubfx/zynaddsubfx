@@ -288,8 +288,8 @@ delete(harmonic);} {}
 class ADOscilEditor {} {
   Function {make_window()} {} {
     Fl_Window osceditUI {
-      label {ADsynth Oscillator Editor}
-      xywh {138 85 750 590} type Double hide
+      label {ADsynth Oscillator Editor} selected
+      xywh {17 85 750 590} type Double hide
     } {
       Fl_Group oscildisplaygroup {
         xywh {15 5 360 300} box ENGRAVED_FRAME
@@ -364,7 +364,10 @@ oldosc->redraw();}
 
 basefuncdisplaygroup->redraw();
 oscildisplaygroup->redraw();
-oldosc->redraw();}
+oldosc->redraw();
+
+if ((oscil->Pcurrentbasefunc==0)||(oscil->Pcurrentbasefunc==127)) basefuncmodulation->deactivate();
+      else basefuncmodulation->activate();}
           xywh {380 285 90 15} down_box BORDER_BOX labelsize 10 align 5 textsize 12
           code0 {o->value(oscil->Pcurrentbasefunc);}
         } {
@@ -481,6 +484,8 @@ if (autoclearbutton->value()){
       oscil->Phphase[i]=64;
    };
    oscil->Phmag[0]=127;
+
+   oscil->Pharmonicshift=0;
    h[0]->mag->value(0);
    wshbutton->value(0);
    wshbutton->do_callback();
@@ -697,8 +702,9 @@ oldosc->redraw();}
           code0 {for (int i=0;i<MAX_AD_HARMONICS;i++){h[i]=new ADOscilharmonic(0,0,20,o->h(),"");h[i]->init(oscil,i,oscildisplaygroup,oldosc,master);}}
         } {}
       }
-      Fl_Group {} {open
+      Fl_Group basefuncmodulation {open
         xywh {615 278 115 25} box ENGRAVED_BOX
+        code0 {if ((oscil->Pcurrentbasefunc==0)||(oscil->Pcurrentbasefunc==127)) basefuncmodulation->deactivate();}
       } {
         Fl_Choice {} {
           label {M.}
@@ -726,7 +732,7 @@ oldosc->redraw();} open
           callback {oscil->Pbasefuncmodulationpar1=(int)o->value();
 basefuncdisplaygroup->redraw();
 oscildisplaygroup->redraw();
-oldosc->redraw();} selected
+oldosc->redraw();}
           tooltip {Oscillator's modulation parameter 1} xywh {690 283 15 15} maximum 127 step 1
           code0 {o->value(oscil->Pbasefuncmodulationpar1);}
           class WidgetPDial
@@ -791,6 +797,34 @@ oldosc->redraw();}
           tooltip {Oscillator's spectrum adjust parameter} xywh {585 310 20 20} maximum 127 step 1
           code0 {o->value(oscil->Psapar);}
           class WidgetPDial
+        }
+      }
+      Fl_Group {} {open
+        xywh {675 405 75 65} box ENGRAVED_BOX
+      } {
+        Fl_Counter harmonicshiftcounter {
+          label {Harmonic Shift}
+          callback {oscil->Pharmonicshift=(int)o->value();
+oscildisplaygroup->redraw();
+oldosc->redraw();}
+          xywh {680 430 65 15} type Simple labelsize 10 align 129 minimum -64 maximum 64 step 1 textfont 1 textsize 10
+          code0 {o->value(oscil->Pharmonicshift);}
+        }
+        Fl_Check_Button {} {
+          label preH
+          callback {oscil->Pharmonicshiftfirst=(int)o->value();
+oscildisplaygroup->redraw();
+oldosc->redraw();}
+          tooltip {Apply the harmonic shift before the waveshaping and filtering} xywh {710 450 35 15} down_box DOWN_BOX labelsize 10 align 24
+          code0 {o->value(oscil->Pharmonicshiftfirst);}
+        }
+        Fl_Button {} {
+          label R
+          callback {oscil->Pharmonicshift=0;
+harmonicshiftcounter->value(0);
+oscildisplaygroup->redraw();
+oldosc->redraw();}
+          xywh {680 450 25 15} box THIN_UP_BOX labelfont 1 labelsize 10
         }
       }
     }

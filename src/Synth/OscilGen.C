@@ -49,7 +49,7 @@ OscilGen::~OscilGen(){
 
 void OscilGen::defaults(){
     oldbasefunc=0;oldbasepar=64;oldhmagtype=0;oldwaveshapingfunction=0;oldwaveshaping=64,oldnormalizemethod=0;
-    oldbasefuncmodulation=0;
+    oldbasefuncmodulation=0;oldharmonicshift=0;
     for (int i=0;i<MAX_AD_HARMONICS;i++){
 	hmag[i]=0.0;
 	hphase[i]=0.0;
@@ -78,6 +78,9 @@ void OscilGen::defaults(){
 
     Pamprandpower=64;
     Pamprandtype=0;
+    
+    Pharmonicshift=0;
+    Pharmonicshiftfirst=0;
     
     if (basefuncFFTfreqsQ!=NULL) {
 	delete(basefuncFFTfreqsQ);
@@ -408,6 +411,45 @@ void OscilGen::spectrumadjust(){
     
 };
 
+void OscilGen::shiftharmonics(){
+    if (Pharmonicshift==0) return;
+    
+    REALTYPE hc,hs;
+    int harmonicshift=-Pharmonicshift;
+    
+    if (harmonicshift>0){
+	for (int i=OSCIL_SIZE/2-2;i>=0;i--){ 
+	    int oldh=i-harmonicshift;
+	    if (oldh<0){
+		hc=0.0;
+		hs=0.0;
+	    } else {
+		hc=oscilFFTfreqs[oldh+1];
+		hs=oscilFFTfreqs[OSCIL_SIZE-oldh-1];
+	    };
+	    oscilFFTfreqs[i+1]=hc;
+	    oscilFFTfreqs[OSCIL_SIZE-i-1]=hs;
+	};
+    } else {
+	for (int i=0;i<OSCIL_SIZE/2-1;i++){ 
+	    int oldh=i+abs(harmonicshift);
+	    if (oldh>=(OSCIL_SIZE/2-1)){
+		hc=0.0;
+		hs=0.0;
+	    } else {
+		hc=oscilFFTfreqs[oldh+1];
+		hs=oscilFFTfreqs[OSCIL_SIZE-oldh-1];
+		if (fabs(hc)<0.000001) hc=0.0;
+		if (fabs(hs)<0.000001) hs=0.0;
+	    };
+	    
+	    oscilFFTfreqs[i+1]=hc;
+	    oscilFFTfreqs[OSCIL_SIZE-i-1]=hs;
+	};
+    };
+    
+    oscilFFTfreqs[0]=0.0;
+};
 
 /* 
  * Prepare the Oscillator
@@ -465,6 +507,8 @@ void OscilGen::prepare(){
 
    };
 
+   if (Pharmonicshiftfirst!=0)  shiftharmonics();
+
    if (Pfilterbeforews==0){
         waveshape();
 	oscilfilter();
@@ -474,6 +518,7 @@ void OscilGen::prepare(){
     };
 
    spectrumadjust();
+   if (Pharmonicshiftfirst==0)  shiftharmonics();
 
    //normalize (sum or RMS) - the "Full RMS" normalisation is located in the "::get()" function
    if ((Pnormalizemethod==0)||(Pnormalizemethod==1)){
@@ -501,6 +546,8 @@ void OscilGen::prepare(){
    };
    oldhmagtype=Phmagtype;
    oldnormalizemethod=Pnormalizemethod;
+   oldharmonicshift=Pharmonicshift+Pharmonicshiftfirst*256;
+
    oscilprepared=1;
 };
 
@@ -535,6 +582,7 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
 	(oldbasefuncmodulationpar2!=Pbasefuncmodulationpar2)) 
 	    oscilprepared=0;
 
+    if (oldharmonicshift!=Pharmonicshift+Pharmonicshiftfirst*256) oscilprepared=0;
     
     if (oscilprepared!=1) prepare();
 
@@ -910,6 +958,9 @@ void OscilGen::add2XML(XMLwrapper *xml){
     xml->addpar("amp_rand_type",Pamprandtype);
     xml->addpar("amp_rand_power",Pamprandpower);
 
+    xml->addpar("harmonic_shift",Pharmonicshift);
+    xml->addparbool("harmonic_shift_first",Pharmonicshiftfirst);
+
     xml->beginbranch("HARMONICS");
 	for (int n=0;n<MAX_AD_HARMONICS;n++){
 	    if ((Phmag[n]==64)&&(Phphase[n]==64)) continue;
@@ -968,6 +1019,9 @@ void OscilGen::getfromXML(XMLwrapper *xml){
     Prand=xml->getpar127("rand",Prand);
     Pamprandtype=xml->getpar127("amp_rand_type",Pamprandtype);
     Pamprandpower=xml->getpar127("amp_rand_power",Pamprandpower);
+
+    Pharmonicshift=xml->getpar("harmonic_shift",Pharmonicshift,-64,64);
+    Pharmonicshiftfirst=xml->getparbool("harmonic_shift_first",Pharmonicshiftfirst);
 
     if (xml->enterbranch("HARMONICS")){
 	Phmag[0]=64;Phphase[0]=64;

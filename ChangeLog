@@ -557,6 +557,7 @@
 08 Mar 2004 - Corectat o mica eroare la OscilGen (se aplica gain-ul rezonantei incorect)
 09 Mar 2004 - Adaugata posibilitatea de stretch la LFO in functie de frecventa notei
 12 Mar 2004 - Adaugata modulatie la OscilGen (functia de baza)
+13 Mar 2004 - Adaugat HarmonicShift la oscilgen
 
 
 
