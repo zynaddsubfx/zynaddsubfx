@@ -60,7 +60,7 @@ SUBnote::SUBnote(SUBnoteParameters *parameters,Controller *ctl_,REALTYPE freq,RE
 	};
     REALTYPE detune=getdetune(pars->PDetuneType,pars->PCoarseDetune,pars->PDetune);
     basefreq*=pow(2.0,detune/1200.0);//detune
-    basefreq*=ctl->pitchwheel.relfreq;//pitch wheel
+//    basefreq*=ctl->pitchwheel.relfreq;//pitch wheel
     
     //global filter    
     GlobalFilterCenterPitch=pars->GlobalFilter->getfreq()+//center freq 
