@@ -43,6 +43,7 @@ class Bank{
 	char *getname(unsigned int ninstrument);
 	char *getnamenumbered(unsigned int ninstrument);
 	void setname(unsigned int ninstrument,const char *newname,int newslot);//if newslot==-1 then this is ignored, else it will be put on that slot
+	bool isPADsynth_used(unsigned int ninstrument);
 	
 	//returns 0 if the slot is not empty or 1 if the slot is empty
 	int emptyslot(unsigned int ninstrument);
@@ -86,6 +87,9 @@ class Bank{
 	    bool used;
 	    char name[PART_MAX_NAME_LEN+1];
 	    char *filename;
+	    struct{
+		bool PADsynth_used;
+	    } info;
 	}ins[BANK_SIZE];
 	
 	char *dirname;

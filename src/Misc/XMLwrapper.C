@@ -70,6 +70,8 @@ XMLwrapper::XMLwrapper(){
 
     minimal=true;
     stackpos=0;
+
+    information.PADsynth_used=false;
     
     tree=mxmlNewElement(MXML_NO_PARENT,"?xml");
     mxmlElementSetAttr(tree,"version","1.0");
@@ -80,9 +82,12 @@ XMLwrapper::XMLwrapper(){
     mxmlElementSetAttr(doctype,"ZynAddSubFX-data",NULL);
 
     node=root=mxmlNewElement(tree,"ZynAddSubFX-data");
-    
+        
     mxmlElementSetAttr(root,"version-major","1");
     mxmlElementSetAttr(root,"version-minor","0");
+
+    //make the empty branch that will contain the information parameters
+    info=addparams0("INFORMATION");
     
     //save zynaddsubfx specifications
     beginbranch("BASE_PARAMETERS");
@@ -95,20 +100,66 @@ XMLwrapper::XMLwrapper(){
 
 	addpar("max_addsynth_voices",NUM_VOICES);
     endbranch();
-    
+
 };
 
 XMLwrapper::~XMLwrapper(){
     if (tree!=NULL) mxmlDelete(tree);
 };
 
+bool XMLwrapper::checkfileinformation(char *filename){
+    stackpos=0;
+    information.PADsynth_used=false;
+
+    if (tree!=NULL) mxmlDelete(tree);tree=NULL;
+    char *xmldata=doloadfile(filename);
+    if (xmldata==NULL) return(-1);//the file could not be loaded or uncompressed
+
+
+    char *start=strstr(xmldata,"<INFORMATION>");
+    char *end=strstr(xmldata,"</INFORMATION>");
+
+    if ((start==NULL)||(end==NULL)||(start>end)) {
+	delete(xmldata);
+	return(false);
+    };
+    end+=strlen("</INFORMATION>");
+    end[0]='\0';    
+    
+    tree=mxmlNewElement(MXML_NO_PARENT,"?xml");
+    node=root=mxmlLoadString(tree,xmldata,MXML_OPAQUE_CALLBACK);
+    if (root==NULL) {
+	delete(xmldata);
+	mxmlDelete(tree);
+	tree=NULL;
+	return(false);
+    };
+
+    root=mxmlFindElement(tree,tree,"INFORMATION",NULL,NULL,MXML_DESCEND);
+    push(root);
+
+    if (root==NULL){
+	delete(xmldata);
+	mxmlDelete(tree);
+	tree=NULL;
+	return(false);
+    };
+    
+    information.PADsynth_used=getparbool("PADsynth_used",false);
+
+    exitbranch();
+    if (tree!=NULL) mxmlDelete(tree);
+    delete(xmldata);
+    tree=NULL;
+
+    return(true);
+};
+
 
 /* SAVE XML members */
 
 int XMLwrapper::saveXMLfile(char *filename){
-    xml_k=0;
-    ZERO(tabs,STACKSIZE+2);
-    char *xmldata=mxmlSaveAllocString(tree,XMLwrapper_whitespace_callback);
+    char *xmldata=getXMLdata();
     if (xmldata==NULL) return(-2);
 
     int compression=config.cfg.GzipCompression;
@@ -127,10 +178,17 @@ int XMLwrapper::saveXMLfile(char *filename){
 char *XMLwrapper::getXMLdata(){
     xml_k=0;
     ZERO(tabs,STACKSIZE+2);
-    char *xmldata=mxmlSaveAllocString(tree,XMLwrapper_whitespace_callback);
     
+    mxml_node_t *oldnode=node;
+    
+    node=info;
+    //Info storing
+    addparbool("PADsynth_used",information.PADsynth_used);
+    
+    node=oldnode;
+    char *xmldata=mxmlSaveAllocString(tree,XMLwrapper_whitespace_callback);
+
     return(xmldata);
-            
 };
 
 
@@ -205,7 +263,6 @@ int XMLwrapper::loadXMLfile(const char *filename){
     ZERO(&values,(int)sizeof(values));
 
     stackpos=0;
-
 
     char *xmldata=doloadfile(filename);    
     if (xmldata==NULL) return(-1);//the file could not be loaded or uncompressed

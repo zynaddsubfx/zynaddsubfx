@@ -700,5 +700,6 @@
 22 Aug 2004 - Corectata o eroare de compilare
 	    - Makefile-ul modificat, a.i. make-ul sa se opreasca in caz de eroare
 	    - Terminat managerul de preset-uri
+23 Aug 2004 - Adaugata posibilitatea de a se vedea direct din lista cu bancile de instrumente
 	    
 	    

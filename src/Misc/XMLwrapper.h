@@ -109,6 +109,15 @@ class XMLwrapper{
 	REALTYPE getparreal(char *name,REALTYPE defaultpar,REALTYPE min,REALTYPE max);
 
 	bool minimal;//false if all parameters will be stored (used only for clipboard)
+	
+	struct {
+	    bool PADsynth_used;
+	}information;
+	
+	//opens a file and parse only the "information" data on it
+	//returns "true" if all went ok or "false" on errors
+	bool checkfileinformation(char *filename);
+	
     private:
     
 	int dosavefile(char *filename,int compression,char *xmldata);
@@ -118,6 +127,7 @@ class XMLwrapper{
 	mxml_node_t *tree;//all xml data
 	mxml_node_t *root;//xml data used by zynaddsubfx
 	mxml_node_t *node;//current node
+	mxml_node_t *info;//this node is used to store the information about the data
 	
 	//adds params like this:
 	// <name>

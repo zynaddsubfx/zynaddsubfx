@@ -66,17 +66,23 @@ bank=bank_;
 nselected=nselected_;
 box(FL_THIN_UP_BOX);
 align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE|FL_ALIGN_CLIP);
+
 highlight=0;
 refresh();} {}
   }
   Function {refresh()} {} {
-    code {if (bank->emptyslot(nslot)) color(46);
-    else color(51);
+    code {if (bank->emptyslot(nslot)) {
+	color(46);
+} else {
+	if (bank->isPADsynth_used(nslot)) color(26);
+		else color(51);
+};
 
 if (*nselected==nslot) color(6);
 
 
-label(bank->getnamenumbered(nslot));} {}
+label(bank->getnamenumbered(nslot));} {selected
+    }
   }
   decl {int *what,*whatslot,nslot,highlight, *nselected;} {}
   decl {void (BankProcess_:: *fnc)(void);} {}
@@ -206,7 +212,7 @@ refreshmainwindow();} open
         label {Refresh bank list}
         callback {rescan_for_banks();
 banklist->value(0);}
-        tooltip {Refresh the bank list (rescan)} xywh {230 8 105 20} box THIN_UP_BOX labelsize 12
+        tooltip {Refresh the bank list (rescan)} xywh {230 8 105 20} box THIN_UP_BOX color 50 labelsize 12
       }
     }
   }
@@ -300,8 +306,7 @@ if (mode==4){//swap
         bs[slot]->refresh();
     };
 };
-if (mode!=4) refreshmainwindow();} {selected
-    }
+if (mode!=4) refreshmainwindow();} {}
   }
   Function {refreshmainwindow()} {} {
     code {bankuiwindow->label(bank->bankfiletitle);

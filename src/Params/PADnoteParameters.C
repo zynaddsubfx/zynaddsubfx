@@ -525,6 +525,8 @@ void PADnoteParameters::applyparameters(bool lockmutex){
 
 
 void PADnoteParameters::add2XML(XMLwrapper *xml){
+    xml->information.PADsynth_used=true;
+
     xml->addparbool("stereo",PStereo);
     xml->addpar("mode",Pmode);
     xml->addpar("bandwidth",Pbandwidth);

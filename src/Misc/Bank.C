@@ -40,12 +40,15 @@
 #define FORCE_BANK_DIR_FILE ".bankdir"
 
 Bank::Bank(){
+
+
     ZERO(defaultinsname,PART_MAX_NAME_LEN);
     snprintf(defaultinsname,PART_MAX_NAME_LEN,"%s"," ");
         
     for (int i=0;i<BANK_SIZE;i++){
 	ins[i].used=false;
 	ins[i].filename=NULL;
+	ins[i].info.PADsynth_used=false;
     };
     dirname=NULL;
     clearbank();
@@ -467,9 +470,21 @@ int Bank::addtobank(int pos, const char *filename, const char* name){
     int len=strlen(filename)+1+strlen(dirname);
     ins[pos].filename=new char[len+1];
     snprintf(ins[pos].filename,len+1,"%s/%s",dirname,filename);
+
+    //see if PADsynth is used
+    XMLwrapper *xml=new XMLwrapper();
+    xml->checkfileinformation(ins[pos].filename);
+    
+    ins[pos].info.PADsynth_used=xml->information.PADsynth_used;
+    delete(xml);
     
     return(0);
 };
+
+bool Bank::isPADsynth_used(unsigned int ninstrument){
+    return(ins[ninstrument].info.PADsynth_used);
+};
+
 
 void Bank::deletefrombank(int pos){
     if ((pos<0)||(pos>=BANK_SIZE)) return;
