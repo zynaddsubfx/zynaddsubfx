@@ -66,7 +66,7 @@ void DynamicFilter::out(REALTYPE *smpsl,REALTYPE *smpsr){
 	efxoutr[i]=smpsr[i];
 	
 	REALTYPE x=(fabs(smpsl[i])+fabs(smpsr[i]))*0.5;
-	ms1=ms1*(1.0-ampsmooth)+x*x*ampsmooth+1e-10;
+	ms1=ms1*(1.0-ampsmooth)+x*ampsmooth+1e-10;
     };
     
 
@@ -74,7 +74,7 @@ void DynamicFilter::out(REALTYPE *smpsl,REALTYPE *smpsr){
     ms2=ms2*(1.0-ampsmooth2)+ms1*ampsmooth2;
     ms3=ms3*(1.0-ampsmooth2)+ms2*ampsmooth2;
     ms4=ms4*(1.0-ampsmooth2)+ms3*ampsmooth2;
-    REALTYPE rms=(sqrt(ms4)-0.25)*ampsns;
+    REALTYPE rms=(sqrt(ms4))*ampsns;
 
     REALTYPE frl=filterl->getrealfreq(freq+lfol+rms);
     REALTYPE frr=filterr->getrealfreq(freq+lfor+rms);
@@ -155,7 +155,7 @@ void DynamicFilter::setpanning(unsigned char Ppanning){
 
 
 void DynamicFilter::setampsns(unsigned char Pampsns){
-    ampsns=pow(Pampsns/127.0,2.5)*8;
+    ampsns=pow(Pampsns/127.0,2.5)*10.0;
     if (Pampsnsinv!=0) ampsns=-ampsns;    
     ampsmooth=exp(-Pampsmooth/127.0*10.0)*0.99;
     this->Pampsns=Pampsns;
@@ -173,15 +173,15 @@ void DynamicFilter::setpreset(unsigned char npreset){
     const int NUM_PRESETS=5;
     unsigned char presets[NUM_PRESETS][PRESET_SIZE]={
 	//WahWah
-	{127,64,80,0,0,64,0,80,0,60},
+	{127,64,80,0,0,64,0,90,0,60},
 	//AutoWah
 	{127,64,70,0,0,80,70,0,0,60},
 	//Sweep
 	{100,64,30,0,0,50,80,0,0,60},
 	//VocalMorph1
-	{127,64,80,0,0,64,0,80,0,60},
+	{127,64,80,0,0,64,0,64,0,60},
 	//VocalMorph1
-	{127,64,50,0,0,96,50,00,0,60}};
+	{127,64,50,0,0,96,64,0,0,60}};
 	
     if (npreset>=NUM_PRESETS) npreset=NUM_PRESETS-1;
     for (int n=0;n<PRESET_SIZE;n++) changepar(n,presets[npreset][n]);
@@ -191,7 +191,7 @@ void DynamicFilter::setpreset(unsigned char npreset){
 	case 0:
 	    filterpars->Pcategory=0;
 	    filterpars->Ptype=2;
-	    filterpars->Pfreq=64;
+	    filterpars->Pfreq=45;
 	    filterpars->Pq=64;
 	    filterpars->Pstages=1;
 	    filterpars->Pgain=64;
@@ -199,7 +199,7 @@ void DynamicFilter::setpreset(unsigned char npreset){
 	case 1:
 	    filterpars->Pcategory=2;
 	    filterpars->Ptype=0;
-	    filterpars->Pfreq=64;
+	    filterpars->Pfreq=72;
 	    filterpars->Pq=64;
 	    filterpars->Pstages=0;
 	    filterpars->Pgain=64;
@@ -215,7 +215,7 @@ void DynamicFilter::setpreset(unsigned char npreset){
 	case 3:
 	    filterpars->Pcategory=1;
 	    filterpars->Ptype=0;
-	    filterpars->Pfreq=64;
+	    filterpars->Pfreq=50;
 	    filterpars->Pq=70;
 	    filterpars->Pstages=1;
 	    filterpars->Pgain=64;
