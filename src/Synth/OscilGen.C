@@ -49,7 +49,7 @@ OscilGen::~OscilGen(){
 
 void OscilGen::defaults(){
     oldbasefunc=0;oldbasepar=64;oldhmagtype=0;oldwaveshapingfunction=0;oldwaveshaping=64,oldnormalizemethod=0;
-    oldbasefuncmodulation=0;oldharmonicshift=0;oldbasefuncmodulationpar1=0;oldbasefuncmodulationpar2=0;
+    oldbasefuncmodulation=0;oldharmonicshift=0;oldbasefuncmodulationpar1=0;oldbasefuncmodulationpar2=0;oldbasefuncmodulationpar3=0;
     for (int i=0;i<MAX_AD_HARMONICS;i++){
 	hmag[i]=0.0;
 	hphase[i]=0.0;
@@ -66,6 +66,7 @@ void OscilGen::defaults(){
     Pbasefuncmodulation=0;
     Pbasefuncmodulationpar1=64;
     Pbasefuncmodulationpar2=0;
+    Pbasefuncmodulationpar3=0;
 
     Pwaveshapingfunction=0;
     Pwaveshaping=64;
@@ -205,25 +206,26 @@ void OscilGen::getbasefunction(REALTYPE *smps){
     if (Pbasefuncpar==64) par=0.5;
     
     REALTYPE basefuncmodulationpar1=Pbasefuncmodulationpar1/127.0,
-	     basefuncmodulationpar2=Pbasefuncmodulationpar2/127.0;
+	     basefuncmodulationpar2=Pbasefuncmodulationpar2/127.0,
+	     basefuncmodulationpar3=Pbasefuncmodulationpar3/127.0;
 
     switch(Pbasefuncmodulation){
         case 1:basefuncmodulationpar1=(pow(2,basefuncmodulationpar1*5.0)-1.0)/10.0;
-	       basefuncmodulationpar2=floor((pow(2,basefuncmodulationpar2*5.0)-1.0));
-	       if (basefuncmodulationpar2<0.9999) basefuncmodulationpar2=-1.0;
+	       basefuncmodulationpar3=floor((pow(2,basefuncmodulationpar3*5.0)-1.0));
+	       if (basefuncmodulationpar3<0.9999) basefuncmodulationpar3=-1.0;
 	    break;
         case 2:basefuncmodulationpar1=(pow(2,basefuncmodulationpar1*5.0)-1.0)/10.0;
-	       basefuncmodulationpar2=1.0+floor((pow(2,basefuncmodulationpar2*5.0)-1.0));
+	       basefuncmodulationpar3=1.0+floor((pow(2,basefuncmodulationpar3*5.0)-1.0));
     	    break;
-    };
+    };	
 
     for (i=0;i<OSCIL_SIZE;i++) {
 	REALTYPE t=i*1.0/OSCIL_SIZE;
 
 	switch(Pbasefuncmodulation){
-	    case 1:t=t*basefuncmodulationpar2+sin(t*2.0*PI)*basefuncmodulationpar1;//rev
+	    case 1:t=t*basefuncmodulationpar3+sin((t+basefuncmodulationpar2)*2.0*PI)*basefuncmodulationpar1;//rev
 		break;
-	    case 2:t=t+sin(t*2.0*PI*basefuncmodulationpar2)*basefuncmodulationpar1;//sine
+	    case 2:t=t+sin((t*basefuncmodulationpar3+basefuncmodulationpar2)*2.0*PI)*basefuncmodulationpar1;//sine
 		break;
 	};
 	
@@ -339,7 +341,7 @@ void OscilGen::changebasefunction(){
     oldbasefuncmodulation=Pbasefuncmodulation;
     oldbasefuncmodulationpar1=Pbasefuncmodulationpar1;
     oldbasefuncmodulationpar2=Pbasefuncmodulationpar2;
-    
+    oldbasefuncmodulationpar3=Pbasefuncmodulationpar3;
 };
 
 /* 
@@ -465,7 +467,8 @@ void OscilGen::prepare(){
    if ((oldbasepar!=Pbasefuncpar)||(oldbasefunc!=Pcurrentbasefunc)||
 	(oldbasefuncmodulation!=Pbasefuncmodulation)||
         (oldbasefuncmodulationpar1!=Pbasefuncmodulationpar1)||
-	(oldbasefuncmodulationpar2!=Pbasefuncmodulationpar2)) 
+	(oldbasefuncmodulationpar2!=Pbasefuncmodulationpar2)||
+	(oldbasefuncmodulationpar3!=Pbasefuncmodulationpar3)) 
 	 changebasefunction();
 
    for (i=0;i<MAX_AD_HARMONICS;i++) hphase[i]=(Phphase[i]-64.0)/64.0*PI/(i+1);
@@ -582,7 +585,8 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
 
     if ((oldbasefuncmodulation!=Pbasefuncmodulation)||
         (oldbasefuncmodulationpar1!=Pbasefuncmodulationpar1)||
-	(oldbasefuncmodulationpar2!=Pbasefuncmodulationpar2)) 
+	(oldbasefuncmodulationpar2!=Pbasefuncmodulationpar2)||
+	(oldbasefuncmodulationpar3!=Pbasefuncmodulationpar3)) 
 	    oscilprepared=0;
 
     if (oldharmonicshift!=Pharmonicshift+Pharmonicshiftfirst*256) oscilprepared=0;
@@ -946,6 +950,7 @@ void OscilGen::add2XML(XMLwrapper *xml){
     xml->addpar("base_function_modulation",Pbasefuncmodulation);
     xml->addpar("base_function_modulation_par1",Pbasefuncmodulationpar1);
     xml->addpar("base_function_modulation_par2",Pbasefuncmodulationpar2);
+    xml->addpar("base_function_modulation_par3",Pbasefuncmodulationpar3);
 
     xml->addpar("wave_shaping",Pwaveshaping);
     xml->addpar("wave_shaping_function",Pwaveshapingfunction);
@@ -1007,6 +1012,7 @@ void OscilGen::getfromXML(XMLwrapper *xml){
     Pbasefuncmodulation=xml->getpar127("base_function_modulation",Pbasefuncmodulation);
     Pbasefuncmodulationpar1=xml->getpar127("base_function_modulation_par1",Pbasefuncmodulationpar1);
     Pbasefuncmodulationpar2=xml->getpar127("base_function_modulation_par2",Pbasefuncmodulationpar2);
+    Pbasefuncmodulationpar3=xml->getpar127("base_function_modulation_par3",Pbasefuncmodulationpar3);
 
 
     Pwaveshaping=xml->getpar127("wave_shaping",Pwaveshaping);

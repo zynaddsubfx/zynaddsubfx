@@ -76,7 +76,7 @@ class OscilGen{
 	unsigned char Pbasefuncpar;//the parameter of the base function
 	
 	unsigned char Pbasefuncmodulation;//what modulation is applied to the basefunc
-	unsigned char Pbasefuncmodulationpar1,Pbasefuncmodulationpar2;//the parameter of the base functions
+	unsigned char Pbasefuncmodulationpar1,Pbasefuncmodulationpar2,Pbasefuncmodulationpar3;//the parameter of the base functions
 
 	/*the Randomness:
 	  64=no randomness
@@ -132,7 +132,7 @@ class OscilGen{
 
 	//Internal Data
 	unsigned char oldbasefunc,oldbasepar,oldhmagtype,oldwaveshapingfunction,oldwaveshaping,oldnormalizemethod;
-	int oldfilterpars,oldsapars,oldbasefuncmodulation,oldbasefuncmodulationpar1,oldbasefuncmodulationpar2,oldharmonicshift;
+	int oldfilterpars,oldsapars,oldbasefuncmodulation,oldbasefuncmodulationpar1,oldbasefuncmodulationpar2,oldbasefuncmodulationpar3,oldharmonicshift;
 	/*
 	  The frequencies of wavefroms are stored like this:
 	  c[0],c[1],....,c[OSCIL_SIZE/2],s[OSCIL_SIZE/2-1],...,s[2],s[1]
