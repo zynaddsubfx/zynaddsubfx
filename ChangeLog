@@ -751,4 +751,5 @@
 
 
 04 Ian 2005 - Corectata o mica eroare care facea ca sa nu arate Force Release la Freemode Envelope
+15 Ian 2005 - Corectata o eroare la controllerul bandwidth care facea ca sa ajunga la valoarea 0 si sa dea peste cap SUBsynth
 

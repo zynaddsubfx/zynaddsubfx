@@ -123,7 +123,7 @@ void Controller::setbandwidth(int value){
 	    REALTYPE tmp=pow(25.0,pow(bandwidth.depth/127.0,1.5))-1.0;
 	    if ((value<64)&&(bandwidth.depth>=64)) tmp=1.0;
 	    bandwidth.relbw=(value/64.0-1.0)*tmp+1.0;
-	    if (bandwidth.relbw<0.0) bandwidth.relbw=0.0;
+	    if (bandwidth.relbw<0.01) bandwidth.relbw=0.01;
     } else {
 	bandwidth.relbw=pow(25.0,(value-64.0)/64.0*(bandwidth.depth/64.0));
     };
