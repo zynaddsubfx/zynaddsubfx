@@ -20,20 +20,44 @@
 
 */
 
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <unistd.h>
 #include "JACKaudiooutput.h"
 
 Master *jackmaster;
 jack_client_t *jackclient;
 jack_port_t *outport_left,*outport_right;
+jack_ringbuffer_t *rb=NULL;
 
+REALTYPE *jackoutl,*jackoutr;
+int jackfinish=0;
+
+void *thread_blocked(void *arg);
 int jackprocess(jack_nframes_t nframes,void *arg);
 int jacksrate(jack_nframes_t nframes,void *arg);
 void jackshutdown(void *arg);
+
+pthread_cond_t more_data=PTHREAD_COND_INITIALIZER;
+pthread_mutex_t zyn_thread_lock=PTHREAD_MUTEX_INITIALIZER;
+
+pthread_t bthr;
+
 
 void JACKaudiooutputinit(Master *master_){
     jackmaster=master_;
     jackclient=0;
     char tmpstr[100];
+
+    jackoutl=new REALTYPE [SOUND_BUFFER_SIZE];
+    jackoutr=new REALTYPE [SOUND_BUFFER_SIZE];
+    
+    int rbbufsize=SOUND_BUFFER_SIZE*sizeof (REALTYPE)*2*2;
+    printf("%d\n",rbbufsize);
+    rb=jack_ringbuffer_create(rbbufsize);
+    memset(rb->buf,rbbufsize,0);
+
 
     for (int i=0;i<15;i++){
 	if (i!=0) snprintf(tmpstr,100,"ZynAddSubFX_%d",i);
@@ -64,6 +88,8 @@ void JACKaudiooutputinit(Master *master_){
 	fprintf(stderr,"Cannot activate jack client\n");
 	exit(1);
     };
+
+    pthread_create(&bthr,NULL,thread_blocked,NULL);
     
     /*
     jack_connect(jackclient,jack_port_name(outport_left),"alsa_pcm:out_1");
@@ -71,19 +97,60 @@ void JACKaudiooutputinit(Master *master_){
      */
 };
 
+void *thread_blocked(void *arg){
+    int datasize=SOUND_BUFFER_SIZE*sizeof (REALTYPE);
+    
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL);
+    pthread_mutex_lock(&zyn_thread_lock);
+
+    while (jackfinish==0){
+	while (jack_ringbuffer_write_space(rb)>=datasize){
+	    pthread_mutex_lock(&jackmaster->mutex);
+	    jackmaster->GetAudioOutSamples(SOUND_BUFFER_SIZE,jack_get_sample_rate(jackclient),jackoutl,jackoutr);
+	    pthread_mutex_unlock(&jackmaster->mutex);
+	
+	    jack_ringbuffer_write(rb, (char *) jackoutl,datasize);
+	    jack_ringbuffer_write(rb, (char *) jackoutr,datasize);
+	};
+	pthread_cond_wait(&more_data,&zyn_thread_lock);
+    };
+    pthread_mutex_unlock(&zyn_thread_lock);
+    
+    return(0);
+};
+
+
 int jackprocess(jack_nframes_t nframes,void *arg){
     jack_default_audio_sample_t *outl=(jack_default_audio_sample_t *) jack_port_get_buffer (outport_left, nframes);
     jack_default_audio_sample_t *outr=(jack_default_audio_sample_t *) jack_port_get_buffer (outport_right, nframes);
 
-    pthread_mutex_lock(&jackmaster->mutex);
-    jackmaster->GetAudioOutSamples(nframes,jack_get_sample_rate(jackclient),outl,outr);
-    pthread_mutex_unlock(&jackmaster->mutex);
+    int datasize=nframes*sizeof (REALTYPE);
+//    printf("%d\n",nframes);
+    if (jack_ringbuffer_read_space(rb)>=datasize){
+	jack_ringbuffer_read(rb, (char *) outl,datasize);
+	jack_ringbuffer_read(rb, (char *) outr,datasize);
+    } else {//the ringbuffer is empty or there are too small amount of samples in it
+	for (int i=0;i<nframes;i++){
+	    outl[i]=0.0;outr[i]=0.0;
+	};
+    };
+    
+    if (pthread_mutex_trylock(&zyn_thread_lock)==0){
+	pthread_cond_signal(&more_data);
+	pthread_mutex_unlock(&zyn_thread_lock);
+    };
     
     return(0);
 };
 
 void JACKfinish(){
+    jackfinish=1;
+    jack_ringbuffer_free(rb);
     jack_client_close(jackclient);
+
+    usleep(100000);
+    delete(jackoutl);
+    delete(jackoutr);
 };
 
 int jacksrate(jack_nframes_t nframes,void *arg){

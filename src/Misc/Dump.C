@@ -48,20 +48,18 @@ void Dump::startnow(){
     if (config.cfg.DumpNotesToFile!=0){
 	if (config.cfg.DumpAppend!=0) file=fopen(config.cfg.DumpFile,"a");
 	    else file=fopen(config.cfg.DumpFile,"w");
-	
+    
 	if (file==NULL) return;
-    };
-    
-    if (config.cfg.DumpAppend!=0) fprintf(file,"#************************************\n");
+	if (config.cfg.DumpAppend!=0) fprintf(file,"#************************************\n");
 
-    time_t tm=time(NULL);    
-    
-    
-    fprintf(file,"#date/time = %s\n",ctime(&tm));
-    fprintf(file,"#1 tick = %g milliseconds\n",SOUND_BUFFER_SIZE*1000.0/SAMPLE_RATE);
-    fprintf(file,"SAMPLERATE = %d\n",SAMPLE_RATE);
-    fprintf(file,"TICKSIZE = %d #samples\n",SOUND_BUFFER_SIZE);
-    fprintf(file,"\n\nSTART\n");
+	time_t tm=time(NULL);    
+        
+	fprintf(file,"#date/time = %s\n",ctime(&tm));
+	fprintf(file,"#1 tick = %g milliseconds\n",SOUND_BUFFER_SIZE*1000.0/SAMPLE_RATE);
+	fprintf(file,"SAMPLERATE = %d\n",SAMPLE_RATE);
+	fprintf(file,"TICKSIZE = %d #samples\n",SOUND_BUFFER_SIZE);
+	fprintf(file,"\n\nSTART\n");
+    };
 };
 
 void Dump::inctick(){

@@ -47,6 +47,7 @@ Sequencer::Sequencer(){
     
     resettime(&rectime);
     resettime(&playtime);
+    nextevent.time=-1.0;//must be less than 0 
 };
 
 Sequencer::~Sequencer(){
@@ -118,17 +119,36 @@ void Sequencer::startplay(){
     
     //test - canalul 1, deocamdata
     rewindlist(&midichan[0].track);
-    printf("\n\n===================================");
-    do {
-	readevent(&midichan[0].track,&tmpevent);
-	printf("Play note %d %d \n",tmpevent.par1,tmpevent.par2);
-    } while(tmpevent.type>=0);
     
 };
 void Sequencer::stopplay(){
     if (play==0) return;
     play=0;
 };
+
+/************** Player stuff ***************/
+
+int Sequencer::getevent(char chan,int *type,int *par1, int *par2){
+    *type=0;
+    if (play==0) return(-1);
+
+    updatecounter(&playtime);
+
+    if (nextevent.time>=playtime.abs) readevent(&midichan[chan].track,&nextevent.ev);
+	else return(-1);
+    if (nextevent.ev.type==-1) return(-1);
+
+    *type=nextevent.ev.type;
+    *par1=nextevent.ev.par1;
+    *par2=nextevent.ev.par2;
+    
+    double dt=nextevent.ev.deltatime*0.001;
+    nextevent.time+=dt;
+
+    printf("%f   -  %d %d \n",nextevent.time,par1,par2);
+    return(0);//?? sau 1
+};
+
 
 /************** Track stuff ***************/
 

@@ -465,7 +465,7 @@ maxkcounter->do_callback();}
     }
     Fl_Window ctlwindow {
       label Controllers
-      private xywh {24 405 420 130} hide
+      private xywh {46 404 420 130} hide
     } {
       Fl_Check_Button {} {
         label Expr
@@ -581,7 +581,7 @@ if (part->ctl.sustain.receive==0) {
           xywh {310 50 55 15} labelsize 10 align 16
         }
         Fl_Dial {} {
-          label {t.up/dn}
+          label {t.dn/up}
           callback {int x=(int) o->value();
 
 part->ctl.portamento.updowntimestretch=x;} selected

@@ -33,8 +33,12 @@ class Sequencer{
 	//theese functions are called by the master and are ignored if the recorder/player are stopped
 	void recordnote(char chan, char note, char vel);
 	void recordcontroller(char chan,unsigned int type,int par);
-	//int playnote(char &chan, char &note, char &vel);//returns 1 if somehing must be played 
-	//(if returns 1) you need to call it until returns 0
+	
+	//this is only for player
+	//it returns 1 if this must be called at least once more
+	//it returns 0 if there are no more notes for the current time
+	//or -1 if there is no note
+	int getevent(char chan, int *type,int *par1, int *par2);
 	
 	
 	//UI controlling functions
@@ -48,11 +52,12 @@ class Sequencer{
 	
     private:
 
+
     /* Events */
     struct event{
         int deltatime;
-	int type,par1,par2;//type=1 for note,2 for controller
-    }tmpevent;
+	int type,par1,par2;//type=1 for note, type=2 for controller
+    } tmpevent;
     struct listpos{
 	event ev;
         struct listpos *next;
@@ -85,7 +90,13 @@ class Sequencer{
     
     void resettime(timestruct *t);
     void updatecounter(timestruct *t);//this updates the timer values
-    
+
+    /* Player only*/
+
+    struct {
+	event ev;
+	double time;
+    } nextevent;    
 };
 
 #endif

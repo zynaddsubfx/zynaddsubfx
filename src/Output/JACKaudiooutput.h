@@ -23,6 +23,9 @@
 #define JACK_AUDIO_OUTPUT_H
 
 #include <jack/jack.h>
+extern "C" {
+#include <jack/ringbuffer.h>
+};
 #include "../globals.h"
 #include "../Misc/Master.h"
 

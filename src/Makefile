@@ -11,7 +11,7 @@ CXXFLAGS += -DOS_$(OS_PORT) -D$(MIDIIN)MIDIIN -D$(AUDIOOUT)AUDIOOUT -DFFTW_VERSI
 export CXXFLAGS
 LIBS= -lm  `fltk-config --ldflags` 
 
-ifeq ($(FFT_VERSION),2)
+ifeq ($(FFTW_VERSION),2)
 LIBS += -lrfftw -lfftw
 else
 LIBS += -lfftw3

@@ -213,6 +213,18 @@ void Master::partonoff(int npart,int what){
  */
 void Master::AudioOut(REALTYPE *outl,REALTYPE *outr){
     int i,npart,nefx;
+
+    //test!!!!!!!!!!!!! se poate bloca aici (mutex)
+    while (1){	
+	int type,par1,par2,again;
+	char chan=0;//deocamdata
+	again=seq.getevent(chan,&type,&par1,&par2);
+//	if (type!=0) printf("%d %d %d %d\n",type,chan,par1,par2);
+	
+	if (again<=0) break;
+    };
+    //test end
+    
     
     //Swaps the Left channel with Right Channel (if it is asked for)
     if (swaplr!=0){

@@ -60,7 +60,7 @@ extern Dump dump;
 #include "UI/MasterUI.h"
 
 MasterUI *ui;
-pthread_t thr1,thr2,thr3;
+pthread_t thr1,thr2,thr3,thr4;
 Master *master;
 int swaplr=0;//1 for left-right swapping
 
@@ -170,6 +170,18 @@ void *thread3(void *arg){
     return(0);
 };
 
+/*
+ * Sequencer thread (test)
+ */
+void *thread4(void *arg){
+    while (Pexitprogram==0){
+	pthread_mutex_lock(&master->mutex);
+//?????????????????????????????????????????????
+	pthread_mutex_unlock(&master->mutex);
+    };
+    
+    return(0);
+};
 
 /*
  * Program initialisation
@@ -227,8 +239,8 @@ void exitprogram(){
     PAfinish();
 #endif
 
-    delete(Midi);
     delete(ui);
+    delete(Midi);
     delete(denormalkillbuf);
 
 //    pthread_mutex_unlock(&master->mutex);

@@ -497,5 +497,8 @@
 26 Nov 2003 - Continuat de scris sequencerul - inceput sa scriu inregistrarea (fara timer)
 27 Nov 2003 - Se poate inregistra (dar nu rula) - adaugat timerul de inregistrat
 	    - Frecventa maxima al filtrelor este de Nyquist-500.0 pentru a evita instabilitatea filtrelor
-28 Nov 2003 - Adaugata favorizarea portamento-ului in sus sau un jos; ex. se poate face ca portamento-ul sa fie doar in sus, sa portamento-ul in jos sa fie mai scurt decat cel in jos
+28 Nov 2003 - Adaugata favorizarea portamento-ului in sus sau un jos; ex. se poate face ca portamento-ul sa fie doar in sus, sau portamento-ul in jos sa fie mai scurt decat cel in jos
 	    - Inceput sa pun pe cvs la cvs.sourceforge.net
+01 Dec 2003 - Am facut niste mici modificari ca urmare a unui bug-report
+05 Dec 2003 - Facute cateva modificari la jack
+08 Dec 2003 - Inceput sa incerc sa fac rt-safe sub jack, dar in stadiul actual suportul jack este nefunctional
