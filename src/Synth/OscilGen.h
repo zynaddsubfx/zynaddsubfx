@@ -74,6 +74,10 @@ class OscilGen{
 
 	unsigned char Pcurrentbasefunc;//The base function used - 0=sin, 1=...
 	unsigned char Pbasefuncpar;//the parameter of the base function
+	
+	unsigned char Pbasefuncmodulation;//what modulation is applied to the basefunc
+	unsigned char Pbasefuncmodulationpar1,Pbasefuncmodulationpar2;//the parameter of the base functions
+
 	/*the Randomness:
 	  64=no randomness
 	  63..0 - block type randomness - 0 is maximum
@@ -85,7 +89,7 @@ class OscilGen{
 	unsigned char Pfilterbeforews;
 	unsigned char Psatype,Psapar;//spectrum adjust
 
-	unsigned char Pamprandpower, Pamprandtype;
+	unsigned char Pamprandpower, Pamprandtype;//amplitude randomness
     private:
 	
 	REALTYPE hmag[MAX_AD_HARMONICS],hphase[MAX_AD_HARMONICS];//the magnituides and the phases of the sine/nonsine harmonics
@@ -122,7 +126,7 @@ class OscilGen{
 
 	//Internal Data
 	unsigned char oldbasefunc,oldbasepar,oldhmagtype,oldwaveshapingfunction,oldwaveshaping,oldnormalizemethod;
-	int oldfilterpars,oldsapars;
+	int oldfilterpars,oldsapars,oldbasefuncmodulation,oldbasefuncmodulationpar1,oldbasefuncmodulationpar2;
 	/*
 	  The frequencies of wavefroms are stored like this:
 	  c[0],c[1],....,c[OSCIL_SIZE/2],s[OSCIL_SIZE/2-1],...,s[2],s[1]

@@ -555,7 +555,8 @@
 03 Mar 2004 - Terminat (teoretic) partea de XML
 05 Mar 2004 - Actualizat Copyright-ul la 2004 in fisiere
 08 Mar 2004 - Corectat o mica eroare la OscilGen (se aplica gain-ul rezonantei incorect)
-09 Mar 2004 - Adaugat posibilitatea de stretch la LFO in functie de frecventa notei
+09 Mar 2004 - Adaugata posibilitatea de stretch la LFO in functie de frecventa notei
+12 Mar 2004 - Adaugata modulatie la OscilGen (functia de baza)
 
 
 

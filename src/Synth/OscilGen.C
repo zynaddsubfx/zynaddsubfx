@@ -49,6 +49,7 @@ OscilGen::~OscilGen(){
 
 void OscilGen::defaults(){
     oldbasefunc=0;oldbasepar=64;oldhmagtype=0;oldwaveshapingfunction=0;oldwaveshaping=64,oldnormalizemethod=0;
+    oldbasefuncmodulation=0;
     for (int i=0;i<MAX_AD_HARMONICS;i++){
 	hmag[i]=0.0;
 	hphase[i]=0.0;
@@ -61,6 +62,11 @@ void OscilGen::defaults(){
 
     Pcurrentbasefunc=0;
     Pbasefuncpar=64;
+
+    Pbasefuncmodulation=0;
+    Pbasefuncmodulationpar1=64;
+    Pbasefuncmodulationpar2=0;
+
     Pwaveshapingfunction=0;
     Pwaveshaping=64;
     Pnormalizemethod=2;
@@ -194,33 +200,60 @@ void OscilGen::getbasefunction(REALTYPE *smps){
     int i;    
     REALTYPE par=(Pbasefuncpar+0.5)/128.0;
     if (Pbasefuncpar==64) par=0.5;
-    switch (Pcurrentbasefunc){
-        case 1:for (i=0;i<OSCIL_SIZE;i++) smps[i]=basefunc_triangle(1.0*i/OSCIL_SIZE,par);
-	       break;
-	case 2:for (i=0;i<OSCIL_SIZE;i++) smps[i]=basefunc_pulse(1.0*i/OSCIL_SIZE,par);
-	       break;
-	case 3:for (i=0;i<OSCIL_SIZE;i++) smps[i]=basefunc_saw(1.0*i/OSCIL_SIZE,par);
-	       break;
-	case 4:for (i=0;i<OSCIL_SIZE;i++) smps[i]=basefunc_power(1.0*i/OSCIL_SIZE,par);
-	       break;
-	case 5:for (i=0;i<OSCIL_SIZE;i++) smps[i]=basefunc_gauss(1.0*i/OSCIL_SIZE,par);
-	       break;
-	case 6:for (i=0;i<OSCIL_SIZE;i++) smps[i]=basefunc_diode(1.0*i/OSCIL_SIZE,par);
-	       break;
-	case 7:for (i=0;i<OSCIL_SIZE;i++) smps[i]=basefunc_abssine(1.0*i/OSCIL_SIZE,par);
-	       break;
-	case 8:for (i=0;i<OSCIL_SIZE;i++) smps[i]=basefunc_pulsesine(1.0*i/OSCIL_SIZE,par);
-	       break;
-	case 9:for (i=0;i<OSCIL_SIZE;i++) smps[i]=basefunc_stretchsine(1.0*i/OSCIL_SIZE,par);
-	       break;
-	case 10:for (i=0;i<OSCIL_SIZE;i++) smps[i]=basefunc_chirp(1.0*i/OSCIL_SIZE,par);
-	       break;
-	case 11:for (i=0;i<OSCIL_SIZE;i++) smps[i]=basefunc_absstretchsine(1.0*i/OSCIL_SIZE,par);
-	       break;
-	case 12:for (i=0;i<OSCIL_SIZE;i++) smps[i]=basefunc_chebyshev(1.0*i/OSCIL_SIZE,par);
-	       break;
-	default:for (i=0;i<OSCIL_SIZE;i++) smps[i]=-sin(2.0*PI*i/OSCIL_SIZE);
+    
+    REALTYPE basefuncmodulationpar1=Pbasefuncmodulationpar1/127.0,
+	     basefuncmodulationpar2=Pbasefuncmodulationpar2/127.0;
+
+    switch(Pbasefuncmodulation){
+        case 1:basefuncmodulationpar1=(pow(2,basefuncmodulationpar1*5.0)-1.0)/10.0;
+	       basefuncmodulationpar2=floor((pow(2,basefuncmodulationpar2*5.0)-1.0));
+	       if (basefuncmodulationpar2<0.9999) basefuncmodulationpar2=-1.0;
+	    break;
+        case 2:basefuncmodulationpar1=(pow(2,basefuncmodulationpar1*5.0)-1.0)/10.0;
+	       basefuncmodulationpar2=1.0+floor((pow(2,basefuncmodulationpar2*5.0)-1.0));
+    	    break;
+    };
+
+    for (i=0;i<OSCIL_SIZE;i++) {
+	REALTYPE t=i*1.0/OSCIL_SIZE;
+
+	switch(Pbasefuncmodulation){
+	    case 1:t=t*basefuncmodulationpar2+sin(t*2.0*PI)*basefuncmodulationpar1;//rev
+		break;
+	    case 2:t=t+sin(t*2.0*PI*basefuncmodulationpar2)*basefuncmodulationpar1;//sine
+		break;
 	};
+	
+	t=t-floor(t);
+	
+	switch (Pcurrentbasefunc){
+    	    case 1:smps[i]=basefunc_triangle(t,par);
+	        break;
+	    case 2:smps[i]=basefunc_pulse(t,par);
+	        break;
+	    case 3:smps[i]=basefunc_saw(t,par);
+	        break;
+	    case 4:smps[i]=basefunc_power(t,par);
+	        break;
+	    case 5:smps[i]=basefunc_gauss(t,par);
+	        break;
+	    case 6:smps[i]=basefunc_diode(t,par);
+	        break;
+	    case 7:smps[i]=basefunc_abssine(t,par);
+	        break;
+	    case 8:smps[i]=basefunc_pulsesine(t,par);
+	        break;
+	    case 9:smps[i]=basefunc_stretchsine(t,par);
+	       break;
+	    case 10:smps[i]=basefunc_chirp(t,par);
+	       break;
+	    case 11:smps[i]=basefunc_absstretchsine(t,par);
+	       break;
+	    case 12:smps[i]=basefunc_chebyshev(t,par);
+	       break;
+	    default:smps[i]=-sin(2.0*PI*i/OSCIL_SIZE);
+	};
+    };
 };
 
 /* 
@@ -281,7 +314,8 @@ void OscilGen::changebasefunction(){
     if (basefuncFFTfreqs!=NULL) {
 		delete(basefuncFFTfreqs);
 		basefuncFFTfreqs=NULL;
-	    };
+    };
+
     if (basefuncFFTfreqs==NULL) basefuncFFTfreqs=new REALTYPE[OSCIL_SIZE];
     if (Pcurrentbasefunc!=0) {
         // I use basefuncfreq for temporary store of the time-domain data 
@@ -296,6 +330,9 @@ void OscilGen::changebasefunction(){
     oscilprepared=0;
     oldbasefunc=Pcurrentbasefunc;
     oldbasepar=Pbasefuncpar;
+    oldbasefuncmodulation=Pbasefuncmodulation;
+    oldbasefuncmodulationpar1=Pbasefuncmodulationpar1;
+    oldbasefuncmodulationpar2=Pbasefuncmodulationpar2;
     
 };
 
@@ -359,7 +396,6 @@ void OscilGen::spectrumadjust(){
         REALTYPE mag=sqrt(pow(oscilFFTfreqs[OSCIL_SIZE-i-1],2)+pow(oscilFFTfreqs[i+1],2.0))/max;
 	REALTYPE phase=atan2(oscilFFTfreqs[i+1],oscilFFTfreqs[OSCIL_SIZE-i-1]);
 	
-	
 	switch (Psatype){
 	    case 1: mag=pow(mag,par);
 		    break;
@@ -379,8 +415,13 @@ void OscilGen::spectrumadjust(){
 void OscilGen::prepare(){
    int i,j,k;
    REALTYPE a,b,c,d,hmagnew;
+
    
-   if ((oldbasepar!=Pbasefuncpar)||(oldbasefunc!=Pcurrentbasefunc)) changebasefunction();
+   if ((oldbasepar!=Pbasefuncpar)||(oldbasefunc!=Pcurrentbasefunc)||
+	(oldbasefuncmodulation!=Pbasefuncmodulation)||
+        (oldbasefuncmodulationpar1!=Pbasefuncmodulationpar1)||
+	(oldbasefuncmodulationpar2!=Pbasefuncmodulationpar2)) 
+	 changebasefunction();
 
    for (i=0;i<MAX_AD_HARMONICS;i++) hphase[i]=(Phphase[i]-64.0)/64.0*PI/(i+1);
 
@@ -488,6 +529,12 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
 	oscilprepared=0;
 	oldsapars=Psatype*256+Psapar;
     };
+
+    if ((oldbasefuncmodulation!=Pbasefuncmodulation)||
+        (oldbasefuncmodulationpar1!=Pbasefuncmodulationpar1)||
+	(oldbasefuncmodulationpar2!=Pbasefuncmodulationpar2)) 
+	    oscilprepared=0;
+
     
     if (oscilprepared!=1) prepare();
 
@@ -572,6 +619,7 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
    };
 
 
+//    for (i=0;i<OSCIL_SIZE/2;i++) outoscilFFTfreqs[i+OSCIL_SIZE/2]*=-1.0;//correct the amplitude
 
     fft->freqs2smps(outoscilFFTfreqs,smps);
 
@@ -844,6 +892,9 @@ void OscilGen::add2XML(XMLwrapper *xml){
 
     xml->addpar("base_function",Pcurrentbasefunc);
     xml->addpar("base_function_par",Pbasefuncpar);
+    xml->addpar("base_function_modulation",Pbasefuncmodulation);
+    xml->addpar("base_function_modulation_par1",Pbasefuncmodulationpar1);
+    xml->addpar("base_function_modulation_par2",Pbasefuncmodulationpar2);
 
     xml->addpar("wave_shaping",Pwaveshaping);
     xml->addpar("wave_shaping_function",Pwaveshapingfunction);
@@ -885,8 +936,6 @@ void OscilGen::add2XML(XMLwrapper *xml){
 			xml->addparreal("sin",xs);
 		    xml->endbranch();
 		};
-
-
 	    };
 	xml->endbranch();
     };
@@ -900,6 +949,11 @@ void OscilGen::getfromXML(XMLwrapper *xml){
 
     Pcurrentbasefunc=xml->getpar127("base_function",Pcurrentbasefunc);
     Pbasefuncpar=xml->getpar127("base_function_par",Pbasefuncpar);
+
+    Pbasefuncmodulation=xml->getpar127("base_function_modulation",Pbasefuncmodulation);
+    Pbasefuncmodulationpar1=xml->getpar127("base_function_modulation_par1",Pbasefuncmodulationpar1);
+    Pbasefuncmodulationpar2=xml->getpar127("base_function_modulation_par2",Pbasefuncmodulationpar2);
+
 
     Pwaveshaping=xml->getpar127("wave_shaping",Pwaveshaping);
     Pwaveshapingfunction=xml->getpar127("wave_shaping_function",Pwaveshapingfunction);

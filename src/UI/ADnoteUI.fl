@@ -289,7 +289,7 @@ class ADOscilEditor {} {
   Function {make_window()} {} {
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor}
-      xywh {121 91 750 590} type Double hide
+      xywh {138 85 750 590} type Double hide
     } {
       Fl_Group oscildisplaygroup {
         xywh {15 5 360 300} box ENGRAVED_FRAME
@@ -359,13 +359,13 @@ oldosc->redraw();}
           code1 {osc->init(oscil,1,master);}
         } {}
         Fl_Choice {} {
-          label {Base Func.}
+          label {Base.F..}
           callback {oscil->Pcurrentbasefunc=(int) o->value();
 
 basefuncdisplaygroup->redraw();
 oscildisplaygroup->redraw();
 oldosc->redraw();}
-          xywh {445 280 90 20} down_box BORDER_BOX labelsize 12 textsize 12
+          xywh {380 285 90 15} down_box BORDER_BOX labelsize 10 align 5 textsize 12
           code0 {o->value(oscil->Pcurrentbasefunc);}
         } {
           menuitem {} {
@@ -431,7 +431,7 @@ oldosc->redraw();}
 basefuncdisplaygroup->redraw();
 oscildisplaygroup->redraw();
 oldosc->redraw();}
-          tooltip {Base Function Parameter} xywh {550 285 175 10} type {Horz Knob} box FLAT_BOX labelsize 10 align 5 minimum -64 maximum 63 step 1
+          tooltip {Base Function Parameter} xywh {475 285 135 15} type {Horz Knob} box FLAT_BOX labelsize 10 align 5 minimum -64 maximum 63 step 1
           code0 {o->value(oscil->Pbasefuncpar-64);}
         }
         Fl_Group {} {open
@@ -532,10 +532,10 @@ pthread_mutex_unlock(&master->mutex);
 
 oscildisplaygroup->redraw();
 oldosc->redraw();}
-        xywh {680 335 50 20} box THIN_UP_BOX labelfont 1 labelsize 12
+        xywh {680 340 50 20} box THIN_UP_BOX labelfont 1 labelsize 12
       }
       Fl_Group {} {
-        xywh {145 305 230 30} box ENGRAVED_BOX
+        xywh {145 305 185 30} box ENGRAVED_BOX
       } {
         Fl_Choice wshbutton {
           label {Wsh.}
@@ -608,7 +608,7 @@ oldosc->redraw();}
 //basefuncdisplaygroup->redraw();
 oscildisplaygroup->redraw();
 oldosc->redraw();}
-          tooltip {Waveshaping Parameter} xywh {230 315 140 10} type {Horz Knob} box FLAT_BOX labelsize 10 align 5 minimum -64 maximum 63 step 1
+          tooltip {Waveshaping Parameter} xywh {230 315 95 10} type {Horz Knob} box FLAT_BOX labelsize 10 align 5 minimum -64 maximum 63 step 1
           code0 {o->value(oscil->Pwaveshaping-64);}
         }
       }
@@ -617,14 +617,14 @@ oldosc->redraw();}
         tooltip {Auto clear when using the oscillator as base function} xywh {105 310 35 20} box THIN_UP_BOX value 1 labelfont 1 labelsize 10
       }
       Fl_Group {} {
-        xywh {375 305 160 30} box ENGRAVED_BOX
+        xywh {330 305 160 30} box ENGRAVED_BOX
       } {
         Fl_Choice fltbutton {
           label Filter
           callback {oscil->Pfiltertype=(int) o->value();
 oscildisplaygroup->redraw();
 oldosc->redraw();}
-          tooltip {Oscillator's filter type} xywh {405 310 50 20} down_box BORDER_BOX labelsize 10 textsize 10
+          tooltip {Oscillator's filter type} xywh {360 310 50 20} down_box BORDER_BOX labelsize 10 textsize 10
           code0 {o->value(oscil->Pfiltertype);}
         } {
           menuitem {} {
@@ -676,7 +676,7 @@ oldosc->redraw();}
           callback {oscil->Pfilterpar=(int)o->value();
 oscildisplaygroup->redraw();
 oldosc->redraw();}
-          tooltip {Oscillator's filter parameter} xywh {460 310 20 20} maximum 127 step 1
+          tooltip {Oscillator's filter parameter} xywh {415 310 20 20} maximum 127 step 1
           code0 {o->value(oscil->Pfilterpar);}
           class WidgetPDial
         }
@@ -685,7 +685,7 @@ oldosc->redraw();}
           callback {oscil->Pfilterbeforews=(int)o->value();
 oscildisplaygroup->redraw();
 oldosc->redraw();}
-          tooltip {Apply the filter before the waveshaping} xywh {490 310 35 20} down_box DOWN_BOX labelsize 10 align 24
+          tooltip {Apply the filter before the waveshaping} xywh {445 310 35 20} down_box DOWN_BOX labelsize 10 align 24
           code0 {o->value(oscil->Pfilterbeforews);}
         }
       }
@@ -697,43 +697,54 @@ oldosc->redraw();}
           code0 {for (int i=0;i<MAX_AD_HARMONICS;i++){h[i]=new ADOscilharmonic(0,0,20,o->h(),"");h[i]->init(oscil,i,oscildisplaygroup,oldosc,master);}}
         } {}
       }
-      Fl_Group {} {
-        xywh {535 305 120 30} box ENGRAVED_BOX
+      Fl_Group {} {open
+        xywh {615 278 115 25} box ENGRAVED_BOX
       } {
-        Fl_Choice sabutton {
-          label {Sp.adj.}
-          callback {oscil->Psatype=(int) o->value();
+        Fl_Choice {} {
+          label {M.}
+          callback {oscil->Pbasefuncmodulation=(int) o->value();
+basefuncdisplaygroup->redraw();
 oscildisplaygroup->redraw();
 oldosc->redraw();} open
-          tooltip {Oscillator's spectrum adjust} xywh {575 310 50 20} down_box BORDER_BOX labelsize 10 textsize 10
-          code0 {o->value(oscil->Psatype);}
+          tooltip {Oscillator's modulation} xywh {635 283 50 15} down_box BORDER_BOX labelsize 10 textsize 10
+          code0 {o->value(oscil->Pbasefuncmodulation);}
         } {
           menuitem {} {
             label None
             xywh {45 45 100 20} labelfont 1 labelsize 10
           }
           menuitem {} {
-            label Pow
+            label Rev
             xywh {55 55 100 20} labelfont 1 labelsize 10
           }
           menuitem {} {
-            label Thrs
+            label Sine
             xywh {65 65 100 20} labelfont 1 labelsize 10
           }
         }
         Fl_Dial {} {
-          callback {oscil->Psapar=(int)o->value();
+          callback {oscil->Pbasefuncmodulationpar1=(int)o->value();
+basefuncdisplaygroup->redraw();
+oscildisplaygroup->redraw();
+oldosc->redraw();} selected
+          tooltip {Oscillator's modulation parameter 1} xywh {690 283 15 15} maximum 127 step 1
+          code0 {o->value(oscil->Pbasefuncmodulationpar1);}
+          class WidgetPDial
+        }
+        Fl_Dial {} {
+          callback {oscil->Pbasefuncmodulationpar2=(int)o->value();
+basefuncdisplaygroup->redraw();
 oscildisplaygroup->redraw();
 oldosc->redraw();}
-          tooltip {Oscillator's spectrum adjust parameter} xywh {630 310 20 20} maximum 127 step 1
-          code0 {o->value(oscil->Psapar);}
+          tooltip {Oscillator's modulation parameter 1} xywh {710 283 15 15} maximum 127 step 1
+          code0 {o->value(oscil->Pbasefuncmodulationpar2);}
           class WidgetPDial
         }
       }
       Fl_Choice {} {
         label Normalize
-        callback {oscil->Pnormalizemethod=(int) o->value();} open selected
-        tooltip {Normalize type (harmonic's sum/RMS) of the oscillator} xywh {680 370 60 20} down_box BORDER_BOX labelsize 10 align 5 textsize 10
+        callback {oscil->Pnormalizemethod=(int) o->value();}
+        tooltip {Normalize type (harmonic's sum/RMS) of the oscillator} xywh {680 375 60 20} down_box BORDER_BOX labelsize 10 align 5 textsize 10
         code0 {o->value(oscil->Pnormalizemethod);}
       } {
         menuitem {} {
@@ -747,6 +758,39 @@ oldosc->redraw();}
         menuitem {} {
           label {F.RMS}
           xywh {85 85 100 20} labelfont 1 labelsize 10
+        }
+      }
+      Fl_Group {} {
+        xywh {490 305 120 30} box ENGRAVED_BOX
+      } {
+        Fl_Choice sabutton {
+          label {Sp.adj.}
+          callback {oscil->Psatype=(int) o->value();
+oscildisplaygroup->redraw();
+oldosc->redraw();} open
+          tooltip {Oscillator's spectrum adjust} xywh {530 310 50 20} down_box BORDER_BOX labelsize 10 textsize 10
+          code0 {o->value(oscil->Psatype);}
+        } {
+          menuitem {} {
+            label None
+            xywh {55 55 100 20} labelfont 1 labelsize 10
+          }
+          menuitem {} {
+            label Pow
+            xywh {65 65 100 20} labelfont 1 labelsize 10
+          }
+          menuitem {} {
+            label Thrs
+            xywh {75 75 100 20} labelfont 1 labelsize 10
+          }
+        }
+        Fl_Dial {} {
+          callback {oscil->Psapar=(int)o->value();
+oscildisplaygroup->redraw();
+oldosc->redraw();}
+          tooltip {Oscillator's spectrum adjust parameter} xywh {585 310 20 20} maximum 127 step 1
+          code0 {o->value(oscil->Psapar);}
+          class WidgetPDial
         }
       }
     }
