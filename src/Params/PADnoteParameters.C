@@ -139,7 +139,9 @@ void PADnoteParameters::deletesamples(){
     for (int i=0;i<PAD_MAX_SAMPLES;i++) deletesample(i);
 };
 
-
+/*
+ * Get the harmonic profile (i.e. the frequency distributio of a single harmonic)
+ */
 REALTYPE PADnoteParameters::getprofile(REALTYPE *smp,int size){
     for (int i=0;i<size;i++) smp[i]=0.0;
     const int supersample=16;
@@ -156,6 +158,7 @@ REALTYPE PADnoteParameters::getprofile(REALTYPE *smp,int size){
 
 	REALTYPE origx=x;
 
+	//compute the full profile or one half
 	switch(Php.onehalf){
 	    case 1:x=x*0.5+0.5;
 		break;
@@ -166,11 +169,11 @@ REALTYPE PADnoteParameters::getprofile(REALTYPE *smp,int size){
 	REALTYPE x_before_freq_mult=x;
     
 	x*=freqmult;
-	
+	//do the modulation of the profile
 	x+=sin(x_before_freq_mult*3.1415926*modfreq)*modpar1;
 	x=fmod(x+1000.0,1.0)*2.0-1.0;
 
-
+	//this is the base function of the profile
 	REALTYPE f;
 	switch (Php.base.type){
 	    case 1:f=exp(-(x*x)*basepar);if (f<0.4) f=0.0; else f=1.0;
@@ -183,6 +186,7 @@ REALTYPE PADnoteParameters::getprofile(REALTYPE *smp,int size){
 	
 	REALTYPE amp=1.0;
 	origx=origx*2.0-1.0;
+	//compute the amplitude multiplier
 	switch(Php.amp.type){
 	    case 1:amp=exp(-(origx*origx)*10.0*amppar1);
 		break;
@@ -191,7 +195,8 @@ REALTYPE PADnoteParameters::getprofile(REALTYPE *smp,int size){
 	    case 3:amp=1.0/(pow(origx*(amppar1*2.0+0.8),14.0)+1.0);
 		break;
 	};
-	
+
+	//apply the amplitude multiplier	
 	REALTYPE finalsmp=f;
 	if (Php.amp.type!=0){
 	    switch(Php.amp.mode){
@@ -205,11 +210,10 @@ REALTYPE PADnoteParameters::getprofile(REALTYPE *smp,int size){
 		    break;
 	    };
 	};
-	
 	smp[i/supersample]+=finalsmp/supersample;
     };    
 
-    //normalize
+    //normalize the profile (make the max. to be equal to 1.0)
     REALTYPE max=0.0;
     for (int i=0;i<size;i++) {
 	if (smp[i]<0.0) smp[i]=0.0;
@@ -232,6 +236,10 @@ REALTYPE PADnoteParameters::getprofile(REALTYPE *smp,int size){
     return(result);
 };
 
+/*
+ * Compute the real bandwidth in cents and returns it
+ * Also, sets the bandwidth parameter
+ */
 REALTYPE PADnoteParameters::setPbandwidth(int Pbandwidth){
     this->Pbandwidth=Pbandwidth;
     REALTYPE result=pow(Pbandwidth/1000.0,1.1);
@@ -239,6 +247,9 @@ REALTYPE PADnoteParameters::setPbandwidth(int Pbandwidth){
     return(result);
 };
 
+/*
+ * Get the harmonic(overtone) position
+ */
 REALTYPE PADnoteParameters::getNhr(int n){
     REALTYPE result=1.0;
     REALTYPE par1=pow(10.0,-(1.0-Phrpos.par1/255.0)*3.0);
@@ -283,11 +294,15 @@ REALTYPE PADnoteParameters::getNhr(int n){
     return(result);
 };
 
+/*
+ * Generates the long spectrum (only amplitudes are generated; phases will be random)
+ */
 void PADnoteParameters::generatespectrum(REALTYPE *spectrum, int size,REALTYPE basefreq,REALTYPE *profile,int profilesize,REALTYPE bwadjust){
     for (int i=0;i<size;i++) spectrum[i]=0.0;
     
     REALTYPE harmonics[OSCIL_SIZE/2];
     for (int i=0;i<OSCIL_SIZE/2;i++) harmonics[i]=0.0;
+    //get the harmonic structure from the oscillator (I am using the frequency amplitudes, only)
     oscilgen->get(harmonics,basefreq,false);
 
     //normalize
@@ -296,12 +311,13 @@ void PADnoteParameters::generatespectrum(REALTYPE *spectrum, int size,REALTYPE b
     if (max<0.000001) max=1;
     for (int i=0;i<OSCIL_SIZE/2;i++) harmonics[i]/=max;
     
-    for (int nh=1;nh<OSCIL_SIZE/2;nh++){
+    for (int nh=1;nh<OSCIL_SIZE/2;nh++){//for each harmonic
 	REALTYPE realfreq=getNhr(nh)*basefreq;
 	if (realfreq>SAMPLE_RATE*0.49999) break;
 	if (realfreq<20.0) break;
 	if (harmonics[nh-1]<1e-4) continue;
 
+	//compute the bandwidth of each harmonic
 	REALTYPE bandwidthcents=setPbandwidth(Pbandwidth);
 	REALTYPE bw=(pow(2.0,bandwidthcents/1200.0)-1.0)*basefreq/bwadjust;
 	REALTYPE power=1.0;
@@ -320,8 +336,8 @@ void PADnoteParameters::generatespectrum(REALTYPE *spectrum, int size,REALTYPE b
 
 	REALTYPE amp=harmonics[nh-1];
 	if (resonance->Penabled) amp*=resonance->getfreqresponse(realfreq);
-
-	if (ibw>profilesize){
+	
+	if (ibw>profilesize){//if the bandwidth is larger than the profilesize
 	    REALTYPE rap=sqrt((REALTYPE)profilesize/(REALTYPE)ibw);
 	    int cfreq=(int) (realfreq/(SAMPLE_RATE*0.5)*size)-ibw/2;
 	    for (int i=0;i<ibw;i++){
@@ -331,8 +347,7 @@ void PADnoteParameters::generatespectrum(REALTYPE *spectrum, int size,REALTYPE b
 		if (spfreq>=size) break;
 		spectrum[spfreq]+=amp*profile[src]*rap;
 	    };
-	}else{
-	
+	}else{//if the bandwidth is smaller than the profilesize
 	    REALTYPE rap=sqrt((REALTYPE)ibw/(REALTYPE)profilesize);
 	    REALTYPE ibasefreq=realfreq/(SAMPLE_RATE*0.5)*size;
 	    for (int i=0;i<profilesize;i++){
@@ -345,10 +360,11 @@ void PADnoteParameters::generatespectrum(REALTYPE *spectrum, int size,REALTYPE b
 	    };
 	};
     };
-
-//for (int i=0;i<size;i++) printf("%d %g\n",i,spectrum[i]);
 };
 
+/*
+ * Applies the parameters (i.e. computes all the samples, based on parameters);
+ */
 void PADnoteParameters::applyparameters(bool lockmutex){
     const int samplesize=(((int) 1)<<(Pquality.samplesize+14));
     int spectrumsize=samplesize/2;
@@ -370,30 +386,29 @@ void PADnoteParameters::applyparameters(bool lockmutex){
 	else samplemax=samplemax/2+1;
     if (samplemax==0) samplemax=1;
     
-//    printf("samplemax=%d\n",samplemax);
-    
+    //prepare a BIG FFT stuff
     FFTwrapper *fft=new FFTwrapper(samplesize);
     
-    REALTYPE adj[samplemax];
+    REALTYPE adj[samplemax];//this is used to compute frequency relation to the base frequency
     for (int nsample=0;nsample<samplemax;nsample++) adj[nsample]=(Pquality.oct+1.0)*(REALTYPE)nsample/samplemax;
     for (int nsample=0;nsample<samplemax;nsample++){
 	REALTYPE tmp=adj[nsample]-adj[samplemax-1]*0.5;
 	REALTYPE basefreqadjust=pow(2.0,tmp);
-//	printf("%g\n",basefreqadjust*basefreq);
+
         generatespectrum(spectrum,spectrumsize,basefreq*basefreqadjust,profile,profilesize,bwadjust);
 
-	const int extra_samples=3;//the last samples contains the first samples (used for interpolation)
+	const int extra_samples=3;//the last samples contains the first samples (used for linear/cubic interpolation)
         newsample.smp=new REALTYPE[samplesize+extra_samples];
     
-	for (int i=0;i<spectrumsize;i++){
+	for (int i=0;i<spectrumsize;i++){//makes the phases as random
 	    REALTYPE phase=RND*6.29;
 	    newsample.smp[i]=spectrum[i]*cos(phase);
 	    newsample.smp[samplesize-1-i]=spectrum[i]*sin(phase);
 	};
-	fft->freqs2smps(newsample.smp,newsample.smp);
+	fft->freqs2smps(newsample.smp,newsample.smp);//that's all; here is the single ifft for the whole sample; no windows are used :-)
+	
 
-    
-        //normalize
+        //normalize(rms)
 	REALTYPE rms=0.0;
         for (int i=0;i<samplesize;i++) rms+=newsample.smp[i]*newsample.smp[i];
 	rms=sqrt(rms);
@@ -401,9 +416,10 @@ void PADnoteParameters::applyparameters(bool lockmutex){
 	rms*=sqrt(262144.0/samplesize);
         for (int i=0;i<samplesize;i++) newsample.smp[i]*=1.0/rms*100.0;
     
-	//prepare extra samples
+	//prepare extra samples used by the linear or cubic interpolation
         for (int i=0;i<extra_samples;i++) newsample.smp[i+samplesize]=newsample.smp[i];
 
+	//replace the current sample with the new computed sample
 	if (lockmutex){
 	    pthread_mutex_lock(mutex);
 	     deletesample(nsample);
@@ -421,9 +437,8 @@ void PADnoteParameters::applyparameters(bool lockmutex){
     };
     delete(fft);
     
+    //delete the additional samples that might exists and are not usefull
     for (int i=samplemax;i<PAD_MAX_SAMPLES;i++) deletesample(i);
-    
-//    for (int i=0;i<samplesize;i++) printf("%3f \n",sample.smp[i]);
     
 };
 

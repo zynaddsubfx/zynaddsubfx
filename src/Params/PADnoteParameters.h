@@ -48,37 +48,38 @@ class PADnoteParameters{
 	REALTYPE getprofile(REALTYPE *smp,int size);
 	
 	//parameters
+	
+	//Harmonic profile (the frequency distribution of a single harmonic)
 	struct {
-	    struct{
+	    struct{//base function 
 		unsigned char type;
 		unsigned char par1;
 	    }base;
-	    unsigned char freqmult;
-	    struct{
+	    unsigned char freqmult;//frequency multiplier of the distribution
+	    struct{//the modulator of the distribution 
 		unsigned char par1;
 		unsigned char freq;
 	    }modulator;
-	    struct{
+	    struct{//the amplitude multiplier of the harmonic profile
 		unsigned char mode;
 		unsigned char type;
 		unsigned char par1;
 		unsigned char par2;
 	    }amp;
-	    bool autoscale;
-	    unsigned char onehalf;
+	    bool autoscale;//if the scale of the harmonic profile is computed automaticaly
+	    unsigned char onehalf;//what part of the base function is used to make the distribution
 	}Php;
 
 	
 	unsigned int Pbandwidth;//the values are from 0 to 1000 
-	unsigned char Pbwscale;
+	unsigned char Pbwscale;//how the bandwidth is increased according to the harmonic's frequency
 	
-	struct{
+	struct{//where are positioned the harmonics (on integer multimplier or different places)
 	    unsigned char type;
 	    unsigned char par1,par2,par3;//0..255
 	}Phrpos;
 
-	
-	struct {
+	struct {//quality of the samples (how many samples, the length of them,etc.)
 	    unsigned char samplesize;
 	    unsigned char basenote,oct,smpoct;
 	} Pquality;
