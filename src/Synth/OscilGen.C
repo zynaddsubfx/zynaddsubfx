@@ -410,7 +410,7 @@ void OscilGen::oscilfilter(){
     max=sqrt(max);
     if (max<1e-10) max=1.0;
     REALTYPE imax=1.0/max;
-    for (int i=1;i<OSCIL_SIZE;i++) {
+    for (int i=1;i<OSCIL_SIZE/2;i++) {
 	oscilFFTfreqs.s[i]*=imax; 
 	oscilFFTfreqs.c[i]*=imax; 
     };
@@ -566,7 +566,7 @@ void OscilGen::spectrumadjust(){
     };
     REALTYPE max=0.0;
     for (int i=0;i<OSCIL_SIZE/2;i++){ 
-	REALTYPE tmp=pow(oscilFFTfreqs.s[i],2)+pow(oscilFFTfreqs.s[i],2.0);
+	REALTYPE tmp=pow(oscilFFTfreqs.c[i],2)+pow(oscilFFTfreqs.s[i],2.0);
 	if (max<tmp) max=tmp;
     };
     max=sqrt(max);
@@ -574,7 +574,7 @@ void OscilGen::spectrumadjust(){
     
     for (int i=0;i<OSCIL_SIZE/2;i++){
         REALTYPE mag=sqrt(pow(oscilFFTfreqs.s[i],2)+pow(oscilFFTfreqs.c[i],2.0))/max;
-	REALTYPE phase=atan2(oscilFFTfreqs.c[i],oscilFFTfreqs.s[i]);
+	REALTYPE phase=atan2(oscilFFTfreqs.s[i],oscilFFTfreqs.c[i]);
 	
 	switch (Psatype){
 	    case 1: mag=pow(mag,par);
@@ -671,8 +671,8 @@ void OscilGen::prepare(){
    };
    if (Pcurrentbasefunc==0) {//the sine case
 	for (i=0;i<MAX_AD_HARMONICS;i++){
-	    oscilFFTfreqs.s[i+1]=-hmag[i]*sin(hphase[i]*(i+1))/2.0;
-	    oscilFFTfreqs.c[i+1]=hmag[i]*cos(hphase[i]*(i+1))/2.0;
+	    oscilFFTfreqs.c[i+1]=-hmag[i]*sin(hphase[i]*(i+1))/2.0;
+	    oscilFFTfreqs.s[i+1]=hmag[i]*cos(hphase[i]*(i+1))/2.0;
 	};
    } else {
 	for (j=0;j<MAX_AD_HARMONICS;j++){
