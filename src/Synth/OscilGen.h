@@ -92,6 +92,10 @@ class OscilGen{
 	unsigned char Pamprandpower, Pamprandtype;//amplitude randomness
 	int Pharmonicshift;//how the harmonics are shifted
 	int Pharmonicshiftfirst;//if the harmonic shift is done before waveshaping and filter
+
+	unsigned char Padaptiveharmonics;//the adaptive harmonics status (off=0,on=1)
+	unsigned char Padaptiveharmonicsbasefreq;//the base frequency of the adaptive harmonic (30..3000Hz)
+	unsigned char Padaptiveharmonicspower;//the strength of the effect (0=off,100=full)
 	
     private:
 	
@@ -112,6 +116,9 @@ class OscilGen{
 	//Shift the harmonics
 	void shiftharmonics();
     
+	//Do the adaptive harmonic stuff
+	void adaptiveharmonic(REALTYPE *freqs,REALTYPE freq);
+	
         //Base function saveto/loadfrom quantised data
 	void savebasefuncQ();
 	void loadbasefuncQ();

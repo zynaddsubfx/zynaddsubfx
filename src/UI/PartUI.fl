@@ -255,9 +255,9 @@ delete(partkititem);} {}
   decl {PartUI_ *partui;} {}
 } 
 
-class PartUI {: {public Fl_Group,PartUI_}
+class PartUI {open : {public Fl_Group,PartUI_}
 } {
-  Function {make_window()} {private
+  Function {make_window()} {open private
   } {
     Fl_Window partgroup {
       private xywh {149 400 385 180} type Double hide
@@ -823,86 +823,86 @@ subsynenabledcheck->value(part->kit[0].Psubenabled);}
       }
     }
     Fl_Window instrumenteditwindow {
-      label {Instrument Edit}
-      xywh {60 156 395 465} type Double hide
+      label {Instrument Edit} selected
+      xywh {60 156 395 360} type Double hide
     } {
       Fl_Group {} {
-        xywh {0 320 395 110} box ENGRAVED_FRAME
+        xywh {0 220 395 110} box ENGRAVED_FRAME
       } {
         Fl_Group {} {
           label PADsynth
-          xywh {205 345 100 80} box ENGRAVED_FRAME labelfont 1
+          xywh {205 245 100 80} box ENGRAVED_FRAME labelfont 1
         } {
           Fl_Button {} {
             label Edit
             callback {//showparameters(0,1);
 fl_alert("Oops... try again...")}
-            xywh {215 380 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 12 align 128
+            xywh {215 280 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 12 align 128
           }
           Fl_Check_Button padsynenabledcheck {
             label Enabled
             callback {//part->kit[0].Padenabled=(int) o->value();}
-            tooltip {enable/disable PADsynth} xywh {215 355 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
+            tooltip {enable/disable PADsynth} xywh {215 255 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
             code1 {//o->value(part->kit[0].Padenabled);}
           }
         }
         Fl_Group {} {
           label ADDsynth
-          xywh {5 345 100 80} box ENGRAVED_FRAME labelfont 1
+          xywh {5 245 100 80} box ENGRAVED_FRAME labelfont 1
         } {
           Fl_Check_Button adsynenabledcheck {
             label Enabled
             callback {part->kit[0].Padenabled=(int) o->value();}
-            tooltip {enable/disable ADsynth} xywh {15 355 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
+            tooltip {enable/disable ADsynth} xywh {15 255 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
             code1 {o->value(part->kit[0].Padenabled);}
           }
           Fl_Button {} {
             label Edit
             callback {showparameters(0,0);}
-            xywh {15 381 80 34} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 12 align 128
+            xywh {15 281 80 34} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 12 align 128
           }
         }
         Fl_Group {} {
           label SUBsynth
-          xywh {105 345 100 80} box ENGRAVED_FRAME labelfont 1
+          xywh {105 245 100 80} box ENGRAVED_FRAME labelfont 1
         } {
           Fl_Check_Button subsynenabledcheck {
             label Enabled
             callback {part->kit[0].Psubenabled=(int) o->value();}
-            tooltip {enable/disable SUBsynth} xywh {115 355 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
+            tooltip {enable/disable SUBsynth} xywh {115 255 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
             code1 {o->value(part->kit[0].Psubenabled);}
           }
           Fl_Button {} {
             label Edit
             callback {showparameters(0,1);}
-            xywh {115 380 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 12 align 128
+            xywh {115 280 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 12 align 128
           }
         }
         Fl_Button {} {
           label {Kit Edit}
           callback {instrumentkitlist->show();}
-          xywh {310 345 80 35} box PLASTIC_UP_BOX color 238 selection_color 220 labelfont 1 align 128
+          xywh {310 245 80 35} box PLASTIC_UP_BOX color 238 selection_color 220 labelfont 1 align 128
         }
         Fl_Button {} {
           label Effects
           callback {partfx->show();}
-          xywh {310 390 80 35} box PLASTIC_UP_BOX labelfont 1 labelsize 16
+          xywh {310 290 80 35} box PLASTIC_UP_BOX labelfont 1 labelsize 16
         }
       }
-      Fl_Group {} {selected
-        xywh {0 5 395 315} box ENGRAVED_FRAME
+      Fl_Group {} {
+        xywh {0 5 395 215} box ENGRAVED_FRAME
       } {
         Fl_Input {} {
           label {Author and Copyright}
           callback {snprintf((char *)part->info.Pauthor,MAX_INFO_TEXT_SIZE,"%s",o->value());}
-          xywh {5 60 385 100} type Multiline labelsize 10 align 5
+          xywh {5 60 385 50} type Multiline color 26 labelsize 10 align 5
           code0 {o->maximum_size(MAX_INFO_TEXT_SIZE);}
           code1 {o->value((char *) &part->info.Pauthor);}
         }
         Fl_Input {} {
           label Comments
           callback {snprintf((char *)part->info.Pcomments,MAX_INFO_TEXT_SIZE,"%s",o->value());}
-          xywh {5 175 385 140} type Multiline labelsize 12 align 5
+          xywh {5 125 385 90} type Multiline color 26 labelsize 12 align 5
           code0 {o->maximum_size(MAX_INFO_TEXT_SIZE);}
           code1 {o->value((char *) &part->info.Pcomments);}
         }
@@ -985,7 +985,7 @@ fl_alert("Oops... try again...")}
       Fl_Button {} {
         label Close
         callback {instrumenteditwindow->hide();}
-        xywh {150 435 95 25} box THIN_UP_BOX
+        xywh {150 335 95 25} box THIN_UP_BOX
       }
     }
   }

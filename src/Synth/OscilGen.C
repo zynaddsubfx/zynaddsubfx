@@ -82,6 +82,10 @@ void OscilGen::defaults(){
     
     Pharmonicshift=0;
     Pharmonicshiftfirst=0;
+
+    Padaptiveharmonics=0;
+    Padaptiveharmonicspower=100;
+    Padaptiveharmonicsbasefreq=128;
     
     if (basefuncFFTfreqsQ!=NULL) {
 	delete(basefuncFFTfreqsQ);
@@ -571,6 +575,65 @@ void OscilGen::prepare(){
    oscilprepared=1;
 };
 
+void OscilGen::adaptiveharmonic(REALTYPE *freqs,REALTYPE freq){
+    if ((Padaptiveharmonics==0)||(freq<1.0)) return;
+
+    REALTYPE *infreqs=new REALTYPE[OSCIL_SIZE];
+    for (int i=0;i<OSCIL_SIZE;i++) {
+	infreqs[i]=freqs[i];
+	freqs[i]=0.0;
+    };
+    
+    REALTYPE hc=0.0,hs=0.0;
+    REALTYPE basefreq=30.0*pow(10.0,Padaptiveharmonicsbasefreq/128.0);
+    REALTYPE power=(Padaptiveharmonicspower+1.0)/101.0;
+    
+    REALTYPE rap=freq/basefreq;
+
+    rap=pow(rap,power);
+
+//    printf("bf=%g (%d) pow=%g(%d)\n",basefreq,Padaptiveharmonicsbasefreq,power,Padaptiveharmonicspower);
+    
+    bool down=false;
+    if (rap>1.0) {
+	rap=1.0/rap;
+	down=true;
+    };
+    
+    for (int i=0;i<OSCIL_SIZE/2-2;i++){ 
+	REALTYPE h=i*rap;
+        int high=(int)(i*rap);
+	REALTYPE low=fmod(h,1.0);
+
+        if (high>=(OSCIL_SIZE/2-2)){
+	    break;
+	} else {
+	    if (down){
+		freqs[high+1]+=infreqs[i+1];
+		freqs[OSCIL_SIZE-high-1]+=infreqs[OSCIL_SIZE-i-1];
+	    } else {
+		hc=infreqs[high+1]*(1.0-low)+infreqs[high+2]*low;
+		hs=infreqs[OSCIL_SIZE-high-1]*(1.0-low)+infreqs[OSCIL_SIZE-high-2]*low;
+	    };
+	    if (fabs(hc)<0.000001) hc=0.0;
+	    if (fabs(hs)<0.000001) hs=0.0;
+	};
+	
+	if (!down){    
+	    if (i==0) {//corect the aplitude of the first harmonic
+		hc*=rap;
+		hs*=rap;
+	    };
+	    freqs[i+1]=hc;
+	    freqs[OSCIL_SIZE-i-1]=hs;
+	};
+    };
+    
+    delete(infreqs);
+};
+
+
+
 /* 
  * Get the oscillator function
  */
@@ -618,10 +681,13 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
 
     //Anti-Aliasing ON
     outoscilFFTfreqs=new REALTYPE[OSCIL_SIZE];
+    for (i=0;i<OSCIL_SIZE;i++) outoscilFFTfreqs[i]=0.0;
+
     nyquist=(int)(0.5*SAMPLE_RATE/fabs(freqHz))+2;
     if (nyquist>OSCIL_SIZE/2) nyquist=OSCIL_SIZE/2;
+    int realnyquist=nyquist;
     
-    for (i=0;i<OSCIL_SIZE;i++) outoscilFFTfreqs[i]=0.0;
+    if (Padaptiveharmonics!=0) nyquist=OSCIL_SIZE/2;
 
     // Randomness (each harmonic), the block type is computed 
     // in ADnote by setting start position according to this setting
@@ -643,6 +709,16 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
 	    outoscilFFTfreqs[OSCIL_SIZE-i]=oscilFFTfreqs[OSCIL_SIZE-i];
 	};
     };
+
+    adaptiveharmonic(outoscilFFTfreqs,freqHz);
+    nyquist=realnyquist;
+    if (Padaptiveharmonics){//do the antialiasing in the case of adaptive harmonics
+        for (i=nyquist;i<OSCIL_SIZE/2;i++) {
+	    outoscilFFTfreqs[i]=0;
+	    outoscilFFTfreqs[OSCIL_SIZE-i]=0;
+	};
+    };
+
 
     //Harmonic Amplitude Randomness
     if (freqHz>0.1) {
@@ -983,6 +1059,10 @@ void OscilGen::add2XML(XMLwrapper *xml){
     xml->addpar("harmonic_shift",Pharmonicshift);
     xml->addparbool("harmonic_shift_first",Pharmonicshiftfirst);
 
+    xml->addpar("adaptive_harmonics",Padaptiveharmonics);
+    xml->addpar("adaptive_harmonics_base_frequency",Padaptiveharmonicsbasefreq);
+    xml->addpar("adaptive_harmonics_power",Padaptiveharmonicspower);
+
     xml->beginbranch("HARMONICS");
 	for (int n=0;n<MAX_AD_HARMONICS;n++){
 	    if ((Phmag[n]==64)&&(Phphase[n]==64)) continue;
@@ -1045,6 +1125,11 @@ void OscilGen::getfromXML(XMLwrapper *xml){
 
     Pharmonicshift=xml->getpar("harmonic_shift",Pharmonicshift,-64,64);
     Pharmonicshiftfirst=xml->getparbool("harmonic_shift_first",Pharmonicshiftfirst);
+
+    Padaptiveharmonics=xml->getpar("adaptive_harmonics",Padaptiveharmonics,0,127);
+    Padaptiveharmonicsbasefreq=xml->getpar("adaptive_harmonics_base_frequency",Padaptiveharmonicsbasefreq,0,255);
+    Padaptiveharmonicspower=xml->getpar("adaptive_harmonics_power",Padaptiveharmonicspower,0,100);
+
 
     if (xml->enterbranch("HARMONICS")){
 	Phmag[0]=64;Phphase[0]=64;
