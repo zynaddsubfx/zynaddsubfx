@@ -285,12 +285,6 @@ bankui->show();}
           code0 {o->value(master->part[npart]->Ppanning);}
           class WidgetPDial
         }
-        Fl_Counter partrcv {
-          callback {master->part[npart]->Prcvchn=(int) o->value();}
-          xywh {15 215 40 15} type Simple minimum 0 maximum 16 step 1
-          code0 {o->bounds(0,NUM_MIDI_CHANNELS-1);}
-          code1 {o->value(master->part[npart]->Prcvchn);}
-        }
         Fl_Button {} {
           label edit
           callback {if ((int)bankui->cbwig->value()!=npart){
@@ -299,6 +293,12 @@ bankui->show();}
 };}
           xywh {15 235 40 20} box PLASTIC_UP_BOX labelsize 10
         }
+        Fl_Choice partrcv {
+          callback {master->part[npart]->Prcvchn=(int) o->value();} open selected
+          tooltip {receive from Midi channel} xywh {10 213 50 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+          code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Ch%d",i+1);if (i!=9) o->add(nrstr); else o->add("Dr10");};}
+          code1 {o->value(master->part[npart]->Prcvchn);}
+        } {}
       }
       Fl_Check_Button partenabled {
         label 01
@@ -770,7 +770,7 @@ pthread_mutex_unlock(&master->mutex);}
       } {
         Fl_Group {} {
           label {System Effects} open
-          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25 hide
+          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25
         } {
           Fl_Counter syseffnocounter {
             label {Sys.Effect No.}
@@ -851,7 +851,7 @@ swapeffwindow->show();}
         }
         Fl_Group {} {
           label {Insertion Effects}
-          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25
+          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25 hide
         } {
           Fl_Button {} {
             label {Swap/Copy...}
@@ -875,7 +875,7 @@ if (master->Pinsparts[ninseff]!=-1) {
 	insefftype->deactivate();
  	inseffectui->deactivate();
         inseffectuigroup->deactivate();
-};} selected
+};}
             xywh {5 120 80 20} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 127 step 1 textfont 1
             code0 {o->bounds(0,NUM_INS_EFX-1);}
             code1 {o->value(ninseff);}
@@ -1154,7 +1154,7 @@ swapeffwindow->hide();}
     }
     Fl_Window panelwindow {
       label {ZynAddSubFX Panel}
-      xywh {4 20 632 635} type Double hide
+      xywh {4 20 630 635} type Double hide
     } {
       Fl_Scroll {} {open
         xywh {0 5 570 310} type HORIZONTAL box THIN_UP_BOX
