@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0105 
+version 1.0104 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -911,8 +911,8 @@ redrawoscil();} open
         Fl_Dial adhrpow {
           label pow
           callback {oscil->Padaptiveharmonicspower=(int)o->value();
-redrawoscil();}
-          tooltip {Adaptive harmonics power} xywh {710 455 25 25} labelsize 10 maximum 100 step 1
+redrawoscil();} selected
+          tooltip {Adaptive harmonics power} xywh {710 455 25 25} labelsize 10 maximum 200 step 1
           class WidgetPDial
         }
         Fl_Dial adhrbf {
@@ -985,12 +985,12 @@ refresh();}
       }
       Fl_Button {} {
         label C
-        callback {presetsui->copy(oscil);} selected
+        callback {presetsui->copy(oscil);}
         xywh {680 545 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
       }
       Fl_Button {} {
         label P
-        callback {presetsui->paste(oscil,this);} selected
+        callback {presetsui->paste(oscil,this);}
         xywh {710 545 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
       }
     }

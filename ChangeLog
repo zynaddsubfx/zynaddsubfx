@@ -738,5 +738,6 @@
 	    - Corectata o mica eroare la OscilGen cu adaptive harmonics care facea ca energia vechilor armonice sa nu se adauge in mod corect la noile armonice (la note inalte)
 	    - Sortarea nu mai este quicksort la bank si la presets pt. ca am vazut ca nu merge in windows intotdeauna
 	    - Corectata o eroare la egalizator care facea ca sa se aplice si la el par. D/W
-	    
+29 Nov 2004 - Marita zona de valori la adaptive harmonics power din OscilGen 
+
 	    

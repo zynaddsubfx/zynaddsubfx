@@ -1085,7 +1085,7 @@ void OscilGen::getfromXML(XMLwrapper *xml){
 
     Padaptiveharmonics=xml->getpar("adaptive_harmonics",Padaptiveharmonics,0,127);
     Padaptiveharmonicsbasefreq=xml->getpar("adaptive_harmonics_base_frequency",Padaptiveharmonicsbasefreq,0,255);
-    Padaptiveharmonicspower=xml->getpar("adaptive_harmonics_power",Padaptiveharmonicspower,0,100);
+    Padaptiveharmonicspower=xml->getpar("adaptive_harmonics_power",Padaptiveharmonicspower,0,200);
 
 
     if (xml->enterbranch("HARMONICS")){
