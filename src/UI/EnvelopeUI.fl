@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0105 
+version 1.0104 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -210,8 +210,7 @@ envfree=NULL;} {}
     code {envwindow->hide();
 hide();
 freemodeeditwindow->hide();
-delete (freemodeeditwindow);} {selected
-    }
+delete (freemodeeditwindow);} {}
   }
   Function {make_freemode_edit_window()} {} {
     Fl_Window freemodeeditwindow {
@@ -224,7 +223,7 @@ delete (freemodeeditwindow);} {selected
         code0 {o->init(env);}
         class EnvelopeFreeEdit
       }
-      Fl_Button {} {
+      Fl_Button addpoint {
         label {Add point}
         callback {int curpoint=freeedit->lastpoint;
 if (curpoint<0) return;
@@ -252,7 +251,7 @@ sustaincounter->maximum(env->Penvpoints-2);}
         xywh {115 155 80 20} box THIN_UP_BOX
         code0 {if (env->Pfreemode==0) o->hide();}
       }
-      Fl_Button {} {
+      Fl_Button deletepoint {
         label {Delete point}
         callback {int curpoint=freeedit->lastpoint;
 if (curpoint<1) return;
@@ -723,13 +722,9 @@ freemodeeditwindow->hide();
 envwindow->hide();
 Fl_Group *par=envwindow->parent();
 par->hide();
-//par->remove(envwindow);
-//delete (envwindow);
 
 
 refresh();
-//par->add(envwindow);
-//par->end();
 envwindow->show();
 par->redraw();
 
@@ -738,8 +733,16 @@ show();
 freemodeeditwindow->position(winx,winy);
 freemodeeditwindow->show();
 
-if (env->Pfreemode!=0) freemodebutton->value(1);
-        else freemodebutton->value(0);} {}
+if (env->Pfreemode!=0) {
+	freemodebutton->value(1);
+	addpoint->show();
+	deletepoint->show();
+}else{
+	freemodebutton->value(0);
+	addpoint->hide();
+	deletepoint->hide();
+};} {selected
+    }
   }
   Function {refresh()} {} {
     code {freemodebutton->value(env->Pfreemode);
