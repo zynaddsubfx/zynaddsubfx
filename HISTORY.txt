@@ -1,3 +1,7 @@
+2.0.0_pre2 (31 Iul 2004)
+	- Updated the XMLwrapper to mxml-2.0
+	- Many bugfixes
+	- Other 
 2.0.0_pre1 (17 Iul 2004)
 	- Added a new powerful synth engine which is called PADsynth, you can make very beautifull pads and even some strange sounds
 	- Now is used the XML format for all zynaddsubfx parameters(.XMZ for master parameters, .XIZ for instrument parameters and .XSZ for scale parameters).You can import older parameters. All parameters files are compressed with gzip algorithm.
