@@ -714,4 +714,4 @@
 07 Sep 2004 - Modificat id-ul vst in 'zasf' (inainte era de 5 litere si poate cauza un crash la host)
 27 Sep 2004 - Corectat un mic bug la salvare in xml la parametrul FMcoarseDetune din adnote
 	    - La VST, daca incerc sa inchid fereastra principala, se minimizeaza	    
-	    
+	    - Eliminate setarile cu indice '0' (zero) 

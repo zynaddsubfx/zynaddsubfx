@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0105 
+version 1.0104 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -55,7 +55,7 @@ class ADvoicelistitem {: {public Fl_Group}
   Function {make_window()} {private
   } {
     Fl_Window ADnoteVoiceListItem {
-      private xywh {335 489 615 27} type Double hide
+      private xywh {335 489 615 30} type Double hide
       class Fl_Group
     } {
       Fl_Group voicelistitemgroup {
@@ -126,9 +126,9 @@ detunevalueoutput->do_callback();}
         callback {pars->VoicePar[nvoice].Enabled=(int)o->value();
 if (o->value()==0) voicelistitemgroup->deactivate();
 else voicelistitemgroup->activate();
-o->redraw();}
+o->redraw();} selected
         private xywh {30 5 20 20} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 4
-        code0 {char tmp[10];snprintf(tmp,10,"%d",nvoice);o->label(strdup(tmp));}
+        code0 {char tmp[10];snprintf(tmp,10,"%d",nvoice+1);o->label(strdup(tmp));}
         code1 {o->value(pars->VoicePar[nvoice].Enabled);}
       }
     }
@@ -305,7 +305,7 @@ o->redraw();}
                 code2 {oscFM->init(pars->VoicePar[nv].FMSmp,0,pars->VoicePar[nvoice].PFMoscilphase,master);}
               } {}
               Fl_Box {} {
-                label {Mod.Oscillator} selected
+                label {Mod.Oscillator}
                 xywh {535 365 155 20} labelfont 1 align 20
               }
               Fl_Button changeFMoscilbutton {
@@ -340,7 +340,7 @@ if ((int) o->value() != 0) {
 voiceFMparametersgroup->redraw();} open
                 xywh {560 390 75 15} down_box BORDER_BOX labelsize 10 textfont 1 textsize 10
                 code0 {o->add("Internal");}
-                code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"ExtM.%2d",i);o->add(tmp);};}
+                code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"ExtM.%2d",i+1);o->add(tmp);};}
                 code3 {o->value(pars->VoicePar[nvoice].PextFMoscil+1);}
               } {}
             }
@@ -357,7 +357,7 @@ if ((int) o->value() != 0) {
 voiceFMparametersgroup->redraw();} open
               xywh {635 40 85 20} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
               code0 {o->add("OFF");}
-              code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"ExtMod.%2d",i);o->add(tmp);};}
+              code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"ExtMod.%2d",i+1);o->add(tmp);};}
               code2 {o->value(pars->VoicePar[nvoice].PFMVoice+1);}
               code3 {if ((int) o->value() != 0) {modoscil->deactivate();modfrequency->deactivate();}}
             } {}
@@ -543,7 +543,7 @@ voiceparametersgroup->redraw();
 voiceonbutton->redraw();} open
             xywh {5 455 65 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
             code0 {o->add("Internal");}
-            code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"Ext.%2d",i);o->add(tmp);};}
+            code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"Ext.%2d",i+1);o->add(tmp);};}
             code3 {o->value(pars->VoicePar[nvoice].Pextoscil+1);}
           } {}
         }
@@ -656,7 +656,7 @@ o->redraw();}
         Fl_Group {} {
           label 01
           xywh {5 5 55 35} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 30 align 16
-          code0 {char tmp[10];snprintf(tmp,10,"%d",nvoice);o->label(strdup(tmp));}
+          code0 {char tmp[10];snprintf(tmp,10,"%d",nvoice+1);o->label(strdup(tmp));}
         } {}
         Fl_Choice {} {
           callback {int x=(int) o->value();
@@ -960,9 +960,14 @@ resui->resonancewindow->show();}
         code1 {o->show();}
         class ADvoiceUI
       } {}
+      Fl_Button {} {
+        label {Close Window}
+        callback {ADnoteVoice->hide();}
+        xywh {300 530 195 25} box THIN_UP_BOX labelfont 1
+      }
       Fl_Counter currentvoicecounter {
         label {Current Voice}
-        callback {nvoice=(int)o->value();
+        callback {nvoice=(int)o->value()-1;
 advoice->hide();
 ADnoteVoice->remove(advoice);
 delete advoice;
@@ -971,13 +976,8 @@ ADnoteVoice->add(advoice);
 advoice->init(pars,nvoice,master);
 advoice->show();
 ADnoteVoice->redraw();}
-        xywh {5 530 130 25} type Simple labelfont 1 align 8 minimum 0 maximum 0 step 1 textfont 1 textsize 18
-        code0 {o->bounds(0,NUM_VOICES-1);}
-      }
-      Fl_Button {} {
-        label {Close Window}
-        callback {ADnoteVoice->hide();}
-        xywh {300 530 195 25} box THIN_UP_BOX labelfont 1
+        xywh {5 530 130 25} type Simple labelfont 1 align 8 minimum 0 maximum 2 step 1 value 1 textfont 1 textsize 18
+        code0 {o->bounds(1,NUM_VOICES);}
       }
       Fl_Button {} {
         label C

@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0105 
+version 1.0104 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -93,7 +93,7 @@ class PartKitItem {: {public Fl_Group}
   Function {make_window()} {private
   } {
     Fl_Window partkititem {
-      private xywh {113 271 670 27} type Double hide
+      private xywh {113 271 670 30} type Double hide
       class Fl_Group
     } {
       Fl_Group partkititemgroup {
@@ -210,9 +210,9 @@ if (o->value()==0) partkititemgroup->deactivate();
 else partkititemgroup->activate();
 o->redraw();
 partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0
-} else o->value(1);}
+} else o->value(1);} selected
         private xywh {30 0 20 15} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 4
-        code0 {snprintf(label,10,"%d",n);o->label(strdup(label));}
+        code0 {snprintf(label,10,"%d",n+1);o->label(strdup(label));}
         code1 {o->value(part->kit[n].Penabled);}
         code2 {if (n==0) o->deactivate();}
       }
@@ -276,7 +276,7 @@ end();} {}
 
 class PartUI {: {public Fl_Group,PartUI_}
 } {
-  Function {make_window()} {selected private
+  Function {make_window()} {private
   } {
     Fl_Window partgroup {
       private xywh {107 533 385 180} type Double hide

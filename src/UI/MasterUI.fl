@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0105 
+version 1.0104 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -228,7 +228,7 @@ labelsize(10);
 align(FL_ALIGN_TOP);
 
 value(master->Psysefxsend[neff1][neff2]);
-char tmp[20];snprintf(tmp,20,"%d->%d",neff1,neff2);this->label(strdup(tmp));} {}
+char tmp[20];snprintf(tmp,20,"%d->%d",neff1+1,neff2+1);this->label(strdup(tmp));} {}
   }
   Function {~SysEffSend()} {} {
     code {hide();} {}
@@ -318,9 +318,9 @@ if ((int) o->value()==0) panellistitemgroup->deactivate();
     };
 };
 
-o->redraw();}
+o->redraw();} selected
         private xywh {5 0 45 20} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 24
-        code0 {char tmp[10];snprintf(tmp,10,"%d",npart);o->label(strdup(tmp));}
+        code0 {char tmp[10];snprintf(tmp,10,"%d",npart+1);o->label(strdup(tmp));}
         code1 {o->value(master->part[npart]->Penabled);}
       }
     }
@@ -379,7 +379,7 @@ if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
       xywh {188 182 390 465} type Double hide
       code0 {setfilelabel(NULL);} non_modal
     } {
-      Fl_Menu_Bar mastermenu {selected
+      Fl_Menu_Bar mastermenu {
         xywh {0 0 690 25}
       } {
         submenu {} {
@@ -699,12 +699,12 @@ pthread_mutex_unlock(&master->mutex);}
         } {
           Fl_Counter syseffnocounter {
             label {Sys.Effect No.}
-            callback {nsyseff=(int) o->value();
+            callback {nsyseff=(int) o->value()-1;
 sysefftype->value(master->sysefx[nsyseff]->geteffect());
 syseffectui->refresh(master->sysefx[nsyseff]);}
-            xywh {5 120 80 20} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 127 step 1 textfont 1
-            code0 {o->bounds(0,NUM_SYS_EFX-1);}
-            code1 {o->value(nsyseff);}
+            xywh {5 120 80 20} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
+            code0 {o->bounds(1,NUM_SYS_EFX);}
+            code1 {o->value(nsyseff+1);}
           }
           Fl_Choice sysefftype {
             label EffType
@@ -785,7 +785,7 @@ pthread_mutex_unlock(&master->mutex);}
         } {
           Fl_Counter inseffnocounter {
             label {Ins.Effect No.}
-            callback {ninseff=(int) o->value();
+            callback {ninseff=(int) o->value()-1;
 insefftype->value(master->insefx[ninseff]->geteffect());
 inseffpart->value(master->Pinsparts[ninseff]+2);
 inseffectui->refresh(master->insefx[ninseff]);
@@ -799,9 +799,9 @@ if (master->Pinsparts[ninseff]!=-1) {
  	inseffectui->deactivate();
         inseffectuigroup->deactivate();
 };}
-            xywh {5 120 80 20} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 127 step 1 textfont 1
-            code0 {o->bounds(0,NUM_INS_EFX-1);}
-            code1 {o->value(ninseff);}
+            xywh {5 120 80 20} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
+            code0 {o->bounds(1,NUM_INS_EFX);}
+            code1 {o->value(ninseff+1);}
           }
           Fl_Choice insefftype {
             label EffType
@@ -876,7 +876,7 @@ if ((int) o->value()==1){
 master->insefx[ninseff]->cleanup();} open
             xywh {95 120 80 20} down_box BORDER_BOX labelfont 1 labelsize 10 align 5 textsize 10
             code0 {o->add("Master Out");o->add("Off");}
-            code1 {char tmp[50]; for (int i=0;i<NUM_MIDI_PARTS;i++) {sprintf(tmp,"Part %2d",i);o->add(tmp);};}
+            code1 {char tmp[50]; for (int i=0;i<NUM_MIDI_PARTS;i++) {sprintf(tmp,"Part %2d",i+1);o->add(tmp);};}
             code3 {o->value(master->Pinsparts[ninseff]+2);}
           } {}
           Fl_Button {} {
@@ -956,18 +956,19 @@ mastermenu->redraw();}
         code0 {o->value(master->ctl.NRPN.receive);}
       }
       Fl_Counter npartcounter {
-        callback {partuigroup->remove(partui);
+        callback {int nval=(int) o->value()-1;
+partuigroup->remove(partui);
 delete partui;
 partui=new PartUI(0,0,765,525);
 partuigroup->add(partui);
-partui->init(master->part[(int) o->value()],master,(int) o->value(),bankui);
+partui->init(master->part[nval],master,nval,bankui);
 partui->redraw();
 o->redraw();
-npart=(int) o->value();
+npart=nval;
 
 updatepanel();}
-        tooltip {The part number} xywh {5 247 70 23} type Simple labelfont 1 minimum 0 maximum 127 step 1 textfont 1
-        code0 {o->bounds(0,NUM_MIDI_PARTS-1);}
+        tooltip {The part number} xywh {5 247 70 23} type Simple labelfont 1 minimum 0 maximum 127 step 1 value 1 textfont 1
+        code0 {o->bounds(1,NUM_MIDI_PARTS);}
         code1 {bankui->init(o);}
       }
       Fl_Button {} {

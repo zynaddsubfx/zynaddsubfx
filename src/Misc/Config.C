@@ -190,7 +190,7 @@ void Config::readConfig(char *filename){
     if (xmlcfg->loadXMLfile(filename)<0) return;
     if (xmlcfg->enterbranch("CONFIGURATION")){
 	cfg.SampleRate=xmlcfg->getpar("sample_rate",cfg.SampleRate,4000,1024000);
-	cfg.SoundBufferSize=xmlcfg->getpar("sound_buffer_size",cfg.SoundBufferSize,2,8192);
+	cfg.SoundBufferSize=xmlcfg->getpar("sound_buffer_size",cfg.SoundBufferSize,16,8192);
 	cfg.OscilSize=xmlcfg->getpar("oscil_size",cfg.OscilSize,MAX_AD_HARMONICS*2,131072);
 	cfg.SwapStereo=xmlcfg->getpar("swap_stereo",cfg.SwapStereo,0,1);
 	cfg.BankUIAutoClose=xmlcfg->getpar("bank_window_auto_close",cfg.BankUIAutoClose,0,1);
