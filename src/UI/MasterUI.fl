@@ -398,6 +398,7 @@ if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
        mastervolumedial->value(master->Pvolume);       
        globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);
        microtonalui=new MicrotonalUI(&master->microtonal);
+       globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);
        updatesendwindow();
        setfilelabel(NULL);
 };
