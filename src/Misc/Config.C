@@ -78,7 +78,11 @@ Config::Config(){
 #endif
 
     cfg.bankRootDirList=new char[MAX_STRING_SIZE];
-    sprintf(cfg.bankRootDirList,"./\n/tmp\n~/paul");
+#if defined(OS_LINUX)
+    sprintf(cfg.bankRootDirList,"./\n/usr/share/zynaddsubfx/banks\n/usr/local/share/zynaddsubfx/banks");
+#else
+    sprintf(cfg.bankRootDirList,"./");
+#endif
     cfg.currentBankDir=new char[MAX_STRING_SIZE];
     sprintf(cfg.currentBankDir,"./testbnk");
     

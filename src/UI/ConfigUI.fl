@@ -30,22 +30,20 @@ decl {\#include "../Misc/Dump.h"} {public
 decl {extern Dump dump;} {public
 } 
 
-class ConfigUI {open
-} {
-  Function {make_window()} {open
-  } {
+class ConfigUI {} {
+  Function {make_window()} {} {
     Fl_Window configwindow {
       label {ZynAddSubFX Settings}
       callback {writebankcfg();
 o->hide();}
-      xywh {88 313 510 340} type Double visible
+      xywh {88 313 510 340} type Double hide
     } {
       Fl_Tabs {} {
         xywh {5 5 500 305}
       } {
         Fl_Group {} {
-          label {Main settings}
-          xywh {5 25 500 285} hide
+          label {Main settings} selected
+          xywh {5 25 500 285}
         } {
           Fl_Group {} {
             label {Sample Rate}
@@ -236,7 +234,7 @@ midiinputnamebox->label(config.winmididevices[config.cfg.WindowsMidiInId].name);
         }
         Fl_Group {} {
           label {Bank root dirs} open
-          xywh {5 25 500 285}
+          xywh {5 25 500 285} hide
         } {
           Fl_Browser rootsbrowse {
             callback {activatebutton_rootdir(o->value()!=0);}
@@ -283,13 +281,11 @@ writebankcfg();}
       }
     }
   }
-  Function {ConfigUI()} {open
-  } {
+  Function {ConfigUI()} {} {
     code {make_window();
 readbankcfg();} {}
   }
-  Function {activatebutton_rootdir(bool active)} {open
-  } {
+  Function {activatebutton_rootdir(bool active)} {} {
     code {if (active) {
 	removerootdirbutton->activate();
 	makedefaultrootdirbutton->activate();
@@ -319,16 +315,14 @@ while (start<dirlistlen){
 };
 delete(currentrootdir);} {}
   }
-  Function {writebankcfg()} {open
-  } {
+  Function {writebankcfg()} {} {
     code {char *str=config.cfg.bankRootDirList;
 str[0]='\\0';
 
 for (int n=1;n<rootsbrowse->size()+1;n++){
 	strncat(str,rootsbrowse->text(n),MAX_STRING_SIZE);
         strncat(str,"\\n",MAX_STRING_SIZE);
-};} {selected
-    }
+};} {}
   }
   Function {getsamplerateorder()} {return_type int
   } {

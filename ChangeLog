@@ -569,6 +569,7 @@
 06 Iun 2004 - Adaugata functia sigmoid la distorsionare
 12 Iun 2004 - Modificat modul cum este realizat bank-urile, adica directoarele de bank-uri exista in anumite directoare si aceste directoare sunt cautate automat de bankuri; adaugat optiunea de a se folosi mai multe bank-uri
 13 Iun 2004 - Adaugat filtrul "sinus" la OscilGen
-
+	    - Managementul bancilor de instrumente este (aproape) complet
+	    - Se cauta bancile si in '/usr/share/zynaddsubfx/banks' si '/usr/local/share/zynaddsubfx/banks'
 
 

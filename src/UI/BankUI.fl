@@ -156,9 +156,14 @@ refreshmainwindow();}
       }
       Fl_Button {} {
         label {New Bank...}
-        callback {char *dirname;
+        callback {const char *dirname;
+/*
 dirname=fl_dir_chooser("New empty Bank:",NULL,0);
 if (dirname==NULL) return;
+*/
+dirname=fl_input("New empty Bank:");
+if (dirname==NULL) return;
+
 
 int result=bank->newbank(dirname);
 
@@ -182,7 +187,7 @@ if (filename==NULL) return;
 master->exportbankasxmldirectory(filename);
 
 for (int i=0;i<128;i++) bs[i]->refresh();
-refreshmainwindow();}
+refreshmainwindow();} selected
         xywh {439 438 105 40} box PLASTIC_UP_BOX color 175 labelfont 1 labelsize 15 labelcolor 0 align 128
       }
       Fl_Choice banklist {
@@ -194,7 +199,7 @@ if (dirname==NULL) return;
 if (bank->loadbank(dirname)==2)
        fl_alert("Error: Could not load the bank from the directory\\n%s.",dirname);
 for (int i=0;i<128;i++) bs[i]->refresh();
-refreshmainwindow();} open selected
+refreshmainwindow();} open
         xywh {5 20 205 20} down_box BORDER_BOX labelfont 1 align 5 textfont 1 textsize 12
       } {}
       Fl_Button {} {

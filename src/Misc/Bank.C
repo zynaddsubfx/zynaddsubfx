@@ -37,6 +37,9 @@
 #define INSTRUMENT_EXTENSION ".xml"
 //.xzz
 
+//if this file exists into a directory, this make the directory to be considered as a bank, even if it not contains a instrument file
+#define FORCE_BANK_DIR_FILE ".bankdir"
+
 Bank::Bank(){
     memset(defaultinsname,0,PART_MAX_NAME_LEN);
     snprintf(defaultinsname,PART_MAX_NAME_LEN,"%s"," ");
@@ -325,10 +328,25 @@ int Bank::loadbank(const char *bankdirname){
  * Makes a new bank, put it on a file and makes it current bank
  */
 int Bank::newbank(const char *newbankdirname){
-    int result=mkdir(newbankdirname,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    int result;
+    char tmpfilename[MAX_STRING_SIZE];
+    char bankdir[MAX_STRING_SIZE];
+    snprintf(bankdir,MAX_STRING_SIZE,"%s",config.cfg.bankRootDirList);
+    for (int i=0;i<strlen(bankdir);i++) if (bankdir[i]<32) bankdir[i]=0;
+
+    if (((bankdir[strlen(bankdir)-1])!='/')&&((bankdir[strlen(bankdir)-1])!='\\')){
+	strncat(bankdir,"/",MAX_STRING_SIZE);
+    };
+    strncat(bankdir,newbankdirname,MAX_STRING_SIZE);
+    result=mkdir(bankdir,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     if (result<0) return(-1);
+
+    snprintf(tmpfilename,MAX_STRING_SIZE,"%s/%s",bankdir,FORCE_BANK_DIR_FILE);
+    printf("%s\n",tmpfilename);
+    FILE *tmpfile=fopen(tmpfilename,"w+");
+    fclose(tmpfile);
     
-    return(loadbank(newbankdirname));
+    return(loadbank(bankdir));
 };
 
 /*
@@ -416,7 +434,8 @@ void Bank::scanrootdir(char *rootdir){
 
 	while((fname=readdir(d))){
 	    if (fname->d_type!=DT_REG) continue;//this is not a regular file
-	    if (strstr(fname->d_name,INSTRUMENT_EXTENSION)!=NULL) {
+	    if ((strstr(fname->d_name,INSTRUMENT_EXTENSION)!=NULL)||
+	       (strstr(fname->d_name,FORCE_BANK_DIR_FILE)!=NULL)){
 		isbank=true;
 		break;//aici as putea pune in loc de break un update la un counter care imi arata nr. de instrumente din bank
 	    };
