@@ -86,7 +86,7 @@ void Buffer::rwbyte(unsigned char *b){
 void Buffer::rwbytepar(unsigned char npar,unsigned char *b){
     if (mode!=0) rwbyte(&npar);    
     rwbyte(b);
-    
+    if (mode==0) *b &= 0x7f;
 #ifdef DEBUG_BUFFER
     fprintf(stderr," ");
 #endif
