@@ -379,7 +379,7 @@ class MasterUI {open
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
-      xywh {555 26 390 465} type Double hide non_modal
+      xywh {555 26 390 465} type Double non_modal visible
     } {
       Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
@@ -588,6 +588,20 @@ if (result!=0) fl_alert("Error: Could not save the file.");}
             label {Show &Sequencer...}
             callback {sequi->show();}
             xywh {0 0 100 20}
+          }
+        }
+        submenu {} {
+          label Misc
+          xywh {10 10 100 20}
+        } {
+          menuitem {} {
+            label {Switch User Interface Mode}
+            callback {if (fl_ask("Switch the User Interface to Beginner mode ?")){
+	masterwindow->hide();
+	refresh_master_ui();
+	simplemasterwindow->show();
+};} selected
+            xywh {10 10 100 20}
           }
         }
       }
@@ -1010,7 +1024,7 @@ updatepanel();}
     Fl_Window selectuiwindow {
       label {User Interface mode}
       callback {*exitprogram=1;}
-      xywh {16 297 434 254} type Double hide
+      xywh {16 297 430 250} type Double hide
     } {
       Fl_Box {} {
         label {Welcome to ZynAddSubFX}
@@ -1021,7 +1035,7 @@ updatepanel();}
         xywh {10 50 265 25} labelfont 1 labelsize 16
       }
       Fl_Button {} {
-        label Expert
+        label Advanced
         callback {masterwindow->show();
 selectuiwindow->hide();}
         xywh {10 165 100 35} box PLASTIC_UP_BOX color 229 labelfont 1 labelsize 20
@@ -1052,44 +1066,177 @@ selectuiwindow->hide();}
     masterwindow->iconize();
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
-\#endif} open selected
-      xywh {20 184 600 335} type Double visible
+\#endif}
+      xywh {20 184 600 335} type Double hide
     } {
+      Fl_Menu_Bar {} {
+        xywh {0 0 690 25}
+      } {
+        submenu {} {
+          label {&File}
+          xywh {10 10 100 20}
+        } {
+          menuitem {} {
+            label {&New (erase all)...}
+            callback {do_new_master();}
+            xywh {30 30 100 20}
+          }
+          menuitem {} {
+            label {&Open Parameters...}
+            callback {do_load_master();}
+            xywh {30 30 100 20}
+          }
+          menuitem {} {
+            label {&Save All Parameters...}
+            callback {do_save_master();}
+            xywh {20 20 100 20} divider
+          }
+          menuitem {} {
+            label {&Settings...}
+            callback {configui->show();}
+            xywh {35 35 100 20} divider
+          }
+          menuitem {} {
+            label {&Copyright...}
+            callback {aboutwindow->show();}
+            xywh {25 25 100 20} divider
+          }
+          menuitem {} {
+            label {E&xit}
+            callback {masterwindow->do_callback();}
+            xywh {20 20 100 20}
+          }
+        }
+        submenu {} {
+          label {&Instrument}
+          xywh {20 20 100 20}
+        } {
+          menuitem {} {
+            label {&Open Instrument...}
+            callback {const char *filename;
+filename=fl_file_chooser("Load:","({*.xiz})",NULL,0);
+if (filename==NULL) return;
+
+
+pthread_mutex_lock(&master->mutex);
+//  int npart=(int)npartcounter->value()-1;
+
+  //clear all instrument parameters, first
+  master->part[npart]->defaultsinstrument();
+
+  //load the instr. parameters
+  int result=master->part[npart]->loadXMLinstrument(filename);
+
+pthread_mutex_unlock(&master->mutex);
+master->part[npart]->applyparameters();
+
+simplenpartcounter->do_callback();
+
+if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an instrument file.");
+      else if (result<0) fl_alert("Error: Could not load the file.");}
+            xywh {40 40 100 20}
+          }
+          menuitem {} {
+            label {Show Instrument &Bank...}
+            callback {bankui->show();}
+            xywh {10 10 100 20} divider
+          }
+        }
+        submenu {} {
+          label Misc
+          xywh {0 0 100 20}
+        } {
+          menuitem {} {
+            label {Switch User Interface Mode}
+            callback {if (fl_ask("Switch the User Interface to Advanced mode ?")){
+	simplemasterwindow->hide();
+	refresh_master_ui();
+	masterwindow->show();
+};}
+            xywh {0 0 100 20}
+          }
+        }
+      }
       Fl_Group simplelistitemgroup {
-        private xywh {140 60 200 155} box ENGRAVED_BOX
+        private xywh {140 65 200 150} box ENGRAVED_BOX
         code0 {if (master->part[npart]->Penabled==0) o->deactivate();}
       } {
         Fl_Button partname {
-          label {Click here to load a instrument}
           callback {if ((int)bankui->cbwig->value()!=(npart+1)){
    bankui->cbwig->value(npart+1);
    bankui->cbwig->do_callback();
 };
 bankui->show();}
-          xywh {160 72 160 18} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 10 align 208
+          xywh {145 72 190 18} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 12 align 208
         }
         Fl_Slider partpanning {
           label Pan
           callback {master->part[npart]->setPpanning((int) o->value());}
-          xywh {250 105 65 15} type {Horz Knob} box FLAT_BOX minimum 127 maximum 0 step 1 value 64
+          xywh {230 100 100 15} type {Horz Knob} box FLAT_BOX minimum 127 maximum 0 step 1 value 64
           code0 {o->value(master->part[npart]->Ppanning);}
         }
         Fl_Choice partrcv {
           label {Midi Channel Receive}
-          callback {master->part[npart]->Prcvchn=(int) o->value();} open
-          tooltip {receive from Midi channel} xywh {155 157 75 18} down_box BORDER_BOX labelsize 13 align 130 textfont 1
+          callback {master->part[npart]->Prcvchn=(int) o->value();
+virkeys->midich=(int) o->value();} open
+          tooltip {receive from Midi channel} xywh {150 157 75 18} down_box BORDER_BOX labelsize 13 align 130 textfont 1
           code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Ch%d",i+1);if (i!=9) o->add(nrstr); else o->add("Dr10");};}
           code1 {o->value(master->part[npart]->Prcvchn);}
         } {}
         Fl_Dial partvolume {
           callback {master->part[npart]->setPvolume((int) o->value());}
-          xywh {160 115 30 30} maximum 127 step 1
+          xywh {165 100 30 30} maximum 127 step 1
           code0 {o->value(master->part[npart]->Pvolume);}
           class WidgetPDial
         }
         Fl_Box {} {
           label Volume
-          xywh {155 95 60 15}
+          xywh {150 130 60 15}
+        }
+        Fl_Check_Button simplepartportamento {
+          label Portamento
+          callback {master->part[npart]->ctl.portamento.portamento=(int) o->value();}
+          tooltip {Enable/Disable the portamento} xywh {230 130 85 20} down_box DOWN_BOX labelfont 1 labelsize 12
+          code0 {o->value(master->part[npart]->ctl.portamento.portamento);}
+        }
+        Fl_Counter simpleminkcounter {
+          label {Min.key}
+          callback {master->part[npart]->Pminkey=(int) o->value();
+if (master->part[npart]->Pminkey>master->part[npart]->Pmaxkey) o->textcolor(FL_RED);
+ else o->textcolor(FL_BLACK);}
+          tooltip {Minimum key (that the part receives NoteOn messages)} xywh {245 158 40 15} type Simple labelfont 1 labelsize 10 minimum 0 maximum 127 step 1 textsize 10
+          code0 {o->value(master->part[npart]->Pminkey);}
+        }
+        Fl_Counter simplemaxkcounter {
+          label {Max.key}
+          callback {master->part[npart]->Pmaxkey=(int) o->value();
+
+if (master->part[npart]->Pminkey>master->part[npart]->Pmaxkey) o->textcolor(FL_RED);
+ else o->textcolor(FL_BLACK);}
+          tooltip {Maximum key (that the part receives NoteOn messages)} xywh {290 158 40 15} type Simple labelfont 1 labelsize 10 minimum 0 maximum 127 step 1 textsize 10
+          code0 {o->value(master->part[npart]->Pmaxkey);}
+        }
+        Fl_Button {} {
+          label m
+          callback {if (master->part[npart]->lastnote>=0) simpleminkcounter->value(master->part[npart]->lastnote);
+simpleminkcounter->do_callback();
+simplemaxkcounter->do_callback();}
+          tooltip {set the minimum key to the last pressed key} xywh {265 188 15 12} box THIN_UP_BOX labelsize 10
+        }
+        Fl_Button {} {
+          label M
+          callback {if (master->part[npart]->lastnote>=0) simplemaxkcounter->value(master->part[npart]->lastnote);
+simplemaxkcounter->do_callback();
+simpleminkcounter->do_callback();}
+          tooltip {set the maximum key to the last pressed key} xywh {295 188 15 12} box THIN_UP_BOX labelsize 10
+        }
+        Fl_Button {} {
+          label R
+          callback {simpleminkcounter->value(0);
+simpleminkcounter->do_callback();
+simplemaxkcounter->value(127);
+simplemaxkcounter->do_callback();}
+          tooltip {reset the minimum key to 0 and maximum key to 127} xywh {280 188 15 12} box THIN_UP_BOX labelfont 1 labelsize 10
         }
       }
       Fl_Check_Button partenabled {
@@ -1320,7 +1467,7 @@ pthread_mutex_unlock(&master->mutex);}
       } {
         Fl_Box {} {
           label {VU-Meter}
-          xywh {5 300 590 30} box FLAT_BOX color 48 selection_color 75
+          xywh {5 300 590 30} box FLAT_BOX color 41 selection_color 75
           code0 {o->init(master,-1);}
           class VUMeter
         }
@@ -1328,14 +1475,14 @@ pthread_mutex_unlock(&master->mutex);}
       Fl_Dial simplemastervolumedial {
         label {Master Volume}
         callback {master->setPvolume((int) o->value());}
-        tooltip {Master Volume} xywh {20 65 40 40} box ROUND_UP_BOX labelfont 1 labelsize 12 align 130 maximum 127 step 1
+        tooltip {Master Volume} xywh {10 35 40 40} box ROUND_UP_BOX labelfont 1 labelsize 12 align 130 maximum 127 step 1
         code0 {o->value(master->Pvolume);}
         class WidgetPDial
       }
       Fl_Counter simplemasterkeyshiftcounter {
         label {Master KeyShift}
         callback {master->setPkeyshift((int) o->value()+64);}
-        xywh {25 140 90 20} labelsize 12 minimum -64 maximum 64 step 1
+        xywh {25 110 90 20} labelsize 12 minimum -64 maximum 64 step 1
         code0 {o->lstep(12);}
         code1 {o->value(master->Pkeyshift-64);}
       }
@@ -1345,105 +1492,39 @@ pthread_mutex_unlock(&master->mutex);}
 pthread_mutex_lock(&master->mutex);
 master->shutup=1;
 pthread_mutex_unlock(&master->mutex);}
-        xywh {5 179 130 31} box PLASTIC_UP_BOX color 231 labelfont 1
+        xywh {5 149 130 31} box PLASTIC_UP_BOX color 231 labelfont 1
       }
       Fl_Button {} {
         label Reset
         callback {simpleglobalfinedetuneslider->value(64.0);
 simpleglobalfinedetuneslider->do_callback();}
-        tooltip {Master fine detune reset} xywh {90 60 45 15} box THIN_UP_BOX labelfont 1 labelsize 12 align 128
+        tooltip {Master fine detune reset} xywh {70 95 50 10} box THIN_UP_BOX labelfont 1 labelsize 12 align 128
       }
       Fl_Dial simpleglobalfinedetuneslider {
         label {Fine Detune}
         callback {master->microtonal.Pglobalfinedetune=(int) o->value();}
-        tooltip {global fine detune} xywh {95 80 30 30} box ROUND_UP_BOX labelsize 12 align 130 maximum 127 step 1 value 64
+        tooltip {global fine detune} xywh {80 35 30 30} box ROUND_UP_BOX labelsize 12 align 130 maximum 127 step 1 value 64
         code0 {o->value(master->microtonal.Pglobalfinedetune);}
         class WidgetPDial
       }
-      Fl_Counter {} {
+      Fl_Counter simplenpartcounter {
         label Part
         callback {npartcounter->value(o->value());
 npart=(int) o->value()-1;
 
-simplerefresh();}
+simplerefresh();
+virkeys->midich=master->part[npart]->Prcvchn;}
         tooltip {The part number} xywh {170 40 70 20} type Simple labelfont 1 align 4 minimum 0 maximum 127 step 1 value 1 textfont 1
         code0 {o->bounds(1,NUM_MIDI_PARTS);}
         code1 {bankui->init(o);}
       }
-      Fl_Menu_Bar {} {open
-        xywh {0 0 690 25}
-      } {
-        submenu {} {
-          label {&File} open
-          xywh {10 10 100 20}
-        } {
-          menuitem {} {
-            label {&New (erase all)...}
-            callback {do_new_master();}
-            xywh {30 30 100 20}
-          }
-          menuitem {} {
-            label {&Open Parameters...}
-            callback {do_load_master();}
-            xywh {30 30 100 20}
-          }
-          menuitem {} {
-            label {&Save All Parameters...}
-            callback {do_save_master();}
-            xywh {20 20 100 20} divider
-          }
-          menuitem {} {
-            label {&Settings...}
-            callback {configui->show();}
-            xywh {35 35 100 20} divider
-          }
-          menuitem {} {
-            label {&Copyright...}
-            callback {aboutwindow->show();}
-            xywh {25 25 100 20} divider
-          }
-          menuitem {} {
-            label {E&xit}
-            callback {masterwindow->do_callback();}
-            xywh {20 20 100 20}
-          }
-        }
-        submenu {} {
-          label {&Instrument} open
-          xywh {20 20 100 20}
-        } {
-          menuitem {} {
-            label {&Open Instrument...}
-            callback {const char *filename;
-filename=fl_file_chooser("Load:","({*.xiz})",NULL,0);
-if (filename==NULL) return;
-
-
-pthread_mutex_lock(&master->mutex);
-//  int npart=(int)npartcounter->value()-1;
-
-  //clear all instrument parameters, first
-  master->part[npart]->defaultsinstrument();
-
-  //load the instr. parameters
-  int result=master->part[npart]->loadXMLinstrument(filename);
-
-pthread_mutex_unlock(&master->mutex);
-master->part[npart]->applyparameters();
-
-npartcounter->do_callback();
-updatepanel();
-
-if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an instrument file.");
-      else if (result<0) fl_alert("Error: Could not load the file.");}
-            xywh {40 40 100 20}
-          }
-          menuitem {} {
-            label {Show Instrument &Bank...}
-            callback {bankui->show();}
-            xywh {10 10 100 20} divider
-          }
-        }
+      Fl_Counter {} {
+        label {Keyb.Oct.}
+        callback {virkeys->relaseallkeys(0);
+virkeys->midioct=(int) o->value();
+virkeys->take_focus();}
+        tooltip {Midi Octave} xywh {5 195 55 20} type Simple labelsize 12 align 8 when 6 minimum 0 maximum 5 step 1 textfont 1 textsize 12
+        code0 {o->value(virkeys->midioct);}
       }
     }
   }
@@ -1452,21 +1533,19 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an
   for (int neff2=neff1+1;neff2<NUM_SYS_EFX;neff2++)
     syseffsend[neff1][neff2]->value(master->Psysefxsend[neff1][neff2]);} {}
   }
-  Function {setfilelabel(const char *filename)} {open
-  } {
+  Function {updatepanel()} {} {
+    code {for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
+  panellistitem[npart]->refresh();
+};} {}
+  }
+  Function {setfilelabel(const char *filename)} {} {
     code {if (filename!=NULL) snprintf(&masterwindowlabel[0],100,"%s - ZynAddSubFX",fl_filename_name(filename));
   else snprintf(&masterwindowlabel[0],100,"%s","ZynAddSubFX (c)2002-2004 Nasca O. Paul");
 masterwindowlabel[99]='\\0';
 masterwindow->label(&masterwindowlabel[0]);
 simplemasterwindow->label(&masterwindowlabel[0]);} {}
   }
-  Function {updatepanel()} {} {
-    code {for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
-  panellistitem[npart]->refresh();
-};} {}
-  }
-  Function {MasterUI(Master *master_,int *exitprogram_)} {open
-  } {
+  Function {MasterUI(Master *master_,int *exitprogram_)} {} {
     code {master=master_;
 exitprogram=exitprogram_;
 ninseff=0;
@@ -1486,7 +1565,8 @@ sequi=new SeqUI(master);
 make_window();
 presetsui=new PresetsUI();
 setfilelabel(NULL);
-swapefftype=0;} {}
+swapefftype=0;
+simplerefresh();} {}
   }
   Function {~MasterUI()} {} {
     code {masterwindow->hide();
@@ -1519,17 +1599,15 @@ partvolume->value(master->part[npart]->Pvolume);
 partpanning->value(master->part[npart]->Ppanning);
 partrcv->value(master->part[npart]->Prcvchn);
 
-partname->label((char *)master->part[npart]->Pname);
-/*
-if ((int)bankui->cbwig->value()!=(npart+1))
-   simplelistitemgroup->color(fl_rgb_color(160,160,160));
-else 
-   simplelistitemgroup->color(fl_rgb_color(50,190,240));
-*/
-simplelistitemgroup->redraw();} {}
+if (master->part[npart]->Pname[0]!=0) partname->label((char *)master->part[npart]->Pname);
+	else partname->label("Click here to load a instrument");
+
+simplelistitemgroup->redraw();
+simplepartportamento->value(master->part[npart]->ctl.portamento.portamento);
+simpleminkcounter->value(master->part[npart]->Pminkey);
+simplemaxkcounter->value(master->part[npart]->Pmaxkey);} {}
   }
-  Function {do_new_master()} {open
-  } {
+  Function {do_new_master()} {} {
     code {if (fl_ask("Clear *ALL* the parameters ?")){
        delete microtonalui;
 
@@ -1543,8 +1621,7 @@ simplelistitemgroup->redraw();} {}
 
 updatepanel();} {}
   }
-  Function {do_load_master()} {open
-  } {
+  Function {do_load_master()} {} {
     code {char *filename;
 filename=fl_file_chooser("Open:","({*.xmz})",NULL,0);
 if (filename==NULL) return;
@@ -1592,7 +1669,12 @@ updatepanel();} {}
   }
   Function {refresh_master_ui()} {open
   } {
-    code {npartcounter->do_callback();
+    code {ninseff=0;
+nsyseff=0;
+npart=0;
+
+//the Master UI
+npartcounter->do_callback();
 syseffnocounter->do_callback();
 inseffnocounter->do_callback();
 masterkeyshiftcounter->value(master->Pkeyshift-64);
@@ -1600,10 +1682,20 @@ mastervolumedial->value(master->Pvolume);
 globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);   
 microtonalui=new MicrotonalUI(&master->microtonal);
 nrpnbutton->value(master->ctl.NRPN.receive);
-globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);
 updatesendwindow();
+updatepanel();
 
-updatepanel();} {}
+//the simle MasterUI
+simplenpartcounter->value(1);
+simplesyseffnocounter->value(1);
+simpleinseffnocounter->value(1);
+simplenpartcounter->do_callback();
+simplesyseffnocounter->do_callback();
+simpleinseffnocounter->do_callback();
+simplemasterkeyshiftcounter->value(master->Pkeyshift-64);
+simplemastervolumedial->value(master->Pvolume);    
+simpleglobalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);
+virkeys->midich=master->part[npart]->Prcvchn;} {}
   }
   decl {Master *master;} {}
   decl {MicrotonalUI *microtonalui;} {}
