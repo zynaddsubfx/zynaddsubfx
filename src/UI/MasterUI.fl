@@ -367,7 +367,8 @@ panellistitemgroup->redraw();} {}
   decl {BankUI *bankui;} {}
 } 
 
-class MasterUI {} {
+class MasterUI {selected
+} {
   Function {make_window()} {} {
     Fl_Window masterwindow {
       label zynaddsubfx
@@ -1154,7 +1155,7 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an
 	refresh_master_ui();
 	masterwindow->show();
 	config.cfg.UserInterfaceMode=1;
-};} selected
+};}
             xywh {0 0 100 20}
           }
         }
@@ -1179,7 +1180,8 @@ bankui->show();}
         }
         Fl_Choice partrcv {
           label {Midi Channel Receive}
-          callback {master->part[npart]->Prcvchn=(int) o->value();
+          callback {virkeys->relaseallkeys(0);
+master->part[npart]->Prcvchn=(int) o->value();
 virkeys->midich=(int) o->value();} open
           tooltip {receive from Midi channel} xywh {150 157 75 18} down_box BORDER_BOX labelsize 13 align 130 textfont 1
           code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Ch%d",i+1);if (i!=9) o->add(nrstr); else o->add("Dr10");};}
@@ -1511,7 +1513,8 @@ simpleglobalfinedetuneslider->do_callback();}
       }
       Fl_Counter simplenpartcounter {
         label Part
-        callback {npartcounter->value(o->value());
+        callback {virkeys->relaseallkeys(0);
+npartcounter->value(o->value());
 npart=(int) o->value()-1;
 
 simplerefresh();
