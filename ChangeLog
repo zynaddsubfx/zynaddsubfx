@@ -571,5 +571,7 @@
 13 Iun 2004 - Adaugat filtrul "sinus" la OscilGen
 	    - Managementul bancilor de instrumente este (aproape) complet
 	    - Se cauta bancile si in '/usr/share/zynaddsubfx/banks' si '/usr/local/share/zynaddsubfx/banks'
+	    - Corectata o eroare la filter la OscilGen care filtra diferit componentele sin si cos
+	    
 
 

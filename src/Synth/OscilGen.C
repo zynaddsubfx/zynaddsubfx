@@ -266,7 +266,7 @@ void OscilGen::oscilfilter(){
     if (Pfiltertype==0) return;
     REALTYPE par=1.0-Pfilterpar/128.0;
     REALTYPE max=0.0;
-    for (int i=0;i<OSCIL_SIZE/2-1;i++){
+    for (int i=1;i<OSCIL_SIZE/2-1;i++){
 	REALTYPE gain=1.0;
 	switch(Pfiltertype){
 	    case 1: gain=pow(1.0-par*par*par,i);//lp
@@ -302,8 +302,8 @@ void OscilGen::oscilfilter(){
 		   gain*=gain;
 		   break;
 	};
-	oscilFFTfreqs[OSCIL_SIZE-i-1]*=gain;
-	oscilFFTfreqs[i+1]*=gain;
+	oscilFFTfreqs[OSCIL_SIZE-i]*=gain;
+	oscilFFTfreqs[i]*=gain;
 	REALTYPE tmp=oscilFFTfreqs[OSCIL_SIZE-i-1]*oscilFFTfreqs[OSCIL_SIZE-i-1]+
 		     oscilFFTfreqs[i+1]*oscilFFTfreqs[i+1];
 	if (max<tmp) max=tmp;
