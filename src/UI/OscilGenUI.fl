@@ -283,11 +283,13 @@ delete(harmonic);} {}
   decl {Master *master;} {}
 } 
 
-class OscilEditor {} {
-  Function {make_window()} {} {
+class OscilEditor {open
+} {
+  Function {make_window()} {open
+  } {
     Fl_Window osceditUI {
-      label {ADsynth Oscillator Editor}
-      xywh {66 94 745 590} type Double hide
+      label {ADsynth Oscillator Editor} open
+      xywh {27 94 745 590} type Double visible
     } {
       Fl_Group oscildisplaygroup {
         xywh {15 5 360 300} box ENGRAVED_FRAME
@@ -573,7 +575,7 @@ pthread_mutex_unlock(&master->mutex);
 
 oscildisplaygroup->redraw();
 basefuncdisplaygroup->redraw();
-oldosc->redraw();} selected
+oldosc->redraw();}
         tooltip {Use this Oscillator as base function} xywh {15 310 85 20} box THIN_UP_BOX labelfont 1 labelsize 12
       }
       Fl_Button {} {
@@ -582,8 +584,10 @@ oldosc->redraw();} selected
         xywh {678 557 62 28} box THIN_UP_BOX
       }
       Fl_Button {} {
-        label Clear
-        callback {for (int i=0;i<MAX_AD_HARMONICS;i++){
+        label Clr
+        callback {if (!fl_ask("Clear the harmonics settings?")) return;
+
+for (int i=0;i<MAX_AD_HARMONICS;i++){
     h[i]->mag->value(64);
     oscil->Phmag[i]=64;
     h[i]->phase->value(64);
@@ -605,7 +609,7 @@ pthread_mutex_unlock(&master->mutex);
 
 oscildisplaygroup->redraw();
 oldosc->redraw();}
-        xywh {680 530 60 20} box THIN_UP_BOX labelfont 1 labelsize 12
+        xywh {680 530 25 20} box THIN_UP_BOX labelfont 1 labelsize 12
       }
       Fl_Group {} {
         xywh {145 305 150 30} box ENGRAVED_BOX
@@ -698,14 +702,14 @@ wsparval->value(oscil->Pwaveshaping-64);}
         label {Clr.}
         tooltip {Auto clear when using the oscillator as base function} xywh {105 310 35 20} box THIN_UP_BOX value 1 labelfont 1 labelsize 10
       }
-      Fl_Group {} {
+      Fl_Group {} {open
         xywh {295 305 155 30} box ENGRAVED_BOX
       } {
         Fl_Choice fltbutton {
           label Filter
           callback {oscil->Pfiltertype=(int) o->value();
 oscildisplaygroup->redraw();
-oldosc->redraw();}
+oldosc->redraw();} open
           tooltip {Oscillator's filter type} xywh {325 310 50 20} down_box BORDER_BOX labelsize 10 textsize 10
           code0 {o->value(oscil->Pfiltertype);}
         } {
@@ -756,6 +760,10 @@ oldosc->redraw();}
           menuitem {} {
             label Sin
             xywh {85 85 100 20} labelfont 1 labelsize 10
+          }
+          menuitem {} {
+            label LSh
+            xywh {95 95 100 20} labelfont 1 labelsize 10
           }
         }
         Fl_Dial {} {
@@ -955,6 +963,18 @@ oldosc->redraw();}
           code0 {o->value(oscil->Pmodulationpar3);}
           class WidgetPDial
         }
+      }
+      Fl_Button {} {
+        label Sine
+        callback {if (!fl_ask("Convert to SINE?")) return;
+
+pthread_mutex_lock(&master->mutex);
+ oscil->convert2sine(0);
+pthread_mutex_unlock(&master->mutex);
+
+oscildisplaygroup->redraw();
+oldosc->redraw();} selected
+        xywh {710 530 30 20} box THIN_UP_BOX labelfont 1 labelsize 12
       }
     }
   }

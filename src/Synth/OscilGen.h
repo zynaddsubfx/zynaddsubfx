@@ -55,6 +55,8 @@ class OscilGen{
 	void defaults();
 	void getfromXML(XMLwrapper *xml);
 
+	void convert2sine(int magtype);
+	
 	//Parameters
 			
 	/* 

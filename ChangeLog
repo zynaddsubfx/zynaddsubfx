@@ -588,6 +588,8 @@
 	    - Adaugata modulatia in frecventa la OsciGen
 20 Iun 2004 - Nu se mai deschide automat fereastra de instrumente daca a fost deschisa si s-a descarcat un instrument
 	    - Facute mici modificari la FM-ul de la Oscil
+21 Iun 2004 - Inceput sa scriu conversia in sinus
+
 
 
 

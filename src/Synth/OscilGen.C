@@ -108,6 +108,44 @@ void OscilGen::defaults(){
     prepare();
 };
 
+void OscilGen::convert2sine(int magtype){
+    REALTYPE mag[MAX_AD_HARMONICS],phase[MAX_AD_HARMONICS];
+    REALTYPE oscil[OSCIL_SIZE],freqs[OSCIL_SIZE];
+
+    get(oscil,-1.0);
+    FFTwrapper *fft=new FFTwrapper(OSCIL_SIZE);
+    fft->smps2freqs(oscil,freqs);
+    delete(fft);
+
+    REALTYPE max=0.0;
+        
+    mag[0]=0;
+    phase[0]=0;
+    for (int i=0;i<MAX_AD_HARMONICS;i++){
+        mag[i]=sqrt(pow(oscilFFTfreqs[OSCIL_SIZE-i-1],2)+pow(oscilFFTfreqs[i+1],2.0));
+	phase[i]=atan2(oscilFFTfreqs[i+1],oscilFFTfreqs[OSCIL_SIZE-i-1]);
+	if (max<mag[i]) max=mag[i];
+    };
+    if (max<0.00001) max=1.0;
+    
+    defaults();
+        
+    for (int i=0;i<MAX_AD_HARMONICS-1;i++){
+	REALTYPE newmag=mag[i]/max;
+	REALTYPE newphase=phase[i];
+
+	Phmag[i]=(int) ((newmag)*64.0)+64;
+	
+	Phphase[i]=64-(int) (64.0*newphase/PI);
+	if (Phphase[i]>127) Phphase[i]=127;
+	
+	if (Phmag[i]==64) Phphase[i]=64;
+    };
+    
+    prepare();
+};
+
+
 /* 
  * Base Functions - START 
  */
@@ -327,6 +365,11 @@ void OscilGen::oscilfilter(){
 	    case 11:gain=sin(par*par*PI/2.0*i);//sin
 		   gain*=gain;
 		   break;
+	    case 12:REALTYPE p2=1.0-par+0.2,x=i/(64.0*p2*p2); 
+		     if (x<0.0) x=0.0;
+		        else if (x>1.0) x=1.0;
+		     gain=cos(x*PI)+1.5;//low shelf
+		    break;
 	};
 	oscilFFTfreqs[OSCIL_SIZE-i]*=gain;
 	oscilFFTfreqs[i]*=gain;
