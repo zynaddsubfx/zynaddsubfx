@@ -39,7 +39,6 @@ void Resonance::defaults(){
     PmaxdB=20;
     Pcenterfreq=64;//1 kHz
     Poctavesfreq=64;
-    Pgain=5;
     Pprotectthefundamental=0;
     ctlcenter=1.0;
     ctlbw=1.0;
@@ -76,9 +75,9 @@ void Resonance::applyres(int n,REALTYPE *fftdata,REALTYPE freq){
 	int kx2=kx1+1;if (kx2>=N_RES_POINTS) kx2=N_RES_POINTS-1;
 	REALTYPE y=(Prespoints[kx1]*(1.0-dx)+Prespoints[kx2]*dx)/127.0-sum/127.0;
 	
-	y=pow(10.0,(y*PmaxdB+Pgain)/20.0);
+	y=pow(10.0,y*PmaxdB/20.0);
 	
-	if ((Pprotectthefundamental!=0)&&(i==1)) y=pow(10.0,Pgain/20.0);
+	if ((Pprotectthefundamental!=0)&&(i==1)) y=1.0;
 	
         fftdata[i]*=y;
         fftdata[OSCIL_SIZE-i]*=y;
@@ -202,8 +201,6 @@ void Resonance::saveloadbuf(Buffer *buf){
 			break;
 	    case 0x83:	buf->rwbytepar(n,&Poctavesfreq);
 			break;
-	    case 0x84:	buf->rwbytepar(n,&Pgain);
-			break;
 	    case 0x85:	buf->rwbytepar(n,&Pprotectthefundamental);
 			break;
 	    case 0xA0:	if (buf->getmode()!=0){
@@ -241,7 +238,6 @@ void Resonance::add2XML(XMLwrapper *xml){
     xml->addpar("max_db",PmaxdB);
     xml->addpar("center_freq",Pcenterfreq);
     xml->addpar("octaves_freq",Poctavesfreq);
-    xml->addpar("gain",Pgain);
     xml->addparbool("protect_fundamental_frequency",Pprotectthefundamental);
     xml->addpar("resonance_points",N_RES_POINTS);
     for (int i=0;i<N_RES_POINTS;i++){
@@ -258,7 +254,6 @@ void Resonance::getfromXML(XMLwrapper *xml){
     PmaxdB=xml->getpar127("max_db",PmaxdB);
     Pcenterfreq=xml->getpar127("center_freq",Pcenterfreq);
     Poctavesfreq=xml->getpar127("octaves_freq",Poctavesfreq);
-    Pgain=xml->getpar127("gain",Pgain);
     Pprotectthefundamental=xml->getparbool("protect_fundamental_frequency",Pprotectthefundamental);
     for (int i=0;i<N_RES_POINTS;i++){
 	if (xml->enterbranch("RESPOINT",i)==0) continue;

@@ -909,7 +909,6 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
     };
     if (sum<0.000001) sum=1.0;	
     sum=sqrt(sum);
-    if ((freqHz>0.1)&&(resonance!=0)&&(res->Penabled!=0)) sum/=dB2rap(res->Pgain*0.5);//apply the ressonance gain
     for (int j=1;j<OSCIL_SIZE;j++) outoscilFFTfreqs[j]/=sum; 
    
 

@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0200 
+version 1.0105 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -154,8 +154,7 @@ if ((event==FL_PUSH)||(event==FL_DRAG)){
 
 if (event==FL_RELEASE) oldx=-1;
 
-return(1);} {selected
-    }
+return(1);} {}
   }
   decl {Fl_Value_Output *khzvalue;} {}
   decl {Fl_Value_Output *dbvalue;} {}
@@ -165,11 +164,13 @@ return(1);} {selected
   }
 } 
 
-class ResonanceUI {} {
-  Function {make_window()} {} {
+class ResonanceUI {open
+} {
+  Function {make_window()} {open
+  } {
     Fl_Window resonancewindow {
       label Resonance
-      xywh {32 300 780 305} type Double hide
+      xywh {32 300 780 305} type Double visible
     } {
       Fl_Value_Output khzvalue {
         label kHz
@@ -238,12 +239,6 @@ respar->PmaxdB=(int) o->value();}
         tooltip {No. of octaves} xywh {210 282 33 18} when 3 minimum 1 maximum 127 step 1 value 30 textfont 1
         code0 {o->value(respar->getoctavesfreq());}
       }
-      Fl_Value_Slider {} {
-        label {Amplification(dB)}
-        callback {respar->Pgain=(int) o->value();}
-        xywh {318 282 108 15} type {Horz Knob} box FLAT_BOX labelfont 1 labelsize 12 align 5 maximum 60 step 1
-        code0 {o->value(respar->Pgain);}
-      }
       Fl_Button {} {
         label RND2
         callback {respar->randomize(1);
@@ -281,7 +276,7 @@ resonancewindow->redraw();}
         label {C.f.}
         callback {respar->Pcenterfreq=(int)o->value();
 centerfreqvo->do_callback();
-rg->redraw();}
+rg->redraw();} selected
         xywh {245 265 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
         code0 {o->value(respar->Pcenterfreq);}
         class WidgetPDial
