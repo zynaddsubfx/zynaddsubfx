@@ -1,8 +1,8 @@
-clean.sh
+./clean.sh
 fluid -c ControllerUI.fl
-gcc -c ControllerUI.cxx -o ControllerUI.o
-gcc -c Controller.C -o Controller.o
-gcc -c main.C -o main.o
+gcc `fltk-config --cflags` -c ControllerUI.cxx -o ControllerUI.o
+gcc `fltk-config --cflags` -c Controller.C -o Controller.o
+gcc `fltk-config --cflags` -c main.C -o main.o
 
 
 

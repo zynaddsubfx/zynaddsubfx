@@ -770,7 +770,7 @@
 28 Feb 2005 - Corectata o mica eroare care facea ca sa nu se afiseze intotdeauna corect detune-ul la ADvoice
 	    - Afisajul VU-meter la Master nu mai prezinta variatii mari in timp scurt
 	    - Adaugata afisajul RMS la VU-meter
-	    
+06 Mar 2005 - Facute cateva mici modificari referitoare in special la warning-uri    
 
 
 

@@ -101,28 +101,28 @@ int Sequencer::getevent(char ntrack,int *midich, int *type,int *par1, int *par2)
     //test
 //    if (ntrack!=0) return(-1);
 
-    updatecounter(&playtime[ntrack]);
+    updatecounter(&playtime[(int)ntrack]);
 
 //    printf("%g %g\n",nextevent[ntrack].time,playtime[ntrack].abs);
 
-    if (nextevent[ntrack].time<playtime[ntrack].abs) readevent(&miditrack[ntrack].track,&nextevent[ntrack].ev);
+    if (nextevent[(int)ntrack].time<playtime[(int)ntrack].abs) readevent(&miditrack[(int)ntrack].track,&nextevent[(int)ntrack].ev);
 	else return(-1);
-    if (nextevent[ntrack].ev.type==-1) return(-1);
+    if (nextevent[(int)ntrack].ev.type==-1) return(-1);
 //    printf("********************************\n");    
 
     //sa pun aici o protectie. a.i. daca distanta dintre timpul curent si eveliment e prea mare (>1sec) sa elimin nota
 
-    if (ntrack==1) printf("_ %f %.2f  (%d)\n",nextevent[ntrack].time,playtime[ntrack].abs,nextevent[ntrack].ev.par2);
+    if (ntrack==1) printf("_ %f %.2f  (%d)\n",nextevent[(int)ntrack].time,playtime[(int)ntrack].abs,nextevent[(int)ntrack].ev.par2);
 
-    *type=nextevent[ntrack].ev.type;
-    *par1=nextevent[ntrack].ev.par1;
-    *par2=nextevent[ntrack].ev.par2;
-    *midich=nextevent[ntrack].ev.channel;
+    *type=nextevent[(int)ntrack].ev.type;
+    *par1=nextevent[(int)ntrack].ev.par1;
+    *par2=nextevent[(int)ntrack].ev.par2;
+    *midich=nextevent[(int)ntrack].ev.channel;
 
     
-    double dt=nextevent[ntrack].ev.deltatime*0.0001*realplayspeed;
-    printf("zzzzzzzzzzzzzz[%d] %d\n",ntrack,nextevent[ntrack].ev.deltatime);
-    nextevent[ntrack].time+=dt;
+    double dt=nextevent[(int)ntrack].ev.deltatime*0.0001*realplayspeed;
+    printf("zzzzzzzzzzzzzz[%d] %d\n",ntrack,nextevent[(int)ntrack].ev.deltatime);
+    nextevent[(int)ntrack].time+=dt;
 
 //    printf("%f   -  %d %d \n",nextevent[ntrack].time,par1,par2);
     return(0);//?? sau 1

@@ -63,7 +63,7 @@ SUBDIRS=DSP Effects Input Misc Output Params Synth Seq
 .PHONY: subdirs $(SUBDIRS)
 
 all:
-	yes " " | head
+#	yes " " | head
 	$(MAKE) -C UI $@
 #	@sh -c "cd UI ; $(CXX) -MM -MG -w *.cc >> ../Make.deps ; cd .."
 	@for name in $(SUBDIRS); do sh -c "cd $$name ; $(CXX) -MM -MG -w *.C >> ../Make.deps ; cd .."; done

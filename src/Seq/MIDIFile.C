@@ -231,7 +231,7 @@ void MIDIFile::parsenoteoff(char ntrack,char chan,unsigned int dt){
     ///test 
 //    ntrack=0;
     
-    me->writeevent(&me->miditrack[ntrack].record,&me->tmpevent);
+    me->writeevent(&me->miditrack[(int)ntrack].record,&me->tmpevent);
     
 };
 
@@ -251,7 +251,7 @@ void MIDIFile::parsenoteon(char ntrack,char chan,unsigned int dt){
     me->tmpevent.par1=note;
     me->tmpevent.par2=vel;
     me->tmpevent.channel=chan;
-    me->writeevent(&me->miditrack[ntrack].record,&me->tmpevent);
+    me->writeevent(&me->miditrack[(int)ntrack].record,&me->tmpevent);
 
     
     
@@ -271,7 +271,7 @@ void MIDIFile::parsecontrolchange(char ntrack,char chan,unsigned int dt){
     me->tmpevent.par1=control;//???????????? ma uit la Sequencer::recordnote() din varianele vechi de zyn
     me->tmpevent.par2=value;
     me->tmpevent.channel=chan;
-    me->writeevent(&me->miditrack[ntrack].record,&me->tmpevent);
+    me->writeevent(&me->miditrack[(int)ntrack].record,&me->tmpevent);
     
 };
 
@@ -304,7 +304,7 @@ void MIDIFile::add_dt(char ntrack, unsigned int dt){
     me->tmpevent.par1=0;
     me->tmpevent.par2=0;
     me->tmpevent.channel=0;
-    me->writeevent(&me->miditrack[ntrack].record,&me->tmpevent);
+    me->writeevent(&me->miditrack[(int)ntrack].record,&me->tmpevent);
 };
 
 
