@@ -375,7 +375,7 @@ class MasterUI {} {
 fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
-\#endif} selected
+\#endif}
       xywh {353 127 390 465} type Double hide
     } {
       Fl_Menu_Bar mastermenu {
@@ -1133,8 +1133,8 @@ bankui->show();}
         }
         Fl_Slider partpanning {
           label Pan
-          callback {master->part[npart]->setPpanning((int) o->value());}
-          xywh {185 95 70 15} type {Horz Knob} box FLAT_BOX minimum 127 maximum 0 step 1 value 64
+          callback {master->part[npart]->setPpanning((int) o->value());} selected
+          xywh {185 95 70 15} type {Horz Knob} box FLAT_BOX maximum 127 step 1 value 64
           code0 {o->value(master->part[npart]->Ppanning);}
         }
         Fl_Choice partrcv {
