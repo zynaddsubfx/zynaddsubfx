@@ -62,10 +62,11 @@ all:
 ifneq ($(AUDIOOUT),VST) 
 	$(CXX) -o zynaddsubfx */*.o *.o $(LIBS)
 else
-	gcc -mdll -o temp1.tmp -Wl,--base-file,temp2.tmp */*.o *.o $(LIBS)
-	dlltool --dllname zynaddsubfx_vst.dll --def zynaddsubfx_gcc.def --base-file temp2.tmp --output-exp temp3.tmp
-	gcc -mdll -o zynaddsubfx_vst.dll */*.o *.o $(LIBS) -Wl,temp3.tmp
-	rm temp1.tmp temp2.tmp temp3.tmp
+	gcc -shared -o zynaddsubfx_vst.dll */*.o *.o $(LIBS) zynaddsubfx_gcc.def
+#	gcc -mdll -o temp1.tmp -Wl,--base-file,temp2.tmp */*.o *.o $(LIBS)
+#	dlltool --dllname zynaddsubfx_vst.dll --def zynaddsubfx_gcc.def --base-file temp2.tmp --output-exp temp3.tmp
+#	gcc -mdll -o zynaddsubfx_vst.dll */*.o *.o $(LIBS) -Wl,temp3.tmp
+#	rm temp1.tmp temp2.tmp temp3.tmp
 endif
 
 objs:$(objects)

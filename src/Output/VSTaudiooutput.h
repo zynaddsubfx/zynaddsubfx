@@ -44,7 +44,6 @@ class VSTSynth:public AudioEffectX{
 	
 	MasterUI *ui;
 	int Pexitprogram;
-
         Master *vmaster;
 	pthread_t thr;
 };

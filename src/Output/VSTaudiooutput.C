@@ -25,8 +25,8 @@
 //the constructor and the destructor are defined in main.C
 
 void VSTSynth::process (float **inputs, float **outputs, long sampleframes){
-    float *outl=inputs[0];
-    float *outr=inputs[1];
+    float *outl=outputs[0];
+    float *outr=outputs[1];
     pthread_mutex_lock(&vmaster->mutex);
      vmaster->GetAudioOutSamples(sampleframes,(int) getSampleRate(),outl,outr);
     pthread_mutex_unlock(&vmaster->mutex);
