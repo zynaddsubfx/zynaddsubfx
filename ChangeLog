@@ -766,7 +766,7 @@
 19 Feb 2005 - Corectata o eroare care facea ca uneori sa fie calculata frecventa la ADnote=nan si programul sa crape pentru ca era folosit parametrul bandwidthDetuneMultiplier inainte de a fi calculat
 21 Feb 2005 - Se afiseaza corect numele fisierului proaspat salvat in fereastra principala
 26 Feb 2005 - Corectata eroarea la windows si la OSS care facea ca pitch bend sa nu fie mapat corect (trebuie verificat)
-
+27 Feb 2005 - Se afiseaza corect valoarea lui detune in centi 
 
 
     

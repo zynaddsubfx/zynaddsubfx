@@ -50,9 +50,9 @@ decl {\#include "OscilGenUI.h"} {public
 decl {\#include "PresetsUI.h"} {public
 } 
 
-class ADvoicelistitem {: {public Fl_Group}
+class ADvoicelistitem {open : {public Fl_Group}
 } {
-  Function {make_window()} {private
+  Function {make_window()} {open private
   } {
     Fl_Window ADnoteVoiceListItem {
       private xywh {247 599 615 30} type Double hide
@@ -92,7 +92,7 @@ class ADvoicelistitem {: {public Fl_Group}
         Fl_Value_Output detunevalueoutput {
           callback {o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());} selected
           xywh {265 5 45 20} labelsize 10 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 10
-          code0 {o->value(getdetune(pars->VoicePar[nvoice].PDetuneType,0,pars->VoicePar[nvoice].PDetune));}
+          code0 {o->value(getdetune(pars->VoicePar[nvoice].PDetuneType,0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
         }
         Fl_Slider voicedetune {
           callback {pars->VoicePar[nvoice].PDetune=(int)o->value()+8192;
@@ -172,7 +172,7 @@ ADnoteVoiceListItem->redraw();} {}
   decl {Master *master;} {}
 } 
 
-class ADvoiceUI {: {public Fl_Group}
+class ADvoiceUI {open : {public Fl_Group}
 } {
   Function {make_window()} {} {
     Fl_Window ADnoteVoiceParameters {
@@ -463,9 +463,9 @@ detunevalueoutput->do_callback();}
             }
             Fl_Value_Output detunevalueoutput {
               label Detune
-              callback {o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune));}
+              callback {o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
               xywh {10 272 45 15} labelsize 10 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 10
-              code0 {o->value(getdetune(pars->VoicePar[nvoice].PDetuneType,0,pars->VoicePar[nvoice].PDetune));}
+              code0 {o->value(getdetune(pars->VoicePar[nvoice].PDetuneType,0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
             }
             Fl_Check_Button {} {
               label 440Hz
