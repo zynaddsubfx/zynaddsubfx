@@ -90,9 +90,9 @@ Section "Standalone" SEC02
   File "zynaddsubfx.exe"
   File "launch_zynaddsubfx.bat"
   CreateDirectory "$SMPROGRAMS\ZynAddSubFX"
-  CreateShortCut "$SMPROGRAMS\ZynAddSubFX\ZynAddSubFX low latency.lnk" "$INSTDIR\launch_zynaddsubfx.bat" "" "zynaddsubfx_icon.ico" 
-  CreateShortCut "$SMPROGRAMS\ZynAddSubFX\ZynAddSubFX.lnk" "$INSTDIR\zynaddsubfx.exe"
-  CreateShortCut "$DESKTOP\ZynAddSubFX.lnk" "$INSTDIR\launch_zynaddsubfx.bat" "" "zynaddsubfx_icon.ico"
+  CreateShortCut "$SMPROGRAMS\ZynAddSubFX\ZynAddSubFX low latency.lnk" "$INSTDIR\launch_zynaddsubfx.bat" "-Y" "zynaddsubfx_icon.ico" 
+  CreateShortCut "$SMPROGRAMS\ZynAddSubFX\ZynAddSubFX.lnk" "$INSTDIR\zynaddsubfx.exe" "-Y" "zynaddsubfx_icon.ico"
+  CreateShortCut "$DESKTOP\ZynAddSubFX.lnk" "$INSTDIR\launch_zynaddsubfx.bat" "-Y" "zynaddsubfx_icon.ico"
 SectionEnd
 
 ;Section /o "VST Plugin" SEC03

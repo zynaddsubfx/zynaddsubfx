@@ -367,6 +367,7 @@ int main(int argc, char *argv[]){
 	{"swap",2,NULL,'S'},
 	{"no-gui",2,NULL,'U'},
 	{"not-use-jack",2,NULL,'A'},
+	{"dummy",2,NULL,'Y'},
 	{"help",2,NULL,'h'},
 	{0,0,0,0}
     };
@@ -378,10 +379,10 @@ int main(int argc, char *argv[]){
     
     while (1){
 #ifdef OS_LINUX
-	opt=getopt_long(argc,argv,"l:r:b:o:hSDUA",opts,&option_index);
+	opt=getopt_long(argc,argv,"l:r:b:o:hSDUAY",opts,&option_index);
 	char *optarguments=optarg;
 #else
-	opt=getopt(argc,argv,"l:r:b:o:hSDUA",&option_index);
+	opt=getopt(argc,argv,"l:r:b:o:hSDUAY",&option_index);
 	char *optarguments=&winoptarguments[0];
 #endif 
 
@@ -390,6 +391,13 @@ int main(int argc, char *argv[]){
 	int tmp;
 	switch(opt){
 	    case 'h':exitwithhelp=1;
+		     break;
+	    case 'Y':/* this command a dummy command (has NO effect) 
+		        and is used because I need for NSIS installer 
+			(NSIS sometimes forces a command line for a 
+			program, even if I don't need that; eg. when 
+			I want to add a icon to a shortcut.
+		      */
 		     break;
 	    case 'U':noui=1;
 		     break;
