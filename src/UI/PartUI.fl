@@ -210,7 +210,7 @@ if (o->value()==0) partkititemgroup->deactivate();
 else partkititemgroup->activate();
 o->redraw();
 partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0
-} else o->value(1);} selected
+} else o->value(1);}
         private xywh {30 0 20 15} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 4
         code0 {snprintf(label,10,"%d",n+1);o->label(strdup(label));}
         code1 {o->value(part->kit[n].Penabled);}
@@ -318,8 +318,8 @@ if (event==FL_RIGHT_MOUSE){
 } else {
   if (event==FL_LEFT_MOUSE) bankui->show();
        else instrumenteditwindow->show();
-};}
-          tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the instrument information} xywh {195 5 185 20} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 12 align 84
+};} selected
+          tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the instrument information} xywh {195 5 185 20} box PLASTIC_THIN_DOWN_BOX down_box FLAT_BOX color 247 labelfont 1 labelsize 12 align 84
           code0 {o->label((char *)part->Pname);}
         }
         Fl_Box {} {

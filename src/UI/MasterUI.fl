@@ -367,9 +367,9 @@ panellistitemgroup->redraw();} {}
   decl {BankUI *bankui;} {}
 } 
 
-class MasterUI {selected
-} {
-  Function {make_window()} {} {
+class MasterUI {} {
+  Function {make_window()} {selected
+  } {
     Fl_Window masterwindow {
       label zynaddsubfx
       callback {\#ifdef VSTAUDIOOUT
@@ -1161,7 +1161,7 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an
         }
       }
       Fl_Group simplelistitemgroup {
-        private xywh {140 65 200 150} box ENGRAVED_BOX
+        private xywh {125 65 215 150} box ENGRAVED_BOX
         code0 {if (master->part[npart]->Penabled==0) o->deactivate();}
       } {
         Fl_Button partname {
@@ -1170,12 +1170,12 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an
    bankui->cbwig->do_callback();
 };
 bankui->show();}
-          xywh {145 72 190 18} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 12 align 208
+          xywh {130 72 205 18} box PLASTIC_THIN_DOWN_BOX down_box FLAT_BOX color 247 labelfont 1 labelsize 12 align 208
         }
         Fl_Slider partpanning {
           label Pan
           callback {master->part[npart]->setPpanning((int) o->value());}
-          xywh {230 100 100 15} type {Horz Knob} box FLAT_BOX minimum 127 maximum 0 step 1 value 64
+          xywh {185 95 70 15} type {Horz Knob} box FLAT_BOX minimum 127 maximum 0 step 1 value 64
           code0 {o->value(master->part[npart]->Ppanning);}
         }
         Fl_Choice partrcv {
@@ -1183,24 +1183,24 @@ bankui->show();}
           callback {virkeys->relaseallkeys(0);
 master->part[npart]->Prcvchn=(int) o->value();
 virkeys->midich=(int) o->value();} open
-          tooltip {receive from Midi channel} xywh {150 157 75 18} down_box BORDER_BOX labelsize 13 align 130 textfont 1
+          tooltip {receive from Midi channel} xywh {140 157 75 18} down_box BORDER_BOX labelsize 13 align 130 textfont 1
           code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Ch%d",i+1);if (i!=9) o->add(nrstr); else o->add("Dr10");};}
           code1 {o->value(master->part[npart]->Prcvchn);}
         } {}
         Fl_Dial partvolume {
           callback {master->part[npart]->setPvolume((int) o->value());}
-          xywh {165 100 30 30} maximum 127 step 1
+          xywh {145 95 30 30} maximum 127 step 1
           code0 {o->value(master->part[npart]->Pvolume);}
           class WidgetPDial
         }
         Fl_Box {} {
           label Volume
-          xywh {150 130 60 15}
+          xywh {130 125 60 15}
         }
         Fl_Check_Button simplepartportamento {
           label Portamento
           callback {master->part[npart]->ctl.portamento.portamento=(int) o->value();}
-          tooltip {Enable/Disable the portamento} xywh {230 130 85 20} down_box DOWN_BOX labelfont 1 labelsize 12
+          tooltip {Enable/Disable the portamento} xywh {260 95 75 20} down_box DOWN_BOX labelfont 1 labelsize 10
           code0 {o->value(master->part[npart]->ctl.portamento.portamento);}
         }
         Fl_Counter simpleminkcounter {
@@ -1241,6 +1241,13 @@ simpleminkcounter->do_callback();
 simplemaxkcounter->value(127);
 simplemaxkcounter->do_callback();}
           tooltip {reset the minimum key to 0 and maximum key to 127} xywh {280 188 15 12} box THIN_UP_BOX labelfont 1 labelsize 10
+        }
+        Fl_Counter simplepartkeyshiftcounter {
+          label KeyShift
+          callback {master->part[npart]->Pkeyshift=(int) o->value()+64;}
+          xywh {240 120 90 20} labelsize 12 minimum -64 maximum 64 step 1
+          code0 {o->lstep(12);}
+          code1 {o->value(master->part[npart]->Pkeyshift-64);}
         }
       }
       Fl_Check_Button partenabled {
@@ -1496,7 +1503,7 @@ pthread_mutex_unlock(&master->mutex);}
 pthread_mutex_lock(&master->mutex);
 master->shutup=1;
 pthread_mutex_unlock(&master->mutex);}
-        xywh {5 149 130 31} box PLASTIC_UP_BOX color 231 labelfont 1
+        xywh {5 149 115 31} box PLASTIC_UP_BOX color 231 labelfont 1 labelsize 12
       }
       Fl_Button {} {
         label Reset
@@ -1614,7 +1621,9 @@ if (master->part[npart]->Pname[0]!=0) partname->label((char *)master->part[npart
 simplelistitemgroup->redraw();
 simplepartportamento->value(master->part[npart]->ctl.portamento.portamento);
 simpleminkcounter->value(master->part[npart]->Pminkey);
-simplemaxkcounter->value(master->part[npart]->Pmaxkey);} {}
+simplemaxkcounter->value(master->part[npart]->Pmaxkey);
+
+simplepartkeyshiftcounter->value(master->part[npart]->Pkeyshift-64);} {}
   }
   Function {do_new_master()} {} {
     code {if (fl_ask("Clear *ALL* the parameters ?")){
