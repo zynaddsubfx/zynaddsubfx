@@ -32,6 +32,7 @@ Reverb::Reverb(int insertion_,REALTYPE *efxoutl_,REALTYPE *efxoutr_){
     efxoutl=efxoutl_;
     efxoutr=efxoutr_;
     inputbuf=new REALTYPE[SOUND_BUFFER_SIZE];
+    filterpars=NULL;
 
     insertion=insertion_;
     //defaults

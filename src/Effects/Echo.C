@@ -28,6 +28,7 @@
 Echo::Echo(int insertion_,REALTYPE *efxoutl_,REALTYPE *efxoutr_){
     efxoutl=efxoutl_;
     efxoutr=efxoutr_;
+    filterpars=NULL;
 
     insertion=insertion_;
     //default values

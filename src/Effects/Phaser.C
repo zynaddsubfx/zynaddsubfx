@@ -28,6 +28,7 @@
 Phaser::Phaser(int insertion_,REALTYPE *efxoutl_,REALTYPE *efxoutr_){
     efxoutl=efxoutl_;
     efxoutr=efxoutr_;
+    filterpars=NULL;
         
     oldl=NULL;
     oldr=NULL;

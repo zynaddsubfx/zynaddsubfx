@@ -35,6 +35,7 @@ Distorsion::Distorsion(int insertion_,REALTYPE *efxoutl_,REALTYPE *efxoutr_){
     hpfl=new AnalogFilter(3,20,1,0);
     hpfr=new AnalogFilter(3,20,1,0);
     
+    filterpars=NULL;
 
     insertion=insertion_;
     //default values

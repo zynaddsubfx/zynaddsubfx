@@ -33,6 +33,7 @@ Chorus::Chorus(int insertion_,REALTYPE *efxoutl_,REALTYPE *efxoutr_){
     delayr=new REALTYPE[maxdelay];
     insertion=insertion_;
 
+    filterpars=NULL;
     Ppreset=0;
     setpreset(Ppreset);
 

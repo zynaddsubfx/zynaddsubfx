@@ -592,7 +592,7 @@ insefftype->do_callback();
 inseffectui->refresh(part->partefx[ninseff]);
 int x=part->Pefxroute[ninseff];
 if (x==127) x=1;
-sendtochoice->value(x);} selected
+sendtochoice->value(x);}
         xywh {5 110 80 20} type Simple labelfont 1 labelsize 11 align 6 minimum 0 maximum 127 step 1 textfont 1
         code0 {o->bounds(0,NUM_PART_EFX-1);}
         code1 {o->value(ninseff);}
@@ -637,6 +637,10 @@ inseffectui->refresh(part->partefx[ninseff]);}
         menuitem {} {
           label EQ
           xywh {100 100 100 20} labelfont 1 labelsize 11
+        }
+        menuitem {} {
+          label DynFilter
+          xywh {110 110 100 20} labelfont 1 labelsize 11
         }
       }
       Fl_Group inseffectuigroup {

@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0105 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -163,8 +163,8 @@ delete (formantparswindow);} {}
   }
   Function {make_window()} {} {
     Fl_Window filterui {
-      xywh {365 269 275 75} color 50 labelfont 1
-      class Fl_Group visible
+      xywh {365 269 275 75} type Double color 50 labelfont 1 hide
+      class Fl_Group
     } {
       Fl_Group filterparamswindow {
         label {Filter Parameters}
@@ -316,7 +316,7 @@ formantfiltergraph->redraw();}
   Function {make_formant_window()} {} {
     Fl_Window formantparswindow {
       label {Formant Filter Parameters}
-      xywh {41 226 710 205} hide
+      xywh {41 226 710 205} type Double hide
     } {
       Fl_Group {} {
         xywh {485 47 105 113} box THIN_UP_BOX

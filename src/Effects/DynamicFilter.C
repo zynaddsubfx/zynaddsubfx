@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
  
-  Alienwah.C - "AlienWah" effect
+  DynamicFilter.C - "WahWah" effect and others
   Copyright (C) 2002-2004 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
@@ -21,41 +21,37 @@
 */
 
 #include <math.h>
-#include "Alienwah.h"
+#include "DynamicFilter.h"
 #include <stdio.h>
 
-Alienwah::Alienwah(int insertion_,REALTYPE *efxoutl_,REALTYPE *efxoutr_){
+DynamicFilter::DynamicFilter(int insertion_,REALTYPE *efxoutl_,REALTYPE *efxoutr_){
     efxoutl=efxoutl_;
     efxoutr=efxoutr_;
         
-    oldl=NULL;
-    oldr=NULL;
-    filterpars=NULL;
     insertion=insertion_;
-
+    
     Ppreset=0;
+    filter=NULL;
+    filterpars=new FilterParams(0,64,64);
     setpreset(Ppreset);
     cleanup();
-    oldclfol.a=fb;oldclfol.b=0.0;
-    oldclfor.a=fb;oldclfor.b=0.0;
 };
 
-Alienwah::~Alienwah(){
-    if (oldl!=NULL) delete [] oldl;
-    if (oldr!=NULL) delete [] oldr ;
+DynamicFilter::~DynamicFilter(){
+    delete(filterpars);
 };
 
 
 /*
  * Apply the effect
  */
-void Alienwah::out(REALTYPE *smpsl,REALTYPE *smpsr){
+void DynamicFilter::out(REALTYPE *smpsl,REALTYPE *smpsr){
     int i;
-    REALTYPE lfol,lfor;
+/*    REALTYPE lfol,lfor;
     COMPLEXTYPE clfol,clfor,out,tmp;
-
-    lfo.effectlfoout(&lfol,&lfor);
-    lfol*=depth*PI*2.0;lfor*=depth*PI*2.0;
+*/
+//    lfo.effectlfoout(&lfol,&lfor);
+/*    lfol*=depth*PI*2.0;lfor*=depth*PI*2.0;
     clfol.a=cos(lfol+phase)*fb;clfol.b=sin(lfol+phase)*fb;
     clfor.a=cos(lfor+phase)*fb;clfor.b=sin(lfor+phase)*fb;
 
@@ -93,7 +89,7 @@ void Alienwah::out(REALTYPE *smpsl,REALTYPE *smpsr){
 
     oldclfol.a=clfol.a;oldclfol.b=clfol.b;
     oldclfor.a=clfor.a;oldclfor.b=clfor.b;
-
+*/
     //Insertion effect
     if (insertion!=0) {
         REALTYPE v1,v2;
@@ -123,14 +119,8 @@ void Alienwah::out(REALTYPE *smpsl,REALTYPE *smpsr){
 /*
  * Cleanup the effect
  */
-void Alienwah::cleanup(){
-    for (int i=0;i<Pdelay;i++) {
-	oldl[i].a=0.0;
-	oldl[i].b=0.0;
-	oldr[i].a=0.0;
-	oldr[i].b=0.0;
-    };
-    oldk=0;
+void DynamicFilter::cleanup(){
+    reinitfilter();
 };
 
 
@@ -138,72 +128,62 @@ void Alienwah::cleanup(){
  * Parameter control
  */
 
-void Alienwah::setdepth(unsigned char Pdepth){
+void DynamicFilter::setdepth(unsigned char Pdepth){
     this->Pdepth=Pdepth;
     depth=(Pdepth/127.0);
 };
 
-void Alienwah::setfb(unsigned char Pfb){
-    this->Pfb=Pfb;
-    fb=fabs((Pfb-64.0)/64.1);
-    fb=sqrt(fb);
-    if (fb<0.4) fb=0.4;
-    if (Pfb<64) fb=-fb;
-};
 
-void Alienwah::setvolume(unsigned char Pvolume){
+void DynamicFilter::setvolume(unsigned char Pvolume){
     this->Pvolume=Pvolume;
     outvolume=Pvolume/127.0;
     if (insertion==0) volume=1.0;
 	else volume=outvolume;
 };
 
-void Alienwah::setpanning(unsigned char Ppanning){
+void DynamicFilter::setpanning(unsigned char Ppanning){
     this->Ppanning=Ppanning;
     panning=Ppanning/127.0;
 };
 
-void Alienwah::setlrcross(unsigned char Plrcross){
+void DynamicFilter::setlrcross(unsigned char Plrcross){
     this->Plrcross=Plrcross;
     lrcross=Plrcross/127.0;
 };
 
-void Alienwah::setphase(unsigned char Pphase){
-    this->Pphase=Pphase;
-    phase=(Pphase-64.0)/64.0*PI;
+void DynamicFilter::setampsns(unsigned char Pampsns){
+    ampsns=Pampsns/127.0;
+    if (Pampsnsinv!=0) ampsns=-ampsns;    
 };
 
-void Alienwah::setdelay(unsigned char Pdelay){
-    if (oldl!=NULL) delete [] oldl;
-    if (oldr!=NULL) delete [] oldr;
-    if (Pdelay>=MAX_ALIENWAH_DELAY) Pdelay=MAX_ALIENWAH_DELAY;
-    this->Pdelay=Pdelay;
-    oldl=new COMPLEXTYPE[Pdelay];
-    oldr=new COMPLEXTYPE[Pdelay];
-    cleanup();
+void DynamicFilter::reinitfilter(){
+    if (filter!=NULL) delete(filter);
+    filter=new Filter(filterpars);
 };
 
-void Alienwah::setpreset(unsigned char npreset){
+void DynamicFilter::setpreset(unsigned char npreset){
     const int PRESET_SIZE=11;
     const int NUM_PRESETS=4;
     unsigned char presets[NUM_PRESETS][PRESET_SIZE]={
-	//AlienWah1
+	//DynamicFilter1
 	{127,64,70,0,0,62,60,105,25,0,64},
-	//AlienWah2
+	//DynamicFilter2
 	{127,64,73,106,0,101,60,105,17,0,64},
-	//AlienWah3
+	//DynamicFilter3
 	{127,64,63,0,1,100,112,105,31,0,42},
-	//AlienWah4
+	//DynamicFilter4
 	{93,64,25,0,1,66,101,11,47,0,86}};
 	
     if (npreset>=NUM_PRESETS) npreset=NUM_PRESETS-1;
     for (int n=0;n<PRESET_SIZE;n++) changepar(n,presets[npreset][n]);
     if (insertion==0) changepar(0,presets[npreset][0]/2);//lower the volume if this is system effect
     Ppreset=npreset;
+    
+    reinitfilter();
 };
 
 
-void Alienwah::changepar(int npar,unsigned char value){
+void DynamicFilter::changepar(int npar,unsigned char value){
     switch(npar){
 	case 0:	setvolume(value);
 	        break;
@@ -223,18 +203,16 @@ void Alienwah::changepar(int npar,unsigned char value){
 		break;	
 	case 6:	setdepth(value);
 	        break;
-	case 7:	setfb(value);
+	case 7:	setampsns(value);
 	        break;
-	case 8:	setdelay(value);
+	case 8:	setampsns(Pampsns);
 	        break;
 	case 9:	setlrcross(value);
-	        break;
-	case 10:setphase(value);
 	        break;
     };
 };
 
-unsigned char Alienwah::getpar(int npar){
+unsigned char DynamicFilter::getpar(int npar){
     switch (npar){
 	case 0:	return(Pvolume);
 		break;
@@ -250,13 +228,11 @@ unsigned char Alienwah::getpar(int npar){
 		break;
 	case 6:	return(Pdepth);
 		break;
-	case 7:	return(Pfb);
+	case 7:	return(Pampsns);
 		break;
-	case 8:	return(Pdelay);
+	case 8:	return(Pampsnsinv);
 		break;
 	case 9:	return(Plrcross);
-		break;
-	case 10:return(Pphase);
 		break;
 	default:return (0);
     };

@@ -29,6 +29,7 @@ EQ::EQ(int insertion_,REALTYPE *efxoutl_,REALTYPE *efxoutr_){
     efxoutl=efxoutl_;
     efxoutr=efxoutr_;
     insertion=insertion_;
+    filterpars=NULL;
     
     for (int i=0;i<MAX_EQ_BANDS;i++){
 	filter[i].Ptype=0;

@@ -35,7 +35,7 @@ EffectMgr::EffectMgr(int insertion_,pthread_mutex_t *mutex_){
 	efxoutl[i]=0.0;
 	efxoutr[i]=0.0;
     };
-    
+    filterpars=NULL;
     defaults();
 };
 
@@ -71,9 +71,12 @@ void EffectMgr::changeeffect(int nefx_){
 	case 5:efx=new Alienwah(insertion,efxoutl,efxoutr);break;
 	case 6:efx=new Distorsion(insertion,efxoutl,efxoutr);break;
 	case 7:efx=new EQ(insertion,efxoutl,efxoutr);break;
+	case 8:efx=new DynamicFilter(insertion,efxoutl,efxoutr);break;
 	//put more effect here
 	default:efx=NULL;break;//no effect (thru)
     };
+    
+    if (efx!=NULL) filterpars=efx->filterpars;
 };
 
 /*

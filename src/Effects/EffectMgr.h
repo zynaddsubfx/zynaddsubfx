@@ -33,8 +33,10 @@
 #include "Alienwah.h"
 #include "Distorsion.h"
 #include "EQ.h"
+#include "DynamicFilter.h"
 #include "../Misc/Buffer.h"
 #include "../Misc/XMLwrapper.h"
+#include "../Params/FilterParams.h"
 
 
 class EffectMgr{
@@ -68,12 +70,13 @@ class EffectMgr{
 
 	//used by UI
 	REALTYPE getEQfreqresponse(REALTYPE freq);
+
+	FilterParams *filterpars;
 	
     private:
 	int nefx;
 	Effect *efx;
 	pthread_mutex_t *mutex;
-    
 };
 
 #endif

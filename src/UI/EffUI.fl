@@ -24,6 +24,9 @@ decl {\#include "WidgetPDial.h"} {public
 decl {\#include "EnvelopeUI.h"} {public
 } 
 
+decl {\#include "FilterUI.h"} {public
+} 
+
 decl {\#include "../Misc/Util.h"} {public
 } 
 
@@ -149,12 +152,15 @@ return(log(freq/20.0)/log(1000.0));} {}
   decl {int maxdB;} {}
 } 
 
-class EffUI {: {public Fl_Group}
+class EffUI {open : {public Fl_Group}
 } {
-  Function {EffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
-    code {eff=NULL;} {}
+  Function {EffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {open
+  } {
+    code {eff=NULL;
+filterwindow=NULL;} {}
   }
-  Function {~EffUI()} {} {
+  Function {~EffUI()} {open
+  } {
     code {effnullwindow->hide();delete (effnullwindow);
 effreverbwindow->hide();delete (effreverbwindow);
 effechowindow->hide();delete (effechowindow);
@@ -162,7 +168,12 @@ effchoruswindow->hide();delete (effchoruswindow);
 effphaserwindow->hide();delete (effphaserwindow);
 effalienwahwindow->hide();delete (effalienwahwindow);
 effdistorsionwindow->hide();delete (effdistorsionwindow);
-effeqwindow->hide();delete (effeqwindow);} {}
+effeqwindow->hide();delete (effeqwindow);
+
+if (filterwindow!=NULL){
+	filterwindow->hide();
+	delete(filterwindow);
+};} {}
   }
   Function {make_null_window()} {} {
     Fl_Window effnullwindow {
@@ -1089,7 +1100,115 @@ eqgraph->redraw();}
       }
     }
   }
-  Function {init(EffectMgr *eff_)} {} {
+  Function {make_dynamicfilter_window()} {open
+  } {
+    Fl_Window effdynamicfilterwindow {
+      xywh {207 390 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1
+      class Fl_Group visible
+    } {
+      Fl_Choice dfp {
+        label Preset
+        callback {eff->changepreset((int)o->value());
+refresh(eff);} open
+        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
+      } {
+        menuitem {} {
+          label cucurigu
+          xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
+        }
+      }
+      Fl_Text_Display {} {
+        label DynFilter
+        xywh {245 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+      }
+      Fl_Dial dfp0 {
+        label Vol
+        callback {eff->seteffectpar(0,(int) o->value());}
+        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        class WidgetPDial
+      }
+      Fl_Dial dfp1 {
+        label Pan
+        callback {eff->seteffectpar(1,(int) o->value());}
+        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        class WidgetPDial
+      }
+      Fl_Dial dfp2 {
+        label Freq
+        callback {eff->seteffectpar(2,(int) o->value());}
+        xywh {85 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        class WidgetPDial
+      }
+      Fl_Dial dfp3 {
+        label Rnd
+        callback {eff->seteffectpar(3,(int) o->value());}
+        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 when 4 maximum 127
+        class WidgetPDial
+      }
+      Fl_Dial dfp5 {
+        label {St.df}
+        callback {eff->seteffectpar(5,(int) o->value());}
+        xywh {200 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        class WidgetPDial
+      }
+      Fl_Dial dfp6 {
+        label Dpth
+        callback {eff->seteffectpar(6,(int) o->value());}
+        xywh {235 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        class WidgetPDial
+      }
+      Fl_Dial dfp9 {
+        label {L/R}
+        callback {eff->seteffectpar(9,(int) o->value());}
+        xywh {345 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        class WidgetPDial
+      }
+      Fl_Choice dfp4 {
+        label {LFO type}
+        callback {eff->seteffectpar(4,(int) o->value());}
+        tooltip {LFO function} xywh {155 50 40 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 130 textsize 8
+      } {
+        menuitem {} {
+          label SINE
+          xywh {15 15 100 20} labelfont 1 labelsize 10
+        }
+        menuitem {} {
+          label TRI
+          xywh {25 25 100 20} labelfont 1 labelsize 10
+        }
+      }
+      Fl_Button {} {
+        label Filter
+        callback {filterwindow->show();}
+        xywh {115 10 55 25} box PLASTIC_THIN_UP_BOX
+      }
+    }
+  }
+  Function {make_filter_window()} {} {
+    Fl_Window filterwindow {
+      label {Filter Parameters for DynFilter Eff.}
+      xywh {212 170 290 125} type Double visible
+    } {
+      Fl_Group {} {
+        label {DynFilter effect  - Filter} open
+        xywh {5 5 275 75} box FLAT_BOX color 50 align 144
+        code0 {o->init(eff->filterpars,NULL,NULL);}
+        class FilterUI
+      } {}
+      Fl_Button {} {
+        label Apply
+        callback {eff->cleanup();} selected
+        tooltip {apply the filter settings} xywh {5 95 70 25} box THIN_UP_BOX
+      }
+      Fl_Button {} {
+        label Close
+        callback {filterwindow->hide();}
+        xywh {210 95 70 25} box THIN_UP_BOX
+      }
+    }
+  }
+  Function {init(EffectMgr *eff_)} {open
+  } {
     code {eff=eff_;
 
 make_null_window();
@@ -1100,6 +1219,7 @@ make_phaser_window();
 make_alienwah_window();
 make_distorsion_window();
 make_eq_window();
+make_dynamicfilter_window();
 
 int px=this->parent()->x();
 int py=this->parent()->y();
@@ -1112,11 +1232,12 @@ effphaserwindow->position(px,py);
 effalienwahwindow->position(px,py);
 effdistorsionwindow->position(px,py);
 effeqwindow->position(px,py);
-
+effdynamicfilterwindow->position(px,py);
 
 refresh(eff);} {}
   }
-  Function {refresh(EffectMgr *eff_)} {} {
+  Function {refresh(EffectMgr *eff_)} {open
+  } {
     code {eff=eff_;
 this->hide();
 
@@ -1128,7 +1249,14 @@ effphaserwindow->hide();
 effalienwahwindow->hide();
 effdistorsionwindow->hide();
 effeqwindow->hide();
+effdynamicfilterwindow->hide();
 eqband=0;
+
+if (filterwindow!=NULL){
+	filterwindow->hide();
+	delete(filterwindow);
+	filterwindow=NULL;
+};
 
 switch(eff->geteffect()){
      case 1:
@@ -1234,6 +1362,10 @@ switch(eff->geteffect()){
 	stagescounter->value(eff->geteffectpar(14));
 	effeqwindow->show();
         break;
+     case 8:make_filter_window();
+	effdynamicfilterwindow->show();
+
+	break;
     default:effnullwindow->show();
             break; 
 };

@@ -598,5 +598,5 @@
 	    - Facute cateva imbunatatiri la interfata unde sunt inlocuite comuter-urile cu setari mai usor de inteles de catre utilizator (ex. la efectele de insertie se arata "insert to Master Out" in loc de "-2")
 29 Iun 2004 - Inlaturata setarea cu gain la Resonance pentru ca este inutil (datorita faptului ca normalize este Full RMS intotdeauna)
 30 Iun 2004 - Inlaturata o eroare recenta la EffectUI si modificat EffectUI in sensul ca nu trebuie sters si reinstantiat pentru a se reincarca valorile curente de efecte
-	    
+	    - Inceput sa scriu un nou efect (DynamicFilter)	    
 

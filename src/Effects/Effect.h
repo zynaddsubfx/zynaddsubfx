@@ -26,6 +26,7 @@
 #include <pthread.h>
 #include "../Misc/Util.h"
 #include "../globals.h"
+#include "../Params/FilterParams.h"
 
 
 class Effect{
@@ -45,6 +46,7 @@ class Effect{
 
       REALTYPE outvolume;//this is the volume of effect and is public because need it in system effect. The out volume of such effects are always 1.0, so this setting tells me how is the volume to the Master Output only.
 
+      FilterParams *filterpars;
       protected:
 
       int insertion;//1 for insertion effect              
