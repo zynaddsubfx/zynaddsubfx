@@ -720,8 +720,8 @@ void OscilGen::adaptiveharmonic(FFTFREQS f,REALTYPE freq){
     FFTFREQS inf;
     newFFTFREQS(&inf,OSCIL_SIZE/2);
     for (int i=0;i<OSCIL_SIZE/2;i++) {
-	inf.s[i]=f.s[i];
-	inf.c[i]=f.c[i];
+	inf.s[i]=pow(fabs(f.s[i]),0.5)*(f.s[i]<0?-1.0:1.0);
+	inf.c[i]=pow(fabs(f.c[i]),0.5)*(f.c[i]<0?-1.0:1.0);
 	f.s[i]=0.0;
 	f.c[i]=0.0;
     };
@@ -743,6 +743,7 @@ void OscilGen::adaptiveharmonic(FFTFREQS f,REALTYPE freq){
     };
     
 //    printf("%d\n",down);
+
     for (int i=0;i<OSCIL_SIZE/2-2;i++){ 
 	REALTYPE h=i*rap;
         int high=(int)(i*rap);
@@ -774,7 +775,13 @@ void OscilGen::adaptiveharmonic(FFTFREQS f,REALTYPE freq){
 	};
     };
     
+    f.c[0]=0.0;f.s[0]=0.0;    
     deleteFFTFREQS(&inf);
+
+    for (int i=1;i<OSCIL_SIZE/2;i++) {
+	f.s[i]=f.s[i]*f.s[i]*(f.s[i]<0?-1.0:1.0);
+	f.c[i]=f.c[i]*f.c[i]*(f.c[i]<0?-1.0:1.0);
+    };
 };
 
 
