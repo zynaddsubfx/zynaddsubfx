@@ -110,7 +110,7 @@ int Sequencer::getevent(char ntrack,int *midich, int *type,int *par1, int *par2)
 //    printf("********************************\n");    
 
 
-///    if (ntrack==1) printf("_ %f %.2f\n",nextevent[ntrack].time,playtime[ntrack].abs);
+    if (ntrack==1) printf("_ %f %.2f  (%d)\n",nextevent[ntrack].time,playtime[ntrack].abs,nextevent[ntrack].ev.par2);
 
     *type=nextevent[ntrack].ev.type;
     *par1=nextevent[ntrack].ev.par1;

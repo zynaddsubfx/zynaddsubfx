@@ -37,7 +37,7 @@ class MIDIEvents{
     struct event{
         int deltatime;
 	int channel;//on what midi channel is
-	int type,par1,par2;//type=1 for note, type=2 for controller
+	int type,par1,par2;//type=1 for note, type=2 for controller, type=255 for time messages
     } tmpevent;
     struct listpos{
 	event ev;

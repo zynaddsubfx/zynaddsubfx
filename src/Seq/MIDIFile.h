@@ -52,6 +52,8 @@ class MIDIFile{
 	void parsecontrolchange(char ntrack,char chan,unsigned int dt);
 	void parsepitchwheel(char ntrack,char chan, unsigned int dt);
 	void parsemetaevent(unsigned char mtype,unsigned char mlength);
+
+	void add_dt(char ntrack, unsigned int dt);
 	
 	void clearmidifile();
 

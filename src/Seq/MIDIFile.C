@@ -133,7 +133,7 @@ int MIDIFile::parsetrack(int ntrack){
 	
 ///	printf("MSGDELTATIME = %d\n",msgdeltatime);
 	
-	dt+=msgdeltatime;
+//	dt+=msgdeltatime;
 
 	int msg=peekbyte();
 ///	printf("raw msg=0x%x     ",msg);
@@ -144,6 +144,9 @@ int MIDIFile::parsetrack(int ntrack){
 	    getbyte();
 	};  
 ///	printf("msg=0x%x\n",msg);
+
+//	dt+=msgdeltatime;
+	add_dt(ntrack, msgdeltatime);
 	
 	unsigned int mtype,mlength;
 	
@@ -193,6 +196,8 @@ int MIDIFile::parsetrack(int ntrack){
 		return(-1);
   	     break;
 	};
+
+
 	
 	if (midieof) return(-1);
 
@@ -291,6 +296,16 @@ void MIDIFile::parsemetaevent(unsigned char mtype,unsigned char mlength){
     midifilek=oldmidifilek+mlength;
         
 };
+
+void MIDIFile::add_dt(char ntrack, unsigned int dt){
+    me->tmpevent.deltatime=convertdt(dt);
+    me->tmpevent.type=255;
+    me->tmpevent.par1=0;
+    me->tmpevent.par2=0;
+    me->tmpevent.channel=0;
+    me->writeevent(&me->miditrack[ntrack].record,&me->tmpevent);
+};
+
 
 unsigned int MIDIFile::convertdt(unsigned int dt){
     double result=dt;
