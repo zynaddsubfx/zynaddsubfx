@@ -61,7 +61,7 @@ void JACKaudiooutputinit(Master *master_){
     int rbbufsize=SOUND_BUFFER_SIZE*sizeof (REALTYPE)*2*2;
     printf("%d\n",rbbufsize);
     rb=jack_ringbuffer_create(rbbufsize);
-    memset(rb->buf,rbbufsize,0);
+    for (int i=0;i<rbuffersize) rb->buf[i]=0.0;
 
 
     for (int i=0;i<15;i++){

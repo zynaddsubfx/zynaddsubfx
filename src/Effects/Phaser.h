@@ -36,6 +36,7 @@ class Phaser:public Effect {
 	void changepar(int npar,unsigned char value);
 	unsigned char getpar(int npar);
 	void cleanup();
+	void setdryonly();
 		
     private:
 	//Parametrii Phaser
@@ -60,7 +61,7 @@ class Phaser:public Effect {
 	
 	//Valorile interne
 	int insertion;
-	REALTYPE volume,panning,fb,depth,lrcross,fbl,fbr,phase;
+	REALTYPE panning,fb,depth,lrcross,fbl,fbr,phase;
 	REALTYPE *oldl,*oldr;
 	REALTYPE oldlgain,oldrgain;
 };

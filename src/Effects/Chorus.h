@@ -60,7 +60,7 @@ class Chorus:public Effect {
 	void setlrcross(unsigned char Plrcross);
 
 	//Valorile interne
-	REALTYPE depth,delay,fb,lrcross,volume,panning;
+	REALTYPE depth,delay,fb,lrcross,panning;
 	REALTYPE dl1,dl2,dr1,dr2,lfol,lfor;
 	int insertion,maxdelay;
 	REALTYPE *delayl,*delayr;

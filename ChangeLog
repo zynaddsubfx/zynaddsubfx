@@ -607,5 +607,48 @@
 03 Iul 2004 - Corectata o mica eroare care nu activa la EffectUI daca efectul anterior era dezactivat
 	    - Actualizat Swap/Copy la efecte ca sa proceseze si parametrii la filtre
 	    - Adaugat Bypass la efectele de instrument
-	    - Imbunatatit interfata utilizator (eliminate setarile "-1",etc);
+	    - Imbunatatit interfata utilizator (eliminate setarile "-1",etc.)
+	    - Scris calcularea profilului la PADsynth
+	    - Adaugat OscilGen si Resonance la PADsynth si inceput sa scriu interfata utilizator la PADsynth
+04 Iul 2004 - Adaugata calcularea automata a largimii de banda echivalente si afisarea ei
+	    - Inceput sa scriu partea de sinteza la PADsynth
+	    - Auzit primul sunet la PADsynth
+05 Iul 2004 - Nu mai face urat daca schimb parametrii in timp ce cant si apas apply
+	    - Adaugat harmonic scale si position la PADsynth
+	    - Se calculeaza corect si armonicele cu largime de banda mare
+06 Iul 2004 - Inceput sa adaug filtre,lfo,envelopes,etc. la PADsynth
+07 Iul 2004 - Corectate cateva mici erori si adaugat autoscale
+	    - Modificata putin interfata de la filtru
+	    - Adaugata interfata si parametrii la LFOs,Envelopes,Filter la PADsynth
+	    - Adaugata fereastra care arata pozitiile armonicelor si continuat de lucru la acestea
+08 Iul 2004 - La pozitiile armonicelor sunt aratate si valorile lor reale in dB
+	    - Alte adaugiri minore la PADsynth
+	    - Adaugat interpolare cubica la PADsynth
+09 Iul 2004 - Modificat modul cum se calculeaza profilul armonicelor la PADsynth (nu se mai ridica la patrat)
+	    - Corectate cateva erori la PADsynth
+	    - Modific amplitudinea in functie de sqrt(largime de banda) => amplitudinile armonicelor sunt echivalente cu oscil
+11 Iul 2004 - Acum nu se mai intrerupe sunetul la notele care canta in timp ce sunt aplicate modificarile la parametrii
+	    - Se poate alege marimea sample-lui
+	    - Adaugat multisampling la PADsynth
+	    - Cand se incarca parametrii ADsynth se da volumul ceva mai incet ca sa corecteze faptul ca normalize-ul este doar RMS
+12 Iul 2004 - Inlocuit codul de D/W sau Volume de la efecte cu un cod unic in EffectMgr
+	    - Se poate face efecte la instrumente la care doar semnalul Wet e procesat de efectele urmatoare
+	    - Modificat modul cum se calculeaza intensitatea Wet la Reverb si Echo
+	    - Corectata eroarea la FM care facea ca daca Adaptive Harmonics!=0 sa se calculeze FM-ul gresit
+13 Iul 2004 - Rezonanta la PADsynth se face in functie de armonica reala si nu de numarul de ordine al armonicei
+	    - LFO,Envelope, Filters, etc. merg la PADnote
+	    - Inceput sa fac partea de aratare ca parametrii au fost schimbati (butonul "Apply" se coloreaza in rosu)
+14 Iul 2004 - Butonul Apply la PADsynth se coloreaza in rosu cand se modifica ceva
+	    - Adaugat fixed freq. la PADsynth
+	    - Sunt salvati si parametrii PADsynth => consider in mod oficial ca PADsynth este complet
+15 Iul 2004 - Facuta o modificare la PADnoteUI care arata foarte frumos
+	    - Completata partea de save/load si stabilite noile extensii ale fisierelor: master - .XMZ, instrument - .XIZ, microtonal - .XSZ
+	    - Inlocuit memset cu un macro (ZERO) pentru ca memset nu seteaza toate valorile ci uneori doar prima valoare cu 0 (e o optimizare la gcc care face asta)
+	    - Corectate niste erori la makefile care aveau legatura cu compilarea in windows
+	    - Corectate 2 erori referitor la Banci de instrumente
+16 Iul 2004 - Adaugat inca noi tipuri de harmonic bandwidth scale
+	    - Adaugat inca un parametru la filter la OscilGen si inca un nou tip de filtru
+17 Iul 2004 - Corectata o eroare care facea sa crape programul uneori dupa ce scria instrumentul in banca
+	    - Modificata optiunea -l ca sa incarce un .xmz
+	    
 

@@ -163,7 +163,7 @@ delete (formantparswindow);} {}
   }
   Function {make_window()} {} {
     Fl_Window filterui {
-      xywh {303 417 275 75} type Double color 50 labelfont 1 hide
+      xywh {268 122 275 75} type Double color 50 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Group filterparamswindow {
@@ -280,15 +280,6 @@ formantfiltergraph->redraw();}
           code0 {o->value(pars->Pfreqtrack);}
           class WidgetPDial
         }
-        Fl_Counter stcounter {
-          label {St.}
-          callback {pars->Pstages=(int)o->value();
-formantfiltergraph->redraw();
-pars->changed=true;}
-          tooltip {Additional filter stages (in order to increase dB/oct. value and the order of the filter)} xywh {225 5 40 15} type Simple labelsize 10 align 4 minimum 1 maximum 127 step 1 textfont 1 textsize 12
-          code0 {o->bounds(0,MAX_FILTER_STAGES-1);}
-          code1 {o->value(pars->Pstages);}
-        }
         Fl_Dial vsnsadial {
           label {V.SnsA.}
           callback {if (velsnsamp!=NULL) *velsnsamp=(int)o->value();}
@@ -310,6 +301,15 @@ pars->changed=true;}
           code0 {o->value(pars->Pgain);}
           class WidgetPDial
         }
+        Fl_Choice stcounter {
+          label Stages
+          callback {pars->Pstages=(int)o->value();
+formantfiltergraph->redraw();
+pars->changed=true;} open
+          tooltip {Filter stages (in order to increase dB/oct. value and the order of the filter)} xywh {235 5 35 15} down_box BORDER_BOX labelsize 10 textfont 1 textsize 10
+          code1 {for (int i=0;i<MAX_FILTER_STAGES;i++) {char tmp[10];snprintf(tmp,10,"%dx",i+1);o->add(tmp);};}
+          code2 {o->value(pars->Pstages);}
+        } {}
       }
       Fl_Button editbutton {
         label Edit

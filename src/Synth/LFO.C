@@ -65,9 +65,9 @@ LFO::LFO(LFOParams *lfopars,REALTYPE basefreq){
     lfotype=lfopars->PLFOtype;
     lfodelay=lfopars->Pdelay/127.0*4.0;//0..4 sec
     incrnd=nextincrnd=1.0;
+    freqrndenabled=(lfopars->Pfreqrand!=0);
     computenextincrnd();
     computenextincrnd();//twice because I want incrnd & nextincrnd to be random
-    freqrndenabled=(lfopars->Pfreqrand!=0);
 };
 
 LFO::~LFO(){

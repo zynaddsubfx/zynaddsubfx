@@ -28,8 +28,10 @@
 #include "../globals.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Params/SUBnoteParameters.h"
+#include "../Params/PADnoteParameters.h"
 #include "../Synth/ADnote.h"
 #include "../Synth/SUBnote.h"
+#include "../Synth/PADnote.h"
 #include "../Params/Controller.h"
 #include "../Misc/Microtonal.h"
 #include "../DSP/FFTwrapper.h"
@@ -58,7 +60,7 @@ class Part{
 
 
       //saves the instrument settings to a XML file
-      //returns 0 for ok, 1 if there is a existing file or -1 if there is an error
+      //returns 0 for ok or <0 if there is an error
       int saveXML(char *filename);
       int loadXMLinstrument(const char *filename);
 
@@ -84,10 +86,11 @@ class Part{
       struct {
         unsigned char Penabled,Pmuted,Pminkey,Pmaxkey;
 	unsigned char *Pname;
-	unsigned char Padenabled,Psubenabled;
+	unsigned char Padenabled,Psubenabled,Ppadenabled;
 	unsigned char Psendtoparteffect;
         ADnoteParameters *adpars;
         SUBnoteParameters *subpars;
+        PADnoteParameters *padpars;
       } kit[NUM_KIT_ITEMS];
 
       
@@ -154,6 +157,7 @@ class Part{
 	struct {	
     	    ADnote *adnote;
     	    SUBnote *subnote;
+    	    PADnote *padnote;
 	    int sendtoparteffect;
 	} kititem[NUM_KIT_ITEMS];
 	int time;

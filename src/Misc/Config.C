@@ -57,7 +57,7 @@ Config::Config(){
 
     cfg.GzipCompression=3;
 
-//    cfg.Interpolation=0;
+    cfg.Interpolation=0;
 
     winwavemax=1;winmidimax=1;
 //try to find out how many input midi devices are there
@@ -82,7 +82,7 @@ Config::Config(){
 
     cfg.bankRootDirList=new char[MAX_STRING_SIZE];
 #if defined(OS_LINUX)
-    sprintf(cfg.bankRootDirList,"~/banks\n./\n/usr/share/zynaddsubfx/banks\n/usr/local/share/zynaddsubfx/banks\n");
+    sprintf(cfg.bankRootDirList,"~/banks\n./\n/usr/share/zynaddsubfx/banks\n/usr/local/share/zynaddsubfx/banks\n../banks\n");
 #else
     sprintf(cfg.bankRootDirList,"./");
 #endif
@@ -129,6 +129,7 @@ void Config::readConfig(char *filename){
 	xmlcfg->getparstr("bank_current",cfg.currentBankDir,MAX_STRING_SIZE);
 	xmlcfg->getparstr("bank_root_list",cfg.bankRootDirList,MAX_STRING_SIZE);
 
+	cfg.Interpolation=xmlcfg->getpar("interpolation",cfg.Interpolation,0,1);
 	//linux stuff
 	xmlcfg->getparstr("linux_oss_wave_out_dev",cfg.LinuxOSSWaveOutDev,MAX_STRING_SIZE);
 	xmlcfg->getparstr("linux_oss_seq_in_dev",cfg.LinuxOSSSeqInDev,MAX_STRING_SIZE);
@@ -164,6 +165,8 @@ void Config::saveConfig(char *filename){
 
 	xmlcfg->addparstr("bank_current",cfg.currentBankDir);
 	xmlcfg->addparstr("bank_root_list",cfg.bankRootDirList);
+
+	xmlcfg->addpar("interpolation",cfg.Interpolation);
 
 	//linux stuff
 	xmlcfg->addparstr("linux_oss_wave_out_dev",cfg.LinuxOSSWaveOutDev);

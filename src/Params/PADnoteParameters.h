@@ -23,13 +23,135 @@
 #ifndef PAD_NOTE_PARAMETERS_H
 #define PAD_NOTE_PARAMETERS_H
 
-
+#include "../Misc/XMLwrapper.h"
+#include "../DSP/FFTwrapper.h"
 #include "../globals.h"
+#include "../Synth/OscilGen.h"
+#include "../Synth/Resonance.h"
+#include "../Misc/Util.h"
+
+#include "EnvelopeParams.h"
+#include "LFOParams.h"
+#include "FilterParams.h"
+
+
 class PADnoteParameters{
     public:
-	PADnoteParameters();
+	PADnoteParameters(FFTwrapper *fft_,pthread_mutex_t *mutex_);
 	~PADnoteParameters();
+	
+	void defaults();
+	void add2XML(XMLwrapper *xml);
+        void getfromXML(XMLwrapper *xml);
+	
+	//returns a value between 0.0-1.0 that represents the estimation perceived bandwidth
+	REALTYPE getprofile(REALTYPE *smp,int size);
+	
+	//parameters
+	struct {
+	    struct{
+		unsigned char type;
+		unsigned char par1;
+	    }base;
+	    unsigned char freqmult;
+	    struct{
+		unsigned char par1;
+		unsigned char freq;
+	    }modulator;
+	    struct{
+		unsigned char mode;
+		unsigned char type;
+		unsigned char par1;
+		unsigned char par2;
+	    }amp;
+	    bool autoscale;
+	    unsigned char onehalf;
+	}Php;
+
+	
+	unsigned int Pbandwidth;//the values are from 0 to 1000 
+	unsigned char Pbwscale;
+	
+	struct{
+	    unsigned char type;
+	    unsigned char par1,par2,par3;//0..255
+	}Phrpos;
+
+	
+	struct {
+	    unsigned char samplesize;
+	    unsigned char basenote,oct,smpoct;
+	} Pquality;
+	
+	//frequency parameters
+	//If the base frequency is fixed to 440 Hz
+	unsigned char Pfixedfreq;
+
+	/* Equal temperate (this is used only if the Pfixedfreq is enabled)
+	   If this parameter is 0, the frequency is fixed (to 440 Hz);
+	   if this parameter is 64, 1 MIDI halftone -> 1 frequency halftone */
+	unsigned char PfixedfreqET;
+	unsigned short int PDetune;//fine detune
+	unsigned short int PCoarseDetune;//coarse detune+octave
+	unsigned char PDetuneType;//detune type
+
+	EnvelopeParams *FreqEnvelope; //Frequency Envelope
+    	LFOParams *FreqLfo;//Frequency LFO
+
+	//Amplitude parameters
+	unsigned char PStereo;
+	/* Panning -  0 - random 
+		      1 - left
+		     64 - center
+		    127 - right */
+	unsigned char PPanning;
+
+	unsigned char PVolume;
+
+	unsigned char PAmpVelocityScaleFunction;
+
+	EnvelopeParams *AmpEnvelope;
+   
+	LFOParams *AmpLfo;   
+
+	unsigned char PPunchStrength,PPunchTime,PPunchStretch,PPunchVelocitySensing;
+
+	//Filter Parameters
+	FilterParams *GlobalFilter;
+
+	// filter velocity sensing
+	unsigned char PFilterVelocityScale; 
+
+	// filter velocity sensing
+	unsigned char PFilterVelocityScaleFunction;
+    
+	EnvelopeParams *FilterEnvelope;
+	LFOParams *FilterLfo;
+	
+
+
+	
+	REALTYPE setPbandwidth(int Pbandwidth);//returns the BandWidth in cents
+	REALTYPE getNhr(int n);//gets the n-th overtone position relatively to N harmonic
+
+	void applyparameters(bool lockmutex);
+
+	OscilGen *oscilgen;
+	Resonance *resonance;
+	
+	struct{
+	    int size;
+	    REALTYPE basefreq;
+	    REALTYPE *smp;
+	}sample[PAD_MAX_SAMPLES],newsample;
+	
     private:
+	void generatespectrum(REALTYPE *spectrum, int size,REALTYPE basefreq,REALTYPE *profile,int profilesize,REALTYPE bwadjust);
+	void deletesamples();
+	void deletesample(int n);
+    
+	FFTwrapper *fft;
+	pthread_mutex_t *mutex;
 };
 
 

@@ -123,27 +123,10 @@ void Chorus::out(REALTYPE *smpsl,REALTYPE *smpsr){
             efxoutr[i] *= -1.0;
 	};
 
-    //Insertion effect
-    if (insertion!=0) {
-        REALTYPE v1,v2;
-	if (volume<0.5) {
-		v1=1.0;
-		v2=volume*2.0;
-	} else {
-		v1=(1.0-volume)*2.0;
-		v2=1.0;
-	};
-	for (i=0;i<SOUND_BUFFER_SIZE;i++){
-	    smpsl[i]=smpsl[i]*v1+efxoutl[i]*panning*v2*2.0;
-	    smpsr[i]=smpsr[i]*v1+efxoutr[i]*(1.0-panning)*v2*2.0;
-	};
-    } else {//System effect
-	for (i=0;i<SOUND_BUFFER_SIZE;i++){
-	    efxoutl[i]*=2.0*volume*panning;
-	    efxoutr[i]*=2.0*volume*(1.0-panning);
-	    smpsl[i]=efxoutl[i];
-	    smpsr[i]=efxoutr[i];
-	};
+
+    for (int i=0;i<SOUND_BUFFER_SIZE;i++){
+	efxoutl[i]*=panning;
+	efxoutr[i]*=(1.0-panning);
     };
 };
 

@@ -40,8 +40,8 @@ int XMLwrapper_whitespace_callback(mxml_node_t *node,int where){
 
 
 XMLwrapper::XMLwrapper(){
-    memset(&parentstack,0,sizeof(parentstack));
-    memset(&values,0,sizeof(values));
+    ZERO(&parentstack,sizeof(parentstack));
+    ZERO(&values,sizeof(values));
 
     stackpos=0;
     
@@ -55,8 +55,8 @@ XMLwrapper::XMLwrapper(){
 
     node=root=mxmlNewElement(tree,"ZynAddSubFX-data");
     
-    mxmlElementSetAttr(root,"version-major","0");
-    mxmlElementSetAttr(root,"version-minor","2");
+    mxmlElementSetAttr(root,"version-major","1");
+    mxmlElementSetAttr(root,"version-minor","0");
     
     //save zynaddsubfx specifications
     beginbranch("BASE_PARAMETERS");
@@ -87,8 +87,7 @@ int XMLwrapper::saveXMLfile(char *filename){
     
     int fnsize=strlen(filename)+100;
     char *filenamenew=new char [fnsize];
-    if ((compression)&&(filename[strlen(filename)-1]!='z')) snprintf(filenamenew,fnsize,"%sz",filename);
-	else snprintf(filenamenew,fnsize,"%s",filename);
+    snprintf(filenamenew,fnsize,"%s",filename);
     
     int result=dosavefile(filenamenew,compression,xmldata);
     
@@ -164,8 +163,8 @@ int XMLwrapper::loadXMLfile(const char *filename){
     if (tree!=NULL) mxmlDelete(tree);
     tree=NULL;
 
-    memset(&parentstack,0,sizeof(parentstack));
-    memset(&values,0,sizeof(values));
+    ZERO(&parentstack,sizeof(parentstack));
+    ZERO(&values,sizeof(values));
 
     stackpos=0;
 
@@ -205,7 +204,7 @@ char *XMLwrapper::doloadfile(const char *filename){
 
 	//rewind the file and load the data
 	xmldata=new char[filesize+1];
-	memset(xmldata,0,filesize+1);
+	ZERO(xmldata,filesize+1);
 
 	gzrewind(gzfile);
 	gzread(gzfile,xmldata,filesize);
@@ -220,7 +219,7 @@ char *XMLwrapper::doloadfile(const char *filename){
 	filesize=ftell(file);
 
 	xmldata=new char [filesize+1];
-	memset(xmldata,0,filesize+1);
+	ZERO(xmldata,filesize+1);
 	
 	rewind(file);
 	fread(xmldata,filesize,1,file);
@@ -296,7 +295,7 @@ int XMLwrapper::getparbool(char *name,int defaultpar){
 };
 
 void XMLwrapper::getparstr(char *name,char *par,int maxstrlen){
-    memset(par,0,maxstrlen);
+    ZERO(par,maxstrlen);
     node=mxmlFindElement(peek(),peek(),"string","name",name,MXML_DESCEND_FIRST);
     
     if (node==NULL) return;

@@ -36,6 +36,7 @@ EffectMgr::EffectMgr(int insertion_,pthread_mutex_t *mutex_){
 	efxoutr[i]=0.0;
     };
     filterpars=NULL;
+    dryonly=false;
     defaults();
 };
 
@@ -48,6 +49,7 @@ EffectMgr::~EffectMgr(){
 
 void EffectMgr::defaults(){
     changeeffect(0);
+    setdryonly(false);
 };
 
 /*
@@ -159,14 +161,60 @@ void EffectMgr::out(REALTYPE *smpsl,REALTYPE *smpsr){
 	if (insertion==0) 
 	    for (i=0;i<SOUND_BUFFER_SIZE;i++){
 	     smpsl[i]=0.0;smpsr[i]=0.0;
+	     efxoutl[i]=0.0;efxoutr[i]=0.0;
 	    };
 	return;
     };
     for (i=0;i<SOUND_BUFFER_SIZE;i++){
 	smpsl[i]+=denormalkillbuf[i];
 	smpsr[i]+=denormalkillbuf[i];
+	efxoutl[i]=0.0;
+	efxoutr[i]=0.0;
     };
     efx->out(smpsl,smpsr);
+    
+    REALTYPE volume=efx->volume;
+    
+    if (nefx==7){//this is need only for the EQ effect
+	for (i=0;i<SOUND_BUFFER_SIZE;i++){
+	    smpsl[i]=efxoutl[i];
+	    smpsr[i]=efxoutr[i];
+	};
+    };
+
+    //Insertion effect
+    if (insertion!=0) {
+        REALTYPE v1,v2;
+	if (volume<0.5) {
+		v1=1.0;
+		v2=volume*2.0;
+	} else {
+		v1=(1.0-volume)*2.0;
+		v2=1.0;
+	};
+	if ((nefx==1)||(nefx==2)) v2*=v2;//for Reverb and Echo, the wet function is not liniar
+	
+	if (dryonly){//this is used for instrument effect only
+    	    for (i=0;i<SOUND_BUFFER_SIZE;i++){
+		smpsl[i]*=v1;
+		smpsr[i]*=v1;
+		efxoutl[i]*=v2;
+		efxoutr[i]*=v2;
+	    };
+	}else{//normal instrument/insertion effect 
+    	    for (i=0;i<SOUND_BUFFER_SIZE;i++){
+		smpsl[i]=smpsl[i]*v1+efxoutl[i]*v2;
+		smpsr[i]=smpsr[i]*v1+efxoutr[i]*v2;
+	    };
+	};
+    } else {//System effect
+	for (i=0;i<SOUND_BUFFER_SIZE;i++){
+	    efxoutl[i]*=2.0*volume;
+	    efxoutr[i]*=2.0*volume;
+	    smpsl[i]=efxoutl[i];
+	    smpsr[i]=efxoutr[i];
+	};
+    };
     
 };
 
@@ -187,6 +235,10 @@ REALTYPE EffectMgr::getEQfreqresponse(REALTYPE freq){
 	else return(0.0);
 };
 
+
+void EffectMgr::setdryonly(bool value){
+    dryonly=value;
+};
 
 
 /*

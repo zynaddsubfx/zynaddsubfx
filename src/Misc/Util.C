@@ -196,7 +196,7 @@ void waveshapesmps(int n,REALTYPE *smps,unsigned char type,unsigned char drive){
 		};
 		break;
 	case 14:ws=pow(ws,5.0)*80.0+0.0001;//sigmoid
-		if (ws>10) tmpv=1.0;
+		if (ws>10.0) tmpv=0.5;
 		    else tmpv=0.5-1.0/(exp(ws)+1.0);
 		for (i=0;i<n;i++) {
 		    REALTYPE tmp=smps[i]*ws;
@@ -307,4 +307,13 @@ int loadbufferfile(Buffer *buf,const char *filename,int whatIload){
     delete(data);
     return(0);//OK
 };
+
+bool fileexists(char *filename){
+    struct stat tmp;
+    int result=stat(filename,&tmp);
+    if (result>=0) return(true);
+    
+    return(false);
+};
+
 

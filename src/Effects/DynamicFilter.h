@@ -38,6 +38,8 @@ class DynamicFilter:public Effect {
 	void changepar(int npar,unsigned char value);
 	unsigned char getpar(int npar);
 	void cleanup();
+
+//	void setdryonly();
     
     private:
 	//Parametrii DynamicFilter
@@ -59,7 +61,7 @@ class DynamicFilter:public Effect {
 	
 	//Valorile interne
 	int insertion;
-	REALTYPE volume,panning,depth,ampsns,ampsmooth;
+	REALTYPE panning,depth,ampsns,ampsmooth;
 	
 	Filter *filterl,*filterr;
 	

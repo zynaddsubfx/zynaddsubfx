@@ -86,7 +86,7 @@ class OscilGen{
 	  65..127 - each harmonic randomness - 127 is maximum*/
 	unsigned char Prand;
 	unsigned char Pwaveshaping,Pwaveshapingfunction;
-	unsigned char Pfiltertype,Pfilterpar;
+	unsigned char Pfiltertype,Pfilterpar1,Pfilterpar2;
 	unsigned char Pfilterbeforews;
 	unsigned char Psatype,Psapar;//spectrum adjust
 
@@ -105,6 +105,9 @@ class OscilGen{
 	//makes a new random seed for Amplitude Randomness
 	//this should be called every note on event
 	void newrandseed(unsigned int randseed);
+	
+	bool ADvsPAD;//if it is used by ADsynth or by PADsynth
+	
     private:
 	
 	REALTYPE hmag[MAX_AD_HARMONICS],hphase[MAX_AD_HARMONICS];//the magnituides and the phases of the sine/nonsine harmonics

@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0200 
+version 1.0105 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -15,13 +15,11 @@ decl {\#include "../Misc/Master.h"} {public
 decl {\#include "WidgetPDial.h"} {public
 } 
 
-class SeqUI {open
-} {
-  Function {make_window()} {open
-  } {
+class SeqUI {} {
+  Function {make_window()} {} {
     Fl_Window seqwin {
       label {Sequencer - ZynAddSubFX}
-      xywh {104 235 235 140} type Double visible
+      xywh {104 235 280 265} type Double hide
     } {
       Fl_Group {} {
         label Player
@@ -51,9 +49,13 @@ master->seq.stopplay();}
       }
       Fl_Value_Slider {} {
         label {Play speed}
-        callback {master->seq.setplayspeed((int) o->value());} selected
+        callback {master->seq.setplayspeed((int) o->value());}
         xywh {15 105 190 20} type {Horz Knob} minimum -128 maximum 128 step 1
         code0 {o->value(master->seq.playspeed);}
+      }
+      Fl_Box {} {
+        label {This is not finished} selected
+        xywh {25 155 225 90} labelfont 1 labelsize 30 align 128
       }
     }
   }

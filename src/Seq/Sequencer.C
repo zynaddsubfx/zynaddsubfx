@@ -135,18 +135,23 @@ void Sequencer::resettime(timestruct *t){
     t->rel=0.0;
     
     timeval tval;
-
+    
+    t->last=0.0;
+    #ifndef windows
     if (gettimeofday(&tval,NULL)==0)  
 	t->last=tval.tv_sec+tval.tv_usec*0.000001;
     else t->last=0.0;
+    #endif
     
 };
 
 void Sequencer::updatecounter(timestruct *t){
     timeval tval;
-    double current;
+    double current=0.0;
+    #ifndef OS_WINDOWS
     if (gettimeofday(&tval,NULL)==0)  
 	current=tval.tv_sec+tval.tv_usec*0.000001;
+    #endif
     else current=0.0;
     
     t->rel=current - t->last;

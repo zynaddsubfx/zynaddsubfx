@@ -48,7 +48,7 @@ ADnote::ADnote(ADnoteParameters *pars,Controller *ctl_,REALTYPE freq,REALTYPE ve
     stereo=pars->GlobalPar.PStereo;
 
     NoteGlobalPar.Detune=getdetune(pars->GlobalPar.PDetuneType
-		,pars->GlobalPar.PCoarseDetune,pars->GlobalPar.PDetune);;
+		,pars->GlobalPar.PCoarseDetune,pars->GlobalPar.PDetune);
     
     if (pars->GlobalPar.PPanning==0) NoteGlobalPar.Panning=RND;
 	else NoteGlobalPar.Panning=pars->GlobalPar.PPanning/128.0;
@@ -335,17 +335,16 @@ void ADnote::initparameters(){
  	   NoteVoicePar[nvoice].FMSmp=new REALTYPE[OSCIL_SIZE+OSCIL_SMP_EXTRA_SAMPLES];
 
 	   //Perform Anti-aliasing only on MORPH or RING MODULATION
-	   REALTYPE tmp=1.0;
-	   switch(NoteVoicePar[nvoice].FMEnabled){
-		case MORPH:
-		case RING_MOD:tmp=getFMvoicebasefreq(nvoice);
-		     break;
-		default: break;
-	   };
 
 	   int vc=nvoice; 
      	   if (partparams->VoicePar[nvoice].PextFMoscil!=-1) vc=partparams->VoicePar[nvoice].PextFMoscil;
 
+	   REALTYPE tmp=1.0;
+	   if ((partparams->VoicePar[vc].FMSmp->Padaptiveharmonics!=0)||
+		(NoteVoicePar[nvoice].FMEnabled==MORPH)||
+		(NoteVoicePar[nvoice].FMEnabled==RING_MOD)){
+		tmp=getFMvoicebasefreq(nvoice);
+	    };
 	   if (!partparams->GlobalPar.Hrandgrouping) partparams->VoicePar[vc].FMSmp->newrandseed(rand());
 	   
 	   oscposhiFM[nvoice]=(oscposhi[nvoice]+partparams->VoicePar[vc].FMSmp->get(NoteVoicePar[nvoice].FMSmp,tmp)) % OSCIL_SIZE;
@@ -550,7 +549,7 @@ inline void ADnote::fadein(REALTYPE *smps){
     int n;
     F2I(tmp,n);//how many samples is the fade-in    
     if (n>SOUND_BUFFER_SIZE) n=SOUND_BUFFER_SIZE;
-    for (int i=0;i<n;i++) {//fade-out
+    for (int i=0;i<n;i++) {//fade-in
 	REALTYPE tmp=0.5-cos((REALTYPE)i/(REALTYPE) n*PI)*0.5;
 	smps[i]*=tmp;
 	};

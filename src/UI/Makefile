@@ -4,7 +4,7 @@ include ../Makefile.inc
 	fluid -c $<
 
 objects=WidgetPDial.o EnvelopeUI.o LFOUI.o FilterUI.o VirKeyboard.o ConfigUI.o\
-	SUBnoteUI.o ResonanceUI.o OscilGenUI.o ADnoteUI.o EffUI.o BankUI.o \
+	SUBnoteUI.o ResonanceUI.o OscilGenUI.o ADnoteUI.o PADnoteUI.o EffUI.o BankUI.o \
 	PartUI.o MicrotonalUI.o SeqUI.o MasterUI.o 
 
 
@@ -19,6 +19,7 @@ ResonanceUI.o:ResonanceUI.fl ResonanceUI.cc ResonanceUI.h
 OscilGenUI.o:OscilGenUI.fl OscilGenUI.cc OscilGenUI.h
 ADnoteUI.o:ADnoteUI.fl ADnoteUI.cc ADnoteUI.h
 SUBnoteUI.o:SUBnoteUI.fl SUBnoteUI.cc SUBnoteUI.h
+PADnoteUI.o:PADnoteUI.fl PADnoteUI.cc PADnoteUI.h
 
 EffUI.o: EffUI.fl EffUI.cc EffUI.h
 BankUI.o: BankUI.fl BankUI.cc BankUI.h

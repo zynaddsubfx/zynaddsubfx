@@ -30,6 +30,9 @@ decl {\#include "ADnoteUI.h"} {public
 decl {\#include "SUBnoteUI.h"} {public
 } 
 
+decl {\#include "PADnoteUI.h"} {public
+} 
+
 decl {\#include "../Misc/Config.h"} {public
 } 
 
@@ -90,11 +93,11 @@ class PartKitItem {: {public Fl_Group}
   Function {make_window()} {private
   } {
     Fl_Window partkititem {
-      private xywh {4 556 590 27} type Double hide
+      private xywh {113 271 670 27} type Double hide
       class Fl_Group
     } {
       Fl_Group partkititemgroup {
-        private xywh {55 0 530 20} box FLAT_BOX
+        private xywh {55 0 605 20} box FLAT_BOX
         code0 {if (part->kit[n].Penabled==0) o->deactivate();}
       } {
         Fl_Counter minkcounter {
@@ -174,10 +177,25 @@ if (part->kit[n].Psubenabled!=0) subeditbutton->activate();
         Fl_Choice sendtoeffect {
           callback {if (o->value()!=0) part->kit[n].Psendtoparteffect=(int)o->value()-1;
     else part->kit[n].Psendtoparteffect=127;} open
-          xywh {540 0 45 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+          xywh {615 0 45 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
           code0 {o->add("OFF");char nrstr[10]; for(int i=0;i<NUM_PART_EFX;i++){sprintf(nrstr,"FX%d",i+1);o->add(nrstr);};}
           code1 {o->value(part->kit[n].Psendtoparteffect+1);if (part->kit[n].Psendtoparteffect==127) o->value(0);}
         } {}
+        Fl_Button padeditbutton {
+          label edit
+          callback {partui->showparameters(n,2);}
+          xywh {560 0 40 15} box THIN_UP_BOX labelsize 12
+          code0 {if (part->kit[n].Ppadenabled==0) o->deactivate();}
+          code1 {if (n==0) o->hide();}
+        }
+        Fl_Check_Button padcheck {
+          callback {part->kit[n].Ppadenabled=(int)o->value();
+if (part->kit[n].Ppadenabled!=0) padeditbutton->activate();
+       else padeditbutton->deactivate();}
+          private xywh {540 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 12 align 4
+          code0 {o->value(part->kit[n].Ppadenabled);}
+          code1 {if (n==0) o->hide();}
+        }
       }
       Fl_Check_Button enabledcheck {
         label 01
@@ -407,7 +425,7 @@ maxkcounter->do_callback();}
           label KLmt
           callback {int val=0;
 val=atoi(o->text());
-part->setkeylimit(val);} open selected
+part->setkeylimit(val);} open
           tooltip {Key Limit} xywh {210 155 50 20} down_box BORDER_BOX labelsize 10 align 8 textfont 1 textsize 10
         } {}
       }
@@ -586,8 +604,8 @@ part->ctl.portamento.updowntimestretch=x;}
       private xywh {121 424 390 145} type Double hide
     } {
       Fl_Counter inseffnocounter {
-        label {Ins.Effect No.}
-        callback {ninseff=(int) o->value();
+        label {FX No.}
+        callback {ninseff=(int) o->value()-1;
 insefftype->value(part->partefx[ninseff]->geteffect());
 //insefftype->do_callback();
 inseffectui->refresh(part->partefx[ninseff]);
@@ -595,10 +613,10 @@ int x=part->Pefxroute[ninseff];
 if (x==127) x=1;
 bypasseff->value(part->Pefxbypass[ninseff]);
 
-sendtochoice->value(x);}
-        xywh {5 110 80 20} type Simple labelfont 1 labelsize 11 align 6 minimum 0 maximum 127 step 1 textfont 1
-        code0 {o->bounds(0,NUM_PART_EFX-1);}
-        code1 {o->value(ninseff);}
+sendtochoice->value(x);} selected
+        xywh {5 110 80 20} type Simple labelfont 1 align 6 minimum 1 maximum 127 step 1 textfont 1
+        code0 {o->bounds(1,NUM_PART_EFX);}
+        code1 {o->value(ninseff+1);}
       }
       Fl_Choice insefftype {
         label EffType
@@ -658,13 +676,14 @@ inseffectui->refresh(part->partefx[ninseff]);}
       Fl_Button {} {
         label Close
         callback {partfx->hide();}
-        xywh {320 120 65 20}
+        xywh {325 115 60 20} box THIN_UP_BOX
       }
       Fl_Choice sendtochoice {
         label {Send To.}
         callback {int x=(int) o->value();
-if (x==1) x=127;
-part->Pefxroute[ninseff]=x;}
+part->Pefxroute[ninseff]=x;
+if (x==2) part->partefx[ninseff]->setdryonly(true);
+	else part->partefx[ninseff]->setdryonly(false);}
         xywh {235 110 80 15} down_box BORDER_BOX labelsize 11 align 6
         code0 {int x=part->Pefxroute[ninseff]; if (x==127) x=1;}
         code1 {o->value(x);}
@@ -677,6 +696,10 @@ part->Pefxroute[ninseff]=x;}
           label {Part Out}
           xywh {55 55 100 20} labelfont 1 labelsize 11
         }
+        menuitem {} {
+          label {Dry Out}
+          xywh {65 65 100 20} labelfont 1 labelsize 11
+        }
       }
       Fl_Check_Button bypasseff {
         label bypass
@@ -687,7 +710,7 @@ part->Pefxroute[ninseff]=x;}
     }
     Fl_Window instrumentkitlist {
       label {Instrument Kit}
-      xywh {70 61 590 370} type Double hide
+      xywh {113 324 670 370} type Double hide
     } {
       Fl_Button {} {
         label {Close Window}
@@ -695,12 +718,12 @@ part->Pefxroute[ninseff]=x;}
         xywh {375 350 160 20} box THIN_UP_BOX
       }
       Fl_Scroll kitlist {
-        xywh {0 15 590 330} type VERTICAL box THIN_UP_BOX
+        xywh {0 15 670 330} type VERTICAL box THIN_UP_BOX
         code0 {if (part->Pkitmode==0) o->deactivate();}
       } {
         Fl_Pack {} {
-          xywh {0 20 590 320}
-          code0 {for (int i=0;i<NUM_KIT_ITEMS;i++){partkititem[i]=new PartKitItem(0,0,590,20,"");partkititem[i]->init(part,i,master,this);}}
+          xywh {0 20 670 320}
+          code0 {for (int i=0;i<NUM_KIT_ITEMS;i++){partkititem[i]=new PartKitItem(0,0,670,20,"");partkititem[i]->init(part,i,master,this);}}
         } {}
       }
       Fl_Box {} {
@@ -725,7 +748,7 @@ part->Pefxroute[ninseff]=x;}
       }
       Fl_Box {} {
         label SUBsynth
-        xywh {475 0 60 15} labelfont 1 labelsize 12 align 18
+        xywh {470 0 60 15} labelfont 1 labelsize 12 align 18
       }
       Fl_Button swapcopybutton {
         label {Swap/Copy...}
@@ -778,7 +801,11 @@ if (part->Pkitmode==0) {
       }
       Fl_Box {} {
         label {FX.r.}
-        xywh {545 0 30 15} labelfont 1 labelsize 12 align 18
+        xywh {620 0 30 15} labelfont 1 labelsize 12 align 18
+      }
+      Fl_Box {} {
+        label PADsynth
+        xywh {540 0 60 15} labelfont 1 labelsize 12 align 18
       }
     }
     Fl_Window swapwindow {
@@ -839,7 +866,7 @@ subsynenabledcheck->value(part->kit[0].Psubenabled);}
     }
     Fl_Window instrumenteditwindow {
       label {Instrument Edit}
-      xywh {60 156 395 360} type Double hide
+      xywh {182 214 395 360} type Double hide
     } {
       Fl_Group {} {
         xywh {0 220 395 110} box ENGRAVED_FRAME
@@ -850,15 +877,14 @@ subsynenabledcheck->value(part->kit[0].Psubenabled);}
         } {
           Fl_Button {} {
             label Edit
-            callback {//showparameters(0,1);
-fl_alert("Oops... try again...")}
+            callback {showparameters(0,2);}
             xywh {215 280 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 18 align 128
           }
           Fl_Check_Button padsynenabledcheck {
             label Enabled
-            callback {//part->kit[0].Padenabled=(int) o->value();}
+            callback {part->kit[0].Ppadenabled=(int) o->value();}
             tooltip {enable/disable PADsynth} xywh {215 255 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
-            code1 {//o->value(part->kit[0].Padenabled);}
+            code1 {o->value(part->kit[0].Ppadenabled);}
           }
         }
         Fl_Group {} {
@@ -1008,6 +1034,7 @@ fl_alert("Oops... try again...")}
     code {part=NULL;
 adnoteui=NULL;
 subnoteui=NULL;
+padnoteui=NULL;
 lastkititem=-1;} {}
   }
   Function {init(Part *part_,Master *master_,int npart_,BankUI *bankui_)} {} {
@@ -1052,7 +1079,8 @@ keylimitlist->value(val);} {}
 if (kititem!=lastkititem){
     if (adnoteui!=NULL) delete (adnoteui);
     if (subnoteui!=NULL) delete (subnoteui);   
-    adnoteui=NULL;subnoteui=NULL;
+    if (padnoteui!=NULL) delete (padnoteui);
+    adnoteui=NULL;subnoteui=NULL;padnoteui=NULL;
     lastkititem=kititem;
 
     if (kititem>=NUM_KIT_ITEMS) return;//bad kit item
@@ -1063,18 +1091,24 @@ if (kititem!=lastkititem){
 
     if (part->kit[kititem].subpars!=NULL) 
        subnoteui=new SUBnoteUI(part->kit[kititem].subpars);
+
+    if (part->kit[kititem].padpars!=NULL) 
+      padnoteui=new PADnoteUI(part->kit[kititem].padpars,master);
+
 };
 
 
 
 if ((engine==0)&&(adnoteui!=NULL)) adnoteui->ADnoteGlobalParameters->show();
-if ((engine==1)&&(subnoteui!=NULL)) subnoteui->SUBparameters->show();} {}
+if ((engine==1)&&(subnoteui!=NULL)) subnoteui->SUBparameters->show();
+if ((engine==2)&&(adnoteui!=NULL)) padnoteui->padnotewindow->show();} {}
   }
   Function {~PartUI()} {} {
     code {config.ui.showinstrumentinfo=instrumenteditwindow->visible();
 
 if (adnoteui!=NULL) delete (adnoteui);
 if (subnoteui!=NULL) delete (subnoteui);
+if (padnoteui!=NULL) delete (padnoteui);
 
 partgroup->hide();
 delete(partgroup);
@@ -1096,6 +1130,7 @@ delete(instrumenteditwindow);} {}
   decl {BankUI *bankui;} {}
   decl {ADnoteUI *adnoteui;} {}
   decl {SUBnoteUI *subnoteui;} {}
+  decl {PADnoteUI *padnoteui;} {}
   decl {PartSysEffSend *psyef[NUM_SYS_EFX];} {}
   decl {int npart;} {}
   decl {int ninseff;} {}

@@ -85,6 +85,29 @@ void Resonance::applyres(int n,REALTYPE *fftdata,REALTYPE freq){
 };
 
 /*
+ * Gets the response at the frequency "freq"
+ */
+
+REALTYPE Resonance::getfreqresponse(REALTYPE freq){
+    REALTYPE l1=log(getfreqx(0.0)*ctlcenter),
+	     l2=log(2.0)*getoctavesfreq()*ctlbw,sum=0.0;
+	
+    for (int i=0;i<N_RES_POINTS;i++) if (sum<Prespoints[i]) sum=Prespoints[i];
+    if (sum<1.0) sum=1.0;
+
+    REALTYPE x=(log(freq)-l1)/l2;//compute where the n-th hamonics fits to the graph
+    if (x<0.0) x=0.0;
+    x*=N_RES_POINTS;
+    REALTYPE dx=x-floor(x);x=floor(x);
+    int kx1=(int)x; if (kx1>=N_RES_POINTS) kx1=N_RES_POINTS-1;
+    int kx2=kx1+1;if (kx2>=N_RES_POINTS) kx2=N_RES_POINTS-1;
+    REALTYPE result=(Prespoints[kx1]*(1.0-dx)+Prespoints[kx2]*dx)/127.0-sum/127.0;
+    result=pow(10.0,result*PmaxdB/20.0);
+    return(result);
+};
+
+
+/*
  * Smooth the resonance function
  */
 void Resonance::smooth(){

@@ -31,7 +31,6 @@ Filter::Filter(FilterParams *pars){
     
     category=pars->Pcategory;
     
-    
     switch (category) {
 	case 1:filter=new FormantFilter(pars);
 		break;

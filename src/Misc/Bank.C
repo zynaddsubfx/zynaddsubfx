@@ -34,14 +34,13 @@
 
 #include "Config.h"
 
-#define INSTRUMENT_EXTENSION ".xml"
-//.xzz
+#define INSTRUMENT_EXTENSION ".xiz"
 
 //if this file exists into a directory, this make the directory to be considered as a bank, even if it not contains a instrument file
 #define FORCE_BANK_DIR_FILE ".bankdir"
 
 Bank::Bank(){
-    memset(defaultinsname,0,PART_MAX_NAME_LEN);
+    ZERO(defaultinsname,PART_MAX_NAME_LEN);
     snprintf(defaultinsname,PART_MAX_NAME_LEN,"%s"," ");
         
     for (int i=0;i<BANK_SIZE;i++){
@@ -101,8 +100,8 @@ void Bank::setname(unsigned int ninstrument,const char *newname,int newslot){
     
     char newfilename[1000+1],tmpfilename[100+1];
     
-    memset(newfilename,0,1001);
-    memset(tmpfilename,0,101);
+    ZERO(newfilename,1001);
+    ZERO(tmpfilename,101);
     if (newslot>=0) snprintf(tmpfilename,100,"%4d-%s",newslot+1,newname);
 	else snprintf(tmpfilename,100,"%4d-%s",ninstrument+1,newname);
     
@@ -120,7 +119,7 @@ void Bank::setname(unsigned int ninstrument,const char *newname,int newslot){
 	tmpfilename[i]='_';
     };
 
-    snprintf(newfilename,1000,"%s/%s.xmlz",dirname,tmpfilename);
+    snprintf(newfilename,1000,"%s/%s.xiz",dirname,tmpfilename);
 
     rename(ins[ninstrument].filename,newfilename);
     snprintf(ins[ninstrument].filename,1000,"%s",newfilename);
@@ -156,7 +155,7 @@ void Bank::savetoslot(unsigned int ninstrument,Part *part){
     
     const int maxfilename=200;
     char tmpfilename[maxfilename+20];
-    memset(tmpfilename,0,maxfilename+20);
+    ZERO(tmpfilename,maxfilename+20);
 
     snprintf(tmpfilename,maxfilename,"%4d-%s",ninstrument+1,(char *)part->Pname);
 
@@ -174,16 +173,12 @@ void Bank::savetoslot(unsigned int ninstrument,Part *part){
 	tmpfilename[i]='_';
     };
 
-    strncat(tmpfilename,".xml",maxfilename+10);
+    strncat(tmpfilename,".xiz",maxfilename+10);
 
     int fnsize=strlen(dirname)+strlen(tmpfilename)+10;
-    char *filename=new char[fnsize+1];
-    memset(filename,0,fnsize+2);
+    char *filename=new char[fnsize+4];
+    ZERO(filename,fnsize+2);
 
-    if (config.cfg.GzipCompression) {
-	tmpfilename[strlen(tmpfilename)]='z';
-	tmpfilename[strlen(tmpfilename)+1]=0;
-    };
     snprintf(filename,fnsize,"%s/%s",dirname,tmpfilename);
 
     remove(filename);
@@ -230,6 +225,7 @@ int Bank::loadbank(const char *bankdirname){
 	const char *filename= fn->d_name;
 	
 	//sa verific daca e si extensia dorita
+	if (strstr(filename,INSTRUMENT_EXTENSION)==NULL) continue;
 	
 	//verify if the name is like this NNNN-name (where N is a digit)
 	int no=0;
@@ -248,7 +244,7 @@ int Bank::loadbank(const char *bankdirname){
 	if ((startname+1)<strlen(filename)) startname++;//to take out the "-"
 	
 	char name[PART_MAX_NAME_LEN+1]; 
-	memset(name,0,PART_MAX_NAME_LEN+1);
+	ZERO(name,PART_MAX_NAME_LEN+1);
 	snprintf(name,PART_MAX_NAME_LEN,"%s",filename);
 	
 	//remove the file extension
@@ -502,13 +498,13 @@ int Bank::addtobank(int pos, const char *filename, const char* name){
 void Bank::deletefrombank(int pos){
     if ((pos<0)||(pos>=BANK_SIZE)) return;
     ins[pos].used=false;
-    memset(ins[pos].name,0,PART_MAX_NAME_LEN+1);
+    ZERO(ins[pos].name,PART_MAX_NAME_LEN+1);
     if (ins[pos].filename!=NULL) {
 	delete (ins[pos].filename);
 	ins[pos].filename=NULL;
     };
     
-    memset(tmpinsname[pos],0,PART_MAX_NAME_LEN+20);
+    ZERO(tmpinsname[pos],PART_MAX_NAME_LEN+20);
     
 };
 

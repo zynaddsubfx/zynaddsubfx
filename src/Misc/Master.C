@@ -738,7 +738,7 @@ void Master::exportbankasxmldirectory(const char *bankfilename){
 	snprintf(nostr,10,"%4d",slot+1);
 	for (int i=0;i<strlen(nostr);i++) if (nostr[i]==' ') nostr[i]='0';
 	
-	snprintf(filename,1000,"%s/%s-%s.xml",directory,nostr,oldbank.getname(slot));
+	snprintf(filename,1000,"%s/%s-%s.xiz",directory,nostr,oldbank.getname(slot));
 	printf("%s\n",filename);
 	tmppart->saveXML(filename);
     };
@@ -807,18 +807,15 @@ void Master::add2XML(XMLwrapper *xml){
 
 
 int Master::saveXML(char *filename){
-
-    //sa pun aici un test daca exista fisierul
-
     XMLwrapper *xml=new XMLwrapper();
 
     xml->beginbranch("MASTER");
     add2XML(xml);
     xml->endbranch();
 
-    xml->saveXMLfile(filename);
+    int result=xml->saveXMLfile(filename);
     delete (xml);
-    return(0);
+    return(result);
 };
 
 
@@ -839,7 +836,6 @@ int Master::loadXML(char *filename){
 };
 
 void Master::getfromXML(XMLwrapper *xml){
-
     setPvolume(xml->getpar127("volume",Pvolume));
     setPkeyshift(xml->getpar127("key_shift",Pkeyshift));
     ctl.NRPN.receive=xml->getparbool("nrpn_receive",ctl.NRPN.receive);

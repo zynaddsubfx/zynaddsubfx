@@ -36,6 +36,7 @@ class Echo:public Effect{
 	unsigned char getpar(int npar);
 	void cleanup();
 
+	void setdryonly();
     private:
 	//Parametrii
 	unsigned char Pvolume;//Volumul or E/R
@@ -55,7 +56,7 @@ class Echo:public Effect{
 	void sethidamp(unsigned char Phidamp);
 	
 	//Parametrii reali
-	REALTYPE volume,panning,lrcross,fb,hidamp;
+	REALTYPE panning,lrcross,fb,hidamp;
 	int dl,dr,delay,lrdelay;
 	
 	void initdelays();

@@ -1,7 +1,7 @@
 Begin4
 Title:		ZynAddSubFX 
-Version: 	1.4.3
-Entered-date: 	31-08-2003
+Version: 	2.0.0pre1
+Entered-date: 	17-07-2004
 Description: 	A real-time software synthesizer for Linux and Windows with many 
 		features, including polyphony, multi-timbral and microtonal 
 		capabilities. It includes randomness of some parameters,which 
@@ -14,7 +14,7 @@ Author:		zynaddsubfx@yahoo.com (Nasca Paul)
 Maintained-by: 	zynaddsubfx@yahoo.com (Nasca Paul)
 Primary-site: 	zynaddsubfx.sourceforge.net
 		sourceforge.net/projects/zynaddsubfx
-		189k ZynAddSubFX-1.4.3.tar.gz  (source code)
+		640k ZynAddSubFX-2.0.0pre1.tar.gz  (source code)
 Alternate-site: 
 Original-site:
 Platforms: 	Linux with X11 or Windows

@@ -260,9 +260,8 @@ class ADnoteParameters{
 	ADnoteGlobalParam GlobalPar;
 	ADnoteVoiceParam VoicePar[NUM_VOICES];
 
-	void add2XML(XMLwrapper *xml);
 	void defaults();
-
+	void add2XML(XMLwrapper *xml);
         void getfromXML(XMLwrapper *xml);
 
 	void saveloadbuf(Buffer *buf);

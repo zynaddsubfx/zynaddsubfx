@@ -47,7 +47,7 @@ class Master{
 	void exportbankasxmldirectory(const char *bankfilename);
 	
 	//saves all settings to a XML file
-	//returns 0 for ok, 1 if there is a existing file or -1 if there is an error
+	//returns 0 for ok  or <0 if there is an error
 	int saveXML(char *filename);
 
 	//this adds the parameters to the XML data

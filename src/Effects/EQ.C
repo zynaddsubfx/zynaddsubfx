@@ -79,22 +79,6 @@ void EQ::out(REALTYPE *smpsl,REALTYPE *smpsr){
 	filter[i].l->filterout(efxoutl);
 	filter[i].r->filterout(efxoutr);
     };
-    
-    //Insertion effect
-    if (insertion!=0) {
-	for (i=0;i<SOUND_BUFFER_SIZE;i++){
-	    smpsl[i]=efxoutl[i];
-	    smpsr[i]=efxoutr[i];
-	};
-    } else {//System effect
-	for (i=0;i<SOUND_BUFFER_SIZE;i++){
-	    efxoutl[i]*=2.0*volume;
-	    efxoutr[i]*=2.0*volume;
-	    smpsl[i]=efxoutl[i];
-	    smpsr[i]=efxoutr[i];
-	};
-    };
-    
 };
 
 

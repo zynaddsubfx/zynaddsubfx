@@ -62,6 +62,13 @@ extern int OSCIL_SIZE;
  */
 #define MAX_SUB_HARMONICS 64
 
+
+/*
+ * The maximum number of samples that are used for 1 PADsynth instrument(or item)
+ */
+#define PAD_MAX_SAMPLES 64
+
+
 /*
  * Number of parts
  */
@@ -176,6 +183,8 @@ extern int OSCIL_SIZE;
  * The random generator (0.0..1.0)
  */
 #define RND (rand()/(RAND_MAX+1.0))
+
+#define ZERO(data,size) {char *data_=(char *) data;for (int i=0;i<size;i++) data_[i]=0;};
 
 enum ONOFFTYPE{OFF=0,ON=1};
 

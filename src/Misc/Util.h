@@ -43,6 +43,8 @@ extern int savebufferfile(Buffer *buf,const char *filename,int overwrite,int wha
 extern int loadbufferfile(Buffer *buf,const char *filename,int whatIload);
 //whatIsave and whatIload are 0 for Master,1 Voice,2 for Microtonal...
 
+bool fileexists(char *filename);
+
 //Waveshaping(called by Distorsion effect and waveshape from OscilGen)
 void waveshapesmps(int n,REALTYPE *smps,unsigned char type,unsigned char drive);
 

@@ -67,7 +67,7 @@ class Alienwah:public Effect {
 	
 	//Valorile interne
 	int insertion;
-	REALTYPE volume,panning,fb,depth,lrcross,phase;
+	REALTYPE panning,fb,depth,lrcross,phase;
 	COMPLEXTYPE *oldl,*oldr;
 	COMPLEXTYPE oldclfol,oldclfor;
 	int oldk;

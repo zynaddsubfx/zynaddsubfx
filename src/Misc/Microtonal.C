@@ -662,3 +662,31 @@ void Microtonal::getfromXML(XMLwrapper *xml){
 };
 
 
+int Microtonal::saveXML(char *filename){
+    XMLwrapper *xml=new XMLwrapper();
+
+    xml->beginbranch("MICROTONAL");
+    add2XML(xml);
+    xml->endbranch();
+
+    int result=xml->saveXMLfile(filename);
+    delete (xml);
+    return(result);
+};
+
+int Microtonal::loadXML(char *filename){
+    XMLwrapper *xml=new XMLwrapper();
+    if (xml->loadXMLfile(filename)<0) {
+	delete(xml);
+	return(-1);
+    };
+    
+    if (xml->enterbranch("MICROTONAL")==0) return(-10);
+	getfromXML(xml);
+    xml->exitbranch();
+    
+    delete(xml);
+    return(0);
+};
+
+

@@ -37,6 +37,7 @@ OscilGen::OscilGen(FFTwrapper *fft_,Resonance *res_){
     basefuncFFTfreqs=NULL;
     outoscilFFTfreqs=NULL;
     randseed=1;
+    ADvsPAD=false;
 
     defaults();
 };
@@ -78,7 +79,8 @@ void OscilGen::defaults(){
     Pwaveshapingfunction=0;
     Pwaveshaping=64;
     Pfiltertype=0;
-    Pfilterpar=64;
+    Pfilterpar1=64;
+    Pfilterpar2=64;
     Pfilterbeforews=0;
     Psatype=0;
     Psapar=64;
@@ -328,48 +330,72 @@ void OscilGen::getbasefunction(REALTYPE *smps){
  */
 void OscilGen::oscilfilter(){
     if (Pfiltertype==0) return;
-    REALTYPE par=1.0-Pfilterpar/128.0;
-    REALTYPE max=0.0;
+    REALTYPE par=1.0-Pfilterpar1/128.0;
+    REALTYPE par2=Pfilterpar2/127.0;
+    REALTYPE max=0.0,tmp=0.0,p2,x;
     for (int i=1;i<OSCIL_SIZE/2;i++){
 	REALTYPE gain=1.0;
 	switch(Pfiltertype){
 	    case 1: gain=pow(1.0-par*par*par*0.99,i);//lp
+		    tmp=par2*par2*par2*par2*0.5+0.0001;
+		    if (gain<tmp) gain=pow(gain,10.0)/pow(tmp,9.0);
 		    break;
 	    case 2: gain=1.0-pow(1.0-par*par,i+1);//hp1
+		    gain=pow(gain,par2*2.0+0.1);
 		    break;
 	    case 3: if (par<0.2) par=par*0.25+0.15;
 		    gain=1.0-pow(1.0-par*par*0.999+0.001,i*0.05*i+1.0);//hp1b
-		    gain*=gain*gain;
+		    tmp=pow(5.0,par2*2.0);
+		    gain=pow(gain,tmp);
 		    break;
 	    case 4: gain=i+1-pow(2,(1.0-par)*7.5);//bp1
 		    gain=1.0/(1.0+gain*gain/(i+1.0));
-		    gain*=gain;
+		    tmp=pow(5.0,par2*2.0);
+		    gain=pow(gain,tmp);
 		    if (gain<1e-5) gain=1e-5;
 		    break;
 	    case 5: gain=i+1-pow(2,(1.0-par)*7.5);//bs1
 		    gain=pow(atan(gain/(i/10.0+1))/1.57,6);
+		    gain=pow(gain,par2*par2*3.9+0.1);
 		    break;
-	    case 6: gain=(i+1>pow(2,(1.0-par)*10)?0.0:1.0);//lp2
+	    case 6: tmp=pow(par2,0.33);
+		    gain=(i+1>pow(2,(1.0-par)*10)?0.0:1.0)*par2+(1.0-par2);//lp2
 		    break;
-	    case 7: gain=(i+1>pow(2,(1.0-par)*7)?1.0:0.0);//hp2
-		    if (Pfilterpar==0) gain=1.0;
+	    case 7: tmp=pow(par2,0.33);
+		    //tmp=1.0-(1.0-par2)*(1.0-par2);
+		    gain=(i+1>pow(2,(1.0-par)*7)?1.0:0.0)*par2+(1.0-par2);//hp2
+		    if (Pfilterpar1==0) gain=1.0;
 		    break;
-	    case 8: gain=(fabs(pow(2,(1.0-par)*7)-i)>i/2+1?0.0:1.0);//bp2
+	    case 8: tmp=pow(par2,0.33);
+		    //tmp=1.0-(1.0-par2)*(1.0-par2);
+	            gain=(fabs(pow(2,(1.0-par)*7)-i)>i/2+1?0.0:1.0)*par2+(1.0-par2);//bp2
 		    break;
-
-	    case 9: gain=(fabs(pow(2,(1.0-par)*7)-i)<i/2+1?0.0:1.0);//bs2
+	    case 9: tmp=pow(par2,0.33);
+		    gain=(fabs(pow(2,(1.0-par)*7)-i)<i/2+1?0.0:1.0)*par2+(1.0-par2);//bs2
 		    break;
-	    case 10:gain=cos(par*par*PI/2.0*i);//cos
+	    case 10:tmp=pow(5.0,par2*2.0-1.0);
+		    tmp=pow(i/32.0,tmp)*32.0;
+		    if (Pfilterpar2==64) tmp=i;
+		    gain=cos(par*par*PI/2.0*tmp);//cos
 		   gain*=gain;
 		   break;
-	    case 11:gain=sin(par*par*PI/2.0*i);//sin
+	    case 11:tmp=pow(5.0,par2*2.0-1.0);
+		    tmp=pow(i/32.0,tmp)*32.0;
+		    if (Pfilterpar2==64) tmp=i;
+		    gain=sin(par*par*PI/2.0*tmp);//sin
 		   gain*=gain;
 		   break;
-	    case 12:REALTYPE p2=1.0-par+0.2,x=i/(64.0*p2*p2); 
+	    case 12:p2=1.0-par+0.2;
+		    x=i/(64.0*p2*p2); 
 		     if (x<0.0) x=0.0;
 		        else if (x>1.0) x=1.0;
-		     gain=cos(x*PI)+1.5;//low shelf
+		     tmp=pow(1.0-par2,2.0);
+		     gain=cos(x*PI)*(1.0-tmp)+1.01+tmp;//low shelf
 		    break;
+	    case 13:tmp=(int) (pow(2.0,(1.0-par)*7.2));
+		    gain=1.0;
+		    if (i==(int) (tmp)) gain=pow(2.0,par2*par2*8.0);
+   		  break;
 	};
 	
 	
@@ -467,14 +493,14 @@ void OscilGen::modulation(){
 	     modulationpar3=Pmodulationpar3/127.0;
 
     switch(Pmodulation){
-        case 1:modulationpar1=(pow(2,modulationpar1*5.0)-1.0)/100.0;
+        case 1:modulationpar1=(pow(2,modulationpar1*7.0)-1.0)/100.0;
 	       modulationpar3=floor((pow(2,modulationpar3*5.0)-1.0));
 	       if (modulationpar3<0.9999) modulationpar3=-1.0;
 	    break;
-        case 2:modulationpar1=(pow(2,modulationpar1*5.0)-1.0)/100.0;
+        case 2:modulationpar1=(pow(2,modulationpar1*7.0)-1.0)/100.0;
 	       modulationpar3=1.0+floor((pow(2,modulationpar3*5.0)-1.0));
     	    break;
-	case 3:modulationpar1=(pow(2,modulationpar1*7.0)-1.0)/100.0;
+	case 3:modulationpar1=(pow(2,modulationpar1*9.0)-1.0)/100.0;
 	       modulationpar3=0.01+(pow(2,modulationpar3*16.0)-1.0)/10.0;
 	    break;
     };	
@@ -793,9 +819,9 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
     
     if ((oldbasepar!=Pbasefuncpar)||(oldbasefunc!=Pcurrentbasefunc)||(oldhmagtype!=Phmagtype)
 	||(oldwaveshaping!=Pwaveshaping)||(oldwaveshapingfunction!=Pwaveshapingfunction)) oscilprepared=0;
-    if (oldfilterpars!=Pfiltertype*256+Pfilterpar+Pfilterbeforews*65536){ 
+    if (oldfilterpars!=Pfiltertype*256+Pfilterpar1+Pfilterpar2*65536+Pfilterbeforews*16777216){ 
 	oscilprepared=0;
-	oldfilterpars=Pfiltertype*256+Pfilterpar+Pfilterbeforews*65536;
+	oldfilterpars=Pfiltertype*256+Pfilterpar1+Pfilterpar2*65536+Pfilterbeforews*16777216;
     };
     if (oldsapars!=Psatype*256+Psapar){ 
 	oscilprepared=0;
@@ -832,7 +858,10 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
     for (i=0;i<OSCIL_SIZE;i++) outoscilFFTfreqs[i]=0.0;
 
     nyquist=(int)(0.5*SAMPLE_RATE/fabs(freqHz))+2;
+    if (ADvsPAD) nyquist=(int)(OSCIL_SIZE/2);
     if (nyquist>OSCIL_SIZE/2) nyquist=OSCIL_SIZE/2;
+    
+    
     int realnyquist=nyquist;
     
     if (Padaptiveharmonics!=0) nyquist=OSCIL_SIZE/2;
@@ -911,13 +940,14 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
     sum=sqrt(sum);
     for (int j=1;j<OSCIL_SIZE;j++) outoscilFFTfreqs[j]/=sum; 
    
-
-
 //    for (i=0;i<OSCIL_SIZE/2;i++) outoscilFFTfreqs[i+OSCIL_SIZE/2]*=-1.0;//correct the amplitude
 
-    fft->freqs2smps(outoscilFFTfreqs,smps);
-
-    for (i=0;i<OSCIL_SIZE;i++) smps[i]*=0.25;//correct the amplitude
+    if ((ADvsPAD)&&(freqHz>0.1)){
+        for (i=1;i<OSCIL_SIZE/2;i++) smps[i-1]=sqrt(outoscilFFTfreqs[i]*outoscilFFTfreqs[i]+outoscilFFTfreqs[OSCIL_SIZE-i]*outoscilFFTfreqs[OSCIL_SIZE-i]);
+    } else {
+	fft->freqs2smps(outoscilFFTfreqs,smps);
+        for (i=0;i<OSCIL_SIZE;i++) smps[i]*=0.25;//correct the amplitude
+    };
 
     delete(outoscilFFTfreqs);
     outoscilFFTfreqs=NULL;
@@ -1151,7 +1181,7 @@ void OscilGen::saveloadbuf(Buffer *buf){
 //			break;
 	    case 0x89:	buf->rwbytepar(n,&Pfiltertype);
 			break;
-	    case 0x8A:	buf->rwbytepar(n,&Pfilterpar);
+	    case 0x8A:	buf->rwbytepar(n,&Pfilterpar1);
 			break;
 	    case 0x8B:	buf->rwbytepar(n,&Pfilterbeforews);
 			break;
@@ -1198,7 +1228,8 @@ void OscilGen::add2XML(XMLwrapper *xml){
     xml->addpar("wave_shaping_function",Pwaveshapingfunction);
 
     xml->addpar("filter_type",Pfiltertype);
-    xml->addpar("filter_par",Pfilterpar);
+    xml->addpar("filter_par1",Pfilterpar1);
+    xml->addpar("filter_par2",Pfilterpar2);
     xml->addpar("filter_before_wave_shaping",Pfilterbeforews);
 
     xml->addpar("spectrum_adjust_type",Psatype);
@@ -1269,7 +1300,8 @@ void OscilGen::getfromXML(XMLwrapper *xml){
     Pwaveshapingfunction=xml->getpar127("wave_shaping_function",Pwaveshapingfunction);
 
     Pfiltertype=xml->getpar127("filter_type",Pfiltertype);
-    Pfilterpar=xml->getpar127("filter_par",Pfilterpar);
+    Pfilterpar1=xml->getpar127("filter_par1",Pfilterpar1);
+    Pfilterpar1=xml->getpar127("filter_par2",Pfilterpar2);
     Pfilterbeforews=xml->getpar127("filter_before_wave_shaping",Pfilterbeforews);
 
     Psatype=xml->getpar127("spectrum_adjust_type",Psatype);

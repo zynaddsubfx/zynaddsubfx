@@ -24,13 +24,82 @@
 #include "../globals.h"
 #include "../Params/PADnoteParameters.h"
 #include "../Params/Controller.h"
+#include "Envelope.h"
+#include "LFO.h"
+#include "../DSP/Filter.h"
+#include "../Params/Controller.h"
 
 class PADnote{
     public:
 	PADnote(PADnoteParameters *parameters, Controller *ctl_,REALTYPE freq, REALTYPE velocity, int portamento_, int midinote);
 	~PADnote();
-    private:
 	
+        int noteout(REALTYPE *outl,REALTYPE *outr); 
+	int finished();
+	void relasekey();
+	
+	int ready;
+		
+    private:
+	void fadein(REALTYPE *smps);
+	void computecurrentparameters();
+	bool finished_;
+	PADnoteParameters *pars;
+	
+	int poshi_l,poshi_r;
+	REALTYPE poslo;
+	
+	REALTYPE basefreq;
+	bool firsttime,released;
+	
+	int nsample,portamento;
+
+        int Compute_Linear(REALTYPE *outl,REALTYPE *outr,int freqhi,REALTYPE freqlo); 
+        int Compute_Cubic(REALTYPE *outl,REALTYPE *outr,int freqhi,REALTYPE freqlo); 
+
+
+	struct{
+    	    /******************************************
+	    *     FREQUENCY GLOBAL PARAMETERS        *
+	    ******************************************/
+	    REALTYPE Detune;//cents
+
+	    Envelope *FreqEnvelope;
+	    LFO *FreqLfo;
+
+	   /********************************************
+	    *     AMPLITUDE GLOBAL PARAMETERS          *
+	    ********************************************/
+	    REALTYPE Volume;// [ 0 .. 1 ]
+
+	    REALTYPE Panning;// [ 0 .. 1 ]
+
+	    Envelope *AmpEnvelope;
+	    LFO *AmpLfo;   
+	
+	    struct {
+		int Enabled;
+		REALTYPE initialvalue,dt,t;
+	    } Punch;
+
+           /******************************************
+	    *        FILTER GLOBAL PARAMETERS        *
+	    ******************************************/
+	    Filter *GlobalFilterL,*GlobalFilterR;
+
+	    REALTYPE FilterCenterPitch;//octaves
+	    REALTYPE FilterQ;
+	    REALTYPE FilterFreqTracking;
+    
+	    Envelope *FilterEnvelope;
+    
+	    LFO *FilterLfo;
+	} NoteGlobalPar;  
+
+	
+	REALTYPE globaloldamplitude,globalnewamplitude,velocity,realfreq;
+	REALTYPE *tmpwave;
+	Controller *ctl;
 };
 
 

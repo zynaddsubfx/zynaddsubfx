@@ -47,6 +47,7 @@ class Resonance{
 
 	REALTYPE getfreqpos(REALTYPE freq);
 	REALTYPE getfreqx(REALTYPE x);
+	REALTYPE getfreqresponse(REALTYPE freq);
 	REALTYPE getcenterfreq();
 	REALTYPE getoctavesfreq();
 	void sendcontroller(MidiControllers ctl,REALTYPE par);

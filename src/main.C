@@ -309,7 +309,8 @@ void exitprogram(){
 
 #ifndef VSTAUDIOOUT
 int main(int argc, char *argv[]){
-    int loadfile=0,noui=0;
+    int noui=0;
+
     fprintf(stderr,"%s","\nZynAddSubFX - Copyright (c) 2002-2004 Nasca Octavian Paul\n");
     fprintf(stderr,"Compiled: %s %s\n",__DATE__,__TIME__);
     fprintf(stderr,"%s","This program is free software (GNU GPL v.2) and \n    it comes with ABSOLUTELY NO WARRANTY.\n\n");
@@ -340,6 +341,9 @@ int main(int argc, char *argv[]){
 #endif
     opterr=0;
     int option_index=0,opt,exitwithhelp=0;
+    
+    char loadfile[1001];ZERO(loadfile,1001);
+    
     while (1){
 #ifdef OS_LINUX
 	opt=getopt_long(argc,argv,"l:r:b:o:hSDU",opts,&option_index);
@@ -359,12 +363,7 @@ int main(int argc, char *argv[]){
 		     break;
 	    case 'l':tmp=0;
 	             if (optarguments!=NULL) {
-		        tmp=loadbufferfile(&slbuf,optarguments,0);
-		        if (tmp!=0) {
-			    fprintf(stderr,"ERROR:Could not load file  %s .\n",optarguments);
-			    exit(1);
-			};
-			loadfile=1;
+		        snprintf(loadfile,1000,"%s",optarguments);
 		     };
 		     break;
 	    case 'r':tmp=0;
@@ -405,7 +404,7 @@ int main(int argc, char *argv[]){
     if (exitwithhelp!=0) {
 	fprintf(stderr,"%s","Usage: zynaddsubfx [OPTION]\n\n");
 	fprintf(stderr,"%s","  -h , --help \t\t\t\t display command-line help and exit\n");
-	fprintf(stderr,"%s","  -l file, --load=FILE\t\t\t loads a .mas-zyn file\n");
+	fprintf(stderr,"%s","  -l file, --load=FILE\t\t\t loads a .xmz file\n");
 	fprintf(stderr,"%s","  -r SR, --sample-rate=SR\t\t set the sample rate SR\n");
 	fprintf(stderr,"%s","  -b BS, --buffer-size=SR\t\t set the buffer size (granularity)\n");
 	fprintf(stderr,"%s","  -o OS, --oscil-size=OS\t\t set the ADsynth oscil. size\n");
@@ -424,10 +423,12 @@ int main(int argc, char *argv[]){
     
     initprogram();
 
-    if (loadfile!=0){
-	slbuf.changemode(0);
-	master->part[0]->Penabled=0;
-	master->saveloadbuf(&slbuf);
+    if (strlen(loadfile)>1){
+        int tmp=master->loadXML(loadfile);
+	if (tmp<0) {
+	    fprintf(stderr,"ERROR:Could not load file  %s .\n",loadfile);
+	    exit(1);
+	};
     };
 
 #if !(defined(NONEMIDIIN)||defined(WINMIDIIN)||defined(VSTMIDIIN))

@@ -44,7 +44,6 @@ class Filter{
  private:
     Filter_ *filter;
     unsigned char category;
-    
 };
 
 

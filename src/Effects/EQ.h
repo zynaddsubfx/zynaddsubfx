@@ -50,7 +50,6 @@ class EQ:public Effect{
 	    AnalogFilter *l,*r;
 	}filter[MAX_EQ_BANDS];
 		
-	REALTYPE volume;
 };
 
 

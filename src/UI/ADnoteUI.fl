@@ -312,7 +312,7 @@ o->redraw();}
 int nv=nvoice;
 if (pars->VoicePar[nvoice].PextFMoscil>=0) nv=pars->VoicePar[nvoice].PextFMoscil;
 
-oscedit=new OscilEditor(pars->VoicePar[nv].FMSmp,fmoscil,master);}
+oscedit=new OscilEditor(pars->VoicePar[nv].FMSmp,fmoscil,NULL,master);} selected
                 xywh {700 370 55 15} box THIN_UP_BOX labelfont 1 labelsize 12
                 code0 {if (pars->VoicePar[nvoice].PextFMoscil>=0) o->labelcolor(FL_BLUE);}
               }
@@ -351,7 +351,7 @@ if ((int) o->value() != 0) {
     modoscil->activate();
     modfrequency->activate();
 };
-voiceFMparametersgroup->redraw();} open selected
+voiceFMparametersgroup->redraw();} open
               xywh {635 40 85 20} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
               code0 {o->add("OFF");}
               code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"ExtMod.%2d",i);o->add(tmp);};}
@@ -503,7 +503,7 @@ detunevalueoutput->do_callback();} open
 int nv=nvoice;
 if (pars->VoicePar[nvoice].Pextoscil>=0) nv=pars->VoicePar[nvoice].Pextoscil;
 
-oscedit=new OscilEditor(pars->VoicePar[nv].OscilSmp,voiceoscil,master);}
+oscedit=new OscilEditor(pars->VoicePar[nv].OscilSmp,voiceoscil,NULL,master);}
             xywh {5 475 65 20} box THIN_UP_BOX labelfont 1 labelsize 12
             code0 {if (pars->VoicePar[nvoice].Pextoscil>=0) o->labelcolor(FL_BLUE);}
           }

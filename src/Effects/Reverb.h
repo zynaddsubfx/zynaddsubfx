@@ -41,7 +41,7 @@ class Reverb:public Effect {
         void setpreset(unsigned char npreset);
 	void changepar(int npar,unsigned char value);
 	unsigned char getpar(int npar);
-	
+
     private:
 	//Parametrii
 	//Amount of the reverb,
@@ -92,7 +92,7 @@ class Reverb:public Effect {
 	void settype(unsigned char Ptype);
 	void setroomsize(unsigned char Proomsize);
 	
-	REALTYPE volume,pan,erbalance;
+	REALTYPE pan,erbalance;
 	//Parametrii 2	
 	int lohidamptype;//0=disable,1=highdamp(lowpass),2=lowdamp(highpass)
 	int idelaylen,rdelaylen;

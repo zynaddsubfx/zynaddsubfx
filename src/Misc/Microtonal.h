@@ -90,6 +90,8 @@ class Microtonal{
 
     	void add2XML(XMLwrapper *xml);
     	void getfromXML(XMLwrapper *xml);
+	int saveXML(char *filename);
+	int loadXML(char *filename);
 
     private:
 	int linetotunings(unsigned int nline,const char *line);

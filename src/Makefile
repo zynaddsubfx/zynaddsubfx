@@ -27,14 +27,14 @@ ifeq ($(MIDIIN),ALSA)
 LIBS+= -lasound
 endif
 
-ifeq ($(MIDIIN),WIN) 
-LIBS+= -lwinmm
-endif
-
-
 ifeq ($(AUDIOOUT),PA) 
 LIBS+= -lportaudio
 endif
+
+ifeq ($(OS_PORT),WINDOWS) 
+LIBS+= -lwinmm
+endif
+
 
 ifeq ($(AUDIOOUT),JACK) 
 CXXFLAGS += `pkg-config --cflags jack`

@@ -37,11 +37,12 @@ Part::Part(Microtonal *microtonal_,FFTwrapper *fft_, pthread_mutex_t *mutex_){
     
     for (int n=0;n<NUM_KIT_ITEMS;n++){
 	kit[n].Pname=new unsigned char [PART_MAX_NAME_LEN];
-	kit[n].adpars=NULL;kit[n].subpars=NULL;
+	kit[n].adpars=NULL;kit[n].subpars=NULL;kit[n].padpars=NULL;
     };
 
     kit[0].adpars=new ADnoteParameters(fft);
     kit[0].subpars=new SUBnoteParameters();
+    kit[0].padpars=new PADnoteParameters(fft,mutex);
 //    ADPartParameters=kit[0].adpars;
 //    SUBPartParameters=kit[0].subpars;
 
@@ -66,6 +67,7 @@ Part::Part(Microtonal *microtonal_,FFTwrapper *fft_, pthread_mutex_t *mutex_){
       for (j=0;j<NUM_KIT_ITEMS;j++){
         partnote[i].kititem[j].adnote=NULL;
         partnote[i].kititem[j].subnote=NULL;
+        partnote[i].kititem[j].padnote=NULL;
       };
       partnote[i].time=0;
     };
@@ -98,11 +100,11 @@ void Part::defaults(){
 };
 
 void Part::defaultsinstrument(){
-    memset(Pname,0,PART_MAX_NAME_LEN);
+    ZERO(Pname,PART_MAX_NAME_LEN);
 
     info.Ptype=0;
-    memset(info.Pauthor,0,MAX_INFO_TEXT_SIZE+1);
-    memset(info.Pcomments,0,MAX_INFO_TEXT_SIZE+1);
+    ZERO(info.Pauthor,MAX_INFO_TEXT_SIZE+1);
+    ZERO(info.Pcomments,MAX_INFO_TEXT_SIZE+1);
 
     Pkitmode=0;
     Pdrummode=0;
@@ -110,8 +112,8 @@ void Part::defaultsinstrument(){
     for (int n=0;n<NUM_KIT_ITEMS;n++){
 	kit[n].Penabled=0;kit[n].Pmuted=0;
 	kit[n].Pminkey=0;kit[n].Pmaxkey=127;
-	kit[n].Padenabled=0;kit[n].Psubenabled=0;
-	memset(kit[n].Pname,0,PART_MAX_NAME_LEN);
+	kit[n].Padenabled=0;kit[n].Psubenabled=0;kit[n].Ppadenabled=0;
+	ZERO(kit[n].Pname,PART_MAX_NAME_LEN);
 	kit[n].Psendtoparteffect=0;
 	if (n!=0) setkititemstatus(n,0);
     };
@@ -119,6 +121,7 @@ void Part::defaultsinstrument(){
     kit[0].Padenabled=1;
     kit[0].adpars->defaults();
     kit[0].subpars->defaults();
+    kit[0].padpars->defaults();
     
     for (int nefx=0;nefx<NUM_PART_EFX;nefx++) {
     	partefx[nefx]->defaults();
@@ -155,7 +158,8 @@ Part::~Part(){
     for (int n=0;n<NUM_KIT_ITEMS;n++){
 	if (kit[n].adpars!=NULL) delete (kit[n].adpars);
 	if (kit[n].subpars!=NULL) delete (kit[n].subpars);
-    	kit[n].adpars=NULL;kit[n].subpars=NULL;
+	if (kit[n].padpars!=NULL) delete (kit[n].padpars);
+    	kit[n].adpars=NULL;kit[n].subpars=NULL;kit[n].padpars=NULL;
 	delete(kit[n].Pname);
     };
 
@@ -237,7 +241,8 @@ void Part::NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift){
 		partnote[pos].kititem[0].sendtoparteffect=0;
         	if (kit[0].Padenabled!=0) partnote[pos].kititem[0].adnote=new ADnote(kit[0].adpars,&ctl,notebasefreq,vel,portamento,note);
         	if (kit[0].Psubenabled!=0) partnote[pos].kititem[0].subnote=new SUBnote(kit[0].subpars,&ctl,notebasefreq,vel,portamento,note);
-		if ((kit[0].Padenabled!=0)||(kit[0].Psubenabled!=0)) partnote[pos].itemsplaying++;
+        	if (kit[0].Ppadenabled!=0) partnote[pos].kititem[0].padnote=new PADnote(kit[0].padpars,&ctl,notebasefreq,vel,portamento,note);
+		if ((kit[0].Padenabled!=0)||(kit[0].Psubenabled!=0)||(kit[0].Ppadenabled!=0)) partnote[pos].itemsplaying++;
 
 	    } else {//init the notes for the "kit mode"
 		for (int item=0;item<NUM_KIT_ITEMS;item++){
@@ -255,9 +260,12 @@ void Part::NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift){
         	    if ((kit[item].subpars!=NULL)&&(kit[item].Psubenabled)!=0) 
 		      partnote[pos].kititem[ci].subnote=new SUBnote(kit[item].subpars,&ctl,notebasefreq,vel,portamento,note);
 
+        	    if ((kit[item].padpars!=NULL)&&(kit[item].Ppadenabled)!=0) 
+		      partnote[pos].kititem[ci].padnote=new PADnote(kit[item].padpars,&ctl,notebasefreq,vel,portamento,note);
+
 		    if ((kit[item].adpars!=NULL)|| (kit[item].subpars!=NULL)) {
 			partnote[pos].itemsplaying++;
-			if ( ((kit[item].Padenabled!=0)||(kit[item].Psubenabled!=0))
+			if ( ((kit[item].Padenabled!=0)||(kit[item].Psubenabled!=0)||(kit[item].Ppadenabled!=0))
 			   && (Pkitmode==2) ) break;
 		    };
 		};
@@ -355,7 +363,7 @@ void Part::SetController(unsigned int type,int par){
 
 void Part::RelaseSustainedKeys(){
     for (int i=0;i<POLIPHONY;i++)
-	if (partnote[i].status==KEY_RELASED_AND_SUSTAINED)  RelaseNotePos(i);
+	if (partnote[i].status==KEY_RELASED_AND_SUSTAINED) RelaseNotePos(i);
 };
 
 /*
@@ -384,6 +392,10 @@ void Part::RelaseNotePos(int pos){
      if (partnote[pos].kititem[j].subnote!=NULL) 
         if (partnote[pos].kititem[j].subnote!=NULL) 
 	  partnote[pos].kititem[j].subnote->relasekey();	    
+
+     if (partnote[pos].kititem[j].padnote!=NULL) 
+        if (partnote[pos].kititem[j].padnote) 
+	  partnote[pos].kititem[j].padnote->relasekey();
     };
     partnote[pos].status=KEY_RELASED;
 }; 
@@ -406,6 +418,10 @@ void Part::KillNotePos(int pos){
      if (partnote[pos].kititem[j].subnote!=NULL) {
 	    delete(partnote[pos].kititem[j].subnote);
 	    partnote[pos].kititem[j].subnote=NULL;
+     };
+     if (partnote[pos].kititem[j].padnote!=NULL) {
+	    delete(partnote[pos].kititem[j].padnote);
+	    partnote[pos].kititem[j].padnote=NULL;
      };
     };
     if (pos==ctl.portamento.noteusing) {
@@ -478,7 +494,8 @@ void Part::ComputePartSmps(){
 	    
 	    ADnote *adnote=partnote[k].kititem[item].adnote;
 	    SUBnote *subnote=partnote[k].kititem[item].subnote;
-	 //get from the ADnote
+	    PADnote *padnote=partnote[k].kititem[item].padnote;
+	   //get from the ADnote
             if (adnote!=NULL) {
     		noteplay++;
 		if (adnote->ready!=0) adnote->noteout(&tmpoutl[0],&tmpoutr[0]);
@@ -487,11 +504,11 @@ void Part::ComputePartSmps(){
 		    delete (adnote);
 		    partnote[k].kititem[item].adnote=NULL;
 		};
-	    for (i=0;i<SOUND_BUFFER_SIZE;i++){//add the ADnote to part(mix)
-		partfxinputl[sendcurrenttofx][i]+=tmpoutl[i];
-		partfxinputr[sendcurrenttofx][i]+=tmpoutr[i];
+		for (i=0;i<SOUND_BUFFER_SIZE;i++){//add the ADnote to part(mix)
+		    partfxinputl[sendcurrenttofx][i]+=tmpoutl[i];
+		    partfxinputr[sendcurrenttofx][i]+=tmpoutr[i];
+		};
 	    };
-	};
 	    //get from the SUBnote
     	    if (subnote!=NULL) {
     		noteplay++;
@@ -507,6 +524,20 @@ void Part::ComputePartSmps(){
 		    partnote[k].kititem[item].subnote=NULL;
 		};
 	    };	
+	   //get from the PADnote
+            if (padnote!=NULL) {
+    		noteplay++;
+		if (padnote->ready!=0) padnote->noteout(&tmpoutl[0],&tmpoutr[0]);
+            	    else for (i=0;i<SOUND_BUFFER_SIZE;i++){tmpoutl[i]=0.0;tmpoutr[i]=0.0;};
+		if (padnote->finished()!=0){
+		    delete (padnote);
+		    partnote[k].kititem[item].padnote=NULL;
+		};
+		for (i=0;i<SOUND_BUFFER_SIZE;i++){//add the PADnote to part(mix)
+		    partfxinputl[sendcurrenttofx][i]+=tmpoutl[i];
+		    partfxinputr[sendcurrenttofx][i]+=tmpoutr[i];
+		};
+	    };
 
 	};
 	//Kill note if there is no synth on that note
@@ -516,12 +547,21 @@ void Part::ComputePartSmps(){
 
     //Apply part's effects and mix them
     for (int nefx=0;nefx<NUM_PART_EFX;nefx++) {
-    	if (!Pefxbypass[nefx]) partefx[nefx]->out(partfxinputl[nefx],partfxinputr[nefx]);
-	int routeto=(Pefxroute[nefx]==0 ? nefx+1 : NUM_PART_EFX);
+    	if (!Pefxbypass[nefx]) {
+	    partefx[nefx]->out(partfxinputl[nefx],partfxinputr[nefx]);
+	    if (Pefxroute[nefx]==2){
+		for (i=0;i<SOUND_BUFFER_SIZE;i++){
+		    partfxinputl[nefx+1][i]+=partefx[nefx]->efxoutl[i];
+		    partfxinputr[nefx+1][i]+=partefx[nefx]->efxoutr[i];
+		};
+	    };
+	};
+	int routeto=((Pefxroute[nefx]==0) ? nefx+1 : NUM_PART_EFX);
 	for (i=0;i<SOUND_BUFFER_SIZE;i++){
 	    partfxinputl[routeto][i]+=partfxinputl[nefx][i];
 	    partfxinputr[routeto][i]+=partfxinputr[nefx][i];
 	};
+	
     };
     for (i=0;i<SOUND_BUFFER_SIZE;i++){
     	partoutl[i]=partfxinputl[NUM_PART_EFX][i];
@@ -568,15 +608,23 @@ void Part::setkititemstatus(int kititem,int Penabled_){
     if ((kititem==0)&&(kititem>=NUM_KIT_ITEMS)) return;//nonexistent kit item and the first kit item is always enabled
     kit[kititem].Penabled=Penabled_;
     
+    bool resetallnotes=false;
     if (Penabled_==0){
 	if (kit[kititem].adpars!=NULL) delete (kit[kititem].adpars);
 	if (kit[kititem].subpars!=NULL) delete (kit[kititem].subpars);
-	kit[kititem].adpars=NULL;kit[kititem].subpars=NULL;
+	if (kit[kititem].padpars!=NULL) {
+	    delete (kit[kititem].padpars);
+	    resetallnotes=true;
+	};
+	kit[kititem].adpars=NULL;kit[kititem].subpars=NULL;kit[kititem].padpars=NULL;
 	kit[kititem].Pname[0]='\0';
     } else {
 	if (kit[kititem].adpars==NULL) kit[kititem].adpars=new ADnoteParameters(fft);
 	if (kit[kititem].subpars==NULL) kit[kititem].subpars=new SUBnoteParameters();
+	if (kit[kititem].padpars==NULL) kit[kititem].padpars=new PADnoteParameters(fft,mutex);
     };
+    
+    if (resetallnotes) 	for (int k=0;k<POLIPHONY;k++) KillNotePos(k);
 };
 
 
@@ -913,8 +961,10 @@ void Part::saveloadbuf(Buffer *buf,int instrumentonly){
 			} else {
 			    unsigned char neffect;
 			    buf->rwbyte(&neffect);
-			    if (neffect<NUM_PART_EFX) buf->rwbyte(&Pefxroute[neffect]);
-			    else buf->rwbyte(&neffect);//this line just throw away the byte
+			    if (neffect<NUM_PART_EFX) {
+				buf->rwbyte(&Pefxroute[neffect]);
+				if (Pefxroute[neffect]==127) Pefxroute[neffect]=1;
+			    } else buf->rwbyte(&neffect);//this line just throw away the byte
 			};
 			break;
 	};
@@ -967,6 +1017,13 @@ void Part::add2XMLinstrument(XMLwrapper *xml){
 			kit[i].subpars->add2XML(xml);
 			xml->endbranch();
 		    };
+
+		    xml->addparbool("pad_enabled",kit[i].Ppadenabled);
+		    if ((kit[i].Ppadenabled!=0)&&(kit[i].padpars!=NULL)){
+			xml->beginbranch("PAD_SYNTH_PARAMETERS");
+			    kit[i].padpars->add2XML(xml);
+			xml->endbranch();
+		    };
 		
 		};
 	    xml->endbranch();
@@ -981,6 +1038,7 @@ void Part::add2XMLinstrument(XMLwrapper *xml){
 	    xml->endbranch();
 
 	    xml->addpar("route",Pefxroute[nefx]);
+	    partefx[nefx]->setdryonly(Pefxroute[nefx]==2);
 	    xml->addparbool("bypass",Pefxbypass[nefx]);
 	xml->endbranch();
     };
@@ -1018,9 +1076,6 @@ void Part::add2XML(XMLwrapper *xml){
 };
 
 int Part::saveXML(char *filename){
-
-    //sa pun aici un test daca exista fisierul
-
     XMLwrapper *xml;
     xml=new XMLwrapper();
 
@@ -1028,9 +1083,9 @@ int Part::saveXML(char *filename){
     add2XMLinstrument(xml);
     xml->endbranch();
 
-    xml->saveXMLfile(filename);
+    int result=xml->saveXMLfile(filename);
     delete (xml);
-    return(0);
+    return(result);
 };
 
 int Part::loadXMLinstrument(const char *filename){
@@ -1094,6 +1149,13 @@ void Part::getfromXMLinstrument(XMLwrapper *xml){
 		    xml->exitbranch();
 		};
 
+		kit[i].Ppadenabled=xml->getparbool("pad_enabled",kit[i].Ppadenabled);
+	    	if (xml->enterbranch("PAD_SYNTH_PARAMETERS")){
+		    kit[i].padpars->getfromXML(xml);
+		    if (kit[i].Ppadenabled!=0) kit[i].padpars->applyparameters(false);
+		    xml->exitbranch();
+		};
+
 		xml->exitbranch();
 	};
         
@@ -1110,11 +1172,13 @@ void Part::getfromXMLinstrument(XMLwrapper *xml){
 		};
 
 	    Pefxroute[nefx]=xml->getpar("route",Pefxroute[nefx],0,NUM_PART_EFX);
+	    partefx[nefx]->setdryonly(Pefxroute[nefx]==2);
 	    Pefxbypass[nefx]=xml->getparbool("bypass",Pefxbypass[nefx]);
 	    xml->exitbranch();
 	};
 	xml->exitbranch();
     };    
+
 };
 
 void Part::getfromXML(XMLwrapper *xml){

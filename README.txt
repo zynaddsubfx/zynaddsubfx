@@ -1,7 +1,7 @@
 ZynAddSubFX
 -----------
 It is a realtime software synthesizer for Linux and Windows with many features. Please see the docs for details.
-Copyright (c) 2002-2003 Nasca Octavian Paul 
+Copyright (c) 2002-2004 Nasca Octavian Paul 
 e-mail: zynaddsubfx AT yahoo D0T com
 ZynAddSubFX is free program and is distribuited WITH NO WARRANTY. It is licensed under GNU General Public License version 2 (and only version 2) - see the file COPYING.
 

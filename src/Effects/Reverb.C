@@ -167,39 +167,18 @@ void Reverb::out(REALTYPE *smps_l, REALTYPE *smps_r){
     if (lpf!=NULL) lpf->filterout(inputbuf);
     if (hpf!=NULL) hpf->filterout(inputbuf);
 
-    for (int i=0;i<SOUND_BUFFER_SIZE;i++){
-	efxoutl[i]=0.0;
-	efxoutr[i]=0.0;
-    };
-    
     processmono(0,efxoutl);//left
     processmono(1,efxoutr);//right
     
-    //Insertion effect
-    if (insertion!=0) {
-        REALTYPE v1,v2;
-	if (volume<0.5) {
-		v1=1.0;
-		v2=volume*2.0;
-	} else {
-		v1=(1.0-volume)*2.0;
-		v2=1.0;
-	};
-	v2*=rs/REV_COMBS*2.0;
-    	for (i=0;i<SOUND_BUFFER_SIZE;i++){
-	    smps_l[i]=smps_l[i]*v1+efxoutl[i]*v2*pan;
-	    smps_r[i]=smps_r[i]*v1+efxoutr[i]*v2*(1.0-pan);
-	};
-    } else {//System effect
-	REALTYPE vol=rs*2.0/REV_COMBS;
-	for (i=0;i<SOUND_BUFFER_SIZE;i++){
-	    efxoutl[i]*=vol*pan;
-	    efxoutr[i]*=vol*(1.0-pan);
-	    smps_l[i]=efxoutl[i];
-	    smps_r[i]=efxoutr[i];
-	};
+    REALTYPE lvol=rs/REV_COMBS*pan;
+    REALTYPE rvol=rs/REV_COMBS*(1.0-pan);
+    if (insertion!=0){
+	lvol*=2;rvol*=2;
     };
-
+    for (int i=0;i<SOUND_BUFFER_SIZE;i++){
+	efxoutl[i]*=lvol;
+	efxoutr[i]*=rvol;
+    };
 };
 
 

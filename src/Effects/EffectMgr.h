@@ -52,10 +52,12 @@ class EffectMgr{
 
 	void out(REALTYPE *smpsl,REALTYPE *smpsr);
 
+	void setdryonly(bool value);
+	
 	//get the output(to speakers) volume of the systemeffect
 	REALTYPE sysefxgetvolume();
 
-	void cleanup();//cleanup the effec5
+	void cleanup();//cleanup the effect
 	
 	void changeeffect(int nefx_);
 	int geteffect();
@@ -77,6 +79,7 @@ class EffectMgr{
 	int nefx;
 	Effect *efx;
 	pthread_mutex_t *mutex;
+	bool dryonly;
 };
 
 #endif

@@ -37,6 +37,7 @@ class Distorsion:public Effect{
 	unsigned char getpar(int npar);
 	void cleanup();
 	void applyfilters(REALTYPE *efxoutl,REALTYPE *efxoutr);
+
     private:
 	//Parametrii
 	unsigned char Pvolume; //Volumul or E/R
@@ -58,7 +59,7 @@ class Distorsion:public Effect{
 	void sethpf(unsigned char Phpf);
 	
 	//Parametrii reali
-	REALTYPE volume,panning,lrcross;
+	REALTYPE panning,lrcross;
 	AnalogFilter *lpfl,*lpfr,*hpfl,*hpfr;
 
 };

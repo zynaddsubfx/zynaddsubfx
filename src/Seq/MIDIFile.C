@@ -44,7 +44,7 @@ int MIDIFile::loadfile(char *filename){
     if (file==NULL) return(-1);
     
     char header[4];
-    memset(header,0,4);
+    ZERO(header,4);
     fread(header,4,1,file);
 
     //test to see if this a midi file
@@ -59,7 +59,7 @@ int MIDIFile::loadfile(char *filename){
     rewind(file);
     
     midifile=new unsigned char[midifilesize];
-    memset(midifile,0,midifilesize);
+    ZERO(midifile,midifilesize);
     fread(midifile,midifilesize,1,file);
     fclose(file);
 

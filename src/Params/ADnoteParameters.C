@@ -436,6 +436,7 @@ void ADnoteParameters::saveloadbuf(Buffer *buf){
 			break;
 	    //Amplitude Global Parameters
 	    case 0x90:	buf->rwbytepar(n,&GlobalPar.PVolume);
+			if (buf->getmode()==0) GlobalPar.PVolume=(int) (GlobalPar.PVolume*0.85);
 			break;
 	    case 0x91:	buf->rwbytepar(n,&GlobalPar.PAmpVelocityScaleFunction);
 			break;

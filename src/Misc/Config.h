@@ -37,7 +37,7 @@ class Config{
 	    int BankUIAutoClose;
 	    int DumpNotesToFile,DumpAppend;
 	    int GzipCompression;
-//	    int Interpolation;
+	    int Interpolation;
 	    char *DumpFile;
 	    char *bankRootDirList,*currentBankDir;
 	} cfg;

@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0200 
+version 1.0105 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -153,32 +153,32 @@ config.cfg.SoundBufferSize=strtoul(o->value(),&tmp,10);}
           }
           Fl_Box {} {
             label {Most settings has effect only after ZynAddSubFX is restarted.}
-            xywh {20 245 235 30} labelfont 1 labelsize 12 align 128
+            xywh {15 270 235 30} labelfont 1 labelsize 12 align 128
           }
           Fl_Box {} {
             label {Read the Readme.txt for other settings}
-            xywh {15 225 240 20} labelfont 1 labelsize 12 align 128
+            xywh {10 250 240 20} labelfont 1 labelsize 12 align 128
           }
           Fl_Group {} {
-            xywh {15 110 230 85} box ENGRAVED_BOX
+            xywh {15 130 230 85} box ENGRAVED_BOX
           } {
             Fl_File_Input {} {
               label {Dump File}
               callback {snprintf(config.cfg.DumpFile,config.maxstringsize,"%s",o->value());}
-              xywh {20 155 220 35} align 5
+              xywh {20 175 220 35} align 5
               code0 {o->insert(config.cfg.DumpFile);}
             }
             Fl_Check_Button {} {
               label {Dump notes}
               callback {config.cfg.DumpNotesToFile=(int) o->value();
 dump.startnow();//this has effect only if this option was disabled}
-              xywh {20 115 100 20} down_box DOWN_BOX
+              xywh {20 135 100 20} down_box DOWN_BOX
               code0 {o->value(config.cfg.DumpNotesToFile);}
             }
             Fl_Check_Button {} {
               label Append
               callback {config.cfg.DumpAppend=(int) o->value();}
-              xywh {160 115 80 20} down_box DOWN_BOX
+              xywh {160 135 80 20} down_box DOWN_BOX
               code0 {o->value(config.cfg.DumpAppend);}
             }
           }
@@ -228,12 +228,27 @@ midiinputnamebox->label(config.winmididevices[config.cfg.WindowsMidiInId].name);
           Fl_Counter {} {
             label {XML compression level}
             callback {config.cfg.GzipCompression=(int) o->value();}
-            tooltip {gzip compression level (0 - uncompressed)} xywh {20 205 65 15} type Simple labelsize 12 align 8 minimum 0 maximum 9 step 1
+            tooltip {gzip compression level (0 - uncompressed)} xywh {20 225 65 15} type Simple labelsize 12 align 8 minimum 0 maximum 9 step 1
             code0 {o->value(config.cfg.GzipCompression);}
+          }
+          Fl_Choice {} {
+            label {PADsynth Interpolation}
+            callback {config.cfg.Interpolation=(int) o->value();} selected
+            xywh {175 105 75 15} down_box BORDER_BOX labelsize 11 textsize 12
+            code0 {o->value(config.cfg.Interpolation);}
+          } {
+            menuitem {} {
+              label {Linear(fast)}
+              xywh {0 0 100 20} labelfont 1 labelsize 10
+            }
+            menuitem {} {
+              label {Cubic(slow)}
+              xywh {10 10 100 20} labelfont 1 labelsize 10
+            }
           }
         }
         Fl_Group {} {
-          label {Bank root dirs} open
+          label {Bank root dirs}
           xywh {5 25 500 285} hide
         } {
           Fl_Browser rootsbrowse {

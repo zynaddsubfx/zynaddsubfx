@@ -1,13 +1,23 @@
-      - started to write an integrated sequencer; I don't have to replace Rosengarden, Muse, etc. I want to make possible to store melodies directly into mas_zyn files, play them, convert to/from midi files
-      - speedups (on some portions, like FM, Chorus, etc. is 10-50%)
-      - added the posibility to use comments/copyritht text to instruments; in order to encourage the sharing of them
-      - you can make zynaddsubfx to load a file when it starts (with "-l") and you can disable the user interface ("-U")
-      - added dump of the events (it writes to a file all notes)
-      - added linear modulation whell controller and made default
-      - added FFTW3 support (but you can choose to user FFTW2) in the Makefile.inc
-      - added the possibility to make "up" portamentos shorter or longer than "down" portamentos
-      - bugfixes and other minor improvements
-      - added the full changelog (since I started to write zynaddsubfx), most is in Romanian
+2.0.0_pre1 (17 Iul 2004)
+	- Added a new powerful synth engine which is called PADsynth, you can make very beautifull pads and even some strange sounds
+	- Now is used the XML format for all zynaddsubfx parameters(.XMZ for master parameters, .XIZ for instrument parameters and .XSZ for scale parameters).You can import older parameters. All parameters files are compressed with gzip algorithm.
+	- Some parameters has changed and you might ecounter different sounds that you saved in the older versions of zynaddsubfx
+	- The instrument banks are no longer single files, but directories that contains instrument .XIZ files (you can organize them even with a file manager). Also, you can use more than 1 banks easily.
+	- Added a new effect called DynamicFilter that allows you to do WahWah,AutoWah, VocalMorpher and other effects
+	- Speedups
+	- Started to write a small sequencer that allows to load and play a midi file from zynaddsubfx (unfinished)
+	- ZynAddSubFX is available from CVS, too. Please look at the sourceforge project page to get more information ( http://sourceforge.net/projects/zynaddsubfx )
+	- The waveform generator (OscilGen) has many new parameters :) also if you press the "Shift" key, you can draw the hamonics amplitude/phases
+	- Many user interface improvements
+	- You can load a file at the start of the program with "-l" command-line parameter and you can run zynaddsubfx w/o user interface with "-U"
+	- It is possible to dump all MIDI notes into a text file
+	- The instruments can contain comments and copyright information in order to encourage sharing of them
+	- FFT3W library is supported
+	- More "randomness" options
+	- Other impovements
+	- Many, many bugfixes
+	- Added the full changelog (since I started to write zynaddsubfx), most is in Romanian 
+	- Other things
       
 1.4.3 (31 Aug 2003)
       - added state variable filters and other types to analog filters

@@ -111,30 +111,6 @@ void Echo::out(REALTYPE *smpsl,REALTYPE *smpsr){
 	if (++kr>=dr) kr=0;
     };
     
-    
-    //Insertion effect
-    if (insertion!=0) {
-        REALTYPE v1,v2;
-	if (volume<0.5) {
-		v1=1.0;
-		v2=volume*2.0;
-	} else {
-		v1=(1.0-volume)*2.0;
-		v2=1.0;
-	};
-	for (i=0;i<SOUND_BUFFER_SIZE;i++){
-	    smpsl[i]=smpsl[i]*v1+efxoutl[i]*v2;
-	    smpsr[i]=smpsr[i]*v1+efxoutr[i]*v2;
-	};
-    } else {//System effect
-	for (i=0;i<SOUND_BUFFER_SIZE;i++){
-	    efxoutl[i]*=2.0*volume;
-	    efxoutr[i]*=2.0*volume;
-	    smpsl[i]=efxoutl[i];
-	    smpsr[i]=efxoutr[i];
-	};
-    };
-    
 };
 
 
