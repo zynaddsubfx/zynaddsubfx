@@ -14,18 +14,21 @@ A1) The name of the program comes from 4 words:
     So, ZynAddSubFX is a SYNthesizer with ADDitive, SUBtractive engines and effects.
         
 
-
-Q2) How can I change the number of parts, voices to ADSynth, effects, etc. ?
-A2) Look in src/globals.h and change there theese values. You don't have to change anything else, just recompile all. But most settings must be below 128. As the rule of the thumb if a setting is 128 or below 128, please don't make it bigger than 128. Anyway, I don't belive that you'll need more than 128 for theese settings; for example you don't need 128(or more) effects same time? That's why I put the limit of 128 (using 7 bits of char).
-
+Q2) How can I load files from older versions of ZynAddSubFX (like *.mas_zyn,etc)
+A2) You need to convert them into new format. Please use 2.0.0pre1 or (recomanded) 2.0.0pre2 versions of ZynAddSubFX to load old file formants and save them in the new formats
 
 
-Q3) How do I enable Jack support on ZynAddSubFX ?
-A3) Look in "Makefile.inc" from "src/" directory for more information. If you want *really* small latencies, you can decrease "SOUND_BUFFER_SIZE" from "src/globals.h". It is highly recomanded that the Jack samplerate to be equal to ZynAddSubFX samplerate (SAMPLE_RATE from globals.h), otherwise the resampling will be done and this will decrease the quality a bit.
+Q3) How can I change the number of parts, voices to ADSynth, effects, etc. ?
+A3) Look in src/globals.h and change there theese values. You don't have to change anything else, just recompile all. But most settings must be below 128. As the rule of the thumb if a setting is 128 or below 128, please don't make it bigger than 128. Anyway, I don't belive that you'll need more than 128 for theese settings; for example you don't need 128(or more) effects same time? That's why I put the limit of 128 (using 7 bits of char).
 
 
-Q4) Why is licensed only under version 2 of the GNU GPL?
-A4) I licensed under GNU GPL v.2 only, because I don't know what the next versions of GPL will say. For example what if they tell that a GPL licensed program can be a part of a proprietary software? This may blow up the entire opensource comunity (well, only 'GPL v.2 or any later version' programs - but they are the most).
+
+Q4) How do I enable Jack support on ZynAddSubFX ?
+A4) Look in "Makefile.inc" from "src/" directory for more information. If you want *really* small latencies, you can decrease "SOUND_BUFFER_SIZE" from "src/globals.h". It is highly recomanded that the Jack samplerate to be equal to ZynAddSubFX samplerate (SAMPLE_RATE from globals.h), otherwise the resampling will be done and this will decrease the quality a bit.
+
+
+Q5) Why is licensed only under version 2 of the GNU GPL?
+A5) I licensed under GNU GPL v.2 only, because I don't know what the next versions of GPL will say. For example what if they tell that a GPL licensed program can be a part of a proprietary software? This may blow up the entire opensource comunity (well, only 'GPL v.2 or any later version' programs - but they are the most).
 To 'be similar in spirit to the present version [of GPL]' (what is said in the section 9 of GNU GPL) is too ambigous for me.
 Anyway, ZynAddSubFX is free (as speech) even is licensed only to GPL v.2 ;-) .
 
