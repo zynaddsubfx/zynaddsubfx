@@ -24,13 +24,13 @@ decl {\#include <FL/Fl_File_Chooser.H>} {public
 decl {\#include "../Misc/Master.h"} {public
 } 
 
-decl {\#include "../Misc/Bank.h"} {public
+decl {\#include "../Misc/OldBank.h"} {public
 } 
 
 class BankProcess_ {} {
   Function {process()} {return_type {virtual void}
   } {}
-  decl {Bank *bank;} {public
+  decl {OldBank *bank;} {public
   }
 } 
 
@@ -55,7 +55,7 @@ int tmp=Fl_Button::handle(event);
 if ((*what!=0) && Fl::event_inside(this)) (bp->*fnc)();
 return(tmp);} {}
   }
-  Function {init(int nslot_, int *what_, int *whatslot_,void (BankProcess_:: *fnc_)(void),BankProcess_ *bp_,Bank *bank_)} {} {
+  Function {init(int nslot_, int *what_, int *whatslot_,void (BankProcess_:: *fnc_)(void),BankProcess_ *bp_,OldBank *bank_)} {} {
     code {nslot=nslot_;
 what=what_;
 whatslot=whatslot_;

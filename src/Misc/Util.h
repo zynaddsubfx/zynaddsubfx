@@ -27,7 +27,6 @@
 #include "../globals.h"
 #include "Buffer.h"
 #include "Microtonal.h"
-#include "Bank.h"
 #include "../DSP/FFTwrapper.h"
 #include "Config.h"
 

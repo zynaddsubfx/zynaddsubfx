@@ -20,16 +20,16 @@
 
 */
 
-#ifndef BANK_H
-#define BANK_H
+#ifndef OLD_BANK_H
+#define OLD_BANK_H
 
 #include "../globals.h"
 #include "Buffer.h"
 
-class Bank{
+class OldBank{
     public:
-	Bank();
-	~Bank();
+	OldBank();
+	~OldBank();
 	char *getname(unsigned char ninstrument);
 	char *getnamenumbered(unsigned char ninstrument);
 	void setname(unsigned char ninstrument,const char *newname);
@@ -44,6 +44,18 @@ class Bank{
 	char *bankfiletitle; //this is shown on the UI of the bank (the title of the window)
 	int locked();
     private:
+	void changebankfilename(const char *newbankfilename,int ro);
+	int savefile();
+	int loadfile();
+
+	int lock;
+	char *bankfilename;
+	char defaultinsname[PART_MAX_NAME_LEN],tmpinsname[128][PART_MAX_NAME_LEN+20];
+	struct insstuct{
+	    char name[PART_MAX_NAME_LEN];
+	    unsigned int size;
+	    unsigned char *data;
+	} ins[128];
 };
 
 #endif

@@ -31,7 +31,7 @@
 #include "../Output/Recorder.h"
 #include "Microtonal.h"
 
-#include "Bank.h"
+#include "OldBank.h"
 #include "Dump.h"
 #include "../Seq/Sequencer.h"
 #include "XMLwrapper.h"
@@ -124,7 +124,7 @@ class Master{
 	
 	//other objects 
 	Microtonal microtonal;
-	Bank bank;
+	OldBank bank;
 	FFTwrapper *fft;
 	pthread_mutex_t mutex;
 

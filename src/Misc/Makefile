@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-objects=Bank.o Buffer.o Master.o Microtonal.o Part.o Util.o Config.o Dump.o XMLwrapper.o
+objects=Bank.o OldBank.o Buffer.o Master.o Microtonal.o Part.o Util.o Config.o Dump.o XMLwrapper.o
 
 
 all: $(objects)

@@ -541,3 +541,5 @@
 	    - Adaugata compresie gzip la fisiere si decompresie automata la incarcare (folosesc biblioteca zlib)
 15 Feb 2004 - O mica modificare la envelope parameters in sensul ca envelope-ul prestabilit la FM nu mai este liniar
 22 Feb 2004 - Adaugat normalize Full RMS la Oscil
+23 Feb 2004 - Inceput sa fac ca sa pot adauga Bank bazat pe XML (adaugat temporar clasa OldBank)
+
