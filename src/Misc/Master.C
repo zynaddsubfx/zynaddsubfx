@@ -721,7 +721,7 @@ void Master::exportbankasxmldirectory(const char *bankfilename){
     int pos=strlen(bankfilename)-20;
     if (pos<0) pos=0;
     snprintf(directory,1000,"export-%s",&bankfilename[pos]);
-    for (int i=0;i<strlen(directory);i++){
+    for (int i=0;i<(int)strlen(directory);i++){
 	if ((directory[i]=='/')||(directory[i]=='\\')||(directory[i]=='.'))
 	    directory[i]='_';
     };
@@ -743,7 +743,7 @@ void Master::exportbankasxmldirectory(const char *bankfilename){
 	if (oldbank.emptyslot(slot)) continue;
 	
 	snprintf(nostr,10,"%4d",slot+1);
-	for (int i=0;i<strlen(nostr);i++) if (nostr[i]==' ') nostr[i]='0';
+	for (int i=0;i<(int)strlen(nostr);i++) if (nostr[i]==' ') nostr[i]='0';
 	
 	snprintf(filename,1000,"%s/%s-%s.xiz",directory,nostr,oldbank.getname(slot));
 	printf("%s\n",filename);

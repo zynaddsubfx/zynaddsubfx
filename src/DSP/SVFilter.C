@@ -127,7 +127,7 @@ void SVFilter::singlefilterout(REALTYPE *smp,fstage &x,parameters &par){
 
 void SVFilter::filterout(REALTYPE *smp){
     int i;
-    REALTYPE *ismp;
+    REALTYPE *ismp=NULL;
     
     if (needsinterpolation!=0){
 	ismp=new REALTYPE[SOUND_BUFFER_SIZE];

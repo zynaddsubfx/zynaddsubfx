@@ -669,6 +669,6 @@
 29 Iul 2004 - Modificat modul cum este stocat lista de banci root dir
 	    - Gasita o eroare care facea ca sa se stearga denormalkillbuffer inaintea lui master
 30 Iul 2004 - Gasite si corectate o gramada de erori (eu stergeam elemente din ferestre si fltk le stergea din nou)
-
+	    - Eliminate warning-urile
 
 

@@ -65,8 +65,8 @@ const char *XMLwrapper_whitespace_callback(mxml_node_t *node,int where){
 
 
 XMLwrapper::XMLwrapper(){
-    ZERO(&parentstack,sizeof(parentstack));
-    ZERO(&values,sizeof(values));
+    ZERO(&parentstack,(int)sizeof(parentstack));
+    ZERO(&values,(int)sizeof(values));
 
     stackpos=0;
     
@@ -190,8 +190,8 @@ int XMLwrapper::loadXMLfile(const char *filename){
     if (tree!=NULL) mxmlDelete(tree);
     tree=NULL;
 
-    ZERO(&parentstack,sizeof(parentstack));
-    ZERO(&values,sizeof(values));
+    ZERO(&parentstack,(int)sizeof(parentstack));
+    ZERO(&values,(int)sizeof(values));
 
     stackpos=0;
 

@@ -160,7 +160,7 @@ REALTYPE Microtonal::getnotefreq(int note,int keyshift){
  */
 int Microtonal::linetotunings(unsigned int nline,const char *line){
     int x1=-1,x2=-1,type=-1;
-    REALTYPE x=-1.0,tmp,tuning;
+    REALTYPE x=-1.0,tmp,tuning=1.0;
     if (strstr(line,"/")==NULL){
 	if (strstr(line,".")==NULL){// M case (M=M/1)
 	    sscanf(line,"%d",&x1);
@@ -255,8 +255,10 @@ void Microtonal::texttomapping(const char *text){
 	lin[i]='\0';
 	if (strlen(lin)==0) continue;
 
-	if (sscanf(lin,"%d",&Pmapping[tx])==0) Pmapping[tx]=-1;
-	if (Pmapping[tx]<-1) Pmapping[tx]=-1;
+	int tmp=0;
+	if (sscanf(lin,"%d",&tmp)==0) tmp=-1;
+	if (tmp<-1) tmp=-1;
+	tmp=Pmapping[tx];
 	
 	if ((tx++)>127) tx=127;
     };

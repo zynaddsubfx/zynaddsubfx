@@ -40,9 +40,6 @@ OldBank::OldBank(){
 	ins[i].size=0;
 	ins[i].data=NULL;
     };
-    
-    struct stat statbuf;
-
 };
 
 OldBank::~OldBank(){
@@ -264,12 +261,14 @@ int OldBank::savefile(){
 void OldBank::changebankfilename(const char *newbankfilename,int ro){
     if (bankfilename!=NULL) delete(bankfilename);
     bankfilename=new char [strlen(newbankfilename)+2];
-    sprintf(bankfilename,"%s\0",newbankfilename);
+    ZERO(bankfilename,(int) strlen(newbankfilename)+2);
+    sprintf(bankfilename,"%s",newbankfilename);
 
     if (bankfiletitle!=NULL) delete(bankfiletitle);
     bankfiletitle=new char [strlen(newbankfilename)+50];
-    if (ro==0) sprintf(bankfiletitle,"OldBank: %s\0",newbankfilename);
-	else sprintf(bankfiletitle,"OldBank: (LOCKED) %s\0",newbankfilename);
+    ZERO(bankfiletitle,(int) strlen(newbankfilename)+50);
+    if (ro==0) sprintf(bankfiletitle,"OldBank: %s",newbankfilename);
+	else sprintf(bankfiletitle,"OldBank: (LOCKED) %s",newbankfilename);
 };
 
 /*

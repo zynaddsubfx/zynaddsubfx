@@ -258,7 +258,6 @@ void Buffer::putalldata(int n,unsigned char *d){
     fprintf(stderr,"\n\n-= DUMP ALL DATA=-\n\n");
 #endif
     resetbuffer();
-    int tmpmode=mode;
 
     mode=1;//write
     for (int k=0;k<n;k++) rwbyte(&d[k]);

@@ -317,7 +317,7 @@ void AnalogFilter::singlefilterout(REALTYPE *smp,fstage &x,fstage &y,REALTYPE *c
     };
 };
 void AnalogFilter::filterout(REALTYPE *smp){
-    REALTYPE *ismp;//used if it needs interpolation
+    REALTYPE *ismp=NULL;//used if it needs interpolation
     int i;
     if (needsinterpolation!=0){
 	ismp=new REALTYPE[SOUND_BUFFER_SIZE];

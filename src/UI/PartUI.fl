@@ -274,7 +274,7 @@ end();} {}
   decl {PartUI_ *partui;} {}
 } 
 
-class PartUI {open : {public Fl_Group,PartUI_}
+class PartUI {: {public Fl_Group,PartUI_}
 } {
   Function {make_window()} {private
   } {
@@ -703,9 +703,9 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
       }
       Fl_Check_Button bypasseff {
         label bypass
-        callback {part->Pefxbypass[ninseff]=(((int)o->value())!=0);}
+        callback {part->Pefxbypass[ninseff]=(((int)o->value())!=0);} selected
         tooltip {if the effect is not used (is bypassed)} xywh {90 110 60 15} down_box DOWN_BOX labelsize 12
-        code0 {int x=part->Pefxbypass[ninseff];}
+        code0 {int x=part->Pefxbypass[ninseff];o->value(x);}
       }
     }
     Fl_Window instrumentkitlist {
@@ -1115,8 +1115,7 @@ if ((engine==0)&&(adnoteui!=NULL)) adnoteui->ADnoteGlobalParameters->show();
 if ((engine==1)&&(subnoteui!=NULL)) subnoteui->SUBparameters->show();
 if ((engine==2)&&(adnoteui!=NULL)) padnoteui->padnotewindow->show();} {}
   }
-  Function {~PartUI()} {open
-  } {
+  Function {~PartUI()} {} {
     code {if (adnoteui!=NULL) delete (adnoteui);
 if (subnoteui!=NULL) delete (subnoteui);
 if (padnoteui!=NULL) delete (padnoteui);
@@ -1134,8 +1133,7 @@ instrumentkitlist->hide();
 delete(instrumentkitlist);
 
 instrumenteditwindow->hide();
-delete(instrumenteditwindow);} {selected
-    }
+delete(instrumenteditwindow);} {}
   }
   decl {Part *part;} {}
   decl {Master *master;} {}
