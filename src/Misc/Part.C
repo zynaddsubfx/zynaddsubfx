@@ -52,6 +52,7 @@ Part::Part(Microtonal *microtonal_,FFTwrapper *fft_, pthread_mutex_t *mutex_){
     for (int n=0;n<NUM_PART_EFX+1;n++) {
 	partfxinputl[n]=new REALTYPE [SOUND_BUFFER_SIZE];
 	partfxinputr[n]=new REALTYPE [SOUND_BUFFER_SIZE];
+	Pefxbypass[n]=false;
     };
 
     killallnotes=0;
@@ -515,7 +516,7 @@ void Part::ComputePartSmps(){
 
     //Apply part's effects and mix them
     for (int nefx=0;nefx<NUM_PART_EFX;nefx++) {
-    	partefx[nefx]->out(partfxinputl[nefx],partfxinputr[nefx]);
+    	if (!Pefxbypass[nefx]) partefx[nefx]->out(partfxinputl[nefx],partfxinputr[nefx]);
 	int routeto=(Pefxroute[nefx]==0 ? nefx+1 : NUM_PART_EFX);
 	for (i=0;i<SOUND_BUFFER_SIZE;i++){
 	    partfxinputl[routeto][i]+=partfxinputl[nefx][i];
@@ -980,6 +981,7 @@ void Part::add2XMLinstrument(XMLwrapper *xml){
 	    xml->endbranch();
 
 	    xml->addpar("route",Pefxroute[nefx]);
+	    xml->addparbool("bypass",Pefxbypass[nefx]);
 	xml->endbranch();
     };
     xml->endbranch();
@@ -1107,8 +1109,8 @@ void Part::getfromXMLinstrument(XMLwrapper *xml){
 		    xml->exitbranch();
 		};
 
-	    xml->getpar("route",Pefxroute[nefx],0,NUM_PART_EFX);
-
+	    Pefxroute[nefx]=xml->getpar("route",Pefxroute[nefx],0,NUM_PART_EFX);
+	    Pefxbypass[nefx]=xml->getparbool("bypass",Pefxbypass[nefx]);
 	    xml->exitbranch();
 	};
 	xml->exitbranch();

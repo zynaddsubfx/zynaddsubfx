@@ -152,7 +152,7 @@ return(log(freq/20.0)/log(1000.0));} {}
   decl {int maxdB;} {}
 } 
 
-class EffUI {open : {public Fl_Group}
+class EffUI {: {public Fl_Group}
 } {
   Function {EffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {eff=NULL;
@@ -1099,7 +1099,7 @@ eqgraph->redraw();}
     }
   }
   Function {make_dynamicfilter_window()} {} {
-    Fl_Window effdynamicfilterwindow {selected
+    Fl_Window effdynamicfilterwindow {
       xywh {104 461 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
@@ -1259,7 +1259,8 @@ effdynamicfilterwindow->position(px,py);
 
 refresh(eff);} {}
   }
-  Function {refresh(EffectMgr *eff_)} {} {
+  Function {refresh(EffectMgr *eff_)} {open
+  } {
     code {eff=eff_;
 this->hide();
 
@@ -1272,6 +1273,7 @@ effalienwahwindow->hide();
 effdistorsionwindow->hide();
 effeqwindow->hide();
 effdynamicfilterwindow->hide();
+
 eqband=0;
 
 if (filterwindow!=NULL){
@@ -1405,7 +1407,8 @@ switch(eff->geteffect()){
             break; 
 };
 
-this->show();} {}
+this->show();} {selected
+    }
   }
   decl {EffectMgr *eff;} {}
   decl {int eqband;} {}

@@ -69,6 +69,45 @@ void FilterParams::defaults(){
 };
 
 /*
+ * Get the parameters from other FilterParams
+ */
+ 
+void FilterParams::getfromFilterParams(FilterParams *pars){
+    defaults();
+    
+    if (pars==NULL) return;
+    
+    Ptype=pars->Ptype;
+    Pfreq=pars->Pfreq;
+    Pq=pars->Pq;
+
+    Pstages=pars->Pstages;
+    Pfreqtrack=pars->Pfreqtrack;
+    Pgain=pars->Pgain;
+    Pcategory=pars->Pcategory;
+    
+    Pnumformants=pars->Pnumformants;
+    Pformantslowness=pars->Pformantslowness;
+    for (int j=0;j<FF_MAX_VOWELS;j++){
+	for (int i=0;i<FF_MAX_FORMANTS;i++){
+	    Pvowels[j].formants[i].freq=pars->Pvowels[j].formants[i].freq;
+	    Pvowels[j].formants[i].q=pars->Pvowels[j].formants[i].q;
+	    Pvowels[j].formants[i].amp=pars->Pvowels[j].formants[i].amp;
+	};
+    };
+    
+    Psequencesize=pars->Psequencesize;
+    for (int i=0;i<FF_MAX_SEQUENCE;i++) Psequence[i].nvowel=pars->Psequence[i].nvowel;
+
+    Psequencestretch=pars->Psequencestretch;
+    Psequencereversed=pars->Psequencereversed;
+    Pcenterfreq=pars->Pcenterfreq;
+    Poctavesfreq=pars->Poctavesfreq;
+    Pvowelclearness=pars->Pvowelclearness;
+};
+
+
+/*
  * Parameter control
  */
 REALTYPE FilterParams::getfreq(){

@@ -582,7 +582,7 @@ part->ctl.portamento.updowntimestretch=x;}
     }
     Fl_Window partfx {
       label {Part's Insert Effects}
-      private xywh {112 331 390 145} type Double hide
+      private xywh {121 424 390 145} type Double hide
     } {
       Fl_Counter inseffnocounter {
         label {Ins.Effect No.}
@@ -592,6 +592,8 @@ insefftype->value(part->partefx[ninseff]->geteffect());
 inseffectui->refresh(part->partefx[ninseff]);
 int x=part->Pefxroute[ninseff];
 if (x==127) x=1;
+bypasseff->value(part->Pefxbypass[ninseff]);
+
 sendtochoice->value(x);}
         xywh {5 110 80 20} type Simple labelfont 1 labelsize 11 align 6 minimum 0 maximum 127 step 1 textfont 1
         code0 {o->bounds(0,NUM_PART_EFX-1);}
@@ -602,8 +604,8 @@ sendtochoice->value(x);}
         callback {pthread_mutex_lock(part->mutex);
 part->partefx[ninseff]->changeeffect((int) o->value());
 pthread_mutex_unlock(part->mutex);
-inseffectui->refresh(part->partefx[ninseff]);} selected
-        xywh {95 110 70 15} down_box BORDER_BOX labelsize 11 align 6
+inseffectui->refresh(part->partefx[ninseff]);}
+        xywh {155 110 70 15} down_box BORDER_BOX labelsize 11 align 6
         code0 {o->value(part->partefx[ninseff]->geteffect());}
       } {
         menuitem {} {
@@ -655,14 +657,14 @@ inseffectui->refresh(part->partefx[ninseff]);} selected
       Fl_Button {} {
         label Close
         callback {partfx->hide();}
-        xywh {315 120 70 20}
+        xywh {320 120 65 20}
       }
       Fl_Choice sendtochoice {
         label {Send To.}
         callback {int x=(int) o->value();
 if (x==1) x=127;
 part->Pefxroute[ninseff]=x;}
-        xywh {175 110 80 15} down_box BORDER_BOX labelsize 11 align 6
+        xywh {235 110 80 15} down_box BORDER_BOX labelsize 11 align 6
         code0 {int x=part->Pefxroute[ninseff]; if (x==127) x=1;}
         code1 {o->value(x);}
       } {
@@ -674,6 +676,12 @@ part->Pefxroute[ninseff]=x;}
           label {Part Out}
           xywh {55 55 100 20} labelfont 1 labelsize 11
         }
+      }
+      Fl_Check_Button bypasseff {
+        label bypass
+        callback {part->Pefxbypass[ninseff]=(((int)o->value())!=0);} selected
+        tooltip {if the effect is not used (is bypassed)} xywh {90 110 60 15} down_box DOWN_BOX labelsize 12
+        code0 {int x=part->Pefxbypass[ninseff];}
       }
     }
     Fl_Window instrumentkitlist {

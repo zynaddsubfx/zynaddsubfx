@@ -604,5 +604,7 @@
 02 Iul 2004 - Continuat la DynamicFilter (adaugata auto-update, adaugat preset-uri)
 	    - Terminat DynamicFilter
 	    - Corectata o eroare la EQui care facea ca sa nu se actualizeze efectul curent si sa nu se obtina graficul egalizatorului
-	    
+03 Iul 2004 - Corectata o mica eroare care nu activa la EffectUI daca efectul anterior era dezactivat
+	    - Actualizat Swap/Copy la efecte ca sa proceseze si parametrii la filtre
+	    - Adaugat Bypass la efectele de instrument
 

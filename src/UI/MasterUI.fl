@@ -372,8 +372,8 @@ fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. P
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
-      xywh {188 182 390 465} type Double
-      code0 {setfilelabel(NULL);} non_modal visible
+      xywh {188 182 390 465} type Double hide
+      code0 {setfilelabel(NULL);} non_modal
     } {
       Fl_Menu_Bar mastermenu {
         xywh {0 0 690 25}
@@ -770,7 +770,7 @@ pthread_mutex_unlock(&master->mutex);}
       } {
         Fl_Group {} {
           label {System Effects} open
-          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25
+          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25 hide
         } {
           Fl_Counter syseffnocounter {
             label {Sys.Effect No.}
@@ -830,7 +830,7 @@ syseffectui->refresh(master->sysefx[nsyseff]);}
           Fl_Group syseffectuigroup {
             xywh {5 140 380 95} box FLAT_BOX color 48
           } {
-            Fl_Group syseffectui {selected
+            Fl_Group syseffectui {
               xywh {5 140 380 95}
               code0 {o->init(master->sysefx[nsyseff]);}
               class EffUI
@@ -851,7 +851,7 @@ swapeffwindow->show();}
         }
         Fl_Group {} {
           label {Insertion Effects}
-          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25 hide
+          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25
         } {
           Fl_Button {} {
             label {Swap/Copy...}
@@ -866,13 +866,16 @@ swapeffwindow->show();}
 insefftype->value(master->insefx[ninseff]->geteffect());
 inseffpart->value(master->Pinsparts[ninseff]+2);
 inseffectui->refresh(master->insefx[ninseff]);
+
 if (master->Pinsparts[ninseff]!=-1) {
         insefftype->activate();
 	inseffectui->activate();
+        inseffectuigroup->activate();
 } else {
 	insefftype->deactivate();
  	inseffectui->deactivate();
-};}
+        inseffectuigroup->deactivate();
+};} selected
             xywh {5 120 80 20} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 127 step 1 textfont 1
             code0 {o->bounds(0,NUM_INS_EFX-1);}
             code1 {o->value(ninseff);}
