@@ -980,7 +980,7 @@ void Part::add2XML(XMLwrapper *xml){
     xml->addparbool("polymode",Ppolymode);
     xml->addpar("keylimit",Pkeylimit);
 
-    xml->beginbranch("INSTRUMENTKIT");
+    xml->beginbranch("INSTRUMENT");
 	add2XMLinstrument(xml);
     xml->endbranch();
     
@@ -999,3 +999,18 @@ void Part::add2XML(XMLwrapper *xml){
     };
 };
 
+int Part::saveXML(char *filename){
+
+    //sa pun aici un test daca exista fisierul
+
+    XMLwrapper *xml;
+    xml=new XMLwrapper();
+
+    xml->beginbranch("INSTRUMENT");
+    add2XMLinstrument(xml);
+    xml->endbranch();
+
+    xml->saveXMLfile(filename,0);
+    delete (xml);
+    return(0);
+};

@@ -523,5 +523,7 @@
 03 Feb 2004 - Continuat de scris suportul XML - inceput sa salvezi cativa parametrii
 04 Feb 2004 - Se salveaza parametrii XML la master, part, filter, lfo, envelope, resonance si adnote (partial)
 05 Feb 2004 - Se salveaza toti parametrii in XML
-
+06 Feb 2004 - Adaugat salvarea de instrument in XML
+	    - Adaugat export la bank intr-un director XML si decis ca bank-ul sa fie un director cu mai multe fisiere xml de forma XXXX-nume.xml sau XXXX-nume.xml.gz
+	    
 

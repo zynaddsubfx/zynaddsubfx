@@ -34,7 +34,7 @@ class BankProcess_ {} {
   }
 } 
 
-class BankSlot {open : {public Fl_Button,BankProcess_}
+class BankSlot {: {public Fl_Button,BankProcess_}
 } {
   Function {BankSlot(int x,int y, int w, int h, const char *label=0):Fl_Button(x,y,w,h,label)} {} {
     code {what=NULL;
@@ -55,8 +55,7 @@ int tmp=Fl_Button::handle(event);
 if ((*what!=0) && Fl::event_inside(this)) (bp->*fnc)();
 return(tmp);} {}
   }
-  Function {init(int nslot_, int *what_, int *whatslot_,void (BankProcess_:: *fnc_)(void),BankProcess_ *bp_,Bank *bank_)} {open
-  } {
+  Function {init(int nslot_, int *what_, int *whatslot_,void (BankProcess_:: *fnc_)(void),BankProcess_ *bp_,Bank *bank_)} {} {
     code {nslot=nslot_;
 what=what_;
 whatslot=whatslot_;
@@ -68,35 +67,34 @@ align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE|FL_ALIGN_CLIP);
 highlight=0;
 refresh();} {}
   }
-  Function {refresh()} {open
-  } {
+  Function {refresh()} {} {
     code {if (bank->emptyslot(nslot)) color(46);
     else color(51);
 
 
 //printf("%s\\n",bank->getnamenumbered(nslot));
 
-label(bank->getnamenumbered(nslot));} {selected
-    }
+label(bank->getnamenumbered(nslot));} {}
   }
   decl {int *what,*whatslot,nslot,highlight;} {}
   decl {void (BankProcess_:: *fnc)(void);} {}
   decl {BankProcess_ *bp;} {}
 } 
 
-class BankUI {: {public BankProcess_}
+class BankUI {open : {public BankProcess_}
 } {
-  Function {make_window()} {} {
+  Function {make_window()} {open
+  } {
     Fl_Window bankuiwindow {
       label Bank
-      xywh {16 205 770 430} type Double hide
+      xywh {16 205 770 430} type Double
       code0 {o->label(bank->bankfiletitle);}
-      code1 {if (bank->bankfiletitle==NULL) o->label ("Choose a bank to use by pressing the 'Load/Use Bank from file...' button or choose 'New Bank...' to make a new bank.");}
+      code1 {if (bank->bankfiletitle==NULL) o->label ("Choose a bank to use by pressing the 'Load/Use Bank from file...' button or choose 'New Bank...' to make a new bank.");} visible
     } {
       Fl_Button {} {
         label Close
         callback {bankuiwindow->hide();}
-        xywh {543 402 72 24} box THIN_UP_BOX
+        xywh {555 402 60 24} box THIN_UP_BOX
       }
       Fl_Pack {} {
         xywh {6 6 150 375} box BORDER_BOX
@@ -146,7 +144,7 @@ class BankUI {: {public BankProcess_}
         }
       }
       Fl_Button loadusebankfile {
-        label {Load/Use Bank from file...}
+        label {Use Bank from file...}
         callback {const char *filename;
 filename=fl_file_chooser("Load and use Bank from file:","(*.bnk_zyn)",NULL,0);
 if (filename==NULL) return;
@@ -154,7 +152,7 @@ if (bank->loadfilebank(filename)==2)
        fl_alert("Error: Could not load the bank from the file..");
 for (int i=0;i<128;i++) bs[i]->refresh();
 refreshmainwindow();}
-        xywh {336 387 105 39} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
+        xywh {330 387 74 39} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
       }
       Fl_Button {} {
         label {Save Bank...}
@@ -176,7 +174,7 @@ if (result==1) {
 if (result!=0) fl_alert("Error: Could not save the bank to the file..");
 
 refreshmainwindow();}
-        xywh {444 387 93 18} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
+        xywh {410 387 93 18} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
       }
       Fl_Button {} {
         label {New Bank...}
@@ -198,13 +196,19 @@ if (result==1) {
 if (result!=0) fl_alert("Error: Could not save the bank to the file..");
 for (int i=0;i<128;i++) bs[i]->refresh();
 refreshmainwindow();}
-        xywh {444 408 93 18} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
+        xywh {410 408 93 18} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
       }
       Fl_Check_Button {} {
         label {auto close}
         callback {config.cfg.BankUIAutoClose=(int) o->value();}
-        tooltip {automatically close the bank window if the instrument is loaded} xywh {545 385 65 15} down_box DOWN_BOX labelsize 10
+        tooltip {automatically close the bank window if the instrument is loaded} xywh {555 385 60 15} down_box DOWN_BOX labelsize 10
         code0 {o->value(config.cfg.BankUIAutoClose);}
+      }
+      Fl_Button {} {
+        label {XML export}
+        callback {const char *tmp=fl_input("Enter the directory:","bank_xml");
+if (tmp!=NULL) master->exportbankasxmldirectory(tmp);} selected
+        xywh {508 390 37 35} box PLASTIC_UP_BOX labelsize 11 align 128
       }
     }
   }

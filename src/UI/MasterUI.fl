@@ -375,7 +375,7 @@ if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
       xywh {149 197 390 465} type Double
       code0 {setfilelabel(NULL);} non_modal visible
     } {
-      Fl_Menu_Bar mastermenu {selected
+      Fl_Menu_Bar mastermenu {open
         xywh {0 0 690 25}
       } {
         submenu {} {
@@ -552,6 +552,22 @@ if (result!=0) fl_alert("Error: Could not save the file.");}
           label {&Instrument}
           xywh {10 10 100 20}
         } {
+          menuitem {} {
+            label {&Save As XML (EXPERIMENTAL)...}
+            callback {char *filename;
+\#define EXT ".xml"
+filename=fl_file_chooser("Save:","(*"EXT")",NULL,0);
+if (filename==NULL) return;
+filename=fl_filename_setext(filename,EXT);
+\#undef EXT
+
+pthread_mutex_lock(&master->mutex);
+master->part[npart]->saveXML(filename);
+pthread_mutex_unlock(&master->mutex);
+
+updatepanel();} selected
+            xywh {20 20 100 20} divider
+          }
           menuitem {} {
             label {&New Instrument...}
             callback {if (fl_ask("Clear instrument's parameters ?")){

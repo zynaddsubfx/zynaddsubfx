@@ -24,7 +24,8 @@
 #include "Master.h"
 
 #include <stdio.h>
-
+#include <sys/stat.h>
+#include <sys/types.h>
 
 Master::Master(){
     int npart,nefx;
@@ -690,6 +691,35 @@ void Master::saveloadbuf(Buffer *buf){
     };
 };
 
+void Master::exportbankasxmldirectory(const char *directory){
+    char filename[1000],nostr[10];
+    Part *tmppart=new Part(&microtonal,fft,&mutex);
+    tmppart->Penabled=1;
+    
+    mkdir(directory,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    for (int slot=0;slot<128;slot++){
+	instrumentdefaultsbuf.changemode(0);
+	tmppart->saveloadbuf(&instrumentdefaultsbuf,1);
+	bank.loadfromslot(slot,&slbuf);
+	slbuf.changemode(0);
+	tmppart->saveloadbuf(&slbuf,1);
+	snprintf((char *)tmppart->kit[0].Pname,PART_MAX_NAME_LEN,bank.getname(slot));
+	snprintf((char *)tmppart->Pname,PART_MAX_NAME_LEN,bank.getname(slot));
+	if (bank.emptyslot(slot)) continue;
+	
+	snprintf(nostr,10,"%4d",slot+1);
+	for (int i=0;i<strlen(nostr);i++) if (nostr[i]==' ') nostr[i]='0';
+	
+	snprintf(filename,1000,"%s/%s-%s.xml",directory,nostr,bank.getname(slot));
+	printf("%s\n",filename);
+	tmppart->saveXML(filename);
+    };
+    
+    
+    delete (tmppart);
+};
+
+
 
 
 void Master::add2XML(XMLwrapper *xml){
@@ -707,9 +737,6 @@ void Master::add2XML(XMLwrapper *xml){
 	xml->endbranch();
     };
     
-    xml->beginbranch("INSERTION_EFFECTS");
-    xml->endbranch();
-
     xml->beginbranch("SYSTEM_EFFECTS");
 	for (int nefx=0;nefx<NUM_SYS_EFX;nefx++){
 	    xml->beginbranch("SYSEFFECT",nefx);

@@ -47,9 +47,6 @@ XMLwrapper::XMLwrapper(){
 
     node=root=mxmlNewElement(tree,"zynaddsubfx-data");
     
-//    mxml_node_t *tmp=mxmlNewElement(root,"test1");
-//    tmp=mxmlNewElement(tmp,"PARAM11");
-//    tmp=mxmlNewElement(tmp,"test3");
 };
 
 XMLwrapper::~XMLwrapper(){
@@ -76,20 +73,20 @@ int XMLwrapper::saveXMLfile(char *filename,int compression){
 
 
 void XMLwrapper::addpar(char *name,int val){
-    addparams2("PARAM","name",name,"value",int2str(val));
+    addparams2("param","name",name,"value",int2str(val));
 };
 
 void XMLwrapper::addparreal(char *name,REALTYPE val){
-    addparams2("PARAMREAL","name",name,"value",real2str(val));
+    addparams2("paramreal","name",name,"value",real2str(val));
 };
 
 void XMLwrapper::addparbool(char *name,int val){
-    if (val!=0) addparams2("BOOLPARAM","name",name,"value","yes");
-	else addparams2("BOOLPARAM","name",name,"value","no");
+    if (val!=0) addparams2("boolparam","name",name,"value","yes");
+	else addparams2("boolparam","name",name,"value","no");
 };
 
 void XMLwrapper::addparstr(char *name,char *val){
-    addparams2("STRPARAM","name",name,"value",val);
+    addparams2("strparam","name",name,"value",val);
 };
 
 

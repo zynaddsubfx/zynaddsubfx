@@ -56,6 +56,11 @@ class Part{
       void saveloadbuf(Buffer *buf,int instrumentonly);
       //instrumentonly: 0 - save all, 1 - save only instrumnet, 2 - save only instrument without the name(used in bank)
 
+
+      //saves the instrument settings to a XML file
+      //returns 0 for ok, 1 if there is a existing file or -1 if there is an error
+      int saveXML(char *filename);
+
       void add2XML(XMLwrapper *xml);
       void add2XMLinstrument(XMLwrapper *xml);
 

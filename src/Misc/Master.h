@@ -41,7 +41,9 @@ class Master{
     public:    
 	Master();
 	~Master();
+
 	void saveloadbuf(Buffer *buf);	
+	void exportbankasxmldirectory(const char *directory);
 	
 	//saves all settings to a XML file
 	//returns 0 for ok, 1 if there is a existing file or -1 if there is an error
