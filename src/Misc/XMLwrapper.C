@@ -22,6 +22,8 @@
 
 #include "XMLwrapper.h"
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "../globals.h"
 
 int XMLwrapper_whitespace_callback(mxml_node_t *node,int where){
@@ -30,13 +32,15 @@ int XMLwrapper_whitespace_callback(mxml_node_t *node,int where){
     if ((where==MXML_WS_BEFORE_OPEN)&&(!strcmp(name,"?xml"))) return(0);
     if ((where==MXML_WS_BEFORE_CLOSE)&&(!strcmp(name,"string"))) return(0);
     if ((where==MXML_WS_BEFORE_OPEN)||(where==MXML_WS_BEFORE_CLOSE)) return('\n');
-
+    
     return(0);
 };
 
 
 XMLwrapper::XMLwrapper(){
     memset(&parentstack,0,sizeof(parentstack));
+    memset(&values,0,sizeof(values));
+
     stackpos=0;
     
     tree=mxmlNewElement(MXML_NO_PARENT,"?xml");
@@ -49,7 +53,8 @@ XMLwrapper::XMLwrapper(){
 
     node=root=mxmlNewElement(tree,"ZynAddSubFX-data");
     
-    mxmlElementSetAttr(root,"version","0.1");
+    mxmlElementSetAttr(root,"version-major","0");
+    mxmlElementSetAttr(root,"version-minor","1");
     
     //save zynaddsubfx specifications
     beginbranch("BASE_PARAMETERS");
@@ -69,27 +74,8 @@ XMLwrapper::~XMLwrapper(){
     if (tree!=NULL) mxmlDelete(tree);
 };
 
-int XMLwrapper::loadXMLfile(char *filename){
-    if (tree!=NULL) mxmlDelete(tree);
-    tree=NULL;
-    
-    FILE *file=fopen(filename,"r");
-    if (file==NULL) return(-1);
-    
-    root=tree=mxmlLoadFile(NULL,file,MXML_NO_CALLBACK);
-    fclose(file);
-    
-    if (tree==NULL) return(-1);//this is not XML
-    
-//    if (strcmp(tree->value.element.name,"?xml")!=0) return(-2);
-    node=root=mxmlFindElement(tree,tree,"ZynAddSuFX-data",NULL,NULL,MXML_DESCEND);
-    if (root==NULL) return(-2);//the XML doesnt embbed zynaddsubfx data
-        
-//    printf("%s\n",root->value.element.name);
-    
-    return(0);
-};
 
+/* SAVE XML members */
 
 int XMLwrapper::saveXMLfile(char *filename,int compression){
     FILE *file;
@@ -144,6 +130,94 @@ void XMLwrapper::endbranch(){
 
 
 
+/* LOAD XML members */
+
+int XMLwrapper::loadXMLfile(char *filename){
+    if (tree!=NULL) mxmlDelete(tree);
+    tree=NULL;
+    
+    FILE *file=fopen(filename,"r");
+    if (file==NULL) return(-1);
+    
+    root=tree=mxmlLoadFile(NULL,file,MXML_NO_CALLBACK);
+    fclose(file);
+    
+    if (tree==NULL) return(-1);//this is not XML
+    
+//    if (strcmp(tree->value.element.name,"?xml")!=0) return(-2);
+    node=root=mxmlFindElement(tree,tree,"ZynAddSubFX-data",NULL,NULL,MXML_DESCEND);
+    if (root==NULL) return(-2);//the XML doesnt embbed zynaddsubfx data
+        
+    push(root);
+
+    values.xml_version.major=str2int(mxmlElementGetAttr(root,"version-major"));
+    values.xml_version.minor=str2int(mxmlElementGetAttr(root,"version-minor"));
+
+    
+//    node=mxmlFindElement(node,node,NULL,"name","volume",MXML_DESCEND);
+    
+    
+    
+//    if (node!=NULL) printf("%s\n",node->value.element.name);
+//        else printf("NULL node\n");
+    
+    return(0);
+};
+
+int XMLwrapper::enterbranch(char *name){
+    node=mxmlFindElement(peek(),peek(),name,NULL,NULL,MXML_DESCEND_FIRST);
+    if (node==NULL) return(0);
+    push(node);
+    
+    return(1);
+};
+
+void XMLwrapper::exitbranch(){
+    pop();
+};
+
+
+int XMLwrapper::getbranchid(int min, int max){
+    int id=str2int(mxmlElementGetAttr(node,"id"));
+    if ((min==0)&&(max==0)) return(id);
+    
+    if (id<min) id=min;
+	else if (id>max) id=max;
+
+    return(id);
+};
+
+int XMLwrapper::getpar(char *name,int defaultpar,int min,int max){
+    node=mxmlFindElement(peek(),peek(),"par","name",name,MXML_DESCEND_FIRST);
+    if (node==NULL) return(defaultpar);
+
+    const char *strval=mxmlElementGetAttr(node,"value");
+    if (strval==NULL) return(defaultpar);
+    
+    int val=str2int(strval);
+    if (val<min) val=min;
+	else if (val>max) val=max;
+    
+    return(val);
+};
+
+int XMLwrapper::getpar127(char *name,int defaultpar){
+    return(getpar(name,defaultpar,0,127));
+};
+
+int XMLwrapper::getparbool(char *name,int defaultpar){
+    node=mxmlFindElement(peek(),peek(),"par_bool","name",name,MXML_DESCEND_FIRST);
+    if (node==NULL) return(defaultpar);
+
+    const char *strval=mxmlElementGetAttr(node,"value");
+    if (strval==NULL) return(defaultpar);
+    
+    if ((strval[0]=='Y')||(strval[0]=='y')) return(1);
+	else return(0);
+};
+
+
+
 /** Private members **/
 
 char *XMLwrapper::int2str(int x){
@@ -155,6 +229,13 @@ char *XMLwrapper::real2str(REALTYPE x){
     snprintf(tmpstr,TMPSTR_SIZE,"%g",x);
     return(tmpstr);
 };
+
+int XMLwrapper::str2int(const char *str){
+    if (str==NULL) return(0);
+    int result=strtol(str,NULL,10);
+    return(result);
+};
+
 
 mxml_node_t *XMLwrapper::addparams0(char *name){
     mxml_node_t *element=mxmlNewElement(node,name);
@@ -195,6 +276,14 @@ mxml_node_t *XMLwrapper::pop(){
     parentstack[stackpos]=NULL;
     stackpos--;
     return(node);
+};
+
+mxml_node_t *XMLwrapper::peek(){
+    if (stackpos<=0) {
+	printf("BUG!: XMLwrapper::peek() - empty parentstack\n");
+	return (root);
+    };
+    return(parentstack[stackpos]);
 };
 
 

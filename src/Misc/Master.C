@@ -796,6 +796,7 @@ int Master::saveXML(char *filename){
 };
 
 
+
 int Master::loadXML(char *filename){
     XMLwrapper *xml=new XMLwrapper();
     if (xml->loadXMLfile(filename)<0) {
@@ -803,11 +804,20 @@ int Master::loadXML(char *filename){
 	return(-1);
     };
     
+    getfromXML(xml);
     
     delete(xml);
     return(0);
 };
 
+void Master::getfromXML(XMLwrapper *xml){
+    xml->enterbranch("MASTER");
+	Pvolume=xml->getpar127("volume",Pvolume);
+	Pkeyshift=xml->getpar127("key_shift",Pkeyshift);
+	ctl.NRPN.receive=xml->getparbool("nrpn_receive",ctl.NRPN.receive);
+	
+    xml->exitbranch();
+};
 
 
 

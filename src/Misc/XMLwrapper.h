@@ -38,11 +38,12 @@ class XMLwrapper{
 	XMLwrapper();
 	~XMLwrapper();
 	
+	/********************************/
+	/*         SAVE to XML          */
+	/********************************/
+
 	//returns 0 if ok or -1 if the file cannot be saved
 	int saveXMLfile(char *filename, int compression);
-
-	//returns 0 if ok or -1 if the file cannot be loaded
-	int loadXMLfile(char *filename);
 
 	//add simple parameter (name and value)
 	void addpar(char *name,int val);
@@ -61,9 +62,36 @@ class XMLwrapper{
 
 	//this must be called after each branch (nodes that contains child nodes)
 	void endbranch();
+
+	/********************************/
+	/*        LOAD from XML         */
+	/********************************/
 	
+	//returns 0 if ok or -1 if the file cannot be loaded
+	int loadXMLfile(char *filename);
+
+	//enter into the branch
+	//returns 1 if is ok, or 0 otherwise
+	int enterbranch(char *name);
 	
+	//exits from a branch
+	void exitbranch();
 	
+	//get the the branch_id and limits it between the min and max
+	//if min==max==0, it will not limit it
+	//if there isn't any id, will return min
+	//this must be called only imediately after enterbranch()
+	int getbranchid(int min, int max);
+
+	//it returns the parameter and limits it between min and max
+	//if min==max==0, it will not limit it
+	//if no parameter will be here, the defaultpar will be returned
+	int getpar(char *name,int defaultpar,int min,int max);
+
+	//the same as getpar, but the limits are 0 and 127
+	int getpar127(char *name,int defaultpar);
+	
+	int getparbool(char *name,int defaultpar);
     private:
 	mxml_node_t *tree;//all xml data
 	mxml_node_t *root;//xml data used by zynaddsubfx
@@ -87,6 +115,8 @@ class XMLwrapper{
 	char *int2str(int x);
 	char *real2str(REALTYPE x);
 	
+	int str2int(const char *str);
+	
 	char tmpstr[TMPSTR_SIZE];	
 	
 	
@@ -96,7 +126,14 @@ class XMLwrapper{
 	
 	void push(mxml_node_t *node);
 	mxml_node_t *pop();
-	
+	mxml_node_t *peek();
+
+	//theese are used to store the values
+	struct{
+	    struct {
+		int major,minor;
+	    }xml_version;
+	}values;
 	
 };
 

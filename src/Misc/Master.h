@@ -49,17 +49,19 @@ class Master{
 	//returns 0 for ok, 1 if there is a existing file or -1 if there is an error
 	int saveXML(char *filename);
 
-	//saves all settings to a XML file
-	//returns 0 for ok or -1 if there is an error
-	int loadXML(char *filename);
-	
 	//this adds the parameters to the XML data
 	void add2XML(XMLwrapper *xml);
 
 	void defaults();
 
+	//saves all settings to a XML file
+	//returns 0 for ok or -1 if there is an error
+	int loadXML(char *filename);
 
+	void getfromXML(XMLwrapper *xml);
 	
+
+
 
 	//Midi IN
 	void NoteOn(unsigned char chan,unsigned char note,unsigned char velocity);

@@ -530,4 +530,5 @@
 08 Feb 2004 - Modificat putin formatul XML
 10 Feb 2004 - Adaugata salvarea parametrilor pt. basefunction la OscilGen
 	    - Inceput sa scriu incarcarea parametrilor
-	    
+11 Feb 2004 - Se pot incarca cativa parametrii de la master
+
