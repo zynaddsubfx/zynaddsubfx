@@ -718,6 +718,7 @@
 28 Sep 2004 - Adaugata salvarea tuturor parametrilor in hostul VST (trebuie testat)
 	    - Adaugat installer pt. windows (cu NSIS)
 29 Sep 2004 - Inceput sa scriu interfata utilizator pt. incepatori
+30 Sep 2004 - Terminat de scris interfata utilizator pt. incepatori si se selecteaza la pornire modul dorit
 
 	    
 

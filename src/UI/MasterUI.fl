@@ -367,10 +367,8 @@ panellistitemgroup->redraw();} {}
   decl {BankUI *bankui;} {}
 } 
 
-class MasterUI {open
-} {
-  Function {make_window()} {open
-  } {
+class MasterUI {} {
+  Function {make_window()} {} {
     Fl_Window masterwindow {
       label zynaddsubfx
       callback {\#ifdef VSTAUDIOOUT
@@ -379,7 +377,7 @@ class MasterUI {open
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
-      xywh {555 26 390 465} type Double non_modal visible
+      xywh {353 127 390 465} type Double hide non_modal
     } {
       Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
@@ -600,7 +598,8 @@ if (result!=0) fl_alert("Error: Could not save the file.");}
 	masterwindow->hide();
 	refresh_master_ui();
 	simplemasterwindow->show();
-};} selected
+	config.cfg.UserInterfaceMode=2;
+};}
             xywh {10 10 100 20}
           }
         }
@@ -1037,7 +1036,8 @@ updatepanel();}
       Fl_Button {} {
         label Advanced
         callback {masterwindow->show();
-selectuiwindow->hide();}
+selectuiwindow->hide();
+config.cfg.UserInterfaceMode=1;}
         xywh {10 165 100 35} box PLASTIC_UP_BOX color 229 labelfont 1 labelsize 20
       }
       Fl_Box {} {
@@ -1047,7 +1047,8 @@ selectuiwindow->hide();}
       Fl_Button {} {
         label Beginner
         callback {simplemasterwindow->show();
-selectuiwindow->hide();}
+selectuiwindow->hide();
+config.cfg.UserInterfaceMode=2;}
         xywh {10 80 100 65} box PLASTIC_UP_BOX color 238 labelfont 1 labelsize 20
       }
       Fl_Box {} {
@@ -1152,7 +1153,8 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an
 	simplemasterwindow->hide();
 	refresh_master_ui();
 	masterwindow->show();
-};}
+	config.cfg.UserInterfaceMode=1;
+};} selected
             xywh {0 0 100 20}
           }
         }
@@ -1585,10 +1587,14 @@ delete (sequi);
 delete(presetsui);} {}
   }
   Function {showUI()} {} {
-    code {if (true) selectuiwindow->show();
-
-
-//masterwindow->show();} {}
+    code {switch (config.cfg.UserInterfaceMode){
+	case 0:selectuiwindow->show();
+	break;
+	case 1:masterwindow->show();
+	break;
+	case 2:simplemasterwindow->show();
+	break;
+};} {}
   }
   Function {simplerefresh()} {} {
     code {partenabled->value(master->part[npart]->Penabled);
@@ -1667,8 +1673,7 @@ if (result<0) fl_alert("Error: Could not save the file.");
 
 updatepanel();} {}
   }
-  Function {refresh_master_ui()} {open
-  } {
+  Function {refresh_master_ui()} {} {
     code {ninseff=0;
 nsyseff=0;
 npart=0;
