@@ -140,7 +140,7 @@ class Part{
 
       pthread_mutex_t *mutex;
       
-      int lastnote,disablekitloading;      
+      int lastnote;      
       
     private:
       void KillNotePos(int pos); 

@@ -76,7 +76,7 @@ Part::Part(Microtonal *microtonal_,FFTwrapper *fft_, pthread_mutex_t *mutex_){
     Pname=new unsigned char [PART_MAX_NAME_LEN];
     
     oldvolumel=oldvolumer=0.5;
-    lastnote=-1;disablekitloading=0;
+    lastnote=-1;
     
     
     defaults();

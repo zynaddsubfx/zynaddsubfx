@@ -276,7 +276,7 @@ end();} {}
 
 class PartUI {: {public Fl_Group,PartUI_}
 } {
-  Function {make_window()} {private
+  Function {make_window()} {selected private
   } {
     Fl_Window partgroup {
       private xywh {107 533 385 180} type Double hide
@@ -318,7 +318,7 @@ if (event==FL_RIGHT_MOUSE){
 } else {
   if (event==FL_LEFT_MOUSE) bankui->show();
        else instrumenteditwindow->show();
-};} selected
+};}
           tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the instrument information} xywh {195 5 185 20} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 12 align 84
           code0 {o->label((char *)part->Pname);}
         }
@@ -762,24 +762,13 @@ pthread_mutex_unlock(&master->mutex);}
         label SUBsynth
         xywh {470 0 60 15} labelfont 1 labelsize 12 align 18
       }
-      Fl_Check_Button protectthekitcheck {
-        label {Protect the kit}
-        callback {part->disablekitloading=(int) o->value();}
-        tooltip {Load only in the 0 item, and preserve other items intact when loading a instrument} xywh {110 350 90 10} down_box DOWN_BOX labelfont 1 labelsize 10
-        code0 {o->value(part->disablekitloading);}
-        code1 {if (part->Pkitmode==0) o->deactivate();}
-      }
       Fl_Choice {} {
         label Mode
         callback {part->Pkitmode=(int) o->value();
 if (part->Pkitmode==0) {
      kitlist->deactivate();
-     protectthekitcheck->value(0);
-     protectthekitcheck->do_callback();
-     protectthekitcheck->deactivate();
  } else {
  kitlist->activate();
- protectthekitcheck->activate();
 };}
         xywh {35 350 70 15} down_box BORDER_BOX labelsize 12 textfont 1 textsize 12
         code0 {o->value(part->Pkitmode);}

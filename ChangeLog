@@ -710,4 +710,6 @@
             - LANSAT PE INTERNET - VERSIUNEA (2.0.0)
 --------------------------------------------------------------------------------------------------
 05 Sep 2004 - Corectata o mica eroare de la SUBnote (legat de pitch wheel)	    
+06 Sep 2004 - Eliminata variabila "disablekitloading" din Part si din UI
+
 	    

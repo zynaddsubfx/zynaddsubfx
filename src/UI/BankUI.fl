@@ -27,7 +27,7 @@ decl {\#include "../Misc/Master.h"} {public
 decl {\#include "../Misc/Bank.h"} {public
 } 
 
-decl {\#include "../Misc/Config.h"} {selected public
+decl {\#include "../Misc/Config.h"} {public
 } 
 
 class BankProcess_ {} {
@@ -250,13 +250,7 @@ if ((what==1)&&(mode==1)&&(!bank->emptyslot(slot))){//Reads from slot
      bank->loadfromslot(slot,master->part[*npart]);
     pthread_mutex_unlock(&master->mutex);
     master->part[*npart]->applyparameters();
-     if (master->part[*npart]->disablekitloading==0){
-       snprintf((char *)master->part[*npart]->Pname,PART_MAX_NAME_LEN
-        ,"%s",bank->getname(slot));
-     } else {
-       snprintf((char *)master->part[*npart]->kit[0].Pname,PART_MAX_NAME_LEN
-        ,"%s",bank->getname(slot));
-     };
+    snprintf((char *)master->part[*npart]->Pname,PART_MAX_NAME_LEN,"%s",bank->getname(slot));
      cbwig->do_callback();
      
      if (config.cfg.BankUIAutoClose!=0)
@@ -303,7 +297,8 @@ if (mode==4){//swap
         bs[slot]->refresh();
     };
 };
-if (mode!=4) refreshmainwindow();} {}
+if (mode!=4) refreshmainwindow();} {selected
+    }
   }
   Function {refreshmainwindow()} {} {
     code {bankuiwindow->label(bank->bankfiletitle);
