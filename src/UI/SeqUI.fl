@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0200 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -15,34 +15,12 @@ decl {\#include "../Misc/Master.h"} {public
 decl {\#include "WidgetPDial.h"} {public
 } 
 
-class SeqUI {open
-} {
-  Function {make_window()} {open
-  } {
+class SeqUI {} {
+  Function {make_window()} {} {
     Fl_Window seqwin {
-      label {Sequencer - ZynAddSubFX} open
-      xywh {104 235 239 100} visible
+      label {Sequencer - ZynAddSubFX}
+      xywh {104 235 235 100} type Double hide
     } {
-      Fl_Group {} {
-        label Recorder
-        xywh {10 20 100 65} box ENGRAVED_BOX labelfont 1
-      } {
-        Fl_Button recordbutton {
-          label {Rec.}
-          callback {o->deactivate();
-stopbutton_rec->activate();
-master->seq.startrec();}
-          tooltip {Start Recording} xywh {20 30 30 30} box ROUND_UP_BOX color 88 labelfont 1 labelsize 16 align 2
-        }
-        Fl_Button stopbutton_rec {
-          label Stop
-          callback {o->deactivate();
-recordbutton->activate();
-
-master->seq.stoprec();}
-          tooltip {Stop Recording} xywh {65 29 30 31} box THIN_UP_BOX color 4 labelfont 1 labelsize 16 align 2 deactivate
-        }
-      }
       Fl_Group {} {
         label Player
         xywh {120 20 100 65} box ENGRAVED_BOX labelfont 1
@@ -60,9 +38,14 @@ master->seq.startplay();}
           callback {o->deactivate();
 playbutton->activate();
 
-master->seq.stopplay();} selected
+master->seq.stopplay();}
           tooltip {Stop Playing} xywh {175 29 30 31} box THIN_UP_BOX color 4 labelfont 1 labelsize 16 align 2 deactivate
         }
+      }
+      Fl_Button {} {
+        label {Open test.mid}
+        callback {master->seq.importmidifile("test.mid");} selected
+        xywh {20 25 75 55} align 128
       }
     }
   }

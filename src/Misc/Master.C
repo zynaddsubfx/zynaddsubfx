@@ -107,7 +107,6 @@ void Master::defaults(){
  */
 void Master::NoteOn(unsigned char chan,unsigned char note,unsigned char velocity){
     dump.dumpnote(chan,note,velocity);
-    seq.recordnote(chan,note,velocity);
 
     noteon(chan,note,velocity);
 };
@@ -135,7 +134,6 @@ void Master::noteon(unsigned char chan,unsigned char note,unsigned char velocity
  */
 void Master::NoteOff(unsigned char chan,unsigned char note){
     dump.dumpnote(chan,note,0);
-    seq.recordnote(chan,note,0);
     
     noteoff(chan,note);
 };
@@ -156,7 +154,6 @@ void Master::noteoff(unsigned char chan,unsigned char note){
  */
 void Master::SetController(unsigned char chan,unsigned int type,int par){
     dump.dumpcontroller(chan,type,par);
-    seq.recordcontroller(chan,type,par);
     
     setcontroller(chan,type,par);
 };

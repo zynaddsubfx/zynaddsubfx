@@ -32,7 +32,6 @@
 
 
 Sequencer::Sequencer(){
-    rec=0;
     play=0;
     for (int i=0;i<NUM_MIDI_CHANNELS;i++){
 	midichan[i].track.first=NULL;
@@ -59,66 +58,13 @@ Sequencer::~Sequencer(){
 
 
 int Sequencer::importmidifile(char *filename){
+    if (midifile.loadfile(filename)<0) return(-1);
+    if (midifile.parsemidifile()<0) return(-1);
     return(0);
 };
 
 
 
-void Sequencer::recordnote(char chan, char note, char vel){
-    if (rec==0) return;
-    if (chan>=NUM_MIDI_CHANNELS) return;
-    
-    updatecounter(&rectime);
-    int dt=(int) (rectime.rel*1000.0);
-    tmpevent.deltatime=dt;
-
-    tmpevent.type=1;
-    tmpevent.par1=note;
-    tmpevent.par2=vel;
-
-    writeevent(&midichan[chan].record,&tmpevent);
-    midichan[chan].record.length=rectime.abs;
-
-    printf("Note %d %d %d \n",chan,note,vel);
-};
-
-void Sequencer::recordcontroller(char chan,unsigned int type,int par){
-    if (rec==0) return;
-    if (chan>=NUM_MIDI_CHANNELS) return;
-
-    updatecounter(&rectime);
-    int dt=(int) (rectime.rel*1000.0);
-    tmpevent.deltatime=dt;
-
-    tmpevent.type=2;
-    tmpevent.par1=type;
-    tmpevent.par2=par;
-
-    writeevent(&midichan[chan].record,&tmpevent);
-    midichan[chan].record.length=rectime.abs;
-
-    printf("Ctl %d %d %d \n",chan,type,par);
-};
-
-
-
-void Sequencer::startrec(){
-    if (rec!=0) return;
-    resettime(&rectime);
-    rec=1;
-};
-
-void Sequencer::stoprec(){
-    if (rec==0) return;
-    //for now, only record over track (erase the track)
-    for (int i=0;i<NUM_MIDI_CHANNELS;i++){
-	deletelist(&midichan[i].track);
-	midichan[i].track=midichan[i].record;
-	deletelistreference(&midichan[i].record);
-    };
-    rec=0;
-};
-	
 void Sequencer::startplay(){
     if (play!=0) return;
     play=1;
