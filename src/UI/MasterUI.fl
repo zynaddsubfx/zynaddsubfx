@@ -60,7 +60,7 @@ decl {\#include "../Misc/Util.h"} {public
 decl {\#include "../globals.h"} {public
 } 
 
-class VUMeter {open : {public Fl_Box}
+class VUMeter {: {public Fl_Box}
 } {
   Function {VUMeter(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
     code {master=NULL;
@@ -76,8 +76,7 @@ olddbr=0.0;
 oldrmsdbl=0.0;
 oldrmsdbr=0.0;} {}
   }
-  Function {draw_master()} {open
-  } {
+  Function {draw_master()} {} {
     code {\#define MIN_DB (-48)
 
 int ox=x(); int oy=y(); int lx=w(); int ly=h();
@@ -140,11 +139,8 @@ int irmsdbr=(int) rmsdbr;
 
 //draw the vu-meter lines
 //db
-fl_rectf(ox,oy,idbr,VULENY,80,255,170);
-fl_rectf(ox,oy+ly/2,idbl,VULENY,80,255,170);
-//rms
-fl_rectf(ox,oy,irmsdbr,VULENY,0,200,255);
-fl_rectf(ox,oy+ly/2,irmsdbl,VULENY,0,200,255);
+fl_rectf(ox,oy,idbr,VULENY,0,200,255);
+fl_rectf(ox,oy+ly/2,idbl,VULENY,0,200,255);
 //black
 fl_rectf(ox+idbr,oy,VULENX-idbr,VULENY,0,0,0);
 fl_rectf(ox+idbl,oy+ly/2,VULENX-idbl,VULENY,0,0,0);
@@ -157,6 +153,11 @@ for (int i=1;i<1-MIN_DB;i++){
    if (i%5==0) fl_rectf(ox+tx,oy,1,VULENY+ly/2,0,230,240);
    if (i%10==0) fl_rectf(ox+tx-1,oy,2,VULENY+ly/2,0,225,255);
 };
+
+//rms
+if (irmsdbr>2) fl_rectf(ox+irmsdbr-1,oy,3,VULENY,255,255,0);
+if (irmsdbl>2) fl_rectf(ox+irmsdbl-1,oy+ly/2,3,VULENY,255,255,0);
+
 
 //draw the red box if clipping has occured
 if (clipped==0) fl_rectf(ox+VULENX+2,oy+1,lx-VULENX-3,ly-4,0,0,10);

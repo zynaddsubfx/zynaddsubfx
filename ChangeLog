@@ -775,6 +775,8 @@
 12 Mar 2005 - Imbunatatiri la interfata PADsynth, adica se poate da "apply" direct din OscilGenUI sau ResonanceUI
 13 Mar 2005 - Facute cateva compilari in Makefile pt. compilare pt. Windows (standalone exe si vst)
 	    - Se compileaza in mod cross-compile pt. windows din linux 
+14 Mar 2005 - Mici modificari la afisarea RMS-ului
+	    - Actualizat textul copyright-ului la anul 2005
 
 
 
