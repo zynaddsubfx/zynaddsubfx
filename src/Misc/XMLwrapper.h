@@ -21,11 +21,14 @@
 */
 
 #include <mxml.h>
+#ifndef REALTYPE
+#define REALTYPE float
+#endif
 
 #ifndef XML_WRAPPER_H
 #define XML_WRAPPER_H
 
-#define TMPSTR_SIZE 20
+#define TMPSTR_SIZE 50
 
 //the maxim tree depth
 #define STACKSIZE 100
@@ -40,6 +43,7 @@ class XMLwrapper{
 
 	//add simple parameter (name and value)
 	void addpar(char *name,int val);
+	void addparreal(char *name,REALTYPE val);
 	
 	//add boolean parameter (name and boolean value)
 	//if the value is 0 => "yes", else "no"
@@ -78,6 +82,7 @@ class XMLwrapper{
 	mxml_node_t *addparams2(char *name,char *par1,char *val1,char *par2, char *val2);
 	
 	char *int2str(int x);
+	char *real2str(REALTYPE x);
 	
 	char tmpstr[TMPSTR_SIZE];	
 	

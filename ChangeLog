@@ -514,12 +514,14 @@
 
 *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *
 
-01 Feb 2003 - Revenit la versiunea din 16 Dec. 2003
+01 Feb 2004 - Revenit la versiunea din 16 Dec. 2003
 	    - Pus iarasi RMS normalize prestabilit la OscilGen
 	    - M-am razgandit ;) nu mai restructurez part-ul; mai bine pun acolo o functie separata pentru salvari/incarcari par instrumente
 	    - Inceput sa adaug suportul XML
-02 Feb 2003 - Corectata o eroare care facea ca numele la instrumentele din bank sa fie aratate gresit (nu era pus un \0 )
+02 Feb 2004 - Corectata o eroare care facea ca numele la instrumentele din bank sa fie aratate gresit (nu era pus un \0 )
 	    - Continuat suportul de XML
-03 Feb 2003 - Continuat de scris suportul XML - inceput sa salvezi cativa parametrii
-04 Feb 2003 - Se salveaza parametrii XML la master, part, filter, lfo, envelope, resonance si adnote (partial)
+03 Feb 2004 - Continuat de scris suportul XML - inceput sa salvezi cativa parametrii
+04 Feb 2004 - Se salveaza parametrii XML la master, part, filter, lfo, envelope, resonance si adnote (partial)
+05 Feb 2004 - Se salveaza toti parametrii in XML
+
 

@@ -483,24 +483,141 @@ void ADnoteParameters::saveloadbuf(Buffer *buf){
 };
 
 
+void ADnoteParameters::add2XMLvoice(XMLwrapper *xml,int nvoice){
+    if (nvoice>=NUM_VOICES) return;
+    
+    int oscilused=0,fmoscilused=0;//if the oscil or fmoscil are used by another voice
+
+    for (int i=0;i<NUM_VOICES;i++){
+	if (VoicePar[i].Pextoscil==nvoice) oscilused=1;
+	if (VoicePar[i].PextFMoscil==nvoice) fmoscilused=1;
+    };
+    
+    xml->addparbool("enabled",VoicePar[nvoice].Enabled);
+    if ((VoicePar[nvoice].Enabled==0)&&(oscilused==0)&&(fmoscilused==0)) return;
+
+    xml->addpar("type",VoicePar[nvoice].Type);
+    xml->addpar("delay",VoicePar[nvoice].PDelay);
+    xml->addparbool("resonance",VoicePar[nvoice].Presonance);
+    
+    xml->addpar("extoscil",VoicePar[nvoice].Pextoscil);
+    xml->addpar("extfmoscil",VoicePar[nvoice].PextFMoscil);
+
+    xml->addpar("oscilphase",VoicePar[nvoice].Poscilphase);
+    xml->addpar("oscilfmphase",VoicePar[nvoice].PFMoscilphase);
+
+    xml->addparbool("filterenabled",VoicePar[nvoice].PFilterEnabled);
+    xml->addparbool("filterbypass",VoicePar[nvoice].Pfilterbypass);
+
+    xml->addparbool("fmenabled",VoicePar[nvoice].PFMEnabled);
+
+    xml->beginbranch("OSCIL");
+	VoicePar[nvoice].OscilSmp->add2XML(xml);
+    xml->endbranch();
+
+
+    xml->beginbranch("AMPLITUDE_PARAMETERS");
+	xml->addpar("panning",VoicePar[nvoice].PPanning);
+    	xml->addpar("volume",VoicePar[nvoice].PVolume);
+    	xml->addparbool("volumeminus",VoicePar[nvoice].PVolumeminus);
+    	xml->addpar("velocitysensing",VoicePar[nvoice].PAmpVelocityScaleFunction);
+
+	xml->addparbool("ampenvelopeenabled",VoicePar[nvoice].PAmpEnvelopeEnabled);
+	if (VoicePar[nvoice].PAmpEnvelopeEnabled!=0){
+	    xml->beginbranch("AMPLITUDE_ENVELOPE");
+		VoicePar[nvoice].AmpEnvelope->add2XML(xml);
+	    xml->endbranch();
+	};
+	xml->addparbool("amplfoenabled",VoicePar[nvoice].PAmpLfoEnabled);
+	if (VoicePar[nvoice].PAmpLfoEnabled!=0){
+	    xml->beginbranch("AMPLITUDE_LFO");
+		VoicePar[nvoice].AmpLfo->add2XML(xml);
+	    xml->endbranch();
+	};
+    xml->endbranch();
+
+    xml->beginbranch("FREQUENCY_PARAMETERS");
+	xml->addparbool("fixedfreq",VoicePar[nvoice].Pfixedfreq);
+	xml->addpar("fixedfreqet",VoicePar[nvoice].PfixedfreqET);
+	xml->addpar("detune",VoicePar[nvoice].PDetune);
+	xml->addpar("coarsedetune",VoicePar[nvoice].PCoarseDetune);
+	xml->addpar("detunetype",VoicePar[nvoice].PDetuneType);
+
+	xml->addparbool("freqenvelopeenabled",VoicePar[nvoice].PFreqEnvelopeEnabled);
+	if (VoicePar[nvoice].PFreqEnvelopeEnabled!=0){
+	    xml->beginbranch("FREQUENCY_ENVELOPE");
+		VoicePar[nvoice].FreqEnvelope->add2XML(xml);
+	    xml->endbranch();
+	};
+	xml->addparbool("freqlfoenabled",VoicePar[nvoice].PFreqLfoEnabled);
+	if (VoicePar[nvoice].PFreqLfoEnabled!=0){
+	    xml->beginbranch("FREQUENCY_LFO");
+		VoicePar[nvoice].FreqLfo->add2XML(xml);
+	    xml->endbranch();
+	};
+    xml->endbranch();
+
+
+    if (VoicePar[nvoice].PFilterEnabled!=0){
+	xml->beginbranch("FILTER_PARAMETERS");
+	    xml->beginbranch("FILTER");
+		GlobalPar.GlobalFilter->add2XML(xml);
+	    xml->endbranch();
+
+	    xml->addparbool("filterenvelopeenabled",VoicePar[nvoice].PFilterEnvelopeEnabled);
+	    if (VoicePar[nvoice].PFilterEnvelopeEnabled!=0){
+		xml->beginbranch("FILTER_ENVELOPE");
+		    VoicePar[nvoice].FilterEnvelope->add2XML(xml);
+		xml->endbranch();
+	    };
+
+	    xml->addparbool("filterlfoenabled",VoicePar[nvoice].PFilterLfoEnabled);
+	    if (VoicePar[nvoice].PFilterLfoEnabled!=0){
+		xml->beginbranch("FILTER_LFO");
+		    VoicePar[nvoice].FilterLfo->add2XML(xml);
+		xml->endbranch();
+	    };
+	xml->endbranch();
+    };
+
+    if ((VoicePar[nvoice].PFMEnabled!=0)||(fmoscilused!=0)){
+	xml->beginbranch("FM_PARAMETERS");
+	    xml->addpar("inputvoice",VoicePar[nvoice].PFMVoice);
+
+    	    xml->addpar("volume",VoicePar[nvoice].PFMVolume);
+    	    xml->addpar("volumedamp",VoicePar[nvoice].PFMVolumeDamp);
+    	    xml->addpar("velocitysensing",VoicePar[nvoice].PFMVelocityScaleFunction);
+
+	    xml->addparbool("ampenvelopeenabled",VoicePar[nvoice].PFMAmpEnvelopeEnabled);
+	    if (VoicePar[nvoice].PFMAmpEnvelopeEnabled!=0){
+		xml->beginbranch("AMPLITUDE_ENVELOPE");
+		    VoicePar[nvoice].FMAmpEnvelope->add2XML(xml);
+		xml->endbranch();
+	    };
+
+    	    xml->addpar("detune",VoicePar[nvoice].PFMDetune);
+    	    xml->addpar("coarsedetune",VoicePar[nvoice].PFMCoarseDetune);
+    	    xml->addpar("detunetype",VoicePar[nvoice].PFMDetuneType);
+
+	    xml->addparbool("freqenvelopeenabled",VoicePar[nvoice].PFMFreqEnvelopeEnabled);
+	    if (VoicePar[nvoice].PFMFreqEnvelopeEnabled!=0){
+		xml->beginbranch("FREQUENCY_ENVELOPE");
+		    VoicePar[nvoice].FMFreqEnvelope->add2XML(xml);
+		xml->endbranch();
+	    };
+
+	    xml->beginbranch("OSCIL");
+		VoicePar[nvoice].FMSmp->add2XML(xml);
+	    xml->endbranch();
+
+	xml->endbranch();
+    };
+};
 
 
 void ADnoteParameters::add2XML(XMLwrapper *xml){
     xml->addpar("stereo",GlobalPar.PStereo);
-    xml->beginbranch("FREQUENCY_PARAMETERS");
-	xml->addpar("detune",GlobalPar.PDetune);
-	xml->addpar("coarsedetune",GlobalPar.PCoarseDetune);
-        xml->addpar("detunetype",GlobalPar.PDetuneType);
-	
-	xml->beginbranch("ENVELOPE_FREQUENCY");
-	    GlobalPar.FreqEnvelope->add2XML(xml);
-	xml->endbranch();
-	
-	xml->beginbranch("LFO_FREQENCY");
-	    GlobalPar.FreqLfo->add2XML(xml);
-	xml->endbranch();
-    xml->endbranch();
-    
+
     xml->beginbranch("AMPLITUDE_PARAMETERS");
 	xml->addpar("volume",GlobalPar.PVolume);
 	xml->addpar("panning",GlobalPar.PPanning);
@@ -510,14 +627,29 @@ void ADnoteParameters::add2XML(XMLwrapper *xml){
 	xml->addpar("punchstretch",GlobalPar.PPunchStretch);
 	xml->addpar("punchvelocitysensing",GlobalPar.PPunchVelocitySensing);
 	
-	xml->beginbranch("ENVELOPE_AMPLITUDE");
+	xml->beginbranch("AMPLITUDE_ENVELOPE");
 	    GlobalPar.AmpEnvelope->add2XML(xml);
 	xml->endbranch();
 	
-	xml->beginbranch("LFO_AMPLITUDE");
+	xml->beginbranch("AMPLITUDE_LFO");
 	    GlobalPar.AmpLfo->add2XML(xml);
 	xml->endbranch();
     xml->endbranch();
+
+    xml->beginbranch("FREQUENCY_PARAMETERS");
+	xml->addpar("detune",GlobalPar.PDetune);
+	xml->addpar("coarsedetune",GlobalPar.PCoarseDetune);
+        xml->addpar("detunetype",GlobalPar.PDetuneType);
+	
+	xml->beginbranch("FREQUENCY_ENVELOPE");
+	    GlobalPar.FreqEnvelope->add2XML(xml);
+	xml->endbranch();
+	
+	xml->beginbranch("FREQUENCY_LFO");
+	    GlobalPar.FreqLfo->add2XML(xml);
+	xml->endbranch();
+    xml->endbranch();
+    
     
     xml->beginbranch("FILTER_PARAMETERS");
 	xml->beginbranch("FILTER");
@@ -527,22 +659,24 @@ void ADnoteParameters::add2XML(XMLwrapper *xml){
 	xml->addpar("velocitysensingamplitude",GlobalPar.PFilterVelocityScale);
 	xml->addpar("velocitysensing",GlobalPar.PFilterVelocityScaleFunction);
 	
-	xml->beginbranch("ENVELOPE_FILTER");
+	xml->beginbranch("FILTER_ENVELOPE");
 	    GlobalPar.FilterEnvelope->add2XML(xml);
 	xml->endbranch();
 	
-	xml->beginbranch("LFO_FILTER");
+	xml->beginbranch("FILTER_LFO");
 	    GlobalPar.FilterLfo->add2XML(xml);
 	xml->endbranch();
     xml->endbranch();
     
-    xml->beginbranch("ENVELOPE_FILTER");
-	GlobalPar.Reson->add2XML(xml);
+    xml->beginbranch("RESONANCE");
+        GlobalPar.Reson->add2XML(xml);
     xml->endbranch();
 
-    //aici sa salvez pt. fiecare voce (apelez o alta functie)
-
-    
+    for (int nvoice=0;nvoice<NUM_VOICES;nvoice++){
+	xml->beginbranch("VOICE",nvoice);
+	    add2XMLvoice(xml,nvoice);
+	xml->endbranch();
+    };
 };
 
 

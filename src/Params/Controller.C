@@ -304,3 +304,30 @@ void Controller::saveloadbuf(Buffer *buf){
 };
 
 
+void Controller::add2XML(XMLwrapper *xml){
+    xml->addpar("pitchwheel_bendrange",pitchwheel.bendrange);
+
+    xml->addpar("expression_receive",expression.receive);
+    xml->addpar("panning_depth",panning.depth);
+    xml->addpar("filtercutoff_depth",filtercutoff.depth);
+    xml->addpar("filterq_depth",filterq.depth);
+    xml->addpar("bandwidth_depth",bandwidth.depth);
+    xml->addpar("modwheel_depth",modwheel.depth);
+    xml->addpar("modwheel_exponential",modwheel.exponential);
+    xml->addpar("fmamp_receive",fmamp.receive);
+    xml->addpar("volume_receive",volume.receive);
+    xml->addpar("sustain_receive",sustain.receive);
+
+    xml->addpar("portamento_receive",portamento.receive);
+    xml->addpar("portamento_time",portamento.time);
+    xml->addpar("portamento_pitchthresh",portamento.pitchthresh);
+    xml->addpar("portamento_pitchthreshtype",portamento.pitchthreshtype);
+    xml->addpar("portamento_portamento",portamento.portamento);
+    xml->addpar("portamento_updowntimestretch",portamento.updowntimestretch);
+
+    xml->addpar("resonancecenter_depth",resonancecenter.depth);
+    xml->addpar("resonancebandwidth_depth",resonancebandwidth.depth);
+};
+
+
+

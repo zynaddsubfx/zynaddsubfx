@@ -193,3 +193,75 @@ void SUBnoteParameters::saveloadbuf(Buffer *buf){
 };
 
 
+void SUBnoteParameters::add2XML(XMLwrapper *xml){
+
+    xml->addpar("numstages",Pnumstages);
+    xml->addpar("magtype",Phmagtype);
+    xml->addpar("start",Pstart);
+    
+    for (int i=0;i<MAX_SUB_HARMONICS;i++){
+	if (Phmag[i]==0) continue;
+	
+	xml->beginbranch("HARMONIC",i);
+	    xml->addpar("mag",Phmag[i]);
+	    xml->addpar("relbw",Phrelbw[i]);
+	xml->endbranch();
+    };
+    
+    xml->beginbranch("AMPLITUDE_PARAMETERS");
+	xml->addparbool("stereo",Pstereo);
+	xml->addpar("volume",PVolume);
+	xml->addpar("panning",PPanning);
+	xml->addpar("velocitysensing",PAmpVelocityScaleFunction);
+	xml->beginbranch("AMPLITUDE_ENVELOPE");
+	    AmpEnvelope->add2XML(xml);
+	xml->endbranch();
+    xml->endbranch();
+
+    xml->beginbranch("FREQUENCY_PARAMETERS");
+	xml->addparbool("fixedfreq",Pfixedfreq);
+	xml->addpar("fixedfreqet",PfixedfreqET);
+
+	xml->addpar("detune",PDetune);
+	xml->addpar("coarsedetune",PCoarseDetune);
+	xml->addpar("detunetype",PDetuneType);
+
+	xml->addpar("bandwidth",Pbandwidth);
+	xml->addpar("bwscale",Pbwscale);
+
+	xml->addparbool("freqenvelopeenabled",PFreqEnvelopeEnabled);
+	if (PFreqEnvelopeEnabled!=0){
+	    xml->beginbranch("FREQUENCY_ENVELOPE");
+	        FreqEnvelope->add2XML(xml);
+	    xml->endbranch();
+	};
+
+	xml->addparbool("bandwidthenvelopeenabled",PBandWidthEnvelopeEnabled);
+	if (PBandWidthEnvelopeEnabled!=0){
+	    xml->beginbranch("BANCWIDTH_ENVELOPE");
+	        BandWidthEnvelope->add2XML(xml);
+	    xml->endbranch();
+	};
+    xml->endbranch();
+
+    xml->beginbranch("FREQUENCY_PARAMETERS");
+	xml->addparbool("enabled",PGlobalFilterEnabled);
+	if (PGlobalFilterEnabled!=0){
+	    xml->beginbranch("FILTER");
+		GlobalFilter->add2XML(xml);
+	    xml->endbranch();
+
+	    xml->addpar("filtervelocitysensing",PGlobalFilterVelocityScaleFunction);
+	    xml->addpar("filtervelocitysensingamplitude",PGlobalFilterVelocityScale);
+
+	    xml->beginbranch("FILTER_ENVELOPE");
+		GlobalFilterEnvelope->add2XML(xml);
+	    xml->endbranch();
+	};
+    xml->endbranch();
+};
+
+
+
+
+

@@ -561,3 +561,69 @@ void Microtonal::saveloadbuf(Buffer *buf){
 	buf->rwbyte(&tmp);
     };
 };
+
+
+void Microtonal::add2XML(XMLwrapper *xml){
+    xml->addparstr("name",(char *) Pname);
+    xml->addparstr("comment",(char *) Pcomment);
+
+    xml->addparbool("invertupdown",Pinvertupdown);
+    xml->addparbool("invertupdowncenter",Pinvertupdowncenter);
+
+    xml->addparbool("enabled",Penabled);
+    xml->addpar("globalfinedetune",Pglobalfinedetune);
+
+    xml->addpar("anote",PAnote);
+    xml->addparreal("afreq",PAfreq);
+
+    if (Penabled==0) return;
+
+    xml->beginbranch("SCALE");
+        xml->addpar("scaleshift",Pscaleshift);
+	xml->addpar("firstkey",Pfirstkey);
+	xml->addpar("lastkey",Plastkey);
+	xml->addpar("middlenote",Pmiddlenote);
+
+	xml->beginbranch("OCTAVE");
+	    xml->addpar("octavesize",octavesize);
+	    for (int i=0;i<octavesize;i++){
+		xml->beginbranch("DEGREE",i);
+		    if (octave[i].type==1){			
+			xml->addparreal("cents",octave[i].tuning);
+		    };
+		    if (octave[i].type==2){			
+			xml->addpar("numerator",octave[i].x1);
+			xml->addpar("denominator",octave[i].x2);
+		    };
+		xml->endbranch();
+	    };
+	xml->endbranch();
+
+	xml->beginbranch("KEYBOARD_MAPPING");
+	    xml->addpar("mapsize",Pmapsize);
+	    xml->addpar("mappingenabled",Pmappingenabled);
+		for (int i=0;i<Pmapsize;i++){
+		    xml->beginbranch("KEYMAP",i);
+			xml->addpar("degree",Pmapping[i]);
+		    xml->endbranch();
+		};
+	xml->endbranch();
+    xml->endbranch();
+    
+    /*
+
+	//Mapping ON/OFF
+	unsigned char Pmappingenabled;
+	//Mapping (keys)
+	short int Pmapping[128];
+	
+	unsigned char Pglobalfinedetune;
+	
+	// Functions
+    
+    */
+    
+};
+
+
+

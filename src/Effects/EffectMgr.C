@@ -168,6 +168,15 @@ REALTYPE EffectMgr::sysefxgetvolume(){
 };
 
 
+/*
+ * Get the EQ response
+ */
+REALTYPE EffectMgr::getEQfreqresponse(REALTYPE freq){
+    if (nefx==7) return(efx->getfreqresponse(freq));
+	else return(0.0);
+};
+
+
 
 /*
  * Save or load the parameters to/from the buffer
@@ -228,13 +237,22 @@ void EffectMgr::saveloadbuf(Buffer *buf){
     };
 };
 
+void EffectMgr::add2XML(XMLwrapper *xml){
+    xml->addpar("type",geteffect());
 
+    if ((efx==NULL)||(geteffect()==0)) return;
+    xml->addpar("preset",efx->Ppreset);
 
-/*
- * Get the EQ response
- */
-REALTYPE EffectMgr::getEQfreqresponse(REALTYPE freq){
-    if (nefx==7) return(efx->getfreqresponse(freq));
-	else return(0.0);
+    xml->beginbranch("EFFECT_PARAMETERS");
+	for (int n=0;n<128;n++){
+	    int par=geteffectpar(n);
+	    if (par==0) continue;
+	    xml->beginbranch("parno",n);
+		xml->addpar("par",par);
+	    xml->endbranch();
+	};
+    xml->endbranch();
 };
+
+
 

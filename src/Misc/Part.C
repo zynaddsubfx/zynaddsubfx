@@ -928,7 +928,7 @@ void Part::add2XMLinstrument(XMLwrapper *xml){
     xml->addparbool("drummode",Pdrummode);
     
     for (int i=0;i<NUM_KIT_ITEMS;i++){
-	xml->beginbranch("INSTRUMENTKIT",i);
+	xml->beginbranch("INSTRUMENTKITITEM",i);
 	    xml->addparbool("enabled",kit[i].Penabled);
 	    if (kit[i].Penabled!=0) {
 		xml->addparstr("name",(char *)kit[i].Pname);
@@ -940,17 +940,16 @@ void Part::add2XMLinstrument(XMLwrapper *xml){
 		xml->addpar("Psendtoparteefect",kit[i].Psendtoparteffect);
 
 		xml->addpar("adenabled",kit[i].Padenabled);
-		xml->addpar("subenabled",kit[i].Psubenabled);
-		
 		if ((kit[i].Padenabled!=0)&&(kit[i].adpars!=NULL)){
 		    xml->beginbranch("ADNOTEPARAMETERS");
 			kit[i].adpars->add2XML(xml);
 		    xml->endbranch();
 		};
 
+		xml->addpar("subenabled",kit[i].Psubenabled);
 		if ((kit[i].Psubenabled!=0)&&(kit[i].subpars!=NULL)){
 		    xml->beginbranch("SUBNOTEPARAMETERS");
-		    //kit[i].subpars->add2XML(xml);
+		    kit[i].subpars->add2XML(xml);
 		    xml->endbranch();
 		};
 		
@@ -977,31 +976,26 @@ void Part::add2XML(XMLwrapper *xml){
     xml->addpar("velsns",Pvelsns);
     xml->addpar("veloffs",Pveloffs);
 
-    xml->addpar("noteon",Pnoteon);
+    xml->addparbool("noteon",Pnoteon);
     xml->addparbool("polymode",Ppolymode);
     xml->addpar("keylimit",Pkeylimit);
-//    xml->addpar("",P);
 
+    xml->beginbranch("INSTRUMENTKIT");
+	add2XMLinstrument(xml);
+    xml->endbranch();
     
-
-
-
-    xml->beginbranch("INSTRUMENT");
-     add2XMLinstrument(xml);
+    xml->beginbranch("CONTROLLER");
+	ctl.add2XML(xml);
     xml->endbranch();
 
+    for (int nefx=0;nefx<NUM_PART_EFX;nefx++){
+	xml->beginbranch("PARTEFFECT",nefx);
+	    xml->beginbranch("EFFECT");
+		partefx[nefx]->add2XML(xml);
+	    xml->endbranch();
 
-    
-//    xml->addpar("volume",Pvolume);
-//    xml->addpar("keyshift",Pkeyshift);
-
-    
-//    for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
-//	xml->addpart(npart);
-	
-	
-	
-//	xml->endbranch();
-//    };
+	    xml->addpar("route",Pefxroute[nefx]);
+	xml->endbranch();
+    };
 };
 

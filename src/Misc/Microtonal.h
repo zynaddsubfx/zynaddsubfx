@@ -25,6 +25,8 @@
 
 #include "../globals.h"
 #include "Buffer.h"
+#include "XMLwrapper.h"
+
 #define MAX_OCTAVE_SIZE 128
 #define MICROTONAL_MAX_NAME_LEN 120
 
@@ -36,9 +38,9 @@ class Microtonal{
 	~Microtonal();
 	void reset();
 	REALTYPE getnotefreq(int note,int keyshift);
+
 	
 	//Parameters
-
 	//if the keys are inversed (the pitch is lower to keys from the right direction)	
 	unsigned char Pinvertupdown;
 
@@ -83,18 +85,25 @@ class Microtonal{
 	void texttomapping(const char *text);
 	unsigned char *Pname;
 	unsigned char *Pcomment;
+
 	void saveloadbuf(Buffer *buf);
+
+    	void add2XML(XMLwrapper *xml);
+
     private:
 	int linetotunings(unsigned int nline,const char *line);
 	int loadline(FILE *file,char *line);//loads a line from the text file, while ignoring the lines beggining with "!"
 	unsigned char octavesize;
 	struct {
+	    unsigned char type;//1 for cents or 2 for division
+
 	    // the real tuning (eg. +1.05946 for one halftone)
 	    // or 2.0 for one octave
 	    REALTYPE tuning;
-	    //folowing parameters are used for save/load from parameters buffers(file)
-	    unsigned char type;
-	    unsigned int x1,x2;// smaller than pow(128.0,3.0)-1.0
+	    
+	    //the real tunning is x1/x2
+	    unsigned int x1,x2;
+	    
 	} octave[MAX_OCTAVE_SIZE],tmpoctave[MAX_OCTAVE_SIZE];
 	
 };

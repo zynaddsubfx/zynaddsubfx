@@ -34,6 +34,7 @@
 #include "Distorsion.h"
 #include "EQ.h"
 #include "../Misc/Buffer.h"
+#include "../Misc/XMLwrapper.h"
 
 
 class EffectMgr{
@@ -41,6 +42,9 @@ class EffectMgr{
 	EffectMgr(int insertion_,pthread_mutex_t *mutex_);
 	~EffectMgr();
 	void saveloadbuf(Buffer *buf);
+	void add2XML(XMLwrapper *xml);
+
+
 	void out(REALTYPE *smpsl,REALTYPE *smpsr);
 
 	//get the output(to speakers) volume of the systemeffect

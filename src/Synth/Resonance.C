@@ -240,7 +240,7 @@ void Resonance::add2XML(XMLwrapper *xml){
     xml->addpar("gain",Pgain);
     xml->addparbool("protectthefundamental",Pprotectthefundamental);
     for (int i=0;i<N_RES_POINTS;i++){
-	xml->beginbranch("POINT",i);
+	xml->beginbranch("RESPOINT",i);
 	    xml->addpar("val",Prespoints[i]);
 	xml->endbranch();
     };

@@ -66,17 +66,21 @@ int XMLwrapper::saveXMLfile(char *filename,int compression){
     
     fclose(file);
     
-    //test
+/*    //test
     printf("\n\n");
     mxmlSaveFile(tree,stdout,XMLwrapper_whitespace_callback);
     printf("\n\n");
-    
+*/    
     return(0);
 };
 
 
 void XMLwrapper::addpar(char *name,int val){
     addparams2("PARAM","name",name,"value",int2str(val));
+};
+
+void XMLwrapper::addparreal(char *name,REALTYPE val){
+    addparams2("PARAMREAL","name",name,"value",real2str(val));
 };
 
 void XMLwrapper::addparbool(char *name,int val){
@@ -112,6 +116,11 @@ char *XMLwrapper::int2str(int x){
     return(tmpstr);
 };
 
+char *XMLwrapper::real2str(REALTYPE x){
+    snprintf(tmpstr,TMPSTR_SIZE,"%g",x);
+    return(tmpstr);
+};
+
 mxml_node_t *XMLwrapper::addparams0(char *name){
     mxml_node_t *element=mxmlNewElement(node,name);
     return(element);
@@ -136,7 +145,7 @@ mxml_node_t *XMLwrapper::addparams2(char *name,char *par1,char *val1,char *par2,
 void XMLwrapper::push(mxml_node_t *node){
     if (stackpos>=STACKSIZE-1) {
 	printf("BUG!: XMLwrapper::push() - full parentstack\n");
-	return;//nu mai este loc in stiva
+	return;
     };
     stackpos++;
     parentstack[stackpos]=node;

@@ -258,12 +258,16 @@ class ADnoteParameters{
 	ADnoteVoiceParam VoicePar[NUM_VOICES];
 
 	void add2XML(XMLwrapper *xml);
+	void add2XMLvoice(XMLwrapper *xml,int nvoice);
 
 	void saveloadbuf(Buffer *buf);
 	void saveloadbufvoice(Buffer *buf,unsigned char nvoice);
 
 	void copypastevoice(int n,int what);	
     private:
+
+
+
 	void EnableVoice(int nvoice);		
 	void KillVoice(int nvoice);		
 	FFTwrapper *fft;	

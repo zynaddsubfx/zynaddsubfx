@@ -26,12 +26,17 @@
 
 #include "../globals.h"
 #include "../Misc/Buffer.h"
+#include "../Misc/XMLwrapper.h"
+
 class Controller{
     public:
 	Controller();
 	~Controller();
 	void resetall();
 	void saveloadbuf(Buffer *buf);
+
+        void add2XML(XMLwrapper *xml);
+
     //Controllers functions
 	void setpitchwheel(int value);
 	void setpitchwheelbendrange(unsigned short int value);

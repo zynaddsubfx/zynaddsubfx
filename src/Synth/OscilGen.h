@@ -25,6 +25,7 @@
 
 #include "../globals.h"
 #include "../Misc/Buffer.h"
+#include "../Misc/XMLwrapper.h"
 #include "Resonance.h"
 #include "../DSP/FFTwrapper.h"  
 
@@ -47,7 +48,10 @@ class OscilGen{
 	void getspectrum(int n,REALTYPE *spc,int what);//what=0 pt. oscil,1 pt. basefunc
         void getcurrentbasefunction(REALTYPE *smps);
 	void useasbase();//convert oscil to base function
+
         void saveloadbuf(Buffer *buf);
+
+    	void add2XML(XMLwrapper *xml);
 
 
 	//Parameters
@@ -81,10 +85,10 @@ class OscilGen{
 	unsigned char Psatype,Psapar;//spectrum adjust
 
 	unsigned char Pamprandpower, Pamprandtype;
+    private:
 	
 	REALTYPE hmag[MAX_AD_HARMONICS],hphase[MAX_AD_HARMONICS];//the magnituides and the phases of the sine/nonsine harmonics
-	//this is public because I get it from interface and show to the user
-    private:
+//    private:
 	FFTwrapper *fft;
 	//computes the basefunction and make the FFT; newbasefunc<0  = same basefunc
 	void changebasefunction();

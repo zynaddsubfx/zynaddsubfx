@@ -698,6 +698,7 @@ void OscilGen::saveloadbuf(Buffer *buf){
     buf->rwbyte(&tmp);//if tmp!=0xfe error
 
     if (buf->getmode()==0){
+	Pnormalizemethod=0;
 	for (nharmonic=0;nharmonic<MAX_AD_HARMONICS;nharmonic++){
 	    Phmag[nharmonic]=64;
 	    Phphase[nharmonic]=64;
@@ -803,7 +804,35 @@ void OscilGen::saveloadbuf(Buffer *buf){
 };
 
 
+void OscilGen::add2XML(XMLwrapper *xml){
+    for (int n=0;n<MAX_AD_HARMONICS;n++){
+	if ((Phmag[n]==64)&&(Phphase[n]==64)) continue;
+	xml->beginbranch("HARMONIC",n);
+	    xml->addpar("mag",Phmag[n]);
+	    xml->addpar("phase",Phphase[n]);
+	xml->endbranch();
+    };
 
+    xml->addpar("hmagtype",Phmagtype);
+    xml->addpar("normalizemethod",Pnormalizemethod);
+
+    xml->addpar("currentbasefunc",Pcurrentbasefunc);
+    xml->addpar("basefuncpar",Pbasefuncpar);
+
+    xml->addpar("waveshaping",Pwaveshaping);
+    xml->addpar("waveshapingfunction",Pwaveshapingfunction);
+
+    xml->addpar("filtertype",Pfiltertype);
+    xml->addpar("filterpar",Pfilterpar);
+    xml->addpar("filterbeforews",Pfilterbeforews);
+
+    xml->addpar("satype",Psatype);
+    xml->addpar("sapar",Psapar);
+
+    xml->addpar("rand",Prand);
+    xml->addpar("amprandtype",Pamprandtype);
+    xml->addpar("amprandpower",Pamprandpower);
+};
 
 
 
