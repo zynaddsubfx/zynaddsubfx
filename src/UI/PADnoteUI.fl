@@ -178,7 +178,7 @@ class PADnoteUI {} {
   Function {make_window()} {} {
     Fl_Window padnotewindow {
       label {PAD synth Parameters}
-      xywh {184 106 535 450} type Double hide
+      xywh {184 106 535 450} type Double visible
     } {
       Fl_Tabs {} {
         callback {if (o->value()!=harmonicstructuregroup) applybutton->hide();
@@ -186,7 +186,7 @@ class PADnoteUI {} {
         xywh {0 0 535 395}
       } {
         Fl_Group harmonicstructuregroup {
-          label {Harmonic Structure}
+          label {Harmonic Structure} selected
           xywh {0 20 535 375} box ENGRAVED_BOX
         } {
           Fl_Group {} {
@@ -404,7 +404,7 @@ cbwidget->do_callback();}
               label OvertonesPosition
               callback {pars->Phrpos.type=o->value();
 overtonepos->redraw();
-cbwidget->do_callback();} open
+cbwidget->do_callback();}
               xywh {325 310 80 20} down_box BORDER_BOX labelsize 10 align 5 textsize 12
               code0 {o->value(pars->Phrpos.type);}
             } {
@@ -431,6 +431,10 @@ cbwidget->do_callback();} open
               menuitem {} {
                 label Sine
                 xywh {110 110 100 20} labelfont 1 labelsize 12
+              }
+              menuitem {} {
+                label Power
+                xywh {120 120 100 20} labelfont 1 labelsize 12
               }
             }
             Fl_Dial {} {
@@ -863,8 +867,7 @@ make_window();} {}
 delete(resui);
 
 padnotewindow->hide();
-delete(padnotewindow);} {selected
-    }
+delete(padnotewindow);} {}
   }
   decl {PADnoteParameters *pars;} {public
   }

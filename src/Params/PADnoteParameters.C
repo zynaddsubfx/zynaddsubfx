@@ -300,6 +300,10 @@ REALTYPE PADnoteParameters::getNhr(int n){
 	case 5:
 	    result=n0+sin(n0*par2*par2*PI*0.999)*sqrt(par1)*2.0+1.0;
 	    break;
+	case 6:
+	    tmp=pow(par2*2.0,2.0)+0.1;
+	    result=n0*pow(1.0+par1*pow(n0*0.8,tmp),tmp)+1.0;
+	    break;
 	default:
 	    result=n;
 	    break;
