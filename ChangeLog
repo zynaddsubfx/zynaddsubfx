@@ -761,7 +761,7 @@
 12 Feb 2005 - Controllerul prestabilit la Virtual Keyboard este Filter Cutoff in loc de BandWidth
 	    - Modificate cateva preseturi la DynamicFilter
 	    - Adaugata posibilitatea de a mari sau micsora cu un parametru detune-ul vocilor de la ADnote	    
-
+17 Feb 2005 - Corectate cateva erori la PADsynth care faceau ca sa se citeasca date din zone de memorie nealocata
 
 
     

@@ -480,7 +480,7 @@ void PADnoteParameters::applyparameters(bool lockmutex){
         if (Pmode==0) generatespectrum_bandwidthMode(spectrum,spectrumsize,basefreq*basefreqadjust,profile,profilesize,bwadjust);
 	    else generatespectrum_otherModes(spectrum,spectrumsize,basefreq*basefreqadjust,profile,profilesize,bwadjust);
 
-	const int extra_samples=3;//the last samples contains the first samples (used for linear/cubic interpolation)
+	const int extra_samples=5;//the last samples contains the first samples (used for linear/cubic interpolation)
         newsample.smp=new REALTYPE[samplesize+extra_samples];
     
 	newsample.smp[0]=0.0;

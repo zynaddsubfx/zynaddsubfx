@@ -30,6 +30,8 @@ ALSAMidiIn::ALSAMidiIn(){
     inputok=0;
     char portname[50];
     sprintf(portname,"ZynAddSubFX");
+
+    midi_handle=NULL;
     
     if (snd_seq_open(&midi_handle,"default",SND_SEQ_OPEN_INPUT,0)!=0) return;
     
@@ -52,7 +54,7 @@ ALSAMidiIn::~ALSAMidiIn(){
  * Get the midi command,channel and parameters
  */
 void ALSAMidiIn::getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmdparams){
-    snd_seq_event_t *midievent;
+    snd_seq_event_t *midievent=NULL;
     cmdtype=MidiNull;
 
     if (inputok==0){

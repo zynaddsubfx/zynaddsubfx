@@ -234,19 +234,19 @@ int PADnote::Compute_Cubic(REALTYPE *outl,REALTYPE *outr,int freqhi,REALTYPE fre
 
 
        //left
-       xm1=smps[poshi_l - 1];
-       x0=smps[poshi_l + 0];
-       x1=smps[poshi_l + 1];
-       x2=smps[poshi_l + 2];
+       xm1=smps[poshi_l];
+       x0=smps[poshi_l + 1];
+       x1=smps[poshi_l + 2];
+       x2=smps[poshi_l + 3];
        a = (3.0 * (x0-x1) - xm1 + x2)*0.5;
        b = 2.0*x1 + xm1 - (5.0*x0 + x2)*0.5;
        c = (x1 - xm1)*0.5;
        outl[i] = (((a * poslo) + b) * poslo + c) * poslo + x0;	
        //right
-       xm1=smps[poshi_r - 1];
-       x0=smps[poshi_r + 0];
-       x1=smps[poshi_r + 1];
-       x2=smps[poshi_r + 2];
+       xm1=smps[poshi_r];
+       x0=smps[poshi_r + 1];
+       x1=smps[poshi_r + 2];
+       x2=smps[poshi_r + 3];
        a = (3.0 * (x0-x1) - xm1 + x2)*0.5;
        b = 2.0*x1 + xm1 - (5.0*x0 + x2)*0.5;
        c = (x1 - xm1)*0.5;
