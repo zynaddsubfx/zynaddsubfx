@@ -66,6 +66,8 @@ int swaplr=0;//1 for left-right swapping
 
 #ifdef JACKAUDIOOUT
 #include "Output/JACKaudiooutput.h"
+#elif JACK_RTAUDIOOUT
+#include "Output/JACKaudiooutput.h"
 #elif PAAUDIOOUT
 #include "Output/PAaudiooutput.h"
 #elif OSSAUDIOOUT
@@ -120,7 +122,7 @@ void *thread1(void *arg){
 /*
  * Wave output thread (if is not compiled for JACK, Portaudio and VST)
  */
-#if !(defined(JACKAUDIOOUT)||defined(PAAUDIOOUT)||defined(VSTAUDIOOUT))
+#if !(defined(JACKAUDIOOUT)||defined(JACK_RTAUDIOOUT)||defined(PAAUDIOOUT)||defined(VSTAUDIOOUT))
 
 void *thread2(void *arg){
     REALTYPE outputl[SOUND_BUFFER_SIZE];
@@ -190,7 +192,9 @@ void *thread4(void *arg){
 
 void initprogram(){
 #ifndef JACKAUDIOOUT
+#ifndef JACK_RTAUDIOOUT
     fprintf(stderr,"\nSample Rate = \t\t%d\n",SAMPLE_RATE);
+#endif
 #endif
     fprintf(stderr,"Sound Buffer Size = \t%d samples\n",SOUND_BUFFER_SIZE);
     fprintf(stderr,"Internal latency = \t%.1f ms\n",SOUND_BUFFER_SIZE*1000.0/SAMPLE_RATE);
@@ -207,6 +211,8 @@ void initprogram(){
 #ifdef OSSAUDIOOUT
     audioout=new OSSaudiooutput();
 #elif JACKAUDIOOUT
+    JACKaudiooutputinit(master);
+#elif JACK_RTAUDIOOUT
     JACKaudiooutputinit(master);
 #elif PAAUDIOOUT
     PAaudiooutputinit(master);
@@ -233,6 +239,9 @@ void exitprogram(){
     delete(audioout);
 #endif
 #ifdef JACKAUDIOOUT
+    JACKfinish();
+#endif
+#ifdef JACK_RTAUDIOOUT
     JACKfinish();
 #endif
 #ifdef PAAUDIOOUT
@@ -398,7 +407,7 @@ int main(int argc, char *argv[]){
     pthread_create(&thr1,NULL,thread1,NULL);
 #endif
 
-#if !(defined(JACKAUDIOOUT)||defined(PAAUDIOOUT)||defined(VSTAUDIOOUT))
+#if !(defined(JACKAUDIOOUT)||defined(JACK_RTAUDIOOUT)||defined(PAAUDIOOUT)||defined(VSTAUDIOOUT))
     pthread_create(&thr2,NULL,thread2,NULL);
 #endif
 

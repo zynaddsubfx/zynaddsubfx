@@ -41,6 +41,11 @@ CXXFLAGS += `pkg-config --cflags jack`
 LIBS+= `pkg-config --libs jack`
 endif
 
+ifeq ($(AUDIOOUT),JACK_RT) 
+CXXFLAGS += `pkg-config --cflags jack`
+LIBS+= `pkg-config --libs jack`
+endif
+
 objects=main.o
 subdirs=DSP Effects Input Misc Output Params Synth Seq
 

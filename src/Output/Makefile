@@ -6,6 +6,10 @@ ifeq ($(AUDIOOUT),JACK)
 objects+=JACKaudiooutput.o
 endif
 
+ifeq ($(AUDIOOUT),JACK_RT)
+objects+=JACK_RTaudiooutput.o
+endif
+
 ifeq ($(AUDIOOUT),PA)
 objects+=PAaudiooutput.o
 endif
