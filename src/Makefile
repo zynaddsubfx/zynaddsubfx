@@ -54,7 +54,7 @@ SUBDIRS=DSP Effects Input Misc Output Params Synth Seq
 all:
 	yes " " | head
 	$(MAKE) -C UI $@
-	@sh -c "cd UI ; $(CXX) -MM -MG -w *.cc >> ../Make.deps ; cd .."
+#	@sh -c "cd UI ; $(CXX) -MM -MG -w *.cc >> ../Make.deps ; cd .."
 	@for name in $(SUBDIRS); do sh -c "cd $$name ; $(CXX) -MM -MG -w *.C >> ../Make.deps ; cd .."; done
 	$(MAKE) subdirs
 	$(MAKE) objs
@@ -85,7 +85,7 @@ main.o:Misc/Master.h Misc/Util.h Output/OSSaudiooutput.h\
 
 .PHONY : clean
 clean: 
-	rm -f $(objects) makeinclude.deps zynaddsubfx zynaddsubfx_vst.dll zynaddsubfx.exe
+	rm -f $(objects) zynaddsubfx zynaddsubfx_vst.dll zynaddsubfx.exe
 	@for name in $(SUBDIRS); do sh -c "make -C $$name $@"; done
 	rm -f Make.deps
 	rm -f */*.o *.o
