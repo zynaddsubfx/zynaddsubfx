@@ -695,14 +695,25 @@ void Master::saveloadbuf(Buffer *buf){
     };
 };
 
-void Master::exportbankasxmldirectory(const char *directory){
-    char filename[1000],nostr[10];
+void Master::exportbankasxmldirectory(const char *bankfilename){
+    char filename[1000],directory[1000],nostr[10];
     Part *tmppart=new Part(&microtonal,fft,&mutex);
     tmppart->Penabled=1;
+    
+    
+    int pos=strlen(bankfilename)-20;
+    if (pos<0) pos=0;
+    snprintf(directory,1000,"export-%s",&bankfilename[pos]);
+    for (int i=0;i<strlen(directory);i++){
+	if ((directory[i]=='/')||(directory[i]=='\\')||(directory[i]=='.'))
+	    directory[i]='_';
+    };
+    
     
     mkdir(directory,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     for (int slot=0;slot<128;slot++){
 	tmppart->defaults();
+	oldbank.loadfilebank(bankfilename);
 	oldbank.loadfromslot(slot,&slbuf);
 	slbuf.changemode(0);
 	tmppart->saveloadbuf(&slbuf,1);
@@ -717,7 +728,8 @@ void Master::exportbankasxmldirectory(const char *directory){
 	printf("%s\n",filename);
 	tmppart->saveXML(filename);
     };
-    
+        
+    bank.loadbank(directory);
     
     delete (tmppart);
 };

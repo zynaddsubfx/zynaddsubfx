@@ -550,7 +550,9 @@
 	    - Corectata o eroare foarte veche la LFO amplitudine (amplitudinea nu scadea corespunzator)
 28 Feb 2004 - Se poate incarca si salva instrumente in Bank
 01 Mar 2004 - Se pot schimba bancile de instrumente
-
+	    - Introduse si celelalte functii la Bank (cu exceptia salvarii/incarcarii locului bancii folosite)
+	    - Se poate importa banci din bnk_zyn
+	    
 
 
 

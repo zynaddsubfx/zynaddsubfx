@@ -46,7 +46,7 @@ class Bank{
 
 	int loadbank(const char *bankdirname);
 //	int savebank(const char *newbankfilename,int overwrite);
-	int newbank(const char *newbankdirname,int overwrite);
+	int newbank(const char *newbankdirname);
 	
 	char *bankfiletitle; //this is shown on the UI of the bank (the title of the window)
 	int locked();

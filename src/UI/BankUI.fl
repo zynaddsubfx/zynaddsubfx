@@ -151,27 +151,18 @@ if (dirname==NULL) return;
 if (bank->loadbank(dirname)==2)
        fl_alert("Error: Could not load the bank from the directory.");
 for (int i=0;i<128;i++) bs[i]->refresh();
-refreshmainwindow();} selected
+refreshmainwindow();}
         xywh {330 385 95 20} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
       }
       Fl_Button {} {
         label {New Bank...}
-        callback {char *filename;
-\#define EXT ".bnk_zyn"
-filename=fl_file_chooser("New empty Bank:","(*"EXT")",NULL,0);
-if (filename==NULL) return;
-filename=fl_filename_setext(filename,EXT);
-\#undef EXT
+        callback {char *dirname;
+dirname=fl_dir_chooser("New empty Bank:",NULL,0);
+if (dirname==NULL) return;
 
-if (filename==NULL) return;
-int result=bank->newbank(filename,0);
-if (result==1) {
-       if (fl_ask("The file exists. \\nOverwrite it?")){
-              result=bank->newbank(filename,1);
-       } else return; 
+int result=bank->newbank(dirname);
 
-};
-if (result!=0) fl_alert("Error: Could not save the bank to the file..");
+if (result!=0) fl_alert("Error: Could not make a new bank (directory)..");
 for (int i=0;i<128;i++) bs[i]->refresh();
 refreshmainwindow();}
         xywh {330 407 93 20} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
@@ -183,10 +174,16 @@ refreshmainwindow();}
         code0 {o->value(config.cfg.BankUIAutoClose);}
       }
       Fl_Button {} {
-        label {XML export}
-        callback {const char *tmp=fl_input("Enter the directory:","bank_xml");
-if (tmp!=NULL) master->exportbankasxmldirectory(tmp);}
-        xywh {508 390 37 35} box PLASTIC_UP_BOX labelsize 11 align 128
+        label {IMPORT from bnk_zyn}
+        callback {const char *filename;
+filename=fl_file_chooser("Convert Bank from bnk_zyn file:","(*.bnk_zyn)",NULL,0);
+if (filename==NULL) return;
+
+master->exportbankasxmldirectory(filename);
+
+for (int i=0;i<128;i++) bs[i]->refresh();
+refreshmainwindow();} selected
+        xywh {440 385 105 40} box PLASTIC_UP_BOX color 175 labelfont 1 labelsize 15 labelcolor 0 align 128
       }
     }
   }

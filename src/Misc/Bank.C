@@ -25,14 +25,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
-
-/*
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
-*/
+
 Bank::Bank(){
     memset(defaultinsname,0,PART_MAX_NAME_LEN);
     snprintf(defaultinsname,PART_MAX_NAME_LEN,"%s"," ");
@@ -46,6 +40,8 @@ Bank::Bank(){
     clearbank();
 
     loadbank("bank_xml");
+    
+    bankfiletitle=dirname;
 
 };
 
@@ -75,7 +71,33 @@ char *Bank::getnamenumbered (unsigned int ninstrument){
  * Changes the name of an instrument (and the filename)
  */
 void Bank::setname(unsigned int ninstrument,const char *newname){
-//    if (ninstrument<0)&&()
+    if (emptyslot(ninstrument)) return;
+    
+    char newfilename[1000+1],tmpfilename[100+1];
+    
+    memset(newfilename,0,1001);
+    memset(tmpfilename,0,101);
+    snprintf(tmpfilename,100,"%4d-%s",ninstrument+1,newname);
+    
+    //add the zeroes at the start of filename
+    for (int i=0;i<4;i++) if (tmpfilename[i]==' ') tmpfilename[i]='0';
+
+    //make the filenames legal
+    for (int i=0;i<strlen(tmpfilename);i++) {
+	char c=tmpfilename[i];
+	if ((c>='0')&&(c<='9')) continue;
+	if ((c>='A')&&(c<='Z')) continue;
+	if ((c>='a')&&(c<='z')) continue;
+	if ((c=='-')||(c==' ')) continue;
+	
+	tmpfilename[i]='_';
+    };
+
+    snprintf(newfilename,1000,"%s/%s.xmlz",dirname,tmpfilename);
+
+    rename(ins[ninstrument].filename,newfilename);
+    snprintf(ins[ninstrument].name,PART_MAX_NAME_LEN,"%s",&tmpfilename[5]);
+    
 };
 
 /*
@@ -96,7 +118,6 @@ void Bank::clearslot(unsigned int ninstrument){
     if (emptyslot(ninstrument)) return;
     remove(ins[ninstrument].filename);
     deletefrombank(ninstrument);
-
 };
 
 /*
@@ -145,14 +166,14 @@ void Bank::savetoslot(unsigned int ninstrument,Part *part){
 };
 
 /*
- * Loads the instrument from the bank to a buffer
+ * Loads the instrument from the bank
  */
 void Bank::loadfromslot(unsigned int ninstrument,Part *part){
     if (emptyslot(ninstrument)) return;
     
     part->defaultsinstrument();
 
-    printf("load:  %s\n",ins[ninstrument].filename);
+   // printf("load:  %s\n",ins[ninstrument].filename);
     
     part->loadXMLinstrument(ins[ninstrument].filename);
     
@@ -172,7 +193,7 @@ int Bank::loadbank(const char *bankdirname){
     dirname=new char[strlen(bankdirname)+1];
     snprintf(dirname,strlen(bankdirname)+1,"%s",bankdirname);
 
-    printf("%s/\n",bankdirname);
+   // printf("%s/\n",bankdirname);
     struct dirent *fn;
     
         
@@ -226,14 +247,18 @@ int Bank::loadbank(const char *bankdirname){
 /*
  * Makes a new bank, put it on a file and makes it current bank
  */
-int Bank::newbank(const char *newbankdirname, int overwrite){
+int Bank::newbank(const char *newbankdirname){
+    int result=mkdir(newbankdirname,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    if (result<0) return(-1);
+    
+    return(loadbank(newbankdirname));
 };
 
 /*
  * Check if the bank is locked (i.e. the file opened was readonly)
  */
 int Bank::locked(){
-    return(0);
+    return(dirname==NULL);
 };
 
 // private stuff
@@ -261,7 +286,7 @@ int Bank::addtobank(int pos, const char *filename, const char* name){
     
     if (pos<0) return (-1);//the bank is full
 
-    printf("%s   %d\n",filename,pos);
+   // printf("%s   %d\n",filename,pos);
 
     deletefrombank(pos);
     
