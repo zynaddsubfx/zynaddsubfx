@@ -553,6 +553,8 @@
 	    - Introduse si celelalte functii la Bank (cu exceptia salvarii/incarcarii locului bancii folosite)
 	    - Se poate importa banci din bnk_zyn
 03 Mar 2004 - Terminat (teoretic) partea de XML
+05 Mar 2004 - Actualizat Copyright-ul la 2004 in fisiere
+08 Mar 2004 - Corectat o mica eroare la OscilGen (se aplica gain-ul rezonantei incorect)
 
 
 
