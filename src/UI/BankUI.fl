@@ -24,7 +24,7 @@ decl {\#include <FL/Fl_File_Chooser.H>} {public
 decl {\#include "../Misc/Master.h"} {public
 } 
 
-decl {\#include "../Misc/Bank.h"} {selected public
+decl {\#include "../Misc/Bank.h"} {public
 } 
 
 class BankProcess_ {} {
@@ -83,8 +83,7 @@ label(bank->getnamenumbered(nslot));} {}
 
 class BankUI {: {public BankProcess_}
 } {
-  Function {make_window()} {open
-  } {
+  Function {make_window()} {} {
     Fl_Window bankuiwindow {
       label Bank
       xywh {16 205 770 430} type Double hide
@@ -248,9 +247,7 @@ if ((what==1)&&(mode==2)){//save(write) to slot
   if (!bank->emptyslot(slot))
       if (!fl_ask("Overwrite the slot no. %d ?",slot+1)) goto nooverwriteslot;
        pthread_mutex_lock(&master->mutex);
-       master->part[*npart]->saveloadbuf(&slbuf,2);
-       bank->setname(slot,(char *)master->part[*npart]->Pname);
-       bank->savetoslot(slot,(char *)master->part[*npart]->Pname,NULL);
+        bank->savetoslot(slot,master->part[*npart]);
        pthread_mutex_unlock(&master->mutex);
 
        bs[slot]->refresh();
@@ -282,7 +279,10 @@ if ((what==1)&&(mode==3)&&(!bank->emptyslot(slot))){//Clears the slot
           bank->clearslot(slot);
           bs[slot]->refresh();
       };
-};} {}
+};
+
+refreshmainwindow();} {selected
+    }
   }
   Function {refreshmainwindow()} {} {
     code {bankuiwindow->label(bank->bankfiletitle);

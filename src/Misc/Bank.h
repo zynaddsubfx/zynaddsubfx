@@ -33,13 +33,16 @@ class Bank{
     public:
 	Bank();
 	~Bank();
-	char *getname(unsigned char ninstrument);
-	char *getnamenumbered(unsigned char ninstrument);
-	void setname(unsigned char ninstrument,const char *newname);
-	int emptyslot(unsigned char ninstrument);
-	void clearslot(unsigned char ninstrument);
-	void savetoslot(unsigned char ninstrument,const char *name,XMLwrapper *xml);
-	void loadfromslot(unsigned char ninstrument,Part *part);
+	char *getname(unsigned int ninstrument);
+	char *getnamenumbered(unsigned int ninstrument);
+	void setname(unsigned int ninstrument,const char *newname);
+	
+	//returns 0 if the slot is not empty or 1 if the slot is empty
+	int emptyslot(unsigned int ninstrument);
+
+	void clearslot(unsigned int ninstrument);
+	void savetoslot(unsigned int ninstrument,Part *part);
+	void loadfromslot(unsigned int ninstrument,Part *part);
 
 	int loadbank(const char *bankdirname);
 //	int savebank(const char *newbankfilename,int overwrite);

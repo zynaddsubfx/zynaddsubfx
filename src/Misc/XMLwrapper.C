@@ -87,7 +87,7 @@ int XMLwrapper::saveXMLfile(char *filename){
     
     int fnsize=strlen(filename)+100;
     char *filenamenew=new char [fnsize];
-    if (compression) snprintf(filenamenew,fnsize,"%sz",filename);
+    if ((compression)&&(filename[strlen(filename)-1]!='z')) snprintf(filenamenew,fnsize,"%sz",filename);
 	else snprintf(filenamenew,fnsize,"%s",filename);
     
     int result=dosavefile(filenamenew,compression,xmldata);
