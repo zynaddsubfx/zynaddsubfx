@@ -35,12 +35,16 @@ class LFO{
     REALTYPE amplfoout();
  private:
     REALTYPE x;
-    REALTYPE incx,incrnd;
+    REALTYPE incx,incrnd,nextincrnd;
     REALTYPE amp1,amp2;// used for randomness
     REALTYPE lfointensity;
     REALTYPE lfornd,lfofreqrnd;
     REALTYPE lfodelay;
     char lfotype;
+    int freqrndenabled;
+    
+    
+    void computenextincrnd();
     
 };
 

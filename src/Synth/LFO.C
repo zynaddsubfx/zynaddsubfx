@@ -46,7 +46,8 @@ LFO::LFO(LFOParams *lfopars){
     lfornd=lfopars->Prandomness/127.0;
     if (lfornd<0.0) lfornd=0.0; else if (lfornd>1.0) lfornd=1.0;
 
-    lfofreqrnd=pow(lfopars->Pfreqrand/127.0,2.0)*2.0*4.0;
+//    lfofreqrnd=pow(lfopars->Pfreqrand/127.0,2.0)*2.0*4.0;
+    lfofreqrnd=pow(lfopars->Pfreqrand/127.0,2.0)*4.0;
 
     switch (lfopars->fel){
 	case 1:lfointensity=lfopars->Pintensity/127.0;break;
@@ -60,7 +61,10 @@ LFO::LFO(LFOParams *lfopars){
     amp2=(1-lfornd)+lfornd*RND;
     lfotype=lfopars->PLFOtype;
     lfodelay=lfopars->Pdelay/127.0*4.0;//0..4 sec
-    incrnd=1.0;
+    incrnd=nextincrnd=1.0;
+    computenextincrnd();
+    computenextincrnd();//twice because I want incrnd & nextincrnd to be random
+    freqrndenabled=(lfopars->Pfreqrand!=0);
 };
 
 LFO::~LFO(){
@@ -98,14 +102,14 @@ REALTYPE LFO::lfoout(){
      if ((lfotype==0)||(lfotype==1)) out*=lfointensity*(amp1+x*(amp2-amp1));
         else out*=lfointensity*amp2;
     if (lfodelay<0.00001) {
-	    x+=incx*incrnd;
-	    if (x>1) {
-		x-=1;
+	    if (freqrndenabled==0) x+=incx;
+		else x+=incx*(incrnd*(1.0-x)+nextincrnd*x);
+	    if (x>=1) {
+		x=fmod(x,1.0);
 		amp1=amp2;
 		amp2=(1-lfornd)+lfornd*RND;
 
-		incrnd=pow(2.0,(RND-0.5)*lfofreqrnd);
-		if (incrnd*incx>=0.49999999) incrnd=1.0;
+		computenextincrnd();
 	    };
     } else lfodelay-=(REALTYPE)SOUND_BUFFER_SIZE/(REALTYPE)SAMPLE_RATE;
     return(out);
@@ -120,5 +124,13 @@ REALTYPE LFO::amplfoout(){
     if (out<-1.0) out=-1.0;
 	else if (out>1.0) out=1.0;
     return(out);
+};
+
+
+void LFO::computenextincrnd(){
+	if (freqrndenabled==0) return;
+	incrnd=nextincrnd;
+	nextincrnd=pow(0.5,lfofreqrnd)+RND*(pow(2.0,lfofreqrnd)-1.0);
+	if (nextincrnd*incx>=0.49999999) nextincrnd=1.0;
 };
 
