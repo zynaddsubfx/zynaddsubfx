@@ -28,12 +28,37 @@
 #include "../globals.h"
 #include "Util.h"
 
-int XMLwrapper_whitespace_callback(mxml_node_t *node,int where){
+int xml_k=0;
+char tabs[STACKSIZE+2];
+
+const char *XMLwrapper_whitespace_callback(mxml_node_t *node,int where){
     const char *name=node->value.element.name;
 
-    if ((where==MXML_WS_BEFORE_OPEN)&&(!strcmp(name,"?xml"))) return(0);
-    if ((where==MXML_WS_BEFORE_CLOSE)&&(!strcmp(name,"string"))) return(0);
-    if ((where==MXML_WS_BEFORE_OPEN)||(where==MXML_WS_BEFORE_CLOSE)) return('\n');
+    if ((where==MXML_WS_BEFORE_OPEN)&&(!strcmp(name,"?xml"))) return(NULL);
+    if ((where==MXML_WS_BEFORE_CLOSE)&&(!strcmp(name,"string"))) return(NULL);
+
+    if ((where==MXML_WS_BEFORE_OPEN)||(where==MXML_WS_BEFORE_CLOSE)) {
+/*	const char *tmp=node->value.element.name;
+	if (tmp!=NULL) {
+	    if ((strstr(tmp,"par")!=tmp)&&(strstr(tmp,"string")!=tmp)) {
+		printf("%s ",tmp);
+		if (where==MXML_WS_BEFORE_OPEN) xml_k++;
+		if (where==MXML_WS_BEFORE_CLOSE) xml_k--;
+		if (xml_k>=STACKSIZE) xml_k=STACKSIZE-1;
+		if (xml_k<0) xml_k=0;
+		printf("%d\n",xml_k);
+		printf("\n");
+	    };
+	    
+	};
+	int i=0;
+	for (i=1;i<xml_k;i++) tabs[i]='\t';
+	tabs[0]='\n';tabs[i+1]='\0';
+	if (where==MXML_WS_BEFORE_OPEN) return(tabs);
+	    else return("\n");
+*/	
+	return("\n");
+    };
     
     return(0);
 };
@@ -80,6 +105,8 @@ XMLwrapper::~XMLwrapper(){
 /* SAVE XML members */
 
 int XMLwrapper::saveXMLfile(char *filename){
+    xml_k=0;
+    ZERO(tabs,STACKSIZE+2);
     char *xmldata=mxmlSaveAllocString(tree,XMLwrapper_whitespace_callback);
     if (xmldata==NULL) return(-2);
 

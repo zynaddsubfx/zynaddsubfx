@@ -25,8 +25,7 @@
 #include <stdio.h>
 
 #include "OscilGen.h"
-
-#include "../Misc/Util.h"
+#include "../Effects/Distorsion.h"
 
 OscilGen::OscilGen(FFTwrapper *fft_,Resonance *res_){
     fft=fft_;

@@ -45,9 +45,6 @@ extern int loadbufferfile(Buffer *buf,const char *filename,int whatIload);
 
 bool fileexists(char *filename);
 
-//Waveshaping(called by Distorsion effect and waveshape from OscilGen)
-void waveshapesmps(int n,REALTYPE *smps,unsigned char type,unsigned char drive);
-
 #define N_DETUNE_TYPES 4 //the number of detune types
 extern REALTYPE getdetune(unsigned char type,unsigned short int coarsedetune,unsigned short int finedetune);
 

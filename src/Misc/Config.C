@@ -102,6 +102,8 @@ Config::~Config(){
     char filename[MAX_STRING_SIZE];
     getConfigFileName(filename,MAX_STRING_SIZE);
     saveConfig(filename);
+
+
     delete(cfg.LinuxOSSWaveOutDev);
     delete(cfg.LinuxOSSSeqInDev);
     delete(cfg.DumpFile);

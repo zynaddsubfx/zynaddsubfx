@@ -65,6 +65,7 @@ OSSaudiooutput::OSSaudiooutput(){
 void OSSaudiooutput::OSSout(REALTYPE *smp_left,REALTYPE *smp_right){
     int i;
     REALTYPE l,r;
+    if (snd_handle<0) return;
     for (i=0;i<SOUND_BUFFER_SIZE;i++){
 	l=smp_left[i];
 	r=smp_right[i];

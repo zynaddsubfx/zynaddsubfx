@@ -46,8 +46,12 @@ PADnote::PADnote(PADnoteParameters *parameters, Controller *ctl_,REALTYPE freq, 
     firsttime=true;
     released=false;
     realfreq=basefreq;
+    NoteGlobalPar.Detune=getdetune(pars->PDetuneType
+		,pars->PCoarseDetune,pars->PDetune);
+
+
     //find out the closest note
-    REALTYPE logfreq=log(freq);
+    REALTYPE logfreq=log(freq*pow(2.0,NoteGlobalPar.Detune/1200.0));
     REALTYPE mindist=fabs(logfreq-log(pars->sample[0].basefreq+0.0001));
     nsample=0;
     for (int i=1;i<PAD_MAX_SAMPLES;i++){
@@ -73,8 +77,6 @@ PADnote::PADnote(PADnoteParameters *parameters, Controller *ctl_,REALTYPE freq, 
     tmpwave=new REALTYPE [SOUND_BUFFER_SIZE];
 
 
-    NoteGlobalPar.Detune=getdetune(pars->PDetuneType
-		,pars->PCoarseDetune,pars->PDetune);;
     
     if (pars->PPanning==0) NoteGlobalPar.Panning=RND;
 	else NoteGlobalPar.Panning=pars->PPanning/128.0;
