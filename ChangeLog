@@ -764,6 +764,8 @@
 17 Feb 2005 - Corectate cateva erori la PADsynth care faceau ca sa se citeasca date din zone de memorie nealocata
 	    - Corectata o eroare la Bank care facea ca uneori sa crape programul cand umblam mult cu bankuri
 19 Feb 2005 - Corectata o eroare care facea ca uneori sa fie calculata frecventa la ADnote=nan si programul sa crape pentru ca era folosit parametrul bandwidthDetuneMultiplier inainte de a fi calculat
+21 Feb 2005 - Se afiseaza corect numele fisierului proaspat salvat in fereastra principala
+
 
 
 

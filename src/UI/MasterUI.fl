@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0106 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -367,8 +367,7 @@ panellistitemgroup->redraw();} {}
   decl {BankUI *bankui;} {}
 } 
 
-class MasterUI {selected
-} {
+class MasterUI {} {
   Function {make_window()} {} {
     Fl_Window masterwindow {
       label zynaddsubfx
@@ -379,7 +378,7 @@ if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
       xywh {353 127 390 465} type Double hide
     } {
-      Fl_Menu_Bar mastermenu {
+      Fl_Menu_Bar mastermenu {selected
         xywh {-5 0 690 25}
       } {
         submenu {} {
@@ -1695,7 +1694,7 @@ result=master->saveXML(filename);
 pthread_mutex_unlock(&master->mutex);
 
 if (result<0) fl_alert("Error: Could not save the file.");
-
+	else setfilelabel(filename);
 
 updatepanel();} {}
   }
