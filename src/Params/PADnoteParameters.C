@@ -66,6 +66,7 @@ PADnoteParameters::~PADnoteParameters(){
 };
 
 void PADnoteParameters::defaults(){
+    Pmode=0;
     Php.base.type=0;
     Php.base.par1=80;
     Php.freqmult=0;

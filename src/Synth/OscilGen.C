@@ -864,6 +864,21 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
     int realnyquist=nyquist;
     
     if (Padaptiveharmonics!=0) nyquist=OSCIL_SIZE/2;
+    for (i=1;i<nyquist-1;i++) {
+        outoscilFFTfreqs[i]=oscilFFTfreqs[i];
+        outoscilFFTfreqs[OSCIL_SIZE-i]=oscilFFTfreqs[OSCIL_SIZE-i];
+    };
+
+    adaptiveharmonic(outoscilFFTfreqs,freqHz);
+
+    nyquist=realnyquist;
+    if (Padaptiveharmonics){//do the antialiasing in the case of adaptive harmonics
+        for (i=nyquist;i<OSCIL_SIZE/2;i++) {
+	    outoscilFFTfreqs[i]=0;
+	    outoscilFFTfreqs[OSCIL_SIZE-i]=0;
+	};
+    };
+
 
     // Randomness (each harmonic), the block type is computed 
     // in ADnote by setting start position according to this setting
@@ -872,28 +887,16 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
         rnd=PI*pow((Prand-64.0)/64.0,2.0);
         for (i=1;i<nyquist-1;i++){//to Nyquist only for AntiAliasing
     	    angle=rnd*i*RND;
-	    a=oscilFFTfreqs[i];
-	    b=oscilFFTfreqs[OSCIL_SIZE-i];
+	    a=outoscilFFTfreqs[i];
+	    b=outoscilFFTfreqs[OSCIL_SIZE-i];
 	    c=cos(angle);
 	    d=sin(angle);
 	    outoscilFFTfreqs[i]=a*c-b*d;
 	    outoscilFFTfreqs[OSCIL_SIZE-i]=a*d+b*c;
 	};	
-    } else {
-	for (i=1;i<nyquist-1;i++) {
-	    outoscilFFTfreqs[i]=oscilFFTfreqs[i];
-	    outoscilFFTfreqs[OSCIL_SIZE-i]=oscilFFTfreqs[OSCIL_SIZE-i];
-	};
     };
 
-    adaptiveharmonic(outoscilFFTfreqs,freqHz);
-    nyquist=realnyquist;
-    if (Padaptiveharmonics){//do the antialiasing in the case of adaptive harmonics
-        for (i=nyquist;i<OSCIL_SIZE/2;i++) {
-	    outoscilFFTfreqs[i]=0;
-	    outoscilFFTfreqs[OSCIL_SIZE-i]=0;
-	};
-    };
+
 
 
     //Harmonic Amplitude Randomness
@@ -941,7 +944,7 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
    
 //    for (i=0;i<OSCIL_SIZE/2;i++) outoscilFFTfreqs[i+OSCIL_SIZE/2]*=-1.0;//correct the amplitude
 
-    if ((ADvsPAD)&&(freqHz>0.1)){
+    if ((ADvsPAD)&&(freqHz>0.1)){//in this case the smps will contain the freqs
         for (i=1;i<OSCIL_SIZE/2;i++) smps[i-1]=sqrt(outoscilFFTfreqs[i]*outoscilFFTfreqs[i]+outoscilFFTfreqs[OSCIL_SIZE-i]*outoscilFFTfreqs[OSCIL_SIZE-i]);
     } else {
 	fft->freqs2smps(outoscilFFTfreqs,smps);

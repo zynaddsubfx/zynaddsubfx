@@ -682,5 +682,6 @@
 --------------------------------------------------------------------------------------------------
 13 Aug 2004 - Inceput sa scriu modurile continous si discrete la PADnote
 14 Aug 2004 - Terminat modul continous la PADnote
-
+	    - Corectata o mica eroare la OscilGen care facea daca adaptive harmonics e activ si phase randomness>0 sa rezulte si aleatorism in amplitudinile armonicelor
+	    - Inceput sa scriu Presets/Clipboard
 

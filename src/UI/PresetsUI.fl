@@ -1,0 +1,64 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0105 
+header_name {.h} 
+code_name {.cxx}
+class PresetsUI {open
+} {
+  Function {make_window()} {open
+  } {
+    Fl_Window {} {
+      label {Copy to Clipboard/Preset} open
+      xywh {511 241 265 315} type Double hide modal
+    } {
+      Fl_Browser {} {
+        xywh {10 30 245 200}
+      }
+      Fl_Button {} {
+        label {Copy to Preset}
+        xywh {75 240 120 20} box THIN_UP_BOX
+      }
+      Fl_Button {} {
+        label {Copy to Clipboard}
+        xywh {25 270 90 40} box THIN_UP_BOX align 192
+      }
+      Fl_Button {} {
+        label Cancel
+        xywh {160 270 80 40} box THIN_UP_BOX align 192
+      }
+      Fl_Box {} {
+        label {Type:}
+        xywh {10 5 45 20} align 20
+      }
+      Fl_Box copytypetext {selected
+        xywh {50 5 200 20} box FLAT_BOX color 50 labelfont 1 align 20
+      }
+    }
+    Fl_Window {} {
+      label {Paste from Clipboard/Preset} open
+      xywh {238 242 265 315} type Double hide modal
+    } {
+      Fl_Browser {} {
+        xywh {10 30 245 205} type Hold
+      }
+      Fl_Button {} {
+        label {Paste from Preset}
+        xywh {50 240 160 20} box THIN_UP_BOX
+      }
+      Fl_Button {} {
+        label {Paste from Clipboard}
+        xywh {25 270 90 40} box THIN_UP_BOX align 192
+      }
+      Fl_Button {} {
+        label Cancel
+        xywh {160 270 80 40} box THIN_UP_BOX align 192
+      }
+      Fl_Box {} {
+        label {Type:}
+        xywh {10 5 45 20} align 20
+      }
+      Fl_Box pastetypetext {
+        xywh {50 5 200 20} box FLAT_BOX color 50 labelfont 1 align 20
+      }
+    }
+  }
+} 
