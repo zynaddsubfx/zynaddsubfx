@@ -48,6 +48,8 @@ bool PresetsStore::pasteclipboard(XMLwrapper *xml){
 };
 
 bool PresetsStore::checkclipboardtype(char *type){
+    //makes LFO's compatible
+    if ((strstr(type,"Plfo")!=NULL)&&(strstr(clipboard.type,"Plfo")!=NULL)) return(true);
     return(strcmp(type,clipboard.type)==0);
 };
 
