@@ -99,8 +99,7 @@ fl_color(0,100,220);
 fl_line(ox+lx/2-rbw,oy,ox+lx/2-rbw,oy+ly-1);
 fl_line(ox+lx/2+rbw,oy,ox+lx/2+rbw,oy+ly-1);
 
-fl_line_style(0);} {selected
-    }
+fl_line_style(0);} {}
   }
   decl {Master *master;} {}
   decl {PADnoteParameters *pars;} {public
@@ -836,8 +835,8 @@ o->color(FL_GRAY);}
       }
       Fl_Button {} {
         label Close
-        callback {padnotewindow->hide();}
-        xywh {300 405 195 40} box THIN_UP_BOX
+        callback {padnotewindow->hide();} selected
+        xywh {300 405 195 40} box THIN_UP_BOX labelsize 20
       }
     }
   }

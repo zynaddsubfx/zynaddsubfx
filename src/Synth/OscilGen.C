@@ -1301,7 +1301,7 @@ void OscilGen::getfromXML(XMLwrapper *xml){
 
     Pfiltertype=xml->getpar127("filter_type",Pfiltertype);
     Pfilterpar1=xml->getpar127("filter_par1",Pfilterpar1);
-    Pfilterpar1=xml->getpar127("filter_par2",Pfilterpar2);
+    Pfilterpar2=xml->getpar127("filter_par2",Pfilterpar2);
     Pfilterbeforews=xml->getpar127("filter_before_wave_shaping",Pfilterbeforews);
 
     Psatype=xml->getpar127("spectrum_adjust_type",Psatype);
