@@ -182,8 +182,6 @@ void ADnoteParameters::EnableVoice(int nvoice){
 REALTYPE ADnoteParameters::getBandwidthDetuneMultiplier(){
     REALTYPE bw=(GlobalPar.PBandwidth-64.0)/64.0;
     bw=pow(2.0,bw*pow(fabs(bw),0.2)*5.0);
-//    bw*=35;
-//    printf("%g\n",bw);
     
     return(bw);
 };

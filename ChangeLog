@@ -763,6 +763,8 @@
 	    - Adaugata posibilitatea de a mari sau micsora cu un parametru detune-ul vocilor de la ADnote	    
 17 Feb 2005 - Corectate cateva erori la PADsynth care faceau ca sa se citeasca date din zone de memorie nealocata
 	    - Corectata o eroare la Bank care facea ca uneori sa crape programul cand umblam mult cu bankuri
+19 Feb 2005 - Corectata o eroare care facea ca uneori sa fie calculata frecventa la ADnote=nan si programul sa crape pentru ca era folosit parametrul bandwidthDetuneMultiplier inainte de a fi calculat
+
 
 
     
