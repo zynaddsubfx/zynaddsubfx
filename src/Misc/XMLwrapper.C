@@ -132,7 +132,7 @@ void XMLwrapper::endbranch(){
 
 /* LOAD XML members */
 
-int XMLwrapper::loadXMLfile(char *filename){
+int XMLwrapper::loadXMLfile(const char *filename){
     if (tree!=NULL) mxmlDelete(tree);
     tree=NULL;
 

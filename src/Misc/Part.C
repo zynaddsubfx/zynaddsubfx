@@ -1048,6 +1048,23 @@ int Part::saveXML(char *filename){
     return(0);
 };
 
+int Part::loadXMLinstrument(const char *filename){
+    XMLwrapper *xml=new XMLwrapper();
+    if (xml->loadXMLfile(filename)<0) {
+	delete(xml);
+	return(-1);
+    };
+    
+    if (xml->enterbranch("INSTRUMENT")==0) return(-10);
+	getfromXMLinstrument(xml);
+    xml->exitbranch();
+    
+    delete(xml);
+    return(0);
+};
+
+
+
 
 void Part::getfromXMLinstrument(XMLwrapper *xml){
     if (xml->enterbranch("INFO")){

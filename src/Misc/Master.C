@@ -804,14 +804,15 @@ int Master::loadXML(char *filename){
 	return(-1);
     };
     
-    getfromXML(xml);
+    if (xml->enterbranch("MASTER")==0) return(-10);
+	getfromXML(xml);
+    xml->exitbranch();
     
     delete(xml);
     return(0);
 };
 
 void Master::getfromXML(XMLwrapper *xml){
-    if (xml->enterbranch("MASTER")==0) return;
 
     setPvolume(xml->getpar127("volume",Pvolume));
     setPkeyshift(xml->getpar127("key_shift",Pkeyshift));
@@ -828,8 +829,6 @@ void Master::getfromXML(XMLwrapper *xml){
         microtonal.getfromXML(xml);
         xml->exitbranch();
     };
-	
-	
 	
     if (xml->enterbranch("SYSTEM_EFFECTS")){
 	for (int nefx=0;nefx<NUM_SYS_EFX;nefx++){

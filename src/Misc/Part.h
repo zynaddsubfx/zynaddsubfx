@@ -60,6 +60,7 @@ class Part{
       //saves the instrument settings to a XML file
       //returns 0 for ok, 1 if there is a existing file or -1 if there is an error
       int saveXML(char *filename);
+      int loadXMLinstrument(const char *filename);
 
       void add2XML(XMLwrapper *xml);
       void add2XMLinstrument(XMLwrapper *xml);

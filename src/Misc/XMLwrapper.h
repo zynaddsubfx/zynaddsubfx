@@ -68,7 +68,7 @@ class XMLwrapper{
 	/********************************/
 	
 	//returns 0 if ok or -1 if the file cannot be loaded
-	int loadXMLfile(char *filename);
+	int loadXMLfile(const char *filename);
 
 	//enter into the branch
 	//returns 1 if is ok, or 0 otherwise

@@ -54,7 +54,7 @@ class Master{
 
 	void defaults();
 
-	//saves all settings to a XML file
+	//loads all settings from a XML file
 	//returns 0 for ok or -1 if there is an error
 	int loadXML(char *filename);
 
