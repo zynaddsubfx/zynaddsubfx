@@ -297,7 +297,7 @@ char *XMLwrapper::doloadfile(const char *filename){
 	    gzseek (gzfile,1024*1024,SEEK_CUR);
 	    if (gztell(gzfile)>10000000) {
 		gzclose(gzfile);
-		goto notgzip;//the file is not gzip
+		goto notgzip;//the file is too big
 	    };
 	};
 	filesize=gztell(gzfile);
