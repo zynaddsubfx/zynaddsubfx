@@ -380,6 +380,15 @@ void Master::AudioOut(REALTYPE *outl,REALTYPE *outr){
     if ((vuoutpeakl>1.0)||(vuoutpeakr>1.0)) vuclipped=1;
     if (vumaxoutpeakl<vuoutpeakl) vumaxoutpeakl=vuoutpeakl;
     if (vumaxoutpeakr<vuoutpeakr) vumaxoutpeakr=vuoutpeakr;
+
+    //RMS Peak computation (for vumeters)
+    vurmspeakl=1e-12;vurmspeakr=1e-12;
+    for (i=0;i<SOUND_BUFFER_SIZE;i++) {
+        vurmspeakl+=outl[i]*outl[i];
+        vurmspeakr+=outr[i]*outr[i];
+    };
+    vurmspeakl=sqrt(vurmspeakl/SOUND_BUFFER_SIZE);
+    vurmspeakr=sqrt(vurmspeakr/SOUND_BUFFER_SIZE);
     
     //Part Peak computation (for Part vumeters or fake part vumeters)
     for (npart=0;npart<NUM_MIDI_PARTS;npart++){

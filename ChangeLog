@@ -768,6 +768,9 @@
 26 Feb 2005 - Corectata eroarea la windows si la OSS care facea ca pitch bend sa nu fie mapat corect (trebuie verificat)
 27 Feb 2005 - Se afiseaza corect valoarea lui detune in centi 
 28 Feb 2005 - Corectata o mica eroare care facea ca sa nu se afiseze intotdeauna corect detune-ul la ADvoice
+	    - Afisajul VU-meter la Master nu mai prezinta variatii mari in timp scurt
+	    - Adaugata afisajul RMS la VU-meter
+	    
 
 
 

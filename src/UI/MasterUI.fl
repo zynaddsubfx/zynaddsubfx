@@ -60,7 +60,7 @@ decl {\#include "../Misc/Util.h"} {public
 decl {\#include "../globals.h"} {public
 } 
 
-class VUMeter {: {public Fl_Box}
+class VUMeter {open : {public Fl_Box}
 } {
   Function {VUMeter(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
     code {master=NULL;
@@ -70,15 +70,23 @@ npart=-1;} {}
     code {//the "part_" parameters sets the part (if it is >=0), else it sets the master
 master=master_;
 label(NULL);
-npart=part_;} {}
+npart=part_;
+olddbl=0.0;
+olddbr=0.0;
+oldrmsdbl=0.0;
+oldrmsdbr=0.0;} {}
   }
-  Function {draw_master()} {} {
+  Function {draw_master()} {open
+  } {
     code {\#define MIN_DB (-48)
+
 int ox=x(); int oy=y(); int lx=w(); int ly=h();
 
 pthread_mutex_lock(&master->mutex);
 REALTYPE dbl=rap2dB(master->vuoutpeakl);
 REALTYPE dbr=rap2dB(master->vuoutpeakr);
+REALTYPE rmsdbl=rap2dB(master->vurmspeakl);
+REALTYPE rmsdbr=rap2dB(master->vurmspeakr);
 REALTYPE maxdbl=rap2dB(master->vumaxoutpeakl);
 REALTYPE maxdbr=rap2dB(master->vumaxoutpeakr);
 int clipped=master->vuclipped;
@@ -92,6 +100,12 @@ dbr=(MIN_DB-dbr)/MIN_DB;
 if (dbr<0.0) dbr=0.0;
   else if (dbr>1.0) dbr=1.0; 
 
+dbl=dbl*0.4+olddbl*0.6;
+dbr=dbr*0.4+olddbr*0.6;
+
+olddbl=dbl;
+olddbr=dbr;
+
 \#define VULENX (lx-35)
 \#define VULENY (ly/2-3)
 
@@ -100,9 +114,38 @@ dbl*=VULENX;dbr*=VULENX;
 int idbl=(int) dbl;
 int idbr=(int) dbr;
 
+//compute RMS - start
+rmsdbl=(MIN_DB-rmsdbl)/MIN_DB; 
+if (rmsdbl<0.0) rmsdbl=0.0;
+  else if (rmsdbl>1.0) rmsdbl=1.0;
+
+rmsdbr=(MIN_DB-rmsdbr)/MIN_DB; 
+if (rmsdbr<0.0) rmsdbr=0.0;
+  else if (rmsdbr>1.0) rmsdbr=1.0; 
+
+rmsdbl=rmsdbl*0.4+oldrmsdbl*0.6;
+rmsdbr=rmsdbr*0.4+oldrmsdbr*0.6;
+
+oldrmsdbl=rmsdbl;
+oldrmsdbr=rmsdbr;
+
+
+rmsdbl*=VULENX;rmsdbr*=VULENX;
+
+int irmsdbl=(int) rmsdbl;
+int irmsdbr=(int) rmsdbr;
+//compute RMS - end
+
+
+
 //draw the vu-meter lines
-fl_rectf(ox,oy,idbr,VULENY,0,200,255);
-fl_rectf(ox,oy+ly/2,idbl,VULENY,0,200,255);
+//db
+fl_rectf(ox,oy,idbr,VULENY,80,255,170);
+fl_rectf(ox,oy+ly/2,idbl,VULENY,80,255,170);
+//rms
+fl_rectf(ox,oy,irmsdbr,VULENY,0,200,255);
+fl_rectf(ox,oy+ly/2,irmsdbl,VULENY,0,200,255);
+//black
 fl_rectf(ox+idbr,oy,VULENX-idbr,VULENY,0,0,0);
 fl_rectf(ox+idbl,oy+ly/2,VULENX-idbl,VULENY,0,0,0);
 
@@ -130,7 +173,8 @@ if ((maxdbl>MIN_DB-20)){
 if ((maxdbr>MIN_DB-20)){
   snprintf((char *)&tmpstr,10,"%ddB",(int)maxdbl);
   fl_draw(tmpstr,ox+VULENX+1,oy+ly/2+1,lx-VULENX-1,VULENY,FL_ALIGN_RIGHT,NULL,0);
-};} {}
+};} {selected
+    }
   }
   Function {draw_part()} {} {
     code {\#define MIN_DB (-48)
@@ -207,6 +251,8 @@ return(1);} {}
   }
   decl {Master *master;} {}
   decl {int npart;} {}
+  decl {float olddbl,olddbr;} {}
+  decl {float oldrmsdbl,oldrmsdbr;} {}
 } 
 
 class SysEffSend {: {public WidgetPDial}
@@ -378,7 +424,7 @@ if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
       xywh {353 127 390 465} type Double hide
     } {
-      Fl_Menu_Bar mastermenu {selected
+      Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
       } {
         submenu {} {

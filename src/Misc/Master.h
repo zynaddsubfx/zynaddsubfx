@@ -112,7 +112,7 @@ class Master{
     
 	//peaks for VU-meter
 	void vuresetpeaks();
-	REALTYPE vuoutpeakl,vuoutpeakr,vumaxoutpeakl,vumaxoutpeakr;
+	REALTYPE vuoutpeakl,vuoutpeakr,vumaxoutpeakl,vumaxoutpeakr,vurmspeakl,vurmspeakr;
 	int vuclipped;
 	
 	//peaks for part VU-meters
