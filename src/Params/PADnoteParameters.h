@@ -49,6 +49,10 @@ class PADnoteParameters{
 	
 	//parameters
 	
+	//the mode: 0 - bandwidth, 1 - discrete (bandwidth=0), 2 - continous
+	//the harmonic profile is used only on mode 0
+	unsigned char Pmode;
+	
 	//Harmonic profile (the frequency distribution of a single harmonic)
 	struct {
 	    struct{//base function 
@@ -149,13 +153,15 @@ class PADnoteParameters{
 	}sample[PAD_MAX_SAMPLES],newsample;
 	
     private:
-	void generatespectrum(REALTYPE *spectrum, int size,REALTYPE basefreq,REALTYPE *profile,int profilesize,REALTYPE bwadjust);
+	void generatespectrum_bandwidthMode(REALTYPE *spectrum, int size,REALTYPE basefreq,REALTYPE *profile,int profilesize,REALTYPE bwadjust);
+	void generatespectrum_otherModes(REALTYPE *spectrum, int size,REALTYPE basefreq,REALTYPE *profile,int profilesize,REALTYPE bwadjust);
 	void deletesamples();
 	void deletesample(int n);
     
 	FFTwrapper *fft;
 	pthread_mutex_t *mutex;
 };
+
 
 
 #endif

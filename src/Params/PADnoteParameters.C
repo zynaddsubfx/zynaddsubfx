@@ -320,9 +320,9 @@ REALTYPE PADnoteParameters::getNhr(int n){
 };
 
 /*
- * Generates the long spectrum (only amplitudes are generated; phases will be random)
+ * Generates the long spectrum for Bandwidth mode (only amplitudes are generated; phases will be random)
  */
-void PADnoteParameters::generatespectrum(REALTYPE *spectrum, int size,REALTYPE basefreq,REALTYPE *profile,int profilesize,REALTYPE bwadjust){
+void PADnoteParameters::generatespectrum_bandwidthMode(REALTYPE *spectrum, int size,REALTYPE basefreq,REALTYPE *profile,int profilesize,REALTYPE bwadjust){
     for (int i=0;i<size;i++) spectrum[i]=0.0;
     
     REALTYPE harmonics[OSCIL_SIZE/2];
@@ -388,6 +388,59 @@ void PADnoteParameters::generatespectrum(REALTYPE *spectrum, int size,REALTYPE b
 };
 
 /*
+ * Generates the long spectrum for non-Bandwidth modes (only amplitudes are generated; phases will be random)
+ */
+void PADnoteParameters::generatespectrum_otherModes(REALTYPE *spectrum, int size,REALTYPE basefreq,REALTYPE *profile,int profilesize,REALTYPE bwadjust){
+    for (int i=0;i<size;i++) spectrum[i]=0.0;
+    
+    REALTYPE harmonics[OSCIL_SIZE/2];
+    for (int i=0;i<OSCIL_SIZE/2;i++) harmonics[i]=0.0;
+    //get the harmonic structure from the oscillator (I am using the frequency amplitudes, only)
+    oscilgen->get(harmonics,basefreq,false);
+
+    //normalize
+    REALTYPE max=0.0;
+    for (int i=0;i<OSCIL_SIZE/2;i++) if (harmonics[i]>max) max=harmonics[i];
+    if (max<0.000001) max=1;
+    for (int i=0;i<OSCIL_SIZE/2;i++) harmonics[i]/=max;
+
+    for (int nh=1;nh<OSCIL_SIZE/2;nh++){//for each harmonic
+	REALTYPE realfreq=getNhr(nh)*basefreq;
+	
+	///sa fac aici interpolarea si sa am grija daca frecv descresc
+	
+	if (realfreq>SAMPLE_RATE*0.49999) break;
+	if (realfreq<20.0) break;
+//	if (harmonics[nh-1]<1e-4) continue;
+
+
+	REALTYPE amp=harmonics[nh-1];
+	if (resonance->Penabled) amp*=resonance->getfreqresponse(realfreq);
+	int cfreq=(int) (realfreq/(SAMPLE_RATE*0.5)*size);
+
+	spectrum[cfreq]=amp+1e-9;
+    };
+    
+    if (Pmode!=1){    
+        int old=0;
+	for (int k=1;k<size;k++){
+	    if ( (spectrum[k]>1e-10) || (k==(size-1)) ){
+		int delta=k-old;
+		REALTYPE val1=spectrum[old];
+		REALTYPE val2=spectrum[k];
+		REALTYPE idelta=1.0/delta;
+		for (int i=0;i<delta;i++){
+		    REALTYPE x=idelta*i;
+		    spectrum[old+i]=val1*(1.0-x)+val2*x;
+		};
+		old=k;
+	    };
+	};    
+    };
+    
+};
+
+/*
  * Applies the parameters (i.e. computes all the samples, based on parameters);
  */
 void PADnoteParameters::applyparameters(bool lockmutex){
@@ -420,17 +473,19 @@ void PADnoteParameters::applyparameters(bool lockmutex){
 	REALTYPE tmp=adj[nsample]-adj[samplemax-1]*0.5;
 	REALTYPE basefreqadjust=pow(2.0,tmp);
 
-        generatespectrum(spectrum,spectrumsize,basefreq*basefreqadjust,profile,profilesize,bwadjust);
+        if (Pmode==0) generatespectrum_bandwidthMode(spectrum,spectrumsize,basefreq*basefreqadjust,profile,profilesize,bwadjust);
+	    else generatespectrum_otherModes(spectrum,spectrumsize,basefreq*basefreqadjust,profile,profilesize,bwadjust);
 
 	const int extra_samples=3;//the last samples contains the first samples (used for linear/cubic interpolation)
         newsample.smp=new REALTYPE[samplesize+extra_samples];
     
-	for (int i=0;i<spectrumsize;i++){//makes the phases as random
+	newsample.smp[0]=0.0;
+	for (int i=1;i<spectrumsize;i++){//makes the phases as random
 	    REALTYPE phase=RND*6.29;
 	    newsample.smp[i]=spectrum[i]*cos(phase);
-	    newsample.smp[samplesize-1-i]=spectrum[i]*sin(phase);
+	    newsample.smp[samplesize-i]=spectrum[i]*sin(phase);
 	};
-	fft->freqs2smps(newsample.smp,newsample.smp);//that's all; here is the single ifft for the whole sample; no windows are used :-)
+	fft->freqs2smps(newsample.smp,newsample.smp);//that's all; here is the only ifft for the whole sample; no windows are used :-)
 	
 
         //normalize(rms)
@@ -464,12 +519,12 @@ void PADnoteParameters::applyparameters(bool lockmutex){
     
     //delete the additional samples that might exists and are not useful
     for (int i=samplemax;i<PAD_MAX_SAMPLES;i++) deletesample(i);
-    
 };
 
 
 void PADnoteParameters::add2XML(XMLwrapper *xml){
     xml->addparbool("stereo",PStereo);
+    xml->addpar("mode",Pmode);
     xml->addpar("bandwidth",Pbandwidth);
     xml->addpar("bandwidth_scale",Pbwscale);
 
@@ -565,6 +620,7 @@ void PADnoteParameters::add2XML(XMLwrapper *xml){
 
 void PADnoteParameters::getfromXML(XMLwrapper *xml){
     PStereo=xml->getparbool("stereo",PStereo);
+    Pmode=xml->getpar127("mode",0);
     Pbandwidth=xml->getpar("bandwidth",Pbandwidth,0,1000);
     Pbwscale=xml->getpar127("bandwidth_scale",Pbwscale);
 

@@ -58,15 +58,18 @@ if (!visible()) return;
 REALTYPE smps[lx];
 
 REALTYPE realbw=pars->getprofile(smps,lx);
+bool active=active_r();
 
 //draw the equivalent bandwidth
-fl_color(220,220,220);
+if (active) fl_color(220,220,220);
+ else fl_color(160,165,165);
 fl_line_style(0);
 int rbw=(int)(realbw*(lx-1.0)/2.0);
 for (int i=lx/2-rbw;i<(lx/2+rbw);i++) fl_line(ox+i,oy,ox+i,oy+ly-1);
 
 fl_line_style(0);
-fl_color(200,200,200);
+if (active) fl_color(200,200,200);
+ else  fl_color(160,160,160);
 for (int i=1;i<10;i++){
 	int kx=(int)(lx/10.0*i);
 	fl_line(ox+kx,oy,ox+kx,oy+ly-1);
@@ -75,6 +78,7 @@ for (int i=1;i<5;i++){
 	int ky=(int)(ly/5.0*i);
 	fl_line(ox,oy+ly-ky,ox+lx,oy+ly-ky-1);
 };
+
 
 fl_color(120,120,120);
 fl_line_style(FL_DOT);
@@ -85,17 +89,19 @@ fl_line_style(0);
 int old=0;
 for (int i=0;i<lx;i++){
    int val=(int) ((ly-2)*smps[i]);
-   fl_color(180,210,240);
+   if (active) fl_color(180,210,240);
+      else fl_color(150,150,155);
    fl_line(ox+i,oy+ly-1,ox+i,oy+ly-1-val);
-   fl_color(0,0,100);
+   if (active) fl_color(0,0,100);
+       else fl_color(150,150,150);
    if (i>0) fl_line(ox+i-1,oy+ly-2-old,ox+i,oy+ly-2-val);
    old=val;   
 };
 
 
-
 fl_line_style(FL_DASH);
-fl_color(0,100,220);
+if (active) fl_color(0,100,220);
+    else fl_color(150,160,170);
 fl_line(ox+lx/2-rbw,oy,ox+lx/2-rbw,oy+ly-1);
 fl_line(ox+lx/2+rbw,oy,ox+lx/2+rbw,oy+ly-1);
 
@@ -152,21 +158,48 @@ for (int i=0;i<n;i++){
 if (max<0.000001) max=1.0;
 max=max*1.05;
 
+REALTYPE spectrum[lx];
+for (int i=0;i<lx;i++) spectrum[i]=0;
 
 
-
-fl_color(180,0,0);
-fl_line_style(0);
 for (int i=1;i<n;i++){
 	REALTYPE nhr=pars->getNhr(i);
 	int kx=(int)(lx/(REALTYPE)maxharmonic*nhr);
 	if ((kx<0)||(kx>lx)) continue;
 
-	REALTYPE x=spc[i-1]/max;
+        spectrum[kx]=spc[i-1]/max+1e-9;
+
+};
+
+fl_color(180,0,0);
+fl_line_style(0);
+
+if (pars->Pmode==2){
+   int old=0;
+   for (int i=1;i<lx;i++){
+	if ((spectrum[i]>1e-10)||(i==(lx-1))){
+		int delta=i-old;
+		REALTYPE val1=spectrum[old];
+		REALTYPE val2=spectrum[i];
+
+		REALTYPE idelta=1.0/delta;
+		for (int j=0;j<delta;j++){
+			REALTYPE x=idelta*j;
+			spectrum[old+j]=val1*(1.0-x)+val2*x;
+		};
+		old=i;
+	};
+      
+   };
+};
+
+for (int i=0;i<lx;i++){
+	REALTYPE x=spectrum[i];
         if (x>dB2rap(-maxdb)) x=rap2dB(x)/maxdb+1;
              else continue;
        	int yy=(int)(x*ly);
-	fl_line(ox+kx,oy+ly-1-yy,ox+kx,oy+ly-1);
+	fl_line(ox+i,oy+ly-1-yy,ox+i,oy+ly-1);
+      
 };} {}
   }
   decl {Master *master;} {}
@@ -178,7 +211,7 @@ class PADnoteUI {} {
   Function {make_window()} {} {
     Fl_Window padnotewindow {
       label {PAD synth Parameters}
-      xywh {184 106 535 450} type Double visible
+      xywh {76 165 535 450} type Double hide
     } {
       Fl_Tabs {} {
         callback {if (o->value()!=harmonicstructuregroup) applybutton->hide();
@@ -186,11 +219,12 @@ class PADnoteUI {} {
         xywh {0 0 535 395}
       } {
         Fl_Group harmonicstructuregroup {
-          label {Harmonic Structure} selected
+          label {Harmonic Structure}
           xywh {0 20 535 375} box ENGRAVED_BOX
         } {
-          Fl_Group {} {
+          Fl_Group bwprofilegroup {
             xywh {5 30 90 260} box ENGRAVED_BOX
+            code0 {if (pars->Pmode!=0) o->deactivate();}
           } {
             Fl_Dial {} {
               label Width
@@ -384,21 +418,23 @@ resui->resonancewindow->show();
 resui->setcbwidget(cbwidget);}
             xywh {375 225 80 20} box THIN_UP_BOX
           }
-          Fl_Dial {} {
+          Fl_Dial bwdial {
             label BandWidth
             callback {bwcents->value(pars->setPbandwidth((int) o->value()));
 cbwidget->do_callback();}
             xywh {15 295 35 35} box ROUND_UP_BOX labelsize 11 maximum 1000 step 1
             code0 {o->value(pars->Pbandwidth);}
+            code1 {if (pars->Pmode!=0) o->deactivate();}
             class WidgetPDial
           }
           Fl_Value_Output bwcents {
             label cents
-            xywh {55 305 55 15} labelsize 10 align 8 maximum 10000 step 0.1
+            xywh {55 305 55 15} labelsize 10 align 6 maximum 10000 step 0.1
             code0 {o->value(pars->setPbandwidth(pars->Pbandwidth));}
+            code1 {if (pars->Pmode!=0) o->deactivate();}
           }
           Fl_Group {} {
-            xywh {310 295 220 45} box ENGRAVED_BOX
+            xywh {315 295 215 45} box ENGRAVED_BOX
           } {
             Fl_Choice {} {
               label OvertonesPosition
@@ -469,7 +505,7 @@ cbwidget->do_callback();}
             label {Bandwidth Scale}
             callback {pars->Pbwscale=(int) o->value();
 cbwidget->do_callback();}
-            xywh {165 305 80 20} down_box BORDER_BOX labelsize 10 align 5 textsize 12
+            xywh {120 305 80 20} down_box BORDER_BOX labelsize 10 align 5 textsize 12
             code0 {o->value(pars->Pbwscale);}
           } {
             menuitem {} {
@@ -655,13 +691,49 @@ cbwidget->do_callback();}
             }
           }
           Fl_Group hprofile {
-            xywh {100 45 430 85} box FLAT_BOX color 54 selection_color 218 labelcolor 63
+            xywh {100 45 430 90} box FLAT_BOX color 54 selection_color 218 labelcolor 63
             code0 {PADnoteHarmonicProfile *hpui=new PADnoteHarmonicProfile(o->x(),o->y(),o->w(),o->h(),"");}
             code1 {hpui->init(pars,master);}
+            code2 {if (pars->Pmode!=0) { o->deactivate(); o->color(48);};}
           } {}
           Fl_Box {} {
             label {Profile of One Harmonic (Frequency Distribution)}
             xywh {160 25 315 20}
+          }
+          Fl_Choice {} {
+            label {Spectrum Mode}
+            callback {pars->Pmode=(int) o->value();
+
+if (pars->Pmode==0){
+   bwprofilegroup->activate();
+   bwdial->activate();
+   bwcents->activate();
+   hprofile->activate();
+   hprofile->color(54);
+} else {
+   bwprofilegroup->deactivate();
+   bwdial->deactivate();
+   bwcents->deactivate();
+   hprofile->deactivate();
+   hprofile->color(48);
+};
+
+cbwidget->do_callback();} selected
+            xywh {220 305 90 20} down_box BORDER_BOX labelfont 1 labelsize 10 labelcolor 0 align 5 textsize 12
+            code0 {o->value(pars->Pmode);}
+          } {
+            menuitem {} {
+              label Bandwidth
+              xywh {105 105 100 20} labelfont 1 labelsize 12
+            }
+            menuitem {} {
+              label Discrete
+              xywh {125 125 100 20} labelfont 1 labelsize 12 labelcolor 0
+            }
+            menuitem {} {
+              label Continous
+              xywh {115 115 100 20} labelfont 1 labelsize 12 labelcolor 0
+            }
           }
         }
         Fl_Group {} {
