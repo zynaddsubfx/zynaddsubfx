@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "ZynAddSubFX"
-!define PRODUCT_VERSION "2.1.0"
+!define PRODUCT_VERSION "2.1.1"
 !define PRODUCT_PUBLISHER "Nasca Octavian Paul"
 !define PRODUCT_WEB_SITE "http://zynaddsubfx.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\zynaddsubfx.exe"

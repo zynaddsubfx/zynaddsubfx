@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0105 
+version 1.0104 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -367,10 +367,8 @@ panellistitemgroup->redraw();} {}
   decl {BankUI *bankui;} {}
 } 
 
-class MasterUI {open
-} {
-  Function {make_window()} {open
-  } {
+class MasterUI {} {
+  Function {make_window()} {} {
     Fl_Window masterwindow {
       label zynaddsubfx
       callback {\#ifdef VSTAUDIOOUT
@@ -915,7 +913,8 @@ o->redraw();
 npart=nval;
 
 updatepanel();
-simplenpartcounter->do_callback();}
+simplenpartcounter->value(nval+1);
+simplenpartcounter->do_callback();} selected
         tooltip {The part number} xywh {5 247 70 23} type Simple labelfont 1 minimum 0 maximum 127 step 1 value 1 textfont 1
         code0 {o->bounds(1,NUM_MIDI_PARTS);}
         code1 {bankui->init(o);}
@@ -1030,7 +1029,7 @@ updatepanel();}
     simplemasterwindow->iconize();
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
-\#endif} selected
+\#endif}
       xywh {135 383 600 335} type Double hide
     } {
       Fl_Menu_Bar {} {

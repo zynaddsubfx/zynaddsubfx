@@ -1,3 +1,5 @@
+2.1.1 (2 Oct 2004) 
+	- Removed a big bug that prevented changing the part
 2.1.0 (1 Oct 2004) 
 	- Added a installer for windows (thanks to NSIS installer ( http://nsis.sourceforge.net/ ) ). Both VST and standalone vesions are contained in the same installer.
 	- Added a new user interface for beginners. You can switch the current user interface with that anytime do you want.
