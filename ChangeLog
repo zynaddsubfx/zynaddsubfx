@@ -697,5 +697,7 @@
 19 Aug 2004 - Corectata o mica eroare la XMLwrapper care facea ca sa se salveze fortat toti parametrii (chiar si cei nefolositi)
 	    - Adaugata partea de salvare/incarcare a listei directoarelor unde se afla presetarile
 21 Aug 2004 - Am lucrat putin la salvare/incarcare a listei dir. cu presetari
+22 Aug 2004 - Corectata o eroare de compilare
+
 	    
 	    

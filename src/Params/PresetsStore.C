@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "PresetsStore.h"
+#include "../Misc/Util.h"
 
 PresetsStore presetsstore;
 
@@ -65,11 +66,11 @@ bool PresetsStore::checkclipboardtype(char *type){
 //Presets management
 void PresetsStore::clearpresets(){
     for (int i=0;i<MAX_PRESETS;i++){
-	if (preset[i].file!=NULL) {
+	if (presets[i].file!=NULL) {
 	    delete(presets[i].file);
 	    presets[i].file=NULL;
 	};
-	if (preset[i].name!=NULL) {
+	if (presets[i].name!=NULL) {
 	    delete(presets[i].name);
 	    presets[i].name=NULL;
 	};
@@ -80,7 +81,7 @@ void PresetsStore::clearpresets(){
 void PresetsStore::rescanforpresets(char *type){
     clearpresets();
     int presetk=0;
-    for (int i=0;i<MAX_PRESETS_DIR;i++){
+    for (int i=0;i<MAX_BANK_ROOT_DIRS;i++){
 	if (config.cfg.presetsDirList[i]==NULL) continue;
 	//de continuat aici
     };

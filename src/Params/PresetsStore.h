@@ -21,6 +21,8 @@
 */
 
 #include "../Misc/XMLwrapper.h"
+#include "../Misc/Config.h"
+
 #define MAX_PRESETTYPE_SIZE 30
 #define MAX_PRESETS 1000
 
