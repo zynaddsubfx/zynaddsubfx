@@ -372,11 +372,10 @@ class MasterUI {} {
     Fl_Window masterwindow {
       label zynaddsubfx
       callback {\#ifdef VSTAUDIOOUT
-//fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
-    masterwindow->iconize();
+fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
-\#endif}
+\#endif} selected
       xywh {353 127 390 465} type Double hide
     } {
       Fl_Menu_Bar mastermenu {
@@ -914,7 +913,7 @@ npart=nval;
 
 updatepanel();
 simplenpartcounter->value(nval+1);
-simplenpartcounter->do_callback();} selected
+simplenpartcounter->do_callback();}
         tooltip {The part number} xywh {5 247 70 23} type Simple labelfont 1 minimum 0 maximum 127 step 1 value 1 textfont 1
         code0 {o->bounds(1,NUM_MIDI_PARTS);}
         code1 {bankui->init(o);}
@@ -1025,8 +1024,7 @@ updatepanel();}
     Fl_Window simplemasterwindow {
       label ZynAddSubFX
       callback {\#ifdef VSTAUDIOOUT
-//fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
-    simplemasterwindow->iconize();
+fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
