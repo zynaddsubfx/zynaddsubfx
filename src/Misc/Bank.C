@@ -94,23 +94,23 @@ Bank::Bank(){
 };
 
 Bank::~Bank(){
-    //**************//
-    char bankcfg[1000];//hope the filename is shorter than that :)
+    if (dirname!=NULL) {
+	//**************//
+	char bankcfg[1000];//hope the filename is shorter than that :)
 #if defined(OS_WINDOWS)
-    strcpy(bankcfg,"zynaddsubfx_usedbank");
+	strcpy(bankcfg,"zynaddsubfx_usedbank");
 #endif
 #if defined(OS_LINUX)
-    strcpy(bankcfg,getenv("HOME"));
-    strcat(bankcfg,"/.zynaddsubfx_usedbank");
+	strcpy(bankcfg,getenv("HOME"));
+	strcat(bankcfg,"/.zynaddsubfx_usedbank");
 #endif
-
-    int file=open(bankcfg,O_CREAT|O_WRONLY|O_TRUNC,00444+00222);
-    if (file!=-1){
-        write(file,dirname,strlen(dirname)+1);
-        close(file);
+	int file=open(bankcfg,O_CREAT|O_WRONLY|O_TRUNC,00444+00222);
+	if (file!=-1){
+    	    write(file,dirname,strlen(dirname)+1);
+    	    close(file);
+	};
+	//**************//
     };
-    //**************//
-
 
 
     clearbank();
