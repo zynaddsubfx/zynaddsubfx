@@ -84,14 +84,14 @@ label(bank->getnamenumbered(nslot));} {}
   decl {BankProcess_ *bp;} {}
 } 
 
-class BankUI {open : {public BankProcess_}
+class BankUI {: {public BankProcess_}
 } {
   Function {make_window()} {} {
     Fl_Window bankuiwindow {
-      label Bank
-      xywh {4 64 785 575} type Double
+      label Bank selected
+      xywh {4 64 785 575} type Double hide
       code0 {o->label(bank->bankfiletitle);}
-      code1 {if (bank->bankfiletitle==NULL) o->label ("Choose a bank to use by pressing the 'Load/Use Bank from file...' button or choose 'New Bank...' to make a new bank.");} visible
+      code1 {if (bank->bankfiletitle==NULL) o->label ("Choose a bank to use by pressing the 'Load/Use Bank from file...' button or choose 'New Bank...' to make a new bank.");}
     } {
       Fl_Button {} {
         label Close
@@ -298,8 +298,7 @@ if (mode==4){//swap
         bs[slot]->refresh();
     };
 };
-if (mode!=4) refreshmainwindow();} {selected
-    }
+if (mode!=4) refreshmainwindow();} {}
   }
   Function {refreshmainwindow()} {} {
     code {bankuiwindow->label(bank->bankfiletitle);
@@ -308,9 +307,11 @@ nselected=-1;
 if (bank->locked()){
     writebutton->deactivate();
     clearbutton->deactivate();
+    swapbutton->deactivate();
 } else {
     writebutton->activate();
     clearbutton->activate();
+    swapbutton->activate();
 };
 for (int i=0;i<BANK_SIZE;i++) bs[i]->refresh();} {}
   }
