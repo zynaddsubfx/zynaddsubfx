@@ -221,7 +221,9 @@ int Bank::loadbank(const char *bankdirname){
     struct dirent *fn;
         
     while ((fn=readdir(dir))){
+#ifndef OS_WINDOWS
 	if (fn->d_type!=DT_REG) continue;//this is not a regular file
+#endif
 	const char *filename= fn->d_name;
 	
 	//sa verific daca e si extensia dorita
@@ -282,7 +284,11 @@ int Bank::newbank(const char *newbankdirname){
 	strncat(bankdir,"/",MAX_STRING_SIZE);
     };
     strncat(bankdir,newbankdirname,MAX_STRING_SIZE);
+#ifdef OS_WINDOWS
+    result=mkdir(bankdir);
+#else
     result=mkdir(bankdir,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+#endif
     if (result<0) return(-1);
 
     snprintf(tmpfilename,MAX_STRING_SIZE,"%s/%s",bankdir,FORCE_BANK_DIR_FILE);
@@ -355,13 +361,13 @@ void Bank::rescanforbanks(){
     char *currentrootdir=new char [dirlistlen];
     while (start<dirlistlen){
 	for (int i=start+1;i<dirlistlen;i++){
-	    if (dirlist[i]<32) break;
 	    end=i;
+	    if (dirlist[i]<32) break;
 	};
 	snprintf(currentrootdir,end-start+2,"%s",&dirlist[start]);
 	
 	//a root director was found
-	scanrootdir(currentrootdir);
+	if (strlen (currentrootdir)>1) scanrootdir(currentrootdir);
 
 	start=end+2;
     };
@@ -397,7 +403,9 @@ void Bank::scanrootdir(char *rootdir){
     
     struct dirent *fn;
     while ((fn=readdir(dir))){
+#ifndef OS_WINDOWS
 	if (fn->d_type!=DT_DIR) continue;//this is not a directory
+#endif
 	const char *dirname=fn->d_name;
 	if (dirname[0]=='.') continue;
 	
@@ -412,7 +420,9 @@ void Bank::scanrootdir(char *rootdir){
 	struct dirent *fname;
 
 	while((fname=readdir(d))){
+#ifndef OS_WINDOWS
 	    if (fname->d_type!=DT_REG) continue;//this is not a regular file
+#endif
 	    if ((strstr(fname->d_name,INSTRUMENT_EXTENSION)!=NULL)||
 	       (strstr(fname->d_name,FORCE_BANK_DIR_FILE)!=NULL)){
 		isbank=true;

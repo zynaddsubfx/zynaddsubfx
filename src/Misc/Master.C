@@ -27,6 +27,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include <unistd.h>
+
 Master::Master(){
     swaplr=0;
     
@@ -723,8 +725,12 @@ void Master::exportbankasxmldirectory(const char *bankfilename){
 	    directory[i]='_';
     };
     
-    
+
+#ifdef OS_WINDOWS
+    mkdir(directory);
+#else    
     mkdir(directory,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+#endif
     for (int slot=0;slot<128;slot++){
 	tmppart->defaults();
 	oldbank.loadfilebank(bankfilename);
