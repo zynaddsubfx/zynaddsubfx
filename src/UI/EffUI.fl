@@ -152,10 +152,9 @@ return(log(freq/20.0)/log(1000.0));} {}
   decl {int maxdB;} {}
 } 
 
-class EffUI {: {public Fl_Group}
+class EffUI {open : {public Fl_Group}
 } {
-  Function {EffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {selected
-  } {
+  Function {EffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {eff=NULL;
 filterwindow=NULL;} {}
   }
@@ -1100,8 +1099,8 @@ eqgraph->redraw();}
     }
   }
   Function {make_dynamicfilter_window()} {} {
-    Fl_Window effdynamicfilterwindow {
-      xywh {100 558 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
+    Fl_Window effdynamicfilterwindow {selected
+      xywh {104 461 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Choice dfp {
@@ -1190,22 +1189,26 @@ refresh(eff);}
         callback {filterwindow->show();}
         xywh {115 10 55 25} box PLASTIC_THIN_UP_BOX
       }
-      Fl_Dial dfp7 {
-        label {A.S.}
-        callback {eff->seteffectpar(7,(int) o->value());}
-        xywh {280 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
-        class WidgetPDial
-      }
-      Fl_Dial dfp9 {
-        label {A.M}
-        callback {eff->seteffectpar(9,(int) o->value());}
-        xywh {310 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
-        class WidgetPDial
-      }
-      Fl_Check_Button dfp8 {
-        label {A.Inv.}
-        callback {eff->seteffectpar(8,(int) o->value());}
-        xywh {350 55 15 15} down_box DOWN_BOX labelfont 1 labelsize 12 align 2
+      Fl_Group {} {open
+        xywh {270 40 105 45} box BORDER_BOX color 181
+      } {
+        Fl_Dial dfp7 {
+          label {A.S.}
+          callback {eff->seteffectpar(7,(int) o->value());}
+          xywh {275 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+          class WidgetPDial
+        }
+        Fl_Dial dfp9 {
+          label {A.M}
+          callback {eff->seteffectpar(9,(int) o->value());}
+          xywh {305 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+          class WidgetPDial
+        }
+        Fl_Check_Button dfp8 {
+          label {A.Inv.}
+          callback {eff->seteffectpar(8,(int) o->value());}
+          xywh {345 55 15 15} down_box DOWN_BOX labelfont 1 labelsize 12 align 2
+        }
       }
     }
   }
