@@ -61,8 +61,7 @@ void ALSAMidiIn::getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmd
 	return;
     };
     
-//    snd_seq_event_input(midi_handle,&midievent);
-    usleep(1000000);
+    snd_seq_event_input(midi_handle,&midievent);
     
     if (midievent==NULL) return;
     switch (midievent->type){
