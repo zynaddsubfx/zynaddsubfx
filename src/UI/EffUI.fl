@@ -152,7 +152,7 @@ return(log(freq/20.0)/log(1000.0));} {}
   decl {int maxdB;} {}
 } 
 
-class EffUI {open : {public Fl_Group}
+class EffUI {: {public Fl_Group}
 } {
   Function {EffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {eff=NULL;
@@ -802,7 +802,7 @@ refresh(eff);}
   }
   Function {make_distorsion_window()} {} {
     Fl_Window effdistorsionwindow {
-      xywh {68 584 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
+      xywh {259 186 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Choice distp {
@@ -963,7 +963,7 @@ refresh(eff);}
   }
   Function {make_eq_window()} {} {
     Fl_Window effeqwindow {
-      xywh {248 307 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
+      xywh {258 307 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Text_Display {} {
@@ -1098,8 +1098,7 @@ eqgraph->redraw();}
       }
     }
   }
-  Function {make_dynamicfilter_window()} {selected
-  } {
+  Function {make_dynamicfilter_window()} {} {
     Fl_Window effdynamicfilterwindow {
       xywh {100 558 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
@@ -1256,7 +1255,8 @@ effdynamicfilterwindow->position(px,py);
 
 refresh(eff);} {}
   }
-  Function {refresh(EffectMgr *eff_)} {} {
+  Function {refresh(EffectMgr *eff_)} {open
+  } {
     code {eff=eff_;
 this->hide();
 
@@ -1379,6 +1379,7 @@ switch(eff->geteffect()){
 	if (eff->geteffectpar(10)<6) gaindial->deactivate();
 	qdial->value(eff->geteffectpar(13));
 	stagescounter->value(eff->geteffectpar(14));
+        eqgraph->init(eff);
 	effeqwindow->show();
         break;
      case 8:make_filter_window();

@@ -372,8 +372,8 @@ fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. P
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
-      xywh {188 182 390 465} type Double hide
-      code0 {setfilelabel(NULL);} non_modal
+      xywh {188 182 390 465} type Double
+      code0 {setfilelabel(NULL);} non_modal visible
     } {
       Fl_Menu_Bar mastermenu {
         xywh {0 0 690 25}
@@ -769,7 +769,7 @@ pthread_mutex_unlock(&master->mutex);}
         xywh {0 80 390 160}
       } {
         Fl_Group {} {
-          label {System Effects} open selected
+          label {System Effects} open
           xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25
         } {
           Fl_Counter syseffnocounter {
@@ -830,7 +830,7 @@ syseffectui->refresh(master->sysefx[nsyseff]);}
           Fl_Group syseffectuigroup {
             xywh {5 140 380 95} box FLAT_BOX color 48
           } {
-            Fl_Group syseffectui {
+            Fl_Group syseffectui {selected
               xywh {5 140 380 95}
               code0 {o->init(master->sysefx[nsyseff]);}
               class EffUI

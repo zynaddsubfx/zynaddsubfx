@@ -255,7 +255,7 @@ delete(partkititem);} {}
   decl {PartUI_ *partui;} {}
 } 
 
-class PartUI {selected : {public Fl_Group,PartUI_}
+class PartUI {: {public Fl_Group,PartUI_}
 } {
   Function {make_window()} {private
   } {
@@ -582,13 +582,13 @@ part->ctl.portamento.updowntimestretch=x;}
     }
     Fl_Window partfx {
       label {Part's Insert Effects}
-      private xywh {110 483 390 145} type Double hide
+      private xywh {112 331 390 145} type Double hide
     } {
       Fl_Counter inseffnocounter {
         label {Ins.Effect No.}
         callback {ninseff=(int) o->value();
 insefftype->value(part->partefx[ninseff]->geteffect());
-insefftype->do_callback();
+//insefftype->do_callback();
 inseffectui->refresh(part->partefx[ninseff]);
 int x=part->Pefxroute[ninseff];
 if (x==127) x=1;
@@ -602,7 +602,7 @@ sendtochoice->value(x);}
         callback {pthread_mutex_lock(part->mutex);
 part->partefx[ninseff]->changeeffect((int) o->value());
 pthread_mutex_unlock(part->mutex);
-inseffectui->refresh(part->partefx[ninseff]);}
+inseffectui->refresh(part->partefx[ninseff]);} selected
         xywh {95 110 70 15} down_box BORDER_BOX labelsize 11 align 6
         code0 {o->value(part->partefx[ninseff]->geteffect());}
       } {

@@ -204,6 +204,7 @@ unsigned char EQ::getpar(int npar){
 
 REALTYPE EQ::getfreqresponse(REALTYPE freq){
     REALTYPE resp=1.0;
+
     for (int i=0;i<MAX_EQ_BANDS;i++){
 	if (filter[i].Ptype==0) continue;
 	resp*=filter[i].l->H(freq);
