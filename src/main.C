@@ -550,7 +550,7 @@ VSTSynth::VSTSynth (audioMasterCallback audioMaster):AudioEffectX(audioMaster,1,
   if (audioMaster){
     setNumInputs(0);
     setNumOutputs(2);
-    setUniqueID('zasf');
+    setUniqueID('ZASF');
     canProcessReplacing();
 //    hasVu(false);
 //    hasClip(false);
