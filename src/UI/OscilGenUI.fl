@@ -239,8 +239,8 @@ class Oscilharmonic {: {public Fl_Group}
     } {
       Fl_Slider mag {
         callback {int x=64;
-if (Fl::event_button1()) x=127-(int)o->value();
-   else o->value(x);
+if (Fl::event_button3()) o->value(x);
+   else x=127-(int)o->value();
 if (x==64) o->selection_color(0);
     else o->selection_color(222);
 
@@ -262,8 +262,8 @@ oldosc->redraw();}
       }
       Fl_Slider phase {
         callback {int x=64;
-if (Fl::event_button1()) x=(int)o->value();
-   else o->value(x);
+if (Fl::event_button3()) o->value(x);
+   else x=(int)o->value();
 
 pthread_mutex_lock(&master->mutex);
  oscil->Phphase[n]=x;
@@ -309,14 +309,13 @@ make_window();
 end();
 harmonic->show();} {}
   }
-  Function {refresh()} {} {
+  Function {refresh()} {open
+  } {
     code {mag->value(127-oscil->Phmag[n]);
 phase->value(oscil->Phphase[n]);
 
 if (oscil->Phmag[n]==64) mag->selection_color(0);
-    else mag->selection_color(222);
-if (oscil->Phphase[n]==64) phase->selection_color(0);
-    else phase->selection_color(222);} {}
+    else mag->selection_color(222);} {}
   }
   Function {~Oscilharmonic()} {} {
     code {harmonic->hide();
@@ -329,13 +328,11 @@ delete(harmonic);} {}
   decl {Master *master;} {}
 } 
 
-class OscilEditor {open
-} {
-  Function {make_window()} {open
-  } {
+class OscilEditor {} {
+  Function {make_window()} {} {
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor}
-      xywh {4 91 745 590} type Double visible
+      xywh {4 91 745 590} type Double hide
     } {
       Fl_Group oscildisplaygroup {
         xywh {15 5 360 300} box ENGRAVED_FRAME
@@ -1003,6 +1000,8 @@ refresh();}
 oldosc=oldosc_;
 master=master_;
 make_window();
+
+refresh();
 osceditUI->show();} {}
   }
   Function {~OscilEditor()} {} {
@@ -1010,8 +1009,7 @@ osceditUI->show();} {}
 for (int i=0;i<MAX_AD_HARMONICS;i++) delete (h[i]);
 delete (osceditUI);} {}
   }
-  Function {refresh()} {open
-  } {
+  Function {refresh()} {} {
     code {magtype->value(oscil->Phmagtype);
 rndslider->value(oscil->Prand-64);
 
@@ -1052,8 +1050,11 @@ adhrtype->value(oscil->Padaptiveharmonics);
 adhrbf->value(oscil->Padaptiveharmonicsbasefreq);
 adhrpow->value(oscil->Padaptiveharmonicspower);
 
-for (int i=0;i<MAX_AD_HARMONICS;i++) h[i]->refresh();} {selected
-    }
+for (int i=0;i<MAX_AD_HARMONICS;i++) h[i]->refresh();
+
+basefuncdisplaygroup->redraw();
+oscildisplaygroup->redraw();
+oldosc->redraw();} {}
   }
   decl {OscilGen *oscil;} {}
   decl {Fl_Widget *oldosc;} {}
