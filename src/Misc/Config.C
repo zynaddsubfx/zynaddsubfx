@@ -196,7 +196,7 @@ void Config::readConfig(char *filename){
 void Config::saveConfig(char *filename){
     FILE *file=fopen(filename,"w");
     if (file==NULL) return;
-    fprintf(file,"#ZynAddSubFX configuration file\n");
+    fprintf(file,"%s","#ZynAddSubFX configuration file\n");
     fprintf(file,"SAMPLE_RATE = %d\n",cfg.SampleRate);
     fprintf(file,"SOUND_BUFFER_SIZE = %d\n",cfg.SoundBufferSize);
     fprintf(file,"OSCIL_SIZE = %d\n",cfg.OscilSize);

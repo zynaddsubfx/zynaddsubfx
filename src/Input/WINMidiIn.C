@@ -61,7 +61,6 @@ void CALLBACK WinMidiInProc(HMIDIIN hMidiIn,UINT wMsg,DWORD dwInstance,
 			  break;
 			case(0xe)://pitch wheel
                           tmp=par1+par2*(long int) 128;
-			  printf("%d\n",tmp);
 			  winmaster->SetController(cmdchan,C_pitchwheel,tmp);
 			  break;
 			default:break;

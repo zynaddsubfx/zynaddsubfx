@@ -50,7 +50,7 @@ void Dump::startnow(){
 	    else file=fopen(config.cfg.DumpFile,"w");
     
 	if (file==NULL) return;
-	if (config.cfg.DumpAppend!=0) fprintf(file,"#************************************\n");
+	if (config.cfg.DumpAppend!=0) fprintf(file,"%s","#************************************\n");
 
 	time_t tm=time(NULL);    
         

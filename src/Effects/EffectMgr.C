@@ -192,7 +192,7 @@ void EffectMgr::saveloadbuf(Buffer *buf){
     unsigned char npar,p,n,tmp;
 
 #ifdef DEBUG_BUFFER
-    fprintf(stderr,"\n( EffectPparameters) \n");
+    fprintf(stderr,"%s","\n( EffectPparameters) \n");
 #endif    
 
     tmp=0xfe;

@@ -58,7 +58,7 @@ REALTYPE Chorus::getdelay(REALTYPE xlfo){
     
     //check if it is too big delay(caused bu errornous setdelay() and setdepth()    
     if ((result+0.5)>=maxdelay) {
-	fprintf(stderr,"WARNING: Chorus.C::getdelay(..) too big delay (see setdelay and setdepth funcs.)\n");
+	fprintf(stderr,"%s","WARNING: Chorus.C::getdelay(..) too big delay (see setdelay and setdepth funcs.)\n");
 	result=maxdelay-1.0;
     };
     return(result);

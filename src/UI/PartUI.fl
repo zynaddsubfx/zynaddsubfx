@@ -151,7 +151,7 @@ maxkcounter->do_callback();}
         Fl_Button labelbutton {
           label {Bass Drum}
           callback {const char *tmp=fl_input("Kit item name:",(const char *)part->kit[n].Pname);
-if (tmp!=NULL) snprintf((char *)part->kit[n].Pname,PART_MAX_NAME_LEN,tmp);}
+if (tmp!=NULL) snprintf((char *)part->kit[n].Pname,PART_MAX_NAME_LEN,"%s",tmp);}
           xywh {90 0 130 15} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 11 align 20
           code0 {o->label((char *)part->kit[n].Pname);}
         }

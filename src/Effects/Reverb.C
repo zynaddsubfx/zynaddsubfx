@@ -108,7 +108,7 @@ void Reverb::cleanup(){
  */
 void Reverb::processmono(int ch,REALTYPE *output){
     int i,j;
-    REALTYPE out,fbout,tmp;
+    REALTYPE fbout,tmp;
     //TODO: implement the high part from lohidamp
     
     for (j=REV_COMBS*ch;j<REV_COMBS*(ch+1);j++){

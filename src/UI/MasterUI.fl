@@ -121,11 +121,11 @@ fl_font(FL_HELVETICA|FL_BOLD,10);
 fl_color(255,255,255);
 char tmpstr[10];
 if ((maxdbl>MIN_DB-20)){
-  snprintf((char *)&tmpstr,10,"%ddB\\0",(int)maxdbr);
+  snprintf((char *)&tmpstr,10,"%ddB",(int)maxdbr);
   fl_draw(tmpstr,ox+VULENX+1,oy+1,lx-VULENX-1,VULENY,FL_ALIGN_RIGHT,NULL,0);
 };
 if ((maxdbr>MIN_DB-20)){
-  snprintf((char *)&tmpstr,10,"%ddB\\0",(int)maxdbl);
+  snprintf((char *)&tmpstr,10,"%ddB",(int)maxdbl);
   fl_draw(tmpstr,ox+VULENX+1,oy+ly/2+1,lx-VULENX-1,VULENY,FL_ALIGN_RIGHT,NULL,0);
 };} {}
   }

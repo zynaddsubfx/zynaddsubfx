@@ -283,12 +283,12 @@ void exitprogram(){
 #ifndef VSTAUDIOOUT
 int main(int argc, char *argv[]){
     int loadfile=0,noui=0;
-    fprintf(stderr,"\nZynAddSubFX - Copyright (c) 2002-2003 Nasca Octavian Paul\n");
-    fprintf(stderr,"This program is free software (GNU GPL v.2) and \n    it comes with ABSOLUTELY NO WARRANTY.\n\n");
+    fprintf(stderr,"%s","\nZynAddSubFX - Copyright (c) 2002-2003 Nasca Octavian Paul\n");
+    fprintf(stderr,"%s","This program is free software (GNU GPL v.2) and \n    it comes with ABSOLUTELY NO WARRANTY.\n\n");
 #ifdef OS_LINUX
-    if (argc==1) fprintf(stderr,"Try 'zynaddsubfx --help' for command-line options.\n");
+    if (argc==1) fprintf(stderr,"%s","Try 'zynaddsubfx --help' for command-line options.\n");
 #else
-    if (argc==1) fprintf(stderr,"Try 'zynaddsubfx -h' for command-line options.\n");
+    if (argc==1) fprintf(stderr,"%s","Try 'zynaddsubfx -h' for command-line options.\n");
 #endif
     /* Get the settings from the Config*/
     SAMPLE_RATE=config.cfg.SampleRate;	
@@ -362,34 +362,33 @@ int main(int argc, char *argv[]){
 		     OSCIL_SIZE=tmp;
 	    	    if (OSCIL_SIZE<MAX_AD_HARMONICS*2) OSCIL_SIZE=MAX_AD_HARMONICS*2;
 		     OSCIL_SIZE=(int) pow(2,ceil(log (OSCIL_SIZE-1.0)/log(2.0)));
-		     if (tmp!=OSCIL_SIZE) fprintf(stderr,"\nOSCIL_SIZE is wrong (must me 2^n) or too small. Adjusting to %d.\n",OSCIL_SIZE);
+		     if (tmp!=OSCIL_SIZE) fprintf(stderr,"%s","\nOSCIL_SIZE is wrong (must me 2^n) or too small. Adjusting to %d.\n",OSCIL_SIZE);
 		     break;
 	    case 'S':swaplr=1;
 		     break;
 	    case 'D':dump.startnow();
 		     break;
-	    case '?':fprintf(stderr,"ERROR:Bad option or parameter.\n\n");
+	    case '?':fprintf(stderr,"%s","ERROR:Bad option or parameter.\n\n");
 	             exitwithhelp=1;
 		     break;
 	};
     };
     
     if (exitwithhelp!=0) {
-	fprintf(stderr,"Usage: zynaddsubfx [OPTION]\n\n");
-	fprintf(stderr,"  -h , --help \t\t\t\t display command-line help and exit\n");
-	fprintf(stderr,"  -l file, --load=FILE\t\t\t loads a .mas-zyn file\n");
-	fprintf(stderr,"  -r SR, --sample-rate=SR\t\t set the sample rate SR\n");
-	fprintf(stderr,"  -b BS, --buffer-size=SR\t\t set the buffer size (granularity)\n");
-	fprintf(stderr,"  -o OS, --oscil-size=OS\t\t set the ADsynth oscil. size\n");
-	fprintf(stderr,"  -S , --swap\t\t\t\t swap Left <--> Right\n");
-	fprintf(stderr,"  -D , --dump\t\t\t\t Dumps midi note ON/OFF commands\n");
-	fprintf(stderr,"  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n");
-	
+	fprintf(stderr,"%s","Usage: zynaddsubfx [OPTION]\n\n");
+	fprintf(stderr,"%s","  -h , --help \t\t\t\t display command-line help and exit\n");
+	fprintf(stderr,"%s","  -l file, --load=FILE\t\t\t loads a .mas-zyn file\n");
+	fprintf(stderr,"%s","  -r SR, --sample-rate=SR\t\t set the sample rate SR\n");
+	fprintf(stderr,"%s","  -b BS, --buffer-size=SR\t\t set the buffer size (granularity)\n");
+	fprintf(stderr,"%s","  -o OS, --oscil-size=OS\t\t set the ADsynth oscil. size\n");
+	fprintf(stderr,"%s","  -S , --swap\t\t\t\t swap Left <--> Right\n");
+	fprintf(stderr,"%s","  -D , --dump\t\t\t\t Dumps midi note ON/OFF commands\n");
+	fprintf(stderr,"%s","  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n");
 #ifdef OS_WINDOWS
-	fprintf(stderr,"\nWARNING: On Windows systems, only short comandline parameters works.\n");
-	fprintf(stderr,"  eg. instead '--buffer-size=512' use '-b 512'\n");
+	fprintf(stderr,"%s","\nWARNING: On Windows systems, only short comandline parameters works.\n");
+	fprintf(stderr,"%s","  eg. instead '--buffer-size=512' use '-b 512'\n");
 #endif
-	fprintf(stderr,"\n\n");
+	fprintf(stderr,"%s","\n\n");
 	return(0);
     };
     

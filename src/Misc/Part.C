@@ -196,7 +196,7 @@ void Part::NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift){
     
     if (pos==-1){
         //test
-	fprintf(stderr,"NOTES TOO MANY (> POLIPHONY) - (Part.C::NoteOn(..))\n");
+	fprintf(stderr,"%s","NOTES TOO MANY (> POLIPHONY) - (Part.C::NoteOn(..))\n");
     } else {
 	if (Pnoteon!=0){
 	    //start the note
@@ -620,7 +620,7 @@ void Part::swapcopyitem(int item1, int item2, int mode){
 
 void Part::saveloadbufkititem(Buffer *buf,unsigned char item,int saveitem0){
     unsigned char npar,n,tmp;
-    int fmon,min,fmexton;//fmon is 0 if there is no need to save the FM parameters
+//    int fmon,min,fmexton;//fmon is 0 if there is no need to save the FM parameters
 
 #ifdef DEBUG_BUFFER
     fprintf(stderr,"\n\n( Part paramete kit item %d) \n",item);    

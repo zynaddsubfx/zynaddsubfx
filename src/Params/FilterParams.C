@@ -120,9 +120,9 @@ REALTYPE FilterParams::getfreqpos(REALTYPE freq){
  * Get the freq. response of the formant filter
  */
 void FilterParams::formantfilterH(int nvowel,int nfreqs,REALTYPE *freqs){
-    REALTYPE c[3],d[3],curfreq=1000.0;
+    REALTYPE c[3],d[3];
     REALTYPE filter_freq,filter_q,filter_amp;
-    REALTYPE omega,sn,cs,alpha,beta;
+    REALTYPE omega,sn,cs,alpha;
 
     for (int i=0;i<nfreqs;i++) freqs[i]=0.0;
 

@@ -64,7 +64,7 @@ if ((freqx>0.0)&&(freqx<1.0))
   Function {draw()} {open
   } {
     code {int maxdB=30;
-int ox=x(),oy=y(),lx=w(),ly=h(),i,ix,iy,oiy;
+int ox=x(),oy=y(),lx=w(),ly=h(),i,oiy;
 REALTYPE freqx;
 
 fl_color(FL_BLACK);

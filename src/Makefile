@@ -3,7 +3,7 @@ include Makefile.inc
 ifneq ($(MAKECMDGOALS),debug)
   CXXFLAGS= -O6 
 else 
-  CXXFLAGS= -O0 -ggdb 
+  CXXFLAGS= -O0 -ggdb -Wall -Wpointer-arith -Wstrict-prototypes
 endif
 
 CXXFLAGS += -DOS_$(OS_PORT) -D$(MIDIIN)MIDIIN -D$(AUDIOOUT)AUDIOOUT -DFFTW_VERSION_$(FFTW_VERSION) -DASM_F2I_$(ASM_F2I) `fltk-config --cflags` 

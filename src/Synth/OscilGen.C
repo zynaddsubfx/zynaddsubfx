@@ -304,8 +304,7 @@ void OscilGen::changebasefunction(){
  */
 void OscilGen::waveshape(){
     int i;
-    REALTYPE tmp;
-    
+
     oldwaveshapingfunction=Pwaveshapingfunction;
     oldwaveshaping=Pwaveshaping;
     if (Pwaveshapingfunction==0) return;
@@ -882,7 +881,7 @@ void OscilGen::add2XML(XMLwrapper *xml){
 	        REALTYPE xs=basefuncFFTfreqs[OSCIL_SIZE-i]/max;
 		if ((fabs(xs)>0.00001)&&(fabs(xs)>0.00001)){
 		    xml->beginbranch("BF_HARMONIC",i);
-			xml->addparreal("cos",xs);
+			xml->addparreal("cos",xc);
 			xml->addparreal("sin",xs);
 		    xml->endbranch();
 		};

@@ -545,6 +545,6 @@
 24 Feb 2004 - Continuat la Bank
 25 Feb 2004 - La Bank - inceput sa scriu partea ca sa arate instrumentele din banca
 26 Feb 2004 - Continuat la Bank
-27 Feb 2004 - Corectate erori la snprintf ( nu dadeam parametru "%s" inainte de string si daca acel string continea ceva %, era periculos)
+27 Feb 2004 - Corectate erori la snprintf ( nu dadeam parametru "%s" inainte de string si daca acel string continea ceva %, era periculos) si alte erori
 
 

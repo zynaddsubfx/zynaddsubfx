@@ -70,8 +70,7 @@ return((int) ((1.0-env->Penvval[n]/127.0)*ly));} {}
   }
   Function {getnearest(int x,int y)} {return_type int
   } {
-    code {int lx=w()-10;
-int ly=h()-10;
+    code {
 x-=5;y-=5;
 
 int nearestpoint=0;
@@ -144,8 +143,8 @@ if (currentpoint<=0){
    time=env->getdt(currentpoint);
 };
 char tmpstr[20];
-if (time<1000.0) snprintf((char *)&tmpstr,20,"%.1fms\\0",time);
-     else snprintf((char *)&tmpstr,20,"%.2fs\\0",time/1000.0);
+if (time<1000.0) snprintf((char *)&tmpstr,20,"%.1fms",time);
+     else snprintf((char *)&tmpstr,20,"%.2fs",time/1000.0);
 fl_draw(tmpstr,ox+lx-20,oy+ly-10,20,10,FL_ALIGN_RIGHT,NULL,0);} {}
   }
   Function {handle(int event)} {return_type int

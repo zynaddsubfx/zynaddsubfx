@@ -112,9 +112,6 @@ int Bank::loadbank(const char *bankdirname){
     printf("%s/\n",bankdirname);
     struct dirent *fn;
     
-    char *remainfiles[BANK_SIZE];
-    memset(remainfiles,0,sizeof(remainfiles));
-    int remainfilek=0;
         
     while(fn=readdir(dir)){
 	if (fn->d_type!=DT_REG) continue;//this is not a regular file
