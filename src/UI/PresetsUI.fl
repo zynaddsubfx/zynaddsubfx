@@ -21,8 +21,7 @@ class PresetsUI_ {} {
   } {}
 } 
 
-class PresetsUI {open
-} {
+class PresetsUI {} {
   Function {PresetsUI()} {} {
     code {p=NULL;
 make_window();} {}
@@ -31,13 +30,17 @@ make_window();} {}
     code {copywin->hide();delete(copywin);
 pastewin->hide();delete(pastewin);} {}
   }
-  Function {make_window()} {open
-  } {
+  Function {make_window()} {} {
     Fl_Window copywin {
       label {Copy to Clipboard/Preset}
       xywh {243 174 265 315} type Double box PLASTIC_THIN_UP_BOX color 238 hide modal
     } {
       Fl_Browser copybrowse {
+        callback {int val=o->value();
+if (val!=0){
+   presetname->cut(0,presetname->maximum_size());
+   presetname->insert(o->text(val));
+};}
         xywh {10 25 245 205} type Select
       }
       Fl_Button copypbutton {
@@ -87,8 +90,13 @@ if (strlen(tmp)>0) {
       xywh {343 225 265 315} type Double box PLASTIC_THIN_UP_BOX color 238 hide modal
     } {
       Fl_Browser pastebrowse {
-        callback {if (o->value()==0) pastepbutton->deactivate();
-	else pastepbutton->activate();}
+        callback {if (o->value()==0) {
+	pastepbutton->deactivate();
+	deletepbutton->deactivate();
+}else{
+	pastepbutton->activate();
+	deletepbutton->activate();
+};}
         xywh {10 30 245 205} type Hold
       }
       Fl_Button pastepbutton {
@@ -96,8 +104,8 @@ if (strlen(tmp)>0) {
         callback {int n=pastebrowse->value();
 if (n!=0) p->paste(n);
 pastewin->hide();
-pui->refresh();} selected
-        xywh {50 240 160 20} box THIN_UP_BOX
+pui->refresh();}
+        xywh {10 240 160 20} box THIN_UP_BOX
       }
       Fl_Button pastebutton {
         label {Paste from Clipboard}
@@ -118,6 +126,13 @@ pui->refresh();}
         label {Type:}
         xywh {15 5 40 15} labelsize 12 align 20
       }
+      Fl_Button deletepbutton {
+        label Delete
+        callback {int n=pastebrowse->value();
+if (n!=0) p->deletepreset(n);
+rescan();}
+        xywh {180 240 75 20} box THIN_UP_BOX
+      }
     }
   }
   Function {copy(Presets *p)} {} {
@@ -137,12 +152,12 @@ if (but) p->copy(NULL);
 	copywin->show();
    };} {}
   }
-  Function {paste(Presets *p,PresetsUI_ *pui)} {open
-  } {
+  Function {paste(Presets *p,PresetsUI_ *pui)} {} {
     code {this->p=p;
 this->pui=pui;
 bool but=(Fl::event_button()!=FL_LEFT_MOUSE);
 pastepbutton->deactivate();
+deletepbutton->deactivate();
 
 if (but) {
 	p->paste(0);
@@ -153,7 +168,8 @@ if (but) {
 	if (p->checkclipboardtype()) pastebutton->activate();
 		else pastebutton->deactivate();
 	pastewin->show();
-   };} {}
+   };} {selected
+    }
   }
   Function {copy(Presets *p,int n)} {} {
     code {p->setelement(n);
@@ -163,8 +179,7 @@ copy(p);} {}
     code {p->setelement(n);
 paste(p,pui);} {}
   }
-  Function {rescan()} {open
-  } {
+  Function {rescan()} {} {
     code {copybrowse->clear();
 pastebrowse->clear();
 p->rescanforpresets();

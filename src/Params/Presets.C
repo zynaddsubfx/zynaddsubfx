@@ -123,4 +123,7 @@ void Presets::rescanforpresets(){
 };
 
 
+void Presets::deletepreset(int npreset){
+    presetsstore.deletepreset(npreset);
+};
 

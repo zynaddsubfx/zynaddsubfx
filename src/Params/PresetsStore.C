@@ -141,4 +141,11 @@ bool PresetsStore::pastepreset(XMLwrapper *xml, int npreset){
     return(result);
 };
 
+void PresetsStore::deletepreset(int npreset){
+    npreset--;
+    if (npreset>=MAX_PRESETS) return;
+    char *filename=presets[npreset].file;
+    if (filename==NULL) return;
+    remove(filename);
+};
 

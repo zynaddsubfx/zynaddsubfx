@@ -337,8 +337,7 @@ writepresetcfg();}
       }
     }
   }
-  Function {ConfigUI()} {selected
-  } {
+  Function {ConfigUI()} {} {
     code {make_window();
 readbankcfg();
 readpresetcfg();} {}
@@ -374,7 +373,8 @@ for (int i=0;i<MAX_BANK_ROOT_DIRS;i++){
 for (int n=0;n<rootsbrowse->size();n++){ 
      config.cfg.bankRootDirList[n]=new char [MAX_STRING_SIZE];
      strncpy(config.cfg.bankRootDirList[n],rootsbrowse->text(n+1),MAX_STRING_SIZE);
-};} {}
+};} {selected
+    }
   }
   Function {readpresetcfg()} {} {
     code {presetbrowse->clear();
