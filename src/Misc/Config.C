@@ -121,7 +121,7 @@ void Config::readConfig(char *filename){
 	if (sscanf(line,"%s = %s",par,val)!=2) continue;//bad line
 	if ((strlen(par)<1)|| (strlen(val)<1)) continue;//empty parameter/value
 	
-//	printf("%s\n",val);
+	printf("%s\n",val);
 
 
 	int intvalue=0;
