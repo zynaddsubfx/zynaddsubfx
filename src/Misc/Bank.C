@@ -343,11 +343,22 @@ void Bank::swapslot(unsigned int n1, unsigned int n2){
     
 };
 
+
+//a helper function that compares 2 banks[] arrays
+int Bank_compar(const void *a,const void *b){
+    struct Bank::bankstruct *bank1= (Bank::bankstruct *)a;
+    struct Bank::bankstruct *bank2= (Bank::bankstruct *)b;
+    if (((bank1->name)==NULL)||((bank2->name)==NULL)) return(0);
+    
+    return(strcasecmp(bank1->name,bank2->name));
+};
+
 /*
  * Re-scan for directories containing instrument banks
  */
 
 void Bank::rescanforbanks(){
+
     for (int i=0;i<MAX_NUM_BANKS;i++){
 	if (banks[i].dir!=NULL) delete (banks[i].dir);
 	if (banks[i].name!=NULL) delete (banks[i].name);
@@ -356,6 +367,8 @@ void Bank::rescanforbanks(){
     };
 
     for (int i=0;i<MAX_BANK_ROOT_DIRS;i++) if (config.cfg.bankRootDirList[i]!=NULL) scanrootdir(config.cfg.bankRootDirList[i]);
+    
+    qsort(banks,MAX_NUM_BANKS,sizeof(bankstruct),Bank_compar);
 }; 
 
 
@@ -411,7 +424,6 @@ void Bank::scanrootdir(char *rootdir){
 	closedir(d);	
     
 	if (isbank) {
-//	    printf("%s = %s\n",bank.name,bank.dir);
 	    int pos=-1;
 	    for (int i=1;i<MAX_NUM_BANKS;i++){	//banks[0] e liber intotdeauna
 		if (banks[i].name==NULL) {
