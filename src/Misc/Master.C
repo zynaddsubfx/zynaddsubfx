@@ -601,7 +601,11 @@ int Master::getalldata(char **data){
     XMLwrapper *xml=new XMLwrapper();
 
     xml->beginbranch("MASTER");
+
+    pthread_mutex_lock(&mutex);
     add2XML(xml);
+    pthread_mutex_unlock(&mutex);
+
     xml->endbranch();
 
     *data=xml->getXMLdata();
@@ -617,7 +621,11 @@ void Master::putalldata(char *data,int size){
     };
     
     if (xml->enterbranch("MASTER")==0) return;
+
+    pthread_mutex_lock(&mutex);
 	getfromXML(xml);
+    pthread_mutex_unlock(&mutex);
+
     xml->exitbranch();
     
     delete(xml);

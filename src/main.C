@@ -634,12 +634,12 @@ return(1);
 
 long VSTSynth::getChunk(void** data){
     int size=0;
-    size=vmaster->getalldata(data);
+    size=vmaster->getalldata((char **)data);
     return(size);
 };
 
-long VSTSynth::setChunk(void *data,long size){
-    vmaster->putalldata(data,size);
+void VSTSynth::setChunk(void *data,long size){
+    vmaster->putalldata((char*)data,size);
 };
 #endif
 

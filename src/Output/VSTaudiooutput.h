@@ -43,6 +43,8 @@ class VSTSynth:public AudioEffectX{
 	virtual bool getProductString(char *txt);
 	virtual void resume();
 		
+	virtual long getChunk(void** data);
+	virtual void setChunk(void *data,long size);		
 
 	MasterUI *ui;
 	int Pexitprogram;
