@@ -868,7 +868,7 @@ subsynenabledcheck->value(part->kit[0].Psubenabled);}
       label {Instrument Edit}
       xywh {182 214 395 360} type Double hide
     } {
-      Fl_Group {} {
+      Fl_Group {} {selected
         xywh {0 220 395 110} box ENGRAVED_FRAME
       } {
         Fl_Group {} {
@@ -939,7 +939,7 @@ if (x==0) subeditbutton->deactivate();
         Fl_Button {} {
           label Effects
           callback {partfx->show();}
-          xywh {310 290 80 35} box PLASTIC_UP_BOX labelfont 1 labelsize 16
+          xywh {310 290 80 35} box PLASTIC_UP_BOX color 230 labelfont 1 labelsize 16
         }
       }
       Fl_Group {} {
@@ -1133,8 +1133,7 @@ instrumentkitlist->hide();
 delete(instrumentkitlist);
 
 instrumenteditwindow->hide();
-delete(instrumenteditwindow);} {selected
-    }
+delete(instrumenteditwindow);} {}
   }
   decl {Part *part;} {}
   decl {Master *master;} {}
