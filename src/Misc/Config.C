@@ -61,7 +61,7 @@ Config::Config(){
     cfg.CheckPADsynth=1;
 
     cfg.UserInterfaceMode=0;
-
+    cfg.VirKeybLayout=1;
     winwavemax=1;winmidimax=1;
 //try to find out how many input midi devices are there
 #ifdef WINMIDIIN
@@ -218,6 +218,7 @@ void Config::readConfig(char *filename){
 
 
 	cfg.UserInterfaceMode=xmlcfg->getpar("user_interface_mode",cfg.UserInterfaceMode,0,2);
+	cfg.VirKeybLayout=xmlcfg->getpar("virtual_keyboard_layout",cfg.VirKeybLayout,0,10);
 
 	//get bankroot dirs
 	for (int i=0;i<MAX_BANK_ROOT_DIRS;i++){
@@ -277,6 +278,9 @@ void Config::saveConfig(char *filename){
 	xmlcfg->addparstr("bank_current",cfg.currentBankDir);
 
 	xmlcfg->addpar("user_interface_mode",cfg.UserInterfaceMode);
+	xmlcfg->addpar("virtual_keyboard_layout",cfg.VirKeybLayout);
+
+
 	for (int i=0;i<MAX_BANK_ROOT_DIRS;i++) if (cfg.bankRootDirList[i]!=NULL) {
 	    xmlcfg->beginbranch("BANKROOT",i);
 	     xmlcfg->addparstr("bank_root",cfg.bankRootDirList[i]);

@@ -744,5 +744,5 @@
 	    - Corectata o eroare care returna gresit la canDo in vst (netestat)
 17 Dec 2004 - Inceput sa folosesc Dvorak pt. VK
 18 Dec 2004 - Continuat putin la VK
-
+20 Dec 2004 - Se poate selecta la VK dintre "qwerty" si "Dvorak"
 	    

@@ -37,7 +37,7 @@ decl {const int keysoct1dw[]={'\\'','2',',','3','.','p','5','y','6','f','7','g',
 
 decl {const int keysoct2dw[]={';','o','q','e','j','k','i','x','d','b','h','m','w','n','v','s','z',0};} {} 
 
-class VirKeys {: {public Fl_Box}
+class VirKeys {open : {public Fl_Box}
 } {
   decl {static const int N_OCT=6;} {}
   decl {static const int SIZE_WHITE=14;} {}
@@ -145,8 +145,14 @@ if ((event==FL_PUSH)||(event==FL_DRAG)||(event==FL_RELEASE)){
 };
 
 
-const int *keysoct1=keysoct1dw;
-const int *keysoct2=keysoct2dw;
+const int *keysoct1=keysoct1qw;
+const int *keysoct2=keysoct2qw;
+
+if (config.cfg.VirKeybLayout==2) {
+	keysoct1=keysoct1dw;
+	keysoct2=keysoct2dw;
+};
+
 if ((event==FL_KEYDOWN)||(event==FL_KEYUP)){
    int key=Fl::event_key();
    int kpos=-1;
@@ -158,7 +164,8 @@ if ((event==FL_KEYDOWN)||(event==FL_KEYUP)){
       else relasekey(kpos,2);
 };
 
-return(1);} {}
+return(1);} {selected
+    }
   }
   Function {presskey(int nk,int exclusive,int type)} {} {
     code {if (nk>=N_OCT*12) return;
@@ -210,15 +217,13 @@ pthread_mutex_unlock(&master->mutex);} {}
   }
 } 
 
-class VirKeyboard {open
-} {
-  Function {make_window()} {open
-  } {
+class VirKeyboard {} {
+  Function {make_window()} {} {
     Fl_Window virkeyboardwindow {
       label {Virtual Keyboard - ZynAddSubFX}
       callback {relaseallkeys();
 virkeyboardwindow->hide();}
-      xywh {40 499 650 130} type Double visible
+      xywh {95 563 650 130} type Double hide
     } {
       Fl_Box virkeys {
         label Keyboard
@@ -246,7 +251,7 @@ virkeys->take_focus();}
         label Vel
         callback {virkeys->midivel=(int) o->value();
 virkeys->take_focus();}
-        tooltip Velocity xywh {100 105 95 15} type {Horz Knob} box FLAT_BOX labelsize 10 align 5 minimum 1 maximum 127 step 1
+        tooltip Velocity xywh {95 105 100 15} type {Horz Knob} box FLAT_BOX labelsize 10 align 5 minimum 1 maximum 127 step 1
         code0 {o->value(virkeys->midivel);}
       }
       Fl_Counter {} {
@@ -373,47 +378,10 @@ pitchwheelroller->do_callback();}
         callback {relaseallkeys();
 virkeys->midich=(int) o->value();
 virkeys->take_focus();} open
-        tooltip {Send to Midi Channel} xywh {35 105 65 20} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+        tooltip {Send to Midi Channel} xywh {20 105 65 20} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
         code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Chn%d",i+1);if (i!=9) o->add(nrstr); else o->add("Drum10");};}
         code1 {o->value(virkeys->midich);}
       } {}
-      Fl_Button {} {
-        label KL
-        callback {relaseallkeys();
-klwindow->show();}
-        xywh {10 105 20 20} box THIN_UP_BOX labelsize 11
-      }
-    }
-    Fl_Window klwindow {
-      label {Keyboard Layout} open
-      xywh {202 296 210 180} type Double modal visible
-    } {
-      Fl_Choice {} {
-        label Keys open
-        xywh {50 15 85 20} down_box BORDER_BOX labelsize 13 textfont 1 textsize 12
-      } {
-        menuitem {} {
-          label { }
-          xywh {0 0 100 20} labelfont 1 labelsize 13 deactivate
-        }
-        menuitem {} {
-          label QWERTY
-          xywh {10 10 100 20} labelfont 1 labelsize 13
-        }
-        menuitem {} {
-          label Dvorak
-          xywh {20 20 100 20} labelfont 1 labelsize 13
-        }
-      }
-      Fl_Button {} {
-        label Close
-        callback {klwindow->hide();}
-        xywh {50 50 85 20} box THIN_UP_BOX
-      }
-      Fl_Box {} {
-        label {sa pun si in begginer mode} selected
-        xywh {25 130 175 25}
-      }
     }
   }
   Function {VirKeyboard(Master *master_)} {} {

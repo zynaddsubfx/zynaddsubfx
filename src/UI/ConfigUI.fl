@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0105 
+version 1.0106 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -42,7 +42,7 @@ o->hide();}
         xywh {5 5 500 305}
       } {
         Fl_Group {} {
-          label {Main settings} selected
+          label {Main settings}
           xywh {5 25 500 285}
         } {
           Fl_Group {} {
@@ -153,11 +153,11 @@ config.cfg.SoundBufferSize=strtoul(o->value(),&tmp,10);}
           }
           Fl_Box {} {
             label {Most settings has effect only after ZynAddSubFX is restarted.}
-            xywh {15 270 235 30} labelfont 1 labelsize 12 align 128
+            xywh {15 275 235 30} labelfont 1 labelsize 12 align 128
           }
           Fl_Box {} {
             label {Read the Readme.txt for other settings}
-            xywh {10 250 240 20} labelfont 1 labelsize 12 align 128
+            xywh {10 255 240 20} labelfont 1 labelsize 12 align 128
           }
           Fl_Group {} {
             xywh {15 125 230 85} box ENGRAVED_BOX
@@ -244,6 +244,25 @@ midiinputnamebox->label(config.winmididevices[config.cfg.WindowsMidiInId].name);
             menuitem {} {
               label {Cubic(slow)}
               xywh {10 10 100 20} labelfont 1 labelsize 10
+            }
+          }
+          Fl_Choice {} {
+            label {Virtual Keyboard Layout}
+            callback {config.cfg.VirKeybLayout=(int) o->value();;} open selected
+            xywh {155 235 85 20} down_box BORDER_BOX labelsize 13 textfont 1 textsize 12
+            code0 {o->value(config.cfg.VirKeybLayout);}
+          } {
+            menuitem {} {
+              label { }
+              xywh {5 5 100 20} labelfont 1 labelsize 13 deactivate
+            }
+            menuitem {} {
+              label QWERTY
+              xywh {15 15 100 20} labelfont 1 labelsize 13
+            }
+            menuitem {} {
+              label Dvorak
+              xywh {25 25 100 20} labelfont 1 labelsize 13
             }
           }
         }

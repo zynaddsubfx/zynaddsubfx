@@ -43,6 +43,7 @@ class Config{
 	    char *presetsDirList[MAX_BANK_ROOT_DIRS];
 	    int CheckPADsynth;
 	    int UserInterfaceMode;
+	    int VirKeybLayout;
 	} cfg;
 	int winwavemax,winmidimax;//number of wave/midi devices on Windows
 	int maxstringsize;
