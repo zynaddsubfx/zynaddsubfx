@@ -128,8 +128,6 @@ Bank::~Bank(){
     clearbank();
 };
 
-
-
 /*
  * Get the name of an instrument from the bank
  */
@@ -177,7 +175,7 @@ void Bank::setname(unsigned int ninstrument,const char *newname,int newslot){
     snprintf(newfilename,1000,"%s/%s.xmlz",dirname,tmpfilename);
 
     rename(ins[ninstrument].filename,newfilename);
-    snprintf(ins[ninstrument].filename,PART_MAX_NAME_LEN,"%s",newfilename);
+    snprintf(ins[ninstrument].filename,1000,"%s",newfilename);
     snprintf(ins[ninstrument].name,PART_MAX_NAME_LEN,"%s",&tmpfilename[5]);
     
 };
@@ -374,6 +372,21 @@ void Bank::swapslot(unsigned int n1, unsigned int n2){
 	ins[n1].used=false;
 	ins[n1].name[0]='\0';
 	ins[n1].filename=NULL;
+    } else {//if both slots are used
+	if (strcmp(ins[n1].name,ins[n2].name)==0){//change the name of the second instrument if the name are equal
+	    strncat(ins[n2].name,"2",PART_MAX_NAME_LEN);
+	};
+	setname(n1,getname(n1),n2);
+	setname(n2,getname(n2),n1);
+	ins_t tmp;
+	tmp.used=true;
+	strcpy(tmp.name,ins[n2].name);
+//	tmp.filename=new char
+	char *tmpfilename=ins[n2].filename;
+	
+	ins[n2]=ins[n1];
+	ins[n1].name=tmp.name;
+	ins[n1].filename=tmpfilename;
     };
     
 };

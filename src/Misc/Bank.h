@@ -82,7 +82,7 @@ class Bank{
 	char defaultinsname[PART_MAX_NAME_LEN];
 	char tmpinsname[BANK_SIZE][PART_MAX_NAME_LEN+20];//this keeps the numbered names
     
-	struct{
+	struct ins_t{
 	    bool used;
 	    char name[PART_MAX_NAME_LEN+1];
 	    char *filename;
