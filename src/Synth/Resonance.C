@@ -243,6 +243,7 @@ void Resonance::add2XML(XMLwrapper *xml){
     xml->addpar("octavesfreq",Poctavesfreq);
     xml->addpar("gain",Pgain);
     xml->addparbool("protectthefundamental",Pprotectthefundamental);
+    xml->addpar("resonance_points",N_RES_POINTS);
     for (int i=0;i<N_RES_POINTS;i++){
 	xml->beginbranch("RESPOINT",i);
 	    xml->addpar("val",Prespoints[i]);

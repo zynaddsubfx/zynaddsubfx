@@ -50,7 +50,7 @@ XMLwrapper::XMLwrapper(){
     node=root=mxmlNewElement(tree,"ZynAddSubFX-data");
     
     //save zynaddsubfx specifications
-    beginbranch("SPECIFICATIONS");
+    beginbranch("BASE_PARAMETERS");
 	addpar("max_midi_parts",NUM_MIDI_PARTS);
 	addpar("max_kit_items_per_instrument",NUM_KIT_ITEMS);
 
