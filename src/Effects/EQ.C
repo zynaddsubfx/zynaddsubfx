@@ -68,7 +68,6 @@ void EQ::cleanup(){
  */
 void EQ::out(REALTYPE *smpsl,REALTYPE *smpsr){
     int i;
-
     for (i=0;i<SOUND_BUFFER_SIZE;i++){
 	efxoutl[i]=smpsl[i]*volume;
 	efxoutr[i]=smpsr[i]*volume;

@@ -39,7 +39,7 @@ class EQ:public Effect{
 	REALTYPE getfreqresponse(REALTYPE freq);
     private:
 	//Parametrii
-	unsigned char Pvolume;//Volumul or
+	unsigned char Pvolume;//Volumul 
 	
 	void setvolume(unsigned char Pvolume);
 	

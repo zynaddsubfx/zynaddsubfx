@@ -129,10 +129,6 @@ void EffectMgr::changepreset(unsigned char npreset){
 void EffectMgr::seteffectpar_nolock(int npar,unsigned char value){
     if (efx==NULL) return;
     efx->changepar(npar,value);
-    
-    //for (int i=0;i<12;i++) fprintf(stderr,"%d ",efx->getpar(i));
-    //fprintf(stderr,"\n");
-    
 };
 
 /*
@@ -181,8 +177,9 @@ void EffectMgr::out(REALTYPE *smpsl,REALTYPE *smpsr){
 	    smpsl[i]=efxoutl[i];
 	    smpsr[i]=efxoutr[i];
 	};
+	return;
     };
-
+    
     //Insertion effect
     if (insertion!=0) {
         REALTYPE v1,v2;
@@ -192,7 +189,7 @@ void EffectMgr::out(REALTYPE *smpsl,REALTYPE *smpsr){
 	} else {
 		v1=(1.0-volume)*2.0;
 		v2=1.0;
-	};
+    	};
 	if ((nefx==1)||(nefx==2)) v2*=v2;//for Reverb and Echo, the wet function is not liniar
 	
 	if (dryonly){//this is used for instrument effect only
