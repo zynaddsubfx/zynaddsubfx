@@ -160,25 +160,25 @@ config.cfg.SoundBufferSize=strtoul(o->value(),&tmp,10);}
             xywh {10 250 240 20} labelfont 1 labelsize 12 align 128
           }
           Fl_Group {} {
-            xywh {15 130 230 85} box ENGRAVED_BOX
+            xywh {15 125 230 85} box ENGRAVED_BOX
           } {
             Fl_File_Input {} {
               label {Dump File}
               callback {snprintf(config.cfg.DumpFile,config.maxstringsize,"%s",o->value());}
-              xywh {20 175 220 35} align 5
+              xywh {20 170 220 35} align 5
               code0 {o->insert(config.cfg.DumpFile);}
             }
             Fl_Check_Button {} {
               label {Dump notes}
               callback {config.cfg.DumpNotesToFile=(int) o->value();
 dump.startnow();//this has effect only if this option was disabled}
-              xywh {20 135 100 20} down_box DOWN_BOX
+              xywh {20 130 100 20} down_box DOWN_BOX
               code0 {o->value(config.cfg.DumpNotesToFile);}
             }
             Fl_Check_Button {} {
               label Append
               callback {config.cfg.DumpAppend=(int) o->value();}
-              xywh {160 135 80 20} down_box DOWN_BOX
+              xywh {160 130 80 20} down_box DOWN_BOX
               code0 {o->value(config.cfg.DumpAppend);}
             }
           }
@@ -228,7 +228,7 @@ midiinputnamebox->label(config.winmididevices[config.cfg.WindowsMidiInId].name);
           Fl_Counter {} {
             label {XML compression level}
             callback {config.cfg.GzipCompression=(int) o->value();}
-            tooltip {gzip compression level (0 - uncompressed)} xywh {20 225 65 15} type Simple labelsize 12 align 8 minimum 0 maximum 9 step 1
+            tooltip {gzip compression level (0 - uncompressed)} xywh {20 215 65 15} type Simple labelsize 12 align 8 minimum 0 maximum 9 step 1
             code0 {o->value(config.cfg.GzipCompression);}
           }
           Fl_Choice {} {

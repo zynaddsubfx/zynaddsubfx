@@ -109,6 +109,7 @@ XMLwrapper::~XMLwrapper(){
 
 bool XMLwrapper::checkfileinformation(char *filename){
     stackpos=0;
+    ZERO(&parentstack,(int)sizeof(parentstack));
     information.PADsynth_used=false;
 
     if (tree!=NULL) mxmlDelete(tree);tree=NULL;

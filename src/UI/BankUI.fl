@@ -27,6 +27,9 @@ decl {\#include "../Misc/Master.h"} {public
 decl {\#include "../Misc/Bank.h"} {public
 } 
 
+decl {\#include "../Misc/Config.h"} {selected public
+} 
+
 class BankProcess_ {} {
   Function {process()} {open return_type {virtual void}
   } {}
@@ -88,7 +91,7 @@ label(bank->getnamenumbered(nslot));} {}
   decl {BankProcess_ *bp;} {}
 } 
 
-class BankUI {selected : {public BankProcess_}
+class BankUI {: {public BankProcess_}
 } {
   Function {make_window()} {} {
     Fl_Window bankuiwindow {
@@ -200,6 +203,13 @@ refreshmainwindow();} open
         callback {rescan_for_banks();
 banklist->value(0);}
         tooltip {Refresh the bank list (rescan)} xywh {230 8 105 20} box THIN_UP_BOX color 50 labelsize 12
+      }
+      Fl_Check_Button {} {
+        label {Show PADsynth status}
+        callback {config.cfg.CheckPADsynth=(int) o->value();
+refreshmainwindow();}
+        xywh {435 530 150 15} down_box DOWN_BOX labelsize 12
+        code0 {o->value(config.cfg.CheckPADsynth);}
       }
     }
   }

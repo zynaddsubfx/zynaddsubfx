@@ -330,6 +330,7 @@ void Bank::swapslot(unsigned int n1, unsigned int n2){
 	ins[n1].used=false;
 	ins[n1].name[0]='\0';
 	ins[n1].filename=NULL;
+	ins[n1].info.PADsynth_used=0;
     } else {//if both slots are used
 	if (strcmp(ins[n1].name,ins[n2].name)==0){//change the name of the second instrument if the name are equal
 	    strncat(ins[n2].name,"2",PART_MAX_NAME_LEN);
@@ -339,12 +340,13 @@ void Bank::swapslot(unsigned int n1, unsigned int n2){
 	ins_t tmp;
 	tmp.used=true;
 	strcpy(tmp.name,ins[n2].name);
-//	tmp.filename=new char
 	char *tmpfilename=ins[n2].filename;
+	bool padsynth_used=ins[n2].info.PADsynth_used;
 	
 	ins[n2]=ins[n1];
 	strcpy(ins[n1].name,tmp.name);
 	ins[n1].filename=tmpfilename;
+	ins[n1].info.PADsynth_used=padsynth_used;
     };
     
 };
@@ -491,17 +493,20 @@ int Bank::addtobank(int pos, const char *filename, const char* name){
     snprintf(ins[pos].filename,len+1,"%s/%s",dirname,filename);
 
     //see if PADsynth is used
-    XMLwrapper *xml=new XMLwrapper();
-    xml->checkfileinformation(ins[pos].filename);
+    if (config.cfg.CheckPADsynth){
+	XMLwrapper *xml=new XMLwrapper();
+	xml->checkfileinformation(ins[pos].filename);
     
-    ins[pos].info.PADsynth_used=xml->information.PADsynth_used;
-    delete(xml);
+	ins[pos].info.PADsynth_used=xml->information.PADsynth_used;
+	delete(xml);
+    } else ins[pos].info.PADsynth_used=false;
     
     return(0);
 };
 
 bool Bank::isPADsynth_used(unsigned int ninstrument){
-    return(ins[ninstrument].info.PADsynth_used);
+    if (config.cfg.CheckPADsynth==0) return(0);
+	else return(ins[ninstrument].info.PADsynth_used);
 };
 
 

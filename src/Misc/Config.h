@@ -41,6 +41,7 @@ class Config{
 	    char *DumpFile;
 	    char *bankRootDirList[MAX_BANK_ROOT_DIRS],*currentBankDir;
 	    char *presetsDirList[MAX_BANK_ROOT_DIRS];
+	    int CheckPADsynth;
 	} cfg;
 	int winwavemax,winmidimax;//number of wave/midi devices on Windows
 	int maxstringsize;

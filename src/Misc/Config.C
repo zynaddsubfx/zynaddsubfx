@@ -58,6 +58,7 @@ Config::Config(){
     cfg.GzipCompression=3;
 
     cfg.Interpolation=0;
+    cfg.CheckPADsynth=1;
 
     winwavemax=1;winmidimax=1;
 //try to find out how many input midi devices are there
@@ -203,6 +204,9 @@ void Config::readConfig(char *filename){
 	xmlcfg->getparstr("bank_current",cfg.currentBankDir,MAX_STRING_SIZE);
 	cfg.Interpolation=xmlcfg->getpar("interpolation",cfg.Interpolation,0,1);
 
+	cfg.CheckPADsynth=xmlcfg->getpar("check_pad_synth",cfg.CheckPADsynth,0,1);
+
+
 	//get bankroot dirs
 	for (int i=0;i<MAX_BANK_ROOT_DIRS;i++){
 	    if (xmlcfg->enterbranch("BANKROOT",i)){
@@ -255,6 +259,8 @@ void Config::saveConfig(char *filename){
 	xmlcfg->addparstr("dump_file",cfg.DumpFile);
 
 	xmlcfg->addpar("gzip_compression",cfg.GzipCompression);
+
+	xmlcfg->addpar("check_pad_synth",cfg.CheckPADsynth);
 
 	xmlcfg->addparstr("bank_current",cfg.currentBankDir);
 
