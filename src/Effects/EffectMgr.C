@@ -1,0 +1,240 @@
+/*
+  ZynAddSubFX - a software synthesizer
+ 
+  EffectMgr.C - Effect manager, an interface betwen the program and effects
+  Copyright (C) 2002-2003 Nasca Octavian Paul
+  Author: Nasca Octavian Paul
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of version 2 of the GNU General Public License 
+  as published by the Free Software Foundation.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License (version 2) for more details.
+
+  You should have received a copy of the GNU General Public License (version 2)
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+
+*/
+
+#include <stdlib.h>
+#include <stdio.h>
+#include "EffectMgr.h"
+
+EffectMgr::EffectMgr(int insertion_,pthread_mutex_t *mutex_){
+    efx=NULL;
+    nefx=0;
+    insertion=insertion_;
+    mutex=mutex_;
+    efxoutl=new REALTYPE[SOUND_BUFFER_SIZE];
+    efxoutr=new REALTYPE[SOUND_BUFFER_SIZE];;
+    for (int i=0;i<SOUND_BUFFER_SIZE;i++){
+	efxoutl[i]=0.0;
+	efxoutr[i]=0.0;
+    };
+};
+
+EffectMgr::~EffectMgr(){
+    if (efx!=NULL) delete (efx);
+    delete (efxoutl);
+    delete (efxoutr);
+};
+
+/*
+ * Change the effect
+ */
+void EffectMgr::changeeffect(int nefx_){
+    if (nefx==nefx_) return;
+    nefx=nefx_;
+    for (int i=0;i<SOUND_BUFFER_SIZE;i++){
+	efxoutl[i]=0.0;
+	efxoutr[i]=0.0;
+    };
+
+    if (efx!=NULL) delete (efx);
+    switch (nefx){
+	case 1:efx=new Reverb(insertion,efxoutl,efxoutr);break;
+	case 2:efx=new Echo(insertion,efxoutl,efxoutr);break;
+	case 3:efx=new Chorus(insertion,efxoutl,efxoutr);break;
+	case 4:efx=new Phaser(insertion,efxoutl,efxoutr);break;
+	case 5:efx=new Alienwah(insertion,efxoutl,efxoutr);break;
+	case 6:efx=new Distorsion(insertion,efxoutl,efxoutr);break;
+	case 7:efx=new EQ(insertion,efxoutl,efxoutr);break;
+	//put more effect here
+	default:efx=NULL;break;//no effect (thru)
+    };
+};
+
+/*
+ * Obtain the effect number
+ */
+int EffectMgr::geteffect(){
+    return (nefx);
+};
+
+/*
+ * Cleanup the current effect
+ */
+void EffectMgr::cleanup(){
+    if (efx!=NULL) efx->cleanup();
+};
+
+
+/*
+ * Get the preset of the current effect
+ */
+ 
+unsigned char EffectMgr::getpreset(){
+    if (efx!=NULL) return(efx->Ppreset);
+	else return(0);
+};
+
+/*
+ * Change the preset of the current effect
+ */
+void EffectMgr::changepreset_nolock(unsigned char npreset){
+    if (efx!=NULL) efx->setpreset(npreset);
+};
+
+/*
+ * Change the preset of the current effect(with thread locking)
+ */
+void EffectMgr::changepreset(unsigned char npreset){
+    pthread_mutex_lock(mutex);
+    changepreset_nolock(npreset);
+    pthread_mutex_unlock(mutex);
+};
+
+
+/*
+ * Change a parameter of the current effect 
+ */
+void EffectMgr::seteffectpar_nolock(int npar,unsigned char value){
+    if (efx==NULL) return;
+    efx->changepar(npar,value);
+    
+    //for (int i=0;i<12;i++) fprintf(stderr,"%d ",efx->getpar(i));
+    //fprintf(stderr,"\n");
+    
+};
+
+/*
+ * Change a parameter of the current effect (with thread locking)
+ */
+void EffectMgr::seteffectpar(int npar,unsigned char value){
+    pthread_mutex_lock(mutex);
+    seteffectpar_nolock(npar,value);
+    pthread_mutex_unlock(mutex);
+};
+
+/*
+ * Get a parameter of the current effect
+ */
+unsigned char EffectMgr::geteffectpar(int npar){
+    if (efx==NULL) return(0);
+    return(efx->getpar(npar));
+};
+
+
+/*
+ * Apply the effect
+ */
+void EffectMgr::out(REALTYPE *smpsl,REALTYPE *smpsr){
+    int i;
+    if (efx==NULL){
+	if (insertion==0) 
+	    for (i=0;i<SOUND_BUFFER_SIZE;i++){
+	     smpsl[i]=0.0;smpsr[i]=0.0;
+	    };
+	return;
+    };
+    for (i=0;i<SOUND_BUFFER_SIZE;i++){
+	smpsl[i]+=denormalkillbuf[i];
+	smpsr[i]+=denormalkillbuf[i];
+    };
+    efx->out(smpsl,smpsr);
+    
+};
+
+/*
+ * Get the effect volume for the system effect
+ */
+REALTYPE EffectMgr::sysefxgetvolume(){
+    if (efx==NULL) return (1.0);
+	else return(efx->outvolume);    
+};
+
+
+
+/*
+ * Save or load the parameters to/from the buffer
+ */
+void EffectMgr::saveloadbuf(Buffer *buf){
+    unsigned char npar,p,n,tmp;
+
+#ifdef DEBUG_BUFFER
+    fprintf(stderr,"\n( EffectPparameters) \n");
+#endif    
+
+    tmp=0xfe;
+    buf->rwbyte(&tmp);//if tmp!=0xfe error
+    
+
+    for (n=0x80;n<0xf0;n++){
+	if (buf->getmode()==0) {
+	    buf->rwbyte(&npar);
+	    n=0;//force a loop until the end of parameters (0xff)
+	} else npar=n;
+
+	if (npar==0xff) break;
+
+	switch (npar){
+	    case 0x80:	p=geteffect();
+			buf->rwbytepar(n,&p);
+			if (buf->getmode()==0) {
+			    changeeffect(p);
+			    for (n=0;n<128;n++){
+				seteffectpar_nolock(n,0);
+			    };
+			};
+			break;
+	    case 0x81:	if (buf->getmode()!=0) {
+			    for (unsigned char np=0;np<0x7f;np++){
+				p=geteffectpar(np);
+				if (p==0) continue;//do not save parameters if they are zero
+				buf->rwbyte(&npar);
+				buf->rwbyte(&np); 
+				buf->rwbyte(&p);
+			    };
+			} else {
+			    unsigned char np;
+			    buf->rwbyte(&np);
+			    buf->rwbyte(&p);
+			    seteffectpar_nolock(np,p);
+			};
+			break;
+	    case 0x82:	if (efx!=NULL) buf->rwbytepar(n,&(efx->Ppreset));
+			break;
+	};
+    };
+
+    
+    if (buf->getmode()!=0) {
+	unsigned char tmp=0xff;
+	buf->rwbyte(&tmp);
+    };
+};
+
+
+
+/*
+ * Get the EQ response
+ */
+REALTYPE EffectMgr::getEQfreqresponse(REALTYPE freq){
+    if (nefx==7) return(efx->getfreqresponse(freq));
+	else return(0.0);
+};
+

@@ -1,0 +1,32 @@
+ZynAddSubFX Compilation on Windows as standalone .EXE
+-----------------------------------------------------
+You don't have to compile it, there are Windows binaries available on the webpage.
+Anyway if you want to compile, good luck :)
+
+First, you have to download and install Mingw and MSYS (www.mingw.org). Download the FLTK sources (www.fltk.org), compile and install.
+Second, you have to download, compile and install pthreads for windows (http://sources.redhat.com/pthreads-win32). You need to compile in GC mode.
+Also, you have to compile the portaudio library (www.portaudio.com). It it doesn't install itself, and you must copy the header files to the "include" directories from mingw(msys) and compiled libraries to the "lib" directory from mingw.
+
+Change the Makefile.inc, and change the compilation options (like operating system,etc.). Now, run make from msys.
+After the compilation, copy in the dll files (pthreadGC.dll and portaudio.dll) to the directory where "zynaddsubfx.exe" is.
+Hope all goes right.
+
+ZynAddSubFX Compilation on Windows as VST plugin (dll file)
+----------------------------------------------------------
+Edit the Makefile.inc and set "WINDOWS_VST" to "YES". The audioout and midiin are automatically set to VST.
+Get the vstsdk2 and copy it to the directory where ZynAddSubFX-1.x.x is.
+If you copy ZynAddSubFX in "C:\temp" and you will run "dir" you should see the ZynAddSubFX-1.x.x and vstsdk2 in the same directory (C:\temp).
+
+Now you have to compile AudioEffect.cpp and audioeffectx.cpp(from vstsdk2) to the object files AudioEffect.o and audioeffectx.o.
+Copy theese object files to zynaddsubfx \src directory. 
+
+Run the makefile. Hope all will goes right. Please notice that "make clean" removes the vst object files that you compiled form vstsdk2. That's why is recomanded to keep a backup copy of theese object files.
+You must copy the pthreads.dll file to windows directory (or else, zynaddsubfx will not work). Btw: how can I make pthreads static?
+Copy the zynaddsubfx_vst.dll to your dll directory.
+
+BUGS only on vst port:
+Warning! The version 1.2.1(and others) of zynaddsubfx vst port is extremely buggy! It may blow up the instrument banks (*.bnk_zyn). Also it will crash (including the VST host) if it will be loaded second time (Why?).
+Also, to avoid more bugs, I had limited zynaddsubfx to one instance. Please report me how it behaves on various vst hosts.
+I hope that I will remove theese bugs on later versions.
+
+

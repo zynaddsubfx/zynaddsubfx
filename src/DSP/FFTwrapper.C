@@ -1,0 +1,97 @@
+/*
+  ZynAddSubFX - a software synthesizer
+ 
+  FFTwrapper.c  -  A wrapper for Fast Fourier Transforms
+  Copyright (C) 2002-2003 Nasca Octavian Paul
+  Author: Nasca Octavian Paul
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of version 2 of the GNU General Public License 
+  as published by the Free Software Foundation.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License (version 2) for more details.
+
+  You should have received a copy of the GNU General Public License (version 2)
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+
+*/
+
+#include <math.h>
+#include "FFTwrapper.h"
+
+FFTwrapper::FFTwrapper(int fftsize_){
+    fftsize=fftsize_;
+    tmpfftdata1=new fftw_real[fftsize];
+    tmpfftdata2=new fftw_real[fftsize];
+#ifdef FFTW_VERSION_2
+    planfftw=rfftw_create_plan(fftsize,FFTW_REAL_TO_COMPLEX,FFTW_ESTIMATE|FFTW_IN_PLACE);
+    planfftw_inv=rfftw_create_plan(fftsize,FFTW_COMPLEX_TO_REAL,FFTW_ESTIMATE|FFTW_IN_PLACE);
+#else
+    planfftw=fftw_plan_r2r_1d(fftsize,tmpfftdata1,tmpfftdata1,FFTW_R2HC,FFTW_ESTIMATE);
+    planfftw_inv=fftw_plan_r2r_1d(fftsize,tmpfftdata2,tmpfftdata2,FFTW_HC2R,FFTW_ESTIMATE);
+#endif
+};
+
+FFTwrapper::~FFTwrapper(){
+#ifdef FFTW_VERSION_2
+    rfftw_destroy_plan(planfftw);
+    rfftw_destroy_plan(planfftw_inv);
+#else 
+    fftw_destroy_plan(planfftw);
+    fftw_destroy_plan(planfftw_inv);
+#endif
+
+    delete (tmpfftdata1);
+    delete (tmpfftdata2);
+};
+
+/*
+ * do the Fast Fourier Transform
+ */
+void FFTwrapper::smps2freqs(REALTYPE *smps,REALTYPE *freqs){
+#ifdef FFTW_VERSION_2
+    for (int i=0;i<fftsize;i++) tmpfftdata1[i]=smps[i];
+    if (freqs==NULL) {
+	    rfftw_one(planfftw,tmpfftdata1,NULL);
+    	    for (int i=0;i<fftsize;i++) smps[i]=tmpfftdata1[i];
+	} else { 
+	    rfftw_one(planfftw,tmpfftdata1,tmpfftdata2);
+	    for (int i=0;i<fftsize;i++) freqs[i]=tmpfftdata2[i];
+	};
+#else
+    for (int i=0;i<fftsize;i++) tmpfftdata1[i]=smps[i];
+    fftw_execute(planfftw);
+    if (freqs==NULL) for (int i=0;i<fftsize;i++) smps[i]=tmpfftdata1[i];
+	else for (int i=0;i<fftsize;i++) freqs[i]=tmpfftdata1[i];
+#endif
+};
+
+/*
+ * do the Inverse Fast Fourier Transform
+ */
+void FFTwrapper::freqs2smps(REALTYPE *freqs,REALTYPE *smps){
+#ifdef FFTW_VERSION_2
+    for (int i=0;i<fftsize;i++) tmpfftdata1[i]=freqs[i];
+    if (smps==NULL) {
+	    rfftw_one(planfftw_inv,tmpfftdata1,NULL);
+	    for (int i=0;i<fftsize;i++) freqs[i]=tmpfftdata1[i];
+	} else {
+	    rfftw_one(planfftw_inv,tmpfftdata1,tmpfftdata2);
+	    for (int i=0;i<fftsize;i++) smps[i]=tmpfftdata2[i];
+	};
+#else
+    for (int i=0;i<fftsize;i++) tmpfftdata2[i]=freqs[i];
+    fftw_execute(planfftw_inv);
+    if (smps==NULL) for (int i=0;i<fftsize;i++) freqs[i]=tmpfftdata2[i];
+	else for (int i=0;i<fftsize;i++) smps[i]=tmpfftdata2[i];
+#endif
+
+};
+
+
+
+

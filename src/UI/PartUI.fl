@@ -1,0 +1,1047 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0104 
+header_name {.h} 
+code_name {.cc}
+decl {//Copyright (c) 2002-2003 Nasca Octavian Paul} {} 
+
+decl {//License: GNU GPL version 2} {} 
+
+decl {\#include <stdlib.h>} {public
+} 
+
+decl {\#include <stdio.h>} {public
+} 
+
+decl {\#include <string.h>} {public
+} 
+
+decl {\#include "WidgetPDial.h"} {public
+} 
+
+decl {\#include "EffUI.h"} {public
+} 
+
+decl {\#include "BankUI.h"} {public
+} 
+
+decl {\#include "ADnoteUI.h"} {public
+} 
+
+decl {\#include "SUBnoteUI.h"} {public
+} 
+
+decl {\#include "../Misc/Config.h"} {public
+} 
+
+decl {\#include "../Misc/Master.h"} {public
+} 
+
+decl {\#include "../Misc/Part.h"} {public
+} 
+
+class PartSysEffSend {: {public Fl_Group}
+} {
+  Function {make_window()} {private
+  } {
+    Fl_Window syseffsend {
+      private xywh {584 83 90 35} hide
+      class Fl_Group
+    } {
+      Fl_Dial {} {
+        label 01
+        callback {master->setPsysefxvol(npart,neff,(int) o->value());}
+        xywh {0 0 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 align 130 maximum 127 step 1
+        code0 {o->size(25,25);}
+        code1 {o->value(master->Psysefxvol[neff][npart]);}
+        code2 {char tmp[10];snprintf(tmp,10,"%d",neff);o->label(strdup(tmp));}
+        class WidgetPDial
+      }
+    }
+  }
+  Function {PartSysEffSend(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
+    code {master=NULL;
+neff=0;
+npart=0;} {}
+  }
+  Function {init(Master *master_,int npart_,int neff_)} {} {
+    code {npart=npart_;
+neff=neff_;
+master=master_;
+make_window();
+syseffsend->show();
+end();} {}
+  }
+  Function {~PartSysEffSend()} {} {
+    code {syseffsend->hide();
+delete(syseffsend);} {}
+  }
+  decl {Master *master;} {}
+  decl {int neff;} {}
+  decl {int npart;} {}
+} 
+
+class PartUI_ {} {
+  Function {showparameters(int kititem,int engine)} {return_type virtual
+  } {}
+} 
+
+class PartKitItem {: {public Fl_Group}
+} {
+  Function {make_window()} {private
+  } {
+    Fl_Window partkititem {
+      private xywh {149 528 590 27} hide
+      class Fl_Group
+    } {
+      Fl_Group partkititemgroup {
+        private xywh {55 0 530 20} box FLAT_BOX
+        code0 {if (part->kit[n].Penabled==0) o->deactivate();}
+      } {
+        Fl_Counter minkcounter {
+          callback {part->kit[n].Pminkey=(int)o->value();}
+          xywh {225 0 55 15} type Simple minimum 0 maximum 128 step 1
+          code0 {o->value(part->kit[n].Pminkey);}
+        }
+        Fl_Button {} {
+          label m
+          callback {if (part->lastnote>=0) minkcounter->value(part->lastnote);
+minkcounter->do_callback();
+maxkcounter->do_callback();}
+          tooltip {set the minimum key to the last pressed key} xywh {285 3 15 12} box THIN_UP_BOX labelsize 10
+        }
+        Fl_Button {} {
+          label M
+          callback {if (part->lastnote>=0) maxkcounter->value(part->lastnote);
+maxkcounter->do_callback();
+minkcounter->do_callback();}
+          tooltip {set the maximum key to the last pressed key} xywh {315 3 15 12} box THIN_UP_BOX labelsize 10
+        }
+        Fl_Button {} {
+          label R
+          callback {minkcounter->value(0);
+minkcounter->do_callback();
+maxkcounter->value(127);
+maxkcounter->do_callback();}
+          tooltip {reset the minimum key to 0 and maximum key to 127} xywh {300 3 15 12} box THIN_UP_BOX labelfont 1 labelsize 10
+        }
+        Fl_Button adeditbutton {
+          label edit
+          callback {partui->showparameters(n,0);}
+          xywh {420 0 40 15} box THIN_UP_BOX labelsize 12
+          code0 {if (part->kit[n].Padenabled==0) o->deactivate();}
+          code1 {if (n==0) o->hide();}
+        }
+        Fl_Button subeditbutton {
+          label edit
+          callback {partui->showparameters(n,1);}
+          xywh {490 0 40 15} box THIN_UP_BOX labelsize 12
+          code0 {if (part->kit[n].Psubenabled==0) o->deactivate();}
+          code1 {if (n==0) o->hide();}
+        }
+        Fl_Check_Button mutedcheck {
+          callback {part->kit[n].Pmuted=(int)o->value();}
+          private xywh {60 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 12 align 4
+          code0 {o->value(part->kit[n].Pmuted);}
+        }
+        Fl_Counter maxkcounter {
+          callback {part->kit[n].Pmaxkey=(int)o->value();}
+          xywh {335 0 55 15} type Simple minimum 0 maximum 128 step 1
+          code0 {o->value(part->kit[n].Pmaxkey);}
+        }
+        Fl_Button labelbutton {
+          label {Bass Drum}
+          callback {const char *tmp=fl_input("Kit item name:",(const char *)part->kit[n].Pname);
+if (tmp!=NULL) snprintf((char *)part->kit[n].Pname,PART_MAX_NAME_LEN,tmp);}
+          xywh {90 0 130 15} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 11 align 20
+          code0 {o->label((char *)part->kit[n].Pname);}
+        }
+        Fl_Check_Button adcheck {
+          callback {part->kit[n].Padenabled=(int)o->value();
+if (part->kit[n].Padenabled!=0) adeditbutton->activate();
+       else  adeditbutton->deactivate();}
+          private xywh {400 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 12 align 4
+          code0 {o->value(part->kit[n].Padenabled);}
+          code1 {if (n==0) o->hide();}
+        }
+        Fl_Check_Button subcheck {
+          callback {part->kit[n].Psubenabled=(int)o->value();
+if (part->kit[n].Psubenabled!=0) subeditbutton->activate();
+       else  subeditbutton->deactivate();}
+          private xywh {470 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 12 align 4
+          code0 {o->value(part->kit[n].Psubenabled);}
+          code1 {if (n==0) o->hide();}
+        }
+        Fl_Counter sentdoeffectcounter {
+          callback {if (o->value()>=0.0) part->kit[n].Psendtoparteffect=(int)o->value();
+    else part->kit[n].Psendtoparteffect=127;}
+          xywh {535 0 45 15} type Simple minimum -1 maximum 128 step 1
+          code0 {o->bounds(-1,NUM_PART_EFX);}
+          code1 {o->value(part->kit[n].Psendtoparteffect);}
+          code2 {if (part->kit[n].Psendtoparteffect==127) o->value(-1);}
+        }
+      }
+      Fl_Check_Button enabledcheck {
+        label 01
+        callback {int answer=1;
+if (o->value()==0) answer=fl_ask("Delete the item?");
+if (answer!=0){
+pthread_mutex_lock(&master->mutex);
+ part->setkititemstatus(n,(int) o->value());
+pthread_mutex_unlock(&master->mutex);
+
+if (o->value()==0) partkititemgroup->deactivate();
+else partkititemgroup->activate();
+o->redraw();
+partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0
+} else o->value(1);}
+        private xywh {30 0 20 15} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 4
+        code0 {snprintf(label,10,"%d",n);o->label(strdup(label));}
+        code1 {o->value(part->kit[n].Penabled);}
+        code2 {if (n==0) o->deactivate();}
+      }
+    }
+  }
+  Function {PartKitItem(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
+    code {n=0;
+part=NULL;} {}
+  }
+  Function {refresh()} {} {
+    code {enabledcheck->value(part->kit[n].Penabled);
+if (part->kit[n].Penabled==0) partkititemgroup->deactivate();
+else partkititemgroup->activate();
+
+mutedcheck->value(part->kit[n].Pmuted);
+labelbutton->label((char *)part->kit[n].Pname);
+minkcounter->value(part->kit[n].Pminkey);
+maxkcounter->value(part->kit[n].Pmaxkey);
+adcheck->value(part->kit[n].Padenabled);
+adcheck->do_callback();
+subcheck->value(part->kit[n].Psubenabled);
+subcheck->do_callback();
+sentdoeffectcounter->value(part->kit[n].Psendtoparteffect);
+
+this->redraw();} {
+      callback {int answer=1;
+if (o->value()==0) answer=fl_ask("Delete the item?");
+if (answer!=0){
+pthread_mutex_lock(&master->mutex);
+ part->setkititemstatus(n,(int) o->value());
+pthread_mutex_unlock(&master->mutex);
+
+if (o->value()==0) partkititemgroup->deactivate();
+else partkititemgroup->activate();
+o->redraw();
+partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0
+} else o->value(1);}
+    }
+  }
+  Function {init(Part *part_,int n_,Master *master_,PartUI_ *partui_)} {} {
+    code {part=part_;
+n=n_;
+partui=partui_;
+master=master_;
+make_window();
+//partkititem->show();
+end();} {}
+  }
+  Function {~PartKitItem()} {} {
+    code {partkititem->hide();
+delete(partkititem);} {}
+  }
+  decl {Part *part;} {}
+  decl {int n;} {}
+  decl {Master *master;} {}
+  decl {char label[10];} {}
+  decl {PartUI_ *partui;} {}
+} 
+
+class PartUI {: {public Fl_Group,PartUI_}
+} {
+  Function {make_window()} {private
+  } {
+    Fl_Window partgroup {
+      private xywh {149 400 385 180} hide
+      class Fl_Group
+    } {
+      Fl_Group partgroupui {
+        xywh {0 0 385 180}
+        code0 {if (part->Penabled==0) o->deactivate();}
+      } {
+        Fl_Dial {} {
+          label Pan
+          callback {part->setPpanning((int) o->value());}
+          xywh {50 40 25 25} box ROUND_UP_BOX labelsize 12 maximum 127 step 1
+          code0 {o->value(part->Ppanning);}
+          class WidgetPDial
+        }
+        Fl_Counter {} {
+          label KeyShift
+          callback {part->Pkeyshift=(int) o->value()+64;}
+          xywh {195 40 90 20} labelsize 12 minimum -64 maximum 64 step 1
+          code0 {o->lstep(12);}
+          code1 {o->value(part->Pkeyshift-64);}
+        }
+        Fl_Counter {} {
+          label {Chn.Rcv.}
+          callback {part->Prcvchn=(int) o->value();}
+          tooltip {receive from Midi channel} xywh {295 55 85 20} type Simple labelfont 1 labelsize 12 minimum 0 maximum 127 step 1
+          code0 {o->bounds(0,NUM_MIDI_CHANNELS-1);}
+          code1 {o->value(part->Prcvchn);}
+        }
+        Fl_Button {} {
+          label AllNotesOff
+          callback {part->AllNotesOff();}
+          xywh {300 30 80 20} box PLASTIC_UP_BOX labelfont 1 labelsize 12
+        }
+        Fl_Group {} {open
+          xywh {1 81 165 70} box ENGRAVED_FRAME
+        } {
+          Fl_Check_Button adsynenabledcheck {
+            label ADsyn
+            callback {part->PADnoteenabled=(int) o->value();
+part->kit[0].Padenabled=part->PADnoteenabled;}
+            tooltip {enable/disable ADsynth} xywh {6 86 70 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
+            code1 {o->value(part->PADnoteenabled);}
+          }
+          Fl_Button {} {
+            label {ADs edit}
+            callback {showparameters(0,0);}
+            xywh {6 106 70 24} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 12 align 128
+          }
+          Fl_Check_Button subsynenabledcheck {
+            label SUBsyn
+            callback {part->PSUBnoteenabled=(int) o->value();
+part->kit[0].Psubenabled=part->PSUBnoteenabled;}
+            tooltip {enable/disable SUBsynth} xywh {81 86 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
+            code1 {o->value(part->PSUBnoteenabled);}
+          }
+          Fl_Button {} {
+            label {SUBs edit}
+            callback {showparameters(0,1);}
+            xywh {81 105 80 25} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 12 align 128
+          }
+          Fl_Button {} {
+            label {Instr.kit items edit}
+            callback {instrumentkitlist->show();}
+            xywh {5 130 155 18} box PLASTIC_UP_BOX color 238 selection_color 220 labeltype ENGRAVED_LABEL labelsize 12 align 128
+          }
+        }
+        Fl_Scroll {} {open
+          xywh {166 91 125 60} box ENGRAVED_FRAME labelfont 1 labelsize 10 align 21
+        } {
+          Fl_Pack {} {open
+            xywh {171 96 115 35} type HORIZONTAL
+            code0 {o->spacing(5);}
+            code1 {for (int i=0;i<NUM_SYS_EFX;i++){psyef[i]=new PartSysEffSend(0,0,25,35,"");psyef[i]->init(master,npart,i);}}
+          } {}
+        }
+        Fl_Button {} {
+          label {Grand Piano}
+          callback {int event=Fl::event_button();
+if (event==FL_RIGHT_MOUSE){
+   const char *tmp=fl_input("Instrument name:",(const char *)part->Pname);
+   if (tmp!=NULL) snprintf((char *)part->Pname,PART_MAX_NAME_LEN,tmp);
+} else {
+  if (event==FL_LEFT_MOUSE) bankui->show();
+       else infowin->show();
+};}
+          tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the instrument information} xywh {155 5 135 20} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 12 align 20
+          code0 {o->label((char *)part->Pname);}
+        }
+        Fl_Box {} {
+          label {To Sys.Efx.}
+          xywh {166 81 95 10} labelfont 1 labelsize 10
+        }
+        Fl_Check_Button {} {
+          label NoteOn
+          callback {part->Pnoteon=(int) o->value();}
+          tooltip {set if the part receives NoteOn messages} xywh {0 155 65 20} down_box DOWN_BOX labelfont 1 labelsize 12
+          code0 {o->value(part->Pnoteon);}
+        }
+        Fl_Counter minkcounter {
+          label {Min.k}
+          callback {part->Pminkey=(int) o->value();
+if (part->Pminkey>part->Pmaxkey) o->textcolor(FL_RED);
+ else o->textcolor(FL_BLACK);}
+          tooltip {Minimum key (that the part receives NoteOn messages)} xywh {295 125 40 15} type Simple labelfont 1 labelsize 10 minimum 0 maximum 127 step 1 textsize 10
+          code0 {o->value(part->Pminkey);}
+        }
+        Fl_Counter maxkcounter {
+          label {Max.k}
+          callback {part->Pmaxkey=(int) o->value();
+
+if (part->Pminkey>part->Pmaxkey) o->textcolor(FL_RED);
+ else o->textcolor(FL_BLACK);}
+          tooltip {Maximum key (that the part receives NoteOn messages)} xywh {340 125 40 15} type Simple labelfont 1 labelsize 10 minimum 0 maximum 127 step 1 textsize 10
+          code0 {o->value(part->Pmaxkey);}
+        }
+        Fl_Dial {} {
+          label Volume
+          callback {part->setPvolume((int) o->value());}
+          tooltip {Part Volume} xywh {10 35 30 30} box ROUND_UP_BOX labelsize 12 maximum 127 step 1
+          code0 {o->value(part->Pvolume);}
+          class WidgetPDial
+        }
+        Fl_Dial {} {
+          label {Vel.Ofs.}
+          callback {part->Pveloffs=(int) o->value();}
+          tooltip {Velocity Offset} xywh {135 40 25 25} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
+          code0 {o->value(part->Pveloffs);}
+          class WidgetPDial
+        }
+        Fl_Dial {} {
+          label {Vel.Sns.}
+          callback {part->Pvelsns=(int) o->value();}
+          tooltip {Velocity Sensing Function} xywh {95 40 25 25} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
+          code0 {o->value(part->Pvelsns);}
+          class WidgetPDial
+        }
+        Fl_Button {} {
+          label Controllers
+          callback {ctlwindow->show();}
+          xywh {295 90 85 30} box PLASTIC_UP_BOX labelfont 1 labelsize 12
+        }
+        Fl_Check_Button {} {
+          label Poly
+          callback {part->Ppolymode=(int) o->value();}
+          tooltip {Part mode (mono/poly)} xywh {65 155 45 20} down_box DOWN_BOX labelfont 1 labelsize 12
+          code0 {o->value(part->Ppolymode);}
+        }
+        Fl_Check_Button {} {
+          label Portamento
+          callback {part->ctl.portamento.portamento=(int) o->value();}
+          tooltip {Enable/Disable the portamento} xywh {115 155 85 20} down_box DOWN_BOX labelfont 1 labelsize 12
+          code0 {o->value(part->ctl.portamento.portamento);}
+        }
+        Fl_Counter keylimitcounter {
+          label {K.lmt.}
+          callback {part->setkeylimit((int) o->value());}
+          tooltip {Key Limit (max notes that are alowed to play in this part)} xywh {210 155 70 20} type Simple labelfont 1 labelsize 10 align 8 minimum 0 maximum 127 step 1
+          code0 {o->value(part->Pkeylimit);}
+        }
+        Fl_Button {} {
+          label PartFX
+          callback {partfx->show();}
+          xywh {300 5 80 20} box PLASTIC_UP_BOX labelfont 1 labelsize 16
+        }
+        Fl_Button {} {
+          label i
+          callback {infowin->show();}
+          xywh {170 40 20 20} box THIN_UP_BOX labelfont 1 labelsize 12
+        }
+      }
+      Fl_Check_Button {} {
+        label Enabled
+        callback {pthread_mutex_lock(&master->mutex);
+master->partonoff(npart,(int) o->value());
+pthread_mutex_unlock(&master->mutex);
+if (part->Penabled==0) partgroupui->deactivate();
+    else partgroupui->activate();}
+        xywh {85 5 65 20} down_box DOWN_BOX labelfont 1 labelsize 12
+        code0 {o->value(part->Penabled);}
+      }
+      Fl_Button {} {
+        label m
+        callback {if (part->lastnote>=0) minkcounter->value(part->lastnote);
+minkcounter->do_callback();
+maxkcounter->do_callback();}
+        tooltip {set the minimum key to the last pressed key} xywh {315 153 15 12} box THIN_UP_BOX labelsize 10
+      }
+      Fl_Button {} {
+        label M
+        callback {if (part->lastnote>=0) maxkcounter->value(part->lastnote);
+maxkcounter->do_callback();
+minkcounter->do_callback();}
+        tooltip {set the maximum key to the last pressed key} xywh {345 153 15 12} box THIN_UP_BOX labelsize 10
+      }
+      Fl_Button {} {
+        label R
+        callback {minkcounter->value(0);
+minkcounter->do_callback();
+maxkcounter->value(127);
+maxkcounter->do_callback();}
+        tooltip {reset the minimum key to 0 and maximum key to 127} xywh {330 153 15 12} box THIN_UP_BOX labelfont 1 labelsize 10
+      }
+    }
+    Fl_Window ctlwindow {
+      label Controllers
+      private xywh {24 405 420 130} hide
+    } {
+      Fl_Check_Button {} {
+        label Expr
+        callback {part->ctl.expression.receive=(int) o->value();}
+        tooltip {Expression enable} xywh {125 55 45 20} box THIN_UP_BOX down_box DOWN_BOX labelsize 10
+        code0 {o->value(part->ctl.expression.receive);}
+      }
+      Fl_Dial {} {
+        label PanDpth
+        callback {part->ctl.panning.depth=(int) o->value();}
+        tooltip {Panning Depth} xywh {10 55 30 30} labelsize 10 maximum 127 step 1
+        code0 {o->value(part->ctl.panning.depth);}
+        class WidgetPDial
+      }
+      Fl_Dial {} {
+        label FltCut
+        callback {part->ctl.filtercutoff.depth=(int) o->value();}
+        tooltip {Filter Cutoff depth} xywh {90 55 30 30} labelsize 10 maximum 127 step 1
+        code0 {o->value(part->ctl.filtercutoff.depth);}
+        class WidgetPDial
+      }
+      Fl_Dial {} {
+        label FltQ
+        callback {part->ctl.filterq.depth=(int) o->value();}
+        tooltip {Filter Q depth} xywh {50 55 30 30} labelsize 10 maximum 127 step 1
+        code0 {o->value(part->ctl.filterq.depth);}
+        class WidgetPDial
+      }
+      Fl_Dial {} {
+        label BwDpth
+        callback {part->ctl.bandwidth.depth=(int) o->value();}
+        tooltip {BandWidth depth} xywh {100 10 30 30} labelsize 10 maximum 127 step 1
+        code0 {o->value(part->ctl.bandwidth.depth);}
+        class WidgetPDial
+      }
+      Fl_Dial {} {
+        label ModWh
+        callback {part->ctl.modwheel.depth=(int) o->value();}
+        tooltip {Modulation Wheel depth} xywh {55 10 30 30} labelsize 10 maximum 127 step 1
+        code0 {o->value(part->ctl.modwheel.depth);}
+        class WidgetPDial
+      }
+      Fl_Counter {} {
+        label {PWheelB.Rng (cents)}
+        callback {part->ctl.pitchwheel.bendrange=(int) o->value();}
+        tooltip {Pitch Wheel Bend Range (cents)} xywh {135 15 110 20} labelsize 10 align 1 minimum -6400 maximum 6400 step 1
+        code0 {o->value(part->ctl.pitchwheel.bendrange);}
+        code1 {o->lstep(100);}
+      }
+      Fl_Check_Button {} {
+        label FMamp
+        callback {part->ctl.fmamp.receive=(int) o->value();}
+        tooltip {FM amplitude enable} xywh {175 55 60 20} box THIN_UP_BOX down_box DOWN_BOX labelsize 10
+        code0 {o->value(part->ctl.fmamp.receive);}
+      }
+      Fl_Check_Button {} {
+        label Vol
+        callback {part->ctl.volume.receive=(int) o->value();}
+        tooltip {Volume enable} xywh {125 80 45 20} box THIN_UP_BOX down_box DOWN_BOX labelsize 10
+        code0 {o->value(part->ctl.volume.receive);}
+      }
+      Fl_Check_Button {} {
+        label Sustain
+        callback {part->ctl.sustain.receive=(int) o->value();
+if (part->ctl.sustain.receive==0) {
+  part->RelaseSustainedKeys();
+  part->ctl.setsustain(0);
+};}
+        tooltip {Sustain pedal enable} xywh {175 80 60 20} box THIN_UP_BOX down_box DOWN_BOX labelsize 10
+        code0 {o->value(part->ctl.sustain.receive);}
+      }
+      Fl_Button {} {
+        label Close
+        callback {ctlwindow->hide();}
+        xywh {300 105 95 20} box THIN_UP_BOX
+      }
+      Fl_Button {} {
+        label {Reset all controllers}
+        callback {part->SetController(C_resetallcontrollers,0);}
+        xywh {5 105 210 20} box THIN_UP_BOX
+      }
+      Fl_Group {} {
+        label Portamento open
+        xywh {250 15 120 85} box ENGRAVED_FRAME labelfont 1 labelsize 10
+      } {
+        Fl_Check_Button {} {
+          label Rcv
+          callback {part->ctl.portamento.receive=(int) o->value();}
+          tooltip {Receive Portamento Controllers} xywh {255 20 40 20} box THIN_UP_BOX down_box DOWN_BOX labelsize 10
+          code0 {o->value(part->ctl.portamento.receive);}
+        }
+        Fl_Dial {} {
+          label time
+          callback {part->ctl.portamento.time=(int) o->value();}
+          tooltip {Portamento time} xywh {255 60 25 25} labelsize 10 maximum 127 step 1
+          code0 {o->value(part->ctl.portamento.time);}
+          class WidgetPDial
+        }
+        Fl_Counter {} {
+          label thresh
+          callback {part->ctl.portamento.pitchthresh=(int) o->value();}
+          tooltip {Minimum or max. difference of the notes in order to do the portamento (x 100 cents)} xywh {310 20 50 20} type Simple labelsize 10 minimum 0 maximum 127 step 1
+          code0 {o->value(part->ctl.portamento.pitchthresh);}
+        }
+        Fl_Check_Button {} {
+          label {th.type}
+          callback {part->ctl.portamento.pitchthreshtype=(int) o->value();}
+          tooltip {Threshold type (min/max)} xywh {340 70 15 15} down_box DOWN_BOX labelsize 10 align 2
+          code0 {o->value(part->ctl.portamento.pitchthreshtype);}
+        }
+        Fl_Box {} {
+          label {x100 cnt.}
+          xywh {310 50 55 15} labelsize 10 align 16
+        }
+        Fl_Dial {} {
+          label {t.up/dn}
+          callback {int x=(int) o->value();
+
+part->ctl.portamento.updowntimestretch=x;} selected
+          tooltip {Portamento time stretch (up/down)} xywh {285 60 25 25} labelsize 10 maximum 127 step 1
+          code0 {o->value(part->ctl.portamento.updowntimestretch);}
+          class WidgetPDial
+        }
+      }
+      Fl_Group {} {
+        label Resonance open
+        xywh {370 15 45 85} box ENGRAVED_BOX labelfont 1 labelsize 10
+      } {
+        Fl_Dial {} {
+          label BWdpth
+          callback {part->ctl.resonancebandwidth.depth=(int) o->value();}
+          tooltip {BandWidth controller depth} xywh {380 60 25 25} labelsize 10 maximum 127 step 1
+          code0 {o->value(part->ctl.resonancebandwidth.depth);}
+          class WidgetPDial
+        }
+        Fl_Dial {} {
+          label CFdpth
+          callback {part->ctl.resonancecenter.depth=(int) o->value();}
+          tooltip {Center Frequency controller Depth} xywh {380 20 25 25} labelsize 10 maximum 127 step 1
+          code0 {o->value(part->ctl.resonancecenter.depth);}
+          class WidgetPDial
+        }
+      }
+      Fl_Check_Button {} {
+        label {Exp MWh}
+        callback {part->ctl.modwheel.exponential=(int) o->value();}
+        tooltip {Exponential modulation wheel} xywh {10 15 40 25} down_box DOWN_BOX labelsize 10 align 148
+        code0 {o->value(part->ctl.modwheel.exponential);}
+      }
+    }
+    Fl_Window partfx {
+      label {Part's Insert Effects}
+      private xywh {110 483 390 145} hide
+    } {
+      Fl_Counter inseffnocounter {
+        label {Ins.Effect No.}
+        callback {ninseff=(int) o->value();
+insefftype->value(part->partefx[ninseff]->geteffect());
+insefftype->do_callback();
+
+int x=part->Pefxroute[ninseff];
+if (x==127) x=1;
+sendtochoice->value(x);}
+        xywh {5 110 80 20} type Simple labelfont 1 labelsize 11 align 6 minimum 0 maximum 127 step 1 textfont 1
+        code0 {o->bounds(0,NUM_PART_EFX-1);}
+        code1 {o->value(ninseff);}
+      }
+      Fl_Choice insefftype {
+        label EffType
+        callback {inseffectuigroup->remove(inseffectui);
+delete inseffectui;
+pthread_mutex_lock(part->mutex);
+part->partefx[ninseff]->changeeffect((int) o->value());
+pthread_mutex_unlock(part->mutex);
+inseffectui=new EffUI(0,0,765,525);
+inseffectuigroup->add(inseffectui);
+inseffectui->init(part->partefx[ninseff],insefftype);
+inseffectui->redraw();}
+        xywh {95 110 70 15} down_box BORDER_BOX labelsize 11 align 6
+        code0 {o->value(part->partefx[ninseff]->geteffect());}
+      } {
+        menuitem {} {
+          label {No Effect}
+          xywh {35 35 100 20} labelfont 1 labelsize 11
+        }
+        menuitem {} {
+          label Reverb
+          xywh {45 45 100 20} labelfont 1 labelsize 11
+        }
+        menuitem {} {
+          label Echo
+          xywh {55 55 100 20} labelfont 1 labelsize 11
+        }
+        menuitem {} {
+          label Chorus
+          xywh {65 65 100 20} labelfont 1 labelsize 11
+        }
+        menuitem {} {
+          label Phaser
+          xywh {70 70 100 20} labelfont 1 labelsize 11
+        }
+        menuitem {} {
+          label AlienWah
+          xywh {80 80 100 20} labelfont 1 labelsize 11
+        }
+        menuitem {} {
+          label Distortion
+          xywh {90 90 100 20} labelfont 1 labelsize 11
+        }
+        menuitem {} {
+          label EQ
+          xywh {100 100 100 20} labelfont 1 labelsize 11
+        }
+      }
+      Fl_Group inseffectuigroup {
+        xywh {5 5 380 100} box FLAT_BOX color 48
+      } {
+        Fl_Group inseffectui {
+          xywh {5 5 380 95}
+          code0 {o->init(part->partefx[ninseff],insefftype);}
+          class EffUI
+        } {}
+      }
+      Fl_Button {} {
+        label Close
+        callback {partfx->hide();}
+        xywh {315 120 70 20}
+      }
+      Fl_Choice sendtochoice {
+        label {Send To.}
+        callback {int x=(int) o->value();
+if (x==1) x=127;
+part->Pefxroute[ninseff]=x;}
+        xywh {175 110 80 15} down_box BORDER_BOX labelsize 11 align 6
+        code0 {int x=part->Pefxroute[ninseff]; if (x==127) x=1;}
+        code1 {o->value(x);}
+      } {
+        menuitem {} {
+          label {Next Effect}
+          xywh {45 45 100 20} labelfont 1 labelsize 11
+        }
+        menuitem {} {
+          label {Part Out}
+          xywh {55 55 100 20} labelfont 1 labelsize 11
+        }
+      }
+    }
+    Fl_Window instrumentkitlist {
+      label {Instrument Kit}
+      xywh {70 61 590 370} hide
+    } {
+      Fl_Button {} {
+        label {Close Window}
+        callback {instrumentkitlist->hide();}
+        xywh {375 350 160 20} box THIN_UP_BOX
+      }
+      Fl_Scroll kitlist {
+        xywh {0 15 590 330} type VERTICAL box THIN_UP_BOX
+        code0 {if (part->Pkitmode==0) o->deactivate();}
+      } {
+        Fl_Pack {} {
+          xywh {0 20 590 320}
+          code0 {for (int i=0;i<NUM_KIT_ITEMS;i++){partkititem[i]=new PartKitItem(0,0,590,20,"");partkititem[i]->init(part,i,master,this);}}
+        } {}
+      }
+      Fl_Box {} {
+        label {No.}
+        xywh {5 0 25 15} labelfont 1 labelsize 12 align 18
+      }
+      Fl_Box {} {
+        label {M.}
+        xywh {55 0 25 15} labelfont 1 labelsize 12 align 18
+      }
+      Fl_Box {} {
+        label {Min.k}
+        xywh {235 0 40 15} labelfont 1 labelsize 12 align 18
+      }
+      Fl_Box {} {
+        label {Max.k}
+        xywh {345 0 40 15} labelfont 1 labelsize 12 align 18
+      }
+      Fl_Box {} {
+        label ADsynth
+        xywh {405 0 50 15} labelfont 1 labelsize 12 align 18
+      }
+      Fl_Box {} {
+        label SUBsynth
+        xywh {475 0 60 15} labelfont 1 labelsize 12 align 18
+      }
+      Fl_Button swapcopybutton {
+        label {Swap/Copy...}
+        callback {swapwindow->show();}
+        xywh {200 350 75 15} box THIN_UP_BOX labelfont 1 labelsize 10
+        code0 {if (part->Pkitmode==0) o->deactivate();}
+      }
+      Fl_Check_Button protectthekitcheck {
+        label {Protect the kit}
+        callback {part->disablekitloading=(int) o->value();}
+        tooltip {Load only in the 0 item, and preserve other items intact when loading a instrument} xywh {110 350 90 10} down_box DOWN_BOX labelfont 1 labelsize 10
+        code0 {o->value(part->disablekitloading);}
+        code1 {if (part->Pkitmode==0) o->deactivate();}
+      }
+      Fl_Choice {} {
+        label Mode
+        callback {part->Pkitmode=(int) o->value();
+if (part->Pkitmode==0) {
+     kitlist->deactivate();
+     swapcopybutton->deactivate();
+     protectthekitcheck->value(0);
+     protectthekitcheck->do_callback();
+     protectthekitcheck->deactivate();
+ } else {
+ kitlist->activate();
+ swapcopybutton->activate();
+ protectthekitcheck->activate();
+};}
+        xywh {35 350 70 15} down_box BORDER_BOX labelsize 12 textfont 1 textsize 12
+        code0 {o->value(part->Pkitmode);}
+      } {
+        menuitem {} {
+          label OFF
+          xywh {0 0 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label MULTI
+          xywh {10 10 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label SINGLE
+          xywh {20 20 100 20} labelfont 1 labelsize 12
+        }
+      }
+      Fl_Check_Button {} {
+        label {Drum mode}
+        callback {part->Pdrummode=(int) o->value();}
+        xywh {285 350 70 15} down_box DOWN_BOX labelsize 11
+        code0 {o->value(part->Pdrummode);}
+      }
+      Fl_Box {} {
+        label {FX.}
+        xywh {545 0 30 15} labelfont 1 labelsize 12 align 18
+      }
+    }
+    Fl_Window swapwindow {
+      label {Swap/Copy item}
+      xywh {384 262 205 100} hide modal
+    } {
+      Fl_Counter swap2counter {
+        label to
+        xywh {110 20 75 20} type Simple labelfont 1 labelsize 12 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
+        code0 {o->maximum(NUM_KIT_ITEMS);}
+      }
+      Fl_Button {} {
+        label Swap
+        callback {int item1=(int) swap1counter->value();
+int item2=(int) swap2counter->value();
+
+pthread_mutex_lock(&master->mutex);
+ part->swapcopyitem(item1,item2,1);
+pthread_mutex_unlock(&master->mutex); 
+
+swapwindow->hide();
+showparameters(0,-1);
+
+for (int i=0;i<NUM_KIT_ITEMS;i++) partkititem[i]->refresh();
+
+adsynenabledcheck->value(part->kit[0].Padenabled);
+subsynenabledcheck->value(part->kit[0].Psubenabled);}
+        xywh {15 60 55 25} box THIN_UP_BOX labelfont 1
+      }
+      Fl_Button {} {
+        label Copy
+        callback {int item1=(int) swap1counter->value();
+int item2=(int) swap2counter->value();
+
+pthread_mutex_lock(&master->mutex);
+ part->swapcopyitem(item1,item2,0);
+pthread_mutex_unlock(&master->mutex);
+
+swapwindow->hide();
+showparameters(0,-1);
+
+for (int i=0;i<NUM_KIT_ITEMS;i++) partkititem[i]->refresh();
+
+adsynenabledcheck->value(part->kit[0].Padenabled);
+subsynenabledcheck->value(part->kit[0].Psubenabled);}
+        xywh {75 60 55 25} box THIN_UP_BOX labelfont 1
+      }
+      Fl_Button {} {
+        label Cancel
+        callback {swapwindow->hide();}
+        xywh {140 60 55 25} box THIN_UP_BOX labelfont 1
+      }
+      Fl_Counter swap1counter {
+        label from
+        xywh {15 20 75 20} type Simple labelfont 1 labelsize 12 align 1 minimum 0 maximum 127 step 1 textfont 1
+        code0 {o->maximum(NUM_KIT_ITEMS);}
+      }
+    }
+    Fl_Window infowin {
+      label {Instrument Info}
+      xywh {224 184 366 343} hide
+    } {
+      Fl_Input {} {
+        label {Author and Copyright}
+        callback {snprintf((char *)part->info.Pauthor,MAX_INFO_TEXT_SIZE,"%s",o->value());}
+        xywh {5 20 355 130} type Multiline align 5
+        code0 {o->maximum_size(MAX_INFO_TEXT_SIZE);}
+        code1 {o->value((char *) &part->info.Pauthor);}
+      }
+      Fl_Input {} {
+        label Comments
+        callback {snprintf((char *)part->info.Pcomments,MAX_INFO_TEXT_SIZE,"%s",o->value());}
+        xywh {5 170 355 145} type Multiline align 5
+        code0 {o->maximum_size(MAX_INFO_TEXT_SIZE);}
+        code1 {o->value((char *) &part->info.Pcomments);}
+      }
+      Fl_Button {} {
+        label Close
+        callback {infowin->hide();}
+        xywh {245 320 110 20} box THIN_UP_BOX
+      }
+      Fl_Choice {} {
+        label {Type:}
+        callback {part->info.Ptype=o->value();}
+        xywh {40 320 150 20} down_box BORDER_BOX labelfont 1 labelsize 12 textsize 11
+        code0 {o->value(part->info.Ptype);}
+      } {
+        menuitem {} {
+          label {------------------------}
+          xywh {10 10 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label Piano
+          xywh {0 0 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label {Chromatic Percussion}
+          xywh {10 10 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label Organ
+          xywh {20 20 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label Guitar
+          xywh {30 30 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label Bass
+          xywh {40 40 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label {Solo Strings}
+          xywh {50 50 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label Ensemble
+          xywh {60 60 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label Brass
+          xywh {70 70 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label Reed
+          xywh {80 80 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label Pipe
+          xywh {90 90 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label {Synth Lead}
+          xywh {100 100 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label {Synth Pad}
+          xywh {110 110 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label {Synth Effects}
+          xywh {120 120 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label Ethnic
+          xywh {130 130 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label Percussive
+          xywh {140 140 100 20} labelfont 1 labelsize 12
+        }
+        menuitem {} {
+          label {Sound Effects}
+          xywh {150 150 100 20} labelfont 1 labelsize 12
+        }
+      }
+    }
+  }
+  Function {PartUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
+    code {part=NULL;
+adnoteui=NULL;
+subnoteui=NULL;
+lastkititem=-1;} {}
+  }
+  Function {init(Part *part_,Master *master_,int npart_,BankUI *bankui_)} {} {
+    code {bankui=bankui_;
+part=part_;
+npart=npart_;
+master=master_;
+ninseff=0;
+
+make_window();
+partgroup->position(this->parent()->x()+2,this->parent()->y()+2);
+partgroup->show();
+end();
+
+
+if (config.ui.showinstrumentinfo!=0) infowin->show();} {}
+  }
+  Function {showparameters(int kititem,int engine)} {} {
+    code {if (engine==-1){//this is used if I want to clear the engine from the part
+   if (kititem==lastkititem) kititem=-1;
+         else kititem=lastkititem;
+};
+
+if (kititem!=lastkititem){
+    if (adnoteui!=NULL) delete (adnoteui);
+    if (subnoteui!=NULL) delete (subnoteui);   
+    adnoteui=NULL;subnoteui=NULL;
+    lastkititem=kititem;
+
+    if (kititem>=NUM_KIT_ITEMS) return;//bad kit item
+    if (kititem<0) return;
+
+    if (part->kit[kititem].adpars!=NULL) 
+      adnoteui=new ADnoteUI(part->kit[kititem].adpars,master);
+
+    if (part->kit[kititem].subpars!=NULL) 
+       subnoteui=new SUBnoteUI(part->kit[kititem].subpars);
+};
+
+
+
+if ((engine==0)&&(adnoteui!=NULL)) adnoteui->ADnoteGlobalParameters->show();
+if ((engine==1)&&(subnoteui!=NULL)) subnoteui->SUBparameters->show();} {}
+  }
+  Function {~PartUI()} {} {
+    code {config.ui.showinstrumentinfo=infowin->visible();
+
+if (adnoteui!=NULL) delete (adnoteui);
+if (subnoteui!=NULL) delete (subnoteui);
+
+partgroup->hide();
+delete(partgroup);
+
+ctlwindow->hide();
+delete(ctlwindow);
+
+partfx->hide();
+delete(partfx);
+
+infowin->hide();
+delete(infowin);
+
+instrumentkitlist->hide();
+delete(instrumentkitlist);} {}
+  }
+  decl {Part *part;} {}
+  decl {Master *master;} {}
+  decl {BankUI *bankui;} {}
+  decl {ADnoteUI *adnoteui;} {}
+  decl {SUBnoteUI *subnoteui;} {}
+  decl {PartSysEffSend *psyef[NUM_SYS_EFX];} {}
+  decl {int npart;} {}
+  decl {int ninseff;} {}
+  decl {int lastkititem;} {}
+  decl {PartKitItem *partkititem[NUM_KIT_ITEMS];} {}
+} 

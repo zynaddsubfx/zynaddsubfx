@@ -1,0 +1,80 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0104 
+header_name {.h} 
+code_name {.cc}
+decl {//Copyright (c) 2002-2003 Nasca Octavian Paul} {} 
+
+decl {//License: GNU GPL version 2} {} 
+
+decl {\#include "../globals.h"} {public
+} 
+
+decl {\#include "../Misc/Master.h"} {public
+} 
+
+decl {\#include "WidgetPDial.h"} {public
+} 
+
+class SeqUI {open
+} {
+  Function {make_window()} {open
+  } {
+    Fl_Window seqwin {
+      label {Sequencer - ZynAddSubFX} open
+      xywh {104 235 239 100} visible
+    } {
+      Fl_Group {} {
+        label Recorder
+        xywh {10 20 100 65} box ENGRAVED_BOX labelfont 1
+      } {
+        Fl_Button recordbutton {
+          label {Rec.}
+          callback {o->deactivate();
+stopbutton_rec->activate();
+master->seq.startrec();}
+          tooltip {Start Recording} xywh {20 30 30 30} box ROUND_UP_BOX color 88 labelfont 1 labelsize 16 align 2
+        }
+        Fl_Button stopbutton_rec {
+          label Stop
+          callback {o->deactivate();
+recordbutton->activate();
+
+master->seq.stoprec();}
+          tooltip {Stop Recording} xywh {65 29 30 31} box THIN_UP_BOX color 4 labelfont 1 labelsize 16 align 2 deactivate
+        }
+      }
+      Fl_Group {} {
+        label Player
+        xywh {120 20 100 65} box ENGRAVED_BOX labelfont 1
+      } {
+        Fl_Button playbutton {
+          label Play
+          callback {o->deactivate();
+stopbutton_play->activate();
+
+master->seq.startplay();}
+          tooltip {Start Playing} xywh {130 30 30 30} box DIAMOND_UP_BOX color 79 labelfont 1 labelsize 16 align 2
+        }
+        Fl_Button stopbutton_play {
+          label Stop
+          callback {o->deactivate();
+playbutton->activate();
+
+master->seq.stopplay();} selected
+          tooltip {Stop Playing} xywh {175 29 30 31} box THIN_UP_BOX color 4 labelfont 1 labelsize 16 align 2 deactivate
+        }
+      }
+    }
+  }
+  Function {SeqUI(Master *master_)} {open
+  } {
+    code {master=master_;
+
+make_window();} {}
+  }
+  decl {Master *master} {}
+  Function {show()} {open
+  } {
+    code {seqwin->show();} {}
+  }
+} 

@@ -1,0 +1,156 @@
+/*
+  ZynAddSubFX - a software synthesizer
+ 
+  Part.h - Part implementation
+  Copyright (C) 2002-2003 Nasca Octavian Paul
+  Author: Nasca Octavian Paul
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of version 2 of the GNU General Public License 
+  as published by the Free Software Foundation.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License (version 2) for more details.
+
+  You should have received a copy of the GNU General Public License (version 2)
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+
+*/
+
+#ifndef PART_H
+#define PART_H
+
+#define MAX_INFO_TEXT_SIZE 1000
+
+#include "../globals.h"
+#include "../Params/ADnoteParameters.h"
+#include "../Params/SUBnoteParameters.h"
+#include "../Synth/ADnote.h"
+#include "../Synth/SUBnote.h"
+#include "../Params/Controller.h"
+#include "../Misc/Microtonal.h"
+#include "../DSP/FFTwrapper.h"
+#include "../Effects/EffectMgr.h"
+
+class Part{
+
+    public:
+      Part(Microtonal *microtonal_,FFTwrapper *fft_,pthread_mutex_t *mutex_);
+      ~Part();
+
+      /* Midi commands implemented */      
+      void NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift); 
+      void NoteOff(unsigned char note); 
+      void AllNotesOff();//panic
+      void SetController(unsigned int type,int par);
+      void RelaseSustainedKeys();//this is called when the sustain pedal is relased 
+      void RelaseAllKeys();//this is called on AllNotesOff controller
+
+      /* The synthesizer part output */      
+      void ComputePartSmps();//Part output
+	
+      void saveloadbuf(Buffer *buf,int instrumentonly);
+      //instrumentonly: 0 - save all, 1 - save only instrumnet, 2 - save only instrument without the name(used in bank)
+
+      void saveloadbufkititem(Buffer *buf,unsigned char item,int saveitem0);
+      void swapcopyitem(int item1,int item2,int mode);
+    
+      void cleanup();
+
+      ADnoteParameters *ADPartParameters;
+      SUBnoteParameters *SUBPartParameters;
+
+      //the part's kit
+      struct {
+        unsigned char Penabled,Pmuted,Pminkey,Pmaxkey;
+	unsigned char *Pname;
+	unsigned char Padenabled,Psubenabled;
+	unsigned char Psendtoparteffect;
+        ADnoteParameters *adpars;
+        SUBnoteParameters *subpars;
+      } kit[NUM_KIT_ITEMS];
+
+      
+      //Part parameters
+      void setkeylimit(unsigned char Pkeylimit);
+      void setkititemstatus(int kititem,int Penabled_);
+
+      unsigned char Penabled;//if the part is enabled
+      unsigned char Pminkey;//the minimum key that the part receives noteon messages
+      unsigned char Pmaxkey;//the maximum key that the part receives noteon messages
+      unsigned char *Pname; //name of the instrument
+      unsigned char Pvolume;//part volume
+      void setPvolume(char Pvolume);
+      unsigned char Pkeyshift;//Part keyshift
+      unsigned char Prcvchn;//from what midi channel it receive commnads
+      unsigned char Ppanning;//part panning
+      void setPpanning(char Ppanning);
+      unsigned char Pvelsns;//velocity sensing (amplitude velocity scale)
+      unsigned char Pveloffs;//velocity offset
+      unsigned char PADnoteenabled;//if ADnote is enabled
+      unsigned char PSUBnoteenabled;//if SUBnote is enabled
+      unsigned char Pnoteon;//if the part receives NoteOn messages
+      unsigned char Pkitmode;//if the kitmode is enabled
+      unsigned char Pdrummode;//if all keys are mapped and the system is 12tET (used for drums)
+
+      unsigned char Ppolymode;//Part mode - 0=monophonic , 1=polyphonic
+      unsigned char Pkeylimit;//how many keys are alowed to be played same time (0=off), the older will be relased
+      
+      struct{
+    	    unsigned char Ptype;
+	    unsigned char Pauthor[MAX_INFO_TEXT_SIZE+1];
+	    unsigned char Pcomments[MAX_INFO_TEXT_SIZE+1];
+      } info;
+      
+      
+      REALTYPE *partoutl;//Left channel output of the part
+      REALTYPE *partoutr;//Right channel output of the part
+
+      REALTYPE *partfxinputl[NUM_PART_EFX+1],*partfxinputr[NUM_PART_EFX+1];//Left and right signal that pass thru part effects; partfxinputl/r[NUM_PART_EFX] is for "no effect" buffer
+
+      enum NoteStatus{KEY_OFF,KEY_PLAYING,KEY_RELASED_AND_SUSTAINED,KEY_RELASED};
+
+      REALTYPE volume,oldvolumel,oldvolumer;//this is applied by Master
+      REALTYPE panning;//this is applied by Master, too
+      
+      Controller ctl;//Part controllers
+
+      EffectMgr *partefx[NUM_PART_EFX];//insertion part effects (they are part of the instrument) 
+      unsigned char Pefxroute[NUM_PART_EFX];//how the effect's output is routed(to next effect/to out)
+
+      pthread_mutex_t *mutex;
+      
+      int lastnote,disablekitloading;      
+      
+    private:
+      void KillNotePos(int pos); 
+      void RelaseNotePos(int pos);      
+      int killallnotes;//is set to 1 if I want to kill all notes
+      
+      struct PartNotes{
+        NoteStatus status;
+        int note;//if there is no note playing, the "note"=-1
+	int itemsplaying;
+	struct {	
+    	    ADnote *adnote;
+    	    SUBnote *subnote;
+	    int sendtoparteffect;
+	} kititem[NUM_KIT_ITEMS];
+	int time;
+      };
+	
+      PartNotes partnote[POLIPHONY];
+      
+      REALTYPE *tmpoutl;//used to get the note
+      REALTYPE *tmpoutr;
+	
+      REALTYPE oldfreq;//this is used for portamento
+      Microtonal *microtonal;
+      FFTwrapper *fft;
+};
+
+#endif
+
