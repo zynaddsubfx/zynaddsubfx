@@ -232,8 +232,7 @@ delete(bankuiwindow);} {}
     code {bankuiwindow->show();
 simplesetmode(config.cfg.UserInterfaceMode==2);} {}
   }
-  Function {hide()} {selected
-  } {
+  Function {hide()} {} {
     code {bankuiwindow->hide();} {}
   }
   Function {init(Fl_Valuator *cbwig_)} {} {
@@ -302,7 +301,8 @@ if (mode==4){//swap
         bs[slot]->refresh();
     };
 };
-if (mode!=4) refreshmainwindow();} {}
+if (mode!=4) refreshmainwindow();} {selected
+    }
   }
   Function {refreshmainwindow()} {} {
     code {bankuiwindow->label(bank->bankfiletitle);

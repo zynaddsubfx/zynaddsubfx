@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "ZynAddSubFX"
-!define PRODUCT_VERSION "2.0.1"
+!define PRODUCT_VERSION "2.1.0"
 !define PRODUCT_PUBLISHER "Nasca Octavian Paul"
 !define PRODUCT_WEB_SITE "http://zynaddsubfx.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\zynaddsubfx.exe"
@@ -100,7 +100,7 @@ Section "VST Plugin" SEC03
   File "zynaddsubfx_vst.dll"
 SectionEnd
 
-Section "Source Code" SEC04
+Section /o "Source Code" SEC04
   SetOutPath "$INSTDIR"
   File /r "source code"
 SectionEnd

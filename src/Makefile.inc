@@ -18,7 +18,11 @@ LINUX_MIDIIN=ALSA
 #LINUX_MIDIIN=OSS
 #LINUX_MIDIIN=NONE
 
-#Next line sets the audio output (OSS/JACK/PA)
+#Next lines sets the audio output (OSS/JACK/PA)
+#You may use only one at the time
+#If you use "OSS_AND_JACK",,at runtime, zynaddsubfx will run by the default with jack support and 
+#it will try OSS if JACK fails. At runtime you can set the OSS by default by command-line
+#parameters (run 'zynaddsubfx --help' for help) 
 
 #LINUX_AUDIOOUT=OSS_AND_JACK
 LINUX_AUDIOOUT=OSS

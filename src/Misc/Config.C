@@ -154,11 +154,11 @@ Config::Config(){
 	sprintf(cfg.presetsDirList[0],"./");
 
 #ifdef VSTAUDIOOUT
-	cfg.bankRootDirList[1]=new char[MAX_STRING_SIZE];
-	sprintf(cfg.bankRootDirList[1],"c:/Program Files/ZynAddSubFX/presets");
+	cfg.presetsDirList[1]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.presetsDirList[1],"c:/Program Files/ZynAddSubFX/presets");
 #else
-	cfg.bankRootDirList[1]=new char[MAX_STRING_SIZE];
-	sprintf(cfg.bankRootDirList[1],"../presets");
+	cfg.presetsDirList[1]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.presetsDirList[1],"../presets");
 #endif
 
 	cfg.presetsDirList[2]=new char[MAX_STRING_SIZE];

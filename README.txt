@@ -41,7 +41,7 @@ Not requred, but recomanded:
 
     - ALSA 0.9.x (with OSS emulation, if you don't use JACK)
     - JACKit - if you want to use it you must enable compilation for JACK in Makefile.inc
-               
+    - a VST host for the VST version
 
 Compilation:
 ------------
@@ -87,7 +87,7 @@ Running on WINDOWS
 	Eg: "set PA_RECOMMENDED_OUTPUT_DEVICE=1"
     A better way to set all of this, I will put on next versions.
 
-Please send me instruments,banks,master settings,songs(midi+..._zyn files) done with ZynAddSubFX. I'll apreciate this.
+Please send me instruments,banks,master settings,songs(midi+...xmz files) done with ZynAddSubFX. I'll apreciate this.
 
 
 Have fun! :-)

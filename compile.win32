@@ -20,14 +20,14 @@ zlib-1.2.1.tar.bz2
 
 
 Change the Makefile.inc, and change the compilation options (like operating system,etc.). Now, run make from msys.
-After the compilation, copy in the dll files (pthreadGC.dll and portaudio.dll) to the directory where "zynaddsubfx.exe" is.
+After the compilation, copy in the dll files (pthreadGC.dll and (portaudio.dll if required)) to the directory where "zynaddsubfx.exe" is.
 Hope all goes right.
 
 ZynAddSubFX Compilation on Windows as VST plugin (dll file)
 ----------------------------------------------------------
 Edit the Makefile.inc and set "WINDOWS_VST" to "YES". The audioout and midiin are automatically set to VST.
-Get the vstsdk2 and copy it to the directory where ZynAddSubFX-1.x.x is.
-If you copy ZynAddSubFX in "C:\temp" and you will run "dir" you should see the ZynAddSubFX-1.x.x and vstsdk2 in the same directory (C:\temp).
+Get the vstsdk2 and copy it to the directory where ZynAddSubFX-2.x.x is.
+If you copy ZynAddSubFX in "C:\temp" and you will run "dir" you should see the ZynAddSubFX-2.x.x and vstsdk2 in the same directory (C:\temp).
 
 Now you have to compile AudioEffect.cpp and audioeffectx.cpp(from vstsdk2) to the object files AudioEffect.o and audioeffectx.o.
 Copy theese object files to zynaddsubfx \src directory. 
@@ -37,7 +37,6 @@ You must copy the pthreads.dll file to windows directory (or else, zynaddsubfx w
 Copy the zynaddsubfx_vst.dll to your dll directory.
 
 BUGS only on vst port:
-Warning! The version 1.2.1(and others) of zynaddsubfx vst port is extremely buggy! It may blow up the instrument banks (*.bnk_zyn). Also it will crash (including the VST host) if it will be loaded second time (Why?).
 Also, to avoid more bugs, I had limited zynaddsubfx to one instance. Please report me how it behaves on various vst hosts.
 I hope that I will remove theese bugs on later versions.
 
