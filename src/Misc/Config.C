@@ -109,99 +109,37 @@ Config::~Config(){
 };
 
 void Config::readConfig(char *filename){
-    FILE *file=fopen(filename,"r");
-    if (file==NULL) return;
-    while (!feof(file)){
-	//read a line
-	char line[MAX_STRING_SIZE+1];line[MAX_STRING_SIZE]=0;
-	if (fgets(line,MAX_STRING_SIZE,file)==NULL) continue;
-	if (strlen(line)<2) continue;
+    XMLwrapper *xmlcfg=new XMLwrapper();
+    if (xmlcfg->loadXMLfile(filename)<0)return;
+    if (xmlcfg->enterbranch("CONFIGURATION")){
+	cfg.SampleRate=xmlcfg->getpar("sample_rate",cfg.SampleRate,4000,1024000);
+	cfg.SoundBufferSize=xmlcfg->getpar("sound_buffer_size",cfg.SoundBufferSize,2,8192);
+	cfg.OscilSize=xmlcfg->getpar("oscil_size",cfg.OscilSize,MAX_AD_HARMONICS*2,131072);
+	cfg.SwapStereo=xmlcfg->getpar("swap_stereo",cfg.SwapStereo,0,1);
+	cfg.BankUIAutoClose=xmlcfg->getpar("bank_window_auto_close",cfg.BankUIAutoClose,0,1);
 
-	//find out if the line begins with "#" (comment)
-	char firstchar=0;
-	for (int i=0;i<strlen(line);i++) 
-	    if (line[i]>33) {
-		firstchar=line[i];
-		break;
-	    };
-	if (firstchar=='#') continue;
-	//get the parameter and the value
-	char par[MAX_STRING_SIZE],val[MAX_STRING_SIZE];
-	par[0]=0;val[0]=0;
-	if (sscanf(line,"%s = %s",par,val)!=2) continue;//bad line
-	if ((strlen(par)<1)|| (strlen(val)<1)) continue;//empty parameter/value
+	cfg.DumpNotesToFile=xmlcfg->getpar("dump_notes_to_file",cfg.DumpNotesToFile,0,1);
+	cfg.DumpAppend=xmlcfg->getpar("dump_append",cfg.DumpAppend,0,1);
+	xmlcfg->getparstr("dump_file",cfg.DumpFile,MAX_STRING_SIZE);
+
+	cfg.GzipCompression=xmlcfg->getpar("gzip_compression",cfg.GzipCompression,0,9);
+
+	xmlcfg->getparstr("bank_current",cfg.currentBankDir,MAX_STRING_SIZE);
+	xmlcfg->getparstr("bank_root_list",cfg.bankRootDirList,MAX_STRING_SIZE);
+
+	//linux stuff
+	xmlcfg->getparstr("linux_oss_wave_out_dev",cfg.LinuxOSSWaveOutDev,MAX_STRING_SIZE);
+	xmlcfg->getparstr("linux_oss_seq_in_dev",cfg.LinuxOSSSeqInDev,MAX_STRING_SIZE);
 	
-//	printf("%s\n",val);
+	//windows stuff
+	cfg.WindowsWaveOutId=xmlcfg->getpar("windows_wave_out_id",cfg.WindowsWaveOutId,0,winwavemax);
+	cfg.WindowsMidiInId=xmlcfg->getpar("windows_midi_in_id",cfg.WindowsMidiInId,0,winmidimax);
 
+      xmlcfg->exitbranch();
+    };
+    delete(xmlcfg);
 
-	int intvalue=0;
-	char *tmp;
-	intvalue=strtoul(val,&tmp,10);
-
-	//Check the parameter
-	if (strstr(par,"SAMPLE_RATE")!=NULL){
-	    cfg.SampleRate=intvalue;
-	};
-	if (strstr(par,"SOUND_BUFFER_SIZE")!=NULL){
-	    cfg.SoundBufferSize=intvalue;
-	};
-	if (strstr(par,"OSCIL_SIZE")!=NULL){
-	    cfg.OscilSize=intvalue;
-	};
-	if (strstr(par,"SWAP_STEREO")!=NULL){
-	    cfg.SwapStereo=intvalue;
-	};
-	if (strstr(par,"BANK_WINDOW_AUTO_CLOSE")!=NULL){
-	    cfg.BankUIAutoClose=intvalue;
-	};
-	if (strstr(par,"LINUX_OSS_WAVE_OUT_DEV")!=NULL){
-	    if (strlen(val)<2) continue;
-	    snprintf(cfg.LinuxOSSWaveOutDev,MAX_STRING_SIZE,val);
-	};
-	if (strstr(par,"LINUX_OSS_SEQ_IN_DEV")!=NULL){
-	    if (strlen(val)<2) continue;
-	    snprintf(cfg.LinuxOSSSeqInDev,MAX_STRING_SIZE,val);
-	};
-	
-	if (strstr(par,"WINDOWS_WAVE_OUT_ID")!=NULL){
-	    cfg.WindowsWaveOutId=intvalue;
-	};
-
-	if (strstr(par,"WINDOWS_MIDI_IN_ID")!=NULL){
-	    cfg.WindowsMidiInId=intvalue;
-	};
-
-	if (strstr(par,"DUMP_NOTES_TO_FILE")!=NULL){
-	    cfg.DumpNotesToFile=intvalue;
-	};
-	if (strstr(par,"DUMP_APPEND")!=NULL){
-	    cfg.DumpAppend=intvalue;
-	};
-	if (strstr(par,"DUMP_FILE")!=NULL){
-	    if (strlen(val)<2) continue;
-	    snprintf(cfg.DumpFile,MAX_STRING_SIZE,val);
-	};
-
-	if (strstr(par,"GZIP_COMPRESSION")!=NULL){
-	    cfg.GzipCompression=intvalue;
-	};
-};    
-    fclose(file);    
-    
-    //now, correct the bogus (incorrect) parameters 
-    if (cfg.SampleRate<4000) cfg.SampleRate=4000;
-    if (cfg.SoundBufferSize<2) cfg.SoundBufferSize=2;
-    
-    if (cfg.OscilSize<MAX_AD_HARMONICS*2) cfg.OscilSize=MAX_AD_HARMONICS*2;
     cfg.OscilSize=(int) pow(2,ceil(log (cfg.OscilSize-1.0)/log(2.0)));
-    
-    cfg.SwapStereo=(cfg.SwapStereo!=0?1:0);
-#ifdef OS_WINDOWS
-    if (cfg.WindowsWaveOutId>=winwavemax) cfg.WindowsWaveOutId=0;
-    if (cfg.WindowsMidiInId>=winmidimax) cfg.WindowsMidiInId=0;
-#endif
-    if (cfg.GzipCompression<0) cfg.GzipCompression=0;
-	else if (cfg.GzipCompression>9) cfg.GzipCompression=9;
 
 };
 

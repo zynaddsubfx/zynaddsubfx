@@ -52,7 +52,6 @@ Bank::Bank(){
     clearbank();
 
 
-//    loadbank("nume directorbank");
 
     for (int i=0;i<MAX_NUM_BANKS;i++){
 	banks[i].dir=NULL;
@@ -60,11 +59,14 @@ Bank::Bank(){
     };
     
     bankfiletitle=dirname;
+
+    loadbank(config.cfg.currentBankDir);
+
 };
 
 Bank::~Bank(){
     if (dirname!=NULL) {
-	//salvez numele bank-ul aici cu numele "dirname"
+	sprintf(config.cfg.currentBankDir,dirname);
     };
     for (int i=0;i<MAX_NUM_BANKS;i++){
 	if (banks[i].dir!=NULL) delete (banks[i].dir);
@@ -288,7 +290,7 @@ int Bank::newbank(const char *newbankdirname){
     if (result<0) return(-1);
 
     snprintf(tmpfilename,MAX_STRING_SIZE,"%s/%s",bankdir,FORCE_BANK_DIR_FILE);
-    printf("%s\n",tmpfilename);
+//    printf("%s\n",tmpfilename);
     FILE *tmpfile=fopen(tmpfilename,"w+");
     fclose(tmpfile);
     
@@ -369,11 +371,11 @@ void Bank::rescanforbanks(){
     };
     delete(currentrootdir);
 
-    for (int i=0;i<MAX_NUM_BANKS;i++){
+/*    for (int i=0;i<MAX_NUM_BANKS;i++){
 	if (banks[i].dir==NULL) continue;
         printf("*  %s = %s\n",banks[i].name,banks[i].dir);	
     };
-    
+*/    
 }; 
 
 

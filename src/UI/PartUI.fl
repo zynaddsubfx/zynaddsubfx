@@ -255,9 +255,9 @@ delete(partkititem);} {}
   decl {PartUI_ *partui;} {}
 } 
 
-class PartUI {open : {public Fl_Group,PartUI_}
+class PartUI {: {public Fl_Group,PartUI_}
 } {
-  Function {make_window()} {open private
+  Function {make_window()} {private
   } {
     Fl_Window partgroup {
       private xywh {149 400 385 180} type Double hide
@@ -823,7 +823,7 @@ subsynenabledcheck->value(part->kit[0].Psubenabled);}
       }
     }
     Fl_Window instrumenteditwindow {
-      label {Instrument Edit} selected
+      label {Instrument Edit}
       xywh {60 156 395 360} type Double hide
     } {
       Fl_Group {} {
@@ -837,7 +837,7 @@ subsynenabledcheck->value(part->kit[0].Psubenabled);}
             label Edit
             callback {//showparameters(0,1);
 fl_alert("Oops... try again...")}
-            xywh {215 280 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 12 align 128
+            xywh {215 280 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 18 align 128
           }
           Fl_Check_Button padsynenabledcheck {
             label Enabled
@@ -859,7 +859,7 @@ fl_alert("Oops... try again...")}
           Fl_Button {} {
             label Edit
             callback {showparameters(0,0);}
-            xywh {15 281 80 34} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 12 align 128
+            xywh {15 281 80 34} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 18 align 128
           }
         }
         Fl_Group {} {
@@ -875,7 +875,7 @@ fl_alert("Oops... try again...")}
           Fl_Button {} {
             label Edit
             callback {showparameters(0,1);}
-            xywh {115 280 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 12 align 128
+            xywh {115 280 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 18 align 128
           }
         }
         Fl_Button {} {

@@ -409,6 +409,8 @@ void OscilGen::spectrumadjust(){
 		break;
 	case 2: par=pow(10.0,(1.0-par)*3.0)*0.00095;
 		break;
+	case 3: par=pow(10.0,(1.0-par)*3.0)*0.00095;
+		break;
     };
     REALTYPE max=0.0;
     for (int i=0;i<OSCIL_SIZE/2-1;i++){ 
@@ -426,6 +428,9 @@ void OscilGen::spectrumadjust(){
 	    case 1: mag=pow(mag,par);
 		    break;
 	    case 2: if (mag<par) mag=0.0;
+		    break;
+	    case 3: mag/=par;
+		    if (mag>1.0) mag=1.0;
 		    break;
 	};
 	oscilFFTfreqs[OSCIL_SIZE-i-1]=mag*cos(phase);

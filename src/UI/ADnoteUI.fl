@@ -285,13 +285,11 @@ delete(harmonic);} {}
   decl {Master *master;} {}
 } 
 
-class ADOscilEditor {open
-} {
-  Function {make_window()} {open
-  } {
+class ADOscilEditor {} {
+  Function {make_window()} {} {
     Fl_Window osceditUI {
-      label {ADsynth Oscillator Editor} open
-      xywh {66 94 750 590} type Double visible
+      label {ADsynth Oscillator Editor}
+      xywh {66 94 750 590} type Double hide
     } {
       Fl_Group oscildisplaygroup {
         xywh {15 5 360 300} box ENGRAVED_FRAME
@@ -802,14 +800,14 @@ oldosc->redraw();}
         }
       }
       Fl_Group {} {
-        xywh {490 305 120 30} box ENGRAVED_BOX
+        xywh {490 305 130 30} box ENGRAVED_BOX
       } {
         Fl_Choice sabutton {
           label {Sp.adj.}
           callback {oscil->Psatype=(int) o->value();
 oscildisplaygroup->redraw();
-oldosc->redraw();} open
-          tooltip {Oscillator's spectrum adjust} xywh {530 310 50 20} down_box BORDER_BOX labelsize 10 textsize 10
+oldosc->redraw();}
+          tooltip {Oscillator's spectrum adjust} xywh {530 310 60 20} down_box BORDER_BOX labelsize 10 textsize 10
           code0 {o->value(oscil->Psatype);}
         } {
           menuitem {} {
@@ -821,15 +819,19 @@ oldosc->redraw();} open
             xywh {65 65 100 20} labelfont 1 labelsize 10
           }
           menuitem {} {
-            label Thrs
+            label ThrsD
             xywh {75 75 100 20} labelfont 1 labelsize 10
+          }
+          menuitem {} {
+            label ThrsU
+            xywh {85 85 100 20} labelfont 1 labelsize 10
           }
         }
         Fl_Dial {} {
           callback {oscil->Psapar=(int)o->value();
 oscildisplaygroup->redraw();
 oldosc->redraw();}
-          tooltip {Oscillator's spectrum adjust parameter} xywh {585 310 20 20} maximum 127 step 1
+          tooltip {Oscillator's spectrum adjust parameter} xywh {595 310 20 20} maximum 127 step 1
           code0 {o->value(oscil->Psapar);}
           class WidgetPDial
         }
@@ -862,7 +864,7 @@ oldosc->redraw();}
           xywh {680 380 25 15} box THIN_UP_BOX labelfont 1 labelsize 10
         }
       }
-      Fl_Group {} {open
+      Fl_Group {} {
         xywh {675 445 65 90} box ENGRAVED_FRAME
       } {
         Fl_Box {} {
@@ -885,7 +887,7 @@ oldosc->redraw();}
         }
         Fl_Dial {} {
           label pow
-          callback {oscil->Padaptiveharmonicspower=(int)o->value();} selected
+          callback {oscil->Padaptiveharmonicspower=(int)o->value();}
           tooltip {Adaptive harmonics power} xywh {710 495 25 25} labelsize 6 maximum 100 step 1
           code0 {o->value(oscil->Padaptiveharmonicspower);}
           class WidgetPDial
