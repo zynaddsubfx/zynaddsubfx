@@ -50,9 +50,9 @@ decl {\#include "OscilGenUI.h"} {public
 decl {\#include "PresetsUI.h"} {public
 } 
 
-class ADvoicelistitem {open : {public Fl_Group}
+class ADvoicelistitem {: {public Fl_Group}
 } {
-  Function {make_window()} {open private
+  Function {make_window()} {private
   } {
     Fl_Window ADnoteVoiceListItem {
       private xywh {247 599 615 30} type Double hide
@@ -90,7 +90,7 @@ class ADvoicelistitem {open : {public Fl_Group}
           code2 {if (pars->VoicePar[nvoice].Pextoscil != -1) {osc->init(pars->VoicePar[pars->VoicePar[nvoice].Pextoscil].OscilSmp,master);}}
         } {}
         Fl_Value_Output detunevalueoutput {
-          callback {o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());} selected
+          callback {o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
           xywh {265 5 45 20} labelsize 10 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 10
           code0 {o->value(getdetune(pars->VoicePar[nvoice].PDetuneType,0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
         }
@@ -172,7 +172,7 @@ ADnoteVoiceListItem->redraw();} {}
   decl {Master *master;} {}
 } 
 
-class ADvoiceUI {open : {public Fl_Group}
+class ADvoiceUI {: {public Fl_Group}
 } {
   Function {make_window()} {} {
     Fl_Window ADnoteVoiceParameters {
@@ -243,9 +243,10 @@ fmdetunevalueoutput->do_callback();}
               }
               Fl_Value_Output fmdetunevalueoutput {
                 label Detune
-                callback {o->value(getdetune((pars->VoicePar[nvoice].PFMDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PFMDetuneType),0,pars->VoicePar[nvoice].PFMDetune));}
+                callback {o->value(getdetune((pars->VoicePar[nvoice].PFMDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PFMDetuneType),0,pars->VoicePar[nvoice].PFMDetune));} selected
                 xywh {540 245 45 13} labelsize 8 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 8
-                code0 {o->value(getdetune(pars->VoicePar[nvoice].PFMDetuneType,0,pars->VoicePar[nvoice].PFMDetune));}
+                code0 {o->value(getdetune((pars->VoicePar[nvoice].PFMDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PFMDetuneType),0,pars->VoicePar[nvoice].PFMDetune));}
+                code1 {//o->value(getdetune(pars->VoicePar[nvoice].PFMDetuneType,0,pars->VoicePar[nvoice].PFMDetune));}
               }
               Fl_Choice {} {
                 label {Detune Type}
@@ -465,7 +466,7 @@ detunevalueoutput->do_callback();}
               label Detune
               callback {o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
               xywh {10 272 45 15} labelsize 10 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 10
-              code0 {o->value(getdetune(pars->VoicePar[nvoice].PDetuneType,0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
+              code0 {o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
             }
             Fl_Check_Button {} {
               label 440Hz

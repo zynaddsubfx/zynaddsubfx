@@ -767,6 +767,8 @@
 21 Feb 2005 - Se afiseaza corect numele fisierului proaspat salvat in fereastra principala
 26 Feb 2005 - Corectata eroarea la windows si la OSS care facea ca pitch bend sa nu fie mapat corect (trebuie verificat)
 27 Feb 2005 - Se afiseaza corect valoarea lui detune in centi 
+28 Feb 2005 - Corectata o mica eroare care facea ca sa nu se afiseze intotdeauna corect detune-ul la ADvoice
+
 
 
     
