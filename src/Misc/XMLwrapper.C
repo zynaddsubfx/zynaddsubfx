@@ -27,6 +27,7 @@ int XMLwrapper_whitespace_callback(mxml_node_t *node,int where){
     const char *name=node->value.element.name;
 
     if ((where==MXML_WS_BEFORE_OPEN)&&(!strcmp(name,"?xml"))) return(0);
+    if ((where==MXML_WS_BEFORE_CLOSE)&&(!strcmp(name,"string"))) return(0);
     if ((where==MXML_WS_BEFORE_OPEN)||(where==MXML_WS_BEFORE_CLOSE)) return('\n');
 
     return(0);
@@ -43,9 +44,9 @@ XMLwrapper::XMLwrapper(){
 
     
     mxml_node_t *doctype=mxmlNewElement(tree,"!DOCTYPE");
-    mxmlElementSetAttr(doctype,"zynaddsubfx-data",NULL);
+    mxmlElementSetAttr(doctype,"ZynAddSubFX-data",NULL);
 
-    node=root=mxmlNewElement(tree,"zynaddsubfx-data");
+    node=root=mxmlNewElement(tree,"ZynAddSubFX-data");
     
 };
 
@@ -86,7 +87,9 @@ void XMLwrapper::addparbool(char *name,int val){
 };
 
 void XMLwrapper::addparstr(char *name,char *val){
-    addparams2("par_string","name",name,"value",val);
+    mxml_node_t *element=mxmlNewElement(node,"string");
+    mxmlElementSetAttr(element,"name",name);
+    mxmlNewText(element,0,val);
 };
 
 
