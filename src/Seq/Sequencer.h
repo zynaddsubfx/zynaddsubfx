@@ -39,7 +39,7 @@ class Sequencer:public MIDIEvents{
 	//it returns 1 if this must be called at least once more
 	//it returns 0 if there are no more notes for the current time
 	//or -1 if there is no note
-	int getevent(char chan, int *midich,int *type,int *par1, int *par2);
+	int getevent(char ntrack, int *midich,int *type,int *par1, int *par2);
 
 	//returns 0 if ok or -1 if there is a error loading file
 	int importmidifile(char *filename);	
@@ -61,7 +61,7 @@ class Sequencer:public MIDIEvents{
 	double last;//the time of the last event (absolute, since 1 Jan 1970)
 	//theese must be double, because the float's precision is too low
 	//and all theese represents the time in seconds
-    } rectime,playtime;
+    } playtime[NUM_MIDI_TRACKS];
     
     void resettime(timestruct *t);
     void updatecounter(timestruct *t);//this updates the timer values
@@ -71,7 +71,7 @@ class Sequencer:public MIDIEvents{
     struct {
 	event ev;
 	double time;
-    } nextevent;    
+    } nextevent[NUM_MIDI_TRACKS];    
 };
 
 #endif

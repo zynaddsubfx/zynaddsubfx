@@ -177,9 +177,36 @@ void *thread3(void *arg){
  */
 void *thread4(void *arg){
     while (Pexitprogram==0){
-	pthread_mutex_lock(&master->mutex);
-//?????????????????????????????????????????????
-	pthread_mutex_unlock(&master->mutex);
+	int type,par1,par2,again,midichan;
+	for (int ntrack=0;ntrack<NUM_MIDI_TRACKS;ntrack++){
+	    if (master->seq.play==0) break;
+	    do{
+		again=master->seq.getevent(ntrack,&midichan,&type,&par1,&par2);
+//		printf("ntrack=%d again=%d\n",ntrack,again);
+		if (type>0) {
+//	    printf("%d %d  %d %d %d\n",type,midichan,chan,par1,par2);
+
+//	if (cmdtype==MidiController) master->SetController(cmdchan,cmdparams[0],cmdparams[1]);
+
+	
+	
+		    pthread_mutex_lock(&master->mutex);
+	    	    if (type==1){//note_on or note_off
+			if (par2!=0) master->NoteOn(midichan,par1,par2);
+			    else master->NoteOff(midichan,par1);
+	    	    };
+		    pthread_mutex_unlock(&master->mutex);
+		};
+	    } while (again>0);
+	    
+	};
+//if (!realtime player) atunci fac asta
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#ifdef OS_LINUX
+	usleep(1000);
+#elif OS_WINDOWS
+	Sleep(1);
+#endif
     };
     
     return(0);
@@ -421,6 +448,7 @@ int main(int argc, char *argv[]){
 */
     if (noui==0) pthread_create(&thr3,NULL,thread3,NULL);
 
+    pthread_create(&thr4,NULL,thread4,NULL);
 #ifdef WINMIDIIN
 	InitWinMidi(master);
 #endif

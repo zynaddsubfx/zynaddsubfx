@@ -42,11 +42,11 @@ Sequencer::Sequencer(){
 	miditrack[i].record.current=NULL;
 	miditrack[i].record.size=0;
 	miditrack[i].record.length=0.0;
+
+	nextevent[i].time=0.0;
+	resettime(&playtime[i]);
     };
     
-    resettime(&rectime);
-    resettime(&playtime);
-    nextevent.time=0.0;//must be less than 0 
 };
 
 Sequencer::~Sequencer(){
@@ -79,9 +79,8 @@ int Sequencer::importmidifile(char *filename){
 void Sequencer::startplay(){
     if (play!=0) return;
     play=1;
-    resettime(&playtime);
+    for (int i=0;i<NUM_MIDI_TRACKS;i++) resettime(&playtime[i]);
     
-    //test - canalul 1, deocamdata
     for (int i=0;i<NUM_MIDI_TRACKS;i++){
 	rewindlist(&miditrack[i].track);
     };
@@ -94,30 +93,32 @@ void Sequencer::stopplay(){
 
 // ************ Player stuff ***************
 
-int Sequencer::getevent(char chan,int *midich, int *type,int *par1, int *par2){
+int Sequencer::getevent(char ntrack,int *midich, int *type,int *par1, int *par2){
     *type=0;
     if (play==0) return(-1);
 
-    updatecounter(&playtime);
+    updatecounter(&playtime[ntrack]);
 
-//    printf("%g %g\n",nextevent.time,playtime.abs);
+//    printf("%g %g\n",nextevent[ntrack].time,playtime[ntrack].abs);
 
-    if (nextevent.time<playtime.abs) readevent(&miditrack[chan].track,&nextevent.ev);
+    if (nextevent[ntrack].time<playtime[ntrack].abs) readevent(&miditrack[ntrack].track,&nextevent[ntrack].ev);
 	else return(-1);
-    if (nextevent.ev.type==-1) return(-1);
+    if (nextevent[ntrack].ev.type==-1) return(-1);
 //    printf("********************************\n");    
 
 
+    if (ntrack==1) printf("_ %.2f %.2f\n",nextevent[ntrack].time/0.32*80.0,playtime[ntrack].abs/0.32*80.0);
 
-    *type=nextevent.ev.type;
-    *par1=nextevent.ev.par1;
-    *par2=nextevent.ev.par2;
-    *midich=nextevent.ev.channel;
+    *type=nextevent[ntrack].ev.type;
+    *par1=nextevent[ntrack].ev.par1;
+    *par2=nextevent[ntrack].ev.par2;
+    *midich=nextevent[ntrack].ev.channel;
+
     
-    double dt=nextevent.ev.deltatime*0.001;
-    nextevent.time+=dt;
+    double dt=nextevent[ntrack].ev.deltatime*0.0001;
+    nextevent[ntrack].time+=dt;
 
-//    printf("%f   -  %d %d \n",nextevent.time,par1,par2);
+//    printf("%f   -  %d %d \n",nextevent[ntrack].time,par1,par2);
     return(0);//?? sau 1
 };
 

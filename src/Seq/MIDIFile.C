@@ -131,8 +131,10 @@ int MIDIFile::parsetrack(int ntrack){
     while(!midieof){
 	unsigned int msgdeltatime=getvarint32();
 	
-	dt+=msgdeltatime;
+	printf("MSGDELTATIME = %d\n",msgdeltatime);
 	
+	dt+=msgdeltatime;
+
 	int msg=peekbyte();
 	printf("raw msg=0x%x     ",msg);
 	if (msg<0x80) {
@@ -147,7 +149,7 @@ int MIDIFile::parsetrack(int ntrack){
 	
 	switch(msg){
 	    case 0x80 ... 0x8f://note on off
-		    parsenoteon(ntrack,msg & 0x0f,dt);
+		    parsenoteoff(ntrack,msg & 0x0f,dt);
 		    dt=0;
 		break;
 	    case 0x90 ... 0x9f://note on (or note off)
@@ -194,8 +196,6 @@ int MIDIFile::parsetrack(int ntrack){
 	
 	if (midieof) return(-1);
 
-	dt=msgdeltatime;
-	
 	if ((midifilek-oldmidifilek)==size) break;
 	    else if((midifilek-oldmidifilek)>size) return(-1);
 //    if (size!=6) return(-1);//header is always 6 bytes long
@@ -208,7 +208,7 @@ int MIDIFile::parsetrack(int ntrack){
 
 
 void MIDIFile::parsenoteoff(char ntrack,char chan,unsigned int dt){
-    unsigned char note,vel;
+    unsigned char note;
     note=getbyte();
     
     if (chan>=NUM_MIDI_CHANNELS) return;
@@ -217,6 +217,7 @@ void MIDIFile::parsenoteoff(char ntrack,char chan,unsigned int dt){
     me->tmpevent.type=1;
     me->tmpevent.par1=note;
     me->tmpevent.par2=0;
+    me->tmpevent.channel=chan;
     
     
     ///test 
@@ -226,6 +227,7 @@ void MIDIFile::parsenoteoff(char ntrack,char chan,unsigned int dt){
     
     printf("Note off:%d ",note);
 };
+
 
 void MIDIFile::parsenoteon(char ntrack,char chan,unsigned int dt){
     unsigned char note,vel;
@@ -238,9 +240,12 @@ void MIDIFile::parsenoteon(char ntrack,char chan,unsigned int dt){
     me->tmpevent.type=1;
     me->tmpevent.par1=note;
     me->tmpevent.par2=vel;
+    me->tmpevent.channel=chan;
     me->writeevent(&me->miditrack[ntrack].record,&me->tmpevent);
 
     printf("[dt %d ]  Note on:%d %d\n",dt,note,vel);
+    
+    
 };
 
 void MIDIFile::parsecontrolchange(char ntrack,char chan,unsigned int dt){
@@ -256,6 +261,7 @@ void MIDIFile::parsecontrolchange(char ntrack,char chan,unsigned int dt){
     me->tmpevent.type=2;
     me->tmpevent.par1=control;//???????????? ma uit la Sequencer::recordnote() din varianele vechi de zyn
     me->tmpevent.par2=value;
+    me->tmpevent.channel=chan;
     me->writeevent(&me->miditrack[ntrack].record,&me->tmpevent);
     
 };
@@ -285,8 +291,8 @@ void MIDIFile::parsemetaevent(unsigned char mtype,unsigned char mlength){
 
 unsigned int MIDIFile::convertdt(unsigned int dt){
     double result=dt;
-    
-    return((int) (result*3.0));
+
+    return((int) (result*30.0));
 };
 
 
@@ -296,9 +302,7 @@ void MIDIFile::clearmidifile(){
     midifilesize=0;
     midifilek=0;
     midieof=false;
-    
     data.tick=0.05;
-    
 };
 
 unsigned char MIDIFile::getbyte(){
