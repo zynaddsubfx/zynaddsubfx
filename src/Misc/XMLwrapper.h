@@ -41,6 +41,9 @@ class XMLwrapper{
 	//returns 0 if ok or -1 if the file cannot be saved
 	int saveXMLfile(char *filename, int compression);
 
+	//returns 0 if ok or -1 if the file cannot be loaded
+	int loadXMLfile(char *filename);
+
 	//add simple parameter (name and value)
 	void addpar(char *name,int val);
 	void addparreal(char *name,REALTYPE val);

@@ -528,3 +528,6 @@
 07 Feb 2004 - Adaugat functii de initializare si renuntat la masterdefaultbuf si instrumentdefaultbuf (adica salvarea la inceput si incarcarea bufferelor cu instrumentele prestabilite)
 	    - Corectata o mica eroare care facea ca sa se incarce subnotepars la adnotepars (eroarea a aparut azi)
 08 Feb 2004 - Modificat putin formatul XML
+10 Feb 2004 - Adaugata salvarea parametrilor pt. basefunction la OscilGen
+	    - Inceput sa scriu incarcarea parametrilor
+	    

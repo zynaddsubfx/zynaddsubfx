@@ -784,8 +784,7 @@ int Master::saveXML(char *filename){
 
     //sa pun aici un test daca exista fisierul
 
-    XMLwrapper *xml;
-    xml=new XMLwrapper();
+    XMLwrapper *xml=new XMLwrapper();
 
     xml->beginbranch("MASTER");
     add2XML(xml);
@@ -796,6 +795,18 @@ int Master::saveXML(char *filename){
     return(0);
 };
 
+
+int Master::loadXML(char *filename){
+    XMLwrapper *xml=new XMLwrapper();
+    if (xml->loadXMLfile(filename)<0) {
+	delete(xml);
+	return(-1);
+    };
+    
+    
+    delete(xml);
+    return(0);
+};
 
 
 

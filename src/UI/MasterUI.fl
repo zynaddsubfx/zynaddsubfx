@@ -372,14 +372,14 @@ fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. P
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
-      xywh {149 197 390 465} type Double
+      xywh {151 174 390 465} type Double
       code0 {setfilelabel(NULL);} non_modal visible
     } {
-      Fl_Menu_Bar mastermenu {open
+      Fl_Menu_Bar mastermenu {
         xywh {0 0 690 25}
       } {
         submenu {} {
-          label {&File}
+          label {&File} open
           xywh {0 0 100 20}
         } {
           menuitem {} {
@@ -396,7 +396,35 @@ master->saveXML(filename);
 pthread_mutex_unlock(&master->mutex);
 
 updatepanel();}
-            xywh {10 10 100 20} divider
+            xywh {10 10 100 20}
+          }
+          menuitem {} {
+            label {&Open XML...}
+            callback {char *filename;
+filename=fl_file_chooser("Open:","(*.xml)",NULL,0);
+if (filename==NULL) return;
+
+
+pthread_mutex_lock(&master->mutex);
+  //clear all parameters
+  master->defaults();
+
+  //load the data
+  master->loadXML(filename);
+pthread_mutex_unlock(&master->mutex);
+
+npartcounter->do_callback();
+syseffnocounter->do_callback();
+inseffnocounter->do_callback();
+masterkeyshiftcounter->value(master->Pkeyshift-64);
+mastervolumedial->value(master->Pvolume);    
+globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);   
+microtonalui=new MicrotonalUI(&master->microtonal);
+nrpnbutton->value(master->ctl.NRPN.receive);
+updatesendwindow();
+
+updatepanel();}
+            xywh {20 20 100 20} divider
           }
           menuitem {} {
             label {&New (erase all)...}
@@ -604,7 +632,7 @@ if (result==0) {
            else fl_alert("Error: Could not load the file.");   
      };
 
-updatepanel();} selected
+updatepanel();}
             xywh {20 20 100 20}
           }
           menuitem {} {

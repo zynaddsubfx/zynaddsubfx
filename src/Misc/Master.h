@@ -48,10 +48,17 @@ class Master{
 	//saves all settings to a XML file
 	//returns 0 for ok, 1 if there is a existing file or -1 if there is an error
 	int saveXML(char *filename);
+
+	//saves all settings to a XML file
+	//returns 0 for ok or -1 if there is an error
+	int loadXML(char *filename);
 	
 	//this adds the parameters to the XML data
 	void add2XML(XMLwrapper *xml);
+
 	void defaults();
+
+
 	
 
 	//Midi IN

@@ -842,13 +842,34 @@ void OscilGen::add2XML(XMLwrapper *xml){
     xml->beginbranch("HARMONICS");
 	for (int n=0;n<MAX_AD_HARMONICS;n++){
 	    if ((Phmag[n]==64)&&(Phphase[n]==64)) continue;
-	    xml->beginbranch("HARMONIC",n);
+	    xml->beginbranch("HARMONIC",n+1);
 		xml->addpar("mag",Phmag[n]);
 		xml->addpar("phase",Phphase[n]);
 	    xml->endbranch();
 	};
     xml->endbranch();
+    
+    if (Pcurrentbasefunc==127){
+	REALTYPE max=0.0;
 
+	for (int i=0;i<OSCIL_SIZE;i++) if (max<fabs(basefuncFFTfreqs[i])) max=fabs(basefuncFFTfreqs[i]);
+	if (max<0.00000001) max=1.0;
+
+	xml->beginbranch("BASE_FUNCTION");
+	    for (int i=1;i<OSCIL_SIZE/2;i++){
+		REALTYPE xc=basefuncFFTfreqs[i]/max;
+	        REALTYPE xs=basefuncFFTfreqs[OSCIL_SIZE-i]/max;
+		if ((fabs(xs)>0.00001)&&(fabs(xs)>0.00001)){
+		    xml->beginbranch("BF_HARMONIC",i);
+			xml->addparreal("cos",xs);
+			xml->addparreal("sin",xs);
+		    xml->endbranch();
+		};
+
+
+	    };
+	xml->endbranch();
+    };
 };
 
 

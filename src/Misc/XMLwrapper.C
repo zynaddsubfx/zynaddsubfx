@@ -38,7 +38,7 @@ int XMLwrapper_whitespace_callback(mxml_node_t *node,int where){
 XMLwrapper::XMLwrapper(){
     memset(&parentstack,0,sizeof(parentstack));
     stackpos=0;
-
+    
     tree=mxmlNewElement(MXML_NO_PARENT,"?xml");
     mxmlElementSetAttr(tree,"version","1.0");
     mxmlElementSetAttr(tree,"encoding","UTF-8");
@@ -48,6 +48,8 @@ XMLwrapper::XMLwrapper(){
     mxmlElementSetAttr(doctype,"ZynAddSubFX-data",NULL);
 
     node=root=mxmlNewElement(tree,"ZynAddSubFX-data");
+    
+    mxmlElementSetAttr(root,"version","0.1");
     
     //save zynaddsubfx specifications
     beginbranch("BASE_PARAMETERS");
@@ -64,9 +66,29 @@ XMLwrapper::XMLwrapper(){
 };
 
 XMLwrapper::~XMLwrapper(){
-    mxmlDelete(tree);
+    if (tree!=NULL) mxmlDelete(tree);
 };
 
+int XMLwrapper::loadXMLfile(char *filename){
+    if (tree!=NULL) mxmlDelete(tree);
+    tree=NULL;
+    
+    FILE *file=fopen(filename,"r");
+    if (file==NULL) return(-1);
+    
+    root=tree=mxmlLoadFile(NULL,file,MXML_NO_CALLBACK);
+    fclose(file);
+    
+    if (tree==NULL) return(-1);//this is not XML
+    
+//    if (strcmp(tree->value.element.name,"?xml")!=0) return(-2);
+    node=root=mxmlFindElement(tree,tree,"ZynAddSuFX-data",NULL,NULL,MXML_DESCEND);
+    if (root==NULL) return(-2);//the XML doesnt embbed zynaddsubfx data
+        
+//    printf("%s\n",root->value.element.name);
+    
+    return(0);
+};
 
 
 int XMLwrapper::saveXMLfile(char *filename,int compression){
