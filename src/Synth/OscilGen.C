@@ -298,6 +298,9 @@ void OscilGen::oscilfilter(){
 	    case 10:gain=cos(par*par*PI/2.0*i);//cos
 		   gain*=gain;
 		   break;
+	    case 11:gain=sin(par*par*PI/2.0*i);//sin
+		   gain*=gain;
+		   break;
 	};
 	oscilFFTfreqs[OSCIL_SIZE-i-1]*=gain;
 	oscilFFTfreqs[i+1]*=gain;

@@ -610,7 +610,7 @@ oldosc->redraw();} open
             xywh {95 95 100 20} labelfont 1 labelsize 10
           }
           menuitem {} {
-            label Sgm selected
+            label Sgm
             xywh {90 90 100 20} labelfont 1 labelsize 10
           }
         }
@@ -681,6 +681,10 @@ oldosc->redraw();}
           menuitem {} {
             label Cos
             xywh {75 75 100 20} labelfont 1 labelsize 10
+          }
+          menuitem {} {
+            label Sin
+            xywh {85 85 100 20} labelfont 1 labelsize 10
           }
         }
         Fl_Dial {} {
