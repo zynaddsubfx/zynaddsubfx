@@ -37,8 +37,8 @@ void VSTSynth::processReplacing (float **inputs, float **outputs, long samplefra
 };
 
 long int VSTSynth::canDo(char *txt){
- if (strcmp(txt,"receiveVstEvents")!=0) return (1);
- if (strcmp(txt,"receiveVstMidiEvent")!=0) return (1);
+ if (strcmp(txt,"receiveVstEvents")==0) return (1);
+ if (strcmp(txt,"receiveVstMidiEvent")==0) return (1);
  return(-1);
 };
 
