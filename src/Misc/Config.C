@@ -30,6 +30,7 @@
 #endif
 
 #include "Config.h"
+#include "XMLwrapper.h"
 
 Config::Config(){
     maxstringsize=MAX_STRING_SIZE;//for ui
@@ -205,39 +206,49 @@ void Config::readConfig(char *filename){
 };
 
 void Config::saveConfig(char *filename){
-    FILE *file=fopen(filename,"w");
-    if (file==NULL) return;
-    fprintf(file,"%s","#ZynAddSubFX configuration file\n");
-    fprintf(file,"SAMPLE_RATE = %d\n",cfg.SampleRate);
-    fprintf(file,"SOUND_BUFFER_SIZE = %d\n",cfg.SoundBufferSize);
-    fprintf(file,"OSCIL_SIZE = %d\n",cfg.OscilSize);
-    fprintf(file,"SWAP_STEREO = %d\n",cfg.SwapStereo);
-
-    fprintf(file,"BANK_WINDOW_AUTO_CLOSE = %d\n",cfg.BankUIAutoClose);
-
-    fprintf(file,"DUMP_NOTES_TO_FILE = %d\n",cfg.DumpNotesToFile);
-    fprintf(file,"DUMP_APPEND = %d\n",cfg.DumpAppend);
-    fprintf(file,"DUMP_FILE = %s\n",cfg.DumpFile);
+    XMLwrapper *xmlcfg=new XMLwrapper();
     
-    fprintf(file,"GZIP_COMPRESSION = %d\n",cfg.GzipCompression);
-
-    fprintf(file,"#Linux\n");
-    fprintf(file,"LINUX_OSS_WAVE_OUT_DEV = %s\n",cfg.LinuxOSSWaveOutDev);
-    fprintf(file,"LINUX_OSS_SEQ_IN_DEV = %s\n",cfg.LinuxOSSSeqInDev);
-
-    fprintf(file,"#Windows\n");
-    fprintf(file,"WINDOWS_WAVE_OUT_ID = %d\n",cfg.WindowsWaveOutId);
-    fprintf(file,"WINDOWS_MIDI_IN_ID = %d\n",cfg.WindowsMidiInId);
+    xmlcfg->beginbranch("CONFIGURATION");    
     
-    fclose(file);    
+	xmlcfg->addpar("sample_rate",cfg.SampleRate);
+	xmlcfg->addpar("sound_buffer_size",cfg.SoundBufferSize);
+	xmlcfg->addpar("oscil_size",cfg.OscilSize);
+	xmlcfg->addpar("swap_stereo",cfg.SwapStereo);
+	xmlcfg->addpar("bank_window_auto_close",cfg.BankUIAutoClose);
+
+	xmlcfg->addpar("dump_notes_to_file",cfg.DumpNotesToFile);
+	xmlcfg->addpar("dump_append",cfg.DumpAppend);
+	xmlcfg->addparstr("dump_file",cfg.DumpFile);
+
+	xmlcfg->addpar("gzip_compression",cfg.GzipCompression);
+
+	xmlcfg->addparstr("bank_current",cfg.currentBankDir);
+	xmlcfg->addparstr("bank_root_list",cfg.bankRootDirList);
+
+	//linux stuff
+	xmlcfg->addparstr("linux_oss_wave_out_dev",cfg.LinuxOSSWaveOutDev);
+	xmlcfg->addparstr("linux_oss_seq_in_dev",cfg.LinuxOSSSeqInDev);
+	
+	//windows stuff
+	xmlcfg->addpar("windows_wave_out_id",cfg.WindowsWaveOutId);
+	xmlcfg->addpar("windows_midi_in_id",cfg.WindowsMidiInId);
+
+    xmlcfg->endbranch();
+    
+    int tmp=cfg.GzipCompression;
+    cfg.GzipCompression=0;
+    xmlcfg->saveXMLfile(filename);
+    cfg.GzipCompression=tmp;
+    
+    delete(xmlcfg);
 };
 
 void Config::getConfigFileName(char *name, int namesize){
     name[0]=0;
 #ifdef OS_LINUX
-    snprintf(name,namesize,"%s%s",getenv("HOME"),"/.zynaddsubfx.cfg");
+    snprintf(name,namesize,"%s%s",getenv("HOME"),"/.zynaddsubfxXML.cfg");
 #else
-    snprintf(name,namesize,"%s","zynaddsubfx.cfg");
+    snprintf(name,namesize,"%s","zynaddsubfxXML.cfg");
 #endif
 
 };

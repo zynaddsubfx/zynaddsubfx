@@ -52,46 +52,7 @@ Bank::Bank(){
     clearbank();
 
 
-    char bankcfg[1000];//hope the filename is shorter than that :)
-#if defined(OS_WINDOWS)
-    strcpy(bankcfg,"zynaddsubfx_usedbank");
-#endif
-#if defined(OS_LINUX)
-    strcpy(bankcfg,getenv("HOME"));
-    strcat(bankcfg,"/.zynaddsubfx_usedbank");
-#endif
-    
-
-    struct stat statbuf;
-    int result=stat(bankcfg,&statbuf);
-    if (result==0){
-	char *fn=new char [statbuf.st_size+2];
-	for (int i=0;i<statbuf.st_size;i++) fn[i]=0;
-	int file=open(bankcfg,O_RDONLY,00444+00222);
-        if (file!=-1){
-	    read(file,fn,statbuf.st_size);
-	    
-	    loadbank(fn);
-	};
-	close(file);
-	delete(fn);
-    } else {
-    
-    result=1;
-#if defined(OS_LINUX)
-    result=stat("/usr/local/share/zynaddsubfx/default_bank",&statbuf);
-    if (result==0) loadbank("/usr/local/share/zynaddsubfx/default_bank");
-	else {
-	    result=stat("/usr/share/zynaddsubfx/default_bank",&statbuf);
-	    if (result==0) loadbank("/usr/share/zynaddsubfx/default_bank");
-	};
-#endif	
-    if (result!=0) loadbank("default_bank");
-    };
-
-
-
-//    loadbank("bank_xml");
+//    loadbank("nume directorbank");
 
     for (int i=0;i<MAX_NUM_BANKS;i++){
 	banks[i].dir=NULL;
@@ -103,23 +64,8 @@ Bank::Bank(){
 
 Bank::~Bank(){
     if (dirname!=NULL) {
-	//**************//
-	char bankcfg[1000];//hope the filename is shorter than that :)
-#if defined(OS_WINDOWS)
-	strcpy(bankcfg,"zynaddsubfx_usedbank");
-#endif
-#if defined(OS_LINUX)
-	strcpy(bankcfg,getenv("HOME"));
-	strcat(bankcfg,"/.zynaddsubfx_usedbank");
-#endif
-	int file=open(bankcfg,O_CREAT|O_WRONLY|O_TRUNC,00444+00222);
-	if (file!=-1){
-    	    write(file,dirname,strlen(dirname)+1);
-    	    close(file);
-	};
-	//**************//
+	//salvez numele bank-ul aici cu numele "dirname"
     };
-
     for (int i=0;i<MAX_NUM_BANKS;i++){
 	if (banks[i].dir!=NULL) delete (banks[i].dir);
 	if (banks[i].name!=NULL) delete (banks[i].name);
