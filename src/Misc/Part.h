@@ -34,6 +34,7 @@
 #include "../Misc/Microtonal.h"
 #include "../DSP/FFTwrapper.h"
 #include "../Effects/EffectMgr.h"
+#include "XMLwrapper.h"
 
 class Part{
 
@@ -54,6 +55,9 @@ class Part{
 	
       void saveloadbuf(Buffer *buf,int instrumentonly);
       //instrumentonly: 0 - save all, 1 - save only instrumnet, 2 - save only instrument without the name(used in bank)
+
+      void add2XML(XMLwrapper *xml);
+      void add2XMLinstrument(XMLwrapper *xml);
 
       void saveloadbufkititem(Buffer *buf,unsigned char item,int saveitem0);
       void swapcopyitem(int item1,int item2,int mode);
@@ -79,10 +83,10 @@ class Part{
       void setkititemstatus(int kititem,int Penabled_);
 
       unsigned char Penabled;//if the part is enabled
+      unsigned char Pvolume;//part volume
       unsigned char Pminkey;//the minimum key that the part receives noteon messages
       unsigned char Pmaxkey;//the maximum key that the part receives noteon messages
       unsigned char *Pname; //name of the instrument
-      unsigned char Pvolume;//part volume
       void setPvolume(char Pvolume);
       unsigned char Pkeyshift;//Part keyshift
       unsigned char Prcvchn;//from what midi channel it receive commnads

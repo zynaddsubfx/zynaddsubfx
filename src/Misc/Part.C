@@ -910,6 +910,61 @@ void Part::saveloadbuf(Buffer *buf,int instrumentonly){
 
 };
 
+/*
+      unsigned char Pkitmode;//if the kitmode is enabled
+      unsigned char Pdrummode;//if all keys are mapped and the system is 12tET (used for drums)
+
+*/
+
+void Part::add2XMLinstrument(XMLwrapper *xml){
+    xml->addparstr("name",(char *)Pname);
+    xml->addpar("kitmode",Pkitmode);
+    xml->addparbool("drummode",Pdrummode);
+    
+};
 
 
+void Part::add2XML(XMLwrapper *xml){
+    //parameters
+    xml->addparbool("enabled",Penabled);
+    if (Penabled==0) return;
+
+    xml->addpar("volume",Pvolume);
+    xml->addpar("panning",Ppanning);
+
+    xml->addpar("minkey",Pminkey);
+    xml->addpar("maxkey",Pmaxkey);
+    xml->addpar("keyshift",Pkeyshift);
+    xml->addpar("rcvchn",Prcvchn);
+
+    xml->addpar("velsns",Pvelsns);
+    xml->addpar("veloffs",Pveloffs);
+
+    xml->addpar("noteon",Pnoteon);
+    xml->addparbool("polymode",Ppolymode);
+    xml->addpar("keylimit",Pkeylimit);
+//    xml->addpar("",P);
+
+    
+
+
+
+    xml->beginbranch("INSTRUMENT");
+     add2XMLinstrument(xml);
+    xml->endbranch();
+
+
+    
+//    xml->addpar("volume",Pvolume);
+//    xml->addpar("keyshift",Pkeyshift);
+
+    
+//    for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
+//	xml->addpart(npart);
+	
+	
+	
+//	xml->endbranch();
+//    };
+};
 

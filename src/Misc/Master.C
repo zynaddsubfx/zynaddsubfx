@@ -22,7 +22,6 @@
 */
 
 #include "Master.h"
-#include "XMLwrapper.h"
 
 #include <stdio.h>
 
@@ -136,7 +135,7 @@ void Master::NoteOff(unsigned char chan,unsigned char note){
 };
 
 /*
- * Internal Note Off 
+ * Internal Note Off
  */
 void Master::noteoff(unsigned char chan,unsigned char note){
     int npart;
@@ -181,7 +180,7 @@ void Master::setcontroller(unsigned char chan,unsigned int type,int par){
 	    
 	    };
 	};
-    } else {//other controllers 
+    } else {//other controllers
 	for (int npart=0;npart<NUM_MIDI_PARTS;npart++){//Send the controller to all part assigned to the channel
 	    if ((chan==part[npart]->Prcvchn) && (part[npart]->Penabled!=0))
 		part[npart]->SetController(type,par);
@@ -226,7 +225,7 @@ void Master::AudioOut(REALTYPE *outl,REALTYPE *outr){
 	if (again<=0) break;
     };
     //test end
-    
+
     
     //Swaps the Left channel with Right Channel (if it is asked for)
     if (swaplr!=0){
@@ -684,7 +683,7 @@ void Master::saveloadbuf(Buffer *buf){
 	};
     };
 
-    
+
     if (buf->getmode()!=0) {
 	unsigned char tmp=0xff;
 	buf->rwbyte(&tmp);
@@ -693,6 +692,21 @@ void Master::saveloadbuf(Buffer *buf){
 
 
 
+void Master::add2XML(XMLwrapper *xml){
+    //parameters
+    xml->addpar("volume",Pvolume);
+    xml->addpar("keyshift",Pkeyshift);
+    xml->addparbool("NRPNreceive",ctl.NRPN.receive);
+
+    //Save all parts
+    
+    for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
+	xml->beginbranch("PART","npart",npart);
+	part[npart]->add2XML(xml);
+	xml->endbranch();
+    };
+};
+
 
 int Master::saveXML(char *filename){
 
@@ -700,10 +714,11 @@ int Master::saveXML(char *filename){
 
     XMLwrapper *xml;
     xml=new XMLwrapper();
-    
-    
-    
-    
+
+    xml->beginbranch("MASTER");
+    add2XML(xml);
+    xml->endbranch();
+
     xml->saveXMLfile(filename,0);
     delete (xml);
     return(0);

@@ -34,6 +34,7 @@
 #include "Bank.h"
 #include "Dump.h"
 #include "../Seq/Sequencer.h"
+#include "XMLwrapper.h"
 
 extern Dump dump;
 class Master{
@@ -45,6 +46,9 @@ class Master{
 	//saves all settings to a XML file
 	//returns 0 for ok, 1 if there is a existing file or -1 if there is an error
 	int saveXML(char *filename);
+	
+	//this adds the parameters to the XML data
+	void add2XML(XMLwrapper *xml);
 
 	//Midi IN
 	void NoteOn(unsigned char chan,unsigned char note,unsigned char velocity);
