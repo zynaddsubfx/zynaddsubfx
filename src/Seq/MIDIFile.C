@@ -83,10 +83,6 @@ int MIDIFile::parsemidifile(){
     int ntracks=getint16();//this is always if the format is "0"
     printf("ntracks %d\n",ntracks);
 
-    if (ntracks>=NUM_MIDI_CHANNELS){
-	ntracks=NUM_MIDI_CHANNELS;
-    };
-    
     int division=getint16();
     printf("division %d\n",division);
     if (division>=0){//delta time units in each a quater note
@@ -95,15 +91,22 @@ int MIDIFile::parsemidifile(){
 	printf("ERROR:in MIDIFile.C::parsemidifile() - SMPTE not implemented yet.");
     };    
     
-//    for (int n=0;n<ntracks;n++){
-	if (parsetrack(0)<0) {
+    for (int n=0;n<ntracks;n++){
+	if (parsetrack(n)<0) {
 	    clearmidifile();
 	    return(-1);
 	};
-//    };
+    };
+
+    printf("\n\nCURRENT File position is = 0x%x\n",midifilek);
+    printf("\nMIDI file succesfully parsed.\n");
+//    printf("\n0x%x\n",getbyte());
 
     return(0);
 };
+
+//private members
+
 
 int MIDIFile::parsetrack(int ntrack){
     printf("\n--==*Reading track %d **==--\n",ntrack);
@@ -112,26 +115,145 @@ int MIDIFile::parsetrack(int ntrack){
     if (chunk!=0x4d54726b) return(-1);
 
     int size=getint32();
-    printf("%d\n",size);
+    printf("size = %d\n",size);
+
+    int oldmidifilek=midifilek;
+
+    unsigned char lastmsg=0;
+    unsigned int dt=0;
+    
+    while(!midieof){
+	unsigned int msgdeltatime=getvarint32();
+	
+	dt+=msgdeltatime;
+	
+	int msg=peekbyte();
+	printf("raw msg=0x%x     ",msg);
+	if (msg<0x80) {
+	    msg=lastmsg;
+	} else {
+	    lastmsg=msg;
+	    getbyte();
+	};  
+	printf("msg=0x%x\n",msg);
+	
+	unsigned int mtype,mlength;
+	
+	switch(msg){
+	    case 0x80 ... 0x8f://note on off
+		    parsenoteon(msg & 0x0f,dt);
+		    dt=0;
+		break;
+	    case 0x90 ... 0x9f://note on (or note off)
+		    parsenoteon(msg & 0x0f,dt);
+		    dt=0;
+		break;
+	    case 0xa0 ... 0xaf://aftertouch - ignored
+		    skipnbytes(2);
+		break;
+	    case 0xb0 ... 0xbf://control change
+		    parsecontrolchange(msg & 0x0f,dt);
+		    dt=0;
+		break;
+	    case 0xc0 ... 0xcf://program change - ignored
+		    skipnbytes(1);
+		break;
+	    case 0xd0 ... 0xdf://channel pressure - ignored
+		    skipnbytes(1);
+		break;
+	    case 0xe0 ... 0xef://channel mode messages
+		    skipnbytes(2);
+		break;
+	    case 0xf0://sysex - ignored
+		while (getbyte()!=0xf7){
+		    if (midieof) break;
+		};
+	      break;
+	    case 0xf7://sysex (another type) - ignored
+		skipnbytes(getvarint32());
+	      break;
+
+	    case 0xff://meta-event
+		mtype=getbyte();
+		mlength=getbyte();
+		parsemetaevent(mtype,mlength);
+  	      break;
+
+	    default:
+		getbyte();
+		printf("UNKNOWN message! 0x%x\n",msg);
+		return(-1);
+  	     break;
+	};
+	
+	if (midieof) return(-1);
+
+	dt=msgdeltatime;
+	
+	if ((midifilek-oldmidifilek)==size) break;
+	    else if((midifilek-oldmidifilek)>size) return(-1);
 //    if (size!=6) return(-1);//header is always 6 bytes long
-/*
-unsigned long ReadVarLen( void ) {
-        unsigned long value;
-        byte c;
+    };
 
-        if ((value = getc(infile)) & 0x80) {
-                value &= 0x7f;
-                do  {
-                        value = (value << 7) + ((c = getc(infile)) & 0x7f);
-                }  while (c & 0x80);
-        }
-        return value;
-}
+    printf("End Track\n\n");
 
-*/
+    return(0);
 };
 
-//private members
+
+void MIDIFile::parsenoteoff(char chan,unsigned int dt){
+    unsigned char note,vel;
+    note=getbyte();
+    
+    if (chan>=NUM_MIDI_CHANNELS) return;
+    
+    printf("Note off:%d ",note);
+};
+
+void MIDIFile::parsenoteon(char chan,unsigned int dt){
+    unsigned char note,vel;
+    note=getbyte();
+    vel=getbyte();
+    
+    if (chan>=NUM_MIDI_CHANNELS) return;
+    
+    printf("[dt %d ]  Note on:%d %d\n",dt,note,vel);
+};
+
+void MIDIFile::parsecontrolchange(char chan,unsigned int dt){
+    unsigned char control,value;
+    control=getbyte();
+    value=getbyte();
+    
+    if (chan>=NUM_MIDI_CHANNELS) return;
+    
+    printf("[dt %d] Control change:%d %d\n",dt,control,value);
+    
+};
+
+void MIDIFile::parsepitchwheel(char chan, unsigned int dt){
+    unsigned char valhi,vallo;
+    vallo=getbyte();
+    valhi=getbyte();
+    
+    if (chan>=NUM_MIDI_CHANNELS) return;
+    
+    int value=(int)valhi*128+vallo;
+    
+    printf("[dt %d] Pitch wheel:%d\n",dt,value);
+    
+};
+
+void MIDIFile::parsemetaevent(unsigned char mtype,unsigned char mlength){
+    int oldmidifilek=midifilek;
+    printf("meta-event type=0x%x  length=%d\n",mtype,mlength);
+    
+
+
+    midifilek=oldmidifilek+mlength;
+        
+};
+
 
 void MIDIFile::clearmidifile(){
     if (midifile!=NULL) delete(midifile);
@@ -153,6 +275,14 @@ unsigned char MIDIFile::getbyte(){
     return(midifile[midifilek++]);
 };
 
+unsigned char MIDIFile::peekbyte(){
+    if (midifilek>=midifilesize) {
+	midieof=true;
+	return(0);
+    };
+    return(midifile[midifilek]);
+};
+
 unsigned int MIDIFile::getint32(){
     unsigned int result=0;
     for (int i=0;i<4;i++) {
@@ -170,3 +300,27 @@ unsigned short int MIDIFile::getint16(){
     if (midieof) result=0;
     return(result);
 };
+
+unsigned int MIDIFile::getvarint32(){
+    unsigned long result=0;
+    unsigned char b;
+
+    if ((result = getbyte()) & 0x80) {
+        result &= 0x7f;
+        do  {
+	    b=getbyte();
+            result = (result << 7) + (b & 0x7f);
+        }while (b & 0x80);
+    }
+    return result;
+};
+
+
+void MIDIFile::skipnbytes(int n){
+    midifilek+=n;
+    if (midifilek>=midifilesize){
+	midifilek=midifilesize-1;
+	midieof=true;
+    };
+};
+

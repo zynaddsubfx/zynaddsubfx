@@ -36,25 +36,42 @@ class MIDIFile{
 	//returns -1 if there is an error, otherwise 0
 	int parsemidifile();
 	
-	//returns -1 if there is an error, otherwise 0
-	int parsetrack(int ntrack);
-	
     private:
 	unsigned char *midifile;
 	int midifilesize,midifilek;
 	bool midieof;
+
+	//returns -1 if there is an error, otherwise 0
+	int parsetrack(int ntrack);
+    
+	void parsenoteoff(char chan,unsigned int dt);
+	void parsenoteon(char chan,unsigned int dt);
+	void parsecontrolchange(char chan,unsigned int dt);
+	void parsepitchwheel(char chan, unsigned int dt);
+	void parsemetaevent(unsigned char mtype,unsigned char mlength);
 	
 	void clearmidifile();
 	
+	/* Low Level MIDIfile functions */
+	
 	//get a byte from the midifile
 	unsigned char getbyte();
+
+	//peek the current byte from the midifile
+	unsigned char peekbyte();
 	
 	//get a set of 4 bytes from the midifile
 	unsigned int getint32();
 	
 	//get a word of 2 bytes from the midifile
 	unsigned short int getint16();
-	
+
+	//read a variable length quantity
+	unsigned int getvarint32();	
+
+	//skip some bytes
+	void skipnbytes(int n);
+
 	struct {
 	    double tick;//how many seconds one tick has
 	}data;
