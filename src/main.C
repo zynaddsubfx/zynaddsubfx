@@ -277,10 +277,10 @@ void exitprogram(){
 
     delete(ui);
     delete(Midi);
-    delete(denormalkillbuf);
+    delete(master); 
 
 //    pthread_mutex_unlock(&master->mutex);
-    delete(master); 
+    delete(denormalkillbuf);
 };
 
 #ifdef OS_WINDOWS
