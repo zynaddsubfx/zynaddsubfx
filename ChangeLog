@@ -549,6 +549,8 @@
 	    - Micsorat timpul de marire amplitudine la ADnote (doar in cazul cand amplitudinea creste brusc ca la un LFO expdown)
 	    - Corectata o eroare foarte veche la LFO amplitudine (amplitudinea nu scadea corespunzator)
 28 Feb 2004 - Se poate incarca si salva instrumente in Bank
+01 Mar 2004 - Se pot schimba bancile de instrumente
+
 
 
 

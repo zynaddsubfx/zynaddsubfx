@@ -81,14 +81,15 @@ label(bank->getnamenumbered(nslot));} {}
   decl {BankProcess_ *bp;} {}
 } 
 
-class BankUI {: {public BankProcess_}
+class BankUI {open : {public BankProcess_}
 } {
-  Function {make_window()} {} {
+  Function {make_window()} {open
+  } {
     Fl_Window bankuiwindow {
       label Bank
-      xywh {16 205 770 430} type Double hide
+      xywh {16 205 770 435} type Double
       code0 {o->label(bank->bankfiletitle);}
-      code1 {if (bank->bankfiletitle==NULL) o->label ("Choose a bank to use by pressing the 'Load/Use Bank from file...' button or choose 'New Bank...' to make a new bank.");}
+      code1 {if (bank->bankfiletitle==NULL) o->label ("Choose a bank to use by pressing the 'Load/Use Bank from file...' button or choose 'New Bank...' to make a new bank.");} visible
     } {
       Fl_Button {} {
         label Close
@@ -142,40 +143,16 @@ class BankUI {: {public BankProcess_}
           code0 {if (bank->locked()) o->deactivate();}
         }
       }
-      Fl_Button loadusebankfile {
-        label {Use Bank from file...}
-        callback {const char *filename;
-filename=fl_file_chooser("Load and use Bank from file:","(*.bnk_zyn)",NULL,0);
-if (filename==NULL) return;
-if (bank->loadbank(filename)==2)
-       fl_alert("Error: Could not load the bank from the file..");
-for (int i=0;i<128;i++) bs[i]->refresh();
-refreshmainwindow();}
-        xywh {330 387 74 39} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
-      }
       Fl_Button {} {
-        label {Save Bank...}
-        callback {char *filename;
-\#define EXT ".bnk_zyn"
-filename=fl_file_chooser("Save Bank to file and use it:","(*"EXT")",NULL,0);
-if (filename==NULL) return;
-filename=fl_filename_setext(filename,EXT);
-\#undef EXT
-
-if (filename==NULL) return;
-//int result=bank->savebank(filename,0);
-int result=0;
-if (result==1) {
-       if (fl_ask("The file exists. \\nOverwrite it?")){
-//              result=bank->savebank(filename,1);
-	    result=0;
-       } else return; 
-
-};
-if (result!=0) fl_alert("Error: Could not save the bank to the file..");
-
-refreshmainwindow();}
-        xywh {410 387 93 18} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
+        label {Use Bank...}
+        callback {const char *dirname;
+dirname=fl_dir_chooser("Load and use Bank from dir.:",NULL,0);
+if (dirname==NULL) return;
+if (bank->loadbank(dirname)==2)
+       fl_alert("Error: Could not load the bank from the directory.");
+for (int i=0;i<128;i++) bs[i]->refresh();
+refreshmainwindow();} selected
+        xywh {330 385 95 20} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
       }
       Fl_Button {} {
         label {New Bank...}
@@ -197,7 +174,7 @@ if (result==1) {
 if (result!=0) fl_alert("Error: Could not save the bank to the file..");
 for (int i=0;i<128;i++) bs[i]->refresh();
 refreshmainwindow();}
-        xywh {410 408 93 18} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
+        xywh {330 407 93 20} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
       }
       Fl_Check_Button {} {
         label {auto close}
@@ -281,8 +258,7 @@ if ((what==1)&&(mode==3)&&(!bank->emptyslot(slot))){//Clears the slot
       };
 };
 
-refreshmainwindow();} {selected
-    }
+refreshmainwindow();} {}
   }
   Function {refreshmainwindow()} {} {
     code {bankuiwindow->label(bank->bankfiletitle);
