@@ -402,7 +402,7 @@ if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
        setfilelabel(NULL);
 };
 
-updatepanel();}
+updatepanel();} selected
             xywh {20 20 100 20}
           }
           menuitem {} {
@@ -428,6 +428,7 @@ mastervolumedial->value(master->Pvolume);
 globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);   
 microtonalui=new MicrotonalUI(&master->microtonal);
 nrpnbutton->value(master->ctl.NRPN.receive);
+globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);
 updatesendwindow();
 
 updatepanel();
@@ -727,7 +728,7 @@ if (result!=0) fl_alert("Error: Could not save the file.");}
           }
         }
         submenu {} {
-          label {&Sequencer} selected
+          label {&Sequencer}
           xywh {0 0 100 20} deactivate
         } {
           menuitem {} {

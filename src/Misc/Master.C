@@ -101,6 +101,7 @@ void Master::defaults(){
     };
 
     sysefx[0]->changeeffect(1);
+    microtonal.defaults();
     ShutUp();
 };
 
