@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0105 
+version 1.0106 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -29,9 +29,13 @@ decl {\#include "WidgetPDial.h"} {public
 
 decl {const int keyspos[12]={0,-1,1,-2,2,3,-4,4,-5,5,-6,6};} {} 
 
-decl {const int keysoct1[]={'q','2','w','3','e','r','5','t','6','y','7','u','i','9','o','0','p','[','=',']','\\\\',FL_Enter,0};} {} 
+decl {const int keysoct1qw[]={'q','2','w','3','e','r','5','t','6','y','7','u','i','9','o','0','p','[','=',']','\\\\',FL_Enter,0};} {} 
 
-decl {const int keysoct2[]={'z','s','x','d','c','v','g','b','h','n','j','m',',','l','.',';','/',0};} {} 
+decl {const int keysoct2qw[]={'z','s','x','d','c','v','g','b','h','n','j','m',',','l','.',';','/',0};} {} 
+
+decl {const int keysoct1dw[]={'\\'','2',',','3','.','p','5','y','6','f','7','g','c','9','r','0','l','/',']','=','\\\\',FL_Enter,0};} {} 
+
+decl {const int keysoct2dw[]={';','o','q','e','j','k','i','x','d','b','h','m','w','n','v','s','z',0};} {} 
 
 class VirKeys {: {public Fl_Box}
 } {
@@ -92,7 +96,7 @@ for (i=0;i<N_OCT*12;i++){
    };
 };} {}
   }
-  Function {handle(int event)} {return_type int
+  Function {handle(int event)} {open return_type int
   } {
     code {int i;
 int ly=h();
@@ -140,6 +144,9 @@ if ((event==FL_PUSH)||(event==FL_DRAG)||(event==FL_RELEASE)){
    take_focus();
 };
 
+
+const int *keysoct1=keysoct1dw;
+const int *keysoct2=keysoct2dw;
 if ((event==FL_KEYDOWN)||(event==FL_KEYUP)){
    int key=Fl::event_key();
    int kpos=-1;
@@ -203,13 +210,15 @@ pthread_mutex_unlock(&master->mutex);} {}
   }
 } 
 
-class VirKeyboard {} {
-  Function {make_window()} {} {
+class VirKeyboard {open
+} {
+  Function {make_window()} {open
+  } {
     Fl_Window virkeyboardwindow {
       label {Virtual Keyboard - ZynAddSubFX}
       callback {relaseallkeys();
 virkeyboardwindow->hide();}
-      xywh {118 534 650 130} type Double hide
+      xywh {40 499 650 130} type Double visible
     } {
       Fl_Box virkeys {
         label Keyboard
@@ -237,7 +246,7 @@ virkeys->take_focus();}
         label Vel
         callback {virkeys->midivel=(int) o->value();
 virkeys->take_focus();}
-        tooltip Velocity xywh {90 105 105 15} type {Horz Knob} box FLAT_BOX labelsize 10 align 5 minimum 1 maximum 127 step 1
+        tooltip Velocity xywh {100 105 95 15} type {Horz Knob} box FLAT_BOX labelsize 10 align 5 minimum 1 maximum 127 step 1
         code0 {o->value(virkeys->midivel);}
       }
       Fl_Counter {} {
@@ -363,11 +372,15 @@ pitchwheelroller->do_callback();}
         label {MIDI Ch.}
         callback {relaseallkeys();
 virkeys->midich=(int) o->value();
-virkeys->take_focus();} open selected
-        tooltip {Send to Midi Channel} xywh {15 105 65 20} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+virkeys->take_focus();} open
+        tooltip {Send to Midi Channel} xywh {35 105 65 20} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
         code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Chn%d",i+1);if (i!=9) o->add(nrstr); else o->add("Drum10");};}
         code1 {o->value(virkeys->midich);}
       } {}
+      Fl_Button {} {
+        label KL selected
+        xywh {10 105 20 20} box THIN_UP_BOX color 42 labelsize 11
+      }
     }
   }
   Function {VirKeyboard(Master *master_)} {} {
