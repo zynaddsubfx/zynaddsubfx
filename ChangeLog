@@ -591,7 +591,7 @@
 21 Iun 2004 - Inceput sa scriu conversia in sinus
 22 Iun 2004 - Continuat conversia in sinus si facut teste pentru posibilitatea de "draw" cu sliderele
 23 Iun 2004 - Modificat modul in care parametrii se afiseaza la OscilGen (este o functie refresh() care face asta)
-
+	    - Adaugata posibilitatea de draw la armonicele OscilGen daca se apasa tasta Shift
 
 
 

@@ -57,8 +57,7 @@ class OscilSpectrum {: {public Fl_Box}
 oscbase=oscbase_;
 master=master_;} {}
   }
-  Function {draw()} {open
-  } {
+  Function {draw()} {} {
     code {int ox=x(),oy=y(),lx=w(),ly=h(),i;
 const int maxdb=60;//must be multiple of 10
 int GX=2;
@@ -130,7 +129,26 @@ class PSlider {: {public Fl_Slider}
   } {}
   Function {handle(int event)} {open return_type int
   } {
-    code {return(0);} {}
+    code {int X=x(),Y=y(),W=w(),H=h();
+
+if ((!Fl::event_buttons())|| (event==0)||(Fl::event_shift()==0)) return(Fl_Slider::handle(event));
+
+if (!Fl::event_inside(X,Y,W,H)) {
+	if (event==FL_DRAG){
+		Fl_Slider::handle(FL_RELEASE);
+		Fl_Slider::handle(FL_LEAVE);
+		deactivate();
+		activate();
+		return(1);	
+	}else{
+		return(Fl_Slider::handle(event));
+	};
+} else {
+	//Fl_Slider::handle(FL_FOCUS);
+	Fl_Slider::handle(FL_PUSH);
+};
+
+return(1);} {}
   }
 } 
 
@@ -213,7 +231,7 @@ for (i=1;i<lx;i++){
 
 class Oscilharmonic {: {public Fl_Group}
 } {
-  Function {make_window()} {open private
+  Function {make_window()} {private
   } {
     Fl_Window harmonic {
       private xywh {421 154 90 225} type Double hide
@@ -240,6 +258,7 @@ oldosc->redraw();}
         xywh {0 15 15 115} type {Vert Knob} box FLAT_BOX selection_color 222 labelcolor 0 maximum 127 step 1 value 64
         code0 {o->value(127-oscil->Phmag[n]);}
         code1 {if (oscil->Phmag[n]==64) o->selection_color(0);}
+        class PSlider
       }
       Fl_Slider phase {
         callback {int x=64;
@@ -255,6 +274,7 @@ display->redraw();
 oldosc->redraw();}
         xywh {0 135 15 75} type {Vert Knob} box FLAT_BOX selection_color 222 maximum 127 step 1 value 64
         code0 {o->value(oscil->Phphase[n]);}
+        class PSlider
       }
       Fl_Box {} {
         xywh {15 70 5 5} box FLAT_BOX color 45
@@ -796,7 +816,7 @@ oldosc->redraw();}
       Fl_Scroll _this_has_to_be_the_last {
         xywh {15 335 660 250} type HORIZONTAL box ENGRAVED_BOX
       } {
-        Fl_Pack harmonics {open selected
+        Fl_Pack harmonics {open
           xywh {20 340 650 225} type HORIZONTAL
           code0 {for (int i=0;i<MAX_AD_HARMONICS;i++){h[i]=new Oscilharmonic(0,0,20,o->h(),"");h[i]->init(oscil,i,oscildisplaygroup,oldosc,master);}}
         } {}
@@ -1032,7 +1052,8 @@ adhrtype->value(oscil->Padaptiveharmonics);
 adhrbf->value(oscil->Padaptiveharmonicsbasefreq);
 adhrpow->value(oscil->Padaptiveharmonicspower);
 
-for (int i=0;i<MAX_AD_HARMONICS;i++) h[i]->refresh();} {}
+for (int i=0;i<MAX_AD_HARMONICS;i++) h[i]->refresh();} {selected
+    }
   }
   decl {OscilGen *oscil;} {}
   decl {Fl_Widget *oldosc;} {}
