@@ -648,7 +648,7 @@ if (result!=0) fl_alert("Error: Could not save the file.");}
         }
         submenu {} {
           label {&Sequencer}
-          xywh {0 0 100 20} deactivate
+          xywh {0 0 100 20} hide
         } {
           menuitem {} {
             label {Show &Sequencer...}

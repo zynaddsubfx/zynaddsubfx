@@ -702,5 +702,6 @@
 	    - Terminat managerul de preset-uri
 23 Aug 2004 - Adaugata posibilitatea de a se vedea direct din lista cu bancile de instrumente
 24 Aug 2004 - Inlaturat complet suportul pentru formatele *.mas_zyn, *.ins_zyn, *.bnk_zyn si *.scl_zyn
+	    - Ascuns Sequencer-ul de utilizator (o sa il continui mai incolo)
 	    
 	    
