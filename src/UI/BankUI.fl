@@ -86,8 +86,8 @@ class BankUI {open : {public BankProcess_}
   Function {make_window()} {open
   } {
     Fl_Window bankuiwindow {
-      label Bank selected
-      xywh {16 205 770 485} type Double
+      label Bank
+      xywh {57 89 770 485} type Double
       code0 {o->label(bank->bankfiletitle);}
       code1 {if (bank->bankfiletitle==NULL) o->label ("Choose a bank to use by pressing the 'Load/Use Bank from file...' button or choose 'New Bank...' to make a new bank.");} visible
     } {
@@ -121,7 +121,7 @@ class BankUI {open : {public BankProcess_}
         code0 {o->box(FL_NO_BOX);}
         code1 {for (int i=100;i<128;i++){bs[i]=new BankSlot (0,0,o->w(),15," ");bs[i]->init(i,&what,&slot,&BankProcess_::process,(BankProcess_ *)this,bank);};}
       } {}
-      Fl_Group {} {open
+      Fl_Group {} {
         xywh {5 437 321 42} box ENGRAVED_BOX
       } {
         Fl_Light_Button writebutton {
@@ -185,14 +185,23 @@ for (int i=0;i<128;i++) bs[i]->refresh();
 refreshmainwindow();}
         xywh {439 438 105 40} box PLASTIC_UP_BOX color 175 labelfont 1 labelsize 15 labelcolor 0 align 128
       }
-      Fl_Choice {} {
-        label Bank open
+      Fl_Choice banklist {
+        label Bank
+        callback {int n=o->value();
+char *dirname=bank->banks[n].dir;
+if (dirname==NULL) return;
+
+if (bank->loadbank(dirname)==2)
+       fl_alert("Error: Could not load the bank from the directory\\n%s.",dirname);
+for (int i=0;i<128;i++) bs[i]->refresh();
+refreshmainwindow();} open selected
         xywh {5 20 205 20} down_box BORDER_BOX labelfont 1 align 5 textfont 1 textsize 12
-      } {
-        menuitem {} {
-          label Pads
-          xywh {0 0 100 20} labelfont 1 labelsize 12
-        }
+      } {}
+      Fl_Button {} {
+        label Refresh
+        callback {rescan_for_banks();
+banklist->value(0);}
+        tooltip {Refresh the bank list (rescan)} xywh {215 20 40 20} box THIN_UP_BOX labelsize 10
       }
     }
   }
@@ -214,7 +223,8 @@ delete(bankuiwindow);} {}
     code {bankuiwindow->show();} {}
   }
   Function {init(Fl_Valuator *cbwig_)} {} {
-    code {cbwig=cbwig_;} {}
+    code {cbwig=cbwig_;
+rescan_for_banks();} {}
   }
   Function {process()} {return_type void
   } {
@@ -275,6 +285,16 @@ if (bank->locked()){
 } else {
     writebutton->activate();
     clearbutton->activate();
+};} {}
+  }
+  Function {rescan_for_banks()} {open
+  } {
+    code {banklist->clear();
+banklist->add(" ");
+bank->rescanforbanks();
+
+for (int i=1;i<MAX_NUM_BANKS;i++) {
+    if (bank->banks[i].name!=NULL) banklist->add(bank->banks[i].name);
 };} {}
   }
   decl {BankSlot *bs[128];} {}

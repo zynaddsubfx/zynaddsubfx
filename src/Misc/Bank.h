@@ -29,6 +29,13 @@
 
 #define BANK_SIZE 128
 
+/*
+ * The max. number of banks that are used
+ */
+#define MAX_NUM_BANKS 400
+
+
+
 class Bank{
     public:
 	Bank();
@@ -54,11 +61,11 @@ class Bank{
 	void rescanforbanks();
 	
 	struct bankstruct{
-	    char dir[maxdirsize];
-	    char name[maxdirsize];	
+	    char *dir;
+	    char *name;
 	};
 	
-///	banks[
+	bankstruct banks[MAX_NUM_BANKS];
 	
     private:
     

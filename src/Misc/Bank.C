@@ -90,12 +90,12 @@ Bank::Bank(){
 
 //    loadbank("bank_xml");
 
-
-
+    for (int i=0;i<MAX_NUM_BANKS;i++){
+	banks[i].dir=NULL;
+	banks[i].name=NULL;
+    };
     
     bankfiletitle=dirname;
-
-    rescanforbanks();
 };
 
 Bank::~Bank(){
@@ -117,6 +117,10 @@ Bank::~Bank(){
 	//**************//
     };
 
+    for (int i=0;i<MAX_NUM_BANKS;i++){
+	if (banks[i].dir!=NULL) delete (banks[i].dir);
+	if (banks[i].name!=NULL) delete (banks[i].name);
+    };
 
     clearbank();
 };
@@ -265,6 +269,7 @@ int Bank::loadbank(const char *bankdirname){
     if (dirname!=NULL) delete(dirname);
     dirname=new char[strlen(bankdirname)+1];
     snprintf(dirname,strlen(bankdirname)+1,"%s",bankdirname);
+    bankfiletitle=dirname;
 
    // printf("%s/\n",bankdirname);
     struct dirent *fn;
@@ -339,6 +344,15 @@ int Bank::locked(){
 
 void Bank::rescanforbanks(){
     int start=0,end=0;
+
+    for (int i=0;i<MAX_NUM_BANKS;i++){
+	if (banks[i].dir!=NULL) delete (banks[i].dir);
+	if (banks[i].name!=NULL) delete (banks[i].name);
+	banks[i].dir=NULL;
+	banks[i].name=NULL;
+    };
+
+
     char *dirlist=config.cfg.bankRootDirList;
     int dirlistlen=strlen(dirlist);
     char *currentrootdir=new char [dirlistlen];
@@ -355,6 +369,11 @@ void Bank::rescanforbanks(){
 	start=end+2;
     };
     delete(currentrootdir);
+
+    for (int i=0;i<MAX_NUM_BANKS;i++){
+	if (banks[i].dir==NULL) continue;
+        printf("*  %s = %s\n",banks[i].name,banks[i].dir);	
+    };
     
 }; 
 
@@ -405,7 +424,24 @@ void Bank::scanrootdir(char *rootdir){
 	
 	closedir(d);	
     
-	if (isbank) printf("%s = %s\n",bank.dir,bank.name);
+	if (isbank) {
+//	    printf("%s = %s\n",bank.name,bank.dir);
+	    int pos=-1;
+	    for (int i=1;i<MAX_NUM_BANKS;i++){	//banks[0] e liber intotdeauna
+		if (banks[i].name==NULL) {
+		    pos=i;
+		    break;
+		};
+	    };
+	    
+	    if (pos>=0) {
+		banks[pos].name=new char[maxdirsize];
+		banks[pos].dir=new char[maxdirsize];
+    		snprintf(banks[pos].name,maxdirsize,"%s",bank.name);
+    		snprintf(banks[pos].dir,maxdirsize,"%s",bank.dir);
+	    };
+	    
+	};
 	
     };
 
@@ -425,7 +461,7 @@ void Bank::scanrootdir(char *rootdir){
 void Bank::clearbank(){
     for (int i=0;i<BANK_SIZE;i++) deletefrombank(i);
     if (dirname!=NULL) delete(dirname);
-    dirname=NULL;
+    bankfiletitle=dirname=NULL;
 };
 
 int Bank::addtobank(int pos, const char *filename, const char* name){
