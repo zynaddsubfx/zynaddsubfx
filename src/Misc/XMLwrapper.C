@@ -22,6 +22,7 @@
 
 #include "XMLwrapper.h"
 #include <stdio.h>
+#include "../globals.h"
 
 int XMLwrapper_whitespace_callback(mxml_node_t *node,int where){
     const char *name=node->value.element.name;
@@ -47,6 +48,18 @@ XMLwrapper::XMLwrapper(){
     mxmlElementSetAttr(doctype,"ZynAddSubFX-data",NULL);
 
     node=root=mxmlNewElement(tree,"ZynAddSubFX-data");
+    
+    //save zynaddsubfx specifications
+    beginbranch("SPECIFICATIONS");
+	addpar("max_midi_parts",NUM_MIDI_PARTS);
+	addpar("max_kit_items_per_instrument",NUM_KIT_ITEMS);
+
+	addpar("max_system_effects",NUM_SYS_EFX);
+	addpar("max_insertion_effects",NUM_INS_EFX);
+	addpar("max_instrument_effects",NUM_PART_EFX);
+
+	addpar("max_addsynth_voices",NUM_VOICES);
+    endbranch();
     
 };
 
