@@ -79,7 +79,7 @@ Running on LINUX
 
 Running on WINDOWS
 ------------------
-    If you launch zynaddsubfx.exe and nothing happens, you need pthreadGC.dll and portaudio.dll in the same directory (or windows directory). The dll files are distribuited with zynaddsubfx windows binaries.
+    If you launch zynaddsubfx.exe and nothing happens, you need pthreadGC.dll  in the same directory (or windows directory). The dll files are distribuited with zynaddsubfx windows binaries.
     It might be possible that the latency will be very high. If this happens, you have to set the environment variable PA_MIN_LATENCY_MSEC to a value that represents the latency in miliseconds.
 	Eg: (in autoexec.bat or launched before running zynaddsubfx) "set PA_MIN_LATENCY_MSEC=50"
     Warning: if the value is too low, you might ecounter severe dropouts on zynaddsubfx. You'll have to set to a higher value and turn off automated background tasks (like virus scanners, email clients, etc.).
