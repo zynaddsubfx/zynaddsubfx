@@ -36,6 +36,7 @@ OscilGen::OscilGen(FFTwrapper *fft_,Resonance *res_){
     basefuncFFTfreqsQ=NULL;
     basefuncFFTfreqs=NULL;
     outoscilFFTfreqs=NULL;
+    randseed=1;
 
     defaults();
 };
@@ -777,6 +778,10 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz){
     return(this->get(smps,freqHz,0));
 };
 
+void OscilGen::newrandseed(unsigned int randseed){
+    this->randseed=randseed;
+};
+
 /* 
  * Get the oscillator function
  */
@@ -864,13 +869,17 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
 
     //Harmonic Amplitude Randomness
     if (freqHz>0.1) {
+	unsigned int realrnd=rand();
+	srand(randseed);
 	REALTYPE power=Pamprandpower/127.0;
 	REALTYPE normalize=1.0/(1.2-power);
 	switch (Pamprandtype){
 	    case 1: power=power*2.0-0.5;
 		    power=pow(15.0,power);
 		    for (i=1;i<nyquist-1;i++){
+//			REALTYPE x=(i-1)/3.0;if (x>1.0) x=1.0;x*=x;
     	    		REALTYPE amp=pow(RND,power)*normalize;
+//			amp=1.0-x+amp*x;
 			outoscilFFTfreqs[i]*=amp;
 			outoscilFFTfreqs[OSCIL_SIZE-i]*=amp;
 		    };
@@ -885,6 +894,7 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
 		    };
 		    break;
 	};	
+	srand(realrnd+1);
     };
 
 

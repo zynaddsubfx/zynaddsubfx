@@ -102,7 +102,10 @@ class OscilGen{
 	unsigned char Pmodulation;//what modulation is applied to the oscil
 	unsigned char Pmodulationpar1,Pmodulationpar2,Pmodulationpar3;//the parameter of the parameters
 
-	
+
+	//makes a new random seed for Amplitude Randomness
+	//this should be called every note on event
+	void newrandseed(unsigned int randseed);
     private:
 	
 	REALTYPE hmag[MAX_AD_HARMONICS],hphase[MAX_AD_HARMONICS];//the magnituides and the phases of the sine/nonsine harmonics
@@ -165,6 +168,8 @@ class OscilGen{
 	
 	unsigned short int *basefuncFFTfreqsQ;
 	Resonance *res;	
+	
+	unsigned int randseed;
 	
 };
 

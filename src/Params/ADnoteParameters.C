@@ -68,6 +68,7 @@ void ADnoteParameters::defaults(){
     GlobalPar.PPunchTime=60;
     GlobalPar.PPunchStretch=64;
     GlobalPar.PPunchVelocitySensing=72;
+    GlobalPar.Hrandgrouping=0;
     
     /* Filter Global Parameters*/
     GlobalPar.PFilterVelocityScale=64;
@@ -76,6 +77,7 @@ void ADnoteParameters::defaults(){
     GlobalPar.FilterEnvelope->defaults();
     GlobalPar.FilterLfo->defaults();
     GlobalPar.Reson->defaults();
+
 
     for (int nvoice=0;nvoice<NUM_VOICES;nvoice++){
 	VoicePar[nvoice].Enabled=0;
@@ -659,6 +661,7 @@ void ADnoteParameters::add2XML(XMLwrapper *xml){
 	xml->addpar("punch_time",GlobalPar.PPunchTime);
 	xml->addpar("punch_stretch",GlobalPar.PPunchStretch);
 	xml->addpar("punch_velocity_sensing",GlobalPar.PPunchVelocitySensing);
+	xml->addpar("harmonic_randomness_grouping",GlobalPar.Hrandgrouping);
 	
 	xml->beginbranch("AMPLITUDE_ENVELOPE");
 	    GlobalPar.AmpEnvelope->add2XML(xml);
@@ -671,7 +674,6 @@ void ADnoteParameters::add2XML(XMLwrapper *xml){
 
     xml->beginbranch("FREQUENCY_PARAMETERS");
 	xml->addpar("detune",GlobalPar.PDetune);
-//	printf("%d\n",GlobalPar.PCoarseDetune);
 	
 	xml->addpar("coarse_detune",GlobalPar.PCoarseDetune);
         xml->addpar("detune_type",GlobalPar.PDetuneType);
@@ -727,6 +729,7 @@ void ADnoteParameters::getfromXML(XMLwrapper *xml){
 	GlobalPar.PPunchTime=xml->getpar127("punch_time",GlobalPar.PPunchTime);
 	GlobalPar.PPunchStretch=xml->getpar127("punch_stretch",GlobalPar.PPunchStretch);
 	GlobalPar.PPunchVelocitySensing=xml->getpar127("punch_velocity_sensing",GlobalPar.PPunchVelocitySensing);
+	GlobalPar.Hrandgrouping=xml->getpar127("harmonic_randomness_grouping",GlobalPar.Hrandgrouping);
 	
 	if (xml->enterbranch("AMPLITUDE_ENVELOPE")){
 	    GlobalPar.AmpEnvelope->getfromXML(xml);

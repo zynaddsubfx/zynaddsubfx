@@ -97,6 +97,9 @@
 	
 	// RESONANCE
 	Resonance *Reson;
+	
+	//how the randomness is applied to the harmonics on more voices using the same oscillator
+	unsigned char Hrandgrouping;
     };  
 
 

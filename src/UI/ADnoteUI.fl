@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0200 
+version 1.0105 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -744,15 +744,14 @@ delete (ADnoteVoiceParameters);} {}
   }
   decl {int nvoice;} {}
   decl {ADnoteParameters *pars;} {}
-  decl {OscilEditor *oscedit;} {selected
-  }
+  decl {OscilEditor *oscedit;} {}
   decl {Oscilloscope *osc;} {}
   decl {Oscilloscope *oscFM;} {}
   decl {Master *master;} {}
 } 
 
 class ADnoteUI {} {
-  Function {make_window()} {open private
+  Function {make_window()} {private
   } {
     Fl_Window ADnoteGlobalParameters {
       label {ADsynth Global Parameters of the Instrument}
@@ -822,7 +821,7 @@ detunevalueoutput->do_callback();}
         }
       }
       Fl_Group {} {
-        label AMPLITUDE
+        label AMPLITUDE selected
         xywh {5 5 240 250} box THIN_UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 17
       } {
         Fl_Value_Slider {} {
@@ -884,6 +883,12 @@ detunevalueoutput->do_callback();}
           code0 {o->init(pars->GlobalPar.AmpLfo);}
           class LFOUI
         } {}
+        Fl_Check_Button {} {
+          label {Rnd Grp}
+          callback {pars->GlobalPar.Hrandgrouping=(int) o->value();}
+          tooltip {How the Harmonic Amplitude is applied to voices that use the same oscillator} xywh {70 225 40 25} down_box DOWN_BOX labelsize 10 align 148
+          code0 {o->value(pars->GlobalPar.Hrandgrouping);}
+        }
       }
       Fl_Group {} {
         label FILTER
@@ -911,7 +916,7 @@ detunevalueoutput->do_callback();}
       Fl_Check_Button {} {
         label Stereo
         callback {pars->GlobalPar.PStereo=(int) o->value();}
-        xywh {5 220 80 35} box ENGRAVED_BOX down_box DOWN_BOX labelfont 1 labelsize 12
+        xywh {5 220 65 35} box ENGRAVED_BOX down_box DOWN_BOX labelfont 1 labelsize 12
         code0 {o->value(pars->GlobalPar.PStereo);}
       }
       Fl_Button {} {

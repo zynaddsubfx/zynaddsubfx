@@ -67,8 +67,9 @@ ADnote::ADnote(ADnoteParameters *pars,Controller *ctl_,REALTYPE freq,REALTYPE ve
 	REALTYPE stretch=pow(440.0/freq,pars->GlobalPar.PPunchStretch/64.0);
 	NoteGlobalPar.Punch.dt=1.0/(time*SAMPLE_RATE*stretch);
     } else NoteGlobalPar.Punch.Enabled=0;
-    
+
     for (int nvoice=0;nvoice<NUM_VOICES;nvoice++){
+	pars->VoicePar[nvoice].OscilSmp->newrandseed(rand());
 	NoteVoicePar[nvoice].OscilSmp=NULL;
 	NoteVoicePar[nvoice].FMSmp=NULL;
 	NoteVoicePar[nvoice].VoiceOut=NULL;
@@ -112,6 +113,7 @@ ADnote::ADnote(ADnoteParameters *pars,Controller *ctl_,REALTYPE freq,REALTYPE ve
 	//Get the voice's oscil or external's voice oscil
 	int vc=nvoice; 
 	if (pars->VoicePar[nvoice].Pextoscil!=-1) vc=pars->VoicePar[nvoice].Pextoscil;
+	if (!pars->GlobalPar.Hrandgrouping) pars->VoicePar[vc].OscilSmp->newrandseed(rand());
 	oscposhi[nvoice]=pars->VoicePar[vc].OscilSmp->get(NoteVoicePar[nvoice].OscilSmp,getvoicebasefreq(nvoice),
 	                 pars->VoicePar[nvoice].Presonance);
 
@@ -329,6 +331,7 @@ void ADnote::initparameters(){
 	
 	/* Voice Modulation Parameters Init */
 	if ((NoteVoicePar[nvoice].FMEnabled!=NONE)&&(NoteVoicePar[nvoice].FMVoice<0)){
+	   partparams->VoicePar[nvoice].FMSmp->newrandseed(rand());
  	   NoteVoicePar[nvoice].FMSmp=new REALTYPE[OSCIL_SIZE+OSCIL_SMP_EXTRA_SAMPLES];
 
 	   //Perform Anti-aliasing only on MORPH or RING MODULATION
@@ -343,6 +346,8 @@ void ADnote::initparameters(){
 	   int vc=nvoice; 
      	   if (partparams->VoicePar[nvoice].PextFMoscil!=-1) vc=partparams->VoicePar[nvoice].PextFMoscil;
 
+	   if (!partparams->GlobalPar.Hrandgrouping) partparams->VoicePar[vc].FMSmp->newrandseed(rand());
+	   
 	   oscposhiFM[nvoice]=(oscposhi[nvoice]+partparams->VoicePar[vc].FMSmp->get(NoteVoicePar[nvoice].FMSmp,tmp)) % OSCIL_SIZE;
 	   for (int i=0;i<OSCIL_SMP_EXTRA_SAMPLES;i++) NoteVoicePar[nvoice].FMSmp[OSCIL_SIZE+i]=NoteVoicePar[nvoice].FMSmp[i];
 	   oscposhiFM[nvoice]+=(int)((partparams->VoicePar[nvoice].PFMoscilphase-64.0)/128.0*OSCIL_SIZE+OSCIL_SIZE*4);
