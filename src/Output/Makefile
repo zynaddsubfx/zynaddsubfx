@@ -10,6 +10,10 @@ ifeq ($(AUDIOOUT),JACK)
 objects+=JACKaudiooutput.o
 endif
 
+ifeq ($(AUDIOOUT),DSSI)
+objects+=DSSIaudiooutput.o
+endif
+
 ifeq ($(AUDIOOUT),JACK_RT)
 objects+=JACK_RTaudiooutput.o
 endif

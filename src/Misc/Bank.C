@@ -388,13 +388,33 @@ void Bank::rescanforbanks(){
 		banks[j].name=tmpname;
 		banks[j].dir=tmpdir;
 		
-/*		bankstruct tmp=banks[i];
-		banks[i]=banks[j];
-		banks[j]=tmp;
-*/
 	    };
 	};
     };
+    
+    //remove duplicate bank names
+    int dupl=0;
+    for (int j=0;j<MAX_NUM_BANKS-1;j++){
+	for (int i=j+1;i<MAX_NUM_BANKS;i++){
+	    if ((banks[i].name==NULL)||(banks[j].name==NULL)) continue;
+	    if (strcmp(banks[i].name,banks[j].name)==0) {//add a [1] to the first bankname and [n] to others
+	        char *tmpname=banks[i].name;
+	        banks[i].name=new char[strlen(tmpname)+100];
+	        sprintf(banks[i].name,"%s[%d]",tmpname,dupl+2);
+	        delete(tmpname);
+		
+		if (dupl==0){
+	    	    char *tmpname=banks[j].name;
+	            banks[j].name=new char[strlen(tmpname)+100];
+		    sprintf(banks[j].name,"%s[1]",tmpname);
+	    	    delete(tmpname);
+		};
+		
+	        dupl++;
+	    } else dupl=0;
+	};
+    };
+    
 }; 
 
 

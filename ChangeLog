@@ -752,4 +752,5 @@
 
 04 Ian 2005 - Corectata o mica eroare care facea ca sa nu arate Force Release la Freemode Envelope
 15 Ian 2005 - Corectata o eroare la controllerul bandwidth care facea ca sa ajunga la valoarea 0 si sa dea peste cap SUBsynth
-
+22 Ian 2005 - Inceput sa scriu suportul pt. DSSI
+27 Ian 2005 - Corectata eroare care facea ca in cazul in care sunt 2 banci cu acelasi nume (sau aceeasi bank root dir sa fie selectat de 2 ori) sa produca confuzie

@@ -73,10 +73,14 @@ all:
 	rm -f Make.deps 
 
 
-ifneq ($(AUDIOOUT),VST) 
-	$(CXX) -o zynaddsubfx */*.o *.o $(LIBS)
+ifeq ($(AUDIOOUT),DSSI) 
+	gcc -shared  -o zynaddsubfx.so */*.o *.o $(LIBS) 
 else
+ifeq ($(AUDIOOUT),VST) 
 	gcc -shared -o zynaddsubfx_vst.dll */*.o *.o $(LIBS) zynaddsubfx_gcc.def
+else
+	$(CXX) -o zynaddsubfx */*.o *.o $(LIBS)
+endif
 endif
 
 subdirs: $(SUBDIRS)
@@ -96,7 +100,7 @@ main.o:Misc/Master.h Misc/Util.h Output/OSSaudiooutput.h\
 
 .PHONY : clean
 clean: 
-	rm -f $(objects) zynaddsubfx zynaddsubfx_vst.dll zynaddsubfx.exe
+	rm -f $(objects) zynaddsubfx zynaddsubfx_vst.dll zynaddsubfx.exe zynaddsubfx.so
 	@for name in $(SUBDIRS); do sh -c "make -C $$name $@"; done
 	rm -f Make.deps
 	rm -f */*.o *.o

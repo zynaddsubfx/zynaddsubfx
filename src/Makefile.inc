@@ -33,6 +33,12 @@ LINUX_AUDIOOUT=OSS
 #LINUX_AUDIOOUT=PA
 
 
+#Next line sets if the synth is compiled for DSSI plugin (as .so file)
+#If this setting is "YES", MIDI in and AUDIOOUT are set automatically to DSSI
+LINUX_DSSI=NO
+#LINUX_DSSI=YES
+
+
 # W I N D O W S   C O N F I G U R A T I O N
 
 #Next line sets the midi input
@@ -54,9 +60,14 @@ ifeq ($(OS_PORT),LINUX)
  MIDIIN=$(LINUX_MIDIIN)
  AUDIOOUT=$(LINUX_AUDIOOUT)
  WINDOWS_VST=NO
+    ifeq ($(LINUX_DSSI),YES)
+     MIDIIN=DSSI
+     AUDIOOUT=DSSI
+    endif
 else
  MIDIIN=$(WINDOWS_MIDIIN)
  AUDIOOUT=$(WINDOWS_AUDIOOUT)
+ LINUX_DSSI=NO
     ifeq ($(WINDOWS_VST),YES)
      MIDIIN=VST
      AUDIOOUT=VST
