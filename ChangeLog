@@ -721,6 +721,8 @@
 30 Sep 2004 - Terminat de scris interfata utilizator pt. incepatori si se selecteaza la pornire modul dorit
 	    - Adaugata posibilitatea de a compila cu suport jack si oss simultan si sa se aleaga runtime ce doresc (jack/oss)
 	    - Corectata o mica eroare care facea ca sa nu se inchida ferestrele cu instrumente cand incarc din banca
+            - LANSAT PE INTERNET - VERSIUNEA (2.1.0)
+--------------------------------------------------------------------------------------------------
 	    
 	    
 
