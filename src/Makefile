@@ -52,6 +52,7 @@ subdirs=DSP Effects Input Misc Output Params Synth Seq
 all:
 	$(MAKE) -C UI $@
 	rm -f Make.deps 
+	yes " " | head
 	@for name in $(subdirs); do sh -c "cd $$name ; $(CXX) -MM -MG -w *.C >> ../Make.deps ; cd .."; done
 	@for name in $(subdirs); do sh -c "make -C $$name $@"; done
 	$(MAKE) objs

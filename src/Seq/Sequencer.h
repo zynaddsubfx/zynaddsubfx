@@ -23,9 +23,10 @@
 #define SEQUENCER_H
 
 #include "../globals.h"
+#include "MIDIEvents.h"
 #include "MIDIFile.h"
 
-class Sequencer{
+class Sequencer:public MIDIEvents{
     public:
 	Sequencer();
 	~Sequencer();
@@ -38,7 +39,7 @@ class Sequencer{
 	//it returns 1 if this must be called at least once more
 	//it returns 0 if there are no more notes for the current time
 	//or -1 if there is no note
-	int getevent(char chan, int *type,int *par1, int *par2);
+	int getevent(char chan, int *midich,int *type,int *par1, int *par2);
 
 	//returns 0 if ok or -1 if there is a error loading file
 	int importmidifile(char *filename);	
@@ -53,32 +54,6 @@ class Sequencer{
     
 	MIDIFile midifile;
 
-    /* Events */
-    struct event{
-        int deltatime;
-	int type,par1,par2;//type=1 for note, type=2 for controller
-    } tmpevent;
-    struct listpos{
-	event ev;
-        struct listpos *next;
-    };
-    struct list{
-	listpos *first,*current;
-	int size;//how many events are
-	double length;//in seconds
-    };
-    struct {
-	list track//the stored track
-	,record;//the track being recorded
-    } midichan[NUM_MIDI_CHANNELS];
-    
-    void writeevent(list *l,event *ev);
-    void readevent(list *l,event *ev);
-    
-    void rewindlist(list *l);
-    void deletelist(list *l);
-    void deletelistreference(list *l);
-    
     /* Timer */
     struct timestruct{
 	double abs;//the time from the begining of the track

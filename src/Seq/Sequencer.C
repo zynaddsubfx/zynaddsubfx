@@ -33,33 +33,44 @@
 
 Sequencer::Sequencer(){
     play=0;
-    for (int i=0;i<NUM_MIDI_CHANNELS;i++){
-	midichan[i].track.first=NULL;
-	midichan[i].track.current=NULL;
-	midichan[i].track.size=0;
-	midichan[i].track.length=0.0;
-	midichan[i].record.first=NULL;
-	midichan[i].record.current=NULL;
-	midichan[i].record.size=0;
-	midichan[i].record.length=0.0;
+    for (int i=0;i<NUM_MIDI_TRACKS;i++){
+	miditrack[i].track.first=NULL;
+	miditrack[i].track.current=NULL;
+	miditrack[i].track.size=0;
+	miditrack[i].track.length=0.0;
+	miditrack[i].record.first=NULL;
+	miditrack[i].record.current=NULL;
+	miditrack[i].record.size=0;
+	miditrack[i].record.length=0.0;
     };
     
     resettime(&rectime);
     resettime(&playtime);
-    nextevent.time=-1.0;//must be less than 0 
+    nextevent.time=0.0;//must be less than 0 
 };
 
 Sequencer::~Sequencer(){
-    for (int i=0;i<NUM_MIDI_CHANNELS;i++){
-	deletelist(&midichan[i].track);
-	deletelist(&midichan[i].record);
+    for (int i=0;i<NUM_MIDI_TRACKS;i++){
+	deletelist(&miditrack[i].track);
+	deletelist(&miditrack[i].record);
     };
 };
 
 
 int Sequencer::importmidifile(char *filename){
     if (midifile.loadfile(filename)<0) return(-1);
-    if (midifile.parsemidifile()<0) return(-1);
+
+    for (int i=0;i<NUM_MIDI_TRACKS;i++){
+	deletelist(&miditrack[i].record);
+    };
+    if (midifile.parsemidifile(this)<0) return(-1);
+    
+    //copy the "record" track to the main track
+    for (int i=0;i<NUM_MIDI_TRACKS;i++){
+	deletelist(&miditrack[i].track);
+	miditrack[i].track=miditrack[i].record;
+	deletelistreference(&miditrack[i].record);
+    };
     return(0);
 };
 
@@ -71,7 +82,9 @@ void Sequencer::startplay(){
     resettime(&playtime);
     
     //test - canalul 1, deocamdata
-    rewindlist(&midichan[0].track);
+    for (int i=0;i<NUM_MIDI_TRACKS;i++){
+	rewindlist(&miditrack[i].track);
+    };
     
 };
 void Sequencer::stopplay(){
@@ -79,73 +92,33 @@ void Sequencer::stopplay(){
     play=0;
 };
 
+// ************ Player stuff ***************
 
-/************** Player stuff ***************/
-
-int Sequencer::getevent(char chan,int *type,int *par1, int *par2){
+int Sequencer::getevent(char chan,int *midich, int *type,int *par1, int *par2){
     *type=0;
     if (play==0) return(-1);
 
     updatecounter(&playtime);
 
-    if (nextevent.time>=playtime.abs) readevent(&midichan[chan].track,&nextevent.ev);
+//    printf("%g %g\n",nextevent.time,playtime.abs);
+
+    if (nextevent.time<playtime.abs) readevent(&miditrack[chan].track,&nextevent.ev);
 	else return(-1);
     if (nextevent.ev.type==-1) return(-1);
+//    printf("********************************\n");    
+
+
 
     *type=nextevent.ev.type;
     *par1=nextevent.ev.par1;
     *par2=nextevent.ev.par2;
+    *midich=nextevent.ev.channel;
     
     double dt=nextevent.ev.deltatime*0.001;
     nextevent.time+=dt;
 
-    printf("%f   -  %d %d \n",nextevent.time,par1,par2);
+//    printf("%f   -  %d %d \n",nextevent.time,par1,par2);
     return(0);//?? sau 1
-};
-
-
-/************** Track stuff ***************/
-
-
-void Sequencer::writeevent(list *l,event *ev){
-    listpos *tmp=new listpos;
-    tmp->next=NULL;
-    tmp->ev=*ev;
-    if (l->current!=NULL) l->current->next=tmp;
-	else l->first=tmp;
-    l->current=tmp;
-    l->size++;
-};
-
-void Sequencer::readevent(list *l,event *ev){
-    if (l->current==NULL) {
-	ev->type=-1;
-	return;
-    };
-    *ev=l->current->ev;
-    l->current=l->current->next;
-};
-
-
-void Sequencer::rewindlist(list *l){
-    l->current=l->first;
-};
-
-void Sequencer::deletelist(list *l){
-    l->current=l->first;
-    if (l->current==NULL) return;
-    while (l->current->next!=NULL){
-	listpos *tmp=l->current;
-	l->current=l->current->next;
-	delete(tmp);
-    };
-    deletelistreference(l);
-};
-
-void Sequencer::deletelistreference(list *l){
-    l->current=l->first=NULL;
-    l->size=0;
-    l->length=0.0;
 };
 
 /************** Timer stuff ***************/

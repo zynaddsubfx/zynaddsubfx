@@ -24,6 +24,7 @@
 #define MIDIFILE_H
 
 #include "../globals.h"
+#include "MIDIEvents.h"
 
 class MIDIFile{
     public:
@@ -34,9 +35,11 @@ class MIDIFile{
 	int loadfile(char *filename);
 	
 	//returns -1 if there is an error, otherwise 0
-	int parsemidifile();
+	int parsemidifile(MIDIEvents *me_);
 	
     private:
+	MIDIEvents *me;	
+    
 	unsigned char *midifile;
 	int midifilesize,midifilek;
 	bool midieof;
@@ -44,13 +47,16 @@ class MIDIFile{
 	//returns -1 if there is an error, otherwise 0
 	int parsetrack(int ntrack);
     
-	void parsenoteoff(char chan,unsigned int dt);
-	void parsenoteon(char chan,unsigned int dt);
-	void parsecontrolchange(char chan,unsigned int dt);
-	void parsepitchwheel(char chan, unsigned int dt);
+	void parsenoteoff(char ntrack,char chan,unsigned int dt);
+	void parsenoteon(char ntrack,char chan,unsigned int dt);
+	void parsecontrolchange(char ntrack,char chan,unsigned int dt);
+	void parsepitchwheel(char ntrack,char chan, unsigned int dt);
 	void parsemetaevent(unsigned char mtype,unsigned char mlength);
 	
 	void clearmidifile();
+
+	//convert the delta-time to internal format 
+	unsigned int convertdt(unsigned int dt);	
 	
 	/* Low Level MIDIfile functions */
 	
@@ -74,6 +80,7 @@ class MIDIFile{
 
 	struct {
 	    double tick;//how many seconds one tick has
+	    
 	}data;
 	
 };

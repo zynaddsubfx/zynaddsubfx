@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-objects=MIDIFile.o Sequencer.o
+objects=MIDIEvents.o MIDIFile.o Sequencer.o
 
 
 all: $(objects)

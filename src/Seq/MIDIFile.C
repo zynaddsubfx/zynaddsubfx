@@ -30,6 +30,7 @@ MIDIFile::MIDIFile(){
     midifilesize=0;
     midifilek=0;
     midieof=false;
+    me=NULL;
 };
 
 MIDIFile::~MIDIFile(){
@@ -69,7 +70,8 @@ int MIDIFile::loadfile(char *filename){
     return(0);
 };
 
-int MIDIFile::parsemidifile(){
+int MIDIFile::parsemidifile(MIDIEvents *me_){
+    this->me=me_;
 
     //read the header
     int chunk=getint32();//MThd
@@ -77,10 +79,11 @@ int MIDIFile::parsemidifile(){
     int size=getint32();
     if (size!=6) return(-1);//header is always 6 bytes long
 
+
     int format=getint16();
     printf("format %d\n",format);
 
-    int ntracks=getint16();//this is always if the format is "0"
+    int ntracks=getint16();//this is always 1 if the format is "0"
     printf("ntracks %d\n",ntracks);
 
     int division=getint16();
@@ -90,6 +93,8 @@ int MIDIFile::parsemidifile(){
     } else {//SMPTE (frames/second and ticks/frame)
 	printf("ERROR:in MIDIFile.C::parsemidifile() - SMPTE not implemented yet.");
     };    
+    
+    if (ntracks>=NUM_MIDI_TRACKS) ntracks=NUM_MIDI_TRACKS-1;
     
     for (int n=0;n<ntracks;n++){
 	if (parsetrack(n)<0) {
@@ -102,6 +107,7 @@ int MIDIFile::parsemidifile(){
     printf("\nMIDI file succesfully parsed.\n");
 //    printf("\n0x%x\n",getbyte());
 
+    this->me=NULL;
     return(0);
 };
 
@@ -141,18 +147,18 @@ int MIDIFile::parsetrack(int ntrack){
 	
 	switch(msg){
 	    case 0x80 ... 0x8f://note on off
-		    parsenoteon(msg & 0x0f,dt);
+		    parsenoteon(ntrack,msg & 0x0f,dt);
 		    dt=0;
 		break;
 	    case 0x90 ... 0x9f://note on (or note off)
-		    parsenoteon(msg & 0x0f,dt);
+		    parsenoteon(ntrack,msg & 0x0f,dt);
 		    dt=0;
 		break;
 	    case 0xa0 ... 0xaf://aftertouch - ignored
 		    skipnbytes(2);
 		break;
 	    case 0xb0 ... 0xbf://control change
-		    parsecontrolchange(msg & 0x0f,dt);
+		    parsecontrolchange(ntrack,msg & 0x0f,dt);
 		    dt=0;
 		break;
 	    case 0xc0 ... 0xcf://program change - ignored
@@ -201,26 +207,43 @@ int MIDIFile::parsetrack(int ntrack){
 };
 
 
-void MIDIFile::parsenoteoff(char chan,unsigned int dt){
+void MIDIFile::parsenoteoff(char ntrack,char chan,unsigned int dt){
     unsigned char note,vel;
     note=getbyte();
     
     if (chan>=NUM_MIDI_CHANNELS) return;
     
+    me->tmpevent.deltatime=convertdt(dt);
+    me->tmpevent.type=1;
+    me->tmpevent.par1=note;
+    me->tmpevent.par2=0;
+    
+    
+    ///test 
+    ntrack=0;
+    
+    me->writeevent(&me->miditrack[ntrack].record,&me->tmpevent);
+    
     printf("Note off:%d ",note);
 };
 
-void MIDIFile::parsenoteon(char chan,unsigned int dt){
+void MIDIFile::parsenoteon(char ntrack,char chan,unsigned int dt){
     unsigned char note,vel;
     note=getbyte();
     vel=getbyte();
     
     if (chan>=NUM_MIDI_CHANNELS) return;
     
+    me->tmpevent.deltatime=convertdt(dt);
+    me->tmpevent.type=1;
+    me->tmpevent.par1=note;
+    me->tmpevent.par2=vel;
+    me->writeevent(&me->miditrack[ntrack].record,&me->tmpevent);
+
     printf("[dt %d ]  Note on:%d %d\n",dt,note,vel);
 };
 
-void MIDIFile::parsecontrolchange(char chan,unsigned int dt){
+void MIDIFile::parsecontrolchange(char ntrack,char chan,unsigned int dt){
     unsigned char control,value;
     control=getbyte();
     value=getbyte();
@@ -229,9 +252,15 @@ void MIDIFile::parsecontrolchange(char chan,unsigned int dt){
     
     printf("[dt %d] Control change:%d %d\n",dt,control,value);
     
+    me->tmpevent.deltatime=convertdt(dt);
+    me->tmpevent.type=2;
+    me->tmpevent.par1=control;//???????????? ma uit la Sequencer::recordnote() din varianele vechi de zyn
+    me->tmpevent.par2=value;
+    me->writeevent(&me->miditrack[ntrack].record,&me->tmpevent);
+    
 };
 
-void MIDIFile::parsepitchwheel(char chan, unsigned int dt){
+void MIDIFile::parsepitchwheel(char ntrack,char chan, unsigned int dt){
     unsigned char valhi,vallo;
     vallo=getbyte();
     valhi=getbyte();
@@ -252,6 +281,12 @@ void MIDIFile::parsemetaevent(unsigned char mtype,unsigned char mlength){
 
     midifilek=oldmidifilek+mlength;
         
+};
+
+unsigned int MIDIFile::convertdt(unsigned int dt){
+    double result=dt;
+    
+    return((int) (result*3.0));
 };
 
 
