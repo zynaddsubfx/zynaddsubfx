@@ -53,6 +53,13 @@ class Bank{
 	
 	void rescanforbanks();
 	
+	struct bankstruct{
+	    char dir[maxdirsize];
+	    char name[maxdirsize];	
+	};
+	
+///	banks[
+	
     private:
     
 	//it adds a filename to the bank

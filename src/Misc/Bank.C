@@ -156,7 +156,7 @@ void Bank::setname(unsigned int ninstrument,const char *newname){
     for (int i=0;i<4;i++) if (tmpfilename[i]==' ') tmpfilename[i]='0';
 
     //make the filenames legal
-    for (int i=0;i<strlen(tmpfilename);i++) {
+    for (int i=0;i<(int) strlen(tmpfilename);i++) {
 	char c=tmpfilename[i];
 	if ((c>='0')&&(c<='9')) continue;
 	if ((c>='A')&&(c<='Z')) continue;
@@ -209,7 +209,7 @@ void Bank::savetoslot(unsigned int ninstrument,Part *part){
     for (int i=0;i<4;i++) if (tmpfilename[i]==' ') tmpfilename[i]='0';
     
     //make the filenames legal
-    for (int i=0;i<strlen(tmpfilename);i++) {
+    for (int i=0;i<(int)strlen(tmpfilename);i++) {
 	char c=tmpfilename[i];
 	if ((c>='0')&&(c<='9')) continue;
 	if ((c>='A')&&(c<='Z')) continue;
@@ -268,7 +268,6 @@ int Bank::loadbank(const char *bankdirname){
 
    // printf("%s/\n",bankdirname);
     struct dirent *fn;
-    
         
     while ((fn=readdir(dir))){
 	if (fn->d_type!=DT_REG) continue;//this is not a regular file
@@ -364,7 +363,63 @@ void Bank::rescanforbanks(){
 // private stuff
 
 void Bank::scanrootdir(char *rootdir){
-    printf("Scanning root dir:%s\n",rootdir);
+//    printf("Scanning root dir:%s\n",rootdir);
+    DIR *dir=opendir(rootdir);
+    if (dir==NULL) return;
+
+    const int maxdirsize=1000;
+    struct {
+	char dir[maxdirsize];
+	char name[maxdirsize];	
+    }bank;
+
+    char *separator="/";
+    if (strlen(rootdir)) {
+	char tmp=rootdir[strlen(rootdir)-1];
+	if ((tmp=='/') || (tmp=='\\')) separator="";
+    };
+    
+    struct dirent *fn;
+    while ((fn=readdir(dir))){
+	if (fn->d_type!=DT_DIR) continue;//this is not a directory
+	const char *dirname=fn->d_name;
+	if (dirname[0]=='.') continue;
+	
+	snprintf(bank.dir,maxdirsize,"%s%s%s/",rootdir,separator,dirname);
+	snprintf(bank.name,maxdirsize,"%s",dirname);
+	//find out if the directory contains at least 1 instrument
+	bool isbank=false;
+	
+	DIR *d=opendir(bank.dir);
+	if (d==NULL) continue;
+	
+	struct dirent *fname;
+
+	while((fname=readdir(d))){
+	    if (fname->d_type!=DT_REG) continue;//this is not a regular file
+	    if (strstr(fname->d_name,INSTRUMENT_EXTENSION)!=NULL) {
+		isbank=true;
+		break;//aici as putea pune in loc de break un update la un counter care imi arata nr. de instrumente din bank
+	    };
+	};
+	
+	closedir(d);	
+    
+	if (isbank) printf("%s = %s\n",bank.dir,bank.name);
+	
+    };
+
+    closedir(dir);
+/*
+
+   // printf("%s/\n",bankdirname);
+    struct dirent *fn;
+        
+    while ((fn=readdir(dir))){
+	if (fn->d_type!=DT_REG) continue;//this is not a regular file
+	const char *filename= fn->d_name;
+*/
+    
 };
 
 void Bank::clearbank(){
