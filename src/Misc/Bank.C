@@ -360,6 +360,7 @@ void Bank::rescanforbanks(){
     int dirlistlen=strlen(dirlist);
     char *currentrootdir=new char [dirlistlen];
     while (start<dirlistlen){
+	end=start;
 	for (int i=start+1;i<dirlistlen;i++){
 	    end=i;
 	    if (dirlist[i]<32) break;

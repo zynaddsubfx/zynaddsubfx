@@ -30,7 +30,8 @@ decl {\#include "../Misc/Dump.h"} {public
 decl {extern Dump dump;} {public
 } 
 
-class ConfigUI {} {
+class ConfigUI {open
+} {
   Function {make_window()} {} {
     Fl_Window configwindow {
       label {ZynAddSubFX Settings}
@@ -233,7 +234,7 @@ midiinputnamebox->label(config.winmididevices[config.cfg.WindowsMidiInId].name);
           }
           Fl_Choice {} {
             label {PADsynth Interpolation}
-            callback {config.cfg.Interpolation=(int) o->value();} selected
+            callback {config.cfg.Interpolation=(int) o->value();}
             xywh {175 105 75 15} down_box BORDER_BOX labelsize 11 textsize 12
             code0 {o->value(config.cfg.Interpolation);}
           } {
@@ -317,18 +318,20 @@ char *dirlist=config.cfg.bankRootDirList;
 int dirlistlen=strlen(dirlist);
 char *currentrootdir=new char [dirlistlen];
 while (start<dirlistlen){
+    end=start;
     for (int i=start+1;i<dirlistlen;i++){
-         if (dirlist[i]<32) break;
          end=i;
+         if (dirlist[i]<32) break;
     };
-    snprintf(currentrootdir,end-start+2,"%s",&dirlist[start]);
+    snprintf(currentrootdir,end-start+1,"%s",&dirlist[start]);
 
     //a root director was found
-    rootsbrowse->add(currentrootdir);
+    if (strlen(currentrootdir)>2) rootsbrowse->add(currentrootdir);
 
-    start=end+2;
+    start=end+1;
 };
-delete(currentrootdir);} {}
+delete(currentrootdir);} {selected
+    }
   }
   Function {writebankcfg()} {} {
     code {char *str=config.cfg.bankRootDirList;
