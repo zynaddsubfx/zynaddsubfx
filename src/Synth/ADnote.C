@@ -173,6 +173,8 @@ ADnote::ADnote(ADnoteParameters *pars,Controller *ctl_,REALTYPE freq,REALTYPE ve
 	NoteVoicePar[nvoice].DelayTicks=(int)((exp(pars->VoicePar[nvoice].PDelay/127.0*log(50.0))-1.0)/SOUND_BUFFER_SIZE/10.0*SAMPLE_RATE);
   };
 
+    bandwidthDetuneMultiplier=pars->getBandwidthDetuneMultiplier();
+
     initparameters();
     ready=1;
 };
@@ -408,7 +410,7 @@ void ADnote::setfreqFM(int nvoice,REALTYPE freq){
  */
 REALTYPE ADnote::getvoicebasefreq(int nvoice){
     REALTYPE detune=NoteVoicePar[nvoice].Detune/100.0+
-	    NoteVoicePar[nvoice].FineDetune/100.0*ctl->bandwidth.relbw+
+	    NoteVoicePar[nvoice].FineDetune/100.0*ctl->bandwidth.relbw*bandwidthDetuneMultiplier+
 	NoteGlobalPar.Detune/100.0;
     if (NoteVoicePar[nvoice].fixedfreq==0) return(this->basefreq*pow(2,detune/12.0));
 	else {//the fixed freq is enabled

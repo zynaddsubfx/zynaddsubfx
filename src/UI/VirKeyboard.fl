@@ -37,7 +37,7 @@ decl {const int keysoct1dw[]={'\\'','2',',','3','.','p','5','y','6','f','7','g',
 
 decl {const int keysoct2dw[]={';','o','q','e','j','k','i','x','d','b','h','m','w','n','v','s','z',0};} {} 
 
-class VirKeys {open : {public Fl_Box}
+class VirKeys {: {public Fl_Box}
 } {
   decl {static const int N_OCT=6;} {}
   decl {static const int SIZE_WHITE=14;} {}
@@ -96,7 +96,7 @@ for (i=0;i<N_OCT*12;i++){
    };
 };} {}
   }
-  Function {handle(int event)} {open return_type int
+  Function {handle(int event)} {return_type int
   } {
     code {int i;
 int ly=h();
@@ -164,8 +164,7 @@ if ((event==FL_KEYDOWN)||(event==FL_KEYUP)){
       else relasekey(kpos,2);
 };
 
-return(1);} {selected
-    }
+return(1);} {}
   }
   Function {presskey(int nk,int exclusive,int type)} {} {
     code {if (nk>=N_OCT*12) return;
@@ -217,7 +216,8 @@ pthread_mutex_unlock(&master->mutex);} {}
   }
 } 
 
-class VirKeyboard {} {
+class VirKeyboard {selected
+} {
   Function {make_window()} {} {
     Fl_Window virkeyboardwindow {
       label {Virtual Keyboard - ZynAddSubFX}
@@ -301,7 +301,7 @@ virkeys->take_focus();}
 
 virkeys->take_focus();}
         xywh {435 105 100 15} down_box BORDER_BOX labelsize 10 align 5 when 6 textfont 1 textsize 10
-        code0 {midictl=C_bandwidth;o->value(8);}
+        code0 {midictl=C_filtercutoff;o->value(7);}
       } {
         menuitem {} {
           label {01: Mod.Wheel}

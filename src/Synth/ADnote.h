@@ -246,6 +246,9 @@ class ADnote{   //ADDitive note
     
     //1 if the note has portamento 
     int portamento;
+    
+    //how the fine detunes are made bigger or smaller
+    REALTYPE bandwidthDetuneMultiplier;
 };
 
 #endif

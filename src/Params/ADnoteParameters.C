@@ -58,6 +58,7 @@ void ADnoteParameters::defaults(){
     GlobalPar.PDetuneType=1;
     GlobalPar.FreqEnvelope->defaults();
     GlobalPar.FreqLfo->defaults();
+    GlobalPar.PBandwidth=64;
     
     /* Amplitude Global Parameters */
     GlobalPar.PVolume=90;
@@ -173,6 +174,18 @@ void ADnoteParameters::EnableVoice(int nvoice){
     VoicePar[nvoice].FMFreqEnvelope->ASRinit(20,90,40,80);
     VoicePar[nvoice].FMAmpEnvelope=new EnvelopeParams(64,1);
     VoicePar[nvoice].FMAmpEnvelope->ADSRinit(80,90,127,100);
+};
+
+/*
+ * Get the Multiplier of the fine detunes of the voices
+ */
+REALTYPE ADnoteParameters::getBandwidthDetuneMultiplier(){
+    REALTYPE bw=(GlobalPar.PBandwidth-64.0)/64.0;
+    bw=pow(2.0,bw*pow(fabs(bw),0.2)*5.0);
+//    bw*=35;
+//    printf("%g\n",bw);
+    
+    return(bw);
 };
 
 

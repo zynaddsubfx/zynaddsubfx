@@ -758,4 +758,10 @@
 06 Feb 2005 - Facuta o mica modificare care interzice punera notelor "0" in dump si alta modificare care mareste nr. de octave calculate la PADsynth
 	    - Renuntat sa fac modificarea la Microtonal inceputa din 03 Feb, pentru ca nu am gasit cum pot schimba culoarea butonului automat cand modific un text
 07 Feb 2005 - Corectata o eroare care facea ca la microtonal mapping sa nu se calculeze corect (adica sa se stocheze valoarea corecta)
+12 Feb 2005 - Controllerul prestabilit la Virtual Keyboard este Filter Cutoff in loc de BandWidth
+	    - Modificate cateva preseturi la DynamicFilter
+	    
+
+
+
     

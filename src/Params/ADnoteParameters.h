@@ -56,6 +56,8 @@
 	unsigned short int PDetune;//fine detune
 	unsigned short int PCoarseDetune;//coarse detune+octave
 	unsigned char PDetuneType;//detune type
+	
+	unsigned char PBandwidth;//how much the relative fine detunes of the voices are changed
 
 	EnvelopeParams *FreqEnvelope; //Frequency Envelope
     
@@ -265,6 +267,7 @@ class ADnoteParameters:public Presets{
 	void add2XML(XMLwrapper *xml);
         void getfromXML(XMLwrapper *xml);
 
+	REALTYPE getBandwidthDetuneMultiplier();
     private:
 	void defaults(int n);//n is the nvoice
 

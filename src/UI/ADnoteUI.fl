@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0106 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -55,7 +55,7 @@ class ADvoicelistitem {: {public Fl_Group}
   Function {make_window()} {private
   } {
     Fl_Window ADnoteVoiceListItem {
-      private xywh {335 489 615 30} type Double hide
+      private xywh {247 599 615 30} type Double hide
       class Fl_Group
     } {
       Fl_Group voicelistitemgroup {
@@ -90,7 +90,7 @@ class ADvoicelistitem {: {public Fl_Group}
           code2 {if (pars->VoicePar[nvoice].Pextoscil != -1) {osc->init(pars->VoicePar[pars->VoicePar[nvoice].Pextoscil].OscilSmp,master);}}
         } {}
         Fl_Value_Output detunevalueoutput {
-          callback {o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune));}
+          callback {o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());} selected
           xywh {265 5 45 20} labelsize 10 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 10
           code0 {o->value(getdetune(pars->VoicePar[nvoice].PDetuneType,0,pars->VoicePar[nvoice].PDetune));}
         }
@@ -126,7 +126,7 @@ detunevalueoutput->do_callback();}
         callback {pars->VoicePar[nvoice].Enabled=(int)o->value();
 if (o->value()==0) voicelistitemgroup->deactivate();
 else voicelistitemgroup->activate();
-o->redraw();} selected
+o->redraw();}
         private xywh {30 5 20 20} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 4
         code0 {char tmp[10];snprintf(tmp,10,"%d",nvoice+1);o->label(strdup(tmp));}
         code1 {o->value(pars->VoicePar[nvoice].Enabled);}
@@ -752,7 +752,7 @@ if (oscedit!=NULL) {
 
 class ADnoteUI {: {public PresetsUI_}
 } {
-  Function {make_window()} {private
+  Function {make_window()} {open private
   } {
     Fl_Window ADnoteGlobalParameters {
       label {ADsynth Global Parameters of the Instrument}
@@ -774,7 +774,7 @@ class ADnoteUI {: {public PresetsUI_}
 if (k<0) k+=16;
 pars->GlobalPar.PCoarseDetune = k*1024+
    pars->GlobalPar.PCoarseDetune%1024;}
-          tooltip Octave xywh {470 275 45 15} type Simple labelsize 10 align 1 minimum -8 maximum 7 step 1 textfont 1 textsize 12
+          tooltip Octave xywh {450 275 45 15} type Simple labelsize 10 align 1 minimum -8 maximum 7 step 1 textfont 1 textsize 12
           code0 {int k=pars->GlobalPar.PCoarseDetune/1024;if (k>=8) k-=16;}
           code2 {o->value(k);}
         }
@@ -798,7 +798,7 @@ pars->GlobalPar.PCoarseDetune = k+
         Fl_Slider freq {
           callback {pars->GlobalPar.PDetune=(int)o->value()+8192;
 detunevalueoutput->do_callback();}
-          tooltip {Fine Detune (cents)} xywh {60 275 390 15} type {Horz Knob} box FLAT_BOX minimum -8192 maximum 8191 step 1
+          tooltip {Fine Detune (cents)} xywh {60 275 385 15} type {Horz Knob} box FLAT_BOX minimum -8192 maximum 8191 step 1
           code0 {o->value(pars->GlobalPar.PDetune-8192);}
         }
         Fl_Value_Output detunevalueoutput {
@@ -815,6 +815,19 @@ detunevalueoutput->do_callback();} open
           code0 {o->add("L35cents");o->add("L10cents");o->add("E100cents");o->add("E1200cents");}
           code1 {o->value(pars->GlobalPar.PDetuneType-1);}
         } {}
+        Fl_Dial {} {
+          label relBW
+          callback {pars->GlobalPar.PBandwidth=(int) o->value();
+
+pars->getBandwidthDetuneMultiplier();
+
+for (int i=0;i<NUM_VOICES;i++){
+  voicelistitem[i]->refreshlist();
+};}
+          tooltip {Bandwidth - how the relative fine detune of the voice are changed} xywh {500 270 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
+          code0 {o->value(pars->GlobalPar.PBandwidth);}
+          class WidgetPDial
+        }
       }
       Fl_Group {} {
         label AMPLITUDE
