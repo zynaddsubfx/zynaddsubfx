@@ -42,7 +42,7 @@ o->hide();}
         xywh {5 5 500 305}
       } {
         Fl_Group {} {
-          label {Main settings} selected
+          label {Main settings}
           xywh {5 25 500 285}
         } {
           Fl_Group {} {
@@ -160,20 +160,26 @@ config.cfg.SoundBufferSize=strtoul(o->value(),&tmp,10);}
             xywh {15 225 240 20} labelfont 1 labelsize 12 align 128
           }
           Fl_Group {} {
-            xywh {15 115 230 85} box ENGRAVED_BOX
+            xywh {15 110 230 85} box ENGRAVED_BOX
           } {
             Fl_File_Input {} {
               label {Dump File}
               callback {snprintf(config.cfg.DumpFile,config.maxstringsize,"%s",o->value());}
-              xywh {20 160 220 35} align 5
+              xywh {20 155 220 35} align 5
               code0 {o->insert(config.cfg.DumpFile);}
             }
             Fl_Check_Button {} {
               label {Dump notes}
               callback {config.cfg.DumpNotesToFile=(int) o->value();
 dump.startnow();//this has effect only if this option was disabled}
-              xywh {20 120 100 20} down_box DOWN_BOX
+              xywh {20 115 100 20} down_box DOWN_BOX
               code0 {o->value(config.cfg.DumpNotesToFile);}
+            }
+            Fl_Check_Button {} {
+              label Append
+              callback {config.cfg.DumpAppend=(int) o->value();}
+              xywh {160 115 80 20} down_box DOWN_BOX
+              code0 {o->value(config.cfg.DumpAppend);}
             }
           }
           Fl_Group {} {
@@ -218,12 +224,6 @@ midiinputnamebox->label(config.winmididevices[config.cfg.WindowsMidiInId].name);
                 code0 {o->label(config.winmididevices[config.cfg.WindowsMidiInId].name);}
               }
             }
-          }
-          Fl_Check_Button {} {
-            label Append
-            callback {config.cfg.DumpAppend=(int) o->value();}
-            xywh {160 120 80 20} down_box DOWN_BOX
-            code0 {o->value(config.cfg.DumpAppend);}
           }
           Fl_Counter {} {
             label {XML compression level}

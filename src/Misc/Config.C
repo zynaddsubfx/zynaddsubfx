@@ -57,6 +57,8 @@ Config::Config(){
 
     cfg.GzipCompression=3;
 
+//    cfg.Interpolation=0;
+
     winwavemax=1;winmidimax=1;
 //try to find out how many input midi devices are there
 #ifdef WINMIDIIN

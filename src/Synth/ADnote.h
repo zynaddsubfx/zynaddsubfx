@@ -33,7 +33,9 @@
 //Globals
 
 //FM amplitude tune
-#define FM_AMP_MULTIPLIER 14.73 // ln(2500000)
+#define FM_AMP_MULTIPLIER 14.71280603
+
+#define OSCIL_SMP_EXTRA_SAMPLES 5
 
 class ADnote{   //ADDitive note
  public:
@@ -58,7 +60,8 @@ class ADnote{   //ADDitive note
   void KillNote();
   inline REALTYPE getvoicebasefreq(int nvoice);
   inline REALTYPE getFMvoicebasefreq(int nvoice);
-  inline void ComputeVoiceOscillator(int nvoice);
+  inline void ComputeVoiceOscillator_LinearInterpolation(int nvoice);
+  inline void ComputeVoiceOscillator_CubicInterpolation(int nvoice);
   inline void ComputeVoiceOscillatorMorph(int nvoice);
   inline void ComputeVoiceOscillatorRingModulation(int nvoice);
   inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice,int FMmode);//FMmode=0 for phase modulation, 1 for Frequency modulation

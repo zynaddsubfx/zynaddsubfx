@@ -107,15 +107,17 @@ ADnote::ADnote(ADnoteParameters *pars,Controller *ctl_,REALTYPE freq,REALTYPE ve
         oscposhi[nvoice]=0;oscposlo[nvoice]=0.0;
         oscposhiFM[nvoice]=0;oscposloFM[nvoice]=0.0;
 	
-	NoteVoicePar[nvoice].OscilSmp=new REALTYPE[OSCIL_SIZE+1];//the extra point contains the first point
+	NoteVoicePar[nvoice].OscilSmp=new REALTYPE[OSCIL_SIZE+OSCIL_SMP_EXTRA_SAMPLES];//the extra points contains the first point
 
 	//Get the voice's oscil or external's voice oscil
 	int vc=nvoice; 
 	if (pars->VoicePar[nvoice].Pextoscil!=-1) vc=pars->VoicePar[nvoice].Pextoscil;
 	oscposhi[nvoice]=pars->VoicePar[vc].OscilSmp->get(NoteVoicePar[nvoice].OscilSmp,getvoicebasefreq(nvoice),
 	                 pars->VoicePar[nvoice].Presonance);
-	//I store the first elment to the last position for speedups
-	NoteVoicePar[nvoice].OscilSmp[OSCIL_SIZE]=NoteVoicePar[nvoice].OscilSmp[0];
+
+	//I store the first elments to the last position for speedups
+	for (int i=0;i<OSCIL_SMP_EXTRA_SAMPLES;i++) NoteVoicePar[nvoice].OscilSmp[OSCIL_SIZE+i]=NoteVoicePar[nvoice].OscilSmp[i];
+
 	oscposhi[nvoice]+=(int)((pars->VoicePar[nvoice].Poscilphase-64.0)/128.0*OSCIL_SIZE+OSCIL_SIZE*4);
 	oscposhi[nvoice]%=OSCIL_SIZE;
 	
@@ -327,7 +329,7 @@ void ADnote::initparameters(){
 	
 	/* Voice Modulation Parameters Init */
 	if ((NoteVoicePar[nvoice].FMEnabled!=NONE)&&(NoteVoicePar[nvoice].FMVoice<0)){
- 	   NoteVoicePar[nvoice].FMSmp=new REALTYPE[OSCIL_SIZE+1];
+ 	   NoteVoicePar[nvoice].FMSmp=new REALTYPE[OSCIL_SIZE+OSCIL_SMP_EXTRA_SAMPLES];
 
 	   //Perform Anti-aliasing only on MORPH or RING MODULATION
 	   REALTYPE tmp=1.0;
@@ -342,7 +344,7 @@ void ADnote::initparameters(){
      	   if (partparams->VoicePar[nvoice].PextFMoscil!=-1) vc=partparams->VoicePar[nvoice].PextFMoscil;
 
 	   oscposhiFM[nvoice]=(oscposhi[nvoice]+partparams->VoicePar[vc].FMSmp->get(NoteVoicePar[nvoice].FMSmp,tmp)) % OSCIL_SIZE;
-	   NoteVoicePar[nvoice].FMSmp[OSCIL_SIZE]=NoteVoicePar[nvoice].FMSmp[0];
+	   for (int i=0;i<OSCIL_SMP_EXTRA_SAMPLES;i++) NoteVoicePar[nvoice].FMSmp[OSCIL_SIZE+i]=NoteVoicePar[nvoice].FMSmp[i];
 	   oscposhiFM[nvoice]+=(int)((partparams->VoicePar[nvoice].PFMoscilphase-64.0)/128.0*OSCIL_SIZE+OSCIL_SIZE*4);
 	   oscposhiFM[nvoice]%=OSCIL_SIZE;
 	};
@@ -550,16 +552,17 @@ inline void ADnote::fadein(REALTYPE *smps){
 };
 
 /*
- * Computes the Oscillator (Without Modulation)
+ * Computes the Oscillator (Without Modulation) - LinearInterpolation
  */
-inline void ADnote::ComputeVoiceOscillator(int nvoice){    
+inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice){    
     int i,poshi;
     REALTYPE poslo;
 
     poshi=oscposhi[nvoice];
     poslo=oscposlo[nvoice];
+    REALTYPE *smps=NoteVoicePar[nvoice].OscilSmp;
     for (i=0;i<SOUND_BUFFER_SIZE;i++){
-	tmpwave[i]=NoteVoicePar[nvoice].OscilSmp[poshi]*(1.0-poslo)+NoteVoicePar[nvoice].OscilSmp[poshi+1]*poslo;
+	tmpwave[i]=smps[poshi]*(1.0-poslo)+smps[poshi+1]*poslo;
 	poslo+=oscfreqlo[nvoice];
 	if (poslo>=1.0) {
     		poslo-=1.0;	
@@ -572,13 +575,50 @@ inline void ADnote::ComputeVoiceOscillator(int nvoice){
     oscposlo[nvoice]=poslo;
 };
 
+
+
+/*
+ * Computes the Oscillator (Without Modulation) - CubicInterpolation
+ *
+ The differences from the Linear are to little to deserve to be used. This is because I am using a large OSCIL_SIZE (>512)
+inline void ADnote::ComputeVoiceOscillator_CubicInterpolation(int nvoice){    
+    int i,poshi;
+    REALTYPE poslo;
+
+    poshi=oscposhi[nvoice];
+    poslo=oscposlo[nvoice];
+    REALTYPE *smps=NoteVoicePar[nvoice].OscilSmp;
+    REALTYPE xm1,x0,x1,x2,a,b,c;
+    for (i=0;i<SOUND_BUFFER_SIZE;i++){
+	xm1=smps[poshi];
+	x0=smps[poshi+1];
+	x1=smps[poshi+2];
+	x2=smps[poshi+3];
+	a=(3.0 * (x0-x1) - xm1 + x2) / 2.0;
+	b = 2.0*x1 + xm1 - (5.0*x0 + x2) / 2.0;
+	c = (x1 - xm1) / 2.0;
+	tmpwave[i]=(((a * poslo) + b) * poslo + c) * poslo + x0;
+	printf("a\n");
+	//tmpwave[i]=smps[poshi]*(1.0-poslo)+smps[poshi+1]*poslo;
+	poslo+=oscfreqlo[nvoice];
+	if (poslo>=1.0) {
+    		poslo-=1.0;	
+		poshi++;
+	};
+    	poshi+=oscfreqhi[nvoice];    
+        poshi&=OSCIL_SIZE-1;
+    };
+    oscposhi[nvoice]=poshi;
+    oscposlo[nvoice]=poslo;
+};
+*/
 /*
  * Computes the Oscillator (Morphing)
  */
 inline void ADnote::ComputeVoiceOscillatorMorph(int nvoice){    
     int i;
     REALTYPE amp;
-    ComputeVoiceOscillator(nvoice);    
+    ComputeVoiceOscillator_LinearInterpolation(nvoice);    
     if (FMnewamplitude[nvoice]>1.0) FMnewamplitude[nvoice]=1.0;
     if (FMoldamplitude[nvoice]>1.0) FMoldamplitude[nvoice]=1.0;
     
@@ -619,7 +659,7 @@ inline void ADnote::ComputeVoiceOscillatorMorph(int nvoice){
 inline void ADnote::ComputeVoiceOscillatorRingModulation(int nvoice){    
     int i;
     REALTYPE amp;
-    ComputeVoiceOscillator(nvoice);    
+    ComputeVoiceOscillator_LinearInterpolation(nvoice);    
     if (FMnewamplitude[nvoice]>1.0) FMnewamplitude[nvoice]=1.0;
     if (FMoldamplitude[nvoice]>1.0) FMoldamplitude[nvoice]=1.0;
     if (NoteVoicePar[nvoice].FMVoice>=0){
@@ -781,7 +821,9 @@ int ADnote::noteout(REALTYPE *outl,REALTYPE *outr){
 		case PHASE_MOD:ComputeVoiceOscillatorFrequencyModulation(nvoice,0);break;
 		case FREQ_MOD:ComputeVoiceOscillatorFrequencyModulation(nvoice,1);break;
 		//case PITCH_MOD:ComputeVoiceOscillatorPitchModulation(nvoice);break;
-		default:ComputeVoiceOscillator(nvoice);
+		default:ComputeVoiceOscillator_LinearInterpolation(nvoice);
+		//if (config.cfg.Interpolation) ComputeVoiceOscillator_CubicInterpolation(nvoice);
+		        
 	    };
 	} else ComputeVoiceNoise(nvoice);
     // Voice Processing
