@@ -77,7 +77,7 @@ REALTYPE LFO::lfoout(){
     REALTYPE out;    
     switch (lfotype){
 	case 1: //LFO_TRIANGLE
-		if ((x>0.0)&&(x<0.25)) out=4.0*x;
+		if ((x>=0.0)&&(x<0.25)) out=4.0*x;
 		else if ((x>0.25)&&(x<0.75)) out=2-4*x;
 		     else out=4.0*x-4.0;
 		break;
@@ -99,7 +99,9 @@ REALTYPE LFO::lfoout(){
 		break;
 	default:out=cos(x*2.0*PI);//LFO_SINE
     };
-     if ((lfotype==0)||(lfotype==1)) out*=lfointensity*(amp1+x*(amp2-amp1));
+
+
+    if ((lfotype==0)||(lfotype==1)) out*=lfointensity*(amp1+x*(amp2-amp1));
         else out*=lfointensity*amp2;
     if (lfodelay<0.00001) {
 	    if (freqrndenabled==0) x+=incx;
@@ -120,7 +122,7 @@ REALTYPE LFO::lfoout(){
  */
 REALTYPE LFO::amplfoout(){
     REALTYPE out;
-    out=1-lfointensity+lfoout()/2.0;
+    out=1.0-lfointensity+lfoout();
     if (out<-1.0) out=-1.0;
 	else if (out>1.0) out=1.0;
     return(out);

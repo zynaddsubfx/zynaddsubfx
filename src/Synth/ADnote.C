@@ -788,10 +788,17 @@ int ADnote::noteout(REALTYPE *outl,REALTYPE *outr){
     
      // Amplitude
      if (ABOVE_AMPLITUDE_THRESHOLD(oldamplitude[nvoice],newamplitude[nvoice])){
+    	  int rest=SOUND_BUFFER_SIZE;
+          //test if the amplitude if raising and the difference is high
+	  if ((newamplitude[nvoice]>oldamplitude[nvoice])&&((newamplitude[nvoice]-oldamplitude[nvoice])>0.25)){
+		rest=10;
+		if (rest>SOUND_BUFFER_SIZE) rest=SOUND_BUFFER_SIZE;
+		for (int i=0;i<SOUND_BUFFER_SIZE-rest;i++) tmpwave[i]*=oldamplitude[nvoice];
+	  };
     	  // Amplitude interpolation
-          for (i=0;i<SOUND_BUFFER_SIZE;i++){
-		tmpwave[i]*=INTERPOLATE_AMPLITUDE(oldamplitude[nvoice]
-		              ,newamplitude[nvoice],i,SOUND_BUFFER_SIZE);
+          for (i=0;i<rest;i++){
+		tmpwave[i+(SOUND_BUFFER_SIZE-rest)]*=INTERPOLATE_AMPLITUDE(oldamplitude[nvoice]
+		 ,newamplitude[nvoice],i,rest);
 	  };
 	} else for (i=0;i<SOUND_BUFFER_SIZE;i++) tmpwave[i]*=newamplitude[nvoice];
 
