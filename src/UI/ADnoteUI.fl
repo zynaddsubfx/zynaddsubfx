@@ -305,7 +305,7 @@ o->redraw();}
                 code2 {oscFM->init(pars->VoicePar[nv].FMSmp,0,pars->VoicePar[nvoice].PFMoscilphase,master);}
               } {}
               Fl_Box {} {
-                label {Modullator Oscillator}
+                label {Mod.Oscillator} selected
                 xywh {535 365 155 20} labelfont 1 align 20
               }
               Fl_Button changeFMoscilbutton {
@@ -981,12 +981,12 @@ ADnoteVoice->redraw();}
       }
       Fl_Button {} {
         label C
-        callback {presetsui->copy(pars,nvoice);} selected
+        callback {presetsui->copy(pars,nvoice);}
         xywh {700 535 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
       }
       Fl_Button {} {
         label P
-        callback {presetsui->paste(pars,this,nvoice);} selected
+        callback {presetsui->paste(pars,this,nvoice);}
         xywh {730 535 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
       }
     }
