@@ -372,7 +372,7 @@ fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. P
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
-      xywh {337 199 390 465} type Double hide
+      xywh {188 182 390 465} type Double hide
       code0 {setfilelabel(NULL);} non_modal
     } {
       Fl_Menu_Bar mastermenu {
@@ -769,29 +769,24 @@ pthread_mutex_unlock(&master->mutex);}
         xywh {0 80 390 160}
       } {
         Fl_Group {} {
-          label {System Effects} selected
-          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25
+          label {System Effects}
+          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25 hide
         } {
           Fl_Counter syseffnocounter {
             label {Sys.Effect No.}
             callback {nsyseff=(int) o->value();
 sysefftype->value(master->sysefx[nsyseff]->geteffect());
-sysefftype->do_callback();}
+syseffectui->refresh(master->sysefx[nsyseff]);}
             xywh {5 120 80 20} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 127 step 1 textfont 1
             code0 {o->bounds(0,NUM_SYS_EFX-1);}
             code1 {o->value(nsyseff);}
           }
           Fl_Choice sysefftype {
             label EffType
-            callback {syseffectuigroup->remove(syseffectui);
-delete syseffectui;
-pthread_mutex_lock(&master->mutex);
+            callback {pthread_mutex_lock(&master->mutex);
 master->sysefx[nsyseff]->changeeffect((int) o->value());
 pthread_mutex_unlock(&master->mutex);
-syseffectui=new EffUI(0,0,765,525);
-syseffectuigroup->add(syseffectui);
-syseffectui->init(master->sysefx[nsyseff],sysefftype);
-syseffectui->redraw();}
+syseffectui->refresh(master->sysefx[nsyseff]);}
             xywh {315 125 70 15} down_box BORDER_BOX labelsize 11
             code0 {o->value(master->sysefx[nsyseff]->geteffect());}
           } {
@@ -833,7 +828,7 @@ syseffectui->redraw();}
           } {
             Fl_Group syseffectui {
               xywh {5 140 380 95}
-              code0 {o->init(master->sysefx[nsyseff],sysefftype);}
+              code0 {o->init(master->sysefx[nsyseff]);}
               class EffUI
             } {}
           }
@@ -852,7 +847,7 @@ swapeffwindow->show();}
         }
         Fl_Group {} {
           label {Insertion Effects}
-          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25 hide
+          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25
         } {
           Fl_Button {} {
             label {Swap/Copy...}
@@ -864,25 +859,22 @@ swapeffwindow->show();}
           Fl_Counter inseffnocounter {
             label {Ins.Effect No.}
             callback {ninseff=(int) o->value();
-insefftype->value(master->insefx[ninseff]->geteffect()-2);
-insefftype->do_callback();
-inseffpart->value(master->Pinsparts[ninseff]-2);
-inseffpart->do_callback();}
+insefftype->value(master->insefx[ninseff]->geteffect());
+inseffpart->value(master->Pinsparts[ninseff]+2);
+//insefftype->do_callback();
+inseffectui->refresh(master->insefx[ninseff]);
+//inseffpart->do_callback();} selected
             xywh {5 120 80 20} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 127 step 1 textfont 1
             code0 {o->bounds(0,NUM_INS_EFX-1);}
             code1 {o->value(ninseff);}
           }
           Fl_Choice insefftype {
             label EffType
-            callback {inseffectuigroup->remove(inseffectui);
-delete inseffectui;
-pthread_mutex_lock(&master->mutex);
+            callback {pthread_mutex_lock(&master->mutex);
 master->insefx[ninseff]->changeeffect((int) o->value());
 pthread_mutex_unlock(&master->mutex);
-inseffectui=new EffUI(0,0,765,525);
-inseffectuigroup->add(inseffectui);
-inseffectui->init(master->insefx[ninseff],insefftype);
-inseffectui->redraw();}
+inseffectui->refresh(master->insefx[ninseff]);
+inseffectui->show();}
             xywh {315 125 70 15} down_box BORDER_BOX labelsize 11
             code0 {o->value(master->insefx[ninseff]->geteffect());}
             code1 {if (master->Pinsparts[ninseff]== -1) o->deactivate();}
@@ -925,7 +917,7 @@ inseffectui->redraw();}
           } {
             Fl_Group inseffectui {
               xywh {5 140 380 95}
-              code0 {o->init(master->insefx[ninseff],insefftype);}
+              code0 {o->init(master->insefx[ninseff]);}
               code1 {if (master->Pinsparts[ninseff]== -1) o->deactivate();}
               class EffUI
             } {}
@@ -936,10 +928,11 @@ inseffectui->redraw();}
 if ((int) o->value()==1){
     inseffectuigroup->deactivate();
     insefftype->deactivate();
-    master->insefx[ninseff]->cleanup();
+    inseffectui->deactivate();
 } else {
     inseffectuigroup->activate();
     insefftype->activate();
+    inseffectui->activate();
 };} open
             xywh {95 120 80 20} down_box BORDER_BOX labelfont 1 labelsize 10 align 5 textsize 10
             code0 {o->add("Master Out");o->add("Off");}

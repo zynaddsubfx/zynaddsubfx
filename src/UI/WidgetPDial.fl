@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0103 
+version 1.0105 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2004 Nasca Octavian Paul} {} 
@@ -42,8 +42,7 @@ case FL_DRAG:
      return(1); 
      break;
 };
-return(0);} {selected
-    }
+return(0);} {}
   }
   Function {drawgradient(int cx,int cy,int sx,double m1,double m2)} {return_type void
   } {
@@ -53,7 +52,8 @@ return(0);} {selected
    fl_arc(cx+sx/2-i/2,cy+sx/2-i/2,i,i,0,360);
 };} {}
   }
-  Function {draw()} {} {
+  Function {draw()} {open
+  } {
     code {int cx=x(),cy=y(),sx=w(),sy=h();
 
 
@@ -113,7 +113,8 @@ fl_push_matrix();
   fl_end_polygon();
  
 
-fl_pop_matrix();} {}
+fl_pop_matrix();} {selected
+    }
   }
   Function {pdialcolor(int r,int g,int b)} {} {
     code {if (active_r()) fl_color(r,g,b);

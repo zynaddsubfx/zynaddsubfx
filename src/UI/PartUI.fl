@@ -589,25 +589,20 @@ part->ctl.portamento.updowntimestretch=x;}
         callback {ninseff=(int) o->value();
 insefftype->value(part->partefx[ninseff]->geteffect());
 insefftype->do_callback();
-
+inseffectui->refresh(part->partefx[ninseff]);
 int x=part->Pefxroute[ninseff];
 if (x==127) x=1;
-sendtochoice->value(x);}
+sendtochoice->value(x);} selected
         xywh {5 110 80 20} type Simple labelfont 1 labelsize 11 align 6 minimum 0 maximum 127 step 1 textfont 1
         code0 {o->bounds(0,NUM_PART_EFX-1);}
         code1 {o->value(ninseff);}
       }
       Fl_Choice insefftype {
         label EffType
-        callback {inseffectuigroup->remove(inseffectui);
-delete inseffectui;
-pthread_mutex_lock(part->mutex);
+        callback {pthread_mutex_lock(part->mutex);
 part->partefx[ninseff]->changeeffect((int) o->value());
 pthread_mutex_unlock(part->mutex);
-inseffectui=new EffUI(0,0,765,525);
-inseffectuigroup->add(inseffectui);
-inseffectui->init(part->partefx[ninseff],insefftype);
-inseffectui->redraw();}
+inseffectui->refresh(part->partefx[ninseff]);}
         xywh {95 110 70 15} down_box BORDER_BOX labelsize 11 align 6
         code0 {o->value(part->partefx[ninseff]->geteffect());}
       } {
@@ -649,7 +644,7 @@ inseffectui->redraw();}
       } {
         Fl_Group inseffectui {
           xywh {5 5 380 95}
-          code0 {o->init(part->partefx[ninseff],insefftype);}
+          code0 {o->init(part->partefx[ninseff]);}
           class EffUI
         } {}
       }
@@ -1033,8 +1028,7 @@ while (klimits[k]!=0){
 };
 
 if (val==-1) val=k;
-keylimitlist->value(val);} {selected
-    }
+keylimitlist->value(val);} {}
   }
   Function {showparameters(int kititem,int engine)} {} {
     code {if (engine==-1){//this is used if I want to clear the engine from the part
