@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0106 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -737,10 +737,12 @@ if (env->Pfreemode!=0) {
 	freemodebutton->value(1);
 	addpoint->show();
 	deletepoint->show();
+	forcedreleasecheck->show();
 }else{
 	freemodebutton->value(0);
 	addpoint->hide();
 	deletepoint->hide();
+	forcedreleasecheck->hide();
 };} {selected
     }
   }

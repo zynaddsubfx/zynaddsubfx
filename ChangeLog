@@ -745,4 +745,10 @@
 17 Dec 2004 - Inceput sa folosesc Dvorak pt. VK
 18 Dec 2004 - Continuat putin la VK
 20 Dec 2004 - Se poate selecta la VK dintre "qwerty" si "Dvorak"
-	    
+	    - Corectata o mica erare care facea sa nu arate BWprofile dezactivat la PADnote
+
+*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *
+
+
+04 Ian 2005 - Corectata o mica eroare care facea ca sa nu arate Force Release la Freemode Envelope
+

@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0105 
+version 1.0106 
 header_name {.h} 
 code_name {.cc}
 decl {\#include "../Params/PADnoteParameters.h"} {public
@@ -210,12 +210,13 @@ for (int i=0;i<lx;i++){
   }
 } 
 
-class PADnoteUI {: {public PresetsUI_}
+class PADnoteUI {open : {public PresetsUI_}
 } {
-  Function {make_window()} {} {
+  Function {make_window()} {open
+  } {
     Fl_Window padnotewindow {
       label {PAD synth Parameters}
-      xywh {76 165 535 450} type Double hide
+      xywh {76 165 535 450} type Double visible
     } {
       Fl_Tabs {} {
         callback {if (o->value()!=harmonicstructuregroup) applybutton->hide();
@@ -223,7 +224,7 @@ class PADnoteUI {: {public PresetsUI_}
         xywh {0 0 535 395}
       } {
         Fl_Group harmonicstructuregroup {
-          label {Harmonic Structure} selected
+          label {Harmonic Structure}
           xywh {0 20 535 375} box ENGRAVED_BOX
         } {
           Fl_Group bwprofilegroup {
@@ -722,10 +723,10 @@ if (pars->Pmode==0){
    bwcents->deactivate();
    hprofile->deactivate();
    hprofile->color(48);
-   bwscale->activate();
+   bwscale->deactivate();
 };
 
-cbwidget->do_callback();}
+cbwidget->do_callback();} selected
             xywh {220 305 90 20} down_box BORDER_BOX labelfont 1 labelsize 10 labelcolor 0 align 5 textsize 12
             code0 {o->value(pars->Pmode);}
           } {
