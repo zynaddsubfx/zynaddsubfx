@@ -364,12 +364,12 @@ void Bank::rescanforbanks(){
 	    end=i;
 	    if (dirlist[i]<32) break;
 	};
-	snprintf(currentrootdir,end-start+2,"%s",&dirlist[start]);
+	snprintf(currentrootdir,end-start+1,"%s",&dirlist[start]);
 	
 	//a root director was found
 	if (strlen (currentrootdir)>1) scanrootdir(currentrootdir);
 
-	start=end+2;
+	start=end+1;
     };
     delete(currentrootdir);
 
