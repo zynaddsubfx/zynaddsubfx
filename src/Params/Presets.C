@@ -56,6 +56,7 @@ void Presets::pasteclipboard(){
     };
     
     if (xml->enterbranch(type)==0) return;
+	defaults();
 	getfromXML(xml);
     xml->exitbranch();
     

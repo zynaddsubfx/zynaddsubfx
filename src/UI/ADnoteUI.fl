@@ -750,9 +750,9 @@ if (oscedit!=NULL) {
   decl {Master *master;} {}
 } 
 
-class ADnoteUI {open : {public PresetsUI_}
+class ADnoteUI {: {public PresetsUI_}
 } {
-  Function {make_window()} {open private
+  Function {make_window()} {private
   } {
     Fl_Window ADnoteGlobalParameters {
       label {ADsynth Global Parameters of the Instrument}
@@ -762,7 +762,7 @@ class ADnoteUI {open : {public PresetsUI_}
         label FREQUENCY
         xywh {5 255 525 115} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 17
       } {
-        Fl_Group {} {
+        Fl_Group freqenv {
           label {ADSynth Global - Frequency Envelope} open
           xywh {10 295 205 70} box FLAT_BOX color 51 align 144
           code0 {o->init(pars->GlobalPar.FreqEnvelope);}
@@ -790,7 +790,7 @@ pars->GlobalPar.PCoarseDetune = k+
           code3 {o->lstep(10);}
         }
         Fl_Group freqlfo {
-          label {Frequency LFO} open selected
+          label {Frequency LFO} open
           xywh {215 295 230 70} box FLAT_BOX color 47 align 144
           code0 {o->init(pars->GlobalPar.FreqLfo);}
           class LFOUI
@@ -867,8 +867,8 @@ detunevalueoutput->do_callback();} open
           code0 {o->value(pars->GlobalPar.PPunchVelocitySensing);}
           class WidgetPDial
         }
-        Fl_Group {} {
-          label {ADSynth Global - Amplitude Envelope} open
+        Fl_Group ampenv {
+          label {ADSynth Global - Amplitude Envelope} open selected
           xywh {10 75 205 70} box FLAT_BOX color 51 align 144
           code0 {o->init(pars->GlobalPar.AmpEnvelope);}
           class EnvelopeUI
@@ -890,7 +890,7 @@ detunevalueoutput->do_callback();} open
         label FILTER
         xywh {245 5 285 250} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 17
       } {
-        Fl_Group {} {
+        Fl_Group filterenv {
           label {ADSynth Global - Filter Envelope} open
           xywh {250 110 275 70} box FLAT_BOX color 51 align 144
           code0 {o->init(pars->GlobalPar.FilterEnvelope);}
@@ -902,7 +902,7 @@ detunevalueoutput->do_callback();} open
           code0 {o->init(pars->GlobalPar.FilterLfo);}
           class LFOUI
         } {}
-        Fl_Group {} {
+        Fl_Group filterui {
           label {ADsynth Global - Filter} open
           xywh {250 35 275 75} box FLAT_BOX color 50 align 144
           code0 {o->init(pars->GlobalPar.GlobalFilter,&pars->GlobalPar.PFilterVelocityScale,&pars->GlobalPar.PFilterVelocityScaleFunction);}
@@ -1064,6 +1064,11 @@ coarsedet->value(k);
 amplfo->refresh();
 freqlfo->refresh();
 filterlfo->refresh();
+
+ampenv->refresh();
+freqenv->refresh();
+filterenv->refresh();
+filterui->refresh();
 
 for (int i=0;i<NUM_VOICES;i++) voicelistitem[i]->refreshlist();
 

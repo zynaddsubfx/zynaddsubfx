@@ -214,7 +214,7 @@ class PADnoteUI {: {public PresetsUI_}
 } {
   Function {make_window()} {} {
     Fl_Window padnotewindow {
-      label {PAD synth Parameters} selected
+      label {PAD synth Parameters}
       xywh {76 165 535 450} type Double hide
     } {
       Fl_Tabs {} {
@@ -230,7 +230,7 @@ class PADnoteUI {: {public PresetsUI_}
             xywh {5 30 90 260} box ENGRAVED_BOX
             code0 {if (pars->Pmode!=0) o->deactivate();}
           } {
-            Fl_Dial {} {
+            Fl_Dial hpbasepar1 {
               label Width
               callback {pars->Php.base.par1=(int) o->value();
 hprofile->redraw();
@@ -239,7 +239,7 @@ cbwidget->do_callback();}
               code0 {o->value(pars->Php.base.par1);}
               class WidgetPDial
             }
-            Fl_Choice {} {
+            Fl_Choice hpbasetype {
               label {Base Type}
               callback {pars->Php.base.type=o->value();
 hprofile->redraw();
@@ -260,8 +260,8 @@ cbwidget->do_callback();}
                 xywh {35 35 100 20} labelfont 1 labelsize 10
               }
             }
-            Fl_Dial {} {
-              label FreqMult
+            Fl_Dial hpfreqmult {
+              label FreqMlt
               callback {pars->Php.freqmult=(int) o->value();
 hprofile->redraw();
 cbwidget->do_callback();}
@@ -269,7 +269,7 @@ cbwidget->do_callback();}
               code0 {o->value(pars->Php.freqmult);}
               class WidgetPDial
             }
-            Fl_Dial {} {
+            Fl_Dial hpmpar1 {
               label Str
               callback {pars->Php.modulator.par1=(int) o->value();
 hprofile->redraw();
@@ -278,7 +278,7 @@ cbwidget->do_callback();}
               code0 {o->value(pars->Php.modulator.par1);}
               class WidgetPDial
             }
-            Fl_Dial {} {
+            Fl_Dial hpmfreq {
               label SFreq
               callback {pars->Php.modulator.freq=(int) o->value();
 hprofile->redraw();
@@ -290,7 +290,7 @@ cbwidget->do_callback();}
             Fl_Group {} {
               xywh {10 160 80 105} box BORDER_BOX
             } {
-              Fl_Choice {} {
+              Fl_Choice hpamptype {
                 label AmpMultiplier
                 callback {pars->Php.amp.type=o->value();
 hprofile->redraw();
@@ -315,7 +315,7 @@ cbwidget->do_callback();}
                   xywh {75 75 100 20} labelfont 1 labelsize 10
                 }
               }
-              Fl_Choice {} {
+              Fl_Choice hpampmode {
                 label AmpMode
                 callback {pars->Php.amp.mode=o->value();
 hprofile->redraw();
@@ -340,7 +340,7 @@ cbwidget->do_callback();}
                   xywh {90 90 100 20} labelfont 1 labelsize 10
                 }
               }
-              Fl_Dial {} {
+              Fl_Dial hpamppar1 {
                 label Par1
                 callback {pars->Php.amp.par1=(int) o->value();
 hprofile->redraw();
@@ -349,7 +349,7 @@ cbwidget->do_callback();}
                 code0 {o->value(pars->Php.amp.par1);}
                 class WidgetPDial
               }
-              Fl_Dial {} {
+              Fl_Dial hpamppar2 {
                 label Par2
                 callback {pars->Php.amp.par2=(int) o->value();
 hprofile->redraw();
@@ -359,7 +359,7 @@ cbwidget->do_callback();}
                 class WidgetPDial
               }
             }
-            Fl_Check_Button {} {
+            Fl_Check_Button hpautoscale {
               label autoscale
               callback {pars->Php.autoscale=(int) o->value();
 hprofile->redraw();
@@ -367,7 +367,7 @@ cbwidget->do_callback();}
               xywh {10 270 60 15} down_box DOWN_BOX labelsize 10
               code0 {o->value(pars->Php.autoscale);}
             }
-            Fl_Choice {} {
+            Fl_Choice hponehalf {
               callback {pars->Php.onehalf=o->value();
 hprofile->redraw();
 cbwidget->do_callback();}
@@ -387,7 +387,7 @@ cbwidget->do_callback();}
                 xywh {35 35 100 20} labelfont 1 labelsize 10
               }
             }
-            Fl_Dial {} {
+            Fl_Dial hpwidth {
               label Size
               callback {pars->Php.width=(int) o->value();
 hprofile->redraw();
@@ -440,7 +440,7 @@ cbwidget->do_callback();}
           Fl_Group {} {
             xywh {315 295 215 45} box ENGRAVED_BOX
           } {
-            Fl_Choice {} {
+            Fl_Choice hrpostype {
               label OvertonesPosition
               callback {pars->Phrpos.type=o->value();
 overtonepos->redraw();
@@ -477,7 +477,7 @@ cbwidget->do_callback();}
                 xywh {120 120 100 20} labelfont 1 labelsize 12
               }
             }
-            Fl_Dial {} {
+            Fl_Dial hrpospar1 {
               label Par1
               callback {pars->Phrpos.par1=(int) o->value();
 overtonepos->redraw();
@@ -486,7 +486,7 @@ cbwidget->do_callback();}
               code0 {o->value(pars->Phrpos.par1);}
               class WidgetPDial
             }
-            Fl_Dial {} {
+            Fl_Dial hrpospar2 {
               label Par2
               callback {pars->Phrpos.par2=(int) o->value();
 overtonepos->redraw();
@@ -495,7 +495,7 @@ cbwidget->do_callback();}
               code0 {o->value(pars->Phrpos.par2);}
               class WidgetPDial
             }
-            Fl_Dial {} {
+            Fl_Dial hrpospar3 {
               label ForceH
               callback {pars->Phrpos.par3=(int) o->value();
 overtonepos->redraw();
@@ -505,12 +505,13 @@ cbwidget->do_callback();}
               class WidgetPDial
             }
           }
-          Fl_Choice {} {
+          Fl_Choice bwscale {
             label {Bandwidth Scale}
             callback {pars->Pbwscale=(int) o->value();
 cbwidget->do_callback();}
             xywh {120 305 80 20} down_box BORDER_BOX labelsize 10 align 5 textsize 12
             code0 {o->value(pars->Pbwscale);}
+            code1 {if (pars->Pmode!=0) o->deactivate();}
           } {
             menuitem {} {
               label Normal
@@ -550,7 +551,7 @@ cbwidget->do_callback();}
             code0 {PADnoteOvertonePosition *opui=new PADnoteOvertonePosition(o->x(),o->y(),o->w(),o->h(),"");}
             code1 {opui->init(pars,master);}
           } {}
-          Fl_Choice {} {
+          Fl_Choice qsamplesize {
             label {Sample Size}
             callback {pars->Pquality.samplesize=(int) o->value();
 cbwidget->do_callback();}
@@ -586,7 +587,7 @@ cbwidget->do_callback();}
               xywh {205 205 100 20} labelfont 1 labelsize 12
             }
           }
-          Fl_Choice {} {
+          Fl_Choice qsmpoct {
             label {smp/oct}
             callback {pars->Pquality.smpoct=(int) o->value();
 cbwidget->do_callback();}
@@ -622,7 +623,7 @@ cbwidget->do_callback();}
               xywh {50 50 100 20} labelfont 1 labelsize 12
             }
           }
-          Fl_Choice {} {
+          Fl_Choice qoct {
             label {no.oct}
             callback {pars->Pquality.oct=(int) o->value();
 cbwidget->do_callback();}
@@ -650,7 +651,7 @@ cbwidget->do_callback();}
               xywh {50 50 100 20} labelfont 1 labelsize 12
             }
           }
-          Fl_Choice {} {
+          Fl_Choice qbasenote {
             label base
             callback {pars->Pquality.basenote=(int) o->value();
 cbwidget->do_callback();}
@@ -704,7 +705,7 @@ cbwidget->do_callback();}
             label {Profile of One Harmonic (Frequency Distribution)}
             xywh {160 25 315 20}
           }
-          Fl_Choice {} {
+          Fl_Choice spectrummode {
             label {Spectrum Mode}
             callback {pars->Pmode=(int) o->value();
 
@@ -714,12 +715,14 @@ if (pars->Pmode==0){
    bwcents->activate();
    hprofile->activate();
    hprofile->color(54);
+   bwscale->activate();
 } else {
    bwprofilegroup->deactivate();
    bwdial->deactivate();
    bwcents->deactivate();
    hprofile->deactivate();
    hprofile->color(48);
+   bwscale->activate();
 };
 
 cbwidget->do_callback();}
@@ -748,13 +751,13 @@ cbwidget->do_callback();}
             label FREQUENCY
             xywh {5 275 525 115} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 17
           } {
-            Fl_Group {} {
+            Fl_Group freqenv {
               label {PADSynth - Frequency Envelope} open
               xywh {10 315 205 70} box FLAT_BOX color 51 align 144
               code0 {o->init(pars->FreqEnvelope);}
               class EnvelopeUI
             } {}
-            Fl_Counter {} {
+            Fl_Counter octave {
               label Octave
               callback {int k=(int) o->value();
 if (k<0) k+=16;
@@ -765,7 +768,7 @@ pars->PCoarseDetune = k*1024+
               code1 {if (k>=8) k-=16;}
               code2 {o->value(k);}
             }
-            Fl_Counter {} {
+            Fl_Counter coarsedet {
               label {Coarse det.}
               callback {int k=(int) o->value();
 if (k<0) k+=1024;
@@ -777,13 +780,13 @@ pars->PCoarseDetune = k+
               code2 {o->value(k);}
               code3 {o->lstep(10);}
             }
-            Fl_Group {} {
+            Fl_Group freqlfo {
               label {Frequency LFO} open
               xywh {215 315 230 70} box FLAT_BOX color 47 align 144
               code0 {o->init(pars->FreqLfo);}
               class LFOUI
             } {}
-            Fl_Slider {} {
+            Fl_Slider detune {
               callback {pars->PDetune=(int)o->value()+8192;
 detunevalueoutput->do_callback();}
               tooltip {Fine Detune (cents)} xywh {60 295 295 15} type {Horz Knob} box FLAT_BOX minimum -8192 maximum 8191 step 1
@@ -795,7 +798,7 @@ detunevalueoutput->do_callback();}
               xywh {12 295 45 15} labelsize 10 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 10
               code0 {o->value(getdetune(pars->PDetuneType,0,pars->PDetune));}
             }
-            Fl_Choice {} {
+            Fl_Choice detunetype {
               label {Detune Type}
               callback {pars->PDetuneType=(int) o->value()+1;
 detunevalueoutput->do_callback();} open
@@ -803,7 +806,7 @@ detunevalueoutput->do_callback();} open
               code0 {o->add("L35cents");o->add("L10cents");o->add("E100cents");o->add("E1200cents");}
               code1 {o->value(pars->PDetuneType-1);}
             } {}
-            Fl_Check_Button {} {
+            Fl_Check_Button hz440 {
               label 440Hz
               callback {int x=(int) o->value();
 pars->Pfixedfreq=x;
@@ -825,66 +828,66 @@ if (x==0) fixedfreqetdial->deactivate();
             label AMPLITUDE
             xywh {5 25 240 250} box THIN_UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 17
           } {
-            Fl_Value_Slider {} {
+            Fl_Value_Slider volume {
               label Vol
               callback {pars->PVolume=(int)o->value();}
               tooltip Volume xywh {10 50 160 15} type {Horz Knob} box FLAT_BOX labelsize 12 align 8 maximum 127 step 1
               code0 {o->value(pars->PVolume);}
             }
-            Fl_Value_Slider {} {
+            Fl_Value_Slider vsns {
               label {V.Sns}
               callback {pars->PAmpVelocityScaleFunction=(int) o->value();}
               tooltip {Velocity Sensing Function (rightmost to disable)} xywh {10 70 160 15} type {Horz Knob} box FLAT_BOX labelsize 12 align 8 maximum 127 step 1
               code0 {o->value(pars->PAmpVelocityScaleFunction);}
             }
-            Fl_Dial {} {
+            Fl_Dial pan {
               label Pan
               callback {pars->PPanning=(int) o->value();}
               tooltip {Panning (leftmost is Random)} xywh {210 45 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
               code0 {o->value(pars->PPanning);}
               class WidgetPDial
             }
-            Fl_Dial {} {
+            Fl_Dial pstr {
               label {P.Str.}
               callback {pars->PPunchStrength=(int) o->value();}
               tooltip {Punch Strength} xywh {125 247 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
               code0 {o->value(pars->PPunchStrength);}
               class WidgetPDial
             }
-            Fl_Dial {} {
+            Fl_Dial pt {
               label {P.t.}
               callback {pars->PPunchTime=(int) o->value();}
               tooltip {Punch Time (duration)} xywh {155 247 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
               code0 {o->value(pars->PPunchTime);}
               class WidgetPDial
             }
-            Fl_Dial {} {
+            Fl_Dial pstc {
               label {P.Stc.}
               callback {pars->PPunchStretch=(int) o->value();}
               tooltip {Punch Stretch} xywh {185 247 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
               code0 {o->value(pars->PPunchStretch);}
               class WidgetPDial
             }
-            Fl_Dial {} {
+            Fl_Dial pvel {
               label {P.Vel.}
               callback {pars->PPunchVelocitySensing=(int) o->value();}
               tooltip {Punch Velocity Sensing} xywh {215 247 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
               code0 {o->value(pars->PPunchVelocitySensing);}
               class WidgetPDial
             }
-            Fl_Group {} {
+            Fl_Group ampenv {
               label {PADSynth - Amplitude Envelope} open
               xywh {10 95 205 70} box FLAT_BOX color 51 align 144
               code0 {o->init(pars->AmpEnvelope);}
               class EnvelopeUI
             } {}
-            Fl_Group {} {
+            Fl_Group amplfo {
               label {Amplitude LFO} open
               xywh {10 165 230 70} box FLAT_BOX color 47 align 144
               code0 {o->init(pars->AmpLfo);}
               class LFOUI
             } {}
-            Fl_Check_Button {} {
+            Fl_Check_Button stereo {
               label Stereo
               callback {pars->PStereo=(int) o->value();
 hprofile->redraw();}
@@ -896,19 +899,19 @@ hprofile->redraw();}
             label FILTER
             xywh {245 25 285 250} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 17
           } {
-            Fl_Group {} {
+            Fl_Group filterenv {
               label {PADSynth - Filter Envelope} open
               xywh {250 130 275 70} box FLAT_BOX color 51 align 144
               code0 {o->init(pars->FilterEnvelope);}
               class EnvelopeUI
             } {}
-            Fl_Group {} {
+            Fl_Group filterlfo {
               label {Filter LFO} open
               xywh {250 200 230 70} box FLAT_BOX color 47 align 144
               code0 {o->init(pars->FilterLfo);}
               class LFOUI
             } {}
-            Fl_Group {} {
+            Fl_Group filterui {
               label {PADsynth - Filter} open
               xywh {250 55 275 75} box FLAT_BOX color 50 align 144
               code0 {o->init(pars->GlobalFilter,&pars->PFilterVelocityScale,&pars->PFilterVelocityScaleFunction);}
@@ -947,6 +950,100 @@ master=master_;
 oscui=NULL;
 resui=new ResonanceUI(pars->resonance);
 make_window();} {}
+  }
+  Function {refresh()} {} {
+    code {volume->value(pars->PVolume);
+vsns->value(pars->PAmpVelocityScaleFunction);
+pan->value(pars->PPanning);
+
+stereo->value(pars->PStereo);
+
+
+pstr->value(pars->PPunchStrength);
+pt->value(pars->PPunchTime);
+pstc->value(pars->PPunchStretch);
+pvel->value(pars->PPunchVelocitySensing);
+
+detunevalueoutput->value(getdetune(pars->PDetuneType,0,pars->PDetune));
+detune->value(pars->PDetune-8192);
+
+int k=pars->PCoarseDetune/1024;if (k>=8) k-=16;
+octave->value(k);
+
+detunetype->value(pars->PDetuneType-1);
+k=pars->PCoarseDetune%1024;if (k>=512) k-=1024;
+coarsedet->value(k);
+
+hz440->value(pars->Pfixedfreq);
+fixedfreqetdial->value(pars->PfixedfreqET);
+
+amplfo->refresh();
+freqlfo->refresh();
+filterlfo->refresh();
+
+ampenv->refresh();
+freqenv->refresh();
+filterenv->refresh();
+filterui->refresh();
+
+
+/* harmonic structure parametrs */
+
+resui->refresh();
+if (oscui!=NULL) oscui->refresh();
+
+hpbasetype->value(pars->Php.base.type);
+hpbasepar1->value(pars->Php.base.par1);
+hpfreqmult->value(pars->Php.freqmult);
+
+hpmpar1->value(pars->Php.modulator.par1);
+hpmfreq->value(pars->Php.modulator.freq);
+hpwidth->value(pars->Php.width);
+
+hponehalf->value(pars->Php.onehalf);
+hpamptype->value(pars->Php.amp.type);
+hpampmode->value(pars->Php.amp.mode);
+hpamppar1->value(pars->Php.amp.par1);
+hpamppar2->value(pars->Php.amp.par2);
+hpautoscale->value(pars->Php.autoscale);
+
+bwdial->value(pars->Pbandwidth);
+if (pars->Pmode==0){
+   bwprofilegroup->activate();
+   bwdial->activate();
+   bwcents->activate();
+   hprofile->activate();
+   hprofile->color(54);
+   bwscale->activate();
+} else {
+   bwprofilegroup->deactivate();
+   bwdial->deactivate();
+   bwcents->deactivate();
+   hprofile->deactivate();
+   hprofile->color(48);
+   bwscale->activate();
+};
+
+spectrummode->value(pars->Pmode);
+
+qbasenote->value(pars->Pquality.basenote);
+qsmpoct->value(pars->Pquality.smpoct);
+qoct->value(pars->Pquality.oct);
+qsamplesize->value(pars->Pquality.samplesize);
+
+hrpostype->value(pars->Phrpos.type);
+hrpospar1->value(pars->Phrpos.par1);
+hrpospar2->value(pars->Phrpos.par2);
+hrpospar3->value(pars->Phrpos.par3);
+
+hprofile->redraw();
+overtonepos->redraw();
+
+osc->redraw();
+pars->applyparameters(true);
+applybutton->color(FL_GRAY);
+applybutton->parent()->redraw();} {selected
+    }
   }
   Function {~PADnoteUI()} {} {
     code {delete(oscui);

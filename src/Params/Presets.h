@@ -42,7 +42,7 @@ class Presets{
     private:
 	virtual void add2XML(XMLwrapper *xml)=0;
         virtual void getfromXML(XMLwrapper *xml)=0;
-	
+	virtual void defaults()=0;	
 };
 
 #endif

@@ -620,8 +620,7 @@ long VSTSynth::processEvents(VstEvents *events){
 	    case 0xB: cntl=Midi->getcontroller(data[1]&0x7f);
 		      vmaster->SetController(cmdchan,cntl,data[2]&0x7f);
 		 break;
-//	    case 0xE: vmaster->SetController(cmdchan,C_pitchwheel,data[1]&0x7f+(data[2]&0x7f)*128);
-	    case 0xE: vmaster->SetController(cmdchan,C_pitchwheel,data[1]+data[2]*128);
+	    case 0xE: vmaster->SetController(cmdchan,C_pitchwheel,data[1]+data[2]*(long int) 128-8192);
 		 break;
 	};
 	pthread_mutex_unlock(&vmaster->mutex);

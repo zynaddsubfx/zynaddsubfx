@@ -687,6 +687,9 @@
 	    - Merge partial partea de Copy in clipboard
 15 Aug 2004 - Corectata o eroare in main.c la pitch bend
 	    - Scos Swap/Copy la efecte si la PartUI si vechiul Copy/Paste de la ADnote voice
-	    - Merge clipboardul la Oscil, Resonance, Filter si partial la ADsynth,SUBSynth si PADsynth (am de facut actualizarea la Filter si SUB/PADsynth)
+	    - Merge clipboardul la Oscil, Resonance, Filter si partial la ADsynth,SUBSynth si PADsynth
+16 Aug 2004 - Corectata inca o eroare la pitch bend (aratata de Krzysztof Korpiela)
+	    - Adaugat refresh si la Filtru si paste la ADnote, SUBnote si PADsynth sunt complete
+	    
 	    
 	    

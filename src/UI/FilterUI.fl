@@ -149,7 +149,7 @@ for (i=1;i<lx;i++){
   decl {REALTYPE *graphpoints;} {}
 } 
 
-class FilterUI {: {public Fl_Group,PresetsUI_}
+class FilterUI {open : {public Fl_Group,PresetsUI_}
 } {
   Function {FilterUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {pars=NULL;
@@ -508,7 +508,8 @@ if (nseqpos<pars->Psequencesize) vowel_counter->activate();
 
 vowel_counter->value(pars->Psequence[nseqpos].nvowel);} {}
   }
-  Function {refresh()} {} {
+  Function {refresh()} {open
+  } {
     code {update_formant_window();
 formantfiltergraph->redraw();
 
@@ -519,18 +520,6 @@ filtertype->value(pars->Pcategory);
 
 cfreqdial->value(pars->Pfreq);
 qdial->value(pars->Pq);
-
-/*
-if (velsnsamp!=NULL) {
-	velsnsamp=&pars->PFilterVelocityScale;
-	vsnsadial->value(pars->PFilterVelocityScale);
-};
-if (velsns!=NULL) {
-	velsns=&pars->PFilterVelocityScaleFunction;
-	vsnsdial->value(*velsns);
-};
-
-*/
 
 freqtrdial->value(pars->Pfreqtrack);
 gaindial->value(pars->Pgain);
