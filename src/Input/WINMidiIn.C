@@ -60,7 +60,7 @@ void CALLBACK WinMidiInProc(HMIDIIN hMidiIn,UINT wMsg,DWORD dwInstance,
 			  winmaster->SetController(cmdchan,midictl.getcontroller(par1),par2&0xff); 
 			  break;
 			case(0xe)://pitch wheel
-                          tmp=par1+par2*(long int) 128;
+                          tmp=(par1+par2*(long int) 128)-8192;
 			  winmaster->SetController(cmdchan,C_pitchwheel,tmp);
 			  break;
 			default:break;

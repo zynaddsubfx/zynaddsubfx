@@ -108,7 +108,7 @@ void OSSMidiIn::getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmdp
 	cmdtype=MidiController;
 	cmdchan=lastmidicmd%16;
 	cmdparams[0]=C_pitchwheel;
-	cmdparams[1]=tmp+getmidibyte()*(int) 128;
+	cmdparams[1]=(tmp+getmidibyte()*(int) 128)-8192;//hope this is correct
     };
 };
 
