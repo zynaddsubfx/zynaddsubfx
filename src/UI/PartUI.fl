@@ -255,7 +255,7 @@ delete(partkititem);} {}
   decl {PartUI_ *partui;} {}
 } 
 
-class PartUI {: {public Fl_Group,PartUI_}
+class PartUI {selected : {public Fl_Group,PartUI_}
 } {
   Function {make_window()} {private
   } {
@@ -284,45 +284,9 @@ class PartUI {: {public Fl_Group,PartUI_}
         Fl_Counter {} {
           label {Chn.Rcv.}
           callback {part->Prcvchn=(int) o->value();}
-          tooltip {receive from Midi channel} xywh {295 55 85 20} type Simple labelfont 1 labelsize 12 minimum 0 maximum 127 step 1
+          tooltip {receive from Midi channel} xywh {295 40 85 20} type Simple labelfont 1 labelsize 12 minimum 0 maximum 127 step 1
           code0 {o->bounds(0,NUM_MIDI_CHANNELS-1);}
           code1 {o->value(part->Prcvchn);}
-        }
-        Fl_Button {} {
-          label AllNotesOff
-          callback {part->AllNotesOff();}
-          xywh {300 30 80 20} box PLASTIC_UP_BOX labelfont 1 labelsize 12
-        }
-        Fl_Group {} {open
-          xywh {1 81 165 70} box ENGRAVED_FRAME
-        } {
-          Fl_Check_Button adsynenabledcheck {
-            label ADsyn
-            callback {part->kit[0].Padenabled=(int) o->value();}
-            tooltip {enable/disable ADsynth} xywh {6 86 70 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
-            code1 {o->value(part->kit[0].Padenabled);}
-          }
-          Fl_Button {} {
-            label {ADs edit}
-            callback {showparameters(0,0);}
-            xywh {6 106 70 24} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 12 align 128
-          }
-          Fl_Check_Button subsynenabledcheck {
-            label SUBsyn
-            callback {part->kit[0].Psubenabled=(int) o->value();}
-            tooltip {enable/disable SUBsynth} xywh {81 86 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
-            code1 {o->value(part->kit[0].Psubenabled);}
-          }
-          Fl_Button {} {
-            label {SUBs edit}
-            callback {showparameters(0,1);}
-            xywh {81 105 80 25} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 12 align 128
-          }
-          Fl_Button {} {
-            label {Instr.kit items edit}
-            callback {instrumentkitlist->show();}
-            xywh {5 130 155 18} box PLASTIC_UP_BOX color 238 selection_color 220 labeltype ENGRAVED_LABEL labelsize 12 align 128
-          }
         }
         Fl_Scroll {} {open
           xywh {166 91 125 60} box ENGRAVED_FRAME labelfont 1 labelsize 10 align 21
@@ -342,8 +306,8 @@ if (event==FL_RIGHT_MOUSE){
 } else {
   if (event==FL_LEFT_MOUSE) bankui->show();
        else infowin->show();
-};} selected
-          tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the instrument information} xywh {155 5 135 20} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 12 align 84
+};}
+          tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the instrument information} xywh {195 5 185 20} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 12 align 84
           code0 {o->label((char *)part->Pname);}
         }
         Fl_Box {} {
@@ -414,18 +378,40 @@ if (part->Pminkey>part->Pmaxkey) o->textcolor(FL_RED);
         Fl_Counter keylimitcounter {
           label {K.lmt.}
           callback {part->setkeylimit((int) o->value());}
-          tooltip {Key Limit (max notes that are alowed to play in this part)} xywh {210 155 70 20} type Simple labelfont 1 labelsize 10 align 8 minimum 0 maximum 127 step 1
+          tooltip {Key Limit (max notes that are alowed to play in this part)} xywh {205 155 70 20} type Simple labelfont 1 labelsize 10 align 8 minimum 0 maximum 127 step 1
           code0 {o->value(part->Pkeylimit);}
-        }
-        Fl_Button {} {
-          label PartFX
-          callback {partfx->show();}
-          xywh {300 5 80 20} box PLASTIC_UP_BOX labelfont 1 labelsize 16
         }
         Fl_Button {} {
           label i
           callback {infowin->show();}
           xywh {170 40 20 20} box THIN_UP_BOX labelfont 1 labelsize 12
+        }
+        Fl_Button {} {
+          label {Edit instrument}
+          callback {instrumenteditwindow->show();}
+          xywh {15 105 130 30} box PLASTIC_UP_BOX color 230 labelfont 1 labelsize 17
+        }
+        Fl_Button {} {
+          label m
+          callback {if (part->lastnote>=0) minkcounter->value(part->lastnote);
+minkcounter->do_callback();
+maxkcounter->do_callback();}
+          tooltip {set the minimum key to the last pressed key} xywh {315 155 15 12} box THIN_UP_BOX labelsize 10
+        }
+        Fl_Button {} {
+          label M
+          callback {if (part->lastnote>=0) maxkcounter->value(part->lastnote);
+maxkcounter->do_callback();
+minkcounter->do_callback();}
+          tooltip {set the maximum key to the last pressed key} xywh {345 155 15 12} box THIN_UP_BOX labelsize 10
+        }
+        Fl_Button {} {
+          label R
+          callback {minkcounter->value(0);
+minkcounter->do_callback();
+maxkcounter->value(127);
+maxkcounter->do_callback();}
+          tooltip {reset the minimum key to 0 and maximum key to 127} xywh {330 155 15 12} box THIN_UP_BOX labelfont 1 labelsize 10
         }
       }
       Fl_Check_Button {} {
@@ -435,30 +421,8 @@ master->partonoff(npart,(int) o->value());
 pthread_mutex_unlock(&master->mutex);
 if (part->Penabled==0) partgroupui->deactivate();
     else partgroupui->activate();}
-        xywh {85 5 65 20} down_box DOWN_BOX labelfont 1 labelsize 12
+        xywh {90 5 75 20} down_box DOWN_BOX labelfont 1 labelsize 12
         code0 {o->value(part->Penabled);}
-      }
-      Fl_Button {} {
-        label m
-        callback {if (part->lastnote>=0) minkcounter->value(part->lastnote);
-minkcounter->do_callback();
-maxkcounter->do_callback();}
-        tooltip {set the minimum key to the last pressed key} xywh {315 153 15 12} box THIN_UP_BOX labelsize 10
-      }
-      Fl_Button {} {
-        label M
-        callback {if (part->lastnote>=0) maxkcounter->value(part->lastnote);
-maxkcounter->do_callback();
-minkcounter->do_callback();}
-        tooltip {set the maximum key to the last pressed key} xywh {345 153 15 12} box THIN_UP_BOX labelsize 10
-      }
-      Fl_Button {} {
-        label R
-        callback {minkcounter->value(0);
-minkcounter->do_callback();
-maxkcounter->value(127);
-maxkcounter->do_callback();}
-        tooltip {reset the minimum key to 0 and maximum key to 127} xywh {330 153 15 12} box THIN_UP_BOX labelfont 1 labelsize 10
       }
     }
     Fl_Window ctlwindow {
@@ -962,6 +926,75 @@ subsynenabledcheck->value(part->kit[0].Psubenabled);}
         }
       }
     }
+    Fl_Window instrumenteditwindow {
+      label {Instrument Edit}
+      xywh {110 280 315 160} type Double hide
+    } {
+      Fl_Group {} {
+        label PADsynth
+        xywh {205 20 100 80} box ENGRAVED_FRAME labelfont 1
+      } {
+        Fl_Button {} {
+          label Edit
+          callback {//showparameters(0,1);
+fl_alert("Oops... try again...")}
+          xywh {215 55 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 12 align 128
+        }
+        Fl_Check_Button padsynenabledcheck {
+          label Enabled
+          callback {//part->kit[0].Padenabled=(int) o->value();}
+          tooltip {enable/disable PADsynth} xywh {215 30 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
+          code1 {//o->value(part->kit[0].Padenabled);}
+        }
+      }
+      Fl_Group {} {
+        label ADDsynth
+        xywh {5 20 100 80} box ENGRAVED_FRAME labelfont 1
+      } {
+        Fl_Check_Button adsynenabledcheck {
+          label Enabled
+          callback {part->kit[0].Padenabled=(int) o->value();}
+          tooltip {enable/disable ADsynth} xywh {15 30 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
+          code1 {o->value(part->kit[0].Padenabled);}
+        }
+        Fl_Button {} {
+          label Edit
+          callback {showparameters(0,0);}
+          xywh {15 56 80 34} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 12 align 128
+        }
+      }
+      Fl_Group {} {
+        label SUBsynth
+        xywh {105 20 100 80} box ENGRAVED_FRAME labelfont 1
+      } {
+        Fl_Check_Button subsynenabledcheck {
+          label Enabled
+          callback {part->kit[0].Psubenabled=(int) o->value();}
+          tooltip {enable/disable SUBsynth} xywh {115 30 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
+          code1 {o->value(part->kit[0].Psubenabled);}
+        }
+        Fl_Button {} {
+          label Edit
+          callback {showparameters(0,1);}
+          xywh {115 55 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 12 align 128
+        }
+      }
+      Fl_Button {} {
+        label {Kit Edit}
+        callback {instrumentkitlist->show();}
+        xywh {15 110 80 40} box PLASTIC_UP_BOX color 238 selection_color 220 labelfont 1 align 128
+      }
+      Fl_Button {} {
+        label Effects
+        callback {partfx->show();}
+        xywh {115 110 80 40} box PLASTIC_UP_BOX labelfont 1 labelsize 16
+      }
+      Fl_Button {} {
+        label Close
+        callback {instrumenteditwindow->hide();}
+        xywh {210 120 90 25} box THIN_UP_BOX
+      }
+    }
   }
   Function {PartUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {part=NULL;
@@ -1011,7 +1044,8 @@ if (kititem!=lastkititem){
 if ((engine==0)&&(adnoteui!=NULL)) adnoteui->ADnoteGlobalParameters->show();
 if ((engine==1)&&(subnoteui!=NULL)) subnoteui->SUBparameters->show();} {}
   }
-  Function {~PartUI()} {} {
+  Function {~PartUI()} {open
+  } {
     code {config.ui.showinstrumentinfo=infowin->visible();
 
 if (adnoteui!=NULL) delete (adnoteui);
@@ -1030,7 +1064,10 @@ infowin->hide();
 delete(infowin);
 
 instrumentkitlist->hide();
-delete(instrumentkitlist);} {}
+delete(instrumentkitlist);
+
+instrumenteditwindow->hide();
+delete(instrumenteditwindow);} {}
   }
   decl {Part *part;} {}
   decl {Master *master;} {}
