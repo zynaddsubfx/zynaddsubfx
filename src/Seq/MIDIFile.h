@@ -23,6 +23,8 @@
 #ifndef MIDIFILE_H
 #define MIDIFILE_H
 
+#include "../globals.h"
+
 class MIDIFile{
     public:
 	MIDIFile();
@@ -33,6 +35,9 @@ class MIDIFile{
 	
 	//returns -1 if there is an error, otherwise 0
 	int parsemidifile();
+	
+	//returns -1 if there is an error, otherwise 0
+	int parsetrack(int ntrack);
 	
     private:
 	unsigned char *midifile;
@@ -49,6 +54,10 @@ class MIDIFile{
 	
 	//get a word of 2 bytes from the midifile
 	unsigned short int getint16();
+	
+	struct {
+	    double tick;//how many seconds one tick has
+	}data;
 	
 };
 

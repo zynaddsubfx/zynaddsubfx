@@ -80,7 +80,55 @@ int MIDIFile::parsemidifile(){
     int format=getint16();
     printf("format %d\n",format);
 
+    int ntracks=getint16();//this is always if the format is "0"
+    printf("ntracks %d\n",ntracks);
+
+    if (ntracks>=NUM_MIDI_CHANNELS){
+	ntracks=NUM_MIDI_CHANNELS;
+    };
+    
+    int division=getint16();
+    printf("division %d\n",division);
+    if (division>=0){//delta time units in each a quater note
+//	tick=???;
+    } else {//SMPTE (frames/second and ticks/frame)
+	printf("ERROR:in MIDIFile.C::parsemidifile() - SMPTE not implemented yet.");
+    };    
+    
+//    for (int n=0;n<ntracks;n++){
+	if (parsetrack(0)<0) {
+	    clearmidifile();
+	    return(-1);
+	};
+//    };
+
     return(0);
+};
+
+int MIDIFile::parsetrack(int ntrack){
+    printf("\n--==*Reading track %d **==--\n",ntrack);
+
+    int chunk=getint32();//MTrk
+    if (chunk!=0x4d54726b) return(-1);
+
+    int size=getint32();
+    printf("%d\n",size);
+//    if (size!=6) return(-1);//header is always 6 bytes long
+/*
+unsigned long ReadVarLen( void ) {
+        unsigned long value;
+        byte c;
+
+        if ((value = getc(infile)) & 0x80) {
+                value &= 0x7f;
+                do  {
+                        value = (value << 7) + ((c = getc(infile)) & 0x7f);
+                }  while (c & 0x80);
+        }
+        return value;
+}
+
+*/
 };
 
 //private members
@@ -91,6 +139,9 @@ void MIDIFile::clearmidifile(){
     midifilesize=0;
     midifilek=0;
     midieof=false;
+    
+    data.tick=0.05;
+    
 };
 
 unsigned char MIDIFile::getbyte(){
