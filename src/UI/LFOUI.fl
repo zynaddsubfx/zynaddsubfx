@@ -41,58 +41,51 @@ class LFOUI {: {public Fl_Group}
   Function {~LFOUI()} {} {
     code {lfoui->hide();
 hide();
-//delete (lfoui);} {selected
-    }
+//delete (lfoui);} {}
   }
   Function {make_window()} {} {
     Fl_Window lfoui {
-      xywh {212 373 230 70} type Double color 50 labelfont 1 hide
+      xywh {66 328 230 70} type Double color 50 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Group lfoparamswindow {
         label LFO
         xywh {0 0 230 70} box PLASTIC_UP_BOX color 223 labeltype ENGRAVED_LABEL labelsize 11 align 17
       } {
-        Fl_Dial {} {
+        Fl_Dial freq {
           label {Freq.}
           callback {pars->Pfreq=o->value();}
           tooltip {LFO Frequency} xywh {5 20 30 30} box ROUND_UP_BOX labelsize 11 step 1e-05
-          code0 {o->value(pars->Pfreq);}
           class WidgetPDial
         }
-        Fl_Dial {} {
+        Fl_Dial intensity {
           label Depth
           callback {pars->Pintensity=(int)o->value();}
           tooltip {LFO Amount} xywh {40 20 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
-          code0 {o->value(pars->Pintensity);}
           class WidgetPDial
         }
-        Fl_Dial {} {
+        Fl_Dial delay {
           label Delay
           callback {pars->Pdelay=(int)o->value();}
           tooltip {LFO delay} xywh {110 20 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
-          code0 {o->value(pars->Pdelay);}
           class WidgetPDial
         }
-        Fl_Dial {} {
+        Fl_Dial startphase {
           label Start
           callback {pars->Pstartphase=(int)o->value();}
           tooltip {LFO Startphase (leftmost is Random)} xywh {75 20 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
-          code0 {o->value(pars->Pstartphase);}
           class WidgetPDial
         }
-        Fl_Dial {} {
+        Fl_Dial randomness {
           label {A.R.}
           callback {pars->Prandomness=(int)o->value();}
           tooltip {LFO Amplitude Randomness} xywh {180 7 20 20} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
-          code0 {o->value(pars->Prandomness);}
           class WidgetPDial
         }
-        Fl_Choice {} {
+        Fl_Choice LFOtype {
           label Type
           callback {pars->PLFOtype=(int)o->value();}
           tooltip {LFO function} xywh {180 40 45 15} down_box BORDER_BOX labelsize 10 align 2 textsize 8
-          code0 {o->value(pars->PLFOtype);}
         } {
           menuitem {} {
             label SINE
@@ -123,28 +116,36 @@ hide();
             xywh {70 70 100 20} labelfont 1 labelsize 10
           }
         }
-        Fl_Check_Button {} {
+        Fl_Check_Button continous {
           label {C.}
           callback {pars->Pcontinous=(int)o->value();}
           tooltip {Continous LFO} xywh {150 13 25 15} down_box DOWN_BOX labelsize 11
-          code0 {o->value(pars->Pcontinous);}
         }
-        Fl_Dial {} {
+        Fl_Dial freqrand {
           label {F.R.}
           callback {pars->Pfreqrand=(int)o->value();}
           tooltip {LFO Frequency Randomness} xywh {205 7 20 20} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
-          code0 {o->value(pars->Pfreqrand);}
           class WidgetPDial
         }
-        Fl_Dial {} {
+        Fl_Dial stretch {
           label {Str.}
           callback {pars->Pstretch=(int)o->value();}
           tooltip {LFO stretch} xywh {150 30 20 20} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
-          code0 {o->value(pars->Pstretch);}
           class WidgetPDial
         }
       }
     }
+  }
+  Function {refresh()} {} {
+    code {freq->value(pars->Pfreq);
+intensity->value(pars->Pintensity);
+startphase->value(pars->Pstartphase);
+delay->value(pars->Pdelay);
+continous->value(pars->Pcontinous);
+stretch->value(pars->Pstretch);
+randomness->value(pars->Prandomness);
+freqrand->value(pars->Pfreqrand);
+LFOtype->value(pars->PLFOtype);} {}
   }
   Function {init(LFOParams *lfopars_)} {} {
     code {pars=lfopars_;
@@ -152,9 +153,12 @@ hide();
 make_window();
 end();
 
+refresh();
+
 lfoui->resize(this->x(),this->y(),this->w(),this->h());
 
-lfoparamswindow->label(this->label());} {}
+lfoparamswindow->label(this->label());} {selected
+    }
   }
   decl {LFOParams *pars;} {}
 } 

@@ -43,6 +43,9 @@ decl {\#include "FilterUI.h"} {public
 decl {\#include "OscilGenUI.h"} {public
 } 
 
+decl {\#include "PresetsUI.h"} {public
+} 
+
 class PADnoteHarmonicProfile {: {public Fl_Box}
 } {
   Function {PADnoteHarmonicProfile(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
@@ -207,10 +210,11 @@ for (int i=0;i<lx;i++){
   }
 } 
 
-class PADnoteUI {} {
+class PADnoteUI {: {public PresetsUI_}
+} {
   Function {make_window()} {} {
     Fl_Window padnotewindow {
-      label {PAD synth Parameters}
+      label {PAD synth Parameters} selected
       xywh {76 165 535 450} type Double hide
     } {
       Fl_Tabs {} {
@@ -718,7 +722,7 @@ if (pars->Pmode==0){
    hprofile->color(48);
 };
 
-cbwidget->do_callback();} selected
+cbwidget->do_callback();}
             xywh {220 305 90 20} down_box BORDER_BOX labelfont 1 labelsize 10 labelcolor 0 align 5 textsize 12
             code0 {o->value(pars->Pmode);}
           } {
@@ -923,7 +927,17 @@ o->color(FL_GRAY);}
       Fl_Button {} {
         label Close
         callback {padnotewindow->hide();}
-        xywh {300 405 195 40} box THIN_UP_BOX labelsize 20
+        xywh {320 405 175 40} box THIN_UP_BOX labelsize 20
+      }
+      Fl_Button {} {
+        label C
+        callback {presetsui->copy(pars);}
+        xywh {240 430 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+      }
+      Fl_Button {} {
+        label P
+        callback {presetsui->paste(pars,this);}
+        xywh {270 430 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
       }
     }
   }

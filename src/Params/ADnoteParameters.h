@@ -33,6 +33,7 @@
 #include "../Misc/Util.h"
 #include "../Misc/XMLwrapper.h"
 #include "../DSP/FFTwrapper.h"
+#include "Presets.h"
 
   enum FMTYPE{NONE,MORPH,RING_MOD,PHASE_MOD,FREQ_MOD,PITCH_MOD};
     
@@ -252,7 +253,7 @@
 	EnvelopeParams *FMAmpEnvelope;
     }; 
 
-class ADnoteParameters/*:public Presets*/{
+class ADnoteParameters:public Presets{
     public:
 	ADnoteParameters(FFTwrapper *fft_);
 	~ADnoteParameters();
@@ -267,7 +268,6 @@ class ADnoteParameters/*:public Presets*/{
 	void saveloadbuf(Buffer *buf);
 	void saveloadbufvoice(Buffer *buf,unsigned char nvoice);
 
-	void copypastevoice(int n,int what);	
     private:
 	void EnableVoice(int nvoice);		
 	void KillVoice(int nvoice);		

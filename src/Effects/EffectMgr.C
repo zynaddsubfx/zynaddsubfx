@@ -25,6 +25,7 @@
 #include "EffectMgr.h"
 
 EffectMgr::EffectMgr(int insertion_,pthread_mutex_t *mutex_){
+    setpresettype("Peffect");
     efx=NULL;
     nefx=0;
     insertion=insertion_;

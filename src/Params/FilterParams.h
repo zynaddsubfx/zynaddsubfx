@@ -26,8 +26,9 @@
 #include "../globals.h"
 #include "../Misc/Buffer.h"
 #include "../Misc/XMLwrapper.h"
+#include "Presets.h"
 
-class FilterParams{
+class FilterParams:public Presets{
     public:
 	FilterParams(unsigned char Ptype_,unsigned char Pfreq,unsigned char Pq_);
 	~FilterParams();

@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
  
-  Presets.h - Presets and Clipboard management
+  PresetsStore.C - Presets and Clipboard store
   Copyright (C) 2002-2004 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
@@ -20,30 +20,24 @@
 
 */
 
-#ifndef PRESETS_H
-#define PRESETS_H
-
 #include "../Misc/XMLwrapper.h"
+#define MAX_PRESETTYPE_SIZE 30
 
-#include "PresetsStore.h"
-
-class Presets{
+class PresetsStore{
     public:
-	Presets();
-	virtual ~Presets();
-
-        void copyclipboard();
-	void pasteclipboard();
-	bool checkclipboardtype();
-
-	char type[MAX_PRESETTYPE_SIZE];
-    protected:
-	void setpresettype(char *type);
+	PresetsStore();
+	~PresetsStore();
+	void copyclipboard(XMLwrapper *xml,char *type);
+	bool pasteclipboard(XMLwrapper *xml);
+	bool checkclipboardtype(char *type);
+	
     private:
-	virtual void add2XML(XMLwrapper *xml)=0;
-        virtual void getfromXML(XMLwrapper *xml)=0;
+	struct {
+	    char *data;
+	    char type[MAX_PRESETTYPE_SIZE];
+	} clipboard;
 	
 };
 
-#endif
+extern PresetsStore presetsstore;
 

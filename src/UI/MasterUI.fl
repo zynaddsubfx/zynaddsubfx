@@ -778,7 +778,7 @@ pthread_mutex_unlock(&master->mutex);}
         xywh {0 80 390 160}
       } {
         Fl_Group {} {
-          label {System Effects} open
+          label {System Effects} open selected
           xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25
         } {
           Fl_Counter syseffnocounter {
@@ -851,24 +851,22 @@ syseffectui->refresh(master->sysefx[nsyseff]);}
             xywh {95 120 75 20} box THIN_UP_BOX labelfont 1 labelsize 12
           }
           Fl_Button {} {
-            label {Swap/Copy...}
-            callback {swapefftype=0;//system effect
-swapwitheffectcounter->do_callback();
-swapeffwindow->show();}
-            xywh {200 125 70 15} box THIN_UP_BOX labelfont 1 labelsize 10
+            label C
+            callback {presetsui->copy(master->sysefx[nsyseff]);}
+            xywh {215 124 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+          }
+          Fl_Button {} {
+            label P
+            callback {pthread_mutex_lock(&master->mutex);
+presetsui->paste(master->sysefx[nsyseff],syseffectui);
+pthread_mutex_unlock(&master->mutex);}
+            xywh {245 124 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
           }
         }
         Fl_Group {} {
           label {Insertion Effects}
           xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25 hide
         } {
-          Fl_Button {} {
-            label {Swap/Copy...}
-            callback {swapefftype=1;//insert effect
-swapwitheffectcounter->do_callback();
-swapeffwindow->show();}
-            xywh {200 125 70 15} box THIN_UP_BOX labelfont 1 labelsize 10
-          }
           Fl_Counter inseffnocounter {
             label {Ins.Effect No.}
             callback {ninseff=(int) o->value();
@@ -965,6 +963,18 @@ master->insefx[ninseff]->cleanup();} open
             code1 {char tmp[50]; for (int i=0;i<NUM_MIDI_PARTS;i++) {sprintf(tmp,"Part %2d",i);o->add(tmp);};}
             code3 {o->value(master->Pinsparts[ninseff]+2);}
           } {}
+          Fl_Button {} {
+            label C
+            callback {presetsui->copy(master->insefx[ninseff]);}
+            xywh {215 124 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+          }
+          Fl_Button {} {
+            label P
+            callback {pthread_mutex_lock(&master->mutex);
+presetsui->paste(master->insefx[ninseff],inseffectui);
+pthread_mutex_unlock(&master->mutex);}
+            xywh {245 124 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+          }
         }
       }
       Fl_Button {} {
@@ -1115,53 +1125,6 @@ GNU General Public License for details.}
         xywh {5 5 110 35} labelsize 10 align 192
       }
     }
-    Fl_Window swapeffwindow {
-      label {Swap/Copy effect}
-      xywh {581 329 205 100} type Double hide modal
-    } {
-      Fl_Counter swapwitheffectcounter {
-        label {Swap with effect/Copy to:}
-        callback {if (swapefftype==0) o->maximum(NUM_SYS_EFX-1);
-     else  o->maximum(NUM_INS_EFX-1);}
-        xywh {65 30 75 20} type Simple labelfont 1 labelsize 12 align 1 minimum 0 maximum 127 step 1 textfont 1
-      }
-      Fl_Button {} {
-        label Swap
-        callback {int neff2=(int) swapwitheffectcounter->value();
-int tmp=0;
-if (swapefftype==0) {
-      pthread_mutex_lock(&master->mutex);
-       master->swapcopyeffects(0,swapefftype,nsyseff,neff2);
-      pthread_mutex_unlock(&master->mutex); 
-      tmp=nsyseff;
-      syseffnocounter->value(neff2);syseffnocounter->do_callback();
-      syseffnocounter->value(tmp);syseffnocounter->do_callback();
-    }else{
-      pthread_mutex_lock(&master->mutex); 
-       master->swapcopyeffects(0,swapefftype,ninseff,neff2);
-      pthread_mutex_unlock(&master->mutex);
-      tmp=ninseff;
-      inseffnocounter->value(neff2);inseffnocounter->do_callback();
-      inseffnocounter->value(tmp);inseffnocounter->do_callback();
-    };
-swapeffwindow->hide();}
-        xywh {15 60 55 25} box THIN_UP_BOX labelfont 1
-      }
-      Fl_Button {} {
-        label Cancel
-        callback {swapeffwindow->hide();}
-        xywh {140 60 55 25} box THIN_UP_BOX labelfont 1
-      }
-      Fl_Button {} {
-        label Copy
-        callback {pthread_mutex_lock(&master->mutex);
-if (swapefftype==0) master->swapcopyeffects(1,swapefftype,nsyseff,(int) swapwitheffectcounter->value());
-      else master->swapcopyeffects(1,swapefftype,ninseff,(int) swapwitheffectcounter->value());
-pthread_mutex_unlock(&master->mutex);
-swapeffwindow->hide();}
-        xywh {75 60 55 25} box THIN_UP_BOX labelfont 1
-      }
-    }
     Fl_Window panelwindow {
       label {ZynAddSubFX Panel}
       xywh {4 20 630 635} type Double hide
@@ -1247,8 +1210,7 @@ delete (bankui);
 delete (configui);
 delete (sequi);
 
-delete(presetsui);} {selected
-    }
+delete(presetsui);} {}
   }
   decl {Master *master;} {}
   decl {MicrotonalUI *microtonalui;} {}

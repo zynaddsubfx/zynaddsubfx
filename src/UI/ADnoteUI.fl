@@ -47,6 +47,9 @@ decl {\#include "FilterUI.h"} {public
 decl {\#include "OscilGenUI.h"} {public
 } 
 
+decl {\#include "PresetsUI.h"} {public
+} 
+
 class ADvoicelistitem {: {public Fl_Group}
 } {
   Function {make_window()} {private
@@ -737,8 +740,7 @@ hide();
 if (oscedit!=NULL) {
     delete(oscedit);
 };
-//delete (ADnoteVoiceParameters);} {selected
-    }
+//delete (ADnoteVoiceParameters);} {}
   }
   decl {int nvoice;} {}
   decl {ADnoteParameters *pars;} {}
@@ -748,12 +750,13 @@ if (oscedit!=NULL) {
   decl {Master *master;} {}
 } 
 
-class ADnoteUI {} {
-  Function {make_window()} {private
+class ADnoteUI {open : {public PresetsUI_}
+} {
+  Function {make_window()} {open private
   } {
     Fl_Window ADnoteGlobalParameters {
       label {ADsynth Global Parameters of the Instrument}
-      xywh {112 194 535 405} type Double hide
+      xywh {66 187 535 405} type Double hide
     } {
       Fl_Group {} {
         label FREQUENCY
@@ -765,36 +768,34 @@ class ADnoteUI {} {
           code0 {o->init(pars->GlobalPar.FreqEnvelope);}
           class EnvelopeUI
         } {}
-        Fl_Counter {} {
+        Fl_Counter octave {
           label Octave
           callback {int k=(int) o->value();
 if (k<0) k+=16;
 pars->GlobalPar.PCoarseDetune = k*1024+
    pars->GlobalPar.PCoarseDetune%1024;}
           tooltip Octave xywh {470 275 45 15} type Simple labelsize 10 align 1 minimum -8 maximum 7 step 1 textfont 1 textsize 12
-          code0 {int k=pars->GlobalPar.PCoarseDetune/1024;}
-          code1 {if (k>=8) k-=16;}
+          code0 {int k=pars->GlobalPar.PCoarseDetune/1024;if (k>=8) k-=16;}
           code2 {o->value(k);}
         }
-        Fl_Counter {} {
+        Fl_Counter coarsedet {
           label {Coarse det.}
           callback {int k=(int) o->value();
 if (k<0) k+=1024;
 pars->GlobalPar.PCoarseDetune = k+
    (pars->GlobalPar.PCoarseDetune/1024)*1024;}
           tooltip {Coarse Detune} xywh {455 345 60 20} labelsize 10 align 5 minimum -64 maximum 63 step 1 textfont 1 textsize 12
-          code0 {int k=pars->GlobalPar.PCoarseDetune%1024;}
-          code1 {if (k>=512) k-=1024;}
+          code0 {int k=pars->GlobalPar.PCoarseDetune%1024;if (k>=512) k-=1024;}
           code2 {o->value(k);}
           code3 {o->lstep(10);}
         }
-        Fl_Group {} {
-          label {Frequency LFO} open
+        Fl_Group freqlfo {
+          label {Frequency LFO} open selected
           xywh {215 295 230 70} box FLAT_BOX color 47 align 144
           code0 {o->init(pars->GlobalPar.FreqLfo);}
           class LFOUI
         } {}
-        Fl_Slider {} {
+        Fl_Slider freq {
           callback {pars->GlobalPar.PDetune=(int)o->value()+8192;
 detunevalueoutput->do_callback();}
           tooltip {Fine Detune (cents)} xywh {60 275 390 15} type {Horz Knob} box FLAT_BOX minimum -8192 maximum 8191 step 1
@@ -806,7 +807,7 @@ detunevalueoutput->do_callback();}
           xywh {12 275 45 15} labelsize 10 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 10
           code0 {o->value(getdetune(pars->GlobalPar.PDetuneType,0,pars->GlobalPar.PDetune));}
         }
-        Fl_Choice {} {
+        Fl_Choice detunetype {
           label {Detune Type}
           callback {pars->GlobalPar.PDetuneType=(int) o->value()+1;
 detunevalueoutput->do_callback();} open
@@ -819,47 +820,47 @@ detunevalueoutput->do_callback();} open
         label AMPLITUDE
         xywh {5 5 240 250} box THIN_UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 17
       } {
-        Fl_Value_Slider {} {
+        Fl_Value_Slider volume {
           label Vol
           callback {pars->GlobalPar.PVolume=(int)o->value();}
           tooltip Volume xywh {10 30 160 15} type {Horz Knob} box FLAT_BOX labelsize 12 align 8 maximum 127 step 1
           code0 {o->value(pars->GlobalPar.PVolume);}
         }
-        Fl_Value_Slider {} {
+        Fl_Value_Slider vsns {
           label {V.Sns}
           callback {pars->GlobalPar.PAmpVelocityScaleFunction=(int) o->value();}
           tooltip {Velocity Sensing Function (rightmost to disable)} xywh {10 50 160 15} type {Horz Knob} box FLAT_BOX labelsize 12 align 8 maximum 127 step 1
           code0 {o->value(pars->GlobalPar.PAmpVelocityScaleFunction);}
         }
-        Fl_Dial {} {
+        Fl_Dial pan {
           label Pan
           callback {pars->GlobalPar.PPanning=(int) o->value();}
           tooltip {Panning (leftmost is Random)} xywh {210 25 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
           code0 {o->value(pars->GlobalPar.PPanning);}
           class WidgetPDial
         }
-        Fl_Dial {} {
+        Fl_Dial pstr {
           label {P.Str.}
           callback {pars->GlobalPar.PPunchStrength=(int) o->value();}
           tooltip {Punch Strength} xywh {125 227 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
           code0 {o->value(pars->GlobalPar.PPunchStrength);}
           class WidgetPDial
         }
-        Fl_Dial {} {
+        Fl_Dial pt {
           label {P.t.}
           callback {pars->GlobalPar.PPunchTime=(int) o->value();}
           tooltip {Punch Time (duration)} xywh {155 227 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
           code0 {o->value(pars->GlobalPar.PPunchTime);}
           class WidgetPDial
         }
-        Fl_Dial {} {
+        Fl_Dial pstc {
           label {P.Stc.}
           callback {pars->GlobalPar.PPunchStretch=(int) o->value();}
           tooltip {Punch Stretch} xywh {185 227 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
           code0 {o->value(pars->GlobalPar.PPunchStretch);}
           class WidgetPDial
         }
-        Fl_Dial {} {
+        Fl_Dial pvel {
           label {P.Vel.}
           callback {pars->GlobalPar.PPunchVelocitySensing=(int) o->value();}
           tooltip {Punch Velocity Sensing} xywh {215 227 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
@@ -872,13 +873,13 @@ detunevalueoutput->do_callback();} open
           code0 {o->init(pars->GlobalPar.AmpEnvelope);}
           class EnvelopeUI
         } {}
-        Fl_Group {} {
+        Fl_Group amplfo {
           label {Amplitude LFO} open
           xywh {10 145 230 70} box FLAT_BOX color 47 align 144
           code0 {o->init(pars->GlobalPar.AmpLfo);}
           class LFOUI
         } {}
-        Fl_Check_Button {} {
+        Fl_Check_Button rndgrp {
           label {Rnd Grp}
           callback {pars->GlobalPar.Hrandgrouping=(int) o->value();}
           tooltip {How the Harmonic Amplitude is applied to voices that use the same oscillator} xywh {70 225 40 25} down_box DOWN_BOX labelsize 10 align 148
@@ -895,7 +896,7 @@ detunevalueoutput->do_callback();} open
           code0 {o->init(pars->GlobalPar.FilterEnvelope);}
           class EnvelopeUI
         } {}
-        Fl_Group {} {
+        Fl_Group filterlfo {
           label {Filter LFO} open
           xywh {250 180 230 70} box FLAT_BOX color 47 align 144
           code0 {o->init(pars->GlobalPar.FilterLfo);}
@@ -908,7 +909,7 @@ detunevalueoutput->do_callback();} open
           class FilterUI
         } {}
       }
-      Fl_Check_Button {} {
+      Fl_Check_Button stereo {
         label Stereo
         callback {pars->GlobalPar.PStereo=(int) o->value();}
         xywh {5 220 65 35} box ENGRAVED_BOX down_box DOWN_BOX labelfont 1 labelsize 12
@@ -930,13 +931,23 @@ ADnoteVoiceList->show();}
       Fl_Button {} {
         label Close
         callback {ADnoteGlobalParameters->hide();}
-        xywh {430 375 100 25} box THIN_UP_BOX
+        xywh {470 375 60 25} box THIN_UP_BOX
       }
       Fl_Button {} {
         label Resonance
         callback {resui->resonancewindow->redraw();
 resui->resonancewindow->show();}
         tooltip Resonance xywh {309 375 86 25} box THIN_UP_BOX
+      }
+      Fl_Button {} {
+        label C
+        callback {presetsui->copy(pars);}
+        xywh {405 380 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+      }
+      Fl_Button {} {
+        label P
+        callback {presetsui->paste(pars,this);}
+        xywh {435 380 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
       }
     }
     Fl_Window ADnoteVoiceList {
@@ -1010,22 +1021,6 @@ ADnoteVoice->redraw();}
         callback {ADnoteVoice->hide();}
         xywh {300 530 195 25} box THIN_UP_BOX labelfont 1
       }
-      Fl_Button {} {
-        label Copy
-        callback {pthread_mutex_lock(&master->mutex);
-  pars->copypastevoice(nvoice,0);
-pthread_mutex_unlock(&master->mutex);}
-        tooltip {Copy the voice to clipboard} xywh {655 530 50 20} box THIN_UP_BOX
-      }
-      Fl_Button {} {
-        label Paste
-        callback {pthread_mutex_lock(&master->mutex);
-  pars->copypastevoice(nvoice,1);
-pthread_mutex_unlock(&master->mutex);
-
-currentvoicecounter->do_callback();}
-        tooltip {Paste the voice from the clipboard} xywh {710 530 50 20} box THIN_UP_BOX
-      }
     }
   }
   Function {ADnoteUI(ADnoteParameters *parameters,Master *master_)} {} {
@@ -1043,6 +1038,37 @@ delete(ADnoteVoiceList);
 delete(ADnoteGlobalParameters);
 delete(ADnoteVoice);
 delete(resui);} {}
+  }
+  Function {refresh()} {} {
+    code {volume->value(pars->GlobalPar.PVolume);
+vsns->value(pars->GlobalPar.PAmpVelocityScaleFunction);
+pan->value(pars->GlobalPar.PPanning);
+
+stereo->value(pars->GlobalPar.PStereo);
+rndgrp->value(pars->GlobalPar.Hrandgrouping);
+
+pstr->value(pars->GlobalPar.PPunchStrength);
+pt->value(pars->GlobalPar.PPunchTime);
+pstc->value(pars->GlobalPar.PPunchStretch);
+pvel->value(pars->GlobalPar.PPunchVelocitySensing);
+
+detunevalueoutput->value(getdetune(pars->GlobalPar.PDetuneType,0,pars->GlobalPar.PDetune));
+freq->value(pars->GlobalPar.PDetune-8192);
+
+int k=pars->GlobalPar.PCoarseDetune/1024;if (k>=8) k-=16;
+octave->value(k);
+
+detunetype->value(pars->GlobalPar.PDetuneType-1);
+k=pars->GlobalPar.PCoarseDetune%1024;if (k>=512) k-=1024;
+coarsedet->value(k);
+amplfo->refresh();
+freqlfo->refresh();
+filterlfo->refresh();
+
+for (int i=0;i<NUM_VOICES;i++) voicelistitem[i]->refreshlist();
+
+resui->refresh();
+currentvoicecounter->do_callback();} {}
   }
   decl {ADnoteParameters *pars;} {}
   decl {ResonanceUI *resui;} {}

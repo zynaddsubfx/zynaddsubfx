@@ -536,45 +536,6 @@ void Master::vuresetpeaks(){
 
 
 /*
- * Swap 2 effect (effect1<->effect2)
- */
-void Master::swapcopyeffects(int what,int type,int neff1,int neff2){
-    EffectMgr *eff1,*eff2;
-    FilterParams tmpfilterparams(0,64,64);
-    if (neff1==neff2) return;//to swap a effect with itself or copy to itself is meaningless
-
-    if (type==0) {
-	eff1=sysefx[neff1];
-	eff2=sysefx[neff2];
-    } else {
-	eff1=insefx[neff1];
-	eff2=insefx[neff2];
-    };
-    
-    //get the eff2 parameters (it is needef for swapping)
-    unsigned char effect=eff2->geteffect();
-    unsigned char preset=eff2->getpreset();
-    unsigned char par[128];
-    for (int i=0;i<128;i++) par[i]=eff2->geteffectpar(i);
-    if (eff2->filterpars!=NULL) tmpfilterparams.getfromFilterParams(eff2->filterpars);
-    
-    //copy the eff1 to eff2
-    eff2->changeeffect(eff1->geteffect());
-    eff2->changepreset_nolock(eff1->getpreset());
-    for (int i=0;i<128;i++) eff2->seteffectpar_nolock(i,eff1->geteffectpar(i));
-    if (eff2->filterpars!=NULL) eff2->filterpars->getfromFilterParams(eff1->filterpars);
-    
-    if (what==0){//if swapping is needed, copy the saved parameters to eff1
-	eff1->changeeffect(effect);
-	eff1->changepreset_nolock(preset);
-	for (int i=0;i<128;i++) eff1->seteffectpar_nolock(i,par[i]);
-	if (eff1->filterpars!=NULL) eff1->filterpars->getfromFilterParams(&tmpfilterparams);
-    };
-};
-
-
-
-/*
  * Get the effect volume for the system effect
  */
 void Master::saveloadbuf(Buffer *buf){

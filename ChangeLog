@@ -685,4 +685,8 @@
 	    - Corectata o mica eroare la OscilGen care facea daca adaptive harmonics e activ si phase randomness>0 sa rezulte si aleatorism in amplitudinile armonicelor
 	    - Inceput sa scriu Presets/Clipboard
 	    - Merge partial partea de Copy in clipboard
+15 Aug 2004 - Corectata o eroare in main.c la pitch bend
+	    - Scos Swap/Copy la efecte si la PartUI si vechiul Copy/Paste de la ADnote voice
+	    - Merge clipboardul la Oscil, Resonance, Filter si partial la ADsynth,SUBSynth si PADsynth (am de facut actualizarea la Filter si SUB/PADsynth)
+	    
 	    

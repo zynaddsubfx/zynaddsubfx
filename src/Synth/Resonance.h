@@ -25,10 +25,11 @@
 #include "../globals.h"
 #include "../Misc/Util.h"
 #include "../Misc/XMLwrapper.h"
+#include "../Params/Presets.h"
 
 #define N_RES_POINTS 256
 
-class Resonance{
+class Resonance:public Presets{
     public:
 	Resonance();
 	~Resonance();

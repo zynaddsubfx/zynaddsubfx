@@ -28,8 +28,9 @@
 #include "../Misc/XMLwrapper.h"
 #include "EnvelopeParams.h"
 #include "FilterParams.h"
+#include "Presets.h"
 
-class SUBnoteParameters{
+class SUBnoteParameters:public Presets{
     public:
 	SUBnoteParameters();
 	~SUBnoteParameters();

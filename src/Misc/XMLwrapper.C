@@ -123,6 +123,16 @@ int XMLwrapper::saveXMLfile(char *filename){
     return(result);
 };
 
+char *XMLwrapper::getXMLdata(){
+    xml_k=0;
+    ZERO(tabs,STACKSIZE+2);
+    char *xmldata=mxmlSaveAllocString(tree,XMLwrapper_whitespace_callback);
+    
+    return(xmldata);
+            
+};
+
+
 int XMLwrapper::dosavefile(char *filename,int compression,char *xmldata){
     if (compression==0){
 	FILE *file;
@@ -215,6 +225,7 @@ int XMLwrapper::loadXMLfile(const char *filename){
     return(0);
 };
 
+
 char *XMLwrapper::doloadfile(const char *filename){
     char *xmldata=NULL;
     int filesize=-1;
@@ -256,6 +267,27 @@ char *XMLwrapper::doloadfile(const char *filename){
     }; 
 };
 
+bool XMLwrapper::putXMLdata(char *xmldata){
+    if (tree!=NULL) mxmlDelete(tree);
+    tree=NULL;
+
+    ZERO(&parentstack,(int)sizeof(parentstack));
+    ZERO(&values,(int)sizeof(values));
+
+    stackpos=0;
+
+    if (xmldata==NULL) return (false);
+    
+    root=tree=mxmlLoadString(NULL,xmldata,MXML_OPAQUE_CALLBACK);
+
+    if (tree==NULL) return(false);
+    
+    node=root=mxmlFindElement(tree,tree,"ZynAddSubFX-data",NULL,NULL,MXML_DESCEND);
+    if (root==NULL) return (false);;
+    push(root);
+
+    return(true);
+};
 
 
 

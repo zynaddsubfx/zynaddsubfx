@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
  
-  Presets.h - Presets and Clipboard management
+  PresetsStore.C - Presets and Clipboard store
   Copyright (C) 2002-2004 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
@@ -19,31 +19,37 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 */
-
-#ifndef PRESETS_H
-#define PRESETS_H
-
-#include "../Misc/XMLwrapper.h"
+#include <stdlib.h>
+#include <string.h>
 
 #include "PresetsStore.h"
 
-class Presets{
-    public:
-	Presets();
-	virtual ~Presets();
+PresetsStore presetsstore;
 
-        void copyclipboard();
-	void pasteclipboard();
-	bool checkclipboardtype();
-
-	char type[MAX_PRESETTYPE_SIZE];
-    protected:
-	void setpresettype(char *type);
-    private:
-	virtual void add2XML(XMLwrapper *xml)=0;
-        virtual void getfromXML(XMLwrapper *xml)=0;
-	
+PresetsStore::PresetsStore(){
+    clipboard.data=NULL;
+    clipboard.type[0]=0;;
 };
 
-#endif
+PresetsStore::~PresetsStore(){
+    if (clipboard.data!=NULL) delete (clipboard.data);
+};
+
+void PresetsStore::copyclipboard(XMLwrapper *xml,char *type){
+    strcpy(clipboard.type,type);
+    if (clipboard.data!=NULL) delete (clipboard.data);
+    clipboard.data=xml->getXMLdata();
+};
+
+bool PresetsStore::pasteclipboard(XMLwrapper *xml){
+    if (clipboard.data!=NULL) xml->putXMLdata(clipboard.data);
+	else return(false);
+    return(true);    
+};
+
+bool PresetsStore::checkclipboardtype(char *type){
+    return(strcmp(type,clipboard.type)==0);
+};
+
+
 

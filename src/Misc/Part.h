@@ -77,7 +77,6 @@ class Part{
 
 
       void saveloadbufkititem(Buffer *buf,unsigned char item,int saveitem0);
-      void swapcopyitem(int item1,int item2,int mode);
     
       void cleanup();
 

@@ -42,11 +42,29 @@ void Presets::copyclipboard(){
     add2XML(xml);
     xml->endbranch();
 
-    xml->saveXMLfile("clipboard");
+    presetsstore.copyclipboard(xml,type);
     
     delete(xml);
 };
+
 void Presets::pasteclipboard(){
+    if (!checkclipboardtype()) return;
+    XMLwrapper *xml=new XMLwrapper();
+    if (!presetsstore.pasteclipboard(xml)) {
+	delete(xml);
+	return;
+    };
+    
+    if (xml->enterbranch(type)==0) return;
+	getfromXML(xml);
+    xml->exitbranch();
+    
+    delete(xml);
+
+};
+
+bool Presets::checkclipboardtype(){
+    return(presetsstore.checkclipboardtype(type));
 };
 
 

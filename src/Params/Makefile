@@ -1,7 +1,7 @@
 include ../Makefile.inc
 
 objects=ADnoteParameters.o EnvelopeParams.o FilterParams.o \
-        LFOParams.o SUBnoteParameters.o PADnoteParameters.o Controller.o Presets.o
+        LFOParams.o SUBnoteParameters.o PADnoteParameters.o Controller.o Presets.o PresetsStore.o
 
 
 all: $(objects)

@@ -707,6 +707,18 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
         tooltip {if the effect is not used (is bypassed)} xywh {90 110 60 15} down_box DOWN_BOX labelsize 12
         code0 {int x=part->Pefxbypass[ninseff];o->value(x);}
       }
+      Fl_Button {} {
+        label C
+        callback {presetsui->copy(part->partefx[ninseff]);}
+        xywh {90 127 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+      }
+      Fl_Button {} {
+        label P
+        callback {pthread_mutex_lock(&master->mutex);
+presetsui->paste(part->partefx[ninseff],inseffectui);
+pthread_mutex_unlock(&master->mutex);}
+        xywh {120 127 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+      }
     }
     Fl_Window instrumentkitlist {
       label {Instrument Kit}
@@ -750,12 +762,6 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
         label SUBsynth
         xywh {470 0 60 15} labelfont 1 labelsize 12 align 18
       }
-      Fl_Button swapcopybutton {
-        label {Swap/Copy...}
-        callback {swapwindow->show();}
-        xywh {200 350 75 15} box THIN_UP_BOX labelfont 1 labelsize 10
-        code0 {if (part->Pkitmode==0) o->deactivate();}
-      }
       Fl_Check_Button protectthekitcheck {
         label {Protect the kit}
         callback {part->disablekitloading=(int) o->value();}
@@ -768,15 +774,13 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
         callback {part->Pkitmode=(int) o->value();
 if (part->Pkitmode==0) {
      kitlist->deactivate();
-     swapcopybutton->deactivate();
      protectthekitcheck->value(0);
      protectthekitcheck->do_callback();
      protectthekitcheck->deactivate();
  } else {
  kitlist->activate();
- swapcopybutton->activate();
  protectthekitcheck->activate();
-};}
+};} selected
         xywh {35 350 70 15} down_box BORDER_BOX labelsize 12 textfont 1 textsize 12
         code0 {o->value(part->Pkitmode);}
       } {
@@ -808,67 +812,11 @@ if (part->Pkitmode==0) {
         xywh {540 0 60 15} labelfont 1 labelsize 12 align 18
       }
     }
-    Fl_Window swapwindow {
-      label {Swap/Copy item}
-      xywh {384 262 205 100} type Double hide modal
-    } {
-      Fl_Counter swap2counter {
-        label to
-        xywh {110 20 75 20} type Simple labelfont 1 labelsize 12 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
-        code0 {o->maximum(NUM_KIT_ITEMS);}
-      }
-      Fl_Button {} {
-        label Swap
-        callback {int item1=(int) swap1counter->value();
-int item2=(int) swap2counter->value();
-
-pthread_mutex_lock(&master->mutex);
- part->swapcopyitem(item1,item2,1);
-pthread_mutex_unlock(&master->mutex); 
-
-swapwindow->hide();
-showparameters(0,-1);
-
-for (int i=0;i<NUM_KIT_ITEMS;i++) partkititem[i]->refresh();
-
-adsynenabledcheck->value(part->kit[0].Padenabled);
-subsynenabledcheck->value(part->kit[0].Psubenabled);}
-        xywh {15 60 55 25} box THIN_UP_BOX labelfont 1
-      }
-      Fl_Button {} {
-        label Copy
-        callback {int item1=(int) swap1counter->value();
-int item2=(int) swap2counter->value();
-
-pthread_mutex_lock(&master->mutex);
- part->swapcopyitem(item1,item2,0);
-pthread_mutex_unlock(&master->mutex);
-
-swapwindow->hide();
-showparameters(0,-1);
-
-for (int i=0;i<NUM_KIT_ITEMS;i++) partkititem[i]->refresh();
-
-adsynenabledcheck->value(part->kit[0].Padenabled);
-subsynenabledcheck->value(part->kit[0].Psubenabled);}
-        xywh {75 60 55 25} box THIN_UP_BOX labelfont 1
-      }
-      Fl_Button {} {
-        label Cancel
-        callback {swapwindow->hide();}
-        xywh {140 60 55 25} box THIN_UP_BOX labelfont 1
-      }
-      Fl_Counter swap1counter {
-        label from
-        xywh {15 20 75 20} type Simple labelfont 1 labelsize 12 align 1 minimum 0 maximum 127 step 1 textfont 1
-        code0 {o->maximum(NUM_KIT_ITEMS);}
-      }
-    }
     Fl_Window instrumenteditwindow {
       label {Instrument Edit}
       xywh {182 214 395 360} type Double hide
     } {
-      Fl_Group {} {selected
+      Fl_Group {} {
         xywh {0 220 395 110} box ENGRAVED_FRAME
       } {
         Fl_Group {} {

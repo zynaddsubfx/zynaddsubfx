@@ -8,6 +8,14 @@ decl {\#include <stdlib.h>} {public
 decl {\#include "../Params/Presets.h"} {public
 } 
 
+class PresetsUI_ {open
+} {
+  Function {refresh()} {open return_type {virtual void}
+  } {}
+  Function {~PresetsUI_()} {open return_type virtual
+  } {}
+} 
+
 class PresetsUI {open
 } {
   Function {PresetsUI()} {} {
@@ -37,12 +45,12 @@ pastewin->hide();delete(pastewin);} {}
         label {Copy to Clipboard}
         callback {p->copyclipboard();
 copywin->hide();}
-        xywh {25 270 90 40} box THIN_UP_BOX align 192
+        xywh {25 270 90 35} box THIN_UP_BOX align 192
       }
       Fl_Button {} {
         label Cancel
         callback {copywin->hide();}
-        xywh {160 270 80 40} box THIN_UP_BOX align 192
+        xywh {160 270 80 35} box THIN_UP_BOX align 192
       }
       Fl_Box {} {
         label {Type:}
@@ -56,21 +64,24 @@ copywin->hide();}
       label {Paste from Clipboard/Preset}
       xywh {516 204 265 315} type Double box PLASTIC_THIN_UP_BOX color 238 hide modal
     } {
-      Fl_Browser {} {
+      Fl_Browser {} {selected
         xywh {10 30 245 205} type Hold
       }
       Fl_Button {} {
         label {Paste from Preset}
         xywh {50 240 160 20} box THIN_UP_BOX
       }
-      Fl_Button {} {
+      Fl_Button pastebutton {
         label {Paste from Clipboard}
-        xywh {25 270 90 40} box THIN_UP_BOX align 192
+        callback {p->pasteclipboard();
+pastewin->hide();
+pui->refresh();}
+        xywh {25 270 90 35} box THIN_UP_BOX align 192
       }
       Fl_Button {} {
         label Cancel
         callback {pastewin->hide();}
-        xywh {160 270 80 40} box THIN_UP_BOX align 192
+        xywh {160 270 80 35} box THIN_UP_BOX align 192
       }
       Fl_Box {} {
         label {Type:}
@@ -84,16 +95,34 @@ copywin->hide();}
   Function {copy(Presets *p)} {open
   } {
     code {this->p=p;
+this->pui=NULL;
 bool but=(Fl::event_button()!=FL_LEFT_MOUSE);
 
 if (but) p->copyclipboard();
    else {
 	copytypetext->label(&p->type[1]);
 	copywin->show();
-   };} {selected
-    }
+   };} {}
+  }
+  Function {paste(Presets *p,PresetsUI_ *pui)} {open
+  } {
+    code {this->p=p;
+this->pui=pui;
+bool but=(Fl::event_button()!=FL_LEFT_MOUSE);
+
+if (but) {
+	p->pasteclipboard();
+	pui->refresh();
+} else {
+	pastetypetext->label(&p->type[1]);
+	if (p->checkclipboardtype()) pastebutton->activate();
+		else pastebutton->deactivate();
+	pastewin->show();
+   };} {}
   }
   decl {Presets *p;} {public
+  }
+  decl {PresetsUI_ *pui;} {public
   }
 } 
 

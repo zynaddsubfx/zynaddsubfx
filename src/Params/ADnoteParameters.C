@@ -26,7 +26,8 @@
 
 #include "ADnoteParameters.h"
 
-ADnoteParameters::ADnoteParameters(FFTwrapper *fft_){
+ADnoteParameters::ADnoteParameters(FFTwrapper *fft_):Presets(){
+    setpresettype("Padsyth");
     fft=fft_;
 
     GlobalPar.FreqEnvelope=new EnvelopeParams(0,0);
@@ -202,16 +203,6 @@ ADnoteParameters::~ADnoteParameters(){
     };
 };
 
-void ADnoteParameters::copypastevoice(int n,int what){
-    if (what==0){//copy
-	clipboardbuf.changemode(1);//write to buffer
-	clipboardbuf.changeminimal(0);
-	saveloadbufvoice(&clipboardbuf,n);
-    } else {//paste
-	clipboardbuf.changemode(0);//read from buffer
-	saveloadbufvoice(&clipboardbuf,n);
-    };
-};
 
 /*
  * Save or load the voice parameters to/from the buffer

@@ -22,9 +22,10 @@
 #include <math.h>
 #include "PADnoteParameters.h"
 
-PADnoteParameters::PADnoteParameters(FFTwrapper *fft_,pthread_mutex_t *mutex_){
+PADnoteParameters::PADnoteParameters(FFTwrapper *fft_,pthread_mutex_t *mutex_):Presets(){
+    setpresettype("Ppadsyth");
+
     fft=fft_;
-    
     mutex=mutex_;
     
     resonance=new Resonance();

@@ -628,43 +628,6 @@ void Part::setkititemstatus(int kititem,int Penabled_){
 };
 
 
-/*
- * Swap the item with other or copy the item to another item
- */
-void Part::swapcopyitem(int item1, int item2, int mode){
-    if (item1==item2) return;
-    if ((item1>=NUM_KIT_ITEMS) || (item2>=NUM_KIT_ITEMS)) return;
-    
-    int e1=kit[item1].Penabled;
-    int e2=kit[item2].Penabled;
-    
-    if ((e1==0) && (e2==0)) return;//both items are disabled
-    if ((e1==0)&&(mode==0)) {//copy a null item to a existent item
-	setkititemstatus (item2,0);//delete item 2
-    };
-    
-    if (e1==0) setkititemstatus(item1,1);
-    if (e2==0) setkititemstatus(item2,1);
-
-    Buffer tmpbuf;
-    if (mode!=0){//swap
-	tmpbuf.changemode(1);
-	tmpbuf.changeminimal(0);
-	saveloadbufkititem(&tmpbuf,item2,1);
-    };
-
-    slbuf.changemode(1);//write to buffer
-    slbuf.changeminimal(0);
-    saveloadbufkititem(&slbuf,item1,1);
-
-    slbuf.changemode(0);//read from buffer
-    saveloadbufkititem(&slbuf,item2,1);
-
-    if (mode!=0){//swap
-	tmpbuf.changemode(0);
-	saveloadbufkititem(&tmpbuf,item1,1);
-    };
-};
 
 
 void Part::saveloadbufkititem(Buffer *buf,unsigned char item,int saveitem0){

@@ -337,10 +337,9 @@ if (oscil->Phmag[n]==64) mag->selection_color(0);
   decl {Master *master;} {}
 } 
 
-class OscilEditor {open
+class OscilEditor {: {public PresetsUI_}
 } {
-  Function {make_window()} {open
-  } {
+  Function {make_window()} {} {
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor}
       xywh {4 91 745 600} type Double hide
@@ -992,6 +991,7 @@ refresh();}
       }
       Fl_Button {} {
         label P
+        callback {presetsui->paste(oscil,this);} selected
         xywh {710 545 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
       }
     }
@@ -1054,9 +1054,12 @@ adhrpow->value(oscil->Padaptiveharmonicspower);
 
 for (int i=0;i<MAX_AD_HARMONICS;i++) h[i]->refresh();
 
+pthread_mutex_lock(&master->mutex);
+ oscil->prepare();
+pthread_mutex_unlock(&master->mutex);
+
 basefuncdisplaygroup->redraw();
-oscildisplaygroup->redraw();
-oldosc->redraw();} {}
+redrawoscil();} {}
   }
   Function {redrawoscil()} {} {
     code {oscildisplaygroup->redraw();

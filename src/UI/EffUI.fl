@@ -33,6 +33,9 @@ decl {\#include "../Misc/Util.h"} {public
 decl {\#include "../Effects/EffectMgr.h"} {public
 } 
 
+decl {\#include "PresetsUI.h"} {public
+} 
+
 class EQGraph {: {public Fl_Box}
 } {
   Function {EQGraph(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
@@ -152,7 +155,7 @@ return(log(freq/20.0)/log(1000.0));} {}
   decl {int maxdB;} {}
 } 
 
-class EffUI {: {public Fl_Group}
+class EffUI {: {public Fl_Group,public PresetsUI_}
 } {
   Function {EffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {eff=NULL;
@@ -172,8 +175,7 @@ effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);
 if (filterwindow!=NULL){
 	filterwindow->hide();
 	delete(filterwindow);
-};} {selected
-    }
+};} {}
   }
   Function {make_null_window()} {} {
     Fl_Window effnullwindow {
@@ -1409,6 +1411,10 @@ switch(eff->geteffect()){
 };
 
 this->show();} {}
+  }
+  Function {refresh()} {} {
+    code {refresh(eff);} {selected
+    }
   }
   decl {EffectMgr *eff;} {}
   decl {int eqband;} {}

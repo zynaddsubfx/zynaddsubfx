@@ -26,7 +26,8 @@
 
 #include <stdio.h>
 
-Resonance::Resonance(){
+Resonance::Resonance():Presets(){
+    setpresettype("Presonance");
     defaults();
 };
 

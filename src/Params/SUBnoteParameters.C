@@ -24,7 +24,8 @@
 #include "SUBnoteParameters.h"
 #include <stdio.h>
 
-SUBnoteParameters::SUBnoteParameters(){
+SUBnoteParameters::SUBnoteParameters():Presets(){
+    setpresettype("Psubsyth");
     AmpEnvelope=new EnvelopeParams(64,1);
     AmpEnvelope->ADSRinit_dB(0,40,127,25);
     FreqEnvelope=new EnvelopeParams(64,0);

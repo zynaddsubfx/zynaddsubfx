@@ -192,18 +192,18 @@ return(1);} {}
   }
 } 
 
-class EnvelopeUI {: {public Fl_Group}
+class EnvelopeUI {open : {public Fl_Group}
 } {
   Function {EnvelopeUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {env=NULL;} {}
   }
-  Function {~EnvelopeUI()} {} {
+  Function {~EnvelopeUI()} {open
+  } {
     code {envwindow->hide();
 hide();
 freemodeeditwindow->hide();
 //delete (envwindow);
-delete (freemodeeditwindow);} {selected
-    }
+delete (freemodeeditwindow);} {}
   }
   Function {make_freemode_edit_window()} {} {
     Fl_Window freemodeeditwindow {
@@ -320,8 +320,8 @@ envfree->redraw();}
   }
   Function {make_ADSR_window()} {} {
     Fl_Window envADSR {
-      xywh {440 55 205 70} type Double color 50 labelfont 1 hide
-      class Fl_Group
+      xywh {440 55 205 70} type Double color 50 labelfont 1
+      class Fl_Group visible
     } {
       Fl_Group {} {
         label {Amplitude Envelope}
@@ -527,7 +527,7 @@ freeedit->redraw();}
     }
   }
   Function {make_ASRbw_window()} {} {
-    Fl_Window envASRbw {
+    Fl_Window envASRbw {selected
       xywh {431 279 210 70} type Double hide
       class Fl_Group
     } {
@@ -656,7 +656,8 @@ if (env->Pfreemode!=0){
    freeedit->setpair(freeeditsmall);
 };} {}
   }
-  Function {reinit()} {} {
+  Function {reinit()} {open
+  } {
     code {if (env->Pfreemode!=0){
   int answer=fl_ask("Disable the free mode of the Envelope?");
   if (env->Pfreemode!=0) freemodebutton->value(1);

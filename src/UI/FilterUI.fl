@@ -33,6 +33,9 @@ decl {\#include <FL/fl_draw.H>} {public
 decl {\#include <FL/fl_ask.H>} {public
 } 
 
+decl {\#include "PresetsUI.h"} {public
+} 
+
 class FormantFilterGraph {: {public Fl_Box}
 } {
   Function {FormantFilterGraph(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
@@ -146,7 +149,7 @@ for (i=1;i<lx;i++){
   decl {REALTYPE *graphpoints;} {}
 } 
 
-class FilterUI {: {public Fl_Group}
+class FilterUI {: {public Fl_Group,PresetsUI_}
 } {
   Function {FilterUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {pars=NULL;
@@ -159,12 +162,11 @@ nvowel=0;nformant=0;nseqpos=0;} {}
 formantparswindow->hide();
 hide();
 //delete (filterui);
-delete (formantparswindow);} {selected
-    }
+delete (formantparswindow);} {}
   }
   Function {make_window()} {} {
     Fl_Window filterui {
-      xywh {268 122 275 75} type Double color 50 labelfont 1 hide
+      xywh {211 312 275 75} type Double color 50 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Group filterparamswindow {
@@ -239,7 +241,7 @@ pars->changed=true;}
             xywh {164 164 100 20} labelfont 1 labelsize 10
           }
         }
-        Fl_Choice {} {
+        Fl_Choice filtertype {
           label Category
           callback {switchcategory((int)o->value());
 pars->changed=true;}
@@ -266,7 +268,7 @@ pars->changed=true;}
           code0 {o->value(pars->Pfreq);}
           class WidgetPDial
         }
-        Fl_Dial {} {
+        Fl_Dial qdial {
           label Q
           callback {pars->Pq=(int)o->value();
 formantfiltergraph->redraw();}
@@ -303,7 +305,7 @@ pars->changed=true;}
           class WidgetPDial
         }
         Fl_Choice stcounter {
-          label Stages
+          label St
           callback {pars->Pstages=(int)o->value();
 formantfiltergraph->redraw();
 pars->changed=true;} open
@@ -316,6 +318,16 @@ pars->changed=true;} open
         label Edit
         callback {formantparswindow->show();}
         xywh {15 40 50 25} box PLASTIC_UP_BOX labelfont 1 labelsize 12
+      }
+      Fl_Button {} {
+        label C
+        callback {presetsui->copy(pars);}
+        xywh {186 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+      }
+      Fl_Button {} {
+        label P
+        callback {presetsui->paste(pars,this);}
+        xywh {203 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
       }
     }
   }
@@ -495,6 +507,36 @@ if (nseqpos<pars->Psequencesize) vowel_counter->activate();
 
 
 vowel_counter->value(pars->Psequence[nseqpos].nvowel);} {}
+  }
+  Function {refresh()} {} {
+    code {update_formant_window();
+formantfiltergraph->redraw();
+
+if (pars->Pcategory==0) svfiltertypechoice->value(pars->Ptype);
+if (pars->Pcategory==2) analogfiltertypechoice->value(pars->Ptype);
+
+filtertype->value(pars->Pcategory);
+
+cfreqdial->value(pars->Pfreq);
+qdial->value(pars->Pq);
+
+/*
+if (velsnsamp!=NULL) {
+	velsnsamp=&pars->PFilterVelocityScale;
+	vsnsadial->value(pars->PFilterVelocityScale);
+};
+if (velsns!=NULL) {
+	velsns=&pars->PFilterVelocityScaleFunction;
+	vsnsdial->value(*velsns);
+};
+
+*/
+
+freqtrdial->value(pars->Pfreqtrack);
+gaindial->value(pars->Pgain);
+
+stcounter->value(pars->Pstages);} {selected
+    }
   }
   Function {init(FilterParams *filterpars_,unsigned char *velsnsamp_,unsigned char *velsns_)} {} {
     code {pars=filterpars_;

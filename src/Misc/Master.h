@@ -101,7 +101,7 @@ class Master{
 	//effects
 	EffectMgr *sysefx[NUM_SYS_EFX];//system
 	EffectMgr *insefx[NUM_INS_EFX];//insertion
-	void swapcopyeffects(int what,int type,int neff1,int neff2);
+//	void swapcopyeffects(int what,int type,int neff1,int neff2);
 
 	//HDD recorder
 	Recorder HDDRecorder; 

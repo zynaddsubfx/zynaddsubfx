@@ -33,9 +33,10 @@
 #include "EnvelopeParams.h"
 #include "LFOParams.h"
 #include "FilterParams.h"
+#include "Presets.h"
 
 
-class PADnoteParameters{
+class PADnoteParameters:public Presets{
     public:
 	PADnoteParameters(FFTwrapper *fft_,pthread_mutex_t *mutex_);
 	~PADnoteParameters();

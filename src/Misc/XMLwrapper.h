@@ -44,6 +44,9 @@ class XMLwrapper{
 
 	//returns 0 if ok or -1 if the file cannot be saved
 	int saveXMLfile(char *filename);
+
+	//returns the new allocated string that contains the XML data (used for clipboard)
+	char *getXMLdata();
 	
 	//add simple parameter (name and value)
 	void addpar(char *name,int val);
@@ -70,6 +73,9 @@ class XMLwrapper{
 	//returns 0 if ok or -1 if the file cannot be loaded
 	int loadXMLfile(const char *filename);
 
+	//used by the clipboard
+	bool putXMLdata(char *xmldata);
+    
 	//enter into the branch
 	//returns 1 if is ok, or 0 otherwise
 	int enterbranch(char *name);

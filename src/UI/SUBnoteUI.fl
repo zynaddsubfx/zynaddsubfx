@@ -33,6 +33,9 @@ decl {\#include "../Misc/Util.h"} {public
 decl {\#include "../Params/SUBnoteParameters.h"} {public
 } 
 
+decl {\#include "PresetsUI.h"} {public
+} 
+
 class SUBnoteharmonic {: {public Fl_Group}
 } {
   Function {make_window()} {private
@@ -95,10 +98,11 @@ hide();
   decl {int n;} {}
 } 
 
-class SUBnoteUI {} {
+class SUBnoteUI {: {public PresetsUI_}
+} {
   Function {make_window()} {} {
     Fl_Window SUBparameters {
-      label {SUBsynth Parameters}
+      label {SUBsynth Parameters} selected
       xywh {4 225 735 390} type Double hide
     } {
       Fl_Scroll {} {
@@ -112,7 +116,7 @@ class SUBnoteUI {} {
       Fl_Button {} {
         label Close
         callback {SUBparameters->hide();}
-        xywh {590 365 140 20} box THIN_UP_BOX labelfont 1 labelsize 12
+        xywh {625 365 105 20} box THIN_UP_BOX labelfont 1 labelsize 12
       }
       Fl_Group {} {
         label AMPLITUDE
@@ -363,6 +367,16 @@ globalfiltergroup->redraw();}
         xywh {445 145 85 20} down_box DOWN_BOX labelfont 1 labelsize 12
         code0 {o->value(pars->PGlobalFilterEnabled);}
       }
+      Fl_Button {} {
+        label C
+        callback {presetsui->copy(pars);}
+        xywh {540 370 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+      }
+      Fl_Button {} {
+        label P
+        callback {presetsui->paste(pars,this);}
+        xywh {570 370 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+      }
     }
   }
   Function {SUBnoteUI(SUBnoteParameters *parameters)} {} {
@@ -372,8 +386,7 @@ make_window();} {}
   Function {~SUBnoteUI()} {} {
     code {//for (int i=0;i<MAX_SUB_HARMONICS;i++) delete (h[i]);
 SUBparameters->hide();
-delete(SUBparameters);} {selected
-    }
+delete(SUBparameters);} {}
   }
   decl {SUBnoteParameters *pars;} {}
   decl {SUBnoteharmonic *h[MAX_SUB_HARMONICS];} {}

@@ -29,6 +29,9 @@ decl {\#include "../Synth/Resonance.h"} {public
 decl {\#include "WidgetPDial.h"} {public
 } 
 
+decl {\#include "PresetsUI.h"} {public
+} 
+
 class ResonanceGraph {: {public Fl_Box}
 } {
   Function {ResonanceGraph(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
@@ -172,20 +175,21 @@ return(1);} {}
   decl {Fl_Widget *cbwidget;} {}
 } 
 
-class ResonanceUI {} {
+class ResonanceUI {: PresetsUI_
+} {
   Function {make_window()} {} {
     Fl_Window resonancewindow {
-      label Resonance selected
-      xywh {32 300 780 305} type Double hide
+      label Resonance
+      xywh {45 259 780 305} type Double hide
     } {
       Fl_Value_Output khzvalue {
         label kHz
-        xywh {480 264 45 18} align 8 minimum 0.001 maximum 48 step 0.01 textfont 1
+        xywh {415 264 45 18} align 8 minimum 0.001 maximum 48 step 0.01 textfont 1
         code0 {//this widget must be before the calling widgets}
       }
       Fl_Value_Output dbvalue {
         label dB
-        xywh {480 282 45 18} align 8 minimum -150 maximum 150 step 0.1 textfont 1
+        xywh {415 282 45 18} align 8 minimum -150 maximum 150 step 0.1 textfont 1
         code0 {//this widget must be before the calling widgets}
       }
       Fl_Group {} {
@@ -197,7 +201,7 @@ class ResonanceUI {} {
       Fl_Button {} {
         label Close
         callback {resonancewindow->hide();}
-        xywh {681 270 93 27} box THIN_UP_BOX
+        xywh {690 270 84 27} box THIN_UP_BOX
       }
       Fl_Button {} {
         label Zero
@@ -205,23 +209,23 @@ class ResonanceUI {} {
    respar->setpoint(i,64);
 resonancewindow->redraw();
 redrawPADnoteApply();}
-        tooltip {Clear the resonance function} xywh {556 264 66 15} box THIN_UP_BOX labelfont 1
+        tooltip {Clear the resonance function} xywh {491 264 66 15} box THIN_UP_BOX labelfont 1
       }
       Fl_Button {} {
         label Smooth
         callback {respar->smooth();
 resonancewindow->redraw();
 redrawPADnoteApply();}
-        tooltip {Smooth the resonance function} xywh {556 282 66 18} box THIN_UP_BOX labelfont 1
+        tooltip {Smooth the resonance function} xywh {491 282 66 18} box THIN_UP_BOX labelfont 1
       }
-      Fl_Check_Button {} {
+      Fl_Check_Button enabled {
         label Enable
         callback {respar->Penabled=(int) o->value();
 redrawPADnoteApply();}
         xywh {6 270 78 27} box THIN_UP_BOX down_box DOWN_BOX
         code0 {o->value(respar->Penabled);}
       }
-      Fl_Roller {} {
+      Fl_Roller maxdb {
         callback {maxdbvo->value(o->value());
 respar->PmaxdB=(int) o->value();
 redrawPADnoteApply();}
@@ -254,27 +258,27 @@ redrawPADnoteApply();}
         callback {respar->randomize(1);
 resonancewindow->redraw();
 redrawPADnoteApply();}
-        tooltip {Randomize the resonance function} xywh {631 276 42 12} box THIN_UP_BOX labelfont 1 labelsize 10
+        tooltip {Randomize the resonance function} xywh {566 276 42 12} box THIN_UP_BOX labelfont 1 labelsize 10
       }
       Fl_Button {} {
         label RND1
         callback {respar->randomize(0);
 resonancewindow->redraw();
 redrawPADnoteApply();}
-        tooltip {Randomize the resonance function} xywh {631 264 42 12} box THIN_UP_BOX labelfont 1 labelsize 10
+        tooltip {Randomize the resonance function} xywh {566 264 42 12} box THIN_UP_BOX labelfont 1 labelsize 10
       }
       Fl_Button {} {
         label RND3
         callback {respar->randomize(2);
 resonancewindow->redraw();
 redrawPADnoteApply();}
-        tooltip {Randomize the resonance function} xywh {631 288 42 12} box THIN_UP_BOX labelfont 1 labelsize 10
+        tooltip {Randomize the resonance function} xywh {566 288 42 12} box THIN_UP_BOX labelfont 1 labelsize 10
       }
-      Fl_Check_Button {} {
+      Fl_Check_Button p1st {
         label {P.1st}
         callback {respar->Pprotectthefundamental=(int) o->value();
 redrawPADnoteApply();}
-        tooltip {Protect the fundamental frequency (do not damp the first harmonic)} xywh {430 285 45 15} down_box DOWN_BOX labelsize 10
+        tooltip {Protect the fundamental frequency (do not damp the first harmonic)} xywh {365 285 45 15} down_box DOWN_BOX labelsize 10
         code0 {o->value(respar->Pprotectthefundamental);}
       }
       Fl_Button {} {
@@ -285,9 +289,9 @@ if (Fl::event_button()==FL_LEFT_MOUSE) type=0;
 respar->interpolatepeaks(type);
 resonancewindow->redraw();
 redrawPADnoteApply();}
-        tooltip {Interpolate the peaks} xywh {430 265 46 15} box THIN_UP_BOX labelfont 1 labelsize 10
+        tooltip {Interpolate the peaks} xywh {365 265 46 15} box THIN_UP_BOX labelfont 1 labelsize 10
       }
-      Fl_Dial {} {
+      Fl_Dial centerfreq {
         label {C.f.}
         callback {respar->Pcenterfreq=(int)o->value();
 centerfreqvo->do_callback();
@@ -297,7 +301,7 @@ redrawPADnoteApply();}
         code0 {o->value(respar->Pcenterfreq);}
         class WidgetPDial
       }
-      Fl_Dial {} {
+      Fl_Dial octavesfreq {
         label {Oct.}
         callback {respar->Poctavesfreq=(int)o->value();
 octavesfreqvo->do_callback();
@@ -306,6 +310,16 @@ redrawPADnoteApply();}
         xywh {280 265 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
         code0 {o->value(respar->Poctavesfreq);}
         class WidgetPDial
+      }
+      Fl_Button {} {
+        label C
+        callback {presetsui->copy(respar);}
+        xywh {625 275 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+      }
+      Fl_Button {} {
+        label P
+        callback {presetsui->paste(respar,this);}
+        xywh {655 275 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
       }
     }
   }
@@ -323,6 +337,25 @@ make_window();} {}
   Function {setcbwidget(Fl_Widget *cbwidget)} {} {
     code {this->cbwidget=cbwidget;
 rg->setcbwidget(cbwidget);} {}
+  }
+  Function {refresh()} {} {
+    code {redrawPADnoteApply();
+
+enabled->value(respar->Penabled);
+
+maxdb->value(respar->PmaxdB);
+maxdbvo->value(respar->PmaxdB);
+
+centerfreqvo->value(respar->getcenterfreq()/1000.0);
+octavesfreqvo->value(respar->getoctavesfreq());
+
+centerfreq->value(respar->Pcenterfreq);
+octavesfreq->value(respar->Poctavesfreq);
+
+p1st->value(respar->Pprotectthefundamental);
+
+rg->redraw();} {selected
+    }
   }
   decl {Resonance *respar;} {public
   }

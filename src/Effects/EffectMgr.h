@@ -37,9 +37,10 @@
 #include "../Misc/Buffer.h"
 #include "../Misc/XMLwrapper.h"
 #include "../Params/FilterParams.h"
+#include "../Params/Presets.h"
 
 
-class EffectMgr{
+class EffectMgr:public Presets{
     public:
 	EffectMgr(int insertion_,pthread_mutex_t *mutex_);
 	~EffectMgr();
