@@ -154,7 +154,8 @@ return(log(freq/20.0)/log(1000.0));} {}
 
 class EffUI {: {public Fl_Group}
 } {
-  Function {EffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
+  Function {EffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {selected
+  } {
     code {eff=NULL;
 filterwindow=NULL;} {}
   }
@@ -1255,8 +1256,7 @@ effdynamicfilterwindow->position(px,py);
 
 refresh(eff);} {}
   }
-  Function {refresh(EffectMgr *eff_)} {open
-  } {
+  Function {refresh(EffectMgr *eff_)} {} {
     code {eff=eff_;
 this->hide();
 
@@ -1384,7 +1384,7 @@ switch(eff->geteffect()){
         break;
      case 8:make_filter_window();
 	dfp->value(eff->getpreset());
-	dfp0->value(eff->geteffectpar(0));if (eff->insertion!=0) revp0->label("D/W");
+	dfp0->value(eff->geteffectpar(0));if (eff->insertion!=0) dfp0->label("D/W");
 	dfp1->value(eff->geteffectpar(1));
 	dfp2->value(eff->geteffectpar(2));
 	dfp3->value(eff->geteffectpar(3));
