@@ -169,20 +169,21 @@ delete(ADnoteVoiceListItem);} {}
   decl {Master *master;} {}
 } 
 
-class ADvoiceUI {: {public Fl_Group}
+class ADvoiceUI {open : {public Fl_Group}
 } {
-  Function {make_window()} {} {
+  Function {make_window()} {open
+  } {
     Fl_Window ADnoteVoiceParameters {
       label Voice
-      xywh {110 101 765 525} type Double hide
-      class Fl_Group
+      xywh {67 162 765 525} type Double
+      class Fl_Group visible
     } {
       Fl_Group voiceparametersgroup {
         xywh {0 0 765 525} box THIN_UP_BOX color 48
         code0 {if (pars->VoicePar[nvoice].Enabled==0) o->deactivate();}
       } {
         Fl_Group voicemodegroup {
-          xywh {5 5 755 515}
+          xywh {0 5 760 515}
         } {
           Fl_Group voiceFMparametersgroup {
             label MODULATOR
@@ -319,21 +320,6 @@ oscedit=new OscilEditor(pars->VoicePar[nv].FMSmp,fmoscil,master);}
                 xywh {700 370 55 15} box THIN_UP_BOX labelfont 1 labelsize 12
                 code0 {if (pars->VoicePar[nvoice].PextFMoscil>=0) o->labelcolor(FL_BLUE);}
               }
-              Fl_Counter {} {
-                label {Ext.}
-                callback {pars->VoicePar[nvoice].PextFMoscil=(int)o->value();
-if ((int) o->value() != -1) {
-    oscFM->init(pars->VoicePar[(int) o->value()].FMSmp,master);
-    changeFMoscilbutton->labelcolor(FL_BLUE);
-} else { 
-    oscFM->init(pars->VoicePar[nvoice].FMSmp,master);
-    changeFMoscilbutton->labelcolor(FL_BLACK);
-};
-voiceFMparametersgroup->redraw();}
-                tooltip {External Oscillator ( -1 for internal)} xywh {570 385 81 20} type Simple labelfont 1 labelsize 12 align 4 minimum -1 maximum 127 step 1 value -1 textfont 1
-                code0 {o->bounds(-1,nvoice-1);}
-                code1 {o->value(pars->VoicePar[nvoice].PextFMoscil);}
-              }
               Fl_Slider {} {
                 label Phase
                 callback {pars->VoicePar[nvoice].PFMoscilphase=64-(int)o->value();
@@ -342,6 +328,22 @@ fmoscil->redraw();}
                 xywh {665 395 65 10} type {Horz Knob} box FLAT_BOX labelsize 10 align 5 minimum -64 maximum 63 step 1
                 code0 {o->value(64-pars->VoicePar[nvoice].PFMoscilphase);}
               }
+              Fl_Choice {} {
+                label Use
+                callback {pars->VoicePar[nvoice].PextFMoscil=(int)o->value()-1;
+if ((int) o->value() != 0) {
+    oscFM->init(pars->VoicePar[(int) o->value()-1].FMSmp,master);
+    changeFMoscilbutton->labelcolor(FL_BLUE);
+} else { 
+    oscFM->init(pars->VoicePar[nvoice].FMSmp,master);
+    changeFMoscilbutton->labelcolor(FL_BLACK);
+};
+voiceFMparametersgroup->redraw();} open
+                xywh {560 390 75 15} down_box BORDER_BOX labelsize 10 textfont 1 textsize 10
+                code0 {o->add("Internal");}
+                code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"ExtFM.%2d",i);o->add(tmp);};}
+                code3 {o->value(pars->VoicePar[nvoice].PextFMoscil+1);}
+              } {}
             }
             Fl_Counter {} {
               label {Ext. Mod.}
@@ -523,11 +525,17 @@ voiceoscil->redraw();}
             xywh {10 420 65 10} type {Horz Knob} box FLAT_BOX labelsize 10 align 5 minimum -64 maximum 63 step 1
             code0 {o->value(64-pars->VoicePar[nvoice].Poscilphase);}
           }
-          Fl_Counter {} {
-            label {Ext. Oscil.}
-            callback {pars->VoicePar[nvoice].Pextoscil=(int)o->value();
-if ((int) o->value() != -1) {
-    osc->init(pars->VoicePar[(int) o->value()].OscilSmp,master);
+          Fl_Check_Button {} {
+            label {R.}
+            callback {pars->VoicePar[nvoice].Presonance=(int) o->value();}
+            tooltip {Resonance On/Off} xywh {210 5 35 35} box THIN_UP_BOX down_box DOWN_BOX labelfont 1 labelsize 12
+            code0 {o->value(pars->VoicePar[nvoice].Presonance);}
+          }
+          Fl_Choice {} {
+            label {Use Oscil.}
+            callback {pars->VoicePar[nvoice].Pextoscil=(int)o->value()-1;
+if ((int) o->value() != 0) {
+    osc->init(pars->VoicePar[(int) o->value()-1].OscilSmp,master);
     changevoiceoscilbutton->labelcolor(FL_BLUE);
 } else { 
     osc->init(pars->VoicePar[nvoice].OscilSmp,master);
@@ -535,17 +543,12 @@ if ((int) o->value() != -1) {
 };
 
 voiceparametersgroup->redraw();
-voiceonbutton->redraw();}
-            tooltip {External Oscillator ( -1 for internal)} xywh {5 450 70 20} type Simple labelsize 12 align 5 minimum -1 maximum 127 step 1 value -1 textfont 1
-            code0 {o->bounds(-1,nvoice-1);}
-            code1 {o->value(pars->VoicePar[nvoice].Pextoscil);}
-          }
-          Fl_Check_Button {} {
-            label {R.}
-            callback {pars->VoicePar[nvoice].Presonance=(int) o->value();}
-            tooltip {Resonance On/Off} xywh {210 5 35 35} box THIN_UP_BOX down_box DOWN_BOX labelfont 1 labelsize 12
-            code0 {o->value(pars->VoicePar[nvoice].Presonance);}
-          }
+voiceonbutton->redraw();} open selected
+            xywh {5 455 65 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+            code0 {o->add("Internal");}
+            code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"Ext.%2d",i);o->add(tmp);};}
+            code3 {o->value(pars->VoicePar[nvoice].Pextoscil+1);}
+          } {}
         }
         Fl_Group {} {
           label AMPLITUDE
@@ -821,7 +824,7 @@ detunevalueoutput->do_callback();}
         }
       }
       Fl_Group {} {
-        label AMPLITUDE selected
+        label AMPLITUDE
         xywh {5 5 240 250} box THIN_UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 17
       } {
         Fl_Value_Slider {} {
