@@ -506,3 +506,6 @@
 13 Dec 2003 - Adaugat LFO frequency randomness
 14 Dec 2003 - Imbunatatit LFO frequency randomness
 15 Dec 2003 - Corectata o mica eroare la ADnoteParameters (lipseau niste break-uri la salvarea/incarcarea parametrilor)
+16 Dec 2003 - Eroarea cu break-urile se dovedeste a fi o eroare majora :( ; adica corectarea ei, necesita resalvarea tuturor instrumentelor
+	    - Am revenit la suportul vechi de JACK, dar cel nou este disponiblil ca JACK_RT (nefunctional inca)
+	    
