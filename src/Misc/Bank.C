@@ -213,7 +213,7 @@ void Bank::loadfromslot(unsigned int ninstrument,Part *part){
 
 
 /*
- * Load a bank from a file and makes it current
+ * Makes current a bank directory
  */
 int Bank::loadbank(const char *bankdirname){
     DIR *dir=opendir(bankdirname);
@@ -224,6 +224,7 @@ int Bank::loadbank(const char *bankdirname){
     if (dirname!=NULL) delete(dirname);
     dirname=new char[strlen(bankdirname)+1];
     snprintf(dirname,strlen(bankdirname)+1,"%s",bankdirname);
+    
     bankfiletitle=dirname;
 
    // printf("loadbank %s/\n",bankdirname);
@@ -354,16 +355,17 @@ int Bank_compar(const void *a,const void *b){
     struct Bank::bankstruct *bank1= (Bank::bankstruct *)a;
     struct Bank::bankstruct *bank2= (Bank::bankstruct *)b;
     if (((bank1->name)==NULL)||((bank2->name)==NULL)) return(0);
-    
-    return(strcasecmp(bank1->name,bank2->name));
+
+    int result=strcasecmp(bank1->name,bank2->name);
+    return(result<0);
 };
+
 
 /*
  * Re-scan for directories containing instrument banks
  */
 
 void Bank::rescanforbanks(){
-
     for (int i=0;i<MAX_NUM_BANKS;i++){
 	if (banks[i].dir!=NULL) delete (banks[i].dir);
 	if (banks[i].name!=NULL) delete (banks[i].name);
@@ -372,8 +374,27 @@ void Bank::rescanforbanks(){
     };
 
     for (int i=0;i<MAX_BANK_ROOT_DIRS;i++) if (config.cfg.bankRootDirList[i]!=NULL) scanrootdir(config.cfg.bankRootDirList[i]);
-    
-    qsort(banks,MAX_NUM_BANKS,sizeof(bankstruct),Bank_compar);
+
+    //sort the banks
+    for (int j=0;j<MAX_NUM_BANKS-1;j++){
+	for (int i=j+1;i<MAX_NUM_BANKS;i++){
+	    if (Bank_compar(&banks[i],&banks[j])) {
+		char *tmpname=banks[i].name;
+		char *tmpdir=banks[i].dir;
+
+		banks[i].name=banks[j].name;
+		banks[i].dir=banks[j].dir;
+
+		banks[j].name=tmpname;
+		banks[j].dir=tmpdir;
+		
+/*		bankstruct tmp=banks[i];
+		banks[i]=banks[j];
+		banks[j]=tmp;
+*/
+	    };
+	};
+    };
 }; 
 
 

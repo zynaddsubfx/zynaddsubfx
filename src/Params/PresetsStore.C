@@ -86,7 +86,7 @@ int Presets_compar(const void *a,const void *b){
     struct PresetsStore::presetstruct *p2= (PresetsStore::presetstruct *)b;
     if (((p1->name)==NULL)||((p2->name)==NULL)) return(0);
     
-    return(strcasecmp(p1->name,p2->name));
+    return(strcasecmp(p1->name,p2->name)<0);
 };
 
 
@@ -122,7 +122,17 @@ void PresetsStore::rescanforpresets(char *type){
 
 	closedir(dir);
     };
-    qsort(presets,MAX_PRESETS,sizeof(presetstruct),Presets_compar);
+
+    //sort the presets
+    for (int j=0;j<MAX_PRESETS-1;j++){
+	for (int i=j+1;i<MAX_PRESETS;i++){
+	    if (Presets_compar(&presets[i],&presets[j])) {
+		presetstruct tmp=presets[i];
+		presets[i]=presets[j];
+		presets[j]=tmp;
+	    };
+	};
+    };
 };
 
 void PresetsStore::copypreset(XMLwrapper *xml,char *type, const char *name){

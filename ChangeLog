@@ -735,4 +735,7 @@
 07 Nov 2004 - Corectata o mica eroare care facea ca sa nu se incarce corect instrumentele in linia de comanda (-l)
 14 Nov 2004 - Nu mai verific in bank daca este un director sau fisier simplu, pt. ca poate sa aiba probleme
 28 Nov 2004 - Curatat codul la OscilGen (acum datele sunt stocate mai bine si nu in functie de biblioteca FFTW)
+	    - Corectata o mica eroare la OscilGen cu adaptive harmonics care facea ca energia vechilor armonice sa nu se adauge in mod corect la noile armonice (la note inalte)
+	    - Sortarea nu mai este quicksort la bank si la presets pt. ca am vazut ca nu merge in windows intotdeauna
+	    
 	    
