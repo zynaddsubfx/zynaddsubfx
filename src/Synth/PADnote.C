@@ -51,7 +51,7 @@ PADnote::PADnote(PADnoteParameters *parameters, Controller *ctl_,REALTYPE freq, 
 
 
     //find out the closest note
-    REALTYPE logfreq=log(freq*pow(2.0,NoteGlobalPar.Detune/1200.0));
+    REALTYPE logfreq=log(basefreq*pow(2.0,NoteGlobalPar.Detune/1200.0));
     REALTYPE mindist=fabs(logfreq-log(pars->sample[0].basefreq+0.0001));
     nsample=0;
     for (int i=1;i<PAD_MAX_SAMPLES;i++){

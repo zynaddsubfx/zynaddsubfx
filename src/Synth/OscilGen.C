@@ -560,18 +560,21 @@ void OscilGen::spectrumadjust(){
 		if (par>=0.0) par=pow(5.0,par);
 		    else par=pow(8.0,par);
 		break;
-	case 2: par=pow(10.0,(1.0-par)*3.0)*0.00095;
+	case 2: par=pow(10.0,(1.0-par)*3.0)*0.25;
 		break;
-	case 3: par=pow(10.0,(1.0-par)*3.0)*0.00095;
+	case 3: par=pow(10.0,(1.0-par)*3.0)*0.25;
 		break;
     };
+
+
     REALTYPE max=0.0;
     for (int i=0;i<OSCIL_SIZE/2;i++){ 
 	REALTYPE tmp=pow(oscilFFTfreqs.c[i],2)+pow(oscilFFTfreqs.s[i],2.0);
 	if (max<tmp) max=tmp;
     };
-    max=sqrt(max);
+    max=sqrt(max)/OSCIL_SIZE*2.0;
     if (max<1e-8) max=1.0;
+
     
     for (int i=0;i<OSCIL_SIZE/2;i++){
         REALTYPE mag=sqrt(pow(oscilFFTfreqs.s[i],2)+pow(oscilFFTfreqs.c[i],2.0))/max;
