@@ -35,7 +35,6 @@ int SAMPLE_RATE=44100;
 int SOUND_BUFFER_SIZE=256;
 int OSCIL_SIZE=512;
 
-
 Config config;
 REALTYPE *denormalkillbuf;
 
