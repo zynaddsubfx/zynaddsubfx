@@ -46,6 +46,7 @@ class XMLwrapper{
 	int saveXMLfile(char *filename);
 
 	//returns the new allocated string that contains the XML data (used for clipboard)
+	//the string is NULL terminated
 	char *getXMLdata();
 	
 	//add simple parameter (name and value)

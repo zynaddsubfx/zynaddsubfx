@@ -556,6 +556,8 @@ VSTSynth::VSTSynth (audioMasterCallback audioMaster):AudioEffectX(audioMaster,1,
 //    hasClip(false);
 
     isSynth(true);
+
+    programsAreChunks(true);
     
   };
 
@@ -628,6 +630,16 @@ long VSTSynth::processEvents(VstEvents *events){
     };
 
 return(1);
+};
+
+long VSTSynth::getChunk(void** data){
+    int size=0;
+    size=vmaster->getalldata(data);
+    return(size);
+};
+
+long VSTSynth::setChunk(void *data,long size){
+    vmaster->putalldata(data,size);
 };
 #endif
 

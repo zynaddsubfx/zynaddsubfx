@@ -50,6 +50,7 @@ class Master{
 
 	void defaults();
 
+
 	//loads all settings from a XML file
 	//returns 0 for ok or -1 if there is an error
 	int loadXML(char *filename);
@@ -57,6 +58,11 @@ class Master{
 
 	void getfromXML(XMLwrapper *xml);
 	
+	//get all data to a newly allocated array (used for VST)
+	//returns the datasize
+	int getalldata(char **data);
+	//put all data from the *data array to zynaddsubfx parameters (used for VST)
+	void putalldata(char *data,int size);
 
 
 

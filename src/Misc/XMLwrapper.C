@@ -85,6 +85,7 @@ XMLwrapper::XMLwrapper(){
         
     mxmlElementSetAttr(root,"version-major","1");
     mxmlElementSetAttr(root,"version-minor","1");
+    mxmlElementSetAttr(root,"ZynAddSubFX-author","Nasca Octavian Paul");
 
     //make the empty branch that will contain the information parameters
     info=addparams0("INFORMATION");

@@ -597,6 +597,32 @@ void Master::add2XML(XMLwrapper *xml){
 };
 
 
+int Master::getalldata(char **data){
+    XMLwrapper *xml=new XMLwrapper();
+
+    xml->beginbranch("MASTER");
+    add2XML(xml);
+    xml->endbranch();
+
+    *data=xml->getXMLdata();
+    delete (xml);
+    return(strlen(*data)+1);
+};
+
+void Master::putalldata(char *data,int size){
+    XMLwrapper *xml=new XMLwrapper();
+    if (!xml->putXMLdata(data)) {
+	delete(xml);
+	return;
+    };
+    
+    if (xml->enterbranch("MASTER")==0) return;
+	getfromXML(xml);
+    xml->exitbranch();
+    
+    delete(xml);
+};
+
 int Master::saveXML(char *filename){
     XMLwrapper *xml=new XMLwrapper();
 
