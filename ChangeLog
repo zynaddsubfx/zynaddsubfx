@@ -690,7 +690,7 @@
 	    - Merge clipboardul la Oscil, Resonance, Filter si partial la ADsynth,SUBSynth si PADsynth
 16 Aug 2004 - Corectata inca o eroare la pitch bend (aratata de Krzysztof Korpiela)
 	    - Adaugat refresh si la Filtru si paste la ADnote, SUBnote si PADsynth sunt complete
-17 Aug 2004 - Adaugat clipboard la LFO	    
+17 Aug 2004 - Adaugat clipboard la LFO si Envelope	    
 	    
 	    
 	    

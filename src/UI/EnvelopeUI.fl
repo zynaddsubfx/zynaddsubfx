@@ -33,6 +33,9 @@ decl {\#include <FL/fl_draw.H>} {public
 decl {\#include <FL/fl_ask.H>} {public
 } 
 
+decl {\#include "PresetsUI.h"} {public
+} 
+
 class EnvelopeFreeEdit {: {public Fl_Box}
 } {
   Function {EnvelopeFreeEdit(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
@@ -192,7 +195,7 @@ return(1);} {}
   }
 } 
 
-class EnvelopeUI {open : {public Fl_Group}
+class EnvelopeUI {: {public Fl_Group,PresetsUI_}
 } {
   Function {EnvelopeUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {env=NULL;
@@ -213,7 +216,7 @@ delete (freemodeeditwindow);} {}
   Function {make_freemode_edit_window()} {} {
     Fl_Window freemodeeditwindow {
       label Envelope
-      xywh {19 242 575 180} type Double hide
+      xywh {60 308 575 180} type Double hide
     } {
       Fl_Box freeedit {
         label Envelope
@@ -320,6 +323,16 @@ envfree->redraw();}
         code1 {if (env->Pfreemode==0) o->hide();}
         code2 {o->maximum(env->Penvpoints-2);}
       }
+      Fl_Button {} {
+        label C
+        callback {presetsui->copy(env);}
+        xywh {465 160 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+      }
+      Fl_Button {} {
+        label P
+        callback {presetsui->paste(env,this);}
+        xywh {482 160 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+      }
     }
   }
   Function {make_ADSR_window()} {} {
@@ -377,15 +390,25 @@ freeedit->redraw();}
           class WidgetPDial
         }
         Fl_Button {} {
-          label Edit
+          label E
           callback {freemodeeditwindow->show();}
-          tooltip {Envelope window} xywh {160 5 40 15} box PLASTIC_UP_BOX labelfont 1 labelsize 10
+          tooltip {Envelope window} xywh {185 5 15 15} box PLASTIC_UP_BOX labelfont 1 labelsize 10
         }
         Fl_Check_Button e1linearenvelope {
           label L
           callback {env->Plinearenvelope=(int)o->value();}
           tooltip {The evelope is linear} xywh {180 20 15 15} down_box DOWN_BOX labelsize 11 align 4
           code0 {o->value(env->Plinearenvelope);}
+        }
+        Fl_Button {} {
+          label C
+          callback {presetsui->copy(env);}
+          xywh {150 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+        }
+        Fl_Button {} {
+          label P
+          callback {presetsui->paste(env,this);}
+          xywh {167 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
         }
       }
     }
@@ -444,11 +467,21 @@ freeedit->redraw();}
           tooltip {Forced release} xywh {180 25 15 25} down_box DOWN_BOX labelsize 11 align 6
           code0 {o->value(env->Pforcedrelease);}
         }
+        Fl_Button {} {
+          label C
+          callback {presetsui->copy(env);}
+          xywh {155 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+        }
+        Fl_Button {} {
+          label P
+          callback {presetsui->paste(env,this);}
+          xywh {172 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+        }
       }
       Fl_Button {} {
-        label Edit
+        label E
         callback {freemodeeditwindow->show();}
-        tooltip {Envelope window} xywh {165 5 40 15} box PLASTIC_UP_BOX labelfont 1 labelsize 10
+        tooltip {Envelope window} xywh {190 5 15 15} box PLASTIC_UP_BOX labelfont 1 labelsize 10
       }
     }
   }
@@ -523,9 +556,19 @@ freeedit->redraw();}
           code0 {o->value(env->Pforcedrelease);}
         }
         Fl_Button {} {
-          label Edit
+          label E
           callback {freemodeeditwindow->show();}
-          xywh {230 5 40 15} box PLASTIC_UP_BOX labelfont 1 labelsize 10
+          xywh {255 5 15 15} box PLASTIC_UP_BOX labelfont 1 labelsize 10
+        }
+        Fl_Button {} {
+          label C
+          callback {presetsui->copy(env);}
+          xywh {220 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+        }
+        Fl_Button {} {
+          label P
+          callback {presetsui->paste(env,this);}
+          xywh {237 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
         }
       }
     }
@@ -584,15 +627,26 @@ freeedit->redraw();}
           tooltip {Forced release} xywh {180 25 15 25} down_box DOWN_BOX labelsize 11 align 6
           code0 {o->value(env->Pforcedrelease);}
         }
+        Fl_Button {} {
+          label C
+          callback {presetsui->copy(env);}
+          xywh {155 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+        }
+        Fl_Button {} {
+          label P
+          callback {presetsui->paste(env,this);}
+          xywh {172 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+        }
       }
       Fl_Button {} {
-        label Edit
+        label E
         callback {freemodeeditwindow->show();}
-        xywh {165 5 40 15} box PLASTIC_UP_BOX labelfont 1 labelsize 10
+        xywh {190 5 15 15} box PLASTIC_UP_BOX labelfont 1 labelsize 10
       }
     }
   }
-  Function {make_free_window()} {} {
+  Function {make_free_window()} {selected
+  } {
     Fl_Window envfree {
       xywh {373 413 205 70} type Double color 50 labelfont 1 hide resizable
       class Fl_Group
@@ -609,9 +663,19 @@ freeedit->redraw();}
           class EnvelopeFreeEdit
         }
         Fl_Button {} {
-          label Edit
+          label E
           callback {freemodeeditwindow->show();}
-          xywh {160 5 40 15} box PLASTIC_UP_BOX labelfont 1 labelsize 10
+          xywh {185 5 15 15} box PLASTIC_UP_BOX labelfont 1 labelsize 10
+        }
+        Fl_Button {} {
+          label C
+          callback {presetsui->copy(env);}
+          xywh {150 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+        }
+        Fl_Button {} {
+          label P
+          callback {presetsui->paste(env,this);}
+          xywh {167 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
         }
       }
     }
@@ -776,8 +840,7 @@ if (env->Pfreemode==0){
 
 envwindow->resize(this->x(),this->y(),this->w(),this->h());
 
-envwindow->show();} {selected
-    }
+envwindow->show();} {}
   }
   decl {EnvelopeParams *env;} {}
   decl {Fl_Group *envwindow;} {}

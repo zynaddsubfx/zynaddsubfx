@@ -60,7 +60,7 @@ REALTYPE EnvelopeParams::getdt(char i){
  * ADSR/ASR... initialisations
  */
 void EnvelopeParams::ADSRinit(char A_dt,char D_dt,char S_val,char R_dt){
-    setpresettype("envamplitude");
+    setpresettype("Penvamplitude");
     Envmode=1;
     PA_dt=A_dt;PD_dt=D_dt;PS_val=S_val;PR_dt=R_dt;
     Pfreemode=0;
@@ -70,7 +70,7 @@ void EnvelopeParams::ADSRinit(char A_dt,char D_dt,char S_val,char R_dt){
 };
 
 void EnvelopeParams::ADSRinit_dB(char A_dt,char D_dt,char S_val,char R_dt){
-    setpresettype("envamplitude");
+    setpresettype("Penvamplitude");
     Envmode=2;
     PA_dt=A_dt;PD_dt=D_dt;PS_val=S_val;PR_dt=R_dt;
     Pfreemode=0;
@@ -80,7 +80,7 @@ void EnvelopeParams::ADSRinit_dB(char A_dt,char D_dt,char S_val,char R_dt){
 };
 
 void EnvelopeParams::ASRinit(char A_val,char A_dt,char R_val,char R_dt){
-    setpresettype("envfrequency");
+    setpresettype("Penvfrequency");
     Envmode=3;
     PA_val=A_val;PA_dt=A_dt;PR_val=R_val;PR_dt=R_dt;
     Pfreemode=0;
@@ -90,7 +90,7 @@ void EnvelopeParams::ASRinit(char A_val,char A_dt,char R_val,char R_dt){
 };
 
 void EnvelopeParams::ADSRinit_filter(char A_val,char A_dt,char D_val,char D_dt,char R_dt,char R_val){
-    setpresettype("envfilter");
+    setpresettype("Penvfilter");
     Envmode=4;
     PA_val=A_val;PA_dt=A_dt;PD_val=D_val;PD_dt=D_dt;PR_dt=R_dt;PR_val=R_val;
     Pfreemode=0;
@@ -99,7 +99,7 @@ void EnvelopeParams::ADSRinit_filter(char A_val,char A_dt,char D_val,char D_dt,c
 };
 
 void EnvelopeParams::ASRinit_bw(char A_val,char A_dt,char R_val,char R_dt){
-    setpresettype("envbandwidth");
+    setpresettype("Penvbandwidth");
     Envmode=5;
     PA_val=A_val;PA_dt=A_dt;PR_val=R_val;PR_dt=R_dt;
     Pfreemode=0;
