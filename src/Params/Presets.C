@@ -38,10 +38,14 @@ void Presets::setpresettype(char *type){
 
 void Presets::copyclipboard(){
     XMLwrapper *xml=new XMLwrapper();
-
+    
+    //used only for the clipboard
+    xml->minimal=false;
+    
     char type[MAX_PRESETTYPE_SIZE];
     strcpy(type,this->type);
     if (nelement!=-1) strcat(type,"n");
+    if (strstr(type,"Plfo")!=NULL) strcpy(type,"Plfo");
 
     xml->beginbranch(type);
     if (nelement==-1) add2XML(xml);
@@ -58,6 +62,7 @@ void Presets::pasteclipboard(){
     char type[MAX_PRESETTYPE_SIZE];
     strcpy(type,this->type);
     if (nelement!=-1) strcat(type,"n");
+    if (strstr(type,"Plfo")!=NULL) strcpy(type,"Plfo");
 
     if (!checkclipboardtype()) {
 	nelement=-1;
