@@ -284,7 +284,8 @@ delete(harmonic);} {}
 } 
 
 class OscilEditor {} {
-  Function {make_window()} {} {
+  Function {make_window()} {open
+  } {
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor}
       xywh {66 94 745 590} type Double hide
@@ -684,7 +685,7 @@ oldosc->redraw();} open
           callback {oscil->Pwaveshaping=(int)o->value()+64;
 oscildisplaygroup->redraw();
 oldosc->redraw();
-wsparval->value(oscil->Pbasefuncpar-64);}
+wsparval->value(oscil->Pwaveshaping-64);}
           tooltip {Waveshaping Parameter} xywh {270 310 20 20} minimum -64 maximum 63 step 1
           code0 {o->value(oscil->Pwaveshaping-64);}
           class WidgetPDial
