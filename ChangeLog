@@ -581,6 +581,9 @@
 16 Iun 2004 - Inceput sa trec configul pe XML
 17 Iun 2004 - Adaugat tipul threshUp la spectrum adjust
 	    - Terminat de trecut config-ul pe XML (inclusiv setarile bancilor de instrumente)
+18 Iun 2004 - Incercata interpolarea cubica dar am vazut ca nu merita pentru ca OSCIL_SIZE e suficient de mare si pentru o interpolare liniara
+	    - Separat OscilGenUI din ADnoteUI
+	    
 
 
 

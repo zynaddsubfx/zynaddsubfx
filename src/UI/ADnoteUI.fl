@@ -44,7 +44,7 @@ decl {\#include "LFOUI.h"} {public
 decl {\#include "FilterUI.h"} {public
 } 
 
-decl {\#include "OscilGenUI.h"} {selected public
+decl {\#include "OscilGenUI.h"} {public
 } 
 
 class ADvoicelistitem {: {public Fl_Group}
@@ -82,7 +82,7 @@ class ADvoicelistitem {: {public Fl_Group}
         }
         Fl_Group voiceoscil {open
           xywh {60 5 30 20} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
-          code0 {osc=new ADOscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
+          code0 {osc=new Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
           code1 {osc->init(pars->VoicePar[nvoice].OscilSmp,0,pars->VoicePar[nvoice].Poscilphase,master);}
           code2 {if (pars->VoicePar[nvoice].Pextoscil != -1) {osc->init(pars->VoicePar[pars->VoicePar[nvoice].Pextoscil].OscilSmp,master);}}
         } {}
@@ -165,7 +165,7 @@ delete(ADnoteVoiceListItem);} {}
   }
   decl {ADnoteParameters *pars;} {}
   decl {int nvoice;} {}
-  decl {ADOscilloscope *osc;} {}
+  decl {Oscilloscope *osc;} {}
   decl {Master *master;} {}
 } 
 
@@ -300,7 +300,7 @@ o->redraw();}
             } {
               Fl_Group fmoscil {open
                 xywh {535 405 220 110} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
-                code0 {oscFM=new ADOscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
+                code0 {oscFM=new Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
                 code1 {int nv=nvoice; if (pars->VoicePar[nvoice].PextFMoscil>=0) nv=pars->VoicePar[nvoice].PextFMoscil;}
                 code2 {oscFM->init(pars->VoicePar[nv].FMSmp,0,pars->VoicePar[nvoice].PFMoscilphase,master);}
               } {}
@@ -315,7 +315,7 @@ o->redraw();}
 int nv=nvoice;
 if (pars->VoicePar[nvoice].PextFMoscil>=0) nv=pars->VoicePar[nvoice].PextFMoscil;
 
-oscedit=new ADOscilEditor(pars->VoicePar[nv].FMSmp,fmoscil,master);}
+oscedit=new OscilEditor(pars->VoicePar[nv].FMSmp,fmoscil,master);}
                 xywh {700 370 55 15} box THIN_UP_BOX labelfont 1 labelsize 12
                 code0 {if (pars->VoicePar[nvoice].PextFMoscil>=0) o->labelcolor(FL_BLUE);}
               }
@@ -496,7 +496,7 @@ if (x==0) fixedfreqetdial->deactivate();
           }
           Fl_Group voiceoscil {
             xywh {80 375 445 145} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
-            code0 {osc=new ADOscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
+            code0 {osc=new Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
             code1 {int nv=nvoice; if (pars->VoicePar[nvoice].Pextoscil>=0) nv=pars->VoicePar[nvoice].Pextoscil;}
             code2 {osc->init(pars->VoicePar[nv].OscilSmp,0,pars->VoicePar[nvoice].Poscilphase,master);}
           } {}
@@ -507,7 +507,7 @@ if (x==0) fixedfreqetdial->deactivate();
 int nv=nvoice;
 if (pars->VoicePar[nvoice].Pextoscil>=0) nv=pars->VoicePar[nvoice].Pextoscil;
 
-oscedit=new ADOscilEditor(pars->VoicePar[nv].OscilSmp,voiceoscil,master);}
+oscedit=new OscilEditor(pars->VoicePar[nv].OscilSmp,voiceoscil,master);}
             xywh {5 475 65 20} box THIN_UP_BOX labelfont 1 labelsize 12
             code0 {if (pars->VoicePar[nvoice].Pextoscil>=0) o->labelcolor(FL_BLUE);}
           }
@@ -744,14 +744,15 @@ delete (ADnoteVoiceParameters);} {}
   }
   decl {int nvoice;} {}
   decl {ADnoteParameters *pars;} {}
-  decl {ADOscilEditor *oscedit;} {}
-  decl {ADOscilloscope *osc;} {}
-  decl {ADOscilloscope *oscFM;} {}
+  decl {OscilEditor *oscedit;} {selected
+  }
+  decl {Oscilloscope *osc;} {}
+  decl {Oscilloscope *oscFM;} {}
   decl {Master *master;} {}
 } 
 
 class ADnoteUI {} {
-  Function {make_window()} {private
+  Function {make_window()} {open private
   } {
     Fl_Window ADnoteGlobalParameters {
       label {ADsynth Global Parameters of the Instrument}

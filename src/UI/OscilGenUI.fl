@@ -44,9 +44,9 @@ decl {\#include "LFOUI.h"} {public
 decl {\#include "FilterUI.h"} {public
 } 
 
-class ADSpectrum {: {public Fl_Box}
+class OscilSpectrum {: {public Fl_Box}
 } {
-  Function {ADSpectrum(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
+  Function {OscilSpectrum(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
     code {oscil=NULL;} {}
   }
   Function {init(OscilGen *oscil_,int oscbase_,Master *master_)} {} {
@@ -114,17 +114,16 @@ for (i=0;i<n;i++){
 
    int val=(int) ((ly-2)*x);
    if (val>0) fl_line(ox+tmp,oy+ly-2-val,ox+tmp,oy+ly-2);
-};} {selected
-    }
+};} {}
   }
   decl {OscilGen *oscil;} {}
   decl {int oscbase;} {}
   decl {Master *master;} {}
 } 
 
-class ADOscilloscope {: {public Fl_Box}
+class Oscilloscope {: {public Fl_Box}
 } {
-  Function {ADOscilloscope(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
+  Function {Oscilloscope(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
     code {oscil=NULL;
 phase=64;
 oscbase=0;} {}
@@ -199,7 +198,7 @@ for (i=1;i<lx;i++){
   decl {Master *master;} {}
 } 
 
-class ADOscilharmonic {: {public Fl_Group}
+class Oscilharmonic {: {public Fl_Group}
 } {
   Function {make_window()} {private
   } {
@@ -258,7 +257,7 @@ oldosc->redraw();}
       }
     }
   }
-  Function {ADOscilharmonic(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
+  Function {Oscilharmonic(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {n=0;
 oscil=NULL;
 display=NULL;} {}
@@ -273,7 +272,7 @@ make_window();
 end();
 harmonic->show();} {}
   }
-  Function {~ADOscilharmonic()} {} {
+  Function {~Oscilharmonic()} {} {
     code {harmonic->hide();
 delete(harmonic);} {}
   }
@@ -284,7 +283,7 @@ delete(harmonic);} {}
   decl {Master *master;} {}
 } 
 
-class ADOscilEditor {} {
+class OscilEditor {} {
   Function {make_window()} {} {
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor}
@@ -295,7 +294,7 @@ class ADOscilEditor {} {
       } {
         Fl_Group {} {open
           xywh {20 85 350 190} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
-          code0 {ADOscilloscope *osc=new ADOscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
+          code0 {Oscilloscope *osc=new Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
           code1 {osc->init(oscil,master);}
         } {}
         Fl_Box {} {
@@ -312,7 +311,7 @@ oldosc->redraw();}
         }
         Fl_Group {} {open
           xywh {20 30 350 50} box THIN_DOWN_BOX color 32 selection_color 218 labelcolor 63
-          code0 {ADSpectrum *spc=new ADSpectrum(o->x(),o->y(),o->w(),o->h(),"");}
+          code0 {OscilSpectrum *spc=new OscilSpectrum(o->x(),o->y(),o->w(),o->h(),"");}
           code1 {spc->init(oscil,0,master);}
         } {}
         Fl_Group {} {
@@ -354,7 +353,7 @@ oldosc->redraw();}
       } {
         Fl_Group {} {
           xywh {380 85 350 190} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
-          code0 {ADOscilloscope *osc=new ADOscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
+          code0 {Oscilloscope *osc=new Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
           code1 {osc->init(oscil,1,master);}
         } {}
         Fl_Dial {} {
@@ -443,7 +442,7 @@ if ((oscil->Pcurrentbasefunc==0)||(oscil->Pcurrentbasefunc==127)) basefuncmodula
         }
         Fl_Group {} {open
           xywh {380 30 350 50} box THIN_DOWN_BOX color 32 selection_color 218 labelcolor 63
-          code0 {ADSpectrum *spc=new ADSpectrum (o->x(),o->y(),o->w(),o->h(),"");}
+          code0 {OscilSpectrum *spc=new OscilSpectrum (o->x(),o->y(),o->w(),o->h(),"");}
           code1 {spc->init(oscil,1,master);}
         } {}
         Fl_Value_Output bfparval {
@@ -776,7 +775,7 @@ oldosc->redraw();}
       } {
         Fl_Pack harmonics {open
           xywh {20 340 650 225} type HORIZONTAL
-          code0 {for (int i=0;i<MAX_AD_HARMONICS;i++){h[i]=new ADOscilharmonic(0,0,20,o->h(),"");h[i]->init(oscil,i,oscildisplaygroup,oldosc,master);}}
+          code0 {for (int i=0;i<MAX_AD_HARMONICS;i++){h[i]=new Oscilharmonic(0,0,20,o->h(),"");h[i]->init(oscil,i,oscildisplaygroup,oldosc,master);}}
         } {}
       }
       Fl_Choice {} {
@@ -901,20 +900,20 @@ oldosc->redraw();}
       }
     }
   }
-  Function {ADOscilEditor(OscilGen *oscil_,Fl_Widget *oldosc_,Master *master_)} {} {
+  Function {OscilEditor(OscilGen *oscil_,Fl_Widget *oldosc_,Master *master_)} {} {
     code {oscil=oscil_;
 oldosc=oldosc_;
 master=master_;
 make_window();
 osceditUI->show();} {}
   }
-  Function {~ADOscilEditor()} {} {
+  Function {~OscilEditor()} {} {
     code {osceditUI->hide();
 for (int i=0;i<MAX_AD_HARMONICS;i++) delete (h[i]);
 delete (osceditUI);} {}
   }
   decl {OscilGen *oscil;} {}
   decl {Fl_Widget *oldosc;} {}
-  decl {ADOscilharmonic *h[MAX_AD_HARMONICS];} {}
+  decl {Oscilharmonic *h[MAX_AD_HARMONICS];} {}
   decl {Master *master;} {}
 } 
