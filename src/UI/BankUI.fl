@@ -261,8 +261,7 @@ if ((what==1)&&(mode==2)){//save(write) to slot
 
 if ((what==1)&&(mode==1)&&(!bank->emptyslot(slot))){//Reads from slot
     pthread_mutex_lock(&master->mutex);
-    instrumentdefaultsbuf.changemode(0);
-     master->part[*npart]->saveloadbuf(&instrumentdefaultsbuf,1);
+     master->part[*npart]->defaultsinstrument();
      bank->loadfromslot(slot,&slbuf);
      slbuf.changemode(0);
      master->part[*npart]->saveloadbuf(&slbuf,1);

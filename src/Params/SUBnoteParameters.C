@@ -25,6 +25,22 @@
 #include <stdio.h>
 
 SUBnoteParameters::SUBnoteParameters(){
+    AmpEnvelope=new EnvelopeParams(64,1);
+    AmpEnvelope->ADSRinit_dB(0,40,127,25);
+    FreqEnvelope=new EnvelopeParams(64,0);
+    FreqEnvelope->ASRinit(30,50,64,60);
+    BandWidthEnvelope=new EnvelopeParams(64,0);
+    BandWidthEnvelope->ASRinit_bw(100,70,64,60);
+
+    GlobalFilter=new FilterParams(2,80,40);
+    GlobalFilterEnvelope=new EnvelopeParams(0,1);
+    GlobalFilterEnvelope->ADSRinit_filter(64,40,64,70,60,64);
+    
+    defaults();
+};
+
+
+void SUBnoteParameters::defaults(){
     PVolume=96;    
     PPanning=64;
     PAmpVelocityScaleFunction=90;
@@ -50,20 +66,19 @@ SUBnoteParameters::SUBnoteParameters(){
     };
     Phmag[0]=127;
 
-    AmpEnvelope=new EnvelopeParams(64,1);
-    AmpEnvelope->ADSRinit_dB(0,40,127,25);
-    FreqEnvelope=new EnvelopeParams(64,0);
-    FreqEnvelope->ASRinit(30,50,64,60);
-    BandWidthEnvelope=new EnvelopeParams(64,0);
-    BandWidthEnvelope->ASRinit_bw(100,70,64,60);
-
     PGlobalFilterEnabled=0;
-    GlobalFilter=new FilterParams(2,80,40);
     PGlobalFilterVelocityScale=64;
     PGlobalFilterVelocityScaleFunction=64;
-    GlobalFilterEnvelope=new EnvelopeParams(0,1);
-    GlobalFilterEnvelope->ADSRinit_filter(64,40,64,70,60,64);
+
+    AmpEnvelope->defaults();
+    FreqEnvelope->defaults();
+    BandWidthEnvelope->defaults();
+    GlobalFilter->defaults();
+    GlobalFilterEnvelope->defaults();
+
 };
+
+
 
 SUBnoteParameters::~SUBnoteParameters(){
     delete (AmpEnvelope);
@@ -260,7 +275,6 @@ void SUBnoteParameters::add2XML(XMLwrapper *xml){
 	};
     xml->endbranch();
 };
-
 
 
 

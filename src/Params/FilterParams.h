@@ -34,6 +34,7 @@ class FilterParams{
         void saveloadbuf(Buffer *buf);
 
 	void add2XML(XMLwrapper *xml);
+	void defaults();
 
 
 	REALTYPE getfreq();
@@ -81,6 +82,10 @@ class FilterParams{
 	REALTYPE getformantq(unsigned char q);
 	
     private:
+	//stored default parameters
+	unsigned char Dtype;
+	unsigned char Dfreq;
+	unsigned char Dq;
 };
 
 #endif

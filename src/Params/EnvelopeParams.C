@@ -43,6 +43,8 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,unsigned char Pforcedr
     Pforcedrelease=Pforcedrelease_;        
     Pfreemode=1;
     Plinearenvelope=0;
+    
+    store2defaults();
 };
 
 EnvelopeParams::~EnvelopeParams(){
@@ -63,6 +65,8 @@ void EnvelopeParams::ADSRinit(char A_dt,char D_dt,char S_val,char R_dt){
     PA_dt=A_dt;PD_dt=D_dt;PS_val=S_val;PR_dt=R_dt;
     Pfreemode=0;
     converttofree();
+
+    store2defaults();
 };
 
 void EnvelopeParams::ADSRinit_dB(char A_dt,char D_dt,char S_val,char R_dt){
@@ -70,6 +74,8 @@ void EnvelopeParams::ADSRinit_dB(char A_dt,char D_dt,char S_val,char R_dt){
     PA_dt=A_dt;PD_dt=D_dt;PS_val=S_val;PR_dt=R_dt;
     Pfreemode=0;
     converttofree();
+
+    store2defaults();
 };
 
 void EnvelopeParams::ASRinit(char A_val,char A_dt,char R_val,char R_dt){
@@ -78,6 +84,7 @@ void EnvelopeParams::ASRinit(char A_val,char A_dt,char R_val,char R_dt){
     Pfreemode=0;
     converttofree();
 
+    store2defaults();
 };
 
 void EnvelopeParams::ADSRinit_filter(char A_val,char A_dt,char D_val,char D_dt,char R_dt,char R_val){
@@ -85,6 +92,7 @@ void EnvelopeParams::ADSRinit_filter(char A_val,char A_dt,char D_val,char D_dt,c
     PA_val=A_val;PA_dt=A_dt;PD_val=D_val;PD_dt=D_dt;PR_dt=R_dt;PR_val=R_val;
     Pfreemode=0;
     converttofree();
+    store2defaults();
 };
 
 void EnvelopeParams::ASRinit_bw(char A_val,char A_dt,char R_val,char R_dt){
@@ -92,7 +100,7 @@ void EnvelopeParams::ASRinit_bw(char A_val,char A_dt,char R_val,char R_dt){
     PA_val=A_val;PA_dt=A_dt;PR_val=R_val;PR_dt=R_dt;
     Pfreemode=0;
     converttofree();
-
+    store2defaults();
 };
 
 /*
@@ -125,6 +133,8 @@ void EnvelopeParams::converttofree(){
 		break;
     };
 };
+
+
 
 
 /*
@@ -226,6 +236,36 @@ void EnvelopeParams::add2XML(XMLwrapper *xml){
 	    xml->endbranch();
 	};
     };
+};
+
+
+
+void EnvelopeParams::defaults(){
+    Penvstretch=Denvstretch;
+    Pforcedrelease=Dforcedrelease;
+    Plinearenvelope=Dlinearenvelope;
+    PA_dt=DA_dt;
+    PD_dt=DD_dt;
+    PR_dt=DR_dt;
+    PA_val=DA_val;
+    PD_val=DD_val;
+    PS_val=DS_val;
+    PR_val=DR_val;
+    Pfreemode=0;
+    converttofree();
+};
+
+void EnvelopeParams::store2defaults(){
+    Denvstretch=Penvstretch;
+    Dforcedrelease=Pforcedrelease;
+    Dlinearenvelope=Plinearenvelope;
+    DA_dt=PA_dt;
+    DD_dt=PD_dt;
+    DR_dt=PR_dt;
+    DA_val=PA_val;
+    DD_val=PD_val;
+    DS_val=PS_val;
+    DR_val=PR_val;
 };
 
 

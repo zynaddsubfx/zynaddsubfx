@@ -36,52 +36,27 @@ Part::Part(Microtonal *microtonal_,FFTwrapper *fft_, pthread_mutex_t *mutex_){
     tmpoutr=new REALTYPE [SOUND_BUFFER_SIZE];
     
     for (int n=0;n<NUM_KIT_ITEMS;n++){
-	kit[n].Penabled=0;kit[n].Pmuted=0;
-	kit[n].Pminkey=0;kit[n].Pmaxkey=127;
-	kit[n].Padenabled=0;kit[n].Psubenabled=0;
 	kit[n].Pname=new unsigned char [PART_MAX_NAME_LEN];
-	for (int i=0;i<PART_MAX_NAME_LEN;i++) kit[n].Pname[i]='\0';
-	kit[n].Psendtoparteffect=0;
 	kit[n].adpars=NULL;kit[n].subpars=NULL;
     };
-    kit[0].Penabled=1;
+
     kit[0].adpars=new ADnoteParameters(fft);
     kit[0].subpars=new SUBnoteParameters();
-    ADPartParameters=kit[0].adpars;
-    SUBPartParameters=kit[0].subpars;
+//    ADPartParameters=kit[0].adpars;
+//    SUBPartParameters=kit[0].subpars;
 
     //Part's Insertion Effects init
-    for (int nefx=0;nefx<NUM_PART_EFX;nefx++) {
+    for (int nefx=0;nefx<NUM_PART_EFX;nefx++) 
     	partefx[nefx]=new EffectMgr(1,mutex);
-	Pefxroute[nefx]=0;//route to next effect
-    };
 
     for (int n=0;n<NUM_PART_EFX+1;n++) {
 	partfxinputl[n]=new REALTYPE [SOUND_BUFFER_SIZE];
 	partfxinputr[n]=new REALTYPE [SOUND_BUFFER_SIZE];
     };
 
-    //parameters setup
-    Penabled=0;
-    Pminkey=0;
-    Pmaxkey=127;
-    Pnoteon=1;
-    Ppolymode=1;
-    setPvolume(96);
-    Pkeyshift=64;
-    Prcvchn=0;
-    setPpanning(64);
-    Pvelsns=64;
-    Pveloffs=64;
-    Pkeylimit=15;
-    Pkitmode=0;
-    Pdrummode=0;
     killallnotes=0;
     oldfreq=-1.0;
 
-    PADnoteenabled=1;
-    PSUBnoteenabled=0;
-    
     int i,j;
     for (i=0;i<POLIPHONY;i++){
       partnote[i].status=KEY_OFF;
@@ -94,16 +69,64 @@ Part::Part(Microtonal *microtonal_,FFTwrapper *fft_, pthread_mutex_t *mutex_){
       partnote[i].time=0;
     };
     cleanup();    
+
     Pname=new unsigned char [PART_MAX_NAME_LEN];
-    for (i=0;i<PART_MAX_NAME_LEN;i++) Pname[i]='\0';
+    
+    oldvolumel=oldvolumer=0.5;
+    lastnote=-1;disablekitloading=0;
+    
+    
+    defaults();
+};
+
+void Part::defaults(){
+    Penabled=0;
+    Pminkey=0;
+    Pmaxkey=127;
+    Pnoteon=1;
+    Ppolymode=1;
+    setPvolume(96);
+    Pkeyshift=64;
+    Prcvchn=0;
+    setPpanning(64);
+    Pvelsns=64;
+    Pveloffs=64;
+    Pkeylimit=15;
+    defaultsinstrument();
+};
+
+void Part::defaultsinstrument(){
+    memset(Pname,0,PART_MAX_NAME_LEN);
 
     info.Ptype=0;
     memset(info.Pauthor,0,MAX_INFO_TEXT_SIZE+1);
     memset(info.Pcomments,0,MAX_INFO_TEXT_SIZE+1);
+
+    PADnoteenabled=1;
+    PSUBnoteenabled=0;
     
-    oldvolumel=oldvolumer=0.5;
-    lastnote=-1;disablekitloading=0;
+    Pkitmode=0;
+    Pdrummode=0;
+
+    for (int n=0;n<NUM_KIT_ITEMS;n++){
+	kit[n].Penabled=0;kit[n].Pmuted=0;
+	kit[n].Pminkey=0;kit[n].Pmaxkey=127;
+	kit[n].Padenabled=0;kit[n].Psubenabled=0;
+	memset(kit[n].Pname,0,PART_MAX_NAME_LEN);
+	kit[n].Psendtoparteffect=0;
+	setkititemstatus(n,0);
+    };
+    kit[0].Penabled=1;
+    kit[0].Padenabled=1;
+    setkititemstatus(0,1);
+
+    for (int nefx=0;nefx<NUM_PART_EFX;nefx++) {
+    	partefx[nefx]->defaults();
+	Pefxroute[nefx]=0;//route to next effect
+    };
+
 };
+
 
 
 /*
@@ -212,8 +235,8 @@ void Part::NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift){
 	    partnote[pos].itemsplaying=0;
 	    if (Pkitmode==0){//init the notes for the "normal mode"
 		partnote[pos].kititem[0].sendtoparteffect=0;
-        	if (PADnoteenabled!=0) partnote[pos].kititem[0].adnote=new ADnote(ADPartParameters,&ctl,notebasefreq,vel,portamento,note);
-        	if (PSUBnoteenabled!=0) partnote[pos].kititem[0].subnote=new SUBnote(SUBPartParameters,&ctl,notebasefreq,vel,portamento,note);
+        	if (PADnoteenabled!=0) partnote[pos].kititem[0].adnote=new ADnote(kit[0].adpars,&ctl,notebasefreq,vel,portamento,note);
+        	if (PSUBnoteenabled!=0) partnote[pos].kititem[0].subnote=new SUBnote(kit[0].subpars,&ctl,notebasefreq,vel,portamento,note);
 		if ((PADnoteenabled!=0)||(PSUBnoteenabled!=0)) partnote[pos].itemsplaying++;
 	    } else {//init the notes for the "kit mode"
 		for (int item=0;item<NUM_KIT_ITEMS;item++){
@@ -304,10 +327,10 @@ void Part::SetController(unsigned int type,int par){
 			  setPvolume(Pvolume);//update the volume
 			  setPpanning(Ppanning);//update the panning
 			  
-			  ADPartParameters->GlobalPar.Reson->
+			  kit[0].adpars->GlobalPar.Reson->
 			    sendcontroller(C_resonance_center,1.0);
 			    
-			  ADPartParameters->GlobalPar.Reson->
+			  kit[0].adpars->GlobalPar.Reson->
 			    sendcontroller(C_resonance_bandwidth,1.0);
 			  //more update to add here if I add controllers
 			  break;
@@ -315,12 +338,12 @@ void Part::SetController(unsigned int type,int par){
 			  break;
 	case C_resonance_center:
 			ctl.setresonancecenter(par);
-			ADPartParameters->GlobalPar.Reson->
+			kit[0].adpars->GlobalPar.Reson->
 			    sendcontroller(C_resonance_center,ctl.resonancecenter.relcenter);
 			  break;
 	case C_resonance_bandwidth:
 			ctl.setresonancebw(par);
-			ADPartParameters->GlobalPar.Reson->
+			kit[0].adpars->GlobalPar.Reson->
 			    sendcontroller(C_resonance_bandwidth,ctl.resonancebandwidth.relbw);
 			  break;
     };
@@ -640,7 +663,7 @@ void Part::saveloadbufkititem(Buffer *buf,unsigned char item,int saveitem0){
 			break;
             case 0xA0:	if (buf->getmode()!=0){//saving
 			    if ((buf->getminimal()!=0)&&(kit[item].Padenabled==0)) break;
-			    if ((item==0)&&(saveitem0==0)) break;//the first item parameters are already saved (as ADPartParameters)
+			    if ((item==0)&&(saveitem0==0)) break;//the first item parameters are already saved (as kit[0].adpars)
 			    if (kit[item].adpars==NULL) break;
 			    buf->rwbyte(&npar);
 			};
@@ -648,7 +671,7 @@ void Part::saveloadbufkititem(Buffer *buf,unsigned char item,int saveitem0){
 			break;
             case 0xA1:	if (buf->getmode()!=0){//saving
 			    if ((buf->getminimal()!=0)&&(kit[item].Psubenabled==0)) break;
-			    if ((item==0)&&(saveitem0==0)) break;//the first item parameters are already saved (as SUBPartParameters)
+			    if ((item==0)&&(saveitem0==0)) break;//the first item parameters are already saved (as kit[0].subpars)
 			    if (kit[item].subpars==NULL) break;
 			    buf->rwbyte(&npar);
 			};
@@ -815,12 +838,12 @@ void Part::saveloadbuf(Buffer *buf,int instrumentonly){
 	    case 0xC0:	if ((buf->getminimal()!=0) && (buf->getmode()!=0) 
 			    && (PADnoteenabled==0)) break;
 			if (buf->getmode()!=0) buf->rwbyte(&npar);
-			ADPartParameters->saveloadbuf(buf);
+			kit[0].adpars->saveloadbuf(buf);
 			break;
 	    case 0xC1:	if ((buf->getminimal()!=0) && (buf->getmode()!=0) 
 			    && (PSUBnoteenabled==0)) break;
 			if (buf->getmode()!=0) buf->rwbyte(&npar);
-			SUBPartParameters->saveloadbuf(buf);
+			kit[0].adpars->saveloadbuf(buf);
 			break;
 	    case 0xD0:  if (buf->getmode()!=0) {
 			    if (instrumentonly!=2){

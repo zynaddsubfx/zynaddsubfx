@@ -36,6 +36,8 @@ class LFOParams{
       
       void add2XML(XMLwrapper *xml);
       
+      void defaults();//reset parameters to the default parameters
+      
     /* Parametrii MIDI */
       unsigned char Pfreq;      // frequency
       unsigned char Pintensity; // intensity
@@ -46,10 +48,18 @@ class LFOParams{
       unsigned char Pdelay;     // delay (0=off)
       unsigned char Pcontinous; // 1 if LFO is continous
 
-
       int fel;//what kind is the LFO (0 - frequency, 1 - amplitude, 2 - filter)
       static int time;//is used by Pcontinous parameter
     private:
+      /* Default parameters */
+      unsigned char Dfreq;      
+      unsigned char Dintensity; 
+      unsigned char Dstartphase;
+      unsigned char DLFOtype;   
+      unsigned char Drandomness;
+      unsigned char Ddelay;     
+      unsigned char Dcontinous;       
+
 };
 
 

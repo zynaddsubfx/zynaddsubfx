@@ -28,19 +28,31 @@
 int LFOParams::time;
 
 LFOParams::LFOParams(char Pfreq_,char Pintensity_,char Pstartphase_, char PLFOtype_,char Prandomness_, char Pdelay_,char Pcontinous_,char fel_){
-    Pfreq=Pfreq_;
-    Pintensity=Pintensity_;
-    Pstartphase=Pstartphase_;
-    PLFOtype=PLFOtype_;
-    Prandomness=Prandomness_;
-    Pdelay=Pdelay_;
-    Pcontinous=Pcontinous_;
-    Pfreqrand=0;
+    Dfreq=Pfreq_;
+    Dintensity=Pintensity_;
+    Dstartphase=Pstartphase_;
+    DLFOtype=PLFOtype_;
+    Drandomness=Prandomness_;
+    Ddelay=Pdelay_;
+    Dcontinous=Pcontinous_;
     fel=fel_;
     time=0;
+    
+    defaults();
 };
 
 LFOParams::~LFOParams(){
+};
+
+void LFOParams::defaults(){
+    Pfreq=Dfreq;
+    Pintensity=Dintensity;
+    Pstartphase=Dstartphase;
+    PLFOtype=DLFOtype;
+    Prandomness=Drandomness;
+    Pdelay=Ddelay;
+    Pcontinous=Dcontinous;
+    Pfreqrand=0;
 };
 
 /*

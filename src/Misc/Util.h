@@ -37,12 +37,6 @@ extern REALTYPE VelF(REALTYPE velocity,unsigned char scaling);
 //Buffer used for Save/Load
 extern Buffer slbuf; 
 
-//this is used to store all parameters at start of program and reload when I need to clear all data (eg. before loading master parameters)
-extern Buffer masterdefaultsbuf;
-
-//this is used to store the default instrument settings (necessary when the instrument is cleared)
-extern Buffer instrumentdefaultsbuf;
-
 //the buffer used as clipboard
 extern Buffer clipboardbuf;
 

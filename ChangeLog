@@ -525,5 +525,5 @@
 05 Feb 2004 - Se salveaza toti parametrii in XML
 06 Feb 2004 - Adaugat salvarea de instrument in XML
 	    - Adaugat export la bank intr-un director XML si decis ca bank-ul sa fie un director cu mai multe fisiere xml de forma XXXX-nume.xml sau XXXX-nume.xml.gz
-	    
+07 Feb 2004 - adaugat functii de initializare si renuntat la masterdefaultbuf si instrumentdefaultbuf (adica salvarea la inceput si incarcarea bufferelor cu instrumentele prestabilite)
 

@@ -63,14 +63,18 @@ class Part{
 
       void add2XML(XMLwrapper *xml);
       void add2XMLinstrument(XMLwrapper *xml);
+      
+      void defaults();
+      void defaultsinstrument();
+      
 
       void saveloadbufkititem(Buffer *buf,unsigned char item,int saveitem0);
       void swapcopyitem(int item1,int item2,int mode);
     
       void cleanup();
 
-      ADnoteParameters *ADPartParameters;
-      SUBnoteParameters *SUBPartParameters;
+//      ADnoteParameters *ADPartParameters;
+//      SUBnoteParameters *SUBPartParameters;
 
       //the part's kit
       struct {

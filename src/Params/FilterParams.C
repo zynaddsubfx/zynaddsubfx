@@ -26,9 +26,22 @@
 #include "FilterParams.h"
 
 FilterParams::FilterParams(unsigned char Ptype_,unsigned char Pfreq_,unsigned  char Pq_){
-    Ptype=Ptype_;
-    Pfreq=Pfreq_;
-    Pq=Pq_;
+    Dtype=Ptype_;
+    Dfreq=Pfreq_;
+    Dq=Pq_;
+
+    defaults();    
+};
+
+FilterParams::~FilterParams(){
+};
+
+
+void FilterParams::defaults(){
+    Ptype=Dtype;
+    Pfreq=Dfreq;
+    Pq=Dq;
+
     Pstages=0;
     Pfreqtrack=64;
     Pgain=64;
@@ -45,8 +58,7 @@ FilterParams::FilterParams(unsigned char Ptype_,unsigned char Pfreq_,unsigned  c
     };
     
     Psequencesize=3;
-    for (int i=0;i<FF_MAX_SEQUENCE;i++) 
-	Psequence[i].nvowel=i%FF_MAX_VOWELS;
+    for (int i=0;i<FF_MAX_SEQUENCE;i++) Psequence[i].nvowel=i%FF_MAX_VOWELS;
 
     Psequencestretch=40;
     Psequencereversed=0;
@@ -54,10 +66,6 @@ FilterParams::FilterParams(unsigned char Ptype_,unsigned char Pfreq_,unsigned  c
     Poctavesfreq=64;
     Pvowelclearness=64;
 };
-
-FilterParams::~FilterParams(){
-};
-
 
 /*
  * Parameter control

@@ -27,6 +27,14 @@
 #include <stdio.h>
 
 Resonance::Resonance(){
+    defaults();
+};
+
+Resonance::~Resonance(){
+};
+
+
+void Resonance::defaults(){
     Penabled=0;
     PmaxdB=20;
     Pcenterfreq=64;//1 kHz
@@ -37,10 +45,6 @@ Resonance::Resonance(){
     ctlbw=1.0;
     for (int i=0;i<N_RES_POINTS;i++) Prespoints[i]=64;
 };
-
-Resonance::~Resonance(){
-};
-
 
 /*
  * Set a point of resonance function with a value

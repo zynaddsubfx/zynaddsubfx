@@ -52,7 +52,7 @@ class OscilGen{
         void saveloadbuf(Buffer *buf);
 
     	void add2XML(XMLwrapper *xml);
-
+	void defaults();
 
 	//Parameters
 			

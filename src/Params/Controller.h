@@ -36,6 +36,7 @@ class Controller{
 	void saveloadbuf(Buffer *buf);
 
         void add2XML(XMLwrapper *xml);
+	void defaults();
 
     //Controllers functions
 	void setpitchwheel(int value);

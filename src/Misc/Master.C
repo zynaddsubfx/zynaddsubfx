@@ -28,7 +28,6 @@
 #include <sys/types.h>
 
 Master::Master(){
-    int npart,nefx;
     swaplr=0;
     
     pthread_mutex_init(&mutex,NULL);
@@ -43,7 +42,6 @@ Master::Master(){
     ksoundbuffersamplelow=0.0;
     oldsamplel=0.0;oldsampler=0.0;
     shutup=0;
-    vuresetpeaks();
     for (int npart=0;npart<NUM_MIDI_PARTS;npart++) {
 	vuoutpeakpart[npart]=1e-9;
 	fakepeakpart[npart]=0;
@@ -54,26 +52,45 @@ Master::Master(){
 	audiooutr[i]=0.0;
     };
 
-    for (npart=0;npart<NUM_MIDI_PARTS;npart++){
+    for (int npart=0;npart<NUM_MIDI_PARTS;npart++)
 	part[npart]=new Part(&microtonal,fft,&mutex);
-	part[npart]->Prcvchn=npart%NUM_MIDI_CHANNELS;
-    };
-    partonoff(0,1);//enable the first part
+    
 
+
+    //Insertion Effects init        
+    for (int nefx=0;nefx<NUM_INS_EFX;nefx++)
+    	insefx[nefx]=new EffectMgr(1,&mutex);
+
+    //System Effects init        
+    for (int nefx=0;nefx<NUM_SYS_EFX;nefx++) {
+	sysefx[nefx]=new EffectMgr(0,&mutex);
+    };
+
+    
+    defaults();
+};
+
+void Master::defaults(){
     volume=1.0;
     setPvolume(80);
     setPkeyshift(64);
-
-    //Insertion Effects init        
-    for (nefx=0;nefx<NUM_INS_EFX;nefx++) {
-    	insefx[nefx]=new EffectMgr(1,&mutex);
-	Pinsparts[nefx]=-1;
+    
+    for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
+	part[npart]->defaults();
+	part[npart]->Prcvchn=npart%NUM_MIDI_CHANNELS;
     };
 
+    partonoff(0,1);//enable the first part
+
+    for (int nefx=0;nefx<NUM_INS_EFX;nefx++) {
+    	insefx[nefx]->defaults();
+	Pinsparts[nefx]=-1;
+    };
+    
     //System Effects init        
-    for (nefx=0;nefx<NUM_SYS_EFX;nefx++) {
-	sysefx[nefx]=new EffectMgr(0,&mutex);
-	for (npart=0;npart<NUM_MIDI_PARTS;npart++){
+    for (int nefx=0;nefx<NUM_SYS_EFX;nefx++) {
+	sysefx[nefx]->defaults();
+	for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
 	    if (nefx==0) setPsysefxvol(npart,nefx,64);
 	    else setPsysefxvol(npart,nefx,0);
 	};
@@ -82,19 +99,6 @@ Master::Master(){
     };
 
     sysefx[0]->changeeffect(1);
-    
-
-    //save all parameters to "masterdefaults" Buffer (I need later when I clear all parameters)
-    //this has to be after the master initialisation
-    masterdefaultsbuf.resetbuffer();
-    masterdefaultsbuf.changeminimal(0);//save all parameters, even disabled
-    masterdefaultsbuf.changemode(1);
-    this->saveloadbuf(&masterdefaultsbuf);
-    //save all instrument patameters
-    instrumentdefaultsbuf.resetbuffer();
-    instrumentdefaultsbuf.changeminimal(0);
-    instrumentdefaultsbuf.changemode(1);
-    part[0]->saveloadbuf(&instrumentdefaultsbuf,1);
 };
 
 /*
@@ -698,8 +702,7 @@ void Master::exportbankasxmldirectory(const char *directory){
     
     mkdir(directory,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     for (int slot=0;slot<128;slot++){
-	instrumentdefaultsbuf.changemode(0);
-	tmppart->saveloadbuf(&instrumentdefaultsbuf,1);
+	tmppart->defaults();
 	bank.loadfromslot(slot,&slbuf);
 	slbuf.changemode(0);
 	tmppart->saveloadbuf(&slbuf,1);

@@ -36,7 +36,7 @@ class Microtonal{
     public:
 	Microtonal();
 	~Microtonal();
-	void reset();
+	void defaults();
 	REALTYPE getnotefreq(int note,int keyshift);
 
 	

@@ -29,14 +29,27 @@
 #include "../Misc/Util.h"
 
 OscilGen::OscilGen(FFTwrapper *fft_,Resonance *res_){
-    int i;
-
     fft=fft_;
-    oscilFFTfreqs=new REALTYPE[OSCIL_SIZE];
-    
     res=res_;
+    oscilFFTfreqs=new REALTYPE[OSCIL_SIZE];
+
+    basefuncFFTfreqsQ=NULL;
+    basefuncFFTfreqs=NULL;
+    outoscilFFTfreqs=NULL;
+
+    defaults();
+};
+
+OscilGen::~OscilGen(){
+    if (basefuncFFTfreqs!=NULL) delete [] basefuncFFTfreqs;
+    if (basefuncFFTfreqsQ!=NULL) delete [] basefuncFFTfreqsQ;
+    delete [] oscilFFTfreqs;
+};
+
+
+void OscilGen::defaults(){
     oldbasefunc=0;oldbasepar=64;oldhmagtype=0;oldwaveshapingfunction=0;oldwaveshaping=64,oldnormalizemethod=0;
-    for (i=0;i<MAX_AD_HARMONICS;i++){
+    for (int i=0;i<MAX_AD_HARMONICS;i++){
 	hmag[i]=0.0;
 	hphase[i]=0.0;
 	Phmag[i]=64;
@@ -60,19 +73,19 @@ OscilGen::OscilGen(FFTwrapper *fft_,Resonance *res_){
     Pamprandpower=64;
     Pamprandtype=0;
     
-    basefuncFFTfreqsQ=NULL;
-    basefuncFFTfreqs=NULL;
-    outoscilFFTfreqs=NULL;
+    if (basefuncFFTfreqsQ!=NULL) {
+	delete(basefuncFFTfreqsQ);
+	basefuncFFTfreqsQ=NULL;
+    };
+    if (basefuncFFTfreqs!=NULL){
+	delete(basefuncFFTfreqs);
+	basefuncFFTfreqs=NULL;
+    };
     
-    for (i=0;i<OSCIL_SIZE;i++) oscilFFTfreqs[i]=0.0;
+    for (int i=0;i<OSCIL_SIZE;i++) oscilFFTfreqs[i]=0.0;
     oscilprepared=0;
     oldfilterpars=0;oldsapars=0;
-};
-
-OscilGen::~OscilGen(){
-    if (basefuncFFTfreqs!=NULL) delete [] basefuncFFTfreqs;
-    if (basefuncFFTfreqsQ!=NULL) delete [] basefuncFFTfreqsQ;
-    delete [] oscilFFTfreqs;
+    prepare();
 };
 
 /* 

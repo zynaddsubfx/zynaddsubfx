@@ -51,6 +51,8 @@ class Master{
 	
 	//this adds the parameters to the XML data
 	void add2XML(XMLwrapper *xml);
+	void defaults();
+	
 
 	//Midi IN
 	void NoteOn(unsigned char chan,unsigned char note,unsigned char velocity);

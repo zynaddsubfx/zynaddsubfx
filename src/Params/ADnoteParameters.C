@@ -27,25 +27,43 @@
 #include "ADnoteParameters.h"
 
 ADnoteParameters::ADnoteParameters(FFTwrapper *fft_){
-    int nvoice;
     fft=fft_;
+
+    GlobalPar.FreqEnvelope=new EnvelopeParams(0,0);
+    GlobalPar.FreqEnvelope->ASRinit(64,50,64,60);
+    GlobalPar.FreqLfo=new LFOParams(70,0,64,0,0,0,0,0);
+    
+    GlobalPar.AmpEnvelope=new EnvelopeParams(64,1);
+    GlobalPar.AmpEnvelope->ADSRinit_dB(0,40,127,25);
+    GlobalPar.AmpLfo=new LFOParams(80,0,64,0,0,0,0,1);
+
+    GlobalPar.GlobalFilter=new FilterParams(2,94,40);
+    GlobalPar.FilterEnvelope=new EnvelopeParams(0,1);
+    GlobalPar.FilterEnvelope->ADSRinit_filter(64,40,64,70,60,64);
+    GlobalPar.FilterLfo=new LFOParams(80,0,64,0,0,0,0,2);
+    GlobalPar.Reson=new Resonance();
+
+    for (int nvoice=0;nvoice<NUM_VOICES;nvoice++) EnableVoice(nvoice);
+    
+    defaults();
+};
+
+void ADnoteParameters::defaults(){
     //Default Parameters
     /* Frequency Global Parameters */
     GlobalPar.PStereo=1;//stereo
     GlobalPar.PDetune=8192;//zero
     GlobalPar.PCoarseDetune=0;
     GlobalPar.PDetuneType=1;
-    GlobalPar.FreqEnvelope=new EnvelopeParams(0,0);
-    GlobalPar.FreqEnvelope->ASRinit(64,50,64,60);
-    GlobalPar.FreqLfo=new LFOParams(70,0,64,0,0,0,0,0);
+    GlobalPar.FreqEnvelope->defaults();
+    GlobalPar.FreqLfo->defaults();
     
     /* Amplitude Global Parameters */
     GlobalPar.PVolume=90;
     GlobalPar.PPanning=64;//center
     GlobalPar.PAmpVelocityScaleFunction=64;
-    GlobalPar.AmpEnvelope=new EnvelopeParams(64,1);
-    GlobalPar.AmpEnvelope->ADSRinit_dB(0,40,127,25);
-    GlobalPar.AmpLfo=new LFOParams(80,0,64,0,0,0,0,1);
+    GlobalPar.AmpEnvelope->defaults();
+    GlobalPar.AmpLfo->defaults();
     GlobalPar.PPunchStrength=0;
     GlobalPar.PPunchTime=60;
     GlobalPar.PPunchStretch=64;
@@ -54,13 +72,12 @@ ADnoteParameters::ADnoteParameters(FFTwrapper *fft_){
     /* Filter Global Parameters*/
     GlobalPar.PFilterVelocityScale=64;
     GlobalPar.PFilterVelocityScaleFunction=64;
-    GlobalPar.GlobalFilter=new FilterParams(2,94,40);
-    GlobalPar.FilterEnvelope=new EnvelopeParams(0,1);
-    GlobalPar.FilterEnvelope->ADSRinit_filter(64,40,64,70,60,64);
-    GlobalPar.FilterLfo=new LFOParams(80,0,64,0,0,0,0,2);
-    GlobalPar.Reson=new Resonance();
+    GlobalPar.GlobalFilter->defaults();
+    GlobalPar.FilterEnvelope->defaults();
+    GlobalPar.FilterLfo->defaults();
+    GlobalPar.Reson->defaults();
 
-    for (nvoice=0;nvoice<NUM_VOICES;nvoice++){
+    for (int nvoice=0;nvoice<NUM_VOICES;nvoice++){
 	VoicePar[nvoice].Enabled=0;
 	VoicePar[nvoice].Type=0;
 	VoicePar[nvoice].Pfixedfreq=0;
@@ -88,7 +105,7 @@ ADnoteParameters::ADnoteParameters(FFTwrapper *fft_){
 	VoicePar[nvoice].PFilterLfoEnabled=0;
 	VoicePar[nvoice].PFMEnabled=0;
 
-	//I use the internal oscillator intern (-1)
+	//I use the internal oscillator (-1)
 	VoicePar[nvoice].PFMVoice=-1;
 
 	VoicePar[nvoice].PFMVolume=90;
@@ -99,11 +116,26 @@ ADnoteParameters::ADnoteParameters(FFTwrapper *fft_){
 	VoicePar[nvoice].PFMFreqEnvelopeEnabled=0;
 	VoicePar[nvoice].PFMAmpEnvelopeEnabled=0;
 	VoicePar[nvoice].PFMVelocityScaleFunction=64;	
-	
-	EnableVoice(nvoice);
+
+	VoicePar[nvoice].OscilSmp->defaults();
+	VoicePar[nvoice].FMSmp->defaults();
+
+	VoicePar[nvoice].AmpEnvelope->defaults();
+	VoicePar[nvoice].AmpLfo->defaults();
+
+	VoicePar[nvoice].FreqEnvelope->defaults();
+	VoicePar[nvoice].FreqLfo->defaults();
+
+	VoicePar[nvoice].VoiceFilter->defaults();
+	VoicePar[nvoice].FilterEnvelope->defaults();
+	VoicePar[nvoice].FilterLfo->defaults();
+
+	VoicePar[nvoice].FMFreqEnvelope->defaults();
+	VoicePar[nvoice].FMAmpEnvelope->defaults();
     };
     VoicePar[0].Enabled=1;
 };
+
 
 /*
  * Init the voice parameters
@@ -111,8 +143,6 @@ ADnoteParameters::ADnoteParameters(FFTwrapper *fft_){
 void ADnoteParameters::EnableVoice(int nvoice){
     VoicePar[nvoice].OscilSmp=new OscilGen(fft,GlobalPar.Reson);
     VoicePar[nvoice].FMSmp=new OscilGen(fft,NULL);
-    VoicePar[nvoice].OscilSmp->prepare();
-    VoicePar[nvoice].FMSmp->prepare();
 
     VoicePar[nvoice].AmpEnvelope=new EnvelopeParams(64,1);
     VoicePar[nvoice].AmpEnvelope->ADSRinit_dB(0,100,127,100);	

@@ -41,9 +41,11 @@ class EffectMgr{
     public:
 	EffectMgr(int insertion_,pthread_mutex_t *mutex_);
 	~EffectMgr();
-	void saveloadbuf(Buffer *buf);
-	void add2XML(XMLwrapper *xml);
 
+	void saveloadbuf(Buffer *buf);
+
+	void add2XML(XMLwrapper *xml);
+	void defaults();
 
 	void out(REALTYPE *smpsl,REALTYPE *smpsr);
 

@@ -35,12 +35,19 @@ EffectMgr::EffectMgr(int insertion_,pthread_mutex_t *mutex_){
 	efxoutl[i]=0.0;
 	efxoutr[i]=0.0;
     };
+    
+    defaults();
 };
+
 
 EffectMgr::~EffectMgr(){
     if (efx!=NULL) delete (efx);
     delete (efxoutl);
     delete (efxoutr);
+};
+
+void EffectMgr::defaults(){
+    changeeffect(0);
 };
 
 /*

@@ -404,9 +404,7 @@ updatepanel();}
        delete microtonalui;
 
        pthread_mutex_lock(&master->mutex);
-        masterdefaultsbuf.changemode(0);
-        master->saveloadbuf(&masterdefaultsbuf);
-        master->microtonal.reset();
+	master->defaults();
        pthread_mutex_unlock(&master->mutex);
 
        npartcounter->do_callback();
@@ -436,12 +434,13 @@ if (result==0) {
        pthread_mutex_lock(&master->mutex);
 
        //clear all parameters, first
-       masterdefaultsbuf.changemode(0);
-       master->saveloadbuf(&masterdefaultsbuf);
-       master->part[0]->Penabled=0;
+
+       master->defaults();
+
        //load the data
        master->saveloadbuf(&slbuf);
        pthread_mutex_unlock(&master->mutex);
+
        npartcounter->do_callback();
        syseffnocounter->do_callback();
        inseffnocounter->do_callback();
@@ -495,7 +494,7 @@ if (result==0) {
 
        slbuf.changemode(0);
        pthread_mutex_lock(&master->mutex);
-       master->microtonal.reset();
+       master->microtonal.defaults();
        master->microtonal.saveloadbuf(&slbuf);
        pthread_mutex_unlock(&master->mutex);         
 
@@ -565,7 +564,7 @@ pthread_mutex_lock(&master->mutex);
 master->part[npart]->saveXML(filename);
 pthread_mutex_unlock(&master->mutex);
 
-updatepanel();} selected
+updatepanel();}
             xywh {20 20 100 20} divider
           }
           menuitem {} {
@@ -573,9 +572,7 @@ updatepanel();} selected
             callback {if (fl_ask("Clear instrument's parameters ?")){
        int npart=(int)npartcounter->value();
        pthread_mutex_lock(&master->mutex);
-       instrumentdefaultsbuf.changemode(0);
-       master->part[npart]->disablekitloading=0;
-       master->part[npart]->saveloadbuf(&instrumentdefaultsbuf,1);
+       master->part[npart]->defaultsinstrument();
        pthread_mutex_unlock(&master->mutex);
 
        npartcounter->do_callback();
@@ -596,8 +593,8 @@ if (result==0) {
        int npart=(int)npartcounter->value();
 
        //clear all instrument parameters, first
-       instrumentdefaultsbuf.changemode(0);
-       master->part[npart]->saveloadbuf(&instrumentdefaultsbuf,1);
+         master->part[npart]->defaultsinstrument();
+
        //load the instr. parameters
        master->part[npart]->saveloadbuf(&slbuf,1);
        pthread_mutex_unlock(&master->mutex);
@@ -607,7 +604,7 @@ if (result==0) {
            else fl_alert("Error: Could not load the file.");   
      };
 
-updatepanel();}
+updatepanel();} selected
             xywh {20 20 100 20}
           }
           menuitem {} {

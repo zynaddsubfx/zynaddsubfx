@@ -43,7 +43,7 @@ class EnvelopeParams{
         void saveloadbuf(Buffer *buf);
 
 	void add2XML(XMLwrapper *xml);
-
+	void defaults();
 
 	REALTYPE getdt(char i);
 
@@ -60,6 +60,8 @@ class EnvelopeParams{
 	unsigned char PA_dt,PD_dt,PR_dt,
 	     PA_val,PD_val,PS_val,PR_val;
 
+
+
 	int Envmode;// 1 for ADSR parameters (linear amplitude)
 		    // 2 for ADSR_dB parameters (dB amplitude)
 		    // 3 for ASR parameters (frequency LFO)
@@ -67,6 +69,16 @@ class EnvelopeParams{
 		    // 5 for ASR_bw parameters (bandwidth parameters)
 
     private:
+	void store2defaults();
+
+	/* Default parameters */
+	unsigned char Denvstretch;
+	unsigned char Dforcedrelease;
+	unsigned char Dlinearenvelope;
+	unsigned char DA_dt,DD_dt,DR_dt,
+	     DA_val,DD_val,DS_val,DR_val;
+
+
 };
 
 

@@ -25,6 +25,14 @@
 #include <stdio.h>
 
 Controller::Controller(){
+    defaults();
+    resetall();
+};
+
+Controller::~Controller(){
+};
+
+void Controller::defaults(){
     setpitchwheelbendrange(200);//2 halftones
     expression.receive=1;
     panning.depth=64;
@@ -52,10 +60,6 @@ Controller::Controller(){
     initportamento(440.0,440.0);
     setportamento(0);
 
-    resetall();
-};
-
-Controller::~Controller(){
 };
 
 void Controller::resetall(){

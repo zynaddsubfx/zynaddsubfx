@@ -35,7 +35,9 @@ class SUBnoteParameters{
 	~SUBnoteParameters();
 
 	void saveloadbuf(Buffer *buf);
+
 	void add2XML(XMLwrapper *xml);
+	void defaults();
 	
 	//Parameters
 	//AMPLITUDE PARAMETRERS

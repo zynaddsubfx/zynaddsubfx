@@ -29,10 +29,10 @@
 Microtonal::Microtonal(){
     Pname=new unsigned char[MICROTONAL_MAX_NAME_LEN];
     Pcomment=new unsigned char[MICROTONAL_MAX_NAME_LEN];
-    reset();
+    defaults();
 };
 
-void Microtonal::reset(){
+void Microtonal::defaults(){
     Pinvertupdown=0;
     Pinvertupdowncenter=60;
     octavesize=12;
