@@ -127,7 +127,9 @@ void Bank::setname(unsigned int ninstrument,const char *newname,int newslot){
 //    printf("rename %s -> %s\n",ins[ninstrument].filename,newfilename);//////////////
 
     rename(ins[ninstrument].filename,newfilename);
-    snprintf(ins[ninstrument].filename,1000,"%s",newfilename);
+    if (ins[ninstrument].filename) delete(ins[ninstrument].filename);
+    ins[ninstrument].filename=new char[strlen(newfilename)+5];
+    snprintf(ins[ninstrument].filename,strlen(newfilename)+1,"%s",newfilename);
     snprintf(ins[ninstrument].name,PART_MAX_NAME_LEN,"%s",&tmpfilename[5]);
     
 };
@@ -521,7 +523,8 @@ int Bank::addtobank(int pos, const char *filename, const char* name){
     snprintf(tmpinsname[pos],PART_MAX_NAME_LEN+10," ");
 
     int len=strlen(filename)+1+strlen(dirname);
-    ins[pos].filename=new char[len+1];
+    ins[pos].filename=new char[len+2];
+    ins[pos].filename[len+1]=0;
     snprintf(ins[pos].filename,len+1,"%s/%s",dirname,filename);
 
     //see if PADsynth is used

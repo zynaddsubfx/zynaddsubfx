@@ -762,6 +762,7 @@
 	    - Modificate cateva preseturi la DynamicFilter
 	    - Adaugata posibilitatea de a mari sau micsora cu un parametru detune-ul vocilor de la ADnote	    
 17 Feb 2005 - Corectate cateva erori la PADsynth care faceau ca sa se citeasca date din zone de memorie nealocata
+	    - Corectata o eroare la Bank care facea ca uneori sa crape programul cand umblam mult cu bankuri
 
 
     

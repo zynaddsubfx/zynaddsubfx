@@ -308,9 +308,6 @@ void exitprogram(){
     delete(OscilGen::tmpsmps);
     deleteFFTFREQS(&OscilGen::outoscilFFTfreqs);
 
-
-
-
 };
 
 #ifdef OS_WINDOWS
