@@ -22,6 +22,7 @@
 
 #include "../Misc/XMLwrapper.h"
 #define MAX_PRESETTYPE_SIZE 30
+#define MAX_PRESETS 1000
 
 class PresetsStore{
     public:
@@ -31,11 +32,20 @@ class PresetsStore{
 	bool pasteclipboard(XMLwrapper *xml);
 	bool checkclipboardtype(char *type);
 	
+	struct presetstruct{
+	    char *file;
+	    char *name;
+	};
+	presetstruct presets[MAX_PRESETS];
+	
     private:
 	struct {
 	    char *data;
 	    char type[MAX_PRESETTYPE_SIZE];
 	} clipboard;
+	
+	void clearpresets();
+	void rescanforpresets(char *type);
 	
 };
 

@@ -28,12 +28,21 @@ PresetsStore presetsstore;
 
 PresetsStore::PresetsStore(){
     clipboard.data=NULL;
-    clipboard.type[0]=0;;
+    clipboard.type[0]=0;
+    
+    for (int i=0;i<MAX_PRESETS;i++){
+	presets[i].file=NULL;
+	presets[i].name=NULL;
+    };
+    
 };
 
 PresetsStore::~PresetsStore(){
     if (clipboard.data!=NULL) delete (clipboard.data);
+    clearpresets();
 };
+
+//Clipboard management
 
 void PresetsStore::copyclipboard(XMLwrapper *xml,char *type){
     strcpy(clipboard.type,type);
@@ -53,5 +62,27 @@ bool PresetsStore::checkclipboardtype(char *type){
     return(strcmp(type,clipboard.type)==0);
 };
 
+//Presets management
+void PresetsStore::clearpresets(){
+    for (int i=0;i<MAX_PRESETS;i++){
+	if (preset[i].file!=NULL) {
+	    delete(presets[i].file);
+	    presets[i].file=NULL;
+	};
+	if (preset[i].name!=NULL) {
+	    delete(presets[i].name);
+	    presets[i].name=NULL;
+	};
+    };
+    
+};
 
+void PresetsStore::rescanforpresets(char *type){
+    clearpresets();
+    int presetk=0;
+    for (int i=0;i<MAX_PRESETS_DIR;i++){
+	if (config.cfg.presetsDirList[i]==NULL) continue;
+	//de continuat aici
+    };
+};
 

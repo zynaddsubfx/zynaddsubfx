@@ -429,15 +429,6 @@ void Bank::scanrootdir(char *rootdir){
     };
 
     closedir(dir);
-/*
-
-   // printf("%s/\n",bankdirname);
-    struct dirent *fn;
-        
-    while ((fn=readdir(dir))){
-	if (fn->d_type!=DT_REG) continue;//this is not a regular file
-	const char *filename= fn->d_name;
-*/
     
 };
 
