@@ -139,7 +139,7 @@ int XMLwrapper::loadXMLfile(char *filename){
     FILE *file=fopen(filename,"r");
     if (file==NULL) return(-1);
     
-    root=tree=mxmlLoadFile(NULL,file,MXML_NO_CALLBACK);
+    root=tree=mxmlLoadFile(NULL,file,MXML_OPAQUE_CALLBACK);
     fclose(file);
     
     if (tree==NULL) return(-1);//this is not XML
@@ -167,10 +167,19 @@ int XMLwrapper::loadXMLfile(char *filename){
 int XMLwrapper::enterbranch(char *name){
     node=mxmlFindElement(peek(),peek(),name,NULL,NULL,MXML_DESCEND_FIRST);
     if (node==NULL) return(0);
+
     push(node);
-    
     return(1);
 };
+
+int XMLwrapper::enterbranch(char *name,int id){
+    snprintf(tmpstr,TMPSTR_SIZE,"%d",id);
+    node=mxmlFindElement(peek(),peek(),name,"id",tmpstr,MXML_DESCEND_FIRST);
+    if (node==NULL) return(0);
+    push(node);
+    return(1);
+};
+
 
 void XMLwrapper::exitbranch(){
     pop();
@@ -216,6 +225,17 @@ int XMLwrapper::getparbool(char *name,int defaultpar){
 	else return(0);
 };
 
+void XMLwrapper::getparstr(char *name,char *par,int maxstrlen){
+    memset(par,0,maxstrlen);
+    node=mxmlFindElement(peek(),peek(),"string","name",name,MXML_DESCEND_FIRST);
+    
+    if (node==NULL) return;
+    if (node->child==NULL) return;
+    if (node->child->type!=MXML_OPAQUE) return;
+    
+    snprintf(par,maxstrlen,node->child->value.element.name);
+    
+};
 
 
 /** Private members **/

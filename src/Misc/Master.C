@@ -811,12 +811,30 @@ int Master::loadXML(char *filename){
 };
 
 void Master::getfromXML(XMLwrapper *xml){
-    xml->enterbranch("MASTER");
+    if (xml->enterbranch("MASTER")){
 	Pvolume=xml->getpar127("volume",Pvolume);
 	Pkeyshift=xml->getpar127("key_shift",Pkeyshift);
 	ctl.NRPN.receive=xml->getparbool("nrpn_receive",ctl.NRPN.receive);
 	
-    xml->exitbranch();
+	
+	for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
+	    if (xml->enterbranch("PART",npart)==0) continue;
+		part[npart]->getfromXML(xml);
+	    xml->exitbranch();
+	};
+
+/*	if (xml->enterbranch("MICROTONAL")){
+	    //
+	    xml->exitbranch();
+	};
+	
+	
+	etc.
+	
+	
+*/	
+	xml->exitbranch();
+    };
 };
 
 

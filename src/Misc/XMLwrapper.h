@@ -73,7 +73,12 @@ class XMLwrapper{
 	//enter into the branch
 	//returns 1 if is ok, or 0 otherwise
 	int enterbranch(char *name);
-	
+
+		
+	//enter into the branch with id
+	//returns 1 if is ok, or 0 otherwise
+	int enterbranch(char *name, int id);
+
 	//exits from a branch
 	void exitbranch();
 	
@@ -92,6 +97,8 @@ class XMLwrapper{
 	int getpar127(char *name,int defaultpar);
 	
 	int getparbool(char *name,int defaultpar);
+
+	void getparstr(char *name,char *par,int maxstrlen);
     private:
 	mxml_node_t *tree;//all xml data
 	mxml_node_t *root;//xml data used by zynaddsubfx

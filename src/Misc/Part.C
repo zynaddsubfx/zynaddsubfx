@@ -1043,3 +1043,67 @@ int Part::saveXML(char *filename){
     delete (xml);
     return(0);
 };
+
+
+void Part::getfromXMLinstrument(XMLwrapper *xml){
+    if (xml->enterbranch("INFO")){
+	xml->getparstr("name",(char *)Pname,PART_MAX_NAME_LEN);
+	xml->getparstr("author",(char *)info.Pauthor,MAX_INFO_TEXT_SIZE);
+	xml->getparstr("comments",(char *)info.Pcomments,MAX_INFO_TEXT_SIZE);
+	info.Ptype=xml->getpar("type",info.Ptype,0,16);
+	
+	xml->endbranch();
+    };
+
+    
+    
+    
+    //!!!!!!!!!!!continui de aici
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+};
+
+void Part::getfromXML(XMLwrapper *xml){
+    Penabled=xml->getparbool("enabled",Penabled);
+
+    Pvolume=xml->getpar127("volume",Pvolume);    
+    Ppanning=xml->getpar127("panning",Ppanning);
+
+    Pminkey=xml->getpar127("min_key",Pminkey);
+    Pmaxkey=xml->getpar127("max_key",Pmaxkey);
+    Pkeyshift=xml->getpar127("key_shift",Pkeyshift);
+    Prcvchn=xml->getpar127("rcv_chn",Prcvchn);
+
+    Pvelsns=xml->getpar127("velocity_sensing",Pvelsns);
+    Pveloffs=xml->getpar127("velocity_offset",Pveloffs);
+
+    Pnoteon=xml->getparbool("note_on",Pnoteon);
+    Ppolymode=xml->getparbool("poly_mode",Ppolymode);
+    Pkeylimit=xml->getpar127("key_limit",Pkeylimit);
+
+    if (xml->enterbranch("INSTRUMENT")){
+	getfromXMLinstrument(xml);
+        xml->exitbranch();
+    };
+    
+    xml->enterbranch("CONTROLLER");
+//	ctl.(xml);
+    xml->exitbranch();
+
+};
+
+
+
