@@ -65,7 +65,7 @@ Bank::Bank(){
 
 Bank::~Bank(){
     if (dirname!=NULL) {
-	sprintf(config.cfg.currentBankDir,dirname);
+	sprintf(config.cfg.currentBankDir,"%s",dirname);
     };
     for (int i=0;i<MAX_NUM_BANKS;i++){
 	if (banks[i].dir!=NULL) delete (banks[i].dir);
