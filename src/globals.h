@@ -143,6 +143,12 @@ extern int OSCIL_SIZE;
 #define FF_MAX_SEQUENCE 8
 
 
+/*
+ * The max. number of banks that are used
+ */
+
+#define MAX_NUM_BANK 256
+
 
 #define LOG_2 0.693147181
 #define PI 3.1415926536

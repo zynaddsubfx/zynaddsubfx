@@ -86,60 +86,60 @@ class BankUI {open : {public BankProcess_}
   Function {make_window()} {open
   } {
     Fl_Window bankuiwindow {
-      label Bank
-      xywh {16 205 770 435} type Double
+      label Bank selected
+      xywh {16 205 770 485} type Double
       code0 {o->label(bank->bankfiletitle);}
       code1 {if (bank->bankfiletitle==NULL) o->label ("Choose a bank to use by pressing the 'Load/Use Bank from file...' button or choose 'New Bank...' to make a new bank.");} visible
     } {
       Fl_Button {} {
         label Close
         callback {bankuiwindow->hide();}
-        xywh {555 402 60 24} box THIN_UP_BOX
+        xywh {554 455 60 24} box THIN_UP_BOX
       }
       Fl_Pack {} {
-        xywh {6 6 150 375} box BORDER_BOX
+        xywh {5 59 150 375} box BORDER_BOX
         code0 {o->box(FL_NO_BOX);}
         code1 {for (int i=0;i<25;i++){bs[i]=new BankSlot (0,0,o->w(),15," ");bs[i]->init(i,&what,&slot,&BankProcess_::process,(BankProcess_ *)this,bank);};}
       } {}
       Fl_Pack {} {
-        xywh {159 6 150 375} box BORDER_BOX
+        xywh {158 59 150 375} box BORDER_BOX
         code0 {o->box(FL_NO_BOX);}
         code1 {for (int i=25;i<50;i++){bs[i]=new BankSlot (0,0,o->w(),15," ");bs[i]->init(i,&what,&slot,&BankProcess_::process,(BankProcess_ *)this,bank);};}
       } {}
       Fl_Pack {} {
-        xywh {312 6 150 375} box BORDER_BOX
+        xywh {311 59 150 375} box BORDER_BOX
         code0 {o->box(FL_NO_BOX);}
         code1 {for (int i=50;i<75;i++){bs[i]=new BankSlot (0,0,o->w(),15," ");bs[i]->init(i,&what,&slot,&BankProcess_::process,(BankProcess_ *)this,bank);};}
       } {}
       Fl_Pack {} {
-        xywh {465 6 150 375} box BORDER_BOX
+        xywh {464 59 150 375} box BORDER_BOX
         code0 {o->box(FL_NO_BOX);}
         code1 {for (int i=75;i<100;i++){bs[i]=new BankSlot (0,0,o->w(),15," ");bs[i]->init(i,&what,&slot,&BankProcess_::process,(BankProcess_ *)this,bank);};}
       } {}
       Fl_Pack {} {
-        xywh {618 6 150 420} box BORDER_BOX
+        xywh {617 59 150 420} box BORDER_BOX
         code0 {o->box(FL_NO_BOX);}
         code1 {for (int i=100;i<128;i++){bs[i]=new BankSlot (0,0,o->w(),15," ");bs[i]->init(i,&what,&slot,&BankProcess_::process,(BankProcess_ *)this,bank);};}
       } {}
       Fl_Group {} {open
-        xywh {6 384 321 42} box ENGRAVED_BOX
+        xywh {5 437 321 42} box ENGRAVED_BOX
       } {
         Fl_Light_Button writebutton {
           label WRITE
           callback {if (o->value()>0.5) mode=2}
-          xywh {117 390 99 30} type Radio box PLASTIC_UP_BOX down_box THIN_DOWN_BOX selection_color 1 labeltype ENGRAVED_LABEL labelfont 1 labelsize 18
+          xywh {116 443 99 30} type Radio box PLASTIC_UP_BOX down_box THIN_DOWN_BOX selection_color 1 labeltype ENGRAVED_LABEL labelfont 1 labelsize 18
           code0 {if (bank->locked()) o->deactivate();}
         }
         Fl_Light_Button readbutton {
           label READ
           callback {if (o->value()>0.5) mode=1;}
-          xywh {12 390 99 30} type Radio box PLASTIC_UP_BOX down_box THIN_DOWN_BOX selection_color 101 labeltype ENGRAVED_LABEL labelfont 1 labelsize 18
+          xywh {11 443 99 30} type Radio box PLASTIC_UP_BOX down_box THIN_DOWN_BOX selection_color 101 labeltype ENGRAVED_LABEL labelfont 1 labelsize 18
           code0 {o->value(1);}
         }
         Fl_Light_Button clearbutton {
           label CLEAR
           callback {if (o->value()>0.5) mode=3;}
-          xywh {222 390 99 30} type Radio box PLASTIC_UP_BOX down_box THIN_DOWN_BOX selection_color 0 labeltype ENGRAVED_LABEL labelfont 1 labelsize 18
+          xywh {221 443 99 30} type Radio box PLASTIC_UP_BOX down_box THIN_DOWN_BOX selection_color 0 labeltype ENGRAVED_LABEL labelfont 1 labelsize 18
           code0 {if (bank->locked()) o->deactivate();}
         }
       }
@@ -152,7 +152,7 @@ if (bank->loadbank(dirname)==2)
        fl_alert("Error: Could not load the bank from the directory.");
 for (int i=0;i<128;i++) bs[i]->refresh();
 refreshmainwindow();}
-        xywh {330 385 95 20} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
+        xywh {329 438 95 20} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
       }
       Fl_Button {} {
         label {New Bank...}
@@ -165,12 +165,12 @@ int result=bank->newbank(dirname);
 if (result!=0) fl_alert("Error: Could not make a new bank (directory)..");
 for (int i=0;i<128;i++) bs[i]->refresh();
 refreshmainwindow();}
-        xywh {330 407 93 20} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
+        xywh {329 460 93 20} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
       }
       Fl_Check_Button {} {
         label {auto close}
         callback {config.cfg.BankUIAutoClose=(int) o->value();}
-        tooltip {automatically close the bank window if the instrument is loaded} xywh {555 385 60 15} down_box DOWN_BOX labelsize 10
+        tooltip {automatically close the bank window if the instrument is loaded} xywh {554 438 60 15} down_box DOWN_BOX labelsize 10
         code0 {o->value(config.cfg.BankUIAutoClose);}
       }
       Fl_Button {} {
@@ -182,8 +182,17 @@ if (filename==NULL) return;
 master->exportbankasxmldirectory(filename);
 
 for (int i=0;i<128;i++) bs[i]->refresh();
-refreshmainwindow();} selected
-        xywh {440 385 105 40} box PLASTIC_UP_BOX color 175 labelfont 1 labelsize 15 labelcolor 0 align 128
+refreshmainwindow();}
+        xywh {439 438 105 40} box PLASTIC_UP_BOX color 175 labelfont 1 labelsize 15 labelcolor 0 align 128
+      }
+      Fl_Choice {} {
+        label Bank open
+        xywh {5 20 205 20} down_box BORDER_BOX labelfont 1 align 5 textfont 1 textsize 12
+      } {
+        menuitem {} {
+          label Pads
+          xywh {0 0 100 20} labelfont 1 labelsize 12
+        }
       }
     }
   }

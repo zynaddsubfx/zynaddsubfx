@@ -32,6 +32,10 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include "Config.h"
+
+#define INSTRUMENT_EXTENSION ".xml"
+//.xzz
 
 Bank::Bank(){
     memset(defaultinsname,0,PART_MAX_NAME_LEN);
@@ -91,6 +95,7 @@ Bank::Bank(){
     
     bankfiletitle=dirname;
 
+    rescanforbanks();
 };
 
 Bank::~Bank(){
@@ -115,6 +120,7 @@ Bank::~Bank(){
 
     clearbank();
 };
+
 
 
 /*
@@ -328,7 +334,38 @@ int Bank::locked(){
     return(dirname==NULL);
 };
 
+/*
+ * Re-scan for directories containing instrument banks
+ */
+
+void Bank::rescanforbanks(){
+    int start=0,end=0;
+    char *dirlist=config.cfg.bankRootDirList;
+    int dirlistlen=strlen(dirlist);
+    char *currentrootdir=new char [dirlistlen];
+    while (start<dirlistlen){
+	for (int i=start+1;i<dirlistlen;i++){
+	    if (dirlist[i]<32) break;
+	    end=i;
+	};
+	snprintf(currentrootdir,end-start+2,"%s",&dirlist[start]);
+	
+	//a root director was found
+	scanrootdir(currentrootdir);
+
+	start=end+2;
+    };
+    delete(currentrootdir);
+    
+}; 
+
+
+
 // private stuff
+
+void Bank::scanrootdir(char *rootdir){
+    printf("Scanning root dir:%s\n",rootdir);
+};
 
 void Bank::clearbank(){
     for (int i=0;i<BANK_SIZE;i++) deletefrombank(i);

@@ -50,6 +50,9 @@ class Bank{
 	
 	char *bankfiletitle; //this is shown on the UI of the bank (the title of the window)
 	int locked();
+	
+	void rescanforbanks();
+	
     private:
     
 	//it adds a filename to the bank
@@ -71,6 +74,8 @@ class Bank{
 	}ins[BANK_SIZE];
 	
 	char *dirname;
+
+	void scanrootdir(char *rootdir);//scans a root dir for banks	
 };
 
 #endif

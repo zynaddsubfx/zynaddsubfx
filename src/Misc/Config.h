@@ -36,6 +36,7 @@ class Config{
 	    int DumpNotesToFile,DumpAppend;
 	    int GzipCompression;
 	    char *DumpFile;
+	    char *bankRootDirList,*currentBankDir;
 	} cfg;
 	int winwavemax,winmidimax;//number of wave/midi devices on Windows
 	int maxstringsize;

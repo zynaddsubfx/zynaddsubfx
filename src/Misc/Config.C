@@ -30,7 +30,7 @@
 #endif
 
 #include "Config.h"
-#define MAX_STRING_SIZE 250
+#define MAX_STRING_SIZE 4000
 
 Config::Config(){
     maxstringsize=MAX_STRING_SIZE;//for ui
@@ -77,6 +77,12 @@ Config::Config(){
 	    snprintf(winmididevices[i].name,MAX_STRING_SIZE,"%s",midiincaps.szPname);
     };
 #endif
+
+    cfg.bankRootDirList=new char[MAX_STRING_SIZE];
+    sprintf(cfg.bankRootDirList,"./\n/tmp\n~/paul");
+    cfg.currentBankDir=new char[MAX_STRING_SIZE];
+    sprintf(cfg.currentBankDir,"./testbnk");
+    
     
     char filename[MAX_STRING_SIZE];
     getConfigFileName(filename,MAX_STRING_SIZE);
