@@ -586,5 +586,8 @@
 	    - Inceput sa scriu modulul de sinteza PADnote
 19 Iun 2004 - Adaugat modul liniar de controller bandwidth si modificat modul liniar la controllerul modulation wheel
 	    - Adaugata modulatia in frecventa la OsciGen
+20 Iun 2004 - Nu se mai deschide automat fereastra de instrumente daca a fost deschisa si s-a descarcat un instrument
+	    - Facute mici modificari la FM-ul de la Oscil
+
 
 

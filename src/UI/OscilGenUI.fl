@@ -284,8 +284,7 @@ delete(harmonic);} {}
 } 
 
 class OscilEditor {} {
-  Function {make_window()} {open
-  } {
+  Function {make_window()} {} {
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor}
       xywh {66 94 745 590} type Double hide
@@ -574,7 +573,7 @@ pthread_mutex_unlock(&master->mutex);
 
 oscildisplaygroup->redraw();
 basefuncdisplaygroup->redraw();
-oldosc->redraw();}
+oldosc->redraw();} selected
         tooltip {Use this Oscillator as base function} xywh {15 310 85 20} box THIN_UP_BOX labelfont 1 labelsize 12
       }
       Fl_Button {} {

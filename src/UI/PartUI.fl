@@ -574,7 +574,7 @@ part->ctl.portamento.updowntimestretch=x;}
       }
       Fl_Check_Button {} {
         label {Exp BW}
-        callback {part->ctl.bandwidth.exponential=(int) o->value();} selected
+        callback {part->ctl.bandwidth.exponential=(int) o->value();}
         tooltip {Exponential BandWidth Controller} xywh {85 15 35 25} down_box DOWN_BOX labelsize 10 align 148
         code0 {o->value(part->ctl.bandwidth.exponential);}
       }
@@ -1014,7 +1014,8 @@ partgroup->show();
 end();
 
 
-if (config.ui.showinstrumentinfo!=0) instrumenteditwindow->show();} {}
+//if (config.ui.showinstrumentinfo!=0) instrumenteditwindow->show();} {selected
+    }
   }
   Function {showparameters(int kititem,int engine)} {} {
     code {if (engine==-1){//this is used if I want to clear the engine from the part

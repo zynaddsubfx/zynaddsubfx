@@ -417,18 +417,18 @@ void OscilGen::modulation(){
 
 
     REALTYPE modulationpar1=Pmodulationpar1/127.0,
-	     modulationpar2=Pmodulationpar2/127.0,
+	     modulationpar2=0.5-Pmodulationpar2/127.0,
 	     modulationpar3=Pmodulationpar3/127.0;
 
     switch(Pmodulation){
-        case 1:modulationpar1=(pow(2,modulationpar1*5.0)-1.0)/10.0;
+        case 1:modulationpar1=(pow(2,modulationpar1*5.0)-1.0)/100.0;
 	       modulationpar3=floor((pow(2,modulationpar3*5.0)-1.0));
 	       if (modulationpar3<0.9999) modulationpar3=-1.0;
 	    break;
-        case 2:modulationpar1=(pow(2,modulationpar1*5.0)-1.0)/10.0;
+        case 2:modulationpar1=(pow(2,modulationpar1*5.0)-1.0)/100.0;
 	       modulationpar3=1.0+floor((pow(2,modulationpar3*5.0)-1.0));
     	    break;
-	case 3:modulationpar1=(pow(2,modulationpar1*7.0)-1.0)/10.0;
+	case 3:modulationpar1=(pow(2,modulationpar1*7.0)-1.0)/100.0;
 	       modulationpar3=0.01+(pow(2,modulationpar3*16.0)-1.0)/10.0;
 	    break;
     };	
