@@ -24,13 +24,13 @@ decl {\#include <FL/Fl_File_Chooser.H>} {public
 decl {\#include "../Misc/Master.h"} {public
 } 
 
-decl {\#include "../Misc/OldBank.h"} {public
+decl {\#include "../Misc/Bank.h"} {selected public
 } 
 
 class BankProcess_ {} {
   Function {process()} {return_type {virtual void}
   } {}
-  decl {OldBank *bank;} {public
+  decl {Bank *bank;} {public
   }
 } 
 
@@ -55,7 +55,7 @@ int tmp=Fl_Button::handle(event);
 if ((*what!=0) && Fl::event_inside(this)) (bp->*fnc)();
 return(tmp);} {}
   }
-  Function {init(int nslot_, int *what_, int *whatslot_,void (BankProcess_:: *fnc_)(void),BankProcess_ *bp_,OldBank *bank_)} {} {
+  Function {init(int nslot_, int *what_, int *whatslot_,void (BankProcess_:: *fnc_)(void),BankProcess_ *bp_,Bank *bank_)} {} {
     code {nslot=nslot_;
 what=what_;
 whatslot=whatslot_;
@@ -81,15 +81,15 @@ label(bank->getnamenumbered(nslot));} {}
   decl {BankProcess_ *bp;} {}
 } 
 
-class BankUI {open : {public BankProcess_}
+class BankUI {: {public BankProcess_}
 } {
   Function {make_window()} {open
   } {
     Fl_Window bankuiwindow {
       label Bank
-      xywh {16 205 770 430} type Double
+      xywh {16 205 770 430} type Double hide
       code0 {o->label(bank->bankfiletitle);}
-      code1 {if (bank->bankfiletitle==NULL) o->label ("Choose a bank to use by pressing the 'Load/Use Bank from file...' button or choose 'New Bank...' to make a new bank.");} visible
+      code1 {if (bank->bankfiletitle==NULL) o->label ("Choose a bank to use by pressing the 'Load/Use Bank from file...' button or choose 'New Bank...' to make a new bank.");}
     } {
       Fl_Button {} {
         label Close
@@ -148,7 +148,7 @@ class BankUI {open : {public BankProcess_}
         callback {const char *filename;
 filename=fl_file_chooser("Load and use Bank from file:","(*.bnk_zyn)",NULL,0);
 if (filename==NULL) return;
-if (bank->loadfilebank(filename)==2)
+if (bank->loadbank(filename)==2)
        fl_alert("Error: Could not load the bank from the file..");
 for (int i=0;i<128;i++) bs[i]->refresh();
 refreshmainwindow();}
@@ -164,10 +164,12 @@ filename=fl_filename_setext(filename,EXT);
 \#undef EXT
 
 if (filename==NULL) return;
-int result=bank->savefilebank(filename,0);
+//int result=bank->savebank(filename,0);
+int result=0;
 if (result==1) {
        if (fl_ask("The file exists. \\nOverwrite it?")){
-              result=bank->savefilebank(filename,1);
+//              result=bank->savebank(filename,1);
+	    result=0;
        } else return; 
 
 };
@@ -186,10 +188,10 @@ filename=fl_filename_setext(filename,EXT);
 \#undef EXT
 
 if (filename==NULL) return;
-int result=bank->newfilebank(filename,0);
+int result=bank->newbank(filename,0);
 if (result==1) {
        if (fl_ask("The file exists. \\nOverwrite it?")){
-              result=bank->newfilebank(filename,1);
+              result=bank->newbank(filename,1);
        } else return; 
 
 };
@@ -207,7 +209,7 @@ refreshmainwindow();}
       Fl_Button {} {
         label {XML export}
         callback {const char *tmp=fl_input("Enter the directory:","bank_xml");
-if (tmp!=NULL) master->exportbankasxmldirectory(tmp);} selected
+if (tmp!=NULL) master->exportbankasxmldirectory(tmp);}
         xywh {508 390 37 35} box PLASTIC_UP_BOX labelsize 11 align 128
       }
     }
@@ -216,7 +218,7 @@ if (tmp!=NULL) master->exportbankasxmldirectory(tmp);} selected
     code {fnc=&BankProcess_::process;
 master=master_;
 npart=npart_;
-bank=&master_->oldbank;
+bank=&master_->bank;
 what=0;
 make_window();
 mode=1;} {}
@@ -246,11 +248,9 @@ if ((what==1)&&(mode==2)){//save(write) to slot
   if (!bank->emptyslot(slot))
       if (!fl_ask("Overwrite the slot no. %d ?",slot+1)) goto nooverwriteslot;
        pthread_mutex_lock(&master->mutex);
-       slbuf.changemode(1);
-       slbuf.changeminimal(1);
        master->part[*npart]->saveloadbuf(&slbuf,2);
        bank->setname(slot,(char *)master->part[*npart]->Pname);
-       bank->savetoslot(slot,(char *)master->part[*npart]->Pname,&slbuf);
+       bank->savetoslot(slot,(char *)master->part[*npart]->Pname,NULL);
        pthread_mutex_unlock(&master->mutex);
 
        bs[slot]->refresh();
@@ -261,10 +261,7 @@ if ((what==1)&&(mode==2)){//save(write) to slot
 
 if ((what==1)&&(mode==1)&&(!bank->emptyslot(slot))){//Reads from slot
     pthread_mutex_lock(&master->mutex);
-     master->part[*npart]->defaultsinstrument();
-     bank->loadfromslot(slot,&slbuf);
-     slbuf.changemode(0);
-     master->part[*npart]->saveloadbuf(&slbuf,1);
+     bank->loadfromslot(slot,master->part[*npart]);
     pthread_mutex_unlock(&master->mutex);
      if (master->part[*npart]->disablekitloading==0){
        snprintf((char *)master->part[*npart]->Pname,PART_MAX_NAME_LEN

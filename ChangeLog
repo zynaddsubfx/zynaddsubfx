@@ -548,5 +548,7 @@
 27 Feb 2004 - Corectate erori la snprintf ( nu dadeam parametru "%s" inainte de string si daca acel string continea ceva %, era periculos) si alte erori
 	    - Micsorat timpul de marire amplitudine la ADnote (doar in cazul cand amplitudinea creste brusc ca la un LFO expdown)
 	    - Corectata o eroare foarte veche la LFO amplitudine (amplitudinea nu scadea corespunzator)
+28 Feb 2004 - Se poate incarca instrumente din Bank
+
 
 

@@ -25,6 +25,7 @@
 
 #include "../globals.h"
 #include "XMLwrapper.h"
+#include "Part.h"
 
 #define BANK_SIZE 128
 
@@ -38,7 +39,7 @@ class Bank{
 	int emptyslot(unsigned char ninstrument);
 	void clearslot(unsigned char ninstrument);
 	void savetoslot(unsigned char ninstrument,const char *name,XMLwrapper *xml);
-	void loadfromslot(unsigned char ninstrument,XMLwrapper *xml);
+	void loadfromslot(unsigned char ninstrument,Part *part);
 
 	int loadbank(const char *bankdirname);
 //	int savebank(const char *newbankfilename,int overwrite);
@@ -65,6 +66,8 @@ class Bank{
 	    char name[PART_MAX_NAME_LEN+1];
 	    char *filename;
 	}ins[BANK_SIZE];
+	
+	char *dirname;
 };
 
 #endif

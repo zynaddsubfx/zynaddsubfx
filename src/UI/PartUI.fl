@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0200 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2003 Nasca Octavian Paul} {} 
@@ -44,7 +44,7 @@ class PartSysEffSend {: {public Fl_Group}
   Function {make_window()} {private
   } {
     Fl_Window syseffsend {
-      private xywh {584 83 90 35} hide
+      private xywh {584 83 90 35} type Double hide
       class Fl_Group
     } {
       Fl_Dial {} {
@@ -90,7 +90,7 @@ class PartKitItem {: {public Fl_Group}
   Function {make_window()} {private
   } {
     Fl_Window partkititem {
-      private xywh {149 528 590 27} hide
+      private xywh {149 528 590 27} type Double hide
       class Fl_Group
     } {
       Fl_Group partkititemgroup {
@@ -260,7 +260,7 @@ class PartUI {: {public Fl_Group,PartUI_}
   Function {make_window()} {private
   } {
     Fl_Window partgroup {
-      private xywh {149 400 385 180} hide
+      private xywh {149 400 385 180} type Double hide
       class Fl_Group
     } {
       Fl_Group partgroupui {
@@ -342,8 +342,8 @@ if (event==FL_RIGHT_MOUSE){
 } else {
   if (event==FL_LEFT_MOUSE) bankui->show();
        else infowin->show();
-};}
-          tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the instrument information} xywh {155 5 135 20} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 12 align 20
+};} selected
+          tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the instrument information} xywh {155 5 135 20} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 12 align 84
           code0 {o->label((char *)part->Pname);}
         }
         Fl_Box {} {
@@ -463,7 +463,7 @@ maxkcounter->do_callback();}
     }
     Fl_Window ctlwindow {
       label Controllers
-      private xywh {46 404 420 130} hide
+      private xywh {46 404 420 130} type Double hide
     } {
       Fl_Check_Button {} {
         label Expr
@@ -582,7 +582,7 @@ if (part->ctl.sustain.receive==0) {
           label {t.dn/up}
           callback {int x=(int) o->value();
 
-part->ctl.portamento.updowntimestretch=x;} selected
+part->ctl.portamento.updowntimestretch=x;}
           tooltip {Portamento time stretch (up/down)} xywh {285 60 25 25} labelsize 10 maximum 127 step 1
           code0 {o->value(part->ctl.portamento.updowntimestretch);}
           class WidgetPDial
@@ -616,7 +616,7 @@ part->ctl.portamento.updowntimestretch=x;} selected
     }
     Fl_Window partfx {
       label {Part's Insert Effects}
-      private xywh {110 483 390 145} hide
+      private xywh {110 483 390 145} type Double hide
     } {
       Fl_Counter inseffnocounter {
         label {Ins.Effect No.}
@@ -713,7 +713,7 @@ part->Pefxroute[ninseff]=x;}
     }
     Fl_Window instrumentkitlist {
       label {Instrument Kit}
-      xywh {70 61 590 370} hide
+      xywh {70 61 590 370} type Double hide
     } {
       Fl_Button {} {
         label {Close Window}
@@ -809,7 +809,7 @@ if (part->Pkitmode==0) {
     }
     Fl_Window swapwindow {
       label {Swap/Copy item}
-      xywh {384 262 205 100} hide modal
+      xywh {384 262 205 100} type Double hide modal
     } {
       Fl_Counter swap2counter {
         label to
@@ -865,7 +865,7 @@ subsynenabledcheck->value(part->kit[0].Psubenabled);}
     }
     Fl_Window infowin {
       label {Instrument Info}
-      xywh {224 184 366 343} hide
+      xywh {224 184 366 343} type Double hide
     } {
       Fl_Input {} {
         label {Author and Copyright}

@@ -41,6 +41,7 @@ Bank::Bank(){
 	ins[i].used=false;
 	ins[i].filename=NULL;
     };
+    dirname=NULL;
 
     clearbank();
 
@@ -57,12 +58,17 @@ Bank::~Bank(){
  * Get the name of an instrument from the bank
  */
 char *Bank::getname (unsigned char ninstrument){
+    if (emptyslot(ninstrument)) return (defaultinsname);
+    return (ins[ninstrument].name);
 };
 
 /*
  * Get the numbered name of an instrument from the bank
  */
 char *Bank::getnamenumbered (unsigned char ninstrument){
+    if (emptyslot(ninstrument)) return (defaultinsname);
+    snprintf(tmpinsname[ninstrument],PART_MAX_NAME_LEN+15,"%d. %s",ninstrument+1,getname(ninstrument));
+    return(tmpinsname[ninstrument]);
 };
 
 /*
@@ -76,6 +82,10 @@ void Bank::setname(unsigned char ninstrument,const char *newname){
  * Check if there is no instrument on a slot from the bank
  */
 int Bank::emptyslot(unsigned char ninstrument){
+    if (ninstrument>=BANK_SIZE) return (1);
+
+    if (ins[ninstrument].used) return (0);
+	else return(1);
 };
 
 /*
@@ -93,8 +103,21 @@ void Bank::savetoslot(unsigned char ninstrument,const char *name,XMLwrapper *buf
 /*
  * Loads the instrument from the bank to a buffer
  */
-void Bank::loadfromslot(unsigned char ninstrument,XMLwrapper *buf){
+void Bank::loadfromslot(unsigned char ninstrument,Part *part){
+    if (emptyslot(ninstrument)) return;
+    if ((dirname==NULL)||(ins[ninstrument].filename==NULL)) return;
+    
+    part->defaultsinstrument();
 
+    char tmpfilename[1001];
+    memset(tmpfilename,0,1001);
+
+    snprintf(tmpfilename,1000,"%s/%s",dirname,ins[ninstrument].filename);
+    
+    printf("load:  %s\n",tmpfilename);
+    
+    part->loadXMLinstrument(tmpfilename);
+    
 };
 
 
@@ -104,43 +127,62 @@ void Bank::loadfromslot(unsigned char ninstrument,XMLwrapper *buf){
  */
 int Bank::loadbank(const char *bankdirname){
     DIR *dir=opendir(bankdirname);
-
     clearbank();
 
     if (dir==NULL) return(-1);
+
+    if (dirname!=NULL) delete(dirname);
+    dirname=new char[strlen(bankdirname)+1];
+    snprintf(dirname,strlen(bankdirname)+1,"%s",bankdirname);
 
     printf("%s/\n",bankdirname);
     struct dirent *fn;
     
         
-    while(fn=readdir(dir)){
+    while ((fn=readdir(dir))){
 	if (fn->d_type!=DT_REG) continue;//this is not a regular file
 	const char *filename= fn->d_name;
 	
 	//sa verific daca e si extensia dorita
 	
 	//verify if the name is like this NNNN-name (where N is a digit)
-	int no=0,startname=0;
+	int no=0;
+	unsigned int startname=0;
 	
-	for (int i=0;i<4;i++) {
+	for (unsigned int i=0;i<4;i++) {
 	    if (strlen(filename)<=i) break;
 
-	    if ((filename[i]>='0')&&(filename[i]<='9')) no=no*10+(filename[i]-'0');
-		else if (startname!=0) startname=i;
+	    if ((filename[i]>='0')&&(filename[i]<='9')) {
+		no=no*10+(filename[i]-'0');
+		startname++;
+	    };
 	};
 	
 	
+	if ((startname+1)<strlen(filename)) startname++;//to take out the "-"
+	
+	char name[PART_MAX_NAME_LEN+1]; 
+	memset(name,0,PART_MAX_NAME_LEN+1);
+	snprintf(name,PART_MAX_NAME_LEN,"%s",filename);
+	
+	for (int i=strlen(name)-1;i>=2;i--){
+	    if (name[i]=='.') {
+		name[i]='\0';
+		break;
+	    };
+	};
 	
 	if (no!=0){//the instrument position in the bank is found
-	    addtobank(no-1,filename,&filename[startname]);
+	    addtobank(no-1,filename,&name[startname]);
 	} else {
-	    addtobank(-1,filename,filename);
+	    addtobank(-1,filename,name);
 	};
 	
     };
     
     
     closedir(dir);
+    return(0);
 };
 
 /*
@@ -155,11 +197,12 @@ int Bank::newbank(const char *newbankdirname, int overwrite){
 int Bank::locked(){
 };
 
-
 // private stuff
 
 void Bank::clearbank(){
     for (int i=0;i<BANK_SIZE;i++) deletefrombank(i);
+    if (dirname!=NULL) delete(dirname);
+    dirname=NULL;
 };
 
 int Bank::addtobank(int pos, const char *filename, const char* name){
@@ -186,11 +229,10 @@ int Bank::addtobank(int pos, const char *filename, const char* name){
     ins[pos].used=true;
     snprintf(ins[pos].name,PART_MAX_NAME_LEN,"%s",name);
 
-    snprintf(tmpinsname[pos],PART_MAX_NAME_LEN+10,"%d. %s",pos,name);
-
+    snprintf(tmpinsname[pos],PART_MAX_NAME_LEN+10," ");
     int len=strlen(filename);
     ins[pos].filename=new char[len+1];
-    snprintf(ins[pos].filename,len,"%s",filename);
+    snprintf(ins[pos].filename,len+1,"%s",filename);
     
     return(0);
 };
