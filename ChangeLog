@@ -706,5 +706,8 @@
 25 Aug 2004 - Listele de banci si de preset-uri sunt sortate
 	    - Corectate niste erori la Oscilgen care faceau ca sa se calculeze randomness chiar daca este folosit de PADsynth si pus automat parametrul randomness daca PADsynth este folosit (in caz ca se va importa la un ADsynth)
 	    - Gasita o eroare care face sa crape daca lucrez mult cu bancile de instrumente
-27 Aug 2004 - Adaugata posibilitatea de a dezactiva aratarea starii PADsynth din instrumente	    
+27 Aug 2004 - Adaugata posibilitatea de a dezactiva aratarea starii PADsynth din instrumente
+            - LANSAT PE INTERNET - VERSIUNEA (2.0.0)
+--------------------------------------------------------------------------------------------------
+	    
 	    
