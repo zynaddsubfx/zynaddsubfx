@@ -728,4 +728,6 @@
 --------------------------------------------------------------------------------------------------
 04 Oct 2004 - Corectata o eroare care face ca in modul simple UI, sa se inverseze panning-ul	    
 	    - Adaugat un icon la ZynAddSubFX
+10 Oct 2004 - Si controllerul de Resonance se aplica la toate item-urile din kit
+
 	    
