@@ -124,6 +124,8 @@ void Bank::setname(unsigned int ninstrument,const char *newname,int newslot){
 
     snprintf(newfilename,1000,"%s/%s.xiz",dirname,tmpfilename);
 
+//    printf("rename %s -> %s\n",ins[ninstrument].filename,newfilename);//////////////
+
     rename(ins[ninstrument].filename,newfilename);
     snprintf(ins[ninstrument].filename,1000,"%s",newfilename);
     snprintf(ins[ninstrument].name,PART_MAX_NAME_LEN,"%s",&tmpfilename[5]);
@@ -146,6 +148,10 @@ int Bank::emptyslot(unsigned int ninstrument){
  */
 void Bank::clearslot(unsigned int ninstrument){
     if (emptyslot(ninstrument)) return;
+    
+//    printf("remove  %s  \n",ins[ninstrument].filename);////////////////////////
+    
+    
     remove(ins[ninstrument].filename);
     deletefrombank(ninstrument);
 };
@@ -220,7 +226,7 @@ int Bank::loadbank(const char *bankdirname){
     snprintf(dirname,strlen(bankdirname)+1,"%s",bankdirname);
     bankfiletitle=dirname;
 
-   // printf("%s/\n",bankdirname);
+   // printf("loadbank %s/\n",bankdirname);
     struct dirent *fn;
         
     while ((fn=readdir(dir))){
@@ -450,7 +456,8 @@ void Bank::scanrootdir(char *rootdir){
 void Bank::clearbank(){
     for (int i=0;i<BANK_SIZE;i++) deletefrombank(i);
     if (dirname!=NULL) delete(dirname);
-    bankfiletitle=dirname=NULL;
+    bankfiletitle=NULL;
+    dirname=NULL;
 };
 
 int Bank::addtobank(int pos, const char *filename, const char* name){

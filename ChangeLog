@@ -705,5 +705,6 @@
 	    - Ascuns Sequencer-ul de utilizator (o sa il continui mai incolo)
 25 Aug 2004 - Listele de banci si de preset-uri sunt sortate
 	    - Corectate niste erori la Oscilgen care faceau ca sa se calculeze randomness chiar daca este folosit de PADsynth si pus automat parametrul randomness daca PADsynth este folosit (in caz ca se va importa la un ADsynth)
-	    
+	    - Gasita o eroare care face sa crape daca lucrez mult cu bancile de instrumente
+	    	    
 	    
