@@ -739,5 +739,5 @@
 	    - Sortarea nu mai este quicksort la bank si la presets pt. ca am vazut ca nu merge in windows intotdeauna
 	    - Corectata o eroare la egalizator care facea ca sa se aplice si la el par. D/W
 29 Nov 2004 - Marita zona de valori la adaptive harmonics power din OscilGen 
-
+	    - Adaugata posibilitate de a post-procesa la adaptive harmonics(adica a adauga sau a amplifica anumite armonice)
 	    

@@ -92,9 +92,10 @@ class OscilGen:public Presets{
 	int Pharmonicshift;//how the harmonics are shifted
 	int Pharmonicshiftfirst;//if the harmonic shift is done before waveshaping and filter
 
-	unsigned char Padaptiveharmonics;//the adaptive harmonics status (off=0,on=1)
+	unsigned char Padaptiveharmonics;//the adaptive harmonics status (off=0,on=1,etc..)
 	unsigned char Padaptiveharmonicsbasefreq;//the base frequency of the adaptive harmonic (30..3000Hz)
 	unsigned char Padaptiveharmonicspower;//the strength of the effect (0=off,100=full)
+	unsigned char Padaptiveharmonicspar;//the parameters in 2,3,4.. modes of adaptive harmonics
 
 	unsigned char Pmodulation;//what modulation is applied to the oscil
 	unsigned char Pmodulationpar1,Pmodulationpar2,Pmodulationpar3;//the parameter of the parameters
@@ -134,6 +135,11 @@ class OscilGen:public Presets{
 	//Do the adaptive harmonic stuff
 	void adaptiveharmonic(FFTFREQS f,REALTYPE freq);
 	
+	//Do the adaptive harmonic postprocessing (2n+1,2xS,2xA,etc..)
+	//this function is called even for the user interface
+	//this can be called for the sine and components, and for the spectrum 
+	//(that's why the sine and cosine components should be processed with a separate call)
+	void adaptiveharmonicpostprocess(REALTYPE *f, int size);
 		
     	//Basic/base functions (Functiile De Baza)
 	REALTYPE basefunc_pulse(REALTYPE x,REALTYPE a);

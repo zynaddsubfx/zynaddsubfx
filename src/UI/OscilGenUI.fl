@@ -646,7 +646,7 @@ pthread_mutex_lock(&master->mutex);
 pthread_mutex_unlock(&master->mutex);
 
 redrawoscil();}
-        xywh {680 500 55 20} box THIN_UP_BOX labelfont 1 labelsize 12
+        xywh {680 505 55 15} box THIN_UP_BOX labelfont 1 labelsize 12
       }
       Fl_Group {} {
         xywh {145 308 150 30} box ENGRAVED_BOX
@@ -887,40 +887,70 @@ redrawoscil();}
           xywh {680 385 20 15} box THIN_UP_BOX labelfont 1 labelsize 10
         }
       }
-      Fl_Group {} {
-        xywh {675 405 65 90} box ENGRAVED_FRAME
+      Fl_Group {} {open
+        xywh {675 410 65 90} box ENGRAVED_FRAME
       } {
-        Fl_Box {} {
-          label {Adaptive Harmonics}
-          xywh {678 410 60 25} labelsize 10 align 144
-        }
         Fl_Choice adhrtype {
+          label {Adpt.Harm.}
           callback {oscil->Padaptiveharmonics=(int) o->value();
 redrawoscil();} open
-          tooltip {The type of the addaptive harmonics} xywh {680 435 55 15} down_box BORDER_BOX labelsize 10 when 6 textsize 10
+          tooltip {The type of the addaptive harmonics} xywh {680 425 55 15} down_box BORDER_BOX labelsize 10 align 129 when 6 textsize 10
         } {
           menuitem {} {
-            label OFF
+            label OFF selected
             xywh {80 80 100 20} labelfont 1 labelsize 10
           }
           menuitem {} {
-            label On
+            label ON
             xywh {90 90 100 20} labelfont 1 labelsize 10
+          }
+          menuitem {} {
+            label {2n+1}
+            xywh {100 100 100 20} labelfont 1 labelsize 10
+          }
+          menuitem {} {
+            label 2xSub
+            xywh {110 110 100 20} labelfont 1 labelsize 10
+          }
+          menuitem {} {
+            label 2xAdd
+            xywh {120 120 100 20} labelfont 1 labelsize 10
+          }
+          menuitem {} {
+            label 3xSub
+            xywh {120 120 100 20} labelfont 1 labelsize 10
+          }
+          menuitem {} {
+            label 3xAdd
+            xywh {130 130 100 20} labelfont 1 labelsize 10
+          }
+          menuitem {} {
+            label 4xSub
+            xywh {130 130 100 20} labelfont 1 labelsize 10
+          }
+          menuitem {} {
+            label 4xAdd
+            xywh {140 140 100 20} labelfont 1 labelsize 10
           }
         }
         Fl_Dial adhrpow {
           label pow
           callback {oscil->Padaptiveharmonicspower=(int)o->value();
-redrawoscil();} selected
-          tooltip {Adaptive harmonics power} xywh {710 455 25 25} labelsize 10 maximum 200 step 1
+redrawoscil();}
+          tooltip {Adaptive harmonics power} xywh {710 460 25 25} labelsize 10 maximum 200 step 1
           class WidgetPDial
         }
         Fl_Dial adhrbf {
           label baseF
           callback {oscil->Padaptiveharmonicsbasefreq=(int)o->value();
 redrawoscil();}
-          tooltip {Adaptive harmonics base frequency} xywh {680 455 25 25} labelsize 10 maximum 255 step 1
+          tooltip {Adaptive harmonics base frequency} xywh {680 460 25 25} labelsize 10 maximum 255 step 1
           class WidgetPDial
+        }
+        Fl_Slider adhrpar {
+          callback {oscil->Padaptiveharmonicspar=(int)o->value();
+redrawoscil();}
+          xywh {680 445 55 10} type {Horz Knob} box FLAT_BOX maximum 100 step 1 value 50
         }
       }
       Fl_Group {} {
@@ -981,7 +1011,7 @@ pthread_mutex_unlock(&master->mutex);
 
 redrawoscil();
 refresh();}
-        xywh {680 520 55 20} box THIN_UP_BOX labelfont 1 labelsize 12
+        xywh {680 525 55 15} box THIN_UP_BOX labelfont 1 labelsize 12
       }
       Fl_Button {} {
         label C
@@ -1050,6 +1080,7 @@ harmonicshiftpre->value(oscil->Pharmonicshiftfirst);
 adhrtype->value(oscil->Padaptiveharmonics);
 adhrbf->value(oscil->Padaptiveharmonicsbasefreq);
 adhrpow->value(oscil->Padaptiveharmonicspower);
+adhrtype->value(oscil->Padaptiveharmonicspar);
 
 for (int i=0;i<MAX_AD_HARMONICS;i++) h[i]->refresh();
 

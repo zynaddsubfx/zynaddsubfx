@@ -98,6 +98,7 @@ void OscilGen::defaults(){
     Padaptiveharmonics=0;
     Padaptiveharmonicspower=100;
     Padaptiveharmonicsbasefreq=128;
+    Padaptiveharmonicspar=50;
     
     for (int i=0;i<OSCIL_SIZE/2;i++) {
 	oscilFFTfreqs.s[i]=0.0;
@@ -725,6 +726,7 @@ void OscilGen::adaptiveharmonic(FFTFREQS f,REALTYPE freq){
 	f.s[i]=0.0;
 	f.c[i]=0.0;
     };
+    inf.c[0]=0.0;inf.s[0]=0.0;    
     
     REALTYPE hc=0.0,hs=0.0;
     REALTYPE basefreq=30.0*pow(10.0,Padaptiveharmonicsbasefreq/128.0);
@@ -771,10 +773,42 @@ void OscilGen::adaptiveharmonic(FFTFREQS f,REALTYPE freq){
 	};
     };
     
-    
     f.c[1]+=f.c[0];f.s[1]+=f.s[0];
     f.c[0]=0.0;f.s[0]=0.0;    
     deleteFFTFREQS(&inf);
+};
+
+void OscilGen::adaptiveharmonicpostprocess(REALTYPE *f,int size){
+    if (Padaptiveharmonics<=1) return;
+    REALTYPE *inf=new REALTYPE[size];
+    REALTYPE par=Padaptiveharmonicspar*0.01;
+    par=1.0-pow((1.0-par),1.5);
+    
+    for (int i=0;i<size;i++) {
+	inf[i]=f[i]*par;
+	f[i]=f[i]*(1.0-par);
+    };
+
+    
+    if (Padaptiveharmonics==2){//2n+1
+        for (int i=0;i<size;i++) if ((i%2)==0) f[i]+=inf[i];//i=0 pt prima armonica,etc.
+    } else{//celelalte moduri
+        int nh=(Padaptiveharmonics-3)/2+2;
+        int sub_vs_add=(Padaptiveharmonics-3)%2;
+	if (sub_vs_add==0){
+    	    for (int i=0;i<size;i++) {
+		if (((i+1)%nh)==0){
+		    f[i]+=inf[i];
+		};
+	    };
+        } else {
+    	    for (int i=0;i<size/nh-1;i++) {
+		f[(i+1)*nh-1]+=inf[i];
+	    };
+	};
+    };
+
+    delete(inf);
 };
 
 
@@ -847,6 +881,8 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
     };
 
     adaptiveharmonic(outoscilFFTfreqs,freqHz);
+    adaptiveharmonicpostprocess(&outoscilFFTfreqs.c[1],OSCIL_SIZE/2-1);
+    adaptiveharmonicpostprocess(&outoscilFFTfreqs.s[1],OSCIL_SIZE/2-1);
 
     nyquist=realnyquist;
     if (Padaptiveharmonics){//do the antialiasing in the case of adaptive harmonics
@@ -900,7 +936,6 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
 	srand(realrnd+1);
     };
 
-
     if ((freqHz>0.1)&&(resonance!=0)) res->applyres(nyquist-1,outoscilFFTfreqs,freqHz);
 
     //Full RMS normalize
@@ -946,7 +981,8 @@ void OscilGen::getspectrum(int n, REALTYPE *spc,int what){
 	    	 basefuncFFTfreqs.s[i]*basefuncFFTfreqs.s[i]);
 	};
     };
-}
+    if (what==0) adaptiveharmonicpostprocess(spc,n-1);
+};
 
 
 /* 
