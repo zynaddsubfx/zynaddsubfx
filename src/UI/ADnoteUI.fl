@@ -353,7 +353,7 @@ oldosc->redraw();}
       Fl_Group basefuncdisplaygroup {
         xywh {375 5 360 300} box ENGRAVED_FRAME
       } {
-        Fl_Group {} {open
+        Fl_Group {} {
           xywh {380 85 350 190} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
           code0 {ADOscilloscope *osc=new ADOscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
           code1 {osc->init(oscil,1,master);}
@@ -447,6 +447,64 @@ if ((oscil->Pcurrentbasefunc==0)||(oscil->Pcurrentbasefunc==127)) basefuncmodula
           label {Par.}
           xywh {500 285 25 15} labelsize 13 minimum -63 maximum 63 step 1
           code0 {o->value(oscil->Pbasefuncpar-64);}
+        }
+        Fl_Group basefuncmodulation {
+          xywh {579 276 150 25} box ENGRAVED_BOX
+          code0 {if ((oscil->Pcurrentbasefunc==0)||(oscil->Pcurrentbasefunc==127)) basefuncmodulation->deactivate();}
+        } {
+          Fl_Choice {} {
+            label {Mod.}
+            callback {oscil->Pbasefuncmodulation=(int) o->value();
+basefuncdisplaygroup->redraw();
+oscildisplaygroup->redraw();
+oldosc->redraw();}
+            tooltip {Base function modulation} xywh {609 281 50 15} down_box BORDER_BOX labelsize 10 textsize 10
+            code0 {o->value(oscil->Pbasefuncmodulation);}
+          } {
+            menuitem {} {
+              label None
+              xywh {50 50 100 20} labelfont 1 labelsize 10
+            }
+            menuitem {} {
+              label Rev
+              xywh {60 60 100 20} labelfont 1 labelsize 10
+            }
+            menuitem {} {
+              label Sine
+              xywh {70 70 100 20} labelfont 1 labelsize 10
+            }
+            menuitem {} {
+              label Pow selected
+              xywh {80 80 100 20} labelfont 1 labelsize 10
+            }
+          }
+          Fl_Dial {} {
+            callback {oscil->Pbasefuncmodulationpar1=(int)o->value();
+basefuncdisplaygroup->redraw();
+oscildisplaygroup->redraw();
+oldosc->redraw();}
+            tooltip {Oscillator's modulation parameter 1} xywh {669 281 15 15} maximum 127 step 1
+            code0 {o->value(oscil->Pbasefuncmodulationpar1);}
+            class WidgetPDial
+          }
+          Fl_Dial {} {
+            callback {oscil->Pbasefuncmodulationpar2=(int)o->value();
+basefuncdisplaygroup->redraw();
+oscildisplaygroup->redraw();
+oldosc->redraw();}
+            tooltip {Oscillator's modulation parameter 2} xywh {689 281 15 15} maximum 127 step 1
+            code0 {o->value(oscil->Pbasefuncmodulationpar2);}
+            class WidgetPDial
+          }
+          Fl_Dial {} {
+            callback {oscil->Pbasefuncmodulationpar3=(int)o->value();
+basefuncdisplaygroup->redraw();
+oscildisplaygroup->redraw();
+oldosc->redraw();}
+            tooltip {Oscillator's modulation parameter 3} xywh {709 281 15 15} maximum 127 step 1
+            code0 {o->value(oscil->Pbasefuncmodulationpar3);}
+            class WidgetPDial
+          }
         }
       }
       Fl_Choice {} {
@@ -718,60 +776,6 @@ oldosc->redraw();}
           code0 {for (int i=0;i<MAX_AD_HARMONICS;i++){h[i]=new ADOscilharmonic(0,0,20,o->h(),"");h[i]->init(oscil,i,oscildisplaygroup,oldosc,master);}}
         } {}
       }
-      Fl_Group basefuncmodulation {
-        xywh {580 278 150 25} box ENGRAVED_BOX
-        code0 {if ((oscil->Pcurrentbasefunc==0)||(oscil->Pcurrentbasefunc==127)) basefuncmodulation->deactivate();}
-      } {
-        Fl_Choice {} {
-          label {Mod.}
-          callback {oscil->Pbasefuncmodulation=(int) o->value();
-basefuncdisplaygroup->redraw();
-oscildisplaygroup->redraw();
-oldosc->redraw();} open
-          tooltip {Base function modulation} xywh {610 283 50 15} down_box BORDER_BOX labelsize 10 textsize 10
-          code0 {o->value(oscil->Pbasefuncmodulation);}
-        } {
-          menuitem {} {
-            label None
-            xywh {45 45 100 20} labelfont 1 labelsize 10
-          }
-          menuitem {} {
-            label Rev
-            xywh {55 55 100 20} labelfont 1 labelsize 10
-          }
-          menuitem {} {
-            label Sine
-            xywh {65 65 100 20} labelfont 1 labelsize 10
-          }
-        }
-        Fl_Dial {} {
-          callback {oscil->Pbasefuncmodulationpar1=(int)o->value();
-basefuncdisplaygroup->redraw();
-oscildisplaygroup->redraw();
-oldosc->redraw();}
-          tooltip {Oscillator's modulation parameter 1} xywh {670 283 15 15} maximum 127 step 1
-          code0 {o->value(oscil->Pbasefuncmodulationpar1);}
-          class WidgetPDial
-        }
-        Fl_Dial {} {
-          callback {oscil->Pbasefuncmodulationpar2=(int)o->value();
-basefuncdisplaygroup->redraw();
-oscildisplaygroup->redraw();
-oldosc->redraw();}
-          tooltip {Oscillator's modulation parameter 2} xywh {690 283 15 15} maximum 127 step 1
-          code0 {o->value(oscil->Pbasefuncmodulationpar2);}
-          class WidgetPDial
-        }
-        Fl_Dial {} {
-          callback {oscil->Pbasefuncmodulationpar3=(int)o->value();
-basefuncdisplaygroup->redraw();
-oscildisplaygroup->redraw();
-oldosc->redraw();} selected
-          tooltip {Oscillator's modulation parameter 3} xywh {710 283 15 15} maximum 127 step 1
-          code0 {o->value(oscil->Pbasefuncmodulationpar3);}
-          class WidgetPDial
-        }
-      }
       Fl_Choice {} {
         label Normalize
         callback {oscil->Pnormalizemethod=(int) o->value();}
@@ -824,7 +828,7 @@ oldosc->redraw();}
           class WidgetPDial
         }
       }
-      Fl_Group {} {open
+      Fl_Group {} {
         xywh {675 405 75 65} box ENGRAVED_BOX
       } {
         Fl_Counter harmonicshiftcounter {

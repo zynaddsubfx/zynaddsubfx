@@ -66,7 +66,7 @@ void OscilGen::defaults(){
     Pbasefuncmodulation=0;
     Pbasefuncmodulationpar1=64;
     Pbasefuncmodulationpar2=0;
-    Pbasefuncmodulationpar3=0;
+    Pbasefuncmodulationpar3=32;
 
     Pwaveshapingfunction=0;
     Pwaveshaping=64;
@@ -217,7 +217,12 @@ void OscilGen::getbasefunction(REALTYPE *smps){
         case 2:basefuncmodulationpar1=(pow(2,basefuncmodulationpar1*5.0)-1.0)/10.0;
 	       basefuncmodulationpar3=1.0+floor((pow(2,basefuncmodulationpar3*5.0)-1.0));
     	    break;
+	case 3:basefuncmodulationpar1=(pow(2,basefuncmodulationpar1*7.0)-1.0)/10.0;
+	       basefuncmodulationpar3=0.01+(pow(2,basefuncmodulationpar3*16.0)-1.0)/10.0;
+	    break;
     };	
+
+//    printf("%.5f %.5f\n",basefuncmodulationpar1,basefuncmodulationpar3);
 
     for (i=0;i<OSCIL_SIZE;i++) {
 	REALTYPE t=i*1.0/OSCIL_SIZE;
@@ -226,6 +231,8 @@ void OscilGen::getbasefunction(REALTYPE *smps){
 	    case 1:t=t*basefuncmodulationpar3+sin((t+basefuncmodulationpar2)*2.0*PI)*basefuncmodulationpar1;//rev
 		break;
 	    case 2:t=t+sin((t*basefuncmodulationpar3+basefuncmodulationpar2)*2.0*PI)*basefuncmodulationpar1;//sine
+		break;
+	    case 3:t=t+pow((1.0-cos((t+basefuncmodulationpar2)*2.0*PI))*0.5,basefuncmodulationpar3)*basefuncmodulationpar1;//power
 		break;
 	};
 	
