@@ -209,6 +209,40 @@ return(1);} {}
   decl {int npart;} {}
 } 
 
+class Simplelistitem {open : {public Fl_Group}
+} {
+  Function {make_window()} {open private
+  } {
+    Fl_Window simplelistitem {open
+      private xywh {330 228 70 260} type Double hide
+      class Fl_Group
+    } {}
+  }
+  Function {Simplelistitem(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {open
+  } {
+    code {npart=0;
+master=NULL;
+bankui=NULL;} {}
+  }
+  Function {init(Master *master_, int npart_,BankUI *bankui_)} {} {
+    code {npart=npart_;
+master=master_;
+bankui=bankui_;
+
+make_window();
+simplelistitem->show();
+end();} {}
+  }
+  Function {~Simplelistitem()} {open
+  } {
+    code {simplelistitem->hide();
+//delete(panellistitem);} {}
+  }
+  decl {int npart;} {}
+  decl {Master *master;} {}
+  decl {BankUI *bankui;} {}
+} 
+
 class SysEffSend {: {public WidgetPDial}
 } {
   Function {SysEffSend(int x,int y, int w, int h, const char *label=0):WidgetPDial(x,y,w,h,label)} {} {
@@ -379,8 +413,8 @@ class MasterUI {open
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
-      xywh {287 45 390 465} type Double
-      code0 {setfilelabel(NULL);} non_modal visible
+      xywh {206 42 390 465} type Double hide
+      code0 {setfilelabel(NULL);} non_modal
     } {
       Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
@@ -1079,8 +1113,8 @@ updatepanel();}
     }
     Fl_Window selectuiwindow {
       label {User Interface mode}
-      callback {*exitprogram=1;} selected
-      xywh {16 297 434 254} type Double visible
+      callback {*exitprogram=1;}
+      xywh {16 297 434 254} type Double hide
     } {
       Fl_Box {} {
         label {Welcome to ZynAddSubFX}
@@ -1122,9 +1156,83 @@ selectuiwindow->hide();}
     masterwindow->iconize();
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
-\#endif} open
-      xywh {31 194 821 511} type Double visible
-    } {}
+\#endif} open selected
+      xywh {142 151 710 562} type Double visible
+    } {
+      Fl_Group simplelistitemgroup {
+        private xywh {30 55 200 240} box EMBOSSED_BOX
+        code0 {if (master->part[npart]->Penabled==0) o->deactivate();}
+      } {
+        Fl_Group {} {
+          xywh {175 85 20 175} box ENGRAVED_FRAME
+        } {
+          Fl_Box {} {
+            label {V U}
+            xywh {175 85 20 175} box FLAT_BOX color 0 selection_color 75 labelcolor 55 align 128
+            code0 {o->init(master,npart);}
+            class VUMeter
+          }
+        }
+        Fl_Button partname {
+          label {  }
+          callback {if ((int)bankui->cbwig->value()!=(npart+1)){
+   bankui->cbwig->value(npart+1);
+   bankui->cbwig->do_callback();
+};
+bankui->show();}
+          xywh {35 62 160 18} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 10 align 208
+        }
+        Fl_Slider partpanning {
+          label Pan
+          callback {master->part[npart]->setPpanning((int) o->value());}
+          xywh {40 155 55 15} type {Horz Knob} box FLAT_BOX minimum 127 maximum 0 step 1 value 127
+          code0 {o->value(master->part[npart]->Ppanning);}
+        }
+        Fl_Choice partrcv {
+          label {Midi Channel Receive}
+          callback {master->part[npart]->Prcvchn=(int) o->value();} open
+          tooltip {receive from Midi channel} xywh {35 192 75 18} down_box BORDER_BOX labelsize 13 align 130 textfont 1
+          code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Ch%d",i+1);if (i!=9) o->add(nrstr); else o->add("Dr10");};}
+          code1 {o->value(master->part[npart]->Prcvchn);}
+        } {}
+        Fl_Dial partvolume {
+          callback {master->part[npart]->setPvolume((int) o->value());}
+          xywh {50 90 40 40} maximum 127 step 1
+          code0 {o->value(master->part[npart]->Pvolume);}
+          class WidgetPDial
+        }
+        Fl_Box {} {
+          label Volume
+          xywh {40 130 60 15}
+        }
+      }
+      Fl_Check_Button partenabled {
+        label 01
+        callback {pthread_mutex_lock(&master->mutex);
+ master->partonoff(npart,(int) o->value());
+pthread_mutex_unlock(&master->mutex);
+
+if ((int) o->value()==0) simplelistitemgroup->deactivate();
+  else {
+    simplelistitemgroup->activate();
+    if ((int)bankui->cbwig->value()!=(npart+1)){
+       bankui->cbwig->value(npart+1);
+       bankui->cbwig->do_callback();
+    };
+};
+
+o->redraw();}
+        private xywh {70 10 45 20} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 24
+        code0 {char tmp[10];snprintf(tmp,10,"%d",npart+1);o->label(strdup(tmp));}
+        code1 {o->value(master->part[npart]->Penabled);}
+      }
+      Fl_Box virkeys {
+        label Keyboard
+        xywh {15 340 590 80} box FLAT_BOX color 17
+        code0 {o->init(master);}
+        class VirKeys
+      }
+    }
   }
   Function {updatesendwindow()} {} {
     code {for (int neff1=0;neff1<NUM_SYS_EFX;neff1++) 
@@ -1186,6 +1294,25 @@ delete(presetsui);} {}
 
 
 //masterwindow->show();} {}
+  }
+  Function {simplerefresh()} {open
+  } {
+    code {partenabled->value(master->part[npart]->Penabled);
+if (master->part[npart]->Penabled!=0) simplelistitemgroup->activate();
+     else simplelistitemgroup->deactivate();
+
+partvolume->value(master->part[npart]->Pvolume);
+partpanning->value(master->part[npart]->Ppanning);
+partrcv->value(master->part[npart]->Prcvchn);
+
+partname->label((char *)master->part[npart]->Pname);
+
+if ((int)bankui->cbwig->value()!=(npart+1))
+   simplelistitemgroup->color(fl_rgb_color(160,160,160));
+else 
+   simplelistitemgroup->color(fl_rgb_color(50,190,240));
+
+simplelistitemgroup->redraw();} {}
   }
   decl {Master *master;} {}
   decl {MicrotonalUI *microtonalui;} {}
