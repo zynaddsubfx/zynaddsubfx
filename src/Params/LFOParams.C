@@ -45,7 +45,7 @@ LFOParams::~LFOParams(){
 };
 
 void LFOParams::defaults(){
-    Pfreq=Dfreq;
+    Pfreq=Dfreq/127.0;
     Pintensity=Dintensity;
     Pstartphase=Dstartphase;
     PLFOtype=DLFOtype;
@@ -68,6 +68,7 @@ void LFOParams::saveloadbuf(Buffer *buf){
     tmp=0xfe;
     buf->rwbyte(&tmp);//if tmp!=0xfe error
 
+    unsigned char freq=(int) (Pfreq*127.0);
 
     for (n=0x80;n<0xf0;n++){
 	if (buf->getmode()==0) {
@@ -78,7 +79,7 @@ void LFOParams::saveloadbuf(Buffer *buf){
 	
 	switch(npar){
 	    //LFO parameters
-	    case 0x80:	buf->rwbytepar(n,&Pfreq);
+	    case 0x80:	buf->rwbytepar(n,&freq);
 			break;
 	    case 0x81:	buf->rwbytepar(n,&Pintensity);
 			break;
@@ -97,6 +98,7 @@ void LFOParams::saveloadbuf(Buffer *buf){
 	};
     };
 
+    Pfreq=freq/127.0;
     
     if (buf->getmode()!=0) {
 	unsigned char tmp=0xff;
@@ -105,7 +107,7 @@ void LFOParams::saveloadbuf(Buffer *buf){
 };
 
 void LFOParams::add2XML(XMLwrapper *xml){
-    xml->addpar("freq",Pfreq);
+    xml->addparreal("freq",Pfreq);
     xml->addpar("intensity",Pintensity);
     xml->addpar("start_phase",Pstartphase);
     xml->addpar("lfo_type",PLFOtype);
@@ -116,7 +118,7 @@ void LFOParams::add2XML(XMLwrapper *xml){
 };
 
 void LFOParams::getfromXML(XMLwrapper *xml){
-    Pfreq=xml->getpar127("freq",Pfreq);
+    Pfreq=xml->getparreal("freq",Pfreq,0.0,1.0);
     Pintensity=xml->getpar127("intensity",Pintensity);
     Pstartphase=xml->getpar127("start_phase",Pstartphase);
     PLFOtype=xml->getpar127("lfo_type",PLFOtype);

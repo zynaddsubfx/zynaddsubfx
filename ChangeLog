@@ -536,3 +536,4 @@
 14 Feb 2004 - Se poate incarca si instrumente
 	    - Rezolvata o problema la coarse detune
 	    - Corectate cateva erori la incarcarea XML-ului
+	    - frecventa LFO-ul de la instrumente are valoare reala intre 0..1

@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0200 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2003 Nasca Octavian Paul} {} 
@@ -45,7 +45,7 @@ delete (lfoui);} {}
   }
   Function {make_window()} {} {
     Fl_Window lfoui {
-      xywh {212 373 230 70} color 50 labelfont 1 hide
+      xywh {212 373 230 70} type Double color 50 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Group lfoparamswindow {
@@ -54,8 +54,8 @@ delete (lfoui);} {}
       } {
         Fl_Dial {} {
           label {Freq.}
-          callback {pars->Pfreq=(int)o->value();}
-          tooltip {LFO Frequency} xywh {5 20 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+          callback {pars->Pfreq=o->value();} selected
+          tooltip {LFO Frequency} xywh {5 20 30 30} box ROUND_UP_BOX labelsize 11 step 1e-05
           code0 {o->value(pars->Pfreq);}
           class WidgetPDial
         }
@@ -82,7 +82,7 @@ delete (lfoui);} {}
         }
         Fl_Dial {} {
           label {A.R.}
-          callback {pars->Prandomness=(int)o->value();} selected
+          callback {pars->Prandomness=(int)o->value();}
           tooltip {LFO Amplitude Randomness} xywh {180 7 20 20} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           code0 {o->value(pars->Prandomness);}
           class WidgetPDial

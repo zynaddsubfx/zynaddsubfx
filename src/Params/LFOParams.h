@@ -39,7 +39,7 @@ class LFOParams{
       void getfromXML(XMLwrapper *xml);
       
     /* Parametrii MIDI */
-      unsigned char Pfreq;      // frequency
+      REALTYPE Pfreq;      // frequency
       unsigned char Pintensity; // intensity
       unsigned char Pstartphase;// start phase (0=random)
       unsigned char PLFOtype;   // LFO type (sin,triangle,square,ramp,...)

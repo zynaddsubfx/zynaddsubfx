@@ -334,7 +334,7 @@ void Controller::add2XML(XMLwrapper *xml){
 };
 
 void Controller::getfromXML(XMLwrapper *xml){
-    pitchwheel.bendrange=xml->getpar127("pitchwheel_bendrange",pitchwheel.bendrange);
+    pitchwheel.bendrange=xml->getpar("pitchwheel_bendrange",pitchwheel.bendrange,-6400,6400);
 
     expression.receive=xml->getparbool("expression_receive",expression.receive);
     panning.depth=xml->getpar127("panning_depth",panning.depth);

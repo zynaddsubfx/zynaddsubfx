@@ -270,6 +270,7 @@ void EffectMgr::getfromXML(XMLwrapper *xml){
 
     if (xml->enterbranch("EFFECT_PARAMETERS")){
 	for (int n=0;n<128;n++){
+	    seteffectpar_nolock(n,0);//erase effect parameter
 	    if (xml->enterbranch("par_no",n)==0) continue;
 
 	    int par=geteffectpar(n);

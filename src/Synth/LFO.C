@@ -28,7 +28,7 @@
 
 
 LFO::LFO(LFOParams *lfopars){
-    REALTYPE lfofreq=(pow(2,lfopars->Pfreq/127.0*10.0)-1.0)/12.0;
+    REALTYPE lfofreq=(pow(2,lfopars->Pfreq*10.0)-1.0)/12.0;
     incx=fabs(lfofreq)*(REALTYPE)SOUND_BUFFER_SIZE/(REALTYPE)SAMPLE_RATE;
 
     if (lfopars->Pcontinous==0){
