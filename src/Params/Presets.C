@@ -59,21 +59,30 @@ void Presets::copy(const char *name){
     nelement=-1;
 };
 
-void Presets::paste(){
+void Presets::paste(int npreset){
     char type[MAX_PRESETTYPE_SIZE];
     strcpy(type,this->type);
     if (nelement!=-1) strcat(type,"n");
     if (strstr(type,"Plfo")!=NULL) strcpy(type,"Plfo");
 
-    if (!checkclipboardtype()) {
-	nelement=-1;
-	return;
-    };
     XMLwrapper *xml=new XMLwrapper();
-    if (!presetsstore.pasteclipboard(xml)) {
-	delete(xml);
-	nelement=-1;
-	return;
+    if (npreset==0){
+	if (!checkclipboardtype()) {
+	    nelement=-1;
+	    delete(xml);
+	    return;
+	};
+	if (!presetsstore.pasteclipboard(xml)) {
+	    delete(xml);
+	    nelement=-1;
+	    return;
+	};
+    } else {
+	if (!presetsstore.pastepreset(xml,npreset)) {
+	    delete(xml);
+	    nelement=-1;
+	    return;
+	};
     };
     
     if (xml->enterbranch(type)==0) {

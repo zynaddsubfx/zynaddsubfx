@@ -35,12 +35,12 @@ pastewin->hide();delete(pastewin);} {}
   } {
     Fl_Window copywin {
       label {Copy to Clipboard/Preset}
-      xywh {243 174 265 315} type Double box PLASTIC_THIN_UP_BOX color 238 non_modal visible
+      xywh {243 174 265 315} type Double box PLASTIC_THIN_UP_BOX color 238 hide modal
     } {
       Fl_Browser copybrowse {
-        xywh {10 25 245 205}
+        xywh {10 25 245 205} type Select
       }
-      Fl_Button {} {
+      Fl_Button copypbutton {
         label {Copy to Preset}
         callback {const char *tmp=presetname->value();
 if (tmp!=NULL) {
@@ -51,7 +51,7 @@ if (tmp!=NULL) {
 };}
         xywh {145 235 110 20} box THIN_UP_BOX
       }
-      Fl_Button {} {
+      Fl_Button copybutton {
         label {Copy to Clipboard}
         callback {p->copy(NULL);
 copywin->hide();}
@@ -70,23 +70,38 @@ copywin->hide();}
         xywh {50 5 205 15} box FLAT_BOX color 238 labelfont 1 labelsize 12 align 20
       }
       Fl_Input presetname {
-        xywh {10 235 130 20}
+        callback {const char *tmp=o->value();
+if (tmp==NULL) tmp="";
+if (strlen(tmp)>0) {
+	copybutton->deactivate();
+	copypbutton->activate();
+} else {
+	copybutton->activate();
+	copypbutton->deactivate();
+};}
+        xywh {10 235 130 20} when 1
       }
     }
     Fl_Window pastewin {
       label {Paste from Clipboard/Preset}
-      xywh {516 204 265 315} type Double box PLASTIC_THIN_UP_BOX color 238 hide modal
+      xywh {343 225 265 315} type Double box PLASTIC_THIN_UP_BOX color 238 hide modal
     } {
       Fl_Browser pastebrowse {
+        callback {if (o->value()==0) pastepbutton->deactivate();
+	else pastepbutton->activate();}
         xywh {10 30 245 205} type Hold
       }
-      Fl_Button {} {
+      Fl_Button pastepbutton {
         label {Paste from Preset}
+        callback {int n=pastebrowse->value();
+if (n!=0) p->paste(n);
+pastewin->hide();
+pui->refresh();} selected
         xywh {50 240 160 20} box THIN_UP_BOX
       }
       Fl_Button pastebutton {
         label {Paste from Clipboard}
-        callback {p->paste();
+        callback {p->paste(0);
 pastewin->hide();
 pui->refresh();}
         xywh {25 270 90 35} box THIN_UP_BOX align 192
@@ -105,15 +120,19 @@ pui->refresh();}
       }
     }
   }
-  Function {copy(Presets *p)} {open
-  } {
-    code {this->p=p;
+  Function {copy(Presets *p)} {} {
+    code {copybutton->activate();
+copypbutton->deactivate();
+
+
+this->p=p;
 this->pui=NULL;
 bool but=(Fl::event_button()!=FL_LEFT_MOUSE);
 presetname->cut(0,presetname->maximum_size());
 
 if (but) p->copy(NULL);
    else {
+        rescan();
 	copytypetext->label(&p->type[1]);
 	copywin->show();
    };} {}
@@ -123,11 +142,13 @@ if (but) p->copy(NULL);
     code {this->p=p;
 this->pui=pui;
 bool but=(Fl::event_button()!=FL_LEFT_MOUSE);
+pastepbutton->deactivate();
 
 if (but) {
-	p->paste();
+	p->paste(0);
 	pui->refresh();
 } else {
+        rescan();
 	pastetypetext->label(&p->type[1]);
 	if (p->checkclipboardtype()) pastebutton->activate();
 		else pastebutton->deactivate();
@@ -145,8 +166,15 @@ paste(p,pui);} {}
   Function {rescan()} {open
   } {
     code {copybrowse->clear();
-pastebrowse->clear();} {selected
-    }
+pastebrowse->clear();
+p->rescanforpresets();
+
+for (int i=0;i<MAX_PRESETS;i++){
+   char *name=presetsstore.presets[i].name;
+   if (name==NULL) break;
+   copybrowse->add(name);
+   pastebrowse->add(name);
+};} {}
   }
   decl {Presets *p;} {public
   }

@@ -21,6 +21,8 @@
 */
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
 #include "PresetsStore.h"
 #include "../Misc/Util.h"
@@ -80,10 +82,31 @@ void PresetsStore::clearpresets(){
 
 void PresetsStore::rescanforpresets(char *type){
     clearpresets();
-//    int presetk=0;
+    int presetk=0;
+    char ftype[MAX_STRING_SIZE];
+    snprintf(ftype,MAX_STRING_SIZE,".%s.xpz",type);
+        
     for (int i=0;i<MAX_BANK_ROOT_DIRS;i++){
 	if (config.cfg.presetsDirList[i]==NULL) continue;
+	char *dirname=config.cfg.presetsDirList[i];
 	//de continuat aici
+	DIR *dir=opendir(dirname);
+	if (dir==NULL) continue;
+	struct dirent *fn;
+	while((fn=readdir(dir))){
+	    const char *filename=fn->d_name;
+	    if (strstr(filename,ftype)==NULL) continue;
+	    presets[presetk].file=new char [MAX_STRING_SIZE];
+	    presets[presetk].name=new char [MAX_STRING_SIZE];
+	    snprintf(presets[presetk].file,MAX_STRING_SIZE,"%s%s",dirname,filename);
+	    snprintf(presets[presetk].name,MAX_STRING_SIZE,"%s",filename);
+	    
+	    char *tmp=strstr(presets[presetk].name,ftype);
+	    if (tmp!=NULL) tmp[0]='\0';
+	    presetk++; if (presetk>=MAX_PRESETS) return;
+	};	
+
+	closedir(dir);
     };
 };
 
@@ -107,6 +130,15 @@ void PresetsStore::copypreset(XMLwrapper *xml,char *type, const char *name){
     snprintf(filename,MAX_STRING_SIZE,"%s%s.%s.xpz",config.cfg.presetsDirList[0],name,type);
     
     xml->saveXMLfile(filename);
+};
+
+bool PresetsStore::pastepreset(XMLwrapper *xml, int npreset){
+    npreset--;
+    if (npreset>=MAX_PRESETS) return(false);
+    char *filename=presets[npreset].file;
+    if (filename==NULL) return(false);
+    bool result=(xml->loadXMLfile(filename)>=0);
+    return(result);
 };
 
 

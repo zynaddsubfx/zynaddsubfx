@@ -38,6 +38,7 @@ class PresetsStore{
 
 	//presets stuff
 	void copypreset(XMLwrapper *xml,char *type, const char *name);
+	bool pastepreset(XMLwrapper *xml, int npreset);
 	
 	struct presetstruct{
 	    char *file;

@@ -222,7 +222,7 @@ int Bank::loadbank(const char *bankdirname){
         
     while ((fn=readdir(dir))){
 #ifndef OS_WINDOWS
-	if (fn->d_type!=DT_REG) continue;//this is not a regular file
+	if (fn->d_type!=DT_REG) continue;
 #endif
 	const char *filename= fn->d_name;
 	
