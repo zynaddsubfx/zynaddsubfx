@@ -372,10 +372,10 @@ fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. P
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
-      xywh {448 226 390 465} type Double
-      code0 {setfilelabel(NULL);} non_modal visible
+      xywh {448 226 390 465} type Double hide
+      code0 {setfilelabel(NULL);} non_modal
     } {
-      Fl_Menu_Bar mastermenu {
+      Fl_Menu_Bar mastermenu {selected
         xywh {0 0 690 25}
       } {
         submenu {} {
@@ -576,7 +576,7 @@ if (result!=0) fl_alert("Error: Could not save the file.");}
           }
         }
         submenu {} {
-          label {&Instrument}
+          label {&Instrument} open
           xywh {10 10 100 20}
         } {
           menuitem {} {
@@ -615,7 +615,7 @@ pthread_mutex_lock(&master->mutex);
 pthread_mutex_unlock(&master->mutex);
 
 npartcounter->do_callback();
-updatepanel();} selected
+updatepanel();}
             xywh {30 30 100 20} divider
           }
           menuitem {} {
@@ -683,11 +683,6 @@ if (result!=0) fl_alert("Error: Could not save the file.");
 
 updatepanel();}
             xywh {10 10 100 20} divider
-          }
-          menuitem {} {
-            label {Instrument Info...}
-            callback {partui->infowin->show();}
-            xywh {45 45 100 20} divider
           }
           menuitem {} {
             label {Show Instr. &Bank...}
