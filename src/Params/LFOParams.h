@@ -26,7 +26,6 @@
 #include "../Misc/Buffer.h"
 #include "../Misc/XMLwrapper.h"
 
-
 class LFOParams{
     public:
       LFOParams(char Pfreq_,char Pintensity_,char Pstartphase_, char PLFOtype_,char Prandomness_, char Pdelay_,char Pcontinous,char fel_);      
@@ -39,14 +38,15 @@ class LFOParams{
       void getfromXML(XMLwrapper *xml);
       
     /* Parametrii MIDI */
-      REALTYPE Pfreq;      // frequency
+      REALTYPE Pfreq;      	// frequency
       unsigned char Pintensity; // intensity
       unsigned char Pstartphase;// start phase (0=random)
       unsigned char PLFOtype;   // LFO type (sin,triangle,square,ramp,...)
       unsigned char Prandomness;// randomness (0=off)
-      unsigned char Pfreqrand;// frequency randomness (0=off)
+      unsigned char Pfreqrand;	// frequency randomness (0=off)
       unsigned char Pdelay;     // delay (0=off)
       unsigned char Pcontinous; // 1 if LFO is continous
+      unsigned char Pstretch;	// how the LFO is "stretched" according the note frequency (64=no stretch)
 
       int fel;//what kind is the LFO (0 - frequency, 1 - amplitude, 2 - filter)
       static int time;//is used by Pcontinous parameter

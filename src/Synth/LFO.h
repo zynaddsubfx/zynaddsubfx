@@ -29,7 +29,7 @@
 
 class LFO{
  public:
-    LFO(LFOParams *lfopars);
+    LFO(LFOParams *lfopars, REALTYPE basefreq);
     ~LFO();
     REALTYPE lfoout();
     REALTYPE amplfoout();

@@ -257,10 +257,10 @@ void ADnote::initparameters(){
 
     // Global Parameters
     NoteGlobalPar.FreqEnvelope=new Envelope(partparams->GlobalPar.FreqEnvelope,basefreq);
-    NoteGlobalPar.FreqLfo=new LFO(partparams->GlobalPar.FreqLfo);
+    NoteGlobalPar.FreqLfo=new LFO(partparams->GlobalPar.FreqLfo,basefreq);
     
     NoteGlobalPar.AmpEnvelope=new Envelope(partparams->GlobalPar.AmpEnvelope,basefreq);
-    NoteGlobalPar.AmpLfo=new LFO(partparams->GlobalPar.AmpLfo);
+    NoteGlobalPar.AmpLfo=new LFO(partparams->GlobalPar.AmpLfo,basefreq);
 
     NoteGlobalPar.Volume=4.0*pow(0.1,3.0*(1.0-partparams->GlobalPar.PVolume/96.0))//-60 dB .. 0 dB
 	    *VelF(velocity,partparams->GlobalPar.PAmpVelocityScaleFunction);//velocity sensing
@@ -272,7 +272,7 @@ void ADnote::initparameters(){
     if (stereo!=0) NoteGlobalPar.GlobalFilterR=new Filter(partparams->GlobalPar.GlobalFilter);
 	
     NoteGlobalPar.FilterEnvelope=new Envelope(partparams->GlobalPar.FilterEnvelope,basefreq);
-    NoteGlobalPar.FilterLfo=new LFO(partparams->GlobalPar.FilterLfo);
+    NoteGlobalPar.FilterLfo=new LFO(partparams->GlobalPar.FilterLfo,basefreq);
     NoteGlobalPar.FilterQ=partparams->GlobalPar.GlobalFilter->getq();
     NoteGlobalPar.FilterFreqTracking=partparams->GlobalPar.GlobalFilter->getfreqtracking(basefreq);
     
@@ -302,7 +302,7 @@ void ADnote::initparameters(){
 	    };
 
 	if (partparams->VoicePar[nvoice].PAmpLfoEnabled!=0){
-		NoteVoicePar[nvoice].AmpLfo=new LFO(partparams->VoicePar[nvoice].AmpLfo);
+		NoteVoicePar[nvoice].AmpLfo=new LFO(partparams->VoicePar[nvoice].AmpLfo,basefreq);
 		newamplitude[nvoice]*=NoteVoicePar[nvoice].AmpLfo->amplfoout();
 	};
 
@@ -310,7 +310,7 @@ void ADnote::initparameters(){
 	if (partparams->VoicePar[nvoice].PFreqEnvelopeEnabled!=0)
  	    NoteVoicePar[nvoice].FreqEnvelope=new Envelope(partparams->VoicePar[nvoice].FreqEnvelope,basefreq);
 
-	if (partparams->VoicePar[nvoice].PFreqLfoEnabled!=0) NoteVoicePar[nvoice].FreqLfo=new LFO(partparams->VoicePar[nvoice].FreqLfo);
+	if (partparams->VoicePar[nvoice].PFreqLfoEnabled!=0) NoteVoicePar[nvoice].FreqLfo=new LFO(partparams->VoicePar[nvoice].FreqLfo,basefreq);
 
 	/* Voice Filter Parameters Init */
 	if (partparams->VoicePar[nvoice].PFilterEnabled!=0){
@@ -321,7 +321,7 @@ void ADnote::initparameters(){
 	    NoteVoicePar[nvoice].FilterEnvelope=new Envelope(partparams->VoicePar[nvoice].FilterEnvelope,basefreq);
 	
 	if (partparams->VoicePar[nvoice].PFilterLfoEnabled!=0)
-	    NoteVoicePar[nvoice].FilterLfo=new LFO(partparams->VoicePar[nvoice].FilterLfo);
+	    NoteVoicePar[nvoice].FilterLfo=new LFO(partparams->VoicePar[nvoice].FilterLfo,basefreq);
 	
 	NoteVoicePar[nvoice].FilterFreqTracking=partparams->VoicePar[nvoice].VoiceFilter->getfreqtracking(basefreq);
 	

@@ -545,7 +545,7 @@
 24 Feb 2004 - Continuat la Bank
 25 Feb 2004 - La Bank - inceput sa scriu partea ca sa arate instrumentele din banca
 26 Feb 2004 - Continuat la Bank
-27 Feb 2004 - Corectate erori la snprintf ( nu dadeam parametru "%s" inainte de string si daca acel string continea ceva %, era periculos) si alte erori
+27 Feb 2004 - Corectate erori la snprintf (nu dadeam parametru "%s" inainte de string si daca acel string continea ceva %, era periculos) si alte erori
 	    - Micsorat timpul de marire amplitudine la ADnote (doar in cazul cand amplitudinea creste brusc ca la un LFO expdown)
 	    - Corectata o eroare foarte veche la LFO amplitudine (amplitudinea nu scadea corespunzator)
 28 Feb 2004 - Se poate incarca si salva instrumente in Bank
@@ -555,7 +555,7 @@
 03 Mar 2004 - Terminat (teoretic) partea de XML
 05 Mar 2004 - Actualizat Copyright-ul la 2004 in fisiere
 08 Mar 2004 - Corectat o mica eroare la OscilGen (se aplica gain-ul rezonantei incorect)
-
+09 Mar 2004 - Adaugat posibilitatea de stretch la LFO in functie de frecventa notei
 
 
 

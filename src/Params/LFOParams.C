@@ -53,6 +53,7 @@ void LFOParams::defaults(){
     Pdelay=Ddelay;
     Pcontinous=Dcontinous;
     Pfreqrand=0;
+    Pstretch=64;
 };
 
 /*
@@ -95,6 +96,8 @@ void LFOParams::saveloadbuf(Buffer *buf){
 			break;
 	    case 0x87:	buf->rwbytepar(n,&Pfreqrand);
 			break;
+	    case 0x88:	buf->rwbytepar(n,&Pstretch);
+			break;
 	};
     };
 
@@ -114,6 +117,7 @@ void LFOParams::add2XML(XMLwrapper *xml){
     xml->addpar("randomness_amplitude",Prandomness);
     xml->addpar("randomness_frequency",Pfreqrand);
     xml->addpar("delay",Pdelay);
+    xml->addpar("stretch",Pstretch);
     xml->addparbool("continous",Pcontinous);
 };
 
@@ -125,6 +129,7 @@ void LFOParams::getfromXML(XMLwrapper *xml){
     Prandomness=xml->getpar127("randomness_amplitude",Prandomness);
     Pfreqrand=xml->getpar127("randomness_frequency",Pfreqrand);
     Pdelay=xml->getpar127("delay",Pdelay);
+    Pstretch=xml->getpar127("stretch",Pstretch);
     Pcontinous=xml->getparbool("continous",Pcontinous);
 };
 

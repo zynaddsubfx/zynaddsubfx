@@ -27,8 +27,11 @@
 #include "LFO.h"
 
 
-LFO::LFO(LFOParams *lfopars){
-    REALTYPE lfofreq=(pow(2,lfopars->Pfreq*10.0)-1.0)/12.0;
+LFO::LFO(LFOParams *lfopars,REALTYPE basefreq){
+    if (lfopars->Pstretch==0) lfopars->Pstretch=1;
+    REALTYPE lfostretch=pow(basefreq/440.0,(lfopars->Pstretch-64.0)/63.0);//max 2x/octave
+
+    REALTYPE lfofreq=(pow(2,lfopars->Pfreq*10.0)-1.0)/12.0*lfostretch;
     incx=fabs(lfofreq)*(REALTYPE)SOUND_BUFFER_SIZE/(REALTYPE)SAMPLE_RATE;
 
     if (lfopars->Pcontinous==0){

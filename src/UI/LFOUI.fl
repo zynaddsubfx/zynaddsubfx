@@ -54,7 +54,7 @@ delete (lfoui);} {}
       } {
         Fl_Dial {} {
           label {Freq.}
-          callback {pars->Pfreq=o->value();} selected
+          callback {pars->Pfreq=o->value();}
           tooltip {LFO Frequency} xywh {5 20 30 30} box ROUND_UP_BOX labelsize 11 step 1e-05
           code0 {o->value(pars->Pfreq);}
           class WidgetPDial
@@ -125,7 +125,7 @@ delete (lfoui);} {}
         Fl_Check_Button {} {
           label {C.}
           callback {pars->Pcontinous=(int)o->value();}
-          tooltip {Continous LFO} xywh {145 30 30 15} down_box DOWN_BOX labelsize 11
+          tooltip {Continous LFO} xywh {150 13 25 15} down_box DOWN_BOX labelsize 11
           code0 {o->value(pars->Pcontinous);}
         }
         Fl_Dial {} {
@@ -133,6 +133,13 @@ delete (lfoui);} {}
           callback {pars->Pfreqrand=(int)o->value();}
           tooltip {LFO Frequency Randomness} xywh {205 7 20 20} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           code0 {o->value(pars->Pfreqrand);}
+          class WidgetPDial
+        }
+        Fl_Dial {} {
+          label {Str.}
+          callback {pars->Pstretch=(int)o->value();}
+          tooltip {LFO stretch} xywh {150 30 20 20} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
+          code0 {o->value(pars->Pstretch);}
           class WidgetPDial
         }
       }
