@@ -654,4 +654,6 @@
 --------------------------------------------------------------------------------------------------
 18 Iul 2004 - Corectata o mica eroare la afisare care facea ca la PADnoteUI sa fie trasate liniile in mod gresit
 19 Iul 2004 - Corectata doua mici erori (se incarca gresit parametrii filtrului de la OscilGen)
-
+	    - Corectata inca o mica eroare care facea ca sa nu se coloreze butonul PAD_Synth Apply in rosu la anumiti parametrii de la oscilgen
+	    - Se dezactiveaza butoanele Edit de la PartUI ca sa nu se poata edita module de sinteza inactive
+	    

@@ -339,8 +339,8 @@ class OscilEditor {} {
   Function {make_window()} {} {
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor}
-      xywh {4 91 745 590} type Double
-      code0 {if (oscil->ADvsPAD) o->label("PADsynth Harmonic Content Editor");} visible
+      xywh {4 91 745 590} type Double hide
+      code0 {if (oscil->ADvsPAD) o->label("PADsynth Harmonic Content Editor");}
     } {
       Fl_Group oscildisplaygroup {
         xywh {15 5 360 300} box ENGRAVED_FRAME
@@ -795,7 +795,7 @@ redrawoscil();}
             xywh {95 95 100 20} labelfont 1 labelsize 10
           }
           menuitem {} {
-            label S selected
+            label S
             xywh {105 105 100 20} labelfont 1 labelsize 10
           }
         }
@@ -893,8 +893,9 @@ redrawoscil();}
           xywh {678 405 60 25} labelsize 10 align 144
         }
         Fl_Choice adhrtype {
-          callback {oscil->Padaptiveharmonics=(int) o->value();} open
-          tooltip {The type of the addaptive harmonics} xywh {680 430 55 15} down_box BORDER_BOX labelsize 10 textsize 10
+          callback {oscil->Padaptiveharmonics=(int) o->value();
+redrawoscil();} open
+          tooltip {The type of the addaptive harmonics} xywh {680 430 55 15} down_box BORDER_BOX labelsize 10 when 6 textsize 10
         } {
           menuitem {} {
             label OFF
@@ -907,13 +908,15 @@ redrawoscil();}
         }
         Fl_Dial adhrpow {
           label pow
-          callback {oscil->Padaptiveharmonicspower=(int)o->value();}
+          callback {oscil->Padaptiveharmonicspower=(int)o->value();
+redrawoscil();} selected
           tooltip {Adaptive harmonics power} xywh {710 450 25 25} labelsize 10 maximum 100 step 1
           class WidgetPDial
         }
         Fl_Dial adhrbf {
           label baseF
-          callback {oscil->Padaptiveharmonicsbasefreq=(int)o->value();}
+          callback {oscil->Padaptiveharmonicsbasefreq=(int)o->value();
+redrawoscil();}
           tooltip {Adaptive harmonics base frequency} xywh {680 450 25 25} labelsize 10 maximum 255 step 1
           class WidgetPDial
         }

@@ -414,7 +414,7 @@ void PADnoteParameters::applyparameters(bool lockmutex){
 	rms=sqrt(rms);
         if (rms<0.000001) rms=1.0;
 	rms*=sqrt(262144.0/samplesize);
-        for (int i=0;i<samplesize;i++) newsample.smp[i]*=1.0/rms*100.0;
+        for (int i=0;i<samplesize;i++) newsample.smp[i]*=1.0/rms*50.0;
     
 	//prepare extra samples used by the linear or cubic interpolation
         for (int i=0;i<extra_samples;i++) newsample.smp[i+samplesize]=newsample.smp[i];

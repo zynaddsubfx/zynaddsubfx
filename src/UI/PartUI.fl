@@ -274,9 +274,9 @@ delete(partkititem);} {}
   decl {PartUI_ *partui;} {}
 } 
 
-class PartUI {: {public Fl_Group,PartUI_}
+class PartUI {open : {public Fl_Group,PartUI_}
 } {
-  Function {make_window()} {private
+  Function {make_window()} {open private
   } {
     Fl_Window partgroup {
       private xywh {107 533 385 180} type Double hide
@@ -613,7 +613,7 @@ int x=part->Pefxroute[ninseff];
 if (x==127) x=1;
 bypasseff->value(part->Pefxbypass[ninseff]);
 
-sendtochoice->value(x);} selected
+sendtochoice->value(x);}
         xywh {5 110 80 20} type Simple labelfont 1 align 6 minimum 1 maximum 127 step 1 textfont 1
         code0 {o->bounds(1,NUM_PART_EFX);}
         code1 {o->value(ninseff+1);}
@@ -866,7 +866,7 @@ subsynenabledcheck->value(part->kit[0].Psubenabled);}
     }
     Fl_Window instrumenteditwindow {
       label {Instrument Edit}
-      xywh {182 214 395 360} type Double hide
+      xywh {182 214 395 360} type Double visible
     } {
       Fl_Group {} {
         xywh {0 220 395 110} box ENGRAVED_FRAME
@@ -875,14 +875,18 @@ subsynenabledcheck->value(part->kit[0].Psubenabled);}
           label PADsynth
           xywh {205 245 100 80} box ENGRAVED_FRAME labelfont 1
         } {
-          Fl_Button {} {
+          Fl_Button padeditbutton {
             label Edit
             callback {showparameters(0,2);}
             xywh {215 280 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 18 align 128
+            code0 {if (part->kit[0].Ppadenabled==0) o->deactivate();}
           }
           Fl_Check_Button padsynenabledcheck {
             label Enabled
-            callback {part->kit[0].Ppadenabled=(int) o->value();}
+            callback {int x=(int) o->value();
+part->kit[0].Ppadenabled=x;
+if (x==0) padeditbutton->deactivate();
+     else padeditbutton->activate();} selected
             tooltip {enable/disable PADsynth} xywh {215 255 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
             code1 {o->value(part->kit[0].Ppadenabled);}
           }
@@ -893,14 +897,18 @@ subsynenabledcheck->value(part->kit[0].Psubenabled);}
         } {
           Fl_Check_Button adsynenabledcheck {
             label Enabled
-            callback {part->kit[0].Padenabled=(int) o->value();}
+            callback {int x=(int) o->value();
+part->kit[0].Padenabled=x;
+if (x==0) adeditbutton->deactivate();
+     else adeditbutton->activate();}
             tooltip {enable/disable ADsynth} xywh {15 255 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
             code1 {o->value(part->kit[0].Padenabled);}
           }
-          Fl_Button {} {
+          Fl_Button adeditbutton {
             label Edit
             callback {showparameters(0,0);}
             xywh {15 281 80 34} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 18 align 128
+            code0 {if (part->kit[0].Padenabled==0) o->deactivate();}
           }
         }
         Fl_Group {} {
@@ -909,14 +917,18 @@ subsynenabledcheck->value(part->kit[0].Psubenabled);}
         } {
           Fl_Check_Button subsynenabledcheck {
             label Enabled
-            callback {part->kit[0].Psubenabled=(int) o->value();}
+            callback {int x=(int) o->value();
+part->kit[0].Psubenabled=x;
+if (x==0) subeditbutton->deactivate();
+     else subeditbutton->activate();}
             tooltip {enable/disable SUBsynth} xywh {115 255 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
             code1 {o->value(part->kit[0].Psubenabled);}
           }
-          Fl_Button {} {
+          Fl_Button subeditbutton {
             label Edit
             callback {showparameters(0,1);}
             xywh {115 280 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 18 align 128
+            code0 {if (part->kit[0].Psubenabled==0) o->deactivate();}
           }
         }
         Fl_Button {} {
