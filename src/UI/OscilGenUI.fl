@@ -328,7 +328,8 @@ delete(harmonic);} {}
   decl {Master *master;} {}
 } 
 
-class OscilEditor {} {
+class OscilEditor {open
+} {
   Function {make_window()} {} {
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor}
@@ -617,7 +618,7 @@ oldosc->redraw();}
         xywh {678 557 62 28} box THIN_UP_BOX
       }
       Fl_Button {} {
-        label Clr
+        label Clear
         callback {if (!fl_ask("Clear the harmonics settings?")) return;
 
 for (int i=0;i<MAX_AD_HARMONICS;i++){
@@ -642,7 +643,7 @@ pthread_mutex_unlock(&master->mutex);
 
 oscildisplaygroup->redraw();
 oldosc->redraw();}
-        xywh {680 530 25 20} box THIN_UP_BOX labelfont 1 labelsize 12
+        xywh {680 500 55 20} box THIN_UP_BOX labelfont 1 labelsize 12
       }
       Fl_Group {} {
         xywh {145 305 150 30} box ENGRAVED_BOX
@@ -818,24 +819,6 @@ oldosc->redraw();}
           code0 {for (int i=0;i<MAX_AD_HARMONICS;i++){h[i]=new Oscilharmonic(0,0,20,o->h(),"");h[i]->init(oscil,i,oscildisplaygroup,oldosc,master);}}
         } {}
       }
-      Fl_Choice normalizetype {
-        label Normalize
-        callback {oscil->Pnormalizemethod=(int) o->value();}
-        tooltip {Normalize type (harmonic's sum/RMS) of the oscillator} xywh {680 415 60 20} down_box BORDER_BOX labelsize 10 align 5 textsize 10
-      } {
-        menuitem {} {
-          label Sum
-          xywh {65 65 100 20} labelfont 1 labelsize 10
-        }
-        menuitem {} {
-          label RMS
-          xywh {75 75 100 20} labelfont 1 labelsize 10
-        }
-        menuitem {} {
-          label {F.RMS}
-          xywh {85 85 100 20} labelfont 1 labelsize 10
-        }
-      }
       Fl_Group {} {
         xywh {600 305 130 30} box ENGRAVED_BOX
       } {
@@ -898,15 +881,15 @@ oldosc->redraw();}
         }
       }
       Fl_Group {} {
-        xywh {675 440 65 85} box ENGRAVED_FRAME
+        xywh {675 400 65 90} box ENGRAVED_FRAME
       } {
         Fl_Box {} {
           label {Adaptive Harmonics}
-          xywh {680 440 60 25} labelsize 10 align 144
+          xywh {678 405 60 25} labelsize 10 align 144
         }
         Fl_Choice adhrtype {
           callback {oscil->Padaptiveharmonics=(int) o->value();} open
-          tooltip {The type of the addaptive harmonics} xywh {680 465 55 15} down_box BORDER_BOX labelsize 10 textsize 10
+          tooltip {The type of the addaptive harmonics} xywh {680 430 55 15} down_box BORDER_BOX labelsize 10 textsize 10
         } {
           menuitem {} {
             label OFF
@@ -920,13 +903,13 @@ oldosc->redraw();}
         Fl_Dial adhrpow {
           label pow
           callback {oscil->Padaptiveharmonicspower=(int)o->value();}
-          tooltip {Adaptive harmonics power} xywh {710 485 25 25} labelsize 10 maximum 100 step 1
+          tooltip {Adaptive harmonics power} xywh {710 450 25 25} labelsize 10 maximum 100 step 1
           class WidgetPDial
         }
         Fl_Dial adhrbf {
           label baseF
           callback {oscil->Padaptiveharmonicsbasefreq=(int)o->value();}
-          tooltip {Adaptive harmonics base frequency} xywh {680 485 25 25} labelsize 10 maximum 255 step 1
+          tooltip {Adaptive harmonics base frequency} xywh {680 450 25 25} labelsize 10 maximum 255 step 1
           class WidgetPDial
         }
       }
@@ -991,7 +974,7 @@ oscildisplaygroup->redraw();
 oldosc->redraw();
 
 refresh();}
-        xywh {710 530 30 20} box THIN_UP_BOX labelfont 1 labelsize 12
+        xywh {680 530 55 20} box THIN_UP_BOX labelfont 1 labelsize 12
       }
     }
   }
@@ -1009,7 +992,8 @@ osceditUI->show();} {}
 for (int i=0;i<MAX_AD_HARMONICS;i++) delete (h[i]);
 delete (osceditUI);} {}
   }
-  Function {refresh()} {} {
+  Function {refresh()} {open
+  } {
     code {magtype->value(oscil->Phmagtype);
 rndslider->value(oscil->Prand-64);
 
@@ -1044,8 +1028,6 @@ sadjpar->value(oscil->Psapar);
 harmonicshiftcounter->value(oscil->Pharmonicshift);
 harmonicshiftpre->value(oscil->Pharmonicshiftfirst);
 
-normalizetype->value(oscil->Pnormalizemethod);
-
 adhrtype->value(oscil->Padaptiveharmonics);
 adhrbf->value(oscil->Padaptiveharmonicsbasefreq);
 adhrpow->value(oscil->Padaptiveharmonicspower);
@@ -1054,7 +1036,8 @@ for (int i=0;i<MAX_AD_HARMONICS;i++) h[i]->refresh();
 
 basefuncdisplaygroup->redraw();
 oscildisplaygroup->redraw();
-oldosc->redraw();} {}
+oldosc->redraw();} {selected
+    }
   }
   decl {OscilGen *oscil;} {}
   decl {Fl_Widget *oldosc;} {}

@@ -49,7 +49,7 @@ OscilGen::~OscilGen(){
 
 
 void OscilGen::defaults(){
-    oldbasefunc=0;oldbasepar=64;oldhmagtype=0;oldwaveshapingfunction=0;oldwaveshaping=64,oldnormalizemethod=0;
+    oldbasefunc=0;oldbasepar=64;oldhmagtype=0;oldwaveshapingfunction=0;oldwaveshaping=64;
     oldbasefuncmodulation=0;oldharmonicshift=0;oldbasefuncmodulationpar1=0;oldbasefuncmodulationpar2=0;oldbasefuncmodulationpar3=0;
     oldmodulation=0;oldmodulationpar1=0;oldmodulationpar2=0;oldmodulationpar3=0;
     for (int i=0;i<MAX_AD_HARMONICS;i++){
@@ -77,7 +77,6 @@ void OscilGen::defaults(){
 
     Pwaveshapingfunction=0;
     Pwaveshaping=64;
-    Pnormalizemethod=2;
     Pfiltertype=0;
     Pfilterpar=64;
     Pfilterbeforews=0;
@@ -372,13 +371,16 @@ void OscilGen::oscilfilter(){
 		     gain=cos(x*PI)+1.5;//low shelf
 		    break;
 	};
+	
+	
 	oscilFFTfreqs[OSCIL_SIZE-i]*=gain;
 	oscilFFTfreqs[i]*=gain;
 	REALTYPE tmp=oscilFFTfreqs[OSCIL_SIZE-i]*oscilFFTfreqs[OSCIL_SIZE-i]+
 		     oscilFFTfreqs[i]*oscilFFTfreqs[i];
 	if (max<tmp) max=tmp;
     };
-    
+
+    max=sqrt(max);
     if (max<1e-10) max=1.0;
     for (int i=1;i<OSCIL_SIZE;i++) oscilFFTfreqs[i]/=max; 
 };
@@ -681,7 +683,7 @@ void OscilGen::prepare(){
    spectrumadjust();
    if (Pharmonicshiftfirst==0)  shiftharmonics();
 
-   //normalize (sum or RMS) - the "Full RMS" normalisation is located in the "::get()" function
+/*   //normalize (sum or RMS) - the "Full RMS" normalisation is located in the "::get()" function
    if ((Pnormalizemethod==0)||(Pnormalizemethod==1)){
         REALTYPE sum=0;
 	for (j=1;j<OSCIL_SIZE/2;j++) {
@@ -689,12 +691,12 @@ void OscilGen::prepare(){
 	    if (Pnormalizemethod==0) sum+=sqrt(term);
 		else sum+=term;
     	};
-        if (sum<0.000001) sum=1.0;
+        if (sum<0.00000001) sum=1.0;
 	if (Pnormalizemethod==1) sum=sqrt(sum)*2.0;
 	sum*=0.5;   
 	for (j=1;j<OSCIL_SIZE;j++) oscilFFTfreqs[j]/=sum; 
    };
-
+*/
    oscilFFTfreqs[0]=0.0;//remove the DC
 
    if (ANTI_ALIAS==0) {
@@ -706,7 +708,7 @@ void OscilGen::prepare(){
 	delete(tmp);
    };
    oldhmagtype=Phmagtype;
-   oldnormalizemethod=Pnormalizemethod;
+//   oldnormalizemethod=Pnormalizemethod;
    oldharmonicshift=Pharmonicshift+Pharmonicshiftfirst*256;
 
    oscilprepared=1;
@@ -791,7 +793,6 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
     
     if ((oldbasepar!=Pbasefuncpar)||(oldbasefunc!=Pcurrentbasefunc)||(oldhmagtype!=Phmagtype)
 	||(oldwaveshaping!=Pwaveshaping)||(oldwaveshapingfunction!=Pwaveshapingfunction)) oscilprepared=0;
-    if (oldnormalizemethod!=Pnormalizemethod) oscilprepared=0;
     if (oldfilterpars!=Pfiltertype*256+Pfilterpar+Pfilterbeforews*65536){ 
 	oscilprepared=0;
 	oldfilterpars=Pfiltertype*256+Pfilterpar+Pfilterbeforews*65536;
@@ -901,19 +902,16 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
     if ((freqHz>0.1)&&(resonance!=0)) res->applyres(nyquist-1,outoscilFFTfreqs,freqHz);
 
     //Full RMS normalize
-    if (Pnormalizemethod==2){
-        REALTYPE sum=0;
-	for (int j=1;j<OSCIL_SIZE/2;j++) {
-	    REALTYPE term=outoscilFFTfreqs[j]*outoscilFFTfreqs[j]+outoscilFFTfreqs[OSCIL_SIZE-j]*outoscilFFTfreqs[OSCIL_SIZE-j];
-	    sum+=term;
-    	};
-        if (sum<0.000001) sum=1.0;	
-	sum=sqrt(sum);
-	
-	if ((freqHz>0.1)&&(resonance!=0)&&(res->Penabled!=0)) sum/=dB2rap(res->Pgain*0.5);//apply the ressonance gain
-	
-	for (int j=1;j<OSCIL_SIZE;j++) outoscilFFTfreqs[j]/=sum; 
-   };
+    REALTYPE sum=0;
+    for (int j=1;j<OSCIL_SIZE/2;j++) {
+        REALTYPE term=outoscilFFTfreqs[j]*outoscilFFTfreqs[j]+outoscilFFTfreqs[OSCIL_SIZE-j]*outoscilFFTfreqs[OSCIL_SIZE-j];
+        sum+=term;
+    };
+    if (sum<0.000001) sum=1.0;	
+    sum=sqrt(sum);
+    if ((freqHz>0.1)&&(resonance!=0)&&(res->Penabled!=0)) sum/=dB2rap(res->Pgain*0.5);//apply the ressonance gain
+    for (int j=1;j<OSCIL_SIZE;j++) outoscilFFTfreqs[j]/=sum; 
+   
 
 
 //    for (i=0;i<OSCIL_SIZE/2;i++) outoscilFFTfreqs[i+OSCIL_SIZE/2]*=-1.0;//correct the amplitude
@@ -1077,7 +1075,6 @@ void OscilGen::saveloadbuf(Buffer *buf){
     buf->rwbyte(&tmp);//if tmp!=0xfe error
 
     if (buf->getmode()==0){
-	Pnormalizemethod=0;
 	for (nharmonic=0;nharmonic<MAX_AD_HARMONICS;nharmonic++){
 	    Phmag[nharmonic]=64;
 	    Phphase[nharmonic]=64;
@@ -1151,8 +1148,8 @@ void OscilGen::saveloadbuf(Buffer *buf){
 			    
 			};
 			break;
-	    case 0x88:	buf->rwbytepar(n,&Pnormalizemethod);
-			break;
+//	    case 0x88:	buf->rwbytepar(n,&Pnormalizemethod);
+//			break;
 	    case 0x89:	buf->rwbytepar(n,&Pfiltertype);
 			break;
 	    case 0x8A:	buf->rwbytepar(n,&Pfilterpar);
@@ -1185,7 +1182,6 @@ void OscilGen::saveloadbuf(Buffer *buf){
 
 void OscilGen::add2XML(XMLwrapper *xml){
     xml->addpar("harmonic_mag_type",Phmagtype);
-    xml->addpar("normalize_method",Pnormalizemethod);
 
     xml->addpar("base_function",Pcurrentbasefunc);
     xml->addpar("base_function_par",Pbasefuncpar);
@@ -1255,7 +1251,7 @@ void OscilGen::add2XML(XMLwrapper *xml){
 void OscilGen::getfromXML(XMLwrapper *xml){
 
     Phmagtype=xml->getpar127("harmonic_mag_type",Phmagtype);
-    Pnormalizemethod=xml->getpar127("normalize_method",Pnormalizemethod);
+//    Pnormalizemethod=xml->getpar127("normalize_method",Pnormalizemethod);
 
     Pcurrentbasefunc=xml->getpar127("base_function",Pcurrentbasefunc);
     Pbasefuncpar=xml->getpar127("base_function_par",Pbasefuncpar);

@@ -86,7 +86,6 @@ class OscilGen{
 	  65..127 - each harmonic randomness - 127 is maximum*/
 	unsigned char Prand;
 	unsigned char Pwaveshaping,Pwaveshapingfunction;
-	unsigned char Pnormalizemethod;
 	unsigned char Pfiltertype,Pfilterpar;
 	unsigned char Pfilterbeforews;
 	unsigned char Psatype,Psapar;//spectrum adjust
@@ -152,7 +151,7 @@ class OscilGen{
 	REALTYPE basefunc_sqr(REALTYPE x,REALTYPE a);
 
 	//Internal Data
-	unsigned char oldbasefunc,oldbasepar,oldhmagtype,oldwaveshapingfunction,oldwaveshaping,oldnormalizemethod;
+	unsigned char oldbasefunc,oldbasepar,oldhmagtype,oldwaveshapingfunction,oldwaveshaping;
 	int oldfilterpars,oldsapars,oldbasefuncmodulation,oldbasefuncmodulationpar1,oldbasefuncmodulationpar2,oldbasefuncmodulationpar3,oldharmonicshift;
 	int oldmodulation,oldmodulationpar1,oldmodulationpar2,oldmodulationpar3;
 	/*

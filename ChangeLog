@@ -594,6 +594,7 @@
 	    - Adaugata posibilitatea de draw la armonicele OscilGen daca se apasa tasta Shift
 	    - Corectata o mica eroare care facea imposibila modificarea amplitudinii armonicelor cu tastatura
 	    - Adaugat randomness de grup (adica se aplica acelasi randomness la toate vocile care folosesc acelasi oscilator)
-	    
+24 Iun 2004 - Inlaturat setara de normalize la OscilGen. Intotdeauna normalize este Full RMS
+
 	    
 
