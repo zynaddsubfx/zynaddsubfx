@@ -389,6 +389,8 @@ void ADnoteParameters::add2XML(XMLwrapper *xml){
 	
 	xml->addpar("coarse_detune",GlobalPar.PCoarseDetune);
         xml->addpar("detune_type",GlobalPar.PDetuneType);
+
+        xml->addpar("bandwidth",GlobalPar.PBandwidth);
 	
 	xml->beginbranch("FREQUENCY_ENVELOPE");
 	    GlobalPar.FreqEnvelope->add2XML(xml);
@@ -460,6 +462,8 @@ void ADnoteParameters::getfromXML(XMLwrapper *xml){
 	GlobalPar.PDetune=xml->getpar("detune",GlobalPar.PDetune,0,16383);
 	GlobalPar.PCoarseDetune=xml->getpar("coarse_detune",GlobalPar.PCoarseDetune,0,16383);
         GlobalPar.PDetuneType=xml->getpar127("detune_type",GlobalPar.PDetuneType);
+
+        GlobalPar.PBandwidth=xml->getpar127("bandwidth",GlobalPar.PBandwidth);
 	
 	xml->enterbranch("FREQUENCY_ENVELOPE");
 	    GlobalPar.FreqEnvelope->getfromXML(xml);
