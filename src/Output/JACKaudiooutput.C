@@ -99,6 +99,11 @@ void JACKaudiooutputinit(Master *master_){
 
 void *thread_blocked(void *arg){
     int datasize=SOUND_BUFFER_SIZE*sizeof (REALTYPE);
+
+    //try to get realtime
+    sched_param sc;
+    sc.sched_priority=50;
+    int err=sched_setscheduler(0,SCHED_FIFO,&sc);
     
     pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS,NULL);
     pthread_mutex_lock(&zyn_thread_lock);
@@ -125,8 +130,29 @@ int jackprocess(jack_nframes_t nframes,void *arg){
     jack_default_audio_sample_t *outr=(jack_default_audio_sample_t *) jack_port_get_buffer (outport_right, nframes);
 
     int datasize=nframes*sizeof (REALTYPE);
-//    printf("%d\n",nframes);
-    if (jack_ringbuffer_read_space(rb)>=datasize){
+    int incoming_datasize=SOUND_BUFFER_SIZE*sizeof (REALTYPE);
+    int data_read=0;
+
+
+    if (jack_ringbuffer_read_space(rb)>=(2*incoming_datasize)){
+	if (datasize>incoming_datasize){
+	    data_read=0;
+	    while (data_read < datasize){
+		jack_ringbuffer_read(rb, (char *) outl+data_read,datasize);
+		jack_ringbuffer_read(rb, (char *) outr+data_read,datasize);
+		data_read+=incoming_datasize;
+	    };
+	} else if (datasize==incoming_datasize){
+		jack_ringbuffer_read(rb, (char *) outl,datasize);
+		jack_ringbuffer_read(rb, (char *) outr,datasize);
+	} else {
+	};
+    } else {//the ringbuffer is empty or there are too small amount of samples in it
+	for (int i=0;i<nframes;i++){
+	    outl[i]=0.0;outr[i]=0.0;
+	}; 
+    };
+/*    if (jack_ringbuffer_read_space(rb)>=datasize){
 	jack_ringbuffer_read(rb, (char *) outl,datasize);
 	jack_ringbuffer_read(rb, (char *) outr,datasize);
     } else {//the ringbuffer is empty or there are too small amount of samples in it
@@ -134,7 +160,7 @@ int jackprocess(jack_nframes_t nframes,void *arg){
 	    outl[i]=0.0;outr[i]=0.0;
 	};
     };
-    
+*/    
     if (pthread_mutex_trylock(&zyn_thread_lock)==0){
 	pthread_cond_signal(&more_data);
 	pthread_mutex_unlock(&zyn_thread_lock);

@@ -38,6 +38,7 @@ class LFOParams{
       unsigned char Pstartphase;// start phase (0=random)
       unsigned char PLFOtype;   // LFO typpe (sin,triangle,square,ramp,...)
       unsigned char Prandomness;// randomness (0=off)
+      unsigned char Pfreqrand;// frequency randomness (0=off)
       unsigned char Pdelay;     // delay (0=off)
       unsigned char Pcontinous; // 1 if LFO is continous
 

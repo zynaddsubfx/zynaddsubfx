@@ -503,3 +503,4 @@
 05 Dec 2003 - Facute cateva modificari la jack
 08 Dec 2003 - Inceput sa incerc sa fac rt-safe sub jack, dar in stadiul actual suportul jack este nefunctional
 11 Dec 2003 - Adaugat aleatorism la amplitudinile armonicelor
+13 Dec 2003 - Adaugat LFO frequency randomness

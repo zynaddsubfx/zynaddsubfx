@@ -35,6 +35,7 @@ LFOParams::LFOParams(char Pfreq_,char Pintensity_,char Pstartphase_, char PLFOty
     Prandomness=Prandomness_;
     Pdelay=Pdelay_;
     Pcontinous=Pcontinous_;
+    Pfreqrand=0;
     fel=fel_;
     time=0;
 };
@@ -78,6 +79,8 @@ void LFOParams::saveloadbuf(Buffer *buf){
 	    case 0x85:	buf->rwbytepar(n,&Pdelay);
 			break;
 	    case 0x86:	buf->rwbytepar(n,&Pcontinous);
+			break;
+	    case 0x87:	buf->rwbytepar(n,&Pfreqrand);
 			break;
 	};
     };

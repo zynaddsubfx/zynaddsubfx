@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0103 
+version 1.0104 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2003 Nasca Octavian Paul} {} 
@@ -45,7 +45,7 @@ delete (lfoui);} {}
   }
   Function {make_window()} {} {
     Fl_Window lfoui {
-      xywh {354 365 231 70} color 50 labelfont 1 hide
+      xywh {212 373 230 70} color 50 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Group lfoparamswindow {
@@ -81,16 +81,16 @@ delete (lfoui);} {}
           class WidgetPDial
         }
         Fl_Dial {} {
-          label RND
-          callback {pars->Prandomness=(int)o->value();}
-          tooltip {LFO Randomness} xywh {145 20 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+          label {A.R.}
+          callback {pars->Prandomness=(int)o->value();} selected
+          tooltip {LFO Amplitude Randomness} xywh {180 7 20 20} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           code0 {o->value(pars->Prandomness);}
           class WidgetPDial
         }
         Fl_Choice {} {
           label Type
           callback {pars->PLFOtype=(int)o->value();}
-          tooltip {LFO function} xywh {180 35 45 15} down_box BORDER_BOX labelsize 10 align 2 textsize 8
+          tooltip {LFO function} xywh {180 40 45 15} down_box BORDER_BOX labelsize 10 align 2 textsize 8
           code0 {o->value(pars->PLFOtype);}
         } {
           menuitem {} {
@@ -123,10 +123,17 @@ delete (lfoui);} {}
           }
         }
         Fl_Check_Button {} {
-          label {Cnt.}
+          label {C.}
           callback {pars->Pcontinous=(int)o->value();}
-          tooltip {Continous LFO} xywh {180 15 40 15} down_box DOWN_BOX labelsize 11
+          tooltip {Continous LFO} xywh {145 30 30 15} down_box DOWN_BOX labelsize 11
           code0 {o->value(pars->Pcontinous);}
+        }
+        Fl_Dial {} {
+          label {F.R.}
+          callback {pars->Pfreqrand=(int)o->value();}
+          tooltip {LFO Frequency Randomness} xywh {205 7 20 20} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
+          code0 {o->value(pars->Pfreqrand);}
+          class WidgetPDial
         }
       }
     }
@@ -139,8 +146,7 @@ end();
 
 lfoui->resize(this->x(),this->y(),this->w(),this->h());
 
-lfoparamswindow->label(this->label());} {selected
-    }
+lfoparamswindow->label(this->label());} {}
   }
   decl {LFOParams *pars;} {}
 } 

@@ -46,6 +46,8 @@ LFO::LFO(LFOParams *lfopars){
     lfornd=lfopars->Prandomness/127.0;
     if (lfornd<0.0) lfornd=0.0; else if (lfornd>1.0) lfornd=1.0;
 
+    lfofreqrnd=pow(lfopars->Pfreqrand/127.0,2.0)*2.0*4.0;
+
     switch (lfopars->fel){
 	case 1:lfointensity=lfopars->Pintensity/127.0;break;
 	case 2:lfointensity=lfopars->Pintensity/127.0*4.0;break;//in octave
@@ -58,6 +60,7 @@ LFO::LFO(LFOParams *lfopars){
     amp2=(1-lfornd)+lfornd*RND;
     lfotype=lfopars->PLFOtype;
     lfodelay=lfopars->Pdelay/127.0*4.0;//0..4 sec
+    incrnd=1.0;
 };
 
 LFO::~LFO(){
@@ -95,14 +98,16 @@ REALTYPE LFO::lfoout(){
      if ((lfotype==0)||(lfotype==1)) out*=lfointensity*(amp1+x*(amp2-amp1));
         else out*=lfointensity*amp2;
     if (lfodelay<0.00001) {
-	    x+=incx;
+	    x+=incx*incrnd;
 	    if (x>1) {
 		x-=1;
 		amp1=amp2;
 		amp2=(1-lfornd)+lfornd*RND;
-		};
-	    }
-	else lfodelay-=(REALTYPE)SOUND_BUFFER_SIZE/(REALTYPE)SAMPLE_RATE;
+
+		incrnd=pow(2.0,(RND-0.5)*lfofreqrnd);
+		if (incrnd*incx>=0.49999999) incrnd=1.0;
+	    };
+    } else lfodelay-=(REALTYPE)SOUND_BUFFER_SIZE/(REALTYPE)SAMPLE_RATE;
     return(out);
 };
 
