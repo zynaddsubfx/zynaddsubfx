@@ -380,6 +380,7 @@ void OscilGen::spectrumadjust(){
 void OscilGen::prepare(){
    int i,j,k;
    REALTYPE a,b,c,d,hmagnew;
+   
    if ((oldbasepar!=Pbasefuncpar)||(oldbasefunc!=Pcurrentbasefunc)) changebasefunction();
 
    for (i=0;i<MAX_AD_HARMONICS;i++) hphase[i]=(Phphase[i]-64.0)/64.0*PI/(i+1);

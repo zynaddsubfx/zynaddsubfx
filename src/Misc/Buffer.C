@@ -58,7 +58,10 @@ void Buffer::rwbyte(unsigned char *b){
     if (datak>=BUFFER_CHUNK_SIZE) {
 	if (mode==0) {//read from the buffer
 	    if (data->next!=NULL) data=data->next;
-		else *b=0xff;
+		else {
+		    *b=0xff;
+		    for (int i=0;i<BUFFER_CHUNK_SIZE;i++) data->d[i]=0xff;
+		};
 	} else {//write to the buffer
 	    list *tmp=new list;
 	    tmp->next=NULL;

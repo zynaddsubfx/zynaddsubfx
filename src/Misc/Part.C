@@ -114,12 +114,13 @@ void Part::defaultsinstrument(){
 	kit[n].Padenabled=0;kit[n].Psubenabled=0;
 	memset(kit[n].Pname,0,PART_MAX_NAME_LEN);
 	kit[n].Psendtoparteffect=0;
-	setkititemstatus(n,0);
+	if (n!=0) setkititemstatus(n,0);
     };
     kit[0].Penabled=1;
     kit[0].Padenabled=1;
-    setkititemstatus(0,1);
-
+    kit[0].adpars->defaults();
+    kit[0].subpars->defaults();
+    
     for (int nefx=0;nefx<NUM_PART_EFX;nefx++) {
     	partefx[nefx]->defaults();
 	Pefxroute[nefx]=0;//route to next effect
@@ -566,6 +567,7 @@ void Part::setPpanning(char Ppanning_){
 void Part::setkititemstatus(int kititem,int Penabled_){
     if ((kititem==0)&&(kititem>=NUM_KIT_ITEMS)) return;//nonexistent kit item and the first kit item is always enabled
     kit[kititem].Penabled=Penabled_;
+    
     if (Penabled_==0){
 	if (kit[kititem].adpars!=NULL) delete (kit[kititem].adpars);
 	if (kit[kititem].subpars!=NULL) delete (kit[kititem].subpars);
@@ -675,6 +677,7 @@ void Part::saveloadbufkititem(Buffer *buf,unsigned char item,int saveitem0){
 			    if (kit[item].subpars==NULL) break;
 			    buf->rwbyte(&npar);
 			};
+			
 			kit[item].subpars->saveloadbuf(buf);
 			break;
 	    case 0xB0:  if (buf->getmode()!=0) {
@@ -719,6 +722,8 @@ void Part::saveloadbuf(Buffer *buf,int instrumentonly){
 
     tmp=0xfe;
     buf->rwbyte(&tmp);//if tmp!=0xfe error
+
+
 
     if ((buf->getmode()==0)&&(disablekitloading==0)){//clears all kit items
 	for (int item=0;item<NUM_KIT_ITEMS;item++) {
@@ -843,7 +848,7 @@ void Part::saveloadbuf(Buffer *buf,int instrumentonly){
 	    case 0xC1:	if ((buf->getminimal()!=0) && (buf->getmode()!=0) 
 			    && (PSUBnoteenabled==0)) break;
 			if (buf->getmode()!=0) buf->rwbyte(&npar);
-			kit[0].adpars->saveloadbuf(buf);
+			kit[0].subpars->saveloadbuf(buf);
 			break;
 	    case 0xD0:  if (buf->getmode()!=0) {
 			    if (instrumentonly!=2){
