@@ -39,7 +39,7 @@ Requirements:
 Not requred, but recomanded:
 ---------------------------
 
-    - ALSA 0.9.x (with OSS emulation, if you don't use JACK)
+    - ALSA 0.9.x or later (with OSS emulation, if you don't use JACK)
     - JACKit - if you want to use it you must enable compilation for JACK in Makefile.inc
     - a VST host for the VST version
 
