@@ -44,7 +44,7 @@ class VSTSynth:public AudioEffectX{
 	virtual void resume();
 		
 	virtual long getChunk(void** data,bool isPreset=false);
-	virtual void setChunk(void *data,long size,bool isPreset=false);		
+	virtual long setChunk(void *data,long size,bool isPreset=false);		
 
 	MasterUI *ui;
 	int Pexitprogram;

@@ -1,9 +1,9 @@
 include Makefile.inc
 
 ifneq ($(MAKECMDGOALS),debug)
-  CXXFLAGS= -O6 -ggdb -Wall 
+  CXXFLAGS= -O6 -Wall 
 else 
-  CXXFLAGS= -O0 -ggdb -Wall -Wpointer-arith -Wstrict-prototypes
+  CXXFLAGS= -O0 -Wall -Wpointer-arith -Wstrict-prototypes
 endif
 
 CXXFLAGS += -DOS_$(OS_PORT) -D$(MIDIIN)MIDIIN -DFFTW_VERSION_$(FFTW_VERSION) -DASM_F2I_$(ASM_F2I) `fltk-config --cflags` 
@@ -26,7 +26,10 @@ endif
 ifeq ($(OS_PORT),LINUX) 
 LIBS+= -lpthread
 else
-LIBS+= -lpthreadGC
+#dynamic linking
+#LIBS+= -lpthreadGC
+#static linking
+LIBS+= /usr/lib/libpthreadGC1.a
 endif
 
 ifeq ($(MIDIIN),ALSA) 
@@ -77,9 +80,15 @@ ifeq ($(AUDIOOUT),DSSI)
 	gcc -shared  -o zynaddsubfx.so */*.o *.o $(LIBS) 
 else
 ifeq ($(AUDIOOUT),VST) 
-	gcc -shared -o zynaddsubfx_vst.dll */*.o *.o $(LIBS) zynaddsubfx_gcc.def
+	gcc -shared -o zynaddsubfx_vst.dll */*.o *.o ../../vstsdk2/source/common/AudioEffect.cpp ../../vstsdk2/source/common/audioeffectx.cpp  $(LIBS) zynaddsubfx_gcc.def
 else
+
+
+ifeq ($(OS_PORT),LINUX) 
 	$(CXX) -o zynaddsubfx */*.o *.o $(LIBS)
+else
+	$(CXX) -o zynaddsubfx.exe */*.o *.o $(LIBS)
+endif 
 endif
 endif
 

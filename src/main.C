@@ -676,14 +676,15 @@ long VSTSynth::processEvents(VstEvents *events){
 return(1);
 };
 
-long VSTSynth::getChunk(void** data,bool isPreset=false){
+long VSTSynth::getChunk(void** data,bool isPreset){
     int size=0;
     size=vmaster->getalldata((char **)data);
     return((long)size);
 };
 
-void VSTSynth::setChunk(void *data,long size,bool isPreset=false){
+long VSTSynth::setChunk(void *data,long size,bool isPreset){
     vmaster->putalldata((char*)data,size);
+    return(0);
 };
 #endif
 

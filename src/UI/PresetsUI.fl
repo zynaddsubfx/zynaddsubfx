@@ -2,7 +2,7 @@
 version 1.0105 
 header_name {.h} 
 code_name {.cc}
-decl {\#include <FL/fl_ask.h>} {public
+decl {\#include <FL/fl_ask.H>} {public
 } 
 
 decl {\#include <stdio.h>} {public
