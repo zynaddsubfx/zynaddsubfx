@@ -152,7 +152,7 @@ return(log(freq/20.0)/log(1000.0));} {}
   decl {int maxdB;} {}
 } 
 
-class EffUI {open : {public Fl_Group}
+class EffUI {: {public Fl_Group}
 } {
   Function {EffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {eff=NULL;
@@ -1194,29 +1194,24 @@ refresh(eff);} open
   }
   Function {make_filter_window()} {} {
     Fl_Window filterwindow {
-      label {Filter Parameters for DynFilter Eff.}
-      xywh {212 170 290 115} type Double hide
+      label {Filter Parameters for DynFilter Eff.} selected
+      xywh {212 170 290 110} type Double hide
     } {
       Fl_Group {} {
         label {DynFilter effect  - Filter} open
         xywh {5 5 275 75} box FLAT_BOX color 50 align 144
         code0 {o->init(eff->filterpars,NULL,NULL);}
+        code1 {o->use_for_dynamic_filter();}
         class FilterUI
       } {}
       Fl_Button {} {
-        label Apply
-        callback {eff->cleanup();}
-        tooltip {apply the filter settings} xywh {5 85 70 25} box THIN_UP_BOX
-      }
-      Fl_Button {} {
         label Close
         callback {filterwindow->hide();}
-        xywh {210 85 70 25} box THIN_UP_BOX
+        xywh {105 85 70 20} box THIN_UP_BOX
       }
     }
   }
-  Function {init(EffectMgr *eff_)} {open
-  } {
+  Function {init(EffectMgr *eff_)} {} {
     code {eff=eff_;
 
 make_null_window();
@@ -1244,8 +1239,7 @@ effdynamicfilterwindow->position(px,py);
 
 refresh(eff);} {}
   }
-  Function {refresh(EffectMgr *eff_)} {open
-  } {
+  Function {refresh(EffectMgr *eff_)} {} {
     code {eff=eff_;
 this->hide();
 
@@ -1390,8 +1384,7 @@ switch(eff->geteffect()){
             break; 
 };
 
-this->show();} {selected
-    }
+this->show();} {}
   }
   decl {EffectMgr *eff;} {}
   decl {int eqband;} {}

@@ -30,6 +30,7 @@ FilterParams::FilterParams(unsigned char Ptype_,unsigned char Pfreq_,unsigned  c
     Dfreq=Pfreq_;
     Dq=Pq_;
 
+    changed=false;
     defaults();    
 };
 

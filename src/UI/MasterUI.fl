@@ -769,8 +769,8 @@ pthread_mutex_unlock(&master->mutex);}
         xywh {0 80 390 160}
       } {
         Fl_Group {} {
-          label {System Effects} open
-          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25 hide
+          label {System Effects} open selected
+          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25
         } {
           Fl_Counter syseffnocounter {
             label {Sys.Effect No.}
@@ -851,7 +851,7 @@ swapeffwindow->show();}
         }
         Fl_Group {} {
           label {Insertion Effects}
-          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25
+          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25 hide
         } {
           Fl_Button {} {
             label {Swap/Copy...}
@@ -872,7 +872,7 @@ if (master->Pinsparts[ninseff]!=-1) {
 } else {
 	insefftype->deactivate();
  	inseffectui->deactivate();
-};} selected
+};}
             xywh {5 120 80 20} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 127 step 1 textfont 1
             code0 {o->bounds(0,NUM_INS_EFX-1);}
             code1 {o->value(ninseff);}

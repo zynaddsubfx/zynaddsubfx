@@ -81,6 +81,8 @@ class FilterParams{
 	REALTYPE getformantfreq(unsigned char freq);
 	REALTYPE getformantamp(unsigned char amp);
 	REALTYPE getformantq(unsigned char q);
+
+	bool changed;
 	
     private:
 	//stored default parameters

@@ -50,6 +50,12 @@ DynamicFilter::~DynamicFilter(){
  */
 void DynamicFilter::out(REALTYPE *smpsl,REALTYPE *smpsr){
     int i;
+    
+    if (filterpars->changed){
+	filterpars->changed=false;
+	cleanup();	
+    };
+    
     REALTYPE lfol,lfor;
     lfo.effectlfoout(&lfol,&lfor);
     lfol*=depth*5.0;lfor*=depth*5.0;
@@ -69,9 +75,7 @@ void DynamicFilter::out(REALTYPE *smpsl,REALTYPE *smpsr){
     ms2=ms2*(1.0-ampsmooth2)+ms1*ampsmooth2;
     ms3=ms3*(1.0-ampsmooth2)+ms2*ampsmooth2;
     ms4=ms4*(1.0-ampsmooth2)+ms3*ampsmooth2;
-    REALTYPE rms=sqrt(ms4)*ampsns;
-//    printf("(%g,%g) %g \n",ampsmooth,ampsmooth2,rms);
-
+    REALTYPE rms=(sqrt(ms4)-0.25)*ampsns;
 
     REALTYPE frl=filterl->getrealfreq(freq+lfol+rms);
     REALTYPE frr=filterr->getrealfreq(freq+lfor+rms);

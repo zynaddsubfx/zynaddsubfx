@@ -25,24 +25,32 @@ class WidgetPDial {: {public Fl_Dial}
   }
   Function {handle(int event)} {return_type int
   } {
-    code {switch (event){
+    code {double dragsize,v;
+int my;
+
+switch (event){
 case FL_PUSH:oldvalue=value();
 case FL_DRAG:
-     int my=-(Fl::event_y()-y()-h()/2);
+     my=-(Fl::event_y()-y()-h()/2);
 
-     double dragsize=200.0;
+     dragsize=200.0;
      if (Fl::event_state(FL_BUTTON1)==0) dragsize*=10;
-     double v=oldvalue+my/dragsize*(maximum()-minimum());
+     v=oldvalue+my/dragsize*(maximum()-minimum());
      if (v<minimum()) v=minimum();
         else if (v>maximum()) v=maximum();
      
      value(v);
      value_damage();
-     do_callback();
+     if (this->when()!=0) do_callback();
      return(1); 
      break;
+case FL_RELEASE:
+     if (this->when()==0) do_callback();
+	return(1);
+     break;
 };
-return(0);} {}
+return(0);} {selected
+    }
   }
   Function {drawgradient(int cx,int cy,int sx,double m1,double m2)} {return_type void
   } {
@@ -52,8 +60,7 @@ return(0);} {}
    fl_arc(cx+sx/2-i/2,cy+sx/2-i/2,i,i,0,360);
 };} {}
   }
-  Function {draw()} {open
-  } {
+  Function {draw()} {} {
     code {int cx=x(),cy=y(),sx=w(),sy=h();
 
 
@@ -113,8 +120,7 @@ fl_push_matrix();
   fl_end_polygon();
  
 
-fl_pop_matrix();} {selected
-    }
+fl_pop_matrix();} {}
   }
   Function {pdialcolor(int r,int g,int b)} {} {
     code {if (active_r()) fl_color(r,g,b);

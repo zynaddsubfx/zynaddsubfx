@@ -601,3 +601,5 @@
 	    - Inceput sa scriu un nou efect (DynamicFilter)	    
 01 Iul 2004 - Corectata o mica eroare la EffectUI care facea ca efectele sa nu apara activate
 	    - Continuat de scris la DynamicFiter (mai este doar de salvat parametrii si de auto-update la filtru)
+02 Iul 2004 - Continuat la DynamicFilter (adaugata auto-update)
+
