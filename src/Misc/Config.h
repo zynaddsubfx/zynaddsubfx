@@ -23,6 +23,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 #include "../globals.h"
+#define MAX_STRING_SIZE 4000
+
 
 class Config{
     public:

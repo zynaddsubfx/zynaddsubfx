@@ -30,7 +30,6 @@
 #endif
 
 #include "Config.h"
-#define MAX_STRING_SIZE 4000
 
 Config::Config(){
     maxstringsize=MAX_STRING_SIZE;//for ui
