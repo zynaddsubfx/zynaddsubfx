@@ -9,7 +9,7 @@ endif
 CXXFLAGS += -DOS_$(OS_PORT) -D$(MIDIIN)MIDIIN -D$(AUDIOOUT)AUDIOOUT -DFFTW_VERSION_$(FFTW_VERSION) -DASM_F2I_$(ASM_F2I) `fltk-config --cflags` 
 
 export CXXFLAGS
-LIBS= -lm  `fltk-config --ldflags` -lmxml
+LIBS= -lm  `fltk-config --ldflags` -lmxml -lz
 
 ifeq ($(FFTW_VERSION),2)
 LIBS += -lrfftw -lfftw

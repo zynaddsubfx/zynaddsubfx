@@ -372,7 +372,7 @@ fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. P
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
 \#endif}
-      xywh {151 174 390 465} type Double
+      xywh {448 226 390 465} type Double
       code0 {setfilelabel(NULL);} non_modal visible
     } {
       Fl_Menu_Bar mastermenu {
@@ -385,11 +385,11 @@ if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
           menuitem {} {
             label {&Save All As XML (EXPERIMENTAL)...}
             callback {char *filename;
-\#define EXT ".xml"
-filename=fl_file_chooser("Save:","(*"EXT")",NULL,0);
+
+filename=fl_file_chooser("Save:","({*.xml,*.xmlz})",NULL,0);
 if (filename==NULL) return;
-filename=fl_filename_setext(filename,EXT);
-\#undef EXT
+filename=fl_filename_setext(filename,".xml");
+
 
 pthread_mutex_lock(&master->mutex);
 master->saveXML(filename);
@@ -401,7 +401,7 @@ updatepanel();}
           menuitem {} {
             label {&Open XML...}
             callback {char *filename;
-filename=fl_file_chooser("Open:","(*.xml)",NULL,0);
+filename=fl_file_chooser("Open:","({*.xml,*.xmlz})",NULL,0);
 if (filename==NULL) return;
 
 
@@ -582,11 +582,11 @@ if (result!=0) fl_alert("Error: Could not save the file.");}
           menuitem {} {
             label {&Save As XML (EXPERIMENTAL)...}
             callback {char *filename;
-\#define EXT ".xml"
-filename=fl_file_chooser("Save:","(*"EXT")",NULL,0);
+
+filename=fl_file_chooser("Save:","({*.xml,*.xmlz})",NULL,0);
 if (filename==NULL) return;
-filename=fl_filename_setext(filename,EXT);
-\#undef EXT
+filename=fl_filename_setext(filename,"xml");
+
 
 pthread_mutex_lock(&master->mutex);
 master->part[npart]->saveXML(filename);
@@ -598,7 +598,7 @@ updatepanel();}
           menuitem {} {
             label {&Load XML Instrument...}
             callback {const char *filename;
-filename=fl_file_chooser("Load:","(*.xml)",NULL,0);
+filename=fl_file_chooser("Load:","({*.xml,*.xmlz})",NULL,0);
 if (filename==NULL) return;
 
 

@@ -43,8 +43,8 @@ class XMLwrapper{
 	/********************************/
 
 	//returns 0 if ok or -1 if the file cannot be saved
-	int saveXMLfile(char *filename, int compression);
-
+	int saveXMLfile(char *filename);
+	
 	//add simple parameter (name and value)
 	void addpar(char *name,int val);
 	void addparreal(char *name,REALTYPE val);
@@ -104,6 +104,11 @@ class XMLwrapper{
 
 
     private:
+    
+	int dosavefile(char *filename,int compression,char *xmldata);
+	char *doloadfile(const char *filename);
+
+    
 	mxml_node_t *tree;//all xml data
 	mxml_node_t *root;//xml data used by zynaddsubfx
 	mxml_node_t *node;//current node

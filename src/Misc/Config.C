@@ -55,6 +55,8 @@ Config::Config(){
     cfg.DumpNotesToFile=0;
     cfg.DumpAppend=1;
 
+    cfg.GzipCompression=3;
+
     winwavemax=1;winmidimax=1;
 //try to find out how many input midi devices are there
 #ifdef WINMIDIIN
@@ -81,6 +83,7 @@ Config::Config(){
     readConfig(filename);
     
     ui.showinstrumentinfo=0;
+
 };
 
 Config::~Config(){
@@ -166,6 +169,10 @@ void Config::readConfig(char *filename){
 	    if (strlen(val)<2) continue;
 	    snprintf(cfg.DumpFile,MAX_STRING_SIZE,val);
 	};
+
+	if (strstr(par,"GZIP_COMPRESSION")!=NULL){
+	    cfg.GzipCompression=intvalue;
+	};
 };    
     fclose(file);    
     
@@ -181,6 +188,9 @@ void Config::readConfig(char *filename){
     if (cfg.WindowsWaveOutId>=winwavemax) cfg.WindowsWaveOutId=0;
     if (cfg.WindowsMidiInId>=winmidimax) cfg.WindowsMidiInId=0;
 #endif
+    if (cfg.GzipCompression<0) cfg.GzipCompression=0;
+	else if (cfg.GzipCompression>9) cfg.GzipCompression=9;
+
 };
 
 void Config::saveConfig(char *filename){
@@ -198,6 +208,8 @@ void Config::saveConfig(char *filename){
     fprintf(file,"DUMP_APPEND = %d\n",cfg.DumpAppend);
     fprintf(file,"DUMP_FILE = %s\n",cfg.DumpFile);
     
+    fprintf(file,"GZIP_COMPRESSION = %d\n",cfg.GzipCompression);
+
     fprintf(file,"#Linux\n");
     fprintf(file,"LINUX_OSS_WAVE_OUT_DEV = %s\n",cfg.LinuxOSSWaveOutDev);
     fprintf(file,"LINUX_OSS_SEQ_IN_DEV = %s\n",cfg.LinuxOSSSeqInDev);

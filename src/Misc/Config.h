@@ -34,6 +34,7 @@ class Config{
 	    int WindowsWaveOutId,WindowsMidiInId;
 	    int BankUIAutoClose;
 	    int DumpNotesToFile,DumpAppend;
+	    int GzipCompression;
 	    char *DumpFile;
 	} cfg;
 	int winwavemax,winmidimax;//number of wave/midi devices on Windows

@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0200 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2003 Nasca Octavian Paul} {} 
@@ -12,7 +12,7 @@ decl {\#include <stdio.h>} {public
 decl {\#include <math.h>} {public
 } 
 
-decl {\#include <stdlib.h>} {selected public
+decl {\#include <stdlib.h>} {public
 } 
 
 decl {\#include "../globals.h"} {public
@@ -27,16 +27,17 @@ decl {\#include "../Misc/Dump.h"} {public
 decl {extern Dump dump;} {public
 } 
 
-class ConfigUI {} {
+class ConfigUI {selected
+} {
   Function {make_window()} {} {
     Fl_Window configwindow {
       label {ZynAddSubFX Settings}
-      xywh {41 80 500 290} hide
+      xywh {120 213 500 290} type Double hide
     } {
       Fl_Button {} {
         label OK
         callback {configwindow->hide();}
-        xywh {70 255 100 20} box THIN_UP_BOX
+        xywh {70 265 100 20} box THIN_UP_BOX
       }
       Fl_Group {} {
         label {Sample Rate}
@@ -145,12 +146,12 @@ config.cfg.SoundBufferSize=strtoul(o->value(),&tmp,10);}
         }
       }
       Fl_Box {} {
-        label {The settings has effect only after ZynAddSubFX is restarted.}
-        xywh {10 210 235 30} labelfont 1 labelsize 12 align 128
+        label {Most settings has effect only after ZynAddSubFX is restarted.}
+        xywh {10 225 235 30} labelfont 1 labelsize 12 align 128
       }
       Fl_Box {} {
         label {Read the Readme.txt for other settings}
-        xywh {5 190 240 20} labelfont 1 labelsize 12 align 128
+        xywh {5 205 240 20} labelfont 1 labelsize 12 align 128
       }
       Fl_Group {} {
         xywh {5 95 230 85} box ENGRAVED_BOX
@@ -170,11 +171,11 @@ dump.startnow();//this has effect only if this option was disabled}
         }
       }
       Fl_Group {} {
-        xywh {250 15 245 275} box ENGRAVED_FRAME
+        xywh {250 30 245 260} box ENGRAVED_FRAME
       } {
         Fl_Box {} {
           label {Note: Not all the following settings are used (this depends on the operating system, etc..)}
-          xywh {255 25 235 45} labelfont 1 labelsize 12 align 128
+          xywh {255 35 235 45} labelfont 1 labelsize 12 align 128
         }
         Fl_Group {} {
           label Linux
@@ -217,6 +218,12 @@ midiinputnamebox->label(config.winmididevices[config.cfg.WindowsMidiInId].name);
         callback {config.cfg.DumpAppend=(int) o->value();}
         xywh {150 100 80 20} down_box DOWN_BOX
         code0 {o->value(config.cfg.DumpAppend);}
+      }
+      Fl_Counter {} {
+        label {XML compression level}
+        callback {config.cfg.GzipCompression=(int) o->value();}
+        tooltip {gzip compression level (0 - uncompressed)} xywh {10 185 65 15} type Simple labelsize 12 align 8 minimum 0 maximum 9 step 1
+        code0 {o->value(config.cfg.GzipCompression);}
       }
     }
   }

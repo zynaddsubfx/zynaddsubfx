@@ -538,4 +538,4 @@
 	    - Corectate cateva erori la incarcarea XML-ului
 	    - frecventa LFO-ul de la instrumente are valoare reala intre 0..1
 	    - corectata eroarea care facea ca functia de rezonanta sa fie trasata incorect
-	    
+	    - adaugata compresie gzip la fisiere si decompresie automata la incarcare (folosesc biblioteca zlib)

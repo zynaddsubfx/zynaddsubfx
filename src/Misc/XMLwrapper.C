@@ -23,8 +23,10 @@
 #include "XMLwrapper.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <zlib.h>
 
 #include "../globals.h"
+#include "Util.h"
 
 int XMLwrapper_whitespace_callback(mxml_node_t *node,int where){
     const char *name=node->value.element.name;
@@ -77,21 +79,47 @@ XMLwrapper::~XMLwrapper(){
 
 /* SAVE XML members */
 
-int XMLwrapper::saveXMLfile(char *filename,int compression){
-    FILE *file;
-    file=fopen(filename,"w");
-    if (file==NULL) return(-1);
-    mxmlSaveFile(tree,file,XMLwrapper_whitespace_callback);
+int XMLwrapper::saveXMLfile(char *filename){
+    char *xmldata=mxmlSaveAllocString(tree,XMLwrapper_whitespace_callback);
+    if (xmldata==NULL) return(-2);
+
+    int compression=config.cfg.GzipCompression;
     
-    fclose(file);
+    int fnsize=strlen(filename)+100;
+    char *filenamenew=new char [fnsize];
+    if (compression) snprintf(filenamenew,fnsize,"%sz",filename);
+	else snprintf(filenamenew,fnsize,"%s",filename);
     
-/*    //test
-    printf("\n\n");
-    mxmlSaveFile(tree,stdout,XMLwrapper_whitespace_callback);
-    printf("\n\n");
-*/    
+    int result=dosavefile(filenamenew,compression,xmldata);
+    
+    delete(filenamenew);
+    delete(xmldata);    
+    return(result);
+};
+
+int XMLwrapper::dosavefile(char *filename,int compression,char *xmldata){
+    if (compression==0){
+	FILE *file;
+	file=fopen(filename,"w");
+	if (file==NULL) return(-1);
+	fputs(xmldata,file);
+	fclose(file);
+    } else {
+	if (compression>9) compression=9;
+	if (compression<1) compression=1;
+	char options[10];
+	snprintf(options,10,"wb%d",compression);
+
+	gzFile gzfile;
+	gzfile=gzopen(filename,options);
+	if (gzfile==NULL) return(-1);
+	gzputs(gzfile,xmldata);
+	gzclose(gzfile);
+    };
+    
     return(0);
 };
+
 
 
 void XMLwrapper::addpar(char *name,int val){
@@ -141,34 +169,69 @@ int XMLwrapper::loadXMLfile(const char *filename){
 
     stackpos=0;
 
+
+    char *xmldata=doloadfile(filename);    
+    if (xmldata==NULL) return(-1);//the file could not be loaded or uncompressed
     
-    FILE *file=fopen(filename,"r");
-    if (file==NULL) return(-1);
+    root=tree=mxmlLoadString(NULL,xmldata,MXML_OPAQUE_CALLBACK);
+
+    delete(xmldata);
+
+    if (tree==NULL) return(-2);//this is not XML
     
-    root=tree=mxmlLoadFile(NULL,file,MXML_OPAQUE_CALLBACK);
-    fclose(file);
-    
-    if (tree==NULL) return(-1);//this is not XML
-    
-//    if (strcmp(tree->value.element.name,"?xml")!=0) return(-2);
     node=root=mxmlFindElement(tree,tree,"ZynAddSubFX-data",NULL,NULL,MXML_DESCEND);
-    if (root==NULL) return(-2);//the XML doesnt embbed zynaddsubfx data
-        
+    if (root==NULL) return(-3);//the XML doesnt embbed zynaddsubfx data
     push(root);
 
     values.xml_version.major=str2int(mxmlElementGetAttr(root,"version-major"));
     values.xml_version.minor=str2int(mxmlElementGetAttr(root,"version-minor"));
 
-    
-//    node=mxmlFindElement(node,node,NULL,"name","volume",MXML_DESCEND);
-    
-    
-    
-//    if (node!=NULL) printf("%s\n",node->value.element.name);
-//        else printf("NULL node\n");
-    
     return(0);
 };
+
+char *XMLwrapper::doloadfile(const char *filename){
+    char *xmldata=NULL;
+    int filesize=-1;
+    
+    //try get filesize as gzip data (first)
+    gzFile gzfile=gzopen(filename,"rb");
+    if (gzfile!=NULL){//this is a gzip file 
+	// first check it's size
+	while(!gzeof(gzfile)) {
+	    gzseek (gzfile,1024*1024,SEEK_CUR);
+	    if (gztell(gzfile)>10000000) goto notgzip;//the file is not gzip
+	};
+	filesize=gztell(gzfile);
+
+	//rewind the file and load the data
+	xmldata=new char[filesize+1];
+	memset(xmldata,0,filesize+1);
+
+	gzrewind(gzfile);
+	gzread(gzfile,xmldata,filesize);
+	
+	gzclose(gzfile);
+	return (xmldata);
+    } else {//this is not a gzip file
+	notgzip:    
+	FILE *file=fopen(filename,"rb");
+	if (file==NULL) return(NULL);
+	fseek(file,0,SEEK_END);
+	filesize=ftell(file);
+
+	xmldata=new char [filesize+1];
+	memset(xmldata,0,filesize+1);
+	
+	rewind(file);
+	fread(xmldata,filesize,1,file);
+	
+	fclose(file);
+	return(xmldata);
+    }; 
+};
+
+
+
 
 int XMLwrapper::enterbranch(char *name){
     node=mxmlFindElement(peek(),peek(),name,NULL,NULL,MXML_DESCEND_FIRST);

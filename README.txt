@@ -32,6 +32,7 @@ Requirements:
                - FFTW 2.x.x (tested with fftw 2.0.5, 2.1.3) - necesary for
   Fast Fourier computations
 	       - MXML library from http://www.easysw.com/~mike/mxml/
+	       - zlib library from http://www.zlib.org - this exists in most linux distributions
                - (for Linux) OpenSoundSystem (OSS) (if you don't have ALSA, only)
 	       - (for Windows) pthreads, portaudio
 

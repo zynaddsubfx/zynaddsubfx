@@ -790,7 +790,7 @@ int Master::saveXML(char *filename){
     add2XML(xml);
     xml->endbranch();
 
-    xml->saveXMLfile(filename,0);
+    xml->saveXMLfile(filename);
     delete (xml);
     return(0);
 };

@@ -1026,7 +1026,7 @@ int Part::saveXML(char *filename){
     add2XMLinstrument(xml);
     xml->endbranch();
 
-    xml->saveXMLfile(filename,0);
+    xml->saveXMLfile(filename);
     delete (xml);
     return(0);
 };
