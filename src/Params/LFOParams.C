@@ -107,10 +107,10 @@ void LFOParams::saveloadbuf(Buffer *buf){
 void LFOParams::add2XML(XMLwrapper *xml){
     xml->addpar("freq",Pfreq);
     xml->addpar("intensity",Pintensity);
-    xml->addpar("startphase",Pstartphase);
-    xml->addpar("LFOtype",PLFOtype);
-    xml->addpar("randomness",Prandomness);
-    xml->addpar("freqrand",Pfreqrand);
+    xml->addpar("start_phase",Pstartphase);
+    xml->addpar("lfo_type",PLFOtype);
+    xml->addpar("randomness_amplitude",Prandomness);
+    xml->addpar("randomness_frequency",Pfreqrand);
     xml->addpar("delay",Pdelay);
     xml->addparbool("continous",Pcontinous);
 };

@@ -727,8 +727,8 @@ void Master::exportbankasxmldirectory(const char *directory){
 
 void Master::add2XML(XMLwrapper *xml){
     xml->addpar("volume",Pvolume);
-    xml->addpar("keyshift",Pkeyshift);
-    xml->addparbool("NRPNreceive",ctl.NRPN.receive);
+    xml->addpar("key_shift",Pkeyshift);
+    xml->addparbool("nrpn_receive",ctl.NRPN.receive);
 
     xml->beginbranch("MICROTONAL");
 	microtonal.add2XML(xml);
@@ -755,7 +755,7 @@ void Master::add2XML(XMLwrapper *xml){
 
 		for (int tonefx=nefx+1;tonefx<NUM_SYS_EFX;tonefx++){
 		    xml->beginbranch("SENDTO",tonefx);
-			xml->addpar("sendvol",Psysefxsend[nefx][tonefx]);
+			xml->addpar("send_vol",Psysefxsend[nefx][tonefx]);
 		    xml->endbranch();    
 		};
 		

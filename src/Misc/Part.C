@@ -945,38 +945,38 @@ void Part::saveloadbuf(Buffer *buf,int instrumentonly){
 */
 
 void Part::add2XMLinstrument(XMLwrapper *xml){
-    xml->beginbranch("INSTRUMENTINFO");
+    xml->beginbranch("INFO");
 	xml->addparstr("name",(char *)Pname);
 	xml->addparstr("author",(char *)info.Pauthor);
 	xml->addparstr("comments",(char *)info.Pcomments);
 	xml->addpar("type",info.Ptype);
     xml->endbranch();
     
-    xml->addpar("kitmode",Pkitmode);
-    xml->addparbool("drummode",Pdrummode);
+    xml->addpar("kit_mode",Pkitmode);
+    xml->addparbool("drum_mode",Pdrummode);
     
     for (int i=0;i<NUM_KIT_ITEMS;i++){
-	xml->beginbranch("INSTRUMENTKITITEM",i);
+	xml->beginbranch("INSTRUMENT_KIT_ITEM",i);
 	    xml->addparbool("enabled",kit[i].Penabled);
 	    if (kit[i].Penabled!=0) {
 		xml->addparstr("name",(char *)kit[i].Pname);
 
 		xml->addpar("muted",kit[i].Pmuted);
-		xml->addpar("minkey",kit[i].Pminkey);
-		xml->addpar("maxkey",kit[i].Pmaxkey);
+		xml->addpar("min_key",kit[i].Pminkey);
+		xml->addpar("max_key",kit[i].Pmaxkey);
 	    
-		xml->addpar("Psendtoparteefect",kit[i].Psendtoparteffect);
+		xml->addpar("send_to_instrument_effect",kit[i].Psendtoparteffect);
 
-		xml->addpar("adenabled",kit[i].Padenabled);
+		xml->addpar("ad_enabled",kit[i].Padenabled);
 		if ((kit[i].Padenabled!=0)&&(kit[i].adpars!=NULL)){
-		    xml->beginbranch("ADNOTEPARAMETERS");
+		    xml->beginbranch("ADD_SYNTH_PARAMETERS");
 			kit[i].adpars->add2XML(xml);
 		    xml->endbranch();
 		};
 
-		xml->addpar("subenabled",kit[i].Psubenabled);
+		xml->addpar("sub_enabled",kit[i].Psubenabled);
 		if ((kit[i].Psubenabled!=0)&&(kit[i].subpars!=NULL)){
-		    xml->beginbranch("SUBNOTEPARAMETERS");
+		    xml->beginbranch("SUB_SYNTH_PARAMETERS");
 		    kit[i].subpars->add2XML(xml);
 		    xml->endbranch();
 		};
@@ -984,7 +984,18 @@ void Part::add2XMLinstrument(XMLwrapper *xml){
 	    };
 	xml->endbranch();
     };
-        
+    
+    xml->beginbranch("EFFECTS");    
+    for (int nefx=0;nefx<NUM_PART_EFX;nefx++){
+	xml->beginbranch("INSTRUMENT_EFFECT",nefx);
+	    xml->beginbranch("EFFECT");
+		partefx[nefx]->add2XML(xml);
+	    xml->endbranch();
+
+	    xml->addpar("route",Pefxroute[nefx]);
+	xml->endbranch();
+    };
+    xml->endbranch();
 };
 
 
@@ -996,17 +1007,17 @@ void Part::add2XML(XMLwrapper *xml){
     xml->addpar("volume",Pvolume);
     xml->addpar("panning",Ppanning);
 
-    xml->addpar("minkey",Pminkey);
-    xml->addpar("maxkey",Pmaxkey);
-    xml->addpar("keyshift",Pkeyshift);
-    xml->addpar("rcvchn",Prcvchn);
+    xml->addpar("min_key",Pminkey);
+    xml->addpar("max_key",Pmaxkey);
+    xml->addpar("key_shift",Pkeyshift);
+    xml->addpar("rcv_chn",Prcvchn);
 
-    xml->addpar("velsns",Pvelsns);
-    xml->addpar("veloffs",Pveloffs);
+    xml->addpar("velocity_sensing",Pvelsns);
+    xml->addpar("velocity_offset",Pveloffs);
 
-    xml->addparbool("noteon",Pnoteon);
-    xml->addparbool("polymode",Ppolymode);
-    xml->addpar("keylimit",Pkeylimit);
+    xml->addparbool("note_on",Pnoteon);
+    xml->addparbool("poly_mode",Ppolymode);
+    xml->addpar("key_limit",Pkeylimit);
 
     xml->beginbranch("INSTRUMENT");
 	add2XMLinstrument(xml);
@@ -1015,16 +1026,6 @@ void Part::add2XML(XMLwrapper *xml){
     xml->beginbranch("CONTROLLER");
 	ctl.add2XML(xml);
     xml->endbranch();
-
-    for (int nefx=0;nefx<NUM_PART_EFX;nefx++){
-	xml->beginbranch("PARTEFFECT",nefx);
-	    xml->beginbranch("EFFECT");
-		partefx[nefx]->add2XML(xml);
-	    xml->endbranch();
-
-	    xml->addpar("route",Pefxroute[nefx]);
-	xml->endbranch();
-    };
 };
 
 int Part::saveXML(char *filename){

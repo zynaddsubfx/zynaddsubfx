@@ -73,20 +73,20 @@ int XMLwrapper::saveXMLfile(char *filename,int compression){
 
 
 void XMLwrapper::addpar(char *name,int val){
-    addparams2("param","name",name,"value",int2str(val));
+    addparams2("par","name",name,"value",int2str(val));
 };
 
 void XMLwrapper::addparreal(char *name,REALTYPE val){
-    addparams2("paramreal","name",name,"value",real2str(val));
+    addparams2("par_real","name",name,"value",real2str(val));
 };
 
 void XMLwrapper::addparbool(char *name,int val){
-    if (val!=0) addparams2("boolparam","name",name,"value","yes");
-	else addparams2("boolparam","name",name,"value","no");
+    if (val!=0) addparams2("par_bool","name",name,"value","yes");
+	else addparams2("par_bool","name",name,"value","no");
 };
 
 void XMLwrapper::addparstr(char *name,char *val){
-    addparams2("strparam","name",name,"value",val);
+    addparams2("par_string","name",name,"value",val);
 };
 
 

@@ -313,12 +313,12 @@ void Controller::add2XML(XMLwrapper *xml){
 
     xml->addpar("expression_receive",expression.receive);
     xml->addpar("panning_depth",panning.depth);
-    xml->addpar("filtercutoff_depth",filtercutoff.depth);
-    xml->addpar("filterq_depth",filterq.depth);
+    xml->addpar("filter_cutoff_depth",filtercutoff.depth);
+    xml->addpar("filter_q_depth",filterq.depth);
     xml->addpar("bandwidth_depth",bandwidth.depth);
-    xml->addpar("modwheel_depth",modwheel.depth);
-    xml->addpar("modwheel_exponential",modwheel.exponential);
-    xml->addpar("fmamp_receive",fmamp.receive);
+    xml->addpar("mod_wheel_depth",modwheel.depth);
+    xml->addpar("mod_wheel_exponential",modwheel.exponential);
+    xml->addpar("fm_amp_receive",fmamp.receive);
     xml->addpar("volume_receive",volume.receive);
     xml->addpar("sustain_receive",sustain.receive);
 
@@ -329,8 +329,8 @@ void Controller::add2XML(XMLwrapper *xml){
     xml->addpar("portamento_portamento",portamento.portamento);
     xml->addpar("portamento_updowntimestretch",portamento.updowntimestretch);
 
-    xml->addpar("resonancecenter_depth",resonancecenter.depth);
-    xml->addpar("resonancebandwidth_depth",resonancebandwidth.depth);
+    xml->addpar("resonance_center_depth",resonancecenter.depth);
+    xml->addpar("resonance_bandwidth_depth",resonancebandwidth.depth);
 };
 
 

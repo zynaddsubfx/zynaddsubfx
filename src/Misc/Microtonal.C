@@ -567,25 +567,25 @@ void Microtonal::add2XML(XMLwrapper *xml){
     xml->addparstr("name",(char *) Pname);
     xml->addparstr("comment",(char *) Pcomment);
 
-    xml->addparbool("invertupdown",Pinvertupdown);
-    xml->addparbool("invertupdowncenter",Pinvertupdowncenter);
+    xml->addparbool("invert_up_down",Pinvertupdown);
+    xml->addparbool("invert_up_down_center",Pinvertupdowncenter);
 
     xml->addparbool("enabled",Penabled);
-    xml->addpar("globalfinedetune",Pglobalfinedetune);
+    xml->addpar("global_fine_detune",Pglobalfinedetune);
 
-    xml->addpar("anote",PAnote);
-    xml->addparreal("afreq",PAfreq);
+    xml->addpar("a_note",PAnote);
+    xml->addparreal("a_freq",PAfreq);
 
     if (Penabled==0) return;
 
     xml->beginbranch("SCALE");
-        xml->addpar("scaleshift",Pscaleshift);
-	xml->addpar("firstkey",Pfirstkey);
-	xml->addpar("lastkey",Plastkey);
-	xml->addpar("middlenote",Pmiddlenote);
+        xml->addpar("scale_shift",Pscaleshift);
+	xml->addpar("first_key",Pfirstkey);
+	xml->addpar("last_key",Plastkey);
+	xml->addpar("middle_note",Pmiddlenote);
 
 	xml->beginbranch("OCTAVE");
-	    xml->addpar("octavesize",octavesize);
+	    xml->addpar("octave_size",octavesize);
 	    for (int i=0;i<octavesize;i++){
 		xml->beginbranch("DEGREE",i);
 		    if (octave[i].type==1){			
@@ -600,8 +600,8 @@ void Microtonal::add2XML(XMLwrapper *xml){
 	xml->endbranch();
 
 	xml->beginbranch("KEYBOARD_MAPPING");
-	    xml->addpar("mapsize",Pmapsize);
-	    xml->addpar("mappingenabled",Pmappingenabled);
+	    xml->addpar("map_size",Pmapsize);
+	    xml->addpar("mapping_enabled",Pmappingenabled);
 		for (int i=0;i<Pmapsize;i++){
 		    xml->beginbranch("KEYMAP",i);
 			xml->addpar("degree",Pmapping[i]);
@@ -609,20 +609,6 @@ void Microtonal::add2XML(XMLwrapper *xml){
 		};
 	xml->endbranch();
     xml->endbranch();
-    
-    /*
-
-	//Mapping ON/OFF
-	unsigned char Pmappingenabled;
-	//Mapping (keys)
-	short int Pmapping[128];
-	
-	unsigned char Pglobalfinedetune;
-	
-	// Functions
-    
-    */
-    
 };
 
 

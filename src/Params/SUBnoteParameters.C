@@ -210,50 +210,51 @@ void SUBnoteParameters::saveloadbuf(Buffer *buf){
 
 void SUBnoteParameters::add2XML(XMLwrapper *xml){
 
-    xml->addpar("numstages",Pnumstages);
-    xml->addpar("magtype",Phmagtype);
+    xml->addpar("num_stages",Pnumstages);
+    xml->addpar("harmonic_mag_type",Phmagtype);
     xml->addpar("start",Pstart);
     
-    for (int i=0;i<MAX_SUB_HARMONICS;i++){
-	if (Phmag[i]==0) continue;
-	
-	xml->beginbranch("HARMONIC",i);
-	    xml->addpar("mag",Phmag[i]);
-	    xml->addpar("relbw",Phrelbw[i]);
-	xml->endbranch();
-    };
-    
+    xml->beginbranch("HARMONICS");
+	for (int i=0;i<MAX_SUB_HARMONICS;i++){
+	    if (Phmag[i]==0) continue;
+	    xml->beginbranch("HARMONIC",i);
+		xml->addpar("mag",Phmag[i]);
+		xml->addpar("relbw",Phrelbw[i]);
+	    xml->endbranch();
+	};
+    xml->endbranch();
+
     xml->beginbranch("AMPLITUDE_PARAMETERS");
 	xml->addparbool("stereo",Pstereo);
 	xml->addpar("volume",PVolume);
 	xml->addpar("panning",PPanning);
-	xml->addpar("velocitysensing",PAmpVelocityScaleFunction);
+	xml->addpar("velocity_sensing",PAmpVelocityScaleFunction);
 	xml->beginbranch("AMPLITUDE_ENVELOPE");
 	    AmpEnvelope->add2XML(xml);
 	xml->endbranch();
     xml->endbranch();
 
     xml->beginbranch("FREQUENCY_PARAMETERS");
-	xml->addparbool("fixedfreq",Pfixedfreq);
-	xml->addpar("fixedfreqet",PfixedfreqET);
+	xml->addparbool("fixed_freq",Pfixedfreq);
+	xml->addpar("fixed_freq_et",PfixedfreqET);
 
 	xml->addpar("detune",PDetune);
-	xml->addpar("coarsedetune",PCoarseDetune);
-	xml->addpar("detunetype",PDetuneType);
+	xml->addpar("coarse_detune",PCoarseDetune);
+	xml->addpar("detune_type",PDetuneType);
 
 	xml->addpar("bandwidth",Pbandwidth);
-	xml->addpar("bwscale",Pbwscale);
+	xml->addpar("bandwidth_scale",Pbwscale);
 
-	xml->addparbool("freqenvelopeenabled",PFreqEnvelopeEnabled);
+	xml->addparbool("freq_envelope_enabled",PFreqEnvelopeEnabled);
 	if (PFreqEnvelopeEnabled!=0){
 	    xml->beginbranch("FREQUENCY_ENVELOPE");
 	        FreqEnvelope->add2XML(xml);
 	    xml->endbranch();
 	};
 
-	xml->addparbool("bandwidthenvelopeenabled",PBandWidthEnvelopeEnabled);
+	xml->addparbool("band_width_envelope_enabled",PBandWidthEnvelopeEnabled);
 	if (PBandWidthEnvelopeEnabled!=0){
-	    xml->beginbranch("BANCWIDTH_ENVELOPE");
+	    xml->beginbranch("BANDWIDTH_ENVELOPE");
 	        BandWidthEnvelope->add2XML(xml);
 	    xml->endbranch();
 	};
@@ -266,8 +267,8 @@ void SUBnoteParameters::add2XML(XMLwrapper *xml){
 		GlobalFilter->add2XML(xml);
 	    xml->endbranch();
 
-	    xml->addpar("filtervelocitysensing",PGlobalFilterVelocityScaleFunction);
-	    xml->addpar("filtervelocitysensingamplitude",PGlobalFilterVelocityScale);
+	    xml->addpar("filter_velocity_sensing",PGlobalFilterVelocityScaleFunction);
+	    xml->addpar("filter_velocity_sensing_amplitude",PGlobalFilterVelocityScale);
 
 	    xml->beginbranch("FILTER_ENVELOPE");
 		GlobalFilterEnvelope->add2XML(xml);

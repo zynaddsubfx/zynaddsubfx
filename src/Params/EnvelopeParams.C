@@ -214,12 +214,12 @@ void EnvelopeParams::saveloadbuf(Buffer *buf){
 };
 
 void EnvelopeParams::add2XML(XMLwrapper *xml){
-    xml->addparbool("freemode",Pfreemode);    
-    xml->addpar("envpoints",Penvpoints);
-    xml->addpar("envsustain",Penvsustain);
-    xml->addpar("envstretch",Penvstretch);
-    xml->addparbool("forcedrelease",Pforcedrelease);
-    xml->addparbool("linearenvelope",Plinearenvelope);
+    xml->addparbool("free_mode",Pfreemode);    
+    xml->addpar("env_points",Penvpoints);
+    xml->addpar("env_sustain",Penvsustain);
+    xml->addpar("env_stretch",Penvstretch);
+    xml->addparbool("forced_release",Pforcedrelease);
+    xml->addparbool("linear_envelope",Plinearenvelope);
     xml->addpar("A_dt",PA_dt);
     xml->addpar("D_dt",PD_dt);
     xml->addpar("R_dt",PR_dt);
@@ -231,8 +231,8 @@ void EnvelopeParams::add2XML(XMLwrapper *xml){
     if (Pfreemode!=0){
 	for (int i=0;i<Penvpoints;i++){
 	    xml->beginbranch("POINT",i);
-		if (i!=0) xml->addpar("envdt",Penvdt[i]);
-		xml->addpar("envval",Penvval[i]);
+		if (i!=0) xml->addpar("dt",Penvdt[i]);
+		xml->addpar("val",Penvval[i]);
 	    xml->endbranch();
 	};
     };
