@@ -192,7 +192,7 @@ return(1);} {}
   }
 } 
 
-class EnvelopeUI {: {public Fl_Group}
+class EnvelopeUI {open : {public Fl_Group}
 } {
   Function {EnvelopeUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {env=NULL;

@@ -177,7 +177,7 @@ class ADvoiceUI {: {public Fl_Group}
   Function {make_window()} {} {
     Fl_Window ADnoteVoiceParameters {
       label Voice
-      xywh {67 162 765 525} type Double hide
+      xywh {231 132 765 525} type Double hide
       class Fl_Group
     } {
       Fl_Group voiceparametersgroup {
@@ -417,7 +417,7 @@ o->redraw();}
               code0 {o->value(pars->VoicePar[nvoice].PFreqEnvelopeEnabled);}
             }
             Fl_Group voicefreqlfogroup {
-              label {Frequency LFO} open
+              label {Frequency LFO     } open
               xywh {215 290 230 70} box FLAT_BOX color 47 align 144
               code0 {o->init(pars->VoicePar[nvoice].FreqLfo);}
               code1 {if (pars->VoicePar[nvoice].PFreqLfoEnabled==0) o->deactivate();}
@@ -587,7 +587,7 @@ o->redraw();}
             code0 {o->value(pars->VoicePar[nvoice].PAmpEnvelopeEnabled);}
           }
           Fl_Group voiceamplfogroup {
-            label {Amplitude LFO} open
+            label {Amplitude LFO     } open
             xywh {10 175 230 70} box FLAT_BOX color 47 align 144
             code0 {o->init(pars->VoicePar[nvoice].AmpLfo);}
             code1 {if (pars->VoicePar[nvoice].PAmpLfoEnabled==0) o->deactivate();}
@@ -637,7 +637,7 @@ o->redraw();}
             code0 {o->value(pars->VoicePar[nvoice].PFilterEnvelopeEnabled);}
           }
           Fl_Group voicefilterlfogroup {
-            label {Filter LFO} open
+            label {Filter LFO     } open selected
             xywh {250 175 230 70} box FLAT_BOX color 47 align 144
             code0 {o->init(pars->VoicePar[nvoice].FilterLfo);}
             code1 {if (pars->VoicePar[nvoice].PFilterLfoEnabled==0) o->deactivate();}
@@ -790,7 +790,7 @@ pars->GlobalPar.PCoarseDetune = k+
           code3 {o->lstep(10);}
         }
         Fl_Group freqlfo {
-          label {Frequency LFO} open
+          label {Frequency LFO     } open
           xywh {215 295 230 70} box FLAT_BOX color 47 align 144
           code0 {o->init(pars->GlobalPar.FreqLfo);}
           class LFOUI
@@ -868,13 +868,13 @@ detunevalueoutput->do_callback();} open
           class WidgetPDial
         }
         Fl_Group ampenv {
-          label {ADSynth Global - Amplitude Envelope} open selected
+          label {ADSynth Global - Amplitude Envelope} open
           xywh {10 75 205 70} box FLAT_BOX color 51 align 144
           code0 {o->init(pars->GlobalPar.AmpEnvelope);}
           class EnvelopeUI
         } {}
         Fl_Group amplfo {
-          label {Amplitude LFO} open
+          label {Amplitude LFO          } open
           xywh {10 145 230 70} box FLAT_BOX color 47 align 144
           code0 {o->init(pars->GlobalPar.AmpLfo);}
           class LFOUI

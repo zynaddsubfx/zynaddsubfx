@@ -149,7 +149,7 @@ for (i=1;i<lx;i++){
   decl {REALTYPE *graphpoints;} {}
 } 
 
-class FilterUI {open : {public Fl_Group,PresetsUI_}
+class FilterUI {: {public Fl_Group,PresetsUI_}
 } {
   Function {FilterUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {pars=NULL;
@@ -508,8 +508,7 @@ if (nseqpos<pars->Psequencesize) vowel_counter->activate();
 
 vowel_counter->value(pars->Psequence[nseqpos].nvowel);} {}
   }
-  Function {refresh()} {open
-  } {
+  Function {refresh()} {} {
     code {update_formant_window();
 formantfiltergraph->redraw();
 

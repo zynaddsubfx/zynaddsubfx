@@ -26,11 +26,12 @@
 #include "../globals.h"
 #include "../Misc/Buffer.h"
 #include "../Misc/XMLwrapper.h"
+#include "Presets.h"
 
 #define MAX_ENVELOPE_POINTS 40
 #define MIN_ENVELOPE_DB -40
 
-class EnvelopeParams{
+class EnvelopeParams:public Presets{
     public:
 	EnvelopeParams(unsigned char Penvstretch_,unsigned char Pforcedrelease_);
 	~EnvelopeParams();

@@ -25,8 +25,9 @@
 
 #include "../Misc/Buffer.h"
 #include "../Misc/XMLwrapper.h"
+#include "Presets.h"
 
-class LFOParams{
+class LFOParams:public Presets{
     public:
       LFOParams(char Pfreq_,char Pintensity_,char Pstartphase_, char PLFOtype_,char Prandomness_, char Pdelay_,char Pcontinous,char fel_);      
       ~LFOParams();

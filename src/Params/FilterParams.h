@@ -35,8 +35,11 @@ class FilterParams:public Presets{
         void saveloadbuf(Buffer *buf);
 
 	void add2XML(XMLwrapper *xml);
+	void add2XMLvowel(XMLwrapper *xml,int nvowel);
 	void defaults();
 	void getfromXML(XMLwrapper *xml);
+	void getfromXMLvowel(XMLwrapper *xml,int nvowel);
+
 
 	void getfromFilterParams(FilterParams *pars);
 

@@ -27,7 +27,15 @@
 
 int LFOParams::time;
 
-LFOParams::LFOParams(char Pfreq_,char Pintensity_,char Pstartphase_, char PLFOtype_,char Prandomness_, char Pdelay_,char Pcontinous_,char fel_){
+LFOParams::LFOParams(char Pfreq_,char Pintensity_,char Pstartphase_, char PLFOtype_,char Prandomness_, char Pdelay_,char Pcontinous_,char fel_):Presets(){
+    switch(fel_) {
+	case 0:setpresettype("Plfofrequency");
+	    break;
+	case 1:setpresettype("Plfoamplitude");
+	    break;
+	case 2:setpresettype("Plfofilter");
+	    break;
+    };
     Dfreq=Pfreq_;
     Dintensity=Pintensity_;
     Dstartphase=Pstartphase_;

@@ -223,7 +223,7 @@ class PADnoteUI {: {public PresetsUI_}
         xywh {0 0 535 395}
       } {
         Fl_Group harmonicstructuregroup {
-          label {Harmonic Structure}
+          label {Harmonic Structure} selected
           xywh {0 20 535 375} box ENGRAVED_BOX
         } {
           Fl_Group bwprofilegroup {
@@ -781,7 +781,7 @@ pars->PCoarseDetune = k+
               code3 {o->lstep(10);}
             }
             Fl_Group freqlfo {
-              label {Frequency LFO} open
+              label {Frequency LFO     } open
               xywh {215 315 230 70} box FLAT_BOX color 47 align 144
               code0 {o->init(pars->FreqLfo);}
               class LFOUI
@@ -882,7 +882,7 @@ if (x==0) fixedfreqetdial->deactivate();
               class EnvelopeUI
             } {}
             Fl_Group amplfo {
-              label {Amplitude LFO} open
+              label {Amplitude LFO     } open
               xywh {10 165 230 70} box FLAT_BOX color 47 align 144
               code0 {o->init(pars->AmpLfo);}
               class LFOUI
@@ -906,7 +906,7 @@ hprofile->redraw();}
               class EnvelopeUI
             } {}
             Fl_Group filterlfo {
-              label {Filter LFO} open
+              label {Filter LFO     } open
               xywh {250 200 230 70} box FLAT_BOX color 47 align 144
               code0 {o->init(pars->FilterLfo);}
               class LFOUI
@@ -1042,8 +1042,7 @@ overtonepos->redraw();
 osc->redraw();
 pars->applyparameters(true);
 applybutton->color(FL_GRAY);
-applybutton->parent()->redraw();} {selected
-    }
+applybutton->parent()->redraw();} {}
   }
   Function {~PADnoteUI()} {} {
     code {delete(oscui);
