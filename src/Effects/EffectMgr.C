@@ -262,6 +262,11 @@ void EffectMgr::add2XML(XMLwrapper *xml){
 		xml->addpar("par",par);
 	    xml->endbranch();
 	};
+	if (filterpars!=NULL){
+	    xml->beginbranch("FILTER");
+		filterpars->add2XML(xml);
+	    xml->endbranch();
+	};
     xml->endbranch();
 };
 
@@ -281,8 +286,15 @@ void EffectMgr::getfromXML(XMLwrapper *xml){
 	    seteffectpar_nolock(n,xml->getpar127("par",par));
 	    xml->exitbranch();
 	};
+	if (filterpars!=NULL){
+	    if (xml->enterbranch("FILTER")){
+		filterpars->getfromXML(xml);
+		xml->exitbranch();
+	    };
+	};
 	xml->exitbranch();
     };
+    cleanup();
 };
 
 

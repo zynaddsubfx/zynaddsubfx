@@ -50,7 +50,6 @@ DynamicFilter::~DynamicFilter(){
  */
 void DynamicFilter::out(REALTYPE *smpsl,REALTYPE *smpsr){
     int i;
-    
     if (filterpars->changed){
 	filterpars->changed=false;
 	cleanup();	
@@ -128,7 +127,7 @@ void DynamicFilter::cleanup(){
     ms1=0.0;
     ms2=0.0;
     ms3=0.0;
-    ms3=0.0;
+    ms4=0.0;
 };
 
 
@@ -187,7 +186,7 @@ void DynamicFilter::setpreset(unsigned char npreset){
     if (npreset>=NUM_PRESETS) npreset=NUM_PRESETS-1;
     for (int n=0;n<PRESET_SIZE;n++) changepar(n,presets[npreset][n]);
     
-//    filterpars->defaults();
+    filterpars->defaults();
     switch(npreset){
 	case 0:
 	    filterpars->Pcategory=0;
