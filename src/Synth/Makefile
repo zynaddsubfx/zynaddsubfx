@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-objects=ADnote.o Envelope.o LFO.o OscilGen.o SUBnote.o Resonance.o
+objects=ADnote.o Envelope.o LFO.o OscilGen.o SUBnote.o Resonance.o PADnote.o
 
 
 all: $(objects)
