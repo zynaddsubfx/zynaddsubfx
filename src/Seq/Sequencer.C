@@ -47,6 +47,7 @@ Sequencer::Sequencer(){
 	resettime(&playtime[i]);
     };
     
+    setplayspeed(0);
 };
 
 Sequencer::~Sequencer(){
@@ -119,7 +120,7 @@ int Sequencer::getevent(char ntrack,int *midich, int *type,int *par1, int *par2)
     *midich=nextevent[ntrack].ev.channel;
 
     
-    double dt=nextevent[ntrack].ev.deltatime*0.0001;
+    double dt=nextevent[ntrack].ev.deltatime*0.0001*realplayspeed;
     printf("zzzzzzzzzzzzzz[%d] %d\n",ntrack,nextevent[ntrack].ev.deltatime);
     nextevent[ntrack].time+=dt;
 
@@ -155,3 +156,7 @@ void Sequencer::updatecounter(timestruct *t){
 //    printf("%f %f %f\n",t->last,t->abs,t->rel);
 };
 
+void Sequencer::setplayspeed(int speed){
+    playspeed=speed;
+    realplayspeed=pow(10.0,speed/128.0);
+};

@@ -15,11 +15,13 @@ decl {\#include "../Misc/Master.h"} {public
 decl {\#include "WidgetPDial.h"} {public
 } 
 
-class SeqUI {} {
-  Function {make_window()} {} {
+class SeqUI {open
+} {
+  Function {make_window()} {open
+  } {
     Fl_Window seqwin {
       label {Sequencer - ZynAddSubFX}
-      xywh {104 235 235 100} type Double hide
+      xywh {104 235 235 140} type Double visible
     } {
       Fl_Group {} {
         label Player
@@ -44,8 +46,14 @@ master->seq.stopplay();}
       }
       Fl_Button {} {
         label {Open test.mid}
-        callback {master->seq.importmidifile("test.mid");} selected
+        callback {master->seq.importmidifile("test.mid");}
         xywh {20 25 75 55} align 128
+      }
+      Fl_Value_Slider {} {
+        label {Play speed}
+        callback {master->seq.setplayspeed((int) o->value());} selected
+        xywh {15 105 190 20} type {Horz Knob} minimum -128 maximum 128 step 1
+        code0 {o->value(master->seq.playspeed);}
       }
     }
   }

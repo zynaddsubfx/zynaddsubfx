@@ -49,6 +49,8 @@ class Sequencer:public MIDIEvents{
 	
 
 	int play;	
+	int playspeed;//viteza de rulare (0.1x-10x), 0=1.0x, 128=10x
+	void setplayspeed(int speed);
 	
     private:
     
@@ -72,7 +74,11 @@ class Sequencer:public MIDIEvents{
 	event ev;
 	double time;
     } nextevent[NUM_MIDI_TRACKS];    
+    
+    double realplayspeed;
+    
 };
+
 
 #endif
 

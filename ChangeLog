@@ -565,5 +565,6 @@
 28 Mar 2004 - Scris partea de incarcat fisier midi 	    
 	    - Merge partial playerul
 26 Mai 2004 - Playerul merge bine cu un canal midi (rezolvata problema cu timing-ul)
+03 Iun 2004 - Adaugata partea de play speed la interfata
 
 
