@@ -115,8 +115,8 @@ void *thread1(void *arg){
 	
 	pthread_mutex_lock(&master->mutex);
 
-	if (cmdtype==MidiNoteON) master->NoteOn(cmdchan,note,vel);
-	if (cmdtype==MidiNoteOFF) master->NoteOff(cmdchan,note);
+	if ((cmdtype==MidiNoteON)&&(note!=0)) master->NoteOn(cmdchan,note,vel);
+	if ((cmdtype==MidiNoteOFF)&&(note!=0)) master->NoteOff(cmdchan,note);
 	if (cmdtype==MidiController) master->SetController(cmdchan,cmdparams[0],cmdparams[1]);
 
 	pthread_mutex_unlock(&master->mutex);

@@ -69,6 +69,7 @@ void Dump::inctick(){
 
 void Dump::dumpnote(char chan,char note, char vel){
     if (file==NULL) return;
+    if (note==0) return;
     if (vel==0) fprintf(file,"n %d -> %d %d \n",tick,chan,note);//note off
 	else fprintf(file,"N %d -> %d %d %d \n",tick,chan,note,vel);//note on
     

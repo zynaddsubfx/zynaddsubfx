@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0105 
+version 1.0106 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -28,7 +28,7 @@ class MicrotonalUI {} {
   Function {make_window()} {} {
     Fl_Window microtonaluiwindow {
       label Scales
-      xywh {140 189 405 450} type Double hide
+      xywh {99 164 405 450} type Double hide
     } {
       Fl_Group {} {
         tooltip {Center where the note's freqs. are turned upside-down} xywh {249 2 155 45} box ENGRAVED_FRAME
@@ -50,20 +50,19 @@ if (microtonal->Pinvertupdown==0) centerinvertcounter->deactivate();
           code2 {if (microtonal->Pinvertupdown==0) o->deactivate();}
         }
       }
-      Fl_Group microtonalgroup {
+      Fl_Group microtonalgroup {selected
         xywh {3 49 402 398} box ENGRAVED_FRAME
         code0 {if (microtonal->Penabled==0) o->deactivate();}
       } {
-        Fl_Button {} {
-          label Apply
-          callback {tuningsinput->do_callback();
-mappinginput->do_callback();}
-          tooltip {Retune the synth accorging to the inputs from "Tunnings" and "Keyboard Mappings"} xywh {8 413 95 28} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 18
+        Fl_Button applybutton {
+          label Retune
+          callback {apply();}
+          tooltip {Retune the synth accorging to the inputs from "Tunnings" and "Keyboard Mappings"} xywh {8 413 107 28} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 18
         }
         Fl_Value_Output octavesizeoutput {
           label {nts./oct.}
           callback {o->value(microtonal->getoctavesize());}
-          tooltip {Notes/Octave} xywh {150 421 35 17} labelsize 10 align 5 maximum 500 step 1 value 12 textfont 1
+          tooltip {Notes/Octave} xywh {150 423 35 17} labelsize 10 align 5 maximum 500 step 1 value 12 textfont 1
           code0 {o->value(microtonal->getoctavesize());}
         }
         Fl_Input nameinput {
@@ -74,11 +73,7 @@ mappinginput->do_callback();}
         }
         Fl_Input tuningsinput {
           label {Tunings:}
-          callback {int err=microtonal->texttotunings(o->value());
-if (err>=0) fl_alert("Parse Error: The input may contain only numbers (like 232.59)\\n or divisions (like 121/64).");
-if (err==-2) fl_alert("Parse Error: The input is empty.");
-octavesizeoutput->do_callback();}
-          xywh {8 144 182 264} type Multiline labelfont 1 labelsize 12 align 5 when 0
+          xywh {8 144 182 264} type Multiline labelfont 1 labelsize 12 align 5 when 2
           code0 {updateTuningsInput();}
         }
         Fl_Input commentinput {
@@ -119,10 +114,7 @@ if (result==0) {
           xywh {193 144 206 264} box ENGRAVED_BOX labelfont 1 labelsize 12
         } {
           Fl_Input mappinginput {
-            callback {microtonal->texttomapping(o->value());
-mapsizeoutput->do_callback();
-anotecounter->do_callback();}
-            xywh {250 147 146 258} type Multiline labelfont 1 labelsize 12 align 5
+            xywh {250 147 146 258} type Multiline labelfont 1 labelsize 12 align 5 when 2
             code0 {updateMappingInput();}
           }
           Fl_Counter firstnotecounter {
@@ -222,8 +214,7 @@ if (microtonal->Penabled==0) microtonalgroup->deactivate();
       }
     }
   }
-  Function {updateTuningsInput()} {selected
-  } {
+  Function {updateTuningsInput()} {} {
     code {char *tmpbuf=new char[100];
 
 tuningsinput->cut(0,tuningsinput->maximum_size());
@@ -262,6 +253,18 @@ delete(microtonaluiwindow);} {}
   }
   Function {show()} {} {
     code {microtonaluiwindow->show();} {}
+  }
+  Function {apply()} {} {
+    code {int err=microtonal->texttotunings(tuningsinput->value());
+if (err>=0) fl_alert("Parse Error: The input may contain only numbers (like 232.59)\\n or divisions (like 121/64).");
+if (err==-2) fl_alert("Parse Error: The input is empty.");
+octavesizeoutput->do_callback();
+
+microtonal->texttomapping(mappinginput->value());
+mapsizeoutput->do_callback();
+anotecounter->do_callback();
+
+//applybutton->color(FL_GRAY);} {}
   }
   decl {Microtonal *microtonal;} {}
 } 
