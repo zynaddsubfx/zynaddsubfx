@@ -22,6 +22,7 @@
 
 #include "MIDIEvents.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 MIDIEvents::MIDIEvents(){
 };
@@ -38,6 +39,8 @@ void MIDIEvents::writeevent(list *l,event *ev){
     if (l->current!=NULL) l->current->next=tmp;
 	else l->first=tmp;
     l->current=tmp;
+    printf("Wx%x ",l->current);
+    printf("-> %d  \n",l->current->ev.deltatime);
     l->size++;
 };
 
@@ -48,6 +51,15 @@ void MIDIEvents::readevent(list *l,event *ev){
     };
     *ev=l->current->ev;
     l->current=l->current->next;
+
+    //test
+    if (l->current!=NULL) {
+//	ev->deltatime=10000;
+//	printf("Rx%d\n",l->current->ev.deltatime);
+	printf("Rx%x  ",l->current);
+	printf("-> %d  (next=%x) \n",l->current->ev.deltatime,l->current->next);
+    };
+
 };
 
 

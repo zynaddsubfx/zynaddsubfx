@@ -54,6 +54,7 @@ void EffectMgr::defaults(){
  * Change the effect
  */
 void EffectMgr::changeeffect(int nefx_){
+    cleanup();
     if (nefx==nefx_) return;
     nefx=nefx_;
     for (int i=0;i<SOUND_BUFFER_SIZE;i++){

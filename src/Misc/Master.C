@@ -71,7 +71,6 @@ Master::Master(){
 };
 
 void Master::defaults(){
-    ShutUp();
     volume=1.0;
     setPvolume(80);
     setPkeyshift(64);
@@ -100,6 +99,7 @@ void Master::defaults(){
     };
 
     sysefx[0]->changeeffect(1);
+    ShutUp();
 };
 
 /*

@@ -131,19 +131,19 @@ int MIDIFile::parsetrack(int ntrack){
     while(!midieof){
 	unsigned int msgdeltatime=getvarint32();
 	
-	printf("MSGDELTATIME = %d\n",msgdeltatime);
+///	printf("MSGDELTATIME = %d\n",msgdeltatime);
 	
 	dt+=msgdeltatime;
 
 	int msg=peekbyte();
-	printf("raw msg=0x%x     ",msg);
+///	printf("raw msg=0x%x     ",msg);
 	if (msg<0x80) {
 	    msg=lastmsg;
 	} else {
 	    lastmsg=msg;
 	    getbyte();
 	};  
-	printf("msg=0x%x\n",msg);
+///	printf("msg=0x%x\n",msg);
 	
 	unsigned int mtype,mlength;
 	
@@ -211,6 +211,7 @@ void MIDIFile::parsenoteoff(char ntrack,char chan,unsigned int dt){
     unsigned char note;
     note=getbyte();
     
+    unsigned char noteoff_velocity=getbyte();//unused by zynaddsubfx
     if (chan>=NUM_MIDI_CHANNELS) return;
     
     me->tmpevent.deltatime=convertdt(dt);
@@ -219,13 +220,13 @@ void MIDIFile::parsenoteoff(char ntrack,char chan,unsigned int dt){
     me->tmpevent.par2=0;
     me->tmpevent.channel=chan;
     
+    printf("Note off:%d \n",note);
     
     ///test 
-    ntrack=0;
+//    ntrack=0;
     
     me->writeevent(&me->miditrack[ntrack].record,&me->tmpevent);
     
-    printf("Note off:%d ",note);
 };
 
 
@@ -233,6 +234,9 @@ void MIDIFile::parsenoteon(char ntrack,char chan,unsigned int dt){
     unsigned char note,vel;
     note=getbyte();
     vel=getbyte();
+    
+//    printf("ntrack=%d\n",ntrack);
+    printf("[dt %d ]  Note on:%d %d\n",dt,note,vel);
     
     if (chan>=NUM_MIDI_CHANNELS) return;
     
@@ -243,7 +247,6 @@ void MIDIFile::parsenoteon(char ntrack,char chan,unsigned int dt){
     me->tmpevent.channel=chan;
     me->writeevent(&me->miditrack[ntrack].record,&me->tmpevent);
 
-    printf("[dt %d ]  Note on:%d %d\n",dt,note,vel);
     
     
 };
@@ -291,8 +294,9 @@ void MIDIFile::parsemetaevent(unsigned char mtype,unsigned char mlength){
 
 unsigned int MIDIFile::convertdt(unsigned int dt){
     double result=dt;
+    printf("DT=%d\n",dt);
 
-    return((int) (result*30.0));
+    return((int) (result*5.0));
 };
 
 
@@ -311,6 +315,7 @@ unsigned char MIDIFile::getbyte(){
 	return(0);
     };
 
+///    printf("(%d) ",midifile[midifilek]);
     return(midifile[midifilek++]);
 };
 
@@ -344,6 +349,8 @@ unsigned int MIDIFile::getvarint32(){
     unsigned long result=0;
     unsigned char b;
 
+///    printf("\n[start]");
+
     if ((result = getbyte()) & 0x80) {
         result &= 0x7f;
         do  {
@@ -351,6 +358,7 @@ unsigned int MIDIFile::getvarint32(){
             result = (result << 7) + (b & 0x7f);
         }while (b & 0x80);
     }
+///    printf("[end - result= %d]\n",result);
     return result;
 };
 
