@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "ZynAddSubFX"
-!define PRODUCT_VERSION "2.1.1"
+!define PRODUCT_VERSION "2.2.0"
 !define PRODUCT_PUBLISHER "Nasca Octavian Paul"
 !define PRODUCT_WEB_SITE "http://zynaddsubfx.sourceforge.net"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\zynaddsubfx.exe"
@@ -75,13 +75,14 @@ Section "-Required" SEC01
   File "COPYING.txt"
   File "ChangeLog.txt"
   File "bugs.txt"
-  File "Warning.txt"
+;  File "Warning.txt"
+  File "zynaddsubfx_icon.ico"
   File /r "banks"
   File /r "examples"
   File /r "presets"
 
   SetOutPath "$SYSDIR"
-  File "pthreadGC.dll"
+  File "pthreadGC1.dll"
 SectionEnd
 
 Section "Standalone" SEC02
@@ -89,15 +90,15 @@ Section "Standalone" SEC02
   File "zynaddsubfx.exe"
   File "launch_zynaddsubfx.bat"
   CreateDirectory "$SMPROGRAMS\ZynAddSubFX"
-  CreateShortCut "$SMPROGRAMS\ZynAddSubFX\ZynAddSubFX low latency.lnk" "$INSTDIR\launch_zynaddsubfx.bat"
+  CreateShortCut "$SMPROGRAMS\ZynAddSubFX\ZynAddSubFX low latency.lnk" "$INSTDIR\launch_zynaddsubfx.bat" "" "zynaddsubfx_icon.ico" 
   CreateShortCut "$SMPROGRAMS\ZynAddSubFX\ZynAddSubFX.lnk" "$INSTDIR\zynaddsubfx.exe"
-  CreateShortCut "$DESKTOP\ZynAddSubFX.lnk" "$INSTDIR\zynaddsubfx.exe"
+  CreateShortCut "$DESKTOP\ZynAddSubFX.lnk" "$INSTDIR\launch_zynaddsubfx.bat" "" "zynaddsubfx_icon.ico"
 SectionEnd
 
-Section /o "VST Plugin" SEC03
-  SetOutPath "$INSTDIR\VST"
-  File "zynaddsubfx_vst.dll"
-SectionEnd
+;Section /o "VST Plugin" SEC03
+;  SetOutPath "$INSTDIR\VST"
+;  File "zynaddsubfx_vst.dll"
+;SectionEnd
 
 Section /o "Source Code" SEC04
   SetOutPath "$INSTDIR"

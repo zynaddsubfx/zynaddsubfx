@@ -1,3 +1,13 @@
+2.2.0 ()
+	- the VST version of ZynAddSubFX is removed from the instalation until it will be more stable (hope soon :) )
+	- now, the instrument banks contains over 300 high quality instruments
+	- added "Apply" a button from OscilGen window for PADsynth 
+	- added another parameter to ADsynth that controls the amount of all detunes of voices
+	- adaptive harmonics postprocess
+	- improved the VU-meter and added a RMS plot
+	- Dvorak support for Virtual Keyboard
+	- many bugs fixed and code cleanups
+	
 2.1.1 (2 Oct 2004) 
 	- Removed a big bug that prevented changing the part
 2.1.0 (1 Oct 2004) 
