@@ -905,7 +905,7 @@ redrawoscil();} open
             xywh {90 90 100 20} labelfont 1 labelsize 10
           }
           menuitem {} {
-            label {2n+1}
+            label Square
             xywh {100 100 100 20} labelfont 1 labelsize 10
           }
           menuitem {} {
