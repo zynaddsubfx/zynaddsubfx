@@ -93,6 +93,8 @@ void set_realtime(){
     sched_param sc;
     
     sc.sched_priority=50;
+
+    //if you want get "sched_setscheduler undeclared" from compilation, you can safely remove the folowing line
     sched_setscheduler(0,SCHED_FIFO,&sc);
 //    if (err==0) printf("Real-time");
 #endif
