@@ -216,7 +216,7 @@ if (tmp!=NULL) master->exportbankasxmldirectory(tmp);} selected
     code {fnc=&BankProcess_::process;
 master=master_;
 npart=npart_;
-bank=&master_->bank;
+bank=&master_->oldbank;
 what=0;
 make_window();
 mode=1;} {}

@@ -703,17 +703,17 @@ void Master::exportbankasxmldirectory(const char *directory){
     mkdir(directory,S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     for (int slot=0;slot<128;slot++){
 	tmppart->defaults();
-	bank.loadfromslot(slot,&slbuf);
+	oldbank.loadfromslot(slot,&slbuf);
 	slbuf.changemode(0);
 	tmppart->saveloadbuf(&slbuf,1);
-	snprintf((char *)tmppart->kit[0].Pname,PART_MAX_NAME_LEN,bank.getname(slot));
-	snprintf((char *)tmppart->Pname,PART_MAX_NAME_LEN,bank.getname(slot));
-	if (bank.emptyslot(slot)) continue;
+	snprintf((char *)tmppart->kit[0].Pname,PART_MAX_NAME_LEN,oldbank.getname(slot));
+	snprintf((char *)tmppart->Pname,PART_MAX_NAME_LEN,oldbank.getname(slot));
+	if (oldbank.emptyslot(slot)) continue;
 	
 	snprintf(nostr,10,"%4d",slot+1);
 	for (int i=0;i<strlen(nostr);i++) if (nostr[i]==' ') nostr[i]='0';
 	
-	snprintf(filename,1000,"%s/%s-%s.xml",directory,nostr,bank.getname(slot));
+	snprintf(filename,1000,"%s/%s-%s.xml",directory,nostr,oldbank.getname(slot));
 	printf("%s\n",filename);
 	tmppart->saveXML(filename);
     };

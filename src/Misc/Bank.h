@@ -24,7 +24,9 @@
 #define BANK_H
 
 #include "../globals.h"
-#include "Buffer.h"
+#include "XMLwrapper.h"
+
+#define BANK_SIZE 128
 
 class Bank{
     public:
@@ -35,15 +37,32 @@ class Bank{
 	void setname(unsigned char ninstrument,const char *newname);
 	int emptyslot(unsigned char ninstrument);
 	void clearslot(unsigned char ninstrument);
-	void savetoslot(unsigned char ninstrument,const char *name,Buffer *buf);
-	void loadfromslot(unsigned char ninstrument,Buffer *buf);
-	int loadfilebank(const char *newbankfilename);
-	int savefilebank(const char *newbankfilename,int overwrite);
-	int newfilebank(const char *newbankfilename,int overwrite);
+	void savetoslot(unsigned char ninstrument,const char *name,XMLwrapper *xml);
+	void loadfromslot(unsigned char ninstrument,XMLwrapper *xml);
+
+	int loadbank(const char *bankdirname);
+//	int savebank(const char *newbankfilename,int overwrite);
+	int newbank(const char *newbankdirname,int overwrite);
 	
 	char *bankfiletitle; //this is shown on the UI of the bank (the title of the window)
 	int locked();
     private:
+    
+	//it adds a filename to the bank
+	//if pos is -1 it try to find a position
+	//returns -1 if the bank is full, or 0 if the instrument was added
+	int addtobank(int pos,const char* filename,const char* name);
+    
+	void deletefrombank(int pos);
+    
+	void clearbank();
+    
+    
+	struct{
+	    bool used;
+	    char name[PART_MAX_NAME_LEN+1];
+	    char *filename;
+	}ins[BANK_SIZE];
 };
 
 #endif
