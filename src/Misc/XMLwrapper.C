@@ -94,9 +94,9 @@ void XMLwrapper::beginbranch(char *name){
     node=addparams0(name);
 };
 
-void XMLwrapper::beginbranch(char *name,char *par,int val){
+void XMLwrapper::beginbranch(char *name,int id){
     push(node);
-    node=addparams1(name,par,int2str(val));
+    node=addparams1(name,"id",int2str(id));
 };
 
 void XMLwrapper::endbranch(){

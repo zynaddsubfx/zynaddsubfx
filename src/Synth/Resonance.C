@@ -229,3 +229,23 @@ void Resonance::saveloadbuf(Buffer *buf){
     };
 };
 
+
+void Resonance::add2XML(XMLwrapper *xml){
+    xml->addparbool("enabled",Penabled);
+    if (Penabled==0) return;
+
+    xml->addpar("maxdb",PmaxdB);
+    xml->addpar("centerfreq",Pcenterfreq);
+    xml->addpar("octavesfreq",Poctavesfreq);
+    xml->addpar("gain",Pgain);
+    xml->addparbool("protectthefundamental",Pprotectthefundamental);
+    for (int i=0;i<N_RES_POINTS;i++){
+	xml->beginbranch("POINT",i);
+	    xml->addpar("val",Prespoints[i]);
+	xml->endbranch();
+    };
+};
+
+
+
+

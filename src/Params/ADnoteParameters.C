@@ -484,3 +484,67 @@ void ADnoteParameters::saveloadbuf(Buffer *buf){
 
 
 
+
+void ADnoteParameters::add2XML(XMLwrapper *xml){
+    xml->addpar("stereo",GlobalPar.PStereo);
+    xml->beginbranch("FREQUENCY_PARAMETERS");
+	xml->addpar("detune",GlobalPar.PDetune);
+	xml->addpar("coarsedetune",GlobalPar.PCoarseDetune);
+        xml->addpar("detunetype",GlobalPar.PDetuneType);
+	
+	xml->beginbranch("ENVELOPE_FREQUENCY");
+	    GlobalPar.FreqEnvelope->add2XML(xml);
+	xml->endbranch();
+	
+	xml->beginbranch("LFO_FREQENCY");
+	    GlobalPar.FreqLfo->add2XML(xml);
+	xml->endbranch();
+    xml->endbranch();
+    
+    xml->beginbranch("AMPLITUDE_PARAMETERS");
+	xml->addpar("volume",GlobalPar.PVolume);
+	xml->addpar("panning",GlobalPar.PPanning);
+	xml->addpar("velocitysensing",GlobalPar.PAmpVelocityScaleFunction);
+	xml->addpar("punchstrength",GlobalPar.PPunchStrength);
+	xml->addpar("punchtime",GlobalPar.PPunchTime);
+	xml->addpar("punchstretch",GlobalPar.PPunchStretch);
+	xml->addpar("punchvelocitysensing",GlobalPar.PPunchVelocitySensing);
+	
+	xml->beginbranch("ENVELOPE_AMPLITUDE");
+	    GlobalPar.AmpEnvelope->add2XML(xml);
+	xml->endbranch();
+	
+	xml->beginbranch("LFO_AMPLITUDE");
+	    GlobalPar.AmpLfo->add2XML(xml);
+	xml->endbranch();
+    xml->endbranch();
+    
+    xml->beginbranch("FILTER_PARAMETERS");
+	xml->beginbranch("FILTER");
+	    GlobalPar.GlobalFilter->add2XML(xml);
+	xml->endbranch();
+	
+	xml->addpar("velocitysensingamplitude",GlobalPar.PFilterVelocityScale);
+	xml->addpar("velocitysensing",GlobalPar.PFilterVelocityScaleFunction);
+	
+	xml->beginbranch("ENVELOPE_FILTER");
+	    GlobalPar.FilterEnvelope->add2XML(xml);
+	xml->endbranch();
+	
+	xml->beginbranch("LFO_FILTER");
+	    GlobalPar.FilterLfo->add2XML(xml);
+	xml->endbranch();
+    xml->endbranch();
+    
+    xml->beginbranch("ENVELOPE_FILTER");
+	GlobalPar.Reson->add2XML(xml);
+    xml->endbranch();
+
+    //aici sa salvez pt. fiecare voce (apelez o alta functie)
+
+    
+};
+
+
+
+

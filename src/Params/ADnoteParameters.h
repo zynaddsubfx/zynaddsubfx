@@ -31,6 +31,7 @@
 #include "../Synth/OscilGen.h"
 #include "../Synth/Resonance.h"
 #include "../Misc/Util.h"
+#include "../Misc/XMLwrapper.h"
 #include "../DSP/FFTwrapper.h"
 
   enum FMTYPE{NONE,MORPH,RING_MOD,PHASE_MOD,FREQ_MOD,PITCH_MOD};
@@ -255,6 +256,8 @@ class ADnoteParameters{
 
 	ADnoteGlobalParam GlobalPar;
 	ADnoteVoiceParam VoicePar[NUM_VOICES];
+
+	void add2XML(XMLwrapper *xml);
 
 	void saveloadbuf(Buffer *buf);
 	void saveloadbufvoice(Buffer *buf,unsigned char nvoice);

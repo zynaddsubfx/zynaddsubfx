@@ -701,7 +701,7 @@ void Master::add2XML(XMLwrapper *xml){
     //Save all parts
     
     for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
-	xml->beginbranch("PART","npart",npart);
+	xml->beginbranch("PART",npart);
 	part[npart]->add2XML(xml);
 	xml->endbranch();
     };

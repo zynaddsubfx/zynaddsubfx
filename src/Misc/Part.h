@@ -86,7 +86,6 @@ class Part{
       unsigned char Pvolume;//part volume
       unsigned char Pminkey;//the minimum key that the part receives noteon messages
       unsigned char Pmaxkey;//the maximum key that the part receives noteon messages
-      unsigned char *Pname; //name of the instrument
       void setPvolume(char Pvolume);
       unsigned char Pkeyshift;//Part keyshift
       unsigned char Prcvchn;//from what midi channel it receive commnads
@@ -103,7 +102,8 @@ class Part{
       unsigned char Ppolymode;//Part mode - 0=monophonic , 1=polyphonic
       unsigned char Pkeylimit;//how many keys are alowed to be played same time (0=off), the older will be relased
       
-      struct{
+      unsigned char *Pname; //name of the instrument
+      struct{//instrument additional information
     	    unsigned char Ptype;
 	    unsigned char Pauthor[MAX_INFO_TEXT_SIZE+1];
 	    unsigned char Pcomments[MAX_INFO_TEXT_SIZE+1];

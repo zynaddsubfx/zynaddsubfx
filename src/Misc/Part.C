@@ -917,10 +917,47 @@ void Part::saveloadbuf(Buffer *buf,int instrumentonly){
 */
 
 void Part::add2XMLinstrument(XMLwrapper *xml){
-    xml->addparstr("name",(char *)Pname);
+    xml->beginbranch("INSTRUMENTINFO");
+	xml->addparstr("name",(char *)Pname);
+	xml->addparstr("author",(char *)info.Pauthor);
+	xml->addparstr("comments",(char *)info.Pcomments);
+	xml->addpar("type",info.Ptype);
+    xml->endbranch();
+    
     xml->addpar("kitmode",Pkitmode);
     xml->addparbool("drummode",Pdrummode);
     
+    for (int i=0;i<NUM_KIT_ITEMS;i++){
+	xml->beginbranch("INSTRUMENTKIT",i);
+	    xml->addparbool("enabled",kit[i].Penabled);
+	    if (kit[i].Penabled!=0) {
+		xml->addparstr("name",(char *)kit[i].Pname);
+
+		xml->addpar("muted",kit[i].Pmuted);
+		xml->addpar("minkey",kit[i].Pminkey);
+		xml->addpar("maxkey",kit[i].Pmaxkey);
+	    
+		xml->addpar("Psendtoparteefect",kit[i].Psendtoparteffect);
+
+		xml->addpar("adenabled",kit[i].Padenabled);
+		xml->addpar("subenabled",kit[i].Psubenabled);
+		
+		if ((kit[i].Padenabled!=0)&&(kit[i].adpars!=NULL)){
+		    xml->beginbranch("ADNOTEPARAMETERS");
+			kit[i].adpars->add2XML(xml);
+		    xml->endbranch();
+		};
+
+		if ((kit[i].Psubenabled!=0)&&(kit[i].subpars!=NULL)){
+		    xml->beginbranch("SUBNOTEPARAMETERS");
+		    //kit[i].subpars->add2XML(xml);
+		    xml->endbranch();
+		};
+		
+	    };
+	xml->endbranch();
+    };
+        
 };
 
 

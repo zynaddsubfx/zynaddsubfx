@@ -281,9 +281,9 @@ freeedit->redraw();}
       }
       Fl_Check_Button {} {
         label frcR
-        callback {env->Pforcedrelase=(int)o->value();}
+        callback {env->Pforcedrelease=(int)o->value();}
         tooltip {Forced Relase} xywh {410 165 40 15} down_box DOWN_BOX labelsize 11
-        code0 {o->value(env->Pforcedrelase);}
+        code0 {o->value(env->Pforcedrelease);}
         code1 {if (env->Pfreemode==0) o->hide();}
       }
       Fl_Dial {} {
@@ -362,9 +362,9 @@ freeedit->redraw();}
         }
         Fl_Check_Button {} {
           label frcR
-          callback {env->Pforcedrelase=(int)o->value();}
+          callback {env->Pforcedrelease=(int)o->value();}
           tooltip {Forced Relase} xywh {180 35 20 15} down_box DOWN_BOX labelsize 11 align 6
-          code0 {o->value(env->Pforcedrelase);}
+          code0 {o->value(env->Pforcedrelease);}
         }
         Fl_Dial {} {
           label Stretch
@@ -437,9 +437,9 @@ freeedit->redraw();}
         }
         Fl_Check_Button {} {
           label frcR
-          callback {env->Pforcedrelase=(int)o->value();}
+          callback {env->Pforcedrelease=(int)o->value();}
           tooltip {Forced release} xywh {180 25 15 25} down_box DOWN_BOX labelsize 11 align 6
-          code0 {o->value(env->Pforcedrelase);}
+          code0 {o->value(env->Pforcedrelease);}
         }
       }
       Fl_Button {} {
@@ -515,9 +515,9 @@ freeedit->redraw();}
         }
         Fl_Check_Button {} {
           label frcR
-          callback {env->Pforcedrelase=(int)o->value();}
+          callback {env->Pforcedrelease=(int)o->value();}
           tooltip {Forced Relase} xywh {250 30 15 20} down_box DOWN_BOX labelsize 11 align 6
-          code0 {o->value(env->Pforcedrelase);}
+          code0 {o->value(env->Pforcedrelease);}
         }
         Fl_Button {} {
           label Edit
@@ -577,9 +577,9 @@ freeedit->redraw();}
         }
         Fl_Check_Button {} {
           label frcR
-          callback {env->Pforcedrelase=(int)o->value();}
+          callback {env->Pforcedrelease=(int)o->value();}
           tooltip {Forced release} xywh {180 25 15 25} down_box DOWN_BOX labelsize 11 align 6
-          code0 {o->value(env->Pforcedrelase);}
+          code0 {o->value(env->Pforcedrelease);}
         }
       }
       Fl_Button {} {

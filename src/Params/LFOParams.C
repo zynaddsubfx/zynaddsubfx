@@ -92,3 +92,15 @@ void LFOParams::saveloadbuf(Buffer *buf){
     };
 };
 
+void LFOParams::add2XML(XMLwrapper *xml){
+    xml->addpar("freq",Pfreq);
+    xml->addpar("intensity",Pintensity);
+    xml->addpar("startphase",Pstartphase);
+    xml->addpar("LFOtype",PLFOtype);
+    xml->addpar("randomness",Prandomness);
+    xml->addpar("freqrand",Pfreqrand);
+    xml->addpar("delay",Pdelay);
+    xml->addparbool("continous",Pcontinous);
+};
+
+

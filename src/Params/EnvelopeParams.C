@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include "EnvelopeParams.h"
 
-EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,unsigned char Pforcedrelase_){
+EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,unsigned char Pforcedrelease_){
     int i;
     
     PA_dt=10;PD_dt=10;PR_dt=10;PA_val=64;PD_val=64;PS_val=64;PR_val=64;
@@ -40,7 +40,7 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,unsigned char Pforcedr
     Penvpoints=1;
     Envmode=1;
     Penvstretch=Penvstretch_;
-    Pforcedrelase=Pforcedrelase_;        
+    Pforcedrelease=Pforcedrelease_;        
     Pfreemode=1;
     Plinearenvelope=0;
 };
@@ -154,7 +154,7 @@ void EnvelopeParams::saveloadbuf(Buffer *buf){
 			break;
 	    case 0x81:	buf->rwbytepar(n,&Penvstretch);
 			break;
-	    case 0x82:	buf->rwbytepar(n,&Pforcedrelase);
+	    case 0x82:	buf->rwbytepar(n,&Pforcedrelease);
 			break;
 	    case 0x83:	buf->rwbytepar(n,&Penvpoints); 
 			break;
@@ -202,5 +202,31 @@ void EnvelopeParams::saveloadbuf(Buffer *buf){
 	buf->rwbyte(&tmp);
     };
 };
+
+void EnvelopeParams::add2XML(XMLwrapper *xml){
+    xml->addparbool("freemode",Pfreemode);    
+    xml->addpar("envpoints",Penvpoints);
+    xml->addpar("envsustain",Penvsustain);
+    xml->addpar("envstretch",Penvstretch);
+    xml->addparbool("forcedrelease",Pforcedrelease);
+    xml->addparbool("linearenvelope",Plinearenvelope);
+    xml->addpar("A_dt",PA_dt);
+    xml->addpar("D_dt",PD_dt);
+    xml->addpar("R_dt",PR_dt);
+    xml->addpar("A_val",PA_val);
+    xml->addpar("D_val",PD_val);
+    xml->addpar("S_val",PS_val);
+    xml->addpar("R_val",PR_val);
+
+    if (Pfreemode!=0){
+	for (int i=0;i<Penvpoints;i++){
+	    xml->beginbranch("POINT",i);
+		if (i!=0) xml->addpar("envdt",Penvdt[i]);
+		xml->addpar("envval",Penvval[i]);
+	    xml->endbranch();
+	};
+    };
+};
+
 
 

@@ -50,7 +50,7 @@ class XMLwrapper{
 
 	//add a branch
 	void beginbranch(char *name);
-	void beginbranch(char *name, char *par, int val);
+	void beginbranch(char *name, int id);
 
 	//this must be called after each branch (nodes that contains child nodes)
 	void endbranch();

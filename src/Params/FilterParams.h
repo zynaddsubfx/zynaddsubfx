@@ -25,6 +25,7 @@
 
 #include "../globals.h"
 #include "../Misc/Buffer.h"
+#include "../Misc/XMLwrapper.h"
 
 class FilterParams{
     public:
@@ -32,12 +33,15 @@ class FilterParams{
 	~FilterParams();
         void saveloadbuf(Buffer *buf);
 
+	void add2XML(XMLwrapper *xml);
+
+
 	REALTYPE getfreq();
 	REALTYPE getq();
 	REALTYPE getfreqtracking(REALTYPE notefreq);
 	REALTYPE getgain();
 	
-        unsigned char Pcategory;//Filter category (Analog/Formant)
+        unsigned char Pcategory;//Filter category (Analog/Formant/StVar)
 	unsigned char Ptype;// Filter type  (for analog lpf,hpf,bpf..)
 	unsigned char Pfreq;// Frequency (64-central frequency)
 	unsigned char Pq;   // Q parameters (resonance or bandwidth)

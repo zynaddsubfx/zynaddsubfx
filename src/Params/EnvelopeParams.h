@@ -25,13 +25,14 @@
 
 #include "../globals.h"
 #include "../Misc/Buffer.h"
+#include "../Misc/XMLwrapper.h"
 
 #define MAX_ENVELOPE_POINTS 40
 #define MIN_ENVELOPE_DB -40
 
 class EnvelopeParams{
     public:
-	EnvelopeParams(unsigned char Penvstretch_,unsigned char Pforcedrelase_);
+	EnvelopeParams(unsigned char Penvstretch_,unsigned char Pforcedrelease_);
 	~EnvelopeParams();
 	void ADSRinit(char A_dt,char D_dt,char S_val,char R_dt);
 	void ADSRinit_dB(char A_dt,char D_dt,char S_val,char R_dt);
@@ -40,16 +41,20 @@ class EnvelopeParams{
 	void ASRinit_bw(char A_val,char A_dt,char R_val,char R_dt);
 	void converttofree();
         void saveloadbuf(Buffer *buf);
+
+	void add2XML(XMLwrapper *xml);
+
+
 	REALTYPE getdt(char i);
 
        /* Parametrii MIDI */
         unsigned char Pfreemode;//1 daca este in modul free sau 0 daca este in mod ADSR,ASR,...
 	unsigned char Penvpoints;
-	unsigned char Penvsustain;//127 pentru dezactivat,0 pentru relase "fortat" (folosit in amplitudine)
+	unsigned char Penvsustain;//127 pentru dezactivat
     	unsigned char Penvdt[MAX_ENVELOPE_POINTS];
 	unsigned char Penvval[MAX_ENVELOPE_POINTS];
 	unsigned char Penvstretch;//64=normal stretch (piano-like), 0=no stretch
-	unsigned char Pforcedrelase;//0 - OFF, 1 - ON
+	unsigned char Pforcedrelease;//0 - OFF, 1 - ON
 	unsigned char Plinearenvelope;//if the amplitude envelope is linear
 	
 	unsigned char PA_dt,PD_dt,PR_dt,

@@ -28,7 +28,7 @@ Envelope::Envelope(EnvelopeParams *envpars,REALTYPE basefreq){
     envpoints=envpars->Penvpoints;
     if (envpoints>MAX_ENVELOPE_POINTS) envpoints=MAX_ENVELOPE_POINTS;
     envsustain=(envpars->Penvsustain==0)?-1:envpars->Penvsustain;
-    forcedrelase=envpars->Pforcedrelase;
+    forcedrelase=envpars->Pforcedrelease;
     envstretch=pow(440.0/basefreq,envpars->Penvstretch/64.0);
     linearenvelope=envpars->Plinearenvelope;
 

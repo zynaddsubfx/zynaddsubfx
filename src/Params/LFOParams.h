@@ -24,6 +24,8 @@
 #define LFO_PARAMS_H
 
 #include "../Misc/Buffer.h"
+#include "../Misc/XMLwrapper.h"
+
 
 class LFOParams{
     public:
@@ -32,18 +34,20 @@ class LFOParams{
       
       void saveloadbuf(Buffer *buf);
       
+      void add2XML(XMLwrapper *xml);
+      
     /* Parametrii MIDI */
       unsigned char Pfreq;      // frequency
       unsigned char Pintensity; // intensity
       unsigned char Pstartphase;// start phase (0=random)
-      unsigned char PLFOtype;   // LFO typpe (sin,triangle,square,ramp,...)
+      unsigned char PLFOtype;   // LFO type (sin,triangle,square,ramp,...)
       unsigned char Prandomness;// randomness (0=off)
       unsigned char Pfreqrand;// frequency randomness (0=off)
       unsigned char Pdelay;     // delay (0=off)
       unsigned char Pcontinous; // 1 if LFO is continous
 
+
       int fel;//what kind is the LFO (0 - frequency, 1 - amplitude, 2 - filter)
-      
       static int time;//is used by Pcontinous parameter
     private:
 };

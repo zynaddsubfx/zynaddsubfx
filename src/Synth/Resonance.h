@@ -24,6 +24,7 @@
 
 #include "../globals.h"
 #include "../Misc/Util.h"
+#include "../Misc/XMLwrapper.h"
 
 #define N_RES_POINTS 256
 
@@ -36,7 +37,12 @@ class Resonance{
 	void smooth();
 	void interpolatepeaks(int type);
 	void randomize(int type);
+
 	void saveloadbuf(Buffer *buf);
+
+	void add2XML(XMLwrapper *xml);
+
+
 	REALTYPE getfreqpos(REALTYPE freq);
 	REALTYPE getfreqx(REALTYPE x);
 	REALTYPE getcenterfreq();
@@ -50,6 +56,7 @@ class Resonance{
     unsigned char Pcenterfreq,Poctavesfreq;     //the center frequency of the res. func., and the number of octaves
     unsigned char Pgain;			//how the signal is amplified 
     unsigned char Pprotectthefundamental;       //the fundamental (1-st harmonic) is not damped, even it resonance function is low
+
     //controllers
     REALTYPE ctlcenter;//center frequency(relative)
     REALTYPE ctlbw;//bandwidth(relative)
