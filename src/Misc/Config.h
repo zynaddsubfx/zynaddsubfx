@@ -24,7 +24,7 @@
 #define CONFIG_H
 #include "../globals.h"
 #define MAX_STRING_SIZE 4000
-
+#define MAX_BANK_ROOT_DIRS 100
 
 class Config{
     public:
@@ -39,7 +39,7 @@ class Config{
 	    int GzipCompression;
 	    int Interpolation;
 	    char *DumpFile;
-	    char *bankRootDirList,*currentBankDir;
+	    char *bankRootDirList[MAX_BANK_ROOT_DIRS],*currentBankDir;
 	} cfg;
 	int winwavemax,winmidimax;//number of wave/midi devices on Windows
 	int maxstringsize;
@@ -49,9 +49,7 @@ class Config{
 	};
 	winmidionedevice *winmididevices;
 
-	struct {
-	    int showinstrumentinfo;
-	} ui;
+	void clearbankrootdirlist();
 	
     private:
 	void readConfig(char *filename);

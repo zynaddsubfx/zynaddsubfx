@@ -276,7 +276,7 @@ delete(partkititem);} {}
 
 class PartUI {: {public Fl_Group,PartUI_}
 } {
-  Function {make_window()} {open selected private
+  Function {make_window()} {private
   } {
     Fl_Window partgroup {
       private xywh {107 533 385 180} type Double hide
@@ -1116,9 +1116,7 @@ if ((engine==1)&&(subnoteui!=NULL)) subnoteui->SUBparameters->show();
 if ((engine==2)&&(adnoteui!=NULL)) padnoteui->padnotewindow->show();} {}
   }
   Function {~PartUI()} {} {
-    code {config.ui.showinstrumentinfo=instrumenteditwindow->visible();
-
-if (adnoteui!=NULL) delete (adnoteui);
+    code {if (adnoteui!=NULL) delete (adnoteui);
 if (subnoteui!=NULL) delete (subnoteui);
 if (padnoteui!=NULL) delete (padnoteui);
 
@@ -1135,7 +1133,8 @@ instrumentkitlist->hide();
 delete(instrumentkitlist);
 
 instrumenteditwindow->hide();
-delete(instrumenteditwindow);} {}
+delete(instrumenteditwindow);} {selected
+    }
   }
   decl {Part *part;} {}
   decl {Master *master;} {}

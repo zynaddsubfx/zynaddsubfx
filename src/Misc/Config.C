@@ -79,13 +79,7 @@ Config::Config(){
 	    snprintf(winmididevices[i].name,MAX_STRING_SIZE,"%s",midiincaps.szPname);
     };
 #endif
-
-    cfg.bankRootDirList=new char[MAX_STRING_SIZE];
-#if defined(OS_LINUX)
-    sprintf(cfg.bankRootDirList,"~/banks\n./\n/usr/share/zynaddsubfx/banks\n/usr/local/share/zynaddsubfx/banks\n../banks\n");
-#else
-    sprintf(cfg.bankRootDirList,"./");
-#endif
+    for (int i=0;i<MAX_BANK_ROOT_DIRS;i++) cfg.bankRootDirList[i]=NULL;
     cfg.currentBankDir=new char[MAX_STRING_SIZE];
     sprintf(cfg.currentBankDir,"./testbnk");
     
@@ -93,16 +87,36 @@ Config::Config(){
     char filename[MAX_STRING_SIZE];
     getConfigFileName(filename,MAX_STRING_SIZE);
     readConfig(filename);
-    
-    ui.showinstrumentinfo=0;
+    if (cfg.bankRootDirList[0]==NULL){
+#if defined(OS_LINUX)
+        cfg.bankRootDirList[0]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.bankRootDirList[0],"~/banks");
 
+	cfg.bankRootDirList[1]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.bankRootDirList[1],"./");
+
+        cfg.bankRootDirList[2]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.bankRootDirList[2],"/usr/share/zynaddsubfx/banks");
+
+	cfg.bankRootDirList[3]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.bankRootDirList[3],"/usr/local/share/zynaddsubfx/banks");
+
+	cfg.bankRootDirList[4]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.bankRootDirList[4],"../banks");
+#else
+	cfg.bankRootDirList[0]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.bankRootDirList[0],"./");
+
+	cfg.bankRootDirList[1]=new char[MAX_STRING_SIZE];
+	sprintf(cfg.bankRootDirList[1],"../banks");
+#endif
+    };
 };
 
 Config::~Config(){
     char filename[MAX_STRING_SIZE];
     getConfigFileName(filename,MAX_STRING_SIZE);
     saveConfig(filename);
-
 
     delete(cfg.LinuxOSSWaveOutDev);
     delete(cfg.LinuxOSSSeqInDev);
@@ -112,9 +126,17 @@ Config::~Config(){
     delete(winmididevices);
 };
 
+void Config::clearbankrootdirlist(){
+    for (int i=0;i<MAX_BANK_ROOT_DIRS;i++) {
+	if (cfg.bankRootDirList[i]=NULL) delete(cfg.bankRootDirList[i]);
+	cfg.bankRootDirList[i]=NULL;
+    };
+};
+
+
 void Config::readConfig(char *filename){
     XMLwrapper *xmlcfg=new XMLwrapper();
-    if (xmlcfg->loadXMLfile(filename)<0)return;
+    if (xmlcfg->loadXMLfile(filename)<0) return;
     if (xmlcfg->enterbranch("CONFIGURATION")){
 	cfg.SampleRate=xmlcfg->getpar("sample_rate",cfg.SampleRate,4000,1024000);
 	cfg.SoundBufferSize=xmlcfg->getpar("sound_buffer_size",cfg.SoundBufferSize,2,8192);
@@ -129,9 +151,18 @@ void Config::readConfig(char *filename){
 	cfg.GzipCompression=xmlcfg->getpar("gzip_compression",cfg.GzipCompression,0,9);
 
 	xmlcfg->getparstr("bank_current",cfg.currentBankDir,MAX_STRING_SIZE);
-	xmlcfg->getparstr("bank_root_list",cfg.bankRootDirList,MAX_STRING_SIZE);
-
 	cfg.Interpolation=xmlcfg->getpar("interpolation",cfg.Interpolation,0,1);
+
+	//get bankroot dirs
+	for (int i=0;i<MAX_BANK_ROOT_DIRS;i++){
+	    if (xmlcfg->enterbranch("BANKROOT",i)){
+	      cfg.bankRootDirList[i]=new char[MAX_STRING_SIZE];
+	      xmlcfg->getparstr("bank_root",cfg.bankRootDirList[i],MAX_STRING_SIZE);
+	     xmlcfg->exitbranch();
+	    };
+	//xmlcfg->getparstr("bank_root_list",cfg.bankRootDirList,MAX_STRING_SIZE);
+	};
+
 	//linux stuff
 	xmlcfg->getparstr("linux_oss_wave_out_dev",cfg.LinuxOSSWaveOutDev,MAX_STRING_SIZE);
 	xmlcfg->getparstr("linux_oss_seq_in_dev",cfg.LinuxOSSSeqInDev,MAX_STRING_SIZE);
@@ -139,6 +170,8 @@ void Config::readConfig(char *filename){
 	//windows stuff
 	cfg.WindowsWaveOutId=xmlcfg->getpar("windows_wave_out_id",cfg.WindowsWaveOutId,0,winwavemax);
 	cfg.WindowsMidiInId=xmlcfg->getpar("windows_midi_in_id",cfg.WindowsMidiInId,0,winmidimax);
+
+
 
       xmlcfg->exitbranch();
     };
@@ -166,7 +199,12 @@ void Config::saveConfig(char *filename){
 	xmlcfg->addpar("gzip_compression",cfg.GzipCompression);
 
 	xmlcfg->addparstr("bank_current",cfg.currentBankDir);
-	xmlcfg->addparstr("bank_root_list",cfg.bankRootDirList);
+
+	for (int i=0;i<MAX_BANK_ROOT_DIRS;i++) if (cfg.bankRootDirList[i]!=NULL) {
+	    xmlcfg->beginbranch("BANKROOT",i);
+	     xmlcfg->addparstr("bank_root",cfg.bankRootDirList[i]);
+	    xmlcfg->endbranch();
+	};
 
 	xmlcfg->addpar("interpolation",cfg.Interpolation);
 

@@ -277,8 +277,7 @@ int Bank::newbank(const char *newbankdirname){
     int result;
     char tmpfilename[MAX_STRING_SIZE];
     char bankdir[MAX_STRING_SIZE];
-    snprintf(bankdir,MAX_STRING_SIZE,"%s",config.cfg.bankRootDirList);
-    for (int i=0;i<strlen(bankdir);i++) if (bankdir[i]<32) bankdir[i]=0;
+    snprintf(bankdir,MAX_STRING_SIZE,"%s",config.cfg.bankRootDirList[0]);
 
     if (((bankdir[strlen(bankdir)-1])!='/')&&((bankdir[strlen(bankdir)-1])!='\\')){
 	strncat(bankdir,"/",MAX_STRING_SIZE);
@@ -355,30 +354,7 @@ void Bank::rescanforbanks(){
 	banks[i].name=NULL;
     };
 
-
-    char *dirlist=config.cfg.bankRootDirList;
-    int dirlistlen=strlen(dirlist);
-    char *currentrootdir=new char [dirlistlen];
-    while (start<dirlistlen){
-	end=start;
-	for (int i=start+1;i<dirlistlen;i++){
-	    end=i;
-	    if (dirlist[i]<32) break;
-	};
-	snprintf(currentrootdir,end-start+1,"%s",&dirlist[start]);
-	
-	//a root director was found
-	if (strlen (currentrootdir)>1) scanrootdir(currentrootdir);
-
-	start=end+1;
-    };
-    delete(currentrootdir);
-
-/*    for (int i=0;i<MAX_NUM_BANKS;i++){
-	if (banks[i].dir==NULL) continue;
-        printf("*  %s = %s\n",banks[i].name,banks[i].dir);	
-    };
-*/    
+    for (int i=0;i<MAX_BANK_ROOT_DIRS;i++) if (config.cfg.bankRootDirList[i]!=NULL) scanrootdir(config.cfg.bankRootDirList[i]);
 }; 
 
 

@@ -30,8 +30,7 @@ decl {\#include "../Misc/Dump.h"} {public
 decl {extern Dump dump;} {public
 } 
 
-class ConfigUI {open
-} {
+class ConfigUI {} {
   Function {make_window()} {} {
     Fl_Window configwindow {
       label {ZynAddSubFX Settings}
@@ -313,34 +312,18 @@ readbankcfg();} {}
   Function {readbankcfg()} {} {
     code {rootsbrowse->clear();
 
-int start=0,end=0;
-char *dirlist=config.cfg.bankRootDirList;
-int dirlistlen=strlen(dirlist);
-char *currentrootdir=new char [dirlistlen];
-while (start<dirlistlen){
-    end=start;
-    for (int i=start+1;i<dirlistlen;i++){
-         end=i;
-         if (dirlist[i]<32) break;
-    };
-    snprintf(currentrootdir,end-start+1,"%s",&dirlist[start]);
-
-    //a root director was found
-    if (strlen(currentrootdir)>2) rootsbrowse->add(currentrootdir);
-
-    start=end+1;
-};
-delete(currentrootdir);} {selected
-    }
+for (int i=0;i<MAX_BANK_ROOT_DIRS;i++){
+  if (config.cfg.bankRootDirList[i]!=NULL) rootsbrowse->add(config.cfg.bankRootDirList[i]);
+};} {}
   }
   Function {writebankcfg()} {} {
-    code {char *str=config.cfg.bankRootDirList;
-str[0]='\\0';
+    code {config.clearbankrootdirlist();
 
-for (int n=1;n<rootsbrowse->size()+1;n++){
-	strncat(str,rootsbrowse->text(n),MAX_STRING_SIZE);
-        strncat(str,"\\n",MAX_STRING_SIZE);
-};} {}
+for (int n=0;n<rootsbrowse->size();n++){ 
+     config.cfg.bankRootDirList[n]=new char [MAX_STRING_SIZE];
+     strncpy(config.cfg.bankRootDirList[n],rootsbrowse->text(n+1),MAX_STRING_SIZE);
+};} {selected
+    }
   }
   Function {getsamplerateorder()} {return_type int
   } {
