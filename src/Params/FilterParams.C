@@ -52,11 +52,7 @@ void FilterParams::defaults(){
     Pnumformants=3;
     Pformantslowness=64;
     for (int j=0;j<FF_MAX_VOWELS;j++){
-	for (int i=0;i<FF_MAX_FORMANTS;i++){
-	    Pvowels[j].formants[i].freq=(int)(RND*127.0);//some random freqs
-	    Pvowels[j].formants[i].q=64;
-	    Pvowels[j].formants[i].amp=127;
-	};
+	defaults(j);
     };
     
     Psequencesize=3;
@@ -68,6 +64,16 @@ void FilterParams::defaults(){
     Poctavesfreq=64;
     Pvowelclearness=64;
 };
+
+void FilterParams::defaults(int n){
+    int j=n;
+	for (int i=0;i<FF_MAX_FORMANTS;i++){
+	    Pvowels[j].formants[i].freq=(int)(RND*127.0);//some random freqs
+	    Pvowels[j].formants[i].q=64;
+	    Pvowels[j].formants[i].amp=127;
+	};
+};
+
 
 /*
  * Get the parameters from other FilterParams
@@ -348,8 +354,8 @@ void FilterParams::saveloadbuf(Buffer *buf){
 };
 
 
-void FilterParams::add2XMLvowel(XMLwrapper *xml,int nvowel){
-	xml->beginbranch("VOWEL",nvowel);
+void FilterParams::add2XMLsection(XMLwrapper *xml,int n){
+	int nvowel=n;
 	for (int nformant=0;nformant<FF_MAX_FORMANTS;nformant++){
 	    xml->beginbranch("FORMANT",nformant);
 		xml->addpar("freq",Pvowels[nvowel].formants[nformant].freq);
@@ -357,7 +363,6 @@ void FilterParams::add2XMLvowel(XMLwrapper *xml,int nvowel){
 		xml->addpar("q",Pvowels[nvowel].formants[nformant].q);
 	    xml->endbranch();
 	};
-	xml->endbranch();
 };
 
 void FilterParams::add2XML(XMLwrapper *xml){
@@ -379,7 +384,9 @@ void FilterParams::add2XML(XMLwrapper *xml){
 	    xml->addpar("center_freq",Pcenterfreq);
 	    xml->addpar("octaves_freq",Poctavesfreq);
 	    for (int nvowel=0;nvowel<FF_MAX_VOWELS;nvowel++){
-		add2XMLvowel(xml,nvowel);
+		xml->beginbranch("VOWEL",nvowel);
+		    add2XMLsection(xml,nvowel);
+		xml->endbranch();
 	    };
   	    xml->addpar("sequence_size",Psequencesize);
   	    xml->addpar("sequence_stretch",Psequencestretch);
@@ -394,8 +401,8 @@ void FilterParams::add2XML(XMLwrapper *xml){
 };
 
 
-void FilterParams::getfromXMLvowel(XMLwrapper *xml,int nvowel){
-	if (xml->enterbranch("VOWEL",nvowel)==0) return;
+void FilterParams::getfromXMLsection(XMLwrapper *xml,int n){
+	int nvowel=n;
 	for (int nformant=0;nformant<FF_MAX_FORMANTS;nformant++){
     	    if (xml->enterbranch("FORMANT",nformant)==0) continue;
 		Pvowels[nvowel].formants[nformant].freq=xml->getpar127("freq",Pvowels[nvowel].formants[nformant].freq);
@@ -403,7 +410,6 @@ void FilterParams::getfromXMLvowel(XMLwrapper *xml,int nvowel){
 		Pvowels[nvowel].formants[nformant].q=xml->getpar127("q",Pvowels[nvowel].formants[nformant].q);
 	    xml->exitbranch();
 	};
-	xml->exitbranch();
 };
 
 void FilterParams::getfromXML(XMLwrapper *xml){
@@ -425,7 +431,9 @@ void FilterParams::getfromXML(XMLwrapper *xml){
 	    Poctavesfreq=xml->getpar127("octaves_freq",Poctavesfreq);
 
 	    for (int nvowel=0;nvowel<FF_MAX_VOWELS;nvowel++){
-		getfromXMLvowel(xml,nvowel);
+		if (xml->enterbranch("VOWEL",nvowel)==0) continue;
+		    getfromXMLsection(xml,nvowel);
+		xml->exitbranch();
 	    };
   	    Psequencesize=xml->getpar127("sequence_size",Psequencesize);
   	    Psequencestretch=xml->getpar127("sequence_stretch",Psequencestretch);

@@ -25,7 +25,8 @@
 
 
 Presets::Presets(){
-    type[0]=0;;
+    type[0]=0;
+    nelement=-1;
 };
 
 Presets::~Presets(){
@@ -38,34 +39,63 @@ void Presets::setpresettype(char *type){
 void Presets::copyclipboard(){
     XMLwrapper *xml=new XMLwrapper();
 
+    char type[MAX_PRESETTYPE_SIZE];
+    strcpy(type,this->type);
+    if (nelement!=-1) strcat(type,"n");
+
     xml->beginbranch(type);
-    add2XML(xml);
+    if (nelement==-1) add2XML(xml);
+	else add2XMLsection(xml,nelement);
     xml->endbranch();
 
     presetsstore.copyclipboard(xml,type);
     
     delete(xml);
+    nelement=-1;
 };
 
 void Presets::pasteclipboard(){
-    if (!checkclipboardtype()) return;
+    char type[MAX_PRESETTYPE_SIZE];
+    strcpy(type,this->type);
+    if (nelement!=-1) strcat(type,"n");
+
+    if (!checkclipboardtype()) {
+	nelement=-1;
+	return;
+    };
     XMLwrapper *xml=new XMLwrapper();
     if (!presetsstore.pasteclipboard(xml)) {
 	delete(xml);
+	nelement=-1;
 	return;
     };
     
-    if (xml->enterbranch(type)==0) return;
-	defaults();
-	getfromXML(xml);
+    if (xml->enterbranch(type)==0) {
+	nelement=-1;
+	return;
+    };
+	if (nelement==-1) {
+	    defaults();
+	    getfromXML(xml);
+	} else {
+	    defaults(nelement);
+	    getfromXMLsection(xml,nelement);
+	};
     xml->exitbranch();
     
     delete(xml);
-
+    nelement=-1;
 };
 
 bool Presets::checkclipboardtype(){
+    char type[MAX_PRESETTYPE_SIZE];
+    strcpy(type,this->type);
+    if (nelement!=-1) strcat(type,"n");
+
     return(presetsstore.checkclipboardtype(type));
 };
 
+void Presets::setelement(int n){
+    nelement=n;
+};
 

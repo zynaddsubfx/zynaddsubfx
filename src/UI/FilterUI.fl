@@ -333,8 +333,8 @@ pars->changed=true;} open
   }
   Function {make_formant_window()} {} {
     Fl_Window formantparswindow {
-      label {Formant Filter Parameters}
-      xywh {47 301 710 205} type Double hide
+      label {Formant Filter Parameters} selected
+      xywh {47 301 700 205} type Double hide
     } {
       Fl_Group {} {
         xywh {485 47 105 113} box THIN_UP_BOX
@@ -491,7 +491,21 @@ pars->changed=true;}
       Fl_Button {} {
         label Close
         callback {formantparswindow->hide();}
-        xywh {645 180 60 25} box THIN_UP_BOX
+        xywh {645 180 50 25} box THIN_UP_BOX
+      }
+      Fl_Button {} {
+        label C
+        callback {presetsui->copy(pars,nvowel);}
+        xywh {635 25 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+      }
+      Fl_Button {} {
+        label P
+        callback {presetsui->paste(pars,this,nvowel);}
+        xywh {665 25 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+      }
+      Fl_Box {} {
+        label Vowel
+        xywh {635 10 55 15}
       }
     }
   }
@@ -523,8 +537,7 @@ qdial->value(pars->Pq);
 freqtrdial->value(pars->Pfreqtrack);
 gaindial->value(pars->Pgain);
 
-stcounter->value(pars->Pstages);} {selected
-    }
+stcounter->value(pars->Pstages);} {}
   }
   Function {init(FilterParams *filterpars_,unsigned char *velsnsamp_,unsigned char *velsns_)} {} {
     code {pars=filterpars_;

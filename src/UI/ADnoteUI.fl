@@ -637,7 +637,7 @@ o->redraw();}
             code0 {o->value(pars->VoicePar[nvoice].PFilterEnvelopeEnabled);}
           }
           Fl_Group voicefilterlfogroup {
-            label {Filter LFO     } open selected
+            label {Filter LFO     } open
             xywh {250 175 230 70} box FLAT_BOX color 47 align 144
             code0 {o->init(pars->VoicePar[nvoice].FilterLfo);}
             code1 {if (pars->VoicePar[nvoice].PFilterLfoEnabled==0) o->deactivate();}
@@ -950,6 +950,46 @@ resui->resonancewindow->show();}
         xywh {435 380 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
       }
     }
+    Fl_Window ADnoteVoice {
+      label {ADsynth Voice Parameters}
+      xywh {53 58 765 560} type Double hide
+    } {
+      Fl_Group advoice {
+        xywh {0 0 760 525} box BORDER_BOX
+        code0 {o->init(pars,nvoice,master);}
+        code1 {o->show();}
+        class ADvoiceUI
+      } {}
+      Fl_Counter currentvoicecounter {
+        label {Current Voice}
+        callback {nvoice=(int)o->value();
+advoice->hide();
+ADnoteVoice->remove(advoice);
+delete advoice;
+advoice=new ADvoiceUI(0,0,765,525);
+ADnoteVoice->add(advoice);
+advoice->init(pars,nvoice,master);
+advoice->show();
+ADnoteVoice->redraw();}
+        xywh {5 530 130 25} type Simple labelfont 1 align 8 minimum 0 maximum 0 step 1 textfont 1 textsize 18
+        code0 {o->bounds(0,NUM_VOICES-1);}
+      }
+      Fl_Button {} {
+        label {Close Window}
+        callback {ADnoteVoice->hide();}
+        xywh {300 530 195 25} box THIN_UP_BOX labelfont 1
+      }
+      Fl_Button {} {
+        label C
+        callback {presetsui->copy(pars,nvoice);} selected
+        xywh {700 535 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+      }
+      Fl_Button {} {
+        label P
+        callback {presetsui->paste(pars,this,nvoice);} selected
+        xywh {730 535 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+      }
+    }
     Fl_Window ADnoteVoiceList {
       label {ADsynth Voices list}
       xywh {32 266 650 260} type Double hide
@@ -990,36 +1030,6 @@ resui->resonancewindow->show();}
           xywh {0 20 620 210}
           code0 {for (int i=0;i<NUM_VOICES;i++){voicelistitem[i]=new ADvoicelistitem(0,0,620,25,"");voicelistitem[i]->init(pars,i,master);}}
         } {}
-      }
-    }
-    Fl_Window ADnoteVoice {
-      label {ADsynth Voice Parameters}
-      xywh {53 58 765 560} type Double hide
-    } {
-      Fl_Group advoice {
-        xywh {0 0 760 525} box BORDER_BOX
-        code0 {o->init(pars,nvoice,master);}
-        code1 {o->show();}
-        class ADvoiceUI
-      } {}
-      Fl_Counter currentvoicecounter {
-        label {Current Voice}
-        callback {nvoice=(int)o->value();
-advoice->hide();
-ADnoteVoice->remove(advoice);
-delete advoice;
-advoice=new ADvoiceUI(0,0,765,525);
-ADnoteVoice->add(advoice);
-advoice->init(pars,nvoice,master);
-advoice->show();
-ADnoteVoice->redraw();}
-        xywh {5 530 130 25} type Simple labelfont 1 align 8 minimum 0 maximum 0 step 1 textfont 1 textsize 18
-        code0 {o->bounds(0,NUM_VOICES-1);}
-      }
-      Fl_Button {} {
-        label {Close Window}
-        callback {ADnoteVoice->hide();}
-        xywh {300 530 195 25} box THIN_UP_BOX labelfont 1
       }
     }
   }

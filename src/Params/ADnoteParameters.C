@@ -81,6 +81,16 @@ void ADnoteParameters::defaults(){
 
 
     for (int nvoice=0;nvoice<NUM_VOICES;nvoice++){
+	defaults(nvoice);
+    };
+    VoicePar[0].Enabled=1;
+};
+
+/*
+ * Defaults a voice
+ */
+void ADnoteParameters::defaults(int n){
+	int nvoice=n;
 	VoicePar[nvoice].Enabled=0;
 	VoicePar[nvoice].Type=0;
 	VoicePar[nvoice].Pfixedfreq=0;
@@ -135,9 +145,8 @@ void ADnoteParameters::defaults(){
 
 	VoicePar[nvoice].FMFreqEnvelope->defaults();
 	VoicePar[nvoice].FMAmpEnvelope->defaults();
-    };
-    VoicePar[0].Enabled=1;
 };
+
 
 
 /*
@@ -509,7 +518,8 @@ void ADnoteParameters::saveloadbuf(Buffer *buf){
 };
 
 
-void ADnoteParameters::add2XMLvoice(XMLwrapper *xml,int nvoice){
+void ADnoteParameters::add2XMLsection(XMLwrapper *xml,int n){
+    int nvoice=n;
     if (nvoice>=NUM_VOICES) return;
     
     int oscilused=0,fmoscilused=0;//if the oscil or fmoscil are used by another voice
@@ -703,7 +713,7 @@ void ADnoteParameters::add2XML(XMLwrapper *xml){
 
     for (int nvoice=0;nvoice<NUM_VOICES;nvoice++){
 	xml->beginbranch("VOICE",nvoice);
-	    add2XMLvoice(xml,nvoice);
+	    add2XMLsection(xml,nvoice);
 	xml->endbranch();
     };
 };
@@ -779,14 +789,15 @@ void ADnoteParameters::getfromXML(XMLwrapper *xml){
     for (int nvoice=0;nvoice<NUM_VOICES;nvoice++){
 	VoicePar[nvoice].Enabled=0;
 	if (xml->enterbranch("VOICE",nvoice)==0) continue;
-	    getfromXMLvoice(xml,nvoice);
+	    getfromXMLsection(xml,nvoice);
 	xml->exitbranch();
     };
     
     
 };
 
-void ADnoteParameters::getfromXMLvoice(XMLwrapper *xml,int nvoice){
+void ADnoteParameters::getfromXMLsection(XMLwrapper *xml,int n){
+    int nvoice=n;
     if (nvoice>=NUM_VOICES) return;
 
     VoicePar[nvoice].Enabled=xml->getparbool("enabled",0);

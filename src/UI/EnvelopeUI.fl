@@ -210,8 +210,8 @@ envfree=NULL;} {}
     code {envwindow->hide();
 hide();
 freemodeeditwindow->hide();
-//delete (envwindow);
-delete (freemodeeditwindow);} {}
+delete (freemodeeditwindow);} {selected
+    }
   }
   Function {make_freemode_edit_window()} {} {
     Fl_Window freemodeeditwindow {
@@ -645,8 +645,7 @@ freeedit->redraw();}
       }
     }
   }
-  Function {make_free_window()} {selected
-  } {
+  Function {make_free_window()} {} {
     Fl_Window envfree {
       xywh {373 413 205 70} type Double color 50 labelfont 1 hide resizable
       class Fl_Group

@@ -37,12 +37,17 @@ class Presets{
 	bool checkclipboardtype();
 
 	char type[MAX_PRESETTYPE_SIZE];
+	void setelement(int n);
     protected:
 	void setpresettype(char *type);
     private:
 	virtual void add2XML(XMLwrapper *xml)=0;
         virtual void getfromXML(XMLwrapper *xml)=0;
 	virtual void defaults()=0;	
+	virtual void add2XMLsection(XMLwrapper *xml,int n){};
+        virtual void getfromXMLsection(XMLwrapper *xml,int n){};
+        virtual void defaults(int n){};
+	int nelement;
 };
 
 #endif

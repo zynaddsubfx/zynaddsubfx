@@ -35,10 +35,10 @@ class FilterParams:public Presets{
         void saveloadbuf(Buffer *buf);
 
 	void add2XML(XMLwrapper *xml);
-	void add2XMLvowel(XMLwrapper *xml,int nvowel);
+	void add2XMLsection(XMLwrapper *xml,int n);
 	void defaults();
 	void getfromXML(XMLwrapper *xml);
-	void getfromXMLvowel(XMLwrapper *xml,int nvowel);
+	void getfromXMLsection(XMLwrapper *xml,int n);
 
 
 	void getfromFilterParams(FilterParams *pars);
@@ -90,6 +90,8 @@ class FilterParams:public Presets{
 	bool changed;
 	
     private:
+	void defaults(int n);
+    
 	//stored default parameters
 	unsigned char Dtype;
 	unsigned char Dfreq;

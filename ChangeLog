@@ -683,14 +683,14 @@
 13 Aug 2004 - Inceput sa scriu modurile continous si discrete la PADnote
 14 Aug 2004 - Terminat modul continous la PADnote
 	    - Corectata o mica eroare la OscilGen care facea daca adaptive harmonics e activ si phase randomness>0 sa rezulte si aleatorism in amplitudinile armonicelor
-	    - Inceput sa scriu Presets/Clipboard
+	    - Inceput sa scriu Presets/Clipboard (Clipboardul, in stadiu actual va putea copia doar parametrii folositi si nu cei dezactivati)
 	    - Merge partial partea de Copy in clipboard
 15 Aug 2004 - Corectata o eroare in main.c la pitch bend
 	    - Scos Swap/Copy la efecte si la PartUI si vechiul Copy/Paste de la ADnote voice
 	    - Merge clipboardul la Oscil, Resonance, Filter si partial la ADsynth,SUBSynth si PADsynth
 16 Aug 2004 - Corectata inca o eroare la pitch bend (aratata de Krzysztof Korpiela)
 	    - Adaugat refresh si la Filtru si paste la ADnote, SUBnote si PADsynth sunt complete
-17 Aug 2004 - Adaugat clipboard la LFO si Envelope	    
+17 Aug 2004 - Adaugat clipboard la LFO, Envelope, ADnoteVoice si Filter Vowel
 	    
 	    
 	    

@@ -269,12 +269,14 @@ class ADnoteParameters:public Presets{
 	void saveloadbufvoice(Buffer *buf,unsigned char nvoice);
 
     private:
+	void defaults(int n);//n is the nvoice
+
 	void EnableVoice(int nvoice);		
 	void KillVoice(int nvoice);		
 	FFTwrapper *fft;	
 
-	void add2XMLvoice(XMLwrapper *xml,int nvoice);
-        void getfromXMLvoice(XMLwrapper *xml,int nvoice);
+	void add2XMLsection(XMLwrapper *xml,int n);
+        void getfromXMLsection(XMLwrapper *xml,int n);
 };
 
 #endif
