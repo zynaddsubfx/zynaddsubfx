@@ -819,6 +819,7 @@ void Master::getfromXML(XMLwrapper *xml){
     ctl.NRPN.receive=xml->getparbool("nrpn_receive",ctl.NRPN.receive);
 	
     
+    part[0]->Penabled=0;
     for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
 	if (xml->enterbranch("PART",npart)==0) continue;
     	part[npart]->getfromXML(xml);
@@ -830,6 +831,7 @@ void Master::getfromXML(XMLwrapper *xml){
         xml->exitbranch();
     };
 	
+    sysefx[0]->changeeffect(0);
     if (xml->enterbranch("SYSTEM_EFFECTS")){
 	for (int nefx=0;nefx<NUM_SYS_EFX;nefx++){
 	    if (xml->enterbranch("SYSTEM_EFFECT",nefx)==0) continue;

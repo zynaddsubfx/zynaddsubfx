@@ -103,9 +103,6 @@ void Part::defaultsinstrument(){
     memset(info.Pauthor,0,MAX_INFO_TEXT_SIZE+1);
     memset(info.Pcomments,0,MAX_INFO_TEXT_SIZE+1);
 
-    PADnoteenabled=1;
-    PSUBnoteenabled=0;
-    
     Pkitmode=0;
     Pdrummode=0;
 
@@ -237,9 +234,10 @@ void Part::NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift){
 	    partnote[pos].itemsplaying=0;
 	    if (Pkitmode==0){//init the notes for the "normal mode"
 		partnote[pos].kititem[0].sendtoparteffect=0;
-        	if (PADnoteenabled!=0) partnote[pos].kititem[0].adnote=new ADnote(kit[0].adpars,&ctl,notebasefreq,vel,portamento,note);
-        	if (PSUBnoteenabled!=0) partnote[pos].kititem[0].subnote=new SUBnote(kit[0].subpars,&ctl,notebasefreq,vel,portamento,note);
-		if ((PADnoteenabled!=0)||(PSUBnoteenabled!=0)) partnote[pos].itemsplaying++;
+        	if (kit[0].Padenabled!=0) partnote[pos].kititem[0].adnote=new ADnote(kit[0].adpars,&ctl,notebasefreq,vel,portamento,note);
+        	if (kit[0].Psubenabled!=0) partnote[pos].kititem[0].subnote=new SUBnote(kit[0].subpars,&ctl,notebasefreq,vel,portamento,note);
+		if ((kit[0].Padenabled!=0)||(kit[0].Psubenabled!=0)) partnote[pos].itemsplaying++;
+
 	    } else {//init the notes for the "kit mode"
 		for (int item=0;item<NUM_KIT_ITEMS;item++){
 		    if (kit[item].Pmuted!=0) continue;
@@ -592,10 +590,6 @@ void Part::swapcopyitem(int item1, int item2, int mode){
     int e2=kit[item2].Penabled;
     
     if ((e1==0) && (e2==0)) return;//both items are disabled
-
-    kit[0].Padenabled=PADnoteenabled;
-    kit[0].Psubenabled=PSUBnoteenabled;
-    
     if ((e1==0)&&(mode==0)) {//copy a null item to a existent item
 	setkititemstatus (item2,0);//delete item 2
     };
@@ -621,9 +615,6 @@ void Part::swapcopyitem(int item1, int item2, int mode){
 	tmpbuf.changemode(0);
 	saveloadbufkititem(&tmpbuf,item1,1);
     };
-
-    PADnoteenabled=kit[0].Padenabled;
-    PSUBnoteenabled=kit[0].Psubenabled;
 };
 
 
@@ -786,9 +777,9 @@ void Part::saveloadbuf(Buffer *buf,int instrumentonly){
 			buf->rwbytepar(n,&Pkeylimit);
 			break;
 	    //Instrument data
-	    case 0xB0:	buf->rwbytepar(n,&PADnoteenabled);
+	    case 0xB0:	buf->rwbytepar(n,&kit[0].Padenabled);
 			break;
-	    case 0xB1:	buf->rwbytepar(n,&PSUBnoteenabled);
+	    case 0xB1:	buf->rwbytepar(n,&kit[0].Psubenabled);
 			break;
 	    case 0xB2:	tmp=0;
 			if ((disablekitloading!=0)&&(buf->getmode()==0))
@@ -842,12 +833,12 @@ void Part::saveloadbuf(Buffer *buf,int instrumentonly){
 			};
 			break;
 	    case 0xC0:	if ((buf->getminimal()!=0) && (buf->getmode()!=0) 
-			    && (PADnoteenabled==0)) break;
+			    && (kit[0].Padenabled==0)) break;
 			if (buf->getmode()!=0) buf->rwbyte(&npar);
 			kit[0].adpars->saveloadbuf(buf);
 			break;
 	    case 0xC1:	if ((buf->getminimal()!=0) && (buf->getmode()!=0) 
-			    && (PSUBnoteenabled==0)) break;
+			    && (kit[0].Psubenabled==0)) break;
 			if (buf->getmode()!=0) buf->rwbyte(&npar);
 			kit[0].subpars->saveloadbuf(buf);
 			break;
@@ -934,16 +925,8 @@ void Part::saveloadbuf(Buffer *buf,int instrumentonly){
 	buf->rwbyte(&tmp);
     };
 
-    kit[0].Padenabled=PADnoteenabled;
-    kit[0].Psubenabled=PSUBnoteenabled;
-
 };
 
-/*
-      unsigned char Pkitmode;//if the kitmode is enabled
-      unsigned char Pdrummode;//if all keys are mapped and the system is 12tET (used for drums)
-
-*/
 
 void Part::add2XMLinstrument(XMLwrapper *xml){
     xml->beginbranch("INFO");
@@ -1080,6 +1063,7 @@ void Part::getfromXMLinstrument(XMLwrapper *xml){
 	Pkitmode=xml->getpar127("kit_mode",Pkitmode);
 	Pdrummode=xml->getparbool("drum_mode",Pdrummode);
 
+	setkititemstatus(0,0);
 	for (int i=0;i<NUM_KIT_ITEMS;i++){
 	    if (xml->enterbranch("INSTRUMENT_KIT_ITEM",i)==0) continue;
 		setkititemstatus(i,xml->getparbool("enabled",kit[i].Penabled));
@@ -1097,8 +1081,6 @@ void Part::getfromXMLinstrument(XMLwrapper *xml){
 		kit[i].Psendtoparteffect=xml->getpar127("send_to_instrument_effect",kit[i].Psendtoparteffect);
 
 		kit[i].Padenabled=xml->getparbool("add_enabled",kit[i].Padenabled);
-
-
 	    	if (xml->enterbranch("ADD_SYNTH_PARAMETERS")){
 		    kit[i].adpars->getfromXML(xml);
 		    xml->exitbranch();

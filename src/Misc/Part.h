@@ -106,8 +106,8 @@ class Part{
       void setPpanning(char Ppanning);
       unsigned char Pvelsns;//velocity sensing (amplitude velocity scale)
       unsigned char Pveloffs;//velocity offset
-      unsigned char PADnoteenabled;//if ADnote is enabled
-      unsigned char PSUBnoteenabled;//if SUBnote is enabled
+//  zzzz    unsigned char PADnoteenabled;//if ADnote is enabled
+//zzz      unsigned char PSUBnoteenabled;//if SUBnote is enabled
       unsigned char Pnoteon;//if the part receives NoteOn messages
       unsigned char Pkitmode;//if the kitmode is enabled
       unsigned char Pdrummode;//if all keys are mapped and the system is 12tET (used for drums)

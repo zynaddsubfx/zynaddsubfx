@@ -896,10 +896,11 @@ void OscilGen::getfromXML(XMLwrapper *xml){
     Pamprandpower=xml->getpar127("amp_rand_power",Pamprandpower);
 
     if (xml->enterbranch("HARMONICS")){
+	Phmag[0]=64;Phphase[0]=64;
 	for (int n=0;n<MAX_AD_HARMONICS;n++){
 	    if (xml->enterbranch("HARMONIC",n+1)==0) continue;
-		Phmag[n]=xml->getpar127("mag",Phmag[n]);
-		Phphase[n]=xml->getpar127("phase",Phphase[n]);
+		Phmag[n]=xml->getpar127("mag",64);
+		Phphase[n]=xml->getpar127("phase",64);
 	    xml->exitbranch();
 	};
      xml->exitbranch();

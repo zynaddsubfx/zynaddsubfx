@@ -282,6 +282,7 @@ void SUBnoteParameters::getfromXML(XMLwrapper *xml){
     Pstart=xml->getpar127("start",Pstart);
     
     if (xml->enterbranch("HARMONICS")){
+	Phmag[0]=0;
 	for (int i=0;i<MAX_SUB_HARMONICS;i++){
 	    if (xml->enterbranch("HARMONIC",i)==0) continue;
 		Phmag[i]=xml->getpar127("mag",Phmag[i]);
@@ -308,7 +309,7 @@ void SUBnoteParameters::getfromXML(XMLwrapper *xml){
 	PfixedfreqET=xml->getpar127("fixed_freq_et",PfixedfreqET);
 
 	PDetune=xml->getpar("detune",PDetune,0,16383);
-	PCoarseDetune=xml->getpar127("coarse_detune",PCoarseDetune);
+	PCoarseDetune=xml->getpar("coarse_detune",PCoarseDetune,0,16383);
 	PDetuneType=xml->getpar127("detune_type",PDetuneType);
 
 	Pbandwidth=xml->getpar127("bandwidth",Pbandwidth);

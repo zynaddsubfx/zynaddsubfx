@@ -391,6 +391,8 @@ void ADnoteParameters::saveloadbufvoice(Buffer *buf,unsigned char nvoice){
 	unsigned char tmp=0xff;
 	buf->rwbyte(&tmp);
     };
+
+	
     
 };
 
@@ -669,6 +671,8 @@ void ADnoteParameters::add2XML(XMLwrapper *xml){
 
     xml->beginbranch("FREQUENCY_PARAMETERS");
 	xml->addpar("detune",GlobalPar.PDetune);
+//	printf("%d\n",GlobalPar.PCoarseDetune);
+	
 	xml->addpar("coarse_detune",GlobalPar.PCoarseDetune);
         xml->addpar("detune_type",GlobalPar.PDetuneType);
 	
@@ -739,7 +743,7 @@ void ADnoteParameters::getfromXML(XMLwrapper *xml){
 
     if (xml->enterbranch("FREQUENCY_PARAMETERS")){
 	GlobalPar.PDetune=xml->getpar("detune",GlobalPar.PDetune,0,16383);
-	GlobalPar.PCoarseDetune=xml->getpar127("coarse_detune",GlobalPar.PCoarseDetune);
+	GlobalPar.PCoarseDetune=xml->getpar("coarse_detune",GlobalPar.PCoarseDetune,0,16383);
         GlobalPar.PDetuneType=xml->getpar127("detune_type",GlobalPar.PDetuneType);
 	
 	xml->enterbranch("FREQUENCY_ENVELOPE");
@@ -778,6 +782,7 @@ void ADnoteParameters::getfromXML(XMLwrapper *xml){
     };
 
     for (int nvoice=0;nvoice<NUM_VOICES;nvoice++){
+	VoicePar[nvoice].Enabled=0;
 	if (xml->enterbranch("VOICE",nvoice)==0) continue;
 	    getfromXMLvoice(xml,nvoice);
 	xml->exitbranch();
@@ -789,7 +794,7 @@ void ADnoteParameters::getfromXML(XMLwrapper *xml){
 void ADnoteParameters::getfromXMLvoice(XMLwrapper *xml,int nvoice){
     if (nvoice>=NUM_VOICES) return;
 
-    VoicePar[nvoice].Enabled=xml->getparbool("enabled",VoicePar[nvoice].Enabled);
+    VoicePar[nvoice].Enabled=xml->getparbool("enabled",0);
 
     VoicePar[nvoice].Type=xml->getpar127("type",VoicePar[nvoice].Type);
     VoicePar[nvoice].PDelay=xml->getpar127("delay",VoicePar[nvoice].PDelay);
@@ -839,7 +844,7 @@ void ADnoteParameters::getfromXMLvoice(XMLwrapper *xml,int nvoice){
 	
 	VoicePar[nvoice].PDetune=xml->getpar("detune",VoicePar[nvoice].PDetune,0,16383);
 	
-	VoicePar[nvoice].PCoarseDetune=xml->getpar127("coarse_detune",VoicePar[nvoice].PCoarseDetune);
+	VoicePar[nvoice].PCoarseDetune=xml->getpar("coarse_detune",VoicePar[nvoice].PCoarseDetune,0,16383);
 	VoicePar[nvoice].PDetuneType=xml->getpar127("detune_type",VoicePar[nvoice].PDetuneType);
 
 	VoicePar[nvoice].PFreqEnvelopeEnabled=xml->getparbool("freq_envelope_enabled",VoicePar[nvoice].PFreqEnvelopeEnabled);

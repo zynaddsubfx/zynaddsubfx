@@ -534,4 +534,5 @@
 12 Feb 2004 - Continuat incarcarea parametrilor XML si la part (neterminat)
 13 Feb 2004 - Terminat de adaugat parametrii la incarcarea XML
 14 Feb 2004 - Se poate incarca si instrumente
-
+	    - Rezolvata o problema la coarse detune
+	    - Corectate cateva erori la incarcarea XML-ului

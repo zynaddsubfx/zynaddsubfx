@@ -298,10 +298,9 @@ class PartUI {: {public Fl_Group,PartUI_}
         } {
           Fl_Check_Button adsynenabledcheck {
             label ADsyn
-            callback {part->PADnoteenabled=(int) o->value();
-part->kit[0].Padenabled=part->PADnoteenabled;}
+            callback {part->kit[0].Padenabled=(int) o->value();}
             tooltip {enable/disable ADsynth} xywh {6 86 70 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
-            code1 {o->value(part->PADnoteenabled);}
+            code1 {o->value(part->kit[0].Padenabled);}
           }
           Fl_Button {} {
             label {ADs edit}
@@ -310,10 +309,9 @@ part->kit[0].Padenabled=part->PADnoteenabled;}
           }
           Fl_Check_Button subsynenabledcheck {
             label SUBsyn
-            callback {part->PSUBnoteenabled=(int) o->value();
-part->kit[0].Psubenabled=part->PSUBnoteenabled;}
+            callback {part->kit[0].Psubenabled=(int) o->value();}
             tooltip {enable/disable SUBsynth} xywh {81 86 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
-            code1 {o->value(part->PSUBnoteenabled);}
+            code1 {o->value(part->kit[0].Psubenabled);}
           }
           Fl_Button {} {
             label {SUBs edit}
