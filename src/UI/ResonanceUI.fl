@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0200 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2003 Nasca Octavian Paul} {} 
@@ -139,7 +139,7 @@ if ((event==FL_PUSH)||(event==FL_DRAG)){
       x1=x_;y1=y_;
       x2=oldx;y2=oldy;
     };
-    for (int i=0;i<x2-x1;i++){
+   for (int i=0;i<x2-x1;i++){
       int sn=(int)((i+x1)*1.0/w()*N_RES_POINTS);
       REALTYPE yy=(y2-y1)*1.0/(x2-x1)*i;
       int sp=127-(int)((y1+yy)/h()*127);
@@ -150,8 +150,12 @@ if ((event==FL_PUSH)||(event==FL_DRAG)){
 
   oldx=x_;oldy=y_;
   redraw();
-} else oldx=-1;
-return(1);} {}
+};
+
+if (event==FL_RELEASE) oldx=-1;
+
+return(1);} {selected
+    }
   }
   decl {Fl_Value_Output *khzvalue;} {}
   decl {Fl_Value_Output *dbvalue;} {}
@@ -165,7 +169,7 @@ class ResonanceUI {} {
   Function {make_window()} {} {
     Fl_Window resonancewindow {
       label Resonance
-      xywh {32 300 780 305} hide
+      xywh {32 300 780 305} type Double hide
     } {
       Fl_Value_Output khzvalue {
         label kHz
@@ -286,7 +290,7 @@ rg->redraw();}
         label {Oct.}
         callback {respar->Poctavesfreq=(int)o->value();
 octavesfreqvo->do_callback();
-rg->redraw();} selected
+rg->redraw();}
         xywh {280 265 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
         code0 {o->value(respar->Poctavesfreq);}
         class WidgetPDial
