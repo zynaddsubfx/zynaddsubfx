@@ -3,7 +3,7 @@ include ../Makefile.inc
 %.cc  : %.fl
 	fluid -c $<
 
-objects=WidgetPDial.o EnvelopeUI.o LFOUI.o FilterUI.o VirKeyboard.o ConfigUI.o\
+objects=WidgetPDial.o PresetsUI.o EnvelopeUI.o LFOUI.o FilterUI.o VirKeyboard.o ConfigUI.o\
 	SUBnoteUI.o ResonanceUI.o OscilGenUI.o ADnoteUI.o PADnoteUI.o EffUI.o BankUI.o \
 	PartUI.o MicrotonalUI.o SeqUI.o MasterUI.o 
 
@@ -11,6 +11,7 @@ objects=WidgetPDial.o EnvelopeUI.o LFOUI.o FilterUI.o VirKeyboard.o ConfigUI.o\
 all: $(objects)
 
 WidgetPDial.o: WidgetPDial.fl WidgetPDial.cc WidgetPDial.h
+PresetsUI.o: PresetsUI.fl PresetsUI.cc PresetsUI.h
 EnvelopeUI.o: EnvelopeUI.fl EnvelopeUI.cc EnvelopeUI.h
 LFOUI.o: LFOUI.fl LFOUI.cc LFOUI.h
 FilterUI.o: FilterUI.fl FilterUI.cc FilterUI.h

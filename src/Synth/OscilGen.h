@@ -28,8 +28,9 @@
 #include "../Misc/XMLwrapper.h"
 #include "Resonance.h"
 #include "../DSP/FFTwrapper.h"  
+#include "../Params/Presets.h"
 
-class OscilGen{
+class OscilGen:public Presets{
     public:
 	OscilGen(FFTwrapper *fft_,Resonance *res_);
 	~OscilGen();

@@ -1,41 +1,60 @@
 # data file for the Fltk User Interface Designer (fluid)
 version 1.0105 
 header_name {.h} 
-code_name {.cxx}
+code_name {.cc}
+decl {\#include <stdlib.h>} {public
+} 
+
+decl {\#include "../Params/Presets.h"} {public
+} 
+
 class PresetsUI {open
 } {
+  Function {PresetsUI()} {} {
+    code {p=NULL;
+make_window();} {}
+  }
+  Function {~PresetsUI()} {open
+  } {
+    code {copywin->hide();delete(copywin);
+pastewin->hide();delete(pastewin);} {}
+  }
   Function {make_window()} {open
   } {
-    Fl_Window {} {
-      label {Copy to Clipboard/Preset} open
-      xywh {511 241 265 315} type Double hide modal
+    Fl_Window copywin {
+      label {Copy to Clipboard/Preset}
+      xywh {95 240 265 315} type Double box PLASTIC_THIN_UP_BOX color 238 hide non_modal
     } {
       Fl_Browser {} {
         xywh {10 30 245 200}
       }
       Fl_Button {} {
         label {Copy to Preset}
+        callback {copywin->hide();}
         xywh {75 240 120 20} box THIN_UP_BOX
       }
       Fl_Button {} {
         label {Copy to Clipboard}
+        callback {p->copyclipboard();
+copywin->hide();}
         xywh {25 270 90 40} box THIN_UP_BOX align 192
       }
       Fl_Button {} {
         label Cancel
+        callback {copywin->hide();}
         xywh {160 270 80 40} box THIN_UP_BOX align 192
       }
       Fl_Box {} {
         label {Type:}
         xywh {10 5 45 20} align 20
       }
-      Fl_Box copytypetext {selected
-        xywh {50 5 200 20} box FLAT_BOX color 50 labelfont 1 align 20
+      Fl_Box copytypetext {
+        xywh {50 5 200 20} box FLAT_BOX color 239 labelfont 1 align 20
       }
     }
-    Fl_Window {} {
-      label {Paste from Clipboard/Preset} open
-      xywh {238 242 265 315} type Double hide modal
+    Fl_Window pastewin {
+      label {Paste from Clipboard/Preset}
+      xywh {516 204 265 315} type Double box PLASTIC_THIN_UP_BOX color 238 hide modal
     } {
       Fl_Browser {} {
         xywh {10 30 245 205} type Hold
@@ -50,6 +69,7 @@ class PresetsUI {open
       }
       Fl_Button {} {
         label Cancel
+        callback {pastewin->hide();}
         xywh {160 270 80 40} box THIN_UP_BOX align 192
       }
       Fl_Box {} {
@@ -57,8 +77,25 @@ class PresetsUI {open
         xywh {10 5 45 20} align 20
       }
       Fl_Box pastetypetext {
-        xywh {50 5 200 20} box FLAT_BOX color 50 labelfont 1 align 20
+        xywh {50 5 200 20} box FLAT_BOX color 239 labelfont 1 align 20
       }
     }
   }
+  Function {copy(Presets *p)} {open
+  } {
+    code {this->p=p;
+bool but=(Fl::event_button()!=FL_LEFT_MOUSE);
+
+if (but) p->copyclipboard();
+   else {
+	copytypetext->label(&p->type[1]);
+	copywin->show();
+   };} {selected
+    }
+  }
+  decl {Presets *p;} {public
+  }
+} 
+
+decl {PresetsUI *presetsui;} {public
 } 

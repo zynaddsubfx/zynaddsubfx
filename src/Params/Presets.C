@@ -19,3 +19,34 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 */
+
+#include "Presets.h"
+#include <string.h>
+
+
+Presets::Presets(){
+    type[0]=0;;
+};
+
+Presets::~Presets(){
+};
+
+void Presets::setpresettype(char *type){
+    strcpy(this->type,type);
+};
+
+void Presets::copyclipboard(){
+    XMLwrapper *xml=new XMLwrapper();
+
+    xml->beginbranch(type);
+    add2XML(xml);
+    xml->endbranch();
+
+    xml->saveXMLfile("clipboard");
+    
+    delete(xml);
+};
+void Presets::pasteclipboard(){
+};
+
+

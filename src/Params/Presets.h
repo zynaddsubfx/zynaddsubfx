@@ -19,3 +19,28 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 */
+
+#ifndef PRESETS_H
+#define PRESETS_H
+
+#include "../Misc/XMLwrapper.h"
+#define MAX_PRESETTYPE_SIZE 20
+
+class Presets{
+    public:
+	Presets();
+	virtual ~Presets();
+        void copyclipboard();
+	void pasteclipboard();
+
+	char type[MAX_PRESETTYPE_SIZE];
+    protected:
+	void setpresettype(char *type);
+    private:
+	virtual void add2XML(XMLwrapper *xml)=0;
+        virtual void getfromXML(XMLwrapper *xml)=0;
+	
+};
+
+#endif
+

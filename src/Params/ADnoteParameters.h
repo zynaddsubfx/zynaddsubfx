@@ -252,7 +252,7 @@
 	EnvelopeParams *FMAmpEnvelope;
     }; 
 
-class ADnoteParameters{
+class ADnoteParameters/*:public Presets*/{
     public:
 	ADnoteParameters(FFTwrapper *fft_);
 	~ADnoteParameters();

@@ -27,7 +27,8 @@
 #include "OscilGen.h"
 #include "../Effects/Distorsion.h"
 
-OscilGen::OscilGen(FFTwrapper *fft_,Resonance *res_){
+OscilGen::OscilGen(FFTwrapper *fft_,Resonance *res_):Presets(){
+    setpresettype("Poscilgen");
     fft=fft_;
     res=res_;
     oscilFFTfreqs=new REALTYPE[OSCIL_SIZE];

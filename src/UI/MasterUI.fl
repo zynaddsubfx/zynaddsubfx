@@ -45,6 +45,9 @@ decl {\#include "MicrotonalUI.h"} {public
 decl {\#include "SeqUI.h"} {public
 } 
 
+decl {\#include "PresetsUI.h"} {public
+} 
+
 decl {\#include "../Misc/Master.h"} {public
 } 
 
@@ -1226,6 +1229,7 @@ configui=new ConfigUI();
 sequi=new SeqUI(master);
 
 make_window();
+presetsui=new PresetsUI();
 
 swapefftype=0;} {}
   }
@@ -1241,7 +1245,9 @@ delete (virkeyboard);
 delete (microtonalui);
 delete (bankui);
 delete (configui);
-delete (sequi);} {selected
+delete (sequi);
+
+delete(presetsui);} {selected
     }
   }
   decl {Master *master;} {}
