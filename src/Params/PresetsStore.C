@@ -80,10 +80,33 @@ void PresetsStore::clearpresets(){
 
 void PresetsStore::rescanforpresets(char *type){
     clearpresets();
-    int presetk=0;
+//    int presetk=0;
     for (int i=0;i<MAX_BANK_ROOT_DIRS;i++){
 	if (config.cfg.presetsDirList[i]==NULL) continue;
 	//de continuat aici
     };
 };
+
+void PresetsStore::copypreset(XMLwrapper *xml,char *type, const char *name){
+    char filename[MAX_STRING_SIZE],tmpfilename[MAX_STRING_SIZE];
+    
+    if (config.cfg.presetsDirList[0]==NULL) return;
+    
+    snprintf(tmpfilename,MAX_STRING_SIZE,"%s",name);
+
+    //make the filenames legal
+    for (int i=0;i<(int) strlen(tmpfilename);i++) {
+	char c=tmpfilename[i];
+	if ((c>='0')&&(c<='9')) continue;
+	if ((c>='A')&&(c<='Z')) continue;
+	if ((c>='a')&&(c<='z')) continue;
+	if ((c=='-')||(c==' ')) continue;
+	tmpfilename[i]='_';
+    };
+    
+    snprintf(filename,MAX_STRING_SIZE,"%s%s.%s.xpz",config.cfg.presetsDirList[0],name,type);
+    
+    xml->saveXMLfile(filename);
+};
+
 

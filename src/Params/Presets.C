@@ -36,11 +36,11 @@ void Presets::setpresettype(char *type){
     strcpy(this->type,type);
 };
 
-void Presets::copyclipboard(){
+void Presets::copy(const char *name){
     XMLwrapper *xml=new XMLwrapper();
     
     //used only for the clipboard
-    xml->minimal=false;
+    if (name==NULL) xml->minimal=false;
     
     char type[MAX_PRESETTYPE_SIZE];
     strcpy(type,this->type);
@@ -52,13 +52,14 @@ void Presets::copyclipboard(){
 	else add2XMLsection(xml,nelement);
     xml->endbranch();
 
-    presetsstore.copyclipboard(xml,type);
+    if (name==NULL) presetsstore.copyclipboard(xml,type);
+	else presetsstore.copypreset(xml,type,name);
     
     delete(xml);
     nelement=-1;
 };
 
-void Presets::pasteclipboard(){
+void Presets::paste(){
     char type[MAX_PRESETTYPE_SIZE];
     strcpy(type,this->type);
     if (nelement!=-1) strcat(type,"n");

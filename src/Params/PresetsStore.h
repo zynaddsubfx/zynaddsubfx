@@ -30,9 +30,14 @@ class PresetsStore{
     public:
 	PresetsStore();
 	~PresetsStore();
+
+	//Clipboard stuff
 	void copyclipboard(XMLwrapper *xml,char *type);
 	bool pasteclipboard(XMLwrapper *xml);
 	bool checkclipboardtype(char *type);
+
+	//presets stuff
+	void copypreset(XMLwrapper *xml,char *type, const char *name);
 	
 	struct presetstruct{
 	    char *file;

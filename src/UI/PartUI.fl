@@ -318,7 +318,7 @@ if (event==FL_RIGHT_MOUSE){
 } else {
   if (event==FL_LEFT_MOUSE) bankui->show();
        else instrumenteditwindow->show();
-};}
+};} selected
           tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the instrument information} xywh {195 5 185 20} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 12 align 84
           code0 {o->label((char *)part->Pname);}
         }
@@ -780,7 +780,7 @@ if (part->Pkitmode==0) {
  } else {
  kitlist->activate();
  protectthekitcheck->activate();
-};} selected
+};}
         xywh {35 350 70 15} down_box BORDER_BOX labelsize 12 textfont 1 textsize 12
         code0 {o->value(part->Pkitmode);}
       } {

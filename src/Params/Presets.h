@@ -31,9 +31,9 @@ class Presets{
     public:
 	Presets();
 	virtual ~Presets();
-
-        void copyclipboard();
-	void pasteclipboard();
+	
+        void copy(const char *name);//if name==NULL, the clipboard is used
+	void paste();
 	bool checkclipboardtype();
 
 	char type[MAX_PRESETTYPE_SIZE];

@@ -257,6 +257,7 @@ void Resonance::saveloadbuf(Buffer *buf){
 
 void Resonance::add2XML(XMLwrapper *xml){
     xml->addparbool("enabled",Penabled);
+    
     if ((Penabled==0)&&(xml->minimal)) return;
 
     xml->addpar("max_db",PmaxdB);

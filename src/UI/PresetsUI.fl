@@ -2,6 +2,9 @@
 version 1.0105 
 header_name {.h} 
 code_name {.cc}
+decl {\#include <FL/fl_ask.h>} {public
+} 
+
 decl {\#include <stdlib.h>} {public
 } 
 
@@ -15,7 +18,8 @@ class PresetsUI_ {} {
   } {}
 } 
 
-class PresetsUI {} {
+class PresetsUI {open
+} {
   Function {PresetsUI()} {} {
     code {p=NULL;
 make_window();} {}
@@ -24,22 +28,27 @@ make_window();} {}
     code {copywin->hide();delete(copywin);
 pastewin->hide();delete(pastewin);} {}
   }
-  Function {make_window()} {} {
+  Function {make_window()} {open
+  } {
     Fl_Window copywin {
       label {Copy to Clipboard/Preset}
-      xywh {95 240 265 315} type Double box PLASTIC_THIN_UP_BOX color 238 hide non_modal
+      xywh {237 99 265 315} type Double box PLASTIC_THIN_UP_BOX color 238 non_modal visible
     } {
       Fl_Browser {} {
         xywh {10 30 245 200}
       }
       Fl_Button {} {
         label {Copy to Preset}
-        callback {copywin->hide();}
+        callback {const char *tmp=fl_input("Copy to Preset:",NULL);
+if (tmp!=NULL) {
+        p->copy(tmp);
+	copywin->hide();
+};} selected
         xywh {75 240 120 20} box THIN_UP_BOX
       }
       Fl_Button {} {
         label {Copy to Clipboard}
-        callback {p->copyclipboard();
+        callback {p->copy(NULL);
 copywin->hide();}
         xywh {25 270 90 35} box THIN_UP_BOX align 192
       }
@@ -69,7 +78,7 @@ copywin->hide();}
       }
       Fl_Button pastebutton {
         label {Paste from Clipboard}
-        callback {p->pasteclipboard();
+        callback {p->paste();
 pastewin->hide();
 pui->refresh();}
         xywh {25 270 90 35} box THIN_UP_BOX align 192
@@ -88,24 +97,26 @@ pui->refresh();}
       }
     }
   }
-  Function {copy(Presets *p)} {} {
+  Function {copy(Presets *p)} {open
+  } {
     code {this->p=p;
 this->pui=NULL;
 bool but=(Fl::event_button()!=FL_LEFT_MOUSE);
 
-if (but) p->copyclipboard();
+if (but) p->copy(NULL);
    else {
 	copytypetext->label(&p->type[1]);
 	copywin->show();
    };} {}
   }
-  Function {paste(Presets *p,PresetsUI_ *pui)} {} {
+  Function {paste(Presets *p,PresetsUI_ *pui)} {open
+  } {
     code {this->p=p;
 this->pui=pui;
 bool but=(Fl::event_button()!=FL_LEFT_MOUSE);
 
 if (but) {
-	p->pasteclipboard();
+	p->paste();
 	pui->refresh();
 } else {
 	pastetypetext->label(&p->type[1]);
@@ -120,8 +131,7 @@ copy(p);} {}
   }
   Function {paste(Presets *p,PresetsUI_ *pui,int n)} {} {
     code {p->setelement(n);
-paste(p,pui);} {selected
-    }
+paste(p,pui);} {}
   }
   decl {Presets *p;} {public
   }
