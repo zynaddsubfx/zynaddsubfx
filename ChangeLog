@@ -777,7 +777,7 @@
 	    - Se compileaza in mod cross-compile pt. windows din linux 
 14 Mar 2005 - Mici modificari la afisarea RMS-ului
 	    - Actualizat textul copyright-ului la anul 2005
-
+22 Mar 2005 - Corectata o mica eroare care facea ca la schimbari foarte lente al parametrilor sa nu se actualizeze Format Filter
 
 
     

@@ -82,7 +82,7 @@ void FormantFilter::setpos(REALTYPE input){
 
     if ((fabs(oldinput-input)<0.001)&&(fabs(slowinput-input)<0.001)&&
 	(fabs(Qfactor-oldQfactor)<0.001)) {
-	oldinput=input;
+//	oldinput=input; daca setez asta, o sa faca probleme la schimbari foarte lente
 	firsttime=0;
 	return;
     } else oldinput=input;
