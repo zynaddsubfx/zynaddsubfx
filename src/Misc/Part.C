@@ -1104,7 +1104,11 @@ int Part::loadXMLinstrument(const char *filename){
 };
 
 
-
+void Part::applyparameters(){
+    for (int n=0;n<NUM_KIT_ITEMS;n++){
+	if ((kit[n].padpars!=NULL)&&(kit[n].Ppadenabled!=0)) kit[n].padpars->applyparameters(true);
+    };
+};
 
 void Part::getfromXMLinstrument(XMLwrapper *xml){
     if (xml->enterbranch("INFO")){
@@ -1152,7 +1156,6 @@ void Part::getfromXMLinstrument(XMLwrapper *xml){
 		kit[i].Ppadenabled=xml->getparbool("pad_enabled",kit[i].Ppadenabled);
 	    	if (xml->enterbranch("PAD_SYNTH_PARAMETERS")){
 		    kit[i].padpars->getfromXML(xml);
-		    if (kit[i].Ppadenabled!=0) kit[i].padpars->applyparameters(false);
 		    xml->exitbranch();
 		};
 

@@ -70,6 +70,8 @@ class Part{
       void defaults();
       void defaultsinstrument();
       
+      void applyparameters();
+      
       void getfromXML(XMLwrapper *xml);
       void getfromXMLinstrument(XMLwrapper *xml);
 

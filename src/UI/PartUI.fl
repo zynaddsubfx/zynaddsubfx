@@ -274,9 +274,9 @@ delete(partkititem);} {}
   decl {PartUI_ *partui;} {}
 } 
 
-class PartUI {open : {public Fl_Group,PartUI_}
+class PartUI {: {public Fl_Group,PartUI_}
 } {
-  Function {make_window()} {open private
+  Function {make_window()} {open selected private
   } {
     Fl_Window partgroup {
       private xywh {107 533 385 180} type Double hide
@@ -866,7 +866,7 @@ subsynenabledcheck->value(part->kit[0].Psubenabled);}
     }
     Fl_Window instrumenteditwindow {
       label {Instrument Edit}
-      xywh {182 214 395 360} type Double visible
+      xywh {182 214 395 360} type Double hide
     } {
       Fl_Group {} {
         xywh {0 220 395 110} box ENGRAVED_FRAME
@@ -886,7 +886,7 @@ subsynenabledcheck->value(part->kit[0].Psubenabled);}
             callback {int x=(int) o->value();
 part->kit[0].Ppadenabled=x;
 if (x==0) padeditbutton->deactivate();
-     else padeditbutton->activate();} selected
+     else padeditbutton->activate();}
             tooltip {enable/disable PADsynth} xywh {215 255 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
             code1 {o->value(part->kit[0].Ppadenabled);}
           }

@@ -83,7 +83,7 @@ label(bank->getnamenumbered(nslot));} {}
   decl {BankProcess_ *bp;} {}
 } 
 
-class BankUI {open : {public BankProcess_}
+class BankUI {: {public BankProcess_}
 } {
   Function {make_window()} {} {
     Fl_Window bankuiwindow {
@@ -259,6 +259,7 @@ if ((what==1)&&(mode==1)&&(!bank->emptyslot(slot))){//Reads from slot
     pthread_mutex_lock(&master->mutex);
      bank->loadfromslot(slot,master->part[*npart]);
     pthread_mutex_unlock(&master->mutex);
+    master->part[*npart]->applyparameters();
      if (master->part[*npart]->disablekitloading==0){
        snprintf((char *)master->part[*npart]->Pname,PART_MAX_NAME_LEN
         ,"%s",bank->getname(slot));
@@ -297,7 +298,8 @@ if (mode==4){//swap
         bs[slot]->refresh();
     };
 };
-if (mode!=4) refreshmainwindow();} {}
+if (mode!=4) refreshmainwindow();} {selected
+    }
   }
   Function {refreshmainwindow()} {} {
     code {bankuiwindow->label(bank->bankfiletitle);
@@ -321,8 +323,7 @@ for (int i=0;i<BANK_SIZE;i++) bs[i]->refresh();} {}
    bs[ns]->refresh();
 };} {}
   }
-  Function {rescan_for_banks()} {selected
-  } {
+  Function {rescan_for_banks()} {} {
     code {banklist->clear();
 banklist->add(" ");
 bank->rescanforbanks();

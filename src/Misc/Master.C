@@ -757,6 +757,11 @@ void Master::exportbankasxmldirectory(const char *bankfilename){
 
 
 
+void Master::applyparameters(){
+    for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
+	part[npart]->applyparameters();
+    };
+};
 
 void Master::add2XML(XMLwrapper *xml){
     xml->addpar("volume",Pvolume);

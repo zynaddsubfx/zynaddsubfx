@@ -398,12 +398,11 @@ if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
        mastervolumedial->value(master->Pvolume);       
        globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);
        microtonalui=new MicrotonalUI(&master->microtonal);
-       globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);
        updatesendwindow();
        setfilelabel(NULL);
 };
 
-updatepanel();} selected
+updatepanel();}
             xywh {20 20 100 20}
           }
           menuitem {} {
@@ -420,6 +419,7 @@ pthread_mutex_lock(&master->mutex);
   //load the data
   int result=master->loadXML(filename);
 pthread_mutex_unlock(&master->mutex);
+master->applyparameters();
 
 npartcounter->do_callback();
 syseffnocounter->do_callback();
@@ -436,7 +436,7 @@ updatepanel();
 
 
 if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not a zynaddsubfx parameters file.");
-      else if (result<0) fl_alert("Error: Could not load the file.");}
+      else if (result<0) fl_alert("Error: Could not load the file.");} selected
             xywh {20 20 100 20}
           }
           menuitem {} {
@@ -620,7 +620,6 @@ filename=fl_file_chooser("Load:","({*.xiz})",NULL,0);
 if (filename==NULL) return;
 
 
-
 pthread_mutex_lock(&master->mutex);
   int npart=(int)npartcounter->value();
 
@@ -631,6 +630,7 @@ pthread_mutex_lock(&master->mutex);
   int result=master->part[npart]->loadXMLinstrument(filename);
 
 pthread_mutex_unlock(&master->mutex);
+master->part[npart]->applyparameters();
 
 npartcounter->do_callback();
 updatepanel();
