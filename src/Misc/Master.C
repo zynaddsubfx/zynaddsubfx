@@ -71,6 +71,7 @@ Master::Master(){
 };
 
 void Master::defaults(){
+    ShutUp();
     volume=1.0;
     setPvolume(80);
     setPkeyshift(64);
