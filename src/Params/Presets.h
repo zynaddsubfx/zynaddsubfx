@@ -38,6 +38,9 @@ class Presets{
 
 	char type[MAX_PRESETTYPE_SIZE];
 	void setelement(int n);
+	
+	void rescanforpresets();
+	
     protected:
 	void setpresettype(char *type);
     private:

@@ -698,6 +698,6 @@
 	    - Adaugata partea de salvare/incarcare a listei directoarelor unde se afla presetarile
 21 Aug 2004 - Am lucrat putin la salvare/incarcare a listei dir. cu presetari
 22 Aug 2004 - Corectata o eroare de compilare
-
+	    - Makefile-ul modificat, a.i. make-ul sa se opreasca in caz de eroare
 	    
 	    

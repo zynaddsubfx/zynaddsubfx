@@ -105,3 +105,9 @@ void Presets::setelement(int n){
     nelement=n;
 };
 
+void Presets::rescanforpresets(){
+    presetsstore.rescanforpresets(type);
+};
+
+
+

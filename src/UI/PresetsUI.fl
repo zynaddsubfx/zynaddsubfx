@@ -5,6 +5,9 @@ code_name {.cc}
 decl {\#include <FL/fl_ask.h>} {public
 } 
 
+decl {\#include <stdio.h>} {public
+} 
+
 decl {\#include <stdlib.h>} {public
 } 
 
@@ -32,19 +35,21 @@ pastewin->hide();delete(pastewin);} {}
   } {
     Fl_Window copywin {
       label {Copy to Clipboard/Preset}
-      xywh {237 99 265 315} type Double box PLASTIC_THIN_UP_BOX color 238 non_modal visible
+      xywh {243 174 265 315} type Double box PLASTIC_THIN_UP_BOX color 238 non_modal visible
     } {
-      Fl_Browser {} {
-        xywh {10 30 245 200}
+      Fl_Browser copybrowse {
+        xywh {10 25 245 205}
       }
       Fl_Button {} {
         label {Copy to Preset}
-        callback {const char *tmp=fl_input("Copy to Preset:",NULL);
+        callback {const char *tmp=presetname->value();
 if (tmp!=NULL) {
-        p->copy(tmp);
-	copywin->hide();
-};} selected
-        xywh {75 240 120 20} box THIN_UP_BOX
+        if (strlen(tmp)>0){
+           p->copy(tmp);
+	   copywin->hide();
+        };
+};}
+        xywh {145 235 110 20} box THIN_UP_BOX
       }
       Fl_Button {} {
         label {Copy to Clipboard}
@@ -59,17 +64,20 @@ copywin->hide();}
       }
       Fl_Box {} {
         label {Type:}
-        xywh {10 5 45 20} align 20
+        xywh {10 5 40 15} labelsize 12 align 20
       }
       Fl_Box copytypetext {
-        xywh {50 5 200 20} box FLAT_BOX color 239 labelfont 1 align 20
+        xywh {50 5 205 15} box FLAT_BOX color 238 labelfont 1 labelsize 12 align 20
+      }
+      Fl_Input presetname {
+        xywh {10 235 130 20}
       }
     }
     Fl_Window pastewin {
       label {Paste from Clipboard/Preset}
       xywh {516 204 265 315} type Double box PLASTIC_THIN_UP_BOX color 238 hide modal
     } {
-      Fl_Browser {} {
+      Fl_Browser pastebrowse {
         xywh {10 30 245 205} type Hold
       }
       Fl_Button {} {
@@ -88,12 +96,12 @@ pui->refresh();}
         callback {pastewin->hide();}
         xywh {160 270 80 35} box THIN_UP_BOX align 192
       }
+      Fl_Box pastetypetext {
+        xywh {55 5 200 15} box FLAT_BOX color 238 labelfont 1 labelsize 12 align 20
+      }
       Fl_Box {} {
         label {Type:}
-        xywh {10 5 45 20} align 20
-      }
-      Fl_Box pastetypetext {
-        xywh {50 5 200 20} box FLAT_BOX color 239 labelfont 1 align 20
+        xywh {15 5 40 15} labelsize 12 align 20
       }
     }
   }
@@ -102,6 +110,7 @@ pui->refresh();}
     code {this->p=p;
 this->pui=NULL;
 bool but=(Fl::event_button()!=FL_LEFT_MOUSE);
+presetname->cut(0,presetname->maximum_size());
 
 if (but) p->copy(NULL);
    else {
@@ -132,6 +141,12 @@ copy(p);} {}
   Function {paste(Presets *p,PresetsUI_ *pui,int n)} {} {
     code {p->setelement(n);
 paste(p,pui);} {}
+  }
+  Function {rescan()} {open
+  } {
+    code {copybrowse->clear();
+pastebrowse->clear();} {selected
+    }
   }
   decl {Presets *p;} {public
   }

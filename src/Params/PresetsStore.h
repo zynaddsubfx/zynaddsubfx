@@ -44,6 +44,8 @@ class PresetsStore{
 	    char *name;
 	};
 	presetstruct presets[MAX_PRESETS];
+
+	void rescanforpresets(char *type);
 	
     private:
 	struct {
@@ -52,7 +54,6 @@ class PresetsStore{
 	} clipboard;
 	
 	void clearpresets();
-	void rescanforpresets(char *type);
 	
 };
 

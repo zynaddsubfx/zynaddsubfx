@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0103 
+version 1.0105 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -28,7 +28,7 @@ class MicrotonalUI {} {
   Function {make_window()} {} {
     Fl_Window microtonaluiwindow {
       label Scales
-      xywh {487 190 405 450} hide
+      xywh {140 189 405 450} type Double hide
     } {
       Fl_Group {} {
         tooltip {Center where the note's freqs. are turned upside-down} xywh {249 2 155 45} box ENGRAVED_FRAME
@@ -101,10 +101,10 @@ if (filename==NULL) return;
 int result=microtonal->loadscl(filename);
 if (result==0) {
        updateTuningsInput();
-       nameinput->cut(0,tuningsinput->maximum_size());
+       nameinput->cut(0,nameinput->maximum_size());
        nameinput->insert((char *)microtonal->Pname);
        nameinput->position(0);
-       commentinput->cut(0,tuningsinput->maximum_size());
+       commentinput->cut(0,commentinput->maximum_size());
        commentinput->insert((char *)microtonal->Pname);
        commentinput->position(0);
        tuningsinput->position(0);
@@ -222,7 +222,8 @@ if (microtonal->Penabled==0) microtonalgroup->deactivate();
       }
     }
   }
-  Function {updateTuningsInput()} {} {
+  Function {updateTuningsInput()} {selected
+  } {
     code {char *tmpbuf=new char[100];
 
 tuningsinput->cut(0,tuningsinput->maximum_size());
