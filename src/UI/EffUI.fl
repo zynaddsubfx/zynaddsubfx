@@ -152,7 +152,7 @@ return(log(freq/20.0)/log(1000.0));} {}
   decl {int maxdB;} {}
 } 
 
-class EffUI {: {public Fl_Group}
+class EffUI {open : {public Fl_Group}
 } {
   Function {EffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {eff=NULL;
@@ -1098,7 +1098,8 @@ eqgraph->redraw();}
       }
     }
   }
-  Function {make_dynamicfilter_window()} {} {
+  Function {make_dynamicfilter_window()} {selected
+  } {
     Fl_Window effdynamicfilterwindow {
       xywh {100 558 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
@@ -1106,12 +1107,28 @@ eqgraph->redraw();}
       Fl_Choice dfp {
         label Preset
         callback {eff->changepreset((int)o->value());
-refresh(eff);} open
+refresh(eff);}
         xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
       } {
         menuitem {} {
-          label cucurigu
+          label WahWah
           xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
+        }
+        menuitem {} {
+          label AutoWah
+          xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
+        }
+        menuitem {} {
+          label Sweep
+          xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
+        }
+        menuitem {} {
+          label VocalMorph1
+          xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
+        }
+        menuitem {} {
+          label VocalMorph2
+          xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
       Fl_Text_Display {} {
@@ -1194,7 +1211,7 @@ refresh(eff);} open
   }
   Function {make_filter_window()} {} {
     Fl_Window filterwindow {
-      label {Filter Parameters for DynFilter Eff.} selected
+      label {Filter Parameters for DynFilter Eff.}
       xywh {212 170 290 110} type Double hide
     } {
       Fl_Group {} {
