@@ -589,6 +589,7 @@
 20 Iun 2004 - Nu se mai deschide automat fereastra de instrumente daca a fost deschisa si s-a descarcat un instrument
 	    - Facute mici modificari la FM-ul de la Oscil
 21 Iun 2004 - Inceput sa scriu conversia in sinus
+22 Iun 2004 - Continuat conversia in sinus si facut teste pentru posibilitatea de "draw" cu sliderele
 
 
 

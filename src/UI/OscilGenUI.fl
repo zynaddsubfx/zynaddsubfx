@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0200 
+version 1.0105 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2004 Nasca Octavian Paul} {} 
@@ -22,6 +22,9 @@ decl {\#include <FL/Fl_Box.H>} {public
 } 
 
 decl {\#include <FL/Fl_Group.H>} {public
+} 
+
+decl {\#include <FL/Fl_Slider.H>} {public
 } 
 
 decl {\#include <math.h>} {} 
@@ -121,6 +124,16 @@ for (i=0;i<n;i++){
   decl {Master *master;} {}
 } 
 
+class PSlider {open : {public Fl_Slider}
+} {
+  Function {PSlider(int x,int y, int w, int h, const char *label=0):Fl_Slider(x,y,w,h,label)} {open
+  } {}
+  Function {handle(int event)} {open return_type int
+  } {
+    code {return(0);} {}
+  }
+} 
+
 class Oscilloscope {: {public Fl_Box}
 } {
   Function {Oscilloscope(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
@@ -198,13 +211,13 @@ for (i=1;i<lx;i++){
   decl {Master *master;} {}
 } 
 
-class Oscilharmonic {: {public Fl_Group}
+class Oscilharmonic {open : {public Fl_Group}
 } {
-  Function {make_window()} {private
+  Function {make_window()} {open private
   } {
     Fl_Window harmonic {
-      private xywh {421 154 90 225} type Double hide
-      class Fl_Group
+      private xywh {421 154 90 225} type Double
+      class Fl_Group visible
     } {
       Fl_Slider mag {
         callback {int x=64;
@@ -215,11 +228,15 @@ if (x==64) o->selection_color(0);
 
 pthread_mutex_lock(&master->mutex);
  oscil->Phmag[n]=x;
+ if (x==64) {
+    oscil->Phphase[n]=64;
+    phase->value(64);
+ };
  oscil->prepare();
 pthread_mutex_unlock(&master->mutex);
 
 display->redraw();
-oldosc->redraw();}
+oldosc->redraw();} selected
         xywh {0 15 15 115} type {Vert Knob} box FLAT_BOX selection_color 222 labelcolor 0 maximum 127 step 1 value 64
         code0 {o->value(127-oscil->Phmag[n]);}
         code1 {if (oscil->Phmag[n]==64) o->selection_color(0);}
@@ -272,6 +289,15 @@ make_window();
 end();
 harmonic->show();} {}
   }
+  Function {refresh()} {} {
+    code {mag->value(127-oscil->Phmag[n]);
+phase->value(oscil->Phphase[n]);
+
+if (oscil->Phmag[n]==64) mag->selection_color(0);
+    else mag->selection_color(222);
+if (oscil->Phphase[n]==64) phase->selection_color(0);
+    else phase->selection_color(222);} {}
+  }
   Function {~Oscilharmonic()} {} {
     code {harmonic->hide();
 delete(harmonic);} {}
@@ -283,13 +309,12 @@ delete(harmonic);} {}
   decl {Master *master;} {}
 } 
 
-class OscilEditor {open
-} {
+class OscilEditor {} {
   Function {make_window()} {open
   } {
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor} open
-      xywh {27 94 745 590} type Double visible
+      xywh {27 94 745 590} type Double hide
     } {
       Fl_Group oscildisplaygroup {
         xywh {15 5 360 300} box ENGRAVED_FRAME
@@ -899,14 +924,14 @@ oldosc->redraw();}
         Fl_Dial {} {
           label pow
           callback {oscil->Padaptiveharmonicspower=(int)o->value();}
-          tooltip {Adaptive harmonics power} xywh {710 490 25 25} labelsize 6 maximum 100 step 1
+          tooltip {Adaptive harmonics power} xywh {710 485 25 25} labelsize 10 maximum 100 step 1
           code0 {o->value(oscil->Padaptiveharmonicspower);}
           class WidgetPDial
         }
         Fl_Dial {} {
           label baseF
           callback {oscil->Padaptiveharmonicsbasefreq=(int)o->value();}
-          tooltip {Adaptive harmonics base frequency} xywh {680 490 25 25} labelsize 9 maximum 255 step 1
+          tooltip {Adaptive harmonics base frequency} xywh {680 485 25 25} labelsize 10 maximum 255 step 1
           code0 {o->value(oscil->Padaptiveharmonicsbasefreq);}
           class WidgetPDial
         }
@@ -973,7 +998,9 @@ pthread_mutex_lock(&master->mutex);
 pthread_mutex_unlock(&master->mutex);
 
 oscildisplaygroup->redraw();
-oldosc->redraw();} selected
+oldosc->redraw();
+
+for (int i=0;i<MAX_AD_HARMONICS;i++) h[i]->refresh();}
         xywh {710 530 30 20} box THIN_UP_BOX labelfont 1 labelsize 12
       }
     }
