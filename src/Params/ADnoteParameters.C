@@ -406,9 +406,13 @@ void ADnoteParameters::saveloadbuf(Buffer *buf){
 	    case 0x91:	buf->rwbytepar(n,&GlobalPar.PAmpVelocityScaleFunction);
 			break;
 	    case 0x92:	buf->rwbytepar(n,&GlobalPar.PPunchStrength);
+			break;
 	    case 0x93:	buf->rwbytepar(n,&GlobalPar.PPunchTime);
+			break;
 	    case 0x94:	buf->rwbytepar(n,&GlobalPar.PPunchStretch);
+			break;
 	    case 0x95:	buf->rwbytepar(n,&GlobalPar.PPunchVelocitySensing);
+			break;
 	    case 0x98:	if (buf->getmode()!=0) buf->rwbyte(&npar);
 			GlobalPar.AmpLfo->saveloadbuf(buf);
 			break;

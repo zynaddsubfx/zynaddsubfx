@@ -505,3 +505,4 @@
 11 Dec 2003 - Adaugat aleatorism la amplitudinile armonicelor
 13 Dec 2003 - Adaugat LFO frequency randomness
 14 Dec 2003 - Imbunatatit LFO frequency randomness
+15 Dec 2003 - Corectata o mica eroare la ADnoteParameters (lipseau niste break-uri la salvarea/incarcarea parametrilor)
