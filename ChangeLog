@@ -599,4 +599,5 @@
 29 Iun 2004 - Inlaturata setarea cu gain la Resonance pentru ca este inutil (datorita faptului ca normalize este Full RMS intotdeauna)
 30 Iun 2004 - Inlaturata o eroare recenta la EffectUI si modificat EffectUI in sensul ca nu trebuie sters si reinstantiat pentru a se reincarca valorile curente de efecte
 	    - Inceput sa scriu un nou efect (DynamicFilter)	    
-
+01 Iul 2004 - Corectata o mica eroare la EffectUI care facea ca efectele sa nu apara activate
+	    - Continuat de scris la DynamicFiter (mai este doar de salvat parametrii si de auto-update la filtru)

@@ -45,25 +45,25 @@ class DynamicFilter:public Effect {
 	unsigned char Pvolume;
 	unsigned char Ppanning;
 	unsigned char Pdepth;//the depth of the lfo of the DynamicFilter
-	unsigned char Plrcross;//left/right crossing
 	unsigned char Pampsns;//how the filter varies according to the input amplitude
 	unsigned char Pampsnsinv;//if the filter freq is lowered if the input amplitude rises
+	unsigned char Pampsmooth;//how smooth the input amplitude changes the filter
 	
 	//Control Parametrii
 	void setvolume(unsigned char Pvolume);
 	void setpanning(unsigned char Ppanning);
 	void setdepth(unsigned char Pdepth);
-	void setlrcross(unsigned char Plrcross);
-	void setampsns(unsigned char Pampsns);
-	
+	void setampsns(unsigned char Pampsns);	
 	
 	void reinitfilter();
 	
 	//Valorile interne
 	int insertion;
-	REALTYPE volume,panning,depth,lrcross,ampsns;
+	REALTYPE volume,panning,depth,ampsns,ampsmooth;
 	
-	Filter *filter;
+	Filter *filterl,*filterr;
+	
+	REALTYPE ms1,ms2,ms3,ms4;//mean squares
 };
 
 #endif

@@ -363,19 +363,17 @@ delete(panellistitem);} {}
   decl {BankUI *bankui;} {}
 } 
 
-class MasterUI {open
-} {
-  Function {make_window()} {open
-  } {
+class MasterUI {} {
+  Function {make_window()} {} {
     Fl_Window masterwindow {
       label zynaddsubfx
       callback {\#ifdef VSTAUDIOOUT
 fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
 \#else
 if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
-\#endif} open
-      xywh {188 182 390 465} type Double
-      code0 {setfilelabel(NULL);} non_modal visible
+\#endif}
+      xywh {188 182 390 465} type Double hide
+      code0 {setfilelabel(NULL);} non_modal
     } {
       Fl_Menu_Bar mastermenu {
         xywh {0 0 690 25}
@@ -767,12 +765,12 @@ pthread_mutex_unlock(&master->mutex);}
           class PartUI
         } {}
       }
-      Fl_Tabs {} {open
+      Fl_Tabs {} {
         xywh {0 80 390 160}
       } {
         Fl_Group {} {
-          label {System Effects} open selected
-          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25
+          label {System Effects} open
+          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25 hide
         } {
           Fl_Counter syseffnocounter {
             label {Sys.Effect No.}
@@ -853,7 +851,7 @@ swapeffwindow->show();}
         }
         Fl_Group {} {
           label {Insertion Effects}
-          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25 hide
+          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 20 align 25
         } {
           Fl_Button {} {
             label {Swap/Copy...}
@@ -867,9 +865,14 @@ swapeffwindow->show();}
             callback {ninseff=(int) o->value();
 insefftype->value(master->insefx[ninseff]->geteffect());
 inseffpart->value(master->Pinsparts[ninseff]+2);
-//insefftype->do_callback();
 inseffectui->refresh(master->insefx[ninseff]);
-//inseffpart->do_callback();}
+if (master->Pinsparts[ninseff]!=-1) {
+        insefftype->activate();
+	inseffectui->activate();
+} else {
+	insefftype->deactivate();
+ 	inseffectui->deactivate();
+};} selected
             xywh {5 120 80 20} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 127 step 1 textfont 1
             code0 {o->bounds(0,NUM_INS_EFX-1);}
             code1 {o->value(ninseff);}

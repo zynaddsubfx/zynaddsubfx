@@ -255,7 +255,7 @@ delete(partkititem);} {}
   decl {PartUI_ *partui;} {}
 } 
 
-class PartUI {: {public Fl_Group,PartUI_}
+class PartUI {selected : {public Fl_Group,PartUI_}
 } {
   Function {make_window()} {private
   } {

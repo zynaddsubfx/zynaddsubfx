@@ -154,13 +154,11 @@ return(log(freq/20.0)/log(1000.0));} {}
 
 class EffUI {open : {public Fl_Group}
 } {
-  Function {EffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {open
-  } {
+  Function {EffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {eff=NULL;
 filterwindow=NULL;} {}
   }
-  Function {~EffUI()} {open
-  } {
+  Function {~EffUI()} {} {
     code {effnullwindow->hide();delete (effnullwindow);
 effreverbwindow->hide();delete (effreverbwindow);
 effechowindow->hide();delete (effechowindow);
@@ -1100,11 +1098,10 @@ eqgraph->redraw();}
       }
     }
   }
-  Function {make_dynamicfilter_window()} {open
-  } {
+  Function {make_dynamicfilter_window()} {} {
     Fl_Window effdynamicfilterwindow {
-      xywh {207 390 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1
-      class Fl_Group visible
+      xywh {100 558 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
+      class Fl_Group
     } {
       Fl_Choice dfp {
         label Preset
@@ -1152,15 +1149,9 @@ refresh(eff);} open
         class WidgetPDial
       }
       Fl_Dial dfp6 {
-        label Dpth
+        label LfoD
         callback {eff->seteffectpar(6,(int) o->value());}
         xywh {235 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
-        class WidgetPDial
-      }
-      Fl_Dial dfp9 {
-        label {L/R}
-        callback {eff->seteffectpar(9,(int) o->value());}
-        xywh {345 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
         class WidgetPDial
       }
       Fl_Choice dfp4 {
@@ -1182,12 +1173,29 @@ refresh(eff);} open
         callback {filterwindow->show();}
         xywh {115 10 55 25} box PLASTIC_THIN_UP_BOX
       }
+      Fl_Dial dfp7 {
+        label {A.S.}
+        callback {eff->seteffectpar(7,(int) o->value());}
+        xywh {280 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        class WidgetPDial
+      }
+      Fl_Dial dfp9 {
+        label {A.M}
+        callback {eff->seteffectpar(9,(int) o->value());}
+        xywh {310 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        class WidgetPDial
+      }
+      Fl_Check_Button dfp8 {
+        label {A.Inv.}
+        callback {eff->seteffectpar(8,(int) o->value());}
+        xywh {350 55 15 15} down_box DOWN_BOX labelfont 1 labelsize 12 align 2
+      }
     }
   }
   Function {make_filter_window()} {} {
     Fl_Window filterwindow {
       label {Filter Parameters for DynFilter Eff.}
-      xywh {212 170 290 125} type Double visible
+      xywh {212 170 290 115} type Double hide
     } {
       Fl_Group {} {
         label {DynFilter effect  - Filter} open
@@ -1197,13 +1205,13 @@ refresh(eff);} open
       } {}
       Fl_Button {} {
         label Apply
-        callback {eff->cleanup();} selected
-        tooltip {apply the filter settings} xywh {5 95 70 25} box THIN_UP_BOX
+        callback {eff->cleanup();}
+        tooltip {apply the filter settings} xywh {5 85 70 25} box THIN_UP_BOX
       }
       Fl_Button {} {
         label Close
         callback {filterwindow->hide();}
-        xywh {210 95 70 25} box THIN_UP_BOX
+        xywh {210 85 70 25} box THIN_UP_BOX
       }
     }
   }
@@ -1363,14 +1371,27 @@ switch(eff->geteffect()){
 	effeqwindow->show();
         break;
      case 8:make_filter_window();
-	effdynamicfilterwindow->show();
+	dfp->value(eff->getpreset());
+	dfp0->value(eff->geteffectpar(0));if (eff->insertion!=0) revp0->label("D/W");
+	dfp1->value(eff->geteffectpar(1));
+	dfp2->value(eff->geteffectpar(2));
+	dfp3->value(eff->geteffectpar(3));
+	dfp4->value(eff->geteffectpar(4));
+	dfp5->value(eff->geteffectpar(5));
+	dfp6->value(eff->geteffectpar(6));
+	dfp7->value(eff->geteffectpar(7));
+	dfp8->value(eff->geteffectpar(8));
+	dfp9->value(eff->geteffectpar(9));
 
+            
+	effdynamicfilterwindow->show();
 	break;
     default:effnullwindow->show();
             break; 
 };
 
-this->show();} {}
+this->show();} {selected
+    }
   }
   decl {EffectMgr *eff;} {}
   decl {int eqband;} {}

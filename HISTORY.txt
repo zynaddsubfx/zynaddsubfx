@@ -1,6 +1,6 @@
       - started to write an integrated sequencer; I don't have to replace Rosengarden, Muse, etc. I want to make possible to store melodies directly into mas_zyn files, play them, convert to/from midi files
       - speedups (on some portions, like FM, Chorus, etc. is 10-50%)
-      - added the posbility to use comments/copyritht text to instruments; in order to encourage the sharing of them
+      - added the posibility to use comments/copyritht text to instruments; in order to encourage the sharing of them
       - you can make zynaddsubfx to load a file when it starts (with "-l") and you can disable the user interface ("-U")
       - added dump of the events (it writes to a file all notes)
       - added linear modulation whell controller and made default

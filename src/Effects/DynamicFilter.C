@@ -31,7 +31,8 @@ DynamicFilter::DynamicFilter(int insertion_,REALTYPE *efxoutl_,REALTYPE *efxoutr
     insertion=insertion_;
     
     Ppreset=0;
-    filter=NULL;
+    filterl=NULL;
+    filterr=NULL;
     filterpars=new FilterParams(0,64,64);
     setpreset(Ppreset);
     cleanup();
@@ -39,6 +40,8 @@ DynamicFilter::DynamicFilter(int insertion_,REALTYPE *efxoutl_,REALTYPE *efxoutr
 
 DynamicFilter::~DynamicFilter(){
     delete(filterpars);
+    delete(filterl);
+    delete(filterr);
 };
 
 
@@ -47,49 +50,46 @@ DynamicFilter::~DynamicFilter(){
  */
 void DynamicFilter::out(REALTYPE *smpsl,REALTYPE *smpsr){
     int i;
-/*    REALTYPE lfol,lfor;
-    COMPLEXTYPE clfol,clfor,out,tmp;
-*/
-//    lfo.effectlfoout(&lfol,&lfor);
-/*    lfol*=depth*PI*2.0;lfor*=depth*PI*2.0;
-    clfol.a=cos(lfol+phase)*fb;clfol.b=sin(lfol+phase)*fb;
-    clfor.a=cos(lfor+phase)*fb;clfor.b=sin(lfor+phase)*fb;
+    REALTYPE lfol,lfor;
+    lfo.effectlfoout(&lfol,&lfor);
+    lfol*=depth*5.0;lfor*=depth*5.0;
+    REALTYPE freq=filterpars->getfreq();
+    REALTYPE q=filterpars->getq();
 
     for (i=0;i<SOUND_BUFFER_SIZE;i++){	
-	REALTYPE x=((REALTYPE) i)/SOUND_BUFFER_SIZE;
-	REALTYPE x1=1.0-x;
-	//left	
-	tmp.a=clfol.a*x+oldclfol.a*x1;
-	tmp.b=clfol.b*x+oldclfol.b*x1;
+	efxoutl[i]=smpsl[i];
+	efxoutr[i]=smpsr[i];
 	
-	out.a=tmp.a*oldl[oldk].a-tmp.b*oldl[oldk].b
-	     +(1-fabs(fb))*smpsl[i]*panning;
-	out.b=tmp.a*oldl[oldk].b+tmp.b*oldl[oldk].a;
-	oldl[oldk].a=out.a;
-	oldl[oldk].b=out.b;
-	REALTYPE l=out.a*10.0*(fb+0.1);
-	
-	//right
-	tmp.a=clfor.a*x+oldclfor.a*x1;
-	tmp.b=clfor.b*x+oldclfor.b*x1;
-	
-	out.a=tmp.a*oldr[oldk].a-tmp.b*oldr[oldk].b
-	     +(1-fabs(fb))*smpsr[i]*(1.0-panning);
-	out.b=tmp.a*oldr[oldk].b+tmp.b*oldr[oldk].a;
-	oldr[oldk].a=out.a;
-	oldr[oldk].b=out.b;
-	REALTYPE r=out.a*10.0*(fb+0.1);
-
-
-	if (++oldk>=Pdelay) oldk=0;
-	//LRcross
-	efxoutl[i]=l*(1.0-lrcross)+r*lrcross;
-	efxoutr[i]=r*(1.0-lrcross)+l*lrcross;
+	REALTYPE x=(fabs(smpsl[i])+fabs(smpsr[i]))*0.5;
+	ms1=ms1*(1.0-ampsmooth)+x*x*ampsmooth+1e-10;
     };
+    
 
-    oldclfol.a=clfol.a;oldclfol.b=clfol.b;
-    oldclfor.a=clfor.a;oldclfor.b=clfor.b;
-*/
+    REALTYPE ampsmooth2=pow(ampsmooth,0.2)*0.3;
+    ms2=ms2*(1.0-ampsmooth2)+ms1*ampsmooth2;
+    ms3=ms3*(1.0-ampsmooth2)+ms2*ampsmooth2;
+    ms4=ms4*(1.0-ampsmooth2)+ms3*ampsmooth2;
+    REALTYPE rms=sqrt(ms4)*ampsns;
+//    printf("(%g,%g) %g \n",ampsmooth,ampsmooth2,rms);
+
+
+    REALTYPE frl=filterl->getrealfreq(freq+lfol+rms);
+    REALTYPE frr=filterr->getrealfreq(freq+lfor+rms);
+    
+    filterl->setfreq_and_q(frl,q);
+    filterr->setfreq_and_q(frr,q);
+    
+    
+    filterl->filterout(efxoutl);
+    filterr->filterout(efxoutr);
+
+    //panning    
+    for (i=0;i<SOUND_BUFFER_SIZE;i++){	
+	efxoutl[i]*=panning;
+	efxoutr[i]*=(1.0-panning);
+    };
+        
+
     //Insertion effect
     if (insertion!=0) {
         REALTYPE v1,v2;
@@ -121,6 +121,10 @@ void DynamicFilter::out(REALTYPE *smpsl,REALTYPE *smpsr){
  */
 void DynamicFilter::cleanup(){
     reinitfilter();
+    ms1=0.0;
+    ms2=0.0;
+    ms3=0.0;
+    ms3=0.0;
 };
 
 
@@ -130,7 +134,7 @@ void DynamicFilter::cleanup(){
 
 void DynamicFilter::setdepth(unsigned char Pdepth){
     this->Pdepth=Pdepth;
-    depth=(Pdepth/127.0);
+    depth=pow((Pdepth/127.0),2.0);
 };
 
 
@@ -146,33 +150,27 @@ void DynamicFilter::setpanning(unsigned char Ppanning){
     panning=Ppanning/127.0;
 };
 
-void DynamicFilter::setlrcross(unsigned char Plrcross){
-    this->Plrcross=Plrcross;
-    lrcross=Plrcross/127.0;
-};
 
 void DynamicFilter::setampsns(unsigned char Pampsns){
-    ampsns=Pampsns/127.0;
+    ampsns=pow(Pampsns/127.0,2.5)*8;
     if (Pampsnsinv!=0) ampsns=-ampsns;    
+    ampsmooth=exp(-Pampsmooth/127.0*10.0)*0.99;
+    this->Pampsns=Pampsns;
 };
 
 void DynamicFilter::reinitfilter(){
-    if (filter!=NULL) delete(filter);
-    filter=new Filter(filterpars);
+    if (filterl!=NULL) delete(filterl);
+    if (filterr!=NULL) delete(filterr);
+    filterl=new Filter(filterpars);
+    filterr=new Filter(filterpars);
 };
 
 void DynamicFilter::setpreset(unsigned char npreset){
-    const int PRESET_SIZE=11;
-    const int NUM_PRESETS=4;
+    const int PRESET_SIZE=10;
+    const int NUM_PRESETS=1;
     unsigned char presets[NUM_PRESETS][PRESET_SIZE]={
 	//DynamicFilter1
-	{127,64,70,0,0,62,60,105,25,0,64},
-	//DynamicFilter2
-	{127,64,73,106,0,101,60,105,17,0,64},
-	//DynamicFilter3
-	{127,64,63,0,1,100,112,105,31,0,42},
-	//DynamicFilter4
-	{93,64,25,0,1,66,101,11,47,0,86}};
+	{127,64,80,0,0,64,0,80,0,60}};
 	
     if (npreset>=NUM_PRESETS) npreset=NUM_PRESETS-1;
     for (int n=0;n<PRESET_SIZE;n++) changepar(n,presets[npreset][n]);
@@ -205,9 +203,11 @@ void DynamicFilter::changepar(int npar,unsigned char value){
 	        break;
 	case 7:	setampsns(value);
 	        break;
-	case 8:	setampsns(Pampsns);
+	case 8:	Pampsnsinv=value;
+		setampsns(Pampsns);
 	        break;
-	case 9:	setlrcross(value);
+	case 9:	Pampsmooth=value;
+		setampsns(Pampsns);
 	        break;
     };
 };
@@ -232,7 +232,7 @@ unsigned char DynamicFilter::getpar(int npar){
 		break;
 	case 8:	return(Pampsnsinv);
 		break;
-	case 9:	return(Plrcross);
+	case 9:	return(Pampsmooth);
 		break;
 	default:return (0);
     };
