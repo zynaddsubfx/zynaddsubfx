@@ -674,4 +674,6 @@
             - LANSAT PE INTERNET - VERSIUNEA (2.0.0pre2)
 --------------------------------------------------------------------------------------------------
 01 Aug 2004 - Adaugat un nou tip de OvertonesPosition la PADsynth
+02 Aug 2004 - Am pus din nou schimbarea schedule-ului la valoare corecta (l-am scos dintr-o greseala)
+
 
