@@ -83,14 +83,15 @@ label(bank->getnamenumbered(nslot));} {}
   decl {BankProcess_ *bp;} {}
 } 
 
-class BankUI {: {public BankProcess_}
+class BankUI {open : {public BankProcess_}
 } {
-  Function {make_window()} {} {
+  Function {make_window()} {open
+  } {
     Fl_Window bankuiwindow {
-      label Bank
-      xywh {4 64 785 575} type Double hide
+      label Bank selected
+      xywh {4 64 785 575} type Double
       code0 {o->label(bank->bankfiletitle);}
-      code1 {if (bank->bankfiletitle==NULL) o->label ("Choose a bank to use by pressing the 'Load/Use Bank from file...' button or choose 'New Bank...' to make a new bank.");}
+      code1 {if (bank->bankfiletitle==NULL) o->label ("Choose a bank from the bank list on the left (or go to settings if to configure the bank location) or choose 'New Bank...' to make a new bank.");} visible
     } {
       Fl_Button {} {
         label Close
@@ -223,8 +224,7 @@ mode=1;} {}
   Function {~BankUI()} {return_type virtual
   } {
     code {bankuiwindow->hide();
-delete(bankuiwindow);} {selected
-    }
+delete(bankuiwindow);} {}
   }
   Function {show()} {} {
     code {bankuiwindow->show();} {}
