@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0200 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2003 Nasca Octavian Paul} {} 
@@ -205,7 +205,7 @@ class ADOscilharmonic {: {public Fl_Group}
   Function {make_window()} {private
   } {
     Fl_Window harmonic {
-      private xywh {421 154 90 225} hide
+      private xywh {421 154 90 225} type Double hide
       class Fl_Group
     } {
       Fl_Slider mag {
@@ -289,7 +289,7 @@ class ADOscilEditor {} {
   Function {make_window()} {} {
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor}
-      xywh {121 91 750 590} hide
+      xywh {121 91 750 590} type Double hide
     } {
       Fl_Group oscildisplaygroup {
         xywh {15 5 360 300} box ENGRAVED_FRAME
@@ -321,7 +321,7 @@ oldosc->redraw();}
         } {
           Fl_Choice {} {
             label {H.rnd}
-            callback {oscil->Pamprandtype=(int) o->value();} selected
+            callback {oscil->Pamprandtype=(int) o->value();}
             tooltip {Harmonic Amplitude Randomness} xywh {291 282 50 15} down_box BORDER_BOX labelsize 10 textsize 10
             code0 {o->value(oscil->Pamprandtype);}
           } {
@@ -616,12 +616,6 @@ oldosc->redraw();}
         label {Clr.}
         tooltip {Auto clear when using the oscillator as base function} xywh {105 310 35 20} box THIN_UP_BOX value 1 labelfont 1 labelsize 10
       }
-      Fl_Light_Button {} {
-        label {RMS normalize}
-        callback {oscil->Pnormalizemethod=(int) o->value();}
-        tooltip {Normalize type (harmonic's sum/RMS) of the oscillator} xywh {680 360 65 30} box THIN_UP_BOX value 1 labelfont 1 labelsize 10 align 148
-        code0 {o->value(oscil->Pnormalizemethod);}
-      }
       Fl_Group {} {
         xywh {375 305 160 30} box ENGRAVED_BOX
       } {
@@ -736,6 +730,25 @@ oldosc->redraw();}
           class WidgetPDial
         }
       }
+      Fl_Choice {} {
+        label Normalize
+        callback {oscil->Pnormalizemethod=(int) o->value();} open selected
+        tooltip {Normalize type (harmonic's sum/RMS) of the oscillator} xywh {680 370 60 20} down_box BORDER_BOX labelsize 10 align 5 textsize 10
+        code0 {o->value(oscil->Pnormalizemethod);}
+      } {
+        menuitem {} {
+          label Sum
+          xywh {65 65 100 20} labelfont 1 labelsize 10
+        }
+        menuitem {} {
+          label RMS
+          xywh {75 75 100 20} labelfont 1 labelsize 10
+        }
+        menuitem {} {
+          label {F.RMS}
+          xywh {85 85 100 20} labelfont 1 labelsize 10
+        }
+      }
     }
   }
   Function {ADOscilEditor(OscilGen *oscil_,Fl_Widget *oldosc_,Master *master_)} {} {
@@ -761,7 +774,7 @@ class ADvoicelistitem {: {public Fl_Group}
   Function {make_window()} {private
   } {
     Fl_Window ADnoteVoiceListItem {
-      private xywh {335 489 615 27} hide
+      private xywh {335 489 615 27} type Double hide
       class Fl_Group
     } {
       Fl_Group voicelistitemgroup {
@@ -883,7 +896,7 @@ class ADvoiceUI {: {public Fl_Group}
   Function {make_window()} {} {
     Fl_Window ADnoteVoiceParameters {
       label Voice
-      xywh {110 101 765 525} hide
+      xywh {110 101 765 525} type Double hide
       class Fl_Group
     } {
       Fl_Group voiceparametersgroup {
@@ -1464,7 +1477,7 @@ class ADnoteUI {} {
   } {
     Fl_Window ADnoteGlobalParameters {
       label {ADsynth Global Parameters of the Instrument}
-      xywh {112 194 535 405} hide
+      xywh {112 194 535 405} type Double hide
     } {
       Fl_Group {} {
         label FREQUENCY
@@ -1649,7 +1662,7 @@ resui->resonancewindow->show();}
     }
     Fl_Window ADnoteVoiceList {
       label {ADsynth Voices list}
-      xywh {32 266 650 260} hide
+      xywh {32 266 650 260} type Double hide
     } {
       Fl_Text_Display {} {
         label {No.}
@@ -1691,7 +1704,7 @@ resui->resonancewindow->show();}
     }
     Fl_Window ADnoteVoice {
       label {ADsynth Voice Parameters}
-      xywh {53 58 765 560} hide
+      xywh {53 58 765 560} type Double hide
     } {
       Fl_Group advoice {
         xywh {0 0 760 525} box BORDER_BOX

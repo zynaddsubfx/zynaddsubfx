@@ -536,6 +536,8 @@
 14 Feb 2004 - Se poate incarca si instrumente
 	    - Rezolvata o problema la coarse detune
 	    - Corectate cateva erori la incarcarea XML-ului
-	    - frecventa LFO-ul de la instrumente are valoare reala intre 0..1
-	    - corectata eroarea care facea ca functia de rezonanta sa fie trasata incorect
-	    - adaugata compresie gzip la fisiere si decompresie automata la incarcare (folosesc biblioteca zlib)
+	    - Frecventa LFO-ul de la instrumente are valoare reala intre 0..1
+	    - Corectata eroarea care facea ca functia de rezonanta sa fie trasata incorect
+	    - Adaugata compresie gzip la fisiere si decompresie automata la incarcare (folosesc biblioteca zlib)
+15 Feb 2004 - O mica modificare la envelope parameters in sensul ca envelope-ul prestabilit la FM nu mai este liniar
+22 Feb 2004 - Adaugat normalize Full RMS la Oscil

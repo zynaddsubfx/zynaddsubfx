@@ -60,7 +60,6 @@ REALTYPE EnvelopeParams::getdt(char i){
  * ADSR/ASR... initialisations
  */
 void EnvelopeParams::ADSRinit(char A_dt,char D_dt,char S_val,char R_dt){
-    Plinearenvelope=1;
     Envmode=1;
     PA_dt=A_dt;PD_dt=D_dt;PS_val=S_val;PR_dt=R_dt;
     Pfreemode=0;
@@ -150,6 +149,7 @@ void EnvelopeParams::saveloadbuf(Buffer *buf){
     tmp=0xfe;
     buf->rwbyte(&tmp);//if tmp!=0xfe error
 
+    if (Envmode==1) Plinearenvelope=1;
 
     for (n=0x80;n<0xF0;n++){
 	if (buf->getmode()==0) {

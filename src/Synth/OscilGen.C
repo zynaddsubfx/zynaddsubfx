@@ -63,7 +63,7 @@ void OscilGen::defaults(){
     Pbasefuncpar=64;
     Pwaveshapingfunction=0;
     Pwaveshaping=64;
-    Pnormalizemethod=1;
+    Pnormalizemethod=2;
     Pfiltertype=0;
     Pfilterpar=64;
     Pfilterbeforews=0;
@@ -434,17 +434,20 @@ void OscilGen::prepare(){
     };
 
    spectrumadjust();
- 
-   REALTYPE sum=0;
-   for (j=1;j<OSCIL_SIZE/2;j++) {
-    REALTYPE term=oscilFFTfreqs[j]*oscilFFTfreqs[j]+oscilFFTfreqs[OSCIL_SIZE-j]*oscilFFTfreqs[OSCIL_SIZE-j];
-    if (Pnormalizemethod==0) sum+=sqrt(term);
-	    else sum+=term;
+
+   //normalize (sum or RMS) - the "Full RMS" normalisation is located in the "::get()" function
+   if ((Pnormalizemethod==0)||(Pnormalizemethod==1)){
+        REALTYPE sum=0;
+	for (j=1;j<OSCIL_SIZE/2;j++) {
+	    REALTYPE term=oscilFFTfreqs[j]*oscilFFTfreqs[j]+oscilFFTfreqs[OSCIL_SIZE-j]*oscilFFTfreqs[OSCIL_SIZE-j];
+	    if (Pnormalizemethod==0) sum+=sqrt(term);
+		else sum+=term;
+    	};
+        if (sum<0.000001) sum=1.0;
+	if (Pnormalizemethod==1) sum=sqrt(sum)*2.0;
+	sum*=0.5;   
+	for (j=1;j<OSCIL_SIZE;j++) oscilFFTfreqs[j]/=sum; 
    };
-   if (sum<0.000001) sum=1.0;
-   if (Pnormalizemethod==1) sum=sqrt(sum)*2.0;
-   sum*=0.5;   
-   for (j=1;j<OSCIL_SIZE;j++) oscilFFTfreqs[j]/=sum; 
 
    oscilFFTfreqs[0]=0.0;//remove the DC
 
@@ -553,6 +556,24 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
 
 
     if ((freqHz>0.1)&&(resonance!=0)) res->applyres(nyquist-1,outoscilFFTfreqs,freqHz);
+
+    //Full RMS normalize
+    if (Pnormalizemethod==2){
+        REALTYPE sum=0;
+	for (int j=1;j<OSCIL_SIZE/2;j++) {
+	    REALTYPE term=outoscilFFTfreqs[j]*outoscilFFTfreqs[j]+outoscilFFTfreqs[OSCIL_SIZE-j]*outoscilFFTfreqs[OSCIL_SIZE-j];
+	    sum+=term;
+    	};
+        if (sum<0.000001) sum=1.0;	
+	sum=sqrt(sum);
+	
+	if ((freqHz>0.1)&&(resonance!=0)) sum/=dB2rap(res->Pgain);//apply the ressonance gain
+	
+	for (int j=1;j<OSCIL_SIZE;j++) outoscilFFTfreqs[j]/=sum; 
+   };
+
+
+
     fft->freqs2smps(outoscilFFTfreqs,smps);
 
     for (i=0;i<OSCIL_SIZE;i++) smps[i]*=0.25;//correct the amplitude
