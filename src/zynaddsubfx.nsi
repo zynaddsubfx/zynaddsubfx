@@ -92,10 +92,9 @@ Section "Standalone" SEC02
   CreateShortCut "$SMPROGRAMS\ZynAddSubFX\ZynAddSubFX low latency.lnk" "$INSTDIR\launch_zynaddsubfx.bat"
   CreateShortCut "$SMPROGRAMS\ZynAddSubFX\ZynAddSubFX.lnk" "$INSTDIR\zynaddsubfx.exe"
   CreateShortCut "$DESKTOP\ZynAddSubFX.lnk" "$INSTDIR\zynaddsubfx.exe"
-;  CreateShortCut "$STARTMENU.lnk" "$INSTDIR\launch_zynaddsubfx.bat"
 SectionEnd
 
-Section "VST Plugin" SEC03
+Section /o "VST Plugin" SEC03
   SetOutPath "$INSTDIR\VST"
   File "zynaddsubfx_vst.dll"
 SectionEnd
@@ -128,17 +127,10 @@ SectionEnd
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} "Required files for ZynAddSubFX "
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} "ZynAddSubFX as a standalone synth"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} "ZynAddSubFX as a VST plugin"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} "ZynAddSubFX as a VST plugin (not stable on every host)"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "Full source code of ZynAddSubFX"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
-;I don't allow to install zynaddsubfx in a existing directory (because the uninstall will recursively remove the directory)
-Function .onVerifyInstDir
-         IfFileExists $INSTDIR fileexists nofile
-         fileexists:
-                      Abort ;
-         nofile:
-FunctionEnd
 
 Function un.onUninstSuccess
   HideWindow
@@ -151,13 +143,30 @@ Function un.onInit
 FunctionEnd
 
 Section Uninstall
-  RMDir /r "$INSTDIR"
+  Delete "$INSTDIR\README.txt"
+  Delete "$INSTDIR\HISTORY.txt"
+  Delete "$INSTDIR\FAQ.txt"
+  Delete "$INSTDIR\COPYING.txt"
+  Delete "$INSTDIR\ChangeLog.txt"
+  Delete "$INSTDIR\bugs.txt"
+  Delete "$INSTDIR\Warning.txt"
+  Delete "$INSTDIR\zynaddsubfx.exe"
+  Delete "$INSTDIR\zynaddsubfx.url"
+  Delete "$INSTDIR\launch_zynaddsubfx.bat"
+  Delete "$INSTDIR\zynaddsubfxXML.cfg"
+  Delete "$INSTDIR\uninst.exe"
+  RMDir /r "$INSTDIR\banks"
+  RMDir /r "$INSTDIR\examples"
+  RMDir /r "$INSTDIR\presets"
+  RMDir /r "$INSTDIR\source code"
+  RMDir /r "$INSTDIR\VST"
 
   Delete "$SMPROGRAMS\ZynAddSubFX\Uninstall.lnk"
   Delete "$SMPROGRAMS\ZynAddSubFX\Website.lnk"
   Delete "$STARTMENU.lnk"
   Delete "$DESKTOP\ZynAddSubFX.lnk"
   Delete "$SMPROGRAMS\ZynAddSubFX\ZynAddSubFX.lnk"
+  Delete "$SMPROGRAMS\ZynAddSubFX\ZynAddSubFX low latency.lnk"
 
   RMDir "$SMPROGRAMS\ZynAddSubFX"
   RMDir "$INSTDIR"
