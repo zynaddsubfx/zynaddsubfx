@@ -28,6 +28,8 @@
 MIDIFile::MIDIFile(){
     midifile=NULL;
     midifilesize=0;
+    midifilek=0;
+    midieof=false;
 };
 
 MIDIFile::~MIDIFile(){
@@ -60,14 +62,24 @@ int MIDIFile::loadfile(char *filename){
     fread(midifile,midifilesize,1,file);
     fclose(file);
 
-    for (int i=0;i<midifilesize;i++) printf("%2x ",midifile[i]);
-    printf("\n");
+//    for (int i=0;i<midifilesize;i++) printf("%2x ",midifile[i]);
+//    printf("\n");
     
     
     return(0);
 };
 
 int MIDIFile::parsemidifile(){
+
+    //read the header
+    int chunk=getint32();//MThd
+    if (chunk!=0x4d546864) return(-1);
+    int size=getint32();
+    if (size!=6) return(-1);//header is always 6 bytes long
+
+    int format=getint16();
+    printf("format %d\n",format);
+
     return(0);
 };
 
@@ -77,6 +89,33 @@ void MIDIFile::clearmidifile(){
     if (midifile!=NULL) delete(midifile);
     midifile=NULL;
     midifilesize=0;
-
+    midifilek=0;
+    midieof=false;
 };
 
+unsigned char MIDIFile::getbyte(){
+    if (midifilek>=midifilesize) {
+	midieof=true;
+	return(0);
+    };
+
+    return(midifile[midifilek++]);
+};
+
+unsigned int MIDIFile::getint32(){
+    unsigned int result=0;
+    for (int i=0;i<4;i++) {
+	result=result*256+getbyte();
+    };
+    if (midieof) result=0;
+    return(result);
+};
+
+unsigned short int MIDIFile::getint16(){
+    unsigned short int result=0;
+    for (int i=0;i<2;i++) {
+	result=result*256+getbyte();
+    };
+    if (midieof) result=0;
+    return(result);
+};

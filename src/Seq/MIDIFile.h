@@ -36,9 +36,19 @@ class MIDIFile{
 	
     private:
 	unsigned char *midifile;
-	int midifilesize;
+	int midifilesize,midifilek;
+	bool midieof;
 	
 	void clearmidifile();
+	
+	//get a byte from the midifile
+	unsigned char getbyte();
+	
+	//get a set of 4 bytes from the midifile
+	unsigned int getint32();
+	
+	//get a word of 2 bytes from the midifile
+	unsigned short int getint16();
 	
 };
 
