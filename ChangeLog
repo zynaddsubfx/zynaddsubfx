@@ -726,5 +726,6 @@
 02 Oct 2004 - Corectata o eroare grava care facea ca sa nu pot schimba partul curent in interfata utilizator obisnuita	    
 03 Oct 2004 - LANSAT PE INTERNET - VERSIUNEA (2.1.1)
 --------------------------------------------------------------------------------------------------
-	    - Corectata o eroare care face ca in modul simple UI, sa se inverseze panning-ul	    
-
+04 Oct 2004 - Corectata o eroare care face ca in modul simple UI, sa se inverseze panning-ul	    
+	    - Adaugat un icon la ZynAddSubFX
+	    
