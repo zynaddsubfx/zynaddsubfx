@@ -129,6 +129,7 @@ class OscilGen{
 	REALTYPE basefunc_chirp(REALTYPE x,REALTYPE a);
 	REALTYPE basefunc_absstretchsine(REALTYPE x,REALTYPE a);
 	REALTYPE basefunc_chebyshev(REALTYPE x,REALTYPE a);
+	REALTYPE basefunc_sqr(REALTYPE x,REALTYPE a);
 
 	//Internal Data
 	unsigned char oldbasefunc,oldbasepar,oldhmagtype,oldwaveshapingfunction,oldwaveshaping,oldnormalizemethod;

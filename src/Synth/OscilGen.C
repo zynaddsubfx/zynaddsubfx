@@ -65,7 +65,7 @@ void OscilGen::defaults(){
 
     Pbasefuncmodulation=0;
     Pbasefuncmodulationpar1=64;
-    Pbasefuncmodulationpar2=0;
+    Pbasefuncmodulationpar2=64;
     Pbasefuncmodulationpar3=32;
 
     Pwaveshapingfunction=0;
@@ -192,6 +192,11 @@ REALTYPE OscilGen::basefunc_chebyshev(REALTYPE x,REALTYPE a){
     a=a*a*a*30.0+1.0;
     return(cos(acos(x*2.0-1.0)*a));
 };
+
+REALTYPE OscilGen::basefunc_sqr(REALTYPE x,REALTYPE a){
+    a=a*a*a*a*160.0+0.001;
+    return(-atan(sin(x*2.0*PI)*a));
+};
 /* 
  * Base Functions - END
  */
@@ -263,13 +268,15 @@ void OscilGen::getbasefunction(REALTYPE *smps){
 	       break;
 	    case 12:smps[i]=basefunc_chebyshev(t,par);
 	       break;
+	    case 13:smps[i]=basefunc_sqr(t,par);
+	       break;
 	    default:smps[i]=-sin(2.0*PI*i/OSCIL_SIZE);
 	};
     };
 };
 
 /* 
- * Filter the basefunction
+ * Filter the oscillator
  */
 void OscilGen::oscilfilter(){
     if (Pfiltertype==0) return;

@@ -289,7 +289,7 @@ class ADOscilEditor {} {
   Function {make_window()} {} {
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor}
-      xywh {96 94 750 590} type Double hide
+      xywh {96 94 750 590} type Double visible
     } {
       Fl_Group oscildisplaygroup {
         xywh {15 5 360 300} box ENGRAVED_FRAME
@@ -433,6 +433,10 @@ if ((oscil->Pcurrentbasefunc==0)||(oscil->Pcurrentbasefunc==127)) basefuncmodula
             label Chebyshev
             xywh {112 112 100 20} labelfont 1 labelsize 12
           }
+          menuitem {} {
+            label Sqr selected
+            xywh {122 122 100 20} labelfont 1 labelsize 12
+          }
         }
         Fl_Box {} {
           label {Base Func.}
@@ -474,7 +478,7 @@ oldosc->redraw();}
               xywh {70 70 100 20} labelfont 1 labelsize 10
             }
             menuitem {} {
-              label Pow selected
+              label Pow
               xywh {80 80 100 20} labelfont 1 labelsize 10
             }
           }

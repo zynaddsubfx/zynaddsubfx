@@ -575,4 +575,5 @@
 	    - Adaugat posibilitatea de swap la instrumentele din bank
 14 Iun 2004 - Adaugat __DATE__ si __TIME__ sa stiu cand s-a compilat
 	    - Modificat interfata la PartUI
-
+	    - Imbunatatit modulatia basefunc la OscilGen (adaugat inca un parametru si inca un tip de modulatie ("power"))
+	    - Adaugat inca o noua functie basefunc la OscilGen (sqr=atan(sin(x)*a))
