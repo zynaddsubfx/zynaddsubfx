@@ -216,7 +216,7 @@ void SUBnoteParameters::add2XML(XMLwrapper *xml){
     
     xml->beginbranch("HARMONICS");
 	for (int i=0;i<MAX_SUB_HARMONICS;i++){
-	    if (Phmag[i]==0) continue;
+	    if ((Phmag[i]==0)&&(xml->minimal)) continue;
 	    xml->beginbranch("HARMONIC",i);
 		xml->addpar("mag",Phmag[i]);
 		xml->addpar("relbw",Phrelbw[i]);
@@ -246,14 +246,14 @@ void SUBnoteParameters::add2XML(XMLwrapper *xml){
 	xml->addpar("bandwidth_scale",Pbwscale);
 
 	xml->addparbool("freq_envelope_enabled",PFreqEnvelopeEnabled);
-	if (PFreqEnvelopeEnabled!=0){
+	if ((PFreqEnvelopeEnabled!=0)||(!xml->minimal)){
 	    xml->beginbranch("FREQUENCY_ENVELOPE");
 	        FreqEnvelope->add2XML(xml);
 	    xml->endbranch();
 	};
 
 	xml->addparbool("band_width_envelope_enabled",PBandWidthEnvelopeEnabled);
-	if (PBandWidthEnvelopeEnabled!=0){
+	if ((PBandWidthEnvelopeEnabled!=0)||(!xml->minimal)){
 	    xml->beginbranch("BANDWIDTH_ENVELOPE");
 	        BandWidthEnvelope->add2XML(xml);
 	    xml->endbranch();
@@ -262,7 +262,7 @@ void SUBnoteParameters::add2XML(XMLwrapper *xml){
 
     xml->beginbranch("FILTER_PARAMETERS");
 	xml->addparbool("enabled",PGlobalFilterEnabled);
-	if (PGlobalFilterEnabled!=0){
+	if ((PGlobalFilterEnabled!=0)||(!xml->minimal)){
 	    xml->beginbranch("FILTER");
 		GlobalFilter->add2XML(xml);
 	    xml->endbranch();

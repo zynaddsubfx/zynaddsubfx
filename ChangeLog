@@ -691,6 +691,7 @@
 16 Aug 2004 - Corectata inca o eroare la pitch bend (aratata de Krzysztof Korpiela)
 	    - Adaugat refresh si la Filtru si paste la ADnote, SUBnote si PADsynth sunt complete
 17 Aug 2004 - Adaugat clipboard la LFO, Envelope, ADnoteVoice si Filter Vowel
+18 Aug 2004 - In clipboard se salveaza toti parametrii (chiar si cei dezactivati)
 	    
 	    
 	    

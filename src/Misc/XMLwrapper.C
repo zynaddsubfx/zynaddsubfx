@@ -68,6 +68,7 @@ XMLwrapper::XMLwrapper(){
     ZERO(&parentstack,(int)sizeof(parentstack));
     ZERO(&values,(int)sizeof(values));
 
+    minimal=false;
     stackpos=0;
     
     tree=mxmlNewElement(MXML_NO_PARENT,"?xml");

@@ -376,7 +376,7 @@ void FilterParams::add2XML(XMLwrapper *xml){
     xml->addpar("gain",Pgain);
 
     //formant filter parameters
-    if (Pcategory==1){
+    if ((Pcategory==1)||(!xml->minimal)){
 	xml->beginbranch("FORMANT_FILTER");
 	    xml->addpar("num_formants",Pnumformants);
 	    xml->addpar("formant_slowness",Pformantslowness);

@@ -1012,7 +1012,7 @@ void Part::add2XMLinstrument(XMLwrapper *xml){
 void Part::add2XML(XMLwrapper *xml){
     //parameters
     xml->addparbool("enabled",Penabled);
-    if (Penabled==0) return;
+    if ((Penabled==0)&&(xml->minimal)) return;
 
     xml->addpar("volume",Pvolume);
     xml->addpar("panning",Ppanning);

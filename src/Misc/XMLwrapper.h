@@ -108,7 +108,7 @@ class XMLwrapper{
 	REALTYPE getparreal(char *name,REALTYPE defaultpar);
 	REALTYPE getparreal(char *name,REALTYPE defaultpar,REALTYPE min,REALTYPE max);
 
-
+	bool minimal;//false if all parameters will be stored (used only for clipboard)
     private:
     
 	int dosavefile(char *filename,int compression,char *xmldata);

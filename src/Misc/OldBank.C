@@ -1,3 +1,5 @@
+//this file/class is obsolete and should be removed
+
 /*
   ZynAddSubFX - a software synthesizer
  

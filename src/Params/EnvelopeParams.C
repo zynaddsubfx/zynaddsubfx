@@ -233,7 +233,7 @@ void EnvelopeParams::add2XML(XMLwrapper *xml){
     xml->addpar("S_val",PS_val);
     xml->addpar("R_val",PR_val);
 
-    if (Pfreemode!=0){
+    if ((Pfreemode!=0)||(!xml->minimal)){
 	for (int i=0;i<Penvpoints;i++){
 	    xml->beginbranch("POINT",i);
 		if (i!=0) xml->addpar("dt",Penvdt[i]);

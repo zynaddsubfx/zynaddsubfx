@@ -1284,7 +1284,6 @@ void OscilGen::add2XML(XMLwrapper *xml){
 void OscilGen::getfromXML(XMLwrapper *xml){
 
     Phmagtype=xml->getpar127("harmonic_mag_type",Phmagtype);
-//    Pnormalizemethod=xml->getpar127("normalize_method",Pnormalizemethod);
 
     Pcurrentbasefunc=xml->getpar127("base_function",Pcurrentbasefunc);
     Pbasefuncpar=xml->getpar127("base_function_par",Pbasefuncpar);

@@ -578,7 +578,7 @@ void Microtonal::add2XML(XMLwrapper *xml){
     xml->addpar("a_note",PAnote);
     xml->addparreal("a_freq",PAfreq);
 
-    if (Penabled==0) return;
+    if ((Penabled==0)&&(xml->minimal)) return;
 
     xml->beginbranch("SCALE");
         xml->addpar("scale_shift",Pscaleshift);
