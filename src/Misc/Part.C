@@ -170,7 +170,7 @@ Part::~Part(){
     delete (tmpoutr);
     for (int nefx=0;nefx<NUM_PART_EFX;nefx++) 
 	delete (partefx[nefx]);
-    for (int n=0;n<NUM_PART_EFX;n++) {
+    for (int n=0;n<NUM_PART_EFX+1;n++) {
 	delete (partfxinputl[n]);
 	delete (partfxinputr[n]);
     };

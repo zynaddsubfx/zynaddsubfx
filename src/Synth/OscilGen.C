@@ -61,7 +61,8 @@ void OscilGen::defaults(){
     };
     Phmag[0]=127;
     Phmagtype=0;
-    Prand=64;//no randomness
+    if (ADvsPAD) Prand=127;//max phase randomness (usefull if the oscil will be imported to a ADsynth from a PADsynth
+	else Prand=64;//no randomness
 
     Pcurrentbasefunc=0;
     Pbasefuncpar=64;
@@ -883,7 +884,7 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
 
     // Randomness (each harmonic), the block type is computed 
     // in ADnote by setting start position according to this setting
-    if ((Prand>64)&&(freqHz>=0.0)){
+    if ((Prand>64)&&(freqHz>=0.0)&&(!ADvsPAD)){
         REALTYPE rnd,angle,a,b,c,d;
         rnd=PI*pow((Prand-64.0)/64.0,2.0);
         for (i=1;i<nyquist-1;i++){//to Nyquist only for AntiAliasing
@@ -901,7 +902,7 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
 
 
     //Harmonic Amplitude Randomness
-    if (freqHz>0.1) {
+    if ((freqHz>0.1)&&(!ADvsPAD)) {
 	unsigned int realrnd=rand();
 	srand(randseed);
 	REALTYPE power=Pamprandpower/127.0;
@@ -943,7 +944,6 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
     sum=sqrt(sum);
     for (int j=1;j<OSCIL_SIZE;j++) outoscilFFTfreqs[j]/=sum; 
    
-//    for (i=0;i<OSCIL_SIZE/2;i++) outoscilFFTfreqs[i+OSCIL_SIZE/2]*=-1.0;//correct the amplitude
 
     if ((ADvsPAD)&&(freqHz>0.1)){//in this case the smps will contain the freqs
         for (i=1;i<OSCIL_SIZE/2;i++) smps[i-1]=sqrt(outoscilFFTfreqs[i]*outoscilFFTfreqs[i]+outoscilFFTfreqs[OSCIL_SIZE-i]*outoscilFFTfreqs[OSCIL_SIZE-i]);
