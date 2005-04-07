@@ -780,9 +780,10 @@
 22 Mar 2005 - Corectata o mica eroare care facea ca la schimbari foarte lente al parametrilor sa nu se actualizeze Format Filter
 25 Mar 2005 - Corectata o eroare care facea ca uneori, la anumite setari ale lui SepctrumAdjust din OscilGen sa rezulte semnal zero
 	      Corectata o mica eroare care facea ca daca se foloseste setarea 440Hz la Padsynth sa se aleaga sample-ul incorect
-05 Apr 2005 - Modificat installerul pt. windows si pregatit pt. installer (folosit cross-compiling si nsis&wine)
+06 Apr 2005 - Modificat installerul pt. windows si pregatit pt. installer (folosit cross-compiling si nsis&wine)
 	    - Adaugat icon in format windows (si la installer)
 	    - Adaugat parametrul '-Y' la linia de comanda, care este folosit doar pentru installerul NSIS (parametrul este necesar pentru ca NSIS ma forteaza sa dau un parametru la program pentru ca sa adauge un icon la shortcut; zynaddsubfx ignora acest parametru)
+07 Apr 2005 - Pregatit pentru release
 
 
     

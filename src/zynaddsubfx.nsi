@@ -90,9 +90,9 @@ Section "Standalone" SEC02
   File "zynaddsubfx.exe"
   File "launch_zynaddsubfx.bat"
   CreateDirectory "$SMPROGRAMS\ZynAddSubFX"
-  CreateShortCut "$SMPROGRAMS\ZynAddSubFX\ZynAddSubFX low latency.lnk" "$INSTDIR\launch_zynaddsubfx.bat" "-Y" "zynaddsubfx_icon.ico" 
-  CreateShortCut "$SMPROGRAMS\ZynAddSubFX\ZynAddSubFX.lnk" "$INSTDIR\zynaddsubfx.exe" "-Y" "zynaddsubfx_icon.ico"
-  CreateShortCut "$DESKTOP\ZynAddSubFX.lnk" "$INSTDIR\launch_zynaddsubfx.bat" "-Y" "zynaddsubfx_icon.ico"
+  CreateShortCut "$SMPROGRAMS\ZynAddSubFX\ZynAddSubFX low latency.lnk" "$INSTDIR\launch_zynaddsubfx.bat" "-Y" "$INSTDIR\zynaddsubfx_icon.ico" 
+  CreateShortCut "$SMPROGRAMS\ZynAddSubFX\ZynAddSubFX.lnk" "$INSTDIR\zynaddsubfx.exe" "-Y" "$INSTDIR\zynaddsubfx_icon.ico"
+  CreateShortCut "$DESKTOP\ZynAddSubFX.lnk" "$INSTDIR\launch_zynaddsubfx.bat" "-Y" "$INSTDIR\zynaddsubfx_icon.ico"
 SectionEnd
 
 ;Section /o "VST Plugin" SEC03
@@ -128,7 +128,7 @@ SectionEnd
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} "Required files for ZynAddSubFX "
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} "ZynAddSubFX as a standalone synth"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} "ZynAddSubFX as a VST plugin (not stable on every host)"
+;  !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} "ZynAddSubFX as a VST plugin (not stable on every host)"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "Full source code of ZynAddSubFX"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
@@ -156,6 +156,8 @@ Section Uninstall
   Delete "$INSTDIR\launch_zynaddsubfx.bat"
   Delete "$INSTDIR\zynaddsubfxXML.cfg"
   Delete "$INSTDIR\uninst.exe"
+  Delete "$INSTDIR\zynaddsubfx.ico"
+  Delete "$INSTDIR\zynaddsubfx_icon.ico"
   RMDir /r "$INSTDIR\banks"
   RMDir /r "$INSTDIR\examples"
   RMDir /r "$INSTDIR\presets"

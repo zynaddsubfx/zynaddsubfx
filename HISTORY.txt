@@ -1,4 +1,4 @@
-2.2.0 ()
+2.2.0 (8 Apr 2005)
 	- the VST version of ZynAddSubFX is removed from the instalation until it will be more stable (hope soon :) )
 	- now, the instrument banks contains over 300 high quality instruments
 	- added "Apply" a button from OscilGen window for PADsynth 
