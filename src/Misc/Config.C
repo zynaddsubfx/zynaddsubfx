@@ -33,6 +33,8 @@
 #include "XMLwrapper.h"
 
 Config::Config(){
+};
+void Config::init(){
     maxstringsize=MAX_STRING_SIZE;//for ui
     //defaults
     cfg.SampleRate=44100;

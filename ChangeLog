@@ -784,6 +784,6 @@
 	    - Adaugat icon in format windows (si la installer)
 	    - Adaugat parametrul '-Y' la linia de comanda, care este folosit doar pentru installerul NSIS (parametrul este necesar pentru ca NSIS ma forteaza sa dau un parametru la program pentru ca sa adauge un icon la shortcut; zynaddsubfx ignora acest parametru)
 07 Apr 2005 - Pregatit pentru release
-
+08 Apr 2005 - Corectata o mica eroare care facea ca sa nu se incarce configul la inceput
 
     

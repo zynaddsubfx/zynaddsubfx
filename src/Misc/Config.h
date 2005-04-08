@@ -55,6 +55,7 @@ class Config{
 
 	void clearbankrootdirlist();
 	void clearpresetsdirlist();
+	void init();
 	
     private:
 	void readConfig(char *filename);
