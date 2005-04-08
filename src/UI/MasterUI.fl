@@ -174,8 +174,7 @@ if ((maxdbl>MIN_DB-20)){
 if ((maxdbr>MIN_DB-20)){
   snprintf((char *)&tmpstr,10,"%ddB",(int)maxdbl);
   fl_draw(tmpstr,ox+VULENX+1,oy+ly/2+1,lx-VULENX-1,VULENY,FL_ALIGN_RIGHT,NULL,0);
-};} {selected
-    }
+};} {}
   }
   Function {draw_part()} {} {
     code {\#define MIN_DB (-48)
@@ -421,8 +420,11 @@ class MasterUI {} {
       callback {\#ifdef VSTAUDIOOUT
 fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
 \#else
-if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
-\#endif}
+if (fl_ask("Exit and leave the unsaved data?")) {
+    config.save();
+    *exitprogram=1;
+};
+\#endif} selected
       xywh {353 127 390 465} type Double hide
     } {
       Fl_Menu_Bar mastermenu {
@@ -1073,7 +1075,10 @@ updatepanel();}
       callback {\#ifdef VSTAUDIOOUT
 fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
 \#else
-if (fl_ask("Exit and leave the unsaved data?")) *exitprogram=1;
+if (fl_ask("Exit and leave the unsaved data?")) {
+	config.save();
+	*exitprogram=1;
+};
 \#endif}
       xywh {135 383 600 335} type Double hide
     } {

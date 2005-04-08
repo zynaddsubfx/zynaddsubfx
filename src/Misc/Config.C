@@ -76,6 +76,7 @@ void Config::init(){
 	for (int j=0;j<MAX_STRING_SIZE;j++) winmididevices[i].name[j]='\0';
     };
 
+
 //get the midi input devices name
 #ifdef WINMIDIIN
     MIDIINCAPS midiincaps;
@@ -93,6 +94,7 @@ void Config::init(){
     char filename[MAX_STRING_SIZE];
     getConfigFileName(filename,MAX_STRING_SIZE);
     readConfig(filename);
+
     if (cfg.bankRootDirList[0]==NULL){
 #if defined(OS_LINUX)
 	//banks
@@ -171,9 +173,6 @@ void Config::init(){
 };
 
 Config::~Config(){
-    char filename[MAX_STRING_SIZE];
-    getConfigFileName(filename,MAX_STRING_SIZE);
-    saveConfig(filename);
 
     delete(cfg.LinuxOSSWaveOutDev);
     delete(cfg.LinuxOSSSeqInDev);
@@ -181,6 +180,13 @@ Config::~Config(){
 
     for (int i=0;i<winmidimax;i++) delete (winmididevices[i].name);
     delete(winmididevices);
+};
+
+
+void Config::save(){
+    char filename[MAX_STRING_SIZE];
+    getConfigFileName(filename,MAX_STRING_SIZE);
+    saveConfig(filename);
 };
 
 void Config::clearbankrootdirlist(){
