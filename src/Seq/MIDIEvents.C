@@ -39,8 +39,8 @@ void MIDIEvents::writeevent(list *l,event *ev){
     if (l->current!=NULL) l->current->next=tmp;
 	else l->first=tmp;
     l->current=tmp;
-    printf("Wx%x ",(int) l->current);
-    printf("-> %d  \n",l->current->ev.deltatime);
+//    printf("Wx%x ",(int) l->current);
+//    printf("-> %d  \n",l->current->ev.deltatime);
     l->size++;
 };
 
@@ -56,8 +56,8 @@ void MIDIEvents::readevent(list *l,event *ev){
     if (l->current!=NULL) {
 //	ev->deltatime=10000;
 //	printf("Rx%d\n",l->current->ev.deltatime);
-	printf("Rx%x  ",(int) l->current);
-	printf("-> %d  (next=%x) \n",(int)l->current->ev.deltatime,(int)l->current->next);
+//	printf("Rx%x  ",(int) l->current);
+//	printf("-> %d  (next=%x) \n",(int)l->current->ev.deltatime,(int)l->current->next);
     };
 
 };
