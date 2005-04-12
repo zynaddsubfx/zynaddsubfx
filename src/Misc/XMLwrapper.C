@@ -73,10 +73,12 @@ XMLwrapper::XMLwrapper(){
 
     information.PADsynth_used=false;
     
-    tree=mxmlNewElement(MXML_NO_PARENT,"?xml");
+    tree=mxmlNewElement(MXML_NO_PARENT,"?xml version=\"1.0\" encoding=\"UTF-8\"?");
+/*  for mxml 2.1 (and older)
+    tree=mxmlNewElement(MXML_NO_PARENT,"?xml"); 
     mxmlElementSetAttr(tree,"version","1.0");
     mxmlElementSetAttr(tree,"encoding","UTF-8");
-
+*/
     
     mxml_node_t *doctype=mxmlNewElement(tree,"!DOCTYPE");
     mxmlElementSetAttr(doctype,"ZynAddSubFX-data",NULL);

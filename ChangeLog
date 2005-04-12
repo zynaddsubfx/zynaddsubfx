@@ -787,5 +787,5 @@
 08 Apr 2005 - Corectata o mica eroare care facea ca sa nu se incarce configul la inceput
             - LANSAT PE INTERNET - VERSIUNEA (2.2.0)
 --------------------------------------------------------------------------------------------------
-
+12 Apr 2005 - Actualizat pentru MXML 2.2 (nu o sa mearga pe vers. mai vechi de mxml) 
     
