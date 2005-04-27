@@ -28,7 +28,6 @@ Requirements:
 -------------
                - a fast computer
                - Linux (tested with RedHat 7.2,7.3,etc.) or Windows
-               - FLTK 1.x.x (tested with fltk 1.1.0, 1.1.1, 1.1.2,etc.)
                - FFTW 2.x.x (tested with fftw 2.0.5, 2.1.3) - necesary for
   Fast Fourier computations
 	       - MXML-2.2 library from http://www.easysw.com/~mike/mxml/
@@ -39,6 +38,7 @@ Requirements:
 Not requred, but recomanded:
 ---------------------------
 
+    - FLTK 1.x.x (tested with fltk 1.1.0, 1.1.1, 1.1.2,etc.)
     - ALSA 0.9.x or later (with OSS emulation, if you don't use JACK)
     - JACKit - if you want to use it you must enable compilation for JACK in Makefile.inc
     - a VST host for the VST version

@@ -368,6 +368,7 @@ int main(int argc, char *argv[]){
 #ifdef OS_LINUX
     struct option opts[]={
 	{"load",2,NULL,'l'},
+	{"load-instrument",2,NULL,'L'},
 	{"sample-rate",2,NULL,'r'},
 	{"buffer-size",2,NULL,'b'},
 	{"oscil-size",2,NULL,'o'},
@@ -384,13 +385,14 @@ int main(int argc, char *argv[]){
     int option_index=0,opt,exitwithhelp=0;
     
     char loadfile[1001];ZERO(loadfile,1001);
+    char loadinstrument[1001];ZERO(loadinstrument,1001);
     
     while (1){
 #ifdef OS_LINUX
-	opt=getopt_long(argc,argv,"l:r:b:o:hSDUAY",opts,&option_index);
+	opt=getopt_long(argc,argv,"l:L:r:b:o:hSDUAY",opts,&option_index);
 	char *optarguments=optarg;
 #else
-	opt=getopt(argc,argv,"l:r:b:o:hSDUAY",&option_index);
+	opt=getopt(argc,argv,"l:L:r:b:o:hSDUAY",&option_index);
 	char *optarguments=&winoptarguments[0];
 #endif 
 
@@ -419,6 +421,11 @@ int main(int argc, char *argv[]){
 	    case 'l':tmp=0;
 	             if (optarguments!=NULL) {
 		        snprintf(loadfile,1000,"%s",optarguments);
+		     };
+		     break;
+	    case 'L':tmp=0;
+	             if (optarguments!=NULL) {
+		        snprintf(loadinstrument,1000,"%s",optarguments);
 		     };
 		     break;
 	    case 'r':tmp=0;
@@ -460,6 +467,7 @@ int main(int argc, char *argv[]){
 	fprintf(stderr,"%s","Usage: zynaddsubfx [OPTION]\n\n");
 	fprintf(stderr,"%s","  -h , --help \t\t\t\t display command-line help and exit\n");
 	fprintf(stderr,"%s","  -l file, --load=FILE\t\t\t loads a .xmz file\n");
+	fprintf(stderr,"%s","  -L file, --load-instrument=FILE\t\t loads a .xiz file\n");
 	fprintf(stderr,"%s","  -r SR, --sample-rate=SR\t\t set the sample rate SR\n");
 	fprintf(stderr,"%s","  -b BS, --buffer-size=SR\t\t set the buffer size (granularity)\n");
 	fprintf(stderr,"%s","  -o OS, --oscil-size=OS\t\t set the ADsynth oscil. size\n");
@@ -484,15 +492,32 @@ int main(int argc, char *argv[]){
     if (strlen(loadfile)>1){
         int tmp=master->loadXML(loadfile);
 	if (tmp<0) {
-	    fprintf(stderr,"ERROR:Could not load file  %s .\n",loadfile);
+	    fprintf(stderr,"ERROR:Could not load master file  %s .\n",loadfile);
 	    exit(1);
 	} else {
 	    master->applyparameters();
 #ifndef DISABLE_GUI
 	    if (noui==0) ui->refresh_master_ui();
 #endif
+	    printf("Master file loaded.\n");
 	};
     };
+
+    if (strlen(loadinstrument)>1){
+	int loadtopart=0;
+        int tmp=master->part[loadtopart]->loadXMLinstrument(loadinstrument);
+	if (tmp<0) {
+	    fprintf(stderr,"ERROR:Could not load instrument file  %s .\n",loadinstrument);
+	    exit(1);
+	} else {
+	    master->part[loadtopart]->applyparameters();
+#ifndef DISABLE_GUI
+	    if (noui==0) ui->refresh_master_ui();
+#endif
+	    printf("Instrument file loaded.\n");
+	};
+    };
+    
 
 #if !(defined(NONEMIDIIN)||defined(WINMIDIIN)||defined(VSTMIDIIN))
     pthread_create(&thr1,NULL,thread1,NULL);

@@ -1,3 +1,8 @@
+2.2.1 (28 Apr 2005)
+	- made to work with mxml-2.2 (will NOT work on older versions)
+	- it is possible to remove completely the graphical user interface (e.g. it can run without X). For this you need to modify the DISABLE_GUI option from the Makefile.inc
+	- added a commandline -L which load a instrument (.xiz) - now it only loads to part 0 (you can use this option with -l to load a master file and after this the option -L to replace the part)
+	
 2.2.0 (8 Apr 2005)
 	- the VST version of ZynAddSubFX is removed from the instalation until it will be more stable (hope soon :) )
 	- now, the instrument banks contains over 300 high quality instruments
