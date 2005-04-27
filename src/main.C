@@ -56,10 +56,11 @@ extern Dump dump;
 #include "Input/WINMidiIn.h"
 #endif
 
-
+#ifndef DISABLE_GUI
 #include "UI/MasterUI.h"
-
 MasterUI *ui;
+#endif
+
 pthread_t thr1,thr2,thr3,thr4;
 Master *master;
 int swaplr=0;//1 for left-right swapping
@@ -177,8 +178,10 @@ void *thread2(void *arg){
  
  
 void *thread3(void *arg){
+#ifndef DISABLE_GUI
     ui->showUI();
     while (Pexitprogram==0) Fl::wait();
+#endif
     return(0);
 };
 
@@ -280,7 +283,9 @@ void initprogram(){
 #if (defined(NONEMIDIIN)||(defined(VSTMIDIIN)))
     Midi=new NULLMidiIn();
 #endif
+#ifndef DISABLE_GUI
     ui=new MasterUI(master,&Pexitprogram);
+#endif
 };
 
 /*
@@ -301,7 +306,9 @@ void exitprogram(){
     PAfinish();
 #endif
 
+#ifndef DISABLE_GUI
     delete(ui);
+#endif
     delete(Midi);
     delete(master); 
 
@@ -481,7 +488,9 @@ int main(int argc, char *argv[]){
 	    exit(1);
 	} else {
 	    master->applyparameters();
+#ifndef DISABLE_GUI
 	    if (noui==0) ui->refresh_master_ui();
+#endif
 	};
     };
 

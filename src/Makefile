@@ -6,7 +6,13 @@ else
   CXXFLAGS= -O0 -Wall -Wpointer-arith -Wstrict-prototypes
 endif
 
-CXXFLAGS += -DOS_$(OS_PORT) -D$(MIDIIN)MIDIIN -DFFTW_VERSION_$(FFTW_VERSION) -DASM_F2I_$(ASM_F2I) `fltk-config --cflags` 
+CXXFLAGS += -DOS_$(OS_PORT) -D$(MIDIIN)MIDIIN -DFFTW_VERSION_$(FFTW_VERSION) -DASM_F2I_$(ASM_F2I)
+
+ifeq ($(DISABLE_GUI),YES)
+    CXXFLAGS += -DDISABLE_GUI
+else
+    CXXFLAGS += `fltk-config --cflags` 
+endif
 
 ifeq ($(AUDIOOUT),OSS_AND_JACK)
     CXXFLAGS += -DOSSAUDIOOUT -DJACKAUDIOOUT 
@@ -15,7 +21,11 @@ else
 endif
 
 export CXXFLAGS
-LIBS= -lm  `fltk-config --ldflags` -lmxml -lz
+
+LIBS= -lm  -lmxml -lz
+ifneq ($(DISABLE_GUI),YES)
+    LIBS+=`fltk-config --ldflags` 
+endif
 
 ifeq ($(FFTW_VERSION),2)
 LIBS += -lrfftw -lfftw
@@ -67,6 +77,7 @@ SUBDIRS=DSP Effects Input Misc Output Params Synth Seq
 
 all:
 #	yes " " | head
+
 	$(MAKE) -C UI $@
 #	@sh -c "cd UI ; $(CXX) -MM -MG -w *.cc >> ../Make.deps ; cd .."
 	@for name in $(SUBDIRS); do sh -c "cd $$name ; $(CXX) -MM -MG -w *.C >> ../Make.deps ; cd .."; done
@@ -77,10 +88,10 @@ all:
 
 
 ifeq ($(AUDIOOUT),DSSI) 
-	gcc -shared  -o zynaddsubfx.so */*.o *.o $(LIBS) 
+	$(CXX) -shared  -o zynaddsubfx.so */*.o *.o $(LIBS) 
 else
 ifeq ($(AUDIOOUT),VST) 
-	gcc -shared -o zynaddsubfx_vst.dll */*.o *.o ../../vstsdk2/source/common/AudioEffect.cpp ../../vstsdk2/source/common/audioeffectx.cpp  $(LIBS) zynaddsubfx_gcc.def
+	$(CXX) -shared -o zynaddsubfx_vst.dll */*.o *.o ../../vstsdk2/source/common/AudioEffect.cpp ../../vstsdk2/source/common/audioeffectx.cpp  $(LIBS) zynaddsubfx_gcc.def
 else
 
 
@@ -103,9 +114,8 @@ objs:$(objects)
 debug: all
 
 main.o:Misc/Master.h Misc/Util.h Output/OSSaudiooutput.h\
-       Input/OSSMidiIn.h Input/ALSAMidiIn.h \
-       UI/MasterUI.h
-
+       Input/OSSMidiIn.h Input/ALSAMidiIn.h
+       
 
 .PHONY : clean
 clean: 

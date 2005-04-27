@@ -788,4 +788,5 @@
             - LANSAT PE INTERNET - VERSIUNEA (2.2.0)
 --------------------------------------------------------------------------------------------------
 12 Apr 2005 - Actualizat pentru MXML 2.2 (nu o sa mearga pe vers. mai vechi de mxml) 
-    
+27 Apr 2005 - Adaugata posibilitatea de a inlatura complet interfata grafica in Makefile.inc (in acest caz nu mai sunt necesare bibliotecile grafice ca fltk)
+

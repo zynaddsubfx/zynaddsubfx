@@ -1,4 +1,4 @@
-CXX=gcc
+CXX=g++
 
 #You can set the on what OS is compiling (Linux/Windows)
 OS_PORT=LINUX
@@ -11,6 +11,10 @@ FFTW_VERSION=3
 #Assembler FLOAT to INT conversions
 ASM_F2I=YES
 #ASM_F2I=NO
+
+#Graphic user interface disable option (ZynAddSubFX will run only in text-mode)
+#DISABLE_GUI=YES
+DISABLE_GUI=NO
 
 # L I N U X   C O N F I G U R A T I O N
 #Next line sets the midi input. It can be "ALSA", "OSS" or "NONE".

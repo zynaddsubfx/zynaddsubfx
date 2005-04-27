@@ -6,7 +6,9 @@ include ../Makefile.inc
 objects=WidgetPDial.o PresetsUI.o EnvelopeUI.o LFOUI.o FilterUI.o VirKeyboard.o ConfigUI.o\
 	SUBnoteUI.o ResonanceUI.o OscilGenUI.o ADnoteUI.o PADnoteUI.o EffUI.o BankUI.o \
 	PartUI.o MicrotonalUI.o SeqUI.o MasterUI.o 
-
+ifeq ($(DISABLE_GUI),YES)
+    objects=
+endif
 
 all: $(objects)
 
