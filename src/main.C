@@ -475,7 +475,9 @@ int main(int argc, char *argv[]){
 	fprintf(stderr,"%s","  -D , --dump\t\t\t\t Dumps midi note ON/OFF commands\n");
 	fprintf(stderr,"%s","  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n");
 #ifdef JACKAUDIOOUT
+#ifdef OSSAUDIOOUT
 	fprintf(stderr,"%s","  -A , --not-use-jack\t\t\t Use OSS/ALSA instead of JACK\n");
+#endif
 #endif
 #ifdef OS_WINDOWS
 	fprintf(stderr,"%s","\nWARNING: On Windows systems, only short comandline parameters works.\n");

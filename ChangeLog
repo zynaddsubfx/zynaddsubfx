@@ -791,4 +791,5 @@
 27 Apr 2005 - Adaugata posibilitatea de a inlatura complet interfata grafica in Makefile.inc (in acest caz nu mai sunt necesare bibliotecile grafice ca fltk)
 	    - Adaugata posibilitatea de a incarca direct un instrument cu -L (deocamdata se poate incarca doar in part-ul 0)
 28 Apr 2005 - Corectata o eroare care facea ca uneori sa fie frecventa prea mare la LFO daca era folosit random
-
+	    - Nu mai afiseaza optionea -A in help daca nu este compilat si OSS si JACK
+	    
