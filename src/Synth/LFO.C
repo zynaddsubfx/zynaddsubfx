@@ -109,7 +109,7 @@ REALTYPE LFO::lfoout(){
     if (lfodelay<0.00001) {
 	    if (freqrndenabled==0) x+=incx;
 		else {
-		    float tmp=(incrnd*(1.0-x)+nextincrnd*x)
+		    float tmp=(incrnd*(1.0-x)+nextincrnd*x);
 		    if (tmp>1.0) tmp=1.0;
 			else if (tmp<0.0) tmp=0.0;
 		    x+=incx*tmp;
