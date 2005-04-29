@@ -108,7 +108,12 @@ REALTYPE LFO::lfoout(){
         else out*=lfointensity*amp2;
     if (lfodelay<0.00001) {
 	    if (freqrndenabled==0) x+=incx;
-		else x+=incx*(incrnd*(1.0-x)+nextincrnd*x);
+		else {
+		    float tmp=(incrnd*(1.0-x)+nextincrnd*x)
+		    if (tmp>1.0) tmp=1.0;
+			else if (tmp<0.0) tmp=0.0;
+		    x+=incx*tmp;
+		};
 	    if (x>=1) {
 		x=fmod(x,1.0);
 		amp1=amp2;
@@ -136,6 +141,5 @@ void LFO::computenextincrnd(){
 	if (freqrndenabled==0) return;
 	incrnd=nextincrnd;
 	nextincrnd=pow(0.5,lfofreqrnd)+RND*(pow(2.0,lfofreqrnd)-1.0);
-	if (nextincrnd*incx>=0.49999999) nextincrnd=0.499999999;
 };
 
