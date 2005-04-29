@@ -136,6 +136,6 @@ void LFO::computenextincrnd(){
 	if (freqrndenabled==0) return;
 	incrnd=nextincrnd;
 	nextincrnd=pow(0.5,lfofreqrnd)+RND*(pow(2.0,lfofreqrnd)-1.0);
-	if (nextincrnd*incx>=0.49999999) nextincrnd=1.0;
+	if (nextincrnd*incx>=0.49999999) nextincrnd=0.499999999;
 };
 
