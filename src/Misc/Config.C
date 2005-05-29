@@ -254,8 +254,6 @@ void Config::readConfig(char *filename){
 	cfg.WindowsWaveOutId=xmlcfg->getpar("windows_wave_out_id",cfg.WindowsWaveOutId,0,winwavemax);
 	cfg.WindowsMidiInId=xmlcfg->getpar("windows_midi_in_id",cfg.WindowsMidiInId,0,winmidimax);
 
-
-
       xmlcfg->exitbranch();
     };
     delete(xmlcfg);

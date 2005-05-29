@@ -67,9 +67,6 @@ Bank::Bank(){
 };
 
 Bank::~Bank(){
-    if (dirname!=NULL) {
-	sprintf(config.cfg.currentBankDir,"%s",dirname);
-    };
     for (int i=0;i<MAX_NUM_BANKS;i++){
 	if (banks[i].dir!=NULL) delete (banks[i].dir);
 	if (banks[i].name!=NULL) delete (banks[i].name);
@@ -276,6 +273,11 @@ int Bank::loadbank(const char *bankdirname){
     
     
     closedir(dir);
+
+    if (dirname!=NULL) {
+	sprintf(config.cfg.currentBankDir,"%s",dirname);
+    };
+
     return(0);
 };
 
