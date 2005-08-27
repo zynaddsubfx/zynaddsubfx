@@ -793,3 +793,4 @@
 28 Apr 2005 - Corectata o eroare care facea ca uneori sa fie frecventa prea mare la LFO daca era folosit random
 	    - Nu mai afiseaza optionea -A in help daca nu este compilat si OSS si JACK
 29 Mai 2005 - Corectata o eroare care facea ca sa nu se tina minte ultimul bank	    
+27 Aug 2005 - Corectata o eroare care facea ca sa nu mearga functia Dump (se initializa inainte de citirea configurarilor)

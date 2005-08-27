@@ -346,6 +346,7 @@ void exitprogram(){
 #ifndef VSTAUDIOOUT
 int main(int argc, char *argv[]){
     config.init();
+    dump.startnow();
     int noui=0;
 #ifdef JACKAUDIOOUT
     usejackit=true;//use jack by default

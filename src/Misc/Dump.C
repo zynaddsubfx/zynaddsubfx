@@ -31,7 +31,6 @@ Dump::Dump(){
     tick=0;
     k=0;
     keyspressed=0;
-    startnow();
 };
 
 Dump::~Dump(){
@@ -44,11 +43,10 @@ Dump::~Dump(){
 
 void Dump::startnow(){
     if (file!=NULL) return;//the file is already open
-    
+
     if (config.cfg.DumpNotesToFile!=0){
 	if (config.cfg.DumpAppend!=0) file=fopen(config.cfg.DumpFile,"a");
 	    else file=fopen(config.cfg.DumpFile,"w");
-    
 	if (file==NULL) return;
 	if (config.cfg.DumpAppend!=0) fprintf(file,"%s","#************************************\n");
 
