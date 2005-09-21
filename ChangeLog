@@ -790,7 +790,10 @@
 12 Apr 2005 - Actualizat pentru MXML 2.2 (nu o sa mearga pe vers. mai vechi de mxml) 
 27 Apr 2005 - Adaugata posibilitatea de a inlatura complet interfata grafica in Makefile.inc (in acest caz nu mai sunt necesare bibliotecile grafice ca fltk)
 	    - Adaugata posibilitatea de a incarca direct un instrument cu -L (deocamdata se poate incarca doar in part-ul 0)
+            - LANSAT PE INTERNET - VERSIUNEA (2.2.1)
+--------------------------------------------------------------------------------------------------
 28 Apr 2005 - Corectata o eroare care facea ca uneori sa fie frecventa prea mare la LFO daca era folosit random
 	    - Nu mai afiseaza optionea -A in help daca nu este compilat si OSS si JACK
 29 Mai 2005 - Corectata o eroare care facea ca sa nu se tina minte ultimul bank	    
 27 Aug 2005 - Corectata o eroare care facea ca sa nu mearga functia Dump (se initializa inainte de citirea configurarilor)
+21 Sep 2005 - Imbunatatit modul de scalare al profilei unei armonice la PADsynth

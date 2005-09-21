@@ -381,10 +381,23 @@ void PADnoteParameters::generatespectrum_bandwidthMode(REALTYPE *spectrum, int s
 		REALTYPE idfreq=i/(REALTYPE)profilesize-0.5;
 		idfreq*=ibw;
 		int spfreq=(int) (idfreq+ibasefreq);
+		REALTYPE fspfreq=fmod(idfreq+ibasefreq,1.0);
+		if (spfreq<=0) continue;
+		if (spfreq>=size-1) break;
+		spectrum[spfreq]+=amp*profile[i]*rap*(1.0-fspfreq);
+		spectrum[spfreq+1]+=amp*profile[i]*rap*fspfreq;
+	    };
+/*	    REALTYPE rap=sqrt((REALTYPE)ibw/(REALTYPE)profilesize);
+	    REALTYPE ibasefreq=realfreq/(SAMPLE_RATE*0.5)*size;
+	    for (int i=0;i<profilesize;i++){
+		REALTYPE idfreq=i/(REALTYPE)profilesize-0.5;
+		idfreq*=ibw;
+		int spfreq=(int) (idfreq+ibasefreq);
 		if (spfreq<=0) continue;
 		if (spfreq>=size) break;
 		spectrum[spfreq]+=amp*profile[i]*rap;
 	    };
+*/
 	};
     };
 };
