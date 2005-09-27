@@ -486,7 +486,7 @@ void PADnoteParameters::applyparameters(bool lockmutex){
         newsample.smp=new REALTYPE[samplesize+extra_samples];
     
 	newsample.smp[0]=0.0;
-	for (int i=1;i<spectrumsize;i++){//makes the phases as random
+	for (int i=1;i<spectrumsize;i++){//randomize the phases
 	    REALTYPE phase=RND*6.29;
 	    fftfreqs.c[i]=spectrum[i]*cos(phase);
 	    fftfreqs.s[i]=spectrum[i]*sin(phase);
@@ -525,7 +525,13 @@ void PADnoteParameters::applyparameters(bool lockmutex){
     deleteFFTFREQS(&fftfreqs);
     
     //delete the additional samples that might exists and are not useful
-    for (int i=samplemax;i<PAD_MAX_SAMPLES;i++) deletesample(i);
+    if (lockmutex){
+        pthread_mutex_lock(mutex);
+	for (int i=samplemax;i<PAD_MAX_SAMPLES;i++) deletesample(i);
+        pthread_mutex_unlock(mutex);
+    } else {
+	for (int i=samplemax;i<PAD_MAX_SAMPLES;i++) deletesample(i);
+    };
 };
 
 
