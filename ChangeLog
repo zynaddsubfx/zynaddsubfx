@@ -797,3 +797,4 @@
 29 Mai 2005 - Corectata o eroare care facea ca sa nu se tina minte ultimul bank	    
 27 Aug 2005 - Corectata o eroare care facea ca sa nu mearga functia Dump (se initializa inainte de citirea configurarilor)
 21 Sep 2005 - Imbunatatit modul de scalare al profilei unei armonice la PADsynth
+27 Sep 2005 - Gasita si rezolvata o posibila problema la PADsynth care facea ca sa nu se foloseasca mutex la stergerea de sample-uri (daca se aleg mai putine sample-uri decat initial)
