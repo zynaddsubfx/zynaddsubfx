@@ -105,8 +105,8 @@ void newFFTFREQS(FFTFREQS *f,int size){
     };
 };
 void deleteFFTFREQS(FFTFREQS *f){
-    delete(f->c);
-    delete(f->s);
+    delete[] f->c;
+    delete[] f->s;
     f->c=f->s=NULL;
 };
 
