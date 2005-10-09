@@ -45,8 +45,8 @@ FFTwrapper::~FFTwrapper(){
     fftw_destroy_plan(planfftw_inv);
 #endif
 
-    delete (tmpfftdata1);
-    delete (tmpfftdata2);
+    delete [] tmpfftdata1;
+    delete [] tmpfftdata2;
 };
 
 /*
