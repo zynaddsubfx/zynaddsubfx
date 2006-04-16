@@ -717,8 +717,7 @@ void Master::getfromXML(XMLwrapper *xml){
 	for (int nefx=0;nefx<NUM_INS_EFX;nefx++){
 	
 	    if (xml->enterbranch("INSERTION_EFFECT",nefx)==0) continue;
-		Pinsparts[nefx]=xml->getpar("part",Pinsparts[nefx],-1,NUM_MIDI_PARTS);
-
+		Pinsparts[nefx]=xml->getpar("part",Pinsparts[nefx],-2,NUM_MIDI_PARTS);
 		if (xml->enterbranch("EFFECT")){
 		    insefx[nefx]->getfromXML(xml);
 		    xml->exitbranch();

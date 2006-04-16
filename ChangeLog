@@ -799,3 +799,9 @@
 21 Sep 2005 - Imbunatatit modul de scalare al profilei unei armonice la PADsynth
 27 Sep 2005 - Gasita si rezolvata o posibila problema la PADsynth care facea ca sa nu se foloseasca mutex la stergerea de sample-uri (daca se aleg mai putine sample-uri decat initial)
 09 Oct 2005 - Rezolvat un memory-leak la FFTwrapper
+
+*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *
+
+16 Apr 2006 - Corectata o eroare care facea ca sa nu se foloseasca insertion effect la master
+
+
