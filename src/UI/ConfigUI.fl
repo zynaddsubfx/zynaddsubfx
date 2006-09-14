@@ -53,7 +53,7 @@ o->hide();}
               callback {if ((int)o->value()==0) samplerateinput->activate();
        else samplerateinput->deactivate();
 
-int samplerates[7]={44100,16000,22050,32000,44100,48000,96000};
+int samplerates[8]={44100,16000,22050,32000,44100,48000,88200,96000};
 config.cfg.SampleRate=samplerates[(int)o->value()];
 
 setsamplerateinput();}
@@ -85,8 +85,12 @@ setsamplerateinput();}
                 xywh {50 50 100 20} labelfont 1
               }
               menuitem {} {
-                label 96000Hz
+                label 88200Hz
                 xywh {60 60 100 20} labelfont 1
+              }
+              menuitem {} {
+                label 96000Hz
+                xywh {70 70 100 20} labelfont 1
               }
             }
             Fl_Input samplerateinput {
@@ -419,7 +423,8 @@ switch(smpr){
    case 32000:order=3;break;
    case 44100:order=4;break;
    case 48000:order=5;break;
-   case 96000:order=6;break;
+   case 88200:order=6;break;
+   case 96000:order=7;break;
    default:order=0;break;
 };
 return(order);} {}
