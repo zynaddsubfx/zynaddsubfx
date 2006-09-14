@@ -719,7 +719,8 @@ void OscilGen::prepare(){
 };
 
 void OscilGen::adaptiveharmonic(FFTFREQS f,REALTYPE freq){
-    if ((Padaptiveharmonics==0)||(freq<1.0)) return;
+    if ((Padaptiveharmonics==0)/*||(freq<1.0)*/) return;
+    if (freq<1.0) freq=440.0;
 
     FFTFREQS inf;
     newFFTFREQS(&inf,OSCIL_SIZE/2);
@@ -974,6 +975,7 @@ short int OscilGen::get(REALTYPE *smps,REALTYPE freqHz,int resonance){
  */
 void OscilGen::getspectrum(int n, REALTYPE *spc,int what){
     if (n>OSCIL_SIZE/2) n=OSCIL_SIZE/2;
+
     for (int i=1;i<n;i++){
 	if (what==0){
 	    spc[i-1]=sqrt(oscilFFTfreqs.c[i]*oscilFFTfreqs.c[i]
@@ -984,7 +986,14 @@ void OscilGen::getspectrum(int n, REALTYPE *spc,int what){
 	    	 basefuncFFTfreqs.s[i]*basefuncFFTfreqs.s[i]);
 	};
     };
-    if (what==0) adaptiveharmonicpostprocess(spc,n-1);
+    
+    if (what==0) {
+        for (int i=0;i<n;i++) outoscilFFTfreqs.s[i]=outoscilFFTfreqs.c[i]=spc[i+1];
+	for (int i=n;i<OSCIL_SIZE/2;i++) outoscilFFTfreqs.s[i]=outoscilFFTfreqs.c[i]=0.0;
+	adaptiveharmonic(outoscilFFTfreqs,0.0);
+	for (int i=1;i<n;i++) spc[i-1]=outoscilFFTfreqs.s[i];
+	adaptiveharmonicpostprocess(spc,n-1);
+    };
 };
 
 
