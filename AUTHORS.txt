@@ -1,6 +1,7 @@
 Main author:
 	Nasca Octavian Paul
 
-Contribuitors:
-
+Contributors:
+	Gerald Folcher (legato, mono notes memory)
+	Lars Luthman (zombie fix)
 
