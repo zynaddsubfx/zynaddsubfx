@@ -805,5 +805,6 @@
 16 Apr 2006 - Corectata o eroare care facea ca sa nu se foloseasca insertion effect la master
 20 Aug 2006 - Adaugat 88200 ca rata de esantionare
 14 Sep 2006 - Se afiseaza spectrul la nota cu frecventa de 440 Hz la Oscil si pentru parametru Adaptive Harmonics
+30 Oct 2006 - Adaugat un patch "standalone zombie fix stripped from Lars" 
 
 

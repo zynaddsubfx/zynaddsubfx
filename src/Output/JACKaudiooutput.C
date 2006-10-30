@@ -77,9 +77,14 @@ int jackprocess(jack_nframes_t nframes,void *arg){
     jack_default_audio_sample_t *outl=(jack_default_audio_sample_t *) jack_port_get_buffer (outport_left, nframes);
     jack_default_audio_sample_t *outr=(jack_default_audio_sample_t *) jack_port_get_buffer (outport_right, nframes);
 
-    pthread_mutex_lock(&jackmaster->mutex);
-    jackmaster->GetAudioOutSamples(nframes,jack_get_sample_rate(jackclient),outl,outr);
-    pthread_mutex_unlock(&jackmaster->mutex);
+    if (!pthread_mutex_trylock(&jackmaster->mutex)) {
+      jackmaster->GetAudioOutSamples(nframes,jack_get_sample_rate(jackclient),outl,outr);
+      pthread_mutex_unlock(&jackmaster->mutex);
+    }
+    else {
+      memset(outl, 0, sizeof(jack_default_audio_sample_t) * nframes);
+      memset(outr, 0, sizeof(jack_default_audio_sample_t) * nframes);
+    }
     
     return(0);
 };
