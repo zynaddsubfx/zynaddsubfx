@@ -122,7 +122,7 @@ class SUBnoteUI {: {public PresetsUI_}
       Fl_Button {} {
         label Close
         callback {SUBparameters->hide();}
-        xywh {625 365 105 20} box THIN_UP_BOX labelfont 1 labelsize 12
+        xywh {625 365 105 20} box THIN_UP_BOX labelfont 1 labelsize 11
       }
       Fl_Group {} {
         label AMPLITUDE
@@ -131,19 +131,19 @@ class SUBnoteUI {: {public PresetsUI_}
         Fl_Value_Slider vol {
           label Vol
           callback {pars->PVolume=(int)o->value();}
-          tooltip Volume xywh {10 25 140 15} type {Horz Knob} box FLAT_BOX labelsize 12 align 8 maximum 127 step 1
+          tooltip Volume xywh {10 25 140 15} type {Horz Knob} box FLAT_BOX labelsize 11 align 8 maximum 127 step 1
           code0 {o->value(pars->PVolume);}
         }
         Fl_Value_Slider vsns {
           label {V.Sns}
           callback {pars->PAmpVelocityScaleFunction=(int) o->value();}
-          tooltip {Velocity Sensing Function (rightmost to disable)} xywh {10 45 140 15} type {Horz Knob} box FLAT_BOX labelsize 12 align 8 maximum 127 step 1
+          tooltip {Velocity Sensing Function (rightmost to disable)} xywh {10 45 140 15} type {Horz Knob} box FLAT_BOX labelsize 11 align 8 maximum 127 step 1
           code0 {o->value(pars->PAmpVelocityScaleFunction);}
         }
         Fl_Dial pan {
           label Pan
           callback {pars->PPanning=(int) o->value();}
-          tooltip {Panning (leftmost is Random)} xywh {185 20 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+          tooltip {Panning (leftmost is Random)} xywh {185 20 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           code0 {o->value(pars->PPanning);}
           class WidgetPDial
         }
@@ -166,47 +166,47 @@ class SUBnoteUI {: {public PresetsUI_}
         Fl_Choice magtype {
           label {Mag.Type}
           callback {pars->Phmagtype=(int) o->value();}
-          xywh {585 340 65 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 1 textsize 12
+          xywh {585 340 65 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 1 textsize 11
           code0 {o->value(pars->Phmagtype);}
         } {
           menuitem {} {
             label Linear
-            xywh {20 20 100 20} labelfont 1 labelsize 12
+            xywh {20 20 100 20} labelfont 1 labelsize 11
           }
           menuitem {} {
             label {-40dB}
-            xywh {30 30 100 20} labelfont 1 labelsize 12
+            xywh {30 30 100 20} labelfont 1 labelsize 11
           }
           menuitem {} {
             label {-60dB}
-            xywh {40 40 100 20} labelfont 1 labelsize 12
+            xywh {40 40 100 20} labelfont 1 labelsize 11
           }
           menuitem {} {
             label {-80dB}
-            xywh {50 50 100 20} labelfont 1 labelsize 12
+            xywh {50 50 100 20} labelfont 1 labelsize 11
           }
           menuitem {} {
             label {-100dB}
-            xywh {60 60 100 20} labelfont 1 labelsize 12
+            xywh {60 60 100 20} labelfont 1 labelsize 11
           }
         }
         Fl_Choice start {
           label Start
           callback {pars->Pstart=(int) o->value();} open
-          xywh {670 340 50 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 1 textsize 12
+          xywh {670 340 50 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 1 textsize 11
           code0 {o->value(pars->Pstart);}
         } {
           menuitem {} {
             label Zero
-            xywh {30 30 100 20} labelfont 1 labelsize 12
+            xywh {30 30 100 20} labelfont 1 labelsize 11
           }
           menuitem {} {
             label RND
-            xywh {40 40 100 20} labelfont 1 labelsize 12
+            xywh {40 40 100 20} labelfont 1 labelsize 11
           }
           menuitem {} {
             label {Max.}
-            xywh {50 50 100 20} labelfont 1 labelsize 12
+            xywh {50 50 100 20} labelfont 1 labelsize 11
           }
         }
       }
@@ -237,7 +237,7 @@ freqsettingsui->redraw();}
 if (k<0) k+=16;
 pars->PCoarseDetune = k*1024+
    pars->PCoarseDetune%1024;}
-          tooltip Octave xywh {670 50 45 15} type Simple labelsize 10 align 1 minimum -8 maximum 7 step 1 textfont 1 textsize 12
+          tooltip Octave xywh {670 50 45 15} type Simple labelsize 10 align 1 minimum -8 maximum 7 step 1 textfont 1 textsize 11
           code0 {int k=pars->PCoarseDetune/1024;if (k>=8) k-=16;}
           code2 {o->value(k);}
         }
@@ -247,7 +247,7 @@ pars->PCoarseDetune = k*1024+
 if (k<0) k+=1024;
 pars->PCoarseDetune = k+
    (pars->PCoarseDetune/1024)*1024;}
-          tooltip {Coarse Detune} xywh {655 115 60 20} labelsize 11 align 1 minimum -64 maximum 63 step 1 textfont 1 textsize 12
+          tooltip {Coarse Detune} xywh {655 115 60 20} labelsize 10 align 1 minimum -64 maximum 63 step 1 textfont 1 textsize 11
           code0 {int k=pars->PCoarseDetune%1024;if (k>=512) k-=1024;}
           code2 {o->value(k);}
           code3 {o->lstep(10);}
@@ -270,7 +270,7 @@ detunevalueoutput->do_callback();}
 pars->Pfixedfreq=x;
 if (x==0) fixedfreqetdial->deactivate();
    else fixedfreqetdial->activate();}
-          tooltip {set the base frequency to 440Hz} xywh {555 45 50 15} down_box DOWN_BOX labelfont 1 labelsize 11
+          tooltip {set the base frequency to 440Hz} xywh {555 45 50 15} down_box DOWN_BOX labelfont 1 labelsize 10
           code0 {o->value(pars->Pfixedfreq);}
         }
         Fl_Dial fixedfreqetdial {
@@ -307,7 +307,7 @@ detunevalueoutput->do_callback();} open
 pars->Phmag[0]=127;
 h[0]->mag->value(0);
 SUBparameters->redraw();}
-        tooltip {Clear the harmonics} xywh {445 365 70 20} box THIN_UP_BOX labelfont 1 labelsize 12
+        tooltip {Clear the harmonics} xywh {445 365 70 20} box THIN_UP_BOX labelfont 1 labelsize 11
       }
       Fl_Group bandwidthsettingsui {
         label BANDWIDTH
@@ -345,7 +345,7 @@ bandwidthsettingsui->redraw();}
       }
       Fl_Group globalfiltergroup {
         label FILTER
-        xywh {440 140 290 185} box THIN_UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 17
+        xywh {440 140 290 185} box THIN_UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
         code0 {if (pars->PGlobalFilterEnabled==0) o->deactivate();}
       } {
         Fl_Group filterenv {
@@ -368,18 +368,18 @@ if (o->value()==0) globalfiltergroup->deactivate();
     else globalfiltergroup->activate();
 o->show();
 globalfiltergroup->redraw();}
-        xywh {445 145 85 20} down_box DOWN_BOX labelfont 1 labelsize 12
+        xywh {445 145 85 20} down_box DOWN_BOX labelfont 1 labelsize 11
         code0 {o->value(pars->PGlobalFilterEnabled);}
       }
       Fl_Button {} {
         label C
         callback {presetsui->copy(pars);}
-        xywh {540 370 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+        xywh {540 370 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
       }
       Fl_Button {} {
         label P
         callback {presetsui->paste(pars,this);}
-        xywh {570 370 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+        xywh {570 370 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
       }
     }
   }

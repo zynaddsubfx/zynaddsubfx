@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0106 
+version 1.0107 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
@@ -169,8 +169,7 @@ if (event==FL_RELEASE) {
 	};
 };
 
-return(1);} {selected
-    }
+return(1);} {}
   }
   Function {setcbwidget(Fl_Widget *cbwidget,Fl_Widget *applybutton)} {} {
     code {this->cbwidget=cbwidget;
@@ -185,21 +184,22 @@ this->applybutton=applybutton;} {}
   decl {Fl_Widget *cbwidget,*applybutton;} {}
 } 
 
-class ResonanceUI {: PresetsUI_
+class ResonanceUI {open : PresetsUI_
 } {
-  Function {make_window()} {} {
+  Function {make_window()} {open
+  } {
     Fl_Window resonancewindow {
-      label Resonance
-      xywh {45 259 780 305} type Double visible
+      label Resonance selected
+      xywh {120 70 780 305} type Double hide
     } {
       Fl_Value_Output khzvalue {
         label kHz
-        xywh {415 264 45 18} align 8 minimum 0.001 maximum 48 step 0.01 textfont 1
+        xywh {415 264 45 18} labelsize 12 align 8 minimum 0.001 maximum 48 step 0.01 textfont 1 textsize 12
         code0 {//this widget must be before the calling widgets}
       }
       Fl_Value_Output dbvalue {
         label dB
-        xywh {415 282 45 18} align 8 minimum -150 maximum 150 step 0.1 textfont 1
+        xywh {415 282 45 18} labelsize 12 align 8 minimum -150 maximum 150 step 0.1 textfont 1 textsize 12
         code0 {//this widget must be before the calling widgets}
       }
       Fl_Group {} {
@@ -219,14 +219,14 @@ class ResonanceUI {: PresetsUI_
    respar->setpoint(i,64);
 resonancewindow->redraw();
 redrawPADnoteApply();}
-        tooltip {Clear the resonance function} xywh {491 264 66 15} box THIN_UP_BOX labelfont 1
+        tooltip {Clear the resonance function} xywh {491 264 66 15} box THIN_UP_BOX labelfont 1 labelsize 12
       }
       Fl_Button {} {
         label Smooth
         callback {respar->smooth();
 resonancewindow->redraw();
 redrawPADnoteApply();}
-        tooltip {Smooth the resonance function} xywh {491 282 66 18} box THIN_UP_BOX labelfont 1
+        tooltip {Smooth the resonance function} xywh {491 282 66 18} box THIN_UP_BOX labelfont 1 labelsize 12
       }
       Fl_Check_Button enabled {
         label Enable
@@ -244,7 +244,7 @@ redrawPADnoteApply();}
       Fl_Value_Output maxdbvo {
         label {Max.}
         callback {o->value(respar->PmaxdB);}
-        tooltip {The Maximum amplitude (dB)} xywh {126 264 24 18} minimum 1 maximum 127 step 1 value 30 textfont 1
+        tooltip {The Maximum amplitude (dB)} xywh {126 264 24 18} labelsize 12 minimum 1 maximum 127 step 1 value 30 textfont 1 textsize 12
         code0 {o->value(respar->PmaxdB);}
       }
       Fl_Box {} {
@@ -254,13 +254,13 @@ redrawPADnoteApply();}
       Fl_Value_Output centerfreqvo {
         label {C.f.}
         callback {o->value(respar->getcenterfreq()/1000.0);}
-        tooltip {Center Frequency (kHz)} xywh {210 264 33 18} when 3 minimum 1 maximum 10 step 0.01 value 1 textfont 1
+        tooltip {Center Frequency (kHz)} xywh {210 264 33 18} labelsize 12 when 3 minimum 1 maximum 10 step 0.01 value 1 textfont 1 textsize 12
         code0 {o->value(respar->getcenterfreq()/1000.0);}
       }
       Fl_Value_Output octavesfreqvo {
         label {Oct.}
         callback {o->value(respar->getoctavesfreq());}
-        tooltip {No. of octaves} xywh {210 282 33 18} when 3 minimum 1 maximum 127 step 1 value 30 textfont 1
+        tooltip {No. of octaves} xywh {210 282 33 18} labelsize 12 when 3 minimum 1 maximum 127 step 1 value 30 textfont 1 textsize 12
         code0 {o->value(respar->getoctavesfreq());}
       }
       Fl_Button {} {
@@ -317,19 +317,19 @@ redrawPADnoteApply();}
 octavesfreqvo->do_callback();
 rg->redraw();
 redrawPADnoteApply();}
-        xywh {280 265 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+        xywh {280 265 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
         code0 {o->value(respar->Poctavesfreq);}
         class WidgetPDial
       }
       Fl_Button {} {
         label C
         callback {presetsui->copy(respar);}
-        xywh {625 275 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+        xywh {625 275 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
       }
       Fl_Button {} {
         label P
         callback {presetsui->paste(respar,this);}
-        xywh {655 275 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+        xywh {655 275 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
       }
       Fl_Button applybutton {
         label Apply
@@ -340,7 +340,7 @@ if (cbapplywidget!=NULL) {
 	cbapplywidget->color(FL_GRAY);
 	cbapplywidget->redraw();
 };}
-        xywh {690 265 85 15} box THIN_UP_BOX labelfont 1 labelsize 12
+        xywh {690 265 85 15} box THIN_UP_BOX labelfont 1 labelsize 11
       }
     }
   }

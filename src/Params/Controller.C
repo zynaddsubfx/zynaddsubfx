@@ -58,7 +58,7 @@ void Controller::defaults(){
     resonancecenter.depth=64;
     resonancebandwidth.depth=64;
 
-    initportamento(440.0,440.0);
+    initportamento(440.0,440.0,false); // Now has a third argument
     setportamento(0);
 
 };
@@ -163,9 +163,17 @@ void Controller::setportamento(int value){
     if (portamento.receive!=0) portamento.portamento=((value<64) ? 0 : 1 );
 };
 
-int Controller::initportamento(REALTYPE oldfreq,REALTYPE newfreq){
+// I added a third argument to pass legato status,
+// when legatoflag is true it means "there's a legato in progress".
+int Controller::initportamento(REALTYPE oldfreq,REALTYPE newfreq,bool legatoflag){
     portamento.x=0.0;
-    if ((portamento.used!=0) || (portamento.portamento==0)) return(0);
+
+    if (legatoflag){ // Legato in progress
+      if (portamento.portamento==0) return(0);
+    } else { // No legato, do the original if...return
+      if ((portamento.used!=0) || (portamento.portamento==0)) return(0);
+    };
+
     REALTYPE portamentotime=pow(100.0,portamento.time/127.0)/50.0;//portamento time in seconds
 
     if ((portamento.updowntimestretch>=64)&&(newfreq<oldfreq)){

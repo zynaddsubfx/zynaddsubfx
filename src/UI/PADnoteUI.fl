@@ -244,7 +244,7 @@ make_window();} {}
               callback {pars->Php.base.par1=(int) o->value();
 hprofile->redraw();
 cbwidget->do_callback();}
-              xywh {20 75 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
+              xywh {20 75 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
               code0 {o->value(pars->Php.base.par1);}
               class WidgetPDial
             }
@@ -274,7 +274,7 @@ cbwidget->do_callback();}
               callback {pars->Php.freqmult=(int) o->value();
 hprofile->redraw();
 cbwidget->do_callback();}
-              xywh {55 75 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
+              xywh {55 75 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
               code0 {o->value(pars->Php.freqmult);}
               class WidgetPDial
             }
@@ -283,7 +283,7 @@ cbwidget->do_callback();}
               callback {pars->Php.modulator.par1=(int) o->value();
 hprofile->redraw();
 cbwidget->do_callback();}
-              xywh {15 115 20 20} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
+              xywh {15 115 20 20} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
               code0 {o->value(pars->Php.modulator.par1);}
               class WidgetPDial
             }
@@ -292,7 +292,7 @@ cbwidget->do_callback();}
               callback {pars->Php.modulator.freq=(int) o->value();
 hprofile->redraw();
 cbwidget->do_callback();}
-              xywh {40 115 20 20} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
+              xywh {40 115 20 20} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
               code0 {o->value(pars->Php.modulator.freq);}
               class WidgetPDial
             }
@@ -354,7 +354,7 @@ cbwidget->do_callback();}
                 callback {pars->Php.amp.par1=(int) o->value();
 hprofile->redraw();
 cbwidget->do_callback();}
-                xywh {15 235 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
+                xywh {15 235 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
                 code0 {o->value(pars->Php.amp.par1);}
                 class WidgetPDial
               }
@@ -363,7 +363,7 @@ cbwidget->do_callback();}
                 callback {pars->Php.amp.par2=(int) o->value();
 hprofile->redraw();
 cbwidget->do_callback();}
-                xywh {55 235 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
+                xywh {55 235 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
                 code0 {o->value(pars->Php.amp.par2);}
                 class WidgetPDial
               }
@@ -401,7 +401,7 @@ cbwidget->do_callback();}
               callback {pars->Php.width=(int) o->value();
 hprofile->redraw();
 cbwidget->do_callback();}
-              xywh {65 115 20 20} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
+              xywh {65 115 20 20} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
               code0 {o->value(pars->Php.width);}
               class WidgetPDial
             }
@@ -415,7 +415,7 @@ cbwidget->do_callback();}
             label Change
             callback {if (oscui!=NULL) delete (oscui);
 oscui=new OscilEditor(pars->oscilgen,osc,cbwidget,applybutton,master);}
-            xywh {375 270 60 20} box THIN_UP_BOX labelfont 1 labelsize 12
+            xywh {375 270 60 20} box THIN_UP_BOX labelfont 1 labelsize 11
           }
           Fl_Box cbwidget {
             label {Harmonic Content}
@@ -435,7 +435,7 @@ resui->setcbwidget(cbwidget,applybutton);}
             label BandWidth
             callback {bwcents->value(pars->setPbandwidth((int) o->value()));
 cbwidget->do_callback();}
-            xywh {15 295 35 35} box ROUND_UP_BOX labelsize 11 maximum 1000 step 1
+            xywh {15 295 35 35} box ROUND_UP_BOX labelsize 10 maximum 1000 step 1
             code0 {o->value(pars->Pbandwidth);}
             code1 {if (pars->Pmode!=0) o->deactivate();}
             class WidgetPDial
@@ -454,36 +454,36 @@ cbwidget->do_callback();}
               callback {pars->Phrpos.type=o->value();
 overtonepos->redraw();
 cbwidget->do_callback();}
-              xywh {325 310 80 20} down_box BORDER_BOX labelsize 10 align 5 textsize 12
+              xywh {325 310 80 20} down_box BORDER_BOX labelsize 10 align 5 textsize 11
               code0 {o->value(pars->Phrpos.type);}
             } {
               menuitem {} {
                 label Harmonic
-                xywh {70 70 100 20} labelfont 1 labelsize 12
+                xywh {70 70 100 20} labelfont 1 labelsize 11
               }
               menuitem {} {
                 label ShiftU
-                xywh {80 80 100 20} labelfont 1 labelsize 12
+                xywh {80 80 100 20} labelfont 1 labelsize 11
               }
               menuitem {} {
                 label ShiftL
-                xywh {90 90 100 20} labelfont 1 labelsize 12
+                xywh {90 90 100 20} labelfont 1 labelsize 11
               }
               menuitem {} {
                 label PowerU
-                xywh {90 90 100 20} labelfont 1 labelsize 12
+                xywh {90 90 100 20} labelfont 1 labelsize 11
               }
               menuitem {} {
                 label PowerL
-                xywh {100 100 100 20} labelfont 1 labelsize 12
+                xywh {100 100 100 20} labelfont 1 labelsize 11
               }
               menuitem {} {
                 label Sine
-                xywh {110 110 100 20} labelfont 1 labelsize 12
+                xywh {110 110 100 20} labelfont 1 labelsize 11
               }
               menuitem {} {
                 label Power
-                xywh {120 120 100 20} labelfont 1 labelsize 12
+                xywh {120 120 100 20} labelfont 1 labelsize 11
               }
             }
             Fl_Dial hrpospar1 {
@@ -491,7 +491,7 @@ cbwidget->do_callback();}
               callback {pars->Phrpos.par1=(int) o->value();
 overtonepos->redraw();
 cbwidget->do_callback();}
-              xywh {425 310 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 255 step 1
+              xywh {425 310 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 255 step 1
               code0 {o->value(pars->Phrpos.par1);}
               class WidgetPDial
             }
@@ -500,7 +500,7 @@ cbwidget->do_callback();}
               callback {pars->Phrpos.par2=(int) o->value();
 overtonepos->redraw();
 cbwidget->do_callback();}
-              xywh {460 310 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 255 step 1
+              xywh {460 310 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 255 step 1
               code0 {o->value(pars->Phrpos.par2);}
               class WidgetPDial
             }
@@ -509,7 +509,7 @@ cbwidget->do_callback();}
               callback {pars->Phrpos.par3=(int) o->value();
 overtonepos->redraw();
 cbwidget->do_callback();}
-              xywh {495 310 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 255 step 1
+              xywh {495 310 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 255 step 1
               code0 {o->value(pars->Phrpos.par3);}
               class WidgetPDial
             }
@@ -518,41 +518,41 @@ cbwidget->do_callback();}
             label {Bandwidth Scale}
             callback {pars->Pbwscale=(int) o->value();
 cbwidget->do_callback();}
-            xywh {120 305 80 20} down_box BORDER_BOX labelsize 10 align 5 textsize 12
+            xywh {120 305 80 20} down_box BORDER_BOX labelsize 10 align 5 textsize 11
             code0 {o->value(pars->Pbwscale);}
             code1 {if (pars->Pmode!=0) o->deactivate();}
           } {
             menuitem {} {
               label Normal
-              xywh {95 95 100 20} labelfont 1 labelsize 12
+              xywh {95 95 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label EqualHz
-              xywh {105 105 100 20} labelfont 1 labelsize 12
+              xywh {105 105 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label Quater
-              xywh {115 115 100 20} labelfont 1 labelsize 12
+              xywh {115 115 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label Half
-              xywh {125 125 100 20} labelfont 1 labelsize 12
+              xywh {125 125 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label {75%}
-              xywh {135 135 100 20} labelfont 1 labelsize 12
+              xywh {135 135 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label {150%}
-              xywh {145 145 100 20} labelfont 1 labelsize 12
+              xywh {145 145 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label Double
-              xywh {145 145 100 20} labelfont 1 labelsize 12
+              xywh {145 145 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label {Inv.Half}
-              xywh {155 155 100 20} labelfont 1 labelsize 12
+              xywh {155 155 100 20} labelfont 1 labelsize 11
             }
           }
           Fl_Group overtonepos {
@@ -564,119 +564,119 @@ cbwidget->do_callback();}
             label {Sample Size}
             callback {pars->Pquality.samplesize=(int) o->value();
 cbwidget->do_callback();}
-            xywh {375 190 115 20} down_box BORDER_BOX labelsize 10 align 5 textsize 12
+            xywh {375 190 115 20} down_box BORDER_BOX labelsize 10 align 5 textsize 11
             code0 {o->value(pars->Pquality.samplesize);}
           } {
             menuitem {} {
               label {16k (Tiny)}
-              xywh {155 155 100 20} labelfont 1 labelsize 12
+              xywh {155 155 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label 32k
-              xywh {165 165 100 20} labelfont 1 labelsize 12
+              xywh {165 165 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label {64k (Small)}
-              xywh {175 175 100 20} labelfont 1 labelsize 12
+              xywh {175 175 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label 128k
-              xywh {185 185 100 20} labelfont 1 labelsize 12
+              xywh {185 185 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label {256k (Normal)}
-              xywh {205 205 100 20} labelfont 1 labelsize 12
+              xywh {205 205 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label 512k
-              xywh {200 200 100 20} labelfont 1 labelsize 12
+              xywh {200 200 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label {1M (Big)}
-              xywh {205 205 100 20} labelfont 1 labelsize 12
+              xywh {205 205 100 20} labelfont 1 labelsize 11
             }
           }
           Fl_Choice qsmpoct {
             label {smp/oct}
             callback {pars->Pquality.smpoct=(int) o->value();
 cbwidget->do_callback();}
-            xywh {430 155 45 20} down_box BORDER_BOX labelsize 12 align 5 textsize 12
+            xywh {430 155 45 20} down_box BORDER_BOX labelsize 11 align 5 textsize 11
             code0 {o->value(pars->Pquality.smpoct);}
           } {
             menuitem {} {
               label {0.5}
-              xywh {10 10 100 20} labelfont 1 labelsize 12
+              xywh {10 10 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label 1
-              xywh {0 0 100 20} labelfont 1 labelsize 12
+              xywh {0 0 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label 2
-              xywh {10 10 100 20} labelfont 1 labelsize 12
+              xywh {10 10 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label 3
-              xywh {20 20 100 20} labelfont 1 labelsize 12
+              xywh {20 20 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label 4
-              xywh {30 30 100 20} labelfont 1 labelsize 12
+              xywh {30 30 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label 6
-              xywh {40 40 100 20} labelfont 1 labelsize 12
+              xywh {40 40 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label 12
-              xywh {50 50 100 20} labelfont 1 labelsize 12
+              xywh {50 50 100 20} labelfont 1 labelsize 11
             }
           }
           Fl_Choice qoct {
             label {no.oct}
             callback {pars->Pquality.oct=(int) o->value();
 cbwidget->do_callback();}
-            xywh {480 155 45 20} down_box BORDER_BOX labelsize 12 align 5 textsize 12
+            xywh {480 155 45 20} down_box BORDER_BOX labelsize 11 align 5 textsize 11
             code0 {o->value(pars->Pquality.oct);}
           } {
             menuitem {} {
               label 1
-              xywh {10 10 100 20} labelfont 1 labelsize 12
+              xywh {10 10 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label 2
-              xywh {20 20 100 20} labelfont 1 labelsize 12
+              xywh {20 20 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label 3
-              xywh {30 30 100 20} labelfont 1 labelsize 12
+              xywh {30 30 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label 4
-              xywh {40 40 100 20} labelfont 1 labelsize 12
+              xywh {40 40 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label 5
-              xywh {50 50 100 20} labelfont 1 labelsize 12
+              xywh {50 50 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label 6
-              xywh {60 60 100 20} labelfont 1 labelsize 12
+              xywh {60 60 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label 7
-              xywh {70 70 100 20} labelfont 1 labelsize 12
+              xywh {70 70 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label 8
-              xywh {80 80 100 20} labelfont 1 labelsize 12
+              xywh {80 80 100 20} labelfont 1 labelsize 11
             }
           }
           Fl_Choice qbasenote {
             label base
             callback {pars->Pquality.basenote=(int) o->value();
 cbwidget->do_callback();}
-            xywh {375 155 50 20} down_box BORDER_BOX labelsize 12 align 5 textsize 12
+            xywh {375 155 50 20} down_box BORDER_BOX labelsize 11 align 5 textsize 11
             code0 {o->value(pars->Pquality.basenote);}
           } {
             menuitem {} {
@@ -747,20 +747,20 @@ if (pars->Pmode==0){
 };
 
 cbwidget->do_callback();}
-            xywh {220 305 90 20} down_box BORDER_BOX labelfont 1 labelsize 10 labelcolor 0 align 5 textsize 12
+            xywh {220 305 90 20} down_box BORDER_BOX labelfont 1 labelsize 10 labelcolor 0 align 5 textsize 11
             code0 {o->value(pars->Pmode);}
           } {
             menuitem {} {
               label Bandwidth
-              xywh {105 105 100 20} labelfont 1 labelsize 12
+              xywh {105 105 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label Discrete
-              xywh {125 125 100 20} labelfont 1 labelsize 12 labelcolor 0
+              xywh {125 125 100 20} labelfont 1 labelsize 11 labelcolor 0
             }
             menuitem {} {
               label Continous
-              xywh {115 115 100 20} labelfont 1 labelsize 12 labelcolor 0
+              xywh {115 115 100 20} labelfont 1 labelsize 11 labelcolor 0
             }
           }
         }
@@ -770,7 +770,7 @@ cbwidget->do_callback();}
         } {
           Fl_Group {} {
             label FREQUENCY
-            xywh {5 275 525 115} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 17
+            xywh {5 275 525 115} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
           } {
             Fl_Group freqenv {
               label {PADSynth - Frequency Envelope} open
@@ -784,7 +784,7 @@ cbwidget->do_callback();}
 if (k<0) k+=16;
 pars->PCoarseDetune = k*1024+
    pars->PCoarseDetune%1024;}
-              tooltip Octave xywh {470 295 45 15} type Simple labelsize 10 align 1 minimum -8 maximum 7 step 1 textfont 1 textsize 12
+              tooltip Octave xywh {470 295 45 15} type Simple labelsize 10 align 1 minimum -8 maximum 7 step 1 textfont 1 textsize 11
               code0 {int k=pars->PCoarseDetune/1024;}
               code1 {if (k>=8) k-=16;}
               code2 {o->value(k);}
@@ -795,7 +795,7 @@ pars->PCoarseDetune = k*1024+
 if (k<0) k+=1024;
 pars->PCoarseDetune = k+
    (pars->PCoarseDetune/1024)*1024;}
-              tooltip {Coarse Detune} xywh {455 365 60 20} labelsize 10 align 5 minimum -64 maximum 63 step 1 textfont 1 textsize 12
+              tooltip {Coarse Detune} xywh {455 365 60 20} labelsize 10 align 5 minimum -64 maximum 63 step 1 textfont 1 textsize 11
               code0 {int k=pars->PCoarseDetune%1024;}
               code1 {if (k>=512) k-=1024;}
               code2 {o->value(k);}
@@ -833,7 +833,7 @@ detunevalueoutput->do_callback();} open
 pars->Pfixedfreq=x;
 if (x==0) fixedfreqetdial->deactivate();
    else fixedfreqetdial->activate();}
-              tooltip {set the base frequency to 440Hz} xywh {365 295 50 15} down_box DOWN_BOX labelfont 1 labelsize 11
+              tooltip {set the base frequency to 440Hz} xywh {365 295 50 15} down_box DOWN_BOX labelfont 1 labelsize 10
               code0 {o->value(pars->Pfixedfreq);}
             }
             Fl_Dial fixedfreqetdial {
@@ -847,52 +847,52 @@ if (x==0) fixedfreqetdial->deactivate();
           }
           Fl_Group {} {
             label AMPLITUDE
-            xywh {5 25 240 250} box THIN_UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 17
+            xywh {5 25 240 250} box THIN_UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
           } {
             Fl_Value_Slider volume {
               label Vol
               callback {pars->PVolume=(int)o->value();}
-              tooltip Volume xywh {10 50 160 15} type {Horz Knob} box FLAT_BOX labelsize 12 align 8 maximum 127 step 1
+              tooltip Volume xywh {10 50 160 15} type {Horz Knob} box FLAT_BOX labelsize 11 align 8 maximum 127 step 1
               code0 {o->value(pars->PVolume);}
             }
             Fl_Value_Slider vsns {
               label {V.Sns}
               callback {pars->PAmpVelocityScaleFunction=(int) o->value();}
-              tooltip {Velocity Sensing Function (rightmost to disable)} xywh {10 70 160 15} type {Horz Knob} box FLAT_BOX labelsize 12 align 8 maximum 127 step 1
+              tooltip {Velocity Sensing Function (rightmost to disable)} xywh {10 70 160 15} type {Horz Knob} box FLAT_BOX labelsize 11 align 8 maximum 127 step 1
               code0 {o->value(pars->PAmpVelocityScaleFunction);}
             }
             Fl_Dial pan {
               label Pan
               callback {pars->PPanning=(int) o->value();}
-              tooltip {Panning (leftmost is Random)} xywh {210 45 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+              tooltip {Panning (leftmost is Random)} xywh {210 45 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
               code0 {o->value(pars->PPanning);}
               class WidgetPDial
             }
             Fl_Dial pstr {
               label {P.Str.}
               callback {pars->PPunchStrength=(int) o->value();}
-              tooltip {Punch Strength} xywh {125 247 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
+              tooltip {Punch Strength} xywh {125 247 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
               code0 {o->value(pars->PPunchStrength);}
               class WidgetPDial
             }
             Fl_Dial pt {
               label {P.t.}
               callback {pars->PPunchTime=(int) o->value();}
-              tooltip {Punch Time (duration)} xywh {155 247 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
+              tooltip {Punch Time (duration)} xywh {155 247 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
               code0 {o->value(pars->PPunchTime);}
               class WidgetPDial
             }
             Fl_Dial pstc {
               label {P.Stc.}
               callback {pars->PPunchStretch=(int) o->value();}
-              tooltip {Punch Stretch} xywh {185 247 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
+              tooltip {Punch Stretch} xywh {185 247 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
               code0 {o->value(pars->PPunchStretch);}
               class WidgetPDial
             }
             Fl_Dial pvel {
               label {P.Vel.}
               callback {pars->PPunchVelocitySensing=(int) o->value();}
-              tooltip {Punch Velocity Sensing} xywh {215 247 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
+              tooltip {Punch Velocity Sensing} xywh {215 247 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
               code0 {o->value(pars->PPunchVelocitySensing);}
               class WidgetPDial
             }
@@ -918,7 +918,7 @@ hprofile->redraw();}
           }
           Fl_Group {} {
             label FILTER
-            xywh {245 25 285 250} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 17
+            xywh {245 25 285 250} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
           } {
             Fl_Group filterenv {
               label {PADSynth - Filter Envelope} open
@@ -953,23 +953,23 @@ if (resui!=NULL) {
 	resui->applybutton->color(FL_GRAY);
 	resui->applybutton->redraw();
 };}
-        xywh {45 405 185 40} box THIN_UP_BOX labelfont 1 labelsize 23
+        xywh {45 405 185 40} box THIN_UP_BOX labelfont 1 labelsize 16
         code0 {o->color(FL_RED);}
       }
       Fl_Button {} {
         label Close
         callback {padnotewindow->hide();}
-        xywh {320 405 175 40} box THIN_UP_BOX labelsize 20
+        xywh {320 405 175 40} box THIN_UP_BOX labelsize 17
       }
       Fl_Button {} {
         label C
         callback {presetsui->copy(pars);}
-        xywh {240 430 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+        xywh {240 430 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
       }
       Fl_Button {} {
         label P
         callback {presetsui->paste(pars,this);}
-        xywh {270 430 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+        xywh {270 430 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
       }
     }
   }

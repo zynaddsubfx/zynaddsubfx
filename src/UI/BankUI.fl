@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0107 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
@@ -37,7 +37,7 @@ class BankProcess_ {} {
   }
 } 
 
-class BankSlot {: {public Fl_Button,BankProcess_}
+class BankSlot {open : {public Fl_Button,BankProcess_}
 } {
   Function {BankSlot(int x,int y, int w, int h, const char *label=0):Fl_Button(x,y,w,h,label)} {} {
     code {what=NULL;
@@ -59,7 +59,8 @@ int tmp=Fl_Button::handle(event);
 if ((*what!=0) && Fl::event_inside(this)) (bp->*fnc)();
 return(tmp);} {}
   }
-  Function {init(int nslot_, int *what_, int *whatslot_,void (BankProcess_:: *fnc_)(void),BankProcess_ *bp_,Bank *bank_,int *nselected_)} {} {
+  Function {init(int nslot_, int *what_, int *whatslot_,void (BankProcess_:: *fnc_)(void),BankProcess_ *bp_,Bank *bank_,int *nselected_)} {open
+  } {
     code {nslot=nslot_;
 what=what_;
 whatslot=whatslot_;
@@ -68,10 +69,13 @@ bp=bp_;
 bank=bank_;
 nselected=nselected_;
 box(FL_THIN_UP_BOX);
+labelfont(0);
+labelsize(13);
 align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE|FL_ALIGN_CLIP);
 
 highlight=0;
-refresh();} {}
+refresh();} {selected
+    }
   }
   Function {refresh()} {} {
     code {if (bank->emptyslot(nslot)) {
@@ -141,28 +145,28 @@ class BankUI {: {public BankProcess_}
           label WRITE
           callback {if (o->value()>0.5) mode=2;
 removeselection();}
-          xywh {116 534 99 30} type Radio box PLASTIC_UP_BOX down_box THIN_DOWN_BOX selection_color 1 labeltype ENGRAVED_LABEL labelfont 1 labelsize 18
+          xywh {116 534 99 30} type Radio box PLASTIC_UP_BOX down_box THIN_DOWN_BOX selection_color 1 labeltype ENGRAVED_LABEL labelfont 1 labelsize 13
           code0 {if (bank->locked()) o->deactivate();}
         }
         Fl_Light_Button readbutton {
           label READ
           callback {if (o->value()>0.5) mode=1;
 removeselection();}
-          xywh {11 534 99 30} type Radio box PLASTIC_UP_BOX down_box THIN_DOWN_BOX selection_color 101 labeltype ENGRAVED_LABEL labelfont 1 labelsize 18
+          xywh {11 534 99 30} type Radio box PLASTIC_UP_BOX down_box THIN_DOWN_BOX selection_color 101 labeltype ENGRAVED_LABEL labelfont 1 labelsize 13
           code0 {o->value(1);}
         }
         Fl_Light_Button clearbutton {
           label CLEAR
           callback {if (o->value()>0.5) mode=3;
 removeselection();}
-          xywh {221 534 99 30} type Radio box PLASTIC_UP_BOX down_box THIN_DOWN_BOX selection_color 0 labeltype ENGRAVED_LABEL labelfont 1 labelsize 18
+          xywh {221 534 99 30} type Radio box PLASTIC_UP_BOX down_box THIN_DOWN_BOX selection_color 0 labeltype ENGRAVED_LABEL labelfont 1 labelsize 13
           code0 {if (bank->locked()) o->deactivate();}
         }
         Fl_Light_Button swapbutton {
           label SWAP
           callback {if (o->value()>0.5) mode=4;
 removeselection();}
-          xywh {325 534 99 30} type Radio box PLASTIC_UP_BOX down_box THIN_DOWN_BOX selection_color 227 labeltype ENGRAVED_LABEL labelfont 1 labelsize 18
+          xywh {325 534 99 30} type Radio box PLASTIC_UP_BOX down_box THIN_DOWN_BOX selection_color 227 labeltype ENGRAVED_LABEL labelfont 1 labelsize 13
           code0 {if (bank->locked()) o->deactivate();}
         }
       }
@@ -179,7 +183,7 @@ int result=bank->newbank(dirname);
 if (result!=0) fl_alert("Error: Could not make a new bank (directory)..");
 
 refreshmainwindow();}
-        xywh {685 5 93 25} box PLASTIC_UP_BOX labelfont 1 labelsize 12 align 128
+        xywh {685 5 93 25} box PLASTIC_UP_BOX labelfont 1 labelsize 11 align 128
       }
       Fl_Check_Button {} {
         label {auto close}
@@ -196,19 +200,19 @@ if (bank->loadbank(dirname)==2)
        fl_alert("Error: Could not load the bank from the directory\\n%s.",dirname);
 for (int i=0;i<BANK_SIZE;i++) bs[i]->refresh();
 refreshmainwindow();} open
-        xywh {5 8 220 20} down_box BORDER_BOX labelfont 1 align 0 textfont 1 textsize 12
+        xywh {5 8 220 20} down_box BORDER_BOX labelfont 1 align 0 textfont 1 textsize 11
       } {}
       Fl_Button {} {
         label {Refresh bank list}
         callback {rescan_for_banks();
 banklist->value(0);}
-        tooltip {Refresh the bank list (rescan)} xywh {230 8 105 20} box THIN_UP_BOX color 50 labelsize 12
+        tooltip {Refresh the bank list (rescan)} xywh {230 8 105 20} box THIN_UP_BOX color 50 labelsize 11
       }
       Fl_Check_Button {} {
         label {Show PADsynth status}
         callback {config.cfg.CheckPADsynth=(int) o->value();
 refreshmainwindow();}
-        xywh {435 530 150 15} down_box DOWN_BOX labelsize 12
+        xywh {435 530 150 15} down_box DOWN_BOX labelsize 11
         code0 {o->value(config.cfg.CheckPADsynth);}
       }
     }
@@ -301,8 +305,7 @@ if (mode==4){//swap
         bs[slot]->refresh();
     };
 };
-if (mode!=4) refreshmainwindow();} {selected
-    }
+if (mode!=4) refreshmainwindow();} {}
   }
   Function {refreshmainwindow()} {} {
     code {bankuiwindow->label(bank->bankfiletitle);

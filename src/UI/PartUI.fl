@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0107 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
@@ -130,20 +130,20 @@ maxkcounter->do_callback();}
         Fl_Button adeditbutton {
           label edit
           callback {partui->showparameters(n,0);}
-          xywh {420 0 40 15} box THIN_UP_BOX labelsize 12
+          xywh {420 0 40 15} box THIN_UP_BOX labelsize 11
           code0 {if (part->kit[n].Padenabled==0) o->deactivate();}
           code1 {if (n==0) o->hide();}
         }
         Fl_Button subeditbutton {
           label edit
           callback {partui->showparameters(n,1);}
-          xywh {490 0 40 15} box THIN_UP_BOX labelsize 12
+          xywh {490 0 40 15} box THIN_UP_BOX labelsize 11
           code0 {if (part->kit[n].Psubenabled==0) o->deactivate();}
           code1 {if (n==0) o->hide();}
         }
         Fl_Check_Button mutedcheck {
           callback {part->kit[n].Pmuted=(int)o->value();}
-          private xywh {60 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 12 align 4
+          private xywh {60 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
           code0 {o->value(part->kit[n].Pmuted);}
         }
         Fl_Counter maxkcounter {
@@ -155,14 +155,14 @@ maxkcounter->do_callback();}
           label {Bass Drum}
           callback {const char *tmp=fl_input("Kit item name:",(const char *)part->kit[n].Pname);
 if (tmp!=NULL) snprintf((char *)part->kit[n].Pname,PART_MAX_NAME_LEN,"%s",tmp);}
-          xywh {90 0 130 15} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 11 align 20
+          xywh {90 0 130 15} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 10 align 20
           code0 {o->label((char *)part->kit[n].Pname);}
         }
         Fl_Check_Button adcheck {
           callback {part->kit[n].Padenabled=(int)o->value();
 if (part->kit[n].Padenabled!=0) adeditbutton->activate();
        else  adeditbutton->deactivate();}
-          private xywh {400 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 12 align 4
+          private xywh {400 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
           code0 {o->value(part->kit[n].Padenabled);}
           code1 {if (n==0) o->hide();}
         }
@@ -170,7 +170,7 @@ if (part->kit[n].Padenabled!=0) adeditbutton->activate();
           callback {part->kit[n].Psubenabled=(int)o->value();
 if (part->kit[n].Psubenabled!=0) subeditbutton->activate();
        else  subeditbutton->deactivate();}
-          private xywh {470 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 12 align 4
+          private xywh {470 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
           code0 {o->value(part->kit[n].Psubenabled);}
           code1 {if (n==0) o->hide();}
         }
@@ -184,7 +184,7 @@ if (part->kit[n].Psubenabled!=0) subeditbutton->activate();
         Fl_Button padeditbutton {
           label edit
           callback {partui->showparameters(n,2);}
-          xywh {560 0 40 15} box THIN_UP_BOX labelsize 12
+          xywh {560 0 40 15} box THIN_UP_BOX labelsize 11
           code0 {if (part->kit[n].Ppadenabled==0) o->deactivate();}
           code1 {if (n==0) o->hide();}
         }
@@ -192,7 +192,7 @@ if (part->kit[n].Psubenabled!=0) subeditbutton->activate();
           callback {part->kit[n].Ppadenabled=(int)o->value();
 if (part->kit[n].Ppadenabled!=0) padeditbutton->activate();
        else padeditbutton->deactivate();}
-          private xywh {540 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 12 align 4
+          private xywh {540 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
           code0 {o->value(part->kit[n].Ppadenabled);}
           code1 {if (n==0) o->hide();}
         }
@@ -211,7 +211,7 @@ else partkititemgroup->activate();
 o->redraw();
 partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0
 } else o->value(1);}
-        private xywh {30 0 20 15} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 4
+        private xywh {30 0 20 15} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 4
         code0 {snprintf(label,10,"%d",n+1);o->label(strdup(label));}
         code1 {o->value(part->kit[n].Penabled);}
         code2 {if (n==0) o->deactivate();}
@@ -274,13 +274,13 @@ end();} {}
   decl {PartUI_ *partui;} {}
 } 
 
-class PartUI {: {public Fl_Group,PartUI_}
+class PartUI {open : {public Fl_Group,PartUI_}
 } {
-  Function {make_window()} {private
+  Function {make_window()} {open private
   } {
     Fl_Window partgroup {
-      private xywh {107 533 385 180} type Double hide
-      class Fl_Group
+      private xywh {424 178 385 180} type Double
+      class Fl_Group visible
     } {
       Fl_Group partgroupui {
         xywh {0 0 385 180}
@@ -289,14 +289,14 @@ class PartUI {: {public Fl_Group,PartUI_}
         Fl_Dial {} {
           label Pan
           callback {part->setPpanning((int) o->value());}
-          xywh {50 40 25 25} box ROUND_UP_BOX labelsize 12 maximum 127 step 1
+          xywh {50 40 25 25} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
           code0 {o->value(part->Ppanning);}
           class WidgetPDial
         }
         Fl_Counter {} {
           label KeyShift
           callback {part->Pkeyshift=(int) o->value()+64;}
-          xywh {195 45 90 20} labelsize 12 align 1 minimum -64 maximum 64 step 1
+          xywh {195 45 90 20} labelsize 11 align 1 minimum -64 maximum 64 step 1
           code0 {o->lstep(12);}
           code1 {o->value(part->Pkeyshift-64);}
         }
@@ -318,8 +318,8 @@ if (event==FL_RIGHT_MOUSE){
 } else {
   if (event==FL_LEFT_MOUSE) bankui->show();
        else instrumenteditwindow->show();
-};} selected
-          tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the instrument information} xywh {195 5 185 20} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 12 align 84
+};}
+          tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the instrument information} xywh {195 5 185 20} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 11 align 84
           code0 {o->label((char *)part->Pname);}
         }
         Fl_Box {} {
@@ -329,7 +329,7 @@ if (event==FL_RIGHT_MOUSE){
         Fl_Check_Button {} {
           label NoteOn
           callback {part->Pnoteon=(int) o->value();}
-          tooltip {set if the part receives NoteOn messages} xywh {0 155 65 20} down_box DOWN_BOX labelfont 1 labelsize 12
+          tooltip {set if the part receives NoteOn messages} xywh {10 155 65 20} down_box DOWN_BOX labelfont 1 labelsize 11
           code0 {o->value(part->Pnoteon);}
         }
         Fl_Counter minkcounter {
@@ -352,7 +352,7 @@ if (part->Pminkey>part->Pmaxkey) o->textcolor(FL_RED);
         Fl_Dial {} {
           label Volume
           callback {part->setPvolume((int) o->value());}
-          tooltip {Part Volume} xywh {10 35 30 30} box ROUND_UP_BOX labelsize 12 maximum 127 step 1
+          tooltip {Part Volume} xywh {10 35 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
           code0 {o->value(part->Pvolume);}
           class WidgetPDial
         }
@@ -373,24 +373,18 @@ if (part->Pminkey>part->Pmaxkey) o->textcolor(FL_RED);
         Fl_Button {} {
           label Controllers
           callback {ctlwindow->show();}
-          xywh {295 90 85 30} box PLASTIC_UP_BOX labelfont 1 labelsize 12
-        }
-        Fl_Check_Button {} {
-          label Poly
-          callback {part->Ppolymode=(int) o->value();}
-          tooltip {Part mode (mono/poly)} xywh {65 155 45 20} down_box DOWN_BOX labelfont 1 labelsize 12
-          code0 {o->value(part->Ppolymode);}
+          xywh {295 90 85 30} box PLASTIC_UP_BOX labelfont 1 labelsize 11
         }
         Fl_Check_Button {} {
           label Portamento
-          callback {part->ctl.portamento.portamento=(int) o->value();}
-          tooltip {Enable/Disable the portamento} xywh {115 155 85 20} down_box DOWN_BOX labelfont 1 labelsize 12
+          callback {part->ctl.portamento.portamento=(int) o->value();} selected
+          tooltip {Enable/Disable the portamento} xywh {95 155 88 20} down_box DOWN_BOX labelfont 1 labelsize 11
           code0 {o->value(part->ctl.portamento.portamento);}
         }
         Fl_Button {} {
           label {Edit instrument}
           callback {instrumenteditwindow->show();}
-          xywh {15 105 130 30} box PLASTIC_UP_BOX color 230 labelfont 1 labelsize 17
+          xywh {15 90 130 30} box PLASTIC_UP_BOX color 230 labelfont 1 labelsize 13
         }
         Fl_Button {} {
           label m
@@ -426,7 +420,28 @@ maxkcounter->do_callback();}
           callback {int val=0;
 val=atoi(o->text());
 part->setkeylimit(val);} open
-          tooltip {Key Limit} xywh {210 155 50 20} down_box BORDER_BOX labelsize 10 align 8 textfont 1 textsize 10
+          tooltip {Key Limit} xywh {215 155 50 20} down_box BORDER_BOX labelsize 10 align 8 textfont 1 textsize 10
+        } {}
+        Fl_Choice {} {
+          label {Mode :}
+          callback {if ((int) o->value()==0){ /* Poly (implies no legato) */
+  part->Ppolymode=1;
+  part->Plegatomode=0;
+} else {
+  if ((int) o->value()==1){ /* Mono (implies no legato) */
+    part->Ppolymode=0;
+    part->Plegatomode=0;
+  } else {
+    if ((int) o->value()==2){ /* Legato (implies mono) */
+      part->Ppolymode=0;
+      part->Plegatomode=1;
+    };
+  };
+};} open
+          tooltip {Poly, Mono or Legato mode} xywh {80 130 64 18} down_box BORDER_BOX labelfont 1 labelsize 11 textfont 1 textsize 10
+          code0 {o->add("Poly"); o->add("Mono"); o->add("Legato");}
+          code1 {if (part->Ppolymode!=0) o->value(0); else o->value(1);}
+          code2 {if (part->Ppolymode==0 && part->Plegatomode!=0) o->value(2);}
         } {}
       }
       Fl_Check_Button {} {
@@ -436,7 +451,7 @@ master->partonoff(npart,(int) o->value());
 pthread_mutex_unlock(&master->mutex);
 if (part->Penabled==0) partgroupui->deactivate();
     else partgroupui->activate();}
-        xywh {90 5 75 20} down_box DOWN_BOX labelfont 1 labelsize 12
+        xywh {90 5 75 20} down_box DOWN_BOX labelfont 1 labelsize 11
         code0 {o->value(part->Penabled);}
       }
     }
@@ -624,44 +639,44 @@ sendtochoice->value(x);}
 part->partefx[ninseff]->changeeffect((int) o->value());
 pthread_mutex_unlock(part->mutex);
 inseffectui->refresh(part->partefx[ninseff]);}
-        xywh {155 110 70 15} down_box BORDER_BOX labelsize 11 align 6
+        xywh {155 110 70 15} down_box BORDER_BOX labelsize 10 align 6
         code0 {o->value(part->partefx[ninseff]->geteffect());}
       } {
-        menuitem {} {
+        MenuItem {} {
           label {No Effect}
-          xywh {35 35 100 20} labelfont 1 labelsize 11
+          xywh {35 35 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Reverb
-          xywh {45 45 100 20} labelfont 1 labelsize 11
+          xywh {45 45 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Echo
-          xywh {55 55 100 20} labelfont 1 labelsize 11
+          xywh {55 55 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Chorus
-          xywh {65 65 100 20} labelfont 1 labelsize 11
+          xywh {65 65 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Phaser
-          xywh {70 70 100 20} labelfont 1 labelsize 11
+          xywh {70 70 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label AlienWah
-          xywh {80 80 100 20} labelfont 1 labelsize 11
+          xywh {80 80 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Distortion
-          xywh {90 90 100 20} labelfont 1 labelsize 11
+          xywh {90 90 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label EQ
-          xywh {100 100 100 20} labelfont 1 labelsize 11
+          xywh {100 100 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label DynFilter
-          xywh {110 110 100 20} labelfont 1 labelsize 11
+          xywh {110 110 100 20} labelfont 1 labelsize 10
         }
       }
       Fl_Group inseffectuigroup {
@@ -684,40 +699,40 @@ inseffectui->refresh(part->partefx[ninseff]);}
 part->Pefxroute[ninseff]=x;
 if (x==2) part->partefx[ninseff]->setdryonly(true);
 	else part->partefx[ninseff]->setdryonly(false);}
-        xywh {235 110 80 15} down_box BORDER_BOX labelsize 11 align 6
+        xywh {235 110 80 15} down_box BORDER_BOX labelsize 10 align 6
         code0 {int x=part->Pefxroute[ninseff]; if (x==127) x=1;}
         code1 {o->value(x);}
       } {
-        menuitem {} {
+        MenuItem {} {
           label {Next Effect}
-          xywh {45 45 100 20} labelfont 1 labelsize 11
+          xywh {45 45 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label {Part Out}
-          xywh {55 55 100 20} labelfont 1 labelsize 11
+          xywh {55 55 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label {Dry Out}
-          xywh {65 65 100 20} labelfont 1 labelsize 11
+          xywh {65 65 100 20} labelfont 1 labelsize 10
         }
       }
       Fl_Check_Button bypasseff {
         label bypass
         callback {part->Pefxbypass[ninseff]=(((int)o->value())!=0);}
-        tooltip {if the effect is not used (is bypassed)} xywh {90 110 60 15} down_box DOWN_BOX labelsize 12
+        tooltip {if the effect is not used (is bypassed)} xywh {90 110 60 15} down_box DOWN_BOX labelsize 11
         code0 {int x=part->Pefxbypass[ninseff];o->value(x);}
       }
       Fl_Button {} {
         label C
         callback {presetsui->copy(part->partefx[ninseff]);}
-        xywh {90 127 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+        xywh {90 127 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
       }
       Fl_Button {} {
         label P
         callback {pthread_mutex_lock(&master->mutex);
 presetsui->paste(part->partefx[ninseff],inseffectui);
 pthread_mutex_unlock(&master->mutex);}
-        xywh {120 127 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+        xywh {120 127 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
       }
     }
     Fl_Window instrumentkitlist {
@@ -740,27 +755,27 @@ pthread_mutex_unlock(&master->mutex);}
       }
       Fl_Box {} {
         label {No.}
-        xywh {5 0 25 15} labelfont 1 labelsize 12 align 18
+        xywh {5 0 25 15} labelfont 1 labelsize 11 align 18
       }
       Fl_Box {} {
         label {M.}
-        xywh {55 0 25 15} labelfont 1 labelsize 12 align 18
+        xywh {55 0 25 15} labelfont 1 labelsize 11 align 18
       }
       Fl_Box {} {
         label {Min.k}
-        xywh {235 0 40 15} labelfont 1 labelsize 12 align 18
+        xywh {235 0 40 15} labelfont 1 labelsize 11 align 18
       }
       Fl_Box {} {
         label {Max.k}
-        xywh {345 0 40 15} labelfont 1 labelsize 12 align 18
+        xywh {345 0 40 15} labelfont 1 labelsize 11 align 18
       }
       Fl_Box {} {
         label ADsynth
-        xywh {405 0 50 15} labelfont 1 labelsize 12 align 18
+        xywh {405 0 50 15} labelfont 1 labelsize 11 align 18
       }
       Fl_Box {} {
         label SUBsynth
-        xywh {470 0 60 15} labelfont 1 labelsize 12 align 18
+        xywh {470 0 60 15} labelfont 1 labelsize 11 align 18
       }
       Fl_Choice {} {
         label Mode
@@ -770,35 +785,35 @@ if (part->Pkitmode==0) {
  } else {
  kitlist->activate();
 };}
-        xywh {35 350 70 15} down_box BORDER_BOX labelsize 12 textfont 1 textsize 12
+        xywh {35 350 70 15} down_box BORDER_BOX labelsize 11 textfont 1 textsize 11
         code0 {o->value(part->Pkitmode);}
       } {
-        menuitem {} {
+        MenuItem {} {
           label OFF
-          xywh {0 0 100 20} labelfont 1 labelsize 12
+          xywh {0 0 100 20} labelfont 1 labelsize 11
         }
-        menuitem {} {
+        MenuItem {} {
           label MULTI
-          xywh {10 10 100 20} labelfont 1 labelsize 12
+          xywh {10 10 100 20} labelfont 1 labelsize 11
         }
-        menuitem {} {
+        MenuItem {} {
           label SINGLE
-          xywh {20 20 100 20} labelfont 1 labelsize 12
+          xywh {20 20 100 20} labelfont 1 labelsize 11
         }
       }
       Fl_Check_Button {} {
         label {Drum mode}
         callback {part->Pdrummode=(int) o->value();}
-        xywh {285 350 70 15} down_box DOWN_BOX labelsize 11
+        xywh {285 350 70 15} down_box DOWN_BOX labelsize 10
         code0 {o->value(part->Pdrummode);}
       }
       Fl_Box {} {
         label {FX.r.}
-        xywh {620 0 30 15} labelfont 1 labelsize 12 align 18
+        xywh {620 0 30 15} labelfont 1 labelsize 11 align 18
       }
       Fl_Box {} {
         label PADsynth
-        xywh {540 0 60 15} labelfont 1 labelsize 12 align 18
+        xywh {540 0 60 15} labelfont 1 labelsize 11 align 18
       }
     }
     Fl_Window instrumenteditwindow {
@@ -815,7 +830,7 @@ if (part->Pkitmode==0) {
           Fl_Button padeditbutton {
             label Edit
             callback {showparameters(0,2);}
-            xywh {215 280 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 18 align 128
+            xywh {215 280 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 13 align 128
             code0 {if (part->kit[0].Ppadenabled==0) o->deactivate();}
           }
           Fl_Check_Button padsynenabledcheck {
@@ -824,7 +839,7 @@ if (part->Pkitmode==0) {
 part->kit[0].Ppadenabled=x;
 if (x==0) padeditbutton->deactivate();
      else padeditbutton->activate();}
-            tooltip {enable/disable PADsynth} xywh {215 255 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
+            tooltip {enable/disable PADsynth} xywh {215 255 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 11
             code1 {o->value(part->kit[0].Ppadenabled);}
           }
         }
@@ -838,13 +853,13 @@ if (x==0) padeditbutton->deactivate();
 part->kit[0].Padenabled=x;
 if (x==0) adeditbutton->deactivate();
      else adeditbutton->activate();}
-            tooltip {enable/disable ADsynth} xywh {15 255 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
+            tooltip {enable/disable ADsynth} xywh {15 255 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 11
             code1 {o->value(part->kit[0].Padenabled);}
           }
           Fl_Button adeditbutton {
             label Edit
             callback {showparameters(0,0);}
-            xywh {15 281 80 34} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 18 align 128
+            xywh {15 281 80 34} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 13 align 128
             code0 {if (part->kit[0].Padenabled==0) o->deactivate();}
           }
         }
@@ -858,13 +873,13 @@ if (x==0) adeditbutton->deactivate();
 part->kit[0].Psubenabled=x;
 if (x==0) subeditbutton->deactivate();
      else subeditbutton->activate();}
-            tooltip {enable/disable SUBsynth} xywh {115 255 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 12
+            tooltip {enable/disable SUBsynth} xywh {115 255 80 20} box PLASTIC_UP_BOX down_box DOWN_BOX color 222 selection_color 218 labelfont 1 labelsize 11
             code1 {o->value(part->kit[0].Psubenabled);}
           }
           Fl_Button subeditbutton {
             label Edit
             callback {showparameters(0,1);}
-            xywh {115 280 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 18 align 128
+            xywh {115 280 80 35} box PLASTIC_UP_BOX color 222 selection_color 220 labelfont 1 labelsize 13 align 128
             code0 {if (part->kit[0].Psubenabled==0) o->deactivate();}
           }
         }
@@ -876,7 +891,7 @@ if (x==0) subeditbutton->deactivate();
         Fl_Button {} {
           label Effects
           callback {partfx->show();}
-          xywh {310 290 80 35} box PLASTIC_UP_BOX color 230 labelfont 1 labelsize 16
+          xywh {310 290 80 35} box PLASTIC_UP_BOX color 230 labelfont 1 labelsize 13
         }
       }
       Fl_Group {} {
@@ -892,83 +907,83 @@ if (x==0) subeditbutton->deactivate();
         Fl_Input {} {
           label Comments
           callback {snprintf((char *)part->info.Pcomments,MAX_INFO_TEXT_SIZE,"%s",o->value());}
-          xywh {5 125 385 90} type Multiline color 26 labelsize 12 align 5
+          xywh {5 125 385 90} type Multiline color 26 labelsize 11 align 5
           code0 {o->maximum_size(MAX_INFO_TEXT_SIZE);}
           code1 {o->value((char *) &part->info.Pcomments);}
         }
         Fl_Choice {} {
           label {Type:}
           callback {part->info.Ptype=o->value();}
-          xywh {5 25 155 20} down_box BORDER_BOX labelfont 1 labelsize 12 align 5 textsize 11
+          xywh {5 25 155 20} down_box BORDER_BOX labelfont 1 labelsize 11 align 5 textsize 10
           code0 {o->value(part->info.Ptype);}
         } {
-          menuitem {} {
+          MenuItem {} {
             label {--------------------------}
-            xywh {20 20 100 20} labelfont 1 labelsize 12
+            xywh {20 20 100 20} labelfont 1 labelsize 11
           }
-          menuitem {} {
+          MenuItem {} {
             label Piano
-            xywh {10 10 100 20} labelfont 1 labelsize 12
+            xywh {10 10 100 20} labelfont 1 labelsize 11
           }
-          menuitem {} {
+          MenuItem {} {
             label {Chromatic Percussion}
-            xywh {20 20 100 20} labelfont 1 labelsize 12
+            xywh {20 20 100 20} labelfont 1 labelsize 11
           }
-          menuitem {} {
+          MenuItem {} {
             label Organ
-            xywh {30 30 100 20} labelfont 1 labelsize 12
+            xywh {30 30 100 20} labelfont 1 labelsize 11
           }
-          menuitem {} {
+          MenuItem {} {
             label Guitar
-            xywh {40 40 100 20} labelfont 1 labelsize 12
+            xywh {40 40 100 20} labelfont 1 labelsize 11
           }
-          menuitem {} {
+          MenuItem {} {
             label Bass
-            xywh {50 50 100 20} labelfont 1 labelsize 12
+            xywh {50 50 100 20} labelfont 1 labelsize 11
           }
-          menuitem {} {
+          MenuItem {} {
             label {Solo Strings}
-            xywh {60 60 100 20} labelfont 1 labelsize 12
+            xywh {60 60 100 20} labelfont 1 labelsize 11
           }
-          menuitem {} {
+          MenuItem {} {
             label Ensemble
-            xywh {70 70 100 20} labelfont 1 labelsize 12
+            xywh {70 70 100 20} labelfont 1 labelsize 11
           }
-          menuitem {} {
+          MenuItem {} {
             label Brass
-            xywh {80 80 100 20} labelfont 1 labelsize 12
+            xywh {80 80 100 20} labelfont 1 labelsize 11
           }
-          menuitem {} {
+          MenuItem {} {
             label Reed
-            xywh {90 90 100 20} labelfont 1 labelsize 12
+            xywh {90 90 100 20} labelfont 1 labelsize 11
           }
-          menuitem {} {
+          MenuItem {} {
             label Pipe
-            xywh {100 100 100 20} labelfont 1 labelsize 12
+            xywh {100 100 100 20} labelfont 1 labelsize 11
           }
-          menuitem {} {
+          MenuItem {} {
             label {Synth Lead}
-            xywh {110 110 100 20} labelfont 1 labelsize 12
+            xywh {110 110 100 20} labelfont 1 labelsize 11
           }
-          menuitem {} {
+          MenuItem {} {
             label {Synth Pad}
-            xywh {120 120 100 20} labelfont 1 labelsize 12
+            xywh {120 120 100 20} labelfont 1 labelsize 11
           }
-          menuitem {} {
+          MenuItem {} {
             label {Synth Effects}
-            xywh {130 130 100 20} labelfont 1 labelsize 12
+            xywh {130 130 100 20} labelfont 1 labelsize 11
           }
-          menuitem {} {
+          MenuItem {} {
             label Ethnic
-            xywh {140 140 100 20} labelfont 1 labelsize 12
+            xywh {140 140 100 20} labelfont 1 labelsize 11
           }
-          menuitem {} {
+          MenuItem {} {
             label Percussive
-            xywh {150 150 100 20} labelfont 1 labelsize 12
+            xywh {150 150 100 20} labelfont 1 labelsize 11
           }
-          menuitem {} {
+          MenuItem {} {
             label {Sound Effects}
-            xywh {160 160 100 20} labelfont 1 labelsize 12
+            xywh {160 160 100 20} labelfont 1 labelsize 11
           }
         }
       }

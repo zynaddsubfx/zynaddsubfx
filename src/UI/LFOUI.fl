@@ -53,30 +53,30 @@ hide();
     } {
       Fl_Group lfoparamswindow {
         label LFO
-        xywh {0 0 230 70} box PLASTIC_UP_BOX color 223 labeltype ENGRAVED_LABEL labelsize 11 align 17
+        xywh {0 0 230 70} box PLASTIC_UP_BOX color 223 labeltype ENGRAVED_LABEL labelsize 10 align 17
       } {
         Fl_Dial freq {
           label {Freq.}
           callback {pars->Pfreq=o->value();}
-          tooltip {LFO Frequency} xywh {5 20 30 30} box ROUND_UP_BOX labelsize 11 step 1e-05
+          tooltip {LFO Frequency} xywh {5 20 30 30} box ROUND_UP_BOX labelsize 10 step 1e-05
           class WidgetPDial
         }
         Fl_Dial intensity {
           label Depth
           callback {pars->Pintensity=(int)o->value();}
-          tooltip {LFO Amount} xywh {40 20 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+          tooltip {LFO Amount} xywh {40 20 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           class WidgetPDial
         }
         Fl_Dial delay {
           label Delay
           callback {pars->Pdelay=(int)o->value();}
-          tooltip {LFO delay} xywh {110 20 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+          tooltip {LFO delay} xywh {110 20 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           class WidgetPDial
         }
         Fl_Dial startphase {
           label Start
           callback {pars->Pstartphase=(int)o->value();}
-          tooltip {LFO Startphase (leftmost is Random)} xywh {75 20 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+          tooltip {LFO Startphase (leftmost is Random)} xywh {75 20 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           class WidgetPDial
         }
         Fl_Dial randomness {
@@ -122,7 +122,7 @@ hide();
         Fl_Check_Button continous {
           label {C.}
           callback {pars->Pcontinous=(int)o->value();}
-          tooltip {Continous LFO} xywh {165 35 15 15} down_box DOWN_BOX labelsize 11 align 2
+          tooltip {Continous LFO} xywh {165 35 15 15} down_box DOWN_BOX labelsize 10 align 2
         }
         Fl_Dial freqrand {
           label {F.R.}

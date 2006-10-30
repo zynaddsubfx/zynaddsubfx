@@ -33,8 +33,10 @@ class PADnote{
     public:
 	PADnote(PADnoteParameters *parameters, Controller *ctl_,REALTYPE freq, REALTYPE velocity, int portamento_, int midinote);
 	~PADnote();
-	
-        int noteout(REALTYPE *outl,REALTYPE *outr); 
+
+	void PADlegatonote(PADnoteParameters *parameters, Controller *ctl_, REALTYPE freq, REALTYPE velocity, int portamento_, int midinote);
+
+	int noteout(REALTYPE *outl,REALTYPE *outr); 
 	int finished();
 	void relasekey();
 	

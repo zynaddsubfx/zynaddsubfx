@@ -259,7 +259,7 @@ virkeys->take_focus();}
         callback {relaseallkeys();
 virkeys->midioct=(int) o->value();
 virkeys->take_focus();}
-        tooltip {Midi Octave} xywh {255 100 55 20} type Simple labelsize 12 align 4 when 6 minimum 0 maximum 5 step 1 textfont 1 textsize 12
+        tooltip {Midi Octave} xywh {255 100 55 20} type Simple labelsize 11 align 4 when 6 minimum 0 maximum 5 step 1 textfont 1 textsize 11
         code0 {o->value(virkeys->midioct);}
       }
       Fl_Button {} {

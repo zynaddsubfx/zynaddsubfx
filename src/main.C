@@ -351,7 +351,7 @@ int main(int argc, char *argv[]){
 #ifdef JACKAUDIOOUT
     usejackit=true;//use jack by default
 #endif
-    fprintf(stderr,"%s","\nZynAddSubFX - Copyright (c) 2002-2005 Nasca Octavian Paul\n");
+    fprintf(stderr,"%s","\nZynAddSubFX - Copyright (c) 2002-2005 Nasca Octavian Paul and others\n");
     fprintf(stderr,"Compiled: %s %s\n",__DATE__,__TIME__);
     fprintf(stderr,"%s","This program is free software (GNU GPL v.2) and \n    it comes with ABSOLUTELY NO WARRANTY.\n\n");
 #ifdef OS_LINUX

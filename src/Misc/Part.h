@@ -38,6 +38,8 @@
 #include "../Effects/EffectMgr.h"
 #include "XMLwrapper.h"
 
+#include <list> // For the monomemnotes list.
+
 class Part{
 
     public:
@@ -111,6 +113,7 @@ class Part{
       unsigned char Pdrummode;//if all keys are mapped and the system is 12tET (used for drums)
 
       unsigned char Ppolymode;//Part mode - 0=monophonic , 1=polyphonic
+      unsigned char Plegatomode;// 0=normal, 1=legato
       unsigned char Pkeylimit;//how many keys are alowed to be played same time (0=off), the older will be relased
       
       unsigned char *Pname; //name of the instrument
@@ -145,6 +148,8 @@ class Part{
     private:
       void KillNotePos(int pos); 
       void RelaseNotePos(int pos);      
+      void MonoMemRenote(); // MonoMem stuff.
+
       int killallnotes;//is set to 1 if I want to kill all notes
       
       struct PartNotes{
@@ -159,7 +164,22 @@ class Part{
 	} kititem[NUM_KIT_ITEMS];
 	int time;
       };
-	
+
+      int lastpos; // To keep track of previously used pos.
+
+      // MonoMem stuff
+      std::list<unsigned char> monomemnotes; // A list to remember held notes.
+      struct {
+	unsigned char velocity;
+	int mkeyshift;// I'm not sure masterkeyshift should be remembered.
+      } monomem[256]; /* 256 is to cover all possible note values.
+		        monomem[] is used in conjunction with the list to
+		        store the velocity and masterkeyshift values of a
+			given note (the list only store note values).
+		        For example 'monomem[note].velocity' would be the
+			velocity value of the note 'note'.
+		      */
+
       PartNotes partnote[POLIPHONY];
       
       REALTYPE *tmpoutl;//used to get the note

@@ -57,7 +57,7 @@ class Controller{
 	void setparameternumber(unsigned int type,int value);//used for RPN and NRPN's
 	int getnrpn(int *parhi, int *parlo, int *valhi, int *vallo);
 
-	int initportamento(REALTYPE oldfreq,REALTYPE newfreq);//returns 1 if the portamento's conditions are true, else return 0
+	int initportamento(REALTYPE oldfreq,REALTYPE newfreq,bool legatoflag);//returns 1 if the portamento's conditions are true, else return 0
 	void updateportamento(); //update portamento values 
 
     // Controllers values 

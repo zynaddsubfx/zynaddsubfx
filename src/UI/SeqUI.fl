@@ -31,7 +31,7 @@ class SeqUI {} {
 stopbutton_play->activate();
 
 master->seq.startplay();}
-          tooltip {Start Playing} xywh {130 30 30 30} box DIAMOND_UP_BOX color 79 labelfont 1 labelsize 16 align 2
+          tooltip {Start Playing} xywh {130 30 30 30} box DIAMOND_UP_BOX color 79 labelfont 1 labelsize 13 align 2
         }
         Fl_Button stopbutton_play {
           label Stop
@@ -39,7 +39,7 @@ master->seq.startplay();}
 playbutton->activate();
 
 master->seq.stopplay();}
-          tooltip {Stop Playing} xywh {175 29 30 31} box THIN_UP_BOX color 4 labelfont 1 labelsize 16 align 2 deactivate
+          tooltip {Stop Playing} xywh {175 29 30 31} box THIN_UP_BOX color 4 labelfont 1 labelsize 13 align 2 deactivate
         }
       }
       Fl_Button {} {
@@ -55,7 +55,7 @@ master->seq.stopplay();}
       }
       Fl_Box {} {
         label {This is not finished} selected
-        xywh {25 155 225 90} labelfont 1 labelsize 30 align 128
+        xywh {25 155 225 90} labelfont 1 labelsize 22 align 128
       }
     }
   }

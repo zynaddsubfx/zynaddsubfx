@@ -171,7 +171,7 @@ delete (formantparswindow);} {}
     } {
       Fl_Group filterparamswindow {
         label {Filter Parameters}
-        xywh {0 0 275 75} box PLASTIC_UP_BOX color 183 labeltype ENGRAVED_LABEL labelsize 11 align 17
+        xywh {0 0 275 75} box PLASTIC_UP_BOX color 183 labeltype ENGRAVED_LABEL labelsize 10 align 17
       } {
         Fl_Choice analogfiltertypechoice {
           label FilterType
@@ -264,7 +264,7 @@ pars->changed=true;}
         Fl_Dial cfreqdial {
           label {C.Freq}
           callback {pars->Pfreq=(int)o->value();}
-          tooltip {Center Frequency of the Filter or the base position in the vowel's sequence} xywh {75 25 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+          tooltip {Center Frequency of the Filter or the base position in the vowel's sequence} xywh {75 25 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           code0 {o->value(pars->Pfreq);}
           class WidgetPDial
         }
@@ -272,27 +272,27 @@ pars->changed=true;}
           label Q
           callback {pars->Pq=(int)o->value();
 formantfiltergraph->redraw();}
-          tooltip {Filter resonance or bandwidth} xywh {110 25 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+          tooltip {Filter resonance or bandwidth} xywh {110 25 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           code0 {o->value(pars->Pq);}
           class WidgetPDial
         }
         Fl_Dial freqtrdial {
           label {freq.tr.}
           callback {pars->Pfreqtrack=(int) o->value();}
-          tooltip {Filter frequency tracking (left is negative, middle is 0, and right is positive)} xywh {215 25 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+          tooltip {Filter frequency tracking (left is negative, middle is 0, and right is positive)} xywh {215 25 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           code0 {o->value(pars->Pfreqtrack);}
           class WidgetPDial
         }
         Fl_Dial vsnsadial {
           label {V.SnsA.}
           callback {if (velsnsamp!=NULL) *velsnsamp=(int)o->value();}
-          tooltip {Velocity sensing amount of the Filter} xywh {145 25 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+          tooltip {Velocity sensing amount of the Filter} xywh {145 25 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           class WidgetPDial
         }
         Fl_Dial vsnsdial {
           label {V.Sns.}
           callback {if (velsns!=NULL) *velsns=(int)o->value();}
-          tooltip {Velocity Sensing Function of the Filter} xywh {180 25 30 30} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+          tooltip {Velocity Sensing Function of the Filter} xywh {180 25 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           class WidgetPDial
         }
         Fl_Dial gaindial {
@@ -300,7 +300,7 @@ formantfiltergraph->redraw();}
           callback {pars->Pgain=(int)o->value();
 formantfiltergraph->redraw();
 pars->changed=true;}
-          tooltip {Filter output gain/damp} xywh {250 35 20 20} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+          tooltip {Filter output gain/damp} xywh {250 35 20 20} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           code0 {o->value(pars->Pgain);}
           class WidgetPDial
         }
@@ -317,7 +317,7 @@ pars->changed=true;} open
       Fl_Button editbutton {
         label Edit
         callback {formantparswindow->show();}
-        xywh {15 40 50 25} box PLASTIC_UP_BOX labelfont 1 labelsize 12
+        xywh {15 40 50 25} box PLASTIC_UP_BOX labelfont 1 labelsize 11
       }
       Fl_Button {} {
         label C
@@ -353,7 +353,7 @@ formantfiltergraph->redraw();}
           callback {nvowel=(int) o->value();
 update_formant_window();
 formantfiltergraph->redraw();}
-          xywh {545 55 40 20} type Simple labelfont 1 labelsize 10 align 4 minimum 0 maximum 127 step 1 textfont 1 textsize 12
+          xywh {545 55 40 20} type Simple labelfont 1 labelsize 10 align 4 minimum 0 maximum 127 step 1 textfont 1 textsize 11
           code0 {o->bounds(0,FF_MAX_VOWELS-1);}
           code1 {o->value(nvowel);}
         }
@@ -365,7 +365,7 @@ formantfiltergraph->redraw();}
             callback {pars->Pvowels[nvowel].formants[nformant].freq=(int) o->value();
 formantfiltergraph->redraw();
 pars->changed=true;}
-            tooltip {Formant frequency} xywh {495 115 25 25} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+            tooltip {Formant frequency} xywh {495 115 25 25} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
             class WidgetPDial
           }
           Fl_Dial formant_q_dial {
@@ -373,7 +373,7 @@ pars->changed=true;}
             callback {pars->Pvowels[nvowel].formants[nformant].q=(int) o->value();
 formantfiltergraph->redraw();
 pars->changed=true;}
-            tooltip {Formant's Q} xywh {525 115 24 25} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+            tooltip {Formant's Q} xywh {525 115 24 25} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
             class WidgetPDial
           }
           Fl_Dial formant_amp_dial {
@@ -381,7 +381,7 @@ pars->changed=true;}
             callback {pars->Pvowels[nvowel].formants[nformant].amp=(int) o->value();
 formantfiltergraph->redraw();
 pars->changed=true;}
-            tooltip {Formant amplitude} xywh {555 115 24 25} box ROUND_UP_BOX labelsize 11 maximum 127 step 1
+            tooltip {Formant amplitude} xywh {555 115 24 25} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
             class WidgetPDial
           }
         }
@@ -394,7 +394,7 @@ pars->changed=true;}
           callback {pars->Psequencesize=(int) o->value();
 update_formant_window();
 pars->changed=true;}
-          xywh {595 62 55 20} type Simple labelfont 1 labelsize 10 align 5 minimum 0 maximum 127 step 1 textfont 1 textsize 12
+          xywh {595 62 55 20} type Simple labelfont 1 labelsize 10 align 5 minimum 0 maximum 127 step 1 textfont 1 textsize 11
           code0 {o->bounds(1,FF_MAX_SEQUENCE-1);}
           code1 {o->value(pars->Psequencesize);}
         }
@@ -411,7 +411,7 @@ pars->changed=true;}
           label Vowel
           callback {pars->Psequence[nseqpos].nvowel=(int) o->value();
 pars->changed=true;}
-          xywh {640 97 40 15} type Simple labelsize 10 align 1 minimum 0 maximum 127 step 1 textsize 11
+          xywh {640 97 40 15} type Simple labelsize 10 align 1 minimum 0 maximum 127 step 1 textsize 10
           code0 {o->bounds(0,FF_MAX_VOWELS-1);}
         }
         Fl_Check_Button {} {
@@ -425,7 +425,7 @@ pars->changed=true;}
           label Strch
           callback {pars->Psequencestretch=(int) o->value();
 pars->changed=true;}
-          tooltip {Sequence Stretch} xywh {595 130 25 25} box ROUND_UP_BOX labelsize 11 align 1 maximum 127 step 1
+          tooltip {Sequence Stretch} xywh {595 130 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
           code0 {o->value(pars->Psequencestretch);}
           class WidgetPDial
         }
@@ -436,7 +436,7 @@ pars->changed=true;}
 update_formant_window();
 pars->changed=true;
 formantfiltergraph->redraw();}
-        xywh {485 15 65 20} type Simple labelfont 1 labelsize 11 align 5 minimum 0 maximum 127 step 1
+        xywh {485 15 65 20} type Simple labelfont 1 labelsize 10 align 5 minimum 0 maximum 127 step 1
         code0 {o->bounds(1,FF_MAX_FORMANTS);}
         code1 {o->value(pars->Pnumformants);}
       }
@@ -444,7 +444,7 @@ formantfiltergraph->redraw();}
         label {Fr.Sl.}
         callback {pars->Pformantslowness=(int) o->value();
 pars->changed=true;}
-        tooltip {Formant's Slowness (Morphing)} xywh {565 15 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 align 1 maximum 127 step 1
+        tooltip {Formant's Slowness (Morphing)} xywh {565 15 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 align 1 maximum 127 step 1
         code0 {o->value(pars->Pformantslowness);}
         class WidgetPDial
       }
@@ -484,7 +484,7 @@ formantfiltergraph->redraw();}
         label {Vw.Cl.}
         callback {pars->Pvowelclearness=(int) o->value();
 pars->changed=true;}
-        tooltip {Vowel "clearness" (how the mixed vowels are avoided)} xywh {600 15 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 align 1 maximum 127 step 1
+        tooltip {Vowel "clearness" (how the mixed vowels are avoided)} xywh {600 15 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 align 1 maximum 127 step 1
         code0 {o->value(pars->Pvowelclearness);}
         class WidgetPDial
       }
@@ -496,12 +496,12 @@ pars->changed=true;}
       Fl_Button {} {
         label C
         callback {presetsui->copy(pars,nvowel);}
-        xywh {635 25 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+        xywh {635 25 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
       }
       Fl_Button {} {
         label P
         callback {presetsui->paste(pars,this,nvowel);}
-        xywh {665 25 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 12 labelcolor 7
+        xywh {665 25 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
       }
       Fl_Box {} {
         label Vowel

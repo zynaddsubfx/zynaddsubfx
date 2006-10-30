@@ -33,6 +33,9 @@ class SUBnote{
     public:
 	SUBnote(SUBnoteParameters *parameters,Controller *ctl_,REALTYPE freq,REALTYPE velocity,int portamento_,int midinote);
 	~SUBnote();
+
+	void SUBlegatonote(SUBnoteParameters *parameters, Controller *ctl_, REALTYPE freq, REALTYPE velocity, int portamento_, int midinote);
+
 	int noteout(REALTYPE *outl,REALTYPE *outr);//note output,return 0 if the note is finished
 	void relasekey();
 	int finished();

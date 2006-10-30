@@ -67,10 +67,10 @@ copywin->hide();}
       }
       Fl_Box {} {
         label {Type:}
-        xywh {10 5 40 15} labelsize 12 align 20
+        xywh {10 5 40 15} labelsize 11 align 20
       }
       Fl_Box copytypetext {
-        xywh {50 5 205 15} box FLAT_BOX color 238 labelfont 1 labelsize 12 align 20
+        xywh {50 5 205 15} box FLAT_BOX color 238 labelfont 1 labelsize 11 align 20
       }
       Fl_Input presetname {
         callback {const char *tmp=o->value();
@@ -120,11 +120,11 @@ pui->refresh();}
         xywh {160 385 80 35} box THIN_UP_BOX align 192
       }
       Fl_Box pastetypetext {
-        xywh {55 5 200 15} box FLAT_BOX color 238 labelfont 1 labelsize 12 align 20
+        xywh {55 5 200 15} box FLAT_BOX color 238 labelfont 1 labelsize 11 align 20
       }
       Fl_Box {} {
         label {Type:}
-        xywh {15 5 40 15} labelsize 12 align 20
+        xywh {15 5 40 15} labelsize 11 align 20
       }
       Fl_Button deletepbutton {
         label Delete

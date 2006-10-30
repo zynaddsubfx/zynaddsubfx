@@ -105,7 +105,7 @@ config.cfg.SampleRate=strtoul(o->value(),&tmp,10);}
             label {Buffer Size}
             callback {char *tmp;
 config.cfg.SoundBufferSize=strtoul(o->value(),&tmp,10);}
-            tooltip {Internal Sound Buffer Size (samples)} xywh {190 45 60 20} type Int labelsize 12 align 129 textfont 1
+            tooltip {Internal Sound Buffer Size (samples)} xywh {190 45 60 20} type Int labelsize 11 align 129 textfont 1
             code0 {char *tmpbuf=new char[100];o->cut(0,o->maximum_size());}
             code1 {snprintf(tmpbuf,100,"%d",config.cfg.SoundBufferSize);o->insert(tmpbuf);}
             code2 {delete(tmpbuf);}
@@ -113,13 +113,13 @@ config.cfg.SoundBufferSize=strtoul(o->value(),&tmp,10);}
           Fl_Light_Button {} {
             label {Swap Stereo }
             callback {config.cfg.SwapStereo=(int) o->value();}
-            xywh {20 80 85 20} box THIN_UP_BOX labelsize 11
+            xywh {20 80 85 20} box THIN_UP_BOX labelsize 10
             code0 {o->value(config.cfg.SwapStereo);}
           }
           Fl_Choice {} {
             label OscilSize
             callback {config.cfg.OscilSize=128<<o->value();}
-            tooltip {ADSynth Oscillator Size (samples)} xywh {175 80 75 20} down_box BORDER_BOX labelfont 1 labelsize 12 textsize 10
+            tooltip {ADSynth Oscillator Size (samples)} xywh {175 80 75 20} down_box BORDER_BOX labelfont 1 labelsize 11 textsize 10
             code0 {o->value( (int) (log(config.cfg.OscilSize/128.0-1.0)/log(2)) +1);}
           } {
             menuitem {} {
@@ -157,11 +157,11 @@ config.cfg.SoundBufferSize=strtoul(o->value(),&tmp,10);}
           }
           Fl_Box {} {
             label {Most settings has effect only after ZynAddSubFX is restarted.}
-            xywh {15 275 235 30} labelfont 1 labelsize 12 align 128
+            xywh {15 275 235 30} labelfont 1 labelsize 11 align 128
           }
           Fl_Box {} {
             label {Read the Readme.txt for other settings}
-            xywh {10 255 240 20} labelfont 1 labelsize 12 align 128
+            xywh {10 255 240 20} labelfont 1 labelsize 11 align 128
           }
           Fl_Group {} {
             xywh {15 125 230 85} box ENGRAVED_BOX
@@ -191,11 +191,11 @@ dump.startnow();//this has effect only if this option was disabled}
           } {
             Fl_Box {} {
               label {Note: Not all the following settings are used (this depends on the operating system, etc..)}
-              xywh {260 50 235 45} labelfont 1 labelsize 12 align 128
+              xywh {260 50 235 45} labelfont 1 labelsize 11 align 128
             }
             Fl_Group {} {
               label Linux
-              xywh {260 110 235 115} box ENGRAVED_BOX labelfont 1 labelsize 16 align 5
+              xywh {260 110 235 115} box ENGRAVED_BOX labelfont 1 labelsize 13 align 5
             } {
               Fl_File_Input {} {
                 label {OSS Sequencer Device (/dev/...)}
@@ -212,19 +212,19 @@ dump.startnow();//this has effect only if this option was disabled}
             }
             Fl_Group {} {
               label Windows
-              xywh {260 250 235 50} box ENGRAVED_BOX labelfont 1 labelsize 16 align 5
+              xywh {260 250 235 50} box ENGRAVED_BOX labelfont 1 labelsize 13 align 5
             } {
               Fl_Counter {} {
                 label {Midi In Dev}
                 callback {config.cfg.WindowsMidiInId=(int) o->value();
 midiinputnamebox->label(config.winmididevices[config.cfg.WindowsMidiInId].name);}
-                xywh {270 270 65 20} type Simple labelsize 12 align 1 minimum 0 maximum 100 step 1
+                xywh {270 270 65 20} type Simple labelsize 11 align 1 minimum 0 maximum 100 step 1
                 code0 {o->maximum(config.winmidimax-1);}
                 code1 {o->value(config.cfg.WindowsMidiInId);}
               }
               Fl_Box midiinputnamebox {
                 label {Midi input device name}
-                xywh {340 260 150 35} labelfont 1 labelsize 12 align 212
+                xywh {340 260 150 35} labelfont 1 labelsize 11 align 212
                 code0 {o->label(config.winmididevices[config.cfg.WindowsMidiInId].name);}
               }
             }
@@ -232,13 +232,13 @@ midiinputnamebox->label(config.winmididevices[config.cfg.WindowsMidiInId].name);
           Fl_Counter {} {
             label {XML compression level}
             callback {config.cfg.GzipCompression=(int) o->value();}
-            tooltip {gzip compression level (0 - uncompressed)} xywh {20 215 65 15} type Simple labelsize 12 align 8 minimum 0 maximum 9 step 1
+            tooltip {gzip compression level (0 - uncompressed)} xywh {20 215 65 15} type Simple labelsize 11 align 8 minimum 0 maximum 9 step 1
             code0 {o->value(config.cfg.GzipCompression);}
           }
           Fl_Choice {} {
             label {PADsynth Interpolation}
             callback {config.cfg.Interpolation=(int) o->value();}
-            xywh {175 105 75 15} down_box BORDER_BOX labelsize 11 textsize 12
+            xywh {175 105 75 15} down_box BORDER_BOX labelsize 10 textsize 11
             code0 {o->value(config.cfg.Interpolation);}
           } {
             menuitem {} {
@@ -253,20 +253,20 @@ midiinputnamebox->label(config.winmididevices[config.cfg.WindowsMidiInId].name);
           Fl_Choice {} {
             label {Virtual Keyboard Layout}
             callback {config.cfg.VirKeybLayout=(int) o->value();;} open selected
-            xywh {155 235 85 20} down_box BORDER_BOX labelsize 13 textfont 1 textsize 12
+            xywh {155 235 85 20} down_box BORDER_BOX labelsize 12 textfont 1 textsize 11
             code0 {o->value(config.cfg.VirKeybLayout);}
           } {
             menuitem {} {
               label { }
-              xywh {5 5 100 20} labelfont 1 labelsize 13 deactivate
+              xywh {5 5 100 20} labelfont 1 labelsize 11 deactivate
             }
             menuitem {} {
               label QWERTY
-              xywh {15 15 100 20} labelfont 1 labelsize 13
+              xywh {15 15 100 20} labelfont 1 labelsize 11
             }
             menuitem {} {
               label Dvorak
-              xywh {25 25 100 20} labelfont 1 labelsize 13
+              xywh {25 25 100 20} labelfont 1 labelsize 11
             }
           }
         }

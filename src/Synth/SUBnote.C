@@ -141,6 +141,125 @@ SUBnote::SUBnote(SUBnoteParameters *parameters,Controller *ctl_,REALTYPE freq,RE
     ready=1;
 };
 
+
+// SUBlegatonote: This function is a copy of SUBnote(...) and
+// initparameters(...) stuck together with some lines removed so that
+// it only alter the already playing note (to perform legato). It is
+// possible I left stuff that is not required for this.
+void SUBnote::SUBlegatonote(SUBnoteParameters *parameters, Controller *ctl_, REALTYPE freq, REALTYPE velocity, int portamento_, int midinote){
+    portamento=portamento_;
+
+    volume=pow(0.1,3.0*(1.0-pars->PVolume/96.0));//-60 dB .. 0 dB
+    volume*=VelF(velocity,pars->PAmpVelocityScaleFunction);
+    if (pars->PPanning!=0) panning=pars->PPanning/127.0;
+    else panning=RND;
+    numstages=pars->Pnumstages;
+    stereo=pars->Pstereo;
+    start=pars->Pstart;
+
+    int pos[MAX_SUB_HARMONICS];
+
+    if (pars->Pfixedfreq==0) basefreq=freq;
+    else {
+      basefreq=440.0;
+      int fixedfreqET=pars->PfixedfreqET;
+      if (fixedfreqET!=0) {//if the frequency varies according the keyboard note
+	REALTYPE tmp=(midinote-69.0)/12.0*(pow(2.0,(fixedfreqET-1)/63.0)-1.0);
+	if (fixedfreqET<=64) basefreq*=pow(2.0,tmp);
+	else basefreq*=pow(3.0,tmp);
+      };
+    };
+    REALTYPE detune=getdetune(pars->PDetuneType,pars->PCoarseDetune,pars->PDetune);
+    basefreq*=pow(2.0,detune/1200.0);//detune
+
+    //global filter
+    GlobalFilterCenterPitch=pars->GlobalFilter->getfreq()+//center freq
+      (pars->PGlobalFilterVelocityScale/127.0*6.0)* //velocity sensing
+      (VelF(velocity,pars->PGlobalFilterVelocityScaleFunction)-1);
+
+    //select only harmonics that desire to compute    
+    numharmonics=0;
+    for (int n=0;n<MAX_SUB_HARMONICS;n++){
+      if (pars->Phmag[n]==0)continue;
+      if (n*basefreq>SAMPLE_RATE/2.0) break;//remove the freqs above the Nyquist freq
+      pos[numharmonics++]=n;
+    };
+
+    if (numharmonics==0) {
+      NoteEnabled=OFF;
+      return;
+    };
+
+
+    //how much the amplitude is normalised (because the harmonics)
+    REALTYPE reduceamp=0.0;
+
+    for (int n=0;n<numharmonics;n++){
+
+      REALTYPE freq=basefreq*(pos[n]+1);
+
+      //the bandwidth is not absolute(Hz); it is relative to frequency
+      REALTYPE bw=pow(10,(pars->Pbandwidth-127.0)/127.0*4)*numstages;
+
+      //Bandwidth Scale
+      bw*=pow(1000/freq,(pars->Pbwscale-64.0)/64.0*3.0);
+
+      //Relative BandWidth    
+      bw*=pow(100,(pars->Phrelbw[pos[n]]-64.0)/64.0);
+
+      if (bw>25.0) bw=25.0;
+
+      //try to keep same amplitude on all freqs and bw. (empirically)
+      REALTYPE gain=sqrt(1500.0/(bw*freq));
+
+      REALTYPE hmagnew=1.0-pars->Phmag[pos[n]]/127.0;
+      REALTYPE hgain;
+
+      switch(pars->Phmagtype){
+      case 1:hgain=exp(hmagnew*log(0.01)); break;
+      case 2:hgain=exp(hmagnew*log(0.001));break;
+      case 3:hgain=exp(hmagnew*log(0.0001));break;
+      case 4:hgain=exp(hmagnew*log(0.00001));break;
+      default:hgain=1.0-hmagnew;
+      };
+      gain*=hgain;
+      reduceamp+=hgain;
+
+      for (int nph=0;nph<numstages;nph++){
+	REALTYPE amp=1.0;
+	if (nph==0) amp=gain;
+	initfilter(lfilter[nph+n*numstages],freq,bw,amp,hgain);
+	if (stereo!=0) initfilter(rfilter[nph+n*numstages],freq,bw,amp,hgain);
+      };
+    };
+
+    if (reduceamp<0.001) reduceamp=1.0;
+    volume/=reduceamp;
+
+    oldpitchwheel=0;
+    oldbandwidth=64;
+
+    if (pars->Pfixedfreq==0) freq=basefreq;
+    else freq*=basefreq/440.0;
+
+
+   ///////////////
+   // Altered initparameters(...) content:
+
+    if (pars->PGlobalFilterEnabled!=0){
+      globalfiltercenterq=pars->GlobalFilter->getq();
+      GlobalFilterFreqTracking=pars->GlobalFilter->getfreqtracking(basefreq);
+    };
+
+   // end of the altered initparameters function content.
+   ///////////////
+
+    oldamplitude=newamplitude;
+
+  // End of the SUBlegatonote function.
+};
+
+
 SUBnote::~SUBnote(){
     if (NoteEnabled!=OFF) KillNote();
     delete [] tmpsmp;

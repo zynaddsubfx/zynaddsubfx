@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0107 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
@@ -155,7 +155,7 @@ return(log(freq/20.0)/log(1000.0));} {}
   decl {int maxdB;} {}
 } 
 
-class EffUI {: {public Fl_Group,public PresetsUI_}
+class EffUI {open : {public Fl_Group,public PresetsUI_}
 } {
   Function {EffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {eff=NULL;
@@ -184,7 +184,7 @@ if (filterwindow!=NULL){
     } {
       Fl_Text_Display {} {
         label {No Effect}
-        xywh {120 35 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 labelcolor 43 align 8
+        xywh {120 35 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 labelcolor 43 align 8
       }
     }
   }
@@ -195,64 +195,64 @@ if (filterwindow!=NULL){
     } {
       Fl_Text_Display {} {
         label {Reverb }
-        xywh {275 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+        xywh {275 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Choice revp {
         label Preset
         callback {eff->changepreset((int)o->value());
 
 refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
-        menuitem {} {
+        MenuItem {} {
           label {Cathedral 1}
           xywh {10 10 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Cathedral 2}
           xywh {20 20 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Cathedral 3}
           xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Hall 1}
           xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Hall 2}
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Room 1}
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Room 2}
           xywh {70 70 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label Basement
           xywh {80 80 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label Tunnel
           xywh {90 90 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Echoed 1}
           xywh {100 100 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Echoed 2}
           xywh {110 110 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Very Long 1}
           xywh {120 120 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Very Long 2}
           xywh {130 130 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
@@ -260,13 +260,13 @@ refresh(eff);}
       Fl_Choice revp10 {
         label Type
         callback {eff->seteffectpar(10,(int) o->value());}
-        xywh {110 15 75 15} down_box BORDER_BOX color 14 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {110 15 75 15} down_box BORDER_BOX color 14 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
-        menuitem {} {
+        MenuItem {} {
           label Random
           xywh {20 20 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label Freeverb
           xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
@@ -274,61 +274,61 @@ refresh(eff);}
       Fl_Dial revp0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
-        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial revp1 {
         label Pan
         callback {eff->seteffectpar(1,(int) o->value());}
-        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial revp2 {
         label Time
         callback {eff->seteffectpar(2,(int) o->value());}
-        xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial revp3 {
         label {I.del}
         callback {eff->seteffectpar(3,(int) o->value());}
-        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 when 4 maximum 127
+        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
         class WidgetPDial
       }
       Fl_Dial revp4 {
         label {I.delfb}
         callback {eff->seteffectpar(4,(int) o->value());}
-        xywh {155 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {155 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial revp5 {
         label {R.delay}
         callback {eff->seteffectpar(5,(int) o->value());}
-        xywh {200 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 when 4 maximum 127 deactivate
+        xywh {200 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127 deactivate
         class WidgetPDial
       }
       Fl_Dial revp6 {
         label {E/R}
         callback {eff->seteffectpar(6,(int) o->value());}
-        xywh {235 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127 deactivate
+        xywh {235 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127 deactivate
         class WidgetPDial
       }
       Fl_Dial revp7 {
         label LPF
         callback {eff->seteffectpar(7,(int) o->value());}
-        xywh {270 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {270 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial revp8 {
         label HPF
         callback {eff->seteffectpar(8,(int) o->value());}
-        xywh {305 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {305 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial revp9 {
         label Damp
         callback {eff->seteffectpar(9,(int) o->value());}
-        xywh {340 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 minimum 64 maximum 127 step 1
+        xywh {340 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 minimum 64 maximum 127 step 1
         class WidgetPDial
       }
       Fl_Dial revp11 {
@@ -351,89 +351,89 @@ eff->seteffectpar(11,x);}
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {11 15 95 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {11 15 95 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
-        menuitem {} {
+        MenuItem {} {
           label {Echo 1}
           xywh {20 20 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Echo 2}
           xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Echo 3}
           xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Simple Echo}
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label Canyon
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Panning Echo 1}
           xywh {70 70 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Panning Echo 2}
           xywh {80 80 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Panning Echo 3}
           xywh {90 90 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Feedback Echo}
           xywh {100 100 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
       Fl_Text_Display {} {
         label Echo
-        xywh {295 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+        xywh {295 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial echop0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
-        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial echop1 {
         label Pan
         callback {eff->seteffectpar(1,(int) o->value());}
-        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial echop2 {
         label Delay
         callback {eff->seteffectpar(2,(int) o->value());}
-        xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 when 4 maximum 127
+        xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
         class WidgetPDial
       }
       Fl_Dial echop3 {
         label {LRdl.}
         callback {eff->seteffectpar(3,(int) o->value());}
-        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 when 4 maximum 127
+        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
         class WidgetPDial
       }
       Fl_Dial echop4 {
         label {LRc.}
         callback {eff->seteffectpar(4,(int) o->value());}
-        xywh {155 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {155 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial echop5 {
         label {Fb.}
         callback {eff->seteffectpar(5,(int) o->value());}
-        xywh {195 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {195 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial echop6 {
         label Damp
         callback {eff->seteffectpar(6,(int) o->value());}
-        xywh {235 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {235 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
     }
@@ -447,105 +447,105 @@ refresh(eff);}
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
-        menuitem {} {
+        MenuItem {} {
           label {Chorus 1}
           xywh {20 20 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Chorus 2}
           xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Chorus 3}
           xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Celeste 1}
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Celeste 2}
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Flange 1}
           xywh {70 70 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Flange 2}
           xywh {80 80 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Flange 3}
           xywh {90 90 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Flange 4}
           xywh {100 100 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Flange 5}
           xywh {110 110 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
       Fl_Text_Display {} {
         label Chorus
-        xywh {265 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+        xywh {265 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial chorusp0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
-        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial chorusp1 {
         label Pan
         callback {eff->seteffectpar(1,(int) o->value());}
-        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial chorusp2 {
         label Freq
         callback {eff->seteffectpar(2,(int) o->value());}
-        xywh {85 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {85 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial chorusp3 {
         label Rnd
         callback {eff->seteffectpar(3,(int) o->value());}
-        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 when 4 maximum 127
+        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
         class WidgetPDial
       }
       Fl_Dial chorusp5 {
         label {St.df}
         callback {eff->seteffectpar(5,(int) o->value());}
-        xywh {200 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {200 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial chorusp6 {
         label Dpth
         callback {eff->seteffectpar(6,(int) o->value());}
-        xywh {235 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {235 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial chorusp7 {
         label Delay
         callback {eff->seteffectpar(7,(int) o->value());}
-        xywh {270 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {270 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial chorusp8 {
         label Fb
         callback {eff->seteffectpar(8,(int) o->value());}
-        xywh {305 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {305 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial chorusp9 {
         label {L/R}
         callback {eff->seteffectpar(9,(int) o->value());}
-        xywh {340 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {340 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Check_Button {} {
@@ -564,120 +564,121 @@ refresh(eff);}
         callback {eff->seteffectpar(4,(int) o->value());}
         tooltip {LFO function} xywh {155 50 40 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 130 textsize 8
       } {
-        menuitem {} {
+        MenuItem {} {
           label SINE
           xywh {15 15 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label TRI
           xywh {25 25 100 20} labelfont 1 labelsize 10
         }
       }
     }
   }
-  Function {make_phaser_window()} {} {
-    Fl_Window effphaserwindow {
-      xywh {197 313 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
+  Function {make_phaser_window()} {open
+  } {
+    Fl_Window effphaserwindow {selected
+      xywh {458 210 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Choice phaserp {
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
-        menuitem {} {
+        MenuItem {} {
           label {Phaser 1}
           xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Phaser 2}
           xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Phaser 3}
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Phaser 4}
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Phaser 5}
           xywh {70 70 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Phaser 6}
           xywh {80 80 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
       Fl_Text_Display {} {
         label Phaser
-        xywh {275 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+        xywh {275 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial phaserp0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
-        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial phaserp1 {
         label Pan
         callback {eff->seteffectpar(1,(int) o->value());}
-        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial phaserp2 {
         label Freq
         callback {eff->seteffectpar(2,(int) o->value());}
-        xywh {85 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {85 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial phaserp3 {
         label Rnd
         callback {eff->seteffectpar(3,(int) o->value());}
-        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 when 4 maximum 127
+        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
         class WidgetPDial
       }
       Fl_Dial phaserp5 {
         label {St.df}
         callback {eff->seteffectpar(5,(int) o->value());}
-        xywh {200 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {200 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial phaserp6 {
         label Dpth
         callback {eff->seteffectpar(6,(int) o->value());}
-        xywh {235 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {235 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial phaserp7 {
         label Fb
         callback {eff->seteffectpar(7,(int) o->value());}
-        xywh {270 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {270 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial phaserp9 {
         label {L/R}
         callback {eff->seteffectpar(9,(int) o->value());}
-        xywh {345 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {345 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Check_Button phaserp10 {
         label Substract
         callback {eff->seteffectpar(10,(int) o->value());}
-        xywh {185 10 70 20} box THIN_UP_BOX down_box DOWN_BOX color 230 labelfont 1 labelsize 10
+        xywh {185 10 74 20} box THIN_UP_BOX down_box DOWN_BOX color 230 labelfont 1 labelsize 10
       }
       Fl_Choice phaserp4 {
         label {LFO type}
         callback {eff->seteffectpar(4,(int) o->value());}
         tooltip {LFO function} xywh {155 50 40 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 130 textsize 8
       } {
-        menuitem {} {
+        MenuItem {} {
           label SINE
           xywh {15 15 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label TRI
           xywh {25 25 100 20} labelfont 1 labelsize 10
         }
@@ -685,7 +686,7 @@ refresh(eff);}
       Fl_Counter phaserp8 {
         label Stages
         callback {eff->seteffectpar(8,(int) o->value());}
-        xywh {305 55 35 15} type Simple labelfont 1 labelsize 12 minimum 0 maximum 127 step 1
+        xywh {305 55 35 15} type Simple labelfont 1 labelsize 11 minimum 0 maximum 127 step 1
         code0 {o->range(1,MAX_PHASER_STAGES);}
       }
       Fl_Dial phaserp11 {
@@ -705,75 +706,75 @@ refresh(eff);}
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
-        menuitem {} {
+        MenuItem {} {
           label {Alienwah 1}
           xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Alienwah 2}
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Alienwah 3}
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Alienwah 4}
           xywh {70 70 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
       Fl_Text_Display {} {
         label AlienWah
-        xywh {245 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+        xywh {245 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial awp0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
-        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial awp1 {
         label Pan
         callback {eff->seteffectpar(1,(int) o->value());}
-        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial awp2 {
         label Freq
         callback {eff->seteffectpar(2,(int) o->value());}
-        xywh {85 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {85 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial awp3 {
         label Rnd
         callback {eff->seteffectpar(3,(int) o->value());}
-        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 when 4 maximum 127
+        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
         class WidgetPDial
       }
       Fl_Dial awp5 {
         label {St.df}
         callback {eff->seteffectpar(5,(int) o->value());}
-        xywh {200 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {200 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial awp6 {
         label Dpth
         callback {eff->seteffectpar(6,(int) o->value());}
-        xywh {235 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {235 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial awp7 {
         label Fb
         callback {eff->seteffectpar(7,(int) o->value());}
-        xywh {270 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {270 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial awp9 {
         label {L/R}
         callback {eff->seteffectpar(9,(int) o->value());}
-        xywh {345 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {345 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Choice awp4 {
@@ -781,11 +782,11 @@ refresh(eff);}
         callback {eff->seteffectpar(4,(int) o->value());}
         tooltip {LFO function} xywh {155 50 40 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 130 textsize 8
       } {
-        menuitem {} {
+        MenuItem {} {
           label SINE
           xywh {15 15 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label TRI
           xywh {25 25 100 20} labelfont 1 labelsize 10
         }
@@ -793,13 +794,13 @@ refresh(eff);}
       Fl_Dial awp10 {
         label Phase
         callback {eff->seteffectpar(10,(int) o->value());}
-        xywh {160 5 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {160 5 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Counter awp8 {
         label Delay
         callback {eff->seteffectpar(8,(int) o->value());}
-        xywh {305 55 35 15} type Simple labelfont 1 labelsize 12 minimum 0 maximum 127 step 1
+        xywh {305 55 35 15} type Simple labelfont 1 labelsize 11 minimum 0 maximum 127 step 1
         code0 {o->range(1,MAX_ALIENWAH_DELAY);}
       }
     }
@@ -813,137 +814,137 @@ refresh(eff);}
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {11 15 95 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {11 15 95 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
-        menuitem {} {
+        MenuItem {} {
           label {Overdrive 1}
           xywh {20 20 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Overdrive 2}
           xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {A. Exciter 1}
           xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {A. Exciter 2}
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Guitar Amp}
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label Quantisize
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
       Fl_Text_Display {} {
         label Distortion
-        xywh {230 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+        xywh {230 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial distp0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
-        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial distp1 {
         label Pan
         callback {eff->seteffectpar(1,(int) o->value());}
-        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial distp2 {
         label {LRc.}
         callback {eff->seteffectpar(2,(int) o->value());}
-        xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 when 4 maximum 127
+        xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
         class WidgetPDial
       }
       Fl_Dial distp3 {
         label Drive
         callback {eff->seteffectpar(3,(int) o->value());}
-        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 when 4 maximum 127
+        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
         class WidgetPDial
       }
       Fl_Dial distp4 {
         label Level
         callback {eff->seteffectpar(4,(int) o->value());}
-        xywh {155 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {155 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial distp7 {
         label LPF
         callback {eff->seteffectpar(7,(int) o->value());}
-        xywh {285 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {285 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial distp8 {
         label HPF
         callback {eff->seteffectpar(8,(int) o->value());}
-        xywh {320 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {320 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Choice distp5 {
         label Type
         callback {eff->seteffectpar(5,(int) o->value());}
-        xywh {190 50 60 20} box UP_BOX down_box BORDER_BOX labelfont 1 labelsize 12 align 2 textsize 10
+        xywh {190 50 60 20} box UP_BOX down_box BORDER_BOX labelfont 1 labelsize 11 align 2 textsize 10
       } {
-        menuitem {} {
+        MenuItem {} {
           label Atan
           xywh {55 55 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Asym1
           xywh {65 65 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Pow
           xywh {75 75 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Sine
           xywh {85 85 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Qnts
           xywh {95 95 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Zigzg
           xywh {105 105 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Lmt
           xywh {115 115 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label LmtU
           xywh {125 125 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label LmtL
           xywh {135 135 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label ILmt
           xywh {147 147 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Clip
           xywh {157 157 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Asym2
           xywh {75 75 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Pow2
           xywh {85 85 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Sgm
           xywh {95 95 100 20} labelfont 1 labelsize 10
         }
@@ -951,17 +952,17 @@ refresh(eff);}
       Fl_Check_Button distp6 {
         label {Neg.}
         callback {eff->seteffectpar(6,(int) o->value());}
-        xywh {260 55 15 15} down_box DOWN_BOX labelfont 1 labelsize 12 align 2
+        xywh {260 55 15 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 2
       }
       Fl_Check_Button distp9 {
         label {St.}
         callback {eff->seteffectpar(9,(int) o->value());}
-        tooltip Stereo xywh {355 60 15 15} down_box DOWN_BOX labelfont 1 labelsize 12 align 2
+        tooltip Stereo xywh {355 60 15 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 2
       }
       Fl_Check_Button distp10 {
         label PF
         callback {eff->seteffectpar(10,(int) o->value());}
-        tooltip {Applies the filters(before or after) the distorsion} xywh {355 44 15 15} down_box DOWN_BOX labelfont 1 labelsize 12 align 1
+        tooltip {Applies the filters(before or after) the distorsion} xywh {355 44 15 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 1
       }
     }
   }
@@ -972,13 +973,13 @@ refresh(eff);}
     } {
       Fl_Text_Display {} {
         label EQ
-        xywh {320 10 15 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+        xywh {320 10 15 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial eqp0 {
         label Gain
         callback {eff->seteffectpar(0,(int) o->value());
 eqgraph->redraw();}
-        xywh {10 35 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {10 35 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Counter bandcounter {
@@ -1006,7 +1007,7 @@ qdial->value(q);
 
 int dbl=eff->geteffectpar(npb+4);
 stagescounter->value(dbl);}
-        tooltip {Band no.} xywh {240 20 45 15} type Simple labelfont 1 labelsize 12 align 1 minimum 0 maximum 1 step 1 textfont 1 textsize 12
+        tooltip {Band no.} xywh {240 20 45 15} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 1 step 1 textfont 1 textsize 11
         code0 {o->bounds(0,MAX_EQ_BANDS-1);}
       }
       Fl_Group bandgroup {
@@ -1042,7 +1043,7 @@ eqgraph->redraw();}
           callback {int np=eqband*5+14;
 eff->seteffectpar(np,(int) o->value());
 eqgraph->redraw();}
-          tooltip {Additional filter stages} xywh {340 60 30 15} type Simple labelfont 1 labelsize 10 minimum 1 maximum 127 step 1 textfont 1 textsize 12
+          tooltip {Additional filter stages} xywh {340 60 30 15} type Simple labelfont 1 labelsize 10 minimum 1 maximum 127 step 1 textfont 1 textsize 11
           code0 {o->bounds(0,MAX_FILTER_STAGES-1);}
         }
       }
@@ -1054,43 +1055,43 @@ bandcounter->do_callback();
 eqgraph->redraw();}
         tooltip Type xywh {290 20 40 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 1 when 6 textsize 10
       } {
-        menuitem {} {
+        MenuItem {} {
           label OFF
           xywh {0 0 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Lp1
           xywh {10 10 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Hp1
           xywh {20 20 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Lp2
           xywh {30 30 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Hp2
           xywh {40 40 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Bp2
           xywh {50 50 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label N2
           xywh {60 60 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Pk
           xywh {80 80 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label LSh
           xywh {70 70 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label HSh
           xywh {80 80 100 20} labelfont 1 labelsize 10
         }
@@ -1111,67 +1112,67 @@ eqgraph->redraw();}
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
-        menuitem {} {
+        MenuItem {} {
           label WahWah
           xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label AutoWah
           xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label Sweep
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label VocalMorph1
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label VocalMorph2
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
       Fl_Text_Display {} {
         label DynFilter
-        xywh {245 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+        xywh {245 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial dfp0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
-        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial dfp1 {
         label Pan
         callback {eff->seteffectpar(1,(int) o->value());}
-        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial dfp2 {
         label Freq
         callback {eff->seteffectpar(2,(int) o->value());}
-        xywh {85 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {85 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial dfp3 {
         label Rnd
         callback {eff->seteffectpar(3,(int) o->value());}
-        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 when 4 maximum 127
+        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
         class WidgetPDial
       }
       Fl_Dial dfp5 {
         label {St.df}
         callback {eff->seteffectpar(5,(int) o->value());}
-        xywh {200 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {200 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial dfp6 {
         label LfoD
         callback {eff->seteffectpar(6,(int) o->value());}
-        xywh {235 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {235 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Choice dfp4 {
@@ -1179,11 +1180,11 @@ refresh(eff);}
         callback {eff->seteffectpar(4,(int) o->value());}
         tooltip {LFO function} xywh {155 50 40 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 130 textsize 8
       } {
-        menuitem {} {
+        MenuItem {} {
           label SINE
           xywh {15 15 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label TRI
           xywh {25 25 100 20} labelfont 1 labelsize 10
         }
@@ -1199,19 +1200,19 @@ refresh(eff);}
         Fl_Dial dfp7 {
           label {A.S.}
           callback {eff->seteffectpar(7,(int) o->value());}
-          xywh {275 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+          xywh {275 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
           class WidgetPDial
         }
         Fl_Dial dfp9 {
           label {A.M}
           callback {eff->seteffectpar(9,(int) o->value());}
-          xywh {305 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+          xywh {305 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
           class WidgetPDial
         }
         Fl_Check_Button dfp8 {
           label {A.Inv.}
           callback {eff->seteffectpar(8,(int) o->value());}
-          xywh {345 55 15 15} down_box DOWN_BOX labelfont 1 labelsize 12 align 2
+          xywh {345 55 15 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 2
         }
       }
     }
@@ -1437,12 +1438,12 @@ effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);} {}
   }
   Function {make_null_window()} {} {
     Fl_Window effnullwindow {
-      xywh {539 150 233 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
+      xywh {539 150 230 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Text_Display {} {
         label {No Effect}
-        xywh {25 35 35 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 labelcolor 43 align 8
+        xywh {25 35 35 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 labelcolor 43 align 8
       }
     }
   }
@@ -1453,64 +1454,64 @@ effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);} {}
     } {
       Fl_Text_Display {} {
         label {Reverb }
-        xywh {115 10 20 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+        xywh {115 10 20 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Choice revp {
         label Preset
         callback {eff->changepreset((int)o->value());
 
 refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
-        menuitem {} {
+        MenuItem {} {
           label {Cathedral 1}
           xywh {10 10 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Cathedral 2}
           xywh {20 20 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Cathedral 3}
           xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Hall 1}
           xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Hall 2}
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Room 1}
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Room 2}
           xywh {70 70 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label Basement
           xywh {80 80 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label Tunnel
           xywh {90 90 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Echoed 1}
           xywh {100 100 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Echoed 2}
           xywh {110 110 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Very Long 1}
           xywh {120 120 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Very Long 2}
           xywh {130 130 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
@@ -1518,25 +1519,25 @@ refresh(eff);}
       Fl_Dial revp0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
-        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial revp2 {
         label Time
         callback {eff->seteffectpar(2,(int) o->value());}
-        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial revp3 {
         label {I.del}
         callback {eff->seteffectpar(3,(int) o->value());}
-        xywh {85 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 when 4 maximum 127
+        xywh {85 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
         class WidgetPDial
       }
       Fl_Dial revp9 {
         label Damp
         callback {eff->seteffectpar(9,(int) o->value());}
-        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 minimum 64 maximum 127 step 1
+        xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 minimum 64 maximum 127 step 1
         class WidgetPDial
       }
     }
@@ -1550,65 +1551,65 @@ refresh(eff);}
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {11 15 95 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {11 15 95 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
-        menuitem {} {
+        MenuItem {} {
           label {Echo 1}
           xywh {20 20 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Echo 2}
           xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Echo 3}
           xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Simple Echo}
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label Canyon
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Panning Echo 1}
           xywh {70 70 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Panning Echo 2}
           xywh {80 80 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Panning Echo 3}
           xywh {90 90 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Feedback Echo}
           xywh {100 100 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
       Fl_Text_Display {} {
         label Echo
-        xywh {145 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+        xywh {145 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial echop0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
-        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial echop2 {
         label Delay
         callback {eff->seteffectpar(2,(int) o->value());}
-        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 when 4 maximum 127
+        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
         class WidgetPDial
       }
       Fl_Dial echop5 {
         label {Fb.}
         callback {eff->seteffectpar(5,(int) o->value());}
-        xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
     }
@@ -1622,81 +1623,81 @@ refresh(eff);}
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
-        menuitem {} {
+        MenuItem {} {
           label {Chorus 1}
           xywh {20 20 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Chorus 2}
           xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Chorus 3}
           xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Celeste 1}
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Celeste 2}
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Flange 1}
           xywh {70 70 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Flange 2}
           xywh {80 80 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Flange 3}
           xywh {90 90 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Flange 4}
           xywh {100 100 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Flange 5}
           xywh {110 110 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
       Fl_Text_Display {} {
         label Chorus
-        xywh {120 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+        xywh {120 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial chorusp0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
-        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial chorusp2 {
         label Freq
         callback {eff->seteffectpar(2,(int) o->value());}
-        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial chorusp6 {
         label Dpth
         callback {eff->seteffectpar(6,(int) o->value());}
-        xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial chorusp7 {
         label Delay
         callback {eff->seteffectpar(7,(int) o->value());}
-        xywh {115 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {115 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial chorusp8 {
         label Fb
         callback {eff->seteffectpar(8,(int) o->value());}
-        xywh {150 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {150 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Check_Button {} {
@@ -1709,78 +1710,78 @@ refresh(eff);}
   }
   Function {make_phaser_window()} {} {
     Fl_Window effphaserwindow {
-      xywh {171 303 232 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
+      xywh {171 303 230 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Choice phaserp {
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
-        menuitem {} {
+        MenuItem {} {
           label {Phaser 1}
           xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Phaser 2}
           xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Phaser 3}
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Phaser 4}
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Phaser 5}
           xywh {70 70 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Phaser 6}
           xywh {80 80 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
       Fl_Text_Display {} {
         label Phaser
-        xywh {125 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+        xywh {125 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial phaserp0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
-        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial phaserp2 {
         label Freq
         callback {eff->seteffectpar(2,(int) o->value());}
-        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial phaserp5 {
         label {St.df}
         callback {eff->seteffectpar(5,(int) o->value());}
-        xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial phaserp6 {
         label Dpth
         callback {eff->seteffectpar(6,(int) o->value());}
-        xywh {115 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {115 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial phaserp7 {
         label Fb
         callback {eff->seteffectpar(7,(int) o->value());}
-        xywh {150 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {150 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Counter phaserp8 {
         label Stages
         callback {eff->seteffectpar(8,(int) o->value());}
-        xywh {185 55 35 15} type Simple labelfont 1 labelsize 12 minimum 0 maximum 127 step 1
+        xywh {185 55 35 15} type Simple labelfont 1 labelsize 11 minimum 0 maximum 127 step 1
         code0 {o->range(1,MAX_PHASER_STAGES);}
       }
     }
@@ -1794,51 +1795,51 @@ refresh(eff);}
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
-        menuitem {} {
+        MenuItem {} {
           label {Alienwah 1}
           xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Alienwah 2}
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Alienwah 3}
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Alienwah 4}
           xywh {70 70 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
       Fl_Text_Display {} {
         label AlienWah
-        xywh {100 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+        xywh {100 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial awp0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
-        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial awp2 {
         label Freq
         callback {eff->seteffectpar(2,(int) o->value());}
-        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial awp6 {
         label Dpth
         callback {eff->seteffectpar(6,(int) o->value());}
-        xywh {85 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {85 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Counter awp8 {
         label Delay
         callback {eff->seteffectpar(8,(int) o->value());}
-        xywh {125 55 35 15} type Simple labelfont 1 labelsize 12 minimum 0 maximum 127 step 1
+        xywh {125 55 35 15} type Simple labelfont 1 labelsize 11 minimum 0 maximum 127 step 1
         code0 {o->range(1,MAX_ALIENWAH_DELAY);}
       }
     }
@@ -1852,119 +1853,119 @@ refresh(eff);}
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {11 15 95 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {11 15 95 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
-        menuitem {} {
+        MenuItem {} {
           label {Overdrive 1}
           xywh {20 20 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Overdrive 2}
           xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {A. Exciter 1}
           xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {A. Exciter 2}
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label {Guitar Amp}
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label Quantisize
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
       Fl_Text_Display {} {
         label Distortion
-        xywh {110 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 20 align 8
+        xywh {110 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 8
       }
       Fl_Dial distp0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
-        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial distp3 {
         label Drive
         callback {eff->seteffectpar(3,(int) o->value());}
-        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 when 4 maximum 127
+        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
         class WidgetPDial
       }
       Fl_Dial distp4 {
         label Level
         callback {eff->seteffectpar(4,(int) o->value());}
-        xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial distp7 {
         label LPF
         callback {eff->seteffectpar(7,(int) o->value());}
-        xywh {190 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {190 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Choice distp5 {
         label Type
         callback {eff->seteffectpar(5,(int) o->value());}
-        xywh {120 50 60 20} box UP_BOX down_box BORDER_BOX labelfont 1 labelsize 12 align 2 textsize 10
+        xywh {120 50 60 20} box UP_BOX down_box BORDER_BOX labelfont 1 labelsize 11 align 2 textsize 10
       } {
-        menuitem {} {
+        MenuItem {} {
           label Atan
           xywh {55 55 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Asym1
           xywh {65 65 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Pow
           xywh {75 75 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Sine
           xywh {85 85 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Qnts
           xywh {95 95 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Zigzg
           xywh {105 105 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Lmt
           xywh {115 115 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label LmtU
           xywh {125 125 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label LmtL
           xywh {135 135 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label ILmt
           xywh {147 147 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Clip
           xywh {157 157 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Asym2
           xywh {75 75 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Pow2
           xywh {85 85 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Sgm
           xywh {95 95 100 20} labelfont 1 labelsize 10
         }
@@ -1978,7 +1979,7 @@ refresh(eff);}
     } {
       Fl_Text_Display {} {
         label EQ
-        xywh {170 5 15 25} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+        xywh {170 5 15 25} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Counter bandcounter {
         label Band
@@ -2005,7 +2006,7 @@ qdial->value(q);
 
 int dbl=eff->geteffectpar(npb+4);
 stagescounter->value(dbl);}
-        tooltip {Band no.} xywh {85 15 45 15} type Simple labelfont 1 labelsize 12 align 1 minimum 0 maximum 1 step 1 textfont 1 textsize 12
+        tooltip {Band no.} xywh {85 15 45 15} type Simple labelfont 1 labelsize 11 align 1 minimum 0 maximum 1 step 1 textfont 1 textsize 11
         code0 {o->bounds(0,MAX_EQ_BANDS-1);}
       }
       Fl_Group bandgroup {
@@ -2041,7 +2042,7 @@ eqgraph->redraw();}
           callback {int np=eqband*5+14;
 eff->seteffectpar(np,(int) o->value());
 eqgraph->redraw();}
-          tooltip {Additional filter stages} xywh {40 55 30 15} type Simple labelfont 1 labelsize 10 minimum 1 maximum 127 step 1 textfont 1 textsize 12
+          tooltip {Additional filter stages} xywh {40 55 30 15} type Simple labelfont 1 labelsize 10 minimum 1 maximum 127 step 1 textfont 1 textsize 11
           code0 {o->bounds(0,MAX_FILTER_STAGES-1);}
         }
       }
@@ -2053,43 +2054,43 @@ bandcounter->do_callback();
 eqgraph->redraw();}
         tooltip Type xywh {135 15 40 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 1 when 6 textsize 10
       } {
-        menuitem {} {
+        MenuItem {} {
           label OFF
           xywh {10 10 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Lp1
           xywh {20 20 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Hp1
           xywh {30 30 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Lp2
           xywh {40 40 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Hp2
           xywh {50 50 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Bp2
           xywh {60 60 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label N2
           xywh {70 70 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label Pk
           xywh {90 90 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label LSh
           xywh {80 80 100 20} labelfont 1 labelsize 10
         }
-        menuitem {} {
+        MenuItem {} {
           label HSh
           xywh {90 90 100 20} labelfont 1 labelsize 10
         }
@@ -2110,49 +2111,49 @@ eqgraph->redraw();}
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 labelcolor 0 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
-        menuitem {} {
+        MenuItem {} {
           label WahWah
           xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label AutoWah
           xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label Sweep
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label VocalMorph1
           xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-        menuitem {} {
+        MenuItem {} {
           label VocalMorph2
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
       Fl_Text_Display {} {
         label DynFilter
-        xywh {100 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 26 align 8
+        xywh {100 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial dfp0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
-        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial dfp2 {
         label Freq
         callback {eff->seteffectpar(2,(int) o->value());}
-        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial dfp6 {
         label LfoD
         callback {eff->seteffectpar(6,(int) o->value());}
-        xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+        xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Group {} {open
@@ -2161,13 +2162,13 @@ refresh(eff);}
         Fl_Dial dfp7 {
           label {A.S.}
           callback {eff->seteffectpar(7,(int) o->value());}
-          xywh {120 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+          xywh {120 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
           class WidgetPDial
         }
         Fl_Dial dfp9 {
           label {A.M}
           callback {eff->seteffectpar(9,(int) o->value());}
-          xywh {150 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 12 maximum 127
+          xywh {150 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
           class WidgetPDial
         }
       }
@@ -2299,8 +2300,7 @@ switch(eff->geteffect()){
             break; 
 };
 
-this->show();} {selected
-    }
+this->show();} {}
   }
   Function {refresh()} {} {
     code {refresh(eff);} {}
