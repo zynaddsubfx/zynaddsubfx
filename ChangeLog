@@ -807,5 +807,7 @@
 14 Sep 2006 - Se afiseaza spectrul la nota cu frecventa de 440 Hz la Oscil si pentru parametru Adaptive Harmonics
 30 Oct 2006 - Adaugat un patch "standalone zombie fix stripped from Lars" 
 	    - Adaugat un patch "Extended mono" si "font resizing stuff" de Gerald Folcher
+31 Oct 2006 - Adaugat un patch "Extended mono v.3" de Gerald Folcher
+
 
 

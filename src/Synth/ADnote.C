@@ -205,15 +205,6 @@ void ADnote::ADlegatonote(ADnoteParameters *pars, Controller *ctl_, REALTYPE fre
       pars->GlobalPar.PFilterVelocityScale/127.0*6.0*  //velocity sensing
       (VelF(velocity,pars->GlobalPar.PFilterVelocityScaleFunction)-1);
 
-    if (pars->GlobalPar.PPunchStrength!=0) {
-      NoteGlobalPar.Punch.Enabled=1;
-      NoteGlobalPar.Punch.t=1.0;//start from 1.0 and to 0.0
-      NoteGlobalPar.Punch.initialvalue=( (pow(10,1.5*pars->GlobalPar.PPunchStrength/127.0)-1.0)
-					 *VelF(velocity,pars->GlobalPar.PPunchVelocitySensing) );
-      REALTYPE time=pow(10,3.0*pars->GlobalPar.PPunchTime/127.0)/10000.0;//0.1 .. 100 ms
-      REALTYPE stretch=pow(440.0/freq,pars->GlobalPar.PPunchStretch/64.0);
-      NoteGlobalPar.Punch.dt=1.0/(time*SAMPLE_RATE*stretch);
-    } else NoteGlobalPar.Punch.Enabled=0;
 
     for (int nvoice=0;nvoice<NUM_VOICES;nvoice++){
       if (pars->VoicePar[nvoice].Enabled==0) {
@@ -255,8 +246,6 @@ void ADnote::ADlegatonote(ADnoteParameters *pars, Controller *ctl_, REALTYPE fre
       //I store the first elments to the last position for speedups
       for (int i=0;i<OSCIL_SMP_EXTRA_SAMPLES;i++) NoteVoicePar[nvoice].OscilSmp[OSCIL_SIZE+i]=NoteVoicePar[nvoice].OscilSmp[i];
 
-      ///oscposhi[nvoice]+=(int)((pars->VoicePar[nvoice].Poscilphase-64.0)/128.0*OSCIL_SIZE+OSCIL_SIZE*4);
-      ///oscposhi[nvoice]%=OSCIL_SIZE;
 
       NoteVoicePar[nvoice].FilterCenterPitch=pars->VoicePar[nvoice].VoiceFilter->getfreq();
       NoteVoicePar[nvoice].filterbypass=pars->VoicePar[nvoice].Pfilterbypass;

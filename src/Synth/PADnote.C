@@ -170,27 +170,12 @@ void PADnote::PADlegatonote(PADnoteParameters *parameters, Controller *ctl_, REA
 	int size=pars->sample[nsample].size;
 	if (size==0) size=1;
 
-	///poshi_l=(int)(RND*(size-1));
-	///if (pars->PStereo!=0) poshi_r=(poshi_l+size/2)%size;
-	///else poshi_r=poshi_l;
-	///poslo=0.0;
-
 	if (pars->PPanning==0) NoteGlobalPar.Panning=RND;
 	else NoteGlobalPar.Panning=pars->PPanning/128.0;
 
 	NoteGlobalPar.FilterCenterPitch=pars->GlobalFilter->getfreq()+//center freq
 		pars->PFilterVelocityScale/127.0*6.0*  //velocity sensing
 		(VelF(velocity,pars->PFilterVelocityScaleFunction)-1);
-
-	if (pars->PPunchStrength!=0) {
-		NoteGlobalPar.Punch.Enabled=1;
-		NoteGlobalPar.Punch.t=1.0;//start from 1.0 and to 0.0
-		NoteGlobalPar.Punch.initialvalue=( (pow(10,1.5*pars->PPunchStrength/127.0)-1.0)
-				*VelF(velocity,pars->PPunchVelocitySensing) );
-		REALTYPE time=pow(10,3.0*pars->PPunchTime/127.0)/10000.0;//0.1 .. 100 ms
-		REALTYPE stretch=pow(440.0/freq,pars->PPunchStretch/64.0);
-		NoteGlobalPar.Punch.dt=1.0/(time*SAMPLE_RATE*stretch);
-	} else NoteGlobalPar.Punch.Enabled=0;
 
 
 	NoteGlobalPar.Volume=4.0*pow(0.1,3.0*(1.0-pars->PVolume/96.0))//-60 dB .. 0 dB
