@@ -39,7 +39,7 @@ void Config::init(){
     //defaults
     cfg.SampleRate=44100;
     cfg.SoundBufferSize=256;
-    cfg.OscilSize=512;
+    cfg.OscilSize=1024;
     cfg.SwapStereo=0;
     
     cfg.LinuxOSSWaveOutDev=new char[MAX_STRING_SIZE];

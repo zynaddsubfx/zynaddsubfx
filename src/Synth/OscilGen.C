@@ -719,67 +719,67 @@ void OscilGen::prepare(){
 };
 
 void OscilGen::adaptiveharmonic(FFTFREQS f,REALTYPE freq){
-    if ((Padaptiveharmonics==0)/*||(freq<1.0)*/) return;
-    if (freq<1.0) freq=440.0;
+	if ((Padaptiveharmonics==0)/*||(freq<1.0)*/) return;
+	if (freq<1.0) freq=440.0;
 
-    FFTFREQS inf;
-    newFFTFREQS(&inf,OSCIL_SIZE/2);
-    for (int i=0;i<OSCIL_SIZE/2;i++) {
-	inf.s[i]=f.s[i];
-	inf.c[i]=f.c[i];
-	f.s[i]=0.0;
-	f.c[i]=0.0;
-    };
-    inf.c[0]=0.0;inf.s[0]=0.0;    
-    
-    REALTYPE hc=0.0,hs=0.0;
-    REALTYPE basefreq=30.0*pow(10.0,Padaptiveharmonicsbasefreq/128.0);
-    REALTYPE power=(Padaptiveharmonicspower+1.0)/101.0;
-    
-    REALTYPE rap=freq/basefreq;
-
-    rap=pow(rap,power);
-
-    bool down=false;
-    if (rap>1.0) {
-	rap=1.0/rap;
-	down=true;
-    };
-    
-    for (int i=0;i<OSCIL_SIZE/2-2;i++){ 
-	REALTYPE h=i*rap;
-        int high=(int)(i*rap);
-	REALTYPE low=fmod(h,1.0);
-
-        if (high>=(OSCIL_SIZE/2-2)){
-	    break;
-	} else {
-	    if (down){
-		f.c[high]+=inf.c[i]*(1.0-low);
-		f.s[high]+=inf.s[i]*(1.0-low);
-		f.c[high+1]+=inf.c[i]*low;
-		f.s[high+1]+=inf.s[i]*low;
-	    } else {
-		hc=inf.c[high]*(1.0-low)+inf.c[high+1]*low;
-		hs=inf.s[high]*(1.0-low)+inf.s[high+1]*low;
-	    };
-	    if (fabs(hc)<0.000001) hc=0.0;
-	    if (fabs(hs)<0.000001) hs=0.0;
+	FFTFREQS inf;
+	newFFTFREQS(&inf,OSCIL_SIZE/2);
+	for (int i=0;i<OSCIL_SIZE/2;i++) {
+		inf.s[i]=f.s[i];
+		inf.c[i]=f.c[i];
+		f.s[i]=0.0;
+		f.c[i]=0.0;
 	};
-	
-	if (!down){    
-	    if (i==0) {//corect the aplitude of the first harmonic
-		hc*=rap;
-		hs*=rap;
-	    };
-	    f.c[i]=hc;
-	    f.s[i]=hs;
+	inf.c[0]=0.0;inf.s[0]=0.0;    
+
+	REALTYPE hc=0.0,hs=0.0;
+	REALTYPE basefreq=30.0*pow(10.0,Padaptiveharmonicsbasefreq/128.0);
+	REALTYPE power=(Padaptiveharmonicspower+1.0)/101.0;
+
+	REALTYPE rap=freq/basefreq;
+
+	rap=pow(rap,power);
+
+	bool down=false;
+	if (rap>1.0) {
+		rap=1.0/rap;
+		down=true;
 	};
-    };
-    
-    f.c[1]+=f.c[0];f.s[1]+=f.s[0];
-    f.c[0]=0.0;f.s[0]=0.0;    
-    deleteFFTFREQS(&inf);
+
+	for (int i=0;i<OSCIL_SIZE/2-2;i++){ 
+		REALTYPE h=i*rap;
+		int high=(int)(i*rap);
+		REALTYPE low=fmod(h,1.0);
+
+		if (high>=(OSCIL_SIZE/2-2)){
+			break;
+		} else {
+			if (down){
+				f.c[high]+=inf.c[i]*(1.0-low);
+				f.s[high]+=inf.s[i]*(1.0-low);
+				f.c[high+1]+=inf.c[i]*low;
+				f.s[high+1]+=inf.s[i]*low;
+			} else {
+				hc=inf.c[high]*(1.0-low)+inf.c[high+1]*low;
+				hs=inf.s[high]*(1.0-low)+inf.s[high+1]*low;
+			};
+			if (fabs(hc)<0.000001) hc=0.0;
+			if (fabs(hs)<0.000001) hs=0.0;
+		};
+
+		if (!down){    
+			if (i==0) {//corect the aplitude of the first harmonic
+				hc*=rap;
+				hs*=rap;
+			};
+			f.c[i]=hc;
+			f.s[i]=hs;
+		};
+	};
+
+	f.c[1]+=f.c[0];f.s[1]+=f.s[0];
+	f.c[0]=0.0;f.s[0]=0.0;    
+	deleteFFTFREQS(&inf);
 };
 
 void OscilGen::adaptiveharmonicpostprocess(REALTYPE *f,int size){

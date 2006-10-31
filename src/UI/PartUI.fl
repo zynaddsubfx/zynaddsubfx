@@ -42,9 +42,9 @@ decl {\#include "../Misc/Master.h"} {public
 decl {\#include "../Misc/Part.h"} {public
 } 
 
-class PartSysEffSend {: {public Fl_Group}
+class PartSysEffSend {open : {public Fl_Group}
 } {
-  Function {make_window()} {private
+  Function {make_window()} {open private
   } {
     Fl_Window syseffsend {
       private xywh {584 83 90 35} type Double hide
@@ -52,11 +52,11 @@ class PartSysEffSend {: {public Fl_Group}
     } {
       Fl_Dial {} {
         label 01
-        callback {master->setPsysefxvol(npart,neff,(int) o->value());}
+        callback {master->setPsysefxvol(npart,neff,(int) o->value());} selected
         xywh {0 0 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 align 130 maximum 127 step 1
         code0 {o->size(25,25);}
         code1 {o->value(master->Psysefxvol[neff][npart]);}
-        code2 {char tmp[10];snprintf(tmp,10,"%d",neff);o->label(strdup(tmp));}
+        code2 {char tmp[10];snprintf(tmp,10,"%d",neff+1);o->label(strdup(tmp));}
         class WidgetPDial
       }
     }
@@ -279,8 +279,8 @@ class PartUI {open : {public Fl_Group,PartUI_}
   Function {make_window()} {open private
   } {
     Fl_Window partgroup {
-      private xywh {424 178 385 180} type Double
-      class Fl_Group visible
+      private xywh {424 178 385 180} type Double hide
+      class Fl_Group
     } {
       Fl_Group partgroupui {
         xywh {0 0 385 180}
@@ -377,7 +377,7 @@ if (part->Pminkey>part->Pmaxkey) o->textcolor(FL_RED);
         }
         Fl_Check_Button {} {
           label Portamento
-          callback {part->ctl.portamento.portamento=(int) o->value();} selected
+          callback {part->ctl.portamento.portamento=(int) o->value();}
           tooltip {Enable/Disable the portamento} xywh {95 155 88 20} down_box DOWN_BOX labelfont 1 labelsize 11
           code0 {o->value(part->ctl.portamento.portamento);}
         }

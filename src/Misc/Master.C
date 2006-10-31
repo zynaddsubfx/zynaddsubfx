@@ -73,36 +73,37 @@ Master::Master(){
 };
 
 void Master::defaults(){
-    volume=1.0;
-    setPvolume(80);
-    setPkeyshift(64);
-    
-    for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
-	part[npart]->defaults();
-	part[npart]->Prcvchn=npart%NUM_MIDI_CHANNELS;
-    };
+	volume=1.0;
+	setPvolume(80);
+	setPkeyshift(64);
 
-    partonoff(0,1);//enable the first part
-
-    for (int nefx=0;nefx<NUM_INS_EFX;nefx++) {
-    	insefx[nefx]->defaults();
-	Pinsparts[nefx]=-1;
-    };
-    
-    //System Effects init        
-    for (int nefx=0;nefx<NUM_SYS_EFX;nefx++) {
-	sysefx[nefx]->defaults();
 	for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
-	    if (nefx==0) setPsysefxvol(npart,nefx,64);
-	    else setPsysefxvol(npart,nefx,0);
+		part[npart]->defaults();
+		part[npart]->Prcvchn=npart%NUM_MIDI_CHANNELS;
 	};
-	for (int nefxto=0;nefxto<NUM_SYS_EFX;nefxto++)
-	    setPsysefxsend(nefx,nefxto,0);
-    };
 
-    sysefx[0]->changeeffect(1);
-    microtonal.defaults();
-    ShutUp();
+	partonoff(0,1);//enable the first part
+
+	for (int nefx=0;nefx<NUM_INS_EFX;nefx++) {
+		insefx[nefx]->defaults();
+		Pinsparts[nefx]=-1;
+	};
+
+	//System Effects init        
+	for (int nefx=0;nefx<NUM_SYS_EFX;nefx++) {
+		sysefx[nefx]->defaults();
+		for (int npart=0;npart<NUM_MIDI_PARTS;npart++){
+			//if (nefx==0) setPsysefxvol(npart,nefx,64);
+			//else 
+			setPsysefxvol(npart,nefx,0);
+		};
+		for (int nefxto=0;nefxto<NUM_SYS_EFX;nefxto++)
+			setPsysefxsend(nefx,nefxto,0);
+	};
+
+//	sysefx[0]->changeeffect(1);
+	microtonal.defaults();
+	ShutUp();
 };
 
 /*
