@@ -704,7 +704,7 @@ refresh();} {}
   }
   Function {reinit()} {} {
     code {if (env->Pfreemode!=0){
-  int answer=fl_ask("Disable the free mode of the Envelope?");
+  int answer=fl_choice("Disable the free mode of the Envelope?","No","Yes",NULL);
   if (env->Pfreemode!=0) freemodebutton->value(1);
           else freemodebutton->value(0);
   if (answer==0) return;

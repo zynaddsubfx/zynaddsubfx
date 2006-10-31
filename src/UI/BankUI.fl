@@ -268,7 +268,7 @@ if ((what==1)&&(mode==1)&&(!bank->emptyslot(slot))){//Reads from slot
 
 if ((what==1)&&(mode==2)){//save(write) to slot
      if (!bank->emptyslot(slot)){
-       if (!fl_ask("Overwrite the slot no. %d ?",slot+1)) goto nooverwriteslot;
+       if (!fl_choice("Overwrite the slot no. %d ?","No","Yes",NULL,slot+1)) goto nooverwriteslot;
       };
        pthread_mutex_lock(&master->mutex);
         bank->savetoslot(slot,master->part[*npart]);
@@ -282,7 +282,7 @@ if ((what==1)&&(mode==2)){//save(write) to slot
 
 
 if ((what==1)&&(mode==3)&&(!bank->emptyslot(slot))){//Clears the slot
-      if (fl_ask("Clear the slot no. %d ?",slot+1)){
+      if (fl_choice("Clear the slot no. %d ?","No","Yes",NULL,slot+1)){
           bank->clearslot(slot);
           bs[slot]->refresh();
       };

@@ -646,7 +646,7 @@ redrawoscil();}
       }
       Fl_Button {} {
         label Clear
-        callback {if (!fl_ask("Clear the harmonics settings?")) return;
+        callback {if (!fl_choice("Clear the harmonics settings?","No","Yes",NULL)) return;
 
 for (int i=0;i<MAX_AD_HARMONICS;i++){
     h[i]->mag->value(64);
@@ -1018,7 +1018,7 @@ redrawoscil();}
       }
       Fl_Button {} {
         label Sine
-        callback {if (!fl_ask("Convert to SINE?")) return;
+        callback {if (!fl_choice("Convert to SINE?","No","Yes",NULL)) return;
 
 pthread_mutex_lock(&master->mutex);
  oscil->convert2sine(0);

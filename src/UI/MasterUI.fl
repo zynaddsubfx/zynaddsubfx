@@ -422,7 +422,7 @@ class MasterUI {open
       callback {\#ifdef VSTAUDIOOUT
 fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
 \#else
-if (fl_ask("Exit and leave the unsaved data?")) {
+if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL)) {
     config.save();
     *exitprogram=1;
 };
@@ -485,7 +485,7 @@ filename=fl_filename_setext(filename,".xsz");
 result=fileexists(filename);
 if (result) {
     result=0;
-   if (!fl_ask("The file exists. \\nOverwrite it?")) return;
+   if (!fl_choice("The file exists. \\nOverwrite it?","No","Yes",NULL)) return;
        
 };
 
@@ -527,7 +527,7 @@ updatepanel();}
         } {
           MenuItem {} {
             label {&Clear Instrument...}
-            callback {if (fl_ask("Clear instrument's parameters ?")){
+            callback {if (fl_choice("Clear instrument's parameters ?","No","Yes",NULL)){
 //       int npart=(int)npartcounter->value()-1;
        pthread_mutex_lock(&master->mutex);
        master->part[npart]->defaultsinstrument();
@@ -576,7 +576,7 @@ filename=fl_filename_setext(filename,".xiz");
 int result=fileexists(filename);
 if (result) {
     result=0;
-   if (!fl_ask("The file exists. \\nOverwrite it?")) return;
+   if (!fl_choice("The file exists. \\nOverwrite it?","No","Yes",NULL)) return;
        
 };
 
@@ -619,7 +619,7 @@ fl_filename_setext(filename,".wav");
 int result=master->HDDRecorder.preparefile(filename,0);
 if (result==1) {
     result=0;
-   if (fl_ask("The file exists. \\nOverwrite it?"))
+   if (fl_choice("The file exists. \\nOverwrite it?","No","Yes",NULL))
        master->HDDRecorder.preparefile(filename,1);
 };
 if (result==0) recordbutton->activate();
@@ -644,7 +644,7 @@ if (result!=0) fl_alert("Error: Could not save the file.");}
         } {
           MenuItem {} {
             label {Switch User Interface Mode}
-            callback {if (fl_ask("Switch the User Interface to Beginner mode ?")){
+            callback {if (fl_choice("Switch the User Interface to Beginner mode ?","No","Yes",NULL)){
 	masterwindow->hide();
 	refresh_master_ui();
 	simplemasterwindow->show();
@@ -1077,7 +1077,7 @@ updatepanel();}
       callback {\#ifdef VSTAUDIOOUT
 fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
 \#else
-if (fl_ask("Exit and leave the unsaved data?")) {
+if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL)) {
 	config.save();
 	*exitprogram=1;
 };
@@ -1163,7 +1163,7 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an
         } {
           MenuItem {} {
             label {Switch User Interface Mode}
-            callback {if (fl_ask("Switch the User Interface to Advanced mode ?")){
+            callback {if (fl_choice("Switch the User Interface to Advanced mode ?","No","Yes",NULL)){
 	simplemasterwindow->hide();
 	refresh_master_ui();
 	masterwindow->show();
@@ -1691,7 +1691,7 @@ simplepartkeyshiftcounter->value(master->part[npart]->Pkeyshift-64);
 simplesyseffsend->value(master->Psysefxvol[nsyseff][npart]);} {}
   }
   Function {do_new_master()} {} {
-    code {if (fl_ask("Clear *ALL* the parameters ?")){
+    code {if (fl_choice("Clear *ALL* the parameters ?","No","Yes",NULL)){
        delete microtonalui;
 
        pthread_mutex_lock(&master->mutex);
@@ -1740,7 +1740,7 @@ filename=fl_filename_setext(filename,".xmz");
 result=fileexists(filename);
 if (result) {
     result=0;
-   if (!fl_ask("The file exists. \\nOverwrite it?")) return;
+   if (!fl_choice("The file exists. \\nOverwrite it?","No","Yes",NULL)) return;
        
 };
 

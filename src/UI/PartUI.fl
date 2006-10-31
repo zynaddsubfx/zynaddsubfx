@@ -200,7 +200,7 @@ if (part->kit[n].Ppadenabled!=0) padeditbutton->activate();
       Fl_Check_Button enabledcheck {
         label 01
         callback {int answer=1;
-if (o->value()==0) answer=fl_ask("Delete the item?");
+if (o->value()==0) answer=fl_choice("Delete the item?","No","Yes",NULL);
 if (answer!=0){
 pthread_mutex_lock(&master->mutex);
  part->setkititemstatus(n,(int) o->value());
@@ -241,7 +241,7 @@ if (part->kit[n].Psendtoparteffect==127) sendtoeffect->value(0);
 
 this->redraw();} {
       callback {int answer=1;
-if (o->value()==0) answer=fl_ask("Delete the item?");
+if (o->value()==0) answer=fl_choice("Delete the item?","No","Yes",NULL);
 if (answer!=0){
 pthread_mutex_lock(&master->mutex);
  part->setkititemstatus(n,(int) o->value());
