@@ -42,6 +42,9 @@ LINUX_AUDIOOUT=OSS
 LINUX_DSSI=NO
 #LINUX_DSSI=YES
 
+#Next line sets if the LASH session handler will be used
+LINUX_USE_LASH=YES
+#LINUX_USE_LASH=NO
 
 # W I N D O W S   C O N F I G U R A T I O N
 

@@ -40,6 +40,8 @@
 
 bool JACKaudiooutputinit(Master *master_);
 void JACKfinish();
+void JACKhandlemidi(unsigned long frames);
+const char* JACKgetname();
 
 #endif
 

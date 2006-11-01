@@ -70,6 +70,12 @@ CXXFLAGS += `pkg-config --cflags jack`
 LIBS+= `pkg-config --libs jack`
 endif
 
+ifeq ($(LINUX_USE_LASH),YES)
+CXXFLAGS += `pkg-config --cflags lash-1.0` -DUSE_LASH
+LIBS+= `pkg-config --libs lash-1.0`
+endif
+
+
 objects=main.o
 SUBDIRS=DSP Effects Input Misc Output Params Synth Seq
 

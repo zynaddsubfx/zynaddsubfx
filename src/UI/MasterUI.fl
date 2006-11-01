@@ -1705,10 +1705,15 @@ simplesyseffsend->value(master->Psysefxvol[nsyseff][npart]);} {}
 
 updatepanel();} {}
   }
-  Function {do_load_master()} {} {
+  Function {do_load_master(char* file = NULL)} {} {
     code {char *filename;
-filename=fl_file_chooser("Open:","({*.xmz})",NULL,0);
-if (filename==NULL) return;
+  if (file == NULL) {
+    filename=fl_file_chooser("Open:","({*.xmz})",NULL,0);
+    if (filename==NULL) return;
+  }
+  else {
+    filename = file;
+  }
 
 
 pthread_mutex_lock(&master->mutex);
@@ -1729,20 +1734,23 @@ if (result>=0) setfilelabel(filename);
 if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not a zynaddsubfx parameters file.");
       else if (result<0) fl_alert("Error: Could not load the file.");} {}
   }
-  Function {do_save_master()} {} {
+  Function {do_save_master(char* file = NULL)} {} {
     code {char *filename;
-int result=0;
-
-filename=fl_file_chooser("Save:","({*.xmz})",NULL,0);
-if (filename==NULL) return;
-filename=fl_filename_setext(filename,".xmz");
-
-result=fileexists(filename);
-if (result) {
-    result=0;
-   if (!fl_choice("The file exists. \\nOverwrite it?","No","Yes",NULL)) return;
-       
-};
+  int result=0;
+  if (file == NULL) {
+    filename=fl_file_chooser("Save:","({*.xmz})",NULL,0);
+    if (filename==NULL) return;
+    filename=fl_filename_setext(filename,".xmz");
+    result=fileexists(filename);
+    if (result) {
+      result=0;
+      if (!fl_choice("The file exists. Overwrite it?","No","Yes",NULL)) return;
+      
+    }
+  }
+  else {
+    filename = file;
+  }
 
 
 pthread_mutex_lock(&master->mutex);

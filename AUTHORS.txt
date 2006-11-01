@@ -3,5 +3,5 @@ Main author:
 
 Contributors:
 	Gerald Folcher (legato, mono notes memory)
-	Lars Luthman (zombie fix)
+	Lars Luthman (zombie fix,jack midi, LASH support)
 

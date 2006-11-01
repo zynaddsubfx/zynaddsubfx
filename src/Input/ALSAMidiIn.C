@@ -94,3 +94,14 @@ void ALSAMidiIn::getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmd
 };
 
 
+int ALSAMidiIn::getalsaid() {
+  if (midi_handle) {
+    snd_seq_client_info_t* seq_info;
+    snd_seq_client_info_malloc(&seq_info);
+    snd_seq_get_client_info(midi_handle, seq_info);
+    int id = snd_seq_client_info_get_client(seq_info);
+    snd_seq_client_info_free(seq_info);
+    return id;
+  }
+  return -1;
+}

@@ -32,6 +32,7 @@ class ALSAMidiIn:public MidiIn{
 	ALSAMidiIn();
 	~ALSAMidiIn();
 	void getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmdparams);
+	int getalsaid();
 
     private:
 	snd_seq_t *midi_handle;

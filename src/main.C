@@ -83,6 +83,11 @@ bool usejackit=false;
 OSSaudiooutput *audioout;
 #endif
 
+#ifdef USE_LASH
+#include "Misc/LASHClient.h"
+LASHClient *lash;
+#endif
+
 MidiIn *Midi;
 int Pexitprogram=0;//if the UI set this to 1, the program will exit
 
@@ -180,7 +185,26 @@ void *thread2(void *arg){
 void *thread3(void *arg){
 #ifndef DISABLE_GUI
     ui->showUI();
-    while (Pexitprogram==0) Fl::wait();
+    while (Pexitprogram==0) {
+#ifdef USE_LASH
+      std::string filename;
+      switch (lash->checkevents(filename)) {
+      case LASHClient::Save:
+        ui->do_save_master(const_cast<char*>(filename.c_str()));
+        lash->confirmevent(LASHClient::Save);
+        break;
+      case LASHClient::Restore:
+        ui->do_load_master(const_cast<char*>(filename.c_str()));
+        lash->confirmevent(LASHClient::Restore);
+        break;
+      case LASHClient::Quit:
+        Pexitprogram = 1;
+      default:
+        break;
+      }
+#endif
+      Fl::wait();
+    }
 #endif
     return(0);
 };
@@ -312,6 +336,10 @@ void exitprogram(){
     delete(Midi);
     delete(master); 
 
+#ifdef USE_LASH
+    delete(lash);
+#endif
+
 //    pthread_mutex_unlock(&master->mutex);
     delete(denormalkillbuf);
     delete(OscilGen::tmpsmps);
@@ -345,6 +373,11 @@ void exitprogram(){
 
 #ifndef VSTAUDIOOUT
 int main(int argc, char *argv[]){
+
+#ifdef USE_LASH
+    lash = new LASHClient(&argc, &argv);
+#endif
+
     config.init();
     dump.startnow();
     int noui=0;
@@ -491,6 +524,17 @@ int main(int argc, char *argv[]){
     //---------
     
     initprogram();
+
+#ifdef USE_LASH
+#ifdef ALSAMIDIIN
+    ALSAMidiIn* alsamidi = dynamic_cast<ALSAMidiIn*>(Midi);
+    if (alsamidi)
+      lash->setalsaid(alsamidi->getalsaid());
+#endif
+#ifdef JACKAUDIOOUT
+    lash->setjackname(JACKgetname());
+#endif
+#endif
 
     if (strlen(loadfile)>1){
         int tmp=master->loadXML(loadfile);
