@@ -46,6 +46,7 @@ ALSAMidiIn::ALSAMidiIn(){
 };
 
 ALSAMidiIn::~ALSAMidiIn(){
+  if (midi_handle)
     snd_seq_close(midi_handle);
 };
 
@@ -58,7 +59,10 @@ void ALSAMidiIn::getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmd
     cmdtype=MidiNull;
 
     if (inputok==0){
-	return;
+      /* The input is broken. We need to block for a while anyway so other
+         non-RT threads get a chance to run. */
+      sleep(1);
+      return;
     };
     
     snd_seq_event_input(midi_handle,&midievent);
