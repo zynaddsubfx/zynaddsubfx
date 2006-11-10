@@ -77,6 +77,7 @@ SUBnote::SUBnote(SUBnoteParameters *parameters,Controller *ctl_,REALTYPE freq,RE
 	if (n*basefreq>SAMPLE_RATE/2.0) break;//remove the freqs above the Nyquist freq
 	pos[numharmonics++]=n;
     };
+    firstnumharmonics=numharmonics;//(gf)Useful in legato mode.
     
     if (numharmonics==0) {
 	NoteEnabled=OFF;
@@ -142,20 +143,22 @@ SUBnote::SUBnote(SUBnoteParameters *parameters,Controller *ctl_,REALTYPE freq,RE
 };
 
 
-// SUBlegatonote: This function is a copy of SUBnote(...) and
+// SUBlegatonote: This function is (mostly) a copy of SUBnote(...) and
 // initparameters(...) stuck together with some lines removed so that
 // it only alter the already playing note (to perform legato). It is
 // possible I left stuff that is not required for this.
-void SUBnote::SUBlegatonote(SUBnoteParameters *parameters, Controller *ctl_, REALTYPE freq, REALTYPE velocity, int portamento_, int midinote){
+void SUBnote::SUBlegatonote(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote){
+    //SUBnoteParameters *parameters=pars;
+    //Controller *ctl_=ctl;
+
     portamento=portamento_;
 
     volume=pow(0.1,3.0*(1.0-pars->PVolume/96.0));//-60 dB .. 0 dB
     volume*=VelF(velocity,pars->PAmpVelocityScaleFunction);
     if (pars->PPanning!=0) panning=pars->PPanning/127.0;
     else panning=RND;
-    numstages=pars->Pnumstages;
-    stereo=pars->Pstereo;
-    start=pars->Pstart;
+
+    ///start=pars->Pstart;
 
     int pos[MAX_SUB_HARMONICS];
 
@@ -177,13 +180,15 @@ void SUBnote::SUBlegatonote(SUBnoteParameters *parameters, Controller *ctl_, REA
       (pars->PGlobalFilterVelocityScale/127.0*6.0)* //velocity sensing
       (VelF(velocity,pars->PGlobalFilterVelocityScaleFunction)-1);
 
-    //select only harmonics that desire to compute    
-    numharmonics=0;
+
+    int legatonumharmonics=0;
     for (int n=0;n<MAX_SUB_HARMONICS;n++){
       if (pars->Phmag[n]==0)continue;
       if (n*basefreq>SAMPLE_RATE/2.0) break;//remove the freqs above the Nyquist freq
-      pos[numharmonics++]=n;
+      pos[legatonumharmonics++]=n;
     };
+    if (legatonumharmonics>firstnumharmonics) numharmonics=firstnumharmonics;
+    else numharmonics=legatonumharmonics;
 
     if (numharmonics==0) {
       NoteEnabled=OFF;

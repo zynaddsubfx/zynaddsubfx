@@ -34,7 +34,7 @@ class SUBnote{
 	SUBnote(SUBnoteParameters *parameters,Controller *ctl_,REALTYPE freq,REALTYPE velocity,int portamento_,int midinote);
 	~SUBnote();
 
-	void SUBlegatonote(SUBnoteParameters *parameters, Controller *ctl_, REALTYPE freq, REALTYPE velocity, int portamento_, int midinote);
+	void SUBlegatonote(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote);
 
 	int noteout(REALTYPE *outl,REALTYPE *outr);//note output,return 0 if the note is finished
 	void relasekey();
@@ -54,6 +54,7 @@ class SUBnote{
         int stereo;
 	int numstages;//number of stages of filters
 	int numharmonics;//number of harmonics (after the too higher hamonics are removed)
+	int firstnumharmonics;//To keep track of the first note's numharmonics value, useful in legato mode.
 	int start;//how the harmonics start
 	REALTYPE basefreq;
 	REALTYPE panning;

@@ -126,11 +126,14 @@ PADnote::PADnote(PADnoteParameters *parameters, Controller *ctl_,REALTYPE freq, 
 };
 
 
-// PADlegatonote: This function is a copy of PADnote(...)
+// PADlegatonote: This function is (mostly) a copy of PADnote(...)
 // with some lines removed so that it only alter the already playing
 // note (to perform legato). It is possible I left stuff that is not
 // required for this.
-void PADnote::PADlegatonote(PADnoteParameters *parameters, Controller *ctl_, REALTYPE freq, REALTYPE velocity, int portamento_, int midinote){
+void PADnote::PADlegatonote(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote){
+        PADnoteParameters *parameters=pars;
+	//Controller *ctl_=ctl;
+
 	portamento=portamento_;
 	this->velocity=velocity;
 	finished_=false;
@@ -148,9 +151,8 @@ void PADnote::PADlegatonote(PADnoteParameters *parameters, Controller *ctl_, REA
 
 	released=false;
 	realfreq=basefreq;
-	///NoteGlobalPar.Detune=getdetune(pars->PDetuneType
-	///			   ,pars->PCoarseDetune,pars->PDetune);
-	getdetune(pars->PDetuneType,pars->PCoarseDetune,pars->PDetune);//(gf) modif
+
+	getdetune(pars->PDetuneType,pars->PCoarseDetune,pars->PDetune);
 
 
 	//find out the closest note

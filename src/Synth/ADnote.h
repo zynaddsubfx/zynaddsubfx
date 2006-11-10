@@ -42,7 +42,7 @@ class ADnote{   //ADDitive note
   ADnote(ADnoteParameters *pars,Controller *ctl_,REALTYPE freq,REALTYPE velocity,int portamento_,int midinote_);
   ~ADnote();
 
-  void ADlegatonote(ADnoteParameters *pars, Controller *ctl_, REALTYPE freq, REALTYPE velocity, int portamento_, int midinote_);
+  void ADlegatonote(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote_);
 
   int noteout(REALTYPE *outl,REALTYPE *outr); 
   void relasekey();

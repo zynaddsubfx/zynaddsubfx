@@ -201,7 +201,7 @@ void Part::NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift){
 						 I'm not sure why though... */
       if ((partnote[lastpos].status!=KEY_PLAYING)
 	  && (partnote[lastpos].status!=KEY_RELASED_AND_SUSTAINED)){
-	ismonofirstnote=true; // No other keys are held or sustained.
+        ismonofirstnote=true; // No other keys are held or sustained.
       }
     } else {
       // Poly mode is On so just make sure the list is empty.
@@ -298,15 +298,15 @@ void Part::NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift){
 	  if (Pkitmode==0){ // "normal mode" legato note
 	    if ((kit[0].Padenabled!=0)
 		&& (partnote[pos].kititem[0].adnote!=NULL))
-	      partnote[pos].kititem[0].adnote->ADlegatonote(kit[0].adpars, &ctl, notebasefreq, vel, portamento, note);
+	      partnote[pos].kititem[0].adnote->ADlegatonote(notebasefreq, vel, portamento, note);
 
 	    if ((kit[0].Psubenabled!=0)
 		&& (partnote[pos].kititem[0].subnote!=NULL))
-	      partnote[pos].kititem[0].subnote->SUBlegatonote(kit[0].subpars, &ctl, notebasefreq, vel, portamento, note);
+	      partnote[pos].kititem[0].subnote->SUBlegatonote(notebasefreq, vel, portamento, note);
 
 	    if ((kit[0].Ppadenabled!=0)
 		&& (partnote[pos].kititem[0].padnote!=NULL))
-	      partnote[pos].kititem[0].padnote->PADlegatonote(kit[0].padpars, &ctl, notebasefreq, vel, portamento, note);
+	      partnote[pos].kititem[0].padnote->PADlegatonote(notebasefreq, vel, portamento, note);
 
 	  } else { // "kit mode" legato note
 	    int ci=0;
@@ -323,15 +323,15 @@ void Part::NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift){
 
 	      if ((kit[item].Padenabled!=0) && (kit[item].adpars!=NULL)
 		  && (partnote[pos].kititem[ci].adnote!=NULL))
-		partnote[pos].kititem[ci].adnote->ADlegatonote(kit[item].adpars,&ctl,notebasefreq,vel,portamento,note);
+		partnote[pos].kititem[ci].adnote->ADlegatonote(notebasefreq,vel,portamento,note);
 
 	      if ((kit[item].Psubenabled!=0) && (kit[item].subpars!=NULL)
 		  && (partnote[pos].kititem[ci].subnote!=NULL))
-		partnote[pos].kititem[ci].subnote->SUBlegatonote(kit[item].subpars,&ctl,notebasefreq,vel,portamento,note);
+		partnote[pos].kititem[ci].subnote->SUBlegatonote(notebasefreq,vel,portamento,note);
 
 	      if ((kit[item].Ppadenabled!=0) && (kit[item].padpars!=NULL)
 		  && (partnote[pos].kititem[ci].padnote!=NULL))
-		partnote[pos].kititem[ci].padnote->PADlegatonote(kit[item].padpars,&ctl,notebasefreq,vel,portamento,note);
+		partnote[pos].kititem[ci].padnote->PADlegatonote(notebasefreq,vel,portamento,note);
 
 	      /* In the non-legato equivalent, (kit[item].padpars!=NULL)
 	        is not checked, is there a reason for that or is it a bug ? */

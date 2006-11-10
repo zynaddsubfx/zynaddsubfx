@@ -34,7 +34,7 @@ class PADnote{
 	PADnote(PADnoteParameters *parameters, Controller *ctl_,REALTYPE freq, REALTYPE velocity, int portamento_, int midinote);
 	~PADnote();
 
-	void PADlegatonote(PADnoteParameters *parameters, Controller *ctl_, REALTYPE freq, REALTYPE velocity, int portamento_, int midinote);
+	void PADlegatonote(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote);
 
 	int noteout(REALTYPE *outl,REALTYPE *outr); 
 	int finished();

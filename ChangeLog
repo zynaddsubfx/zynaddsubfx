@@ -813,6 +813,7 @@
 	    - Efectele sunt numerotare de la 1 si in la "send to" din partui
 01 Nov 2006 - Adaugat patch-urile de Jack Midi si LASH de Lars Luthman
 06 Nov 2006 - Aplicat un patch "Fix for ALSA system lockup" de Lars Luthman
-	    
+10 Nov 2006 - Aplicat un patch "zyn-extendedmono_v4_update-061110.diff.gz" de Gerald Folcher
+
 
 

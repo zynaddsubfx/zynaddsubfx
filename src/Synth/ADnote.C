@@ -179,11 +179,14 @@ ADnote::ADnote(ADnoteParameters *pars,Controller *ctl_,REALTYPE freq,REALTYPE ve
 };
 
 
-// ADlegatonote: This function is a copy of ADnote(...) and
+// ADlegatonote: This function is (mostly) a copy of ADnote(...) and
 // initparameters() stuck together with some lines removed so that it
 // only alter the already playing note (to perform legato). It is
 // possible I left stuff that is not required for this.
-void ADnote::ADlegatonote(ADnoteParameters *pars, Controller *ctl_, REALTYPE freq, REALTYPE velocity, int portamento_, int midinote_){
+void ADnote::ADlegatonote(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote_){
+    ADnoteParameters *pars=partparams;
+    //Controller *ctl_=ctl;
+
     portamento=portamento_;
     midinote=midinote_;
     basefreq=freq;
@@ -191,7 +194,6 @@ void ADnote::ADlegatonote(ADnoteParameters *pars, Controller *ctl_, REALTYPE fre
     if (velocity>1.0) velocity=1.0;
     this->velocity=velocity;  
 
-    stereo=pars->GlobalPar.PStereo;
 
     NoteGlobalPar.Detune=getdetune(pars->GlobalPar.PDetuneType
 		,pars->GlobalPar.PCoarseDetune,pars->GlobalPar.PDetune);
@@ -207,10 +209,8 @@ void ADnote::ADlegatonote(ADnoteParameters *pars, Controller *ctl_, REALTYPE fre
 
 
     for (int nvoice=0;nvoice<NUM_VOICES;nvoice++){
-      if (pars->VoicePar[nvoice].Enabled==0) {
-	NoteVoicePar[nvoice].Enabled=OFF;
-	continue; //the voice is disabled
-      };
+      if (NoteVoicePar[nvoice].Enabled==OFF)
+	continue; //(gf) Stay the same as first note in legato.
 
       NoteVoicePar[nvoice].fixedfreq=pars->VoicePar[nvoice].Pfixedfreq;
       NoteVoicePar[nvoice].fixedfreqET=pars->VoicePar[nvoice].PfixedfreqET;
@@ -250,14 +250,6 @@ void ADnote::ADlegatonote(ADnoteParameters *pars, Controller *ctl_, REALTYPE fre
       NoteVoicePar[nvoice].FilterCenterPitch=pars->VoicePar[nvoice].VoiceFilter->getfreq();
       NoteVoicePar[nvoice].filterbypass=pars->VoicePar[nvoice].Pfilterbypass;
 
-      switch(pars->VoicePar[nvoice].PFMEnabled){
-      case 1:NoteVoicePar[nvoice].FMEnabled=MORPH;break;
-      case 2:NoteVoicePar[nvoice].FMEnabled=RING_MOD;break;
-      case 3:NoteVoicePar[nvoice].FMEnabled=PHASE_MOD;break;
-      case 4:NoteVoicePar[nvoice].FMEnabled=FREQ_MOD;break;
-      case 5:NoteVoicePar[nvoice].FMEnabled=PITCH_MOD;break;
-      default:NoteVoicePar[nvoice].FMEnabled=NONE;
-      };
 
       NoteVoicePar[nvoice].FMVoice=pars->VoicePar[nvoice].PFMVoice;
 
@@ -316,11 +308,13 @@ void ADnote::ADlegatonote(ADnoteParameters *pars, Controller *ctl_, REALTYPE fre
       else NoteVoicePar[nvoice].Panning=partparams->VoicePar[nvoice].PPanning/128.0;
 
       newamplitude[nvoice]=1.0;
-      if (partparams->VoicePar[nvoice].PAmpEnvelopeEnabled!=0) {
+      if ((partparams->VoicePar[nvoice].PAmpEnvelopeEnabled!=0)
+	  && (NoteVoicePar[nvoice].AmpEnvelope!=NULL)){
 	newamplitude[nvoice]*=NoteVoicePar[nvoice].AmpEnvelope->envout_dB();
       };
 
-      if (partparams->VoicePar[nvoice].PAmpLfoEnabled!=0){
+      if ((partparams->VoicePar[nvoice].PAmpLfoEnabled!=0)
+	  && (NoteVoicePar[nvoice].AmpLfo!=NULL)){
 	newamplitude[nvoice]*=NoteVoicePar[nvoice].AmpLfo->amplfoout();
       };
 
@@ -353,7 +347,8 @@ void ADnote::ADlegatonote(ADnoteParameters *pars, Controller *ctl_, REALTYPE fre
 
       FMnewamplitude[nvoice]=NoteVoicePar[nvoice].FMVolume*ctl->fmamp.relamp;
 
-      if (partparams->VoicePar[nvoice].PFMAmpEnvelopeEnabled!=0){
+      if ((partparams->VoicePar[nvoice].PFMAmpEnvelopeEnabled!=0)
+	  && (NoteVoicePar[nvoice].FMAmpEnvelope!=NULL)){
 	FMnewamplitude[nvoice]*=NoteVoicePar[nvoice].FMAmpEnvelope->envout_dB();
       };
     };
