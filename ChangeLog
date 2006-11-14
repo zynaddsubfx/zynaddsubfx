@@ -814,6 +814,8 @@
 01 Nov 2006 - Adaugat patch-urile de Jack Midi si LASH de Lars Luthman
 06 Nov 2006 - Aplicat un patch "Fix for ALSA system lockup" de Lars Luthman
 10 Nov 2006 - Aplicat un patch "zyn-extendedmono_v4_update-061110.diff.gz" de Gerald Folcher
+14 Nov 2006 - Aplicat un patch "zyn-CVS-extendedmono_v5_update-061113.diff.gz" de Gerald Folcher
+
 
 
 

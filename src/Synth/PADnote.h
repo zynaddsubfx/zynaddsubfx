@@ -31,10 +31,10 @@
 
 class PADnote{
     public:
-	PADnote(PADnoteParameters *parameters, Controller *ctl_,REALTYPE freq, REALTYPE velocity, int portamento_, int midinote);
+        PADnote(PADnoteParameters *parameters, Controller *ctl_,REALTYPE freq, REALTYPE velocity, int portamento_, int midinote, bool besilent);
 	~PADnote();
 
-	void PADlegatonote(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote);
+	void PADlegatonote(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote, bool externcall);
 
 	int noteout(REALTYPE *outl,REALTYPE *outr); 
 	int finished();
@@ -102,6 +102,22 @@ class PADnote{
 	REALTYPE globaloldamplitude,globalnewamplitude,velocity,realfreq;
 	REALTYPE *tmpwave;
 	Controller *ctl;
+
+	// Legato vars
+	struct {
+	  bool silent;
+	  REALTYPE lastfreq;
+	  LegatoMsg msg;
+	  int decounter;
+	  struct { // Fade In/Out vars
+	    int length;
+	    REALTYPE m, step;
+	  } fade;
+	  struct { // Note parameters
+	    REALTYPE freq, vel;
+	    int portamento, midinote;
+	  } param;
+	} Legato;
 };
 
 

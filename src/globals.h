@@ -194,6 +194,7 @@ enum MidiControllers{C_NULL=0,C_pitchwheel=1000,C_expression=11,C_panning=10,
 
     C_dataentryhi=0x06,C_dataentrylo=0x26,C_nrpnhi=99,C_nrpnlo=98};
 
+enum LegatoMsg{LM_Norm, LM_FadeIn, LM_FadeOut, LM_CatchUp, LM_ToNorm};
 
 //is like i=(int)(floor(f))
 #ifdef ASM_F2I_YES

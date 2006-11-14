@@ -39,10 +39,10 @@
 
 class ADnote{   //ADDitive note
  public:
-  ADnote(ADnoteParameters *pars,Controller *ctl_,REALTYPE freq,REALTYPE velocity,int portamento_,int midinote_);
+  ADnote(ADnoteParameters *pars,Controller *ctl_,REALTYPE freq,REALTYPE velocity,int portamento_,int midinote_,bool besilent);//(gf)Added the besilent parameter to tell it to start silent (if true).
   ~ADnote();
 
-  void ADlegatonote(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote_);
+  void ADlegatonote(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote_, bool externcall);
 
   int noteout(REALTYPE *outl,REALTYPE *outr); 
   void relasekey();
@@ -252,6 +252,22 @@ class ADnote{   //ADDitive note
     
     //how the fine detunes are made bigger or smaller
     REALTYPE bandwidthDetuneMultiplier;
+
+    // Legato vars
+    struct {
+      bool silent;
+      REALTYPE lastfreq;
+      LegatoMsg msg;
+      int decounter;
+      struct { // Fade In/Out vars
+	int length;
+	REALTYPE m, step;
+      } fade;
+      struct { // Note parameters
+	REALTYPE freq, vel;
+	int portamento, midinote;
+      } param;
+    } Legato;
 };
 
 #endif

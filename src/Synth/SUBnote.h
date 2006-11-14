@@ -31,10 +31,10 @@
 
 class SUBnote{
     public:
-	SUBnote(SUBnoteParameters *parameters,Controller *ctl_,REALTYPE freq,REALTYPE velocity,int portamento_,int midinote);
+        SUBnote(SUBnoteParameters *parameters,Controller *ctl_,REALTYPE freq,REALTYPE velocity,int portamento_,int midinote,bool besilent);
 	~SUBnote();
 
-	void SUBlegatonote(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote);
+	void SUBlegatonote(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote, bool externcall);
 
 	int noteout(REALTYPE *outl,REALTYPE *outr);//note output,return 0 if the note is finished
 	void relasekey();
@@ -93,6 +93,21 @@ class SUBnote{
 	int oldpitchwheel,oldbandwidth;
 	REALTYPE globalfiltercenterq;
 	
+	// Legato vars
+	struct {
+	  bool silent;
+	  REALTYPE lastfreq;
+	  LegatoMsg msg;
+	  int decounter;
+	  struct { // Fade In/Out vars
+	    int length;
+	    REALTYPE m, step;
+	  } fade;
+	  struct { // Note parameters
+	    REALTYPE freq, vel;
+	    int portamento, midinote;
+	  } param;
+	} Legato;
 };
 
 

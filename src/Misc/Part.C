@@ -78,6 +78,7 @@ Part::Part(Microtonal *microtonal_,FFTwrapper *fft_, pthread_mutex_t *mutex_){
     oldvolumel=oldvolumer=0.5;
     lastnote=-1;
     lastpos=0; // lastpos will store previously used NoteOn(...)'s pos.
+    lastlegatomodevalid=false; // To store previous legatomodevalid value.
     
     
     defaults();
@@ -185,16 +186,18 @@ void Part::NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift){
     int i,pos;
 
     // Legato and MonoMem used vars:
+    int posb=POLIPHONY-1; // Just a dummy initial value.
+    bool legatomodevalid=false;//true when legato mode is determined applicable.
     bool doinglegato=false; // true when we determined we do a legato note.
     bool ismonofirstnote=false; /*(In Mono/Legato) true when we determined
 				  no other notes are held down or sustained.*/
-    int lastnotecopy=lastnote; // Useful after lastnote has been changed.
+    int lastnotecopy=lastnote;//Useful after lastnote has been changed.
 
-    if (Pnoteon==0) return; // (This check was performed later)
+    if (Pnoteon==0) return;
     if ((note<Pminkey)||(note>Pmaxkey)) return;
 
     // MonoMem stuff:
-    if (Ppolymode==0){ // If Poly is off (should we check for drummode too ?).
+    if (Ppolymode==0){ // If Poly is off
       monomemnotes.push_back(note); // Add note to the list.
       monomem[note].velocity=velocity; // Store this note's velocity.
       monomem[note].mkeyshift=masterkeyshift; /* Store masterkeyshift too,
@@ -219,21 +222,35 @@ void Part::NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift){
     };
 
     if ((Plegatomode!=0) && (Pdrummode==0)){
-      // Legato mode is on and applicable.
       if (Ppolymode!=0){
 	fprintf(stderr, "ZynAddSubFX WARNING: Poly and Legato modes are both On, that should not happen ! ... Disabling Legato mode ! - (Part.C::NoteOn(..))\n");
 	Plegatomode=0;
       } else {
-	if (not ismonofirstnote){
-	  // At least one other key is held or sustained
+	// Legato mode is on and applicable.
+	legatomodevalid=true;
+	if ((not ismonofirstnote)&&(lastlegatomodevalid)){
+	  // At least one other key is held or sustained, and the
+	  // previous note was played while in valid legato mode.
 	  doinglegato=true; // So we'll do a legato note.
-	  pos=lastpos; // A legato note uses same pos as previous.
+	  pos=lastpos; // A legato note uses same pos as previous..
+	  posb=lastposb; // .. same goes for posb.
 	} else {
+	  // Legato mode is valid, but this is only a first note.
 	  for (i=0;i<POLIPHONY;i++)
 	    if ((partnote[i].status==KEY_PLAYING) ||
 		(partnote[i].status==KEY_RELASED_AND_SUSTAINED))
 	      RelaseNotePos(i);
+
+	  // Set posb
+	  posb=(pos+1)%POLIPHONY;//We really want it (if the following fails)
+	  for (i=0;i<POLIPHONY;i++){
+	    if ((partnote[i].status==KEY_OFF) && (pos!=i)){
+	      posb=i;
+	      break;
+	    }
+	  }
 	}
+	lastposb=posb;// Keep a trace of used posb
       }
     } else { // Legato mode is either off or non-applicable.
       if (Ppolymode==0){//if the mode is 'mono' turn off all other notes
@@ -242,16 +259,20 @@ void Part::NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift){
 	RelaseSustainedKeys();
       }
     }
+    lastlegatomodevalid=legatomodevalid;
 
     if (pos==-1){
         //test
        fprintf(stderr,"%s","NOTES TOO MANY (> POLIPHONY) - (Part.C::NoteOn(..))\n");
     } else {
-      ///      if (Pnoteon!=0){
 
 	//start the note
 	partnote[pos].status=KEY_PLAYING;
 	partnote[pos].note=note;
+	if (legatomodevalid){
+	  partnote[posb].status=KEY_PLAYING;
+	  partnote[posb].note=note;
+	}
 
 	//this computes the velocity sensing of the part 
 	REALTYPE vel=VelF(velocity/127.0,Pvelsns);
@@ -297,16 +318,25 @@ void Part::NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift){
 	  // Do Legato note
 	  if (Pkitmode==0){ // "normal mode" legato note
 	    if ((kit[0].Padenabled!=0)
-		&& (partnote[pos].kititem[0].adnote!=NULL))
-	      partnote[pos].kititem[0].adnote->ADlegatonote(notebasefreq, vel, portamento, note);
+		&& (partnote[pos].kititem[0].adnote!=NULL)
+		&& (partnote[posb].kititem[0].adnote!=NULL)){
+	      partnote[pos].kititem[0].adnote->ADlegatonote(notebasefreq, vel, portamento, note, true);//'true' is to tell it it's being called from here.
+	      partnote[posb].kititem[0].adnote->ADlegatonote(notebasefreq, vel, portamento, note, true);
+	    }
 
 	    if ((kit[0].Psubenabled!=0)
-		&& (partnote[pos].kititem[0].subnote!=NULL))
-	      partnote[pos].kititem[0].subnote->SUBlegatonote(notebasefreq, vel, portamento, note);
+		&& (partnote[pos].kititem[0].subnote!=NULL)
+		&& (partnote[posb].kititem[0].subnote!=NULL)){
+	      partnote[pos].kititem[0].subnote->SUBlegatonote(notebasefreq, vel, portamento, note, true);
+	      partnote[posb].kititem[0].subnote->SUBlegatonote(notebasefreq, vel, portamento, note, true);
+	    }
 
 	    if ((kit[0].Ppadenabled!=0)
-		&& (partnote[pos].kititem[0].padnote!=NULL))
-	      partnote[pos].kititem[0].padnote->PADlegatonote(notebasefreq, vel, portamento, note);
+		&& (partnote[pos].kititem[0].padnote!=NULL)
+		&& (partnote[posb].kititem[0].padnote!=NULL)){
+	      partnote[pos].kititem[0].padnote->PADlegatonote(notebasefreq, vel, portamento, note, true);
+	      partnote[posb].kititem[0].padnote->PADlegatonote(notebasefreq, vel, portamento, note, true);
+	    }
 
 	  } else { // "kit mode" legato note
 	    int ci=0;
@@ -318,23 +348,28 @@ void Part::NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift){
 		  ||(lastnotecopy>kit[item].Pmaxkey))
 		continue; // We will not perform legato across 2 key regions.
 
-	      partnote[pos].kititem[ci].sendtoparteffect=( kit[item].Psendtoparteffect<NUM_PART_EFX ?
-							   kit[item].Psendtoparteffect: NUM_PART_EFX);//if this parameter is 127 for "unprocessed"
+	      partnote[pos].kititem[ci].sendtoparteffect=( kit[item].Psendtoparteffect<NUM_PART_EFX ? kit[item].Psendtoparteffect: NUM_PART_EFX);//if this parameter is 127 for "unprocessed"
+	      partnote[posb].kititem[ci].sendtoparteffect=( kit[item].Psendtoparteffect<NUM_PART_EFX ? kit[item].Psendtoparteffect: NUM_PART_EFX);
 
 	      if ((kit[item].Padenabled!=0) && (kit[item].adpars!=NULL)
-		  && (partnote[pos].kititem[ci].adnote!=NULL))
-		partnote[pos].kititem[ci].adnote->ADlegatonote(notebasefreq,vel,portamento,note);
-
+		  && (partnote[pos].kititem[ci].adnote!=NULL)
+		  && (partnote[posb].kititem[ci].adnote!=NULL)){
+		partnote[pos].kititem[ci].adnote->ADlegatonote(notebasefreq,vel,portamento,note,true);
+		partnote[posb].kititem[ci].adnote->ADlegatonote(notebasefreq,vel,portamento,note,true);
+	      }
 	      if ((kit[item].Psubenabled!=0) && (kit[item].subpars!=NULL)
-		  && (partnote[pos].kititem[ci].subnote!=NULL))
-		partnote[pos].kititem[ci].subnote->SUBlegatonote(notebasefreq,vel,portamento,note);
-
+		  && (partnote[pos].kititem[ci].subnote!=NULL)
+		  && (partnote[posb].kititem[ci].subnote!=NULL)){
+		partnote[pos].kititem[ci].subnote->SUBlegatonote(notebasefreq,vel,portamento,note,true);
+		partnote[posb].kititem[ci].subnote->SUBlegatonote(notebasefreq,vel,portamento,note,true);
+	      }
 	      if ((kit[item].Ppadenabled!=0) && (kit[item].padpars!=NULL)
-		  && (partnote[pos].kititem[ci].padnote!=NULL))
-		partnote[pos].kititem[ci].padnote->PADlegatonote(notebasefreq,vel,portamento,note);
+		  && (partnote[pos].kititem[ci].padnote!=NULL)
+		  && (partnote[posb].kititem[ci].padnote!=NULL)){
+		partnote[pos].kititem[ci].padnote->PADlegatonote(notebasefreq,vel,portamento,note,true);
+		partnote[posb].kititem[ci].padnote->PADlegatonote(notebasefreq,vel,portamento,note,true);
+	      }
 
-	      /* In the non-legato equivalent, (kit[item].padpars!=NULL)
-	        is not checked, is there a reason for that or is it a bug ? */
 	      if ((kit[item].adpars!=NULL)||(kit[item].subpars!=NULL)||(kit[item].padpars!=NULL)) {
 		ci++;
 		if ( ((kit[item].Padenabled!=0)||(kit[item].Psubenabled!=0)||(kit[item].Ppadenabled!=0)) && (Pkitmode==2) ) break;
@@ -346,17 +381,28 @@ void Part::NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift){
 	      lastnote=lastnotecopy; // Set lastnote back to previous value.
 	    }
 	  }
-	  return; // Ok, Legato note stuff done, return.
+	  return; // Ok, Legato note done, return.
 	}
 
 	partnote[pos].itemsplaying=0;
+	if (legatomodevalid) partnote[posb].itemsplaying=0;
 
 	if (Pkitmode==0){//init the notes for the "normal mode"
 	  partnote[pos].kititem[0].sendtoparteffect=0;
-	  if (kit[0].Padenabled!=0) partnote[pos].kititem[0].adnote=new ADnote(kit[0].adpars,&ctl,notebasefreq,vel,portamento,note);
-	  if (kit[0].Psubenabled!=0) partnote[pos].kititem[0].subnote=new SUBnote(kit[0].subpars,&ctl,notebasefreq,vel,portamento,note);
-	  if (kit[0].Ppadenabled!=0) partnote[pos].kititem[0].padnote=new PADnote(kit[0].padpars,&ctl,notebasefreq,vel,portamento,note);
+	  if (kit[0].Padenabled!=0) partnote[pos].kititem[0].adnote=new ADnote(kit[0].adpars,&ctl,notebasefreq,vel,portamento,note,false);
+	  if (kit[0].Psubenabled!=0) partnote[pos].kititem[0].subnote=new SUBnote(kit[0].subpars,&ctl,notebasefreq,vel,portamento,note,false);
+	  if (kit[0].Ppadenabled!=0) partnote[pos].kititem[0].padnote=new PADnote(kit[0].padpars,&ctl,notebasefreq,vel,portamento,note,false);
 	  if ((kit[0].Padenabled!=0)||(kit[0].Psubenabled!=0)||(kit[0].Ppadenabled!=0)) partnote[pos].itemsplaying++;
+
+	  // Spawn another note (but silent) if legatomodevalid==true
+	  if (legatomodevalid){
+	    partnote[posb].kititem[0].sendtoparteffect=0;
+	    if (kit[0].Padenabled!=0) partnote[posb].kititem[0].adnote=new ADnote(kit[0].adpars,&ctl,notebasefreq,vel,portamento,note,true);//true for silent.
+	    if (kit[0].Psubenabled!=0) partnote[posb].kititem[0].subnote=new SUBnote(kit[0].subpars,&ctl,notebasefreq,vel,portamento,note,true);
+	    if (kit[0].Ppadenabled!=0) partnote[posb].kititem[0].padnote=new PADnote(kit[0].padpars,&ctl,notebasefreq,vel,portamento,note,true);
+	    if ((kit[0].Padenabled!=0)||(kit[0].Psubenabled!=0)||(kit[0].Ppadenabled!=0)) partnote[posb].itemsplaying++;
+	  }
+
 	} else {//init the notes for the "kit mode"
 	  for (int item=0;item<NUM_KIT_ITEMS;item++){
 	    if (kit[item].Pmuted!=0) continue;
@@ -368,13 +414,28 @@ void Part::NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift){
 							 kit[item].Psendtoparteffect: NUM_PART_EFX);//if this parameter is 127 for "unprocessed"
 
 	    if ((kit[item].adpars!=NULL)&&(kit[item].Padenabled)!=0) 
-	      partnote[pos].kititem[ci].adnote=new ADnote(kit[item].adpars,&ctl,notebasefreq,vel,portamento,note);
+	      partnote[pos].kititem[ci].adnote=new ADnote(kit[item].adpars,&ctl,notebasefreq,vel,portamento,note,false);
 
 	    if ((kit[item].subpars!=NULL)&&(kit[item].Psubenabled)!=0) 
-	      partnote[pos].kititem[ci].subnote=new SUBnote(kit[item].subpars,&ctl,notebasefreq,vel,portamento,note);
+	      partnote[pos].kititem[ci].subnote=new SUBnote(kit[item].subpars,&ctl,notebasefreq,vel,portamento,note,false);
 
 	    if ((kit[item].padpars!=NULL)&&(kit[item].Ppadenabled)!=0) 
-	      partnote[pos].kititem[ci].padnote=new PADnote(kit[item].padpars,&ctl,notebasefreq,vel,portamento,note);
+	      partnote[pos].kititem[ci].padnote=new PADnote(kit[item].padpars,&ctl,notebasefreq,vel,portamento,note,false);
+
+	    // Spawn another note (but silent) if legatomodevalid==true
+	    if (legatomodevalid){
+	      partnote[posb].kititem[ci].sendtoparteffect=( kit[item].Psendtoparteffect<NUM_PART_EFX ? kit[item].Psendtoparteffect: NUM_PART_EFX);//if this parameter is 127 for "unprocessed"
+
+	      if ((kit[item].adpars!=NULL)&&(kit[item].Padenabled)!=0)
+		partnote[posb].kititem[ci].adnote=new ADnote(kit[item].adpars,&ctl,notebasefreq,vel,portamento,note,true);//true for silent.
+	      if ((kit[item].subpars!=NULL)&&(kit[item].Psubenabled)!=0)
+		partnote[posb].kititem[ci].subnote=new SUBnote(kit[item].subpars,&ctl,notebasefreq,vel,portamento,note,true);
+	      if ((kit[item].padpars!=NULL)&&(kit[item].Ppadenabled)!=0)
+		partnote[posb].kititem[ci].padnote=new PADnote(kit[item].padpars,&ctl,notebasefreq,vel,portamento,note,true);
+
+	      if ((kit[item].adpars!=NULL)|| (kit[item].subpars!=NULL))
+		partnote[posb].itemsplaying++;
+	    }
 
 	    if ((kit[item].adpars!=NULL)|| (kit[item].subpars!=NULL)) {
 	      partnote[pos].itemsplaying++;
@@ -383,7 +444,6 @@ void Part::NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift){
 	    };
 	  };
 	};
-	///      };
     };
     
     //this only relase the keys if there is maximum number of keys allowed
