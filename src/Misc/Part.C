@@ -919,7 +919,7 @@ void Part::add2XML(XMLwrapper *xml){
 
     xml->addparbool("note_on",Pnoteon);
     xml->addparbool("poly_mode",Ppolymode);
-    xml->addparbool("legato_mode",Plegatomode);
+    xml->addpar("legato_mode",Plegatomode);
     xml->addpar("key_limit",Pkeylimit);
 
     xml->beginbranch("INSTRUMENT");
@@ -1056,7 +1056,8 @@ void Part::getfromXML(XMLwrapper *xml){
 
     Pnoteon=xml->getparbool("note_on",Pnoteon);
     Ppolymode=xml->getparbool("poly_mode",Ppolymode);
-    Plegatomode=xml->getparbool("legato_mode",Plegatomode);
+    Plegatomode=xml->getparbool("legato_mode",Plegatomode);//older versions
+    if (!Plegatomode) Plegatomode=xml->getpar127("legato_mode",Plegatomode);
     Pkeylimit=xml->getpar127("key_limit",Pkeylimit);
 
 
