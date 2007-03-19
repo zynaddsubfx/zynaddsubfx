@@ -816,6 +816,10 @@
 10 Nov 2006 - Aplicat un patch "zyn-extendedmono_v4_update-061110.diff.gz" de Gerald Folcher
 14 Nov 2006 - Aplicat un patch "zyn-CVS-extendedmono_v5_update-061113.diff.gz" de Gerald Folcher
 
+*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *
+
+19 Mar 2007 - Aplicat un patch mic de la Daniel Clemente care este un workaround la bug-ul X11 cand tin tastele apasate mai mult timp
+
 
 
 
