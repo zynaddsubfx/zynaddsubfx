@@ -418,6 +418,7 @@ class MasterUI {open
   Function {make_window()} {open
   } {
     Fl_Window masterwindow {
+      xclass zynaddsubfx
       label zynaddsubfx
       callback {\#ifdef VSTAUDIOOUT
 fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
