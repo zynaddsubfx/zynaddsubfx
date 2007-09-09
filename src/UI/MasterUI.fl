@@ -4,7 +4,7 @@ header_name {.h}
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
 
-decl {//License: GNU GPL version 2} {} 
+decl {//License: GNU GPL version 2 or later} {} 
 
 decl {\#include <stdlib.h>} {public
 } 
@@ -1005,10 +1005,10 @@ panelwindow->show();}
       }
       Fl_Box {} {
         label {This is free software; you may redistribute it and/or modify it under the terms of the 
-version 2 of the GNU General Public License as published by the Free Software Fundation.
+version 2 (or any later version) of the GNU General Public License as published by the Free Software Fundation.
   This program comes with
  ABSOLUTELY NO WARRANTY. 
- See the version 2 of the 
+ See the version 2 (or any later version) of the 
 GNU General Public License for details.}
         xywh {0 60 325 115} labelfont 1 labelsize 11 align 144
       }

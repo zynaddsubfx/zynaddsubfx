@@ -12,7 +12,7 @@
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License (version 2) for more details.
+  GNU General Public License (version 2 or later) for more details.
 
   You should have received a copy of the GNU General Public License (version 2)
   along with this program; if not, write to the Free Software Foundation,
@@ -384,9 +384,9 @@ int main(int argc, char *argv[]){
 #ifdef JACKAUDIOOUT
     usejackit=true;//use jack by default
 #endif
-    fprintf(stderr,"%s","\nZynAddSubFX - Copyright (c) 2002-2005 Nasca Octavian Paul and others\n");
+    fprintf(stderr,"%s","\nZynAddSubFX - Copyright (c) 2002-2007 Nasca Octavian Paul and others\n");
     fprintf(stderr,"Compiled: %s %s\n",__DATE__,__TIME__);
-    fprintf(stderr,"%s","This program is free software (GNU GPL v.2) and \n    it comes with ABSOLUTELY NO WARRANTY.\n\n");
+    fprintf(stderr,"%s","This program is free software (GNU GPL v.2 or later) and \n    it comes with ABSOLUTELY NO WARRANTY.\n\n");
 #ifdef OS_LINUX
     if (argc==1) fprintf(stderr,"%s","Try 'zynaddsubfx --help' for command-line options.\n");
 #else

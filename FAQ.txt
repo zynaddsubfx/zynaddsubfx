@@ -25,9 +25,3 @@ A3) Look in src/globals.h and change there theese values. You don't have to chan
 Q4) How do I enable Jack support on ZynAddSubFX ?
 A4) Look in "Makefile.inc" from "src/" directory for more information. It is highly recomanded that the Jack samplerate to be equal to ZynAddSubFX samplerate (SAMPLE_RATE from globals.h), otherwise the resampling will be done and this will decrease the quality a bit.
 
-
-Q5) Why it is licensed only under version 2 of the GNU GPL?
-A5) I licensed under GNU GPL v.2 only, because I don't know what the next versions of GPL will say. For example what if they tell that a GPL licensed program can be a part of a proprietary software? This may blow up the entire opensource comunity (well, only 'GPL v.2 or any later version' programs - but they are the most).
-To 'be similar in spirit to the present version [of GPL]' (what is said in the section 9 of GNU GPL) is too ambigous for me.
-Anyway, ZynAddSubFX is free (as speech) even is licensed only to GPL v.2 ;-) .
-
