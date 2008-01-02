@@ -3,7 +3,7 @@ include Makefile.inc
 ifneq ($(MAKECMDGOALS),debug)
   CXXFLAGS= -O6 -Wall 
 else 
-  CXXFLAGS= -O0 -Wall -Wpointer-arith
+  CXXFLAGS= -O0 -Wall -Wpointer-arith -ggdb
 endif
 
 CXXFLAGS += -DOS_$(OS_PORT) -D$(MIDIIN)MIDIIN -DFFTW_VERSION_$(FFTW_VERSION) -DASM_F2I_$(ASM_F2I)

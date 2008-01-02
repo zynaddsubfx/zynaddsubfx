@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-objects=Recorder.o 
+objects=Recorder.o WAVaudiooutput.o
 
 ifeq ($(AUDIOOUT),OSS_AND_JACK)
 objects+=OSSaudiooutput.o JACKaudiooutput.o

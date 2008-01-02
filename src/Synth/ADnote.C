@@ -404,7 +404,7 @@ void ADnote::ADlegatonote(REALTYPE freq, REALTYPE velocity, int portamento_, int
  */
 void ADnote::KillVoice(int nvoice){
   
-    delete (NoteVoicePar[nvoice].OscilSmp);
+    delete []NoteVoicePar[nvoice].OscilSmp;
 
     if (NoteVoicePar[nvoice].FreqEnvelope!=NULL) delete(NoteVoicePar[nvoice].FreqEnvelope);
     NoteVoicePar[nvoice].FreqEnvelope=NULL;
@@ -433,7 +433,7 @@ void ADnote::KillVoice(int nvoice){
     if (NoteVoicePar[nvoice].FMAmpEnvelope!=NULL) delete (NoteVoicePar[nvoice].FMAmpEnvelope);
     NoteVoicePar[nvoice].FMAmpEnvelope=NULL;
     
-    if ((NoteVoicePar[nvoice].FMEnabled!=NONE)&&(NoteVoicePar[nvoice].FMVoice<0)) delete NoteVoicePar[nvoice].FMSmp;
+    if ((NoteVoicePar[nvoice].FMEnabled!=NONE)&&(NoteVoicePar[nvoice].FMVoice<0)) delete []NoteVoicePar[nvoice].FMSmp;
     
     if (NoteVoicePar[nvoice].VoiceOut!=NULL) 
 	for (int i=0;i<SOUND_BUFFER_SIZE;i++) NoteVoicePar[nvoice].VoiceOut[i]=0.0;//do not delete, yet: perhaps is used by another voice

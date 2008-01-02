@@ -24,6 +24,7 @@
 #define RECORDER_H
 
 #include "../globals.h"
+#include "WAVaudiooutput.h"
 
 class Recorder{
     public:
@@ -44,9 +45,9 @@ class Recorder{
 	int status;
 	
     private:
-	int file;		
+	WAVaudiooutput wav;
 	short int *recordbuf_16bit;
-	int sampleswritten,notetrigger;
+	int notetrigger;
 };
 
 #endif

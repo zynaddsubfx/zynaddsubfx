@@ -124,7 +124,7 @@ bool XMLwrapper::checkfileinformation(char *filename){
     char *end=strstr(xmldata,"</INFORMATION>");
 
     if ((start==NULL)||(end==NULL)||(start>end)) {
-	delete(xmldata);
+	delete []xmldata;
 	return(false);
     };
     end+=strlen("</INFORMATION>");
@@ -133,7 +133,7 @@ bool XMLwrapper::checkfileinformation(char *filename){
     tree=mxmlNewElement(MXML_NO_PARENT,"?xml");
     node=root=mxmlLoadString(tree,xmldata,MXML_OPAQUE_CALLBACK);
     if (root==NULL) {
-	delete(xmldata);
+	delete []xmldata;
 	mxmlDelete(tree);
 	node=root=tree=NULL;
 	return(false);
@@ -143,7 +143,7 @@ bool XMLwrapper::checkfileinformation(char *filename){
     push(root);
 
     if (root==NULL){
-	delete(xmldata);
+	delete []xmldata;
 	mxmlDelete(tree);
 	node=root=tree=NULL;
 	return(false);
@@ -153,7 +153,7 @@ bool XMLwrapper::checkfileinformation(char *filename){
 
     exitbranch();
     if (tree!=NULL) mxmlDelete(tree);
-    delete(xmldata);
+    delete []xmldata;
     node=root=tree=NULL;
 
     return(true);
@@ -174,8 +174,8 @@ int XMLwrapper::saveXMLfile(char *filename){
     
     int result=dosavefile(filenamenew,compression,xmldata);
     
-    delete(filenamenew);
-    delete(xmldata);    
+    delete []filenamenew;
+    delete []xmldata;    
     return(result);
 };
 
@@ -273,7 +273,7 @@ int XMLwrapper::loadXMLfile(const char *filename){
     
     root=tree=mxmlLoadString(NULL,xmldata,MXML_OPAQUE_CALLBACK);
 
-    delete(xmldata);
+    delete []xmldata;
 
     if (tree==NULL) return(-2);//this is not XML
     

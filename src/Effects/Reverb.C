@@ -74,7 +74,7 @@ Reverb::Reverb(int insertion_,REALTYPE *efxoutl_,REALTYPE *efxoutr_){
 
 Reverb::~Reverb(){
     int i;
-    if (idelay!=NULL) delete idelay;
+    if (idelay!=NULL) delete []idelay;
     if (hpf!=NULL) delete hpf;
     if (lpf!=NULL) delete lpf;
 
@@ -235,7 +235,7 @@ void Reverb::setidelay(unsigned char Pidelay){
     this->Pidelay=Pidelay;
     delay=pow(50*Pidelay/127.0,2)-1.0;
     
-    if (idelay!=NULL) delete (idelay);
+    if (idelay!=NULL) delete []idelay;
     idelay=NULL;
     
     idelaylen=(int) (SAMPLE_RATE*delay/1000);
@@ -307,7 +307,7 @@ void Reverb::settype(unsigned char Ptype){
 	comblen[i]=(int) tmp;
 	combk[i]=0;
 	lpcomb[i]=0;
-	if (comb[i]!=NULL) delete comb[i];
+	if (comb[i]!=NULL) delete []comb[i];
 	comb[i]=new REALTYPE[comblen[i]];
     };	
 
@@ -320,7 +320,7 @@ void Reverb::settype(unsigned char Ptype){
 	if (tmp<10) tmp=10;
 	aplen[i]=(int) tmp;
 	apk[i]=0;
-	if (ap[i]!=NULL) delete ap[i];
+	if (ap[i]!=NULL) delete []ap[i];
 	ap[i]=new REALTYPE[aplen[i]];
     };
     settime(Ptime);

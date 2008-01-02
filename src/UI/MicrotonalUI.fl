@@ -225,7 +225,7 @@ for (int i=0;i<microtonal->getoctavesize();i++){
    tuningsinput->insert(tmpbuf);
 };
 
-delete(tmpbuf);} {}
+delete []tmpbuf;} {}
   }
   Function {updateMappingInput()} {} {
     code {char *tmpbuf=new char[100];
@@ -240,7 +240,7 @@ for (int i=0;i<microtonal->Pmapsize;i++){
    mappinginput->insert(tmpbuf);
 };
 
-delete(tmpbuf);} {}
+delete []tmpbuf;} {}
   }
   Function {MicrotonalUI(Microtonal *microtonal_)} {} {
     code {microtonal=microtonal_;

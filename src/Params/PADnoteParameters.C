@@ -131,7 +131,7 @@ void PADnoteParameters::defaults(){
 void PADnoteParameters::deletesample(int n){
     if ((n<0)||(n>=PAD_MAX_SAMPLES)) return;
     if (sample[n].smp!=NULL){
-	delete(sample[n].smp);
+	delete[]sample[n].smp;
 	sample[n].smp=NULL;
     };
     sample[n].size=0;

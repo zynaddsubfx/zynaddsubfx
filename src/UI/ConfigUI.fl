@@ -108,7 +108,7 @@ config.cfg.SoundBufferSize=strtoul(o->value(),&tmp,10);}
             tooltip {Internal Sound Buffer Size (samples)} xywh {190 45 60 20} type Int labelsize 11 align 129 textfont 1
             code0 {char *tmpbuf=new char[100];o->cut(0,o->maximum_size());}
             code1 {snprintf(tmpbuf,100,"%d",config.cfg.SoundBufferSize);o->insert(tmpbuf);}
-            code2 {delete(tmpbuf);}
+            code2 {delete []tmpbuf;}
           }
           Fl_Light_Button {} {
             label {Swap Stereo }
@@ -435,7 +435,7 @@ return(order);} {}
 samplerateinput->cut(0,samplerateinput->maximum_size());
 snprintf(tmpbuf,100,"%d",config.cfg.SampleRate);
 samplerateinput->insert(tmpbuf);
-delete (tmpbuf);} {}
+delete []tmpbuf;} {}
   }
   Function {show()} {} {
     code {configwindow->show();} {}

@@ -44,8 +44,8 @@ EffectMgr::EffectMgr(int insertion_,pthread_mutex_t *mutex_){
 
 EffectMgr::~EffectMgr(){
     if (efx!=NULL) delete (efx);
-    delete (efxoutl);
-    delete (efxoutr);
+    delete []efxoutl;
+    delete []efxoutr;
 };
 
 void EffectMgr::defaults(){
@@ -65,7 +65,7 @@ void EffectMgr::changeeffect(int nefx_){
 	efxoutr[i]=0.0;
     };
 
-    if (efx!=NULL) delete (efx);
+    if (efx!=NULL) delete efx;
     switch (nefx){
 	case 1:efx=new Reverb(insertion,efxoutl,efxoutr);break;
 	case 2:efx=new Echo(insertion,efxoutl,efxoutr);break;

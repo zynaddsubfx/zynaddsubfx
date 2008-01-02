@@ -22,7 +22,7 @@
 
 //this file contains code used from trivial_synth.c from 
 //the DSSI (published by Steve Harris under public domain) as a template
-
+//the code is incomplete
 #include <string.h>
 #include "DSSIaudiooutput.h"
 

@@ -68,8 +68,8 @@ Bank::Bank(){
 
 Bank::~Bank(){
     for (int i=0;i<MAX_NUM_BANKS;i++){
-	if (banks[i].dir!=NULL) delete (banks[i].dir);
-	if (banks[i].name!=NULL) delete (banks[i].name);
+	if (banks[i].dir!=NULL) delete []banks[i].dir;
+	if (banks[i].name!=NULL) delete []banks[i].name;
     };
 
     clearbank();
@@ -124,7 +124,7 @@ void Bank::setname(unsigned int ninstrument,const char *newname,int newslot){
 //    printf("rename %s -> %s\n",ins[ninstrument].filename,newfilename);//////////////
 
     rename(ins[ninstrument].filename,newfilename);
-    if (ins[ninstrument].filename) delete(ins[ninstrument].filename);
+    if (ins[ninstrument].filename) delete []ins[ninstrument].filename;
     ins[ninstrument].filename=new char[strlen(newfilename)+5];
     snprintf(ins[ninstrument].filename,strlen(newfilename)+1,"%s",newfilename);
     snprintf(ins[ninstrument].name,PART_MAX_NAME_LEN,"%s",&tmpfilename[5]);
@@ -193,7 +193,7 @@ void Bank::savetoslot(unsigned int ninstrument,Part *part){
     part->saveXML(filename);
     addtobank(ninstrument,tmpfilename,(char *) part->Pname);
     
-    delete(filename);
+    delete[]filename;
 };
 
 /*
@@ -220,7 +220,7 @@ int Bank::loadbank(const char *bankdirname){
 
     if (dir==NULL) return(-1);
 
-    if (dirname!=NULL) delete(dirname);
+    if (dirname!=NULL) delete[]dirname;
     dirname=new char[strlen(bankdirname)+1];
     snprintf(dirname,strlen(bankdirname)+1,"%s",bankdirname);
     
@@ -371,8 +371,8 @@ int Bank_compar(const void *a,const void *b){
 
 void Bank::rescanforbanks(){
     for (int i=0;i<MAX_NUM_BANKS;i++){
-	if (banks[i].dir!=NULL) delete (banks[i].dir);
-	if (banks[i].name!=NULL) delete (banks[i].name);
+	if (banks[i].dir!=NULL) delete []banks[i].dir;
+	if (banks[i].name!=NULL) delete []banks[i].name;
 	banks[i].dir=NULL;
 	banks[i].name=NULL;
     };
@@ -405,13 +405,13 @@ void Bank::rescanforbanks(){
 	        char *tmpname=banks[i].name;
 	        banks[i].name=new char[strlen(tmpname)+100];
 	        sprintf(banks[i].name,"%s[%d]",tmpname,dupl+2);
-	        delete(tmpname);
+	        delete[]tmpname;
 		
 		if (dupl==0){
 	    	    char *tmpname=banks[j].name;
 	            banks[j].name=new char[strlen(tmpname)+100];
 		    sprintf(banks[j].name,"%s[1]",tmpname);
-	    	    delete(tmpname);
+	    	    delete[]tmpname;
 		};
 		
 	        dupl++;
@@ -493,7 +493,7 @@ void Bank::scanrootdir(char *rootdir){
 
 void Bank::clearbank(){
     for (int i=0;i<BANK_SIZE;i++) deletefrombank(i);
-    if (dirname!=NULL) delete(dirname);
+    if (dirname!=NULL) delete[]dirname;
     bankfiletitle=NULL;
     dirname=NULL;
 };
@@ -535,7 +535,7 @@ int Bank::addtobank(int pos, const char *filename, const char* name){
 	xml->checkfileinformation(ins[pos].filename);
     
 	ins[pos].info.PADsynth_used=xml->information.PADsynth_used;
-	delete(xml);
+	delete xml;
     } else ins[pos].info.PADsynth_used=false;
     
     return(0);
@@ -552,7 +552,7 @@ void Bank::deletefrombank(int pos){
     ins[pos].used=false;
     ZERO(ins[pos].name,PART_MAX_NAME_LEN+1);
     if (ins[pos].filename!=NULL) {
-	delete (ins[pos].filename);
+	delete []ins[pos].filename;
 	ins[pos].filename=NULL;
     };
     
