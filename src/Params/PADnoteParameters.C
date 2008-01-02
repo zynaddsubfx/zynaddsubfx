@@ -542,7 +542,7 @@ void PADnoteParameters::export2wav(string basefilename){
     for (int k=0;k<PAD_MAX_SAMPLES;k++){
 	if (sample[k].smp==NULL) continue;
 	char tmpstr[20];
-	snprintf(tmpstr,20,"_%02d",k);
+	snprintf(tmpstr,20,"_%02d",k+1);
 	string filename=basefilename+string(tmpstr)+".wav";
 	WAVaudiooutput wav;
 	if (wav.newfile(filename,SAMPLE_RATE,1)) {
