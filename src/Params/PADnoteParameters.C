@@ -21,6 +21,8 @@
 */
 #include <math.h>
 #include "PADnoteParameters.h"
+#include "../Output/WAVaudiooutput.h"
+using namespace std;
 
 PADnoteParameters::PADnoteParameters(FFTwrapper *fft_,pthread_mutex_t *mutex_):Presets(){
     setpresettype("Ppadsyth");
@@ -533,6 +535,26 @@ void PADnoteParameters::applyparameters(bool lockmutex){
 	for (int i=samplemax;i<PAD_MAX_SAMPLES;i++) deletesample(i);
     };
 };
+
+void PADnoteParameters::export2wav(string basefilename){
+    applyparameters(true);
+    basefilename+="_PADsynth_";
+    for (int k=0;k<PAD_MAX_SAMPLES;k++){
+	if (sample[k].smp==NULL) continue;
+	char tmpstr[20];
+	snprintf(tmpstr,20,"_%02d",k);
+	string filename=basefilename+string(tmpstr)+".wav";
+	WAVaudiooutput wav;
+	if (wav.newfile(filename,SAMPLE_RATE,1)) {
+	    int nsmps=sample[k].size;
+	    short int *smps=new short int[nsmps];
+	    for (int i=0;i<nsmps;i++) smps[i]=(short int)(sample[k].smp[i]*32767.0);
+	    wav.write(nsmps, smps);
+	    wav.close();
+	};
+    };
+};
+
 
 
 void PADnoteParameters::add2XML(XMLwrapper *xml){

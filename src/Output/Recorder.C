@@ -58,7 +58,7 @@ int Recorder::preparefile(char *filename_,int overwrite){
 		};
 	};
    
-    if (!wav.newfile(filename_, SAMPLE_RATE)) return 2;
+    if (!wav.newfile(filename_, SAMPLE_RATE,2)) return 2;
     
     status=1;//ready
     

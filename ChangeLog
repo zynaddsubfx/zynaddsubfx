@@ -822,5 +822,13 @@
 01 Apr 2007 - O mica modificare cu xclass zynaddsubfx in MasterUI.fl
 09 Sep 2007 - Schimbata licenta la GPL 2 or other later
 
+*  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *
+
+02 Ian 2008 - Corectate cateva mici erori la dezalocarea memoriei
+	    - Codul de recorder wav a fost rescris
+	    - Adaugata functia de export la sample-urile din PADsynth
+
+
+
 
 

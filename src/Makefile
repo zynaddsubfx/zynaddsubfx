@@ -3,10 +3,10 @@ include Makefile.inc
 ifneq ($(MAKECMDGOALS),debug)
   CXXFLAGS= -O6 -Wall 
 else 
-  CXXFLAGS= -O0 -Wall -Wpointer-arith -ggdb
+  CXXFLAGS= -O0 -Wall -Wpointer-arith 
 endif
 
-CXXFLAGS += -DOS_$(OS_PORT) -D$(MIDIIN)MIDIIN -DFFTW_VERSION_$(FFTW_VERSION) -DASM_F2I_$(ASM_F2I)
+CXXFLAGS += -DOS_$(OS_PORT) -D$(MIDIIN)MIDIIN -DFFTW_VERSION_$(FFTW_VERSION) -DASM_F2I_$(ASM_F2I) -ggdb
 
 ifeq ($(DISABLE_GUI),YES)
     CXXFLAGS += -DDISABLE_GUI

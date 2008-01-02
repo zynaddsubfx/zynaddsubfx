@@ -47,7 +47,7 @@ class Distorsion:public Effect{
 	unsigned char Ppanning;//Panning
 	unsigned char Plrcross;// L/R Mixing
 	unsigned char Pdrive;  //the input amplification
-	unsigned char Plevel;  //the ouput amplification
+	unsigned char Plevel;  //the output amplification
 	unsigned char Ptype;   //Distorsion type
 	unsigned char Pnegate; //if the input is negated 
 	unsigned char Plpf;    //lowpass filter

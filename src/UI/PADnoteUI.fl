@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0106 
+version 1.0107 
 header_name {.h} 
 code_name {.cc}
 decl {\#include "../Params/PADnoteParameters.h"} {public
@@ -18,6 +18,9 @@ decl {\#include <FL/Fl_Box.H>} {public
 } 
 
 decl {\#include <FL/Fl_Group.H>} {public
+} 
+
+decl {\#include <FL/Fl_File_Chooser.H>} {public
 } 
 
 decl {\#include <math.h>} {} 
@@ -223,8 +226,8 @@ make_window();} {}
   Function {make_window()} {open
   } {
     Fl_Window padnotewindow {
-      label {PAD synth Parameters} selected
-      xywh {76 165 535 450} type Double hide
+      label {PAD synth Parameters} open
+      xywh {281 302 535 450} type Double visible
     } {
       Fl_Tabs {} {
         callback {if (o->value()!=harmonicstructuregroup) applybutton->hide();
@@ -256,15 +259,15 @@ cbwidget->do_callback();}
               xywh {15 45 75 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
               code0 {o->value(pars->Php.base.type);}
             } {
-              menuitem {} {
+              MenuItem {} {
                 label Gauss
                 xywh {15 15 100 20} labelfont 1 labelsize 10
               }
-              menuitem {} {
+              MenuItem {} {
                 label Square
                 xywh {25 25 100 20} labelfont 1 labelsize 10
               }
-              menuitem {} {
+              MenuItem {} {
                 label DoubleExp
                 xywh {35 35 100 20} labelfont 1 labelsize 10
               }
@@ -307,19 +310,19 @@ cbwidget->do_callback();}
                 xywh {15 175 70 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
                 code0 {o->value(pars->Php.amp.type);}
               } {
-                menuitem {} {
+                MenuItem {} {
                   label OFF
                   xywh {45 45 100 20} labelfont 1 labelsize 10
                 }
-                menuitem {} {
+                MenuItem {} {
                   label Gauss
                   xywh {55 55 100 20} labelfont 1 labelsize 10
                 }
-                menuitem {} {
+                MenuItem {} {
                   label Sine
                   xywh {65 65 100 20} labelfont 1 labelsize 10
                 }
-                menuitem {} {
+                MenuItem {} {
                   label Flat
                   xywh {75 75 100 20} labelfont 1 labelsize 10
                 }
@@ -332,19 +335,19 @@ cbwidget->do_callback();}
                 xywh {15 205 70 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
                 code0 {o->value(pars->Php.amp.mode);}
               } {
-                menuitem {} {
+                MenuItem {} {
                   label Sum
                   xywh {60 60 100 20} labelfont 1 labelsize 10
                 }
-                menuitem {} {
+                MenuItem {} {
                   label Mult
                   xywh {70 70 100 20} labelfont 1 labelsize 10
                 }
-                menuitem {} {
+                MenuItem {} {
                   label Div1
                   xywh {80 80 100 20} labelfont 1 labelsize 10
                 }
-                menuitem {} {
+                MenuItem {} {
                   label Div2
                   xywh {90 90 100 20} labelfont 1 labelsize 10
                 }
@@ -383,15 +386,15 @@ cbwidget->do_callback();}
               xywh {10 143 80 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
               code0 {o->value(pars->Php.onehalf);}
             } {
-              menuitem {} {
+              MenuItem {} {
                 label Full
                 xywh {25 25 100 20} labelfont 1 labelsize 10
               }
-              menuitem {} {
+              MenuItem {} {
                 label {Upper Half}
                 xywh {45 45 100 20} labelfont 1 labelsize 10
               }
-              menuitem {} {
+              MenuItem {} {
                 label {Lower Half}
                 xywh {35 35 100 20} labelfont 1 labelsize 10
               }
@@ -457,31 +460,31 @@ cbwidget->do_callback();}
               xywh {325 310 80 20} down_box BORDER_BOX labelsize 10 align 5 textsize 11
               code0 {o->value(pars->Phrpos.type);}
             } {
-              menuitem {} {
+              MenuItem {} {
                 label Harmonic
                 xywh {70 70 100 20} labelfont 1 labelsize 11
               }
-              menuitem {} {
+              MenuItem {} {
                 label ShiftU
                 xywh {80 80 100 20} labelfont 1 labelsize 11
               }
-              menuitem {} {
+              MenuItem {} {
                 label ShiftL
                 xywh {90 90 100 20} labelfont 1 labelsize 11
               }
-              menuitem {} {
+              MenuItem {} {
                 label PowerU
                 xywh {90 90 100 20} labelfont 1 labelsize 11
               }
-              menuitem {} {
+              MenuItem {} {
                 label PowerL
                 xywh {100 100 100 20} labelfont 1 labelsize 11
               }
-              menuitem {} {
+              MenuItem {} {
                 label Sine
                 xywh {110 110 100 20} labelfont 1 labelsize 11
               }
-              menuitem {} {
+              MenuItem {} {
                 label Power
                 xywh {120 120 100 20} labelfont 1 labelsize 11
               }
@@ -522,35 +525,35 @@ cbwidget->do_callback();}
             code0 {o->value(pars->Pbwscale);}
             code1 {if (pars->Pmode!=0) o->deactivate();}
           } {
-            menuitem {} {
+            MenuItem {} {
               label Normal
               xywh {95 95 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label EqualHz
               xywh {105 105 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label Quater
               xywh {115 115 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label Half
               xywh {125 125 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label {75%}
               xywh {135 135 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label {150%}
               xywh {145 145 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label Double
               xywh {145 145 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label {Inv.Half}
               xywh {155 155 100 20} labelfont 1 labelsize 11
             }
@@ -567,31 +570,31 @@ cbwidget->do_callback();}
             xywh {375 190 115 20} down_box BORDER_BOX labelsize 10 align 5 textsize 11
             code0 {o->value(pars->Pquality.samplesize);}
           } {
-            menuitem {} {
+            MenuItem {} {
               label {16k (Tiny)}
               xywh {155 155 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label 32k
               xywh {165 165 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label {64k (Small)}
               xywh {175 175 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label 128k
               xywh {185 185 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label {256k (Normal)}
               xywh {205 205 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label 512k
               xywh {200 200 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label {1M (Big)}
               xywh {205 205 100 20} labelfont 1 labelsize 11
             }
@@ -603,31 +606,31 @@ cbwidget->do_callback();}
             xywh {430 155 45 20} down_box BORDER_BOX labelsize 11 align 5 textsize 11
             code0 {o->value(pars->Pquality.smpoct);}
           } {
-            menuitem {} {
+            MenuItem {} {
               label {0.5}
               xywh {10 10 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label 1
               xywh {0 0 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label 2
               xywh {10 10 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label 3
               xywh {20 20 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label 4
               xywh {30 30 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label 6
               xywh {40 40 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label 12
               xywh {50 50 100 20} labelfont 1 labelsize 11
             }
@@ -639,35 +642,35 @@ cbwidget->do_callback();}
             xywh {480 155 45 20} down_box BORDER_BOX labelsize 11 align 5 textsize 11
             code0 {o->value(pars->Pquality.oct);}
           } {
-            menuitem {} {
+            MenuItem {} {
               label 1
               xywh {10 10 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label 2
               xywh {20 20 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label 3
               xywh {30 30 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label 4
               xywh {40 40 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label 5
               xywh {50 50 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label 6
               xywh {60 60 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label 7
               xywh {70 70 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label 8
               xywh {80 80 100 20} labelfont 1 labelsize 11
             }
@@ -679,39 +682,39 @@ cbwidget->do_callback();}
             xywh {375 155 50 20} down_box BORDER_BOX labelsize 11 align 5 textsize 11
             code0 {o->value(pars->Pquality.basenote);}
           } {
-            menuitem {} {
+            MenuItem {} {
               label {C-2}
               xywh {10 10 100 20} labelfont 1
             }
-            menuitem {} {
+            MenuItem {} {
               label {G-2}
               xywh {20 20 100 20} labelfont 1
             }
-            menuitem {} {
+            MenuItem {} {
               label {C-3}
               xywh {20 20 100 20} labelfont 1
             }
-            menuitem {} {
+            MenuItem {} {
               label {G-3}
               xywh {30 30 100 20} labelfont 1
             }
-            menuitem {} {
+            MenuItem {} {
               label {C-4}
               xywh {30 30 100 20} labelfont 1
             }
-            menuitem {} {
+            MenuItem {} {
               label {G-4}
               xywh {40 40 100 20} labelfont 1
             }
-            menuitem {} {
+            MenuItem {} {
               label {C-5}
               xywh {40 40 100 20} labelfont 1
             }
-            menuitem {} {
+            MenuItem {} {
               label {G-5}
               xywh {50 50 100 20} labelfont 1
             }
-            menuitem {} {
+            MenuItem {} {
               label {G-6}
               xywh {60 60 100 20} labelfont 1
             }
@@ -747,20 +750,20 @@ if (pars->Pmode==0){
 };
 
 cbwidget->do_callback();}
-            xywh {220 305 90 20} down_box BORDER_BOX labelfont 1 labelsize 10 labelcolor 0 align 5 textsize 11
+            xywh {220 305 90 20} down_box BORDER_BOX labelfont 1 labelsize 10 align 5 textsize 11
             code0 {o->value(pars->Pmode);}
           } {
-            menuitem {} {
+            MenuItem {} {
               label Bandwidth
               xywh {105 105 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label Discrete
-              xywh {125 125 100 20} labelfont 1 labelsize 11 labelcolor 0
+              xywh {125 125 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label Continous
-              xywh {115 115 100 20} labelfont 1 labelsize 11 labelcolor 0
+              xywh {115 115 100 20} labelfont 1 labelsize 11
             }
           }
         }
@@ -970,6 +973,18 @@ if (resui!=NULL) {
         label P
         callback {presetsui->paste(pars,this);}
         xywh {270 430 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
+      }
+      Fl_Button {} {
+        label export
+        callback {char *filename;
+filename=fl_file_chooser("Export samples:","(*.wav)",NULL,0);
+if (filename==NULL) return;
+fl_filename_setext(filename,"");
+
+
+
+pars->export2wav(filename);} selected
+        tooltip {export samples as wav file} xywh {240 405 55 15} box THIN_UP_BOX color 255 labelsize 11 align 128
       }
     }
   }

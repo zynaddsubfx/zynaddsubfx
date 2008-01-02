@@ -34,7 +34,7 @@
 #include "LFOParams.h"
 #include "FilterParams.h"
 #include "Presets.h"
-
+#include <string>
 
 class PADnoteParameters:public Presets{
     public:
@@ -143,6 +143,7 @@ class PADnoteParameters:public Presets{
 	REALTYPE getNhr(int n);//gets the n-th overtone position relatively to N harmonic
 
 	void applyparameters(bool lockmutex);
+	void export2wav(std::string basefilename);
 
 	OscilGen *oscilgen;
 	Resonance *resonance;

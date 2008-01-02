@@ -27,7 +27,7 @@ class WAVaudiooutput{
 	WAVaudiooutput();
 	~WAVaudiooutput();
 	
-	bool newfile(std::string filename,int samplerate);
+	bool newfile(std::string filename,int samplerate,int channels);
 	void close();
 
 	void write(int nsmps, short int *smps);
@@ -35,6 +35,7 @@ class WAVaudiooutput{
     private:
 	int sampleswritten;
 	int samplerate;
+	int channels;
 	FILE *file;
 };
 #endif
