@@ -110,7 +110,7 @@ XMLwrapper::~XMLwrapper(){
     if (tree!=NULL) mxmlDelete(tree);
 };
 
-bool XMLwrapper::checkfileinformation(char *filename){
+bool XMLwrapper::checkfileinformation(const char *filename){
     stackpos=0;
     ZERO(&parentstack,(int)sizeof(parentstack));
     information.PADsynth_used=false;
@@ -162,7 +162,7 @@ bool XMLwrapper::checkfileinformation(char *filename){
 
 /* SAVE XML members */
 
-int XMLwrapper::saveXMLfile(char *filename){
+int XMLwrapper::saveXMLfile(const char *filename){
     char *xmldata=getXMLdata();
     if (xmldata==NULL) return(-2);
 
@@ -175,7 +175,7 @@ int XMLwrapper::saveXMLfile(char *filename){
     int result=dosavefile(filenamenew,compression,xmldata);
     
     delete []filenamenew;
-    delete []xmldata;    
+    free(xmldata);    
     return(result);
 };
 
@@ -196,7 +196,7 @@ char *XMLwrapper::getXMLdata(){
 };
 
 
-int XMLwrapper::dosavefile(char *filename,int compression,char *xmldata){
+int XMLwrapper::dosavefile(const char *filename,int compression,const char *xmldata){
     if (compression==0){
 	FILE *file;
 	file=fopen(filename,"w");
@@ -221,32 +221,32 @@ int XMLwrapper::dosavefile(char *filename,int compression,char *xmldata){
 
 
 
-void XMLwrapper::addpar(char *name,int val){
+void XMLwrapper::addpar(const char *name,int val){
     addparams2("par","name",name,"value",int2str(val));
 };
 
-void XMLwrapper::addparreal(char *name,REALTYPE val){
+void XMLwrapper::addparreal(const char *name,REALTYPE val){
     addparams2("par_real","name",name,"value",real2str(val));
 };
 
-void XMLwrapper::addparbool(char *name,int val){
+void XMLwrapper::addparbool(const char *name,int val){
     if (val!=0) addparams2("par_bool","name",name,"value","yes");
 	else addparams2("par_bool","name",name,"value","no");
 };
 
-void XMLwrapper::addparstr(char *name,char *val){
+void XMLwrapper::addparstr(const char *name,const char *val){
     mxml_node_t *element=mxmlNewElement(node,"string");
     mxmlElementSetAttr(element,"name",name);
     mxmlNewText(element,0,val);
 };
 
 
-void XMLwrapper::beginbranch(char *name){
+void XMLwrapper::beginbranch(const char *name){
     push(node);
     node=addparams0(name);
 };
 
-void XMLwrapper::beginbranch(char *name,int id){
+void XMLwrapper::beginbranch(const char *name,int id){
     push(node);
     node=addparams1(name,"id",int2str(id));
 };
@@ -268,7 +268,7 @@ int XMLwrapper::loadXMLfile(const char *filename){
 
     stackpos=0;
 
-    char *xmldata=doloadfile(filename);    
+    const char *xmldata=doloadfile(filename);    
     if (xmldata==NULL) return(-1);//the file could not be loaded or uncompressed
     
     root=tree=mxmlLoadString(NULL,xmldata,MXML_OPAQUE_CALLBACK);
@@ -333,7 +333,7 @@ char *XMLwrapper::doloadfile(const char *filename){
     }; 
 };
 
-bool XMLwrapper::putXMLdata(char *xmldata){
+bool XMLwrapper::putXMLdata(const char *xmldata){
     if (tree!=NULL) mxmlDelete(tree);
     tree=NULL;
 
@@ -357,7 +357,7 @@ bool XMLwrapper::putXMLdata(char *xmldata){
 
 
 
-int XMLwrapper::enterbranch(char *name){
+int XMLwrapper::enterbranch(const char *name){
     node=mxmlFindElement(peek(),peek(),name,NULL,NULL,MXML_DESCEND_FIRST);
     if (node==NULL) return(0);
 
@@ -365,7 +365,7 @@ int XMLwrapper::enterbranch(char *name){
     return(1);
 };
 
-int XMLwrapper::enterbranch(char *name,int id){
+int XMLwrapper::enterbranch(const char *name,int id){
     snprintf(tmpstr,TMPSTR_SIZE,"%d",id);
     node=mxmlFindElement(peek(),peek(),name,"id",tmpstr,MXML_DESCEND_FIRST);
     if (node==NULL) return(0);
@@ -390,7 +390,7 @@ int XMLwrapper::getbranchid(int min, int max){
     return(id);
 };
 
-int XMLwrapper::getpar(char *name,int defaultpar,int min,int max){
+int XMLwrapper::getpar(const char *name,int defaultpar,int min,int max){
     node=mxmlFindElement(peek(),peek(),"par","name",name,MXML_DESCEND_FIRST);
     if (node==NULL) return(defaultpar);
 
@@ -404,11 +404,11 @@ int XMLwrapper::getpar(char *name,int defaultpar,int min,int max){
     return(val);
 };
 
-int XMLwrapper::getpar127(char *name,int defaultpar){
+int XMLwrapper::getpar127(const char *name,int defaultpar){
     return(getpar(name,defaultpar,0,127));
 };
 
-int XMLwrapper::getparbool(char *name,int defaultpar){
+int XMLwrapper::getparbool(const char *name,int defaultpar){
     node=mxmlFindElement(peek(),peek(),"par_bool","name",name,MXML_DESCEND_FIRST);
     if (node==NULL) return(defaultpar);
 
@@ -419,7 +419,7 @@ int XMLwrapper::getparbool(char *name,int defaultpar){
 	else return(0);
 };
 
-void XMLwrapper::getparstr(char *name,char *par,int maxstrlen){
+void XMLwrapper::getparstr(const char *name,char *par,int maxstrlen){
     ZERO(par,maxstrlen);
     node=mxmlFindElement(peek(),peek(),"string","name",name,MXML_DESCEND_FIRST);
     
@@ -431,7 +431,7 @@ void XMLwrapper::getparstr(char *name,char *par,int maxstrlen){
     
 };
 
-REALTYPE XMLwrapper::getparreal(char *name,REALTYPE defaultpar){
+REALTYPE XMLwrapper::getparreal(const char *name,REALTYPE defaultpar){
     node=mxmlFindElement(peek(),peek(),"par_real","name",name,MXML_DESCEND_FIRST);
     if (node==NULL) return(defaultpar);
 
@@ -441,7 +441,7 @@ REALTYPE XMLwrapper::getparreal(char *name,REALTYPE defaultpar){
     return(str2real(strval));
 };
 
-REALTYPE XMLwrapper::getparreal(char *name,REALTYPE defaultpar,REALTYPE min,REALTYPE max){
+REALTYPE XMLwrapper::getparreal(const char *name,REALTYPE defaultpar,REALTYPE min,REALTYPE max){
     REALTYPE result=getparreal(name,defaultpar);
     
     if (result<min) result=min;
@@ -475,18 +475,18 @@ REALTYPE XMLwrapper::str2real(const char *str){
 };
 
 
-mxml_node_t *XMLwrapper::addparams0(char *name){
+mxml_node_t *XMLwrapper::addparams0(const char *name){
     mxml_node_t *element=mxmlNewElement(node,name);
     return(element);
 };
 
-mxml_node_t *XMLwrapper::addparams1(char *name,char *par1,char *val1){
+mxml_node_t *XMLwrapper::addparams1(const char *name,const char *par1,const char *val1){
     mxml_node_t *element=mxmlNewElement(node,name);
     mxmlElementSetAttr(element,par1,val1);
     return(element);
 };
 
-mxml_node_t *XMLwrapper::addparams2(char *name,char *par1,char *val1,char *par2, char *val2){
+mxml_node_t *XMLwrapper::addparams2(const char *name,const char *par1,const char *val1,const char *par2, const char *val2){
     mxml_node_t *element=mxmlNewElement(node,name);
     mxmlElementSetAttr(element,par1,val1);
     mxmlElementSetAttr(element,par2,val2);

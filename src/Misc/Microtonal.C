@@ -64,8 +64,8 @@ void Microtonal::defaults(){
 };
 
 Microtonal::~Microtonal(){
-    delete (Pname);
-    delete (Pcomment);
+    delete [] Pname;
+    delete [] Pcomment;
 };
 
 /*

@@ -482,9 +482,9 @@ void Master::GetAudioOutSamples(int nsamples,int samplerate,REALTYPE *outl,REALT
 
 
 Master::~Master(){
-    for (int npart=0;npart<NUM_MIDI_PARTS;npart++) delete (part[npart]);
-    for (int nefx=0;nefx<NUM_INS_EFX;nefx++) delete (insefx[nefx]);
-    for (int nefx=0;nefx<NUM_SYS_EFX;nefx++) delete (sysefx[nefx]);
+    for (int npart=0;npart<NUM_MIDI_PARTS;npart++) delete part[npart];
+    for (int nefx=0;nefx<NUM_INS_EFX;nefx++) delete insefx[nefx];
+    for (int nefx=0;nefx<NUM_SYS_EFX;nefx++) delete sysefx[nefx];
     
     delete [] audiooutl;
     delete [] audiooutr;

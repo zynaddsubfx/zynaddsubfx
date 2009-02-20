@@ -4,7 +4,7 @@ Spliter
 This program splits the keyboard and alows you to play two instruments same time. You can use this program with ZynAddSubFX or any other synthesizer.
 This requires ALSA 0.9.x.
 
-To compile it, run the file "compile.sh". There is no Makefile, yet.
+To compile it, run "make".
 If you want to use with ZynAddSubFX send the midi events thru Spliter with aconnect like this:
 
  - connect the keyboard port to "Spliter IN" port

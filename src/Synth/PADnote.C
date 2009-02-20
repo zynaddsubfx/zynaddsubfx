@@ -242,7 +242,7 @@ PADnote::~PADnote(){
     delete (NoteGlobalPar.GlobalFilterR);
     delete (NoteGlobalPar.FilterEnvelope);
     delete (NoteGlobalPar.FilterLfo);
-    delete (tmpwave);
+    delete [] tmpwave;
 };
 
 

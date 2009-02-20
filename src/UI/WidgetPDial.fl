@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0105 
+version 1.0109 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2003-2005 Nasca Octavian Paul} {} 
@@ -12,16 +12,95 @@ decl {\#include <FL/Fl_Dial.H>} {public
 decl {\#include <FL/fl_draw.H>} {public
 } 
 
-decl {\#include <stdio.h>} {public
+decl {\#include <FL/Fl_Tooltip.H>} {public
 } 
 
 decl {\#include <math.h>} {public
 } 
 
+decl {\#include <string.h>} {public
+} 
+
+decl {\#include <stdio.h>} {public
+} 
+
+decl {\#include <FL/Fl_Group.H>} {public
+} 
+
+decl {\#include <FL/Fl_Menu_Window.H>} {public
+} 
+
+class TipWin {: {public Fl_Menu_Window}
+} {
+  Function {TipWin():Fl_Menu_Window(1,1)} {} {
+    code {strcpy(tip, "X.XX");
+set_override();
+end();} {}
+  }
+  Function {draw()} {return_type void
+  } {
+    code {draw_box(FL_BORDER_BOX, 0, 0, w(), h(), Fl_Color(175));
+        fl_color(FL_BLACK);
+        fl_font(labelfont(), labelsize());
+        if(textmode)
+             fl_draw(text, 3, 3, w()-6, h()-6, Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_WRAP));
+        else
+             fl_draw(tip, 3, 3, w()-6, h()-6, Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_WRAP));} {}
+  }
+  Function {value(float f)} {return_type void
+  } {
+    code {sprintf(tip, "%.2f", f);
+textmode=false;
+        // Recalc size of window
+        fl_font(labelfont(), labelsize());
+        int W = w(), H = h();
+        fl_measure(tip, W, H, 0);
+        W += 8;
+        size(W, H);
+        redraw();} {}
+  }
+  Function {setText(const char * c)} {return_type void
+  } {
+    code {strcpy(text,c);
+textmode=true;
+        // Recalc size of window
+        fl_font(labelfont(), labelsize());
+        int W = w(), H = h();
+        fl_measure(text, W, H, 0);
+        W += 8;
+        size(W, H);
+        redraw();} {}
+  }
+  Function {setTextmode()} {return_type void
+  } {
+    code {textmode=true;
+        // Recalc size of window
+        fl_font(labelfont(), labelsize());
+        int W = w(), H = h();
+        fl_measure(text, W, H, 0);
+        W += 8;
+        size(W, H);
+        redraw();} {}
+  }
+  decl {char tip[40];} {}
+  decl {bool textmode;} {}
+  decl {char text[400];//bad stuff will happen if too much is put in this (perhaps dynamically allocate?)} {}
+} 
+
 class WidgetPDial {: {public Fl_Dial}
 } {
   Function {WidgetPDial(int x,int y, int w, int h, const char *label=0):Fl_Dial(x,y,w,h,label)} {} {
-    code {oldvalue=0.0;} {}
+    code {callback(value_cb, (void*)this);
+Fl_Group *save = Fl_Group::current();
+tipwin = new TipWin();
+tipwin->hide();
+Fl_Group::current(save);
+oldvalue=0.0;
+pos=false;
+textset=false;} {}
+  }
+  Function {~WidgetPDial()} {} {
+    code {delete tipwin;} {}
   }
   Function {handle(int event)} {return_type int
   } {
@@ -29,8 +108,15 @@ class WidgetPDial {: {public Fl_Dial}
 int my;
 
 switch (event){
-case FL_PUSH:oldvalue=value();
+case FL_PUSH:
+     oldvalue=value();
 case FL_DRAG:
+     if(!pos){
+         tipwin->position(Fl::event_x_root(), Fl::event_y_root()+20);
+         pos=true;
+     }
+     tipwin->value(value());
+     tipwin->show();
      my=-(Fl::event_y()-y()-h()/2);
 
      dragsize=200.0;
@@ -45,7 +131,24 @@ case FL_DRAG:
      if (this->when()!=0) do_callback();
      return(1); 
      break;
+case FL_ENTER:
+     if(textset){
+         if(!pos){
+             tipwin->position(Fl::event_x_root(), Fl::event_y_root()+20);
+             pos=true;
+         }
+         tipwin->setTextmode();
+         tipwin->show();
+         return(1);} 
+     break;
+case FL_HIDE:
+case FL_LEAVE:
+     tipwin->hide();
+     pos=false;
+     break;
 case FL_RELEASE:
+     tipwin->hide();
+     pos=false;
      if (this->when()==0) do_callback();
 	return(1);
      break;
@@ -127,5 +230,22 @@ fl_pop_matrix();} {}
     code {if (active_r()) fl_color(r,g,b);
    else fl_color(160-(160-r)/3,160-(160-b)/3,160-(160-b)/3);} {}
   }
+  Function {value_cb2()} {return_type void
+  } {
+    code {tipwin->value(value());} {}
+  }
+  Function {value_cb(Fl_Widget*, void*data)} {return_type {static void}
+  } {
+    code {WidgetPDial *val = (WidgetPDial*)data;
+        val->value_cb2();} {}
+  }
+  Function {tooltip(const char * c)} {return_type void
+  } {
+    code {tipwin->setText(c);
+textset=true;} {}
+  }
+  decl {bool textset;} {}
+  decl {bool pos;} {}
   decl {double oldvalue;} {}
+  decl {TipWin *tipwin;} {}
 } 

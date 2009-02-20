@@ -163,20 +163,20 @@ Part::~Part(){
 	if (kit[n].subpars!=NULL) delete (kit[n].subpars);
 	if (kit[n].padpars!=NULL) delete (kit[n].padpars);
     	kit[n].adpars=NULL;kit[n].subpars=NULL;kit[n].padpars=NULL;
-	delete(kit[n].Pname);
+	delete [] kit[n].Pname;
     };
 
-    delete (Pname);
-    delete (partoutl);
-    delete (partoutr);
-    delete (tmpoutl);
-    delete (tmpoutr);
+    delete [] Pname;
+    delete [] partoutl;
+    delete [] partoutr;
+    delete [] tmpoutl;
+    delete [] tmpoutr;
     for (int nefx=0;nefx<NUM_PART_EFX;nefx++) 
 	delete (partefx[nefx]);
     for (int n=0;n<NUM_PART_EFX+1;n++) {
-	delete (partfxinputl[n]);
-	delete (partfxinputr[n]);
-    };
+	delete [] partfxinputl[n];
+	delete [] partfxinputr[n];
+    }
 };
 
 /*

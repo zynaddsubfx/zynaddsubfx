@@ -332,7 +332,7 @@ void AnalogFilter::filterout(REALTYPE *smp){
 	    REALTYPE x=i/(REALTYPE) SOUND_BUFFER_SIZE;
 	    smp[i]=ismp[i]*(1.0-x)+smp[i]*x;
 	};
-	delete (ismp);
+	delete [] ismp;
 	needsinterpolation=0;
     };
 

@@ -59,8 +59,8 @@ class Config{
 	void save();
 	
     private:
-	void readConfig(char *filename);
-	void saveConfig(char *filename);
+	void readConfig(const char *filename);
+	void saveConfig(const char *filename);
 	void getConfigFileName(char *name,int namesize);
 };
 #endif

@@ -58,7 +58,7 @@ Sequencer::~Sequencer(){
 };
 
 
-int Sequencer::importmidifile(char *filename){
+int Sequencer::importmidifile(const char *filename){
     if (midifile.loadfile(filename)<0) return(-1);
 
     for (int i=0;i<NUM_MIDI_TRACKS;i++){

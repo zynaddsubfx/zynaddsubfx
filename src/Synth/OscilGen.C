@@ -543,7 +543,7 @@ void OscilGen::modulation(){
 	tmpsmps[i]=in[poshi]*(1.0-poslo)+in[poshi+1]*poslo;
     };
 
-    delete(in);
+    delete [] in;
     fft->smps2freqs(tmpsmps,oscilFFTfreqs);//perform FFT
 };
 

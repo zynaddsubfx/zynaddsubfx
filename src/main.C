@@ -341,8 +341,8 @@ void exitprogram(){
 #endif
 
 //    pthread_mutex_unlock(&master->mutex);
-    delete(denormalkillbuf);
-    delete(OscilGen::tmpsmps);
+    delete [] denormalkillbuf;
+    delete [] OscilGen::tmpsmps;
     deleteFFTFREQS(&OscilGen::outoscilFFTfreqs);
 
 };

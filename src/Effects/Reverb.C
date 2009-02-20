@@ -78,8 +78,8 @@ Reverb::~Reverb(){
     if (hpf!=NULL) delete hpf;
     if (lpf!=NULL) delete lpf;
 
-    for (i=0;i<REV_APS*2;i++) delete ap[i];
-    for (i=0;i<REV_COMBS*2;i++) delete comb[i];
+    for (i=0;i<REV_APS*2;i++) delete [] ap[i];
+    for (i=0;i<REV_COMBS*2;i++) delete [] comb[i];
 
     delete [] inputbuf;
 };

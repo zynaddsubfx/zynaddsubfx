@@ -32,7 +32,7 @@ Presets::Presets(){
 Presets::~Presets(){
 };
 
-void Presets::setpresettype(char *type){
+void Presets::setpresettype(const char *type){
     strcpy(this->type,type);
 };
 

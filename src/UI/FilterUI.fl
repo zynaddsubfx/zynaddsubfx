@@ -141,7 +141,7 @@ for (i=1;i<lx;i++){
 };} {}
   }
   Function {~FormantFilterGraph()} {} {
-    code {delete(graphpoints);} {}
+    code {delete [] graphpoints;} {}
   }
   decl {FilterParams *pars;} {}
   decl {int oldx,oldy;} {}

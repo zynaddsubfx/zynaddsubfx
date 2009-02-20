@@ -32,7 +32,7 @@ class MIDIFile{
 	~MIDIFile();
 	
 	//returns -1 if there is an error, otherwise 0
-	int loadfile(char *filename);
+	int loadfile(const char *filename);
 	
 	//returns -1 if there is an error, otherwise 0
 	int parsemidifile(MIDIEvents *me_);

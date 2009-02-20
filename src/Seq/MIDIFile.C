@@ -37,7 +37,7 @@ MIDIFile::~MIDIFile(){
     clearmidifile();
 };
 
-int MIDIFile::loadfile(char *filename){
+int MIDIFile::loadfile(const char *filename){
     clearmidifile();
     
     FILE *file=fopen(filename,"r");

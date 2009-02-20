@@ -436,7 +436,7 @@ void Bank::scanrootdir(char *rootdir){
 	char name[maxdirsize];	
     }bank;
 
-    char *separator="/";
+    const char *separator="/";
     if (strlen(rootdir)) {
 	char tmp=rootdir[strlen(rootdir)-1];
 	if ((tmp=='/') || (tmp=='\\')) separator="";

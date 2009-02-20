@@ -43,26 +43,26 @@ class XMLwrapper{
 	/********************************/
 
 	//returns 0 if ok or -1 if the file cannot be saved
-	int saveXMLfile(char *filename);
+	int saveXMLfile(const char *filename);
 
 	//returns the new allocated string that contains the XML data (used for clipboard)
 	//the string is NULL terminated
 	char *getXMLdata();
 	
 	//add simple parameter (name and value)
-	void addpar(char *name,int val);
-	void addparreal(char *name,REALTYPE val);
+	void addpar(const char *name,int val);
+	void addparreal(const char *name,REALTYPE val);
 	
 	//add boolean parameter (name and boolean value)
 	//if the value is 0 => "yes", else "no"
-	void addparbool(char *name,int val);
+	void addparbool(const char *name,int val);
 
 	//add string parameter (name and string)
-	void addparstr(char *name,char *val);
+	void addparstr(const char *name,const char *val);
 
 	//add a branch
-	void beginbranch(char *name);
-	void beginbranch(char *name, int id);
+	void beginbranch(const char *name);
+	void beginbranch(const char *name, int id);
 
 	//this must be called after each branch (nodes that contains child nodes)
 	void endbranch();
@@ -75,16 +75,16 @@ class XMLwrapper{
 	int loadXMLfile(const char *filename);
 
 	//used by the clipboard
-	bool putXMLdata(char *xmldata);
+	bool putXMLdata(const char *xmldata);
     
 	//enter into the branch
 	//returns 1 if is ok, or 0 otherwise
-	int enterbranch(char *name);
+	int enterbranch(const char *name);
 
 		
 	//enter into the branch with id
 	//returns 1 if is ok, or 0 otherwise
-	int enterbranch(char *name, int id);
+	int enterbranch(const char *name, int id);
 
 	//exits from a branch
 	void exitbranch();
@@ -98,16 +98,16 @@ class XMLwrapper{
 	//it returns the parameter and limits it between min and max
 	//if min==max==0, it will not limit it
 	//if no parameter will be here, the defaultpar will be returned
-	int getpar(char *name,int defaultpar,int min,int max);
+	int getpar(const char *name,int defaultpar,int min,int max);
 
 	//the same as getpar, but the limits are 0 and 127
-	int getpar127(char *name,int defaultpar);
+	int getpar127(const char *name,int defaultpar);
 	
-	int getparbool(char *name,int defaultpar);
+	int getparbool(const char *name,int defaultpar);
 
-	void getparstr(char *name,char *par,int maxstrlen);
-	REALTYPE getparreal(char *name,REALTYPE defaultpar);
-	REALTYPE getparreal(char *name,REALTYPE defaultpar,REALTYPE min,REALTYPE max);
+	void getparstr(const char *name,char *par,int maxstrlen);
+	REALTYPE getparreal(const char *name,REALTYPE defaultpar);
+	REALTYPE getparreal(const char *name,REALTYPE defaultpar,REALTYPE min,REALTYPE max);
 
 	bool minimal;//false if all parameters will be stored (used only for clipboard)
 	
@@ -117,11 +117,11 @@ class XMLwrapper{
 	
 	//opens a file and parse only the "information" data on it
 	//returns "true" if all went ok or "false" on errors
-	bool checkfileinformation(char *filename);
+	bool checkfileinformation(const char *filename);
 	
     private:
     
-	int dosavefile(char *filename,int compression,char *xmldata);
+	int dosavefile(const char *filename,int compression,const char *xmldata);
 	char *doloadfile(const char *filename);
 
     
@@ -133,17 +133,17 @@ class XMLwrapper{
 	//adds params like this:
 	// <name>
 	//returns the node
-	mxml_node_t *addparams0(char *name);
+	mxml_node_t *addparams0(const char *name);
 
 	//adds params like this:
 	// <name par1="val1">
 	//returns the node
-	mxml_node_t *addparams1(char *name,char *par1,char *val1);
+	mxml_node_t *addparams1(const char *name,const char *par1,const char *val1);
 
 	//adds params like this:
 	// <name par1="val1" par2="val2">
 	//returns the node
-	mxml_node_t *addparams2(char *name,char *par1,char *val1,char *par2, char *val2);
+	mxml_node_t *addparams2(const char *name,const char *par1,const char *val1,const char *par2, const char *val2);
 	
 	char *int2str(int x);
 	char *real2str(REALTYPE x);

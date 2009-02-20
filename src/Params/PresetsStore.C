@@ -110,8 +110,9 @@ void PresetsStore::rescanforpresets(char *type){
 	    presets[presetk].file=new char [MAX_STRING_SIZE];
 	    presets[presetk].name=new char [MAX_STRING_SIZE];
 	    char tmpc=dirname[strlen(dirname)-1];
-	    char *tmps="/";
+	    const char *tmps;
 	    if ((tmpc=='/')||(tmpc=='\\')) tmps="";
+	    else tmps="/";
 	    snprintf(presets[presetk].file,MAX_STRING_SIZE,"%s%s%s",dirname,tmps,filename);
 	    snprintf(presets[presetk].name,MAX_STRING_SIZE,"%s",filename);
 
@@ -152,10 +153,11 @@ void PresetsStore::copypreset(XMLwrapper *xml,char *type, const char *name){
 	tmpfilename[i]='_';
     };
     
-    char *dirname=config.cfg.presetsDirList[0];
+    const char *dirname=config.cfg.presetsDirList[0];
     char tmpc=dirname[strlen(dirname)-1];
-    char *tmps="/";
+    const char *tmps;
     if ((tmpc=='/')||(tmpc=='\\')) tmps="";
+    else tmps="/";
 
     snprintf(filename,MAX_STRING_SIZE,"%s%s%s.%s.xpz",dirname,tmps,name,type);
     

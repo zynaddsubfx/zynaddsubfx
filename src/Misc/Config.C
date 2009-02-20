@@ -174,12 +174,12 @@ void Config::init(){
 
 Config::~Config(){
 
-    delete(cfg.LinuxOSSWaveOutDev);
-    delete(cfg.LinuxOSSSeqInDev);
-    delete(cfg.DumpFile);
+    delete [] cfg.LinuxOSSWaveOutDev;
+    delete [] cfg.LinuxOSSSeqInDev;
+    delete [] cfg.DumpFile;
 
-    for (int i=0;i<winmidimax;i++) delete (winmididevices[i].name);
-    delete(winmididevices);
+    for (int i=0;i<winmidimax;i++) delete [] winmididevices[i].name;
+    delete [] winmididevices;
 };
 
 
@@ -203,7 +203,7 @@ void Config::clearpresetsdirlist(){
     };
 };
 
-void Config::readConfig(char *filename){
+void Config::readConfig(const char *filename){
     XMLwrapper *xmlcfg=new XMLwrapper();
     if (xmlcfg->loadXMLfile(filename)<0) return;
     if (xmlcfg->enterbranch("CONFIGURATION")){
@@ -262,7 +262,7 @@ void Config::readConfig(char *filename){
 
 };
 
-void Config::saveConfig(char *filename){
+void Config::saveConfig(const char *filename){
     XMLwrapper *xmlcfg=new XMLwrapper();
     
     xmlcfg->beginbranch("CONFIGURATION");    

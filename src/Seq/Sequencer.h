@@ -42,7 +42,7 @@ class Sequencer:public MIDIEvents{
 	int getevent(char ntrack, int *midich,int *type,int *par1, int *par2);
 
 	//returns 0 if ok or -1 if there is a error loading file
-	int importmidifile(char *filename);	
+	int importmidifile(const char *filename);	
 	
 	void startplay();
 	void stopplay();
