@@ -842,7 +842,8 @@
 	    - Standardized the code, so it could compile with pedantic without
 	      errors
 
-
-
-
+22 Feb 2009 (Mark McCurry)
+	    - Fix improper deallocation in PresetsStore
+	    - Fixed errors with drawing of the Oscillator as reported with
+	      valgrind
 
