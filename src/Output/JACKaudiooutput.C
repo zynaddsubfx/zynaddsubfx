@@ -116,14 +116,10 @@ void JACKhandlemidi(unsigned long frames) {
   void* midi_buf = jack_port_get_buffer(midi_inport, frames);
   jack_midi_event_t jack_midi_event;
   jack_nframes_t event_index = 0;
-  jack_nframes_t event_count = 
-    jack_midi_port_get_info(midi_buf, frames)->event_count;
   unsigned char* midi_data;
   unsigned char type, chan;
-  
-  while (event_index < event_count) {
-    
-    jack_midi_event_get(&jack_midi_event, midi_buf, event_index, frames);
+
+  while (jack_midi_event_get(&jack_midi_event,midi_buf, event_index++) == 0) {
     midi_data = jack_midi_event.buffer;
     type = midi_data[0] & 0xF0;
     chan = midi_data[0] & 0x0F;
@@ -149,8 +145,6 @@ void JACKhandlemidi(unsigned long frames) {
 
     /* XXX TODO: handle MSB/LSB controllers and RPNs and NRPNs */
     }    
-    
-    event_index++;
   }
   
 }

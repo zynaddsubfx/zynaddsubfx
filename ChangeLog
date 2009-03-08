@@ -847,3 +847,7 @@
 	    - Fixed errors with drawing of the Oscillator as reported with
 	      valgrind
 
+07 Mar 2009 (Mark McCurry)
+	    - Added start of DocBook documentation
+	    - Incorperated JACK output patch by Emmanuel Saracco
+	    - Incorperated QUERTZ layout by Achim Settelmeier
