@@ -21,8 +21,13 @@ void LASHClient::setalsaid(int id) {
 
 void LASHClient::setjackname(const char* name) {
   if (lash_enabled(client)) {
-    if (name != NULL)
+    if (name != NULL){
       lash_jack_client_name(client, name);
+
+      lash_event_t *event = lash_event_new_with_type(LASH_Client_Name);
+      lash_event_set_string(event, name);
+      lash_send_event(client, event);
+	 }
   }
 }
 
