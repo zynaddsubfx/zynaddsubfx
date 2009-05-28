@@ -1,5 +1,6 @@
 set(zynaddsubfxgui_output_SRCS
 	Recorder.C
+	WAVaudiooutput.C
 )
 
 if(AlsaMidiOutput)
