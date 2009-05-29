@@ -26,10 +26,16 @@
 #include "../globals.h"
 #include "../Params/LFOParams.h"
 
-
+/**Class for creating Low Frequency Ocillators*/
 class LFO{
  public:
+    /**Constructor
+     *
+     * @param lfopars pointer to a LFOParams object
+     * @param basefreq base frequency of LFO
+     */
     LFO(LFOParams *lfopars, REALTYPE basefreq);
+    /**Deconstructor*/
     ~LFO();
     REALTYPE lfoout();
     REALTYPE amplfoout();
@@ -40,6 +46,7 @@ class LFO{
     REALTYPE lfointensity;
     REALTYPE lfornd,lfofreqrnd;
     REALTYPE lfodelay;
+    /**\todo see if an enum would be better here*/
     char lfotype;
     int freqrndenabled;
     
@@ -48,5 +55,5 @@ class LFO{
     
 };
 
-
 #endif
+

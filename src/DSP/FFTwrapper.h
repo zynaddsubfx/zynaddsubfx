@@ -44,10 +44,17 @@ Hope all goes right." */
 #define rfftw_plan fftw_plan
 #endif
 
+/**A wrapper for the FFTW library (Fast Fourier Transforms)*/
 class FFTwrapper{
     public:
+        /**Constructor
+         * @param fftsize The size of samples to be fed to fftw*/
 	FFTwrapper(int fftsize_);
+        /**Destructor*/
 	~FFTwrapper();
+        /**Convert Samples to Frequencies using Fourier Transform
+         * @param smps Pointer to Samples to be converted; has length fftsize_
+         * @param freqs Structure FFTFREQS which stores the frequencies*/
 	void smps2freqs(REALTYPE *smps,FFTFREQS freqs);
 	void freqs2smps(FFTFREQS freqs,REALTYPE *smps);
     private:

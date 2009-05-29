@@ -163,3 +163,4 @@ void Sequencer::setplayspeed(int speed){
     playspeed=speed;
     realplayspeed=pow(10.0,speed/128.0);
 };
+

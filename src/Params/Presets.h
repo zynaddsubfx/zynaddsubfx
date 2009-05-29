@@ -27,12 +27,13 @@
 
 #include "PresetsStore.h"
 
+/**Presets and Clipboard management*/
 class Presets{
     public:
 	Presets();
 	virtual ~Presets();
 	
-        void copy(const char *name);//if name==NULL, the clipboard is used
+        void copy(const char *name);/**<if name==NULL, the clipboard is used*/
 	void paste(int npreset);//npreset==0 for clipboard
 	bool checkclipboardtype();
 	void deletepreset(int npreset);

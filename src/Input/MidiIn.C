@@ -24,12 +24,13 @@
 #include "MidiIn.h"
 
 int MidiIn::getcontroller(unsigned char b){
+    /**\todo there might be a better way to do this*/
     int ctl=C_NULL;
     switch (b){
-	    case 1:ctl=C_modwheel;//Modulation Wheel
-		break;
-	    case 7:ctl=C_volume;//Volume
-    		break;
+            case 1:ctl=C_modwheel;//Modulation Wheel
+                break;
+            case 7:ctl=C_volume;//Volume
+                break;
 	    case 10:ctl=C_panning;//Panning
 		break;
 	    case 11:ctl=C_expression;//Expression

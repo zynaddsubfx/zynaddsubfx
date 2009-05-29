@@ -28,15 +28,22 @@
 enum MidiCmdType{MidiNull,MidiNoteOFF,MidiNoteON,MidiController};
 #define MP_MAX_BYTES 4000  //in case of loooong SYS_EXes
 
+/**This class is inherited by all the Midi input classes*/
 class MidiIn{
     public:
-	virtual void getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmdparams){};
-	virtual ~MidiIn(){};
-	int getcontroller(unsigned char b);
+         /**Get the command,channel and parameters of the MIDI
+         *
+         * \todo make pure virtual
+         * @param cmdtype the referece to the variable that will store the type
+         * @param cmdchan the channel for the event
+         * @param parameters for the event*/
+        virtual void getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmdparams){};
+        virtual ~MidiIn(){};//**< \todo figure out if this declaation the intended one*/
+        int getcontroller(unsigned char b);
     protected:
-	int inputok;//1 if I can read midi bytes from input ports
+        int inputok;/**<1 if I can read midi bytes from input ports*/
+        /**\todo figure out if inputtok can be a bool*/
 };
-
 
 #endif
 

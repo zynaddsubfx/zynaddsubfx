@@ -94,6 +94,3 @@ void FFTwrapper::freqs2smps(FFTFREQS freqs,REALTYPE *smps){
 
 };
 
-
-
-

@@ -26,22 +26,29 @@
 #include "MIDIEvents.h"
 #include "MIDIFile.h"
 
+/**The Sequencer*/
 class Sequencer:public MIDIEvents{
     public:
+        /**Constructor*/
 	Sequencer();
+        /**Destructor
+         * \todo investigate deletelist, it looks suspicious*/
 	~Sequencer();
 	
-	//theese functions are called by the master and are ignored if the recorder/player are stopped
+	//these functions are called by the master and are ignored if the recorder/player are stopped
 	void recordnote(char chan, char note, char vel);
 	void recordcontroller(char chan,unsigned int type,int par);
 	
-	//this is only for player
-	//it returns 1 if this must be called at least once more
-	//it returns 0 if there are no more notes for the current time
-	//or -1 if there is no note
+	/**Gets an event \todo better description
+         *
+         * this is only for player
+	 * @return 1 if this must be called at least once more
+	 *         0 if there are no more notes for the current time
+	 *        -1 if there are no notes*/
 	int getevent(char ntrack, int *midich,int *type,int *par1, int *par2);
 
-	//returns 0 if ok or -1 if there is a error loading file
+	/**Imports a given midifile
+         * @return 0 if ok or -1 if there is a error loading file*/
 	int importmidifile(const char *filename);	
 	
 	void startplay();
@@ -61,8 +68,8 @@ class Sequencer:public MIDIEvents{
 	double abs;//the time from the begining of the track
 	double rel;//the time difference between the last and the current event
 	double last;//the time of the last event (absolute, since 1 Jan 1970)
-	//theese must be double, because the float's precision is too low
-	//and all theese represents the time in seconds
+	//these must be double, because the float's precision is too low
+	//and all these represent the time in seconds
     } playtime[NUM_MIDI_TRACKS];
     
     void resettime(timestruct *t);
@@ -78,7 +85,6 @@ class Sequencer:public MIDIEvents{
     double realplayspeed;
     
 };
-
 
 #endif
 

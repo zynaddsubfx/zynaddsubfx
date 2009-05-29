@@ -27,14 +27,22 @@
 #include "../globals.h"
 #include "../Params/EnvelopeParams.h"
 
+/**Implementation of a general Envelope*/
 class Envelope{
 public:
+
+    /**Constructor*/
     Envelope(EnvelopeParams *envpars,REALTYPE basefreq);
+    /**Destructor*/
     ~Envelope();
     void relasekey();
     REALTYPE envout();
     REALTYPE envout_dB();
-    int finished();//returns 1 if the envelope is finished
+    /**Determines the status of the Envelope
+     *
+     *\todo see if this can be changed to use a boolean
+     * @return returns 1 if the envelope is finished*/
+    int finished();
 private:
     int envpoints;
     int envsustain;//"-1" means disabled
@@ -45,8 +53,8 @@ private:
 
     int currentpoint; //current envelope point (starts from 1)
     int forcedrelase;
-    char keyreleased; //if the key was released 
-    char envfinish;    
+    char keyreleased; //if the key was released /** \todo figure out WHY IS THIS A CHAR*/
+    char envfinish; /** \todo figure out WHY IS THIS A CHAR*/   
     REALTYPE t;   // the time from the last point
     REALTYPE inct;// the time increment 
     REALTYPE envoutval;//used to do the forced release
@@ -54,5 +62,4 @@ private:
 
 
 #endif
-
 

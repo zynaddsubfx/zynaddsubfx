@@ -26,9 +26,12 @@
 #define MAX_STRING_SIZE 4000
 #define MAX_BANK_ROOT_DIRS 100
 
+/**Configuration file functions*/
 class Config{
     public:
+        /** Constructor*/
 	Config();
+        /** Destructor*/
 	~Config();
 	struct {
 	    char *LinuxOSSWaveOutDev,*LinuxOSSSeqInDev;

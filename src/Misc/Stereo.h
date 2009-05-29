@@ -1,9 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
  
-  Util.h - Miscellaneous functions
-  Copyright (C) 2002-2005 Nasca Octavian Paul
-  Author: Nasca Octavian Paul
+  Stereo.h - Object for storing a pair of objects
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License 
@@ -17,29 +15,26 @@
   You should have received a copy of the GNU General Public License (version 2)
   along with this program; if not, write to the Free Software Foundation,
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
-
 */
+#ifndef STEREO_H
+#define STEREO_H
 
-#ifndef UTIL_H
-#define UTIL_H
+template <class T>
+class Stereo{
+    public:
+        Stereo(const T &left,const T &right);
+        ~Stereo(){};
 
-#include <pthread.h>
-#include "../globals.h"
-#include "Microtonal.h"
-#include "../DSP/FFTwrapper.h"
-#include "Config.h"
+        void operator=(const Stereo<T> &smp);
+        T &left(){return leftChannel;}; 
+        T &right(){return rightChannel;}; 
+        const T &left()const{return leftChannel;}; 
+        const T &right()const{return rightChannel;}; 
+    private:
+        T leftChannel;
+        T rightChannel;
 
-//Velocity Sensing function
-extern REALTYPE VelF(REALTYPE velocity,unsigned char scaling);
-
-bool fileexists(char *filename);
-
-#define N_DETUNE_TYPES 4 //the number of detune types
-extern REALTYPE getdetune(unsigned char type,unsigned short int coarsedetune,unsigned short int finedetune);
-
-extern REALTYPE *denormalkillbuf;/**<the buffer to add noise in order to avoid denormalisation*/
-
-extern Config config;
-
+};
 #endif
 
+#include "Stereo.C"

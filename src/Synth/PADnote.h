@@ -29,6 +29,7 @@
 #include "../DSP/Filter.h"
 #include "../Params/Controller.h"
 
+/**The "pad" synthesizer*/
 class PADnote{
     public:
         PADnote(PADnoteParameters *parameters, Controller *ctl_,REALTYPE freq, REALTYPE velocity, int portamento_, int midinote, bool besilent);

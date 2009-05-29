@@ -34,10 +34,10 @@ class OscilGen:public Presets{
 	OscilGen(FFTwrapper *fft_,Resonance *res_);
 	~OscilGen();
 
-        //computes the full spectrum of oscil from harmonics,phases and basefunc
+        /**computes the full spectrum of oscil from harmonics,phases and basefunc*/
 	void prepare();
 
-	//do the antialiasing(cut off higher freqs.),apply randomness and do a IFFT
+	/**do the antialiasing(cut off higher freqs.),apply randomness and do a IFFT*/
 	short get(REALTYPE *smps,REALTYPE freqHz);//returns where should I start getting samples, used in block type randomness
 	short get(REALTYPE *smps,REALTYPE freqHz,int resonance);
 	//if freqHz is smaller than 0, return the "un-randomized" sample for UI
@@ -47,7 +47,8 @@ class OscilGen:public Presets{
 	//called by UI
 	void getspectrum(int n,REALTYPE *spc,int what);//what=0 pt. oscil,1 pt. basefunc
         void getcurrentbasefunction(REALTYPE *smps);
-	void useasbase();//convert oscil to base function
+        /**convert oscil to base function*/
+	void useasbase();
 
     	void add2XML(XMLwrapper *xml);
 	void defaults();
@@ -57,19 +58,19 @@ class OscilGen:public Presets{
 	
 	//Parameters
 			
-	/* 
-	  The hmag and hphase starts counting from 0, so the first harmonic(1) has the index 0,
-	  2-nd harmonic has index 1, ..the 128 harminic has index 127
-	*/
+	/**
+	 * The hmag and hphase starts counting from 0, so the first harmonic(1) has the index 0,
+	 * 2-nd harmonic has index 1, ..the 128 harminic has index 127
+	 */
 	unsigned char Phmag[MAX_AD_HARMONICS],Phphase[MAX_AD_HARMONICS];//the MIDI parameters for mag. and phases
 	
 	
-	/*The Type of magnitude:
-	    0 - Linear
-	    1 - dB scale (-40)
-	    2 - dB scale (-60)
-	    3 - dB scale (-80)
-	    4 - dB scale (-100)*/
+	/**The Type of magnitude:
+	 *   0 - Linear
+	 *   1 - dB scale (-40)
+	 *   2 - dB scale (-60)
+	 *   3 - dB scale (-80)
+	 *   4 - dB scale (-100)*/
 	unsigned char Phmagtype;
 
 	unsigned char Pcurrentbasefunc;//The base function used - 0=sin, 1=...

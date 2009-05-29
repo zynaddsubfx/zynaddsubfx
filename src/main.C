@@ -20,10 +20,8 @@
 
 */
 
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
+#include <stdio.h>//remove once iostream is used
+#include <iostream>
 
 #include <unistd.h>
 #include <pthread.h>
@@ -485,7 +483,7 @@ int main(int argc, char *argv[]){
 		     OSCIL_SIZE=tmp;
 	    	    if (OSCIL_SIZE<MAX_AD_HARMONICS*2) OSCIL_SIZE=MAX_AD_HARMONICS*2;
 		     OSCIL_SIZE=(int) pow(2,ceil(log (OSCIL_SIZE-1.0)/log(2.0)));
-		     if (tmp!=OSCIL_SIZE) fprintf(stderr,"\nOSCIL_SIZE is wrong (must me 2^n) or too small. Adjusting to %d.\n",OSCIL_SIZE);
+		     if (tmp!=OSCIL_SIZE) fprintf(stderr,"\nOSCIL_SIZE is wrong (must be 2^n) or too small. Adjusting to %d.\n",OSCIL_SIZE);
 		     break;
 	    case 'S':swaplr=1;
 		     break;

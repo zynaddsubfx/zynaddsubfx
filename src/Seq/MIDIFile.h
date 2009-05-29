@@ -26,12 +26,15 @@
 #include "../globals.h"
 #include "MIDIEvents.h"
 
+/**MIDI file loader*/
 class MIDIFile{
     public:
 	MIDIFile();
 	~MIDIFile();
 	
-	//returns -1 if there is an error, otherwise 0
+	/**Loads the given file
+         * @param filename The name of the file to load
+         * @return -1 if there is an error, otherwise 0*/
 	int loadfile(const char *filename);
 	
 	//returns -1 if there is an error, otherwise 0
@@ -88,3 +91,4 @@ class MIDIFile{
 };
 
 #endif
+

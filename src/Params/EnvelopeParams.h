@@ -47,7 +47,7 @@ class EnvelopeParams:public Presets{
 
 	REALTYPE getdt(char i);
 
-       /* Parametrii MIDI */
+       /* MIDI Parameters */
         unsigned char Pfreemode;//1 daca este in modul free sau 0 daca este in mod ADSR,ASR,...
 	unsigned char Penvpoints;
 	unsigned char Penvsustain;//127 pentru dezactivat
@@ -80,7 +80,6 @@ class EnvelopeParams:public Presets{
 
 
 };
-
 
 #endif
 

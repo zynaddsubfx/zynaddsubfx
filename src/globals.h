@@ -35,10 +35,10 @@ struct FFTFREQS{
 extern void newFFTFREQS(FFTFREQS *f,int size);
 extern void deleteFFTFREQS(FFTFREQS *f);
 
-// Sampling rate
+/**Sampling rate*/
 extern int SAMPLE_RATE;
 
-/* 
+/** 
  * The size of a sound buffer (or the granularity)
  * All internal transfer of sound data use buffer of this size
  * All parameters are constant during this period of time, exception
@@ -49,21 +49,21 @@ extern int SAMPLE_RATE;
 extern int SOUND_BUFFER_SIZE;
 
 
-/*
+/**
  * The size of ADnote Oscillator
  * Decrease this => poor quality
  * Increase this => CPU requirements gets high (only at start of the note)
  */
 extern int OSCIL_SIZE;
 
-/*
+/**
  * The number of harmonics of additive synth
  * This must be smaller than OSCIL_SIZE/2
  */
 #define MAX_AD_HARMONICS 128
 
 
-/*
+/**
  * The number of harmonics of substractive
  */
 #define MAX_SUB_HARMONICS 64

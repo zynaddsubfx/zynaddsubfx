@@ -36,32 +36,36 @@
 #include "XMLwrapper.h"
 
 extern Dump dump;
+/** It sends Midi Messages to Parts, receives samples from parts,
+ *  process them with system/insertion effects and mix them */
 class Master{
-    public:    
+    public:
+        /** Constructor*/
 	Master();
+        /** Destructor*/
 	~Master();
 
-	//saves all settings to a XML file
-	//returns 0 for ok  or <0 if there is an error
+	/**Saves all settings to a XML file
+	 * @return 0 for ok or <0 if there is an error*/
 	int saveXML(char *filename);
 
-	//this adds the parameters to the XML data
+	/**This adds the parameters to the XML data*/
 	void add2XML(XMLwrapper *xml);
 
 	void defaults();
 
 
-	//loads all settings from a XML file
-	//returns 0 for ok or -1 if there is an error
+	/**loads all settings from a XML file
+	 * @return 0 for ok or -1 if there is an error*/
 	int loadXML(char *filename);
 	void applyparameters();
 
 	void getfromXML(XMLwrapper *xml);
 	
-	//get all data to a newly allocated array (used for VST)
-	//returns the datasize
+	/**get all data to a newly allocated array (used for VST)
+	 * @return the datasize*/
 	int getalldata(char **data);
-	//put all data from the *data array to zynaddsubfx parameters (used for VST)
+	/**put all data from the *data array to zynaddsubfx parameters (used for VST)*/
 	void putalldata(char *data,int size);
 
 
@@ -76,15 +80,15 @@ class Master{
         void ShutUp();
 	int shutup;
 
-	//Audio Output
+	/**Audio Output*/
 	void AudioOut(REALTYPE *outl,REALTYPE *outr);
-	//Audio Output (for callback mode). This allows the program to be controled by an external program
+	/**Audio Output (for callback mode). This allows the program to be controled by an external program*/
 	void GetAudioOutSamples(int nsamples,int samplerate,REALTYPE *outl,REALTYPE *outr);
 
 
 	void partonoff(int npart,int what);
 	
-	//parts
+	/**parts \todo see if this can be made to be dynamic*/
 	Part *part[NUM_MIDI_PARTS];
 		
 	//parameters
@@ -152,7 +156,7 @@ class Master{
 	REALTYPE ksoundbuffersamplelow;//this is used for resampling (eg. if Jack samplerate!= SAMPLE_RATE)
 	REALTYPE oldsamplel,oldsampler;//this is used for resampling
 
-	//Theese are called by the NoteOn, NoteOff,SetController (which are from external sources like MIDI, Virtual Keyboard)
+	//These are called by the NoteOn, NoteOff,SetController (which are from external sources like MIDI, Virtual Keyboard)
 	//and are called by internal parts of the program (like sequencer)
 	void noteon(unsigned char chan,unsigned char note,unsigned char velocity);
 	void noteoff(unsigned char chan,unsigned char note);

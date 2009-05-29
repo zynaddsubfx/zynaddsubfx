@@ -1,9 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
  
-  Util.h - Miscellaneous functions
-  Copyright (C) 2002-2005 Nasca Octavian Paul
-  Author: Nasca Octavian Paul
+  Sample.h - Object for storing information on samples
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License 
@@ -17,29 +15,30 @@
   You should have received a copy of the GNU General Public License (version 2)
   along with this program; if not, write to the Free Software Foundation,
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
-
 */
+#ifndef STEREOSAMPLE_H
+#define STEREOSAMPLE_H
 
-#ifndef UTIL_H
-#define UTIL_H
+#include <iostream>
+#include "Sample.h"
+#include "MonoSample.h"
 
-#include <pthread.h>
-#include "../globals.h"
-#include "Microtonal.h"
-#include "../DSP/FFTwrapper.h"
-#include "Config.h"
+class StereoSample:public Sample{
+    public:
+        StereoSample(int length);
+        StereoSample(const MonoSample &left_,const MonoSample &right_);
+        ~StereoSample(){std::cout<<"~StereoSample\n";};
+        void clear();
+        int size() const;
 
-//Velocity Sensing function
-extern REALTYPE VelF(REALTYPE velocity,unsigned char scaling);
+        float &operator[](const int &index);
+        StereoSample &operator=(const StereoSample &smp);
+        MonoSample &left(){return leftSample;}; 
+        MonoSample &right(){return rightSample;}; 
+    private:
+        MonoSample leftSample;
+        MonoSample rightSample;
 
-bool fileexists(char *filename);
-
-#define N_DETUNE_TYPES 4 //the number of detune types
-extern REALTYPE getdetune(unsigned char type,unsigned short int coarsedetune,unsigned short int finedetune);
-
-extern REALTYPE *denormalkillbuf;/**<the buffer to add noise in order to avoid denormalisation*/
-
-extern Config config;
-
+};
 #endif
 

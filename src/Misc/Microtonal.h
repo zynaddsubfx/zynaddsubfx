@@ -31,81 +31,91 @@
 
 #include <stdio.h>
 
+
+/**Tuning settings and microtonal capabilities*/
 class Microtonal{
     public:
-	Microtonal();
-	~Microtonal();
-	void defaults();
-	REALTYPE getnotefreq(int note,int keyshift);
+        /**Constructor*/
+        Microtonal();
+        /**Destructor*/
+        ~Microtonal();
+        void defaults();
+        /**Calculates the frequency for a given note
+         */
+        REALTYPE getnotefreq(int note,int keyshift);
 
 	
-	//Parameters
-	//if the keys are inversed (the pitch is lower to keys from the right direction)	
-	unsigned char Pinvertupdown;
+        //Parameters
+        /**if the keys are inversed (the pitch is lower to keys from the right direction) \todo figure out why this is not a bool*/
+        unsigned char Pinvertupdown;
 
-	//the central key of the inversion
-	unsigned char Pinvertupdowncenter;
+        /**the central key of the inversion*/
+        unsigned char Pinvertupdowncenter;
 
-	//0 for 12 key temperate scale, 1 for microtonal
-	unsigned char Penabled;
+        /**0 for 12 key temperate scale, 1 for microtonal
+         * \todo find one good reason why this is not a bool*/
+        unsigned char Penabled; 
 
-	//the note of "A" key
-	unsigned char PAnote;
+        /**the note of "A" key*/
+        unsigned char PAnote;
 
-	//the frequency of the "A" note
-	REALTYPE PAfreq;  
-	
-	//if the scale is "tuned" to a note, you can tune to other note
-	unsigned char Pscaleshift;
+        /**the frequency of the "A" note*/
+        REALTYPE PAfreq;  
+        
+        /**if the scale is "tuned" to a note, you can tune to other note*/
+        unsigned char Pscaleshift;
 
-	//first and last key (to retune)
-	unsigned char Pfirstkey;
-	unsigned char Plastkey;
-	
-	//The middle note where scale degree 0 is mapped to
-	unsigned char Pmiddlenote;
-	
-	//Map size
-	unsigned char Pmapsize;
-
-	//Mapping ON/OFF
-	unsigned char Pmappingenabled;
-	//Mapping (keys)
-	short int Pmapping[128];
-	
-	unsigned char Pglobalfinedetune;
-	
-	// Functions
-	unsigned char getoctavesize();
-	void tuningtoline(int n,char *line,int maxn);
-	int loadscl(const char *filename);//load the tunnings from a .scl file
-	int loadkbm(const char *filename);//load the mapping from .kbm file
-	int texttotunings(const char *text);
-	void texttomapping(const char *text);
-	unsigned char *Pname;
-	unsigned char *Pcomment;
-
-    	void add2XML(XMLwrapper *xml);
-    	void getfromXML(XMLwrapper *xml);
-	int saveXML(char *filename);
-	int loadXML(char *filename);
+        //first and last key (to retune)
+        unsigned char Pfirstkey;
+        unsigned char Plastkey;
+        
+        //The middle note where scale degree 0 is mapped to
+        unsigned char Pmiddlenote;
+        
+        //Map size
+        unsigned char Pmapsize;
+        
+        //Mapping ON/OFF
+        unsigned char Pmappingenabled;
+        //Mapping (keys)
+        short int Pmapping[128];
+        
+        unsigned char Pglobalfinedetune;
+        
+        // Functions
+        /** Return the current octave size
+         * \todo why is this not an int?*/
+        unsigned char getoctavesize();
+        void tuningtoline(int n,char *line,int maxn);
+        int loadscl(const char *filename);//load the tunnings from a .scl file
+        int loadkbm(const char *filename);//load the mapping from .kbm file
+        int texttotunings(const char *text);
+        void texttomapping(const char *text);
+        unsigned char *Pname;
+        unsigned char *Pcomment;
+        
+        void add2XML(XMLwrapper *xml);
+        void getfromXML(XMLwrapper *xml);
+        int saveXML(char *filename);
+        int loadXML(char *filename);
 
     private:
-	int linetotunings(unsigned int nline,const char *line);
-	int loadline(FILE *file,char *line);//loads a line from the text file, while ignoring the lines beggining with "!"
-	unsigned char octavesize;
-	struct {
-	    unsigned char type;//1 for cents or 2 for division
+        int linetotunings(unsigned int nline,const char *line);
+        int loadline(FILE *file,char *line);//loads a line from the text file, while ignoring the lines beggining with "!"
+        unsigned char octavesize;
+        struct {
+            unsigned char type;//1 for cents or 2 for division
 
-	    // the real tuning (eg. +1.05946 for one halftone)
-	    // or 2.0 for one octave
-	    REALTYPE tuning;
-	    
-	    //the real tunning is x1/x2
-	    unsigned int x1,x2;
-	    
-	} octave[MAX_OCTAVE_SIZE],tmpoctave[MAX_OCTAVE_SIZE];
-	
-};
-
+            // the real tuning (eg. +1.05946 for one halftone)
+            // or 2.0 for one octave
+            REALTYPE tuning;
+            
+            //the real tunning is x1/x2
+            unsigned int x1,x2;
+            
+        } octave[MAX_OCTAVE_SIZE],tmpoctave[MAX_OCTAVE_SIZE];
+        
+};        
+        
 #endif
+

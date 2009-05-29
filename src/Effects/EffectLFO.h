@@ -24,7 +24,8 @@
 #define EFFECT_LFO_H
 
 #include "../globals.h"
-/**LFO for some of the Effect objects*/
+/**LFO for some of the Effect objects
+ * \todo see if this should inherit LFO*/
 class EffectLFO{
  public:
     EffectLFO();
@@ -43,7 +44,7 @@ class EffectLFO{
     REALTYPE ampl1,ampl2,ampr1,ampr2;//necessary for "randomness"
     REALTYPE lfointensity;
     REALTYPE lfornd;
-    char lfotype; /**\todo GET RID OF CHAR (use a subclass if types are needed)*/
+    char lfotype; /**\todo GET RID OF CHAR (replace with short or enum)*/
 };
 
 

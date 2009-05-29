@@ -223,5 +223,3 @@ void EnvelopeParams::store2defaults(){
     DR_val=PR_val;
 };
 
-
-

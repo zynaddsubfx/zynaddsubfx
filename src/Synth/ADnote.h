@@ -32,48 +32,49 @@
 
 //Globals
 
-//FM amplitude tune
+/**FM amplitude tune*/
 #define FM_AMP_MULTIPLIER 14.71280603
 
 #define OSCIL_SMP_EXTRA_SAMPLES 5
 
+/**The "additive" synthesizer*/
 class ADnote{   //ADDitive note
- public:
-  ADnote(ADnoteParameters *pars,Controller *ctl_,REALTYPE freq,REALTYPE velocity,int portamento_,int midinote_,bool besilent);//(gf)Added the besilent parameter to tell it to start silent (if true).
-  ~ADnote();
+  public:
+    ADnote(ADnoteParameters *pars,Controller *ctl_,REALTYPE freq,REALTYPE velocity,int portamento_,int midinote_,bool besilent);//(gf)Added the besilent parameter to tell it to start silent (if true).
+    ~ADnote();
 
-  void ADlegatonote(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote_, bool externcall);
+    void ADlegatonote(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote_, bool externcall);
 
-  int noteout(REALTYPE *outl,REALTYPE *outr); 
-  void relasekey();
-  int finished();
+    int noteout(REALTYPE *outl,REALTYPE *outr); 
+    void relasekey();
+    int finished();
 
 
-  /*ready - this is 0 if it is not ready (the parameters has to be computed)
-   or other value if the parameters has been computed and if it is ready to output*/
-  char ready;
+    /*ready - this is 0 if it is not ready (the parameters has to be computed)
+     or other value if the parameters has been computed and if it is ready to output*/
+    char ready;
 
- private:
+  private:
      
-  void setfreq(int nvoice,REALTYPE freq);
-  void setfreqFM(int nvoice,REALTYPE freq);
-  void computecurrentparameters();
-  void initparameters();
-  void KillVoice(int nvoice);
-  void KillNote();
-  inline REALTYPE getvoicebasefreq(int nvoice);
-  inline REALTYPE getFMvoicebasefreq(int nvoice);
-  inline void ComputeVoiceOscillator_LinearInterpolation(int nvoice);
-  inline void ComputeVoiceOscillator_CubicInterpolation(int nvoice);
-  inline void ComputeVoiceOscillatorMorph(int nvoice);
-  inline void ComputeVoiceOscillatorRingModulation(int nvoice);
-  inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice,int FMmode);//FMmode=0 for phase modulation, 1 for Frequency modulation
-//  inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice);
-  inline void ComputeVoiceOscillatorPitchModulation(int nvoice);
+   void setfreq(int nvoice,REALTYPE freq);
+   void setfreqFM(int nvoice,REALTYPE freq);
+   void computecurrentparameters();
+   void initparameters();
+   void KillVoice(int nvoice);
+   void KillNote();
+   inline REALTYPE getvoicebasefreq(int nvoice);
+   inline REALTYPE getFMvoicebasefreq(int nvoice);
+   inline void ComputeVoiceOscillator_LinearInterpolation(int nvoice);
+   inline void ComputeVoiceOscillator_CubicInterpolation(int nvoice);
+   inline void ComputeVoiceOscillatorMorph(int nvoice);
+   inline void ComputeVoiceOscillatorRingModulation(int nvoice);
+   inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice,int FMmode);//FMmode=0 for phase modulation, 1 for Frequency modulation
+   //  inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice);
+   inline void ComputeVoiceOscillatorPitchModulation(int nvoice);
 
-  inline void ComputeVoiceNoise(int nvoice);
+   inline void ComputeVoiceNoise(int nvoice);
 
-  inline void fadein(REALTYPE *smps);
+   inline void fadein(REALTYPE *smps);
 
 
    //GLOBALS

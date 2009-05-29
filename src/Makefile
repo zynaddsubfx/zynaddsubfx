@@ -1,7 +1,7 @@
 include Makefile.inc
 
 ifneq ($(MAKECMDGOALS),debug)
-  CXXFLAGS= -O6 -Wall 
+  CXXFLAGS= -O6 -Wall -g 
 else 
   CXXFLAGS= -O0 -Wall -Wpointer-arith 
 endif
@@ -77,7 +77,7 @@ endif
 
 
 objects=main.o
-SUBDIRS=DSP Effects Input Misc Output Params Synth Seq
+SUBDIRS=Controls DSP Effects Input Misc Output Params Samples Synth Seq
 
 .PHONY: subdirs $(SUBDIRS)
 

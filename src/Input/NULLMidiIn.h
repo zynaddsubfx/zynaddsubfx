@@ -26,15 +26,22 @@
 #include "MidiIn.h"
 
 
+/**a dummy Midi port*/
 class NULLMidiIn:public MidiIn{
     public:
-	NULLMidiIn();
-	~NULLMidiIn();
-	void getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,unsigned char *cmdparams);
+        /**Dummy Constructor
+         * \todo see if the default constructor would work here*/
+        NULLMidiIn();
+        /**Dummy Destructor
+         * \todo see if the default destructor would work here*/
+        ~NULLMidiIn();
+        /**Get the midi command,channel and parameters
+         * It returns MidiNull because it is a dummy driver
+         */
+        void getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,unsigned char *cmdparams);
 
     private:
 };
-
 
 #endif
 

@@ -53,8 +53,7 @@ void Alienwah::out(REALTYPE *smpsl,REALTYPE *smpsr){
     clfol=complex<REALTYPE>(cos(lfol+phase)*fb,sin(lfol+phase)*fb); //rework
     clfor=complex<REALTYPE>(cos(lfor+phase)*fb,sin(lfor+phase)*fb); //rework
 
-    for (int i=0;i<SOUND_BUFFER_SIZE;i++){/**\todo reduce significantly with
-                                            * valarray*/
+    for (int i=0;i<SOUND_BUFFER_SIZE;i++){
 	REALTYPE x=((REALTYPE) i)/SOUND_BUFFER_SIZE;
 	REALTYPE x1=1.0-x;
 	//left
@@ -91,7 +90,7 @@ void Alienwah::out(REALTYPE *smpsl,REALTYPE *smpsr){
  * Cleanup the effect
  */
 void Alienwah::cleanup(){
-    for (int i=0;i<Pdelay;i++) { /**\todo reduce with valarray*/
+    for (int i=0;i<Pdelay;i++) {
 	oldl[i]=complex<REALTYPE>(0.0,0.0);
 	oldr[i]=complex<REALTYPE>(0.0,0.0);
     };

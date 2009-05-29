@@ -840,7 +840,7 @@
 	      hovers over them
 	    - Created tooltips for the effects knobs
 	    - Standardized the code, so it could compile with pedantic without
-	      errors [it looks like some errors may have ben missed]
+	      errors [it looks like some errors may have been missed]
 
 22 Feb 2009 (Mark McCurry)
 	    - Fix improper deallocation in PresetsStore
@@ -861,3 +861,9 @@
 	    - Almost all changes contained in Effects until further
 	      discussion on the style, so consistancy can be reached
 
+28 May 2009 (Mark McCurry)
+	    - Added some more Doxygen comments
+	    - Added Audio Samples classes
+	    - Added Stereo template
+	    - Added Control class
+	    - Added DelayCtl class

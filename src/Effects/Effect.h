@@ -23,7 +23,6 @@
 #ifndef EFFECT_H
 #define EFFECT_H
 
-#include <valarray>
 #include "../Misc/Util.h"
 #include "../globals.h"
 #include "../Params/FilterParams.h"
@@ -41,7 +40,7 @@ class Effect{
        * @param filterpars_ pointer to FilterParams array
        * @param Ppreset_ chosen preset
        * @return Initialized Effect object*/
-      Effect(const int & insertion_,REALTYPE *const efxoutl_,
+      Effect(bool insertion_,REALTYPE *const efxoutl_,
           REALTYPE *const efxoutr_,FilterParams *filterpars_,
           const unsigned char & Ppreset_);
       /**Deconstructor
@@ -93,12 +92,9 @@ class Effect{
       FilterParams *filterpars;/**<Parameters for filters used by Effect*/
       protected:
 
-      const int insertion;/**<If Effect is an insertion effect, insertion=1
+      const bool insertion;/**<If Effect is an insertion effect, insertion=1
                            *otherwise, it should be insertion=0*/
 };
 
 #endif
-
-
-
 

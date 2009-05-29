@@ -21,32 +21,36 @@
 */
 
 #include <cmath>
+#include <iostream>
 #include "Echo.h"
 
 Echo::Echo(const int & insertion_,REALTYPE *const efxoutl_,REALTYPE *const efxoutr_)
   : Effect(insertion_,efxoutl_,efxoutr_,NULL,0),
-    Pvolume(50),Ppanning(64),Pdelay(60),
+    Pvolume(50),Ppanning(64),//Pdelay(60),
     Plrdelay(100),Plrcross(100),Pfb(40),Phidamp(60),
-    lrdelay(0),ldelay(NULL),rdelay(NULL)
+    lrdelay(0),delaySample(AuSample(1),AuSample(1)),old(0.0,0.0)
 {
     setpreset(Ppreset);    	   
     cleanup();
 }
 
 Echo::~Echo(){
-    delete[] ldelay;
-    delete[] rdelay;
+    //delete[] ldelay;
+    //delete[] rdelay;
 }
 
 /*
  * Cleanup the effect
  */
 void Echo::cleanup(){
-    int i;
-    for (i=0;i<dl;i++) ldelay[i]=0.0;
-    for (i=0;i<dr;i++) rdelay[i]=0.0;
-    oldl=0.0;
-    oldr=0.0;
+    //int i;
+    delaySample.left().clear();
+    delaySample.right().clear();
+    //for (i=0;i<dl;i++) ldelay[i]=0.0;
+    //for (i=0;i<dr;i++) rdelay[i]=0.0;
+    old=Stereo<REALTYPE>(0.0,0.0);
+    //oldl=0.0;
+    //oldr=0.0;
 }
 
 
@@ -54,14 +58,17 @@ void Echo::cleanup(){
  * Initialize the delays
  */
 void Echo::initdelays(){
+  /**\todo make this adjust insted of destroy old delays*/
     kl=0;kr=0;
-    dl=delay-lrdelay;if (dl<1) dl=1;
-    dr=delay+lrdelay;if (dr<1) dr=1;
+    dl=(int)(1+delay.getiVal()*SAMPLE_RATE-lrdelay);if (dl<1) dl=1;
+    dr=(int)(1+delay.getiVal()*SAMPLE_RATE+lrdelay);if (dr<1) dr=1;
     
-    if (ldelay!=NULL) delete [] ldelay;
-    if (rdelay!=NULL) delete [] rdelay;
-    ldelay=new REALTYPE[dl];
-    rdelay=new REALTYPE[dr];
+    delaySample.left()=AuSample(dl);
+    delaySample.right()=AuSample(dr);
+    //if (ldelay!=NULL) delete [] ldelay;
+    //if (rdelay!=NULL) delete [] rdelay;
+    //ldelay=new REALTYPE[dl];
+    //rdelay=new REALTYPE[dr];
 
     cleanup();
 }
@@ -70,26 +77,29 @@ void Echo::initdelays(){
  * Effect output
  */
 void Echo::out(REALTYPE *const smpsl,REALTYPE *const smpsr){
-    int i;
-    REALTYPE l,r,ldl,rdl;
+//void Echo::out(const Stereo<AuSample> & input){ //ideal
+    REALTYPE l,r,ldl,rdl;/**\todo move l+r->? ldl+rdl->?*/
+    Stereo<AuSample> input(AuSample(smpsl,SOUND_BUFFER_SIZE),AuSample(smpsr,SOUND_BUFFER_SIZE));
 
-    for (i=0;i<SOUND_BUFFER_SIZE;i++){
-        ldl=ldelay[kl];
-        rdl=rdelay[kr];
+    for (int i=0;i<input.left().size();i++){
+        ldl=delaySample.left()[kl];
+        rdl=delaySample.right()[kr];
         l=ldl*(1.0-lrcross)+rdl*lrcross;
         r=rdl*(1.0-lrcross)+ldl*lrcross;
         ldl=l;rdl=r;
         
         efxoutl[i]=ldl*2.0;
         efxoutr[i]=rdl*2.0;
-        ldl=smpsl[i]*panning-ldl*fb;
-        rdl=smpsr[i]*(1.0-panning)-rdl*fb;
+
+
+        ldl=input.left()[i]*panning-ldl*fb;
+        rdl=input.right()[i]*(1.0-panning)-rdl*fb;
 
         //LowPass Filter
-        ldelay[kl]=ldl=ldl*hidamp+oldl*(1.0-hidamp);
-        rdelay[kr]=rdl=rdl*hidamp+oldr*(1.0-hidamp);
-        oldl=ldl;
-        oldr=rdl;
+        delaySample.left()[kl]=ldl=ldl*hidamp+old.left()*(1.0-hidamp);
+        delaySample.right()[kr]=rdl=rdl*hidamp+old.right()*(1.0-hidamp);
+        old.left()=ldl;
+        old.right()=rdl;
 
         if (++kl>=dl) kl=0;
         if (++kr>=dr) kr=0;
@@ -120,8 +130,9 @@ void Echo::setpanning(const unsigned char & Ppanning){
 }
 
 void Echo::setdelay(const unsigned char & Pdelay){
-    this->Pdelay=Pdelay;
-    delay=1+(int)(Pdelay/127.0*SAMPLE_RATE*1.5);//0 .. 1.5 sec
+    delay.setmVal(Pdelay);
+    //this->Pdelay=Pdelay;
+    //delay=1+(int)(Pdelay/127.0*SAMPLE_RATE*1.5);//0 .. 1.5 sec
     initdelays();
 }
 
@@ -176,13 +187,12 @@ void Echo::setpreset(unsigned char npreset){
 
     if (npreset>=NUM_PRESETS) npreset=NUM_PRESETS-1;
     for (int n=0;n<PRESET_SIZE;n++) changepar(n,presets[npreset][n]);
-    if (insertion!=0) setvolume(presets[npreset][0]/2);//lower the volume if this is insertion effect
+    if (insertion) setvolume(presets[npreset][0]/2);//lower the volume if this is insertion effect
     Ppreset=npreset;
 }
 
 
 void Echo::changepar(const int & npar,const unsigned char & value){
-  /**\todo get rid of this leaky abstraction*/
     switch (npar){
         case 0: setvolume(value);
                 break;
@@ -202,13 +212,12 @@ void Echo::changepar(const int & npar,const unsigned char & value){
 }
 
 unsigned char Echo::getpar(const int & npar)const{
-  /**\todo get rid of this leaky abstraction*/
     switch (npar){
         case 0: return(Pvolume);
                 break;
         case 1: return(Ppanning);
                 break;
-        case 2: return(Pdelay);
+        case 2: return(delay.getmVal());
                 break;
         case 3: return(Plrdelay);
                 break;

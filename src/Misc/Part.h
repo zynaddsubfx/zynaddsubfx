@@ -40,13 +40,19 @@
 
 #include <list> // For the monomemnotes list.
 
+/** Part implementation*/
 class Part{
 
     public:
+      /**Constructor
+       * @param microtonal_ Pointer to the microtonal object
+       * @param fft_ Pointer to the FFTwrapper
+       * @param mutex_ Pointer to the master pthread_mutex_t*/
       Part(Microtonal *microtonal_,FFTwrapper *fft_,pthread_mutex_t *mutex_);
+      /**Destructor*/
       ~Part();
 
-      /* Midi commands implemented */      
+      // Midi commands implemented 
       void NoteOn(unsigned char note,unsigned char velocity,int masterkeyshift); 
       void NoteOff(unsigned char note); 
       void AllNotesOff();//panic
@@ -97,9 +103,9 @@ class Part{
       void setkeylimit(unsigned char Pkeylimit);
       void setkititemstatus(int kititem,int Penabled_);
 
-      unsigned char Penabled;//if the part is enabled
-      unsigned char Pvolume;//part volume
-      unsigned char Pminkey;//the minimum key that the part receives noteon messages
+      unsigned char Penabled;/**<if the part is enabled*/
+      unsigned char Pvolume;/**<part volume*/
+      unsigned char Pminkey;/**<the minimum key that the part receives noteon messages*/
       unsigned char Pmaxkey;//the maximum key that the part receives noteon messages
       void setPvolume(char Pvolume);
       unsigned char Pkeyshift;//Part keyshift

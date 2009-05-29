@@ -61,19 +61,16 @@ class EffectMgr:public Presets{
          * @param nefx_ the number of the effect*/
 	void changeeffect(int nefx_);
         /**Get the number of the effect
-         * @return the number
-         * \todo try to fix abstraction failure*/
+         * @return the number*/
 	int geteffect();
         /**
          * Change the preset to the given one
          * @param npreset number of the chosen preset
-         * \todo figure out why this is binary
          */
         void changepreset(unsigned char npreset);
         /**
          * Change the preset to the given one without locking the thread
          * @param npreset number of the chosen preset
-         * \todo figure out why this is binary
          */
         void changepreset_nolock(unsigned char npreset);
         /**
@@ -85,8 +82,7 @@ class EffectMgr:public Presets{
         /**<sets the effect par without thread lock*/
         void seteffectpar_nolock(int npar,unsigned char value);
 	unsigned char geteffectpar(int npar);
-        int insertion;/**<1 if the effect is connected as insertion effect
-                       * \todo figure out why this is not a bool*/
+        const bool insertion;/**<1 if the effect is connected as insertion effect*/
 	REALTYPE *efxoutl,*efxoutr;
 
 	/**used by UI

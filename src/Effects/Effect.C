@@ -23,7 +23,7 @@
 #include "Effect.h"
 
       
-Effect::Effect(const int & insertion_,REALTYPE *const efxoutl_,
+Effect::Effect(bool insertion_,REALTYPE *const efxoutl_,
                REALTYPE *const efxoutr_,FilterParams *filterpars_,
                const unsigned char & Ppreset_)
     :Ppreset(Ppreset_),efxoutl(efxoutl_),efxoutr(efxoutr_),

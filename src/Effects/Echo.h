@@ -25,6 +25,9 @@
 
 #include "../globals.h"
 #include "Effect.h"
+#include "../Samples/AuSample.h"
+#include "../Misc/Stereo.h"
+#include "../Controls/DelayCtl.h"
 
 /**Echo Effect*/
 class Echo:public Effect{
@@ -50,7 +53,7 @@ class Echo:public Effect{
          * @param smpsl Sample from Left channel
          * @param smpsr Sample from Right channel
          * \todo try to figure out if smpsl should be const *const
-         * or not
+         * or not (It should be)
          */
         void out(REALTYPE *const smpsl,REALTYPE *const smpr);
         
@@ -89,11 +92,10 @@ class Echo:public Effect{
          *   -# Dampening
          * @param npar number of chosen parameter
          * @return value of parameter
-         * 
-         * \todo make this method use constant variables by reference
-         *Currently doing so results in strange behavior
          */
         unsigned char getpar(const int & npar)const;
+
+        int getnumparams();
 
         /**Zeros out the state of the Echo*/
         void cleanup();
@@ -101,15 +103,14 @@ class Echo:public Effect{
         /**\todo This function needs to be implemented or the  prototype should be removed*/
         void setdryonly();
     private:
-        /**\todo remove all of these once they have been depreciated*/
         //Parameters
-        unsigned char Pvolume;/**<#1 Volume or Dry/Wetness*/
-        unsigned char Ppanning;/**<#2 Panning*/
-        unsigned char Pdelay;/**<#3 Delay of the Echo*/
-        unsigned char Plrdelay;/**<#4 L/R delay difference*/
-        unsigned char Plrcross;/**<#5 L/R Mixing*/
-        unsigned char Pfb;/**<#6Feedback*/
-        unsigned char Phidamp;/**<#7Dampening of the Echo*/
+        char     Pvolume;/**<#1 Volume or Dry/Wetness*/
+        char     Ppanning;/**<#2 Panning*/
+        DelayCtl delay;/**<#3 Delay of the Echo*/
+        char     Plrdelay;/**<#4 L/R delay difference*/
+        char     Plrcross;/**<#5 L/R Mixing*/
+        char     Pfb;/**<#6Feedback*/
+        char     Phidamp;/**<#7Dampening of the Echo*/
         
         void setvolume(const unsigned char & Pvolume);
         void setpanning(const unsigned char & Ppanning);
@@ -120,12 +121,16 @@ class Echo:public Effect{
         void sethidamp(const unsigned char & Phidamp);
 
         //Real Parameters
-        REALTYPE panning,lrcross,fb,hidamp;
-        int dl,dr,delay,lrdelay;
+        REALTYPE panning,lrcross,fb,hidamp; //needs better names
+        int dl,dr,lrdelay; //needs better names
         
         void initdelays();
-        REALTYPE *ldelay,*rdelay;
-        REALTYPE oldl,oldr;//pt. lpf
+        //REALTYPE *ldelay,*rdelay;
+        Stereo<AuSample> delaySample;
+
+        //REALTYPE oldl,oldr;//pt. lpf
+        Stereo<REALTYPE> old;
+
         int kl,kr;
 };
 

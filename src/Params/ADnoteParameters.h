@@ -112,16 +112,16 @@
    /***********************************************************/
     struct ADnoteVoiceParam{
 
-        /* If the voice is enabled */
+        /** If the voice is enabled */
         unsigned char Enabled; 
 
-	/* Type of the voice (0=Sound,1=Noise)*/
+	/** Type of the voice (0=Sound,1=Noise)*/
 	unsigned char Type;
     
-	/* Voice Delay */
+	/** Voice Delay */
         unsigned char PDelay;
 
-	/* If the resonance is enabled for this voice */
+	/** If the resonance is enabled for this voice */
 	unsigned char Presonance;
 	
 	// What external oscil should I use, -1 for internal OscilSmp&FMSmp
@@ -134,14 +134,14 @@
 	// filter bypass
 	unsigned char Pfilterbypass;
 
-        /* Voice oscillator */ 
+        /** Voice oscillator */ 
         OscilGen *OscilSmp;    
 
         /**********************************
 	*     FREQUENCY PARAMETERS        *
 	**********************************/
 
-	/* If the base frequency is fixed to 440 Hz*/
+	/** If the base frequency is fixed to 440 Hz*/
 	unsigned char Pfixedfreq;
 	
 	/* Equal temperate (this is used only if the Pfixedfreq is enabled)
@@ -149,13 +149,13 @@
 	   if this parameter is 64, 1 MIDI halftone -> 1 frequency halftone */
 	unsigned char PfixedfreqET;
 
-	/* Fine detune */
+	/** Fine detune */
 	unsigned short int PDetune;
 
-	/* Coarse detune + octave */
+	/** Coarse detune + octave */
 	unsigned short int PCoarseDetune;
 
-	/* Detune type */
+	/** Detune type */
 	unsigned char PDetuneType;
     
 	/* Frequency Envelope */

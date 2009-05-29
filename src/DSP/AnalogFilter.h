@@ -25,6 +25,8 @@
 
 #include "../globals.h"
 #include "Filter_.h"
+
+/**Implementation of Several analog filters (lowpass, highpass...)*/
 class AnalogFilter:public Filter_{
  public:
     AnalogFilter(unsigned char Ftype,REALTYPE Ffreq, REALTYPE Fq,unsigned char Fstages);
@@ -62,7 +64,7 @@ class AnalogFilter:public Filter_{
     REALTYPE oldc[3],oldd[3];//old coefficients(used only if some filter paremeters changes very fast, and it needs interpolation)
 
     REALTYPE xd[3],yd[3];//used if the filter is applied more times
-    int needsinterpolation,firsttime;
+    int needsinterpolation,firsttime;/**\todo see if bool works for these*/
     int abovenq;//this is 1 if the frequency is above the nyquist
     int oldabovenq;//if the last time was above nyquist (used to see if it needs interpolation)
 };
