@@ -5,6 +5,11 @@ Stereo<T>::Stereo(const T &left, const T &right)
 {}
 
 template <class T>
+Stereo<T>::Stereo(const T &val)
+    :leftChannel(val),rightChannel(val)
+{}
+
+template <class T>
 void Stereo<T>::operator=(const Stereo<T> & nstr)
 {
     leftChannel=nstr.leftChannel;
