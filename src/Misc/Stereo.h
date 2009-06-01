@@ -39,6 +39,6 @@ class Stereo{
         T rightChannel;
 
 };
+#include "Stereo.C"
 #endif
 
-#include "Stereo.C"
