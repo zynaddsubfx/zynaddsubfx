@@ -22,19 +22,18 @@
 
 #include <cmath>
 #include "Phaser.h"
-/**\todo figure out why this define was made*/
 #define PHASER_LFO_SHAPE 2
 
 Phaser::Phaser(const int &insertion_,REALTYPE *efxoutl_,REALTYPE *efxoutr_)
-    :Effect(insertion_,efxoutl_,efxoutr_,NULL,0),oldl(NULL),oldr(NULL)
+    :Effect(insertion_,efxoutl_,efxoutr_,NULL,0),old(1),oldgain(0.0)
 {
     setpreset(Ppreset);
     cleanup();
 };
 
 Phaser::~Phaser(){
-    if (oldl!=NULL) delete [] oldl;
-    if (oldr!=NULL) delete [] oldr;
+    //if (oldl!=NULL) delete [] oldl;
+    //if (oldr!=NULL) delete [] oldr;
 };
 
 
@@ -61,22 +60,22 @@ void Phaser::out(REALTYPE *smpsl,REALTYPE *smpsr){
     for (i=0;i<SOUND_BUFFER_SIZE;i++){  
     REALTYPE x=(REALTYPE) i /SOUND_BUFFER_SIZE;
     REALTYPE x1=1.0-x;
-    REALTYPE gl=lgain*x+oldlgain*x1;
-    REALTYPE gr=rgain*x+oldrgain*x1;
+    REALTYPE gl=lgain*x+oldgain.left()*x1;
+    REALTYPE gr=rgain*x+oldgain.right()*x1;
     REALTYPE inl=smpsl[i]*panning+fbl;
     REALTYPE inr=smpsr[i]*(1.0-panning)+fbr;
 
     //Left channel
     for (j=0;j<Pstages*2;j++){//Phasing routine
-        tmp=oldl[j];
-        oldl[j]=gl*tmp+inl;
-        inl=tmp-gl*oldl[j];
+        tmp=old.left()[j];
+        old.left()[j]=gl*tmp+inl;
+        inl=tmp-gl*old.left()[j];
     };
     //Right channel
     for (j=0;j<Pstages*2;j++){//Phasing routine
-        tmp=oldr[j];
-        oldr[j]=gr*tmp+inr;
-        inr=tmp-gr*oldr[j];
+        tmp=old.right()[j];
+        old.right()[j]=gr*tmp+inr;
+        inr=tmp-gr*old.right()[j];
     };
     //Left/Right crossing
     REALTYPE l=inl;
@@ -91,7 +90,7 @@ void Phaser::out(REALTYPE *smpsl,REALTYPE *smpsr){
 
     };
 
-    oldlgain=lgain; oldrgain=rgain;
+    oldgain=Stereo<REALTYPE>(lgain,rgain);
 
     if (Poutsub!=0)
     for (i=0;i<SOUND_BUFFER_SIZE;i++){
@@ -106,12 +105,15 @@ void Phaser::out(REALTYPE *smpsl,REALTYPE *smpsr){
  */
 void Phaser::cleanup(){
     fbl=0.0;fbr=0.0;
-    oldlgain=0.0;
-    oldrgain=0.0;
-    for (int i=0;i<Pstages*2;i++) {
-    oldl[i]=0.0;
-    oldr[i]=0.0;
-    };
+    //oldlgain=0.0;
+    //oldrgain=0.0;
+    oldgain=Stereo<REALTYPE>(0.0);
+    //for (int i=0;i<Pstages*2;i++) {
+    //oldl[i]=0.0;
+    //oldr[i]=0.0;
+    //};
+    old.left().clear();
+    old.right().clear();
 };
 
 /*
@@ -146,12 +148,13 @@ void Phaser::setlrcross(const unsigned char &Plrcross){
 };
 
 void Phaser::setstages(const unsigned char &Pstages){
-    if (oldl!=NULL) delete [] oldl;
-    if (oldr!=NULL) delete [] oldr;
+    //if (oldl!=NULL) delete [] oldl;
+    //if (oldr!=NULL) delete [] oldr;
     if (Pstages>=MAX_PHASER_STAGES) this->Pstages=MAX_PHASER_STAGES-1;
     else this->Pstages=Pstages;
-    oldl=new REALTYPE[Pstages*2];
-    oldr=new REALTYPE[Pstages*2];
+    //oldl=new REALTYPE[Pstages*2];
+    //oldr=new REALTYPE[Pstages*2];
+    old=Stereo<AuSample>(Pstages*2);
     cleanup();
 };
 

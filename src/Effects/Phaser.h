@@ -23,6 +23,8 @@
 #ifndef PHASER_H
 #define PHASER_H
 #include "../globals.h"
+#include "../Misc/Stereo.h"
+#include "../Samples/AuSample.h"
 #include "Effect.h"
 #include "EffectLFO.h"
 
@@ -63,8 +65,10 @@ class Phaser:public Effect {
         //Internal Values
         //int insertion; //inherited from Effect
         REALTYPE panning,fb,depth,lrcross,fbl,fbr,phase;
-        REALTYPE *oldl,*oldr;
-        REALTYPE oldlgain,oldrgain;
+        //REALTYPE *oldl,*oldr;
+        Stereo<AuSample> old;
+        //REALTYPE oldlgain,oldrgain;
+        Stereo<REALTYPE> oldgain;
 };
 
 #endif
