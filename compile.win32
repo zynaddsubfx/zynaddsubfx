@@ -8,7 +8,7 @@ Second, you have to download, compile and install pthreads for windows (http://s
 Also, you have to compile the portaudio library (www.portaudio.com). It it doesn't install itself, and you must copy the header files to the "include" directories from mingw(msys) and compiled libraries to the "lib" directory from mingw.
 You need zlib and mxml-2.0.
 
-In short, the dependecies directories are (but some version might differ):
+In short, the dependencies directories are (but some version might differ):
 MinGW-3.1.0-1.exe
 MSYS-1.0.10.exe
 fftw-3.0.1.tar.gz
@@ -29,12 +29,12 @@ Edit the Makefile.inc and set "WINDOWS_VST" to "YES". The audioout and midiin ar
 Get the vstsdk2 (or 2.3) and copy it to the directory where ZynAddSubFX-2.x.x is.
 If you copy ZynAddSubFX in "C:\temp" and you will run "dir" you should see the ZynAddSubFX-2.x.x and "vstsdk2" in the same directory (C:\temp).
 
-Run the makefile. Hope all will goes right. Please notice that "make clean" removes the vst object files that you compiled form vstsdk2. That's why is recomanded to keep a backup copy of theese object files.
-You must copy the pthreads.dll file to windows directory (or else, zynaddsubfx will not work). Btw: how can I make pthreads static?
+Run the makefile. Hope all will goes right. Please notice that "make clean" removes the vst object files that you compiled form vstsdk2. That's why is recommended to keep a backup copy of these object files.
+You must copy the pthreads.dll file to windows directory (or else, ZynAddSubFX will not work). Btw: how can I make pthreads static?
 Copy the zynaddsubfx_vst.dll to your dll directory.
 
 BUGS only on vst port:
-Also, to avoid more bugs, I had limited zynaddsubfx to one instance. Please report me how it behaves on various vst hosts.
-I hope that I will remove theese bugs on later versions.
+Also, to avoid more bugs, I had limited ZynAddSubFX to one instance. Please report me how it behaves on various vst hosts.
+I hope that I will remove these bugs on later versions.
 
 
