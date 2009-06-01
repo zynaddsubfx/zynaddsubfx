@@ -6,6 +6,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 #in CMakeCache.txt
 SET (FFTW_VERSION 3 CACHE STRING "Version number of FFTW")
 SET (OutputModule jack CACHE STRING "Output module, either alsa, jack or portaudio")
+set (WANT_FLTK ON)
 
 
 if (OutputModule STREQUAL alsa)
@@ -45,20 +46,49 @@ add_definitions(-DFFTW_VERSION_${FFTW_VERSION}
 	 )
 
 
+ if(WANT_FLTK) # Check for FLTK
+    find_package(FLTK REQUIRED)
+    # message(STATUS "FLTK_LIBRARIES: ${FLTK_LIBRARIES}")
+    # message("FLTK_MATH_LIBRARY: ${FLTK_MATH_LIBRARY}")
+    # message("FLTK_LIBRARIES: ${FLTK_LIBRARIES}")
+
+    mark_as_advanced(FORCE FLTK_BASE_LIBRARY)
+    mark_as_advanced(FORCE FLTK_CONFIG_SCRIPT)
+    mark_as_advanced(FORCE FLTK_DIR)
+    mark_as_advanced(FORCE FLTK_FLUID_EXECUTABLE)
+    mark_as_advanced(FORCE FLTK_FORMS_LIBRARY)
+    mark_as_advanced(FORCE FLTK_GL_LIBRARY)
+    mark_as_advanced(FORCE FLTK_IMAGES_LIBRARY)
+    mark_as_advanced(FORCE FLTK_INCLUDE_DIR)
+    mark_as_advanced(FORCE FLTK_MATH_LIBRARY)
+
+    set(FLTK_LIBRARIES
+        ${FLTK_BASE_LIBRARY}    ${FLTK_MATH_LIBRARY}    ${FLTK_FORMS_LIBRARY}
+        ${FLTK_IMAGES_LIBRARY}  ${FLTK_GL_LIBRARY}
+    )
+    add_definitions(-DWANT_GUI)
+    message(STATUS "will build gui")
+endif()
+
+
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}/NewUI
 	${CMAKE_CURRENT_SOURCE_DIR}/NewUI)
 
 add_subdirectory(Misc)
 add_subdirectory(Input)
 add_subdirectory(Output)
+add_subdirectory(Controls)
 #add_subdirectory(NewUI)
 add_subdirectory(Synth)
 add_subdirectory(Seq)
 add_subdirectory(Effects)
 add_subdirectory(Params)
 add_subdirectory(DSP)
+add_subdirectory(UI)
+add_subdirectory(Samples)
 
 set(zynaddsubfxgui_SRCS
 	#main.cpp
@@ -78,5 +108,8 @@ target_link_libraries(zynaddsubfxgui
 	zynaddsubfxgui_effect
 	zynaddsubfxgui_params
 	zynaddsubfxgui_dsp
+	zynaddsubfxgui_samples
+	zynaddsubfxgui_controls
+	${FLTK_LIBRARIES}
 	zynaddsubfxguilib)
 
