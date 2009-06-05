@@ -25,6 +25,9 @@
 #include "../globals.h"
 #define NUM_MIDI_TRACKS NUM_MIDI_CHANNELS
 
+/**storage the midi events from midi file or sequencer
+ * \todo this looks quite like a remake of a linked list
+ *       if it is, then it should be rewritten to use <list>*/
 class MIDIEvents{
     friend class MIDIFile;
     public:
