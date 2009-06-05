@@ -129,5 +129,6 @@ clean:
 	@for name in $(SUBDIRS); do sh -c "make -C $$name $@"; done
 	rm -f Make.deps
 	rm -f */*.o *.o
+	rm -f ./*/*~ ./*~
 	$(MAKE) -C UI $@
 
