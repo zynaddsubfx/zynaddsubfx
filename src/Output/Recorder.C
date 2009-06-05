@@ -20,26 +20,16 @@
 
 */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
-
 #include "Recorder.h"
-#include <sys/stat.h> 
 
 Recorder::Recorder(){
     recordbuf_16bit=new short int [SOUND_BUFFER_SIZE*2];
     status=0;
     notetrigger=0;
-	for (int i=0;i<SOUND_BUFFER_SIZE*2;i++){
-		recordbuf_16bit[i]=0;
-	};
+    for (int i=0;i<SOUND_BUFFER_SIZE*2;i++){
+        recordbuf_16bit[i]=0;
+    }
 };
 
 Recorder::~Recorder(){
@@ -47,16 +37,15 @@ Recorder::~Recorder(){
     delete [] recordbuf_16bit;
 };
 
-int Recorder::preparefile(char *filename_,int overwrite){
-	if (!overwrite){
-		struct stat fileinfo;
-		int statr;
-
-		statr = stat(filename_,&fileinfo);
-		if(statr == 0) {//file exists
-			return 1;
-		};
-	};
+int Recorder::preparefile(std::string filename_,int overwrite){
+    if (!overwrite){
+        struct stat fileinfo;
+        int statr;
+        statr = stat(filename_.c_str(),&fileinfo);
+        if(statr == 0) {//file exists
+            return 1;
+        }
+    }
    
     if (!wav.newfile(filename_, SAMPLE_RATE,2)) return 2;
     
@@ -81,24 +70,24 @@ void Recorder::pause(){
 
 int Recorder::recording(){
     if ((status==2)&&(notetrigger!=0)) return(1);
-	else return(0);
+    else return(0);
 };
 
 void Recorder::recordbuffer(REALTYPE *outl,REALTYPE *outr){
-	int tmp;
-	if (status!=2) return;
-	for (int i=0;i<SOUND_BUFFER_SIZE;i++){
-		tmp=(int)(outl[i]*32767.0);
-		if (tmp<-32768) tmp=-32768;
-		if (tmp>32767) tmp=32767;
-		recordbuf_16bit[i*2]=tmp;
+    int tmp;
+    if (status!=2) return;
+    for (int i=0;i<SOUND_BUFFER_SIZE;i++){
+        tmp=(int)(outl[i]*32767.0);
+        if (tmp<-32768) tmp=-32768;
+        if (tmp>32767) tmp=32767;
+        recordbuf_16bit[i*2]=tmp;
 
-		tmp=(int)(outr[i]*32767.0);
-		if (tmp<-32768) tmp=-32768;
-		if (tmp>32767) tmp=32767;
-		recordbuf_16bit[i*2+1]=tmp;
-	};
-	wav.write(SOUND_BUFFER_SIZE,recordbuf_16bit);
+        tmp=(int)(outr[i]*32767.0);
+        if (tmp<-32768) tmp=-32768;
+        if (tmp>32767) tmp=32767;
+        recordbuf_16bit[i*2+1]=tmp;
+    };
+    wav.write(SOUND_BUFFER_SIZE,recordbuf_16bit);
 };
 
 void Recorder::triggernow(){

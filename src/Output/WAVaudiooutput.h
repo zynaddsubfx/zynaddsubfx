@@ -20,7 +20,6 @@
 #ifndef WAVOUTPUT_H
 #define WAVOUTPUT_H
 #include <string>
-#include <stdio.h>
 
 class WAVaudiooutput{
     public:
