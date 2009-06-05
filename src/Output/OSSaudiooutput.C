@@ -27,9 +27,12 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <iostream>
 
 #include "OSSaudiooutput.h"
 #include "../Misc/Util.h"
+#include "../globals.h"
+using namespace std;
 
 OSSaudiooutput::OSSaudiooutput(){
     int i;
@@ -44,7 +47,8 @@ OSSaudiooutput::OSSaudiooutput(){
         
     snd_handle=open(config.cfg.LinuxOSSWaveOutDev,O_WRONLY,0);
     if (snd_handle == -1) {
-	fprintf(stderr,"ERROR - I can't open the %s .\n",config.cfg.LinuxOSSWaveOutDev);
+        cerr << "ERROR - I can't open the ";
+        cerr << config.cfg.LinuxOSSWaveOutDev << '.'<< endl;
 	return;
     };
     ioctl(snd_handle,SNDCTL_DSP_RESET,NULL);

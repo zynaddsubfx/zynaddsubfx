@@ -23,9 +23,8 @@
 #ifndef OSS_AUDIO_OUTPUT_H
 #define OSS_AUDIO_OUTPUT_H
 
-
-#include <sys/soundcard.h>
 #include "../globals.h"
+
 class OSSaudiooutput{
     public:
 	OSSaudiooutput();

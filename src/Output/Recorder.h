@@ -22,7 +22,7 @@
 
 #ifndef RECORDER_H
 #define RECORDER_H
-
+#include <string>
 #include "../globals.h"
 #include "WAVaudiooutput.h"
 
@@ -32,7 +32,7 @@ class Recorder{
 
         Recorder();
         ~Recorder();
-        int preparefile(char *filename_,int overwrite);//returns 1 if the file exists
+        int preparefile(std::string filename_,int overwrite);//returns 1 if the file exists
         void start();
         void stop();
         void pause();
