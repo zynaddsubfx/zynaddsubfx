@@ -47,7 +47,7 @@ class Master{
 
 	/**Saves all settings to a XML file
 	 * @return 0 for ok or <0 if there is an error*/
-	int saveXML(char *filename);
+	int saveXML(const char *filename);
 
 	/**This adds the parameters to the XML data*/
 	void add2XML(XMLwrapper *xml);
@@ -57,7 +57,7 @@ class Master{
 
 	/**loads all settings from a XML file
 	 * @return 0 for ok or -1 if there is an error*/
-	int loadXML(char *filename);
+	int loadXML(const char *filename);
 	void applyparameters();
 
 	void getfromXML(XMLwrapper *xml);
