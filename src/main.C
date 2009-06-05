@@ -59,6 +59,8 @@ extern Dump dump;
 MasterUI *ui;
 #endif
 
+using namespace std;
+
 pthread_t thr1,thr2,thr3,thr4;
 Master *master;
 int swaplr=0;//1 for left-right swapping
@@ -185,14 +187,14 @@ void *thread3(void *arg){
     ui->showUI();
     while (Pexitprogram==0) {
 #ifdef USE_LASH
-      std::string filename;
+      string filename;
       switch (lash->checkevents(filename)) {
       case LASHClient::Save:
-        ui->do_save_master(const_cast<char*>(filename.c_str()));
+        ui->do_save_master(filename);
         lash->confirmevent(LASHClient::Save);
         break;
       case LASHClient::Restore:
-        ui->do_load_master(const_cast<char*>(filename.c_str()));
+        ui->do_load_master(filename);
         lash->confirmevent(LASHClient::Restore);
         break;
       case LASHClient::Quit:
@@ -253,16 +255,18 @@ void *thread4(void *arg){
 
 
 void initprogram(){
+    cerr.precision(1);
+    cerr << std::fixed;
 #ifndef JACKAUDIOOUT
 #ifndef JACK_RTAUDIOOUT
-    fprintf(stderr,"\nSample Rate = \t\t%d\n",SAMPLE_RATE);
+    cerr << "\nSample Rate = \t\t" << SAMPLE_RATE << endl;
 #endif
 #endif
-    fprintf(stderr,"Sound Buffer Size = \t%d samples\n",SOUND_BUFFER_SIZE);
-    fprintf(stderr,"Internal latency = \t%.1f ms\n",SOUND_BUFFER_SIZE*1000.0/SAMPLE_RATE);
-    fprintf(stderr,"ADsynth Oscil.Size = \t%d samples\n",OSCIL_SIZE);
+    cerr << "Sound Buffer Size = \t" << SOUND_BUFFER_SIZE << "samples" << endl;
+    cerr << "Internal latency = \t%.1f",SOUND_BUFFER_SIZE*1000.0/SAMPLE_RATE << "ms" << endl;
+    cerr << "ADsynth Oscil.Size = \t" << OSCIL_SIZE << "samples" << endl;
 
-    fflush(stderr);
+    //fflush(stderr);
     srand(time(NULL));
     denormalkillbuf=new REALTYPE [SOUND_BUFFER_SIZE];
     for (int i=0;i<SOUND_BUFFER_SIZE;i++) denormalkillbuf[i]=(RND-0.5)*1e-16;
@@ -277,7 +281,7 @@ void initprogram(){
     if (usejackit) {
 	bool tmp=JACKaudiooutputinit(master);
 #if defined(OSSAUDIOOUT)
-	if (!tmp) printf("\nUsing OSS instead.\n");
+	if (!tmp) cout << "\nUsing OSS instead." << endl;
 #else
 	if (!tmp) exit(1);
 #endif
@@ -382,13 +386,14 @@ int main(int argc, char *argv[]){
 #ifdef JACKAUDIOOUT
     usejackit=true;//use jack by default
 #endif
-    fprintf(stderr,"%s","\nZynAddSubFX - Copyright (c) 2002-2008 Nasca Octavian Paul and others\n");
-    fprintf(stderr,"Compiled: %s %s\n",__DATE__,__TIME__);
-    fprintf(stderr,"%s","This program is free software (GNU GPL v.2 or later) and \n    it comes with ABSOLUTELY NO WARRANTY.\n\n");
+    cerr<<"\nZynAddSubFX - Copyright (c) 2002-2008 Nasca Octavian Paul and others"<<endl;
+    cerr << "Compiled: " << __DATE__ << " " << __TIME__ << endl;
+    cerr << "This program is free software (GNU GPL v.2 or later) and \n";
+    cerr << "it comes with ABSOLUTELY NO WARRANTY.\n" << endl;
 #ifdef OS_LINUX
-    if (argc==1) fprintf(stderr,"%s","Try 'zynaddsubfx --help' for command-line options.\n");
+    if (argc==1) cerr << "Try 'zynaddsubfx --help' for command-line options." << endl;
 #else
-    if (argc==1) fprintf(stderr,"%s","Try 'zynaddsubfx -h' for command-line options.\n");
+    if (argc==1) cerr << "Try 'zynaddsubfx -h' for command-line options.\n" << endl;
 #endif
     /* Get the settings from the Config*/
     SAMPLE_RATE=config.cfg.SampleRate;	
@@ -420,6 +425,7 @@ int main(int argc, char *argv[]){
     char loadinstrument[1001];ZERO(loadinstrument,1001);
     
     while (1){
+        /**\todo check this process for a small memory leak*/
 #ifdef OS_LINUX
 	opt=getopt_long(argc,argv,"l:L:r:b:o:hSDUAY",opts,&option_index);
 	char *optarguments=optarg;
@@ -465,7 +471,7 @@ int main(int argc, char *argv[]){
 		     if (tmp>=4000) {
 		        SAMPLE_RATE=tmp;
 		     } else {
-		        fprintf(stderr,"ERROR:Incorrect sample rate  %s .\n",optarguments);
+                         cerr << "ERROR:Incorrect sample rate: " << optarguments << endl;
 			exit(1);
 		     };
 		     break;
@@ -474,7 +480,7 @@ int main(int argc, char *argv[]){
 		     if (tmp>=2) {
 		        SOUND_BUFFER_SIZE=tmp;
 		     } else {
-		        fprintf(stderr,"ERROR:Incorrect buffer size  %s .\n",optarguments);
+                         cerr << "ERROR:Incorrect buffer size: " << optarguments << endl;
 			exit(1);
 		     };
 		     break;
@@ -483,39 +489,42 @@ int main(int argc, char *argv[]){
 		     OSCIL_SIZE=tmp;
 	    	    if (OSCIL_SIZE<MAX_AD_HARMONICS*2) OSCIL_SIZE=MAX_AD_HARMONICS*2;
 		     OSCIL_SIZE=(int) pow(2,ceil(log (OSCIL_SIZE-1.0)/log(2.0)));
-		     if (tmp!=OSCIL_SIZE) fprintf(stderr,"\nOSCIL_SIZE is wrong (must be 2^n) or too small. Adjusting to %d.\n",OSCIL_SIZE);
+		     if (tmp!=OSCIL_SIZE){
+                         cerr << "\nOSCIL_SIZE is wrong (must be 2^n) or too small. Adjusting to ";
+                         cerr << OSCIL_SIZE << "." << endl;
+                     }
 		     break;
 	    case 'S':swaplr=1;
 		     break;
 	    case 'D':dump.startnow();
 		     break;
-	    case '?':fprintf(stderr,"%s","ERROR:Bad option or parameter.\n\n");
+            case '?':cerr << "ERROR:Bad option or parameter.\n" << endl;
 	             exitwithhelp=1;
 		     break;
 	};
     };
     
     if (exitwithhelp!=0) {
-	fprintf(stderr,"%s","Usage: zynaddsubfx [OPTION]\n\n");
-	fprintf(stderr,"%s","  -h , --help \t\t\t\t display command-line help and exit\n");
-	fprintf(stderr,"%s","  -l file, --load=FILE\t\t\t loads a .xmz file\n");
-	fprintf(stderr,"%s","  -L file, --load-instrument=FILE\t\t loads a .xiz file\n");
-	fprintf(stderr,"%s","  -r SR, --sample-rate=SR\t\t set the sample rate SR\n");
-	fprintf(stderr,"%s","  -b BS, --buffer-size=SR\t\t set the buffer size (granularity)\n");
-	fprintf(stderr,"%s","  -o OS, --oscil-size=OS\t\t set the ADsynth oscil. size\n");
-	fprintf(stderr,"%s","  -S , --swap\t\t\t\t swap Left <--> Right\n");
-	fprintf(stderr,"%s","  -D , --dump\t\t\t\t Dumps midi note ON/OFF commands\n");
-	fprintf(stderr,"%s","  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n");
+	cout << "Usage: zynaddsubfx [OPTION]\n" << endl;
+	cout << "  -h , --help \t\t\t\t display command-line help and exit" << endl;
+	cout << "  -l file, --load=FILE\t\t\t loads a .xmz file" << endl;
+	cout << "  -L file, --load-instrument=FILE\t\t loads a .xiz file" << endl;
+	cout << "  -r SR, --sample-rate=SR\t\t set the sample rate SR" << endl;
+	cout << "  -b BS, --buffer-size=SR\t\t set the buffer size (granularity)" << endl;
+	cout << "  -o OS, --oscil-size=OS\t\t set the ADsynth oscil. size" << endl;
+	cout << "  -S , --swap\t\t\t\t swap Left <--> Right" << endl;
+	cout << "  -D , --dump\t\t\t\t Dumps midi note ON/OFF commands" << endl;
+	cout << "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface" << endl;
 #ifdef JACKAUDIOOUT
 #ifdef OSSAUDIOOUT
-	fprintf(stderr,"%s","  -A , --not-use-jack\t\t\t Use OSS/ALSA instead of JACK\n");
+	cout << "  -A , --not-use-jack\t\t\t Use OSS/ALSA instead of JACK" << endl;
 #endif
 #endif
 #ifdef OS_WINDOWS
-	fprintf(stderr,"%s","\nWARNING: On Windows systems, only short comandline parameters works.\n");
-	fprintf(stderr,"%s","  eg. instead '--buffer-size=512' use '-b 512'\n");
+	cout << "\nWARNING: On Windows systems, only short comandline parameters works." << endl;
+	cout << "  eg. instead '--buffer-size=512' use '-b 512'" << endl;
 #endif
-	fprintf(stderr,"%s","\n\n");
+	cout << '\n' << endl;
 	return(0);
     };
     
@@ -544,7 +553,7 @@ int main(int argc, char *argv[]){
 #ifndef DISABLE_GUI
 	    if (noui==0) ui->refresh_master_ui();
 #endif
-	    printf("Master file loaded.\n");
+	    cout << "Master file loaded." << endl;
 	};
     };
 
@@ -552,14 +561,14 @@ int main(int argc, char *argv[]){
 	int loadtopart=0;
         int tmp=master->part[loadtopart]->loadXMLinstrument(loadinstrument);
 	if (tmp<0) {
-	    fprintf(stderr,"ERROR:Could not load instrument file  %s .\n",loadinstrument);
+	    cerr << "ERROR:Could not load instrument file " << loadinstrument << '.' << endl;
 	    exit(1);
 	} else {
 	    master->part[loadtopart]->applyparameters();
 #ifndef DISABLE_GUI
 	    if (noui==0) ui->refresh_master_ui();
 #endif
-	    printf("Instrument file loaded.\n");
+	    cout << "Instrument file loaded." << endl;
 	};
     };
     

@@ -413,12 +413,9 @@ panellistitemgroup->redraw();} {}
   decl {BankUI *bankui;} {}
 } 
 
-class MasterUI {open
-} {
-  Function {make_window()} {open
-  } {
+class MasterUI {} {
+  Function {make_window()} {} {
     Fl_Window masterwindow {
-      xclass zynaddsubfx
       label zynaddsubfx
       callback {\#ifdef VSTAUDIOOUT
 fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
@@ -428,7 +425,7 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL)) {
     *exitprogram=1;
 };
 \#endif}
-      xywh {31 206 390 465} type Double visible
+      xywh {31 206 390 465} type Double xclass zynaddsubfx visible
     } {
       Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
@@ -1613,14 +1610,12 @@ config.cfg.UserInterfaceMode=2;}
   panellistitem[npart]->refresh();
 };} {}
   }
-  Function {setfilelabel(const char *filename)} {open
-  } {
+  Function {setfilelabel(const char *filename)} {} {
     code {if (filename!=NULL) snprintf(&masterwindowlabel[0],100,"%s - ZynAddSubFX",fl_filename_name(filename));
   else snprintf(&masterwindowlabel[0],100,"%s","ZynAddSubFX (c)2002-2006 Nasca Paul and others");
 masterwindowlabel[99]='\\0';
 masterwindow->label(&masterwindowlabel[0]);
-simplemasterwindow->label(&masterwindowlabel[0]);} {selected
-    }
+simplemasterwindow->label(&masterwindowlabel[0]);} {}
   }
   Function {MasterUI(Master *master_,int *exitprogram_)} {} {
     code {master=master_;
@@ -1706,8 +1701,8 @@ simplesyseffsend->value(master->Psysefxvol[nsyseff][npart]);} {}
 
 updatepanel();} {}
   }
-  Function {do_load_master(char* file = NULL)} {} {
-    code {char *filename;
+  Function {do_load_master(const char* file = NULL)} {} {
+    code {const char *filename;
   if (file == NULL) {
     filename=fl_file_chooser("Open:","({*.xmz})",NULL,0);
     if (filename==NULL) return;
@@ -1735,14 +1730,16 @@ if (result>=0) setfilelabel(filename);
 if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not a zynaddsubfx parameters file.");
       else if (result<0) fl_alert("Error: Could not load the file.");} {}
   }
-  Function {do_save_master(char* file = NULL)} {} {
-    code {char *filename;
+  Function {do_save_master(const char* file = NULL)} {} {
+    code {const char *filename;
+char *tmp;
   int result=0;
   if (file == NULL) {
-    filename=fl_file_chooser("Save:","({*.xmz})",NULL,0);
-    if (filename==NULL) return;
-    filename=fl_filename_setext(filename,".xmz");
-    result=fileexists(filename);
+    tmp=fl_file_chooser("Save:","({*.xmz})",NULL,0);
+    if (tmp==NULL) return;
+    tmp=fl_filename_setext(tmp,".xmz");
+    filename=tmp;
+    result=fileexists(tmp);
     if (result) {
       result=0;
       if (!fl_choice("The file exists. Overwrite it?","No","Yes",NULL)) return;
@@ -1761,7 +1758,8 @@ pthread_mutex_unlock(&master->mutex);
 if (result<0) fl_alert("Error: Could not save the file.");
 	else setfilelabel(filename);
 
-updatepanel();} {}
+updatepanel();} {selected
+    }
   }
   Function {refresh_master_ui()} {} {
     code {ninseff=0;
