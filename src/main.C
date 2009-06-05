@@ -262,9 +262,9 @@ void initprogram(){
     cerr << "\nSample Rate = \t\t" << SAMPLE_RATE << endl;
 #endif
 #endif
-    cerr << "Sound Buffer Size = \t" << SOUND_BUFFER_SIZE << "samples" << endl;
-    cerr << "Internal latency = \t%.1f",SOUND_BUFFER_SIZE*1000.0/SAMPLE_RATE << "ms" << endl;
-    cerr << "ADsynth Oscil.Size = \t" << OSCIL_SIZE << "samples" << endl;
+    cerr << "Sound Buffer Size = \t" << SOUND_BUFFER_SIZE << " samples" << endl;
+    cerr << "Internal latency = \t" << SOUND_BUFFER_SIZE*1000.0/SAMPLE_RATE << " ms" << endl;
+    cerr << "ADsynth Oscil.Size = \t" << OSCIL_SIZE << " samples" << endl;
 
     //fflush(stderr);
     srand(time(NULL));
