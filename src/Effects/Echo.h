@@ -125,10 +125,7 @@ class Echo:public Effect{
         int dl,dr,lrdelay; //needs better names
         
         void initdelays();
-        //REALTYPE *ldelay,*rdelay;
         Stereo<AuSample> delaySample;
-
-        //REALTYPE oldl,oldr;//pt. lpf
         Stereo<REALTYPE> old;
 
         int kl,kr;

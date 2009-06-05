@@ -28,29 +28,21 @@ Echo::Echo(const int & insertion_,REALTYPE *const efxoutl_,REALTYPE *const efxou
   : Effect(insertion_,efxoutl_,efxoutr_,NULL,0),
     Pvolume(50),Ppanning(64),//Pdelay(60),
     Plrdelay(100),Plrcross(100),Pfb(40),Phidamp(60),
-    lrdelay(0),delaySample(AuSample(1),AuSample(1)),old(0.0,0.0)
+    lrdelay(0),delaySample(1),old(0.0)
 {
     setpreset(Ppreset);    	   
     cleanup();
 }
 
-Echo::~Echo(){
-    //delete[] ldelay;
-    //delete[] rdelay;
-}
+Echo::~Echo(){}
 
 /*
  * Cleanup the effect
  */
 void Echo::cleanup(){
-    //int i;
     delaySample.left().clear();
     delaySample.right().clear();
-    //for (i=0;i<dl;i++) ldelay[i]=0.0;
-    //for (i=0;i<dr;i++) rdelay[i]=0.0;
-    old=Stereo<REALTYPE>(0.0,0.0);
-    //oldl=0.0;
-    //oldr=0.0;
+    old=Stereo<REALTYPE>(0.0);
 }
 
 
@@ -65,10 +57,6 @@ void Echo::initdelays(){
     
     delaySample.left()=AuSample(dl);
     delaySample.right()=AuSample(dr);
-    //if (ldelay!=NULL) delete [] ldelay;
-    //if (rdelay!=NULL) delete [] rdelay;
-    //ldelay=new REALTYPE[dl];
-    //rdelay=new REALTYPE[dr];
 
     cleanup();
 }
