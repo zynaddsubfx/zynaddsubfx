@@ -27,19 +27,19 @@
 
 class OSSMidiIn:public MidiIn{
     public:
-	OSSMidiIn();
-	~OSSMidiIn();
-	unsigned char getmidibyte();
-	unsigned char readbyte();
+        OSSMidiIn();
+        ~OSSMidiIn();
+        unsigned char getmidibyte();
+        unsigned char readbyte();
 
-	//Midi parser
-	void getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmdparams);
-	unsigned char cmdtype;//the Message Type (noteon,noteof,sysex..)
-	unsigned char cmdchan;//the channel number
+        //Midi parser
+        void getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmdparams);
+        unsigned char cmdtype;//the Message Type (noteon,noteof,sysex..)
+        unsigned char cmdchan;//the channel number
 
     private:
-	int midi_handle;
-	unsigned char lastmidicmd;//last byte (>=80) received from the Midi
+        int midi_handle;
+        unsigned char lastmidicmd;//last byte (>=80) received from the Midi
 
 };
 
