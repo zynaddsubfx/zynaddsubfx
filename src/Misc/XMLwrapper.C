@@ -28,6 +28,8 @@
 #include "../globals.h"
 #include "Util.h"
 
+using namespace std;
+
 int xml_k=0;
 char tabs[STACKSIZE+2];
 
@@ -162,19 +164,13 @@ bool XMLwrapper::checkfileinformation(const char *filename){
 
 /* SAVE XML members */
 
-int XMLwrapper::saveXMLfile(const char *filename){
+int XMLwrapper::saveXMLfile(const string &filename){
     char *xmldata=getXMLdata();
     if (xmldata==NULL) return(-2);
 
     int compression=config.cfg.GzipCompression;
+    int result=dosavefile(filename.c_str(),compression,xmldata);
     
-    int fnsize=strlen(filename)+100;
-    char *filenamenew=new char [fnsize];
-    snprintf(filenamenew,fnsize,"%s",filename);
-    
-    int result=dosavefile(filenamenew,compression,xmldata);
-    
-    delete []filenamenew;
     free(xmldata);    
     return(result);
 };
@@ -221,34 +217,34 @@ int XMLwrapper::dosavefile(const char *filename,int compression,const char *xmld
 
 
 
-void XMLwrapper::addpar(const char *name,int val){
-    addparams2("par","name",name,"value",int2str(val));
+void XMLwrapper::addpar(const string &name,int val){
+    addparams2("par","name",name.c_str(),"value",int2str(val));
 };
 
-void XMLwrapper::addparreal(const char *name,REALTYPE val){
-    addparams2("par_real","name",name,"value",real2str(val));
+void XMLwrapper::addparreal(const string &name,REALTYPE val){
+    addparams2("par_real","name",name.c_str(),"value",real2str(val));
 };
 
-void XMLwrapper::addparbool(const char *name,int val){
-    if (val!=0) addparams2("par_bool","name",name,"value","yes");
-	else addparams2("par_bool","name",name,"value","no");
+void XMLwrapper::addparbool(const string &name,int val){
+    if (val!=0) addparams2("par_bool","name",name.c_str(),"value","yes");
+    else addparams2("par_bool","name",name.c_str(),"value","no");
 };
 
-void XMLwrapper::addparstr(const char *name,const char *val){
+void XMLwrapper::addparstr(const string &name,const string &val){
     mxml_node_t *element=mxmlNewElement(node,"string");
-    mxmlElementSetAttr(element,"name",name);
-    mxmlNewText(element,0,val);
+    mxmlElementSetAttr(element,"name",name.c_str());
+    mxmlNewText(element,0,val.c_str());
 };
 
 
-void XMLwrapper::beginbranch(const char *name){
+void XMLwrapper::beginbranch(const string &name){
     push(node);
-    node=addparams0(name);
+    node=addparams0(name.c_str());
 };
 
-void XMLwrapper::beginbranch(const char *name,int id){
+void XMLwrapper::beginbranch(const string &name,int id){
     push(node);
-    node=addparams1(name,"id",int2str(id));
+    node=addparams1(name.c_str(),"id",int2str(id));
 };
 
 void XMLwrapper::endbranch(){
@@ -259,7 +255,7 @@ void XMLwrapper::endbranch(){
 
 /* LOAD XML members */
 
-int XMLwrapper::loadXMLfile(const char *filename){
+int XMLwrapper::loadXMLfile(const string &filename){
     if (tree!=NULL) mxmlDelete(tree);
     tree=NULL;
 
@@ -268,7 +264,7 @@ int XMLwrapper::loadXMLfile(const char *filename){
 
     stackpos=0;
 
-    const char *xmldata=doloadfile(filename);    
+    const char *xmldata=doloadfile(filename.c_str());    
     if (xmldata==NULL) return(-1);//the file could not be loaded or uncompressed
     
     root=tree=mxmlLoadString(NULL,xmldata,MXML_OPAQUE_CALLBACK);
@@ -289,12 +285,12 @@ int XMLwrapper::loadXMLfile(const char *filename){
 };
 
 
-char *XMLwrapper::doloadfile(const char *filename){
+char *XMLwrapper::doloadfile(const string &filename){
     char *xmldata=NULL;
     int filesize=-1;
     
     //try get filesize as gzip data (first)
-    gzFile gzfile=gzopen(filename,"rb");
+    gzFile gzfile=gzopen(filename.c_str(),"rb");
     if (gzfile!=NULL){//this is a gzip file 
 	// first check it's size
 	while(!gzeof(gzfile)) {
@@ -317,7 +313,7 @@ char *XMLwrapper::doloadfile(const char *filename){
 	return (xmldata);
     } else {//this is not a gzip file
 	notgzip:    
-	FILE *file=fopen(filename,"rb");
+	FILE *file=fopen(filename.c_str(),"rb");
 	if (file==NULL) return(NULL);
 	fseek(file,0,SEEK_END);
 	filesize=ftell(file);
@@ -357,17 +353,17 @@ bool XMLwrapper::putXMLdata(const char *xmldata){
 
 
 
-int XMLwrapper::enterbranch(const char *name){
-    node=mxmlFindElement(peek(),peek(),name,NULL,NULL,MXML_DESCEND_FIRST);
+int XMLwrapper::enterbranch(const string &name){
+    node=mxmlFindElement(peek(),peek(),name.c_str(),NULL,NULL,MXML_DESCEND_FIRST);
     if (node==NULL) return(0);
 
     push(node);
     return(1);
 };
 
-int XMLwrapper::enterbranch(const char *name,int id){
+int XMLwrapper::enterbranch(const string &name,int id){
     snprintf(tmpstr,TMPSTR_SIZE,"%d",id);
-    node=mxmlFindElement(peek(),peek(),name,"id",tmpstr,MXML_DESCEND_FIRST);
+    node=mxmlFindElement(peek(),peek(),name.c_str(),"id",tmpstr,MXML_DESCEND_FIRST);
     if (node==NULL) return(0);
 
     push(node);
@@ -390,8 +386,8 @@ int XMLwrapper::getbranchid(int min, int max){
     return(id);
 };
 
-int XMLwrapper::getpar(const char *name,int defaultpar,int min,int max){
-    node=mxmlFindElement(peek(),peek(),"par","name",name,MXML_DESCEND_FIRST);
+int XMLwrapper::getpar(const string &name,int defaultpar,int min,int max){
+    node=mxmlFindElement(peek(),peek(),"par","name",name.c_str(),MXML_DESCEND_FIRST);
     if (node==NULL) return(defaultpar);
 
     const char *strval=mxmlElementGetAttr(node,"value");
@@ -404,12 +400,12 @@ int XMLwrapper::getpar(const char *name,int defaultpar,int min,int max){
     return(val);
 };
 
-int XMLwrapper::getpar127(const char *name,int defaultpar){
+int XMLwrapper::getpar127(const string &name,int defaultpar){
     return(getpar(name,defaultpar,0,127));
 };
 
-int XMLwrapper::getparbool(const char *name,int defaultpar){
-    node=mxmlFindElement(peek(),peek(),"par_bool","name",name,MXML_DESCEND_FIRST);
+int XMLwrapper::getparbool(const string &name,int defaultpar){
+    node=mxmlFindElement(peek(),peek(),"par_bool","name",name.c_str(),MXML_DESCEND_FIRST);
     if (node==NULL) return(defaultpar);
 
     const char *strval=mxmlElementGetAttr(node,"value");
@@ -419,9 +415,9 @@ int XMLwrapper::getparbool(const char *name,int defaultpar){
 	else return(0);
 };
 
-void XMLwrapper::getparstr(const char *name,char *par,int maxstrlen){
+void XMLwrapper::getparstr(const string &name,char *par,int maxstrlen){
     ZERO(par,maxstrlen);
-    node=mxmlFindElement(peek(),peek(),"string","name",name,MXML_DESCEND_FIRST);
+    node=mxmlFindElement(peek(),peek(),"string","name",name.c_str(),MXML_DESCEND_FIRST);
     
     if (node==NULL) return;
     if (node->child==NULL) return;

@@ -21,6 +21,7 @@
 */
 
 #include <mxml.h>
+#include <string>
 #ifndef REALTYPE
 #define REALTYPE float
 #endif
@@ -43,26 +44,26 @@ class XMLwrapper{
 	/********************************/
 
 	//returns 0 if ok or -1 if the file cannot be saved
-	int saveXMLfile(const char *filename);
+	int saveXMLfile(const std::string &filename);
 
 	//returns the new allocated string that contains the XML data (used for clipboard)
 	//the string is NULL terminated
 	char *getXMLdata();
 	
 	//add simple parameter (name and value)
-	void addpar(const char *name,int val);
-	void addparreal(const char *name,REALTYPE val);
+	void addpar(const std::string &name,int val);
+	void addparreal(const std::string &name,REALTYPE val);
 	
 	//add boolean parameter (name and boolean value)
 	//if the value is 0 => "yes", else "no"
-	void addparbool(const char *name,int val);
+	void addparbool(const std::string &name,int val);
 
 	//add string parameter (name and string)
-	void addparstr(const char *name,const char *val);
+	void addparstr(const std::string &name,const std::string &val);
 
 	//add a branch
-	void beginbranch(const char *name);
-	void beginbranch(const char *name, int id);
+	void beginbranch(const std::string &name);
+	void beginbranch(const std::string &name, int id);
 
 	//this must be called after each branch (nodes that contains child nodes)
 	void endbranch();
@@ -72,19 +73,19 @@ class XMLwrapper{
 	/********************************/
 	
 	//returns 0 if ok or -1 if the file cannot be loaded
-	int loadXMLfile(const char *filename);
+	int loadXMLfile(const std::string &filename);
 
 	//used by the clipboard
 	bool putXMLdata(const char *xmldata);
     
 	//enter into the branch
 	//returns 1 if is ok, or 0 otherwise
-	int enterbranch(const char *name);
+	int enterbranch(const std::string &name);
 
 		
 	//enter into the branch with id
 	//returns 1 if is ok, or 0 otherwise
-	int enterbranch(const char *name, int id);
+	int enterbranch(const std::string &name, int id);
 
 	//exits from a branch
 	void exitbranch();
@@ -98,14 +99,14 @@ class XMLwrapper{
 	//it returns the parameter and limits it between min and max
 	//if min==max==0, it will not limit it
 	//if no parameter will be here, the defaultpar will be returned
-	int getpar(const char *name,int defaultpar,int min,int max);
+	int getpar(const std::string &name,int defaultpar,int min,int max);
 
 	//the same as getpar, but the limits are 0 and 127
-	int getpar127(const char *name,int defaultpar);
+	int getpar127(const std::string &name,int defaultpar);
 	
-	int getparbool(const char *name,int defaultpar);
+	int getparbool(const std::string &name,int defaultpar);
 
-	void getparstr(const char *name,char *par,int maxstrlen);
+	void getparstr(const std::string &name,char *par,int maxstrlen);
 	REALTYPE getparreal(const char *name,REALTYPE defaultpar);
 	REALTYPE getparreal(const char *name,REALTYPE defaultpar,REALTYPE min,REALTYPE max);
 
@@ -122,7 +123,7 @@ class XMLwrapper{
     private:
     
 	int dosavefile(const char *filename,int compression,const char *xmldata);
-	char *doloadfile(const char *filename);
+	char *doloadfile(const std::string &filename);
 
     
 	mxml_node_t *tree;//all xml data
