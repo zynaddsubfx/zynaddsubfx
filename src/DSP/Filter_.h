@@ -28,10 +28,10 @@
 class Filter_{
  public:
     virtual ~Filter_(){};	
-    virtual void filterout(REALTYPE *smp){};
-    virtual void setfreq(REALTYPE frequency){};
-    virtual void setfreq_and_q(REALTYPE frequency,REALTYPE q_){};
-    virtual void setq(REALTYPE q_){};
+    virtual void filterout(REALTYPE *smp)=0;
+    virtual void setfreq(REALTYPE frequency)=0;
+    virtual void setfreq_and_q(REALTYPE frequency,REALTYPE q_)=0;
+    virtual void setq(REALTYPE q_)=0;
     virtual void setgain(REALTYPE dBgain){};
     REALTYPE outgain;
  private:
