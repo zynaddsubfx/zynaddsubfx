@@ -89,7 +89,7 @@ REALTYPE getdetune(unsigned char type,unsigned short int coarsedetune,unsigned s
 };
 
 
-bool fileexists(char *filename){
+bool fileexists(const char *filename){
     struct stat tmp;
     int result=stat(filename,&tmp);
     if (result>=0) return(true);
