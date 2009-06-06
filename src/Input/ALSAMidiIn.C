@@ -21,15 +21,10 @@
 */
 
 #include "ALSAMidiIn.h"
-#include <stdlib.h>
-#include <stdio.h>
-
 
 ALSAMidiIn::ALSAMidiIn(){
     int alsaport;
     inputok=0;
-    char portname[50];
-    sprintf(portname,"ZynAddSubFX");
 
     midi_handle=NULL;
     
@@ -37,17 +32,16 @@ ALSAMidiIn::ALSAMidiIn(){
     
     snd_seq_set_client_name(midi_handle,"ZynAddSubFX");//thanks to Frank Neumann
 
-    alsaport = snd_seq_create_simple_port(midi_handle,portname
-	        ,SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE
-		,SND_SEQ_PORT_TYPE_SYNTH);
+    alsaport = snd_seq_create_simple_port(midi_handle,"ZynAddSubFX"
+                ,SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE
+                ,SND_SEQ_PORT_TYPE_SYNTH);
     if (alsaport<0) return;
 
     inputok=1;
 };
 
 ALSAMidiIn::~ALSAMidiIn(){
-  if (midi_handle)
-    snd_seq_close(midi_handle);
+    if (midi_handle) snd_seq_close(midi_handle);
 };
 
 
@@ -69,43 +63,44 @@ void ALSAMidiIn::getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmd
     
     if (midievent==NULL) return;
     switch (midievent->type){
-	case SND_SEQ_EVENT_NOTEON:  
-		cmdtype=MidiNoteON;
-		cmdchan=midievent->data.note.channel;
-		cmdparams[0]=midievent->data.note.note;
-		cmdparams[1]=midievent->data.note.velocity;
-		break;
+        case SND_SEQ_EVENT_NOTEON:  
+                cmdtype=MidiNoteON;
+                cmdchan=midievent->data.note.channel;
+                cmdparams[0]=midievent->data.note.note;
+                cmdparams[1]=midievent->data.note.velocity;
+                break;
 	case SND_SEQ_EVENT_NOTEOFF: 
-		cmdtype=MidiNoteOFF;
-		cmdchan=midievent->data.note.channel;
-		cmdparams[0]=midievent->data.note.note;
-		break;
+                cmdtype=MidiNoteOFF;
+                cmdchan=midievent->data.note.channel;
+                cmdparams[0]=midievent->data.note.note;
+                break;
 	case SND_SEQ_EVENT_PITCHBEND:
-		cmdtype=MidiController;
-		cmdchan=midievent->data.control.channel;
-		cmdparams[0]=C_pitchwheel;//Pitch Bend
-		cmdparams[1]=midievent->data.control.value;
-		break;
+                cmdtype=MidiController;
+                cmdchan=midievent->data.control.channel;
+                cmdparams[0]=C_pitchwheel;//Pitch Bend
+                cmdparams[1]=midievent->data.control.value;
+                break;
 	case SND_SEQ_EVENT_CONTROLLER:
-		cmdtype=MidiController;
-		cmdchan=midievent->data.control.channel;
-		cmdparams[0]=getcontroller(midievent->data.control.param);
-		cmdparams[1]=midievent->data.control.value;
+                cmdtype=MidiController;
+                cmdchan=midievent->data.control.channel;
+                cmdparams[0]=getcontroller(midievent->data.control.param);
+                cmdparams[1]=midievent->data.control.value;
     	        //fprintf(stderr,"t=%d val=%d\n",midievent->data.control.param,midievent->data.control.value);
-		break;
+                break;
 				    
     };
 };
 
 
 int ALSAMidiIn::getalsaid() {
-  if (midi_handle) {
-    snd_seq_client_info_t* seq_info;
-    snd_seq_client_info_malloc(&seq_info);
-    snd_seq_get_client_info(midi_handle, seq_info);
-    int id = snd_seq_client_info_get_client(seq_info);
-    snd_seq_client_info_free(seq_info);
-    return id;
-  }
-  return -1;
+    if (midi_handle) {
+        snd_seq_client_info_t* seq_info;
+        snd_seq_client_info_malloc(&seq_info);
+        snd_seq_get_client_info(midi_handle, seq_info);
+        int id = snd_seq_client_info_get_client(seq_info);
+        snd_seq_client_info_free(seq_info);
+        return id;
+    }
+    return -1;
 }
+
