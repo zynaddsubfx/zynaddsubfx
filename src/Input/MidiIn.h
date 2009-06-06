@@ -37,8 +37,7 @@ class MidiIn{
          * @param cmdtype the referece to the variable that will store the type
          * @param cmdchan the channel for the event
          * @param parameters for the event*/
-        virtual void getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmdparams){};
-        virtual ~MidiIn(){};//**< \todo figure out if this declaation the intended one*/
+        virtual void getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmdparams)=0;
         int getcontroller(unsigned char b);
     protected:
         int inputok;/**<1 if I can read midi bytes from input ports*/
