@@ -25,6 +25,8 @@
 #include "../globals.h"
 #include "Effect.h"
 #include "EffectLFO.h"
+#include "../Samples/AuSample.h"
+#include "../Misc/Stereo.h"
 
 #define MAX_CHORUS_DELAY 250.0 //ms
 
@@ -101,7 +103,8 @@ class Chorus:public Effect {
 	REALTYPE depth,delay,fb,lrcross,panning;
 	REALTYPE dl1,dl2,dr1,dr2,lfol,lfor;
 	int maxdelay;
-	REALTYPE *delayl,*delayr;
+        Stereo<AuSample> delaySample;
+	//REALTYPE *delayl,*delayr;
 	int dlk,drk,dlhi,dlhi2;
 	REALTYPE getdelay(REALTYPE xlfo);
 	REALTYPE dllo,mdel;

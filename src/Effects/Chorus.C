@@ -27,12 +27,14 @@
 using namespace std;
 
 Chorus::Chorus(const int &insertion_,REALTYPE *const efxoutl_,REALTYPE *const efxoutr_)
-    :Effect(insertion_,efxoutl_,efxoutr_,NULL,0)
+    :Effect(insertion_,efxoutl_,efxoutr_,NULL,0),
+    maxdelay((int)(MAX_CHORUS_DELAY/1000.0*SAMPLE_RATE)),
+    delaySample(maxdelay)
 {
     dlk=0;drk=0;
-    maxdelay=(int)(MAX_CHORUS_DELAY/1000.0*SAMPLE_RATE);
-    delayl=new REALTYPE[maxdelay];
-    delayr=new REALTYPE[maxdelay];
+    //maxdelay=(int)(MAX_CHORUS_DELAY/1000.0*SAMPLE_RATE);
+    //delayl=new REALTYPE[maxdelay];
+    //delayr=new REALTYPE[maxdelay];
 
     setpreset(Ppreset);
 
@@ -42,10 +44,7 @@ Chorus::Chorus(const int &insertion_,REALTYPE *const efxoutl_,REALTYPE *const ef
     cleanup();
 };
 
-Chorus::~Chorus(){
-    delete [] delayl;
-    delete [] delayr;
-};
+Chorus::~Chorus(){};
 
 /*
  * get the delay value in samples; xlfo is the current lfo value
@@ -69,7 +68,7 @@ REALTYPE Chorus::getdelay(REALTYPE xlfo){
  * Apply the effect
  */
 void Chorus::out(REALTYPE *smpsl,REALTYPE *smpsr){
-    int i;
+    const Stereo<AuSample> input(AuSample(smpsl,SOUND_BUFFER_SIZE),AuSample(smpsr,SOUND_BUFFER_SIZE)); 
     const REALTYPE one=1.0;
     dl1=dl2;dr1=dr2;
     lfo.effectlfoout(&lfol,&lfor);
@@ -77,14 +76,14 @@ void Chorus::out(REALTYPE *smpsl,REALTYPE *smpsr){
     dl2=getdelay(lfol);
     dr2=getdelay(lfor);
 
-    for (i=0;i<SOUND_BUFFER_SIZE;i++){	
-	REALTYPE inl=smpsl[i];
-	REALTYPE inr=smpsr[i];
+    for (int i=0;i<input.l().size();i++){	
+	REALTYPE inl=input.l()[i];
+	REALTYPE inr=input.r()[i];
 	//LRcross
-	REALTYPE l=inl;
-	REALTYPE r=inr;
-	inl=l*(1.0-lrcross)+r*lrcross;
-	inr=r*(1.0-lrcross)+l*lrcross;
+	Stereo<REALTYPE> tmpc(inl,inr);
+	//REALTYPE r=inr;
+	inl=tmpc.l()*(1.0-lrcross)+tmpc.r()*lrcross;
+	inr=tmpc.r()*(1.0-lrcross)+tmpc.l()*lrcross;
 	
 	//Left channel
 
@@ -98,8 +97,8 @@ void Chorus::out(REALTYPE *smpsl,REALTYPE *smpsr){
 	
 	dlhi2=(dlhi-1+maxdelay)%maxdelay;
 	dllo=1.0-fmod(tmp,one);
-        efxoutl[i]=delayl[dlhi2]*dllo+delayl[dlhi]*(1.0-dllo);
-	delayl[dlk]=inl+efxoutl[i]*fb;
+        efxoutl[i]=delaySample.l()[dlhi2]*dllo+delaySample.l()[dlhi]*(1.0-dllo);
+	delaySample.l()[dlk]=inl+efxoutl[i]*fb;
 
 	//Right channel
 
@@ -113,19 +112,19 @@ void Chorus::out(REALTYPE *smpsl,REALTYPE *smpsr){
 	
 	dlhi2=(dlhi-1+maxdelay)%maxdelay;
 	dllo=1.0-fmod(tmp,one);
-        efxoutr[i]=delayr[dlhi2]*dllo+delayr[dlhi]*(1.0-dllo);
-	delayr[dlk]=inr+efxoutr[i]*fb;
+        efxoutr[i]=delaySample.r()[dlhi2]*dllo+delaySample.r()[dlhi]*(1.0-dllo);
+	delaySample.r()[dlk]=inr+efxoutr[i]*fb;
 
     };
 
     if (Poutsub!=0)
-	for (i=0;i<SOUND_BUFFER_SIZE;i++){
+	for (int i=0;i<input.l().size();i++){
     	    efxoutl[i] *= -1.0;
             efxoutr[i] *= -1.0;
 	};
 
 
-    for (int i=0;i<SOUND_BUFFER_SIZE;i++){
+    for (int i=0;i<input.l().size();i++){
 	efxoutl[i]*=panning;
 	efxoutr[i]*=(1.0-panning);
     };
@@ -135,10 +134,12 @@ void Chorus::out(REALTYPE *smpsl,REALTYPE *smpsr){
  * Cleanup the effect
  */
 void Chorus::cleanup(){
-    for (int i=0;i<maxdelay;i++){
-	delayl[i]=0.0;
-	delayr[i]=0.0;
-    };
+    delaySample.l().clear();
+    delaySample.r().clear();
+    //for (int i=0;i<maxdelay;i++){
+//	delayl[i]=0.0;
+//	delayr[i]=0.0;
+    //};
         
 };
 
