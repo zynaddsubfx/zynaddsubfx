@@ -25,11 +25,12 @@
 
 DynamicFilter::DynamicFilter(int insertion_,REALTYPE *efxoutl_,REALTYPE *efxoutr_)
     :Effect(insertion_,efxoutl_,efxoutr_,new FilterParams(0,64,64),0),
+     Pvolume(110),Ppanning(64),Pdepth(0),Pampsns(90),
+     Pampsnsinv(0),Pampsmooth(60),
      filterl(NULL),filterr(NULL)
 {
     setpreset(Ppreset);
     cleanup();
-    /**\todo fix intialization issues here*/
 };
 
 DynamicFilter::~DynamicFilter(){
@@ -126,10 +127,7 @@ void DynamicFilter::setpanning(const unsigned char &Ppanning){
 void DynamicFilter::setampsns(const unsigned char &Pampsns){
     ampsns=pow(Pampsns/127.0,2.5)*10.0;
     if (Pampsnsinv!=0) ampsns=-ampsns;    
-    ampsmooth=exp(-Pampsmooth/127.0*10.0)*0.99;/**\todo currently Pampsmooth is
-                                                 * uninitialized when this is
-                                                 * called. Please fix.
-                                                 */
+    ampsmooth=exp(-Pampsmooth/127.0*10.0)*0.99;
     this->Pampsns=Pampsns;
 };
 

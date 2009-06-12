@@ -111,9 +111,11 @@ void set_realtime(){
  */
 #if !(defined(WINMIDIIN)||defined(VSTMIDIIN))
 void *thread1(void *arg){
-    MidiCmdType cmdtype;
-    unsigned char cmdchan,note,vel;
+    MidiCmdType cmdtype=MidiNoteOFF;
+    unsigned char cmdchan=0,note=0,vel=0;
     int cmdparams[MP_MAX_BYTES];
+    for(int i=0;i<MP_MAX_BYTES;++i)
+        cmdparams[i]=0;
 
     set_realtime();
     while (Pexitprogram==0){
