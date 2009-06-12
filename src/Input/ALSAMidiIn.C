@@ -24,7 +24,7 @@
 
 ALSAMidiIn::ALSAMidiIn(){
     int alsaport;
-    inputok=0;
+    inputok=false;
 
     midi_handle=NULL;
     
@@ -37,7 +37,7 @@ ALSAMidiIn::ALSAMidiIn(){
                 ,SND_SEQ_PORT_TYPE_SYNTH);
     if (alsaport<0) return;
 
-    inputok=1;
+    inputok=true;
 };
 
 ALSAMidiIn::~ALSAMidiIn(){
@@ -52,7 +52,7 @@ void ALSAMidiIn::getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmd
     snd_seq_event_t *midievent=NULL;
     cmdtype=MidiNull;
 
-    if (inputok==0){
+    if (inputok==false){
       /* The input is broken. We need to block for a while anyway so other
          non-RT threads get a chance to run. */
       sleep(1);

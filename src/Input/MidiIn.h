@@ -40,8 +40,7 @@ class MidiIn{
         virtual void getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmdparams)=0;
         int getcontroller(unsigned char b);
     protected:
-        int inputok;/**<1 if I can read midi bytes from input ports*/
-        /**\todo figure out if inputtok can be a bool*/
+        bool inputok;/**<1 if I can read midi bytes from input ports*/
 };
 
 #endif

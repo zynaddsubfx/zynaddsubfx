@@ -32,9 +32,9 @@
 #include "../Misc/Util.h"
 
 OSSMidiIn::OSSMidiIn(){
-    inputok=0;
+    inputok=false;
     midi_handle=open(config.cfg.LinuxOSSSeqInDev,O_RDONLY,0);
-    if (midi_handle!=-1) inputok=1;
+    if (midi_handle!=-1) inputok=true;
     
     lastmidicmd=0;
     cmdtype=0;
@@ -68,7 +68,7 @@ unsigned char OSSMidiIn::getmidibyte(){
  */
 void OSSMidiIn::getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmdparams){
     unsigned char tmp,i;
-    if (inputok==0) {
+    if (inputok==false) {
         cmdtype=MidiNull;
         return;
     }
