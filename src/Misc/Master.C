@@ -192,6 +192,15 @@ void Master::setcontroller(unsigned char chan,unsigned int type,int par){
 	    if ((chan==part[npart]->Prcvchn) && (part[npart]->Penabled!=0))
 		part[npart]->SetController(type,par);
 	};
+        
+        if(type==C_allsoundsoff) { //cleanup insertion/system FX
+            for (int nefx=0;nefx<NUM_SYS_EFX;++nefx) {
+                sysefx[nefx]->cleanup();
+            }
+            for (int nefx=0;nefx<NUM_INS_EFX;++nefx) {
+                insefx[nefx]->cleanup();
+            }
+        }
     };
 };
 
