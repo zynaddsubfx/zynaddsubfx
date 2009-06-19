@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
  
-  Dump.h - It dumps the notes to a text file
+  Control.h - Defines a variable that can be controled from a frontend
 
   Copyright (C) 2009 Harald Hvaal
   Author: Harald Hvaal
