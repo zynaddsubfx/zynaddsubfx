@@ -2,6 +2,8 @@
   ZynAddSubFX - a software synthesizer
  
   Stereo.h - Object for storing a pair of objects
+  Copyright (C) 2009-2009 Mark McCurry
+  Author: Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License 
