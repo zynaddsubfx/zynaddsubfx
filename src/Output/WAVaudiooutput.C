@@ -78,9 +78,16 @@ void WAVaudiooutput::close(){
     }
 };
 
-void WAVaudiooutput::write(int nsmps,short int *smps){
+void WAVaudiooutput::write_stereo_samples(int nsmps,short int *smps){
     if (!file) return;
     fwrite(smps,nsmps,4,file);
     sampleswritten+=nsmps;
 };
+
+void WAVaudiooutput::write_mono_samples(int nsmps,short int *smps){
+    if (!file) return;
+    fwrite(smps,nsmps,2,file);
+    sampleswritten+=nsmps;
+};
+
 

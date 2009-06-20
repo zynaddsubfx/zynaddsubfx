@@ -87,7 +87,7 @@ void Recorder::recordbuffer(REALTYPE *outl,REALTYPE *outr){
         if (tmp>32767) tmp=32767;
         recordbuf_16bit[i*2+1]=tmp;
     };
-    wav.write(SOUND_BUFFER_SIZE,recordbuf_16bit);
+    wav.write_stereo_samples(SOUND_BUFFER_SIZE,recordbuf_16bit);
 };
 
 void Recorder::triggernow(){

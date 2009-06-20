@@ -29,7 +29,8 @@ class WAVaudiooutput{
 	bool newfile(std::string filename,int samplerate,int channels);
 	void close();
 
-	void write(int nsmps, short int *smps);
+	void write_mono_samples(int nsmps, short int *smps);
+	void write_stereo_samples(int nsmps, short int *smps);
 	
     private:
 	int sampleswritten;

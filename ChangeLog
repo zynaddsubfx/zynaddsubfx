@@ -867,3 +867,6 @@
 	    - Added Stereo template
 	    - Added Control class
 	    - Added DelayCtl class
+20 Iun 2009 (Paul Nasca)
+	    - Bugfix regarding WAV export of PADsynth
+	    
