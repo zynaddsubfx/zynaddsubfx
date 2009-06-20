@@ -28,9 +28,9 @@ Requirements:
 -------------
                - a fast computer
                - Linux (tested with RedHat 7.2,7.3,etc.) or Windows
-               - FFTW 2.x.x (tested with fftw 2.0.5, 2.1.3) - necessary for
+               - FFTW 2.x.x or 3.x.x (tested with fftw 2.0.5, 2.1.3, and 3.1.3) - necessary for
   Fast Fourier computations
-	       - MXML-2.2 library from http://www.easysw.com/~mike/mxml/
+	       - MXML-2.5 library from www.minixml.org
 	       - zlib library from http://www.zlib.org - this exists in most Linux distributions
                - (for Linux) OpenSoundSystem (OSS) (if you don't have ALSA, only)
 	       - (for Windows) pthreads, portaudio
@@ -92,4 +92,4 @@ Please send me instruments,banks,master settings,songs(midi+...xmz files) done w
 
 Have fun! :-)
 
-
+--The ZynAddSubFX team
