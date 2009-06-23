@@ -1,12 +1,12 @@
 /*
   ZynAddSubFX - a software synthesizer
- 
+
   DelayCtl.C - Control For Delays
   Copyright (C) 2009-2009 Mark McCurry
   Author: Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
+  it under the terms of version 2 of the GNU General Public License
   as published by the Free Software Foundation.
 
   This program is distributed in the hope that it will be useful,
@@ -23,7 +23,7 @@
 #include <sstream>
 
 DelayCtl::DelayCtl()
-    :Control(64),value(64/127.0*1.5){} /**\todo finishme*/
+        :Control(64),value(64/127.0*1.5) {} /**\todo finishme*/
 
 std::string DelayCtl::getString() const
 {

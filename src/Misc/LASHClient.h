@@ -1,12 +1,12 @@
 /*
   ZynAddSubFX - a software synthesizer
- 
+
   LASHClient.h - LASH support
   Copyright (C) 2006-2009 Lars Luthman
   Author: Lars Luthman
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
+  it under the terms of version 2 of the GNU General Public License
   as published by the Free Software Foundation.
 
   This program is distributed in the hope that it will be useful,
@@ -31,33 +31,34 @@
  *  the LASH daemon.
  *  \todo fix indentation nonconformism
  *  \todo see why there is no destructor*/
-class LASHClient {
- public:
-  /**Enum to represent the LASH events that are currently handled*/
-  enum Event {
-    Save,
-    Restore,
-    Quit,
-    NoEvent
-  };
+class LASHClient
+{
+public:
+    /**Enum to represent the LASH events that are currently handled*/
+    enum Event {
+        Save,
+        Restore,
+        Quit,
+        NoEvent
+    };
 
-  /** Constructor
-   *  @param argc number of arguments
-   *  @param argv the text arguments*/
-  LASHClient(int* argc, char*** argv);
-  
-  /**set the ALSA id
-   * @param id new ALSA id*/
-  void setalsaid(int id);
-  /**Set the JACK name
-   * @param name the new name*/
-  void setjackname(const char* name);
-  Event checkevents(std::string& filename);
-  void confirmevent(Event event);
-  
- private:
-  
-  lash_client_t* client;
+    /** Constructor
+     *  @param argc number of arguments
+     *  @param argv the text arguments*/
+    LASHClient(int* argc, char*** argv);
+
+    /**set the ALSA id
+     * @param id new ALSA id*/
+    void setalsaid(int id);
+    /**Set the JACK name
+     * @param name the new name*/
+    void setjackname(const char* name);
+    Event checkevents(std::string& filename);
+    void confirmevent(Event event);
+
+private:
+
+    lash_client_t* client;
 };
 
 

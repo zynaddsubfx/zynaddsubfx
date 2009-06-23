@@ -1,12 +1,12 @@
 /*
   ZynAddSubFX - a software synthesizer
- 
+
   LFOParams.C - Parameters for LFO
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
+  it under the terms of version 2 of the GNU General Public License
   as published by the Free Software Foundation.
 
   This program is distributed in the hope that it will be useful,
@@ -27,14 +27,18 @@
 
 int LFOParams::time;
 
-LFOParams::LFOParams(char Pfreq_,char Pintensity_,char Pstartphase_, char PLFOtype_,char Prandomness_, char Pdelay_,char Pcontinous_,char fel_):Presets(){
-    switch(fel_) {
-	case 0:setpresettype("Plfofrequency");
-	    break;
-	case 1:setpresettype("Plfoamplitude");
-	    break;
-	case 2:setpresettype("Plfofilter");
-	    break;
+LFOParams::LFOParams(char Pfreq_,char Pintensity_,char Pstartphase_, char PLFOtype_,char Prandomness_, char Pdelay_,char Pcontinous_,char fel_):Presets()
+{
+    switch (fel_) {
+    case 0:
+        setpresettype("Plfofrequency");
+        break;
+    case 1:
+        setpresettype("Plfoamplitude");
+        break;
+    case 2:
+        setpresettype("Plfofilter");
+        break;
     };
     Dfreq=Pfreq_;
     Dintensity=Pintensity_;
@@ -45,14 +49,16 @@ LFOParams::LFOParams(char Pfreq_,char Pintensity_,char Pstartphase_, char PLFOty
     Dcontinous=Pcontinous_;
     fel=fel_;
     time=0;
-    
+
     defaults();
 };
 
-LFOParams::~LFOParams(){
+LFOParams::~LFOParams()
+{
 };
 
-void LFOParams::defaults(){
+void LFOParams::defaults()
+{
     Pfreq=Dfreq/127.0;
     Pintensity=Dintensity;
     Pstartphase=Dstartphase;
@@ -65,7 +71,8 @@ void LFOParams::defaults(){
 };
 
 
-void LFOParams::add2XML(XMLwrapper *xml){
+void LFOParams::add2XML(XMLwrapper *xml)
+{
     xml->addparreal("freq",Pfreq);
     xml->addpar("intensity",Pintensity);
     xml->addpar("start_phase",Pstartphase);
@@ -77,7 +84,8 @@ void LFOParams::add2XML(XMLwrapper *xml){
     xml->addparbool("continous",Pcontinous);
 };
 
-void LFOParams::getfromXML(XMLwrapper *xml){
+void LFOParams::getfromXML(XMLwrapper *xml)
+{
     Pfreq=xml->getparreal("freq",Pfreq,0.0,1.0);
     Pintensity=xml->getpar127("intensity",Pintensity);
     Pstartphase=xml->getpar127("start_phase",Pstartphase);

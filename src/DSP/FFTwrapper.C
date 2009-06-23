@@ -1,12 +1,12 @@
 /*
   ZynAddSubFX - a software synthesizer
- 
+
   FFTwrapper.c  -  A wrapper for Fast Fourier Transforms
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
+  it under the terms of version 2 of the GNU General Public License
   as published by the Free Software Foundation.
 
   This program is distributed in the hope that it will be useful,
@@ -23,7 +23,8 @@
 #include <math.h>
 #include "FFTwrapper.h"
 
-FFTwrapper::FFTwrapper(int fftsize_){
+FFTwrapper::FFTwrapper(int fftsize_)
+{
     fftsize=fftsize_;
     tmpfftdata1=new fftw_real[fftsize];
     tmpfftdata2=new fftw_real[fftsize];
@@ -36,11 +37,12 @@ FFTwrapper::FFTwrapper(int fftsize_){
 #endif
 };
 
-FFTwrapper::~FFTwrapper(){
+FFTwrapper::~FFTwrapper()
+{
 #ifdef FFTW_VERSION_2
     rfftw_destroy_plan(planfftw);
     rfftw_destroy_plan(planfftw_inv);
-#else 
+#else
     fftw_destroy_plan(planfftw);
     fftw_destroy_plan(planfftw_inv);
 #endif
@@ -52,20 +54,21 @@ FFTwrapper::~FFTwrapper(){
 /*
  * do the Fast Fourier Transform
  */
-void FFTwrapper::smps2freqs(REALTYPE *smps,FFTFREQS freqs){
+void FFTwrapper::smps2freqs(REALTYPE *smps,FFTFREQS freqs)
+{
 #ifdef FFTW_VERSION_2
     for (int i=0;i<fftsize;i++) tmpfftdata1[i]=smps[i];
     rfftw_one(planfftw,tmpfftdata1,tmpfftdata2);
     for (int i=0;i<fftsize/2;i++) {
-	freqs.c[i]=tmpfftdata2[i];
-	if (i!=0) freqs.s[i]=tmpfftdata2[fftsize-i];
+        freqs.c[i]=tmpfftdata2[i];
+        if (i!=0) freqs.s[i]=tmpfftdata2[fftsize-i];
     };
 #else
     for (int i=0;i<fftsize;i++) tmpfftdata1[i]=smps[i];
     fftw_execute(planfftw);
     for (int i=0;i<fftsize/2;i++) {
-	freqs.c[i]=tmpfftdata1[i];
-	if (i!=0) freqs.s[i]=tmpfftdata1[fftsize-i];
+        freqs.c[i]=tmpfftdata1[i];
+        if (i!=0) freqs.s[i]=tmpfftdata1[fftsize-i];
     };
 #endif
     tmpfftdata2[fftsize/2]=0.0;
@@ -74,19 +77,20 @@ void FFTwrapper::smps2freqs(REALTYPE *smps,FFTFREQS freqs){
 /*
  * do the Inverse Fast Fourier Transform
  */
-void FFTwrapper::freqs2smps(FFTFREQS freqs,REALTYPE *smps){
+void FFTwrapper::freqs2smps(FFTFREQS freqs,REALTYPE *smps)
+{
     tmpfftdata2[fftsize/2]=0.0;
 #ifdef FFTW_VERSION_2
     for (int i=0;i<fftsize/2;i++) {
-	tmpfftdata1[i]=freqs.c[i];
-	if (i!=0) tmpfftdata1[fftsize-i]=freqs.s[i];
+        tmpfftdata1[i]=freqs.c[i];
+        if (i!=0) tmpfftdata1[fftsize-i]=freqs.s[i];
     };
     rfftw_one(planfftw_inv,tmpfftdata1,tmpfftdata2);
     for (int i=0;i<fftsize;i++) smps[i]=tmpfftdata2[i];
 #else
     for (int i=0;i<fftsize/2;i++) {
-	tmpfftdata2[i]=freqs.c[i];
-	if (i!=0) tmpfftdata2[fftsize-i]=freqs.s[i];
+        tmpfftdata2[i]=freqs.c[i];
+        if (i!=0) tmpfftdata2[fftsize-i]=freqs.s[i];
     };
     fftw_execute(planfftw_inv);
     for (int i=0;i<fftsize;i++) smps[i]=tmpfftdata2[i];

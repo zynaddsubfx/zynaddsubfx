@@ -1,12 +1,12 @@
 /*
   ZynAddSubFX - a software synthesizer
- 
+
   PAaudiooutput.C - Audio output for PortAudio
   Copyright (C) 2002 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
+  it under the terms of version 2 of the GNU General Public License
   as published by the Free Software Foundation.
 
   This program is distributed in the hope that it will be useful,
@@ -27,30 +27,32 @@ PaStream *stream;
 REALTYPE *outl,*outr;
 
 int PAprocess(void *inputBuffer,void *outputBuffer,
-		unsigned long framesPerBuffer,
-		PaTimestamp outTime,void *userData){
+              unsigned long framesPerBuffer,
+              PaTimestamp outTime,void *userData)
+{
 
     if (framesPerBuffer!=SOUND_BUFFER_SIZE) {
-	fprintf(stderr,"Bug: PAudioOutput::PAprocess  SOUND_BUFFER_SIZE!=framesPerBuffer");
+        fprintf(stderr,"Bug: PAudioOutput::PAprocess  SOUND_BUFFER_SIZE!=framesPerBuffer");
         fprintf(stderr,"%d %d\n",framesPerBuffer,SOUND_BUFFER_SIZE);
     };
 
     pthread_mutex_lock(&PAmaster->mutex);
-     PAmaster->GetAudioOutSamples(SOUND_BUFFER_SIZE,SAMPLE_RATE,outl,outr);
+    PAmaster->GetAudioOutSamples(SOUND_BUFFER_SIZE,SAMPLE_RATE,outl,outr);
     pthread_mutex_unlock(&PAmaster->mutex);
 
     float *out=(float *)outputBuffer;
 
-    for (int i=0;i<framesPerBuffer;i++){
-	if (i>=SOUND_BUFFER_SIZE) break;//this should never happens, except only when framesPerBuffer!>SOUND_BUFFER_SIZE
-	out[i*2]=outl[i];
-	out[i*2+1]=outr[i];
+    for (int i=0;i<framesPerBuffer;i++) {
+        if (i>=SOUND_BUFFER_SIZE) break;//this should never happens, except only when framesPerBuffer!>SOUND_BUFFER_SIZE
+        out[i*2]=outl[i];
+        out[i*2+1]=outr[i];
     };
 
     return(0);
 };
 
-void PAaudiooutputinit(Master *master_){
+void PAaudiooutputinit(Master *master_)
+{
     PAmaster=master_;
     outl=new REALTYPE [SOUND_BUFFER_SIZE];
     outr=new REALTYPE [SOUND_BUFFER_SIZE];
@@ -59,7 +61,8 @@ void PAaudiooutputinit(Master *master_){
     Pa_StartStream(stream);
 };
 
-void PAfinish(){
+void PAfinish()
+{
     Pa_StopStream(stream);
     delete (outl);
     delete (outr);

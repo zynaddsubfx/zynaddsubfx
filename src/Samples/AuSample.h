@@ -1,12 +1,12 @@
 /*
   ZynAddSubFX - a software synthesizer
- 
+
   AuSample.h - Object for storing information on audio samples (for one channel)
   Copyright (C) 2009-2009 Mark McCurry
   Author: Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
+  it under the terms of version 2 of the GNU General Public License
   as published by the Free Software Foundation.
 
   This program is distributed in the hope that it will be useful,
@@ -26,10 +26,10 @@
 
 class AuSample : public Sample
 {
-    public:
-        AuSample(const int &length);
-        AuSample(float *input,const int &length);
-        FqSample getFqSample();/**\todo implement this*/
+public:
+    AuSample(const int &length);
+    AuSample(float *input,const int &length);
+    FqSample getFqSample();/**\todo implement this*/
 
 };
 #endif

@@ -3,7 +3,7 @@
   Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
+  it under the terms of version 2 of the GNU General Public License
   as published by the Free Software Foundation.
 
   This program is distributed in the hope that it will be useful,
@@ -21,18 +21,21 @@
 #include "WAVaudiooutput.h"
 using namespace std;
 
-WAVaudiooutput::WAVaudiooutput(){
+WAVaudiooutput::WAVaudiooutput()
+{
     file=NULL;
     sampleswritten=0;
     samplerate=44100;
 };
 
-WAVaudiooutput::~WAVaudiooutput(){
+WAVaudiooutput::~WAVaudiooutput()
+{
     close();
 };
 
-bool WAVaudiooutput::newfile(string filename,int samplerate,int channels){
-   /**\todo Move this into the Constructor*/ 
+bool WAVaudiooutput::newfile(string filename,int samplerate,int channels)
+{
+    /**\todo Move this into the Constructor*/
     close();//inchide un posibil fisier existent
     file=fopen(filename.c_str(),"w");
     if (!file) return false;
@@ -44,14 +47,15 @@ bool WAVaudiooutput::newfile(string filename,int samplerate,int channels){
     return(true);
 };
 
-void WAVaudiooutput::close(){
-    if (file){
+void WAVaudiooutput::close()
+{
+    if (file) {
         unsigned int chunksize;
         rewind(file);
 
         fwrite("RIFF",4,1,file);
         chunksize=sampleswritten*4+36;
-    	fwrite(&chunksize,4,1,file);
+        fwrite(&chunksize,4,1,file);
 
         fwrite("WAVEfmt ",8,1,file);
         chunksize=16;
@@ -68,7 +72,7 @@ void WAVaudiooutput::close(){
         fwrite(&blockalign,2,1,file);
         unsigned short int bitspersample=16;
         fwrite(&bitspersample,2,1,file);
-		
+
         fwrite("data",4,1,file);
         chunksize=sampleswritten*blockalign;
         fwrite(&chunksize,4,1,file);
@@ -78,13 +82,15 @@ void WAVaudiooutput::close(){
     }
 };
 
-void WAVaudiooutput::write_stereo_samples(int nsmps,short int *smps){
+void WAVaudiooutput::write_stereo_samples(int nsmps,short int *smps)
+{
     if (!file) return;
     fwrite(smps,nsmps,4,file);
     sampleswritten+=nsmps;
 };
 
-void WAVaudiooutput::write_mono_samples(int nsmps,short int *smps){
+void WAVaudiooutput::write_mono_samples(int nsmps,short int *smps)
+{
     if (!file) return;
     fwrite(smps,nsmps,2,file);
     sampleswritten+=nsmps;

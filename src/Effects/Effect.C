@@ -1,12 +1,12 @@
 /*
   ZynAddSubFX - a software synthesizer
- 
+
   Effect.C - this class is inherited by the all effects(Reverb, Echo, ..)
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
+  it under the terms of version 2 of the GNU General Public License
   as published by the Free Software Foundation.
 
   This program is distributed in the hope that it will be useful,
@@ -22,9 +22,9 @@
 
 #include "Effect.h"
 
-      
+
 Effect::Effect(bool insertion_,REALTYPE *const efxoutl_,
                REALTYPE *const efxoutr_,FilterParams *filterpars_,
                const unsigned char & Ppreset_)
-    :Ppreset(Ppreset_),efxoutl(efxoutl_),efxoutr(efxoutr_),
-     filterpars(filterpars_),insertion(insertion_){}
+        :Ppreset(Ppreset_),efxoutl(efxoutl_),efxoutr(efxoutr_),
+        filterpars(filterpars_),insertion(insertion_) {}

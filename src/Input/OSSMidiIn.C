@@ -1,12 +1,12 @@
 /*
   ZynAddSubFX - a software synthesizer
- 
+
   OSSMidiIn.C - Midi input for Open Sound System
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
+  it under the terms of version 2 of the GNU General Public License
   as published by the Free Software Foundation.
 
   This program is distributed in the hope that it will be useful,
@@ -31,31 +31,35 @@
 #include "OSSMidiIn.h"
 #include "../Misc/Util.h"
 
-OSSMidiIn::OSSMidiIn(){
+OSSMidiIn::OSSMidiIn()
+{
     inputok=false;
     midi_handle=open(config.cfg.LinuxOSSSeqInDev,O_RDONLY,0);
     if (midi_handle!=-1) inputok=true;
-    
+
     lastmidicmd=0;
     cmdtype=0;
     cmdchan=0;
 
 };
 
-OSSMidiIn::~OSSMidiIn(){
+OSSMidiIn::~OSSMidiIn()
+{
     close(midi_handle);
 };
 
-unsigned char OSSMidiIn::readbyte(){
+unsigned char OSSMidiIn::readbyte()
+{
     unsigned char tmp[4];
     read(midi_handle,&tmp[0],1);
-    while (tmp[0]!=SEQ_MIDIPUTC){
+    while (tmp[0]!=SEQ_MIDIPUTC) {
         read(midi_handle,&tmp[0],4);
     }
     return(tmp[1]);
 };
 
-unsigned char OSSMidiIn::getmidibyte(){
+unsigned char OSSMidiIn::getmidibyte()
+{
     unsigned char b;
     do {
         b=readbyte();
@@ -66,14 +70,15 @@ unsigned char OSSMidiIn::getmidibyte(){
 /*
  * Get the midi command,channel and parameters
  */
-void OSSMidiIn::getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmdparams){
+void OSSMidiIn::getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmdparams)
+{
     unsigned char tmp,i;
     if (inputok==false) {
         cmdtype=MidiNull;
         return;
     }
     i=0;
-    if (lastmidicmd==0){//asteapta prima data pana cand vine prima comanda midi
+    if (lastmidicmd==0) {//asteapta prima data pana cand vine prima comanda midi
         while (tmp<0x80) tmp=getmidibyte();
         lastmidicmd=tmp;
     }
@@ -85,26 +90,26 @@ void OSSMidiIn::getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmdp
         tmp=getmidibyte();
     }
 
-    if ((lastmidicmd>=0x80)&&(lastmidicmd<=0x8f)){//Note OFF
+    if ((lastmidicmd>=0x80)&&(lastmidicmd<=0x8f)) {//Note OFF
         cmdtype=MidiNoteOFF;
         cmdchan=lastmidicmd%16;
         cmdparams[0]=tmp;//note number
     }
 
-    if ((lastmidicmd>=0x90)&&(lastmidicmd<=0x9f)){//Note ON
+    if ((lastmidicmd>=0x90)&&(lastmidicmd<=0x9f)) {//Note ON
         cmdtype=MidiNoteON;
         cmdchan=lastmidicmd%16;
-        cmdparams[0]=tmp;//note number	
+        cmdparams[0]=tmp;//note number
         cmdparams[1]=getmidibyte();//velocity
         if (cmdparams[1]==0) cmdtype=MidiNoteOFF;//if velocity==0 then is note off
     }
-    if ((lastmidicmd>=0xB0)&&(lastmidicmd<=0xBF)){//Controllers
+    if ((lastmidicmd>=0xB0)&&(lastmidicmd<=0xBF)) {//Controllers
         cmdtype=MidiController;
         cmdchan=lastmidicmd%16;
         cmdparams[0]=getcontroller(tmp);
         cmdparams[1]=getmidibyte();
     }
-    if ((lastmidicmd>=0xE0)&&(lastmidicmd<=0xEF)){//Pitch Wheel
+    if ((lastmidicmd>=0xE0)&&(lastmidicmd<=0xEF)) {//Pitch Wheel
         cmdtype=MidiController;
         cmdchan=lastmidicmd%16;
         cmdparams[0]=C_pitchwheel;

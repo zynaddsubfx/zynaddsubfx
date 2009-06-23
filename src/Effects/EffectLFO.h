@@ -1,12 +1,12 @@
 /*
   ZynAddSubFX - a software synthesizer
- 
+
   EffectLFO.h - Stereo LFO used by some effects
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
+  it under the terms of version 2 of the GNU General Public License
   as published by the Free Software Foundation.
 
   This program is distributed in the hope that it will be useful,
@@ -26,8 +26,9 @@
 #include "../globals.h"
 /**LFO for some of the Effect objects
  * \todo see if this should inherit LFO*/
-class EffectLFO{
- public:
+class EffectLFO
+{
+public:
     EffectLFO();
     ~EffectLFO();
     void effectlfoout(REALTYPE *outl,REALTYPE *outr);
@@ -36,9 +37,9 @@ class EffectLFO{
     unsigned char Prandomness;
     unsigned char PLFOtype;
     unsigned char Pstereo;//"64"=0
- private:
+private:
     REALTYPE getlfoshape(REALTYPE x);
- 
+
     REALTYPE xl,xr;
     REALTYPE incx;
     REALTYPE ampl1,ampl2,ampr1,ampr2;//necessary for "randomness"

@@ -1,12 +1,12 @@
 /*
   ZynAddSubFX - a software synthesizer
- 
+
   EffectLFO.C - Stereo LFO used by some effects
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
+  it under the terms of version 2 of the GNU General Public License
   as published by the Free Software Foundation.
 
   This program is distributed in the hope that it will be useful,
@@ -26,13 +26,15 @@
 #include "EffectLFO.h"
 
 
-EffectLFO::EffectLFO(){
-    xl=0.0;xr=0.0;
+EffectLFO::EffectLFO()
+{
+    xl=0.0;
+    xr=0.0;
     Pfreq=40;
     Prandomness=0;
     PLFOtype=0;
     Pstereo=96;
-    
+
     updateparams();
 
     ampl1=(1-lfornd)+lfornd*RND;
@@ -41,20 +43,23 @@ EffectLFO::EffectLFO(){
     ampr2=(1-lfornd)+lfornd*RND;
 };
 
-EffectLFO::~EffectLFO(){
+EffectLFO::~EffectLFO()
+{
 };
 
 
 /*
  * Update the changed parameters
  */
-void EffectLFO::updateparams(){
+void EffectLFO::updateparams()
+{
     REALTYPE lfofreq=(pow(2,Pfreq/127.0*10.0)-1.0)*0.03;
     incx=fabs(lfofreq)*(REALTYPE)SOUND_BUFFER_SIZE/(REALTYPE)SAMPLE_RATE;
     if (incx>0.49999999) incx=0.499999999; //Limit the Frequency
 
     lfornd=Prandomness/127.0;
-    if (lfornd<0.0) lfornd=0.0; else if (lfornd>1.0) lfornd=1.0;
+    if (lfornd<0.0) lfornd=0.0;
+    else if (lfornd>1.0) lfornd=1.0;
 
     if (PLFOtype>1) PLFOtype=1;//this has to be updated if more lfo's are added
     lfotype=PLFOtype;
@@ -66,16 +71,18 @@ void EffectLFO::updateparams(){
 /*
  * Compute the shape of the LFO
  */
-REALTYPE EffectLFO::getlfoshape(REALTYPE x){
+REALTYPE EffectLFO::getlfoshape(REALTYPE x)
+{
     REALTYPE out;
-    switch (lfotype){
-	case 1: //EffectLFO_TRIANGLE
-		if ((x>0.0)&&(x<0.25)) out=4.0*x;
-		else if ((x>0.25)&&(x<0.75)) out=2-4*x;
-		     else out=4.0*x-4.0;
-		break;
-	/**\todo more to be added here; also ::updateparams() need to be updated (to allow more lfotypes)*/
-	default:out=cos(x*2*PI);//EffectLFO_SINE
+    switch (lfotype) {
+    case 1: //EffectLFO_TRIANGLE
+        if ((x>0.0)&&(x<0.25)) out=4.0*x;
+        else if ((x>0.25)&&(x<0.75)) out=2-4*x;
+        else out=4.0*x-4.0;
+        break;
+        /**\todo more to be added here; also ::updateparams() need to be updated (to allow more lfotypes)*/
+    default:
+        out=cos(x*2*PI);//EffectLFO_SINE
     };
     return(out);
 };
@@ -83,16 +90,17 @@ REALTYPE EffectLFO::getlfoshape(REALTYPE x){
 /*
  * LFO output
  */
-void EffectLFO::effectlfoout(REALTYPE *outl,REALTYPE *outr){
-    REALTYPE out;    
-    
+void EffectLFO::effectlfoout(REALTYPE *outl,REALTYPE *outr)
+{
+    REALTYPE out;
+
     out=getlfoshape(xl);
     if ((lfotype==0)||(lfotype==1)) out*=(ampl1+xl*(ampl2-ampl1));
     xl+=incx;
     if (xl>1.0) {
-	xl-=1.0;
-	ampl1=ampl2;
-	ampl2=(1.0-lfornd)+lfornd*RND;
+        xl-=1.0;
+        ampl1=ampl2;
+        ampl2=(1.0-lfornd)+lfornd*RND;
     };
     *outl=(out+1.0)*0.5;
 
@@ -100,9 +108,9 @@ void EffectLFO::effectlfoout(REALTYPE *outl,REALTYPE *outr){
     if ((lfotype==0)||(lfotype==1)) out*=(ampr1+xr*(ampr2-ampr1));
     xr+=incx;
     if (xr>1.0) {
-	xr-=1.0;
-	ampr1=ampr2;
-	ampr2=(1.0-lfornd)+lfornd*RND;
+        xr-=1.0;
+        ampr1=ampr2;
+        ampr2=(1.0-lfornd)+lfornd*RND;
     };
     *outr=(out+1.0)*0.5;
 };

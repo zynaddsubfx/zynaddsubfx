@@ -1,12 +1,12 @@
 /*
   ZynAddSubFX - a software synthesizer
- 
+
   NULLMidiIn.C - a dummy Midi port
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
+  it under the terms of version 2 of the GNU General Public License
   as published by the Free Software Foundation.
 
   This program is distributed in the hope that it will be useful,
@@ -22,17 +22,20 @@
 
 #include "NULLMidiIn.h"
 
-NULLMidiIn::NULLMidiIn(){
+NULLMidiIn::NULLMidiIn()
+{
 };
 
-NULLMidiIn::~NULLMidiIn(){
+NULLMidiIn::~NULLMidiIn()
+{
 };
 
 /*
  * Get the midi command,channel and parameters
  * It returns MidiNull because it is a dummy driver
  */
-void NULLMidiIn::getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,unsigned char *cmdparams){
+void NULLMidiIn::getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,unsigned char *cmdparams)
+{
     cmdtype=MidiNull;
 };
 

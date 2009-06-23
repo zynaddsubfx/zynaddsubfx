@@ -1,12 +1,12 @@
 /*
   ZynAddSubFX - a software synthesizer
- 
+
   FqSample.h - Object for storing information on samples
   Copyright (C) 2009-2009 Mark McCurry
   Author: Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
+  it under the terms of version 2 of the GNU General Public License
   as published by the Free Software Foundation.
 
   This program is distributed in the hope that it will be useful,
@@ -26,12 +26,12 @@
 
 class FqSample : public Sample
 {
-    public:
-        FqSample(const int &length);
-        FqSample(float *input,const int &length);
-        ~FqSample();
-        //FqSample &operator=(const FqSample &smp);
-        //float *dontuse(){return buffer;};
+public:
+    FqSample(const int &length);
+    FqSample(float *input,const int &length);
+    ~FqSample();
+    //FqSample &operator=(const FqSample &smp);
+    //float *dontuse(){return buffer;};
 };
 #endif
 

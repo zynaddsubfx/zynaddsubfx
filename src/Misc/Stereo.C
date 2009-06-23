@@ -1,12 +1,12 @@
 /*
   ZynAddSubFX - a software synthesizer
- 
+
   Stereo.C - Object for storing a pair of objects
   Copyright (C) 2009-2009 Mark McCurry
   Author: Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
+  it under the terms of version 2 of the GNU General Public License
   as published by the Free Software Foundation.
 
   This program is distributed in the hope that it will be useful,
@@ -21,12 +21,12 @@
 
 template <class T>
 Stereo<T>::Stereo(const T &left, const T &right)
-    :leftChannel(left),rightChannel(right)
+        :leftChannel(left),rightChannel(right)
 {}
 
 template <class T>
 Stereo<T>::Stereo(const T &val)
-    :leftChannel(val),rightChannel(val)
+        :leftChannel(val),rightChannel(val)
 {}
 
 template <class T>
