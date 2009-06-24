@@ -1,11 +1,11 @@
-set(zynaddsubfxgui_seq_SRCS
+set(zynaddsubfx_seq_SRCS
 	MIDIEvents.C
 	MIDIFile.C
 	Sequencer.C
 )
 
-add_library(zynaddsubfxgui_seq STATIC
-	${zynaddsubfxgui_seq_SRCS} 
+add_library(zynaddsubfx_seq STATIC
+	${zynaddsubfx_seq_SRCS} 
 	)
 
-target_link_libraries(zynaddsubfxgui_seq ${ASOUND_LIBRARY})
+target_link_libraries(zynaddsubfx_seq ${ASOUND_LIBRARY})

@@ -1,14 +1,14 @@
-set(zynaddsubfxgui_samples_SRCS
+set(zynaddsubfx_samples_SRCS
 	AuSample.C
 	FqSample.C
 	Sample.C
 	#StereoSample.C
 )
 
-add_library(zynaddsubfxgui_samples STATIC
-	${zynaddsubfxgui_samples_SRCS} 
+add_library(zynaddsubfx_samples STATIC
+	${zynaddsubfx_samples_SRCS} 
 	)
 
-target_link_libraries(zynaddsubfxgui_samples 
-	zynaddsubfxgui_samples
+target_link_libraries(zynaddsubfx_samples 
+	zynaddsubfx_samples
 	)

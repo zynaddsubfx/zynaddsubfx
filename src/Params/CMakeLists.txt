@@ -1,4 +1,4 @@
-set(zynaddsubfxgui_params_SRCS
+set(zynaddsubfx_params_SRCS
 	ADnoteParameters.C
 	Controller.C
 	EnvelopeParams.C
@@ -11,8 +11,8 @@ set(zynaddsubfxgui_params_SRCS
 
 )
 
-add_library(zynaddsubfxgui_params STATIC
-	${zynaddsubfxgui_params_SRCS} 
+add_library(zynaddsubfx_params STATIC
+	${zynaddsubfx_params_SRCS} 
 	)
 
-target_link_libraries(zynaddsubfxgui_params ${ASOUND_LIBRARY})
+target_link_libraries(zynaddsubfx_params ${ASOUND_LIBRARY})

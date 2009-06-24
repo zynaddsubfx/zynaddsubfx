@@ -1,13 +1,23 @@
-FIND_PACKAGE(Qt4)
-INCLUDE(${QT_USE_FILE})
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-
-#settings. These cache variables can be changed before compile
-#in CMakeCache.txt
+######### Settings ###########
+# NOTE: These cache variables should normallly not be changed in this
+# file, but either in in CMakeCache.txt before compile, or by passing
+# parameters directly into cmake using the -D flag.
 SET (FFTW_VERSION 3 CACHE STRING "Version number of FFTW")
 SET (OutputModule jack CACHE STRING "Output module, either alsa, jack or portaudio")
-set (WANT_FLTK ON)
+SET (GuiModule fltk CACHE STRING "GUI module, either fltk, qt or off")
 
+# Now, handle the incoming settings and set define flags/variables based
+# on this
+
+if (GuiModule STREQUAL qt)
+	set (QtGui TRUE)
+elseif(GuiModule STREQUAL fltk)
+	set (FltkGui TRUE)
+elseif(GuiModule STREQUAL off)
+    add_definitions(-DDISABLE_GUI)
+else  ()
+	message(FATAL_ERROR "GUI module must be either fltk, qt or off")
+endif()
 
 if (OutputModule STREQUAL alsa)
 	set(AlsaMidiOutput TRUE)
@@ -19,9 +29,12 @@ else ()
 	message(FATAL_ERROR "OutputModule must be either alsa, jack or portaudio")
 endif()
 
-message(STATUS "OutputModule set to ${OutputModule}")
+########### Settings dependant code ###########
+# From here on, the setting variables have  been prepared so concentrate
+# on the actual compiling.
 
-# setting dependent stuff
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+
 if(AlsaMidiOutput)
 	FIND_PACKAGE(Alsa)
 	add_definitions(-DOSSAUDIOOUT)
@@ -46,7 +59,7 @@ add_definitions(-DFFTW_VERSION_${FFTW_VERSION}
 	 )
 
 
- if(WANT_FLTK) # Check for FLTK
+if(FltkGui) # Check for FLTK
     find_package(FLTK REQUIRED)
     # message(STATUS "FLTK_LIBRARIES: ${FLTK_LIBRARIES}")
     # message("FLTK_MATH_LIBRARY: ${FLTK_MATH_LIBRARY}")
@@ -62,26 +75,33 @@ add_definitions(-DFFTW_VERSION_${FFTW_VERSION}
     mark_as_advanced(FORCE FLTK_INCLUDE_DIR)
     mark_as_advanced(FORCE FLTK_MATH_LIBRARY)
 
-    set(FLTK_LIBRARIES
+
+    set(GUI_LIBRARIES
         ${FLTK_BASE_LIBRARY}    ${FLTK_MATH_LIBRARY}    ${FLTK_FORMS_LIBRARY}
         ${FLTK_IMAGES_LIBRARY}  ${FLTK_GL_LIBRARY}
-    )
-    add_definitions(-DWANT_GUI)
-    message(STATUS "will build gui")
+  zynaddsubfx_gui
+  )
+    add_definitions(-DFLTK_GUI)
+
+    message(STATUS "Will build fltk gui")
+
+	add_subdirectory(UI)
 endif()
 
+
+########### General section ##############
+# Following this should be only general compilation code, and no mention
+# of module-specific variables
 
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}
-	${CMAKE_CURRENT_BINARY_DIR}/NewUI
-	${CMAKE_CURRENT_SOURCE_DIR}/NewUI)
+	)
 
 add_subdirectory(Misc)
 add_subdirectory(Input)
 add_subdirectory(Output)
 add_subdirectory(Controls)
-#add_subdirectory(NewUI)
 add_subdirectory(Synth)
 add_subdirectory(Seq)
 add_subdirectory(Effects)
@@ -90,26 +110,25 @@ add_subdirectory(DSP)
 add_subdirectory(UI)
 add_subdirectory(Samples)
 
-set(zynaddsubfxgui_SRCS
-	#main.cpp
+set(zynaddsubfx_SRCS
 	main.C
 	)
 
-add_executable(zynaddsubfxgui 
-	${zynaddsubfxgui_SRCS}
+add_executable(zynaddsubfx 
+	${zynaddsubfx_SRCS}
 )
 
-target_link_libraries(zynaddsubfxgui
-	zynaddsubfxgui_input
-	zynaddsubfxgui_output
-	zynaddsubfxgui_misc
-	zynaddsubfxgui_synth
-	zynaddsubfxgui_seq
-	zynaddsubfxgui_effect
-	zynaddsubfxgui_params
-	zynaddsubfxgui_dsp
-	zynaddsubfxgui_samples
-	zynaddsubfxgui_controls
-	${FLTK_LIBRARIES}
-	zynaddsubfxguilib)
+target_link_libraries(zynaddsubfx
+	zynaddsubfx_input
+	zynaddsubfx_output
+	zynaddsubfx_misc
+	zynaddsubfx_synth
+	zynaddsubfx_seq
+	zynaddsubfx_effect
+	zynaddsubfx_params
+	zynaddsubfx_dsp
+	zynaddsubfx_samples
+	zynaddsubfx_controls
+	${GUI_LIBRARIES}
+	)
 

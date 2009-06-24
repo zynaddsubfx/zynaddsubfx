@@ -55,9 +55,20 @@ extern Dump dump;
 #endif
 
 #ifndef DISABLE_GUI
+#ifdef QT_GUI
+
+#include <QApplication>
+#include "masterui.h"
+QApplication *app;
+
+#elif defined FLTK_GUI
+
 #include "UI/MasterUI.h"
+#endif // FLTK_GUI
+
 MasterUI *ui;
-#endif
+
+#endif //DISABLE_GUI
 
 using namespace std;
 
@@ -190,7 +201,10 @@ void *thread2(void *arg)
 void *thread3(void *arg)
 {
 #ifndef DISABLE_GUI
+
+#ifdef FLTK_GUI
     ui->showUI();
+
     while (Pexitprogram==0) {
 #ifdef USE_LASH
         string filename;
@@ -208,10 +222,18 @@ void *thread3(void *arg)
         default:
             break;
         }
-#endif
+#endif //USE_LASH
         Fl::wait();
     }
-#endif
+
+#elif defined QT_GUI
+    app = new QApplication(0, 0);
+    ui=new MasterUI(master, 0);
+    ui->show();
+    app->exec();
+#endif //defined QT_GUI
+
+#endif //DISABLE_GUI
     return(0);
 };
 

@@ -1,4 +1,4 @@
-set(zynaddsubfxgui_effect_SRCS
+set(zynaddsubfx_effect_SRCS
 	Alienwah.C
 	Chorus.C
 	Distorsion.C
@@ -12,8 +12,8 @@ set(zynaddsubfxgui_effect_SRCS
 	Reverb.C
 )
 
-add_library(zynaddsubfxgui_effect STATIC
-	${zynaddsubfxgui_effect_SRCS} 
+add_library(zynaddsubfx_effect STATIC
+	${zynaddsubfx_effect_SRCS} 
 	)
 
-target_link_libraries(zynaddsubfxgui_effect ${ASOUND_LIBRARY})
+target_link_libraries(zynaddsubfx_effect ${ASOUND_LIBRARY})

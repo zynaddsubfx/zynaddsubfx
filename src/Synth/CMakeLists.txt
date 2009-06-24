@@ -1,4 +1,4 @@
-set(zynaddsubfxgui_synth_SRCS
+set(zynaddsubfx_synth_SRCS
 	ADnote.C
 	Envelope.C
 	LFO.C
@@ -8,8 +8,8 @@ set(zynaddsubfxgui_synth_SRCS
 	SUBnote.C
 )
 
-add_library(zynaddsubfxgui_synth STATIC
-	${zynaddsubfxgui_synth_SRCS} 
+add_library(zynaddsubfx_synth STATIC
+	${zynaddsubfx_synth_SRCS} 
 	)
 
-target_link_libraries(zynaddsubfxgui_synth ${ASOUND_LIBRARY})
+target_link_libraries(zynaddsubfx_synth ${ASOUND_LIBRARY})

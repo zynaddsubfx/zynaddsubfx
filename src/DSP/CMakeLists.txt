@@ -1,4 +1,4 @@
-set(zynaddsubfxgui_dsp_SRCS
+set(zynaddsubfx_dsp_SRCS
 	AnalogFilter.C
 	FFTwrapper.C
 	Filter.C
@@ -6,8 +6,8 @@ set(zynaddsubfxgui_dsp_SRCS
 	SVFilter.C
 )
 
-add_library(zynaddsubfxgui_dsp STATIC
-	${zynaddsubfxgui_dsp_SRCS} 
+add_library(zynaddsubfx_dsp STATIC
+	${zynaddsubfx_dsp_SRCS} 
 	)
 
-target_link_libraries(zynaddsubfxgui_dsp ${ASOUND_LIBRARY})
+target_link_libraries(zynaddsubfx_dsp ${ASOUND_LIBRARY})
