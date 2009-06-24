@@ -1,15 +1,15 @@
 set(zynaddsubfx_effect_SRCS
-	Alienwah.C
-	Chorus.C
-	Distorsion.C
-	DynamicFilter.C
-	Echo.C
-	Effect.C
-	EffectLFO.C
-	EffectMgr.C
-	EQ.C
-	Phaser.C
-	Reverb.C
+	Alienwah.cpp
+	Chorus.cpp
+	Distorsion.cpp
+	DynamicFilter.cpp
+	Echo.cpp
+	Effect.cpp
+	EffectLFO.cpp
+	EffectMgr.cpp
+	EQ.cpp
+	Phaser.cpp
+	Reverb.cpp
 )
 
 add_library(zynaddsubfx_effect STATIC

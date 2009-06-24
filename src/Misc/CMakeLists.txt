@@ -4,14 +4,14 @@ find_package(fftw3)
 include_directories(${MXML_INCLUDE_DIR})
 
 set(zynaddsubfx_misc_SRCS
-	Bank.C
-	Config.C
-	Dump.C
-	Master.C
-	Microtonal.C
-	Part.C
-	Util.C
-	XMLwrapper.C
+	Bank.cpp
+	Config.cpp
+	Dump.cpp
+	Master.cpp
+	Microtonal.cpp
+	Part.cpp
+	Util.cpp
+	XMLwrapper.cpp
 )
 
 add_library(zynaddsubfx_misc STATIC

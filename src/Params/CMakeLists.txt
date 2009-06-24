@@ -1,13 +1,13 @@
 set(zynaddsubfx_params_SRCS
-	ADnoteParameters.C
-	Controller.C
-	EnvelopeParams.C
-	FilterParams.C
-	LFOParams.C
-	PADnoteParameters.C
-	Presets.C
-	PresetsStore.C
-	SUBnoteParameters.C
+	ADnoteParameters.cpp
+	Controller.cpp
+	EnvelopeParams.cpp
+	FilterParams.cpp
+	LFOParams.cpp
+	PADnoteParameters.cpp
+	Presets.cpp
+	PresetsStore.cpp
+	SUBnoteParameters.cpp
 
 )
 

@@ -1,11 +1,11 @@
 set(zynaddsubfx_synth_SRCS
-	ADnote.C
-	Envelope.C
-	LFO.C
-	OscilGen.C
-	PADnote.C
-	Resonance.C
-	SUBnote.C
+	ADnote.cpp
+	Envelope.cpp
+	LFO.cpp
+	OscilGen.cpp
+	PADnote.cpp
+	Resonance.cpp
+	SUBnote.cpp
 )
 
 add_library(zynaddsubfx_synth STATIC

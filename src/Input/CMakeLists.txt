@@ -1,16 +1,16 @@
 SET (AlsaMidiInput On CACHE BOOL "Include ALSA Midi input")
 set(zynaddsubfx_input_SRCS
-	MidiIn.C 
-	NULLMidiIn.C 
-	#OSSMidiIn.C
-	#WINMidiIn.C
+	MidiIn.cpp 
+	NULLMidiIn.cpp 
+	#OSSMidiIn.cpp
+	#WINMidiIn.cpp
 )
 FIND_PACKAGE(Alsa)
 
 if(AlsaMidiInput)
 	set(zynaddsubfx_input_SRCS
 		${zynaddsubfx_input_SRCS}
-		ALSAMidiIn.C
+		ALSAMidiIn.cpp
 		)
 	message("Alsa midi input enabled")
 endif(AlsaMidiInput)

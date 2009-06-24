@@ -85,6 +85,11 @@ if(FltkGui) # Check for FLTK
 
     message(STATUS "Will build fltk gui")
 
+	include_directories(
+			${CMAKE_CURRENT_SOURCE_DIR}/UI
+			${CMAKE_CURRENT_BINARY_DIR}/UI
+			)
+
 	add_subdirectory(UI)
 endif()
 
@@ -107,11 +112,10 @@ add_subdirectory(Seq)
 add_subdirectory(Effects)
 add_subdirectory(Params)
 add_subdirectory(DSP)
-add_subdirectory(UI)
 add_subdirectory(Samples)
 
 set(zynaddsubfx_SRCS
-	main.C
+	main.cpp
 	)
 
 add_executable(zynaddsubfx 

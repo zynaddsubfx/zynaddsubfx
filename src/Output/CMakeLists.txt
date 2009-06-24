@@ -1,12 +1,12 @@
 set(zynaddsubfx_output_SRCS
-	Recorder.C
-	WAVaudiooutput.C
+	Recorder.cpp
+	WAVaudiooutput.cpp
 )
 
 if(AlsaMidiOutput)
 	set(zynaddsubfx_output_SRCS
 		${zynaddsubfx_output_SRCS}
-		OSSaudiooutput.C)
+		OSSaudiooutput.cpp)
 	set(zynaddsubfx_output_lib ${ASOUND_LIBRARY})
 endif(AlsaMidiOutput)
 
@@ -14,7 +14,7 @@ if(JackOutput)
 	include_directories(${JACK_INCLUDE_DIR})
 	set(zynaddsubfx_output_SRCS
 		${zynaddsubfx_output_SRCS}
-		JACKaudiooutput.C)
+		JACKaudiooutput.cpp)
 	set(zynaddsubfx_output_lib ${JACK_LIBRARIES})
 endif(JackOutput)
 
@@ -22,7 +22,7 @@ if(PortAudioOutput)
 	include_directories(${PORTAUDIO_INCLUDE_DIR})
 	set(zynaddsubfx_output_SRCS
 		${zynaddsubfx_output_SRCS}
-		PAaudiooutput.C)
+		PAaudiooutput.cpp)
 	set(zynaddsubfx_output_lib ${PORTAUDIO_LIBRARIES})
 endif(PortAudioOutput)
 

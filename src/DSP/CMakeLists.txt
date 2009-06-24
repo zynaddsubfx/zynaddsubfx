@@ -1,9 +1,9 @@
 set(zynaddsubfx_dsp_SRCS
-	AnalogFilter.C
-	FFTwrapper.C
-	Filter.C
-	FormantFilter.C
-	SVFilter.C
+	AnalogFilter.cpp
+	FFTwrapper.cpp
+	Filter.cpp
+	FormantFilter.cpp
+	SVFilter.cpp
 )
 
 add_library(zynaddsubfx_dsp STATIC

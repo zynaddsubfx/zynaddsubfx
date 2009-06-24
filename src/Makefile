@@ -11,7 +11,7 @@ CXXFLAGS += -DOS_$(OS_PORT) -D$(MIDIIN)MIDIIN -DFFTW_VERSION_$(FFTW_VERSION) -DA
 ifeq ($(DISABLE_GUI),YES)
     CXXFLAGS += -DDISABLE_GUI
 else
-    CXXFLAGS += `fltk-config --cflags` 
+    CXXFLAGS += -DFLTK_GUI `fltk-config --cflags` 
 endif
 
 ifeq ($(AUDIOOUT),OSS_AND_JACK)
@@ -86,7 +86,7 @@ all:
 
 	$(MAKE) -C UI $@
 #	@sh -c "cd UI ; $(CXX) -MM -MG -w *.cc >> ../Make.deps ; cd .."
-	@for name in $(SUBDIRS); do sh -c "cd $$name ; $(CXX) -MM -MG -w *.C >> ../Make.deps ; cd .."; done
+	@for name in $(SUBDIRS); do sh -c "cd $$name ; $(CXX) -MM -MG -w *.cpp >> ../Make.deps ; cd .."; done
 	$(MAKE) subdirs
 	$(MAKE) objs
 	rm -f zynaddsubfx zynaddsubfx.exe

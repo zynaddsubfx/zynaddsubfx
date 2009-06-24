@@ -1,7 +1,7 @@
 set(zynaddsubfx_seq_SRCS
-	MIDIEvents.C
-	MIDIFile.C
-	Sequencer.C
+	MIDIEvents.cpp
+	MIDIFile.cpp
+	Sequencer.cpp
 )
 
 add_library(zynaddsubfx_seq STATIC
