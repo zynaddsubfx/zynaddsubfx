@@ -179,8 +179,6 @@ void Controller::setportamento(int value)
     if (portamento.receive!=0) portamento.portamento=((value<64) ? 0 : 1 );
 };
 
-// I added a third argument to pass legato status,
-// when legatoflag is true it means "there's a legato in progress".
 int Controller::initportamento(REALTYPE oldfreq,REALTYPE newfreq,bool legatoflag)
 {
     portamento.x=0.0;
