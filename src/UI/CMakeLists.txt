@@ -25,10 +25,10 @@ set(UI_fl_files
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set_source_files_properties(UI/MasterUI.h PROPERTIES GENERATED 1)
-fltk_wrap_ui(zynaddsubfxguilib ${UI_fl_files})
+fltk_wrap_ui(zynaddsubfx_gui ${UI_fl_files})
 
-add_library(zynaddsubfxguilib STATIC
+add_library(zynaddsubfx_gui STATIC
 	${UI_objs}
-	${zynaddsubfxguilib_FLTK_UI_SRCS}
+	${zynaddsubfx_gui_FLTK_UI_SRCS}
 	)
-target_link_libraries(zynaddsubfxguilib)
+target_link_libraries(zynaddsubfx_gui)

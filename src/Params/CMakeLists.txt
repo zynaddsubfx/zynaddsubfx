@@ -1,18 +1,18 @@
-set(zynaddsubfxgui_params_SRCS
-	ADnoteParameters.C
-	Controller.C
-	EnvelopeParams.C
-	FilterParams.C
-	LFOParams.C
-	PADnoteParameters.C
-	Presets.C
-	PresetsStore.C
-	SUBnoteParameters.C
+set(zynaddsubfx_params_SRCS
+	ADnoteParameters.cpp
+	Controller.cpp
+	EnvelopeParams.cpp
+	FilterParams.cpp
+	LFOParams.cpp
+	PADnoteParameters.cpp
+	Presets.cpp
+	PresetsStore.cpp
+	SUBnoteParameters.cpp
 
 )
 
-add_library(zynaddsubfxgui_params STATIC
-	${zynaddsubfxgui_params_SRCS} 
+add_library(zynaddsubfx_params STATIC
+	${zynaddsubfx_params_SRCS} 
 	)
 
-target_link_libraries(zynaddsubfxgui_params ${ASOUND_LIBRARY})
+target_link_libraries(zynaddsubfx_params ${ASOUND_LIBRARY})

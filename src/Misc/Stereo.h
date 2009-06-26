@@ -62,6 +62,6 @@ private:
     T rightChannel;
 
 };
-#include "Stereo.C"
+#include "Stereo.cpp"
 #endif
 

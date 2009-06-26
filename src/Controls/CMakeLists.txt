@@ -1,8 +1,8 @@
-set(zynaddsubfxgui_controls_SRCS
-	Control.C
-	DelayCtl.C
+set(zynaddsubfx_controls_SRCS
+	Control.cpp
+	DelayCtl.cpp
 )
 
-add_library(zynaddsubfxgui_controls STATIC
-	${zynaddsubfxgui_controls_SRCS} 
+add_library(zynaddsubfx_controls STATIC
+	${zynaddsubfx_controls_SRCS} 
 	)
