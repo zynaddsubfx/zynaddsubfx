@@ -457,7 +457,7 @@ if (part->Penabled==0) partgroupui->deactivate();
     }
     Fl_Window ctlwindow {
       label Controllers
-      private xywh {248 461 460 130} type Double hide
+      private xywh {254 346 530 130} type Double hide
     } {
       Fl_Check_Button {} {
         label Expr
@@ -540,7 +540,7 @@ if (part->ctl.sustain.receive==0) {
         xywh {5 105 210 20} box THIN_UP_BOX
       }
       Fl_Group {} {
-        label Portamento open
+        label Portamento
         xywh {280 15 120 85} box ENGRAVED_FRAME labelfont 1 labelsize 10
       } {
         Fl_Check_Button {} {
@@ -583,13 +583,13 @@ part->ctl.portamento.updowntimestretch=x;}
         }
         Fl_Check_Button {} {
           label {Proprt.}
-          callback {part->ctl.portamento.proportional=(int) o->value();} selected
+          callback {part->ctl.portamento.proportional=(int) o->value();}
           tooltip {Enable Proportinal Portamento (over fixed Portamento)} xywh {285 40 50 15} box THIN_UP_BOX down_box DOWN_BOX labelsize 9
           code0 {o->value(part->ctl.portamento.proportional);}
         }
       }
       Fl_Group {} {
-        label Resonance open
+        label Resonance
         xywh {400 15 45 85} box ENGRAVED_BOX labelfont 1 labelsize 10
       } {
         Fl_Dial {} {
@@ -618,6 +618,20 @@ part->ctl.portamento.updowntimestretch=x;}
         callback {part->ctl.bandwidth.exponential=(int) o->value();}
         tooltip {Exponential BandWidth Controller} xywh {85 15 35 25} down_box DOWN_BOX labelsize 10 align 148
         code0 {o->value(part->ctl.bandwidth.exponential);}
+      }
+      Fl_Dial {} {
+        label {Temp A}
+        callback {part->ctl.portamento.tmpa=(int) o->value();}
+        tooltip {Distance required to double change from nonpropotinal portamento time} xywh {465 15 35 35} maximum 127 step 1
+        code0 {o->value(part->ctl.portamento.tmpa);}
+        class WidgetPDial
+      }
+      Fl_Dial {} {
+        label {Temp B}
+        callback {part->ctl.portamento.tmpb=(int) o->value();} selected
+        tooltip {The difference from nonproportinal portamento} xywh {465 70 30 30} maximum 127 step 1
+        code0 {o->value(part->ctl.portamento.tmpb);}
+        class WidgetPDial
       }
     }
     Fl_Window partfx {

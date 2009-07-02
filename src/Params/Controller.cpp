@@ -53,6 +53,8 @@ void Controller::defaults()
     portamento.portamento=0;
     portamento.used=0;
     portamento.proportional=0;
+    portamento.tmpa=64;
+    portamento.tmpb=64;
     portamento.receive=1;
     portamento.time=64;
     portamento.updowntimestretch=64;
@@ -182,7 +184,6 @@ void Controller::setportamento(int value)
 
 int Controller::initportamento(REALTYPE oldfreq,REALTYPE newfreq,bool legatoflag)
 {
-    printf("%f    %f\n",oldfreq,newfreq);
     portamento.x=0.0;
 
     if (legatoflag) { // Legato in progress
@@ -194,12 +195,15 @@ int Controller::initportamento(REALTYPE oldfreq,REALTYPE newfreq,bool legatoflag
     REALTYPE portamentotime=pow(100.0,portamento.time/127.0)/50.0;//portamento time in seconds
     
     if (portamento.proportional) {
-        //If there is a min(float,float) and max(float,float) then they
+        //If there is a min(float,float) and a max(float,float) then they
         //could be used here
-        if(oldfreq > newfreq) //2 is a proportionality constant
-            portamentotime *= oldfreq/newfreq/2;  
-        else
-            portamentotime *= newfreq/oldfreq/2;
+        //Linear functors could also make this nicer
+        if(oldfreq > newfreq) //2 is the center of tmpa
+            portamentotime *= pow(oldfreq/newfreq/(portamento.tmpa/127.0*3+.05),
+                                  (portamento.tmpb/127.0*1.6+.2));  
+        else                  //1 is the center of tmpb 
+            portamentotime *= pow(newfreq/oldfreq/(portamento.tmpa/127.0*3+.05),
+                                  (portamento.tmpb/127.0*1.6+.2));
     }
 
     if ((portamento.updowntimestretch>=64)&&(newfreq<oldfreq)) {
@@ -210,6 +214,8 @@ int Controller::initportamento(REALTYPE oldfreq,REALTYPE newfreq,bool legatoflag
         if (portamento.updowntimestretch==0) return(0);
         portamentotime*=pow(0.1,(64.0-portamento.updowntimestretch)/64.0);
     };
+
+    printf("%f->%f : Time %f\n",oldfreq,newfreq,portamentotime);
 
     portamento.dx=SOUND_BUFFER_SIZE/(portamentotime*SAMPLE_RATE);
     portamento.origfreqrap=oldfreq/newfreq;
