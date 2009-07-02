@@ -146,6 +146,11 @@ public:
          * Translates in an expontal fashion to 0 Seconds to 1.93 Seconds
          * of completion time*/
         unsigned char time;
+        /**If the portamento is proportinal to the distance spanned
+         *
+         * 0 - nonproportional (default)
+         * 1 - proportional*/
+        unsigned char proportional;
         /**pitchthresh is the threshold of enabling protamento*/
         unsigned char pitchthresh;
         /**enable the portamento only below(0)/above(1) the threshold*/
@@ -174,6 +179,7 @@ public:
         /**if a the portamento is used by a note
          * \todo see if this can be a bool*/
         int used;
+
         //Internal data
 
         /**x is from 0.0 (start portamento) to 1.0 (finished portamento)*/

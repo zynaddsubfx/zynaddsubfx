@@ -52,6 +52,7 @@ void Controller::defaults()
 
     portamento.portamento=0;
     portamento.used=0;
+    portamento.proportional=0;
     portamento.receive=1;
     portamento.time=64;
     portamento.updowntimestretch=64;
@@ -181,6 +182,7 @@ void Controller::setportamento(int value)
 
 int Controller::initportamento(REALTYPE oldfreq,REALTYPE newfreq,bool legatoflag)
 {
+    printf("%f    %f\n",oldfreq,newfreq);
     portamento.x=0.0;
 
     if (legatoflag) { // Legato in progress
@@ -190,6 +192,15 @@ int Controller::initportamento(REALTYPE oldfreq,REALTYPE newfreq,bool legatoflag
     };
 
     REALTYPE portamentotime=pow(100.0,portamento.time/127.0)/50.0;//portamento time in seconds
+    
+    if (portamento.proportional) {
+        //If there is a min(float,float) and max(float,float) then they
+        //could be used here
+        if(oldfreq > newfreq) //2 is a proportionality constant
+            portamentotime *= oldfreq/newfreq/2;  
+        else
+            portamentotime *= newfreq/oldfreq/2;
+    }
 
     if ((portamento.updowntimestretch>=64)&&(newfreq<oldfreq)) {
         if (portamento.updowntimestretch==127) return(0);
