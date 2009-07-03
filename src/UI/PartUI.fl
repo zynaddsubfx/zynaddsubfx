@@ -457,7 +457,7 @@ if (part->Penabled==0) partgroupui->deactivate();
     }
     Fl_Window ctlwindow {
       label Controllers
-      private xywh {254 346 530 130} type Double hide
+      private xywh {4 188 500 130} type Double visible
     } {
       Fl_Check_Button {} {
         label Expr
@@ -540,8 +540,8 @@ if (part->ctl.sustain.receive==0) {
         xywh {5 105 210 20} box THIN_UP_BOX
       }
       Fl_Group {} {
-        label Portamento
-        xywh {280 15 120 85} box ENGRAVED_FRAME labelfont 1 labelsize 10
+        label Portamento selected
+        xywh {280 15 160 90} box ENGRAVED_FRAME labelfont 1 labelsize 10
       } {
         Fl_Check_Button {} {
           label Rcv
@@ -565,7 +565,7 @@ if (part->ctl.sustain.receive==0) {
         Fl_Check_Button {} {
           label {th.type}
           callback {part->ctl.portamento.pitchthreshtype=(int) o->value();}
-          tooltip {Threshold type (min/max)} xywh {370 70 15 15} down_box DOWN_BOX labelsize 10 align 2
+          tooltip {Threshold type (min/max)} xywh {365 70 15 15} down_box DOWN_BOX labelsize 10 align 2
           code0 {o->value(part->ctl.portamento.pitchthreshtype);}
         }
         Fl_Box {} {
@@ -581,28 +581,46 @@ part->ctl.portamento.updowntimestretch=x;}
           code0 {o->value(part->ctl.portamento.updowntimestretch);}
           class WidgetPDial
         }
+        Fl_Dial propta {
+          label {Prp.Rate}
+          callback {part->ctl.portamento.tmpa=(int) o->value();}
+          tooltip {Distance required to double change from nonpropotinal portamento time} xywh {405 20 25 25} labelsize 9 maximum 127 step 1
+          code0 {o->value(part->ctl.portamento.tmpa);}
+          class WidgetPDial
+        }
+        Fl_Dial proptb {
+          label {Prp.Dpth}
+          callback {part->ctl.portamento.tmpb=(int) o->value();}
+          tooltip {The difference from nonproportinal portamento} xywh {405 60 25 25} labelsize 9 maximum 127 step 1
+          code0 {o->value(part->ctl.portamento.tmpb);}
+          class WidgetPDial
+        }
         Fl_Check_Button {} {
           label {Proprt.}
-          callback {part->ctl.portamento.proportional=(int) o->value();}
+          callback {part->ctl.portamento.proportional=(int) o->value();
+if(o->value()){propta->activate();proptb->activate();}
+else {propta->deactivate();proptb->deactivate();}}
           tooltip {Enable Proportinal Portamento (over fixed Portamento)} xywh {285 40 50 15} box THIN_UP_BOX down_box DOWN_BOX labelsize 9
           code0 {o->value(part->ctl.portamento.proportional);}
+          code1 {if(o->value()){propta->activate();proptb->activate();}}
+          code2 {else {propta->deactivate();proptb->deactivate();}}
         }
       }
       Fl_Group {} {
         label Resonance
-        xywh {400 15 45 85} box ENGRAVED_BOX labelfont 1 labelsize 10
+        xywh {440 15 50 90} box ENGRAVED_BOX labelfont 1 labelsize 10
       } {
         Fl_Dial {} {
           label BWdpth
           callback {part->ctl.resonancebandwidth.depth=(int) o->value();}
-          tooltip {BandWidth controller depth} xywh {410 60 25 25} labelsize 10 maximum 127 step 1
+          tooltip {BandWidth controller depth} xywh {450 60 25 25} labelsize 10 maximum 127 step 1
           code0 {o->value(part->ctl.resonancebandwidth.depth);}
           class WidgetPDial
         }
         Fl_Dial {} {
           label CFdpth
           callback {part->ctl.resonancecenter.depth=(int) o->value();}
-          tooltip {Center Frequency controller Depth} xywh {410 20 25 25} labelsize 10 maximum 127 step 1
+          tooltip {Center Frequency controller Depth} xywh {450 20 25 25} labelsize 10 maximum 127 step 1
           code0 {o->value(part->ctl.resonancecenter.depth);}
           class WidgetPDial
         }
@@ -618,20 +636,6 @@ part->ctl.portamento.updowntimestretch=x;}
         callback {part->ctl.bandwidth.exponential=(int) o->value();}
         tooltip {Exponential BandWidth Controller} xywh {85 15 35 25} down_box DOWN_BOX labelsize 10 align 148
         code0 {o->value(part->ctl.bandwidth.exponential);}
-      }
-      Fl_Dial {} {
-        label {Temp A}
-        callback {part->ctl.portamento.tmpa=(int) o->value();}
-        tooltip {Distance required to double change from nonpropotinal portamento time} xywh {465 15 35 35} maximum 127 step 1
-        code0 {o->value(part->ctl.portamento.tmpa);}
-        class WidgetPDial
-      }
-      Fl_Dial {} {
-        label {Temp B}
-        callback {part->ctl.portamento.tmpb=(int) o->value();} selected
-        tooltip {The difference from nonproportinal portamento} xywh {465 70 30 30} maximum 127 step 1
-        code0 {o->value(part->ctl.portamento.tmpb);}
-        class WidgetPDial
       }
     }
     Fl_Window partfx {
