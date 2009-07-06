@@ -7,19 +7,7 @@ ___________
 
 include::./intro.txt[]
 
-Filters
-=======
-In ZynAddSubFX filters can be used at several different stages to
-increase or decrease a defined set of frequencys.
-
-.Types of Filters
-[grid="all"]
-`------.--------'-----------------------
-Short  Long     Description
-----------------------------------------
-LPF    Low Pass High Frequencies cutoff
-HPF    High PassHigher frequencies cutoff
-----------------------------------------
+include::./filter.txt[]
 
 include::./lfo.txt[]
 
