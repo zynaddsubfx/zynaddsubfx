@@ -15,4 +15,6 @@ include::./envelope.txt[]
 
 include::./controller.txt[]
 
+include::./nrpn.txt[]
+
 include::./mididefaults.txt[]
