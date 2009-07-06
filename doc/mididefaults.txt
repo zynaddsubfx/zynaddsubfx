@@ -1,0 +1,26 @@
+Appendex A: MIDI Defaults
+=========================
+:Author: Paul Nasca
+
+.Default MIDI Connections
+[width="50%"]
+|===============================================
+|Parameter                 |GM|Controller Number
+
+|Pitch Blend               |T |N/A
+|Modulation Wheel          |T |1
+|Volume                    |T |7
+|Pan                       |T |10
+|Expression                |T |11
+|Sustain                   |T |64
+|Portamento Enable         |T |65
+|Filter Q                  |T |71
+|Filter Cutoff             |T |74
+|Bandwidth                 |F |75
+|Modulation Amplitude      |F |76
+|Resonance Center Frequency|F |77
+|Resonance Bandwidth       |F |78
+|All Sounds Off            |T |120
+|Reset All Controllers     |T |121
+|All Notes Off             |T |123
+|===============================================
