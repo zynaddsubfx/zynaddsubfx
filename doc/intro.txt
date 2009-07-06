@@ -1,0 +1,23 @@
+Getting Started
+===============
+
+In most cases ZynAddSubFX is used it will not alone, and it will be linked
+with other programs.
+
+MIDI
+----
+
+MIDI can be used to connect other applications to ZynAddSubFX.
+Under ALSA on Linux the standard tool to connect ZynAddSubFX's MIDI is
+aconnect.
+
+ZynAddSubFX has one incomming MIDI port.
+Once another application is connected to this port, then it should be
+able to send information on notes, pitches, and modulations to
+ZynAddSubFX.
+For more specific information see INSERT CHAPTER NAME HERE.
+
+JACK
+----
+JACK can be used to connect the output of ZynAddSubFX to other
+applications.
