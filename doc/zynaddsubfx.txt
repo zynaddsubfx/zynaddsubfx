@@ -13,4 +13,6 @@ include::./lfo.txt[]
 
 include::./envelope.txt[]
 
+include::./controller.txt[]
+
 include::./mididefaults.txt[]
