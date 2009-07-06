@@ -1,26 +1,22 @@
 Appendex A: MIDI Defaults
 =========================
-:Author: Paul Nasca
 
 .Default MIDI Connections
-[width="50%"]
-|===============================================
-|Parameter                 |GM|Controller Number
+[literal]
+001 - Modulation Wheel
+007 - Volume
+010 - Pan
+011 - Expression
+064 - Sustain 
+065 - Portamento Enable
+071 - Filter Q
+074 - Filter Cutoff
+075 - Bandwidth(*)
+076 - Modulation Amplitude(*)
+077 - Resonance Center Frequency(*)
+078 - Resonance Bandwidth(*)
+120 - All Sounds Off
+121 - Reset All Controllers
+123 - All Notes Off
 
-|Pitch Blend               |T |N/A
-|Modulation Wheel          |T |1
-|Volume                    |T |7
-|Pan                       |T |10
-|Expression                |T |11
-|Sustain                   |T |64
-|Portamento Enable         |T |65
-|Filter Q                  |T |71
-|Filter Cutoff             |T |74
-|Bandwidth                 |F |75
-|Modulation Amplitude      |F |76
-|Resonance Center Frequency|F |77
-|Resonance Bandwidth       |F |78
-|All Sounds Off            |T |120
-|Reset All Controllers     |T |121
-|All Notes Off             |T |123
-|===============================================
+The entries with `(*)` are not within the General Midi specification
