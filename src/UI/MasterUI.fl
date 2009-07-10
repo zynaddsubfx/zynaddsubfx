@@ -1,8 +1,9 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0109 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
+decl {//Copyright (c) 2002-2009 Nasca Octavian Paul} {selected
+} 
 
 decl {//License: GNU GPL version 2 or later} {} 
 
@@ -994,11 +995,11 @@ panelwindow->show();}
     }
     Fl_Window aboutwindow {
       label {Copyright...}
-      xywh {629 278 330 210} type Double hide
+      xywh {411 344 365 280} type Double hide
     } {
       Fl_Box {} {
-        label {Copyright (c) 2002-2005 Nasca O. Paul and others}
-        xywh {0 35 330 25} labeltype EMBOSSED_LABEL labelsize 15 align 16
+        label {Copyright (c) 2002-2009 Nasca O. PAUL and others. Please read AUTHORS.txt}
+        xywh {15 35 335 55} labeltype EMBOSSED_LABEL labelsize 15 align 208
       }
       Fl_Box {} {
         label {This is free software; you may redistribute it and/or modify it under the terms of the 
@@ -1007,16 +1008,16 @@ version 2 (or any later version) of the GNU General Public License as published 
  ABSOLUTELY NO WARRANTY. 
  See the version 2 (or any later version) of the 
 GNU General Public License for details.}
-        xywh {0 60 325 115} labelfont 1 labelsize 11 align 144
+        xywh {15 90 335 145} labelfont 1 labelsize 11 align 144
       }
       Fl_Button {} {
         label {Close this window}
         callback {aboutwindow->hide();}
-        xywh {80 180 180 25} box THIN_UP_BOX labelsize 11
+        xywh {80 245 190 25} box THIN_UP_BOX labelsize 11
       }
       Fl_Box {} {
         label ZynAddSubFX
-        xywh {5 5 325 30} labeltype EMBOSSED_LABEL labelfont 1 labelsize 20 align 16
+        xywh {15 5 335 30} labeltype EMBOSSED_LABEL labelfont 1 labelsize 20 align 16
       }
     }
     Fl_Window syseffsendwindow {
@@ -1612,7 +1613,7 @@ config.cfg.UserInterfaceMode=2;}
   }
   Function {setfilelabel(const char *filename)} {} {
     code {if (filename!=NULL) snprintf(&masterwindowlabel[0],100,"%s - ZynAddSubFX",fl_filename_name(filename));
-  else snprintf(&masterwindowlabel[0],100,"%s","ZynAddSubFX (c)2002-2006 Nasca Paul and others");
+  else snprintf(&masterwindowlabel[0],100,"%s","ZynAddSubFX");
 masterwindowlabel[99]='\\0';
 masterwindow->label(&masterwindowlabel[0]);
 simplemasterwindow->label(&masterwindowlabel[0]);} {}
@@ -1758,8 +1759,7 @@ pthread_mutex_unlock(&master->mutex);
 if (result<0) fl_alert("Error: Could not save the file.");
 	else setfilelabel(filename);
 
-updatepanel();} {selected
-    }
+updatepanel();} {}
   }
   Function {refresh_master_ui()} {} {
     code {ninseff=0;

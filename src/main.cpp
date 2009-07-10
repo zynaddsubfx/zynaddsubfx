@@ -419,7 +419,7 @@ int main(int argc, char *argv[])
 #ifdef JACKAUDIOOUT
     usejackit=true;//use jack by default
 #endif
-    cerr<<"\nZynAddSubFX - Copyright (c) 2002-2008 Nasca Octavian Paul and others"<<endl;
+    cerr<<"\nZynAddSubFX - Copyright (c) 2002-2009 Nasca Octavian Paul and others"<<endl;
     cerr << "Compiled: " << __DATE__ << " " << __TIME__ << endl;
     cerr << "This program is free software (GNU GPL v.2 or later) and \n";
     cerr << "it comes with ABSOLUTELY NO WARRANTY.\n" << endl;
