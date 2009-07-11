@@ -9,6 +9,7 @@ chunked:
 	         --conf-file=myconf.conf zynaddsubfx.txt
 	mkdir ./zynaddsubfx.chunked
 	rm -f "./zynaddsubfx.chunked/*.html"
+	ln -s ../images/ zynaddsubfx.chunked/images
 	cd "."
 	xsltproc --stringparam html.stylesheet "./docbook-xsl.css" \
 	         --stringparam callout.graphics 0 \
@@ -29,5 +30,6 @@ pdf:
 	latex zynaddsubfx.tex
 
 clean:
-	rm -f *~ *html *pdf *tex
+	rm -f *~ *html *pdf *xml *tex *log zynaddsubfx.chunked/images
+	rm -r -f zynaddsubfx.chunked/
 
