@@ -457,7 +457,7 @@ if (part->Penabled==0) partgroupui->deactivate();
     }
     Fl_Window ctlwindow {
       label Controllers
-      private xywh {4 188 500 130} type Double visible
+      private xywh {542 212 500 130} type Double hide
     } {
       Fl_Check_Button {} {
         label Expr
@@ -540,7 +540,7 @@ if (part->ctl.sustain.receive==0) {
         xywh {5 105 210 20} box THIN_UP_BOX
       }
       Fl_Group {} {
-        label Portamento selected
+        label Portamento
         xywh {280 15 160 90} box ENGRAVED_FRAME labelfont 1 labelsize 10
       } {
         Fl_Check_Button {} {
@@ -583,16 +583,16 @@ part->ctl.portamento.updowntimestretch=x;}
         }
         Fl_Dial propta {
           label {Prp.Rate}
-          callback {part->ctl.portamento.tmpa=(int) o->value();}
+          callback {part->ctl.portamento.propRate=(int) o->value();}
           tooltip {Distance required to double change from nonpropotinal portamento time} xywh {405 20 25 25} labelsize 9 maximum 127 step 1
-          code0 {o->value(part->ctl.portamento.tmpa);}
+          code0 {o->value(part->ctl.portamento.propRate);}
           class WidgetPDial
         }
         Fl_Dial proptb {
           label {Prp.Dpth}
-          callback {part->ctl.portamento.tmpb=(int) o->value();}
+          callback {part->ctl.portamento.propDepth=(int) o->value();} selected
           tooltip {The difference from nonproportinal portamento} xywh {405 60 25 25} labelsize 9 maximum 127 step 1
-          code0 {o->value(part->ctl.portamento.tmpb);}
+          code0 {o->value(part->ctl.portamento.propDepth);}
           class WidgetPDial
         }
         Fl_Check_Button {} {

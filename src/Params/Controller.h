@@ -148,13 +148,13 @@ public:
         unsigned char time;
         /**If the portamento is proportinal to the distance spanned
          *
-         * 0 - nonproportional (default)
+         * 0 - constant time(default)
          * 1 - proportional*/
         unsigned char proportional;
-        /**Should be removed or renamed later*/
-        unsigned char tmpa;
-        /**Should be removed or renamed later*/
-        unsigned char tmpb;
+        /**Rate of proportinal portamento*/
+        unsigned char propRate;
+        /**Depth of proportinal portamento*/
+        unsigned char propDepth;
         /**pitchthresh is the threshold of enabling protamento*/
         unsigned char pitchthresh;
         /**enable the portamento only below(0)/above(1) the threshold*/
