@@ -1,0 +1,34 @@
+Filters
+=======
+:Author: Mark McCurry
+:Date: July 5, 2009
+
+In ZynAddSubFX filters can be used at several different stages to
+increase or decrease a defined set of frequencys.
+
+Types
+-----
+
+ZynAddSubFX currently supports a wide set of filters that it can provide
+
+image:images/filter0.png[]
+
+Values
+------
+
+Each of these filters will be affected by their Q values, number of poles, and
+cutoff values.
+
+The folowing diagram shows the frequency response under different Q values:
+
+image:images/filter1.png[]
+
+The folowing diagram shows the frequency response under a different number of
+poles:
+
+image:images/filter2.png[]
+
+User Interface
+--------------
+
+A picture of the UI will go here

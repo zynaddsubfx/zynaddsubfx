@@ -1,0 +1,20 @@
+Zynaddsubfx
+___________
+:Author: Paul Nasca
+
+
+:titles.underlines: "__","==","--","~~","^^"
+
+include::./intro.txt[]
+
+include::./filter.txt[]
+
+include::./lfo.txt[]
+
+include::./envelope.txt[]
+
+include::./controller.txt[]
+
+include::./nrpn.txt[]
+
+include::./mididefaults.txt[]
