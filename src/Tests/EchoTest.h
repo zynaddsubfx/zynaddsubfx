@@ -24,9 +24,6 @@
 #include "../Effects/Echo.h"
 #include "../globals.h"
 
-int SOUND_BUFFER_SIZE=256;
-int SAMPLE_RATE=1024;
-
 class EchoTest : public CxxTest::TestSuite
 {
 public:
@@ -59,10 +56,10 @@ public:
         //Make sure that the output will be zero at start
         //(given a zero input)
         testFX->out(inL,inR);
-        for (int i=0;i<SOUND_BUFFER_SIZE;++i)
-            TS_ASSERT_EQUALS(outL[i],0.0);
-        for (int i=0;i<SOUND_BUFFER_SIZE;++i)
-            TS_ASSERT_EQUALS(outR[i],0.0);
+        for (int i=0;i<SOUND_BUFFER_SIZE;++i){
+            TS_ASSERT_DELTA(outL[i],0.0,0.0001);
+            TS_ASSERT_DELTA(outR[i],0.0,0.0001);
+        }
     }
 
     void testClear() {
@@ -72,7 +69,7 @@ public:
             *(inL+i)=1.0;
         for (int i=0;i<SOUND_BUFFER_SIZE;++i)
             *(inR+i)=1.0;
-        for (int i=0;i<50;++i)
+        for (int i=0;i<500;++i)
             testFX->out(inL,inR);
         for (int i=0;i<SOUND_BUFFER_SIZE;++i) {
             TS_ASSERT_DIFFERS(outL[i],0.0);
@@ -97,7 +94,7 @@ public:
             *(inR+i)=1.0;
         char FEEDBACK=5;
         testFX->changepar(FEEDBACK,127);
-        for (int i=0;i<4;++i)
+        for (int i=0;i<100;++i)
             testFX->out(inL,inR);
         for (int i=0;i<SOUND_BUFFER_SIZE;++i) {
             TS_ASSERT_DIFFERS(outL[i],0.0);

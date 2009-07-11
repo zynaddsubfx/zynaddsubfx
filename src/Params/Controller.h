@@ -51,6 +51,8 @@ public:
     void setfmamp(int value);
     void setvolume(int value);
     void setsustain(int value);
+    /**Enable or disable portamento
+     * @param value 0-127 MIDI value (greater than 64 enables)*/
     void setportamento(int value);
     void setresonancecenter(int value);
     void setresonancebw(int value);
@@ -59,8 +61,16 @@ public:
     void setparameternumber(unsigned int type,int value);//used for RPN and NRPN's
     int getnrpn(int *parhi, int *parlo, int *valhi, int *vallo);
 
-    int initportamento(REALTYPE oldfreq,REALTYPE newfreq,bool legatoflag);//returns 1 if the portamento's conditions are true, else return 0
-    void updateportamento(); //update portamento values
+    /**
+     * Initialize a portamento
+     *
+     * @param oldfreq Starting frequency of the portamento (Hz)
+     * @param newfreq Ending frequency of the portamento (Hz)
+     * @param legatoflag true when legato is in progress, false otherwise
+     * @returns 1 if properly initialized, 0 otherwise*/
+    int initportamento(REALTYPE oldfreq,REALTYPE newfreq,bool legatoflag);
+    /**Update portamento's freqrap to next value based upon dx*/
+    void updateportamento();
 
     // Controllers values
     struct {//Pitch Wheel
@@ -129,29 +139,59 @@ public:
         //parameters
         int data;
         unsigned char portamento;
-
-        unsigned char receive,time;
-        /**pitchthresh is the threshold of enabling protamento \todo see if this should be an int*/
+        /**Whether the portamento midi events are received or not*/
+        unsigned char receive;
+        /** The time that it takes for the portamento to complete
+         *
+         * Translates in an expontal fashion to 0 Seconds to 1.93 Seconds
+         * of completion time*/
+        unsigned char time;
+        /**If the portamento is proportinal to the distance spanned
+         *
+         * 0 - constant time(default)
+         * 1 - proportional*/
+        unsigned char proportional;
+        /**Rate of proportinal portamento*/
+        unsigned char propRate;
+        /**Depth of proportinal portamento*/
+        unsigned char propDepth;
+        /**pitchthresh is the threshold of enabling protamento*/
         unsigned char pitchthresh;
-        /**pitchthreshtype -> enable the portamento only below(0)/above(1) the threshold*/
+        /**enable the portamento only below(0)/above(1) the threshold*/
         unsigned char pitchthreshtype;
 
         /**this value represent how the portamento time is reduced
-         * 0 - for down portamento, 1..63 - the up portamento's time is smaller than the down portamento
-        * 64 - the portamento time is always the same
-        * 64-126 - the down portamento's time is smaller than the up portamento
-        * 127 - for upper portamento
-         * 'up portanemto' means when the frequency is rising (eg: the portamento is from 200Hz to 300 Hz)
-         * 'down portanemto' means when the frequency is lowering (eg: the portamento is from 300Hz to 200 Hz)
+         * 0      - for down portamento
+         * 1-63   - the up portamento's time is smaller than the down portamento
+         * 64     - the portamento time is always the same
+         * 64-126 - the down portamento's time is smaller than the up portamento
+         * 127    - for upper portamento
+         * 'up portamento'   means when the frequency is rising 
+         * (eg: the portamento is from 200Hz to 300 Hz)
+         * 'down portamento' means when the frequency is lowering 
+         * (eg: the portamento is from 300Hz to 200 Hz)
          */
         unsigned char updowntimestretch;
+        /**this value is used to compute the actual portamento
+         *
+         * This is a multiplyer to change the frequency of the newer
+         * frequency to fit the profile of the portamento.
+         * This will be linear with respect to x.*/
+        REALTYPE freqrap;
+        /**this is used by the Part for knowing which note uses the portamento*/
+        int noteusing;
+        /**if a the portamento is used by a note
+         * \todo see if this can be a bool*/
+        int used;
 
-        REALTYPE freqrap;/**<this value is used to compute the actual portamento*/
-        int noteusing;/**this is used by the Part for knowing which note uses the portamento*/
-        int used;/**<if a the portamento is used by a note \todo see if this can be a bool*/
-        //internal data
-        REALTYPE x,dx;//x is from 0.0 (start portamento) to 1.0 (finished portamento), dx is x increment
-        REALTYPE origfreqrap;// this is used for computing oldfreq value from x
+        //Internal data
+
+        /**x is from 0.0 (start portamento) to 1.0 (finished portamento)*/
+        REALTYPE x;
+        /**dx is the increment to x when updateportamento is called*/
+        REALTYPE dx;
+        /** this is used for computing oldfreq value from x*/
+        REALTYPE origfreqrap;
     } portamento;
 
     struct {//Resonance Center Frequency
