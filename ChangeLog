@@ -877,3 +877,6 @@
 11 Jul 2009 (Mark McCurry)
 	    - Added Proportinal Portamento
 	    - Replaced Docbook with AsciiDoc
+
+18 Jul 2009 (Mark McCurry)
+	    - Enabled volume controller by default

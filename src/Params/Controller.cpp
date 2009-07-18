@@ -46,7 +46,7 @@ void Controller::defaults()
     modwheel.depth=80;
     modwheel.exponential=0;
     fmamp.receive=1;
-    volume.receive=0;
+    volume.receive=1;
     sustain.receive=1;
     NRPN.receive=1;
 
