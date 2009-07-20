@@ -2,7 +2,6 @@ set(zynaddsubfx_samples_SRCS
 	AuSample.cpp
 	FqSample.cpp
 	Sample.cpp
-	#StereoSample.cpp
 )
 
 add_library(zynaddsubfx_samples STATIC

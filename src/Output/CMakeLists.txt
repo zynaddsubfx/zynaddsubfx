@@ -7,7 +7,7 @@ if(AlsaMidiOutput)
 	set(zynaddsubfx_output_SRCS
 		${zynaddsubfx_output_SRCS}
 		OSSaudiooutput.cpp)
-	set(zynaddsubfx_output_lib ${ASOUND_LIBRARY})
+        set(zynaddsubfx_output_lib ${ASOUND_LIBRARY})
 endif(AlsaMidiOutput)
 
 if(JackOutput)
@@ -15,7 +15,7 @@ if(JackOutput)
 	set(zynaddsubfx_output_SRCS
 		${zynaddsubfx_output_SRCS}
 		JACKaudiooutput.cpp)
-	set(zynaddsubfx_output_lib ${JACK_LIBRARIES})
+        set(zynaddsubfx_output_lib ${JACK_LIBRARIES})
 endif(JackOutput)
 
 if(PortAudioOutput)
@@ -23,7 +23,7 @@ if(PortAudioOutput)
 	set(zynaddsubfx_output_SRCS
 		${zynaddsubfx_output_SRCS}
 		PAaudiooutput.cpp)
-	set(zynaddsubfx_output_lib ${PORTAUDIO_LIBRARIES})
+        set(zynaddsubfx_output_lib ${PORTAUDIO_LIBRARIES})
 endif(PortAudioOutput)
 
 add_library(zynaddsubfx_output STATIC

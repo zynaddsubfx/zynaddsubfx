@@ -16,4 +16,4 @@ add_library(zynaddsubfx_effect STATIC
 	${zynaddsubfx_effect_SRCS} 
 	)
 
-target_link_libraries(zynaddsubfx_effect ${ASOUND_LIBRARY})
+target_link_libraries(zynaddsubfx_effect)

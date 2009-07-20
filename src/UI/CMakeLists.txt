@@ -1,6 +1,3 @@
-
-set(UI_cpp_files GuiThread.cpp PARENT_SCOPE)
-
 set(UI_fl_files
     ADnoteUI.fl
     BankUI.fl
@@ -31,4 +28,5 @@ add_library(zynaddsubfx_gui STATIC
 	${UI_objs}
 	${zynaddsubfx_gui_FLTK_UI_SRCS}
 	)
-target_link_libraries(zynaddsubfx_gui)
+
+target_link_libraries(zynaddsubfx_gui ${FLTK_LIBRARIES} ${MYFLTK_LIBRARIES})

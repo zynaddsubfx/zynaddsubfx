@@ -15,4 +15,4 @@ add_library(zynaddsubfx_params STATIC
 	${zynaddsubfx_params_SRCS} 
 	)
 
-target_link_libraries(zynaddsubfx_params ${ASOUND_LIBRARY})
+target_link_libraries(zynaddsubfx_params)# ${ASOUND_LIBRARY})

@@ -12,4 +12,4 @@ add_library(zynaddsubfx_synth STATIC
 	${zynaddsubfx_synth_SRCS} 
 	)
 
-target_link_libraries(zynaddsubfx_synth ${ASOUND_LIBRARY})
+target_link_libraries(zynaddsubfx_synth)

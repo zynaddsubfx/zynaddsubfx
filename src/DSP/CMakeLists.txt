@@ -10,4 +10,4 @@ add_library(zynaddsubfx_dsp STATIC
 	${zynaddsubfx_dsp_SRCS} 
 	)
 
-target_link_libraries(zynaddsubfx_dsp ${ASOUND_LIBRARY})
+target_link_libraries(zynaddsubfx_dsp)
