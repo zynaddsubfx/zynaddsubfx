@@ -50,13 +50,14 @@ Part::Part(Microtonal *microtonal_,FFTwrapper *fft_, pthread_mutex_t *mutex_)
 //    SUBPartParameters=kit[0].subpars;
 
     //Part's Insertion Effects init
-    for (int nefx=0;nefx<NUM_PART_EFX;nefx++)
+    for (int nefx=0;nefx<NUM_PART_EFX;nefx++) {
         partefx[nefx]=new EffectMgr(1,mutex);
+        Pefxbypass[nefx]=false;
+    }
 
     for (int n=0;n<NUM_PART_EFX+1;n++) {
         partfxinputl[n]=new REALTYPE [SOUND_BUFFER_SIZE];
         partfxinputr[n]=new REALTYPE [SOUND_BUFFER_SIZE];
-        Pefxbypass[n]=false;
     };
 
     killallnotes=0;
