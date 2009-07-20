@@ -41,6 +41,10 @@ decl {const int keysoct1qwertz[]={'q','2','w','3','e','r','5','t','6','z','7','u
 
 decl {const int keysoct2qwertz[]={'y','s','x','d','c','v','g','b','h','n','j','m',',','l','.',246,'-',0};} {} 
 
+decl {const int keysoct1az[]={'a',233,'z','\\"','e','r','(','t','-','y',232,'u','i',231,'o',224,'p',65106,'=','$',0};} {}
+
+decl {const int keysoct2az[]={'w','s','x','d','c','v','g','b','h','n','j',',',';','l',':','m','!',0};} {}
+
 class VirKeys {: {public Fl_Box}
 } {
   decl {static const int N_OCT=6;} {}
@@ -158,6 +162,9 @@ if (config.cfg.VirKeybLayout==2) {
 }else if (config.cfg.VirKeybLayout==3) {
 	keysoct1=keysoct1qwertz;
 	keysoct2=keysoct2qwertz;
+}else if (config.cfg.VirKeybLayout==4) {
+	keysoct1=keysoct1az;
+	keysoct2=keysoct2az;
 };
 
 if ((event==FL_KEYDOWN)||(event==FL_KEYUP)){
