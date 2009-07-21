@@ -3,6 +3,7 @@ Main author:
 
 Developers:
 	Mark McCurry
+    Harald Hvaal
 
 Contributors:
 	Gerald Folcher (legato, mono notes memory)
