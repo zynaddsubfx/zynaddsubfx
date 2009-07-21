@@ -44,7 +44,19 @@ public:
 
         //prepare the default settings
         ADnoteParameters *defaultPreset = new ADnoteParameters(new FFTwrapper(OSCIL_SIZE));
-        defaultPreset->defaults();
+        XMLwrapper *wrap = new XMLwrapper();
+        wrap->loadXMLfile("src/Tests/guitar-adnote.xmz");
+        TS_ASSERT(wrap->enterbranch("MASTER"));
+        TS_ASSERT(wrap->enterbranch("PART", 0));
+        TS_ASSERT(wrap->enterbranch("INSTRUMENT"));
+        TS_ASSERT(wrap->enterbranch("INSTRUMENT_KIT"));
+        TS_ASSERT(wrap->enterbranch("INSTRUMENT_KIT_ITEM", 0));
+        TS_ASSERT(wrap->enterbranch("ADD_SYNTH_PARAMETERS"));
+        defaultPreset->getfromXML(wrap);
+        //defaultPreset->defaults();
+
+
+
         controller = new Controller();
 
         //lets go with.... 50! as a nice note
@@ -72,7 +84,6 @@ public:
 
 //#define WRITE_OUTPUT
 
-
 #ifdef WRITE_OUTPUT
         ofstream file("adnoteout", ios::out);
 #endif
@@ -84,13 +95,26 @@ public:
 #endif
         sampleCount += SOUND_BUFFER_SIZE;
 
-        TS_ASSERT_DELTA(outL[255], 0.123737, 0.000001);
+        TS_ASSERT_DELTA(outL[255], 0.1724, 0.0001);
 
         note->relasekey();
+
+
         note->noteout(outL, outR);
         sampleCount += SOUND_BUFFER_SIZE;
+        TS_ASSERT_DELTA(outL[255], -0.1284, 0.0001);
 
-        TS_ASSERT_DELTA(outL[255], 0.14147, 0.00001);
+        note->noteout(outL, outR);
+        sampleCount += SOUND_BUFFER_SIZE;
+        TS_ASSERT_DELTA(outL[255], -0.0206, 0.0001);
+
+        note->noteout(outL, outR);
+        sampleCount += SOUND_BUFFER_SIZE;
+        TS_ASSERT_DELTA(outL[255], -0.1122, 0.0001);
+
+        note->noteout(outL, outR);
+        sampleCount += SOUND_BUFFER_SIZE;
+        TS_ASSERT_DELTA(outL[255], 0.1707, 0.0001);
 
         while (!note->finished()) {
             note->noteout(outL, outR);
@@ -105,7 +129,7 @@ public:
         file.close();
 #endif
 
-        TS_ASSERT_EQUALS(sampleCount, 2304);
+        TS_ASSERT_EQUALS(sampleCount, 9472);
 
     }
 };
