@@ -23,7 +23,7 @@
 #include <cmath>
 #include "../Effects/Echo.h"
 #include "../globals.h"
-
+//int SOUND_BUFFER_SIZE=256;
 class EchoTest : public CxxTest::TestSuite
 {
 public:

@@ -113,26 +113,31 @@ include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
 	)
 
-add_subdirectory(Misc)
-add_subdirectory(Input)
-add_subdirectory(Output)
-add_subdirectory(Controls)
-add_subdirectory(Synth)
-add_subdirectory(Seq)
-add_subdirectory(Effects)
-add_subdirectory(Params)
-add_subdirectory(DSP)
-add_subdirectory(Samples)
+#macro for tests
+macro(unit_test NAME CXX_FILE FILES)
+	set(PATH_FILES "")
+	foreach(part ${FILES})
+		set(PATH_FILES "${CMAKE_CURRENT_SOURCE_DIR}/${part}" ${PATH_FILES})
+	endforeach(part ${FILES})
+	set(CXX_FILE_REAL "${CMAKE_CURRENT_SOURCE_DIR}/${CXX_FILE}")
+	add_custom_command(
+		OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx"
+		COMMAND cxxtestgen.py --error-printer -o "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx" ${CXX_FILE_REAL}
+		DEPENDS "${FILE}"
+		)
+	set(CXXTEST_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx")
+	add_executable("${NAME}" "${CXXTEST_OUTPUT}" ${PATH_FILES})
+	target_link_libraries("${NAME}" ${CXXTEST_LINK_LIBS}
+            ${NONGUI_LIBRARIES}
+            ${GUI_LIBRARIES}
+            ${zlib_LIBRARIES}
+            ${fftw_LIBRARIES}
+            ${MXML_LIBRARIES}
+            )
+	add_test("${NAME}" "${EXECUTABLE_OUTPUT_PATH}/${NAME}")
+endmacro(unit_test)
 
-set(zynaddsubfx_SRCS
-	main.cpp
-	)
-
-add_executable(zynaddsubfx 
-	${zynaddsubfx_SRCS}
-)
-
-target_link_libraries(zynaddsubfx
+set(NONGUI_LIBRARIES
 	zynaddsubfx_input
 	zynaddsubfx_output
 	zynaddsubfx_misc
@@ -143,6 +148,32 @@ target_link_libraries(zynaddsubfx
 	zynaddsubfx_dsp
 	zynaddsubfx_samples
 	zynaddsubfx_controls
+    )
+
+set(CXXTEST_LINK_LIBS ${NONGUI_LIBRARIES})
+
+add_subdirectory(Misc)
+add_subdirectory(Input)
+add_subdirectory(Controls)
+add_subdirectory(Synth)
+add_subdirectory(Output)
+add_subdirectory(Seq)
+add_subdirectory(Effects)
+add_subdirectory(Params)
+add_subdirectory(DSP)
+add_subdirectory(Samples)
+add_subdirectory(Tests)
+
+set(zynaddsubfx_SRCS
+	main.cpp
+	)
+
+add_executable(zynaddsubfx 
+	${zynaddsubfx_SRCS}
+)
+
+target_link_libraries(zynaddsubfx
+    ${NONGUI_LIBRARIES}
 	${GUI_LIBRARIES}
         ${zlib_LIBRARIES}
         ${fftw_LIBRARIES}

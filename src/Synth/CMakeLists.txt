@@ -13,3 +13,6 @@ add_library(zynaddsubfx_synth STATIC
 	)
 
 target_link_libraries(zynaddsubfx_synth)
+
+unit_test(adnote_test ADnote.cxx "")
+
