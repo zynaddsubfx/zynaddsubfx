@@ -31,7 +31,6 @@ Echo::Echo(const int & insertion_,REALTYPE *const efxoutl_,REALTYPE *const efxou
         lrdelay(0),delaySample(1),old(0.0)
 {
     setpreset(Ppreset);
-    cleanup();
 }
 
 Echo::~Echo() {}
@@ -41,8 +40,8 @@ Echo::~Echo() {}
  */
 void Echo::cleanup()
 {
-    delaySample.left().clear();
-    delaySample.right().clear();
+    delaySample.l().clear();
+    delaySample.r().clear();
     old=Stereo<REALTYPE>(0.0);
 }
 
@@ -60,10 +59,10 @@ void Echo::initdelays()
     dr=(int)(1+delay.getiVal()*SAMPLE_RATE+lrdelay);
     if (dr<1) dr=1;
 
-    delaySample.left()=AuSample(dl);
-    delaySample.right()=AuSample(dr);
+    delaySample.l()=AuSample(dl);
+    delaySample.r()=AuSample(dr);
 
-    cleanup();
+    old=Stereo<REALTYPE>(0.0);
 }
 
 /*
@@ -71,13 +70,18 @@ void Echo::initdelays()
  */
 void Echo::out(REALTYPE *const smpsl,REALTYPE *const smpsr)
 {
+    Stereo<AuSample> input(AuSample(SOUND_BUFFER_SIZE,smpsl),AuSample(SOUND_BUFFER_SIZE,smpsr));
+    out(input);
+}
+
+void Echo::out(const Stereo<AuSample> &input)
+{
 //void Echo::out(const Stereo<AuSample> & input){ //ideal
     REALTYPE l,r,ldl,rdl;/**\todo move l+r->? ldl+rdl->?*/
-    Stereo<AuSample> input(AuSample(smpsl,SOUND_BUFFER_SIZE),AuSample(smpsr,SOUND_BUFFER_SIZE));
 
-    for (int i=0;i<input.left().size();i++) {
-        ldl=delaySample.left()[kl];
-        rdl=delaySample.right()[kr];
+    for (int i=0;i<input.l().size();i++) {
+        ldl=delaySample.l()[kl];
+        rdl=delaySample.r()[kr];
         l=ldl*(1.0-lrcross)+rdl*lrcross;
         r=rdl*(1.0-lrcross)+ldl*lrcross;
         ldl=l;
@@ -87,14 +91,14 @@ void Echo::out(REALTYPE *const smpsl,REALTYPE *const smpsr)
         efxoutr[i]=rdl*2.0;
 
 
-        ldl=input.left()[i]*panning-ldl*fb;
-        rdl=input.right()[i]*(1.0-panning)-rdl*fb;
+        ldl=input.l()[i]*panning-ldl*fb;
+        rdl=input.r()[i]*(1.0-panning)-rdl*fb;
 
         //LowPass Filter
-        delaySample.left()[kl]=ldl=ldl*hidamp+old.left()*(1.0-hidamp);
-        delaySample.right()[kr]=rdl=rdl*hidamp+old.right()*(1.0-hidamp);
-        old.left()=ldl;
-        old.right()=rdl;
+        delaySample.l()[kl]=ldl=ldl*hidamp+old.l()*(1.0-hidamp);
+        delaySample.r()[kr]=rdl=rdl*hidamp+old.r()*(1.0-hidamp);
+        old.l()=ldl;
+        old.r()=rdl;
 
         if (++kl>=dl) kl=0;
         if (++kr>=dr) kr=0;

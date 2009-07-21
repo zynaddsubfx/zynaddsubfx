@@ -30,6 +30,9 @@ public:
         TS_ASSERT_EQUALS(smp.size(),10);
         for (int i=0;i<20;++i)
             TS_ASSERT_EQUALS(smp[i],0.0);
+        AuSample nsmp(5,15.0);
+        TS_ASSERT_EQUALS(nsmp.size(),5);
+        TS_ASSERT_EQUALS(nsmp[4],15.0);
     }
 
     void testAssign() {
@@ -53,7 +56,7 @@ public:
         for (int i=0;i<50;++i)
             *(fl+i)=i;
         AuSample smp(2);
-        smp = AuSample(fl, 50);
+        smp = AuSample(50,fl);
         delete [] fl;
         for (int i=0;i<50;++i)
             TS_ASSERT_DELTA(smp[i],i,0.001);

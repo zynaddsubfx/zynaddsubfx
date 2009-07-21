@@ -27,8 +27,8 @@
 class AuSample : public Sample
 {
 public:
-    AuSample(const int &length);
-    AuSample(float *input,const int &length);
+    AuSample(int length,REALTYPE fill=0);
+    AuSample(int length,const REALTYPE *input);
     FqSample getFqSample();/**\todo implement this*/
 
 };

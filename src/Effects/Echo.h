@@ -57,6 +57,7 @@ public:
      * or not (It should be)
      */
     void out(REALTYPE *const smpsl,REALTYPE *const smpr);
+    void out(const Stereo<AuSample> &input);
 
     /**
      * Sets the state of Echo to the specified preset

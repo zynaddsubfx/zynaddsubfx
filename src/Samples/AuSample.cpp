@@ -20,9 +20,9 @@
 */
 #include "AuSample.h"
 
-AuSample::AuSample(const int &length)
-        : Sample(length) {}
+AuSample::AuSample(int length,REALTYPE fill)
+        : Sample(length,fill) {}
 
-AuSample::AuSample(float *input,const int &length)
-        : Sample(input,length) {}
+AuSample::AuSample(int length,const REALTYPE *input)
+        : Sample(length,input) {}
 

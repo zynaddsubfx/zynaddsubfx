@@ -71,7 +71,12 @@ REALTYPE Chorus::getdelay(REALTYPE xlfo)
  */
 void Chorus::out(REALTYPE *smpsl,REALTYPE *smpsr)
 {
-    const Stereo<AuSample> input(AuSample(smpsl,SOUND_BUFFER_SIZE),AuSample(smpsr,SOUND_BUFFER_SIZE));
+    const Stereo<AuSample> input(AuSample(SOUND_BUFFER_SIZE,smpsl),AuSample(SOUND_BUFFER_SIZE,smpsr));
+    out(input);
+}
+
+void Chorus::out(const Stereo<AuSample> &input)
+{
     const REALTYPE one=1.0;
     dl1=dl2;
     dr1=dr2;
@@ -141,11 +146,6 @@ void Chorus::cleanup()
 {
     delaySample.l().clear();
     delaySample.r().clear();
-    //for (int i=0;i<maxdelay;i++){
-//	delayl[i]=0.0;
-//	delayr[i]=0.0;
-    //};
-
 };
 
 /*

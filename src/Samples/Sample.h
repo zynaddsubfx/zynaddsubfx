@@ -20,7 +20,7 @@
 */
 #ifndef SAMPLE_H
 #define SAMPLE_H
-
+#include "../globals.h"
 /**
  * Base Class for Samples
  */
@@ -28,8 +28,8 @@ class Sample
 {
 public:
     Sample(const Sample &smp);
-    Sample(const int &length);
-    Sample(float *input,const int &length);
+    Sample(int length,REALTYPE fill=0);
+    Sample(int length,const REALTYPE *fill);
     ~Sample();
     /**Fills the buffer with zeros*/
     void clear();
@@ -39,22 +39,27 @@ public:
         return bufferSize;
     };
     /**Provides the indexing operator for non const Samples*/
-    float &operator[](int index) {
+    REALTYPE &operator[](int index) {
         return *(buffer+index%bufferSize);
     };
     /**Provides the indexing operator for const Samples*/
-    const float &operator[](int index)const {
+    const REALTYPE &operator[](int index)const {
         return *(buffer+index%bufferSize);
     };
     /**Provides the assignment operator*/
     void operator=(const Sample &smp);
+    /**Provides the == operator*/
+    bool operator==(const Sample &smp)const;
     /**Provides direct access to the buffer to allow for transition
      *
-     * This method should be removed to ensure encapsulation once
-     * it is integrated into the code*/
-    float *dontuse() {
+     * This method is like c_str() from the string class and should be used
+     * sparingly*/
+    const REALTYPE *c_buf() {
         return buffer;
     };
+    REALTYPE max()const;
+    REALTYPE min()const;
+    REALTYPE absMax()const;
 private:
     int bufferSize;
     float *buffer;

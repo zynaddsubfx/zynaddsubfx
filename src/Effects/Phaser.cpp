@@ -33,8 +33,6 @@ Phaser::Phaser(const int &insertion_,REALTYPE *efxoutl_,REALTYPE *efxoutr_)
 
 Phaser::~Phaser()
 {
-    //if (oldl!=NULL) delete [] oldl;
-    //if (oldr!=NULL) delete [] oldr;
 };
 
 
@@ -111,15 +109,9 @@ void Phaser::cleanup()
 {
     fbl=0.0;
     fbr=0.0;
-    //oldlgain=0.0;
-    //oldrgain=0.0;
     oldgain=Stereo<REALTYPE>(0.0);
-    //for (int i=0;i<Pstages*2;i++) {
-    //oldl[i]=0.0;
-    //oldr[i]=0.0;
-    //};
-    old.left().clear();
-    old.right().clear();
+    old.l().clear();
+    old.r().clear();
 };
 
 /*
@@ -160,12 +152,8 @@ void Phaser::setlrcross(const unsigned char &Plrcross)
 
 void Phaser::setstages(const unsigned char &Pstages)
 {
-    //if (oldl!=NULL) delete [] oldl;
-    //if (oldr!=NULL) delete [] oldr;
     if (Pstages>=MAX_PHASER_STAGES) this->Pstages=MAX_PHASER_STAGES-1;
     else this->Pstages=Pstages;
-    //oldl=new REALTYPE[Pstages*2];
-    //oldr=new REALTYPE[Pstages*2];
     old=Stereo<AuSample>(Pstages*2);
     cleanup();
 };

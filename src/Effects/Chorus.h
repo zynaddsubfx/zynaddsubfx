@@ -38,6 +38,7 @@ public:
     /**Destructor*/
     ~Chorus();
     void out(REALTYPE *smpsl,REALTYPE *smpsr);
+    void out(const Stereo<AuSample> &input);
     void setpreset(unsigned char npreset);
     /**
      * Sets the value of the chosen variable

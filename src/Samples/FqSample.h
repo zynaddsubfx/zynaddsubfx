@@ -27,8 +27,8 @@
 class FqSample : public Sample
 {
 public:
-    FqSample(const int &length);
-    FqSample(float *input,const int &length);
+    FqSample(int length,REALTYPE fill=0);
+    FqSample(int length,const REALTYPE *input);
     ~FqSample();
     //FqSample &operator=(const FqSample &smp);
     //float *dontuse(){return buffer;};
