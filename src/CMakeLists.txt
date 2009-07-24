@@ -15,6 +15,7 @@ find_package(FLTK)
 SET (FFTW_VERSION 3 CACHE STRING "Version number of FFTW")
 SET (OutputModule alsa CACHE STRING "Output module, either alsa, jack or portaudio")
 SET (GuiModule fltk CACHE STRING "GUI module, either fltk, qt or off")
+SET (CompileTests OFF CACHE BOOL "whether tests should be compiled in or not")
 
 # Now, handle the incoming settings and set define flags/variables based
 # on this
@@ -48,6 +49,10 @@ endif()
 if(AlsaMidiOutput)
 	add_definitions(-DOSSAUDIOOUT)
         set(AUDIO_LIBRARIES ${AUDIO_LIBRARIES} ${ASOUND_LIBRARY})
+endif()
+
+if (CompileTests)
+	ENABLE_TESTING()
 endif()
 
 if(JackOutput)
@@ -115,26 +120,28 @@ include_directories(
 
 #macro for tests
 macro(unit_test NAME CXX_FILE FILES)
-	set(PATH_FILES "")
-	foreach(part ${FILES})
-		set(PATH_FILES "${CMAKE_CURRENT_SOURCE_DIR}/${part}" ${PATH_FILES})
-	endforeach(part ${FILES})
-	set(CXX_FILE_REAL "${CMAKE_CURRENT_SOURCE_DIR}/${CXX_FILE}")
-	add_custom_command(
-		OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx"
-		COMMAND cxxtestgen.py --error-printer -o "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx" ${CXX_FILE_REAL}
-		DEPENDS "${FILE}"
-		)
-	set(CXXTEST_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx")
-	add_executable("${NAME}" "${CXXTEST_OUTPUT}" ${PATH_FILES})
-	target_link_libraries("${NAME}" ${CXXTEST_LINK_LIBS}
-            ${NONGUI_LIBRARIES}
-            ${GUI_LIBRARIES}
-            ${zlib_LIBRARIES}
-            ${fftw_LIBRARIES}
-            ${MXML_LIBRARIES}
-            )
-	add_test("${NAME}" "${EXECUTABLE_OUTPUT_PATH}/${NAME}")
+	if (CompileTests)
+		set(PATH_FILES "")
+		foreach(part ${FILES})
+			set(PATH_FILES "${CMAKE_CURRENT_SOURCE_DIR}/${part}" ${PATH_FILES})
+		endforeach(part ${FILES})
+		set(CXX_FILE_REAL "${CMAKE_CURRENT_SOURCE_DIR}/${CXX_FILE}")
+		add_custom_command(
+			OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx"
+			COMMAND cxxtestgen.py --error-printer -o "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx" ${CXX_FILE_REAL}
+			DEPENDS "${FILE}"
+			)
+		set(CXXTEST_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx")
+		add_executable("${NAME}" "${CXXTEST_OUTPUT}" ${PATH_FILES})
+		target_link_libraries("${NAME}" ${CXXTEST_LINK_LIBS}
+				${NONGUI_LIBRARIES}
+				${GUI_LIBRARIES}
+				${zlib_LIBRARIES}
+				${fftw_LIBRARIES}
+				${MXML_LIBRARIES}
+				)
+		add_test("${NAME}" "${EXECUTABLE_OUTPUT_PATH}/${NAME}")
+	endif()
 endmacro(unit_test)
 
 set(NONGUI_LIBRARIES
@@ -151,6 +158,7 @@ set(NONGUI_LIBRARIES
     )
 
 set(CXXTEST_LINK_LIBS ${NONGUI_LIBRARIES})
+set(MIDIINPUT_LIBRARIES "")
 
 add_subdirectory(Misc)
 add_subdirectory(Input)
@@ -179,5 +187,6 @@ target_link_libraries(zynaddsubfx
         ${fftw_LIBRARIES}
         ${MXML_LIBRARIES}
         ${AUDIO_LIBRARIES}
+        ${MIDIINPUT_LIBRARIES}
 	)
 
