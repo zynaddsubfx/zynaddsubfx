@@ -43,18 +43,17 @@ public:
     void defaults();
     /**Calculates the frequency for a given note
      */
-    REALTYPE getnotefreq(int note,int keyshift);
+    REALTYPE getnotefreq(int note,int keyshift) const;
 
 
     //Parameters
-    /**if the keys are inversed (the pitch is lower to keys from the right direction) \todo figure out why this is not a bool*/
+    /**if the keys are inversed (the pitch is lower to keys from the right direction)*/
     unsigned char Pinvertupdown;
 
     /**the central key of the inversion*/
     unsigned char Pinvertupdowncenter;
 
-    /**0 for 12 key temperate scale, 1 for microtonal
-     * \todo find one good reason why this is not a bool*/
+    /**0 for 12 key temperate scale, 1 for microtonal*/
     unsigned char Penabled;
 
     /**the note of "A" key*/
@@ -70,35 +69,51 @@ public:
     unsigned char Pfirstkey;
     unsigned char Plastkey;
 
-    //The middle note where scale degree 0 is mapped to
+    /**The middle note where scale degree 0 is mapped to*/
     unsigned char Pmiddlenote;
 
-    //Map size
+    /**Map size*/
     unsigned char Pmapsize;
 
-    //Mapping ON/OFF
+    /**Mapping ON/OFF*/
     unsigned char Pmappingenabled;
-    //Mapping (keys)
+    /**Mapping (keys)*/
     short int Pmapping[128];
 
+    /**Fine detune to be applied to all notes*/
     unsigned char Pglobalfinedetune;
 
     // Functions
-    /** Return the current octave size
-     * \todo why is this not an int?*/
-    unsigned char getoctavesize();
+    /** Return the current octave size*/
+    unsigned char getoctavesize() const;
+    /**Convert tunning to string*/
     void tuningtoline(int n,char *line,int maxn);
-    int loadscl(const char *filename);//load the tunnings from a .scl file
-    int loadkbm(const char *filename);//load the mapping from .kbm file
+    /**load the tunnings from a .scl file*/
+    int loadscl(const char *filename);
+    /**load the mapping from .kbm file*/
+    int loadkbm(const char *filename);
+    /**Load text into the internal tunings
+     *
+     *\todo better description*/
     int texttotunings(const char *text);
+    /**Load text into the internal mappings
+     *
+     *\todo better description*/
     void texttomapping(const char *text);
+
+    /**Name of Microtonal tuning*/
     unsigned char *Pname;
+    /**Comment about the tuning*/
     unsigned char *Pcomment;
 
-    void add2XML(XMLwrapper *xml);
+    void add2XML(XMLwrapper *xml)const;
     void getfromXML(XMLwrapper *xml);
-    int saveXML(char *filename);
-    int loadXML(char *filename);
+    int saveXML(const char *filename)const;
+    int loadXML(const char *filename);
+
+    //simple operators primarily for debug
+    bool operator==(const Microtonal &micro) const;
+    bool operator!=(const Microtonal &micro) const;
 
 private:
     int linetotunings(unsigned int nline,const char *line);
