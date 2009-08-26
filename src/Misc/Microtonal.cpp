@@ -171,7 +171,7 @@ bool Microtonal::operator==(const Microtonal &micro) const
     return(!(*this!=micro));
 }
 
-/**\TODO remove printfs once testing is done
+/**\TODO remove printfs once testing is done*/
 //A simple macro to test equality MiCRotonal EQuals (not the perfect approach, but good enough for debug)
 #define MCREQ( x ) if(x!=micro.x){printf("%d\n",__LINE__);return true;}
 //for floats
