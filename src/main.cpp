@@ -210,11 +210,11 @@ void *thread3(void *arg)
         string filename;
         switch (lash->checkevents(filename)) {
         case LASHClient::Save:
-            ui->do_save_master(filename);
+            ui->do_save_master(filename.c_str());
             lash->confirmevent(LASHClient::Save);
             break;
         case LASHClient::Restore:
-            ui->do_load_master(filename);
+            ui->do_load_master(filename.c_str());
             lash->confirmevent(LASHClient::Restore);
             break;
         case LASHClient::Quit:

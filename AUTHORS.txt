@@ -12,4 +12,5 @@ Contributors:
         Emmanuel Saracco (fix for JACK output)
         Achim Settelmeier (QUERTZ keyboard layout for virtual keyboard)
         Jérémie Andréi (AZERTY keyboard layout, Array index fix)
+        Alexis Ballier (const char* <-> string mismatch)
 
