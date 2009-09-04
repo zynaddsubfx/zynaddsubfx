@@ -78,7 +78,7 @@ Microtonal::~Microtonal()
 /*
  * Get the size of the octave
  */
-unsigned char Microtonal::getoctavesize()
+unsigned char Microtonal::getoctavesize() const
 {
     if (Penabled!=0) return(octavesize);
     else return(12);
@@ -87,7 +87,7 @@ unsigned char Microtonal::getoctavesize()
 /*
  * Get the frequency according the note number
  */
-REALTYPE Microtonal::getnotefreq(int note,int keyshift)
+REALTYPE Microtonal::getnotefreq(int note,int keyshift) const
 {
     // in this function will appears many times things like this:
     // var=(a+b*100)%b
@@ -165,6 +165,57 @@ REALTYPE Microtonal::getnotefreq(int note,int keyshift)
         return(freq*rap_keyshift);
     };
 };
+
+bool Microtonal::operator==(const Microtonal &micro) const
+{
+    return(!(*this!=micro));
+}
+
+bool Microtonal::operator!=(const Microtonal &micro) const
+{
+
+    //A simple macro to test equality MiCRotonal EQuals (not the perfect
+    //approach, but good enough)
+#define MCREQ( x ) if(x!=micro.x)return true;
+
+    //for floats
+#define FMCREQ( x ) if(!((x<micro.x+0.0001)&&(x>micro.x-0.0001)))return true;
+
+    MCREQ(Pinvertupdown);
+    MCREQ(Pinvertupdowncenter);
+    MCREQ(octavesize);
+    MCREQ(Penabled);
+    MCREQ(PAnote);
+    FMCREQ(PAfreq);
+    MCREQ(Pscaleshift);
+
+    MCREQ(Pfirstkey);
+    MCREQ(Plastkey);
+    MCREQ(Pmiddlenote);
+    MCREQ(Pmapsize);
+    MCREQ(Pmappingenabled);
+
+    for (int i=0;i<128;i++)
+        MCREQ(Pmapping[i]);
+
+    for (int i=0;i<octavesize;i++) {
+        FMCREQ(octave[i].tuning);
+        MCREQ(octave[i].type);
+        MCREQ(octave[i].x1);
+        MCREQ(octave[i].x2);
+    }
+    if(strcmp((const char *)this->Pname,(const char *)micro.Pname))
+        return true;
+    if(strcmp((const char *)this->Pcomment,(const char *)micro.Pcomment))
+        return true;
+    MCREQ(Pglobalfinedetune);
+    return false;
+
+    //undefine macros, as they are no longer needed
+#undef MCREQ
+#undef FMCREQ
+
+}
 
 
 /*
@@ -411,13 +462,13 @@ int Microtonal::loadkbm(const char *filename)
 
 
 
-void Microtonal::add2XML(XMLwrapper *xml)
+void Microtonal::add2XML(XMLwrapper *xml)const
 {
     xml->addparstr("name",(char *) Pname);
     xml->addparstr("comment",(char *) Pcomment);
 
     xml->addparbool("invert_up_down",Pinvertupdown);
-    xml->addparbool("invert_up_down_center",Pinvertupdowncenter);
+    xml->addpar("invert_up_down_center",Pinvertupdowncenter);
 
     xml->addparbool("enabled",Penabled);
     xml->addpar("global_fine_detune",Pglobalfinedetune);
@@ -456,6 +507,7 @@ void Microtonal::add2XML(XMLwrapper *xml)
         xml->addpar("degree",Pmapping[i]);
         xml->endbranch();
     };
+
     xml->endbranch();
     xml->endbranch();
 };
@@ -466,7 +518,7 @@ void Microtonal::getfromXML(XMLwrapper *xml)
     xml->getparstr("comment",(char *) Pcomment,MICROTONAL_MAX_NAME_LEN);
 
     Pinvertupdown=xml->getparbool("invert_up_down",Pinvertupdown);
-    Pinvertupdowncenter=xml->getparbool("invert_up_down_center",Pinvertupdowncenter);
+    Pinvertupdowncenter=xml->getpar127("invert_up_down_center",Pinvertupdowncenter);
 
     Penabled=xml->getparbool("enabled",Penabled);
     Pglobalfinedetune=xml->getpar127("global_fine_detune",Pglobalfinedetune);
@@ -512,7 +564,8 @@ void Microtonal::getfromXML(XMLwrapper *xml)
 };
 
 
-int Microtonal::saveXML(char *filename)
+
+int Microtonal::saveXML(const char *filename)const
 {
     XMLwrapper *xml=new XMLwrapper();
 
@@ -525,7 +578,7 @@ int Microtonal::saveXML(char *filename)
     return(result);
 };
 
-int Microtonal::loadXML(char *filename)
+int Microtonal::loadXML(const char *filename)
 {
     XMLwrapper *xml=new XMLwrapper();
     if (xml->loadXMLfile(filename)<0) {
