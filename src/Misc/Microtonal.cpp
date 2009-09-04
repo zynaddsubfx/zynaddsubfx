@@ -171,13 +171,16 @@ bool Microtonal::operator==(const Microtonal &micro) const
     return(!(*this!=micro));
 }
 
-/**\TODO remove printfs once testing is done*/
-//A simple macro to test equality MiCRotonal EQuals (not the perfect approach, but good enough for debug)
-#define MCREQ( x ) if(x!=micro.x){printf("%d\n",__LINE__);return true;}
-//for floats
-#define FMCREQ( x ) if(!((x<micro.x+0.0001)&&(x>micro.x-0.0001))){printf("%d\n",__LINE__);return true;}
 bool Microtonal::operator!=(const Microtonal &micro) const
 {
+
+    //A simple macro to test equality MiCRotonal EQuals (not the perfect
+    //approach, but good enough)
+#define MCREQ( x ) if(x!=micro.x)return true;
+
+    //for floats
+#define FMCREQ( x ) if(!((x<micro.x+0.0001)&&(x>micro.x-0.0001)))return true;
+
     MCREQ(Pinvertupdown);
     MCREQ(Pinvertupdowncenter);
     MCREQ(octavesize);
@@ -202,11 +205,16 @@ bool Microtonal::operator!=(const Microtonal &micro) const
         MCREQ(octave[i].x2);
     }
     if(strcmp((const char *)this->Pname,(const char *)micro.Pname))
-        {printf("%d\n",__LINE__); return true;}
+        return true;
     if(strcmp((const char *)this->Pcomment,(const char *)micro.Pcomment))
-        {printf("%d\n",__LINE__);return true;}
+        return true;
     MCREQ(Pglobalfinedetune);
     return false;
+
+    //undefine macros, as they are no longer needed
+#undef MCREQ
+#undef FMCREQ
+
 }
 
 

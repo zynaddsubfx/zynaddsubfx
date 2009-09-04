@@ -24,6 +24,7 @@
 #include "../Misc/Microtonal.h"
 #include <cstring>
 #include <string>
+#include <cstdio>
 
 using namespace std;
 
@@ -76,6 +77,7 @@ public:
         //Gah, the XMLwrapper is a twisted maze
         testMicro->Penabled=1;
         XMLwrapper xml;
+        XMLwrapper xml2;
         xml.beginbranch("Dummy"); //this should not be needed, but odd behavior
                                   //seems to exist from MICROTONAL being on the
                                   //top of the stack 
@@ -86,42 +88,56 @@ public:
                         //stack errors
         
         char *tmp=xml.getXMLdata();
+        xml2.putXMLdata(tmp);
         //printf("%s",tmp);
         Microtonal other;
 
-        cout << (char*)testMicro->Pname << " vs1 "
-             << (char*)other.Pname << endl;
+        //cout << (char*)testMicro->Pname << " vs1 "
+        //     << (char*)other.Pname << endl;
 
         other.Penabled=1;
         strcpy((char *)other.Pname,"Myname");//will be nicer with strings
 
-        cout << (char*)testMicro->Pname << " vs1.5 "
-             << (char*)other.Pname << endl;
+        //cout << (char*)testMicro->Pname << " vs1.5 "
+        //     << (char*)other.Pname << endl;
 
         TS_ASSERT(*testMicro!=other);//sanity check
        
-        TS_ASSERT(xml.enterbranch("Dummy"));
-        TS_ASSERT(xml.enterbranch("MICROTONAL"));
+        TS_ASSERT(xml2.enterbranch("Dummy"));
+        TS_ASSERT(xml2.enterbranch("MICROTONAL"));
         //printf("%s",tmp);
 
-        other.getfromXML(&xml); //failure here
-        xml.exitbranch();
-        xml.exitbranch();
-        char *tmpo=xml.getXMLdata();
+        other.getfromXML(&xml2); //failure here
+        xml2.exitbranch();
+        xml2.exitbranch();
+        char *tmpo=xml2.getXMLdata();
 
-        cout << (char*)testMicro->Pname << " vs2 "
-             << (char*)other.Pname << endl; //shows error here
+        //cout << (char*)testMicro->Pname << " vs2 "
+        //     << (char*)other.Pname << endl; //shows error here
 
         //printf("%s",tmpo);
+
+        FILE *f=fopen("aaaa.xml","w");
+        fprintf(f,tmp);
+        fclose(f);
+        FILE *f2=fopen("aaaaoo.xml","w");
+        fprintf(f2,tmpo);
+        fclose(f2);
         TS_ASSERT(!strcmp(tmp,tmpo)); //these should be equal, but there seems
                                       //to be one line that is duplicated
                                       //(I think in one of the reads)
         free(tmp);
         free(tmpo);
 
+		//testMicro->saveXML("0testMicro.xml");
+		//other.saveXML("0other.xml");
+
         TS_ASSERT(*testMicro==other); //cxxTest sees error here
-        cout << (char*)testMicro->Pname << " vs3 "
-             << (char*)other.Pname << endl;
+        //cout << (char*)testMicro->Pname << " vs3 "
+        //     << (char*)other.Pname << endl;
+        //remove unneeded files
+        remove("aaaa.xml");
+        remove("aaaaoo.xml");
 
     }
 
