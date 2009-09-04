@@ -39,7 +39,7 @@ public:
     /**Get the midi command,channel and parameters
      * It returns MidiNull because it is a dummy driver
      */
-    void getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,unsigned char *cmdparams);
+    void getmidicmd(MidiCmdType &cmdtype,unsigned char &cmdchan,int *cmdparams);
 
 private:
 };

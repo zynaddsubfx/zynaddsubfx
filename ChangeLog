@@ -886,3 +886,6 @@
 
 02 Sep 2009 (Mark McCurry)
 	    - Incorperated const char* <-> string mismatch by Alexis Ballier 
+	    
+04 Sep 2009 (Mark McCurry)
+	    - Incorperated NULLMidiIn function prototype fix by Alexis Ballier
