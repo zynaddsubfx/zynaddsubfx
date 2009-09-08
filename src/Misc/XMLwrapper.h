@@ -224,9 +224,12 @@ private:
      */
     int dosavefile(const char *filename,int compression,const char *xmldata);
 
-    /**Loads the file.
-     * @param filename the name of the file
-     * @returns gunziped contents of file
+    /**
+     * Loads specified file and returns data.
+     * 
+     * Will load a gziped file or an uncompressed file.
+     * @param filename the file
+     * @return The decompressed data
      */
     char *doloadfile(const std::string &filename);
 

@@ -889,3 +889,6 @@
 	    
 04 Sep 2009 (Mark McCurry)
 	    - Incorperated NULLMidiIn function prototype fix by Alexis Ballier
+
+07 Sep 2009 (Mark McCurry)
+	    - Fixed glitch in XMLwrapper, which would prevent file loading

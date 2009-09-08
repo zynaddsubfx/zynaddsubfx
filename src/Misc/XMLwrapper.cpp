@@ -21,9 +21,13 @@
 */
 
 #include "XMLwrapper.h"
+#include <cstring>
 #include <stdio.h>
 #include <stdlib.h>
+#include <cstdarg>
 #include <zlib.h>
+#include <iostream>
+#include <sstream>
 
 #include "../globals.h"
 #include "Util.h"
@@ -303,48 +307,34 @@ int XMLwrapper::loadXMLfile(const string &filename)
 
 char *XMLwrapper::doloadfile(const string &filename)
 {
-    char *xmldata=NULL;
-    int filesize=-1;
+    char * xmldata = NULL;
+    gzFile gzfile  = gzopen(filename.c_str(),"rb");
 
-    //try get filesize as gzip data (first)
-    gzFile gzfile=gzopen(filename.c_str(),"rb");
-    if (gzfile!=NULL) {//this is a gzip file
-        // first check it's size
-        while (!gzeof(gzfile)) {
-            gzseek (gzfile,1024*1024,SEEK_CUR);
-            if (gztell(gzfile)>10000000) {
-                gzclose(gzfile);
-                goto notgzip;//the file is too big
-            };
-        };
-        filesize=gztell(gzfile);
+    if (gzfile != NULL) {//The possibly compressed file opened
 
-        //rewind the file and load the data
-        xmldata=new char[filesize+1];
-        ZERO(xmldata,filesize+1);
+        stringstream strBuf;             //reading stream
+        const int    bufSize = 500;      //fetch size
+        char         fetchBuf[bufSize+1];//fetch buffer
+        int          read    = 0;        //chars read in last fetch
 
-        gzrewind(gzfile);
-        gzread(gzfile,xmldata,filesize);
+        fetchBuf[bufSize] = 0;//force null termination
+
+        while(bufSize == (read = gzread(gzfile, fetchBuf, bufSize)))
+            strBuf << fetchBuf;
+
+        fetchBuf[read] = 0;//Truncate last partial read
+        strBuf << fetchBuf;
 
         gzclose(gzfile);
-        return (xmldata);
-    } else {//this is not a gzip file
-notgzip:
-        FILE *file=fopen(filename.c_str(),"rb");
-        if (file==NULL) return(NULL);
-        fseek(file,0,SEEK_END);
-        filesize=ftell(file);
 
-        xmldata=new char [filesize+1];
-        ZERO(xmldata,filesize+1);
+        //Place data in output format
+        string tmp = strBuf.str();
+        xmldata = new char[tmp.size()+1];
+        strncpy(xmldata, tmp.c_str(), tmp.size()+1);
+    }
 
-        rewind(file);
-        fread(xmldata,filesize,1,file);
-
-        fclose(file);
-        return(xmldata);
-    };
-};
+    return xmldata;
+}
 
 bool XMLwrapper::putXMLdata(const char *xmldata)
 {
@@ -393,6 +383,7 @@ int XMLwrapper::enterbranch(const string &name,int id)
 
 void XMLwrapper::exitbranch()
 {
+    /**@bug Does not set the current node correctly*/
     pop();
 };
 
@@ -524,13 +515,10 @@ mxml_node_t *XMLwrapper::addparams2(const char *name,const char *par1,const char
     return(element);
 };
 
-
-
-
 void XMLwrapper::push(mxml_node_t *node)
 {
     if (stackpos>=STACKSIZE-1) {
-        printf("BUG!: XMLwrapper::push() - full parentstack\n");
+        cerr << "BUG!: XMLwrapper::push() - full parentstack" << endl;
         return;
     };
     stackpos++;
@@ -542,7 +530,7 @@ void XMLwrapper::push(mxml_node_t *node)
 mxml_node_t *XMLwrapper::pop()
 {
     if (stackpos<=0) {
-        printf("BUG!: XMLwrapper::pop() - empty parentstack\n");
+        cerr << "BUG!: XMLwrapper::pop() - empty parentstack" << endl;
         return (root);
     };
     mxml_node_t *node=parentstack[stackpos];
@@ -557,7 +545,7 @@ mxml_node_t *XMLwrapper::pop()
 mxml_node_t *XMLwrapper::peek()
 {
     if (stackpos<=0) {
-        printf("BUG!: XMLwrapper::peek() - empty parentstack\n");
+        cerr << "BUG!: XMLwrapper::peek() - empty parentstack" << endl;
         return (root);
     };
     return(parentstack[stackpos]);
