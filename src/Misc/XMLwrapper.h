@@ -204,15 +204,14 @@ public:
 
     bool minimal;/**<false if all parameters will be stored (used only for clipboard)*/
 
-    struct {
-        bool PADsynth_used;/**<if PADsynth is used*/
-    }information;/**<Defines if PADsynth is used*/
-
     /**
-     * Opens a file and parses the "information" section data on it.
-     * @returns "true" if all went ok or "false" on errors.
+     * Sets the current tree's PAD Synth usage
      */
-    bool checkfileinformation(const char *filename);
+    void setPadSynth(bool enabled);
+    /**
+     * Checks the current tree for PADsynth usage
+     */
+    bool hasPadSynth() const;
 
 private:
 

@@ -37,6 +37,8 @@ using namespace std;
 int xml_k=0;
 char tabs[STACKSIZE+2];
 
+bool verbose = false;
+
 const char *XMLwrapper_whitespace_callback(mxml_node_t *node,int where)
 {
     const char *name=node->value.element.name;
@@ -79,8 +81,6 @@ XMLwrapper::XMLwrapper()
     minimal=true;
     stackpos=0;
 
-    information.PADsynth_used=false;
-
     tree=mxmlNewElement(MXML_NO_PARENT,"?xml version=\"1.0\" encoding=\"UTF-8\"?");
     /*  for mxml 2.1 (and older)
         tree=mxmlNewElement(MXML_NO_PARENT,"?xml");
@@ -119,56 +119,36 @@ XMLwrapper::~XMLwrapper()
     if (tree!=NULL) mxmlDelete(tree);
 };
 
-bool XMLwrapper::checkfileinformation(const char *filename)
+void XMLwrapper::setPadSynth(bool enabled)
 {
-    stackpos=0;
-    ZERO(&parentstack,(int)sizeof(parentstack));
-    information.PADsynth_used=false;
+    /**@bug this might create multiple nodes when only one is needed*/
+    mxml_node_t *oldnode=node;
+    node=info;
+    //Info storing
+    addparbool("PADsynth_used",enabled);
+    node=oldnode;
+}
 
-    if (tree!=NULL) mxmlDelete(tree);
-    tree=NULL;
-    char *xmldata=doloadfile(filename);
-    if (xmldata==NULL) return(-1);//the file could not be loaded or uncompressed
+bool XMLwrapper::hasPadSynth() const
+{
+    /**Right now this has a copied implementation of setparbool, so this should
+     * be reworked as XMLwrapper evolves*/
+    mxml_node_t * tmp = mxmlFindElement(tree,tree,"INFORMATION",NULL,NULL,MXML_DESCEND);
 
-
-    char *start=strstr(xmldata,"<INFORMATION>");
-    char *end=strstr(xmldata,"</INFORMATION>");
-
-    if ((start==NULL)||(end==NULL)||(start>end)) {
-        delete []xmldata;
+    mxml_node_t * parameter = mxmlFindElement(tmp, tmp, "par_bool", "name",
+            "PADsynth_used", MXML_DESCEND_FIRST);
+    if (parameter==NULL)//no information availiable
         return(false);
-    };
-    end+=strlen("</INFORMATION>");
-    end[0]='\0';
 
-    tree=mxmlNewElement(MXML_NO_PARENT,"?xml");
-    node=root=mxmlLoadString(tree,xmldata,MXML_OPAQUE_CALLBACK);
-    if (root==NULL) {
-        delete []xmldata;
-        mxmlDelete(tree);
-        node=root=tree=NULL;
+    const char *strval = mxmlElementGetAttr(parameter,"value");
+    if (strval==NULL)//no information available
         return(false);
-    };
 
-    root=mxmlFindElement(tree,tree,"INFORMATION",NULL,NULL,MXML_DESCEND);
-    push(root);
-
-    if (root==NULL) {
-        delete []xmldata;
-        mxmlDelete(tree);
-        node=root=tree=NULL;
+    if ((strval[0]=='Y')||(strval[0]=='y'))
+        return(true);
+    else
         return(false);
-    };
-
-    information.PADsynth_used=getparbool("PADsynth_used",false);
-
-    exitbranch();
-    if (tree!=NULL) mxmlDelete(tree);
-    delete []xmldata;
-    node=root=tree=NULL;
-
-    return(true);
-};
+}
 
 
 /* SAVE XML members */
@@ -187,16 +167,9 @@ int XMLwrapper::saveXMLfile(const string &filename)
 
 char *XMLwrapper::getXMLdata()
 {
-    xml_k=0;
+    //xml_k=0;
     ZERO(tabs,STACKSIZE+2);
 
-    mxml_node_t *oldnode=node;
-
-    node=info;
-    //Info storing
-    addparbool("PADsynth_used",information.PADsynth_used);
-
-    node=oldnode;
     char *xmldata=mxmlSaveAllocString(tree,XMLwrapper_whitespace_callback);
 
     return(xmldata);
@@ -255,18 +228,24 @@ void XMLwrapper::addparstr(const string &name,const string &val)
 
 void XMLwrapper::beginbranch(const string &name)
 {
+    if(verbose)
+        cout << "beginbranch()" << name << endl;
     push(node);
     node=addparams0(name.c_str());
 };
 
 void XMLwrapper::beginbranch(const string &name,int id)
 {
+    if(verbose)
+        cout << "beginbranch(" << id << ")" << name << endl;
     push(node);
     node=addparams1(name.c_str(),"id",int2str(id));
 };
 
 void XMLwrapper::endbranch()
 {
+    if(verbose)
+        cout << "endbranch()" << endl;
     node=pop();
 };
 
@@ -363,6 +342,8 @@ bool XMLwrapper::putXMLdata(const char *xmldata)
 
 int XMLwrapper::enterbranch(const string &name)
 {
+    if(verbose)
+        cout << "enterbranch() " << name << endl;
     node=mxmlFindElement(peek(),peek(),name.c_str(),NULL,NULL,MXML_DESCEND_FIRST);
     if (node==NULL) return(0);
 
@@ -372,6 +353,8 @@ int XMLwrapper::enterbranch(const string &name)
 
 int XMLwrapper::enterbranch(const string &name,int id)
 {
+    if(verbose)
+        cout << "enterbranch("<<id<<") " << name << endl;
     snprintf(tmpstr,TMPSTR_SIZE,"%d",id);
     node=mxmlFindElement(peek(),peek(),name.c_str(),"id",tmpstr,MXML_DESCEND_FIRST);
     if (node==NULL) return(0);
@@ -383,6 +366,8 @@ int XMLwrapper::enterbranch(const string &name,int id)
 
 void XMLwrapper::exitbranch()
 {
+    if(verbose)
+        cout << "exitbranch() " << endl;
     /**@bug Does not set the current node correctly*/
     pop();
 };
@@ -517,6 +502,8 @@ mxml_node_t *XMLwrapper::addparams2(const char *name,const char *par1,const char
 
 void XMLwrapper::push(mxml_node_t *node)
 {
+    if(verbose)
+        cout << "push() " << node << "-" << node->value.element.name << endl;
     if (stackpos>=STACKSIZE-1) {
         cerr << "BUG!: XMLwrapper::push() - full parentstack" << endl;
         return;
@@ -529,6 +516,8 @@ void XMLwrapper::push(mxml_node_t *node)
 };
 mxml_node_t *XMLwrapper::pop()
 {
+    if(verbose)
+        cout << "pop()  " << node->parent << " : " << parentstack[stackpos] << "-" << node->parent->value.element.name << " -" << parentstack[stackpos]->value.element.name <<endl;
     if (stackpos<=0) {
         cerr << "BUG!: XMLwrapper::pop() - empty parentstack" << endl;
         return (root);
@@ -544,6 +533,8 @@ mxml_node_t *XMLwrapper::pop()
 
 mxml_node_t *XMLwrapper::peek()
 {
+    if(verbose)
+        cout << "peek() " << node << " : " << parentstack[stackpos] << "-" << node->value.element.name << " -" << parentstack[stackpos]->value.element.name << endl;
     if (stackpos<=0) {
         cerr << "BUG!: XMLwrapper::peek() - empty parentstack" << endl;
         return (root);

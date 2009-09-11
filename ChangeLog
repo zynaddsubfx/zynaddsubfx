@@ -892,3 +892,6 @@
 
 07 Sep 2009 (Mark McCurry)
 	    - Fixed glitch in XMLwrapper, which would prevent file loading
+
+11 Sep 2009 (Mark McCurry)
+	    - moved PADsynth_used from public struct to has/set methods in XMLwrapper
