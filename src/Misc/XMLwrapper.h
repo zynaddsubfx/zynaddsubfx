@@ -232,7 +232,6 @@ private:
      */
     char *doloadfile(const std::string &filename) const;
 
-
     mxml_node_t *tree;/**<all xml data*/
     mxml_node_t *root;/**<xml data used by zynaddsubfx*/
     mxml_node_t *node;/**<current node*/
@@ -250,38 +249,6 @@ private:
      * attribute_value
      */
     mxml_node_t *addparams(const char *name, unsigned int params, ...) const;
-
-    /**
-     * Convert integer to string
-     * @param x integer input
-     * @returns string output
-     */
-    char *int2str(int x);
-
-    /**
-     * Convert integer to string
-     * @param x integer input
-     * @returns string output
-     */
-    char *real2str(REALTYPE x);
-
-    /**
-     * Convert string to int
-     * @param str string input
-     * @returns integer output
-     */
-    int str2int(const char *str) const;
-
-    /**
-     * Convert string to realtype
-     * @param x integer input
-     * @returns string output
-     */
-    REALTYPE str2real(const char *str) const;
-
-    /**Temporary string for various uses*/
-    char tmpstr[TMPSTR_SIZE];
-
 
     /**this is used to store the parents.
      * @todo Use the stack class provided by C++*/

@@ -3,7 +3,9 @@
 
   XMLwrapper.C - XML wrapper
   Copyright (C) 2003-2005 Nasca Octavian Paul
+  Copyright (C) 2009-2009 Mark McCurry
   Author: Nasca Octavian Paul
+          Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License
@@ -220,12 +222,12 @@ int XMLwrapper::dosavefile(const char *filename,int compression,const char *xmld
 
 void XMLwrapper::addpar(const string &name,int val)
 {
-    addparams("par",2,"name",name.c_str(),"value",int2str(val));
+    addparams("par",2,"name",name.c_str(),"value",stringFrom<int>(val).c_str());
 };
 
 void XMLwrapper::addparreal(const string &name,REALTYPE val)
 {
-    addparams("par_real",2,"name",name.c_str(),"value",real2str(val));
+    addparams("par_real",2,"name",name.c_str(),"value",stringFrom<REALTYPE>(val).c_str());
 };
 
 void XMLwrapper::addparbool(const string &name,int val)
@@ -255,7 +257,7 @@ void XMLwrapper::beginbranch(const string &name,int id)
     if(verbose)
         cout << "beginbranch(" << id << ")" << name << endl;
     push(node);
-    node=addparams(name.c_str(),1,"id",int2str(id));
+    node=addparams(name.c_str(),1,"id",stringFrom<int>(id).c_str());
 };
 
 void XMLwrapper::endbranch()
@@ -293,8 +295,8 @@ int XMLwrapper::loadXMLfile(const string &filename)
     if (root==NULL) return(-3);//the XML doesnt embbed zynaddsubfx data
     push(root);
 
-    values.xml_version.major=str2int(mxmlElementGetAttr(root,"version-major"));
-    values.xml_version.minor=str2int(mxmlElementGetAttr(root,"version-minor"));
+    values.xml_version.major=stringTo<int>(mxmlElementGetAttr(root,"version-major"));
+    values.xml_version.minor=stringTo<int>(mxmlElementGetAttr(root,"version-minor"));
 
     return(0);
 };
@@ -371,8 +373,7 @@ int XMLwrapper::enterbranch(const string &name,int id)
 {
     if(verbose)
         cout << "enterbranch("<<id<<") " << name << endl;
-    snprintf(tmpstr,TMPSTR_SIZE,"%d",id);
-    node=mxmlFindElement(peek(),peek(),name.c_str(),"id",tmpstr,MXML_DESCEND_FIRST);
+    node=mxmlFindElement(peek(),peek(),name.c_str(),"id",stringFrom<int>(id).c_str(),MXML_DESCEND_FIRST);
     if (node==NULL) return(0);
 
     push(node);
@@ -391,7 +392,7 @@ void XMLwrapper::exitbranch()
 
 int XMLwrapper::getbranchid(int min, int max) const
 {
-    int id=str2int(mxmlElementGetAttr(node,"id"));
+    int id=stringTo<int>(mxmlElementGetAttr(node,"id"));
     if ((min==0)&&(max==0)) return(id);
 
     if (id<min) id=min;
@@ -409,7 +410,7 @@ int XMLwrapper::getpar(const string &name,int defaultpar,int min,int max) const
     const char *strval=mxmlElementGetAttr(tmp,"value");
     if (strval==NULL) return(defaultpar);
 
-    int val=str2int(strval);
+    int val=stringTo<int>(strval);
     if (val<min) val=min;
     else if (val>max) val=max;
 
@@ -455,7 +456,7 @@ REALTYPE XMLwrapper::getparreal(const char *name,REALTYPE defaultpar) const
     const char *strval=mxmlElementGetAttr(tmp,"value");
     if (strval==NULL) return(defaultpar);
 
-    return(str2real(strval));
+    return(stringTo<REALTYPE>(strval));
 };
 
 REALTYPE XMLwrapper::getparreal(const char *name,REALTYPE defaultpar,REALTYPE min,REALTYPE max) const
@@ -469,32 +470,6 @@ REALTYPE XMLwrapper::getparreal(const char *name,REALTYPE defaultpar,REALTYPE mi
 
 
 /** Private members **/
-
-char *XMLwrapper::int2str(int x)
-{
-    snprintf(tmpstr,TMPSTR_SIZE,"%d",x);
-    return(tmpstr);
-};
-
-char *XMLwrapper::real2str(REALTYPE x)
-{
-    snprintf(tmpstr,TMPSTR_SIZE,"%g",x);
-    return(tmpstr);
-};
-
-int XMLwrapper::str2int(const char *str) const
-{
-    if (str==NULL) return(0);
-    int result=strtol(str,NULL,10);
-    return(result);
-};
-
-REALTYPE XMLwrapper::str2real(const char *str) const
-{
-    if (str==NULL) return(0.0);
-    REALTYPE result=strtod(str,NULL);
-    return(result);
-};
 
 mxml_node_t *XMLwrapper::addparams(const char *name, unsigned int params, ...) const
 {
