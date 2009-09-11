@@ -54,14 +54,14 @@ public:
      * @param filename the name of the destination file.
      * @returns 0 if ok or -1 if the file cannot be saved.
      */
-    int saveXMLfile(const std::string &filename);
+    int saveXMLfile(const std::string &filename) const;
 
     /**
      * Return XML tree as a string.
      * Note: The string must be freed with free() to deallocate
      * @returns a newly allocated NULL terminated string of the XML data.
      */
-    char *getXMLdata();
+    char *getXMLdata() const;
 
     /**
      * Add simple parameter.
@@ -150,7 +150,7 @@ public:
      * if there isn't any id, will return min
      * this must be called only imediately after enterbranch()
      */
-    int getbranchid(int min, int max);
+    int getbranchid(int min, int max) const;
 
     /**
      * Returns the integer value stored in node name.
@@ -162,21 +162,21 @@ public:
      * @param min The minimum return value.
      * @param max The maximum return value.
      */
-    int getpar(const std::string &name,int defaultpar,int min,int max);
+    int getpar(const std::string &name,int defaultpar,int min,int max) const;
 
     /**
      * Returns the integer value stored in the node with range [0,127].
      * @param name The parameter name.
      * @param defaultpar The default value if the real value is not found.
      */
-    int getpar127(const std::string &name,int defaultpar);
+    int getpar127(const std::string &name,int defaultpar) const;
 
     /**
      * Returns the boolean value stored in the node.
      * @param name The parameter name.
      * @param defaultpar The default value if the real value is not found.
      */
-    int getparbool(const std::string &name,int defaultpar);
+    int getparbool(const std::string &name,int defaultpar) const;
 
     /**
      * Get the string value stored in the node.
@@ -184,14 +184,14 @@ public:
      * @param par  Pointer to destination string
      * @param maxstrlen Max string length for destination
      */
-    void getparstr(const std::string &name,char *par,int maxstrlen);
+    void getparstr(const std::string &name,char *par,int maxstrlen) const;
 
     /**
      * Returns the real value stored in the node.
      * @param name The parameter name.
      * @param defaultpar The default value if the real value is not found.
      */
-    REALTYPE getparreal(const char *name,REALTYPE defaultpar);
+    REALTYPE getparreal(const char *name,REALTYPE defaultpar) const;
 
     /**
      * Returns the real value stored in the node.
@@ -200,7 +200,7 @@ public:
      * @param min The minimum value
      * @param max The maximum value
      */
-    REALTYPE getparreal(const char *name,REALTYPE defaultpar,REALTYPE min,REALTYPE max);
+    REALTYPE getparreal(const char *name,REALTYPE defaultpar,REALTYPE min,REALTYPE max) const;
 
     bool minimal;/**<false if all parameters will be stored (used only for clipboard)*/
 
@@ -221,7 +221,7 @@ private:
      * @param compression Level of gzip compression
      * @param xmldata String to be saved
      */
-    int dosavefile(const char *filename,int compression,const char *xmldata);
+    int dosavefile(const char *filename,int compression,const char *xmldata) const;
 
     /**
      * Loads specified file and returns data.
@@ -230,7 +230,7 @@ private:
      * @param filename the file
      * @return The decompressed data
      */
-    char *doloadfile(const std::string &filename);
+    char *doloadfile(const std::string &filename) const;
 
 
     mxml_node_t *tree;/**<all xml data*/
@@ -243,21 +243,21 @@ private:
      * <name>.
      * @returns The node
      */
-    mxml_node_t *addparams0(const char *name);
+    mxml_node_t *addparams0(const char *name) const;
 
     /**
      * Adds params like this:
      * <name par1="val1">.
      * @returns The node
      */
-    mxml_node_t *addparams1(const char *name,const char *par1,const char *val1);
+    mxml_node_t *addparams1(const char *name,const char *par1,const char *val1) const;
 
     /**
      * Adds params like this:
      * <name par1="val1" par2="val2">.
      * @returns the node
      */
-    mxml_node_t *addparams2(const char *name,const char *par1,const char *val1,const char *par2, const char *val2);
+    mxml_node_t *addparams2(const char *name,const char *par1,const char *val1,const char *par2, const char *val2) const;
 
     /**
      * Convert integer to string
@@ -278,14 +278,14 @@ private:
      * @param str string input
      * @returns integer output
      */
-    int str2int(const char *str);
+    int str2int(const char *str) const;
 
     /**
      * Convert string to realtype
      * @param x integer input
      * @returns string output
      */
-    REALTYPE str2real(const char *str);
+    REALTYPE str2real(const char *str) const;
 
     /**Temporary string for various uses*/
     char tmpstr[TMPSTR_SIZE];
@@ -303,6 +303,7 @@ private:
     mxml_node_t *pop();
     /**Returns top node off of parent stack*/
     mxml_node_t *peek();
+    const mxml_node_t *peek() const;
 
     struct {
         struct {

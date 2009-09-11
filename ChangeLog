@@ -894,4 +894,6 @@
 	    - Fixed glitch in XMLwrapper, which would prevent file loading
 
 11 Sep 2009 (Mark McCurry)
-	    - moved PADsynth_used from public struct to has/set methods in XMLwrapper
+	    - Moved PADsynth_used from public struct to has/set methods in XMLwrapper
+	    - Created wrapper functions, so that XMLwrapper can be somewhat
+	      usable when const

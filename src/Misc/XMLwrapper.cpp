@@ -72,6 +72,22 @@ const char *XMLwrapper_whitespace_callback(mxml_node_t *node,int where)
     return(0);
 };
 
+//temporary const overload of mxmlFindElement
+const mxml_node_t *mxmlFindElement(const mxml_node_t *node,
+        const mxml_node_t *top, const char *name, const char *attr,
+        const char *value, int descend)
+{
+    return(const_cast<const mxml_node_t *> (mxmlFindElement(
+                    const_cast<mxml_node_t *>(node),
+                    const_cast<mxml_node_t *>(top),
+                    name, attr, value, descend)));
+}
+
+//temporary const overload of mxmlElementGetAttr
+const char *mxmlElementGetAttr(const mxml_node_t *node, const char *name)
+{
+    return mxmlElementGetAttr(const_cast<mxml_node_t *>(node),name);
+}
 
 XMLwrapper::XMLwrapper()
 {
@@ -153,7 +169,7 @@ bool XMLwrapper::hasPadSynth() const
 
 /* SAVE XML members */
 
-int XMLwrapper::saveXMLfile(const string &filename)
+int XMLwrapper::saveXMLfile(const string &filename) const
 {
     char *xmldata=getXMLdata();
     if (xmldata==NULL) return(-2);
@@ -165,7 +181,7 @@ int XMLwrapper::saveXMLfile(const string &filename)
     return(result);
 };
 
-char *XMLwrapper::getXMLdata()
+char *XMLwrapper::getXMLdata() const
 {
     //xml_k=0;
     ZERO(tabs,STACKSIZE+2);
@@ -176,7 +192,7 @@ char *XMLwrapper::getXMLdata()
 };
 
 
-int XMLwrapper::dosavefile(const char *filename,int compression,const char *xmldata)
+int XMLwrapper::dosavefile(const char *filename,int compression,const char *xmldata) const
 {
     if (compression==0) {
         FILE *file;
@@ -284,7 +300,7 @@ int XMLwrapper::loadXMLfile(const string &filename)
 };
 
 
-char *XMLwrapper::doloadfile(const string &filename)
+char *XMLwrapper::doloadfile(const string &filename) const
 {
     char * xmldata = NULL;
     gzFile gzfile  = gzopen(filename.c_str(),"rb");
@@ -373,7 +389,7 @@ void XMLwrapper::exitbranch()
 };
 
 
-int XMLwrapper::getbranchid(int min, int max)
+int XMLwrapper::getbranchid(int min, int max) const
 {
     int id=str2int(mxmlElementGetAttr(node,"id"));
     if ((min==0)&&(max==0)) return(id);
@@ -384,12 +400,13 @@ int XMLwrapper::getbranchid(int min, int max)
     return(id);
 };
 
-int XMLwrapper::getpar(const string &name,int defaultpar,int min,int max)
+int XMLwrapper::getpar(const string &name,int defaultpar,int min,int max) const
 {
-    node=mxmlFindElement(peek(),peek(),"par","name",name.c_str(),MXML_DESCEND_FIRST);
-    if (node==NULL) return(defaultpar);
+    const mxml_node_t * tmp = mxmlFindElement(peek(),peek(),"par","name",name.c_str(),MXML_DESCEND_FIRST);
 
-    const char *strval=mxmlElementGetAttr(node,"value");
+    if (tmp==NULL) return(defaultpar);
+
+    const char *strval=mxmlElementGetAttr(tmp,"value");
     if (strval==NULL) return(defaultpar);
 
     int val=str2int(strval);
@@ -399,48 +416,49 @@ int XMLwrapper::getpar(const string &name,int defaultpar,int min,int max)
     return(val);
 };
 
-int XMLwrapper::getpar127(const string &name,int defaultpar)
+int XMLwrapper::getpar127(const string &name,int defaultpar) const
 {
     return(getpar(name,defaultpar,0,127));
 };
 
-int XMLwrapper::getparbool(const string &name,int defaultpar)
+int XMLwrapper::getparbool(const string &name,int defaultpar) const
 {
-    node=mxmlFindElement(peek(),peek(),"par_bool","name",name.c_str(),MXML_DESCEND_FIRST);
-    if (node==NULL) return(defaultpar);
+    const mxml_node_t * tmp = mxmlFindElement(peek(),peek(),"par_bool","name",name.c_str(),MXML_DESCEND_FIRST);
 
-    const char *strval=mxmlElementGetAttr(node,"value");
+    if (tmp==NULL) return(defaultpar);
+
+    const char *strval=mxmlElementGetAttr(tmp,"value");
     if (strval==NULL) return(defaultpar);
 
     if ((strval[0]=='Y')||(strval[0]=='y')) return(1);
     else return(0);
 };
 
-void XMLwrapper::getparstr(const string &name,char *par,int maxstrlen)
+void XMLwrapper::getparstr(const string &name,char *par,int maxstrlen) const
 {
     ZERO(par,maxstrlen);
-    node=mxmlFindElement(peek(),peek(),"string","name",name.c_str(),MXML_DESCEND_FIRST);
+    const mxml_node_t * tmp = mxmlFindElement(peek(),peek(),"string","name",name.c_str(),MXML_DESCEND_FIRST);
 
-    if (node==NULL) return;
-    if (node->child==NULL) return;
-    if (node->child->type!=MXML_OPAQUE) return;
+    if (tmp==NULL) return;
+    if (tmp->child==NULL) return;
+    if (tmp->child->type!=MXML_OPAQUE) return;
 
-    snprintf(par,maxstrlen,"%s",node->child->value.element.name);
+    snprintf(par,maxstrlen,"%s",tmp->child->value.element.name);
 
 };
 
-REALTYPE XMLwrapper::getparreal(const char *name,REALTYPE defaultpar)
+REALTYPE XMLwrapper::getparreal(const char *name,REALTYPE defaultpar) const
 {
-    node=mxmlFindElement(peek(),peek(),"par_real","name",name,MXML_DESCEND_FIRST);
-    if (node==NULL) return(defaultpar);
+    const mxml_node_t * tmp = mxmlFindElement(peek(),peek(),"par_real","name",name,MXML_DESCEND_FIRST);
+    if (tmp==NULL) return(defaultpar);
 
-    const char *strval=mxmlElementGetAttr(node,"value");
+    const char *strval=mxmlElementGetAttr(tmp,"value");
     if (strval==NULL) return(defaultpar);
 
     return(str2real(strval));
 };
 
-REALTYPE XMLwrapper::getparreal(const char *name,REALTYPE defaultpar,REALTYPE min,REALTYPE max)
+REALTYPE XMLwrapper::getparreal(const char *name,REALTYPE defaultpar,REALTYPE min,REALTYPE max) const
 {
     REALTYPE result=getparreal(name,defaultpar);
 
@@ -464,14 +482,14 @@ char *XMLwrapper::real2str(REALTYPE x)
     return(tmpstr);
 };
 
-int XMLwrapper::str2int(const char *str)
+int XMLwrapper::str2int(const char *str) const
 {
     if (str==NULL) return(0);
     int result=strtol(str,NULL,10);
     return(result);
 };
 
-REALTYPE XMLwrapper::str2real(const char *str)
+REALTYPE XMLwrapper::str2real(const char *str) const
 {
     if (str==NULL) return(0.0);
     REALTYPE result=strtod(str,NULL);
@@ -479,20 +497,20 @@ REALTYPE XMLwrapper::str2real(const char *str)
 };
 
 
-mxml_node_t *XMLwrapper::addparams0(const char *name)
+mxml_node_t *XMLwrapper::addparams0(const char *name) const
 {
     mxml_node_t *element=mxmlNewElement(node,name);
     return(element);
 };
 
-mxml_node_t *XMLwrapper::addparams1(const char *name,const char *par1,const char *val1)
+mxml_node_t *XMLwrapper::addparams1(const char *name,const char *par1,const char *val1) const
 {
     mxml_node_t *element=mxmlNewElement(node,name);
     mxmlElementSetAttr(element,par1,val1);
     return(element);
 };
 
-mxml_node_t *XMLwrapper::addparams2(const char *name,const char *par1,const char *val1,const char *par2, const char *val2)
+mxml_node_t *XMLwrapper::addparams2(const char *name,const char *par1,const char *val1,const char *par2, const char *val2) const
 {
     mxml_node_t *element=mxmlNewElement(node,name);
     mxmlElementSetAttr(element,par1,val1);
@@ -540,7 +558,16 @@ mxml_node_t *XMLwrapper::peek()
         return (root);
     };
     return(parentstack[stackpos]);
-};
+}
 
-
+const mxml_node_t *XMLwrapper::peek() const
+{
+    if(verbose)
+        cout << "peek()const " << node << " : " << parentstack[stackpos] << "-" << node->value.element.name << " -" << parentstack[stackpos]->value.element.name << endl;
+    if (stackpos<=0) {
+        cerr << "BUG!: XMLwrapper::peek() - empty parentstack" << endl;
+        return (root);
+    };
+    return(parentstack[stackpos]);
+}
 
