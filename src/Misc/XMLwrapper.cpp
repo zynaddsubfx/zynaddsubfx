@@ -114,7 +114,7 @@ XMLwrapper::XMLwrapper()
     mxmlElementSetAttr(root,"ZynAddSubFX-author","Nasca Octavian Paul");
 
     //make the empty branch that will contain the information parameters
-    info=addparams0("INFORMATION");
+    info=addparams("INFORMATION",0);
 
     //save zynaddsubfx specifications
     beginbranch("BASE_PARAMETERS");
@@ -220,18 +220,18 @@ int XMLwrapper::dosavefile(const char *filename,int compression,const char *xmld
 
 void XMLwrapper::addpar(const string &name,int val)
 {
-    addparams2("par","name",name.c_str(),"value",int2str(val));
+    addparams("par",2,"name",name.c_str(),"value",int2str(val));
 };
 
 void XMLwrapper::addparreal(const string &name,REALTYPE val)
 {
-    addparams2("par_real","name",name.c_str(),"value",real2str(val));
+    addparams("par_real",2,"name",name.c_str(),"value",real2str(val));
 };
 
 void XMLwrapper::addparbool(const string &name,int val)
 {
-    if (val!=0) addparams2("par_bool","name",name.c_str(),"value","yes");
-    else addparams2("par_bool","name",name.c_str(),"value","no");
+    if (val!=0) addparams("par_bool",2,"name",name.c_str(),"value","yes");
+    else addparams("par_bool",2,"name",name.c_str(),"value","no");
 };
 
 void XMLwrapper::addparstr(const string &name,const string &val)
@@ -247,7 +247,7 @@ void XMLwrapper::beginbranch(const string &name)
     if(verbose)
         cout << "beginbranch()" << name << endl;
     push(node);
-    node=addparams0(name.c_str());
+    node=addparams(name.c_str(),0);
 };
 
 void XMLwrapper::beginbranch(const string &name,int id)
@@ -255,7 +255,7 @@ void XMLwrapper::beginbranch(const string &name,int id)
     if(verbose)
         cout << "beginbranch(" << id << ")" << name << endl;
     push(node);
-    node=addparams1(name.c_str(),"id",int2str(id));
+    node=addparams(name.c_str(),1,"id",int2str(id));
 };
 
 void XMLwrapper::endbranch()
@@ -496,27 +496,28 @@ REALTYPE XMLwrapper::str2real(const char *str) const
     return(result);
 };
 
-
-mxml_node_t *XMLwrapper::addparams0(const char *name) const
+mxml_node_t *XMLwrapper::addparams(const char *name, unsigned int params, ...) const
 {
-    mxml_node_t *element=mxmlNewElement(node,name);
-    return(element);
-};
+    /**@todo make this function send out a good error message if something goes
+     * wrong**/
+    mxml_node_t *element=mxmlNewElement(node, name);
 
-mxml_node_t *XMLwrapper::addparams1(const char *name,const char *par1,const char *val1) const
-{
-    mxml_node_t *element=mxmlNewElement(node,name);
-    mxmlElementSetAttr(element,par1,val1);
-    return(element);
-};
+    if(params){
+        va_list variableList;
+        va_start(variableList, params);
 
-mxml_node_t *XMLwrapper::addparams2(const char *name,const char *par1,const char *val1,const char *par2, const char *val2) const
-{
-    mxml_node_t *element=mxmlNewElement(node,name);
-    mxmlElementSetAttr(element,par1,val1);
-    mxmlElementSetAttr(element,par2,val2);
-    return(element);
-};
+        const char *ParamName;
+        const char *ParamValue;
+        while(params--){
+            ParamName  = va_arg(variableList, const char *);
+            ParamValue = va_arg(variableList, const char *);
+            if(verbose)
+                cout << "addparams()[" << params <<"]=" << name << " " << ParamName <<"=\"" << ParamValue << "\"" << endl;
+            mxmlElementSetAttr(element, ParamName, ParamValue);
+        }
+    }
+    return element;
+}
 
 void XMLwrapper::push(mxml_node_t *node)
 {

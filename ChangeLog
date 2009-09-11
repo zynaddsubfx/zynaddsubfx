@@ -897,3 +897,5 @@
 	    - Moved PADsynth_used from public struct to has/set methods in XMLwrapper
 	    - Created wrapper functions, so that XMLwrapper can be somewhat
 	      usable when const
+	    - Removed multiple addparam methods and replaced it with one
+	      variable argument function

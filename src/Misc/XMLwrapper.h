@@ -239,25 +239,17 @@ private:
     mxml_node_t *info;/**<Node used to store the information about the data*/
 
     /**
-     * Adds params like this:
-     * <name>.
-     * @returns The node
+     * Create mxml_node_t with specified name and parameters
+     *
+     * Results should look like:
+     * <name optionalParam1="value1" optionalParam2="value2" ...>
+     *
+     * @param name The name of the xml node
+     * @param params The number of the attributes
+     * @param ... const char * pairs that are in the format attribute_name,
+     * attribute_value
      */
-    mxml_node_t *addparams0(const char *name) const;
-
-    /**
-     * Adds params like this:
-     * <name par1="val1">.
-     * @returns The node
-     */
-    mxml_node_t *addparams1(const char *name,const char *par1,const char *val1) const;
-
-    /**
-     * Adds params like this:
-     * <name par1="val1" par2="val2">.
-     * @returns the node
-     */
-    mxml_node_t *addparams2(const char *name,const char *par1,const char *val1,const char *par2, const char *val2) const;
+    mxml_node_t *addparams(const char *name, unsigned int params, ...) const;
 
     /**
      * Convert integer to string
