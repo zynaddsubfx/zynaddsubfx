@@ -31,11 +31,6 @@
 #ifndef XML_WRAPPER_H
 #define XML_WRAPPER_H
 
-#define TMPSTR_SIZE 50
-
-//the maxim tree depth
-#define STACKSIZE 100
-
 /**Mxml wrapper*/
 class XMLwrapper
 {
@@ -249,12 +244,6 @@ private:
      * attribute_value
      */
     mxml_node_t *addparams(const char *name, unsigned int params, ...) const;
-
-    /**this is used to store the parents.
-     * @todo Use the stack class provided by C++*/
-    mxml_node_t *parentstack[STACKSIZE];
-    int stackpos;/**<position in stack*/
-
 
     void push(mxml_node_t *node);
 

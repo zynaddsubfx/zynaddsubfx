@@ -36,9 +36,7 @@
 
 using namespace std;
 
-int xml_k=0;
-char tabs[STACKSIZE+2];
-
+int xml_k = 0;
 bool verbose = false;
 
 const char *XMLwrapper_whitespace_callback(mxml_node_t *node,int where)
@@ -93,11 +91,9 @@ const char *mxmlElementGetAttr(const mxml_node_t *node, const char *name)
 
 XMLwrapper::XMLwrapper()
 {
-    ZERO(&parentstack,(int)sizeof(parentstack));
     ZERO(&values,(int)sizeof(values));
 
     minimal=true;
-    stackpos=0;
 
     tree=mxmlNewElement(MXML_NO_PARENT,"?xml version=\"1.0\" encoding=\"UTF-8\"?");
     /*  for mxml 2.1 (and older)
@@ -185,8 +181,7 @@ int XMLwrapper::saveXMLfile(const string &filename) const
 
 char *XMLwrapper::getXMLdata() const
 {
-    //xml_k=0;
-    ZERO(tabs,STACKSIZE+2);
+    xml_k=0;
 
     char *xmldata=mxmlSaveAllocString(tree,XMLwrapper_whitespace_callback);
 
@@ -276,10 +271,7 @@ int XMLwrapper::loadXMLfile(const string &filename)
     if (tree!=NULL) mxmlDelete(tree);
     tree=NULL;
 
-    ZERO(&parentstack,(int)sizeof(parentstack));
     ZERO(&values,(int)sizeof(values));
-
-    stackpos=0;
 
     const char *xmldata=doloadfile(filename.c_str());
     if (xmldata==NULL) return(-1);//the file could not be loaded or uncompressed
@@ -338,10 +330,7 @@ bool XMLwrapper::putXMLdata(const char *xmldata)
     if (tree!=NULL) mxmlDelete(tree);
     tree=NULL;
 
-    ZERO(&parentstack,(int)sizeof(parentstack));
     ZERO(&values,(int)sizeof(values));
-
-    stackpos=0;
 
     if (xmldata==NULL) return (false);
 
@@ -385,8 +374,7 @@ void XMLwrapper::exitbranch()
 {
     if(verbose)
         cout << "exitbranch() " << endl;
-    /**@bug Does not set the current node correctly*/
-    pop();
+    node = pop();
 };
 
 
@@ -498,52 +486,27 @@ void XMLwrapper::push(mxml_node_t *node)
 {
     if(verbose)
         cout << "push() " << node << "-" << node->value.element.name << endl;
-    if (stackpos>=STACKSIZE-1) {
-        cerr << "BUG!: XMLwrapper::push() - full parentstack" << endl;
-        return;
-    };
-    stackpos++;
-    parentstack[stackpos]=node;
+    this->node = node;
+}
 
-//    printf("push %d - %s\n",stackpos,node->value.element.name);
-
-};
 mxml_node_t *XMLwrapper::pop()
 {
     if(verbose)
-        cout << "pop()  " << node->parent << " : " << parentstack[stackpos] << "-" << node->parent->value.element.name << " -" << parentstack[stackpos]->value.element.name <<endl;
-    if (stackpos<=0) {
-        cerr << "BUG!: XMLwrapper::pop() - empty parentstack" << endl;
-        return (root);
-    };
-    mxml_node_t *node=parentstack[stackpos];
-    parentstack[stackpos]=NULL;
-
-//    printf("pop %d - %s\n",stackpos,node->value.element.name);
-
-    stackpos--;
-    return(node);
+        cout << "pop()  " << node->parent << "-" << node->parent->value.element.name << endl;
+    return node->parent;
 };
 
 mxml_node_t *XMLwrapper::peek()
 {
     if(verbose)
-        cout << "peek() " << node << " : " << parentstack[stackpos] << "-" << node->value.element.name << " -" << parentstack[stackpos]->value.element.name << endl;
-    if (stackpos<=0) {
-        cerr << "BUG!: XMLwrapper::peek() - empty parentstack" << endl;
-        return (root);
-    };
-    return(parentstack[stackpos]);
+        cout << "peek() " << node << "-" << node->value.element.name << endl;
+    return node;
 }
 
 const mxml_node_t *XMLwrapper::peek() const
 {
     if(verbose)
-        cout << "peek()const " << node << " : " << parentstack[stackpos] << "-" << node->value.element.name << " -" << parentstack[stackpos]->value.element.name << endl;
-    if (stackpos<=0) {
-        cerr << "BUG!: XMLwrapper::peek() - empty parentstack" << endl;
-        return (root);
-    };
-    return(parentstack[stackpos]);
+        cout << "peek()const " << node << "-" << node->value.element.name << endl;
+    return node;
 }
 

@@ -903,3 +903,4 @@
 	    - Replaced int2str, real2str, str2int, and str2real from XMLwrapper
 	      with stringTo<T> and stringFrom<T> function templates in Util.
 	    - Moved newFFTFREQS and deleteFFTFREQS from Util to FFTwrapper
+	    - Removed unneeded stack from XMLwrapper
