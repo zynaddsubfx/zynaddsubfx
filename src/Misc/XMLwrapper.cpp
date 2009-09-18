@@ -245,23 +245,22 @@ void XMLwrapper::beginbranch(const string &name)
 {
     if(verbose)
         cout << "beginbranch()" << name << endl;
-    push(node);
-    node=addparams(name.c_str(),0);
+    node = addparams(name.c_str(),0);
 };
 
 void XMLwrapper::beginbranch(const string &name,int id)
 {
     if(verbose)
         cout << "beginbranch(" << id << ")" << name << endl;
-    push(node);
-    node=addparams(name.c_str(),1,"id",stringFrom<int>(id).c_str());
+    node = addparams(name.c_str(),1,"id",stringFrom<int>(id).c_str());
 };
 
 void XMLwrapper::endbranch()
 {
     if(verbose)
-        cout << "endbranch()" << endl;
-    node=pop();
+        cout << "endbranch()" << node << "-" << node->value.element.name << " To "
+             << node->parent << "-" << node->parent->value.element.name << endl;
+    node = node->parent;
 };
 
 
@@ -283,9 +282,8 @@ int XMLwrapper::loadXMLfile(const string &filename)
     if (tree==NULL) return(-2);//this is not XML
 
 
-    node=root=mxmlFindElement(tree,tree,"ZynAddSubFX-data",NULL,NULL,MXML_DESCEND);
+    node = root = mxmlFindElement(tree,tree,"ZynAddSubFX-data",NULL,NULL,MXML_DESCEND);
     if (root==NULL) return(-3);//the XML doesnt embbed zynaddsubfx data
-    push(root);
 
     //fetch version information
     version.Major    = stringTo<int>(mxmlElementGetAttr(root,"version-major"));
@@ -333,18 +331,20 @@ char *XMLwrapper::doloadfile(const string &filename) const
 
 bool XMLwrapper::putXMLdata(const char *xmldata)
 {
-    if (tree!=NULL) mxmlDelete(tree);
+    if (tree!=NULL)
+        mxmlDelete(tree);
+
     tree=NULL;
+    if (xmldata==NULL)
+        return (false);
 
-    if (xmldata==NULL) return (false);
+    root = tree = mxmlLoadString(NULL,xmldata,MXML_OPAQUE_CALLBACK);
+    if (tree==NULL)
+        return(false);
 
-    root=tree=mxmlLoadString(NULL,xmldata,MXML_OPAQUE_CALLBACK);
-
-    if (tree==NULL) return(false);
-
-    node=root=mxmlFindElement(tree,tree,"ZynAddSubFX-data",NULL,NULL,MXML_DESCEND);
-    if (root==NULL) return (false);
-    push(root);
+    node = root = mxmlFindElement(tree,tree,"ZynAddSubFX-data",NULL,NULL,MXML_DESCEND);
+    if (root==NULL)
+        return (false);
 
     return(true);
 };
@@ -355,10 +355,11 @@ int XMLwrapper::enterbranch(const string &name)
 {
     if(verbose)
         cout << "enterbranch() " << name << endl;
-    mxml_node_t *tmp = mxmlFindElement(peek(),peek(),name.c_str(),NULL,NULL,MXML_DESCEND_FIRST);
-    if (tmp==NULL) return(0);
+    mxml_node_t *tmp = mxmlFindElement(node,node,name.c_str(),NULL,NULL,MXML_DESCEND_FIRST);
+    if (tmp==NULL)
+        return(0);
 
-    push(tmp);
+    node = tmp;
     return(1);
 };
 
@@ -366,10 +367,11 @@ int XMLwrapper::enterbranch(const string &name,int id)
 {
     if(verbose)
         cout << "enterbranch("<<id<<") " << name << endl;
-    mxml_node_t *tmp = mxmlFindElement(peek(),peek(),name.c_str(),"id",stringFrom<int>(id).c_str(),MXML_DESCEND_FIRST);
-    if (tmp==NULL) return(0);
+    mxml_node_t *tmp = mxmlFindElement(node,node,name.c_str(),"id",stringFrom<int>(id).c_str(),MXML_DESCEND_FIRST);
+    if (tmp==NULL)
+        return(0);
 
-    push(tmp);
+    node = tmp;
     return(1);
 };
 
@@ -377,8 +379,9 @@ int XMLwrapper::enterbranch(const string &name,int id)
 void XMLwrapper::exitbranch()
 {
     if(verbose)
-        cout << "exitbranch() " << endl;
-    node = pop();
+        cout << "exitbranch()" << node << "-" << node->value.element.name << " To "
+             << node->parent << "-" << node->parent->value.element.name << endl;
+    node = node->parent;
 };
 
 
@@ -395,7 +398,7 @@ int XMLwrapper::getbranchid(int min, int max) const
 
 int XMLwrapper::getpar(const string &name,int defaultpar,int min,int max) const
 {
-    const mxml_node_t * tmp = mxmlFindElement(peek(),peek(),"par","name",name.c_str(),MXML_DESCEND_FIRST);
+    const mxml_node_t * tmp = mxmlFindElement(node,node,"par","name",name.c_str(),MXML_DESCEND_FIRST);
 
     if (tmp==NULL) return(defaultpar);
 
@@ -416,7 +419,7 @@ int XMLwrapper::getpar127(const string &name,int defaultpar) const
 
 int XMLwrapper::getparbool(const string &name,int defaultpar) const
 {
-    const mxml_node_t * tmp = mxmlFindElement(peek(),peek(),"par_bool","name",name.c_str(),MXML_DESCEND_FIRST);
+    const mxml_node_t * tmp = mxmlFindElement(node,node,"par_bool","name",name.c_str(),MXML_DESCEND_FIRST);
 
     if (tmp==NULL) return(defaultpar);
 
@@ -430,7 +433,7 @@ int XMLwrapper::getparbool(const string &name,int defaultpar) const
 void XMLwrapper::getparstr(const string &name,char *par,int maxstrlen) const
 {
     ZERO(par,maxstrlen);
-    const mxml_node_t * tmp = mxmlFindElement(peek(),peek(),"string","name",name.c_str(),MXML_DESCEND_FIRST);
+    const mxml_node_t * tmp = mxmlFindElement(node,node,"string","name",name.c_str(),MXML_DESCEND_FIRST);
 
     if (tmp==NULL) return;
     if (tmp->child==NULL) return;
@@ -442,7 +445,7 @@ void XMLwrapper::getparstr(const string &name,char *par,int maxstrlen) const
 
 REALTYPE XMLwrapper::getparreal(const char *name,REALTYPE defaultpar) const
 {
-    const mxml_node_t * tmp = mxmlFindElement(peek(),peek(),"par_real","name",name,MXML_DESCEND_FIRST);
+    const mxml_node_t * tmp = mxmlFindElement(node,node,"par_real","name",name,MXML_DESCEND_FIRST);
     if (tmp==NULL) return(defaultpar);
 
     const char *strval=mxmlElementGetAttr(tmp,"value");
@@ -484,33 +487,5 @@ mxml_node_t *XMLwrapper::addparams(const char *name, unsigned int params, ...) c
         }
     }
     return element;
-}
-
-void XMLwrapper::push(mxml_node_t *node)
-{
-    if(verbose)
-        cout << "push() " << node << "-" << node->value.element.name << endl;
-    this->node = node;
-}
-
-mxml_node_t *XMLwrapper::pop()
-{
-    if(verbose)
-        cout << "pop()  " << node->parent << "-" << node->parent->value.element.name << endl;
-    return node->parent;
-};
-
-mxml_node_t *XMLwrapper::peek()
-{
-    if(verbose)
-        cout << "peek() " << node << "-" << node->value.element.name << endl;
-    return node;
-}
-
-const mxml_node_t *XMLwrapper::peek() const
-{
-    if(verbose)
-        cout << "peek()const " << node << "-" << node->value.element.name << endl;
-    return node;
 }
 

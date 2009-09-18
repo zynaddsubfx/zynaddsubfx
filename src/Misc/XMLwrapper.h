@@ -229,7 +229,7 @@ private:
 
     mxml_node_t *tree;/**<all xml data*/
     mxml_node_t *root;/**<xml data used by zynaddsubfx*/
-    mxml_node_t *node;/**<current node*/
+    mxml_node_t *node;/**<current subtree in parsing or writing */
     mxml_node_t *info;/**<Node used to store the information about the data*/
 
     /**
@@ -244,14 +244,6 @@ private:
      * attribute_value
      */
     mxml_node_t *addparams(const char *name, unsigned int params, ...) const;
-
-    void push(mxml_node_t *node);/**<puts node onto stack 
-                                     @deprecated just set this->node*/
-    mxml_node_t *pop();/**<pops node from stack
-                           @deprecated just get node->parent*/
-    mxml_node_t *peek();/**<returns current stack top
-                            @deprecated just get this->node*/
-    const mxml_node_t *peek() const;
 
     /**@todo keep these numbers up to date*/
     struct{
