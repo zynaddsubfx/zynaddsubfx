@@ -904,3 +904,6 @@
 	      with stringTo<T> and stringFrom<T> function templates in Util.
 	    - Moved newFFTFREQS and deleteFFTFREQS from Util to FFTwrapper
 	    - Removed unneeded stack from XMLwrapper
+
+18 Sep 2009 (Mark McCurry)
+	    - Started to use versioning information in XMLwrapper

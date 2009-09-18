@@ -49,8 +49,9 @@ std::string stringFrom(T x)
 }
 
 template <class T>
-T stringTo(std::string str)
+T stringTo(const char * x)
 {
+    std::string str = x!=NULL ? x : "0"; //should work for the basic float/int
     std::stringstream ss(str);
     T ans;
     ss >> ans;

@@ -245,20 +245,20 @@ private:
      */
     mxml_node_t *addparams(const char *name, unsigned int params, ...) const;
 
-    void push(mxml_node_t *node);
-
-    /**Pops top node off of parent stack*/
-    mxml_node_t *pop();
-    /**Returns top node off of parent stack*/
-    mxml_node_t *peek();
+    void push(mxml_node_t *node);/**<puts node onto stack 
+                                     @deprecated just set this->node*/
+    mxml_node_t *pop();/**<pops node from stack
+                           @deprecated just get node->parent*/
+    mxml_node_t *peek();/**<returns current stack top
+                            @deprecated just get this->node*/
     const mxml_node_t *peek() const;
 
-    struct {
-        struct {
-            int major;/**<major version number.*/
-            int minor;/**<minor version number.*/
-        }xml_version;/**<Stores ZynAddSubFX versioning information*/
-    }values;/**< Stores ZynAddSubFX versioning information*/
+    /**@todo keep these numbers up to date*/
+    struct{
+        int Major;/**<major version number.*/
+        int Minor;/**<minor version number.*/
+        int Revision;/**<version revision number.*/
+    }version;
 
 };
 
