@@ -182,6 +182,13 @@ public:
     void getparstr(const std::string &name,char *par,int maxstrlen) const;
 
     /**
+     * Get the string value stored in the node.
+     * @param name The parameter name.
+     * @param defaultpar The default value if the real value is not found.
+     */
+    std::string getparstr(const std::string &name,const std::string &defaultpar) const;
+
+    /**
      * Returns the real value stored in the node.
      * @param name The parameter name.
      * @param defaultpar The default value if the real value is not found.

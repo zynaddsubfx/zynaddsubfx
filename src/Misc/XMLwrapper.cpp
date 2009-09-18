@@ -443,6 +443,16 @@ void XMLwrapper::getparstr(const string &name,char *par,int maxstrlen) const
 
 };
 
+string XMLwrapper::getparstr(const string &name,const std::string &defaultpar) const
+{
+    const mxml_node_t * tmp = mxmlFindElement(node, node, "string", "name", name.c_str(), MXML_DESCEND_FIRST);
+
+    if (tmp==NULL||tmp->child==NULL||tmp->child->type!=MXML_OPAQUE)
+        return defaultpar;
+
+    return tmp->child->value.element.name;
+}
+
 REALTYPE XMLwrapper::getparreal(const char *name,REALTYPE defaultpar) const
 {
     const mxml_node_t * tmp = mxmlFindElement(node,node,"par_real","name",name,MXML_DESCEND_FIRST);

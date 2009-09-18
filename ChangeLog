@@ -908,3 +908,4 @@
 18 Sep 2009 (Mark McCurry)
 	    - Started to use versioning information in XMLwrapper
 	    - Remove last of stack helper functions in XMLwrapper
+	    - Added std::string retreval to XMLwrapper
