@@ -902,3 +902,4 @@
 22 Sep 2009 (Mark McCurry)
 	    - Changed temporary data for Oscilgen from static to instance
 	      recommended by Tobias Doerffel
+	    - Fixed Memory leaks in UI based upon James Morris' patch
