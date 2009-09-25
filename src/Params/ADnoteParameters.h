@@ -36,6 +36,7 @@
 #include "Presets.h"
 
 enum FMTYPE {NONE,MORPH,RING_MOD,PHASE_MOD,FREQ_MOD,PITCH_MOD};
+extern int ADnote_unison_sizes[];
 
 /*****************************************************************/
 /*                    GLOBAL PARAMETERS                          */
@@ -114,6 +115,24 @@ struct ADnoteVoiceParam {
 
     /** If the voice is enabled */
     unsigned char Enabled;
+
+	/** How many subvoices are used in this voice */
+	unsigned char Unison_size;
+
+	/** How subvoices are spread */
+	unsigned char Unison_frequency_spread;
+
+	/** Stereo spread of the subvoices*/
+	unsigned char Unison_stereo_spread;
+	
+	/** Vibratto of the subvoices (which makes the unison more "natural")*/
+	unsigned char Unison_vibratto;
+
+	/** Medium speed of the vibratto of the subvoices*/
+	unsigned char Unison_vibratto_speed;
+
+	/** Unison invert phase */
+	unsigned char Unison_invert_phase;//0=none,1=random,2=50%,3=33%,4=25%
 
     /** Type of the voice (0=Sound,1=Noise)*/
     unsigned char Type;
@@ -269,6 +288,9 @@ public:
     void getfromXML(XMLwrapper *xml);
 
     REALTYPE getBandwidthDetuneMultiplier();
+	REALTYPE getUnisonFrequencySpreadCents(int nvoice);
+	int get_unison_size_index(int nvoice);
+	void set_unison_size_index(int nvoice,int index);
 private:
     void defaults(int n);//n is the nvoice
 

@@ -1,4 +1,4 @@
-6 Mar 2002  -(dupamasa - in jur de ora 4) Mi-a venit ideea exact cum sa fac cand ma plimbam pe strada Rolirudnap
+6 Mar 2002  -(dupamasa - in jur de ora 4) Mi-a venit ideea exact cum sa fac cand ma plimbam pe strada Pandurilor
 7/8 Mar 2002 - Started to do diagrams
 10 Mar 2002 - Started to write "voice"
 11 Mar 2002 - Heard first sound
@@ -910,6 +910,27 @@
 	    - Remove last of stack helper functions in XMLwrapper
 	    - Added std::string retreval to XMLwrapper
 
+20 Sep 2009 (Paul Nasca)
+	    - Started to implement the Unison effect for ADsynth
+	    
+22 Sep 2009 (Paul Nasca)
+	    - Added vibratto and other features to Unison effect
+
+22 Sep 2009 (Mark McCurry)
+	    - Changed temporary data for Oscilgen from static to instance
+	      recommended by Tobias Doerffel
+	    - Fixed Memory leaks in UI based upon James Morris' patch
+
+23 Sep 2009 (Paul Nasca)
+	    - Added unison invert phase
+	    - Made unison frequency spread to depend on Bandwidth controllers and parameters
+	    - Added unison vibratto speed control and other improvements
+	    - bugfixes: Voice Amplitude Envelope and FM	    
+
+24 Sep 2009 (Paul Nasca)
+	    - Small enhancements and bugfixes to Unison
+	    - Started to implement Bandwidth to the Reverb effect
+		    
 25 Sep 2009 (Mark McCurry)
 	    - Allowed for XMLwrapper to retrieve strings stored in mxml TEXT
 	      fields
