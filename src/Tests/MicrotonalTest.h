@@ -63,7 +63,7 @@ public:
 
         TS_ASSERT_DELTA(testMicro->getnotefreq(19,0),24.4997,0.0001);
     }
-    
+
     //performs basic sanity check with the == and != operators
     void testeqeq(){
         Microtonal other;
@@ -77,68 +77,35 @@ public:
         //Gah, the XMLwrapper is a twisted maze
         testMicro->Penabled=1;
         XMLwrapper xml;
-        XMLwrapper xml2;
         xml.beginbranch("Dummy"); //this should not be needed, but odd behavior
                                   //seems to exist from MICROTONAL being on the
-                                  //top of the stack 
+                                  //top of the stack
         xml.beginbranch("MICROTONAL");
         testMicro->add2XML(&xml);
         xml.endbranch();
-        xml.endbranch();//this will cause the system to complain about
-                        //stack errors
-        
-        char *tmp=xml.getXMLdata();
-        xml2.putXMLdata(tmp);
-        //printf("%s",tmp);
-        Microtonal other;
+        xml.endbranch();
 
-        //cout << (char*)testMicro->Pname << " vs1 "
-        //     << (char*)other.Pname << endl;
+        char *tmp = xml.getXMLdata();
+        Microtonal other;
 
         other.Penabled=1;
         strcpy((char *)other.Pname,"Myname");//will be nicer with strings
 
-        //cout << (char*)testMicro->Pname << " vs1.5 "
-        //     << (char*)other.Pname << endl;
-
         TS_ASSERT(*testMicro!=other);//sanity check
-       
-        TS_ASSERT(xml2.enterbranch("Dummy"));
-        TS_ASSERT(xml2.enterbranch("MICROTONAL"));
-        //printf("%s",tmp);
 
-        other.getfromXML(&xml2); //failure here
-        xml2.exitbranch();
-        xml2.exitbranch();
-        char *tmpo=xml2.getXMLdata();
+        TS_ASSERT(xml.enterbranch("Dummy"));
+        TS_ASSERT(xml.enterbranch("MICROTONAL"));
 
-        //cout << (char*)testMicro->Pname << " vs2 "
-        //     << (char*)other.Pname << endl; //shows error here
+        other.getfromXML(&xml);
+        xml.exitbranch();
+        xml.exitbranch();
+        char *tmpo=xml.getXMLdata();
 
-        //printf("%s",tmpo);
-
-        FILE *f=fopen("aaaa.xml","w");
-        fprintf(f,tmp);
-        fclose(f);
-        FILE *f2=fopen("aaaaoo.xml","w");
-        fprintf(f2,tmpo);
-        fclose(f2);
-        TS_ASSERT(!strcmp(tmp,tmpo)); //these should be equal, but there seems
-                                      //to be one line that is duplicated
-                                      //(I think in one of the reads)
+        TS_ASSERT(!strcmp(tmp,tmpo));
         free(tmp);
         free(tmpo);
 
-		//testMicro->saveXML("0testMicro.xml");
-		//other.saveXML("0other.xml");
-
         TS_ASSERT(*testMicro==other); //cxxTest sees error here
-        //cout << (char*)testMicro->Pname << " vs3 "
-        //     << (char*)other.Pname << endl;
-        //remove unneeded files
-        remove("aaaa.xml");
-        remove("aaaaoo.xml");
-
     }
 
     /**\todo Test Saving/loading from file*/

@@ -437,9 +437,14 @@ void XMLwrapper::getparstr(const string &name,char *par,int maxstrlen) const
 
     if (tmp==NULL) return;
     if (tmp->child==NULL) return;
-    if (tmp->child->type!=MXML_OPAQUE) return;
-
-    snprintf(par,maxstrlen,"%s",tmp->child->value.element.name);
+    if (tmp->child->type==MXML_OPAQUE){
+        snprintf(par,maxstrlen,"%s",tmp->child->value.element.name);
+        return;
+    }
+    if (tmp->child->type==MXML_TEXT && tmp->child->value.text.string!=NULL){
+        snprintf(par,maxstrlen,"%s",tmp->child->value.text.string);
+        return;
+    }
 
 };
 
@@ -447,10 +452,16 @@ string XMLwrapper::getparstr(const string &name,const std::string &defaultpar) c
 {
     const mxml_node_t * tmp = mxmlFindElement(node, node, "string", "name", name.c_str(), MXML_DESCEND_FIRST);
 
-    if (tmp==NULL||tmp->child==NULL||tmp->child->type!=MXML_OPAQUE)
+    if (tmp==NULL||tmp->child==NULL)
         return defaultpar;
 
-    return tmp->child->value.element.name;
+    if (tmp->child->type==MXML_OPAQUE && tmp->child->value.element.name!=NULL)
+        return tmp->child->value.element.name;
+
+    if (tmp->child->type==MXML_TEXT && tmp->child->value.text.string!=NULL)
+        return tmp->child->value.text.string;
+
+    return defaultpar;
 }
 
 REALTYPE XMLwrapper::getparreal(const char *name,REALTYPE defaultpar) const

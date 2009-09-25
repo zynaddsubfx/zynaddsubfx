@@ -909,3 +909,7 @@
 	    - Started to use versioning information in XMLwrapper
 	    - Remove last of stack helper functions in XMLwrapper
 	    - Added std::string retreval to XMLwrapper
+
+25 Sep 2009 (Mark McCurry)
+	    - Allowed for XMLwrapper to retrieve strings stored in mxml TEXT
+	      fields
