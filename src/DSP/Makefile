@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-objects=FFTwrapper.o AnalogFilter.o FormantFilter.o SVFilter.o Filter.o
+objects=FFTwrapper.o AnalogFilter.o FormantFilter.o SVFilter.o Filter.o Unison.o
 
 
 all: $(objects)
