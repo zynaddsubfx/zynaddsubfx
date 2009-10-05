@@ -944,3 +944,6 @@
 02 Oct 2009 (Mark McCurry)
 	    - Added OSS failsafe by Jérémie Andréi
 
+04 Oct 2009 (Mark McCurry)
+	    - fixed Ctest issues
+

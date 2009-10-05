@@ -36,10 +36,6 @@ public:
         denormalkillbuf= new REALTYPE[SOUND_BUFFER_SIZE];
         for (int i=0;i<SOUND_BUFFER_SIZE;i++) denormalkillbuf[i]=0;
 
-        OscilGen::tmpsmps=new REALTYPE[OSCIL_SIZE];
-        newFFTFREQS(&OscilGen::outoscilFFTfreqs,OSCIL_SIZE/2);
-
-
         //phew, glad to get thouse out of my way. took me a lot of sweat and gdb to get this far...
 
         //prepare the default settings
@@ -74,7 +70,6 @@ public:
 
     void tearDown() {
         delete note;
-        deleteFFTFREQS(&OscilGen::outoscilFFTfreqs);
     }
 
     void testDefaults() {

@@ -20,29 +20,30 @@
 
 */
 #include <cxxtest/TestSuite.h>
-#include "../XMLwrapper.h"
+#include "../Misc/XMLwrapper.h"
 
-class XMLwrapperTest : pubilc CxxTest::TestSuite
+class XMLwrapperTest : public CxxTest::TestSuite
 {
-pubilic:
+public:
     void setUp() {
         xmla = new XMLwrapper;
         xmlb = new XMLwrapper;
     }
 
+
+    void testAddPar() {
+        xmla->addpar("my Pa*_ramet@er",75);
+        TS_ASSERT_EQUALS(xmla->getpar("my Pa*_ramet@er",0,-200,200),75);
+    }
+    
     void tearDown() {
         delete xmla;
         delete xmlb;
-    }
-
-    void testAddPar(){
-        xmla.addpar("my Pa*_ramet@er",75);
-        TS_ASSERT_EQUALS(xmla.getpar("my Pa*_ramet@er",0,-200,200),75);
     }
 
 
 private:
         XMLwrapper *xmla;
         XMLwrapper *xmlb;
-}
+};
 
