@@ -119,6 +119,8 @@ include_directories(
 	)
 
 
+#for tests looking for files stored in the source dir
+add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 #macro for tests
 macro(unit_test NAME CXX_FILE FILES)
     #	if (CompileTests)
