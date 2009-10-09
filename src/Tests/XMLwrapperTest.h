@@ -22,27 +22,27 @@
 #include <cxxtest/TestSuite.h>
 #include "../Misc/XMLwrapper.h"
 
-class XMLwrapperTest : public CxxTest::TestSuite
+class XMLwrapperTest:public CxxTest::TestSuite
 {
-public:
-    void setUp() {
-        xmla = new XMLwrapper;
-        xmlb = new XMLwrapper;
-    }
+    public:
+        void setUp() {
+            xmla = new XMLwrapper;
+            xmlb = new XMLwrapper;
+        }
 
 
-    void testAddPar() {
-        xmla->addpar("my Pa*_ramet@er",75);
-        TS_ASSERT_EQUALS(xmla->getpar("my Pa*_ramet@er",0,-200,200),75);
-    }
-    
-    void tearDown() {
-        delete xmla;
-        delete xmlb;
-    }
+        void testAddPar() {
+            xmla->addpar("my Pa*_ramet@er", 75);
+            TS_ASSERT_EQUALS(xmla->getpar("my Pa*_ramet@er", 0, -200, 200), 75);
+        }
+
+        void tearDown() {
+            delete xmla;
+            delete xmlb;
+        }
 
 
-private:
+    private:
         XMLwrapper *xmla;
         XMLwrapper *xmlb;
 };

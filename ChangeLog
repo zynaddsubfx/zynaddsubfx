@@ -954,3 +954,6 @@
 	    - Started to see if memset/memcpy offer performance benifits when
 	      widely used
 	    - Added basic SUBnote test
+
+09 Oct 2009 (Mark McCurry)
+	    - Restylized codebase with uncrustify

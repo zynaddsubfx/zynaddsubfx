@@ -23,51 +23,50 @@
 #include <iostream>
 #include "../Params/Controller.h"
 
-class ControllerTest : public CxxTest::TestSuite
+class ControllerTest:public CxxTest::TestSuite
 {
-public:
-    void setUp() {
-        testCtl=new Controller();
-    }
-
-    void tearDown() {
-        delete testCtl;
-    }
-
-
-    void testPortamentoRange() {
-        //Initialize portamento
-        testCtl->setportamento(127);
-        testCtl->portamento.time=127;
-        testCtl->initportamento(40.0,400.0,false);
-        //Bounds Check
-        while(testCtl->portamento.used){
-            TS_ASSERT((0.0<=testCtl->portamento.x)&&
-                    (testCtl->portamento.x<=1.0));
-            TS_ASSERT((0.1<=testCtl->portamento.freqrap)&&
-                    (testCtl->portamento.freqrap<=1.0));
-            testCtl->updateportamento();
+    public:
+        void setUp() {
+            testCtl = new Controller();
         }
-        TS_ASSERT((0.0<=testCtl->portamento.x)&&
-                (testCtl->portamento.x<=1.0));
-            TS_ASSERT((0.1<=testCtl->portamento.freqrap)&&
-                    (testCtl->portamento.freqrap<=1.0));
-    }
 
-    void testPortamentoValue() {
-        testCtl->setportamento(127);
-        testCtl->portamento.time=127;
-        testCtl->initportamento(40.0,400.0,false);
-        int i;
-        for(i=0;i<10;++i){
-            testCtl->updateportamento();
+        void tearDown() {
+            delete testCtl;
         }
-        //Assert that the numbers are the same as they were at release
-        TS_ASSERT_DELTA(testCtl->portamento.x,0.0290249,0.000001)
-        TS_ASSERT_DELTA(testCtl->portamento.freqrap,0.126122,0.000001)
-    }
 
-private:
-    Controller *testCtl;
 
+        void testPortamentoRange() {
+            //Initialize portamento
+            testCtl->setportamento(127);
+            testCtl->portamento.time = 127;
+            testCtl->initportamento(40.0, 400.0, false);
+            //Bounds Check
+            while(testCtl->portamento.used) {
+                TS_ASSERT((0.0 <= testCtl->portamento.x)
+                          && (testCtl->portamento.x <= 1.0));
+                TS_ASSERT((0.1 <= testCtl->portamento.freqrap)
+                          && (testCtl->portamento.freqrap <= 1.0));
+                testCtl->updateportamento();
+            }
+            TS_ASSERT((0.0 <= testCtl->portamento.x)
+                      && (testCtl->portamento.x <= 1.0));
+            TS_ASSERT((0.1 <= testCtl->portamento.freqrap)
+                      && (testCtl->portamento.freqrap <= 1.0));
+        }
+
+        void testPortamentoValue() {
+            testCtl->setportamento(127);
+            testCtl->portamento.time = 127;
+            testCtl->initportamento(40.0, 400.0, false);
+            int i;
+            for(i = 0; i < 10; ++i)
+                testCtl->updateportamento();
+            //Assert that the numbers are the same as they were at release
+            TS_ASSERT_DELTA(testCtl->portamento.x, 0.0290249, 0.000001)
+            TS_ASSERT_DELTA(testCtl->portamento.freqrap, 0.126122, 0.000001)
+        }
+
+    private:
+        Controller *testCtl;
 };
+
