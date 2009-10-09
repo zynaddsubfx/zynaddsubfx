@@ -289,7 +289,7 @@ version-revision="1" ZynAddSubFX-author="Nasca Octavian Paul">
 <FREQUENCY_LFO>
 <par_real name="freq" value="0.590551" />
 <par name="intensity" value="18" />
-<par name="start_phase" value="0" />
+<par name="start_phase" value="64" />
 <par name="lfo_type" value="0" />
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
@@ -488,7 +488,7 @@ version-revision="1" ZynAddSubFX-author="Nasca Octavian Paul">
 <FREQUENCY_LFO>
 <par_real name="freq" value="0.393701" />
 <par name="intensity" value="20" />
-<par name="start_phase" value="0" />
+<par name="start_phase" value="66" />
 <par name="lfo_type" value="0" />
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
@@ -570,7 +570,7 @@ version-revision="1" ZynAddSubFX-author="Nasca Octavian Paul">
 <FREQUENCY_LFO>
 <par_real name="freq" value="0.393701" />
 <par name="intensity" value="18" />
-<par name="start_phase" value="0" />
+<par name="start_phase" value="67" />
 <par name="lfo_type" value="0" />
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />

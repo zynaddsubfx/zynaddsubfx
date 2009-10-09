@@ -95,26 +95,26 @@ public:
 #endif
         sampleCount += SOUND_BUFFER_SIZE;
 
-        TS_ASSERT_DELTA(outL[255], 0.3022, 0.0001);
+        TS_ASSERT_DELTA(outL[255], 0.3019, 0.0001);
 
         note->relasekey();
 
 
         note->noteout(outL, outR);
         sampleCount += SOUND_BUFFER_SIZE;
-        TS_ASSERT_DELTA(outL[255], -0.1391, 0.0001);
+        TS_ASSERT_DELTA(outL[255], -0.1382, 0.0001);
 
         note->noteout(outL, outR);
         sampleCount += SOUND_BUFFER_SIZE;
-        TS_ASSERT_DELTA(outL[255], -0.0331, 0.0001);
+        TS_ASSERT_DELTA(outL[255], -0.0334, 0.0001);
 
         note->noteout(outL, outR);
         sampleCount += SOUND_BUFFER_SIZE;
-        TS_ASSERT_DELTA(outL[255], -0.1302, 0.0001);
+        TS_ASSERT_DELTA(outL[255], -0.1329, 0.0001);
 
         note->noteout(outL, outR);
         sampleCount += SOUND_BUFFER_SIZE;
-        TS_ASSERT_DELTA(outL[255], 0.2675, 0.0001);
+        TS_ASSERT_DELTA(outL[255], 0.2690, 0.0001);
 
         while (!note->finished()) {
             note->noteout(outL, outR);
