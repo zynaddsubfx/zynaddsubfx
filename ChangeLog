@@ -953,3 +953,4 @@
 08 Oct 2009 (Mark McCurry)
 	    - Started to see if memset/memcpy offer performance benifits when
 	      widely used
+	    - Added basic SUBnote test
