@@ -111,7 +111,6 @@ class MicrotonalTest:public CxxTest::TestSuite
         }
 
         /**\todo Test Saving/loading from file*/
-        //void testSaveLoad() {}
 
         //Test texttomapping TODO finish
         void testTextToMapping() {
