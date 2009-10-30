@@ -35,6 +35,8 @@
 #include "../Seq/Sequencer.h"
 #include "XMLwrapper.h"
 
+typedef enum { MUTEX_TRYLOCK, MUTEX_LOCK, MUTEX_UNLOCK } lockset;
+
 extern Dump dump;
 /** It sends Midi Messages to Parts, receives samples from parts,
  *  process them with system/insertion effects and mix them */
@@ -69,7 +71,11 @@ class Master
         /**put all data from the *data array to zynaddsubfx parameters (used for VST)*/
         void putalldata(char *data, int size);
 
-
+        //Mutex control
+        /**Control the Master's mutex state.
+         * @param lockset either trylock, lock, or unlock.
+         * @return true when successful false otherwise.*/
+        bool mutexLock(lockset request);
 
         //Midi IN
         void NoteOn(unsigned char chan,

@@ -30,6 +30,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <sched.h>
+
 
 int SAMPLE_RATE = 44100;
 int SOUND_BUFFER_SIZE = 256;
@@ -113,3 +115,14 @@ bool fileexists(const char *filename)
     return false;
 }
 
+void set_realtime()
+{
+#ifdef OS_LINUX
+    sched_param sc;
+    sc.sched_priority = 60;
+    //if you want get "sched_setscheduler undeclared" from compilation,
+    //you can safely remove the folowing line:
+    sched_setscheduler(0, SCHED_FIFO, &sc);
+    //if (err==0) printf("Real-time");
+#endif
+}

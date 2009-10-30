@@ -32,6 +32,8 @@
 #include "Config.h"
 #include "XMLwrapper.h"
 
+using namespace std;
+
 Config::Config()
 {}
 void Config::init()
@@ -178,6 +180,8 @@ void Config::init()
         sprintf(cfg.presetsDirList[2], "presets");
 #endif
     }
+    cfg.LinuxALSAaudioDev = "default";
+    cfg.nameTag = "";
 }
 
 Config::~Config()

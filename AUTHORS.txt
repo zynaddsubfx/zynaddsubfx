@@ -15,4 +15,5 @@ Contributors:
         Alexis Ballier (const char* <-> string mismatch, NULLMidi prototype fix)
         Tobias Doerffel (static vs instance variables alteration)
         James Morris (Memory leaks in FLTK GUI)
+        Alan Calvert (Portions of New IO)
 

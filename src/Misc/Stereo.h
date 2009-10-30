@@ -30,6 +30,7 @@ class Stereo
         /**Initializes Stereo with left and right set to val
          * @param val the value for both channels*/
         Stereo(const T &val);
+        Stereo() {};
         ~Stereo() {}
 
         void operator=(const Stereo<T> &smp);

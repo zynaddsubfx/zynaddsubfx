@@ -22,11 +22,12 @@
 #define SAMPLE_H
 #include "../globals.h"
 /**
- * Base Class for Samples
+ * Audio Samples Representation
  */
 class Sample
 {
     public:
+        Sample();
         Sample(const Sample &smp);
         Sample(int length, REALTYPE fill = 0);
         Sample(int length, const REALTYPE *fill);

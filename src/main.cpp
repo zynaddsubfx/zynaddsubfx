@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  main.c  -  Main file of the synthesizer
+  main.cpp  -  Main file of the synthesizer
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
@@ -38,6 +38,10 @@
 #include "Misc/Dump.h"
 extern Dump dump;
 
+//#ifdef NEW_IO
+#include "Nio/OutMgr.h"
+//#endif
+
 #ifdef ALSAMIDIIN
 #include "Input/ALSAMidiIn.h"
 #endif
@@ -72,10 +76,15 @@ MasterUI *ui;
 
 using namespace std;
 
-pthread_t thr1, thr2, thr3, thr4;
+pthread_t thr1, thr2, thr3, thr4;/**@deprecated*/
 Master   *master;
 int  swaplr    = 0; //1 for left-right swapping
 bool usejackit = false;
+
+#ifdef NEW_IO
+#include "Nio/AlsaEngine.h"//temporary include
+#include "Nio/OutMgr.h"
+#endif
 
 #ifdef JACKAUDIOOUT
 #include "Output/JACKaudiooutput.h"
@@ -101,22 +110,6 @@ LASHClient *lash;
 
 MidiIn *Midi;
 int     Pexitprogram = 0; //if the UI set this to 1, the program will exit
-
-/*
- * Try to get the realtime priority
- */
-void set_realtime()
-{
-#ifdef OS_LINUX
-    sched_param sc;
-
-    sc.sched_priority = 50;
-
-    //if you want get "sched_setscheduler undeclared" from compilation, you can safely remove the folowing line
-    sched_setscheduler(0, SCHED_FIFO, &sc);
-//    if (err==0) printf("Real-time");
-#endif
-}
 
 /*
  * Midi input thread
@@ -315,32 +308,32 @@ void initprogram()
     master = new Master();
     master->swaplr = swaplr;
 
-#if defined(JACKAUDIOOUT)
-    if(usejackit) {
-        bool tmp = JACKaudiooutputinit(master);
-#if defined(OSSAUDIOOUT)
-        if(!tmp)
-            cout << "\nUsing OSS instead." << endl;
-#else
-        if(!tmp)
-            exit(1);
-#endif
-        usejackit = tmp;
-    }
-#endif
-#if defined(OSSAUDIOOUT)
-    if(!usejackit)
-        audioout = new OSSaudiooutput();
-    else
-        audioout = NULL;
-#endif
+//#if defined(JACKAUDIOOUT)
+//    if(usejackit) {
+//        bool tmp = JACKaudiooutputinit(master);
+//#if defined(OSSAUDIOOUT)
+//        if(!tmp)
+//            cout << "\nUsing OSS instead." << endl;
+//#else
+//        if(!tmp)
+//            exit(1);
+//#endif
+//        usejackit = tmp;
+//    }
+//#endif
+//#if defined(OSSAUDIOOUT)
+//    if(!usejackit)
+//        audioout = new OSSaudiooutput();
+//    else
+//        audioout = NULL;
+//#endif
 
-#ifdef JACK_RTAUDIOOUT
-    JACKaudiooutputinit(master);
-#endif
-#ifdef PAAUDIOOUT
-    PAaudiooutputinit(master);
-#endif
+//#ifdef JACK_RTAUDIOOUT
+//    JACKaudiooutputinit(master);
+//#endif
+//#ifdef PAAUDIOOUT
+//    PAaudiooutputinit(master);
+//#endif
 
 #ifdef ALSAMIDIIN
     Midi = new ALSAMidiIn();
@@ -362,19 +355,19 @@ void initprogram()
 void exitprogram()
 {
     pthread_mutex_lock(&master->mutex);
-#ifdef OSSAUDIOOUT
-    delete (audioout);
-#endif
-#ifdef JACKAUDIOOUT
-    if(usejackit)
-        JACKfinish();
-#endif
-#ifdef JACK_RTAUDIOOUT
-    JACKfinish();
-#endif
-#ifdef PAAUDIOOUT
-    PAfinish();
-#endif
+//#ifdef OSSAUDIOOUT
+//    delete (audioout);
+//#endif
+//#ifdef JACKAUDIOOUT
+//    if(usejackit)
+//        JACKfinish();
+//#endif
+//#ifdef JACK_RTAUDIOOUT
+//    JACKfinish();
+//#endif
+//#ifdef PAAUDIOOUT
+//    PAfinish();
+//#endif
 
 #ifndef DISABLE_GUI
     delete (ui);
@@ -452,15 +445,10 @@ int main(int argc, char *argv[])
     /* Parse command-line options */
 #ifdef OS_LINUX
     struct option opts[] = {
-        {
-            "load", 2, NULL, 'l'
+        {"load", 2, NULL, 'l'},
+        {"load-instrument", 2, NULL, 'L'
         },
-        {
-            "load-instrument", 2, NULL, 'L'
-        },
-        {
-            "sample-rate", 2, NULL, 'r'
-        },
+        {"sample-rate", 2, NULL, 'r'},
         {
             "buffer-size", 2, NULL, 'b'
         },
@@ -690,6 +678,15 @@ int main(int argc, char *argv[])
 //!(defined(JACKAUDIOOUT)||defined(JACK_RTAUDIOOUT)||defined(PAAUDIOOUT)||defined(VSTAUDIOOUT))
     if(!usejackit)
         pthread_create(&thr2, NULL, thread2, NULL);
+#endif
+
+#ifdef NEW_IO
+    sysOut = new OutMgr(master);
+    AlsaEngine *tmp = new AlsaEngine();
+    tmp->openAudio();
+    sysOut->add(tmp);
+    sysOut->run();
+
 #endif
 
     /*It is not working and I don't know why

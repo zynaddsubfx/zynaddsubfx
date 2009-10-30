@@ -109,6 +109,21 @@ void Master::defaults()
     ShutUp();
 }
 
+bool Master::mutexLock(lockset request)
+{
+    switch (request)
+    {
+        case MUTEX_TRYLOCK:
+            return !pthread_mutex_trylock(&mutex);
+        case MUTEX_LOCK:
+            return !pthread_mutex_lock(&mutex);
+        case MUTEX_UNLOCK:
+            return !pthread_mutex_unlock(&mutex);
+    }
+    return false;
+}
+
+
 /*
  * Note On Messages (velocity=0 for NoteOff)
  */
@@ -116,9 +131,11 @@ void Master::NoteOn(unsigned char chan,
                     unsigned char note,
                     unsigned char velocity)
 {
+    pthread_mutex_lock(&mutex);
     dump.dumpnote(chan, note, velocity);
 
     noteon(chan, note, velocity);
+    pthread_mutex_unlock(&mutex);
 }
 
 /*
@@ -149,9 +166,11 @@ void Master::noteon(unsigned char chan,
  */
 void Master::NoteOff(unsigned char chan, unsigned char note)
 {
+    pthread_mutex_lock(&mutex);
     dump.dumpnote(chan, note, 0);
 
     noteoff(chan, note);
+    pthread_mutex_unlock(&mutex);
 }
 
 /*

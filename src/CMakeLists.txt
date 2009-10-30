@@ -13,7 +13,7 @@ find_package(FLTK)
 # file, but either in in CMakeCache.txt before compile, or by passing
 # parameters directly into cmake using the -D flag.
 SET (FFTW_VERSION 3 CACHE STRING "Version number of FFTW")
-SET (OutputModule alsa CACHE STRING "Output module, either alsa, jack or portaudio")
+SET (OutputModule alsa CACHE STRING "Output module, either alsa, nio, jack or portaudio")
 SET (GuiModule fltk CACHE STRING "GUI module, either fltk, qt or off")
 SET (CompileTests OFF CACHE BOOL "whether tests should be compiled in or not")
 
@@ -38,8 +38,10 @@ elseif(OutputModule STREQUAL jack AND JACK_FOUND)
 	set(JackOutput TRUE)
 elseif(OutputModule STREQUAL portaudio AND PortAudio_FOUND)
 	set(PortAudioOutput TRUE)
+elseif(OutputModule STREQUAL nio AND ALSA_FOUND)
+        set(NewIO TRUE)
 else ()
-	message(FATAL_ERROR "OutputModule must be either alsa, jack or portaudio")
+	message(FATAL_ERROR "OutputModule must be either alsa, nio, jack or portaudio")
 endif()
 
 ########### Settings dependant code ###########
@@ -48,6 +50,11 @@ endif()
 
 if(AlsaMidiOutput)
 	add_definitions(-DOSSAUDIOOUT)
+        set(AUDIO_LIBRARIES ${AUDIO_LIBRARIES} ${ASOUND_LIBRARY})
+endif()
+
+if(NewIO)
+	add_definitions(-DNEW_IO)
         set(AUDIO_LIBRARIES ${AUDIO_LIBRARIES} ${ASOUND_LIBRARY})
 endif()
 
@@ -71,6 +78,7 @@ add_definitions(-DFFTW_VERSION_${FFTW_VERSION}
 	 -DOS_LINUX
 	 -DALSAMIDIIN
 	 -DASM_F2I_YES
+         -g #TODO #todo put in a better location
 	 )
 
 
@@ -149,8 +157,8 @@ endmacro(unit_test)
 
 set(NONGUI_LIBRARIES
 	zynaddsubfx_input
-	zynaddsubfx_output
 	zynaddsubfx_misc
+        zynaddsubfx_nio
 	zynaddsubfx_synth
 	zynaddsubfx_seq
 	zynaddsubfx_effect
@@ -158,6 +166,7 @@ set(NONGUI_LIBRARIES
 	zynaddsubfx_dsp
 	zynaddsubfx_samples
 	zynaddsubfx_controls
+        zynaddsubfx_output
     )
 
 set(CXXTEST_LINK_LIBS ${NONGUI_LIBRARIES})
@@ -174,6 +183,7 @@ add_subdirectory(Params)
 add_subdirectory(DSP)
 add_subdirectory(Samples)
 add_subdirectory(Tests)
+add_subdirectory(Nio)
 
 set(zynaddsubfx_SRCS
 	main.cpp
@@ -191,5 +201,6 @@ target_link_libraries(zynaddsubfx
         ${MXML_LIBRARIES}
         ${AUDIO_LIBRARIES}
         ${MIDIINPUT_LIBRARIES}
+        ${NIO_LIBRARIES}
 	)
 

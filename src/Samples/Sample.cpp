@@ -23,6 +23,12 @@
 
 /**\TODO start using pointer math here as these will be Frequency called
  * functions throughout the code*/
+Sample::Sample()
+    :bufferSize(1),buffer(new REALTYPE[1])
+{
+    buffer[0] = 0.0;
+}
+
 Sample::Sample(const Sample &smp)
     :bufferSize(smp.bufferSize)
 {

@@ -204,9 +204,7 @@ if (rndvelocity!=0){
   vel=midivel*(127.0-rndvelocity)/127.0+RND*rndvelocity;
 };
 
-pthread_mutex_lock(&master->mutex);
- master->NoteOn(midich,nk+midioct*12,(int)vel);
-pthread_mutex_unlock(&master->mutex);} {}
+master->NoteOn(midich,nk+midioct*12,(int)vel);} {}
   }
   Function {relasekey(int nk,int type)} {} {
     code {if ((nk<0)||(nk>=N_OCT*12)) return;
@@ -218,9 +216,8 @@ pressed[nk]=0;
 
 damage(1);
 
-pthread_mutex_lock(&master->mutex);
- master->NoteOff(midich,nk+12*midioct);
-pthread_mutex_unlock(&master->mutex);} {}
+master->NoteOff(midich,nk+12*midioct);} {selected
+    }
   }
   Function {relaseallkeys(int type)} {} {
     code {for (int i=0;i<N_OCT*12;i++) relasekey(i,type);} {}
@@ -410,8 +407,7 @@ midictl=75;
 make_window();} {}
   }
   Function {~VirKeyboard()} {} {
-    code {delete virkeyboardwindow;} {selected
-    }
+    code {delete virkeyboardwindow;} {}
   }
   Function {show()} {} {
     code {virkeyboardwindow->show();} {}
