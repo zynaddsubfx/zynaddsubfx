@@ -55,7 +55,7 @@ class Sample
          *
          * This method is like c_str() from the string class and should be used
          * sparingly*/
-        const REALTYPE *c_buf() {
+        const REALTYPE *c_buf() const{
             return buffer;
         }
         REALTYPE max() const;

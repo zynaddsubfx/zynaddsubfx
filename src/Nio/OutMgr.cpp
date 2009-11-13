@@ -25,6 +25,14 @@ OutMgr::OutMgr(Master *nmaster)
     outl = new REALTYPE[SOUND_BUFFER_SIZE];
 };
 
+OutMgr::~OutMgr()
+{
+    running = false;
+    pthread_mutex_lock(&close_m);
+    pthread_cond_wait(&close_cond, &close_m);
+    pthread_mutex_unlock(&close_m);
+}
+
 void *_outputThread(void *arg)
 {
     return (static_cast<OutMgr*>(arg))->outputThread();
@@ -33,32 +41,37 @@ void *_outputThread(void *arg)
 void *OutMgr::outputThread()
 {
     pthread_mutex_lock(&mutex);
-    cout << "run start" << endl;
+    //cout << "run start" << endl;
     for(int i = 0; i < outs.size(); ++i)
         outs[i]->Start();
-    cout << "running" << endl;
+    //cout << "running" << endl;
     pthread_mutex_unlock(&mutex);
     running=true;
     init=true;
     while(running){
-        cout << "OutMgr THREAD" << endl;
+        //cout << "OutMgr THREAD" << endl;
         pthread_mutex_lock(&processing);
-        cout << "OutMgr wait" << endl;
-        if(init||pthread_cond_wait(&needsProcess, &processing));
-        //init=false;FIXME
+        //cout << "OutMgr wait" << endl;
+        pthread_cond_wait(&needsProcess, &processing);
         //make master use samples
-        cout << "have some food" << endl;
+        //cout << "have some food" << endl;
+        pthread_mutex_lock(&(master->mutex));
         master->AudioOut(outl,outr);
+        pthread_mutex_unlock(&(master->mutex));
         smps = Stereo<Sample>(Sample(SOUND_BUFFER_SIZE, outl), 
-                              Sample(SOUND_BUFFER_SIZE, outr));
+                Sample(SOUND_BUFFER_SIZE, outr));
+        //cout << "Samp: " << outl[2] << outr[2] << endl;
         pthread_mutex_unlock(&processing);
-        
+
         pthread_mutex_lock(&mutex);
         for(int i = 0; i < outs.size(); ++i)
             outs[i]->out(smps);
         pthread_mutex_unlock(&mutex);
 
     }
+    pthread_mutex_lock(&close_m);
+    pthread_cond_signal(&close_cond);
+    pthread_mutex_unlock(&close_m);
     return NULL;
 }
 
@@ -90,10 +103,10 @@ int OutMgr::remove(AudioOut *out)
 
 int OutMgr::requestSamples()
 {
-    cout << "me hungry" << endl;
+    //cout << "me hungry" << endl;
     pthread_mutex_lock(&processing);
     pthread_cond_signal(&needsProcess);
-    cout << "me start fire" << endl;
+    //cout << "me start fire" << endl;
     pthread_mutex_unlock(&processing);
 }
 

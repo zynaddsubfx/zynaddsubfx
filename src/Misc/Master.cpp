@@ -34,6 +34,7 @@ Master::Master()
     swaplr = 0;
 
     pthread_mutex_init(&mutex, NULL);
+    pthread_mutex_init(&vumutex, NULL);
     fft = new FFTwrapper(OSCIL_SIZE);
 
     tmpmixl   = new REALTYPE[SOUND_BUFFER_SIZE];
@@ -430,30 +431,31 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
     }
 
     //Peak computation (for vumeters)
-    vuoutpeakl = 1e-12;
-    vuoutpeakr = 1e-12;
+    pthread_mutex_lock(&vumutex);
+    vu.outpeakl = 1e-12;
+    vu.outpeakr = 1e-12;
     for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        if(fabs(outl[i]) > vuoutpeakl)
-            vuoutpeakl = fabs(outl[i]);
-        if(fabs(outr[i]) > vuoutpeakr)
-            vuoutpeakr = fabs(outr[i]);
+        if(fabs(outl[i]) > vu.outpeakl)
+            vu.outpeakl = fabs(outl[i]);
+        if(fabs(outr[i]) > vu.outpeakr)
+            vu.outpeakr = fabs(outr[i]);
     }
-    if((vuoutpeakl > 1.0) || (vuoutpeakr > 1.0))
-        vuclipped = 1;
-    if(vumaxoutpeakl < vuoutpeakl)
-        vumaxoutpeakl = vuoutpeakl;
-    if(vumaxoutpeakr < vuoutpeakr)
-        vumaxoutpeakr = vuoutpeakr;
+    if((vu.outpeakl > 1.0) || (vu.outpeakr > 1.0))
+        vu.clipped = 1;
+    if(vu.maxoutpeakl < vu.outpeakl)
+        vu.maxoutpeakl = vu.outpeakl;
+    if(vu.maxoutpeakr < vu.outpeakr)
+        vu.maxoutpeakr = vu.outpeakr;
 
     //RMS Peak computation (for vumeters)
-    vurmspeakl = 1e-12;
-    vurmspeakr = 1e-12;
+    vu.rmspeakl = 1e-12;
+    vu.rmspeakr = 1e-12;
     for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        vurmspeakl += outl[i] * outl[i];
-        vurmspeakr += outr[i] * outr[i];
+        vu.rmspeakl += outl[i] * outl[i];
+        vu.rmspeakr += outr[i] * outr[i];
     }
-    vurmspeakl = sqrt(vurmspeakl / SOUND_BUFFER_SIZE);
-    vurmspeakr = sqrt(vurmspeakr / SOUND_BUFFER_SIZE);
+    vu.rmspeakl = sqrt(vu.rmspeakl / SOUND_BUFFER_SIZE);
+    vu.rmspeakr = sqrt(vu.rmspeakr / SOUND_BUFFER_SIZE);
 
     //Part Peak computation (for Part vumeters or fake part vumeters)
     for(npart = 0; npart < NUM_MIDI_PARTS; npart++) {
@@ -473,6 +475,7 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
             fakepeakpart[npart]--;
         ;
     }
+    pthread_mutex_unlock(&vumutex);
 
 
     //Shutup if it is asked (with fade-out)
@@ -579,6 +582,7 @@ Master::~Master()
     delete (fft);
 
     pthread_mutex_destroy(&mutex);
+    pthread_mutex_destroy(&vumutex);
 }
 
 
@@ -634,13 +638,29 @@ void Master::ShutUp()
  */
 void Master::vuresetpeaks()
 {
-    vuoutpeakl    = 1e-9;
-    vuoutpeakr    = 1e-9;
-    vumaxoutpeakl = 1e-9;
-    vumaxoutpeakr = 1e-9;
-    vuclipped     = 0;
+    pthread_mutex_lock(&vumutex);
+    vu.outpeakl    = 1e-9;
+    vu.outpeakr    = 1e-9;
+    vu.maxoutpeakl = 1e-9;
+    vu.maxoutpeakr = 1e-9;
+    vu.clipped     = 0;
+    pthread_mutex_unlock(&vumutex);
 }
 
+vuData Master::getVuData()
+{
+    vuData tmp;
+    pthread_mutex_lock(&vumutex);
+    tmp.outpeakl=vu.outpeakl;
+    tmp.outpeakr=vu.outpeakr;
+    tmp.maxoutpeakl=vu.maxoutpeakl;
+    tmp.maxoutpeakr=vu.maxoutpeakr;
+    tmp.rmspeakl=vu.rmspeakl;
+    tmp.rmspeakr=vu.rmspeakr;
+    tmp.clipped=vu.clipped;
+    pthread_mutex_unlock(&vumutex);
+    return tmp;
+}
 
 
 void Master::applyparameters()

@@ -82,7 +82,9 @@ int  swaplr    = 0; //1 for left-right swapping
 bool usejackit = false;
 
 #ifdef NEW_IO
+#include "Nio/AudioOut.h"//temporary include
 #include "Nio/AlsaEngine.h"//temporary include
+#include "Nio/OssEngine.h"//temporary include
 #include "Nio/OutMgr.h"
 #endif
 
@@ -129,7 +131,7 @@ void *thread1(void *arg)
         note = cmdparams[0];
         vel  = cmdparams[1];
 
-        pthread_mutex_lock(&master->mutex);
+       // pthread_mutex_lock(&master->mutex);
 
         if((cmdtype == MidiNoteON) && (note != 0))
             master->NoteOn(cmdchan, note, vel);
@@ -138,7 +140,7 @@ void *thread1(void *arg)
         if(cmdtype == MidiController)
             master->SetController(cmdchan, cmdparams[0], cmdparams[1]);
 
-        pthread_mutex_unlock(&master->mutex);
+        //pthread_mutex_unlock(&master->mutex);
     }
 
     return 0;
@@ -682,8 +684,9 @@ int main(int argc, char *argv[])
 
 #ifdef NEW_IO
     sysOut = new OutMgr(master);
-    AlsaEngine *tmp = new AlsaEngine();
-    tmp->openAudio();
+    //AlsaEngine *tmp = new AlsaEngine();
+    AudioOut *tmp = new OssEngine();
+    //tmp->openAudio();
     sysOut->add(tmp);
     sysOut->run();
 

@@ -21,11 +21,18 @@
 #ifndef AUDIO_OUT_H
 #define AUDIO_OUT_H
 
+#include "../Misc/Stereo.h"
+#include "../Samples/Sample.h"
+#include <queue>
+#include <pthread.h>
+#include "OutMgr.h"
+
+class AudioOut;
 class AudioOut
 {
     public:
         AudioOut();
-        virtual ~AudioOut() { };
+        virtual ~AudioOut() {};
 
         virtual bool openAudio()=0;
         virtual bool Start()=0;

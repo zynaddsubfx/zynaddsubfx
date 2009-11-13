@@ -1,4 +1,5 @@
 set(zynaddsubfx_nio_SRCS
+	OssEngine.cpp
 	AlsaEngine.cpp
 	AudioOut.cpp
 	OutMgr.cpp

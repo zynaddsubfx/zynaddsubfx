@@ -38,6 +38,13 @@
 typedef enum { MUTEX_TRYLOCK, MUTEX_LOCK, MUTEX_UNLOCK } lockset;
 
 extern Dump dump;
+
+typedef struct vuData_t {
+    REALTYPE outpeakl, outpeakr, maxoutpeakl, maxoutpeakr,
+             rmspeakl, rmspeakr;
+    int clipped;
+} vuData;
+
 /** It sends Midi Messages to Parts, receives samples from parts,
  *  process them with system/insertion effects and mix them */
 class Master
@@ -126,13 +133,14 @@ class Master
         //part that's apply the insertion effect; -1 to disable
         short int Pinsparts[NUM_INS_EFX];
 
+
         //peaks for VU-meter
         void vuresetpeaks();
-        REALTYPE vuoutpeakl, vuoutpeakr, vumaxoutpeakl, vumaxoutpeakr,
-                 vurmspeakl, vurmspeakr;
-        int vuclipped;
+        //get VU-meter data
+        vuData getVuData();
 
         //peaks for part VU-meters
+        /**\todo synchronize this with a mutex*/
         REALTYPE      vuoutpeakpart[NUM_MIDI_PARTS];
         unsigned char fakepeakpart[NUM_MIDI_PARTS]; //this is used to compute the "peak" when the part is disabled
 
@@ -148,8 +156,10 @@ class Master
 
         FFTwrapper     *fft;
         pthread_mutex_t mutex;
-
+        pthread_mutex_t vumutex;
+ 
     private:
+        vuData vu;
         REALTYPE volume;
         REALTYPE sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         REALTYPE sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];

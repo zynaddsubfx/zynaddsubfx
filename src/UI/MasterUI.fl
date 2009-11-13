@@ -81,15 +81,17 @@ oldrmsdbr=0.0;} {}
 
 int ox=x(); int oy=y(); int lx=w(); int ly=h();
 
-pthread_mutex_lock(&master->mutex);
-REALTYPE dbl=rap2dB(master->vuoutpeakl);
-REALTYPE dbr=rap2dB(master->vuoutpeakr);
-REALTYPE rmsdbl=rap2dB(master->vurmspeakl);
-REALTYPE rmsdbr=rap2dB(master->vurmspeakr);
-REALTYPE maxdbl=rap2dB(master->vumaxoutpeakl);
-REALTYPE maxdbr=rap2dB(master->vumaxoutpeakr);
-int clipped=master->vuclipped;
-pthread_mutex_unlock(&master->mutex);
+vuData data = master->getVuData();
+
+//pthread_mutex_lock(&master->mutex);
+REALTYPE dbl=rap2dB(data.outpeakl);
+REALTYPE dbr=rap2dB(data.outpeakr);
+REALTYPE rmsdbl=rap2dB(data.rmspeakl);
+REALTYPE rmsdbr=rap2dB(data.rmspeakr);
+REALTYPE maxdbl=rap2dB(data.maxoutpeakl);
+REALTYPE maxdbr=rap2dB(data.maxoutpeakr);
+int clipped=data.clipped;
+//pthread_mutex_unlock(&master->mutex);
 
 dbl=(MIN_DB-dbl)/MIN_DB; 
 if (dbl<0.0) dbl=0.0;
@@ -414,8 +416,7 @@ panellistitemgroup->redraw();} {}
 } 
 
 class MasterUI {} {
-  Function {make_window()} {selected
-  } {
+  Function {make_window()} {} {
     Fl_Window masterwindow {
       label zynaddsubfx
       callback {\#ifdef VSTAUDIOOUT
@@ -1723,8 +1724,9 @@ pthread_mutex_lock(&master->mutex);
 
   //load the data
   int result=master->loadXML(filename);
-pthread_mutex_unlock(&master->mutex);
+
 master->applyparameters();
+pthread_mutex_unlock(&master->mutex);
 
 npartcounter->value(1);
 refresh_master_ui();
@@ -1733,7 +1735,8 @@ if (result>=0) setfilelabel(filename);
 
 
 if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not a zynaddsubfx parameters file.");
-      else if (result<0) fl_alert("Error: Could not load the file.");} {}
+      else if (result<0) fl_alert("Error: Could not load the file.");} {selected
+    }
   }
   Function {do_save_master(const char* file = NULL)} {} {
     code {const char *filename;

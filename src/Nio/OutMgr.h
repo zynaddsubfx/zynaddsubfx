@@ -18,10 +18,13 @@
 //    WAV_OUTPUT;
 //} outputDriver;
 
+class AudioOut;
+
 class OutMgr
 {
     public:
         OutMgr(Master *nmaster);
+        ~OutMgr();
         /**Adds audio output out.
          * @return -1 for error 0 otherwise*/
         int add(AudioOut *out);
@@ -49,6 +52,9 @@ class OutMgr
 
         pthread_t outThread;
         pthread_cond_t needsProcess;
+        /**for closing*/
+        pthread_mutex_t close_m;
+        pthread_cond_t close_cond;
         /**Buffer*/
         Stereo<Sample> smps;
         REALTYPE *outl;
