@@ -48,11 +48,18 @@ void *OutMgr::outputThread()
     pthread_mutex_unlock(&mutex);
     running=true;
     init=true;
+    bool doWait;
     while(running){
         //cout << "OutMgr THREAD" << endl;
+        pthread_mutex_lock(&request_m);
+        doWait = numRequests--<1;
+        //cout << numRequests << endl;
+        pthread_mutex_unlock(&request_m);
         pthread_mutex_lock(&processing);
-        //cout << "OutMgr wait" << endl;
-        pthread_cond_wait(&needsProcess, &processing);
+        if(doWait) {
+            //cout << "OutMgr wait" << endl;
+            pthread_cond_wait(&needsProcess, &processing);
+        }
         //make master use samples
         //cout << "have some food" << endl;
         pthread_mutex_lock(&(master->mutex));
@@ -101,13 +108,26 @@ int OutMgr::remove(AudioOut *out)
     pthread_mutex_unlock(&mutex);
 }
 
+int OutMgr::getRunning()
+{
+    int tmp;
+    pthread_mutex_lock(&request_m);
+    tmp=numRequests;
+    pthread_mutex_unlock(&request_m);
+    return tmp;
+}
+
 int OutMgr::requestSamples()
 {
     //cout << "me hungry" << endl;
+    pthread_mutex_lock(&request_m);
+    ++numRequests;
+    pthread_mutex_unlock(&request_m);
     pthread_mutex_lock(&processing);
     pthread_cond_signal(&needsProcess);
     //cout << "me start fire" << endl;
     pthread_mutex_unlock(&processing);
+    return 0;
 }
 
 //int OutMgr::enable(outputDriver out);

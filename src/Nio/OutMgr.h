@@ -34,6 +34,8 @@ class OutMgr
         /**Request a new set of samples
          * @return -1 for locking issues 0 for valid request*/
         int requestSamples();
+        /**Return the number of building samples*/
+        int getRunning();
         /**Enables one instance of given driver*/
         //int enable(outputDriver out);
         /**Disables all instances of given driver*/
@@ -52,6 +54,9 @@ class OutMgr
 
         pthread_t outThread;
         pthread_cond_t needsProcess;
+        /**for num requests*/
+        pthread_mutex_t request_m;
+        int numRequests;
         /**for closing*/
         pthread_mutex_t close_m;
         pthread_cond_t close_cond;

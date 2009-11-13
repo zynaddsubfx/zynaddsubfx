@@ -76,8 +76,8 @@ void OssEngine::out(const Stereo<Sample> smps)
 {
     pthread_mutex_lock(&outBuf_mutex);
     outBuf.push(smps);
-    if(outBuf.size()<10)
-        manager->requestSamples();
+    //if(outBuf.size()<)
+    //    manager->requestSamples();
     pthread_cond_signal(&outBuf_cv);
     pthread_mutex_unlock(&outBuf_mutex);
 }
@@ -90,10 +90,7 @@ void *OssEngine::_AudioThread(void *arg)
 
 void *OssEngine::AudioThread()
 {  
-    manager->requestSamples();
-    manager->requestSamples();
-    manager->requestSamples();
-    manager->requestSamples();
+    //get some initial samples
     manager->requestSamples();
     manager->requestSamples();
     manager->requestSamples();
@@ -107,9 +104,6 @@ void *OssEngine::AudioThread()
     }
     return NULL;
 }
-//void OssEngine::out(const Stereo<Sample> smps)
-//{
-//    OSSout(smps.l().
 
 /*
  * Output the samples to the soundcard
@@ -117,32 +111,32 @@ void *OssEngine::AudioThread()
  */
 void OssEngine::OSSout(const REALTYPE *smp_left, const REALTYPE *smp_right)
 {
+    if(snd_handle < 0) {  //output could not be opened
+        struct timeval now;
+        int remaining = 0;
+        gettimeofday(&now, NULL);
+        if((playing_until.tv_usec == 0) && (playing_until.tv_sec == 0)) {
+            playing_until.tv_usec = now.tv_usec;
+            playing_until.tv_sec  = now.tv_sec;
+        }
+        else  {
+            remaining = (playing_until.tv_usec - now.tv_usec)
+                + (playing_until.tv_sec - now.tv_sec) * 1000000;
+            if(remaining > 10000) //Don't sleep() less than 10ms.
+                //This will add latency...
+                usleep(remaining - 10000);
+            if(remaining < 0)
+                cerr << "WARNING - too late" << endl;
+        }
+        playing_until.tv_usec += SOUND_BUFFER_SIZE * 1000000 / SAMPLE_RATE;
+        if(remaining < 0)
+            playing_until.tv_usec -= remaining;
+        playing_until.tv_sec  += playing_until.tv_usec / 1000000;
+        playing_until.tv_usec %= 1000000;
+        return;
+    }
     outOut(smp_left,smp_right);
     return;
-//    if(snd_handle < 0) {  //output could not be opened
-    struct timeval now;
-    int remaining = 0;
-    gettimeofday(&now, NULL);
-    if((playing_until.tv_usec == 0) && (playing_until.tv_sec == 0)) {
-        playing_until.tv_usec = now.tv_usec;
-        playing_until.tv_sec  = now.tv_sec;
-    }
-    else  {
-        remaining = (playing_until.tv_usec - now.tv_usec)
-            + (playing_until.tv_sec - now.tv_sec) * 1000000;
-        if(remaining > 10000) //Don't sleep() less than 10ms.
-            //This will add latency...
-            usleep(remaining - 10000);
-        if(remaining < 0)
-            cerr << "WARNING - too late" << endl;
-    }
-    playing_until.tv_usec += SOUND_BUFFER_SIZE * 1000000 / SAMPLE_RATE;
-    if(remaining < 0)
-        playing_until.tv_usec -= remaining;
-    playing_until.tv_sec  += playing_until.tv_usec / 1000000;
-    playing_until.tv_usec %= 1000000;
-    return;
-//    }
 }
 
 void OssEngine::outOut(const REALTYPE *smp_left, const REALTYPE *smp_right)
@@ -185,25 +179,19 @@ const Stereo<Sample> OssEngine::getNext()
     pthread_mutex_unlock(&outBuf_mutex);
     if(isEmpty)//fetch samples if possible
     {
-        if(true)//FIXME care about locking state later on
-            //mgr.requestSamples()!=-1)//samples are being prepared
-        {
+        if(manager->getRunning()<1)
             manager->requestSamples();
-            //pthread_mutex_lock(&outBuf_mutex);
-            //pthread_cond_wait(&outBuf_cv, &outBuf_mutex);
-            //ans = outBuf.front();
-            //outBuf.pop();
-            //pthread_mutex_unlock(&outBuf_mutex);
-            return current;
-        }
+        cout << "Starvation"<< endl;
+        return current;
     }
     else
     {
         pthread_mutex_lock(&outBuf_mutex);
-        if(outBuf.size()<10)
-            manager->requestSamples();
         ans = outBuf.front();
         outBuf.pop();
+        if(outBuf.size()+manager->getRunning()==0)
+            manager->requestSamples();
+        cout << outBuf.size()+manager->getRunning() << endl;
         pthread_mutex_unlock(&outBuf_mutex);
     }
     current=ans;
