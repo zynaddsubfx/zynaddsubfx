@@ -25,8 +25,6 @@
 
 
 #include "../globals.h"
-#include "EnvelopeParams.h"
-#include "LFOParams.h"
 #include "FilterParams.h"
 #include "../Synth/OscilGen.h"
 #include "../Synth/Resonance.h"
@@ -34,6 +32,9 @@
 #include "../Misc/XMLwrapper.h"
 #include "../DSP/FFTwrapper.h"
 #include "Presets.h"
+
+class EnvelopeParams;
+class LFOParams;
 
 enum FMTYPE {
     NONE, MORPH, RING_MOD, PHASE_MOD, FREQ_MOD, PITCH_MOD

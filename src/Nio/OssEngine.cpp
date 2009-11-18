@@ -20,6 +20,10 @@
 
 */
 
+#include "OssEngine.h"
+#include "../Misc/Util.h"
+#include "../globals.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -29,12 +33,10 @@
 #include <unistd.h>
 #include <iostream>
 
-#include "OssEngine.h"
-#include "../Misc/Util.h"
-#include "../globals.h"
 using namespace std;
 
-OssEngine::OssEngine()
+OssEngine::OssEngine(OutMgr *out)
+    :AudioOut(out)
 {
     current = Stereo<Sample>(Sample(SOUND_BUFFER_SIZE), 
                 Sample(SOUND_BUFFER_SIZE));
@@ -65,21 +67,39 @@ OssEngine::OssEngine()
     ioctl(snd_handle, SNDCTL_DSP_SPEED, &snd_samplerate);
     ioctl(snd_handle, SNDCTL_DSP_SAMPLESIZE, &snd_bitsize);
     ioctl(snd_handle, SNDCTL_DSP_SETFRAGMENT, &snd_fragment);
-
-    pthread_mutex_init(&outBuf_mutex, NULL);
-    pthread_cond_init (&outBuf_cv, NULL);
-    manager = sysOut;
 }
 
-
-void OssEngine::out(const Stereo<Sample> smps)
+OssEngine::~OssEngine()
 {
-    pthread_mutex_lock(&outBuf_mutex);
-    outBuf.push(smps);
-    //if(outBuf.size()<)
-    //    manager->requestSamples();
-    pthread_cond_signal(&outBuf_cv);
-    pthread_mutex_unlock(&outBuf_mutex);
+    close(snd_handle);
+    delete [] smps;
+}
+
+bool OssEngine::openAudio()
+{
+    return true;
+}
+
+bool OssEngine::Start()
+{
+    int chk;
+    pthread_attr_t attr;
+    threadStop = false;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    pthread_create(&pThread, &attr, _AudioThread, this);
+
+    return true;
+}
+
+void OssEngine::Stop()
+{
+    threadStop = true;
+}
+
+void OssEngine::Close()
+{
+    Stop();
 }
 
 void *OssEngine::_AudioThread(void *arg)
@@ -95,7 +115,7 @@ void *OssEngine::AudioThread()
     manager->requestSamples();
     manager->requestSamples();
     set_realtime();
-    while (!threadStop)
+    while (!threadStop())
     {
         //cout << "OssEngine THREAD" << endl;
         const Stereo<Sample> smps = getNext();
@@ -165,62 +185,3 @@ void OssEngine::outOut(const REALTYPE *smp_left, const REALTYPE *smp_right)
     write(snd_handle, smps, SOUND_BUFFER_SIZE * 4); // *2 because is 16 bit, again * 2 because is stereo
 }
 
-OssEngine::~OssEngine()
-{
-    close(snd_handle);
-    delete [] smps;
-}
-
-const Stereo<Sample> OssEngine::getNext()
-{
-    Stereo<Sample> ans;
-    pthread_mutex_lock(&outBuf_mutex);
-    bool isEmpty =outBuf.empty();
-    pthread_mutex_unlock(&outBuf_mutex);
-    if(isEmpty)//fetch samples if possible
-    {
-        if(manager->getRunning()<1)
-            manager->requestSamples();
-        cout << "Starvation"<< endl;
-        return current;
-    }
-    else
-    {
-        pthread_mutex_lock(&outBuf_mutex);
-        ans = outBuf.front();
-        outBuf.pop();
-        if(outBuf.size()+manager->getRunning()==0)
-            manager->requestSamples();
-        cout << outBuf.size()+manager->getRunning() << endl;
-        pthread_mutex_unlock(&outBuf_mutex);
-    }
-    current=ans;
-    return ans;
-}
-
-bool OssEngine::Start()
-{
-    int chk;
-    pthread_attr_t attr;
-    threadStop = false;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    pthread_create(&pThread, &attr, _AudioThread, this);
-
-    return true;
-}
-
-void OssEngine::Stop(void)
-{
-    threadStop = true;
-}
-
-void OssEngine::Close()
-{
-    Stop();
-}
-
-bool OssEngine::openAudio()
-{
-    return true;
-}

@@ -18,6 +18,7 @@
 */
 
 #include <iostream>
+#include <cmath>
 
 using namespace std;
 
@@ -26,7 +27,8 @@ using namespace std;
 #include "../Misc/Master.h"
 #include "AlsaEngine.h"
 
-AlsaEngine::AlsaEngine()
+AlsaEngine::AlsaEngine(OutMgr *out)
+    :AudioOut(out)
 {
     audio.handle = NULL;
     audio.period_time = 0;
@@ -314,9 +316,11 @@ void *AlsaEngine::AudioThread()
             delete [] tmp;
         }
         else
-            ;//config.cfg.verbose
+        {
+            //config.cfg.verbose
              //   && cerr << "Error, audio pcm still not RUNNING" << endl;
              cerr << "Error, audio pcm still not running";
+        }
     }
     return NULL;
 }

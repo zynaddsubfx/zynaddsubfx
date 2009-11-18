@@ -1,9 +1,9 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Effect.C - this class is inherited by the all effects(Reverb, Echo, ..)
-  Copyright (C) 2002-2005 Nasca Octavian Paul
-  Author: Nasca Octavian Paul
+  Atom.h - Simple Atomic operation wrapper
+  Copyright (C) 2009-2009 Mark McCurry
+  Author: Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License
@@ -17,16 +17,30 @@
   You should have received a copy of the GNU General Public License (version 2)
   along with this program; if not, write to the Free Software Foundation,
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
-
 */
+#ifndef ATOM_H
+#define ATOM_H
 
-#include "Effect.h"
-#include "../Params/FilterParams.h"
+#include <pthread.h>
 
+/**Very simple threaded value container*/
+template<class T>
+class Atom
+{
+    public:
+        /**Initializes Atom
+         * @param val the value of the atom*/
+        Atom(const T &val);
+        ~Atom();
 
-Effect::Effect(bool insertion_, REALTYPE *const efxoutl_,
-               REALTYPE *const efxoutr_, FilterParams *filterpars_,
-               const unsigned char &Ppreset_)
-    :Ppreset(Ppreset_), efxoutl(efxoutl_), efxoutr(efxoutr_),
-      filterpars(filterpars_), insertion(insertion_) {}
+        void operator=(const T &val);
+        T operator()() const;
+        T operator++();
+        T operator--();
+    private:
+        mutable pthread_mutex_t mutex;
+        T value;
+};
+#include "Atom.cpp"
+#endif
 

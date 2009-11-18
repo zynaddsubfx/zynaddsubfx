@@ -444,6 +444,7 @@ int main(int argc, char *argv[])
     OSCIL_SIZE  = config.cfg.OscilSize;
     swaplr      = config.cfg.SwapStereo;
 
+
     /* Parse command-line options */
 #ifdef OS_LINUX
     struct option opts[] = {
@@ -683,9 +684,12 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef NEW_IO
+    sysOut=NULL;
     sysOut = new OutMgr(master);
+    if(sysOut);
     //AlsaEngine *tmp = new AlsaEngine();
-    AudioOut *tmp = new OssEngine();
+    AudioOut *tmp = new OssEngine(sysOut);
+    if(tmp);
     //tmp->openAudio();
     sysOut->add(tmp);
     sysOut->run();

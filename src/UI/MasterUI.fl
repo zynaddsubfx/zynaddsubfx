@@ -300,7 +300,7 @@ class Panellistitem {: {public Fl_Group}
   Function {make_window()} {private
   } {
     Fl_Window panellistitem {
-      private xywh {315 213 70 260} type Double hide
+      private xywh {315 213 70 260} type Double labeltype NORMAL_LABEL align 80 hide
       class Fl_Group
     } {
       Fl_Group panellistitemgroup {
@@ -427,7 +427,7 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL)) {
     *exitprogram=1;
 };
 \#endif}
-      xywh {31 206 390 465} type Double hide xclass zynaddsubfx
+      xywh {450 306 390 465} type Double labeltype NORMAL_LABEL align 80 hide xclass zynaddsubfx
     } {
       Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
@@ -993,10 +993,15 @@ globalfinedetuneslider->do_callback();}
 panelwindow->show();}
         tooltip {Panel Window} xywh {293 62 92 16} box PLASTIC_UP_BOX color 183 labelfont 1 labelsize 10
       }
+      Fl_Button {} {
+        label N
+        callback {newiowindow->show();} selected
+        xywh {270 75 20 25}
+      }
     }
     Fl_Window aboutwindow {
       label {Copyright...}
-      xywh {411 344 365 280} type Double hide
+      xywh {411 344 365 280} type Double labeltype NORMAL_LABEL align 80 hide
     } {
       Fl_Box {} {
         label {Copyright (c) 2002-2009 Nasca O. PAUL and others. Please read AUTHORS.txt}
@@ -1023,7 +1028,7 @@ GNU General Public License for details.}
     }
     Fl_Window syseffsendwindow {
       label {System Effects Send}
-      xywh {171 234 120 250} type Double hide resizable
+      xywh {171 234 120 250} type Double labeltype NORMAL_LABEL align 80 hide resizable
     } {
       Fl_Scroll {} {open
         xywh {0 45 120 170} box FLAT_BOX resizable
@@ -1042,7 +1047,7 @@ GNU General Public License for details.}
     }
     Fl_Window panelwindow {
       label {ZynAddSubFX Panel}
-      xywh {89 59 630 635} type Double hide
+      xywh {89 59 630 635} type Double labeltype NORMAL_LABEL align 80 hide
     } {
       Fl_Scroll {} {
         xywh {0 5 570 310} type HORIZONTAL box THIN_UP_BOX
@@ -1082,7 +1087,7 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL)) {
 	*exitprogram=1;
 };
 \#endif}
-      xywh {400 405 600 335} type Double hide
+      xywh {400 405 600 335} type Double labeltype NORMAL_LABEL align 80 hide
     } {
       Fl_Menu_Bar {} {
         xywh {0 0 690 25}
@@ -1564,7 +1569,7 @@ virkeys->take_focus();}
     Fl_Window selectuiwindow {
       label {User Interface mode}
       callback {*exitprogram=1;}
-      xywh {342 246 430 250} type Double hide non_modal
+      xywh {342 246 430 250} type Double labeltype NORMAL_LABEL align 80 hide non_modal
     } {
       Fl_Box {} {
         label {Welcome to ZynAddSubFX}
@@ -1599,6 +1604,16 @@ config.cfg.UserInterfaceMode=2;}
       Fl_Box {} {
         label {You can switch the interface modes anytime you want.}
         xywh {30 215 360 25} box BORDER_BOX color 51 labelfont 1 labelsize 11 align 144
+      }
+    }
+    Fl_Window newiowindow {
+      label {New IO}
+      xywh {467 490 120 55} type Double labeltype NORMAL_LABEL align 80 hide
+    } {
+      Fl_Light_Button nullToggle {
+        label {Null Output}
+        callback {master->toggleNull();}
+        xywh {10 15 100 20} labelfont 13
       }
     }
   }
@@ -1735,8 +1750,7 @@ if (result>=0) setfilelabel(filename);
 
 
 if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not a zynaddsubfx parameters file.");
-      else if (result<0) fl_alert("Error: Could not load the file.");} {selected
-    }
+      else if (result<0) fl_alert("Error: Could not load the file.");} {}
   }
   Function {do_save_master(const char* file = NULL)} {} {
     code {const char *filename;

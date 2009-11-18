@@ -26,19 +26,20 @@
 #define MAX_INFO_TEXT_SIZE 1000
 
 #include "../globals.h"
-#include "../Params/ADnoteParameters.h"
-#include "../Params/SUBnoteParameters.h"
-#include "../Params/PADnoteParameters.h"
-#include "../Synth/ADnote.h"
-#include "../Synth/SUBnote.h"
-#include "../Synth/PADnote.h"
 #include "../Params/Controller.h"
 #include "../Misc/Microtonal.h"
 #include "../DSP/FFTwrapper.h"
-#include "../Effects/EffectMgr.h"
 #include "XMLwrapper.h"
 
 #include <list> // For the monomemnotes list.
+
+class EffectMgr;
+class ADnoteParameters;
+class SUBnoteParameters;
+class PADnoteParameters;
+class ADnote;
+class SUBnote;
+class PADnote;
 
 /** Part implementation*/
 class Part

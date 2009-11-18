@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Effect.C - this class is inherited by the all effects(Reverb, Echo, ..)
+  NulEngine.h - Dummy In/Out driver
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
@@ -20,13 +20,33 @@
 
 */
 
-#include "Effect.h"
-#include "../Params/FilterParams.h"
+#ifndef NUL_ENGINE_H
+#define NUL_ENGINE_H
 
+#include <sys/time.h>
+#include "../globals.h"
+#include "AudioOut.h"
 
-Effect::Effect(bool insertion_, REALTYPE *const efxoutl_,
-               REALTYPE *const efxoutr_, FilterParams *filterpars_,
-               const unsigned char &Ppreset_)
-    :Ppreset(Ppreset_), efxoutl(efxoutl_), efxoutr(efxoutr_),
-      filterpars(filterpars_), insertion(insertion_) {}
+class NulEngine: public AudioOut
+{
+    public:
+        NulEngine(OutMgr *out);
+        ~NulEngine();
+        
+        bool openAudio();
+        bool Start();
+        void Stop();
+        void Close();
+
+    protected:
+        void *AudioThread();
+        static void *_AudioThread(void *arg);
+
+    private:
+        
+        void dummyOut();
+        struct timeval playing_until;
+};
+
+#endif
 

@@ -3,10 +3,10 @@
 
 #include "../globals.h"
 #include "../Misc/Stereo.h"
+#include "../Misc/Atom.h"
 #include "../Samples/Sample.h"
-#include "../Misc/Master.h"
-#include "AudioOut.h"
-#include <vector>
+//#include "../Misc/Master.h"
+#include <list>
 #include <pthread.h>
 
 //typedef enum
@@ -19,7 +19,7 @@
 //} outputDriver;
 
 class AudioOut;
-
+class Master;
 class OutMgr
 {
     public:
@@ -27,10 +27,10 @@ class OutMgr
         ~OutMgr();
         /**Adds audio output out.
          * @return -1 for error 0 otherwise*/
-        int add(AudioOut *out);
+        void add(AudioOut *out);
         /**Removes given audio output engine
          * @return -1 for error 0 otherwise*/
-        int remove(AudioOut *out);
+        void remove(AudioOut *out);
         /**Request a new set of samples
          * @return -1 for locking issues 0 for valid request*/
         int requestSamples();
@@ -47,16 +47,14 @@ class OutMgr
         bool running;
         bool init;
 
-        std::vector<AudioOut *> outs;
+        std::list<AudioOut *> outs;
         mutable pthread_mutex_t mutex;
 
         pthread_mutex_t processing;
 
         pthread_t outThread;
         pthread_cond_t needsProcess;
-        /**for num requests*/
-        pthread_mutex_t request_m;
-        int numRequests;
+        Atom<int> numRequests;
         /**for closing*/
         pthread_mutex_t close_m;
         pthread_cond_t close_cond;

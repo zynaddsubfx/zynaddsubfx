@@ -79,6 +79,8 @@ add_definitions(-DFFTW_VERSION_${FFTW_VERSION}
 	 -DALSAMIDIIN
 	 -DASM_F2I_YES
          -g #TODO #todo put in a better location
+         -Wall
+         -Wextra
 	 )
 
 
@@ -158,15 +160,15 @@ endmacro(unit_test)
 set(NONGUI_LIBRARIES
 	zynaddsubfx_input
 	zynaddsubfx_misc
-        zynaddsubfx_nio
 	zynaddsubfx_synth
 	zynaddsubfx_seq
 	zynaddsubfx_effect
 	zynaddsubfx_params
+        zynaddsubfx_output
 	zynaddsubfx_dsp
 	zynaddsubfx_samples
 	zynaddsubfx_controls
-        zynaddsubfx_output
+        zynaddsubfx_nio
     )
 
 set(CXXTEST_LINK_LIBS ${NONGUI_LIBRARIES})
@@ -199,8 +201,8 @@ target_link_libraries(zynaddsubfx
         ${zlib_LIBRARIES}
         ${fftw_LIBRARIES}
         ${MXML_LIBRARIES}
+        ${NIO_LIBRARIES}
         ${AUDIO_LIBRARIES}
         ${MIDIINPUT_LIBRARIES}
-        ${NIO_LIBRARIES}
 	)
 

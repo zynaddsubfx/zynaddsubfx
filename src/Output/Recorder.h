@@ -25,7 +25,9 @@
 #include <string>
 #include "../globals.h"
 #include "WAVaudiooutput.h"
+#include "../Nio/WavEngine.h"
 
+//class WavEngine;
 /**Records sound to a file*/
 class Recorder
 {
@@ -33,13 +35,17 @@ class Recorder
 
         Recorder();
         ~Recorder();
-        int preparefile(std::string filename_, int overwrite); //returns 1 if the file exists
+        /**Prepare the given file.
+         * @returns 1 if the file exists */
+        int preparefile(std::string filename_, int overwrite);
         void start();
         void stop();
         void pause();
         int recording();
         void triggernow();
+#ifndef NEW_IO
         void recordbuffer(REALTYPE *outl, REALTYPE *outr);
+#endif
 
         /** Status:
          *  0 - not ready(no file selected),
@@ -48,8 +54,12 @@ class Recorder
         int status;
 
     private:
+#ifndef NEW_IO
         WAVaudiooutput wav;
         short int     *recordbuf_16bit;
+#else
+        WavEngine *wave;
+#endif
         int notetrigger;
 };
 

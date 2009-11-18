@@ -1,6 +1,8 @@
 #include "OutMgr.h"
 #include <algorithm>
 #include <iostream>
+#include "AudioOut.h"
+#include "../Misc/Master.h"
 using namespace std;
 
 OutMgr *sysOut;
@@ -14,11 +16,14 @@ OutMgr *sysOut;
 //} outputDriver;
 
 OutMgr::OutMgr(Master *nmaster)
+    :numRequests(0)
 {
+    running = false;
     master = nmaster;
     //initialize mutex
     pthread_mutex_init(&mutex,       NULL);
     pthread_mutex_init(&processing,  NULL);
+    //pthread_mutex_init(&request_m,   NULL);
     pthread_cond_init(&needsProcess, NULL);
     //init samples
     outr = new REALTYPE[SOUND_BUFFER_SIZE];
@@ -41,38 +46,62 @@ void *_outputThread(void *arg)
 void *OutMgr::outputThread()
 {
     pthread_mutex_lock(&mutex);
-    //cout << "run start" << endl;
-    for(int i = 0; i < outs.size(); ++i)
-        outs[i]->Start();
-    //cout << "running" << endl;
+    for(list<AudioOut*>::iterator itr = outs.begin(); itr != outs.end(); ++itr)
+        (*itr)->Start();
     pthread_mutex_unlock(&mutex);
+
     running=true;
     init=true;
-    bool doWait;
+    bool doWait=false;
+    int lRequests;
     while(running){
-        //cout << "OutMgr THREAD" << endl;
-        pthread_mutex_lock(&request_m);
-        doWait = numRequests--<1;
-        //cout << numRequests << endl;
-        pthread_mutex_unlock(&request_m);
+        //pthread_mutex_lock(&request_m);
+        //lRequests=numRequests--;
+        //pthread_mutex_unlock(&request_m);
+
+        --numRequests;
+
+        pthread_mutex_lock(&mutex);
+        if(true)
+        {
+            cout << "Status: ";
+            cout << outs.size();
+            cout << " outs, ";
+            cout << doWait;
+            cout << " waits, ";
+            cout << numRequests();
+            cout << " requests" << endl;
+        }
+        pthread_mutex_unlock(&mutex);
+
+        doWait = (numRequests()<1);
+
         pthread_mutex_lock(&processing);
         if(doWait) {
-            //cout << "OutMgr wait" << endl;
             pthread_cond_wait(&needsProcess, &processing);
         }
-        //make master use samples
-        //cout << "have some food" << endl;
+        else
+            if(true)
+                cout << "Run Forest Run!" << endl;
+
         pthread_mutex_lock(&(master->mutex));
         master->AudioOut(outl,outr);
         pthread_mutex_unlock(&(master->mutex));
-        smps = Stereo<Sample>(Sample(SOUND_BUFFER_SIZE, outl), 
+
+        smps = Stereo<Sample>(Sample(SOUND_BUFFER_SIZE, outl),
                 Sample(SOUND_BUFFER_SIZE, outr));
-        //cout << "Samp: " << outl[2] << outr[2] << endl;
         pthread_mutex_unlock(&processing);
 
         pthread_mutex_lock(&mutex);
-        for(int i = 0; i < outs.size(); ++i)
-            outs[i]->out(smps);
+        if(false)
+            cout << "output to ";
+        for(list<AudioOut*>::iterator itr = outs.begin(); itr != outs.end(); ++itr) {
+            (*itr)->out(smps);
+            if(false)
+                cout << *itr << " ";
+        }
+        if(false)
+            cout << endl;
         pthread_mutex_unlock(&mutex);
 
     }
@@ -84,7 +113,6 @@ void *OutMgr::outputThread()
 
 void OutMgr::run()
 {
-    int chk;
     pthread_attr_t attr;
     //threadStop = false;
     pthread_attr_init(&attr);
@@ -93,39 +121,42 @@ void OutMgr::run()
 }
 
 
-int OutMgr::add(AudioOut *driver)
+void OutMgr::add(AudioOut *driver)
 {
     pthread_mutex_lock(&mutex);
     outs.push_back(driver);
+    if(running)//hotplug
+        driver->Start();
     pthread_mutex_unlock(&mutex);
 }
 
-int OutMgr::remove(AudioOut *out)
+void OutMgr::remove(AudioOut *out)
 {
     pthread_mutex_lock(&mutex);
-    //vector<AudioOut>::iterator it;
-    //outs.remove(out);
+    outs.remove(out);
+    out->Stop();//tells engine to stop
+    out->out(Stereo<Sample>(Sample(SOUND_BUFFER_SIZE),
+                Sample(SOUND_BUFFER_SIZE)));//gives a dummy sample to make sure it is not stuck
     pthread_mutex_unlock(&mutex);
 }
 
 int OutMgr::getRunning()
 {
-    int tmp;
-    pthread_mutex_lock(&request_m);
-    tmp=numRequests;
-    pthread_mutex_unlock(&request_m);
-    return tmp;
+    //int tmp;
+    //pthread_mutex_lock(&request_m);
+    //tmp=eumRequests;
+    //pthread_mutex_unlock(&request_m);
+    return numRequests();//tmp;
 }
 
 int OutMgr::requestSamples()
 {
-    //cout << "me hungry" << endl;
-    pthread_mutex_lock(&request_m);
+    //pthread_mutex_lock(&request_m);
     ++numRequests;
-    pthread_mutex_unlock(&request_m);
+    //pthread_mutex_unlock(&request_m);
+
     pthread_mutex_lock(&processing);
     pthread_cond_signal(&needsProcess);
-    //cout << "me start fire" << endl;
     pthread_mutex_unlock(&processing);
     return 0;
 }

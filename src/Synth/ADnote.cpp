@@ -1876,7 +1876,7 @@ int ADnote::noteout(REALTYPE *outl, REALTYPE *outr)
     if(Legato.silent)    // Silencer
         if(Legato.msg != LM_FadeIn) {
             memset(outl, 0, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
-            memset(outl, 0, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
+            memset(outr, 0, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
         }
     switch(Legato.msg) {
     case LM_CatchUp:  // Continue the catch-up...

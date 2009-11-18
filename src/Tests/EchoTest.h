@@ -21,6 +21,7 @@
 */
 #include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cstdlib>
 #include "../Effects/Echo.h"
 #include "../globals.h"
 //int SOUND_BUFFER_SIZE=256;

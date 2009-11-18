@@ -24,19 +24,13 @@
 
 #include <pthread.h>
 
-#include "Effect.h"
-#include "Reverb.h"
-#include "Echo.h"
-#include "Chorus.h"
-#include "Phaser.h"
 #include "Alienwah.h"
-#include "Distorsion.h"
-#include "EQ.h"
-#include "DynamicFilter.h"
-#include "../Misc/XMLwrapper.h"
-#include "../Params/FilterParams.h"
+#include "Phaser.h"
 #include "../Params/Presets.h"
 
+class Effect;
+class FilterParams;
+class XMLwrapper;
 
 /**Effect manager, an interface betwen the program and effects*/
 class EffectMgr:public Presets

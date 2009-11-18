@@ -34,7 +34,7 @@
 class AlsaEngine : public AudioOut//, MidiIn
 {
     public:
-        AlsaEngine();
+        AlsaEngine(OutMgr *out);
         ~AlsaEngine() { };
         
         bool openAudio();

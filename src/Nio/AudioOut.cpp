@@ -25,7 +25,13 @@ using namespace std;
 #include "../Misc/Master.h"
 #include "AudioOut.h"
 
-AudioOut::AudioOut(){}
+AudioOut::AudioOut(OutMgr *out)
+    :manager(out),threadStop(false)
+{
+    cout << out;
+    pthread_mutex_init(&outBuf_mutex, NULL);
+    pthread_cond_init (&outBuf_cv, NULL);
+}
 
 //bool AudioOut::prepAudiobuffers(unsigned int nframes, bool with_interleaved)
 //{
@@ -112,3 +118,40 @@ AudioOut::AudioOut(){}
 //    }
 //}
 
+void AudioOut::out(const Stereo<Sample> smps)
+{
+    pthread_mutex_lock(&outBuf_mutex);
+    outBuf.push(smps);
+    pthread_cond_signal(&outBuf_cv);
+    pthread_mutex_unlock(&outBuf_mutex);
+}
+
+const Stereo<Sample> AudioOut::getNext()
+{
+    Stereo<Sample> ans;
+    pthread_mutex_lock(&outBuf_mutex);
+    bool isEmpty = outBuf.empty();
+    pthread_mutex_unlock(&outBuf_mutex);
+    if(isEmpty)//fetch samples if possible
+    {
+        //cerr << manager << endl;
+        if(manager->getRunning()<4)
+            manager->requestSamples();
+        if(true)
+            cout << "-----------------Starvation------------------"<< endl;
+        return current;
+    }
+    else
+    {
+        pthread_mutex_lock(&outBuf_mutex);
+        ans = outBuf.front();
+        outBuf.pop();
+        if(outBuf.size()+manager->getRunning()<4)
+            manager->requestSamples();
+        if(true)
+            cout << "AudioOut "<< outBuf.size()<< '+' << manager->getRunning() << endl;
+        pthread_mutex_unlock(&outBuf_mutex);
+    }
+    current=ans;
+    return ans;
+}

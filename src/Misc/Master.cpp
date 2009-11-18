@@ -23,14 +23,22 @@
 
 #include "Master.h"
 
+#include "../Params/LFOParams.h"
+#include "../Effects/EffectMgr.h"
+#include "../Nio/NulEngine.h"
+
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <iostream>
 
 #include <unistd.h>
 
+using namespace std;
+
 Master::Master()
 {
+    myNull=NULL;
     swaplr = 0;
 
     pthread_mutex_init(&mutex, NULL);
@@ -158,7 +166,6 @@ void Master::noteon(unsigned char chan,
     }
     else
         this->NoteOff(chan, note);
-    ;
     HDDRecorder.triggernow();
 }
 
@@ -492,8 +499,10 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
     //update the LFO's time
     LFOParams::time++;
 
+#ifndef NEW_IO
     if(HDDRecorder.recording())
         HDDRecorder.recordbuffer(outl, outr);
+#endif
     dump.inctick();
 }
 
@@ -662,6 +671,25 @@ vuData Master::getVuData()
     return tmp;
 }
 
+void Master::toggleNull()
+{
+    if(myNull==NULL)
+    {
+        myNull=new NulEngine(sysOut);
+        nullRun=false;
+    }
+    if(nullRun)
+    {
+        sysOut->add(myNull);
+        cout << "Inserting A Null Output-----------------" << endl;
+    }
+    else
+    {
+        sysOut->remove(myNull);
+        cout << "Uninserting A Null Output-----------------" << endl;
+    }
+    nullRun=!nullRun;
+}
 
 void Master::applyparameters()
 {

@@ -22,6 +22,13 @@
 
 #include "Part.h"
 #include "Microtonal.h"
+#include "../Effects/EffectMgr.h"
+#include "../Params/ADnoteParameters.h"
+#include "../Params/SUBnoteParameters.h"
+#include "../Params/PADnoteParameters.h"
+#include "../Synth/ADnote.h"
+#include "../Synth/SUBnote.h"
+#include "../Synth/PADnote.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

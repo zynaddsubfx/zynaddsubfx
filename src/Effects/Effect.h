@@ -25,8 +25,8 @@
 
 #include "../Misc/Util.h"
 #include "../globals.h"
-#include "../Params/FilterParams.h"
 
+class FilterParams;
 
 /**this class is inherited by the all effects(Reverb, Echo, ..)*/
 class Effect
@@ -76,7 +76,7 @@ class Effect
         virtual void cleanup() {}
         /**This is only used for EQ (for user interface)*/
         virtual REALTYPE getfreqresponse(REALTYPE freq) {
-            return 0;
+            return freq;
         }
 
         unsigned char   Ppreset; /**<Currently used preset*/

@@ -26,19 +26,20 @@
 #include <queue>
 #include <pthread.h>
 #include "OutMgr.h"
+#include "../Misc/Atom.h"
 
-class AudioOut;
+//class AudioOut;
 class AudioOut
 {
     public:
-        AudioOut();
+        AudioOut(OutMgr *out);
         virtual ~AudioOut() {};
 
         virtual bool openAudio()=0;
         virtual bool Start()=0;
         virtual void Stop()=0;
         virtual void Close()=0;
-        virtual void out(const Stereo<Sample> smps)=0;
+        virtual void out(const Stereo<Sample> smps);
         //bool prepAudiobuffers(unsigned int buffersize, bool with_interleaved);
         //void silenceBuffers();
         //void dimBuffers();
@@ -46,10 +47,19 @@ class AudioOut
         //virtual bool isSingleton() const {return true;};
 
     protected:
-        //float      *outl;
-        //float      *outr;
-        //short int  *shortInterleaved;
-        //int buffersize;
+        /**Get the next sample for output.*/
+        virtual const Stereo<Sample> getNext();
+
+        std::queue<Stereo<Sample> >  outBuf;
+        const Sample *  curSmp;
+        Stereo<Sample> current;
+        pthread_mutex_t outBuf_mutex;
+        pthread_cond_t  outBuf_cv;
+
+        OutMgr *manager;
+        //thread resources
+        Atom<bool> threadStop;
+        pthread_t pThread;
 };
 
 #endif

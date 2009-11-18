@@ -25,12 +25,11 @@
 #define MASTER_H
 
 #include "../globals.h"
-#include "../Effects/EffectMgr.h"
-#include "Part.h"
-#include "../Output/Recorder.h"
 #include "Microtonal.h"
 
 #include "Bank.h"
+#include "../Output/Recorder.h"
+#include "Part.h"
 #include "Dump.h"
 #include "../Seq/Sequencer.h"
 #include "XMLwrapper.h"
@@ -39,11 +38,14 @@ typedef enum { MUTEX_TRYLOCK, MUTEX_LOCK, MUTEX_UNLOCK } lockset;
 
 extern Dump dump;
 
+class NulEngine;
+
 typedef struct vuData_t {
     REALTYPE outpeakl, outpeakr, maxoutpeakl, maxoutpeakr,
              rmspeakl, rmspeakr;
     int clipped;
 } vuData;
+
 
 /** It sends Midi Messages to Parts, receives samples from parts,
  *  process them with system/insertion effects and mix them */
@@ -157,8 +159,12 @@ class Master
         FFTwrapper     *fft;
         pthread_mutex_t mutex;
         pthread_mutex_t vumutex;
+
+        void toggleNull();//temporary debug function
  
     private:
+        NulEngine *myNull;
+        bool nullRun;
         vuData vu;
         REALTYPE volume;
         REALTYPE sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
