@@ -965,3 +965,7 @@
 
 18 Nov 2009 (Mark McCurry)
 	    - Fixed segfault in VirKeyBoard
+
+02 Dec 2009 (Paul Nasca)
+		- Fixed a small typo on Virtual Keyboard
+
