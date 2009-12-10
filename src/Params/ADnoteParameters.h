@@ -31,7 +31,7 @@
 #include "../Misc/Util.h"
 #include "../Misc/XMLwrapper.h"
 #include "../DSP/FFTwrapper.h"
-#include "Presets.h"
+#include "PresetsArray.h"
 
 class EnvelopeParams;
 class LFOParams;
@@ -276,7 +276,7 @@ struct ADnoteVoiceParam {
     EnvelopeParams *FMAmpEnvelope;
 };
 
-class ADnoteParameters:public Presets
+class ADnoteParameters : public PresetsArray
 {
     public:
         ADnoteParameters(FFTwrapper *fft_);
