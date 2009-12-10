@@ -687,11 +687,12 @@ int main(int argc, char *argv[])
     sysOut=NULL;
     sysOut = new OutMgr(master);
     if(sysOut);
-    //AlsaEngine *tmp = new AlsaEngine();
-    AudioOut *tmp = new OssEngine(sysOut);
-    if(tmp);
+    AudioOut *tmp = new AlsaEngine(sysOut);
+    tmp->openAudio();
     //tmp->openAudio();
-    sysOut->add(tmp);
+    //AudioOut *tmp = new OssEngine(sysOut);
+    if(tmp)
+        sysOut->add(tmp);
     sysOut->run();
 
 #endif

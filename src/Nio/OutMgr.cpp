@@ -23,7 +23,6 @@ OutMgr::OutMgr(Master *nmaster)
     //initialize mutex
     pthread_mutex_init(&mutex,       NULL);
     pthread_mutex_init(&processing,  NULL);
-    //pthread_mutex_init(&request_m,   NULL);
     pthread_cond_init(&needsProcess, NULL);
     //init samples
     outr = new REALTYPE[SOUND_BUFFER_SIZE];
@@ -142,18 +141,12 @@ void OutMgr::remove(AudioOut *out)
 
 int OutMgr::getRunning()
 {
-    //int tmp;
-    //pthread_mutex_lock(&request_m);
-    //tmp=eumRequests;
-    //pthread_mutex_unlock(&request_m);
-    return numRequests();//tmp;
+    return numRequests();
 }
 
 int OutMgr::requestSamples()
 {
-    //pthread_mutex_lock(&request_m);
     ++numRequests;
-    //pthread_mutex_unlock(&request_m);
 
     pthread_mutex_lock(&processing);
     pthread_cond_signal(&needsProcess);

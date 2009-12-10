@@ -42,7 +42,6 @@ class AlsaEngine : public AudioOut//, MidiIn
         bool Start();
         void Stop();
         void Close();
-        void out(const Stereo<Sample> smps);
         
         unsigned int getSamplerate() { return audio.samplerate; };
         unsigned int getBuffersize() { return audio.period_size; };
@@ -61,7 +60,7 @@ class AlsaEngine : public AudioOut//, MidiIn
     private:
         bool prepHwparams();
         bool prepSwparams();
-        void Write(const short *InterleavedSmps);
+        void Write(const short *InterleavedSmps, int size);
         bool Recover(int err);
         bool xrunRecover();
         bool alsaBad(int op_result, std::string err_msg);
@@ -72,7 +71,7 @@ class AlsaEngine : public AudioOut//, MidiIn
                                       snd_pcm_uframes_t nframes);
 
         /**Get the next sample for output.*/
-        const Stereo<Sample> getNext();
+        //const Stereo<Sample> getNext();
         /**Interleave Samples. \todo move this to util*/
         const short *interleave(const Stereo<Sample> smps) const;
 
@@ -95,7 +94,21 @@ class AlsaEngine : public AudioOut//, MidiIn
         //    pthread_t    pThread;
         //} midi;
 
-        bool threadStop;
+        //from alsa example
+        long loops;
+        int rc;
+        int size;
+        snd_pcm_t *handle;
+        snd_pcm_hw_params_t *params;
+        unsigned int val;
+        int dir;
+        snd_pcm_uframes_t frames;
+        const short *buffer;
+
+        void RunStuff();
+        void OpenStuff();
+
+        //bool threadStop;
 
         //outside audio interface
         queue<Stereo<Sample> > outBuf;

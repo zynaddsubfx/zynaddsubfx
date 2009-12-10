@@ -33,12 +33,11 @@ AlsaEngine::AlsaEngine(OutMgr *out)
     audio.handle = NULL;
     audio.period_time = 0;
     audio.samplerate = 0;
-    audio.buffer_size = 0;
+    audio.buffer_size = SOUND_BUFFER_SIZE;//0;
     audio.period_size = 0;
-    audio.buffer_size = 0;
     audio.alsaId = -1;
     audio.pThread = 0;
-    
+
 //    midi.handle = NULL;
 //    midi.alsaId = -1;
 //    midi.pThread = 0;
@@ -53,27 +52,8 @@ AlsaEngine::AlsaEngine(OutMgr *out)
 
 bool AlsaEngine::openAudio()
 {
-    audio.device = "default";//config.cfg.audioDevice;
-    audio.samplerate = config.cfg.SampleRate;
-    audio.period_size = config.cfg.SoundBufferSize;
-    audio.period_time =  audio.period_size * 1000000.0f / audio.samplerate;
-    alsaBad(snd_config_update_free_global(), "failed to update snd config");
-    if (alsaBad(snd_pcm_open(&audio.handle, audio.device.c_str(),
-                    SND_PCM_STREAM_PLAYBACK, SND_PCM_NO_AUTO_CHANNELS),
-                "failed to open alsa audio device:" + audio.device))
-        goto bail_out;
-    if (alsaBad(snd_pcm_nonblock(audio.handle, 0), "set blocking failed"))
-        goto bail_out;
-    if (!prepHwparams())
-        goto bail_out;
-    if (!prepSwparams())
-        goto bail_out;
-    //config.cfg.Samplerate = getSamplerate();
-    //config.cfg.Buffersize = getBuffersize();
+    OpenStuff();
     return true;
-bail_out:
-    Close();
-    return false;
 }
 
 
@@ -112,23 +92,9 @@ bail_out:
 void AlsaEngine::Close()
 {
     Stop();
-    if (audio.handle != NULL)
-        alsaBad(snd_pcm_close(audio.handle), "close pcm failed");
-    audio.handle = NULL;
-//    if (NULL != midi.handle)
-//        if (snd_seq_close(midi.handle) < 0)
-//            cerr << "Error closing Alsa midi connection" << endl;
-//    midi.handle = NULL;
+    snd_pcm_drain(handle);
+    snd_pcm_close(handle);
 }
-
-void AlsaEngine::out(const Stereo<Sample> smps)
-{
-    pthread_mutex_lock(&outBuf_mutex);
-    outBuf.push(smps);
-    pthread_cond_signal(&outBuf_cv);
-    pthread_mutex_unlock(&outBuf_mutex);
-}
-
 
 string AlsaEngine::audioClientName()
 {
@@ -146,125 +112,6 @@ string AlsaEngine::audioClientName()
 //    return name;
 //}
 
-
-bool AlsaEngine::prepHwparams()
-{
-    unsigned int buffer_time = audio.period_time * 4;
-    unsigned int desired_samplerate = audio.samplerate;
-    snd_pcm_format_t format = SND_PCM_FORMAT_S16; // Alsa appends _LE/_BE? hmmm
-    snd_pcm_access_t axs = SND_PCM_ACCESS_MMAP_INTERLEAVED;
-    snd_pcm_hw_params_t  *hwparams = NULL;
-    snd_pcm_hw_params_alloca(&hwparams);
-    if (alsaBad(snd_pcm_hw_params_any(audio.handle, hwparams),
-                "alsa audio no playback configurations available"))
-        goto bail_out;
-    if (alsaBad(snd_pcm_hw_params_set_periods_integer(audio.handle, hwparams),
-                "alsa audio cannot restrict period size to integral value"))
-        goto bail_out;
-    if (!alsaBad(snd_pcm_hw_params_set_access(audio.handle, hwparams, axs),
-                 "alsa audio mmap not possible"))
-        pcmWrite = &snd_pcm_mmap_writei;
-    else
-    {
-        axs = SND_PCM_ACCESS_RW_INTERLEAVED;
-        if (alsaBad(snd_pcm_hw_params_set_access(audio.handle, hwparams, axs),
-                     "alsa audio failed to set access, both mmap and rw failed"))
-            goto bail_out;
-        pcmWrite = &snd_pcm_writei;
-    }
-    if (alsaBad(snd_pcm_hw_params_set_format(audio.handle, hwparams, format),
-                "alsa audio failed to set sample format"))
-        goto bail_out;
-    alsaBad(snd_pcm_hw_params_set_rate_resample(audio.handle, hwparams, 1),
-            "alsa audio failed to set allow resample");
-    if (alsaBad(snd_pcm_hw_params_set_rate_near(audio.handle, hwparams,
-                                                &audio.samplerate, NULL),
-                "alsa audio failed to set sample rate to "
-                + stringFrom<int>(desired_samplerate)))
-        goto bail_out;
-    if (alsaBad(snd_pcm_hw_params_set_channels(audio.handle, hwparams, 2),
-                "alsa audio failed to set channels to 2"))
-        goto bail_out;
-    if (!alsaBad(snd_pcm_hw_params_set_buffer_time_near(audio.handle, hwparams,
-                 &buffer_time, NULL), "initial buffer time setting failed"))
-    {
-        if (alsaBad(snd_pcm_hw_params_get_buffer_size(hwparams, &audio.buffer_size),
-                    "alsa audio failed to get buffer size"))
-            goto bail_out;
-        if (alsaBad(snd_pcm_hw_params_set_period_time_near(audio.handle, hwparams,
-                    &audio.period_time, NULL), "failed to set period time"))
-            goto bail_out;
-        if (alsaBad(snd_pcm_hw_params_get_period_size(hwparams, &audio.period_size,
-                    NULL), "alsa audio failed to get period size"))
-            goto bail_out;
-    }
-    else
-    {
-        if (alsaBad(snd_pcm_hw_params_set_period_time_near(audio.handle, hwparams,
-                    &audio.period_time, NULL), "failed to set period time"))
-            goto bail_out;
-        audio.buffer_size = audio.period_size * 4;
-        if (alsaBad(snd_pcm_hw_params_set_buffer_size_near(audio.handle, hwparams,
-                    &audio.buffer_size), "failed to set buffer size"))
-            goto bail_out;
-    }
-    if (alsaBad(snd_pcm_hw_params(audio.handle, hwparams),
-                "alsa audio failed to set hardware parameters"))
-		goto bail_out;
-    if (alsaBad(snd_pcm_hw_params_get_buffer_size(hwparams, &audio.buffer_size),
-                "alsa audio failed to get buffer size"))
-        goto bail_out;
-    if (alsaBad(snd_pcm_hw_params_get_period_size(hwparams, &audio.period_size,
-                NULL), "failed to get period size"))
-        goto bail_out;
-    return true;
-
-bail_out:
-    if (audio.handle != NULL)
-        Close();
-    return false;
-}
-
-
-bool AlsaEngine::prepSwparams()
-{
-    snd_pcm_sw_params_t *swparams;
-    snd_pcm_sw_params_alloca(&swparams);
-	snd_pcm_uframes_t boundary;
-    if (alsaBad(snd_pcm_sw_params_current(audio.handle, swparams),
-                 "alsa audio failed to get swparams"))
-        goto bail_out;
-    if (alsaBad(snd_pcm_sw_params_get_boundary(swparams, &boundary),
-                "alsa audio failed to get boundary"))
-        goto bail_out;
-    if (alsaBad(snd_pcm_sw_params_set_start_threshold(audio.handle, swparams,
-                                                      boundary + 1),
-                "failed to set start threshold")) // explicit start, not auto start
-        goto bail_out;
-    if (alsaBad(snd_pcm_sw_params_set_stop_threshold(audio.handle, swparams,
-                                                    boundary),
-               "alsa audio failed to set stop threshold"))
-        goto bail_out;
-    if (alsaBad(snd_pcm_sw_params(audio.handle, swparams),
-                "alsa audio failed to set software parameters"))
-        goto bail_out;
-    return true;
-
-bail_out:
-    return false;
-}
-
-
-bool AlsaEngine::alsaBad(int op_result, string err_msg)
-{
-    bool isbad = (op_result < 0); // (op_result < 0) -> is bad -> return true
-    if (isbad)
-        cerr << "Error, alsa audio: " << err_msg << ": "
-             << string(snd_strerror(op_result)) << endl;
-    return isbad;
-}
-
-
 void *AlsaEngine::_AudioThread(void *arg)
 {
     return (static_cast<AlsaEngine*>(arg))->AudioThread();
@@ -272,69 +119,20 @@ void *AlsaEngine::_AudioThread(void *arg)
 
 
 void *AlsaEngine::AudioThread()
-{  
-    if (NULL == audio.handle)
-    {
-        cerr << "Error, null pcm handle into AlsaEngine::AudioThread" << endl;
-        return NULL;
-    }
-    set_realtime();
-    alsaBad(snd_pcm_start(audio.handle), "alsa audio pcm start failed");
-    while (!threadStop)
-    {
-        cout << "AlsaEngine THREAD" << endl;
-        const Stereo<Sample> smps = getNext();
-
-        audio.pcm_state = snd_pcm_state(audio.handle);
-        if (audio.pcm_state != SND_PCM_STATE_RUNNING)
-        {
-            switch (audio.pcm_state)
-            {
-                case SND_PCM_STATE_XRUN:
-                case SND_PCM_STATE_SUSPENDED:
-                    if (!xrunRecover())
-                        break;
-                    // else fall through to ...
-                case SND_PCM_STATE_SETUP:
-                    if (alsaBad(snd_pcm_prepare(audio.handle),
-                                "alsa audio pcm prepare failed"))
-                        break;
-                case SND_PCM_STATE_PREPARED:
-                    alsaBad(snd_pcm_start(audio.handle), "pcm start failed");
-                    break;
-                default:
-                    cout << "AlsaEngine::AudioThread, weird SND_PCM_STATE: "
-                         << audio.pcm_state << endl;
-                    break;
-            }
-            audio.pcm_state = snd_pcm_state(audio.handle);
-        }
-        if (audio.pcm_state == SND_PCM_STATE_RUNNING)
-        {
-            const short *tmp = interleave(smps);
-            Write(tmp);
-            delete [] tmp;
-        }
-        else
-        {
-            //config.cfg.verbose
-             //   && cerr << "Error, audio pcm still not RUNNING" << endl;
-             cerr << "Error, audio pcm still not running";
-        }
-    }
+{
+    RunStuff();
     return NULL;
 }
 
 
-void AlsaEngine::Write(const short *InterleavedSmps)
+void AlsaEngine::Write(const short *InterleavedSmps,int size)
 {
-    snd_pcm_uframes_t towrite = getBuffersize();
+    snd_pcm_uframes_t towrite = size;//getBuffersize();
     snd_pcm_sframes_t wrote = 0;
     const short int *data = InterleavedSmps;
     while (towrite > 0)
     {
-        //wrote = pcmWrite(audio.handle, &data, towrite);
-        wrote = snd_pcm_writei(audio.handle, data, towrite);
+        wrote = pcmWrite(audio.handle, &data, towrite);
         if (wrote >= 0)
         {
             if ((snd_pcm_uframes_t)wrote < towrite || wrote == -EAGAIN)
@@ -350,7 +148,7 @@ void AlsaEngine::Write(const short *InterleavedSmps)
             switch (wrote)
             {
                 case -EBADFD:
-                    alsaBad(-EBADFD, "alsa audio unfit for writing");
+                    //alsaBad(-EBADFD, "alsa audio unfit for writing");
                     break;
                 case -EPIPE:
                     xrunRecover();
@@ -359,7 +157,7 @@ void AlsaEngine::Write(const short *InterleavedSmps)
                     Recover(wrote);
                     break;
                 default:
-                    alsaBad(wrote, "alsa audio, snd_pcm_writei ==> weird state");
+                    //alsaBad(wrote, "alsa audio, snd_pcm_writei ==> weird state");
                     break;
             }
             wrote = 0;
@@ -379,14 +177,14 @@ bool AlsaEngine::Recover(int err)
             isgood = true; // nuthin to see here
             break;
         case -ESTRPIPE:
-            if (!alsaBad(snd_pcm_prepare(audio.handle),
-                         "Error, AlsaEngine failed to recover from suspend"))
-                isgood = true;
+           // if (!alsaBad(snd_pcm_prepare(audio.handle),
+             //            "Error, AlsaEngine failed to recover from suspend"))
+            //    isgood = true;
             break;
         case -EPIPE:
-            if (!alsaBad(snd_pcm_prepare(audio.handle),
-                         "Error, AlsaEngine failed to recover from underrun"))
-                isgood = true;
+           // if (!alsaBad(snd_pcm_prepare(audio.handle),
+           //              "Error, AlsaEngine failed to recover from underrun"))
+           //     isgood = true;
             break;
         default:
             break;
@@ -400,8 +198,8 @@ bool AlsaEngine::xrunRecover()
     bool isgood = false;
     if (audio.handle != NULL)
     {
-        if (!alsaBad(snd_pcm_drop(audio.handle), "pcm drop failed"))
-            if (!alsaBad(snd_pcm_prepare(audio.handle), "pcm prepare failed"))
+        //if (!alsaBad(snd_pcm_drop(audio.handle), "pcm drop failed"))
+         //   if (!alsaBad(snd_pcm_prepare(audio.handle), "pcm prepare failed"))
                 isgood = true;
         ;//config.cfg.verbose
          //   && cout << "Info, xrun recovery " << ((isgood) ? "good" : "not good")
@@ -416,12 +214,12 @@ bool AlsaEngine::Start(void)
     int chk;
     pthread_attr_t attr;
     threadStop = false;
-    if (NULL != audio.handle)
-    {
+    //if (NULL != audio.handle)
+    //{
         pthread_attr_init(&attr);
         pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
         pthread_create(&audio.pThread, &attr, _AudioThread, this);
-    }
+    //}
 
 //    if (NULL != midi.handle)
 //    {
@@ -442,7 +240,7 @@ bail_out:
 void AlsaEngine::Stop(void)
 {
     threadStop = true;
-    
+
     if (NULL != audio.handle && audio.pThread)
         if (pthread_cancel(audio.pThread))
             cerr << "Error, failed to cancel Alsa audio thread" << endl;
@@ -545,40 +343,11 @@ void AlsaEngine::Stop(void)
 //    return NULL;
 //}
 
-const Stereo<Sample> AlsaEngine::getNext()
-{
-    Stereo<Sample> ans;
-    if(outBuf.empty())//fetch samples if possible
-    {
-        if(true)//FIXME care about locking state later on
-            //mgr.requestSamples()!=-1)//samples are being prepared
-        {
-            manager->requestSamples();
-            pthread_mutex_lock(&outBuf_mutex);
-            pthread_cond_wait(&outBuf_cv, &outBuf_mutex);
-            ans = outBuf.front();
-            outBuf.pop();
-            pthread_mutex_unlock(&outBuf_mutex);
-        }
-    }
-    else
-    {
-        pthread_mutex_lock(&outBuf_mutex);
-        ans = outBuf.front();
-        outBuf.pop();
-        pthread_mutex_unlock(&outBuf_mutex);
-    }
-    return ans;
-}
-
-
 const short *AlsaEngine::interleave(const Stereo<Sample> smps)const
 {
-    //hm, this seems less than optimum
-    //TODO remove this excessive allocation/deallocation once things are
-    //integrated
-    short *shortInterleaved = new short[smps.l().size()*2+1002];//over allocation
-    /**\todo TODO fix overallocation*/
+    /**\todo TODO fix repeated allocation*/
+    short *shortInterleaved = new short[smps.l().size()*2];//over allocation
+    memset(shortInterleaved,0,smps.l().size()*2*sizeof(short));
     int idx = 0;//possible off by one error here
     double scaled;
     for (int frame = 0; frame < smps.l().size(); ++frame)
@@ -587,5 +356,86 @@ const short *AlsaEngine::interleave(const Stereo<Sample> smps)const
         shortInterleaved[idx++] = (short int)(lrint(scaled) >> 16);
         scaled = smps.r()[frame] * (8.0 * 0x10000000);
         shortInterleaved[idx++] = (short int)(lrint(scaled) >> 16);
+    }
+    return shortInterleaved;
+}
+
+
+void AlsaEngine::OpenStuff()
+{
+  /* Open PCM device for playback. */
+    handle=NULL;
+  rc = snd_pcm_open(&handle, "default",
+                    SND_PCM_STREAM_PLAYBACK, 0);
+  if (rc < 0) {
+    fprintf(stderr,
+            "unable to open pcm device: %s\n",
+            snd_strerror(rc));
+    exit(1);
+  }
+
+  /* Allocate a hardware parameters object. */
+  snd_pcm_hw_params_alloca(&params);
+
+  /* Fill it in with default values. */
+  snd_pcm_hw_params_any(handle, params);
+
+  /* Set the desired hardware parameters. */
+
+  /* Interleaved mode */
+  snd_pcm_hw_params_set_access(handle, params,
+                      SND_PCM_ACCESS_RW_INTERLEAVED);
+
+  /* Signed 16-bit little-endian format */
+  snd_pcm_hw_params_set_format(handle, params,
+                              SND_PCM_FORMAT_S16_LE);
+
+  /* Two channels (stereo) */
+  snd_pcm_hw_params_set_channels(handle, params, 2);
+
+  /* 44100 bits/second sampling rate (CD quality)
+   * \TODO make this dynamic*/
+  val = 44100;
+  snd_pcm_hw_params_set_rate_near(handle, params,
+                                  &val, NULL);//&dir);
+
+  frames = 32;
+  snd_pcm_hw_params_set_period_size_near(handle,
+                              params, &frames, NULL);//&dir);
+
+  /* Write the parameters to the driver */
+  rc = snd_pcm_hw_params(handle, params);
+  if (rc < 0) {
+    fprintf(stderr,
+            "unable to set hw parameters: %s\n",
+            snd_strerror(rc));
+    exit(1);
+  }
+
+  /* Set buffer size (in frames). The resulting latency is given by */
+  /* latency = periodsize * periods / (rate * bytes_per_frame)     */
+  snd_pcm_hw_params_set_buffer_size(handle, params, SOUND_BUFFER_SIZE);
+
+  /* Use a buffer large enough to hold one period */
+  snd_pcm_hw_params_get_period_size(params, &frames, &dir);
+
+  snd_pcm_hw_params_get_period_time(params, &val, &dir);
+}
+
+void AlsaEngine::RunStuff()
+{
+    while (!threadStop()) {
+        buffer = interleave(getNext());
+        rc = snd_pcm_writei(handle, buffer, SOUND_BUFFER_SIZE);
+        delete buffer;
+        if (rc == -EPIPE) {
+            /* EPIPE means underrun */
+            cerr << "underrun occurred" << endl;
+            snd_pcm_prepare(handle);
+        }
+        else if (rc < 0)
+            cerr << "error from writei: " << snd_strerror(rc) << endl;
+        else if (rc != (int)frames)
+            cerr << "short write, write " << rc << "frames" << endl;
     }
 }
