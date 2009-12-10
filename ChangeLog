@@ -969,3 +969,7 @@
 02 Dec 2009 (Paul Nasca)
 		- Fixed a small typo on Virtual Keyboard
 
+10 Dec 2009 (Mark McCurry)
+	    - Separated out Presets and arrayed Presets to reduce warnings from
+	      the Wextra flag
+
