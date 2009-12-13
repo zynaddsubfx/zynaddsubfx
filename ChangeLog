@@ -980,4 +980,5 @@
 13 Dec 2009 (Mark McCurry)
 	    - Deprecating Output system for the Nio system
 	    - General Code Cleanup
+	    - Adding OpenGL linking for proper compiles
 

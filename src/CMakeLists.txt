@@ -6,7 +6,9 @@ find_package(MXML REQUIRED)
 find_package(Alsa)
 find_package(JACK)
 find_package(PortAudio)
+set(FLTK_SKIP_OPENGL true)
 find_package(FLTK)
+find_package(OpenGL) #for FLTK
 
 ######### Settings ###########
 # NOTE: These cache variables should normally not be changed in this
@@ -104,9 +106,6 @@ if(FLTK_FOUND)
 endif(FLTK_FOUND)
 
 if(FltkGui)
-    #message(STATUS "FLTK_LIBRARIES: ${FLTK_LIBRARIES}")
-    #message(STATUS "FLTK_MATH_LIBRARY: ${FLTK_MATH_LIBRARY}")
-
     #UGLY WORKAROUND
     find_program (MYFLTK_CONFIG fltk-config)
     if (MYFLTK_CONFIG)
@@ -114,8 +113,11 @@ if(FltkGui)
         string(STRIP ${MYFLTK_LDFLAGS} MYFLTK_LIBRARIES)
     endif()
 
+    message(STATUS ${MYFLTK_LDFLAGS})
 
-    set(GUI_LIBRARIES ${FLTK_LIBRARIES} ${MYFLTK_LIBRARIES} zynaddsubfx_gui)
+
+    set(GUI_LIBRARIES  ${MYFLTK_LIBRARIES} ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES} zynaddsubfx_gui)
+
     add_definitions(-DFLTK_GUI)
 
     message(STATUS "Will build fltk gui")

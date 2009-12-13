@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Atom.cpp - Simple Atomic operation wrapper
+  Atomic.cpp - Simple Atomic operation wrapper
   Copyright (C) 2009-2009 Mark McCurry
   Author: Mark McCurry
 
@@ -20,20 +20,20 @@
 */
 
 template<class T>
-Atom<T>::Atom(const T &val)
+Atomic<T>::Atomic(const T &val)
     :value(val)
 {
     pthread_mutex_init(&mutex, NULL);
 }
 
 template<class T>
-Atom<T>::~Atom()
+Atomic<T>::~Atomic()
 {
     pthread_mutex_destroy(&mutex);
 }
 
 template<class T>
-void Atom<T>::operator=(const T &nval)
+void Atomic<T>::operator=(const T &nval)
 {
     pthread_mutex_lock(&mutex);
     value = nval;
@@ -41,7 +41,7 @@ void Atom<T>::operator=(const T &nval)
 }
 
 template<class T>
-T Atom<T>::operator()() const
+T Atomic<T>::operator()() const
 {
     T tmp;
     pthread_mutex_lock(&mutex);
@@ -51,7 +51,7 @@ T Atom<T>::operator()() const
 }
 
 template<class T>
-T Atom<T>::operator++(){
+T Atomic<T>::operator++(){
     T tmp;
     pthread_mutex_lock(&mutex);
     tmp = ++value;
@@ -60,7 +60,7 @@ T Atom<T>::operator++(){
 }
 
 template<class T>
-T Atom<T>::operator--(){
+T Atomic<T>::operator--(){
     T tmp;
     pthread_mutex_lock(&mutex);
     tmp = --value;

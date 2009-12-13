@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Atom.h - Simple Atomic operation wrapper
+  Atomic.h - Simple Atomic operation wrapper
   Copyright (C) 2009-2009 Mark McCurry
   Author: Mark McCurry
 
@@ -25,13 +25,13 @@
 
 /**Very simple threaded value container*/
 template<class T>
-class Atom
+class Atomic
 {
     public:
         /**Initializes Atom
          * @param val the value of the atom*/
-        Atom(const T &val);
-        ~Atom();
+        Atomic(const T &val);
+        ~Atomic();
 
         void operator=(const T &val);
         T operator()() const;
@@ -41,6 +41,6 @@ class Atom
         mutable pthread_mutex_t mutex;
         T value;
 };
-#include "Atom.cpp"
+#include "Atomic.cpp"
 #endif
 

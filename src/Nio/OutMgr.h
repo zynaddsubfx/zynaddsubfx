@@ -3,7 +3,7 @@
 
 #include "../globals.h"
 #include "../Misc/Stereo.h"
-#include "../Misc/Atom.h"
+#include "../Misc/Atomic.h"
 #include "../Samples/Sample.h"
 //#include "../Misc/Master.h"
 #include <list>
@@ -54,7 +54,7 @@ class OutMgr
 
         pthread_t outThread;
         pthread_cond_t needsProcess;
-        Atom<int> numRequests;
+        Atomic<int> numRequests;
         /**for closing*/
         pthread_mutex_t close_m;
         pthread_cond_t close_cond;

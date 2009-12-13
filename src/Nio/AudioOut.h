@@ -26,7 +26,7 @@
 #include <queue>
 #include <pthread.h>
 #include "OutMgr.h"
-#include "../Misc/Atom.h"
+#include "../Misc/Atomic.h"
 
 //class AudioOut;
 class AudioOut
@@ -58,7 +58,7 @@ class AudioOut
 
         OutMgr *manager;
         //thread resources
-        Atom<bool> threadStop;
+        Atomic<bool> threadStop;
         pthread_t pThread;
 };
 
