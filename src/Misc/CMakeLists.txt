@@ -9,10 +9,11 @@ set(zynaddsubfx_misc_SRCS
 	Part.cpp
 	Util.cpp
 	XMLwrapper.cpp
+        Recorder.cpp
 )
 
 add_library(zynaddsubfx_misc STATIC
 	${zynaddsubfx_misc_SRCS} 
 	)
 
-target_link_libraries(zynaddsubfx_misc zynaddsubfx_output)
+target_link_libraries(zynaddsubfx_misc zynaddsubfx_nio zynaddsubfx_output)

@@ -28,24 +28,13 @@
 #endif
 
 Recorder::Recorder()
-    :status(0), notetrigger(0)
-{
-#ifndef NEW_IO
-    recordbuf_16bit = new short int [SOUND_BUFFER_SIZE * 2];
-    for(int i = 0; i < SOUND_BUFFER_SIZE * 2; i++)
-        recordbuf_16bit[i] = 0;
-#else
-        wave=NULL;
-#endif
-}
+    :status(0), notetrigger(0), wave(NULL)
+{}
 
 Recorder::~Recorder()
 {
     if(recording() == 1)
         stop();
-#ifndef NEW_IO
-    delete [] recordbuf_16bit;
-#endif
 }
 
 int Recorder::preparefile(std::string filename_, int overwrite)
@@ -58,13 +47,8 @@ int Recorder::preparefile(std::string filename_, int overwrite)
             return 1;
     }
 
-#ifndef NEW_IO
-    if(!wav.newfile(filename_, SAMPLE_RATE, 2))
-        return 2;
-#else
     if(!(wave=new WavEngine(sysOut, filename_, SAMPLE_RATE, 2)))
         return 2;
-#endif
 
     status = 1; //ready
 
@@ -79,9 +63,6 @@ void Recorder::start()
 
 void Recorder::stop()
 {
-#ifndef NEW_IO
-    wav.close();
-#else
     if(wave)
     {
         sysOut->remove(wave);
@@ -89,17 +70,14 @@ void Recorder::stop()
         delete wave;
         wave = NULL; //is this even needed?
     }
-#endif
     status = 0;
 }
 
 void Recorder::pause()
 {
     status = 0;
-#ifdef NEW_IO
 //        wave->Stop();
         sysOut->remove(wave);
-#endif
 }
 
 int Recorder::recording()
@@ -110,41 +88,14 @@ int Recorder::recording()
         return 0;
 }
 
-#ifndef NEW_IO
-void Recorder::recordbuffer(REALTYPE *outl, REALTYPE *outr)
-{
-    int tmp;
-    if(status != 2)
-        return;
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        tmp = (int)(outl[i] * 32767.0);
-        if(tmp < -32768)
-            tmp = -32768;
-        if(tmp > 32767)
-            tmp = 32767;
-        recordbuf_16bit[i * 2] = tmp;
-
-        tmp = (int)(outr[i] * 32767.0);
-        if(tmp < -32768)
-            tmp = -32768;
-        if(tmp > 32767)
-            tmp = 32767;
-        recordbuf_16bit[i * 2 + 1] = tmp;
-    }
-    wav.write_stereo_samples(SOUND_BUFFER_SIZE, recordbuf_16bit);
-}
-#endif
-
 void Recorder::triggernow()
 {
     if(status == 2) {
-#ifdef NEW_IO
         if(notetrigger!=1) {
             wave->openAudio();
             //wave->Start();
             sysOut->add(wave);
         }
-#endif
         notetrigger = 1;
     }
 }

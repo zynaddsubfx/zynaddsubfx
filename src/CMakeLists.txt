@@ -9,13 +9,21 @@ find_package(PortAudio)
 find_package(FLTK)
 
 ######### Settings ###########
-# NOTE: These cache variables should normallly not be changed in this
+# NOTE: These cache variables should normally not be changed in this
 # file, but either in in CMakeCache.txt before compile, or by passing
 # parameters directly into cmake using the -D flag.
 SET (FFTW_VERSION 3 CACHE STRING "Version number of FFTW")
 SET (OutputModule alsa CACHE STRING "Output module, either alsa, nio, jack or portaudio")
 SET (GuiModule fltk CACHE STRING "GUI module, either fltk, qt or off")
 SET (CompileTests OFF CACHE BOOL "whether tests should be compiled in or not")
+
+#change this to have defaults set by results of find_package
+SET (AlsaEnable OFF CACHE BOOL
+    "Enable support for Advanced Linux Sound Architecture")
+SET (JackEnable OFF CACHE BOOL
+    "Enable support for JACK Audio Connection toolKit")
+SET (OssEnable OFF CACHE BOOL
+    "Enable support for Open Sound System")
 
 # Now, handle the incoming settings and set define flags/variables based
 # on this
@@ -83,6 +91,17 @@ add_definitions(-DFFTW_VERSION_${FFTW_VERSION}
          -Wextra
 	 )
 
+if(FLTK_FOUND)
+    mark_as_advanced(FORCE FLTK_BASE_LIBRARY)
+    mark_as_advanced(FORCE FLTK_CONFIG_SCRIPT)
+    mark_as_advanced(FORCE FLTK_DIR)
+    mark_as_advanced(FORCE FLTK_FLUID_EXECUTABLE)
+    mark_as_advanced(FORCE FLTK_FORMS_LIBRARY)
+    mark_as_advanced(FORCE FLTK_GL_LIBRARY)
+    mark_as_advanced(FORCE FLTK_IMAGES_LIBRARY)
+    mark_as_advanced(FORCE FLTK_INCLUDE_DIR)
+    mark_as_advanced(FORCE FLTK_MATH_LIBRARY)
+endif(FLTK_FOUND)
 
 if(FltkGui)
     #message(STATUS "FLTK_LIBRARIES: ${FLTK_LIBRARIES}")
@@ -94,15 +113,6 @@ if(FltkGui)
         execute_process (COMMAND ${MYFLTK_CONFIG} --ldflags OUTPUT_VARIABLE MYFLTK_LDFLAGS)
         string(STRIP ${MYFLTK_LDFLAGS} MYFLTK_LIBRARIES)
     endif()
-    mark_as_advanced(FORCE FLTK_BASE_LIBRARY)
-    mark_as_advanced(FORCE FLTK_CONFIG_SCRIPT)
-    mark_as_advanced(FORCE FLTK_DIR)
-    mark_as_advanced(FORCE FLTK_FLUID_EXECUTABLE)
-    mark_as_advanced(FORCE FLTK_FORMS_LIBRARY)
-    mark_as_advanced(FORCE FLTK_GL_LIBRARY)
-    mark_as_advanced(FORCE FLTK_IMAGES_LIBRARY)
-    mark_as_advanced(FORCE FLTK_INCLUDE_DIR)
-    mark_as_advanced(FORCE FLTK_MATH_LIBRARY)
 
 
     set(GUI_LIBRARIES ${FLTK_LIBRARIES} ${MYFLTK_LIBRARIES} zynaddsubfx_gui)
@@ -191,7 +201,7 @@ set(zynaddsubfx_SRCS
 	main.cpp
 	)
 
-add_executable(zynaddsubfx 
+add_executable(zynaddsubfx
 	${zynaddsubfx_SRCS}
 )
 

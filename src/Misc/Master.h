@@ -28,7 +28,7 @@
 #include "Microtonal.h"
 
 #include "Bank.h"
-#include "../Output/Recorder.h"
+#include "Recorder.h"
 #include "Part.h"
 #include "Dump.h"
 #include "../Seq/Sequencer.h"

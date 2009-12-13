@@ -22,6 +22,7 @@
 
 #include <stdio.h> //remove once iostream is used
 #include <iostream>
+#include <cmath>
 
 #include <unistd.h>
 #include <pthread.h>
@@ -38,9 +39,7 @@
 #include "Misc/Dump.h"
 extern Dump dump;
 
-//#ifdef NEW_IO
 #include "Nio/OutMgr.h"
-//#endif
 
 #ifdef ALSAMIDIIN
 #include "Input/ALSAMidiIn.h"
@@ -81,29 +80,10 @@ Master   *master;
 int  swaplr    = 0; //1 for left-right swapping
 bool usejackit = false;
 
-#ifdef NEW_IO
-#include "Nio/AudioOut.h"//temporary include
-#include "Nio/AlsaEngine.h"//temporary include
-#include "Nio/OssEngine.h"//temporary include
 #include "Nio/OutMgr.h"
-#endif
+//temporary include (remove once the OutMgr can bootstrap itself)
+#include "Nio/NulEngine.h"
 
-#ifdef JACKAUDIOOUT
-#include "Output/JACKaudiooutput.h"
-#endif
-
-#ifdef JACK_RTAUDIOOUT
-#include "Output/JACKaudiooutput.h"
-#endif
-
-#ifdef PAAUDIOOUT
-#include "Output/PAaudiooutput.h"
-#endif
-
-#ifdef OSSAUDIOOUT
-#include "Output/OSSaudiooutput.h"
-OSSaudiooutput *audioout;
-#endif
 
 #ifdef USE_LASH
 #include "Misc/LASHClient.h"
@@ -131,71 +111,22 @@ void *thread1(void *arg)
         note = cmdparams[0];
         vel  = cmdparams[1];
 
-       // pthread_mutex_lock(&master->mutex);
-
         if((cmdtype == MidiNoteON) && (note != 0))
             master->NoteOn(cmdchan, note, vel);
         if((cmdtype == MidiNoteOFF) && (note != 0))
             master->NoteOff(cmdchan, note);
         if(cmdtype == MidiController)
             master->SetController(cmdchan, cmdparams[0], cmdparams[1]);
-
-        //pthread_mutex_unlock(&master->mutex);
     }
 
     return 0;
 }
 #endif
 
-/*
- * Wave output thread (for OSS AUDIO out)
- */
-#if defined(OSSAUDIOOUT)
-//!(defined(JACKAUDIOOUT)||defined(JACK_RTAUDIOOUT)||defined(PAAUDIOOUT)||defined(VSTAUDIOOUT))
-
-void *thread2(void *arg)
-{
-    REALTYPE outputl[SOUND_BUFFER_SIZE];
-    REALTYPE outputr[SOUND_BUFFER_SIZE];
-
-    set_realtime();
-    while(Pexitprogram == 0) {
-        pthread_mutex_lock(&master->mutex);
-        master->AudioOut(outputl, outputr);
-        pthread_mutex_unlock(&master->mutex);
-
-#ifndef NONEAUDIOOUT
-        audioout->OSSout(outputl, outputr);
-#endif
-
-        /** /   int i,x,x2;
-            REALTYPE xx,xx2;
-
-                short int xsmps[SOUND_BUFFER_SIZE*2];
-            for (i=0;i<SOUND_BUFFER_SIZE;i++){//output to stdout
-                xx=-outputl[i]*32767;
-                xx2=-outputr[i]*32767;
-                if (xx<-32768) xx=-32768;
-                if (xx>32767) xx=32767;
-                if (xx2<-32768) xx2=-32768;
-                if (xx2>32767) xx2=32767;
-                x=(short int) xx;
-                x2=(short int) xx2;
-                xsmps[i*2]=x;xsmps[i*2+1]=x2;
-                };
-                write(1,&xsmps,SOUND_BUFFER_SIZE*2*2);
-
-                / * */
-    }
-    return 0;
-}
-#endif
 
 /*
  * User Interface thread
  */
-
-
 void *thread3(void *arg)
 {
 #ifndef DISABLE_GUI
@@ -310,32 +241,6 @@ void initprogram()
     master = new Master();
     master->swaplr = swaplr;
 
-//#if defined(JACKAUDIOOUT)
-//    if(usejackit) {
-//        bool tmp = JACKaudiooutputinit(master);
-//#if defined(OSSAUDIOOUT)
-//        if(!tmp)
-//            cout << "\nUsing OSS instead." << endl;
-//#else
-//        if(!tmp)
-//            exit(1);
-//#endif
-//        usejackit = tmp;
-//    }
-//#endif
-//#if defined(OSSAUDIOOUT)
-//    if(!usejackit)
-//        audioout = new OSSaudiooutput();
-//    else
-//        audioout = NULL;
-//#endif
-
-//#ifdef JACK_RTAUDIOOUT
-//    JACKaudiooutputinit(master);
-//#endif
-//#ifdef PAAUDIOOUT
-//    PAaudiooutputinit(master);
-//#endif
 
 #ifdef ALSAMIDIIN
     Midi = new ALSAMidiIn();
@@ -357,19 +262,6 @@ void initprogram()
 void exitprogram()
 {
     pthread_mutex_lock(&master->mutex);
-//#ifdef OSSAUDIOOUT
-//    delete (audioout);
-//#endif
-//#ifdef JACKAUDIOOUT
-//    if(usejackit)
-//        JACKfinish();
-//#endif
-//#ifdef JACK_RTAUDIOOUT
-//    JACKfinish();
-//#endif
-//#ifdef PAAUDIOOUT
-//    PAfinish();
-//#endif
 
 #ifndef DISABLE_GUI
     delete (ui);
@@ -677,35 +569,19 @@ int main(int argc, char *argv[])
     pthread_create(&thr1, NULL, thread1, NULL);
 #endif
 
-#ifdef OSSAUDIOOUT
-//!(defined(JACKAUDIOOUT)||defined(JACK_RTAUDIOOUT)||defined(PAAUDIOOUT)||defined(VSTAUDIOOUT))
-    if(!usejackit)
-        pthread_create(&thr2, NULL, thread2, NULL);
-#endif
-
-#ifdef NEW_IO
+    //Output Bootstrapping
     sysOut=NULL;
     sysOut = new OutMgr(master);
     if(sysOut);
-    AudioOut *tmp = new AlsaEngine(sysOut);
-    tmp->openAudio();
+    AudioOut *tmp = new NulEngine(sysOut);
+    //tmp->openAudio();
     //tmp->openAudio();
     //AudioOut *tmp = new OssEngine(sysOut);
     if(tmp)
         sysOut->add(tmp);
     sysOut->run();
 
-#endif
 
-    /*It is not working and I don't know why
-    //drop the suid-root permisions
-    #if !(defined(JACKAUDIOOUT)||defined(PAAUDIOOUT)||defined(VSTAUDIOOUT)|| (defined (WINMIDIIN)) )
-          setuid(getuid());
-          seteuid(getuid());
-    //      setreuid(getuid(),getuid());
-    //      setregid(getuid(),getuid());
-    #endif
-    */
     if(noui == 0)
         pthread_create(&thr3, NULL, thread3, NULL);
 

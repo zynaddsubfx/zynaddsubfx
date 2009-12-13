@@ -977,3 +977,7 @@
 	      the Wextra flag
 	    - Minor change to Filter_ and FormantFilter to reduce unwanted warnings
 
+13 Dec 2009 (Mark McCurry)
+	    - Deprecating Output system for the Nio system
+	    - General Code Cleanup
+

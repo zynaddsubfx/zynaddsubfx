@@ -499,10 +499,6 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
     //update the LFO's time
     LFOParams::time++;
 
-#ifndef NEW_IO
-    if(HDDRecorder.recording())
-        HDDRecorder.recordbuffer(outl, outr);
-#endif
     dump.inctick();
 }
 
