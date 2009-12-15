@@ -49,14 +49,10 @@ void *_outputThread(void *arg)
 
 void *OutMgr::outputThread()
 {
-    //pthread_mutex_lock(&mutex);
-    //for(list<AudioOut*>::iterator itr = outs.begin(); itr != outs.end(); ++itr)
-    //    (*itr)->Start();
-    //pthread_mutex_unlock(&mutex);
 
-    if(!defaultOut->openAudio())//there should be a better failsafe
+    //open up the default output
+    if(!defaultOut->Start())//there should be a better failsafe
         cerr << "ERROR: The default Audio Output Failed to Open!" << endl;
-    defaultOut->Start();
 
     //setup
     running=true;
@@ -102,7 +98,8 @@ void *OutMgr::outputThread()
             cout << "output to ";
         for(map<string,AudioOut*>::iterator itr = managedOuts.begin();
                 itr != managedOuts.end(); ++itr) {
-            itr->second->out(smps);
+            if(itr->second->isEnabled())
+                itr->second->out(smps);
             if(false)
                 cout << itr->second << " ";
         }

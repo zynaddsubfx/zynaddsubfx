@@ -89,6 +89,7 @@ bool NulEngine::Start()
 {
     pthread_attr_t attr;
     threadStop = false;
+    enabled = true;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     pthread_create(&pThread, &attr, _AudioThread, this);
@@ -99,14 +100,6 @@ bool NulEngine::Start()
 void NulEngine::Stop()
 {
     threadStop = true;
+    enabled    = false;
 }
 
-void NulEngine::Close()
-{
-    Stop();
-}
-
-bool NulEngine::openAudio()
-{
-    return true;
-}

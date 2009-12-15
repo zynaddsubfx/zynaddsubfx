@@ -34,11 +34,6 @@ class AudioOut
         AudioOut(OutMgr *out);
         virtual ~AudioOut() {};
 
-        //depricated
-        virtual bool openAudio()=0;
-        //depricated
-        virtual void Close()=0;
-
         /**Start the Driver*/
         virtual bool Start()=0;
         /**Stop the Driver*/

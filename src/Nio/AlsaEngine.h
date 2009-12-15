@@ -37,11 +37,9 @@ class AlsaEngine : public AudioOut//, MidiIn
         AlsaEngine(OutMgr *out);
         ~AlsaEngine() { };
         
-        bool openAudio();
         //bool openMidi();
         bool Start();
         void Stop();
-        void Close();
         
         unsigned int getSamplerate() { return audio.samplerate; };
         unsigned int getBuffersize() { return audio.period_size; };
@@ -70,8 +68,6 @@ class AlsaEngine : public AudioOut//, MidiIn
         snd_pcm_sframes_t (*pcmWrite)(snd_pcm_t *handle, const void *data,
                                       snd_pcm_uframes_t nframes);
 
-        /**Get the next sample for output.*/
-        //const Stereo<Sample> getNext();
         /**Interleave Samples. \todo move this to util*/
         const short *interleave(const Stereo<Sample> smps) const;
 
@@ -107,16 +103,6 @@ class AlsaEngine : public AudioOut//, MidiIn
 
         void RunStuff();
         void OpenStuff();
-
-        //bool threadStop;
-
-        //outside audio interface
-        queue<Stereo<Sample> > outBuf;
-        const Sample *               curSmp;
-        pthread_mutex_t              outBuf_mutex;
-        pthread_cond_t               outBuf_cv;
-
-        OutMgr *manager;
 
 };
 

@@ -52,7 +52,6 @@ AlsaEngine::AlsaEngine(OutMgr *out)
 
 bool AlsaEngine::openAudio()
 {
-    OpenStuff();
     return true;
 }
 
@@ -88,13 +87,6 @@ bool AlsaEngine::openAudio()
 //    return false;
 //}
 
-
-void AlsaEngine::Close()
-{
-    Stop();
-    snd_pcm_drain(handle);
-    snd_pcm_close(handle);
-}
 
 string AlsaEngine::audioClientName()
 {
@@ -209,11 +201,13 @@ bool AlsaEngine::xrunRecover()
 }
 
 
-bool AlsaEngine::Start(void)
+bool AlsaEngine::Start()
 {
+    OpenStuff();
     int chk;
     pthread_attr_t attr;
     threadStop = false;
+    enable = true;
     //if (NULL != audio.handle)
     //{
         pthread_attr_init(&attr);
@@ -237,13 +231,16 @@ bail_out:
 }
 
 
-void AlsaEngine::Stop(void)
+void AlsaEngine::Stop()
 {
     threadStop = true;
+    enable = false;
 
     if (NULL != audio.handle && audio.pThread)
         if (pthread_cancel(audio.pThread))
             cerr << "Error, failed to cancel Alsa audio thread" << endl;
+    snd_pcm_drain(handle);
+    snd_pcm_close(handle);
     //if (NULL != midi.handle && midi.pThread)
     //    if (pthread_cancel(midi.pThread))
     //        cerr << "Error, failed to cancel Alsa midi thread" << endl;

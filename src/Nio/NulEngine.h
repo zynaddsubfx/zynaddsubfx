@@ -33,10 +33,8 @@ class NulEngine: public AudioOut
         NulEngine(OutMgr *out);
         ~NulEngine();
         
-        bool openAudio();
         bool Start();
         void Stop();
-        void Close();
 
     protected:
         void *AudioThread();

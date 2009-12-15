@@ -75,10 +75,10 @@ OssEngine::~OssEngine()
     delete [] smps;
 }
 
-bool OssEngine::openAudio()
-{
-    return true;
-}
+//bool OssEngine::openAudio()
+//{
+//    return true;
+//}
 
 bool OssEngine::Start()
 {
@@ -97,10 +97,10 @@ void OssEngine::Stop()
     threadStop = true;
 }
 
-void OssEngine::Close()
-{
-    Stop();
-}
+//void OssEngine::Close()
+//{
+//    Stop();
+//}
 
 void *OssEngine::_AudioThread(void *arg)
 {

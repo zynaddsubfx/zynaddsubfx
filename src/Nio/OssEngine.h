@@ -36,10 +36,8 @@ class OssEngine: public AudioOut
         //the out is [-1.0 .. 1.0]
         /* smp_left[] and smp_right[] has the size of SOUND_BUFFER_SIZE */
 
-        bool openAudio();
         bool Start();
         void Stop();
-        void Close();
 
     protected:
         void *AudioThread();
