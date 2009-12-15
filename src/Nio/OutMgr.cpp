@@ -79,7 +79,7 @@ void *OutMgr::outputThread()
         --numRequests;
 
         pthread_mutex_lock(&mutex);
-        if(true) {
+        if(false) {
             cout << "Status: ";
             cout << managedOuts.size() << "-";
             cout << unmanagedOuts.size();

@@ -13,7 +13,7 @@ class Pack : public Fl_Pack
         Pack(int x, int y, int w, int h);
     private:
         Fl_Light_Button b1,b2,b3;
-        static void nioTogglei(Fl_Widget *wid, void *name);
+        static void nioToggle(Fl_Widget *w, void *name);
 };
 
 class NioUI : public Fl_Window

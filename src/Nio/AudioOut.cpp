@@ -62,7 +62,7 @@ const Stereo<Sample> AudioOut::getNext()
         outBuf.pop();
         if(outBuf.size()+manager->getRunning()<4)
             manager->requestSamples();
-        if(true)
+        if(false)
             cout << "AudioOut "<< outBuf.size()<< '+' << manager->getRunning() << endl;
         pthread_mutex_unlock(&outBuf_mutex);
     }
