@@ -26,7 +26,7 @@ using namespace std;
 #include "AudioOut.h"
 
 AudioOut::AudioOut(OutMgr *out)
-    :manager(out),threadStop(false)
+    :manager(out),threadStop(false),enabled(false)
 {
     cout << out;
     pthread_mutex_init(&outBuf_mutex, NULL);

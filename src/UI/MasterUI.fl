@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0300 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2009 Nasca Octavian Paul} {} 
@@ -46,6 +46,9 @@ decl {\#include "SeqUI.h"} {public
 } 
 
 decl {\#include "PresetsUI.h"} {public
+} 
+
+decl {\#include "NioUI.h"} {public global
 } 
 
 decl {\#include "../Misc/Master.h"} {public
@@ -427,7 +430,7 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL)) {
     *exitprogram=1;
 };
 \#endif}
-      xywh {450 306 390 465} type Double labeltype NORMAL_LABEL align 80 hide xclass zynaddsubfx
+      xywh {450 306 390 465} type Double align 80 hide xclass zynaddsubfx
     } {
       Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
@@ -995,7 +998,7 @@ panelwindow->show();}
       }
       Fl_Button {} {
         label N
-        callback {newiowindow->show();} selected
+        callback {nioui.show();} selected
         xywh {270 75 20 25}
       }
     }
@@ -1827,4 +1830,5 @@ bankui->hide();} {}
   decl {int swapefftype;} {}
   decl {char masterwindowlabel[100];} {}
   decl {Panellistitem *panellistitem[NUM_MIDI_PARTS];} {}
+  decl {NioUI nioui;} {}
 } 

@@ -42,6 +42,7 @@ else  ()
 	message(STATUS "GUI module defaulting to off")
 endif()
 
+#depricated block
 if (OutputModule STREQUAL alsa AND ALSA_FOUND)
 	set(AlsaMidiOutput TRUE)
 elseif(OutputModule STREQUAL jack AND JACK_FOUND)
@@ -53,6 +54,16 @@ elseif(OutputModule STREQUAL nio AND ALSA_FOUND)
 else ()
 	message(FATAL_ERROR "OutputModule must be either alsa, nio, jack or portaudio")
 endif()
+
+if(AlsaEnable)
+        add_definitions(-DALSA=1)
+endif(AlsaEnable)
+if(JackEnable)
+        add_definitions(-DJACK=1)
+endif(JackEnable)
+if(OssEnable)
+        add_definitions(-DOSS=1)
+endif(OssEnable)
 
 ########### Settings dependant code ###########
 # From here on, the setting variables have  been prepared so concentrate

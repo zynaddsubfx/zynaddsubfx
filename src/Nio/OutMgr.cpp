@@ -3,30 +3,35 @@
 #include <iostream>
 #include "AudioOut.h"
 #include "../Misc/Master.h"
+#include "NulEngine.h"
 using namespace std;
 
 OutMgr *sysOut;
-//typedef enum
-//{
-//    JACK_OUTPUT;
-//    ALSA_OUTPUT;
-//    OSS_OUTPUT;
-//    WINDOWS_OUTPUT;
-//    WAV_OUTPUT;
-//} outputDriver;
 
 OutMgr::OutMgr(Master *nmaster)
     :numRequests(0)
 {
     running = false;
     master = nmaster;
+
     //initialize mutex
     pthread_mutex_init(&mutex,       NULL);
     pthread_mutex_init(&processing,  NULL);
     pthread_cond_init(&needsProcess, NULL);
+
     //init samples
     outr = new REALTYPE[SOUND_BUFFER_SIZE];
     outl = new REALTYPE[SOUND_BUFFER_SIZE];
+
+    //conditional compiling
+    managedOuts["NULL"] = defaultOut = new NulEngine(this);
+#if OSS
+    managedOuts["OSS"] = new OssEngine(this);
+#endif
+#if ALSA
+    managedOuts["ALSA"] = new ALSAEngine(this);
+#endif
+
 };
 
 OutMgr::~OutMgr()
@@ -44,27 +49,28 @@ void *_outputThread(void *arg)
 
 void *OutMgr::outputThread()
 {
-    pthread_mutex_lock(&mutex);
-    for(list<AudioOut*>::iterator itr = outs.begin(); itr != outs.end(); ++itr)
-        (*itr)->Start();
-    pthread_mutex_unlock(&mutex);
+    //pthread_mutex_lock(&mutex);
+    //for(list<AudioOut*>::iterator itr = outs.begin(); itr != outs.end(); ++itr)
+    //    (*itr)->Start();
+    //pthread_mutex_unlock(&mutex);
 
+    if(!defaultOut->openAudio())//there should be a better failsafe
+        cerr << "ERROR: The default Audio Output Failed to Open!" << endl;
+    defaultOut->Start();
+
+    //setup
     running=true;
     init=true;
     bool doWait=false;
     int lRequests;
-    while(running){
-        //pthread_mutex_lock(&request_m);
-        //lRequests=numRequests--;
-        //pthread_mutex_unlock(&request_m);
-
+    while(running) {
         --numRequests;
 
         pthread_mutex_lock(&mutex);
-        if(true)
-        {
+        if(true) {
             cout << "Status: ";
-            cout << outs.size();
+            cout << managedOuts.size() << "-";
+            cout << unmanagedOuts.size();
             cout << " outs, ";
             cout << doWait;
             cout << " waits, ";
@@ -94,7 +100,14 @@ void *OutMgr::outputThread()
         pthread_mutex_lock(&mutex);
         if(false)
             cout << "output to ";
-        for(list<AudioOut*>::iterator itr = outs.begin(); itr != outs.end(); ++itr) {
+        for(map<string,AudioOut*>::iterator itr = managedOuts.begin();
+                itr != managedOuts.end(); ++itr) {
+            itr->second->out(smps);
+            if(false)
+                cout << itr->second << " ";
+        }
+        for(list<AudioOut*>::iterator itr = unmanagedOuts.begin();
+                itr != unmanagedOuts.end(); ++itr) {
             (*itr)->out(smps);
             if(false)
                 cout << *itr << " ";
@@ -119,11 +132,16 @@ void OutMgr::run()
     pthread_create(&outThread, &attr, _outputThread, this);
 }
 
+AudioOut *OutMgr::getOut(string name)
+{
+    transform(name.begin(), name.end(), name.begin(), ::toupper);
+    return managedOuts[name];
+}
 
 void OutMgr::add(AudioOut *driver)
 {
     pthread_mutex_lock(&mutex);
-    outs.push_back(driver);
+    unmanagedOuts.push_back(driver);
     if(running)//hotplug
         driver->Start();
     pthread_mutex_unlock(&mutex);
@@ -132,7 +150,7 @@ void OutMgr::add(AudioOut *driver)
 void OutMgr::remove(AudioOut *out)
 {
     pthread_mutex_lock(&mutex);
-    outs.remove(out);
+    unmanagedOuts.remove(out);
     out->Stop();//tells engine to stop
     out->out(Stereo<Sample>(Sample(SOUND_BUFFER_SIZE),
                 Sample(SOUND_BUFFER_SIZE)));//gives a dummy sample to make sure it is not stuck
@@ -153,7 +171,4 @@ int OutMgr::requestSamples()
     pthread_mutex_unlock(&processing);
     return 0;
 }
-
-//int OutMgr::enable(outputDriver out);
-//int OutMgr::disable(outputDriver out);
 

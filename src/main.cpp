@@ -81,8 +81,6 @@ int  swaplr    = 0; //1 for left-right swapping
 bool usejackit = false;
 
 #include "Nio/OutMgr.h"
-//temporary include (remove once the OutMgr can bootstrap itself)
-#include "Nio/NulEngine.h"
 
 
 #ifdef USE_LASH
@@ -572,13 +570,13 @@ int main(int argc, char *argv[])
     //Output Bootstrapping
     sysOut=NULL;
     sysOut = new OutMgr(master);
-    if(sysOut);
-    AudioOut *tmp = new NulEngine(sysOut);
+    //if(sysOut);
+    //AudioOut *tmp = new NulEngine(sysOut);
     //tmp->openAudio();
     //tmp->openAudio();
     //AudioOut *tmp = new OssEngine(sysOut);
-    if(tmp)
-        sysOut->add(tmp);
+    //if(tmp)
+    //    sysOut->add(tmp);
     sysOut->run();
 
 

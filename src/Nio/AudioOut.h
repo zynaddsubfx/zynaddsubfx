@@ -28,23 +28,30 @@
 #include "OutMgr.h"
 #include "../Misc/Atomic.h"
 
-//class AudioOut;
 class AudioOut
 {
     public:
         AudioOut(OutMgr *out);
         virtual ~AudioOut() {};
 
+        //depricated
         virtual bool openAudio()=0;
-        virtual bool Start()=0;
-        virtual void Stop()=0;
+        //depricated
         virtual void Close()=0;
+
+        /**Start the Driver*/
+        virtual bool Start()=0;
+        /**Stop the Driver*/
+        virtual void Stop()=0;
+
+        /**Give the Driver Samples to process*/
         virtual void out(const Stereo<Sample> smps);
-        //bool prepAudiobuffers(unsigned int buffersize, bool with_interleaved);
-        //void silenceBuffers();
-        //void dimBuffers();
         /**Determines if new operator should/can be used*/
-        //virtual bool isSingleton() const {return true;};
+        virtual bool isEnabled() const {return enabled();};
+
+        /**Report the state of the engine
+         * @return 0 for stoped, 1 for running*/
+        virtual int state() const {return enabled();};
 
     protected:
         /**Get the next sample for output.*/
@@ -60,6 +67,7 @@ class AudioOut
         //thread resources
         Atomic<bool> threadStop;
         pthread_t pThread;
+        Atomic<bool> enabled;
 };
 
 #endif
