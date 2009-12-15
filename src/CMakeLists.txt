@@ -3,6 +3,7 @@ find_package(zlib REQUIRED)
 find_package(fftw REQUIRED)
 find_package(MXML REQUIRED)
 #find_package(pthread REQUIRED)
+#find_package(OSS)
 find_package(Alsa)
 find_package(JACK)
 find_package(PortAudio)
@@ -15,16 +16,15 @@ find_package(OpenGL) #for FLTK
 # file, but either in in CMakeCache.txt before compile, or by passing
 # parameters directly into cmake using the -D flag.
 SET (FFTW_VERSION 3 CACHE STRING "Version number of FFTW")
-SET (OutputModule alsa CACHE STRING "Output module, either alsa, nio, jack or portaudio")
+SET (DefaultOutput oss CACHE STRING
+    "Default Output module: [null, alsa, oss, jack, portaudio]")
 SET (GuiModule fltk CACHE STRING "GUI module, either fltk, qt or off")
 SET (CompileTests OFF CACHE BOOL "whether tests should be compiled in or not")
-
-#change this to have defaults set by results of find_package
-SET (AlsaEnable OFF CACHE BOOL
+SET (AlsaEnable ${ALSA_FOUND} CACHE BOOL
     "Enable support for Advanced Linux Sound Architecture")
-SET (JackEnable OFF CACHE BOOL
+SET (JackEnable ${JACK_FOUND} CACHE BOOL
     "Enable support for JACK Audio Connection toolKit")
-SET (OssEnable OFF CACHE BOOL
+SET (OssEnable ${ALSA_FOUND} CACHE BOOL #TODO perhaps check for /dev/dsp
     "Enable support for Open Sound System")
 
 # Now, handle the incoming settings and set define flags/variables based
@@ -42,40 +42,34 @@ else  ()
 	message(STATUS "GUI module defaulting to off")
 endif()
 
-#depricated block
-if (OutputModule STREQUAL alsa AND ALSA_FOUND)
-	set(AlsaMidiOutput TRUE)
-elseif(OutputModule STREQUAL jack AND JACK_FOUND)
-	set(JackOutput TRUE)
-elseif(OutputModule STREQUAL portaudio AND PortAudio_FOUND)
-	set(PortAudioOutput TRUE)
-elseif(OutputModule STREQUAL nio AND ALSA_FOUND)
-        set(NewIO TRUE)
-else ()
-	message(FATAL_ERROR "OutputModule must be either alsa, nio, jack or portaudio")
+if (DefaultOutput STREQUAL alsa)
+        add_definitions(-DALSA_DEFAULT=1)
+elseif(DefaultOutput STREQUAL oss)
+        add_definitions(-DOSS_DEFAULT=1)
+elseif(DefaultOutput STREQUAL jack)
+        add_definitions(-DOSS_DEFAULT=1)
 endif()
 
+
+########### Settings dependant code ###########
+# From here on, the setting variables have  been prepared so concentrate
+# on the actual compiling.
+
 if(AlsaEnable)
+        list(APPEND AUDIO_LIBRARIES ${ASOUND_LIBRARY})
         add_definitions(-DALSA=1)
 endif(AlsaEnable)
 if(JackEnable)
         add_definitions(-DJACK=1)
 endif(JackEnable)
 if(OssEnable)
+	add_definitions(-DOSSAUDIOOUT)
+        list(APPEND AUDIO_LIBRARIES ${ASOUND_LIBRARY})
         add_definitions(-DOSS=1)
 endif(OssEnable)
 
-########### Settings dependant code ###########
-# From here on, the setting variables have  been prepared so concentrate
-# on the actual compiling.
-
 if(AlsaMidiOutput)
 	add_definitions(-DOSSAUDIOOUT)
-        set(AUDIO_LIBRARIES ${AUDIO_LIBRARIES} ${ASOUND_LIBRARY})
-endif()
-
-if(NewIO)
-	add_definitions(-DNEW_IO)
         set(AUDIO_LIBRARIES ${AUDIO_LIBRARIES} ${ASOUND_LIBRARY})
 endif()
 

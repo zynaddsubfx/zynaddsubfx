@@ -4,6 +4,13 @@
 #include "AudioOut.h"
 #include "../Misc/Master.h"
 #include "NulEngine.h"
+#if OSS
+#include "OssEngine.h"
+#endif
+#if ALSA
+#include "AlsaEngine.h"
+#endif
+
 using namespace std;
 
 OutMgr *sysOut;
@@ -23,13 +30,21 @@ OutMgr::OutMgr(Master *nmaster)
     outr = new REALTYPE[SOUND_BUFFER_SIZE];
     outl = new REALTYPE[SOUND_BUFFER_SIZE];
 
-    //conditional compiling
+    //conditional compiling mess (but contained)
     managedOuts["NULL"] = defaultOut = new NulEngine(this);
 #if OSS
+#if OSS_DEFAULT
+    managedOuts["OSS"] = defaultOut = new OssEngine(this);
+#else
     managedOuts["OSS"] = new OssEngine(this);
 #endif
+#endif
 #if ALSA
-    managedOuts["ALSA"] = new ALSAEngine(this);
+#if ALSA_DEFAULT
+    managedOuts["ALSA"] = defaultOut = new AlsaEngine(this);
+#else
+    managedOuts["ALSA"] = new AlsaEngine(this);
+#endif
 #endif
 
 };
@@ -40,6 +55,7 @@ OutMgr::~OutMgr()
     pthread_mutex_lock(&close_m);
     pthread_cond_wait(&close_cond, &close_m);
     pthread_mutex_unlock(&close_m);
+#warning TODO deallocate Engines (or have possible issues)
 }
 
 void *_outputThread(void *arg)

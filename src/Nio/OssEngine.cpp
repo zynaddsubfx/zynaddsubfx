@@ -67,6 +67,7 @@ OssEngine::OssEngine(OutMgr *out)
     ioctl(snd_handle, SNDCTL_DSP_SPEED, &snd_samplerate);
     ioctl(snd_handle, SNDCTL_DSP_SAMPLESIZE, &snd_bitsize);
     ioctl(snd_handle, SNDCTL_DSP_SETFRAGMENT, &snd_fragment);
+    cerr << "hello?" << endl;
 }
 
 OssEngine::~OssEngine()
@@ -88,6 +89,8 @@ bool OssEngine::Start()
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     pthread_create(&pThread, &attr, _AudioThread, this);
+    cerr << "Starting?";
+    enabled = true;
 
     return true;
 }
@@ -95,6 +98,7 @@ bool OssEngine::Start()
 void OssEngine::Stop()
 {
     threadStop = true;
+    enabled = false;
 }
 
 //void OssEngine::Close()

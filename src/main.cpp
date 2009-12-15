@@ -568,15 +568,7 @@ int main(int argc, char *argv[])
 #endif
 
     //Output Bootstrapping
-    sysOut=NULL;
     sysOut = new OutMgr(master);
-    //if(sysOut);
-    //AudioOut *tmp = new NulEngine(sysOut);
-    //tmp->openAudio();
-    //tmp->openAudio();
-    //AudioOut *tmp = new OssEngine(sysOut);
-    //if(tmp)
-    //    sysOut->add(tmp);
     sysOut->run();
 
 

@@ -49,13 +49,6 @@ AlsaEngine::AlsaEngine(OutMgr *out)
 
 }
 
-
-bool AlsaEngine::openAudio()
-{
-    return true;
-}
-
-
 //bool AlsaEngine::openMidi()
 //{
 //    midi.device = config.cfg.midiDevice;
@@ -207,7 +200,7 @@ bool AlsaEngine::Start()
     int chk;
     pthread_attr_t attr;
     threadStop = false;
-    enable = true;
+    enabled = true;
     //if (NULL != audio.handle)
     //{
         pthread_attr_init(&attr);
@@ -225,7 +218,7 @@ bool AlsaEngine::Start()
 
 bail_out:
     cerr << "Error - bail out of AlsaEngine::Start()" << endl;
-    Close();
+    Stop();
     threadStop = true;
     return false;
 }
@@ -234,7 +227,7 @@ bail_out:
 void AlsaEngine::Stop()
 {
     threadStop = true;
-    enable = false;
+    enabled = false;
 
     if (NULL != audio.handle && audio.pThread)
         if (pthread_cancel(audio.pThread))
