@@ -193,7 +193,7 @@ bool AlsaEngine::xrunRecover()
 bool AlsaEngine::Start()
 {
     if(enabled())
-        return;
+        return true;
     OpenStuff();
     int chk;
     pthread_attr_t attr;
