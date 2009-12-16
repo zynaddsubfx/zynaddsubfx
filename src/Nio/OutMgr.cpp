@@ -16,12 +16,12 @@ using namespace std;
 OutMgr *sysOut;
 
 OutMgr::OutMgr(Master *nmaster)
-    :numRequests(0)
+    :running(false),numRequests(0)
 {
-    running = false;
     master = nmaster;
 
     //initialize mutex
+    pthread_mutex_init(&close_m,     NULL);
     pthread_mutex_init(&mutex,       NULL);
     pthread_mutex_init(&processing,  NULL);
     pthread_cond_init(&needsProcess, NULL);
@@ -51,10 +51,24 @@ OutMgr::OutMgr(Master *nmaster)
 
 OutMgr::~OutMgr()
 {
+    for(map<string,AudioOut*>::iterator itr = managedOuts.begin();
+            itr != managedOuts.end(); ++itr) {
+            itr->second->Stop();
+    }
     running = false;
+    pthread_mutex_lock(&processing);
+    pthread_cond_signal(&needsProcess);
+    pthread_mutex_unlock(&processing);
     pthread_mutex_lock(&close_m);
-    pthread_cond_wait(&close_cond, &close_m);
     pthread_mutex_unlock(&close_m);
+    for(map<string,AudioOut*>::iterator itr = managedOuts.begin();
+            itr != managedOuts.end(); ++itr) {
+            delete itr->second;
+    }
+    pthread_mutex_destroy(&close_m);
+    pthread_mutex_destroy(&mutex);
+    pthread_mutex_destroy(&processing);
+    pthread_cond_destroy(&needsProcess);
 #warning TODO deallocate Engines (or have possible issues)
 }
 
@@ -66,6 +80,7 @@ void *_outputThread(void *arg)
 void *OutMgr::outputThread()
 {
 
+    pthread_mutex_lock(&close_m);
     //open up the default output
     if(!defaultOut->Start())//there should be a better failsafe
         cerr << "ERROR: The default Audio Output Failed to Open!" << endl;
@@ -74,31 +89,21 @@ void *OutMgr::outputThread()
     running=true;
     init=true;
     bool doWait=false;
-    while(running) {
-        --numRequests;
+    while(running()) {
 
-        pthread_mutex_lock(&mutex);
         if(false) {
             cout << "Status: ";
+            pthread_mutex_lock(&mutex);
             cout << managedOuts.size() << "-";
             cout << unmanagedOuts.size();
+            pthread_mutex_unlock(&mutex);
             cout << " outs, ";
             cout << doWait;
             cout << " waits, ";
             cout << numRequests();
             cout << " requests" << endl;
         }
-        pthread_mutex_unlock(&mutex);
 
-        doWait = (numRequests()<1);
-
-        pthread_mutex_lock(&processing);
-        if(doWait) {
-            pthread_cond_wait(&needsProcess, &processing);
-        }
-        else
-            if(true)
-                cout << "Run Forest Run!" << endl;
 
         pthread_mutex_lock(&(master->mutex));
         master->AudioOut(outl,outr);
@@ -128,9 +133,19 @@ void *OutMgr::outputThread()
             cout << endl;
         pthread_mutex_unlock(&mutex);
 
+        //wait for next run
+        --numRequests;
+        doWait = (numRequests()<1);
+        pthread_mutex_lock(&processing);
+        if(doWait) {
+            pthread_cond_wait(&needsProcess, &processing);
+            pthread_mutex_unlock(&processing);
+        }
+        else
+            if(false)
+                cout << "Run Forest Run!" << endl;
+
     }
-    pthread_mutex_lock(&close_m);
-    pthread_cond_signal(&close_cond);
     pthread_mutex_unlock(&close_m);
     return NULL;
 }
@@ -154,7 +169,7 @@ void OutMgr::add(AudioOut *driver)
 {
     pthread_mutex_lock(&mutex);
     unmanagedOuts.push_back(driver);
-    if(running)//hotplug
+    if(running())//hotplug
         driver->Start();
     pthread_mutex_unlock(&mutex);
 }

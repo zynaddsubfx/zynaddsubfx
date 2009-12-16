@@ -51,7 +51,7 @@ OssEngine::OssEngine(OutMgr *out)
 
 OssEngine::~OssEngine()
 {
-    close(snd_handle);
+    Stop();
     delete [] smps;
 }
 
@@ -93,6 +93,7 @@ void OssEngine::Stop()
 {
     threadStop = true;
     enabled = false;
+    close(snd_handle);
 }
 
 void *OssEngine::_AudioThread(void *arg)

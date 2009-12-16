@@ -44,7 +44,7 @@ class OutMgr
 
         void *outputThread();
     private:
-        bool running;
+        Atomic<bool> running;
         bool init;
 
         //should hold outputs here that exist for the life of the OutMgr

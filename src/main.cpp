@@ -260,6 +260,7 @@ void initprogram()
 void exitprogram()
 {
     pthread_mutex_lock(&master->mutex);
+    delete sysOut;
 
 #ifndef DISABLE_GUI
     delete (ui);

@@ -33,6 +33,11 @@ AudioOut::AudioOut(OutMgr *out)
     pthread_cond_init (&outBuf_cv, NULL);
 }
 
+AudioOut::~AudioOut()
+{
+#warning TODO destroy other mutex
+}
+
 void AudioOut::out(const Stereo<Sample> smps)
 {
     pthread_mutex_lock(&outBuf_mutex);

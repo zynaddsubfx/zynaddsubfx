@@ -32,7 +32,7 @@ class AudioOut
 {
     public:
         AudioOut(OutMgr *out);
-        virtual ~AudioOut() {};
+        virtual ~AudioOut();
 
         /**Start the Driver*/
         virtual bool Start()=0;
@@ -59,6 +59,7 @@ class AudioOut
         pthread_cond_t  outBuf_cv;
 
         OutMgr *manager;
+#warning TODO remove threadStop in favor of enabled
         //thread resources
         Atomic<bool> threadStop;
         pthread_t pThread;

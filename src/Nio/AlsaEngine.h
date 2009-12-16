@@ -35,7 +35,7 @@ class AlsaEngine : public AudioOut//, MidiIn
 {
     public:
         AlsaEngine(OutMgr *out);
-        ~AlsaEngine() { };
+        ~AlsaEngine();
         
         //bool openMidi();
         bool Start();
@@ -103,7 +103,7 @@ class AlsaEngine : public AudioOut//, MidiIn
 
         void RunStuff();
         void OpenStuff();
-
+        pthread_mutex_t close_m;
 };
 
 #endif

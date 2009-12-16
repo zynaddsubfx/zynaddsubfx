@@ -42,8 +42,18 @@ AlsaEngine::AlsaEngine(OutMgr *out)
 //    midi.alsaId = -1;
 //    midi.pThread = 0;
 
+    pthread_mutex_init(&close_m, NULL);
     threadStop = true;
 }
+
+AlsaEngine::~AlsaEngine()
+{
+    Stop();
+    pthread_mutex_lock(&close_m);
+    pthread_mutex_unlock(&close_m);
+    pthread_mutex_destroy(&close_m);
+}
+
 
 //bool AlsaEngine::openMidi()
 //{
@@ -414,6 +424,7 @@ void AlsaEngine::OpenStuff()
 
 void AlsaEngine::RunStuff()
 {
+    pthread_mutex_lock(&close_m);
     while (!threadStop()) {
         buffer = interleave(getNext());
         rc = snd_pcm_writei(handle, buffer, SOUND_BUFFER_SIZE);
@@ -428,4 +439,5 @@ void AlsaEngine::RunStuff()
         //else if (rc != (int)frames)
         //    cerr << "short write, write " << rc << "frames" << endl;
     }
+    pthread_mutex_unlock(&close_m);
 }
