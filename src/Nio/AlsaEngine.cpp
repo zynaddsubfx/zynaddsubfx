@@ -43,10 +43,6 @@ AlsaEngine::AlsaEngine(OutMgr *out)
 //    midi.pThread = 0;
 
     threadStop = true;
-    pthread_mutex_init(&outBuf_mutex, NULL);
-    pthread_cond_init (&outBuf_cv, NULL);
-    manager = sysOut;
-
 }
 
 //bool AlsaEngine::openMidi()
@@ -196,6 +192,8 @@ bool AlsaEngine::xrunRecover()
 
 bool AlsaEngine::Start()
 {
+    if(enabled())
+        return;
     OpenStuff();
     int chk;
     pthread_attr_t attr;
@@ -226,6 +224,8 @@ bail_out:
 
 void AlsaEngine::Stop()
 {
+    if(!enabled())
+        return;
     threadStop = true;
     enabled = false;
 
@@ -355,7 +355,7 @@ void AlsaEngine::OpenStuff()
 {
   /* Open PCM device for playback. */
     handle=NULL;
-  rc = snd_pcm_open(&handle, "default",
+  rc = snd_pcm_open(&handle, "hw:0",
                     SND_PCM_STREAM_PLAYBACK, 0);
   if (rc < 0) {
     fprintf(stderr,
@@ -425,7 +425,7 @@ void AlsaEngine::RunStuff()
         }
         else if (rc < 0)
             cerr << "error from writei: " << snd_strerror(rc) << endl;
-        else if (rc != (int)frames)
-            cerr << "short write, write " << rc << "frames" << endl;
+        //else if (rc != (int)frames)
+        //    cerr << "short write, write " << rc << "frames" << endl;
     }
 }

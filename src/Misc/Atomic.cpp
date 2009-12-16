@@ -51,7 +51,8 @@ T Atomic<T>::operator()() const
 }
 
 template<class T>
-T Atomic<T>::operator++(){
+T Atomic<T>::operator++()
+{
     T tmp;
     pthread_mutex_lock(&mutex);
     tmp = ++value;

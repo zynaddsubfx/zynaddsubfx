@@ -48,9 +48,10 @@ const Stereo<Sample> AudioOut::getNext()
     pthread_mutex_lock(&outBuf_mutex);
     bool isEmpty = outBuf.empty();
     pthread_mutex_unlock(&outBuf_mutex);
+
     if(isEmpty)//fetch samples if possible
     {
-        if(manager->getRunning()<BUFF_SIZE)
+        if(manager->getRunning() < BUFF_SIZE)
             manager->requestSamples(BUFF_SIZE-manager->getRunning());
         if(true)
             cout << "-----------------Starvation------------------"<< endl;
