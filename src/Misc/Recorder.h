@@ -24,7 +24,8 @@
 #define RECORDER_H
 #include <string>
 #include "../globals.h"
-#include "../Nio/WavEngine.h"
+
+class WavEngine;
 
 /**Records sound to a file*/
 class Recorder

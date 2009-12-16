@@ -22,10 +22,8 @@
 
 #include <sys/stat.h>
 #include "Recorder.h"
-#ifdef NEW_IO
 #include "../Nio/OutMgr.h"
 #include "../Nio/WavEngine.h"
-#endif
 
 Recorder::Recorder()
     :status(0), notetrigger(0), wave(NULL)
