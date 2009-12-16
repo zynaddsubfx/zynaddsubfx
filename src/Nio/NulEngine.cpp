@@ -44,7 +44,6 @@ void *NulEngine::_AudioThread(void *arg)
 
 void *NulEngine::AudioThread()
 {  
-    //set_realtime();
     while (!threadStop())
     {
         const Stereo<Sample> smps = getNext();
@@ -69,7 +68,7 @@ void NulEngine::dummyOut()
             //This will add latency...
             usleep(remaining - 10000);
         if(remaining < 0)
-            ;//cerr << "WARNING - too late" << endl;
+            cerr << "WARNING - too late" << endl;
     }
     playing_until.tv_usec += SOUND_BUFFER_SIZE * 1000000 / SAMPLE_RATE;
     if(remaining < 0)

@@ -33,9 +33,6 @@ class OssEngine: public AudioOut
         OssEngine(OutMgr *out);
         ~OssEngine();
 
-        //the out is [-1.0 .. 1.0]
-        /* smp_left[] and smp_right[] has the size of SOUND_BUFFER_SIZE */
-
         bool Start();
         void Stop();
 
@@ -44,19 +41,18 @@ class OssEngine: public AudioOut
         static void *_AudioThread(void *arg);
 
     private:
+        /**Open the audio device
+         * @return true for success*/
+        bool openAudio();
         
         void OSSout(const REALTYPE *smp_left, const REALTYPE *smp_right);
-        void outOut(const REALTYPE *smp_left, const REALTYPE *smp_right);
         int snd_handle;
         int snd_fragment;
         int snd_stereo;
         int snd_format;
         int snd_samplerate;
-        struct timeval playing_until;
 
         short int *smps; //Samples to be sent to soundcard
-
-
 };
 
 #endif

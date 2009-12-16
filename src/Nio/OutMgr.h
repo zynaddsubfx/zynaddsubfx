@@ -27,8 +27,9 @@ class OutMgr
         void remove(AudioOut *out);
 
         /**Request a new set of samples
+         * @param n number of requested samples (defaults to 1)
          * @return -1 for locking issues 0 for valid request*/
-        int requestSamples();
+        int requestSamples(unsigned int n=1);
 
         /**Return the number of building samples*/
         int getRunning();

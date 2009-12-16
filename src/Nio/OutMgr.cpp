@@ -74,7 +74,6 @@ void *OutMgr::outputThread()
     running=true;
     init=true;
     bool doWait=false;
-    int lRequests;
     while(running) {
         --numRequests;
 
@@ -175,9 +174,9 @@ int OutMgr::getRunning()
     return numRequests();
 }
 
-int OutMgr::requestSamples()
+int OutMgr::requestSamples(unsigned int n)
 {
-    ++numRequests;
+    numRequests = numRequests() + n;
 
     pthread_mutex_lock(&processing);
     pthread_cond_signal(&needsProcess);

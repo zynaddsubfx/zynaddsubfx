@@ -43,14 +43,15 @@ void AudioOut::out(const Stereo<Sample> smps)
 
 const Stereo<Sample> AudioOut::getNext()
 {
+    const int BUFF_SIZE = 4;
     Stereo<Sample> ans;
     pthread_mutex_lock(&outBuf_mutex);
     bool isEmpty = outBuf.empty();
     pthread_mutex_unlock(&outBuf_mutex);
     if(isEmpty)//fetch samples if possible
     {
-        if(manager->getRunning()<4)
-            manager->requestSamples();
+        if(manager->getRunning()<BUFF_SIZE)
+            manager->requestSamples(BUFF_SIZE-manager->getRunning());
         if(true)
             cout << "-----------------Starvation------------------"<< endl;
         return current;
@@ -61,7 +62,8 @@ const Stereo<Sample> AudioOut::getNext()
         ans = outBuf.front();
         outBuf.pop();
         if(outBuf.size()+manager->getRunning()<4)
-            manager->requestSamples();
+            manager->requestSamples(BUFF_SIZE - (outBuf.size()
+                        + manager->getRunning()));
         if(false)
             cout << "AudioOut "<< outBuf.size()<< '+' << manager->getRunning() << endl;
         pthread_mutex_unlock(&outBuf_mutex);
