@@ -19,8 +19,10 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 */
 #include <cmath>
+#include <cstring>//for memcpy/memset
 #include "Sample.h"
 
+#warning TODO Think about renaming Sample to Frame
 /**\TODO start using pointer math here as these will be Frequency called
  * functions throughout the code*/
 Sample::Sample()
@@ -96,6 +98,74 @@ bool Sample::operator==(const Sample &smp) const
         if(this->buffer[i] != smp.buffer[i])
             return false;
     return true;
+}
+
+/**
+ * Linear point estimation
+ * @param ya Y of point a
+ * @param yb Y of point b
+ * @param xt X of test point
+ * @param xa X of point a
+ * @param xb X of point b
+ * @return estimated Y of test point
+ */
+float linearEstimate(float ya, float yb, float xt, float xa = 0.0, float xb =1.0)
+{
+#warning TODO this could be done with a good bit less computation
+    //Lets make this simple by normalizing the x axis
+
+    //Normalize point a
+    xb -= xa;
+    xt -= xa;
+    xa -= xa;
+
+    //Normalize point b
+    xt /= xb;
+    xb /= xb;
+
+    //Now xa=0 xb=1 0<=xt<=1
+    //simpily use y=mx+b
+    return (yb-ya) * xt + ya;
+}
+
+
+void Sample::resample(const unsigned int rate, const unsigned int nrate)
+{
+    if(rate == nrate)
+        return; //no resampling here
+    else {//resampling occurs here
+        int   itr   = 0;
+        float ratio = (nrate * 1.0) / (rate * 1.0);
+
+        int    nBufferSize = (int)bufferSize * ratio;
+        float *nBuffer     = new float[nBufferSize];
+
+        //addition is done to avoid 0 edge case
+        for(int i = 0; i < nBufferSize; ++i)
+            nBuffer[i] = linearEstimate(buffer[(int)floor(i/ratio)],
+                                        buffer[(int)ceil((i+1)/ratio)],
+                                        i,
+                                        floor(i/ratio),
+                                        ceil((i+1)/ratio));
+
+        //put the new data in
+        delete buffer;
+        buffer     = nBuffer;
+        bufferSize = nBufferSize;
+    }
+}
+
+void Sample::append(const Sample &smp)
+{
+    int nbufferSize = bufferSize + smp.bufferSize;
+    float *nbuffer  = new float[nbufferSize];
+
+    memcpy(nbuffer, buffer, bufferSize * sizeof(float));
+    memcpy(nbuffer + bufferSize, smp.buffer, smp.bufferSize * sizeof(float));
+    delete buffer;
+
+    buffer     = nbuffer;
+    bufferSize = nbufferSize;
 }
 
 REALTYPE Sample::max() const
