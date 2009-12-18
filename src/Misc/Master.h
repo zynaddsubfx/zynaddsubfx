@@ -38,8 +38,6 @@ typedef enum { MUTEX_TRYLOCK, MUTEX_LOCK, MUTEX_UNLOCK } lockset;
 
 extern Dump dump;
 
-class NulEngine;
-
 typedef struct vuData_t {
     REALTYPE outpeakl, outpeakr, maxoutpeakl, maxoutpeakr,
              rmspeakl, rmspeakr;
@@ -160,10 +158,7 @@ class Master
         pthread_mutex_t mutex;
         pthread_mutex_t vumutex;
 
-        void toggleNull();//temporary debug function
- 
     private:
-        NulEngine *myNull;
         bool nullRun;
         vuData vu;
         REALTYPE volume;

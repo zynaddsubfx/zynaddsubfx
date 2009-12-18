@@ -25,7 +25,6 @@
 
 #include "../Params/LFOParams.h"
 #include "../Effects/EffectMgr.h"
-#include "../Nio/NulEngine.h"
 
 #include <stdio.h>
 #include <sys/stat.h>
@@ -38,7 +37,6 @@ using namespace std;
 
 Master::Master()
 {
-    myNull=NULL;
     swaplr = 0;
 
     pthread_mutex_init(&mutex, NULL);
@@ -665,26 +663,6 @@ vuData Master::getVuData()
     tmp.clipped=vu.clipped;
     pthread_mutex_unlock(&vumutex);
     return tmp;
-}
-
-void Master::toggleNull()
-{
-    if(myNull==NULL)
-    {
-        myNull=new NulEngine(sysOut);
-        nullRun=false;
-    }
-    if(nullRun)
-    {
-        sysOut->add(myNull);
-        cout << "Inserting A Null Output-----------------" << endl;
-    }
-    else
-    {
-        sysOut->remove(myNull);
-        cout << "Uninserting A Null Output-----------------" << endl;
-    }
-    nullRun=!nullRun;
 }
 
 void Master::applyparameters()
