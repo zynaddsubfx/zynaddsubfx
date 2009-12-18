@@ -57,7 +57,7 @@ decl {\#include "../Misc/Master.h"} {public
 decl {\#include "../Misc/Part.h"} {public
 } 
 
-decl {\#include "../Misc/Util.h"} {public
+decl {\#include "../Misc/Util.h"} {selected public
 } 
 
 decl {\#include "../globals.h"} {public
@@ -998,7 +998,7 @@ panelwindow->show();}
       }
       Fl_Button {} {
         label N
-        callback {nioui.show();} selected
+        callback {nioui.show();}
         xywh {270 75 20 25}
       }
     }
@@ -1607,16 +1607,6 @@ config.cfg.UserInterfaceMode=2;}
       Fl_Box {} {
         label {You can switch the interface modes anytime you want.}
         xywh {30 215 360 25} box BORDER_BOX color 51 labelfont 1 labelsize 11 align 144
-      }
-    }
-    Fl_Window newiowindow {
-      label {New IO}
-      xywh {467 490 120 55} type Double labeltype NORMAL_LABEL align 80 hide
-    } {
-      Fl_Light_Button nullToggle {
-        label {Null Output}
-        callback {master->toggleNull();}
-        xywh {10 15 100 20} labelfont 13
       }
     }
   }
