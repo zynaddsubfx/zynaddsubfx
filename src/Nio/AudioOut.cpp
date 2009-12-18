@@ -44,7 +44,6 @@ void AudioOut::out(Stereo<Sample> smps)
     if(samplerate != SAMPLE_RATE) {
         smps.l().resample(SAMPLE_RATE,samplerate);//we need to resample
         smps.r().resample(SAMPLE_RATE,samplerate);//we need to resample
-        cout << "bad system" << endl;
     }
 
     pthread_mutex_lock(&outBuf_mutex);
@@ -55,7 +54,6 @@ void AudioOut::out(Stereo<Sample> smps)
 
 const Stereo<Sample> AudioOut::popOne()
 {
-    cout << "popOne" << endl;
     const int BUFF_SIZE = 6;
     Stereo<Sample> ans;
     pthread_mutex_lock(&outBuf_mutex);
@@ -90,7 +88,6 @@ const Stereo<Sample> AudioOut::popOne()
 //(it can cause a horrible mess with the current starvation behavior)
 void AudioOut::putBack(const Stereo<Sample> smp)
 {
-    cout << "putBack"<< endl;
     pthread_mutex_lock(&outBuf_mutex);
     outBuf.push_front(smp);
     pthread_mutex_unlock(&outBuf_mutex);
@@ -98,18 +95,14 @@ void AudioOut::putBack(const Stereo<Sample> smp)
 
 const Stereo<Sample> AudioOut::getNext(int smps)
 {
-    cout << "getNext" << endl;
 
     if(smps<1)
         smps = nsamples;
 
     Stereo<Sample> ans = popOne();
 
-    cout << "ans.l().size()" << ans.l().size() << endl;
-
     //if everything is perfectly configured, this should not need to loop
     while(ans.l().size()!=smps) {
-        cout << "hi" << endl;
         if(ans.l().size() > smps) {
             //subsample/putback excess
 #warning TODO check for off by one errors
@@ -117,13 +110,11 @@ const Stereo<Sample> AudioOut::getNext(int smps)
                                    ans.l().subSample(smps,ans.l().size())));
             ans = Stereo<Sample>(ans.l().subSample(0,smps),
                                    ans.l().subSample(0,smps));
-            cout << "ans.l().size()" << ans.l().size() << endl;
         }
         else {
             Stereo<Sample> next = popOne();
             ans.l().append(next.l());
             ans.r().append(next.r());
-            cout << "ans.l().size()" << ans.l().size() << endl;
         }
     }
 
