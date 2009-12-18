@@ -24,6 +24,7 @@
 #include "../Misc/Util.h"
 #include "../globals.h"
 
+#include <cstring>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
