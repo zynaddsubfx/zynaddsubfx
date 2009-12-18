@@ -204,17 +204,16 @@ bool AlsaEngine::Start()
 {
     if(enabled())
         return true;
-    OpenStuff();
-    int chk;
+    if(!OpenStuff())
+        return false;
+
     pthread_attr_t attr;
     threadStop = false;
     enabled = true;
-    //if (NULL != audio.handle)
-    //{
-        pthread_attr_init(&attr);
-        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-        pthread_create(&audio.pThread, &attr, _AudioThread, this);
-    //}
+
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    pthread_create(&audio.pThread, &attr, _AudioThread, this);
 
 //    if (NULL != midi.handle)
 //    {
@@ -360,8 +359,7 @@ const short *AlsaEngine::interleave(const Stereo<Sample> smps)const
     return shortInterleaved;
 }
 
-
-void AlsaEngine::OpenStuff()
+bool AlsaEngine::OpenStuff()
 {
   /* Open PCM device for playback. */
     handle=NULL;
@@ -371,7 +369,7 @@ void AlsaEngine::OpenStuff()
     fprintf(stderr,
             "unable to open pcm device: %s\n",
             snd_strerror(rc));
-    exit(1);
+    return false;
   }
 
   /* Allocate a hardware parameters object. */
@@ -393,9 +391,7 @@ void AlsaEngine::OpenStuff()
   /* Two channels (stereo) */
   snd_pcm_hw_params_set_channels(handle, params, 2);
 
-  /* 44100 bits/second sampling rate (CD quality)
-   * \TODO make this dynamic*/
-  val = 44100;
+  val = SAMPLE_RATE; //44100;
   snd_pcm_hw_params_set_rate_near(handle, params,
                                   &val, NULL);//&dir);
 
@@ -409,7 +405,7 @@ void AlsaEngine::OpenStuff()
     fprintf(stderr,
             "unable to set hw parameters: %s\n",
             snd_strerror(rc));
-    exit(1);
+    return false;
   }
 
   /* Set buffer size (in frames). The resulting latency is given by */
@@ -420,6 +416,7 @@ void AlsaEngine::OpenStuff()
   snd_pcm_hw_params_get_period_size(params, &frames, &dir);
 
   snd_pcm_hw_params_get_period_time(params, &val, &dir);
+  return true;
 }
 
 void AlsaEngine::RunStuff()
@@ -428,7 +425,7 @@ void AlsaEngine::RunStuff()
     while (!threadStop()) {
         buffer = interleave(getNext());
         rc = snd_pcm_writei(handle, buffer, SOUND_BUFFER_SIZE);
-        delete buffer;
+        delete[] buffer;
         if (rc == -EPIPE) {
             /* EPIPE means underrun */
             cerr << "underrun occurred" << endl;

@@ -16,6 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with yoshimi.  If not, see <http://www.gnu.org/licenses/>.
 */
+#warning TODO remove threadStop in favor of enabled
 
 #include <iostream>
 #include <cstring>
@@ -26,9 +27,9 @@ using namespace std;
 #include "AudioOut.h"
 
 AudioOut::AudioOut(OutMgr *out)
-    :manager(out),threadStop(false),enabled(false)
+    :samplerate(SAMPLE_RATE),nsamples(SOUND_BUFFER_SIZE),
+     manager(out),threadStop(false),enabled(false)
 {
-    cout << out;
     pthread_mutex_init(&outBuf_mutex, NULL);
     pthread_cond_init (&outBuf_cv, NULL);
 }
@@ -38,17 +39,24 @@ AudioOut::~AudioOut()
 #warning TODO destroy other mutex
 }
 
-void AudioOut::out(const Stereo<Sample> smps)
+void AudioOut::out(Stereo<Sample> smps)
 {
+    if(samplerate != SAMPLE_RATE) {
+        smps.l().resample(SAMPLE_RATE,samplerate);//we need to resample
+        smps.r().resample(SAMPLE_RATE,samplerate);//we need to resample
+        cout << "bad system" << endl;
+    }
+
     pthread_mutex_lock(&outBuf_mutex);
-    outBuf.push(smps);
+    outBuf.push_back(smps);
     pthread_cond_signal(&outBuf_cv);
     pthread_mutex_unlock(&outBuf_mutex);
 }
 
-const Stereo<Sample> AudioOut::getNext()
+const Stereo<Sample> AudioOut::popOne()
 {
-    const int BUFF_SIZE = 4;
+    cout << "popOne" << endl;
+    const int BUFF_SIZE = 6;
     Stereo<Sample> ans;
     pthread_mutex_lock(&outBuf_mutex);
     bool isEmpty = outBuf.empty();
@@ -66,8 +74,8 @@ const Stereo<Sample> AudioOut::getNext()
     {
         pthread_mutex_lock(&outBuf_mutex);
         ans = outBuf.front();
-        outBuf.pop();
-        if(outBuf.size()+manager->getRunning()<4)
+        outBuf.pop_front();
+        if(outBuf.size()+manager->getRunning()<BUFF_SIZE)
             manager->requestSamples(BUFF_SIZE - (outBuf.size()
                         + manager->getRunning()));
         if(false)
@@ -75,5 +83,49 @@ const Stereo<Sample> AudioOut::getNext()
         pthread_mutex_unlock(&outBuf_mutex);
     }
     current=ans;
+    return ans;
+}
+
+//hopefully this does not need to be called
+//(it can cause a horrible mess with the current starvation behavior)
+void AudioOut::putBack(const Stereo<Sample> smp)
+{
+    cout << "putBack"<< endl;
+    pthread_mutex_lock(&outBuf_mutex);
+    outBuf.push_front(smp);
+    pthread_mutex_unlock(&outBuf_mutex);
+}
+
+const Stereo<Sample> AudioOut::getNext(int smps)
+{
+    cout << "getNext" << endl;
+
+    if(smps<1)
+        smps = nsamples;
+
+    Stereo<Sample> ans = popOne();
+
+    cout << "ans.l().size()" << ans.l().size() << endl;
+
+    //if everything is perfectly configured, this should not need to loop
+    while(ans.l().size()!=smps) {
+        cout << "hi" << endl;
+        if(ans.l().size() > smps) {
+            //subsample/putback excess
+#warning TODO check for off by one errors
+            putBack(Stereo<Sample>(ans.l().subSample(smps,ans.l().size()),
+                                   ans.l().subSample(smps,ans.l().size())));
+            ans = Stereo<Sample>(ans.l().subSample(0,smps),
+                                   ans.l().subSample(0,smps));
+            cout << "ans.l().size()" << ans.l().size() << endl;
+        }
+        else {
+            Stereo<Sample> next = popOne();
+            ans.l().append(next.l());
+            ans.r().append(next.r());
+            cout << "ans.l().size()" << ans.l().size() << endl;
+        }
+    }
+
     return ans;
 }

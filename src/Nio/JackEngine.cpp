@@ -81,6 +81,8 @@ bool JackEngine::connectServer(string server)
 
 bool JackEngine::Start()
 {
+    if(enabled())
+        return true;
     enabled = true;
     connectServer("");
     openAudio();
@@ -194,21 +196,10 @@ bool JackEngine::processAudio(jack_nframes_t nframes)
         }
     }
     
-    Stereo<Sample> smp = getNext();
+    Stereo<Sample> smp = getNext(nframes);
     //cout << "smp size of: " << smp.l().size() << endl;
     memcpy(audio.portBuffs[0], smp.l().c_buf(), smp.l().size()*sizeof(REALTYPE));
     memcpy(audio.portBuffs[1], smp.r().c_buf(), smp.r().size()*sizeof(REALTYPE));
-    //todo figure out how to do this right!
-    smp = getNext();
-    memcpy(audio.portBuffs[0]+smp.l().size(), smp.l().c_buf(), smp.l().size()*sizeof(REALTYPE));
-    memcpy(audio.portBuffs[1]+smp.r().size(), smp.r().c_buf(), smp.r().size()*sizeof(REALTYPE));
-    smp = getNext();
-    memcpy(audio.portBuffs[0]+2*smp.l().size(), smp.l().c_buf(), smp.l().size()*sizeof(REALTYPE));
-    memcpy(audio.portBuffs[1]+2*smp.r().size(), smp.r().c_buf(), smp.r().size()*sizeof(REALTYPE));
-    smp = getNext();
-    memcpy(audio.portBuffs[0]+3*smp.l().size(), smp.l().c_buf(), smp.l().size()*sizeof(REALTYPE));
-    memcpy(audio.portBuffs[1]+3*smp.r().size(), smp.r().c_buf(), smp.r().size()*sizeof(REALTYPE));
-
     return true;
 
 }

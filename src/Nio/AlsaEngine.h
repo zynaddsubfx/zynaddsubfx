@@ -102,7 +102,7 @@ class AlsaEngine : public AudioOut//, MidiIn
         const short *buffer;
 
         void RunStuff();
-        void OpenStuff();
+        bool OpenStuff();
         pthread_mutex_t close_m;
 };
 

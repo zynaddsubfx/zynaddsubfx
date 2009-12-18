@@ -26,7 +26,7 @@
 #include "../Nio/WavEngine.h"
 
 Recorder::Recorder()
-    :status(0), notetrigger(0), wave(NULL)
+    :status(0), wave(NULL), notetrigger(0)
 {}
 
 Recorder::~Recorder()

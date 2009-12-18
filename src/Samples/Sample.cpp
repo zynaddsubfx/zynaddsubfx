@@ -149,7 +149,7 @@ void Sample::resample(const unsigned int rate, const unsigned int nrate)
                                         ceil((i+1)/ratio));
 
         //put the new data in
-        delete buffer;
+        delete[]  buffer;
         buffer     = nBuffer;
         bufferSize = nBufferSize;
     }
@@ -162,10 +162,15 @@ void Sample::append(const Sample &smp)
 
     memcpy(nbuffer, buffer, bufferSize * sizeof(float));
     memcpy(nbuffer + bufferSize, smp.buffer, smp.bufferSize * sizeof(float));
-    delete buffer;
+    delete[]  buffer;
 
     buffer     = nbuffer;
     bufferSize = nbufferSize;
+}
+
+Sample Sample::subSample(int a, int b) const
+{
+    return Sample(b-a, buffer+a);
 }
 
 REALTYPE Sample::max() const

@@ -64,6 +64,9 @@ class Sample
         /**Appends another Sample to this Sample*/
         void append(const Sample &smp);
 
+        /**Gets a subsample from a to b*/
+        Sample subSample(int a, int b) const;
+
         REALTYPE max() const;
         REALTYPE min() const;
         REALTYPE absMax() const;

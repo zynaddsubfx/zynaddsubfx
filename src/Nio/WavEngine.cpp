@@ -27,7 +27,6 @@ WavEngine::WavEngine(OutMgr *out, string _filename, int _samplerate, int _channe
     :AudioOut(out),filename(_filename),sampleswritten(0),
     samplerate(_samplerate),channels(_channels),file(NULL)
 {
-    //pthread_mutex_init(&stop_mutex, NULL);
     pthread_mutex_init(&write_mutex, NULL);
     pthread_cond_init(&stop_cond, NULL);
 }
@@ -35,14 +34,12 @@ WavEngine::WavEngine(OutMgr *out, string _filename, int _samplerate, int _channe
 
 WavEngine::~WavEngine()
 {
-    //TODO cleanup mutex
+#warning TODO cleanup mutex
     Close();
 }
 
 bool WavEngine::openAudio()
 {
-    //cerr << "stuff should open" << endl;
-    //Close(); //to ensure that file is closed/NULL
     file = fopen(filename.c_str(), "w");
     if(!file)
         return false;
@@ -67,14 +64,7 @@ bool WavEngine::Start()
 
 void WavEngine::Stop()
 {
-    //pthread_mutex_lock(&stop_mutex);
-    //if(!threadStop())
-    //{
         threadStop = true;
-        //cout << "WavEngine Stopping" << endl;
-    //}
-    //pthread_mutex_unlock(&stop_mutex);
-    //cout << "WavEngine Stopped" << endl;
 }
 
 void WavEngine::Close()
@@ -133,8 +123,7 @@ const Stereo<Sample> WavEngine::getNext()
     }
     pthread_mutex_lock(&outBuf_mutex);
     ans = outBuf.front();
-    outBuf.pop();
-    //cout << "Wav Out: " << outBuf.size()<<'+'<<manager->getRunning() << endl;
+    outBuf.pop_front();
     pthread_mutex_unlock(&outBuf_mutex);
     return ans;
 }
@@ -155,9 +144,6 @@ void *WavEngine::AudioThread()
     short int *recordbuf_16bit = new short int [SOUND_BUFFER_SIZE*2];
     int size = SOUND_BUFFER_SIZE;
 
-    //pthread_mutex_lock(&run_mutex);
-    //bool doRun = !threadStop();
-    //pthread_mutex_unlock(&run_mutex);
 
     while (!threadStop())
     {
@@ -167,13 +153,7 @@ void *WavEngine::AudioThread()
             recordbuf_16bit[i*2+1] = limit((int)(smps.r()[i] * 32767.0), -32768, 32767);
         }
         write_stereo_samples(size, recordbuf_16bit);
-        //cout << "foo" << threadStop() << endl;
-        //pthread_mutex_lock(&run_mutex);
-        //doRun = ;
-        //pthread_mutex_unlock(&run_mutex);
     }
-    //cout << "WavEngine Stopped" << endl;
-    //cout << "WavEngine Stopped" << endl;
     return NULL;
 }
 
