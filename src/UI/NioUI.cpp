@@ -7,14 +7,23 @@ Pack::Pack(int x, int y, int w, int h)
     :Fl_Pack(x,y,w,h),
     b1(0,0,100,25,"Null I/O"),
     b2(0,0,100,25,"ALSA I/O"),
-    b3(0,0,100,25,"OSS  I/O")
+    b3(0,0,100,25,"OSS  I/O"),
+    b4(0,0,100,25,"JACK I/O")
 {
     b1.selection_color(fl_rgb_color(0,255,0));
     b2.selection_color(fl_rgb_color(0,255,0));
     b3.selection_color(fl_rgb_color(0,255,0));
+    b4.selection_color(fl_rgb_color(0,255,0));
     b1.callback(nioToggle, (void *)"NULL");
     b2.callback(nioToggle, (void *)"ALSA");
     b3.callback(nioToggle, (void *)"OSS");
+    b4.callback(nioToggle, (void *)"JACK");
+    //b1.value((NULL==sysOut->getOut("NULL")?false:
+    //            sysOut->getOut("NULL")->isEnabled()));
+    //b2.value((NULL==sysOut->getOut("ALSA")?false:
+    //            sysOut->getOut("ALSA")->isEnabled()));
+    //b3.value((NULL==sysOut->getOut("OSS")?false:
+    //            sysOut->getOut("OSS")->isEnabled()));
 }
 
 void Pack::nioToggle(Fl_Widget *w, void *name)

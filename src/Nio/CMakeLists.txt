@@ -12,12 +12,11 @@ set(zynaddsubfx_nio_SRCS
 
 set(zynaddsubfx_nio_lib )
 
-#Uncomment when Jack is integrated
-#if(JackEnable)
-#        include_directories(${JACK_INCLUDE_DIR})
-#        list(APPEND zynaddsubfx_nio_SRCS JackEngine.cpp)
-#        set(zynaddsubfx_nio_lib ${JACK_LIBRARIES})
-#endif(JackEnable)
+if(JackEnable)
+    include_directories(${JACK_INCLUDE_DIR})
+    list(APPEND zynaddsubfx_nio_SRCS JackEngine.cpp)
+    list(APPEND zynaddsubfx_nio_lib ${JACK_LIBRARIES})
+endif(JackEnable)
 
 #Uncomment when Port Audio is integrated
 #if(PortAudioOutput)

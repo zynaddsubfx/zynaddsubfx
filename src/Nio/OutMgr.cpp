@@ -10,6 +10,9 @@
 #if ALSA
 #include "AlsaEngine.h"
 #endif
+#if JACK
+#include "JackEngine.h"
+#endif
 
 using namespace std;
 
@@ -44,6 +47,13 @@ OutMgr::OutMgr(Master *nmaster)
     managedOuts["ALSA"] = defaultOut = new AlsaEngine(this);
 #else
     managedOuts["ALSA"] = new AlsaEngine(this);
+#endif
+#endif
+#if JACK
+#if JACK_DEFAULT
+    managedOuts["JACK"] = defaultOut = new JackEngine(this);
+#else
+    managedOuts["JACK"] = new JackEngine(this);
 #endif
 #endif
 
