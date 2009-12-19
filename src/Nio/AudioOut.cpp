@@ -16,7 +16,6 @@
     You should have received a copy of the GNU General Public License
     along with yoshimi.  If not, see <http://www.gnu.org/licenses/>.
 */
-#warning TODO remove threadStop in favor of enabled
 
 #include <iostream>
 #include <cstring>
@@ -28,7 +27,7 @@ using namespace std;
 
 AudioOut::AudioOut(OutMgr *out)
     :samplerate(SAMPLE_RATE),nsamples(SOUND_BUFFER_SIZE),
-     manager(out),threadStop(false),enabled(false)
+     manager(out),enabled(false)
 {
     pthread_mutex_init(&outBuf_mutex, NULL);
     pthread_cond_init (&outBuf_cv, NULL);

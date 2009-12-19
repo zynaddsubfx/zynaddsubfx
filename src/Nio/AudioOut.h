@@ -75,7 +75,6 @@ class AudioOut
 
         OutMgr *manager;
         //thread resources
-        Atomic<bool> threadStop;
         pthread_t pThread;
         Atomic<bool> enabled;
 };

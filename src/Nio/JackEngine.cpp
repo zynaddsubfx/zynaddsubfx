@@ -109,6 +109,8 @@ bail_out:
 
 void JackEngine::Stop()
 {
+    if(!enabled())
+        return;
     enabled = false;
     if (jackClient)
     {

@@ -80,7 +80,6 @@ bool OssEngine::Start()
     if(!openAudio())
         return false;
     pthread_attr_t attr;
-    threadStop = false;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     pthread_create(&pThread, &attr, _AudioThread, this);
@@ -92,7 +91,6 @@ bool OssEngine::Start()
 
 void OssEngine::Stop()
 {
-    threadStop = true;
     enabled = false;
     close(snd_handle);
 }
@@ -110,7 +108,7 @@ void *OssEngine::AudioThread()
     manager->requestSamples();
     manager->requestSamples();
     set_realtime();
-    while (!threadStop())
+    while (enabled())
     {
         const Stereo<Sample> smps = getNext();
         OSSout(smps.l().c_buf(),smps.r().c_buf());

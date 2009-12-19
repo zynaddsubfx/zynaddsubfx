@@ -43,7 +43,6 @@ AlsaEngine::AlsaEngine(OutMgr *out)
 //    midi.pThread = 0;
 
     pthread_mutex_init(&close_m, NULL);
-    threadStop = true;
 }
 
 AlsaEngine::~AlsaEngine()
@@ -208,7 +207,6 @@ bool AlsaEngine::Start()
         return false;
 
     pthread_attr_t attr;
-    threadStop = false;
     enabled = true;
 
     pthread_attr_init(&attr);
@@ -226,7 +224,6 @@ bool AlsaEngine::Start()
 bail_out:
     cerr << "Error - bail out of AlsaEngine::Start()" << endl;
     Stop();
-    threadStop = true;
     return false;
 }
 
@@ -235,7 +232,6 @@ void AlsaEngine::Stop()
 {
     if(!enabled())
         return;
-    threadStop = true;
     enabled = false;
 
     if (NULL != audio.handle && audio.pThread)
@@ -422,7 +418,7 @@ bool AlsaEngine::OpenStuff()
 void AlsaEngine::RunStuff()
 {
     pthread_mutex_lock(&close_m);
-    while (!threadStop()) {
+    while (enabled()) {
         buffer = interleave(getNext());
         rc = snd_pcm_writei(handle, buffer, SOUND_BUFFER_SIZE);
         delete[] buffer;

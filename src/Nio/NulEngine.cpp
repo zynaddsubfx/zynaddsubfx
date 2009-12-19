@@ -44,7 +44,7 @@ void *NulEngine::_AudioThread(void *arg)
 
 void *NulEngine::AudioThread()
 {  
-    while (!threadStop())
+    while (enabled())
     {
         const Stereo<Sample> smps = getNext();
         dummyOut();
@@ -87,7 +87,6 @@ NulEngine::~NulEngine()
 bool NulEngine::Start()
 {
     pthread_attr_t attr;
-    threadStop = false;
     enabled = true;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
@@ -98,7 +97,6 @@ bool NulEngine::Start()
 
 void NulEngine::Stop()
 {
-    threadStop = true;
     enabled    = false;
 }
 

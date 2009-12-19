@@ -54,7 +54,7 @@ bool WavEngine::openAudio()
 bool WavEngine::Start()
 {
     pthread_attr_t attr;
-    threadStop = false;
+    enabled = true;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     pthread_create(&pThread, &attr, _AudioThread, this);
@@ -64,7 +64,7 @@ bool WavEngine::Start()
 
 void WavEngine::Stop()
 {
-        threadStop = true;
+        enabled = false;
 }
 
 void WavEngine::Close()
@@ -145,7 +145,7 @@ void *WavEngine::AudioThread()
     int size = SOUND_BUFFER_SIZE;
 
 
-    while (!threadStop())
+    while (enabled())
     {
         const Stereo<Sample> smps = getNext();
         for(int i = 0; i < size; i++) {
