@@ -56,6 +56,8 @@ OutMgr::OutMgr(Master *nmaster)
     managedOuts["JACK"] = new JackEngine(this);
 #endif
 #endif
+    defaultOut->out(Stereo<Sample>(Sample(SOUND_BUFFER_SIZE * 20, 0.0),
+                                   Sample(SOUND_BUFFER_SIZE * 20, 0.0)));
 
 };
 

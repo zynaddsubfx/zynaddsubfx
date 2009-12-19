@@ -7,21 +7,18 @@
 #include <FL/Fl_Pack.H>
 #include <FL/Enumerations.H>
 
-class Pack : public Fl_Pack
-{
-    public:
-        Pack(int x, int y, int w, int h);
-    private:
-        Fl_Light_Button b1, b2, b3, b4;
-        static void nioToggle(Fl_Widget *w, void *name);
-};
-
 class NioUI : public Fl_Window
 {
     public:
         NioUI();
+        void refresh();
+
     private:
-        Pack foo;
+        const char *nullc, *alsac, *ossc, *jackc;
+
+        static void nioToggle(Fl_Widget *w, void *name);
+        Fl_Group  **groups;
+        Fl_Button **buttons;
 };
 #endif
 

@@ -115,6 +115,7 @@ bail_out:
 
 void JackEngine::Stop()
 {
+    enabled = false;
     if (jackClient)
     {
         for (int i = 0; i < 2; ++i)
@@ -126,7 +127,6 @@ void JackEngine::Stop()
         int chk = jack_client_close(jackClient);
         jackClient = NULL;
     }
-    enabled = false;
 }
 
 bool JackEngine::openAudio()

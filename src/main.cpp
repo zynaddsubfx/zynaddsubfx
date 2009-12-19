@@ -249,6 +249,10 @@ void initprogram()
 #if (defined(NONEMIDIIN) || (defined(VSTMIDIIN)))
     Midi = new NULLMidiIn();
 #endif
+
+    sysOut = new OutMgr(master);
+    sysOut->run();
+
 #ifndef DISABLE_GUI
     ui = new MasterUI(master, &Pexitprogram);
 #endif
@@ -527,6 +531,7 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
+
     if(strlen(loadfile) > 1) {
         int tmp = master->loadXML(loadfile);
         if(tmp < 0) {
@@ -568,9 +573,6 @@ int main(int argc, char *argv[])
     pthread_create(&thr1, NULL, thread1, NULL);
 #endif
 
-    //Output Bootstrapping
-    sysOut = new OutMgr(master);
-    sysOut->run();
 
 
     if(noui == 0)

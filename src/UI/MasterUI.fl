@@ -57,7 +57,7 @@ decl {\#include "../Misc/Master.h"} {public
 decl {\#include "../Misc/Part.h"} {public
 } 
 
-decl {\#include "../Misc/Util.h"} {selected public
+decl {\#include "../Misc/Util.h"} {public
 } 
 
 decl {\#include "../globals.h"} {public
@@ -511,7 +511,13 @@ updatepanel();}
           MenuItem {} {
             label {&Settings...}
             callback {configui->show();}
-            xywh {25 25 100 20} divider
+            xywh {25 25 100 20}
+          }
+          MenuItem {} {
+            label {N&io Settings}
+            callback {nioui.refresh();
+nioui.show();} selected
+            xywh {0 0 36 21} divider
           }
           MenuItem {} {
             label {&Copyright...}
@@ -995,11 +1001,6 @@ globalfinedetuneslider->do_callback();}
         callback {updatepanel();
 panelwindow->show();}
         tooltip {Panel Window} xywh {293 62 92 16} box PLASTIC_UP_BOX color 183 labelfont 1 labelsize 10
-      }
-      Fl_Button {} {
-        label N
-        callback {nioui.show();}
-        xywh {270 75 20 25}
       }
     }
     Fl_Window aboutwindow {
