@@ -172,11 +172,9 @@ void Master::noteon(unsigned char chan,
  */
 void Master::NoteOff(unsigned char chan, unsigned char note)
 {
-    pthread_mutex_lock(&mutex);
     dump.dumpnote(chan, note, 0);
 
     noteoff(chan, note);
-    pthread_mutex_unlock(&mutex);
 }
 
 /*
