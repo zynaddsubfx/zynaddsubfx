@@ -57,23 +57,16 @@ bool JackEngine::connectServer(string server)
         jack_options_t jopts = (jack_options_t)
             (((use_server_name) ? JackServerName : JackNullOption)
             | ((autostart_jack) ? JackNullOption : JackNoStartServer));
-        for (int tries = 0; tries < 3 && NULL == jackClient; ++tries)
-        {
-            if (use_server_name)
-                jackClient = jack_client_open(clientname.c_str(), jopts, &jackstatus,
-                                              server.c_str());
-            else
-                jackClient = jack_client_open(clientname.c_str(), jopts, &jackstatus);
-            if (NULL != jackClient)
-                break;
-            else
-                usleep(3333);
-        }
+        if (use_server_name)
+            jackClient = jack_client_open(clientname.c_str(), jopts, &jackstatus,
+                    server.c_str());
+        else
+            jackClient = jack_client_open(clientname.c_str(), jopts, &jackstatus);
         if (NULL != jackClient)
             return true;
         else
             cerr << "Error, failed to open jack client on server: " << server
-                 << ", status " << jackstatus << endl;
+                 << " status " << jackstatus << endl;
         return false;
     }
     return true;
@@ -84,7 +77,8 @@ bool JackEngine::Start()
     if(enabled())
         return true;
     enabled = true;
-    connectServer("");
+    if(!connectServer(""))
+        return false;
     openAudio();
     if (NULL != jackClient)
     {
@@ -124,7 +118,7 @@ void JackEngine::Stop()
                 jack_port_unregister(jackClient, audio.ports[i]);
             audio.ports[i] = NULL;
         }
-        int chk = jack_client_close(jackClient);
+        jack_client_close(jackClient);
         jackClient = NULL;
     }
 }
