@@ -1,3 +1,7 @@
+#checking include/library paths
+message(STATUS "Checking Include Path" $ENV{CMAKE_INCLUDE_PATH} ${CMAKE_INCLUDE_PATH})
+message(STATUS "Checking Library Path" $ENV{CMAKE_LIBRARY_PATH} ${CMAKE_LIBRARY_PATH})
+
 #Dependency check
 find_package(zlib REQUIRED)
 find_package(fftw REQUIRED)
@@ -29,6 +33,8 @@ SET (OssEnable ${ALSA_FOUND} CACHE BOOL #TODO perhaps check for /dev/dsp
 
 # Now, handle the incoming settings and set define flags/variables based
 # on this
+
+
 
 if (GuiModule STREQUAL qt AND QT_FOUND)
 	set (QtGui TRUE)
@@ -151,28 +157,28 @@ include_directories(
 add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 #macro for tests
 macro(unit_test NAME CXX_FILE FILES)
-    #	if (CompileTests)
-		set(PATH_FILES "")
-		foreach(part ${FILES})
-			set(PATH_FILES "${CMAKE_CURRENT_SOURCE_DIR}/${part}" ${PATH_FILES})
-		endforeach(part ${FILES})
-		set(CXX_FILE_REAL "${CMAKE_CURRENT_SOURCE_DIR}/${CXX_FILE}")
-		add_custom_command(
-			OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx"
-			COMMAND cxxtestgen.py --error-printer -o "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx" ${CXX_FILE_REAL}
-			DEPENDS "${FILE}"
-			)
-		set(CXXTEST_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx")
-		add_executable("${NAME}" "${CXXTEST_OUTPUT}" ${PATH_FILES})
-		target_link_libraries("${NAME}" ${CXXTEST_LINK_LIBS}
-				${NONGUI_LIBRARIES}
-				${GUI_LIBRARIES}
-				${zlib_LIBRARIES}
-				${fftw_LIBRARIES}
-				${MXML_LIBRARIES}
-				)
-		add_test("${NAME}" "${EXECUTABLE_OUTPUT_PATH}/${NAME}")
-                #endif()
+    if (CompileTests)
+        set(PATH_FILES "")
+        foreach(part ${FILES})
+            set(PATH_FILES "${CMAKE_CURRENT_SOURCE_DIR}/${part}" ${PATH_FILES})
+        endforeach(part ${FILES})
+        set(CXX_FILE_REAL "${CMAKE_CURRENT_SOURCE_DIR}/${CXX_FILE}")
+        add_custom_command(
+            OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx"
+            COMMAND cxxtestgen.py --error-printer -o "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx" ${CXX_FILE_REAL}
+            DEPENDS "${FILE}"
+            )
+        set(CXXTEST_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx")
+        add_executable("${NAME}" "${CXXTEST_OUTPUT}" ${PATH_FILES})
+        target_link_libraries("${NAME}" ${CXXTEST_LINK_LIBS}
+            ${NONGUI_LIBRARIES}
+            ${GUI_LIBRARIES}
+            ${zlib_LIBRARIES}
+            ${fftw_LIBRARIES}
+            ${MXML_LIBRARIES}
+            )
+        add_test("${NAME}" "${EXECUTABLE_OUTPUT_PATH}/${NAME}")
+    endif()
 endmacro(unit_test)
 
 set(NONGUI_LIBRARIES
