@@ -71,6 +71,7 @@ OutMgr::~OutMgr()
     pthread_mutex_lock(&processing);
     pthread_cond_signal(&needsProcess);
     pthread_mutex_unlock(&processing);
+
     pthread_mutex_lock(&close_m);
     pthread_mutex_unlock(&close_m);
     for(map<string,AudioOut*>::iterator itr = managedOuts.begin();
@@ -81,7 +82,6 @@ OutMgr::~OutMgr()
     pthread_mutex_destroy(&mutex);
     pthread_mutex_destroy(&processing);
     pthread_cond_destroy(&needsProcess);
-#warning TODO deallocate Engines (or have possible issues)
 }
 
 void *_outputThread(void *arg)
@@ -123,7 +123,6 @@ void *OutMgr::outputThread()
 
         smps = Stereo<Sample>(Sample(SOUND_BUFFER_SIZE, outl),
                 Sample(SOUND_BUFFER_SIZE, outr));
-        pthread_mutex_unlock(&processing);
 
         pthread_mutex_lock(&mutex);
         if(false)
@@ -148,8 +147,8 @@ void *OutMgr::outputThread()
         //wait for next run
         --numRequests;
         doWait = (numRequests()<1);
-        pthread_mutex_lock(&processing);
         if(doWait) {
+            pthread_mutex_lock(&processing);
             pthread_cond_wait(&needsProcess, &processing);
             pthread_mutex_unlock(&processing);
         }
@@ -165,7 +164,6 @@ void *OutMgr::outputThread()
 void OutMgr::run()
 {
     pthread_attr_t attr;
-    //threadStop = false;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     pthread_create(&outThread, &attr, _outputThread, this);
