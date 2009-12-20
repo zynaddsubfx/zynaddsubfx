@@ -42,15 +42,11 @@ AlsaEngine::AlsaEngine(OutMgr *out)
 //    midi.alsaId = -1;
 //    midi.pThread = 0;
 
-    pthread_mutex_init(&close_m, NULL);
 }
 
 AlsaEngine::~AlsaEngine()
 {
     Stop();
-    pthread_mutex_lock(&close_m);
-    pthread_mutex_unlock(&close_m);
-    pthread_mutex_destroy(&close_m);
 }
 
 
@@ -111,7 +107,6 @@ void *AlsaEngine::_AudioThread(void *arg)
 void *AlsaEngine::AudioThread()
 {
     RunStuff();
-    return NULL;
 }
 
 
@@ -210,7 +205,7 @@ bool AlsaEngine::Start()
     enabled = true;
 
     pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
     pthread_create(&audio.pThread, &attr, _AudioThread, this);
 
 //    if (NULL != midi.handle)
@@ -233,6 +228,7 @@ void AlsaEngine::Stop()
     if(!enabled())
         return;
     enabled = false;
+    pthread_join(audio.pThread, NULL);
 
     if (NULL != audio.handle && audio.pThread)
         if (pthread_cancel(audio.pThread))
@@ -417,7 +413,6 @@ bool AlsaEngine::OpenStuff()
 
 void AlsaEngine::RunStuff()
 {
-    pthread_mutex_lock(&close_m);
     while (enabled()) {
         buffer = interleave(getNext());
         rc = snd_pcm_writei(handle, buffer, SOUND_BUFFER_SIZE);
@@ -432,5 +427,5 @@ void AlsaEngine::RunStuff()
         //else if (rc != (int)frames)
         //    cerr << "short write, write " << rc << "frames" << endl;
     }
-    pthread_mutex_unlock(&close_m);
+    pthread_exit(NULL);
 }

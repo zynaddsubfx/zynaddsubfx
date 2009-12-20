@@ -56,7 +56,7 @@ bool WavEngine::Start()
     pthread_attr_t attr;
     enabled = true;
     pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
     pthread_create(&pThread, &attr, _AudioThread, this);
 
     return true;
@@ -64,7 +64,8 @@ bool WavEngine::Start()
 
 void WavEngine::Stop()
 {
-        enabled = false;
+    enabled = false;
+    pthread_join(pThread, NULL);
 }
 
 void WavEngine::Close()
@@ -154,7 +155,7 @@ void *WavEngine::AudioThread()
         }
         write_stereo_samples(size, recordbuf_16bit);
     }
-    return NULL;
+    pthread_exit(NULL);
 }
 
 void WavEngine::write_stereo_samples(int nsmps, short int *smps)

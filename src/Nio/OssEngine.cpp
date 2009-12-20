@@ -81,7 +81,7 @@ bool OssEngine::Start()
         return false;
     pthread_attr_t attr;
     pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
     pthread_create(&pThread, &attr, _AudioThread, this);
     cout << "Starting Oss";
     enabled = true;
@@ -92,6 +92,7 @@ bool OssEngine::Start()
 void OssEngine::Stop()
 {
     enabled = false;
+    pthread_join(pThread, NULL);
     close(snd_handle);
 }
 
@@ -113,7 +114,7 @@ void *OssEngine::AudioThread()
         const Stereo<Sample> smps = getNext();
         OSSout(smps.l().c_buf(),smps.r().c_buf());
     }
-    return NULL;
+    pthread_exit(NULL);
 }
 
 /*

@@ -24,7 +24,6 @@ OutMgr::OutMgr(Master *nmaster)
     master = nmaster;
 
     //initialize mutex
-    pthread_mutex_init(&close_m,     NULL);
     pthread_mutex_init(&mutex,       NULL);
     pthread_mutex_init(&processing,  NULL);
     pthread_cond_init(&needsProcess, NULL);
@@ -72,13 +71,11 @@ OutMgr::~OutMgr()
     pthread_cond_signal(&needsProcess);
     pthread_mutex_unlock(&processing);
 
-    pthread_mutex_lock(&close_m);
-    pthread_mutex_unlock(&close_m);
+    pthread_join(outThread, NULL);
     for(map<string,AudioOut*>::iterator itr = managedOuts.begin();
             itr != managedOuts.end(); ++itr) {
             delete itr->second;
     }
-    pthread_mutex_destroy(&close_m);
     pthread_mutex_destroy(&mutex);
     pthread_mutex_destroy(&processing);
     pthread_cond_destroy(&needsProcess);
@@ -92,7 +89,6 @@ void *_outputThread(void *arg)
 void *OutMgr::outputThread()
 {
 
-    pthread_mutex_lock(&close_m);
     //open up the default output
     if(!defaultOut->Start())//there should be a better failsafe
         cerr << "ERROR: The default Audio Output Failed to Open!" << endl;
@@ -157,15 +153,14 @@ void *OutMgr::outputThread()
                 cout << "Run Forest Run!" << endl;
 
     }
-    pthread_mutex_unlock(&close_m);
-    return NULL;
+    pthread_exit(NULL);
 }
 
 void OutMgr::run()
 {
     pthread_attr_t attr;
     pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
     pthread_create(&outThread, &attr, _outputThread, this);
 }
 

@@ -62,7 +62,6 @@ class OutMgr
         pthread_cond_t needsProcess;
         Atomic<int> numRequests;
         /**for closing*/
-        pthread_mutex_t close_m;
         pthread_cond_t close_cond;
         /**Buffer*/
         Stereo<Sample> smps;
