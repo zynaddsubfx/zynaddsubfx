@@ -23,7 +23,7 @@
 
 #include "../Misc/Stereo.h"
 #include "../Samples/Sample.h"
-#include <deque>
+#include <queue>
 #include <pthread.h>
 #include "OutMgr.h"
 #include "../Misc/Atomic.h"
@@ -50,28 +50,29 @@ class AudioOut
 
         /**Sets the Sample Rate of this Output
          * (used for getNext()).*/
-        void setSamplerate(int _samplerate) {samplerate=_samplerate;};
+        void setSamplerate(int _samplerate);
 
         /**Sets the Samples required per Out of this driver
          * (used for getNext()).*/
-        void setNsamples(int _nsamples) {nsamples=_nsamples;};
+        void setBufferSize(int _bufferSize);
 
     protected:
 
-        const Stereo<Sample> popOne();
         void putBack(const Stereo<Sample> smp);
         /**Get the next sample for output.
          * (has nsamples sampled at a rate of samplerate)*/
-        virtual const Stereo<Sample> getNext(int smps = -1);
+        virtual const Stereo<Sample> getNext();
 
         int samplerate;
-        int nsamples;
+        int bufferSize;
 
-        std::deque<Stereo<Sample> >  outBuf;
-        const Sample *  curSmp;
-        Stereo<Sample> current;
+        std::queue<Stereo<Sample> >  outBuf;
         pthread_mutex_t outBuf_mutex;
         pthread_cond_t  outBuf_cv;
+
+        Stereo<Sample> partialIn;/**<used for taking in samples with a different samplerate/buffersize*/
+        bool usePartial;
+        Stereo<Sample> current;/**<used for xrun defence*/
 
         OutMgr *manager;
         //thread resources

@@ -50,6 +50,8 @@ class JackEngine : public AudioOut
 
         int processCallback(jack_nframes_t nframes);
         static int _processCallback(jack_nframes_t nframes, void *arg);
+        int bufferSizeCallback(jack_nframes_t nframes);
+        static int _bufferSizeCallback(jack_nframes_t nframes, void *arg);
         static void _errorCallback(const char *msg);
         static void _infoCallback(const char *msg);
         static int _xrunCallback(void *arg);

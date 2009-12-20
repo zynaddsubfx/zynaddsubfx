@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Sample.C - Object for storing information on samples
+  Sample.cpp - Object for storing information on samples
   Copyright (C) 2009-2009 Mark McCurry
   Author: Mark McCurry
 
@@ -134,7 +134,6 @@ void Sample::resample(const unsigned int rate, const unsigned int nrate)
     if(rate == nrate)
         return; //no resampling here
     else {//resampling occurs here
-        int   itr   = 0;
         float ratio = (nrate * 1.0) / (rate * 1.0);
 
         int    nBufferSize = (int)bufferSize * ratio;
@@ -155,7 +154,7 @@ void Sample::resample(const unsigned int rate, const unsigned int nrate)
     }
 }
 
-void Sample::append(const Sample &smp)
+Sample &Sample::append(const Sample &smp)
 {
     int nbufferSize = bufferSize + smp.bufferSize;
     float *nbuffer  = new float[nbufferSize];
@@ -166,6 +165,7 @@ void Sample::append(const Sample &smp)
 
     buffer     = nbuffer;
     bufferSize = nbufferSize;
+    return *this;
 }
 
 Sample Sample::subSample(int a, int b) const

@@ -107,6 +107,7 @@ void *AlsaEngine::_AudioThread(void *arg)
 void *AlsaEngine::AudioThread()
 {
     RunStuff();
+    return NULL;
 }
 
 

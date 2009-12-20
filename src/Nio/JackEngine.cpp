@@ -82,9 +82,12 @@ bool JackEngine::Start()
     openAudio();
     if (NULL != jackClient)
     {
+        setBufferSize(jack_get_buffer_size(jackClient));
         int chk;
         jack_set_error_function(_errorCallback);
         jack_set_info_function(_infoCallback);
+        if(jack_set_buffer_size_callback(jackClient, _bufferSizeCallback, this))
+            cerr << "Error setting the bufferSize callback" << endl;
         if ((chk = jack_set_xrun_callback(jackClient, _xrunCallback, this)))
             cerr << "Error setting jack xrun callback" << endl;
         if (jack_set_process_callback(jackClient, _processCallback, this))
@@ -192,8 +195,10 @@ bool JackEngine::processAudio(jack_nframes_t nframes)
         }
     }
     
-    Stereo<Sample> smp = getNext(nframes);
+    Stereo<Sample> smp = getNext();
     //cout << "smp size of: " << smp.l().size() << endl;
+
+    //Assumes smp.l().size() == nframes
     memcpy(audio.portBuffs[0], smp.l().c_buf(), smp.l().size()*sizeof(REALTYPE));
     memcpy(audio.portBuffs[1], smp.r().c_buf(), smp.r().size()*sizeof(REALTYPE));
     return true;
@@ -214,4 +219,16 @@ void JackEngine::_errorCallback(const char *msg)
 void JackEngine::_infoCallback(const char *msg)
 {
     cerr << "Jack info message: " << msg << endl;
+}
+
+int JackEngine::_bufferSizeCallback(jack_nframes_t nframes, void *arg)
+{
+    return static_cast<JackEngine*>(arg)->bufferSizeCallback(nframes);
+}
+
+int JackEngine::bufferSizeCallback(jack_nframes_t nframes)
+{
+    cerr << "Jack buffer resized" << endl;
+    setBufferSize(nframes);
+    return 0;
 }

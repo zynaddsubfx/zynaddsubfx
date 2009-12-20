@@ -46,8 +46,6 @@ OssEngine::OssEngine(OutMgr *out)
 
     smps = new short[SOUND_BUFFER_SIZE * 2];
     memset(smps, 0, sizeof(short) * SOUND_BUFFER_SIZE * 2);
-
-    cerr << "hello?" << endl;
 }
 
 OssEngine::~OssEngine()
@@ -60,7 +58,6 @@ bool OssEngine::openAudio()
 {
     int snd_bitsize = 16;
     snd_handle = open(config.cfg.LinuxOSSWaveOutDev, O_WRONLY, 0);
-    cerr << config.cfg.LinuxOSSWaveOutDev << endl;
     if(snd_handle == -1) {
         cerr << "ERROR - I can't open the "
              << config.cfg.LinuxOSSWaveOutDev << '.' << endl;
@@ -81,12 +78,11 @@ bool OssEngine::Start()
         return true;
     if(!openAudio())
         return false;
+    enabled = true;
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
     pthread_create(&pThread, &attr, _AudioThread, this);
-    cout << "Starting Oss";
-    enabled = true;
 
     return true;
 }

@@ -32,7 +32,7 @@ class OutMgr
         int requestSamples(unsigned int n=1);
 
         /**Return the number of building samples*/
-        int getRunning();
+        unsigned int getRunning();
 
         void run();
 

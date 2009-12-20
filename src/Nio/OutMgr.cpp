@@ -93,10 +93,11 @@ void *OutMgr::outputThread()
     if(!defaultOut->Start())//there should be a better failsafe
         cerr << "ERROR: The default Audio Output Failed to Open!" << endl;
 
+
     //setup
-    running=true;
-    init=true;
-    bool doWait=false;
+    running     = true;
+    init        = true;
+    bool doWait = false;
     while(running()) {
 
         if(false) {
@@ -189,7 +190,7 @@ void OutMgr::remove(AudioOut *out)
     pthread_mutex_unlock(&mutex);
 }
 
-int OutMgr::getRunning()
+unsigned int OutMgr::getRunning()
 {
     return numRequests();
 }

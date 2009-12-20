@@ -128,7 +128,7 @@ const Stereo<Sample> WavEngine::getNext()
     }
     pthread_mutex_lock(&outBuf_mutex);
     ans = outBuf.front();
-    outBuf.pop_front();
+    outBuf.pop();
     pthread_mutex_unlock(&outBuf_mutex);
     return ans;
 }
