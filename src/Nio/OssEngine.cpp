@@ -77,6 +77,8 @@ bool OssEngine::openAudio()
 
 bool OssEngine::Start()
 {
+    if(enabled())
+        return true;
     if(!openAudio())
         return false;
     pthread_attr_t attr;
@@ -91,6 +93,8 @@ bool OssEngine::Start()
 
 void OssEngine::Stop()
 {
+    if(!enabled())
+        return;
     enabled = false;
     pthread_join(pThread, NULL);
     close(snd_handle);
