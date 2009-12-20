@@ -43,13 +43,6 @@ NioUI::NioUI()
         {
             Fl_Light_Button *enabler = new Fl_Light_Button(20,30,100,25,"Enable");
             enabler->callback(nioToggle, (void *)oss);
-            //enabler->value((NULL==sysOut->getOut(ossc)?false:
-            //            sysOut->getOut(ossc)->isEnabled()));
-            //if(sysOut->getOut(ossc)!=NULL&&sysOut->getOut(ossc)->isEnabled())
-            //{
-            //    oss->labelcolor(fl_rgb_color(0,255,0));
-            //    oss->redraw();
-            //}
             groups[0]  = oss;
             buttons[0] = enabler;
         }
@@ -58,13 +51,6 @@ NioUI::NioUI()
         {
             Fl_Light_Button *enabler = new Fl_Light_Button(20,30,100,25,"Enable");
             enabler->callback(nioToggle, (void *)alsa);
-            //enabler->value((NULL==sysOut->getOut(alsac)?false:
-            //            sysOut->getOut(alsac)->isEnabled()));
-            //if(sysOut->getOut(alsac)!=NULL&&sysOut->getOut(alsac)->isEnabled())
-            //{
-            //    alsa->labelcolor(fl_rgb_color(0,255,0));
-            //    alsa->redraw();
-            //}
             groups[1]  = alsa;
             buttons[1] = enabler;
         }
@@ -73,13 +59,6 @@ NioUI::NioUI()
         {
             Fl_Light_Button *enabler = new Fl_Light_Button(20,30,100,25,"Enable");
             enabler->callback(nioToggle, (void *)jack);
-            //enabler->value((NULL==sysOut->getOut(jackc)?false:
-            //            sysOut->getOut(jackc)->isEnabled()));
-            //if(sysOut->getOut(jackc)!=NULL&&sysOut->getOut(jackc)->isEnabled())
-            //{
-            //    jack->labelcolor(fl_rgb_color(0,255,0));
-            //    jack->redraw();
-            //}
             groups[2]  = jack;
             buttons[2] = enabler;
         }
@@ -88,13 +67,6 @@ NioUI::NioUI()
         {
             Fl_Light_Button *enabler = new Fl_Light_Button(20,30,100,25,"Enable");
             enabler->callback(nioToggle, (void *)null);
-            //enabler->value((NULL==sysOut->getOut(nullc)?false:
-            //            sysOut->getOut(nullc)->isEnabled()));
-            //if(sysOut->getOut(nullc)!=NULL&&sysOut->getOut(nullc)->isEnabled())
-            //{
-            //    null->labelcolor(fl_rgb_color(0,255,0));
-            //    null->redraw();
-            //}
             groups[3]  = null;
             buttons[3] = enabler;
         }
@@ -111,7 +83,16 @@ void NioUI::refresh()
 {
     for(int i = 0; i < 4; ++i)
         if(groups[i])
-            nioToggle(buttons[i],groups[i]);
+        {
+            const char *tmp = groups[i]->label();
+            buttons[i]->value((NULL==sysOut->getOut(tmp)?false:
+                        sysOut->getOut(tmp)->isEnabled()));
+            if(sysOut->getOut(tmp)!=NULL&&sysOut->getOut(tmp)->isEnabled())
+            {
+                groups[i]->labelcolor(fl_rgb_color(0,255,0));
+                groups[i]->redraw();
+            }
+        }
 }
 
 //this is a bit of a hack (but a fun one)
