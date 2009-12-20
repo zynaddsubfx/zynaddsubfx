@@ -85,6 +85,8 @@ NulEngine::~NulEngine()
 
 bool NulEngine::Start()
 {
+    if(enabled())
+        return true;
     pthread_attr_t attr;
     enabled = true;
     pthread_attr_init(&attr);
@@ -96,7 +98,9 @@ bool NulEngine::Start()
 
 void NulEngine::Stop()
 {
-    enabled    = false;
+    if(!enabled())
+        return;
+    enabled = false;
     pthread_join(pThread, NULL);
 }
 
