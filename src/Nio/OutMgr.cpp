@@ -13,6 +13,9 @@
 #if JACK
 #include "JackEngine.h"
 #endif
+#if PORTAUDIO
+#include "PaEngine.h"
+#endif
 
 using namespace std;
 
@@ -53,6 +56,13 @@ OutMgr::OutMgr(Master *nmaster)
     managedOuts["JACK"] = defaultOut = new JackEngine(this);
 #else
     managedOuts["JACK"] = new JackEngine(this);
+#endif
+#endif
+#if PORTAUDIO
+#if PORTAUDIO_DEFAULT
+    managedOuts["PA"] = defaultOut = new PaEngine(this);
+#else
+    managedOuts["PA"] = new PaEngine(this);
 #endif
 #endif
     defaultOut->out(Stereo<Sample>(Sample(SOUND_BUFFER_SIZE * 20, 0.0),

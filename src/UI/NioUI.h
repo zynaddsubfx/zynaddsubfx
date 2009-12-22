@@ -14,7 +14,7 @@ class NioUI : public Fl_Window
         void refresh();
 
     private:
-        const char *nullc, *alsac, *ossc, *jackc;
+        const char *nullc, *alsac, *ossc, *jackc, *pac;
 
         static void nioToggle(Fl_Widget *w, void *name);
         Fl_Group  **groups;

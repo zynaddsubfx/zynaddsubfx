@@ -30,6 +30,8 @@ SET (JackEnable ${JACK_FOUND} CACHE BOOL
     "Enable support for JACK Audio Connection toolKit")
 SET (OssEnable ${ALSA_FOUND} CACHE BOOL #TODO perhaps check for /dev/dsp
     "Enable support for Open Sound System")
+SET (PaEnable ${PORTAUDIO_FOUND} CACHE BOOL
+    "Enable support for Port Audio System")
 
 # Now, handle the incoming settings and set define flags/variables based
 # on this
@@ -54,6 +56,8 @@ elseif(DefaultOutput STREQUAL oss)
         add_definitions(-DOSS_DEFAULT=1)
 elseif(DefaultOutput STREQUAL jack)
         add_definitions(-DJACK_DEFAULT=1)
+elseif(DefaultOutput STREQUAL portaudio)
+        add_definitions(-DPORTAUDIO_DEFAULT=1)
 endif()
 
 
@@ -65,15 +69,24 @@ if(AlsaEnable)
         list(APPEND AUDIO_LIBRARIES ${ASOUND_LIBRARY})
         add_definitions(-DALSA=1)
 endif(AlsaEnable)
+
 if(JackEnable)
         list(APPEND AUDIO_LIBRARIES ${JACK_LIBRARIES})
         add_definitions(-DJACK=1)
 endif(JackEnable)
+
 if(OssEnable)
 	add_definitions(-DOSSAUDIOOUT)
         list(APPEND AUDIO_LIBRARIES ${ASOUND_LIBRARY})
         add_definitions(-DOSS=1)
 endif(OssEnable)
+
+if(PaEnable)
+	include_directories(${PORTAUDIO_INCLUDE_DIR})
+	add_definitions(-DPORTAUDIO=1)
+        list(APPEND AUDIO_LIBRARIES ${PORTAUDIO_LIBRARIES})
+endif()
+
 
 if(AlsaMidiOutput)
 	add_definitions(-DOSSAUDIOOUT)
@@ -88,12 +101,6 @@ if(JackOutput)
 	include_directories(${JACK_INCLUDE_DIR})
 	add_definitions(-DJACKAUDIOOUT)
         set(AUDIO_LIBRARIES ${AUDIO_LIBRARIES} ${JACK_LIBRARIES})
-endif()
-
-if(PortAudioOutput)
-	include_directories(${PORTAUDIO_INCLUDE_DIR})
-	add_definitions(-DPAAUDIOOUT)
-        set(AUDIO_LIBRARIES ${AUDIO_LIBRARIES} ${PORTAUDIO_LIBRARIES})
 endif()
 
 add_definitions(-DFFTW_VERSION_${FFTW_VERSION}

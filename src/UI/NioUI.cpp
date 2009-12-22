@@ -9,17 +9,19 @@
 
 NioUI::NioUI()
     :Fl_Window(200,100,400,400,"New IO Controls"),
-    groups(new Fl_Group*[4]), buttons(new Fl_Button*[4])
+    groups(new Fl_Group*[5]), buttons(new Fl_Button*[4])
 {
     groups[0]=NULL;
     groups[1]=NULL;
     groups[2]=NULL;
     groups[3]=NULL;
+    groups[4]=NULL;
 
     jackc = "JACK";
     ossc  = "OSS";
     alsac = "ALSA";
     nullc = "NULL";
+    pac   = "PA";
 
 
     //hm, I appear to be leaking memory
@@ -39,6 +41,7 @@ NioUI::NioUI()
             intro->wrap_mode(4, 40);
         }
         gen->end();
+#if OSS
         Fl_Group *oss  = new Fl_Group(10,40,400,400-35,ossc);
         {
             Fl_Light_Button *enabler = new Fl_Light_Button(20,30,100,25,"Enable");
@@ -47,6 +50,8 @@ NioUI::NioUI()
             buttons[0] = enabler;
         }
         oss->end();
+#endif
+#if ALSA
         Fl_Group *alsa = new Fl_Group(0,20,400,400-35,alsac);
         {
             Fl_Light_Button *enabler = new Fl_Light_Button(20,30,100,25,"Enable");
@@ -55,6 +60,8 @@ NioUI::NioUI()
             buttons[1] = enabler;
         }
         alsa->end();
+#endif
+#if JACK
         Fl_Group *jack = new Fl_Group(0,20,400,400-35,jackc);
         {
             Fl_Light_Button *enabler = new Fl_Light_Button(20,30,100,25,"Enable");
@@ -63,12 +70,23 @@ NioUI::NioUI()
             buttons[2] = enabler;
         }
         jack->end();
+#endif
+#if PORTAUDIO
+        Fl_Group *pa = new Fl_Group(0,20,400,400-35,pac);
+        {
+            Fl_Light_Button *enabler = new Fl_Light_Button(20,30,100,25,"Enable");
+            enabler->callback(nioToggle, (void *)pa);
+            groups[3]  = pa;
+            buttons[3] = enabler;
+        }
+        pa->end();
+#endif
         Fl_Group *null = new Fl_Group(0,20,400,400-35,nullc);
         {
             Fl_Light_Button *enabler = new Fl_Light_Button(20,30,100,25,"Enable");
             enabler->callback(nioToggle, (void *)null);
-            groups[3]  = null;
-            buttons[3] = enabler;
+            groups[4]  = null;
+            buttons[4] = enabler;
         }
         null->end();
     }
