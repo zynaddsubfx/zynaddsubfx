@@ -97,13 +97,26 @@ if(PortAudioOutput)
 endif()
 
 add_definitions(-DFFTW_VERSION_${FFTW_VERSION}
-	 -DOS_LINUX
-	 -DALSAMIDIIN
 	 -DASM_F2I_YES
          -g #TODO #todo put in a better location
          -Wall
          -Wextra
 	 )
+
+#set os flag
+if(CYGWIN)
+	add_definitions(-DOS_CYGWIN=1)
+	set(OS_LIBRARIES "-Wl,--enable-auto-import")
+elseif(WINDOWS)
+	add_definitions(-DOS_WINDOWS=1)
+	set(OS_LIBRARIES "")
+elseif(LINUX)
+	add_definitions(-DOS_LINUX=1)
+	set(OS_LIBRARIES "")
+else()
+        message(STATUS Error: building on unsupported OS)
+endif()
+
 
 if(FLTK_FOUND)
     mark_as_advanced(FORCE FLTK_BASE_LIBRARY)
@@ -176,6 +189,7 @@ macro(unit_test NAME CXX_FILE FILES)
             ${zlib_LIBRARIES}
             ${fftw_LIBRARIES}
             ${MXML_LIBRARIES}
+            ${OS_LIBRARIES}
             )
         add_test("${NAME}" "${EXECUTABLE_OUTPUT_PATH}/${NAME}")
     endif()
@@ -228,5 +242,6 @@ target_link_libraries(zynaddsubfx
         ${NIO_LIBRARIES}
         ${AUDIO_LIBRARIES}
         ${MIDIINPUT_LIBRARIES}
+	${OS_LIBRARIES}
 	)
 

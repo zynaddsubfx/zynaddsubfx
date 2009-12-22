@@ -44,6 +44,9 @@ extern REALTYPE getdetune(unsigned char type,
  * pthread_attr_t*/
 void set_realtime();
 
+/**Os independent sleep in microsecond*/
+void os_sleep(long length);
+
 extern REALTYPE *denormalkillbuf; /**<the buffer to add noise in order to avoid denormalisation*/
 
 extern Config config;

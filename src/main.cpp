@@ -27,9 +27,9 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#ifdef OS_LINUX
+#if OS_LINUX || OS_CYGWIN
 #include <getopt.h>
-#elif OS_WINDOIWS
+#elif OS_WINDOWS
 #include <winbase.h>
 #include <windows.h>
 #endif
@@ -41,6 +41,8 @@ extern Dump dump;
 
 #include "Nio/OutMgr.h"
 
+#include "Input/MidiIn.h"
+
 #ifdef ALSAMIDIIN
 #include "Input/ALSAMidiIn.h"
 #endif
@@ -49,7 +51,7 @@ extern Dump dump;
 #include "Input/OSSMidiIn.h"
 #endif
 
-#if (defined(NONEMIDIIN) || defined(VSTMIDIIN))
+#if (defined(NONEMIDIIN) || (defined(VSTMIDIIN))||(!ALSAMIDIIN && !OSSMIDIIN))
 #include "Input/NULLMidiIn.h"
 #endif
 
@@ -75,7 +77,7 @@ MasterUI *ui;
 
 using namespace std;
 
-pthread_t thr1, thr2, thr3, thr4;/**@deprecated*/
+pthread_t thr1, thr2, thr3, thr4;
 Master   *master;
 int  swaplr    = 0; //1 for left-right swapping
 bool usejackit = false;
@@ -201,11 +203,7 @@ void *thread4(void *arg)
         }
 //if (!realtime player) atunci fac asta
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#ifdef OS_LINUX
-        usleep(1000);
-#elif OS_WINDOWS
-        Sleep(1);
-#endif
+		os_sleep(1000);
     }
 
     return 0;
@@ -246,7 +244,7 @@ void initprogram()
 #ifdef OSSMIDIIN
     Midi = new OSSMidiIn();
 #endif
-#if (defined(NONEMIDIIN) || (defined(VSTMIDIIN)))
+#if (defined(NONEMIDIIN) || (defined(VSTMIDIIN))||(!ALSAMIDIIN && !OSSMIDIIN))
     Midi = new NULLMidiIn();
 #endif
 
@@ -280,7 +278,7 @@ void exitprogram()
     delete [] denormalkillbuf;
 }
 
-#ifdef OS_WINDOWS
+#if OS_WINDOWS
 #define ARGSIZE 100
 char winoptarguments[ARGSIZE];
 char getopt(int argc, char *argv[], const char *shortopts, int *index)
@@ -326,13 +324,13 @@ int main(int argc, char *argv[])
     cerr << "Compiled: " << __DATE__ << " " << __TIME__ << endl;
     cerr << "This program is free software (GNU GPL v.2 or later) and \n";
     cerr << "it comes with ABSOLUTELY NO WARRANTY.\n" << endl;
-#ifdef OS_LINUX
-    if(argc == 1)
-        cerr << "Try 'zynaddsubfx --help' for command-line options." << endl;
-#else
-    if(argc == 1)
-        cerr << "Try 'zynaddsubfx -h' for command-line options.\n" << endl;
+	if(argc == 1)
+#if OS_LINUX || OS_CYGWIN
+    cerr << "Try 'zynaddsubfx --help' for command-line options." << endl;
+#else //assuming windows
+    cerr << "Try 'zynaddsubfx -h' for command-line options.\n" << endl;
 #endif
+
     /* Get the settings from the Config*/
     SAMPLE_RATE = config.cfg.SampleRate;
     SOUND_BUFFER_SIZE = config.cfg.SoundBufferSize;
@@ -341,7 +339,7 @@ int main(int argc, char *argv[])
 
 
     /* Parse command-line options */
-#ifdef OS_LINUX
+#if OS_LINUX || OS_CYGWIN
     struct option opts[] = {
         {"load", 2, NULL, 'l'},
         {"load-instrument", 2, NULL, 'L'
@@ -386,12 +384,14 @@ int main(int argc, char *argv[])
 
     while(1) {
         /**\todo check this process for a small memory leak*/
-#ifdef OS_LINUX
+#if OS_LINUX || OS_CYGWIN
         opt = getopt_long(argc, argv, "l:L:r:b:o:hSDUAY", opts, &option_index);
         char *optarguments = optarg;
-#else
+#elif OS_WINDOWS
         opt = getopt(argc, argv, "l:L:r:b:o:hSDUAY", &option_index);
         char *optarguments = &winoptarguments[0];
+#else
+#error Undefined OS
 #endif
 
         if(opt == -1)
@@ -505,7 +505,7 @@ int main(int argc, char *argv[])
              << endl;
 #endif
 #endif
-#ifdef OS_WINDOWS
+#if OS == WINDOWS
         cout
         <<
         "\nWARNING: On Windows systems, only short comandline parameters works."
@@ -584,11 +584,7 @@ int main(int argc, char *argv[])
 #endif
 
     while(Pexitprogram == 0) {
-#ifdef OS_LINUX
-        usleep(100000);
-#elif OS_WINDOWS
-        Sleep(100);
-#endif
+		os_sleep(100000);
     }
 
 #ifdef WINMIDIIN

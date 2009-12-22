@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef OS_WINDOWS
+#if OS_WINDOWS
 #include <windows.h>
 #include <mmsystem.h>
 #endif
@@ -107,7 +107,7 @@ void Config::init()
     readConfig(filename);
 
     if(cfg.bankRootDirList[0] == NULL) {
-#if defined(OS_LINUX)
+#if OS_LINUX
         //banks
         cfg.bankRootDirList[0] = new char[MAX_STRING_SIZE];
         sprintf(cfg.bankRootDirList[0], "~/banks");
@@ -146,7 +146,7 @@ void Config::init()
     }
 
     if(cfg.presetsDirList[0] == NULL) {
-#if defined(OS_LINUX)
+#if OS_LINUX || OS_CYGWIN
         //presets
         cfg.presetsDirList[0] = new char[MAX_STRING_SIZE];
         sprintf(cfg.presetsDirList[0], "./");
@@ -163,7 +163,7 @@ void Config::init()
         cfg.presetsDirList[4] = new char[MAX_STRING_SIZE];
         sprintf(cfg.presetsDirList[4], "/usr/local/share/zynaddsubfx/presets");
 
-#else
+#elif OS_WINDOWS 
         //presets
         cfg.presetsDirList[0] = new char[MAX_STRING_SIZE];
         sprintf(cfg.presetsDirList[0], "./");
@@ -174,11 +174,13 @@ void Config::init()
 #else
         cfg.presetsDirList[1] = new char[MAX_STRING_SIZE];
         sprintf(cfg.presetsDirList[1], "../presets");
-#endif
+#endif //end vst
 
         cfg.presetsDirList[2] = new char[MAX_STRING_SIZE];
         sprintf(cfg.presetsDirList[2], "presets");
-#endif
+#else
+#error Undefined OS
+#endif //end OS
     }
     cfg.LinuxALSAaudioDev = "default";
     cfg.nameTag = "";
@@ -398,8 +400,10 @@ void Config::getConfigFileName(char *name, int namesize)
     name[0] = 0;
 #ifdef OS_LINUX
     snprintf(name, namesize, "%s%s", getenv("HOME"), "/.zynaddsubfxXML.cfg");
-#else
+#elif OS_WINDOWS || OS_CYGWIN
     snprintf(name, namesize, "%s", "zynaddsubfxXML.cfg");
+#else
+#error Undefined OS
 #endif
 }
 

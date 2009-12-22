@@ -155,6 +155,7 @@ void *OutMgr::outputThread()
 
     }
     pthread_exit(NULL);
+    return NULL;
 }
 
 void OutMgr::run()
@@ -167,8 +168,17 @@ void OutMgr::run()
 
 AudioOut *OutMgr::getOut(string name)
 {
+    AudioOut *ans = NULL;
+
     transform(name.begin(), name.end(), name.begin(), ::toupper);
-    return managedOuts[name];
+    for(map<string,AudioOut*>::iterator itr = managedOuts.begin();
+            itr != managedOuts.end(); ++itr) {
+        if(itr->first == name) {
+            ans = itr->second;
+            break;
+        }
+    }
+    return ans;
 }
 
 void OutMgr::add(AudioOut *driver)

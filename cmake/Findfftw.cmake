@@ -7,7 +7,7 @@
 
 SET(fftw_FOUND 0)
 
-IF(UNIX)
+IF(UNIX OR CYGWIN)
   FIND_PATH(fftw_INCLUDE_DIR
 	  fftw3.h
     /usr/include
@@ -18,7 +18,7 @@ IF(UNIX)
     /usr/lib
     )
 
-ENDIF(UNIX)
+ENDIF(UNIX OR CYGWIN)
 
 # handle the QUIETLY and REQUIRED arguments and set fftw_FOUND to TRUE if 
 # all listed variables are TRUE
