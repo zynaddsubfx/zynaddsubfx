@@ -68,6 +68,7 @@ endif()
 if(AlsaEnable)
         list(APPEND AUDIO_LIBRARIES ${ASOUND_LIBRARY})
         add_definitions(-DALSA=1)
+        add_definitions(-DALSAMIDIIN=1) #alsa midi TEMPORARY
 endif(AlsaEnable)
 
 if(JackEnable)
@@ -117,11 +118,11 @@ if(CYGWIN)
 elseif(WINDOWS)
 	add_definitions(-DOS_WINDOWS=1)
 	set(OS_LIBRARIES "")
-elseif(LINUX)
+elseif(UNIX)
 	add_definitions(-DOS_LINUX=1)
 	set(OS_LIBRARIES "")
 else()
-        message(STATUS Error: building on unsupported OS)
+        message(STATUS "Error: building on unsupported OS")
 endif()
 
 

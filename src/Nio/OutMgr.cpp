@@ -22,7 +22,7 @@ using namespace std;
 OutMgr *sysOut;
 
 OutMgr::OutMgr(Master *nmaster)
-    :running(false),numRequests(0)
+    :running(false),numRequests(2)
 {
     master = nmaster;
 
@@ -210,7 +210,7 @@ void OutMgr::remove(AudioOut *out)
     pthread_mutex_unlock(&mutex);
 }
 
-unsigned int OutMgr::getRunning()
+int OutMgr::getRunning()
 {
     return numRequests();
 }

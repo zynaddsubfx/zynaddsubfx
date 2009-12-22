@@ -21,6 +21,7 @@
 */
 
 #include "NULLMidiIn.h"
+#include "../Misc/Util.h"
 
 NULLMidiIn::NULLMidiIn()
 {}
@@ -37,5 +38,6 @@ void NULLMidiIn::getmidicmd(MidiCmdType &cmdtype,
                             int *cmdparams)
 {
     cmdtype = MidiNull;
+    os_sleep(10000);
 }
 

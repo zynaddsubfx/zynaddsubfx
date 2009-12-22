@@ -9,7 +9,7 @@
 
 NioUI::NioUI()
     :Fl_Window(200,100,400,400,"New IO Controls"),
-    groups(new Fl_Group*[5]), buttons(new Fl_Button*[4])
+    groups(new Fl_Group*[5]), buttons(new Fl_Button*[5])
 {
     groups[0]=NULL;
     groups[1]=NULL;

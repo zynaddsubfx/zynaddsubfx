@@ -238,13 +238,11 @@ void initprogram()
     master->swaplr = swaplr;
 
 
-#ifdef ALSAMIDIIN
+#if defined(ALSAMIDIIN)
     Midi = new ALSAMidiIn();
-#endif
-#ifdef OSSMIDIIN
+#elif defined(OSSMIDIIN)
     Midi = new OSSMidiIn();
-#endif
-#if (defined(NONEMIDIIN) || (defined(VSTMIDIIN))||(!ALSAMIDIIN && !OSSMIDIIN))
+#else // defined(NONEMIDIIN) || (defined(VSTMIDIIN))
     Midi = new NULLMidiIn();
 #endif
 
