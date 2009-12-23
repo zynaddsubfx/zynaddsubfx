@@ -24,14 +24,22 @@
 #include <iostream>
 #include "Echo.h"
 
+using namespace std;
+
 Echo::Echo(const int &insertion_,
            REALTYPE *const efxoutl_,
            REALTYPE *const efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
       Pvolume(50), Ppanning(64), //Pdelay(60),
       Plrdelay(100), Plrcross(100), Pfb(40), Phidamp(60),
-      lrdelay(0), delaySample(1), old(0.0)
+      dl(0), dr(0), lrdelay(0), delaySample(1), old(0.0),
+      itr(0),
+      maxDelay(SAMPLE_RATE * (1.5  + (pow(2.0, 9) - 1.0) /1000.0) + 1)
 {
+    pthread_mutex_init(&mutex, NULL);
+    delaySample.l() = Sample(maxDelay, 0.0);
+    delaySample.r() = Sample(maxDelay, 0.0);
+    initdelays();
     setpreset(Ppreset);
 }
 
@@ -53,44 +61,63 @@ void Echo::cleanup()
  */
 void Echo::initdelays()
 {
-    /**\todo make this adjust insted of destroy old delays*/
-    kl = 0;
-    kr = 0;
-    dl = (int)(1 + delay.getiVal() * SAMPLE_RATE - lrdelay);
-    if(dl < 1)
-        dl = 1;
-    dr = (int)(1 + delay.getiVal() * SAMPLE_RATE + lrdelay);
-    if(dr < 1)
-        dr = 1;
+    pthread_mutex_lock(&mutex);
+    int ndl = (int)(delay.getiVal() * SAMPLE_RATE - lrdelay);
+    if(ndl < 0)
+        ndl = dl = 0;
 
-    delaySample.l() = Sample(dl);
-    delaySample.r() = Sample(dr);
+    int ndr = (int)(delay.getiVal() * SAMPLE_RATE + lrdelay);
+    if(ndr < 0)
+        ndr = dr = 0;
 
-    old = Stereo<REALTYPE>(0.0);
-}
+    if(ndl != dl) { //lets rewite history
+        Sample rewrite(ndl);
+        int j = 0;
+        //this is where real iterators would be useful
+        for(int i=(itr>dl?itr-dl:itr+maxDelay-dl); i%maxDelay!=itr; ++i)
+            rewrite[j++] = delaySample.l()[i];
+        rewrite.resize(ndl);
+        j = 0;
+        for(int i=(itr>ndl?itr-ndl:itr+maxDelay-ndl); i%maxDelay!=itr; ++i)
+            delaySample.l()[i] = rewrite[j++];
+    }
 
-/*
- * Effect output
- */
-void Echo::out(REALTYPE *const smpsl, REALTYPE *const smpsr)
-{
-    Stereo<Sample> input(Sample(SOUND_BUFFER_SIZE, smpsl), Sample(
-                               SOUND_BUFFER_SIZE,
-                               smpsr));
-    out(input);
+    if(ndr != dr) { //lets rewite history
+        Sample rewrite(ndr);
+        int j = 0;
+        //this is where real iterators would be useful
+        for(int i=(itr>dr?itr-dr:itr+maxDelay-dr); i%maxDelay!=itr; ++i)
+            rewrite[j++] = delaySample.r()[i];
+        rewrite.resize(ndr);
+        j = 0;
+        for(int i=(itr>ndr?itr-ndr:itr+maxDelay-ndr); i%maxDelay!=itr; ++i)
+            delaySample.r()[i] = rewrite[j++];
+    }
+    dl = ndl;
+    dr = ndr;
+
+
+    //cout << "dl: " << dl << endl;
+    //cout << "dr: " << dr << endl;
+    //cout << "max: " << maxDelay << endl;
+    pthread_mutex_unlock(&mutex);
+
 }
 
 void Echo::out(const Stereo<Sample> &input)
 {
-    REALTYPE l, r, ldl, rdl; /**\todo move l+r->? ldl+rdl->?*/
+    REALTYPE ldl, rdl;
 
-    for(int i = 0; i < input.l().size(); i++) {
-        ldl = delaySample.l()[kl];
-        rdl = delaySample.r()[kr];
-        l   = ldl * (1.0 - lrcross) + rdl * lrcross;
-        r   = rdl * (1.0 - lrcross) + ldl * lrcross;
-        ldl = l;
-        rdl = r;
+    pthread_mutex_lock(&mutex);
+    for(int i = 0; i < input.l().size(); ++i) {
+        //get past samples (maxDelay is used due to implementaiton of Sample)
+        dl;
+        "foo";
+        itr;
+        ldl = delaySample.l()[itr-dl+maxDelay];
+        rdl = delaySample.r()[itr-dr+maxDelay];
+        ldl = ldl * (1.0 - lrcross) + rdl * lrcross;
+        rdl = rdl * (1.0 - lrcross) + ldl * lrcross;
 
         efxoutl[i] = ldl * 2.0;
         efxoutr[i] = rdl * 2.0;
@@ -100,16 +127,12 @@ void Echo::out(const Stereo<Sample> &input)
         rdl = input.r()[i] * (1.0 - panning) - rdl * fb;
 
         //LowPass Filter
-        delaySample.l()[kl] = ldl = ldl * hidamp + old.l() * (1.0 - hidamp);
-        delaySample.r()[kr] = rdl = rdl * hidamp + old.r() * (1.0 - hidamp);
-        old.l() = ldl;
-        old.r() = rdl;
-
-        if(++kl >= dl)
-            kl = 0;
-        if(++kr >= dr)
-            kr = 0;
+        old.l() = delaySample.l()[itr] = ldl * hidamp + old.l() * (1.0 - hidamp);
+        old.r() = delaySample.r()[itr] = rdl * hidamp + old.r() * (1.0 - hidamp);
+        ++itr;
     }
+    itr %= maxDelay;
+    pthread_mutex_unlock(&mutex);
 }
 
 

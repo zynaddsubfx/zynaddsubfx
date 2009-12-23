@@ -28,6 +28,7 @@
 #include "../Samples/Sample.h"
 #include "../Misc/Stereo.h"
 #include "../Controls/DelayCtl.h"
+#include <pthread.h>
 
 /**Echo Effect*/
 class Echo:public Effect
@@ -51,14 +52,6 @@ class Echo:public Effect
          */
         ~Echo();
 
-        /**
-         * Outputs the echo to efxoutl and efxoutr
-         * @param smpsl Sample from Left channel
-         * @param smpsr Sample from Right channel
-         * \todo try to figure out if smpsl should be const *const
-         * or not (It should be)
-         */
-        void out(REALTYPE *const smpsl, REALTYPE *const smpr);
         void out(const Stereo<Sample> &input);
 
         /**
@@ -126,13 +119,19 @@ class Echo:public Effect
 
         //Real Parameters
         REALTYPE panning, lrcross, fb, hidamp; //needs better names
-        int      dl, dr, lrdelay; //needs better names
+        //Left/Right delay lengths
+        int dl, dr, lrdelay;
+
+//        int ndl, ndr; //used for shifting delay amounts
 
         void initdelays();
         Stereo<Sample> delaySample;
         Stereo<REALTYPE> old;
 
-        int kl, kr;
+        int itr;
+        //int kl, kr;
+        int maxDelay;
+        mutable pthread_mutex_t mutex;
 };
 
 #endif

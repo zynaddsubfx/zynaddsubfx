@@ -125,6 +125,8 @@ float linearEstimate(float ya, float yb, float xt, float xa = 0.0, float xb =1.0
 
 void Sample::resample(const unsigned int rate, const unsigned int nrate)
 {
+    //does not call resize, as I have a feeling that that could lose precision
+    //(have not tested, so feel free to prove me wrong)
     if(rate == nrate)
         return; //no resampling here
     else {//resampling occurs here
@@ -132,6 +134,32 @@ void Sample::resample(const unsigned int rate, const unsigned int nrate)
         float ratio = (nrate * 1.0) / (rate * 1.0);
 
         int    nBufferSize = (int)bufferSize * ratio;
+        float *nBuffer     = new float[nBufferSize];
+
+        //addition is done to avoid 0 edge case
+        for(int i = 0; i < nBufferSize; ++i)
+            nBuffer[i] = linearEstimate(buffer[(int)floor(i/ratio)],
+                                        buffer[(int)ceil((i+1)/ratio)],
+                                        i,
+                                        floor(i/ratio),
+                                        ceil((i+1)/ratio));
+
+        //put the new data in
+        delete buffer;
+        buffer     = nBuffer;
+        bufferSize = nBufferSize;
+    }
+}
+
+void Sample::resize(unsigned int nsize)
+{
+    if(bufferSize == nsize)
+        return;
+    else {//resampling occurs here
+        int   itr   = 0;
+        float ratio = (nsize * 1.0) / (bufferSize * 1.0);
+
+        int    nBufferSize = nsize;
         float *nBuffer     = new float[nBufferSize];
 
         //addition is done to avoid 0 edge case

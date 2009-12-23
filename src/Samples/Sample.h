@@ -60,6 +60,9 @@ class Sample
         /**Change the sampling rate of the Sample*/
         void resample(const unsigned int rate, const unsigned int nrate);
 
+        /**Change the size of the sample*/
+        void resize(unsigned int nsize);
+
         /**Appends another Sample to this Sample*/
         void append(const Sample &smp);
 
