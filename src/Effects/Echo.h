@@ -25,7 +25,7 @@
 
 #include "../globals.h"
 #include "Effect.h"
-#include "../Samples/AuSample.h"
+#include "../Samples/Sample.h"
 #include "../Misc/Stereo.h"
 #include "../Controls/DelayCtl.h"
 
@@ -59,7 +59,7 @@ class Echo:public Effect
          * or not (It should be)
          */
         void out(REALTYPE *const smpsl, REALTYPE *const smpr);
-        void out(const Stereo<AuSample> &input);
+        void out(const Stereo<Sample> &input);
 
         /**
          * Sets the state of Echo to the specified preset
@@ -81,7 +81,7 @@ class Echo:public Effect
          * @param npar number of chosen parameter
          * @param value the new value
          */
-        void changepar(const int &npar, const unsigned char &value);
+        void changepar(int npar, unsigned char value);
 
         /**
          * Gets the specified parameter
@@ -97,7 +97,7 @@ class Echo:public Effect
          * @param npar number of chosen parameter
          * @return value of parameter
          */
-        unsigned char getpar(const int &npar) const;
+        unsigned char getpar(int npar) const;
 
         int getnumparams();
 
@@ -108,28 +108,28 @@ class Echo:public Effect
         void setdryonly();
     private:
         //Parameters
-        char     Pvolume; /**<#1 Volume or Dry/Wetness*/
+        char     Pvolume;  /**<#1 Volume or Dry/Wetness*/
         char     Ppanning; /**<#2 Panning*/
-        DelayCtl delay; /**<#3 Delay of the Echo*/
+        DelayCtl delay;    /**<#3 Delay of the Echo*/
         char     Plrdelay; /**<#4 L/R delay difference*/
         char     Plrcross; /**<#5 L/R Mixing*/
-        char     Pfb; /**<#6Feedback*/
-        char     Phidamp; /**<#7Dampening of the Echo*/
+        char     Pfb;      /**<#6Feedback*/
+        char     Phidamp;  /**<#7Dampening of the Echo*/
 
-        void setvolume(const unsigned char &Pvolume);
-        void setpanning(const unsigned char &Ppanning);
-        void setdelay(const unsigned char &Pdelay);
-        void setlrdelay(const unsigned char &Plrdelay);
-        void setlrcross(const unsigned char &Plrcross);
-        void setfb(const unsigned char &Pfb);
-        void sethidamp(const unsigned char &Phidamp);
+        void setvolume(unsigned char Pvolume);
+        void setpanning(unsigned char Ppanning);
+        void setdelay(unsigned char Pdelay);
+        void setlrdelay(unsigned char Plrdelay);
+        void setlrcross(unsigned char Plrcross);
+        void setfb(unsigned char Pfb);
+        void sethidamp(unsigned char Phidamp);
 
         //Real Parameters
         REALTYPE panning, lrcross, fb, hidamp; //needs better names
         int      dl, dr, lrdelay; //needs better names
 
         void initdelays();
-        Stereo<AuSample> delaySample;
+        Stereo<Sample> delaySample;
         Stereo<REALTYPE> old;
 
         int kl, kr;

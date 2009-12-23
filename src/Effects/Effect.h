@@ -26,6 +26,8 @@
 #include "../Misc/Util.h"
 #include "../globals.h"
 #include "../Params/FilterParams.h"
+#include "../Misc/Stereo.h"
+#include "../Samples/Sample.h"
 
 
 /**this class is inherited by the all effects(Reverb, Echo, ..)*/
@@ -56,12 +58,12 @@ class Effect
         /**Change parameter npar to value
          * @param npar chosen parameter
          * @param value chosen new value*/
-        virtual void changepar(const int &npar, const unsigned char &value) = 0;
+        virtual void changepar(int npar, unsigned char value) = 0;
         /**Get the value of parameter npar
          * @param npar chosen parameter
          * @return the value of the parameter in an unsigned char or 0 if it
          * does not exist*/
-        virtual unsigned char getpar(const int &npar) const = 0;
+        virtual unsigned char getpar(int npar) const = 0;
         /**Output result of effect based on the given buffers
          *
          * This method should result in the effect generating its results
@@ -71,12 +73,13 @@ class Effect
          * @param smpsl Input buffer for the Left channel
          * @param smpsr Input buffer for the Right channel
          */
-        virtual void out(REALTYPE *const smpsl, REALTYPE *const smpsr) = 0;
+        void out(REALTYPE *const smpsl, REALTYPE *const smpsr);
+        virtual void out(const Stereo<Sample> &smp) = 0;
         /**Reset the state of the effect*/
         virtual void cleanup() {}
         /**This is only used for EQ (for user interface)*/
         virtual REALTYPE getfreqresponse(REALTYPE freq) {
-            return 0;
+            return freq;
         }
 
         unsigned char   Ppreset; /**<Currently used preset*/
@@ -96,7 +99,7 @@ class Effect
     protected:
 
         const bool insertion;/**<If Effect is an insertion effect, insertion=1
-                           *otherwise, it should be insertion=0*/
+                               *otherwise, it should be insertion=0*/
 };
 
 #endif

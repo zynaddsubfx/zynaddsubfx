@@ -22,10 +22,16 @@
 
 #include "Effect.h"
 
-
 Effect::Effect(bool insertion_, REALTYPE *const efxoutl_,
                REALTYPE *const efxoutr_, FilterParams *filterpars_,
                const unsigned char &Ppreset_)
     :Ppreset(Ppreset_), efxoutl(efxoutl_), efxoutr(efxoutr_),
-      filterpars(filterpars_), insertion(insertion_) {}
+      filterpars(filterpars_), insertion(insertion_) 
+{}
+
+void Effect::out(REALTYPE *const smpsl, REALTYPE *const smpsr)
+{
+    out(Stereo<Sample>(Sample(SOUND_BUFFER_SIZE, smpsl),
+                       Sample(SOUND_BUFFER_SIZE, smpsr)));
+}
 

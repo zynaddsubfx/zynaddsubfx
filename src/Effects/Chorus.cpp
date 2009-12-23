@@ -35,9 +35,6 @@ Chorus::Chorus(const int &insertion_,
 {
     dlk = 0;
     drk = 0;
-    //maxdelay=(int)(MAX_CHORUS_DELAY/1000.0*SAMPLE_RATE);
-    //delayl=new REALTYPE[maxdelay];
-    //delayr=new REALTYPE[maxdelay];
 
     setpreset(Ppreset);
 
@@ -71,18 +68,7 @@ REALTYPE Chorus::getdelay(REALTYPE xlfo)
     return result;
 }
 
-/*
- * Apply the effect
- */
-void Chorus::out(REALTYPE *smpsl, REALTYPE *smpsr)
-{
-    const Stereo<AuSample> input(AuSample(SOUND_BUFFER_SIZE, smpsl), AuSample(
-                                     SOUND_BUFFER_SIZE,
-                                     smpsr));
-    out(input);
-}
-
-void Chorus::out(const Stereo<AuSample> &input)
+void Chorus::out(const Stereo<Sample> &input)
 {
     const REALTYPE one = 1.0;
     dl1 = dl2;
@@ -162,24 +148,24 @@ void Chorus::cleanup()
 /*
  * Parameter control
  */
-void Chorus::setdepth(const unsigned char &Pdepth)
+void Chorus::setdepth(unsigned char Pdepth)
 {
     this->Pdepth = Pdepth;
     depth = (pow(8.0, (Pdepth / 127.0) * 2.0) - 1.0) / 1000.0; //seconds
 }
 
-void Chorus::setdelay(const unsigned char &Pdelay)
+void Chorus::setdelay(unsigned char Pdelay)
 {
     this->Pdelay = Pdelay;
     delay = (pow(10.0, (Pdelay / 127.0) * 2.0) - 1.0) / 1000.0; //seconds
 }
 
-void Chorus::setfb(const unsigned char &Pfb)
+void Chorus::setfb(unsigned char Pfb)
 {
     this->Pfb = Pfb;
     fb = (Pfb - 64.0) / 64.1;
 }
-void Chorus::setvolume(const unsigned char &Pvolume)
+void Chorus::setvolume(unsigned char Pvolume)
 {
     this->Pvolume = Pvolume;
     outvolume     = Pvolume / 127.0;
@@ -189,13 +175,13 @@ void Chorus::setvolume(const unsigned char &Pvolume)
         volume = outvolume;
 }
 
-void Chorus::setpanning(const unsigned char &Ppanning)
+void Chorus::setpanning(unsigned char Ppanning)
 {
     this->Ppanning = Ppanning;
     panning = Ppanning / 127.0;
 }
 
-void Chorus::setlrcross(const unsigned char &Plrcross)
+void Chorus::setlrcross(unsigned char Plrcross)
 {
     this->Plrcross = Plrcross;
     lrcross = Plrcross / 127.0;
@@ -236,7 +222,7 @@ void Chorus::setpreset(unsigned char npreset)
 }
 
 
-void Chorus::changepar(const int &npar, const unsigned char &value)
+void Chorus::changepar(int npar, unsigned char value)
 {
     switch(npar) {
     case 0:
@@ -288,7 +274,7 @@ void Chorus::changepar(const int &npar, const unsigned char &value)
     }
 }
 
-unsigned char Chorus::getpar(const int &npar) const
+unsigned char Chorus::getpar(int npar) const
 {
     switch(npar) {
     case 0:

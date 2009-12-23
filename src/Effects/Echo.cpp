@@ -63,8 +63,8 @@ void Echo::initdelays()
     if(dr < 1)
         dr = 1;
 
-    delaySample.l() = AuSample(dl);
-    delaySample.r() = AuSample(dr);
+    delaySample.l() = Sample(dl);
+    delaySample.r() = Sample(dr);
 
     old = Stereo<REALTYPE>(0.0);
 }
@@ -74,15 +74,14 @@ void Echo::initdelays()
  */
 void Echo::out(REALTYPE *const smpsl, REALTYPE *const smpsr)
 {
-    Stereo<AuSample> input(AuSample(SOUND_BUFFER_SIZE, smpsl), AuSample(
+    Stereo<Sample> input(Sample(SOUND_BUFFER_SIZE, smpsl), Sample(
                                SOUND_BUFFER_SIZE,
                                smpsr));
     out(input);
 }
 
-void Echo::out(const Stereo<AuSample> &input)
+void Echo::out(const Stereo<Sample> &input)
 {
-//void Echo::out(const Stereo<AuSample> & input){ //ideal
     REALTYPE l, r, ldl, rdl; /**\todo move l+r->? ldl+rdl->?*/
 
     for(int i = 0; i < input.l().size(); i++) {
@@ -117,7 +116,7 @@ void Echo::out(const Stereo<AuSample> &input)
 /*
  * Parameter control
  */
-void Echo::setvolume(const unsigned char &Pvolume)
+void Echo::setvolume(unsigned char Pvolume)
 {
     this->Pvolume = Pvolume;
 
@@ -132,13 +131,13 @@ void Echo::setvolume(const unsigned char &Pvolume)
         cleanup();
 }
 
-void Echo::setpanning(const unsigned char &Ppanning)
+void Echo::setpanning(unsigned char Ppanning)
 {
     this->Ppanning = Ppanning;
     panning = (Ppanning + 0.5) / 127.0;
 }
 
-void Echo::setdelay(const unsigned char &Pdelay)
+void Echo::setdelay(unsigned char Pdelay)
 {
     delay.setmVal(Pdelay);
     //this->Pdelay=Pdelay;
@@ -146,7 +145,7 @@ void Echo::setdelay(const unsigned char &Pdelay)
     initdelays();
 }
 
-void Echo::setlrdelay(const unsigned char &Plrdelay)
+void Echo::setlrdelay(unsigned char Plrdelay)
 {
     REALTYPE tmp;
     this->Plrdelay = Plrdelay;
@@ -158,19 +157,19 @@ void Echo::setlrdelay(const unsigned char &Plrdelay)
     initdelays();
 }
 
-void Echo::setlrcross(const unsigned char &Plrcross)
+void Echo::setlrcross(unsigned char Plrcross)
 {
     this->Plrcross = Plrcross;
     lrcross = Plrcross / 127.0 * 1.0;
 }
 
-void Echo::setfb(const unsigned char &Pfb)
+void Echo::setfb(unsigned char Pfb)
 {
     this->Pfb = Pfb;
     fb = Pfb / 128.0;
 }
 
-void Echo::sethidamp(const unsigned char &Phidamp)
+void Echo::sethidamp(unsigned char Phidamp)
 {
     this->Phidamp = Phidamp;
     hidamp = 1.0 - Phidamp / 127.0;
@@ -213,7 +212,7 @@ void Echo::setpreset(unsigned char npreset)
 }
 
 
-void Echo::changepar(const int &npar, const unsigned char &value)
+void Echo::changepar(int npar, unsigned char value)
 {
     switch(npar) {
     case 0:
@@ -240,7 +239,7 @@ void Echo::changepar(const int &npar, const unsigned char &value)
     }
 }
 
-unsigned char Echo::getpar(const int &npar) const
+unsigned char Echo::getpar(int npar) const
 {
     switch(npar) {
     case 0:
