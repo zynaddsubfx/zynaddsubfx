@@ -106,20 +106,11 @@ bool Sample::operator==(const Sample &smp) const
  * @param xb X of point b
  * @return estimated Y of test point
  */
-float linearEstimate(float ya, float yb, float xt, int xa = 0, int xb = 1)
+inline float linearEstimate(float ya, float yb, float xt, int xa = 0, int xb = 1)
 {
     if(xa == xb)
         return ya;
 
-    //Normalize point a
-    //xb -= xa;
-    //xt -= xa;
-
-    //Normalize point b
-    //xt /= xb;
-
-    //Now xa=0 xb=1 0<=xt<=1
-    //simpily use y=mx+b
     return (yb-ya) * (xt-xa)/(xb-xa) + ya;
 }
 
@@ -128,7 +119,6 @@ void Sample::resize(unsigned int nsize)
     if(bufferSize == nsize)
         return;
     else {//resampling occurs here
-        int   itr   = 0;
         float ratio = (nsize * 1.0) / (bufferSize * 1.0);
 
         int    nBufferSize = nsize;
@@ -153,19 +143,6 @@ void Sample::resize(unsigned int nsize)
             nBuffer[i] = linearEstimate(buffer[(int)left],
                                         buffer[(int)right],
                                         test, (int)left, (int)right);
-            if(nBuffer[i] != nBuffer[i])
-            {
-                cout << "ERROR: " << nBuffer[i] << endl;
-                cout << "ERROR2: " << buffer[(int)left] << endl;
-                cout << "ERROR33: " << buffer[(int)right] << endl;
-                cout << "ERROR444: " << right << endl;
-                cout << "ERROR5555: " << left << endl;
-                cout << "ERROR66666: " << i << endl;
-                cout << "ERROR7777: " << i/ratio << endl;
-                cout << "ERROR888: " << test << endl;
-                exit(1);
-            }
-
         }
 
         //put the new data in

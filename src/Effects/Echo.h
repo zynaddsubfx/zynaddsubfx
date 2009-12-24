@@ -28,7 +28,6 @@
 #include "../Samples/Sample.h"
 #include "../Misc/Stereo.h"
 #include "../Controls/DelayCtl.h"
-#include <pthread.h>
 
 /**Echo Effect*/
 class Echo:public Effect
@@ -121,7 +120,7 @@ class Echo:public Effect
         REALTYPE panning, lrcross, fb, hidamp; //needs better names
         //Left/Right delay lengths
         Stereo<int> delayTime;
-        int dl, dr, lrdelay;
+        int lrdelay;
 
         void initdelays();
         //2 channel ring buffer
@@ -130,7 +129,6 @@ class Echo:public Effect
 
         //position of reading/writing from delaysample
         Stereo<int> pos;
-        mutable pthread_mutex_t mutex;
 };
 
 #endif

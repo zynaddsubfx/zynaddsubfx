@@ -21,10 +21,7 @@
 */
 
 #include <cmath>
-#include <iostream>
 #include "Echo.h"
-
-using namespace std;
 
 Echo::Echo(const int &insertion_,
            REALTYPE *const efxoutl_,
@@ -32,11 +29,10 @@ Echo::Echo(const int &insertion_,
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
       Pvolume(50), Ppanning(64), //Pdelay(60),
       Plrdelay(100), Plrcross(100), Pfb(40), Phidamp(60),
-      delayTime(1), dl(1), dr(1), lrdelay(0), delay(128000), old(0.0),
+      delayTime(1), lrdelay(0), delay(128000), old(0.0),
       pos(0)
       
 {
-    pthread_mutex_init(&mutex, NULL);
     initdelays();
     setpreset(Ppreset);
 }
@@ -70,35 +66,17 @@ void Echo::initdelays()
     if(dl == delay.l().size() && dr == delay.r().size())
         return; //no need to do anything here
     
-    //resetting the loop to a known state
-    pthread_mutex_lock(&mutex);
-    Sample tmpl(delay.l().size());
-    for(int i = 0; i < delay.l().size(); ++i)
-        tmpl[i] = delay.l()[pos.l()+i];
-
-    Sample tmpr(delay.r().size());
-    for(int i = 0; i < delay.r().size(); ++i)
-        tmpr[i] = delay.r()[pos.r()+i];
-
-    tmpl.resize(dl);
-    tmpr.resize(dr);
-    
-    delay.l() = tmpl;
-    delay.r() = tmpr;
     pos.l() = 0;
     pos.r() = 0;
-    pthread_mutex_unlock(&mutex);
+    delay.l() = Sample(dl, 0.0);
+    delay.r() = Sample(dr, 0.0);
 }
 
 void Echo::out(const Stereo<Sample> &input)
 {
     REALTYPE ldl, rdl;
 
-    pthread_mutex_lock(&mutex);
     for(int i = 0; i < input.l().size(); ++i) {
-        //get past samples (delay .size() is used due to implementaiton of Sample)
-        //should get fixed so negative indexes are properly referenced
-        //or iterators should work
         ldl = delay.l()[pos.l()];
         rdl = delay.r()[pos.r()];
         ldl = ldl * (1.0 - lrcross) + rdl * lrcross;
@@ -106,22 +84,6 @@ void Echo::out(const Stereo<Sample> &input)
 
         efxoutl[i] = ldl * 2.0;
         efxoutr[i] = rdl * 2.0;
-        if(rdl != rdl) {
-            cout << "hi" << hidamp << endl;
-            cout << "l" << ldl << endl;
-            cout << "r" << rdl << endl;
-            cout << "ol " << efxoutl[i] << endl;
-            cout << "or " << efxoutr[i] << endl;
-            cout << "cross " << lrcross << endl;
-            cout << pos.l() << endl;
-            cout << pos.r() << endl;
-            cout << input.l()[0] << endl;
-            cout << input.r()[0] << endl;
-            for(int i=pos.l()-SOUND_BUFFER_SIZE; i<pos.l(); ++i)
-                cout << i << ": " << delay.l()[i] << endl;
-            exit(1);
-        }
-
 
         ldl = input.l()[i] * panning - ldl * fb;
         rdl = input.r()[i] * (1.0 - panning) - rdl * fb;
@@ -136,7 +98,6 @@ void Echo::out(const Stereo<Sample> &input)
     }
     pos.l() %= delay.l().size();
     pos.r() %= delay.r().size();
-    pthread_mutex_unlock(&mutex);
 }
 
 
