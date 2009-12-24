@@ -32,13 +32,11 @@ Echo::Echo(const int &insertion_,
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
       Pvolume(50), Ppanning(64), //Pdelay(60),
       Plrdelay(100), Plrcross(100), Pfb(40), Phidamp(60),
-      dl(0), dr(0), lrdelay(0), delaySample(1), old(0.0),
-      itr(0),
-      maxDelay(SAMPLE_RATE * (1.5  + (pow(2.0, 9) - 1.0) /1000.0) + 1)
+      delayTime(1), dl(1), dr(1), lrdelay(0), delay(128000), old(0.0),
+      pos(0)
+      
 {
     pthread_mutex_init(&mutex, NULL);
-    delaySample.l() = Sample(maxDelay, 0.0);
-    delaySample.r() = Sample(maxDelay, 0.0);
     initdelays();
     setpreset(Ppreset);
 }
@@ -50,8 +48,8 @@ Echo::~Echo() {}
  */
 void Echo::cleanup()
 {
-    delaySample.l().clear();
-    delaySample.r().clear();
+    delay.l().clear();
+    delay.r().clear();
     old = Stereo<REALTYPE>(0.0);
 }
 
@@ -61,47 +59,35 @@ void Echo::cleanup()
  */
 void Echo::initdelays()
 {
+    int dl = (int)(delayCtl.getiVal() * SAMPLE_RATE - lrdelay);
+    if(dl < 1)
+        dl = 1;
+
+    int dr = (int)(delayCtl.getiVal() * SAMPLE_RATE + lrdelay);
+    if(dr < 1)
+        dr = 1;
+    
+    if(dl == delay.l().size() && dr == delay.r().size())
+        return; //no need to do anything here
+    
+    //resetting the loop to a known state
     pthread_mutex_lock(&mutex);
-    int ndl = (int)(delay.getiVal() * SAMPLE_RATE - lrdelay);
-    if(ndl < 0)
-        ndl = dl = 0;
+    Sample tmpl(delay.l().size());
+    for(int i = 0; i < delay.l().size(); ++i)
+        tmpl[i] = delay.l()[pos.l()+i];
 
-    int ndr = (int)(delay.getiVal() * SAMPLE_RATE + lrdelay);
-    if(ndr < 0)
-        ndr = dr = 0;
+    Sample tmpr(delay.r().size());
+    for(int i = 0; i < delay.r().size(); ++i)
+        tmpr[i] = delay.r()[pos.r()+i];
 
-    if(ndl != dl) { //lets rewite history
-        Sample rewrite(ndl);
-        int j = 0;
-        //this is where real iterators would be useful
-        for(int i=(itr>dl?itr-dl:itr+maxDelay-dl); i%maxDelay!=itr; ++i)
-            rewrite[j++] = delaySample.l()[i];
-        rewrite.resize(ndl);
-        j = 0;
-        for(int i=(itr>ndl?itr-ndl:itr+maxDelay-ndl); i%maxDelay!=itr; ++i)
-            delaySample.l()[i] = rewrite[j++];
-    }
-
-    if(ndr != dr) { //lets rewite history
-        Sample rewrite(ndr);
-        int j = 0;
-        //this is where real iterators would be useful
-        for(int i=(itr>dr?itr-dr:itr+maxDelay-dr); i%maxDelay!=itr; ++i)
-            rewrite[j++] = delaySample.r()[i];
-        rewrite.resize(ndr);
-        j = 0;
-        for(int i=(itr>ndr?itr-ndr:itr+maxDelay-ndr); i%maxDelay!=itr; ++i)
-            delaySample.r()[i] = rewrite[j++];
-    }
-    dl = ndl;
-    dr = ndr;
-
-
-    //cout << "dl: " << dl << endl;
-    //cout << "dr: " << dr << endl;
-    //cout << "max: " << maxDelay << endl;
+    tmpl.resize(dl);
+    tmpr.resize(dr);
+    
+    delay.l() = tmpl;
+    delay.r() = tmpr;
+    pos.l() = 0;
+    pos.r() = 0;
     pthread_mutex_unlock(&mutex);
-
 }
 
 void Echo::out(const Stereo<Sample> &input)
@@ -110,28 +96,46 @@ void Echo::out(const Stereo<Sample> &input)
 
     pthread_mutex_lock(&mutex);
     for(int i = 0; i < input.l().size(); ++i) {
-        //get past samples (maxDelay is used due to implementaiton of Sample)
-        dl;
-        "foo";
-        itr;
-        ldl = delaySample.l()[itr-dl+maxDelay];
-        rdl = delaySample.r()[itr-dr+maxDelay];
+        //get past samples (delay .size() is used due to implementaiton of Sample)
+        //should get fixed so negative indexes are properly referenced
+        //or iterators should work
+        ldl = delay.l()[pos.l()];
+        rdl = delay.r()[pos.r()];
         ldl = ldl * (1.0 - lrcross) + rdl * lrcross;
         rdl = rdl * (1.0 - lrcross) + ldl * lrcross;
 
         efxoutl[i] = ldl * 2.0;
         efxoutr[i] = rdl * 2.0;
+        if(rdl != rdl) {
+            cout << "hi" << hidamp << endl;
+            cout << "l" << ldl << endl;
+            cout << "r" << rdl << endl;
+            cout << "ol " << efxoutl[i] << endl;
+            cout << "or " << efxoutr[i] << endl;
+            cout << "cross " << lrcross << endl;
+            cout << pos.l() << endl;
+            cout << pos.r() << endl;
+            cout << input.l()[0] << endl;
+            cout << input.r()[0] << endl;
+            for(int i=pos.l()-SOUND_BUFFER_SIZE; i<pos.l(); ++i)
+                cout << i << ": " << delay.l()[i] << endl;
+            exit(1);
+        }
 
 
         ldl = input.l()[i] * panning - ldl * fb;
         rdl = input.r()[i] * (1.0 - panning) - rdl * fb;
 
         //LowPass Filter
-        old.l() = delaySample.l()[itr] = ldl * hidamp + old.l() * (1.0 - hidamp);
-        old.r() = delaySample.r()[itr] = rdl * hidamp + old.r() * (1.0 - hidamp);
-        ++itr;
+        old.l() = delay.l()[pos.l()] 
+            = ldl * hidamp + old.l() * (1.0 - hidamp);
+        old.r() = delay.r()[pos.r()] 
+            = rdl * hidamp + old.r() * (1.0 - hidamp);
+        ++pos.l();
+        ++pos.r();
     }
-    itr %= maxDelay;
+    pos.l() %= delay.l().size();
+    pos.r() %= delay.r().size();
     pthread_mutex_unlock(&mutex);
 }
 
@@ -162,7 +166,7 @@ void Echo::setpanning(unsigned char Ppanning)
 
 void Echo::setdelay(unsigned char Pdelay)
 {
-    delay.setmVal(Pdelay);
+    delayCtl.setmVal(Pdelay);
     //this->Pdelay=Pdelay;
     //delay=1+(int)(Pdelay/127.0*SAMPLE_RATE*1.5);//0 .. 1.5 sec
     initdelays();
@@ -272,7 +276,7 @@ unsigned char Echo::getpar(int npar) const
         return Ppanning;
         break;
     case 2:
-        return delay.getmVal();
+        return delayCtl.getmVal();
         break;
     case 3:
         return Plrdelay;

@@ -57,9 +57,6 @@ class Sample
          * sparingly*/
         const REALTYPE *c_buf() const {return buffer;}
 
-        /**Change the sampling rate of the Sample*/
-        void resample(const unsigned int rate, const unsigned int nrate);
-
         /**Change the size of the sample*/
         void resize(unsigned int nsize);
 

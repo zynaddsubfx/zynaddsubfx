@@ -103,7 +103,7 @@ class Echo:public Effect
         //Parameters
         char     Pvolume;  /**<#1 Volume or Dry/Wetness*/
         char     Ppanning; /**<#2 Panning*/
-        DelayCtl delay;    /**<#3 Delay of the Echo*/
+        DelayCtl delayCtl;    /**<#3 Delay of the Echo*/
         char     Plrdelay; /**<#4 L/R delay difference*/
         char     Plrcross; /**<#5 L/R Mixing*/
         char     Pfb;      /**<#6Feedback*/
@@ -120,17 +120,16 @@ class Echo:public Effect
         //Real Parameters
         REALTYPE panning, lrcross, fb, hidamp; //needs better names
         //Left/Right delay lengths
+        Stereo<int> delayTime;
         int dl, dr, lrdelay;
 
-//        int ndl, ndr; //used for shifting delay amounts
-
         void initdelays();
-        Stereo<Sample> delaySample;
+        //2 channel ring buffer
+        Stereo<Sample> delay;
         Stereo<REALTYPE> old;
 
-        int itr;
-        //int kl, kr;
-        int maxDelay;
+        //position of reading/writing from delaysample
+        Stereo<int> pos;
         mutable pthread_mutex_t mutex;
 };
 

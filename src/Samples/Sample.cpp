@@ -20,7 +20,10 @@
 */
 #include <cmath>
 #include <cstring>//for memcpy/memset
+#include <iostream>
 #include "Sample.h"
+
+using namespace std;
 
 #warning TODO Think about renaming Sample to Frame
 /**\TODO start using pointer math here as these will be Frequency called
@@ -103,52 +106,21 @@ bool Sample::operator==(const Sample &smp) const
  * @param xb X of point b
  * @return estimated Y of test point
  */
-float linearEstimate(float ya, float yb, float xt, float xa = 0.0, float xb =1.0)
+float linearEstimate(float ya, float yb, float xt, int xa = 0, int xb = 1)
 {
-#warning TODO this could be done with a good bit less computation
-    //Lets make this simple by normalizing the x axis
+    if(xa == xb)
+        return ya;
 
     //Normalize point a
-    xb -= xa;
-    xt -= xa;
-    xa -= xa;
+    //xb -= xa;
+    //xt -= xa;
 
     //Normalize point b
-    xt /= xb;
-    xb /= xb;
+    //xt /= xb;
 
     //Now xa=0 xb=1 0<=xt<=1
     //simpily use y=mx+b
-    return (yb-ya) * xt + ya;
-}
-
-
-void Sample::resample(const unsigned int rate, const unsigned int nrate)
-{
-    //does not call resize, as I have a feeling that that could lose precision
-    //(have not tested, so feel free to prove me wrong)
-    if(rate == nrate)
-        return; //no resampling here
-    else {//resampling occurs here
-        int   itr   = 0;
-        float ratio = (nrate * 1.0) / (rate * 1.0);
-
-        int    nBufferSize = (int)bufferSize * ratio;
-        float *nBuffer     = new float[nBufferSize];
-
-        //addition is done to avoid 0 edge case
-        for(int i = 0; i < nBufferSize; ++i)
-            nBuffer[i] = linearEstimate(buffer[(int)floor(i/ratio)],
-                                        buffer[(int)ceil((i+1)/ratio)],
-                                        i,
-                                        floor(i/ratio),
-                                        ceil((i+1)/ratio));
-
-        //put the new data in
-        delete buffer;
-        buffer     = nBuffer;
-        bufferSize = nBufferSize;
-    }
+    return (yb-ya) * (xt-xa)/(xb-xa) + ya;
 }
 
 void Sample::resize(unsigned int nsize)
@@ -162,16 +134,42 @@ void Sample::resize(unsigned int nsize)
         int    nBufferSize = nsize;
         float *nBuffer     = new float[nBufferSize];
 
+        //take care of edge cases
+        *nBuffer = *buffer;
+        *(nBuffer+nBufferSize-1) = *(buffer+bufferSize-1);
+
         //addition is done to avoid 0 edge case
-        for(int i = 0; i < nBufferSize; ++i)
-            nBuffer[i] = linearEstimate(buffer[(int)floor(i/ratio)],
-                                        buffer[(int)ceil((i+1)/ratio)],
-                                        i,
-                                        floor(i/ratio),
-                                        ceil((i+1)/ratio));
+        for(int i = 1; i < nBufferSize - 1; ++i)
+        {
+            float left  = floor(i/ratio);
+            float right = ceil((i+1)/ratio);
+            float test  = i/ratio;
+            if(left > bufferSize - 1)
+                left = bufferSize - 1;
+            if(right > bufferSize - 1)
+                right = bufferSize - 1;
+            if(left > test)
+                test = left;
+            nBuffer[i] = linearEstimate(buffer[(int)left],
+                                        buffer[(int)right],
+                                        test, (int)left, (int)right);
+            if(nBuffer[i] != nBuffer[i])
+            {
+                cout << "ERROR: " << nBuffer[i] << endl;
+                cout << "ERROR2: " << buffer[(int)left] << endl;
+                cout << "ERROR33: " << buffer[(int)right] << endl;
+                cout << "ERROR444: " << right << endl;
+                cout << "ERROR5555: " << left << endl;
+                cout << "ERROR66666: " << i << endl;
+                cout << "ERROR7777: " << i/ratio << endl;
+                cout << "ERROR888: " << test << endl;
+                exit(1);
+            }
+
+        }
 
         //put the new data in
-        delete buffer;
+        delete[] buffer;
         buffer     = nBuffer;
         bufferSize = nBufferSize;
     }
