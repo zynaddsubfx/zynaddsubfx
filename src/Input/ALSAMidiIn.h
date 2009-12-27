@@ -25,6 +25,7 @@
 
 #include <alsa/asoundlib.h>
 #include "MidiIn.h"
+#include "../Nio/InMgr.h"
 
 
 /**Midi input for ALSA (this creates an ALSA virtual port)*/
@@ -36,6 +37,12 @@ class ALSAMidiIn:public MidiIn
         /**Destructor*/
         ~ALSAMidiIn();
 
+        void run();
+
+        static void *_inputThread(void *arg);
+        void *inputThread();
+
+
         void getmidicmd(MidiCmdType &cmdtype,
                         unsigned char &cmdchan,
                         int *cmdparams);
@@ -45,6 +52,7 @@ class ALSAMidiIn:public MidiIn
 
     private:
         snd_seq_t *midi_handle;
+        pthread_t thread;
 };
 
 #endif

@@ -1,37 +1,50 @@
 /*
-    MusicIO.h
+  ZynAddSubFX - a software synthesizer
 
-    Copyright 2009, Alan Calvert
-    Copyright 2009, James Morris
+  MidiIn.h - This class is inherited by all the Midi input classes
+  Copyright (C) 2002-2005 Nasca Octavian Paul
+  Author: Nasca Octavian Paul
 
-    This file is part of yoshimi, which is free software: you can
-    redistribute it and/or modify it under the terms of the GNU General
-    Public License as published by the Free Software Foundation, either
-    version 3 of the License, or (at your option) any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of version 2 of the GNU General Public License
+  as published by the Free Software Foundation.
 
-    yoshimi is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License (version 2 or later) for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with yoshimi.  If not, see <http://www.gnu.org/licenses/>.
+  You should have received a copy of the GNU General Public License (version 2)
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+
 */
 
 #ifndef MIDI_IN_H
 #define MIDI_IN_H
 
+#include "../globals.h"
+
+enum MidiCmdType {
+    MidiNull, MidiNoteOFF, MidiNoteON, MidiController
+};
+#define MP_MAX_BYTES 4000  //in case of loooong SYS_EXes
+
+/**This class is inherited by all the Midi input classes*/
 class MidiIn
 {
     public:
-        MidiIn();
-        virtual ~MusicIO() {};
-
-        int getMidiController(unsigned char b);
-        void setMidiController(unsigned char ch, unsigned int ctrl, int param);
-        void setMidiNote(unsigned char chan, unsigned char note);
-        void setMidiNote(unsigned char chan, unsigned char note,
-                         unsigned char velocity);
+        /**Get the command,channel and parameters of the MIDI
+        *
+        * \todo make pure virtual
+        * @param cmdtype the referece to the variable that will store the type
+        * @param cmdchan the channel for the event
+        * @param parameters for the event*/
+        virtual void getmidicmd(MidiCmdType &cmdtype,
+                                unsigned char &cmdchan,
+                                int *cmdparams) = 0;
+        static int getcontroller(unsigned char b);
 };
 
 #endif
+

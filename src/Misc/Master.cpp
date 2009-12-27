@@ -134,23 +134,7 @@ bool Master::mutexLock(lockset request)
 /*
  * Note On Messages (velocity=0 for NoteOff)
  */
-void Master::NoteOn(unsigned char chan,
-                    unsigned char note,
-                    unsigned char velocity)
-{
-    pthread_mutex_lock(&mutex);
-    dump.dumpnote(chan, note, velocity);
-
-    noteon(chan, note, velocity);
-    pthread_mutex_unlock(&mutex);
-}
-
-/*
- * Internal Note On (velocity=0 for NoteOff)
- */
-void Master::noteon(unsigned char chan,
-                    unsigned char note,
-                    unsigned char velocity)
+void Master::noteOn(char chan, char note, char velocity)
 {
     int npart;
     if(velocity != 0) {
@@ -163,24 +147,14 @@ void Master::noteon(unsigned char chan,
         }
     }
     else
-        this->NoteOff(chan, note);
+        this->noteOff(chan, note);
     HDDRecorder.triggernow();
 }
 
 /*
  * Note Off Messages
  */
-void Master::NoteOff(unsigned char chan, unsigned char note)
-{
-    dump.dumpnote(chan, note, 0);
-
-    noteoff(chan, note);
-}
-
-/*
- * Internal Note Off
- */
-void Master::noteoff(unsigned char chan, unsigned char note)
+void Master::noteOff(char chan, char note)
 {
     int npart;
     for(npart = 0; npart < NUM_MIDI_PARTS; npart++)
@@ -192,17 +166,7 @@ void Master::noteoff(unsigned char chan, unsigned char note)
 /*
  * Controllers
  */
-void Master::SetController(unsigned char chan, unsigned int type, int par)
-{
-    dump.dumpcontroller(chan, type, par);
-
-    setcontroller(chan, type, par);
-}
-
-/*
- * Internal Controllers
- */
-void Master::setcontroller(unsigned char chan, unsigned int type, int par)
+void Master::setController(char chan, int type, int par)
 {
     if((type == C_dataentryhi) || (type == C_dataentrylo)
        || (type == C_nrpnhi) || (type == C_nrpnlo)) { //Process RPN and NRPN by the Master (ignore the chan)

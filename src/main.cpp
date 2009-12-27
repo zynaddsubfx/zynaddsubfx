@@ -41,6 +41,8 @@ extern Dump dump;
 
 #include "Nio/OutMgr.h"
 
+#warning TODO remove conditional include block
+
 #include "Input/MidiIn.h"
 
 #ifdef ALSAMIDIIN
@@ -77,7 +79,7 @@ MasterUI *ui;
 
 using namespace std;
 
-pthread_t thr1, thr2, thr3, thr4;
+pthread_t thr3, thr4;
 Master   *master;
 int  swaplr    = 0; //1 for left-right swapping
 bool usejackit = false;
@@ -92,37 +94,6 @@ LASHClient *lash;
 
 MidiIn *Midi;
 int     Pexitprogram = 0; //if the UI set this to 1, the program will exit
-
-/*
- * Midi input thread
- */
-#if !(defined(WINMIDIIN) || defined(VSTMIDIIN))
-void *thread1(void *arg)
-{
-    MidiCmdType   cmdtype = MidiNoteOFF;
-    unsigned char cmdchan = 0, note = 0, vel = 0;
-    int cmdparams[MP_MAX_BYTES];
-    for(int i = 0; i < MP_MAX_BYTES; ++i)
-        cmdparams[i] = 0;
-
-    set_realtime();
-    while(Pexitprogram == 0) {
-        Midi->getmidicmd(cmdtype, cmdchan, cmdparams);
-        note = cmdparams[0];
-        vel  = cmdparams[1];
-
-        if((cmdtype == MidiNoteON) && (note != 0))
-            master->NoteOn(cmdchan, note, vel);
-        if((cmdtype == MidiNoteOFF) && (note != 0))
-            master->NoteOff(cmdchan, note);
-        if(cmdtype == MidiController)
-            master->SetController(cmdchan, cmdparams[0], cmdparams[1]);
-    }
-
-    return 0;
-}
-#endif
-
 
 /*
  * User Interface thread
@@ -166,6 +137,9 @@ void *thread3(void *arg)
     return 0;
 }
 
+//this code is disabled for Nio testing
+//it should get moved out of here into the nio system soon
+#if 0
 /*
  * Sequencer thread (test)
  */
@@ -208,12 +182,11 @@ void *thread4(void *arg)
 
     return 0;
 }
+#endif
 
 /*
  * Program initialisation
  */
-
-
 void initprogram()
 {
     cerr.precision(1);
@@ -248,6 +221,11 @@ void initprogram()
 
     sysOut = new OutMgr(master);
     sysOut->run();
+
+    sysIn = new InMgr(master);
+    ALSAMidiIn *alsamidi = dynamic_cast<ALSAMidiIn *>(Midi);
+    cout << "run" << endl;
+    alsamidi->run();
 
 #ifndef DISABLE_GUI
     ui = new MasterUI(master, &Pexitprogram);
@@ -567,16 +545,10 @@ int main(int argc, char *argv[])
     }
 
 
-#if !(defined(NONEMIDIIN) || defined(WINMIDIIN) || defined(VSTMIDIIN))
-    pthread_create(&thr1, NULL, thread1, NULL);
-#endif
-
-
-
     if(noui == 0)
         pthread_create(&thr3, NULL, thread3, NULL);
 
-    pthread_create(&thr4, NULL, thread4, NULL);
+//    pthread_create(&thr4, NULL, thread4, NULL);
 #ifdef WINMIDIIN
     InitWinMidi(master);
 #endif

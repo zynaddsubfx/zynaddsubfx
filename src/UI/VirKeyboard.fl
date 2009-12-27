@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0300 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
@@ -204,7 +204,9 @@ if (rndvelocity!=0){
   vel=midivel*(127.0-rndvelocity)/127.0+RND*rndvelocity;
 };
 
-master->NoteOn(midich,nk+midioct*12,(int)vel);} {}
+pthread_mutex_lock(&master->mutex);
+master->noteOn(midich,nk+midioct*12,(int)vel);
+pthread_mutex_unlock(&master->mutex);} {}
   }
   Function {relasekey(int nk,int type)} {} {
     code {if ((nk<0)||(nk>=N_OCT*12)) return;
@@ -216,8 +218,9 @@ pressed[nk]=0;
 
 damage(1);
 
-master->NoteOff(midich,nk+12*midioct);} {selected
-    }
+pthread_mutex_lock(&master->mutex);
+master->noteOff(midich,nk+12*midioct);
+pthread_mutex_unlock(&master->mutex);} {}
   }
   Function {relaseallkeys(int type)} {} {
     code {for (int i=0;i<N_OCT*12;i++) relasekey(i,type);} {}
@@ -290,7 +293,7 @@ virkeyboardwindow->hide();}
         callback {int ctl=midictl;
 
 pthread_mutex_lock(&master->mutex);
- master->SetController(virkeys->midich,ctl,(int) o->value());
+master->setController(virkeys->midich,ctl,(int) o->value());
 pthread_mutex_unlock(&master->mutex);
 virkeys->take_focus();}
         tooltip {Controller value} xywh {605 10 15 115} type {Vert Fill} box ENGRAVED_BOX selection_color 229 labelsize 8 align 5 minimum 127 maximum 0 step 1 value 64 textsize 7
@@ -372,7 +375,7 @@ virkeys->take_focus();}
       Fl_Roller pitchwheelroller {
         label Pwh
         callback {pthread_mutex_lock(&master->mutex);
- master->SetController(virkeys->midich,C_pitchwheel,-(int) o->value());
+master->setController(virkeys->midich,C_pitchwheel,-(int) o->value());
 pthread_mutex_unlock(&master->mutex);
 virkeys->take_focus();}
         tooltip {Pitch Wheel} xywh {625 10 20 95} box PLASTIC_UP_BOX labelsize 8 align 1 when 3 minimum -8192 maximum 8192 step 64
@@ -385,7 +388,7 @@ pitchwheelroller->do_callback();}
       }
       Fl_Dial {} {
         label Vrnd
-        callback {virkeys->rndvelocity=(int) o->value();}
+        callback {virkeys->rndvelocity=(int) o->value();} selected
         tooltip {Velocity Randomness} xywh {205 105 20 20} box ROUND_UP_BOX labelsize 10 align 129 maximum 127 step 1
         code0 {o->value(virkeys->rndvelocity);}
         class WidgetPDial

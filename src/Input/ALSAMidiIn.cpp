@@ -21,6 +21,11 @@
 */
 
 #include "ALSAMidiIn.h"
+#include "../Nio/MidiEvent.h"
+
+#include <iostream>
+using namespace std;
+
 
 ALSAMidiIn::ALSAMidiIn()
 {
@@ -32,7 +37,7 @@ ALSAMidiIn::ALSAMidiIn()
     if(snd_seq_open(&midi_handle, "default", SND_SEQ_OPEN_INPUT, 0) != 0)
         return;
 
-    snd_seq_set_client_name(midi_handle, "ZynAddSubFX"); //thanks to Frank Neumann
+    snd_seq_set_client_name(midi_handle, "ZynAddSubFX");
 
     alsaport = snd_seq_create_simple_port(
         midi_handle,
@@ -42,8 +47,6 @@ ALSAMidiIn::ALSAMidiIn()
         SND_SEQ_PORT_TYPE_SYNTH);
     if(alsaport < 0)
         return;
-
-    inputok = true;
 }
 
 ALSAMidiIn::~ALSAMidiIn()
@@ -52,6 +55,54 @@ ALSAMidiIn::~ALSAMidiIn()
         snd_seq_close(midi_handle);
 }
 
+void ALSAMidiIn::run()
+{
+    cout << "starting midi#run" << endl;
+    pthread_attr_t attr;
+
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+    pthread_create(&thread, &attr, _inputThread, this);
+}
+
+void *ALSAMidiIn::_inputThread(void *arg)
+{
+    return (static_cast<ALSAMidiIn *>(arg))->inputThread();
+}
+void *ALSAMidiIn::inputThread()
+{
+    cout << "starting Midi" << endl;
+    while(1) {
+        snd_seq_event_t *midievent = NULL;
+
+        snd_seq_event_input(midi_handle, &midievent);
+
+        if(midievent == NULL)
+            continue;
+        switch(midievent->type) {
+            case SND_SEQ_EVENT_NOTEON:
+                sysIn->putEvent(MidiNote(midievent->data.note.note,
+                            midievent->data.note.channel,
+                            midievent->data.note.velocity));
+                break;
+            case SND_SEQ_EVENT_NOTEOFF:
+                sysIn->putEvent(MidiNote(midievent->data.note.note,
+                            midievent->data.note.channel));
+                break;
+            case SND_SEQ_EVENT_PITCHBEND:
+                sysIn->putEvent(MidiCtl(C_pitchwheel,
+                            midievent->data.control.channel,
+                            midievent->data.control.value));
+                break;
+            case SND_SEQ_EVENT_CONTROLLER:
+                sysIn->putEvent(MidiCtl(midievent->data.control.param,
+                            midievent->data.control.channel,
+                            midievent->data.control.value));
+                break;
+        }
+    }
+    return NULL;
+}
 
 /*
  * Get the midi command,channel and parameters
@@ -62,13 +113,6 @@ void ALSAMidiIn::getmidicmd(MidiCmdType &cmdtype,
 {
     snd_seq_event_t *midievent = NULL;
     cmdtype = MidiNull;
-
-    if(inputok == false) {
-        /* The input is broken. We need to block for a while anyway so other
-           non-RT threads get a chance to run. */
-        sleep(1);
-        return;
-    }
 
     snd_seq_event_input(midi_handle, &midievent);
 

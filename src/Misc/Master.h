@@ -85,11 +85,9 @@ class Master
         bool mutexLock(lockset request);
 
         //Midi IN
-        void NoteOn(unsigned char chan,
-                    unsigned char note,
-                    unsigned char velocity);
-        void NoteOff(unsigned char chan, unsigned char note);
-        void SetController(unsigned char chan, unsigned int type, int par);
+        void noteOn(char chan, char note, char velocity);
+        void noteOff(char chan, char note);
+        void setController(char chan, int type, int par);
         //void NRPN...
 
 
@@ -125,7 +123,7 @@ class Master
         //effects
         EffectMgr *sysefx[NUM_SYS_EFX]; //system
         EffectMgr *insefx[NUM_INS_EFX]; //insertion
-//	void swapcopyeffects(int what,int type,int neff1,int neff2);
+//      void swapcopyeffects(int what,int type,int neff1,int neff2);
 
         //HDD recorder
         Recorder HDDRecorder;
@@ -148,6 +146,7 @@ class Master
         int swaplr; //1 if L and R are swapped
 
         //Sequencer
+#warning TODO move Sequencer out of master
         Sequencer seq;
 
         //other objects
@@ -157,6 +156,7 @@ class Master
         FFTwrapper     *fft;
         pthread_mutex_t mutex;
         pthread_mutex_t vumutex;
+
 
     private:
         bool nullRun;
@@ -179,14 +179,6 @@ class Master
         int      ksoundbuffersample; //this is used to know if there is need to call AudioOut by GetAudioOutSamples method
         REALTYPE ksoundbuffersamplelow; //this is used for resampling (eg. if Jack samplerate!= SAMPLE_RATE)
         REALTYPE oldsamplel, oldsampler; //this is used for resampling
-
-        //These are called by the NoteOn, NoteOff,SetController (which are from external sources like MIDI, Virtual Keyboard)
-        //and are called by internal parts of the program (like sequencer)
-        void noteon(unsigned char chan,
-                    unsigned char note,
-                    unsigned char velocity);
-        void noteoff(unsigned char chan, unsigned char note);
-        void setcontroller(unsigned char chan, unsigned int type, int par);
 };
 
 

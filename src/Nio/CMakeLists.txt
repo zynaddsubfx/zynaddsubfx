@@ -8,6 +8,8 @@ set(zynaddsubfx_nio_SRCS
     NulEngine.cpp
     AudioOut.cpp
     OutMgr.cpp
+    InMgr.cpp
+    MidiEvent.cpp
     )
 
 set(zynaddsubfx_nio_lib )
