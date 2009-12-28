@@ -63,7 +63,7 @@ decl {\#include "../Misc/Util.h"} {public
 decl {\#include "../globals.h"} {public
 } 
 
-class VUMeter {: {public Fl_Box}
+class VUMeter {selected : {public Fl_Box}
 } {
   Function {VUMeter(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
     code {master=NULL;
@@ -234,7 +234,7 @@ REALTYPE  tmp=ly*1.0/MIN_DB;
   Function {tick(void *v)} {return_type {static void}
   } {
     code {tickdraw((VUMeter *) v);
-Fl::add_timeout(1.0/25.0,tick,v);//25 fps} {}
+Fl::add_timeout(1.0/60.0,tick,v);//60 fps} {}
   }
   Function {handle(int event)} {return_type int
   } {
@@ -516,7 +516,7 @@ updatepanel();}
           MenuItem {} {
             label {N&io Settings}
             callback {nioui.refresh();
-nioui.show();} selected
+nioui.show();}
             xywh {0 0 36 21} divider
           }
           MenuItem {} {
