@@ -25,6 +25,7 @@ using namespace std;
 #include "../Misc/Util.h"
 #include "../Misc/Config.h"
 #include "../Misc/Master.h"
+#include "InMgr.h"
 #include "AlsaEngine.h"
 
 AlsaEngine::AlsaEngine(OutMgr *out)
@@ -38,9 +39,9 @@ AlsaEngine::AlsaEngine(OutMgr *out)
     audio.alsaId = -1;
     audio.pThread = 0;
 
-//    midi.handle = NULL;
-//    midi.alsaId = -1;
-//    midi.pThread = 0;
+    midi.handle = NULL;
+    midi.alsaId = -1;
+    midi.pThread = 0;
 
 }
 
@@ -50,36 +51,26 @@ AlsaEngine::~AlsaEngine()
 }
 
 
-//bool AlsaEngine::openMidi()
-//{
-//    midi.device = config.cfg.midiDevice;
-//    if (!midi.device.size())
-//        midi.device = "default";
-//    string port_name = "input";
-//    if (snd_seq_open(&midi.handle, midi.device.c_str(), SND_SEQ_OPEN_INPUT, 0))
-//    {
-//        cerr << "Error, failed to open alsa midi device: " << midi.device << endl;
-//        goto bail_out;
-//    }
-//    snd_seq_client_info_t *seq_info;
-//    snd_seq_client_info_alloca(&seq_info);
-//    snd_seq_get_client_info(midi.handle, seq_info);
-//    midi.alsaId = snd_seq_client_info_get_client(seq_info);
-//    snd_seq_set_client_name(midi.handle, midiClientName().c_str());
-//    if (0 > snd_seq_create_simple_port(midi.handle, port_name.c_str(),
-//                                       SND_SEQ_PORT_CAP_WRITE
-//                                       | SND_SEQ_PORT_CAP_SUBS_WRITE,
-//                                       SND_SEQ_PORT_TYPE_SYNTH))
-//    {
-//        cerr << "Error, failed to acquire alsa midi port" << endl;
-//        goto bail_out;
-//    }
-//    return true;
-//
-//bail_out:
-//    Close();
-//    return false;
-//}
+bool AlsaEngine::openMidi()
+{
+    int alsaport;
+    midi.handle = NULL;
+
+    if(snd_seq_open(&midi.handle, "default", SND_SEQ_OPEN_INPUT, 0) != 0)
+        return false;
+
+    snd_seq_set_client_name(midi.handle, "ZynAddSubFX");
+
+    alsaport = snd_seq_create_simple_port(
+        midi.handle,
+        "ZynAddSubFX",
+        SND_SEQ_PORT_CAP_WRITE
+        | SND_SEQ_PORT_CAP_SUBS_WRITE,
+        SND_SEQ_PORT_TYPE_SYNTH);
+    if(alsaport < 0)
+        return false;
+    return true;
+}
 
 
 string AlsaEngine::audioClientName()
@@ -90,13 +81,13 @@ string AlsaEngine::audioClientName()
     return name;
 }
 
-//string AlsaEngine::midiClientName()
-//{
-//    string name = "zynaddsubfx";
-//    if (!config.cfg.nameTag.empty())
-//        name += ("-" + config.cfg.nameTag);
-//    return name;
-//}
+string AlsaEngine::midiClientName()
+{
+    string name = "zynaddsubfx";
+    if (!config.cfg.nameTag.empty())
+        name += ("-" + config.cfg.nameTag);
+    return name;
+}
 
 void *AlsaEngine::_AudioThread(void *arg)
 {
@@ -201,6 +192,7 @@ bool AlsaEngine::Start()
         return true;
     if(!OpenStuff())
         return false;
+    openMidi();
 
     pthread_attr_t attr;
     enabled = true;
@@ -209,18 +201,13 @@ bool AlsaEngine::Start()
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
     pthread_create(&audio.pThread, &attr, _AudioThread, this);
 
-//    if (NULL != midi.handle)
-//    {
-//        chk = pthread_attr_init(&attr);
-//        chk = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-//        chk = pthread_create(&midi.pThread, &attr, _MidiThread, this);
-//    }
+    if (NULL != midi.handle)
+    {
+        pthread_attr_init(&attr);
+        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+        pthread_create(&midi.pThread, &attr, _MidiThread, this);
+    }
     return true;
-
-bail_out:
-    cerr << "Error - bail out of AlsaEngine::Start()" << endl;
-    Stop();
-    return false;
 }
 
 
@@ -236,104 +223,109 @@ void AlsaEngine::Stop()
             cerr << "Error, failed to cancel Alsa audio thread" << endl;
     snd_pcm_drain(handle);
     snd_pcm_close(handle);
-    //if (NULL != midi.handle && midi.pThread)
-    //    if (pthread_cancel(midi.pThread))
-    //        cerr << "Error, failed to cancel Alsa midi thread" << endl;
+    if (NULL != midi.handle && midi.pThread)
+        if (pthread_cancel(midi.pThread))
+            cerr << "Error, failed to cancel Alsa midi thread" << endl;
+    //Stop midi 
+    if(midi.handle)
+        snd_seq_close(midi.handle);
+
+    cout << "foo" << endl;
 }
 
 
-//void *AlsaEngine::_MidiThread(void *arg)
-//{
-//    return static_cast<AlsaEngine*>(arg)->MidiThread();
-//}
+void *AlsaEngine::_MidiThread(void *arg)
+{
+    return static_cast<AlsaEngine*>(arg)->MidiThread();
+}
 
 
-//void *AlsaEngine::MidiThread(void)
-//{
-//    snd_seq_event_t *event;
-//    unsigned char channel;
-//    unsigned char note;
-//    unsigned char velocity;
-//    int ctrltype;
-//    int par;
-//    int chk;
-//    set_realtime();
-//    while (!threadStop)
-//    {
-//        while ((chk = snd_seq_event_input(midi.handle, &event)) > 0)
-//        {
-//            if (!event)
-//                continue;
-//            par = event->data.control.param;
-//            switch (event->type)
-//            {
-//                case SND_SEQ_EVENT_NOTEON:
-//                     if (event->data.note.note)
-//                    {
-//                        channel = event->data.note.channel;
-//                        note = event->data.note.note;
-//                        velocity = event->data.note.velocity;
-//                        setMidiNote(channel, note, velocity);
-//                    }
-//                    break;
-//
-//                case SND_SEQ_EVENT_NOTEOFF:
-//                    channel = event->data.note.channel;
-//                    note = event->data.note.note;
-//                    setMidiNote(channel, note);
-//                    break;
-//
-//                case SND_SEQ_EVENT_PITCHBEND:
-//                    channel = event->data.control.channel;
-//                    ctrltype = C_pitchwheel;
-//                    par = event->data.control.value;
-//                    setMidiController(channel, ctrltype, par);
-//                    break;
-//
-//                case SND_SEQ_EVENT_CONTROLLER:
-//                    channel = event->data.control.channel;
-//                    ctrltype = event->data.control.param;
-//                    par = event->data.control.value;
-//                    setMidiController(channel, ctrltype, par);
-//                    break;
-//
-//                case SND_SEQ_EVENT_RESET: // reset to power-on state
-//                    channel = event->data.control.channel;
-//                    ctrltype = C_resetallcontrollers;
-//                    setMidiController(channel, ctrltype, 0);
-//                    break;
-//
-//                case SND_SEQ_EVENT_PORT_SUBSCRIBED: // ports connected
-//                    if (config.cfg.verbose)
-//                        cout << "Info, alsa midi port connected" << endl;
-//                    break;
-//
-//                case SND_SEQ_EVENT_PORT_UNSUBSCRIBED: // ports disconnected
-//                    if (config.cfg.verbose)
-//                        cout << "Info, alsa midi port disconnected" << endl;
-//                    break;
-//
-//                case SND_SEQ_EVENT_SYSEX:   // system exclusive
-//                case SND_SEQ_EVENT_SENSING: // midi device still there
-//                    break;
-//
-//                default:
-//                    if (config.cfg.verbose)
-//                        cout << "Info, other non-handled midi event, type: "
-//                             << (int)event->type << endl;
-//                    break;
-//            }
-//            snd_seq_free_event(event);
-//        }
-//        if (chk < 0)
-//        {
-//            if (config.cfg.verbose)
-//                cerr << "Error, ALSA midi input read failed: " << chk << endl;
-//            return NULL;
-//        }
-//    }
-//    return NULL;
-//}
+void *AlsaEngine::MidiThread(void)
+{
+    snd_seq_event_t *event;
+    unsigned char channel;
+    unsigned char note;
+    unsigned char velocity;
+    int ctrltype;
+    int par;
+    int chk;
+    set_realtime();
+    while (enabled())
+    {
+        while ((chk = snd_seq_event_input(midi.handle, &event)) > 0)
+        {
+            if (!event)
+                continue;
+            par = event->data.control.param;
+            switch (event->type)
+            {
+                case SND_SEQ_EVENT_NOTEON:
+                     if (event->data.note.note)
+                    {
+                        channel = event->data.note.channel;
+                        note = event->data.note.note;
+                        velocity = event->data.note.velocity;
+                        sysIn->putEvent(MidiNote(note, channel, velocity));
+                    }
+                    break;
+
+                case SND_SEQ_EVENT_NOTEOFF:
+                    channel = event->data.note.channel;
+                    note = event->data.note.note;
+                    sysIn->putEvent(MidiNote(note, channel));
+                    break;
+
+                case SND_SEQ_EVENT_PITCHBEND:
+                    channel = event->data.control.channel;
+                    ctrltype = C_pitchwheel;
+                    par = event->data.control.value;
+                    sysIn->putEvent(MidiCtl(ctrltype, channel, par));
+                    break;
+
+                case SND_SEQ_EVENT_CONTROLLER:
+                    channel = event->data.control.channel;
+                    ctrltype = event->data.control.param;
+                    par = event->data.control.value;
+                    sysIn->putEvent(MidiCtl(ctrltype, channel, par));
+                    break;
+
+                case SND_SEQ_EVENT_RESET: // reset to power-on state
+                    channel = event->data.control.channel;
+                    ctrltype = C_resetallcontrollers;
+                    sysIn->putEvent(MidiCtl(ctrltype, channel, 0));
+                    break;
+
+                case SND_SEQ_EVENT_PORT_SUBSCRIBED: // ports connected
+                    if (true)
+                        cout << "Info, alsa midi port connected" << endl;
+                    break;
+
+                case SND_SEQ_EVENT_PORT_UNSUBSCRIBED: // ports disconnected
+                    if (true)
+                        cout << "Info, alsa midi port disconnected" << endl;
+                    break;
+
+                case SND_SEQ_EVENT_SYSEX:   // system exclusive
+                case SND_SEQ_EVENT_SENSING: // midi device still there
+                    break;
+
+                default:
+                    if (true)
+                        cout << "Info, other non-handled midi event, type: "
+                             << (int)event->type << endl;
+                    break;
+            }
+            snd_seq_free_event(event);
+        }
+        if (chk < 0)
+        {
+            if (true)
+                cerr << "Error, ALSA midi input read failed: " << chk << endl;
+            return NULL;
+        }
+    }
+    return NULL;
+}
 
 const short *AlsaEngine::interleave(const Stereo<Sample> smps)const
 {

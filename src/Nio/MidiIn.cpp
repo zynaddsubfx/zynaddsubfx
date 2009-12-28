@@ -20,7 +20,6 @@
 
 */
 
-#include "../globals.h"
 #include "MidiIn.h"
 
 int MidiIn::getcontroller(unsigned char b)

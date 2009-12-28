@@ -26,18 +26,18 @@
 #include <queue>
 
 #include "AudioOut.h"
-//include "MidiIn.h"
+#include "MidiIn.h"
 #include "OutMgr.h"
 #include "../Misc/Stereo.h"
 #include "../Samples/Sample.h"
 
-class AlsaEngine : public AudioOut//, MidiIn
+class AlsaEngine : public AudioOut, MidiIn
 {
     public:
         AlsaEngine(OutMgr *out);
         ~AlsaEngine();
         
-        //bool openMidi();
+        bool openMidi();
         bool Start();
         void Stop();
         
@@ -45,15 +45,15 @@ class AlsaEngine : public AudioOut//, MidiIn
         unsigned int getBuffersize() { return audio.period_size; };
         
         std::string audioClientName();
-        //std::string midiClientName();
+        std::string midiClientName();
         int audioClientId() { return audio.alsaId; };
-        //int midiClientId() { return midi.alsaId; };
+        int midiClientId() { return midi.alsaId; };
 
     protected:
         void *AudioThread();
         static void *_AudioThread(void *arg);
-        //void *MidiThread(oid);
-        //static void *_MidiThread();
+        void *MidiThread();
+        static void *_MidiThread(void *arg);
 
     private:
         bool prepHwparams();
@@ -63,7 +63,7 @@ class AlsaEngine : public AudioOut//, MidiIn
         bool xrunRecover();
         bool alsaBad(int op_result, std::string err_msg);
         void closeAudio();
-        //void closeMidi();
+        void closeMidi();
 
         snd_pcm_sframes_t (*pcmWrite)(snd_pcm_t *handle, const void *data,
                                       snd_pcm_uframes_t nframes);
@@ -83,12 +83,12 @@ class AlsaEngine : public AudioOut//, MidiIn
             pthread_t          pThread;
         } audio;
 
-        //struct {
-        //    std::string  device;
-        //    snd_seq_t   *handle;
-        //    int          alsaId;
-        //    pthread_t    pThread;
-        //} midi;
+        struct {
+            std::string  device;
+            snd_seq_t   *handle;
+            int          alsaId;
+            pthread_t    pThread;
+        } midi;
 
         //from alsa example
         long loops;

@@ -1,4 +1,4 @@
-set(AlsaMidiInput ${ALSA_FOUND} CACHE BOOL "Include ALSA Midi input")
+#set(AlsaMidiInput ${ALSA_FOUND} CACHE BOOL "Include ALSA Midi input")
 set(zynaddsubfx_input_SRCS
 	MidiIn.cpp 
 	NULLMidiIn.cpp 

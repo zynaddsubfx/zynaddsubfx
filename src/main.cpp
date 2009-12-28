@@ -40,9 +40,10 @@
 extern Dump dump;
 
 #include "Nio/OutMgr.h"
+#include "Nio/InMgr.h"
 
 #warning TODO remove conditional include block
-
+#if 0
 #include "Input/MidiIn.h"
 
 #ifdef ALSAMIDIIN
@@ -59,6 +60,7 @@ extern Dump dump;
 
 #ifdef WINMIDIIN
 #include "Input/WINMidiIn.h"
+#endif
 #endif
 
 #ifndef DISABLE_GUI
@@ -210,7 +212,7 @@ void initprogram()
     master = new Master();
     master->swaplr = swaplr;
 
-
+#if 0
 #if defined(ALSAMIDIIN)
     Midi = new ALSAMidiIn();
 #elif defined(OSSMIDIIN)
@@ -218,14 +220,12 @@ void initprogram()
 #else // defined(NONEMIDIIN) || (defined(VSTMIDIIN))
     Midi = new NULLMidiIn();
 #endif
+#endif
 
     sysOut = new OutMgr(master);
     sysOut->run();
 
     sysIn = new InMgr(master);
-    ALSAMidiIn *alsamidi = dynamic_cast<ALSAMidiIn *>(Midi);
-    cout << "run" << endl;
-    alsamidi->run();
 
 #ifndef DISABLE_GUI
     ui = new MasterUI(master, &Pexitprogram);
