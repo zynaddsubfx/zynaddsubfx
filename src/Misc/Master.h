@@ -169,16 +169,7 @@ class Master
         REALTYPE *tmpmixl;
         REALTYPE *tmpmixr;
 
-
         int keyshift;
-
-        //Audio Output samples (if it used GetAudioOutSamples - eg. for Jack output; elsewhere is unused)
-        REALTYPE *audiooutl;
-        REALTYPE *audiooutr;
-
-        int      ksoundbuffersample; //this is used to know if there is need to call AudioOut by GetAudioOutSamples method
-        REALTYPE ksoundbuffersamplelow; //this is used for resampling (eg. if Jack samplerate!= SAMPLE_RATE)
-        REALTYPE oldsamplel, oldsampler; //this is used for resampling
 };
 
 

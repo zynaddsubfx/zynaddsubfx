@@ -45,28 +45,15 @@ Master::Master()
 
     tmpmixl   = new REALTYPE[SOUND_BUFFER_SIZE];
     tmpmixr   = new REALTYPE[SOUND_BUFFER_SIZE];
-    audiooutl = new REALTYPE[SOUND_BUFFER_SIZE];
-    audiooutr = new REALTYPE[SOUND_BUFFER_SIZE];
 
-    ksoundbuffersample    = -1; //this is only time when this is -1; this means that the GetAudioOutSamples was never called
-    ksoundbuffersamplelow = 0.0;
-    oldsamplel = 0.0;
-    oldsampler = 0.0;
     shutup     = 0;
     for(int npart = 0; npart < NUM_MIDI_PARTS; npart++) {
         vuoutpeakpart[npart] = 1e-9;
         fakepeakpart[npart]  = 0;
     }
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        audiooutl[i] = 0.0;
-        audiooutr[i] = 0.0;
-    }
-
     for(int npart = 0; npart < NUM_MIDI_PARTS; npart++)
         part[npart] = new Part(&microtonal, fft, &mutex);
-
-
 
     //Insertion Effects init
     for(int nefx = 0; nefx < NUM_INS_EFX; nefx++)
@@ -462,75 +449,6 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
     dump.inctick();
 }
 
-void Master::GetAudioOutSamples(int nsamples,
-                                int samplerate,
-                                REALTYPE *outl,
-                                REALTYPE *outr)
-{
-    if(ksoundbuffersample == -1) { //first time
-        AudioOut(&audiooutl[0], &audiooutr[0]);
-        ksoundbuffersample = 0;
-    }
-
-
-    if(samplerate == SAMPLE_RATE) { //no resample
-        int ksample = 0;
-        while(ksample < nsamples) {
-            outl[ksample] = audiooutl[ksoundbuffersample];
-            outr[ksample] = audiooutr[ksoundbuffersample];
-
-            ksample++;
-            ksoundbuffersample++;
-            if(ksoundbuffersample >= SOUND_BUFFER_SIZE) {
-                AudioOut(&audiooutl[0], &audiooutr[0]);
-                ksoundbuffersample = 0;
-            }
-        }
-    }
-    else {  //Resample
-        int      ksample = 0;
-        REALTYPE srinc   = SAMPLE_RATE / (REALTYPE)samplerate;
-
-        while(ksample < nsamples) {
-            if(ksoundbuffersample != 0) {
-                outl[ksample] = audiooutl[ksoundbuffersample]
-                                * ksoundbuffersamplelow
-                                + audiooutl[ksoundbuffersample
-                                            - 1] * (1.0 - ksoundbuffersamplelow);
-                outr[ksample] = audiooutr[ksoundbuffersample]
-                                * ksoundbuffersamplelow
-                                + audiooutr[ksoundbuffersample
-                                            - 1] * (1.0 - ksoundbuffersamplelow);
-            }
-            else {
-                outl[ksample] = audiooutl[ksoundbuffersample]
-                                * ksoundbuffersamplelow
-                                + oldsamplel * (1.0 - ksoundbuffersamplelow);
-                outr[ksample] = audiooutr[ksoundbuffersample]
-                                * ksoundbuffersamplelow
-                                + oldsampler * (1.0 - ksoundbuffersamplelow);
-            }
-
-            ksample++;
-
-            ksoundbuffersamplelow += srinc;
-            if(ksoundbuffersamplelow >= 1.0) {
-                ksoundbuffersample   += (int) floor(ksoundbuffersamplelow);
-                ksoundbuffersamplelow = ksoundbuffersamplelow - floor(
-                    ksoundbuffersamplelow);
-            }
-
-            if(ksoundbuffersample >= SOUND_BUFFER_SIZE) {
-                oldsamplel = audiooutl[SOUND_BUFFER_SIZE - 1];
-                oldsampler = audiooutr[SOUND_BUFFER_SIZE - 1];
-                AudioOut(&audiooutl[0], &audiooutr[0]);
-                ksoundbuffersample = 0;
-            }
-        }
-    }
-}
-
-
 Master::~Master()
 {
     for(int npart = 0; npart < NUM_MIDI_PARTS; npart++)
@@ -540,8 +458,6 @@ Master::~Master()
     for(int nefx = 0; nefx < NUM_SYS_EFX; nefx++)
         delete sysefx[nefx];
 
-    delete [] audiooutl;
-    delete [] audiooutr;
     delete [] tmpmixl;
     delete [] tmpmixr;
     delete (fft);
