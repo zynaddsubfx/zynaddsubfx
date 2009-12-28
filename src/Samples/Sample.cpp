@@ -35,8 +35,7 @@ Sample::Sample(const Sample &smp)
     :bufferSize(smp.bufferSize)
 {
     buffer = new REALTYPE[bufferSize];
-    for(int i = 0; i < bufferSize; ++i)
-        *(i + buffer) = *(i + smp.buffer);
+    memcpy(buffer, smp.buffer, bufferSize * sizeof(float));
 }
 
 Sample::Sample(int length, REALTYPE fill)
@@ -45,8 +44,7 @@ Sample::Sample(int length, REALTYPE fill)
     if(length < 1)
         bufferSize = 1;
     buffer = new REALTYPE[bufferSize];
-    for(int i = 0; i < bufferSize; ++i)
-        buffer[i] = fill;
+    memset(buffer, fill, bufferSize * sizeof(float));
 }
 
 Sample::Sample(int length, const REALTYPE *input)
@@ -54,8 +52,7 @@ Sample::Sample(int length, const REALTYPE *input)
 {
     if(length > 0) {
         buffer = new REALTYPE[length];
-        for(int i = 0; i < length; ++i)
-            *(buffer + i) = *(input + i);
+        memcpy(buffer, input, bufferSize * sizeof(float));
     }
     else {
         buffer     = new REALTYPE[1];
@@ -77,17 +74,12 @@ void Sample::clear()
 
 void Sample::operator=(const Sample &smp)
 {
-    /**\todo rewrite to be less repetitive*/
-    if(bufferSize == smp.bufferSize)
-        for(int i = 0; i < bufferSize; ++i)
-            *(i + buffer) = *(i + smp.buffer);
-    else {
+    if(bufferSize != smp.bufferSize) {
         delete[] buffer;
         buffer     = new REALTYPE[smp.bufferSize];
         bufferSize = smp.bufferSize;
-        for(int i = 0; i < bufferSize; ++i)
-            *(i + buffer) = *(i + smp.buffer);
     }
+    memcpy(buffer, smp.buffer, bufferSize * sizeof(float));
 }
 
 bool Sample::operator==(const Sample &smp) const
