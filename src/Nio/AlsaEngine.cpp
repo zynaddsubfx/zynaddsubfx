@@ -97,6 +97,7 @@ void *AlsaEngine::_AudioThread(void *arg)
 
 void *AlsaEngine::AudioThread()
 {
+    set_realtime();
     RunStuff();
     return NULL;
 }

@@ -3,6 +3,7 @@
 #include <iostream>
 #include "AudioOut.h"
 #include "../Misc/Master.h"
+#include "../Misc/Util.h"//for set_realtime()
 #include "NulEngine.h"
 #if OSS
 #include "OssEngine.h"
@@ -99,6 +100,7 @@ void *_outputThread(void *arg)
 void *OutMgr::outputThread()
 {
 
+    set_realtime();
     //open up the default output
     if(!defaultOut->Start())//there should be a better failsafe
         cerr << "ERROR: The default Audio Output Failed to Open!" << endl;
