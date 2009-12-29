@@ -366,9 +366,11 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
 
     //Mix all parts
     for(npart = 0; npart < NUM_MIDI_PARTS; npart++) {
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) { //the volume did not changed
-            outl[i] += part[npart]->partoutl[i];
-            outr[i] += part[npart]->partoutr[i];
+        if(part[npart]->Penabled) { //only mix active parts
+            for(i = 0; i < SOUND_BUFFER_SIZE; i++) { //the volume did not changed
+                outl[i] += part[npart]->partoutl[i];
+                outr[i] += part[npart]->partoutr[i];
+            }
         }
     }
 
