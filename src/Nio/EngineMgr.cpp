@@ -23,33 +23,33 @@ EngineMgr *sysEngine;
 EngineMgr::EngineMgr()
 {
     //conditional compiling mess (but contained)
-    engines["NULL"] = defaultEng = new NulEngine(sysOut);
+    engines.push_back(defaultEng = new NulEngine(sysOut));
 #if OSS
 #if OSS_DEFAULT
-    engines["OSS"] = defaultEng = new OssEngine(sysOut);
+    engines.push_back(defaultEng = new OssEngine(sysOut));
 #else
-    engines["OSS"] = new OssEngine(sysOut);
+    engines.push_back(new OssEngine(sysOut));
 #endif
 #endif
 #if ALSA
 #if ALSA_DEFAULT
-    engines["ALSA"] = defaultEng = new AlsaEngine(sysOut);
+    engines.push_back(defaultEng = new AlsaEngine(sysOut));
 #else
-    engines["ALSA"] = new AlsaEngine(sysOut);
+    engines.push_back(new AlsaEngine(sysOut));
 #endif
 #endif
 #if JACK
 #if JACK_DEFAULT
-    engines["JACK"] = defaultEng = new JackEngine(sysOut);
+    engines.push_back(defaultEng = new JackEngine(sysOut));
 #else
-    engines["JACK"] = new JackEngine(sysOut);
+    engines.push_back(new JackEngine(sysOut));
 #endif
 #endif
 #if PORTAUDIO
 #if PORTAUDIO_DEFAULT
-    engines["PA"] = defaultEng = new PaEngine(sysOut);
+    engines.push_back(defaultEng = new PaEngine(sysOut));
 #else
-    engines["PA"] = new PaEngine(sysOut);
+    engines.push_back(new PaEngine(sysOut));
 #endif
 #endif
 
@@ -57,24 +57,21 @@ EngineMgr::EngineMgr()
 
 EngineMgr::~EngineMgr()
 {
-    for(map<string, Engine*>::iterator itr = engines.begin();
+    for(list<Engine*>::iterator itr = engines.begin();
             itr != engines.end(); ++itr) {
-            delete itr->second;
+            delete *itr;
     }
 }
 
 Engine *EngineMgr::getEng(string name)
 {
-    Engine *ans = NULL;
-
     transform(name.begin(), name.end(), name.begin(), ::toupper);
-    for(map<string, Engine*>::iterator itr = engines.begin();
+    for(list<Engine*>::iterator itr = engines.begin();
             itr != engines.end(); ++itr) {
-        if(itr->first == name) {
-            ans = itr->second;
-            break;
+        if((*itr)->name == name) {
+            return *itr;
         }
     }
-    return ans;
+    return NULL;
 }
 

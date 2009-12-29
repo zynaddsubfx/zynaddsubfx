@@ -39,6 +39,7 @@ using namespace std;
 OssEngine::OssEngine(OutMgr *out)
     :AudioOut(out)
 {
+    name           = "OSS";
     snd_fragment   = 0x00080009; //fragment size (?)
     snd_stereo     = 1; //stereo
     snd_format     = AFMT_S16_LE;

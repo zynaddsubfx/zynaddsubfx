@@ -1,5 +1,5 @@
 #include "NioUI.h"
-#include "../Nio/OutMgr.h"
+#include "../Nio/EngineMgr.h"
 #include "../Nio/AudioOut.h"
 #include <cstdio>
 #include <FL/Fl_Tabs.H>
@@ -29,19 +29,11 @@ NioUI::NioUI()
             intro->wrap_mode(4, 40);
         }
         gen->end();
-#if OSS
-        tabs.push_back(new NioTab("OSS"));
-#endif
-#if ALSA
-        tabs.push_back(new NioTab("ALSA"));
-#endif
-#if JACK
-        tabs.push_back(new NioTab("JACK"));
-#endif
-#if PORTAUDIO
-        tabs.push_back(new NioTab("PA"));
-#endif
-        tabs.push_back(new NioTab("NULL"));
+
+        for(list<Engine *>::iterator itr = sysEngine->engines.begin();
+                itr != sysEngine->engines.end(); ++itr)
+            tabs.push_back(new NioTab((*itr)->name));
+
         //add tabs
         for(list<NioTab *>::iterator itr = tabs.begin();
                 itr != tabs.end(); ++itr)

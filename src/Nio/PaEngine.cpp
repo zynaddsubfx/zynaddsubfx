@@ -28,7 +28,9 @@ using namespace std;
 
 PaEngine::PaEngine(OutMgr *out)
     :AudioOut(out)
-{}
+{
+    name = "PA";
+}
 
 
 PaEngine::~PaEngine()

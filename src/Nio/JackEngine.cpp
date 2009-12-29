@@ -33,6 +33,7 @@ using namespace std;
 JackEngine::JackEngine(OutMgr *out)
     :AudioOut(out), jackClient(NULL)
 {
+    name = "JACK";
     audio.jackSamplerate = 0;
     audio.jackNframes = 0;
     for (int i = 0; i < 2; ++i)

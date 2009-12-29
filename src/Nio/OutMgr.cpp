@@ -94,9 +94,9 @@ void *OutMgr::outputThread()
 
         pthread_mutex_lock(&mutex);
 
-        for(map<string, Engine*>::iterator itr = sysEngine->engines.begin();
+        for(list<Engine*>::iterator itr = sysEngine->engines.begin();
                 itr != sysEngine->engines.end(); ++itr) {
-            AudioOut *out = dynamic_cast<AudioOut *>(itr->second);
+            AudioOut *out = dynamic_cast<AudioOut *>(*itr);
             if(out && out->isEnabled())
                 out->out(smps);
         }

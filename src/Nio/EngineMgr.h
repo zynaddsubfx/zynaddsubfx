@@ -1,7 +1,7 @@
 #ifndef ENGINE_MGR_H
 #define ENGINE_MGR_H
 
-#include <map>
+#include <list>
 #include <string>
 #include "Engine.h"
 
@@ -9,7 +9,7 @@
 class MidiIn;
 class AudioOut;
 class OutMgr;
-/**Container/Owner of the long lived Engines*/ 
+/**Container/Owner of the long lived Engines*/
 class EngineMgr
 {
     public:
@@ -21,14 +21,16 @@ class EngineMgr
          * @return pointer to Engine or NULL
          */
         Engine *getEng(std::string name);
-        
+
     private:
-        std::map<std::string,Engine *> engines;
+        std::list<Engine *> engines;
 
         Engine *defaultEng;/**<The default output*/
 
         //Engine Manager user
+        //[if there is another 'user, just make this class a struct]
         friend class OutMgr;
+        friend class NioUI;
 };
 
 extern EngineMgr *sysEngine;

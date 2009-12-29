@@ -30,6 +30,7 @@ using namespace std;
 NulEngine::NulEngine(OutMgr *out)
     :AudioOut(out)
 {
+    name = "NULL";
     playing_until.tv_sec  = 0;
     playing_until.tv_usec = 0;
 }

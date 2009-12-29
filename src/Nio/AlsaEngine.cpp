@@ -31,6 +31,7 @@ using namespace std;
 AlsaEngine::AlsaEngine(OutMgr *out)
     :AudioOut(out)
 {
+    name = "ALSA";
     audio.handle = NULL;
     audio.period_time = 0;
     audio.samplerate = 0;
