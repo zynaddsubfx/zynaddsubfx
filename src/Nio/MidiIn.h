@@ -23,8 +23,10 @@
 #ifndef MIDI_IN_H
 #define MIDI_IN_H
 
+#include "Engine.h"
+
 /**This class is inherited by all the Midi input classes*/
-class MidiIn
+class MidiIn : public virtual Engine
 {
     public:
         static int getcontroller(unsigned char b);

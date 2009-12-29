@@ -39,8 +39,10 @@
 #include "Misc/Dump.h"
 extern Dump dump;
 
+//Nio System
 #include "Nio/OutMgr.h"
 #include "Nio/InMgr.h"
+#include "Nio/EngineMgr.h"
 
 #warning TODO remove conditional include block
 #if 0
@@ -222,10 +224,22 @@ void initprogram()
 #endif
 #endif
 
-    sysOut = new OutMgr(master);
-    sysOut->run();
+    //Nio Initialization
 
-    sysIn = new InMgr(master);
+    //Enable input wrapper
+    sysIn     = new InMgr(master);
+
+    //Initialize the Output Systems
+    sysOut    = new OutMgr(master);
+
+    //Initialize The Engines
+    sysEngine = new EngineMgr();
+
+    //Run the system
+    sysOut->run();
+#warning remove welcome message when system is out of beta
+    cout << "\nThanks for using the Nio system :)" << endl;
+
 
 #ifndef DISABLE_GUI
     ui = new MasterUI(master, &Pexitprogram);

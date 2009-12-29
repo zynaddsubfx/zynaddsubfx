@@ -9,6 +9,8 @@ set(zynaddsubfx_nio_SRCS
     AudioOut.cpp
     OutMgr.cpp
     InMgr.cpp
+    Engine.cpp
+    EngineMgr.cpp
     MidiEvent.cpp
     )
 

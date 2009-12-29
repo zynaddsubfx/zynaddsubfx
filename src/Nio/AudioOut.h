@@ -27,8 +27,9 @@
 #include <pthread.h>
 #include "OutMgr.h"
 #include "../Misc/Atomic.h"
+#include "Engine.h"
 
-class AudioOut
+class AudioOut : public virtual Engine
 {
     public:
         AudioOut(OutMgr *out);

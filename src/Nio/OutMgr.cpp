@@ -2,21 +2,10 @@
 #include <algorithm>
 #include <iostream>
 #include "AudioOut.h"
+#include "Engine.h"
+#include "EngineMgr.h"
 #include "../Misc/Master.h"
 #include "../Misc/Util.h"//for set_realtime()
-#include "NulEngine.h"
-#if OSS
-#include "OssEngine.h"
-#endif
-#if ALSA
-#include "AlsaEngine.h"
-#endif
-#if JACK
-#include "JackEngine.h"
-#endif
-#if PORTAUDIO
-#include "PaEngine.h"
-#endif
 
 using namespace std;
 
@@ -35,40 +24,6 @@ OutMgr::OutMgr(Master *nmaster)
     //init samples
     outr = new REALTYPE[SOUND_BUFFER_SIZE];
     outl = new REALTYPE[SOUND_BUFFER_SIZE];
-
-    //conditional compiling mess (but contained)
-    managedOuts["NULL"] = defaultOut = new NulEngine(this);
-#if OSS
-#if OSS_DEFAULT
-    managedOuts["OSS"] = defaultOut = new OssEngine(this);
-#else
-    managedOuts["OSS"] = new OssEngine(this);
-#endif
-#endif
-#if ALSA
-#if ALSA_DEFAULT
-    managedOuts["ALSA"] = defaultOut = new AlsaEngine(this);
-#else
-    managedOuts["ALSA"] = new AlsaEngine(this);
-#endif
-#endif
-#if JACK
-#if JACK_DEFAULT
-    managedOuts["JACK"] = defaultOut = new JackEngine(this);
-#else
-    managedOuts["JACK"] = new JackEngine(this);
-#endif
-#endif
-#if PORTAUDIO
-#if PORTAUDIO_DEFAULT
-    managedOuts["PA"] = defaultOut = new PaEngine(this);
-#else
-    managedOuts["PA"] = new PaEngine(this);
-#endif
-#endif
-    defaultOut->out(Stereo<Sample>(Sample(SOUND_BUFFER_SIZE * 20, 0.0),
-                                   Sample(SOUND_BUFFER_SIZE * 20, 0.0)));
-
 };
 
 OutMgr::~OutMgr()
@@ -83,10 +38,7 @@ OutMgr::~OutMgr()
     pthread_mutex_unlock(&processing);
 
     pthread_join(outThread, NULL);
-    for(map<string,AudioOut*>::iterator itr = managedOuts.begin();
-            itr != managedOuts.end(); ++itr) {
-            delete itr->second;
-    }
+
     pthread_mutex_destroy(&mutex);
     pthread_mutex_destroy(&processing);
     pthread_cond_destroy(&needsProcess);
@@ -99,6 +51,13 @@ void *_outputThread(void *arg)
 
 void *OutMgr::outputThread()
 {
+    defaultOut = dynamic_cast<AudioOut *>(sysEngine->defaultEng);
+    if(!defaultOut) {
+        cerr << "ERROR: It looks like someone broke the Nio Output\n"
+             << "       Attempting to recover by defaulting to the\n"
+             << "       Null Engine." << endl;
+        defaultOut = dynamic_cast<AudioOut *>(sysEngine->getEng("NULL"));
+    }
 
     set_realtime();
     //open up the default output
@@ -134,23 +93,21 @@ void *OutMgr::outputThread()
                 Sample(SOUND_BUFFER_SIZE, outr));
 
         pthread_mutex_lock(&mutex);
-        if(false)
-            cout << "output to ";
-        for(map<string,AudioOut*>::iterator itr = managedOuts.begin();
-                itr != managedOuts.end(); ++itr) {
-            if(itr->second->isEnabled())
-                itr->second->out(smps);
-            if(false)
-                cout << itr->second << " ";
+
+        for(map<string, Engine*>::iterator itr = sysEngine->engines.begin();
+                itr != sysEngine->engines.end(); ++itr) {
+            AudioOut *out = dynamic_cast<AudioOut *>(itr->second);
+            if(out && out->isEnabled())
+                out->out(smps);
         }
+
         for(list<AudioOut*>::iterator itr = unmanagedOuts.begin();
                 itr != unmanagedOuts.end(); ++itr) {
             (*itr)->out(smps);
             if(false)
                 cout << *itr << " ";
         }
-        if(false)
-            cout << endl;
+
         pthread_mutex_unlock(&mutex);
 
         //wait for next run
@@ -180,17 +137,7 @@ void OutMgr::run()
 
 AudioOut *OutMgr::getOut(string name)
 {
-    AudioOut *ans = NULL;
-
-    transform(name.begin(), name.end(), name.begin(), ::toupper);
-    for(map<string,AudioOut*>::iterator itr = managedOuts.begin();
-            itr != managedOuts.end(); ++itr) {
-        if(itr->first == name) {
-            ans = itr->second;
-            break;
-        }
-    }
-    return ans;
+    return dynamic_cast<AudioOut *>(sysEngine->getEng(name));
 }
 
 void OutMgr::add(AudioOut *driver)
@@ -207,8 +154,10 @@ void OutMgr::remove(AudioOut *out)
     pthread_mutex_lock(&mutex);
     unmanagedOuts.remove(out);
     out->Stop();//tells engine to stop
-    out->out(Stereo<Sample>(Sample(SOUND_BUFFER_SIZE),
-                Sample(SOUND_BUFFER_SIZE)));//gives a dummy sample to make sure it is not stuck
+
+    //gives a dummy sample to make sure it is not stuck
+    out->out(Stereo<Sample>(Sample(SOUND_BUFFER_SIZE, 0.0),
+                            Sample(SOUND_BUFFER_SIZE, 0.0)));
     pthread_mutex_unlock(&mutex);
 }
 
