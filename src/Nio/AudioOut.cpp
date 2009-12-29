@@ -27,7 +27,7 @@ using namespace std;
 
 AudioOut::AudioOut(OutMgr *out)
     :samplerate(SAMPLE_RATE),bufferSize(SOUND_BUFFER_SIZE),
-     usePartial(false),manager(out),enabled(false)
+     usePartial(false),buffering(6),manager(out),enabled(false)
 {
     pthread_mutex_init(&outBuf_mutex, NULL);
     pthread_cond_init (&outBuf_cv, NULL);
@@ -95,10 +95,19 @@ void AudioOut::setBufferSize(int _bufferSize)
     pthread_mutex_unlock(&outBuf_mutex);
 };
 
+void AudioOut::bufferingSize(int nBuffering)
+{
+   buffering = nBuffering;
+}
+
+int AudioOut::bufferingSize()
+{
+    return buffering;
+}
 
 const Stereo<Sample> AudioOut::getNext()
 {
-    const unsigned int BUFF_SIZE = 6;
+    const unsigned int BUFF_SIZE = buffering;
     Stereo<Sample> ans;
     pthread_mutex_lock(&outBuf_mutex);
     bool isEmpty = outBuf.empty();
@@ -106,7 +115,7 @@ const Stereo<Sample> AudioOut::getNext()
 
     if(isEmpty)//fetch samples if possible
     {
-        if(manager->getRunning() < BUFF_SIZE)
+        if((unsigned int)manager->getRunning() < BUFF_SIZE)
             manager->requestSamples(BUFF_SIZE-manager->getRunning());
         if(true)
             cout << "-----------------Starvation------------------"<< endl;

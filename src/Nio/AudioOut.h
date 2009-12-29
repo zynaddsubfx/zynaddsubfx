@@ -57,6 +57,9 @@ class AudioOut : public virtual Engine
          * (used for getNext()).*/
         void setBufferSize(int _bufferSize);
 
+        void bufferingSize(int nBuffering);
+        int bufferingSize();
+
     protected:
 
         void putBack(const Stereo<Sample> smp);
@@ -74,6 +77,11 @@ class AudioOut : public virtual Engine
         Stereo<Sample> partialIn;/**<used for taking in samples with a different samplerate/buffersize*/
         bool usePartial;
         Stereo<Sample> current;/**<used for xrun defence*/
+
+        //The number of Samples that are used to buffer
+        //Note: there is some undetermined behavior when:
+        //sampleRate != SAMPLE_RATE || bufferSize != SOUND_BUFFER_SIZE
+        unsigned int buffering;
 
         OutMgr *manager;
         //thread resources
