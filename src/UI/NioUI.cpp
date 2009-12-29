@@ -5,27 +5,15 @@
 #include <FL/Fl_Tabs.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Text_Display.H>
+#include <iostream>
 
+using namespace std;
 
 NioUI::NioUI()
-    :Fl_Window(200,100,400,400,"New IO Controls"),
-    groups(new Fl_Group*[5]), buttons(new Fl_Button*[5])
+    :Fl_Window(200,100,400,400,"New IO Controls")
 {
-    groups[0]=NULL;
-    groups[1]=NULL;
-    groups[2]=NULL;
-    groups[3]=NULL;
-    groups[4]=NULL;
-
-    jackc = "JACK";
-    ossc  = "OSS";
-    alsac = "ALSA";
-    nullc = "NULL";
-    pac   = "PA";
-
-
     //hm, I appear to be leaking memory
-    Fl_Tabs *tabs = new Fl_Tabs(0,0,400,400-15);
+    Fl_Tabs *wintabs = new Fl_Tabs(0,0,400,400-15);
     {
         Fl_Group *gen  = new Fl_Group(0,20,400,400-35,"General");
         {
@@ -42,55 +30,24 @@ NioUI::NioUI()
         }
         gen->end();
 #if OSS
-        Fl_Group *oss  = new Fl_Group(10,40,400,400-35,ossc);
-        {
-            Fl_Light_Button *enabler = new Fl_Light_Button(20,30,100,25,"Enable");
-            enabler->callback(nioToggle, (void *)oss);
-            groups[0]  = oss;
-            buttons[0] = enabler;
-        }
-        oss->end();
+        tabs.push_back(new NioTab("OSS"));
 #endif
 #if ALSA
-        Fl_Group *alsa = new Fl_Group(0,20,400,400-35,alsac);
-        {
-            Fl_Light_Button *enabler = new Fl_Light_Button(20,30,100,25,"Enable");
-            enabler->callback(nioToggle, (void *)alsa);
-            groups[1]  = alsa;
-            buttons[1] = enabler;
-        }
-        alsa->end();
+        tabs.push_back(new NioTab("ALSA"));
 #endif
 #if JACK
-        Fl_Group *jack = new Fl_Group(0,20,400,400-35,jackc);
-        {
-            Fl_Light_Button *enabler = new Fl_Light_Button(20,30,100,25,"Enable");
-            enabler->callback(nioToggle, (void *)jack);
-            groups[2]  = jack;
-            buttons[2] = enabler;
-        }
-        jack->end();
+        tabs.push_back(new NioTab("JACK"));
 #endif
 #if PORTAUDIO
-        Fl_Group *pa = new Fl_Group(0,20,400,400-35,pac);
-        {
-            Fl_Light_Button *enabler = new Fl_Light_Button(20,30,100,25,"Enable");
-            enabler->callback(nioToggle, (void *)pa);
-            groups[3]  = pa;
-            buttons[3] = enabler;
-        }
-        pa->end();
+        tabs.push_back(new NioTab("PA"));
 #endif
-        Fl_Group *null = new Fl_Group(0,20,400,400-35,nullc);
-        {
-            Fl_Light_Button *enabler = new Fl_Light_Button(20,30,100,25,"Enable");
-            enabler->callback(nioToggle, (void *)null);
-            groups[4]  = null;
-            buttons[4] = enabler;
-        }
-        null->end();
+        tabs.push_back(new NioTab("NULL"));
+        //add tabs
+        for(list<NioTab *>::iterator itr = tabs.begin();
+                itr != tabs.end(); ++itr)
+            wintabs->add(*itr);
     }
-    tabs->end();
+    wintabs->end();
 
     Fl::scheme("plastic");
     resizable(this);
@@ -99,40 +56,43 @@ NioUI::NioUI()
 
 void NioUI::refresh()
 {
-    for(int i = 0; i < 4; ++i)
-        if(groups[i])
-        {
-            const char *tmp = groups[i]->label();
-            buttons[i]->value((NULL==sysOut->getOut(tmp)?false:
-                        sysOut->getOut(tmp)->isEnabled()));
-            if(sysOut->getOut(tmp)!=NULL&&sysOut->getOut(tmp)->isEnabled())
-            {
-                groups[i]->labelcolor(fl_rgb_color(0,255,0));
-                groups[i]->redraw();
-            }
-        }
+    for(list<NioTab *>::iterator itr = tabs.begin();
+            itr != tabs.end(); ++itr)
+        (*itr)->refresh();
 }
 
-//this is a bit of a hack (but a fun one)
-void NioUI::nioToggle(Fl_Widget *wid, void *parent)
+void NioTab::nioToggle(Fl_Widget *wid, void *arg)
 {
     Fl_Button *w = static_cast<Fl_Button *>(wid);
-    Fl_Group  *p = static_cast<Fl_Group *>(parent);
+    NioTab *p = static_cast<NioTab *>(arg);
     bool val = w->value();
-    
-    AudioOut *out = sysOut->getOut(p->label());
-    if(!out)
-        return;
 
-    bool result=false;
+    AudioOut *out = sysOut->getOut(p->name);
+    if(out) {
+        if(val)
+            out->Start();
+        else
+            out->Stop();
+    }
+    p->refresh();
+}
 
-    if(val)
-        result=out->Start();
-    else
-        out->Stop();
+NioTab::NioTab(string name)
+    :Fl_Group(10, 40, 400, 400-35, strdup(name.c_str())),
+    outEnable(20 ,30 ,100, 25, "Enable"),
+    name(name)
+{
+    outEnable.callback(nioToggle, (void *)this);
+    end();
+}
 
-    w->value(result);
-    p->labelcolor(fl_rgb_color(0,result*255,0));
-    p->redraw();
+void NioTab::refresh()
+{
+    //getOut should only be called with present Engines
+    bool state = sysOut->getOut(name)->isEnabled();
+    outEnable.value(state);
+
+    this->labelcolor(fl_rgb_color(0,255*state,0));
+    this->redraw();
 }
 
