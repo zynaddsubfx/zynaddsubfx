@@ -253,6 +253,8 @@ void exitprogram()
 {
     pthread_mutex_lock(&master->mutex);
     delete sysOut;
+    delete sysIn;
+    delete sysEngine;
 
 #ifndef DISABLE_GUI
     delete (ui);
