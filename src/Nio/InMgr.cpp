@@ -12,9 +12,9 @@ InMgr::InMgr(Master *_master)
 
 void InMgr::putEvent(MidiNote note)
 {
+    cout << note << endl;
     pthread_mutex_lock(&master->mutex);
     {
-        cout << "got a note event" << endl;
         dump.dumpnote(note.channel, note.note, note.velocity);
 
         if(note.velocity)
@@ -27,9 +27,9 @@ void InMgr::putEvent(MidiNote note)
 
 void InMgr::putEvent(MidiCtl control)
 {
+    cout << control << endl;
     pthread_mutex_lock(&master->mutex);
     {
-        cout << "got a control event" << endl;
         dump.dumpcontroller(control.channel, control.controller,
                 control.value);
 
