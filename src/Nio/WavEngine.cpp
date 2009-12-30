@@ -69,6 +69,15 @@ void WavEngine::Stop()
     if(!enabled())
         return;
     enabled = false;
+
+    //put something in the queue
+    pthread_mutex_lock(&outBuf_mutex);
+    outBuf.push(Stereo<Sample>(Sample(1,0.0),Sample(1,0.0)));
+    pthread_mutex_unlock(&outBuf_mutex);
+
+    //make sure it moves
+    pthread_cond_signal(&outBuf_cv);
+    pthread_mutex_unlock(&outBuf_mutex);
     pthread_join(pThread, NULL);
 }
 
@@ -109,7 +118,7 @@ void WavEngine::Close()
         file = NULL;
     }
     pthread_mutex_unlock(&write_mutex);
-    
+
 }
 
 //lazy getter
@@ -145,7 +154,7 @@ T limit(T val, T min, T max)
 }
 
 void *WavEngine::AudioThread()
-{  
+{
     short int *recordbuf_16bit = new short int [SOUND_BUFFER_SIZE*2];
     int size = SOUND_BUFFER_SIZE;
 
@@ -165,18 +174,16 @@ void *WavEngine::AudioThread()
 void WavEngine::write_stereo_samples(int nsmps, short int *smps)
 {
     pthread_mutex_lock(&write_mutex);
-    if(!file)
-        return;
-    fwrite(smps, nsmps, 4, file);
+    if(file)
+        fwrite(smps, nsmps, 4, file);
     pthread_mutex_unlock(&write_mutex);
     sampleswritten += nsmps;
 }
 
 void WavEngine::write_mono_samples(int nsmps, short int *smps)
 {
-    if(!file)
-        return;
-    fwrite(smps, nsmps, 2, file);
+    if(file)
+        fwrite(smps, nsmps, 2, file);
     sampleswritten += nsmps;
 }
 

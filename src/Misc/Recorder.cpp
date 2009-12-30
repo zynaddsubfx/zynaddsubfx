@@ -64,6 +64,7 @@ void Recorder::stop()
     if(wave)
     {
         sysOut->remove(wave);
+        wave->Stop();
         wave->Close();
         delete wave;
         wave = NULL; //is this even needed?
@@ -74,8 +75,8 @@ void Recorder::stop()
 void Recorder::pause()
 {
     status = 0;
-//        wave->Stop();
-        sysOut->remove(wave);
+    wave->Stop();
+    sysOut->remove(wave);
 }
 
 int Recorder::recording()
