@@ -19,12 +19,12 @@
 
 #include <iostream>
 
-//#include <jack/midiport.h>
+#include <jack/midiport.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#include "InMgr.h"
 
-//#include "../Misc/Config.h"
 #include "../Misc/Master.h"
 #include "JackEngine.h"
 
@@ -45,7 +45,6 @@ JackEngine::JackEngine(OutMgr *out)
 
 bool JackEngine::connectServer(string server)
 {
-    cout << "Bla" << endl;
     //temporary (move to a higher level configuation)
     bool autostart_jack = true;
 
@@ -124,6 +123,7 @@ void JackEngine::Stop()
                 jack_port_unregister(jackClient, audio.ports[i]);
             audio.ports[i] = NULL;
         }
+        jack_port_unregister(jackClient, midi.inport);
         jack_client_close(jackClient);
         jackClient = NULL;
     }
@@ -136,12 +136,15 @@ bool JackEngine::openAudio()
     {
         audio.ports[port] = jack_port_register(jackClient, portnames[port],
                                               JACK_DEFAULT_AUDIO_TYPE,
-                                              JackPortIsOutput, 0);
+                                              JackPortIsOutput | JackPortIsTerminal, 0);
     }
     if (NULL != audio.ports[0] && NULL != audio.ports[1])
     {
         audio.jackSamplerate = jack_get_sample_rate(jackClient);
         audio.jackNframes = jack_get_buffer_size(jackClient);
+        midi.inport   = jack_port_register(jackClient, "midi_input",
+                                           JACK_DEFAULT_MIDI_TYPE,
+                                           JackPortIsInput | JackPortIsTerminal, 0);
         return true;
     }
     else
@@ -195,13 +198,14 @@ bool JackEngine::processAudio(jack_nframes_t nframes)
             return false;
         }
     }
-    
+
     Stereo<Sample> smp = getNext();
     //cout << "smp size of: " << smp.l().size() << endl;
 
     //Assumes smp.l().size() == nframes
     memcpy(audio.portBuffs[0], smp.l().c_buf(), smp.l().size()*sizeof(REALTYPE));
     memcpy(audio.portBuffs[1], smp.r().c_buf(), smp.r().size()*sizeof(REALTYPE));
+    handleMidi(nframes);
     return true;
 
 }
@@ -233,3 +237,41 @@ int JackEngine::bufferSizeCallback(jack_nframes_t nframes)
     setBufferSize(nframes);
     return 0;
 }
+
+void JackEngine::handleMidi(unsigned long frames)
+{
+    void *midi_buf = jack_port_get_buffer(midi.inport, frames);
+    jack_midi_event_t jack_midi_event;
+    jack_nframes_t    event_index = 0;
+    unsigned char    *midi_data;
+    unsigned char     type, chan;
+
+    while(jack_midi_event_get(&jack_midi_event, midi_buf,
+                event_index++) == 0) {
+        midi_data = jack_midi_event.buffer;
+        type      = midi_data[0] & 0xF0;
+        chan      = midi_data[0] & 0x0F;
+
+        switch(type) {
+            case 0x80: /* note-off */
+                sysIn->putEvent(MidiNote(midi_data[1], chan));
+                break;
+
+            case 0x90: /* note-on */
+                sysIn->putEvent(MidiNote(midi_data[1], chan, midi_data[2]));
+                break;
+
+            case 0xB0: /* controller */
+                sysIn->putEvent(MidiCtl(midi_data[1], chan, midi_data[2]));
+                break;
+
+            case 0xE0: /* pitch bend */
+                sysIn->putEvent(MidiCtl(C_pitchwheel, chan,
+                        ((midi_data[2] << 7) | midi_data[1])));
+                break;
+
+                /* XXX TODO: handle MSB/LSB controllers and RPNs and NRPNs */
+        }
+    }
+}
+

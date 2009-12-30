@@ -25,12 +25,14 @@
 #include <semaphore.h>
 #include <jack/jack.h>
 #include <jack/ringbuffer.h>
+#include <pthread.h>
 
+#include "MidiIn.h"
 #include "AudioOut.h"
 
 typedef jack_default_audio_sample_t jsample_t;
 
-class JackEngine : public AudioOut
+class JackEngine : public AudioOut, MidiIn
 {
     public:
         JackEngine(OutMgr *out);
@@ -68,6 +70,11 @@ class JackEngine : public AudioOut
             jack_port_t  *ports[2];
             jsample_t    *portBuffs[2];
         } audio;
+        struct {
+            jack_port_t *inport;
+        } midi;
+
+        void handleMidi(unsigned long frames);
 };
 
 #endif
