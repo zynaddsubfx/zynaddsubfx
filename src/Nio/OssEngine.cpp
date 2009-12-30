@@ -34,6 +34,9 @@
 #include <unistd.h>
 #include <iostream>
 
+#include "MidiEvent.h"
+#include "InMgr.h"
+
 using namespace std;
 
 OssEngine::OssEngine(OutMgr *out)
@@ -85,6 +88,9 @@ bool OssEngine::Start()
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
     pthread_create(&pThread, &attr, _AudioThread, this);
 
+
+    StartMidi();
+
     return true;
 }
 
@@ -95,6 +101,25 @@ void OssEngine::Stop()
     enabled = false;
     pthread_join(pThread, NULL);
     close(snd_handle);
+
+    StopMidi();
+}
+
+bool OssEngine::StartMidi()
+{
+    openMidi();
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    pthread_create(&pThreadMidi, &attr, _MidiThread, this);
+
+    return true;
+}
+
+void OssEngine::StopMidi()
+{
+    pthread_cancel(pThreadMidi);
+    close(midiHandle);
 }
 
 void *OssEngine::_AudioThread(void *arg)
@@ -104,7 +129,7 @@ void *OssEngine::_AudioThread(void *arg)
 
 
 void *OssEngine::AudioThread()
-{  
+{
     //get some initial samples
     manager->requestSamples();
     manager->requestSamples();
@@ -113,9 +138,47 @@ void *OssEngine::AudioThread()
     while (enabled())
     {
         const Stereo<Sample> smps = getNext();
+        smps.l().c_buf()[10];
         OSSout(smps.l().c_buf(),smps.r().c_buf());
     }
     pthread_exit(NULL);
+}
+
+void *OssEngine::_MidiThread(void *arg)
+{
+    return (static_cast<OssEngine*>(arg))->MidiThread();
+}
+
+void *OssEngine::MidiThread()
+{
+    set_realtime();
+    while(1) {
+        lastmidicmd = 0;
+        unsigned char tmp, i;
+        i = 0;
+
+        if(lastmidicmd == 0) { //asteapta prima data pana cand vine prima comanda midi
+            while(tmp < 0x80)
+                tmp = getmidibyte();
+            lastmidicmd = tmp;
+        }
+
+        tmp = getmidibyte();
+
+        if(tmp >= 0x80) {
+            lastmidicmd = tmp;
+            tmp = getmidibyte();
+        }
+
+        if((lastmidicmd >= 0x80) && (lastmidicmd <= 0x8f))      //Note OFF
+            sysIn->putEvent(MidiNote(tmp, lastmidicmd%16));
+        else if((lastmidicmd >= 0x90) && (lastmidicmd <= 0x9f)) //Note ON
+            sysIn->putEvent(MidiNote(tmp, lastmidicmd%16, getmidibyte()));
+        else if((lastmidicmd >= 0xB0) && (lastmidicmd <= 0xBF)) //Controllers
+            sysIn->putEvent(MidiCtl(tmp, lastmidicmd%16, getmidibyte()));
+        else if((lastmidicmd >= 0xE0) && (lastmidicmd <= 0xEF)) //Pitch Wheel
+            sysIn->putEvent(MidiCtl(C_pitchwheel, lastmidicmd%16, (tmp + getmidibyte() * (int) 128) - 8192));
+    }
 }
 
 /*
@@ -145,5 +208,39 @@ void OssEngine::OSSout(const REALTYPE *smp_left, const REALTYPE *smp_right)
         smps[i * 2 + 1] = (short int) (r * 32767.0);
     }
     write(snd_handle, smps, SOUND_BUFFER_SIZE * 4); // *2 because is 16 bit, again * 2 because is stereo
+}
+
+bool OssEngine::openMidi()
+{
+    midiHandle = open(config.cfg.LinuxOSSSeqInDev, O_RDONLY, 0);
+
+    lastmidicmd = 0;
+    cmdtype     = 0;
+    cmdchan     = 0;
+
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+
+
+    return midiHandle != -1;
+}
+
+unsigned char OssEngine::readbyte()
+{
+    unsigned char tmp[4] = {0, 0, 0, 0};
+    read(midiHandle, &tmp[0], 1);
+    while(tmp[0] != SEQ_MIDIPUTC) {
+        read(midiHandle, &tmp[0], 4);
+    }
+    return tmp[1];
+}
+
+unsigned char OssEngine::getmidibyte()
+{
+    unsigned char b;
+    do {
+        b = readbyte();
+    } while(b == 0xfe); //drops the Active Sense Messages
+    return b;
 }
 

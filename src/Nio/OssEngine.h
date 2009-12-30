@@ -26,8 +26,9 @@
 #include <sys/time.h>
 #include "../globals.h"
 #include "AudioOut.h"
+#include "MidiIn.h"
 
-class OssEngine: public AudioOut
+class OssEngine: public AudioOut, MidiIn
 {
     public:
         OssEngine(OutMgr *out);
@@ -36,11 +37,17 @@ class OssEngine: public AudioOut
         bool Start();
         void Stop();
 
+        bool StartMidi();
+        void StopMidi();
+
     protected:
         void *AudioThread();
         static void *_AudioThread(void *arg);
+        void *MidiThread();
+        static void *_MidiThread(void *arg);
 
     private:
+        //Audio
         /**Open the audio device
          * @return true for success*/
         bool openAudio();
@@ -53,6 +60,20 @@ class OssEngine: public AudioOut
         int snd_samplerate;
 
         short int *smps; //Samples to be sent to soundcard
+
+        //Midi
+        pthread_t pThreadMidi;
+        bool openMidi();
+        void stopMidi();
+        unsigned char getmidibyte();
+        unsigned char readbyte();
+
+        unsigned char cmdtype; //the Message Type (noteon,noteof,sysex..)
+        unsigned char cmdchan; //the channel number
+
+        int midiHandle;
+        unsigned char lastmidicmd; //last byte (>=80) received from the Midi
+
 };
 
 #endif
