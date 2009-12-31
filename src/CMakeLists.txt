@@ -68,7 +68,6 @@ endif()
 if(AlsaEnable)
         list(APPEND AUDIO_LIBRARIES ${ASOUND_LIBRARY})
         add_definitions(-DALSA=1)
-        add_definitions(-DALSAMIDIIN=1) #alsa midi TEMPORARY
 endif(AlsaEnable)
 
 if(JackEnable)
@@ -86,12 +85,6 @@ if(PaEnable)
 	include_directories(${PORTAUDIO_INCLUDE_DIR})
 	add_definitions(-DPORTAUDIO=1)
         list(APPEND AUDIO_LIBRARIES ${PORTAUDIO_LIBRARIES})
-endif()
-
-
-if(AlsaMidiOutput)
-	add_definitions(-DOSSAUDIOOUT)
-        set(AUDIO_LIBRARIES ${AUDIO_LIBRARIES} ${ASOUND_LIBRARY})
 endif()
 
 if (CompileTests)
@@ -204,13 +197,11 @@ macro(unit_test NAME CXX_FILE FILES)
 endmacro(unit_test)
 
 set(NONGUI_LIBRARIES
-	zynaddsubfx_input
 	zynaddsubfx_misc
 	zynaddsubfx_synth
 	zynaddsubfx_seq
 	zynaddsubfx_effect
 	zynaddsubfx_params
-        zynaddsubfx_output
 	zynaddsubfx_dsp
 	zynaddsubfx_samples
 	zynaddsubfx_controls
@@ -218,13 +209,10 @@ set(NONGUI_LIBRARIES
     )
 
 set(CXXTEST_LINK_LIBS ${NONGUI_LIBRARIES})
-set(MIDIINPUT_LIBRARIES "")
 
 add_subdirectory(Misc)
-add_subdirectory(Input)
 add_subdirectory(Controls)
 add_subdirectory(Synth)
-add_subdirectory(Output)
 add_subdirectory(Seq)
 add_subdirectory(Effects)
 add_subdirectory(Params)
@@ -249,7 +237,6 @@ target_link_libraries(zynaddsubfx
         ${MXML_LIBRARIES}
         ${NIO_LIBRARIES}
         ${AUDIO_LIBRARIES}
-        ${MIDIINPUT_LIBRARIES}
-	${OS_LIBRARIES}
+        ${OS_LIBRARIES}
 	)
 

@@ -10,10 +10,11 @@ set(zynaddsubfx_misc_SRCS
 	Util.cpp
 	XMLwrapper.cpp
         Recorder.cpp
+        WavFile.cpp
 )
 
 add_library(zynaddsubfx_misc STATIC
 	${zynaddsubfx_misc_SRCS} 
 	)
 
-target_link_libraries(zynaddsubfx_misc zynaddsubfx_nio zynaddsubfx_output)
+target_link_libraries(zynaddsubfx_misc zynaddsubfx_nio)

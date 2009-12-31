@@ -21,7 +21,7 @@
 */
 #include <math.h>
 #include "PADnoteParameters.h"
-#include "../Output/WAVaudiooutput.h"
+#include "../Misc/WavFile.h"
 using namespace std;
 
 PADnoteParameters::PADnoteParameters(FFTwrapper *fft_,
@@ -676,14 +676,13 @@ void PADnoteParameters::export2wav(string basefilename)
         char tmpstr[20];
         snprintf(tmpstr, 20, "_%02d", k + 1);
         string filename = basefilename + string(tmpstr) + ".wav";
-        WAVaudiooutput wav;
-        if(wav.newfile(filename, SAMPLE_RATE, 1)) {
+        WavFile wav(filename, SAMPLE_RATE, 1);
+        if(wav.good()) {
             int nsmps = sample[k].size;
             short int *smps = new short int[nsmps];
             for(int i = 0; i < nsmps; i++)
                 smps[i] = (short int)(sample[k].smp[i] * 32767.0);
-            wav.write_mono_samples(nsmps, smps);
-            wav.close();
+            wav.writeMonoSamples(nsmps, smps);
         }
     }
 }

@@ -44,27 +44,6 @@ extern Dump dump;
 #include "Nio/InMgr.h"
 #include "Nio/EngineMgr.h"
 
-#warning TODO remove conditional include block
-#if 0
-#include "Input/MidiIn.h"
-
-#ifdef ALSAMIDIIN
-#include "Input/ALSAMidiIn.h"
-#endif
-
-#ifdef OSSMIDIIN
-#include "Input/OSSMidiIn.h"
-#endif
-
-#if (defined(NONEMIDIIN) || (defined(VSTMIDIIN))||(!ALSAMIDIIN && !OSSMIDIIN))
-#include "Input/NULLMidiIn.h"
-#endif
-
-#ifdef WINMIDIIN
-#include "Input/WINMidiIn.h"
-#endif
-#endif
-
 #ifndef DISABLE_GUI
 #ifdef QT_GUI
 
@@ -96,7 +75,6 @@ bool usejackit = false;
 LASHClient *lash;
 #endif
 
-MidiIn *Midi;
 int     Pexitprogram = 0; //if the UI set this to 1, the program will exit
 
 /*
@@ -214,16 +192,6 @@ void initprogram()
     master = new Master();
     master->swaplr = swaplr;
 
-#if 0
-#if defined(ALSAMIDIIN)
-    Midi = new ALSAMidiIn();
-#elif defined(OSSMIDIIN)
-    Midi = new OSSMidiIn();
-#else // defined(NONEMIDIIN) || (defined(VSTMIDIIN))
-    Midi = new NULLMidiIn();
-#endif
-#endif
-
     //Nio Initialization
 
     //Enable input wrapper
@@ -257,13 +225,12 @@ void exitprogram()
     delete sysEngine;
 
 #ifndef DISABLE_GUI
-    delete (ui);
+    delete ui;
 #endif
-    delete (Midi);
-    delete (master);
+    delete master;
 
 #ifdef USE_LASH
-    delete (lash);
+    delete lash;
 #endif
 
 //    pthread_mutex_unlock(&master->mutex);
