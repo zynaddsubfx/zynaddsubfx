@@ -218,7 +218,9 @@ add_subdirectory(Effects)
 add_subdirectory(Params)
 add_subdirectory(DSP)
 add_subdirectory(Samples)
-add_subdirectory(Tests)
+if(CompileTests)
+    add_subdirectory(Tests)
+endif(CompileTests)
 add_subdirectory(Nio)
 
 set(zynaddsubfx_SRCS
