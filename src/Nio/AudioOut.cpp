@@ -27,7 +27,8 @@ using namespace std;
 
 AudioOut::AudioOut(OutMgr *out)
     :samplerate(SAMPLE_RATE),bufferSize(SOUND_BUFFER_SIZE),
-     usePartial(false),buffering(6),manager(out),enabled(false)
+     usePartial(false),current(Sample(SOUND_BUFFER_SIZE,0.0)),
+     buffering(6),manager(out),enabled(false)
 {
     pthread_mutex_init(&outBuf_mutex, NULL);
     pthread_cond_init (&outBuf_cv, NULL);
