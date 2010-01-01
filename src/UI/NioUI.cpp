@@ -7,6 +7,7 @@
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Text_Display.H>
 #include <iostream>
+#include <cstring>
 
 using namespace std;
 
