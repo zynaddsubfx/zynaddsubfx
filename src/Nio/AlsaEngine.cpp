@@ -192,16 +192,20 @@ bool AlsaEngine::Start()
 {
     if(enabled())
         return true;
+#if !HACK
     if(!OpenStuff())
         return false;
+#endif
     openMidi();
 
     pthread_attr_t attr;
     enabled = true;
 
+#if !HACK
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
     pthread_create(&audio.pThread, &attr, _AudioThread, this);
+#endif
 
     if (NULL != midi.handle)
     {
