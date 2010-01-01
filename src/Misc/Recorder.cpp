@@ -65,7 +65,6 @@ void Recorder::stop()
     {
         sysOut->remove(wave);
         wave->Stop();
-        wave->Close();
         delete wave;
         wave = NULL; //is this even needed?
     }
@@ -92,7 +91,6 @@ void Recorder::triggernow()
     if(status == 2) {
         if(notetrigger!=1) {
             wave->openAudio();
-            //wave->Start();
             sysOut->add(wave);
         }
         notetrigger = 1;

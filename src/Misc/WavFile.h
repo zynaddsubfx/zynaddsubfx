@@ -1,5 +1,7 @@
 /*
+  ZynAddSubFX - a software synthesizer
 
+  WavFile.h - Records sound to a file
   Copyright (C) 2008 Nasca Octavian Paul
   Author: Nasca Octavian Paul
           Mark McCurry
