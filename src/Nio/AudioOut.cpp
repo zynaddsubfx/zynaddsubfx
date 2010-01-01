@@ -59,11 +59,23 @@ void AudioOut::out(Stereo<Sample> smps)
         pthread_cond_signal(&outBuf_cv);
     }
     else if(smps.l().size() > bufferSize) { //store overflow
-        outBuf.push(Stereo<Sample>(smps.l().subSample(0,bufferSize),
-                                        smps.r().subSample(0,bufferSize)));
-        partialIn = Stereo<Sample>(smps.l().subSample(bufferSize,smps.l().size()),
-                                 smps.r().subSample(bufferSize,smps.r().size()));
-        usePartial = true;
+
+        while(smps.l().size() > bufferSize) {
+            outBuf.push(Stereo<Sample>(smps.l().subSample(0,bufferSize),
+                                       smps.r().subSample(0,bufferSize)));
+            smps = Stereo<Sample>(smps.l().subSample(bufferSize,smps.l().size()),
+                                  smps.r().subSample(bufferSize,smps.r().size()));
+        }
+
+        if(smps.l().size() == bufferSize) { //no partial
+            outBuf.push(smps);
+            usePartial = false;
+        }
+        else { //partial
+            partialIn = smps;
+            usePartial = true;
+        }
+
         pthread_cond_signal(&outBuf_cv);
     }
     else { //underflow
