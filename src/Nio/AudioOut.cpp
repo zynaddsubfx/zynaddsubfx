@@ -31,17 +31,17 @@ AudioOut::AudioOut(OutMgr *out)
      buffering(6),manager(out),enabled(false)
 {
     pthread_mutex_init(&outBuf_mutex, NULL);
-    pthread_cond_init (&outBuf_cv, NULL);
+    pthread_cond_init(&outBuf_cv, NULL);
 }
 
 AudioOut::~AudioOut()
 {
-#warning TODO destroy other mutex
+    pthread_mutex_destroy(&outBuf_mutex);
+    pthread_cond_destroy(&outBuf_cv);
 }
 
 void AudioOut::out(Stereo<Sample> smps)
 {
-#warning TODO check for off by one errors
     pthread_mutex_lock(&outBuf_mutex);
     if(samplerate != SAMPLE_RATE) { //we need to resample
         smps.l().resample(SAMPLE_RATE,samplerate);
