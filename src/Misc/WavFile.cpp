@@ -18,6 +18,7 @@
 */
 
 #include <cstdio>
+#include <cstring>
 #include <cstdlib>
 #include "WavFile.h"
 using namespace std;
