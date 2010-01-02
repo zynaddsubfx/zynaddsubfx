@@ -12,14 +12,13 @@ using namespace std;
 OutMgr *sysOut;
 
 OutMgr::OutMgr(Master *nmaster)
-    :running(false),numRequests(2)
+    :running(false)
 {
     master = nmaster;
 
     //initialize mutex
-    pthread_mutex_init(&mutex,       NULL);
-    pthread_mutex_init(&processing,  NULL);
-    pthread_cond_init(&needsProcess, NULL);
+    pthread_mutex_init(&mutex, NULL);
+    sem_init(&requested, PTHREAD_PROCESS_PRIVATE, 0);
 
     //init samples
     outr = new REALTYPE[SOUND_BUFFER_SIZE];
@@ -33,15 +32,12 @@ OutMgr::~OutMgr()
             itr->second->Stop();
     }
     running = false;
-    pthread_mutex_lock(&processing);
-    pthread_cond_signal(&needsProcess);
-    pthread_mutex_unlock(&processing);
+    sem_post(&requested);
 
     pthread_join(outThread, NULL);
 
     pthread_mutex_destroy(&mutex);
-    pthread_mutex_destroy(&processing);
-    pthread_cond_destroy(&needsProcess);
+    sem_destroy(&requested);
 }
 
 void *_outputThread(void *arg)
@@ -68,7 +64,6 @@ void *OutMgr::outputThread()
     //setup
     running     = true;
     init        = true;
-    bool doWait = false;
     while(running()) {
 
         if(false) {
@@ -78,9 +73,7 @@ void *OutMgr::outputThread()
             cout << unmanagedOuts.size();
             pthread_mutex_unlock(&mutex);
             cout << " outs, ";
-            cout << doWait;
-            cout << " waits, ";
-            cout << numRequests();
+            cout << getRunning();
             cout << " requests" << endl;
         }
 
@@ -92,6 +85,7 @@ void *OutMgr::outputThread()
         smps = Stereo<Sample>(Sample(SOUND_BUFFER_SIZE, outl),
                 Sample(SOUND_BUFFER_SIZE, outr));
 
+        //this mutex might be redundant
         pthread_mutex_lock(&mutex);
 
         for(list<Engine*>::iterator itr = sysEngine->engines.begin();
@@ -104,24 +98,12 @@ void *OutMgr::outputThread()
         for(list<AudioOut*>::iterator itr = unmanagedOuts.begin();
                 itr != unmanagedOuts.end(); ++itr) {
             (*itr)->out(smps);
-            if(false)
-                cout << *itr << " ";
         }
 
         pthread_mutex_unlock(&mutex);
 
         //wait for next run
-        --numRequests;
-        doWait = (numRequests()<1);
-        if(doWait) {
-            pthread_mutex_lock(&processing);
-            pthread_cond_wait(&needsProcess, &processing);
-            pthread_mutex_unlock(&processing);
-        }
-        else
-            if(false)
-                cout << "Run Forest Run!" << endl;
-
+        sem_wait(&requested);
     }
     pthread_exit(NULL);
     return NULL;
@@ -163,16 +145,16 @@ void OutMgr::remove(AudioOut *out)
 
 int OutMgr::getRunning()
 {
-    return numRequests();
+    int tmp;
+    sem_getvalue(&requested, &tmp);
+    if(tmp < 0)
+        tmp = 0;
+    return tmp;
 }
 
-int OutMgr::requestSamples(unsigned int n)
+void OutMgr::requestSamples(unsigned int n)
 {
-    numRequests = numRequests() + n;
-
-    pthread_mutex_lock(&processing);
-    pthread_cond_signal(&needsProcess);
-    pthread_mutex_unlock(&processing);
-    return 0;
+    for(unsigned int i = 0; i < n; ++i)
+        sem_post(&requested);
 }
 

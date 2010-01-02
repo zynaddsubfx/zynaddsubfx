@@ -9,6 +9,7 @@
 #include <map>
 #include <string>
 #include <pthread.h>
+#include <semaphore.h>
 
 
 class AudioOut;
@@ -29,7 +30,7 @@ class OutMgr
         /**Request a new set of samples
          * @param n number of requested samples (defaults to 1)
          * @return -1 for locking issues 0 for valid request*/
-        int requestSamples(unsigned int n=1);
+        void requestSamples(unsigned int n=1);
 
         /**Return the number of building samples*/
         int getRunning();
@@ -56,13 +57,9 @@ class OutMgr
         std::list<AudioOut *> unmanagedOuts;
         mutable pthread_mutex_t mutex;
 
-        pthread_mutex_t processing;
-
         pthread_t outThread;
-        pthread_cond_t needsProcess;
-        Atomic<int> numRequests;
-        /**for closing*/
-        pthread_cond_t close_cond;
+        sem_t requested;
+
         /**Buffer*/
         Stereo<Sample> smps;
         REALTYPE *outl;
