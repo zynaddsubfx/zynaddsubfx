@@ -42,4 +42,4 @@ add_library(zynaddsubfx_nio STATIC
     ${zynaddsubfx_nio_SRCS} 
     )
 
-target_link_libraries(zynaddsubfx_nio)
+target_link_libraries(zynaddsubfx_nio zynaddsubfx_misc) #for WavFile
