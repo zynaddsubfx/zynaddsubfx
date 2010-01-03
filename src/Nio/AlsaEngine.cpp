@@ -255,50 +255,64 @@ void *AlsaEngine::MidiThread(void)
     int ctrltype;
     int par;
     int chk;
+    MidiEvent ev;
     set_realtime();
     while (enabled())
     {
         while ((chk = snd_seq_event_input(midi.handle, &event)) > 0)
         {
+            //ensure ev is empty
+            ev.channel = 0;
+            ev.num = 0;
+            ev.value = 0;
+            ev.type = 0;
+
             if (!event)
                 continue;
             par = event->data.control.param;
             switch (event->type)
             {
                 case SND_SEQ_EVENT_NOTEON:
-                     if (event->data.note.note)
+                    if (event->data.note.note)
                     {
-                        channel = event->data.note.channel;
-                        note = event->data.note.note;
-                        velocity = event->data.note.velocity;
-                        sysIn->putEvent(MidiNote(note, channel, velocity));
+                        ev.type    = M_NOTE;
+                        ev.channel = event->data.note.channel;
+                        ev.num     = event->data.note.note;
+                        ev.value   = event->data.note.velocity;
+                        sysIn->putEvent(ev);
                     }
                     break;
 
                 case SND_SEQ_EVENT_NOTEOFF:
-                    channel = event->data.note.channel;
-                    note = event->data.note.note;
-                    sysIn->putEvent(MidiNote(note, channel));
+                    ev.type    = M_NOTE;
+                    ev.channel = event->data.note.channel;
+                    ev.num     = event->data.note.note;
+                    ev.value   = 0;
+                    sysIn->putEvent(ev);
                     break;
 
                 case SND_SEQ_EVENT_PITCHBEND:
-                    channel = event->data.control.channel;
-                    ctrltype = C_pitchwheel;
-                    par = event->data.control.value;
-                    sysIn->putEvent(MidiCtl(ctrltype, channel, par));
+                    ev.type    = M_CONTROLLER;
+                    ev.channel = event->data.control.channel;
+                    ev.num     = C_pitchwheel;
+                    ev.value   = event->data.control.value;
+                    sysIn->putEvent(ev);
                     break;
 
                 case SND_SEQ_EVENT_CONTROLLER:
-                    channel = event->data.control.channel;
-                    ctrltype = event->data.control.param;
-                    par = event->data.control.value;
-                    sysIn->putEvent(MidiCtl(ctrltype, channel, par));
+                    ev.type    = M_CONTROLLER;
+                    ev.channel = event->data.control.channel;
+                    ev.num     = event->data.control.param;
+                    ev.value   = event->data.control.value;
+                    sysIn->putEvent(ev);
                     break;
 
                 case SND_SEQ_EVENT_RESET: // reset to power-on state
-                    channel = event->data.control.channel;
-                    ctrltype = C_resetallcontrollers;
-                    sysIn->putEvent(MidiCtl(ctrltype, channel, 0));
+                    ev.type    = M_CONTROLLER;
+                    ev.channel = event->data.control.channel;
+                    ev.num     = C_resetallcontrollers;
+                    ev.value   = 0;
+                    sysIn->putEvent(ev);
                     break;
 
                 case SND_SEQ_EVENT_PORT_SUBSCRIBED: // ports connected

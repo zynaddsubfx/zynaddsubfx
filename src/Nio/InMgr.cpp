@@ -1,4 +1,3 @@
-#include <pthread.h>
 #include "InMgr.h"
 #include <iostream>
 
@@ -6,36 +5,84 @@ using namespace std;
 
 InMgr *sysIn;
 
-InMgr::InMgr(Master *_master)
-    :master(_master)
+ostream &operator<<(ostream &out, const MidiEvent& ev)
+{
+    if(ev.type == M_NOTE)
+        out << "MidiNote: note("     << ev.num      << ")\n"
+            << "          channel("  << ev.channel  << ")\n"
+            << "          velocity(" << ev.value    << ")";
+    else
+        out << "MidiCtl: controller(" << ev.num     << ")\n"
+            << "         channel("    << ev.channel << ")\n"
+            << "         value("      << ev.value   << ")";
+    return out;
+}
+
+MidiEvent::MidiEvent()
+    :channel(0),type(0),num(0),value(0)
 {}
 
-void InMgr::putEvent(MidiNote note)
+InMgr::InMgr(Master *_master)
+    :queue(100), enabled(false), master(_master)
 {
-    cout << note << endl;
-    pthread_mutex_lock(&master->mutex);
-    {
-        dump.dumpnote(note.channel, note.note, note.velocity);
-
-        if(note.velocity)
-            master->noteOn(note.channel, note.note, note.velocity);
-        else
-            master->noteOff(note.channel, note.note);
-    }
-    pthread_mutex_unlock(&master->mutex);
+    sem_init(&work, PTHREAD_PROCESS_PRIVATE, 0);
 }
 
-void InMgr::putEvent(MidiCtl control)
+InMgr::~InMgr()
 {
-    cout << control << endl;
-    pthread_mutex_lock(&master->mutex);
-    {
-        dump.dumpcontroller(control.channel, control.controller,
-                control.value);
+    //lets stop the consumer thread
+    enabled = false;
+    sem_post(&work);
+    pthread_join(inThread, NULL);
 
-        master->setController(control.channel, control.controller, control.value);
-    }
-    pthread_mutex_unlock(&master->mutex);
+    sem_destroy(&work);
 }
 
+void InMgr::putEvent(MidiEvent ev)
+{
+    if(queue.push(ev)) //check for error
+        cout << "Error, Midi Ringbuffer is FULL" << endl;
+    else
+        sem_post(&work);
+}
+
+void *_inputThread(void *arg)
+{
+    return static_cast<InMgr *>(arg)->inputThread();
+}
+
+void InMgr::run()
+{
+    enabled = true;
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+    pthread_create(&inThread, &attr, _inputThread, this);
+}
+
+void *InMgr::inputThread()
+{
+    MidiEvent ev;
+    while(enabled()) {
+        sem_wait(&work);
+        queue.pop(ev);
+        cout << ev << endl;
+
+        pthread_mutex_lock(&master->mutex);
+        if(M_NOTE == ev.type) {
+            dump.dumpnote(ev.channel, ev.num, ev.value);
+
+            if(ev.value)
+                master->noteOn(ev.channel, ev.num, ev.value);
+            else
+                master->noteOff(ev.channel, ev.num);
+        }
+        else {
+            dump.dumpcontroller(ev.channel, ev.num, ev.value);
+            master->setController(ev.channel, ev.num, ev.value);
+        }
+        pthread_mutex_unlock(&master->mutex);
+    }
+    return NULL;
+}
 

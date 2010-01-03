@@ -34,7 +34,6 @@
 #include <unistd.h>
 #include <iostream>
 
-#include "MidiEvent.h"
 #include "InMgr.h"
 
 using namespace std;
@@ -152,6 +151,7 @@ void *OssEngine::_MidiThread(void *arg)
 void *OssEngine::MidiThread()
 {
     set_realtime();
+    MidiEvent ev;
     while(1) {
         lastmidicmd = 0;
         unsigned char tmp, i;
@@ -170,14 +170,34 @@ void *OssEngine::MidiThread()
             tmp = getmidibyte();
         }
 
-        if((lastmidicmd >= 0x80) && (lastmidicmd <= 0x8f))      //Note OFF
-            sysIn->putEvent(MidiNote(tmp, lastmidicmd%16));
-        else if((lastmidicmd >= 0x90) && (lastmidicmd <= 0x9f)) //Note ON
-            sysIn->putEvent(MidiNote(tmp, lastmidicmd%16, getmidibyte()));
-        else if((lastmidicmd >= 0xB0) && (lastmidicmd <= 0xBF)) //Controllers
-            sysIn->putEvent(MidiCtl(tmp, lastmidicmd%16, getmidibyte()));
-        else if((lastmidicmd >= 0xE0) && (lastmidicmd <= 0xEF)) //Pitch Wheel
-            sysIn->putEvent(MidiCtl(C_pitchwheel, lastmidicmd%16, (tmp + getmidibyte() * (int) 128) - 8192));
+        if((lastmidicmd >= 0x80) && (lastmidicmd <= 0x8f)) {     //Note OFF
+            ev.type    = M_NOTE;
+            ev.channel = lastmidicmd%16;
+            ev.num     = tmp;
+            ev.value   = 0;
+            sysIn->putEvent(ev);
+        }
+        else if((lastmidicmd >= 0x90) && (lastmidicmd <= 0x9f)) {//Note ON
+            ev.type    = M_NOTE;
+            ev.channel = lastmidicmd%16;
+            ev.num     = tmp;
+            ev.value   = getmidibyte();
+            sysIn->putEvent(ev);
+        }
+        else if((lastmidicmd >= 0xB0) && (lastmidicmd <= 0xBF)) {//Controllers
+            ev.type    = M_CONTROLLER;
+            ev.channel = lastmidicmd%16;
+            ev.num     = tmp;
+            ev.value   = getmidibyte();
+            sysIn->putEvent(ev);
+        }
+        else if((lastmidicmd >= 0xE0) && (lastmidicmd <= 0xEF)) {//Pitch Wheel
+            ev.type    = M_CONTROLLER;
+            ev.channel = lastmidicmd%16;
+            ev.num     = C_pitchwheel;
+            ev.value   = (tmp + getmidibyte() * (int) 128) - 8192;
+            sysIn->putEvent(ev);
+        }
     }
 }
 

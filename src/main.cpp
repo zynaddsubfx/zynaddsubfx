@@ -205,6 +205,7 @@ void initprogram()
 
     //Run the system
     sysOut->run();
+    sysIn->run();
 #warning remove welcome message when system is out of beta
     cout << "\nThanks for using the Nio system :)" << endl;
 

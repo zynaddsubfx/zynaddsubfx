@@ -76,6 +76,7 @@ bool JackEngine::Start()
 {
     if(enabled())
         return true;
+    cout << "Runn" << endl;
     enabled = true;
     if(!connectServer(""))
         return false;
@@ -248,26 +249,38 @@ void JackEngine::handleMidi(unsigned long frames)
 
     while(jack_midi_event_get(&jack_midi_event, midi_buf,
                 event_index++) == 0) {
-        midi_data = jack_midi_event.buffer;
-        type      = midi_data[0] & 0xF0;
-        chan      = midi_data[0] & 0x0F;
+        MidiEvent ev;
+        midi_data  = jack_midi_event.buffer;
+        type       = midi_data[0] & 0xF0;
+        ev.channel = midi_data[0] & 0x0F;
 
         switch(type) {
             case 0x80: /* note-off */
-                sysIn->putEvent(MidiNote(midi_data[1], chan));
+                ev.type    = M_NOTE;
+                ev.num     = midi_data[1];
+                ev.value   = 0;
+                sysIn->putEvent(ev);
                 break;
 
             case 0x90: /* note-on */
-                sysIn->putEvent(MidiNote(midi_data[1], chan, midi_data[2]));
+                ev.type    = M_NOTE;
+                ev.num     = midi_data[1];
+                ev.value   = midi_data[2];
+                sysIn->putEvent(ev);
                 break;
 
             case 0xB0: /* controller */
-                sysIn->putEvent(MidiCtl(midi_data[1], chan, midi_data[2]));
+                ev.type    = M_CONTROLLER;
+                ev.num     = midi_data[1];
+                ev.value   = midi_data[2];
+                sysIn->putEvent(ev);
                 break;
 
             case 0xE0: /* pitch bend */
-                sysIn->putEvent(MidiCtl(C_pitchwheel, chan,
-                        ((midi_data[2] << 7) | midi_data[1])));
+                ev.type    = M_CONTROLLER;
+                ev.num     = C_pitchwheel;
+                ev.value   = ((midi_data[2] << 7) | midi_data[1]);
+                sysIn->putEvent(ev);
                 break;
 
                 /* XXX TODO: handle MSB/LSB controllers and RPNs and NRPNs */
