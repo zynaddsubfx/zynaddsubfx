@@ -41,54 +41,82 @@ using namespace std;
 OssEngine::OssEngine(OutMgr *out)
     :AudioOut(out)
 {
-    name           = "OSS";
-    snd_fragment   = 0x00080009; //fragment size (?)
-    snd_stereo     = 1; //stereo
-    snd_format     = AFMT_S16_LE;
-    snd_samplerate = SAMPLE_RATE;
+    name = "OSS";
 
-    smps = new short[SOUND_BUFFER_SIZE * 2];
-    memset(smps, 0, sizeof(short) * SOUND_BUFFER_SIZE * 2);
+    midi.en  = true;
+    audio.en = true;
+
+    audio.smps = new short[SOUND_BUFFER_SIZE * 2];
+    memset(audio.smps, 0, sizeof(short) * SOUND_BUFFER_SIZE * 2);
 }
 
 OssEngine::~OssEngine()
 {
     Stop();
-    delete [] smps;
+    delete [] audio.smps;
 }
 
 bool OssEngine::openAudio()
 {
-    int snd_bitsize = 16;
-    snd_handle = open(config.cfg.LinuxOSSWaveOutDev, O_WRONLY, 0);
-    if(snd_handle == -1) {
+    int snd_bitsize    = 16;
+    int snd_fragment   = 0x00080009; //fragment size (?);
+    int snd_stereo     = 1; //stereo;
+    int snd_format     = AFMT_S16_LE;
+    int snd_samplerate = SAMPLE_RATE;;
+
+    audio.snd_handle = open(config.cfg.LinuxOSSWaveOutDev, O_WRONLY, 0);
+    if(audio.snd_handle == -1) {
         cerr << "ERROR - I can't open the "
              << config.cfg.LinuxOSSWaveOutDev << '.' << endl;
         return false;
     }
-    ioctl(snd_handle, SNDCTL_DSP_RESET, NULL);
-    ioctl(snd_handle, SNDCTL_DSP_SETFMT, &snd_format);
-    ioctl(snd_handle, SNDCTL_DSP_STEREO, &snd_stereo);
-    ioctl(snd_handle, SNDCTL_DSP_SPEED, &snd_samplerate);
-    ioctl(snd_handle, SNDCTL_DSP_SAMPLESIZE, &snd_bitsize);
-    ioctl(snd_handle, SNDCTL_DSP_SETFRAGMENT, &snd_fragment);
+    ioctl(audio.snd_handle, SNDCTL_DSP_RESET, NULL);
+    ioctl(audio.snd_handle, SNDCTL_DSP_SETFMT, &snd_format);
+    ioctl(audio.snd_handle, SNDCTL_DSP_STEREO, &snd_stereo);
+    ioctl(audio.snd_handle, SNDCTL_DSP_SPEED, &snd_samplerate);
+    ioctl(audio.snd_handle, SNDCTL_DSP_SAMPLESIZE, &snd_bitsize);
+    ioctl(audio.snd_handle, SNDCTL_DSP_SETFRAGMENT, &snd_fragment);
+
     return true;
+}
+
+void OssEngine::stopAudio()
+{
+    int handle = audio.snd_handle;
+    if(handle == -1) //already closed
+        return;
+    audio.snd_handle = -1;
+    close(handle);
 }
 
 bool OssEngine::Start()
 {
     if(enabled())
         return true;
-    if(!openAudio())
-        return false;
     enabled = true;
+
+    bool good = true;
+    if(audio.en)
+        if(!openAudio()) {
+            cerr << "Failed to open OSS audio" << endl;
+            good = false;
+        }
+
+    if(midi.en)
+        if(!openMidi()) {
+            cerr << "Failed to open OSS midi" << endl;
+            good = false;
+        }
+
+    if(!good) {
+        Stop();
+        return false;
+    }
+
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&pThread, &attr, _AudioThread, this);
-
-
-    StartMidi();
+    pthread_create(&pThread, &attr, _thread, this);
 
     return true;
 }
@@ -98,169 +126,173 @@ void OssEngine::Stop()
     if(!enabled())
         return;
     enabled = false;
+    stopAudio();
+    stopMidi();
     pthread_join(pThread, NULL);
-    close(snd_handle);
-
-    StopMidi();
 }
 
-bool OssEngine::StartMidi()
+void OssEngine::setMidiEn(bool nval)
 {
-    openMidi();
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    pthread_create(&pThreadMidi, &attr, _MidiThread, this);
-
-    return true;
-}
-
-void OssEngine::StopMidi()
-{
-    pthread_cancel(pThreadMidi);
-    close(midiHandle);
-}
-
-void *OssEngine::_AudioThread(void *arg)
-{
-    return (static_cast<OssEngine*>(arg))->AudioThread();
-}
-
-
-void *OssEngine::AudioThread()
-{
-    //get some initial samples
-    manager->requestSamples();
-    manager->requestSamples();
-    manager->requestSamples();
-    set_realtime();
-    while (enabled())
-    {
-        const Stereo<Sample> smps = getNext();
-        smps.l().c_buf()[10];
-        OSSout(smps.l().c_buf(),smps.r().c_buf());
-    }
-    pthread_exit(NULL);
-}
-
-void *OssEngine::_MidiThread(void *arg)
-{
-    return (static_cast<OssEngine*>(arg))->MidiThread();
-}
-
-void *OssEngine::MidiThread()
-{
-    set_realtime();
-    MidiEvent ev;
-    while(1) {
-        lastmidicmd = 0;
-        unsigned char tmp, i;
-        i = 0;
-
-        if(lastmidicmd == 0) { //asteapta prima data pana cand vine prima comanda midi
-            while(tmp < 0x80)
-                tmp = getmidibyte();
-            lastmidicmd = tmp;
-        }
-
-        tmp = getmidibyte();
-
-        if(tmp >= 0x80) {
-            lastmidicmd = tmp;
-            tmp = getmidibyte();
-        }
-
-        if((lastmidicmd >= 0x80) && (lastmidicmd <= 0x8f)) {     //Note OFF
-            ev.type    = M_NOTE;
-            ev.channel = lastmidicmd%16;
-            ev.num     = tmp;
-            ev.value   = 0;
-            sysIn->putEvent(ev);
-        }
-        else if((lastmidicmd >= 0x90) && (lastmidicmd <= 0x9f)) {//Note ON
-            ev.type    = M_NOTE;
-            ev.channel = lastmidicmd%16;
-            ev.num     = tmp;
-            ev.value   = getmidibyte();
-            sysIn->putEvent(ev);
-        }
-        else if((lastmidicmd >= 0xB0) && (lastmidicmd <= 0xBF)) {//Controllers
-            ev.type    = M_CONTROLLER;
-            ev.channel = lastmidicmd%16;
-            ev.num     = tmp;
-            ev.value   = getmidibyte();
-            sysIn->putEvent(ev);
-        }
-        else if((lastmidicmd >= 0xE0) && (lastmidicmd <= 0xEF)) {//Pitch Wheel
-            ev.type    = M_CONTROLLER;
-            ev.channel = lastmidicmd%16;
-            ev.num     = C_pitchwheel;
-            ev.value   = (tmp + getmidibyte() * (int) 128) - 8192;
-            sysIn->putEvent(ev);
-        }
-    }
-}
-
-/*
- * Output the samples to the soundcard
- * The samples are bigger than -1.0 and smaller 1.0
- */
-void OssEngine::OSSout(const REALTYPE *smp_left, const REALTYPE *smp_right)
-{
-    int i;
-    REALTYPE l, r;
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        l = smp_left[i];
-        r = smp_right[i];
-
-        if(l < -1.0)
-            l = -1.0;
+    midi.en = nval;
+    if(enabled()) {
+        if(nval)
+            openMidi();
         else
-        if(l > 1.0)
-            l = 1.0;
-        if(r < -1.0)
-            r = -1.0;
-        else
-        if(r > 1.0)
-            r = 1.0;
-
-        smps[i * 2]     = (short int) (l * 32767.0);
-        smps[i * 2 + 1] = (short int) (r * 32767.0);
+            stopMidi();
     }
-    write(snd_handle, smps, SOUND_BUFFER_SIZE * 4); // *2 because is 16 bit, again * 2 because is stereo
+}
+
+bool OssEngine::getMidiEn() const
+{
+    if(enabled())
+        return midi.handle != -1;
+    else
+        return midi.en;
+}
+
+void OssEngine::setAudioEn(bool nval)
+{
+    audio.en = nval;
+    if(enabled()) { //lets rebind the ports
+        if(nval)
+            openAudio();
+        else
+            stopAudio();
+    }
+}
+
+bool OssEngine::getAudioEn() const
+{
+    if(enabled())
+        return audio.snd_handle != -1;
+    else
+        return audio.en;
 }
 
 bool OssEngine::openMidi()
 {
-    midiHandle = open(config.cfg.LinuxOSSSeqInDev, O_RDONLY, 0);
+    midi.handle = open(config.cfg.LinuxOSSSeqInDev, O_RDONLY, 0);
 
-    lastmidicmd = 0;
-    cmdtype     = 0;
-    cmdchan     = 0;
+    if(-1 == midi.handle)
+       return false;
 
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-
-
-    return midiHandle != -1;
+    midi.run = true;
+    return true;
 }
 
-unsigned char OssEngine::readbyte()
+void OssEngine::stopMidi()
 {
+    int tmp = midi.handle;
+    if(tmp == -1) //already closed
+        return;
+
+    midi.run = false;
+    midi.handle = -1;
+    close(tmp);
+}
+
+void *OssEngine::_thread(void *arg)
+{
+    return (static_cast<OssEngine*>(arg))->thread();
+}
+
+
+void *OssEngine::thread()
+{
+    MidiEvent ev;
     unsigned char tmp[4] = {0, 0, 0, 0};
-    read(midiHandle, &tmp[0], 1);
-    while(tmp[0] != SEQ_MIDIPUTC) {
-        read(midiHandle, &tmp[0], 4);
+    set_realtime();
+    while (midi.run || audio.snd_handle != -1)
+    {
+        if(audio.snd_handle != -1)
+        {
+            const Stereo<Sample> smps = getNext();
+
+            REALTYPE l, r;
+            for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+                l = smps.l()[i];
+                r = smps.r()[i];
+
+                if(l < -1.0)
+                    l = -1.0;
+                else
+                    if(l > 1.0)
+                        l = 1.0;
+                if(r < -1.0)
+                    r = -1.0;
+                else
+                    if(r > 1.0)
+                        r = 1.0;
+
+                audio.smps[i * 2]     = (short int) (l * 32767.0);
+                audio.smps[i * 2 + 1] = (short int) (r * 32767.0);
+            }
+            int handle = audio.snd_handle;
+            if(handle != -1)
+                write(handle, audio.smps, SOUND_BUFFER_SIZE * 4); // *2 because is 16 bit, again * 2 because is stereo
+            else
+                break;
+        }
+
+        //Collect up to 10 midi events
+        for (int k = 0; k < 10 && midi.run; ++k) {
+            getMidi(tmp);
+            unsigned char type = tmp[0];
+            unsigned char header = tmp[1];
+            if(header!=0xfe&&type==SEQ_MIDIPUTC&&header>=0x80)
+            {
+                getMidi(tmp);
+                unsigned char num = tmp[1];
+                getMidi(tmp);
+                unsigned char value = tmp[1];
+
+                midiProcess(header, num, value);
+            }
+        }
     }
-    return tmp[1];
+    pthread_exit(NULL);
+    return NULL;
 }
 
-unsigned char OssEngine::getmidibyte()
+void OssEngine::getMidi(unsigned char *midiPtr)
 {
-    unsigned char b;
-    do {
-        b = readbyte();
-    } while(b == 0xfe); //drops the Active Sense Messages
-    return b;
+    read(midi.handle, midiPtr, 4);
+}
+
+void OssEngine::midiProcess(unsigned char head, unsigned char num, unsigned char value)
+{
+    MidiEvent ev;
+    unsigned char chan = head & 0x0f;
+    switch(head & 0xf0)
+    {
+        case 0x80: //Note Off
+            ev.type    = M_NOTE;
+            ev.channel = chan;
+            ev.num     = num;
+            ev.value   = 0;
+            sysIn->putEvent(ev);
+            break;
+        case 0x90: //Note On
+            ev.type    = M_NOTE;
+            ev.channel = chan;
+            ev.num     = num;
+            ev.value   = value;
+            sysIn->putEvent(ev);
+            break;
+        case 0xb0: //Controller
+            ev.type    = M_CONTROLLER;
+            ev.channel = chan;
+            ev.num     = num;
+            ev.value   = value;
+            sysIn->putEvent(ev);
+            break;
+        case 0xe0: //Pitch Wheel
+            ev.type    = M_CONTROLLER;
+            ev.channel = chan;
+            ev.num     = C_pitchwheel;
+            ev.value   = (num + value * (int) 128) - 8192;
+            sysIn->putEvent(ev);
+            break;
+    }
 }
 

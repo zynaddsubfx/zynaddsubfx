@@ -41,6 +41,7 @@ EngineMgr::EngineMgr()
 #if JACK
 #if JACK_DEFAULT
     engines.push_back(defaultEng = new JackEngine(sysOut));
+    cout << "jack go" << endl;
 #else
     engines.push_back(new JackEngine(sysOut));
 #endif

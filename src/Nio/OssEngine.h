@@ -37,43 +37,39 @@ class OssEngine: public AudioOut, MidiIn
         bool Start();
         void Stop();
 
-        bool StartMidi();
-        void StopMidi();
+        void setAudioEn(bool nval);
+        bool getAudioEn() const;
+
+        void setMidiEn(bool nval);
+        bool getMidiEn() const;
+
 
     protected:
-        void *AudioThread();
-        static void *_AudioThread(void *arg);
-        void *MidiThread();
-        static void *_MidiThread(void *arg);
+        void *thread();
+        static void *_thread(void *arg);
 
     private:
         //Audio
-        /**Open the audio device
-         * @return true for success*/
         bool openAudio();
-        
-        void OSSout(const REALTYPE *smp_left, const REALTYPE *smp_right);
-        int snd_handle;
-        int snd_fragment;
-        int snd_stereo;
-        int snd_format;
-        int snd_samplerate;
-
-        short int *smps; //Samples to be sent to soundcard
+        void stopAudio();
+        struct {
+            int snd_handle;
+            short int *smps; //Samples to be sent to soundcard
+            bool en;
+        } audio;
 
         //Midi
-        pthread_t pThreadMidi;
         bool openMidi();
         void stopMidi();
-        unsigned char getmidibyte();
-        unsigned char readbyte();
+        void midiProcess(unsigned char head, unsigned char num, unsigned char value);
 
-        unsigned char cmdtype; //the Message Type (noteon,noteof,sysex..)
-        unsigned char cmdchan; //the channel number
+        void getMidi(unsigned char *midiPtr);
 
-        int midiHandle;
-        unsigned char lastmidicmd; //last byte (>=80) received from the Midi
-
+        struct {
+            int handle;
+            bool en;
+            bool run;
+        } midi;
 };
 
 #endif

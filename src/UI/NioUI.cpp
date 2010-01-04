@@ -2,6 +2,7 @@
 #include "../Nio/EngineMgr.h"
 #include "../Nio/OutMgr.h"
 #include "../Nio/AudioOut.h"
+#include "../Nio/MidiIn.h"
 #include <cstdio>
 #include <FL/Fl_Tabs.H>
 #include <FL/Fl_Group.H>
@@ -33,8 +34,11 @@ NioUI::NioUI()
         gen->end();
 
         for(list<Engine *>::iterator itr = sysEngine->engines.begin();
-                itr != sysEngine->engines.end(); ++itr)
-            tabs.push_back(new NioTab((*itr)->name));
+                itr != sysEngine->engines.end(); ++itr) {
+            bool midi  = dynamic_cast<MidiIn *>(*itr);
+            bool audio = dynamic_cast<AudioOut *>(*itr);
+            tabs.push_back(new NioTab((*itr)->name, midi, audio));
+        }
 
         //add tabs
         for(list<NioTab *>::iterator itr = tabs.begin();
@@ -55,19 +59,43 @@ void NioUI::refresh()
         (*itr)->refresh();
 }
 
+//this is a repetitve block of code
+//perhaps something on the Engine's side should be refactored
 void NioTab::nioToggle(Fl_Widget *wid, void *arg)
 {
     Fl_Button *w = static_cast<Fl_Button *>(wid);
     NioTab *p = static_cast<NioTab *>(arg);
     bool val = w->value();
 
-    AudioOut *out = sysOut->getOut(p->name);
-    if(out) {
+    Engine *eng = sysEngine->getEng(p->name);
+    if(eng) {
         if(val)
-            out->Start();
+            eng->Start();
         else
-            out->Stop();
+            eng->Stop();
     }
+    p->refresh();
+}
+
+void NioTab::audioToggle(Fl_Widget *wid, void *arg)
+{
+    Fl_Button *w = static_cast<Fl_Button *>(wid);
+    NioTab *p = static_cast<NioTab *>(arg);
+    bool val = w->value();
+
+    AudioOut *out = sysOut->getOut(p->name);
+    out->setAudioEn(val);
+    p->refresh();
+}
+
+void NioTab::midiToggle(Fl_Widget *wid, void *arg)
+{
+    Fl_Button *w = static_cast<Fl_Button *>(wid);
+    NioTab *p = static_cast<NioTab *>(arg);
+    bool val = w->value();
+
+    MidiIn *in = dynamic_cast<MidiIn *>(sysEngine->getEng(p->name));
+    in->setMidiEn(val);
     p->refresh();
 }
 
@@ -85,27 +113,46 @@ void NioTab::nioBuffer(Fl_Widget *wid, void *arg)
     }
 }
 
-NioTab::NioTab(string name)
+NioTab::NioTab(string name, bool _midi, bool _audio)
     :Fl_Group(10, 40, 400, 400-35, strdup(name.c_str())),
-    outEnable(20, 30, 100, 25, "Enable"),
-    buffer(70, 60, 50, 25, "Buffer:"),//in SOUND_BUFFER_SIZE units
+    enable(20, 30, 100, 25, "Enable"),
+    audio(NULL), midi(NULL), buffer(NULL),
     name(name)
 {
-    outEnable.callback(nioToggle, (void *)this);
-    buffer.callback(nioBuffer, (void *)name.c_str());
-    //this is a COMPLETELY arbitrary max
-    //I just assume that users do not want an overly long buffer
-    buffer.range(1, 100);
-    buffer.type(FL_INT_INPUT);
+    enable.callback(nioToggle, (void *)this);
+    if(_audio) {
+        buffer = new Fl_Spinner(70, 60, 50, 25, "Buffer:");//in SOUND_BUFFER_SIZE units
+        buffer->callback(nioBuffer, (void *)name.c_str());
+        //this is a COMPLETELY arbitrary max
+        //I just assume that users do not want an overly long buffer
+        buffer->range(1, 100);
+        buffer->type(FL_INT_INPUT);
+        audio = new Fl_Light_Button(20, 80, 100, 25, "Audio");
+        audio->callback(audioToggle, (void *)this);
+    }
+    if(_midi) {
+        midi = new Fl_Light_Button(20, 100, 100, 25, "Midi");
+        midi->callback(midiToggle, (void *)this);
+    }
+
     end();
 }
 
 void NioTab::refresh()
 {
-    //getOut should only be called with present Engines
-    bool state = sysOut->getOut(name)->isEnabled();
-    outEnable.value(state);
-    buffer.value(sysOut->getOut(name)->bufferingSize());
+    //get engine
+    Engine *eng = sysEngine->getEng(name);
+    MidiIn *midiIn = dynamic_cast<MidiIn *>(eng);
+    AudioOut *audioOut = dynamic_cast<AudioOut *>(eng);
+    if(midi)
+        midi->value(midiIn->getMidiEn());
+    if(audio)
+        audio->value(audioOut->getAudioEn());
+
+    bool state = eng->isRunning();
+    enable.value(state);
+    buffer->value(sysOut->getOut(name)->bufferingSize());
+
 
     this->labelcolor(fl_rgb_color(0,255*state,0));
     this->redraw();

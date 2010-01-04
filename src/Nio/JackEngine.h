@@ -24,7 +24,6 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <jack/jack.h>
-#include <jack/ringbuffer.h>
 #include <pthread.h>
 
 #include "MidiIn.h"
@@ -41,7 +40,13 @@ class JackEngine : public AudioOut, MidiIn
         bool setServer(std::string server);
         bool Start();
         void Stop();
-        
+
+        void setMidiEn(bool nval);
+        bool getMidiEn() const;
+
+        void setAudioEn(bool nval);
+        bool getAudioEn() const;
+
         unsigned int getSamplerate() { return audio.jackSamplerate; };
         unsigned int getBuffersize() { return audio.jackNframes; };
 
@@ -61,10 +66,14 @@ class JackEngine : public AudioOut, MidiIn
     private:
         bool connectServer(std::string server);
         bool openAudio();
+        void stopAudio();
         bool processAudio(jack_nframes_t nframes);
+        bool openMidi();
+        void stopMidi();
 
         jack_client_t      *jackClient;
         struct {
+            bool en;
             unsigned int  jackSamplerate;
             unsigned int  jackNframes;
             jack_port_t  *ports[2];
@@ -72,6 +81,7 @@ class JackEngine : public AudioOut, MidiIn
         } audio;
         struct {
             jack_port_t *inport;
+            bool en;
         } midi;
 
         void handleMidi(unsigned long frames);

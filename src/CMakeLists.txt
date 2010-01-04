@@ -32,15 +32,9 @@ SET (OssEnable ${ALSA_FOUND} CACHE BOOL #TODO perhaps check for /dev/dsp
     "Enable support for Open Sound System")
 SET (PaEnable ${PORTAUDIO_FOUND} CACHE BOOL
     "Enable support for Port Audio System")
-SET (HACK OFF CACHE BOOL
-    "If you do not know what this does do not touch it")
 
 # Now, handle the incoming settings and set define flags/variables based
 # on this
-
-if(HACK)
-    add_definitions(-DHACK=1)
-endif(HACK)
 
 if (GuiModule STREQUAL qt AND QT_FOUND)
 	set (QtGui TRUE)

@@ -91,7 +91,7 @@ void *OutMgr::outputThread()
         for(list<Engine*>::iterator itr = sysEngine->engines.begin();
                 itr != sysEngine->engines.end(); ++itr) {
             AudioOut *out = dynamic_cast<AudioOut *>(*itr);
-            if(out && out->isEnabled())
+            if(out && out->isRunning() && out->getAudioEn())
                 out->out(smps);
         }
 

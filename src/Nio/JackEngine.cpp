@@ -33,6 +33,8 @@ using namespace std;
 JackEngine::JackEngine(OutMgr *out)
     :AudioOut(out), jackClient(NULL)
 {
+    midi.en = true;
+    audio.en = true;
     name = "JACK";
     audio.jackSamplerate = 0;
     audio.jackNframes = 0;
@@ -74,13 +76,17 @@ bool JackEngine::connectServer(string server)
 
 bool JackEngine::Start()
 {
+    cout << "Starting Jack" << endl;
     if(enabled())
         return true;
-    cout << "Runn" << endl;
+
     enabled = true;
     if(!connectServer(""))
-        return false;
-    openAudio();
+        goto bail_out;
+    if(midi.en)
+        openMidi();
+    if(audio.en)
+        openAudio();
     if (NULL != jackClient)
     {
         setBufferSize(jack_get_buffer_size(jackClient));
@@ -113,21 +119,55 @@ bail_out:
 
 void JackEngine::Stop()
 {
+    cout << "Stopping Jack" << endl;
     if(!enabled())
         return;
     enabled = false;
     if (jackClient)
     {
-        for (int i = 0; i < 2; ++i)
-        {
-            if (NULL != audio.ports[i])
-                jack_port_unregister(jackClient, audio.ports[i]);
-            audio.ports[i] = NULL;
-        }
-        jack_port_unregister(jackClient, midi.inport);
+        stopMidi();
+        stopAudio();
         jack_client_close(jackClient);
         jackClient = NULL;
     }
+}
+
+void JackEngine::setMidiEn(bool nval)
+{
+    midi.en = nval;
+    if(enabled()) { //lets rebind the ports
+        if(nval)
+            openMidi();
+        else
+            stopMidi();
+    }
+}
+
+bool JackEngine::getMidiEn() const
+{
+    if(enabled())
+        return midi.inport;
+    else
+        return midi.en;
+}
+
+void JackEngine::setAudioEn(bool nval)
+{
+    audio.en = nval;
+    if(enabled()) { //lets rebind the ports
+        if(nval)
+            openAudio();
+        else
+            stopAudio();
+    }
+}
+
+bool JackEngine::getAudioEn() const
+{
+    if(enabled())
+        return audio.ports[0];
+    else
+        return audio.en;
 }
 
 bool JackEngine::openAudio()
@@ -143,15 +183,37 @@ bool JackEngine::openAudio()
     {
         audio.jackSamplerate = jack_get_sample_rate(jackClient);
         audio.jackNframes = jack_get_buffer_size(jackClient);
-        midi.inport   = jack_port_register(jackClient, "midi_input",
-                                           JACK_DEFAULT_MIDI_TYPE,
-                                           JackPortIsInput | JackPortIsTerminal, 0);
         return true;
     }
     else
         cerr << "Error, failed to register jack audio ports" << endl;
-    Stop();
     return false;
+}
+
+void JackEngine::stopAudio()
+{
+    for (int i = 0; i < 2; ++i)
+    {
+        jack_port_t *port = audio.ports[i];
+        audio.ports[i] = NULL;
+        if (NULL != port)
+            jack_port_unregister(jackClient, port);
+    }
+}
+
+bool JackEngine::openMidi()
+{
+    return midi.inport = jack_port_register(jackClient, "midi_input",
+                                            JACK_DEFAULT_MIDI_TYPE,
+                                            JackPortIsInput | JackPortIsTerminal, 0);
+}
+
+void JackEngine::stopMidi()
+{
+    jack_port_t *port = midi.inport;
+    midi.inport = NULL;
+    if(port)
+        jack_port_unregister(jackClient, port);
 }
 
 int JackEngine::clientId()
@@ -187,7 +249,6 @@ int JackEngine::processCallback(jack_nframes_t nframes)
 
 bool JackEngine::processAudio(jack_nframes_t nframes)
 {
-    //cout << "I got called with: " << nframes << endl;
     for (int port = 0; port < 2; ++port)
     {
         audio.portBuffs[port] =
@@ -201,7 +262,6 @@ bool JackEngine::processAudio(jack_nframes_t nframes)
     }
 
     Stereo<Sample> smp = getNext();
-    //cout << "smp size of: " << smp.l().size() << endl;
 
     //Assumes smp.l().size() == nframes
     memcpy(audio.portBuffs[0], smp.l().c_buf(), smp.l().size()*sizeof(REALTYPE));
@@ -241,6 +301,8 @@ int JackEngine::bufferSizeCallback(jack_nframes_t nframes)
 
 void JackEngine::handleMidi(unsigned long frames)
 {
+    if(!midi.inport)
+        return;
     void *midi_buf = jack_port_get_buffer(midi.inport, frames);
     jack_midi_event_t jack_midi_event;
     jack_nframes_t    event_index = 0;

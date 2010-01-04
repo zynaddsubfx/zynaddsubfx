@@ -37,18 +37,14 @@ class AlsaEngine : public AudioOut, MidiIn
         AlsaEngine(OutMgr *out);
         ~AlsaEngine();
         
-        bool openMidi();
         bool Start();
         void Stop();
         
-        unsigned int getSamplerate() { return audio.samplerate; };
-        unsigned int getBuffersize() { return audio.period_size; };
+        void setAudioEn(bool nval);
+        bool getAudioEn() const;
+        void setMidiEn(bool nval);
+        bool getMidiEn() const;
         
-        std::string audioClientName();
-        std::string midiClientName();
-        int audioClientId() { return audio.alsaId; };
-        int midiClientId() { return midi.alsaId; };
-
     protected:
         void *AudioThread();
         static void *_AudioThread(void *arg);
@@ -56,54 +52,33 @@ class AlsaEngine : public AudioOut, MidiIn
         static void *_MidiThread(void *arg);
 
     private:
-        bool prepHwparams();
-        bool prepSwparams();
-        void Write(const short *InterleavedSmps, int size);
-        bool Recover(int err);
-        bool xrunRecover();
-        bool alsaBad(int op_result, std::string err_msg);
-        void closeAudio();
-        void closeMidi();
+        bool openMidi();
+        void stopMidi();
+        bool openAudio();
+        void stopAudio();
 
-        snd_pcm_sframes_t (*pcmWrite)(snd_pcm_t *handle, const void *data,
-                                      snd_pcm_uframes_t nframes);
-
-        /**Interleave Samples. \todo move this to util*/
         const short *interleave(const Stereo<Sample> smps) const;
-
-        struct {
-            std::string        device;
-            snd_pcm_t         *handle;
-            unsigned int       period_time;
-            unsigned int       samplerate;
-            snd_pcm_uframes_t  period_size;
-            snd_pcm_uframes_t  buffer_size;
-            int                alsaId;
-            snd_pcm_state_t    pcm_state;
-            pthread_t          pThread;
-        } audio;
 
         struct {
             std::string  device;
             snd_seq_t   *handle;
             int          alsaId;
             pthread_t    pThread;
+            bool en;
         } midi;
 
-        //from alsa example
-        long loops;
-        int rc;
-        int size;
-        snd_pcm_t *handle;
-        snd_pcm_hw_params_t *params;
-        unsigned int val;
-        int dir;
-        snd_pcm_uframes_t frames;
-        const short *buffer;
+        struct {
+            bool en;
+            bool run;
+            snd_pcm_t *handle;
+            snd_pcm_hw_params_t *params;
+            unsigned int sampleRate;
+            snd_pcm_uframes_t frames;
+            const short *buffer;
+            pthread_t    pThread;
+        } audio;
 
-        void RunStuff();
-        bool OpenStuff();
-        pthread_mutex_t close_m;
+        void processAudio();
 };
 
 #endif

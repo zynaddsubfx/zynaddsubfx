@@ -36,6 +36,9 @@ class WavEngine: public AudioOut
         bool Start();
         void Stop();
 
+        void setAudioEn(bool nval){};
+        bool getAudioEn() const{};
+
         const Stereo<Sample> getNext();
 
     protected:

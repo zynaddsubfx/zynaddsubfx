@@ -105,3 +105,11 @@ void NulEngine::Stop()
     pthread_join(pThread, NULL);
 }
 
+void NulEngine::setAudioEn(bool nval)
+{}
+
+bool NulEngine::getAudioEn() const
+{
+    return true;
+}
+

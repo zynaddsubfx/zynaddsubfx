@@ -32,16 +32,19 @@ class NulEngine: public AudioOut
     public:
         NulEngine(OutMgr *out);
         ~NulEngine();
-        
+
         bool Start();
         void Stop();
+
+        void setAudioEn(bool nval);
+        bool getAudioEn() const;
 
     protected:
         void *AudioThread();
         static void *_AudioThread(void *arg);
 
     private:
-        
+        bool en;
         void dummyOut();
         struct timeval playing_until;
 };
