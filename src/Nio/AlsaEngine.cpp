@@ -33,7 +33,9 @@ AlsaEngine::AlsaEngine(OutMgr *out)
 {
     name = "ALSA";
     audio.handle = NULL;
+    audio.en     = true;
 
+    midi.en      = true;
     midi.handle = NULL;
     midi.alsaId = -1;
     midi.pThread = 0;
