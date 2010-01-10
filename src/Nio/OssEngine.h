@@ -65,6 +65,8 @@ class OssEngine: public AudioOut, MidiIn
 
         void getMidi(unsigned char *midiPtr);
 
+        pthread_t *engThread;
+
         struct {
             int handle;
             bool en;

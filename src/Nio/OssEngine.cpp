@@ -39,7 +39,7 @@
 using namespace std;
 
 OssEngine::OssEngine(OutMgr *out)
-    :AudioOut(out)
+    :AudioOut(out), engThread(NULL)
 {
     name = "OSS";
 
@@ -68,6 +68,7 @@ bool OssEngine::openAudio()
     if(audio.snd_handle == -1) {
         cerr << "ERROR - I can't open the "
              << config.cfg.LinuxOSSWaveOutDev << '.' << endl;
+        stopAudio();
         return false;
     }
     ioctl(audio.snd_handle, SNDCTL_DSP_RESET, NULL);
@@ -109,14 +110,14 @@ bool OssEngine::Start()
         }
 
     if(!good) {
-        Stop();
         return false;
     }
 
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&pThread, &attr, _thread, this);
+    engThread = new pthread_t;
+    pthread_create(engThread, &attr, _thread, this);
 
     return true;
 }
@@ -128,7 +129,10 @@ void OssEngine::Stop()
     enabled = false;
     stopAudio();
     stopMidi();
-    pthread_join(pThread, NULL);
+    if(engThread)
+        pthread_join(*engThread, NULL);
+    delete engThread;
+    engThread = NULL;
 }
 
 void OssEngine::setMidiEn(bool nval)
@@ -173,8 +177,11 @@ bool OssEngine::openMidi()
 {
     midi.handle = open(config.cfg.LinuxOSSSeqInDev, O_RDONLY, 0);
 
-    if(-1 == midi.handle)
-       return false;
+    if(-1 == midi.handle) {
+        stopMidi();
+        midi.run = false;
+        return false;
+    }
 
     midi.run = true;
     return true;
