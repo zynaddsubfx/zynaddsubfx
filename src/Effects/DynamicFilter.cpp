@@ -46,7 +46,7 @@ DynamicFilter::~DynamicFilter()
 /*
  * Apply the effect
  */
-void DynamicFilter::out(const Stereo<Sample> &smp)
+void DynamicFilter::out(const Stereo<float *> &smp)
 {
     int i;
     if(filterpars->changed) {

@@ -46,7 +46,7 @@ Alienwah::~Alienwah()
 /*
  * Apply the effect
  */
-void Alienwah::out(const Stereo<Sample> &smp)
+void Alienwah::out(const Stereo<float *> &smp)
 {
     REALTYPE lfol, lfor; //Left/Right LFOs
     complex<REALTYPE> clfol, clfor, out, tmp;

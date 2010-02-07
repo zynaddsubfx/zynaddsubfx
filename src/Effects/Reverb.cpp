@@ -165,7 +165,7 @@ void Reverb::processmono(int ch, REALTYPE *output)
 /*
  * Effect output
  */
-void Reverb::out(const Stereo<Sample> &smp)
+void Reverb::out(const Stereo<float *> &smp)
 {
     int i;
     if((Pvolume == 0) && (insertion != 0))

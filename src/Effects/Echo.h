@@ -25,8 +25,8 @@
 
 #include "../globals.h"
 #include "Effect.h"
-#include "../Samples/Sample.h"
 #include "../Misc/Stereo.h"
+#include "../Samples/Sample.h"
 #include "../Controls/DelayCtl.h"
 
 /**Echo Effect*/
@@ -51,7 +51,7 @@ class Echo:public Effect
          */
         ~Echo();
 
-        void out(const Stereo<Sample> &input);
+        void out(const Stereo<float *> &input);
 
         /**
          * Sets the state of Echo to the specified preset

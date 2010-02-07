@@ -260,7 +260,7 @@ void Distorsion::applyfilters(REALTYPE *efxoutl, REALTYPE *efxoutr)
 /*
  * Effect output
  */
-void Distorsion::out(const Stereo<Sample> &smp)
+void Distorsion::out(const Stereo<float *> &smp)
 {
     int      i;
     REALTYPE l, r, lout, rout;
@@ -270,7 +270,7 @@ void Distorsion::out(const Stereo<Sample> &smp)
         inputvol *= -1.0;
 
     if(Pstereo != 0) { //Stereo
-        for(i = 0; i < smp.l().size(); i++) {
+        for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
             efxoutl[i] = smp.l()[i] * inputvol * panning;
             efxoutr[i] = smp.r()[i] * inputvol * (1.0 - panning);
         }

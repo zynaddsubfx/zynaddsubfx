@@ -27,7 +27,6 @@
 #include "../globals.h"
 #include "../Params/FilterParams.h"
 #include "../Misc/Stereo.h"
-#include "../Samples/Sample.h"
 
 
 /**this class is inherited by the all effects(Reverb, Echo, ..)*/
@@ -74,7 +73,7 @@ class Effect
          * @param smpsr Input buffer for the Right channel
          */
         void out(REALTYPE *const smpsl, REALTYPE *const smpsr);
-        virtual void out(const Stereo<Sample> &smp) = 0;
+        virtual void out(const Stereo<float *> &smp) = 0;
         /**Reset the state of the effect*/
         virtual void cleanup() {}
         /**This is only used for EQ (for user interface)*/
@@ -85,7 +84,7 @@ class Effect
         unsigned char   Ppreset; /**<Currently used preset*/
         REALTYPE *const efxoutl; /**<Effect out Left Channel*/
         REALTYPE *const efxoutr; /**<Effect out Right Channel*/
-        /**\todo make efxoutl and efxoutr private and replace them with a StereoSample*/
+        /**\todo make efxoutl and efxoutr private and replace them with a Stereo<float*>*/
 
         REALTYPE outvolume;/**<This is the volume of effect and is public because
                           * it is needed in system effects.

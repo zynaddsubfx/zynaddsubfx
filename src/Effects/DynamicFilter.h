@@ -33,7 +33,7 @@ class DynamicFilter:public Effect
     public:
         DynamicFilter(int insetion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_);
         ~DynamicFilter();
-        void out(const Stereo<Sample> &smp);
+        void out(const Stereo<float *> &smp);
 
         void setpreset(unsigned char npreset);
         void changepar(int npar, unsigned char value);

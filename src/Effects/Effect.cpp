@@ -30,8 +30,5 @@ Effect::Effect(bool insertion_, REALTYPE *const efxoutl_,
 {}
 
 void Effect::out(REALTYPE *const smpsl, REALTYPE *const smpsr)
-{
-    out(Stereo<Sample>(Sample(SOUND_BUFFER_SIZE, smpsl),
-                       Sample(SOUND_BUFFER_SIZE, smpsr)));
-}
+{};
 

@@ -53,7 +53,7 @@ void EQ::cleanup()
     }
 }
 
-void EQ::out(const Stereo<Sample> &smp)
+void EQ::out(const Stereo<float *> &smp)
 {
     int i;
     for(i = 0; i < SOUND_BUFFER_SIZE; i++) {

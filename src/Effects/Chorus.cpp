@@ -68,7 +68,7 @@ REALTYPE Chorus::getdelay(REALTYPE xlfo)
     return result;
 }
 
-void Chorus::out(const Stereo<Sample> &input)
+void Chorus::out(const Stereo<float *> &input)
 {
     const REALTYPE one = 1.0;
     dl1 = dl2;
@@ -78,7 +78,7 @@ void Chorus::out(const Stereo<Sample> &input)
     dl2 = getdelay(lfol);
     dr2 = getdelay(lfor);
 
-    for(int i = 0; i < input.l().size(); i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
         REALTYPE inl = input.l()[i];
         REALTYPE inr = input.r()[i];
         //LRcross
@@ -123,14 +123,14 @@ void Chorus::out(const Stereo<Sample> &input)
     }
 
     if(Poutsub != 0)
-        for(int i = 0; i < input.l().size(); i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
             efxoutl[i] *= -1.0;
             efxoutr[i] *= -1.0;
         }
     ;
 
 
-    for(int i = 0; i < input.l().size(); i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
         efxoutl[i] *= panning;
         efxoutr[i] *= (1.0 - panning);
     }

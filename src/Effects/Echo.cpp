@@ -72,11 +72,11 @@ void Echo::initdelays()
     delay.r() = Sample(dr, 0.0);
 }
 
-void Echo::out(const Stereo<Sample> &input)
+void Echo::out(const Stereo<float *> &input)
 {
     REALTYPE ldl, rdl;
 
-    for(int i = 0; i < input.l().size(); ++i) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         ldl = delay.l()[pos.l()];
         rdl = delay.r()[pos.r()];
         ldl = ldl * (1.0 - lrcross) + rdl * lrcross;

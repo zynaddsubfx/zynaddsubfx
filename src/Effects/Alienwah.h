@@ -46,7 +46,7 @@ class Alienwah:public Effect
                  REALTYPE *const efxoutl_,
                  REALTYPE *const efxoutr_);
         ~Alienwah();
-        void out(const Stereo<Sample> &smp);
+        void out(const Stereo<float *> &smp);
 
         void setpreset(unsigned char npreset);
         void changepar(int npar, unsigned char value);

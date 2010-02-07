@@ -38,7 +38,7 @@ Phaser::~Phaser()
 /*
  * Effect output
  */
-void Phaser::out(const Stereo<Sample> &smp)
+void Phaser::out(const Stereo<float *> &smp)
 {
     int      i, j;
     REALTYPE lfol, lfor, lgain, rgain, tmp;

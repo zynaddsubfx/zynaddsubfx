@@ -40,7 +40,7 @@ class Reverb:public Effect
     public:
         Reverb(const int &insertion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_);
         ~Reverb();
-        void out(const Stereo<Sample> &smp);
+        void out(const Stereo<float *> &smp);
         void cleanup();
 
         void setpreset(unsigned char npreset);

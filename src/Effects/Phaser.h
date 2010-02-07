@@ -35,7 +35,7 @@ class Phaser:public Effect
     public:
         Phaser(const int &insetion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_);
         ~Phaser();
-        void out(const Stereo<Sample> &smp);
+        void out(const Stereo<float *> &smp);
         void setpreset(unsigned char npreset);
         void changepar(int npar, unsigned char value);
         unsigned char getpar(int npar) const;

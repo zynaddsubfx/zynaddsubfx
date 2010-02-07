@@ -33,7 +33,7 @@ class EQ:public Effect
     public:
         EQ(const int &insertion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_);
         ~EQ();
-        void out(const Stereo<Sample> &smp);
+        void out(const Stereo<float *> &smp);
         void setpreset(unsigned char npreset);
         void changepar(int npar, unsigned char value);
         unsigned char getpar(int npar) const;
