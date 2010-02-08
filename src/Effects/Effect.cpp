@@ -30,5 +30,7 @@ Effect::Effect(bool insertion_, REALTYPE *const efxoutl_,
 {}
 
 void Effect::out(REALTYPE *const smpsl, REALTYPE *const smpsr)
-{};
+{
+    out(Stereo<float *>(smpsl,smpsr));
+};
 
