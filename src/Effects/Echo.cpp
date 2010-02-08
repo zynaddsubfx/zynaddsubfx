@@ -23,53 +23,60 @@
 #include <cmath>
 #include "Echo.h"
 
+#define MAX_DELAY 2
+
 Echo::Echo(const int &insertion_,
            REALTYPE *const efxoutl_,
            REALTYPE *const efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
       Pvolume(50), Ppanning(64), //Pdelay(60),
       Plrdelay(100), Plrcross(100), Pfb(40), Phidamp(60),
-      delayTime(1), lrdelay(0), delay(128000), old(0.0),
-      pos(0)
-      
+      delayTime(1), lrdelay(0),
+      delay(new REALTYPE[(int)(MAX_DELAY * SAMPLE_RATE)],
+            new REALTYPE[(int)(MAX_DELAY * SAMPLE_RATE)]),
+      old(0.0), pos(0),delta(1)
 {
     initdelays();
     setpreset(Ppreset);
 }
 
-Echo::~Echo() {}
+Echo::~Echo() {
+//need to delete samples
+}
 
 /*
  * Cleanup the effect
  */
 void Echo::cleanup()
 {
-    delay.l().clear();
-    delay.r().clear();
+    memset(delay.l(),0,MAX_DELAY*SAMPLE_RATE);
+    memset(delay.r(),0,MAX_DELAY*SAMPLE_RATE);
     old = Stereo<REALTYPE>(0.0);
 }
 
+inline int max(int a, int b)
+{
+    return a > b ? a : b;
+}
 
 /*
  * Initialize the delays
  */
 void Echo::initdelays()
 {
-    int dl = (int)(delayCtl.getiVal() * SAMPLE_RATE - lrdelay);
-    if(dl < 1)
-        dl = 1;
+    //number of seconds to delay left chan
+    float dl = delayCtl.getiVal() - lrdelay;
 
-    int dr = (int)(delayCtl.getiVal() * SAMPLE_RATE + lrdelay);
-    if(dr < 1)
-        dr = 1;
-    
-    if(dl == delay.l().size() && dr == delay.r().size())
-        return; //no need to do anything here
-    
-    pos.l() = 0;
-    pos.r() = 0;
-    delay.l() = Sample(dl, 0.0);
-    delay.r() = Sample(dr, 0.0);
+    //number of seconds to delay right chan
+    float dr = delayCtl.getiVal() + lrdelay;
+
+    delta.l() = max(1,(int) (dl * SAMPLE_RATE));
+    delta.r() = max(1,(int) (dr * SAMPLE_RATE));
+
+    printf("Left do    %f - Right do    %f \n", dl / MAX_DELAY * SAMPLE_RATE, dr / MAX_DELAY * SAMPLE_RATE);
+    printf("Left d     %f - Right d     %f \n", dl, dr);
+    printf("Left delta %d - Right delta %d \n", delta.l(), delta.r());
+    printf("Left size  %d - Right size  %d \n", MAX_DELAY * SAMPLE_RATE, MAX_DELAY * SAMPLE_RATE);
 }
 
 void Echo::out(const Stereo<float *> &input)
@@ -89,15 +96,17 @@ void Echo::out(const Stereo<float *> &input)
         rdl = input.r()[i] * (1.0 - panning) - rdl * fb;
 
         //LowPass Filter
-        old.l() = delay.l()[pos.l()] 
-            = ldl * hidamp + old.l() * (1.0 - hidamp);
-        old.r() = delay.r()[pos.r()] 
-            = rdl * hidamp + old.r() * (1.0 - hidamp);
-        ++pos.l();
-        ++pos.r();
+        old.l() = delay.l()[pos.l()] =  ldl * hidamp + old.l() * (1.0 - hidamp);
+        old.r() = delay.r()[pos.r()] = rdl * hidamp + old.r() * (1.0 - hidamp);
+
+        //increment
+        pos.l() += delta.l();
+        pos.r() += delta.r();
+
+        //ensure that pos is still in bounds
+        pos.l() %= MAX_DELAY * SAMPLE_RATE;
+        pos.r() %= MAX_DELAY * SAMPLE_RATE;
     }
-    pos.l() %= delay.l().size();
-    pos.r() %= delay.r().size();
 }
 
 
@@ -138,10 +147,10 @@ void Echo::setlrdelay(unsigned char Plrdelay)
     REALTYPE tmp;
     this->Plrdelay = Plrdelay;
     tmp =
-        (pow(2, fabs(Plrdelay - 64.0) / 64.0 * 9) - 1.0) / 1000.0 * SAMPLE_RATE;
+        (pow(2, fabs(Plrdelay - 64.0) / 64.0 * 9) - 1.0) / 1000.0;
     if(Plrdelay < 64.0)
         tmp = -tmp;
-    lrdelay = (int) tmp;
+    lrdelay = tmp;
     initdelays();
 }
 

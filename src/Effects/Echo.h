@@ -117,18 +117,20 @@ class Echo:public Effect
         void sethidamp(unsigned char Phidamp);
 
         //Real Parameters
-        REALTYPE panning, lrcross, fb, hidamp; //needs better names
+        REALTYPE panning, lrcross, fb, hidamp;
         //Left/Right delay lengths
         Stereo<int> delayTime;
-        int lrdelay;
+        float lrdelay;
 
         void initdelays();
         //2 channel ring buffer
-        Stereo<Sample> delay;
+        Stereo<REALTYPE *> delay;
         Stereo<REALTYPE> old;
 
         //position of reading/writing from delaysample
         Stereo<int> pos;
+        //step size for delay buffer
+        Stereo<int> delta;
 };
 
 #endif
