@@ -274,7 +274,7 @@ bool AlsaEngine::openAudio()
 
     /* Interleaved mode */
     snd_pcm_hw_params_set_access(audio.handle, audio.params,
-            SND_PCM_ACCESS_RW_NONINTERLEAVED);
+            SND_PCM_ACCESS_RW_INTERLEAVED);
 
     /* Signed 16-bit little-endian format */
     snd_pcm_hw_params_set_format(audio.handle, audio.params,
