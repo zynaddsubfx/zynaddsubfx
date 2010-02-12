@@ -33,8 +33,6 @@ using namespace std;
 JackEngine::JackEngine(OutMgr *out)
     :AudioOut(out), jackClient(NULL)
 {
-    midi.en = true;
-    audio.en = true;
     name = "JACK";
     audio.jackSamplerate = 0;
     audio.jackNframes = 0;
@@ -47,46 +45,35 @@ JackEngine::JackEngine(OutMgr *out)
 
 bool JackEngine::connectServer(string server)
 {
-    //temporary (move to a higher level configuation)
     bool autostart_jack = true;
+    if(jackClient)
+        return true;
 
 
-    if (NULL == jackClient) // ie, not already connected
-    {
-        string clientname = "zynaddsubfx";
-        jack_status_t jackstatus;
-        bool use_server_name = server.size() && server.compare("default") != 0;
-        jack_options_t jopts = (jack_options_t)
-            (((use_server_name) ? JackServerName : JackNullOption)
-            | ((autostart_jack) ? JackNullOption : JackNoStartServer));
-        if (use_server_name)
-            jackClient = jack_client_open(clientname.c_str(), jopts, &jackstatus,
-                    server.c_str());
-        else
-            jackClient = jack_client_open(clientname.c_str(), jopts, &jackstatus);
-        if (NULL != jackClient)
-            return true;
-        else
-            cerr << "Error, failed to open jack client on server: " << server
-                 << " status " << jackstatus << endl;
-        return false;
-    }
+    string clientname = "zynaddsubfx";
+    jack_status_t jackstatus;
+    bool use_server_name = server.size() && server.compare("default") != 0;
+    jack_options_t jopts = (jack_options_t)
+        (((use_server_name) ? JackServerName : JackNullOption)
+         | ((autostart_jack) ? JackNullOption : JackNoStartServer));
+    if (use_server_name)
+        jackClient = jack_client_open(clientname.c_str(), jopts, &jackstatus,
+                server.c_str());
+    else
+        jackClient = jack_client_open(clientname.c_str(), jopts, &jackstatus);
+    if (NULL != jackClient)
+        return true;
+    else
+        cerr << "Error, failed to open jack client on server: " << server
+            << " status " << jackstatus << endl;
+    return false;
+
     return true;
 }
 
-bool JackEngine::Start()
+bool JackEngine::connectJack()
 {
-    cout << "Starting Jack" << endl;
-    if(enabled())
-        return true;
-
-    enabled = true;
-    if(!connectServer(""))
-        goto bail_out;
-    if(midi.en)
-        openMidi();
-    if(audio.en)
-        openAudio();
+    connectServer("");
     if (NULL != jackClient)
     {
         setBufferSize(jack_get_buffer_size(jackClient));
@@ -100,78 +87,76 @@ bool JackEngine::Start()
         if (jack_set_process_callback(jackClient, _processCallback, this))
         {
             cerr << "Error, JackEngine failed to set process callback" << endl;
-            goto bail_out;
+            return false;
         }
         if (jack_activate(jackClient))
         {
             cerr << "Error, failed to activate jack client" << endl;;
-            goto bail_out;
+            return false;
         }
 
         return true;
     }
     else
         cerr << "Error, NULL jackClient through Start()" << endl;
-bail_out:
-    Stop();
     return false;
 }
 
-void JackEngine::Stop()
+void JackEngine::disconnectJack()
 {
-    cout << "Stopping Jack" << endl;
-    if(!enabled())
-        return;
-    enabled = false;
-    if (jackClient)
-    {
-        stopMidi();
-        stopAudio();
+    if(jackClient) {
         jack_client_close(jackClient);
         jackClient = NULL;
     }
 }
 
+bool JackEngine::Start()
+{
+    return openMidi() && openAudio();
+}
+
+void JackEngine::Stop()
+{
+    stopMidi();
+    stopAudio();
+}
+
 void JackEngine::setMidiEn(bool nval)
 {
-    midi.en = nval;
-    if(enabled()) { //lets rebind the ports
-        if(nval)
-            openMidi();
-        else
-            stopMidi();
-    }
+    if(nval)
+        openMidi();
+    else
+        stopMidi();
 }
 
 bool JackEngine::getMidiEn() const
 {
-    if(enabled())
-        return midi.inport;
-    else
-        return midi.en;
+    return midi.inport;
 }
 
 void JackEngine::setAudioEn(bool nval)
 {
-    audio.en = nval;
-    if(enabled()) { //lets rebind the ports
-        if(nval)
-            openAudio();
-        else
-            stopAudio();
-    }
+    if(nval)
+        openAudio();
+    else
+        stopAudio();
 }
 
 bool JackEngine::getAudioEn() const
 {
-    if(enabled())
-        return audio.ports[0];
-    else
-        return audio.en;
+    return audio.ports[0];
 }
 
 bool JackEngine::openAudio()
 {
+    if(getAudioEn())
+        return true;
+
+    if(!getMidiEn())
+        if(!connectJack())
+            return false;
+
+
     const char *portnames[] = { "left", "right" };
     for (int port = 0; port < 2; ++port)
     {
@@ -199,13 +184,22 @@ void JackEngine::stopAudio()
         if (NULL != port)
             jack_port_unregister(jackClient, port);
     }
+    if(!getMidiEn())
+        disconnectJack();
 }
 
 bool JackEngine::openMidi()
 {
-    return midi.inport = jack_port_register(jackClient, "midi_input",
-                                            JACK_DEFAULT_MIDI_TYPE,
-                                            JackPortIsInput | JackPortIsTerminal, 0);
+    if(getMidiEn())
+        return true;
+    if(!getAudioEn())
+        if(!connectJack())
+            return false;
+
+    midi.inport = jack_port_register(jackClient, "midi_input",
+                                     JACK_DEFAULT_MIDI_TYPE,
+                                     JackPortIsInput | JackPortIsTerminal, 0);
+    return midi.inport;
 }
 
 void JackEngine::stopMidi()
@@ -214,6 +208,9 @@ void JackEngine::stopMidi()
     midi.inport = NULL;
     if(port)
         jack_port_unregister(jackClient, port);
+
+    if(!getAudioEn())
+        disconnectJack();
 }
 
 int JackEngine::clientId()

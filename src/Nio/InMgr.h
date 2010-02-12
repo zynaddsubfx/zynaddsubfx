@@ -4,7 +4,6 @@
 #include <string>
 #include <pthread.h>
 #include <semaphore.h>
-#include "../Misc/Master.h"
 #include "../Misc/Atomic.h"
 #include "SafeQueue.h"
 
@@ -36,6 +35,10 @@ class InMgr
         void run();
 
         void *inputThread();
+
+        bool setSource(std::string name);
+
+        std::string getSource() const;
 
     private:
         SafeQueue<MidiEvent> queue;

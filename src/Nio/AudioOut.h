@@ -25,16 +25,12 @@
 
 #include "../Misc/Stereo.h"
 #include "../Samples/Sample.h"
-#include <queue>
-#include <pthread.h>
-#include "OutMgr.h"
-#include "../Misc/Atomic.h"
 #include "Engine.h"
 
 class AudioOut : public virtual Engine
 {
     public:
-        AudioOut(OutMgr *out);
+        AudioOut(class OutMgr *out);
         virtual ~AudioOut();
 
         /**Give the Driver Samples to process*/
@@ -60,29 +56,11 @@ class AudioOut : public virtual Engine
         void putBack(const Stereo<Sample> smp);
         /**Get the next sample for output.
          * (has nsamples sampled at a rate of samplerate)*/
-        virtual const Stereo<Sample> getNext();
+        const Stereo<Sample> getNext(bool wait = false);
 
-        int samplerate;
-        int bufferSize;
-
-        std::queue<Stereo<Sample> >  outBuf;
-        pthread_mutex_t outBuf_mutex;
-        pthread_cond_t  outBuf_cv;
-
-        /**used for taking in samples with a different
-         * samplerate/buffersize*/
-        Stereo<Sample> partialIn;
-        bool usePartial;
-        Stereo<Sample> current;/**<used for xrun defence*/
-
-        //The number of Samples that are used to buffer
-        //Note: there is some undetermined behavior when:
-        //sampleRate!=SAMPLE_RATE || bufferSize!=SOUND_BUFFER_SIZE
-        unsigned int buffering;
-
-        OutMgr *manager;
-        //thread resources
-        pthread_t pThread;
+        //using opaque pointer to reduce compile times
+        struct Data;
+        Data *dat;
 };
 
 #endif

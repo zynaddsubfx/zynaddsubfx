@@ -37,7 +37,6 @@ class JackEngine : public AudioOut, MidiIn
         JackEngine(OutMgr *out);
         ~JackEngine() { };
 
-        bool setServer(std::string server);
         bool Start();
         void Stop();
 
@@ -65,6 +64,8 @@ class JackEngine : public AudioOut, MidiIn
 
     private:
         bool connectServer(std::string server);
+        bool connectJack();
+        void disconnectJack();
         bool openAudio();
         void stopAudio();
         bool processAudio(jack_nframes_t nframes);
@@ -72,16 +73,14 @@ class JackEngine : public AudioOut, MidiIn
         void stopMidi();
 
         jack_client_t      *jackClient;
-        struct {
-            bool en;
+        struct audio{
             unsigned int  jackSamplerate;
             unsigned int  jackNframes;
             jack_port_t  *ports[2];
             jsample_t    *portBuffs[2];
         } audio;
-        struct {
+        struct midi{
             jack_port_t *inport;
-            bool en;
         } midi;
 
         void handleMidi(unsigned long frames);

@@ -222,6 +222,7 @@ void exitprogram()
 {
     pthread_mutex_lock(&master->mutex);
     pthread_mutex_unlock(&master->mutex);
+    sysEngine->stop();
     delete sysOut;
     delete sysIn;
     delete sysEngine;

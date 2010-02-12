@@ -28,88 +28,88 @@
 using namespace std;
 
 NulEngine::NulEngine(OutMgr *out)
-    :AudioOut(out)
+    :AudioOut(out), pThread(NULL)
 {
     name = "NULL";
     playing_until.tv_sec  = 0;
     playing_until.tv_usec = 0;
 }
 
-
-
 void *NulEngine::_AudioThread(void *arg)
 {
     return (static_cast<NulEngine*>(arg))->AudioThread();
 }
 
-
 void *NulEngine::AudioThread()
 {  
-    while (enabled())
+    while(pThread)
     {
         const Stereo<Sample> smps = getNext();
-        dummyOut();
+
+        struct timeval now;
+        int remaining = 0;
+        gettimeofday(&now, NULL);
+        if((playing_until.tv_usec == 0) && (playing_until.tv_sec == 0)) {
+            playing_until.tv_usec = now.tv_usec;
+            playing_until.tv_sec  = now.tv_sec;
+        }
+        else  {
+            remaining = (playing_until.tv_usec - now.tv_usec)
+                + (playing_until.tv_sec - now.tv_sec) * 1000000;
+            if(remaining > 10000) //Don't sleep() less than 10ms.
+                //This will add latency...
+                usleep(remaining - 10000);
+            if(remaining < 0)
+                cerr << "WARNING - too late" << endl;
+        }
+        playing_until.tv_usec += SOUND_BUFFER_SIZE * 1000000 / SAMPLE_RATE;
+        if(remaining < 0)
+            playing_until.tv_usec -= remaining;
+        playing_until.tv_sec  += playing_until.tv_usec / 1000000;
+        playing_until.tv_usec %= 1000000;
     }
     pthread_exit(NULL);
 }
-
-void NulEngine::dummyOut()
-{
-    struct timeval now;
-    int remaining = 0;
-    gettimeofday(&now, NULL);
-    if((playing_until.tv_usec == 0) && (playing_until.tv_sec == 0)) {
-        playing_until.tv_usec = now.tv_usec;
-        playing_until.tv_sec  = now.tv_sec;
-    }
-    else  {
-        remaining = (playing_until.tv_usec - now.tv_usec)
-            + (playing_until.tv_sec - now.tv_sec) * 1000000;
-        if(remaining > 10000) //Don't sleep() less than 10ms.
-            //This will add latency...
-            usleep(remaining - 10000);
-        if(remaining < 0)
-            cerr << "WARNING - too late" << endl;
-    }
-    playing_until.tv_usec += SOUND_BUFFER_SIZE * 1000000 / SAMPLE_RATE;
-    if(remaining < 0)
-        playing_until.tv_usec -= remaining;
-    playing_until.tv_sec  += playing_until.tv_usec / 1000000;
-    playing_until.tv_usec %= 1000000;
-}
-
 
 NulEngine::~NulEngine()
 {
 }
 
-
 bool NulEngine::Start()
 {
-    if(enabled())
-        return true;
-    pthread_attr_t attr;
-    enabled = true;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&pThread, &attr, _AudioThread, this);
-
-    return true;
+    setAudioEn(true);
+    return getAudioEn();
 }
 
 void NulEngine::Stop()
 {
-    if(!enabled())
-        return;
-    enabled = false;
-    pthread_join(pThread, NULL);
+    setAudioEn(false);
 }
 
 void NulEngine::setAudioEn(bool nval)
-{}
+{
+    if(nval) {
+        if(!getAudioEn()) {
+            pthread_t *thread = new pthread_t;
+            pthread_attr_t attr;
+            pthread_attr_init(&attr);
+            pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+            pThread = thread;
+            pthread_create(pThread, &attr, _AudioThread, this);
+        }
+    }
+    else {
+        if(getAudioEn()) {
+            pthread_t *thread = pThread;
+            pThread = NULL;
+            pthread_join(*thread, NULL);
+            delete thread;
+        }
+    }
+}
 
 bool NulEngine::getAudioEn() const
 {
-    return true;
+    return pThread;
 }
 

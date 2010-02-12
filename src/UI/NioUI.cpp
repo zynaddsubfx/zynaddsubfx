@@ -1,6 +1,7 @@
 #include "NioUI.h"
 #include "../Nio/EngineMgr.h"
 #include "../Nio/OutMgr.h"
+#include "../Nio/InMgr.h"
 #include "../Nio/AudioOut.h"
 #include "../Nio/MidiIn.h"
 #include <cstdio>
@@ -33,32 +34,63 @@ NioUI::NioUI()
         }
         gen->end();
 
+        Fl_Group *settings = new Fl_Group(0,20,400,400-35,"Settings");
+        {
+            audio = new Fl_Choice(60, 80, 100, 25, "Audio");
+            audio->callback(audioCallback);
+            midi = new Fl_Choice(60, 100, 100, 25, "Midi");
+            midi->callback(midiCallback);
+        }
+        settings->end();
+       
         for(list<Engine *>::iterator itr = sysEngine->engines.begin();
                 itr != sysEngine->engines.end(); ++itr) {
-            bool midi  = dynamic_cast<MidiIn *>(*itr);
-            bool audio = dynamic_cast<AudioOut *>(*itr);
-            tabs.push_back(new NioTab((*itr)->name, midi, audio));
+            Engine *eng = *itr;
+            if(dynamic_cast<MidiIn *>(eng))
+                midi->add(eng->name.c_str());
+            if(dynamic_cast<AudioOut *>(eng))
+                audio->add(eng->name.c_str());
         }
 
+
+       //for(list<Engine *>::iterator itr = sysEngine->engines.begin();
+       //        itr != sysEngine->engines.end(); ++itr) {
+       //     bool midi  = dynamic_cast<MidiIn *>(*itr);
+       //     bool audio = dynamic_cast<AudioOut *>(*itr);
+       //     tabs.push_back(new NioTab((*itr)->name, midi, audio));
+       //}
+
         //add tabs
-        for(list<NioTab *>::iterator itr = tabs.begin();
-                itr != tabs.end(); ++itr)
-            wintabs->add(*itr);
+        //for(list<NioTab *>::iterator itr = tabs.begin();
+        //        itr != tabs.end(); ++itr)
+        //    wintabs->add(*itr);
     }
     wintabs->end();
 
-    Fl::scheme("plastic");
     resizable(this);
     size_range(400,300);
 }
 
 void NioUI::refresh()
 {
-    for(list<NioTab *>::iterator itr = tabs.begin();
-            itr != tabs.end(); ++itr)
-        (*itr)->refresh();
+    //for(list<NioTab *>::iterator itr = tabs.begin();
+    //        itr != tabs.end(); ++itr)
+    //    (*itr)->refresh();
+    
 }
 
+void NioUI::midiCallback(Fl_Widget *c)
+{
+    bool good = sysIn->setSource(static_cast<Fl_Choice *>(c)->text());
+    static_cast<Fl_Choice *>(c)->textcolor(fl_rgb_color(255*!good,0,0));
+}
+
+void NioUI::audioCallback(Fl_Widget *c)
+{
+    bool good = sysOut->setSink(static_cast<Fl_Choice *>(c)->text());
+    static_cast<Fl_Choice *>(c)->textcolor(fl_rgb_color(255*!good,0,0));
+}
+#if 0
 //this is a repetitve block of code
 //perhaps something on the Engine's side should be refactored
 void NioTab::nioToggle(Fl_Widget *wid, void *arg)
@@ -157,4 +189,5 @@ void NioTab::refresh()
     this->labelcolor(fl_rgb_color(0,255*state,0));
     this->redraw();
 }
+#endif
 

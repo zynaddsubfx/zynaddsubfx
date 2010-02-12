@@ -69,5 +69,11 @@ T stringTo(const char *x)
     return ans;
 }
 
+template <class T>
+T limit(T val, T min, T max)
+{
+    return (val < min ? min : (val > max ? max : val));
+}
+
 #endif
 

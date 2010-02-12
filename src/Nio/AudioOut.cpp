@@ -22,134 +22,168 @@
 
 #include <iostream>
 #include <cstring>
+#include "SafeQueue.h"
 
 using namespace std;
 
+#include "OutMgr.h"
 #include "../Misc/Master.h"
 #include "AudioOut.h"
 
-AudioOut::AudioOut(OutMgr *out)
-    :samplerate(SAMPLE_RATE),bufferSize(SOUND_BUFFER_SIZE),
-     usePartial(false),current(Sample(SOUND_BUFFER_SIZE,0.0)),
-     buffering(6),manager(out)
+struct AudioOut::Data
 {
-    pthread_mutex_init(&outBuf_mutex, NULL);
-    pthread_cond_init(&outBuf_cv, NULL);
+    Data(OutMgr *out);
+
+    int samplerate;
+    int bufferSize;
+
+    SafeQueue<Stereo<Sample> >  outBuf;
+    pthread_mutex_t outBuf_mutex;
+    pthread_cond_t  outBuf_cv;
+
+    /**used for taking in samples with a different
+     * samplerate/buffersize*/
+    Stereo<Sample> partialIn;
+    bool usePartial;
+    Stereo<Sample> current;/**<used for xrun defence*/
+
+    //The number of Samples that are used to buffer
+    //Note: there is some undetermined behavior when:
+    //sampleRate!=SAMPLE_RATE || bufferSize!=SOUND_BUFFER_SIZE
+    unsigned int buffering;
+
+    OutMgr *manager;
+};
+
+AudioOut::Data::Data(OutMgr *out)
+    :samplerate(SAMPLE_RATE),bufferSize(SOUND_BUFFER_SIZE),
+     outBuf(100),usePartial(false),
+     current(Sample(SOUND_BUFFER_SIZE,0.0)),buffering(6),
+     manager(out)
+{}
+
+AudioOut::AudioOut(OutMgr *out)
+    :dat(new Data(out))
+{
+    pthread_mutex_init(&dat->outBuf_mutex, NULL);
+    pthread_cond_init(&dat->outBuf_cv, NULL);
 }
 
 AudioOut::~AudioOut()
 {
-    pthread_mutex_destroy(&outBuf_mutex);
-    pthread_cond_destroy(&outBuf_cv);
+    pthread_mutex_destroy(&dat->outBuf_mutex);
+    pthread_cond_destroy(&dat->outBuf_cv);
+    delete dat;
 }
 
 void AudioOut::out(Stereo<Sample> smps)
 {
-    pthread_mutex_lock(&outBuf_mutex);
-    if(samplerate != SAMPLE_RATE) { //we need to resample
-        smps.l().resample(SAMPLE_RATE,samplerate);
-        smps.r().resample(SAMPLE_RATE,samplerate);
+    pthread_mutex_lock(&dat->outBuf_mutex);
+    if(dat->samplerate != SAMPLE_RATE) { //we need to resample
+        smps.l().resample(SAMPLE_RATE,dat->samplerate);
+        smps.r().resample(SAMPLE_RATE,dat->samplerate);
     }
 
-    if(usePartial) { //we have a partial to use
-        smps.l() = partialIn.l().append(smps.l());
-        smps.r() = partialIn.r().append(smps.r());
+    if(dat->usePartial) { //we have a partial to use
+        smps.l() = dat->partialIn.l().append(smps.l());
+        smps.r() = dat->partialIn.r().append(smps.r());
     }
 
-    if(smps.l().size() == bufferSize) { //sized just right
-        outBuf.push(smps);
-        usePartial = false;
-        pthread_cond_signal(&outBuf_cv);
+    if(smps.l().size() == dat->bufferSize) { //sized just right
+        dat->outBuf.push(smps);
+        dat->usePartial = false;
+        pthread_cond_signal(&dat->outBuf_cv);
     }
-    else if(smps.l().size() > bufferSize) { //store overflow
+    else if(smps.l().size() > dat->bufferSize) { //store overflow
 
-        while(smps.l().size() > bufferSize) {
-            outBuf.push(Stereo<Sample>(smps.l().subSample(0,bufferSize),
-                                       smps.r().subSample(0,bufferSize)));
-            smps = Stereo<Sample>(smps.l().subSample(bufferSize,smps.l().size()),
-                                  smps.r().subSample(bufferSize,smps.r().size()));
+        while(smps.l().size() > dat->bufferSize) {
+            dat->outBuf.push(Stereo<Sample>(smps.l().subSample(0,dat->bufferSize),
+                                            smps.r().subSample(0,dat->bufferSize)));
+            smps = Stereo<Sample>(smps.l().subSample(dat->bufferSize,smps.l().size()),
+                                  smps.r().subSample(dat->bufferSize,smps.r().size()));
         }
 
-        if(smps.l().size() == bufferSize) { //no partial
-            outBuf.push(smps);
-            usePartial = false;
+        if(smps.l().size() == dat->bufferSize) { //no partial
+            dat->outBuf.push(smps);
+            dat->usePartial = false;
         }
         else { //partial
-            partialIn = smps;
-            usePartial = true;
+            dat->partialIn = smps;
+            dat->usePartial = true;
         }
 
-        pthread_cond_signal(&outBuf_cv);
+        pthread_cond_signal(&dat->outBuf_cv);
     }
     else { //underflow
-        partialIn = smps;
-        usePartial = true;
+        dat->partialIn = smps;
+        dat->usePartial = true;
     }
-    pthread_mutex_unlock(&outBuf_mutex);
+    pthread_mutex_unlock(&dat->outBuf_mutex);
 }
 
 void AudioOut::setSamplerate(int _samplerate)
 {
-    pthread_mutex_lock(&outBuf_mutex);
-    usePartial = false;
-    samplerate = _samplerate;
-    //hm, the queue does not have a clear
-    while(!outBuf.empty())
-        outBuf.pop();
-    pthread_mutex_unlock(&outBuf_mutex);
+    pthread_mutex_lock(&dat->outBuf_mutex);
+    dat->usePartial = false;
+    dat->samplerate = _samplerate;
+    dat->outBuf.clear();
+    pthread_mutex_unlock(&dat->outBuf_mutex);
 
 }
 
 void AudioOut::setBufferSize(int _bufferSize)
 {
-    pthread_mutex_lock(&outBuf_mutex);
-    usePartial = false;
-    bufferSize = _bufferSize;
-    //hm, the queue does not have a clear
-    while(!outBuf.empty())
-        outBuf.pop();
-    pthread_mutex_unlock(&outBuf_mutex);
-};
+    pthread_mutex_lock(&dat->outBuf_mutex);
+    dat->usePartial = false;
+    dat->bufferSize = _bufferSize;
+    dat->outBuf.clear();
+    pthread_mutex_unlock(&dat->outBuf_mutex);
+}
 
 void AudioOut::bufferingSize(int nBuffering)
 {
-   buffering = nBuffering;
+   dat->buffering = nBuffering;
 }
 
 int AudioOut::bufferingSize()
 {
-    return buffering;
+    return dat->buffering;
 }
 
-
-const Stereo<Sample> AudioOut::getNext()
+const Stereo<Sample> AudioOut::getNext(bool wait)
 {
-    const unsigned int BUFF_SIZE = buffering;
+    const unsigned int BUFF_SIZE = dat->buffering;
     Stereo<Sample> ans;
-    pthread_mutex_lock(&outBuf_mutex);
-    bool isEmpty = outBuf.empty();
-    pthread_mutex_unlock(&outBuf_mutex);
+    pthread_mutex_lock(&dat->outBuf_mutex);
+    bool isEmpty = !dat->outBuf.size();
+    pthread_mutex_unlock(&dat->outBuf_mutex);
 
     if(isEmpty)//fetch samples if possible
     {
-        if((unsigned int)manager->getRunning() < BUFF_SIZE)
-            manager->requestSamples(BUFF_SIZE-manager->getRunning());
+        if((unsigned int)dat->manager->getRunning() < BUFF_SIZE)
+            dat->manager->requestSamples(BUFF_SIZE-dat->manager->getRunning());
         if(true)
             cout << "-----------------Starvation------------------"<< endl;
-        return current;
+        if(wait)
+        {
+            pthread_mutex_lock(&dat->outBuf_mutex);
+            pthread_cond_wait(&dat->outBuf_cv,&dat->outBuf_mutex);
+            pthread_mutex_unlock(&dat->outBuf_mutex);
+            //now the code has a sample to fetch
+        }
+        else
+            return dat->current;
     }
-    else
-    {
-        pthread_mutex_lock(&outBuf_mutex);
-        ans = outBuf.front();
-        outBuf.pop();
-        if(outBuf.size()+manager->getRunning()<BUFF_SIZE)
-            manager->requestSamples(BUFF_SIZE - (outBuf.size()
-                        + manager->getRunning()));
-        if(false)
-            cout << "AudioOut "<< outBuf.size()<< '+' << manager->getRunning() << endl;
-        pthread_mutex_unlock(&outBuf_mutex);
-    }
-    current=ans;
+
+    pthread_mutex_lock(&dat->outBuf_mutex);
+    dat->outBuf.pop(ans);
+    if(dat->outBuf.size()+dat->manager->getRunning()<BUFF_SIZE)
+        dat->manager->requestSamples(BUFF_SIZE - (dat->outBuf.size()
+                    + dat->manager->getRunning()));
+    if(false)
+        cout << "AudioOut "<< dat->outBuf.size()<< '+' << dat->manager->getRunning() << endl;
+    pthread_mutex_unlock(&dat->outBuf_mutex);
+
+    dat->current = ans;
     return ans;
 }

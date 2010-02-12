@@ -9,7 +9,7 @@ SafeQueue<T>::SafeQueue(size_t maxlen)
 template<class T>
 SafeQueue<T>::~SafeQueue()
 {
-    delete buffer;
+    delete[] buffer;
 }
 
 template<class T>
@@ -76,3 +76,8 @@ int SafeQueue<T>::pop(T &out)
     return 0;
 }
 
+template<class T>
+void SafeQueue<T>::clear()
+{
+    readPtr = writePtr;
+}

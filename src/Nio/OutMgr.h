@@ -43,13 +43,25 @@ class OutMgr
          */
         AudioOut *getOut(std::string name);
 
+        /**Sets the running driver by name
+         * @return true for successful insertion*/
+        bool setDriver(std::string name);
+
+        /**Gets the name of the first running driver
+         * @return if no running output, "" is returned
+         */
+        std::string getDriver() const;
+
         void *outputThread();
+        
+        bool setSink(std::string name);
+
+        std::string getSink() const;
     private:
         Atomic<bool> running;
         bool init;
 
         //should hold outputs here that exist for the life of the OutMgr
-        std::map<std::string,AudioOut *> managedOuts;
         AudioOut *defaultOut;/**<The default output*/
 
         //should hold short lived, externally controlled Outputs (eg WavEngine)

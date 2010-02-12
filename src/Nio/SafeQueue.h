@@ -1,7 +1,7 @@
 
 #ifndef SAFEQUEUE_H
 #define SAFEQUEUE_H
-
+#include <cstdlib>
 
 /**
  * C++ thread safe lockless queue
@@ -20,6 +20,9 @@ class SafeQueue
          * Returns -1 on error*/
         int push(const T &in);
         int pop(T &out);
+
+        //clears reading space
+        void clear();
 
     private:
         unsigned int wSpace() const;

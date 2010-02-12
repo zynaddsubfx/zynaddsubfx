@@ -22,13 +22,8 @@
 #include "Engine.h"
 
 Engine::Engine()
-    :enabled(false)
 {};
 
 Engine::~Engine()
 {};
 
-bool Engine::isRunning() const
-{
-    return enabled();
-}

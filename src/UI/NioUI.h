@@ -7,9 +7,12 @@
 #include <FL/Fl_Pack.H>
 #include <FL/Fl_Spinner.H>
 #include <FL/Enumerations.H>
+#include <FL/Fl_Choice.H>
 #include <list>
 #include <string>
 
+//removed from code for now
+#if 0
 struct NioTab : public Fl_Group
 {
     NioTab(std::string name, bool _midi, bool _audio);
@@ -26,6 +29,8 @@ struct NioTab : public Fl_Group
     Fl_Spinner *buffer;
     const std::string name;
 };
+#endif
+
 
 class NioUI : public Fl_Window
 {
@@ -33,7 +38,12 @@ class NioUI : public Fl_Window
         NioUI();
         void refresh();
     private:
-        std::list<NioTab *> tabs;
+        //std::list<NioTab *> tabs;
+
+        Fl_Choice *midi;
+        Fl_Choice *audio;
+        static void midiCallback(Fl_Widget *c);
+        static void audioCallback(Fl_Widget *c);
 };
 
 #endif

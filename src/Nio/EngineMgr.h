@@ -10,9 +10,8 @@ class MidiIn;
 class AudioOut;
 class OutMgr;
 /**Container/Owner of the long lived Engines*/
-class EngineMgr
+struct EngineMgr
 {
-    public:
         EngineMgr();
         ~EngineMgr();
 
@@ -22,15 +21,12 @@ class EngineMgr
          */
         Engine *getEng(std::string name);
 
-    private:
+        /**Stop all engines*/
+        void stop();
+
         std::list<Engine *> engines;
 
         Engine *defaultEng;/**<The default output*/
-
-        //Engine Manager user
-        //[if there is another 'user, just make this class a struct]
-        friend class OutMgr;
-        friend class NioUI;
 };
 
 extern EngineMgr *sysEngine;

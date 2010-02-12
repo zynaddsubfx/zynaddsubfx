@@ -23,7 +23,6 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 #include <string>
-#include "../Misc/Atomic.h"
 /**Marker for input/output driver*/
 class Engine
 {
@@ -31,17 +30,12 @@ class Engine
         Engine();
         virtual ~Engine();
 
-        /**Start the Driver
+        /**Start the Driver with all capabilities
          * @return true on success*/
         virtual bool Start()=0;
-        /**Stop the Driver*/
+        /**Completely stop the Driver*/
         virtual void Stop()=0;
 
-        /**Retruns if engine is on*/
-        bool isRunning() const;
-
         std::string name;
-    protected:
-        Atomic<bool> enabled;
 };
 #endif

@@ -20,11 +20,14 @@
 #include <cstdio>
 #include <iostream>
 #include <cstdlib>
+#include "SafeQueue.h"
+#include "../Misc/Util.h"
 
 using namespace std;
 
 WavEngine::WavEngine(OutMgr *out, string filename, int samplerate, int channels)
-    :AudioOut(out), file(filename, samplerate, channels)
+    :AudioOut(out), file(filename, samplerate, channels),
+    enabled(false)
 {
 }
 
@@ -57,46 +60,12 @@ void WavEngine::Stop()
         return;
     enabled = false;
 
-    //put something in the queue
-    pthread_mutex_lock(&outBuf_mutex);
-    outBuf.push(Stereo<Sample>(Sample(1,0.0),Sample(1,0.0)));
-    pthread_mutex_unlock(&outBuf_mutex);
-
-    //make sure it moves
-    pthread_cond_signal(&outBuf_cv);
-    pthread_mutex_unlock(&outBuf_mutex);
     pthread_join(pThread, NULL);
-}
-
-//lazy getter
-const Stereo<Sample> WavEngine::getNext()
-{
-    Stereo<Sample> ans;
-    pthread_mutex_lock(&outBuf_mutex);
-    bool isEmpty = outBuf.empty();
-    pthread_mutex_unlock(&outBuf_mutex);
-    if(isEmpty)//wait for samples
-    {
-        pthread_mutex_lock(&outBuf_mutex);
-        pthread_cond_wait(&outBuf_cv, &outBuf_mutex);
-        pthread_mutex_unlock(&outBuf_mutex);
-    }
-    pthread_mutex_lock(&outBuf_mutex);
-    ans = outBuf.front();
-    outBuf.pop();
-    pthread_mutex_unlock(&outBuf_mutex);
-    return ans;
 }
 
 void *WavEngine::_AudioThread(void *arg)
 {
     return (static_cast<WavEngine*>(arg))->AudioThread();
-}
-
-template <class T>
-T limit(T val, T min, T max)
-{
-    return (val < min ? min : (val > max ? max : val));
 }
 
 void *WavEngine::AudioThread()
@@ -107,7 +76,7 @@ void *WavEngine::AudioThread()
 
     while (enabled())
     {
-        const Stereo<Sample> smps = getNext();
+        const Stereo<Sample> smps = getNext(true);
         for(int i = 0; i < size; i++) {
             recordbuf_16bit[i*2]   = limit((int)(smps.l()[i] * 32767.0), -32768, 32767);
             recordbuf_16bit[i*2+1] = limit((int)(smps.r()[i] * 32767.0), -32768, 32767);

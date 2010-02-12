@@ -24,7 +24,9 @@
 #define WAVENGINE_H
 #include "AudioOut.h"
 #include "../Misc/WavFile.h"
+#include "../Misc/Atomic.h"
 #include <string>
+#include <pthread.h>
 
 class WavEngine: public AudioOut
 {
@@ -39,14 +41,14 @@ class WavEngine: public AudioOut
         void setAudioEn(bool nval){};
         bool getAudioEn() const{};
 
-        const Stereo<Sample> getNext();
-
     protected:
         void *AudioThread();
         static void *_AudioThread(void *arg);
 
     private:
         WavFile file;
+        Atomic<bool> enabled;
+        pthread_t pThread;
 };
 #endif
 

@@ -24,6 +24,7 @@
 #define NUL_ENGINE_H
 
 #include <sys/time.h>
+#include <pthread.h>
 #include "../globals.h"
 #include "AudioOut.h"
 
@@ -44,9 +45,8 @@ class NulEngine: public AudioOut
         static void *_AudioThread(void *arg);
 
     private:
-        bool en;
-        void dummyOut();
         struct timeval playing_until;
+        pthread_t *pThread;
 };
 
 #endif

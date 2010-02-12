@@ -1,6 +1,7 @@
 #include "EngineMgr.h"
 #include <algorithm>
 #include <iostream>
+#include "OutMgr.h"
 #include "AudioOut.h"
 #include "NulEngine.h"
 #if OSS
@@ -74,5 +75,12 @@ Engine *EngineMgr::getEng(string name)
         }
     }
     return NULL;
+}
+
+void EngineMgr::stop()
+{
+    for(list<Engine*>::iterator itr = engines.begin();
+            itr != engines.end(); ++itr) 
+        (*itr)->Stop();
 }
 

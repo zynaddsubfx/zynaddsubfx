@@ -33,9 +33,7 @@ AlsaEngine::AlsaEngine(OutMgr *out)
 {
     name = "ALSA";
     audio.handle = NULL;
-    audio.en     = true;
 
-    midi.en      = true;
     midi.handle = NULL;
     midi.alsaId = -1;
     midi.pThread = 0;
@@ -61,62 +59,41 @@ void *AlsaEngine::AudioThread()
 
 bool AlsaEngine::Start()
 {
-    if(enabled())
-        return true;
-    enabled = true;
-    if(audio.en)
-        openAudio();
-    if(midi.en)
-        openMidi();
-
-    return true;
+    return openAudio() && openMidi();
 }
 
 void AlsaEngine::Stop()
 {
-    if(!enabled())
-        return;
-    enabled = false;
-
-
+    if(getMidiEn())
+        setMidiEn(false);
+    if(getAudioEn())
+        setAudioEn(false);
 }
 
 void AlsaEngine::setMidiEn(bool nval)
 {
-    midi.en = nval;
-    if(enabled()) {
-        if(nval)
-            openMidi();
-        else
-            stopMidi();
-    }
+    if(nval)
+        openMidi();
+    else
+        stopMidi();
 }
 
 bool AlsaEngine::getMidiEn() const
 {
-    if(enabled())
-        return midi.handle;
-    else
-        return midi.en;
+    return midi.handle;
 }
 
 void AlsaEngine::setAudioEn(bool nval)
 {
-    audio.en = nval;
-    if(enabled()) {
-        if(nval)
-            openAudio();
-        else
-            stopAudio();
-    }
+    if(nval)
+        openAudio();
+    else
+        stopAudio();
 }
 
 bool AlsaEngine::getAudioEn() const
 {
-    if(enabled())
-        return audio.handle;
-    else
-        return audio.en;
+    return audio.handle;
 }
 
 void *AlsaEngine::_MidiThread(void *arg)
@@ -130,91 +107,91 @@ void *AlsaEngine::MidiThread(void)
     snd_seq_event_t *event;
     MidiEvent ev;
     set_realtime();
-    while (enabled())
+    while (snd_seq_event_input(midi.handle, &event) > 0)
     {
-        while (snd_seq_event_input(midi.handle, &event) > 0)
+        //ensure ev is empty
+        ev.channel = 0;
+        ev.num = 0;
+        ev.value = 0;
+        ev.type = 0;
+
+        if (!event)
+            continue;
+        switch (event->type)
         {
-            //ensure ev is empty
-            ev.channel = 0;
-            ev.num = 0;
-            ev.value = 0;
-            ev.type = 0;
-
-            if (!event)
-                continue;
-            switch (event->type)
-            {
-                case SND_SEQ_EVENT_NOTEON:
-                    if (event->data.note.note)
-                    {
-                        ev.type    = M_NOTE;
-                        ev.channel = event->data.note.channel;
-                        ev.num     = event->data.note.note;
-                        ev.value   = event->data.note.velocity;
-                        sysIn->putEvent(ev);
-                    }
-                    break;
-
-                case SND_SEQ_EVENT_NOTEOFF:
+            case SND_SEQ_EVENT_NOTEON:
+                if (event->data.note.note)
+                {
                     ev.type    = M_NOTE;
                     ev.channel = event->data.note.channel;
                     ev.num     = event->data.note.note;
-                    ev.value   = 0;
+                    ev.value   = event->data.note.velocity;
                     sysIn->putEvent(ev);
-                    break;
+                }
+                break;
 
-                case SND_SEQ_EVENT_PITCHBEND:
-                    ev.type    = M_CONTROLLER;
-                    ev.channel = event->data.control.channel;
-                    ev.num     = C_pitchwheel;
-                    ev.value   = event->data.control.value;
-                    sysIn->putEvent(ev);
-                    break;
+            case SND_SEQ_EVENT_NOTEOFF:
+                ev.type    = M_NOTE;
+                ev.channel = event->data.note.channel;
+                ev.num     = event->data.note.note;
+                ev.value   = 0;
+                sysIn->putEvent(ev);
+                break;
 
-                case SND_SEQ_EVENT_CONTROLLER:
-                    ev.type    = M_CONTROLLER;
-                    ev.channel = event->data.control.channel;
-                    ev.num     = event->data.control.param;
-                    ev.value   = event->data.control.value;
-                    sysIn->putEvent(ev);
-                    break;
+            case SND_SEQ_EVENT_PITCHBEND:
+                ev.type    = M_CONTROLLER;
+                ev.channel = event->data.control.channel;
+                ev.num     = C_pitchwheel;
+                ev.value   = event->data.control.value;
+                sysIn->putEvent(ev);
+                break;
 
-                case SND_SEQ_EVENT_RESET: // reset to power-on state
-                    ev.type    = M_CONTROLLER;
-                    ev.channel = event->data.control.channel;
-                    ev.num     = C_resetallcontrollers;
-                    ev.value   = 0;
-                    sysIn->putEvent(ev);
-                    break;
+            case SND_SEQ_EVENT_CONTROLLER:
+                ev.type    = M_CONTROLLER;
+                ev.channel = event->data.control.channel;
+                ev.num     = event->data.control.param;
+                ev.value   = event->data.control.value;
+                sysIn->putEvent(ev);
+                break;
 
-                case SND_SEQ_EVENT_PORT_SUBSCRIBED: // ports connected
-                    if (true)
-                        cout << "Info, alsa midi port connected" << endl;
-                    break;
+            case SND_SEQ_EVENT_RESET: // reset to power-on state
+                ev.type    = M_CONTROLLER;
+                ev.channel = event->data.control.channel;
+                ev.num     = C_resetallcontrollers;
+                ev.value   = 0;
+                sysIn->putEvent(ev);
+                break;
 
-                case SND_SEQ_EVENT_PORT_UNSUBSCRIBED: // ports disconnected
-                    if (true)
-                        cout << "Info, alsa midi port disconnected" << endl;
-                    break;
+            case SND_SEQ_EVENT_PORT_SUBSCRIBED: // ports connected
+                if (true)
+                    cout << "Info, alsa midi port connected" << endl;
+                break;
 
-                case SND_SEQ_EVENT_SYSEX:   // system exclusive
-                case SND_SEQ_EVENT_SENSING: // midi device still there
-                    break;
+            case SND_SEQ_EVENT_PORT_UNSUBSCRIBED: // ports disconnected
+                if (true)
+                    cout << "Info, alsa midi port disconnected" << endl;
+                break;
 
-                default:
-                    if (true)
-                        cout << "Info, other non-handled midi event, type: "
-                             << (int)event->type << endl;
-                    break;
-            }
-            snd_seq_free_event(event);
+            case SND_SEQ_EVENT_SYSEX:   // system exclusive
+            case SND_SEQ_EVENT_SENSING: // midi device still there
+                break;
+
+            default:
+                if (true)
+                    cout << "Info, other non-handled midi event, type: "
+                        << (int)event->type << endl;
+                break;
         }
+        snd_seq_free_event(event);
     }
     return NULL;
 }
 
 bool AlsaEngine::openMidi()
 {
+    if(getMidiEn())
+        return true;
+
     int alsaport;
     midi.handle = NULL;
 
@@ -242,11 +219,15 @@ bool AlsaEngine::openMidi()
 
 void AlsaEngine::stopMidi()
 {
+    if(!getMidiEn())
+        return;
+
+    snd_seq_t *handle = midi.handle;
     if (NULL != midi.handle && midi.pThread)
         pthread_cancel(midi.pThread);
     midi.handle = NULL;
-    if(midi.handle)
-        snd_seq_close(midi.handle);
+    if(handle)
+        snd_seq_close(handle);
 }
 
 const short *AlsaEngine::interleave(const Stereo<Sample> smps)const
@@ -268,6 +249,9 @@ const short *AlsaEngine::interleave(const Stereo<Sample> smps)const
 
 bool AlsaEngine::openAudio()
 {
+    if(getAudioEn())
+        return true;
+
     int rc = 0;
     /* Open PCM device for playback. */
     audio.handle=NULL;
@@ -288,10 +272,9 @@ bool AlsaEngine::openAudio()
 
     /* Set the desired hardware parameters. */
 
-#warning TODO Make Access noninterleaved
     /* Interleaved mode */
     snd_pcm_hw_params_set_access(audio.handle, audio.params,
-            SND_PCM_ACCESS_RW_INTERLEAVED);
+            SND_PCM_ACCESS_RW_NONINTERLEAVED);
 
     /* Signed 16-bit little-endian format */
     snd_pcm_hw_params_set_format(audio.handle, audio.params,
@@ -333,6 +316,9 @@ bool AlsaEngine::openAudio()
 
 void AlsaEngine::stopAudio()
 {
+    if(!getAudioEn())
+        return;
+
     snd_pcm_t *handle = audio.handle;
     audio.handle = NULL;
     pthread_join(audio.pThread, NULL);

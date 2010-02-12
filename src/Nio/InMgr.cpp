@@ -1,4 +1,7 @@
 #include "InMgr.h"
+#include "MidiIn.h"
+#include "EngineMgr.h"
+#include "../Misc/Master.h"
 #include <iostream>
 
 using namespace std;
@@ -84,5 +87,37 @@ void *InMgr::inputThread()
         pthread_mutex_unlock(&master->mutex);
     }
     return NULL;
+}
+
+bool InMgr::setSource(string name)
+{
+    MidiIn *src = NULL;
+    for(list<Engine*>::iterator itr = sysEngine->engines.begin();
+            itr != sysEngine->engines.end(); ++itr) {
+        MidiIn *in = dynamic_cast<MidiIn *>(*itr);
+        if(in) {
+            if(in->name == name)
+                src = in;
+            else
+                in->setMidiEn(false);
+        }
+    }
+
+    if(!src)
+        return false;
+
+    src->setMidiEn(true);
+
+    return src->getMidiEn();
+}
+
+string InMgr::getSource() const
+{
+    for(list<Engine*>::iterator itr = sysEngine->engines.begin();
+            itr != sysEngine->engines.end(); ++itr) {
+        MidiIn *in = dynamic_cast<MidiIn *>(*itr);
+        if(in && in->getMidiEn())
+            return in->name;
+    }
 }
 

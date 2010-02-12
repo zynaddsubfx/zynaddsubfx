@@ -64,12 +64,9 @@ class AlsaEngine : public AudioOut, MidiIn
             snd_seq_t   *handle;
             int          alsaId;
             pthread_t    pThread;
-            bool en;
         } midi;
 
         struct {
-            bool en;
-            bool run;
             snd_pcm_t *handle;
             snd_pcm_hw_params_t *params;
             unsigned int sampleRate;

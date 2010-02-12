@@ -27,10 +27,6 @@ OutMgr::OutMgr(Master *nmaster)
 
 OutMgr::~OutMgr()
 {
-    for(map<string,AudioOut*>::iterator itr = managedOuts.begin();
-            itr != managedOuts.end(); ++itr) {
-            itr->second->Stop();
-    }
     running = false;
     sem_post(&requested);
 
@@ -40,9 +36,73 @@ OutMgr::~OutMgr()
     sem_destroy(&requested);
 }
 
+void OutMgr::add(AudioOut *driver)
+{
+    pthread_mutex_lock(&mutex);
+    unmanagedOuts.push_back(driver);
+    if(running())//hotplug
+        driver->Start();
+    pthread_mutex_unlock(&mutex);
+}
+
+void OutMgr::remove(AudioOut *out)
+{
+    pthread_mutex_lock(&mutex);
+    unmanagedOuts.remove(out);
+    out->Stop();//tells engine to stop
+
+    //gives a dummy sample to make sure it is not stuck
+    out->out(Stereo<Sample>(Sample(SOUND_BUFFER_SIZE, 0.0),
+                            Sample(SOUND_BUFFER_SIZE, 0.0)));
+    pthread_mutex_unlock(&mutex);
+}
+
+void OutMgr::requestSamples(unsigned int n)
+{
+    for(unsigned int i = 0; i < n; ++i)
+        sem_post(&requested);
+}
+
+int OutMgr::getRunning()
+{
+    int tmp;
+    sem_getvalue(&requested, &tmp);
+    if(tmp < 0)
+        tmp = 0;
+    return tmp;
+}
+
 void *_outputThread(void *arg)
 {
     return (static_cast<OutMgr*>(arg))->outputThread();
+}
+
+void OutMgr::run()
+{
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+    pthread_create(&outThread, &attr, _outputThread, this);
+}
+
+AudioOut *OutMgr::getOut(string name)
+{
+    return dynamic_cast<AudioOut *>(sysEngine->getEng(name));
+}
+
+string OutMgr::getDriver() const
+{
+    for(list<Engine*>::iterator itr = sysEngine->engines.begin();
+            itr != sysEngine->engines.end(); ++itr) {
+        AudioOut *out = dynamic_cast<AudioOut *>(*itr);
+        if(out && out->getAudioEn())
+            return out->name;
+    }
+}
+
+bool OutMgr::setDriver(string name)
+{
+    return false;
 }
 
 void *OutMgr::outputThread()
@@ -69,7 +129,6 @@ void *OutMgr::outputThread()
         if(false) {
             cout << "Status: ";
             pthread_mutex_lock(&mutex);
-            cout << managedOuts.size() << "-";
             cout << unmanagedOuts.size();
             pthread_mutex_unlock(&mutex);
             cout << " outs, ";
@@ -91,7 +150,7 @@ void *OutMgr::outputThread()
         for(list<Engine*>::iterator itr = sysEngine->engines.begin();
                 itr != sysEngine->engines.end(); ++itr) {
             AudioOut *out = dynamic_cast<AudioOut *>(*itr);
-            if(out && out->isRunning() && out->getAudioEn())
+            if(out && out->getAudioEn())
                 out->out(smps);
         }
 
@@ -109,52 +168,35 @@ void *OutMgr::outputThread()
     return NULL;
 }
 
-void OutMgr::run()
+bool OutMgr::setSink(string name)
 {
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&outThread, &attr, _outputThread, this);
+    AudioOut *sink = NULL;
+    for(list<Engine*>::iterator itr = sysEngine->engines.begin();
+            itr != sysEngine->engines.end(); ++itr) {
+        AudioOut *out = dynamic_cast<AudioOut *>(*itr);
+        if(out) {
+            if(out->name == name)
+                sink = out;
+            else
+                out->setAudioEn(false);
+        }
+    }
+
+    if(!sink)
+        return false;
+
+    sink->setAudioEn(true);
+
+    return sink->getAudioEn();
 }
 
-AudioOut *OutMgr::getOut(string name)
+string OutMgr::getSink() const
 {
-    return dynamic_cast<AudioOut *>(sysEngine->getEng(name));
-}
-
-void OutMgr::add(AudioOut *driver)
-{
-    pthread_mutex_lock(&mutex);
-    unmanagedOuts.push_back(driver);
-    if(running())//hotplug
-        driver->Start();
-    pthread_mutex_unlock(&mutex);
-}
-
-void OutMgr::remove(AudioOut *out)
-{
-    pthread_mutex_lock(&mutex);
-    unmanagedOuts.remove(out);
-    out->Stop();//tells engine to stop
-
-    //gives a dummy sample to make sure it is not stuck
-    out->out(Stereo<Sample>(Sample(SOUND_BUFFER_SIZE, 0.0),
-                            Sample(SOUND_BUFFER_SIZE, 0.0)));
-    pthread_mutex_unlock(&mutex);
-}
-
-int OutMgr::getRunning()
-{
-    int tmp;
-    sem_getvalue(&requested, &tmp);
-    if(tmp < 0)
-        tmp = 0;
-    return tmp;
-}
-
-void OutMgr::requestSamples(unsigned int n)
-{
-    for(unsigned int i = 0; i < n; ++i)
-        sem_post(&requested);
+    for(list<Engine*>::iterator itr = sysEngine->engines.begin();
+            itr != sysEngine->engines.end(); ++itr) {
+        AudioOut *out = dynamic_cast<AudioOut *>(*itr);
+        if(out && out->getAudioEn())
+            return out->name;
+    }
 }
 
