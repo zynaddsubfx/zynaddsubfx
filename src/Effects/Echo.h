@@ -131,6 +131,7 @@ class Echo:public Effect
         Stereo<int> pos;
         //step size for delay buffer
         Stereo<int> delta;
+        Stereo<int> ndelta;
 };
 
 #endif

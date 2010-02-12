@@ -34,7 +34,7 @@ Echo::Echo(const int &insertion_,
       delayTime(1), lrdelay(0),
       delay(new REALTYPE[(int)(MAX_DELAY * SAMPLE_RATE)],
             new REALTYPE[(int)(MAX_DELAY * SAMPLE_RATE)]),
-      old(0.0), pos(0),delta(1)
+      old(0.0), pos(0), delta(1), ndelta(1)
 {
     initdelays();
     setpreset(Ppreset);
@@ -70,8 +70,8 @@ void Echo::initdelays()
     //number of seconds to delay right chan
     float dr = delayCtl.getiVal() + lrdelay;
 
-    delta.l() = max(1,(int) (dl * SAMPLE_RATE));
-    delta.r() = max(1,(int) (dr * SAMPLE_RATE));
+    ndelta.l() = max(1,(int) (dl * SAMPLE_RATE));
+    ndelta.r() = max(1,(int) (dr * SAMPLE_RATE));
 
     printf("Left do    %f - Right do    %f \n", dl / MAX_DELAY * SAMPLE_RATE, dr / MAX_DELAY * SAMPLE_RATE);
     printf("Left d     %f - Right d     %f \n", dl, dr);
@@ -96,16 +96,32 @@ void Echo::out(const Stereo<float *> &input)
         rdl = input.r()[i] * (1.0 - panning) - rdl * fb;
 
         //LowPass Filter
-        old.l() = delay.l()[pos.l()] =  ldl * hidamp + old.l() * (1.0 - hidamp);
-        old.r() = delay.r()[pos.r()] = rdl * hidamp + old.r() * (1.0 - hidamp);
+        old.l() = delay.l()[(pos.l()+delta.l())%(MAX_DELAY * SAMPLE_RATE)] =  ldl * hidamp + old.l() * (1.0 - hidamp);
+        old.r() = delay.r()[(pos.r()+delta.r())%(MAX_DELAY * SAMPLE_RATE)] =  rdl * hidamp + old.r() * (1.0 - hidamp);
 
         //increment
-        pos.l() += delta.l();
-        pos.r() += delta.r();
+        ++pos.l();// += delta.l();
+        ++pos.r();// += delta.r();
 
         //ensure that pos is still in bounds
         pos.l() %= MAX_DELAY * SAMPLE_RATE;
         pos.r() %= MAX_DELAY * SAMPLE_RATE;
+
+        //adjust delay if needed
+        delta.l() = (15*delta.l() + ndelta.l())/16;
+        delta.r() = (15*delta.r() + ndelta.r())/16;
+        //if(delta.l()!=ndelta.l()){
+        //    if(delta.l() > ndelta.l())
+        //        delta--delta.l();
+        //    else
+        //        ++delta.l();
+        //}
+        //if(delta.r()!=ndelta.r()){
+        //    if(delta.r() > ndelta.r())
+        //        --delta.r();
+        //    else
+        //        ++delta.r();
+        //}
     }
 }
 
