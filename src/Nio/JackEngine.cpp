@@ -157,7 +157,7 @@ bool JackEngine::openAudio()
             return false;
 
 
-    const char *portnames[] = { "left", "right" };
+    const char *portnames[] = { "out_1", "out_2" };
     for (int port = 0; port < 2; ++port)
     {
         audio.ports[port] = jack_port_register(jackClient, portnames[port],
