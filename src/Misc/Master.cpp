@@ -191,6 +191,52 @@ void Master::setController(char chan, int type, int par)
     }
 }
 
+void Master::vuUpdate(const REALTYPE *outl, const REALTYPE *outr)
+{
+    //Peak computation (for vumeters)
+    vu.outpeakl = 1e-12;
+    vu.outpeakr = 1e-12;
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        if(fabs(outl[i]) > vu.outpeakl)
+            vu.outpeakl = fabs(outl[i]);
+        if(fabs(outr[i]) > vu.outpeakr)
+            vu.outpeakr = fabs(outr[i]);
+    }
+    if((vu.outpeakl > 1.0) || (vu.outpeakr > 1.0))
+        vu.clipped = 1;
+    if(vu.maxoutpeakl < vu.outpeakl)
+        vu.maxoutpeakl = vu.outpeakl;
+    if(vu.maxoutpeakr < vu.outpeakr)
+        vu.maxoutpeakr = vu.outpeakr;
+
+    //RMS Peak computation (for vumeters)
+    vu.rmspeakl = 1e-12;
+    vu.rmspeakr = 1e-12;
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        vu.rmspeakl += outl[i] * outl[i];
+        vu.rmspeakr += outr[i] * outr[i];
+    }
+    vu.rmspeakl = sqrt(vu.rmspeakl / SOUND_BUFFER_SIZE);
+    vu.rmspeakr = sqrt(vu.rmspeakr / SOUND_BUFFER_SIZE);
+
+    //Part Peak computation (for Part vumeters or fake part vumeters)
+    for(int npart = 0; npart < NUM_MIDI_PARTS; npart++) {
+        vuoutpeakpart[npart] = 1.0e-12;
+        if(part[npart]->Penabled != 0) {
+            REALTYPE *outl = part[npart]->partoutl,
+                     *outr = part[npart]->partoutr;
+            for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+                REALTYPE tmp = fabs(outl[i] + outr[i]);
+                if(tmp > vuoutpeakpart[npart])
+                    vuoutpeakpart[npart] = tmp;
+            }
+            vuoutpeakpart[npart] *= volume;
+        }
+        else
+            if(fakepeakpart[npart] > 1)
+                fakepeakpart[npart]--;
+    }
+}
 
 /*
  * Enable/Disable a part
@@ -386,52 +432,10 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
         outr[i] *= volume;
     }
 
-    //Peak computation (for vumeters)
-    pthread_mutex_lock(&vumutex);
-    vu.outpeakl = 1e-12;
-    vu.outpeakr = 1e-12;
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        if(fabs(outl[i]) > vu.outpeakl)
-            vu.outpeakl = fabs(outl[i]);
-        if(fabs(outr[i]) > vu.outpeakr)
-            vu.outpeakr = fabs(outr[i]);
+    if(!pthread_mutex_trylock(&vumutex)) {
+        vuUpdate(outl, outr);
+        pthread_mutex_unlock(&vumutex);
     }
-    if((vu.outpeakl > 1.0) || (vu.outpeakr > 1.0))
-        vu.clipped = 1;
-    if(vu.maxoutpeakl < vu.outpeakl)
-        vu.maxoutpeakl = vu.outpeakl;
-    if(vu.maxoutpeakr < vu.outpeakr)
-        vu.maxoutpeakr = vu.outpeakr;
-
-    //RMS Peak computation (for vumeters)
-    vu.rmspeakl = 1e-12;
-    vu.rmspeakr = 1e-12;
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        vu.rmspeakl += outl[i] * outl[i];
-        vu.rmspeakr += outr[i] * outr[i];
-    }
-    vu.rmspeakl = sqrt(vu.rmspeakl / SOUND_BUFFER_SIZE);
-    vu.rmspeakr = sqrt(vu.rmspeakr / SOUND_BUFFER_SIZE);
-
-    //Part Peak computation (for Part vumeters or fake part vumeters)
-    for(npart = 0; npart < NUM_MIDI_PARTS; npart++) {
-        vuoutpeakpart[npart] = 1.0e-12;
-        if(part[npart]->Penabled != 0) {
-            REALTYPE *outl = part[npart]->partoutl,
-            *outr = part[npart]->partoutr;
-            for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-                REALTYPE tmp = fabs(outl[i] + outr[i]);
-                if(tmp > vuoutpeakpart[npart])
-                    vuoutpeakpart[npart] = tmp;
-            }
-            vuoutpeakpart[npart] *= volume;
-        }
-        else
-        if(fakepeakpart[npart] > 1)
-            fakepeakpart[npart]--;
-        ;
-    }
-    pthread_mutex_unlock(&vumutex);
 
 
     //Shutup if it is asked (with fade-out)

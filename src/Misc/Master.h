@@ -94,6 +94,8 @@ class Master
         void ShutUp();
         int shutup;
 
+        void vuUpdate(const REALTYPE *outl, const REALTYPE *outr);
+
         /**Audio Output*/
         void AudioOut(REALTYPE *outl, REALTYPE *outr);
         /**Audio Output (for callback mode). This allows the program to be controled by an external program*/
