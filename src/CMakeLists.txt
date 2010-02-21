@@ -2,6 +2,7 @@
 find_package(zlib REQUIRED)
 find_package(fftw REQUIRED)
 find_package(MXML REQUIRED)
+find_package(PkgConfig REQUIRED)
 #find_package(pthread REQUIRED)
 find_package(Alsa)
 find_package(JACK)
@@ -16,6 +17,7 @@ SET (FFTW_VERSION 3 CACHE STRING "Version number of FFTW")
 SET (OutputModule alsa CACHE STRING "Output module, either alsa, jack or portaudio")
 SET (GuiModule fltk CACHE STRING "GUI module, either fltk, qt or off")
 SET (CompileTests OFF CACHE BOOL "whether tests should be compiled in or not")
+
 
 # Now, handle the incoming settings and set define flags/variables based
 # on this
@@ -42,6 +44,14 @@ else ()
 	message(FATAL_ERROR "OutputModule must be either alsa, jack or portaudio")
 endif()
 
+if(NOT PKG_CONFIG_FOUND)
+    message(FATAL_ERROR "pkg-config not found")
+endif(NOT PKG_CONFIG_FOUND)
+
+# lash
+pkg_search_module(LASH lash-1.0)
+mark_as_advanced(LASH_LIBRARIES)
+
 ########### Settings dependant code ###########
 # From here on, the setting variables have  been prepared so concentrate
 # on the actual compiling.
@@ -65,6 +75,13 @@ if(PortAudioOutput)
 	include_directories(${PORTAUDIO_INCLUDE_DIR})
 	add_definitions(-DPAAUDIOOUT)
         set(AUDIO_LIBRARIES ${AUDIO_LIBRARIES} ${PORTAUDIO_LIBRARIES})
+endif()
+
+if(LASH_FOUND)
+	include_directories(${LASH_INCLUDE_DIRS})
+	add_definitions(-DUSE_LASH)
+	set(AUDIO_LIBRARIES ${AUDIO_LIBRARIES} ${LASH_LIBRARIES})
+	message(STATUS "Compiling with lash")
 endif()
 
 add_definitions(-DFFTW_VERSION_${FFTW_VERSION}
