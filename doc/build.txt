@@ -1,5 +1,5 @@
-Building ZynAddSubFX
-====================
+Appendix B: Building ZynAddSubFX
+================================
 
 Introduction to CMake
 ---------------------
@@ -33,6 +33,11 @@ Quick start guide
 
 For the impatient ones, here is a quick guide on how to immediately
 build ZynAddSubFX from source.
+
+**************************************************************
+Note: This assumes that you already have a copy of the source.
+**************************************************************
+
 ---------------------------------
 #enter the source directory
 cd zynaddsubfx
@@ -46,13 +51,9 @@ cd build
 cmake ..
 
 #OPTIONAL: Adjust compile variables in the Cache file:
-$EDITOR CMakeCache.txt
+ccmake .
 
 #And finally, build as usual using make
 make
 ---------------------------------
-
-Customizing the build
----------------------
-
 

@@ -18,3 +18,7 @@ include::./controller.txt[]
 include::./nrpn.txt[]
 
 include::./mididefaults.txt[]
+
+include::./build.txt[]
+
+include::./getting.txt[]
