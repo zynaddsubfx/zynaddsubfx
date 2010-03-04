@@ -28,7 +28,7 @@
 
 #ifdef OS_LINUX
 #include <getopt.h>
-#elif OS_WINDOIWS
+#elif OS_WINDOWS
 #include <winbase.h>
 #include <windows.h>
 #endif
@@ -46,7 +46,7 @@ extern Dump dump;
 #include "Input/OSSMidiIn.h"
 #endif
 
-#if (defined(NONEMIDIIN) || defined(VSTMIDIIN))
+#if (defined(NONEMIDIIN) || defined(VSTMIDIIN) || defined(DSSIMIDIIN))
 #include "Input/NULLMidiIn.h"
 #endif
 
