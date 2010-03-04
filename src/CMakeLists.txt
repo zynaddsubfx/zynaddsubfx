@@ -210,3 +210,6 @@ target_link_libraries(zynaddsubfx
         ${MIDIINPUT_LIBRARIES}
 	)
 
+install(TARGETS zynaddsubfx
+	RUNTIME DESTINATION bin
+	)
