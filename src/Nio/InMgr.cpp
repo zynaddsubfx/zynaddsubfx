@@ -119,5 +119,6 @@ string InMgr::getSource() const
         if(in && in->getMidiEn())
             return in->name;
     }
+    return "ERROR";
 }
 

@@ -98,6 +98,7 @@ string OutMgr::getDriver() const
         if(out && out->getAudioEn())
             return out->name;
     }
+    return "ERROR";
 }
 
 bool OutMgr::setDriver(string name)
@@ -198,5 +199,6 @@ string OutMgr::getSink() const
         if(out && out->getAudioEn())
             return out->name;
     }
+    return "ERROR";
 }
 
