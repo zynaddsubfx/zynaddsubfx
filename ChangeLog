@@ -982,3 +982,7 @@
 	    - General Code Cleanup
 	    - Adding OpenGL linking for proper compiles
 
+14 Jan 2010 (Mark McCurry)
+	    - Fixed No UI Flag "-U" as it was previously partially initializing
+	      the gui
+
