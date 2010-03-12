@@ -101,7 +101,7 @@ string OutMgr::getDriver() const
     return "ERROR";
 }
 
-bool OutMgr::setDriver(string name)
+bool OutMgr::setDriver(string /*name*/)
 {
     return false;
 }

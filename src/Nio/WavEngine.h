@@ -38,7 +38,7 @@ class WavEngine: public AudioOut
         bool Start();
         void Stop();
 
-        void setAudioEn(bool nval){};
+        void setAudioEn(bool /*nval*/){};
         bool getAudioEn() const{return true;};
 
     protected:

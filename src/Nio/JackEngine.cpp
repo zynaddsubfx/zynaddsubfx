@@ -268,7 +268,7 @@ bool JackEngine::processAudio(jack_nframes_t nframes)
 
 }
 
-int JackEngine::_xrunCallback(void *arg)
+int JackEngine::_xrunCallback(void * /*/arg*/)
 {
     cerr << "Jack reports xrun" << endl;
     return 0;
@@ -304,7 +304,7 @@ void JackEngine::handleMidi(unsigned long frames)
     jack_midi_event_t jack_midi_event;
     jack_nframes_t    event_index = 0;
     unsigned char    *midi_data;
-    unsigned char     type, chan;
+    unsigned char     type;
 
     while(jack_midi_event_get(&jack_midi_event, midi_buf,
                 event_index++) == 0) {
