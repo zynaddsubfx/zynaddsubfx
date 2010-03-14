@@ -16,4 +16,5 @@ Contributors:
         Tobias Doerffel (static-instance variables fix, missing include fix)
         James Morris (Memory leaks in FLTK GUI)
         Alan Calvert (Portions of New IO)
+        Stephen Parry (DSSI rebuild)
 

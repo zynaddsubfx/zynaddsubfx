@@ -986,3 +986,6 @@
 	    - Fixed No UI Flag "-U" as it was previously partially initializing
 	      the gui
 
+14 Feb 2010 (Stephen Parry)
+	    - DSSI Support Repaired
+

@@ -13,6 +13,10 @@ set(zynaddsubfx_misc_SRCS
         WavFile.cpp
 )
 
+if (LASH_FOUND)
+    set(zynaddsubfx_misc_SRCS ${zynaddsubfx_misc_SRCS} LASHClient.cpp)
+endif()
+
 add_library(zynaddsubfx_misc STATIC
 	${zynaddsubfx_misc_SRCS} 
 	)

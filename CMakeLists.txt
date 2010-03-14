@@ -5,3 +5,7 @@ project(zynaddsubfx)
 enable_testing()
 #Currently the only directory that uses cmake
 add_subdirectory(src)
+
+install(FILES AUTHORS.txt COPYING FAQ.txt HISTORY.txt README.txt
+	DESTINATION share/doc/zynaddsubfx
+	)
