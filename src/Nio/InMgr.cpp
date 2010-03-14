@@ -26,52 +26,33 @@ MidiEvent::MidiEvent()
 {}
 
 InMgr::InMgr(Master *_master)
-    :queue(100), enabled(false), master(_master)
+    :queue(100), master(_master)
 {
+    current = NULL;
     sem_init(&work, PTHREAD_PROCESS_PRIVATE, 0);
 }
 
 InMgr::~InMgr()
 {
     //lets stop the consumer thread
-    enabled = false;
-    sem_post(&work);
-    pthread_join(inThread, NULL);
-
     sem_destroy(&work);
 }
 
 void InMgr::putEvent(MidiEvent ev)
 {
     if(queue.push(ev)) //check for error
-        cout << "Error, Midi Ringbuffer is FULL" << endl;
+        cerr << "ERROR: Midi Ringbuffer is FULL" << endl;
     else
         sem_post(&work);
 }
 
-void *_inputThread(void *arg)
-{
-    return static_cast<InMgr *>(arg)->inputThread();
-}
-
-void InMgr::run()
-{
-    enabled = true;
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&inThread, &attr, _inputThread, this);
-}
-
-void *InMgr::inputThread()
+void InMgr::flush()
 {
     MidiEvent ev;
-    while(enabled()) {
-        sem_wait(&work);
+    while(!sem_trywait(&work)) {
         queue.pop(ev);
         cout << ev << endl;
 
-        pthread_mutex_lock(&master->mutex);
         if(M_NOTE == ev.type) {
             dump.dumpnote(ev.channel, ev.num, ev.value);
 
@@ -84,9 +65,7 @@ void *InMgr::inputThread()
             dump.dumpcontroller(ev.channel, ev.num, ev.value);
             master->setController(ev.channel, ev.num, ev.value);
         }
-        pthread_mutex_unlock(&master->mutex);
     }
-    return NULL;
 }
 
 bool InMgr::setSource(string name)
@@ -95,29 +74,28 @@ bool InMgr::setSource(string name)
     for(list<Engine*>::iterator itr = sysEngine->engines.begin();
             itr != sysEngine->engines.end(); ++itr) {
         MidiIn *in = dynamic_cast<MidiIn *>(*itr);
-        if(in) {
-            if(in->name == name)
+        if(in && in->name == name) {
                 src = in;
-            else
-                in->setMidiEn(false);
+                break;
         }
     }
 
     if(!src)
         return false;
 
-    src->setMidiEn(true);
+    if(current)
+        current->setMidiEn(false);
+    current = src;
+    current->setMidiEn(true);
 
-    return src->getMidiEn();
+    return current->getMidiEn();
 }
 
 string InMgr::getSource() const
 {
-    for(list<Engine*>::iterator itr = sysEngine->engines.begin();
-            itr != sysEngine->engines.end(); ++itr) {
-        MidiIn *in = dynamic_cast<MidiIn *>(*itr);
-        if(in && in->getMidiEn())
-            return in->name;
-    }
+    if(current)
+        return current->name;
+    else
+        return "ERROR";
 }
 

@@ -22,6 +22,7 @@ struct MidiEvent
 };
 
 class Master;
+class MidiIn;
 //super simple class to manage the inputs
 class InMgr
 {
@@ -31,10 +32,8 @@ class InMgr
 
         void putEvent(MidiEvent ev);
 
-        //run the InMgr
-        void run();
-
-        void *inputThread();
+        /**Flush the Midi Queue*/
+        void flush();
 
         bool setSource(std::string name);
 
@@ -43,8 +42,7 @@ class InMgr
     private:
         SafeQueue<MidiEvent> queue;
         sem_t work;
-        Atomic<bool> enabled;
-        pthread_t inThread;
+        MidiIn *current;
 
         /**the link to the rest of zyn*/
         Master *master;

@@ -48,16 +48,6 @@ else  ()
 	message(STATUS "GUI module defaulting to off")
 endif()
 
-if (DefaultOutput STREQUAL alsa)
-        add_definitions(-DALSA_DEFAULT=1)
-elseif(DefaultOutput STREQUAL oss)
-        add_definitions(-DOSS_DEFAULT=1)
-elseif(DefaultOutput STREQUAL jack)
-        add_definitions(-DJACK_DEFAULT=1)
-elseif(DefaultOutput STREQUAL portaudio)
-        add_definitions(-DPORTAUDIO_DEFAULT=1)
-endif()
-
 
 ########### Settings dependant code ###########
 # From here on, the setting variables have  been prepared so concentrate
@@ -87,12 +77,6 @@ endif()
 
 if (CompileTests)
 	ENABLE_TESTING()
-endif()
-
-if(JackOutput)
-	include_directories(${JACK_INCLUDE_DIR})
-	add_definitions(-DJACKAUDIOOUT)
-        set(AUDIO_LIBRARIES ${AUDIO_LIBRARIES} ${JACK_LIBRARIES})
 endif()
 
 add_definitions(-DFFTW_VERSION_${FFTW_VERSION}
