@@ -8,6 +8,7 @@ find_package(Alsa)
 find_package(JACK)
 find_package(PortAudio)
 find_package(FLTK)
+find_package(OpenGL) #for FLTK
 
 ######### Settings ###########
 # NOTE: These cache variables should normallly not be changed in this
@@ -112,7 +113,7 @@ if(FltkGui)
     mark_as_advanced(FORCE FLTK_MATH_LIBRARY)
 
 
-    set(GUI_LIBRARIES ${FLTK_LIBRARIES} ${MYFLTK_LIBRARIES} zynaddsubfx_gui)
+    set(GUI_LIBRARIES ${FLTK_LIBRARIES} ${MYFLTK_LIBRARIES} ${OPENGL_LIBRARIES} zynaddsubfx_gui)
     add_definitions(-DFLTK_GUI)
 
     message(STATUS "Will build fltk gui")
