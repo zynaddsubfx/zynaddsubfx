@@ -3,7 +3,9 @@
 
   Echo.C - Echo effect
   Copyright (C) 2002-2005 Nasca Octavian Paul
+  Copyright (C) 2009-2010 Mark McCurry
   Author: Nasca Octavian Paul
+          Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License
@@ -40,8 +42,10 @@ Echo::Echo(const int &insertion_,
     setpreset(Ppreset);
 }
 
-Echo::~Echo() {
-//need to delete samples
+Echo::~Echo()
+{
+    delete[] delay.l();
+    delete[] delay.r();
 }
 
 /*
@@ -72,11 +76,6 @@ void Echo::initdelays()
 
     ndelta.l() = max(1,(int) (dl * SAMPLE_RATE));
     ndelta.r() = max(1,(int) (dr * SAMPLE_RATE));
-
-    printf("Left do    %f - Right do    %f \n", dl / MAX_DELAY * SAMPLE_RATE, dr / MAX_DELAY * SAMPLE_RATE);
-    printf("Left d     %f - Right d     %f \n", dl, dr);
-    printf("Left delta %d - Right delta %d \n", delta.l(), delta.r());
-    printf("Left size  %d - Right size  %d \n", MAX_DELAY * SAMPLE_RATE, MAX_DELAY * SAMPLE_RATE);
 }
 
 void Echo::out(const Stereo<float *> &input)
@@ -110,18 +109,6 @@ void Echo::out(const Stereo<float *> &input)
         //adjust delay if needed
         delta.l() = (15*delta.l() + ndelta.l())/16;
         delta.r() = (15*delta.r() + ndelta.r())/16;
-        //if(delta.l()!=ndelta.l()){
-        //    if(delta.l() > ndelta.l())
-        //        delta--delta.l();
-        //    else
-        //        ++delta.l();
-        //}
-        //if(delta.r()!=ndelta.r()){
-        //    if(delta.r() > ndelta.r())
-        //        --delta.r();
-        //    else
-        //        ++delta.r();
-        //}
     }
 }
 

@@ -981,3 +981,7 @@
 14 Feb 2010 (Stephen Parry)
 	    - DSSI Support Repaired
 
+14 Feb 2010 (Mark McCurry)
+	    - Made the Echo attempt to adjust the delay instead of erasing it
+	      when length is changed
+
