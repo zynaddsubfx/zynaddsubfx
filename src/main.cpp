@@ -28,7 +28,7 @@
 
 #ifdef OS_LINUX
 #include <getopt.h>
-#elif OS_WINDOIWS
+#elif OS_WINDOWS
 #include <winbase.h>
 #include <windows.h>
 #endif
@@ -46,7 +46,7 @@ extern Dump dump;
 #include "Input/OSSMidiIn.h"
 #endif
 
-#if (defined(NONEMIDIIN) || defined(VSTMIDIIN))
+#if (defined(NONEMIDIIN) || defined(VSTMIDIIN) || defined(DSSIMIDIIN))
 #include "Input/NULLMidiIn.h"
 #endif
 
@@ -351,9 +351,6 @@ void initprogram()
 #if (defined(NONEMIDIIN) || (defined(VSTMIDIIN)))
     Midi = new NULLMidiIn();
 #endif
-#ifndef DISABLE_GUI
-    ui = new MasterUI(master, &Pexitprogram);
-#endif
 }
 
 /*
@@ -655,10 +652,6 @@ int main(int argc, char *argv[])
         }
         else {
             master->applyparameters();
-#ifndef DISABLE_GUI
-            if(noui == 0)
-                ui->refresh_master_ui();
-#endif
             cout << "Master file loaded." << endl;
         }
     }
@@ -673,10 +666,6 @@ int main(int argc, char *argv[])
         }
         else {
             master->part[loadtopart]->applyparameters();
-#ifndef DISABLE_GUI
-            if(noui == 0)
-                ui->refresh_master_ui();
-#endif
             cout << "Instrument file loaded." << endl;
         }
     }
@@ -701,8 +690,12 @@ int main(int argc, char *argv[])
     //      setregid(getuid(),getuid());
     #endif
     */
-    if(noui == 0)
+#ifndef DISABLE_GUI
+    if(noui == 0) {
+        ui = new MasterUI(master, &Pexitprogram);
         pthread_create(&thr3, NULL, thread3, NULL);
+    }
+#endif
 
     pthread_create(&thr4, NULL, thread4, NULL);
 #ifdef WINMIDIIN
