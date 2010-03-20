@@ -10,6 +10,7 @@ set(zynaddsubfx_effect_SRCS
 	EQ.cpp
 	Phaser.cpp
 	Reverb.cpp
+        APhaser.cpp
 )
 
 add_library(zynaddsubfx_effect STATIC
