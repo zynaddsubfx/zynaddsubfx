@@ -23,7 +23,7 @@
 #include <cmath>
 #include "../Effects/Echo.h"
 #include "../globals.h"
-//int SOUND_BUFFER_SIZE=256;
+
 class EchoTest:public CxxTest::TestSuite
 {
     public:
@@ -34,11 +34,13 @@ class EchoTest:public CxxTest::TestSuite
             outR = new float[SOUND_BUFFER_SIZE];
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
                 *(outR + i) = 0;
-            input  = new Stereo<AuSample>(SOUND_BUFFER_SIZE);
+            input  = new Stereo<REALTYPE *>(new REALTYPE[SOUND_BUFFER_SIZE],new REALTYPE[SOUND_BUFFER_SIZE]);
             testFX = new Echo(true, outL, outR);
         }
 
         void tearDown() {
+            delete input->r();
+            delete input->l();
             delete input;
             delete[] outL;
             delete[] outR;
@@ -59,7 +61,11 @@ class EchoTest:public CxxTest::TestSuite
         void testClear() {
             char DELAY = 2;
             testFX->changepar(DELAY, 127);
-            *input = Stereo<AuSample>(AuSample(SOUND_BUFFER_SIZE, 1.0));
+
+            //flood with high input
+            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+                input->r()[i] = input->l()[i] = 1.0;
+
             for(int i = 0; i < 500; ++i)
                 testFX->out(*input);
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
@@ -79,7 +85,10 @@ class EchoTest:public CxxTest::TestSuite
         }
         //Insures that the proper decay occurs with high feedback
         void testDecaywFb() {
-            *input = Stereo<AuSample>(AuSample(SOUND_BUFFER_SIZE, 1.0));
+
+            //flood with high input
+            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+                input->r()[i] = input->l()[i] = 1.0;
             char FEEDBACK = 5;
             testFX->changepar(FEEDBACK, 127);
             for(int i = 0; i < 100; ++i)
@@ -90,7 +99,9 @@ class EchoTest:public CxxTest::TestSuite
             }
             float amp = abs(outL[0] + outR[0]) / 2;
             //reset input to zero
-            *input = Stereo<AuSample>(SOUND_BUFFER_SIZE);
+            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+                input->r()[i] = input->l()[i] = 0.0;
+
             //give the echo time to fade based upon zero input and high feedback
             for(int i = 0; i < 50; ++i)
                 testFX->out(*input);
@@ -98,11 +109,8 @@ class EchoTest:public CxxTest::TestSuite
         }
 
 
-
-
-
     private:
-        Stereo<AuSample> *input;
+        Stereo<REALTYPE *> *input;
         float *outR, *outL;
         Echo  *testFX;
 };
