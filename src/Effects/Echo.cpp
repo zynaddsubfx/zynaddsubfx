@@ -53,8 +53,8 @@ Echo::~Echo()
  */
 void Echo::cleanup()
 {
-    memset(delay.l(),0,MAX_DELAY*SAMPLE_RATE);
-    memset(delay.r(),0,MAX_DELAY*SAMPLE_RATE);
+    memset(delay.l(),0,MAX_DELAY*SAMPLE_RATE*sizeof(REALTYPE));
+    memset(delay.r(),0,MAX_DELAY*SAMPLE_RATE*sizeof(REALTYPE));
     old = Stereo<REALTYPE>(0.0);
 }
 

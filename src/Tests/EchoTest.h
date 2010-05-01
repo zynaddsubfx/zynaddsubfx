@@ -21,8 +21,11 @@
 */
 #include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <iostream>
 #include "../Effects/Echo.h"
 #include "../globals.h"
+
+using namespace std;
 
 class EchoTest:public CxxTest::TestSuite
 {
@@ -30,17 +33,19 @@ class EchoTest:public CxxTest::TestSuite
         void setUp() {
             outL = new float[SOUND_BUFFER_SIZE];
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
-                *(outL + i) = 0;
+                outL[i] = 0.0;
             outR = new float[SOUND_BUFFER_SIZE];
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
-                *(outR + i) = 0;
+                outR[i] = 0.0;
             input  = new Stereo<REALTYPE *>(new REALTYPE[SOUND_BUFFER_SIZE],new REALTYPE[SOUND_BUFFER_SIZE]);
+            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+                input->l()[i] = input->r()[i] = 0.0f;
             testFX = new Echo(true, outL, outR);
         }
 
         void tearDown() {
-            delete input->r();
-            delete input->l();
+            delete[] input->r();
+            delete[] input->l();
             delete input;
             delete[] outL;
             delete[] outR;
@@ -105,7 +110,7 @@ class EchoTest:public CxxTest::TestSuite
             //give the echo time to fade based upon zero input and high feedback
             for(int i = 0; i < 50; ++i)
                 testFX->out(*input);
-            TS_ASSERT_LESS_THAN(abs(outL[0] + outR[0]) / 2, amp);
+            TS_ASSERT_LESS_THAN_EQUALS(abs(outL[0] + outR[0]) / 2, amp);
         }
 
 
