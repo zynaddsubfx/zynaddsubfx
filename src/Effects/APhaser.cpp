@@ -201,6 +201,7 @@ void Analog_Phaser::out(const Stereo<REALTYPE *> &input)
         }
 
         //cout << fb << ' ' << input.l()[i] - lxn << endl;
+        //cout << "input" << input.l()[i] << "output:" << lxn << endl;
 
         fbl = lxn * fb;
         fbr = rxn * fb;
@@ -260,7 +261,12 @@ void Analog_Phaser::setvolume(unsigned char Pvolume)
     cout << "setting volume" << (int) Pvolume << endl;
     this->Pvolume = Pvolume;
     // outvolume is needed in calling program
-    outvolume = (float)Pvolume / 127.0f;
+    if(insertion == 0) {
+        outvolume = pow(0.01, (1.0 - Pvolume / 127.0)) * 4.0;
+        volume    = 1.0;
+    }
+    else
+        volume = outvolume = Pvolume / 127.0;
 };
 
 void Analog_Phaser::setdistortion(unsigned char Pdistortion)
