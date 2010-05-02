@@ -17,4 +17,5 @@ Contributors:
         James Morris (Memory leaks in FLTK GUI)
         Alan Calvert (Portions of New IO)
         Stephen Parry (DSSI rebuild)
+        Ryan Billing (APhaser)
 

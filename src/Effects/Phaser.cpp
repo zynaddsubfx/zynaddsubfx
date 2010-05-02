@@ -38,7 +38,7 @@ Phaser::~Phaser()
 /*
  * Effect output
  */
-void Phaser::out(REALTYPE *smpsl, REALTYPE *smpsr)
+void Phaser::out(const Stereo<float *> &smp)
 {
     int      i, j;
     REALTYPE lfol, lfor, lgain, rgain, tmp;
@@ -69,8 +69,8 @@ void Phaser::out(REALTYPE *smpsl, REALTYPE *smpsr)
         REALTYPE x1  = 1.0 - x;
         REALTYPE gl  = lgain * x + oldgain.left() * x1;
         REALTYPE gr  = rgain * x + oldgain.right() * x1;
-        REALTYPE inl = smpsl[i] * panning + fbl;
-        REALTYPE inr = smpsr[i] * (1.0 - panning) + fbr;
+        REALTYPE inl = smp.l()[i] * panning + fbl;
+        REALTYPE inr = smp.r()[i] * (1.0 - panning) + fbr;
 
         //Left channel
         for(j = 0; j < Pstages * 2; j++) { //Phasing routine
@@ -121,20 +121,20 @@ void Phaser::cleanup()
 /*
  * Parameter control
  */
-void Phaser::setdepth(const unsigned char &Pdepth)
+void Phaser::setdepth(unsigned char Pdepth)
 {
     this->Pdepth = Pdepth;
     depth = (Pdepth / 127.0);
 }
 
 
-void Phaser::setfb(const unsigned char &Pfb)
+void Phaser::setfb(unsigned char Pfb)
 {
     this->Pfb = Pfb;
     fb = (Pfb - 64.0) / 64.1;
 }
 
-void Phaser::setvolume(const unsigned char &Pvolume)
+void Phaser::setvolume(unsigned char Pvolume)
 {
     this->Pvolume = Pvolume;
     outvolume     = Pvolume / 127.0;
@@ -144,29 +144,29 @@ void Phaser::setvolume(const unsigned char &Pvolume)
         volume = outvolume;
 }
 
-void Phaser::setpanning(const unsigned char &Ppanning)
+void Phaser::setpanning(unsigned char Ppanning)
 {
     this->Ppanning = Ppanning;
     panning = Ppanning / 127.0;
 }
 
-void Phaser::setlrcross(const unsigned char &Plrcross)
+void Phaser::setlrcross(unsigned char Plrcross)
 {
     this->Plrcross = Plrcross;
     lrcross = Plrcross / 127.0;
 }
 
-void Phaser::setstages(const unsigned char &Pstages)
+void Phaser::setstages(unsigned char Pstages)
 {
     if(Pstages >= MAX_PHASER_STAGES)
         this->Pstages = MAX_PHASER_STAGES - 1;
     else
         this->Pstages = Pstages;
-    old = Stereo<AuSample>(Pstages * 2);
+    old = Stereo<Sample>(Pstages * 2);
     cleanup();
 }
 
-void Phaser::setphase(const unsigned char &Pphase)
+void Phaser::setphase(unsigned char Pphase)
 {
     this->Pphase = Pphase;
     phase = (Pphase / 127.0);
@@ -199,7 +199,7 @@ void Phaser::setpreset(unsigned char npreset)
 }
 
 
-void Phaser::changepar(const int &npar, const unsigned char &value)
+void Phaser::changepar(int npar, unsigned char value)
 {
     switch(npar) {
     case 0:
@@ -248,7 +248,7 @@ void Phaser::changepar(const int &npar, const unsigned char &value)
     }
 }
 
-unsigned char Phaser::getpar(const int &npar) const
+unsigned char Phaser::getpar(int npar) const
 {
     switch(npar) {
     case 0:

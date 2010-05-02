@@ -20,7 +20,11 @@
 */
 #include <cmath>
 #include <cstring>//for memcpy/memset
+
+#include <iostream>
 #include "Sample.h"
+
+using namespace std;
 
 #warning TODO Think about renaming Sample to Frame
 /**\TODO start using pointer math here as these will be Frequency called
@@ -163,6 +167,10 @@ Sample &Sample::append(const Sample &smp)
 Sample Sample::subSample(int a, int b) const
 {
     return Sample(b-a, buffer+a);
+    delete buffer;
+
+    buffer     = nbuffer;
+    bufferSize = nbufferSize;
 }
 
 REALTYPE Sample::max() const

@@ -32,6 +32,14 @@ class Effect;
 class FilterParams;
 class XMLwrapper;
 
+#include "Distorsion.h"
+#include "EQ.h"
+#include "DynamicFilter.h"
+#include "APhaser.h"
+#include "../Misc/XMLwrapper.h"
+#include "../Params/FilterParams.h"
+#include "../Params/Presets.h"
+
 /**Effect manager, an interface betwen the program and effects*/
 class EffectMgr:public Presets
 {
