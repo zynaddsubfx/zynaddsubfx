@@ -98,7 +98,7 @@ void OssEngine::stopAudio()
         return;
     audio.handle = -1;
 
-    if(!getMidiEn())
+    if(!getMidiEn() && engThread)
         pthread_join(*engThread, NULL);
     delete engThread;
     engThread = NULL;
@@ -187,7 +187,7 @@ void OssEngine::stopMidi()
 
     midi.handle = -1;
     
-    if(!getAudioEn()) {
+    if(!getAudioEn() && engThread) {
         pthread_join(*engThread, NULL);
         delete engThread;
         engThread = NULL;
