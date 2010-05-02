@@ -68,6 +68,7 @@ inline int max(int a, int b)
  */
 void Echo::initdelays()
 {
+    cleanup();
     //number of seconds to delay left chan
     float dl = delayCtl.getiVal() - lrdelay;
 
