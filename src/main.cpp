@@ -85,6 +85,8 @@ void *thread3(void *arg)
 #ifndef DISABLE_GUI
 
 #ifdef FLTK_GUI
+
+    ui = new MasterUI(master, &Pexitprogram);
     ui->showUI();
 
     while(Pexitprogram == 0) {
@@ -209,9 +211,6 @@ void initprogram()
     cout << "\nThanks for using the Nio system :)" << endl;
 
 
-#ifndef DISABLE_GUI
-    ui = new MasterUI(master, &Pexitprogram);
-#endif
 }
 
 /*
