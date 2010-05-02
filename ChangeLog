@@ -985,3 +985,6 @@
 	    - Made the Echo attempt to adjust the delay instead of erasing it
 	      when length is changed
 
+02 May 2010 (Mark McCurry)
+	    - Merging in cleanup from effects and adding APhaser by Ryan Billing
+
