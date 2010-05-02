@@ -155,7 +155,7 @@ return(log(freq/20.0)/log(1000.0));} {}
   decl {int maxdB;} {}
 } 
 
-class EffUI {open : {public Fl_Group,public PresetsUI_}
+class EffUI {: {public Fl_Group,public PresetsUI_}
 } {
   Function {EffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {eff=NULL;
@@ -704,7 +704,8 @@ refresh(eff);}
       }
     }
   }
-  Function {make_analog_phaser_window()} {} {
+  Function {make_analog_phaser_window()} {selected
+  } {
     Fl_Window effaphaserwindow {
       xywh {292 251 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       code0 {putchar('a'); putchar('b'); putchar('c');}
@@ -764,9 +765,9 @@ refresh(eff);}
         class WidgetPDial
       }
       Fl_Dial aphaser3 {
-        label {?}
+        label rnd
         callback {eff->seteffectpar(3,(int) o->value());}
-        tooltip {????????} xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
+        tooltip Randomness xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
         class WidgetPDial
       }
       Fl_Choice aphaser4 {
@@ -1351,8 +1352,7 @@ refresh(eff);}
       }
     }
   }
-  Function {make_filter_window()} {selected
-  } {
+  Function {make_filter_window()} {} {
     Fl_Window filterwindow {
       label {Filter Parameters for DynFilter Eff.}
       xywh {212 170 290 110} type Double hide
@@ -1401,8 +1401,7 @@ effdynamicfilterwindow->position(px,py);
 
 refresh(eff);} {}
   }
-  Function {refresh(EffectMgr *eff_)} {open
-  } {
+  Function {refresh(EffectMgr *eff_)} {} {
     code {eff=eff_;
 this->hide();
 
