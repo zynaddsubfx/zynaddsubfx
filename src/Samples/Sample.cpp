@@ -167,10 +167,6 @@ Sample &Sample::append(const Sample &smp)
 Sample Sample::subSample(int a, int b) const
 {
     return Sample(b-a, buffer+a);
-    delete buffer;
-
-    buffer     = nbuffer;
-    bufferSize = nbufferSize;
 }
 
 REALTYPE Sample::max() const
