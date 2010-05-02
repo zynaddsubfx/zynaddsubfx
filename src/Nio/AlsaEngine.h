@@ -71,6 +71,7 @@ class AlsaEngine : public AudioOut, MidiIn
             snd_pcm_hw_params_t *params;
             unsigned int sampleRate;
             snd_pcm_uframes_t frames;
+            unsigned int periods;
             const short *buffer;
             pthread_t    pThread;
         } audio;

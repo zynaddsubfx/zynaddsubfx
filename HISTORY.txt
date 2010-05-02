@@ -1,3 +1,13 @@
+2.4.1 (In Beta)
+        - Azerty layout
+        - XML bug fixes
+        - Vibrato/Unison additions
+        - Reverb rewrite
+        - DSSI support enabled
+        - Adding APhaser
+        - other bugfixes
+        - code cleanup
+
 2.4.0 (21 Jun 2009)
 	- extended mono functionality
 	- legato mode

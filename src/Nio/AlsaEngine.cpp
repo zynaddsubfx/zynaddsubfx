@@ -287,9 +287,13 @@ bool AlsaEngine::openAudio()
     snd_pcm_hw_params_set_rate_near(audio.handle, audio.params,
             &audio.sampleRate, NULL);
 
-    audio.frames = 32;
+    audio.frames = 512;
     snd_pcm_hw_params_set_period_size_near(audio.handle,
             audio.params, &audio.frames, NULL);
+
+    audio.periods = 4;
+    snd_pcm_hw_params_set_periods_near(audio.handle,
+            audio.params, &audio.periods, NULL);
 
     /* Write the parameters to the driver */
     rc = snd_pcm_hw_params(audio.handle, audio.params);

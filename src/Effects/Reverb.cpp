@@ -165,14 +165,14 @@ void Reverb::processmono(int ch, REALTYPE *output)
 /*
  * Effect output
  */
-void Reverb::out(REALTYPE *smps_l, REALTYPE *smps_r)
+void Reverb::out(const Stereo<float *> &smp)
 {
     int i;
     if((Pvolume == 0) && (insertion != 0))
         return;
 
     for(i = 0; i < SOUND_BUFFER_SIZE; i++)
-        inputbuf[i] = (smps_l[i] + smps_r[i]) / 2.0;
+        inputbuf[i] = (smp.l()[i] + smp.r()[i]) / 2.0;
     ;
 
     if(idelay != NULL) {
@@ -215,7 +215,7 @@ void Reverb::out(REALTYPE *smps_l, REALTYPE *smps_r)
 /*
  * Parameter control
  */
-void Reverb::setvolume(const unsigned char &Pvolume)
+void Reverb::setvolume(unsigned char Pvolume)
 {
     this->Pvolume = Pvolume;
     if(insertion == 0) {
@@ -229,13 +229,13 @@ void Reverb::setvolume(const unsigned char &Pvolume)
     }
 }
 
-void Reverb::setpan(const unsigned char &Ppan)
+void Reverb::setpan(unsigned char Ppan)
 {
     this->Ppan = Ppan;
     pan = (REALTYPE)Ppan / 127.0;
 }
 
-void Reverb::settime(const unsigned char &Ptime)
+void Reverb::settime(unsigned char Ptime)
 {
     int      i;
     REALTYPE t;
@@ -271,7 +271,7 @@ void Reverb::setlohidamp(unsigned char Plohidamp)
     }
 }
 
-void Reverb::setidelay(const unsigned char &Pidelay)
+void Reverb::setidelay(unsigned char Pidelay)
 {
     REALTYPE delay;
     this->Pidelay = Pidelay;
@@ -290,13 +290,13 @@ void Reverb::setidelay(const unsigned char &Pidelay)
     }
 }
 
-void Reverb::setidelayfb(const unsigned char &Pidelayfb)
+void Reverb::setidelayfb(unsigned char Pidelayfb)
 {
     this->Pidelayfb = Pidelayfb;
     idelayfb = Pidelayfb / 128.0;
 }
 
-void Reverb::sethpf(const unsigned char &Phpf)
+void Reverb::sethpf(unsigned char Phpf)
 {
     this->Phpf = Phpf;
     if(Phpf == 0) { //No HighPass
@@ -313,7 +313,7 @@ void Reverb::sethpf(const unsigned char &Phpf)
     }
 }
 
-void Reverb::setlpf(const unsigned char &Plpf)
+void Reverb::setlpf(unsigned char Plpf)
 {
     this->Plpf = Plpf;
     if(Plpf == 127) { //No LowPass
@@ -405,7 +405,7 @@ void Reverb::settype(unsigned char Ptype)
     }
 }
 
-void Reverb::setroomsize(const unsigned char &Proomsize)
+void Reverb::setroomsize(unsigned char Proomsize)
 {
     this->Proomsize = Proomsize;
     if(Proomsize == 0)
@@ -418,7 +418,7 @@ void Reverb::setroomsize(const unsigned char &Proomsize)
     settype(Ptype);
 }
 
-void Reverb::setbandwidth(const unsigned char &Pbandwidth) {
+void Reverb::setbandwidth(unsigned char Pbandwidth) {
     this->Pbandwidth = Pbandwidth;
     REALTYPE v = Pbandwidth / 127.0;
     if(bandwidth)
@@ -468,7 +468,7 @@ void Reverb::setpreset(unsigned char npreset)
 }
 
 
-void Reverb::changepar(const int &npar, const unsigned char &value)
+void Reverb::changepar(int npar, unsigned char value)
 {
     switch(npar) {
     case 0:
@@ -511,7 +511,7 @@ void Reverb::changepar(const int &npar, const unsigned char &value)
     }
 }
 
-unsigned char Reverb::getpar(const int &npar) const
+unsigned char Reverb::getpar(int npar) const
 {
     switch(npar) {
     case 0:

@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-objects=Sample.o AuSample.o FqSample.o
+objects=Sample.o
 
 
 all: $(objects)

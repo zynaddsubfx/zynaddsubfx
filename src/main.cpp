@@ -466,7 +466,7 @@ int main(int argc, char *argv[])
              << endl;
 #endif
 #endif
-#if OS == WINDOWS
+#if OS_WINDOWS
         cout
         <<
         "\nWARNING: On Windows systems, only short comandline parameters works."
@@ -503,10 +503,6 @@ int main(int argc, char *argv[])
         }
         else {
             master->applyparameters();
-#ifndef DISABLE_GUI
-            if(noui == 0)
-                ui->refresh_master_ui();
-#endif
             cout << "Master file loaded." << endl;
         }
     }
@@ -521,17 +517,17 @@ int main(int argc, char *argv[])
         }
         else {
             master->part[loadtopart]->applyparameters();
-#ifndef DISABLE_GUI
-            if(noui == 0)
-                ui->refresh_master_ui();
-#endif
             cout << "Instrument file loaded." << endl;
         }
     }
 
 
-    if(noui == 0)
+#ifndef DISABLE_GUI
+    if(noui == 0) {
+        ui = new MasterUI(master, &Pexitprogram);
         pthread_create(&thr3, NULL, thread3, NULL);
+    }
+#endif
 
 //    pthread_create(&thr4, NULL, thread4, NULL);
 #ifdef WINMIDIIN
@@ -539,7 +535,11 @@ int main(int argc, char *argv[])
 #endif
 
     while(Pexitprogram == 0) {
-		os_sleep(100000);
+#ifdef OS_LINUX
+        usleep(100000);
+#elif OS_WINDOWS
+        Sleep(100);
+#endif
     }
 
 #ifdef WINMIDIIN

@@ -6,6 +6,7 @@ message(STATUS "Checking Library Path" $ENV{CMAKE_LIBRARY_PATH} ${CMAKE_LIBRARY_
 find_package(zlib REQUIRED)
 find_package(fftw REQUIRED)
 find_package(MXML REQUIRED)
+find_package(PkgConfig REQUIRED)
 #find_package(pthread REQUIRED)
 #find_package(OSS)
 find_package(Alsa)
@@ -33,6 +34,7 @@ SET (OssEnable ${ALSA_FOUND} CACHE BOOL #TODO perhaps check for /dev/dsp
 SET (PaEnable ${PORTAUDIO_FOUND} CACHE BOOL
     "Enable support for Port Audio System")
 
+
 # Now, handle the incoming settings and set define flags/variables based
 # on this
 
@@ -48,6 +50,13 @@ else  ()
 	message(STATUS "GUI module defaulting to off")
 endif()
 
+if(NOT PKG_CONFIG_FOUND)
+    message(FATAL_ERROR "pkg-config not found")
+endif(NOT PKG_CONFIG_FOUND)
+
+# lash
+pkg_search_module(LASH lash-1.0)
+mark_as_advanced(LASH_LIBRARIES)
 
 ########### Settings dependant code ###########
 # From here on, the setting variables have  been prepared so concentrate
@@ -77,6 +86,13 @@ endif()
 
 if (CompileTests)
 	ENABLE_TESTING()
+endif()
+
+if(LASH_FOUND)
+	include_directories(${LASH_INCLUDE_DIRS})
+	add_definitions(-DUSE_LASH)
+	set(AUDIO_LIBRARIES ${AUDIO_LIBRARIES} ${LASH_LIBRARIES})
+	message(STATUS "Compiling with lash")
 endif()
 
 add_definitions(-DFFTW_VERSION_${FFTW_VERSION}
@@ -124,7 +140,7 @@ if(FltkGui)
     message(STATUS ${MYFLTK_LDFLAGS})
 
 
-    set(GUI_LIBRARIES  ${MYFLTK_LIBRARIES} ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES} zynaddsubfx_gui)
+    set(GUI_LIBRARIES ${FLTK_LIBRARIES} ${MYFLTK_LIBRARIES} ${OPENGL_LIBRARIES} zynaddsubfx_gui)
 
     add_definitions(-DFLTK_GUI)
 
@@ -224,3 +240,6 @@ target_link_libraries(zynaddsubfx
         ${OS_LIBRARIES}
 	)
 
+install(TARGETS zynaddsubfx
+	RUNTIME DESTINATION bin
+	)

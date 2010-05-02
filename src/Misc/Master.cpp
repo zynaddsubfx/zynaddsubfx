@@ -21,6 +21,8 @@
 
 */
 
+#warning TODO move Sequencer out of master
+
 #include "Master.h"
 
 #include "../Params/LFOParams.h"

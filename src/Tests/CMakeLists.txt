@@ -1,6 +1,6 @@
 unit_test(ControllerTest ControllerTest.h ../Params/Controller.h)
 unit_test(EchoTest EchoTest.h ../Effects/Echo.h)
-unit_test(SampleTest SampleTest.h ../Samples/AuSample.h)
+unit_test(SampleTest SampleTest.h ../Samples/Sample.h)
 unit_test(MicrotonalTest MicrotonalTest.h ../Misc/Microtonal.h)
 unit_test(XMLwrapperTest XMLwrapperTest.h ../Misc/XMLwrapper.h)
 unit_test(ADnoteTest AdNoteTest.h ../Synth/ADnote.h)

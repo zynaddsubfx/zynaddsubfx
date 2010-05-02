@@ -24,7 +24,7 @@
 #define PHASER_H
 #include "../globals.h"
 #include "../Misc/Stereo.h"
-#include "../Samples/AuSample.h"
+#include "../Samples/Sample.h"
 #include "Effect.h"
 #include "EffectLFO.h"
 
@@ -35,10 +35,10 @@ class Phaser:public Effect
     public:
         Phaser(const int &insetion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_);
         ~Phaser();
-        void out(REALTYPE *smpsl, REALTYPE *smpsr);
+        void out(const Stereo<float *> &smp);
         void setpreset(unsigned char npreset);
-        void changepar(const int &npar, const unsigned char &value);
-        unsigned char getpar(const int &npar) const;
+        void changepar(int npar, unsigned char value);
+        unsigned char getpar(int npar) const;
         void cleanup();
         void setdryonly();
 
@@ -49,26 +49,23 @@ class Phaser:public Effect
         unsigned char Ppanning;
         unsigned char Pdepth; /**<the depth of the Phaser*/
         unsigned char Pfb; /**<feedback*/
-        unsigned char Plrcross; /**<feedback*/
+        unsigned char Plrcross; /**<crossover*/
         unsigned char Pstages;
         unsigned char Poutsub; /**<if I wish to substract the output instead of the adding it*/
         unsigned char Pphase;
 
-        //Control Parametrii
-        void setvolume(const unsigned char &Pvolume);
-        void setpanning(const unsigned char &Ppanning);
-        void setdepth(const unsigned char &Pdepth);
-        void setfb(const unsigned char &Pfb);
-        void setlrcross(const unsigned char &Plrcross);
-        void setstages(const unsigned char &Pstages);
-        void setphase(const unsigned char &Pphase);
+        //Control Parameters
+        void setvolume(unsigned char Pvolume);
+        void setpanning(unsigned char Ppanning);
+        void setdepth(unsigned char Pdepth);
+        void setfb(unsigned char Pfb);
+        void setlrcross(unsigned char Plrcross);
+        void setstages(unsigned char Pstages);
+        void setphase(unsigned char Pphase);
 
         //Internal Values
-        //int insertion; //inherited from Effect
         REALTYPE panning, fb, depth, lrcross, fbl, fbr, phase;
-        //REALTYPE *oldl,*oldr;
-        Stereo<AuSample> old;
-        //REALTYPE oldlgain,oldrgain;
+        Stereo<Sample> old;
         Stereo<REALTYPE> oldgain;
 };
 
