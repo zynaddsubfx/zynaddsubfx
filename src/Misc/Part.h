@@ -106,6 +106,9 @@ class Part
         void setkeylimit(unsigned char Pkeylimit);
         void setkititemstatus(int kititem, int Penabled_);
 
+        Microtonal *getMicrotonal(){return microtonal;};
+        FFTwrapper *getFFT(){return fft;};
+
         unsigned char Penabled; /**<if the part is enabled*/
         unsigned char Pvolume; /**<part volume*/
         unsigned char Pminkey; /**<the minimum key that the part receives noteon messages*/

@@ -57,7 +57,7 @@ class Bank
         /**Saves the given Part to slot*/
         void savetoslot(unsigned int ninstrument, Part *part);
         /**Loads the given slot into a Part*/
-        void loadfromslot(unsigned int ninstrument, Part *part);
+        void loadfromslot(unsigned int ninstrument, Part *&part);
 
         /**Swaps Slots*/
         void swapslot(unsigned int n1, unsigned int n2);

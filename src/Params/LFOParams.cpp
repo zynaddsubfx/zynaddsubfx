@@ -25,7 +25,7 @@
 #include "../globals.h"
 #include "LFOParams.h"
 
-int LFOParams::time;
+int LFOParams::time=0;
 
 LFOParams::LFOParams(char Pfreq_,
                      char Pintensity_,
@@ -55,7 +55,6 @@ LFOParams::LFOParams(char Pfreq_,
     Ddelay      = Pdelay_;
     Dcontinous  = Pcontinous_;
     fel  = fel_;
-    time = 0;
 
     defaults();
 }
