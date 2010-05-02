@@ -33,7 +33,6 @@
 
 #include <iostream>
 using namespace std;
->>>>>>> master:src/Effects/EffectMgr.cpp
 
 EffectMgr::EffectMgr(int insertion_, pthread_mutex_t *mutex_)
     :insertion(insertion_),
