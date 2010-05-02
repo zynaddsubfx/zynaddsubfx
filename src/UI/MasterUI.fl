@@ -425,7 +425,7 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL)) {
     *exitprogram=1;
 };
 \#endif}
-      xywh {31 206 390 465} type Double xclass zynaddsubfx visible
+      xywh {31 206 390 465} type Double hide xclass zynaddsubfx
     } {
       Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
@@ -850,7 +850,7 @@ inseffectui->show();}
             }
             MenuItem {} {
               label APhaser selected
-              xywh {0 0 36 21}
+              xywh {0 0 36 21} labelfont 1 labelsize 10
             }
           }
           Fl_Group inseffectuigroup {
