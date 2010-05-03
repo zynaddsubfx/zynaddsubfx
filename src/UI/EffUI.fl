@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0107 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
@@ -704,8 +704,7 @@ refresh(eff);}
       }
     }
   }
-  Function {make_analog_phaser_window()} {selected
-  } {
+  Function {make_analog_phaser_window()} {} {
     Fl_Window effaphaserwindow {
       xywh {292 251 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       code0 {putchar('a'); putchar('b'); putchar('c');}
@@ -1548,7 +1547,7 @@ switch(eff->geteffect()){
 	break;
      case 9://make_analog_phaser_window(); 
 	aphaserp->value(eff->getpreset());
-	aphaser0->value(eff->geteffectpar(0));
+	aphaser0->value(eff->geteffectpar(0));if (eff->insertion!=0) aphaser0->label("D/W");
 	aphaser1->value(eff->geteffectpar(1));
 	aphaser2->value(eff->geteffectpar(2));
 	aphaser3->value(eff->geteffectpar(3));
@@ -1568,7 +1567,8 @@ switch(eff->geteffect()){
             break; 
 };
 
-this->show();} {}
+this->show();} {selected
+    }
   }
   Function {refresh()} {} {
     code {refresh(eff);} {}

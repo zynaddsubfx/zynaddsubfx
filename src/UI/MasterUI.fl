@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0107 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2009 Nasca Octavian Paul} {} 
@@ -689,7 +689,7 @@ pthread_mutex_unlock(&master->mutex);}
       } {
         Fl_Group {} {
           label {System Effects}
-          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 15 align 25 hide
+          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 15 align 25
         } {
           Fl_Counter syseffnocounter {
             label {Sys.Effect No.}
@@ -746,8 +746,8 @@ syseffectui->refresh(master->sysefx[nsyseff]);}
               xywh {90 90 100 20} labelfont 1 labelsize 10
             }
             MenuItem {} {
-              label APhaser
-              xywh {0 0 36 21}
+              label APhaser selected
+              xywh {0 0 36 21} labelfont 1 labelsize 10
             }
           }
           Fl_Group syseffectuigroup {
@@ -779,7 +779,7 @@ pthread_mutex_unlock(&master->mutex);}
         }
         Fl_Group {} {
           label {Insertion Effects}
-          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 15 align 25
+          xywh {0 100 390 140} box ENGRAVED_FRAME labeltype EMBOSSED_LABEL labelsize 15 align 25 hide
         } {
           Fl_Counter inseffnocounter {
             label {Ins.Effect No.}
@@ -849,7 +849,7 @@ inseffectui->show();}
               xywh {100 100 100 20} labelfont 1 labelsize 10
             }
             MenuItem {} {
-              label APhaser selected
+              label APhaser
               xywh {0 0 36 21} labelfont 1 labelsize 10
             }
           }
