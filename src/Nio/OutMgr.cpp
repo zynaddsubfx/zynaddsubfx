@@ -103,10 +103,10 @@ void OutMgr::run()
         defaultOut = dynamic_cast<AudioOut *>(sysEngine->getEng("NULL"));
     }
 
+    currentOut = defaultOut;
     //open up the default output
     if(!defaultOut->Start()) {
         cerr << "ERROR: The default Audio Output Failed to Open!" << endl;
-        currentOut = defaultOut;
     }
     else {
         currentOut = defaultOut = dynamic_cast<AudioOut *>(sysEngine->getEng("NULL"));
@@ -155,8 +155,8 @@ void OutMgr::addSmps(REALTYPE *l, REALTYPE *r)
         smps.r().resample(SAMPLE_RATE,currentOut->getSampleRate());
     }
 
-    memcpy(priBuffCurrent.l(), smps.l().c_buf(), SOUND_BUFFER_SIZE);
-    memcpy(priBuffCurrent.r(), smps.r().c_buf(), SOUND_BUFFER_SIZE);
+    memcpy(priBuffCurrent.l(), smps.l().c_buf(), SOUND_BUFFER_SIZE*sizeof(REALTYPE));
+    memcpy(priBuffCurrent.r(), smps.r().c_buf(), SOUND_BUFFER_SIZE*sizeof(REALTYPE));
     priBuffCurrent.l() += SOUND_BUFFER_SIZE;
     priBuffCurrent.r() += SOUND_BUFFER_SIZE;
 }
