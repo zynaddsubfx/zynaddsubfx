@@ -43,6 +43,8 @@ class OutMgr
         bool setSink(std::string name);
 
         std::string getSink() const;
+
+        WavEngine *wave;     /**<The Wave Recorder*/
     private:
         void addSmps(REALTYPE *l, REALTYPE *r);
         int  storedSmps() const {return priBuffCurrent.l() - priBuf.l();};
@@ -53,7 +55,6 @@ class OutMgr
 
         AudioOut *currentOut;/**<The current output driver*/
 
-        WavEngine *wave;     /**<The Wave Recorder*/
         sem_t requested;
 
         /**Buffer*/

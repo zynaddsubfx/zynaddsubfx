@@ -5,6 +5,7 @@
 #include "Engine.h"
 #include "EngineMgr.h"
 #include "InMgr.h"
+#include "WavEngine.h"
 #include "../Misc/Master.h"
 #include "../Misc/Util.h"//for set_realtime()
 
@@ -13,7 +14,8 @@ using namespace std;
 OutMgr *sysOut;
 
 OutMgr::OutMgr(Master *nmaster)
-    :priBuf(new REALTYPE[4096],new REALTYPE[4096]),priBuffCurrent(priBuf)
+    :wave(new WavEngine(this)),
+    priBuf(new REALTYPE[4096],new REALTYPE[4096]),priBuffCurrent(priBuf)
 {
     currentOut = NULL;
     stales = 0;
@@ -148,6 +150,9 @@ string OutMgr::getSink() const
 
 void OutMgr::addSmps(REALTYPE *l, REALTYPE *r)
 {
+    //allow wave file to syphon off stream
+    wave->push(Stereo<REALTYPE *>(l,r),SOUND_BUFFER_SIZE);
+
     Stereo<Sample> smps(Sample(SOUND_BUFFER_SIZE, l), Sample(SOUND_BUFFER_SIZE, r));
 
     if(currentOut->getSampleRate() != SAMPLE_RATE) { //we need to resample

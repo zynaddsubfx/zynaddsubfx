@@ -25,8 +25,6 @@
 #include <string>
 #include "../globals.h"
 
-class WavEngine;
-
 /**Records sound to a file*/
 class Recorder
 {
@@ -50,7 +48,6 @@ class Recorder
         int status;
 
     private:
-        WavEngine *wave;
         int notetrigger;
 };
 

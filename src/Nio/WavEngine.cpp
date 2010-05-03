@@ -20,47 +20,81 @@
 #include <cstdio>
 #include <iostream>
 #include <cstdlib>
-#include "SafeQueue.h"
+#include "../Misc/WavFile.h"
 #include "../Misc/Util.h"
 
 using namespace std;
 
-WavEngine::WavEngine(OutMgr *out, string filename, int samplerate, int channels)
-    :AudioOut(out), file(filename, samplerate, channels),
-    enabled(false)
+WavEngine::WavEngine(OutMgr *out)
+    :AudioOut(out), file(NULL), buffer(SAMPLE_RATE*2), pThread(NULL)
 {
+    sem_init(&work, PTHREAD_PROCESS_PRIVATE, 0);
 }
 
 WavEngine::~WavEngine()
 {
     Stop();
+    sem_destroy(&work);
+    destroyFile();
 }
 
 bool WavEngine::openAudio()
 {
-    return file.good();
+    return file && file->good();
 }
 
 bool WavEngine::Start()
 {
-    if(enabled())
+    if(pThread)
         return true;
+    pThread = new pthread_t;
+
     pthread_attr_t attr;
-    enabled = true;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&pThread, &attr, _AudioThread, this);
+    pthread_create(pThread, &attr, _AudioThread, this);
 
     return true;
 }
 
 void WavEngine::Stop()
 {
-    if(!enabled())
+    if(!pThread)
         return;
-    enabled = false;
 
-    pthread_join(pThread, NULL);
+    pthread_t *tmp = pThread;
+    pThread = NULL;
+
+    sem_post(&work);
+    pthread_join(*tmp, NULL);
+    delete pThread;
+}
+
+void WavEngine::push(Stereo<REALTYPE *> smps, size_t len)
+{
+    if(!pThread)
+        return;
+
+
+    //copy the input [overflow when needed]
+    for(size_t i = 0; i < len; ++i) {
+        buffer.push(*smps.l()++);
+        buffer.push(*smps.r()++);
+        sem_post(&work);
+    }
+}
+
+void WavEngine::newFile(WavFile *_file)
+{
+    //ensure system is clean
+    destroyFile();
+    file = _file;
+}
+
+void WavEngine::destroyFile()
+{
+    if(file)
+        delete file;
 }
 
 void *WavEngine::_AudioThread(void *arg)
@@ -70,18 +104,16 @@ void *WavEngine::_AudioThread(void *arg)
 
 void *WavEngine::AudioThread()
 {
-    short int *recordbuf_16bit = new short int [SOUND_BUFFER_SIZE*2];
-    int size = SOUND_BUFFER_SIZE;
+    short int recordbuf_16bit[2];
 
-
-    while (enabled())
+    while(!sem_wait(&work) && pThread)
     {
-        const Stereo<Sample> smps = getNext(true);
-        for(int i = 0; i < size; i++) {
-            recordbuf_16bit[i*2]   = limit((int)(smps.l()[i] * 32767.0), -32768, 32767);
-            recordbuf_16bit[i*2+1] = limit((int)(smps.r()[i] * 32767.0), -32768, 32767);
-        }
-        file.writeStereoSamples(size, recordbuf_16bit);
+        float left=0.0f, right=0.0f;
+        buffer.pop(left);
+        buffer.pop(right);
+        recordbuf_16bit[0] = limit((int)(left  * 32767.0), -32768, 32767);
+        recordbuf_16bit[1] = limit((int)(right * 32767.0), -32768, 32767);
+        file->writeStereoSamples(1, recordbuf_16bit);
     }
     pthread_exit(NULL);
 }
