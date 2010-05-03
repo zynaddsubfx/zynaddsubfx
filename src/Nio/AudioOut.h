@@ -33,9 +33,6 @@ class AudioOut : public virtual Engine
         AudioOut(class OutMgr *out);
         virtual ~AudioOut();
 
-        /**Give the Driver Samples to process*/
-        //virtual void out(Stereo<Sample> smps);
-
         /**Sets the Sample Rate of this Output
          * (used for getNext()).*/
         void setSamplerate(int _samplerate);
