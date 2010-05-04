@@ -2,9 +2,7 @@
 #define INMGR_H
 
 #include <string>
-#include <pthread.h>
 #include <semaphore.h>
-#include "../Misc/Atomic.h"
 #include "SafeQueue.h"
 
 enum midi_type{

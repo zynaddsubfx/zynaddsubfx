@@ -22,11 +22,12 @@
 
 #include <sys/stat.h>
 #include "Recorder.h"
+#include "WavFile.h"
 #include "../Nio/OutMgr.h"
 #include "../Nio/WavEngine.h"
 
 Recorder::Recorder()
-    :status(0), wave(NULL), notetrigger(0)
+    :status(0), notetrigger(0)
 {}
 
 Recorder::~Recorder()
@@ -45,8 +46,7 @@ int Recorder::preparefile(std::string filename_, int overwrite)
             return 1;
     }
 
-    if(!(wave=new WavEngine(sysOut, filename_, SAMPLE_RATE, 2)))
-        return 2;
+    sysOut->wave->newFile(new WavFile(filename_, SAMPLE_RATE, 2));
 
     status = 1; //ready
 
@@ -61,21 +61,15 @@ void Recorder::start()
 
 void Recorder::stop()
 {
-    if(wave)
-    {
-        sysOut->remove(wave);
-        wave->Stop();
-        delete wave;
-        wave = NULL; //is this even needed?
-    }
+    sysOut->wave->Stop();
+    sysOut->wave->destroyFile();
     status = 0;
 }
 
 void Recorder::pause()
 {
     status = 0;
-    wave->Stop();
-    sysOut->remove(wave);
+    sysOut->wave->Stop();
 }
 
 int Recorder::recording()
@@ -90,8 +84,7 @@ void Recorder::triggernow()
 {
     if(status == 2) {
         if(notetrigger!=1) {
-            wave->openAudio();
-            sysOut->add(wave);
+            sysOut->wave->Start();
         }
         notetrigger = 1;
     }

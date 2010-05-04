@@ -3,27 +3,20 @@
 
 #include "../globals.h"
 #include "../Misc/Stereo.h"
-#include "../Misc/Atomic.h"
-#include "../Samples/Sample.h"
+#include "../Samples/Sample.h" //deprecated 
 #include <list>
-#include <map>
 #include <string>
-#include <pthread.h>
 #include <semaphore.h>
 
 
 class AudioOut;
+class WavEngine;
 class Master;
 class OutMgr
 {
     public:
         OutMgr(Master *nmaster);
         ~OutMgr();
-
-        /**Adds audio output out.*/
-        void add(AudioOut *out){};
-        /**Removes given audio output engine*/
-        void remove(AudioOut *out){};
 
         /**Execute a tick*/
         const Stereo<REALTYPE *> tick(unsigned int frameSize);
@@ -40,6 +33,7 @@ class OutMgr
         AudioOut *getOut(std::string name);
 
         /**Gets the name of the first running driver
+         * Deprecated
          * @return if no running output, "" is returned
          */
         std::string getDriver() const;
@@ -49,30 +43,25 @@ class OutMgr
         bool setSink(std::string name);
 
         std::string getSink() const;
+
+        WavEngine *wave;     /**<The Wave Recorder*/
     private:
         void addSmps(REALTYPE *l, REALTYPE *r);
-        int storedSmps() const {return priBuffCurrent.l() - priBuf.l();};
+        int  storedSmps() const {return priBuffCurrent.l() - priBuf.l();};
         void makeStale(unsigned int size);
         void removeStaleSmps();
-        //should hold outputs here that exist for the life of the OutMgr
+
         AudioOut *defaultOut;/**<The default output*/
 
-        AudioOut *currentOut;
+        AudioOut *currentOut;/**<The current output driver*/
 
-        //should hold short lived, externally controlled Outputs (eg WavEngine)
-        //[needs mutex]
-        //std::list<AudioOut *> unmanagedOuts;
-        //mutable pthread_mutex_t mutex;
         sem_t requested;
 
-        //information on current active primary driver
-        //sample rate
-        //frame size
-
         /**Buffer*/
-        Stereo<REALTYPE *> priBuf; //buffer for primary drivers
+        Stereo<REALTYPE *> priBuf;          //buffer for primary drivers
         Stereo<REALTYPE *> priBuffCurrent; //current array accessor
-        Stereo<Sample> smps;
+        Stereo<Sample> smps; /**Deprecated TODO Remove*/
+
         REALTYPE *outl;
         REALTYPE *outr;
         Master *master;

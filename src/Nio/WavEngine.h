@@ -23,15 +23,16 @@
 #ifndef WAVENGINE_H
 #define WAVENGINE_H
 #include "AudioOut.h"
-#include "../Misc/WavFile.h"
-#include "../Misc/Atomic.h"
 #include <string>
 #include <pthread.h>
+#include <semaphore.h>
+#include "SafeQueue.h"
 
+class WavFile;
 class WavEngine: public AudioOut
 {
     public:
-        WavEngine(OutMgr *out, std::string filename, int samplerate, int channels);
+        WavEngine(OutMgr *out);
         ~WavEngine();
 
         bool openAudio();
@@ -41,14 +42,21 @@ class WavEngine: public AudioOut
         void setAudioEn(bool /*nval*/){};
         bool getAudioEn() const{return true;};
 
+        void push(Stereo<REALTYPE *> smps, size_t len);
+
+        void newFile(WavFile *_file);
+        void destroyFile();
+
     protected:
         void *AudioThread();
         static void *_AudioThread(void *arg);
 
     private:
-        WavFile file;
-        Atomic<bool> enabled;
-        pthread_t pThread;
+        WavFile *file;
+        sem_t work;
+        SafeQueue<float> buffer;
+
+        pthread_t *pThread;
 };
 #endif
 
