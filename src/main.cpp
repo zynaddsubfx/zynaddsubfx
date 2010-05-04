@@ -20,7 +20,6 @@
 
 */
 
-#include <stdio.h> //remove once iostream is used
 #include <iostream>
 #include <cmath>
 
@@ -65,10 +64,6 @@ using namespace std;
 pthread_t thr3, thr4;
 Master   *master;
 int  swaplr    = 0; //1 for left-right swapping
-bool usejackit = false;
-
-#include "Nio/OutMgr.h"
-
 
 #ifdef USE_LASH
 #include "Misc/LASHClient.h"
@@ -80,7 +75,7 @@ int     Pexitprogram = 0; //if the UI set this to 1, the program will exit
 /*
  * User Interface thread
  */
-void *thread3(void *arg)
+void *thread3(void *)
 {
 #ifndef DISABLE_GUI
 
@@ -175,17 +170,12 @@ void initprogram()
 {
     cerr.precision(1);
     cerr << std::fixed;
-#ifndef JACKAUDIOOUT
-#ifndef JACK_RTAUDIOOUT
     cerr << "\nSample Rate = \t\t" << SAMPLE_RATE << endl;
-#endif
-#endif
     cerr << "Sound Buffer Size = \t" << SOUND_BUFFER_SIZE << " samples" << endl;
     cerr << "Internal latency = \t" << SOUND_BUFFER_SIZE * 1000.0
     / SAMPLE_RATE << " ms" << endl;
     cerr << "ADsynth Oscil.Size = \t" << OSCIL_SIZE << " samples" << endl;
 
-    //fflush(stderr);
     srand(time(NULL));
     denormalkillbuf = new REALTYPE [SOUND_BUFFER_SIZE];
     for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
@@ -234,7 +224,6 @@ void exitprogram()
     delete lash;
 #endif
 
-//    pthread_mutex_unlock(&master->mutex);
     delete [] denormalkillbuf;
 }
 
@@ -275,9 +264,6 @@ int main(int argc, char *argv[])
     config.init();
     dump.startnow();
     int noui = 0;
-#ifdef JACKAUDIOOUT
-    usejackit = true; //use jack by default
-#endif
     cerr
     << "\nZynAddSubFX - Copyright (c) 2002-2009 Nasca Octavian Paul and others"
     << endl;
@@ -302,36 +288,16 @@ int main(int argc, char *argv[])
 #if OS_LINUX || OS_CYGWIN
     struct option opts[] = {
         {"load", 2, NULL, 'l'},
-        {"load-instrument", 2, NULL, 'L'
-        },
+        {"load-instrument", 2, NULL, 'L'},
         {"sample-rate", 2, NULL, 'r'},
-        {
-            "buffer-size", 2, NULL, 'b'
-        },
-        {
-            "oscil-size", 2, NULL, 'o'
-        },
-        {
-            "dump", 2, NULL, 'D'
-        },
-        {
-            "swap", 2, NULL, 'S'
-        },
-        {
-            "no-gui", 2, NULL, 'U'
-        },
-        {
-            "not-use-jack", 2, NULL, 'A'
-        },
-        {
-            "dummy", 2, NULL, 'Y'
-        },
-        {
-            "help", 2, NULL, 'h'
-        },
-        {
-            0, 0, 0, 0
-        }
+        {"buffer-size", 2, NULL, 'b'},
+        {"oscil-size", 2, NULL, 'o'},
+        {"dump", 2, NULL, 'D'},
+        {"swap", 2, NULL, 'S'},
+        {"no-gui", 2, NULL, 'U'},
+        {"dummy", 2, NULL, 'Y'},
+        {"help", 2, NULL, 'h'},
+        {0, 0, 0, 0}
     };
 #endif
     opterr = 0;
@@ -345,10 +311,10 @@ int main(int argc, char *argv[])
     while(1) {
         /**\todo check this process for a small memory leak*/
 #if OS_LINUX || OS_CYGWIN
-        opt = getopt_long(argc, argv, "l:L:r:b:o:hSDUAY", opts, &option_index);
+        opt = getopt_long(argc, argv, "l:L:r:b:o:hSDUY", opts, &option_index);
         char *optarguments = optarg;
 #elif OS_WINDOWS
-        opt = getopt(argc, argv, "l:L:r:b:o:hSDUAY", &option_index);
+        opt = getopt(argc, argv, "l:L:r:b:o:hSDUY", &option_index);
         char *optarguments = &winoptarguments[0];
 #else
 #error Undefined OS
@@ -371,13 +337,6 @@ int main(int argc, char *argv[])
             break;
         case 'U':
             noui = 1;
-            break;
-        case 'A':
-#ifdef JACKAUDIOOUT
-#ifdef OSSAUDIOOUT
-            usejackit = false;
-#endif
-#endif
             break;
         case 'l':
             tmp = 0;
@@ -459,12 +418,6 @@ int main(int argc, char *argv[])
         cout
         << "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface"
         << endl;
-#ifdef JACKAUDIOOUT
-#ifdef OSSAUDIOOUT
-        cout << "  -A , --not-use-jack\t\t\t Use OSS/ALSA instead of JACK"
-             << endl;
-#endif
-#endif
 #if OS_WINDOWS
         cout
         <<
@@ -476,10 +429,9 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    //---------
-
     initprogram();
 
+#if 0 //TODO update this code
 #ifdef USE_LASH
 #ifdef ALSAMIDIIN
     ALSAMidiIn *alsamidi = dynamic_cast<ALSAMidiIn *>(Midi);
@@ -488,6 +440,7 @@ int main(int argc, char *argv[])
 #endif
 #ifdef JACKAUDIOOUT
     lash->setjackname(JACKgetname());
+#endif
 #endif
 #endif
 
