@@ -114,19 +114,26 @@ void OutMgr::addSmps(REALTYPE *l, REALTYPE *r)
     memcpy(priBuffCurrent.r(), smps.r().c_buf(), SOUND_BUFFER_SIZE*sizeof(REALTYPE));
     priBuffCurrent.l() += SOUND_BUFFER_SIZE;
     priBuffCurrent.r() += SOUND_BUFFER_SIZE;
+    stales += SOUND_BUFFER_SIZE;
 }
 
 void OutMgr::makeStale(unsigned int size)
 {
-    stales = size;
+    //stales = size;
 }
 
 void OutMgr::removeStaleSmps()
 {
-    int toShift = priBuf.l() + stales - priBuffCurrent.l();
-    memmove(priBuf.l(), priBuf.l()+stales, toShift);
-    memmove(priBuf.r(), priBuf.r()+stales, toShift);
-    priBuffCurrent.l() = toShift + priBuf.l();
-    priBuffCurrent.r() = toShift + priBuf.r();
+    int toShift = storedSmps() - stales;
+    cout << "Beta toShift" << toShift << endl << "stales:" << stales << endl;
+    if(!stales)
+        return;
+    cout << "toShift" << toShift << endl << "stales:" << stales << endl;
+
+    memmove(priBuf.l(), priBuf.l()+stales, stales*sizeof(float));
+    memmove(priBuf.r(), priBuf.r()+stales, stales*sizeof(float));
+    priBuffCurrent.l() -= stales;
+    priBuffCurrent.r() -= stales;
+    stales = 0;
 }
 
