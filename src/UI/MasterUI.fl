@@ -757,7 +757,7 @@ syseffectui->refresh(master->sysefx[nsyseff]);}
               xywh {90 90 100 20} labelfont 1 labelsize 10
             }
             MenuItem {} {
-              label APhaser selected
+              label APhaser
               xywh {0 0 36 21} labelfont 1 labelsize 10
             }
           }
@@ -1323,7 +1323,7 @@ o->redraw();}
         } {
           Fl_Group {} {
             label {System Effects}
-            xywh {345 55 245 155} box ENGRAVED_FRAME labelfont 1 labelsize 12 align 18
+            xywh {345 55 245 155} box ENGRAVED_FRAME labelfont 1 labelsize 12 align 18 hide
           } {
             Fl_Counter simplesyseffnocounter {
               label {Sys.Effect No.}
@@ -1380,6 +1380,10 @@ simplesyseffectui->refresh(master->sysefx[nsyseff]);}
                 label DynFilter
                 xywh {100 100 100 20} labelfont 1 labelsize 10
               }
+              MenuItem {} {
+                label Aphaser
+                xywh {0 0 40 25} labelfont 1 labelsize 10
+              }
             }
             Fl_Group simplesyseffectuigroup {
               xywh {350 95 235 95} box FLAT_BOX color 48
@@ -1405,7 +1409,7 @@ pthread_mutex_unlock(&master->mutex);}
           }
           Fl_Group {} {
             label {Insertion Effects}
-            xywh {345 55 245 155} box ENGRAVED_FRAME labelfont 1 labelsize 12 align 18 hide
+            xywh {345 55 245 155} box ENGRAVED_FRAME labelfont 1 labelsize 12 align 18
           } {
             Fl_Counter simpleinseffnocounter {
               label {Ins.Effect No.}
@@ -1473,6 +1477,10 @@ simpleinseffectui->show();}
               MenuItem {} {
                 label DynFilter
                 xywh {110 110 100 20} labelfont 1 labelsize 10
+              }
+              MenuItem {} {
+                label Aphaser
+                xywh {0 0 40 25} labelfont 1 labelsize 10
               }
             }
             Fl_Group simpleinseffectuigroup {

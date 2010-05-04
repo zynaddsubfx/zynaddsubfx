@@ -162,7 +162,6 @@ void Analog_Phaser::out(const Stereo<REALTYPE *> &input)
         };
 
 
-        //cout << lxn << " vs ";
         //Left channel
         for (j = 0; j < Pstages; j++)
         {			//Phasing routine
@@ -180,7 +179,6 @@ void Analog_Phaser::out(const Stereo<REALTYPE *> &input)
             lxn = lyn1[j];
             if (j==1) lxn += fbl;  //Insert feedback after first phase stage
         };
-        //cout << lxn << endl;
 
         //Right channel
         for (j = 0; j < Pstages; j++)
@@ -200,8 +198,6 @@ void Analog_Phaser::out(const Stereo<REALTYPE *> &input)
             if (j==1) rxn += fbr;  //Insert feedback after first phase stage
         }
 
-        //cout << fb << ' ' << input.l()[i] - lxn << endl;
-        //cout << "input" << input.l()[i] << "output:" << lxn << endl;
 
         fbl = lxn * fb;
         fbr = rxn * fb;
@@ -258,7 +254,6 @@ void Analog_Phaser::setfb(unsigned char Pfb)
 
 void Analog_Phaser::setvolume(unsigned char Pvolume)
 {
-    cout << "setting volume" << (int) Pvolume << endl;
     this->Pvolume = Pvolume;
     // outvolume is needed in calling program
     if(insertion == 0) {
