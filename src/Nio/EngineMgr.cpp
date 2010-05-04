@@ -25,7 +25,7 @@ EngineMgr *sysEngine;
 
 EngineMgr::EngineMgr()
 {
-    Engine *defaultEng;
+    Engine *defaultEng = NULL;
 
     //conditional compiling mess (but contained)
     engines.push_back(defaultEng = new NulEngine(sysOut));
@@ -97,8 +97,9 @@ void EngineMgr::start()
     sysIn->current     = defaultIn;
 
     //open up the default output(s)
+    cout << "Starting Audio: " << defaultOut->name << endl;
     defaultOut->setAudioEn(true);
-    if(defaultOut->getAudioEn()) {
+    if(!defaultOut->getAudioEn()) {
         cerr << "ERROR: The default audio output failed to open!" << endl;
     }
     else { //recover
@@ -106,8 +107,9 @@ void EngineMgr::start()
         sysOut->currentOut->setAudioEn(true);
     }
 
+    cout << "Starting MIDI: " << defaultIn->name << endl;
     defaultIn->setMidiEn(true);
-    if(defaultIn->getMidiEn()) {
+    if(!defaultIn->getMidiEn()) {
         cerr << "ERROR: The default MIDI input failed to open!" << endl;
     }
     else { //recover

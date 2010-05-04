@@ -38,8 +38,6 @@ class OutMgr
          */
         std::string getDriver() const;
 
-        void run();
-
         bool setSink(std::string name);
 
         std::string getSink() const;

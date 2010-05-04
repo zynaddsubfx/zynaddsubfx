@@ -32,29 +32,6 @@ OutMgr::~OutMgr()
     delete [] outl;
 }
 
-#if 0 //reenable to get secondary inputs working
-void OutMgr::add(AudioOut *driver)
-{
-    pthread_mutex_lock(&mutex);
-    unmanagedOuts.push_back(driver);
-    if(running())//hotplug
-        driver->Start();
-    pthread_mutex_unlock(&mutex);
-}
-
-void OutMgr::remove(AudioOut *out)
-{
-    pthread_mutex_lock(&mutex);
-    unmanagedOuts.remove(out);
-    out->Stop();//tells engine to stop
-
-    //gives a dummy sample to make sure it is not stuck
-    out->out(Stereo<Sample>(Sample(SOUND_BUFFER_SIZE, 0.0),
-                            Sample(SOUND_BUFFER_SIZE, 0.0)));
-    pthread_mutex_unlock(&mutex);
-}
-#endif
-
 /* Sequence of a tick
  * 1) lets see if we have any stuff to do via midi
  * 2) Lets do that stuff
@@ -95,38 +72,9 @@ string OutMgr::getDriver() const
     return currentOut->name;
 }
 
-void OutMgr::run()
-{
-#if 0
-    defaultOut = dynamic_cast<AudioOut *>(sysEngine->defaultEng);
-    if(!defaultOut) {
-        cerr << "ERROR: It looks like someone broke the Nio Output\n"
-             << "       Attempting to recover by defaulting to the\n"
-             << "       Null Engine." << endl;
-        defaultOut = dynamic_cast<AudioOut *>(sysEngine->getEng("NULL"));
-    }
-
-    currentOut = defaultOut;
-    //open up the default output
-    if(!defaultOut->Start()) {
-        cerr << "ERROR: The default Audio Output Failed to Open!" << endl;
-    }
-    else {
-        currentOut = defaultOut = dynamic_cast<AudioOut *>(sysEngine->getEng("NULL"));
-        defaultOut->Start();
-    }
-#endif
-}
-
 bool OutMgr::setSink(string name)
 {
-    AudioOut *sink = NULL;
-    for(list<Engine*>::iterator itr = sysEngine->engines.begin();
-            itr != sysEngine->engines.end(); ++itr) {
-        AudioOut *out = dynamic_cast<AudioOut *>(*itr);
-        if(out && out->name == name)
-            sink = out;
-    }
+    AudioOut *sink = getOut(name);
 
     if(!sink)
         return false;
