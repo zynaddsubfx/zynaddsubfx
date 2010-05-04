@@ -21,12 +21,21 @@ struct EngineMgr
          */
         Engine *getEng(std::string name);
 
+        /**Start up defaults*/
+        void start();
+
         /**Stop all engines*/
         void stop();
 
         std::list<Engine *> engines;
 
-        Engine *defaultEng;/**<The default output*/
+        //return false on failure
+        bool setInDefault(std::string name);
+        bool setOutDefault(std::string name);
+
+        //default I/O
+        AudioOut *defaultOut;
+        MidiIn   *defaultIn;
 };
 
 extern EngineMgr *sysEngine;

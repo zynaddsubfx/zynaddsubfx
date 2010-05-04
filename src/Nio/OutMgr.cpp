@@ -97,6 +97,7 @@ string OutMgr::getDriver() const
 
 void OutMgr::run()
 {
+#if 0
     defaultOut = dynamic_cast<AudioOut *>(sysEngine->defaultEng);
     if(!defaultOut) {
         cerr << "ERROR: It looks like someone broke the Nio Output\n"
@@ -114,6 +115,7 @@ void OutMgr::run()
         currentOut = defaultOut = dynamic_cast<AudioOut *>(sysEngine->getEng("NULL"));
         defaultOut->Start();
     }
+#endif
 }
 
 bool OutMgr::setSink(string name)

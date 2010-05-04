@@ -45,13 +45,12 @@ class OutMgr
         std::string getSink() const;
 
         WavEngine *wave;     /**<The Wave Recorder*/
+        friend class EngineMgr;
     private:
         void addSmps(REALTYPE *l, REALTYPE *r);
         int  storedSmps() const {return priBuffCurrent.l() - priBuf.l();};
         void makeStale(unsigned int size);
         void removeStaleSmps();
-
-        AudioOut *defaultOut;/**<The default output*/
 
         AudioOut *currentOut;/**<The current output driver*/
 

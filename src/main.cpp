@@ -198,13 +198,6 @@ void initprogram()
 
     //Initialize The Engines
     sysEngine = new EngineMgr();
-
-    //Run the system
-    sysOut->run();
-#warning remove welcome message when system is out of beta
-    cout << "\nThanks for using the Nio system :)" << endl;
-
-
 }
 
 /*
@@ -458,34 +451,24 @@ int main(int argc, char *argv[])
     }
 
 
-    //Select Drivers TODO abstract this a bit more
     if(!input.empty()) {
-        //upper case
-        transform(input.begin(), input.end(), input.begin(), ::toupper);
-
-        MidiIn *chosen;
-        if((chosen = dynamic_cast<MidiIn *>(sysEngine->getEng(input))))
-            cout << input << " selected" << endl,
-                 sysIn->setSource(input);
-        else {
+        if(!sysEngine->setInDefault(input)) {
             cerr << "There is no input for " << input << endl;
             exit(1);
         }
     }
     if(!output.empty()) {
-        //upper case
-        transform(output.begin(), output.end(), output.begin(), ::toupper);
-
-        AudioOut *chosen;
-        if((chosen = dynamic_cast<AudioOut *>(sysEngine->getEng(output))))
-            cout << output << " selected" << endl,
-                 sysOut->setSink(output);
-        else {
+        if(!sysEngine->setOutDefault(input)) {
             cerr << "There is no output for " << output << endl;
             exit(1);
         }
     }
 
+    //Run the Nio system
+    sysEngine->start(); //Drivers start your engines!
+
+#warning remove welcome message when system is out of beta
+    cout << "\nThanks for using the Nio system :)" << endl;
 
 #ifndef DISABLE_GUI
     if(noui == 0) {

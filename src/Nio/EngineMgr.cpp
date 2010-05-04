@@ -1,8 +1,10 @@
 #include "EngineMgr.h"
 #include <algorithm>
 #include <iostream>
+#include "InMgr.h"
 #include "OutMgr.h"
 #include "AudioOut.h"
+#include "MidiIn.h"
 #include "NulEngine.h"
 #if OSS
 #include "OssEngine.h"
@@ -23,6 +25,8 @@ EngineMgr *sysEngine;
 
 EngineMgr::EngineMgr()
 {
+    Engine *defaultEng;
+
     //conditional compiling mess (but contained)
     engines.push_back(defaultEng = new NulEngine(sysOut));
 #if OSS
@@ -42,7 +46,6 @@ EngineMgr::EngineMgr()
 #if JACK
 #if JACK_DEFAULT
     engines.push_back(defaultEng = new JackEngine(sysOut));
-    cout << "jack go" << endl;
 #else
     engines.push_back(new JackEngine(sysOut));
 #endif
@@ -55,6 +58,9 @@ EngineMgr::EngineMgr()
 #endif
 #endif
 
+    defaultOut = dynamic_cast<AudioOut *>(defaultEng);
+
+    defaultIn = dynamic_cast<MidiIn *>(defaultEng);
 };
 
 EngineMgr::~EngineMgr()
@@ -77,10 +83,64 @@ Engine *EngineMgr::getEng(string name)
     return NULL;
 }
 
+void EngineMgr::start()
+{
+    if(!(defaultOut&&defaultIn)) {
+        cerr << "ERROR: It looks like someone broke the Nio Output\n"
+             << "       Attempting to recover by defaulting to the\n"
+             << "       Null Engine." << endl;
+        defaultOut = dynamic_cast<AudioOut *>(getEng("NULL"));
+        defaultIn  = dynamic_cast<MidiIn *>(getEng("NULL"));
+    }
+
+    sysOut->currentOut = defaultOut;
+    sysIn->current     = defaultIn;
+
+    //open up the default output(s)
+    defaultOut->setAudioEn(true);
+    if(defaultOut->getAudioEn()) {
+        cerr << "ERROR: The default audio output failed to open!" << endl;
+    }
+    else { //recover
+        sysOut->currentOut = dynamic_cast<AudioOut *>(sysEngine->getEng("NULL"));
+        sysOut->currentOut->setAudioEn(true);
+    }
+
+    defaultIn->setMidiEn(true);
+    if(defaultIn->getMidiEn()) {
+        cerr << "ERROR: The default MIDI input failed to open!" << endl;
+    }
+    else { //recover
+        sysIn->current = dynamic_cast<MidiIn *>(sysEngine->getEng("NULL"));
+        sysIn->current->setMidiEn(true);
+    }
+}
+
 void EngineMgr::stop()
 {
     for(list<Engine*>::iterator itr = engines.begin();
-            itr != engines.end(); ++itr) 
+            itr != engines.end(); ++itr)
         (*itr)->Stop();
 }
+
+bool EngineMgr::setInDefault(string name)
+{
+        MidiIn *chosen;
+        if((chosen = dynamic_cast<MidiIn *>(getEng(name)))){ //got the input
+                 defaultIn = chosen;
+                 return true;
+        }
+        return false;
+}
+
+bool EngineMgr::setOutDefault(string name)
+{
+        AudioOut *chosen;
+        if((chosen = dynamic_cast<AudioOut *>(getEng(name)))){ //got the output
+                 defaultOut = chosen;
+                 return true;
+        }
+        return false;
+}
+
 

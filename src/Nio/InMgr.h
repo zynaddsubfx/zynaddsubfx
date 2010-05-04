@@ -37,6 +37,7 @@ class InMgr
 
         std::string getSource() const;
 
+        friend class EngineMgr;
     private:
         SafeQueue<MidiEvent> queue;
         sem_t work;

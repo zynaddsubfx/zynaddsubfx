@@ -27,8 +27,9 @@
 #include <pthread.h>
 #include "../globals.h"
 #include "AudioOut.h"
+#include "MidiIn.h"
 
-class NulEngine: public AudioOut
+class NulEngine: public AudioOut, MidiIn
 {
     public:
         NulEngine(OutMgr *out);
@@ -39,6 +40,9 @@ class NulEngine: public AudioOut
 
         void setAudioEn(bool nval);
         bool getAudioEn() const;
+
+        void setMidiEn(bool){};
+        bool getMidiEn() const{return true;};
 
     protected:
         void *AudioThread();
