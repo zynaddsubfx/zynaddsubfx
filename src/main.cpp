@@ -22,6 +22,8 @@
 
 #include <iostream>
 #include <cmath>
+#include <cctype>
+#include <algorithm>
 
 #include <unistd.h>
 #include <pthread.h>
@@ -39,6 +41,8 @@
 extern Dump dump;
 
 //Nio System
+#include "Nio/MidiIn.h"
+#include "Nio/AudioOut.h"
 #include "Nio/OutMgr.h"
 #include "Nio/InMgr.h"
 #include "Nio/EngineMgr.h"
@@ -453,14 +457,34 @@ int main(int argc, char *argv[])
         }
     }
 
-    //if selection
-    //  if driver_valid
-    //    setup
-    //  else
-    //    warn and exit
 
-    cout << "User Wants " << (input.empty() ? "DEFAULT" : input) << "->"
-         << (output.empty() ? "DEFAULT" : output) << endl;
+    //Select Drivers TODO abstract this a bit more
+    if(!input.empty()) {
+        //upper case
+        transform(input.begin(), input.end(), input.begin(), ::toupper);
+
+        MidiIn *chosen;
+        if((chosen = dynamic_cast<MidiIn *>(sysEngine->getEng(input))))
+            cout << input << " selected" << endl,
+                 sysIn->setSource(input);
+        else {
+            cerr << "There is no input for " << input << endl;
+            exit(1);
+        }
+    }
+    if(!output.empty()) {
+        //upper case
+        transform(output.begin(), output.end(), output.begin(), ::toupper);
+
+        AudioOut *chosen;
+        if((chosen = dynamic_cast<AudioOut *>(sysEngine->getEng(output))))
+            cout << output << " selected" << endl,
+                 sysOut->setSink(output);
+        else {
+            cerr << "There is no output for " << output << endl;
+            exit(1);
+        }
+    }
 
 
 #ifndef DISABLE_GUI
