@@ -705,9 +705,8 @@ refresh(eff);}
     }
   }
   Function {make_analog_phaser_window()} {} {
-    Fl_Window effaphaserwindow {
+    Fl_Window effaphaserwindow {selected
       xywh {292 251 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      code0 {putchar('a'); putchar('b'); putchar('c');}
       class Fl_Group
     } {
       Fl_Choice aphaserp {
@@ -1560,7 +1559,6 @@ switch(eff->geteffect()){
 	aphaser10->value(eff->geteffectpar(10));
 	aphaser11->value(eff->geteffectpar(11));
 	aphaser12->value(eff->geteffectpar(12));
-	putchar('?');
 	effaphaserwindow->show();
 	break;
     default:effnullwindow->show();
