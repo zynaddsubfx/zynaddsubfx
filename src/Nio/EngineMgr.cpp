@@ -99,20 +99,22 @@ void EngineMgr::start()
     //open up the default output(s)
     cout << "Starting Audio: " << defaultOut->name << endl;
     defaultOut->setAudioEn(true);
-    if(!defaultOut->getAudioEn()) {
-        cerr << "ERROR: The default audio output failed to open!" << endl;
+    if(defaultOut->getAudioEn()) {
+        cout << "Audio Started" << endl;
     }
-    else { //recover
+    else { 
+        cerr << "ERROR: The default audio output failed to open!" << endl;
         sysOut->currentOut = dynamic_cast<AudioOut *>(sysEngine->getEng("NULL"));
         sysOut->currentOut->setAudioEn(true);
     }
 
     cout << "Starting MIDI: " << defaultIn->name << endl;
     defaultIn->setMidiEn(true);
-    if(!defaultIn->getMidiEn()) {
-        cerr << "ERROR: The default MIDI input failed to open!" << endl;
+    if(defaultIn->getMidiEn()) {
+        cout << "MIDI Started" << endl;
     }
     else { //recover
+        cerr << "ERROR: The default MIDI input failed to open!" << endl;
         sysIn->current = dynamic_cast<MidiIn *>(sysEngine->getEng("NULL"));
         sysIn->current->setMidiEn(true);
     }

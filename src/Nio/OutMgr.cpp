@@ -51,14 +51,15 @@ const Stereo<REALTYPE *> OutMgr::tick(unsigned int frameSize)
     //SysEv->execute();
     removeStaleSmps();
     while(frameSize > storedSmps()) {
-        {//get more stuff
-            pthread_mutex_lock(&(master->mutex));
-            master->AudioOut(outl, outr);
-            pthread_mutex_unlock(&(master->mutex));
-            addSmps(outl,outr);
-        }
+        pthread_mutex_lock(&(master->mutex));
+        master->AudioOut(outl, outr);
+        pthread_mutex_unlock(&(master->mutex));
+        addSmps(outl,outr);
     }
-    makeStale(frameSize);
+    Stereo<REALTYPE *> ans = priBuffCurrent;
+    ans.l() -= frameSize;
+    ans.r() -= frameSize;
+    //cout << storedSmps() << '=' << frameSize << endl;
     return priBuf;
 }
 
@@ -106,6 +107,7 @@ void OutMgr::addSmps(REALTYPE *l, REALTYPE *r)
     Stereo<Sample> smps(Sample(SOUND_BUFFER_SIZE, l), Sample(SOUND_BUFFER_SIZE, r));
 
     if(currentOut->getSampleRate() != SAMPLE_RATE) { //we need to resample
+        //cout << "BAD RESAMPLING" << endl;
         smps.l().resample(SAMPLE_RATE,currentOut->getSampleRate());
         smps.r().resample(SAMPLE_RATE,currentOut->getSampleRate());
     }
@@ -117,23 +119,17 @@ void OutMgr::addSmps(REALTYPE *l, REALTYPE *r)
     stales += SOUND_BUFFER_SIZE;
 }
 
-void OutMgr::makeStale(unsigned int size)
-{
-    //stales = size;
-}
-
 void OutMgr::removeStaleSmps()
 {
     int toShift = storedSmps() - stales;
-    cout << "Beta toShift" << toShift << endl << "stales:" << stales << endl;
+    //cout << "toShift: " << toShift << endl << "stales: " << stales << endl << priBuf.l() << ' ' << priBuffCurrent.l() << endl;
     if(!stales)
         return;
-    cout << "toShift" << toShift << endl << "stales:" << stales << endl;
 
-    memmove(priBuf.l(), priBuf.l()+stales, stales*sizeof(float));
-    memmove(priBuf.r(), priBuf.r()+stales, stales*sizeof(float));
-    priBuffCurrent.l() -= stales;
-    priBuffCurrent.r() -= stales;
+    memset(priBuf.l(), '0', 4096*sizeof(REALTYPE));
+    memset(priBuf.r(), '0', 4096*sizeof(REALTYPE));
+    priBuffCurrent = priBuf;
     stales = 0;
+
 }
 

@@ -47,7 +47,6 @@ class OutMgr
     private:
         void addSmps(REALTYPE *l, REALTYPE *r);
         int  storedSmps() const {return priBuffCurrent.l() - priBuf.l();};
-        void makeStale(unsigned int size);
         void removeStaleSmps();
 
         AudioOut *currentOut;/**<The current output driver*/

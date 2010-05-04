@@ -456,12 +456,14 @@ int main(int argc, char *argv[])
             cerr << "There is no input for " << input << endl;
             exit(1);
         }
+        cout << input << " selected." << endl;
     }
     if(!output.empty()) {
-        if(!sysEngine->setOutDefault(input)) {
+        if(!sysEngine->setOutDefault(output)) {
             cerr << "There is no output for " << output << endl;
             exit(1);
         }
+        cout << output << " selected." << endl;
     }
 
     //Run the Nio system
