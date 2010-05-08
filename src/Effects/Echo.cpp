@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Echo.C - Echo effect
+  Echo.cpp - Echo effect
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Copyright (C) 2009-2010 Mark McCurry
   Author: Nasca Octavian Paul
@@ -31,9 +31,9 @@ Echo::Echo(const int &insertion_,
            REALTYPE *const efxoutl_,
            REALTYPE *const efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
-      Pvolume(50), Ppanning(64), //Pdelay(60),
+      Pvolume(50), Ppanning(64), Pdelay(60),
       Plrdelay(100), Plrcross(100), Pfb(40), Phidamp(60),
-      delayTime(1), lrdelay(0),
+      delayTime(1), lrdelay(0), avgDelay(0),
       delay(new REALTYPE[(int)(MAX_DELAY * SAMPLE_RATE)],
             new REALTYPE[(int)(MAX_DELAY * SAMPLE_RATE)]),
       old(0.0), pos(0), delta(1), ndelta(1)
@@ -70,10 +70,10 @@ void Echo::initdelays()
 {
     cleanup();
     //number of seconds to delay left chan
-    float dl = delayCtl.getiVal() - lrdelay;
+    float dl = avgDelay - lrdelay;
 
     //number of seconds to delay right chan
-    float dr = delayCtl.getiVal() + lrdelay;
+    float dr = avgDelay + lrdelay;
 
     ndelta.l() = max(1,(int) (dl * SAMPLE_RATE));
     ndelta.r() = max(1,(int) (dr * SAMPLE_RATE));
@@ -140,9 +140,8 @@ void Echo::setpanning(unsigned char Ppanning)
 
 void Echo::setdelay(unsigned char Pdelay)
 {
-    delayCtl.setmVal(Pdelay);
-    //this->Pdelay=Pdelay;
-    //delay=1+(int)(Pdelay/127.0*SAMPLE_RATE*1.5);//0 .. 1.5 sec
+    this->Pdelay=Pdelay;
+    avgDelay=(Pdelay/127.0*1.5);//0 .. 1.5 sec
     initdelays();
 }
 
@@ -250,7 +249,7 @@ unsigned char Echo::getpar(int npar) const
         return Ppanning;
         break;
     case 2:
-        return delayCtl.getmVal();
+        return Pdelay;
         break;
     case 3:
         return Plrdelay;

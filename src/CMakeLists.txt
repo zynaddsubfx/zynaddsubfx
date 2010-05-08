@@ -202,14 +202,12 @@ set(NONGUI_LIBRARIES
 	zynaddsubfx_params
 	zynaddsubfx_dsp
 	zynaddsubfx_samples
-	zynaddsubfx_controls
         zynaddsubfx_nio
     )
 
 set(CXXTEST_LINK_LIBS ${NONGUI_LIBRARIES})
 
 add_subdirectory(Misc)
-add_subdirectory(Controls)
 add_subdirectory(Synth)
 add_subdirectory(Seq)
 add_subdirectory(Effects)

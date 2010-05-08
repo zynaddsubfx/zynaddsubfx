@@ -47,7 +47,7 @@ class Analog_Phaser:public Effect
     private:
         //Phaser parameters
         EffectLFO lfo;              //Phaser modulator
-        unsigned char Pvolume;      //Used in Process.C to set wet/dry mix
+        unsigned char Pvolume;      //Used in Process.cpp to set wet/dry mix
         unsigned char Pdistortion;  //Model distortion added by FET element
         unsigned char Pwidth;       //Phaser width (LFO amplitude)
         unsigned char Pfb;          //feedback
