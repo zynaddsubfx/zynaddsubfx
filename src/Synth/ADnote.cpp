@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  ADnote.C - The "additive" synthesizer
+  ADnote.cpp - The "additive" synthesizer
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 

@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Echo.C - Echo effect
+  Echo.cpp - Echo effect
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Copyright (C) 2009-2010 Mark McCurry
   Author: Nasca Octavian Paul

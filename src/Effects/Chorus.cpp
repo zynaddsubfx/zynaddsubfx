@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Chorus.C - Chorus and Flange effects
+  Chorus.cpp - Chorus and Flange effects
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
@@ -62,7 +62,7 @@ REALTYPE Chorus::getdelay(REALTYPE xlfo)
     if((result + 0.5) >= maxdelay) {
         cerr
         <<
-        "WARNING: Chorus.C::getdelay(..) too big delay (see setdelay and setdepth funcs.)\n";
+        "WARNING: Chorus.cpp::getdelay(..) too big delay (see setdelay and setdepth funcs.)\n";
         result = maxdelay - 1.0;
     }
     return result;

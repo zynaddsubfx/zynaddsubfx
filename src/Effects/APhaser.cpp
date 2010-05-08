@@ -1,6 +1,6 @@
 /*
 
-  APhaser.C  - Approximate digital model of an analog JFET phaser.
+  APhaser.cpp  - Approximate digital model of an analog JFET phaser.
   Analog modeling implemented by Ryan Billing aka Transmogrifox.
   November, 2009
   
@@ -8,7 +8,7 @@
   ///////////////////
   ZynAddSubFX - a software synthesizer
  
-  Phaser.C - Phaser effect
+  Phaser.cpp - Phaser effect
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 

@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Stereo.C - Object for storing a pair of objects
+  Stereo.cpp - Object for storing a pair of objects
   Copyright (C) 2009-2009 Mark McCurry
   Author: Mark McCurry
 
