@@ -27,7 +27,6 @@
 #include "Effect.h"
 #include "../Misc/Stereo.h"
 #include "../Samples/Sample.h"
-#include "../Controls/DelayCtl.h"
 
 /**Echo Effect*/
 class Echo:public Effect
@@ -102,7 +101,7 @@ class Echo:public Effect
         //Parameters
         char     Pvolume;  /**<#1 Volume or Dry/Wetness*/
         char     Ppanning; /**<#2 Panning*/
-        DelayCtl delayCtl;    /**<#3 Delay of the Echo*/
+        char     Pdelay;   /**<#3 Delay of the Echo*/
         char     Plrdelay; /**<#4 L/R delay difference*/
         char     Plrcross; /**<#5 L/R Mixing*/
         char     Pfb;      /**<#6Feedback*/
@@ -120,7 +119,8 @@ class Echo:public Effect
         REALTYPE panning, lrcross, fb, hidamp;
         //Left/Right delay lengths
         Stereo<int> delayTime;
-        float lrdelay;
+        REALTYPE lrdelay;
+        REALTYPE avgDelay;
 
         void initdelays();
         //2 channel ring buffer

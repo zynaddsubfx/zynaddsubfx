@@ -175,7 +175,6 @@ set(NONGUI_LIBRARIES
 	zynaddsubfx_params
 	zynaddsubfx_dsp
 	zynaddsubfx_samples
-	zynaddsubfx_controls
     )
 
 set(CXXTEST_LINK_LIBS ${NONGUI_LIBRARIES})
@@ -183,7 +182,6 @@ set(MIDIINPUT_LIBRARIES "")
 
 add_subdirectory(Misc)
 add_subdirectory(Input)
-add_subdirectory(Controls)
 add_subdirectory(Synth)
 add_subdirectory(Output)
 add_subdirectory(Seq)
