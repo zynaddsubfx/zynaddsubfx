@@ -178,11 +178,7 @@ void Part::cleanup()
 
 Part::~Part()
 {
-    for(int k = 0; k < POLIPHONY; k++)
-        KillNotePos(k);
-    for(int nefx = 0; nefx < NUM_PART_EFX; nefx++)
-        partefx[nefx]->cleanup();
-
+    cleanup();
     for(int n = 0; n < NUM_KIT_ITEMS; n++) {
         if(kit[n].adpars != NULL)
             delete (kit[n].adpars);

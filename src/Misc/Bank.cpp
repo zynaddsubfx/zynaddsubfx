@@ -26,17 +26,13 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include <algorithm>
 
-#include <pthread.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
 
 #include "Config.h"
-
-using namespace std;
 
 #define INSTRUMENT_EXTENSION ".xiz"
 
@@ -241,21 +237,16 @@ void Bank::savetoslot(unsigned int ninstrument, Part *part)
 /*
  * Loads the instrument from the bank
  */
-void Bank::loadfromslot(unsigned int ninstrument, Part *&part)
+void Bank::loadfromslot(unsigned int ninstrument, Part *part)
 {
     if(emptyslot(ninstrument))
         return;
 
-    Part *p = new Part(part->getMicrotonal(), part->getFFT(), part->mutex);
-    p->loadXMLinstrument(ins[ninstrument].filename);
-    p->Penabled = true;
-    p->applyparameters();
+    part->defaultsinstrument();
 
-    //swap pointers to greatly reduce locked time
-    pthread_mutex_lock(part->mutex);
-    swap(part,p);
-    delete p;
-    pthread_mutex_unlock(part->mutex);
+//    printf("load:  %s\n",ins[ninstrument].filename);
+
+    part->loadXMLinstrument(ins[ninstrument].filename);
 }
 
 
