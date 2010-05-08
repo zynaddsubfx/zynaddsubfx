@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Control.C - Control base class
+  Control.cpp - Control base class
   Copyright (C) 2009-2009 Mark McCurry
   Author: Mark McCurry
 

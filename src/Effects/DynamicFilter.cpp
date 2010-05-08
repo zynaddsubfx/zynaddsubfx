@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  DynamicFilter.C - "WahWah" effect and others
+  DynamicFilter.cpp - "WahWah" effect and others
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 

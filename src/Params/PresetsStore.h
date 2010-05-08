@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  PresetsStore.C - Presets and Clipboard store
+  PresetsStore.cpp - Presets and Clipboard store
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 

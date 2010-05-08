@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Sample.C - Object for storing information on samples
+  Sample.cpp - Object for storing information on samples
   Copyright (C) 2009-2009 Mark McCurry
   Author: Mark McCurry
 

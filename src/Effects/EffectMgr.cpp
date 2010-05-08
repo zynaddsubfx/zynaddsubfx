@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  EffectMgr.C - Effect manager, an interface betwen the program and effects
+  EffectMgr.cpp - Effect manager, an interface betwen the program and effects
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 

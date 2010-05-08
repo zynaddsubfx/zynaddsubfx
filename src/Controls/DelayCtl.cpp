@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  DelayCtl.C - Control For Delays
+  DelayCtl.cpp - Control For Delays
   Copyright (C) 2009-2009 Mark McCurry
   Author: Mark McCurry
 

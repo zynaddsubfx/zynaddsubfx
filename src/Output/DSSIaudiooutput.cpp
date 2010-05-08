@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  DSSIaudiooutput.C - Audio functions for DSSI
+  DSSIaudiooutput.cpp - Audio functions for DSSI
   Copyright (C) 2002 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
