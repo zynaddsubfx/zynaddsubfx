@@ -11,27 +11,6 @@
 #include <list>
 #include <string>
 
-//removed from code for now
-#if 0
-struct NioTab : public Fl_Group
-{
-    NioTab(std::string name, bool _midi, bool _audio);
-
-    void refresh();
-    static void nioToggle(Fl_Widget *w, void *arg);
-    static void audioToggle(Fl_Widget *w, void *arg);
-    static void midiToggle(Fl_Widget *w, void *arg);
-    static void nioBuffer(Fl_Widget *w, void *arg);
-
-    Fl_Light_Button enable;
-    Fl_Light_Button *midi;
-    Fl_Light_Button *audio;
-    Fl_Spinner *buffer;
-    const std::string name;
-};
-#endif
-
-
 class NioUI : public Fl_Window
 {
     public:
