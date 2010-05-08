@@ -50,14 +50,10 @@ NioUI::NioUI()
                 midi->add(eng->name.c_str());
             if(dynamic_cast<AudioOut *>(eng))
                 audio->add(eng->name.c_str());
-            if(eng->name == sysOut->getSink()) {
+            if(eng->name == sysOut->getSink())
                 audioval = audio->size() - 2;
-                cout << "Setting audio value to " << audio->size() << endl;
-            }
-            if(eng->name == sysIn->getSource()) {
+            if(eng->name == sysIn->getSource())
                 midival = midi->size() - 2;
-                cout << "Setting midi value to " << midi->size() << endl;
-            }
         }
         audio->value(audioval);
         midi->value(midival);
