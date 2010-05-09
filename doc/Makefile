@@ -1,3 +1,6 @@
+
+.PHONY: subdirs gen
+
 all: xhtml
 
 xhtml: zynaddsubfx.txt envelope.txt intro.txt lfo.txt
