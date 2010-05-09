@@ -77,7 +77,7 @@ endif
 
 
 objects=main.o
-SUBDIRS=Controls DSP Effects Input Misc Output Params Samples Synth Seq
+SUBDIRS=DSP Effects Input Misc Output Params Samples Synth Seq
 
 .PHONY: subdirs $(SUBDIRS)
 
