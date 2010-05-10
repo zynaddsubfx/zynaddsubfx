@@ -39,6 +39,7 @@ class InMgr
 
         friend class EngineMgr;
     private:
+        MidiIn *getIn(std::string name);
         SafeQueue<MidiEvent> queue;
         sem_t work;
         MidiIn *current;

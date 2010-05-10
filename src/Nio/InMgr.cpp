@@ -70,15 +70,7 @@ void InMgr::flush()
 
 bool InMgr::setSource(string name)
 {
-    MidiIn *src = NULL;
-    for(list<Engine*>::iterator itr = sysEngine->engines.begin();
-            itr != sysEngine->engines.end(); ++itr) {
-        MidiIn *in = dynamic_cast<MidiIn *>(*itr);
-        if(in && in->name == name) {
-                src = in;
-                break;
-        }
-    }
+    MidiIn *src = getIn(name);
 
     if(!src)
         return false;
@@ -88,7 +80,13 @@ bool InMgr::setSource(string name)
     current = src;
     current->setMidiEn(true);
 
-    return current->getMidiEn();
+    bool success = current->getMidiEn();
+
+    //Keep system in a valid state (aka with a running driver)
+    if(!success)
+        (current = dynamic_cast<MidiIn *>(sysEngine->getEng("NULL")))->setMidiEn(true);
+
+    return success;
 }
 
 string InMgr::getSource() const
@@ -97,5 +95,10 @@ string InMgr::getSource() const
         return current->name;
     else
         return "ERROR";
+}
+
+MidiIn *InMgr::getIn(string name)
+{
+    return dynamic_cast<MidiIn *>(sysEngine->getEng(name));
 }
 

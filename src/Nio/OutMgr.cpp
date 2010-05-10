@@ -85,7 +85,14 @@ bool OutMgr::setSink(string name)
 
     currentOut = sink;
     currentOut->setAudioEn(true);
-    return currentOut->getAudioEn();
+
+    bool success = currentOut->getAudioEn();
+
+    //Keep system in a valid state (aka with a running driver)
+    if(!success)
+        (currentOut = getOut("NULL"))->setAudioEn(true);
+
+    return success;
 }
 
 string OutMgr::getSink() const
@@ -122,7 +129,6 @@ void OutMgr::addSmps(REALTYPE *l, REALTYPE *r)
 void OutMgr::removeStaleSmps()
 {
     int toShift = storedSmps() - stales;
-    //cout << "toShift: " << toShift << endl << "stales: " << stales << endl << priBuf.l() << ' ' << priBuffCurrent.l() << endl;
     if(!stales)
         return;
 
