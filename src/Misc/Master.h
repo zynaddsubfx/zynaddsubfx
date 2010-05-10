@@ -68,7 +68,7 @@ class Master
         /**loads all settings from a XML file
          * @return 0 for ok or -1 if there is an error*/
         int loadXML(const char *filename);
-        void applyparameters();
+        void applyparameters(bool lockmutex = true);
 
         void getfromXML(XMLwrapper *xml);
 

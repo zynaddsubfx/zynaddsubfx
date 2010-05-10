@@ -551,11 +551,10 @@ vuData Master::getVuData()
     return tmp;
 }
 
-void Master::applyparameters()
+void Master::applyparameters(bool lockmutex)
 {
     for(int npart = 0; npart < NUM_MIDI_PARTS; npart++)
-        part[npart]->applyparameters();
-    ;
+        part[npart]->applyparameters(lockmutex);
 }
 
 void Master::add2XML(XMLwrapper *xml)

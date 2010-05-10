@@ -1750,7 +1750,7 @@ pthread_mutex_lock(&master->mutex);
   //load the data
   int result=master->loadXML(filename);
 
-master->applyparameters();
+master->applyparameters(false);
 pthread_mutex_unlock(&master->mutex);
 
 npartcounter->value(1);

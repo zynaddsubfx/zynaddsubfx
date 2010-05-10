@@ -80,7 +80,7 @@ class Part
         void defaults();
         void defaultsinstrument();
 
-        void applyparameters();
+        void applyparameters(bool lockmutex = true);
 
         void getfromXML(XMLwrapper *xml);
         void getfromXMLinstrument(XMLwrapper *xml);

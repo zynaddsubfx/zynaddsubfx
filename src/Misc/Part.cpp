@@ -1249,12 +1249,11 @@ int Part::loadXMLinstrument(const char *filename)
 }
 
 
-void Part::applyparameters()
+void Part::applyparameters(bool lockmutex)
 {
     for(int n = 0; n < NUM_KIT_ITEMS; n++)
         if((kit[n].padpars != NULL) && (kit[n].Ppadenabled != 0))
-            kit[n].padpars->applyparameters(true);
-    ;
+            kit[n].padpars->applyparameters(lockmutex);
 }
 
 void Part::getfromXMLinstrument(XMLwrapper *xml)
