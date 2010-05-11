@@ -20,11 +20,12 @@
 
 */
 
+#include <string>
+#include <vector>
 #include "../Misc/XMLwrapper.h"
 #include "../Misc/Config.h"
 
 #define MAX_PRESETTYPE_SIZE 30
-#define MAX_PRESETS 1000
 
 class PresetsStore
 {
@@ -43,12 +44,15 @@ class PresetsStore
         void deletepreset(int npreset);
 
         struct presetstruct {
-            char *file;
-            char *name;
+            presetstruct(std::string _file, std::string _name)
+                :file(_file),name(_name){};
+            bool operator<(const presetstruct &b) const;
+            std::string file;
+            std::string name;
         };
-        presetstruct presets[MAX_PRESETS];
+        std::vector<presetstruct> presets;
 
-        void rescanforpresets(char *type);
+        void rescanforpresets(const std::string type);
 
     private:
         struct {
