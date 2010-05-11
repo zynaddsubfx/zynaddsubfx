@@ -39,7 +39,7 @@ class PresetsStore
         bool checkclipboardtype(char *type);
 
         //presets stuff
-        void copypreset(XMLwrapper *xml, char *type, const char *name);
+        void copypreset(XMLwrapper *xml, char *type, const std::string name);
         bool pastepreset(XMLwrapper *xml, int npreset);
         void deletepreset(int npreset);
 

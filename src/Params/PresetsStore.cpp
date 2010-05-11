@@ -21,6 +21,7 @@
 */
 #include <iostream>
 #include <algorithm>
+#include <cctype>
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
@@ -137,44 +138,28 @@ void PresetsStore::rescanforpresets(string type)
 }
 
 
-void PresetsStore::copypreset(XMLwrapper *xml, char *type, const char *name)
+void PresetsStore::copypreset(XMLwrapper *xml, char *type, const string name)
 {
-    char filename[MAX_STRING_SIZE], tmpfilename[MAX_STRING_SIZE];
-
     if(config.cfg.presetsDirList[0] == NULL)
         return;
 
-    snprintf(tmpfilename, MAX_STRING_SIZE, "%s", name);
-
     //make the filenames legal
-    for(int i = 0; i < (int) strlen(tmpfilename); i++) {
-        char c = tmpfilename[i];
-        if((c >= '0') && (c <= '9'))
-            continue;
-        if((c >= 'A') && (c <= 'Z'))
-            continue;
-        if((c >= 'a') && (c <= 'z'))
-            continue;
-        if((c == '-') || (c == ' '))
-            continue;
-        tmpfilename[i] = '_';
+    for(int i = 0; i < (int) name.size(); i++) {
+        char c = name[i];
+        if(!(isdigit(c) || isalpha(c) || (c == '-') || (c == ' ')))
+            name[i] = '_';
     }
 
-    const char *dirname = config.cfg.presetsDirList[0];
-    char tmpc = dirname[strlen(dirname) - 1];
+    //make path legal
+    const string dirname = config.cfg.presetsDirList[0];
+    char tmpc = dirname[dirname.size() - 1];
     const char *tmps;
     if((tmpc == '/') || (tmpc == '\\'))
         tmps = "";
     else
         tmps = "/";
 
-    snprintf(filename,
-             MAX_STRING_SIZE,
-             "%s%s%s.%s.xpz",
-             dirname,
-             tmps,
-             name,
-             type);
+    string filename("" + dirname + tmps + name + type);
 
     xml->saveXMLfile(filename);
 }
