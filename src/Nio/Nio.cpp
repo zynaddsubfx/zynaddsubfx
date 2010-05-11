@@ -1,0 +1,105 @@
+#include "Nio.h"
+#include "OutMgr.h"
+#include "InMgr.h"
+#include "EngineMgr.h"
+#include "MidiIn.h"
+#include "AudioOut.h"
+#include <iostream>
+using namespace std;
+
+Nio::Nio(class Master *master)
+{
+    //Enable input wrapper
+    in = sysIn = new InMgr(master);
+
+    //Initialize the Output Systems
+    out = sysOut = new OutMgr(master);
+
+    //Initialize The Engines
+    eng = sysEngine = new EngineMgr();
+}
+
+Nio::~Nio()
+{
+    stop();
+    delete out;
+    delete in;
+    delete eng;
+}
+
+void Nio::start()
+{
+    eng->start();//Drivers start your engines!
+}
+
+void Nio::stop()
+{
+    eng->stop();
+}
+    
+int Nio::setDefaultSource(string name)
+{
+    if(name.empty())
+        return 0;
+
+    if(!eng->setInDefault(name)) {
+        cerr << "There is no input for " << name << endl;
+        return false;
+    }
+    cout << name << " selected." << endl;
+    return 0;
+}
+    
+
+int Nio::setDefaultSink(string name)
+{
+    if(name.empty())
+        return 0;
+
+    if(!eng->setOutDefault(name)) {
+        cerr << "There is no output for " << name << endl;
+    }
+    cout << name << " selected." << endl;
+    return 0;
+}
+
+bool Nio::setSource(string name)
+{
+     return in->setSource(name);
+}
+
+bool Nio::setSink(string name)
+{
+     return out->setSink(name);
+}
+        
+set<string> Nio::getSources() const
+{
+    set<string> sources;
+    for(list<Engine *>::iterator itr = eng->engines.begin();
+            itr != eng->engines.end(); ++itr)
+        if(dynamic_cast<MidiIn *>(*itr))
+            sources.insert((*itr)->name);
+    return sources;
+}
+
+set<string> Nio::getSinks() const
+{
+    set<string> sinks;
+    for(list<Engine *>::iterator itr = eng->engines.begin();
+            itr != eng->engines.end(); ++itr)
+        if(dynamic_cast<AudioOut *>(*itr))
+            sinks.insert((*itr)->name);
+    return sinks;
+}
+        
+string Nio::getSource() const
+{
+     return in->getSource();
+}
+
+string Nio::getSink() const
+{
+     return out->getSink();
+}
+

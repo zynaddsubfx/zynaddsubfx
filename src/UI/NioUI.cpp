@@ -1,9 +1,5 @@
 #include "NioUI.h"
-#include "../Nio/EngineMgr.h"
-#include "../Nio/OutMgr.h"
-#include "../Nio/InMgr.h"
-#include "../Nio/AudioOut.h"
-#include "../Nio/MidiIn.h"
+#include "../Nio/Nio.h"
 #include <cstdio>
 #include <FL/Fl_Tabs.H>
 #include <FL/Fl_Group.H>
@@ -40,23 +36,34 @@ NioUI::NioUI()
             midi->callback(midiCallback);
         }
         settings->end();
-       
-        int audioval = 0;
-        int midival  = 0;
-        for(list<Engine *>::iterator itr = sysEngine->engines.begin();
-                itr != sysEngine->engines.end(); ++itr) {
-            Engine *eng = *itr;
-            if(dynamic_cast<MidiIn *>(eng))
-                midi->add(eng->name.c_str());
-            if(dynamic_cast<AudioOut *>(eng))
-                audio->add(eng->name.c_str());
-            if(eng->name == sysOut->getSink())
-                audioval = audio->size() - 2;
-            if(eng->name == sysIn->getSource())
-                midival = midi->size() - 2;
+
+        //initialize midi list
+        {
+            set<string> midiList = sysNio->getSources();
+            string source = sysNio->getSource();
+            int midival = 0;
+            for(set<string>::iterator itr = midiList.begin();
+                    itr != midiList.end(); ++itr) {
+                midi->add(itr->c_str());
+                if(*itr == source)
+                    midival = midi->size() - 2;
+            }
+            midi->value(midival);
         }
-        audio->value(audioval);
-        midi->value(midival);
+
+        //initialize audio list
+        {
+            set<string> audioList = sysNio->getSinks();
+            string sink = sysNio->getSink();
+            int audioval = 0;
+            for(set<string>::iterator itr = audioList.begin();
+                    itr != audioList.end(); ++itr) {
+                audio->add(itr->c_str());
+                if(*itr == sink)
+                    audioval = audio->size() - 2;
+            }
+            audio->value(audioval);
+        }
     }
     wintabs->end();
 
@@ -70,13 +77,13 @@ void NioUI::refresh()
 
 void NioUI::midiCallback(Fl_Widget *c)
 {
-    bool good = sysIn->setSource(static_cast<Fl_Choice *>(c)->text());
+    bool good = sysNio->setSource(static_cast<Fl_Choice *>(c)->text());
     static_cast<Fl_Choice *>(c)->textcolor(fl_rgb_color(255*!good,0,0));
 }
 
 void NioUI::audioCallback(Fl_Widget *c)
 {
-    bool good = sysOut->setSink(static_cast<Fl_Choice *>(c)->text());
+    bool good = sysNio->setSink(static_cast<Fl_Choice *>(c)->text());
     static_cast<Fl_Choice *>(c)->textcolor(fl_rgb_color(255*!good,0,0));
 }
 

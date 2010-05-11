@@ -12,6 +12,7 @@ set(zynaddsubfx_nio_SRCS
     InMgr.cpp
     Engine.cpp
     EngineMgr.cpp
+    Nio.cpp
     )
 
 set(zynaddsubfx_nio_lib )

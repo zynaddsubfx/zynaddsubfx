@@ -17,8 +17,6 @@ class NioUI : public Fl_Window
         NioUI();
         void refresh();
     private:
-        //std::list<NioTab *> tabs;
-
         Fl_Choice *midi;
         Fl_Choice *audio;
         static void midiCallback(Fl_Widget *c);

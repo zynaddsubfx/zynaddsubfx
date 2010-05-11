@@ -41,11 +41,8 @@
 extern Dump dump;
 
 //Nio System
-#include "Nio/MidiIn.h"
-#include "Nio/AudioOut.h"
-#include "Nio/OutMgr.h"
-#include "Nio/InMgr.h"
-#include "Nio/EngineMgr.h"
+#include "Nio/Nio.h"
+Nio *sysNio, *nio;
 
 #ifndef DISABLE_GUI
 #ifdef QT_GUI
@@ -189,15 +186,7 @@ void initprogram()
     master->swaplr = swaplr;
 
     //Nio Initialization
-
-    //Enable input wrapper
-    sysIn     = new InMgr(master);
-
-    //Initialize the Output Systems
-    sysOut    = new OutMgr(master);
-
-    //Initialize The Engines
-    sysEngine = new EngineMgr();
+    sysNio = nio = new Nio(master);
 }
 
 /*
@@ -207,10 +196,8 @@ void exitprogram()
 {
     pthread_mutex_lock(&master->mutex);
     pthread_mutex_unlock(&master->mutex);
-    sysEngine->stop();
-    delete sysOut;
-    delete sysIn;
-    delete sysEngine;
+    nio->stop();
+    delete nio;
 
 #ifndef DISABLE_GUI
     delete ui;
@@ -451,23 +438,13 @@ int main(int argc, char *argv[])
     }
 
 
-    if(!input.empty()) {
-        if(!sysEngine->setInDefault(input)) {
-            cerr << "There is no input for " << input << endl;
-            exit(1);
-        }
-        cout << input << " selected." << endl;
-    }
-    if(!output.empty()) {
-        if(!sysEngine->setOutDefault(output)) {
-            cerr << "There is no output for " << output << endl;
-            exit(1);
-        }
-        cout << output << " selected." << endl;
-    }
+    if(nio->setDefaultSource(input))
+        exit(1);
+    if(nio->setDefaultSink(output))
+        exit(1);
 
     //Run the Nio system
-    sysEngine->start(); //Drivers start your engines!
+    nio->start();
 
 #warning remove welcome message when system is out of beta
     cout << "\nThanks for using the Nio system :)" << endl;
