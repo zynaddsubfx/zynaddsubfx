@@ -2,6 +2,7 @@
 #ifndef SAFEQUEUE_H
 #define SAFEQUEUE_H
 #include <cstdlib>
+#include <semaphore.h>
 
 /**
  * C++ thread safe lockless queue
@@ -28,10 +29,15 @@ class SafeQueue
         unsigned int wSpace() const;
         unsigned int rSpace() const;
 
-        //next writting spot
-        volatile size_t writePtr;
+        //write space
+        mutable sem_t w_space;
+        //read space
+        mutable sem_t r_space;
+
+        //next writing spot
+        size_t writePtr;
         //next reading spot
-        volatile size_t readPtr;
+        size_t readPtr;
         const size_t bufSize;
         T *buffer;
 };

@@ -80,8 +80,8 @@ void WavEngine::push(Stereo<REALTYPE *> smps, size_t len)
     for(size_t i = 0; i < len; ++i) {
         buffer.push(*smps.l()++);
         buffer.push(*smps.r()++);
-        sem_post(&work);
     }
+    sem_post(&work);
 }
 
 void WavEngine::newFile(WavFile *_file)
@@ -104,17 +104,21 @@ void *WavEngine::_AudioThread(void *arg)
 
 void *WavEngine::AudioThread()
 {
-    short int recordbuf_16bit[2];
+    short *recordbuf_16bit = new short[2*SOUND_BUFFER_SIZE];
 
     while(!sem_wait(&work) && pThread)
     {
-        float left=0.0f, right=0.0f;
-        buffer.pop(left);
-        buffer.pop(right);
-        recordbuf_16bit[0] = limit((int)(left  * 32767.0), -32768, 32767);
-        recordbuf_16bit[1] = limit((int)(right * 32767.0), -32768, 32767);
-        file->writeStereoSamples(1, recordbuf_16bit);
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+            float left=0.0f, right=0.0f;
+            buffer.pop(left);
+            buffer.pop(right);
+            recordbuf_16bit[2*i]   = limit((int)(left  * 32767.0), -32768, 32767);
+            recordbuf_16bit[2*i+1] = limit((int)(right * 32767.0), -32768, 32767);
+            file->writeStereoSamples(SOUND_BUFFER_SIZE, recordbuf_16bit);
+        }
     }
+
+    delete[] recordbuf_16bit;
     pthread_exit(NULL);
 }
 
