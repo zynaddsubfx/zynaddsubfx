@@ -26,4 +26,21 @@ postprocessing and at this level much of the sound generation is hidden.
 Voices
 ------
 
+The voice gives access to a similar setup to the global parameters and then some
+more, such as the modulator, oscillator, and unison features.
+
+image:images/ad-voice.png[]
+
+Modulation
+~~~~~~~~~~
+
+Within the options for modulation, one can select:
+* Morph
+* Ring Modulation
+* Phase Modulation
+* Frequency Modulation
+* Disabled
+
+Unison
+~~~~~~
 
