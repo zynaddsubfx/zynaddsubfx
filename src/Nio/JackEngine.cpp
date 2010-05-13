@@ -41,6 +41,7 @@ JackEngine::JackEngine()
         audio.ports[i] = NULL;
         audio.portBuffs[i] = NULL;
     }
+    midi.inport = NULL;
 }
 
 bool JackEngine::connectServer(string server)

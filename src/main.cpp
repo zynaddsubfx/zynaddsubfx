@@ -189,10 +189,6 @@ void initprogram()
     / SAMPLE_RATE << " ms" << endl;
     cerr << "ADsynth Oscil.Size = \t" << OSCIL_SIZE << " samples" << endl;
 
-    srand(time(NULL));
-    denormalkillbuf = new REALTYPE [SOUND_BUFFER_SIZE];
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
-        denormalkillbuf[i] = (RND - 0.5) * 1e-16;
 
     master = &Master::getInstance();
     master->swaplr = swaplr;
@@ -277,6 +273,11 @@ int main(int argc, char *argv[])
     OSCIL_SIZE  = config.cfg.OscilSize;
     swaplr      = config.cfg.SwapStereo;
 
+    srand(time(NULL));
+    //produce denormal buf
+    denormalkillbuf = new REALTYPE [SOUND_BUFFER_SIZE];
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
+        denormalkillbuf[i] = (RND - 0.5) * 1e-16;
 
     /* Parse command-line options */
 #if OS_LINUX || OS_CYGWIN
@@ -299,7 +300,7 @@ int main(int argc, char *argv[])
     opterr = 0;
     int option_index = 0, opt, exitwithhelp = 0;
 
-    string loadfile, loadinstrument, input, output;
+    string loadfile, loadinstrument;
 
     while(1) {
         /**\todo check this process for a small memory leak*/
@@ -373,10 +374,16 @@ int main(int argc, char *argv[])
             dump.startnow();
             break;
         case 'I':
-            GETOP(input);
+            if(optarguments) {
+                if(Nio::getInstance().setDefaultSource(optarguments))
+                    exit(1);
+            }
             break;
         case 'O':
-            GETOP(output);
+            if(optarguments) {
+                if(Nio::getInstance().setDefaultSink(optarguments))
+                    exit(1);
+            }
             break;
         case '?':
             cerr << "ERROR:Bad option or parameter.\n" << endl;
@@ -449,15 +456,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    Nio &nio = Nio::getInstance();
-
-    if(nio.setDefaultSource(input))
-        exit(1);
-    if(nio.setDefaultSink(output))
-        exit(1);
-
     //Run the Nio system
-    nio.start();
+    Nio::getInstance().start();
 
 #warning remove welcome message when system is out of beta
     cout << "\nThanks for using the Nio system :)" << endl;

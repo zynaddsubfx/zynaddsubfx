@@ -85,7 +85,7 @@ class Part
         void getfromXML(XMLwrapper *xml);
         void getfromXMLinstrument(XMLwrapper *xml);
 
-        void cleanup();
+        void cleanup(bool final = false);
 
 //      ADnoteParameters *ADPartParameters;
 //      SUBnoteParameters *SUBPartParameters;

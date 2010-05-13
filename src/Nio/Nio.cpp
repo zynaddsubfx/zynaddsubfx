@@ -43,7 +43,6 @@ int Nio::setDefaultSource(string name)
         cerr << "There is no input for " << name << endl;
         return false;
     }
-    cout << name << " selected." << endl;
     return 0;
 }
     
@@ -56,7 +55,6 @@ int Nio::setDefaultSink(string name)
     if(!eng.setOutDefault(name)) {
         cerr << "There is no output for " << name << endl;
     }
-    cout << name << " selected." << endl;
     return 0;
 }
 
