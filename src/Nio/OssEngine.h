@@ -31,7 +31,7 @@
 class OssEngine: public AudioOut, MidiIn
 {
     public:
-        OssEngine(OutMgr *out);
+        OssEngine();
         ~OssEngine();
 
         bool Start();

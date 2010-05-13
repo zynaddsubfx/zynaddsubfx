@@ -47,7 +47,6 @@ class PaEngine: public AudioOut
 };
 
 
-void PAaudiooutputinit(Master *master_);
 void PAfinish();
 
 #endif

@@ -27,8 +27,8 @@
 
 using namespace std;
 
-NulEngine::NulEngine(OutMgr *out)
-    :AudioOut(out), pThread(NULL)
+NulEngine::NulEngine()
+    :AudioOut(), pThread(NULL)
 {
     name = "NULL";
     playing_until.tv_sec  = 0;

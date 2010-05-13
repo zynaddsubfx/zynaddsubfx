@@ -50,10 +50,12 @@ typedef struct vuData_t {
 class Master
 {
     public:
-        /** Constructor*/
+        /** Constructor TODO make private*/
         Master();
         /** Destructor*/
         ~Master();
+
+        static Master &getInstance();
 
         /**Saves all settings to a XML file
          * @return 0 for ok or <0 if there is an error*/

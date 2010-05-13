@@ -9,7 +9,7 @@
 class Nio
 {
     public:
-        Nio(class Master *master);
+        static Nio &getInstance();
         ~Nio();
 
         void start();
@@ -28,12 +28,12 @@ class Nio
         std::string getSink()   const;
 
     private:
-        class EngineMgr *eng;
-        class OutMgr    *out;
-        class InMgr     *in;
-};
+        Nio();
 
-extern Nio *sysNio;
+        class InMgr     &in;
+        class OutMgr    &out;
+        class EngineMgr &eng;
+};
 
 #endif
 

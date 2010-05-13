@@ -35,28 +35,28 @@ void MidiIn::midiProcess(unsigned char head, unsigned char num, unsigned char va
             ev.channel = chan;
             ev.num     = num;
             ev.value   = 0;
-            sysIn->putEvent(ev);
+            InMgr::getInstance().putEvent(ev);
             break;
         case 0x90: //Note On
             ev.type    = M_NOTE;
             ev.channel = chan;
             ev.num     = num;
             ev.value   = value;
-            sysIn->putEvent(ev);
+            InMgr::getInstance().putEvent(ev);
             break;
         case 0xb0: //Controller
             ev.type    = M_CONTROLLER;
             ev.channel = chan;
             ev.num     = num;
             ev.value   = value;
-            sysIn->putEvent(ev);
+            InMgr::getInstance().putEvent(ev);
             break;
         case 0xe0: //Pitch Wheel
             ev.type    = M_CONTROLLER;
             ev.channel = chan;
             ev.num     = C_pitchwheel;
             ev.value   = (num + value * (int) 128) - 8192;
-            sysIn->putEvent(ev);
+            InMgr::getInstance().putEvent(ev);
             break;
     }
 }

@@ -24,6 +24,7 @@
 #include <cmath>
 #include <cctype>
 #include <algorithm>
+#include <signal.h>
 
 #include <unistd.h>
 #include <pthread.h>
@@ -42,7 +43,6 @@ extern Dump dump;
 
 //Nio System
 #include "Nio/Nio.h"
-Nio *sysNio, *nio;
 
 #ifndef DISABLE_GUI
 #ifdef QT_GUI
@@ -164,6 +164,18 @@ void *thread4(void *arg)
 }
 #endif
 
+void exitprogram();
+
+//cleanup on signaled exit
+void sigterm_exit(int sig)
+{
+    Pexitprogram = 1;
+    sleep(1);
+    exitprogram();
+    exit(0);
+}
+
+
 /*
  * Program initialisation
  */
@@ -182,11 +194,11 @@ void initprogram()
     for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
         denormalkillbuf[i] = (RND - 0.5) * 1e-16;
 
-    master = new Master();
+    master = &Master::getInstance();
     master->swaplr = swaplr;
 
-    //Nio Initialization
-    sysNio = nio = new Nio(master);
+    signal(SIGINT, sigterm_exit);
+    signal(SIGTERM, sigterm_exit);
 }
 
 /*
@@ -194,15 +206,15 @@ void initprogram()
  */
 void exitprogram()
 {
+    //ensure that everything has stopped with the mutex wait
     pthread_mutex_lock(&master->mutex);
     pthread_mutex_unlock(&master->mutex);
-    nio->stop();
-    delete nio;
+
+    Nio::getInstance().stop();
 
 #ifndef DISABLE_GUI
     delete ui;
 #endif
-    delete master;
 
 #ifdef USE_LASH
     delete lash;
@@ -437,14 +449,15 @@ int main(int argc, char *argv[])
         }
     }
 
+    Nio &nio = Nio::getInstance();
 
-    if(nio->setDefaultSource(input))
+    if(nio.setDefaultSource(input))
         exit(1);
-    if(nio->setDefaultSink(output))
+    if(nio.setDefaultSink(output))
         exit(1);
 
     //Run the Nio system
-    nio->start();
+    nio.start();
 
 #warning remove welcome message when system is out of beta
     cout << "\nThanks for using the Nio system :)" << endl;

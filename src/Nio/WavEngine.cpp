@@ -25,8 +25,8 @@
 
 using namespace std;
 
-WavEngine::WavEngine(OutMgr *out)
-    :AudioOut(out), file(NULL), buffer(SAMPLE_RATE*2), pThread(NULL)
+WavEngine::WavEngine()
+    :AudioOut(), file(NULL), buffer(SAMPLE_RATE*2), pThread(NULL)
 {
     sem_init(&work, PTHREAD_PROCESS_PRIVATE, 0);
 }

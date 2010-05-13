@@ -7,34 +7,31 @@
 #include <iostream>
 using namespace std;
 
-Nio::Nio(class Master *master)
+Nio &Nio::getInstance()
 {
-    //Enable input wrapper
-    in = sysIn = new InMgr(master);
-
-    //Initialize the Output Systems
-    out = sysOut = new OutMgr(master);
-
-    //Initialize The Engines
-    eng = sysEngine = new EngineMgr();
+    static Nio instance;
+    return instance;
 }
+
+Nio::Nio()
+:in(InMgr::getInstance()),//Enable input wrapper
+    out(OutMgr::getInstance()),//Initialize the Output Systems
+    eng(EngineMgr::getInstance())//Initialize The Engines
+{}
 
 Nio::~Nio()
 {
     stop();
-    delete out;
-    delete in;
-    delete eng;
 }
 
 void Nio::start()
 {
-    eng->start();//Drivers start your engines!
+    eng.start();//Drivers start your engines!
 }
 
 void Nio::stop()
 {
-    eng->stop();
+    eng.stop();
 }
     
 int Nio::setDefaultSource(string name)
@@ -42,7 +39,7 @@ int Nio::setDefaultSource(string name)
     if(name.empty())
         return 0;
 
-    if(!eng->setInDefault(name)) {
+    if(!eng.setInDefault(name)) {
         cerr << "There is no input for " << name << endl;
         return false;
     }
@@ -56,7 +53,7 @@ int Nio::setDefaultSink(string name)
     if(name.empty())
         return 0;
 
-    if(!eng->setOutDefault(name)) {
+    if(!eng.setOutDefault(name)) {
         cerr << "There is no output for " << name << endl;
     }
     cout << name << " selected." << endl;
@@ -65,19 +62,19 @@ int Nio::setDefaultSink(string name)
 
 bool Nio::setSource(string name)
 {
-     return in->setSource(name);
+     return in.setSource(name);
 }
 
 bool Nio::setSink(string name)
 {
-     return out->setSink(name);
+     return out.setSink(name);
 }
         
 set<string> Nio::getSources() const
 {
     set<string> sources;
-    for(list<Engine *>::iterator itr = eng->engines.begin();
-            itr != eng->engines.end(); ++itr)
+    for(list<Engine *>::iterator itr = eng.engines.begin();
+            itr != eng.engines.end(); ++itr)
         if(dynamic_cast<MidiIn *>(*itr))
             sources.insert((*itr)->name);
     return sources;
@@ -86,8 +83,8 @@ set<string> Nio::getSources() const
 set<string> Nio::getSinks() const
 {
     set<string> sinks;
-    for(list<Engine *>::iterator itr = eng->engines.begin();
-            itr != eng->engines.end(); ++itr)
+    for(list<Engine *>::iterator itr = eng.engines.begin();
+            itr != eng.engines.end(); ++itr)
         if(dynamic_cast<AudioOut *>(*itr))
             sinks.insert((*itr)->name);
     return sinks;
@@ -95,11 +92,11 @@ set<string> Nio::getSinks() const
         
 string Nio::getSource() const
 {
-     return in->getSource();
+     return in.getSource();
 }
 
 string Nio::getSink() const
 {
-     return out->getSink();
+     return out.getSink();
 }
 

@@ -32,23 +32,18 @@ using namespace std;
 
 struct AudioOut::Data
 {
-    Data(OutMgr *out);
+    Data();
 
     int samplerate;
     int bufferSize;
-
-    Stereo<Sample> current;/**<used for xrun defence*/
-
-    OutMgr *manager;
 };
 
-AudioOut::Data::Data(OutMgr *out)
-    :samplerate(SAMPLE_RATE),bufferSize(SOUND_BUFFER_SIZE),
-     current(Sample(SOUND_BUFFER_SIZE,0.0)),manager(out)
+AudioOut::Data::Data()
+    :samplerate(SAMPLE_RATE),bufferSize(SOUND_BUFFER_SIZE)
 {}
 
-AudioOut::AudioOut(OutMgr *out)
-    :dat(new Data(out))
+AudioOut::AudioOut()
+    :dat(new Data())
 {}
 
 AudioOut::~AudioOut()
@@ -85,7 +80,7 @@ int AudioOut::bufferingSize()
 
 const Stereo<Sample> AudioOut::getNext(bool wait)
 {
-    Stereo<REALTYPE *> tmp = sysOut->tick(dat->bufferSize);
+    Stereo<REALTYPE *> tmp = OutMgr::getInstance().tick(dat->bufferSize);
 
     //stop the samples
     return Stereo<Sample>(Sample(dat->bufferSize, tmp.l()), Sample(dat->bufferSize, tmp.r()));

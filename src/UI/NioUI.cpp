@@ -37,10 +37,12 @@ NioUI::NioUI()
         }
         settings->end();
 
+        Nio &nio = Nio::getInstance();
+
         //initialize midi list
         {
-            set<string> midiList = sysNio->getSources();
-            string source = sysNio->getSource();
+            set<string> midiList = nio.getSources();
+            string source = nio.getSource();
             int midival = 0;
             for(set<string>::iterator itr = midiList.begin();
                     itr != midiList.end(); ++itr) {
@@ -53,8 +55,8 @@ NioUI::NioUI()
 
         //initialize audio list
         {
-            set<string> audioList = sysNio->getSinks();
-            string sink = sysNio->getSink();
+            set<string> audioList = nio.getSinks();
+            string sink = nio.getInstance().getSink();
             int audioval = 0;
             for(set<string>::iterator itr = audioList.begin();
                     itr != audioList.end(); ++itr) {
@@ -77,13 +79,13 @@ void NioUI::refresh()
 
 void NioUI::midiCallback(Fl_Widget *c)
 {
-    bool good = sysNio->setSource(static_cast<Fl_Choice *>(c)->text());
+    bool good = Nio::getInstance().setSource(static_cast<Fl_Choice *>(c)->text());
     static_cast<Fl_Choice *>(c)->textcolor(fl_rgb_color(255*!good,0,0));
 }
 
 void NioUI::audioCallback(Fl_Widget *c)
 {
-    bool good = sysNio->setSink(static_cast<Fl_Choice *>(c)->text());
+    bool good = Nio::getInstance().setSink(static_cast<Fl_Choice *>(c)->text());
     static_cast<Fl_Choice *>(c)->textcolor(fl_rgb_color(255*!good,0,0));
 }
 

@@ -119,6 +119,11 @@ bool Master::mutexLock(lockset request)
     return false;
 }
 
+Master &Master::getInstance()
+{
+    static Master instance;
+    return instance;
+}
 
 /*
  * Note On Messages (velocity=0 for NoteOff)

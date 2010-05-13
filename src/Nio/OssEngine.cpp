@@ -38,8 +38,8 @@
 
 using namespace std;
 
-OssEngine::OssEngine(OutMgr *out)
-    :AudioOut(out), engThread(NULL)
+OssEngine::OssEngine()
+    :AudioOut(), engThread(NULL)
 {
     name = "OSS";
 

@@ -21,46 +21,50 @@
 
 using namespace std;
 
-EngineMgr *sysEngine;
+EngineMgr &EngineMgr::getInstance()
+{
+    static EngineMgr instance;
+    return instance;
+}
 
 EngineMgr::EngineMgr()
 {
     Engine *defaultEng = NULL;
 
     //conditional compiling mess (but contained)
-    engines.push_back(defaultEng = new NulEngine(sysOut));
+    engines.push_back(defaultEng = new NulEngine());
 #if OSS
 #if OSS_DEFAULT
-    engines.push_back(defaultEng = new OssEngine(sysOut));
+    engines.push_back(defaultEng = new OssEngine());
 #else
-    engines.push_back(new OssEngine(sysOut));
+    engines.push_back(new OssEngine());
 #endif
 #endif
 #if ALSA
 #if ALSA_DEFAULT
-    engines.push_back(defaultEng = new AlsaEngine(sysOut));
+    engines.push_back(defaultEng = new AlsaEngine());
 #else
-    engines.push_back(new AlsaEngine(sysOut));
+    engines.push_back(new AlsaEngine());
 #endif
 #endif
 #if JACK
 #if JACK_DEFAULT
-    engines.push_back(defaultEng = new JackEngine(sysOut));
+    engines.push_back(defaultEng = new JackEngine());
 #else
-    engines.push_back(new JackEngine(sysOut));
+    engines.push_back(new JackEngine());
 #endif
 #endif
 #if PORTAUDIO
 #if PORTAUDIO_DEFAULT
-    engines.push_back(defaultEng = new PaEngine(sysOut));
+    engines.push_back(defaultEng = new PaEngine());
 #else
-    engines.push_back(new PaEngine(sysOut));
+    engines.push_back(new PaEngine());
 #endif
 #endif
 
     defaultOut = dynamic_cast<AudioOut *>(defaultEng);
 
-    defaultIn = dynamic_cast<MidiIn *>(defaultEng);
+    defaultIn  = dynamic_cast<MidiIn *>(defaultEng);
 };
 
 EngineMgr::~EngineMgr()
@@ -93,8 +97,8 @@ void EngineMgr::start()
         defaultIn  = dynamic_cast<MidiIn *>(getEng("NULL"));
     }
 
-    sysOut->currentOut = defaultOut;
-    sysIn->current     = defaultIn;
+    OutMgr::getInstance().currentOut = defaultOut;
+    InMgr::getInstance().current     = defaultIn;
 
     //open up the default output(s)
     cout << "Starting Audio: " << defaultOut->name << endl;
@@ -104,8 +108,8 @@ void EngineMgr::start()
     }
     else { 
         cerr << "ERROR: The default audio output failed to open!" << endl;
-        sysOut->currentOut = dynamic_cast<AudioOut *>(sysEngine->getEng("NULL"));
-        sysOut->currentOut->setAudioEn(true);
+        OutMgr::getInstance().currentOut = dynamic_cast<AudioOut *>(getEng("NULL"));
+        OutMgr::getInstance().currentOut->setAudioEn(true);
     }
 
     cout << "Starting MIDI: " << defaultIn->name << endl;
@@ -115,8 +119,8 @@ void EngineMgr::start()
     }
     else { //recover
         cerr << "ERROR: The default MIDI input failed to open!" << endl;
-        sysIn->current = dynamic_cast<MidiIn *>(sysEngine->getEng("NULL"));
-        sysIn->current->setMidiEn(true);
+        InMgr::getInstance().current = dynamic_cast<MidiIn *>(getEng("NULL"));
+        InMgr::getInstance().current->setMidiEn(true);
     }
 }
 

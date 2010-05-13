@@ -30,7 +30,7 @@
 class AudioOut : public virtual Engine
 {
     public:
-        AudioOut(class OutMgr *out);
+        AudioOut();
         virtual ~AudioOut();
 
         /**Sets the Sample Rate of this Output

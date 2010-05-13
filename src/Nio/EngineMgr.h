@@ -12,7 +12,7 @@ class OutMgr;
 /**Container/Owner of the long lived Engines*/
 struct EngineMgr
 {
-        EngineMgr();
+        static EngineMgr &getInstance();
         ~EngineMgr();
 
         /**Gets requested engine
@@ -36,8 +36,8 @@ struct EngineMgr
         //default I/O
         AudioOut *defaultOut;
         MidiIn   *defaultIn;
+    private:
+        EngineMgr();
 };
-
-extern EngineMgr *sysEngine;
 #endif
 

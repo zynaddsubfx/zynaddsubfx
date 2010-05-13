@@ -28,8 +28,8 @@ using namespace std;
 #include "InMgr.h"
 #include "AlsaEngine.h"
 
-AlsaEngine::AlsaEngine(OutMgr *out)
-    :AudioOut(out)
+AlsaEngine::AlsaEngine()
+    :AudioOut()
 {
     name = "ALSA";
     audio.handle = NULL;
@@ -126,7 +126,7 @@ void *AlsaEngine::MidiThread(void)
                     ev.channel = event->data.note.channel;
                     ev.num     = event->data.note.note;
                     ev.value   = event->data.note.velocity;
-                    sysIn->putEvent(ev);
+                    InMgr::getInstance().putEvent(ev);
                 }
                 break;
 
@@ -135,7 +135,7 @@ void *AlsaEngine::MidiThread(void)
                 ev.channel = event->data.note.channel;
                 ev.num     = event->data.note.note;
                 ev.value   = 0;
-                sysIn->putEvent(ev);
+                InMgr::getInstance().putEvent(ev);
                 break;
 
             case SND_SEQ_EVENT_PITCHBEND:
@@ -143,7 +143,7 @@ void *AlsaEngine::MidiThread(void)
                 ev.channel = event->data.control.channel;
                 ev.num     = C_pitchwheel;
                 ev.value   = event->data.control.value;
-                sysIn->putEvent(ev);
+                InMgr::getInstance().putEvent(ev);
                 break;
 
             case SND_SEQ_EVENT_CONTROLLER:
@@ -151,7 +151,7 @@ void *AlsaEngine::MidiThread(void)
                 ev.channel = event->data.control.channel;
                 ev.num     = event->data.control.param;
                 ev.value   = event->data.control.value;
-                sysIn->putEvent(ev);
+                InMgr::getInstance().putEvent(ev);
                 break;
 
             case SND_SEQ_EVENT_RESET: // reset to power-on state
@@ -159,7 +159,7 @@ void *AlsaEngine::MidiThread(void)
                 ev.channel = event->data.control.channel;
                 ev.num     = C_resetallcontrollers;
                 ev.value   = 0;
-                sysIn->putEvent(ev);
+                InMgr::getInstance().putEvent(ev);
                 break;
 
             case SND_SEQ_EVENT_PORT_SUBSCRIBED: // ports connected

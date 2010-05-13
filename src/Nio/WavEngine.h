@@ -32,7 +32,7 @@ class WavFile;
 class WavEngine: public AudioOut
 {
     public:
-        WavEngine(OutMgr *out);
+        WavEngine();
         ~WavEngine();
 
         bool openAudio();
