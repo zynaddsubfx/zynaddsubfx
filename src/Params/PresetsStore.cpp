@@ -138,7 +138,7 @@ void PresetsStore::rescanforpresets(string type)
 }
 
 
-void PresetsStore::copypreset(XMLwrapper *xml, char *type, const string name)
+void PresetsStore::copypreset(XMLwrapper *xml, char *type, string name)
 {
     if(config.cfg.presetsDirList[0] == NULL)
         return;
