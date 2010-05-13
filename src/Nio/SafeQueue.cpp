@@ -13,7 +13,7 @@ SafeQueue<T>::~SafeQueue()
 {
     sem_destroy(&w_space);
     sem_destroy(&r_space);
-    delete[] buffer;
+    delete [] buffer;
 }
 
 template<class T>

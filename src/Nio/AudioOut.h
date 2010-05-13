@@ -54,9 +54,8 @@ class AudioOut : public virtual Engine
          * (has nsamples sampled at a rate of samplerate)*/
         const Stereo<Sample> getNext(bool wait = false);
 
-        //using opaque pointer to reduce compile times
-        struct Data;
-        Data *dat;
+        int samplerate;
+        int bufferSize;
 };
 
 #endif

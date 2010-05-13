@@ -68,7 +68,7 @@ void *NulEngine::AudioThread()
         playing_until.tv_sec  += playing_until.tv_usec / 1000000;
         playing_until.tv_usec %= 1000000;
     }
-    pthread_exit(NULL);
+    return NULL;
 }
 
 NulEngine::~NulEngine()

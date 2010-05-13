@@ -30,58 +30,45 @@ using namespace std;
 #include "../Misc/Master.h"
 #include "AudioOut.h"
 
-struct AudioOut::Data
-{
-    Data();
-
-    int samplerate;
-    int bufferSize;
-};
-
-AudioOut::Data::Data()
-    :samplerate(SAMPLE_RATE),bufferSize(SOUND_BUFFER_SIZE)
-{}
-
 AudioOut::AudioOut()
-    :dat(new Data())
+    :samplerate(SAMPLE_RATE),bufferSize(SOUND_BUFFER_SIZE)
 {}
 
 AudioOut::~AudioOut()
 {
-    delete dat;
 }
 
 void AudioOut::setSamplerate(int _samplerate)
 {
-    dat->samplerate = _samplerate;
+    samplerate = _samplerate;
 }
 
 int AudioOut::getSampleRate()
 {
-    return dat->samplerate;
+    return samplerate;
 }
 
 void AudioOut::setBufferSize(int _bufferSize)
 {
-    dat->bufferSize = _bufferSize;
+    bufferSize = _bufferSize;
 }
 
 //delete me
 void AudioOut::bufferingSize(int nBuffering)
 {
-   //dat->buffering = nBuffering;
+   //buffering = nBuffering;
 }
 
 //delete me
 int AudioOut::bufferingSize()
 {
-    //return dat->buffering;
+    //return buffering;
 }
 
 const Stereo<Sample> AudioOut::getNext(bool wait)
 {
-    Stereo<REALTYPE *> tmp = OutMgr::getInstance().tick(dat->bufferSize);
+    Stereo<REALTYPE *> tmp = OutMgr::getInstance().tick(bufferSize);
 
     //stop the samples
-    return Stereo<Sample>(Sample(dat->bufferSize, tmp.l()), Sample(dat->bufferSize, tmp.r()));
+    return Stereo<Sample>(Sample(bufferSize, tmp.l()), Sample(bufferSize, tmp.r()));
 }

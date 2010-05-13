@@ -66,5 +66,6 @@ class FFTwrapper
 
 void newFFTFREQS(FFTFREQS *f, int size);
 void deleteFFTFREQS(FFTFREQS *f);
+void FFT_cleanup();
 #endif
 

@@ -32,6 +32,9 @@ OutMgr::OutMgr()
 
 OutMgr::~OutMgr()
 {
+    delete wave;
+    delete [] priBuf.l();
+    delete [] priBuf.r();
     delete [] outr;
     delete [] outl;
 }

@@ -134,3 +134,8 @@ void deleteFFTFREQS(FFTFREQS *f)
     f->c = f->s = NULL;
 }
 
+void FFT_cleanup()
+{
+    fftw_cleanup();
+}
+
