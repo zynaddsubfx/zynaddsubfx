@@ -110,9 +110,9 @@ void PresetsStore::rescanforpresets(char *type)
     snprintf(ftype, MAX_STRING_SIZE, ".%s.xpz", type);
 
     for(int i = 0; i < MAX_BANK_ROOT_DIRS; i++) {
-        if(config.cfg.presetsDirList[i] == NULL)
+        if(config.cfg.presetsDirList[i].empty())
             continue;
-        char *dirname = config.cfg.presetsDirList[i];
+        const char *dirname = config.cfg.presetsDirList[i].c_str();
         DIR  *dir     = opendir(dirname);
         if(dir == NULL)
             continue;
@@ -166,7 +166,7 @@ void PresetsStore::copypreset(XMLwrapper *xml, char *type, const char *name)
 {
     char filename[MAX_STRING_SIZE], tmpfilename[MAX_STRING_SIZE];
 
-    if(config.cfg.presetsDirList[0] == NULL)
+    if(config.cfg.presetsDirList[0].empty())
         return;
 
     snprintf(tmpfilename, MAX_STRING_SIZE, "%s", name);
@@ -185,7 +185,7 @@ void PresetsStore::copypreset(XMLwrapper *xml, char *type, const char *name)
         tmpfilename[i] = '_';
     }
 
-    const char *dirname = config.cfg.presetsDirList[0];
+    const char *dirname = config.cfg.presetsDirList[0].c_str();
     char tmpc = dirname[strlen(dirname) - 1];
     const char *tmps;
     if((tmpc == '/') || (tmpc == '\\'))

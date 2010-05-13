@@ -1217,7 +1217,7 @@ void Part::add2XML(XMLwrapper *xml)
     xml->endbranch();
 }
 
-int Part::saveXML(char *filename)
+int Part::saveXML(const char *filename)
 {
     XMLwrapper *xml;
     xml = new XMLwrapper();
