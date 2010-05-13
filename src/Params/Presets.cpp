@@ -47,11 +47,10 @@ void Presets::copy(const char *name)
 
     char type[MAX_PRESETTYPE_SIZE];
     strcpy(type, this->type);
-    strcat(type, "n");
+    //strcat(type, "n");
     if(name == NULL)
         if(strstr(type, "Plfo") != NULL)
             strcpy(type, "Plfo");
-    ;
 
     xml->beginbranch(type);
     add2XML(xml);
@@ -69,12 +68,11 @@ void Presets::paste(int npreset)
 {
     char type[MAX_PRESETTYPE_SIZE];
     strcpy(type, this->type);
-    strcat(type, "n");
+    //strcat(type, "n");
 
     if(npreset == 0)
         if(strstr(type, "Plfo") != NULL)
             strcpy(type, "Plfo");
-    ;
 
     XMLwrapper *xml = new XMLwrapper();
     if(npreset == 0) {

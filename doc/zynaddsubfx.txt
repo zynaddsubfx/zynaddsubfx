@@ -13,6 +13,8 @@ include::./lfo.txt[]
 
 include::./envelope.txt[]
 
+include::./adsynth.txt[]
+
 include::./controller.txt[]
 
 include::./nrpn.txt[]
