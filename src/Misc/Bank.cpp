@@ -609,11 +609,10 @@ int Bank::addtobank(int pos, const char *filename, const char *name)
 
     //see if PADsynth is used
     if(config.cfg.CheckPADsynth) {
-        XMLwrapper *xml = new XMLwrapper();
-        xml->loadXMLfile(ins[pos].filename);
+        XMLwrapper xml;
+        xml.loadXMLfile(ins[pos].filename);
 
-        ins[pos].info.PADsynth_used = xml->hasPadSynth();
-        delete xml;
+        ins[pos].info.PADsynth_used = xml.hasPadSynth();
     }
     else
         ins[pos].info.PADsynth_used = false;

@@ -225,110 +225,109 @@ void Config::clearpresetsdirlist()
 
 void Config::readConfig(const char *filename)
 {
-    XMLwrapper *xmlcfg = new XMLwrapper();
-    if(xmlcfg->loadXMLfile(filename) < 0)
+    XMLwrapper xmlcfg;
+    if(xmlcfg.loadXMLfile(filename) < 0)
         return;
-    if(xmlcfg->enterbranch("CONFIGURATION")) {
-        cfg.SampleRate      = xmlcfg->getpar("sample_rate",
+    if(xmlcfg.enterbranch("CONFIGURATION")) {
+        cfg.SampleRate      = xmlcfg.getpar("sample_rate",
                                              cfg.SampleRate,
                                              4000,
                                              1024000);
-        cfg.SoundBufferSize = xmlcfg->getpar("sound_buffer_size",
+        cfg.SoundBufferSize = xmlcfg.getpar("sound_buffer_size",
                                              cfg.SoundBufferSize,
                                              16,
                                              8192);
-        cfg.OscilSize = xmlcfg->getpar("oscil_size",
+        cfg.OscilSize = xmlcfg.getpar("oscil_size",
                                        cfg.OscilSize,
                                        MAX_AD_HARMONICS * 2,
                                        131072);
-        cfg.SwapStereo      = xmlcfg->getpar("swap_stereo",
+        cfg.SwapStereo      = xmlcfg.getpar("swap_stereo",
                                              cfg.SwapStereo,
                                              0,
                                              1);
-        cfg.BankUIAutoClose = xmlcfg->getpar("bank_window_auto_close",
+        cfg.BankUIAutoClose = xmlcfg.getpar("bank_window_auto_close",
                                              cfg.BankUIAutoClose,
                                              0,
                                              1);
 
-        cfg.DumpNotesToFile = xmlcfg->getpar("dump_notes_to_file",
+        cfg.DumpNotesToFile = xmlcfg.getpar("dump_notes_to_file",
                                              cfg.DumpNotesToFile,
                                              0,
                                              1);
-        cfg.DumpAppend      = xmlcfg->getpar("dump_append",
+        cfg.DumpAppend      = xmlcfg.getpar("dump_append",
                                              cfg.DumpAppend,
                                              0,
                                              1);
-        xmlcfg->getparstr("dump_file", cfg.DumpFile, MAX_STRING_SIZE);
+        xmlcfg.getparstr("dump_file", cfg.DumpFile, MAX_STRING_SIZE);
 
-        cfg.GzipCompression = xmlcfg->getpar("gzip_compression",
+        cfg.GzipCompression = xmlcfg.getpar("gzip_compression",
                                              cfg.GzipCompression,
                                              0,
                                              9);
 
-        xmlcfg->getparstr("bank_current", cfg.currentBankDir, MAX_STRING_SIZE);
-        cfg.Interpolation = xmlcfg->getpar("interpolation",
+        xmlcfg.getparstr("bank_current", cfg.currentBankDir, MAX_STRING_SIZE);
+        cfg.Interpolation = xmlcfg.getpar("interpolation",
                                            cfg.Interpolation,
                                            0,
                                            1);
 
-        cfg.CheckPADsynth = xmlcfg->getpar("check_pad_synth",
+        cfg.CheckPADsynth = xmlcfg.getpar("check_pad_synth",
                                            cfg.CheckPADsynth,
                                            0,
                                            1);
 
 
-        cfg.UserInterfaceMode = xmlcfg->getpar("user_interface_mode",
+        cfg.UserInterfaceMode = xmlcfg.getpar("user_interface_mode",
                                                cfg.UserInterfaceMode,
                                                0,
                                                2);
-        cfg.VirKeybLayout     = xmlcfg->getpar("virtual_keyboard_layout",
+        cfg.VirKeybLayout     = xmlcfg.getpar("virtual_keyboard_layout",
                                                cfg.VirKeybLayout,
                                                0,
                                                10);
 
         //get bankroot dirs
         for(int i = 0; i < MAX_BANK_ROOT_DIRS; i++) {
-            if(xmlcfg->enterbranch("BANKROOT", i)) {
+            if(xmlcfg.enterbranch("BANKROOT", i)) {
                 cfg.bankRootDirList[i] = new char[MAX_STRING_SIZE];
-                xmlcfg->getparstr("bank_root",
+                xmlcfg.getparstr("bank_root",
                                   cfg.bankRootDirList[i],
                                   MAX_STRING_SIZE);
-                xmlcfg->exitbranch();
+                xmlcfg.exitbranch();
             }
         }
 
         //get preset root dirs
         for(int i = 0; i < MAX_BANK_ROOT_DIRS; i++) {
-            if(xmlcfg->enterbranch("PRESETSROOT", i)) {
+            if(xmlcfg.enterbranch("PRESETSROOT", i)) {
                 cfg.presetsDirList[i] = new char[MAX_STRING_SIZE];
-                xmlcfg->getparstr("presets_root",
+                xmlcfg.getparstr("presets_root",
                                   cfg.presetsDirList[i],
                                   MAX_STRING_SIZE);
-                xmlcfg->exitbranch();
+                xmlcfg.exitbranch();
             }
         }
 
         //linux stuff
-        xmlcfg->getparstr("linux_oss_wave_out_dev",
+        xmlcfg.getparstr("linux_oss_wave_out_dev",
                           cfg.LinuxOSSWaveOutDev,
                           MAX_STRING_SIZE);
-        xmlcfg->getparstr("linux_oss_seq_in_dev",
+        xmlcfg.getparstr("linux_oss_seq_in_dev",
                           cfg.LinuxOSSSeqInDev,
                           MAX_STRING_SIZE);
 
         //windows stuff
-        cfg.WindowsWaveOutId = xmlcfg->getpar("windows_wave_out_id",
+        cfg.WindowsWaveOutId = xmlcfg.getpar("windows_wave_out_id",
                                               cfg.WindowsWaveOutId,
                                               0,
                                               winwavemax);
-        cfg.WindowsMidiInId  = xmlcfg->getpar("windows_midi_in_id",
+        cfg.WindowsMidiInId  = xmlcfg.getpar("windows_midi_in_id",
                                               cfg.WindowsMidiInId,
                                               0,
                                               winmidimax);
 
-        xmlcfg->exitbranch();
+        xmlcfg.exitbranch();
     }
-    delete (xmlcfg);
 
     cfg.OscilSize = (int) pow(2, ceil(log(cfg.OscilSize - 1.0) / log(2.0)));
 }

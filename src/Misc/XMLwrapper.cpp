@@ -140,7 +140,7 @@ XMLwrapper::XMLwrapper()
 
 XMLwrapper::~XMLwrapper()
 {
-    if(tree != NULL)
+    if(tree)
         mxmlDelete(tree);
 }
 
@@ -295,6 +295,13 @@ void XMLwrapper::endbranch()
 }
 
 
+//workaround for memory leak
+const char *trimLeadingWhite(const char *c)
+{
+    while(isspace(*c))
+        ++c;
+    return c;
+}
 
 /* LOAD XML members */
 
@@ -306,15 +313,14 @@ int XMLwrapper::loadXMLfile(const string &filename)
 
     const char *xmldata = doloadfile(filename.c_str());
     if(xmldata == NULL)
-        return -1;                //the file could not be loaded or uncompressed
+        return -1; //the file could not be loaded or uncompressed
 
-    root = tree = mxmlLoadString(NULL, xmldata, MXML_OPAQUE_CALLBACK);
+    root = tree = mxmlLoadString(NULL, trimLeadingWhite(xmldata), MXML_OPAQUE_CALLBACK);
 
-    delete [] xmldata;
+    delete[] xmldata;
 
     if(tree == NULL)
-        return -2;             //this is not XML
-
+        return -2; //this is not XML
 
     node = root = mxmlFindElement(tree,
                                   tree,
@@ -323,7 +329,7 @@ int XMLwrapper::loadXMLfile(const string &filename)
                                   NULL,
                                   MXML_DESCEND);
     if(root == NULL)
-        return -3;             //the XML doesnt embbed zynaddsubfx data
+        return -3; //the XML doesnt embbed zynaddsubfx data
 
     //fetch version information
     version.Major    = stringTo<int>(mxmlElementGetAttr(root, "version-major"));
@@ -334,7 +340,6 @@ int XMLwrapper::loadXMLfile(const string &filename)
     if(verbose)
         cout << "loadXMLfile() version: " << version.Major << '.'
              << version.Minor << '.' << version.Revision << endl;
-
 
     return 0;
 }
@@ -379,7 +384,7 @@ bool XMLwrapper::putXMLdata(const char *xmldata)
     if(xmldata == NULL)
         return false;
 
-    root = tree = mxmlLoadString(NULL, xmldata, MXML_OPAQUE_CALLBACK);
+    root = tree = mxmlLoadString(NULL, trimLeadingWhite(xmldata), MXML_OPAQUE_CALLBACK);
     if(tree == NULL)
         return false;
 
