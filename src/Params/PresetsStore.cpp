@@ -144,11 +144,7 @@ void PresetsStore::copypreset(XMLwrapper *xml, char *type, string name)
         return;
 
     //make the filenames legal
-    for(int i = 0; i < (int) name.size(); i++) {
-        char c = name[i];
-        if(!(isdigit(c) || isalpha(c) || (c == '-') || (c == ' ')))
-            name[i] = '_';
-    }
+    name = legalizeFilename(name);
 
     //make path legal
     const string dirname = config.cfg.presetsDirList[0];

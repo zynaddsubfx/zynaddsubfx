@@ -1,9 +1,11 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Bank.h - Instrument Bank
+  Bank.cpp - Instrument Bank
   Copyright (C) 2002-2005 Nasca Octavian Paul
+  Copyright (C) 2010-2010 Mark McCurry
   Author: Nasca Octavian Paul
+          Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License
@@ -27,6 +29,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <algorithm>
+#include <iostream>
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -43,17 +46,10 @@
 using namespace std;
 
 Bank::Bank()
+    :defaultinsname(" ")
 {
-    defaultinsname = " ";
-
-    for(int i = 0; i < BANK_SIZE; i++) {
-        ins[i].used     = false;
-        ins[i].info.PADsynth_used = false;
-    }
     clearbank();
-
     bankfiletitle = dirname;
-
     loadbank(config.cfg.currentBankDir);
 }
 
@@ -79,12 +75,8 @@ string Bank::getnamenumbered(unsigned int ninstrument)
 {
     if(emptyslot(ninstrument))
         return defaultinsname;
-    snprintf(tmpinsname[ninstrument],
-             PART_MAX_NAME_LEN + 15,
-             "%d. %s",
-             ninstrument + 1,
-             getname(ninstrument).c_str());
-    return tmpinsname[ninstrument];
+
+    return stringFrom(ninstrument + 1) + ". " + getname(ninstrument);
 }
 
 /*
@@ -108,43 +100,28 @@ void Bank::setname(unsigned int ninstrument, string newname, int newslot)
         if(tmpfilename[i] == ' ')
             tmpfilename[i] = '0';
 
-    //make the filenames legal
-    for(int i = 0; i < (int) strlen(tmpfilename); i++) {
-        char c = tmpfilename[i];
-        if((c >= '0') && (c <= '9'))
-            continue;
-        if((c >= 'A') && (c <= 'Z'))
-            continue;
-        if((c >= 'a') && (c <= 'z'))
-            continue;
-        if((c == '-') || (c == ' '))
-            continue;
-
-        tmpfilename[i] = '_';
-    }
-
-    newfilename = dirname + '/' + tmpfilename + ".xiz";
+    newfilename = dirname + '/' + legalizeFilename(tmpfilename) + ".xiz";
 
     rename(ins[ninstrument].filename.c_str(), newfilename.c_str());
 
     ins[ninstrument].filename = newfilename;
-    ins[ninstrument].name = tmpfilename; //TODO limit name to PART_MAX_NAME_LEN
+    ins[ninstrument].name = legalizeFilename(tmpfilename); //TODO limit name to PART_MAX_NAME_LEN
 }
 
 /*
  * Check if there is no instrument on a slot from the bank
  */
-int Bank::emptyslot(unsigned int ninstrument)
+bool Bank::emptyslot(unsigned int ninstrument)
 {
     if(ninstrument >= BANK_SIZE)
-        return 1;
+        return true;
     if(ins[ninstrument].filename.empty())
-        return 1;
+        return true;
 
     if(ins[ninstrument].used)
-        return 0;
+        return false;
     else
-        return 1;
+        return true;
 }
 
 /*
@@ -181,28 +158,11 @@ void Bank::savetoslot(unsigned int ninstrument, Part *part)
         if(tmpfilename[i] == ' ')
             tmpfilename[i] = '0';
 
-    //make the filenames legal
-    for(int i = 0; i < (int)strlen(tmpfilename); i++) {
-        char c = tmpfilename[i];
-        if((c >= '0') && (c <= '9'))
-            continue;
-        if((c >= 'A') && (c <= 'Z'))
-            continue;
-        if((c >= 'a') && (c <= 'z'))
-            continue;
-        if((c == '-') || (c == ' '))
-            continue;
-
-        tmpfilename[i] = '_';
-    }
-
-    strncat(tmpfilename, ".xiz", maxfilename + 10);
-
-    string filename = dirname + '/' + tmpfilename;
+    string filename = dirname + '/' + legalizeFilename(tmpfilename) + ".xiz";
 
     remove(filename.c_str());
     part->saveXML(filename.c_str());
-    addtobank(ninstrument, tmpfilename, (char *) part->Pname);
+    addtobank(ninstrument, legalizeFilename(tmpfilename), (char *) part->Pname);
 }
 
 /*
@@ -217,7 +177,6 @@ void Bank::loadfromslot(unsigned int ninstrument, Part *part)
 
     part->loadXMLinstrument(ins[ninstrument].filename.c_str());
 }
-
 
 /*
  * Makes current a bank directory
@@ -239,7 +198,7 @@ int Bank::loadbank(string bankdirname)
     while((fn = readdir(dir))) {
         const char *filename = fn->d_name;
 
-        //sa verific daca e si extensia dorita
+        //check for extension
         if(strstr(filename, INSTRUMENT_EXTENSION) == NULL)
             continue;
 
@@ -257,9 +216,8 @@ int Bank::loadbank(string bankdirname)
             }
         }
 
-
         if((startname + 1) < strlen(filename))
-            startname++;                                //to take out the "-"
+            startname++; //to take out the "-"
 
         string name = filename;
 
@@ -276,7 +234,6 @@ int Bank::loadbank(string bankdirname)
         else
             addtobank(-1, filename, name);
     }
-
 
     closedir(dir);
 
@@ -331,24 +288,17 @@ int Bank::locked()
  */
 void Bank::swapslot(unsigned int n1, unsigned int n2)
 {
-    //TODO use std::swap
     if((n1 == n2) || (locked()))
         return;
     if(emptyslot(n1) && (emptyslot(n2)))
         return;
-    if(emptyslot(n1)) { //change n1 to n2 in order to make
-        int tmp = n2;
-        n2 = n1;
-        n1 = tmp;
-    }
+    if(emptyslot(n1)) //change n1 to n2 in order to make
+        swap(n1, n2);
 
     if(emptyslot(n2)) { //this is just a movement from slot1 to slot2
         setname(n1, getname(n1), n2);
         ins[n2] = ins[n1];
-        ins[n1].used     = false;
-        ins[n1].name.clear();
-        ins[n1].filename.clear();
-        ins[n1].info.PADsynth_used = 0;
+        ins[n1] = ins_t();
     }
     else {  //if both slots are used
         if(ins[n1].name == ins[n2].name) //change the name of the second instrument if the name are equal
@@ -356,16 +306,7 @@ void Bank::swapslot(unsigned int n1, unsigned int n2)
 
         setname(n1, getname(n1), n2);
         setname(n2, getname(n2), n1);
-        ins_t tmp;
-        tmp.used = true;
-        tmp.name = ins[n2].name;
-        string tmpfilename  = ins[n2].filename;
-        bool  padsynth_used = ins[n2].info.PADsynth_used;
-
-        ins[n2] = ins[n1];
-        ins[n1].name = tmp.name;
-        ins[n1].filename = tmpfilename;
-        ins[n1].info.PADsynth_used = padsynth_used;
+        swap(ins[n2],ins[n1]);
     }
 }
 
@@ -381,10 +322,8 @@ bool Bank::bankstruct::operator<(const bankstruct &b) const
 
 void Bank::rescanforbanks()
 {
-    for(int i = 0; i < MAX_NUM_BANKS; i++) {
-        banks[i].dir.clear();
-        banks[i].name.clear();
-    }
+    //remove old banks
+    banks.clear();
 
     for(int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
         if(!config.cfg.bankRootDirList[i].empty())
@@ -395,18 +334,13 @@ void Bank::rescanforbanks()
 
     //remove duplicate bank names
     int dupl = 0;
-    for(int j = 0; j < banks.size() - 1; j++) {
-        for(int i = j + 1; i < banks.size(); i++) {
-            if(banks[i].name.empty() || banks[j].name.empty())
-                continue;
-            if(banks[i].name == banks[j].name) { //add a [1] to the first bankname and [n] to others
-                char *tmpname = new char[strlen(tmpname) + 100];
-                sprintf(tmpname, "%s[%d]", tmpname, dupl + 2);
-                banks[i].name = tmpname;
-                delete[] tmpname;
-
+    for(unsigned int j = 0; j < banks.size() - 1; j++) {
+        for(unsigned int i = j + 1; i < banks.size(); i++) {
+            if(banks[i].name == banks[j].name) {
+                //add a [1] to the first bankname and [n] to others
+                banks[i].name = banks[i].name + '[' + stringFrom(dupl +2) + ']';
                 if(dupl == 0)
-                    banks[i].name += "[1]";
+                    banks[j].name += "[1]";
 
                 dupl++;
             }
@@ -417,7 +351,6 @@ void Bank::rescanforbanks()
 }
 
 
-
 // private stuff
 
 void Bank::scanrootdir(string rootdir)
@@ -426,7 +359,6 @@ void Bank::scanrootdir(string rootdir)
     if(dir == NULL)
         return;
 
-    const int maxdirsize = 1000;
     bankstruct bank;
 
     const char *separator = "/";
@@ -457,26 +389,14 @@ void Bank::scanrootdir(string rootdir)
             if((strstr(fname->d_name, INSTRUMENT_EXTENSION) != NULL)
                || (strstr(fname->d_name, FORCE_BANK_DIR_FILE) != NULL)) {
                 isbank = true;
-                break; //aici as putea pune in loc de break un update la un counter care imi arata nr. de instrumente din bank
+                break; //could put a #instrument counter here instead
             }
         }
+
+        if(isbank)
+            banks.push_back(bank);
 
         closedir(d);
-
-        if(isbank) {
-            int pos = -1;
-            for(int i = 1; i < MAX_NUM_BANKS; i++) { //banks[0] e liber intotdeauna
-                if(banks[i].name.empty()) {
-                    pos = i;
-                    break;
-                }
-            }
-
-            if(pos >= 0) {
-                banks[pos].name = bank.name;
-                banks[pos].dir  = bank.dir;
-            }
-        }
     }
 
     closedir(dir);
@@ -484,7 +404,8 @@ void Bank::scanrootdir(string rootdir)
 
 void Bank::clearbank()
 {
-    banks.clear();
+    for(int i = 0; i < BANK_SIZE; ++i)
+        ins[i] = ins_t();
 
     bankfiletitle.clear();
     dirname.clear();
@@ -494,34 +415,29 @@ int Bank::addtobank(int pos, string filename, string name)
 {
     if((pos >= 0) && (pos < BANK_SIZE)) {
         if(ins[pos].used)
-            pos = -1;             //force it to find a new free position
+            pos = -1; //force it to find a new free position
     }
     else
-    if(pos >= BANK_SIZE)
-        pos = -1;
+        if(pos >= BANK_SIZE)
+            pos = -1;
 
 
     if(pos < 0) { //find a free position
-        for(int i = BANK_SIZE - 1; i >= 0; i--)
+        for(int i = BANK_SIZE - 1; i >= 0; i--) {
             if(!ins[i].used) {
                 pos = i;
                 break;
             }
-        ;
+        }
     }
 
     if(pos < 0)
-        return -1;         //the bank is full
-
-    // printf("%s   %d\n",filename,pos);
+        return -1;//the bank is full
 
     deletefrombank(pos);
 
     ins[pos].used = true;
     ins[pos].name = name;
-
-    snprintf(tmpinsname[pos], PART_MAX_NAME_LEN + 10, " ");
-
     ins[pos].filename = dirname + '/' + filename;
 
     //see if PADsynth is used
@@ -548,12 +464,14 @@ bool Bank::isPADsynth_used(unsigned int ninstrument)
 
 void Bank::deletefrombank(int pos)
 {
-    if((pos < 0) || (pos >= banks.size()))
+    if((pos < 0) || (pos >= (int) banks.size()))
         return;
-    ins[pos].used = false;
-    ins[pos].name.clear();
-    ins[pos].filename.clear();
+    ins[pos] = ins_t();
+}
 
-    ZERO(tmpinsname[pos], PART_MAX_NAME_LEN + 20);
+Bank::ins_t::ins_t()
+    :used(false), name(""), filename("")
+{
+    info.PADsynth_used = false;
 }
 

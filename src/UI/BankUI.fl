@@ -76,17 +76,20 @@ highlight=0;
 refresh();} {}
   }
   Function {refresh()} {} {
-    code {if (bank->emptyslot(nslot)) {
-	color(46);
-} else {
-	if (bank->isPADsynth_used(nslot)) color(26);
-		else color(51);
-};
-
-if (*nselected==nslot) color(6);
+    code {if (bank->emptyslot(nslot))
+    color(46);
+else if (bank->isPADsynth_used(nslot)) 
+    color(26);
+else 
+    color(51);
 
 
-label(bank->getnamenumbered(nslot).c_str());} {}
+if (*nselected==nslot) 
+    color(6);
+
+
+copy_label(bank->getnamenumbered(nslot).c_str());} {selected
+    }
   }
   decl {int *what,*whatslot,nslot,highlight, *nselected;} {}
   decl {void (BankProcess_:: *fnc)(void);} {}
@@ -318,8 +321,8 @@ if (bank->locked()){
     clearbutton->activate();
     swapbutton->activate();
 };
-for (int i=0;i<BANK_SIZE;i++) bs[i]->refresh();} {selected
-    }
+for (int i=0;i<BANK_SIZE;i++) 
+   bs[i]->refresh();} {}
   }
   Function {removeselection()} {} {
     code {if (nselected>=0) {
@@ -333,8 +336,7 @@ for (int i=0;i<BANK_SIZE;i++) bs[i]->refresh();} {selected
 banklist->add(" ");
 bank->rescanforbanks();
 
-for (int i=1;i<MAX_NUM_BANKS;i++) {
-    if (!bank->banks[i].name.empty())
+for (unsigned int i=1;i<bank->banks.size();i++) {
      banklist->add(bank->banks[i].name.c_str());
 };} {}
   }

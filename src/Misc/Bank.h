@@ -30,12 +30,8 @@
 #include "XMLwrapper.h"
 #include "Part.h"
 
+//entries in a bank
 #define BANK_SIZE 160
-
-/**
- * The max. number of banks that are used
- */
-#define MAX_NUM_BANKS 400
 
 /**The instrument Bank*/
 class Bank
@@ -49,9 +45,8 @@ class Bank
         void setname(unsigned int ninstrument, const std::string newname, int newslot); //if newslot==-1 then this is ignored, else it will be put on that slot
         bool isPADsynth_used(unsigned int ninstrument);
 
-        /**returns 0 if the slot is not empty or 1 if the slot is empty
-         * \todo start using bool before facepalm*/
-        int emptyslot(unsigned int ninstrument);
+        /**returns true when slot is empty*/
+        bool emptyslot(unsigned int ninstrument);
 
         /**Empties out the selected slot*/
         void clearslot(unsigned int ninstrument);
@@ -91,9 +86,9 @@ class Bank
         void clearbank();
 
         std::string defaultinsname;
-        char tmpinsname[BANK_SIZE][PART_MAX_NAME_LEN + 20]; //this keeps the numbered names
 
         struct ins_t {
+            ins_t();
             bool  used;
             std::string name;
             std::string filename;
