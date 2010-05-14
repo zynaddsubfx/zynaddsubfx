@@ -36,7 +36,7 @@ class PresetsStore
         //Clipboard stuff
         void copyclipboard(XMLwrapper *xml, char *type);
         bool pasteclipboard(XMLwrapper *xml);
-        bool checkclipboardtype(char *type);
+        bool checkclipboardtype(const char *type);
 
         //presets stuff
         void copypreset(XMLwrapper *xml, char *type, std::string name);

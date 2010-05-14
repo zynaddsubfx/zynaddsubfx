@@ -106,10 +106,6 @@ void Presets::paste(int npreset)
 
 bool Presets::checkclipboardtype()
 {
-    char type[MAX_PRESETTYPE_SIZE];
-    strcpy(type, this->type);
-    strcat(type, "n");
-
     return presetsstore.checkclipboardtype(type);
 }
 
