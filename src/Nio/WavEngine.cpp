@@ -95,6 +95,7 @@ void WavEngine::destroyFile()
 {
     if(file)
         delete file;
+    file = NULL;
 }
 
 void *WavEngine::_AudioThread(void *arg)
