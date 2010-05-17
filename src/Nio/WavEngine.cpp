@@ -26,7 +26,7 @@
 using namespace std;
 
 WavEngine::WavEngine()
-    :AudioOut(), file(NULL), buffer(SAMPLE_RATE*2), pThread(NULL)
+    :AudioOut(), file(NULL), buffer(SAMPLE_RATE*4), pThread(NULL)
 {
     sem_init(&work, PTHREAD_PROCESS_PRIVATE, 0);
 }
@@ -89,6 +89,10 @@ void WavEngine::newFile(WavFile *_file)
     //ensure system is clean
     destroyFile();
     file = _file;
+
+    //check state
+    if(!file->good())
+        cerr << "ERROR: WavEngine handed bad file output WavEngine::newFile()" << endl;
 }
 
 void WavEngine::destroyFile()
@@ -115,11 +119,12 @@ void *WavEngine::AudioThread()
             buffer.pop(right);
             recordbuf_16bit[2*i]   = limit((int)(left  * 32767.0), -32768, 32767);
             recordbuf_16bit[2*i+1] = limit((int)(right * 32767.0), -32768, 32767);
-            file->writeStereoSamples(SOUND_BUFFER_SIZE, recordbuf_16bit);
         }
+        file->writeStereoSamples(SOUND_BUFFER_SIZE, recordbuf_16bit);
     }
 
     delete[] recordbuf_16bit;
-    pthread_exit(NULL);
+
+    return NULL;
 }
 
