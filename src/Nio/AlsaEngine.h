@@ -76,7 +76,7 @@ class AlsaEngine : public AudioOut, MidiIn
             pthread_t    pThread;
         } audio;
 
-        void processAudio();
+        void *processAudio();
 };
 
 #endif

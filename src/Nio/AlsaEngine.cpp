@@ -53,8 +53,7 @@ void *AlsaEngine::_AudioThread(void *arg)
 void *AlsaEngine::AudioThread()
 {
     set_realtime();
-    processAudio();
-    return NULL;
+    return processAudio();
 }
 
 bool AlsaEngine::Start()
@@ -68,6 +67,7 @@ void AlsaEngine::Stop()
         setMidiEn(false);
     if(getAudioEn())
         setAudioEn(false);
+    snd_config_update_free_global();
 }
 
 void AlsaEngine::setMidiEn(bool nval)
@@ -107,7 +107,7 @@ void *AlsaEngine::MidiThread(void)
     snd_seq_event_t *event;
     MidiEvent ev;
     set_realtime();
-    while (snd_seq_event_input(midi.handle, &event) > 0)
+    while(snd_seq_event_input(midi.handle, &event) > 0)
     {
         //ensure ev is empty
         ev.channel = 0;
@@ -311,6 +311,7 @@ bool AlsaEngine::openAudio()
     //snd_pcm_hw_params_get_period_size(audio.params, &audio.frames, NULL);
     //snd_pcm_hw_params_get_period_time(audio.params, &val, NULL);
 
+
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
@@ -327,10 +328,11 @@ void AlsaEngine::stopAudio()
     audio.handle = NULL;
     pthread_join(audio.pThread, NULL);
     snd_pcm_drain(handle);
-    snd_pcm_close(handle);
+    if(snd_pcm_close(handle))
+        cout << "Error: in snd_pcm_close " << __LINE__ << ' ' << __FILE__ << endl;
 }
 
-void AlsaEngine::processAudio()
+void *AlsaEngine::processAudio()
 {
     int rc;
     while (audio.handle) {
@@ -347,5 +349,5 @@ void AlsaEngine::processAudio()
         else if (rc < 0)
             cerr << "error from writei: " << snd_strerror(rc) << endl;
     }
-    pthread_exit(NULL);
+    return NULL;
 }
