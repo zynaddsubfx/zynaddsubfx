@@ -1,4 +1,4 @@
-2.4.1 (In Beta)
+2.4.1 (22 May 2010)
         - Azerty layout
         - XML bug fixes
         - Vibrato/Unison additions
