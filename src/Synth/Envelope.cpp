@@ -79,9 +79,9 @@ Envelope::Envelope(EnvelopeParams *envpars, REALTYPE basefreq)
     envdt[0]     = 1.0;
 
     currentpoint = 1; //the envelope starts from 1
-    keyreleased  = 0;
+    keyreleased  = false;
     t = 0.0;
-    envfinish    = 0;
+    envfinish    = false;
     inct = envdt[1];
     envoutval    = 0.0;
 }
@@ -95,9 +95,9 @@ Envelope::~Envelope()
  */
 void Envelope::relasekey()
 {
-    if(keyreleased == 1)
+    if(keyreleased)
         return;
-    keyreleased = 1;
+    keyreleased = true;
     if(forcedrelase != 0)
         t = 0.0;
 }
@@ -109,16 +109,16 @@ REALTYPE Envelope::envout()
 {
     REALTYPE out;
 
-    if(envfinish != 0) { //if the envelope is finished
+    if(envfinish) { //if the envelope is finished
         envoutval = envval[envpoints - 1];
         return envoutval;
     }
-    if((currentpoint == envsustain + 1) && (keyreleased == 0)) { //if it is sustaining now
+    if((currentpoint == envsustain + 1) && !keyreleased) { //if it is sustaining now
         envoutval = envval[envsustain];
         return envoutval;
     }
 
-    if((keyreleased != 0) && (forcedrelase != 0)) { //do the forced release
+    if(keyreleased && (forcedrelase != 0)) { //do the forced release
         int tmp = (envsustain < 0) ? (envpoints - 1) : (envsustain + 1); //if there is no sustain point, use the last point for release
 
         if(envdt[tmp] < 0.00000001)
@@ -133,21 +133,20 @@ REALTYPE Envelope::envout()
             t    = 0.0;
             inct = envdt[currentpoint];
             if((currentpoint >= envpoints) || (envsustain < 0))
-                envfinish = 1;
+                envfinish = true;
         }
         return out;
     }
     if(inct >= 1.0)
         out = envval[currentpoint];
     else
-        out =
-            envval[currentpoint
-                   - 1] + (envval[currentpoint] - envval[currentpoint - 1]) * t;
+        out = envval[currentpoint - 1] +
+             (envval[currentpoint] - envval[currentpoint - 1]) * t;
 
     t += inct;
     if(t >= 1.0) {
         if(currentpoint >= envpoints - 1)
-            envfinish = 1;
+            envfinish = true;
         else
             currentpoint++;
         t    = 0.0;
@@ -167,7 +166,7 @@ REALTYPE Envelope::envout_dB()
     if(linearenvelope != 0)
         return envout();
 
-    if((currentpoint == 1) && ((keyreleased == 0) || (forcedrelase == 0))) { //first point is always lineary interpolated
+    if((currentpoint == 1) && (!keyreleased || (forcedrelase == 0))) { //first point is always lineary interpolated
         REALTYPE v1 = dB2rap(envval[0]);
         REALTYPE v2 = dB2rap(envval[1]);
         out = v1 + (v2 - v1) * t;
@@ -191,7 +190,7 @@ REALTYPE Envelope::envout_dB()
     return out;
 }
 
-int Envelope::finished()
+bool Envelope::finished() const
 {
     return envfinish;
 }
