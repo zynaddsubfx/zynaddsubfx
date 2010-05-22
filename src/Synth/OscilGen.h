@@ -39,8 +39,8 @@ class OscilGen:public Presets
         void prepare();
 
         /**do the antialiasing(cut off higher freqs.),apply randomness and do a IFFT*/
-        short get(REALTYPE *smps, REALTYPE freqHz); //returns where should I start getting samples, used in block type randomness
-        short get(REALTYPE *smps, REALTYPE freqHz, int resonance);
+        //returns where should I start getting samples, used in block type randomness
+        short get(REALTYPE *smps, REALTYPE freqHz, int resonance=0);
         //if freqHz is smaller than 0, return the "un-randomized" sample for UI
 
         void getbasefunction(REALTYPE *smps);
@@ -79,7 +79,7 @@ class OscilGen:public Presets
 
         unsigned char Pbasefuncmodulation; //what modulation is applied to the basefunc
         unsigned char Pbasefuncmodulationpar1, Pbasefuncmodulationpar2,
-                      Pbasefuncmodulationpar3;                                            //the parameter of the base function modulation
+                      Pbasefuncmodulationpar3;//the parameter of the base function modulation
 
         /*the Randomness:
           64=no randomness
@@ -144,21 +144,6 @@ class OscilGen:public Presets
         //(that's why the sine and cosine components should be processed with a separate call)
         void adaptiveharmonicpostprocess(REALTYPE *f, int size);
 
-        //Basic/base functions (Functiile De Baza)
-        REALTYPE basefunc_pulse(REALTYPE x, REALTYPE a);
-        REALTYPE basefunc_saw(REALTYPE x, REALTYPE a);
-        REALTYPE basefunc_triangle(REALTYPE x, REALTYPE a);
-        REALTYPE basefunc_power(REALTYPE x, REALTYPE a);
-        REALTYPE basefunc_gauss(REALTYPE x, REALTYPE a);
-        REALTYPE basefunc_diode(REALTYPE x, REALTYPE a);
-        REALTYPE basefunc_abssine(REALTYPE x, REALTYPE a);
-        REALTYPE basefunc_pulsesine(REALTYPE x, REALTYPE a);
-        REALTYPE basefunc_stretchsine(REALTYPE x, REALTYPE a);
-        REALTYPE basefunc_chirp(REALTYPE x, REALTYPE a);
-        REALTYPE basefunc_absstretchsine(REALTYPE x, REALTYPE a);
-        REALTYPE basefunc_chebyshev(REALTYPE x, REALTYPE a);
-        REALTYPE basefunc_sqr(REALTYPE x, REALTYPE a);
-
         //Internal Data
         unsigned char oldbasefunc, oldbasepar, oldhmagtype,
                       oldwaveshapingfunction, oldwaveshaping;
@@ -177,6 +162,11 @@ class OscilGen:public Presets
 
         unsigned int randseed;
 };
+
+typedef REALTYPE(*filter_func)(unsigned int, REALTYPE, REALTYPE);
+filter_func getFilter(unsigned char func);
+typedef REALTYPE(*base_func)(REALTYPE,REALTYPE);
+base_func getBaseFunction(unsigned char func);
 
 
 #endif

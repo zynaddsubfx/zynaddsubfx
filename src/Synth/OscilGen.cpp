@@ -20,12 +20,14 @@
 
 */
 
+#include <cassert>
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
 
 #include "OscilGen.h"
 #include "../Effects/Distorsion.h"
+
 
 OscilGen::OscilGen(FFTwrapper *fft_, Resonance *res_):Presets()
 {
@@ -173,154 +175,6 @@ void OscilGen::convert2sine(int magtype)
 }
 
 /*
- * Base Functions - START
- */
-REALTYPE OscilGen::basefunc_pulse(REALTYPE x, REALTYPE a)
-{
-    return (fmod(x, 1.0) < a) ? -1.0 : 1.0;
-}
-
-REALTYPE OscilGen::basefunc_saw(REALTYPE x, REALTYPE a)
-{
-    if(a < 0.00001)
-        a = 0.00001;
-    else
-    if(a > 0.99999)
-        a = 0.99999;
-    x = fmod(x, 1);
-    if(x < a)
-        return x / a * 2.0 - 1.0;
-    else
-        return (1.0 - x) / (1.0 - a) * 2.0 - 1.0;
-}
-
-REALTYPE OscilGen::basefunc_triangle(REALTYPE x, REALTYPE a)
-{
-    x = fmod(x + 0.25, 1);
-    a = 1 - a;
-    if(a < 0.00001)
-        a = 0.00001;
-    if(x < 0.5)
-        x = x * 4 - 1.0;
-    else
-        x = (1.0 - x) * 4 - 1.0;
-    x /= -a;
-    if(x < -1.0)
-        x = -1.0;
-    if(x > 1.0)
-        x = 1.0;
-    return x;
-}
-
-REALTYPE OscilGen::basefunc_power(REALTYPE x, REALTYPE a)
-{
-    x = fmod(x, 1);
-    if(a < 0.00001)
-        a = 0.00001;
-    else
-    if(a > 0.99999)
-        a = 0.99999;
-    return pow(x, exp((a - 0.5) * 10.0)) * 2.0 - 1.0;
-}
-
-REALTYPE OscilGen::basefunc_gauss(REALTYPE x, REALTYPE a)
-{
-    x = fmod(x, 1) * 2.0 - 1.0;
-    if(a < 0.00001)
-        a = 0.00001;
-    return exp(-x * x * (exp(a * 8) + 5.0)) * 2.0 - 1.0;
-}
-
-REALTYPE OscilGen::basefunc_diode(REALTYPE x, REALTYPE a)
-{
-    if(a < 0.00001)
-        a = 0.00001;
-    else
-    if(a > 0.99999)
-        a = 0.99999;
-    a = a * 2.0 - 1.0;
-    x = cos((x + 0.5) * 2.0 * PI) - a;
-    if(x < 0.0)
-        x = 0.0;
-    return x / (1.0 - a) * 2 - 1.0;
-}
-
-REALTYPE OscilGen::basefunc_abssine(REALTYPE x, REALTYPE a)
-{
-    x = fmod(x, 1);
-    if(a < 0.00001)
-        a = 0.00001;
-    else
-    if(a > 0.99999)
-        a = 0.99999;
-    return sin(pow(x, exp((a - 0.5) * 5.0)) * PI) * 2.0 - 1.0;
-}
-
-REALTYPE OscilGen::basefunc_pulsesine(REALTYPE x, REALTYPE a)
-{
-    if(a < 0.00001)
-        a = 0.00001;
-    x = (fmod(x, 1) - 0.5) * exp((a - 0.5) * log(128));
-    if(x < -0.5)
-        x = -0.5;
-    else
-    if(x > 0.5)
-        x = 0.5;
-    x = sin(x * PI * 2.0);
-    return x;
-}
-
-REALTYPE OscilGen::basefunc_stretchsine(REALTYPE x, REALTYPE a)
-{
-    x = fmod(x + 0.5, 1) * 2.0 - 1.0;
-    a = (a - 0.5) * 4;
-    if(a > 0.0)
-        a *= 2;
-    a = pow(3.0, a);
-    REALTYPE b = pow(fabs(x), a);
-    if(x < 0)
-        b = -b;
-    return -sin(b * PI);
-}
-
-REALTYPE OscilGen::basefunc_chirp(REALTYPE x, REALTYPE a)
-{
-    x = fmod(x, 1.0) * 2.0 * PI;
-    a = (a - 0.5) * 4;
-    if(a < 0.0)
-        a *= 2.0;
-    a = pow(3.0, a);
-    return sin(x / 2.0) * sin(a * x * x);
-}
-
-REALTYPE OscilGen::basefunc_absstretchsine(REALTYPE x, REALTYPE a)
-{
-    x = fmod(x + 0.5, 1) * 2.0 - 1.0;
-    a = (a - 0.5) * 9;
-    a = pow(3.0, a);
-    REALTYPE b = pow(fabs(x), a);
-    if(x < 0)
-        b = -b;
-    return -pow(sin(b * PI), 2);
-}
-
-REALTYPE OscilGen::basefunc_chebyshev(REALTYPE x, REALTYPE a)
-{
-    a = a * a * a * 30.0 + 1.0;
-    return cos(acos(x * 2.0 - 1.0) * a);
-}
-
-REALTYPE OscilGen::basefunc_sqr(REALTYPE x, REALTYPE a)
-{
-    a = a * a * a * a * 160.0 + 0.001;
-    return -atan(sin(x * 2.0 * PI) * a);
-}
-/*
- * Base Functions - END
- */
-
-
-/*
  * Get the base function
  */
 void OscilGen::getbasefunction(REALTYPE *smps)
@@ -359,7 +213,7 @@ void OscilGen::getbasefunction(REALTYPE *smps)
         break;
     }
 
-//    printf("%.5f %.5f\n",basefuncmodulationpar1,basefuncmodulationpar3);
+    base_func func = getBaseFunction(Pcurrentbasefunc);
 
     for(i = 0; i < OSCIL_SIZE; i++) {
         REALTYPE t = i * 1.0 / OSCIL_SIZE;
@@ -368,65 +222,26 @@ void OscilGen::getbasefunction(REALTYPE *smps)
         case 1:
             t = t * basefuncmodulationpar3 + sin(
                 (t
-                 + basefuncmodulationpar2) * 2.0 * PI) * basefuncmodulationpar1;                     //rev
+                 + basefuncmodulationpar2) * 2.0 * PI) * basefuncmodulationpar1;//rev
             break;
         case 2:
             t = t + sin(
                 (t * basefuncmodulationpar3
-                 + basefuncmodulationpar2) * 2.0 * PI) * basefuncmodulationpar1;                     //sine
+                 + basefuncmodulationpar2) * 2.0 * PI) * basefuncmodulationpar1;//sine
             break;
         case 3:
             t = t + pow((1.0 - cos(
                              (t + basefuncmodulationpar2) * 2.0 * PI)) * 0.5,
-                        basefuncmodulationpar3) * basefuncmodulationpar1;                                           //power
+                        basefuncmodulationpar3) * basefuncmodulationpar1;//power
             break;
         }
 
         t = t - floor(t);
 
-        switch(Pcurrentbasefunc) {
-        case 1:
-            smps[i] = basefunc_triangle(t, par);
-            break;
-        case 2:
-            smps[i] = basefunc_pulse(t, par);
-            break;
-        case 3:
-            smps[i] = basefunc_saw(t, par);
-            break;
-        case 4:
-            smps[i] = basefunc_power(t, par);
-            break;
-        case 5:
-            smps[i] = basefunc_gauss(t, par);
-            break;
-        case 6:
-            smps[i] = basefunc_diode(t, par);
-            break;
-        case 7:
-            smps[i] = basefunc_abssine(t, par);
-            break;
-        case 8:
-            smps[i] = basefunc_pulsesine(t, par);
-            break;
-        case 9:
-            smps[i] = basefunc_stretchsine(t, par);
-            break;
-        case 10:
-            smps[i] = basefunc_chirp(t, par);
-            break;
-        case 11:
-            smps[i] = basefunc_absstretchsine(t, par);
-            break;
-        case 12:
-            smps[i] = basefunc_chebyshev(t, par);
-            break;
-        case 13:
-            smps[i] = basefunc_sqr(t, par);
-            break;
-        default:
+        if(func)
+            smps[i] = func(t, par);
+        else
             smps[i] = -sin(2.0 * PI * i / OSCIL_SIZE);
-        }
     }
 }
 
@@ -437,128 +252,36 @@ void OscilGen::oscilfilter()
 {
     if(Pfiltertype == 0)
         return;
-    REALTYPE par  = 1.0 - Pfilterpar1 / 128.0;
-    REALTYPE par2 = Pfilterpar2 / 127.0;
-    REALTYPE max  = 0.0, tmp = 0.0, p2, x;
-    for(int i = 1; i < OSCIL_SIZE / 2; i++) {
-        REALTYPE gain = 1.0;
-        switch(Pfiltertype) {
-        case 1:
-            gain = pow(1.0 - par * par * par * 0.99, i); //lp
-            tmp  = par2 * par2 * par2 * par2 * 0.5 + 0.0001;
-            if(gain < tmp)
-                gain = pow(gain, 10.0) / pow(tmp, 9.0);
-            break;
-        case 2:
-            gain = 1.0 - pow(1.0 - par * par, i + 1); //hp1
-            gain = pow(gain, par2 * 2.0 + 0.1);
-            break;
-        case 3:
-            if(par < 0.2)
-                par = par * 0.25 + 0.15;
-            gain = 1.0 - pow(1.0 - par * par * 0.999 + 0.001,
-                             i * 0.05 * i + 1.0);              //hp1b
-            tmp  = pow(5.0, par2 * 2.0);
-            gain = pow(gain, tmp);
-            break;
-        case 4:
-            gain = i + 1 - pow(2, (1.0 - par) * 7.5); //bp1
-            gain = 1.0 / (1.0 + gain * gain / (i + 1.0));
-            tmp  = pow(5.0, par2 * 2.0);
-            gain = pow(gain, tmp);
-            if(gain < 1e-5)
-                gain = 1e-5;
-            break;
-        case 5:
-            gain = i + 1 - pow(2, (1.0 - par) * 7.5); //bs1
-            gain = pow(atan(gain / (i / 10.0 + 1)) / 1.57, 6);
-            gain = pow(gain, par2 * par2 * 3.9 + 0.1);
-            break;
-        case 6:
-            tmp  = pow(par2, 0.33);
-            gain =
-                (i + 1 >
-                 pow(2, (1.0 - par) * 10) ? 0.0 : 1.0) * par2 + (1.0 - par2); //lp2
-            break;
-        case 7:
-            tmp  = pow(par2, 0.33);
-            //tmp=1.0-(1.0-par2)*(1.0-par2);
-            gain =
-                (i + 1 >
-                 pow(2, (1.0 - par) * 7) ? 1.0 : 0.0) * par2 + (1.0 - par2); //hp2
-            if(Pfilterpar1 == 0)
-                gain = 1.0;
-            break;
-        case 8:
-            tmp  = pow(par2, 0.33);
-            //tmp=1.0-(1.0-par2)*(1.0-par2);
-            gain =
-                (fabs(pow(2,
-                          (1.0
-                           - par)
-                          * 7) - i) > i / 2 + 1 ? 0.0 : 1.0) * par2 + (1.0 - par2); //bp2
-            break;
-        case 9:
-            tmp  = pow(par2, 0.33);
-            gain =
-                (fabs(pow(2,
-                          (1.0
-                           - par)
-                          * 7) - i) < i / 2 + 1 ? 0.0 : 1.0) * par2 + (1.0 - par2); //bs2
-            break;
-        case 10:
-            tmp   = pow(5.0, par2 * 2.0 - 1.0);
-            tmp   = pow(i / 32.0, tmp) * 32.0;
-            if(Pfilterpar2 == 64)
-                tmp = i;
-            gain  = cos(par * par * PI / 2.0 * tmp); //cos
-            gain *= gain;
-            break;
-        case 11:
-            tmp   = pow(5.0, par2 * 2.0 - 1.0);
-            tmp   = pow(i / 32.0, tmp) * 32.0;
-            if(Pfilterpar2 == 64)
-                tmp = i;
-            gain  = sin(par * par * PI / 2.0 * tmp); //sin
-            gain *= gain;
-            break;
-        case 12:
-            p2 = 1.0 - par + 0.2;
-            x  = i / (64.0 * p2 * p2);
-            if(x < 0.0)
-                x = 0.0;
-            else
-            if(x > 1.0)
-                x = 1.0;
-            tmp  = pow(1.0 - par2, 2.0);
-            gain = cos(x * PI) * (1.0 - tmp) + 1.01 + tmp; //low shelf
-            break;
-        case 13:
-            tmp  = (int) (pow(2.0, (1.0 - par) * 7.2));
-            gain = 1.0;
-            if(i == (int) (tmp))
-                gain = pow(2.0, par2 * par2 * 8.0);
-            break;
-        }
 
+    const REALTYPE par  = 1.0 - Pfilterpar1 / 128.0;
+    const REALTYPE par2 = Pfilterpar2 / 127.0;
+    REALTYPE max  = 0.0;
+    filter_func filter = getFilter(Pfiltertype);
+
+    for(int i = 1; i < OSCIL_SIZE / 2; i++) {
+        REALTYPE gain = filter(i,par,par2);
 
         oscilFFTfreqs.s[i] *= gain;
         oscilFFTfreqs.c[i] *= gain;
-        REALTYPE tmp = oscilFFTfreqs.s[i] * oscilFFTfreqs.s[i]
-                       + oscilFFTfreqs.c[i] * oscilFFTfreqs.c[i];
-        if(max < tmp)
-            max = tmp;
+        REALTYPE magnitude = oscilFFTfreqs.s[i] * oscilFFTfreqs.s[i]
+                           + oscilFFTfreqs.c[i] * oscilFFTfreqs.c[i];
+        if(max < magnitude)
+            max = magnitude;
     }
 
+    //Finish RMS calculation
     max = sqrt(max);
     if(max < 1e-10)
         max = 1.0;
     REALTYPE imax = 1.0 / max;
+
+    //Normalize signal
     for(int i = 1; i < OSCIL_SIZE / 2; i++) {
         oscilFFTfreqs.s[i] *= imax;
         oscilFFTfreqs.c[i] *= imax;
     }
 }
+
 
 /*
  * Change the base function
@@ -692,17 +415,17 @@ void OscilGen::modulation()
         switch(Pmodulation) {
         case 1:
             t = t * modulationpar3
-                + sin((t + modulationpar2) * 2.0 * PI) * modulationpar1;     //rev
+                + sin((t + modulationpar2) * 2.0 * PI) * modulationpar1; //rev
             break;
         case 2:
             t = t
                 + sin((t * modulationpar3
-                       + modulationpar2) * 2.0 * PI) * modulationpar1;       //sine
+                       + modulationpar2) * 2.0 * PI) * modulationpar1; //sine
             break;
         case 3:
             t = t + pow((1.0 - cos(
                              (t + modulationpar2) * 2.0 * PI)) * 0.5,
-                        modulationpar3) * modulationpar1;                                   //power
+                        modulationpar3) * modulationpar1; //power
             break;
         }
 
@@ -907,8 +630,6 @@ void OscilGen::prepare()
     if(Pharmonicshiftfirst != 0)
         shiftharmonics();
 
-
-
     if(Pfilterbeforews == 0) {
         waveshape();
         oscilfilter();
@@ -1021,7 +742,7 @@ void OscilGen::adaptiveharmonicpostprocess(REALTYPE *f, int size)
     if(Padaptiveharmonics == 2) { //2n+1
         for(int i = 0; i < size; i++)
             if((i % 2) == 0)
-                f[i] += inf[i];                             //i=0 pt prima armonica,etc.
+                f[i] += inf[i]; //i=0 pt prima armonica,etc.
     }
     else {  //celelalte moduri
         int nh = (Padaptiveharmonics - 3) / 2 + 2;
@@ -1041,16 +762,6 @@ void OscilGen::adaptiveharmonicpostprocess(REALTYPE *f, int size)
     }
 
     delete (inf);
-}
-
-
-
-/*
- * Get the oscillator function
- */
-short int OscilGen::get(REALTYPE *smps, REALTYPE freqHz)
-{
-    return this->get(smps, freqHz, 0);
 }
 
 void OscilGen::newrandseed(unsigned int randseed)
@@ -1471,5 +1182,317 @@ void OscilGen::getfromXML(XMLwrapper *xml)
                 basefuncFFTfreqs.s[i] /= max;
         }
     }
+}
+
+//Define basic functions
+#define FUNC(b) REALTYPE basefunc_##b(REALTYPE x, REALTYPE a)
+
+FUNC(pulse)
+{
+    return (fmod(x, 1.0) < a) ? -1.0 : 1.0;
+}
+
+FUNC(saw)
+{
+    if(a < 0.00001)
+        a = 0.00001;
+    else
+    if(a > 0.99999)
+        a = 0.99999;
+    x = fmod(x, 1);
+    if(x < a)
+        return x / a * 2.0 - 1.0;
+    else
+        return (1.0 - x) / (1.0 - a) * 2.0 - 1.0;
+}
+
+FUNC(triangle)
+{
+    x = fmod(x + 0.25, 1);
+    a = 1 - a;
+    if(a < 0.00001)
+        a = 0.00001;
+    if(x < 0.5)
+        x = x * 4 - 1.0;
+    else
+        x = (1.0 - x) * 4 - 1.0;
+    x /= -a;
+    if(x < -1.0)
+        x = -1.0;
+    if(x > 1.0)
+        x = 1.0;
+    return x;
+}
+
+FUNC(power)
+{
+    x = fmod(x, 1);
+    if(a < 0.00001)
+        a = 0.00001;
+    else
+    if(a > 0.99999)
+        a = 0.99999;
+    return pow(x, exp((a - 0.5) * 10.0)) * 2.0 - 1.0;
+}
+
+FUNC(gauss)
+{
+    x = fmod(x, 1) * 2.0 - 1.0;
+    if(a < 0.00001)
+        a = 0.00001;
+    return exp(-x * x * (exp(a * 8) + 5.0)) * 2.0 - 1.0;
+}
+
+FUNC(diode)
+{
+    if(a < 0.00001)
+        a = 0.00001;
+    else
+    if(a > 0.99999)
+        a = 0.99999;
+    a = a * 2.0 - 1.0;
+    x = cos((x + 0.5) * 2.0 * PI) - a;
+    if(x < 0.0)
+        x = 0.0;
+    return x / (1.0 - a) * 2 - 1.0;
+}
+
+FUNC(abssine)
+{
+    x = fmod(x, 1);
+    if(a < 0.00001)
+        a = 0.00001;
+    else
+    if(a > 0.99999)
+        a = 0.99999;
+    return sin(pow(x, exp((a - 0.5) * 5.0)) * PI) * 2.0 - 1.0;
+}
+
+FUNC(pulsesine)
+{
+    if(a < 0.00001)
+        a = 0.00001;
+    x = (fmod(x, 1) - 0.5) * exp((a - 0.5) * log(128));
+    if(x < -0.5)
+        x = -0.5;
+    else
+    if(x > 0.5)
+        x = 0.5;
+    x = sin(x * PI * 2.0);
+    return x;
+}
+
+FUNC(stretchsine)
+{
+    x = fmod(x + 0.5, 1) * 2.0 - 1.0;
+    a = (a - 0.5) * 4;
+    if(a > 0.0)
+        a *= 2;
+    a = pow(3.0, a);
+    REALTYPE b = pow(fabs(x), a);
+    if(x < 0)
+        b = -b;
+    return -sin(b * PI);
+}
+
+FUNC(chirp)
+{
+    x = fmod(x, 1.0) * 2.0 * PI;
+    a = (a - 0.5) * 4;
+    if(a < 0.0)
+        a *= 2.0;
+    a = pow(3.0, a);
+    return sin(x / 2.0) * sin(a * x * x);
+}
+
+FUNC(absstretchsine)
+{
+    x = fmod(x + 0.5, 1) * 2.0 - 1.0;
+    a = (a - 0.5) * 9;
+    a = pow(3.0, a);
+    REALTYPE b = pow(fabs(x), a);
+    if(x < 0)
+        b = -b;
+    return -pow(sin(b * PI), 2);
+}
+
+FUNC(chebyshev)
+{
+    a = a * a * a * 30.0 + 1.0;
+    return cos(acos(x * 2.0 - 1.0) * a);
+}
+
+FUNC(sqr)
+{
+    a = a * a * a * a * 160.0 + 0.001;
+    return -atan(sin(x * 2.0 * PI) * a);
+}
+
+typedef REALTYPE(*base_func)(REALTYPE,REALTYPE);
+base_func getBaseFunction(unsigned char func)
+{
+    if(!func)
+        return NULL;
+
+    func--;
+    assert(func < 13);
+    base_func functions[] = {
+        basefunc_triangle,
+        basefunc_pulse,
+        basefunc_saw,
+        basefunc_power,
+        basefunc_gauss,
+        basefunc_diode,
+        basefunc_abssine,
+        basefunc_pulsesine,
+        basefunc_stretchsine,
+        basefunc_chirp,
+        basefunc_absstretchsine,
+        basefunc_chebyshev,
+        basefunc_sqr,};
+    return functions[func];
+}
+
+//And filters
+
+#define FILTER(x) REALTYPE osc_##x(unsigned int i, REALTYPE par, REALTYPE par2)
+FILTER(lp)
+{
+    REALTYPE gain = pow(1.0 - par * par * par * 0.99, i);
+    REALTYPE tmp  = par2 * par2 * par2 * par2 * 0.5 + 0.0001;
+    if(gain < tmp)
+        gain = pow(gain, 10.0) / pow(tmp, 9.0);
+    return gain;
+}
+
+FILTER(hp1)
+{
+    REALTYPE gain = 1.0 - pow(1.0 - par * par, i + 1);
+    return pow(gain, par2 * 2.0 + 0.1);
+}
+
+FILTER(hp1b)
+{
+    if(par < 0.2)
+        par = par * 0.25 + 0.15;
+    REALTYPE gain = 1.0 - pow(1.0 - par * par * 0.999 + 0.001, i * 0.05 * i + 1.0);
+    REALTYPE tmp  = pow(5.0, par2 * 2.0);
+    return pow(gain, tmp);
+}
+
+FILTER(bp1)
+{
+    REALTYPE gain = i + 1 - pow(2, (1.0 - par) * 7.5);
+    gain = 1.0 / (1.0 + gain * gain / (i + 1.0));
+    REALTYPE tmp  = pow(5.0, par2 * 2.0);
+    gain = pow(gain, tmp);
+    if(gain < 1e-5)
+        gain = 1e-5;
+    return gain;
+}
+
+FILTER(bs1)
+{
+    REALTYPE gain = i + 1 - pow(2, (1.0 - par) * 7.5);
+    gain = pow(atan(gain / (i / 10.0 + 1)) / 1.57, 6);
+    return pow(gain, par2 * par2 * 3.9 + 0.1);
+}
+
+FILTER(lp2)
+{
+    return (i + 1 > pow(2, (1.0 - par) * 10) ? 0.0 : 1.0) * par2 + (1.0 - par2);
+}
+
+FILTER(hp2)
+{
+    if(par == 1)
+        return 1.0;
+    return (i + 1 > pow(2, (1.0 - par) * 7) ? 1.0 : 0.0) * par2 + (1.0 - par2);
+}
+
+FILTER(bp2)
+{
+    return (fabs(pow(2, (1.0 - par) * 7) - i) > i / 2 + 1 ? 0.0 : 1.0) * par2 + (1.0 - par2);
+}
+
+FILTER(bs2)
+{
+    return (fabs(pow(2, (1.0 - par) * 7) - i) < i / 2 + 1 ? 0.0 : 1.0) * par2 + (1.0 - par2);
+}
+
+bool floatEq(float a, float b)
+{
+    const float fudge = .01;
+    return a + fudge > b && a - fudge < b;
+}
+
+FILTER(cos)
+{
+    REALTYPE tmp = pow(5.0, par2 * 2.0 - 1.0);
+    tmp = pow(i / 32.0, tmp) * 32.0;
+    if(floatEq(par2 * 127.0, 64.0))
+        tmp = i;
+    REALTYPE gain  = cos(par * par * PI / 2.0 * tmp);
+    gain *= gain;
+    return gain;
+}
+
+FILTER(sin)
+{
+    REALTYPE tmp = pow(5.0, par2 * 2.0 - 1.0);
+    tmp = pow(i / 32.0, tmp) * 32.0;
+    if(floatEq(par2 * 127.0, 64.0))
+        tmp = i;
+    REALTYPE gain = sin(par * par * PI / 2.0 * tmp);
+    gain *= gain;
+    return gain;
+}
+
+FILTER(low_shelf)
+{
+    REALTYPE p2 = 1.0 - par + 0.2;
+    REALTYPE x  = i / (64.0 * p2 * p2);
+    if(x < 0.0)
+        x = 0.0;
+    else
+        if(x > 1.0)
+            x = 1.0;
+    REALTYPE tmp  = pow(1.0 - par2, 2.0);
+    return cos(x * PI) * (1.0 - tmp) + 1.01 + tmp;
+}
+
+FILTER(s)
+{
+    unsigned int tmp  = (int) (pow(2.0, (1.0 - par) * 7.2));
+    REALTYPE gain = 1.0;
+    if(i == tmp)
+        gain = pow(2.0, par2 * par2 * 8.0);
+    return gain;
+}
+#undef FILTER
+
+typedef REALTYPE(*filter_func)(unsigned int, REALTYPE, REALTYPE);
+filter_func getFilter(unsigned char func)
+{
+    if(!func)
+        return NULL;
+
+    func--;
+    assert(func < 13);
+    filter_func functions[] = {
+        osc_lp,
+        osc_hp1,
+        osc_hp1b,
+        osc_bp1,
+        osc_bs1,
+        osc_lp2,
+        osc_hp2,
+        osc_bp2,
+        osc_bs2,
+        osc_cos,
+        osc_sin,
+        osc_low_shelf,
+        osc_s};
+    return functions[func];
 }
 
