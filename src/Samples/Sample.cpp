@@ -20,6 +20,7 @@
 */
 #include <cmath>
 #include <cstring>//for memcpy/memset
+
 #include <iostream>
 #include "Sample.h"
 
@@ -28,12 +29,17 @@ using namespace std;
 #warning TODO Think about renaming Sample to Frame
 /**\TODO start using pointer math here as these will be Frequency called
  * functions throughout the code*/
+Sample::Sample()
+    :bufferSize(1),buffer(new REALTYPE[1])
+{
+    buffer[0] = 0.0;
+}
+
 Sample::Sample(const Sample &smp)
     :bufferSize(smp.bufferSize)
 {
     buffer = new REALTYPE[bufferSize];
-    for(int i = 0; i < bufferSize; ++i)
-        *(i + buffer) = *(i + smp.buffer);
+    memcpy(buffer, smp.buffer, bufferSize * sizeof(float));
 }
 
 Sample::Sample(int length, REALTYPE fill)
@@ -42,8 +48,7 @@ Sample::Sample(int length, REALTYPE fill)
     if(length < 1)
         bufferSize = 1;
     buffer = new REALTYPE[bufferSize];
-    for(int i = 0; i < bufferSize; ++i)
-        buffer[i] = fill;
+    memset(buffer, fill, bufferSize * sizeof(float));
 }
 
 Sample::Sample(int length, const REALTYPE *input)
@@ -51,8 +56,7 @@ Sample::Sample(int length, const REALTYPE *input)
 {
     if(length > 0) {
         buffer = new REALTYPE[length];
-        for(int i = 0; i < length; ++i)
-            *(buffer + i) = *(input + i);
+        memcpy(buffer, input, bufferSize * sizeof(float));
     }
     else {
         buffer     = new REALTYPE[1];
@@ -74,17 +78,12 @@ void Sample::clear()
 
 void Sample::operator=(const Sample &smp)
 {
-    /**\todo rewrite to be less repetitive*/
-    if(bufferSize == smp.bufferSize)
-        for(int i = 0; i < bufferSize; ++i)
-            *(i + buffer) = *(i + smp.buffer);
-    else {
+    if(bufferSize != smp.bufferSize) {
         delete[] buffer;
         buffer     = new REALTYPE[smp.bufferSize];
         bufferSize = smp.bufferSize;
-        for(int i = 0; i < bufferSize; ++i)
-            *(i + buffer) = *(i + smp.buffer);
     }
+    memcpy(buffer, smp.buffer, bufferSize * sizeof(float));
 }
 
 bool Sample::operator==(const Sample &smp) const
@@ -106,63 +105,68 @@ bool Sample::operator==(const Sample &smp) const
  * @param xb X of point b
  * @return estimated Y of test point
  */
-inline float linearEstimate(float ya, float yb, float xt, int xa = 0, int xb = 1)
+float linearEstimate(float ya, float yb, float xt, float xa = 0.0, float xb =1.0)
 {
-    if(xa == xb)
-        return ya;
+#warning TODO this could be done with a good bit less computation
+    //Lets make this simple by normalizing the x axis
 
-    return (yb-ya) * (xt-xa)/(xb-xa) + ya;
+    //Normalize point a
+    xb -= xa;
+    xt -= xa;
+    xa -= xa;
+
+    //Normalize point b
+    xt /= xb;
+    xb /= xb;
+
+    //Now xa=0 xb=1 0<=xt<=1
+    //simpily use y=mx+b
+    return (yb-ya) * xt + ya;
 }
 
-void Sample::resize(unsigned int nsize)
-{
-    if(bufferSize == nsize)
-        return;
-    else {//resampling occurs here
-        float ratio = (nsize * 1.0) / (bufferSize * 1.0);
 
-        int    nBufferSize = nsize;
+void Sample::resample(const unsigned int rate, const unsigned int nrate)
+{
+    if(rate == nrate)
+        return; //no resampling here
+    else {//resampling occurs here
+        float ratio = (nrate * 1.0) / (rate * 1.0);
+
+        int    nBufferSize = (int)bufferSize * ratio;
         float *nBuffer     = new float[nBufferSize];
 
-        //take care of edge cases
-        *nBuffer = *buffer;
-        *(nBuffer+nBufferSize-1) = *(buffer+bufferSize-1);
-
         //addition is done to avoid 0 edge case
-        for(int i = 1; i < nBufferSize - 1; ++i)
-        {
-            float left  = floor(i/ratio);
-            float right = ceil((i+1)/ratio);
-            float test  = i/ratio;
-            if(left > bufferSize - 1)
-                left = bufferSize - 1;
-            if(right > bufferSize - 1)
-                right = bufferSize - 1;
-            if(left > test)
-                test = left;
-            nBuffer[i] = linearEstimate(buffer[(int)left],
-                                        buffer[(int)right],
-                                        test, (int)left, (int)right);
-        }
+        for(int i = 0; i < nBufferSize; ++i)
+            nBuffer[i] = linearEstimate(buffer[(int)floor(i/ratio)],
+                                        buffer[(int)ceil((i+1)/ratio)],
+                                        i,
+                                        floor(i/ratio),
+                                        ceil((i+1)/ratio));
 
         //put the new data in
-        delete[] buffer;
+        delete[]  buffer;
         buffer     = nBuffer;
         bufferSize = nBufferSize;
     }
 }
 
-void Sample::append(const Sample &smp)
+Sample &Sample::append(const Sample &smp)
 {
     int nbufferSize = bufferSize + smp.bufferSize;
     float *nbuffer  = new float[nbufferSize];
 
     memcpy(nbuffer, buffer, bufferSize * sizeof(float));
     memcpy(nbuffer + bufferSize, smp.buffer, smp.bufferSize * sizeof(float));
-    delete buffer;
+    delete[]  buffer;
 
     buffer     = nbuffer;
     bufferSize = nbufferSize;
+    return *this;
+}
+
+Sample Sample::subSample(int a, int b) const
+{
+    return Sample(b-a, buffer+a);
 }
 
 REALTYPE Sample::max() const

@@ -21,45 +21,41 @@
 
 */
 
+#warning TODO move Sequencer out of master
+
 #include "Master.h"
+
+#include "../Params/LFOParams.h"
+#include "../Effects/EffectMgr.h"
 
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <iostream>
 
 #include <unistd.h>
+
+using namespace std;
 
 Master::Master()
 {
     swaplr = 0;
 
     pthread_mutex_init(&mutex, NULL);
+    pthread_mutex_init(&vumutex, NULL);
     fft = new FFTwrapper(OSCIL_SIZE);
 
     tmpmixl   = new REALTYPE[SOUND_BUFFER_SIZE];
     tmpmixr   = new REALTYPE[SOUND_BUFFER_SIZE];
-    audiooutl = new REALTYPE[SOUND_BUFFER_SIZE];
-    audiooutr = new REALTYPE[SOUND_BUFFER_SIZE];
 
-    ksoundbuffersample    = -1; //this is only time when this is -1; this means that the GetAudioOutSamples was never called
-    ksoundbuffersamplelow = 0.0;
-    oldsamplel = 0.0;
-    oldsampler = 0.0;
     shutup     = 0;
     for(int npart = 0; npart < NUM_MIDI_PARTS; npart++) {
         vuoutpeakpart[npart] = 1e-9;
         fakepeakpart[npart]  = 0;
     }
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        audiooutl[i] = 0.0;
-        audiooutr[i] = 0.0;
-    }
-
     for(int npart = 0; npart < NUM_MIDI_PARTS; npart++)
         part[npart] = new Part(&microtonal, fft, &mutex);
-
-
 
     //Insertion Effects init
     for(int nefx = 0; nefx < NUM_INS_EFX; nefx++)
@@ -109,24 +105,25 @@ void Master::defaults()
     ShutUp();
 }
 
+bool Master::mutexLock(lockset request)
+{
+    switch (request)
+    {
+        case MUTEX_TRYLOCK:
+            return !pthread_mutex_trylock(&mutex);
+        case MUTEX_LOCK:
+            return !pthread_mutex_lock(&mutex);
+        case MUTEX_UNLOCK:
+            return !pthread_mutex_unlock(&mutex);
+    }
+    return false;
+}
+
+
 /*
  * Note On Messages (velocity=0 for NoteOff)
  */
-void Master::NoteOn(unsigned char chan,
-                    unsigned char note,
-                    unsigned char velocity)
-{
-    dump.dumpnote(chan, note, velocity);
-
-    noteon(chan, note, velocity);
-}
-
-/*
- * Internal Note On (velocity=0 for NoteOff)
- */
-void Master::noteon(unsigned char chan,
-                    unsigned char note,
-                    unsigned char velocity)
+void Master::noteOn(char chan, char note, char velocity)
 {
     int npart;
     if(velocity != 0) {
@@ -139,25 +136,14 @@ void Master::noteon(unsigned char chan,
         }
     }
     else
-        this->NoteOff(chan, note);
-    ;
+        this->noteOff(chan, note);
     HDDRecorder.triggernow();
 }
 
 /*
  * Note Off Messages
  */
-void Master::NoteOff(unsigned char chan, unsigned char note)
-{
-    dump.dumpnote(chan, note, 0);
-
-    noteoff(chan, note);
-}
-
-/*
- * Internal Note Off
- */
-void Master::noteoff(unsigned char chan, unsigned char note)
+void Master::noteOff(char chan, char note)
 {
     int npart;
     for(npart = 0; npart < NUM_MIDI_PARTS; npart++)
@@ -169,17 +155,7 @@ void Master::noteoff(unsigned char chan, unsigned char note)
 /*
  * Controllers
  */
-void Master::SetController(unsigned char chan, unsigned int type, int par)
-{
-    dump.dumpcontroller(chan, type, par);
-
-    setcontroller(chan, type, par);
-}
-
-/*
- * Internal Controllers
- */
-void Master::setcontroller(unsigned char chan, unsigned int type, int par)
+void Master::setController(char chan, int type, int par)
 {
     if((type == C_dataentryhi) || (type == C_dataentrylo)
        || (type == C_nrpnhi) || (type == C_nrpnlo)) { //Process RPN and NRPN by the Master (ignore the chan)
@@ -217,6 +193,52 @@ void Master::setcontroller(unsigned char chan, unsigned int type, int par)
     }
 }
 
+void Master::vuUpdate(const REALTYPE *outl, const REALTYPE *outr)
+{
+    //Peak computation (for vumeters)
+    vu.outpeakl = 1e-12;
+    vu.outpeakr = 1e-12;
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        if(fabs(outl[i]) > vu.outpeakl)
+            vu.outpeakl = fabs(outl[i]);
+        if(fabs(outr[i]) > vu.outpeakr)
+            vu.outpeakr = fabs(outr[i]);
+    }
+    if((vu.outpeakl > 1.0) || (vu.outpeakr > 1.0))
+        vu.clipped = 1;
+    if(vu.maxoutpeakl < vu.outpeakl)
+        vu.maxoutpeakl = vu.outpeakl;
+    if(vu.maxoutpeakr < vu.outpeakr)
+        vu.maxoutpeakr = vu.outpeakr;
+
+    //RMS Peak computation (for vumeters)
+    vu.rmspeakl = 1e-12;
+    vu.rmspeakr = 1e-12;
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        vu.rmspeakl += outl[i] * outl[i];
+        vu.rmspeakr += outr[i] * outr[i];
+    }
+    vu.rmspeakl = sqrt(vu.rmspeakl / SOUND_BUFFER_SIZE);
+    vu.rmspeakr = sqrt(vu.rmspeakr / SOUND_BUFFER_SIZE);
+
+    //Part Peak computation (for Part vumeters or fake part vumeters)
+    for(int npart = 0; npart < NUM_MIDI_PARTS; npart++) {
+        vuoutpeakpart[npart] = 1.0e-12;
+        if(part[npart]->Penabled != 0) {
+            REALTYPE *outl = part[npart]->partoutl,
+                     *outr = part[npart]->partoutr;
+            for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+                REALTYPE tmp = fabs(outl[i] + outr[i]);
+                if(tmp > vuoutpeakpart[npart])
+                    vuoutpeakpart[npart] = tmp;
+            }
+            vuoutpeakpart[npart] *= volume;
+        }
+        else
+            if(fakepeakpart[npart] > 1)
+                fakepeakpart[npart]--;
+    }
+}
 
 /*
  * Enable/Disable a part
@@ -392,9 +414,11 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
 
     //Mix all parts
     for(npart = 0; npart < NUM_MIDI_PARTS; npart++) {
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) { //the volume did not changed
-            outl[i] += part[npart]->partoutl[i];
-            outr[i] += part[npart]->partoutr[i];
+        if(part[npart]->Penabled) { //only mix active parts
+            for(i = 0; i < SOUND_BUFFER_SIZE; i++) { //the volume did not changed
+                outl[i] += part[npart]->partoutl[i];
+                outr[i] += part[npart]->partoutr[i];
+            }
         }
     }
 
@@ -410,49 +434,9 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
         outr[i] *= volume;
     }
 
-    //Peak computation (for vumeters)
-    vuoutpeakl = 1e-12;
-    vuoutpeakr = 1e-12;
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        if(fabs(outl[i]) > vuoutpeakl)
-            vuoutpeakl = fabs(outl[i]);
-        if(fabs(outr[i]) > vuoutpeakr)
-            vuoutpeakr = fabs(outr[i]);
-    }
-    if((vuoutpeakl > 1.0) || (vuoutpeakr > 1.0))
-        vuclipped = 1;
-    if(vumaxoutpeakl < vuoutpeakl)
-        vumaxoutpeakl = vuoutpeakl;
-    if(vumaxoutpeakr < vuoutpeakr)
-        vumaxoutpeakr = vuoutpeakr;
-
-    //RMS Peak computation (for vumeters)
-    vurmspeakl = 1e-12;
-    vurmspeakr = 1e-12;
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        vurmspeakl += outl[i] * outl[i];
-        vurmspeakr += outr[i] * outr[i];
-    }
-    vurmspeakl = sqrt(vurmspeakl / SOUND_BUFFER_SIZE);
-    vurmspeakr = sqrt(vurmspeakr / SOUND_BUFFER_SIZE);
-
-    //Part Peak computation (for Part vumeters or fake part vumeters)
-    for(npart = 0; npart < NUM_MIDI_PARTS; npart++) {
-        vuoutpeakpart[npart] = 1.0e-12;
-        if(part[npart]->Penabled != 0) {
-            REALTYPE *outl = part[npart]->partoutl,
-            *outr = part[npart]->partoutr;
-            for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-                REALTYPE tmp = fabs(outl[i] + outr[i]);
-                if(tmp > vuoutpeakpart[npart])
-                    vuoutpeakpart[npart] = tmp;
-            }
-            vuoutpeakpart[npart] *= volume;
-        }
-        else
-        if(fakepeakpart[npart] > 1)
-            fakepeakpart[npart]--;
-        ;
+    if(!pthread_mutex_trylock(&vumutex)) {
+        vuUpdate(outl, outr);
+        pthread_mutex_unlock(&vumutex);
     }
 
 
@@ -470,79 +454,8 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
     //update the LFO's time
     LFOParams::time++;
 
-    if(HDDRecorder.recording())
-        HDDRecorder.recordbuffer(outl, outr);
     dump.inctick();
 }
-
-void Master::GetAudioOutSamples(int nsamples,
-                                int samplerate,
-                                REALTYPE *outl,
-                                REALTYPE *outr)
-{
-    if(ksoundbuffersample == -1) { //first time
-        AudioOut(&audiooutl[0], &audiooutr[0]);
-        ksoundbuffersample = 0;
-    }
-
-
-    if(samplerate == SAMPLE_RATE) { //no resample
-        int ksample = 0;
-        while(ksample < nsamples) {
-            outl[ksample] = audiooutl[ksoundbuffersample];
-            outr[ksample] = audiooutr[ksoundbuffersample];
-
-            ksample++;
-            ksoundbuffersample++;
-            if(ksoundbuffersample >= SOUND_BUFFER_SIZE) {
-                AudioOut(&audiooutl[0], &audiooutr[0]);
-                ksoundbuffersample = 0;
-            }
-        }
-    }
-    else {  //Resample
-        int      ksample = 0;
-        REALTYPE srinc   = SAMPLE_RATE / (REALTYPE)samplerate;
-
-        while(ksample < nsamples) {
-            if(ksoundbuffersample != 0) {
-                outl[ksample] = audiooutl[ksoundbuffersample]
-                                * ksoundbuffersamplelow
-                                + audiooutl[ksoundbuffersample
-                                            - 1] * (1.0 - ksoundbuffersamplelow);
-                outr[ksample] = audiooutr[ksoundbuffersample]
-                                * ksoundbuffersamplelow
-                                + audiooutr[ksoundbuffersample
-                                            - 1] * (1.0 - ksoundbuffersamplelow);
-            }
-            else {
-                outl[ksample] = audiooutl[ksoundbuffersample]
-                                * ksoundbuffersamplelow
-                                + oldsamplel * (1.0 - ksoundbuffersamplelow);
-                outr[ksample] = audiooutr[ksoundbuffersample]
-                                * ksoundbuffersamplelow
-                                + oldsampler * (1.0 - ksoundbuffersamplelow);
-            }
-
-            ksample++;
-
-            ksoundbuffersamplelow += srinc;
-            if(ksoundbuffersamplelow >= 1.0) {
-                ksoundbuffersample   += (int) floor(ksoundbuffersamplelow);
-                ksoundbuffersamplelow = ksoundbuffersamplelow - floor(
-                    ksoundbuffersamplelow);
-            }
-
-            if(ksoundbuffersample >= SOUND_BUFFER_SIZE) {
-                oldsamplel = audiooutl[SOUND_BUFFER_SIZE - 1];
-                oldsampler = audiooutr[SOUND_BUFFER_SIZE - 1];
-                AudioOut(&audiooutl[0], &audiooutr[0]);
-                ksoundbuffersample = 0;
-            }
-        }
-    }
-}
-
 
 Master::~Master()
 {
@@ -553,13 +466,12 @@ Master::~Master()
     for(int nefx = 0; nefx < NUM_SYS_EFX; nefx++)
         delete sysefx[nefx];
 
-    delete [] audiooutl;
-    delete [] audiooutr;
     delete [] tmpmixl;
     delete [] tmpmixr;
     delete (fft);
 
     pthread_mutex_destroy(&mutex);
+    pthread_mutex_destroy(&vumutex);
 }
 
 
@@ -615,14 +527,29 @@ void Master::ShutUp()
  */
 void Master::vuresetpeaks()
 {
-    vuoutpeakl    = 1e-9;
-    vuoutpeakr    = 1e-9;
-    vumaxoutpeakl = 1e-9;
-    vumaxoutpeakr = 1e-9;
-    vuclipped     = 0;
+    pthread_mutex_lock(&vumutex);
+    vu.outpeakl    = 1e-9;
+    vu.outpeakr    = 1e-9;
+    vu.maxoutpeakl = 1e-9;
+    vu.maxoutpeakr = 1e-9;
+    vu.clipped     = 0;
+    pthread_mutex_unlock(&vumutex);
 }
 
-
+vuData Master::getVuData()
+{
+    vuData tmp;
+    pthread_mutex_lock(&vumutex);
+    tmp.outpeakl=vu.outpeakl;
+    tmp.outpeakr=vu.outpeakr;
+    tmp.maxoutpeakl=vu.maxoutpeakl;
+    tmp.maxoutpeakr=vu.maxoutpeakr;
+    tmp.rmspeakl=vu.rmspeakl;
+    tmp.rmspeakr=vu.rmspeakr;
+    tmp.clipped=vu.clipped;
+    pthread_mutex_unlock(&vumutex);
+    return tmp;
+}
 
 void Master::applyparameters()
 {

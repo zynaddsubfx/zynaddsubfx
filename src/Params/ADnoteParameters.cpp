@@ -25,6 +25,9 @@
 #include <math.h>
 
 #include "ADnoteParameters.h"
+#include "EnvelopeParams.h"
+#include "LFOParams.h"
+
 int ADnote_unison_sizes[] =
 {1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 0};
 

@@ -963,6 +963,9 @@
 28 Oct 2009 (Paul Nasca)
 	    - Disable "bw" control on Reverb when Bandwidth mode is not enabled
 
+30 Oct 2009 (Mark McCurry)
+	    - Commited first stage of Nio (New IO) WIP
+
 18 Nov 2009 (Mark McCurry)
 	    - Fixed segfault in VirKeyBoard
 
@@ -973,6 +976,11 @@
 	    - Separated out Presets and arrayed Presets to reduce warnings from
 	      the Wextra flag
 	    - Minor change to Filter_ and FormantFilter to reduce unwanted warnings
+
+13 Dec 2009 (Mark McCurry)
+	    - Deprecating Output system for the Nio system
+	    - General Code Cleanup
+	    - Adding OpenGL linking for proper compiles
 
 14 Jan 2010 (Mark McCurry)
 	    - Fixed No UI Flag "-U" as it was previously partially initializing

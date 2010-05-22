@@ -28,6 +28,7 @@
 #include "../Params/FilterParams.h"
 #include "../Misc/Stereo.h"
 
+class FilterParams;
 
 /**this class is inherited by the all effects(Reverb, Echo, ..)*/
 class Effect

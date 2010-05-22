@@ -21,6 +21,7 @@
 */
 #include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <cstdlib>
 #include <iostream>
 #include "../Effects/Echo.h"
 #include "../globals.h"

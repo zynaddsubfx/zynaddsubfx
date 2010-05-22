@@ -21,6 +21,7 @@
 */
 
 #include "Effect.h"
+#include "../Params/FilterParams.h"
 
 Effect::Effect(bool insertion_, REALTYPE *const efxoutl_,
                REALTYPE *const efxoutr_, FilterParams *filterpars_,

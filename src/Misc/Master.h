@@ -25,17 +25,26 @@
 #define MASTER_H
 
 #include "../globals.h"
-#include "../Effects/EffectMgr.h"
-#include "Part.h"
-#include "../Output/Recorder.h"
 #include "Microtonal.h"
 
 #include "Bank.h"
+#include "Recorder.h"
+#include "Part.h"
 #include "Dump.h"
 #include "../Seq/Sequencer.h"
 #include "XMLwrapper.h"
 
+typedef enum { MUTEX_TRYLOCK, MUTEX_LOCK, MUTEX_UNLOCK } lockset;
+
 extern Dump dump;
+
+typedef struct vuData_t {
+    REALTYPE outpeakl, outpeakr, maxoutpeakl, maxoutpeakr,
+             rmspeakl, rmspeakr;
+    int clipped;
+} vuData;
+
+
 /** It sends Midi Messages to Parts, receives samples from parts,
  *  process them with system/insertion effects and mix them */
 class Master
@@ -69,19 +78,23 @@ class Master
         /**put all data from the *data array to zynaddsubfx parameters (used for VST)*/
         void putalldata(char *data, int size);
 
-
+        //Mutex control
+        /**Control the Master's mutex state.
+         * @param lockset either trylock, lock, or unlock.
+         * @return true when successful false otherwise.*/
+        bool mutexLock(lockset request);
 
         //Midi IN
-        void NoteOn(unsigned char chan,
-                    unsigned char note,
-                    unsigned char velocity);
-        void NoteOff(unsigned char chan, unsigned char note);
-        void SetController(unsigned char chan, unsigned int type, int par);
+        void noteOn(char chan, char note, char velocity);
+        void noteOff(char chan, char note);
+        void setController(char chan, int type, int par);
         //void NRPN...
 
 
         void ShutUp();
         int shutup;
+
+        void vuUpdate(const REALTYPE *outl, const REALTYPE *outr);
 
         /**Audio Output*/
         void AudioOut(REALTYPE *outl, REALTYPE *outr);
@@ -112,7 +125,7 @@ class Master
         //effects
         EffectMgr *sysefx[NUM_SYS_EFX]; //system
         EffectMgr *insefx[NUM_INS_EFX]; //insertion
-//	void swapcopyeffects(int what,int type,int neff1,int neff2);
+//      void swapcopyeffects(int what,int type,int neff1,int neff2);
 
         //HDD recorder
         Recorder HDDRecorder;
@@ -120,13 +133,14 @@ class Master
         //part that's apply the insertion effect; -1 to disable
         short int Pinsparts[NUM_INS_EFX];
 
+
         //peaks for VU-meter
         void vuresetpeaks();
-        REALTYPE vuoutpeakl, vuoutpeakr, vumaxoutpeakl, vumaxoutpeakr,
-                 vurmspeakl, vurmspeakr;
-        int vuclipped;
+        //get VU-meter data
+        vuData getVuData();
 
         //peaks for part VU-meters
+        /**\todo synchronize this with a mutex*/
         REALTYPE      vuoutpeakpart[NUM_MIDI_PARTS];
         unsigned char fakepeakpart[NUM_MIDI_PARTS]; //this is used to compute the "peak" when the part is disabled
 
@@ -142,8 +156,12 @@ class Master
 
         FFTwrapper     *fft;
         pthread_mutex_t mutex;
+        pthread_mutex_t vumutex;
+
 
     private:
+        bool nullRun;
+        vuData vu;
         REALTYPE volume;
         REALTYPE sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         REALTYPE sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
@@ -152,24 +170,7 @@ class Master
         REALTYPE *tmpmixl;
         REALTYPE *tmpmixr;
 
-
         int keyshift;
-
-        //Audio Output samples (if it used GetAudioOutSamples - eg. for Jack output; elsewhere is unused)
-        REALTYPE *audiooutl;
-        REALTYPE *audiooutr;
-
-        int      ksoundbuffersample; //this is used to know if there is need to call AudioOut by GetAudioOutSamples method
-        REALTYPE ksoundbuffersamplelow; //this is used for resampling (eg. if Jack samplerate!= SAMPLE_RATE)
-        REALTYPE oldsamplel, oldsampler; //this is used for resampling
-
-        //These are called by the NoteOn, NoteOff,SetController (which are from external sources like MIDI, Virtual Keyboard)
-        //and are called by internal parts of the program (like sequencer)
-        void noteon(unsigned char chan,
-                    unsigned char note,
-                    unsigned char velocity);
-        void noteoff(unsigned char chan, unsigned char note);
-        void setcontroller(unsigned char chan, unsigned int type, int par);
 };
 
 

@@ -22,11 +22,12 @@
 #define SAMPLE_H
 #include "../globals.h"
 /**
- * Base Class for Samples
+ * Audio Samples Representation
  */
 class Sample
 {
     public:
+        Sample();
         Sample(const Sample &smp);
         Sample(int length, REALTYPE fill = 0);
         Sample(int length, const REALTYPE *fill);
@@ -57,11 +58,15 @@ class Sample
          * sparingly*/
         const REALTYPE *c_buf() const {return buffer;}
 
-        /**Change the size of the sample*/
-        void resize(unsigned int nsize);
+        /**Change the sampling rate of the Sample*/
+        void resample(const unsigned int rate, const unsigned int nrate);
 
-        /**Appends another Sample to this Sample*/
-        void append(const Sample &smp);
+        /**Appends another Sample to this Sample
+         * @return this*/
+        Sample &append(const Sample &smp);
+
+        /**Gets a subsample from a to b*/
+        Sample subSample(int a, int b) const;
 
         REALTYPE max() const;
         REALTYPE min() const;

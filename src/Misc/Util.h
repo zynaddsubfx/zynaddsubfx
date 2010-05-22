@@ -38,6 +38,15 @@ extern REALTYPE getdetune(unsigned char type,
                           unsigned short int coarsedetune,
                           unsigned short int finedetune);
 
+/**Try to set current thread to realtime priority program priority
+ * \todo see if the right pid is being sent
+ * \todo see if this is having desired effect, if not then look at
+ * pthread_attr_t*/
+void set_realtime();
+
+/**Os independent sleep in microsecond*/
+void os_sleep(long length);
+
 extern REALTYPE *denormalkillbuf; /**<the buffer to add noise in order to avoid denormalisation*/
 
 extern Config config;
@@ -58,6 +67,12 @@ T stringTo(const char *x)
     T ans;
     ss >> ans;
     return ans;
+}
+
+template <class T>
+T limit(T val, T min, T max)
+{
+    return (val < min ? min : (val > max ? max : val));
 }
 
 #endif

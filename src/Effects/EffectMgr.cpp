@@ -21,6 +21,16 @@
 */
 
 #include "EffectMgr.h"
+#include "Effect.h"
+#include "Reverb.h"
+#include "Echo.h"
+#include "Chorus.h"
+#include "Distorsion.h"
+#include "EQ.h"
+#include "DynamicFilter.h"
+#include "../Misc/XMLwrapper.h"
+#include "../Params/FilterParams.h"
+
 #include <iostream>
 using namespace std;
 

@@ -27,6 +27,7 @@ fltk_wrap_ui(zynaddsubfx_gui ${UI_fl_files})
 add_library(zynaddsubfx_gui STATIC
 	${UI_objs}
 	${zynaddsubfx_gui_FLTK_UI_SRCS}
+        NioUI.cpp
 	)
 
 target_link_libraries(zynaddsubfx_gui ${FLTK_LIBRARIES} ${MYFLTK_LIBRARIES})

@@ -24,12 +24,14 @@
 
 #include <pthread.h>
 
-#include "Effect.h"
-#include "Reverb.h"
-#include "Echo.h"
-#include "Chorus.h"
-#include "Phaser.h"
 #include "Alienwah.h"
+#include "Phaser.h"
+#include "../Params/Presets.h"
+
+class Effect;
+class FilterParams;
+class XMLwrapper;
+
 #include "Distorsion.h"
 #include "EQ.h"
 #include "DynamicFilter.h"

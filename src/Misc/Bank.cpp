@@ -340,10 +340,12 @@ int Bank::newbank(const char *newbankdirname)
         strncat(bankdir, "/", MAX_STRING_SIZE);
     ;
     strncat(bankdir, newbankdirname, MAX_STRING_SIZE);
-#ifdef OS_WINDOWS
+#if OS_WINDOWS
     result = mkdir(bankdir);
-#else
+#elif OS_LINUX || OS_CYGWIN
     result = mkdir(bankdir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+#else
+#warning Undefined OS
 #endif
     if(result < 0)
         return -1;

@@ -80,5 +80,23 @@ class SampleTest:public CxxTest::TestSuite
             for(int i = 0; i < 74; ++i)
                 TS_ASSERT_DELTA(smp1[i], (i < 54 ? 2 : 17), 0.001);
         }
+
+        void testResample() {
+            Sample orig(32,2);
+            Sample cpy(orig);
+
+            //test for no resampleing
+            orig.resample(128,128);
+            TS_ASSERT_EQUALS(cpy,orig);
+
+            //test for no bad distortions
+            orig.resample(128,256);
+            orig.resample(256,128);
+            TS_ASSERT_EQUALS(cpy,orig);
+
+            //test for downsample
+            orig.resample(256,128);
+            TS_ASSERT_EQUALS(orig.size(),cpy.size()/2);
+        }
 };
 

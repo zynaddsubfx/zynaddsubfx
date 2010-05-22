@@ -24,6 +24,7 @@
 #define BANK_H
 
 #include "../globals.h"
+#include "Util.h"
 #include "XMLwrapper.h"
 #include "Part.h"
 
