@@ -23,34 +23,30 @@
 #ifndef BANK_H
 #define BANK_H
 
+#include <string>
+#include <vector>
 #include "../globals.h"
 #include "Util.h"
 #include "XMLwrapper.h"
 #include "Part.h"
 
+//entries in a bank
 #define BANK_SIZE 160
 
-/**
- * The max. number of banks that are used
- */
-#define MAX_NUM_BANKS 400
-
-/**The instrument Bank
- * \todo add in strings to replace char* */
+/**The instrument Bank*/
 class Bank
 {
     public:
         /**Constructor*/
         Bank();
         ~Bank();
-        char *getname(unsigned int ninstrument);
-        char *getnamenumbered(unsigned int ninstrument);
-        void setname(unsigned int ninstrument, const char *newname, int newslot); //if newslot==-1 then this is ignored, else it will be put on that slot
+        std::string getname(unsigned int ninstrument);
+        std::string getnamenumbered(unsigned int ninstrument);
+        void setname(unsigned int ninstrument, const std::string newname, int newslot); //if newslot==-1 then this is ignored, else it will be put on that slot
         bool isPADsynth_used(unsigned int ninstrument);
 
-        /**returns 0 if the slot is not empty or 1 if the slot is empty
-         * \todo start using bool before facepalm*/
-        int emptyslot(unsigned int ninstrument);
+        /**returns true when slot is empty*/
+        bool emptyslot(unsigned int ninstrument);
 
         /**Empties out the selected slot*/
         void clearslot(unsigned int ninstrument);
@@ -62,47 +58,48 @@ class Bank
         /**Swaps Slots*/
         void swapslot(unsigned int n1, unsigned int n2);
 
-        int loadbank(const char *bankdirname);
-        int newbank(const char *newbankdirname);
+        int loadbank(std::string bankdirname);
+        int newbank(std::string newbankdirname);
 
-        char *bankfiletitle; //this is shown on the UI of the bank (the title of the window)
+        std::string bankfiletitle; //this is shown on the UI of the bank (the title of the window)
         int locked();
 
         void rescanforbanks();
 
         struct bankstruct {
-            char *dir;
-            char *name;
+            bool operator<(const bankstruct &b) const;
+            std::string dir;
+            std::string name;
         };
 
-        bankstruct banks[MAX_NUM_BANKS];
+        std::vector<bankstruct> banks;
 
     private:
 
         //it adds a filename to the bank
         //if pos is -1 it try to find a position
         //returns -1 if the bank is full, or 0 if the instrument was added
-        int addtobank(int pos, const char *filename, const char *name);
+        int addtobank(int pos, std::string filename, std::string name);
 
         void deletefrombank(int pos);
 
         void clearbank();
 
-        char defaultinsname[PART_MAX_NAME_LEN];
-        char tmpinsname[BANK_SIZE][PART_MAX_NAME_LEN + 20]; //this keeps the numbered names
+        std::string defaultinsname;
 
         struct ins_t {
+            ins_t();
             bool  used;
-            char  name[PART_MAX_NAME_LEN + 1];
-            char *filename;
+            std::string name;
+            std::string filename;
             struct {
                 bool PADsynth_used;
             } info;
         } ins[BANK_SIZE];
 
-        char *dirname;
+        std::string dirname;
 
-        void scanrootdir(char *rootdir); //scans a root dir for banks
+        void scanrootdir(std::string rootdir); //scans a root dir for banks
 };
 
 #endif

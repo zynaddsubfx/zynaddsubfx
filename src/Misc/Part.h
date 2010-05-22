@@ -71,7 +71,7 @@ class Part
 
         //saves the instrument settings to a XML file
         //returns 0 for ok or <0 if there is an error
-        int saveXML(char *filename);
+        int saveXML(const char *filename);
         int loadXMLinstrument(const char *filename);
 
         void add2XML(XMLwrapper *xml);
@@ -80,12 +80,12 @@ class Part
         void defaults();
         void defaultsinstrument();
 
-        void applyparameters();
+        void applyparameters(bool lockmutex = true);
 
         void getfromXML(XMLwrapper *xml);
         void getfromXMLinstrument(XMLwrapper *xml);
 
-        void cleanup();
+        void cleanup(bool final = false);
 
 //      ADnoteParameters *ADPartParameters;
 //      SUBnoteParameters *SUBPartParameters;

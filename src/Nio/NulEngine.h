@@ -32,7 +32,7 @@
 class NulEngine: public AudioOut, MidiIn
 {
     public:
-        NulEngine(OutMgr *out);
+        NulEngine();
         ~NulEngine();
 
         bool Start();

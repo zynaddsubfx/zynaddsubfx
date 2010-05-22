@@ -11,15 +11,19 @@
 
 using namespace std;
 
-OutMgr *sysOut;
+OutMgr &OutMgr::getInstance()
+{
+    static OutMgr instance;
+    return instance;
+}
 
-OutMgr::OutMgr(Master *nmaster)
-    :wave(new WavEngine(this)),
-    priBuf(new REALTYPE[4096],new REALTYPE[4096]),priBuffCurrent(priBuf)
+OutMgr::OutMgr()
+    :wave(new WavEngine()),
+    priBuf(new REALTYPE[4096],new REALTYPE[4096]),priBuffCurrent(priBuf),master(Master::getInstance())
 {
     currentOut = NULL;
     stales = 0;
-    master = nmaster;
+    master = Master::getInstance();
 
     //init samples
     outr = new REALTYPE[SOUND_BUFFER_SIZE];
@@ -28,6 +32,9 @@ OutMgr::OutMgr(Master *nmaster)
 
 OutMgr::~OutMgr()
 {
+    delete wave;
+    delete [] priBuf.l();
+    delete [] priBuf.r();
     delete [] outr;
     delete [] outl;
 }
@@ -45,15 +52,15 @@ OutMgr::~OutMgr()
  */
 const Stereo<REALTYPE *> OutMgr::tick(unsigned int frameSize)
 {
-    pthread_mutex_lock(&(master->mutex));
-    sysIn->flush();
-    pthread_mutex_unlock(&(master->mutex));
+    pthread_mutex_lock(&(master.mutex));
+    InMgr::getInstance().flush();
+    pthread_mutex_unlock(&(master.mutex));
     //SysEv->execute();
     removeStaleSmps();
     while(frameSize > storedSmps()) {
-        pthread_mutex_lock(&(master->mutex));
-        master->AudioOut(outl, outr);
-        pthread_mutex_unlock(&(master->mutex));
+        pthread_mutex_lock(&(master.mutex));
+        master.AudioOut(outl, outr);
+        pthread_mutex_unlock(&(master.mutex));
         addSmps(outl,outr);
     }
     Stereo<REALTYPE *> ans = priBuffCurrent;
@@ -65,7 +72,7 @@ const Stereo<REALTYPE *> OutMgr::tick(unsigned int frameSize)
 
 AudioOut *OutMgr::getOut(string name)
 {
-    return dynamic_cast<AudioOut *>(sysEngine->getEng(name));
+    return dynamic_cast<AudioOut *>(EngineMgr::getInstance().getEng(name));
 }
 
 string OutMgr::getDriver() const
@@ -85,7 +92,14 @@ bool OutMgr::setSink(string name)
 
     currentOut = sink;
     currentOut->setAudioEn(true);
-    return currentOut->getAudioEn();
+
+    bool success = currentOut->getAudioEn();
+
+    //Keep system in a valid state (aka with a running driver)
+    if(!success)
+        (currentOut = getOut("NULL"))->setAudioEn(true);
+
+    return success;
 }
 
 string OutMgr::getSink() const
@@ -122,7 +136,6 @@ void OutMgr::addSmps(REALTYPE *l, REALTYPE *r)
 void OutMgr::removeStaleSmps()
 {
     int toShift = storedSmps() - stales;
-    //cout << "toShift: " << toShift << endl << "stales: " << stales << endl << priBuf.l() << ' ' << priBuffCurrent.l() << endl;
     if(!stales)
         return;
 

@@ -3,13 +3,17 @@ template<class T>
 SafeQueue<T>::SafeQueue(size_t maxlen)
     :writePtr(0),readPtr(0),bufSize(maxlen)
 {
+    sem_init(&w_space, PTHREAD_PROCESS_PRIVATE, maxlen-1);
+    sem_init(&r_space, PTHREAD_PROCESS_PRIVATE, 0);
     buffer = new T[maxlen];
 }
 
 template<class T>
 SafeQueue<T>::~SafeQueue()
 {
-    delete[] buffer;
+    sem_destroy(&w_space);
+    sem_destroy(&r_space);
+    delete [] buffer;
 }
 
 template<class T>
@@ -21,33 +25,17 @@ unsigned int SafeQueue<T>::size() const
 template<class T>
 unsigned int SafeQueue<T>::rSpace() const
 {
-  size_t w, r;
-
-  w = writePtr;
-  r = readPtr;
-
-  if (w > r) {
-    return w - r;
-  }
-  else {
-    return (w - r + bufSize) % bufSize;
-  }
+    int space = 0;
+    sem_getvalue(&r_space, &space);
+    return space;
 }
 
 template<class T>
 unsigned int SafeQueue<T>::wSpace() const
 {
-  size_t w, r;
-
-  w = writePtr;
-  r = readPtr - 1;
-
-  if (r > w) {
-    return r - w;
-  }
-  else {
-    return (r - w + bufSize) % bufSize;
-  }
+    int space = 0;
+    sem_getvalue(&w_space, &space);
+    return space;
 }
 
 template<class T>
@@ -60,6 +48,10 @@ int SafeQueue<T>::push(const T &in)
     size_t w = (writePtr + 1) % bufSize;
     buffer[w] = in;
     writePtr = w;
+
+    //adjust ranges
+    sem_wait(&w_space);//guaranteed not to wait
+    sem_post(&r_space);
     return 0;
 }
 
@@ -73,11 +65,18 @@ int SafeQueue<T>::pop(T &out)
     size_t r = (readPtr + 1) % bufSize;
     out = buffer[r];
     readPtr = r;
+
+    //adjust ranges
+    sem_wait(&r_space);//guaranteed not to wait
+    sem_post(&w_space);
     return 0;
 }
 
 template<class T>
 void SafeQueue<T>::clear()
 {
+    //thread unsafe
+    while(!sem_trywait(&r_space))
+        sem_post(&w_space);
     readPtr = writePtr;
 }

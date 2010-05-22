@@ -1,0 +1,48 @@
+\documentclass[11pt]{report}
+\pagestyle{empty}
+\usepackage{pst-sigsys}
+\begin{document}
+\begin{pspicture}[showgrid=true](0,0)(10,10)
+    %Style
+    \psset{framesize=1 .65}
+    \psset{style=Arrow}
+
+    %In/Out
+    \rput(0,7){\rnode{in}{$x[n]$}}
+    \rput(10,5){\rnode{out}{$y[n]$}}
+
+    %Panning
+    \psfblock[framesize=1.3 .65](1.5,7){pan}{Panning}
+    \ncline{in}{pan}
+
+    %Crossover
+    \psfblock[framesize=1.8 .65](5,5){cross}{Crossover}
+
+    %Gain
+    \psfblock(7,5){gain}{Gain}
+
+    %Feedback
+    \psfblock[framesize=1.6 .65](5,7){fb}{Feedback}
+    \ncline{cross}{fb}
+    \pscircleop(3,7){combine}
+    \ncline{pan}{combine}
+    \ncline{fb}{combine}
+
+    %Dampining
+    \psfblock[framesize=1.6 .65](3,6){hidamp}{Dampening}
+    \ncline{combine}{hidamp}
+    
+    %Delay
+    \psfblock(3,5){delay}{$z^{-n}$}
+    \pscircleop(1,5){delayp}
+
+    \nclist{ncline}{delayp,delay,cross,gain,out}
+    %\ncline{in}{delayp}
+
+    %Filter Unit
+    \psfblock(1,6){fildelay}{$z^{-1}$}
+    \ncline[arrows=<->]{fildelay}{hidamp}
+    \ncline{fildelay}{delayp}
+
+\end{pspicture}
+\end{document}

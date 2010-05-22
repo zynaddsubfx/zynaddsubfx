@@ -40,10 +40,8 @@ class Envelope
         REALTYPE envout();
         REALTYPE envout_dB();
         /**Determines the status of the Envelope
-         *
-         *\todo see if this can be changed to use a boolean
          * @return returns 1 if the envelope is finished*/
-        int finished();
+        bool finished() const;
     private:
         int      envpoints;
         int      envsustain; //"-1" means disabled
@@ -54,8 +52,8 @@ class Envelope
 
         int      currentpoint; //current envelope point (starts from 1)
         int      forcedrelase;
-        char     keyreleased; //if the key was released /** \todo figure out WHY IS THIS A CHAR*/
-        char     envfinish; /** \todo figure out WHY IS THIS A CHAR*/
+        bool     keyreleased; //if the key was released
+        bool     envfinish;
         REALTYPE t; // the time from the last point
         REALTYPE inct; // the time increment
         REALTYPE envoutval; //used to do the forced release

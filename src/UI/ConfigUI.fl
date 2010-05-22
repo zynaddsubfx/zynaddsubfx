@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0106 
+version 1.0107 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
@@ -60,35 +60,35 @@ setsamplerateinput();}
               xywh {20 50 85 20} down_box BORDER_BOX textsize 10
               code0 {o->value(getsamplerateorder());}
             } {
-              menuitem {} {
+              MenuItem {} {
                 label Custom
                 xywh {10 10 100 20} labelfont 1
               }
-              menuitem {} {
+              MenuItem {} {
                 label 16000Hz
                 xywh {30 30 100 20} labelfont 1
               }
-              menuitem {} {
+              MenuItem {} {
                 label 22050Hz
                 xywh {20 20 100 20} labelfont 1
               }
-              menuitem {} {
+              MenuItem {} {
                 label 32000Hz
                 xywh {30 30 100 20} labelfont 1
               }
-              menuitem {} {
+              MenuItem {} {
                 label 44100Hz
                 xywh {40 40 100 20} labelfont 1
               }
-              menuitem {} {
+              MenuItem {} {
                 label 48000Hz
                 xywh {50 50 100 20} labelfont 1
               }
-              menuitem {} {
+              MenuItem {} {
                 label 88200Hz
                 xywh {60 60 100 20} labelfont 1
               }
-              menuitem {} {
+              MenuItem {} {
                 label 96000Hz
                 xywh {70 70 100 20} labelfont 1
               }
@@ -122,35 +122,35 @@ config.cfg.SoundBufferSize=strtoul(o->value(),&tmp,10);}
             tooltip {ADSynth Oscillator Size (samples)} xywh {175 80 75 20} down_box BORDER_BOX labelfont 1 labelsize 11 textsize 10
             code0 {o->value( (int) (log(config.cfg.OscilSize/128.0-1.0)/log(2)) +1);}
           } {
-            menuitem {} {
+            MenuItem {} {
               label 128
               xywh {25 25 100 20} labelfont 1
             }
-            menuitem {} {
+            MenuItem {} {
               label 256
               xywh {35 35 100 20} labelfont 1
             }
-            menuitem {} {
+            MenuItem {} {
               label 512
               xywh {45 45 100 20} labelfont 1
             }
-            menuitem {} {
+            MenuItem {} {
               label 1024
               xywh {45 45 100 20} labelfont 1
             }
-            menuitem {} {
+            MenuItem {} {
               label 2048
               xywh {55 55 100 20} labelfont 1
             }
-            menuitem {} {
+            MenuItem {} {
               label 4096
               xywh {55 55 100 20} labelfont 1
             }
-            menuitem {} {
+            MenuItem {} {
               label 8192
               xywh {65 65 100 20} labelfont 1
             }
-            menuitem {} {
+            MenuItem {} {
               label 16384
               xywh {75 75 100 20} labelfont 1
             }
@@ -168,9 +168,9 @@ config.cfg.SoundBufferSize=strtoul(o->value(),&tmp,10);}
           } {
             Fl_File_Input {} {
               label {Dump File}
-              callback {snprintf(config.cfg.DumpFile,config.maxstringsize,"%s",o->value());}
+              callback {config.cfg.DumpFile = o->value();} selected
               xywh {20 170 220 35} align 5
-              code0 {o->insert(config.cfg.DumpFile);}
+              code0 {o->insert(config.cfg.DumpFile.c_str());}
             }
             Fl_Check_Button {} {
               label {Dump notes}
@@ -241,38 +241,38 @@ midiinputnamebox->label(config.winmididevices[config.cfg.WindowsMidiInId].name);
             xywh {175 105 75 15} down_box BORDER_BOX labelsize 10 textsize 11
             code0 {o->value(config.cfg.Interpolation);}
           } {
-            menuitem {} {
+            MenuItem {} {
               label {Linear(fast)}
               xywh {0 0 100 20} labelfont 1 labelsize 10
             }
-            menuitem {} {
+            MenuItem {} {
               label {Cubic(slow)}
               xywh {10 10 100 20} labelfont 1 labelsize 10
             }
           }
           Fl_Choice {} {
             label {Virtual Keyboard Layout}
-            callback {config.cfg.VirKeybLayout=(int) o->value();;} open selected
+            callback {config.cfg.VirKeybLayout=(int) o->value();;}
             xywh {155 235 85 20} down_box BORDER_BOX labelsize 12 textfont 1 textsize 11
             code0 {o->value(config.cfg.VirKeybLayout);}
           } {
-            menuitem {} {
+            MenuItem {} {
               label { }
               xywh {5 5 100 20} labelfont 1 labelsize 11 deactivate
             }
-            menuitem {} {
+            MenuItem {} {
               label QWERTY
               xywh {15 15 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label Dvorak
               xywh {25 25 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label QWERTZ
               xywh {35 35 100 20} labelfont 1 labelsize 11
             }
-            menuitem {} {
+            MenuItem {} {
               label AZERTY
               xywh {45 45 100 20} labelfont 1 labelsize 11
             }
@@ -395,31 +395,30 @@ readpresetcfg();} {}
     code {rootsbrowse->clear();
 
 for (int i=0;i<MAX_BANK_ROOT_DIRS;i++){
-  if (config.cfg.bankRootDirList[i]!=NULL) rootsbrowse->add(config.cfg.bankRootDirList[i]);
+  if (!config.cfg.bankRootDirList[i].empty())
+    rootsbrowse->add(config.cfg.bankRootDirList[i].c_str());
 };} {}
   }
   Function {writebankcfg()} {} {
     code {config.clearbankrootdirlist();
 
 for (int n=0;n<rootsbrowse->size();n++){ 
-     config.cfg.bankRootDirList[n]=new char [MAX_STRING_SIZE];
-     strncpy(config.cfg.bankRootDirList[n],rootsbrowse->text(n+1),MAX_STRING_SIZE);
+     config.cfg.bankRootDirList[n] = rootsbrowse->text(n+1);
 };} {}
   }
   Function {readpresetcfg()} {} {
     code {presetbrowse->clear();
 
-for (int i=0;i<MAX_BANK_ROOT_DIRS;i++){
-  if (config.cfg.presetsDirList[i]!=NULL) presetbrowse->add(config.cfg.presetsDirList[i]);
+for(int i=0;i<MAX_BANK_ROOT_DIRS;i++){
+  if(!config.cfg.presetsDirList[i].empty())
+   presetbrowse->add(config.cfg.presetsDirList[i].c_str());
 };} {}
   }
   Function {writepresetcfg()} {} {
     code {config.clearpresetsdirlist();
 
-for (int n=0;n<presetbrowse->size();n++){ 
-     config.cfg.presetsDirList[n]=new char [MAX_STRING_SIZE];
-     strncpy(config.cfg.presetsDirList[n],presetbrowse->text(n+1),MAX_STRING_SIZE);
-};} {}
+for (int n=0;n<presetbrowse->size();n++)
+     config.cfg.presetsDirList[n] = presetbrowse->text(n+1);} {}
   }
   Function {getsamplerateorder()} {return_type int
   } {

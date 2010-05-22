@@ -24,6 +24,7 @@
 #include <cmath>
 #include <cctype>
 #include <algorithm>
+#include <signal.h>
 
 #include <unistd.h>
 #include <pthread.h>
@@ -41,11 +42,7 @@
 extern Dump dump;
 
 //Nio System
-#include "Nio/MidiIn.h"
-#include "Nio/AudioOut.h"
-#include "Nio/OutMgr.h"
-#include "Nio/InMgr.h"
-#include "Nio/EngineMgr.h"
+#include "Nio/Nio.h"
 
 #ifndef DISABLE_GUI
 #ifdef QT_GUI
@@ -167,6 +164,18 @@ void *thread4(void *arg)
 }
 #endif
 
+void exitprogram();
+
+//cleanup on signaled exit
+void sigterm_exit(int sig)
+{
+    Pexitprogram = 1;
+    sleep(1);
+    exitprogram();
+    exit(0);
+}
+
+
 /*
  * Program initialisation
  */
@@ -180,24 +189,12 @@ void initprogram()
     / SAMPLE_RATE << " ms" << endl;
     cerr << "ADsynth Oscil.Size = \t" << OSCIL_SIZE << " samples" << endl;
 
-    srand(time(NULL));
-    denormalkillbuf = new REALTYPE [SOUND_BUFFER_SIZE];
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
-        denormalkillbuf[i] = (RND - 0.5) * 1e-16;
 
-    master = new Master();
+    master = &Master::getInstance();
     master->swaplr = swaplr;
 
-    //Nio Initialization
-
-    //Enable input wrapper
-    sysIn     = new InMgr(master);
-
-    //Initialize the Output Systems
-    sysOut    = new OutMgr(master);
-
-    //Initialize The Engines
-    sysEngine = new EngineMgr();
+    signal(SIGINT, sigterm_exit);
+    signal(SIGTERM, sigterm_exit);
 }
 
 /*
@@ -205,17 +202,15 @@ void initprogram()
  */
 void exitprogram()
 {
+    //ensure that everything has stopped with the mutex wait
     pthread_mutex_lock(&master->mutex);
     pthread_mutex_unlock(&master->mutex);
-    sysEngine->stop();
-    delete sysOut;
-    delete sysIn;
-    delete sysEngine;
+
+    Nio::getInstance().stop();
 
 #ifndef DISABLE_GUI
     delete ui;
 #endif
-    delete master;
 
 #ifdef USE_LASH
     delete lash;
@@ -278,6 +273,11 @@ int main(int argc, char *argv[])
     OSCIL_SIZE  = config.cfg.OscilSize;
     swaplr      = config.cfg.SwapStereo;
 
+    srand(time(NULL));
+    //produce denormal buf
+    denormalkillbuf = new REALTYPE [SOUND_BUFFER_SIZE];
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
+        denormalkillbuf[i] = (RND - 0.5) * 1e-16;
 
     /* Parse command-line options */
 #if OS_LINUX || OS_CYGWIN
@@ -300,7 +300,7 @@ int main(int argc, char *argv[])
     opterr = 0;
     int option_index = 0, opt, exitwithhelp = 0;
 
-    string loadfile, loadinstrument, input, output;
+    string loadfile, loadinstrument;
 
     while(1) {
         /**\todo check this process for a small memory leak*/
@@ -374,10 +374,16 @@ int main(int argc, char *argv[])
             dump.startnow();
             break;
         case 'I':
-            GETOP(input);
+            if(optarguments) {
+                if(Nio::getInstance().setDefaultSource(optarguments))
+                    exit(1);
+            }
             break;
         case 'O':
-            GETOP(output);
+            if(optarguments) {
+                if(Nio::getInstance().setDefaultSink(optarguments))
+                    exit(1);
+            }
             break;
         case '?':
             cerr << "ERROR:Bad option or parameter.\n" << endl;
@@ -450,24 +456,8 @@ int main(int argc, char *argv[])
         }
     }
 
-
-    if(!input.empty()) {
-        if(!sysEngine->setInDefault(input)) {
-            cerr << "There is no input for " << input << endl;
-            exit(1);
-        }
-        cout << input << " selected." << endl;
-    }
-    if(!output.empty()) {
-        if(!sysEngine->setOutDefault(output)) {
-            cerr << "There is no output for " << output << endl;
-            exit(1);
-        }
-        cout << output << " selected." << endl;
-    }
-
     //Run the Nio system
-    sysEngine->start(); //Drivers start your engines!
+    Nio::getInstance().start();
 
 #warning remove welcome message when system is out of beta
     cout << "\nThanks for using the Nio system :)" << endl;

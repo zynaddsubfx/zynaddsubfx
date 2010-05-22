@@ -34,7 +34,7 @@ typedef jack_default_audio_sample_t jsample_t;
 class JackEngine : public AudioOut, MidiIn
 {
     public:
-        JackEngine(OutMgr *out);
+        JackEngine();
         ~JackEngine() { };
 
         bool Start();

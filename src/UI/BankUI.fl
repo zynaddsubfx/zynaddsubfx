@@ -37,7 +37,7 @@ class BankProcess_ {} {
   }
 } 
 
-class BankSlot {open : {public Fl_Button,BankProcess_}
+class BankSlot {: {public Fl_Button,BankProcess_}
 } {
   Function {BankSlot(int x,int y, int w, int h, const char *label=0):Fl_Button(x,y,w,h,label)} {} {
     code {what=NULL;
@@ -59,8 +59,7 @@ int tmp=Fl_Button::handle(event);
 if ((*what!=0) && Fl::event_inside(this)) (bp->*fnc)();
 return(tmp);} {}
   }
-  Function {init(int nslot_, int *what_, int *whatslot_,void (BankProcess_:: *fnc_)(void),BankProcess_ *bp_,Bank *bank_,int *nselected_)} {open
-  } {
+  Function {init(int nslot_, int *what_, int *whatslot_,void (BankProcess_:: *fnc_)(void),BankProcess_ *bp_,Bank *bank_,int *nselected_)} {} {
     code {nslot=nslot_;
 what=what_;
 whatslot=whatslot_;
@@ -74,21 +73,23 @@ labelsize(13);
 align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE|FL_ALIGN_CLIP);
 
 highlight=0;
-refresh();} {selected
-    }
+refresh();} {}
   }
   Function {refresh()} {} {
-    code {if (bank->emptyslot(nslot)) {
-	color(46);
-} else {
-	if (bank->isPADsynth_used(nslot)) color(26);
-		else color(51);
-};
-
-if (*nselected==nslot) color(6);
+    code {if (bank->emptyslot(nslot))
+    color(46);
+else if (bank->isPADsynth_used(nslot)) 
+    color(26);
+else 
+    color(51);
 
 
-label(bank->getnamenumbered(nslot));} {}
+if (*nselected==nslot) 
+    color(6);
+
+
+copy_label(bank->getnamenumbered(nslot).c_str());} {selected
+    }
   }
   decl {int *what,*whatslot,nslot,highlight, *nselected;} {}
   decl {void (BankProcess_:: *fnc)(void);} {}
@@ -100,9 +101,9 @@ class BankUI {: {public BankProcess_}
   Function {make_window()} {} {
     Fl_Window bankuiwindow {
       label Bank
-      xywh {4 64 785 575} type Double hide
-      code0 {o->label(bank->bankfiletitle);}
-      code1 {if (bank->bankfiletitle==NULL) o->label ("Choose a bank from the bank list on the left (or go to settings if to configure the bank location) or choose 'New Bank...' to make a new bank.");}
+      xywh {5 64 785 575} type Double hide
+      code0 {o->label(bank->bankfiletitle.c_str());}
+      code1 {if (bank->bankfiletitle.empty()) o->label ("Choose a bank from the bank list on the left (or go to settings if to configure the bank location) or choose 'New Bank...' to make a new bank.");}
     } {
       Fl_Button {} {
         label Close
@@ -193,13 +194,13 @@ refreshmainwindow();}
       }
       Fl_Choice banklist {
         callback {int n=o->value();
-char *dirname=bank->banks[n].dir;
-if (dirname==NULL) return;
+std::string dirname=bank->banks[n].dir;
+if (dirname.empty()) return;
 
 if (bank->loadbank(dirname)==2)
-       fl_alert("Error: Could not load the bank from the directory\\n%s.",dirname);
+       fl_alert("Error: Could not load the bank from the directory\\n%s.",dirname.c_str());
 for (int i=0;i<BANK_SIZE;i++) bs[i]->refresh();
-refreshmainwindow();} open
+refreshmainwindow();}
         xywh {5 8 220 20} down_box BORDER_BOX labelfont 1 align 0 textfont 1 textsize 11
       } {}
       Fl_Button {} {
@@ -248,7 +249,7 @@ rescan_for_banks();} {}
     code {int slot=this->slot;
 
 if ((what==2)&&(bank->emptyslot(slot)==0)&&(mode!=4)) {//Rename slot
-    const char *tmp=fl_input("Slot (instrument) name:",(const char *)bank->getname(slot));
+    const char *tmp=fl_input("Slot (instrument) name:",bank->getname(slot).c_str());
     if (tmp!=NULL) bank->setname(slot,tmp,-1);
     bs[slot]->refresh();
 };
@@ -258,7 +259,7 @@ if ((what==1)&&(mode==1)&&(!bank->emptyslot(slot))){//Reads from slot
      bank->loadfromslot(slot,master->part[*npart]);
     pthread_mutex_unlock(&master->mutex);
     master->part[*npart]->applyparameters();
-    snprintf((char *)master->part[*npart]->Pname,PART_MAX_NAME_LEN,"%s",bank->getname(slot));
+    snprintf((char *)master->part[*npart]->Pname,PART_MAX_NAME_LEN,"%s",bank->getname(slot).c_str());
      cbwig->do_callback();
      
      if (config.cfg.BankUIAutoClose!=0)
@@ -308,7 +309,7 @@ if (mode==4){//swap
 if (mode!=4) refreshmainwindow();} {}
   }
   Function {refreshmainwindow()} {} {
-    code {bankuiwindow->label(bank->bankfiletitle);
+    code {bankuiwindow->label(bank->bankfiletitle.c_str());
 mode=1;readbutton->value(1);writebutton->value(0);clearbutton->value(0);swapbutton->value(0);
 nselected=-1;
 if (bank->locked()){
@@ -320,7 +321,8 @@ if (bank->locked()){
     clearbutton->activate();
     swapbutton->activate();
 };
-for (int i=0;i<BANK_SIZE;i++) bs[i]->refresh();} {}
+for (int i=0;i<BANK_SIZE;i++) 
+   bs[i]->refresh();} {}
   }
   Function {removeselection()} {} {
     code {if (nselected>=0) {
@@ -334,8 +336,8 @@ for (int i=0;i<BANK_SIZE;i++) bs[i]->refresh();} {}
 banklist->add(" ");
 bank->rescanforbanks();
 
-for (int i=1;i<MAX_NUM_BANKS;i++) {
-    if (bank->banks[i].name!=NULL) banklist->add(bank->banks[i].name);
+for (unsigned int i=1;i<bank->banks.size();i++) {
+     banklist->add(bank->banks[i].name.c_str());
 };} {}
   }
   Function {simplesetmode(bool beginnerui)} {} {

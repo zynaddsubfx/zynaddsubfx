@@ -19,13 +19,11 @@ struct MidiEvent
     int value;   //velocity or controller value
 };
 
-class Master;
-class MidiIn;
 //super simple class to manage the inputs
 class InMgr
 {
     public:
-        InMgr(Master *nmaster);
+        static InMgr &getInstance();
         ~InMgr();
 
         void putEvent(MidiEvent ev);
@@ -39,14 +37,15 @@ class InMgr
 
         friend class EngineMgr;
     private:
+        InMgr();
+        class MidiIn *getIn(std::string name);
         SafeQueue<MidiEvent> queue;
         sem_t work;
-        MidiIn *current;
+        class MidiIn *current;
 
         /**the link to the rest of zyn*/
-        Master *master;
+        class Master &master;
 };
 
-extern InMgr *sysIn;
 #endif
 

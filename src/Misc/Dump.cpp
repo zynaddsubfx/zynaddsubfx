@@ -55,9 +55,9 @@ void Dump::startnow()
 
     if(config.cfg.DumpNotesToFile != 0) {
         if(config.cfg.DumpAppend != 0)
-            file = fopen(config.cfg.DumpFile, "a");
+            file = fopen(config.cfg.DumpFile.c_str(), "a");
         else
-            file = fopen(config.cfg.DumpFile, "w");
+            file = fopen(config.cfg.DumpFile.c_str(), "w");
         if(file == NULL)
             return;
         if(config.cfg.DumpAppend != 0)

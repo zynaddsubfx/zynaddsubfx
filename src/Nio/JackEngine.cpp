@@ -30,8 +30,8 @@
 
 using namespace std;
 
-JackEngine::JackEngine(OutMgr *out)
-    :AudioOut(out), jackClient(NULL)
+JackEngine::JackEngine()
+    :AudioOut(), jackClient(NULL)
 {
     name = "JACK";
     audio.jackSamplerate = 0;
@@ -41,6 +41,7 @@ JackEngine::JackEngine(OutMgr *out)
         audio.ports[i] = NULL;
         audio.portBuffs[i] = NULL;
     }
+    midi.inport = NULL;
 }
 
 bool JackEngine::connectServer(string server)
@@ -318,28 +319,28 @@ void JackEngine::handleMidi(unsigned long frames)
                 ev.type    = M_NOTE;
                 ev.num     = midi_data[1];
                 ev.value   = 0;
-                sysIn->putEvent(ev);
+                InMgr::getInstance().putEvent(ev);
                 break;
 
             case 0x90: /* note-on */
                 ev.type    = M_NOTE;
                 ev.num     = midi_data[1];
                 ev.value   = midi_data[2];
-                sysIn->putEvent(ev);
+                InMgr::getInstance().putEvent(ev);
                 break;
 
             case 0xB0: /* controller */
                 ev.type    = M_CONTROLLER;
                 ev.num     = midi_data[1];
                 ev.value   = midi_data[2];
-                sysIn->putEvent(ev);
+                InMgr::getInstance().putEvent(ev);
                 break;
 
             case 0xE0: /* pitch bend */
                 ev.type    = M_CONTROLLER;
                 ev.num     = C_pitchwheel;
                 ev.value   = ((midi_data[2] << 7) | midi_data[1]);
-                sysIn->putEvent(ev);
+                InMgr::getInstance().putEvent(ev);
                 break;
 
                 /* XXX TODO: handle MSB/LSB controllers and RPNs and NRPNs */

@@ -43,9 +43,9 @@ class Config
             int   DumpNotesToFile, DumpAppend;
             int   GzipCompression;
             int   Interpolation;
-            char *DumpFile;
-            char *bankRootDirList[MAX_BANK_ROOT_DIRS], *currentBankDir;
-            char *presetsDirList[MAX_BANK_ROOT_DIRS];
+            std::string DumpFile;
+            std::string bankRootDirList[MAX_BANK_ROOT_DIRS], currentBankDir;
+            std::string presetsDirList[MAX_BANK_ROOT_DIRS];
             int   CheckPADsynth;
             int   UserInterfaceMode;
             int   VirKeybLayout;

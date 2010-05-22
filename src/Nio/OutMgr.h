@@ -10,12 +10,10 @@
 
 
 class AudioOut;
-class WavEngine;
-class Master;
 class OutMgr
 {
     public:
-        OutMgr(Master *nmaster);
+        static OutMgr &getInstance();
         ~OutMgr();
 
         /**Execute a tick*/
@@ -42,9 +40,10 @@ class OutMgr
 
         std::string getSink() const;
 
-        WavEngine *wave;     /**<The Wave Recorder*/
+        class WavEngine *wave;     /**<The Wave Recorder*/
         friend class EngineMgr;
     private:
+        OutMgr();
         void addSmps(REALTYPE *l, REALTYPE *r);
         int  storedSmps() const {return priBuffCurrent.l() - priBuf.l();};
         void removeStaleSmps();
@@ -60,11 +59,10 @@ class OutMgr
 
         REALTYPE *outl;
         REALTYPE *outr;
-        Master *master;
+        class Master &master;
 
         int stales;
 };
 
-extern OutMgr *sysOut;
 #endif
 

@@ -142,4 +142,14 @@ void os_sleep(long length)
     Sleep((long)length/1000);
 #endif
 }
-    
+
+std::string legalizeFilename(std::string filename)
+{
+    for(int i = 0; i < (int) filename.size(); i++) {
+        char c = filename[i];
+        if(!(isdigit(c) || isalpha(c) || (c == '-') || (c == ' ')))
+            filename[i] = '_';
+    }
+    return filename;
+}
+
