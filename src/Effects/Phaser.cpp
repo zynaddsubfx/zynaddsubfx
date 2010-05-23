@@ -25,7 +25,7 @@
 #define PHASER_LFO_SHAPE 2
 
 Phaser::Phaser(const int &insertion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_)
-    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0), old(1), oldgain(0.0)
+    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0), old(1), oldgain(0.0), fb(0.0)
 {
     setpreset(Ppreset);
     cleanup();
@@ -34,76 +34,62 @@ Phaser::Phaser(const int &insertion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_)
 Phaser::~Phaser()
 {}
 
-
 /*
  * Effect output
  */
 void Phaser::out(const Stereo<float *> &smp)
 {
-    int      i, j;
-    REALTYPE lfol, lfor, lgain, rgain, tmp;
+    Stereo<REALTYPE> gain(0.0), lfoVal(0.0);
 
-    lfo.effectlfoout(&lfol, &lfor);
-    lgain = lfol;
-    rgain = lfor;
-    lgain = (exp(lgain * PHASER_LFO_SHAPE) - 1) / (exp(PHASER_LFO_SHAPE) - 1.0);
-    rgain = (exp(rgain * PHASER_LFO_SHAPE) - 1) / (exp(PHASER_LFO_SHAPE) - 1.0);
+    lfo.effectlfoout(&lfoVal.l, &lfoVal.r);
+    gain.l = (exp(lfoVal.l * PHASER_LFO_SHAPE) - 1) / (exp(PHASER_LFO_SHAPE) - 1.0);
+    gain.r = (exp(lfoVal.r * PHASER_LFO_SHAPE) - 1) / (exp(PHASER_LFO_SHAPE) - 1.0);
 
 
-    lgain = 1.0 - phase * (1.0 - depth) - (1.0 - phase) * lgain * depth;
-    rgain = 1.0 - phase * (1.0 - depth) - (1.0 - phase) * rgain * depth;
+    gain.l = 1.0 - phase * (1.0 - depth) - (1.0 - phase) * gain.l * depth;
+    gain.r = 1.0 - phase * (1.0 - depth) - (1.0 - phase) * gain.r * depth;
 
-    if(lgain > 1.0)
-        lgain = 1.0;
-    else
-    if(lgain < 0.0)
-        lgain = 0.0;
-    if(rgain > 1.0)
-        rgain = 1.0;
-    else
-    if(rgain < 0.0)
-        rgain = 0.0;
+    gain.l = limit(gain.l, 0.0f, 1.0f);
+    gain.r = limit(gain.r, 0.0f, 1.0f);
 
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
         REALTYPE x   = (REALTYPE) i / SOUND_BUFFER_SIZE;
         REALTYPE x1  = 1.0 - x;
-        REALTYPE gl  = lgain * x + oldgain.l * x1;
-        REALTYPE gr  = rgain * x + oldgain.r * x1;
-        REALTYPE inl = smp.l[i] * panning + fbl;
-        REALTYPE inr = smp.r[i] * (1.0 - panning) + fbr;
+        Stereo<REALTYPE> g(gain.l * x + oldgain.l * x1,
+                           gain.l * x + oldgain.r * x1);
+        Stereo<REALTYPE> in(smp.l[i] * panning + fb.l,
+                            smp.r[i] * (1.0 - panning) + fb.r);
 
         //Left channel
-        for(j = 0; j < Pstages * 2; j++) { //Phasing routine
-            tmp = old.l[j];
-            old.l[j] = gl * tmp + inl;
-            inl = tmp - gl *old.l[j];
+        for(int j = 0; j < Pstages * 2; j++) { //Phasing routine
+            REALTYPE tmp = old.l[j];
+            old.l[j] = g.l * tmp + in.l;
+            in.l = tmp - g.l *old.l[j];
         }
         //Right channel
-        for(j = 0; j < Pstages * 2; j++) { //Phasing routine
-            tmp = old.r[j];
-            old.r[j] = gr * tmp + inr;
-            inr = tmp - gr *old.r[j];
+        for(int j = 0; j < Pstages * 2; j++) { //Phasing routine
+            REALTYPE tmp = old.r[j];
+            old.r[j] = g.r * tmp + in.r;
+            in.r = tmp - g.r *old.r[j];
         }
         //Left/Right crossing
-        REALTYPE l = inl;
-        REALTYPE r = inr;
-        inl = l * (1.0 - lrcross) + r * lrcross;
-        inr = r * (1.0 - lrcross) + l * lrcross;
+        Stereo<REALTYPE> tmp = in;
+        in.l = tmp.l * (1.0 - lrcross) + tmp.r * lrcross;
+        in.r = tmp.r * (1.0 - lrcross) + tmp.l * lrcross;
 
-        fbl = inl * fb;
-        fbr = inr * fb;
-        efxoutl[i] = inl;
-        efxoutr[i] = inr;
+        fb.l = in.l * feedback;
+        fb.r = in.r * feedback;
+        efxoutl[i] = in.l;
+        efxoutr[i] = in.r;
     }
 
-    oldgain = Stereo<REALTYPE>(lgain, rgain);
+    oldgain = gain;
 
     if(Poutsub != 0)
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
             efxoutl[i] *= -1.0;
             efxoutr[i] *= -1.0;
         }
-    ;
 }
 
 /*
@@ -111,8 +97,8 @@ void Phaser::out(const Stereo<float *> &smp)
  */
 void Phaser::cleanup()
 {
-    fbl     = 0.0;
-    fbr     = 0.0;
+    fb.l     = 0.0;
+    fb.r     = 0.0;
     oldgain = Stereo<REALTYPE>(0.0);
     old.l.clear();
     old.r.clear();
@@ -131,7 +117,7 @@ void Phaser::setdepth(unsigned char Pdepth)
 void Phaser::setfb(unsigned char Pfb)
 {
     this->Pfb = Pfb;
-    fb = (Pfb - 64.0) / 64.1;
+    feedback = (Pfb - 64.0) / 64.1;
 }
 
 void Phaser::setvolume(unsigned char Pvolume)

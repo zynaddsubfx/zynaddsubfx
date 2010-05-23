@@ -64,9 +64,10 @@ class Phaser:public Effect
         void setphase(unsigned char Pphase);
 
         //Internal Values
-        REALTYPE panning, fb, depth, lrcross, fbl, fbr, phase;
+        REALTYPE panning, feedback, depth, lrcross, phase;
         Stereo<Sample> old;
         Stereo<REALTYPE> oldgain;
+        Stereo<REALTYPE> fb;
 };
 
 #endif
