@@ -43,14 +43,10 @@ using namespace std;
 #define ZERO_ 0.00001f        // Same idea as above.
 
 Analog_Phaser::Analog_Phaser(const int & insertion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_)
-    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0)
+    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0), xn1(NULL), yn1(NULL), diff(0.0), oldgain(0.0),
+     fb(0.0)
 {
-    lxn1 = NULL;
-    lyn1 = NULL;
-    rxn1 = NULL;
-    ryn1 = NULL;
-
-    offset = new REALTYPE[12];	//model mismatch between JFET devices
+    //model mismatch between JFET devices
     offset[0] = -0.2509303f;
     offset[1] = 0.9408924f;
     offset[2] = 0.998f;
@@ -67,38 +63,31 @@ Analog_Phaser::Analog_Phaser(const int & insertion_, REALTYPE *efxoutl_, REALTYP
     barber = 0;  //Deactivate barber pole phasing by default
 
     mis = 1.0f;
-    Rmin = 625.0f;	// 2N5457 typical on resistance at Vgs = 0
-    Rmax = 22000.0f;	// Resistor parallel to FET
+    Rmin = 625.0f;// 2N5457 typical on resistance at Vgs = 0
+    Rmax = 22000.0f;// Resistor parallel to FET
     Rmx = Rmin/Rmax;
     Rconst = 1.0f + Rmx;  // Handle parallel resistor relationship
-    C = 0.00000005f;	     // 50 nF
+    C = 0.00000005f;     // 50 nF
     CFs = (float) 2.0f*(float)SAMPLE_RATE*C;
     invperiod = 1.0f / ((float) SOUND_BUFFER_SIZE);
 
 
     Ppreset = 0;
-    setpreset (Ppreset);
-    cleanup ();
-};
+    setpreset(Ppreset);
+    cleanup();
+}
 
 Analog_Phaser::~Analog_Phaser()
 {
-
-    if(lxn1 != NULL)
-        delete[]lxn1;
-
-    if(lyn1 != NULL)
-        delete[]lyn1;
-
-    if(rxn1 != NULL)
-        delete[]rxn1;
-
-    if(ryn1 != NULL)
-        delete[]ryn1;
-
-    if(offset != NULL)
-        delete[]offset;
-};
+    if(xn1.l)
+        delete[] xn1.l;
+    if(yn1.l)
+        delete[] yn1.l;
+    if(xn1.r)
+        delete[] xn1.r;
+    if(yn1.r)
+        delete[] yn1.r;
+}
 
 
 /*
@@ -106,135 +95,111 @@ Analog_Phaser::~Analog_Phaser()
  */
 void Analog_Phaser::out(const Stereo<REALTYPE *> &input)
 {
-    int i, j;
-    float lfol, lfor, lgain, rgain, bl, br, gl, gr, rmod, lmod, d, hpfr, hpfl;
-    lgain = 0.0;
-    rgain = 0.0;
+    Stereo<REALTYPE> gain(0.0), lfoVal(0.0), mod(0.0), g(0.0), b(0.0), hpf(0.0);
 
-    //initialize hpf
-    hpfl = 0.0;
-    hpfr = 0.0;
+    lfo.effectlfoout(&lfoVal.l, &lfoVal.r);
+    mod.l = lfoVal.l*width + depth;
+    mod.r = lfoVal.r*width + depth;
 
-    lfo.effectlfoout (&lfol, &lfor);
-    lmod = lfol*width + depth;
-    rmod = lfor*width + depth;
+    mod.l = limit(mod.l, ZERO_, ONE_);
+    mod.r = limit(mod.r, ZERO_, ONE_);
 
-    if(lmod > ONE_)
-        lmod = ONE_;
-    else if(lmod < ZERO_)
-        lmod = ZERO_;
-    if(rmod > ONE_)
-        rmod = ONE_;
-    else if(rmod < ZERO_)
-        rmod = ZERO_;
+    if(Phyper != 0) {
+        //Triangle wave squared is approximately sin on bottom, tri on top
+        //Result is exponential sweep more akin to filter in synth with
+        //exponential generator circuitry.
+        mod.l *= mod.l;
+        mod.r *= mod.r;
+    }
 
-    if(Phyper != 0)
-    {
-        lmod *= lmod;  //Triangle wave squared is approximately sin on bottom, tri on top
-        rmod *= rmod;  //Result is exponential sweep more akin to filter in synth with exponential generator circuitry.
-    };
+    //g.l,g.r is Vp - Vgs. Typical FET drain-source resistance follows constant/[1-sqrt(Vp - Vgs)]
+    mod.l = sqrtf(1.0f - mod.l);   
+    mod.r = sqrtf(1.0f - mod.r);
 
-    lmod = sqrtf(1.0f - lmod);  //gl,gr is Vp - Vgs. Typical FET drain-source resistance follows constant/[1-sqrt(Vp - Vgs)] 
-    rmod = sqrtf(1.0f - rmod);
+    diff.r = (mod.r - oldgain.r) * invperiod;
+    diff.l = (mod.l - oldgain.l) * invperiod;
 
-    rdiff = (rmod - oldrgain) * invperiod;
-    ldiff = (lmod - oldlgain) * invperiod;
+    g = oldgain;
+    oldgain = mod;
 
-    gl = oldlgain;
-    gr = oldrgain;
-
-    oldlgain = lmod;
-    oldrgain = rmod;
-
-    for (i = 0; i < SOUND_BUFFER_SIZE; i++)
+    for (int i = 0; i < SOUND_BUFFER_SIZE; i++)
     {
 
-        gl += ldiff;	// Linear interpolation between LFO samples
-        gr += rdiff;
+        g.l += diff.l;// Linear interpolation between LFO samples
+        g.r += diff.r;
 
-        float lxn = input.l[i];
-        float rxn = input.r[i];
-
+        Stereo<REALTYPE> xn(input.l[i], input.r[i]);
 
         if (barber) {
-            gl = fmodf((gl + 0.25f) , ONE_);
-            gr = fmodf((gr + 0.25f) , ONE_);
-        };
-
+            g.l = fmodf((g.l + 0.25f) , ONE_);
+            g.r = fmodf((g.r + 0.25f) , ONE_);
+        }
 
         //Left channel
-        for (j = 0; j < Pstages; j++)
-        {			//Phasing routine
+        for (int j = 0; j < Pstages; j++) {//Phasing routine
             mis = 1.0f + offsetpct*offset[j];
-            d = (1.0f + 2.0f*(0.25f + gl)*hpfl*hpfl*distortion) * mis;  //This is symmetrical. FET is not, so this deviates slightly, however sym dist. is better sounding than a real FET.
-            Rconst =  1.0f + mis*Rmx;	
-            bl = (Rconst - gl )/ (d*Rmin);  // This is 1/R. R is being modulated to control filter fc.
-            lgain = (CFs - bl)/(CFs + bl);
+            float d = (1.0f + 2.0f*(0.25f + g.l)*hpf.l*hpf.l*distortion) * mis;  //This is symmetrical. FET is not, so this deviates slightly, however sym dist. is better sounding than a real FET.
+            Rconst =  1.0f + mis*Rmx;
+            b.l = (Rconst - g.l )/ (d*Rmin);  // This is 1/R. R is being modulated to control filter fc.
+            gain.l = (CFs - b.l)/(CFs + b.l);
 
-            lyn1[j] = lgain * (lxn + lyn1[j]) - lxn1[j];
-            //lyn1[j] += DENORMAL_GUARD;
-            hpfl = lyn1[j] + (1.0f-lgain)*lxn1[j];  //high pass filter -- Distortion depends on the high-pass part of the AP stage. 
+            yn1.l[j] = gain.l * (xn.l + yn1.l[j]) - xn1.l[j];
+            hpf.l = yn1.l[j] + (1.0f-gain.l)*xn1.l[j];  //high pass filter -- Distortion depends on the high-pass part of the AP stage. 
 
-            lxn1[j] = lxn;
-            lxn = lyn1[j];
-            if (j==1) lxn += fbl;  //Insert feedback after first phase stage
-        };
+            xn1.l[j] = xn.l;
+            xn.l = yn1.l[j];
+            if (j==1)
+                xn.l += fb.l;  //Insert feedback after first phase stage
+        }
 
         //Right channel
-        for (j = 0; j < Pstages; j++)
-        {			//Phasing routine
+        for (int j = 0; j < Pstages; j++) {//Phasing routine
             mis = 1.0f + offsetpct*offset[j];
-            d = (1.0f + 2.0f*(0.25f + gr)*hpfr*hpfr*distortion) * mis;   // distortion
+            float d = (1.0f + 2.0f*(0.25f + g.r)*hpf.r*hpf.r*distortion) * mis;   // distortion
             Rconst =  1.0f + mis*Rmx;
-            br = (Rconst - gr )/ (d*Rmin);
-            rgain = (CFs - br)/(CFs + br);
+            b.r = (Rconst - g.r )/ (d*Rmin);
+            gain.r = (CFs - b.r)/(CFs + b.r);
 
-            ryn1[j] = rgain * (rxn + ryn1[j]) - rxn1[j];
-            //ryn1[j] += DENORMAL_GUARD;
-            hpfr = ryn1[j] + (1.0f-rgain)*rxn1[j];  //high pass filter
+            yn1.r[j] = gain.r * (xn.r + yn1.r[j]) - xn1.r[j];
+            hpf.r = yn1.r[j] + (1.0f-gain.r)*xn1.r[j];  //high pass filter
 
-            rxn1[j] = rxn;
-            rxn = ryn1[j];
-            if (j==1) rxn += fbr;  //Insert feedback after first phase stage
+            xn1.r[j] = xn.r;
+            xn.r = yn1.r[j];
+            if (j==1)
+                xn.r += fb.r;  //Insert feedback after first phase stage
         }
 
 
-        fbl = lxn * fb;
-        fbr = rxn * fb;
-        efxoutl[i] = lxn;
-        efxoutr[i] = rxn;
+        fb.l = xn.l * feedback;
+        fb.r = xn.r * feedback;
+        efxoutl[i] = xn.l;
+        efxoutr[i] = xn.r;
 
     }
 
     if(Poutsub != 0)
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++)
+        for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
         {
             efxoutl[i] *= -1.0f;
             efxoutr[i] *= -1.0f;
-        };
-};
+        }
+}
 
 /*
  * Cleanup the effect
  */
 void Analog_Phaser::cleanup()
 {
-    fbl = 0.0;
-    fbr = 0.0;
-    oldlgain = 0.0;
-    oldrgain = 0.0;
+    fb = oldgain = Stereo<REALTYPE>(0.0);
     for(int i = 0; i < Pstages; i++)
     {
-        lxn1[i] = 0.0;
+        xn1.l[i] = 0.0;
+        yn1.l[i] = 0.0;
+        xn1.r[i] = 0.0;
+        yn1.r[i] = 0.0;
 
-        lyn1[i] = 0.0;
-
-        rxn1[i] = 0.0;
-
-        ryn1[i] = 0.0;
-
-    };
-};
+    }
+}
 
 /*
  * Parameter control
@@ -243,14 +208,14 @@ void Analog_Phaser::setwidth(unsigned char Pwidth)
 {
     this->Pwidth = Pwidth;
     width = ((float)Pwidth / 127.0f);
-};
+}
 
 
 void Analog_Phaser::setfb(unsigned char Pfb)
 {
     this->Pfb = Pfb;
-    fb = (float) (Pfb - 64) / 64.2f;
-};
+    feedback = (float) (Pfb - 64) / 64.2f;
+}
 
 void Analog_Phaser::setvolume(unsigned char Pvolume)
 {
@@ -262,55 +227,51 @@ void Analog_Phaser::setvolume(unsigned char Pvolume)
     }
     else
         volume = outvolume = Pvolume / 127.0;
-};
+}
 
 void Analog_Phaser::setdistortion(unsigned char Pdistortion)
 {
     this->Pdistortion = Pdistortion;
     distortion = (float)Pdistortion / 127.0f;
-};
+}
 
 void Analog_Phaser::setoffset(unsigned char Poffset)
 {
     this->Poffset = Poffset;  
     offsetpct = (float)Poffset / 127.0f;
-};
+}
 
 void Analog_Phaser::setstages(unsigned char Pstages)
 {
-
-    if(lxn1 != NULL)
-        delete[]lxn1;
-
-    if(lyn1 != NULL)
-        delete[]lyn1;
-
-    if(rxn1 != NULL)
-        delete[]rxn1;
-
-    if(ryn1 != NULL)
-        delete[]ryn1;
+    if(xn1.l)
+        delete[] xn1.l;
+    if(yn1.l)
+        delete[] yn1.l;
+    if(xn1.r)
+        delete[] xn1.r;
+    if(yn1.r)
+        delete[] yn1.r;
 
 
     if(Pstages >= MAX_PHASER_STAGES)
-        Pstages = MAX_PHASER_STAGES ;
+        Pstages = MAX_PHASER_STAGES;
     this->Pstages = Pstages;
 
 
-    lxn1 = new REALTYPE[Pstages];
-    lyn1 = new REALTYPE[Pstages];
+    xn1 = Stereo<REALTYPE *>(new REALTYPE[Pstages],
+                             new REALTYPE[Pstages]);
 
-    rxn1 = new REALTYPE[Pstages];
-    ryn1 = new REALTYPE[Pstages];
+    yn1 = Stereo<REALTYPE *>(new REALTYPE[Pstages],
+                             new REALTYPE[Pstages]);
 
     cleanup();
-};
+}
 
 void Analog_Phaser::setdepth(unsigned char Pdepth)
 {
     this->Pdepth = Pdepth;
     depth = (float)(Pdepth - 64) / 127.0f;  //Pdepth input should be 0-127.  depth shall range 0-0.5 since we don't need to shift the full spectrum.
-};
+}
 
 
 void Analog_Phaser::setpreset(unsigned char npreset)
@@ -336,7 +297,7 @@ void Analog_Phaser::setpreset(unsigned char npreset)
     for(int n = 0; n < PRESET_SIZE; n++)
         changepar(n, presets[npreset][n]);
     Ppreset = npreset;
-};
+}
 
 
 void Analog_Phaser::changepar(int npar, unsigned char value)
@@ -392,8 +353,8 @@ void Analog_Phaser::changepar(int npar, unsigned char value)
                 value = 1;
             Phyper = value;
             break;
-    };
-};
+    }
+}
 
 unsigned char Analog_Phaser::getpar(int npar) const
 {

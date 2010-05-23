@@ -32,10 +32,10 @@ struct Stereo
         Stereo(const T &val);
         ~Stereo() {}
 
-        void operator=(const Stereo<T> &smp);
+        Stereo<T> &operator=(const Stereo<T> &smp);
 
-        T l;
-        T r;
+        //data
+        T l, r;
 };
 #include "Stereo.cpp"
 #endif

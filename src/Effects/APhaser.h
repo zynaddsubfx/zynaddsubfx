@@ -70,12 +70,14 @@ class Analog_Phaser:public Effect
 
         //Internal Variables
         bool barber; //Barber pole phasing flag
-        REALTYPE distortion, fb, width, offsetpct, fbl, fbr, depth;
-        REALTYPE *lxn1, *lyn1,*rxn1, *ryn1, *offset;
-        REALTYPE oldlgain, oldrgain, rdiff, ldiff, invperiod;
+        REALTYPE distortion, feedback, width, offsetpct, depth;
+        Stereo<REALTYPE *> xn1, yn1;
+        Stereo<REALTYPE> diff, oldgain, fb;
+        REALTYPE invperiod;
+        REALTYPE offset[12];
 
         float mis;
-        float Rmin;     // 2N5457 typical on resistance at Vgs = 0
+        float Rmin;     // 3N5457 typical on resistance at Vgs = 0
         float Rmax;     // Resistor parallel to FET
         float Rmx;      // Rmin/Rmax to avoid division in loop
         float Rconst;   // Handle parallel resistor relationship

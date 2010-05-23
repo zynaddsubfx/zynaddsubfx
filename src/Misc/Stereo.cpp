@@ -30,9 +30,10 @@ Stereo<T>::Stereo(const T &val)
 {}
 
 template<class T>
-void Stereo<T>::operator=(const Stereo<T> &nstr)
+Stereo<T> &Stereo<T>::operator=(const Stereo<T> &nstr)
 {
-    l  = nstr.l;
+    l = nstr.l;
     r = nstr.r;
+    return *this;
 }
 
