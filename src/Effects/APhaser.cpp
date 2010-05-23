@@ -152,8 +152,8 @@ void Analog_Phaser::out(const Stereo<REALTYPE *> &input)
         gl += ldiff;	// Linear interpolation between LFO samples
         gr += rdiff;
 
-        float lxn = input.l()[i];
-        float rxn = input.r()[i];
+        float lxn = input.l[i];
+        float rxn = input.r[i];
 
 
         if (barber) {

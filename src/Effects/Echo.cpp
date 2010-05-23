@@ -44,8 +44,8 @@ Echo::Echo(const int &insertion_,
 
 Echo::~Echo()
 {
-    delete[] delay.l();
-    delete[] delay.r();
+    delete[] delay.l;
+    delete[] delay.r;
 }
 
 /*
@@ -53,8 +53,8 @@ Echo::~Echo()
  */
 void Echo::cleanup()
 {
-    memset(delay.l(),0,MAX_DELAY*SAMPLE_RATE*sizeof(REALTYPE));
-    memset(delay.r(),0,MAX_DELAY*SAMPLE_RATE*sizeof(REALTYPE));
+    memset(delay.l,0,MAX_DELAY*SAMPLE_RATE*sizeof(REALTYPE));
+    memset(delay.r,0,MAX_DELAY*SAMPLE_RATE*sizeof(REALTYPE));
     old = Stereo<REALTYPE>(0.0);
 }
 
@@ -75,8 +75,8 @@ void Echo::initdelays()
     //number of seconds to delay right chan
     float dr = avgDelay + lrdelay;
 
-    ndelta.l() = max(1,(int) (dl * SAMPLE_RATE));
-    ndelta.r() = max(1,(int) (dr * SAMPLE_RATE));
+    ndelta.l = max(1,(int) (dl * SAMPLE_RATE));
+    ndelta.r = max(1,(int) (dr * SAMPLE_RATE));
 }
 
 void Echo::out(const Stereo<float *> &input)
@@ -84,32 +84,32 @@ void Echo::out(const Stereo<float *> &input)
     REALTYPE ldl, rdl;
 
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-        ldl = delay.l()[pos.l()];
-        rdl = delay.r()[pos.r()];
+        ldl = delay.l[pos.l];
+        rdl = delay.r[pos.r];
         ldl = ldl * (1.0 - lrcross) + rdl * lrcross;
         rdl = rdl * (1.0 - lrcross) + ldl * lrcross;
 
         efxoutl[i] = ldl * 2.0;
         efxoutr[i] = rdl * 2.0;
 
-        ldl = input.l()[i] * panning - ldl * fb;
-        rdl = input.r()[i] * (1.0 - panning) - rdl * fb;
+        ldl = input.l[i] * panning - ldl * fb;
+        rdl = input.r[i] * (1.0 - panning) - rdl * fb;
 
         //LowPass Filter
-        old.l() = delay.l()[(pos.l()+delta.l())%(MAX_DELAY * SAMPLE_RATE)] =  ldl * hidamp + old.l() * (1.0 - hidamp);
-        old.r() = delay.r()[(pos.r()+delta.r())%(MAX_DELAY * SAMPLE_RATE)] =  rdl * hidamp + old.r() * (1.0 - hidamp);
+        old.l = delay.l[(pos.l+delta.l)%(MAX_DELAY * SAMPLE_RATE)] =  ldl * hidamp + old.l * (1.0 - hidamp);
+        old.r = delay.r[(pos.r+delta.r)%(MAX_DELAY * SAMPLE_RATE)] =  rdl * hidamp + old.r * (1.0 - hidamp);
 
         //increment
-        ++pos.l();// += delta.l();
-        ++pos.r();// += delta.r();
+        ++pos.l;// += delta.l;
+        ++pos.r;// += delta.r;
 
         //ensure that pos is still in bounds
-        pos.l() %= MAX_DELAY * SAMPLE_RATE;
-        pos.r() %= MAX_DELAY * SAMPLE_RATE;
+        pos.l %= MAX_DELAY * SAMPLE_RATE;
+        pos.r %= MAX_DELAY * SAMPLE_RATE;
 
         //adjust delay if needed
-        delta.l() = (15*delta.l() + ndelta.l())/16;
-        delta.r() = (15*delta.r() + ndelta.r())/16;
+        delta.l = (15*delta.l + ndelta.l)/16;
+        delta.r = (15*delta.r + ndelta.r)/16;
     }
 }
 

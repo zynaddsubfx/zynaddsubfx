@@ -67,22 +67,22 @@ void Phaser::out(const Stereo<float *> &smp)
     for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
         REALTYPE x   = (REALTYPE) i / SOUND_BUFFER_SIZE;
         REALTYPE x1  = 1.0 - x;
-        REALTYPE gl  = lgain * x + oldgain.left() * x1;
-        REALTYPE gr  = rgain * x + oldgain.right() * x1;
-        REALTYPE inl = smp.l()[i] * panning + fbl;
-        REALTYPE inr = smp.r()[i] * (1.0 - panning) + fbr;
+        REALTYPE gl  = lgain * x + oldgain.l * x1;
+        REALTYPE gr  = rgain * x + oldgain.r * x1;
+        REALTYPE inl = smp.l[i] * panning + fbl;
+        REALTYPE inr = smp.r[i] * (1.0 - panning) + fbr;
 
         //Left channel
         for(j = 0; j < Pstages * 2; j++) { //Phasing routine
-            tmp = old.left()[j];
-            old.left()[j] = gl * tmp + inl;
-            inl = tmp - gl *old.left()[j];
+            tmp = old.l[j];
+            old.l[j] = gl * tmp + inl;
+            inl = tmp - gl *old.l[j];
         }
         //Right channel
         for(j = 0; j < Pstages * 2; j++) { //Phasing routine
-            tmp = old.right()[j];
-            old.right()[j] = gr * tmp + inr;
-            inr = tmp - gr *old.right()[j];
+            tmp = old.r[j];
+            old.r[j] = gr * tmp + inr;
+            inr = tmp - gr *old.r[j];
         }
         //Left/Right crossing
         REALTYPE l = inl;
@@ -114,8 +114,8 @@ void Phaser::cleanup()
     fbl     = 0.0;
     fbr     = 0.0;
     oldgain = Stereo<REALTYPE>(0.0);
-    old.l().clear();
-    old.r().clear();
+    old.l.clear();
+    old.r.clear();
 }
 
 /*

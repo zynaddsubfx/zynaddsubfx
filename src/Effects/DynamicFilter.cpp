@@ -62,10 +62,10 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     REALTYPE q    = filterpars->getq();
 
     for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        efxoutl[i] = smp.l()[i];
-        efxoutr[i] = smp.r()[i];
+        efxoutl[i] = smp.l[i];
+        efxoutr[i] = smp.r[i];
 
-        REALTYPE x = (fabs(smp.l()[i]) + fabs(smp.l()[i])) * 0.5;
+        REALTYPE x = (fabs(smp.l[i]) + fabs(smp.l[i])) * 0.5;
         ms1 = ms1 * (1.0 - ampsmooth) + x * ampsmooth + 1e-10;
     }
 

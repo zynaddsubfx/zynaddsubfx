@@ -172,8 +172,7 @@ void Reverb::out(const Stereo<float *> &smp)
         return;
 
     for(i = 0; i < SOUND_BUFFER_SIZE; i++)
-        inputbuf[i] = (smp.l()[i] + smp.r()[i]) / 2.0;
-    ;
+        inputbuf[i] = (smp.l[i] + smp.r[i]) / 2.0;
 
     if(idelay != NULL) {
         for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
@@ -184,7 +183,6 @@ void Reverb::out(const Stereo<float *> &smp)
             idelayk++;
             if(idelayk >= idelaylen)
                 idelayk = 0;
-            ;
         }
     }
 
@@ -246,7 +244,6 @@ void Reverb::settime(unsigned char Ptime)
         combfb[i] =
             -exp((REALTYPE)comblen[i] / (REALTYPE)SAMPLE_RATE * log(0.001) / t);
         //the feedback is negative because it removes the DC
-    ;
 }
 
 void Reverb::setlohidamp(unsigned char Plohidamp)
