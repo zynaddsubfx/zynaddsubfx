@@ -2,30 +2,26 @@
 
   APhaser.cpp  - Approximate digital model of an analog JFET phaser.
   Analog modeling implemented by Ryan Billing aka Transmogrifox.
-  November, 2009
-  
-  Credit to:
-  ///////////////////
   ZynAddSubFX - a software synthesizer
- 
+
   Phaser.cpp - Phaser effect
   Copyright (C) 2002-2005 Nasca Octavian Paul
+  Copyright (C) 2009-2010 Ryan Billing
+  Copyright (C) 2010-2010 Mark McCurry
   Author: Nasca Octavian Paul
+          Ryan Billing
+          Mark McCurry
 
-  Modified for rakarrack by Josep Andreu
-  
   DSP analog modeling theory & practice largely influenced by various CCRMA publications, particularly works by Julius O. Smith.
-  ////////////////////
-  
-  
+
   This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
+  it under the terms of version 2 of the GNU General Public License
   as published by the Free Software Foundation.
 
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License (version 2) for more details.
+  GNU General Public License (version 2 or later) for more details.
 
   You should have received a copy of the GNU General Public License (version 2)
   along with this program; if not, write to the Free Software Foundation,
@@ -34,15 +30,16 @@
 */
 
 #include <cmath>
+#include <algorithm>
 #include "APhaser.h"
-#include <cstdio>
-#include <iostream>
+
 using namespace std;
+
 #define PHASER_LFO_SHAPE 2
 #define ONE_  0.99999f        // To prevent LFO ever reaching 1.0 for filter stability purposes
 #define ZERO_ 0.00001f        // Same idea as above.
 
-Analog_Phaser::Analog_Phaser(const int & insertion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_)
+Analog_Phaser::Analog_Phaser(const int &insertion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0), xn1(NULL), yn1(NULL), diff(0.0), oldgain(0.0),
      fb(0.0)
 {
@@ -71,8 +68,6 @@ Analog_Phaser::Analog_Phaser(const int & insertion_, REALTYPE *efxoutl_, REALTYP
     CFs = (float) 2.0f*(float)SAMPLE_RATE*C;
     invperiod = 1.0f / ((float) SOUND_BUFFER_SIZE);
 
-
-    Ppreset = 0;
     setpreset(Ppreset);
     cleanup();
 }
@@ -89,7 +84,6 @@ Analog_Phaser::~Analog_Phaser()
         delete[] yn1.r;
 }
 
-
 /*
  * Effect output
  */
@@ -104,7 +98,7 @@ void Analog_Phaser::out(const Stereo<REALTYPE *> &input)
     mod.l = limit(mod.l, ZERO_, ONE_);
     mod.r = limit(mod.r, ZERO_, ONE_);
 
-    if(Phyper != 0) {
+    if(Phyper) {
         //Triangle wave squared is approximately sin on bottom, tri on top
         //Result is exponential sweep more akin to filter in synth with
         //exponential generator circuitry.
@@ -113,7 +107,7 @@ void Analog_Phaser::out(const Stereo<REALTYPE *> &input)
     }
 
     //g.l,g.r is Vp - Vgs. Typical FET drain-source resistance follows constant/[1-sqrt(Vp - Vgs)]
-    mod.l = sqrtf(1.0f - mod.l);   
+    mod.l = sqrtf(1.0f - mod.l);
     mod.r = sqrtf(1.0f - mod.r);
 
     diff.r = (mod.r - oldgain.r) * invperiod;
@@ -122,67 +116,60 @@ void Analog_Phaser::out(const Stereo<REALTYPE *> &input)
     g = oldgain;
     oldgain = mod;
 
-    for (int i = 0; i < SOUND_BUFFER_SIZE; i++)
-    {
-
+    for (int i = 0; i < SOUND_BUFFER_SIZE; i++) {
         g.l += diff.l;// Linear interpolation between LFO samples
         g.r += diff.r;
 
         Stereo<REALTYPE> xn(input.l[i], input.r[i]);
 
         if (barber) {
-            g.l = fmodf((g.l + 0.25f) , ONE_);
-            g.r = fmodf((g.r + 0.25f) , ONE_);
+            g.l = fmodf((g.l + 0.25f), ONE_);
+            g.r = fmodf((g.r + 0.25f), ONE_);
         }
 
-        //Left channel
-        for (int j = 0; j < Pstages; j++) {//Phasing routine
-            mis = 1.0f + offsetpct*offset[j];
-            float d = (1.0f + 2.0f*(0.25f + g.l)*hpf.l*hpf.l*distortion) * mis;  //This is symmetrical. FET is not, so this deviates slightly, however sym dist. is better sounding than a real FET.
-            Rconst =  1.0f + mis*Rmx;
-            b.l = (Rconst - g.l )/ (d*Rmin);  // This is 1/R. R is being modulated to control filter fc.
-            gain.l = (CFs - b.l)/(CFs + b.l);
-
-            yn1.l[j] = gain.l * (xn.l + yn1.l[j]) - xn1.l[j];
-            hpf.l = yn1.l[j] + (1.0f-gain.l)*xn1.l[j];  //high pass filter -- Distortion depends on the high-pass part of the AP stage. 
-
-            xn1.l[j] = xn.l;
-            xn.l = yn1.l[j];
-            if (j==1)
-                xn.l += fb.l;  //Insert feedback after first phase stage
-        }
-
-        //Right channel
-        for (int j = 0; j < Pstages; j++) {//Phasing routine
-            mis = 1.0f + offsetpct*offset[j];
-            float d = (1.0f + 2.0f*(0.25f + g.r)*hpf.r*hpf.r*distortion) * mis;   // distortion
-            Rconst =  1.0f + mis*Rmx;
-            b.r = (Rconst - g.r )/ (d*Rmin);
-            gain.r = (CFs - b.r)/(CFs + b.r);
-
-            yn1.r[j] = gain.r * (xn.r + yn1.r[j]) - xn1.r[j];
-            hpf.r = yn1.r[j] + (1.0f-gain.r)*xn1.r[j];  //high pass filter
-
-            xn1.r[j] = xn.r;
-            xn.r = yn1.r[j];
-            if (j==1)
-                xn.r += fb.r;  //Insert feedback after first phase stage
-        }
+        xn.l = applyPhase(xn.l, g.l, fb.l, hpf.l, yn1.l, xn1.l);
+        xn.r = applyPhase(xn.r, g.r, fb.r, hpf.r, yn1.r, xn1.r);
 
 
         fb.l = xn.l * feedback;
         fb.r = xn.r * feedback;
         efxoutl[i] = xn.l;
         efxoutr[i] = xn.r;
-
     }
 
-    if(Poutsub != 0)
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
-        {
-            efxoutl[i] *= -1.0f;
-            efxoutr[i] *= -1.0f;
-        }
+    if(Poutsub) {
+        invSignal(efxoutl, SOUND_BUFFER_SIZE);
+        invSignal(efxoutr, SOUND_BUFFER_SIZE);
+    }
+}
+
+REALTYPE Analog_Phaser::applyPhase(REALTYPE x, REALTYPE g, REALTYPE fb,
+                              REALTYPE &hpf, REALTYPE *yn1, REALTYPE *xn1)
+{
+    for(int j = 0; j < Pstages; j++) { //Phasing routine
+        mis = 1.0f + offsetpct*offset[j];
+
+        //This is symmetrical.
+        //FET is not, so this deviates slightly, however sym dist. is
+        //better sounding than a real FET.
+        float d = (1.0f + 2.0f*(0.25f + g)*hpf*hpf*distortion) * mis;
+        Rconst =  1.0f + mis*Rmx;
+
+        // This is 1/R. R is being modulated to control filter fc.
+        float b = (Rconst - g)/ (d*Rmin);
+        float gain = (CFs - b)/(CFs + b);
+        yn1[j] = gain * (x + yn1[j]) - xn1[j];
+
+        //high pass filter:
+        //Distortion depends on the high-pass part of the AP stage.
+        hpf = yn1[j] + (1.0f-gain)*xn1[j];
+
+        xn1[j] = x;
+        x = yn1[j];
+        if (j==1)
+            x += fb;  //Insert feedback after first phase stage
+    }
+    return x;
 }
 
 /*
@@ -191,13 +178,11 @@ void Analog_Phaser::out(const Stereo<REALTYPE *> &input)
 void Analog_Phaser::cleanup()
 {
     fb = oldgain = Stereo<REALTYPE>(0.0);
-    for(int i = 0; i < Pstages; i++)
-    {
+    for(int i = 0; i < Pstages; i++) {
         xn1.l[i] = 0.0;
         yn1.l[i] = 0.0;
         xn1.r[i] = 0.0;
         yn1.r[i] = 0.0;
-
     }
 }
 
@@ -220,13 +205,11 @@ void Analog_Phaser::setfb(unsigned char Pfb)
 void Analog_Phaser::setvolume(unsigned char Pvolume)
 {
     this->Pvolume = Pvolume;
-    // outvolume is needed in calling program
-    if(insertion == 0) {
-        outvolume = pow(0.01, (1.0 - Pvolume / 127.0)) * 4.0;
-        volume    = 1.0;
-    }
+    outvolume     = Pvolume / 127.0;
+    if(insertion == 0)
+        volume = 1.0;
     else
-        volume = outvolume = Pvolume / 127.0;
+        volume = outvolume;
 }
 
 void Analog_Phaser::setdistortion(unsigned char Pdistortion)
@@ -237,7 +220,7 @@ void Analog_Phaser::setdistortion(unsigned char Pdistortion)
 
 void Analog_Phaser::setoffset(unsigned char Poffset)
 {
-    this->Poffset = Poffset;  
+    this->Poffset = Poffset;
     offsetpct = (float)Poffset / 127.0f;
 }
 
@@ -253,10 +236,7 @@ void Analog_Phaser::setstages(unsigned char Pstages)
         delete[] yn1.r;
 
 
-    if(Pstages >= MAX_PHASER_STAGES)
-        Pstages = MAX_PHASER_STAGES;
-    this->Pstages = Pstages;
-
+    this->Pstages = min(MAX_PHASER_STAGES, (int)Pstages);
 
     xn1 = Stereo<REALTYPE *>(new REALTYPE[Pstages],
                              new REALTYPE[Pstages]);
@@ -269,8 +249,9 @@ void Analog_Phaser::setstages(unsigned char Pstages)
 
 void Analog_Phaser::setdepth(unsigned char Pdepth)
 {
+    //depth shall range 0-0.5 since we don't need to shift the full spectrum.
     this->Pdepth = Pdepth;
-    depth = (float)(Pdepth - 64) / 127.0f;  //Pdepth input should be 0-127.  depth shall range 0-0.5 since we don't need to shift the full spectrum.
+    depth = (float)(Pdepth - 64) / 127.0f;
 }
 
 
@@ -302,8 +283,7 @@ void Analog_Phaser::setpreset(unsigned char npreset)
 
 void Analog_Phaser::changepar(int npar, unsigned char value)
 {
-    switch(npar)
-    {
+    switch(npar) {
         case 0:
             setvolume(value);
             break;
@@ -316,13 +296,12 @@ void Analog_Phaser::changepar(int npar, unsigned char value)
             break;
         case 3:
             lfo.Prandomness = value;
-            lfo.updateparams ();
+            lfo.updateparams();
             break;
         case 4:
             lfo.PLFOtype = value;
             lfo.updateparams();
-            barber = 0;
-            if (value == 2) barber = 1;
+            barber = (2 == value);
             break;
         case 5:
             lfo.Pstereo = value;
@@ -341,66 +320,47 @@ void Analog_Phaser::changepar(int npar, unsigned char value)
             setoffset(value);
             break;
         case 10:
-            if (value > 1)
-                value = 1;
-            Poutsub = value;
+            Poutsub = min((int)value,1);
             break;
         case 11:
             setdepth(value);
             break;
         case 12:
-            if (value > 1)
-                value = 1;
-            Phyper = value;
+            Phyper = min((int)value, 1);
             break;
     }
 }
 
 unsigned char Analog_Phaser::getpar(int npar) const
 {
-    switch(npar)
-    {
+    switch(npar) {
         case 0:
-            return(Pvolume);
-            break;
+            return Pvolume;
         case 1:
-            return(Pdistortion);
-            break;
+            return Pdistortion;
         case 2:
-            return(lfo.Pfreq);
-            break;
+            return lfo.Pfreq;
         case 3:
-            return(lfo.Prandomness);
-            break;
+            return lfo.Prandomness;
         case 4:
-            return(lfo.PLFOtype);
-            break;
+            return lfo.PLFOtype;
         case 5:
-            return(lfo.Pstereo);
-            break;
+            return lfo.Pstereo;
         case 6:
-            return(Pwidth);
-            break;
+            return Pwidth;
         case 7:
-            return(Pfb);
-            break;
+            return Pfb;
         case 8:
-            return(Pstages);
-            break;
+            return Pstages;
         case 9:
-            return(Poffset);
-            break;
+            return Poffset;
         case 10:
-            return(Poutsub);
-            break;
+            return Poutsub;
         case 11:
-            return(Pdepth);
-            break;
+            return Pdepth;
         case 12:
-            return(Phyper);
-            break;
-
+            return Phyper;
         default:
-            return(0);
+            return 0;
     }
 }

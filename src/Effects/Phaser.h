@@ -3,7 +3,11 @@
 
   Phaser.h - Phaser effect
   Copyright (C) 2002-2005 Nasca Octavian Paul
+  Copyright (C) 2009-2010 Ryan Billing
+  Copyright (C) 2010-2010 Mark McCurry
   Author: Nasca Octavian Paul
+          Ryan Billing
+          Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License
@@ -23,38 +27,35 @@
 #ifndef PHASER_H
 #define PHASER_H
 #include "../globals.h"
-#include "../Misc/Stereo.h"
-#include "../Samples/Sample.h"
 #include "Effect.h"
 #include "EffectLFO.h"
 
 #define MAX_PHASER_STAGES 12
-/**Phaser Effect*/
+
 class Phaser:public Effect
 {
     public:
-        Phaser(const int &insetion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_);
+        Phaser(const int &insertion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_);
         ~Phaser();
-        void out(const Stereo<float *> &smp);
+        void out(const Stereo<REALTYPE *> &input);
         void setpreset(unsigned char npreset);
         void changepar(int npar, unsigned char value);
         unsigned char getpar(int npar) const;
         void cleanup();
-        void setdryonly();
 
     private:
-        //Parametrii Phaser
-        EffectLFO     lfo; /**<lfo-ul Phaser*/
-        unsigned char Pvolume;
+        //Phaser parameters
+        EffectLFO lfo;              //Phaser modulator
+        unsigned char Pvolume;      //Used to set wet/dry mix
         unsigned char Ppanning;
-        unsigned char Pdepth; /**<the depth of the Phaser*/
-        unsigned char Pfb; /**<feedback*/
+        unsigned char Pdepth;       //Depth of phaser sweep
+        unsigned char Pfb;          //feedback
         unsigned char Plrcross; /**<crossover*/
-        unsigned char Pstages;
-        unsigned char Poutsub; /**<if I wish to substract the output instead of the adding it*/
+        unsigned char Pstages;      //Number of first-order All-Pass stages
+        unsigned char Poutsub;      //if I wish to subtract the output instead of adding
         unsigned char Pphase;
 
-        //Control Parameters
+        //Control parameters
         void setvolume(unsigned char Pvolume);
         void setpanning(unsigned char Ppanning);
         void setdepth(unsigned char Pdepth);
@@ -63,11 +64,12 @@ class Phaser:public Effect
         void setstages(unsigned char Pstages);
         void setphase(unsigned char Pphase);
 
-        //Internal Values
+        //Internal Variables
         REALTYPE panning, feedback, depth, lrcross, phase;
-        Stereo<Sample> old;
-        Stereo<REALTYPE> oldgain;
-        Stereo<REALTYPE> fb;
+        Stereo<REALTYPE *> old;
+        Stereo<REALTYPE> oldgain, fb;
+
+        REALTYPE applyPhase(REALTYPE x, REALTYPE g, REALTYPE *old);
 };
 
 #endif

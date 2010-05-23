@@ -1,22 +1,22 @@
 /*
   ZynAddSubFX - a software synthesizer
- 
+
   Phaser.h - Phaser effect
   Copyright (C) 2002-2005 Nasca Octavian Paul
+  Copyright (C) 2009-2010 Ryan Billing
+  Copyright (C) 2010-2010 Mark McCurry
   Author: Nasca Octavian Paul
+          Ryan Billing
+          Mark McCurry
 
-  Modified for rakarrack by Josep Andreu
-
-  Further modified for rakarrack by Ryan Billing (Transmogrifox) to model Analog Phaser behavior 2009
-  
   This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License 
+  it under the terms of version 2 of the GNU General Public License
   as published by the Free Software Foundation.
 
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License (version 2) for more details.
+  GNU General Public License (version 2 or later) for more details.
 
   You should have received a copy of the GNU General Public License (version 2)
   along with this program; if not, write to the Free Software Foundation,
@@ -35,25 +35,24 @@
 class Analog_Phaser:public Effect
 {
     public:
-        Analog_Phaser(const int & insertion_, REALTYPE * efxoutl_, REALTYPE * efxoutr_);
+        Analog_Phaser(const int &insertion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_);
         ~Analog_Phaser();
         void out(const Stereo<REALTYPE *> &input);
         void setpreset(unsigned char npreset);
         void changepar(int npar, unsigned char value);
         unsigned char getpar(int npar) const;
         void cleanup();
-        //unsigned char Ppreset;
 
     private:
         //Phaser parameters
         EffectLFO lfo;              //Phaser modulator
-        unsigned char Pvolume;      //Used in Process.cpp to set wet/dry mix
+        unsigned char Pvolume;      //Used to set wet/dry mix
         unsigned char Pdistortion;  //Model distortion added by FET element
         unsigned char Pwidth;       //Phaser width (LFO amplitude)
         unsigned char Pfb;          //feedback
         unsigned char Poffset;      //Model mismatch between variable resistors
         unsigned char Pstages;      //Number of first-order All-Pass stages
-        unsigned char Poutsub;      //if I wish to subtract the output instead of the adding it
+        unsigned char Poutsub;      //if I wish to subtract the output instead of adding
         unsigned char Phyper;       //lfo^2 -- converts tri into hyper-sine
         unsigned char Pdepth;       //Depth of phaser sweep
         unsigned char Pbarber;      //Enable parber pole phasing
@@ -83,6 +82,9 @@ class Analog_Phaser:public Effect
         float Rconst;   // Handle parallel resistor relationship
         float C;        // Capacitor
         float CFs;      // A constant derived from capacitor and resistor relationships
+
+        REALTYPE applyPhase(REALTYPE x, REALTYPE g, REALTYPE fb,
+                       REALTYPE &hpf, REALTYPE *yn1, REALTYPE *xn1);
 };
 
 #endif
