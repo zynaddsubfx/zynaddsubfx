@@ -33,7 +33,6 @@
 #include "Distorsion.h"
 #include "EQ.h"
 #include "DynamicFilter.h"
-#include "APhaser.h"
 #include "../Misc/XMLwrapper.h"
 #include "../Params/FilterParams.h"
 #include "../Params/Presets.h"

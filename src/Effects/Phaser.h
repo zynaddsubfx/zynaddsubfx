@@ -48,27 +48,55 @@ class Phaser:public Effect
         EffectLFO lfo;              //Phaser modulator
         unsigned char Pvolume;      //Used to set wet/dry mix
         unsigned char Ppanning;
+        unsigned char Pdistortion;  //Model distortion added by FET element
         unsigned char Pdepth;       //Depth of phaser sweep
+        unsigned char Pwidth;       //Phaser width (LFO amplitude)
         unsigned char Pfb;          //feedback
-        unsigned char Plrcross; /**<crossover*/
+        unsigned char Poffset;      //Model mismatch between variable resistors
+        unsigned char Plrcross;     //crossover
         unsigned char Pstages;      //Number of first-order All-Pass stages
         unsigned char Poutsub;      //if I wish to subtract the output instead of adding
         unsigned char Pphase;
+        unsigned char Phyper;       //lfo^2 -- converts tri into hyper-sine
+        unsigned char Pbarber;      //Enable parber pole phasing
+        unsigned char Panalog;
 
         //Control parameters
         void setvolume(unsigned char Pvolume);
         void setpanning(unsigned char Ppanning);
         void setdepth(unsigned char Pdepth);
         void setfb(unsigned char Pfb);
+        void setdistortion(unsigned char Pdistortion);
+        void setwidth(unsigned char Pwidth);
+        void setoffset(unsigned char Poffset);
         void setlrcross(unsigned char Plrcross);
         void setstages(unsigned char Pstages);
         void setphase(unsigned char Pphase);
 
         //Internal Variables
+        bool barber; //Barber pole phasing flag
+        REALTYPE distortion, width, offsetpct;
         REALTYPE panning, feedback, depth, lrcross, phase;
-        Stereo<REALTYPE *> old;
-        Stereo<REALTYPE> oldgain, fb;
+        Stereo<REALTYPE *> old, xn1, yn1;
+        Stereo<REALTYPE> diff, oldgain, fb;
+        REALTYPE invperiod;
+        REALTYPE offset[12];
+        
+        float mis;
+        float Rmin;     // 3N5457 typical on resistance at Vgs = 0
+        float Rmax;     // Resistor parallel to FET
+        float Rmx;      // Rmin/Rmax to avoid division in loop
+        float Rconst;   // Handle parallel resistor relationship
+        float C;        // Capacitor
+        float CFs;      // A constant derived from capacitor and resistor relationships
 
+        void analog_setup();
+        void AnalogPhase(const Stereo<REALTYPE *> &input);
+        //analog case
+        REALTYPE applyPhase(REALTYPE x, REALTYPE g, REALTYPE fb,
+                            REALTYPE &hpf, REALTYPE *yn1, REALTYPE *xn1);
+
+        void normalPhase(const Stereo<REALTYPE *> &input);
         REALTYPE applyPhase(REALTYPE x, REALTYPE g, REALTYPE *old);
 };
 
