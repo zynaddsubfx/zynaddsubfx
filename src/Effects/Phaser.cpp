@@ -426,6 +426,9 @@ void Phaser::changepar(int npar, unsigned char value)
         case 13:
             setdistortion(value);
             break;
+        case 14:
+            Panalog = value;
+            break;
     }
 }
 
