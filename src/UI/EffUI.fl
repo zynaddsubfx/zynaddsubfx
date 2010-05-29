@@ -585,7 +585,7 @@ refresh(eff);}
   }
   Function {make_phaser_window()} {open
   } {
-    Fl_Window effphaserwindow {open
+    Fl_Window effphaserwindow {open selected
       xywh {75 25 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1
       class Fl_Group visible
     } {
@@ -593,7 +593,7 @@ refresh(eff);}
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {10 15 70 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 100 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
         MenuItem {} {
           label {Phaser 1}
@@ -648,6 +648,20 @@ refresh(eff);}
         tooltip {LFO randomness} xywh {120 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
         class WidgetPDial
       }
+      Fl_Choice phaserp4 {
+        label LFO
+        callback {eff->seteffectpar(4,(int) o->value());}
+        tooltip {LFO function} xywh {245 55 40 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 130 textsize 8
+      } {
+        MenuItem {} {
+          label SIN
+          xywh {15 15 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label TRI
+          xywh {25 25 100 20} labelfont 1 labelsize 10
+        }
+      }
       Fl_Dial phaserp5 {
         label {St.df}
         callback {eff->seteffectpar(5,(int) o->value());}
@@ -666,6 +680,12 @@ refresh(eff);}
         tooltip Feedback xywh {185 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
+      Fl_Counter phaserp8 {
+        label Stages
+        callback {eff->seteffectpar(8,(int) o->value());}
+        xywh {290 55 35 15} type Simple labelfont 1 labelsize 11 minimum 0 maximum 127 step 1
+        code0 {o->range(1,MAX_PHASER_STAGES);}
+      }
       Fl_Dial phaserp9 {
         label {L/R}
         callback {eff->seteffectpar(9,(int) o->value());}
@@ -677,31 +697,26 @@ refresh(eff);}
         callback {eff->seteffectpar(10,(int) o->value());}
         tooltip {inverts output} xywh {200 10 74 20} box THIN_UP_BOX down_box DOWN_BOX color 230 labelfont 1 labelsize 10
       }
-      Fl_Choice phaserp4 {
-        label LFO
-        callback {eff->seteffectpar(4,(int) o->value());}
-        tooltip {LFO function} xywh {245 55 40 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 130 textsize 8
-      } {
-        MenuItem {} {
-          label SIN
-          xywh {15 15 100 20} labelfont 1 labelsize 10
-        }
-        MenuItem {} {
-          label TRI
-          xywh {25 25 100 20} labelfont 1 labelsize 10
-        }
-      }
-      Fl_Counter phaserp8 {
-        label Stages
-        callback {eff->seteffectpar(8,(int) o->value());}
-        xywh {290 55 35 15} type Simple labelfont 1 labelsize 11 minimum 0 maximum 127 step 1
-        code0 {o->range(1,MAX_PHASER_STAGES);}
-      }
       Fl_Dial phaserp11 {
         label Phase
         callback {eff->seteffectpar(11,(int) o->value());}
         xywh {155 5 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 maximum 127
         class WidgetPDial
+      }
+      Fl_Check_Button {} {
+        label Analog
+        xywh {305 35 70 15} down_box DOWN_BOX
+      }
+      Fl_Dial aphaser13 {
+        label dist
+        callback {eff->seteffectpar(13,(int) o->value());}
+        tooltip Distortion xywh {340 50 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        class WidgetPDial
+      }
+      Fl_Check_Button aphaser12 {
+        label {hyp.}
+        callback {eff->seteffectpar(12,(int) o->value());}
+        tooltip hyper xywh {245 35 55 15} down_box DOWN_BOX
       }
     }
   }
@@ -715,7 +730,7 @@ refresh(eff);}
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {10 15 70 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 105 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
         MenuItem {} {
           label {Phaser 1}
@@ -811,7 +826,7 @@ refresh(eff);}
       Fl_Dial aphaser9 {
         label offset
         callback {eff->seteffectpar(9,(int) o->value());}
-        tooltip offset xywh {155 5 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        tooltip offset xywh {215 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Check_Button aphaser10 {
@@ -821,8 +836,8 @@ refresh(eff);}
       }
       Fl_Dial aphaser11 {
         label Width
-        callback {eff->seteffectpar(11,(int) o->value());} selected
-        xywh {215 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 maximum 127
+        callback {eff->seteffectpar(11,(int) o->value());}
+        xywh {155 5 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 maximum 127
         class WidgetPDial
       }
       Fl_Check_Button aphaser12 {
@@ -833,7 +848,7 @@ refresh(eff);}
       Fl_Dial aphaser13 {
         label dist
         callback {eff->seteffectpar(13,(int) o->value());}
-        tooltip Distortion xywh {85 5 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        tooltip Distortion xywh {335 50 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Check_Button {} {
