@@ -47,6 +47,7 @@ class Analog_Phaser:public Effect
         //Phaser parameters
         EffectLFO lfo;              //Phaser modulator
         unsigned char Pvolume;      //Used to set wet/dry mix
+        unsigned char Ppanning;     //Sets the pan of the output
         unsigned char Pdistortion;  //Model distortion added by FET element
         unsigned char Pwidth;       //Phaser width (LFO amplitude)
         unsigned char Pfb;          //feedback
@@ -60,6 +61,7 @@ class Analog_Phaser:public Effect
 
         //Control parameters
         void setvolume(unsigned char Pvolume);
+        void setpanning(unsigned char Ppanning);
         void setdistortion(unsigned char Pdistortion);
         void setwidth(unsigned char Pwidth);
         void setfb(unsigned char Pfb);

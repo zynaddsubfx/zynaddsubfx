@@ -585,7 +585,7 @@ refresh(eff);}
   }
   Function {make_phaser_window()} {open
   } {
-    Fl_Window effphaserwindow {open selected
+    Fl_Window effphaserwindow {open
       xywh {75 25 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1
       class Fl_Group visible
     } {
@@ -753,9 +753,9 @@ refresh(eff);}
         class WidgetPDial
       }
       Fl_Dial aphaser1 {
-        label dist
+        label Pan
         callback {eff->seteffectpar(1,(int) o->value());}
-        tooltip Distortion xywh {85 5 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial aphaser2 {
@@ -830,10 +830,10 @@ refresh(eff);}
         callback {eff->seteffectpar(12,(int) o->value());}
         tooltip hyper xywh {245 35 55 15} down_box DOWN_BOX
       }
-      Fl_Dial aphaser2 {
-        label Pan
-        callback {eff->seteffectpar(2,(int) o->value());}
-        xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+      Fl_Dial aphaser13 {
+        label dist
+        callback {eff->seteffectpar(13,(int) o->value());} selected
+        tooltip Distortion xywh {85 5 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Check_Button {} {

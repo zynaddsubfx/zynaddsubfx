@@ -120,7 +120,8 @@ void Analog_Phaser::out(const Stereo<REALTYPE *> &input)
         g.l += diff.l;// Linear interpolation between LFO samples
         g.r += diff.r;
 
-        Stereo<REALTYPE> xn(input.l[i], input.r[i]);
+        Stereo<REALTYPE> xn(input.l[i] * panning, 
+                            input.r[i] * (1.0f - panning));
 
         if (barber) {
             g.l = fmodf((g.l + 0.25f), ONE_);
@@ -195,6 +196,12 @@ void Analog_Phaser::setwidth(unsigned char Pwidth)
     width = ((float)Pwidth / 127.0f);
 }
 
+void Analog_Phaser::setpanning(unsigned char Ppanning)
+{
+    this->Ppanning = Ppanning;
+    panning = (float)Ppanning / 127.0;
+}
+
 
 void Analog_Phaser::setfb(unsigned char Pfb)
 {
@@ -257,21 +264,21 @@ void Analog_Phaser::setdepth(unsigned char Pdepth)
 
 void Analog_Phaser::setpreset(unsigned char npreset)
 {
-    const int PRESET_SIZE = 13;
+    const int PRESET_SIZE = 14;
     const int NUM_PRESETS = 6;
     unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Phaser1
-        {64, 20, 14, 0, 1, 64, 110, 40, 4, 10, 0, 64, 1},
+        {64, 64, 14, 0, 1, 64, 110, 40, 4, 10, 0, 64, 1, 20},
         //Phaser2
-        {64, 20, 14, 5, 1, 64, 110, 40, 6, 10, 0, 70, 1},
+        {64, 64, 14, 5, 1, 64, 110, 40, 6, 10, 0, 70, 1, 20},
         //Phaser3
-        {64, 20, 9, 0, 0, 64, 40, 40, 8, 10, 0, 60, 0},
+        {64, 64, 9, 0, 0, 64, 40, 40, 8, 10, 0, 60, 0, 20},
         //Phaser4
-        {64, 20, 14, 10, 0, 64, 110, 80, 7, 10, 1, 45, 1},
+        {64, 64, 14, 10, 0, 64, 110, 80, 7, 10, 1, 45, 1, 20},
         //Phaser5
-        {25, 20, 240, 10, 0, 64, 25, 16, 8, 100, 0, 25, 0},
+        {25, 64, 127, 10, 0, 64, 25, 16, 8, 100, 0, 25, 0, 20},
         //Phaser6
-        {64, 20, 1, 10, 1, 64, 110, 40, 12, 10, 0, 70, 1}
+        {64, 64, 1, 10, 1, 64, 110, 40, 12, 10, 0, 70, 1, 20}
     };
     if(npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
@@ -288,7 +295,7 @@ void Analog_Phaser::changepar(int npar, unsigned char value)
             setvolume(value);
             break;
         case 1:
-            setdistortion(value);
+            setpanning(value);
             break;
         case 2:
             lfo.Pfreq = value;
@@ -328,6 +335,9 @@ void Analog_Phaser::changepar(int npar, unsigned char value)
         case 12:
             Phyper = min((int)value, 1);
             break;
+        case 13:
+            setdistortion(value);
+            break;
     }
 }
 
@@ -337,7 +347,7 @@ unsigned char Analog_Phaser::getpar(int npar) const
         case 0:
             return Pvolume;
         case 1:
-            return Pdistortion;
+            return Ppanning;
         case 2:
             return lfo.Pfreq;
         case 3:
@@ -360,6 +370,8 @@ unsigned char Analog_Phaser::getpar(int npar) const
             return Pdepth;
         case 12:
             return Phyper;
+        case 13:
+            return Pdistortion;
         default:
             return 0;
     }
