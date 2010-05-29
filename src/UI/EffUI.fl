@@ -820,8 +820,8 @@ refresh(eff);}
         tooltip {inverts output} xywh {190 10 74 20} box THIN_UP_BOX down_box DOWN_BOX color 230 labelfont 1 labelsize 10
       }
       Fl_Dial aphaser11 {
-        label Depth
-        callback {eff->seteffectpar(11,(int) o->value());}
+        label Width
+        callback {eff->seteffectpar(11,(int) o->value());} selected
         xywh {215 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 maximum 127
         class WidgetPDial
       }
@@ -832,7 +832,7 @@ refresh(eff);}
       }
       Fl_Dial aphaser13 {
         label dist
-        callback {eff->seteffectpar(13,(int) o->value());} selected
+        callback {eff->seteffectpar(13,(int) o->value());}
         tooltip Distortion xywh {85 5 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
