@@ -40,17 +40,15 @@ class DynamicFilter:public Effect
         unsigned char getpar(int npar) const;
         void cleanup();
 
-//	void setdryonly();
-
     private:
         //Parametrii DynamicFilter
-        EffectLFO     lfo; //lfo-ul DynamicFilter
-        unsigned char Pvolume;
-        unsigned char Ppanning;
-        unsigned char Pdepth; /**<the depth of the lfo of the DynamicFilter*/
-        unsigned char Pampsns; /**<how the filter varies according to the input amplitude*/
-        unsigned char Pampsnsinv; //if the filter freq is lowered if the input amplitude rises
-        unsigned char Pampsmooth; //how smooth the input amplitude changes the filter
+        EffectLFO     lfo;          //lfo-ul DynamicFilter
+        unsigned char Pvolume;      //Volume
+        unsigned char Ppanning;     //Pan
+        unsigned char Pdepth;       //the depth of the lfo of the DynamicFilter
+        unsigned char Pampsns;      //how the filter varies according to the input amplitude
+        unsigned char Pampsnsinv;   //if the filter freq is lowered if the input amplitude rises
+        unsigned char Pampsmooth;   //how smooth the input amplitude changes the filter
 
         //Parameter Control
         void setvolume(unsigned char Pvolume);

@@ -48,7 +48,6 @@ DynamicFilter::~DynamicFilter()
  */
 void DynamicFilter::out(const Stereo<float *> &smp)
 {
-    int i;
     if(filterpars->changed) {
         filterpars->changed = false;
         cleanup();
@@ -58,26 +57,25 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     lfo.effectlfoout(&lfol, &lfor);
     lfol *= depth * 5.0;
     lfor *= depth * 5.0;
-    REALTYPE freq = filterpars->getfreq();
-    REALTYPE q    = filterpars->getq();
+    const REALTYPE freq = filterpars->getfreq();
+    const REALTYPE q    = filterpars->getq();
 
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
         efxoutl[i] = smp.l()[i];
         efxoutr[i] = smp.r()[i];
 
-        REALTYPE x = (fabs(smp.l()[i]) + fabs(smp.l()[i])) * 0.5;
+        const REALTYPE x = (fabs(smp.l()[i]) + fabs(smp.l()[i])) * 0.5;
         ms1 = ms1 * (1.0 - ampsmooth) + x * ampsmooth + 1e-10;
     }
 
-
-    REALTYPE ampsmooth2 = pow(ampsmooth, 0.2) * 0.3;
+    const REALTYPE ampsmooth2 = pow(ampsmooth, 0.2) * 0.3;
     ms2 = ms2 * (1.0 - ampsmooth2) + ms1 * ampsmooth2;
     ms3 = ms3 * (1.0 - ampsmooth2) + ms2 * ampsmooth2;
     ms4 = ms4 * (1.0 - ampsmooth2) + ms3 * ampsmooth2;
-    REALTYPE rms = (sqrt(ms4)) * ampsns;
+    const REALTYPE rms = (sqrt(ms4)) * ampsns;
 
-    REALTYPE frl = filterl->getrealfreq(freq + lfol + rms);
-    REALTYPE frr = filterr->getrealfreq(freq + lfor + rms);
+    const REALTYPE frl = filterl->getrealfreq(freq + lfol + rms);
+    const REALTYPE frr = filterr->getrealfreq(freq + lfor + rms);
 
     filterl->setfreq_and_q(frl, q);
     filterr->setfreq_and_q(frr, q);
@@ -87,7 +85,7 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     filterr->filterout(efxoutr);
 
     //panning
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
         efxoutl[i] *= panning;
         efxoutr[i] *= (1.0 - panning);
     }
