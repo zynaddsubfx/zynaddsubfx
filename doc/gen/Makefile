@@ -1,4 +1,4 @@
-all:echo.png ad-note.png
+all:echo.png ad-note.png distort.png
 
 ad-note.png: ad-note.tex
 	pslatex ad-note.tex
@@ -9,3 +9,9 @@ echo.png: echo.tex
 	pslatex echo.tex
 	convert echo.dvi -trim echo.png
 	rm echo.dvi echo.log echo.aux
+
+#ought to figure out the right way for this
+distort.png: distort.tex
+	pslatex distort.tex
+	convert distort.dvi -trim distort.png
+	rm distort.dvi distort.log distort.aux
