@@ -464,7 +464,6 @@ int main(int argc, char *argv[])
 
 #ifndef DISABLE_GUI
     if(noui == 0) {
-        ui = new MasterUI(master, &Pexitprogram);
         pthread_create(&thr3, NULL, thread3, NULL);
     }
 #endif
