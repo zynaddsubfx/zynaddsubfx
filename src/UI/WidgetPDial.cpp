@@ -9,6 +9,7 @@
 #include <FL/fl_draw.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Menu_Window.H>
+#include "../Misc/Util.h"
 //Copyright (c) 2003-2005 Nasca Octavian Paul
 //License: GNU GPL version 2 or later
 
@@ -18,154 +19,140 @@ class TipWin : public Fl_Menu_Window {
     public:
         TipWin();
         void draw();
-        void value(float f);
+        void showValue(float f);
         void setText(const char * c);
-        void setTextmode();
+        void showText();
     private:
+        void redraw();
+        const char *getStr() const;
         string tip;
         string text;
         bool textmode;
 };
 
-TipWin::TipWin():Fl_Menu_Window(1,1) 
+TipWin::TipWin():Fl_Menu_Window(1,1)
 {
-    tip = "X.XX";
     set_override();
     end();
 }
 
-void TipWin::draw() 
+void TipWin::draw()
 {
+    //setup window
     draw_box(FL_BORDER_BOX, 0, 0, w(), h(), Fl_Color(175));
     fl_color(FL_BLACK);
     fl_font(labelfont(), labelsize());
-    if(textmode)
-        fl_draw(text.c_str(), 3, 3, w()-6, h()-6, Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_WRAP));
-    else
-        fl_draw(tip.c_str(), 3, 3, w()-6, h()-6, Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_WRAP));
+
+    //Draw the current string
+    fl_draw(getStr(), 3, 3, w()-6, h()-6, Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_WRAP));
 }
 
-void TipWin::value(float f) 
+void TipWin::showValue(float f)
 {
+    //convert the value to a string
     char tmp[10];
     snprintf(tmp, 9, "%.2f", f);
-
     tip = tmp;
+
     textmode=false;
-    // Recalc size of window
-    fl_font(labelfont(), labelsize());
-    int W = w(), H = h();
-    fl_measure(tip.c_str(), W, H, 0);
-    W += 8;
-    size(W, H);
     redraw();
+    show();
 }
 
-void TipWin::setText(const char * c) 
+void TipWin::setText(const char * c)
 {
     text = c;
     textmode=true;
-    // Recalc size of window
-    fl_font(labelfont(), labelsize());
-    int W = w(), H = h();
-    fl_measure(text.c_str(), W, H, 0);
-    W += 8;
-    size(W, H);
     redraw();
 }
 
-void TipWin::setTextmode() 
+void TipWin::showText()
 {
-    textmode=true;
+    if(!text.empty()) {
+        textmode=true;
+        redraw();
+        show();
+    }
+}
+
+void TipWin::redraw()
+{
     // Recalc size of window
     fl_font(labelfont(), labelsize());
-    int W = w(), H = h();
-    fl_measure(text.c_str(), W, H, 0);
+    int W, H;
+    fl_measure(getStr(), W, H, 0);
+    //provide a bit of extra space
     W += 8;
+    H += 4;
     size(W, H);
-    redraw();
+    Fl_Menu_Window::redraw();
+}
+
+const char *TipWin::getStr() const
+{
+    return (textmode ? text : tip).c_str();
 }
 
 //static int numobj = 0;
 
-WidgetPDial::WidgetPDial(int x,int y, int w, int h, const char *label):Fl_Dial(x,y,w,h,label) 
+WidgetPDial::WidgetPDial(int x,int y, int w, int h, const char *label)
+    :Fl_Dial(x,y,w,h,label),oldvalue(0.0),pos(false),textset(false)
 {
-    //cout << "There are now " << ++numobj << endl;
-    callback(value_cb, (void*)this);
+    //cout << "[" << label << "] There are now " << ++numobj << endl;
     Fl_Group *save = Fl_Group::current();
-
     tipwin = new TipWin();
     tipwin->hide();
     Fl_Group::current(save);
-    oldvalue=0.0;
-    pos=false;
-    textset=false;
 }
 
-WidgetPDial::~WidgetPDial() 
+WidgetPDial::~WidgetPDial()
 {
     //cout << "There are now " << --numobj << endl;
     delete tipwin;
 }
 
-int WidgetPDial::handle(int event) 
+int WidgetPDial::handle(int event)
 {
-    double dragsize,v,min=minimum(),max=maximum();
+    double dragsize, min=minimum(),max=maximum();
     int my;
 
     switch (event){
         case FL_PUSH:
             oldvalue=value();
         case FL_DRAG:
-            if(!pos){
-                tipwin->position(Fl::event_x_root(), Fl::event_y_root()+20);
-                pos=true;
-            }
-            tipwin->value(value());
-            tipwin->show();
+            getPos();
+            tipwin->showValue(value());
             my=-(Fl::event_y()-y()-h()/2);
 
             dragsize=200.0;
-            if (Fl::event_state(FL_BUTTON1)==0) dragsize*=10;
-            v=oldvalue+my/dragsize*(max-min);
-            if(v<min) 
-                v=min;
-            else if(v>max) 
-                v=max;
+            if (Fl::event_state(FL_BUTTON1)==0)
+                dragsize*=10;
 
-            //printf("%d   %g    %g\n",my,v,oldvalue);     
-            value(v);
+            value(limit(oldvalue+my/dragsize*(max-min),min,max));
             value_damage();
             if (this->when()!=0) do_callback();
-            return 1; 
-            break;
+            return 1;
         case FL_ENTER:
-            if(textset){
-                if(!pos){
-                    tipwin->position(Fl::event_x_root(), Fl::event_y_root()+20);
-                    pos=true;
-                }
-                tipwin->setTextmode();
-                tipwin->show();
-                return 1;
-            } 
-                break;
+            getPos();
+            tipwin->showText();
+            return 1;
         case FL_HIDE:
         case FL_LEAVE:
-                tipwin->hide();
-                pos=false;
-                break;
+            tipwin->hide();
+            resetPos();
+            break;
         case FL_RELEASE:
-                tipwin->hide();
-                pos=false;
-                if (this->when()==0) do_callback();
-                return(1);
-                break;
+            tipwin->hide();
+            resetPos();
+            if (this->when()==0)
+                do_callback();
+            return 1;
+            break;
     }
-    return(0);
+    return 0;
 }
 
-void WidgetPDial::drawgradient(int cx,int cy,int sx,double m1,double m2) 
+void WidgetPDial::drawgradient(int cx,int cy,int sx,double m1,double m2)
 {
     for (int i=(int)(m1*sx);i<(int)(m2*sx);i++){
         double tmp=1.0-pow(i*1.0/sx,2.0);
@@ -174,10 +161,9 @@ void WidgetPDial::drawgradient(int cx,int cy,int sx,double m1,double m2)
     }
 }
 
-void WidgetPDial::draw() 
+void WidgetPDial::draw()
 {
     int cx=x(),cy=y(),sx=w(),sy=h();
-
 
     //clears the button face
     pdialcolor(190,190,200);
@@ -214,41 +200,43 @@ void WidgetPDial::draw()
     fl_push_matrix();
 
     fl_translate(cx+sx/2,cy+sy/2);
-    fl_rotate(a-90.0); 
+    fl_rotate(a-90.0);
 
     fl_translate(sx/2,0);
-
 
     fl_begin_polygon();
     pdialcolor(0,0,0);
     fl_vertex(-10,-4);
     fl_vertex(-10,4);
-    fl_vertex(0,0);  
+    fl_vertex(0,0);
     fl_end_polygon();
-
 
     fl_pop_matrix();
 }
 
-void WidgetPDial::pdialcolor(int r,int g,int b) 
+void WidgetPDial::pdialcolor(int r,int g,int b)
 {
-    if (active_r()) fl_color(r,g,b);
-    else fl_color(160-(160-r)/3,160-(160-b)/3,160-(160-b)/3);
+    if (active_r())
+        fl_color(r,g,b);
+    else
+        fl_color(160-(160-r)/3,160-(160-b)/3,160-(160-b)/3);
 }
 
-void WidgetPDial::value_cb2() 
-{
-    tipwin->value(value());
-}
-
-void WidgetPDial::value_cb(Fl_Widget*, void*data) 
-{
-    WidgetPDial *val = (WidgetPDial*)data;
-    val->value_cb2();
-}
-
-void WidgetPDial::tooltip(const char * c) 
+void WidgetPDial::tooltip(const char * c)
 {
     tipwin->setText(c);
     textset=true;
+}
+
+void WidgetPDial::getPos()
+{
+    if(!pos) {
+        tipwin->position(Fl::event_x_root(), Fl::event_y_root()+20);
+        pos=true;
+    }
+}
+
+void WidgetPDial::resetPos()
+{
+    pos = false;
 }

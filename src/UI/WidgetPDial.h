@@ -2,7 +2,6 @@
 
 #ifndef WIDGETPDIAL_h
 #define WIDGETPDIAL_h
-#include <FL/Fl.H>
 #include <FL/Fl_Dial.H>
 
 
@@ -14,13 +13,13 @@ class WidgetPDial : public Fl_Dial {
         void drawgradient(int cx,int cy,int sx,double m1,double m2);
         void draw();
         void pdialcolor(int r,int g,int b);
-        void value_cb2();
-        static void value_cb(Fl_Widget*, void*data);
         void tooltip(const char * c);
     private:
-        bool textset;
-        bool pos;
+        void getPos();
+        void resetPos();
         double oldvalue;
+        bool pos;
+        bool textset;
         class TipWin *tipwin;
 };
 #endif
