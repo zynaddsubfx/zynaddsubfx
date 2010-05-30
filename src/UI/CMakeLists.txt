@@ -16,7 +16,6 @@ set(UI_fl_files
     SeqUI.fl
     SUBnoteUI.fl
     VirKeyboard.fl
-    WidgetPDial.fl
 )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -28,6 +27,7 @@ add_library(zynaddsubfx_gui STATIC
 	${UI_objs}
 	${zynaddsubfx_gui_FLTK_UI_SRCS}
         NioUI.cpp
+        WidgetPDial.cpp
 	)
 
 target_link_libraries(zynaddsubfx_gui ${FLTK_LIBRARIES} ${MYFLTK_LIBRARIES})
