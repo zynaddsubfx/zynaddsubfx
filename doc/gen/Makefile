@@ -1,17 +1,14 @@
-all:echo.png ad-note.png distort.png
+SOURCES=ad-note.tex echo.tex distort.tex dynamic.tex reverb.tex chorus.tex
+OBJECTS=$(SOURCES:.tex=.png)
 
-ad-note.png: ad-note.tex
-	pslatex ad-note.tex
-	convert ad-note.dvi -trim ad-note.png
-	rm ad-note.dvi ad-note.log ad-note.aux
+all:$(OBJECTS)
 
-echo.png: echo.tex
-	pslatex echo.tex
-	convert echo.dvi -trim echo.png
-	rm echo.dvi echo.log echo.aux
+%.png: %.tex
+	pslatex $<
+	convert $(<:.tex=.dvi) -resize 200% -trim $@
+	rm $(<:.tex=.dvi) $(<:.tex=.log) $(<:.tex=.aux)
 
-#ought to figure out the right way for this
-distort.png: distort.tex
-	pslatex distort.tex
-	convert distort.dvi -trim distort.png
-	rm distort.dvi distort.log distort.aux
+.PHONY
+clean:
+	rm -f *.png *~
+
