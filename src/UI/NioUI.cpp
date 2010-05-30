@@ -1,11 +1,15 @@
 #include "NioUI.h"
 #include "../Nio/Nio.h"
 #include <cstdio>
+#include <iostream>
+#include <cstring>
+#include <FL/Fl_Pack.H>
+#include <FL/Fl_Spinner.H>
+#include <FL/Enumerations.H>
+#include <FL/Fl_Choice.H>
 #include <FL/Fl_Tabs.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Text_Display.H>
-#include <iostream>
-#include <cstring>
 
 using namespace std;
 
@@ -17,7 +21,7 @@ NioUI::NioUI()
     {
         Fl_Group *gen  = new Fl_Group(0,20,400,400-35,"General");
         {
-            Fl_Text_Buffer  *buff  = new Fl_Text_Buffer();
+            Fl_Text_Buffer *buff  = new Fl_Text_Buffer();
             Fl_Text_Display *intro = new Fl_Text_Display(20,40,350,300);
             intro->buffer(buff);
             buff->text("Thanks For Testing Out the New"
@@ -71,6 +75,10 @@ NioUI::NioUI()
 
     resizable(this);
     size_range(400,300);
+}
+
+NioUI::~NioUI()
+{
 }
 
 void NioUI::refresh()
