@@ -15,6 +15,9 @@ find_package(PortAudio)
 set(FLTK_SKIP_OPENGL true)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
+# lash
+pkg_search_module(LASH lash-1.0)
+mark_as_advanced(LASH_LIBRARIES)
 
 ######### Settings ###########
 # NOTE: These cache variables should normally not be changed in this
@@ -33,6 +36,8 @@ SET (OssEnable ${ALSA_FOUND} CACHE BOOL #TODO perhaps check for /dev/dsp
     "Enable support for Open Sound System")
 SET (PaEnable ${PORTAUDIO_FOUND} CACHE BOOL
     "Enable support for Port Audio System")
+SET (LashEnable ${LASH_FOUND} CACHE BOOL
+    "Enable LASH Audio Session Handler")
 
 
 # Now, handle the incoming settings and set define flags/variables based
@@ -54,9 +59,6 @@ if(NOT PKG_CONFIG_FOUND)
     message(FATAL_ERROR "pkg-config not found")
 endif(NOT PKG_CONFIG_FOUND)
 
-# lash
-pkg_search_module(LASH lash-1.0)
-mark_as_advanced(LASH_LIBRARIES)
 
 ########### Settings dependant code ###########
 # From here on, the setting variables have  been prepared so concentrate
@@ -88,9 +90,9 @@ if (CompileTests)
 	ENABLE_TESTING()
 endif()
 
-if(LASH_FOUND)
+if(LashEnable)
 	include_directories(${LASH_INCLUDE_DIRS})
-	add_definitions(-DUSE_LASH)
+	add_definitions(-DLASH=1)
 	set(AUDIO_LIBRARIES ${AUDIO_LIBRARIES} ${LASH_LIBRARIES})
 	message(STATUS "Compiling with lash")
 endif()
