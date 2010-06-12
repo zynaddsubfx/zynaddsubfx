@@ -53,6 +53,7 @@ class AudioOut : public virtual Engine
         /**Get the next sample for output.
          * (has nsamples sampled at a rate of samplerate)*/
         const Stereo<Sample> getNext(bool wait = false);
+        const Stereo<REALTYPE *> getNextBuf();
 
         int samplerate;
         int bufferSize;

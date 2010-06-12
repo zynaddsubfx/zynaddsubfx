@@ -72,3 +72,8 @@ const Stereo<Sample> AudioOut::getNext(bool wait)
     //stop the samples
     return Stereo<Sample>(Sample(bufferSize, tmp.l()), Sample(bufferSize, tmp.r()));
 }
+
+const Stereo<REALTYPE *> AudioOut::getNextBuf()
+{
+    return OutMgr::getInstance().tick(bufferSize);
+}

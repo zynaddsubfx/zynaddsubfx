@@ -118,16 +118,18 @@ void OutMgr::addSmps(REALTYPE *l, REALTYPE *r)
     //allow wave file to syphon off stream
     wave->push(Stereo<REALTYPE *>(l,r),SOUND_BUFFER_SIZE);
 
-    Stereo<Sample> smps(Sample(SOUND_BUFFER_SIZE, l), Sample(SOUND_BUFFER_SIZE, r));
-
     if(currentOut->getSampleRate() != SAMPLE_RATE) { //we need to resample
         //cout << "BAD RESAMPLING" << endl;
+        Stereo<Sample> smps(Sample(SOUND_BUFFER_SIZE, l), Sample(SOUND_BUFFER_SIZE, r));
         smps.l().resample(SAMPLE_RATE,currentOut->getSampleRate());
         smps.r().resample(SAMPLE_RATE,currentOut->getSampleRate());
+        memcpy(priBuffCurrent.l(), smps.l().c_buf(), SOUND_BUFFER_SIZE*sizeof(REALTYPE));
+        memcpy(priBuffCurrent.r(), smps.r().c_buf(), SOUND_BUFFER_SIZE*sizeof(REALTYPE));
     }
-
-    memcpy(priBuffCurrent.l(), smps.l().c_buf(), SOUND_BUFFER_SIZE*sizeof(REALTYPE));
-    memcpy(priBuffCurrent.r(), smps.r().c_buf(), SOUND_BUFFER_SIZE*sizeof(REALTYPE));
+    else { //just copy the samples
+        memcpy(priBuffCurrent.l(), l, SOUND_BUFFER_SIZE*sizeof(REALTYPE));
+        memcpy(priBuffCurrent.r(), r, SOUND_BUFFER_SIZE*sizeof(REALTYPE));
+    }
     priBuffCurrent.l() += SOUND_BUFFER_SIZE;
     priBuffCurrent.r() += SOUND_BUFFER_SIZE;
     stales += SOUND_BUFFER_SIZE;

@@ -259,11 +259,11 @@ bool JackEngine::processAudio(jack_nframes_t nframes)
         }
     }
 
-    Stereo<Sample> smp = getNext();
+    Stereo<REALTYPE *> smp = getNextBuf();
 
     //Assumes smp.l().size() == nframes
-    memcpy(audio.portBuffs[0], smp.l().c_buf(), smp.l().size()*sizeof(REALTYPE));
-    memcpy(audio.portBuffs[1], smp.r().c_buf(), smp.r().size()*sizeof(REALTYPE));
+    memcpy(audio.portBuffs[0], smp.l(), bufferSize*sizeof(REALTYPE));
+    memcpy(audio.portBuffs[1], smp.r(), bufferSize*sizeof(REALTYPE));
     handleMidi(nframes);
     return true;
 
