@@ -53,18 +53,6 @@ void AudioOut::setBufferSize(int _bufferSize)
     bufferSize = _bufferSize;
 }
 
-//delete me
-void AudioOut::bufferingSize(int nBuffering)
-{
-   //buffering = nBuffering;
-}
-
-//delete me
-int AudioOut::bufferingSize()
-{
-    //return buffering;
-}
-
 const Stereo<REALTYPE *> AudioOut::getNext()
 {
     return OutMgr::getInstance().tick(bufferSize);

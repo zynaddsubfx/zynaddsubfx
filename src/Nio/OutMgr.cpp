@@ -137,14 +137,13 @@ void OutMgr::addSmps(REALTYPE *l, REALTYPE *r)
 
 void OutMgr::removeStaleSmps()
 {
-    int toShift = storedSmps() - stales;
     if(!stales)
         return;
 
+    //memset is possibly unneeded
     memset(priBuf.l(), '0', 4096*sizeof(REALTYPE));
     memset(priBuf.r(), '0', 4096*sizeof(REALTYPE));
     priBuffCurrent = priBuf;
     stales = 0;
-
 }
 
