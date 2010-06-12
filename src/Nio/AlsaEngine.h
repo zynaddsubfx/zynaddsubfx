@@ -29,7 +29,6 @@
 #include "MidiIn.h"
 #include "OutMgr.h"
 #include "../Misc/Stereo.h"
-#include "../Samples/Sample.h"
 
 class AlsaEngine : public AudioOut, MidiIn
 {
@@ -57,7 +56,7 @@ class AlsaEngine : public AudioOut, MidiIn
         bool openAudio();
         void stopAudio();
 
-        const short *interleave(const Stereo<Sample> smps) const;
+        const short *interleave(const Stereo<REALTYPE *> smps) const;
 
         struct {
             std::string  device;

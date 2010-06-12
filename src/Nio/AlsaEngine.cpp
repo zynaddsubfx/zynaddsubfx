@@ -230,14 +230,14 @@ void AlsaEngine::stopMidi()
         snd_seq_close(handle);
 }
 
-const short *AlsaEngine::interleave(const Stereo<Sample> smps)const
+const short *AlsaEngine::interleave(const Stereo<REALTYPE *> smps)const
 {
     /**\todo TODO fix repeated allocation*/
-    short *shortInterleaved = new short[smps.l().size()*2];
-    memset(shortInterleaved,0,smps.l().size()*2*sizeof(short));
+    short *shortInterleaved = new short[bufferSize*2];
+    memset(shortInterleaved,0,bufferSize*2*sizeof(short));
     int idx = 0;//possible off by one error here
     double scaled;
-    for (int frame = 0; frame < smps.l().size(); ++frame)
+    for (int frame = 0; frame < bufferSize; ++frame)
     {   // with a nod to libsamplerate ...
         scaled = smps.l()[frame] * (8.0 * 0x10000000);
         shortInterleaved[idx++] = (short int)(lrint(scaled) >> 16);

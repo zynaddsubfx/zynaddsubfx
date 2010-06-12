@@ -65,15 +65,7 @@ int AudioOut::bufferingSize()
     //return buffering;
 }
 
-const Stereo<Sample> AudioOut::getNext(bool wait)
-{
-    Stereo<REALTYPE *> tmp = OutMgr::getInstance().tick(bufferSize);
-
-    //stop the samples
-    return Stereo<Sample>(Sample(bufferSize, tmp.l()), Sample(bufferSize, tmp.r()));
-}
-
-const Stereo<REALTYPE *> AudioOut::getNextBuf()
+const Stereo<REALTYPE *> AudioOut::getNext()
 {
     return OutMgr::getInstance().tick(bufferSize);
 }

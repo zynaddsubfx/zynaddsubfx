@@ -42,9 +42,8 @@ void *NulEngine::_AudioThread(void *arg)
 
 void *NulEngine::AudioThread()
 {
-    while(pThread)
-    {
-        const Stereo<Sample> smps = getNext();
+    while(pThread) {
+        getNext();
 
         struct timeval now;
         int remaining = 0;

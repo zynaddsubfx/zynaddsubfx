@@ -44,7 +44,7 @@ bool PaEngine::Start()
         return true;
     enabled = true;
     Pa_Initialize();
-    
+
     PaStreamParameters outputParameters;
     outputParameters.device = Pa_GetDefaultOutputDevice();
     if (outputParameters.device == paNoDevice) {
@@ -54,7 +54,7 @@ bool PaEngine::Start()
     }
     outputParameters.channelCount = 2; /* stereo output */
     outputParameters.sampleFormat = paFloat32; /* 32 bit floating point output */
-    outputParameters.suggestedLatency = 
+    outputParameters.suggestedLatency =
         Pa_GetDeviceInfo(outputParameters.device)->defaultLowOutputLatency;
     outputParameters.hostApiSpecificStreamInfo = NULL;
 
@@ -70,7 +70,7 @@ bool PaEngine::Start()
     Pa_StartStream(stream);
     return true;
 }
-        
+
 int PaEngine::PAprocess(const void *inputBuffer, void *outputBuffer,
         unsigned long framesPerBuffer,
         const PaStreamCallbackTimeInfo *outTime, PaStreamCallbackFlags flags,
@@ -83,15 +83,13 @@ int PaEngine::PAprocess(const void *inputBuffer, void *outputBuffer,
 int PaEngine::process(float *out, unsigned long framesPerBuffer)
 {
 
-    const Stereo<Sample> smp = getNext();
-    
-    if(framesPerBuffer != smp.l().size()) 
-        cerr << "Bug: PaEngine::process  SOUND_BUFFER_SIZE!=framesPerBuffer"
-             << framesPerBuffer << ' ' << smp.l().size() << endl;
+    const Stereo<REALTYPE *> smp = getNext();
+
+    //if(framesPerBuffer != smp.l().size())
+    //    cerr << "Bug: PaEngine::process  SOUND_BUFFER_SIZE!=framesPerBuffer"
+    //         << framesPerBuffer << ' ' << smp.l().size() << endl;
 
     for(int i = 0; i < framesPerBuffer; i++) {
-        if(i >= smp.l().size())
-            break;//this should never happens, except only when framesPerBuffer!>SOUND_BUFFER_SIZE
         *out++ = smp.l()[i];
         *out++ = smp.r()[i];
     }
