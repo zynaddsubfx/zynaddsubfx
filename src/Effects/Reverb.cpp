@@ -163,8 +163,8 @@ void Reverb::out(const Stereo<float *> &smp)
     if((Pvolume == 0) && (insertion != 0))
         return;
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
-        inputbuf[i] = (smp.l()[i] + smp.r()[i]) / 2.0;
+    for(i = 0; i < SOUND_BUFFER_SIZE; i++)
+        inputbuf[i] = (smp.l[i] + smp.r[i]) / 2.0;
 
     if(idelay != NULL) {
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {

@@ -57,8 +57,8 @@ void EQ::out(const Stereo<float *> &smp)
 {
     int i;
     for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        efxoutl[i] = smp.l()[i] * volume;
-        efxoutr[i] = smp.r()[i] * volume;
+        efxoutl[i] = smp.l[i] * volume;
+        efxoutr[i] = smp.r[i] * volume;
     }
 
     for(i = 0; i < MAX_EQ_BANDS; i++) {

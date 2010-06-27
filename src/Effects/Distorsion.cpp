@@ -271,14 +271,14 @@ void Distorsion::out(const Stereo<float *> &smp)
 
     if(Pstereo != 0) { //Stereo
         for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            efxoutl[i] = smp.l()[i] * inputvol * panning;
-            efxoutr[i] = smp.r()[i] * inputvol * (1.0 - panning);
+            efxoutl[i] = smp.l[i] * inputvol * panning;
+            efxoutr[i] = smp.r[i] * inputvol * (1.0 - panning);
         }
     }
     else {
         for(i = 0; i < SOUND_BUFFER_SIZE; i++)
             efxoutl[i] =
-                (smp.l()[i] * panning + smp.r()[i] * (1.0 - panning)) * inputvol;
+                (smp.l[i] * panning + smp.r[i] * (1.0 - panning)) * inputvol;
         ;
     }
 

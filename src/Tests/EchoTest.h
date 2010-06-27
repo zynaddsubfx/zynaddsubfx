@@ -40,13 +40,13 @@ class EchoTest:public CxxTest::TestSuite
                 outR[i] = 0.0;
             input  = new Stereo<REALTYPE *>(new REALTYPE[SOUND_BUFFER_SIZE],new REALTYPE[SOUND_BUFFER_SIZE]);
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
-                input->l()[i] = input->r()[i] = 0.0f;
+                input->l[i] = input->r[i] = 0.0f;
             testFX = new Echo(true, outL, outR);
         }
 
         void tearDown() {
-            delete[] input->r();
-            delete[] input->l();
+            delete[] input->r;
+            delete[] input->l;
             delete input;
             delete[] outL;
             delete[] outR;
@@ -70,7 +70,7 @@ class EchoTest:public CxxTest::TestSuite
 
             //flood with high input
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
-                input->r()[i] = input->l()[i] = 1.0;
+                input->r[i] = input->l[i] = 1.0;
 
             for(int i = 0; i < 500; ++i)
                 testFX->out(*input);
@@ -94,7 +94,7 @@ class EchoTest:public CxxTest::TestSuite
 
             //flood with high input
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
-                input->r()[i] = input->l()[i] = 1.0;
+                input->r[i] = input->l[i] = 1.0;
             char FEEDBACK = 5;
             testFX->changepar(FEEDBACK, 127);
             for(int i = 0; i < 100; ++i)
@@ -106,7 +106,7 @@ class EchoTest:public CxxTest::TestSuite
             float amp = abs(outL[0] + outR[0]) / 2;
             //reset input to zero
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
-                input->r()[i] = input->l()[i] = 0.0;
+                input->r[i] = input->l[i] = 0.0;
 
             //give the echo time to fade based upon zero input and high feedback
             for(int i = 0; i < 50; ++i)

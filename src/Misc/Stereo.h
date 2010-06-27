@@ -22,7 +22,7 @@
 #define STEREO_H
 
 template<class T>
-class Stereo
+struct Stereo
 {
     public:
         Stereo(const T &left, const T &right);
@@ -34,33 +34,9 @@ class Stereo
         ~Stereo() {}
 
         void operator=(const Stereo<T> &smp);
-        T &left() {
-            return leftChannel;
-        }
-        T &right() {
-            return rightChannel;
-        }
-        T &l() {
-            return leftChannel;
-        }
-        T &r() {
-            return rightChannel;
-        }
-        const T &left() const {
-            return leftChannel;
-        }
-        const T &right() const {
-            return rightChannel;
-        }
-        const T &l() const {
-            return leftChannel;
-        }
-        const T &r() const {
-            return rightChannel;
-        }
-    private:
-        T leftChannel;
-        T rightChannel;
+
+        T l;
+        T r;
 };
 #include "Stereo.cpp"
 #endif

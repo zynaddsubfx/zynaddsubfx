@@ -79,13 +79,13 @@ void Chorus::out(const Stereo<float *> &input)
     dr2 = getdelay(lfor);
 
     for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        REALTYPE inl = input.l()[i];
-        REALTYPE inr = input.r()[i];
+        REALTYPE inl = input.l[i];
+        REALTYPE inr = input.r[i];
         //LRcross
         Stereo<REALTYPE> tmpc(inl, inr);
         //REALTYPE r=inr;
-        inl = tmpc.l() * (1.0 - lrcross) + tmpc.r() * lrcross;
-        inr = tmpc.r() * (1.0 - lrcross) + tmpc.l() * lrcross;
+        inl = tmpc.l * (1.0 - lrcross) + tmpc.r * lrcross;
+        inr = tmpc.r * (1.0 - lrcross) + tmpc.l * lrcross;
 
         //Left channel
 
@@ -100,9 +100,9 @@ void Chorus::out(const Stereo<float *> &input)
 
         dlhi2      = (dlhi - 1 + maxdelay) % maxdelay;
         dllo       = 1.0 - fmod(tmp, one);
-        efxoutl[i] = delaySample.l()[dlhi2] * dllo + delaySample.l()[dlhi]
+        efxoutl[i] = delaySample.l[dlhi2] * dllo + delaySample.l[dlhi]
                      * (1.0 - dllo);
-        delaySample.l()[dlk] = inl + efxoutl[i] * fb;
+        delaySample.l[dlk] = inl + efxoutl[i] * fb;
 
         //Right channel
 
@@ -117,9 +117,9 @@ void Chorus::out(const Stereo<float *> &input)
 
         dlhi2      = (dlhi - 1 + maxdelay) % maxdelay;
         dllo       = 1.0 - fmod(tmp, one);
-        efxoutr[i] = delaySample.r()[dlhi2] * dllo + delaySample.r()[dlhi]
+        efxoutr[i] = delaySample.r[dlhi2] * dllo + delaySample.r[dlhi]
                      * (1.0 - dllo);
-        delaySample.r()[dlk] = inr + efxoutr[i] * fb;
+        delaySample.r[dlk] = inr + efxoutr[i] * fb;
     }
 
     if(Poutsub != 0)
@@ -139,8 +139,8 @@ void Chorus::out(const Stereo<float *> &input)
  */
 void Chorus::cleanup()
 {
-    delaySample.l().clear();
-    delaySample.r().clear();
+    delaySample.l.clear();
+    delaySample.r.clear();
 }
 
 /*
