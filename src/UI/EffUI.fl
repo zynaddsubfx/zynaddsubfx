@@ -167,7 +167,6 @@ effreverbwindow->hide();//delete (effreverbwindow);
 effechowindow->hide();//delete (effechowindow);
 effchoruswindow->hide();//delete (effchoruswindow);
 effphaserwindow->hide();//delete (effphaserwindow);
-effaphaserwindow->hide();//delete (effaphaserwindow);
 effalienwahwindow->hide();//delete (effalienwahwindow);
 effdistorsionwindow->hide();//delete (effdistorsionwindow);
 effeqwindow->hide();//delete (effeqwindow);
@@ -585,14 +584,14 @@ refresh(eff);}
   }
   Function {make_phaser_window()} {} {
     Fl_Window effphaserwindow {
-      xywh {389 213 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
+      xywh {75 25 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
       class Fl_Group
     } {
       Fl_Choice phaserp {
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 100 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
       } {
         MenuItem {} {
           label {Phaser 1}
@@ -617,6 +616,30 @@ refresh(eff);}
         MenuItem {} {
           label {Phaser 6}
           xywh {80 80 100 20} labelfont 1 labelsize 10 labelcolor 7
+        }
+        MenuItem {} {
+          label {APhaser 1}
+          xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
+        }
+        MenuItem {} {
+          label {APhaser 2}
+          xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
+        }
+        MenuItem {} {
+          label {APhaser 3}
+          xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
+        }
+        MenuItem {} {
+          label {APhaser 4}
+          xywh {70 70 100 20} labelfont 1 labelsize 10 labelcolor 7
+        }
+        MenuItem {} {
+          label {APhaser 5}
+          xywh {80 80 100 20} labelfont 1 labelsize 10 labelcolor 7
+        }
+        MenuItem {} {
+          label {APhaser 6} selected
+          xywh {90 90 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
       Fl_Text_Display {} {
@@ -638,195 +661,85 @@ refresh(eff);}
       Fl_Dial phaserp2 {
         label Freq
         callback {eff->seteffectpar(2,(int) o->value());}
-        tooltip {LFO frequency} xywh {85 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        tooltip {LFO frequency} xywh {85 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial phaserp3 {
         label Rnd
         callback {eff->seteffectpar(3,(int) o->value());}
-        tooltip {LFO randomness} xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
+        tooltip {LFO randomness} xywh {120 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
         class WidgetPDial
+      }
+      Fl_Choice phaserp4 {
+        label LFO
+        callback {eff->seteffectpar(4,(int) o->value());}
+        tooltip {LFO function} xywh {245 55 40 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 130 textsize 8
+      } {
+        MenuItem {} {
+          label SIN
+          xywh {15 15 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label TRI
+          xywh {25 25 100 20} labelfont 1 labelsize 10
+        }
       }
       Fl_Dial phaserp5 {
         label {St.df}
         callback {eff->seteffectpar(5,(int) o->value());}
-        tooltip {Left/Right Channel Phase Shift} xywh {200 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        tooltip {Left/Right Channel Phase Shift} xywh {155 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Dial phaserp6 {
         label Dpth
         callback {eff->seteffectpar(6,(int) o->value());}
-        tooltip {LFO Depth} xywh {235 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        tooltip {LFO Depth} xywh {120 5 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 maximum 127
         class WidgetPDial
       }
       Fl_Dial phaserp7 {
         label Fb
         callback {eff->seteffectpar(7,(int) o->value());}
-        tooltip Feedback xywh {270 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        tooltip Feedback xywh {185 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
+      }
+      Fl_Counter phaserp8 {
+        label Stages
+        callback {eff->seteffectpar(8,(int) o->value());}
+        xywh {290 55 35 15} type Simple labelfont 1 labelsize 11 minimum 0 maximum 127 step 1
+        code0 {o->range(1,MAX_PHASER_STAGES);}
       }
       Fl_Dial phaserp9 {
         label {L/R}
         callback {eff->seteffectpar(9,(int) o->value());}
-        tooltip {Channel Routing} xywh {345 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        tooltip {Channel Routing} xywh {215 45 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
         class WidgetPDial
       }
       Fl_Check_Button phaserp10 {
         label Substract
         callback {eff->seteffectpar(10,(int) o->value());}
-        tooltip {inverts output} xywh {185 10 74 20} box THIN_UP_BOX down_box DOWN_BOX color 230 labelfont 1 labelsize 10
-      }
-      Fl_Choice phaserp4 {
-        label {LFO type}
-        callback {eff->seteffectpar(4,(int) o->value());}
-        tooltip {LFO function} xywh {155 50 40 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 130 textsize 8
-      } {
-        MenuItem {} {
-          label SINE
-          xywh {15 15 100 20} labelfont 1 labelsize 10
-        }
-        MenuItem {} {
-          label TRI
-          xywh {25 25 100 20} labelfont 1 labelsize 10
-        }
-      }
-      Fl_Counter phaserp8 {
-        label Stages
-        callback {eff->seteffectpar(8,(int) o->value());}
-        xywh {305 55 35 15} type Simple labelfont 1 labelsize 11 minimum 0 maximum 127 step 1
-        code0 {o->range(1,MAX_PHASER_STAGES);}
+        tooltip {inverts output} xywh {200 10 74 20} box THIN_UP_BOX down_box DOWN_BOX color 230 labelfont 1 labelsize 10
       }
       Fl_Dial phaserp11 {
         label Phase
         callback {eff->seteffectpar(11,(int) o->value());}
-        xywh {155 10 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 maximum 127
+        xywh {155 5 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 maximum 127
         class WidgetPDial
       }
-    }
-  }
-  Function {make_analog_phaser_window()} {} {
-    Fl_Window effaphaserwindow {selected
-      xywh {292 251 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
-    } {
-      Fl_Choice aphaserp {
-        label Preset
-        callback {eff->changepreset((int)o->value());
-refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
-      } {
-        MenuItem {} {
-          label {Phaser 1}
-          xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
-        }
-        MenuItem {} {
-          label {Phaser 2}
-          xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
-        }
-        MenuItem {} {
-          label {Phaser 3}
-          xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
-        }
-        MenuItem {} {
-          label {Phaser 4}
-          xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
-        }
-        MenuItem {} {
-          label {Phaser 5}
-          xywh {70 70 100 20} labelfont 1 labelsize 10 labelcolor 7
-        }
-        MenuItem {} {
-          label {Phaser 6}
-          xywh {80 80 100 20} labelfont 1 labelsize 10 labelcolor 7
-        }
-      }
-      Fl_Text_Display {} {
-        label APhaser
-        xywh {260 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
-      }
-      Fl_Dial aphaser0 {
-        label Vol
-        callback {eff->seteffectpar(0,(int) o->value());}
-        tooltip {Effect Volume} xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
-        class WidgetPDial
-      }
-      Fl_Dial aphaser1 {
-        label dist
-        callback {eff->seteffectpar(1,(int) o->value());}
-        tooltip Distortion xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
-        class WidgetPDial
-      }
-      Fl_Dial aphaser2 {
-        label Freq
-        callback {eff->seteffectpar(2,(int) o->value());}
-        tooltip {LFO frequency} xywh {85 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
-        class WidgetPDial
-      }
-      Fl_Dial aphaser3 {
-        label rnd
-        callback {eff->seteffectpar(3,(int) o->value());}
-        tooltip Randomness xywh {120 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 when 4 maximum 127
-        class WidgetPDial
-      }
-      Fl_Choice aphaser4 {
-        label {LFO type}
-        callback {eff->seteffectpar(4,(int) o->value());}
-        tooltip {LFO function} xywh {155 50 40 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 130 textsize 8
-      } {
-        MenuItem {} {
-          label SINE
-          xywh {15 15 100 20} labelfont 1 labelsize 10
-        }
-        MenuItem {} {
-          label TRI
-          xywh {25 25 100 20} labelfont 1 labelsize 10
-        }
-      }
-      Fl_Dial aphaser5 {
-        label {St.df}
-        callback {eff->seteffectpar(5,(int) o->value());}
-        tooltip {Left/Right Channel Phase Shift} xywh {200 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
-        class WidgetPDial
-      }
-      Fl_Dial aphaser6 {
-        label Dpth
-        callback {eff->seteffectpar(6,(int) o->value());}
-        tooltip {LFO Depth} xywh {235 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
-        class WidgetPDial
-      }
-      Fl_Dial aphaser7 {
-        label Fb
-        callback {eff->seteffectpar(7,(int) o->value());}
-        tooltip Feedback xywh {270 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
-        class WidgetPDial
-      }
-      Fl_Counter aphaser8 {
-        label Stages
-        callback {eff->seteffectpar(8,(int) o->value());}
-        xywh {305 55 35 15} type Simple labelfont 1 labelsize 11 minimum 0 maximum 127 step 1
-        code0 {o->range(1,MAX_PHASER_STAGES);}
-      }
-      Fl_Dial aphaser9 {
-        label offset
-        callback {eff->seteffectpar(9,(int) o->value());}
-        tooltip offset xywh {345 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
-        class WidgetPDial
-      }
-      Fl_Check_Button aphaser10 {
-        label Substract
-        callback {eff->seteffectpar(10,(int) o->value());}
-        tooltip {inverts output} xywh {185 10 74 20} box THIN_UP_BOX down_box DOWN_BOX color 230 labelfont 1 labelsize 10
-      }
-      Fl_Dial aphaser11 {
-        label Depth
-        callback {eff->seteffectpar(11,(int) o->value());}
-        xywh {155 10 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 maximum 127
-        class WidgetPDial
-      }
-      Fl_Check_Button aphaser12 {
+      Fl_Check_Button phaserp12 {
         label {hyp.}
         callback {eff->seteffectpar(12,(int) o->value());}
-        tooltip hyper xywh {100 10 55 15} down_box DOWN_BOX
+        tooltip hyper xywh {245 35 55 15} down_box DOWN_BOX
+      }
+      Fl_Dial phaserp13 {
+        label dist
+        callback {eff->seteffectpar(13,(int) o->value());}
+        tooltip Distortion xywh {340 50 25 25} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        class WidgetPDial
+      }
+      Fl_Check_Button phaserp14 {
+        label Analog
+        callback {eff->seteffectpar(14,(int) o->value());}
+        xywh {305 35 70 15} down_box DOWN_BOX
       }
     }
   }
@@ -1377,7 +1290,6 @@ make_reverb_window();
 make_echo_window();
 make_chorus_window();
 make_phaser_window();
-make_analog_phaser_window();
 make_alienwah_window();
 make_distorsion_window();
 make_eq_window();
@@ -1391,7 +1303,6 @@ effreverbwindow->position(px,py);
 effechowindow->position(px,py);
 effchoruswindow->position(px,py);
 effphaserwindow->position(px,py);
-effaphaserwindow->position(px,py);
 effalienwahwindow->position(px,py);
 effdistorsionwindow->position(px,py);
 effeqwindow->position(px,py);
@@ -1399,7 +1310,8 @@ effdynamicfilterwindow->position(px,py);
 
 refresh(eff);} {}
   }
-  Function {refresh(EffectMgr *eff_)} {} {
+  Function {refresh(EffectMgr *eff_)} {open
+  } {
     code {eff=eff_;
 this->hide();
 
@@ -1408,7 +1320,6 @@ effreverbwindow->hide();
 effechowindow->hide();
 effchoruswindow->hide();
 effphaserwindow->hide();
-effaphaserwindow->hide();
 effalienwahwindow->hide();
 effdistorsionwindow->hide();
 effeqwindow->hide();
@@ -1481,6 +1392,9 @@ switch(eff->geteffect()){
 	phaserp9->value(eff->geteffectpar(9));
 	phaserp10->value(eff->geteffectpar(10));
 	phaserp11->value(eff->geteffectpar(11));
+	phaserp12->value(eff->geteffectpar(12));
+	phaserp13->value(eff->geteffectpar(13));
+	phaserp14->value(eff->geteffectpar(14));
 	effphaserwindow->show();
         break; 
      case 5:
@@ -1544,30 +1458,14 @@ switch(eff->geteffect()){
             
 	effdynamicfilterwindow->show();
 	break;
-     case 9://make_analog_phaser_window(); 
-	aphaserp->value(eff->getpreset());
-	aphaser0->value(eff->geteffectpar(0));if (eff->insertion!=0) aphaser0->label("D/W");
-	aphaser1->value(eff->geteffectpar(1));
-	aphaser2->value(eff->geteffectpar(2));
-	aphaser3->value(eff->geteffectpar(3));
-	aphaser4->value(eff->geteffectpar(4));
-	aphaser5->value(eff->geteffectpar(5));
-	aphaser6->value(eff->geteffectpar(6));
-	aphaser7->value(eff->geteffectpar(7));
-	aphaser8->value(eff->geteffectpar(8));
-	aphaser9->value(eff->geteffectpar(9));
-	aphaser10->value(eff->geteffectpar(10));
-	aphaser11->value(eff->geteffectpar(11));
-	aphaser12->value(eff->geteffectpar(12));
-	effaphaserwindow->show();
-	break;
     default:effnullwindow->show();
             break; 
 };
 
 this->show();} {}
   }
-  Function {refresh()} {} {
+  Function {refresh()} {open
+  } {
     code {refresh(eff);} {}
   }
   decl {EffectMgr *eff;} {}
@@ -1936,79 +1834,6 @@ refresh(eff);}
         label Stages
         callback {eff->seteffectpar(8,(int) o->value());}
         xywh {185 55 35 15} type Simple labelfont 1 labelsize 11 minimum 0 maximum 127 step 1
-        code0 {o->range(1,MAX_PHASER_STAGES);}
-      }
-    }
-  }
-  Function {make_analog_phaser_window()} {} {
-    Fl_Window effaphaserwindow {
-      xywh {367 295 230 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      code0 {}
-      class Fl_Group
-    } {
-      Fl_Choice aphaserp {
-        label Preset
-        callback {eff->changepreset((int)o->value());
-refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
-      } {
-        MenuItem {} {
-          label {Phaser 1}
-          xywh {30 30 100 20} labelfont 1 labelsize 10 labelcolor 7
-        }
-        MenuItem {} {
-          label {Phaser 2}
-          xywh {40 40 100 20} labelfont 1 labelsize 10 labelcolor 7
-        }
-        MenuItem {} {
-          label {Phaser 3}
-          xywh {50 50 100 20} labelfont 1 labelsize 10 labelcolor 7
-        }
-        MenuItem {} {
-          label {Phaser 4}
-          xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
-        }
-        MenuItem {} {
-          label {Phaser 5}
-          xywh {70 70 100 20} labelfont 1 labelsize 10 labelcolor 7
-        }
-        MenuItem {} {
-          label {Phaser 6}
-          xywh {80 80 100 20} labelfont 1 labelsize 10 labelcolor 7
-        }
-      }
-      Fl_Text_Display {} {
-        label APhaser
-        xywh {105 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
-      }
-      Fl_Dial aphaser0 {
-        label Vol
-        callback {eff->seteffectpar(0,(int) o->value());}
-        tooltip {Effect Volume} xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
-        class WidgetPDial
-      }
-      Fl_Dial aphaser2 {
-        label Freq
-        callback {eff->seteffectpar(2,(int) o->value());}
-        tooltip {LFO frequency} xywh {50 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
-        class WidgetPDial
-      }
-      Fl_Dial aphaser6 {
-        label Dpth
-        callback {eff->seteffectpar(6,(int) o->value());}
-        tooltip {LFO Depth} xywh {90 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
-        class WidgetPDial
-      }
-      Fl_Dial aphaser7 {
-        label Fb
-        callback {eff->seteffectpar(7,(int) o->value());}
-        tooltip Feedback xywh {135 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
-        class WidgetPDial
-      }
-      Fl_Counter aphaser8 {
-        label Stages
-        callback {eff->seteffectpar(8,(int) o->value());}
-        xywh {175 55 35 15} type Simple labelfont 1 labelsize 11 minimum 0 maximum 127 step 1
         code0 {o->range(1,MAX_PHASER_STAGES);}
       }
     }
@@ -2409,7 +2234,6 @@ make_reverb_window();
 make_echo_window();
 make_chorus_window();
 make_phaser_window();
-make_analog_phaser_window();
 make_alienwah_window();
 make_distorsion_window();
 make_eq_window();
@@ -2423,7 +2247,6 @@ effreverbwindow->position(px,py);
 effechowindow->position(px,py);
 effchoruswindow->position(px,py);
 effphaserwindow->position(px,py);
-effaphaserwindow->position(px,py);
 effalienwahwindow->position(px,py);
 effdistorsionwindow->position(px,py);
 effeqwindow->position(px,py);
@@ -2440,7 +2263,6 @@ effreverbwindow->hide();
 effechowindow->hide();
 effchoruswindow->hide();
 effphaserwindow->hide();
-effaphaserwindow->hide();
 effalienwahwindow->hide();
 effdistorsionwindow->hide();
 effeqwindow->hide();
@@ -2524,17 +2346,6 @@ switch(eff->geteffect()){
 
             
 	effdynamicfilterwindow->show();
-	break;
-     case 9:
-	aphaserp->value(eff->getpreset());
-	aphaser0->value(eff->geteffectpar(0));if (eff->insertion!=0) dfp0->label("D/W");
-	aphaser2->value(eff->geteffectpar(2));
-	aphaser6->value(eff->geteffectpar(6));
-	aphaser7->value(eff->geteffectpar(7));
-	aphaser8->value(eff->geteffectpar(8));
-
-            
-	effaphaserwindow->show();
 	break;
     default:effnullwindow->show();
             break; 

@@ -53,6 +53,10 @@ extern REALTYPE *denormalkillbuf; /**<the buffer to add noise in order to avoid 
 
 extern Config config;
 
+void invSignal(REALTYPE *sig, size_t len);
+
+void crossover(REALTYPE &a, REALTYPE &b, REALTYPE crossover);
+
 template<class T>
 std::string stringFrom(T x)
 {

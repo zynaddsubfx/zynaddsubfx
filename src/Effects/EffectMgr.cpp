@@ -113,9 +113,6 @@ void EffectMgr::changeeffect(int nefx_)
     case 8:
         efx = new DynamicFilter(insertion, efxoutl, efxoutr);
         break;
-    case 9:
-        efx = new Analog_Phaser(insertion, efxoutl, efxoutr);
-        break;
     //put more effect here
     default:
         efx = NULL;
