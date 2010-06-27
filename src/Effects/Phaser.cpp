@@ -104,8 +104,8 @@ void Phaser::AnalogPhase(const Stereo<REALTYPE *> &input)
     Stereo<REALTYPE> gain(0.0), lfoVal(0.0), mod(0.0), g(0.0), b(0.0), hpf(0.0);
 
     lfo.effectlfoout(&lfoVal.l, &lfoVal.r);
-    mod.l = lfoVal.l*width + depth;
-    mod.r = lfoVal.r*width + depth;
+    mod.l = lfoVal.l*width + (depth - 0.5f);
+    mod.r = lfoVal.r*width + (depth - 0.5f);
 
     mod.l = limit(mod.l, ZERO_, ONE_);
     mod.r = limit(mod.r, ZERO_, ONE_);
@@ -206,7 +206,7 @@ void Phaser::normalPhase(const Stereo<REALTYPE *> &input)
                             input.r[i] * (1.0 - panning) + fb.r);
 
         Stereo<REALTYPE> g(gain.l * x + oldgain.l * x1,
-                           gain.l * x + oldgain.r * x1);
+                           gain.r * x + oldgain.r * x1);
 
         xn.l = applyPhase(xn.l, g.l, old.l);
         xn.r = applyPhase(xn.r, g.r, old.r);
