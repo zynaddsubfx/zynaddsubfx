@@ -213,8 +213,8 @@ void *OssEngine::thread()
 
             REALTYPE l, r;
             for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-                l = smps.l()[i];
-                r = smps.r()[i];
+                l = smps.l[i];
+                r = smps.r[i];
 
                 if(l < -1.0)
                     l = -1.0;

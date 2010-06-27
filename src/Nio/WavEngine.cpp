@@ -78,8 +78,8 @@ void WavEngine::push(Stereo<REALTYPE *> smps, size_t len)
 
     //copy the input [overflow when needed]
     for(size_t i = 0; i < len; ++i) {
-        buffer.push(*smps.l()++);
-        buffer.push(*smps.r()++);
+        buffer.push(*smps.l++);
+        buffer.push(*smps.r++);
     }
     sem_post(&work);
 }

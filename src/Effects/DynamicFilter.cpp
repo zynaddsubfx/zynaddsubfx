@@ -60,7 +60,7 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     const REALTYPE freq = filterpars->getfreq();
     const REALTYPE q    = filterpars->getq();
 
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
         efxoutl[i] = smp.l[i];
         efxoutr[i] = smp.r[i];
 

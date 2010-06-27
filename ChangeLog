@@ -996,3 +996,5 @@
 02 May 2010 (Mark McCurry)
 	    - Merging in cleanup from effects and adding APhaser by Ryan Billing
 
+27 Jun 2010 (Mark McCurry)
+	   - Aphaser and Phaser are within same effect now
