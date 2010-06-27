@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2009 Nasca Octavian Paul} {} 
@@ -425,7 +425,7 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL)) {
     *exitprogram=1;
 };
 \#endif}
-      xywh {31 206 390 465} type Double hide xclass zynaddsubfx
+      xywh {585 104 390 465} type Double xclass zynaddsubfx visible
     } {
       Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
@@ -745,10 +745,6 @@ syseffectui->refresh(master->sysefx[nsyseff]);}
               label DynFilter
               xywh {90 90 100 20} labelfont 1 labelsize 10
             }
-            MenuItem {} {
-              label APhaser
-              xywh {0 0 36 21} labelfont 1 labelsize 10
-            }
           }
           Fl_Group syseffectuigroup {
             xywh {5 140 380 95} box FLAT_BOX color 48
@@ -847,10 +843,6 @@ inseffectui->show();}
             MenuItem {} {
               label DynFilter
               xywh {100 100 100 20} labelfont 1 labelsize 10
-            }
-            MenuItem {} {
-              label APhaser
-              xywh {0 0 36 21} labelfont 1 labelsize 10
             }
           }
           Fl_Group inseffectuigroup {
@@ -1369,10 +1361,6 @@ simplesyseffectui->refresh(master->sysefx[nsyseff]);}
                 label DynFilter
                 xywh {100 100 100 20} labelfont 1 labelsize 10
               }
-              MenuItem {} {
-                label Aphaser
-                xywh {0 0 40 25} labelfont 1 labelsize 10
-              }
             }
             Fl_Group simplesyseffectuigroup {
               xywh {350 95 235 95} box FLAT_BOX color 48
@@ -1426,7 +1414,7 @@ if (master->Pinsparts[ninseff]!=-1) {
 master->insefx[ninseff]->changeeffect((int) o->value());
 pthread_mutex_unlock(&master->mutex);
 simpleinseffectui->refresh(master->insefx[ninseff]);
-simpleinseffectui->show();}
+simpleinseffectui->show();} selected
               xywh {515 80 70 15} down_box BORDER_BOX labelsize 10 align 5
               code0 {o->value(master->insefx[ninseff]->geteffect());}
               code1 {if (master->Pinsparts[ninseff]== -1) o->deactivate();}
@@ -1466,10 +1454,6 @@ simpleinseffectui->show();}
               MenuItem {} {
                 label DynFilter
                 xywh {110 110 100 20} labelfont 1 labelsize 10
-              }
-              MenuItem {} {
-                label Aphaser
-                xywh {0 0 40 25} labelfont 1 labelsize 10
               }
             }
             Fl_Group simpleinseffectuigroup {
