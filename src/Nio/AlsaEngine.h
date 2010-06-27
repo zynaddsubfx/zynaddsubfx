@@ -2,6 +2,7 @@
     AlsaEngine.h
 
     Copyright 2009, Alan Calvert
+              2010, Mark McCurry
 
     This file is part of ZynAddSubFX, which is free software: you can
     redistribute it and/or modify it under the terms of the GNU General
@@ -56,7 +57,7 @@ class AlsaEngine : public AudioOut, MidiIn
         bool openAudio();
         void stopAudio();
 
-        const short *interleave(const Stereo<REALTYPE *> smps) const;
+        short *interleave(const Stereo<REALTYPE *> smps);
 
         struct {
             std::string  device;
@@ -71,7 +72,7 @@ class AlsaEngine : public AudioOut, MidiIn
             unsigned int sampleRate;
             snd_pcm_uframes_t frames;
             unsigned int periods;
-            const short *buffer;
+            short *buffer;
             pthread_t    pThread;
         } audio;
 

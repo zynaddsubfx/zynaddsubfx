@@ -2,6 +2,7 @@
     AlsaEngine.cpp
 
     Copyright 2009, Alan Calvert
+              2010, Mark McCurry
 
     This file is part of ZynAddSubFX, which is free software: you can
     redistribute it and/or modify it under the terms of the GNU General
@@ -31,6 +32,7 @@ using namespace std;
 AlsaEngine::AlsaEngine()
     :AudioOut()
 {
+    audio.buffer = new short[SOUND_BUFFER_SIZE*2];
     name = "ALSA";
     audio.handle = NULL;
 
@@ -43,6 +45,7 @@ AlsaEngine::AlsaEngine()
 AlsaEngine::~AlsaEngine()
 {
     Stop();
+    delete[] audio.buffer;
 }
 
 void *AlsaEngine::_AudioThread(void *arg)
@@ -230,10 +233,10 @@ void AlsaEngine::stopMidi()
         snd_seq_close(handle);
 }
 
-const short *AlsaEngine::interleave(const Stereo<REALTYPE *> smps)const
+short *AlsaEngine::interleave(const Stereo<REALTYPE *> smps)
 {
     /**\todo TODO fix repeated allocation*/
-    short *shortInterleaved = new short[bufferSize*2];
+    short *shortInterleaved = audio.buffer;
     memset(shortInterleaved,0,bufferSize*2*sizeof(short));
     int idx = 0;//possible off by one error here
     double scaled;
@@ -340,7 +343,6 @@ void *AlsaEngine::processAudio()
         snd_pcm_t *handle = audio.handle;
         if(handle)
             rc = snd_pcm_writei(handle, audio.buffer, SOUND_BUFFER_SIZE);
-        delete[] audio.buffer;
         if (rc == -EPIPE) {
             /* EPIPE means underrun */
             cerr << "underrun occurred" << endl;
