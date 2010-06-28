@@ -167,7 +167,7 @@ void *thread4(void *arg)
 void exitprogram();
 
 //cleanup on signaled exit
-void sigterm_exit(int sig)
+void sigterm_exit(int /*sig*/)
 {
     Pexitprogram = 1;
     sleep(1);

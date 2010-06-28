@@ -486,10 +486,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(REALTYPE *spectrum,
  */
 void PADnoteParameters::generatespectrum_otherModes(REALTYPE *spectrum,
                                                     int size,
-                                                    REALTYPE basefreq,
-                                                    REALTYPE *profile,
-                                                    int profilesize,
-                                                    REALTYPE bwadjust)
+                                                    REALTYPE basefreq)
 {
     for(int i = 0; i < size; i++)
         spectrum[i] = 0.0;
@@ -599,12 +596,8 @@ void PADnoteParameters::applyparameters(bool lockmutex)
                                            profilesize,
                                            bwadjust);
         else
-            generatespectrum_otherModes(spectrum,
-                                        spectrumsize,
-                                        basefreq * basefreqadjust,
-                                        profile,
-                                        profilesize,
-                                        bwadjust);
+            generatespectrum_otherModes(spectrum, spectrumsize,
+                                        basefreq * basefreqadjust);
 
         const int extra_samples = 5; //the last samples contains the first samples (used for linear/cubic interpolation)
         newsample.smp    = new REALTYPE[samplesize + extra_samples];

@@ -634,7 +634,7 @@ int Master::getalldata(char **data)
     return strlen(*data) + 1;
 }
 
-void Master::putalldata(char *data, int size)
+void Master::putalldata(char *data, int /*size*/)
 {
     XMLwrapper *xml = new XMLwrapper();
     if(!xml->putXMLdata(data)) {

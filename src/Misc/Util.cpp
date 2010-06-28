@@ -155,7 +155,7 @@ std::string legalizeFilename(std::string filename)
 
 void invSignal(REALTYPE *sig, size_t len)
 {
-    for(int i = 0; i < len; i++)
+    for(size_t i = 0; i < len; i++)
         sig[i] *= -1.0f;
 }
 

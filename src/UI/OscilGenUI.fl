@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0109 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
@@ -119,8 +119,7 @@ for (i=0;i<n;i++){
    int val=(int) ((ly-2)*x);
    if (val>0) fl_line(ox+tmp,oy+ly-2-val,ox+tmp,oy+ly-2);
 }
-delete [] spc;} {selected
-    }
+delete [] spc;} {}
   }
   decl {OscilGen *oscil;} {}
   decl {int oscbase;} {}
@@ -1023,11 +1022,11 @@ redrawoscil();}
         callback {if (!fl_choice("Convert to SINE?","No","Yes",NULL)) return;
 
 pthread_mutex_lock(&master->mutex);
- oscil->convert2sine(0);
+ oscil->convert2sine();
 pthread_mutex_unlock(&master->mutex);
 
 redrawoscil();
-refresh();}
+refresh();} selected
         xywh {670 525 55 15} box THIN_UP_BOX labelfont 1 labelsize 11
       }
       Fl_Button {} {

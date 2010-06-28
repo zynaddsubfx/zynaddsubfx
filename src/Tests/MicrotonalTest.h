@@ -110,10 +110,11 @@ class MicrotonalTest:public CxxTest::TestSuite
             TS_ASSERT(*testMicro == other); //cxxTest sees error here
         }
 
+#if 0
         /**\todo Test Saving/loading from file*/
 
         //Test texttomapping TODO finish
-        void testTextToMapping() {
+        void _testTextToMapping() {
             //the mapping is from old documentation for "Intense Diatonic" scale
             const char *mapping[12] =
             {"0", "x", "1", "x", "2", "3", "x", "4", "x", "5", "x", "6"};
@@ -124,7 +125,7 @@ class MicrotonalTest:public CxxTest::TestSuite
             //    find dead notes
         }
         //Test texttotunings TODO finish
-        void testTextToTunings() {
+        void _testTextToTunings() {
             //the tuning is from old documentation for "Intense Diatonic" scale
             const char *tuning[7] =
             {"9/8", "5/4", "4/3", "3/2", "5/3", "15/8", "2/1"};
@@ -134,6 +135,7 @@ class MicrotonalTest:public CxxTest::TestSuite
             //    go to middle key and verify the proportions
         }
         /**\TODO test loading from scl and kbm files*/
+#endif
 
     private:
         Microtonal *testMicro;

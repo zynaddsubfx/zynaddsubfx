@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
 decl {\#include <FL/fl_ask.H>} {public
@@ -189,7 +189,7 @@ paste(p,pui);} {}
 pastebrowse->clear();
 p->rescanforpresets();
 
-for (int i=0;i<presetsstore.presets.size();i++){
+for (unsigned int i=0;i<presetsstore.presets.size();i++){
    std::string name=presetsstore.presets[i].name;
    if(name.empty())
        continue;

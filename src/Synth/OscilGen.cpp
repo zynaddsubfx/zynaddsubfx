@@ -130,7 +130,7 @@ void OscilGen::defaults()
     prepare();
 }
 
-void OscilGen::convert2sine(int magtype)
+void OscilGen::convert2sine()
 {
     REALTYPE mag[MAX_AD_HARMONICS], phase[MAX_AD_HARMONICS];
     REALTYPE oscil[OSCIL_SIZE];

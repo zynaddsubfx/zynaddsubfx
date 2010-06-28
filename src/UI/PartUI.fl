@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
@@ -81,11 +81,6 @@ end();} {}
   decl {Master *master;} {}
   decl {int neff;} {}
   decl {int npart;} {}
-} 
-
-class PartUI_ {} {
-  Function {showparameters(int kititem,int engine)} {return_type virtual
-  } {}
 } 
 
 class PartKitItem {: {public Fl_Group}
@@ -254,7 +249,8 @@ partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0
 } else o->value(1);}
     }
   }
-  Function {init(Part *part_,int n_,Master *master_,PartUI_ *partui_)} {} {
+  Function {init(Part *part_,int n_,Master *master_,class PartUI *partui_)} {selected
+  } {
     code {part=part_;
 n=n_;
 partui=partui_;
@@ -271,10 +267,10 @@ end();} {}
   decl {int n;} {}
   decl {Master *master;} {}
   decl {char label[10];} {}
-  decl {PartUI_ *partui;} {}
+  decl {class PartUI *partui;} {}
 } 
 
-class PartUI {: {public Fl_Group,PartUI_}
+class PartUI {: {public Fl_Group}
 } {
   Function {make_window()} {private
   } {
@@ -841,7 +837,7 @@ if (part->Pkitmode==0) {
       }
     }
     Fl_Window instrumenteditwindow {
-      label {Instrument Edit} selected
+      label {Instrument Edit}
       xywh {182 214 395 360} type Double hide
     } {
       Fl_Group {} {

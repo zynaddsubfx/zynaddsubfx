@@ -40,8 +40,8 @@ class PresetsStore
 
         //presets stuff
         void copypreset(XMLwrapper *xml, char *type, std::string name);
-        bool pastepreset(XMLwrapper *xml, int npreset);
-        void deletepreset(int npreset);
+        bool pastepreset(XMLwrapper *xml, unsigned int npreset);
+        void deletepreset(unsigned int npreset);
 
         struct presetstruct {
             presetstruct(std::string _file, std::string _name)

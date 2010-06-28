@@ -1586,7 +1586,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
 
 
 /*Calculeaza Oscilatorul cu PITCH MODULATION*/
-inline void ADnote::ComputeVoiceOscillatorPitchModulation(int nvoice)
+inline void ADnote::ComputeVoiceOscillatorPitchModulation(int /*nvoice*/)
 {
 //TODO
 }

@@ -191,7 +191,7 @@ void FormantFilter::setq(REALTYPE q_)
         formant[i]->setq(Qfactor * currentformants[i].q);
 }
 
-void FormantFilter::setgain(REALTYPE dBgain)
+void FormantFilter::setgain(REALTYPE /*dBgain*/)
 {}
 
 

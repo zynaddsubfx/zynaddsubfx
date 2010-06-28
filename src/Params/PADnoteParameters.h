@@ -166,10 +166,7 @@ class PADnoteParameters:public Presets
                                             REALTYPE bwadjust);
         void generatespectrum_otherModes(REALTYPE *spectrum,
                                          int size,
-                                         REALTYPE basefreq,
-                                         REALTYPE *profile,
-                                         int profilesize,
-                                         REALTYPE bwadjust);
+                                         REALTYPE basefreq);
         void deletesamples();
         void deletesample(int n);
 

@@ -160,7 +160,7 @@ void PresetsStore::copypreset(XMLwrapper *xml, char *type, string name)
     xml->saveXMLfile(filename);
 }
 
-bool PresetsStore::pastepreset(XMLwrapper *xml, int npreset)
+bool PresetsStore::pastepreset(XMLwrapper *xml, unsigned int npreset)
 {
     npreset--;
     if(npreset >= presets.size())
@@ -172,7 +172,7 @@ bool PresetsStore::pastepreset(XMLwrapper *xml, int npreset)
     return result;
 }
 
-void PresetsStore::deletepreset(int npreset)
+void PresetsStore::deletepreset(unsigned int npreset)
 {
     npreset--;
     if(npreset >= presets.size())
