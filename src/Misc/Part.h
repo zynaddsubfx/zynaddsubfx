@@ -195,9 +195,6 @@ class Part
 
         PartNotes partnote[POLIPHONY];
 
-        REALTYPE *tmpoutl; //used to get the note
-        REALTYPE *tmpoutr;
-
         REALTYPE    oldfreq; //this is used for portamento
         Microtonal *microtonal;
         FFTwrapper *fft;

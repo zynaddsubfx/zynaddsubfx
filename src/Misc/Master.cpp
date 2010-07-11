@@ -45,9 +45,6 @@ Master::Master()
     pthread_mutex_init(&vumutex, NULL);
     fft = new FFTwrapper(OSCIL_SIZE);
 
-    tmpmixl   = new REALTYPE[SOUND_BUFFER_SIZE];
-    tmpmixr   = new REALTYPE[SOUND_BUFFER_SIZE];
-
     shutup     = 0;
     for(int npart = 0; npart < NUM_MIDI_PARTS; npart++) {
         vuoutpeakpart[npart] = 1e-9;
@@ -371,11 +368,11 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
         if(sysefx[nefx]->geteffect() == 0)
             continue;                              //the effect is disabled
 
+        REALTYPE *tmpmixl = getTmpBuffer();
+        REALTYPE *tmpmixr = getTmpBuffer();
         //Clean up the samples used by the system effects
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            tmpmixl[i] = 0.0;
-            tmpmixr[i] = 0.0;
-        }
+        memset(tmpmixl, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+        memset(tmpmixr, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
 
         //Mix the channels according to the part settings about System Effect
         for(npart = 0; npart < NUM_MIDI_PARTS; npart++) {
@@ -414,6 +411,9 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
             outl[i] += tmpmixl[i] * outvol;
             outr[i] += tmpmixr[i] * outvol;
         }
+
+        returnTmpBuffer(tmpmixl);
+        returnTmpBuffer(tmpmixr);
     }
 
     //Mix all parts
@@ -470,8 +470,6 @@ Master::~Master()
     for(int nefx = 0; nefx < NUM_SYS_EFX; nefx++)
         delete sysefx[nefx];
 
-    delete [] tmpmixl;
-    delete [] tmpmixr;
     delete fft;
     FFT_cleanup();
 

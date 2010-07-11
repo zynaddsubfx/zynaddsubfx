@@ -118,7 +118,6 @@ class PADnote
 
 
         REALTYPE    globaloldamplitude, globalnewamplitude, velocity, realfreq;
-        REALTYPE   *tmpwave;
         Controller *ctl;
 
         // Legato vars

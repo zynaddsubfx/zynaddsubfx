@@ -22,6 +22,7 @@
 
 #include "Part.h"
 #include "Microtonal.h"
+#include "Util.h"
 #include "../Effects/EffectMgr.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Params/SUBnoteParameters.h"
@@ -40,8 +41,6 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
     mutex      = mutex_;
     partoutl   = new REALTYPE [SOUND_BUFFER_SIZE];
     partoutr   = new REALTYPE [SOUND_BUFFER_SIZE];
-    tmpoutl    = new REALTYPE [SOUND_BUFFER_SIZE];
-    tmpoutr    = new REALTYPE [SOUND_BUFFER_SIZE];
 
     for(int n = 0; n < NUM_KIT_ITEMS; n++) {
         kit[n].Pname   = new unsigned char [PART_MAX_NAME_LEN];
@@ -162,8 +161,6 @@ void Part::cleanup(bool final)
     for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
         partoutl[i] = final ? 0.0 : denormalkillbuf[i];
         partoutr[i] = final ? 0.0 : denormalkillbuf[i];
-        tmpoutl[i]  = 0.0;
-        tmpoutr[i]  = 0.0;
     }
     ctl.resetall();
     for(int nefx = 0; nefx < NUM_PART_EFX; nefx++)
@@ -195,8 +192,6 @@ Part::~Part()
     delete [] Pname;
     delete [] partoutl;
     delete [] partoutr;
-    delete [] tmpoutl;
-    delete [] tmpoutr;
     for(int nefx = 0; nefx < NUM_PART_EFX; nefx++)
         delete (partefx[nefx]);
     for(int n = 0; n < NUM_PART_EFX + 1; n++) {
@@ -949,16 +944,17 @@ void Part::ComputePartSmps()
             SUBnote *subnote    = partnote[k].kititem[item].subnote;
             PADnote *padnote    = partnote[k].kititem[item].padnote;
             //get from the ADnote
-            if(adnote != NULL) {
+            if(adnote) {
+                REALTYPE *tmpoutr = getTmpBuffer();
+                REALTYPE *tmpoutl = getTmpBuffer();
                 noteplay++;
-                if(adnote->ready != 0)
+                if(adnote->ready)
                     adnote->noteout(&tmpoutl[0], &tmpoutr[0]);
-                else
-                    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-                        tmpoutl[i] = 0.0;
-                        tmpoutr[i] = 0.0;
-                    }
-                ;
+                else {
+                    memset(tmpoutl, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+                    memset(tmpoutr, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+                }
+
                 if(adnote->finished() != 0) {
                     delete (adnote);
                     partnote[k].kititem[item].adnote = NULL;
@@ -967,18 +963,21 @@ void Part::ComputePartSmps()
                     partfxinputl[sendcurrenttofx][i] += tmpoutl[i];
                     partfxinputr[sendcurrenttofx][i] += tmpoutr[i];
                 }
+                returnTmpBuffer(tmpoutr);
+                returnTmpBuffer(tmpoutl);
             }
             //get from the SUBnote
-            if(subnote != NULL) {
+            if(subnote) {
+                REALTYPE *tmpoutr = getTmpBuffer();
+                REALTYPE *tmpoutl = getTmpBuffer();
                 noteplay++;
-                if(subnote->ready != 0)
+                if(subnote->ready)
                     subnote->noteout(&tmpoutl[0], &tmpoutr[0]);
-                else
-                    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-                        tmpoutl[i] = 0.0;
-                        tmpoutr[i] = 0.0;
-                    }
-                ;
+                else {
+                    memset(tmpoutl, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+                    memset(tmpoutr, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+                }
+
 
                 for(i = 0; i < SOUND_BUFFER_SIZE; i++) { //add the SUBnote to part(mix)
                     partfxinputl[sendcurrenttofx][i] += tmpoutl[i];
@@ -988,18 +987,21 @@ void Part::ComputePartSmps()
                     delete (subnote);
                     partnote[k].kititem[item].subnote = NULL;
                 }
+                returnTmpBuffer(tmpoutr);
+                returnTmpBuffer(tmpoutl);
             }
             //get from the PADnote
-            if(padnote != NULL) {
+            if(padnote) {
+                REALTYPE *tmpoutr = getTmpBuffer();
+                REALTYPE *tmpoutl = getTmpBuffer();
                 noteplay++;
-                if(padnote->ready != 0)
+                if(padnote->ready)
                     padnote->noteout(&tmpoutl[0], &tmpoutr[0]);
-                else
-                    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-                        tmpoutl[i] = 0.0;
-                        tmpoutr[i] = 0.0;
-                    }
-                ;
+                else {
+                    memset(tmpoutl, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+                    memset(tmpoutr, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+                }
+
                 if(padnote->finished() != 0) {
                     delete (padnote);
                     partnote[k].kititem[item].padnote = NULL;
@@ -1008,6 +1010,8 @@ void Part::ComputePartSmps()
                     partfxinputl[sendcurrenttofx][i] += tmpoutl[i];
                     partfxinputr[sendcurrenttofx][i] += tmpoutr[i];
                 }
+                returnTmpBuffer(tmpoutr);
+                returnTmpBuffer(tmpoutl);
             }
         }
         //Kill note if there is no synth on that note
@@ -1045,15 +1049,13 @@ void Part::ComputePartSmps()
                 (SOUND_BUFFER_SIZE - i) / (REALTYPE) SOUND_BUFFER_SIZE;
             partoutl[i] *= tmp;
             partoutr[i] *= tmp;
-            tmpoutl[i]   = 0.0;
-            tmpoutr[i]   = 0.0;
         }
         for(int k = 0; k < POLIPHONY; k++)
             KillNotePos(k);
         killallnotes = 0;
         for(int nefx = 0; nefx < NUM_PART_EFX; nefx++)
             partefx[nefx]->cleanup();
-        ;
+
     }
     ctl.updateportamento();
 }

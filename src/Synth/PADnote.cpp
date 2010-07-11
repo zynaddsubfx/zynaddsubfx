@@ -103,9 +103,6 @@ PADnote::PADnote(PADnoteParameters *parameters,
         poshi_r = poshi_l;
     poslo   = 0.0;
 
-    tmpwave = new REALTYPE [SOUND_BUFFER_SIZE];
-
-
 
     if(pars->PPanning == 0)
         NoteGlobalPar.Panning = RND;
@@ -297,7 +294,6 @@ PADnote::~PADnote()
     delete (NoteGlobalPar.GlobalFilterR);
     delete (NoteGlobalPar.FilterEnvelope);
     delete (NoteGlobalPar.FilterLfo);
-    delete [] tmpwave;
 }
 
 

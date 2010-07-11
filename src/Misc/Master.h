@@ -167,11 +167,6 @@ class Master
         REALTYPE volume;
         REALTYPE sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         REALTYPE sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
-
-        //Temporary mixing samples for part samples which is sent to system effect
-        REALTYPE *tmpmixl;
-        REALTYPE *tmpmixr;
-
         int keyshift;
 };
 
