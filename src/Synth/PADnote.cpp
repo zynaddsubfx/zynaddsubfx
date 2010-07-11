@@ -165,31 +165,10 @@ void PADnote::legatonote(REALTYPE freq,
                             bool externcall)
 {
     PADnoteParameters *parameters = pars;
-    //Controller *ctl_=ctl;
 
     // Manage legato stuff
-    if(externcall)
-        legato.msg = LM_Norm;
-    if(legato.msg != LM_CatchUp) {
-        legato.lastfreq   = legato.param.freq;
-        legato.param.freq = freq;
-        legato.param.vel  = velocity;
-        legato.param.portamento = portamento_;
-        legato.param.midinote   = midinote;
-        if(legato.msg == LM_Norm) {
-            if(legato.silent) {
-                legato.fade.m = 0.0;
-                legato.msg    = LM_FadeIn;
-            }
-            else {
-                legato.fade.m = 1.0;
-                legato.msg    = LM_FadeOut;
-                return;
-            }
-        }
-        if(legato.msg == LM_ToNorm)
-            legato.msg = LM_Norm;
-    }
+    if(legato.update(freq, velocity, portamento_, midinote, externcall))
+        return;
 
     portamento     = portamento_;
     this->velocity = velocity;
@@ -493,81 +472,7 @@ int PADnote::noteout(REALTYPE *outl, REALTYPE *outr)
 
 
     // Apply legato-specific sound signal modifications
-    if(legato.silent)    // Silencer
-        if(legato.msg != LM_FadeIn)
-            for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-                outl[i] = 0.0;
-                outr[i] = 0.0;
-            }
-    switch(legato.msg) {
-    case LM_CatchUp:  // Continue the catch-up...
-        if(legato.decounter == -10)
-            legato.decounter = legato.fade.length;
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) { //Yea, could be done without the loop...
-            legato.decounter--;
-            if(legato.decounter < 1) {
-                // Catching-up done, we can finally set
-                // the note to the actual parameters.
-                legato.decounter = -10;
-                legato.msg = LM_ToNorm;
-                legatonote(legato.param.freq,
-                           legato.param.vel,
-                           legato.param.portamento,
-                           legato.param.midinote,
-                           false);
-                break;
-            }
-        }
-        break;
-    case LM_FadeIn:  // Fade-in
-        if(legato.decounter == -10)
-            legato.decounter = legato.fade.length;
-        legato.silent = false;
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            legato.decounter--;
-            if(legato.decounter < 1) {
-                legato.decounter = -10;
-                legato.msg = LM_Norm;
-                break;
-            }
-            legato.fade.m += legato.fade.step;
-            outl[i] *= legato.fade.m;
-            outr[i] *= legato.fade.m;
-        }
-        break;
-    case LM_FadeOut:  // Fade-out, then set the catch-up
-        if(legato.decounter == -10)
-            legato.decounter = legato.fade.length;
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            legato.decounter--;
-            if(legato.decounter < 1) {
-                for(int j = i; j < SOUND_BUFFER_SIZE; j++) {
-                    outl[j] = 0.0;
-                    outr[j] = 0.0;
-                }
-                legato.decounter = -10;
-                legato.silent    = true;
-                // Fading-out done, now set the catch-up :
-                legato.decounter = legato.fade.length;
-                legato.msg = LM_CatchUp;
-                REALTYPE catchupfreq = legato.param.freq
-                                       * (legato.param.freq / legato.lastfreq);            //This freq should make this now silent note to catch-up (or should I say resync ?) with the heard note for the same length it stayed at the previous freq during the fadeout.
-                legatonote(catchupfreq,
-                           legato.param.vel,
-                           legato.param.portamento,
-                           legato.param.midinote,
-                           false);
-                break;
-            }
-            legato.fade.m -= legato.fade.step;
-            outl[i] *= legato.fade.m;
-            outr[i] *= legato.fade.m;
-        }
-        break;
-    default:
-        break;
-    }
-
+    legato.apply(*this,outl,outr);
 
     // Check if the global amplitude is finished.
     // If it does, disable the note

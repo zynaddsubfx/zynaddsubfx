@@ -38,9 +38,6 @@ SUBnote::SUBnote(SUBnoteParameters *parameters,
 {
     ready  = false;
 
-    tmpsmp = new REALTYPE[SOUND_BUFFER_SIZE];
-    tmprnd = new REALTYPE[SOUND_BUFFER_SIZE];
-
     pars = parameters;
     ctl  = ctl_;
     portamento  = portamento_;
@@ -190,32 +187,9 @@ void SUBnote::legatonote(REALTYPE freq,
                             int midinote,
                             bool externcall)
 {
-    //SUBnoteParameters *parameters=pars;
-    //Controller *ctl_=ctl;
-
     // Manage legato stuff
-    if(externcall)
-        legato.msg = LM_Norm;
-    if(legato.msg != LM_CatchUp) {
-        legato.lastfreq   = legato.param.freq;
-        legato.param.freq = freq;
-        legato.param.vel  = velocity;
-        legato.param.portamento = portamento_;
-        legato.param.midinote   = midinote;
-        if(legato.msg == LM_Norm) {
-            if(legato.silent) {
-                legato.fade.m = 0.0;
-                legato.msg    = LM_FadeIn;
-            }
-            else {
-                legato.fade.m = 1.0;
-                legato.msg    = LM_FadeOut;
-                return;
-            }
-        }
-        if(legato.msg == LM_ToNorm)
-            legato.msg = LM_Norm;
-    }
+    if(legato.update(freq, velocity, portamento_, midinote, externcall))
+        return;
 
     portamento = portamento_;
 
@@ -356,7 +330,6 @@ void SUBnote::legatonote(REALTYPE freq,
     ///////////////
 
     oldamplitude = newamplitude;
-
 }
 
 
@@ -364,8 +337,6 @@ SUBnote::~SUBnote()
 {
     if(NoteEnabled != OFF)
         KillNote();
-    delete [] tmpsmp;
-    delete [] tmprnd;
 }
 
 /*
@@ -590,22 +561,22 @@ void SUBnote::computecurrentparameters()
  */
 int SUBnote::noteout(REALTYPE *outl, REALTYPE *outr)
 {
-    int i;
-
     memcpy(outl, denormalkillbuf, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
     memcpy(outr, denormalkillbuf, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
 
     if(NoteEnabled == OFF)
         return 0;
 
+    REALTYPE *tmprnd = getTmpBuffer();
+    REALTYPE *tmpsmp = getTmpBuffer();
     //left channel
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++)
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
         tmprnd[i] = RND * 2.0 - 1.0;
     for(int n = 0; n < numharmonics; n++) {
         memcpy(tmpsmp, tmprnd, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
         for(int nph = 0; nph < numstages; nph++)
             filter(lfilter[nph + n * numstages], tmpsmp);
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++)
+        for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
             outl[i] += tmpsmp[i];
     }
 
@@ -614,13 +585,13 @@ int SUBnote::noteout(REALTYPE *outl, REALTYPE *outr)
 
     //right channel
     if(stereo != 0) {
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++)
+        for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
             tmprnd[i] = RND * 2.0 - 1.0;
         for(int n = 0; n < numharmonics; n++) {
             memcpy(tmpsmp, tmprnd, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
             for(int nph = 0; nph < numstages; nph++)
                 filter(rfilter[nph + n * numstages], tmpsmp);
-            for(i = 0; i < SOUND_BUFFER_SIZE; i++)
+            for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
                 outr[i] += tmpsmp[i];
         }
         if(GlobalFilterR != NULL)
@@ -628,12 +599,14 @@ int SUBnote::noteout(REALTYPE *outl, REALTYPE *outr)
     }
     else
         memcpy(outr, outl, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
+    returnTmpBuffer(tmprnd);
+    returnTmpBuffer(tmpsmp);
 
     if(firsttick != 0) {
         int n = 10;
         if(n > SOUND_BUFFER_SIZE)
             n = SOUND_BUFFER_SIZE;
-        for(i = 0; i < n; i++) {
+        for(int i = 0; i < n; i++) {
             REALTYPE ampfadein = 0.5 - 0.5 * cos(
                 (REALTYPE) i / (REALTYPE) n * PI);
             outl[i] *= ampfadein;
@@ -644,7 +617,7 @@ int SUBnote::noteout(REALTYPE *outl, REALTYPE *outr)
 
     if(ABOVE_AMPLITUDE_THRESHOLD(oldamplitude, newamplitude)) {
         // Amplitude interpolation
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
             REALTYPE tmpvol = INTERPOLATE_AMPLITUDE(oldamplitude,
                                                     newamplitude,
                                                     i,
@@ -654,7 +627,7 @@ int SUBnote::noteout(REALTYPE *outl, REALTYPE *outr)
         }
     }
     else {
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
             outl[i] *= newamplitude * panning;
             outr[i] *= newamplitude * (1.0 - panning);
         }
@@ -664,83 +637,11 @@ int SUBnote::noteout(REALTYPE *outl, REALTYPE *outr)
     computecurrentparameters();
 
     // Apply legato-specific sound signal modifications
-    if(legato.silent)    // Silencer
-        if(legato.msg != LM_FadeIn) {
-            memset(outl, 0, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
-            memset(outr, 0, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
-        }
-    switch(legato.msg) {
-    case LM_CatchUp:  // Continue the catch-up...
-        if(legato.decounter == -10)
-            legato.decounter = legato.fade.length;
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) { //Yea, could be done without the loop...
-            legato.decounter--;
-            if(legato.decounter < 1) {
-                // Catching-up done, we can finally set
-                // the note to the actual parameters.
-                legato.decounter = -10;
-                legato.msg = LM_ToNorm;
-                legatonote(legato.param.freq,
-                           legato.param.vel,
-                           legato.param.portamento,
-                           legato.param.midinote,
-                           false);
-                break;
-            }
-        }
-        break;
-    case LM_FadeIn:  // Fade-in
-        if(legato.decounter == -10)
-            legato.decounter = legato.fade.length;
-        legato.silent = false;
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            legato.decounter--;
-            if(legato.decounter < 1) {
-                legato.decounter = -10;
-                legato.msg = LM_Norm;
-                break;
-            }
-            legato.fade.m += legato.fade.step;
-            outl[i] *= legato.fade.m;
-            outr[i] *= legato.fade.m;
-        }
-        break;
-    case LM_FadeOut:  // Fade-out, then set the catch-up
-        if(legato.decounter == -10)
-            legato.decounter = legato.fade.length;
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            legato.decounter--;
-            if(legato.decounter < 1) {
-                for(int j = i; j < SOUND_BUFFER_SIZE; j++) {
-                    outl[j] = 0.0;
-                    outr[j] = 0.0;
-                }
-                legato.decounter = -10;
-                legato.silent    = true;
-                // Fading-out done, now set the catch-up :
-                legato.decounter = legato.fade.length;
-                legato.msg = LM_CatchUp;
-                REALTYPE catchupfreq = legato.param.freq
-                                       * (legato.param.freq / legato.lastfreq);            //This freq should make this now silent note to catch-up (or should I say resync ?) with the heard note for the same length it stayed at the previous freq during the fadeout.
-                legatonote(catchupfreq,
-                           legato.param.vel,
-                           legato.param.portamento,
-                           legato.param.midinote,
-                           false);
-                break;
-            }
-            legato.fade.m -= legato.fade.step;
-            outl[i] *= legato.fade.m;
-            outr[i] *= legato.fade.m;
-        }
-        break;
-    default:
-        break;
-    }
+    legato.apply(*this,outl,outr);
 
     // Check if the note needs to be computed more
     if(AmpEnvelope->finished() != 0) {
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) { //fade-out
+        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) { //fade-out
             REALTYPE tmp = 1.0 - (REALTYPE)i / (REALTYPE)SOUND_BUFFER_SIZE;
             outl[i] *= tmp;
             outr[i] *= tmp;
@@ -756,11 +657,11 @@ int SUBnote::noteout(REALTYPE *outl, REALTYPE *outr)
 void SUBnote::relasekey()
 {
     AmpEnvelope->relasekey();
-    if(FreqEnvelope != NULL)
+    if(FreqEnvelope)
         FreqEnvelope->relasekey();
-    if(BandWidthEnvelope != NULL)
+    if(BandWidthEnvelope)
         BandWidthEnvelope->relasekey();
-    if(GlobalFilterEnvelope != NULL)
+    if(GlobalFilterEnvelope)
         GlobalFilterEnvelope->relasekey();
 }
 

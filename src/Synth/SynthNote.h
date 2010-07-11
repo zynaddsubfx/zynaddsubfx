@@ -47,22 +47,29 @@ class SynthNote
          * false when parameters need to be computed.*/
         bool ready;
     protected:
-        // Legato vars
-        struct Legato{
-            Legato(REALTYPE freq, REALTYPE vel, int port,
-                           int note, bool quiet);
-            bool      silent;
-            REALTYPE  lastfreq;
-            LegatoMsg msg;
-            int decounter;
-            struct { // Fade In/Out vars
-                int      length;
-                REALTYPE m, step;
-            } fade;
-            struct { // Note parameters
-                REALTYPE freq, vel;
-                int      portamento, midinote;
-            } param;
+        // Legato transitions
+        class Legato{
+            public:
+                Legato(REALTYPE freq, REALTYPE vel, int port,
+                        int note, bool quiet);
+
+                void apply(SynthNote &note, REALTYPE *outl, REALTYPE *outr);
+                int update(REALTYPE freq, REALTYPE velocity, int portamento_,
+                        int midinote_, bool externalcall);
+
+            private:
+                bool      silent;
+                REALTYPE  lastfreq;
+                LegatoMsg msg;
+                int decounter;
+                struct { // Fade In/Out vars
+                    int      length;
+                    REALTYPE m, step;
+                } fade;
+                struct { // Note parameters
+                    REALTYPE freq, vel;
+                    int      portamento, midinote;
+                } param;
         } legato;
 };
 
