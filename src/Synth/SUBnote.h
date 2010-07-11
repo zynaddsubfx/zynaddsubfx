@@ -33,13 +33,8 @@
 class SUBnote :public SynthNote
 {
     public:
-        SUBnote(SUBnoteParameters *parameters,
-                Controller *ctl_,
-                REALTYPE freq,
-                REALTYPE velocity,
-                int portamento_,
-                int midinote,
-                bool besilent);
+        SUBnote(SUBnoteParameters *parameters, Controller *ctl_, REALTYPE freq,
+                REALTYPE velocity, int portamento_, int midinote, bool besilent);
         ~SUBnote();
 
         void legatonote(REALTYPE freq, REALTYPE velocity, int portamento_,
@@ -50,6 +45,7 @@ class SUBnote :public SynthNote
         int finished() const;
     private:
 
+        void setup(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote, bool legato=false);
         void computecurrentparameters();
         void initparameters(REALTYPE freq);
         void KillNote();
@@ -106,9 +102,6 @@ class SUBnote :public SynthNote
         int      oldpitchwheel, oldbandwidth;
         REALTYPE globalfiltercenterq;
 };
-
-
-
 
 #endif
 
