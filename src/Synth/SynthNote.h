@@ -26,25 +26,44 @@
 class SynthNote
 {
     public:
+        SynthNote(REALTYPE freq, REALTYPE vel, int port, int note, bool quiet);
         virtual ~SynthNote() {}
-        
+
         /**Compute Output Samples
          * @return 0 if note is finished*/
         virtual int noteout(REALTYPE *outl, REALTYPE *outr) = 0;
-        
+
         //TODO fix this spelling error [noisey commit]
         /**Release the key for the note and start release portion of envelopes.*/
         virtual void relasekey() = 0;
-        
+
         /**Return if note is finished.
          * @return finished=1 unfinished=0*/
         virtual int finished() const = 0;
-        
-        virtual void legatonote(REALTYPE freq, REALTYPE velocity, 
+
+        virtual void legatonote(REALTYPE freq, REALTYPE velocity,
                 int portamento_, int midinote_, bool externcall) = 0;
         /**true when ready for output(the parameters has been computed)
          * false when parameters need to be computed.*/
         bool ready;
+    protected:
+        // Legato vars
+        struct Legato{
+            Legato(REALTYPE freq, REALTYPE vel, int port,
+                           int note, bool quiet);
+            bool      silent;
+            REALTYPE  lastfreq;
+            LegatoMsg msg;
+            int decounter;
+            struct { // Fade In/Out vars
+                int      length;
+                REALTYPE m, step;
+            } fade;
+            struct { // Note parameters
+                REALTYPE freq, vel;
+                int      portamento, midinote;
+            } param;
+        } legato;
 };
 
 #endif

@@ -315,22 +315,6 @@ class ADnote :public SynthNote
 
         //how the fine detunes are made bigger or smaller
         REALTYPE bandwidthDetuneMultiplier;
-
-        // Legato vars
-        struct {
-            bool      silent;
-            REALTYPE  lastfreq;
-            LegatoMsg msg;
-            int decounter;
-            struct { // Fade In/Out vars
-                int      length;
-                REALTYPE m, step;
-            } fade;
-            struct { // Note parameters
-                REALTYPE freq, vel;
-                int      portamento, midinote;
-            } param;
-        } Legato;
 };
 
 #endif

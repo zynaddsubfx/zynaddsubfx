@@ -105,22 +105,6 @@ class SUBnote :public SynthNote
         Controller *ctl;
         int      oldpitchwheel, oldbandwidth;
         REALTYPE globalfiltercenterq;
-
-        // Legato vars
-        struct {
-            bool      silent;
-            REALTYPE  lastfreq;
-            LegatoMsg msg;
-            int decounter;
-            struct { // Fade In/Out vars
-                int      length;
-                REALTYPE m, step;
-            } fade;
-            struct { // Note parameters
-                REALTYPE freq, vel;
-                int      portamento, midinote;
-            } param;
-        } Legato;
 };
 
 

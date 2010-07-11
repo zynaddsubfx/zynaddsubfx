@@ -114,22 +114,6 @@ class PADnote :public SynthNote
 
         REALTYPE    globaloldamplitude, globalnewamplitude, velocity, realfreq;
         Controller *ctl;
-
-        // Legato vars
-        struct {
-            bool      silent;
-            REALTYPE  lastfreq;
-            LegatoMsg msg;
-            int decounter;
-            struct { // Fade In/Out vars
-                int      length;
-                REALTYPE m, step;
-            } fade;
-            struct { // Note parameters
-                REALTYPE freq, vel;
-                int      portamento, midinote;
-            } param;
-        } Legato;
 };
 
 

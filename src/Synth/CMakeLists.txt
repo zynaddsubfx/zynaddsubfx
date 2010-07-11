@@ -1,4 +1,5 @@
 set(zynaddsubfx_synth_SRCS
+	SynthNote.cpp
 	ADnote.cpp
 	Envelope.cpp
 	LFO.cpp
