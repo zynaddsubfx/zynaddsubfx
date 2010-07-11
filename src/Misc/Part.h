@@ -29,7 +29,6 @@
 #include "../Params/Controller.h"
 #include "../Misc/Microtonal.h"
 #include "../DSP/FFTwrapper.h"
-#include "XMLwrapper.h"
 
 #include <list> // For the monomemnotes list.
 
@@ -37,9 +36,8 @@ class EffectMgr;
 class ADnoteParameters;
 class SUBnoteParameters;
 class PADnoteParameters;
-class ADnote;
-class SUBnote;
-class PADnote;
+class SynthNote;
+class XMLWrapper;
 
 /** Part implementation*/
 class Part
@@ -87,9 +85,6 @@ class Part
 
         void cleanup(bool final = false);
 
-//      ADnoteParameters *ADPartParameters;
-//      SUBnoteParameters *SUBPartParameters;
-
         //the part's kit
         struct {
             unsigned char      Penabled, Pmuted, Pminkey, Pmaxkey;
@@ -136,8 +131,8 @@ class Part
         REALTYPE *partoutl; //Left channel output of the part
         REALTYPE *partoutr; //Right channel output of the part
 
-        REALTYPE *partfxinputl[NUM_PART_EFX + 1],
-        *partfxinputr[NUM_PART_EFX + 1];                                 //Left and right signal that pass thru part effects; partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
+        REALTYPE *partfxinputl[NUM_PART_EFX + 1], //Left and right signal that pass thru part effects;
+                 *partfxinputr[NUM_PART_EFX + 1]; //partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
 
         enum NoteStatus {
             KEY_OFF, KEY_PLAYING, KEY_RELASED_AND_SUSTAINED, KEY_RELASED
@@ -170,9 +165,9 @@ class Part
             int note; //if there is no note playing, the "note"=-1
             int itemsplaying;
             struct {
-                class SynthNote  *adnote,
-                                 *subnote,
-                                 *padnote;
+                SynthNote  *adnote,
+                           *subnote,
+                           *padnote;
                 int      sendtoparteffect;
             } kititem[NUM_KIT_ITEMS];
             int time;
@@ -186,13 +181,11 @@ class Part
         struct {
             unsigned char velocity;
             int mkeyshift; // I'm not sure masterkeyshift should be remembered.
-        } monomem[256]; /* 256 is to cover all possible note values.
-                monomem[] is used in conjunction with the list to
-                store the velocity and masterkeyshift values of a
-            given note (the list only store note values).
-                For example 'monomem[note].velocity' would be the
-            velocity value of the note 'note'.
-              */
+        } monomem[256];
+        /* 256 is to cover all possible note values.
+           monomem[] is used in conjunction with the list to
+           store the velocity and masterkeyshift values of a given note (the list only store note values).
+           For example 'monomem[note].velocity' would be the velocity value of the note 'note'.*/
 
         PartNotes partnote[POLIPHONY];
 

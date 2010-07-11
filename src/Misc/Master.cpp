@@ -366,7 +366,7 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
     //System effects
     for(nefx = 0; nefx < NUM_SYS_EFX; nefx++) {
         if(sysefx[nefx]->geteffect() == 0)
-            continue;                              //the effect is disabled
+            continue; //the effect is disabled
 
         REALTYPE *tmpmixl = getTmpBuffer();
         REALTYPE *tmpmixr = getTmpBuffer();
