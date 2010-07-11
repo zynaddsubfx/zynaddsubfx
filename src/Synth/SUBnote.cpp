@@ -35,7 +35,7 @@ SUBnote::SUBnote(SUBnoteParameters *parameters,
                  int midinote,
                  bool besilent)
 {
-    ready  = 0;
+    ready  = false;
 
     tmpsmp = new REALTYPE[SOUND_BUFFER_SIZE];
     tmprnd = new REALTYPE[SOUND_BUFFER_SIZE];
@@ -188,15 +188,15 @@ SUBnote::SUBnote(SUBnoteParameters *parameters,
         initparameters(basefreq / 440.0 * freq);
 
     oldamplitude = newamplitude;
-    ready = 1;
+    ready = true;
 }
 
 
-// SUBlegatonote: This function is (mostly) a copy of SUBnote(...) and
+// legatonote: This function is (mostly) a copy of SUBnote(...) and
 // initparameters(...) stuck together with some lines removed so that
 // it only alter the already playing note (to perform legato). It is
 // possible I left stuff that is not required for this.
-void SUBnote::SUBlegatonote(REALTYPE freq,
+void SUBnote::legatonote(REALTYPE freq,
                             REALTYPE velocity,
                             int portamento_,
                             int midinote,
@@ -369,7 +369,6 @@ void SUBnote::SUBlegatonote(REALTYPE freq,
 
     oldamplitude = newamplitude;
 
-    // End of the SUBlegatonote function.
 }
 
 
@@ -693,11 +692,11 @@ int SUBnote::noteout(REALTYPE *outl, REALTYPE *outr)
                 // the note to the actual parameters.
                 Legato.decounter = -10;
                 Legato.msg = LM_ToNorm;
-                SUBlegatonote(Legato.param.freq,
-                              Legato.param.vel,
-                              Legato.param.portamento,
-                              Legato.param.midinote,
-                              false);
+                legatonote(Legato.param.freq,
+                           Legato.param.vel,
+                           Legato.param.portamento,
+                           Legato.param.midinote,
+                           false);
                 break;
             }
         }
@@ -735,11 +734,11 @@ int SUBnote::noteout(REALTYPE *outl, REALTYPE *outr)
                 Legato.msg = LM_CatchUp;
                 REALTYPE catchupfreq = Legato.param.freq
                                        * (Legato.param.freq / Legato.lastfreq);            //This freq should make this now silent note to catch-up (or should I say resync ?) with the heard note for the same length it stayed at the previous freq during the fadeout.
-                SUBlegatonote(catchupfreq,
-                              Legato.param.vel,
-                              Legato.param.portamento,
-                              Legato.param.midinote,
-                              false);
+                legatonote(catchupfreq,
+                           Legato.param.vel,
+                           Legato.param.portamento,
+                           Legato.param.midinote,
+                           false);
                 break;
             }
             Legato.fade.m -= Legato.fade.step;
@@ -780,7 +779,7 @@ void SUBnote::relasekey()
 /*
  * Check if the note is finished
  */
-int SUBnote::finished()
+int SUBnote::finished() const
 {
     if(NoteEnabled == OFF)
         return 1;

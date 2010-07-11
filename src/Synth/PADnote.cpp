@@ -30,7 +30,7 @@ PADnote::PADnote(PADnoteParameters *parameters,
                  int midinote,
                  bool besilent)
 {
-    ready = 0;
+    ready = false;
 
     // Initialise some legato-specific vars
     Legato.msg = LM_Norm;
@@ -157,7 +157,7 @@ PADnote::PADnote(PADnoteParameters *parameters,
     NoteGlobalPar.FilterFreqTracking = pars->GlobalFilter->getfreqtracking(
         basefreq);
 
-    ready = 1; ///sa il pun pe asta doar cand e chiar gata
+    ready = true; ///sa il pun pe asta doar cand e chiar gata
 
     if(parameters->sample[nsample].smp == NULL) {
         finished_ = true;
@@ -166,11 +166,11 @@ PADnote::PADnote(PADnoteParameters *parameters,
 }
 
 
-// PADlegatonote: This function is (mostly) a copy of PADnote(...)
+// legatonote: This function is (mostly) a copy of PADnote(...)
 // with some lines removed so that it only alter the already playing
 // note (to perform legato). It is possible I left stuff that is not
 // required for this.
-void PADnote::PADlegatonote(REALTYPE freq,
+void PADnote::legatonote(REALTYPE freq,
                             REALTYPE velocity,
                             int portamento_,
                             int midinote,
@@ -280,7 +280,6 @@ void PADnote::PADlegatonote(REALTYPE freq,
         return;
     }
 
-    // End of the PADlegatonote function.
 }
 
 
@@ -523,11 +522,11 @@ int PADnote::noteout(REALTYPE *outl, REALTYPE *outr)
                 // the note to the actual parameters.
                 Legato.decounter = -10;
                 Legato.msg = LM_ToNorm;
-                PADlegatonote(Legato.param.freq,
-                              Legato.param.vel,
-                              Legato.param.portamento,
-                              Legato.param.midinote,
-                              false);
+                legatonote(Legato.param.freq,
+                           Legato.param.vel,
+                           Legato.param.portamento,
+                           Legato.param.midinote,
+                           false);
                 break;
             }
         }
@@ -565,11 +564,11 @@ int PADnote::noteout(REALTYPE *outl, REALTYPE *outr)
                 Legato.msg = LM_CatchUp;
                 REALTYPE catchupfreq = Legato.param.freq
                                        * (Legato.param.freq / Legato.lastfreq);            //This freq should make this now silent note to catch-up (or should I say resync ?) with the heard note for the same length it stayed at the previous freq during the fadeout.
-                PADlegatonote(catchupfreq,
-                              Legato.param.vel,
-                              Legato.param.portamento,
-                              Legato.param.midinote,
-                              false);
+                legatonote(catchupfreq,
+                           Legato.param.vel,
+                           Legato.param.portamento,
+                           Legato.param.midinote,
+                           false);
                 break;
             }
             Legato.fade.m -= Legato.fade.step;
@@ -596,7 +595,7 @@ int PADnote::noteout(REALTYPE *outl, REALTYPE *outr)
     return 1;
 }
 
-int PADnote::finished()
+int PADnote::finished() const
 {
     return finished_;
 }

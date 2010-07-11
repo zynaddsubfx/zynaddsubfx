@@ -23,7 +23,7 @@
 #ifndef AD_NOTE_H
 #define AD_NOTE_H
 
-#include "../globals.h"
+#include "SynthNote.h"
 #include "Envelope.h"
 #include "LFO.h"
 #include "../DSP/Filter.h"
@@ -38,7 +38,7 @@
 #define OSCIL_SMP_EXTRA_SAMPLES 5
 
 /**The "additive" synthesizer*/
-class ADnote    //ADDitive note
+class ADnote :public SynthNote
 {
     public:
         /**Constructor.
@@ -56,24 +56,12 @@ class ADnote    //ADDitive note
         ~ADnote();
 
         /**Alters the playing note for legato effect*/
-        void ADlegatonote(REALTYPE freq, REALTYPE velocity, int portamento_,
-                          int midinote_, bool externcall);
+        void legatonote(REALTYPE freq, REALTYPE velocity, int portamento_,
+                        int midinote_, bool externcall);
 
-        /**Compute ADnote Samples.
-         * @return 0 if note is finished*/
         int noteout(REALTYPE *outl, REALTYPE *outr);
-
-        /**Release the key for the note and start release portion of envelopes.*/
         void relasekey();
-        /**Return if note is finished.
-         * @return finished=1 unfinished=0*/
         int finished() const;
-
-
-        /**Nonzero when ready for output(the parameters has been computed)
-         * zero when parameters need to be computed.*/
-        char ready;
-
     private:
 
         /**Changes the frequency of an oscillator.

@@ -158,6 +158,7 @@ class Part
         int lastnote;
 
     private:
+        void RunNote(unsigned k);
         void KillNotePos(int pos);
         void RelaseNotePos(int pos);
         void MonoMemRenote(); // MonoMem stuff.
@@ -169,9 +170,9 @@ class Part
             int note; //if there is no note playing, the "note"=-1
             int itemsplaying;
             struct {
-                ADnote  *adnote;
-                SUBnote *subnote;
-                PADnote *padnote;
+                class SynthNote  *adnote,
+                                 *subnote,
+                                 *padnote;
                 int      sendtoparteffect;
             } kititem[NUM_KIT_ITEMS];
             int time;

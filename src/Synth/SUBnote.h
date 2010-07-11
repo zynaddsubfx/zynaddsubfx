@@ -23,13 +23,14 @@
 #ifndef SUB_NOTE_H
 #define SUB_NOTE_H
 
+#include "SynthNote.h"
 #include "../globals.h"
 #include "../Params/SUBnoteParameters.h"
 #include "../Params/Controller.h"
 #include "Envelope.h"
 #include "../DSP/Filter.h"
 
-class SUBnote
+class SUBnote :public SynthNote
 {
     public:
         SUBnote(SUBnoteParameters *parameters,
@@ -41,18 +42,12 @@ class SUBnote
                 bool besilent);
         ~SUBnote();
 
-        void SUBlegatonote(REALTYPE freq,
-                           REALTYPE velocity,
-                           int portamento_,
-                           int midinote,
-                           bool externcall);
+        void legatonote(REALTYPE freq, REALTYPE velocity, int portamento_,
+                        int midinote, bool externcall);
 
         int noteout(REALTYPE *outl, REALTYPE *outr); //note output,return 0 if the note is finished
         void relasekey();
-        int finished();
-
-        int ready; //if I can get the sampledata
-
+        int finished() const;
     private:
 
         void computecurrentparameters();

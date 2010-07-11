@@ -37,7 +37,7 @@ ADnote::ADnote(ADnoteParameters *pars,
                int midinote_,
                bool besilent)
 {
-    ready    = 0;
+    ready    = false;
 
     tmpwavel = new REALTYPE [SOUND_BUFFER_SIZE];
     tmpwaver = new REALTYPE [SOUND_BUFFER_SIZE];
@@ -412,18 +412,15 @@ ADnote::ADnote(ADnoteParameters *pars,
     }
 
     initparameters();
-    ready = 1;
+    ready = true;
 }
 
 // ADlegatonote: This function is (mostly) a copy of ADnote(...) and
 // initparameters() stuck together with some lines removed so that it
 // only alter the already playing note (to perform legato). It is
 // possible I left stuff that is not required for this.
-void ADnote::ADlegatonote(REALTYPE freq,
-                          REALTYPE velocity,
-                          int portamento_,
-                          int midinote_,
-                          bool externcall)
+void ADnote::legatonote(REALTYPE freq, REALTYPE velocity, int portamento_,
+                        int midinote_, bool externcall)
 {
     ADnoteParameters *pars = partparams;
     //Controller *ctl_=ctl;
@@ -700,9 +697,6 @@ void ADnote::ADlegatonote(REALTYPE freq,
                 tmp[i] = 1;
         ;
     }
-    ///////////////
-
-    // End of the ADlegatonote function.
 }
 
 
@@ -1884,11 +1878,11 @@ int ADnote::noteout(REALTYPE *outl, REALTYPE *outr)
                 // the note to the actual parameters.
                 Legato.decounter = -10;
                 Legato.msg = LM_ToNorm;
-                ADlegatonote(Legato.param.freq,
-                             Legato.param.vel,
-                             Legato.param.portamento,
-                             Legato.param.midinote,
-                             false);
+                legatonote(Legato.param.freq,
+                           Legato.param.vel,
+                           Legato.param.portamento,
+                           Legato.param.midinote,
+                           false);
                 break;
             }
         }
@@ -1926,11 +1920,11 @@ int ADnote::noteout(REALTYPE *outl, REALTYPE *outr)
                 Legato.msg = LM_CatchUp;
                 REALTYPE catchupfreq = Legato.param.freq
                                        * (Legato.param.freq / Legato.lastfreq);            //This freq should make this now silent note to catch-up (or should I say resync ?) with the heard note for the same length it stayed at the previous freq during the fadeout.
-                ADlegatonote(catchupfreq,
-                             Legato.param.vel,
-                             Legato.param.portamento,
-                             Legato.param.midinote,
-                             false);
+                legatonote(catchupfreq,
+                           Legato.param.vel,
+                           Legato.param.portamento,
+                           Legato.param.midinote,
+                           false);
                 break;
             }
             Legato.fade.m -= Legato.fade.step;

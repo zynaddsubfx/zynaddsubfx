@@ -21,6 +21,7 @@
 #ifndef PAD_NOTE_H
 #define PAD_NOTE_H
 
+#include "SynthNote.h"
 #include "../globals.h"
 #include "../Params/PADnoteParameters.h"
 #include "../Params/Controller.h"
@@ -30,7 +31,7 @@
 #include "../Params/Controller.h"
 
 /**The "pad" synthesizer*/
-class PADnote
+class PADnote :public SynthNote
 {
     public:
         PADnote(PADnoteParameters *parameters,
@@ -42,18 +43,12 @@ class PADnote
                 bool besilent);
         ~PADnote();
 
-        void PADlegatonote(REALTYPE freq,
-                           REALTYPE velocity,
-                           int portamento_,
-                           int midinote,
-                           bool externcall);
+        void legatonote(REALTYPE freq, REALTYPE velocity, int portamento_,
+                        int midinote, bool externcall);
 
         int noteout(REALTYPE *outl, REALTYPE *outr);
-        int finished();
+        int finished() const;
         void relasekey();
-
-        int ready;
-
     private:
         void fadein(REALTYPE *smps);
         void computecurrentparameters();
