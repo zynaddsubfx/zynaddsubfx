@@ -20,8 +20,9 @@
 
 */
 
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
+#include "../Misc/Util.h"
 #include "AnalogFilter.h"
 
 AnalogFilter::AnalogFilter(unsigned char Ftype,
@@ -43,11 +44,11 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
     if(stages >= MAX_FILTER_STAGES)
         stages = MAX_FILTER_STAGES;
     cleanup();
-    firsttime  = 0;
+    firsttime  = false;
     abovenq    = 0;
     oldabovenq = 0;
     setfreq_and_q(Ffreq, Fq);
-    firsttime  = 1;
+    firsttime  = true;
     d[0] = 0; //this is not used
     outgain    = 1.0;
 }
@@ -65,7 +66,7 @@ void AnalogFilter::cleanup()
         oldx[i] = x[i];
         oldy[i] = y[i];
     }
-    needsinterpolation = 0;
+    needsinterpolation = false;
 }
 
 void AnalogFilter::computefiltercoefs()
@@ -330,12 +331,12 @@ void AnalogFilter::setfreq(REALTYPE frequency)
             oldx[i] = x[i];
             oldy[i] = y[i];
         }
-        if(firsttime == 0)
-            needsinterpolation = 1;
+        if(!firsttime)
+            needsinterpolation = true;
     }
     freq      = frequency;
     computefiltercoefs();
-    firsttime = 0;
+    firsttime = false;
 }
 
 void AnalogFilter::setfreq_and_q(REALTYPE frequency, REALTYPE q_)
@@ -404,28 +405,27 @@ void AnalogFilter::singlefilterout(REALTYPE *smp,
 void AnalogFilter::filterout(REALTYPE *smp)
 {
     REALTYPE *ismp = NULL; //used if it needs interpolation
-    int i;
-    if(needsinterpolation != 0) {
-        ismp = new REALTYPE[SOUND_BUFFER_SIZE];
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++)
+    if(needsinterpolation) {
+        ismp = getTmpBuffer();
+        for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
             ismp[i] = smp[i];
-        for(i = 0; i < stages + 1; i++)
+        for(int i = 0; i < stages + 1; i++)
             singlefilterout(ismp, oldx[i], oldy[i], oldc, oldd);
     }
 
-    for(i = 0; i < stages + 1; i++)
+    for(int i = 0; i < stages + 1; i++)
         singlefilterout(smp, x[i], y[i], c, d);
 
-    if(needsinterpolation != 0) {
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    if(needsinterpolation) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
             REALTYPE x = i / (REALTYPE) SOUND_BUFFER_SIZE;
             smp[i] = ismp[i] * (1.0 - x) + smp[i] * x;
         }
-        delete [] ismp;
-        needsinterpolation = 0;
+        returnTmpBuffer(ismp);
+        needsinterpolation = false;
     }
 
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++)
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
         smp[i] *= outgain;
 }
 

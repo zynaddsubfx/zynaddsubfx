@@ -21,6 +21,7 @@
 */
 
 #include "Util.h"
+#include <vector>
 #include <math.h>
 #include <stdio.h>
 
@@ -166,4 +167,44 @@ void crossover(REALTYPE &a, REALTYPE &b, REALTYPE crossover)
     a = tmpa * (1.0 - crossover) + tmpb * crossover;
     b = tmpb * (1.0 - crossover) + tmpa * crossover;
 }
+
+//Some memory pools for short term buffer use
+//(avoid the use of new in RT thread(s))
+
+struct pool_entry{
+    bool free;
+    REALTYPE *dat;
+};
+typedef std::vector<pool_entry> pool_t;
+typedef pool_t::iterator pool_itr_t;
+
+pool_t pool;
+
+REALTYPE *getTmpBuffer()
+{
+    for(pool_itr_t itr = pool.begin(); itr != pool.end(); ++itr) {
+        if(itr->free) { //Use Pool
+            itr->free = false;
+            return itr->dat;
+        }
+    }
+    pool_entry p; //Extend Pool
+    p.free = false;
+    p.dat = new REALTYPE[SOUND_BUFFER_SIZE];
+    pool.push_back(p);
+
+    return p.dat;
+}
+
+void returnTmpBuffer(REALTYPE *buf)
+{
+    for(pool_itr_t itr = pool.begin(); itr != pool.end(); ++itr) {
+        if(itr->dat == buf) { //Return to Pool
+            itr->free = true;
+            return;
+        }
+    }
+    fprintf(stderr,"ERROR: invalid buffer returned %s %d\n",__FILE__,__LINE__);
+}
+
 
