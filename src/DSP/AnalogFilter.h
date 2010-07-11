@@ -3,7 +3,9 @@
 
   Analog Filter.h - Several analog filters (lowpass, highpass...)
   Copyright (C) 2002-2005 Nasca Octavian Paul
+  Copyright (C) 2010-2010 Mark McCurry
   Author: Nasca Octavian Paul
+          Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License
@@ -26,7 +28,9 @@
 #include "../globals.h"
 #include "Filter_.h"
 
-/**Implementation of Several analog filters (lowpass, highpass...)*/
+/**Implementation of Several analog filters (lowpass, highpass...)
+ * Implemented with IIR filters
+ * Coefficients generated with "Cookbook formulae for audio EQ"*/
 class AnalogFilter:public Filter_
 {
     public:
@@ -49,33 +53,33 @@ class AnalogFilter:public Filter_
 
     private:
         struct fstage {
-            REALTYPE c1, c2;
-        } x[MAX_FILTER_STAGES + 1], y[MAX_FILTER_STAGES + 1],
-          oldx[MAX_FILTER_STAGES + 1], oldy[MAX_FILTER_STAGES + 1];
+            REALTYPE x1, x2;//Input History
+            REALTYPE y1, y2;//Output History
+        } history[MAX_FILTER_STAGES + 1], oldHistory[MAX_FILTER_STAGES + 1];
 
-        void singlefilterout(REALTYPE *smp,
-                             fstage &x,
-                             fstage &y,
-                             REALTYPE *c,
-                             REALTYPE *d);
+        struct Coeff {
+            REALTYPE c[3], //Feed Forward
+                     d[3]; //Feed Back
+        } coeff, oldCoeff;
+        //old coeffs are used for interpolation when paremeters change quickly
+
+        //Apply IIR filter to Samples, with coefficients, and past history
+        void singlefilterout(REALTYPE *smp, fstage &hist, const Coeff &coeff);
+        //Update coeff and order
         void computefiltercoefs();
-        int      type; //The type of the filter (LPF1,HPF1,LPF2,HPF2...)
+
+        int      type;   //The type of the filter (LPF1,HPF1,LPF2,HPF2...)
         int      stages; //how many times the filter is applied (0->1,1->2,etc.)
-        REALTYPE freq; //Frequency given in Hz
-        REALTYPE q; //Q factor (resonance or Q factor)
-        REALTYPE gain; //the gain of the filter (if are shelf/peak) filters
+        REALTYPE freq;   //Frequency given in Hz
+        REALTYPE q;      //Q factor (resonance or Q factor)
+        REALTYPE gain;   //the gain of the filter (if are shelf/peak) filters
 
-        int order; //the order of the filter (number of poles)
-
-        REALTYPE c[3], d[3]; //coefficients
-
-        REALTYPE oldc[3], //old coefficients(used only if filter
-                 oldd[3]; //paremeters change very fast, needing interpolation)
+        int order;       //the order of the filter (number of poles)
 
         bool     needsinterpolation,  //Interpolation between coeff changes
                  firsttime;           //First Iteration of filter
-        int      abovenq;             //this is 1 if the frequency is above the nyquist
-        int      oldabovenq;          //if the last time was above nyquist
+        bool     abovenq,             //if the frequency is above the nyquist
+                 oldabovenq;          //if the last time was above nyquist
                                       //(used to see if it needs interpolation)
 };
 

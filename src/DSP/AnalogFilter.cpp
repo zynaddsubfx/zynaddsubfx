@@ -3,7 +3,9 @@
 
   AnalogFilter.cpp - Several analog filters (lowpass, highpass...)
   Copyright (C) 2002-2005 Nasca Octavian Paul
+  Copyright (C) 2010-2010 Mark McCurry
   Author: Nasca Octavian Paul
+          Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License
@@ -22,6 +24,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <cstring> //memcpy
 #include "../Misc/Util.h"
 #include "AnalogFilter.h"
 
@@ -32,10 +35,10 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
 {
     stages = Fstages;
     for(int i = 0; i < 3; i++) {
-        oldc[i] = 0.0;
-        oldd[i] = 0.0;
-        c[i]    = 0.0;
-        d[i]    = 0.0;
+        coeff.c[i]    = 0.0;
+        coeff.d[i]    = 0.0;
+        oldCoeff.c[i] = 0.0;
+        oldCoeff.d[i] = 0.0;
     }
     type = Ftype;
     freq = Ffreq;
@@ -45,11 +48,11 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
         stages = MAX_FILTER_STAGES;
     cleanup();
     firsttime  = false;
-    abovenq    = 0;
-    oldabovenq = 0;
+    abovenq    = false;
+    oldabovenq = false;
     setfreq_and_q(Ffreq, Fq);
     firsttime  = true;
-    d[0] = 0; //this is not used
+    coeff.d[0] = 0; //this is not used
     outgain    = 1.0;
 }
 
@@ -59,12 +62,11 @@ AnalogFilter::~AnalogFilter()
 void AnalogFilter::cleanup()
 {
     for(int i = 0; i < MAX_FILTER_STAGES + 1; i++) {
-        x[i].c1 = 0.0;
-        x[i].c2 = 0.0;
-        y[i].c1 = 0.0;
-        y[i].c2 = 0.0;
-        oldx[i] = x[i];
-        oldy[i] = y[i];
+        history[i].x1 = 0.0;
+        history[i].x2 = 0.0;
+        history[i].y1 = 0.0;
+        history[i].y2 = 0.0;
+        oldHistory[i] = history[i];
     }
     needsinterpolation = false;
 }
@@ -72,14 +74,13 @@ void AnalogFilter::cleanup()
 void AnalogFilter::computefiltercoefs()
 {
     REALTYPE tmp;
-    REALTYPE omega, sn, cs, alpha, beta;
-    int      zerocoefs = 0; //this is used if the freq is too high
+    bool     zerocoefs = false; //this is used if the freq is too high
 
     //do not allow frequencies bigger than samplerate/2
     REALTYPE freq = this->freq;
     if(freq > (SAMPLE_RATE / 2 - 500.0)) {
         freq      = SAMPLE_RATE / 2 - 500.0;
-        zerocoefs = 1;
+        zerocoefs = true;
     }
     if(freq < 0.1)
         freq = 0.1;
@@ -96,13 +97,22 @@ void AnalogFilter::computefiltercoefs()
         tmpgain = pow(gain, 1.0 / (stages + 1));
     }
 
+    //Alias Terms
+    REALTYPE *c = coeff.c;
+    REALTYPE *d = coeff.d;
+
+    //General Constants
+    const REALTYPE omega = 2 * PI * freq / SAMPLE_RATE;
+    const REALTYPE sn = sin(omega), cs = cos(omega);
+    REALTYPE alpha, beta;
+
     //most of theese are implementations of
     //the "Cookbook formulae for audio EQ" by Robert Bristow-Johnson
     //The original location of the Cookbook is:
     //http://www.harmony-central.com/Computer/Programming/Audio-EQ-Cookbook.txt
     switch(type) {
     case 0: //LPF 1 pole
-        if(zerocoefs == 0)
+        if(!zerocoefs)
             tmp = exp(-2.0 * PI * freq / SAMPLE_RATE);
         else
             tmp = 0.0;
@@ -114,7 +124,7 @@ void AnalogFilter::computefiltercoefs()
         order = 1;
         break;
     case 1: //HPF 1 pole
-        if(zerocoefs == 0)
+        if(!zerocoefs)
             tmp = exp(-2.0 * PI * freq / SAMPLE_RATE);
         else
             tmp = 0.0;
@@ -126,10 +136,7 @@ void AnalogFilter::computefiltercoefs()
         order = 1;
         break;
     case 2: //LPF 2 poles
-        if(zerocoefs == 0) {
-            omega = 2 * PI * freq / SAMPLE_RATE;
-            sn    = sin(omega);
-            cs    = cos(omega);
+        if(!zerocoefs) {
             alpha = sn / (2 * tmpq);
             tmp   = 1 + alpha;
             c[0]  = (1.0 - cs) / 2.0 / tmp;
@@ -148,10 +155,7 @@ void AnalogFilter::computefiltercoefs()
         order = 2;
         break;
     case 3: //HPF 2 poles
-        if(zerocoefs == 0) {
-            omega = 2 * PI * freq / SAMPLE_RATE;
-            sn    = sin(omega);
-            cs    = cos(omega);
+        if(!zerocoefs) {
             alpha = sn / (2 * tmpq);
             tmp   = 1 + alpha;
             c[0]  = (1.0 + cs) / 2.0 / tmp;
@@ -170,10 +174,7 @@ void AnalogFilter::computefiltercoefs()
         order = 2;
         break;
     case 4: //BPF 2 poles
-        if(zerocoefs == 0) {
-            omega = 2 * PI * freq / SAMPLE_RATE;
-            sn    = sin(omega);
-            cs    = cos(omega);
+        if(!zerocoefs) {
             alpha = sn / (2 * tmpq);
             tmp   = 1 + alpha;
             c[0]  = alpha / tmp *sqrt(tmpq + 1);
@@ -192,10 +193,7 @@ void AnalogFilter::computefiltercoefs()
         order = 2;
         break;
     case 5: //NOTCH 2 poles
-        if(zerocoefs == 0) {
-            omega = 2 * PI * freq / SAMPLE_RATE;
-            sn    = sin(omega);
-            cs    = cos(omega);
+        if(!zerocoefs) {
             alpha = sn / (2 * sqrt(tmpq));
             tmp   = 1 + alpha;
             c[0]  = 1 / tmp;
@@ -214,10 +212,7 @@ void AnalogFilter::computefiltercoefs()
         order = 2;
         break;
     case 6: //PEAK (2 poles)
-        if(zerocoefs == 0) {
-            omega = 2 * PI * freq / SAMPLE_RATE;
-            sn    = sin(omega);
-            cs    = cos(omega);
+        if(!zerocoefs) {
             tmpq *= 3.0;
             alpha = sn / (2 * tmpq);
             tmp   = 1 + alpha / tmpgain;
@@ -237,10 +232,7 @@ void AnalogFilter::computefiltercoefs()
         order = 2;
         break;
     case 7: //Low Shelf - 2 poles
-        if(zerocoefs == 0) {
-            omega = 2 * PI * freq / SAMPLE_RATE;
-            sn    = sin(omega);
-            cs    = cos(omega);
+        if(!zerocoefs) {
             tmpq  = sqrt(tmpq);
             alpha = sn / (2 * tmpq);
             beta  = sqrt(tmpgain) / tmpq;
@@ -269,10 +261,7 @@ void AnalogFilter::computefiltercoefs()
         order = 2;
         break;
     case 8: //High Shelf - 2 poles
-        if(zerocoefs == 0) {
-            omega = 2 * PI * freq / SAMPLE_RATE;
-            sn    = sin(omega);
-            cs    = cos(omega);
+        if(!zerocoefs) {
             tmpq  = sqrt(tmpq);
             alpha = sn / (2 * tmpq);
             beta  = sqrt(tmpgain) / tmpq;
@@ -319,18 +308,14 @@ void AnalogFilter::setfreq(REALTYPE frequency)
     oldabovenq = abovenq;
     abovenq    = frequency > (SAMPLE_RATE / 2 - 500.0);
 
-    int nyquistthresh = (abovenq ^ oldabovenq);
+    bool nyquistthresh = (abovenq ^ oldabovenq);
 
 
-    if((rap > 3.0) || (nyquistthresh != 0)) { //if the frequency is changed fast, it needs interpolation (now, filter and coeficients backup)
-        for(int i = 0; i < 3; i++) {
-            oldc[i] = c[i];
-            oldd[i] = d[i];
-        }
-        for(int i = 0; i < MAX_FILTER_STAGES + 1; i++) {
-            oldx[i] = x[i];
-            oldy[i] = y[i];
-        }
+    //if the frequency is changed fast, it needs interpolation
+    if((rap > 3.0) || nyquistthresh) { //(now, filter and coeficients backup)
+        oldCoeff   = coeff;
+        for(int i = 0; i < MAX_FILTER_STAGES + 1; ++i)
+            oldHistory[i] = history[i];
         if(!firsttime)
             needsinterpolation = true;
     }
@@ -372,51 +357,44 @@ void AnalogFilter::setstages(int stages_)
     computefiltercoefs();
 }
 
-void AnalogFilter::singlefilterout(REALTYPE *smp,
-                                   fstage &x,
-                                   fstage &y,
-                                   REALTYPE *c,
-                                   REALTYPE *d)
+void AnalogFilter::singlefilterout(REALTYPE *smp, fstage &hist,
+                                   const Coeff &coeff)
 {
-    int      i;
-    REALTYPE y0;
     if(order == 1) { //First order filter
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            y0     = smp[i] * c[0] + x.c1 * c[1] + y.c1 * d[1];
-            y.c1   = y0;
-            x.c1   = smp[i];
-            //output
-            smp[i] = y0;
+        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+            REALTYPE y0 =    smp[i]*coeff.c[0] + hist.x1*coeff.c[1]
+                          + hist.y1*coeff.d[1];
+            hist.y1 = y0;
+            hist.x1 = smp[i];
+            smp[i]  = y0;
         }
     }
     if(order == 2) { //Second order filter
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            y0     = smp[i] * c[0] + x.c1 * c[1] + x.c2 * c[2] + y.c1 * d[1]
-                     + y.c2 * d[2];
-            y.c2   = y.c1;
-            y.c1   = y0;
-            x.c2   = x.c1;
-            x.c1   = smp[i];
-            //output
-            smp[i] = y0;
+        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+            REALTYPE y0 =    smp[i]*coeff.c[0] + hist.x1*coeff.c[1]
+                          + hist.x2*coeff.c[2] + hist.y1*coeff.d[1]
+                          + hist.y2*coeff.d[2];
+            hist.y2 = hist.y1;
+            hist.y1 = y0;
+            hist.x2 = hist.x1;
+            hist.x1 = smp[i];
+            smp[i]  = y0;
         }
     }
 }
 void AnalogFilter::filterout(REALTYPE *smp)
 {
-    REALTYPE *ismp = NULL; //used if it needs interpolation
-    if(needsinterpolation) {
-        ismp = getTmpBuffer();
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
-            ismp[i] = smp[i];
-        for(int i = 0; i < stages + 1; i++)
-            singlefilterout(ismp, oldx[i], oldy[i], oldc, oldd);
-    }
-
     for(int i = 0; i < stages + 1; i++)
-        singlefilterout(smp, x[i], y[i], c, d);
+        singlefilterout(smp, history[i], coeff);
 
     if(needsinterpolation) {
+        //Merge Filter at old coeff with new coeff
+        REALTYPE *ismp = getTmpBuffer();
+        memcpy(ismp, smp, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+
+        for(int i = 0; i < stages + 1; i++)
+            singlefilterout(ismp, oldHistory[i], oldCoeff);
+
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
             REALTYPE x = i / (REALTYPE) SOUND_BUFFER_SIZE;
             smp[i] = ismp[i] * (1.0 - x) + smp[i] * x;
@@ -432,17 +410,17 @@ void AnalogFilter::filterout(REALTYPE *smp)
 REALTYPE AnalogFilter::H(REALTYPE freq)
 {
     REALTYPE fr = freq / SAMPLE_RATE * PI * 2.0;
-    REALTYPE x  = c[0], y = 0.0;
+    REALTYPE x  = coeff.c[0], y = 0.0;
     for(int n = 1; n < 3; n++) {
-        x += cos(n * fr) * c[n];
-        y -= sin(n * fr) * c[n];
+        x += cos(n * fr) * coeff.c[n];
+        y -= sin(n * fr) * coeff.c[n];
     }
     REALTYPE h = x * x + y * y;
     x = 1.0;
     y = 0.0;
     for(int n = 1; n < 3; n++) {
-        x -= cos(n * fr) * d[n];
-        y += sin(n * fr) * d[n];
+        x -= cos(n * fr) * coeff.d[n];
+        y += sin(n * fr) * coeff.d[n];
     }
     h = h / (x * x + y * y);
     return pow(h, (stages + 1.0) / 2.0);
