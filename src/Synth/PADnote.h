@@ -50,6 +50,8 @@ class PADnote :public SynthNote
         int finished() const;
         void relasekey();
     private:
+        void setup(REALTYPE freq, REALTYPE velocity,int portamento_,
+                   int midinote, bool legato=false);
         void fadein(REALTYPE *smps);
         void computecurrentparameters();
         bool finished_;

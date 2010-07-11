@@ -32,10 +32,17 @@ PADnote::PADnote(PADnoteParameters *parameters,
 :SynthNote(freq, velocity, portamento_, midinote, besilent)
 {
     ready = false;
+    pars = parameters;
 
-    pars           = parameters;
+    ctl       = ctl_;
+    firsttime = true;
+    setup(freq, velocity, portamento_, midinote);
+}
+
+
+void PADnote::setup(REALTYPE freq, REALTYPE velocity,int portamento_, int midinote, bool legato)
+{
     portamento     = portamento_;
-    ctl            = ctl_;
     this->velocity = velocity;
     finished_      = false;
 
@@ -59,8 +66,9 @@ PADnote::PADnote(PADnoteParameters *parameters,
     firsttime = true;
     released  = false;
     realfreq  = basefreq;
-    NoteGlobalPar.Detune = getdetune(pars->PDetuneType,
-                                     pars->PCoarseDetune, pars->PDetune);
+    if(!legato)
+        NoteGlobalPar.Detune = getdetune(pars->PDetuneType, pars->PCoarseDetune,
+                                         pars->PDetune);
 
 
     //find out the closest note
@@ -71,7 +79,6 @@ PADnote::PADnote(PADnoteParameters *parameters,
         if(pars->sample[i].smp == NULL)
             break;
         REALTYPE dist = fabs(logfreq - log(pars->sample[i].basefreq + 0.0001));
-//	printf("(mindist=%g) %i %g                  %g\n",mindist,i,dist,pars->sample[i].basefreq);
 
         if(dist < mindist) {
             nsample = i;
@@ -84,12 +91,14 @@ PADnote::PADnote(PADnoteParameters *parameters,
         size = 1;
 
 
-    poshi_l = (int)(RND * (size - 1));
-    if(pars->PStereo != 0)
-        poshi_r = (poshi_l + size / 2) % size;
-    else
-        poshi_r = poshi_l;
-    poslo   = 0.0;
+    if(!legato) {//not sure
+        poshi_l = (int)(RND * (size - 1));
+        if(pars->PStereo != 0)
+            poshi_r = (poshi_l + size / 2) % size;
+        else
+            poshi_r = poshi_l;
+        poslo   = 0.0;
+    }
 
 
     if(pars->PPanning == 0)
@@ -104,27 +113,27 @@ PADnote::PADnote(PADnoteParameters *parameters,
                                               pars->
                                               PFilterVelocityScaleFunction) - 1);
 
-    if(pars->PPunchStrength != 0) {
-        NoteGlobalPar.Punch.Enabled      = 1;
-        NoteGlobalPar.Punch.t = 1.0; //start from 1.0 and to 0.0
-        NoteGlobalPar.Punch.initialvalue =
-            ((pow(10, 1.5 * pars->PPunchStrength / 127.0) - 1.0)
-             * VelF(velocity,
-                    pars->PPunchVelocitySensing));
-        REALTYPE time    = pow(10, 3.0 * pars->PPunchTime / 127.0) / 10000.0; //0.1 .. 100 ms
-        REALTYPE stretch = pow(440.0 / freq, pars->PPunchStretch / 64.0);
-        NoteGlobalPar.Punch.dt = 1.0 / (time * SAMPLE_RATE * stretch);
+    if(!legato) {
+        if(pars->PPunchStrength != 0) {
+            NoteGlobalPar.Punch.Enabled      = 1;
+            NoteGlobalPar.Punch.t = 1.0; //start from 1.0 and to 0.0
+            NoteGlobalPar.Punch.initialvalue =
+                ((pow(10, 1.5 * pars->PPunchStrength / 127.0) - 1.0)
+                 * VelF(velocity,
+                     pars->PPunchVelocitySensing));
+            REALTYPE time    = pow(10, 3.0 * pars->PPunchTime / 127.0) / 10000.0; //0.1 .. 100 ms
+            REALTYPE stretch = pow(440.0 / freq, pars->PPunchStretch / 64.0);
+            NoteGlobalPar.Punch.dt = 1.0 / (time * SAMPLE_RATE * stretch);
+        }
+        else
+            NoteGlobalPar.Punch.Enabled = 0;
+
+        NoteGlobalPar.FreqEnvelope = new Envelope(pars->FreqEnvelope, basefreq);
+        NoteGlobalPar.FreqLfo      = new LFO(pars->FreqLfo, basefreq);
+
+        NoteGlobalPar.AmpEnvelope  = new Envelope(pars->AmpEnvelope, basefreq);
+        NoteGlobalPar.AmpLfo = new LFO(pars->AmpLfo, basefreq);
     }
-    else
-        NoteGlobalPar.Punch.Enabled = 0;
-
-
-
-    NoteGlobalPar.FreqEnvelope = new Envelope(pars->FreqEnvelope, basefreq);
-    NoteGlobalPar.FreqLfo      = new LFO(pars->FreqLfo, basefreq);
-
-    NoteGlobalPar.AmpEnvelope  = new Envelope(pars->AmpEnvelope, basefreq);
-    NoteGlobalPar.AmpLfo = new LFO(pars->AmpLfo, basefreq);
 
     NoteGlobalPar.Volume = 4.0 * pow(0.1, 3.0 * (1.0 - pars->PVolume / 96.0)) //-60 dB .. 0 dB
                            * VelF(velocity, pars->PAmpVelocityScaleFunction); //velocity sensing
@@ -135,118 +144,37 @@ PADnote::PADnote(PADnoteParameters *parameters,
                                               envout_dB()
                                               * NoteGlobalPar.AmpLfo->amplfoout();
 
-    NoteGlobalPar.GlobalFilterL      = new Filter(pars->GlobalFilter);
-    NoteGlobalPar.GlobalFilterR      = new Filter(pars->GlobalFilter);
+    if(!legato) {
+        NoteGlobalPar.GlobalFilterL  = new Filter(pars->GlobalFilter);
+        NoteGlobalPar.GlobalFilterR  = new Filter(pars->GlobalFilter);
 
-    NoteGlobalPar.FilterEnvelope     = new Envelope(pars->FilterEnvelope,
-                                                    basefreq);
-    NoteGlobalPar.FilterLfo          = new LFO(pars->FilterLfo, basefreq);
+        NoteGlobalPar.FilterEnvelope = new Envelope(pars->FilterEnvelope,
+                                                        basefreq);
+        NoteGlobalPar.FilterLfo      = new LFO(pars->FilterLfo, basefreq);
+    }
     NoteGlobalPar.FilterQ = pars->GlobalFilter->getq();
     NoteGlobalPar.FilterFreqTracking = pars->GlobalFilter->getfreqtracking(
         basefreq);
 
     ready = true; ///sa il pun pe asta doar cand e chiar gata
 
-    if(parameters->sample[nsample].smp == NULL) {
+    if(pars->sample[nsample].smp == NULL) {
         finished_ = true;
         return;
     }
 }
 
-
-// legatonote: This function is (mostly) a copy of PADnote(...)
-// with some lines removed so that it only alter the already playing
-// note (to perform legato). It is possible I left stuff that is not
-// required for this.
 void PADnote::legatonote(REALTYPE freq,
                             REALTYPE velocity,
                             int portamento_,
                             int midinote,
                             bool externcall)
 {
-    PADnoteParameters *parameters = pars;
-
     // Manage legato stuff
     if(legato.update(freq, velocity, portamento_, midinote, externcall))
         return;
 
-    portamento     = portamento_;
-    this->velocity = velocity;
-    finished_      = false;
-
-    if(pars->Pfixedfreq == 0)
-        basefreq = freq;
-    else {
-        basefreq = 440.0;
-        int fixedfreqET = pars->PfixedfreqET;
-        if(fixedfreqET != 0) { //if the frequency varies according the keyboard note
-            REALTYPE tmp =
-                (midinote
-                 - 69.0) / 12.0 * (pow(2.0, (fixedfreqET - 1) / 63.0) - 1.0);
-            if(fixedfreqET <= 64)
-                basefreq *= pow(2.0, tmp);
-            else
-                basefreq *= pow(3.0, tmp);
-        }
-    }
-
-    released = false;
-    realfreq = basefreq;
-
-    getdetune(pars->PDetuneType, pars->PCoarseDetune, pars->PDetune);
-
-
-    //find out the closest note
-    REALTYPE logfreq = log(basefreq * pow(2.0, NoteGlobalPar.Detune / 1200.0));
-    REALTYPE mindist = fabs(logfreq - log(pars->sample[0].basefreq + 0.0001));
-    nsample = 0;
-    for(int i = 1; i < PAD_MAX_SAMPLES; i++) {
-        if(pars->sample[i].smp == NULL)
-            break;
-        REALTYPE dist = fabs(logfreq - log(pars->sample[i].basefreq + 0.0001));
-
-        if(dist < mindist) {
-            nsample = i;
-            mindist = dist;
-        }
-    }
-
-    int size = pars->sample[nsample].size;
-    if(size == 0)
-        size = 1;
-
-    if(pars->PPanning == 0)
-        NoteGlobalPar.Panning = RND;
-    else
-        NoteGlobalPar.Panning = pars->PPanning / 128.0;
-
-    NoteGlobalPar.FilterCenterPitch = pars->GlobalFilter->getfreq() //center freq
-                                      + pars->PFilterVelocityScale / 127.0
-                                      * 6.0                                //velocity sensing
-                                      * (VelF(velocity,
-                                              pars->
-                                              PFilterVelocityScaleFunction) - 1);
-
-
-    NoteGlobalPar.Volume = 4.0 * pow(0.1, 3.0 * (1.0 - pars->PVolume / 96.0)) //-60 dB .. 0 dB
-                           * VelF(velocity, pars->PAmpVelocityScaleFunction); //velocity sensing
-
-    NoteGlobalPar.AmpEnvelope->envout_dB(); //discard the first envelope output
-    globaloldamplitude = globalnewamplitude = NoteGlobalPar.Volume
-                                              * NoteGlobalPar.AmpEnvelope->
-                                              envout_dB()
-                                              * NoteGlobalPar.AmpLfo->amplfoout();
-
-    NoteGlobalPar.FilterQ = pars->GlobalFilter->getq();
-    NoteGlobalPar.FilterFreqTracking = pars->GlobalFilter->getfreqtracking(
-        basefreq);
-
-
-    if(parameters->sample[nsample].smp == NULL) {
-        finished_ = true;
-        return;
-    }
-
+    setup(freq, velocity, portamento_, midinote, true);
 }
 
 
