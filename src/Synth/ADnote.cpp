@@ -26,6 +26,7 @@
 
 #include "../globals.h"
 #include "../Misc/Util.h"
+#include "OscilGen.h"
 #include "ADnote.h"
 
 

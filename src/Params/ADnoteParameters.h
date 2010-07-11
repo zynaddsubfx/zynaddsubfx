@@ -25,16 +25,15 @@
 
 
 #include "../globals.h"
-#include "FilterParams.h"
-#include "../Synth/OscilGen.h"
-#include "../Synth/Resonance.h"
 #include "../Misc/Util.h"
-#include "../Misc/XMLwrapper.h"
-#include "../DSP/FFTwrapper.h"
 #include "PresetsArray.h"
 
 class EnvelopeParams;
 class LFOParams;
+class FilterParams;
+class Resonance;
+class OscilGen;
+class FFTwrapper;
 
 enum FMTYPE {
     NONE, MORPH, RING_MOD, PHASE_MOD, FREQ_MOD, PITCH_MOD
@@ -46,6 +45,11 @@ extern int ADnote_unison_sizes[];
 /*****************************************************************/
 
 struct ADnoteGlobalParam {
+    ADnoteGlobalParam();
+    ~ADnoteGlobalParam();
+    void defaults();
+    void add2XML(XMLwrapper *xml);
+    void getfromXML(XMLwrapper *xml);
     /* The instrument type  - MONO/STEREO
     If the mode is MONO, the panning of voices are not used
     Stereo=1, Mono=0. */
@@ -115,6 +119,11 @@ struct ADnoteGlobalParam {
 /*                    VOICE PARAMETERS                     */
 /***********************************************************/
 struct ADnoteVoiceParam {
+    void getfromXML(XMLwrapper *xml, unsigned nvoice);
+    void add2XML(XMLwrapper *xml,bool fmoscilused);
+    void defaults();
+    void enable(FFTwrapper *fft, Resonance *Reson);
+    void kill();
     /** If the voice is enabled */
     unsigned char Enabled;
 
