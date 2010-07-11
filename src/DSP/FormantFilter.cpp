@@ -20,8 +20,9 @@
 
 */
 
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
+#include "../Misc/Util.h"
 #include "FormantFilter.h"
 
 FormantFilter::FormantFilter(FilterParams *pars)
@@ -30,8 +31,6 @@ FormantFilter::FormantFilter(FilterParams *pars)
     for(int i = 0; i < numformants; i++)
         formant[i] = new AnalogFilter(4 /*BPF*/, 1000.0, 10.0, pars->Pstages);
     cleanup();
-    inbuffer = new REALTYPE [SOUND_BUFFER_SIZE];
-    tmpbuf   = new REALTYPE [SOUND_BUFFER_SIZE];
 
     for(int j = 0; j < FF_MAX_VOWELS; j++)
         for(int i = 0; i < numformants; i++) {
@@ -42,7 +41,7 @@ FormantFilter::FormantFilter(FilterParams *pars)
             formantpar[j][i].q    = pars->getformantq(
                 pars->Pvowels[j].formants[i].q);
         }
-    ;
+
     for(int i = 0; i < FF_MAX_FORMANTS; i++)
         oldformantamp[i] = 1.0;
     for(int i = 0; i < numformants; i++) {
@@ -77,12 +76,7 @@ FormantFilter::~FormantFilter()
 {
     for(int i = 0; i < numformants; i++)
         delete (formant[i]);
-    delete[] inbuffer;
-    delete[] tmpbuf;
 }
-
-
-
 
 void FormantFilter::cleanup()
 {
@@ -204,28 +198,30 @@ void FormantFilter::setfreq_and_q(REALTYPE frequency, REALTYPE q_)
 
 void FormantFilter::filterout(REALTYPE *smp)
 {
-    int i, j;
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        inbuffer[i] = smp[i];
-        smp[i]      = 0.0;
-    }
+    REALTYPE *inbuffer = getTmpBuffer();
 
-    for(j = 0; j < numformants; j++) {
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++)
+    memcpy(inbuffer, smp, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+    memset(smp, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+
+    for(int j = 0; j < numformants; j++) {
+        REALTYPE *tmpbuf = getTmpBuffer();
+        for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
             tmpbuf[i] = inbuffer[i] * outgain;
         formant[j]->filterout(tmpbuf);
 
         if(ABOVE_AMPLITUDE_THRESHOLD(oldformantamp[j], currentformants[j].amp))
-            for(i = 0; i < SOUND_BUFFER_SIZE; i++)
+            for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
                 smp[i] += tmpbuf[i]
                           * INTERPOLATE_AMPLITUDE(oldformantamp[j],
                                                   currentformants[j].amp,
                                                   i,
                                                   SOUND_BUFFER_SIZE);
         else
-            for(i = 0; i < SOUND_BUFFER_SIZE; i++)
+            for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
                 smp[i] += tmpbuf[i] * currentformants[j].amp;
+        returnTmpBuffer(tmpbuf);
         oldformantamp[j] = currentformants[j].amp;
     }
+    returnTmpBuffer(inbuffer);
 }
 

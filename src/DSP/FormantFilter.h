@@ -43,7 +43,6 @@ class FormantFilter:public Filter_
         void cleanup();
     private:
         AnalogFilter *formant[FF_MAX_FORMANTS];
-        REALTYPE     *inbuffer, *tmpbuf;
 
         struct {
             REALTYPE freq, amp, q; //frequency,amplitude,Q
