@@ -55,15 +55,15 @@ class SVFilter:public Filter_
 
         void singlefilterout(REALTYPE *smp, fstage &x, parameters &par);
         void computefiltercoefs();
-        int      type; //The type of the filter (LPF1,HPF1,LPF2,HPF2...)
+        int      type;   //The type of the filter (LPF1,HPF1,LPF2,HPF2...)
         int      stages; //how many times the filter is applied (0->1,1->2,etc.)
-        REALTYPE freq; //Frequency given in Hz
-        REALTYPE q; //Q factor (resonance or Q factor)
-        REALTYPE gain; //the gain of the filter (if are shelf/peak) filters
+        REALTYPE freq;   //Frequency given in Hz
+        REALTYPE q;      //Q factor (resonance or Q factor)
+        REALTYPE gain;   //the gain of the filter (if are shelf/peak) filters
 
-        int abovenq; //this is 1 if the frequency is above the nyquist
-        int oldabovenq;
-        int needsinterpolation, firsttime;
+        bool abovenq,   //if the frequency is above the nyquist
+             oldabovenq;
+        bool needsinterpolation, firsttime;
 };
 
 

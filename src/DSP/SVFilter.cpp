@@ -20,8 +20,10 @@
 
 */
 
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
+#include <cstring>
+#include "../Misc/Util.h"
 #include "SVFilter.h"
 
 SVFilter::SVFilter(unsigned char Ftype,
@@ -35,8 +37,8 @@ SVFilter::SVFilter(unsigned char Ftype,
     q         = Fq;
     gain      = 1.0;
     outgain   = 1.0;
-    needsinterpolation = 0;
-    firsttime = 1;
+    needsinterpolation = false;
+    firsttime = true;
     if(stages >= MAX_FILTER_STAGES)
         stages = MAX_FILTER_STAGES;
     cleanup();
@@ -54,8 +56,8 @@ void SVFilter::cleanup()
         st[i].band  = 0.0;
         st[i].notch = 0.0;
     }
-    oldabovenq = 0;
-    abovenq    = 0;
+    oldabovenq = false;
+    abovenq    = false;
 }
 
 void SVFilter::computefiltercoefs()
@@ -80,17 +82,17 @@ void SVFilter::setfreq(REALTYPE frequency)
     oldabovenq = abovenq;
     abovenq    = frequency > (SAMPLE_RATE / 2 - 500.0);
 
-    int nyquistthresh = (abovenq ^ oldabovenq);
+    bool nyquistthresh = (abovenq ^ oldabovenq);
 
-
-    if((rap > 3.0) || (nyquistthresh != 0)) { //if the frequency is changed fast, it needs interpolation (now, filter and coeficients backup)
-        if(firsttime == 0)
-            needsinterpolation = 1;
+    //if the frequency is changed fast, it needs interpolation
+    if((rap > 3.0) || nyquistthresh) {//(now, filter and coeficients backup)
         ipar = par;
+        if(!firsttime)
+            needsinterpolation = true;
     }
     freq      = frequency;
     computefiltercoefs();
-    firsttime = 0;
+    firsttime = false;
 }
 
 void SVFilter::setfreq_and_q(REALTYPE frequency, REALTYPE q_)
@@ -128,7 +130,6 @@ void SVFilter::setstages(int stages_)
 
 void SVFilter::singlefilterout(REALTYPE *smp, fstage &x, parameters &par)
 {
-    int i;
     REALTYPE *out = NULL;
     switch(type) {
     case 0:
@@ -145,7 +146,7 @@ void SVFilter::singlefilterout(REALTYPE *smp, fstage &x, parameters &par)
         break;
     }
 
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
         x.low   = x.low + par.f * x.band;
         x.high  = par.q_sqrt * smp[i] - x.low - par.q * x.band;
         x.band  = par.f * x.high + x.band;
@@ -157,30 +158,25 @@ void SVFilter::singlefilterout(REALTYPE *smp, fstage &x, parameters &par)
 
 void SVFilter::filterout(REALTYPE *smp)
 {
-    int i;
-    REALTYPE *ismp = NULL;
-
-    if(needsinterpolation != 0) {
-        ismp = new REALTYPE[SOUND_BUFFER_SIZE];
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++)
-            ismp[i] = smp[i];
-        for(i = 0; i < stages + 1; i++)
-            singlefilterout(ismp, st[i], ipar);
-    }
-
-    for(i = 0; i < stages + 1; i++)
+    for(int i = 0; i < stages + 1; i++)
         singlefilterout(smp, st[i], par);
 
-    if(needsinterpolation != 0) {
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    if(needsinterpolation) {
+        REALTYPE *ismp = getTmpBuffer();
+        memcpy(ismp, smp, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+
+        for(int i = 0; i < stages + 1; i++)
+            singlefilterout(ismp, st[i], ipar);
+
+        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
             REALTYPE x = i / (REALTYPE) SOUND_BUFFER_SIZE;
             smp[i] = ismp[i] * (1.0 - x) + smp[i] * x;
         }
-        delete [] ismp;
-        needsinterpolation = 0;
+        returnTmpBuffer(ismp);
+        needsinterpolation = false;
     }
 
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++)
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
         smp[i] *= outgain;
 }
 
