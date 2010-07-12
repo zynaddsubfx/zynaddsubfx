@@ -100,7 +100,7 @@ class ADnote :public SynthNote
         /**Computes the Frequency Modulated Oscillator.
          * @param FMmode modulation type 0=Phase 1=Frequency*/
         inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice,
-                                                              int FMmode);       //FMmode=0 for phase modulation, 1 for Frequency modulation
+                                                              int FMmode);
         //  inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice);
         /**TODO*/
         inline void ComputeVoiceOscillatorPitchModulation(int nvoice);
@@ -125,7 +125,11 @@ class ADnote :public SynthNote
         /*                    GLOBAL PARAMETERS                          */
         /*****************************************************************/
 
-        struct ADnoteGlobal {
+        struct Global {
+            void kill();
+            void initparameters(const ADnoteGlobalParam &param,
+                                REALTYPE basefreq, REALTYPE velocity,
+                                bool stereo);
             /******************************************
             *     FREQUENCY GLOBAL PARAMETERS        *
             ******************************************/
@@ -168,7 +172,9 @@ class ADnote :public SynthNote
         /***********************************************************/
         /*                    VOICE PARAMETERS                     */
         /***********************************************************/
-        struct ADnoteVoice {
+        struct Voice{
+            void releasekey();
+            void kill();
             /* If the voice is enabled */
             ONOFFTYPE Enabled;
 
