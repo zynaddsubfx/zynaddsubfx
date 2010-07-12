@@ -126,9 +126,8 @@ class Reverb:public Effect
 
         REALTYPE     *idelay;
         AnalogFilter *lpf, *hpf; //filters
-        REALTYPE     *inputbuf;
 
-        void processmono(int ch, REALTYPE *output);
+        void processmono(int ch, REALTYPE *output, REALTYPE *inputbuf);
 };
 
 #endif
