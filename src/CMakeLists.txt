@@ -23,7 +23,6 @@ mark_as_advanced(LASH_LIBRARIES)
 # NOTE: These cache variables should normally not be changed in this
 # file, but either in in CMakeCache.txt before compile, or by passing
 # parameters directly into cmake using the -D flag.
-SET (FFTW_VERSION 3 CACHE STRING "Version number of FFTW")
 SET (DefaultOutput oss CACHE STRING
     "Default Output module: [null, alsa, oss, jack, portaudio]")
 SET (GuiModule fltk CACHE STRING "GUI module, either fltk, qt or off")
@@ -97,7 +96,7 @@ if(LashEnable)
 	message(STATUS "Compiling with lash")
 endif()
 
-add_definitions(-DFFTW_VERSION_${FFTW_VERSION}
+add_definitions(
 	 -DASM_F2I_YES
          -g #TODO #todo put in a better location
          -Wall
