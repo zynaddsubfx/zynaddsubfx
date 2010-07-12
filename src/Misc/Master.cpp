@@ -32,6 +32,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <iostream>
+#include <algorithm>
 
 #include <unistd.h>
 
@@ -88,15 +89,12 @@ void Master::defaults()
     for(int nefx = 0; nefx < NUM_SYS_EFX; nefx++) {
         sysefx[nefx]->defaults();
         for(int npart = 0; npart < NUM_MIDI_PARTS; npart++)
-            //if (nefx==0) setPsysefxvol(npart,nefx,64);
-            //else
             setPsysefxvol(npart, nefx, 0);
-        ;
+
         for(int nefxto = 0; nefxto < NUM_SYS_EFX; nefxto++)
             setPsysefxsend(nefx, nefxto, 0);
     }
 
-//	sysefx[0]->changeeffect(1);
     microtonal.defaults();
     ShutUp();
 }
@@ -126,12 +124,11 @@ Master &Master::getInstance()
  */
 void Master::noteOn(char chan, char note, char velocity)
 {
-    int npart;
-    if(velocity != 0) {
-        for(npart = 0; npart < NUM_MIDI_PARTS; npart++) {
+    if(velocity) {
+        for(int npart = 0; npart < NUM_MIDI_PARTS; npart++) {
             if(chan == part[npart]->Prcvchn) {
                 fakepeakpart[npart] = velocity * 2;
-                if(part[npart]->Penabled != 0)
+                if(part[npart]->Penabled)
                     part[npart]->NoteOn(note, velocity, keyshift);
             }
         }
@@ -146,11 +143,9 @@ void Master::noteOn(char chan, char note, char velocity)
  */
 void Master::noteOff(char chan, char note)
 {
-    int npart;
-    for(npart = 0; npart < NUM_MIDI_PARTS; npart++)
-        if((chan == part[npart]->Prcvchn) && (part[npart]->Penabled != 0))
+    for(int npart = 0; npart < NUM_MIDI_PARTS; npart++)
+        if((chan == part[npart]->Prcvchn) && part[npart]->Penabled)
             part[npart]->NoteOff(note);
-    ;
 }
 
 /*
@@ -269,53 +264,24 @@ void Master::partonoff(int npart, int what)
  */
 void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
 {
-    int i, npart, nefx;
+    //Swaps the Left channel with Right Channel
+    if(swaplr)
+        swap(outl,outr);
 
-    /*    //test!!!!!!!!!!!!! se poate bloca aici (mutex)
-        if (seq.play){
-        int type,par1,par2,again,midichan;
-        int ntrack=1;
-    //	    do{
-            again=seq.getevent(ntrack,&midichan,&type,&par1,&par2);
-            if (type>0) {
-    //		printf("aaa\n");
-
-                    if (type==1){//note_on or note_off
-                if (par2!=0) NoteOn(midichan,par1,par2);
-                    else NoteOff(midichan,par1);
-                    };
-            };
-    //	    } while (again);
-        };
-    */
-
-
-//    printf("zzzz\n");
-
-
-    //Swaps the Left channel with Right Channel (if it is asked for)
-    if(swaplr != 0) {
-        REALTYPE *tmp = outl;
-        outl = outr;
-        outr = tmp;
-    }
-
-    //clean up the output samples
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        outl[i] = 0.0;
-        outr[i] = 0.0;
-    }
+    //clean up the output samples (should not be needed?)
+    memset(outl, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+    memset(outr, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
 
     //Compute part samples and store them part[npart]->partoutl,partoutr
-    for(npart = 0; npart < NUM_MIDI_PARTS; npart++)
+    for(int npart = 0; npart < NUM_MIDI_PARTS; npart++)
         if(part[npart]->Penabled != 0)
             part[npart]->ComputePartSmps();
 
     //Insertion effects
-    for(nefx = 0; nefx < NUM_INS_EFX; nefx++) {
+    for(int nefx = 0; nefx < NUM_INS_EFX; nefx++) {
         if(Pinsparts[nefx] >= 0) {
             int efxpart = Pinsparts[nefx];
-            if(part[efxpart]->Penabled != 0)
+            if(part[efxpart]->Penabled)
                 insefx[nefx]->out(part[efxpart]->partoutl,
                                   part[efxpart]->partoutr);
         }
@@ -323,48 +289,45 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
 
 
     //Apply the part volumes and pannings (after insertion effects)
-    for(npart = 0; npart < NUM_MIDI_PARTS; npart++) {
+    for(int npart = 0; npart < NUM_MIDI_PARTS; npart++) {
         if(part[npart]->Penabled == 0)
             continue;
 
-        REALTYPE newvol_l = part[npart]->volume;
-        REALTYPE newvol_r = part[npart]->volume;
-        REALTYPE oldvol_l = part[npart]->oldvolumel;
-        REALTYPE oldvol_r = part[npart]->oldvolumer;
+        Stereo<REALTYPE> newvol(part[npart]->volume),
+                         oldvol(part[npart]->oldvolumel,
+                                part[npart]->oldvolumer);
+
         REALTYPE pan      = part[npart]->panning;
         if(pan < 0.5)
-            newvol_l *= pan * 2.0;
+            newvol.l *= pan * 2.0;
         else
-            newvol_r *= (1.0 - pan) * 2.0;
+            newvol.r *= (1.0 - pan) * 2.0;
 
-        if(ABOVE_AMPLITUDE_THRESHOLD(oldvol_l, newvol_l)
-           || ABOVE_AMPLITUDE_THRESHOLD(oldvol_r, newvol_r)) { //the volume or the panning has changed and needs interpolation
-            for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-                REALTYPE vol_l = INTERPOLATE_AMPLITUDE(oldvol_l,
-                                                       newvol_l,
-                                                       i,
-                                                       SOUND_BUFFER_SIZE);
-                REALTYPE vol_r = INTERPOLATE_AMPLITUDE(oldvol_r,
-                                                       newvol_r,
-                                                       i,
-                                                       SOUND_BUFFER_SIZE);
-                part[npart]->partoutl[i] *= vol_l;
-                part[npart]->partoutr[i] *= vol_r;
+        //the volume or the panning has changed and needs interpolation
+        if(ABOVE_AMPLITUDE_THRESHOLD(oldvol.l, newvol.l)
+           || ABOVE_AMPLITUDE_THRESHOLD(oldvol.r, newvol.r)) {
+            for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+                Stereo<REALTYPE> vol(INTERPOLATE_AMPLITUDE(oldvol.l, newvol.l,
+                                                       i, SOUND_BUFFER_SIZE),
+                                     INTERPOLATE_AMPLITUDE(oldvol.r, newvol.r,
+                                                       i, SOUND_BUFFER_SIZE));
+                part[npart]->partoutl[i] *= vol.l;
+                part[npart]->partoutr[i] *= vol.r;
             }
-            part[npart]->oldvolumel = newvol_l;
-            part[npart]->oldvolumer = newvol_r;
+            part[npart]->oldvolumel = newvol.l;
+            part[npart]->oldvolumer = newvol.r;
         }
         else {
-            for(i = 0; i < SOUND_BUFFER_SIZE; i++) { //the volume did not changed
-                part[npart]->partoutl[i] *= newvol_l;
-                part[npart]->partoutr[i] *= newvol_r;
+            for(int i = 0; i < SOUND_BUFFER_SIZE; i++) { //the volume did not changed
+                part[npart]->partoutl[i] *= newvol.l;
+                part[npart]->partoutr[i] *= newvol.r;
             }
         }
     }
 
 
     //System effects
-    for(nefx = 0; nefx < NUM_SYS_EFX; nefx++) {
+    for(int nefx = 0; nefx < NUM_SYS_EFX; nefx++) {
         if(sysefx[nefx]->geteffect() == 0)
             continue; //the effect is disabled
 
@@ -375,7 +338,7 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
         memset(tmpmixr, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
 
         //Mix the channels according to the part settings about System Effect
-        for(npart = 0; npart < NUM_MIDI_PARTS; npart++) {
+        for(int npart = 0; npart < NUM_MIDI_PARTS; npart++) {
             //skip if the part has no output to effect
             if(Psysefxvol[nefx][npart] == 0)
                 continue;
@@ -385,8 +348,8 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
                 continue;
 
             //the output volume of each part to system effect
-            REALTYPE vol = sysefxvol[nefx][npart];
-            for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+            const REALTYPE vol = sysefxvol[nefx][npart];
+            for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
                 tmpmixl[i] += part[npart]->partoutl[i] * vol;
                 tmpmixr[i] += part[npart]->partoutr[i] * vol;
             }
@@ -395,10 +358,10 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
         // system effect send to next ones
         for(int nefxfrom = 0; nefxfrom < nefx; nefxfrom++) {
             if(Psysefxsend[nefxfrom][nefx] != 0) {
-                REALTYPE v = sysefxsend[nefxfrom][nefx];
-                for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-                    tmpmixl[i] += sysefx[nefxfrom]->efxoutl[i] * v;
-                    tmpmixr[i] += sysefx[nefxfrom]->efxoutr[i] * v;
+                const REALTYPE vol = sysefxsend[nefxfrom][nefx];
+                for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+                    tmpmixl[i] += sysefx[nefxfrom]->efxoutl[i] * vol;
+                    tmpmixr[i] += sysefx[nefxfrom]->efxoutr[i] * vol;
                 }
             }
         }
@@ -406,8 +369,8 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
         sysefx[nefx]->out(tmpmixl, tmpmixr);
 
         //Add the System Effect to sound output
-        REALTYPE outvol = sysefx[nefx]->sysefxgetvolume();
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        const REALTYPE outvol = sysefx[nefx]->sysefxgetvolume();
+        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
             outl[i] += tmpmixl[i] * outvol;
             outr[i] += tmpmixr[i] * outvol;
         }
@@ -417,9 +380,9 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
     }
 
     //Mix all parts
-    for(npart = 0; npart < NUM_MIDI_PARTS; npart++) {
+    for(int npart = 0; npart < NUM_MIDI_PARTS; npart++) {
         if(part[npart]->Penabled) { //only mix active parts
-            for(i = 0; i < SOUND_BUFFER_SIZE; i++) { //the volume did not changed
+            for(int i = 0; i < SOUND_BUFFER_SIZE; i++) { //the volume did not changed
                 outl[i] += part[npart]->partoutl[i];
                 outr[i] += part[npart]->partoutr[i];
             }
@@ -427,13 +390,13 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
     }
 
     //Insertion effects for Master Out
-    for(nefx = 0; nefx < NUM_INS_EFX; nefx++)
+    for(int nefx = 0; nefx < NUM_INS_EFX; nefx++)
         if(Pinsparts[nefx] == -2)
             insefx[nefx]->out(outl, outr);
-    ;
+
 
     //Master Volume
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
         outl[i] *= volume;
         outr[i] *= volume;
     }
@@ -443,10 +406,9 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
         pthread_mutex_unlock(&vumutex);
     }
 
-
     //Shutup if it is asked (with fade-out)
-    if(shutup != 0) {
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    if(shutup) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
             REALTYPE tmp =
                 (SOUND_BUFFER_SIZE - i) / (REALTYPE) SOUND_BUFFER_SIZE;
             outl[i] *= tmp;
@@ -543,13 +505,7 @@ vuData Master::getVuData()
 {
     vuData tmp;
     pthread_mutex_lock(&vumutex);
-    tmp.outpeakl=vu.outpeakl;
-    tmp.outpeakr=vu.outpeakr;
-    tmp.maxoutpeakl=vu.maxoutpeakl;
-    tmp.maxoutpeakr=vu.maxoutpeakr;
-    tmp.rmspeakl=vu.rmspeakl;
-    tmp.rmspeakr=vu.rmspeakr;
-    tmp.clipped=vu.clipped;
+    tmp = vu;
     pthread_mutex_unlock(&vumutex);
     return tmp;
 }

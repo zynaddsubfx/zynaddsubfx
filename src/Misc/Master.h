@@ -147,7 +147,7 @@ class Master
         unsigned char fakepeakpart[NUM_MIDI_PARTS]; //this is used to compute the "peak" when the part is disabled
 
         Controller ctl;
-        int swaplr; //1 if L and R are swapped
+        bool swaplr; //if L and R are swapped
 
         //Sequencer
         Sequencer seq;
