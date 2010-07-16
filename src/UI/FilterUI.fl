@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0106 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
@@ -9,10 +9,12 @@ decl {//License: GNU GPL version 2 or later} {}
 decl {\#include "WidgetPDial.h"} {public
 } 
 
-decl {\#include <stdio.h>} {public
+decl {\#include <cmath>} {} 
+
+decl {\#include <stdio.h>} {global
 } 
 
-decl {\#include <stdlib.h>} {public
+decl {\#include <stdlib.h>} {selected global
 } 
 
 decl {\#include "../globals.h"} {public
@@ -180,39 +182,39 @@ pars->changed=true;}
           tooltip {The Filter type} xywh {10 50 50 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
           code1 {o->value(pars->Ptype);}
         } {
-          menuitem {} {
+          MenuItem {} {
             label LPF1
             xywh {40 40 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label HPF1
             xywh {50 50 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label LPF2
             xywh {60 60 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label HPF2
             xywh {70 70 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label BPF2
             xywh {82 82 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label NF2
             xywh {94 94 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label PkF2
             xywh {104 104 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label LSh2
             xywh {114 114 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label HSh2
             xywh {124 124 100 20} labelfont 1 labelsize 10
           }
@@ -224,19 +226,19 @@ pars->changed=true;}
           tooltip {The Filter type} xywh {10 50 50 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
           code1 {o->value(pars->Ptype);}
         } {
-          menuitem {} {
+          MenuItem {} {
             label 1LPF
             xywh {134 134 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label 1HPF
             xywh {144 144 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label 1BPF
             xywh {154 154 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label 1NF
             xywh {164 164 100 20} labelfont 1 labelsize 10
           }
@@ -248,15 +250,15 @@ pars->changed=true;}
           tooltip {The Category of the Filter (Analog/Formantic/etc.)} xywh {10 20 60 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
           code0 {o->value(pars->Pcategory);}
         } {
-          menuitem {} {
+          MenuItem {} {
             label Analog
             xywh {50 50 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label Formant
             xywh {60 60 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label StVarF
             xywh {70 70 100 20} labelfont 1 labelsize 10
           }
@@ -558,8 +560,7 @@ if ((categ==0)||(categ==2)) {
         cfreqdial->label("BS.pos");
 };
 
-filterparamswindow->redraw();} {selected
-    }
+filterparamswindow->redraw();} {}
   }
   Function {init(FilterParams *filterpars_,unsigned char *velsnsamp_,unsigned char *velsns_)} {} {
     code {pars=filterpars_;
