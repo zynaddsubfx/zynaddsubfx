@@ -179,7 +179,7 @@ void sigterm_exit(int /*sig*/)
 /*
  * Program initialisation
  */
-void initprogram()
+void initprogram(int argc, char **argv)
 {
 #if LASH
     lash = new LASHClient(&argc, &argv);
@@ -414,7 +414,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    initprogram();
+    initprogram(argc,argv);
 
 #if 0 //TODO update this code
 #ifdef USE_LASH

@@ -13,7 +13,7 @@ set(zynaddsubfx_misc_SRCS
         WavFile.cpp
 )
 
-if(LashEnabled)
+if(LashEnable)
     set(zynaddsubfx_misc_SRCS ${zynaddsubfx_misc_SRCS} LASHClient.cpp)
 endif()
 
