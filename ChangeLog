@@ -998,3 +998,7 @@
 
 27 Jun 2010 (Mark McCurry)
 	   - Aphaser and Phaser are within same effect now
+
+17 Aug 2010 (Paul Nasca)
+	   - small bugix on adsynth.cpp
+	   
