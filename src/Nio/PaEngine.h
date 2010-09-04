@@ -30,11 +30,14 @@
 class PaEngine: public AudioOut
 {
     public:
-        PaEngine(OutMgr *out);
+        PaEngine();
         ~PaEngine();
 
         bool Start();
         void Stop();
+
+        void setAudioEn(bool nval);
+        bool getAudioEn() const;
 
     protected:
         static int PAprocess(const void *inputBuffer, void *outputBuffer,

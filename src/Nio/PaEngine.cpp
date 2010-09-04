@@ -21,13 +21,12 @@
 */
 
 #include "PaEngine.h"
-#include "../Samples/Sample.h"
 #include <iostream>
 
 using namespace std;
 
-PaEngine::PaEngine(OutMgr *out)
-    :AudioOut(out)
+PaEngine::PaEngine()
+    :stream(NULL)
 {
     name = "PA";
 }
@@ -40,9 +39,8 @@ PaEngine::~PaEngine()
 
 bool PaEngine::Start()
 {
-    if(enabled())
+    if(getAudioEn())
         return true;
-    enabled = true;
     Pa_Initialize();
 
     PaStreamParameters outputParameters;
@@ -69,6 +67,19 @@ bool PaEngine::Start()
                   (void *) this);
     Pa_StartStream(stream);
     return true;
+}
+
+void PaEngine::setAudioEn(bool nval)
+{
+    if(nval)
+        Start();
+    else
+        Stop();
+}
+
+bool PaEngine::getAudioEn() const
+{
+    return stream;
 }
 
 int PaEngine::PAprocess(const void *inputBuffer, void *outputBuffer,
@@ -99,11 +110,11 @@ int PaEngine::process(float *out, unsigned long framesPerBuffer)
 
 void PaEngine::Stop()
 {
-    if(!enabled())
+    if(!getAudioEn())
         return;
-    enabled = false;
     Pa_StopStream(stream);
     Pa_CloseStream(stream);
+    stream = NULL;
     Pa_Terminate();
 }
 
