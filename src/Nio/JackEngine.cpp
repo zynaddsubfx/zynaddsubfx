@@ -217,7 +217,7 @@ void JackEngine::stopMidi()
 int JackEngine::clientId()
 {
     if (NULL != jackClient)
-        return jack_client_thread_id(jackClient);
+        return (long)jack_client_thread_id(jackClient);
     else
         return -1;
 }
@@ -242,6 +242,8 @@ int JackEngine::processCallback(jack_nframes_t nframes)
 
     if (NULL != audio.ports[0] && NULL != audio.ports[1])
         okaudio = processAudio(nframes);
+    if (okaudio)
+	handleMidi(nframes);
     return okaudio ? 0 : -1;
 }
 
@@ -264,7 +266,6 @@ bool JackEngine::processAudio(jack_nframes_t nframes)
     //Assumes size of smp.l == nframes
     memcpy(audio.portBuffs[0], smp.l, bufferSize*sizeof(REALTYPE));
     memcpy(audio.portBuffs[1], smp.r, bufferSize*sizeof(REALTYPE));
-    handleMidi(nframes);
     return true;
 
 }
