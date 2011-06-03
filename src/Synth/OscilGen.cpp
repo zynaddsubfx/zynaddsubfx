@@ -761,7 +761,7 @@ void OscilGen::adaptiveharmonicpostprocess(REALTYPE *f, int size)
         }
     }
 
-    delete (inf);
+    delete [] inf;
 }
 
 void OscilGen::newrandseed(unsigned int randseed)
