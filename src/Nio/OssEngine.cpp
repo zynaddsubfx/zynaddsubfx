@@ -239,18 +239,36 @@ void *OssEngine::thread()
 
         //Collect up to 30 midi events
         for (int k = 0; k < 30 && getMidiEn(); ++k) {
-            getMidi(tmp);
-            unsigned char type = tmp[0];
-            unsigned char header = tmp[1];
-            if(header!=0xfe&&type==SEQ_MIDIPUTC&&header>=0x80)
-            {
-                getMidi(tmp);
-                unsigned char num = tmp[1];
-                getMidi(tmp);
-                unsigned char value = tmp[1];
+            static char escaped;
 
-                midiProcess(header, num, value);
+            memset(tmp, 0, 4);
+
+            if (escaped) {
+                tmp[0] = escaped;
+                escaped = 0;
+            } else {
+                getMidi(tmp);
+                if (!(tmp[0] & 0x80))
+                    continue;
             }
+            getMidi(tmp + 1);
+            if (tmp[1] & 0x80) {
+                escaped = tmp[1];
+                tmp[1] = 0;
+            } else {
+                getMidi(tmp + 2);
+                if (tmp[2] & 0x80) {
+                    escaped = tmp[2];
+                    tmp[2] = 0;
+                } else {
+                    getMidi(tmp + 3);
+                    if (tmp[3] & 0x80) {
+                        escaped = tmp[3];
+                        tmp[3] = 0;
+                    }
+                }
+            }
+            midiProcess(tmp[0], tmp[1], tmp[2]);
         }
     }
     pthread_exit(NULL);
@@ -259,6 +277,6 @@ void *OssEngine::thread()
 
 void OssEngine::getMidi(unsigned char *midiPtr)
 {
-    read(midi.handle, midiPtr, 4);
+    read(midi.handle, midiPtr, 1);
 }
 

@@ -18,4 +18,5 @@ Contributors:
         Alan Calvert (Portions of New IO)
         Stephen Parry (DSSI rebuild)
         Ryan Billing (APhaser)
+        Hans Petter Selasky (OSS Midi)
 
