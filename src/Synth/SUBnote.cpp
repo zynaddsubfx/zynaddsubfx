@@ -439,7 +439,7 @@ void SUBnote::computecurrentparameters()
                                      + GlobalFilterEnvelope->envout();
         float filterfreq = globalfilterpitch + ctl->filtercutoff.relfreq
                               + GlobalFilterFreqTracking;
-        filterfreq = GlobalFilterL->getrealfreq(filterfreq);
+        filterfreq = Filter::getrealfreq(filterfreq);
 
         GlobalFilterL->setfreq_and_q(filterfreq,
                                      globalfiltercenterq * ctl->filterq.relq);

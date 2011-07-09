@@ -191,8 +191,11 @@ void FormantFilter::setgain(float /*dBgain*/)
 
 void FormantFilter::setfreq_and_q(float frequency, float q_)
 {
+    //Convert form real freq[Hz]
+    const float freq = log2(frequency) - 9.96578428; //log2(1000)=9.95748.
+
     Qfactor = q_;
-    setpos(frequency);
+    setpos(freq);
 }
 
 

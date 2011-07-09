@@ -228,7 +228,7 @@ void PADnote::computecurrentparameters()
     float tmpfilterfreq = globalfilterpitch + ctl->filtercutoff.relfreq
                              + NoteGlobalPar.FilterFreqTracking;
 
-    tmpfilterfreq = NoteGlobalPar.GlobalFilterL->getrealfreq(tmpfilterfreq);
+    tmpfilterfreq = Filter::getrealfreq(tmpfilterfreq);
 
     float globalfilterq = NoteGlobalPar.FilterQ * ctl->filterq.relq;
     NoteGlobalPar.GlobalFilterL->setfreq_and_q(tmpfilterfreq, globalfilterq);

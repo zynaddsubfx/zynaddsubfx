@@ -24,15 +24,18 @@
 #include <stdio.h>
 
 #include "Filter.h"
+#include "Filter_.h"
+#include "AnalogFilter.h"
+#include "FormantFilter.h"
+#include "SVFilter.h"
+#include "../Params/FilterParams.h"
 
 Filter::Filter(FilterParams *pars)
 {
     unsigned char Ftype   = pars->Ptype;
     unsigned char Fstages = pars->Pstages;
 
-    category = pars->Pcategory;
-
-    switch(category) {
+    switch(pars->Pcategory) {
     case 1:
         filter = new FormantFilter(pars);
         break;
@@ -79,9 +82,6 @@ void Filter::setq(float q_)
 
 float Filter::getrealfreq(float freqpitch)
 {
-    if((category == 0) || (category == 2))
-        return pow(2.0, freqpitch + 9.96578428);                            //log2(1000)=9.95748
-    else
-        return freqpitch;
+    return pow(2.0, freqpitch + 9.96578428); //log2(1000)=9.95748
 }
 

@@ -963,7 +963,7 @@ void ADnote::computecurrentparameters()
     float tmpfilterfreq = globalfilterpitch + ctl->filtercutoff.relfreq
                              + NoteGlobalPar.FilterFreqTracking;
 
-    tmpfilterfreq = NoteGlobalPar.GlobalFilterL->getrealfreq(tmpfilterfreq);
+    tmpfilterfreq = Filter::getrealfreq(tmpfilterfreq);
 
     float globalfilterq = NoteGlobalPar.FilterQ * ctl->filterq.relq;
     NoteGlobalPar.GlobalFilterL->setfreq_and_q(tmpfilterfreq, globalfilterq);
@@ -1014,8 +1014,7 @@ void ADnote::computecurrentparameters()
                 filterpitch += NoteVoicePar[nvoice].FilterLfo->lfoout();
 
             filterfreq = filterpitch + NoteVoicePar[nvoice].FilterFreqTracking;
-            filterfreq = NoteVoicePar[nvoice].VoiceFilterL->getrealfreq(
-                filterfreq);
+            filterfreq = Filter::getrealfreq(filterfreq);
 
             NoteVoicePar[nvoice].VoiceFilterL->setfreq(filterfreq);
             if(stereo && NoteVoicePar[nvoice].VoiceFilterR)

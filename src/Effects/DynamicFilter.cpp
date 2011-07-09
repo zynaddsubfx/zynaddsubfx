@@ -74,8 +74,8 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     ms4 = ms4 * (1.0 - ampsmooth2) + ms3 * ampsmooth2;
     const float rms = (sqrt(ms4)) * ampsns;
 
-    const float frl = filterl->getrealfreq(freq + lfol + rms);
-    const float frr = filterr->getrealfreq(freq + lfor + rms);
+    const float frl = Filter::getrealfreq(freq + lfol + rms);
+    const float frr = Filter::getrealfreq(freq + lfor + rms);
 
     filterl->setfreq_and_q(frl, q);
     filterr->setfreq_and_q(frr, q);

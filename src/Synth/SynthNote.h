@@ -22,6 +22,7 @@
 #ifndef SYNTH_NOTE_H
 #define SYNTH_NOTE_H
 #include "../globals.h"
+#include "../Params/FilterParams.h"
 
 class SynthNote
 {
