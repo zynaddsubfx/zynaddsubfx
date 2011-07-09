@@ -24,6 +24,8 @@
 #include <cstdio>
 #include "../Misc/Util.h"
 #include "FormantFilter.h"
+#include "AnalogFilter.h"
+#include "../Params/FilterParams.h"
 
 FormantFilter::FormantFilter(FilterParams *pars)
 {

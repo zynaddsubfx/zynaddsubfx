@@ -21,6 +21,7 @@
 #include <math.h>
 #include "PADnote.h"
 #include "../Misc/Config.h"
+#include "../DSP/Filter.h"
 
 PADnote::PADnote(PADnoteParameters *parameters,
                  Controller *ctl_,
@@ -144,8 +145,8 @@ void PADnote::setup(float freq, float velocity,int portamento_, int midinote, bo
                                               * NoteGlobalPar.AmpLfo->amplfoout();
 
     if(!legato) {
-        NoteGlobalPar.GlobalFilterL  = new Filter(pars->GlobalFilter);
-        NoteGlobalPar.GlobalFilterR  = new Filter(pars->GlobalFilter);
+        NoteGlobalPar.GlobalFilterL  = Filter::generate(pars->GlobalFilter);
+        NoteGlobalPar.GlobalFilterR  = Filter::generate(pars->GlobalFilter);
 
         NoteGlobalPar.FilterEnvelope = new Envelope(pars->FilterEnvelope,
                                                         basefreq);

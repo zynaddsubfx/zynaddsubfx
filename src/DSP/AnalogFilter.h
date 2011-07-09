@@ -26,12 +26,12 @@
 #define ANALOG_FILTER_H
 
 #include "../globals.h"
-#include "Filter_.h"
+#include "Filter.h"
 
 /**Implementation of Several analog filters (lowpass, highpass...)
  * Implemented with IIR filters
  * Coefficients generated with "Cookbook formulae for audio EQ"*/
-class AnalogFilter:public Filter_
+class AnalogFilter:public Filter
 {
     public:
         AnalogFilter(unsigned char Ftype,

@@ -22,6 +22,7 @@
 
 #include <cmath>
 #include "EQ.h"
+#include "../DSP/AnalogFilter.h"
 
 EQ::EQ(const int &insertion_, float *efxoutl_, float *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0)

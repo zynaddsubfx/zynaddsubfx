@@ -21,6 +21,7 @@
 */
 
 #include <cmath>
+#include "../DSP/AnalogFilter.h"
 #include "Distorsion.h"
 
 

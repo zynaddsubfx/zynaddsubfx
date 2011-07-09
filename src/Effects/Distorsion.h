@@ -24,7 +24,6 @@
 #define DISTORSION_H
 
 #include "../globals.h"
-#include "../DSP/AnalogFilter.h"
 #include "Effect.h"
 
 //Waveshaping(called by Distorsion effect and waveshape from OscilGen)
@@ -67,7 +66,7 @@ class Distorsion:public Effect
 
         //Real Parameters
         float      panning, lrcross;
-        AnalogFilter *lpfl, *lpfr, *hpfl, *hpfr;
+        class AnalogFilter *lpfl, *lpfr, *hpfl, *hpfr;
 };
 
 

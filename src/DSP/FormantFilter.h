@@ -24,15 +24,13 @@
 #define FORMANT_FILTER_H
 
 #include "../globals.h"
-#include "Filter_.h"
-#include "AnalogFilter.h"
-#include "../Params/FilterParams.h"
+#include "Filter.h"
 
 
-class FormantFilter:public Filter_
+class FormantFilter:public Filter
 {
     public:
-        FormantFilter(FilterParams *pars);
+        FormantFilter(class FilterParams *pars);
         ~FormantFilter();
         void filterout(float *smp);
         void setfreq(float frequency);
@@ -42,7 +40,7 @@ class FormantFilter:public Filter_
 
         void cleanup();
     private:
-        AnalogFilter *formant[FF_MAX_FORMANTS];
+        class AnalogFilter *formant[FF_MAX_FORMANTS];
 
         struct {
             float freq, amp, q; //frequency,amplitude,Q
@@ -62,7 +60,6 @@ class FormantFilter:public Filter_
 
         void setpos(float input);
 };
-
 
 #endif
 

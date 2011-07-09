@@ -23,6 +23,7 @@
 #include <cmath>
 #include "Reverb.h"
 #include "../Misc/Util.h"
+#include "../DSP/AnalogFilter.h"
 
 /**\todo: EarlyReflections,Prdelay,Perbalance */
 

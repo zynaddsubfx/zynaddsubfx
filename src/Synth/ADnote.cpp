@@ -26,6 +26,7 @@
 
 #include "../globals.h"
 #include "../Misc/Util.h"
+#include "../DSP/Filter.h"
 #include "OscilGen.h"
 #include "ADnote.h"
 
@@ -761,8 +762,8 @@ void ADnote::initparameters()
 
         /* Voice Filter Parameters Init */
         if(param.PFilterEnabled != 0) {
-            vce.VoiceFilterL = new Filter(param.VoiceFilter);
-            vce.VoiceFilterR = new Filter(param.VoiceFilter);
+            vce.VoiceFilterL = Filter::generate(param.VoiceFilter);
+            vce.VoiceFilterR = Filter::generate(param.VoiceFilter);
         }
 
         if(param.PFilterEnvelopeEnabled != 0)
@@ -1795,9 +1796,9 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
     Volume = 4.0 * pow(0.1, 3.0 * (1.0 - param.PVolume / 96.0)) //-60 dB .. 0 dB
                  * VelF(velocity, param.PAmpVelocityScaleFunction); //sensing
 
-    GlobalFilterL = new Filter(param.GlobalFilter);
+    GlobalFilterL = Filter::generate(param.GlobalFilter);
     if(stereo)
-        GlobalFilterR = new Filter(param.GlobalFilter);
+        GlobalFilterR = Filter::generate(param.GlobalFilter);
 
     FilterEnvelope     = new Envelope(param.FilterEnvelope, basefreq);
     FilterLfo          = new LFO(param.FilterLfo, basefreq);

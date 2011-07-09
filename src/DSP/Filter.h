@@ -28,16 +28,18 @@
 class Filter
 {
     public:
-        Filter(class FilterParams *pars);
-        ~Filter();
-        void filterout(float *smp);
-        void setfreq(float frequency);
-        void setfreq_and_q(float frequency, float q_);
-        void setq(float q_);
-
         static float getrealfreq(float freqpitch);
-    private:
-        class Filter_ *filter;
+        static Filter *generate(class FilterParams *pars);
+
+        virtual ~Filter() {}
+        virtual void filterout(float *smp)    = 0;
+        virtual void setfreq(float frequency) = 0;
+        virtual void setfreq_and_q(float frequency, float q_) = 0;
+        virtual void setq(float q_) = 0;
+        virtual void setgain(float dBgain) = 0;
+
+    protected:
+        float outgain;
 };
 
 #endif

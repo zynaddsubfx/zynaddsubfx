@@ -26,7 +26,6 @@
 #include "SynthNote.h"
 #include "Envelope.h"
 #include "LFO.h"
-#include "../DSP/Filter.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Params/Controller.h"
 
@@ -156,7 +155,7 @@ class ADnote :public SynthNote
             /******************************************
             *        FILTER GLOBAL PARAMETERS        *
             ******************************************/
-            Filter   *GlobalFilterL, *GlobalFilterR;
+            class Filter   *GlobalFilterL, *GlobalFilterR;
 
             float  FilterCenterPitch; //octaves
             float  FilterQ;
@@ -218,8 +217,8 @@ class ADnote :public SynthNote
             *   FILTER PARAMETERS    *
             *************************/
 
-            Filter   *VoiceFilterL;
-            Filter   *VoiceFilterR;
+            class Filter   *VoiceFilterL;
+            class Filter   *VoiceFilterR;
 
             float  FilterCenterPitch; /* Filter center Pitch*/
             float  FilterFreqTracking;

@@ -24,8 +24,8 @@
 #define SV_FILTER_H
 
 #include "../globals.h"
-#include "Filter_.h"
-class SVFilter:public Filter_
+#include "Filter.h"
+class SVFilter:public Filter
 {
     public:
         SVFilter(unsigned char Ftype,

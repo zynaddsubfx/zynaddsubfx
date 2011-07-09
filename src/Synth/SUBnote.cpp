@@ -356,9 +356,9 @@ void SUBnote::initparameters(float freq)
         BandWidthEnvelope = NULL;
     if(pars->PGlobalFilterEnabled != 0) {
         globalfiltercenterq = pars->GlobalFilter->getq();
-        GlobalFilterL = new Filter(pars->GlobalFilter);
-        if(stereo != 0)
-            GlobalFilterR = new Filter(pars->GlobalFilter);
+        GlobalFilterL = Filter::generate(pars->GlobalFilter);
+        if(stereo)
+            GlobalFilterR = Filter::generate(pars->GlobalFilter);
         GlobalFilterEnvelope     = new Envelope(pars->GlobalFilterEnvelope,
                                                 freq);
         GlobalFilterFreqTracking = pars->GlobalFilter->getfreqtracking(basefreq);

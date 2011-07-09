@@ -27,7 +27,6 @@
 #include "../Params/Controller.h"
 #include "Envelope.h"
 #include "LFO.h"
-#include "../DSP/Filter.h"
 #include "../Params/Controller.h"
 
 /**The "pad" synthesizer*/
@@ -102,7 +101,7 @@ class PADnote :public SynthNote
             /******************************************
             *        FILTER GLOBAL PARAMETERS        *
             ******************************************/
-            Filter   *GlobalFilterL, *GlobalFilterR;
+            class Filter   *GlobalFilterL, *GlobalFilterR;
 
             float  FilterCenterPitch; //octaves
             float  FilterQ;

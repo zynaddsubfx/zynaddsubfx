@@ -24,7 +24,6 @@
 #define EQ_H
 
 #include "../globals.h"
-#include "../DSP/AnalogFilter.h"
 #include "Effect.h"
 
 /**EQ Effect*/
@@ -49,7 +48,7 @@ class EQ:public Effect
             //parameters
             unsigned char Ptype, Pfreq, Pgain, Pq, Pstages;
             //internal values
-            AnalogFilter *l, *r;
+            class AnalogFilter *l, *r;
         } filter[MAX_EQ_BANDS];
 };
 

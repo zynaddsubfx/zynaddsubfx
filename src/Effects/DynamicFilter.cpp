@@ -22,6 +22,7 @@
 
 #include <cmath>
 #include "DynamicFilter.h"
+#include "../DSP/Filter.h"
 
 DynamicFilter::DynamicFilter(int insertion_,
                              float *efxoutl_,
@@ -147,8 +148,8 @@ void DynamicFilter::reinitfilter()
         delete (filterl);
     if(filterr != NULL)
         delete (filterr);
-    filterl = new Filter(filterpars);
-    filterr = new Filter(filterpars);
+    filterl = Filter::generate(filterpars);
+    filterr = Filter::generate(filterpars);
 }
 
 void DynamicFilter::setpreset(unsigned char npreset)

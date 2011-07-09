@@ -26,7 +26,6 @@
 #include "Effect.h"
 #include "EffectLFO.h"
 
-#include "../DSP/Filter.h"
 /**DynamicFilter Effect*/
 class DynamicFilter:public Effect
 {
@@ -61,7 +60,7 @@ class DynamicFilter:public Effect
         //Internal Values
         float panning, depth, ampsns, ampsmooth;
 
-        Filter *filterl, *filterr;
+        class Filter *filterl, *filterr;
 
         float ms1, ms2, ms3, ms4; //mean squares
 };

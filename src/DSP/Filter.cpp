@@ -24,17 +24,17 @@
 #include <stdio.h>
 
 #include "Filter.h"
-#include "Filter_.h"
 #include "AnalogFilter.h"
 #include "FormantFilter.h"
 #include "SVFilter.h"
 #include "../Params/FilterParams.h"
 
-Filter::Filter(FilterParams *pars)
+Filter *Filter::generate(FilterParams *pars)
 {
     unsigned char Ftype   = pars->Ptype;
     unsigned char Fstages = pars->Pstages;
 
+    Filter *filter;
     switch(pars->Pcategory) {
     case 1:
         filter = new FormantFilter(pars);
@@ -53,31 +53,7 @@ Filter::Filter(FilterParams *pars)
             filter->outgain = dB2rap(pars->getgain());
         break;
     }
-}
-
-Filter::~Filter()
-{
-    delete (filter);
-}
-
-void Filter::filterout(float *smp)
-{
-    filter->filterout(smp);
-}
-
-void Filter::setfreq(float frequency)
-{
-    filter->setfreq(frequency);
-}
-
-void Filter::setfreq_and_q(float frequency, float q_)
-{
-    filter->setfreq_and_q(frequency, q_);
-}
-
-void Filter::setq(float q_)
-{
-    filter->setq(q_);
+    return filter;
 }
 
 float Filter::getrealfreq(float freqpitch)

@@ -25,7 +25,6 @@
 
 #include <math.h>
 #include "../globals.h"
-#include "../DSP/AnalogFilter.h"
 #include "../DSP/FFTwrapper.h"
 #include "../DSP/Unison.h"
 #include "Effect.h"
@@ -125,7 +124,7 @@ class Reverb:public Effect
         int apk[REV_APS * 2];
 
         float     *idelay;
-        AnalogFilter *lpf, *hpf; //filters
+        class AnalogFilter *lpf, *hpf; //filters
 
         void processmono(int ch, float *output, float *inputbuf);
 };
