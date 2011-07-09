@@ -45,6 +45,10 @@ class AdNoteTest:public CxxTest::TestSuite
             //prepare the default settings
             ADnoteParameters *defaultPreset = new ADnoteParameters(
                 new FFTwrapper(OSCIL_SIZE));
+
+            //Assert defaults
+            TS_ASSERT(!defaultPreset->VoicePar[1].Enabled);
+
             XMLwrapper *wrap = new XMLwrapper();
             cout << string(SOURCE_DIR) + string("/Tests/guitar-adnote.xmz")
                  << endl;
@@ -58,6 +62,9 @@ class AdNoteTest:public CxxTest::TestSuite
             TS_ASSERT(wrap->enterbranch("ADD_SYNTH_PARAMETERS"));
             defaultPreset->getfromXML(wrap);
             //defaultPreset->defaults();
+
+            //verify xml was loaded
+            TS_ASSERT(defaultPreset->VoicePar[1].Enabled);
 
 
 
@@ -86,7 +93,6 @@ class AdNoteTest:public CxxTest::TestSuite
         }
 
         void testDefaults() {
-            TS_ASSERT(note->ready);
             int sampleCount = 0;
 
 //#define WRITE_OUTPUT

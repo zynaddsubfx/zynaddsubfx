@@ -82,7 +82,7 @@ string Bank::getnamenumbered(unsigned int ninstrument)
 /*
  * Changes the name of an instrument (and the filename)
  */
-void Bank::setname(unsigned int ninstrument, string newname, int newslot)
+void Bank::setname(unsigned int ninstrument, const string &newname, int newslot)
 {
     if(emptyslot(ninstrument))
         return;
@@ -248,7 +248,6 @@ int Bank::loadbank(string bankdirname)
  */
 int Bank::newbank(string newbankdirname)
 {
-    int  result;
     string bankdir;
     bankdir = config.cfg.bankRootDirList[0];
 
@@ -258,16 +257,16 @@ int Bank::newbank(string newbankdirname)
 
     bankdir += newbankdirname;
 #if OS_WINDOWS
-    result = mkdir(bankdir.c_str());
+    if(mkdir(bankdir.c_str()) < 0)
+        return -1;
 #elif OS_LINUX || OS_CYGWIN
-    result = mkdir(bankdir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    if(mkdir(bankdir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) < 0)
+        return -1;
 #else
 #warning Undefined OS
 #endif
-    if(result < 0)
-        return -1;
 
-    string tmpfilename = bankdir + '/' + FORCE_BANK_DIR_FILE;
+    const string tmpfilename = bankdir + '/' + FORCE_BANK_DIR_FILE;
 
     FILE *tmpfile = fopen(tmpfilename.c_str(), "w+");
     fclose(tmpfile);

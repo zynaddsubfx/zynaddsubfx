@@ -3,7 +3,6 @@
 
 #include "../globals.h"
 #include "../Misc/Stereo.h"
-#include "../Samples/Sample.h" //deprecated 
 #include <list>
 #include <string>
 #include <semaphore.h>
@@ -55,7 +54,6 @@ class OutMgr
         /**Buffer*/
         Stereo<REALTYPE *> priBuf;          //buffer for primary drivers
         Stereo<REALTYPE *> priBuffCurrent; //current array accessor
-        Stereo<Sample> smps; /**Deprecated TODO Remove*/
 
         REALTYPE *outl;
         REALTYPE *outr;

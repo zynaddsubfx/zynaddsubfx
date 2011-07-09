@@ -39,7 +39,6 @@ ADnote::ADnote(ADnoteParameters *pars,
                bool besilent)
 :SynthNote(freq, velocity, portamento_, midinote, besilent)
 {
-    ready    = false;
 
     tmpwavel = new REALTYPE [SOUND_BUFFER_SIZE];
     tmpwaver = new REALTYPE [SOUND_BUFFER_SIZE];
@@ -394,7 +393,6 @@ ADnote::ADnote(ADnoteParameters *pars,
     }
 
     initparameters();
-    ready = true;
 }
 
 // ADlegatonote: This function is (mostly) a copy of ADnote(...) and
@@ -614,22 +612,12 @@ void ADnote::legatonote(REALTYPE freq, REALTYPE velocity, int portamento_,
             if(partparams->VoicePar[nvoice].PextFMoscil != -1)
                 vc = partparams->VoicePar[nvoice].PextFMoscil;
 
-            REALTYPE tmp = 1.0;
-            if((partparams->VoicePar[vc].FMSmp->Padaptiveharmonics != 0)
-               || (NoteVoicePar[nvoice].FMEnabled == MORPH)
-               || (NoteVoicePar[nvoice].FMEnabled == RING_MOD))
-                tmp = getFMvoicebasefreq(nvoice);
-
             if(!partparams->GlobalPar.Hrandgrouping)
                 partparams->VoicePar[vc].FMSmp->newrandseed(rand());
 
-            ///oscposhiFM[nvoice]=(oscposhi[nvoice]+partparams->VoicePar[vc].FMSmp->get(NoteVoicePar[nvoice].FMSmp,tmp)) % OSCIL_SIZE;
-            // /	oscposhi[nvoice]+partparams->VoicePar[vc].FMSmp->get(NoteVoicePar[nvoice].FMSmp,tmp); //(gf) Modif of the above line.
             for(int i = 0; i < OSCIL_SMP_EXTRA_SAMPLES; i++)
-                NoteVoicePar[nvoice].FMSmp[OSCIL_SIZE
-                                           + i] = NoteVoicePar[nvoice].FMSmp[i];
-            ///oscposhiFM[nvoice]+=(int)((partparams->VoicePar[nvoice].PFMoscilphase-64.0)/128.0*OSCIL_SIZE+OSCIL_SIZE*4);
-            ///oscposhiFM[nvoice]%=OSCIL_SIZE;
+                NoteVoicePar[nvoice].FMSmp[OSCIL_SIZE + i] = 
+                    NoteVoicePar[nvoice].FMSmp[i];
         }
 
         FMnewamplitude[nvoice] = NoteVoicePar[nvoice].FMVolume

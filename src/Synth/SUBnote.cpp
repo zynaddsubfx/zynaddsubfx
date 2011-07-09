@@ -36,7 +36,6 @@ SUBnote::SUBnote(SUBnoteParameters *parameters,
                  bool besilent)
 :SynthNote(freq, velocity, portamento_, midinote, besilent)
 {
-    ready  = false;
     pars = parameters;
     ctl  = ctl_;
     NoteEnabled= ON;
@@ -205,7 +204,6 @@ void SUBnote::setup(REALTYPE freq, REALTYPE velocity, int portamento_, int midin
     }
 
     oldamplitude = newamplitude;
-    ready = true;
 }
 
 void SUBnote::legatonote(REALTYPE freq, REALTYPE velocity, int portamento_,

@@ -773,9 +773,10 @@ void Part::setkeylimit(unsigned char Pkeylimit)
                || (partnote[i].status == KEY_RELASED_AND_SUSTAINED))
                 notecount++;
 
-        int oldestnotepos = -1, maxtime = 0;
+        int oldestnotepos = -1;
         if(notecount > keylimit) { //find out the oldest note
             for(int i = 0; i < POLIPHONY; i++) {
+                int maxtime = 0;
                 if(((partnote[i].status == KEY_PLAYING)
                     || (partnote[i].status == KEY_RELASED_AND_SUSTAINED))
                    && (partnote[i].time > maxtime)) {
@@ -821,12 +822,7 @@ void Part::RunNote(unsigned int k)
 
             REALTYPE *tmpoutr = getTmpBuffer();
             REALTYPE *tmpoutl = getTmpBuffer();
-            if((*note)->ready)
-                (*note)->noteout(&tmpoutl[0], &tmpoutr[0]);
-            else {
-                memset(tmpoutl, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
-                memset(tmpoutr, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
-            }
+            (*note)->noteout(&tmpoutl[0], &tmpoutr[0]);
 
             if((*note)->finished()) {
                 delete (*note);

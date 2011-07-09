@@ -83,7 +83,6 @@ class SubNoteTest:public CxxTest::TestSuite
             //Note: if these tests fail it is due to the relationship between
             //global.h::RND and SUBnote.cpp
 
-            TS_ASSERT(note->ready);
             int sampleCount = 0;
 
 //#define WRITE_OUTPUT

@@ -10,8 +10,9 @@ class MidiIn;
 class AudioOut;
 class OutMgr;
 /**Container/Owner of the long lived Engines*/
-struct EngineMgr
+class EngineMgr
 {
+    public:
         static EngineMgr &getInstance();
         ~EngineMgr();
 

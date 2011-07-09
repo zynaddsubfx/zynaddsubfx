@@ -31,7 +31,6 @@ PADnote::PADnote(PADnoteParameters *parameters,
                  bool besilent)
 :SynthNote(freq, velocity, portamento_, midinote, besilent)
 {
-    ready = false;
     pars = parameters;
 
     ctl       = ctl_;
@@ -155,8 +154,6 @@ void PADnote::setup(REALTYPE freq, REALTYPE velocity,int portamento_, int midino
     NoteGlobalPar.FilterQ = pars->GlobalFilter->getq();
     NoteGlobalPar.FilterFreqTracking = pars->GlobalFilter->getfreqtracking(
         basefreq);
-
-    ready = true; ///sa il pun pe asta doar cand e chiar gata
 
     if(pars->sample[nsample].smp == NULL) {
         finished_ = true;

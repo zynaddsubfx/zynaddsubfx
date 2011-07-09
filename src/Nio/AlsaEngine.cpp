@@ -233,7 +233,7 @@ void AlsaEngine::stopMidi()
         snd_seq_close(handle);
 }
 
-short *AlsaEngine::interleave(const Stereo<REALTYPE *> smps)
+short *AlsaEngine::interleave(const Stereo<REALTYPE *> &smps)
 {
     /**\todo TODO fix repeated allocation*/
     short *shortInterleaved = audio.buffer;

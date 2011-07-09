@@ -30,7 +30,6 @@ struct Stereo
         /**Initializes Stereo with left and right set to val
          * @param val the value for both channels*/
         Stereo(const T &val);
-        Stereo() {};
         ~Stereo() {}
 
         Stereo<T> &operator=(const Stereo<T> &smp);

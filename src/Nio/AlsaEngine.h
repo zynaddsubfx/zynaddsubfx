@@ -57,7 +57,7 @@ class AlsaEngine : public AudioOut, MidiIn
         bool openAudio();
         void stopAudio();
 
-        short *interleave(const Stereo<REALTYPE *> smps);
+        short *interleave(const Stereo<REALTYPE *> &smps);
 
         struct {
             std::string  device;

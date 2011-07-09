@@ -23,6 +23,8 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <cassert>
+#include <err.h>
 #include "../Misc/Util.h"
 #include "SVFilter.h"
 
@@ -31,6 +33,7 @@ SVFilter::SVFilter(unsigned char Ftype,
                    REALTYPE Fq,
                    unsigned char Fstages)
 {
+    assert(Ftype<4);
     stages    = Fstages;
     type      = Ftype;
     freq      = Ffreq;
@@ -144,6 +147,8 @@ void SVFilter::singlefilterout(REALTYPE *smp, fstage &x, parameters &par)
     case 3:
         out = &x.notch;
         break;
+    default:
+        errx(1, "Impossible SVFilter type encountered [%d]", type);
     }
 
     for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {

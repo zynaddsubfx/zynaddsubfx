@@ -43,9 +43,6 @@ class SynthNote
 
         virtual void legatonote(REALTYPE freq, REALTYPE velocity,
                 int portamento_, int midinote_, bool externcall) = 0;
-        /**true when ready for output(the parameters has been computed)
-         * false when parameters need to be computed.*/
-        bool ready;
     protected:
         // Legato transitions
         class Legato{

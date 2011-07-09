@@ -20,7 +20,8 @@ SynthNote::Legato::Legato(REALTYPE freq, REALTYPE vel, int port,
     param.vel        = vel;
     param.portamento = port;
     param.midinote   = note;
-    silent  = quiet;
+    lastfreq = 0.0;
+    silent   = quiet;
 }
 
 int SynthNote::Legato::update(REALTYPE freq, REALTYPE velocity, int portamento_,

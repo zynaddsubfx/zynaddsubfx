@@ -28,13 +28,14 @@
 #include "Engine.h"
 
 /**This class is inherited by all the Midi input classes*/
-struct MidiIn : public virtual Engine
+class MidiIn : public virtual Engine
 {
-    /**Enables or disables driver based upon value*/
-    virtual void setMidiEn(bool nval)=0;
-    /**Returns if driver is initialized*/
-    virtual bool getMidiEn() const=0;
-    static void midiProcess(unsigned char head, unsigned char num, unsigned char value);
+    public:
+        /**Enables or disables driver based upon value*/
+        virtual void setMidiEn(bool nval)=0;
+        /**Returns if driver is initialized*/
+        virtual bool getMidiEn() const=0;
+        static void midiProcess(unsigned char head, unsigned char num, unsigned char value);
 };
 
 #endif

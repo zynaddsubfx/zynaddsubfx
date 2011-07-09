@@ -312,6 +312,7 @@ int main(int argc, char *argv[])
         opt = getopt(argc, argv, "l:L:r:b:o:I:O:hSDUY", &option_index);
         char *optarguments = &winoptarguments[0];
 #else
+        char *optarguments = NULL;
 #error Undefined OS
 #endif
 

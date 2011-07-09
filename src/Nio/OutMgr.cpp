@@ -8,6 +8,7 @@
 #include "WavEngine.h"
 #include "../Misc/Master.h"
 #include "../Misc/Util.h"//for set_realtime()
+#include "../Samples/Sample.h"//for resampling
 
 using namespace std;
 

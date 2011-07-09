@@ -95,9 +95,6 @@ class SUBnote :public SynthNote
 
         bpfilter *lfilter, *rfilter;
 
-        REALTYPE *tmpsmp;
-        REALTYPE *tmprnd; //this is filled with random numbers
-
         Controller *ctl;
         int      oldpitchwheel, oldbandwidth;
         REALTYPE globalfiltercenterq;

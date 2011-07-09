@@ -24,7 +24,7 @@
 #define AUDIO_OUT_H
 
 #include "../Misc/Stereo.h"
-#include "../Samples/Sample.h"
+#include "../globals.h"
 #include "Engine.h"
 
 class AudioOut : public virtual Engine
