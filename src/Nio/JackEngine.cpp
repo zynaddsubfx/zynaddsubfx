@@ -340,7 +340,7 @@ void JackEngine::handleMidi(unsigned long frames)
             case 0xE0: /* pitch bend */
                 ev.type    = M_CONTROLLER;
                 ev.num     = C_pitchwheel;
-                ev.value   = ((midi_data[2] << 7) | midi_data[1]);
+                ev.value   = ((midi_data[2] << 7) | midi_data[1]) - 8192;
                 InMgr::getInstance().putEvent(ev);
                 break;
 
