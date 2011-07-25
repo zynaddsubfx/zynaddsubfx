@@ -23,6 +23,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#include "Nio.h"
 #include "InMgr.h"
 
 #include "../Misc/Master.h"
@@ -52,6 +53,9 @@ bool JackEngine::connectServer(string server)
 
 
     string clientname = "zynaddsubfx";
+    string postfix = Nio::getInstance().getPostfix();
+    if(!postfix.empty())
+        clientname += "_" + postfix;
     jack_status_t jackstatus;
     bool use_server_name = server.size() && server.compare("default") != 0;
     jack_options_t jopts = (jack_options_t)

@@ -21,6 +21,9 @@ class Nio
         bool setSource(std::string name);
         bool setSink(std::string name);
 
+        void setPostfix(std::string post);
+        std::string getPostfix(void) const;
+
         std::set<std::string> getSources() const;
         std::set<std::string> getSinks() const;
 
@@ -33,6 +36,7 @@ class Nio
         class InMgr     &in;
         class OutMgr    &out;
         class EngineMgr &eng;
+        std::string postfix;
 };
 
 #endif

@@ -293,6 +293,7 @@ int main(int argc, char *argv[])
         {"no-gui", 2, NULL, 'U'},
         {"dummy", 2, NULL, 'Y'},
         {"help", 2, NULL, 'h'},
+        {"named", 1, NULL, 'N'},
         {"output", 1, NULL, 'O'},
         {"input", 1, NULL, 'I'},
         {0, 0, 0, 0}
@@ -375,6 +376,9 @@ int main(int argc, char *argv[])
         case 'D':
             dump.startnow();
             break;
+        case 'N':
+            Nio::getInstance().setPostfix(optarguments);
+            break;
         case 'I':
             if(optarguments) {
                 if(Nio::getInstance().setDefaultSource(optarguments))
@@ -405,6 +409,7 @@ int main(int argc, char *argv[])
              << "  -S , --swap\t\t\t\t Swap Left <--> Right\n"
              << "  -D , --dump\t\t\t\t Dumps midi note ON/OFF commands\n"
              << "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
+             << "  -N , --named\t\t\t\t  postfix IO Name when possible\n"
              << "  -O , --output\t\t\t\t Set Output Engine\n"
              << "  -I , --input\t\t\t\t Set Input Engine" << endl;
 

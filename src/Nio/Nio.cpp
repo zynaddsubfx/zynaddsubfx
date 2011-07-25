@@ -16,7 +16,8 @@ Nio &Nio::getInstance()
 Nio::Nio()
 :in(InMgr::getInstance()),//Enable input wrapper
     out(OutMgr::getInstance()),//Initialize the Output Systems
-    eng(EngineMgr::getInstance())//Initialize The Engines
+    eng(EngineMgr::getInstance()),//Initialize The Engines
+    postfix("")//no default postfix
 {}
 
 Nio::~Nio()
@@ -67,6 +68,17 @@ bool Nio::setSink(string name)
 {
      return out.setSink(name);
 }
+
+void Nio::setPostfix(std::string post)
+{
+    postfix = post;
+}
+
+std::string Nio::getPostfix(void) const
+{
+    return postfix;
+}
+
         
 set<string> Nio::getSources() const
 {
