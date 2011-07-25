@@ -294,6 +294,7 @@ int main(int argc, char *argv[])
         {"dummy", 2, NULL, 'Y'},
         {"help", 2, NULL, 'h'},
         {"named", 1, NULL, 'N'},
+        {"auto-connect", 0, NULL, 'a'},
         {"output", 1, NULL, 'O'},
         {"input", 1, NULL, 'I'},
         {0, 0, 0, 0}
@@ -307,10 +308,10 @@ int main(int argc, char *argv[])
     while(1) {
         /**\todo check this process for a small memory leak*/
 #if OS_LINUX || OS_CYGWIN
-        opt = getopt_long(argc, argv, "l:L:r:b:o:I:O:N:hSDUY", opts, &option_index);
+        opt = getopt_long(argc, argv, "l:L:r:b:o:I:O:N:haSDUY", opts, &option_index);
         char *optarguments = optarg;
 #elif OS_WINDOWS
-        opt = getopt(argc, argv, "l:L:r:b:o:I:O:N:hSDUY", &option_index);
+        opt = getopt(argc, argv, "l:L:r:b:o:I:O:N:haSDUY", &option_index);
         char *optarguments = &winoptarguments[0];
 #else
         char *optarguments = NULL;
@@ -391,6 +392,9 @@ int main(int argc, char *argv[])
                     exit(1);
             }
             break;
+        case 'a':
+            Nio::getInstance().autoConnect = true;
+            break;
         case '?':
             cerr << "ERROR:Bad option or parameter.\n" << endl;
             exitwithhelp = 1;
@@ -409,7 +413,8 @@ int main(int argc, char *argv[])
              << "  -S , --swap\t\t\t\t Swap Left <--> Right\n"
              << "  -D , --dump\t\t\t\t Dumps midi note ON/OFF commands\n"
              << "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
-             << "  -N , --named\t\t\t\t  postfix IO Name when possible\n"
+             << "  -N , --named\t\t\t\t Postfix IO Name when possible\n"
+             << "  -a , --auto-connect\t\t\t AutoConnect when using JACK\n"
              << "  -O , --output\t\t\t\t Set Output Engine\n"
              << "  -I , --input\t\t\t\t Set Input Engine" << endl;
 

@@ -14,7 +14,8 @@ Nio &Nio::getInstance()
 }
 
 Nio::Nio()
-:in(InMgr::getInstance()),//Enable input wrapper
+:autoConnect(false),
+    in(InMgr::getInstance()),//Enable input wrapper
     out(OutMgr::getInstance()),//Initialize the Output Systems
     eng(EngineMgr::getInstance()),//Initialize The Engines
     postfix("")//no default postfix

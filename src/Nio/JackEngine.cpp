@@ -22,6 +22,7 @@
 #include <jack/midiport.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <cassert>
 
 #include "Nio.h"
 #include "InMgr.h"
@@ -173,6 +174,23 @@ bool JackEngine::openAudio()
     {
         audio.jackSamplerate = jack_get_sample_rate(jackClient);
         audio.jackNframes = jack_get_buffer_size(jackClient);
+
+        //Attempt to autoConnect when specified
+        if(Nio::getInstance().autoConnect)
+        {
+            const char **outPorts = jack_get_ports(jackClient, NULL, NULL,
+                    JackPortIsPhysical|JackPortIsInput);
+            if(outPorts != NULL) {
+                //Verify that stereo is available
+                assert(outPorts[0]);
+                assert(outPorts[1]);
+
+                //Connect to physical outputs
+                jack_connect(jackClient, jack_port_name(audio.ports[0]), outPorts[0]);
+                jack_connect(jackClient, jack_port_name(audio.ports[1]), outPorts[1]);
+            } else
+                cerr << "Warning, No outputs to autoconnect to" << endl;
+        }
         return true;
     }
     else

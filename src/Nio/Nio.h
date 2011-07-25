@@ -30,6 +30,7 @@ class Nio
         std::string getSource() const;
         std::string getSink()   const;
 
+        bool autoConnect;
     private:
         Nio();
 
