@@ -76,12 +76,14 @@ int     Pexitprogram = 0; //if the UI set this to 1, the program will exit
 /*
  * User Interface thread
  */
-void *thread3(void *)
+void *thread3(void *v)
 {
 #ifndef DISABLE_GUI
 
 #ifdef FLTK_GUI
 
+    if(v)
+        fl_alert("Default IO did not initialize.\nDefaulting to NULL backend.");
     ui = new MasterUI(master, &Pexitprogram);
     ui->showUI();
 
@@ -469,15 +471,15 @@ int main(int argc, char *argv[])
     }
 
     //Run the Nio system
-    Nio::getInstance().start();
+    bool ioGood = Nio::getInstance().start();
+
 
 #warning remove welcome message when system is out of beta
     cout << "\nThanks for using the Nio system :)" << endl;
 
 #ifndef DISABLE_GUI
-    if(noui == 0) {
-        pthread_create(&thr3, NULL, thread3, NULL);
-    }
+    if(noui == 0)
+        pthread_create(&thr3, NULL, thread3, (void*)!ioGood);
 #endif
 
 //    pthread_create(&thr4, NULL, thread4, NULL);

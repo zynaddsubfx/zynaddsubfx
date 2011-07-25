@@ -87,8 +87,9 @@ Engine *EngineMgr::getEng(string name)
     return NULL;
 }
 
-void EngineMgr::start()
+bool EngineMgr::start()
 {
+    bool expected = true;
     if(!(defaultOut&&defaultIn)) {
         cerr << "ERROR: It looks like someone broke the Nio Output\n"
              << "       Attempting to recover by defaulting to the\n"
@@ -107,6 +108,7 @@ void EngineMgr::start()
         cout << "Audio Started" << endl;
     }
     else { 
+        expected = false;
         cerr << "ERROR: The default audio output failed to open!" << endl;
         OutMgr::getInstance().currentOut = dynamic_cast<AudioOut *>(getEng("NULL"));
         OutMgr::getInstance().currentOut->setAudioEn(true);
@@ -118,10 +120,14 @@ void EngineMgr::start()
         cout << "MIDI Started" << endl;
     }
     else { //recover
+        expected = false;
         cerr << "ERROR: The default MIDI input failed to open!" << endl;
         InMgr::getInstance().current = dynamic_cast<MidiIn *>(getEng("NULL"));
         InMgr::getInstance().current->setMidiEn(true);
     }
+
+    //Show if expected drivers were booted
+    return expected;
 }
 
 void EngineMgr::stop()

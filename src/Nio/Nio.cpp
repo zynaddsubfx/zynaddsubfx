@@ -26,9 +26,9 @@ Nio::~Nio()
     stop();
 }
 
-void Nio::start()
+bool Nio::start()
 {
-    eng.start();//Drivers start your engines!
+    return eng.start();//Drivers start your engines!
 }
 
 void Nio::stop()

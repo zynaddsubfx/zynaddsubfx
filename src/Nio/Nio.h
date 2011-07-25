@@ -12,7 +12,7 @@ class Nio
         static Nio &getInstance();
         ~Nio();
 
-        void start();
+        bool start();
         void stop();
 
         int setDefaultSource(std::string name);

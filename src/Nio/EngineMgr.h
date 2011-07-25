@@ -23,7 +23,7 @@ class EngineMgr
         Engine *getEng(std::string name);
 
         /**Start up defaults*/
-        void start();
+        bool start();
 
         /**Stop all engines*/
         void stop();
