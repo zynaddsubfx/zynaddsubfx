@@ -307,10 +307,10 @@ int main(int argc, char *argv[])
     while(1) {
         /**\todo check this process for a small memory leak*/
 #if OS_LINUX || OS_CYGWIN
-        opt = getopt_long(argc, argv, "l:L:r:b:o:I:O:hSDUY", opts, &option_index);
+        opt = getopt_long(argc, argv, "l:L:r:b:o:I:O:N:hSDUY", opts, &option_index);
         char *optarguments = optarg;
 #elif OS_WINDOWS
-        opt = getopt(argc, argv, "l:L:r:b:o:I:O:hSDUY", &option_index);
+        opt = getopt(argc, argv, "l:L:r:b:o:I:O:N:hSDUY", &option_index);
         char *optarguments = &winoptarguments[0];
 #else
         char *optarguments = NULL;
