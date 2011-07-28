@@ -23,6 +23,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fenv.h>
 
 #if OS_WINDOWS
 #include <windows.h>
@@ -38,6 +39,9 @@ Config::Config()
 {}
 void Config::init()
 {
+    //Ensure rounding mode
+    fesetround(FE_TOWARDZERO);
+
     maxstringsize = MAX_STRING_SIZE; //for ui
     //defaults
     cfg.SampleRate = 44100;
