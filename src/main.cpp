@@ -105,7 +105,7 @@ void *thread3(void *v)
                 break;
         }
 #endif //LASH
-        Fl::wait();
+        Fl::wait(0.1);
     }
 
 #elif defined QT_GUI
