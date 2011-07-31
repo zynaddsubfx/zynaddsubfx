@@ -333,8 +333,8 @@ void Bank::rescanforbanks()
 
     //remove duplicate bank names
     int dupl = 0;
-    for(unsigned int j = 0; j < banks.size() - 1; j++) {
-        for(unsigned int i = j + 1; i < banks.size(); i++) {
+    for(int j = 0; j < (int) banks.size() - 1; j++) {
+        for(int i = j + 1; i <(int) banks.size(); i++) {
             if(banks[i].name == banks[j].name) {
                 //add a [1] to the first bankname and [n] to others
                 banks[i].name = banks[i].name + '[' + stringFrom(dupl +2) + ']';
