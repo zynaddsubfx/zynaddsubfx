@@ -148,6 +148,7 @@ if(FltkGui)
     message(STATUS "Will build fltk gui")
 
 	include_directories(
+			${FLTK_INCLUDE_DIR}
 			"${CMAKE_CURRENT_SOURCE_DIR}/UI"
 			"${CMAKE_CURRENT_BINARY_DIR}/UI"
 			)
