@@ -42,9 +42,6 @@ decl {\#include "PartUI.h"} {public
 decl {\#include "MicrotonalUI.h"} {public
 } 
 
-decl {\#include "SeqUI.h"} {public
-} 
-
 decl {\#include "PresetsUI.h"} {public
 } 
 
@@ -634,16 +631,6 @@ if (result==1) {
 if (result==0) recordbutton->activate();
 
 if (result!=0) fl_alert("Error: Could not save the file.");}
-            xywh {0 0 100 20}
-          }
-        }
-        Submenu {} {
-          label {&Sequencer}
-          xywh {0 0 100 20} hide
-        } {
-          MenuItem {} {
-            label {Show &Sequencer...}
-            callback {sequi->show();}
             xywh {0 0 100 20}
           }
         }
@@ -1643,7 +1630,6 @@ microtonalui=new MicrotonalUI(&master->microtonal);
 virkeyboard=new VirKeyboard(master);
 bankui=new BankUI(master,&npart);
 configui=new ConfigUI();
-sequi=new SeqUI(master);
 
 make_window();
 presetsui=new PresetsUI();
@@ -1665,7 +1651,6 @@ delete virkeyboard;
 delete microtonalui;
 delete bankui;
 delete configui;
-delete sequi;
 
 delete presetsui;
 delete panelwindow;
@@ -1810,7 +1795,6 @@ bankui->hide();} {}
   }
   decl {Master *master;} {}
   decl {MicrotonalUI *microtonalui;} {}
-  decl {SeqUI *sequi;} {}
   decl {BankUI *bankui;} {}
   decl {int ninseff,npart;} {}
   decl {int nsyseff;} {}

@@ -32,11 +32,6 @@
 #include <errno.h>
 #include <string.h>
 #include <sched.h>
-#if OS_WINDOWS
-//used for the sleep func
-#include <winbase.h>
-#include <windows.h>
-#endif
 
 
 int SAMPLE_RATE = 44100;
@@ -123,25 +118,17 @@ bool fileexists(const char *filename)
 
 void set_realtime()
 {
-#if OS_LINUX || OS_CYGWIN
     sched_param sc;
     sc.sched_priority = 60;
     //if you want get "sched_setscheduler undeclared" from compilation,
     //you can safely remove the folowing line:
     sched_setscheduler(0, SCHED_FIFO, &sc);
     //if (err==0) printf("Real-time");
-#else
-#warning set_realtime() undefined for your opperating system
-#endif
 }
 
 void os_sleep(long length)
 {
-#if OS_LINUX || OS_CYGWIN
     usleep(length);
-#elif OS_WINDOWS
-    Sleep((long)length/1000);
-#endif
 }
 
 std::string legalizeFilename(std::string filename)

@@ -24,10 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if OS_WINDOWS
-#include <windows.h>
-#include <mmsystem.h>
-#endif
 
 #include "Config.h"
 #include "XMLwrapper.h"
@@ -68,12 +64,7 @@ void Config::init()
     cfg.VirKeybLayout     = 1;
     winwavemax = 1;
     winmidimax = 1;
-//try to find out how many input midi devices are there
-#ifdef WINMIDIIN
-    winmidimax = midiInGetNumDevs();
-    if(winmidimax == 0)
-        winmidimax = 1;
-#endif
+    //try to find out how many input midi devices are there
     winmididevices = new winmidionedevice[winmidimax];
     for(int i = 0; i < winmidimax; i++) {
         winmididevices[i].name = new char[MAX_STRING_SIZE];
@@ -83,16 +74,6 @@ void Config::init()
 
 
 //get the midi input devices name
-#ifdef WINMIDIIN
-    MIDIINCAPS midiincaps;
-    for(int i = 0; i < winmidimax; i++)
-        if(!midiInGetDevCaps(i, &midiincaps, sizeof(MIDIINCAPS)))
-            snprintf(winmididevices[i].name,
-                     MAX_STRING_SIZE,
-                     "%s",
-                     midiincaps.szPname);
-    ;
-#endif
     cfg.currentBankDir = "./testbnk";
 
     char filename[MAX_STRING_SIZE];
@@ -100,7 +81,6 @@ void Config::init()
     readConfig(filename);
 
     if(cfg.bankRootDirList[0].empty()) {
-#if OS_LINUX
         //banks
         cfg.bankRootDirList[0] = "~/banks";
         cfg.bankRootDirList[1] = "./";
@@ -108,44 +88,15 @@ void Config::init()
         cfg.bankRootDirList[3] = "/usr/local/share/zynaddsubfx/banks";
         cfg.bankRootDirList[4] = "../banks";
         cfg.bankRootDirList[5] = "banks";
-
-#else
-        //banks
-        cfg.bankRootDirList[0] = "./";
-
-#ifdef VSTAUDIOOUT
-        cfg.bankRootDirList[1] = "c:/Program Files/ZynAddSubFX/banks";
-#else
-        cfg.bankRootDirList[1] = "../banks";
-#endif
-        cfg.bankRootDirList[2] = "banks";
-
-#endif
     }
 
     if(cfg.presetsDirList[0].empty()) {
-#if OS_LINUX || OS_CYGWIN
         //presets
         cfg.presetsDirList[0] = "./";
         cfg.presetsDirList[1] = "../presets";
         cfg.presetsDirList[2] = "presets";
         cfg.presetsDirList[3] = "/usr/share/zynaddsubfx/presets";
         cfg.presetsDirList[4] = "/usr/local/share/zynaddsubfx/presets";
-
-#elif OS_WINDOWS 
-        //presets
-        cfg.presetsDirList[0] = "./";
-
-#ifdef VSTAUDIOOUT
-        cfg.presetsDirList[1] = "c:/Program Files/ZynAddSubFX/presets";
-#else
-        cfg.presetsDirList[1] = "../presets";
-#endif //end vst
-
-        cfg.presetsDirList[2] =  "presets";
-#else
-#error Undefined OS
-#endif //end OS
     }
     cfg.LinuxALSAaudioDev = "default";
     cfg.nameTag = "";
@@ -347,12 +298,6 @@ void Config::saveConfig(const char *filename)
 void Config::getConfigFileName(char *name, int namesize)
 {
     name[0] = 0;
-#ifdef OS_LINUX
     snprintf(name, namesize, "%s%s", getenv("HOME"), "/.zynaddsubfxXML.cfg");
-#elif OS_WINDOWS || OS_CYGWIN
-    snprintf(name, namesize, "%s", "zynaddsubfxXML.cfg");
-#else
-#error Undefined OS
-#endif
 }
 

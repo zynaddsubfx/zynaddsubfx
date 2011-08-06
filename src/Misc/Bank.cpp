@@ -256,15 +256,8 @@ int Bank::newbank(string newbankdirname)
         bankdir += "/";
 
     bankdir += newbankdirname;
-#if OS_WINDOWS
-    if(mkdir(bankdir.c_str()) < 0)
-        return -1;
-#elif OS_LINUX || OS_CYGWIN
     if(mkdir(bankdir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) < 0)
         return -1;
-#else
-#warning Undefined OS
-#endif
 
     const string tmpfilename = bankdir + '/' + FORCE_BANK_DIR_FILE;
 

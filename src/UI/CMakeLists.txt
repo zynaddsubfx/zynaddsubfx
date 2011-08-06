@@ -13,7 +13,6 @@ set(UI_fl_files
     PartUI.fl
     PresetsUI.fl
     ResonanceUI.fl
-    SeqUI.fl
     SUBnoteUI.fl
     VirKeyboard.fl
 )

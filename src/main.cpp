@@ -29,12 +29,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#if OS_LINUX || OS_CYGWIN
 #include <getopt.h>
-#elif OS_WINDOWS
-#include <winbase.h>
-#include <windows.h>
-#endif
 
 #include "Misc/Master.h"
 #include "Misc/Util.h"
@@ -119,53 +114,6 @@ void *thread3(void *v)
     return 0;
 }
 
-//this code is disabled for Nio testing
-//it should get moved out of here into the nio system soon
-#if 0
-/*
- * Sequencer thread (test)
- */
-void *thread4(void *arg)
-{
-    while(Pexitprogram == 0) {
-        int type, par1, par2, again, midichan;
-        for(int ntrack = 0; ntrack < NUM_MIDI_TRACKS; ntrack++) {
-            if(master->seq.play == 0)
-                break;
-            do {
-                again = master->seq.getevent(ntrack,
-                                             &midichan,
-                                             &type,
-                                             &par1,
-                                             &par2);
-//		printf("ntrack=%d again=%d\n",ntrack,again);
-                if(type > 0) {
-//	    printf("%d %d  %d %d %d\n",type,midichan,chan,par1,par2);
-
-//	if (cmdtype==MidiController) master->SetController(cmdchan,cmdparams[0],cmdparams[1]);
-
-
-
-                    pthread_mutex_lock(&master->mutex);
-                    if(type == 1) { //note_on or note_off
-                        if(par2 != 0)
-                            master->NoteOn(midichan, par1, par2);
-                        else
-                            master->NoteOff(midichan, par1);
-                    }
-                    pthread_mutex_unlock(&master->mutex);
-                }
-            } while(again > 0);
-        }
-//if (!realtime player) atunci fac asta
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		os_sleep(1000);
-    }
-
-    return 0;
-}
-#endif
-
 void exitprogram();
 
 //cleanup on signaled exit
@@ -225,32 +173,6 @@ void exitprogram()
     delete [] denormalkillbuf;
 }
 
-#if OS_WINDOWS
-#define ARGSIZE 100
-char winoptarguments[ARGSIZE];
-char getopt(int argc, char *argv[], const char *shortopts, int *index)
-{
-    winoptarguments[0] = 0;
-    char result = 0;
-
-    if(*index >= argc)
-        return -1;
-
-    if(strlen(argv[*index]) == 2)
-        if(argv[*index][0] == '-') {
-            result = argv[*index][1];
-            if(*index + 1 < argc)
-                snprintf(winoptarguments, ARGSIZE, "%s", argv[*index + 1]);
-        }
-    (*index)++;
-    return result;
-}
-int opterr = 0;
-#undef ARGSIZE
-
-#endif
-
-#ifndef VSTAUDIOOUT
 int main(int argc, char *argv[])
 {
 
@@ -264,11 +186,7 @@ int main(int argc, char *argv[])
     cerr << "This program is free software (GNU GPL v.2 or later) and \n";
     cerr << "it comes with ABSOLUTELY NO WARRANTY.\n" << endl;
 	if(argc == 1)
-#if OS_LINUX || OS_CYGWIN
     cerr << "Try 'zynaddsubfx --help' for command-line options." << endl;
-#else //assuming windows
-    cerr << "Try 'zynaddsubfx -h' for command-line options.\n" << endl;
-#endif
 
     /* Get the settings from the Config*/
     SAMPLE_RATE = config.cfg.SampleRate;
@@ -283,7 +201,6 @@ int main(int argc, char *argv[])
         denormalkillbuf[i] = (RND - 0.5) * 1e-16;
 
     /* Parse command-line options */
-#if OS_LINUX || OS_CYGWIN
     struct option opts[] = {
         {"load", 2, NULL, 'l'},
         {"load-instrument", 2, NULL, 'L'},
@@ -301,7 +218,6 @@ int main(int argc, char *argv[])
         {"input", 1, NULL, 'I'},
         {0, 0, 0, 0}
     };
-#endif
     opterr = 0;
     int option_index = 0, opt, exitwithhelp = 0;
 
@@ -309,16 +225,8 @@ int main(int argc, char *argv[])
 
     while(1) {
         /**\todo check this process for a small memory leak*/
-#if OS_LINUX || OS_CYGWIN
         opt = getopt_long(argc, argv, "l:L:r:b:o:I:O:N:haSDUY", opts, &option_index);
         char *optarguments = optarg;
-#elif OS_WINDOWS
-        opt = getopt(argc, argv, "l:L:r:b:o:I:O:N:haSDUY", &option_index);
-        char *optarguments = &winoptarguments[0];
-#else
-        char *optarguments = NULL;
-#error Undefined OS
-#endif
 
 #define GETOP(x) if(optarguments) x = optarguments
 #define GETOPNUM(x) if(optarguments) x = atoi(optarguments)
@@ -420,10 +328,6 @@ int main(int argc, char *argv[])
              << "  -O , --output\t\t\t\t Set Output Engine\n"
              << "  -I , --input\t\t\t\t Set Input Engine" << endl;
 
-#if OS_WINDOWS
-        cout << "nWARNING: On Windows systems, only short comandline parameters works.\n"
-             << "  eg. instead '--buffer-size=512' use '-b 512'" << endl;
-#endif
         return 0;
     }
 
@@ -482,215 +386,11 @@ int main(int argc, char *argv[])
         pthread_create(&thr3, NULL, thread3, (void*)!ioGood);
 #endif
 
-//    pthread_create(&thr4, NULL, thread4, NULL);
-#ifdef WINMIDIIN
-    InitWinMidi(master);
-#endif
-
     //TODO look into a conditional variable here, it seems to match usage
     while(Pexitprogram == 0) {
-#ifdef OS_LINUX
         usleep(100000);
-#elif OS_WINDOWS
-        Sleep(100);
-#endif
     }
-
-#ifdef WINMIDIIN
-    StopWinMidi();
-#endif
 
     exitprogram();
     return 0;
 }
-
-
-#else
-
-#include "Output/VSTaudiooutput.h"
-
-#define main main_plugin
-extern "C" __declspec(dllexport) AEffect * main_plugin(
-    audioMasterCallback audioMaster);
-
-int instances = -1;
-
-AEffect *main(audioMasterCallback audioMaster)
-{
-//    if (audioMaster(0,audioMasterVersion,0,0,0,0)!=0) {
-//	return(0);
-//    };
-
-    if(instances == -1) {
-        Midi = new NULLMidiIn();
-        denormalkillbuf = new REALTYPE [SOUND_BUFFER_SIZE];
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
-            denormalkillbuf[i] = (RND - 0.5) * 1e-16;
-        instances = 0;
-    }
-
-    if(instances != 0)
-        return 0;               //don't allow multiple instances
-
-    AudioEffect *sintetizator = new VSTSynth(audioMaster);
-
-    return sintetizator->getAeffect();
-}
-
-void *hInstance;
-BOOL WINAPI DllMain(HINSTANCE hInst, DWORD dwReason, LPVOID lpvReserved)
-{
-    hInstance = hInst;
-    return 1;
-}
-
-void *thread(void *arg)
-{
-    VSTSynth *vs = (VSTSynth *) arg;
-
-    /*    FILE *a=fopen("aaaa1","a");
-        fprintf(a,"%lx %lx %lx -i=%d\n",vs,0,vs->vmaster,instances);
-        fflush(a);fclose(a);
-    */
-
-    vs->ui = new MasterUI(vs->vmaster, &vs->Pexitprogram);
-
-    /*    a=fopen("aaaa1","a");
-        fprintf(a,"%lx %lx %lx\n",vs,vs->ui->master,vs->vmaster);
-        fflush(a);fclose(a);
-    */
-
-    vs->ui->showUI();
-
-    /*    a=fopen("aaaa1","a");
-        fprintf(a,"%lx %lx %lx\n",vs,vs->ui,vs->vmaster);
-        fflush(a);fclose(a);
-    */
-
-    while(vs->Pexitprogram == 0)
-        Fl::wait(0.01);
-
-    delete (vs->ui);
-    Fl::wait(0.01);
-
-    /*    a=fopen("aaaa1","a");
-        fprintf(a,"EXIT\n");
-        fflush(a);fclose(a);
-    */
-
-
-    pthread_exit(0);
-    return 0;
-}
-
-//Parts of the VSTSynth class
-VSTSynth::VSTSynth(audioMasterCallback audioMaster):AudioEffectX(audioMaster, 1,
-                                                                 0)
-{
-    instances++;
-
-    if(audioMaster) {
-        setNumInputs(0);
-        setNumOutputs(2);
-        setUniqueID('ZASF');
-        canProcessReplacing();
-//    hasVu(false);
-//    hasClip(false);
-
-        isSynth(true);
-
-        programsAreChunks(true);
-    }
-
-
-    SAMPLE_RATE = config.cfg.SampleRate;
-    SOUND_BUFFER_SIZE = config.cfg.SoundBufferSize;
-    OSCIL_SIZE  = config.cfg.OscilSize;
-    swaplr      = config.cfg.SwapStereo;
-    this->Pexitprogram    = 0;
-
-    this->vmaster         = new Master();
-    this->vmaster->swaplr = swaplr;
-
-
-//    FILE *a=fopen("aaaa0","a");
-//    fprintf(a,"%lx %lx %lx\n",this,this->ui,this->ui->masterwindow);
-//    fflush(a);fclose(a);
-
-    pthread_create(&this->thr, NULL, thread, this);
-
-//    suspend();
-}
-
-
-
-VSTSynth::~VSTSynth()
-{
-    this->Pexitprogram = 1;
-
-    Sleep(200); //wait the thread to finish
-
-//    pthread_mutex_lock(&vmaster->mutex);
-
-
-    delete (this->vmaster);
-
-    instances--;
-}
-
-long VSTSynth::processEvents(VstEvents *events)
-{
-    for(int i = 0; i < events->numEvents; i++) {
-        //debug stuff
-//      FILE *a=fopen("events","a");
-//      fprintf(a,"%lx\n",events->events[i]->type);
-//      fflush(a);fclose(a);
-
-        if((events->events[i])->type != kVstMidiType)
-            continue;
-        VstMidiEvent  *ev   = (VstMidiEvent *) events->events[i];
-        unsigned char *data = (unsigned char *)ev->midiData;
-        int status  = data[0] / 16;
-        int cmdchan = data[0] & 0x0f;
-        int cntl;
-
-        pthread_mutex_lock(&vmaster->mutex);
-        switch(status) {
-        case 0x8:
-            vmaster->NoteOff(cmdchan, data[1] & 0x7f);
-            break;
-        case 0x9:
-            if(data[2] == 0)
-                vmaster->NoteOff(cmdchan, data[1] & 0x7f);
-            else
-                vmaster->NoteOn(cmdchan, data[1] & 0x7f, data[2] & 0x7f);
-            break;
-        case 0xB:
-            cntl = Midi->getcontroller(data[1] & 0x7f);
-            vmaster->SetController(cmdchan, cntl, data[2] & 0x7f);
-            break;
-        case 0xE:
-            vmaster->SetController(cmdchan, C_pitchwheel, data[1] + data[2]
-                                   * (long int) 128 - 8192);
-            break;
-        }
-        pthread_mutex_unlock(&vmaster->mutex);
-    }
-
-    return 1;
-}
-
-long VSTSynth::getChunk(void **data, bool isPreset)
-{
-    int size = 0;
-    size = vmaster->getalldata((char **)data);
-    return (long)size;
-}
-
-long VSTSynth::setChunk(void *data, long size, bool isPreset)
-{
-    vmaster->putalldata((char *)data, size);
-    return 0;
-}
-#endif
-

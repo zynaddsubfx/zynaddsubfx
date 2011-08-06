@@ -21,9 +21,6 @@ decl {\#include "../globals.h"} {public
 decl {\#include "../Misc/Master.h"} {public
 } 
 
-decl {\#include "../Input/MidiIn.h"} {public
-} 
-
 decl {\#include "WidgetPDial.h"} {public
 } 
 

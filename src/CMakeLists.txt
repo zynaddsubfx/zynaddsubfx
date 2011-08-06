@@ -104,13 +104,7 @@ add_definitions(
 	 )
 
 #set os flag
-if(CYGWIN)
-	add_definitions(-DOS_CYGWIN=1)
-	set(OS_LIBRARIES "-Wl,--enable-auto-import")
-elseif(WINDOWS)
-	add_definitions(-DOS_WINDOWS=1)
-	set(OS_LIBRARIES "")
-elseif(UNIX)
+if(UNIX)
 	add_definitions(-DOS_LINUX=1)
 	set(OS_LIBRARIES "-lpthread")
 else()
@@ -199,7 +193,6 @@ endmacro(unit_test)
 set(NONGUI_LIBRARIES
 	zynaddsubfx_misc
 	zynaddsubfx_synth
-	zynaddsubfx_seq
 	zynaddsubfx_effect
 	zynaddsubfx_params
 	zynaddsubfx_dsp
@@ -211,7 +204,6 @@ set(CXXTEST_LINK_LIBS ${NONGUI_LIBRARIES})
 
 add_subdirectory(Misc)
 add_subdirectory(Synth)
-add_subdirectory(Seq)
 add_subdirectory(Effects)
 add_subdirectory(Params)
 add_subdirectory(DSP)
