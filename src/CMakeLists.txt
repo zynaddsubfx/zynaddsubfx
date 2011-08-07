@@ -58,6 +58,32 @@ if(NOT PKG_CONFIG_FOUND)
     message(FATAL_ERROR "pkg-config not found")
 endif(NOT PKG_CONFIG_FOUND)
 
+#Build Flags
+option (BuildForAMD_X86_64 "Build for AMD x86_64 system" OFF)
+option (BuildForCore2_X86_64 "Build for Intel Core2 x86_64 system" OFF)
+option (BuildForDebug "Include gdb debugging support" OFF)
+
+set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=core2 -ffast-math -fno-finite-math-only -fomit-frame-pointer")
+set(CMAKE_CXX_FLAGS_DEBUG   "-O3 -march=core2 -ffast-math -fno-finite-math-only -fomit-frame-pointer")
+
+set (BuildOptions_x86_64AMD
+    "-O3 -march=athlon64 -m64 -Wall -ffast-math -fno-finite-math-only -fomit-frame-pointer"
+  CACHE STRING "X86_64 compiler options"
+)
+
+set (BuildOptions_X86_64Core2
+    "-O3 -march=core2 -m64 -Wall -ffast-math -fno-finite-math-only -fomit-frame-pointer"
+  CACHE STRING "X86_64 compiler options"
+)
+
+set (BuildOptionsBasic
+    "-O3 -msse -msse2 -mfpmath=sse -ffast-math -fomit-frame-pointer"
+    CACHE STRING "basic X86 complier options"
+)
+
+set (BuildOptionsDebug
+    "-O0 -g3 -ggdb -Wall -Wpointer-arith" CACHE STRING "Debug build flags")
 
 ########### Settings dependant code ###########
 # From here on, the setting variables have  been prepared so concentrate
@@ -150,6 +176,23 @@ if(FltkGui)
 	add_subdirectory(UI)
 endif()
 
+if (BuildForDebug)
+    set (CMAKE_BUILD_TYPE "Debug")
+    set (CMAKE_CXX_FLAGS_DEBUG ${BuildOptionsDebug})
+    message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_DEBUG}")
+else (BuildForDebug)
+    set (CMAKE_BUILD_TYPE "Release")
+    if (BuildForAMD_X86_64)
+        set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptions_x86_64AMD})
+    else (BuildForAMD_X86_64)
+        if (BuildForCore2_X86_64)
+            set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptions_X86_64Core2})
+        else (BuildForCore2_X86_64)
+            set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptionsBasic})
+        endif (BuildForCore2_X86_64)
+    endif (BuildForAMD_X86_64)
+    message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_RELEASE}")
+endif (BuildForDebug)
 
 ########### General section ##############
 # Following this should be only general compilation code, and no mention
