@@ -57,27 +57,27 @@ Filter::~Filter()
     delete (filter);
 }
 
-void Filter::filterout(REALTYPE *smp)
+void Filter::filterout(float *smp)
 {
     filter->filterout(smp);
 }
 
-void Filter::setfreq(REALTYPE frequency)
+void Filter::setfreq(float frequency)
 {
     filter->setfreq(frequency);
 }
 
-void Filter::setfreq_and_q(REALTYPE frequency, REALTYPE q_)
+void Filter::setfreq_and_q(float frequency, float q_)
 {
     filter->setfreq_and_q(frequency, q_);
 }
 
-void Filter::setq(REALTYPE q_)
+void Filter::setq(float q_)
 {
     filter->setq(q_);
 }
 
-REALTYPE Filter::getrealfreq(REALTYPE freqpitch)
+float Filter::getrealfreq(float freqpitch)
 {
     if((category == 0) || (category == 2))
         return pow(2.0, freqpitch + 9.96578428);                            //log2(1000)=9.95748

@@ -48,7 +48,7 @@ class PADnoteParameters:public Presets
         void getfromXML(XMLwrapper *xml);
 
         //returns a value between 0.0-1.0 that represents the estimation perceived bandwidth
-        REALTYPE getprofile(REALTYPE *smp, int size);
+        float getprofile(float *smp, int size);
 
         //parameters
 
@@ -142,8 +142,8 @@ class PADnoteParameters:public Presets
 
 
 
-        REALTYPE setPbandwidth(int Pbandwidth); //returns the BandWidth in cents
-        REALTYPE getNhr(int n); //gets the n-th overtone position relatively to N harmonic
+        float setPbandwidth(int Pbandwidth); //returns the BandWidth in cents
+        float getNhr(int n); //gets the n-th overtone position relatively to N harmonic
 
         void applyparameters(bool lockmutex);
         void export2wav(std::string basefilename);
@@ -153,20 +153,20 @@ class PADnoteParameters:public Presets
 
         struct {
             int size;
-            REALTYPE  basefreq;
-            REALTYPE *smp;
+            float  basefreq;
+            float *smp;
         } sample[PAD_MAX_SAMPLES], newsample;
 
     private:
-        void generatespectrum_bandwidthMode(REALTYPE *spectrum,
+        void generatespectrum_bandwidthMode(float *spectrum,
                                             int size,
-                                            REALTYPE basefreq,
-                                            REALTYPE *profile,
+                                            float basefreq,
+                                            float *profile,
                                             int profilesize,
-                                            REALTYPE bwadjust);
-        void generatespectrum_otherModes(REALTYPE *spectrum,
+                                            float bwadjust);
+        void generatespectrum_otherModes(float *spectrum,
                                          int size,
-                                         REALTYPE basefreq);
+                                         float basefreq);
         void deletesamples();
         void deletesample(int n);
 

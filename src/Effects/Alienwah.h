@@ -43,8 +43,8 @@ class Alienwah:public Effect
          * @return Initialized Alienwah
          */
         Alienwah(const int &insetion_,
-                 REALTYPE *const efxoutl_,
-                 REALTYPE *const efxoutr_);
+                 float *const efxoutl_,
+                 float *const efxoutr_);
         ~Alienwah();
         void out(const Stereo<float *> &smp);
 
@@ -75,9 +75,9 @@ class Alienwah:public Effect
         void setphase(unsigned char Pphase);
 
         //Internal Values
-        REALTYPE panning, fb, depth, lrcross, phase;
-        complex<REALTYPE> *oldl, *oldr;
-        complex<REALTYPE>  oldclfol, oldclfor;
+        float panning, fb, depth, lrcross, phase;
+        complex<float> *oldl, *oldr;
+        complex<float>  oldclfol, oldclfor;
         int oldk;
 };
 

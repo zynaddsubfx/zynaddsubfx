@@ -52,7 +52,7 @@ FFTwrapper::~FFTwrapper()
 /*
  * do the Fast Fourier Transform
  */
-void FFTwrapper::smps2freqs(REALTYPE *smps, FFTFREQS freqs)
+void FFTwrapper::smps2freqs(float *smps, FFTFREQS freqs)
 {
     for(int i = 0; i < fftsize; i++)
         tmpfftdata1[i] = smps[i];
@@ -68,7 +68,7 @@ void FFTwrapper::smps2freqs(REALTYPE *smps, FFTFREQS freqs)
 /*
  * do the Inverse Fast Fourier Transform
  */
-void FFTwrapper::freqs2smps(FFTFREQS freqs, REALTYPE *smps)
+void FFTwrapper::freqs2smps(FFTFREQS freqs, float *smps)
 {
     tmpfftdata2[fftsize / 2] = 0.0;
     for(int i = 0; i < fftsize / 2; i++) {
@@ -83,8 +83,8 @@ void FFTwrapper::freqs2smps(FFTFREQS freqs, REALTYPE *smps)
 
 void newFFTFREQS(FFTFREQS *f, int size)
 {
-    f->c = new REALTYPE[size];
-    f->s = new REALTYPE[size];
+    f->c = new float[size];
+    f->s = new float[size];
     for(int i = 0; i < size; i++) {
         f->c[i] = 0.0;
         f->s[i] = 0.0;

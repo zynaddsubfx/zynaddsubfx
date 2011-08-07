@@ -63,7 +63,7 @@ for (int i=1;i<npoints;i++) sum+=env->getdt(i)+1;
 float sumbefore=0;//the sum of all points before the computed point
 for (int i=1;i<=n;i++) sumbefore+=env->getdt(i)+1;
 
-return((int) (sumbefore/(REALTYPE) sum*lx));} {}
+return((int) (sumbefore/(float) sum*lx));} {}
   }
   Function {getpointy(int n)} {return_type int
   } {

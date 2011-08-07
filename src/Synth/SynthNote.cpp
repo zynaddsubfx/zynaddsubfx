@@ -2,11 +2,11 @@
 #include "../globals.h"
 #include <cstring>
 
-SynthNote::SynthNote(REALTYPE freq, REALTYPE vel, int port, int note, bool quiet)
+SynthNote::SynthNote(float freq, float vel, int port, int note, bool quiet)
     :legato(freq,vel,port,note,quiet)
 {}
 
-SynthNote::Legato::Legato(REALTYPE freq, REALTYPE vel, int port,
+SynthNote::Legato::Legato(float freq, float vel, int port,
                           int note, bool quiet)
 {
     // Initialise some legato-specific vars
@@ -24,7 +24,7 @@ SynthNote::Legato::Legato(REALTYPE freq, REALTYPE vel, int port,
     silent   = quiet;
 }
 
-int SynthNote::Legato::update(REALTYPE freq, REALTYPE velocity, int portamento_,
+int SynthNote::Legato::update(float freq, float velocity, int portamento_,
                                int midinote_, bool externcall)
 {
     if(externcall)
@@ -52,12 +52,12 @@ int SynthNote::Legato::update(REALTYPE freq, REALTYPE velocity, int portamento_,
     return 0;
 }
 
-void SynthNote::Legato::apply(SynthNote &note, REALTYPE *outl, REALTYPE *outr)
+void SynthNote::Legato::apply(SynthNote &note, float *outl, float *outr)
 {
     if(silent) // Silencer
         if(msg != LM_FadeIn) {
-            memset(outl, 0, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
-            memset(outr, 0, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
+            memset(outl, 0, SOUND_BUFFER_SIZE * sizeof(float));
+            memset(outr, 0, SOUND_BUFFER_SIZE * sizeof(float));
         }
     switch(msg) {
     case LM_CatchUp:  // Continue the catch-up...
@@ -111,7 +111,7 @@ void SynthNote::Legato::apply(SynthNote &note, REALTYPE *outl, REALTYPE *outr)
                 //This freq should make this now silent note to catch-up/resync
                 //with the heard note for the same length it stayed at the
                 //previous freq during the fadeout.
-                REALTYPE catchupfreq = param.freq * (param.freq / lastfreq);
+                float catchupfreq = param.freq * (param.freq / lastfreq);
                 note.legatonote(catchupfreq, param.vel, param.portamento,
                                 param.midinote, false);
                 break;

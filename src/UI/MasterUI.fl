@@ -84,12 +84,12 @@ int ox=x(); int oy=y(); int lx=w(); int ly=h();
 vuData data = master->getVuData();
 
 //pthread_mutex_lock(&master->mutex);
-REALTYPE dbl=rap2dB(data.outpeakl);
-REALTYPE dbr=rap2dB(data.outpeakr);
-REALTYPE rmsdbl=rap2dB(data.rmspeakl);
-REALTYPE rmsdbr=rap2dB(data.rmspeakr);
-REALTYPE maxdbl=rap2dB(data.maxoutpeakl);
-REALTYPE maxdbr=rap2dB(data.maxoutpeakr);
+float dbl=rap2dB(data.outpeakl);
+float dbr=rap2dB(data.outpeakr);
+float rmsdbl=rap2dB(data.rmspeakl);
+float rmsdbr=rap2dB(data.rmspeakr);
+float maxdbl=rap2dB(data.maxoutpeakl);
+float maxdbr=rap2dB(data.maxoutpeakr);
 int clipped=data.clipped;
 //pthread_mutex_unlock(&master->mutex);
 
@@ -148,7 +148,7 @@ fl_rectf(ox+idbr,oy,VULENX-idbr,VULENY,0,0,0);
 fl_rectf(ox+idbl,oy+ly/2,VULENX-idbl,VULENY,0,0,0);
 
 //draw the scales
-REALTYPE  tmp=VULENX*1.0/MIN_DB;
+float  tmp=VULENX*1.0/MIN_DB;
 for (int i=1;i<1-MIN_DB;i++){
    int tx=VULENX+(int) (tmp*i);
    fl_rectf(ox+tx,oy,1,VULENY+ly/2,0,160,200);
@@ -197,7 +197,7 @@ if (!active_r()){
 
 //draw the vu lines
 pthread_mutex_lock(&master->mutex);
- REALTYPE db=rap2dB(master->vuoutpeakpart[npart]);
+ float db=rap2dB(master->vuoutpeakpart[npart]);
 pthread_mutex_unlock(&master->mutex);
 
 db=(MIN_DB-db)/MIN_DB; 
@@ -213,7 +213,7 @@ fl_rectf(ox,oy,lx,ly-idb,0,0,0);
 
 
 //draw the scales
-REALTYPE  tmp=ly*1.0/MIN_DB;
+float  tmp=ly*1.0/MIN_DB;
  for (int i=1;i<1-MIN_DB;i++){
     int ty=ly+(int) (tmp*i);
     if (i%5==0) fl_rectf(ox,oy+ly-ty,lx,1,0,160,200);

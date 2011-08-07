@@ -51,10 +51,10 @@ graphpoints=NULL;} {}
 nvowel=nvowel_;
 nformant=nformant_;
 oldx=-1;
-graphpoints=new REALTYPE [w()];} {}
+graphpoints=new float [w()];} {}
   }
-  Function {draw_freq_line(REALTYPE freq,int type)} {} {
-    code {REALTYPE freqx=pars->getfreqpos(freq);
+  Function {draw_freq_line(float freq,int type)} {} {
+    code {float freqx=pars->getfreqpos(freq);
 switch(type){
   case 0:fl_line_style(FL_SOLID);break;
   case 1:fl_line_style(FL_DOT);break;
@@ -70,7 +70,7 @@ if ((freqx>0.0)&&(freqx<1.0))
   } {
     code {int maxdB=30;
 int ox=x(),oy=y(),lx=w(),ly=h(),i,oiy;
-REALTYPE freqx;
+float freqx;
 
 fl_color(FL_BLACK);
 fl_rectf(ox,oy,lx,ly);
@@ -107,7 +107,7 @@ draw_freq_line(20000.0,1);
 fl_line_style(FL_DOT);
 int GY=10;if (ly<GY*3) GY=-1;
 for (i=1;i<GY;i++){
-   int tmp=(int)(ly/(REALTYPE)GY*i);
+   int tmp=(int)(ly/(float)GY*i);
    fl_line(ox+2,oy+tmp,ox+lx-2,oy+tmp);
 };
 
@@ -148,7 +148,7 @@ for (i=1;i<lx;i++){
   decl {FilterParams *pars;} {}
   decl {int oldx,oldy;} {}
   decl {int *nvowel,*nformant;} {}
-  decl {REALTYPE *graphpoints;} {}
+  decl {float *graphpoints;} {}
 } 
 
 class FilterUI {: {public Fl_Group,PresetsUI_}

@@ -38,7 +38,7 @@ typedef enum { MUTEX_TRYLOCK, MUTEX_LOCK, MUTEX_UNLOCK } lockset;
 extern Dump dump;
 
 typedef struct vuData_t {
-    REALTYPE outpeakl, outpeakr, maxoutpeakl, maxoutpeakr,
+    float outpeakl, outpeakr, maxoutpeakl, maxoutpeakr,
              rmspeakl, rmspeakr;
     int clipped;
 } vuData;
@@ -95,15 +95,15 @@ class Master
         void ShutUp();
         int shutup;
 
-        void vuUpdate(const REALTYPE *outl, const REALTYPE *outr);
+        void vuUpdate(const float *outl, const float *outr);
 
         /**Audio Output*/
-        void AudioOut(REALTYPE *outl, REALTYPE *outr);
+        void AudioOut(float *outl, float *outr);
         /**Audio Output (for callback mode). This allows the program to be controled by an external program*/
         void GetAudioOutSamples(int nsamples,
                                 int samplerate,
-                                REALTYPE *outl,
-                                REALTYPE *outr);
+                                float *outl,
+                                float *outr);
 
 
         void partonoff(int npart, int what);
@@ -142,7 +142,7 @@ class Master
 
         //peaks for part VU-meters
         /**\todo synchronize this with a mutex*/
-        REALTYPE      vuoutpeakpart[NUM_MIDI_PARTS];
+        float      vuoutpeakpart[NUM_MIDI_PARTS];
         unsigned char fakepeakpart[NUM_MIDI_PARTS]; //this is used to compute the "peak" when the part is disabled
 
         Controller ctl;
@@ -160,9 +160,9 @@ class Master
     private:
         bool nullRun;
         vuData vu;
-        REALTYPE volume;
-        REALTYPE sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
-        REALTYPE sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
+        float volume;
+        float sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
+        float sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
         int keyshift;
 };
 

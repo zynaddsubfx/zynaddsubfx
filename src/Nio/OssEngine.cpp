@@ -209,9 +209,9 @@ void *OssEngine::thread()
     {
         if(getAudioEn())
         {
-            const Stereo<REALTYPE *> smps = getNext();
+            const Stereo<float *> smps = getNext();
 
-            REALTYPE l, r;
+            float l, r;
             for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
                 l = smps.l[i];
                 r = smps.r[i];

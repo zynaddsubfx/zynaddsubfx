@@ -58,9 +58,9 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
 EnvelopeParams::~EnvelopeParams()
 {}
 
-REALTYPE EnvelopeParams::getdt(char i)
+float EnvelopeParams::getdt(char i)
 {
-    REALTYPE result = (pow(2.0, Penvdt[(int)i] / 127.0 * 12.0) - 1.0) * 10.0; //miliseconds
+    float result = (pow(2.0, Penvdt[(int)i] / 127.0 * 12.0) - 1.0) * 10.0; //miliseconds
     return result;
 }
 

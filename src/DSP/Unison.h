@@ -30,26 +30,26 @@
 class Unison
 {
     public:
-        Unison(int update_period_samples_, REALTYPE max_delay_sec_);
+        Unison(int update_period_samples_, float max_delay_sec_);
         ~Unison();
 
         void set_size(int new_size);
-        void set_base_frequency(REALTYPE freq);
-        void set_bandwidth(REALTYPE bandwidth_cents);
+        void set_base_frequency(float freq);
+        void set_bandwidth(float bandwidth_cents);
 
-        void process(int bufsize, REALTYPE *inbuf, REALTYPE *outbuf = NULL);
+        void process(int bufsize, float *inbuf, float *outbuf = NULL);
 
     private:
         void update_parameters();
         void update_unison_data();
 
         int      unison_size;
-        REALTYPE base_freq;
+        float base_freq;
         struct UnisonVoice {
-            REALTYPE step, position; //base LFO
-            REALTYPE realpos1, realpos2; //the position regarding samples
-            REALTYPE relative_amplitude;
-            REALTYPE lin_fpos, lin_ffreq;
+            float step, position; //base LFO
+            float realpos1, realpos2; //the position regarding samples
+            float relative_amplitude;
+            float lin_fpos, lin_ffreq;
             UnisonVoice() {
                 position = RND * 1.8 - 0.9;
                 realpos1 = 0.0;
@@ -61,9 +61,9 @@ class Unison
         int       update_period_samples, update_period_sample_k;
         int       max_delay, delay_k;
         bool      first_time;
-        REALTYPE *delay_buffer;
-        REALTYPE  unison_amplitude_samples;
-        REALTYPE  unison_bandwidth_cents;
+        float *delay_buffer;
+        float  unison_amplitude_samples;
+        float  unison_bandwidth_cents;
 };
 #endif
 

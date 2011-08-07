@@ -40,8 +40,8 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
     microtonal = microtonal_;
     fft = fft_;
     mutex      = mutex_;
-    partoutl   = new REALTYPE [SOUND_BUFFER_SIZE];
-    partoutr   = new REALTYPE [SOUND_BUFFER_SIZE];
+    partoutl   = new float [SOUND_BUFFER_SIZE];
+    partoutr   = new float [SOUND_BUFFER_SIZE];
 
     for(int n = 0; n < NUM_KIT_ITEMS; n++) {
         kit[n].Pname   = new unsigned char [PART_MAX_NAME_LEN];
@@ -61,8 +61,8 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
     }
 
     for(int n = 0; n < NUM_PART_EFX + 1; n++) {
-        partfxinputl[n] = new REALTYPE [SOUND_BUFFER_SIZE];
-        partfxinputr[n] = new REALTYPE [SOUND_BUFFER_SIZE];
+        partfxinputl[n] = new float [SOUND_BUFFER_SIZE];
+        partfxinputr[n] = new float [SOUND_BUFFER_SIZE];
     }
 
     killallnotes = 0;
@@ -302,7 +302,7 @@ void Part::NoteOn(unsigned char note,
         }
 
         //this computes the velocity sensing of the part
-        REALTYPE vel = VelF(velocity / 127.0, Pvelsns);
+        float vel = VelF(velocity / 127.0, Pvelsns);
 
         //compute the velocity offset
         vel += (Pveloffs - 64.0) / 64.0;
@@ -317,7 +317,7 @@ void Part::NoteOn(unsigned char note,
         int keyshift     = masterkeyshift + partkeyshift;
 
         //initialise note frequency
-        REALTYPE notebasefreq;
+        float notebasefreq;
         if(Pdrummode == 0) {
             notebasefreq = microtonal->getnotefreq(note, keyshift);
             if(notebasefreq < 0.0)
@@ -820,8 +820,8 @@ void Part::RunNote(unsigned int k)
                 continue;
             noteplay++;
 
-            REALTYPE *tmpoutr = getTmpBuffer();
-            REALTYPE *tmpoutl = getTmpBuffer();
+            float *tmpoutr = getTmpBuffer();
+            float *tmpoutl = getTmpBuffer();
             (*note)->noteout(&tmpoutl[0], &tmpoutr[0]);
 
             if((*note)->finished()) {
@@ -888,8 +888,8 @@ void Part::ComputePartSmps()
     //Kill All Notes if killallnotes!=0
     if(killallnotes != 0) {
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            REALTYPE tmp =
-                (SOUND_BUFFER_SIZE - i) / (REALTYPE) SOUND_BUFFER_SIZE;
+            float tmp =
+                (SOUND_BUFFER_SIZE - i) / (float) SOUND_BUFFER_SIZE;
             partoutl[i] *= tmp;
             partoutr[i] *= tmp;
         }

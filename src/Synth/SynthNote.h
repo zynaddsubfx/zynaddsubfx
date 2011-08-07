@@ -26,12 +26,12 @@
 class SynthNote
 {
     public:
-        SynthNote(REALTYPE freq, REALTYPE vel, int port, int note, bool quiet);
+        SynthNote(float freq, float vel, int port, int note, bool quiet);
         virtual ~SynthNote() {}
 
         /**Compute Output Samples
          * @return 0 if note is finished*/
-        virtual int noteout(REALTYPE *outl, REALTYPE *outr) = 0;
+        virtual int noteout(float *outl, float *outr) = 0;
 
         //TODO fix this spelling error [noisey commit]
         /**Release the key for the note and start release portion of envelopes.*/
@@ -41,30 +41,30 @@ class SynthNote
          * @return finished=1 unfinished=0*/
         virtual int finished() const = 0;
 
-        virtual void legatonote(REALTYPE freq, REALTYPE velocity,
+        virtual void legatonote(float freq, float velocity,
                 int portamento_, int midinote_, bool externcall) = 0;
     protected:
         // Legato transitions
         class Legato{
             public:
-                Legato(REALTYPE freq, REALTYPE vel, int port,
+                Legato(float freq, float vel, int port,
                         int note, bool quiet);
 
-                void apply(SynthNote &note, REALTYPE *outl, REALTYPE *outr);
-                int update(REALTYPE freq, REALTYPE velocity, int portamento_,
+                void apply(SynthNote &note, float *outl, float *outr);
+                int update(float freq, float velocity, int portamento_,
                         int midinote_, bool externalcall);
 
             private:
                 bool      silent;
-                REALTYPE  lastfreq;
+                float  lastfreq;
                 LegatoMsg msg;
                 int decounter;
                 struct { // Fade In/Out vars
                     int      length;
-                    REALTYPE m, step;
+                    float m, step;
                 } fade;
                 struct { // Note parameters
-                    REALTYPE freq, vel;
+                    float freq, vel;
                     int      portamento, midinote;
                 } param;
         } legato;

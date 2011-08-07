@@ -41,8 +41,8 @@ class FFTwrapper
         /**Convert Samples to Frequencies using Fourier Transform
          * @param smps Pointer to Samples to be converted; has length fftsize_
          * @param freqs Structure FFTFREQS which stores the frequencies*/
-        void smps2freqs(REALTYPE *smps, FFTFREQS freqs);
-        void freqs2smps(FFTFREQS freqs, REALTYPE *smps);
+        void smps2freqs(float *smps, FFTFREQS freqs);
+        void freqs2smps(FFTFREQS freqs, float *smps);
     private:
         int fftsize;
         fftw_real *tmpfftdata1, *tmpfftdata2;

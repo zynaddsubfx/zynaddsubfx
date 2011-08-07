@@ -42,7 +42,7 @@ class WavEngine: public AudioOut
         void setAudioEn(bool /*nval*/){};
         bool getAudioEn() const{return true;};
 
-        void push(Stereo<REALTYPE *> smps, size_t len);
+        void push(Stereo<float *> smps, size_t len);
 
         void newFile(WavFile *_file);
         void destroyFile();

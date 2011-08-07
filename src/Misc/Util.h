@@ -29,12 +29,12 @@
 #include "../globals.h"
 
 //Velocity Sensing function
-extern REALTYPE VelF(REALTYPE velocity, unsigned char scaling);
+extern float VelF(float velocity, unsigned char scaling);
 
 bool fileexists(const char *filename);
 
 #define N_DETUNE_TYPES 4 //the number of detune types
-extern REALTYPE getdetune(unsigned char type,
+extern float getdetune(unsigned char type,
                           unsigned short int coarsedetune,
                           unsigned short int finedetune);
 
@@ -49,19 +49,19 @@ void os_sleep(long length);
 
 std::string legalizeFilename(std::string filename);
 
-extern REALTYPE *denormalkillbuf; /**<the buffer to add noise in order to avoid denormalisation*/
+extern float *denormalkillbuf; /**<the buffer to add noise in order to avoid denormalisation*/
 
 extern class Config config;
 
-void invSignal(REALTYPE *sig, size_t len);
+void invSignal(float *sig, size_t len);
 
-void crossover(REALTYPE &a, REALTYPE &b, REALTYPE crossover);
+void crossover(float &a, float &b, float crossover);
 
 //Memory pool for temporary buffers
 //No allocation in *normal* case
 //All should be sized to SOUND_BUFFER_SIZE
-REALTYPE *getTmpBuffer();
-void returnTmpBuffer(REALTYPE *buf);
+float *getTmpBuffer();
+void returnTmpBuffer(float *buf);
 
 template<class T>
 std::string stringFrom(T x)

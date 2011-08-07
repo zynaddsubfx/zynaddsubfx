@@ -43,8 +43,8 @@ class Effect
          * @param filterpars_ pointer to FilterParams array
          * @param Ppreset_ chosen preset
          * @return Initialized Effect object*/
-        Effect(bool insertion_, REALTYPE *const efxoutl_,
-               REALTYPE *const efxoutr_, FilterParams *filterpars_,
+        Effect(bool insertion_, float *const efxoutl_,
+               float *const efxoutr_, FilterParams *filterpars_,
                const unsigned char &Ppreset_);
         /**Deconstructor
          *
@@ -73,27 +73,27 @@ class Effect
          * @param smpsl Input buffer for the Left channel
          * @param smpsr Input buffer for the Right channel
          */
-        void out(REALTYPE *const smpsl, REALTYPE *const smpsr);
+        void out(float *const smpsl, float *const smpsr);
         virtual void out(const Stereo<float *> &smp) = 0;
         /**Reset the state of the effect*/
         virtual void cleanup() {}
         /**This is only used for EQ (for user interface)*/
-        virtual REALTYPE getfreqresponse(REALTYPE freq) {
+        virtual float getfreqresponse(float freq) {
             return freq;
         }
 
         unsigned char   Ppreset; /**<Currently used preset*/
-        REALTYPE *const efxoutl; /**<Effect out Left Channel*/
-        REALTYPE *const efxoutr; /**<Effect out Right Channel*/
+        float *const efxoutl; /**<Effect out Left Channel*/
+        float *const efxoutr; /**<Effect out Right Channel*/
         /**\todo make efxoutl and efxoutr private and replace them with a Stereo<float*>*/
 
-        REALTYPE outvolume;/**<This is the volume of effect and is public because
+        float outvolume;/**<This is the volume of effect and is public because
                           * it is needed in system effects.
                           * The out volume of such effects are always 1.0, so
                           * this setting tells me how is the volume to the
                           * Master Output only.*/
 
-        REALTYPE volume;
+        float volume;
 
         FilterParams *filterpars; /**<Parameters for filters used by Effect*/
     protected:

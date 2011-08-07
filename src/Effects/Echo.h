@@ -42,8 +42,8 @@ class Echo:public Effect
          * @return An initialized Echo Object
          */
         Echo(const int &insertion_,
-             REALTYPE *const efxoutl_,
-             REALTYPE *const efxoutr_);
+             float *const efxoutl_,
+             float *const efxoutr_);
 
         /**
          * The destructor
@@ -116,16 +116,16 @@ class Echo:public Effect
         void sethidamp(unsigned char Phidamp);
 
         //Real Parameters
-        REALTYPE panning, lrcross, fb, hidamp;
+        float panning, lrcross, fb, hidamp;
         //Left/Right delay lengths
         Stereo<int> delayTime;
-        REALTYPE lrdelay;
-        REALTYPE avgDelay;
+        float lrdelay;
+        float avgDelay;
 
         void initdelays();
         //2 channel ring buffer
-        Stereo<REALTYPE *> delay;
-        Stereo<REALTYPE> old;
+        Stereo<float *> delay;
+        Stereo<float> old;
 
         //position of reading/writing from delaysample
         Stereo<int> pos;

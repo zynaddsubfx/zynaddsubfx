@@ -37,7 +37,7 @@ class SubNoteTest:public CxxTest::TestSuite
 
             //next the bad global variables that for some reason have not been properly placed in some
             //initialization routine, but rather exist as cryptic oneliners in main.cpp:
-            denormalkillbuf = new REALTYPE[SOUND_BUFFER_SIZE];
+            denormalkillbuf = new float[SOUND_BUFFER_SIZE];
             for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
                 denormalkillbuf[i] = 0;
 
@@ -59,7 +59,7 @@ class SubNoteTest:public CxxTest::TestSuite
 
             //lets go with.... 50! as a nice note
             testnote = 50;
-            REALTYPE freq = 440.0 * pow(2.0, (testnote - 69.0) / 12.0);
+            float freq = 440.0 * pow(2.0, (testnote - 69.0) / 12.0);
 
             note = new SUBnote(defaultPreset,
                                controller,

@@ -52,7 +52,7 @@ class AudioOut : public virtual Engine
     protected:
         /**Get the next sample for output.
          * (has nsamples sampled at a rate of samplerate)*/
-        const Stereo<REALTYPE *> getNext();
+        const Stereo<float *> getNext();
 
         int samplerate;
         int bufferSize;

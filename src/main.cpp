@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
 
     srand(time(NULL));
     //produce denormal buf
-    denormalkillbuf = new REALTYPE [SOUND_BUFFER_SIZE];
+    denormalkillbuf = new float [SOUND_BUFFER_SIZE];
     for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
         denormalkillbuf[i] = (RND - 0.5) * 1e-16;
 

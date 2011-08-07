@@ -23,7 +23,7 @@
 #include <cmath>
 #include "EQ.h"
 
-EQ::EQ(const int &insertion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_)
+EQ::EQ(const int &insertion_, float *efxoutl_, float *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0)
 {
     for(int i = 0; i < MAX_EQ_BANDS; i++) {
@@ -120,7 +120,7 @@ void EQ::changepar(int npar, unsigned char value)
         return;
     int bp = npar % 5; //band paramenter
 
-    REALTYPE tmp;
+    float tmp;
     switch(bp) {
     case 0:
         filter[nb].Ptype = value;
@@ -198,9 +198,9 @@ unsigned char EQ::getpar(int npar) const
 
 
 
-REALTYPE EQ::getfreqresponse(REALTYPE freq)
+float EQ::getfreqresponse(float freq)
 {
-    REALTYPE resp = 1.0;
+    float resp = 1.0;
 
     for(int i = 0; i < MAX_EQ_BANDS; i++) {
         if(filter[i].Ptype == 0)

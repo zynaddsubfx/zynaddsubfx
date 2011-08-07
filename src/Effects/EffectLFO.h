@@ -31,20 +31,20 @@ class EffectLFO
     public:
         EffectLFO();
         ~EffectLFO();
-        void effectlfoout(REALTYPE *outl, REALTYPE *outr);
+        void effectlfoout(float *outl, float *outr);
         void updateparams();
         unsigned char Pfreq;
         unsigned char Prandomness;
         unsigned char PLFOtype;
         unsigned char Pstereo; //"64"=0
     private:
-        REALTYPE getlfoshape(REALTYPE x);
+        float getlfoshape(float x);
 
-        REALTYPE xl, xr;
-        REALTYPE incx;
-        REALTYPE ampl1, ampl2, ampr1, ampr2; //necessary for "randomness"
-        REALTYPE lfointensity;
-        REALTYPE lfornd;
+        float xl, xr;
+        float incx;
+        float ampl1, ampl2, ampr1, ampr2; //necessary for "randomness"
+        float lfointensity;
+        float lfornd;
         char     lfotype; /**\todo GET RID OF CHAR (replace with short or enum)*/
 };
 

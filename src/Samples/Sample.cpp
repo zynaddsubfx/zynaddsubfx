@@ -30,7 +30,7 @@ using namespace std;
 /**\TODO start using pointer math here as these will be Frequency called
  * functions throughout the code*/
 Sample::Sample()
-    :bufferSize(1),buffer(new REALTYPE[1])
+    :bufferSize(1),buffer(new float[1])
 {
     buffer[0] = 0.0;
 }
@@ -38,28 +38,28 @@ Sample::Sample()
 Sample::Sample(const Sample &smp)
     :bufferSize(smp.bufferSize)
 {
-    buffer = new REALTYPE[bufferSize];
+    buffer = new float[bufferSize];
     memcpy(buffer, smp.buffer, bufferSize * sizeof(float));
 }
 
-Sample::Sample(int length, REALTYPE fill)
+Sample::Sample(int length, float fill)
     :bufferSize(length)
 {
     if(length < 1)
         bufferSize = 1;
-    buffer = new REALTYPE[bufferSize];
+    buffer = new float[bufferSize];
     memset(buffer, fill, bufferSize * sizeof(float));
 }
 
-Sample::Sample(int length, const REALTYPE *input)
+Sample::Sample(int length, const float *input)
     :bufferSize(length)
 {
     if(length > 0) {
-        buffer = new REALTYPE[length];
+        buffer = new float[length];
         memcpy(buffer, input, bufferSize * sizeof(float));
     }
     else {
-        buffer     = new REALTYPE[1];
+        buffer     = new float[1];
         bufferSize = 1;
         *buffer    = 0;
     }
@@ -80,7 +80,7 @@ void Sample::operator=(const Sample &smp)
 {
     if(bufferSize != smp.bufferSize) {
         delete[] buffer;
-        buffer     = new REALTYPE[smp.bufferSize];
+        buffer     = new float[smp.bufferSize];
         bufferSize = smp.bufferSize;
     }
     memcpy(buffer, smp.buffer, bufferSize * sizeof(float));
@@ -169,27 +169,27 @@ Sample Sample::subSample(int a, int b) const
     return Sample(b-a, buffer+a);
 }
 
-REALTYPE Sample::max() const
+float Sample::max() const
 {
-    REALTYPE max = -1500; //a good low considering that samples should store values -1.0 to 1.0
+    float max = -1500; //a good low considering that samples should store values -1.0 to 1.0
     for(int i = 0; i < bufferSize; ++i)
         if(buffer[i] > max)
             max = buffer[i];
     return max;
 }
 
-REALTYPE Sample::min() const
+float Sample::min() const
 {
-    REALTYPE min = 1500; //a good high considering that samples should store values -1.0 to 1.0
+    float min = 1500; //a good high considering that samples should store values -1.0 to 1.0
     for(int i = 0; i < bufferSize; ++i)
         if(buffer[i] < min)
             min = buffer[i];
     return min;
 }
 
-REALTYPE Sample::absMax() const
+float Sample::absMax() const
 {
-    REALTYPE max = 0;
+    float max = 0;
     for(int i = 0; i < bufferSize; ++i)
         if(fabs(buffer[i]) > max)
             max = fabs(buffer[i]);

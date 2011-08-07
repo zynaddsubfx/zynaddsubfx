@@ -36,8 +36,8 @@ using namespace std;
 
 EffectMgr::EffectMgr(int insertion_, pthread_mutex_t *mutex_)
     :insertion(insertion_),
-      efxoutl(new REALTYPE[SOUND_BUFFER_SIZE]),
-      efxoutr(new REALTYPE[SOUND_BUFFER_SIZE]),
+      efxoutl(new float[SOUND_BUFFER_SIZE]),
+      efxoutr(new float[SOUND_BUFFER_SIZE]),
       filterpars(NULL), nefx(0), efx(NULL), mutex(mutex_), dryonly(false)
 {
     setpresettype("Peffect"); /**\todo Figure out what this is doing
@@ -46,8 +46,8 @@ EffectMgr::EffectMgr(int insertion_, pthread_mutex_t *mutex_)
 //    nefx=0;
 //    insertion=insertion_;
 //    mutex=mutex_;
-//    efxoutl=new REALTYPE[SOUND_BUFFER_SIZE];
-//    efxoutr=new REALTYPE[SOUND_BUFFER_SIZE];
+//    efxoutl=new float[SOUND_BUFFER_SIZE];
+//    efxoutr=new float[SOUND_BUFFER_SIZE];
     for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
         efxoutl[i] = 0.0;
         efxoutr[i] = 0.0;
@@ -207,7 +207,7 @@ unsigned char EffectMgr::geteffectpar(int npar)
 /*
  * Apply the effect
  */
-void EffectMgr::out(REALTYPE *smpsl, REALTYPE *smpsr)
+void EffectMgr::out(float *smpsl, float *smpsr)
 {
     int i;
     if(efx == NULL) {
@@ -229,7 +229,7 @@ void EffectMgr::out(REALTYPE *smpsl, REALTYPE *smpsr)
     }
     efx->out(smpsl, smpsr);
 
-    REALTYPE volume = efx->volume;
+    float volume = efx->volume;
 
     if(nefx == 7) { //this is need only for the EQ effect
         /**\todo figure out why*/
@@ -242,7 +242,7 @@ void EffectMgr::out(REALTYPE *smpsl, REALTYPE *smpsr)
 
     //Insertion effect
     if(insertion != 0) {
-        REALTYPE v1, v2;
+        float v1, v2;
         if(volume < 0.5) {
             v1 = 1.0;
             v2 = volume * 2.0;
@@ -282,7 +282,7 @@ void EffectMgr::out(REALTYPE *smpsl, REALTYPE *smpsr)
 /*
  * Get the effect volume for the system effect
  */
-REALTYPE EffectMgr::sysefxgetvolume()
+float EffectMgr::sysefxgetvolume()
 {
     if(efx == NULL)
         return 1.0;
@@ -294,7 +294,7 @@ REALTYPE EffectMgr::sysefxgetvolume()
 /*
  * Get the EQ response
  */
-REALTYPE EffectMgr::getEQfreqresponse(REALTYPE freq)
+float EffectMgr::getEQfreqresponse(float freq)
 {
     if(nefx == 7)
         return efx->getfreqresponse(freq);

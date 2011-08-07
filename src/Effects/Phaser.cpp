@@ -39,7 +39,7 @@ using namespace std;
 #define ONE_  0.99999f        // To prevent LFO ever reaching 1.0 for filter stability purposes
 #define ZERO_ 0.00001f        // Same idea as above.
 
-Phaser::Phaser(const int &insertion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_)
+Phaser::Phaser(const int &insertion_, float *efxoutl_, float *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0), old(NULL), xn1(NULL),
      yn1(NULL), diff(0.0), oldgain(0.0), fb(0.0)
 {
@@ -91,7 +91,7 @@ Phaser::~Phaser()
 /*
  * Effect output
  */
-void Phaser::out(const Stereo<REALTYPE *> &input)
+void Phaser::out(const Stereo<float *> &input)
 {
     if(Panalog)
         AnalogPhase(input);
@@ -99,9 +99,9 @@ void Phaser::out(const Stereo<REALTYPE *> &input)
         normalPhase(input);
 }
 
-void Phaser::AnalogPhase(const Stereo<REALTYPE *> &input)
+void Phaser::AnalogPhase(const Stereo<float *> &input)
 {
-    Stereo<REALTYPE> gain(0.0), lfoVal(0.0), mod(0.0), g(0.0), b(0.0), hpf(0.0);
+    Stereo<float> gain(0.0), lfoVal(0.0), mod(0.0), g(0.0), b(0.0), hpf(0.0);
 
     lfo.effectlfoout(&lfoVal.l, &lfoVal.r);
     mod.l = lfoVal.l*width + (depth - 0.5f);
@@ -132,7 +132,7 @@ void Phaser::AnalogPhase(const Stereo<REALTYPE *> &input)
         g.l += diff.l;// Linear interpolation between LFO samples
         g.r += diff.r;
 
-        Stereo<REALTYPE> xn(input.l[i] * panning, 
+        Stereo<float> xn(input.l[i] * panning, 
                             input.r[i] * (1.0f - panning));
 
         if (barber) {
@@ -156,8 +156,8 @@ void Phaser::AnalogPhase(const Stereo<REALTYPE *> &input)
     }
 }
 
-REALTYPE Phaser::applyPhase(REALTYPE x, REALTYPE g, REALTYPE fb,
-                            REALTYPE &hpf, REALTYPE *yn1, REALTYPE *xn1)
+float Phaser::applyPhase(float x, float g, float fb,
+                            float &hpf, float *yn1, float *xn1)
 {
     for(int j = 0; j < Pstages; j++) { //Phasing routine
         mis = 1.0f + offsetpct*offset[j];
@@ -184,9 +184,9 @@ REALTYPE Phaser::applyPhase(REALTYPE x, REALTYPE g, REALTYPE fb,
     }
     return x;
 }
-void Phaser::normalPhase(const Stereo<REALTYPE *> &input)
+void Phaser::normalPhase(const Stereo<float *> &input)
 {
-    Stereo<REALTYPE> gain(0.0), lfoVal(0.0);
+    Stereo<float> gain(0.0), lfoVal(0.0);
 
     lfo.effectlfoout(&lfoVal.l, &lfoVal.r);
     gain.l = (exp(lfoVal.l * PHASER_LFO_SHAPE) - 1) / (exp(PHASER_LFO_SHAPE) - 1.0);
@@ -199,13 +199,13 @@ void Phaser::normalPhase(const Stereo<REALTYPE *> &input)
     gain.r = limit(gain.r, ZERO_, ONE_);
 
     for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        REALTYPE x   = (REALTYPE) i / SOUND_BUFFER_SIZE;
-        REALTYPE x1  = 1.0 - x;
+        float x   = (float) i / SOUND_BUFFER_SIZE;
+        float x1  = 1.0 - x;
         //TODO think about making panning an external feature
-        Stereo<REALTYPE> xn(input.l[i] * panning + fb.l,
+        Stereo<float> xn(input.l[i] * panning + fb.l,
                             input.r[i] * (1.0 - panning) + fb.r);
 
-        Stereo<REALTYPE> g(gain.l * x + oldgain.l * x1,
+        Stereo<float> g(gain.l * x + oldgain.l * x1,
                            gain.r * x + oldgain.r * x1);
 
         xn.l = applyPhase(xn.l, g.l, old.l);
@@ -228,10 +228,10 @@ void Phaser::normalPhase(const Stereo<REALTYPE *> &input)
     }
 }
 
-REALTYPE Phaser::applyPhase(REALTYPE x, REALTYPE g, REALTYPE *old)
+float Phaser::applyPhase(float x, float g, float *old)
 {
     for(int j = 0; j < Pstages * 2; j++) { //Phasing routine
-        REALTYPE tmp = old[j];
+        float tmp = old[j];
         old[j] = g * tmp + x;
         x = tmp - g *old[j];
     }
@@ -243,7 +243,7 @@ REALTYPE Phaser::applyPhase(REALTYPE x, REALTYPE g, REALTYPE *old)
  */
 void Phaser::cleanup()
 {
-    fb = oldgain = Stereo<REALTYPE>(0.0);
+    fb = oldgain = Stereo<float>(0.0);
     for(int i = 0; i < Pstages * 2; i++) {
         old.l[i] = 0.0;
         old.r[i] = 0.0;
@@ -319,14 +319,14 @@ void Phaser::setstages(unsigned char Pstages)
 
     this->Pstages = min(MAX_PHASER_STAGES, (int)Pstages);
 
-    old = Stereo<REALTYPE *>(new REALTYPE[Pstages * 2],
-                             new REALTYPE[Pstages * 2]);
+    old = Stereo<float *>(new float[Pstages * 2],
+                             new float[Pstages * 2]);
 
-    xn1 = Stereo<REALTYPE *>(new REALTYPE[Pstages],
-                             new REALTYPE[Pstages]);
+    xn1 = Stereo<float *>(new float[Pstages],
+                             new float[Pstages]);
 
-    yn1 = Stereo<REALTYPE *>(new REALTYPE[Pstages],
-                             new REALTYPE[Pstages]);
+    yn1 = Stereo<float *>(new float[Pstages],
+                             new float[Pstages]);
 
     cleanup();
 }

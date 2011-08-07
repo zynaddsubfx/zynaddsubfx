@@ -68,7 +68,7 @@ class Controller
          * @param newfreq Ending frequency of the portamento (Hz)
          * @param legatoflag true when legato is in progress, false otherwise
          * @returns 1 if properly initialized, 0 otherwise*/
-        int initportamento(REALTYPE oldfreq, REALTYPE newfreq, bool legatoflag);
+        int initportamento(float oldfreq, float newfreq, bool legatoflag);
         /**Update portamento's freqrap to next value based upon dx*/
         void updateportamento();
 
@@ -76,57 +76,57 @@ class Controller
         struct { //Pitch Wheel
             int       data;
             short int bendrange; //bendrange is in cents
-            REALTYPE  relfreq; //the relative frequency (default is 1.0)
+            float  relfreq; //the relative frequency (default is 1.0)
         } pitchwheel;
 
         struct { //Expression
             int           data;
-            REALTYPE      relvolume;
+            float      relvolume;
             unsigned char receive;
         } expression;
 
         struct { //Panning
             int           data;
-            REALTYPE      pan;
+            float      pan;
             unsigned char depth;
         } panning;
 
 
         struct { //Filter cutoff
             int           data;
-            REALTYPE      relfreq;
+            float      relfreq;
             unsigned char depth;
         } filtercutoff;
 
         struct { //Filter Q
             int           data;
-            REALTYPE      relq;
+            float      relq;
             unsigned char depth;
         } filterq;
 
         struct { //Bandwidth
             int           data;
-            REALTYPE      relbw;
+            float      relbw;
             unsigned char depth;
             unsigned char exponential;
         } bandwidth;
 
         struct { //Modulation Wheel
             int           data;
-            REALTYPE      relmod;
+            float      relmod;
             unsigned char depth;
             unsigned char exponential;
         } modwheel;
 
         struct { //FM amplitude
             int           data;
-            REALTYPE      relamp;
+            float      relamp;
             unsigned char receive;
         } fmamp;
 
         struct { //Volume
             int           data;
-            REALTYPE      volume;
+            float      volume;
             unsigned char receive;
         } volume;
 
@@ -177,7 +177,7 @@ class Controller
              * This is a multiplyer to change the frequency of the newer
              * frequency to fit the profile of the portamento.
              * This will be linear with respect to x.*/
-            REALTYPE freqrap;
+            float freqrap;
             /**this is used by the Part for knowing which note uses the portamento*/
             int      noteusing;
             /**if a the portamento is used by a note
@@ -187,22 +187,22 @@ class Controller
             //Internal data
 
             /**x is from 0.0 (start portamento) to 1.0 (finished portamento)*/
-            REALTYPE x;
+            float x;
             /**dx is the increment to x when updateportamento is called*/
-            REALTYPE dx;
+            float dx;
             /** this is used for computing oldfreq value from x*/
-            REALTYPE origfreqrap;
+            float origfreqrap;
         } portamento;
 
         struct { //Resonance Center Frequency
             int           data;
-            REALTYPE      relcenter;
+            float      relcenter;
             unsigned char depth;
         } resonancecenter;
 
         struct { //Resonance Bandwidth
             int           data;
-            REALTYPE      relbw;
+            float      relbw;
             unsigned char depth;
         } resonancebandwidth;
 

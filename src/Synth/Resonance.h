@@ -35,7 +35,7 @@ class Resonance:public Presets
         Resonance();
         ~Resonance();
         void setpoint(int n, unsigned char p);
-        void applyres(int n, FFTFREQS fftdata, REALTYPE freq);
+        void applyres(int n, FFTFREQS fftdata, float freq);
         void smooth();
         void interpolatepeaks(int type);
         void randomize(int type);
@@ -45,12 +45,12 @@ class Resonance:public Presets
         void getfromXML(XMLwrapper *xml);
 
 
-        REALTYPE getfreqpos(REALTYPE freq);
-        REALTYPE getfreqx(REALTYPE x);
-        REALTYPE getfreqresponse(REALTYPE freq);
-        REALTYPE getcenterfreq();
-        REALTYPE getoctavesfreq();
-        void sendcontroller(MidiControllers ctl, REALTYPE par);
+        float getfreqpos(float freq);
+        float getfreqx(float x);
+        float getfreqresponse(float freq);
+        float getcenterfreq();
+        float getoctavesfreq();
+        void sendcontroller(MidiControllers ctl, float par);
 
         //parameters
         unsigned char Penabled;     //if the ressonance is enabled
@@ -60,8 +60,8 @@ class Resonance:public Presets
         unsigned char Pprotectthefundamental;   //the fundamental (1-st harmonic) is not damped, even it resonance function is low
 
         //controllers
-        REALTYPE ctlcenter; //center frequency(relative)
-        REALTYPE ctlbw; //bandwidth(relative)
+        float ctlcenter; //center frequency(relative)
+        float ctlbw; //bandwidth(relative)
 
     private:
 };

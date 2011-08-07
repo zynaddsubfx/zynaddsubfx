@@ -27,16 +27,16 @@
 #include "LFO.h"
 
 
-LFO::LFO(LFOParams *lfopars, REALTYPE basefreq)
+LFO::LFO(LFOParams *lfopars, float basefreq)
 {
     if(lfopars->Pstretch == 0)
         lfopars->Pstretch = 1;
-    REALTYPE lfostretch = pow(basefreq / 440.0,
+    float lfostretch = pow(basefreq / 440.0,
                               (lfopars->Pstretch - 64.0) / 63.0);         //max 2x/octave
 
-    REALTYPE lfofreq    =
+    float lfofreq    =
         (pow(2, lfopars->Pfreq * 10.0) - 1.0) / 12.0 * lfostretch;
-    incx = fabs(lfofreq) * (REALTYPE)SOUND_BUFFER_SIZE / (REALTYPE)SAMPLE_RATE;
+    incx = fabs(lfofreq) * (float)SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
 
     if(lfopars->Pcontinous == 0) {
         if(lfopars->Pstartphase == 0)
@@ -45,7 +45,7 @@ LFO::LFO(LFOParams *lfopars, REALTYPE basefreq)
             x = fmod((lfopars->Pstartphase - 64.0) / 127.0 + 1.0, 1.0);
     }
     else {
-        REALTYPE tmp = fmod(lfopars->time * incx, 1.0);
+        float tmp = fmod(lfopars->time * incx, 1.0);
         x = fmod((lfopars->Pstartphase - 64.0) / 127.0 + 1.0 + tmp, 1.0);
     }
 
@@ -93,9 +93,9 @@ LFO::~LFO()
 /*
  * LFO out
  */
-REALTYPE LFO::lfoout()
+float LFO::lfoout()
 {
-    REALTYPE out;
+    float out;
     switch(lfotype) {
     case 1: //LFO_TRIANGLE
         if((x >= 0.0) && (x < 0.25))
@@ -154,16 +154,16 @@ REALTYPE LFO::lfoout()
         }
     }
     else
-        lfodelay -= (REALTYPE)SOUND_BUFFER_SIZE / (REALTYPE)SAMPLE_RATE;
+        lfodelay -= (float)SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
     return out;
 }
 
 /*
  * LFO out (for amplitude)
  */
-REALTYPE LFO::amplfoout()
+float LFO::amplfoout()
 {
-    REALTYPE out;
+    float out;
     out = 1.0 - lfointensity + lfoout();
     if(out < -1.0)
         out = -1.0;

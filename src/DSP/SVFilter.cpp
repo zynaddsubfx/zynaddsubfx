@@ -29,8 +29,8 @@
 #include "SVFilter.h"
 
 SVFilter::SVFilter(unsigned char Ftype,
-                   REALTYPE Ffreq,
-                   REALTYPE Fq,
+                   float Ffreq,
+                   float Fq,
                    unsigned char Fstages)
 {
     assert(Ftype<4);
@@ -74,11 +74,11 @@ void SVFilter::computefiltercoefs()
 }
 
 
-void SVFilter::setfreq(REALTYPE frequency)
+void SVFilter::setfreq(float frequency)
 {
     if(frequency < 0.1)
         frequency = 0.1;
-    REALTYPE rap = freq / frequency;
+    float rap = freq / frequency;
     if(rap < 1.0)
         rap = 1.0 / rap;
 
@@ -98,13 +98,13 @@ void SVFilter::setfreq(REALTYPE frequency)
     firsttime = false;
 }
 
-void SVFilter::setfreq_and_q(REALTYPE frequency, REALTYPE q_)
+void SVFilter::setfreq_and_q(float frequency, float q_)
 {
     q = q_;
     setfreq(frequency);
 }
 
-void SVFilter::setq(REALTYPE q_)
+void SVFilter::setq(float q_)
 {
     q = q_;
     computefiltercoefs();
@@ -116,7 +116,7 @@ void SVFilter::settype(int type_)
     computefiltercoefs();
 }
 
-void SVFilter::setgain(REALTYPE dBgain)
+void SVFilter::setgain(float dBgain)
 {
     gain = dB2rap(dBgain);
     computefiltercoefs();
@@ -131,9 +131,9 @@ void SVFilter::setstages(int stages_)
     computefiltercoefs();
 }
 
-void SVFilter::singlefilterout(REALTYPE *smp, fstage &x, parameters &par)
+void SVFilter::singlefilterout(float *smp, fstage &x, parameters &par)
 {
-    REALTYPE *out = NULL;
+    float *out = NULL;
     switch(type) {
     case 0:
         out = &x.low;
@@ -161,20 +161,20 @@ void SVFilter::singlefilterout(REALTYPE *smp, fstage &x, parameters &par)
     }
 }
 
-void SVFilter::filterout(REALTYPE *smp)
+void SVFilter::filterout(float *smp)
 {
     for(int i = 0; i < stages + 1; i++)
         singlefilterout(smp, st[i], par);
 
     if(needsinterpolation) {
-        REALTYPE *ismp = getTmpBuffer();
-        memcpy(ismp, smp, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+        float *ismp = getTmpBuffer();
+        memcpy(ismp, smp, sizeof(float) * SOUND_BUFFER_SIZE);
 
         for(int i = 0; i < stages + 1; i++)
             singlefilterout(ismp, st[i], ipar);
 
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            REALTYPE x = i / (REALTYPE) SOUND_BUFFER_SIZE;
+            float x = i / (float) SOUND_BUFFER_SIZE;
             smp[i] = ismp[i] * (1.0 - x) + smp[i] * x;
         }
         returnTmpBuffer(ismp);

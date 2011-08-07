@@ -53,7 +53,7 @@ void AudioOut::setBufferSize(int _bufferSize)
     bufferSize = _bufferSize;
 }
 
-const Stereo<REALTYPE *> AudioOut::getNext()
+const Stereo<float *> AudioOut::getNext()
 {
     return OutMgr::getInstance().tick(bufferSize);
 }

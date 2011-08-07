@@ -35,44 +35,44 @@ class AnalogFilter:public Filter_
 {
     public:
         AnalogFilter(unsigned char Ftype,
-                     REALTYPE Ffreq,
-                     REALTYPE Fq,
+                     float Ffreq,
+                     float Fq,
                      unsigned char Fstages);
         ~AnalogFilter();
-        void filterout(REALTYPE *smp);
-        void setfreq(REALTYPE frequency);
-        void setfreq_and_q(REALTYPE frequency, REALTYPE q_);
-        void setq(REALTYPE q_);
+        void filterout(float *smp);
+        void setfreq(float frequency);
+        void setfreq_and_q(float frequency, float q_);
+        void setq(float q_);
 
         void settype(int type_);
-        void setgain(REALTYPE dBgain);
+        void setgain(float dBgain);
         void setstages(int stages_);
         void cleanup();
 
-        REALTYPE H(REALTYPE freq); //Obtains the response for a given frequency
+        float H(float freq); //Obtains the response for a given frequency
 
     private:
         struct fstage {
-            REALTYPE x1, x2;//Input History
-            REALTYPE y1, y2;//Output History
+            float x1, x2;//Input History
+            float y1, y2;//Output History
         } history[MAX_FILTER_STAGES + 1], oldHistory[MAX_FILTER_STAGES + 1];
 
         struct Coeff {
-            REALTYPE c[3], //Feed Forward
+            float c[3], //Feed Forward
                      d[3]; //Feed Back
         } coeff, oldCoeff;
         //old coeffs are used for interpolation when paremeters change quickly
 
         //Apply IIR filter to Samples, with coefficients, and past history
-        void singlefilterout(REALTYPE *smp, fstage &hist, const Coeff &coeff);
+        void singlefilterout(float *smp, fstage &hist, const Coeff &coeff);
         //Update coeff and order
         void computefiltercoefs();
 
         int      type;   //The type of the filter (LPF1,HPF1,LPF2,HPF2...)
         int      stages; //how many times the filter is applied (0->1,1->2,etc.)
-        REALTYPE freq;   //Frequency given in Hz
-        REALTYPE q;      //Q factor (resonance or Q factor)
-        REALTYPE gain;   //the gain of the filter (if are shelf/peak) filters
+        float freq;   //Frequency given in Hz
+        float q;      //Q factor (resonance or Q factor)
+        float gain;   //the gain of the filter (if are shelf/peak) filters
 
         int order;       //the order of the filter (number of poles)
 

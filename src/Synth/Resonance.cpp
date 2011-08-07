@@ -62,11 +62,11 @@ void Resonance::setpoint(int n, unsigned char p)
 /*
  * Apply the resonance to FFT data
  */
-void Resonance::applyres(int n, FFTFREQS fftdata, REALTYPE freq)
+void Resonance::applyres(int n, FFTFREQS fftdata, float freq)
 {
     if(Penabled == 0)
         return;             //if the resonance is disabled
-    REALTYPE sum = 0.0,
+    float sum = 0.0,
              l1  = log(getfreqx(0.0) * ctlcenter),
              l2  = log(2.0) * getoctavesfreq() * ctlbw;
 
@@ -77,12 +77,12 @@ void Resonance::applyres(int n, FFTFREQS fftdata, REALTYPE freq)
         sum = 1.0;
 
     for(int i = 1; i < n; i++) {
-        REALTYPE x = (log(freq * i) - l1) / l2; //compute where the n-th hamonics fits to the graph
+        float x = (log(freq * i) - l1) / l2; //compute where the n-th hamonics fits to the graph
         if(x < 0.0)
             x = 0.0;
 
         x *= N_RES_POINTS;
-        REALTYPE dx = x - floor(x);
+        float dx = x - floor(x);
         x  = floor(x);
         int kx1     = (int)x;
         if(kx1 >= N_RES_POINTS)
@@ -90,7 +90,7 @@ void Resonance::applyres(int n, FFTFREQS fftdata, REALTYPE freq)
         int kx2     = kx1 + 1;
         if(kx2 >= N_RES_POINTS)
             kx2 = N_RES_POINTS - 1;
-        REALTYPE y  =
+        float y  =
             (Prespoints[kx1]
              * (1.0 - dx) + Prespoints[kx2] * dx) / 127.0 - sum / 127.0;
 
@@ -108,9 +108,9 @@ void Resonance::applyres(int n, FFTFREQS fftdata, REALTYPE freq)
  * Gets the response at the frequency "freq"
  */
 
-REALTYPE Resonance::getfreqresponse(REALTYPE freq)
+float Resonance::getfreqresponse(float freq)
 {
-    REALTYPE l1 = log(getfreqx(0.0) * ctlcenter),
+    float l1 = log(getfreqx(0.0) * ctlcenter),
              l2 = log(2.0) * getoctavesfreq() * ctlbw, sum = 0.0;
 
     for(int i = 0; i < N_RES_POINTS; i++)
@@ -119,11 +119,11 @@ REALTYPE Resonance::getfreqresponse(REALTYPE freq)
     if(sum < 1.0)
         sum = 1.0;
 
-    REALTYPE x = (log(freq) - l1) / l2; //compute where the n-th hamonics fits to the graph
+    float x = (log(freq) - l1) / l2; //compute where the n-th hamonics fits to the graph
     if(x < 0.0)
         x = 0.0;
     x *= N_RES_POINTS;
-    REALTYPE dx     = x - floor(x);
+    float dx     = x - floor(x);
     x  = floor(x);
     int kx1         = (int)x;
     if(kx1 >= N_RES_POINTS)
@@ -131,7 +131,7 @@ REALTYPE Resonance::getfreqresponse(REALTYPE freq)
     int kx2         = kx1 + 1;
     if(kx2 >= N_RES_POINTS)
         kx2 = N_RES_POINTS - 1;
-    REALTYPE result =
+    float result =
         (Prespoints[kx1]
          * (1.0 - dx) + Prespoints[kx2] * dx) / 127.0 - sum / 127.0;
     result = pow(10.0, result * PmaxdB / 20.0);
@@ -144,7 +144,7 @@ REALTYPE Resonance::getfreqresponse(REALTYPE freq)
  */
 void Resonance::smooth()
 {
-    REALTYPE old = Prespoints[0];
+    float old = Prespoints[0];
     for(int i = 0; i < N_RES_POINTS; i++) {
         old = old * 0.4 + Prespoints[i] * 0.6;
         Prespoints[i] = (int) old;
@@ -200,18 +200,18 @@ void Resonance::interpolatepeaks(int type)
 /*
  * Get the frequency from x, where x is [0..1]; x is the x coordinate
  */
-REALTYPE Resonance::getfreqx(REALTYPE x)
+float Resonance::getfreqx(float x)
 {
     if(x > 1.0)
         x = 1.0;
-    REALTYPE octf = pow(2.0, getoctavesfreq());
+    float octf = pow(2.0, getoctavesfreq());
     return getcenterfreq() / sqrt(octf) * pow(octf, x);
 }
 
 /*
  * Get the x coordinate from frequency (used by the UI)
  */
-REALTYPE Resonance::getfreqpos(REALTYPE freq)
+float Resonance::getfreqpos(float freq)
 {
     return (log(freq) - log(getfreqx(0.0))) / log(2.0) / getoctavesfreq();
 }
@@ -219,7 +219,7 @@ REALTYPE Resonance::getfreqpos(REALTYPE freq)
 /*
  * Get the center frequency of the resonance graph
  */
-REALTYPE Resonance::getcenterfreq()
+float Resonance::getcenterfreq()
 {
     return 10000.0 * pow(10, -(1.0 - Pcenterfreq / 127.0) * 2.0);
 }
@@ -227,12 +227,12 @@ REALTYPE Resonance::getcenterfreq()
 /*
  * Get the number of octave that the resonance functions applies to
  */
-REALTYPE Resonance::getoctavesfreq()
+float Resonance::getoctavesfreq()
 {
     return 0.25 + 10.0 * Poctavesfreq / 127.0;
 }
 
-void Resonance::sendcontroller(MidiControllers ctl, REALTYPE par)
+void Resonance::sendcontroller(MidiControllers ctl, float par)
 {
     if(ctl == C_resonance_center)
         ctlcenter = par;

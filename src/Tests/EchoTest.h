@@ -38,7 +38,7 @@ class EchoTest:public CxxTest::TestSuite
             outR = new float[SOUND_BUFFER_SIZE];
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
                 outR[i] = 0.0;
-            input  = new Stereo<REALTYPE *>(new REALTYPE[SOUND_BUFFER_SIZE],new REALTYPE[SOUND_BUFFER_SIZE]);
+            input  = new Stereo<float *>(new float[SOUND_BUFFER_SIZE],new float[SOUND_BUFFER_SIZE]);
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
                 input->l[i] = input->r[i] = 0.0f;
             testFX = new Echo(true, outL, outR);
@@ -116,7 +116,7 @@ class EchoTest:public CxxTest::TestSuite
 
 
     private:
-        Stereo<REALTYPE *> *input;
+        Stereo<float *> *input;
         float *outR, *outL;
         Echo  *testFX;
 };

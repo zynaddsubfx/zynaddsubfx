@@ -49,17 +49,17 @@ class ADnote :public SynthNote
          * @param portamento_ 1 if the note has portamento
          * @param midinote_ The midi number of the note
          * @param besilent Start silent note if true*/
-        ADnote(ADnoteParameters *pars, Controller *ctl_, REALTYPE freq,
-               REALTYPE velocity, int portamento_, int midinote_,
+        ADnote(ADnoteParameters *pars, Controller *ctl_, float freq,
+               float velocity, int portamento_, int midinote_,
                bool besilent);
         /**Destructor*/
         ~ADnote();
 
         /**Alters the playing note for legato effect*/
-        void legatonote(REALTYPE freq, REALTYPE velocity, int portamento_,
+        void legatonote(float freq, float velocity, int portamento_,
                         int midinote_, bool externcall);
 
-        int noteout(REALTYPE *outl, REALTYPE *outr);
+        int noteout(float *outl, float *outr);
         void relasekey();
         int finished() const;
     private:
@@ -67,9 +67,9 @@ class ADnote :public SynthNote
         /**Changes the frequency of an oscillator.
          * @param nvoice voice to run computations on
          * @param in_freq new frequency*/
-        void setfreq(int nvoice, REALTYPE in_freq);
+        void setfreq(int nvoice, float in_freq);
         /**Set the frequency of the modulator oscillator*/
-        void setfreqFM(int nvoice, REALTYPE in_freq);
+        void setfreqFM(int nvoice, float in_freq);
         /**Computes relative frequency for unison and unison's vibratto.
          * Note: Must be called before setfreq* functions.*/
         void compute_unison_freq_rap(int nvoice);
@@ -82,9 +82,9 @@ class ADnote :public SynthNote
         /**Deallocate Note resources and voice resources*/
         void KillNote();
         /**Get the Voice's base frequency*/
-        inline REALTYPE getvoicebasefreq(int nvoice) const;
+        inline float getvoicebasefreq(int nvoice) const;
         /**Get modulator's base frequency*/
-        inline REALTYPE getFMvoicebasefreq(int nvoice) const;
+        inline float getFMvoicebasefreq(int nvoice) const;
         /**Compute the Oscillator's samples.
          * Affects tmpwave_unison and updates oscposhi/oscposlo*/
         inline void ComputeVoiceOscillator_LinearInterpolation(int nvoice);
@@ -109,14 +109,14 @@ class ADnote :public SynthNote
         inline void ComputeVoiceNoise(int nvoice);
 
         /**Fadein in a way that removes clicks but keep sound "punchy"*/
-        inline void fadein(REALTYPE *smps) const;
+        inline void fadein(float *smps) const;
 
 
         //GLOBALS
         ADnoteParameters *partparams;
         unsigned char     stereo; //if the note is stereo (allows note Panning)
         int      midinote;
-        REALTYPE velocity, basefreq;
+        float velocity, basefreq;
 
         ONOFFTYPE   NoteEnabled;
         Controller *ctl;
@@ -128,12 +128,12 @@ class ADnote :public SynthNote
         struct Global {
             void kill();
             void initparameters(const ADnoteGlobalParam &param,
-                                REALTYPE basefreq, REALTYPE velocity,
+                                float basefreq, float velocity,
                                 bool stereo);
             /******************************************
             *     FREQUENCY GLOBAL PARAMETERS        *
             ******************************************/
-            REALTYPE  Detune; //cents
+            float  Detune; //cents
 
             Envelope *FreqEnvelope;
             LFO      *FreqLfo;
@@ -141,16 +141,16 @@ class ADnote :public SynthNote
             /********************************************
             *     AMPLITUDE GLOBAL PARAMETERS          *
             ********************************************/
-            REALTYPE  Volume; // [ 0 .. 1 ]
+            float  Volume; // [ 0 .. 1 ]
 
-            REALTYPE  Panning; // [ 0 .. 1 ]
+            float  Panning; // [ 0 .. 1 ]
 
             Envelope *AmpEnvelope;
             LFO      *AmpLfo;
 
             struct {
                 int      Enabled;
-                REALTYPE initialvalue, dt, t;
+                float initialvalue, dt, t;
             } Punch;
 
             /******************************************
@@ -158,9 +158,9 @@ class ADnote :public SynthNote
             ******************************************/
             Filter   *GlobalFilterL, *GlobalFilterR;
 
-            REALTYPE  FilterCenterPitch; //octaves
-            REALTYPE  FilterQ;
-            REALTYPE  FilterFreqTracking;
+            float  FilterCenterPitch; //octaves
+            float  FilterQ;
+            float  FilterFreqTracking;
 
             Envelope *FilterEnvelope;
 
@@ -188,7 +188,7 @@ class ADnote :public SynthNote
             int DelayTicks;
 
             /* Waveform of the Voice */
-            REALTYPE *OscilSmp;
+            float *OscilSmp;
 
             /************************************
             *     FREQUENCY PARAMETERS          *
@@ -197,7 +197,7 @@ class ADnote :public SynthNote
             int fixedfreqET; //if the "fixed" frequency varies according to the note (ET)
 
             // cents = basefreq*VoiceDetune
-            REALTYPE  Detune, FineDetune;
+            float  Detune, FineDetune;
 
             Envelope *FreqEnvelope;
             LFO      *FreqLfo;
@@ -208,8 +208,8 @@ class ADnote :public SynthNote
             ***************************/
 
             /* Panning 0.0=left, 0.5 - center, 1.0 = right */
-            REALTYPE  Panning;
-            REALTYPE  Volume; // [-1.0 .. 1.0]
+            float  Panning;
+            float  Volume; // [-1.0 .. 1.0]
 
             Envelope *AmpEnvelope;
             LFO      *AmpLfo;
@@ -221,8 +221,8 @@ class ADnote :public SynthNote
             Filter   *VoiceFilterL;
             Filter   *VoiceFilterR;
 
-            REALTYPE  FilterCenterPitch; /* Filter center Pitch*/
-            REALTYPE  FilterFreqTracking;
+            float  FilterCenterPitch; /* Filter center Pitch*/
+            float  FilterFreqTracking;
 
             Envelope *FilterEnvelope;
             LFO      *FilterLfo;
@@ -237,13 +237,13 @@ class ADnote :public SynthNote
             int    FMVoice;
 
             // Voice Output used by other voices if use this as modullator
-            REALTYPE *VoiceOut;
+            float *VoiceOut;
 
             /* Wave of the Voice */
-            REALTYPE *FMSmp;
+            float *FMSmp;
 
-            REALTYPE  FMVolume;
-            REALTYPE  FMDetune; //in cents
+            float  FMVolume;
+            float  FMDetune; //in cents
 
             Envelope *FMFreqEnvelope;
             Envelope *FMAmpEnvelope;
@@ -255,37 +255,37 @@ class ADnote :public SynthNote
         /********************************************************/
 
         //time from the start of the note
-        REALTYPE time;
+        float time;
 
         //the size of unison for a single voice
         int unison_size[NUM_VOICES];
 
         //the stereo spread of the unison subvoices (0.0=mono,1.0=max)
-        REALTYPE unison_stereo_spread[NUM_VOICES];
+        float unison_stereo_spread[NUM_VOICES];
 
         //fractional part (skip)
-        REALTYPE *oscposlo[NUM_VOICES], *oscfreqlo[NUM_VOICES];
+        float *oscposlo[NUM_VOICES], *oscfreqlo[NUM_VOICES];
 
         //integer part (skip)
         int *oscposhi[NUM_VOICES], *oscfreqhi[NUM_VOICES];
 
         //fractional part (skip) of the Modullator
-        REALTYPE *oscposloFM[NUM_VOICES], *oscfreqloFM[NUM_VOICES];
+        float *oscposloFM[NUM_VOICES], *oscfreqloFM[NUM_VOICES];
 
         //the unison base_value
-        REALTYPE *unison_base_freq_rap[NUM_VOICES];
+        float *unison_base_freq_rap[NUM_VOICES];
 
         //how the unison subvoice's frequency is changed (1.0 for no change)
-        REALTYPE *unison_freq_rap[NUM_VOICES];
+        float *unison_freq_rap[NUM_VOICES];
 
         //which subvoice has phase inverted
         bool *unison_invert_phase[NUM_VOICES];
 
         //unison vibratto
         struct {
-            REALTYPE  amplitude; //amplitude which be added to unison_freq_rap
-            REALTYPE *step; //value which increments the position
-            REALTYPE *position; //between -1.0 and 1.0
+            float  amplitude; //amplitude which be added to unison_freq_rap
+            float *step; //value which increments the position
+            float *position; //between -1.0 and 1.0
         } unison_vibratto[NUM_VOICES];
 
 
@@ -293,25 +293,25 @@ class ADnote :public SynthNote
         unsigned int *oscposhiFM[NUM_VOICES], *oscfreqhiFM[NUM_VOICES];
 
         //used to compute and interpolate the amplitudes of voices and modullators
-        REALTYPE oldamplitude[NUM_VOICES],
+        float oldamplitude[NUM_VOICES],
                  newamplitude[NUM_VOICES],
                  FMoldamplitude[NUM_VOICES],
                  FMnewamplitude[NUM_VOICES];
 
         //used by Frequency Modulation (for integration)
-        REALTYPE *FMoldsmp[NUM_VOICES];
+        float *FMoldsmp[NUM_VOICES];
 
         //temporary buffer
-        REALTYPE *tmpwavel;
-        REALTYPE *tmpwaver;
+        float *tmpwavel;
+        float *tmpwaver;
         int max_unison;
-        REALTYPE **tmpwave_unison;
+        float **tmpwave_unison;
 
         //Filter bypass samples
-        REALTYPE *bypassl, *bypassr;
+        float *bypassl, *bypassr;
 
         //interpolate the amplitudes
-        REALTYPE globaloldamplitude, globalnewamplitude;
+        float globaloldamplitude, globalnewamplitude;
 
         //1 - if it is the fitst tick (used to fade in the sound)
         char firsttick[NUM_VOICES];
@@ -320,7 +320,7 @@ class ADnote :public SynthNote
         int portamento;
 
         //how the fine detunes are made bigger or smaller
-        REALTYPE bandwidthDetuneMultiplier;
+        float bandwidthDetuneMultiplier;
 };
 
 #endif

@@ -40,14 +40,14 @@ class OscilGen:public Presets
 
         /**do the antialiasing(cut off higher freqs.),apply randomness and do a IFFT*/
         //returns where should I start getting samples, used in block type randomness
-        short get(REALTYPE *smps, REALTYPE freqHz, int resonance=0);
+        short get(float *smps, float freqHz, int resonance=0);
         //if freqHz is smaller than 0, return the "un-randomized" sample for UI
 
-        void getbasefunction(REALTYPE *smps);
+        void getbasefunction(float *smps);
 
         //called by UI
-        void getspectrum(int n, REALTYPE *spc, int what); //what=0 pt. oscil,1 pt. basefunc
-        void getcurrentbasefunction(REALTYPE *smps);
+        void getspectrum(int n, float *spc, int what); //what=0 pt. oscil,1 pt. basefunc
+        void getcurrentbasefunction(float *smps);
         /**convert oscil to base function*/
         void useasbase();
 
@@ -112,10 +112,10 @@ class OscilGen:public Presets
 
     private:
         //This array stores some termporary data and it has OSCIL_SIZE elements
-        REALTYPE *tmpsmps;
+        float *tmpsmps;
         FFTFREQS  outoscilFFTfreqs;
 
-        REALTYPE hmag[MAX_AD_HARMONICS], hphase[MAX_AD_HARMONICS]; //the magnituides and the phases of the sine/nonsine harmonics
+        float hmag[MAX_AD_HARMONICS], hphase[MAX_AD_HARMONICS]; //the magnituides and the phases of the sine/nonsine harmonics
 //    private:
         FFTwrapper *fft;
         //computes the basefunction and make the FFT; newbasefunc<0  = same basefunc
@@ -136,13 +136,13 @@ class OscilGen:public Presets
         void modulation();
 
         //Do the adaptive harmonic stuff
-        void adaptiveharmonic(FFTFREQS f, REALTYPE freq);
+        void adaptiveharmonic(FFTFREQS f, float freq);
 
         //Do the adaptive harmonic postprocessing (2n+1,2xS,2xA,etc..)
         //this function is called even for the user interface
         //this can be called for the sine and components, and for the spectrum
         //(that's why the sine and cosine components should be processed with a separate call)
-        void adaptiveharmonicpostprocess(REALTYPE *f, int size);
+        void adaptiveharmonicpostprocess(float *f, int size);
 
         //Internal Data
         unsigned char oldbasefunc, oldbasepar, oldhmagtype,
@@ -163,9 +163,9 @@ class OscilGen:public Presets
         unsigned int randseed;
 };
 
-typedef REALTYPE(*filter_func)(unsigned int, REALTYPE, REALTYPE);
+typedef float(*filter_func)(unsigned int, float, float);
 filter_func getFilter(unsigned char func);
-typedef REALTYPE(*base_func)(REALTYPE,REALTYPE);
+typedef float(*base_func)(float,float);
 base_func getBaseFunction(unsigned char func);
 
 

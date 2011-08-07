@@ -84,7 +84,7 @@ void FormantFilter::cleanup()
         formant[i]->cleanup();
 }
 
-void FormantFilter::setpos(REALTYPE input)
+void FormantFilter::setpos(float input)
 {
     int p1, p2;
 
@@ -104,7 +104,7 @@ void FormantFilter::setpos(REALTYPE input)
         oldinput = input;
 
 
-    REALTYPE pos = fmod(input * sequencestretch, 1.0);
+    float pos = fmod(input * sequencestretch, 1.0);
     if(pos < 0.0)
         pos += 1.0;
 
@@ -173,38 +173,38 @@ void FormantFilter::setpos(REALTYPE input)
     oldQfactor = Qfactor;
 }
 
-void FormantFilter::setfreq(REALTYPE frequency)
+void FormantFilter::setfreq(float frequency)
 {
     setpos(frequency);
 }
 
-void FormantFilter::setq(REALTYPE q_)
+void FormantFilter::setq(float q_)
 {
     Qfactor = q_;
     for(int i = 0; i < numformants; i++)
         formant[i]->setq(Qfactor * currentformants[i].q);
 }
 
-void FormantFilter::setgain(REALTYPE /*dBgain*/)
+void FormantFilter::setgain(float /*dBgain*/)
 {}
 
 
-void FormantFilter::setfreq_and_q(REALTYPE frequency, REALTYPE q_)
+void FormantFilter::setfreq_and_q(float frequency, float q_)
 {
     Qfactor = q_;
     setpos(frequency);
 }
 
 
-void FormantFilter::filterout(REALTYPE *smp)
+void FormantFilter::filterout(float *smp)
 {
-    REALTYPE *inbuffer = getTmpBuffer();
+    float *inbuffer = getTmpBuffer();
 
-    memcpy(inbuffer, smp, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
-    memset(smp, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+    memcpy(inbuffer, smp, sizeof(float) * SOUND_BUFFER_SIZE);
+    memset(smp, 0, sizeof(float) * SOUND_BUFFER_SIZE);
 
     for(int j = 0; j < numformants; j++) {
-        REALTYPE *tmpbuf = getTmpBuffer();
+        float *tmpbuf = getTmpBuffer();
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
             tmpbuf[i] = inbuffer[i] * outgain;
         formant[j]->filterout(tmpbuf);

@@ -46,8 +46,8 @@ dbvalue=dbvalue_;
 oldx=-1;
 khzval=-1;} {}
   }
-  Function {draw_freq_line(REALTYPE freq,int type)} {} {
-    code {REALTYPE freqx=respar->getfreqpos(freq);
+  Function {draw_freq_line(float freq,int type)} {} {
+    code {float freqx=respar->getfreqpos(freq);
 switch(type){
   case 0:fl_line_style(FL_SOLID);break;
   case 1:fl_line_style(FL_DOT);break;
@@ -61,7 +61,7 @@ if ((freqx>0.0)&&(freqx<1.0))
   }
   Function {draw()} {} {
     code {int ox=x(),oy=y(),lx=w(),ly=h(),i,ix,iy,oiy;
-REALTYPE freqx;
+float freqx;
 
 fl_color(FL_BLACK);
 fl_rectf(ox,oy,lx,ly);
@@ -98,7 +98,7 @@ draw_freq_line(20000.0,1);
 fl_line_style(FL_DOT);
 int GY=10;if (ly<GY*3) GY=-1;
 for (i=1;i<GY;i++){
-   int tmp=(int)(ly/(REALTYPE)GY*i);
+   int tmp=(int)(ly/(float)GY*i);
    fl_line(ox+2,oy+tmp,ox+lx-2,oy+tmp);
 };
 
@@ -146,7 +146,7 @@ if ((event==FL_PUSH)||(event==FL_DRAG)){
     };
    for (int i=0;i<x2-x1;i++){
       int sn=(int)((i+x1)*1.0/w()*N_RES_POINTS);
-      REALTYPE yy=(y2-y1)*1.0/(x2-x1)*i;
+      float yy=(y2-y1)*1.0/(x2-x1)*i;
       int sp=127-(int)((y1+yy)/h()*127);
       if (leftbutton!=0) respar->setpoint(sn,sp);
          else respar->setpoint(sn,64);
@@ -179,7 +179,7 @@ this->applybutton=applybutton;} {}
   decl {Fl_Value_Output *dbvalue;} {}
   decl {Resonance *respar;} {}
   decl {int oldx,oldy;} {}
-  decl {REALTYPE khzval;} {public
+  decl {float khzval;} {public
   }
   decl {Fl_Widget *cbwidget,*applybutton;} {}
 } 

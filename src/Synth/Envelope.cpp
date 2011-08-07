@@ -24,7 +24,7 @@
 #include "Envelope.h"
 #include "../Params/EnvelopeParams.h"
 
-Envelope::Envelope(EnvelopeParams *envpars, REALTYPE basefreq)
+Envelope::Envelope(EnvelopeParams *envpars, float basefreq)
 {
     int i;
     envpoints      = envpars->Penvpoints;
@@ -38,7 +38,7 @@ Envelope::Envelope(EnvelopeParams *envpars, REALTYPE basefreq)
     if(envpars->Pfreemode == 0)
         envpars->converttofree();
 
-    REALTYPE bufferdt = SOUND_BUFFER_SIZE / (REALTYPE)SAMPLE_RATE;
+    float bufferdt = SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
 
     int mode = envpars->Envmode;
 
@@ -49,7 +49,7 @@ Envelope::Envelope(EnvelopeParams *envpars, REALTYPE basefreq)
         mode = 1;                              //change to linear
 
     for(i = 0; i < MAX_ENVELOPE_POINTS; i++) {
-        REALTYPE tmp = envpars->getdt(i) / 1000.0 * envstretch;
+        float tmp = envpars->getdt(i) / 1000.0 * envstretch;
         if(tmp > bufferdt)
             envdt[i] = bufferdt / tmp;
         else
@@ -106,9 +106,9 @@ void Envelope::relasekey()
 /*
  * Envelope Output
  */
-REALTYPE Envelope::envout()
+float Envelope::envout()
 {
-    REALTYPE out;
+    float out;
 
     if(envfinish) { //if the envelope is finished
         envoutval = envval[envpoints - 1];
@@ -161,15 +161,15 @@ REALTYPE Envelope::envout()
 /*
  * Envelope Output (dB)
  */
-REALTYPE Envelope::envout_dB()
+float Envelope::envout_dB()
 {
-    REALTYPE out;
+    float out;
     if(linearenvelope != 0)
         return envout();
 
     if((currentpoint == 1) && (!keyreleased || (forcedrelase == 0))) { //first point is always lineary interpolated
-        REALTYPE v1 = dB2rap(envval[0]);
-        REALTYPE v2 = dB2rap(envval[1]);
+        float v1 = dB2rap(envval[0]);
+        float v2 = dB2rap(envval[1]);
         out = v1 + (v2 - v1) * t;
 
         t  += inct;

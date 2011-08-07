@@ -39,15 +39,15 @@ int SOUND_BUFFER_SIZE = 256;
 int OSCIL_SIZE  = 1024;
 
 Config    config;
-REALTYPE *denormalkillbuf;
+float *denormalkillbuf;
 
 
 /*
  * Transform the velocity according the scaling parameter (velocity sensing)
  */
-REALTYPE VelF(REALTYPE velocity, unsigned char scaling)
+float VelF(float velocity, unsigned char scaling)
 {
-    REALTYPE x;
+    float x;
     x = pow(VELOCITY_MAX_SCALE, (64.0 - scaling) / 64.0);
     if((scaling == 127) || (velocity > 0.99))
         return 1.0;
@@ -58,11 +58,11 @@ REALTYPE VelF(REALTYPE velocity, unsigned char scaling)
 /*
  * Get the detune in cents
  */
-REALTYPE getdetune(unsigned char type,
+float getdetune(unsigned char type,
                    unsigned short int coarsedetune,
                    unsigned short int finedetune)
 {
-    REALTYPE det = 0.0, octdet = 0.0, cdet = 0.0, findet = 0.0;
+    float det = 0.0, octdet = 0.0, cdet = 0.0, findet = 0.0;
     //Get Octave
     int octave   = coarsedetune / 1024;
     if(octave >= 8)
@@ -141,16 +141,16 @@ std::string legalizeFilename(std::string filename)
     return filename;
 }
 
-void invSignal(REALTYPE *sig, size_t len)
+void invSignal(float *sig, size_t len)
 {
     for(size_t i = 0; i < len; i++)
         sig[i] *= -1.0f;
 }
 
-void crossover(REALTYPE &a, REALTYPE &b, REALTYPE crossover)
+void crossover(float &a, float &b, float crossover)
 {
-    REALTYPE tmpa = a;
-    REALTYPE tmpb = b;
+    float tmpa = a;
+    float tmpb = b;
     a = tmpa * (1.0 - crossover) + tmpb * crossover;
     b = tmpb * (1.0 - crossover) + tmpa * crossover;
 }
@@ -160,14 +160,14 @@ void crossover(REALTYPE &a, REALTYPE &b, REALTYPE crossover)
 
 struct pool_entry{
     bool free;
-    REALTYPE *dat;
+    float *dat;
 };
 typedef std::vector<pool_entry> pool_t;
 typedef pool_t::iterator pool_itr_t;
 
 pool_t pool;
 
-REALTYPE *getTmpBuffer()
+float *getTmpBuffer()
 {
     for(pool_itr_t itr = pool.begin(); itr != pool.end(); ++itr) {
         if(itr->free) { //Use Pool
@@ -177,13 +177,13 @@ REALTYPE *getTmpBuffer()
     }
     pool_entry p; //Extend Pool
     p.free = false;
-    p.dat = new REALTYPE[SOUND_BUFFER_SIZE];
+    p.dat = new float[SOUND_BUFFER_SIZE];
     pool.push_back(p);
 
     return p.dat;
 }
 
-void returnTmpBuffer(REALTYPE *buf)
+void returnTmpBuffer(float *buf)
 {
     for(pool_itr_t itr = pool.begin(); itr != pool.end(); ++itr) {
         if(itr->dat == buf) { //Return to Pool

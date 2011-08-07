@@ -23,14 +23,14 @@
 #include "Effect.h"
 #include "../Params/FilterParams.h"
 
-Effect::Effect(bool insertion_, REALTYPE *const efxoutl_,
-               REALTYPE *const efxoutr_, FilterParams *filterpars_,
+Effect::Effect(bool insertion_, float *const efxoutl_,
+               float *const efxoutr_, FilterParams *filterpars_,
                const unsigned char &Ppreset_)
     :Ppreset(Ppreset_), efxoutl(efxoutl_), efxoutr(efxoutr_),
       filterpars(filterpars_), insertion(insertion_) 
 {}
 
-void Effect::out(REALTYPE *const smpsl, REALTYPE *const smpsr)
+void Effect::out(float *const smpsl, float *const smpsr)
 {
     out(Stereo<float *>(smpsl,smpsr));
 };

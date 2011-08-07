@@ -92,7 +92,7 @@ void Controller::resetall()
 void Controller::setpitchwheel(int value)
 {
     pitchwheel.data = value;
-    REALTYPE cents = value / 8192.0;
+    float cents = value / 8192.0;
     cents *= pitchwheel.bendrange;
     pitchwheel.relfreq = pow(2, cents / 1200.0);
     //fprintf(stderr,"%ld %ld -> %.3f\n",pitchwheel.bendrange,pitchwheel.data,pitchwheel.relfreq);fflush(stderr);
@@ -135,7 +135,7 @@ void Controller::setbandwidth(int value)
 {
     bandwidth.data = value;
     if(bandwidth.exponential == 0) {
-        REALTYPE tmp = pow(25.0, pow(bandwidth.depth / 127.0, 1.5)) - 1.0;
+        float tmp = pow(25.0, pow(bandwidth.depth / 127.0, 1.5)) - 1.0;
         if((value < 64) && (bandwidth.depth >= 64))
             tmp = 1.0;
         bandwidth.relbw = (value / 64.0 - 1.0) * tmp + 1.0;
@@ -152,7 +152,7 @@ void Controller::setmodwheel(int value)
 {
     modwheel.data = value;
     if(modwheel.exponential == 0) {
-        REALTYPE tmp = pow(25.0, pow(modwheel.depth / 127.0, 1.5) * 2.0) / 25.0;
+        float tmp = pow(25.0, pow(modwheel.depth / 127.0, 1.5) * 2.0) / 25.0;
         if((value < 64) && (modwheel.depth >= 64))
             tmp = 1.0;
         modwheel.relmod = (value / 64.0 - 1.0) * tmp + 1.0;
@@ -199,8 +199,8 @@ void Controller::setportamento(int value)
         portamento.portamento = ((value < 64) ? 0 : 1);
 }
 
-int Controller::initportamento(REALTYPE oldfreq,
-                               REALTYPE newfreq,
+int Controller::initportamento(float oldfreq,
+                               float newfreq,
                                bool legatoflag)
 {
     portamento.x = 0.0;
@@ -214,7 +214,7 @@ int Controller::initportamento(REALTYPE oldfreq,
         return 0;
     ;
 
-    REALTYPE portamentotime = pow(100.0, portamento.time / 127.0) / 50.0; //portamento time in seconds
+    float portamentotime = pow(100.0, portamento.time / 127.0) / 50.0; //portamento time in seconds
 
     if(portamento.proportional) {
         //If there is a min(float,float) and a max(float,float) then they
@@ -246,11 +246,11 @@ int Controller::initportamento(REALTYPE oldfreq,
     portamento.dx = SOUND_BUFFER_SIZE / (portamentotime * SAMPLE_RATE);
     portamento.origfreqrap = oldfreq / newfreq;
 
-    REALTYPE tmprap = ((portamento.origfreqrap > 1.0) ?
+    float tmprap = ((portamento.origfreqrap > 1.0) ?
                        (portamento.origfreqrap) :
                        (1.0 / portamento.origfreqrap));
 
-    REALTYPE thresholdrap = pow(2.0, portamento.pitchthresh / 12.0);
+    float thresholdrap = pow(2.0, portamento.pitchthresh / 12.0);
     if((portamento.pitchthreshtype == 0) && (tmprap - 0.00001 > thresholdrap))
         return 0;
     if((portamento.pitchthreshtype == 1) && (tmprap + 0.00001 < thresholdrap))

@@ -31,7 +31,7 @@
 class DynamicFilter:public Effect
 {
     public:
-        DynamicFilter(int insetion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_);
+        DynamicFilter(int insetion_, float *efxoutl_, float *efxoutr_);
         ~DynamicFilter();
         void out(const Stereo<float *> &smp);
 
@@ -59,11 +59,11 @@ class DynamicFilter:public Effect
         void reinitfilter();
 
         //Internal Values
-        REALTYPE panning, depth, ampsns, ampsmooth;
+        float panning, depth, ampsns, ampsmooth;
 
         Filter *filterl, *filterr;
 
-        REALTYPE ms1, ms2, ms3, ms4; //mean squares
+        float ms1, ms2, ms3, ms4; //mean squares
 };
 
 #endif

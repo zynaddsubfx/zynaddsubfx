@@ -20,7 +20,7 @@ class Pad {: {public Fl_Box}
   }
   Function {temp_draw()} {} {
     code {/*int ox=x(),oy=y(),lx=w(),ly=h(),i,ix,iy,oiy;
-REALTYPE freqx;
+float freqx;
 
 fl_color(FL_BLACK);
 fl_rectf(ox,oy,lx,ly);

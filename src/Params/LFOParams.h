@@ -45,7 +45,7 @@ class LFOParams:public Presets
         void getfromXML(XMLwrapper *xml);
 
         /*  MIDI Parameters*/
-        REALTYPE      Pfreq; /**<frequency*/
+        float      Pfreq; /**<frequency*/
         unsigned char Pintensity; /**<intensity*/
         unsigned char Pstartphase; /**<start phase (0=random)*/
         unsigned char PLFOtype; /**<LFO type (sin,triangle,square,ramp,...)*/

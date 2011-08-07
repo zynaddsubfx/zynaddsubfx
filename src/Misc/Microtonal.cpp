@@ -95,7 +95,7 @@ unsigned char Microtonal::getoctavesize() const
 /*
  * Get the frequency according the note number
  */
-REALTYPE Microtonal::getnotefreq(int note, int keyshift) const
+float Microtonal::getnotefreq(int note, int keyshift) const
 {
     // in this function will appears many times things like this:
     // var=(a+b*100)%b
@@ -106,7 +106,7 @@ REALTYPE Microtonal::getnotefreq(int note, int keyshift) const
         note = (int) Pinvertupdowncenter * 2 - note;
 
     //compute global fine detune
-    REALTYPE globalfinedetunerap = pow(2.0, (Pglobalfinedetune - 64.0) / 1200.0); //-64.0 .. 63.0 cents
+    float globalfinedetunerap = pow(2.0, (Pglobalfinedetune - 64.0) / 1200.0); //-64.0 .. 63.0 cents
 
     if(Penabled == 0)
         return pow(2.0,
@@ -117,7 +117,7 @@ REALTYPE Microtonal::getnotefreq(int note, int keyshift) const
         ((int)Pscaleshift - 64 + (int) octavesize * 100) % octavesize;
 
     //compute the keyshift
-    REALTYPE rap_keyshift = 1.0;
+    float rap_keyshift = 1.0;
     if(keyshift != 0) {
         int kskey = (keyshift + (int)octavesize * 100) % octavesize;
         int ksoct = (keyshift + (int)octavesize * 100) / octavesize - 100;
@@ -140,7 +140,7 @@ REALTYPE Microtonal::getnotefreq(int note, int keyshift) const
         for(int i = 0; i < tmp; i++)
             if(Pmapping[i % Pmapsize] >= 0)
                 deltanote++;
-        REALTYPE rap_anote_middlenote =
+        float rap_anote_middlenote =
             (deltanote ==
              0) ? (1.0) : (octave[(deltanote - 1) % octavesize].tuning);
         if(deltanote != 0)
@@ -169,7 +169,7 @@ REALTYPE Microtonal::getnotefreq(int note, int keyshift) const
         degoct += degkey / octavesize;
         degkey %= octavesize;
 
-        REALTYPE freq = (degkey == 0) ? (1.0) : octave[degkey - 1].tuning;
+        float freq = (degkey == 0) ? (1.0) : octave[degkey - 1].tuning;
         freq *= pow(octave[octavesize - 1].tuning, degoct);
         freq *= PAfreq / rap_anote_middlenote;
         freq *= globalfinedetunerap;
@@ -182,8 +182,8 @@ REALTYPE Microtonal::getnotefreq(int note, int keyshift) const
         int ntkey     = (nt + (int)octavesize * 100) % octavesize;
         int ntoct     = (nt - ntkey) / octavesize;
 
-        REALTYPE oct  = octave[octavesize - 1].tuning;
-        REALTYPE freq =
+        float oct  = octave[octavesize - 1].tuning;
+        float freq =
             octave[(ntkey + octavesize - 1) % octavesize].tuning *pow(oct,
                                                                       ntoct)
             * PAfreq;
@@ -255,7 +255,7 @@ bool Microtonal::operator!=(const Microtonal &micro) const
 int Microtonal::linetotunings(unsigned int nline, const char *line)
 {
     int      x1 = -1, x2 = -1, type = -1;
-    REALTYPE x  = -1.0, tmp, tuning = 1.0;
+    float x  = -1.0, tmp, tuning = 1.0;
     if(strstr(line, "/") == NULL) {
         if(strstr(line, ".") == NULL) { // M case (M=M/1)
             sscanf(line, "%d", &x1);
@@ -285,7 +285,7 @@ int Microtonal::linetotunings(unsigned int nline, const char *line)
     if((type == 2)
        && ((x1 > (128 * 128 * 128 - 1)) || (x2 > (128 * 128 * 128 - 1)))) {
         type = 1;
-        x    = ((REALTYPE) x1) / x2;
+        x    = ((float) x1) / x2;
     }
     switch(type) {
     case 1:
@@ -295,7 +295,7 @@ int Microtonal::linetotunings(unsigned int nline, const char *line)
         tuning = pow(2.0, x / 1200.0);
         break;
     case 2:
-        x      = ((REALTYPE)x1) / x2;
+        x      = ((float)x1) / x2;
         tuning = x;
         break;
     }
@@ -514,7 +514,7 @@ int Microtonal::loadkbm(const char *filename)
     //loads the reference freq.
     if(loadline(file, &tmp[0]) != 0)
         return 2;
-    REALTYPE tmpPAfreq = 440.0;
+    float tmpPAfreq = 440.0;
     if(sscanf(&tmp[0], "%f", &tmpPAfreq) == 0)
         return 2;
     PAfreq = tmpPAfreq;

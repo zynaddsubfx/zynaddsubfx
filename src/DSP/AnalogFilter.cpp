@@ -29,8 +29,8 @@
 #include "AnalogFilter.h"
 
 AnalogFilter::AnalogFilter(unsigned char Ftype,
-                           REALTYPE Ffreq,
-                           REALTYPE Fq,
+                           float Ffreq,
+                           float Fq,
                            unsigned char Fstages)
 {
     stages = Fstages;
@@ -73,11 +73,11 @@ void AnalogFilter::cleanup()
 
 void AnalogFilter::computefiltercoefs()
 {
-    REALTYPE tmp;
+    float tmp;
     bool     zerocoefs = false; //this is used if the freq is too high
 
     //do not allow frequencies bigger than samplerate/2
-    REALTYPE freq = this->freq;
+    float freq = this->freq;
     if(freq > (SAMPLE_RATE / 2 - 500.0)) {
         freq      = SAMPLE_RATE / 2 - 500.0;
         zerocoefs = true;
@@ -87,7 +87,7 @@ void AnalogFilter::computefiltercoefs()
     //do not allow bogus Q
     if(q < 0.0)
         q = 0.0;
-    REALTYPE tmpq, tmpgain;
+    float tmpq, tmpgain;
     if(stages == 0) {
         tmpq    = q;
         tmpgain = gain;
@@ -98,13 +98,13 @@ void AnalogFilter::computefiltercoefs()
     }
 
     //Alias Terms
-    REALTYPE *c = coeff.c;
-    REALTYPE *d = coeff.d;
+    float *c = coeff.c;
+    float *d = coeff.d;
 
     //General Constants
-    const REALTYPE omega = 2 * PI * freq / SAMPLE_RATE;
-    const REALTYPE sn = sin(omega), cs = cos(omega);
-    REALTYPE alpha, beta;
+    const float omega = 2 * PI * freq / SAMPLE_RATE;
+    const float sn = sin(omega), cs = cos(omega);
+    float alpha, beta;
 
     //most of theese are implementations of
     //the "Cookbook formulae for audio EQ" by Robert Bristow-Johnson
@@ -297,11 +297,11 @@ void AnalogFilter::computefiltercoefs()
 }
 
 
-void AnalogFilter::setfreq(REALTYPE frequency)
+void AnalogFilter::setfreq(float frequency)
 {
     if(frequency < 0.1)
         frequency = 0.1;
-    REALTYPE rap = freq / frequency;
+    float rap = freq / frequency;
     if(rap < 1.0)
         rap = 1.0 / rap;
 
@@ -324,13 +324,13 @@ void AnalogFilter::setfreq(REALTYPE frequency)
     firsttime = false;
 }
 
-void AnalogFilter::setfreq_and_q(REALTYPE frequency, REALTYPE q_)
+void AnalogFilter::setfreq_and_q(float frequency, float q_)
 {
     q = q_;
     setfreq(frequency);
 }
 
-void AnalogFilter::setq(REALTYPE q_)
+void AnalogFilter::setq(float q_)
 {
     q = q_;
     computefiltercoefs();
@@ -342,7 +342,7 @@ void AnalogFilter::settype(int type_)
     computefiltercoefs();
 }
 
-void AnalogFilter::setgain(REALTYPE dBgain)
+void AnalogFilter::setgain(float dBgain)
 {
     gain = dB2rap(dBgain);
     computefiltercoefs();
@@ -357,12 +357,12 @@ void AnalogFilter::setstages(int stages_)
     computefiltercoefs();
 }
 
-void AnalogFilter::singlefilterout(REALTYPE *smp, fstage &hist,
+void AnalogFilter::singlefilterout(float *smp, fstage &hist,
                                    const Coeff &coeff)
 {
     if(order == 1) { //First order filter
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            REALTYPE y0 =    smp[i]*coeff.c[0] + hist.x1*coeff.c[1]
+            float y0 =    smp[i]*coeff.c[0] + hist.x1*coeff.c[1]
                           + hist.y1*coeff.d[1];
             hist.y1 = y0;
             hist.x1 = smp[i];
@@ -371,7 +371,7 @@ void AnalogFilter::singlefilterout(REALTYPE *smp, fstage &hist,
     }
     if(order == 2) { //Second order filter
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            REALTYPE y0 =    smp[i]*coeff.c[0] + hist.x1*coeff.c[1]
+            float y0 =    smp[i]*coeff.c[0] + hist.x1*coeff.c[1]
                           + hist.x2*coeff.c[2] + hist.y1*coeff.d[1]
                           + hist.y2*coeff.d[2];
             hist.y2 = hist.y1;
@@ -382,21 +382,21 @@ void AnalogFilter::singlefilterout(REALTYPE *smp, fstage &hist,
         }
     }
 }
-void AnalogFilter::filterout(REALTYPE *smp)
+void AnalogFilter::filterout(float *smp)
 {
     for(int i = 0; i < stages + 1; i++)
         singlefilterout(smp, history[i], coeff);
 
     if(needsinterpolation) {
         //Merge Filter at old coeff with new coeff
-        REALTYPE *ismp = getTmpBuffer();
-        memcpy(ismp, smp, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+        float *ismp = getTmpBuffer();
+        memcpy(ismp, smp, sizeof(float) * SOUND_BUFFER_SIZE);
 
         for(int i = 0; i < stages + 1; i++)
             singlefilterout(ismp, oldHistory[i], oldCoeff);
 
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            REALTYPE x = i / (REALTYPE) SOUND_BUFFER_SIZE;
+            float x = i / (float) SOUND_BUFFER_SIZE;
             smp[i] = ismp[i] * (1.0 - x) + smp[i] * x;
         }
         returnTmpBuffer(ismp);
@@ -407,15 +407,15 @@ void AnalogFilter::filterout(REALTYPE *smp)
         smp[i] *= outgain;
 }
 
-REALTYPE AnalogFilter::H(REALTYPE freq)
+float AnalogFilter::H(float freq)
 {
-    REALTYPE fr = freq / SAMPLE_RATE * PI * 2.0;
-    REALTYPE x  = coeff.c[0], y = 0.0;
+    float fr = freq / SAMPLE_RATE * PI * 2.0;
+    float x  = coeff.c[0], y = 0.0;
     for(int n = 1; n < 3; n++) {
         x += cos(n * fr) * coeff.c[n];
         y -= sin(n * fr) * coeff.c[n];
     }
-    REALTYPE h = x * x + y * y;
+    float h = x * x + y * y;
     x = 1.0;
     y = 0.0;
     for(int n = 1; n < 3; n++) {

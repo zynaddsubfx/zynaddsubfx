@@ -94,7 +94,7 @@ int PaEngine::PAprocess(const void *inputBuffer, void *outputBuffer,
 int PaEngine::process(float *out, unsigned long framesPerBuffer)
 {
 
-    const Stereo<REALTYPE *> smp = getNext();
+    const Stereo<float *> smp = getNext();
 
     //if(framesPerBuffer != smp.l.size())
     //    cerr << "Bug: PaEngine::process  SOUND_BUFFER_SIZE!=framesPerBuffer"

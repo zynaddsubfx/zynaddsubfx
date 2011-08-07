@@ -52,8 +52,8 @@ EffectLFO::~EffectLFO()
  */
 void EffectLFO::updateparams()
 {
-    REALTYPE lfofreq = (pow(2, Pfreq / 127.0 * 10.0) - 1.0) * 0.03;
-    incx = fabs(lfofreq) * (REALTYPE)SOUND_BUFFER_SIZE / (REALTYPE)SAMPLE_RATE;
+    float lfofreq = (pow(2, Pfreq / 127.0 * 10.0) - 1.0) * 0.03;
+    incx = fabs(lfofreq) * (float)SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
     if(incx > 0.49999999)
         incx = 0.499999999;                //Limit the Frequency
 
@@ -75,9 +75,9 @@ void EffectLFO::updateparams()
 /*
  * Compute the shape of the LFO
  */
-REALTYPE EffectLFO::getlfoshape(REALTYPE x)
+float EffectLFO::getlfoshape(float x)
 {
-    REALTYPE out;
+    float out;
     switch(lfotype) {
     case 1: //EffectLFO_TRIANGLE
         if((x > 0.0) && (x < 0.25))
@@ -98,9 +98,9 @@ REALTYPE EffectLFO::getlfoshape(REALTYPE x)
 /*
  * LFO output
  */
-void EffectLFO::effectlfoout(REALTYPE *outl, REALTYPE *outr)
+void EffectLFO::effectlfoout(float *outl, float *outr)
 {
-    REALTYPE out;
+    float out;
 
     out = getlfoshape(xl);
     if((lfotype == 0) || (lfotype == 1))

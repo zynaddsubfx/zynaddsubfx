@@ -220,9 +220,9 @@ void ADnoteVoiceParam::enable(FFTwrapper *fft, Resonance *Reson)
 /*
  * Get the Multiplier of the fine detunes of the voices
  */
-REALTYPE ADnoteParameters::getBandwidthDetuneMultiplier()
+float ADnoteParameters::getBandwidthDetuneMultiplier()
 {
-    REALTYPE bw = (GlobalPar.PBandwidth - 64.0) / 64.0;
+    float bw = (GlobalPar.PBandwidth - 64.0) / 64.0;
     bw = pow(2.0, bw * pow(fabs(bw), 0.2) * 5.0);
 
     return bw;
@@ -232,8 +232,8 @@ REALTYPE ADnoteParameters::getBandwidthDetuneMultiplier()
  * Get the unison spread in cents for a voice
  */
 
-REALTYPE ADnoteParameters::getUnisonFrequencySpreadCents(int nvoice) {
-    REALTYPE unison_spread = VoicePar[nvoice].Unison_frequency_spread / 127.0;
+float ADnoteParameters::getUnisonFrequencySpreadCents(int nvoice) {
+    float unison_spread = VoicePar[nvoice].Unison_frequency_spread / 127.0;
     unison_spread = pow(unison_spread * 2.0, 2.0) * 50.0; //cents
     return unison_spread;
 }

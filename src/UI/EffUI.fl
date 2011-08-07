@@ -47,9 +47,9 @@ maxdB=30;} {}
 oldx=-1;
 khzval=-1;} {}
   }
-  Function {draw_freq_line(REALTYPE freq,int type)} {} {
+  Function {draw_freq_line(float freq,int type)} {} {
     code {fl_color(FL_GRAY);
-REALTYPE freqx=getfreqpos(freq);
+float freqx=getfreqpos(freq);
 switch(type){
   case 0:if (active_r()) fl_color(FL_WHITE);
             else fl_color(205,205,205);
@@ -66,7 +66,7 @@ if ((freqx>0.0)&&(freqx<1.0))
   }
   Function {draw()} {} {
     code {int ox=x(),oy=y(),lx=w(),ly=h(),i,iy,oiy;
-REALTYPE freqx;
+float freqx;
 
 if (active_r()) fl_color(0,70,150);
        else fl_color(80,120,160);
@@ -107,7 +107,7 @@ draw_freq_line(20000.0,1);
 fl_line_style(FL_DOT);
 int GY=6;if (ly<GY*3) GY=-1;
 for (i=1;i<GY;i++){
-   int tmp=(int)(ly/(REALTYPE)GY*i);
+   int tmp=(int)(ly/(float)GY*i);
    fl_line(ox+2,oy+tmp,ox+lx-2,oy+tmp);
 };
 
@@ -118,7 +118,7 @@ if (active_r()) fl_color(FL_YELLOW);
 fl_line_style(FL_SOLID);
 oiy=getresponse(ly,getfreqx(0.0));
 for (i=1;i<lx;i++){
-   REALTYPE frq=getfreqx(i/(REALTYPE) lx);
+   float frq=getfreqx(i/(float) lx);
    if (frq>SAMPLE_RATE/2) break;
    iy=getresponse(ly,frq);
    if ((oiy>=0) && (oiy<ly) &&
@@ -127,9 +127,9 @@ for (i=1;i<lx;i++){
    oiy=iy;
 };} {}
   }
-  Function {getresponse(int maxy,REALTYPE freq)} {return_type int
+  Function {getresponse(int maxy,float freq)} {return_type int
   } {
-    code {REALTYPE dbresp=eff->getEQfreqresponse(freq);
+    code {float dbresp=eff->getEQfreqresponse(freq);
 int idbresp=(int) ((dbresp/maxdB+1.0)*maxy/2.0);
 
 
@@ -138,18 +138,18 @@ int idbresp=(int) ((dbresp/maxdB+1.0)*maxy/2.0);
 
 return(idbresp);} {}
   }
-  Function {getfreqx(REALTYPE x)} {return_type REALTYPE
+  Function {getfreqx(float x)} {return_type float
   } {
     code {if (x>1.0) x=1.0;
-return(20.0*pow((REALTYPE)1000.0,x));} {}
+return(20.0*pow((float)1000.0,x));} {}
   }
-  Function {getfreqpos(REALTYPE freq)} {return_type REALTYPE
+  Function {getfreqpos(float freq)} {return_type float
   } {
     code {if (freq<0.00001) freq=0.00001;
 return(log(freq/20.0)/log(1000.0));} {}
   }
   decl {int oldx,oldy;} {}
-  decl {REALTYPE khzval;} {public
+  decl {float khzval;} {public
   }
   decl {EffectMgr *eff;} {}
   decl {int maxdB;} {}

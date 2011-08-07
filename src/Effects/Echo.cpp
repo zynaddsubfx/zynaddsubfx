@@ -28,14 +28,14 @@
 #define MAX_DELAY 2
 
 Echo::Echo(const int &insertion_,
-           REALTYPE *const efxoutl_,
-           REALTYPE *const efxoutr_)
+           float *const efxoutl_,
+           float *const efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
       Pvolume(50), Ppanning(64), Pdelay(60),
       Plrdelay(100), Plrcross(100), Pfb(40), Phidamp(60),
       delayTime(1), lrdelay(0), avgDelay(0),
-      delay(new REALTYPE[(int)(MAX_DELAY * SAMPLE_RATE)],
-            new REALTYPE[(int)(MAX_DELAY * SAMPLE_RATE)]),
+      delay(new float[(int)(MAX_DELAY * SAMPLE_RATE)],
+            new float[(int)(MAX_DELAY * SAMPLE_RATE)]),
       old(0.0), pos(0), delta(1), ndelta(1)
 {
     initdelays();
@@ -53,9 +53,9 @@ Echo::~Echo()
  */
 void Echo::cleanup()
 {
-    memset(delay.l,0,MAX_DELAY*SAMPLE_RATE*sizeof(REALTYPE));
-    memset(delay.r,0,MAX_DELAY*SAMPLE_RATE*sizeof(REALTYPE));
-    old = Stereo<REALTYPE>(0.0);
+    memset(delay.l,0,MAX_DELAY*SAMPLE_RATE*sizeof(float));
+    memset(delay.r,0,MAX_DELAY*SAMPLE_RATE*sizeof(float));
+    old = Stereo<float>(0.0);
 }
 
 inline int max(int a, int b)
@@ -81,7 +81,7 @@ void Echo::initdelays()
 
 void Echo::out(const Stereo<float *> &input)
 {
-    REALTYPE ldl, rdl;
+    float ldl, rdl;
 
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         ldl = delay.l[pos.l];
@@ -147,7 +147,7 @@ void Echo::setdelay(unsigned char Pdelay)
 
 void Echo::setlrdelay(unsigned char Plrdelay)
 {
-    REALTYPE tmp;
+    float tmp;
     this->Plrdelay = Plrdelay;
     tmp =
         (pow(2, fabs(Plrdelay - 64.0) / 64.0 * 9) - 1.0) / 1000.0;

@@ -128,18 +128,18 @@ class Part
         } info;
 
 
-        REALTYPE *partoutl; //Left channel output of the part
-        REALTYPE *partoutr; //Right channel output of the part
+        float *partoutl; //Left channel output of the part
+        float *partoutr; //Right channel output of the part
 
-        REALTYPE *partfxinputl[NUM_PART_EFX + 1], //Left and right signal that pass thru part effects;
+        float *partfxinputl[NUM_PART_EFX + 1], //Left and right signal that pass thru part effects;
                  *partfxinputr[NUM_PART_EFX + 1]; //partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
 
         enum NoteStatus {
             KEY_OFF, KEY_PLAYING, KEY_RELASED_AND_SUSTAINED, KEY_RELASED
         };
 
-        REALTYPE volume, oldvolumel, oldvolumer; //this is applied by Master
-        REALTYPE panning; //this is applied by Master, too
+        float volume, oldvolumel, oldvolumer; //this is applied by Master
+        float panning; //this is applied by Master, too
 
         Controller ctl; //Part controllers
 
@@ -189,7 +189,7 @@ class Part
 
         PartNotes partnote[POLIPHONY];
 
-        REALTYPE    oldfreq; //this is used for portamento
+        float    oldfreq; //this is used for portamento
         Microtonal *microtonal;
         FFTwrapper *fft;
 };

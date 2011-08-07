@@ -29,37 +29,37 @@ class SVFilter:public Filter_
 {
     public:
         SVFilter(unsigned char Ftype,
-                 REALTYPE Ffreq,
-                 REALTYPE Fq,
+                 float Ffreq,
+                 float Fq,
                  unsigned char Fstages);
         ~SVFilter();
-        void filterout(REALTYPE *smp);
-        void setfreq(REALTYPE frequency);
-        void setfreq_and_q(REALTYPE frequency, REALTYPE q_);
-        void setq(REALTYPE q_);
+        void filterout(float *smp);
+        void setfreq(float frequency);
+        void setfreq_and_q(float frequency, float q_);
+        void setq(float q_);
 
         void settype(int type_);
-        void setgain(REALTYPE dBgain);
+        void setgain(float dBgain);
         void setstages(int stages_);
         void cleanup();
 
     private:
         struct fstage {
-            REALTYPE low, high, band, notch;
+            float low, high, band, notch;
         } st[MAX_FILTER_STAGES + 1];
 
         struct parameters {
-            REALTYPE f, q, q_sqrt;
+            float f, q, q_sqrt;
         } par, ipar;
 
 
-        void singlefilterout(REALTYPE *smp, fstage &x, parameters &par);
+        void singlefilterout(float *smp, fstage &x, parameters &par);
         void computefiltercoefs();
         int      type;   //The type of the filter (LPF1,HPF1,LPF2,HPF2...)
         int      stages; //how many times the filter is applied (0->1,1->2,etc.)
-        REALTYPE freq;   //Frequency given in Hz
-        REALTYPE q;      //Q factor (resonance or Q factor)
-        REALTYPE gain;   //the gain of the filter (if are shelf/peak) filters
+        float freq;   //Frequency given in Hz
+        float q;      //Q factor (resonance or Q factor)
+        float gain;   //the gain of the filter (if are shelf/peak) filters
 
         bool abovenq,   //if the frequency is above the nyquist
              oldabovenq;

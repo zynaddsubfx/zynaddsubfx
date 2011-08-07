@@ -189,7 +189,7 @@ void Master::setController(char chan, int type, int par)
     }
 }
 
-void Master::vuUpdate(const REALTYPE *outl, const REALTYPE *outr)
+void Master::vuUpdate(const float *outl, const float *outr)
 {
     //Peak computation (for vumeters)
     vu.outpeakl = 1e-12;
@@ -221,10 +221,10 @@ void Master::vuUpdate(const REALTYPE *outl, const REALTYPE *outr)
     for(int npart = 0; npart < NUM_MIDI_PARTS; npart++) {
         vuoutpeakpart[npart] = 1.0e-12;
         if(part[npart]->Penabled != 0) {
-            REALTYPE *outl = part[npart]->partoutl,
+            float *outl = part[npart]->partoutl,
                      *outr = part[npart]->partoutr;
             for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-                REALTYPE tmp = fabs(outl[i] + outr[i]);
+                float tmp = fabs(outl[i] + outr[i]);
                 if(tmp > vuoutpeakpart[npart])
                     vuoutpeakpart[npart] = tmp;
             }
@@ -262,15 +262,15 @@ void Master::partonoff(int npart, int what)
 /*
  * Master audio out (the final sound)
  */
-void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
+void Master::AudioOut(float *outl, float *outr)
 {
     //Swaps the Left channel with Right Channel
     if(swaplr)
         swap(outl,outr);
 
     //clean up the output samples (should not be needed?)
-    memset(outl, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
-    memset(outr, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+    memset(outl, 0, sizeof(float) * SOUND_BUFFER_SIZE);
+    memset(outr, 0, sizeof(float) * SOUND_BUFFER_SIZE);
 
     //Compute part samples and store them part[npart]->partoutl,partoutr
     for(int npart = 0; npart < NUM_MIDI_PARTS; npart++)
@@ -293,11 +293,11 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
         if(part[npart]->Penabled == 0)
             continue;
 
-        Stereo<REALTYPE> newvol(part[npart]->volume),
+        Stereo<float> newvol(part[npart]->volume),
                          oldvol(part[npart]->oldvolumel,
                                 part[npart]->oldvolumer);
 
-        REALTYPE pan      = part[npart]->panning;
+        float pan      = part[npart]->panning;
         if(pan < 0.5)
             newvol.l *= pan * 2.0;
         else
@@ -307,7 +307,7 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
         if(ABOVE_AMPLITUDE_THRESHOLD(oldvol.l, newvol.l)
            || ABOVE_AMPLITUDE_THRESHOLD(oldvol.r, newvol.r)) {
             for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-                Stereo<REALTYPE> vol(INTERPOLATE_AMPLITUDE(oldvol.l, newvol.l,
+                Stereo<float> vol(INTERPOLATE_AMPLITUDE(oldvol.l, newvol.l,
                                                        i, SOUND_BUFFER_SIZE),
                                      INTERPOLATE_AMPLITUDE(oldvol.r, newvol.r,
                                                        i, SOUND_BUFFER_SIZE));
@@ -331,11 +331,11 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
         if(sysefx[nefx]->geteffect() == 0)
             continue; //the effect is disabled
 
-        REALTYPE *tmpmixl = getTmpBuffer();
-        REALTYPE *tmpmixr = getTmpBuffer();
+        float *tmpmixl = getTmpBuffer();
+        float *tmpmixr = getTmpBuffer();
         //Clean up the samples used by the system effects
-        memset(tmpmixl, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
-        memset(tmpmixr, 0, sizeof(REALTYPE) * SOUND_BUFFER_SIZE);
+        memset(tmpmixl, 0, sizeof(float) * SOUND_BUFFER_SIZE);
+        memset(tmpmixr, 0, sizeof(float) * SOUND_BUFFER_SIZE);
 
         //Mix the channels according to the part settings about System Effect
         for(int npart = 0; npart < NUM_MIDI_PARTS; npart++) {
@@ -348,7 +348,7 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
                 continue;
 
             //the output volume of each part to system effect
-            const REALTYPE vol = sysefxvol[nefx][npart];
+            const float vol = sysefxvol[nefx][npart];
             for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
                 tmpmixl[i] += part[npart]->partoutl[i] * vol;
                 tmpmixr[i] += part[npart]->partoutr[i] * vol;
@@ -358,7 +358,7 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
         // system effect send to next ones
         for(int nefxfrom = 0; nefxfrom < nefx; nefxfrom++) {
             if(Psysefxsend[nefxfrom][nefx] != 0) {
-                const REALTYPE vol = sysefxsend[nefxfrom][nefx];
+                const float vol = sysefxsend[nefxfrom][nefx];
                 for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
                     tmpmixl[i] += sysefx[nefxfrom]->efxoutl[i] * vol;
                     tmpmixr[i] += sysefx[nefxfrom]->efxoutr[i] * vol;
@@ -369,7 +369,7 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
         sysefx[nefx]->out(tmpmixl, tmpmixr);
 
         //Add the System Effect to sound output
-        const REALTYPE outvol = sysefx[nefx]->sysefxgetvolume();
+        const float outvol = sysefx[nefx]->sysefxgetvolume();
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
             outl[i] += tmpmixl[i] * outvol;
             outr[i] += tmpmixr[i] * outvol;
@@ -409,8 +409,8 @@ void Master::AudioOut(REALTYPE *outl, REALTYPE *outr)
     //Shutup if it is asked (with fade-out)
     if(shutup) {
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            REALTYPE tmp =
-                (SOUND_BUFFER_SIZE - i) / (REALTYPE) SOUND_BUFFER_SIZE;
+            float tmp =
+                (SOUND_BUFFER_SIZE - i) / (float) SOUND_BUFFER_SIZE;
             outl[i] *= tmp;
             outr[i] *= tmp;
         }

@@ -24,8 +24,8 @@
 
 PADnote::PADnote(PADnoteParameters *parameters,
                  Controller *ctl_,
-                 REALTYPE freq,
-                 REALTYPE velocity,
+                 float freq,
+                 float velocity,
                  int portamento_,
                  int midinote,
                  bool besilent)
@@ -39,7 +39,7 @@ PADnote::PADnote(PADnoteParameters *parameters,
 }
 
 
-void PADnote::setup(REALTYPE freq, REALTYPE velocity,int portamento_, int midinote, bool legato)
+void PADnote::setup(float freq, float velocity,int portamento_, int midinote, bool legato)
 {
     portamento     = portamento_;
     this->velocity = velocity;
@@ -52,7 +52,7 @@ void PADnote::setup(REALTYPE freq, REALTYPE velocity,int portamento_, int midino
         basefreq = 440.0;
         int fixedfreqET = pars->PfixedfreqET;
         if(fixedfreqET != 0) { //if the frequency varies according the keyboard note
-            REALTYPE tmp =
+            float tmp =
                 (midinote
                  - 69.0) / 12.0 * (pow(2.0, (fixedfreqET - 1) / 63.0) - 1.0);
             if(fixedfreqET <= 64)
@@ -71,13 +71,13 @@ void PADnote::setup(REALTYPE freq, REALTYPE velocity,int portamento_, int midino
 
 
     //find out the closest note
-    REALTYPE logfreq = log(basefreq * pow(2.0, NoteGlobalPar.Detune / 1200.0));
-    REALTYPE mindist = fabs(logfreq - log(pars->sample[0].basefreq + 0.0001));
+    float logfreq = log(basefreq * pow(2.0, NoteGlobalPar.Detune / 1200.0));
+    float mindist = fabs(logfreq - log(pars->sample[0].basefreq + 0.0001));
     nsample = 0;
     for(int i = 1; i < PAD_MAX_SAMPLES; i++) {
         if(pars->sample[i].smp == NULL)
             break;
-        REALTYPE dist = fabs(logfreq - log(pars->sample[i].basefreq + 0.0001));
+        float dist = fabs(logfreq - log(pars->sample[i].basefreq + 0.0001));
 
         if(dist < mindist) {
             nsample = i;
@@ -120,8 +120,8 @@ void PADnote::setup(REALTYPE freq, REALTYPE velocity,int portamento_, int midino
                 ((pow(10, 1.5 * pars->PPunchStrength / 127.0) - 1.0)
                  * VelF(velocity,
                      pars->PPunchVelocitySensing));
-            REALTYPE time    = pow(10, 3.0 * pars->PPunchTime / 127.0) / 10000.0; //0.1 .. 100 ms
-            REALTYPE stretch = pow(440.0 / freq, pars->PPunchStretch / 64.0);
+            float time    = pow(10, 3.0 * pars->PPunchTime / 127.0) / 10000.0; //0.1 .. 100 ms
+            float stretch = pow(440.0 / freq, pars->PPunchStretch / 64.0);
             NoteGlobalPar.Punch.dt = 1.0 / (time * SAMPLE_RATE * stretch);
         }
         else
@@ -161,8 +161,8 @@ void PADnote::setup(REALTYPE freq, REALTYPE velocity,int portamento_, int midino
     }
 }
 
-void PADnote::legatonote(REALTYPE freq,
-                            REALTYPE velocity,
+void PADnote::legatonote(float freq,
+                            float velocity,
                             int portamento_,
                             int midinote,
                             bool externcall)
@@ -188,14 +188,14 @@ PADnote::~PADnote()
 }
 
 
-inline void PADnote::fadein(REALTYPE *smps)
+inline void PADnote::fadein(float *smps)
 {
     int zerocrossings = 0;
     for(int i = 1; i < SOUND_BUFFER_SIZE; i++)
         if((smps[i - 1] < 0.0) && (smps[i] > 0.0))
             zerocrossings++;                                  //this is only the possitive crossings
 
-    REALTYPE tmp = (SOUND_BUFFER_SIZE - 1.0) / (zerocrossings + 1) / 3.0;
+    float tmp = (SOUND_BUFFER_SIZE - 1.0) / (zerocrossings + 1) / 3.0;
     if(tmp < 8.0)
         tmp = 8.0;
 
@@ -204,7 +204,7 @@ inline void PADnote::fadein(REALTYPE *smps)
     if(n > SOUND_BUFFER_SIZE)
         n = SOUND_BUFFER_SIZE;
     for(int i = 0; i < n; i++) { //fade-in
-        REALTYPE tmp = 0.5 - cos((REALTYPE)i / (REALTYPE) n * PI) * 0.5;
+        float tmp = 0.5 - cos((float)i / (float) n * PI) * 0.5;
         smps[i] *= tmp;
     }
 }
@@ -212,7 +212,7 @@ inline void PADnote::fadein(REALTYPE *smps)
 
 void PADnote::computecurrentparameters()
 {
-    REALTYPE globalpitch, globalfilterpitch;
+    float globalpitch, globalfilterpitch;
     globalpitch = 0.01 * (NoteGlobalPar.FreqEnvelope->envout()
                           + NoteGlobalPar.FreqLfo->lfoout()
                           * ctl->modwheel.relmod + NoteGlobalPar.Detune);
@@ -225,17 +225,17 @@ void PADnote::computecurrentparameters()
                         + NoteGlobalPar.FilterLfo->lfoout()
                         + NoteGlobalPar.FilterCenterPitch;
 
-    REALTYPE tmpfilterfreq = globalfilterpitch + ctl->filtercutoff.relfreq
+    float tmpfilterfreq = globalfilterpitch + ctl->filtercutoff.relfreq
                              + NoteGlobalPar.FilterFreqTracking;
 
     tmpfilterfreq = NoteGlobalPar.GlobalFilterL->getrealfreq(tmpfilterfreq);
 
-    REALTYPE globalfilterq = NoteGlobalPar.FilterQ * ctl->filterq.relq;
+    float globalfilterq = NoteGlobalPar.FilterQ * ctl->filterq.relq;
     NoteGlobalPar.GlobalFilterL->setfreq_and_q(tmpfilterfreq, globalfilterq);
     NoteGlobalPar.GlobalFilterR->setfreq_and_q(tmpfilterfreq, globalfilterq);
 
     //compute the portamento, if it is used by this note
-    REALTYPE portamentofreqrap = 1.0;
+    float portamentofreqrap = 1.0;
     if(portamento != 0) { //this voice use portamento
         portamentofreqrap = ctl->portamento.freqrap;
         if(ctl->portamento.used == 0) //the portamento has finished
@@ -248,12 +248,12 @@ void PADnote::computecurrentparameters()
 }
 
 
-int PADnote::Compute_Linear(REALTYPE *outl,
-                            REALTYPE *outr,
+int PADnote::Compute_Linear(float *outl,
+                            float *outr,
                             int freqhi,
-                            REALTYPE freqlo)
+                            float freqlo)
 {
-    REALTYPE *smps = pars->sample[nsample].smp;
+    float *smps = pars->sample[nsample].smp;
     if(smps == NULL) {
         finished_ = true;
         return 1;
@@ -278,18 +278,18 @@ int PADnote::Compute_Linear(REALTYPE *outl,
     }
     return 1;
 }
-int PADnote::Compute_Cubic(REALTYPE *outl,
-                           REALTYPE *outr,
+int PADnote::Compute_Cubic(float *outl,
+                           float *outr,
                            int freqhi,
-                           REALTYPE freqlo)
+                           float freqlo)
 {
-    REALTYPE *smps = pars->sample[nsample].smp;
+    float *smps = pars->sample[nsample].smp;
     if(smps == NULL) {
         finished_ = true;
         return 1;
     }
     int      size = pars->sample[nsample].size;
-    REALTYPE xm1, x0, x1, x2, a, b, c;
+    float xm1, x0, x1, x2, a, b, c;
     for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
         poshi_l += freqhi;
         poshi_r += freqhi;
@@ -328,10 +328,10 @@ int PADnote::Compute_Cubic(REALTYPE *outl,
 }
 
 
-int PADnote::noteout(REALTYPE *outl, REALTYPE *outr)
+int PADnote::noteout(float *outl, float *outr)
 {
     computecurrentparameters();
-    REALTYPE *smps = pars->sample[nsample].smp;
+    float *smps = pars->sample[nsample].smp;
     if(smps == NULL) {
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
             outl[i] = 0.0;
@@ -339,12 +339,12 @@ int PADnote::noteout(REALTYPE *outl, REALTYPE *outr)
         }
         return 1;
     }
-    REALTYPE smpfreq = pars->sample[nsample].basefreq;
+    float smpfreq = pars->sample[nsample].basefreq;
 
 
-    REALTYPE freqrap = realfreq / smpfreq;
+    float freqrap = realfreq / smpfreq;
     int      freqhi  = (int) (floor(freqrap));
-    REALTYPE freqlo  = freqrap - floor(freqrap);
+    float freqlo  = freqrap - floor(freqrap);
 
 
     if(config.cfg.Interpolation)
@@ -365,7 +365,7 @@ int PADnote::noteout(REALTYPE *outl, REALTYPE *outr)
     //Apply the punch
     if(NoteGlobalPar.Punch.Enabled != 0) {
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            REALTYPE punchamp = NoteGlobalPar.Punch.initialvalue
+            float punchamp = NoteGlobalPar.Punch.initialvalue
                                 * NoteGlobalPar.Punch.t + 1.0;
             outl[i] *= punchamp;
             outr[i] *= punchamp;
@@ -380,7 +380,7 @@ int PADnote::noteout(REALTYPE *outl, REALTYPE *outr)
     if(ABOVE_AMPLITUDE_THRESHOLD(globaloldamplitude, globalnewamplitude)) {
         // Amplitude Interpolation
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            REALTYPE tmpvol = INTERPOLATE_AMPLITUDE(globaloldamplitude,
+            float tmpvol = INTERPOLATE_AMPLITUDE(globaloldamplitude,
                                                     globalnewamplitude,
                                                     i,
                                                     SOUND_BUFFER_SIZE);
@@ -403,7 +403,7 @@ int PADnote::noteout(REALTYPE *outl, REALTYPE *outr)
     // If it does, disable the note
     if(NoteGlobalPar.AmpEnvelope->finished() != 0) {
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++) { //fade-out
-            REALTYPE tmp = 1.0 - (REALTYPE)i / (REALTYPE)SOUND_BUFFER_SIZE;
+            float tmp = 1.0 - (float)i / (float)SOUND_BUFFER_SIZE;
             outl[i] *= tmp;
             outr[i] *= tmp;
         }

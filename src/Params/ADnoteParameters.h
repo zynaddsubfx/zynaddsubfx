@@ -298,8 +298,8 @@ class ADnoteParameters : public PresetsArray
         void add2XML(XMLwrapper *xml);
         void getfromXML(XMLwrapper *xml);
 
-        REALTYPE getBandwidthDetuneMultiplier();
-        REALTYPE getUnisonFrequencySpreadCents(int nvoice);
+        float getBandwidthDetuneMultiplier();
+        float getUnisonFrequencySpreadCents(int nvoice);
         int get_unison_size_index(int nvoice);
         void set_unison_size_index(int nvoice, int index);
     private:

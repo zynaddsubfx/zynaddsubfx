@@ -35,7 +35,7 @@ OscilGen::OscilGen(FFTwrapper *fft_, Resonance *res_):Presets()
     fft     = fft_;
     res     = res_;
 
-    tmpsmps = new REALTYPE[OSCIL_SIZE];
+    tmpsmps = new float[OSCIL_SIZE];
     newFFTFREQS(&outoscilFFTfreqs, OSCIL_SIZE / 2);
     newFFTFREQS(&oscilFFTfreqs, OSCIL_SIZE / 2);
     newFFTFREQS(&basefuncFFTfreqs, OSCIL_SIZE / 2);
@@ -132,8 +132,8 @@ void OscilGen::defaults()
 
 void OscilGen::convert2sine()
 {
-    REALTYPE mag[MAX_AD_HARMONICS], phase[MAX_AD_HARMONICS];
-    REALTYPE oscil[OSCIL_SIZE];
+    float mag[MAX_AD_HARMONICS], phase[MAX_AD_HARMONICS];
+    float oscil[OSCIL_SIZE];
     FFTFREQS freqs;
     newFFTFREQS(&freqs, OSCIL_SIZE / 2);
 
@@ -142,7 +142,7 @@ void OscilGen::convert2sine()
     fft->smps2freqs(oscil, freqs);
     delete (fft);
 
-    REALTYPE max = 0.0;
+    float max = 0.0;
 
     mag[0]   = 0;
     phase[0] = 0;
@@ -158,8 +158,8 @@ void OscilGen::convert2sine()
     defaults();
 
     for(int i = 0; i < MAX_AD_HARMONICS - 1; i++) {
-        REALTYPE newmag   = mag[i] / max;
-        REALTYPE newphase = phase[i];
+        float newmag   = mag[i] / max;
+        float newphase = phase[i];
 
         Phmag[i]   = (int) ((newmag) * 64.0) + 64;
 
@@ -177,14 +177,14 @@ void OscilGen::convert2sine()
 /*
  * Get the base function
  */
-void OscilGen::getbasefunction(REALTYPE *smps)
+void OscilGen::getbasefunction(float *smps)
 {
     int      i;
-    REALTYPE par = (Pbasefuncpar + 0.5) / 128.0;
+    float par = (Pbasefuncpar + 0.5) / 128.0;
     if(Pbasefuncpar == 64)
         par = 0.5;
 
-    REALTYPE basefuncmodulationpar1 = Pbasefuncmodulationpar1 / 127.0,
+    float basefuncmodulationpar1 = Pbasefuncmodulationpar1 / 127.0,
              basefuncmodulationpar2 = Pbasefuncmodulationpar2 / 127.0,
              basefuncmodulationpar3 = Pbasefuncmodulationpar3 / 127.0;
 
@@ -216,7 +216,7 @@ void OscilGen::getbasefunction(REALTYPE *smps)
     base_func func = getBaseFunction(Pcurrentbasefunc);
 
     for(i = 0; i < OSCIL_SIZE; i++) {
-        REALTYPE t = i * 1.0 / OSCIL_SIZE;
+        float t = i * 1.0 / OSCIL_SIZE;
 
         switch(Pbasefuncmodulation) {
         case 1:
@@ -253,17 +253,17 @@ void OscilGen::oscilfilter()
     if(Pfiltertype == 0)
         return;
 
-    const REALTYPE par  = 1.0 - Pfilterpar1 / 128.0;
-    const REALTYPE par2 = Pfilterpar2 / 127.0;
-    REALTYPE max  = 0.0;
+    const float par  = 1.0 - Pfilterpar1 / 128.0;
+    const float par2 = Pfilterpar2 / 127.0;
+    float max  = 0.0;
     filter_func filter = getFilter(Pfiltertype);
 
     for(int i = 1; i < OSCIL_SIZE / 2; i++) {
-        REALTYPE gain = filter(i,par,par2);
+        float gain = filter(i,par,par2);
 
         oscilFFTfreqs.s[i] *= gain;
         oscilFFTfreqs.c[i] *= gain;
-        REALTYPE magnitude = oscilFFTfreqs.s[i] * oscilFFTfreqs.s[i]
+        float magnitude = oscilFFTfreqs.s[i] * oscilFFTfreqs.s[i]
                            + oscilFFTfreqs.c[i] * oscilFFTfreqs.c[i];
         if(max < magnitude)
             max = magnitude;
@@ -273,7 +273,7 @@ void OscilGen::oscilfilter()
     max = sqrt(max);
     if(max < 1e-10)
         max = 1.0;
-    REALTYPE imax = 1.0 / max;
+    float imax = 1.0 / max;
 
     //Normalize signal
     for(int i = 1; i < OSCIL_SIZE / 2; i++) {
@@ -324,14 +324,14 @@ void OscilGen::waveshape()
     oscilFFTfreqs.c[0] = 0.0; //remove the DC
     //reduce the amplitude of the freqs near the nyquist
     for(i = 1; i < OSCIL_SIZE / 8; i++) {
-        REALTYPE tmp = i / (OSCIL_SIZE / 8.0);
+        float tmp = i / (OSCIL_SIZE / 8.0);
         oscilFFTfreqs.s[OSCIL_SIZE / 2 - i] *= tmp;
         oscilFFTfreqs.c[OSCIL_SIZE / 2 - i] *= tmp;
     }
     fft->freqs2smps(oscilFFTfreqs, tmpsmps);
 
     //Normalize
-    REALTYPE max = 0.0;
+    float max = 0.0;
     for(i = 0; i < OSCIL_SIZE; i++)
         if(max < fabs(tmpsmps[i]))
             max = fabs(tmpsmps[i]);
@@ -363,7 +363,7 @@ void OscilGen::modulation()
         return;
 
 
-    REALTYPE modulationpar1 = Pmodulationpar1 / 127.0,
+    float modulationpar1 = Pmodulationpar1 / 127.0,
              modulationpar2 = 0.5 - Pmodulationpar2 / 127.0,
              modulationpar3 = Pmodulationpar3 / 127.0;
 
@@ -387,16 +387,16 @@ void OscilGen::modulation()
     oscilFFTfreqs.c[0] = 0.0; //remove the DC
     //reduce the amplitude of the freqs near the nyquist
     for(i = 1; i < OSCIL_SIZE / 8; i++) {
-        REALTYPE tmp = i / (OSCIL_SIZE / 8.0);
+        float tmp = i / (OSCIL_SIZE / 8.0);
         oscilFFTfreqs.s[OSCIL_SIZE / 2 - i] *= tmp;
         oscilFFTfreqs.c[OSCIL_SIZE / 2 - i] *= tmp;
     }
     fft->freqs2smps(oscilFFTfreqs, tmpsmps);
     int extra_points = 2;
-    REALTYPE *in     = new REALTYPE[OSCIL_SIZE + extra_points];
+    float *in     = new float[OSCIL_SIZE + extra_points];
 
     //Normalize
-    REALTYPE max = 0.0;
+    float max = 0.0;
     for(i = 0; i < OSCIL_SIZE; i++)
         if(max < fabs(tmpsmps[i]))
             max = fabs(tmpsmps[i]);
@@ -410,7 +410,7 @@ void OscilGen::modulation()
 
     //Do the modulation
     for(i = 0; i < OSCIL_SIZE; i++) {
-        REALTYPE t = i * 1.0 / OSCIL_SIZE;
+        float t = i * 1.0 / OSCIL_SIZE;
 
         switch(Pmodulation) {
         case 1:
@@ -432,7 +432,7 @@ void OscilGen::modulation()
         t = (t - floor(t)) * OSCIL_SIZE;
 
         int      poshi = (int) t;
-        REALTYPE poslo = t - floor(t);
+        float poslo = t - floor(t);
 
         tmpsmps[i] = in[poshi] * (1.0 - poslo) + in[poshi + 1] * poslo;
     }
@@ -450,7 +450,7 @@ void OscilGen::spectrumadjust()
 {
     if(Psatype == 0)
         return;
-    REALTYPE par = Psapar / 127.0;
+    float par = Psapar / 127.0;
     switch(Psatype) {
     case 1:
         par = 1.0 - par * 2.0;
@@ -468,9 +468,9 @@ void OscilGen::spectrumadjust()
     }
 
 
-    REALTYPE max = 0.0;
+    float max = 0.0;
     for(int i = 0; i < OSCIL_SIZE / 2; i++) {
-        REALTYPE tmp = pow(oscilFFTfreqs.c[i], 2) + pow(oscilFFTfreqs.s[i], 2.0);
+        float tmp = pow(oscilFFTfreqs.c[i], 2) + pow(oscilFFTfreqs.s[i], 2.0);
         if(max < tmp)
             max = tmp;
     }
@@ -480,10 +480,10 @@ void OscilGen::spectrumadjust()
 
 
     for(int i = 0; i < OSCIL_SIZE / 2; i++) {
-        REALTYPE mag   =
+        float mag   =
             sqrt(pow(oscilFFTfreqs.s[i],
                      2) + pow(oscilFFTfreqs.c[i], 2.0)) / max;
-        REALTYPE phase = atan2(oscilFFTfreqs.s[i], oscilFFTfreqs.c[i]);
+        float phase = atan2(oscilFFTfreqs.s[i], oscilFFTfreqs.c[i]);
 
         switch(Psatype) {
         case 1:
@@ -509,7 +509,7 @@ void OscilGen::shiftharmonics()
     if(Pharmonicshift == 0)
         return;
 
-    REALTYPE hc, hs;
+    float hc, hs;
     int      harmonicshift = -Pharmonicshift;
 
     if(harmonicshift > 0) {
@@ -557,7 +557,7 @@ void OscilGen::shiftharmonics()
 void OscilGen::prepare()
 {
     int      i, j, k;
-    REALTYPE a, b, c, d, hmagnew;
+    float a, b, c, d, hmagnew;
 
     if((oldbasepar != Pbasefuncpar) || (oldbasefunc != Pcurrentbasefunc)
        || (oldbasefuncmodulation != Pbasefuncmodulation)
@@ -652,7 +652,7 @@ void OscilGen::prepare()
     oscilprepared    = 1;
 }
 
-void OscilGen::adaptiveharmonic(FFTFREQS f, REALTYPE freq)
+void OscilGen::adaptiveharmonic(FFTFREQS f, float freq)
 {
     if(Padaptiveharmonics == 0 /*||(freq<1.0)*/)
         return;
@@ -670,11 +670,11 @@ void OscilGen::adaptiveharmonic(FFTFREQS f, REALTYPE freq)
     inf.c[0] = 0.0;
     inf.s[0] = 0.0;
 
-    REALTYPE hc = 0.0, hs = 0.0;
-    REALTYPE basefreq = 30.0 * pow(10.0, Padaptiveharmonicsbasefreq / 128.0);
-    REALTYPE power    = (Padaptiveharmonicspower + 1.0) / 101.0;
+    float hc = 0.0, hs = 0.0;
+    float basefreq = 30.0 * pow(10.0, Padaptiveharmonicsbasefreq / 128.0);
+    float power    = (Padaptiveharmonicspower + 1.0) / 101.0;
 
-    REALTYPE rap      = freq / basefreq;
+    float rap      = freq / basefreq;
 
     rap = pow(rap, power);
 
@@ -685,9 +685,9 @@ void OscilGen::adaptiveharmonic(FFTFREQS f, REALTYPE freq)
     }
 
     for(int i = 0; i < OSCIL_SIZE / 2 - 2; i++) {
-        REALTYPE h    = i * rap;
+        float h    = i * rap;
         int      high = (int)(i * rap);
-        REALTYPE low  = fmod(h, 1.0);
+        float low  = fmod(h, 1.0);
 
         if(high >= (OSCIL_SIZE / 2 - 2))
             break;
@@ -725,12 +725,12 @@ void OscilGen::adaptiveharmonic(FFTFREQS f, REALTYPE freq)
     deleteFFTFREQS(&inf);
 }
 
-void OscilGen::adaptiveharmonicpostprocess(REALTYPE *f, int size)
+void OscilGen::adaptiveharmonicpostprocess(float *f, int size)
 {
     if(Padaptiveharmonics <= 1)
         return;
-    REALTYPE *inf = new REALTYPE[size];
-    REALTYPE  par = Padaptiveharmonicspar * 0.01;
+    float *inf = new float[size];
+    float  par = Padaptiveharmonicspar * 0.01;
     par = 1.0 - pow((1.0 - par), 1.5);
 
     for(int i = 0; i < size; i++) {
@@ -772,7 +772,7 @@ void OscilGen::newrandseed(unsigned int randseed)
 /*
  * Get the oscillator function
  */
-short int OscilGen::get(REALTYPE *smps, REALTYPE freqHz, int resonance)
+short int OscilGen::get(float *smps, float freqHz, int resonance)
 {
     int i;
     int nyquist, outpos;
@@ -812,7 +812,7 @@ short int OscilGen::get(REALTYPE *smps, REALTYPE freqHz, int resonance)
         prepare();
 
     outpos =
-        (int)((RND * 2.0 - 1.0) * (REALTYPE) OSCIL_SIZE * (Prand - 64.0) / 64.0);
+        (int)((RND * 2.0 - 1.0) * (float) OSCIL_SIZE * (Prand - 64.0) / 64.0);
     outpos = (outpos + 2 * OSCIL_SIZE) % OSCIL_SIZE;
 
 
@@ -852,7 +852,7 @@ short int OscilGen::get(REALTYPE *smps, REALTYPE freqHz, int resonance)
     // Randomness (each harmonic), the block type is computed
     // in ADnote by setting start position according to this setting
     if((Prand > 64) && (freqHz >= 0.0) && (!ADvsPAD)) {
-        REALTYPE rnd, angle, a, b, c, d;
+        float rnd, angle, a, b, c, d;
         rnd = PI * pow((Prand - 64.0) / 64.0, 2.0);
         for(i = 1; i < nyquist - 1; i++) { //to Nyquist only for AntiAliasing
             angle = rnd * i * RND;
@@ -869,14 +869,14 @@ short int OscilGen::get(REALTYPE *smps, REALTYPE freqHz, int resonance)
     if((freqHz > 0.1) && (!ADvsPAD)) {
         unsigned int realrnd = rand();
         srand(randseed);
-        REALTYPE power     = Pamprandpower / 127.0;
-        REALTYPE normalize = 1.0 / (1.2 - power);
+        float power     = Pamprandpower / 127.0;
+        float normalize = 1.0 / (1.2 - power);
         switch(Pamprandtype) {
         case 1:
             power = power * 2.0 - 0.5;
             power = pow(15.0, power);
             for(i = 1; i < nyquist - 1; i++) {
-                REALTYPE amp = pow(RND, power) * normalize;
+                float amp = pow(RND, power) * normalize;
                 outoscilFFTfreqs.c[i] *= amp;
                 outoscilFFTfreqs.s[i] *= amp;
             }
@@ -884,9 +884,9 @@ short int OscilGen::get(REALTYPE *smps, REALTYPE freqHz, int resonance)
         case 2:
             power = power * 2.0 - 0.5;
             power = pow(15.0, power) * 2.0;
-            REALTYPE rndfreq = 2 * PI * RND;
+            float rndfreq = 2 * PI * RND;
             for(i = 1; i < nyquist - 1; i++) {
-                REALTYPE amp = pow(fabs(sin(i * rndfreq)), power) * normalize;
+                float amp = pow(fabs(sin(i * rndfreq)), power) * normalize;
                 outoscilFFTfreqs.c[i] *= amp;
                 outoscilFFTfreqs.s[i] *= amp;
             }
@@ -899,9 +899,9 @@ short int OscilGen::get(REALTYPE *smps, REALTYPE freqHz, int resonance)
         res->applyres(nyquist - 1, outoscilFFTfreqs, freqHz);
 
     //Full RMS normalize
-    REALTYPE sum = 0;
+    float sum = 0;
     for(int j = 1; j < OSCIL_SIZE / 2; j++) {
-        REALTYPE term = outoscilFFTfreqs.c[j] * outoscilFFTfreqs.c[j]
+        float term = outoscilFFTfreqs.c[j] * outoscilFFTfreqs.c[j]
                         + outoscilFFTfreqs.s[j] * outoscilFFTfreqs.s[j];
         sum += term;
     }
@@ -934,7 +934,7 @@ short int OscilGen::get(REALTYPE *smps, REALTYPE freqHz, int resonance)
 /*
  * Get the spectrum of the oscillator for the UI
  */
-void OscilGen::getspectrum(int n, REALTYPE *spc, int what)
+void OscilGen::getspectrum(int n, float *spc, int what)
 {
     if(n > OSCIL_SIZE / 2)
         n = OSCIL_SIZE / 2;
@@ -987,7 +987,7 @@ void OscilGen::useasbase()
 /*
  * Get the base function for UI
  */
-void OscilGen::getcurrentbasefunction(REALTYPE *smps)
+void OscilGen::getcurrentbasefunction(float *smps)
 {
     if(Pcurrentbasefunc != 0)
         fft->freqs2smps(basefuncFFTfreqs, smps);
@@ -1046,7 +1046,7 @@ void OscilGen::add2XML(XMLwrapper *xml)
     xml->endbranch();
 
     if(Pcurrentbasefunc == 127) {
-        REALTYPE max = 0.0;
+        float max = 0.0;
 
         for(int i = 0; i < OSCIL_SIZE / 2; i++) {
             if(max < fabs(basefuncFFTfreqs.c[i]))
@@ -1059,8 +1059,8 @@ void OscilGen::add2XML(XMLwrapper *xml)
 
         xml->beginbranch("BASE_FUNCTION");
         for(int i = 1; i < OSCIL_SIZE / 2; i++) {
-            REALTYPE xc = basefuncFFTfreqs.c[i] / max;
-            REALTYPE xs = basefuncFFTfreqs.s[i] / max;
+            float xc = basefuncFFTfreqs.c[i] / max;
+            float xs = basefuncFFTfreqs.s[i] / max;
             if((fabs(xs) > 0.00001) && (fabs(xs) > 0.00001)) {
                 xml->beginbranch("BF_HARMONIC", i);
                 xml->addparreal("cos", xc);
@@ -1163,7 +1163,7 @@ void OscilGen::getfromXML(XMLwrapper *xml)
         }
         xml->exitbranch();
 
-        REALTYPE max = 0.0;
+        float max = 0.0;
 
         basefuncFFTfreqs.c[0] = 0.0;
         for(int i = 0; i < OSCIL_SIZE / 2; i++) {
@@ -1185,7 +1185,7 @@ void OscilGen::getfromXML(XMLwrapper *xml)
 }
 
 //Define basic functions
-#define FUNC(b) REALTYPE basefunc_##b(REALTYPE x, REALTYPE a)
+#define FUNC(b) float basefunc_##b(float x, float a)
 
 FUNC(pulse)
 {
@@ -1289,7 +1289,7 @@ FUNC(stretchsine)
     if(a > 0.0)
         a *= 2;
     a = pow(3.0, a);
-    REALTYPE b = pow(fabs(x), a);
+    float b = pow(fabs(x), a);
     if(x < 0)
         b = -b;
     return -sin(b * PI);
@@ -1310,7 +1310,7 @@ FUNC(absstretchsine)
     x = fmod(x + 0.5, 1) * 2.0 - 1.0;
     a = (a - 0.5) * 9;
     a = pow(3.0, a);
-    REALTYPE b = pow(fabs(x), a);
+    float b = pow(fabs(x), a);
     if(x < 0)
         b = -b;
     return -pow(sin(b * PI), 2);
@@ -1328,7 +1328,7 @@ FUNC(sqr)
     return -atan(sin(x * 2.0 * PI) * a);
 }
 
-typedef REALTYPE(*base_func)(REALTYPE,REALTYPE);
+typedef float(*base_func)(float,float);
 base_func getBaseFunction(unsigned char func)
 {
     if(!func)
@@ -1358,11 +1358,11 @@ base_func getBaseFunction(unsigned char func)
 
 //And filters
 
-#define FILTER(x) REALTYPE osc_##x(unsigned int i, REALTYPE par, REALTYPE par2)
+#define FILTER(x) float osc_##x(unsigned int i, float par, float par2)
 FILTER(lp)
 {
-    REALTYPE gain = pow(1.0 - par * par * par * 0.99, i);
-    REALTYPE tmp  = par2 * par2 * par2 * par2 * 0.5 + 0.0001;
+    float gain = pow(1.0 - par * par * par * 0.99, i);
+    float tmp  = par2 * par2 * par2 * par2 * 0.5 + 0.0001;
     if(gain < tmp)
         gain = pow(gain, 10.0) / pow(tmp, 9.0);
     return gain;
@@ -1370,7 +1370,7 @@ FILTER(lp)
 
 FILTER(hp1)
 {
-    REALTYPE gain = 1.0 - pow(1.0 - par * par, i + 1);
+    float gain = 1.0 - pow(1.0 - par * par, i + 1);
     return pow(gain, par2 * 2.0 + 0.1);
 }
 
@@ -1378,16 +1378,16 @@ FILTER(hp1b)
 {
     if(par < 0.2)
         par = par * 0.25 + 0.15;
-    REALTYPE gain = 1.0 - pow(1.0 - par * par * 0.999 + 0.001, i * 0.05 * i + 1.0);
-    REALTYPE tmp  = pow(5.0, par2 * 2.0);
+    float gain = 1.0 - pow(1.0 - par * par * 0.999 + 0.001, i * 0.05 * i + 1.0);
+    float tmp  = pow(5.0, par2 * 2.0);
     return pow(gain, tmp);
 }
 
 FILTER(bp1)
 {
-    REALTYPE gain = i + 1 - pow(2, (1.0 - par) * 7.5);
+    float gain = i + 1 - pow(2, (1.0 - par) * 7.5);
     gain = 1.0 / (1.0 + gain * gain / (i + 1.0));
-    REALTYPE tmp  = pow(5.0, par2 * 2.0);
+    float tmp  = pow(5.0, par2 * 2.0);
     gain = pow(gain, tmp);
     if(gain < 1e-5)
         gain = 1e-5;
@@ -1396,7 +1396,7 @@ FILTER(bp1)
 
 FILTER(bs1)
 {
-    REALTYPE gain = i + 1 - pow(2, (1.0 - par) * 7.5);
+    float gain = i + 1 - pow(2, (1.0 - par) * 7.5);
     gain = pow(atan(gain / (i / 10.0 + 1)) / 1.57, 6);
     return pow(gain, par2 * par2 * 3.9 + 0.1);
 }
@@ -1431,50 +1431,50 @@ bool floatEq(float a, float b)
 
 FILTER(cos)
 {
-    REALTYPE tmp = pow(5.0, par2 * 2.0 - 1.0);
+    float tmp = pow(5.0, par2 * 2.0 - 1.0);
     tmp = pow(i / 32.0, tmp) * 32.0;
     if(floatEq(par2 * 127.0, 64.0))
         tmp = i;
-    REALTYPE gain  = cos(par * par * PI / 2.0 * tmp);
+    float gain  = cos(par * par * PI / 2.0 * tmp);
     gain *= gain;
     return gain;
 }
 
 FILTER(sin)
 {
-    REALTYPE tmp = pow(5.0, par2 * 2.0 - 1.0);
+    float tmp = pow(5.0, par2 * 2.0 - 1.0);
     tmp = pow(i / 32.0, tmp) * 32.0;
     if(floatEq(par2 * 127.0, 64.0))
         tmp = i;
-    REALTYPE gain = sin(par * par * PI / 2.0 * tmp);
+    float gain = sin(par * par * PI / 2.0 * tmp);
     gain *= gain;
     return gain;
 }
 
 FILTER(low_shelf)
 {
-    REALTYPE p2 = 1.0 - par + 0.2;
-    REALTYPE x  = i / (64.0 * p2 * p2);
+    float p2 = 1.0 - par + 0.2;
+    float x  = i / (64.0 * p2 * p2);
     if(x < 0.0)
         x = 0.0;
     else
         if(x > 1.0)
             x = 1.0;
-    REALTYPE tmp  = pow(1.0 - par2, 2.0);
+    float tmp  = pow(1.0 - par2, 2.0);
     return cos(x * PI) * (1.0 - tmp) + 1.01 + tmp;
 }
 
 FILTER(s)
 {
     unsigned int tmp  = (int) (pow(2.0, (1.0 - par) * 7.2));
-    REALTYPE gain = 1.0;
+    float gain = 1.0;
     if(i == tmp)
         gain = pow(2.0, par2 * par2 * 8.0);
     return gain;
 }
 #undef FILTER
 
-typedef REALTYPE(*filter_func)(unsigned int, REALTYPE, REALTYPE);
+typedef float(*filter_func)(unsigned int, float, float);
 filter_func getFilter(unsigned char func)
 {
     if(!func)

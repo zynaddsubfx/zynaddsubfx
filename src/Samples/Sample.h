@@ -29,8 +29,8 @@ class Sample
     public:
         Sample();
         Sample(const Sample &smp);
-        Sample(int length, REALTYPE fill = 0);
-        Sample(int length, const REALTYPE *fill);
+        Sample(int length, float fill = 0);
+        Sample(int length, const float *fill);
         ~Sample();
         /**Fills the buffer with zeros*/
         void clear();
@@ -40,11 +40,11 @@ class Sample
             return bufferSize;
         }
         /**Provides the indexing operator for non const Samples*/
-        REALTYPE &operator[](int index) {
+        float &operator[](int index) {
             return *(buffer + index % bufferSize);
         }
         /**Provides the indexing operator for const Samples*/
-        const REALTYPE &operator[](int index) const {
+        const float &operator[](int index) const {
             return *(buffer + index % bufferSize);
         }
         /**Provides the assignment operator*/
@@ -56,7 +56,7 @@ class Sample
          *
          * This method is like c_str() from the string class and should be used
          * sparingly*/
-        const REALTYPE *c_buf() const {return buffer;}
+        const float *c_buf() const {return buffer;}
 
         /**Change the sampling rate of the Sample*/
         void resample(const unsigned int rate, const unsigned int nrate);
@@ -68,9 +68,9 @@ class Sample
         /**Gets a subsample from a to b*/
         Sample subSample(int a, int b) const;
 
-        REALTYPE max() const;
-        REALTYPE min() const;
-        REALTYPE absMax() const;
+        float max() const;
+        float min() const;
+        float absMax() const;
     private:
         int    bufferSize;
         float *buffer;

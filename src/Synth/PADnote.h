@@ -36,50 +36,50 @@ class PADnote :public SynthNote
     public:
         PADnote(PADnoteParameters *parameters,
                 Controller *ctl_,
-                REALTYPE freq,
-                REALTYPE velocity,
+                float freq,
+                float velocity,
                 int portamento_,
                 int midinote,
                 bool besilent);
         ~PADnote();
 
-        void legatonote(REALTYPE freq, REALTYPE velocity, int portamento_,
+        void legatonote(float freq, float velocity, int portamento_,
                         int midinote, bool externcall);
 
-        int noteout(REALTYPE *outl, REALTYPE *outr);
+        int noteout(float *outl, float *outr);
         int finished() const;
         void relasekey();
     private:
-        void setup(REALTYPE freq, REALTYPE velocity,int portamento_,
+        void setup(float freq, float velocity,int portamento_,
                    int midinote, bool legato=false);
-        void fadein(REALTYPE *smps);
+        void fadein(float *smps);
         void computecurrentparameters();
         bool finished_;
         PADnoteParameters *pars;
 
         int      poshi_l, poshi_r;
-        REALTYPE poslo;
+        float poslo;
 
-        REALTYPE basefreq;
+        float basefreq;
         bool     firsttime, released;
 
         int nsample, portamento;
 
-        int Compute_Linear(REALTYPE *outl,
-                           REALTYPE *outr,
+        int Compute_Linear(float *outl,
+                           float *outr,
                            int freqhi,
-                           REALTYPE freqlo);
-        int Compute_Cubic(REALTYPE *outl,
-                          REALTYPE *outr,
+                           float freqlo);
+        int Compute_Cubic(float *outl,
+                          float *outr,
                           int freqhi,
-                          REALTYPE freqlo);
+                          float freqlo);
 
 
         struct {
             /******************************************
             *     FREQUENCY GLOBAL PARAMETERS        *
             ******************************************/
-            REALTYPE  Detune; //cents
+            float  Detune; //cents
 
             Envelope *FreqEnvelope;
             LFO      *FreqLfo;
@@ -87,16 +87,16 @@ class PADnote :public SynthNote
             /********************************************
              *     AMPLITUDE GLOBAL PARAMETERS          *
              ********************************************/
-            REALTYPE  Volume; // [ 0 .. 1 ]
+            float  Volume; // [ 0 .. 1 ]
 
-            REALTYPE  Panning; // [ 0 .. 1 ]
+            float  Panning; // [ 0 .. 1 ]
 
             Envelope *AmpEnvelope;
             LFO      *AmpLfo;
 
             struct {
                 int      Enabled;
-                REALTYPE initialvalue, dt, t;
+                float initialvalue, dt, t;
             } Punch;
 
             /******************************************
@@ -104,9 +104,9 @@ class PADnote :public SynthNote
             ******************************************/
             Filter   *GlobalFilterL, *GlobalFilterR;
 
-            REALTYPE  FilterCenterPitch; //octaves
-            REALTYPE  FilterQ;
-            REALTYPE  FilterFreqTracking;
+            float  FilterCenterPitch; //octaves
+            float  FilterQ;
+            float  FilterFreqTracking;
 
             Envelope *FilterEnvelope;
 
@@ -114,7 +114,7 @@ class PADnote :public SynthNote
         } NoteGlobalPar;
 
 
-        REALTYPE    globaloldamplitude, globalnewamplitude, velocity, realfreq;
+        float    globaloldamplitude, globalnewamplitude, velocity, realfreq;
         Controller *ctl;
 };
 

@@ -35,9 +35,9 @@
 class Phaser:public Effect
 {
     public:
-        Phaser(const int &insertion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_);
+        Phaser(const int &insertion_, float *efxoutl_, float *efxoutr_);
         ~Phaser();
-        void out(const Stereo<REALTYPE *> &input);
+        void out(const Stereo<float *> &input);
         void setpreset(unsigned char npreset);
         void changepar(int npar, unsigned char value);
         unsigned char getpar(int npar) const;
@@ -74,12 +74,12 @@ class Phaser:public Effect
 
         //Internal Variables
         bool barber; //Barber pole phasing flag
-        REALTYPE distortion, width, offsetpct;
-        REALTYPE panning, feedback, depth, lrcross, phase;
-        Stereo<REALTYPE *> old, xn1, yn1;
-        Stereo<REALTYPE> diff, oldgain, fb;
-        REALTYPE invperiod;
-        REALTYPE offset[12];
+        float distortion, width, offsetpct;
+        float panning, feedback, depth, lrcross, phase;
+        Stereo<float *> old, xn1, yn1;
+        Stereo<float> diff, oldgain, fb;
+        float invperiod;
+        float offset[12];
         
         float mis;
         float Rmin;     // 3N5457 typical on resistance at Vgs = 0
@@ -90,13 +90,13 @@ class Phaser:public Effect
         float CFs;      // A constant derived from capacitor and resistor relationships
 
         void analog_setup();
-        void AnalogPhase(const Stereo<REALTYPE *> &input);
+        void AnalogPhase(const Stereo<float *> &input);
         //analog case
-        REALTYPE applyPhase(REALTYPE x, REALTYPE g, REALTYPE fb,
-                            REALTYPE &hpf, REALTYPE *yn1, REALTYPE *xn1);
+        float applyPhase(float x, float g, float fb,
+                            float &hpf, float *yn1, float *xn1);
 
-        void normalPhase(const Stereo<REALTYPE *> &input);
-        REALTYPE applyPhase(REALTYPE x, REALTYPE g, REALTYPE *old);
+        void normalPhase(const Stereo<float *> &input);
+        float applyPhase(float x, float g, float *old);
 };
 
 #endif

@@ -29,8 +29,8 @@
 
 SUBnote::SUBnote(SUBnoteParameters *parameters,
                  Controller *ctl_,
-                 REALTYPE freq,
-                 REALTYPE velocity,
+                 float freq,
+                 float velocity,
                  int portamento_,
                  int midinote,
                  bool besilent)
@@ -42,7 +42,7 @@ SUBnote::SUBnote(SUBnoteParameters *parameters,
     setup(freq, velocity, portamento_, midinote);
 }
 
-void SUBnote::setup(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote, bool legato)
+void SUBnote::setup(float freq, float velocity, int portamento_, int midinote, bool legato)
 {
     portamento  = portamento_;
     NoteEnabled = ON;
@@ -66,7 +66,7 @@ void SUBnote::setup(REALTYPE freq, REALTYPE velocity, int portamento_, int midin
         basefreq = 440.0;
         int fixedfreqET = pars->PfixedfreqET;
         if(fixedfreqET != 0) { //if the frequency varies according the keyboard note
-            REALTYPE tmp =
+            float tmp =
                 (midinote
                  - 69.0) / 12.0 * (pow(2.0, (fixedfreqET - 1) / 63.0) - 1.0);
             if(fixedfreqET <= 64)
@@ -75,7 +75,7 @@ void SUBnote::setup(REALTYPE freq, REALTYPE velocity, int portamento_, int midin
                 basefreq *= pow(3.0, tmp);
         }
     }
-    REALTYPE detune = getdetune(pars->PDetuneType,
+    float detune = getdetune(pars->PDetuneType,
                                 pars->PCoarseDetune,
                                 pars->PDetune);
     basefreq *= pow(2.0, detune / 1200.0); //detune
@@ -126,13 +126,13 @@ void SUBnote::setup(REALTYPE freq, REALTYPE velocity, int portamento_, int midin
     }
 
     //how much the amplitude is normalised (because the harmonics)
-    REALTYPE reduceamp = 0.0;
+    float reduceamp = 0.0;
 
     for(int n = 0; n < numharmonics; n++) {
-        REALTYPE freq = basefreq * (pos[n] + 1);
+        float freq = basefreq * (pos[n] + 1);
 
         //the bandwidth is not absolute(Hz); it is relative to frequency
-        REALTYPE bw =
+        float bw =
             pow(10, (pars->Pbandwidth - 127.0) / 127.0 * 4) * numstages;
 
         //Bandwidth Scale
@@ -145,10 +145,10 @@ void SUBnote::setup(REALTYPE freq, REALTYPE velocity, int portamento_, int midin
             bw = 25.0;
 
         //try to keep same amplitude on all freqs and bw. (empirically)
-        REALTYPE gain    = sqrt(1500.0 / (bw * freq));
+        float gain    = sqrt(1500.0 / (bw * freq));
 
-        REALTYPE hmagnew = 1.0 - pars->Phmag[pos[n]] / 127.0;
-        REALTYPE hgain;
+        float hmagnew = 1.0 - pars->Phmag[pos[n]] / 127.0;
+        float hgain;
 
         switch(pars->Phmagtype) {
         case 1:
@@ -170,7 +170,7 @@ void SUBnote::setup(REALTYPE freq, REALTYPE velocity, int portamento_, int midin
         reduceamp += hgain;
 
         for(int nph = 0; nph < numstages; nph++) {
-            REALTYPE amp = 1.0;
+            float amp = 1.0;
             if(nph == 0)
                 amp = gain;
             initfilter(lfilter[nph + n * numstages], freq, bw, amp, hgain);
@@ -206,7 +206,7 @@ void SUBnote::setup(REALTYPE freq, REALTYPE velocity, int portamento_, int midin
     oldamplitude = newamplitude;
 }
 
-void SUBnote::legatonote(REALTYPE freq, REALTYPE velocity, int portamento_,
+void SUBnote::legatonote(float freq, float velocity, int portamento_,
                          int midinote, bool externcall)
 {
     // Manage legato stuff
@@ -247,18 +247,18 @@ void SUBnote::KillNote()
  * Compute the filters coefficients
  */
 void SUBnote::computefiltercoefs(bpfilter &filter,
-                                 REALTYPE freq,
-                                 REALTYPE bw,
-                                 REALTYPE gain)
+                                 float freq,
+                                 float bw,
+                                 float gain)
 {
     if(freq > SAMPLE_RATE / 2.0 - 200.0)
         freq = SAMPLE_RATE / 2.0 - 200.0;
 
 
-    REALTYPE omega = 2.0 * PI * freq / SAMPLE_RATE;
-    REALTYPE sn    = sin(omega);
-    REALTYPE cs    = cos(omega);
-    REALTYPE alpha = sn * sinh(LOG_2 / 2.0 * bw * omega / sn);
+    float omega = 2.0 * PI * freq / SAMPLE_RATE;
+    float sn    = sin(omega);
+    float cs    = cos(omega);
+    float alpha = sn * sinh(LOG_2 / 2.0 * bw * omega / sn);
 
     if(alpha > 1)
         alpha = 1;
@@ -276,10 +276,10 @@ void SUBnote::computefiltercoefs(bpfilter &filter,
  * Initialise the filters
  */
 void SUBnote::initfilter(bpfilter &filter,
-                         REALTYPE freq,
-                         REALTYPE bw,
-                         REALTYPE amp,
-                         REALTYPE mag)
+                         float freq,
+                         float bw,
+                         float amp,
+                         float mag)
 {
     filter.xn1 = 0.0;
     filter.xn2 = 0.0;
@@ -289,8 +289,8 @@ void SUBnote::initfilter(bpfilter &filter,
         filter.yn2 = 0.0;
     }
     else {
-        REALTYPE a = 0.1 * mag; //empirically
-        REALTYPE p = RND * 2.0 * PI;
+        float a = 0.1 * mag; //empirically
+        float p = RND * 2.0 * PI;
         if(start == 1)
             a *= RND;
         filter.yn1 = a * cos(p);
@@ -313,10 +313,10 @@ void SUBnote::initfilter(bpfilter &filter,
 /*
  * Do the filtering
  */
-void SUBnote::filter(bpfilter &filter, REALTYPE *smps)
+void SUBnote::filter(bpfilter &filter, float *smps)
 {
     int      i;
-    REALTYPE out;
+    float out;
     for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
         out = smps[i] * filter.b0 + filter.b2 * filter.xn2
               - filter.a1 * filter.yn1 - filter.a2 * filter.yn2;
@@ -331,7 +331,7 @@ void SUBnote::filter(bpfilter &filter, REALTYPE *smps)
 /*
  * Init Parameters
  */
-void SUBnote::initparameters(REALTYPE freq)
+void SUBnote::initparameters(float freq)
 {
     AmpEnvelope = new Envelope(pars->AmpEnvelope, freq);
     if(pars->PFreqEnvelopeEnabled != 0)
@@ -364,9 +364,9 @@ void SUBnote::computecurrentparameters()
        || (oldpitchwheel != ctl->pitchwheel.data)
        || (oldbandwidth != ctl->bandwidth.data)
        || (portamento != 0)) {
-        REALTYPE envfreq = 1.0;
-        REALTYPE envbw   = 1.0;
-        REALTYPE gain    = 1.0;
+        float envfreq = 1.0;
+        float envbw   = 1.0;
+        float gain    = 1.0;
 
         if(FreqEnvelope != NULL) {
             envfreq = FreqEnvelope->envout() / 1200;
@@ -386,7 +386,7 @@ void SUBnote::computecurrentparameters()
         }
         envbw *= ctl->bandwidth.relbw; //bandwidth controller
 
-        REALTYPE tmpgain = 1.0 / sqrt(envbw * envfreq);
+        float tmpgain = 1.0 / sqrt(envbw * envfreq);
 
         for(int n = 0; n < numharmonics; n++) {
             for(int nph = 0; nph < numstages; nph++) {
@@ -423,9 +423,9 @@ void SUBnote::computecurrentparameters()
 
     //Filter
     if(GlobalFilterL != NULL) {
-        REALTYPE globalfilterpitch = GlobalFilterCenterPitch
+        float globalfilterpitch = GlobalFilterCenterPitch
                                      + GlobalFilterEnvelope->envout();
-        REALTYPE filterfreq = globalfilterpitch + ctl->filtercutoff.relfreq
+        float filterfreq = globalfilterpitch + ctl->filtercutoff.relfreq
                               + GlobalFilterFreqTracking;
         filterfreq = GlobalFilterL->getrealfreq(filterfreq);
 
@@ -442,21 +442,21 @@ void SUBnote::computecurrentparameters()
 /*
  * Note Output
  */
-int SUBnote::noteout(REALTYPE *outl, REALTYPE *outr)
+int SUBnote::noteout(float *outl, float *outr)
 {
-    memcpy(outl, denormalkillbuf, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
-    memcpy(outr, denormalkillbuf, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
+    memcpy(outl, denormalkillbuf, SOUND_BUFFER_SIZE * sizeof(float));
+    memcpy(outr, denormalkillbuf, SOUND_BUFFER_SIZE * sizeof(float));
 
     if(NoteEnabled == OFF)
         return 0;
 
-    REALTYPE *tmprnd = getTmpBuffer();
-    REALTYPE *tmpsmp = getTmpBuffer();
+    float *tmprnd = getTmpBuffer();
+    float *tmpsmp = getTmpBuffer();
     //left channel
     for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
         tmprnd[i] = RND * 2.0 - 1.0;
     for(int n = 0; n < numharmonics; n++) {
-        memcpy(tmpsmp, tmprnd, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
+        memcpy(tmpsmp, tmprnd, SOUND_BUFFER_SIZE * sizeof(float));
         for(int nph = 0; nph < numstages; nph++)
             filter(lfilter[nph + n * numstages], tmpsmp);
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
@@ -471,7 +471,7 @@ int SUBnote::noteout(REALTYPE *outl, REALTYPE *outr)
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
             tmprnd[i] = RND * 2.0 - 1.0;
         for(int n = 0; n < numharmonics; n++) {
-            memcpy(tmpsmp, tmprnd, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
+            memcpy(tmpsmp, tmprnd, SOUND_BUFFER_SIZE * sizeof(float));
             for(int nph = 0; nph < numstages; nph++)
                 filter(rfilter[nph + n * numstages], tmpsmp);
             for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
@@ -481,7 +481,7 @@ int SUBnote::noteout(REALTYPE *outl, REALTYPE *outr)
             GlobalFilterR->filterout(&outr[0]);
     }
     else
-        memcpy(outr, outl, SOUND_BUFFER_SIZE * sizeof(REALTYPE));
+        memcpy(outr, outl, SOUND_BUFFER_SIZE * sizeof(float));
     returnTmpBuffer(tmprnd);
     returnTmpBuffer(tmpsmp);
 
@@ -490,8 +490,8 @@ int SUBnote::noteout(REALTYPE *outl, REALTYPE *outr)
         if(n > SOUND_BUFFER_SIZE)
             n = SOUND_BUFFER_SIZE;
         for(int i = 0; i < n; i++) {
-            REALTYPE ampfadein = 0.5 - 0.5 * cos(
-                (REALTYPE) i / (REALTYPE) n * PI);
+            float ampfadein = 0.5 - 0.5 * cos(
+                (float) i / (float) n * PI);
             outl[i] *= ampfadein;
             outr[i] *= ampfadein;
         }
@@ -501,7 +501,7 @@ int SUBnote::noteout(REALTYPE *outl, REALTYPE *outr)
     if(ABOVE_AMPLITUDE_THRESHOLD(oldamplitude, newamplitude)) {
         // Amplitude interpolation
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            REALTYPE tmpvol = INTERPOLATE_AMPLITUDE(oldamplitude,
+            float tmpvol = INTERPOLATE_AMPLITUDE(oldamplitude,
                                                     newamplitude,
                                                     i,
                                                     SOUND_BUFFER_SIZE);
@@ -525,7 +525,7 @@ int SUBnote::noteout(REALTYPE *outl, REALTYPE *outr)
     // Check if the note needs to be computed more
     if(AmpEnvelope->finished() != 0) {
         for(int i = 0; i < SOUND_BUFFER_SIZE; i++) { //fade-out
-            REALTYPE tmp = 1.0 - (REALTYPE)i / (REALTYPE)SOUND_BUFFER_SIZE;
+            float tmp = 1.0 - (float)i / (float)SOUND_BUFFER_SIZE;
             outl[i] *= tmp;
             outr[i] *= tmp;
         }

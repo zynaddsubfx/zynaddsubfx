@@ -24,8 +24,8 @@
 #include "DynamicFilter.h"
 
 DynamicFilter::DynamicFilter(int insertion_,
-                             REALTYPE *efxoutl_,
-                             REALTYPE *efxoutr_)
+                             float *efxoutl_,
+                             float *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, new FilterParams(0, 64, 64), 0),
       Pvolume(110), Ppanning(64), Pdepth(0), Pampsns(90),
       Pampsnsinv(0), Pampsmooth(60),
@@ -53,29 +53,29 @@ void DynamicFilter::out(const Stereo<float *> &smp)
         cleanup();
     }
 
-    REALTYPE lfol, lfor;
+    float lfol, lfor;
     lfo.effectlfoout(&lfol, &lfor);
     lfol *= depth * 5.0;
     lfor *= depth * 5.0;
-    const REALTYPE freq = filterpars->getfreq();
-    const REALTYPE q    = filterpars->getq();
+    const float freq = filterpars->getfreq();
+    const float q    = filterpars->getq();
 
     for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
         efxoutl[i] = smp.l[i];
         efxoutr[i] = smp.r[i];
 
-        const REALTYPE x = (fabs(smp.l[i]) + fabs(smp.l[i])) * 0.5;
+        const float x = (fabs(smp.l[i]) + fabs(smp.l[i])) * 0.5;
         ms1 = ms1 * (1.0 - ampsmooth) + x * ampsmooth + 1e-10;
     }
 
-    const REALTYPE ampsmooth2 = pow(ampsmooth, 0.2) * 0.3;
+    const float ampsmooth2 = pow(ampsmooth, 0.2) * 0.3;
     ms2 = ms2 * (1.0 - ampsmooth2) + ms1 * ampsmooth2;
     ms3 = ms3 * (1.0 - ampsmooth2) + ms2 * ampsmooth2;
     ms4 = ms4 * (1.0 - ampsmooth2) + ms3 * ampsmooth2;
-    const REALTYPE rms = (sqrt(ms4)) * ampsns;
+    const float rms = (sqrt(ms4)) * ampsns;
 
-    const REALTYPE frl = filterl->getrealfreq(freq + lfol + rms);
-    const REALTYPE frr = filterr->getrealfreq(freq + lfor + rms);
+    const float frl = filterl->getrealfreq(freq + lfol + rms);
+    const float frr = filterr->getrealfreq(freq + lfor + rms);
 
     filterl->setfreq_and_q(frl, q);
     filterr->setfreq_and_q(frr, q);

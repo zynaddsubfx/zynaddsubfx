@@ -29,21 +29,21 @@
 
 //Waveshaping(called by Distorsion effect and waveshape from OscilGen)
 void waveshapesmps(int n,
-                   REALTYPE *smps,
+                   float *smps,
                    unsigned char type,
                    unsigned char drive);
 /**Distortion Effect*/
 class Distorsion:public Effect
 {
     public:
-        Distorsion(const int &insertion, REALTYPE *efxoutl_, REALTYPE *efxoutr_);
+        Distorsion(const int &insertion, float *efxoutl_, float *efxoutr_);
         ~Distorsion();
         void out(const Stereo<float *> &smp);
         void setpreset(unsigned char npreset);
         void changepar(int npar, unsigned char value);
         unsigned char getpar(int npar) const;
         void cleanup();
-        void applyfilters(REALTYPE *efxoutl, REALTYPE *efxoutr);
+        void applyfilters(float *efxoutl, float *efxoutr);
 
     private:
         //Parametrii
@@ -66,7 +66,7 @@ class Distorsion:public Effect
         void sethpf(unsigned char Phpf);
 
         //Real Parameters
-        REALTYPE      panning, lrcross;
+        float      panning, lrcross;
         AnalogFilter *lpfl, *lpfr, *hpfl, *hpfr;
 };
 

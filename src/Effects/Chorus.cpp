@@ -27,8 +27,8 @@
 using namespace std;
 
 Chorus::Chorus(const int &insertion_,
-               REALTYPE *const efxoutl_,
-               REALTYPE *const efxoutr_)
+               float *const efxoutl_,
+               float *const efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
       maxdelay((int)(MAX_CHORUS_DELAY / 1000.0 * SAMPLE_RATE)),
       delaySample(maxdelay)
@@ -49,9 +49,9 @@ Chorus::~Chorus() {}
 /*
  * get the delay value in samples; xlfo is the current lfo value
  */
-REALTYPE Chorus::getdelay(REALTYPE xlfo)
+float Chorus::getdelay(float xlfo)
 {
-    REALTYPE result;
+    float result;
     if(Pflangemode == 0)
         result = (delay + xlfo * depth) * SAMPLE_RATE;
     else
@@ -70,7 +70,7 @@ REALTYPE Chorus::getdelay(REALTYPE xlfo)
 
 void Chorus::out(const Stereo<float *> &input)
 {
-    const REALTYPE one = 1.0;
+    const float one = 1.0;
     dl1 = dl2;
     dr1 = dr2;
     lfo.effectlfoout(&lfol, &lfor);
@@ -79,11 +79,11 @@ void Chorus::out(const Stereo<float *> &input)
     dr2 = getdelay(lfor);
 
     for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        REALTYPE inl = input.l[i];
-        REALTYPE inr = input.r[i];
+        float inl = input.l[i];
+        float inr = input.r[i];
         //LRcross
-        Stereo<REALTYPE> tmpc(inl, inr);
-        //REALTYPE r=inr;
+        Stereo<float> tmpc(inl, inr);
+        //float r=inr;
         inl = tmpc.l * (1.0 - lrcross) + tmpc.r * lrcross;
         inr = tmpc.r * (1.0 - lrcross) + tmpc.l * lrcross;
 
@@ -93,7 +93,7 @@ void Chorus::out(const Stereo<float *> &input)
         mdel = (dl1 * (SOUND_BUFFER_SIZE - i) + dl2 * i) / SOUND_BUFFER_SIZE;
         if(++dlk >= maxdelay)
             dlk = 0;
-        REALTYPE tmp = dlk - mdel + maxdelay * 2.0; //where should I get the sample from
+        float tmp = dlk - mdel + maxdelay * 2.0; //where should I get the sample from
 
         F2I(tmp, dlhi);
         dlhi %= maxdelay;

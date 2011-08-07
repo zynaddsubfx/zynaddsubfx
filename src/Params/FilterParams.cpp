@@ -127,21 +127,21 @@ void FilterParams::getfromFilterParams(FilterParams *pars)
 /*
  * Parameter control
  */
-REALTYPE FilterParams::getfreq()
+float FilterParams::getfreq()
 {
     return (Pfreq / 64.0 - 1.0) * 5.0;
 }
 
-REALTYPE FilterParams::getq()
+float FilterParams::getq()
 {
-    return exp(pow((REALTYPE) Pq / 127.0, 2) * log(1000.0)) - 0.9;
+    return exp(pow((float) Pq / 127.0, 2) * log(1000.0)) - 0.9;
 }
-REALTYPE FilterParams::getfreqtracking(REALTYPE notefreq)
+float FilterParams::getfreqtracking(float notefreq)
 {
     return log(notefreq / 440.0) * (Pfreqtrack - 64.0) / (64.0 * LOG_2);
 }
 
-REALTYPE FilterParams::getgain()
+float FilterParams::getgain()
 {
     return (Pgain / 64.0 - 1.0) * 30.0; //-30..30dB
 }
@@ -149,7 +149,7 @@ REALTYPE FilterParams::getgain()
 /*
  * Get the center frequency of the formant's graph
  */
-REALTYPE FilterParams::getcenterfreq()
+float FilterParams::getcenterfreq()
 {
     return 10000.0 * pow(10, -(1.0 - Pcenterfreq / 127.0) * 2.0);
 }
@@ -157,7 +157,7 @@ REALTYPE FilterParams::getcenterfreq()
 /*
  * Get the number of octave that the formant functions applies to
  */
-REALTYPE FilterParams::getoctavesfreq()
+float FilterParams::getoctavesfreq()
 {
     return 0.25 + 10.0 * Poctavesfreq / 127.0;
 }
@@ -165,18 +165,18 @@ REALTYPE FilterParams::getoctavesfreq()
 /*
  * Get the frequency from x, where x is [0..1]
  */
-REALTYPE FilterParams::getfreqx(REALTYPE x)
+float FilterParams::getfreqx(float x)
 {
     if(x > 1.0)
         x = 1.0;
-    REALTYPE octf = pow(2.0, getoctavesfreq());
+    float octf = pow(2.0, getoctavesfreq());
     return getcenterfreq() / sqrt(octf) * pow(octf, x);
 }
 
 /*
  * Get the x coordinate from frequency (used by the UI)
  */
-REALTYPE FilterParams::getfreqpos(REALTYPE freq)
+float FilterParams::getfreqpos(float freq)
 {
     return (log(freq) - log(getfreqx(0.0))) / log(2.0) / getoctavesfreq();
 }
@@ -185,11 +185,11 @@ REALTYPE FilterParams::getfreqpos(REALTYPE freq)
 /*
  * Get the freq. response of the formant filter
  */
-void FilterParams::formantfilterH(int nvowel, int nfreqs, REALTYPE *freqs)
+void FilterParams::formantfilterH(int nvowel, int nfreqs, float *freqs)
 {
-    REALTYPE c[3], d[3];
-    REALTYPE filter_freq, filter_q, filter_amp;
-    REALTYPE omega, sn, cs, alpha;
+    float c[3], d[3];
+    float filter_freq, filter_q, filter_amp;
+    float omega, sn, cs, alpha;
 
     for(int i = 0; i < nfreqs; i++)
         freqs[i] = 0.0;
@@ -211,7 +211,7 @@ void FilterParams::formantfilterH(int nvowel, int nfreqs, REALTYPE *freqs)
             sn    = sin(omega);
             cs    = cos(omega);
             alpha = sn / (2 * filter_q);
-            REALTYPE tmp = 1 + alpha;
+            float tmp = 1 + alpha;
             c[0]  = alpha / tmp *sqrt(filter_q + 1);
             c[1]  = 0;
             c[2]  = -alpha / tmp *sqrt(filter_q + 1);
@@ -223,19 +223,19 @@ void FilterParams::formantfilterH(int nvowel, int nfreqs, REALTYPE *freqs)
 
 
         for(int i = 0; i < nfreqs; i++) {
-            REALTYPE freq = getfreqx(i / (REALTYPE) nfreqs);
+            float freq = getfreqx(i / (float) nfreqs);
             if(freq > SAMPLE_RATE / 2) {
                 for(int tmp = i; tmp < nfreqs; tmp++)
                     freqs[tmp] = 0.0;
                 break;
             }
-            REALTYPE fr = freq / SAMPLE_RATE * PI * 2.0;
-            REALTYPE x  = c[0], y = 0.0;
+            float fr = freq / SAMPLE_RATE * PI * 2.0;
+            float x  = c[0], y = 0.0;
             for(int n = 1; n < 3; n++) {
                 x += cos(n * fr) * c[n];
                 y -= sin(n * fr) * c[n];
             }
-            REALTYPE h = x * x + y * y;
+            float h = x * x + y * y;
             x = 1.0;
             y = 0.0;
             for(int n = 1; n < 3; n++) {
@@ -258,22 +258,22 @@ void FilterParams::formantfilterH(int nvowel, int nfreqs, REALTYPE *freqs)
 /*
  * Transforms a parameter to the real value
  */
-REALTYPE FilterParams::getformantfreq(unsigned char freq)
+float FilterParams::getformantfreq(unsigned char freq)
 {
-    REALTYPE result = getfreqx(freq / 127.0);
+    float result = getfreqx(freq / 127.0);
     return result;
 }
 
-REALTYPE FilterParams::getformantamp(unsigned char amp)
+float FilterParams::getformantamp(unsigned char amp)
 {
-    REALTYPE result = pow(0.1, (1.0 - amp / 127.0) * 4.0);
+    float result = pow(0.1, (1.0 - amp / 127.0) * 4.0);
     return result;
 }
 
-REALTYPE FilterParams::getformantq(unsigned char q)
+float FilterParams::getformantq(unsigned char q)
 {
     //temp
-    REALTYPE result = pow(25.0, (q - 32.0) / 64.0);
+    float result = pow(25.0, (q - 32.0) / 64.0);
     return result;
 }
 

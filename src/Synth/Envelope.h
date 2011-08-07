@@ -32,30 +32,30 @@ class Envelope
     public:
 
         /**Constructor*/
-        Envelope(class EnvelopeParams *envpars, REALTYPE basefreq);
+        Envelope(class EnvelopeParams *envpars, float basefreq);
         /**Destructor*/
         ~Envelope();
         void relasekey();
-        REALTYPE envout();
-        REALTYPE envout_dB();
+        float envout();
+        float envout_dB();
         /**Determines the status of the Envelope
          * @return returns 1 if the envelope is finished*/
         bool finished() const;
     private:
         int      envpoints;
         int      envsustain; //"-1" means disabled
-        REALTYPE envdt[MAX_ENVELOPE_POINTS]; //millisecons
-        REALTYPE envval[MAX_ENVELOPE_POINTS]; // [0.0 .. 1.0]
-        REALTYPE envstretch;
+        float envdt[MAX_ENVELOPE_POINTS]; //millisecons
+        float envval[MAX_ENVELOPE_POINTS]; // [0.0 .. 1.0]
+        float envstretch;
         int      linearenvelope;
 
         int      currentpoint; //current envelope point (starts from 1)
         int      forcedrelase;
         bool     keyreleased; //if the key was released
         bool     envfinish;
-        REALTYPE t; // the time from the last point
-        REALTYPE inct; // the time increment
-        REALTYPE envoutval; //used to do the forced release
+        float t; // the time from the last point
+        float inct; // the time increment
+        float envoutval; //used to do the forced release
 };
 
 

@@ -249,10 +249,10 @@ void XMLwrapper::addpar(const string &name, int val)
                   val).c_str());
 }
 
-void XMLwrapper::addparreal(const string &name, REALTYPE val)
+void XMLwrapper::addparreal(const string &name, float val)
 {
     addparams("par_real", 2, "name", name.c_str(), "value",
-              stringFrom<REALTYPE>(val).c_str());
+              stringFrom<float>(val).c_str());
 }
 
 void XMLwrapper::addparbool(const string &name, int val)
@@ -559,7 +559,7 @@ string XMLwrapper::getparstr(const string &name,
     return defaultpar;
 }
 
-REALTYPE XMLwrapper::getparreal(const char *name, REALTYPE defaultpar) const
+float XMLwrapper::getparreal(const char *name, float defaultpar) const
 {
     const mxml_node_t *tmp = mxmlFindElement(node,
                                              node,
@@ -574,15 +574,15 @@ REALTYPE XMLwrapper::getparreal(const char *name, REALTYPE defaultpar) const
     if(strval == NULL)
         return defaultpar;
 
-    return stringTo<REALTYPE>(strval);
+    return stringTo<float>(strval);
 }
 
-REALTYPE XMLwrapper::getparreal(const char *name,
-                                REALTYPE defaultpar,
-                                REALTYPE min,
-                                REALTYPE max) const
+float XMLwrapper::getparreal(const char *name,
+                                float defaultpar,
+                                float min,
+                                float max) const
 {
-    REALTYPE result = getparreal(name, defaultpar);
+    float result = getparreal(name, defaultpar);
 
     if(result < min)
         result = min;

@@ -20,15 +20,15 @@ OutMgr &OutMgr::getInstance()
 
 OutMgr::OutMgr()
     :wave(new WavEngine()),
-    priBuf(new REALTYPE[4096],new REALTYPE[4096]),priBuffCurrent(priBuf),master(Master::getInstance())
+    priBuf(new float[4096],new float[4096]),priBuffCurrent(priBuf),master(Master::getInstance())
 {
     currentOut = NULL;
     stales = 0;
     master = Master::getInstance();
 
     //init samples
-    outr = new REALTYPE[SOUND_BUFFER_SIZE];
-    outl = new REALTYPE[SOUND_BUFFER_SIZE];
+    outr = new float[SOUND_BUFFER_SIZE];
+    outl = new float[SOUND_BUFFER_SIZE];
 };
 
 OutMgr::~OutMgr()
@@ -51,7 +51,7 @@ OutMgr::~OutMgr()
  * 8) Lets return those samples to the primary and secondary outputs
  * 9) Lets wait for another tick
  */
-const Stereo<REALTYPE *> OutMgr::tick(unsigned int frameSize)
+const Stereo<float *> OutMgr::tick(unsigned int frameSize)
 {
     pthread_mutex_lock(&(master.mutex));
     InMgr::getInstance().flush();
@@ -64,7 +64,7 @@ const Stereo<REALTYPE *> OutMgr::tick(unsigned int frameSize)
         pthread_mutex_unlock(&(master.mutex));
         addSmps(outl,outr);
     }
-    Stereo<REALTYPE *> ans = priBuffCurrent;
+    Stereo<float *> ans = priBuffCurrent;
     ans.l -= frameSize;
     ans.r -= frameSize;
     //cout << storedSmps() << '=' << frameSize << endl;
@@ -114,22 +114,22 @@ string OutMgr::getSink() const
     return "ERROR";
 }
 
-void OutMgr::addSmps(REALTYPE *l, REALTYPE *r)
+void OutMgr::addSmps(float *l, float *r)
 {
     //allow wave file to syphon off stream
-    wave->push(Stereo<REALTYPE *>(l,r),SOUND_BUFFER_SIZE);
+    wave->push(Stereo<float *>(l,r),SOUND_BUFFER_SIZE);
 
     if(currentOut->getSampleRate() != SAMPLE_RATE) { //we need to resample
         //cout << "BAD RESAMPLING" << endl;
         Stereo<Sample> smps(Sample(SOUND_BUFFER_SIZE, l), Sample(SOUND_BUFFER_SIZE, r));
         smps.l.resample(SAMPLE_RATE,currentOut->getSampleRate());
         smps.r.resample(SAMPLE_RATE,currentOut->getSampleRate());
-        memcpy(priBuffCurrent.l, smps.l.c_buf(), SOUND_BUFFER_SIZE*sizeof(REALTYPE));
-        memcpy(priBuffCurrent.r, smps.r.c_buf(), SOUND_BUFFER_SIZE*sizeof(REALTYPE));
+        memcpy(priBuffCurrent.l, smps.l.c_buf(), SOUND_BUFFER_SIZE*sizeof(float));
+        memcpy(priBuffCurrent.r, smps.r.c_buf(), SOUND_BUFFER_SIZE*sizeof(float));
     }
     else { //just copy the samples
-        memcpy(priBuffCurrent.l, l, SOUND_BUFFER_SIZE*sizeof(REALTYPE));
-        memcpy(priBuffCurrent.r, r, SOUND_BUFFER_SIZE*sizeof(REALTYPE));
+        memcpy(priBuffCurrent.l, l, SOUND_BUFFER_SIZE*sizeof(float));
+        memcpy(priBuffCurrent.r, r, SOUND_BUFFER_SIZE*sizeof(float));
     }
     priBuffCurrent.l += SOUND_BUFFER_SIZE;
     priBuffCurrent.r += SOUND_BUFFER_SIZE;
@@ -142,8 +142,8 @@ void OutMgr::removeStaleSmps()
         return;
 
     //memset is possibly unneeded
-    memset(priBuf.l, '0', 4096*sizeof(REALTYPE));
-    memset(priBuf.r, '0', 4096*sizeof(REALTYPE));
+    memset(priBuf.l, '0', 4096*sizeof(float));
+    memset(priBuf.r, '0', 4096*sizeof(float));
     priBuffCurrent = priBuf;
     stales = 0;
 }

@@ -52,7 +52,7 @@ class EnvelopeParams:public Presets
         void defaults();
         void getfromXML(XMLwrapper *xml);
 
-        REALTYPE getdt(char i);
+        float getdt(char i);
 
         /* MIDI Parameters */
         unsigned char Pfreemode; //1 daca este in modul free sau 0 daca este in mod ADSR,ASR,...

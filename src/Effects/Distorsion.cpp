@@ -29,13 +29,13 @@
  */
 
 void waveshapesmps(int n,
-                   REALTYPE *smps,
+                   float *smps,
                    unsigned char type,
                    unsigned char drive)
 {
     int      i;
-    REALTYPE ws = drive / 127.0;
-    REALTYPE tmpv;
+    float ws = drive / 127.0;
+    float tmpv;
 
     switch(type) {
     case 1:
@@ -92,7 +92,7 @@ void waveshapesmps(int n,
     case 7:
         ws = pow(2.0, -ws * ws * 8.0); //Limiter
         for(i = 0; i < n; i++) {
-            REALTYPE tmp = smps[i];
+            float tmp = smps[i];
             if(fabs(tmp) > ws) {
                 if(tmp >= 0.0)
                     smps[i] = 1.0;
@@ -106,7 +106,7 @@ void waveshapesmps(int n,
     case 8:
         ws = pow(2.0, -ws * ws * 8.0); //Upper Limiter
         for(i = 0; i < n; i++) {
-            REALTYPE tmp = smps[i];
+            float tmp = smps[i];
             if(tmp > ws)
                 smps[i] = ws;
             smps[i] *= 2.0;
@@ -115,7 +115,7 @@ void waveshapesmps(int n,
     case 9:
         ws = pow(2.0, -ws * ws * 8.0); //Lower Limiter
         for(i = 0; i < n; i++) {
-            REALTYPE tmp = smps[i];
+            float tmp = smps[i];
             if(tmp < -ws)
                 smps[i] = -ws;
             smps[i] *= 2.0;
@@ -124,7 +124,7 @@ void waveshapesmps(int n,
     case 10:
         ws = (pow(2.0, ws * 6.0) - 1.0) / pow(2.0, 6.0); //Inverse Limiter
         for(i = 0; i < n; i++) {
-            REALTYPE tmp = smps[i];
+            float tmp = smps[i];
             if(fabs(tmp) > ws) {
                 if(tmp >= 0.0)
                     smps[i] = tmp - ws;
@@ -149,7 +149,7 @@ void waveshapesmps(int n,
         else
             tmpv = 1.0;
         for(i = 0; i < n; i++) {
-            REALTYPE tmp = smps[i] * ws;
+            float tmp = smps[i] * ws;
             if((tmp > -2.0) && (tmp < 1.0))
                 smps[i] = tmp * (1.0 - tmp) * (tmp + 2.0) / tmpv;
             else
@@ -163,7 +163,7 @@ void waveshapesmps(int n,
         else
             tmpv = 1.0;
         for(i = 0; i < n; i++) {
-            REALTYPE tmp = smps[i] * ws;
+            float tmp = smps[i] * ws;
             if((tmp > -1.0) && (tmp < 1.618034))
                 smps[i] = tmp * (1.0 - tmp) / tmpv;
             else
@@ -180,7 +180,7 @@ void waveshapesmps(int n,
         else
             tmpv = 0.5 - 1.0 / (exp(ws) + 1.0);
         for(i = 0; i < n; i++) {
-            REALTYPE tmp = smps[i] * ws;
+            float tmp = smps[i] * ws;
             if(tmp < -10.0)
                 tmp = -10.0;
             else
@@ -196,8 +196,8 @@ void waveshapesmps(int n,
 
 
 Distorsion::Distorsion(const int &insertion_,
-                       REALTYPE *efxoutl_,
-                       REALTYPE *efxoutr_)
+                       float *efxoutl_,
+                       float *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0)
 {
     lpfl = new AnalogFilter(2, 22000, 1, 0);
@@ -246,7 +246,7 @@ void Distorsion::cleanup()
  * Apply the filters
  */
 
-void Distorsion::applyfilters(REALTYPE *efxoutl, REALTYPE *efxoutr)
+void Distorsion::applyfilters(float *efxoutl, float *efxoutr)
 {
     lpfl->filterout(efxoutl);
     hpfl->filterout(efxoutl);
@@ -263,9 +263,9 @@ void Distorsion::applyfilters(REALTYPE *efxoutl, REALTYPE *efxoutr)
 void Distorsion::out(const Stereo<float *> &smp)
 {
     int      i;
-    REALTYPE l, r, lout, rout;
+    float l, r, lout, rout;
 
-    REALTYPE inputvol = pow(5.0, (Pdrive - 32.0) / 127.0);
+    float inputvol = pow(5.0, (Pdrive - 32.0) / 127.0);
     if(Pnegate != 0)
         inputvol *= -1.0;
 
@@ -297,7 +297,7 @@ void Distorsion::out(const Stereo<float *> &smp)
         for(i = 0; i < SOUND_BUFFER_SIZE; i++)
             efxoutr[i] = efxoutl[i];
 
-    REALTYPE level = dB2rap(60.0 * Plevel / 127.0 - 40.0);
+    float level = dB2rap(60.0 * Plevel / 127.0 - 40.0);
     for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
         lout = efxoutl[i];
         rout = efxoutr[i];
@@ -346,7 +346,7 @@ void Distorsion::setlrcross(unsigned char Plrcross)
 void Distorsion::setlpf(unsigned char Plpf)
 {
     this->Plpf = Plpf;
-    REALTYPE fr = exp(pow(Plpf / 127.0, 0.5) * log(25000.0)) + 40;
+    float fr = exp(pow(Plpf / 127.0, 0.5) * log(25000.0)) + 40;
     lpfl->setfreq(fr);
     lpfr->setfreq(fr);
 }
@@ -354,7 +354,7 @@ void Distorsion::setlpf(unsigned char Plpf)
 void Distorsion::sethpf(unsigned char Phpf)
 {
     this->Phpf = Phpf;
-    REALTYPE fr = exp(pow(Phpf / 127.0, 0.5) * log(25000.0)) + 20.0;
+    float fr = exp(pow(Phpf / 127.0, 0.5) * log(25000.0)) + 20.0;
     hpfl->setfreq(fr);
     hpfr->setfreq(fr);
 }

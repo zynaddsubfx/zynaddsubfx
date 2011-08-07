@@ -61,9 +61,9 @@ this->pars=pars;} {}
   Function {draw()} {} {
     code {int ox=x(),oy=y(),lx=w(),ly=h();
 if (!visible()) return;
-REALTYPE smps[lx];
+float smps[lx];
 
-REALTYPE realbw=pars->getprofile(smps,lx);
+float realbw=pars->getprofile(smps,lx);
 bool active=active_r();
 
 //draw the equivalent bandwidth
@@ -140,14 +140,14 @@ for (int i=1;i<maxharmonic;i++){
 	fl_line_style(FL_DOT);
 	if (i%5==0) fl_line_style(0);
 	if (i%10==0) fl_color(160,160,160);
-	int kx=(int)(lx/(REALTYPE)maxharmonic*i);
+	int kx=(int)(lx/(float)maxharmonic*i);
 	fl_line(ox+kx,oy,ox+kx,oy+ly);
 };
 
 
 
 int n=OSCIL_SIZE/2;
-REALTYPE spc[n];
+float spc[n];
 for (int i=0;i<n;i++) spc[i]=0.0;
 
 pthread_mutex_lock(&master->mutex);
@@ -156,21 +156,21 @@ pthread_mutex_unlock(&master->mutex);
 
 
 //normalize
-REALTYPE max=0;
+float max=0;
 for (int i=0;i<n;i++){
-   REALTYPE x=fabs(spc[i]);
+   float x=fabs(spc[i]);
    if (max<x) max=x;
 }
 if (max<0.000001) max=1.0;
 max=max*1.05;
 
-REALTYPE spectrum[lx];
+float spectrum[lx];
 for (int i=0;i<lx;i++) spectrum[i]=0;
 
 
 for (int i=1;i<n;i++){
-	REALTYPE nhr=pars->getNhr(i);
-	int kx=(int)(lx/(REALTYPE)maxharmonic*nhr);
+	float nhr=pars->getNhr(i);
+	int kx=(int)(lx/(float)maxharmonic*nhr);
 	if ((kx<0)||(kx>lx)) continue;
 
         spectrum[kx]=spc[i-1]/max+1e-9;
@@ -185,12 +185,12 @@ if (pars->Pmode==2){
    for (int i=1;i<lx;i++){
 	if ((spectrum[i]>1e-10)||(i==(lx-1))){
 		int delta=i-old;
-		REALTYPE val1=spectrum[old];
-		REALTYPE val2=spectrum[i];
+		float val1=spectrum[old];
+		float val2=spectrum[i];
 
-		REALTYPE idelta=1.0/delta;
+		float idelta=1.0/delta;
 		for (int j=0;j<delta;j++){
-			REALTYPE x=idelta*j;
+			float x=idelta*j;
 			spectrum[old+j]=val1*(1.0-x)+val2*x;
 		};
 		old=i;
@@ -200,7 +200,7 @@ if (pars->Pmode==2){
 };
 
 for (int i=0;i<lx;i++){
-	REALTYPE x=spectrum[i];
+	float x=spectrum[i];
         if (x>dB2rap(-maxdb)) x=rap2dB(x)/maxdb+1;
              else continue;
        	int yy=(int)(x*ly);

@@ -70,7 +70,7 @@ void WavEngine::Stop()
     delete pThread;
 }
 
-void WavEngine::push(Stereo<REALTYPE *> smps, size_t len)
+void WavEngine::push(Stereo<float *> smps, size_t len)
 {
     if(!pThread)
         return;

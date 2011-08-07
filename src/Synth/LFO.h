@@ -35,18 +35,18 @@ class LFO
          * @param lfopars pointer to a LFOParams object
          * @param basefreq base frequency of LFO
          */
-        LFO(LFOParams *lfopars, REALTYPE basefreq);
+        LFO(LFOParams *lfopars, float basefreq);
         /**Deconstructor*/
         ~LFO();
-        REALTYPE lfoout();
-        REALTYPE amplfoout();
+        float lfoout();
+        float amplfoout();
     private:
-        REALTYPE x;
-        REALTYPE incx, incrnd, nextincrnd;
-        REALTYPE amp1, amp2; // used for randomness
-        REALTYPE lfointensity;
-        REALTYPE lfornd, lfofreqrnd;
-        REALTYPE lfodelay;
+        float x;
+        float incx, incrnd, nextincrnd;
+        float amp1, amp2; // used for randomness
+        float lfointensity;
+        float lfornd, lfofreqrnd;
+        float lfodelay;
         /**\todo see if an enum would be better here*/
         char lfotype;
         int  freqrndenabled;

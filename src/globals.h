@@ -25,11 +25,8 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-//What float type I use for internal sampledata
-#define REALTYPE float
-
 struct FFTFREQS {
-    REALTYPE *s, *c; //sine and cosine components
+    float *s, *c; //sine and cosine components
 };
 
 extern void newFFTFREQS(FFTFREQS *f, int size);
@@ -171,8 +168,8 @@ extern int OSCIL_SIZE;
  */
 #define INTERPOLATE_AMPLITUDE(a, b, x, size) ((a) \
                                               + ((b) \
-                                                 - (a)) * (REALTYPE)(x) \
-                                              / (REALTYPE) (size))
+                                                 - (a)) * (float)(x) \
+                                              / (float) (size))
 
 
 /*
@@ -190,7 +187,7 @@ extern int OSCIL_SIZE;
                                                            i < size; \
                                                            i++) \
                               data_[i] = 0;}
-#define ZERO_REALTYPE(data, size) {REALTYPE *data_ = (REALTYPE *) data; \
+#define ZERO_float(data, size) {float *data_ = (float *) data; \
                                    for(int i = 0; \
                                        i < size; \
                                        i++) \

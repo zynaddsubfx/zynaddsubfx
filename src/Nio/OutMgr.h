@@ -16,7 +16,7 @@ class OutMgr
         ~OutMgr();
 
         /**Execute a tick*/
-        const Stereo<REALTYPE *> tick(unsigned int frameSize);
+        const Stereo<float *> tick(unsigned int frameSize);
 
         /**Request a new set of samples
          * @param n number of requested samples (defaults to 1)
@@ -43,7 +43,7 @@ class OutMgr
         friend class EngineMgr;
     private:
         OutMgr();
-        void addSmps(REALTYPE *l, REALTYPE *r);
+        void addSmps(float *l, float *r);
         unsigned int  storedSmps() const {return priBuffCurrent.l - priBuf.l;};
         void removeStaleSmps();
 
@@ -52,11 +52,11 @@ class OutMgr
         sem_t requested;
 
         /**Buffer*/
-        Stereo<REALTYPE *> priBuf;          //buffer for primary drivers
-        Stereo<REALTYPE *> priBuffCurrent; //current array accessor
+        Stereo<float *> priBuf;          //buffer for primary drivers
+        Stereo<float *> priBuffCurrent; //current array accessor
 
-        REALTYPE *outl;
-        REALTYPE *outr;
+        float *outl;
+        float *outr;
         class Master &master;
 
         int stales;

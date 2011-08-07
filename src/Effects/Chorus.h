@@ -34,7 +34,7 @@
 class Chorus:public Effect
 {
     public:
-        Chorus(const int &insetion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_);
+        Chorus(const int &insetion_, float *efxoutl_, float *efxoutr_);
         /**Destructor*/
         ~Chorus();
         void out(const Stereo<float *> &input);
@@ -101,13 +101,13 @@ class Chorus:public Effect
         void setlrcross(unsigned char Plrcross);
 
         //Internal Values
-        REALTYPE depth, delay, fb, lrcross, panning;
-        REALTYPE dl1, dl2, dr1, dr2, lfol, lfor;
+        float depth, delay, fb, lrcross, panning;
+        float dl1, dl2, dr1, dr2, lfol, lfor;
         int      maxdelay;
         Stereo<Sample> delaySample;
         int dlk, drk, dlhi, dlhi2;
-        REALTYPE getdelay(REALTYPE xlfo);
-        REALTYPE dllo, mdel;
+        float getdelay(float xlfo);
+        float dllo, mdel;
 };
 
 #endif

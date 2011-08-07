@@ -38,7 +38,7 @@
 class Reverb:public Effect
 {
     public:
-        Reverb(const int &insertion_, REALTYPE *efxoutl_, REALTYPE *efxoutr_);
+        Reverb(const int &insertion_, float *efxoutl_, float *efxoutr_);
         ~Reverb();
         void out(const Stereo<float *> &smp);
         void cleanup();
@@ -102,32 +102,32 @@ class Reverb:public Effect
         void setroomsize(unsigned char Proomsize);
         void setbandwidth(unsigned char Pbandwidth);
 
-        REALTYPE pan, erbalance;
+        float pan, erbalance;
         //Parameters
         int      lohidamptype; /**<0=disable,1=highdamp(lowpass),2=lowdamp(highpass)*/
         int      idelaylen, rdelaylen;
         int      idelayk;
-        REALTYPE lohifb, idelayfb, roomsize, rs; //rs is used to "normalise" the volume according to the roomsize
+        float lohifb, idelayfb, roomsize, rs; //rs is used to "normalise" the volume according to the roomsize
         int      comblen[REV_COMBS * 2];
         int      aplen[REV_APS * 2];
         Unison  *bandwidth;
 
         //Internal Variables
 
-        REALTYPE *comb[REV_COMBS * 2];
+        float *comb[REV_COMBS * 2];
 
         int      combk[REV_COMBS * 2];
-        REALTYPE combfb[REV_COMBS * 2]; /**<feedback-ul fiecarui filtru "comb"*/
-        REALTYPE lpcomb[REV_COMBS * 2]; /**<pentru Filtrul LowPass*/
+        float combfb[REV_COMBS * 2]; /**<feedback-ul fiecarui filtru "comb"*/
+        float lpcomb[REV_COMBS * 2]; /**<pentru Filtrul LowPass*/
 
-        REALTYPE *ap[REV_APS * 2];
+        float *ap[REV_APS * 2];
 
         int apk[REV_APS * 2];
 
-        REALTYPE     *idelay;
+        float     *idelay;
         AnalogFilter *lpf, *hpf; //filters
 
-        void processmono(int ch, REALTYPE *output, REALTYPE *inputbuf);
+        void processmono(int ch, float *output, float *inputbuf);
 };
 
 #endif

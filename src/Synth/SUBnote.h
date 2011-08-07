@@ -33,21 +33,21 @@
 class SUBnote :public SynthNote
 {
     public:
-        SUBnote(SUBnoteParameters *parameters, Controller *ctl_, REALTYPE freq,
-                REALTYPE velocity, int portamento_, int midinote, bool besilent);
+        SUBnote(SUBnoteParameters *parameters, Controller *ctl_, float freq,
+                float velocity, int portamento_, int midinote, bool besilent);
         ~SUBnote();
 
-        void legatonote(REALTYPE freq, REALTYPE velocity, int portamento_,
+        void legatonote(float freq, float velocity, int portamento_,
                         int midinote, bool externcall);
 
-        int noteout(REALTYPE *outl, REALTYPE *outr); //note output,return 0 if the note is finished
+        int noteout(float *outl, float *outr); //note output,return 0 if the note is finished
         void relasekey();
         int finished() const;
     private:
 
-        void setup(REALTYPE freq, REALTYPE velocity, int portamento_, int midinote, bool legato=false);
+        void setup(float freq, float velocity, int portamento_, int midinote, bool legato=false);
         void computecurrentparameters();
-        void initparameters(REALTYPE freq);
+        void initparameters(float freq);
         void KillNote();
 
         SUBnoteParameters *pars;
@@ -58,8 +58,8 @@ class SUBnote :public SynthNote
         int numharmonics; //number of harmonics (after the too higher hamonics are removed)
         int firstnumharmonics; //To keep track of the first note's numharmonics value, useful in legato mode.
         int start; //how the harmonics start
-        REALTYPE  basefreq;
-        REALTYPE  panning;
+        float  basefreq;
+        float  panning;
         Envelope *AmpEnvelope;
         Envelope *FreqEnvelope;
         Envelope *BandWidthEnvelope;
@@ -71,33 +71,33 @@ class SUBnote :public SynthNote
         //internal values
         ONOFFTYPE NoteEnabled;
         int      firsttick, portamento;
-        REALTYPE volume, oldamplitude, newamplitude;
+        float volume, oldamplitude, newamplitude;
 
-        REALTYPE GlobalFilterCenterPitch; //octaves
-        REALTYPE GlobalFilterFreqTracking;
+        float GlobalFilterCenterPitch; //octaves
+        float GlobalFilterFreqTracking;
 
         struct bpfilter {
-            REALTYPE freq, bw, amp; //filter parameters
-            REALTYPE a1, a2, b0, b2; //filter coefs. b1=0
-            REALTYPE xn1, xn2, yn1, yn2; //filter internal values
+            float freq, bw, amp; //filter parameters
+            float a1, a2, b0, b2; //filter coefs. b1=0
+            float xn1, xn2, yn1, yn2; //filter internal values
         };
 
         void initfilter(bpfilter &filter,
-                        REALTYPE freq,
-                        REALTYPE bw,
-                        REALTYPE amp,
-                        REALTYPE mag);
+                        float freq,
+                        float bw,
+                        float amp,
+                        float mag);
         void computefiltercoefs(bpfilter &filter,
-                                REALTYPE freq,
-                                REALTYPE bw,
-                                REALTYPE gain);
-        inline void filter(bpfilter &filter, REALTYPE *smps);
+                                float freq,
+                                float bw,
+                                float gain);
+        inline void filter(bpfilter &filter, float *smps);
 
         bpfilter *lfilter, *rfilter;
 
         Controller *ctl;
         int      oldpitchwheel, oldbandwidth;
-        REALTYPE globalfiltercenterq;
+        float globalfiltercenterq;
 };
 
 #endif
