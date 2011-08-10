@@ -23,6 +23,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstdio>
+#include <cassert>
 #include "../globals.h"
 #include "SUBnote.h"
 #include "../Misc/Util.h"
@@ -313,18 +314,29 @@ void SUBnote::initfilter(bpfilter &filter,
 /*
  * Do the filtering
  */
+inline float SUBnote::SubFilter(bpfilter &filter, const float input) const
+{
+    const float out = input * filter.b0 + filter.b2 * filter.xn2
+                      - filter.a1 * filter.yn1 - filter.a2 * filter.yn2;
+    filter.xn2 = filter.xn1;
+    filter.xn1 = input;
+    filter.yn2 = filter.yn1;
+    filter.yn1 = out;
+    return out;
+}
+
 void SUBnote::filter(bpfilter &filter, float *smps)
 {
-    int      i;
-    float out;
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        out = smps[i] * filter.b0 + filter.b2 * filter.xn2
-              - filter.a1 * filter.yn1 - filter.a2 * filter.yn2;
-        filter.xn2 = filter.xn1;
-        filter.xn1 = smps[i];
-        filter.yn2 = filter.yn1;
-        filter.yn1 = out;
-        smps[i]    = out;
+    assert(SOUND_BUFFER_SIZE % 8 == 0);
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i += 8) {
+        smps[i] =   SubFilter(filter, smps[i]);
+        smps[i+1] = SubFilter(filter, smps[i+1]);
+        smps[i+2] = SubFilter(filter, smps[i+2]);
+        smps[i+3] = SubFilter(filter, smps[i+3]);
+        smps[i+4] = SubFilter(filter, smps[i+4]);
+        smps[i+5] = SubFilter(filter, smps[i+5]);
+        smps[i+6] = SubFilter(filter, smps[i+6]);
+        smps[i+7] = SubFilter(filter, smps[i+7]);
     }
 }
 
