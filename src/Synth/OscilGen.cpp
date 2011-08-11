@@ -29,6 +29,17 @@
 #include <stdio.h>
 
 
+//operations on FFTfreqs
+inline void clearAll(FFTFREQS &freqs)
+{
+    memset(freqs.s, 0, OSCIL_SIZE / 2 * sizeof(float));
+    memset(freqs.c, 0, OSCIL_SIZE / 2 * sizeof(float));
+}
+
+inline void clearDC(FFTFREQS &freqs)
+{
+    freqs.s[0] = freqs.c[0] = 0.0f;
+}
 
 OscilGen::OscilGen(FFTwrapper *fft_, Resonance *res_):Presets()
 {
@@ -121,12 +132,8 @@ void OscilGen::defaults()
     Padaptiveharmonicsbasefreq = 128;
     Padaptiveharmonicspar      = 50;
 
-    for(int i = 0; i < OSCIL_SIZE / 2; i++) {
-        oscilFFTfreqs.s[i]    = 0.0;
-        oscilFFTfreqs.c[i]    = 0.0;
-        basefuncFFTfreqs.s[i] = 0.0;
-        basefuncFFTfreqs.c[i] = 0.0;
-    }
+    clearAll(oscilFFTfreqs);
+    clearAll(basefuncFFTfreqs);
     oscilprepared = 0;
     oldfilterpars = 0;
     oldsapars     = 0;
@@ -294,15 +301,10 @@ void OscilGen::changebasefunction()
     if(Pcurrentbasefunc != 0) {
         getbasefunction(tmpsmps);
         fft->smps2freqs(tmpsmps, basefuncFFTfreqs);
-        basefuncFFTfreqs.c[0] = 0.0;
+        clearDC(basefuncFFTfreqs);
     }
-    else {
-        for(int i = 0; i < OSCIL_SIZE / 2; i++) {
-            basefuncFFTfreqs.s[i] = 0.0;
-            basefuncFFTfreqs.c[i] = 0.0;
-        }
-        //in this case basefuncFFTfreqs_ are not used
-    }
+    else //in this case basefuncFFTfreqs are not used
+        clearAll(basefuncFFTfreqs);
     oscilprepared = 0;
     oldbasefunc   = Pcurrentbasefunc;
     oldbasepar    = Pbasefuncpar;
@@ -324,7 +326,7 @@ void OscilGen::waveshape()
     if(Pwaveshapingfunction == 0)
         return;
 
-    oscilFFTfreqs.c[0] = 0.0; //remove the DC
+    clearDC(oscilFFTfreqs);
     //reduce the amplitude of the freqs near the nyquist
     for(i = 1; i < OSCIL_SIZE / 8; i++) {
         float tmp = i / (OSCIL_SIZE / 8.0);
@@ -387,7 +389,7 @@ void OscilGen::modulation()
         break;
     }
 
-    oscilFFTfreqs.c[0] = 0.0; //remove the DC
+    clearDC(oscilFFTfreqs); //remove the DC
     //reduce the amplitude of the freqs near the nyquist
     for(i = 1; i < OSCIL_SIZE / 8; i++) {
         float tmp = i / (OSCIL_SIZE / 8.0);
@@ -602,10 +604,7 @@ void OscilGen::prepare()
             hmag[i] = 0.0;
 
 
-    for(i = 0; i < OSCIL_SIZE / 2; i++) {
-        oscilFFTfreqs.c[i] = 0.0;
-        oscilFFTfreqs.s[i] = 0.0;
-    }
+    clearAll(oscilFFTfreqs);
     if(Pcurrentbasefunc == 0) { //the sine case
         for(i = 0; i < MAX_AD_HARMONICS; i++) {
             oscilFFTfreqs.c[i + 1] = -hmag[i] * sin(hphase[i] * (i + 1)) / 2.0;
@@ -647,7 +646,7 @@ void OscilGen::prepare()
     if(Pharmonicshiftfirst == 0)
         shiftharmonics();
 
-    oscilFFTfreqs.c[0] = 0.0;
+    clearDC(oscilFFTfreqs);
 
     oldhmagtype      = Phmagtype;
     oldharmonicshift = Pharmonicshift + Pharmonicshiftfirst * 256;
@@ -667,11 +666,9 @@ void OscilGen::adaptiveharmonic(FFTFREQS f, float freq)
     for(int i = 0; i < OSCIL_SIZE / 2; i++) {
         inf.s[i] = f.s[i];
         inf.c[i] = f.c[i];
-        f.s[i]   = 0.0;
-        f.c[i]   = 0.0;
     }
-    inf.c[0] = 0.0;
-    inf.s[0] = 0.0;
+    clearAll(f);
+    clearDC(inf);
 
     float hc = 0.0, hs = 0.0;
     float basefreq = 30.0 * pow(10.0, Padaptiveharmonicsbasefreq / 128.0);
@@ -723,8 +720,7 @@ void OscilGen::adaptiveharmonic(FFTFREQS f, float freq)
 
     f.c[1] += f.c[0];
     f.s[1] += f.s[0];
-    f.c[0]  = 0.0;
-    f.s[0]  = 0.0;
+    clearDC(f);
     deleteFFTFREQS(&inf);
 }
 
@@ -819,10 +815,7 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
     outpos = (outpos + 2 * OSCIL_SIZE) % OSCIL_SIZE;
 
 
-    for(i = 0; i < OSCIL_SIZE / 2; i++) {
-        outoscilFFTfreqs.c[i] = 0.0;
-        outoscilFFTfreqs.s[i] = 0.0;
-    }
+    clearAll(outoscilFFTfreqs);
 
     nyquist = (int)(0.5 * SAMPLE_RATE / fabs(freqHz)) + 2;
     if(ADvsPAD)
@@ -959,8 +952,8 @@ void OscilGen::getspectrum(int n, float *spc, int what)
     if(what == 0) {
         for(int i = 0; i < n; i++)
             outoscilFFTfreqs.s[i] = outoscilFFTfreqs.c[i] = spc[i];
-        for(int i = n; i < OSCIL_SIZE / 2; i++)
-            outoscilFFTfreqs.s[i] = outoscilFFTfreqs.c[i] = 0.0;
+        memset(outoscilFFTfreqs.s+n, 0, (OSCIL_SIZE / 2 - n) * sizeof(float));
+        memset(outoscilFFTfreqs.c+n, 0, (OSCIL_SIZE / 2 - n) * sizeof(float));
         adaptiveharmonic(outoscilFFTfreqs, 0.0);
         for(int i = 0; i < n; i++)
             spc[i] = outoscilFFTfreqs.s[i];
@@ -1168,7 +1161,7 @@ void OscilGen::getfromXML(XMLwrapper *xml)
 
         float max = 0.0;
 
-        basefuncFFTfreqs.c[0] = 0.0;
+        clearDC(basefuncFFTfreqs);
         for(int i = 0; i < OSCIL_SIZE / 2; i++) {
             if(max < fabs(basefuncFFTfreqs.c[i]))
                 max = fabs(basefuncFFTfreqs.c[i]);
