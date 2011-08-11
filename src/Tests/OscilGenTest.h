@@ -91,4 +91,25 @@ class OscilGenTest:public CxxTest::TestSuite
             TS_ASSERT_DELTA(outR[47], 0.003425, 0.0001);
             TS_ASSERT_DELTA(outR[65], 0.001293, 0.0001);
         }
+
+        //performance testing
+        void testSpeed() {
+            const int samps = 15000;
+
+            int t_on = clock(); // timer before calling func
+            for(int i = 0; i < samps; ++i)
+                oscil->prepare();
+            int t_off = clock(); // timer when func returns
+
+            printf("OscilGenTest: %f seconds for %d prepares.\n",
+                   (static_cast<float>(t_off - t_on)) / CLOCKS_PER_SEC, samps);
+            
+            t_on = clock(); // timer before calling func
+            for(int i = 0; i < samps; ++i)
+                oscil->get(outL, freq);
+            t_off = clock(); // timer when func returns
+
+            printf("OscilGenTest: %f seconds for %d gets.\n",
+                   (static_cast<float>(t_off - t_on)) / CLOCKS_PER_SEC, samps);
+        }
 };
