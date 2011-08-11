@@ -36,6 +36,8 @@ OscilGen::OscilGen(FFTwrapper *fft_, Resonance *res_):Presets()
     fft     = fft_;
     res     = res_;
 
+    assert(fft);
+
     tmpsmps = new float[OSCIL_SIZE];
     newFFTFREQS(&outoscilFFTfreqs, OSCIL_SIZE / 2);
     newFFTFREQS(&oscilFFTfreqs, OSCIL_SIZE / 2);
