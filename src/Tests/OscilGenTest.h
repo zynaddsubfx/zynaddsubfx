@@ -37,7 +37,7 @@ class OscilGenTest:public CxxTest::TestSuite
 
             XMLwrapper *wrap = new XMLwrapper();
             wrap->loadXMLfile(string(SOURCE_DIR)
-                              + string("/Tests/guitar-adnote.xmz"));
+                              + string("/guitar-adnote.xmz"));
             TS_ASSERT(wrap->enterbranch("MASTER"));
             TS_ASSERT(wrap->enterbranch("PART", 0));
             TS_ASSERT(wrap->enterbranch("INSTRUMENT"));

@@ -1,8 +1,22 @@
-unit_test(ControllerTest ControllerTest.h ../Params/Controller.h)
-unit_test(EchoTest EchoTest.h ../Effects/Echo.h)
-unit_test(SampleTest SampleTest.h ../Samples/Sample.h)
-unit_test(MicrotonalTest MicrotonalTest.h ../Misc/Microtonal.h)
-unit_test(XMLwrapperTest XMLwrapperTest.h ../Misc/XMLwrapper.h)
-unit_test(ADnoteTest AdNoteTest.h ../Synth/ADnote.h)
-unit_test(SUBnoteTest SubNoteTest.h ../Synth/SUBnote.h)
-unit_test(OscilGenTest OscilGenTest.h ../Synth/OscilGen.h)
+#for tests looking for files stored in the source dir
+add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
+CXXTEST_ADD_TEST(ControllerTest ControllerTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/ControllerTest.h)
+CXXTEST_ADD_TEST(EchoTest EchoTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/EchoTest.h)
+#CXXTEST_ADD_TEST(SampleTest SampleTest.h)
+CXXTEST_ADD_TEST(MicrotonalTest MicrotonalTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/MicrotonalTest.h)
+CXXTEST_ADD_TEST(XMLwrapperTest XMLwrapper.cpp ${CMAKE_CURRENT_SOURCE_DIR}/XMLwrapperTest.h)
+CXXTEST_ADD_TEST(ADnoteTest AdNoteTest.cpp 
+    ${CMAKE_CURRENT_SOURCE_DIR}/AdNoteTest.h) 
+CXXTEST_ADD_TEST(SUBnoteTest SubNoteTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/SubNoteTest.h)
+CXXTEST_ADD_TEST(OscilGenTest OscilGenTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/OscilGenTest.h)
+        
+set(test_lib ${NONGUI_LIBRARIES} ${zlib_LIBRARIES} ${fftw_LIBRARIES}
+    ${MXML_LIBRARIES})
+target_link_libraries(ADnoteTest     ${test_lib})
+target_link_libraries(SUBnoteTest    ${test_lib})
+target_link_libraries(ControllerTest ${test_lib})
+target_link_libraries(EchoTest       ${test_lib})
+target_link_libraries(MicrotonalTest ${test_lib})
+target_link_libraries(OscilGenTest   ${test_lib})
+target_link_libraries(XMLwrapperTest ${test_lib})

@@ -50,10 +50,10 @@ class AdNoteTest:public CxxTest::TestSuite
             TS_ASSERT(!defaultPreset->VoicePar[1].Enabled);
 
             XMLwrapper *wrap = new XMLwrapper();
-            cout << string(SOURCE_DIR) + string("/Tests/guitar-adnote.xmz")
+            cout << string(SOURCE_DIR) + string("/guitar-adnote.xmz")
                  << endl;
             wrap->loadXMLfile(string(SOURCE_DIR)
-                              + string("/Tests/guitar-adnote.xmz"));
+                              + string("/guitar-adnote.xmz"));
             TS_ASSERT(wrap->enterbranch("MASTER"));
             TS_ASSERT(wrap->enterbranch("PART", 0));
             TS_ASSERT(wrap->enterbranch("INSTRUMENT"));

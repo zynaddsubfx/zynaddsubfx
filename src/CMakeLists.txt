@@ -15,6 +15,7 @@ find_package(PortAudio)
 set(FLTK_SKIP_OPENGL true)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
+find_package(CxxTest)
 # lash
 pkg_search_module(LASH lash-1.0)
 mark_as_advanced(LASH_LIBRARIES)
@@ -220,34 +221,6 @@ include_directories(
 	)
 
 
-#for tests looking for files stored in the source dir
-add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
-#macro for tests
-macro(unit_test NAME CXX_FILE FILES)
-    if (CompileTests)
-        set(PATH_FILES "")
-        foreach(part ${FILES})
-            set(PATH_FILES "${CMAKE_CURRENT_SOURCE_DIR}/${part}" ${PATH_FILES})
-        endforeach(part ${FILES})
-        set(CXX_FILE_REAL "${CMAKE_CURRENT_SOURCE_DIR}/${CXX_FILE}")
-        add_custom_command(
-            OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx"
-            COMMAND cxxtestgen.py --error-printer -o "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx" ${CXX_FILE_REAL}
-            DEPENDS "${FILE}"
-            )
-        set(CXXTEST_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${NAME}.cxx")
-        add_executable("${NAME}" "${CXXTEST_OUTPUT}" ${PATH_FILES})
-        target_link_libraries("${NAME}" ${CXXTEST_LINK_LIBS}
-            ${NONGUI_LIBRARIES}
-            ${GUI_LIBRARIES}
-            ${zlib_LIBRARIES}
-            ${fftw_LIBRARIES}
-            ${MXML_LIBRARIES}
-            ${OS_LIBRARIES}
-            )
-        add_test("${NAME}" "${EXECUTABLE_OUTPUT_PATH}/${NAME}")
-    endif()
-endmacro(unit_test)
 
 set(NONGUI_LIBRARIES
 	zynaddsubfx_misc

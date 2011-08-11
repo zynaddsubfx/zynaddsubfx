@@ -45,7 +45,7 @@ class SubNoteTest:public CxxTest::TestSuite
             SUBnoteParameters *defaultPreset = new SUBnoteParameters();
             XMLwrapper *wrap = new XMLwrapper();
             wrap->loadXMLfile(string(SOURCE_DIR)
-                              + string("/Tests/guitar-adnote.xmz"));
+                              + string("/guitar-adnote.xmz"));
             TS_ASSERT(wrap->enterbranch("MASTER"));
             TS_ASSERT(wrap->enterbranch("PART", 1));
             TS_ASSERT(wrap->enterbranch("INSTRUMENT"));
