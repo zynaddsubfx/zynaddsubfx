@@ -41,23 +41,41 @@ inline void clearDC(FFTFREQS &freqs)
     freqs.s[0] = freqs.c[0] = 0.0f;
 }
 
+//return magnitude squared
+inline float normal(const FFTFREQS &freqs, off_t x)
+{
+    return freqs.c[x] * freqs.c[x]
+         + freqs.s[x] * freqs.s[x];
+}
+
+//return magnitude
+inline float abs(const FFTFREQS &freqs, off_t x)
+{
+    return sqrt(normal(freqs, x));
+}
+
+//return angle aka phase
+inline float arg(const FFTFREQS &freqs, off_t x)
+{
+    return atan2(freqs.c[x], freqs.s[x]);
+}
+
 /**
  * Take frequency spectrum and ensure values are normalized based upon
  * magnitude to 0<=x<=1
  */
-inline void normalize(FFTFREQS &freqs)
+void normalize(FFTFREQS &freqs)
 {
     float normMax = 0.0;
     for(int i = 0; i < OSCIL_SIZE / 2; ++i) {
         //magnitude squared
-        float norm = freqs.c[i] * freqs.c[i]
-                   + freqs.s[i] * freqs.s[i];
+        const float norm = normal(freqs, i);
         if(normMax < norm)
             normMax = norm;
     }
 
     const float max = sqrt(normMax);
-    if(max < 1e-8) //data is all zero, do not amplify noise
+    if(max < 1e-8) //data is all ~zero, do not amplify noise
         return;
 
     for(int i=0; i < OSCIL_SIZE / 2; ++i) {
@@ -65,6 +83,25 @@ inline void normalize(FFTFREQS &freqs)
         freqs.c[i] /= max;
     }
 }
+
+//Full RMS normalize
+void rmsNormalize(FFTFREQS &freqs)
+{
+    float sum = 0.0f;
+    for(int i = 1; i < OSCIL_SIZE / 2; ++i)
+        sum += normal(freqs, i);
+
+    if(sum < 0.000001)
+        return; //data is all ~zero, do not amplify noise
+
+    const float gain = 1.0 / sqrt(sum);
+
+    for(int i = 1; i < OSCIL_SIZE / 2; i++) {
+        freqs.c[i] *= gain;
+        freqs.s[i] *= gain;
+    }
+}
+
 
 OscilGen::OscilGen(FFTwrapper *fft_, Resonance *res_):Presets()
 {
@@ -182,9 +219,8 @@ void OscilGen::convert2sine()
     mag[0]   = 0;
     phase[0] = 0;
     for(int i = 0; i < MAX_AD_HARMONICS; i++) {
-        mag[i]   = sqrt(freqs.s[i + 1] * freqs.s[i + 1] 
-                      + freqs.c[i + 1] * freqs.c[i + 1]);
-        phase[i] = atan2(freqs.c[i + 1], freqs.s[i + 1]);
+        mag[i]   = abs(freqs, i + 1);
+        phase[i] = arg(freqs, i + 1);
     }
 
     defaults();
@@ -482,10 +518,8 @@ void OscilGen::spectrumadjust()
     normalize(oscilFFTfreqs);
 
     for(int i = 0; i < OSCIL_SIZE / 2; i++) {
-        float mag   =
-            sqrt(oscilFFTfreqs.s[i] * oscilFFTfreqs.s[i]
-                    + oscilFFTfreqs.c[i] * oscilFFTfreqs.c[i]);
-        float phase = atan2(oscilFFTfreqs.s[i], oscilFFTfreqs.c[i]);
+        float mag   = abs(oscilFFTfreqs, i);
+        float phase = arg(oscilFFTfreqs, i);
 
         switch(Psatype) {
         case 1:
@@ -891,26 +925,11 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
     if((freqHz > 0.1) && (resonance != 0))
         res->applyres(nyquist - 1, outoscilFFTfreqs, freqHz);
 
-    //Full RMS normalize
-    float sum = 0;
-    for(int j = 1; j < OSCIL_SIZE / 2; j++) {
-        float term = outoscilFFTfreqs.c[j] * outoscilFFTfreqs.c[j]
-                        + outoscilFFTfreqs.s[j] * outoscilFFTfreqs.s[j];
-        sum += term;
-    }
-    if(sum < 0.000001)
-        sum = 1.0;
-    sum = 1.0 / sqrt(sum);
-    for(int j = 1; j < OSCIL_SIZE / 2; j++) {
-        outoscilFFTfreqs.c[j] *= sum;
-        outoscilFFTfreqs.s[j] *= sum;
-    }
-
+    rmsNormalize(outoscilFFTfreqs);
 
     if((ADvsPAD) && (freqHz > 0.1)) //in this case the smps will contain the freqs
         for(i = 1; i < OSCIL_SIZE / 2; i++)
-            smps[i - 1] = sqrt(outoscilFFTfreqs.c[i] * outoscilFFTfreqs.c[i]
-                               + outoscilFFTfreqs.s[i] * outoscilFFTfreqs.s[i]);
+            smps[i - 1] = abs(outoscilFFTfreqs, i);
     else {
         fft->freqs2smps(outoscilFFTfreqs, smps);
         for(i = 0; i < OSCIL_SIZE; i++)
@@ -934,15 +953,12 @@ void OscilGen::getspectrum(int n, float *spc, int what)
 
     for(int i = 1; i < n; i++) {
         if(what == 0)
-            spc[i - 1] = sqrt(oscilFFTfreqs.c[i] * oscilFFTfreqs.c[i]
-                              + oscilFFTfreqs.s[i] * oscilFFTfreqs.s[i]);
+            spc[i - 1] = abs(oscilFFTfreqs, i);
         else {
             if(Pcurrentbasefunc == 0)
                 spc[i - 1] = ((i == 1) ? (1.0) : (0.0));
             else
-                spc[i - 1] = sqrt(basefuncFFTfreqs.c[i] * basefuncFFTfreqs.c[i]
-                                  + basefuncFFTfreqs.s[i]
-                                  * basefuncFFTfreqs.s[i]);
+                spc[i - 1] = abs(basefuncFFTfreqs, i);
         }
     }
 
