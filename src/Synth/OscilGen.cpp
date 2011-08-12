@@ -56,9 +56,9 @@ inline void normalize(FFTFREQS &freqs)
             normMax = norm;
     }
 
-    float max = sqrt(normMax);
-    if(max < 1e-8)
-        max = 1.0;
+    const float max = sqrt(normMax);
+    if(max < 1e-8) //data is all zero, do not amplify noise
+        return;
 
     for(int i=0; i < OSCIL_SIZE / 2; ++i) {
         freqs.s[i] /= max;
@@ -280,29 +280,6 @@ void OscilGen::getbasefunction(float *smps)
     }
 }
 
-inline void rootMaxSquaredNormal(FFTFREQS &freqs)
-{
-    float max = 0.0f;
-    for(int i = 1; i < OSCIL_SIZE / 2; i++) {
-        const float magnitude = freqs.s[i] * freqs.s[i]
-                              + freqs.c[i] * freqs.c[i];
-        if(max < magnitude)
-            max = magnitude;
-    }
-
-    //Root MAX Squared best describes this, but based upon previous
-    //documentation, it should be root mean squared, current state is for
-    //compatiability
-    max = sqrt(max);
-    if(max < 1e-10)
-        max = 1.0;
-
-    //Normalize signal
-    for(int i = 1; i < OSCIL_SIZE / 2; i++) {
-        freqs.s[i] /= max;
-        freqs.c[i] /= max;
-    }
-}
 
 /*
  * Filter the oscillator
@@ -322,7 +299,7 @@ void OscilGen::oscilfilter()
         oscilFFTfreqs.c[i] *= gain;
     }
 
-    rootMaxSquaredNormal(oscilFFTfreqs);
+    normalize(oscilFFTfreqs);
 }
 
 
@@ -479,25 +456,6 @@ void OscilGen::modulation()
     fft->smps2freqs(tmpsmps, oscilFFTfreqs); //perform FFT
 }
 
-inline void quasiRmsNorm(FFTFREQS &freqs)
-{
-    float max = 0.0;
-    for(int i = 0; i < OSCIL_SIZE / 2; ++i) {
-        float tmp = freqs.c[i] * freqs.c[i]
-                  + freqs.s[i] * freqs.s[i];
-        if(max < tmp)
-            max = tmp;
-    }
-    max = sqrt(max) / OSCIL_SIZE * 2.0;
-    if(max < 1e-8)
-        max = 1.0;
-
-    for(int i=0; i < OSCIL_SIZE / 2; ++i) {
-        freqs.s[i] /= max;
-        freqs.c[i] /= max;
-    }
-}
-
 
 /*
  * Adjust the spectrum
@@ -524,7 +482,7 @@ void OscilGen::spectrumadjust()
     }
 
 
-    quasiRmsNorm(oscilFFTfreqs);
+    normalize(oscilFFTfreqs);
 
     for(int i = 0; i < OSCIL_SIZE / 2; i++) {
         float mag   =
@@ -1031,25 +989,6 @@ void OscilGen::getcurrentbasefunction(float *smps)
         getbasefunction(smps);   //the sine case
 }
 
-inline void peiceNormal(FFTFREQS &freqs)
-{
-    float max = 0.0;
-
-    for(int i = 0; i < OSCIL_SIZE / 2; i++) {
-        if(max < fabs(freqs.c[i]))
-            max = fabs(freqs.c[i]);
-        if(max < fabs(freqs.s[i]))
-            max = fabs(freqs.s[i]);
-    }
-    if(max < 0.00000001)
-        max = 1.0;
-
-    for(int i = 0; i < OSCIL_SIZE / 2; i++) {
-        freqs.c[i] /= max;
-        freqs.s[i] /= max;
-    }
-}
-
 void OscilGen::add2XML(XMLwrapper *xml)
 {
     xml->addpar("harmonic_mag_type", Phmagtype);
@@ -1100,21 +1039,12 @@ void OscilGen::add2XML(XMLwrapper *xml)
     xml->endbranch();
 
     if(Pcurrentbasefunc == 127) {
-        float max = 0.0;
-
-        for(int i = 0; i < OSCIL_SIZE / 2; i++) {
-            if(max < fabs(basefuncFFTfreqs.c[i]))
-                max = fabs(basefuncFFTfreqs.c[i]);
-            if(max < fabs(basefuncFFTfreqs.s[i]))
-                max = fabs(basefuncFFTfreqs.s[i]);
-        }
-        if(max < 0.00000001)
-            max = 1.0;
+        normalize(basefuncFFTfreqs);
 
         xml->beginbranch("BASE_FUNCTION");
         for(int i = 1; i < OSCIL_SIZE / 2; i++) {
-            float xc = basefuncFFTfreqs.c[i] / max;
-            float xs = basefuncFFTfreqs.s[i] / max;
+            float xc = basefuncFFTfreqs.c[i];
+            float xs = basefuncFFTfreqs.s[i];
             if((fabs(xs) > 0.00001) && (fabs(xs) > 0.00001)) {
                 xml->beginbranch("BF_HARMONIC", i);
                 xml->addparreal("cos", xc);
@@ -1217,7 +1147,7 @@ void OscilGen::getfromXML(XMLwrapper *xml)
         xml->exitbranch();
 
         clearDC(basefuncFFTfreqs);
-        peiceNormal(basefuncFFTfreqs);
+        normalize(basefuncFFTfreqs);
     }
 }
 
