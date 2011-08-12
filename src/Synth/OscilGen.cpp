@@ -177,23 +177,20 @@ void OscilGen::convert2sine()
     fft->smps2freqs(oscil, freqs);
     delete (fft);
 
-    float max = 0.0;
+    normalize(freqs);
 
     mag[0]   = 0;
     phase[0] = 0;
     for(int i = 0; i < MAX_AD_HARMONICS; i++) {
-        mag[i]   = sqrt(pow(freqs.s[i + 1], 2) + pow(freqs.c[i + 1], 2.0));
+        mag[i]   = sqrt(freqs.s[i + 1] * freqs.s[i + 1] 
+                      + freqs.c[i + 1] * freqs.c[i + 1]);
         phase[i] = atan2(freqs.c[i + 1], freqs.s[i + 1]);
-        if(max < mag[i])
-            max = mag[i];
     }
-    if(max < 0.00001)
-        max = 1.0;
 
     defaults();
 
     for(int i = 0; i < MAX_AD_HARMONICS - 1; i++) {
-        float newmag   = mag[i] / max;
+        float newmag   = mag[i];
         float newphase = phase[i];
 
         Phmag[i]   = (int) ((newmag) * 64.0) + 64;
