@@ -135,6 +135,9 @@ class OscilGen:public Presets
         //Do the oscil modulation stuff
         void modulation();
 
+        //Check system for needed updates
+        bool needPrepare(void);
+
         //Do the adaptive harmonic stuff
         void adaptiveharmonic(FFTFREQS f, float freq);
 
