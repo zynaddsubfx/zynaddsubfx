@@ -21,6 +21,7 @@
 */
 
 #include <cmath>
+#include <cassert>
 #include "FFTwrapper.h"
 
 FFTwrapper::FFTwrapper(int fftsize_)
@@ -52,7 +53,7 @@ FFTwrapper::~FFTwrapper()
 /*
  * do the Fast Fourier Transform
  */
-void FFTwrapper::smps2freqs(float *smps, FFTFREQS freqs)
+void FFTwrapper::smps2freqs(const float *smps, FFTFREQS freqs)
 {
     for(int i = 0; i < fftsize; i++)
         tmpfftdata1[i] = smps[i];
@@ -68,7 +69,7 @@ void FFTwrapper::smps2freqs(float *smps, FFTFREQS freqs)
 /*
  * do the Inverse Fast Fourier Transform
  */
-void FFTwrapper::freqs2smps(FFTFREQS freqs, float *smps)
+void FFTwrapper::freqs2smps(const FFTFREQS freqs, float *smps)
 {
     tmpfftdata2[fftsize / 2] = 0.0;
     for(int i = 0; i < fftsize / 2; i++) {
@@ -79,6 +80,31 @@ void FFTwrapper::freqs2smps(FFTFREQS freqs, float *smps)
     fftw_execute(planfftw_inv);
     for(int i = 0; i < fftsize; i++)
         smps[i] = tmpfftdata2[i];
+}
+
+//only OSCILLGEN SHOULD CALL THIS FOR NOW
+void FFTwrapper::smps2freqs(const float *smps, fft_t *freqs)
+{
+    assert(fftsize==OSCIL_SIZE);
+    FFTFREQS tmp;
+    newFFTFREQS(&tmp, fftsize);
+    smps2freqs(smps, tmp);
+    for(int i = 0; i < fftsize / 2; ++i)
+        freqs[i] = fft_t(tmp.c[i], tmp.s[i]);
+    deleteFFTFREQS(&tmp);
+}
+
+void FFTwrapper::freqs2smps(const fft_t *freqs, float *smps)
+{
+    assert(fftsize==OSCIL_SIZE);
+    FFTFREQS tmp;
+    newFFTFREQS(&tmp, fftsize);
+    for(int i = 0; i < fftsize / 2; ++i) {
+        tmp.c[i] = freqs[i].real();
+        tmp.s[i] = freqs[i].imag();
+    }
+    freqs2smps(tmp, smps);
+    deleteFFTFREQS(&tmp);
 }
 
 void newFFTFREQS(FFTFREQS *f, int size)

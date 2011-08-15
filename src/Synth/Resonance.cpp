@@ -23,9 +23,6 @@
 #include <stdlib.h>
 #include "Resonance.h"
 
-
-#include <stdio.h>
-
 Resonance::Resonance():Presets()
 {
     setpresettype("Presonance");
@@ -62,7 +59,7 @@ void Resonance::setpoint(int n, unsigned char p)
 /*
  * Apply the resonance to FFT data
  */
-void Resonance::applyres(int n, FFTFREQS fftdata, float freq)
+void Resonance::applyres(int n, fft_t *fftdata, float freq)
 {
     if(Penabled == 0)
         return;             //if the resonance is disabled
@@ -99,8 +96,7 @@ void Resonance::applyres(int n, FFTFREQS fftdata, float freq)
         if((Pprotectthefundamental != 0) && (i == 1))
             y = 1.0;
 
-        fftdata.c[i] *= y;
-        fftdata.s[i] *= y;
+        fftdata[i] *= y;
     }
 }
 

@@ -26,6 +26,7 @@
 #include "../Misc/Util.h"
 #include "../Misc/XMLwrapper.h"
 #include "../Params/Presets.h"
+#include "../DSP/FFTwrapper.h"
 
 #define N_RES_POINTS 256
 
@@ -35,7 +36,7 @@ class Resonance:public Presets
         Resonance();
         ~Resonance();
         void setpoint(int n, unsigned char p);
-        void applyres(int n, FFTFREQS fftdata, float freq);
+        void applyres(int n, fft_t *fftdata, float freq);
         void smooth();
         void interpolatepeaks(int type);
         void randomize(int type);

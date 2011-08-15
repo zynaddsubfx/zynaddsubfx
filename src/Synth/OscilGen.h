@@ -25,9 +25,9 @@
 
 #include "../globals.h"
 #include "../Misc/XMLwrapper.h"
-#include "Resonance.h"
 #include "../DSP/FFTwrapper.h"
 #include "../Params/Presets.h"
+#include "Resonance.h"
 
 class OscilGen:public Presets
 {
@@ -113,7 +113,7 @@ class OscilGen:public Presets
     private:
         //This array stores some termporary data and it has OSCIL_SIZE elements
         float *tmpsmps;
-        FFTFREQS  outoscilFFTfreqs;
+        fft_t *outoscilFFTfreqs;
 
         float hmag[MAX_AD_HARMONICS], hphase[MAX_AD_HARMONICS]; //the magnituides and the phases of the sine/nonsine harmonics
 //    private:
@@ -139,13 +139,13 @@ class OscilGen:public Presets
         bool needPrepare(void);
 
         //Do the adaptive harmonic stuff
-        void adaptiveharmonic(FFTFREQS f, float freq);
+        void adaptiveharmonic(fft_t *f, float freq);
 
         //Do the adaptive harmonic postprocessing (2n+1,2xS,2xA,etc..)
         //this function is called even for the user interface
         //this can be called for the sine and components, and for the spectrum
         //(that's why the sine and cosine components should be processed with a separate call)
-        void adaptiveharmonicpostprocess(float *f, int size);
+        void adaptiveharmonicpostprocess(fft_t *f, int size);
 
         //Internal Data
         unsigned char oldbasefunc, oldbasepar, oldhmagtype,
@@ -157,8 +157,8 @@ class OscilGen:public Presets
             oldmodulationpar3;
 
 
-        FFTFREQS basefuncFFTfreqs; //Base Function Frequencies
-        FFTFREQS oscilFFTfreqs; //Oscillator Frequencies - this is different than the hamonics set-up by the user, it may contains time-domain data if the antialiasing is turned off
+        fft_t *basefuncFFTfreqs; //Base Function Frequencies
+        fft_t *oscilFFTfreqs; //Oscillator Frequencies - this is different than the hamonics set-up by the user, it may contains time-domain data if the antialiasing is turned off
         int      oscilprepared; //1 if the oscil is prepared, 0 if it is not prepared and is need to call ::prepare() before ::get()
 
         Resonance *res;
