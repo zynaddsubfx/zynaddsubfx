@@ -22,23 +22,22 @@
 
 #include <cmath>
 #include <cassert>
+#include <cstring>
 #include "FFTwrapper.h"
 
 FFTwrapper::FFTwrapper(int fftsize_)
 {
-    fftsize      = fftsize_;
-    tmpfftdata1  = new fftw_real[fftsize];
-    tmpfftdata2  = new fftw_real[fftsize];
-    planfftw     = fftw_plan_r2r_1d(fftsize,
-                                    tmpfftdata1,
-                                    tmpfftdata1,
-                                    FFTW_R2HC,
+    fftsize  = fftsize_;
+    time     = new fftw_real[fftsize];
+    fft      = new fftw_complex[fftsize];
+    planfftw = fftw_plan_dft_r2c_1d(fftsize,
+                                    time,
+                                    fft,
                                     FFTW_ESTIMATE);
-    planfftw_inv = fftw_plan_r2r_1d(fftsize,
-                                    tmpfftdata2,
-                                    tmpfftdata2,
-                                    FFTW_HC2R,
-                                    FFTW_ESTIMATE);
+    planfftw_inv = fftw_plan_dft_c2r_1d(fftsize,
+                                        fft,
+                                        time,
+                                        FFTW_ESTIMATE);
 }
 
 FFTwrapper::~FFTwrapper()
@@ -46,82 +45,34 @@ FFTwrapper::~FFTwrapper()
     fftw_destroy_plan(planfftw);
     fftw_destroy_plan(planfftw_inv);
 
-    delete [] tmpfftdata1;
-    delete [] tmpfftdata2;
+    delete [] time;
+    delete [] fft;
 }
 
-/*
- * do the Fast Fourier Transform
- */
-void FFTwrapper::smps2freqs(const float *smps, FFTFREQS freqs)
-{
-    for(int i = 0; i < fftsize; i++)
-        tmpfftdata1[i] = smps[i];
-    fftw_execute(planfftw);
-    for(int i = 0; i < fftsize / 2; i++) {
-        freqs.c[i] = tmpfftdata1[i];
-        if(i != 0)
-            freqs.s[i] = tmpfftdata1[fftsize - i];
-    }
-    tmpfftdata2[fftsize / 2] = 0.0;
-}
-
-/*
- * do the Inverse Fast Fourier Transform
- */
-void FFTwrapper::freqs2smps(const FFTFREQS freqs, float *smps)
-{
-    tmpfftdata2[fftsize / 2] = 0.0;
-    for(int i = 0; i < fftsize / 2; i++) {
-        tmpfftdata2[i] = freqs.c[i];
-        if(i != 0)
-            tmpfftdata2[fftsize - i] = freqs.s[i];
-    }
-    fftw_execute(planfftw_inv);
-    for(int i = 0; i < fftsize; i++)
-        smps[i] = tmpfftdata2[i];
-}
-
-//only OSCILLGEN SHOULD CALL THIS FOR NOW
 void FFTwrapper::smps2freqs(const float *smps, fft_t *freqs)
 {
-    assert(fftsize==OSCIL_SIZE);
-    FFTFREQS tmp;
-    newFFTFREQS(&tmp, fftsize);
-    smps2freqs(smps, tmp);
-    for(int i = 0; i < fftsize / 2; ++i)
-        freqs[i] = fft_t(tmp.c[i], tmp.s[i]);
-    deleteFFTFREQS(&tmp);
+    //Load data
+    for(int i = 0; i < fftsize; ++i)
+        time[i] = static_cast<double>(smps[i]);
+
+    //DFT
+    fftw_execute(planfftw);
+
+    //Grab data
+    memcpy((void*)freqs, (const void*)fft, fftsize*sizeof(double));
 }
 
 void FFTwrapper::freqs2smps(const fft_t *freqs, float *smps)
 {
-    assert(fftsize==OSCIL_SIZE);
-    FFTFREQS tmp;
-    newFFTFREQS(&tmp, fftsize);
-    for(int i = 0; i < fftsize / 2; ++i) {
-        tmp.c[i] = freqs[i].real();
-        tmp.s[i] = freqs[i].imag();
-    }
-    freqs2smps(tmp, smps);
-    deleteFFTFREQS(&tmp);
-}
+    //Load data
+    memcpy( (void*)fft, (const void*)freqs, fftsize*sizeof(double));
 
-void newFFTFREQS(FFTFREQS *f, int size)
-{
-    f->c = new float[size];
-    f->s = new float[size];
-    for(int i = 0; i < size; i++) {
-        f->c[i] = 0.0;
-        f->s[i] = 0.0;
-    }
-}
+    //IDFT
+    fftw_execute(planfftw_inv);
 
-void deleteFFTFREQS(FFTFREQS *f)
-{
-    delete[] f->c;
-    delete[] f->s;
-    f->c = f->s = NULL;
+    //Grab data
+    for(int i = 0; i < fftsize; ++i)
+        smps[i] = static_cast<float>(time[i]);
 }
 
 void FFT_cleanup()

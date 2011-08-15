@@ -469,7 +469,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
                 float idfreq  = i / (float)profilesize - 0.5;
                 idfreq *= ibw;
                 int      spfreq  = (int) (idfreq + ibasefreq);
-                float fspfreq = fmod(idfreq + ibasefreq, 1.0);
+                float fspfreq = fmod((double)idfreq + ibasefreq, 1.0);
                 if(spfreq <= 0)
                     continue;
                 if(spfreq >= size - 1)
@@ -577,9 +577,8 @@ void PADnoteParameters::applyparameters(bool lockmutex)
         samplemax = 1;
 
     //prepare a BIG FFT stuff
-    FFTwrapper *fft = new FFTwrapper(samplesize);
-    FFTFREQS    fftfreqs;
-    newFFTFREQS(&fftfreqs, samplesize / 2);
+    FFTwrapper *fft      = new FFTwrapper(samplesize);
+    fft_t      *fftfreqs = new fft_t[samplesize / 2];
 
     float adj[samplemax]; //this is used to compute frequency relation to the base frequency
     for(int nsample = 0; nsample < samplemax; nsample++)
@@ -603,11 +602,8 @@ void PADnoteParameters::applyparameters(bool lockmutex)
         newsample.smp    = new float[samplesize + extra_samples];
 
         newsample.smp[0] = 0.0;
-        for(int i = 1; i < spectrumsize; i++) { //randomize the phases
-            float phase = RND * 6.29;
-            fftfreqs.c[i] = spectrum[i] * cos(phase);
-            fftfreqs.s[i] = spectrum[i] * sin(phase);
-        }
+        for(int i = 1; i < spectrumsize; i++) //randomize the phases
+            fftfreqs[i] = std::polar(spectrum[i], (float)RND * 6.29f);
         fft->freqs2smps(fftfreqs, newsample.smp); //that's all; here is the only ifft for the whole sample; no windows are used ;-)
 
 
@@ -644,7 +640,7 @@ void PADnoteParameters::applyparameters(bool lockmutex)
         newsample.smp = NULL;
     }
     delete (fft);
-    deleteFFTFREQS(&fftfreqs);
+    delete[] fftfreqs;
 
     //delete the additional samples that might exists and are not useful
     if(lockmutex) {

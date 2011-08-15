@@ -25,13 +25,6 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-struct FFTFREQS {
-    float *s, *c; //sine and cosine components
-};
-
-extern void newFFTFREQS(FFTFREQS *f, int size);
-extern void deleteFFTFREQS(FFTFREQS *f);
-
 /**Sampling rate*/
 extern int SAMPLE_RATE;
 
