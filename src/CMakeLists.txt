@@ -64,8 +64,10 @@ option (BuildForCore2_X86_64 "Build for Intel Core2 x86_64 system" OFF)
 option (BuildForDebug "Include gdb debugging support" OFF)
 
 set(CMAKE_BUILD_TYPE "Release")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=core2 -ffast-math -fno-finite-math-only -fomit-frame-pointer")
-set(CMAKE_CXX_FLAGS_DEBUG   "-O3 -march=core2 -ffast-math -fno-finite-math-only -fomit-frame-pointer")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -msse -msse2 -mfpmath=sse -ffast-math -fno-finite-math-only -fomit-frame-pointer" 
+    CACHE STRING "basic x86 compiler options")
+set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g3 -ggdbc -Wall -Wextra" 
+    CACHE STRING "Debug build flags")
 
 set (BuildOptions_x86_64AMD
     "-O3 -march=athlon64 -m64 -Wall -ffast-math -fno-finite-math-only -fomit-frame-pointer"
