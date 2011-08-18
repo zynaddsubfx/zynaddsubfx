@@ -18,6 +18,8 @@ find_package(OpenGL) #for FLTK
 # lash
 pkg_search_module(LASH lash-1.0)
 mark_as_advanced(LASH_LIBRARIES)
+pkg_search_module(DSSI dssi>=0.9.0)
+mark_as_advanced(DSSI_LIBRARIES)
 
 ######### Settings ###########
 # NOTE: These cache variables should normally not be changed in this
@@ -37,6 +39,8 @@ SET (PaEnable ${PORTAUDIO_FOUND} CACHE BOOL
     "Enable support for Port Audio System")
 SET (LashEnable ${LASH_FOUND} CACHE BOOL
     "Enable LASH Audio Session Handler")
+SET (DssiEnable ${DSSI_FOUND} CACHE BOOL
+    "Enable DSSI Plugin compilation")
 
 
 # Now, handle the incoming settings and set define flags/variables based
@@ -152,6 +156,11 @@ else (BuildForDebug)
     endif (BuildForAMD_X86_64)
     message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_RELEASE}")
 endif (BuildForDebug)
+
+if (DssiEnable)
+    add_definitions(-fPIC)
+endif()
+
 
 if(FLTK_FOUND)
     mark_as_advanced(FORCE FLTK_BASE_LIBRARY)
@@ -271,6 +280,22 @@ target_link_libraries(zynaddsubfx
         ${AUDIO_LIBRARIES}
         ${OS_LIBRARIES}
 	)
+
+if (DssiEnable)
+	add_library(zynaddsubfx_dssi SHARED
+		Output/DSSIaudiooutput.cpp
+		)
+
+	target_link_libraries(zynaddsubfx_dssi
+		${NONGUI_LIBRARIES}
+		${zlib_LIBRARIES}
+		${fftw_LIBRARIES}
+		${MXML_LIBRARIES}
+		${NIO_LIBRARIES}
+		${AUDIO_LIBRARIES}
+		${OS_LIBRARIES}
+		)
+endif()
 
 install(TARGETS zynaddsubfx
 	RUNTIME DESTINATION bin

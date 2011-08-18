@@ -33,6 +33,9 @@
 #include "../Misc/Bank.h"
 #include <limits.h>
 
+using std::string;
+using std::vector;
+
 //
 // Static stubs for LADSPA member functions
 //
@@ -345,10 +348,10 @@ void DSSIaudiooutput::selectProgram(unsigned long bank, unsigned long program)
 {
     initBanks();
 //    cerr << "selectProgram(" << (bank & 0x7F) << ':' << ((bank >> 7) & 0x7F) << "," << program  << ")" << '\n';
-    if(bank < MAX_NUM_BANKS && program < BANK_SIZE)
+    if(bank <  master->bank.banks.size() && program < BANK_SIZE)
     {
-        char* bankdir = master->bank.banks[ bank ].dir;
-        if(bankdir != NULL)
+        const std::string bankdir = master->bank.banks[ bank ].dir;
+        if(!bankdir.empty())
         {
             pthread_mutex_lock(&master->mutex);
 
@@ -454,15 +457,15 @@ void DSSIaudiooutput::runSynth(unsigned long sample_count, snd_seq_event_t *even
         {
             if(events[event_index].type == SND_SEQ_EVENT_NOTEON)
             {
-                master->NoteOn(events[event_index].data.note.channel, events[event_index].data.note.note, events[event_index].data.note.velocity);
+                master->noteOn(events[event_index].data.note.channel, events[event_index].data.note.note, events[event_index].data.note.velocity);
             }
             else if(events[event_index].type == SND_SEQ_EVENT_NOTEOFF)
             {
-                master->NoteOff(events[event_index].data.note.channel, events[event_index].data.note.note);
+                master->noteOff(events[event_index].data.note.channel, events[event_index].data.note.note);
             }
             else if(events[event_index].type == SND_SEQ_EVENT_CONTROLLER)
             {
-                master->SetController(events[event_index].data.control.channel, events[event_index].data.control.param, events[event_index].data.control.value);
+                master->setController(events[event_index].data.control.channel, events[event_index].data.control.param, events[event_index].data.control.value);
             }
             else
             {
@@ -516,7 +519,7 @@ DSSI_Descriptor* DSSIaudiooutput::initDssiDescriptor()
     DSSI_Descriptor* newDssiDescriptor = new DSSI_Descriptor;
 
     LADSPA_PortDescriptor* newPortDescriptors;
-    char** newPortNames;
+    const char** newPortNames;
     LADSPA_PortRangeHint* newPortRangeHints;
 
     if (newDssiDescriptor)
@@ -532,7 +535,7 @@ DSSI_Descriptor* DSSIaudiooutput::initDssiDescriptor()
             newLadspaDescriptor->Copyright = "GNU General Public License v.2";
             newLadspaDescriptor->PortCount = 2;
 
-            newPortNames = new char *[newLadspaDescriptor->PortCount];
+            newPortNames = new const char *[newLadspaDescriptor->PortCount];
             newPortNames[0] = "Output L";
             newPortNames[1] = "Output R";
             newLadspaDescriptor->PortNames = newPortNames;
@@ -593,6 +596,8 @@ DSSIaudiooutput* DSSIaudiooutput::getInstance(LADSPA_Handle instance)
  */
 DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate)
 {
+    SAMPLE_RATE  = sampleRate;
+
     this->sampleRate = sampleRate;
     this->banksInited = false;
 
@@ -662,7 +667,7 @@ bool DSSIaudiooutput::mapNextBank()
     pthread_mutex_lock(&master->mutex);
     Bank& bank = master->bank;
     bool retval;
-    if(bankNoToMap >= MAX_NUM_BANKS || bank.banks[bankNoToMap].dir == NULL)
+    if(bankNoToMap >= (int)bank.banks.size() || bank.banks[bankNoToMap].dir.empty())
     {
         retval = false;
     }
@@ -671,10 +676,11 @@ bool DSSIaudiooutput::mapNextBank()
         bank.loadbank(bank.banks[bankNoToMap].dir);
         for(unsigned long instrument = 0; instrument < BANK_SIZE; instrument++)
         {
-            char* insName = bank.getname(instrument);
-            if(insName != NULL && insName[0] != '\0' && insName[0] != ' ')
+            string insName = bank.getname(instrument);
+            if(!insName.empty() && insName[0] != '\0' && insName[0] != ' ')
             {
-                programMap.push_back(ProgramDescriptor(bankNoToMap,instrument,insName));
+                programMap.push_back(ProgramDescriptor(bankNoToMap,instrument,
+                            const_cast<char*>(insName.c_str())));
             }
         }
         bankNoToMap ++;

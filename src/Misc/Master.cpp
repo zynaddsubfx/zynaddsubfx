@@ -423,6 +423,49 @@ void Master::AudioOut(float *outl, float *outr)
     dump.inctick();
 }
 
+//TODO review the respective code from yoshimi for this
+//If memory serves correctly, libsamplerate was used
+void Master::GetAudioOutSamples(size_t nsamples,
+                                int samplerate,
+                                float *outl,
+                                float *outr)
+{
+    static float *bufl = new float[SOUND_BUFFER_SIZE],
+                 *bufr = new float[SOUND_BUFFER_SIZE];
+    static off_t  off  = 0;
+    static size_t smps = 0;
+
+    off_t out_off = 0;
+
+    //Fail when resampling rather than doing a poor job
+    if(SAMPLE_RATE != samplerate) {
+        printf("darn it: %d vs %d\n", SAMPLE_RATE, samplerate);
+        return;
+    }
+
+    while(nsamples) {
+        //use all available samples
+        if(nsamples >= smps) {
+            memcpy(outl+out_off, bufl+off, sizeof(float) * smps);
+            memcpy(outr+out_off, bufr+off, sizeof(float) * smps);
+
+            //generate samples
+            AudioOut(bufl, bufr);
+            off = 0;
+            smps = SOUND_BUFFER_SIZE;
+
+            out_off  += smps;
+            nsamples -= smps;
+        } else { //use some samples
+            memcpy(outl+out_off, bufl+off, sizeof(float) * nsamples);
+            memcpy(outr+out_off, bufr+off, sizeof(float) * nsamples);
+            smps -= nsamples;
+            off  += nsamples;
+            nsamples = 0;
+        }
+    }
+}
+
 Master::~Master()
 {
     for(int npart = 0; npart < NUM_MIDI_PARTS; npart++)

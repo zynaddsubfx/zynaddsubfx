@@ -100,7 +100,7 @@ class Master
         /**Audio Output*/
         void AudioOut(float *outl, float *outr);
         /**Audio Output (for callback mode). This allows the program to be controled by an external program*/
-        void GetAudioOutSamples(int nsamples,
+        void GetAudioOutSamples(size_t nsamples,
                                 int samplerate,
                                 float *outl,
                                 float *outr);
