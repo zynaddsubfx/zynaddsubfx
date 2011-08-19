@@ -26,11 +26,6 @@
 #include "../globals.h"
 #include "Effect.h"
 
-//Waveshaping(called by Distorsion effect and waveshape from OscilGen)
-void waveshapesmps(int n,
-                   float *smps,
-                   unsigned char type,
-                   unsigned char drive);
 /**Distortion Effect*/
 class Distorsion:public Effect
 {

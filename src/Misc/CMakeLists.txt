@@ -9,8 +9,9 @@ set(zynaddsubfx_misc_SRCS
 	Part.cpp
 	Util.cpp
 	XMLwrapper.cpp
-        Recorder.cpp
-        WavFile.cpp
+	Recorder.cpp
+	WavFile.cpp
+	WaveShapeSmps.cpp
 )
 
 if(LashEnable)
@@ -18,7 +19,7 @@ if(LashEnable)
 endif()
 
 add_library(zynaddsubfx_misc STATIC
-	${zynaddsubfx_misc_SRCS} 
+	${zynaddsubfx_misc_SRCS}
 	)
 
 target_link_libraries(zynaddsubfx_misc zynaddsubfx_nio)

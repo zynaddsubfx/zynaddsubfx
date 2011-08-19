@@ -20,13 +20,14 @@
 
 */
 
+#include "OscilGen.h"
+#include "../Misc/WaveShapeSmps.h"
+
 #include <cassert>
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
 
-#include "OscilGen.h"
-#include "../Effects/Distorsion.h"
 
 
 OscilGen::OscilGen(FFTwrapper *fft_, Resonance *res_):Presets()
@@ -342,7 +343,7 @@ void OscilGen::waveshape()
         tmpsmps[i] *= max;
 
     //Do the waveshaping
-    waveshapesmps(OSCIL_SIZE, tmpsmps, Pwaveshapingfunction, Pwaveshaping);
+    waveShapeSmps(OSCIL_SIZE, tmpsmps, Pwaveshapingfunction, Pwaveshaping);
 
     fft->smps2freqs(tmpsmps, oscilFFTfreqs); //perform FFT
 }
