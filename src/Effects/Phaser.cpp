@@ -435,39 +435,23 @@ void Phaser::changepar(int npar, unsigned char value)
 unsigned char Phaser::getpar(int npar) const
 {
     switch(npar) {
-        case 0:
-            return Pvolume;
-        case 1:
-            return Ppanning;
-        case 2:
-            return lfo.Pfreq;
-        case 3:
-            return lfo.Prandomness;
-        case 4:
-            return lfo.PLFOtype;
-        case 5:
-            return lfo.Pstereo;
-        case 6:
-            return Pdepth;
-        case 7:
-            return Pfb;
-        case 8:
-            return Pstages;
-        case 9:
-            return Plrcross;
-            return Poffset;
-        case 10:
-            return Poutsub;
-        case 11:
-            return Pphase;
-            return Pwidth;
-        case 12:
-            return Phyper;
-        case 13:
-            return Pdistortion;
-        case 14:
-            return Panalog;
-        default:
-            return 0;
+        case 0:  return Pvolume;
+        case 1:  return Ppanning;
+        case 2:  return lfo.Pfreq;
+        case 3:  return lfo.Prandomness;
+        case 4:  return lfo.PLFOtype;
+        case 5:  return lfo.Pstereo;
+        case 6:  return Pdepth;
+        case 7:  return Pfb;
+        case 8:  return Pstages;
+        case 9:  return Plrcross;
+                 return Poffset; //same
+        case 10: return Poutsub;
+        case 11: return Pphase;
+                 return Pwidth; //same
+        case 12: return Phyper;
+        case 13: return Pdistortion;
+        case 14: return Panalog;
+        default: return 0;
     }
 }

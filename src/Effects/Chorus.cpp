@@ -223,96 +223,65 @@ void Chorus::setpreset(unsigned char npreset)
 void Chorus::changepar(int npar, unsigned char value)
 {
     switch(npar) {
-    case 0:
-        setvolume(value);
-        break;
-    case 1:
-        setpanning(value);
-        break;
-    case 2:
-        lfo.Pfreq = value;
-        lfo.updateparams();
-        break;
-    case 3:
-        lfo.Prandomness = value;
-        lfo.updateparams();
-        break;
-    case 4:
-        lfo.PLFOtype = value;
-        lfo.updateparams();
-        break;
-    case 5:
-        lfo.Pstereo = value;
-        lfo.updateparams();
-        break;
-    case 6:
-        setdepth(value);
-        break;
-    case 7:
-        setdelay(value);
-        break;
-    case 8:
-        setfb(value);
-        break;
-    case 9:
-        setlrcross(value);
-        break;
-    case 10:
-        if(value > 1)
-            Pflangemode = 1;
-        else
-            Pflangemode = value;
-        break;
-    case 11:
-        if(value > 1)
-            Poutsub = 1;
-        else
-            Poutsub = value;
-        break;
+        case 0:
+            setvolume(value);
+            break;
+        case 1:
+            setpanning(value);
+            break;
+        case 2:
+            lfo.Pfreq = value;
+            lfo.updateparams();
+            break;
+        case 3:
+            lfo.Prandomness = value;
+            lfo.updateparams();
+            break;
+        case 4:
+            lfo.PLFOtype = value;
+            lfo.updateparams();
+            break;
+        case 5:
+            lfo.Pstereo = value;
+            lfo.updateparams();
+            break;
+        case 6:
+            setdepth(value);
+            break;
+        case 7:
+            setdelay(value);
+            break;
+        case 8:
+            setfb(value);
+            break;
+        case 9:
+            setlrcross(value);
+            break;
+        case 10:
+            Pflangemode = (value > 1) ? 1 : value;
+            break;
+        case 11:
+            Poutsub = (value > 1) ? 1 : value;
+            break;
     }
 }
 
 unsigned char Chorus::getpar(int npar) const
 {
     switch(npar) {
-    case 0:
-        return Pvolume;
-        break;
-    case 1:
-        return Ppanning;
-        break;
-    case 2:
-        return lfo.Pfreq;
-        break;
-    case 3:
-        return lfo.Prandomness;
-        break;
-    case 4:
-        return lfo.PLFOtype;
-        break;
-    case 5:
-        return lfo.Pstereo;
-        break;
-    case 6:
-        return Pdepth;
-        break;
-    case 7:
-        return Pdelay;
-        break;
-    case 8:
-        return Pfb;
-        break;
-    case 9:
-        return Plrcross;
-        break;
-    case 10:
-        return Pflangemode;
-        break;
-    case 11:
-        return Poutsub;
-        break;
-    default:
-        return 0;
+        case 0:  return Pvolume;
+        case 1:  return Ppanning;
+        case 2:  return lfo.Pfreq;
+        case 3:  return lfo.Prandomness;
+        case 4:  return lfo.PLFOtype;
+        case 5:  return lfo.Pstereo;
+        case 6:  return Pdepth;
+        case 7:  return Pdelay;
+        case 8:  return Pfb;
+        case 9:  return Plrcross;
+        case 10: return Pflangemode;
+        case 11: return Poutsub;
+        default: return 0;
     }
 }
 

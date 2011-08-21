@@ -459,87 +459,64 @@ void Reverb::setpreset(unsigned char npreset)
 void Reverb::changepar(int npar, unsigned char value)
 {
     switch(npar) {
-    case 0:
-        setvolume(value);
-        break;
-    case 1:
-        setpan(value);
-        break;
-    case 2:
-        settime(value);
-        break;
-    case 3:
-        setidelay(value);
-        break;
-    case 4:
-        setidelayfb(value);
-        break;
-//  case 5: setrdelay(value);
-//      break;
-//  case 6: seterbalance(value);
-//      break;
-    case 7:
-        setlpf(value);
-        break;
-    case 8:
-        sethpf(value);
-        break;
-    case 9:
-        setlohidamp(value);
-        break;
-    case 10:
-        settype(value);
-        break;
-    case 11:
-        setroomsize(value);
-        break;
-    case 12:
-        setbandwidth(value);
-        break;
+        case 0:
+            setvolume(value);
+            break;
+        case 1:
+            setpan(value);
+            break;
+        case 2:
+            settime(value);
+            break;
+        case 3:
+            setidelay(value);
+            break;
+        case 4:
+            setidelayfb(value);
+            break;
+//      case 5:
+//          setrdelay(value);
+//          break;
+//      case 6:
+//          seterbalance(value);
+//          break;
+        case 7:
+            setlpf(value);
+            break;
+        case 8:
+            sethpf(value);
+            break;
+        case 9:
+            setlohidamp(value);
+            break;
+        case 10:
+            settype(value);
+            break;
+        case 11:
+            setroomsize(value);
+            break;
+        case 12:
+            setbandwidth(value);
+            break;
     }
 }
 
 unsigned char Reverb::getpar(int npar) const
 {
     switch(npar) {
-    case 0:
-        return Pvolume;
-        break;
-    case 1:
-        return Ppan;
-        break;
-    case 2:
-        return Ptime;
-        break;
-    case 3:
-        return Pidelay;
-        break;
-    case 4:
-        return Pidelayfb;
-        break;
-//  case 5: return(Prdelay);
-//      break;
-//  case 6: return(Perbalance);
-//      break;
-    case 7:
-        return Plpf;
-        break;
-    case 8:
-        return Phpf;
-        break;
-    case 9:
-        return Plohidamp;
-        break;
-    case 10:
-        return Ptype;
-        break;
-    case 11:
-        return Proomsize;
-        break;
-    case 12:
-        return Pbandwidth;
-        break;
+        case 0:  return Pvolume;
+        case 1:  return Ppan;
+        case 2:  return Ptime;
+        case 3:  return Pidelay;
+        case 4:  return Pidelayfb;
+//      case 5:  return Prdelay;
+//      case 6:  return Perbalance;
+        case 7:  return Plpf;
+        case 8:  return Phpf;
+        case 9:  return Plohidamp;
+        case 10: return Ptype;
+        case 11: return Proomsize;
+        case 12: return Pbandwidth;
+        default: return 0;
     }
-    return 0; //in case of bogus "parameter"
 }
-

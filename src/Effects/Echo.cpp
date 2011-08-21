@@ -215,55 +215,41 @@ void Echo::setpreset(unsigned char npreset)
 void Echo::changepar(int npar, unsigned char value)
 {
     switch(npar) {
-    case 0:
-        setvolume(value);
-        break;
-    case 1:
-        setpanning(value);
-        break;
-    case 2:
-        setdelay(value);
-        break;
-    case 3:
-        setlrdelay(value);
-        break;
-    case 4:
-        setlrcross(value);
-        break;
-    case 5:
-        setfb(value);
-        break;
-    case 6:
-        sethidamp(value);
-        break;
+        case 0:
+            setvolume(value);
+            break;
+        case 1:
+            setpanning(value);
+            break;
+        case 2:
+            setdelay(value);
+            break;
+        case 3:
+            setlrdelay(value);
+            break;
+        case 4:
+            setlrcross(value);
+            break;
+        case 5:
+            setfb(value);
+            break;
+        case 6:
+            sethidamp(value);
+            break;
     }
 }
 
 unsigned char Echo::getpar(int npar) const
 {
     switch(npar) {
-    case 0:
-        return Pvolume;
-        break;
-    case 1:
-        return Ppanning;
-        break;
-    case 2:
-        return Pdelay;
-        break;
-    case 3:
-        return Plrdelay;
-        break;
-    case 4:
-        return Plrcross;
-        break;
-    case 5:
-        return Pfb;
-        break;
-    case 6:
-        return Phidamp;
-        break;
+        case 0:  return Pvolume;
+        case 1:  return Ppanning;
+        case 2:  return Pdelay;
+        case 3:  return Plrdelay;
+        case 4:  return Plrcross;
+        case 5:  return Pfb;
+        case 6:  return Phidamp;
+        default: return 0;
     }
     return 0; // in case of bogus parameter number
 }
-

@@ -224,88 +224,63 @@ void Distorsion::setpreset(unsigned char npreset)
 void Distorsion::changepar(int npar, unsigned char value)
 {
     switch(npar) {
-    case 0:
-        setvolume(value);
-        break;
-    case 1:
-        setpanning(value);
-        break;
-    case 2:
-        setlrcross(value);
-        break;
-    case 3:
-        Pdrive = value;
-        break;
-    case 4:
-        Plevel = value;
-        break;
-    case 5:
-        if(value > 13)
-            Ptype = 13;        //this must be increased if more distorsion types are added
-        else
-            Ptype = value;
-        break;
-    case 6:
-        if(value > 1)
-            Pnegate = 1;
-        else
-            Pnegate = value;
-        break;
-    case 7:
-        setlpf(value);
-        break;
-    case 8:
-        sethpf(value);
-        break;
-    case 9:
-        if(value > 1)
-            Pstereo = 1;
-        else
-            Pstereo = value;
-        break;
-    case 10:
-        Pprefiltering = value;
-        break;
+        case 0:
+            setvolume(value);
+            break;
+        case 1:
+            setpanning(value);
+            break;
+        case 2:
+            setlrcross(value);
+            break;
+        case 3:
+            Pdrive = value;
+            break;
+        case 4:
+            Plevel = value;
+            break;
+        case 5:
+            if(value > 13)
+                Ptype = 13; //this must be increased if more distorsion types are added
+            else
+                Ptype = value;
+            break;
+        case 6:
+            if(value > 1)
+                Pnegate = 1;
+            else
+                Pnegate = value;
+            break;
+        case 7:
+            setlpf(value);
+            break;
+        case 8:
+            sethpf(value);
+            break;
+        case 9:
+            Pstereo = (value > 1) ? 1 : value;
+            break;
+        case 10:
+            Pprefiltering = value;
+            break;
     }
 }
 
 unsigned char Distorsion::getpar(int npar) const
 {
     switch(npar) {
-    case 0:
-        return Pvolume;
-        break;
-    case 1:
-        return Ppanning;
-        break;
-    case 2:
-        return Plrcross;
-        break;
-    case 3:
-        return Pdrive;
-        break;
-    case 4:
-        return Plevel;
-        break;
-    case 5:
-        return Ptype;
-        break;
-    case 6:
-        return Pnegate;
-        break;
-    case 7:
-        return Plpf;
-        break;
-    case 8:
-        return Phpf;
-        break;
-    case 9:
-        return Pstereo;
-        break;
-    case 10:
-        return Pprefiltering;
-        break;
+        case 0:  return Pvolume;
+        case 1:  return Ppanning;
+        case 2:  return Plrcross;
+        case 3:  return Pdrive;
+        case 4:  return Plevel;
+        case 5:  return Ptype;
+        case 6:  return Pnegate;
+        case 7:  return Plpf;
+        case 8:  return Phpf;
+        case 9:  return Pstereo;
+        case 10: return Pprefiltering;
+        default: return 0;
     }
-    return 0; //in case of bogus parameter number
 }
 
