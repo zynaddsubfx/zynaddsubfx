@@ -62,6 +62,7 @@ class OscilGenTest:public CxxTest::TestSuite
             delete[] outL;
             delete[] outR;
             delete[] denormalkillbuf;
+            FFT_cleanup();
         }
 
         //verifies that initialization occurs

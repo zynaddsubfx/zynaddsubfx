@@ -17,6 +17,7 @@ class AdNoteTest:public CxxTest::TestSuite
 
         ADnote *note;
         Master *master;
+        FFTwrapper *fft;
         Controller   *controller;
         unsigned char testnote;
 
@@ -42,9 +43,9 @@ class AdNoteTest:public CxxTest::TestSuite
 
             //phew, glad to get thouse out of my way. took me a lot of sweat and gdb to get this far...
 
+            fft = new FFTwrapper(OSCIL_SIZE);
             //prepare the default settings
-            ADnoteParameters *defaultPreset = new ADnoteParameters(
-                new FFTwrapper(OSCIL_SIZE));
+            ADnoteParameters *defaultPreset = new ADnoteParameters(fft);
 
             //Assert defaults
             TS_ASSERT(!defaultPreset->VoicePar[1].Enabled);
@@ -81,6 +82,9 @@ class AdNoteTest:public CxxTest::TestSuite
                               0,
                               testnote,
                               false);
+
+            delete defaultPreset;
+            delete wrap;
         }
 
         void willNoteBeRunButIsHereForLinkingReasonsHowsThisForCamelCaseEh()
@@ -90,6 +94,11 @@ class AdNoteTest:public CxxTest::TestSuite
 
         void tearDown() {
             delete note;
+            delete controller;
+            delete fft;
+            delete [] outL;
+            delete [] outR;
+            delete [] denormalkillbuf;
         }
 
         void testDefaults() {

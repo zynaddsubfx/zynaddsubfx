@@ -1744,10 +1744,12 @@ void ADnote::Voice::releasekey()
 
 template<class T>
 static inline void nullify(T &t) {delete t; t=NULL;}
+template<class T>
+static inline void arrayNullify(T &t) {delete [] t; t=NULL;}
 
 void ADnote::Voice::kill()
 {
-    nullify(OscilSmp);
+    arrayNullify(OscilSmp);
     nullify(FreqEnvelope);
     nullify(FreqLfo);
     nullify(AmpEnvelope);

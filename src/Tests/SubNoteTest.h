@@ -53,7 +53,6 @@ class SubNoteTest:public CxxTest::TestSuite
             TS_ASSERT(wrap->enterbranch("INSTRUMENT_KIT_ITEM", 0));
             TS_ASSERT(wrap->enterbranch("SUB_SYNTH_PARAMETERS"));
             defaultPreset->getfromXML(wrap);
-            //defaultPreset->defaults();
 
             controller = new Controller();
 
@@ -68,6 +67,8 @@ class SubNoteTest:public CxxTest::TestSuite
                                0,
                                testnote,
                                false);
+            delete wrap;
+            delete defaultPreset;
         }
 
         void willNoteBeRunButIsHereForLinkingReasonsHowsThisForCamelCaseEh()
@@ -76,7 +77,11 @@ class SubNoteTest:public CxxTest::TestSuite
         }
 
         void tearDown() {
+            delete controller;
             delete note;
+            delete [] outL;
+            delete [] outR;
+            delete [] denormalkillbuf;
         }
 
         void testDefaults() {
