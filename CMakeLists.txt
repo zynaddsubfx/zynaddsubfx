@@ -3,6 +3,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 project(zynaddsubfx)
 
 enable_testing()
+include(CTestConfig.cmake)
 #Currently the only directory that uses cmake
 add_subdirectory(src)
 

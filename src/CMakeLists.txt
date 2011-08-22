@@ -300,3 +300,5 @@ endif()
 install(TARGETS zynaddsubfx
 	RUNTIME DESTINATION bin
 	)
+
+include(CTest)
