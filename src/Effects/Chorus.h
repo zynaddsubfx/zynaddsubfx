@@ -83,25 +83,21 @@ class Chorus:public Effect
         //Chorus Parameters
         EffectLFO     lfo; //lfo-ul chorus
         unsigned char Pvolume;
-        unsigned char Ppanning;
         unsigned char Pdepth; //the depth of the Chorus(ms)
         unsigned char Pdelay; //the delay (ms)
         unsigned char Pfb; //feedback
-        unsigned char Plrcross; //feedback
         unsigned char Pflangemode; //how the LFO is scaled, to result chorus or flange
         unsigned char Poutsub; //if I wish to substract the output instead of the adding it
 
 
         //Parameter Controls
         void setvolume(unsigned char Pvolume);
-        void setpanning(unsigned char Ppanning);
         void setdepth(unsigned char Pdepth);
         void setdelay(unsigned char Pdelay);
         void setfb(unsigned char Pfb);
-        void setlrcross(unsigned char Plrcross);
 
         //Internal Values
-        float depth, delay, fb, lrcross, panning;
+        float depth, delay, fb;
         float dl1, dl2, dr1, dr2, lfol, lfor;
         int      maxdelay;
         Stereo<Sample> delaySample;

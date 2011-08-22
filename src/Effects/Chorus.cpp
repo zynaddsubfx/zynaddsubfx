@@ -79,11 +79,11 @@ void Chorus::out(const Stereo<float *> &input)
     dr2 = getdelay(lfor);
 
     for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+
         float inl = input.l[i];
         float inr = input.r[i];
         //LRcross
         Stereo<float> tmpc(inl, inr);
-        //float r=inr;
         inl = tmpc.l * (1.0 - lrcross) + tmpc.r * lrcross;
         inr = tmpc.r * (1.0 - lrcross) + tmpc.l * lrcross;
 
@@ -129,8 +129,8 @@ void Chorus::out(const Stereo<float *> &input)
         }
 
     for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        efxoutl[i] *= panning;
-        efxoutr[i] *= (1.0 - panning);
+        efxoutl[i] *= pangainL;
+        efxoutr[i] *= pangainR;
     }
 }
 
@@ -173,17 +173,6 @@ void Chorus::setvolume(unsigned char Pvolume)
         volume = outvolume;
 }
 
-void Chorus::setpanning(unsigned char Ppanning)
-{
-    this->Ppanning = Ppanning;
-    panning = Ppanning / 127.0;
-}
-
-void Chorus::setlrcross(unsigned char Plrcross)
-{
-    this->Plrcross = Plrcross;
-    lrcross = Plrcross / 127.0;
-}
 
 void Chorus::setpreset(unsigned char npreset)
 {

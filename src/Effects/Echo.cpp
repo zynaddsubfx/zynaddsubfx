@@ -31,8 +31,8 @@ Echo::Echo(const int &insertion_,
            float *const efxoutl_,
            float *const efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
-      Pvolume(50), Ppanning(64), Pdelay(60),
-      Plrdelay(100), Plrcross(100), Pfb(40), Phidamp(60),
+      Pvolume(50), Pdelay(60),
+      Plrdelay(100), Pfb(40), Phidamp(60),
       delayTime(1), lrdelay(0), avgDelay(0),
       delay(new float[(int)(MAX_DELAY * SAMPLE_RATE)],
             new float[(int)(MAX_DELAY * SAMPLE_RATE)]),
@@ -92,8 +92,8 @@ void Echo::out(const Stereo<float *> &input)
         efxoutl[i] = ldl * 2.0;
         efxoutr[i] = rdl * 2.0;
 
-        ldl = input.l[i] * panning - ldl * fb;
-        rdl = input.r[i] * (1.0 - panning) - rdl * fb;
+        ldl = input.l[i] * pangainL - ldl * fb;
+        rdl = input.r[i] * pangainR - rdl * fb;
 
         //LowPass Filter
         old.l = delay.l[(pos.l+delta.l)%(MAX_DELAY * SAMPLE_RATE)] =  ldl * hidamp + old.l * (1.0 - hidamp);
@@ -127,15 +127,8 @@ void Echo::setvolume(unsigned char Pvolume)
     }
     else
         volume = outvolume = Pvolume / 127.0;
-    ;
     if(Pvolume == 0)
         cleanup();
-}
-
-void Echo::setpanning(unsigned char Ppanning)
-{
-    this->Ppanning = Ppanning;
-    panning = (Ppanning + 0.5) / 127.0;
 }
 
 void Echo::setdelay(unsigned char Pdelay)
@@ -155,12 +148,6 @@ void Echo::setlrdelay(unsigned char Plrdelay)
         tmp = -tmp;
     lrdelay = tmp;
     initdelays();
-}
-
-void Echo::setlrcross(unsigned char Plrcross)
-{
-    this->Plrcross = Plrcross;
-    lrcross = Plrcross / 127.0 * 1.0;
 }
 
 void Echo::setfb(unsigned char Pfb)

@@ -43,7 +43,6 @@ class DynamicFilter:public Effect
         //Parametrii DynamicFilter
         EffectLFO     lfo;          //lfo-ul DynamicFilter
         unsigned char Pvolume;      //Volume
-        unsigned char Ppanning;     //Pan
         unsigned char Pdepth;       //the depth of the lfo of the DynamicFilter
         unsigned char Pampsns;      //how the filter varies according to the input amplitude
         unsigned char Pampsnsinv;   //if the filter freq is lowered if the input amplitude rises
@@ -51,14 +50,13 @@ class DynamicFilter:public Effect
 
         //Parameter Control
         void setvolume(unsigned char Pvolume);
-        void setpanning(unsigned char Ppanning);
         void setdepth(unsigned char Pdepth);
         void setampsns(unsigned char Pampsns);
 
         void reinitfilter();
 
         //Internal Values
-        float panning, depth, ampsns, ampsmooth;
+        float depth, ampsns, ampsmooth;
 
         class Filter *filterl, *filterr;
 

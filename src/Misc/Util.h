@@ -55,8 +55,6 @@ extern class Config config;
 
 void invSignal(float *sig, size_t len);
 
-void crossover(float &a, float &b, float crossover);
-
 //Memory pool for temporary buffers
 //No allocation in *normal* case
 //All should be sized to SOUND_BUFFER_SIZE

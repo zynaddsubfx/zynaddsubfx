@@ -34,7 +34,6 @@ Reverb::Reverb(const int &insertion_, float *efxoutl_, float *efxoutr_)
 
     //defaults
     Pvolume    = 48;
-    Ppan       = 64;
     Ptime      = 64;
     Pidelay    = 40;
     Pidelayfb  = 0;
@@ -190,8 +189,8 @@ void Reverb::out(const Stereo<float *> &smp)
     processmono(1, efxoutr, inputbuf); //right
     returnTmpBuffer(inputbuf);
 
-    float lvol = rs / REV_COMBS * pan;
-    float rvol = rs / REV_COMBS * (1.0 - pan);
+    float lvol = rs / REV_COMBS * pangainL;
+    float rvol = rs / REV_COMBS * pangainR;
     if(insertion != 0) {
         lvol *= 2;
         rvol *= 2;
@@ -218,12 +217,6 @@ void Reverb::setvolume(unsigned char Pvolume)
         if(Pvolume == 0)
             cleanup();
     }
-}
-
-void Reverb::setpan(unsigned char Ppan)
-{
-    this->Ppan = Ppan;
-    pan = (float)Ppan / 127.0;
 }
 
 void Reverb::settime(unsigned char Ptime)
@@ -463,7 +456,7 @@ void Reverb::changepar(int npar, unsigned char value)
             setvolume(value);
             break;
         case 1:
-            setpan(value);
+            setpanning(value);
             break;
         case 2:
             settime(value);
@@ -505,7 +498,7 @@ unsigned char Reverb::getpar(int npar) const
 {
     switch(npar) {
         case 0:  return Pvolume;
-        case 1:  return Ppan;
+        case 1:  return Ppanning;
         case 2:  return Ptime;
         case 3:  return Pidelay;
         case 4:  return Pidelayfb;

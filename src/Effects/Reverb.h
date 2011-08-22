@@ -51,9 +51,6 @@ class Reverb:public Effect
         /**Amount of the reverb*/
         unsigned char Pvolume;
 
-        /**Left/Right Panning*/
-        unsigned char Ppan;
-
         /**duration of reverb*/
         unsigned char Ptime;
 
@@ -90,7 +87,6 @@ class Reverb:public Effect
 
         //parameter control
         void setvolume(unsigned char Pvolume);
-        void setpan(unsigned char Ppan);
         void settime(unsigned char Ptime);
         void setlohidamp(unsigned char Plohidamp);
         void setidelay(unsigned char Pidelay);
@@ -101,7 +97,7 @@ class Reverb:public Effect
         void setroomsize(unsigned char Proomsize);
         void setbandwidth(unsigned char Pbandwidth);
 
-        float pan, erbalance;
+        float erbalance;
         //Parameters
         int      lohidamptype; /**<0=disable,1=highdamp(lowpass),2=lowdamp(highpass)*/
         int      idelaylen, rdelaylen;

@@ -147,14 +147,6 @@ void invSignal(float *sig, size_t len)
         sig[i] *= -1.0f;
 }
 
-void crossover(float &a, float &b, float crossover)
-{
-    float tmpa = a;
-    float tmpb = b;
-    a = tmpa * (1.0 - crossover) + tmpb * crossover;
-    b = tmpb * (1.0 - crossover) + tmpa * crossover;
-}
-
 //Some memory pools for short term buffer use
 //(avoid the use of new in RT thread(s))
 

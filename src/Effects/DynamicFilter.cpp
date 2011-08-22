@@ -28,7 +28,7 @@ DynamicFilter::DynamicFilter(int insertion_,
                              float *efxoutl_,
                              float *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, new FilterParams(0, 64, 64), 0),
-      Pvolume(110), Ppanning(64), Pdepth(0), Pampsns(90),
+      Pvolume(110), Pdepth(0), Pampsns(90),
       Pampsnsinv(0), Pampsmooth(60),
       filterl(NULL), filterr(NULL)
 {
@@ -87,8 +87,8 @@ void DynamicFilter::out(const Stereo<float *> &smp)
 
     //panning
     for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
-        efxoutl[i] *= panning;
-        efxoutr[i] *= (1.0 - panning);
+        efxoutl[i] *= pangainL;
+        efxoutr[i] *= pangainR;
     }
 }
 
@@ -125,13 +125,6 @@ void DynamicFilter::setvolume(unsigned char Pvolume)
     else
         volume = outvolume;
 }
-
-void DynamicFilter::setpanning(unsigned char Ppanning)
-{
-    this->Ppanning = Ppanning;
-    panning = Ppanning / 127.0;
-}
-
 
 void DynamicFilter::setampsns(unsigned char Pampsns)
 {

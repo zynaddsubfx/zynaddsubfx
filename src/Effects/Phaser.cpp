@@ -132,8 +132,7 @@ void Phaser::AnalogPhase(const Stereo<float *> &input)
         g.l += diff.l;// Linear interpolation between LFO samples
         g.r += diff.r;
 
-        Stereo<float> xn(input.l[i] * panning, 
-                            input.r[i] * (1.0f - panning));
+        Stereo<float> xn(input.l[i] * pangainL, input.r[i] * pangainR);
 
         if (barber) {
             g.l = fmodf((g.l + 0.25f), ONE_);
@@ -202,8 +201,8 @@ void Phaser::normalPhase(const Stereo<float *> &input)
         float x   = (float) i / SOUND_BUFFER_SIZE;
         float x1  = 1.0 - x;
         //TODO think about making panning an external feature
-        Stereo<float> xn(input.l[i] * panning + fb.l,
-                            input.r[i] * (1.0 - panning) + fb.r);
+        Stereo<float> xn(input.l[i] * pangainL + fb.l,
+                            input.r[i] * pangainR + fb.r);
 
         Stereo<float> g(gain.l * x + oldgain.l * x1,
                            gain.r * x + oldgain.r * x1);
@@ -279,18 +278,6 @@ void Phaser::setvolume(unsigned char Pvolume)
         volume = 1.0;
     else
         volume = outvolume;
-}
-
-void Phaser::setpanning(unsigned char Ppanning)
-{
-    this->Ppanning = Ppanning;
-    panning = (float)Ppanning / 127.0;
-}
-
-void Phaser::setlrcross(unsigned char Plrcross)
-{
-    this->Plrcross = Plrcross;
-    lrcross = Plrcross / 127.0;
 }
 
 void Phaser::setdistortion(unsigned char Pdistortion)

@@ -96,10 +96,22 @@ class Effect
         float volume;
 
         FilterParams *filterpars; /**<Parameters for filters used by Effect*/
+
+        //Perform L/R crossover
+        static void crossover(float &a, float &b, float crossover);
+
     protected:
+        void setpanning(char Ppanning_);
+        void setlrcross(char Plrcross_);
 
         const bool insertion;/**<If Effect is an insertion effect, insertion=1
                                *otherwise, it should be insertion=0*/
+        //panning parameters
+        char Ppanning;
+        float pangainL;
+        float pangainR;
+        char  Plrcross; // L/R mix
+        float lrcross;
 };
 
 #endif

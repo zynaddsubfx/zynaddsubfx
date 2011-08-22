@@ -3,6 +3,7 @@
 
   Effect.cpp - this class is inherited by the all effects(Reverb, Echo, ..)
   Copyright (C) 2002-2005 Nasca Octavian Paul
+  Copyright 2011, Alan Calvert
   Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify
@@ -22,6 +23,7 @@
 
 #include "Effect.h"
 #include "../Params/FilterParams.h"
+#include <cmath>
 
 Effect::Effect(bool insertion_, float *const efxoutl_,
                float *const efxoutr_, FilterParams *filterpars_,
@@ -33,5 +35,26 @@ Effect::Effect(bool insertion_, float *const efxoutl_,
 void Effect::out(float *const smpsl, float *const smpsr)
 {
     out(Stereo<float *>(smpsl,smpsr));
-};
+}
 
+void Effect::crossover(float &a, float &b, float crossover)
+{
+    float tmpa = a;
+    float tmpb = b;
+    a = tmpa * (1.0 - crossover) + tmpb * crossover;
+    b = tmpb * (1.0 - crossover) + tmpa * crossover;
+}
+
+void Effect::setpanning(char Ppanning_)
+{
+    Ppanning = Ppanning_;
+    float t = (Ppanning > 0) ? (float)(Ppanning - 1) / 126.0f : 0.0f;
+    pangainL = cos(t * PI / 2.0f);
+    pangainR = cos((1.0f - t) * PI / 2.0f);
+}
+
+void Effect::setlrcross(char Plrcross_)
+{
+    Plrcross = Plrcross_;
+    lrcross = (float)Plrcross / 127.0f;
+}

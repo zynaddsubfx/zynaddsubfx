@@ -57,25 +57,21 @@ class Alienwah:public Effect
         //Alienwah Parameters
         EffectLFO     lfo; //lfo-ul Alienwah
         unsigned char Pvolume;
-        unsigned char Ppanning;
         unsigned char Pdepth; //the depth of the Alienwah
         unsigned char Pfb; //feedback
-        unsigned char Plrcross; //feedback
         unsigned char Pdelay;
         unsigned char Pphase;
 
 
         //Control Parameters
         void setvolume(unsigned char Pvolume);
-        void setpanning(unsigned char Ppanning);
         void setdepth(unsigned char Pdepth);
         void setfb(unsigned char Pfb);
-        void setlrcross(unsigned char Plrcross);
         void setdelay(unsigned char Pdelay);
         void setphase(unsigned char Pphase);
 
         //Internal Values
-        float panning, fb, depth, lrcross, phase;
+        float fb, depth, phase;
         complex<float> *oldl, *oldr;
         complex<float>  oldclfol, oldclfor;
         int oldk;

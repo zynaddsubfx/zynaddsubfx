@@ -67,7 +67,7 @@ void Alienwah::out(const Stereo<float *> &smp)
         complex<float> tmp = clfol * x + oldclfol * x1;
 
         complex<float>out = tmp * oldl[oldk];
-        out.real() += (1 - fabs(fb)) * smp.l[i] * (1.0 - panning);
+        out.real() += (1 - fabs(fb)) * smp.l[i] * pangainL;
 
         oldl[oldk]  = out;
         float l = out.real() * 10.0 * (fb + 0.1);
@@ -76,7 +76,7 @@ void Alienwah::out(const Stereo<float *> &smp)
         tmp = clfor * x + oldclfor * x1;
 
         out = tmp * oldr[oldk];
-        out.real() += (1 - fabs(fb)) * smp.r[i] * (1.0 - panning);
+        out.real() += (1 - fabs(fb)) * smp.r[i] * pangainR;
 
         oldr[oldk]  = out;
         float r = out.real() * 10.0 * (fb + 0.1);
@@ -135,18 +135,6 @@ void Alienwah::setvolume(unsigned char Pvolume)
         volume = 1.0;
     else
         volume = outvolume;
-}
-
-void Alienwah::setpanning(unsigned char Ppanning)
-{
-    this->Ppanning = Ppanning;
-    panning = Ppanning / 127.0;
-}
-
-void Alienwah::setlrcross(unsigned char Plrcross)
-{
-    this->Plrcross = Plrcross;
-    lrcross = Plrcross / 127.0;
 }
 
 void Alienwah::setphase(unsigned char Pphase)

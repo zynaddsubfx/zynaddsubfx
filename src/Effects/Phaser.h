@@ -47,13 +47,11 @@ class Phaser:public Effect
         //Phaser parameters
         EffectLFO lfo;              //Phaser modulator
         unsigned char Pvolume;      //Used to set wet/dry mix
-        unsigned char Ppanning;
         unsigned char Pdistortion;  //Model distortion added by FET element
         unsigned char Pdepth;       //Depth of phaser sweep
         unsigned char Pwidth;       //Phaser width (LFO amplitude)
         unsigned char Pfb;          //feedback
         unsigned char Poffset;      //Model mismatch between variable resistors
-        unsigned char Plrcross;     //crossover
         unsigned char Pstages;      //Number of first-order All-Pass stages
         unsigned char Poutsub;      //if I wish to subtract the output instead of adding
         unsigned char Pphase;
@@ -62,20 +60,18 @@ class Phaser:public Effect
 
         //Control parameters
         void setvolume(unsigned char Pvolume);
-        void setpanning(unsigned char Ppanning);
         void setdepth(unsigned char Pdepth);
         void setfb(unsigned char Pfb);
         void setdistortion(unsigned char Pdistortion);
         void setwidth(unsigned char Pwidth);
         void setoffset(unsigned char Poffset);
-        void setlrcross(unsigned char Plrcross);
         void setstages(unsigned char Pstages);
         void setphase(unsigned char Pphase);
 
         //Internal Variables
         bool barber; //Barber pole phasing flag
         float distortion, width, offsetpct;
-        float panning, feedback, depth, lrcross, phase;
+        float feedback, depth, phase;
         Stereo<float *> old, xn1, yn1;
         Stereo<float> diff, oldgain, fb;
         float invperiod;

@@ -100,23 +100,19 @@ class Echo:public Effect
     private:
         //Parameters
         char     Pvolume;  /**<#1 Volume or Dry/Wetness*/
-        char     Ppanning; /**<#2 Panning*/
         char     Pdelay;   /**<#3 Delay of the Echo*/
         char     Plrdelay; /**<#4 L/R delay difference*/
-        char     Plrcross; /**<#5 L/R Mixing*/
         char     Pfb;      /**<#6Feedback*/
         char     Phidamp;  /**<#7Dampening of the Echo*/
 
         void setvolume(unsigned char Pvolume);
-        void setpanning(unsigned char Ppanning);
         void setdelay(unsigned char Pdelay);
         void setlrdelay(unsigned char Plrdelay);
-        void setlrcross(unsigned char Plrcross);
         void setfb(unsigned char Pfb);
         void sethidamp(unsigned char Phidamp);
 
         //Real Parameters
-        float panning, lrcross, fb, hidamp;
+        float fb, hidamp;
         //Left/Right delay lengths
         Stereo<int> delayTime;
         float lrdelay;

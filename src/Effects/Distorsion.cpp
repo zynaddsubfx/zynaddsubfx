@@ -38,7 +38,6 @@ Distorsion::Distorsion(const int &insertion_,
 
     //default values
     Pvolume = 50;
-    Plrcross      = 40;
     Pdrive        = 90;
     Plevel        = 64;
     Ptype         = 0;
@@ -101,15 +100,13 @@ void Distorsion::out(const Stereo<float *> &smp)
 
     if(Pstereo != 0) { //Stereo
         for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
-            efxoutl[i] = smp.l[i] * inputvol * panning;
-            efxoutr[i] = smp.r[i] * inputvol * (1.0 - panning);
+            efxoutl[i] = smp.l[i] * inputvol * pangainL;
+            efxoutr[i] = smp.r[i] * inputvol * pangainR;
         }
     }
     else {
         for(i = 0; i < SOUND_BUFFER_SIZE; i++)
-            efxoutl[i] =
-                (smp.l[i] * panning + smp.r[i] * (1.0 - panning)) * inputvol;
-        ;
+            efxoutl[i] = (smp.l[i] * pangainL + smp.r[i] * pangainR) * inputvol;
     }
 
     if(Pprefiltering != 0)
@@ -158,19 +155,6 @@ void Distorsion::setvolume(unsigned char Pvolume)
     ;
     if(Pvolume == 0)
         cleanup();
-}
-
-void Distorsion::setpanning(unsigned char Ppanning)
-{
-    this->Ppanning = Ppanning;
-    panning = (Ppanning + 0.5) / 127.0;
-}
-
-
-void Distorsion::setlrcross(unsigned char Plrcross)
-{
-    this->Plrcross = Plrcross;
-    lrcross = Plrcross / 127.0 * 1.0;
 }
 
 void Distorsion::setlpf(unsigned char Plpf)

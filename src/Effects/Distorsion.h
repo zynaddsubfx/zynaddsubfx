@@ -42,8 +42,6 @@ class Distorsion:public Effect
     private:
         //Parametrii
         unsigned char Pvolume;       //Volume or E/R
-        unsigned char Ppanning;      //Panning
-        unsigned char Plrcross;      // L/R Mixing
         unsigned char Pdrive;        //the input amplification
         unsigned char Plevel;        //the output amplification
         unsigned char Ptype;         //Distorsion type
@@ -54,13 +52,10 @@ class Distorsion:public Effect
         unsigned char Pprefiltering; //if you want to do the filtering before the distorsion
 
         void setvolume(unsigned char Pvolume);
-        void setpanning(unsigned char Ppanning);
-        void setlrcross(unsigned char Plrcross);
         void setlpf(unsigned char Plpf);
         void sethpf(unsigned char Phpf);
 
         //Real Parameters
-        float      panning, lrcross;
         class AnalogFilter *lpfl, *lpfr, *hpfl, *hpfr;
 };
 
