@@ -29,7 +29,7 @@ FFTwrapper::FFTwrapper(int fftsize_)
 {
     fftsize  = fftsize_;
     time     = new fftw_real[fftsize];
-    fft      = new fftw_complex[fftsize];
+    fft      = new fftw_complex[fftsize + 1];
     planfftw = fftw_plan_dft_r2c_1d(fftsize,
                                     time,
                                     fft,
@@ -66,6 +66,10 @@ void FFTwrapper::freqs2smps(const fft_t *freqs, float *smps)
 {
     //Load data
     memcpy( (void*)fft, (const void*)freqs, fftsize*sizeof(double));
+
+    //clear unused freq channel
+    fft[fftsize/2][0] = 0.0;
+    fft[fftsize/2][1] = 0.0;
 
     //IDFT
     fftw_execute(planfftw_inv);

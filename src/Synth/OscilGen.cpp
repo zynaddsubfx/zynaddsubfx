@@ -52,10 +52,11 @@ inline float abs(const fft_t *freqs, off_t x)
     return abs(freqs[x]);
 }
 
-//return angle aka phase
+//return angle aka phase from a sine (not cosine wave)
 inline float arg(const fft_t *freqs, off_t x)
 {
-    return arg(freqs[x]);
+    const fft_t tmp(freqs[x].imag(), freqs[x].real());
+    return arg(tmp);
 }
 
 /**
