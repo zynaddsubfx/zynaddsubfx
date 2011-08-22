@@ -1,12 +1,12 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
 
 decl {//License: GNU GPL version 2 or later} {} 
 
-decl {\#include <stdlib.h>} {public
+decl {\#include <stdlib.h>} {selected public
 } 
 
 decl {\#include <FL/fl_draw.H>} {public
@@ -385,7 +385,7 @@ pitchwheelroller->do_callback();}
       }
       Fl_Dial {} {
         label Vrnd
-        callback {virkeys->rndvelocity=(int) o->value();} selected
+        callback {virkeys->rndvelocity=(int) o->value();}
         tooltip {Velocity Randomness} xywh {205 105 20 20} box ROUND_UP_BOX labelsize 10 align 129 maximum 127 step 1
         code0 {o->value(virkeys->rndvelocity);}
         class WidgetPDial

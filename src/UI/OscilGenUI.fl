@@ -2,7 +2,8 @@
 version 1.0110 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {selected
+} 
 
 decl {//License: GNU GPL version 2 or later} {} 
 
@@ -128,7 +129,9 @@ delete [] spc;} {}
 
 class PSlider {: {public Fl_Slider}
 } {
-  Function {PSlider(int x,int y, int w, int h, const char *label=0):Fl_Slider(x,y,w,h,label)} {} {code{;}}
+  Function {PSlider(int x,int y, int w, int h, const char *label=0):Fl_Slider(x,y,w,h,label)} {} {
+    code {;} {}
+  }
   Function {handle(int event)} {return_type int
   } {
     code {int X=x(),Y=y(),W=w(),H=h();
@@ -1026,7 +1029,7 @@ pthread_mutex_lock(&master->mutex);
 pthread_mutex_unlock(&master->mutex);
 
 redrawoscil();
-refresh();} selected
+refresh();}
         xywh {670 525 55 15} box THIN_UP_BOX labelfont 1 labelsize 11
       }
       Fl_Button {} {

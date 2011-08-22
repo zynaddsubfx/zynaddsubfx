@@ -1,8 +1,9 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {selected
+} 
 
 decl {//License: GNU GPL version 2 or later} {} 
 
@@ -32,7 +33,9 @@ decl {\#include "../Misc/Config.h"} {public
 
 class BankProcess_ {} {
   Function {process()} {open return_type {virtual void}
-  } {code{;}}
+  } {
+    code {;} {}
+  }
   decl {Bank *bank;} {public
   }
 } 
@@ -88,8 +91,7 @@ if (*nselected==nslot)
     color(6);
 
 
-copy_label(bank->getnamenumbered(nslot).c_str());} {selected
-    }
+copy_label(bank->getnamenumbered(nslot).c_str());} {}
   }
   decl {int *what,*whatslot,nslot,highlight, *nselected;} {}
   decl {void (BankProcess_:: *fnc)(void);} {}

@@ -2,7 +2,7 @@
 version 1.0110 
 header_name {.h} 
 code_name {.cc}
-decl {\#include <FL/fl_ask.H>} {public
+decl {\#include <FL/fl_ask.H>} {selected public
 } 
 
 decl {\#include <stdio.h>} {public
@@ -18,9 +18,13 @@ decl {\#include "../Params/Presets.h"} {public
 
 class PresetsUI_ {} {
   Function {refresh()} {open return_type {virtual void}
-  } {code{;}}
+  } {
+    code {;} {}
+  }
   Function {~PresetsUI_()} {open return_type virtual
-  } {code{;}}
+  } {
+    code {;} {}
+  }
 } 
 
 class PresetsUI {} {
@@ -195,8 +199,7 @@ for (unsigned int i=0;i<presetsstore.presets.size();i++){
        continue;
    copybrowse->add(name.c_str());
    pastebrowse->add(name.c_str());
-};} {selected
-    }
+};} {}
   }
   decl {Presets *p;} {public
   }
