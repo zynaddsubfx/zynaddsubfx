@@ -20,6 +20,16 @@ pkg_search_module(LASH lash-1.0)
 mark_as_advanced(LASH_LIBRARIES)
 pkg_search_module(DSSI dssi>=0.9.0)
 mark_as_advanced(DSSI_LIBRARIES)
+#simple cxxtest find until cmake 2.6 support is changed
+find_path(CXXTEST_INCLUDE_DIR cxxtest/TestSuite.h)
+message("searching for cxxtest...")
+if(CXXTEST_INCLUDE_DIR)
+    message("CxxTest found at ${CXXTEST_INCLUDE_DIR}")
+    set(CXXTEST_FOUND true)
+else()
+    message("CxxTest not found...")
+    set(CXXTEST_FOUND false)
+endif()
 
 ######### Settings ###########
 # NOTE: These cache variables should normally not be changed in this
@@ -28,7 +38,7 @@ mark_as_advanced(DSSI_LIBRARIES)
 SET (DefaultOutput oss CACHE STRING
     "Default Output module: [null, alsa, oss, jack, portaudio]")
 SET (GuiModule fltk CACHE STRING "GUI module, either fltk, qt or off")
-SET (CompileTests OFF CACHE BOOL "whether tests should be compiled in or not")
+SET (CompileTests ${CXXTEST_FOUND} CACHE BOOL "whether tests should be compiled in or not")
 SET (AlsaEnable ${ALSA_FOUND} CACHE BOOL
     "Enable support for Advanced Linux Sound Architecture")
 SET (JackEnable ${JACK_FOUND} CACHE BOOL
