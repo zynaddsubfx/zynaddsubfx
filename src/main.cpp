@@ -224,6 +224,8 @@ int main(int argc, char *argv[])
     string loadfile, loadinstrument;
 
     while(1) {
+        int tmp = 0;
+
         /**\todo check this process for a small memory leak*/
         opt = getopt_long(argc, argv, "l:L:r:b:o:I:O:N:haSDUY", opts, &option_index);
         char *optarguments = optarg;
@@ -270,7 +272,6 @@ int main(int argc, char *argv[])
             }
             break;
         case 'o':
-            int tmp;
             if(optarguments)
                 OSCIL_SIZE = tmp = atoi(optarguments);
             if(OSCIL_SIZE < MAX_AD_HARMONICS * 2)

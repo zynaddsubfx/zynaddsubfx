@@ -22,7 +22,6 @@
 #include <math.h>
 #include "PADnoteParameters.h"
 #include "../Misc/WavFile.h"
-using namespace std;
 
 PADnoteParameters::PADnoteParameters(FFTwrapper *fft_,
                                      pthread_mutex_t *mutex_):Presets()
@@ -655,7 +654,7 @@ void PADnoteParameters::applyparameters(bool lockmutex)
     ;
 }
 
-void PADnoteParameters::export2wav(string basefilename)
+void PADnoteParameters::export2wav(std::string basefilename)
 {
     applyparameters(true);
     basefilename += "_PADsynth_";
@@ -664,7 +663,7 @@ void PADnoteParameters::export2wav(string basefilename)
             continue;
         char tmpstr[20];
         snprintf(tmpstr, 20, "_%02d", k + 1);
-        string filename = basefilename + string(tmpstr) + ".wav";
+        std::string filename = basefilename + std::string(tmpstr) + ".wav";
         WavFile wav(filename, SAMPLE_RATE, 1);
         if(wav.good()) {
             int nsmps = sample[k].size;
@@ -675,8 +674,6 @@ void PADnoteParameters::export2wav(string basefilename)
         }
     }
 }
-
-
 
 void PADnoteParameters::add2XML(XMLwrapper *xml)
 {
