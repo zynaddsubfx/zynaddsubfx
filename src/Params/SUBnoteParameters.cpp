@@ -63,7 +63,7 @@ void SUBnoteParameters::defaults()
     PFreqEnvelopeEnabled      = 0;
     PBandWidthEnvelopeEnabled = 0;
 
-    for(int n = 0; n < MAX_SUB_HARMONICS; n++) {
+    for(int n = 0; n < MAX_SUB_HARMONICS; ++n) {
         Phmag[n]   = 0;
         Phrelbw[n] = 64;
     }
@@ -101,7 +101,7 @@ void SUBnoteParameters::add2XML(XMLwrapper *xml)
     xml->addpar("start", Pstart);
 
     xml->beginbranch("HARMONICS");
-    for(int i = 0; i < MAX_SUB_HARMONICS; i++) {
+    for(int i = 0; i < MAX_SUB_HARMONICS; ++i) {
         if((Phmag[i] == 0) && (xml->minimal))
             continue;
         xml->beginbranch("HARMONIC", i);
@@ -174,7 +174,7 @@ void SUBnoteParameters::getfromXML(XMLwrapper *xml)
 
     if(xml->enterbranch("HARMONICS")) {
         Phmag[0] = 0;
-        for(int i = 0; i < MAX_SUB_HARMONICS; i++) {
+        for(int i = 0; i < MAX_SUB_HARMONICS; ++i) {
             if(xml->enterbranch("HARMONIC", i) == 0)
                 continue;
             Phmag[i]   = xml->getpar127("mag", Phmag[i]);

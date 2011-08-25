@@ -83,7 +83,7 @@ void Unison::update_parameters() {
     float increments_per_second = SAMPLE_RATE
                                      / (float) update_period_samples;
 //	printf("#%g, %g\n",increments_per_second,base_freq);
-    for(int i = 0; i < unison_size; i++) {
+    for(int i = 0; i < unison_size; ++i) {
         float base   = pow(UNISON_FREQ_SPAN, RND * 2.0 - 1.0);
         uv[i].relative_amplitude = base;
         float period = base / base_freq;
@@ -116,7 +116,7 @@ void Unison::process(int bufsize, float *inbuf, float *outbuf) {
     float volume    = 1.0 / sqrt(unison_size);
     float xpos_step = 1.0 / (float) update_period_samples;
     float xpos      = (float) update_period_sample_k * xpos_step;
-    for(int i = 0; i < bufsize; i++) {
+    for(int i = 0; i < bufsize; ++i) {
         if((update_period_sample_k++) >= update_period_samples) {
             update_unison_data();
             update_period_sample_k = 0;
@@ -126,7 +126,7 @@ void Unison::process(int bufsize, float *inbuf, float *outbuf) {
         float in   = inbuf[i], out = 0.0;
 
         float sign = 1.0;
-        for(int k = 0; k < unison_size; k++) {
+        for(int k = 0; k < unison_size; ++k) {
             float vpos = uv[k].realpos1
                             * (1.0 - xpos) + uv[k].realpos2 * xpos;     //optimize
             float pos  = delay_k + max_delay - vpos - 1.0; //optimize
@@ -154,7 +154,7 @@ void Unison::update_unison_data() {
     if(!uv)
         return;
 
-    for(int k = 0; k < unison_size; k++) {
+    for(int k = 0; k < unison_size; ++k) {
         float pos  = uv[k].position;
         float step = uv[k].step;
         pos += step;

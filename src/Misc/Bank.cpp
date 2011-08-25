@@ -96,7 +96,7 @@ void Bank::setname(unsigned int ninstrument, const string &newname, int newslot)
         snprintf(tmpfilename, 100, "%4d-%s", ninstrument + 1, newname.c_str());
 
     //add the zeroes at the start of filename
-    for(int i = 0; i < 4; i++)
+    for(int i = 0; i < 4; ++i)
         if(tmpfilename[i] == ' ')
             tmpfilename[i] = '0';
 
@@ -154,7 +154,7 @@ void Bank::savetoslot(unsigned int ninstrument, Part *part)
              (char *)part->Pname);
 
     //add the zeroes at the start of filename
-    for(int i = 0; i < 4; i++)
+    for(int i = 0; i < 4; ++i)
         if(tmpfilename[i] == ' ')
             tmpfilename[i] = '0';
 
@@ -206,7 +206,7 @@ int Bank::loadbank(string bankdirname)
         int no = 0;
         unsigned int startname = 0;
 
-        for(unsigned int i = 0; i < 4; i++) {
+        for(unsigned int i = 0; i < 4; ++i) {
             if(strlen(filename) <= i)
                 break;
 
@@ -317,7 +317,7 @@ void Bank::rescanforbanks()
     //remove old banks
     banks.clear();
 
-    for(int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
+    for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
         if(!config.cfg.bankRootDirList[i].empty())
             scanrootdir(config.cfg.bankRootDirList[i]);
 
@@ -326,8 +326,8 @@ void Bank::rescanforbanks()
 
     //remove duplicate bank names
     int dupl = 0;
-    for(int j = 0; j < (int) banks.size() - 1; j++) {
-        for(int i = j + 1; i <(int) banks.size(); i++) {
+    for(int j = 0; j < (int) banks.size() - 1; ++j) {
+        for(int i = j + 1; i <(int) banks.size(); ++i) {
             if(banks[i].name == banks[j].name) {
                 //add a [1] to the first bankname and [n] to others
                 banks[i].name = banks[i].name + '[' + stringFrom(dupl +2) + ']';

@@ -38,7 +38,7 @@ class AdNoteTest:public CxxTest::TestSuite
             //next the bad global variables that for some reason have not been properly placed in some
             //initialization routine, but rather exist as cryptic oneliners in main.cpp:
             denormalkillbuf = new float[SOUND_BUFFER_SIZE];
-            for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
+            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
                 denormalkillbuf[i] = 0;
 
             //phew, glad to get thouse out of my way. took me a lot of sweat and gdb to get this far...

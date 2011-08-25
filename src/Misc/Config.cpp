@@ -66,9 +66,9 @@ void Config::init()
     winmidimax = 1;
     //try to find out how many input midi devices are there
     winmididevices = new winmidionedevice[winmidimax];
-    for(int i = 0; i < winmidimax; i++) {
+    for(int i = 0; i < winmidimax; ++i) {
         winmididevices[i].name = new char[MAX_STRING_SIZE];
-        for(int j = 0; j < MAX_STRING_SIZE; j++)
+        for(int j = 0; j < MAX_STRING_SIZE; ++j)
             winmididevices[i].name[j] = '\0';
     }
 
@@ -107,7 +107,7 @@ Config::~Config()
     delete [] cfg.LinuxOSSWaveOutDev;
     delete [] cfg.LinuxOSSSeqInDev;
 
-    for(int i = 0; i < winmidimax; i++)
+    for(int i = 0; i < winmidimax; ++i)
         delete [] winmididevices[i].name;
     delete [] winmididevices;
 }
@@ -122,13 +122,13 @@ void Config::save()
 
 void Config::clearbankrootdirlist()
 {
-    for(int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
+    for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
         cfg.bankRootDirList[i].clear();
 }
 
 void Config::clearpresetsdirlist()
 {
-    for(int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
+    for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
             cfg.presetsDirList[i].clear();
 }
 
@@ -196,7 +196,7 @@ void Config::readConfig(const char *filename)
                                                10);
 
         //get bankroot dirs
-        for(int i = 0; i < MAX_BANK_ROOT_DIRS; i++) {
+        for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i) {
             if(xmlcfg.enterbranch("BANKROOT", i)) {
                 cfg.bankRootDirList[i] = xmlcfg.getparstr("bank_root", "");
                 xmlcfg.exitbranch();
@@ -204,7 +204,7 @@ void Config::readConfig(const char *filename)
         }
 
         //get preset root dirs
-        for(int i = 0; i < MAX_BANK_ROOT_DIRS; i++) {
+        for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i) {
             if(xmlcfg.enterbranch("PRESETSROOT", i)) {
                 cfg.presetsDirList[i] = xmlcfg.getparstr("presets_root", "");
                 xmlcfg.exitbranch();
@@ -261,14 +261,14 @@ void Config::saveConfig(const char *filename)
     xmlcfg->addpar("virtual_keyboard_layout", cfg.VirKeybLayout);
 
 
-    for(int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
+    for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
         if(!cfg.bankRootDirList[i].empty()) {
             xmlcfg->beginbranch("BANKROOT", i);
             xmlcfg->addparstr("bank_root", cfg.bankRootDirList[i]);
             xmlcfg->endbranch();
         }
 
-    for(int i = 0; i < MAX_BANK_ROOT_DIRS; i++)
+    for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
         if(!cfg.presetsDirList[i].empty()) {
             xmlcfg->beginbranch("PRESETSROOT", i);
             xmlcfg->addparstr("presets_root", cfg.presetsDirList[i]);

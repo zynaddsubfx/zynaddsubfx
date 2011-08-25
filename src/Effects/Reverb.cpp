@@ -48,7 +48,7 @@ Reverb::Reverb(const int &insertion_, float *efxoutl_, float *efxoutr_)
     roomsize   = 1.0;
     rs = 1.0;
 
-    for(int i = 0; i < REV_COMBS * 2; i++) {
+    for(int i = 0; i < REV_COMBS * 2; ++i) {
         comblen[i] = 800 + (int)(RND * 1400);
         combk[i]   = 0;
         lpcomb[i]  = 0;
@@ -56,7 +56,7 @@ Reverb::Reverb(const int &insertion_, float *efxoutl_, float *efxoutr_)
         comb[i]    = NULL;
     }
 
-    for(int i = 0; i < REV_APS * 2; i++) {
+    for(int i = 0; i < REV_APS * 2; ++i) {
         aplen[i] = 500 + (int)(RND * 500);
         apk[i]   = 0;
         ap[i]    = NULL;
@@ -81,9 +81,9 @@ Reverb::~Reverb()
     if(lpf != NULL)
         delete lpf;
 
-    for(i = 0; i < REV_APS * 2; i++)
+    for(i = 0; i < REV_APS * 2; ++i)
         delete [] ap[i];
-    for(i = 0; i < REV_COMBS * 2; i++)
+    for(i = 0; i < REV_COMBS * 2; ++i)
         delete [] comb[i];
 
     if(bandwidth)
@@ -96,18 +96,18 @@ Reverb::~Reverb()
 void Reverb::cleanup()
 {
     int i, j;
-    for(i = 0; i < REV_COMBS * 2; i++) {
+    for(i = 0; i < REV_COMBS * 2; ++i) {
         lpcomb[i] = 0.0;
-        for(j = 0; j < comblen[i]; j++)
+        for(j = 0; j < comblen[i]; ++j)
             comb[i][j] = 0.0;
     }
 
-    for(i = 0; i < REV_APS * 2; i++)
-        for(j = 0; j < aplen[i]; j++)
+    for(i = 0; i < REV_APS * 2; ++i)
+        for(j = 0; j < aplen[i]; ++j)
             ap[i][j] = 0.0;
 
     if(idelay != NULL)
-        for(i = 0; i < idelaylen; i++)
+        for(i = 0; i < idelaylen; ++i)
             idelay[i] = 0.0;
 
     if(hpf != NULL)
@@ -122,12 +122,12 @@ void Reverb::cleanup()
 void Reverb::processmono(int ch, float *output, float *inputbuf)
 {
     /**\todo: implement the high part from lohidamp*/
-    for(int j = REV_COMBS * ch; j < REV_COMBS * (ch + 1); j++) {
+    for(int j = REV_COMBS * ch; j < REV_COMBS * (ch + 1); ++j) {
         int &ck = combk[j];
         const int comblength = comblen[j];
         float &lpcombj = lpcomb[j];
 
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             float fbout = comb[j][ck] * combfb[j];
             fbout = fbout * (1.0 - lohifb) + lpcombj * lohifb;
             lpcombj     = fbout;
@@ -140,10 +140,10 @@ void Reverb::processmono(int ch, float *output, float *inputbuf)
         }
     }
 
-    for(int j = REV_APS * ch; j < REV_APS * (1 + ch); j++) {
+    for(int j = REV_APS * ch; j < REV_APS * (1 + ch); ++j) {
         int &ak = apk[j];
         const int aplength = aplen[j];
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             float tmp = ap[j][ak];
             ap[j][ak] = 0.7 * tmp + output[i];
             output[i] = tmp - 0.7 * ap[j][ak];
@@ -162,11 +162,11 @@ void Reverb::out(const Stereo<float *> &smp)
         return;
 
     float *inputbuf = getTmpBuffer();
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
         inputbuf[i] = (smp.l[i] + smp.r[i]) / 2.0;
 
     if(idelay != NULL) {
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             //Initial delay r
             float tmp = inputbuf[i] + idelay[idelayk] * idelayfb;
             inputbuf[i]     = idelay[idelayk];
@@ -195,7 +195,7 @@ void Reverb::out(const Stereo<float *> &smp)
         lvol *= 2;
         rvol *= 2;
     }
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         efxoutl[i] *= lvol;
         efxoutr[i] *= rvol;
     }
@@ -226,7 +226,7 @@ void Reverb::settime(unsigned char Ptime)
     this->Ptime = Ptime;
     t = pow(60.0, (float)Ptime / 127.0) - 0.97;
 
-    for(i = 0; i < REV_COMBS * 2; i++)
+    for(i = 0; i < REV_COMBS * 2; ++i)
         combfb[i] =
             -exp((float)comblen[i] / (float)SAMPLE_RATE * log(0.001) / t);
         //the feedback is negative because it removes the DC
@@ -266,7 +266,7 @@ void Reverb::setidelay(unsigned char Pidelay)
     if(idelaylen > 1) {
         idelayk = 0;
         idelay  = new float[idelaylen];
-        for(int i = 0; i < idelaylen; i++)
+        for(int i = 0; i < idelaylen; ++i)
             idelay[i] = 0.0;
     }
 }
@@ -336,7 +336,7 @@ void Reverb::settype(unsigned char Ptype)
     this->Ptype = Ptype;
 
     float tmp;
-    for(int i = 0; i < REV_COMBS * 2; i++) {
+    for(int i = 0; i < REV_COMBS * 2; ++i) {
         if(Ptype == 0)
             tmp = 800.0 + (int)(RND * 1400.0);
         else
@@ -356,7 +356,7 @@ void Reverb::settype(unsigned char Ptype)
         comb[i]    = new float[comblen[i]];
     }
 
-    for(int i = 0; i < REV_APS * 2; i++) {
+    for(int i = 0; i < REV_APS * 2; ++i) {
         if(Ptype == 0)
             tmp = 500 + (int)(RND * 500);
         else
@@ -441,7 +441,7 @@ void Reverb::setpreset(unsigned char npreset)
 
     if(npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; n++)
+    for(int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
     if(insertion != 0)
         changepar(0, presets[npreset][0] / 2);           //lower the volume if reverb is insertion effect

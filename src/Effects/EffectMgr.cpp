@@ -48,7 +48,7 @@ EffectMgr::EffectMgr(int insertion_, pthread_mutex_t *mutex_)
 //    mutex=mutex_;
 //    efxoutl=new float[SOUND_BUFFER_SIZE];
 //    efxoutr=new float[SOUND_BUFFER_SIZE];
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         efxoutl[i] = 0.0;
         efxoutr[i] = 0.0;
     }
@@ -81,7 +81,7 @@ void EffectMgr::changeeffect(int nefx_)
     if(nefx == nefx_)
         return;
     nefx = nefx_;
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         efxoutl[i] = 0.0;
         efxoutr[i] = 0.0;
     }
@@ -212,7 +212,7 @@ void EffectMgr::out(float *smpsl, float *smpsr)
     int i;
     if(efx == NULL) {
         if(insertion == 0)
-            for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+            for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
                 smpsl[i]   = 0.0;
                 smpsr[i]   = 0.0;
                 efxoutl[i] = 0.0;
@@ -221,7 +221,7 @@ void EffectMgr::out(float *smpsl, float *smpsr)
         ;
         return;
     }
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         smpsl[i]  += denormalkillbuf[i];
         smpsr[i]  += denormalkillbuf[i];
         efxoutl[i] = 0.0;
@@ -233,7 +233,7 @@ void EffectMgr::out(float *smpsl, float *smpsr)
 
     if(nefx == 7) { //this is need only for the EQ effect
         /**\todo figure out why*/
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             smpsl[i] = efxoutl[i];
             smpsr[i] = efxoutr[i];
         }
@@ -255,7 +255,7 @@ void EffectMgr::out(float *smpsl, float *smpsr)
             v2 *= v2;                    //for Reverb and Echo, the wet function is not liniar
 
         if(dryonly) { //this is used for instrument effect only
-            for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+            for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
                 smpsl[i]   *= v1;
                 smpsr[i]   *= v1;
                 efxoutl[i] *= v2;
@@ -263,14 +263,14 @@ void EffectMgr::out(float *smpsl, float *smpsr)
             }
         }
         else {  //normal instrument/insertion effect
-            for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+            for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
                 smpsl[i] = smpsl[i] * v1 + efxoutl[i] * v2;
                 smpsr[i] = smpsr[i] * v1 + efxoutr[i] * v2;
             }
         }
     }
     else {  //System effect
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             efxoutl[i] *= 2.0 * volume;
             efxoutr[i] *= 2.0 * volume;
             smpsl[i]    = efxoutl[i];
@@ -317,7 +317,7 @@ void EffectMgr::add2XML(XMLwrapper *xml)
     xml->addpar("preset", efx->Ppreset);
 
     xml->beginbranch("EFFECT_PARAMETERS");
-    for(int n = 0; n < 128; n++) {
+    for(int n = 0; n < 128; ++n) {
         /**\todo evaluate who should oversee saving
              * and loading of parameters*/
         int par = geteffectpar(n);
@@ -345,7 +345,7 @@ void EffectMgr::getfromXML(XMLwrapper *xml)
     efx->Ppreset = xml->getpar127("preset", efx->Ppreset);
 
     if(xml->enterbranch("EFFECT_PARAMETERS")) {
-        for(int n = 0; n < 128; n++) {
+        for(int n = 0; n < 128; ++n) {
             seteffectpar_nolock(n, 0); //erase effect parameter
             if(xml->enterbranch("par_no", n) == 0)
                 continue;

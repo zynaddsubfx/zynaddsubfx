@@ -8,7 +8,7 @@ int Pexitprogram;
 
 Controller::Controller() {
     //init
-    for(int i = 0; i < 6; i++) {
+    for(int i = 0; i < 6; ++i) {
         pars[i].mode      = 1;
         pars[i].val1      = 0;
         pars[i].val2      = 127;

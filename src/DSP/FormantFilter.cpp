@@ -30,12 +30,12 @@
 FormantFilter::FormantFilter(FilterParams *pars)
 {
     numformants = pars->Pnumformants;
-    for(int i = 0; i < numformants; i++)
+    for(int i = 0; i < numformants; ++i)
         formant[i] = new AnalogFilter(4 /*BPF*/, 1000.0, 10.0, pars->Pstages);
     cleanup();
 
-    for(int j = 0; j < FF_MAX_VOWELS; j++)
-        for(int i = 0; i < numformants; i++) {
+    for(int j = 0; j < FF_MAX_VOWELS; ++j)
+        for(int i = 0; i < numformants; ++i) {
             formantpar[j][i].freq = pars->getformantfreq(
                 pars->Pvowels[j].formants[i].freq);
             formantpar[j][i].amp  = pars->getformantamp(
@@ -44,9 +44,9 @@ FormantFilter::FormantFilter(FilterParams *pars)
                 pars->Pvowels[j].formants[i].q);
         }
 
-    for(int i = 0; i < FF_MAX_FORMANTS; i++)
+    for(int i = 0; i < FF_MAX_FORMANTS; ++i)
         oldformantamp[i] = 1.0;
-    for(int i = 0; i < numformants; i++) {
+    for(int i = 0; i < numformants; ++i) {
         currentformants[i].freq = 1000.0;
         currentformants[i].amp  = 1.0;
         currentformants[i].q    = 2.0;
@@ -57,7 +57,7 @@ FormantFilter::FormantFilter(FilterParams *pars)
     sequencesize    = pars->Psequencesize;
     if(sequencesize == 0)
         sequencesize = 1;
-    for(int k = 0; k < sequencesize; k++)
+    for(int k = 0; k < sequencesize; ++k)
         sequence[k].nvowel = pars->Psequence[k].nvowel;
 
     vowelclearness  = pow(10.0, (pars->Pvowelclearness - 32.0) / 48.0);
@@ -76,13 +76,13 @@ FormantFilter::FormantFilter(FilterParams *pars)
 
 FormantFilter::~FormantFilter()
 {
-    for(int i = 0; i < numformants; i++)
+    for(int i = 0; i < numformants; ++i)
         delete (formant[i]);
 }
 
 void FormantFilter::cleanup()
 {
-    for(int i = 0; i < numformants; i++)
+    for(int i = 0; i < numformants; ++i)
         formant[i]->cleanup();
 }
 
@@ -129,7 +129,7 @@ void FormantFilter::setpos(float input)
     p2 = sequence[p2].nvowel;
 
     if(firsttime != 0) {
-        for(int i = 0; i < numformants; i++) {
+        for(int i = 0; i < numformants; ++i) {
             currentformants[i].freq = formantpar[p1][i].freq
                                       * (1.0
                                          - pos) + formantpar[p2][i].freq * pos;
@@ -145,7 +145,7 @@ void FormantFilter::setpos(float input)
         firsttime = 0;
     }
     else {
-        for(int i = 0; i < numformants; i++) {
+        for(int i = 0; i < numformants; ++i) {
             currentformants[i].freq = currentformants[i].freq
                                       * (1.0 - formantslowness)
                                       + (formantpar[p1][i].freq
@@ -183,7 +183,7 @@ void FormantFilter::setfreq(float frequency)
 void FormantFilter::setq(float q_)
 {
     Qfactor = q_;
-    for(int i = 0; i < numformants; i++)
+    for(int i = 0; i < numformants; ++i)
         formant[i]->setq(Qfactor * currentformants[i].q);
 }
 
@@ -208,21 +208,21 @@ void FormantFilter::filterout(float *smp)
     memcpy(inbuffer, smp, sizeof(float) * SOUND_BUFFER_SIZE);
     memset(smp, 0, sizeof(float) * SOUND_BUFFER_SIZE);
 
-    for(int j = 0; j < numformants; j++) {
+    for(int j = 0; j < numformants; ++j) {
         float *tmpbuf = getTmpBuffer();
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
             tmpbuf[i] = inbuffer[i] * outgain;
         formant[j]->filterout(tmpbuf);
 
         if(ABOVE_AMPLITUDE_THRESHOLD(oldformantamp[j], currentformants[j].amp))
-            for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
+            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
                 smp[i] += tmpbuf[i]
                           * INTERPOLATE_AMPLITUDE(oldformantamp[j],
                                                   currentformants[j].amp,
                                                   i,
                                                   SOUND_BUFFER_SIZE);
         else
-            for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
+            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
                 smp[i] += tmpbuf[i] * currentformants[j].amp;
         returnTmpBuffer(tmpbuf);
         oldformantamp[j] = currentformants[j].amp;

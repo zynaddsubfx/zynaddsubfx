@@ -61,7 +61,7 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     const float freq = filterpars->getfreq();
     const float q    = filterpars->getq();
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         efxoutl[i] = smp.l[i];
         efxoutr[i] = smp.r[i];
 
@@ -86,7 +86,7 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     filterr->filterout(efxoutr);
 
     //panning
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         efxoutl[i] *= pangainL;
         efxoutr[i] *= pangainR;
     }
@@ -164,7 +164,7 @@ void DynamicFilter::setpreset(unsigned char npreset)
 
     if(npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; n++)
+    for(int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
 
     filterpars->defaults();

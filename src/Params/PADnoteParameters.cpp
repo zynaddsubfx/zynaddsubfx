@@ -48,7 +48,7 @@ PADnoteParameters::PADnoteParameters(FFTwrapper *fft_,
     FilterEnvelope->ADSRinit_filter(64, 40, 64, 70, 60, 64);
     FilterLfo      = new LFOParams(80, 0, 64, 0, 0, 0, 0, 2);
 
-    for(int i = 0; i < PAD_MAX_SAMPLES; i++)
+    for(int i = 0; i < PAD_MAX_SAMPLES; ++i)
         sample[i].smp = NULL;
     newsample.smp = NULL;
 
@@ -147,7 +147,7 @@ void PADnoteParameters::deletesample(int n)
 
 void PADnoteParameters::deletesamples()
 {
-    for(int i = 0; i < PAD_MAX_SAMPLES; i++)
+    for(int i = 0; i < PAD_MAX_SAMPLES; ++i)
         deletesample(i);
 }
 
@@ -156,7 +156,7 @@ void PADnoteParameters::deletesamples()
  */
 float PADnoteParameters::getprofile(float *smp, int size)
 {
-    for(int i = 0; i < size; i++)
+    for(int i = 0; i < size; ++i)
         smp[i] = 0.0;
     const int supersample = 16;
     float  basepar     = pow(2.0, (1.0 - Php.base.par1 / 127.0) * 12.0);
@@ -173,7 +173,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
     float amppar2      = (1.0 - Php.amp.par2 / 127.0) * 0.998 + 0.001;
     float width = pow(150.0 / (Php.width + 22.0), 2.0);
 
-    for(int i = 0; i < size * supersample; i++) {
+    for(int i = 0; i < size * supersample; ++i) {
         bool     makezero = false;
         float x     = i * 1.0 / (size * (float) supersample);
 
@@ -272,7 +272,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
 
     //normalize the profile (make the max. to be equal to 1.0)
     float max = 0.0;
-    for(int i = 0; i < size; i++) {
+    for(int i = 0; i < size; ++i) {
         if(smp[i] < 0.0)
             smp[i] = 0.0;
         if(smp[i] > max)
@@ -280,7 +280,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
     }
     if(max < 0.00001)
         max = 1.0;
-    for(int i = 0; i < size; i++)
+    for(int i = 0; i < size; ++i)
         smp[i] /= max;
 
     if(!Php.autoscale)
@@ -289,7 +289,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
     //compute the estimated perceived bandwidth
     float sum = 0.0;
     int      i;
-    for(i = 0; i < size / 2 - 2; i++) {
+    for(i = 0; i < size / 2 - 2; ++i) {
         sum += smp[i] * smp[i] + smp[size - i - 1] * smp[size - i - 1];
         if(sum >= 4.0)
             break;
@@ -381,26 +381,26 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
                                                        int profilesize,
                                                        float bwadjust)
 {
-    for(int i = 0; i < size; i++)
+    for(int i = 0; i < size; ++i)
         spectrum[i] = 0.0;
 
     float harmonics[OSCIL_SIZE / 2];
-    for(int i = 0; i < OSCIL_SIZE / 2; i++)
+    for(int i = 0; i < OSCIL_SIZE / 2; ++i)
         harmonics[i] = 0.0;
     //get the harmonic structure from the oscillator (I am using the frequency amplitudes, only)
     oscilgen->get(harmonics, basefreq, false);
 
     //normalize
     float max = 0.0;
-    for(int i = 0; i < OSCIL_SIZE / 2; i++)
+    for(int i = 0; i < OSCIL_SIZE / 2; ++i)
         if(harmonics[i] > max)
             max = harmonics[i];
     if(max < 0.000001)
         max = 1;
-    for(int i = 0; i < OSCIL_SIZE / 2; i++)
+    for(int i = 0; i < OSCIL_SIZE / 2; ++i)
         harmonics[i] /= max;
 
-    for(int nh = 1; nh < OSCIL_SIZE / 2; nh++) { //for each harmonic
+    for(int nh = 1; nh < OSCIL_SIZE / 2; ++nh) { //for each harmonic
         float realfreq = getNhr(nh) * basefreq;
         if(realfreq > SAMPLE_RATE * 0.49999)
             break;
@@ -451,7 +451,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
             float rap   = sqrt((float)profilesize / (float)ibw);
             int      cfreq =
                 (int) (realfreq / (SAMPLE_RATE * 0.5) * size) - ibw / 2;
-            for(int i = 0; i < ibw; i++) {
+            for(int i = 0; i < ibw; ++i) {
                 int src    = (int)(i * rap * rap);
                 int spfreq = i + cfreq;
                 if(spfreq < 0)
@@ -464,7 +464,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
         else {  //if the bandwidth is smaller than the profilesize
             float rap = sqrt((float)ibw / (float)profilesize);
             float ibasefreq = realfreq / (SAMPLE_RATE * 0.5) * size;
-            for(int i = 0; i < profilesize; i++) {
+            for(int i = 0; i < profilesize; ++i) {
                 float idfreq  = i / (float)profilesize - 0.5;
                 idfreq *= ibw;
                 int      spfreq  = (int) (idfreq + ibasefreq);
@@ -487,26 +487,26 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
                                                     int size,
                                                     float basefreq)
 {
-    for(int i = 0; i < size; i++)
+    for(int i = 0; i < size; ++i)
         spectrum[i] = 0.0;
 
     float harmonics[OSCIL_SIZE / 2];
-    for(int i = 0; i < OSCIL_SIZE / 2; i++)
+    for(int i = 0; i < OSCIL_SIZE / 2; ++i)
         harmonics[i] = 0.0;
     //get the harmonic structure from the oscillator (I am using the frequency amplitudes, only)
     oscilgen->get(harmonics, basefreq, false);
 
     //normalize
     float max = 0.0;
-    for(int i = 0; i < OSCIL_SIZE / 2; i++)
+    for(int i = 0; i < OSCIL_SIZE / 2; ++i)
         if(harmonics[i] > max)
             max = harmonics[i];
     if(max < 0.000001)
         max = 1;
-    for(int i = 0; i < OSCIL_SIZE / 2; i++)
+    for(int i = 0; i < OSCIL_SIZE / 2; ++i)
         harmonics[i] /= max;
 
-    for(int nh = 1; nh < OSCIL_SIZE / 2; nh++) { //for each harmonic
+    for(int nh = 1; nh < OSCIL_SIZE / 2; ++nh) { //for each harmonic
         float realfreq = getNhr(nh) * basefreq;
 
         ///sa fac aici interpolarea si sa am grija daca frecv descresc
@@ -528,13 +528,13 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
 
     if(Pmode != 1) {
         int old = 0;
-        for(int k = 1; k < size; k++) {
+        for(int k = 1; k < size; ++k) {
             if((spectrum[k] > 1e-10) || (k == (size - 1))) {
                 int      delta  = k - old;
                 float val1   = spectrum[old];
                 float val2   = spectrum[k];
                 float idelta = 1.0 / delta;
-                for(int i = 0; i < delta; i++) {
+                for(int i = 0; i < delta; ++i) {
                     float x = idelta * i;
                     spectrum[old + i] = val1 * (1.0 - x) + val2 * x;
                 }
@@ -580,9 +580,9 @@ void PADnoteParameters::applyparameters(bool lockmutex)
     fft_t      *fftfreqs = new fft_t[samplesize / 2];
 
     float adj[samplemax]; //this is used to compute frequency relation to the base frequency
-    for(int nsample = 0; nsample < samplemax; nsample++)
+    for(int nsample = 0; nsample < samplemax; ++nsample)
         adj[nsample] = (Pquality.oct + 1.0) * (float)nsample / samplemax;
-    for(int nsample = 0; nsample < samplemax; nsample++) {
+    for(int nsample = 0; nsample < samplemax; ++nsample) {
         float tmp = adj[nsample] - adj[samplemax - 1] * 0.5;
         float basefreqadjust = pow(2.0, tmp);
 
@@ -601,24 +601,24 @@ void PADnoteParameters::applyparameters(bool lockmutex)
         newsample.smp    = new float[samplesize + extra_samples];
 
         newsample.smp[0] = 0.0;
-        for(int i = 1; i < spectrumsize; i++) //randomize the phases
+        for(int i = 1; i < spectrumsize; ++i) //randomize the phases
             fftfreqs[i] = std::polar(spectrum[i], (float)RND * 6.29f);
         fft->freqs2smps(fftfreqs, newsample.smp); //that's all; here is the only ifft for the whole sample; no windows are used ;-)
 
 
         //normalize(rms)
         float rms = 0.0;
-        for(int i = 0; i < samplesize; i++)
+        for(int i = 0; i < samplesize; ++i)
             rms += newsample.smp[i] * newsample.smp[i];
         rms  = sqrt(rms);
         if(rms < 0.000001)
             rms = 1.0;
         rms *= sqrt(262144.0 / samplesize);
-        for(int i = 0; i < samplesize; i++)
+        for(int i = 0; i < samplesize; ++i)
             newsample.smp[i] *= 1.0 / rms * 50.0;
 
         //prepare extra samples used by the linear or cubic interpolation
-        for(int i = 0; i < extra_samples; i++)
+        for(int i = 0; i < extra_samples; ++i)
             newsample.smp[i + samplesize] = newsample.smp[i];
 
         //replace the current sample with the new computed sample
@@ -644,12 +644,12 @@ void PADnoteParameters::applyparameters(bool lockmutex)
     //delete the additional samples that might exists and are not useful
     if(lockmutex) {
         pthread_mutex_lock(mutex);
-        for(int i = samplemax; i < PAD_MAX_SAMPLES; i++)
+        for(int i = samplemax; i < PAD_MAX_SAMPLES; ++i)
             deletesample(i);
         pthread_mutex_unlock(mutex);
     }
     else
-        for(int i = samplemax; i < PAD_MAX_SAMPLES; i++)
+        for(int i = samplemax; i < PAD_MAX_SAMPLES; ++i)
             deletesample(i);
     ;
 }
@@ -658,7 +658,7 @@ void PADnoteParameters::export2wav(std::string basefilename)
 {
     applyparameters(true);
     basefilename += "_PADsynth_";
-    for(int k = 0; k < PAD_MAX_SAMPLES; k++) {
+    for(int k = 0; k < PAD_MAX_SAMPLES; ++k) {
         if(sample[k].smp == NULL)
             continue;
         char tmpstr[20];
@@ -668,7 +668,7 @@ void PADnoteParameters::export2wav(std::string basefilename)
         if(wav.good()) {
             int nsmps = sample[k].size;
             short int *smps = new short int[nsmps];
-            for(int i = 0; i < nsmps; i++)
+            for(int i = 0; i < nsmps; ++i)
                 smps[i] = (short int)(sample[k].smp[i] * 32767.0);
             wav.writeMonoSamples(nsmps, smps);
         }

@@ -53,7 +53,7 @@ SVFilter::~SVFilter()
 
 void SVFilter::cleanup()
 {
-    for(int i = 0; i < MAX_FILTER_STAGES + 1; i++) {
+    for(int i = 0; i < MAX_FILTER_STAGES + 1; ++i) {
         st[i].low   = 0.0;
         st[i].high  = 0.0;
         st[i].band  = 0.0;
@@ -151,7 +151,7 @@ void SVFilter::singlefilterout(float *smp, fstage &x, parameters &par)
         errx(1, "Impossible SVFilter type encountered [%d]", type);
     }
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         x.low   = x.low + par.f * x.band;
         x.high  = par.q_sqrt * smp[i] - x.low - par.q * x.band;
         x.band  = par.f * x.high + x.band;
@@ -163,17 +163,17 @@ void SVFilter::singlefilterout(float *smp, fstage &x, parameters &par)
 
 void SVFilter::filterout(float *smp)
 {
-    for(int i = 0; i < stages + 1; i++)
+    for(int i = 0; i < stages + 1; ++i)
         singlefilterout(smp, st[i], par);
 
     if(needsinterpolation) {
         float *ismp = getTmpBuffer();
         memcpy(ismp, smp, sizeof(float) * SOUND_BUFFER_SIZE);
 
-        for(int i = 0; i < stages + 1; i++)
+        for(int i = 0; i < stages + 1; ++i)
             singlefilterout(ismp, st[i], ipar);
 
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             float x = i / (float) SOUND_BUFFER_SIZE;
             smp[i] = ismp[i] * (1.0 - x) + smp[i] * x;
         }
@@ -181,7 +181,7 @@ void SVFilter::filterout(float *smp)
         needsinterpolation = false;
     }
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
         smp[i] *= outgain;
 }
 

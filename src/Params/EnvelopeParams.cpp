@@ -39,7 +39,7 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
     PS_val = 64;
     PR_val = 64;
 
-    for(i = 0; i < MAX_ENVELOPE_POINTS; i++) {
+    for(i = 0; i < MAX_ENVELOPE_POINTS; ++i) {
         Penvdt[i]  = 32;
         Penvval[i] = 64;
     }
@@ -223,7 +223,7 @@ void EnvelopeParams::add2XML(XMLwrapper *xml)
     xml->addpar("R_val", PR_val);
 
     if((Pfreemode != 0) || (!xml->minimal)) {
-        for(int i = 0; i < Penvpoints; i++) {
+        for(int i = 0; i < Penvpoints; ++i) {
             xml->beginbranch("POINT", i);
             if(i != 0)
                 xml->addpar("dt", Penvdt[i]);
@@ -252,7 +252,7 @@ void EnvelopeParams::getfromXML(XMLwrapper *xml)
     PS_val = xml->getpar127("S_val", PS_val);
     PR_val = xml->getpar127("R_val", PR_val);
 
-    for(int i = 0; i < Penvpoints; i++) {
+    for(int i = 0; i < Penvpoints; ++i) {
         if(xml->enterbranch("POINT", i) == 0)
             continue;
         if(i != 0)

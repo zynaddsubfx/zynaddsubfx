@@ -43,7 +43,7 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
     partoutl   = new float [SOUND_BUFFER_SIZE];
     partoutr   = new float [SOUND_BUFFER_SIZE];
 
-    for(int n = 0; n < NUM_KIT_ITEMS; n++) {
+    for(int n = 0; n < NUM_KIT_ITEMS; ++n) {
         kit[n].Pname   = new unsigned char [PART_MAX_NAME_LEN];
         kit[n].adpars  = NULL;
         kit[n].subpars = NULL;
@@ -55,12 +55,12 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
     kit[0].padpars = new PADnoteParameters(fft, mutex);
 
     //Part's Insertion Effects init
-    for(int nefx = 0; nefx < NUM_PART_EFX; nefx++) {
+    for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
         partefx[nefx]    = new EffectMgr(1, mutex);
         Pefxbypass[nefx] = false;
     }
 
-    for(int n = 0; n < NUM_PART_EFX + 1; n++) {
+    for(int n = 0; n < NUM_PART_EFX + 1; ++n) {
         partfxinputl[n] = new float [SOUND_BUFFER_SIZE];
         partfxinputr[n] = new float [SOUND_BUFFER_SIZE];
     }
@@ -68,11 +68,11 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
     killallnotes = 0;
     oldfreq      = -1.0;
 
-    for(int i = 0; i < POLIPHONY; i++) {
+    for(int i = 0; i < POLIPHONY; ++i) {
         partnote[i].status = KEY_OFF;
         partnote[i].note   = -1;
         partnote[i].itemsplaying = 0;
-        for(int j = 0; j < NUM_KIT_ITEMS; j++) {
+        for(int j = 0; j < NUM_KIT_ITEMS; ++j) {
             partnote[i].kititem[j].adnote  = NULL;
             partnote[i].kititem[j].subnote = NULL;
             partnote[i].kititem[j].padnote = NULL;
@@ -121,7 +121,7 @@ void Part::defaultsinstrument()
     Pkitmode  = 0;
     Pdrummode = 0;
 
-    for(int n = 0; n < NUM_KIT_ITEMS; n++) {
+    for(int n = 0; n < NUM_KIT_ITEMS; ++n) {
         kit[n].Penabled    = 0;
         kit[n].Pmuted      = 0;
         kit[n].Pminkey     = 0;
@@ -140,7 +140,7 @@ void Part::defaultsinstrument()
     kit[0].subpars->defaults();
     kit[0].padpars->defaults();
 
-    for(int nefx = 0; nefx < NUM_PART_EFX; nefx++) {
+    for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
         partefx[nefx]->defaults();
         Pefxroute[nefx] = 0; //route to next effect
     }
@@ -153,17 +153,17 @@ void Part::defaultsinstrument()
  */
 void Part::cleanup(bool final)
 {
-    for(int k = 0; k < POLIPHONY; k++)
+    for(int k = 0; k < POLIPHONY; ++k)
         KillNotePos(k);
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         partoutl[i] = final ? 0.0 : denormalkillbuf[i];
         partoutr[i] = final ? 0.0 : denormalkillbuf[i];
     }
     ctl.resetall();
-    for(int nefx = 0; nefx < NUM_PART_EFX; nefx++)
+    for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx)
         partefx[nefx]->cleanup();
-    for(int n = 0; n < NUM_PART_EFX + 1; n++) {
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int n = 0; n < NUM_PART_EFX + 1; ++n) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             partfxinputl[n][i] = final ? 0.0 : denormalkillbuf[i];
             partfxinputr[n][i] = final ? 0.0 : denormalkillbuf[i];
         }
@@ -173,7 +173,7 @@ void Part::cleanup(bool final)
 Part::~Part()
 {
     cleanup(true);
-    for(int n = 0; n < NUM_KIT_ITEMS; n++) {
+    for(int n = 0; n < NUM_KIT_ITEMS; ++n) {
         if(kit[n].adpars != NULL)
             delete (kit[n].adpars);
         if(kit[n].subpars != NULL)
@@ -189,9 +189,9 @@ Part::~Part()
     delete [] Pname;
     delete [] partoutl;
     delete [] partoutr;
-    for(int nefx = 0; nefx < NUM_PART_EFX; nefx++)
+    for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx)
         delete (partefx[nefx]);
-    for(int n = 0; n < NUM_PART_EFX + 1; n++) {
+    for(int n = 0; n < NUM_PART_EFX + 1; ++n) {
         delete [] partfxinputl[n];
         delete [] partfxinputr[n];
     }
@@ -237,7 +237,7 @@ void Part::NoteOn(unsigned char note,
     lastnote = note;
 
     pos      = -1;
-    for(i = 0; i < POLIPHONY; i++) {
+    for(i = 0; i < POLIPHONY; ++i) {
         if(partnote[i].status == KEY_OFF) {
             pos = i;
             break;
@@ -262,14 +262,14 @@ void Part::NoteOn(unsigned char note,
             }
             else {
                 // Legato mode is valid, but this is only a first note.
-                for(i = 0; i < POLIPHONY; i++)
+                for(i = 0; i < POLIPHONY; ++i)
                     if((partnote[i].status == KEY_PLAYING)
                        || (partnote[i].status == KEY_RELASED_AND_SUSTAINED))
                         RelaseNotePos(i);
 
                 // Set posb
                 posb = (pos + 1) % POLIPHONY; //We really want it (if the following fails)
-                for(i = 0; i < POLIPHONY; i++)
+                for(i = 0; i < POLIPHONY; ++i)
                     if((partnote[i].status == KEY_OFF) && (pos != i)) {
                         posb = i;
                         break;
@@ -280,7 +280,7 @@ void Part::NoteOn(unsigned char note,
     }
     else     // Legato mode is either off or non-applicable.
     if(Ppolymode == 0) {   //if the mode is 'mono' turn off all other notes
-        for(i = 0; i < POLIPHONY; i++)
+        for(i = 0; i < POLIPHONY; ++i)
             if(partnote[i].status == KEY_PLAYING)
                 RelaseNotePos(i);
         RelaseSustainedKeys();
@@ -380,7 +380,7 @@ void Part::NoteOn(unsigned char note,
             }
             else {   // "kit mode" legato note
                 int ci = 0;
-                for(int item = 0; item < NUM_KIT_ITEMS; item++) {
+                for(int item = 0; item < NUM_KIT_ITEMS; ++item) {
                     if(kit[item].Pmuted != 0)
                         continue;
                     if((note < kit[item].Pminkey) || (note > kit[item].Pmaxkey))
@@ -480,7 +480,7 @@ void Part::NoteOn(unsigned char note,
             }
         }
         else {  //init the notes for the "kit mode"
-            for(int item = 0; item < NUM_KIT_ITEMS; item++) {
+            for(int item = 0; item < NUM_KIT_ITEMS; ++item) {
                 if(kit[item].Pmuted != 0)
                     continue;
                 if((note < kit[item].Pminkey) || (note > kit[item].Pmaxkey))
@@ -631,7 +631,7 @@ void Part::SetController(unsigned int type, int par)
         setPvolume(Pvolume); //update the volume
         setPpanning(Ppanning); //update the panning
 
-        for(int item = 0; item < NUM_KIT_ITEMS; item++) {
+        for(int item = 0; item < NUM_KIT_ITEMS; ++item) {
             if(kit[item].adpars == NULL)
                 continue;
             kit[item].adpars->GlobalPar.Reson->
@@ -647,7 +647,7 @@ void Part::SetController(unsigned int type, int par)
         break;
     case C_resonance_center:
         ctl.setresonancecenter(par);
-        for(int item = 0; item < NUM_KIT_ITEMS; item++) {
+        for(int item = 0; item < NUM_KIT_ITEMS; ++item) {
             if(kit[item].adpars == NULL)
                 continue;
             kit[item].adpars->GlobalPar.Reson->
@@ -672,7 +672,7 @@ void Part::RelaseSustainedKeys()
         if(monomemnotes.back() != lastnote) // Sustain controller manipulation would cause repeated same note respawn without this check.
             MonoMemRenote(); // To play most recent still held note.
 
-    for(int i = 0; i < POLIPHONY; i++)
+    for(int i = 0; i < POLIPHONY; ++i)
         if(partnote[i].status == KEY_RELASED_AND_SUSTAINED)
             RelaseNotePos(i);
 }
@@ -683,7 +683,7 @@ void Part::RelaseSustainedKeys()
 
 void Part::RelaseAllKeys()
 {
-    for(int i = 0; i < POLIPHONY; i++)
+    for(int i = 0; i < POLIPHONY; ++i)
         if((partnote[i].status != KEY_RELASED)
            && (partnote[i].status != KEY_OFF)) //thanks to Frank Neumann
             RelaseNotePos(i);
@@ -707,7 +707,7 @@ void Part::MonoMemRenote()
  */
 void Part::RelaseNotePos(int pos)
 {
-    for(int j = 0; j < NUM_KIT_ITEMS; j++) {
+    for(int j = 0; j < NUM_KIT_ITEMS; ++j) {
         if(partnote[pos].kititem[j].adnote != NULL)
             if(partnote[pos].kititem[j].adnote)
                 partnote[pos].kititem[j].adnote->relasekey();
@@ -734,7 +734,7 @@ void Part::KillNotePos(int pos)
     partnote[pos].time   = 0;
     partnote[pos].itemsplaying = 0;
 
-    for(int j = 0; j < NUM_KIT_ITEMS; j++) {
+    for(int j = 0; j < NUM_KIT_ITEMS; ++j) {
         if(partnote[pos].kititem[j].adnote != NULL) {
             delete (partnote[pos].kititem[j].adnote);
             partnote[pos].kititem[j].adnote = NULL;
@@ -768,14 +768,14 @@ void Part::setkeylimit(unsigned char Pkeylimit)
     //release old keys if the number of notes>keylimit
     if(Ppolymode != 0) {
         int notecount = 0;
-        for(int i = 0; i < POLIPHONY; i++)
+        for(int i = 0; i < POLIPHONY; ++i)
             if((partnote[i].status == KEY_PLAYING)
                || (partnote[i].status == KEY_RELASED_AND_SUSTAINED))
                 notecount++;
 
         int oldestnotepos = -1;
         if(notecount > keylimit) { //find out the oldest note
-            for(int i = 0; i < POLIPHONY; i++) {
+            for(int i = 0; i < POLIPHONY; ++i) {
                 int maxtime = 0;
                 if(((partnote[i].status == KEY_PLAYING)
                     || (partnote[i].status == KEY_RELASED_AND_SUSTAINED))
@@ -802,7 +802,7 @@ void Part::AllNotesOff()
 void Part::RunNote(unsigned int k)
 {
     unsigned noteplay = 0;
-    for(int item = 0; item < partnote[k].itemsplaying; item++) {
+    for(int item = 0; item < partnote[k].itemsplaying; ++item) {
         int sendcurrenttofx = partnote[k].kititem[item].sendtoparteffect;
 
         for(unsigned type = 0; type < 3; ++type) {
@@ -828,7 +828,7 @@ void Part::RunNote(unsigned int k)
                 delete (*note);
                 (*note) = NULL;
             }
-            for(int i = 0; i < SOUND_BUFFER_SIZE; i++) { //add the note to part(mix)
+            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) { //add the note to part(mix)
                 partfxinputl[sendcurrenttofx][i] += tmpoutl[i];
                 partfxinputr[sendcurrenttofx][i] += tmpoutr[i];
             }
@@ -847,14 +847,14 @@ void Part::RunNote(unsigned int k)
  */
 void Part::ComputePartSmps()
 {
-    for(unsigned nefx = 0; nefx < NUM_PART_EFX + 1; nefx++) {
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(unsigned nefx = 0; nefx < NUM_PART_EFX + 1; ++nefx) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             partfxinputl[nefx][i] = 0.0;
             partfxinputr[nefx][i] = 0.0;
         }
     }
 
-    for(unsigned k = 0; k < POLIPHONY; k++) {
+    for(unsigned k = 0; k < POLIPHONY; ++k) {
         if(partnote[k].status == KEY_OFF)
             continue;
         partnote[k].time++;
@@ -864,39 +864,39 @@ void Part::ComputePartSmps()
 
 
     //Apply part's effects and mix them
-    for(int nefx = 0; nefx < NUM_PART_EFX; nefx++) {
+    for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
         if(!Pefxbypass[nefx]) {
             partefx[nefx]->out(partfxinputl[nefx], partfxinputr[nefx]);
             if(Pefxroute[nefx] == 2) {
-                for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+                for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
                     partfxinputl[nefx + 1][i] += partefx[nefx]->efxoutl[i];
                     partfxinputr[nefx + 1][i] += partefx[nefx]->efxoutr[i];
                 }
             }
         }
         int routeto = ((Pefxroute[nefx] == 0) ? nefx + 1 : NUM_PART_EFX);
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             partfxinputl[routeto][i] += partfxinputl[nefx][i];
             partfxinputr[routeto][i] += partfxinputr[nefx][i];
         }
     }
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         partoutl[i] = partfxinputl[NUM_PART_EFX][i];
         partoutr[i] = partfxinputr[NUM_PART_EFX][i];
     }
 
     //Kill All Notes if killallnotes!=0
     if(killallnotes != 0) {
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             float tmp =
                 (SOUND_BUFFER_SIZE - i) / (float) SOUND_BUFFER_SIZE;
             partoutl[i] *= tmp;
             partoutr[i] *= tmp;
         }
-        for(int k = 0; k < POLIPHONY; k++)
+        for(int k = 0; k < POLIPHONY; ++k)
             KillNotePos(k);
         killallnotes = 0;
-        for(int nefx = 0; nefx < NUM_PART_EFX; nefx++)
+        for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx)
             partefx[nefx]->cleanup();
 
     }
@@ -957,7 +957,7 @@ void Part::setkititemstatus(int kititem, int Penabled_)
     }
 
     if(resetallnotes)
-        for(int k = 0; k < POLIPHONY; k++)
+        for(int k = 0; k < POLIPHONY; ++k)
             KillNotePos(k);
 }
 
@@ -975,7 +975,7 @@ void Part::add2XMLinstrument(XMLwrapper *xml)
     xml->addpar("kit_mode", Pkitmode);
     xml->addparbool("drum_mode", Pdrummode);
 
-    for(int i = 0; i < NUM_KIT_ITEMS; i++) {
+    for(int i = 0; i < NUM_KIT_ITEMS; ++i) {
         xml->beginbranch("INSTRUMENT_KIT_ITEM", i);
         xml->addparbool("enabled", kit[i].Penabled);
         if(kit[i].Penabled != 0) {
@@ -1013,7 +1013,7 @@ void Part::add2XMLinstrument(XMLwrapper *xml)
     xml->endbranch();
 
     xml->beginbranch("INSTRUMENT_EFFECTS");
-    for(int nefx = 0; nefx < NUM_PART_EFX; nefx++) {
+    for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
         xml->beginbranch("INSTRUMENT_EFFECT", nefx);
         xml->beginbranch("EFFECT");
         partefx[nefx]->add2XML(xml);
@@ -1092,7 +1092,7 @@ int Part::loadXMLinstrument(const char *filename)/*{*/
 
 void Part::applyparameters(bool lockmutex)/*{*/
 {
-    for(int n = 0; n < NUM_KIT_ITEMS; n++)
+    for(int n = 0; n < NUM_KIT_ITEMS; ++n)
         if((kit[n].padpars != NULL) && (kit[n].Ppadenabled != 0))
             kit[n].padpars->applyparameters(lockmutex);
 }/*}*/
@@ -1113,7 +1113,7 @@ void Part::getfromXMLinstrument(XMLwrapper *xml)
         Pdrummode = xml->getparbool("drum_mode", Pdrummode);
 
         setkititemstatus(0, 0);
-        for(int i = 0; i < NUM_KIT_ITEMS; i++) {
+        for(int i = 0; i < NUM_KIT_ITEMS; ++i) {
             if(xml->enterbranch("INSTRUMENT_KIT_ITEM", i) == 0)
                 continue;
             setkititemstatus(i, xml->getparbool("enabled", kit[i].Penabled));
@@ -1161,7 +1161,7 @@ void Part::getfromXMLinstrument(XMLwrapper *xml)
 
 
     if(xml->enterbranch("INSTRUMENT_EFFECTS")) {
-        for(int nefx = 0; nefx < NUM_PART_EFX; nefx++) {
+        for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
             if(xml->enterbranch("INSTRUMENT_EFFECT", nefx) == 0)
                 continue;
             if(xml->enterbranch("EFFECT")) {

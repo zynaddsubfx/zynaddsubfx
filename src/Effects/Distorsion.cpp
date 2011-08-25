@@ -99,13 +99,13 @@ void Distorsion::out(const Stereo<float *> &smp)
         inputvol *= -1.0;
 
     if(Pstereo != 0) { //Stereo
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             efxoutl[i] = smp.l[i] * inputvol * pangainL;
             efxoutr[i] = smp.r[i] * inputvol * pangainR;
         }
     }
     else {
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++)
+        for(i = 0; i < SOUND_BUFFER_SIZE; ++i)
             efxoutl[i] = (smp.l[i] * pangainL + smp.r[i] * pangainR) * inputvol;
     }
 
@@ -121,11 +121,11 @@ void Distorsion::out(const Stereo<float *> &smp)
         applyfilters(efxoutl, efxoutr);
 
     if(Pstereo == 0)
-        for(i = 0; i < SOUND_BUFFER_SIZE; i++)
+        for(i = 0; i < SOUND_BUFFER_SIZE; ++i)
             efxoutr[i] = efxoutl[i];
 
     float level = dB2rap(60.0 * Plevel / 127.0 - 40.0);
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         lout = efxoutl[i];
         rout = efxoutr[i];
         l    = lout * (1.0 - lrcross) + rout * lrcross;
@@ -196,7 +196,7 @@ void Distorsion::setpreset(unsigned char npreset)
 
     if(npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; n++)
+    for(int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
     if(insertion == 0)
         changepar(0, (int) (presets[npreset][0] / 1.5));           //lower the volume if this is system effect

@@ -96,7 +96,7 @@ void PresetsStore::rescanforpresets(const string &type)
     clearpresets();
     string ftype = "." + type + ".xpz";
 
-    for(int i = 0; i < MAX_BANK_ROOT_DIRS; i++) {
+    for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i) {
         if(config.cfg.presetsDirList[i].empty())
             continue;
 

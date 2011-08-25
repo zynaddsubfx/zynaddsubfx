@@ -34,7 +34,7 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
                            unsigned char Fstages)
 {
     stages = Fstages;
-    for(int i = 0; i < 3; i++) {
+    for(int i = 0; i < 3; ++i) {
         coeff.c[i]    = 0.0;
         coeff.d[i]    = 0.0;
         oldCoeff.c[i] = 0.0;
@@ -61,7 +61,7 @@ AnalogFilter::~AnalogFilter()
 
 void AnalogFilter::cleanup()
 {
-    for(int i = 0; i < MAX_FILTER_STAGES + 1; i++) {
+    for(int i = 0; i < MAX_FILTER_STAGES + 1; ++i) {
         history[i].x1 = 0.0;
         history[i].x2 = 0.0;
         history[i].y1 = 0.0;
@@ -361,7 +361,7 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist,
                                    const Coeff &coeff)
 {
     if(order == 1) { //First order filter
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             float y0 =    smp[i]*coeff.c[0] + hist.x1*coeff.c[1]
                           + hist.y1*coeff.d[1];
             hist.y1 = y0;
@@ -370,7 +370,7 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist,
         }
     }
     if(order == 2) { //Second order filter
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             float y0 =    smp[i]*coeff.c[0] + hist.x1*coeff.c[1]
                           + hist.x2*coeff.c[2] + hist.y1*coeff.d[1]
                           + hist.y2*coeff.d[2];
@@ -384,7 +384,7 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist,
 }
 void AnalogFilter::filterout(float *smp)
 {
-    for(int i = 0; i < stages + 1; i++)
+    for(int i = 0; i < stages + 1; ++i)
         singlefilterout(smp, history[i], coeff);
 
     if(needsinterpolation) {
@@ -392,10 +392,10 @@ void AnalogFilter::filterout(float *smp)
         float *ismp = getTmpBuffer();
         memcpy(ismp, smp, sizeof(float) * SOUND_BUFFER_SIZE);
 
-        for(int i = 0; i < stages + 1; i++)
+        for(int i = 0; i < stages + 1; ++i)
             singlefilterout(ismp, oldHistory[i], oldCoeff);
 
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             float x = i / (float) SOUND_BUFFER_SIZE;
             smp[i] = ismp[i] * (1.0 - x) + smp[i] * x;
         }
@@ -403,7 +403,7 @@ void AnalogFilter::filterout(float *smp)
         needsinterpolation = false;
     }
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
         smp[i] *= outgain;
 }
 
@@ -411,14 +411,14 @@ float AnalogFilter::H(float freq)
 {
     float fr = freq / SAMPLE_RATE * PI * 2.0;
     float x  = coeff.c[0], y = 0.0;
-    for(int n = 1; n < 3; n++) {
+    for(int n = 1; n < 3; ++n) {
         x += cos(n * fr) * coeff.c[n];
         y -= sin(n * fr) * coeff.c[n];
     }
     float h = x * x + y * y;
     x = 1.0;
     y = 0.0;
-    for(int n = 1; n < 3; n++) {
+    for(int n = 1; n < 3; ++n) {
         x -= cos(n * fr) * coeff.d[n];
         y += sin(n * fr) * coeff.d[n];
     }

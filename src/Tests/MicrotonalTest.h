@@ -60,7 +60,7 @@ class MicrotonalTest:public CxxTest::TestSuite
                                  (const char *)testMicro->Pcomment),
                              "Equal Temperament 12 notes per octave");
 
-            for(int i = 0; i < 128; i++)
+            for(int i = 0; i < 128; ++i)
                 TS_ASSERT_EQUALS(testMicro->Pmapping[i], i);
 
             TS_ASSERT_DELTA(testMicro->getnotefreq(19, 0), 24.4997, 0.0001);

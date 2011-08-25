@@ -48,7 +48,7 @@ Envelope::Envelope(EnvelopeParams *envpars, float basefreq)
     if((mode == 2) && (linearenvelope != 0))
         mode = 1;                              //change to linear
 
-    for(i = 0; i < MAX_ENVELOPE_POINTS; i++) {
+    for(i = 0; i < MAX_ENVELOPE_POINTS; ++i) {
         float tmp = envpars->getdt(i) / 1000.0 * envstretch;
         if(tmp > bufferdt)
             envdt[i] = bufferdt / tmp;

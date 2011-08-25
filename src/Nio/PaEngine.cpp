@@ -100,7 +100,7 @@ int PaEngine::process(float *out, unsigned long framesPerBuffer)
     //    cerr << "Bug: PaEngine::process  SOUND_BUFFER_SIZE!=framesPerBuffer"
     //         << framesPerBuffer << ' ' << smp.l.size() << endl;
 
-    for(int i = 0; i < framesPerBuffer; i++) {
+    for(int i = 0; i < framesPerBuffer; ++i) {
         *out++ = smp.l[i];
         *out++ = smp.r[i];
     }

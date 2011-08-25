@@ -133,7 +133,7 @@ void os_sleep(long length)
 
 std::string legalizeFilename(std::string filename)
 {
-    for(int i = 0; i < (int) filename.size(); i++) {
+    for(int i = 0; i < (int) filename.size(); ++i) {
         char c = filename[i];
         if(!(isdigit(c) || isalpha(c) || (c == '-') || (c == ' ')))
             filename[i] = '_';
@@ -143,7 +143,7 @@ std::string legalizeFilename(std::string filename)
 
 void invSignal(float *sig, size_t len)
 {
-    for(size_t i = 0; i < len; i++)
+    for(size_t i = 0; i < len; ++i)
         sig[i] *= -1.0f;
 }
 

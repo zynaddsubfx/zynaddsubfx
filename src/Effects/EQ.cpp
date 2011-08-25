@@ -27,7 +27,7 @@
 EQ::EQ(const int &insertion_, float *efxoutl_, float *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0)
 {
-    for(int i = 0; i < MAX_EQ_BANDS; i++) {
+    for(int i = 0; i < MAX_EQ_BANDS; ++i) {
         filter[i].Ptype   = 0;
         filter[i].Pfreq   = 64;
         filter[i].Pgain   = 64;
@@ -48,7 +48,7 @@ EQ::~EQ()
 
 void EQ::cleanup()
 {
-    for(int i = 0; i < MAX_EQ_BANDS; i++) {
+    for(int i = 0; i < MAX_EQ_BANDS; ++i) {
         filter[i].l->cleanup();
         filter[i].r->cleanup();
     }
@@ -57,12 +57,12 @@ void EQ::cleanup()
 void EQ::out(const Stereo<float *> &smp)
 {
     int i;
-    for(i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         efxoutl[i] = smp.l[i] * volume;
         efxoutr[i] = smp.r[i] * volume;
     }
 
-    for(i = 0; i < MAX_EQ_BANDS; i++) {
+    for(i = 0; i < MAX_EQ_BANDS; ++i) {
         if(filter[i].Ptype == 0)
             continue;
         filter[i].l->filterout(efxoutl);
@@ -100,7 +100,7 @@ void EQ::setpreset(unsigned char npreset)
 
     if(npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; n++)
+    for(int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
     Ppreset = npreset;
 }
@@ -203,7 +203,7 @@ float EQ::getfreqresponse(float freq)
 {
     float resp = 1.0;
 
-    for(int i = 0; i < MAX_EQ_BANDS; i++) {
+    for(int i = 0; i < MAX_EQ_BANDS; ++i) {
         if(filter[i].Ptype == 0)
             continue;
         resp *= filter[i].l->H(freq);

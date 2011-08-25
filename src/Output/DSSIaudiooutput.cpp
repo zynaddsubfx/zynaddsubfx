@@ -674,7 +674,7 @@ bool DSSIaudiooutput::mapNextBank()
     else
     {
         bank.loadbank(bank.banks[bankNoToMap].dir);
-        for(unsigned long instrument = 0; instrument < BANK_SIZE; instrument++)
+        for(unsigned long instrument = 0; instrument < BANK_SIZE; ++instrument)
         {
             string insName = bank.getname(instrument);
             if(!insName.empty() && insName[0] != '\0' && insName[0] != ' ')

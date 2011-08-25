@@ -64,7 +64,7 @@ void SynthNote::Legato::apply(SynthNote &note, float *outl, float *outr)
         if(decounter == -10)
             decounter = fade.length;
         //Yea, could be done without the loop...
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             decounter--;
             if(decounter < 1) {
                 // Catching-up done, we can finally set
@@ -81,7 +81,7 @@ void SynthNote::Legato::apply(SynthNote &note, float *outl, float *outr)
         if(decounter == -10)
             decounter = fade.length;
         silent = false;
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             decounter--;
             if(decounter < 1) {
                 decounter = -10;
@@ -96,10 +96,10 @@ void SynthNote::Legato::apply(SynthNote &note, float *outl, float *outr)
     case LM_FadeOut:  // Fade-out, then set the catch-up
         if(decounter == -10)
             decounter = fade.length;
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             decounter--;
             if(decounter < 1) {
-                for(int j = i; j < SOUND_BUFFER_SIZE; j++) {
+                for(int j = i; j < SOUND_BUFFER_SIZE; ++j) {
                     outl[j] = 0.0;
                     outr[j] = 0.0;
                 }

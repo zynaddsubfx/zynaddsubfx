@@ -43,7 +43,7 @@ ADnoteParameters::ADnoteParameters(FFTwrapper *fft_)
     fft = fft_;
 
 
-    for(int nvoice = 0; nvoice < NUM_VOICES; nvoice++)
+    for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
         EnableVoice(nvoice);
 
     defaults();
@@ -71,7 +71,7 @@ void ADnoteParameters::defaults()
     //Default Parameters
     GlobalPar.defaults();
 
-    for(int nvoice = 0; nvoice < NUM_VOICES; nvoice++)
+    for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
         defaults(nvoice);
 
     VoicePar[0].Enabled = 1;
@@ -280,7 +280,7 @@ ADnoteGlobalParam::~ADnoteGlobalParam()
 
 ADnoteParameters::~ADnoteParameters()
 {
-    for(int nvoice = 0; nvoice < NUM_VOICES; nvoice++)
+    for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
         KillVoice(nvoice);
 }
 
@@ -304,7 +304,7 @@ int ADnoteParameters::get_unison_size_index(int nvoice) {
 
 void ADnoteParameters::set_unison_size_index(int nvoice, int index) {
     int unison = 1;
-    for(int i = 0; i <= index; i++) {
+    for(int i = 0; i <= index; ++i) {
         unison = ADnote_unison_sizes[i];
         if(unison == 0) {
             unison = ADnote_unison_sizes[i - 1];
@@ -325,7 +325,7 @@ void ADnoteParameters::add2XMLsection(XMLwrapper *xml, int n)
 
     int oscilused = 0, fmoscilused = 0; //if the oscil or fmoscil are used by another voice
 
-    for(int i = 0; i < NUM_VOICES; i++) {
+    for(int i = 0; i < NUM_VOICES; ++i) {
         if(VoicePar[i].Pextoscil == nvoice)
             oscilused = 1;
         if(VoicePar[i].PextFMoscil == nvoice)
@@ -544,7 +544,7 @@ void ADnoteGlobalParam::add2XML(XMLwrapper *xml)
 void ADnoteParameters::add2XML(XMLwrapper *xml)
 {
     GlobalPar.add2XML(xml);
-    for(int nvoice = 0; nvoice < NUM_VOICES; nvoice++) {
+    for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
         xml->beginbranch("VOICE", nvoice);
         add2XMLsection(xml, nvoice);
         xml->endbranch();
@@ -631,7 +631,7 @@ void ADnoteParameters::getfromXML(XMLwrapper *xml)
 {
     GlobalPar.getfromXML(xml);
 
-    for(int nvoice = 0; nvoice < NUM_VOICES; nvoice++) {
+    for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
         VoicePar[nvoice].Enabled = 0;
         if(xml->enterbranch("VOICE", nvoice) == 0)
             continue;

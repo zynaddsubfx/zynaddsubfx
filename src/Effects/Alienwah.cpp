@@ -60,7 +60,7 @@ void Alienwah::out(const Stereo<float *> &smp)
     clfol = complex<float>(cos(lfol + phase) * fb, sin(lfol + phase) * fb); //rework
     clfor = complex<float>(cos(lfor + phase) * fb, sin(lfor + phase) * fb); //rework
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         float x  = ((float) i) / SOUND_BUFFER_SIZE;
         float x1 = 1.0 - x;
         //left
@@ -98,7 +98,7 @@ void Alienwah::out(const Stereo<float *> &smp)
  */
 void Alienwah::cleanup()
 {
-    for(int i = 0; i < Pdelay; i++) {
+    for(int i = 0; i < Pdelay; ++i) {
         oldl[i] = complex<float>(0.0, 0.0);
         oldr[i] = complex<float>(0.0, 0.0);
     }
@@ -175,7 +175,7 @@ void Alienwah::setpreset(unsigned char npreset)
 
     if(npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; n++)
+    for(int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
     if(insertion == 0)
         changepar(0, presets[npreset][0] / 2); //lower the volume if this is system effect

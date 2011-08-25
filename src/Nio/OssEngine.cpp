@@ -212,7 +212,7 @@ void *OssEngine::thread()
             const Stereo<float *> smps = getNext();
 
             float l, r;
-            for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
                 l = smps.l[i];
                 r = smps.r[i];
 

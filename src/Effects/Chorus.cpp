@@ -78,7 +78,7 @@ void Chorus::out(const Stereo<float *> &input)
     dl2 = getdelay(lfol);
     dr2 = getdelay(lfor);
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
 
         float inl = input.l[i];
         float inr = input.r[i];
@@ -123,12 +123,12 @@ void Chorus::out(const Stereo<float *> &input)
     }
 
     if(Poutsub != 0)
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             efxoutl[i] *= -1.0;
             efxoutr[i] *= -1.0;
         }
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         efxoutl[i] *= pangainL;
         efxoutr[i] *= pangainR;
     }
@@ -203,7 +203,7 @@ void Chorus::setpreset(unsigned char npreset)
 
     if(npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; n++)
+    for(int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
     Ppreset = npreset;
 }

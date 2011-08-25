@@ -128,7 +128,7 @@ void Phaser::AnalogPhase(const Stereo<float *> &input)
     g = oldgain;
     oldgain = mod;
 
-    for (int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for (int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         g.l += diff.l;// Linear interpolation between LFO samples
         g.r += diff.r;
 
@@ -158,7 +158,7 @@ void Phaser::AnalogPhase(const Stereo<float *> &input)
 float Phaser::applyPhase(float x, float g, float fb,
                             float &hpf, float *yn1, float *xn1)
 {
-    for(int j = 0; j < Pstages; j++) { //Phasing routine
+    for(int j = 0; j < Pstages; ++j) { //Phasing routine
         mis = 1.0f + offsetpct*offset[j];
 
         //This is symmetrical.
@@ -197,7 +197,7 @@ void Phaser::normalPhase(const Stereo<float *> &input)
     gain.l = limit(gain.l, ZERO_, ONE_);
     gain.r = limit(gain.r, ZERO_, ONE_);
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         float x   = (float) i / SOUND_BUFFER_SIZE;
         float x1  = 1.0 - x;
         //TODO think about making panning an external feature
@@ -229,7 +229,7 @@ void Phaser::normalPhase(const Stereo<float *> &input)
 
 float Phaser::applyPhase(float x, float g, float *old)
 {
-    for(int j = 0; j < Pstages * 2; j++) { //Phasing routine
+    for(int j = 0; j < Pstages * 2; ++j) { //Phasing routine
         float tmp = old[j];
         old[j] = g * tmp + x;
         x = tmp - g *old[j];
@@ -243,11 +243,11 @@ float Phaser::applyPhase(float x, float g, float *old)
 void Phaser::cleanup()
 {
     fb = oldgain = Stereo<float>(0.0);
-    for(int i = 0; i < Pstages * 2; i++) {
+    for(int i = 0; i < Pstages * 2; ++i) {
         old.l[i] = 0.0;
         old.r[i] = 0.0;
     }
-    for(int i = 0; i < Pstages; i++) {
+    for(int i = 0; i < Pstages; ++i) {
         xn1.l[i] = 0.0;
         yn1.l[i] = 0.0;
         xn1.r[i] = 0.0;
@@ -355,7 +355,7 @@ void Phaser::setpreset(unsigned char npreset)
     };
     if(npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; n++)
+    for(int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
     Ppreset = npreset;
 }

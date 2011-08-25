@@ -35,7 +35,7 @@ void waveShapeSmps(int n,
     switch(type) {
     case 1:
         ws = pow(10, ws * ws * 3.0) - 1.0 + 0.001; //Arctangent
-        for(i = 0; i < n; i++)
+        for(i = 0; i < n; ++i)
             smps[i] = atan(smps[i] * ws) / atan(ws);
         break;
     case 2:
@@ -44,13 +44,13 @@ void waveShapeSmps(int n,
             tmpv = sin(ws) + 0.1;
         else
             tmpv = 1.1;
-        for(i = 0; i < n; i++)
+        for(i = 0; i < n; ++i)
             smps[i] = sin(smps[i] * (0.1 + ws - ws * smps[i])) / tmpv;
         ;
         break;
     case 3:
         ws = ws * ws * ws * 20.0 + 0.0001; //Pow
-        for(i = 0; i < n; i++) {
+        for(i = 0; i < n; ++i) {
             smps[i] *= ws;
             if(fabs(smps[i]) < 1.0) {
                 smps[i] = (smps[i] - pow(smps[i], 3.0)) * 3.0;
@@ -67,12 +67,12 @@ void waveShapeSmps(int n,
             tmpv = sin(ws);
         else
             tmpv = 1.0;
-        for(i = 0; i < n; i++)
+        for(i = 0; i < n; ++i)
             smps[i] = sin(smps[i] * ws) / tmpv;
         break;
     case 5:
         ws = ws * ws + 0.000001; //Quantisize
-        for(i = 0; i < n; i++)
+        for(i = 0; i < n; ++i)
             smps[i] = floor(smps[i] / ws + 0.5) * ws;
         break;
     case 6:
@@ -81,12 +81,12 @@ void waveShapeSmps(int n,
             tmpv = sin(ws);
         else
             tmpv = 1.0;
-        for(i = 0; i < n; i++)
+        for(i = 0; i < n; ++i)
             smps[i] = asin(sin(smps[i] * ws)) / tmpv;
         break;
     case 7:
         ws = pow(2.0, -ws * ws * 8.0); //Limiter
-        for(i = 0; i < n; i++) {
+        for(i = 0; i < n; ++i) {
             float tmp = smps[i];
             if(fabs(tmp) > ws) {
                 if(tmp >= 0.0)
@@ -100,7 +100,7 @@ void waveShapeSmps(int n,
         break;
     case 8:
         ws = pow(2.0, -ws * ws * 8.0); //Upper Limiter
-        for(i = 0; i < n; i++) {
+        for(i = 0; i < n; ++i) {
             float tmp = smps[i];
             if(tmp > ws)
                 smps[i] = ws;
@@ -109,7 +109,7 @@ void waveShapeSmps(int n,
         break;
     case 9:
         ws = pow(2.0, -ws * ws * 8.0); //Lower Limiter
-        for(i = 0; i < n; i++) {
+        for(i = 0; i < n; ++i) {
             float tmp = smps[i];
             if(tmp < -ws)
                 smps[i] = -ws;
@@ -118,7 +118,7 @@ void waveShapeSmps(int n,
         break;
     case 10:
         ws = (pow(2.0, ws * 6.0) - 1.0) / pow(2.0, 6.0); //Inverse Limiter
-        for(i = 0; i < n; i++) {
+        for(i = 0; i < n; ++i) {
             float tmp = smps[i];
             if(fabs(tmp) > ws) {
                 if(tmp >= 0.0)
@@ -132,7 +132,7 @@ void waveShapeSmps(int n,
         break;
     case 11:
         ws = pow(5, ws * ws * 1.0) - 1.0; //Clip
-        for(i = 0; i < n; i++)
+        for(i = 0; i < n; ++i)
             smps[i] = smps[i]
                       * (ws + 0.5) * 0.9999 - floor(
                 0.5 + smps[i] * (ws + 0.5) * 0.9999);
@@ -143,7 +143,7 @@ void waveShapeSmps(int n,
             tmpv = ws;
         else
             tmpv = 1.0;
-        for(i = 0; i < n; i++) {
+        for(i = 0; i < n; ++i) {
             float tmp = smps[i] * ws;
             if((tmp > -2.0) && (tmp < 1.0))
                 smps[i] = tmp * (1.0 - tmp) * (tmp + 2.0) / tmpv;
@@ -157,7 +157,7 @@ void waveShapeSmps(int n,
             tmpv = ws * (1 + ws) / 2.0;
         else
             tmpv = 1.0;
-        for(i = 0; i < n; i++) {
+        for(i = 0; i < n; ++i) {
             float tmp = smps[i] * ws;
             if((tmp > -1.0) && (tmp < 1.618034))
                 smps[i] = tmp * (1.0 - tmp) / tmpv;
@@ -174,7 +174,7 @@ void waveShapeSmps(int n,
             tmpv = 0.5;
         else
             tmpv = 0.5 - 1.0 / (exp(ws) + 1.0);
-        for(i = 0; i < n; i++) {
+        for(i = 0; i < n; ++i) {
             float tmp = smps[i] * ws;
             if(tmp < -10.0)
                 tmp = -10.0;

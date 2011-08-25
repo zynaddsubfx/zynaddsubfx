@@ -42,7 +42,7 @@ void Resonance::defaults()
     Pprotectthefundamental = 0;
     ctlcenter    = 1.0;
     ctlbw = 1.0;
-    for(int i = 0; i < N_RES_POINTS; i++)
+    for(int i = 0; i < N_RES_POINTS; ++i)
         Prespoints[i] = 64;
 }
 
@@ -67,13 +67,13 @@ void Resonance::applyres(int n, fft_t *fftdata, float freq)
              l1  = log(getfreqx(0.0) * ctlcenter),
              l2  = log(2.0) * getoctavesfreq() * ctlbw;
 
-    for(int i = 0; i < N_RES_POINTS; i++)
+    for(int i = 0; i < N_RES_POINTS; ++i)
         if(sum < Prespoints[i])
             sum = Prespoints[i];
     if(sum < 1.0)
         sum = 1.0;
 
-    for(int i = 1; i < n; i++) {
+    for(int i = 1; i < n; ++i) {
         float x = (log(freq * i) - l1) / l2; //compute where the n-th hamonics fits to the graph
         if(x < 0.0)
             x = 0.0;
@@ -109,7 +109,7 @@ float Resonance::getfreqresponse(float freq)
     float l1 = log(getfreqx(0.0) * ctlcenter),
              l2 = log(2.0) * getoctavesfreq() * ctlbw, sum = 0.0;
 
-    for(int i = 0; i < N_RES_POINTS; i++)
+    for(int i = 0; i < N_RES_POINTS; ++i)
         if(sum < Prespoints[i])
             sum = Prespoints[i];
     if(sum < 1.0)
@@ -141,7 +141,7 @@ float Resonance::getfreqresponse(float freq)
 void Resonance::smooth()
 {
     float old = Prespoints[0];
-    for(int i = 0; i < N_RES_POINTS; i++) {
+    for(int i = 0; i < N_RES_POINTS; ++i) {
         old = old * 0.4 + Prespoints[i] * 0.6;
         Prespoints[i] = (int) old;
     }
@@ -160,7 +160,7 @@ void Resonance::smooth()
 void Resonance::randomize(int type)
 {
     int r = (int)(RND * 127.0);
-    for(int i = 0; i < N_RES_POINTS; i++) {
+    for(int i = 0; i < N_RES_POINTS; ++i) {
         Prespoints[i] = r;
         if((RND < 0.1) && (type == 0))
             r = (int)(RND * 127.0);
@@ -178,10 +178,10 @@ void Resonance::randomize(int type)
 void Resonance::interpolatepeaks(int type)
 {
     int x1 = 0, y1 = Prespoints[0];
-    for(int i = 1; i < N_RES_POINTS; i++) {
+    for(int i = 1; i < N_RES_POINTS; ++i) {
         if((Prespoints[i] != 64) || (i + 1 == N_RES_POINTS)) {
             int y2 = Prespoints[i];
-            for(int k = 0; k < i - x1; k++) {
+            for(int k = 0; k < i - x1; ++k) {
                 float x = (float) k / (i - x1);
                 if(type == 0)
                     x = (1 - cos(x * PI)) * 0.5;
@@ -251,7 +251,7 @@ void Resonance::add2XML(XMLwrapper *xml)
     xml->addpar("octaves_freq", Poctavesfreq);
     xml->addparbool("protect_fundamental_frequency", Pprotectthefundamental);
     xml->addpar("resonance_points", N_RES_POINTS);
-    for(int i = 0; i < N_RES_POINTS; i++) {
+    for(int i = 0; i < N_RES_POINTS; ++i) {
         xml->beginbranch("RESPOINT", i);
         xml->addpar("val", Prespoints[i]);
         xml->endbranch();
@@ -268,7 +268,7 @@ void Resonance::getfromXML(XMLwrapper *xml)
     Poctavesfreq = xml->getpar127("octaves_freq", Poctavesfreq);
     Pprotectthefundamental = xml->getparbool("protect_fundamental_frequency",
                                              Pprotectthefundamental);
-    for(int i = 0; i < N_RES_POINTS; i++) {
+    for(int i = 0; i < N_RES_POINTS; ++i) {
         if(xml->enterbranch("RESPOINT", i) == 0)
             continue;
         Prespoints[i] = xml->getpar127("val", Prespoints[i]);

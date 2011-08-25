@@ -75,7 +75,7 @@ void PADnote::setup(float freq, float velocity,int portamento_, int midinote, bo
     float logfreq = log(basefreq * pow(2.0, NoteGlobalPar.Detune / 1200.0));
     float mindist = fabs(logfreq - log(pars->sample[0].basefreq + 0.0001));
     nsample = 0;
-    for(int i = 1; i < PAD_MAX_SAMPLES; i++) {
+    for(int i = 1; i < PAD_MAX_SAMPLES; ++i) {
         if(pars->sample[i].smp == NULL)
             break;
         float dist = fabs(logfreq - log(pars->sample[i].basefreq + 0.0001));
@@ -192,7 +192,7 @@ PADnote::~PADnote()
 inline void PADnote::fadein(float *smps)
 {
     int zerocrossings = 0;
-    for(int i = 1; i < SOUND_BUFFER_SIZE; i++)
+    for(int i = 1; i < SOUND_BUFFER_SIZE; ++i)
         if((smps[i - 1] < 0.0) && (smps[i] > 0.0))
             zerocrossings++;                                  //this is only the possitive crossings
 
@@ -204,7 +204,7 @@ inline void PADnote::fadein(float *smps)
     F2I(tmp, n); //how many samples is the fade-in
     if(n > SOUND_BUFFER_SIZE)
         n = SOUND_BUFFER_SIZE;
-    for(int i = 0; i < n; i++) { //fade-in
+    for(int i = 0; i < n; ++i) { //fade-in
         float tmp = 0.5 - cos((float)i / (float) n * PI) * 0.5;
         smps[i] *= tmp;
     }
@@ -260,7 +260,7 @@ int PADnote::Compute_Linear(float *outl,
         return 1;
     }
     int size = pars->sample[nsample].size;
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         poshi_l += freqhi;
         poshi_r += freqhi;
         poslo   += freqlo;
@@ -291,7 +291,7 @@ int PADnote::Compute_Cubic(float *outl,
     }
     int      size = pars->sample[nsample].size;
     float xm1, x0, x1, x2, a, b, c;
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         poshi_l += freqhi;
         poshi_r += freqhi;
         poslo   += freqlo;
@@ -334,7 +334,7 @@ int PADnote::noteout(float *outl, float *outr)
     computecurrentparameters();
     float *smps = pars->sample[nsample].smp;
     if(smps == NULL) {
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             outl[i] = 0.0;
             outr[i] = 0.0;
         }
@@ -365,7 +365,7 @@ int PADnote::noteout(float *outl, float *outr)
 
     //Apply the punch
     if(NoteGlobalPar.Punch.Enabled != 0) {
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             float punchamp = NoteGlobalPar.Punch.initialvalue
                                 * NoteGlobalPar.Punch.t + 1.0;
             outl[i] *= punchamp;
@@ -380,7 +380,7 @@ int PADnote::noteout(float *outl, float *outr)
 
     if(ABOVE_AMPLITUDE_THRESHOLD(globaloldamplitude, globalnewamplitude)) {
         // Amplitude Interpolation
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             float tmpvol = INTERPOLATE_AMPLITUDE(globaloldamplitude,
                                                     globalnewamplitude,
                                                     i,
@@ -390,7 +390,7 @@ int PADnote::noteout(float *outl, float *outr)
         }
     }
     else {
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             outl[i] *= globalnewamplitude * NoteGlobalPar.Panning;
             outr[i] *= globalnewamplitude * (1.0 - NoteGlobalPar.Panning);
         }
@@ -403,7 +403,7 @@ int PADnote::noteout(float *outl, float *outr)
     // Check if the global amplitude is finished.
     // If it does, disable the note
     if(NoteGlobalPar.AmpEnvelope->finished() != 0) {
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) { //fade-out
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) { //fade-out
             float tmp = 1.0 - (float)i / (float)SOUND_BUFFER_SIZE;
             outl[i] *= tmp;
             outr[i] *= tmp;

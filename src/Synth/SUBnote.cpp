@@ -97,7 +97,7 @@ void SUBnote::setup(float freq, float velocity, int portamento_, int midinote, b
 
     //select only harmonics that desire to compute
     int harmonics = 0;
-    for(int n = 0; n < MAX_SUB_HARMONICS; n++) {
+    for(int n = 0; n < MAX_SUB_HARMONICS; ++n) {
         if(pars->Phmag[n] == 0)
             continue;
         if(n * basefreq > SAMPLE_RATE / 2.0)
@@ -129,7 +129,7 @@ void SUBnote::setup(float freq, float velocity, int portamento_, int midinote, b
     //how much the amplitude is normalised (because the harmonics)
     float reduceamp = 0.0;
 
-    for(int n = 0; n < numharmonics; n++) {
+    for(int n = 0; n < numharmonics; ++n) {
         float freq = basefreq * (pos[n] + 1);
 
         //the bandwidth is not absolute(Hz); it is relative to frequency
@@ -170,7 +170,7 @@ void SUBnote::setup(float freq, float velocity, int portamento_, int midinote, b
         gain      *= hgain;
         reduceamp += hgain;
 
-        for(int nph = 0; nph < numstages; nph++) {
+        for(int nph = 0; nph < numstages; ++nph) {
             float amp = 1.0;
             if(nph == 0)
                 amp = gain;
@@ -400,8 +400,8 @@ void SUBnote::computecurrentparameters()
 
         float tmpgain = 1.0 / sqrt(envbw * envfreq);
 
-        for(int n = 0; n < numharmonics; n++) {
-            for(int nph = 0; nph < numstages; nph++) {
+        for(int n = 0; n < numharmonics; ++n) {
+            for(int nph = 0; nph < numstages; ++nph) {
                 if(nph == 0)
                     gain = tmpgain;
                 else
@@ -413,8 +413,8 @@ void SUBnote::computecurrentparameters()
             }
         }
         if(stereo != 0)
-            for(int n = 0; n < numharmonics; n++) {
-                for(int nph = 0; nph < numstages; nph++) {
+            for(int n = 0; n < numharmonics; ++n) {
+                for(int nph = 0; nph < numstages; ++nph) {
                     if(nph == 0)
                         gain = tmpgain;
                     else
@@ -465,13 +465,13 @@ int SUBnote::noteout(float *outl, float *outr)
     float *tmprnd = getTmpBuffer();
     float *tmpsmp = getTmpBuffer();
     //left channel
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
         tmprnd[i] = RND * 2.0 - 1.0;
-    for(int n = 0; n < numharmonics; n++) {
+    for(int n = 0; n < numharmonics; ++n) {
         memcpy(tmpsmp, tmprnd, SOUND_BUFFER_SIZE * sizeof(float));
-        for(int nph = 0; nph < numstages; nph++)
+        for(int nph = 0; nph < numstages; ++nph)
             filter(lfilter[nph + n * numstages], tmpsmp);
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
             outl[i] += tmpsmp[i];
     }
 
@@ -480,13 +480,13 @@ int SUBnote::noteout(float *outl, float *outr)
 
     //right channel
     if(stereo != 0) {
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
             tmprnd[i] = RND * 2.0 - 1.0;
-        for(int n = 0; n < numharmonics; n++) {
+        for(int n = 0; n < numharmonics; ++n) {
             memcpy(tmpsmp, tmprnd, SOUND_BUFFER_SIZE * sizeof(float));
-            for(int nph = 0; nph < numstages; nph++)
+            for(int nph = 0; nph < numstages; ++nph)
                 filter(rfilter[nph + n * numstages], tmpsmp);
-            for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
+            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
                 outr[i] += tmpsmp[i];
         }
         if(GlobalFilterR != NULL)
@@ -501,7 +501,7 @@ int SUBnote::noteout(float *outl, float *outr)
         int n = 10;
         if(n > SOUND_BUFFER_SIZE)
             n = SOUND_BUFFER_SIZE;
-        for(int i = 0; i < n; i++) {
+        for(int i = 0; i < n; ++i) {
             float ampfadein = 0.5 - 0.5 * cos(
                 (float) i / (float) n * PI);
             outl[i] *= ampfadein;
@@ -512,7 +512,7 @@ int SUBnote::noteout(float *outl, float *outr)
 
     if(ABOVE_AMPLITUDE_THRESHOLD(oldamplitude, newamplitude)) {
         // Amplitude interpolation
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             float tmpvol = INTERPOLATE_AMPLITUDE(oldamplitude,
                                                     newamplitude,
                                                     i,
@@ -522,7 +522,7 @@ int SUBnote::noteout(float *outl, float *outr)
         }
     }
     else {
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) {
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             outl[i] *= newamplitude * panning;
             outr[i] *= newamplitude * (1.0 - panning);
         }
@@ -536,7 +536,7 @@ int SUBnote::noteout(float *outl, float *outr)
 
     // Check if the note needs to be computed more
     if(AmpEnvelope->finished() != 0) {
-        for(int i = 0; i < SOUND_BUFFER_SIZE; i++) { //fade-out
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) { //fade-out
             float tmp = 1.0 - (float)i / (float)SOUND_BUFFER_SIZE;
             outl[i] *= tmp;
             outr[i] *= tmp;
