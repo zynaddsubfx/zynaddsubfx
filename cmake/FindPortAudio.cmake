@@ -1,31 +1,19 @@
-# - Try to find Motif (or lesstif)
-# Once done this will define:
-#  PORTAUDIO_FOUND        - system has PORTAUDIO
-#  PORTAUDIO_INCLUDE_DIR  - incude paths to use Motif
-#  PORTAUDIO_LIBRARIES    - Link these to use Motif
+#Find Port Audio
 
-SET(PORTAUDIO_FOUND 0)
 
-IF(UNIX)
-  FIND_PATH(PORTAUDIO_INCLUDE_DIR
-	  portaudio.h
-    /usr/include
+include(LibFindMacros)
+libfind_pkg_check_modules(PortAudio portaudio-2.0>=19)
+
+find_path(PortAudio_INCLUDE_DIR
+    NAMES portaudio.h
+    PATHS ${PortAudio_INCLUDE_DIRS}
     )
 
-  FIND_LIBRARY(PORTAUDIO_LIBRARIES
-	  portaudio
-    /usr/lib
+find_library(PortAudio_LIBRARY
+    NAMES portaudio
+    PATHS ${Portaudio_LIBRARY_DIRS}
     )
 
-ENDIF(UNIX)
-
-# handle the QUIETLY and REQUIRED arguments and set PORTAUDIO_FOUND to TRUE if 
-# all listed variables are TRUE
-INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(PortAudio DEFAULT_MSG PORTAUDIO_LIBRARIES PORTAUDIO_INCLUDE_DIR)
-
-
-MARK_AS_ADVANCED(
-  PORTAUDIO_INCLUDE_DIR
-  PORTAUDIO_LIBRARIES
-)
+set(PortAudio_PROCESS_INCLUDES PortAudio_INCLUDE_DIR)
+set(PortAudio_PROCESS_LIBS PortAudio_LIBRARY)
+libfind_process(PortAudio)

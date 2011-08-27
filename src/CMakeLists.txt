@@ -23,12 +23,12 @@ pkg_search_module(DSSI dssi>=0.9.0)
 mark_as_advanced(DSSI_LIBRARIES)
 #simple cxxtest find until cmake 2.6 support is changed
 find_path(CXXTEST_INCLUDE_DIR cxxtest/TestSuite.h)
-message("searching for cxxtest...")
+message(STATUS "searching for cxxtest...")
 if(CXXTEST_INCLUDE_DIR)
-    message("CxxTest found at ${CXXTEST_INCLUDE_DIR}")
+    message(STATUS "Found CxxTest: ${CXXTEST_INCLUDE_DIR}")
     set(CXXTEST_FOUND true)
 else()
-    message("CxxTest not found...")
+    message(STATUS "CxxTest not found...")
     set(CXXTEST_FOUND false)
 endif()
 
@@ -254,14 +254,14 @@ add_executable(zynaddsubfx
 )
 
 target_link_libraries(zynaddsubfx
-    ${NONGUI_LIBRARIES}
+	${NONGUI_LIBRARIES}
 	${GUI_LIBRARIES}
-        ${zlib_LIBRARIES}
-        ${fftw_LIBRARIES}
-        ${MXML_LIBRARIES}
-        ${NIO_LIBRARIES}
-        ${AUDIO_LIBRARIES}
-        ${OS_LIBRARIES}
+	${zlib_LIBRARIES}
+	${fftw_LIBRARIES}
+	${MXML_LIBRARIES}
+	${NIO_LIBRARIES}
+	${AUDIO_LIBRARIES}
+	${OS_LIBRARIES}
 	)
 
 if (DssiEnable)

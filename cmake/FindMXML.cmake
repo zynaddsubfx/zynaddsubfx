@@ -1,31 +1,17 @@
-# - Try to find Motif (or lesstif)
-# Once done this will define:
-#  MXML_FOUND        - system has MXML
-#  MXML_INCLUDE_DIR  - incude paths to use Motif
-#  MXML_LIBRARIES    - Link these to use Motif
+#Find mxml (mini xml library)
 
-SET(MXML_FOUND 0)
-
-IF(UNIX)
-  FIND_PATH(MXML_INCLUDE_DIR
-	  mxml.h
-    /usr/include
+include(LibFindMacros)
+libfind_pkg_check_modules(MXML mxml)
+find_path(MXML_INCLUDE_DIR
+    NAMES mxml.h
+    PATHS ${MXML_INCLUDE_DIRS}
     )
 
-  FIND_LIBRARY(MXML_LIBRARIES
-	  mxml
-    /usr/lib
+find_library(MXML_LIBRARY
+    NAMES mxml
+    PATHS ${MXML_LIBRARY_DIRS}
     )
 
-ENDIF(UNIX)
-
-# handle the QUIETLY and REQUIRED arguments and set MXML_FOUND to TRUE if 
-# all listed variables are TRUE
-INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(MXML DEFAULT_MSG MXML_LIBRARIES MXML_INCLUDE_DIR)
-
-
-MARK_AS_ADVANCED(
-  MXML_INCLUDE_DIR
-  MXML_LIBRARIES
-)
+set(MXML_PROCESS_INCLUDES MXML_INCLUDE_DIR)
+set(MXML_PROCESS_LIBS MXML_LIBRARY)
+libfind_process(MXML)
