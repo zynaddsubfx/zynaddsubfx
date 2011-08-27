@@ -7,8 +7,8 @@ find_package(zlib REQUIRED)
 find_package(fftw REQUIRED)
 find_package(MXML REQUIRED)
 find_package(PkgConfig REQUIRED)
-#find_package(pthread REQUIRED)
-#find_package(OSS)
+find_package(Threads   REQUIRED)
+find_package(OSS)
 find_package(Alsa)
 find_package(JACK)
 find_package(PortAudio)
@@ -44,7 +44,7 @@ SET (AlsaEnable ${ALSA_FOUND} CACHE BOOL
     "Enable support for Advanced Linux Sound Architecture")
 SET (JackEnable ${JACK_FOUND} CACHE BOOL
     "Enable support for JACK Audio Connection toolKit")
-SET (OssEnable ${ALSA_FOUND} CACHE BOOL #TODO perhaps check for /dev/dsp
+SET (OssEnable ${OSS_FOUND} CACHE BOOL
     "Enable support for Open Sound System")
 SET (PaEnable ${PORTAUDIO_FOUND} CACHE BOOL
     "Enable support for Port Audio System")
@@ -141,14 +141,6 @@ add_definitions(
          -Wall
          -Wextra
 	 )
-
-#set os flag
-if(UNIX)
-	add_definitions(-DOS_LINUX=1)
-	set(OS_LIBRARIES "-lpthread")
-else()
-        message(STATUS "Error: building on unsupported OS")
-endif()
 
 if (BuildForDebug)
     set (CMAKE_BUILD_TYPE "Debug")
@@ -262,6 +254,7 @@ target_link_libraries(zynaddsubfx
 	${NIO_LIBRARIES}
 	${AUDIO_LIBRARIES}
 	${OS_LIBRARIES}
+	pthread
 	)
 
 if (DssiEnable)
