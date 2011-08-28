@@ -11,7 +11,7 @@ CXXTEST_ADD_TEST(ADnoteTest AdNoteTest.cpp
 CXXTEST_ADD_TEST(SUBnoteTest SubNoteTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/SubNoteTest.h)
 CXXTEST_ADD_TEST(OscilGenTest OscilGenTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/OscilGenTest.h)
 
-set(test_lib ${NONGUI_LIBRARIES} ${zlib_LIBRARIES} ${fftw_LIBRARIES}
+set(test_lib ${NONGUI_LIBRARIES} ${ZLIB_LIBRARIES} ${FFTW_LIBRARIES}
     ${MXML_LIBRARIES})
 target_link_libraries(ADnoteTest     ${test_lib})
 target_link_libraries(SUBnoteTest    ${test_lib})

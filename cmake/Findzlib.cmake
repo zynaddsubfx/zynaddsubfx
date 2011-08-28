@@ -18,22 +18,22 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-IF (zlib_INCLUDE_DIR)
+IF (ZLIB_INCLUDE_DIR)
   # Already in cache, be silent
-  SET(zlib_FIND_QUIETLY TRUE)
-ENDIF (zlib_INCLUDE_DIR)
+  SET(ZLIB_FIND_QUIETLY TRUE)
+ENDIF (ZLIB_INCLUDE_DIR)
 
-FIND_PATH(zlib_INCLUDE_DIR zlib.h)
+FIND_PATH(ZLIB_INCLUDE_DIR zlib.h)
 
-SET(zlib_NAMES z zlib zdll)
-FIND_LIBRARY(zlib_LIBRARY NAMES ${zlib_NAMES} )
-MARK_AS_ADVANCED( zlib_LIBRARY zlib_INCLUDE_DIR )
+SET(ZLIB_NAMES z zlib zdll)
+FIND_LIBRARY(ZLIB_LIBRARY NAMES ${ZLIB_NAMES} )
+MARK_AS_ADVANCED( ZLIB_LIBRARY ZLIB_INCLUDE_DIR )
 
 # Per-recommendation
-SET(zlib_INCLUDE_DIRS "${zlib_INCLUDE_DIR}")
-SET(zlib_LIBRARIES    "${zlib_LIBRARY}")
+SET(ZLIB_INCLUDE_DIRS "${ZLIB_INCLUDE_DIR}")
+SET(ZLIB_LIBRARIES    "${ZLIB_LIBRARY}")
 
-# handle the QUIETLY and REQUIRED arguments and set zlib_FOUND to TRUE if
+# handle the QUIETLY and REQUIRED arguments and set ZLIB_FOUND to TRUE if
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(zlib DEFAULT_MSG zlib_LIBRARIES zlib_INCLUDE_DIRS)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(ZLIB DEFAULT_MSG ZLIB_LIBRARIES ZLIB_INCLUDE_DIRS)

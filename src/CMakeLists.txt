@@ -135,6 +135,9 @@ if(LashEnable)
 	message(STATUS "Compiling with lash")
 endif()
 
+# other include directories
+include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS})
+
 add_definitions(
 	 -DASM_F2I_YES
          -g #TODO #todo put in a better location
@@ -248,8 +251,8 @@ add_executable(zynaddsubfx
 target_link_libraries(zynaddsubfx
 	${NONGUI_LIBRARIES}
 	${GUI_LIBRARIES}
-	${zlib_LIBRARIES}
-	${fftw_LIBRARIES}
+	${ZLIB_LIBRARIES}
+	${FFTW_LIBRARIES}
 	${MXML_LIBRARIES}
 	${NIO_LIBRARIES}
 	${AUDIO_LIBRARIES}
@@ -264,8 +267,8 @@ if (DssiEnable)
 
 	target_link_libraries(zynaddsubfx_dssi
 		${NONGUI_LIBRARIES}
-		${zlib_LIBRARIES}
-		${fftw_LIBRARIES}
+		${ZLIB_LIBRARIES}
+		${FFTW_LIBRARIES}
 		${MXML_LIBRARIES}
 		${NIO_LIBRARIES}
 		${AUDIO_LIBRARIES}
