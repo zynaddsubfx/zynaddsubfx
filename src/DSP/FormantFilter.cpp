@@ -20,6 +20,7 @@
 
 */
 
+#include <math.h>
 #include <cmath>
 #include <cstdio>
 #include "../Misc/Util.h"
