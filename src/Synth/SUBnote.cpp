@@ -234,11 +234,12 @@ void SUBnote::KillNote()
         if(stereo != 0)
             delete [] rfilter;
         rfilter = NULL;
-        delete (AmpEnvelope);
-        if(FreqEnvelope != NULL)
-            delete (FreqEnvelope);
-        if(BandWidthEnvelope != NULL)
-            delete (BandWidthEnvelope);
+        delete AmpEnvelope;
+        delete FreqEnvelope;
+        delete BandWidthEnvelope;
+        delete GlobalFilterL;
+        delete GlobalFilterR;
+        delete GlobalFilterEnvelope;
         NoteEnabled = OFF;
     }
 }
