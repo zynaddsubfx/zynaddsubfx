@@ -378,10 +378,6 @@ int main(int argc, char *argv[])
     //Run the Nio system
     bool ioGood = Nio::getInstance().start();
 
-
-#warning remove welcome message when system is out of beta
-    cout << "\nThanks for using the Nio system :)" << endl;
-
 #ifndef DISABLE_GUI
     if(noui == 0)
         pthread_create(&thr3, NULL, thread3, (void*)!ioGood);

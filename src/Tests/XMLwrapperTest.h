@@ -52,8 +52,6 @@ class XMLwrapperTest:public CxxTest::TestSuite
 version-revision=\"1\" ZynAddSubFX-author=\"Nasca Octavian Paul\">\n\
 </ZynAddSubFX-data>\n";
             xmlb->putXMLdata(dat.c_str());
-#warning todo contact mxml people about possible memoryleak when
-#warning       mxmlLoadString is giving something starting with a newline
         }
 
         void tearDown() {

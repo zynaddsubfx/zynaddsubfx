@@ -337,12 +337,10 @@ void AlsaEngine::stopAudio()
 
 void *AlsaEngine::processAudio()
 {
-    int rc;
     while (audio.handle) {
         audio.buffer = interleave(getNext());
         snd_pcm_t *handle = audio.handle;
-        if(handle)
-            rc = snd_pcm_writei(handle, audio.buffer, SOUND_BUFFER_SIZE);
+        int rc = snd_pcm_writei(handle, audio.buffer, SOUND_BUFFER_SIZE);
         if (rc == -EPIPE) {
             /* EPIPE means underrun */
             cerr << "underrun occurred" << endl;

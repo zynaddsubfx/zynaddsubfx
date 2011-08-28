@@ -61,7 +61,7 @@ LASHClient::Event LASHClient::checkevents(std::string &filename)
 
     Event received = NoEvent;
     lash_event_t *event;
-    while(event = lash_get_event(client)) {
+    while((event = lash_get_event(client))) {
         // save
         if(lash_event_get_type(event) == LASH_Save_File) {
             std::cerr << "LASH event: LASH_Save_File" << std::endl;
