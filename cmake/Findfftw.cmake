@@ -1,17 +1,17 @@
 #Find fftw (FFT algorithm library)
 
 include(LibFindMacros)
-libfind_pkg_check_modules(fftw fftw3)
-find_path(fftw_INCLUDE_DIR
+libfind_pkg_check_modules(FFTW fftw3)
+find_path(FFTW_INCLUDE_DIR
     NAMES fftw3.h
-    PATHS ${fftw_INCLUDE_DIRS}
+    PATHS ${FFTW_INCLUDE_DIRS}
     )
 
-find_library(fftw_LIBRARY
+find_library(FFTW_LIBRARY
     NAMES fftw3
-    PATHS ${fftw_LIBRARY_DIRS}
+    PATHS ${FFTW_LIBRARY_DIRS}
     )
 
-set(fftw_PROCESS_INCLUDES fftw_INCLUDE_DIR)
-set(fftw_PROCESS_LIBS fftw_LIBRARY)
-libfind_process(fftw)
+set(FFTW_PROCESS_INCLUDES FFTW_INCLUDE_DIR)
+set(FFTW_PROCESS_LIBS FFTW_LIBRARY)
+libfind_process(FFTW)
