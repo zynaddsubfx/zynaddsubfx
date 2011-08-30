@@ -103,25 +103,26 @@ set (BuildOptionsDebug
 # on the actual compiling.
 
 if(AlsaEnable)
-        list(APPEND AUDIO_LIBRARIES ${ASOUND_LIBRARY})
-        add_definitions(-DALSA=1)
+	list(APPEND AUDIO_LIBRARIES ${ASOUND_LIBRARY})
+	list(APPEND AUDIO_LIBRARY_DIRS ${ASOUND_LIBRARY_DIRS})
+	add_definitions(-DALSA=1)
 endif(AlsaEnable)
 
 if(JackEnable)
-        list(APPEND AUDIO_LIBRARIES ${JACK_LIBRARIES})
-        add_definitions(-DJACK=1)
+	list(APPEND AUDIO_LIBRARIES ${JACK_LIBRARIES})
+	list(APPEND AUDIO_LIBRARY_DIRS ${JACK_LIBRARY_DIRS})
+	add_definitions(-DJACK=1)
 endif(JackEnable)
 
 if(OssEnable)
-	add_definitions(-DOSSAUDIOOUT)
-        list(APPEND AUDIO_LIBRARIES ${ASOUND_LIBRARY})
-        add_definitions(-DOSS=1)
+	add_definitions(-DOSS=1)
 endif(OssEnable)
 
 if(PaEnable)
 	include_directories(${PORTAUDIO_INCLUDE_DIR})
 	add_definitions(-DPORTAUDIO=1)
-        list(APPEND AUDIO_LIBRARIES ${PORTAUDIO_LIBRARIES})
+	list(APPEND AUDIO_LIBRARIES ${PORTAUDIO_LIBRARIES})
+	list(APPEND AUDIO_LIBRARY_DIRS ${PORTAUDIO_LIBRARY_DIRS})
 endif()
 
 if (CompileTests)
@@ -131,7 +132,8 @@ endif()
 if(LashEnable)
 	include_directories(${LASH_INCLUDE_DIRS})
 	add_definitions(-DLASH=1)
-	set(AUDIO_LIBRARIES ${AUDIO_LIBRARIES} ${LASH_LIBRARIES})
+	list(APPEND AUDIO_LIBRARIES ${LASH_LIBRARIES})
+	list(APPEND AUDIO_LIBRARY_DIRS ${LASH_LIBRARY_DIRS})
 	message(STATUS "Compiling with lash")
 endif()
 
@@ -210,6 +212,8 @@ endif()
 # Following this should be only general compilation code, and no mention
 # of module-specific variables
 
+link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS})
+
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}
@@ -243,6 +247,9 @@ add_subdirectory(Nio)
 set(zynaddsubfx_SRCS
 	main.cpp
 	)
+
+message(STATUS "using link directories: ${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS}")
+
 
 add_executable(zynaddsubfx
 	${zynaddsubfx_SRCS}
@@ -281,6 +288,7 @@ if (DssiEnable)
     endif ()
 endif()
 
+message(STATUS "Link libraries: ${ZLIB_LIBRARIES} ${FFTW_LIBRARIES} ${MXML_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")
 install(TARGETS zynaddsubfx
 	RUNTIME DESTINATION bin
 	)
