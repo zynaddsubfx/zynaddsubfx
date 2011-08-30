@@ -99,6 +99,7 @@ class AdNoteTest:public CxxTest::TestSuite
             delete [] outL;
             delete [] outR;
             delete [] denormalkillbuf;
+            FFT_cleanup();
         }
 
         void testDefaults() {
