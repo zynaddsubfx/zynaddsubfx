@@ -142,62 +142,62 @@ include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS})
 
 add_definitions(
 	 -DASM_F2I_YES
-         -g #TODO #todo put in a better location
-         -Wall
-         -Wextra
+	 -g #TODO #todo put in a better location
+	 -Wall
+	 -Wextra
 	 )
 
 if (BuildForDebug)
-    set (CMAKE_BUILD_TYPE "Debug")
-    set (CMAKE_CXX_FLAGS_DEBUG ${BuildOptionsDebug})
-    message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_DEBUG}")
+	set (CMAKE_BUILD_TYPE "Debug")
+	set (CMAKE_CXX_FLAGS_DEBUG ${BuildOptionsDebug})
+	message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_DEBUG}")
 else (BuildForDebug)
-    set (CMAKE_BUILD_TYPE "Release")
-    if (BuildForAMD_X86_64)
-        set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptions_x86_64AMD})
-    else (BuildForAMD_X86_64)
-        if (BuildForCore2_X86_64)
-            set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptions_X86_64Core2})
-        else (BuildForCore2_X86_64)
-            set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptionsBasic})
-        endif (BuildForCore2_X86_64)
-    endif (BuildForAMD_X86_64)
-    message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_RELEASE}")
+	set (CMAKE_BUILD_TYPE "Release")
+	if (BuildForAMD_X86_64)
+		set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptions_x86_64AMD})
+	else (BuildForAMD_X86_64)
+		if (BuildForCore2_X86_64)
+			set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptions_X86_64Core2})
+		else (BuildForCore2_X86_64)
+			set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptionsBasic})
+		endif (BuildForCore2_X86_64)
+	endif (BuildForAMD_X86_64)
+	message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_RELEASE}")
 endif (BuildForDebug)
 
 if (DssiEnable)
-    add_definitions(-fPIC)
+	add_definitions(-fPIC)
 endif()
 
 
 if(FLTK_FOUND)
-    mark_as_advanced(FORCE FLTK_BASE_LIBRARY)
-    mark_as_advanced(FORCE FLTK_CONFIG_SCRIPT)
-    mark_as_advanced(FORCE FLTK_DIR)
-    mark_as_advanced(FORCE FLTK_FLUID_EXECUTABLE)
-    mark_as_advanced(FORCE FLTK_FORMS_LIBRARY)
-    mark_as_advanced(FORCE FLTK_GL_LIBRARY)
-    mark_as_advanced(FORCE FLTK_IMAGES_LIBRARY)
-    mark_as_advanced(FORCE FLTK_INCLUDE_DIR)
-    mark_as_advanced(FORCE FLTK_MATH_LIBRARY)
+	mark_as_advanced(FORCE FLTK_BASE_LIBRARY)
+	mark_as_advanced(FORCE FLTK_CONFIG_SCRIPT)
+	mark_as_advanced(FORCE FLTK_DIR)
+	mark_as_advanced(FORCE FLTK_FLUID_EXECUTABLE)
+	mark_as_advanced(FORCE FLTK_FORMS_LIBRARY)
+	mark_as_advanced(FORCE FLTK_GL_LIBRARY)
+	mark_as_advanced(FORCE FLTK_IMAGES_LIBRARY)
+	mark_as_advanced(FORCE FLTK_INCLUDE_DIR)
+	mark_as_advanced(FORCE FLTK_MATH_LIBRARY)
 endif(FLTK_FOUND)
 
 if(FltkGui)
-    #UGLY WORKAROUND
-    find_program (MYFLTK_CONFIG fltk-config)
-    if (MYFLTK_CONFIG)
-        execute_process (COMMAND ${MYFLTK_CONFIG} --ldflags OUTPUT_VARIABLE MYFLTK_LDFLAGS)
-        string(STRIP ${MYFLTK_LDFLAGS} MYFLTK_LIBRARIES)
-    endif()
+	#UGLY WORKAROUND
+	find_program (MYFLTK_CONFIG fltk-config)
+	if (MYFLTK_CONFIG)
+		execute_process (COMMAND ${MYFLTK_CONFIG} --ldflags OUTPUT_VARIABLE MYFLTK_LDFLAGS)
+		string(STRIP ${MYFLTK_LDFLAGS} MYFLTK_LIBRARIES)
+	endif()
 
-    message(STATUS ${MYFLTK_LDFLAGS})
+	message(STATUS ${MYFLTK_LDFLAGS})
 
 
-    set(GUI_LIBRARIES ${FLTK_LIBRARIES} ${MYFLTK_LIBRARIES} ${OPENGL_LIBRARIES} zynaddsubfx_gui)
+	set(GUI_LIBRARIES ${FLTK_LIBRARIES} ${MYFLTK_LIBRARIES} ${OPENGL_LIBRARIES} zynaddsubfx_gui)
 
-    add_definitions(-DFLTK_GUI)
+	add_definitions(-DFLTK_GUI)
 
-    message(STATUS "Will build fltk gui")
+	message(STATUS "Will build fltk gui")
 
 	include_directories(
 			${FLTK_INCLUDE_DIR}
@@ -228,8 +228,8 @@ set(NONGUI_LIBRARIES
 	zynaddsubfx_params
 	zynaddsubfx_dsp
 	zynaddsubfx_samples
-        zynaddsubfx_nio
-    )
+	zynaddsubfx_nio
+	)
 
 set(CXXTEST_LINK_LIBS ${NONGUI_LIBRARIES})
 
@@ -240,7 +240,7 @@ add_subdirectory(Params)
 add_subdirectory(DSP)
 add_subdirectory(Samples)
 if(CompileTests)
-    add_subdirectory(Tests)
+	add_subdirectory(Tests)
 endif(CompileTests)
 add_subdirectory(Nio)
 
@@ -281,11 +281,11 @@ if (DssiEnable)
 		${AUDIO_LIBRARIES}
 		${OS_LIBRARIES}
 		)
-    if (${CMAKE_SIZEOF_VOID_P} EQUAL "8")
-        install(TARGETS zynaddsubfx_dssi LIBRARY DESTINATION lib64/dssi/)
-    else ()
-        install(TARGETS zynaddsubfx_dssi LIBRARY DESTINATION lib/dssi/)
-    endif ()
+	if (${CMAKE_SIZEOF_VOID_P} EQUAL "8")
+		install(TARGETS zynaddsubfx_dssi LIBRARY DESTINATION lib64/dssi/)
+	else ()
+		install(TARGETS zynaddsubfx_dssi LIBRARY DESTINATION lib/dssi/)
+	endif ()
 endif()
 
 message(STATUS "Link libraries: ${ZLIB_LIBRARIES} ${FFTW_LIBRARIES} ${MXML_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")
