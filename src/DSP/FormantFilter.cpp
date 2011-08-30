@@ -20,7 +20,6 @@
 
 */
 
-#include <math.h>
 #include <cmath>
 #include <cstdio>
 #include "../Misc/Util.h"
@@ -191,11 +190,15 @@ void FormantFilter::setq(float q_)
 void FormantFilter::setgain(float /*dBgain*/)
 {}
 
+inline float log_2(float x)
+{
+    return log(x)/log(2.0);
+}
 
 void FormantFilter::setfreq_and_q(float frequency, float q_)
 {
     //Convert form real freq[Hz]
-    const float freq = log2(frequency) - 9.96578428; //log2(1000)=9.95748.
+    const float freq = log_2(frequency) - 9.96578428; //log2(1000)=9.95748.
 
     Qfactor = q_;
     setpos(freq);
