@@ -60,6 +60,7 @@ void invSignal(float *sig, size_t len);
 //All should be sized to SOUND_BUFFER_SIZE
 float *getTmpBuffer();
 void returnTmpBuffer(float *buf);
+void clearTmpBuffers(void);
 
 template<class T>
 std::string stringFrom(T x)

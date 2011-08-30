@@ -24,6 +24,7 @@
 #include <vector>
 #include <math.h>
 #include <stdio.h>
+#include <err.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -184,6 +185,16 @@ void returnTmpBuffer(float *buf)
         }
     }
     fprintf(stderr,"ERROR: invalid buffer returned %s %d\n",__FILE__,__LINE__);
+}
+
+void clearTmpBuffers(void)
+{
+    for(pool_itr_t itr = pool.begin(); itr != pool.end(); ++itr) {
+        if(!itr->free) //Warn about used buffers
+            warn("Temporary buffer (%p) about to be freed may be in use", itr->dat);
+        delete [] itr->dat;
+    }
+    pool.clear();
 }
 
 
