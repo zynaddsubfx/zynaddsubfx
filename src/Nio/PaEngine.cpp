@@ -87,20 +87,17 @@ int PaEngine::PAprocess(const void *inputBuffer, void *outputBuffer,
         const PaStreamCallbackTimeInfo *outTime, PaStreamCallbackFlags flags,
         void *userData)
 {
+    (void) inputBuffer;
+    (void) outTime;
+    (void) flags;
     return static_cast<PaEngine *>(userData)->process((float *) outputBuffer,
                                                       framesPerBuffer);
 }
 
 int PaEngine::process(float *out, unsigned long framesPerBuffer)
 {
-
     const Stereo<float *> smp = getNext();
-
-    //if(framesPerBuffer != smp.l.size())
-    //    cerr << "Bug: PaEngine::process  SOUND_BUFFER_SIZE!=framesPerBuffer"
-    //         << framesPerBuffer << ' ' << smp.l.size() << endl;
-
-    for(int i = 0; i < framesPerBuffer; ++i) {
+    for(unsigned i = 0; i < framesPerBuffer; ++i) {
         *out++ = smp.l[i];
         *out++ = smp.r[i];
     }
