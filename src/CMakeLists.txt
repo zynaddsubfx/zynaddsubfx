@@ -231,8 +231,6 @@ set(NONGUI_LIBRARIES
 	zynaddsubfx_nio
 	)
 
-set(CXXTEST_LINK_LIBS ${NONGUI_LIBRARIES})
-
 add_subdirectory(Misc)
 add_subdirectory(Synth)
 add_subdirectory(Effects)
@@ -275,8 +273,8 @@ if (DssiEnable)
 	target_link_libraries(zynaddsubfx_dssi
 		${NONGUI_LIBRARIES}
 		${ZLIB_LIBRARIES}
-		${FFTW_LIBRARIES}
-		${MXML_LIBRARIES}
+		${FFTW_LIBRARY}
+		${MXML_LIBRARY}
 		${NIO_LIBRARIES}
 		${AUDIO_LIBRARIES}
 		${OS_LIBRARIES}
@@ -288,7 +286,7 @@ if (DssiEnable)
 	endif ()
 endif()
 
-message(STATUS "Link libraries: ${ZLIB_LIBRARIES} ${FFTW_LIBRARIES} ${MXML_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")
+message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARY} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")
 install(TARGETS zynaddsubfx
 	RUNTIME DESTINATION bin
 	)
