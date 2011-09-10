@@ -31,11 +31,11 @@ class RandTest:public CxxTest::TestSuite
     public:
         void testPRNG(void) {
             //verify RND returns expected pattern when unseeded
-            TS_ASSERT_DELTA(RND, 0.840188, 0.00001);
-            TS_ASSERT_DELTA(RND, 0.394383, 0.00001);
-            TS_ASSERT_DELTA(RND, 0.783099, 0.00001);
-            TS_ASSERT_DELTA(RND, 0.798440, 0.00001);
-            TS_ASSERT_DELTA(RND, 0.911647, 0.00001);
+            TS_ASSERT_DELTA(RND, 0.840188f, 0.00001f);
+            TS_ASSERT_DELTA(RND, 0.394383f, 0.00001f);
+            TS_ASSERT_DELTA(RND, 0.783099f, 0.00001f);
+            TS_ASSERT_DELTA(RND, 0.798440f, 0.00001f);
+            TS_ASSERT_DELTA(RND, 0.911647f, 0.00001f);
         }
 };
 

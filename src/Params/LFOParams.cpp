@@ -65,7 +65,7 @@ LFOParams::~LFOParams()
 
 void LFOParams::defaults()
 {
-    Pfreq = Dfreq / 127.0;
+    Pfreq = Dfreq / 127.0f;
     Pintensity  = Dintensity;
     Pstartphase = Dstartphase;
     PLFOtype    = DLFOtype;
@@ -92,7 +92,7 @@ void LFOParams::add2XML(XMLwrapper *xml)
 
 void LFOParams::getfromXML(XMLwrapper *xml)
 {
-    Pfreq = xml->getparreal("freq", Pfreq, 0.0, 1.0);
+    Pfreq = xml->getparreal("freq", Pfreq, 0.0f, 1.0f);
     Pintensity  = xml->getpar127("intensity", Pintensity);
     Pstartphase = xml->getpar127("start_phase", Pstartphase);
     PLFOtype    = xml->getpar127("lfo_type", PLFOtype);

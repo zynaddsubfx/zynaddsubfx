@@ -103,10 +103,10 @@ XMLwrapper::XMLwrapper()
     minimal = true;
 
     node    = tree = mxmlNewElement(MXML_NO_PARENT,
-                                    "?xml version=\"1.0\" encoding=\"UTF-8\"?");
-    /*  for mxml 2.1 (and older)
+                                    "?xml version=\"1.0f\" encoding=\"UTF-8\"?");
+    /*  for mxml 2.1f (and older)
         tree=mxmlNewElement(MXML_NO_PARENT,"?xml");
-        mxmlElementSetAttr(tree,"version","1.0");
+        mxmlElementSetAttr(tree,"version","1.0f");
         mxmlElementSetAttr(tree,"encoding","UTF-8");
     */
 

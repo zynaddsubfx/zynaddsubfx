@@ -49,11 +49,11 @@ float *denormalkillbuf;
 float VelF(float velocity, unsigned char scaling)
 {
     float x;
-    x = pow(VELOCITY_MAX_SCALE, (64.0 - scaling) / 64.0);
-    if((scaling == 127) || (velocity > 0.99))
-        return 1.0;
+    x = powf(VELOCITY_MAX_SCALE, (64.0f - scaling) / 64.0f);
+    if((scaling == 127) || (velocity > 0.99f))
+        return 1.0f;
     else
-        return pow(velocity, x);
+        return powf(velocity, x);
 }
 
 /*
@@ -63,12 +63,12 @@ float getdetune(unsigned char type,
                    unsigned short int coarsedetune,
                    unsigned short int finedetune)
 {
-    float det = 0.0, octdet = 0.0, cdet = 0.0, findet = 0.0;
+    float det = 0.0f, octdet = 0.0f, cdet = 0.0f, findet = 0.0f;
     //Get Octave
     int octave   = coarsedetune / 1024;
     if(octave >= 8)
         octave -= 16;
-    octdet = octave * 1200.0;
+    octdet = octave * 1200.0f;
 
     //Coarse and fine detune
     int cdetune = coarsedetune % 1024;
@@ -80,21 +80,21 @@ float getdetune(unsigned char type,
     switch(type) {
 //	case 1: is used for the default (see below)
     case 2:
-        cdet   = fabs(cdetune * 10.0);
-        findet = fabs(fdetune / 8192.0) * 10.0;
+        cdet   = fabs(cdetune * 10.0f);
+        findet = fabs(fdetune / 8192.0f) * 10.0f;
         break;
     case 3:
         cdet   = fabs(cdetune * 100);
-        findet = pow(10, fabs(fdetune / 8192.0) * 3.0) / 10.0 - 0.1;
+        findet = powf(10, fabs(fdetune / 8192.0f) * 3.0f) / 10.0f - 0.1f;
         break;
     case 4:
-        cdet   = fabs(cdetune * 701.95500087); //perfect fifth
-        findet = (pow(2, fabs(fdetune / 8192.0) * 12.0) - 1.0) / 4095 * 1200;
+        cdet   = fabs(cdetune * 701.95500087f); //perfect fifth
+        findet = (powf(2, fabs(fdetune / 8192.0f) * 12.0f) - 1.0f) / 4095 * 1200;
         break;
     //case ...: need to update N_DETUNE_TYPES, if you'll add more
     default:
-        cdet   = fabs(cdetune * 50.0);
-        findet = fabs(fdetune / 8192.0) * 35.0; //almost like "Paul's Sound Designer 2"
+        cdet   = fabs(cdetune * 50.0f);
+        findet = fabs(fdetune / 8192.0f) * 35.0f; //almost like "Paul's Sound Designer 2"
         break;
     }
     if(finedetune < 8192)

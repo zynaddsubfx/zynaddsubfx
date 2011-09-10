@@ -36,7 +36,7 @@ Echo::Echo(const int &insertion_,
       delayTime(1), lrdelay(0), avgDelay(0),
       delay(new float[(int)(MAX_DELAY * SAMPLE_RATE)],
             new float[(int)(MAX_DELAY * SAMPLE_RATE)]),
-      old(0.0), pos(0), delta(1), ndelta(1)
+      old(0.0f), pos(0), delta(1), ndelta(1)
 {
     initdelays();
     setpreset(Ppreset);
@@ -55,7 +55,7 @@ void Echo::cleanup()
 {
     memset(delay.l,0,MAX_DELAY*SAMPLE_RATE*sizeof(float));
     memset(delay.r,0,MAX_DELAY*SAMPLE_RATE*sizeof(float));
-    old = Stereo<float>(0.0);
+    old = Stereo<float>(0.0f);
 }
 
 inline int max(int a, int b)
@@ -86,18 +86,18 @@ void Echo::out(const Stereo<float *> &input)
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         ldl = delay.l[pos.l];
         rdl = delay.r[pos.r];
-        ldl = ldl * (1.0 - lrcross) + rdl * lrcross;
-        rdl = rdl * (1.0 - lrcross) + ldl * lrcross;
+        ldl = ldl * (1.0f - lrcross) + rdl * lrcross;
+        rdl = rdl * (1.0f - lrcross) + ldl * lrcross;
 
-        efxoutl[i] = ldl * 2.0;
-        efxoutr[i] = rdl * 2.0;
+        efxoutl[i] = ldl * 2.0f;
+        efxoutr[i] = rdl * 2.0f;
 
         ldl = input.l[i] * pangainL - ldl * fb;
         rdl = input.r[i] * pangainR - rdl * fb;
 
         //LowPass Filter
-        old.l = delay.l[(pos.l+delta.l)%(MAX_DELAY * SAMPLE_RATE)] =  ldl * hidamp + old.l * (1.0 - hidamp);
-        old.r = delay.r[(pos.r+delta.r)%(MAX_DELAY * SAMPLE_RATE)] =  rdl * hidamp + old.r * (1.0 - hidamp);
+        old.l = delay.l[(pos.l+delta.l)%(MAX_DELAY * SAMPLE_RATE)] =  ldl * hidamp + old.l * (1.0f - hidamp);
+        old.r = delay.r[(pos.r+delta.r)%(MAX_DELAY * SAMPLE_RATE)] =  rdl * hidamp + old.r * (1.0f - hidamp);
 
         //increment
         ++pos.l;// += delta.l;
@@ -122,11 +122,11 @@ void Echo::setvolume(unsigned char Pvolume)
     this->Pvolume = Pvolume;
 
     if(insertion == 0) {
-        outvolume = pow(0.01, (1.0 - Pvolume / 127.0)) * 4.0;
-        volume    = 1.0;
+        outvolume = powf(0.01f, (1.0f - Pvolume / 127.0f)) * 4.0f;
+        volume    = 1.0f;
     }
     else
-        volume = outvolume = Pvolume / 127.0;
+        volume = outvolume = Pvolume / 127.0f;
     if(Pvolume == 0)
         cleanup();
 }
@@ -134,7 +134,7 @@ void Echo::setvolume(unsigned char Pvolume)
 void Echo::setdelay(unsigned char Pdelay)
 {
     this->Pdelay=Pdelay;
-    avgDelay=(Pdelay/127.0*1.5);//0 .. 1.5 sec
+    avgDelay=(Pdelay/127.0f*1.5f);//0 .. 1.5f sec
     initdelays();
 }
 
@@ -143,8 +143,8 @@ void Echo::setlrdelay(unsigned char Plrdelay)
     float tmp;
     this->Plrdelay = Plrdelay;
     tmp =
-        (pow(2, fabs(Plrdelay - 64.0) / 64.0 * 9) - 1.0) / 1000.0;
-    if(Plrdelay < 64.0)
+        (powf(2, fabs(Plrdelay - 64.0f) / 64.0f * 9) - 1.0f) / 1000.0f;
+    if(Plrdelay < 64.0f)
         tmp = -tmp;
     lrdelay = tmp;
     initdelays();
@@ -153,13 +153,13 @@ void Echo::setlrdelay(unsigned char Plrdelay)
 void Echo::setfb(unsigned char Pfb)
 {
     this->Pfb = Pfb;
-    fb = Pfb / 128.0;
+    fb = Pfb / 128.0f;
 }
 
 void Echo::sethidamp(unsigned char Phidamp)
 {
     this->Phidamp = Phidamp;
-    hidamp = 1.0 - Phidamp / 127.0;
+    hidamp = 1.0f - Phidamp / 127.0f;
 }
 
 void Echo::setpreset(unsigned char npreset)

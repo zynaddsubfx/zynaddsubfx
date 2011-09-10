@@ -87,7 +87,7 @@ class SUBnoteParameters:public Presets
         //Magnitudes
         unsigned char Phmag[MAX_SUB_HARMONICS];
 
-        //Relative BandWidth ("64"=1.0)
+        //Relative BandWidth ("64"=1.0f)
         unsigned char Phrelbw[MAX_SUB_HARMONICS];
 
         //how much the bandwidth is increased according to lower/higher frequency; 64-default

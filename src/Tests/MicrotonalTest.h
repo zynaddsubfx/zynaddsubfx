@@ -46,7 +46,7 @@ class MicrotonalTest:public CxxTest::TestSuite
             TS_ASSERT_EQUALS(testMicro->getoctavesize(), 12);
             TS_ASSERT_EQUALS(testMicro->Penabled, 0);
             TS_ASSERT_EQUALS(testMicro->PAnote, 69);
-            TS_ASSERT_EQUALS(testMicro->PAfreq, 440.0);
+            TS_ASSERT_EQUALS(testMicro->PAfreq, 440.0f);
             TS_ASSERT_EQUALS(testMicro->Pscaleshift, 64);
             TS_ASSERT_EQUALS(testMicro->Pfirstkey, 0);
             TS_ASSERT_EQUALS(testMicro->Plastkey, 127);
@@ -63,14 +63,14 @@ class MicrotonalTest:public CxxTest::TestSuite
             for(int i = 0; i < 128; ++i)
                 TS_ASSERT_EQUALS(testMicro->Pmapping[i], i);
 
-            TS_ASSERT_DELTA(testMicro->getnotefreq(19, 0), 24.4997, 0.0001);
+            TS_ASSERT_DELTA(testMicro->getnotefreq(19, 0), 24.4997f, 0.0001f);
         }
 
         //performs basic sanity check with the == and != operators
         void testeqeq() {
             Microtonal other;
             TS_ASSERT(*testMicro == other); //both are constructed the same, so they should be equal
-            other.PAfreq = 220.0;
+            other.PAfreq = 220.0f;
             TS_ASSERT(*testMicro != other); //other is now different
         }
 

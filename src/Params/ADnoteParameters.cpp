@@ -222,8 +222,8 @@ void ADnoteVoiceParam::enable(FFTwrapper *fft, Resonance *Reson)
  */
 float ADnoteParameters::getBandwidthDetuneMultiplier()
 {
-    float bw = (GlobalPar.PBandwidth - 64.0) / 64.0;
-    bw = pow(2.0, bw * pow(fabs(bw), 0.2) * 5.0);
+    float bw = (GlobalPar.PBandwidth - 64.0f) / 64.0f;
+    bw = powf(2.0f, bw * powf(fabs(bw), 0.2f) * 5.0f);
 
     return bw;
 }
@@ -233,8 +233,8 @@ float ADnoteParameters::getBandwidthDetuneMultiplier()
  */
 
 float ADnoteParameters::getUnisonFrequencySpreadCents(int nvoice) {
-    float unison_spread = VoicePar[nvoice].Unison_frequency_spread / 127.0;
-    unison_spread = pow(unison_spread * 2.0, 2.0) * 50.0; //cents
+    float unison_spread = VoicePar[nvoice].Unison_frequency_spread / 127.0f;
+    unison_spread = powf(unison_spread * 2.0f, 2.0f) * 50.0f; //cents
     return unison_spread;
 }
 

@@ -67,7 +67,7 @@ Master::Master()
 
 void Master::defaults()
 {
-    volume = 1.0;
+    volume = 1.0f;
     setPvolume(80);
     setPkeyshift(64);
 
@@ -198,7 +198,7 @@ void Master::vuUpdate(const float *outl, const float *outr)
         if(fabs(outr[i]) > vu.outpeakr)
             vu.outpeakr = fabs(outr[i]);
     }
-    if((vu.outpeakl > 1.0) || (vu.outpeakr > 1.0))
+    if((vu.outpeakl > 1.0f) || (vu.outpeakr > 1.0f))
         vu.clipped = 1;
     if(vu.maxoutpeakl < vu.outpeakl)
         vu.maxoutpeakl = vu.outpeakl;
@@ -217,7 +217,7 @@ void Master::vuUpdate(const float *outl, const float *outr)
 
     //Part Peak computation (for Part vumeters or fake part vumeters)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
-        vuoutpeakpart[npart] = 1.0e-12;
+        vuoutpeakpart[npart] = 1.0e-12f;
         if(part[npart]->Penabled != 0) {
             float *outl = part[npart]->partoutl,
                      *outr = part[npart]->partoutr;
@@ -296,10 +296,10 @@ void Master::AudioOut(float *outl, float *outr)
                                 part[npart]->oldvolumer);
 
         float pan      = part[npart]->panning;
-        if(pan < 0.5)
-            newvol.l *= pan * 2.0;
+        if(pan < 0.5f)
+            newvol.l *= pan * 2.0f;
         else
-            newvol.r *= (1.0 - pan) * 2.0;
+            newvol.r *= (1.0f - pan) * 2.0f;
 
         //the volume or the panning has changed and needs interpolation
         if(ABOVE_AMPLITUDE_THRESHOLD(oldvol.l, newvol.l)
@@ -487,7 +487,7 @@ Master::~Master()
 void Master::setPvolume(char Pvolume_)
 {
     Pvolume = Pvolume_;
-    volume  = dB2rap((Pvolume - 96.0) / 96.0 * 40.0);
+    volume  = dB2rap((Pvolume - 96.0f) / 96.0f * 40.0f);
 }
 
 void Master::setPkeyshift(char Pkeyshift_)
@@ -500,13 +500,13 @@ void Master::setPkeyshift(char Pkeyshift_)
 void Master::setPsysefxvol(int Ppart, int Pefx, char Pvol)
 {
     Psysefxvol[Pefx][Ppart] = Pvol;
-    sysefxvol[Pefx][Ppart]  = pow(0.1, (1.0 - Pvol / 96.0) * 2.0);
+    sysefxvol[Pefx][Ppart]  = powf(0.1f, (1.0f - Pvol / 96.0f) * 2.0f);
 }
 
 void Master::setPsysefxsend(int Pefxfrom, int Pefxto, char Pvol)
 {
     Psysefxsend[Pefxfrom][Pefxto] = Pvol;
-    sysefxsend[Pefxfrom][Pefxto]  = pow(0.1, (1.0 - Pvol / 96.0) * 2.0);
+    sysefxsend[Pefxfrom][Pefxto]  = powf(0.1f, (1.0f - Pvol / 96.0f) * 2.0f);
 }
 
 

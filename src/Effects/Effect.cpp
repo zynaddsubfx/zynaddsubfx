@@ -41,16 +41,16 @@ void Effect::crossover(float &a, float &b, float crossover)
 {
     float tmpa = a;
     float tmpb = b;
-    a = tmpa * (1.0 - crossover) + tmpb * crossover;
-    b = tmpb * (1.0 - crossover) + tmpa * crossover;
+    a = tmpa * (1.0f - crossover) + tmpb * crossover;
+    b = tmpb * (1.0f - crossover) + tmpa * crossover;
 }
 
 void Effect::setpanning(char Ppanning_)
 {
     Ppanning = Ppanning_;
     float t = (Ppanning > 0) ? (float)(Ppanning - 1) / 126.0f : 0.0f;
-    pangainL = cos(t * PI / 2.0f);
-    pangainR = cos((1.0f - t) * PI / 2.0f);
+    pangainL = cosf(t * PI / 2.0f);
+    pangainR = cosf((1.0f - t) * PI / 2.0f);
 }
 
 void Effect::setlrcross(char Plrcross_)

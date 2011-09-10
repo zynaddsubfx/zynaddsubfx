@@ -30,7 +30,7 @@ Chorus::Chorus(const int &insertion_,
                float *const efxoutl_,
                float *const efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
-      maxdelay((int)(MAX_CHORUS_DELAY / 1000.0 * SAMPLE_RATE)),
+      maxdelay((int)(MAX_CHORUS_DELAY / 1000.0f * SAMPLE_RATE)),
       delaySample(maxdelay)
 {
     dlk = 0;
@@ -59,18 +59,18 @@ float Chorus::getdelay(float xlfo)
 
     //check if it is too big delay(caused bu errornous setdelay() and setdepth()
     /**\todo fix setdelay() and setdepth(), so this error cannot occur*/
-    if((result + 0.5) >= maxdelay) {
+    if((result + 0.5f) >= maxdelay) {
         cerr
         <<
         "WARNING: Chorus.cpp::getdelay(..) too big delay (see setdelay and setdepth funcs.)\n";
-        result = maxdelay - 1.0;
+        result = maxdelay - 1.0f;
     }
     return result;
 }
 
 void Chorus::out(const Stereo<float *> &input)
 {
-    const float one = 1.0;
+    const float one = 1.0f;
     dl1 = dl2;
     dr1 = dr2;
     lfo.effectlfoout(&lfol, &lfor);
@@ -84,8 +84,8 @@ void Chorus::out(const Stereo<float *> &input)
         float inr = input.r[i];
         //LRcross
         Stereo<float> tmpc(inl, inr);
-        inl = tmpc.l * (1.0 - lrcross) + tmpc.r * lrcross;
-        inr = tmpc.r * (1.0 - lrcross) + tmpc.l * lrcross;
+        inl = tmpc.l * (1.0f - lrcross) + tmpc.r * lrcross;
+        inr = tmpc.r * (1.0f - lrcross) + tmpc.l * lrcross;
 
         //Left channel
 
@@ -93,15 +93,15 @@ void Chorus::out(const Stereo<float *> &input)
         mdel = (dl1 * (SOUND_BUFFER_SIZE - i) + dl2 * i) / SOUND_BUFFER_SIZE;
         if(++dlk >= maxdelay)
             dlk = 0;
-        float tmp = dlk - mdel + maxdelay * 2.0; //where should I get the sample from
+        float tmp = dlk - mdel + maxdelay * 2.0f; //where should I get the sample from
 
         F2I(tmp, dlhi);
         dlhi %= maxdelay;
 
         dlhi2      = (dlhi - 1 + maxdelay) % maxdelay;
-        dllo       = 1.0 - fmod(tmp, one);
+        dllo       = 1.0f - fmod(tmp, one);
         efxoutl[i] = delaySample.l[dlhi2] * dllo + delaySample.l[dlhi]
-                     * (1.0 - dllo);
+                     * (1.0f - dllo);
         delaySample.l[dlk] = inl + efxoutl[i] * fb;
 
         //Right channel
@@ -110,22 +110,22 @@ void Chorus::out(const Stereo<float *> &input)
         mdel = (dr1 * (SOUND_BUFFER_SIZE - i) + dr2 * i) / SOUND_BUFFER_SIZE;
         if(++drk >= maxdelay)
             drk = 0;
-        tmp  = drk * 1.0 - mdel + maxdelay * 2.0; //where should I get the sample from
+        tmp  = drk * 1.0f - mdel + maxdelay * 2.0f; //where should I get the sample from
 
         F2I(tmp, dlhi);
         dlhi %= maxdelay;
 
         dlhi2      = (dlhi - 1 + maxdelay) % maxdelay;
-        dllo       = 1.0 - fmod(tmp, one);
+        dllo       = 1.0f - fmod(tmp, one);
         efxoutr[i] = delaySample.r[dlhi2] * dllo + delaySample.r[dlhi]
-                     * (1.0 - dllo);
+                     * (1.0f - dllo);
         delaySample.r[dlk] = inr + efxoutr[i] * fb;
     }
 
     if(Poutsub != 0)
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-            efxoutl[i] *= -1.0;
-            efxoutr[i] *= -1.0;
+            efxoutl[i] *= -1.0f;
+            efxoutr[i] *= -1.0f;
         }
 
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
@@ -149,26 +149,26 @@ void Chorus::cleanup()
 void Chorus::setdepth(unsigned char Pdepth)
 {
     this->Pdepth = Pdepth;
-    depth = (pow(8.0, (Pdepth / 127.0) * 2.0) - 1.0) / 1000.0; //seconds
+    depth = (powf(8.0f, (Pdepth / 127.0f) * 2.0f) - 1.0f) / 1000.0f; //seconds
 }
 
 void Chorus::setdelay(unsigned char Pdelay)
 {
     this->Pdelay = Pdelay;
-    delay = (pow(10.0, (Pdelay / 127.0) * 2.0) - 1.0) / 1000.0; //seconds
+    delay = (powf(10.0f, (Pdelay / 127.0f) * 2.0f) - 1.0f) / 1000.0f; //seconds
 }
 
 void Chorus::setfb(unsigned char Pfb)
 {
     this->Pfb = Pfb;
-    fb = (Pfb - 64.0) / 64.1;
+    fb = (Pfb - 64.0f) / 64.1f;
 }
 void Chorus::setvolume(unsigned char Pvolume)
 {
     this->Pvolume = Pvolume;
-    outvolume     = Pvolume / 127.0;
+    outvolume     = Pvolume / 127.0f;
     if(insertion == 0)
-        volume = 1.0;
+        volume = 1.0f;
     else
         volume = outvolume;
 }

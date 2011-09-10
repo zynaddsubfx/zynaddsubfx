@@ -28,8 +28,8 @@
 
 EffectLFO::EffectLFO()
 {
-    xl          = 0.0;
-    xr          = 0.0;
+    xl          = 0.0f;
+    xr          = 0.0f;
     Pfreq       = 40;
     Prandomness = 0;
     PLFOtype    = 0;
@@ -52,23 +52,23 @@ EffectLFO::~EffectLFO()
  */
 void EffectLFO::updateparams()
 {
-    float lfofreq = (pow(2, Pfreq / 127.0 * 10.0) - 1.0) * 0.03;
+    float lfofreq = (powf(2, Pfreq / 127.0f * 10.0f) - 1.0f) * 0.03f;
     incx = fabs(lfofreq) * (float)SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
-    if(incx > 0.49999999)
-        incx = 0.499999999;                //Limit the Frequency
+    if(incx > 0.49999999f)
+        incx = 0.499999999f;                //Limit the Frequency
 
-    lfornd = Prandomness / 127.0;
-    if(lfornd < 0.0)
-        lfornd = 0.0;
+    lfornd = Prandomness / 127.0f;
+    if(lfornd < 0.0f)
+        lfornd = 0.0f;
     else
-    if(lfornd > 1.0)
-        lfornd = 1.0;
+    if(lfornd > 1.0f)
+        lfornd = 1.0f;
 
     if(PLFOtype > 1)
         PLFOtype = 1;          //this has to be updated if more lfo's are added
     lfotype = PLFOtype;
 
-    xr      = fmod(xl + (Pstereo - 64.0) / 127.0 + 1.0, 1.0);
+    xr      = fmod(xl + (Pstereo - 64.0f) / 127.0f + 1.0f, 1.0f);
 }
 
 
@@ -80,17 +80,17 @@ float EffectLFO::getlfoshape(float x)
     float out;
     switch(lfotype) {
     case 1: //EffectLFO_TRIANGLE
-        if((x > 0.0) && (x < 0.25))
-            out = 4.0 * x;
+        if((x > 0.0f) && (x < 0.25f))
+            out = 4.0f * x;
         else
-        if((x > 0.25) && (x < 0.75))
+        if((x > 0.25f) && (x < 0.75f))
             out = 2 - 4 * x;
         else
-            out = 4.0 * x - 4.0;
+            out = 4.0f * x - 4.0f;
         break;
     /**\todo more to be added here; also ::updateparams() need to be updated (to allow more lfotypes)*/
     default:
-        out = cos(x * 2 * PI); //EffectLFO_SINE
+        out = cosf(x * 2 * PI); //EffectLFO_SINE
     }
     return out;
 }
@@ -106,22 +106,22 @@ void EffectLFO::effectlfoout(float *outl, float *outr)
     if((lfotype == 0) || (lfotype == 1))
         out *= (ampl1 + xl * (ampl2 - ampl1));
     xl += incx;
-    if(xl > 1.0) {
-        xl   -= 1.0;
+    if(xl > 1.0f) {
+        xl   -= 1.0f;
         ampl1 = ampl2;
-        ampl2 = (1.0 - lfornd) + lfornd * RND;
+        ampl2 = (1.0f - lfornd) + lfornd * RND;
     }
-    *outl = (out + 1.0) * 0.5;
+    *outl = (out + 1.0f) * 0.5f;
 
     out   = getlfoshape(xr);
     if((lfotype == 0) || (lfotype == 1))
         out *= (ampr1 + xr * (ampr2 - ampr1));
     xr   += incx;
-    if(xr > 1.0) {
-        xr   -= 1.0;
+    if(xr > 1.0f) {
+        xr   -= 1.0f;
         ampr1 = ampr2;
-        ampr2 = (1.0 - lfornd) + lfornd * RND;
+        ampr2 = (1.0f - lfornd) + lfornd * RND;
     }
-    *outr = (out + 1.0) * 0.5;
+    *outr = (out + 1.0f) * 0.5f;
 }
 

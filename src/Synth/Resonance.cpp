@@ -40,8 +40,8 @@ void Resonance::defaults()
     Pcenterfreq  = 64; //1 kHz
     Poctavesfreq = 64;
     Pprotectthefundamental = 0;
-    ctlcenter    = 1.0;
-    ctlbw = 1.0;
+    ctlcenter    = 1.0f;
+    ctlbw = 1.0f;
     for(int i = 0; i < N_RES_POINTS; ++i)
         Prespoints[i] = 64;
 }
@@ -63,20 +63,20 @@ void Resonance::applyres(int n, fft_t *fftdata, float freq)
 {
     if(Penabled == 0)
         return;             //if the resonance is disabled
-    float sum = 0.0,
-             l1  = log(getfreqx(0.0) * ctlcenter),
-             l2  = log(2.0) * getoctavesfreq() * ctlbw;
+    float sum = 0.0f,
+             l1  = logf(getfreqx(0.0f) * ctlcenter),
+             l2  = logf(2.0f) * getoctavesfreq() * ctlbw;
 
     for(int i = 0; i < N_RES_POINTS; ++i)
         if(sum < Prespoints[i])
             sum = Prespoints[i];
-    if(sum < 1.0)
-        sum = 1.0;
+    if(sum < 1.0f)
+        sum = 1.0f;
 
     for(int i = 1; i < n; ++i) {
-        float x = (log(freq * i) - l1) / l2; //compute where the n-th hamonics fits to the graph
-        if(x < 0.0)
-            x = 0.0;
+        float x = (logf(freq * i) - l1) / l2; //compute where the n-th hamonics fits to the graph
+        if(x < 0.0f)
+            x = 0.0f;
 
         x *= N_RES_POINTS;
         float dx = x - floor(x);
@@ -89,12 +89,12 @@ void Resonance::applyres(int n, fft_t *fftdata, float freq)
             kx2 = N_RES_POINTS - 1;
         float y  =
             (Prespoints[kx1]
-             * (1.0 - dx) + Prespoints[kx2] * dx) / 127.0 - sum / 127.0;
+             * (1.0f - dx) + Prespoints[kx2] * dx) / 127.0f - sum / 127.0f;
 
-        y = pow(10.0, y * PmaxdB / 20.0);
+        y = powf(10.0f, y * PmaxdB / 20.0f);
 
         if((Pprotectthefundamental != 0) && (i == 1))
-            y = 1.0;
+            y = 1.0f;
 
         fftdata[i] *= y;
     }
@@ -106,18 +106,18 @@ void Resonance::applyres(int n, fft_t *fftdata, float freq)
 
 float Resonance::getfreqresponse(float freq)
 {
-    float l1 = log(getfreqx(0.0) * ctlcenter),
-             l2 = log(2.0) * getoctavesfreq() * ctlbw, sum = 0.0;
+    float l1 = logf(getfreqx(0.0f) * ctlcenter),
+             l2 = logf(2.0f) * getoctavesfreq() * ctlbw, sum = 0.0f;
 
     for(int i = 0; i < N_RES_POINTS; ++i)
         if(sum < Prespoints[i])
             sum = Prespoints[i];
-    if(sum < 1.0)
-        sum = 1.0;
+    if(sum < 1.0f)
+        sum = 1.0f;
 
-    float x = (log(freq) - l1) / l2; //compute where the n-th hamonics fits to the graph
-    if(x < 0.0)
-        x = 0.0;
+    float x = (logf(freq) - l1) / l2; //compute where the n-th hamonics fits to the graph
+    if(x < 0.0f)
+        x = 0.0f;
     x *= N_RES_POINTS;
     float dx     = x - floor(x);
     x  = floor(x);
@@ -129,8 +129,8 @@ float Resonance::getfreqresponse(float freq)
         kx2 = N_RES_POINTS - 1;
     float result =
         (Prespoints[kx1]
-         * (1.0 - dx) + Prespoints[kx2] * dx) / 127.0 - sum / 127.0;
-    result = pow(10.0, result * PmaxdB / 20.0);
+         * (1.0f - dx) + Prespoints[kx2] * dx) / 127.0f - sum / 127.0f;
+    result = powf(10.0f, result * PmaxdB / 20.0f);
     return result;
 }
 
@@ -142,12 +142,12 @@ void Resonance::smooth()
 {
     float old = Prespoints[0];
     for(int i = 0; i < N_RES_POINTS; ++i) {
-        old = old * 0.4 + Prespoints[i] * 0.6;
+        old = old * 0.4f + Prespoints[i] * 0.6f;
         Prespoints[i] = (int) old;
     }
     old = Prespoints[N_RES_POINTS - 1];
     for(int i = N_RES_POINTS - 1; i > 0; i--) {
-        old = old * 0.4 + Prespoints[i] * 0.6;
+        old = old * 0.4f + Prespoints[i] * 0.6f;
         Prespoints[i] = (int) old + 1;
         if(Prespoints[i] > 127)
             Prespoints[i] = 127;
@@ -159,15 +159,15 @@ void Resonance::smooth()
  */
 void Resonance::randomize(int type)
 {
-    int r = (int)(RND * 127.0);
+    int r = (int)(RND * 127.0f);
     for(int i = 0; i < N_RES_POINTS; ++i) {
         Prespoints[i] = r;
-        if((RND < 0.1) && (type == 0))
-            r = (int)(RND * 127.0);
-        if((RND < 0.3) && (type == 1))
-            r = (int)(RND * 127.0);
+        if((RND < 0.1f) && (type == 0))
+            r = (int)(RND * 127.0f);
+        if((RND < 0.3f) && (type == 1))
+            r = (int)(RND * 127.0f);
         if(type == 2)
-            r = (int)(RND * 127.0);
+            r = (int)(RND * 127.0f);
     }
     smooth();
 }
@@ -184,8 +184,8 @@ void Resonance::interpolatepeaks(int type)
             for(int k = 0; k < i - x1; ++k) {
                 float x = (float) k / (i - x1);
                 if(type == 0)
-                    x = (1 - cos(x * PI)) * 0.5;
-                Prespoints[x1 + k] = (int)(y1 * (1.0 - x) + y2 * x);
+                    x = (1 - cosf(x * PI)) * 0.5f;
+                Prespoints[x1 + k] = (int)(y1 * (1.0f - x) + y2 * x);
             }
             x1 = i;
             y1 = y2;
@@ -198,10 +198,10 @@ void Resonance::interpolatepeaks(int type)
  */
 float Resonance::getfreqx(float x)
 {
-    if(x > 1.0)
-        x = 1.0;
-    float octf = pow(2.0, getoctavesfreq());
-    return getcenterfreq() / sqrt(octf) * pow(octf, x);
+    if(x > 1.0f)
+        x = 1.0f;
+    float octf = powf(2.0f, getoctavesfreq());
+    return getcenterfreq() / sqrt(octf) * powf(octf, x);
 }
 
 /*
@@ -209,7 +209,7 @@ float Resonance::getfreqx(float x)
  */
 float Resonance::getfreqpos(float freq)
 {
-    return (log(freq) - log(getfreqx(0.0))) / log(2.0) / getoctavesfreq();
+    return (logf(freq) - logf(getfreqx(0.0f))) / logf(2.0f) / getoctavesfreq();
 }
 
 /*
@@ -217,7 +217,7 @@ float Resonance::getfreqpos(float freq)
  */
 float Resonance::getcenterfreq()
 {
-    return 10000.0 * pow(10, -(1.0 - Pcenterfreq / 127.0) * 2.0);
+    return 10000.0f * powf(10, -(1.0f - Pcenterfreq / 127.0f) * 2.0f);
 }
 
 /*
@@ -225,7 +225,7 @@ float Resonance::getcenterfreq()
  */
 float Resonance::getoctavesfreq()
 {
-    return 0.25 + 10.0 * Poctavesfreq / 127.0;
+    return 0.25f + 10.0f * Poctavesfreq / 127.0f;
 }
 
 void Resonance::sendcontroller(MidiControllers ctl, float par)

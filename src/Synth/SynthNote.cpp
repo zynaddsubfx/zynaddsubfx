@@ -11,16 +11,16 @@ SynthNote::Legato::Legato(float freq, float vel, int port,
 {
     // Initialise some legato-specific vars
     msg = LM_Norm;
-    fade.length      = (int)(SAMPLE_RATE * 0.005); // 0.005 seems ok.
+    fade.length      = (int)(SAMPLE_RATE * 0.005f); // 0.005f seems ok.
     if(fade.length < 1)
         fade.length = 1;                    // (if something's fishy)
-    fade.step        = (1.0 / fade.length);
+    fade.step        = (1.0f / fade.length);
     decounter        = -10;
     param.freq       = freq;
     param.vel        = vel;
     param.portamento = port;
     param.midinote   = note;
-    lastfreq = 0.0;
+    lastfreq = 0.0f;
     silent   = quiet;
 }
 
@@ -37,11 +37,11 @@ int SynthNote::Legato::update(float freq, float velocity, int portamento_,
         param.midinote   = midinote_;
         if(msg == LM_Norm) {
             if(silent) {
-                fade.m = 0.0;
+                fade.m = 0.0f;
                 msg    = LM_FadeIn;
             }
             else {
-                fade.m = 1.0;
+                fade.m = 1.0f;
                 msg    = LM_FadeOut;
                 return 1;
             }
@@ -100,8 +100,8 @@ void SynthNote::Legato::apply(SynthNote &note, float *outl, float *outr)
             decounter--;
             if(decounter < 1) {
                 for(int j = i; j < SOUND_BUFFER_SIZE; ++j) {
-                    outl[j] = 0.0;
-                    outr[j] = 0.0;
+                    outl[j] = 0.0f;
+                    outr[j] = 0.0f;
                 }
                 decounter = -10;
                 silent    = true;

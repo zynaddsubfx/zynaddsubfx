@@ -53,7 +53,7 @@ class OscilGenTest:public CxxTest::TestSuite
 
             //lets go with.... 50! as a nice note
             const char testnote = 50;
-            freq = 440.0 * pow(2.0, (testnote - 69.0) / 12.0);
+            freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
         }
         
         void tearDown() {
@@ -74,23 +74,23 @@ class OscilGenTest:public CxxTest::TestSuite
         void testOutput(void)
         {
             oscil->get(outL, freq);
-            TS_ASSERT_DELTA(outL[23],  -0.014717, 0.0001);
-            TS_ASSERT_DELTA(outL[129], -0.567502, 0.0001);
-            TS_ASSERT_DELTA(outL[586], -0.030894, 0.0001);
-            TS_ASSERT_DELTA(outL[1023], -0.080001, 0.0001);
+            TS_ASSERT_DELTA(outL[23],  -0.014717f, 0.0001f);
+            TS_ASSERT_DELTA(outL[129], -0.567502f, 0.0001f);
+            TS_ASSERT_DELTA(outL[586], -0.030894f, 0.0001f);
+            TS_ASSERT_DELTA(outL[1023], -0.080001f, 0.0001f);
         }
 
         void testSpectrum(void)
         {
             oscil->getspectrum(OSCIL_SIZE / 2, outR, 1);
-            TS_ASSERT_DELTA(outR[0], 350.698059, 0.0001);
-            TS_ASSERT_DELTA(outR[1], 228.889267, 0.0001);
-            TS_ASSERT_DELTA(outR[2], 62.187931, 0.0001);
-            TS_ASSERT_DELTA(outR[3], 22.295225, 0.0001);
-            TS_ASSERT_DELTA(outR[4], 6.942001, 0.0001);
-            TS_ASSERT_DELTA(outR[26], 0.015110, 0.0001);
-            TS_ASSERT_DELTA(outR[47], 0.003425, 0.0001);
-            TS_ASSERT_DELTA(outR[65], 0.001293, 0.0001);
+            TS_ASSERT_DELTA(outR[0], 350.698059f, 0.0001f);
+            TS_ASSERT_DELTA(outR[1], 228.889267f, 0.0001f);
+            TS_ASSERT_DELTA(outR[2], 62.187931f, 0.0001f);
+            TS_ASSERT_DELTA(outR[3], 22.295225f, 0.0001f);
+            TS_ASSERT_DELTA(outR[4], 6.942001f, 0.0001f);
+            TS_ASSERT_DELTA(outR[26], 0.015110f, 0.0001f);
+            TS_ASSERT_DELTA(outR[47], 0.003425f, 0.0001f);
+            TS_ASSERT_DELTA(outR[65], 0.001293f, 0.0001f);
         }
 
         //performance testing

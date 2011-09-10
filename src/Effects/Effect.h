@@ -89,7 +89,7 @@ class Effect
 
         float outvolume;/**<This is the volume of effect and is public because
                           * it is needed in system effects.
-                          * The out volume of such effects are always 1.0, so
+                          * The out volume of such effects are always 1.0f, so
                           * this setting tells me how is the volume to the
                           * Master Output only.*/
 

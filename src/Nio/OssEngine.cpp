@@ -216,19 +216,19 @@ void *OssEngine::thread()
                 l = smps.l[i];
                 r = smps.r[i];
 
-                if(l < -1.0)
-                    l = -1.0;
+                if(l < -1.0f)
+                    l = -1.0f;
                 else
-                    if(l > 1.0)
-                        l = 1.0;
-                if(r < -1.0)
-                    r = -1.0;
+                    if(l > 1.0f)
+                        l = 1.0f;
+                if(r < -1.0f)
+                    r = -1.0f;
                 else
-                    if(r > 1.0)
-                        r = 1.0;
+                    if(r > 1.0f)
+                        r = 1.0f;
 
-                audio.smps[i * 2]     = (short int) (l * 32767.0);
-                audio.smps[i * 2 + 1] = (short int) (r * 32767.0);
+                audio.smps[i * 2]     = (short int) (l * 32767.0f);
+                audio.smps[i * 2 + 1] = (short int) (r * 32767.0f);
             }
             int handle = audio.handle;
             if(handle != -1)

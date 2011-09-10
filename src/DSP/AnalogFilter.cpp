@@ -35,15 +35,15 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
 {
     stages = Fstages;
     for(int i = 0; i < 3; ++i) {
-        coeff.c[i]    = 0.0;
-        coeff.d[i]    = 0.0;
-        oldCoeff.c[i] = 0.0;
-        oldCoeff.d[i] = 0.0;
+        coeff.c[i]    = 0.0f;
+        coeff.d[i]    = 0.0f;
+        oldCoeff.c[i] = 0.0f;
+        oldCoeff.d[i] = 0.0f;
     }
     type = Ftype;
     freq = Ffreq;
     q    = Fq;
-    gain = 1.0;
+    gain = 1.0f;
     if(stages >= MAX_FILTER_STAGES)
         stages = MAX_FILTER_STAGES;
     cleanup();
@@ -53,7 +53,7 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
     setfreq_and_q(Ffreq, Fq);
     firsttime  = true;
     coeff.d[0] = 0; //this is not used
-    outgain    = 1.0;
+    outgain    = 1.0f;
 }
 
 AnalogFilter::~AnalogFilter()
@@ -62,10 +62,10 @@ AnalogFilter::~AnalogFilter()
 void AnalogFilter::cleanup()
 {
     for(int i = 0; i < MAX_FILTER_STAGES + 1; ++i) {
-        history[i].x1 = 0.0;
-        history[i].x2 = 0.0;
-        history[i].y1 = 0.0;
-        history[i].y2 = 0.0;
+        history[i].x1 = 0.0f;
+        history[i].x2 = 0.0f;
+        history[i].y1 = 0.0f;
+        history[i].y2 = 0.0f;
         oldHistory[i] = history[i];
     }
     needsinterpolation = false;
@@ -78,23 +78,23 @@ void AnalogFilter::computefiltercoefs()
 
     //do not allow frequencies bigger than samplerate/2
     float freq = this->freq;
-    if(freq > (SAMPLE_RATE / 2 - 500.0)) {
-        freq      = SAMPLE_RATE / 2 - 500.0;
+    if(freq > (SAMPLE_RATE / 2 - 500.0f)) {
+        freq      = SAMPLE_RATE / 2 - 500.0f;
         zerocoefs = true;
     }
-    if(freq < 0.1)
-        freq = 0.1;
+    if(freq < 0.1f)
+        freq = 0.1f;
     //do not allow bogus Q
-    if(q < 0.0)
-        q = 0.0;
+    if(q < 0.0f)
+        q = 0.0f;
     float tmpq, tmpgain;
     if(stages == 0) {
         tmpq    = q;
         tmpgain = gain;
     }
     else {
-        tmpq    = (q > 1.0 ? pow(q, 1.0 / (stages + 1)) : q);
-        tmpgain = pow(gain, 1.0 / (stages + 1));
+        tmpq    = (q > 1.0f ? powf(q, 1.0f / (stages + 1)) : q);
+        tmpgain = powf(gain, 1.0f / (stages + 1));
     }
 
     //Alias Terms
@@ -103,7 +103,7 @@ void AnalogFilter::computefiltercoefs()
 
     //General Constants
     const float omega = 2 * PI * freq / SAMPLE_RATE;
-    const float sn = sin(omega), cs = cos(omega);
+    const float sn = sinf(omega), cs = cosf(omega);
     float alpha, beta;
 
     //most of theese are implementations of
@@ -113,44 +113,44 @@ void AnalogFilter::computefiltercoefs()
     switch(type) {
     case 0: //LPF 1 pole
         if(!zerocoefs)
-            tmp = exp(-2.0 * PI * freq / SAMPLE_RATE);
+            tmp = expf(-2.0f * PI * freq / SAMPLE_RATE);
         else
-            tmp = 0.0;
-        c[0]  = 1.0 - tmp;
-        c[1]  = 0.0;
-        c[2]  = 0.0;
+            tmp = 0.0f;
+        c[0]  = 1.0f - tmp;
+        c[1]  = 0.0f;
+        c[2]  = 0.0f;
         d[1]  = tmp;
-        d[2]  = 0.0;
+        d[2]  = 0.0f;
         order = 1;
         break;
     case 1: //HPF 1 pole
         if(!zerocoefs)
-            tmp = exp(-2.0 * PI * freq / SAMPLE_RATE);
+            tmp = expf(-2.0f * PI * freq / SAMPLE_RATE);
         else
-            tmp = 0.0;
-        c[0]  = (1.0 + tmp) / 2.0;
-        c[1]  = -(1.0 + tmp) / 2.0;
-        c[2]  = 0.0;
+            tmp = 0.0f;
+        c[0]  = (1.0f + tmp) / 2.0f;
+        c[1]  = -(1.0f + tmp) / 2.0f;
+        c[2]  = 0.0f;
         d[1]  = tmp;
-        d[2]  = 0.0;
+        d[2]  = 0.0f;
         order = 1;
         break;
     case 2: //LPF 2 poles
         if(!zerocoefs) {
             alpha = sn / (2 * tmpq);
             tmp   = 1 + alpha;
-            c[0]  = (1.0 - cs) / 2.0 / tmp;
-            c[1]  = (1.0 - cs) / tmp;
-            c[2]  = (1.0 - cs) / 2.0 / tmp;
+            c[0]  = (1.0f - cs) / 2.0f / tmp;
+            c[1]  = (1.0f - cs) / tmp;
+            c[2]  = (1.0f - cs) / 2.0f / tmp;
             d[1]  = -2 * cs / tmp * (-1);
             d[2]  = (1 - alpha) / tmp * (-1);
         }
         else {
-            c[0] = 1.0;
-            c[1] = 0.0;
-            c[2] = 0.0;
-            d[1] = 0.0;
-            d[2] = 0.0;
+            c[0] = 1.0f;
+            c[1] = 0.0f;
+            c[2] = 0.0f;
+            d[1] = 0.0f;
+            d[2] = 0.0f;
         }
         order = 2;
         break;
@@ -158,18 +158,18 @@ void AnalogFilter::computefiltercoefs()
         if(!zerocoefs) {
             alpha = sn / (2 * tmpq);
             tmp   = 1 + alpha;
-            c[0]  = (1.0 + cs) / 2.0 / tmp;
-            c[1]  = -(1.0 + cs) / tmp;
-            c[2]  = (1.0 + cs) / 2.0 / tmp;
+            c[0]  = (1.0f + cs) / 2.0f / tmp;
+            c[1]  = -(1.0f + cs) / tmp;
+            c[2]  = (1.0f + cs) / 2.0f / tmp;
             d[1]  = -2 * cs / tmp * (-1);
             d[2]  = (1 - alpha) / tmp * (-1);
         }
         else {
-            c[0] = 0.0;
-            c[1] = 0.0;
-            c[2] = 0.0;
-            d[1] = 0.0;
-            d[2] = 0.0;
+            c[0] = 0.0f;
+            c[1] = 0.0f;
+            c[2] = 0.0f;
+            d[1] = 0.0f;
+            d[2] = 0.0f;
         }
         order = 2;
         break;
@@ -184,11 +184,11 @@ void AnalogFilter::computefiltercoefs()
             d[2]  = (1 - alpha) / tmp * (-1);
         }
         else {
-            c[0] = 0.0;
-            c[1] = 0.0;
-            c[2] = 0.0;
-            d[1] = 0.0;
-            d[2] = 0.0;
+            c[0] = 0.0f;
+            c[1] = 0.0f;
+            c[2] = 0.0f;
+            d[1] = 0.0f;
+            d[2] = 0.0f;
         }
         order = 2;
         break;
@@ -203,31 +203,31 @@ void AnalogFilter::computefiltercoefs()
             d[2]  = (1 - alpha) / tmp * (-1);
         }
         else {
-            c[0] = 1.0;
-            c[1] = 0.0;
-            c[2] = 0.0;
-            d[1] = 0.0;
-            d[2] = 0.0;
+            c[0] = 1.0f;
+            c[1] = 0.0f;
+            c[2] = 0.0f;
+            d[1] = 0.0f;
+            d[2] = 0.0f;
         }
         order = 2;
         break;
     case 6: //PEAK (2 poles)
         if(!zerocoefs) {
-            tmpq *= 3.0;
+            tmpq *= 3.0f;
             alpha = sn / (2 * tmpq);
             tmp   = 1 + alpha / tmpgain;
-            c[0]  = (1.0 + alpha * tmpgain) / tmp;
-            c[1]  = (-2.0 * cs) / tmp;
-            c[2]  = (1.0 - alpha * tmpgain) / tmp;
+            c[0]  = (1.0f + alpha * tmpgain) / tmp;
+            c[1]  = (-2.0f * cs) / tmp;
+            c[2]  = (1.0f - alpha * tmpgain) / tmp;
             d[1]  = -2 * cs / tmp * (-1);
             d[2]  = (1 - alpha / tmpgain) / tmp * (-1);
         }
         else {
-            c[0] = 1.0;
-            c[1] = 0.0;
-            c[2] = 0.0;
-            d[1] = 0.0;
-            d[2] = 0.0;
+            c[0] = 1.0f;
+            c[1] = 0.0f;
+            c[2] = 0.0f;
+            d[1] = 0.0f;
+            d[2] = 0.0f;
         }
         order = 2;
         break;
@@ -236,27 +236,27 @@ void AnalogFilter::computefiltercoefs()
             tmpq  = sqrt(tmpq);
             alpha = sn / (2 * tmpq);
             beta  = sqrt(tmpgain) / tmpq;
-            tmp   = (tmpgain + 1.0) + (tmpgain - 1.0) * cs + beta * sn;
+            tmp   = (tmpgain + 1.0f) + (tmpgain - 1.0f) * cs + beta * sn;
 
             c[0]  = tmpgain
                     * ((tmpgain
-                        + 1.0) - (tmpgain - 1.0) * cs + beta * sn) / tmp;
-            c[1]  = 2.0 * tmpgain
-                    * ((tmpgain - 1.0) - (tmpgain + 1.0) * cs) / tmp;
+                        + 1.0f) - (tmpgain - 1.0f) * cs + beta * sn) / tmp;
+            c[1]  = 2.0f * tmpgain
+                    * ((tmpgain - 1.0f) - (tmpgain + 1.0f) * cs) / tmp;
             c[2]  = tmpgain
                     * ((tmpgain
-                        + 1.0) - (tmpgain - 1.0) * cs - beta * sn) / tmp;
-            d[1]  = -2.0 * ((tmpgain - 1.0) + (tmpgain + 1.0) * cs) / tmp * (-1);
+                        + 1.0f) - (tmpgain - 1.0f) * cs - beta * sn) / tmp;
+            d[1]  = -2.0f * ((tmpgain - 1.0f) + (tmpgain + 1.0f) * cs) / tmp * (-1);
             d[2]  =
                 ((tmpgain
-                  + 1.0) + (tmpgain - 1.0) * cs - beta * sn) / tmp * (-1);
+                  + 1.0f) + (tmpgain - 1.0f) * cs - beta * sn) / tmp * (-1);
         }
         else {
             c[0] = tmpgain;
-            c[1] = 0.0;
-            c[2] = 0.0;
-            d[1] = 0.0;
-            d[2] = 0.0;
+            c[1] = 0.0f;
+            c[2] = 0.0f;
+            d[1] = 0.0f;
+            d[2] = 0.0f;
         }
         order = 2;
         break;
@@ -265,27 +265,27 @@ void AnalogFilter::computefiltercoefs()
             tmpq  = sqrt(tmpq);
             alpha = sn / (2 * tmpq);
             beta  = sqrt(tmpgain) / tmpq;
-            tmp   = (tmpgain + 1.0) - (tmpgain - 1.0) * cs + beta * sn;
+            tmp   = (tmpgain + 1.0f) - (tmpgain - 1.0f) * cs + beta * sn;
 
             c[0]  = tmpgain
                     * ((tmpgain
-                        + 1.0) + (tmpgain - 1.0) * cs + beta * sn) / tmp;
-            c[1]  = -2.0 * tmpgain
-                    * ((tmpgain - 1.0) + (tmpgain + 1.0) * cs) / tmp;
+                        + 1.0f) + (tmpgain - 1.0f) * cs + beta * sn) / tmp;
+            c[1]  = -2.0f * tmpgain
+                    * ((tmpgain - 1.0f) + (tmpgain + 1.0f) * cs) / tmp;
             c[2]  = tmpgain
                     * ((tmpgain
-                        + 1.0) + (tmpgain - 1.0) * cs - beta * sn) / tmp;
-            d[1]  = 2.0 * ((tmpgain - 1.0) - (tmpgain + 1.0) * cs) / tmp * (-1);
+                        + 1.0f) + (tmpgain - 1.0f) * cs - beta * sn) / tmp;
+            d[1]  = 2.0f * ((tmpgain - 1.0f) - (tmpgain + 1.0f) * cs) / tmp * (-1);
             d[2]  =
                 ((tmpgain
-                  + 1.0) - (tmpgain - 1.0) * cs - beta * sn) / tmp * (-1);
+                  + 1.0f) - (tmpgain - 1.0f) * cs - beta * sn) / tmp * (-1);
         }
         else {
-            c[0] = 1.0;
-            c[1] = 0.0;
-            c[2] = 0.0;
-            d[1] = 0.0;
-            d[2] = 0.0;
+            c[0] = 1.0f;
+            c[1] = 0.0f;
+            c[2] = 0.0f;
+            d[1] = 0.0f;
+            d[2] = 0.0f;
         }
         order = 2;
         break;
@@ -299,20 +299,20 @@ void AnalogFilter::computefiltercoefs()
 
 void AnalogFilter::setfreq(float frequency)
 {
-    if(frequency < 0.1)
-        frequency = 0.1;
+    if(frequency < 0.1f)
+        frequency = 0.1f;
     float rap = freq / frequency;
-    if(rap < 1.0)
-        rap = 1.0 / rap;
+    if(rap < 1.0f)
+        rap = 1.0f / rap;
 
     oldabovenq = abovenq;
-    abovenq    = frequency > (SAMPLE_RATE / 2 - 500.0);
+    abovenq    = frequency > (SAMPLE_RATE / 2 - 500.0f);
 
     bool nyquistthresh = (abovenq ^ oldabovenq);
 
 
     //if the frequency is changed fast, it needs interpolation
-    if((rap > 3.0) || nyquistthresh) { //(now, filter and coeficients backup)
+    if((rap > 3.0f) || nyquistthresh) { //(now, filter and coeficients backup)
         oldCoeff   = coeff;
         for(int i = 0; i < MAX_FILTER_STAGES + 1; ++i)
             oldHistory[i] = history[i];
@@ -397,7 +397,7 @@ void AnalogFilter::filterout(float *smp)
 
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             float x = i / (float) SOUND_BUFFER_SIZE;
-            smp[i] = ismp[i] * (1.0 - x) + smp[i] * x;
+            smp[i] = ismp[i] * (1.0f - x) + smp[i] * x;
         }
         returnTmpBuffer(ismp);
         needsinterpolation = false;
@@ -409,20 +409,20 @@ void AnalogFilter::filterout(float *smp)
 
 float AnalogFilter::H(float freq)
 {
-    float fr = freq / SAMPLE_RATE * PI * 2.0;
-    float x  = coeff.c[0], y = 0.0;
+    float fr = freq / SAMPLE_RATE * PI * 2.0f;
+    float x  = coeff.c[0], y = 0.0f;
     for(int n = 1; n < 3; ++n) {
-        x += cos(n * fr) * coeff.c[n];
-        y -= sin(n * fr) * coeff.c[n];
+        x += cosf(n * fr) * coeff.c[n];
+        y -= sinf(n * fr) * coeff.c[n];
     }
     float h = x * x + y * y;
-    x = 1.0;
-    y = 0.0;
+    x = 1.0f;
+    y = 0.0f;
     for(int n = 1; n < 3; ++n) {
-        x -= cos(n * fr) * coeff.d[n];
-        y += sin(n * fr) * coeff.d[n];
+        x -= cosf(n * fr) * coeff.d[n];
+        y += sinf(n * fr) * coeff.d[n];
     }
     h = h / (x * x + y * y);
-    return pow(h, (stages + 1.0) / 2.0);
+    return powf(h, (stages + 1.0f) / 2.0f);
 }
 

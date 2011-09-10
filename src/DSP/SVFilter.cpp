@@ -38,8 +38,8 @@ SVFilter::SVFilter(unsigned char Ftype,
     type      = Ftype;
     freq      = Ffreq;
     q         = Fq;
-    gain      = 1.0;
-    outgain   = 1.0;
+    gain      = 1.0f;
+    outgain   = 1.0f;
     needsinterpolation = false;
     firsttime = true;
     if(stages >= MAX_FILTER_STAGES)
@@ -54,10 +54,10 @@ SVFilter::~SVFilter()
 void SVFilter::cleanup()
 {
     for(int i = 0; i < MAX_FILTER_STAGES + 1; ++i) {
-        st[i].low   = 0.0;
-        st[i].high  = 0.0;
-        st[i].band  = 0.0;
-        st[i].notch = 0.0;
+        st[i].low   = 0.0f;
+        st[i].high  = 0.0f;
+        st[i].band  = 0.0f;
+        st[i].notch = 0.0f;
     }
     oldabovenq = false;
     abovenq    = false;
@@ -65,30 +65,30 @@ void SVFilter::cleanup()
 
 void SVFilter::computefiltercoefs()
 {
-    par.f      = freq / SAMPLE_RATE * 4.0;
-    if(par.f > 0.99999)
-        par.f = 0.99999;
-    par.q      = 1.0 - atan(sqrt(q)) * 2.0 / PI;
-    par.q      = pow(par.q, 1.0 / (stages + 1));
+    par.f      = freq / SAMPLE_RATE * 4.0f;
+    if(par.f > 0.99999f)
+        par.f = 0.99999f;
+    par.q      = 1.0f - atanf(sqrt(q)) * 2.0f / PI;
+    par.q      = powf(par.q, 1.0f / (stages + 1));
     par.q_sqrt = sqrt(par.q);
 }
 
 
 void SVFilter::setfreq(float frequency)
 {
-    if(frequency < 0.1)
-        frequency = 0.1;
+    if(frequency < 0.1f)
+        frequency = 0.1f;
     float rap = freq / frequency;
-    if(rap < 1.0)
-        rap = 1.0 / rap;
+    if(rap < 1.0f)
+        rap = 1.0f / rap;
 
     oldabovenq = abovenq;
-    abovenq    = frequency > (SAMPLE_RATE / 2 - 500.0);
+    abovenq    = frequency > (SAMPLE_RATE / 2 - 500.0f);
 
     bool nyquistthresh = (abovenq ^ oldabovenq);
 
     //if the frequency is changed fast, it needs interpolation
-    if((rap > 3.0) || nyquistthresh) {//(now, filter and coeficients backup)
+    if((rap > 3.0f) || nyquistthresh) {//(now, filter and coeficients backup)
         ipar = par;
         if(!firsttime)
             needsinterpolation = true;
@@ -175,7 +175,7 @@ void SVFilter::filterout(float *smp)
 
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             float x = i / (float) SOUND_BUFFER_SIZE;
-            smp[i] = ismp[i] * (1.0 - x) + smp[i] * x;
+            smp[i] = ismp[i] * (1.0f - x) + smp[i] * x;
         }
         returnTmpBuffer(ismp);
         needsinterpolation = false;

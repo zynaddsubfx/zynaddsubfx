@@ -76,7 +76,7 @@ class Controller
         struct { //Pitch Wheel
             int       data;
             short int bendrange; //bendrange is in cents
-            float  relfreq; //the relative frequency (default is 1.0)
+            float  relfreq; //the relative frequency (default is 1.0f)
         } pitchwheel;
 
         struct { //Expression
@@ -143,7 +143,7 @@ class Controller
             unsigned char receive;
             /** The time that it takes for the portamento to complete
              *
-             * Translates in an expontal fashion to 0 Seconds to 1.93 Seconds
+             * Translates in an expontal fashion to 0 Seconds to 1.93f Seconds
              * of completion time*/
             unsigned char time;
             /**If the portamento is proportinal to the distance spanned
@@ -186,7 +186,7 @@ class Controller
 
             //Internal data
 
-            /**x is from 0.0 (start portamento) to 1.0 (finished portamento)*/
+            /**x is from 0.0f (start portamento) to 1.0f (finished portamento)*/
             float x;
             /**dx is the increment to x when updateportamento is called*/
             float dx;

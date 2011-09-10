@@ -40,13 +40,13 @@ Filter *Filter::generate(FilterParams *pars)
         filter = new FormantFilter(pars);
         break;
     case 2:
-        filter = new SVFilter(Ftype, 1000.0, pars->getq(), Fstages);
+        filter = new SVFilter(Ftype, 1000.0f, pars->getq(), Fstages);
         filter->outgain = dB2rap(pars->getgain());
-        if(filter->outgain > 1.0)
+        if(filter->outgain > 1.0f)
             filter->outgain = sqrt(filter->outgain);
         break;
     default:
-        filter = new AnalogFilter(Ftype, 1000.0, pars->getq(), Fstages);
+        filter = new AnalogFilter(Ftype, 1000.0f, pars->getq(), Fstages);
         if((Ftype >= 6) && (Ftype <= 8))
             filter->setgain(pars->getgain());
         else
@@ -58,6 +58,6 @@ Filter *Filter::generate(FilterParams *pars)
 
 float Filter::getrealfreq(float freqpitch)
 {
-    return pow(2.0, freqpitch + 9.96578428); //log2(1000)=9.95748
+    return powf(2.0f, freqpitch + 9.96578428f); //log2(1000)=9.95748f
 }
 

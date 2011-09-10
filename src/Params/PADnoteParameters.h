@@ -47,7 +47,7 @@ class PADnoteParameters:public Presets
         void add2XML(XMLwrapper *xml);
         void getfromXML(XMLwrapper *xml);
 
-        //returns a value between 0.0-1.0 that represents the estimation perceived bandwidth
+        //returns a value between 0.0f-1.0f that represents the estimation perceived bandwidth
         float getprofile(float *smp, int size);
 
         //parameters

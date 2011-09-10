@@ -46,7 +46,7 @@ class XMLwrapperTest:public CxxTest::TestSuite
 
         void testAnotherLoad()
         {
-            string dat = "\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
+            string dat = "\n<?xml version=\"1.0f\" encoding=\"UTF-8\"?>\n\
 <!DOCTYPE ZynAddSubFX-data>\n\
 <ZynAddSubFX-data version-major=\"2\" version-minor=\"4\"\n\
 version-revision=\"1\" ZynAddSubFX-author=\"Nasca Octavian Paul\">\n\

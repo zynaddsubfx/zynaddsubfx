@@ -58,7 +58,7 @@ class SubNoteTest:public CxxTest::TestSuite
 
             //lets go with.... 50! as a nice note
             testnote = 50;
-            float freq = 440.0 * pow(2.0, (testnote - 69.0) / 12.0);
+            float freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
 
             note = new SUBnote(defaultPreset,
                                controller,
@@ -104,26 +104,26 @@ class SubNoteTest:public CxxTest::TestSuite
 #endif
             sampleCount += SOUND_BUFFER_SIZE;
 
-            TS_ASSERT_DELTA(outL[255], 0.0000, 0.0001);
+            TS_ASSERT_DELTA(outL[255], 0.0000f, 0.0001f);
 
             note->relasekey();
 
 
             note->noteout(outL, outR);
             sampleCount += SOUND_BUFFER_SIZE;
-            TS_ASSERT_DELTA(outL[255], 0.0022, 0.0001);
+            TS_ASSERT_DELTA(outL[255], 0.0022f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += SOUND_BUFFER_SIZE;
-            TS_ASSERT_DELTA(outL[255], -0.0020, 0.0001);
+            TS_ASSERT_DELTA(outL[255], -0.0020f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += SOUND_BUFFER_SIZE;
-            TS_ASSERT_DELTA(outL[255], 0.0010, 0.0001);
+            TS_ASSERT_DELTA(outL[255], 0.0010f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += SOUND_BUFFER_SIZE;
-            TS_ASSERT_DELTA(outL[255], 0.0005, 0.0001);
+            TS_ASSERT_DELTA(outL[255], 0.0005f, 0.0001f);
 
             while(!note->finished()) {
                 note->noteout(outL, outR);

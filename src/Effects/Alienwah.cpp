@@ -30,8 +30,8 @@ Alienwah::Alienwah(const int &insertion_,
 {
     setpreset(Ppreset);
     cleanup();
-    oldclfol = complex<float>(fb, 0.0);
-    oldclfor = complex<float>(fb, 0.0);
+    oldclfol = complex<float>(fb, 0.0f);
+    oldclfor = complex<float>(fb, 0.0f);
 }
 
 Alienwah::~Alienwah()
@@ -55,14 +55,14 @@ void Alienwah::out(const Stereo<float *> &smp)
      * Before all calculations needed to be done with individual float,
      * but now they can be done together*/
     lfo.effectlfoout(&lfol, &lfor);
-    lfol *= depth * PI * 2.0;
-    lfor *= depth * PI * 2.0;
-    clfol = complex<float>(cos(lfol + phase) * fb, sin(lfol + phase) * fb); //rework
-    clfor = complex<float>(cos(lfor + phase) * fb, sin(lfor + phase) * fb); //rework
+    lfol *= depth * PI * 2.0f;
+    lfor *= depth * PI * 2.0f;
+    clfol = complex<float>(cosf(lfol + phase) * fb, sinf(lfol + phase) * fb); //rework
+    clfor = complex<float>(cosf(lfor + phase) * fb, sinf(lfor + phase) * fb); //rework
 
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         float x  = ((float) i) / SOUND_BUFFER_SIZE;
-        float x1 = 1.0 - x;
+        float x1 = 1.0f - x;
         //left
         complex<float> tmp = clfol * x + oldclfol * x1;
 
@@ -70,7 +70,7 @@ void Alienwah::out(const Stereo<float *> &smp)
         out.real() += (1 - fabs(fb)) * smp.l[i] * pangainL;
 
         oldl[oldk]  = out;
-        float l = out.real() * 10.0 * (fb + 0.1);
+        float l = out.real() * 10.0f * (fb + 0.1f);
 
         //right
         tmp = clfor * x + oldclfor * x1;
@@ -79,14 +79,14 @@ void Alienwah::out(const Stereo<float *> &smp)
         out.real() += (1 - fabs(fb)) * smp.r[i] * pangainR;
 
         oldr[oldk]  = out;
-        float r = out.real() * 10.0 * (fb + 0.1);
+        float r = out.real() * 10.0f * (fb + 0.1f);
 
 
         if(++oldk >= Pdelay)
             oldk = 0;
         //LRcross
-        efxoutl[i] = l * (1.0 - lrcross) + r * lrcross;
-        efxoutr[i] = r * (1.0 - lrcross) + l * lrcross;
+        efxoutl[i] = l * (1.0f - lrcross) + r * lrcross;
+        efxoutr[i] = r * (1.0f - lrcross) + l * lrcross;
     }
 
     oldclfol = clfol;
@@ -99,8 +99,8 @@ void Alienwah::out(const Stereo<float *> &smp)
 void Alienwah::cleanup()
 {
     for(int i = 0; i < Pdelay; ++i) {
-        oldl[i] = complex<float>(0.0, 0.0);
-        oldr[i] = complex<float>(0.0, 0.0);
+        oldl[i] = complex<float>(0.0f, 0.0f);
+        oldr[i] = complex<float>(0.0f, 0.0f);
     }
     oldk = 0;
 }
@@ -113,16 +113,16 @@ void Alienwah::cleanup()
 void Alienwah::setdepth(unsigned char Pdepth)
 {
     this->Pdepth = Pdepth;
-    depth = (Pdepth / 127.0);
+    depth = (Pdepth / 127.0f);
 }
 
 void Alienwah::setfb(unsigned char Pfb)
 {
     this->Pfb = Pfb;
-    fb = fabs((Pfb - 64.0) / 64.1);
+    fb = fabs((Pfb - 64.0f) / 64.1f);
     fb = sqrt(fb);
-    if(fb < 0.4)
-        fb = 0.4;
+    if(fb < 0.4f)
+        fb = 0.4f;
     if(Pfb < 64)
         fb = -fb;
 }
@@ -130,9 +130,9 @@ void Alienwah::setfb(unsigned char Pfb)
 void Alienwah::setvolume(unsigned char Pvolume)
 {
     this->Pvolume = Pvolume;
-    outvolume     = Pvolume / 127.0;
+    outvolume     = Pvolume / 127.0f;
     if(insertion == 0)
-        volume = 1.0;
+        volume = 1.0f;
     else
         volume = outvolume;
 }
@@ -140,7 +140,7 @@ void Alienwah::setvolume(unsigned char Pvolume)
 void Alienwah::setphase(unsigned char Pphase)
 {
     this->Pphase = Pphase;
-    phase = (Pphase - 64.0) / 64.0 * PI;
+    phase = (Pphase - 64.0f) / 64.0f * PI;
 }
 
 void Alienwah::setdelay(unsigned char Pdelay)

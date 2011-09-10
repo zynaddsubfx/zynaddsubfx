@@ -29,10 +29,10 @@ class SampleTest:public CxxTest::TestSuite
             Sample smp(10);
             TS_ASSERT_EQUALS(smp.size(), 10);
             for(int i = 0; i < 20; ++i)
-                TS_ASSERT_EQUALS(smp[i], 0.0);
-            Sample nsmp(5, 15.0);
+                TS_ASSERT_EQUALS(smp[i], 0.0f);
+            Sample nsmp(5, 15.0f);
             TS_ASSERT_EQUALS(nsmp.size(), 5);
-            TS_ASSERT_EQUALS(nsmp[4], 15.0);
+            TS_ASSERT_EQUALS(nsmp[4], 15.0f);
         }
 
         void testAssign() {
@@ -59,7 +59,7 @@ class SampleTest:public CxxTest::TestSuite
             smp = Sample(50, fl);
             delete [] fl;
             for(int i = 0; i < 50; ++i)
-                TS_ASSERT_DELTA(smp[i], i, 0.001);
+                TS_ASSERT_DELTA(smp[i], i, 0.001f);
             smp = Sample(3);
         }
 
@@ -78,7 +78,7 @@ class SampleTest:public CxxTest::TestSuite
             smp1.append(smp2);
             TS_ASSERT_EQUALS(smp1.size(), 74);
             for(int i = 0; i < 74; ++i)
-                TS_ASSERT_DELTA(smp1[i], (i < 54 ? 2 : 17), 0.001);
+                TS_ASSERT_DELTA(smp1[i], (i < 54 ? 2 : 17), 0.001f);
         }
 
         void testResample() {

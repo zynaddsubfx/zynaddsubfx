@@ -36,12 +36,12 @@
 using namespace std;
 
 #define PHASER_LFO_SHAPE 2
-#define ONE_  0.99999f        // To prevent LFO ever reaching 1.0 for filter stability purposes
+#define ONE_  0.99999f        // To prevent LFO ever reaching 1.0f for filter stability purposes
 #define ZERO_ 0.00001f        // Same idea as above.
 
 Phaser::Phaser(const int &insertion_, float *efxoutl_, float *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0), old(NULL), xn1(NULL),
-     yn1(NULL), diff(0.0), oldgain(0.0), fb(0.0)
+     yn1(NULL), diff(0.0f), oldgain(0.0f), fb(0.0f)
 {
     analog_setup();
     setpreset(Ppreset);
@@ -101,7 +101,7 @@ void Phaser::out(const Stereo<float *> &input)
 
 void Phaser::AnalogPhase(const Stereo<float *> &input)
 {
-    Stereo<float> gain(0.0), lfoVal(0.0), mod(0.0), g(0.0), b(0.0), hpf(0.0);
+    Stereo<float> gain(0.0f), lfoVal(0.0f), mod(0.0f), g(0.0f), b(0.0f), hpf(0.0f);
 
     lfo.effectlfoout(&lfoVal.l, &lfoVal.r);
     mod.l = lfoVal.l*width + (depth - 0.5f);
@@ -185,21 +185,21 @@ float Phaser::applyPhase(float x, float g, float fb,
 }
 void Phaser::normalPhase(const Stereo<float *> &input)
 {
-    Stereo<float> gain(0.0), lfoVal(0.0);
+    Stereo<float> gain(0.0f), lfoVal(0.0f);
 
     lfo.effectlfoout(&lfoVal.l, &lfoVal.r);
-    gain.l = (exp(lfoVal.l * PHASER_LFO_SHAPE) - 1) / (exp(PHASER_LFO_SHAPE) - 1.0);
-    gain.r = (exp(lfoVal.r * PHASER_LFO_SHAPE) - 1) / (exp(PHASER_LFO_SHAPE) - 1.0);
+    gain.l = (expf(lfoVal.l * PHASER_LFO_SHAPE) - 1) / (expf(PHASER_LFO_SHAPE) - 1.0f);
+    gain.r = (expf(lfoVal.r * PHASER_LFO_SHAPE) - 1) / (expf(PHASER_LFO_SHAPE) - 1.0f);
 
-    gain.l = 1.0 - phase * (1.0 - depth) - (1.0 - phase) * gain.l * depth;
-    gain.r = 1.0 - phase * (1.0 - depth) - (1.0 - phase) * gain.r * depth;
+    gain.l = 1.0f - phase * (1.0f - depth) - (1.0f - phase) * gain.l * depth;
+    gain.r = 1.0f - phase * (1.0f - depth) - (1.0f - phase) * gain.r * depth;
 
     gain.l = limit(gain.l, ZERO_, ONE_);
     gain.r = limit(gain.r, ZERO_, ONE_);
 
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         float x   = (float) i / SOUND_BUFFER_SIZE;
-        float x1  = 1.0 - x;
+        float x1  = 1.0f - x;
         //TODO think about making panning an external feature
         Stereo<float> xn(input.l[i] * pangainL + fb.l,
                             input.r[i] * pangainR + fb.r);
@@ -242,16 +242,16 @@ float Phaser::applyPhase(float x, float g, float *old)
  */
 void Phaser::cleanup()
 {
-    fb = oldgain = Stereo<float>(0.0);
+    fb = oldgain = Stereo<float>(0.0f);
     for(int i = 0; i < Pstages * 2; ++i) {
-        old.l[i] = 0.0;
-        old.r[i] = 0.0;
+        old.l[i] = 0.0f;
+        old.r[i] = 0.0f;
     }
     for(int i = 0; i < Pstages; ++i) {
-        xn1.l[i] = 0.0;
-        yn1.l[i] = 0.0;
-        xn1.r[i] = 0.0;
-        yn1.r[i] = 0.0;
+        xn1.l[i] = 0.0f;
+        yn1.l[i] = 0.0f;
+        xn1.r[i] = 0.0f;
+        yn1.r[i] = 0.0f;
     }
 }
 
@@ -273,9 +273,9 @@ void Phaser::setfb(unsigned char Pfb)
 void Phaser::setvolume(unsigned char Pvolume)
 {
     this->Pvolume = Pvolume;
-    outvolume     = Pvolume / 127.0;
+    outvolume     = Pvolume / 127.0f;
     if(insertion == 0)
-        volume = 1.0;
+        volume = 1.0f;
     else
         volume = outvolume;
 }
@@ -321,7 +321,7 @@ void Phaser::setstages(unsigned char Pstages)
 void Phaser::setphase(unsigned char Pphase)
 {
     this->Pphase = Pphase;
-    phase = (Pphase / 127.0);
+    phase = (Pphase / 127.0f);
 }
 
 void Phaser::setdepth(unsigned char Pdepth)

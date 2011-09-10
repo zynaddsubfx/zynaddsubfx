@@ -68,7 +68,7 @@ void Dump::startnow()
         fprintf(file, "#date/time = %s\n", ctime(&tm));
         fprintf(file,
                 "#1 tick = %g milliseconds\n",
-                SOUND_BUFFER_SIZE * 1000.0 / SAMPLE_RATE);
+                SOUND_BUFFER_SIZE * 1000.0f / SAMPLE_RATE);
         fprintf(file, "SAMPLERATE = %d\n", SAMPLE_RATE);
         fprintf(file, "TICKSIZE = %d #samples\n", SOUND_BUFFER_SIZE);
         fprintf(file, "\n\nSTART\n");

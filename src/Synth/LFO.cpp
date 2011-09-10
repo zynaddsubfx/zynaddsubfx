@@ -31,57 +31,57 @@ LFO::LFO(LFOParams *lfopars, float basefreq)
 {
     if(lfopars->Pstretch == 0)
         lfopars->Pstretch = 1;
-    float lfostretch = pow(basefreq / 440.0,
-                              (lfopars->Pstretch - 64.0) / 63.0);         //max 2x/octave
+    float lfostretch = powf(basefreq / 440.0f,
+                              (lfopars->Pstretch - 64.0f) / 63.0f);         //max 2x/octave
 
     float lfofreq    =
-        (pow(2, lfopars->Pfreq * 10.0) - 1.0) / 12.0 * lfostretch;
+        (powf(2, lfopars->Pfreq * 10.0f) - 1.0f) / 12.0f * lfostretch;
     incx = fabs(lfofreq) * (float)SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
 
     if(lfopars->Pcontinous == 0) {
         if(lfopars->Pstartphase == 0)
             x = RND;
         else
-            x = fmod((lfopars->Pstartphase - 64.0) / 127.0 + 1.0, 1.0);
+            x = fmod((lfopars->Pstartphase - 64.0f) / 127.0f + 1.0f, 1.0f);
     }
     else {
-        float tmp = fmod(lfopars->time * incx, 1.0);
-        x = fmod((lfopars->Pstartphase - 64.0) / 127.0 + 1.0 + tmp, 1.0);
+        float tmp = fmod(lfopars->time * incx, 1.0f);
+        x = fmod((lfopars->Pstartphase - 64.0f) / 127.0f + 1.0f + tmp, 1.0f);
     }
 
     //Limit the Frequency(or else...)
-    if(incx > 0.49999999)
-        incx = 0.499999999;
+    if(incx > 0.49999999f)
+        incx = 0.499999999f;
 
 
-    lfornd = lfopars->Prandomness / 127.0;
-    if(lfornd < 0.0)
-        lfornd = 0.0;
+    lfornd = lfopars->Prandomness / 127.0f;
+    if(lfornd < 0.0f)
+        lfornd = 0.0f;
     else
-    if(lfornd > 1.0)
-        lfornd = 1.0;
+    if(lfornd > 1.0f)
+        lfornd = 1.0f;
 
-//    lfofreqrnd=pow(lfopars->Pfreqrand/127.0,2.0)*2.0*4.0;
-    lfofreqrnd = pow(lfopars->Pfreqrand / 127.0, 2.0) * 4.0;
+//    lfofreqrnd=powf(lfopars->Pfreqrand/127.0f,2.0f)*2.0f*4.0f;
+    lfofreqrnd = powf(lfopars->Pfreqrand / 127.0f, 2.0f) * 4.0f;
 
     switch(lfopars->fel) {
     case 1:
-        lfointensity = lfopars->Pintensity / 127.0;
+        lfointensity = lfopars->Pintensity / 127.0f;
         break;
     case 2:
-        lfointensity = lfopars->Pintensity / 127.0 * 4.0;
+        lfointensity = lfopars->Pintensity / 127.0f * 4.0f;
         break; //in octave
     default:
-        lfointensity = pow(2, lfopars->Pintensity / 127.0 * 11.0) - 1.0; //in centi
-        x -= 0.25; //chance the starting phase
+        lfointensity = powf(2, lfopars->Pintensity / 127.0f * 11.0f) - 1.0f; //in centi
+        x -= 0.25f; //chance the starting phase
         break;
     }
 
     amp1     = (1 - lfornd) + lfornd * RND;
     amp2     = (1 - lfornd) + lfornd * RND;
     lfotype  = lfopars->PLFOtype;
-    lfodelay = lfopars->Pdelay / 127.0 * 4.0; //0..4 sec
-    incrnd   = nextincrnd = 1.0;
+    lfodelay = lfopars->Pdelay / 127.0f * 4.0f; //0..4 sec
+    incrnd   = nextincrnd = 1.0f;
     freqrndenabled = (lfopars->Pfreqrand != 0);
     computenextincrnd();
     computenextincrnd(); //twice because I want incrnd & nextincrnd to be random
@@ -98,34 +98,34 @@ float LFO::lfoout()
     float out;
     switch(lfotype) {
     case 1: //LFO_TRIANGLE
-        if((x >= 0.0) && (x < 0.25))
-            out = 4.0 * x;
+        if((x >= 0.0f) && (x < 0.25f))
+            out = 4.0f * x;
         else
-        if((x > 0.25) && (x < 0.75))
+        if((x > 0.25f) && (x < 0.75f))
             out = 2 - 4 * x;
         else
-            out = 4.0 * x - 4.0;
+            out = 4.0f * x - 4.0f;
         break;
     case 2: //LFO_SQUARE
-        if(x < 0.5)
+        if(x < 0.5f)
             out = -1;
         else
             out = 1;
         break;
     case 3: //LFO_RAMPUP
-        out = (x - 0.5) * 2.0;
+        out = (x - 0.5f) * 2.0f;
         break;
     case 4: //LFO_RAMPDOWN
-        out = (0.5 - x) * 2.0;
+        out = (0.5f - x) * 2.0f;
         break;
     case 5: //LFO_EXP_DOWN 1
-        out = pow(0.05, x) * 2.0 - 1.0;
+        out = powf(0.05f, x) * 2.0f - 1.0f;
         break;
     case 6: //LFO_EXP_DOWN 2
-        out = pow(0.001, x) * 2.0 - 1.0;
+        out = powf(0.001f, x) * 2.0f - 1.0f;
         break;
     default:
-        out = cos(x * 2.0 * PI); //LFO_SINE
+        out = cosf(x * 2.0f * PI); //LFO_SINE
     }
 
 
@@ -133,20 +133,20 @@ float LFO::lfoout()
         out *= lfointensity * (amp1 + x * (amp2 - amp1));
     else
         out *= lfointensity * amp2;
-    if(lfodelay < 0.00001) {
+    if(lfodelay < 0.00001f) {
         if(freqrndenabled == 0)
             x += incx;
         else {
-            float tmp = (incrnd * (1.0 - x) + nextincrnd * x);
-            if(tmp > 1.0)
-                tmp = 1.0;
+            float tmp = (incrnd * (1.0f - x) + nextincrnd * x);
+            if(tmp > 1.0f)
+                tmp = 1.0f;
             else
-            if(tmp < 0.0)
-                tmp = 0.0;
+            if(tmp < 0.0f)
+                tmp = 0.0f;
             x += incx * tmp;
         }
         if(x >= 1) {
-            x    = fmod(x, 1.0);
+            x    = fmod(x, 1.0f);
             amp1 = amp2;
             amp2 = (1 - lfornd) + lfornd * RND;
 
@@ -164,12 +164,12 @@ float LFO::lfoout()
 float LFO::amplfoout()
 {
     float out;
-    out = 1.0 - lfointensity + lfoout();
-    if(out < -1.0)
-        out = -1.0;
+    out = 1.0f - lfointensity + lfoout();
+    if(out < -1.0f)
+        out = -1.0f;
     else
-    if(out > 1.0)
-        out = 1.0;
+    if(out > 1.0f)
+        out = 1.0f;
     return out;
 }
 
@@ -179,6 +179,6 @@ void LFO::computenextincrnd()
     if(freqrndenabled == 0)
         return;
     incrnd     = nextincrnd;
-    nextincrnd = pow(0.5, lfofreqrnd) + RND * (pow(2.0, lfofreqrnd) - 1.0);
+    nextincrnd = powf(0.5f, lfofreqrnd) + RND * (powf(2.0f, lfofreqrnd) - 1.0f);
 }
 

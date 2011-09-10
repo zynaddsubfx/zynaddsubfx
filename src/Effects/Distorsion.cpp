@@ -94,9 +94,9 @@ void Distorsion::out(const Stereo<float *> &smp)
     int      i;
     float l, r, lout, rout;
 
-    float inputvol = pow(5.0, (Pdrive - 32.0) / 127.0);
+    float inputvol = powf(5.0f, (Pdrive - 32.0f) / 127.0f);
     if(Pnegate != 0)
-        inputvol *= -1.0;
+        inputvol *= -1.0f;
 
     if(Pstereo != 0) { //Stereo
         for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
@@ -124,17 +124,17 @@ void Distorsion::out(const Stereo<float *> &smp)
         for(i = 0; i < SOUND_BUFFER_SIZE; ++i)
             efxoutr[i] = efxoutl[i];
 
-    float level = dB2rap(60.0 * Plevel / 127.0 - 40.0);
+    float level = dB2rap(60.0f * Plevel / 127.0f - 40.0f);
     for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         lout = efxoutl[i];
         rout = efxoutr[i];
-        l    = lout * (1.0 - lrcross) + rout * lrcross;
-        r    = rout * (1.0 - lrcross) + lout * lrcross;
+        l    = lout * (1.0f - lrcross) + rout * lrcross;
+        r    = rout * (1.0f - lrcross) + lout * lrcross;
         lout = l;
         rout = r;
 
-        efxoutl[i] = lout * 2.0 * level;
-        efxoutr[i] = rout * 2.0 * level;
+        efxoutl[i] = lout * 2.0f * level;
+        efxoutr[i] = rout * 2.0f * level;
     }
 }
 
@@ -147,11 +147,11 @@ void Distorsion::setvolume(unsigned char Pvolume)
     this->Pvolume = Pvolume;
 
     if(insertion == 0) {
-        outvolume = pow(0.01, (1.0 - Pvolume / 127.0)) * 4.0;
-        volume    = 1.0;
+        outvolume = powf(0.01f, (1.0f - Pvolume / 127.0f)) * 4.0f;
+        volume    = 1.0f;
     }
     else
-        volume = outvolume = Pvolume / 127.0;
+        volume = outvolume = Pvolume / 127.0f;
     ;
     if(Pvolume == 0)
         cleanup();
@@ -160,7 +160,7 @@ void Distorsion::setvolume(unsigned char Pvolume)
 void Distorsion::setlpf(unsigned char Plpf)
 {
     this->Plpf = Plpf;
-    float fr = exp(pow(Plpf / 127.0, 0.5) * log(25000.0)) + 40;
+    float fr = expf(powf(Plpf / 127.0f, 0.5f) * logf(25000.0f)) + 40;
     lpfl->setfreq(fr);
     lpfr->setfreq(fr);
 }
@@ -168,7 +168,7 @@ void Distorsion::setlpf(unsigned char Plpf)
 void Distorsion::sethpf(unsigned char Phpf)
 {
     this->Phpf = Phpf;
-    float fr = exp(pow(Phpf / 127.0, 0.5) * log(25000.0)) + 20.0;
+    float fr = expf(powf(Phpf / 127.0f, 0.5f) * logf(25000.0f)) + 20.0f;
     hpfl->setfreq(fr);
     hpfr->setfreq(fr);
 }
@@ -199,7 +199,7 @@ void Distorsion::setpreset(unsigned char npreset)
     for(int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
     if(insertion == 0)
-        changepar(0, (int) (presets[npreset][0] / 1.5));           //lower the volume if this is system effect
+        changepar(0, (int) (presets[npreset][0] / 1.5f));           //lower the volume if this is system effect
     Ppreset = npreset;
     cleanup();
 }

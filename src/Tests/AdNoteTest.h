@@ -73,7 +73,7 @@ class AdNoteTest:public CxxTest::TestSuite
 
             //lets go with.... 50! as a nice note
             testnote = 50;
-            float freq = 440.0 * pow(2.0, (testnote - 69.0) / 12.0);
+            float freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
 
             note = new ADnote(defaultPreset,
                               controller,
@@ -118,26 +118,26 @@ class AdNoteTest:public CxxTest::TestSuite
 #endif
             sampleCount += SOUND_BUFFER_SIZE;
 
-            TS_ASSERT_DELTA(outL[255], 0.3019, 0.0001);
+            TS_ASSERT_DELTA(outL[255], 0.3019f, 0.0001f);
 
             note->relasekey();
 
 
             note->noteout(outL, outR);
             sampleCount += SOUND_BUFFER_SIZE;
-            TS_ASSERT_DELTA(outL[255], -0.1382, 0.0001);
+            TS_ASSERT_DELTA(outL[255], -0.1382f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += SOUND_BUFFER_SIZE;
-            TS_ASSERT_DELTA(outL[255], -0.0334, 0.0001);
+            TS_ASSERT_DELTA(outL[255], -0.0334f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += SOUND_BUFFER_SIZE;
-            TS_ASSERT_DELTA(outL[255], -0.1329, 0.0001);
+            TS_ASSERT_DELTA(outL[255], -0.1329f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += SOUND_BUFFER_SIZE;
-            TS_ASSERT_DELTA(outL[255], 0.2690, 0.0001);
+            TS_ASSERT_DELTA(outL[255], 0.2690f, 0.0001f);
 
             while(!note->finished()) {
                 note->noteout(outL, outR);

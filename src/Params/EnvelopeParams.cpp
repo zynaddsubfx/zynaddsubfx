@@ -60,7 +60,7 @@ EnvelopeParams::~EnvelopeParams()
 
 float EnvelopeParams::getdt(char i)
 {
-    float result = (pow(2.0, Penvdt[(int)i] / 127.0 * 12.0) - 1.0) * 10.0; //miliseconds
+    float result = (powf(2.0f, Penvdt[(int)i] / 127.0f * 12.0f) - 1.0f) * 10.0f; //miliseconds
     return result;
 }
 

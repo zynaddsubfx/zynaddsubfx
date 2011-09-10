@@ -117,8 +117,8 @@ void *WavEngine::AudioThread()
             float left=0.0f, right=0.0f;
             buffer.pop(left);
             buffer.pop(right);
-            recordbuf_16bit[2*i]   = limit((int)(left  * 32767.0), -32768, 32767);
-            recordbuf_16bit[2*i+1] = limit((int)(right * 32767.0), -32768, 32767);
+            recordbuf_16bit[2*i]   = limit((int)(left  * 32767.0f), -32768, 32767);
+            recordbuf_16bit[2*i+1] = limit((int)(right * 32767.0f), -32768, 32767);
         }
         file->writeStereoSamples(SOUND_BUFFER_SIZE, recordbuf_16bit);
     }

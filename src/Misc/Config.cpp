@@ -232,7 +232,7 @@ void Config::readConfig(const char *filename)
         xmlcfg.exitbranch();
     }
 
-    cfg.OscilSize = (int) pow(2, ceil(log(cfg.OscilSize - 1.0) / log(2.0)));
+    cfg.OscilSize = (int) powf(2, ceil(logf(cfg.OscilSize - 1.0f) / logf(2.0f)));
 }
 
 void Config::saveConfig(const char *filename)

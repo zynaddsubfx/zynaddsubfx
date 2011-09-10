@@ -56,8 +56,8 @@ void DynamicFilter::out(const Stereo<float *> &smp)
 
     float lfol, lfor;
     lfo.effectlfoout(&lfol, &lfor);
-    lfol *= depth * 5.0;
-    lfor *= depth * 5.0;
+    lfol *= depth * 5.0f;
+    lfor *= depth * 5.0f;
     const float freq = filterpars->getfreq();
     const float q    = filterpars->getq();
 
@@ -65,14 +65,14 @@ void DynamicFilter::out(const Stereo<float *> &smp)
         efxoutl[i] = smp.l[i];
         efxoutr[i] = smp.r[i];
 
-        const float x = (fabs(smp.l[i]) + fabs(smp.l[i])) * 0.5;
-        ms1 = ms1 * (1.0 - ampsmooth) + x * ampsmooth + 1e-10;
+        const float x = (fabs(smp.l[i]) + fabs(smp.l[i])) * 0.5f;
+        ms1 = ms1 * (1.0f - ampsmooth) + x * ampsmooth + 1e-10;
     }
 
-    const float ampsmooth2 = pow(ampsmooth, 0.2) * 0.3;
-    ms2 = ms2 * (1.0 - ampsmooth2) + ms1 * ampsmooth2;
-    ms3 = ms3 * (1.0 - ampsmooth2) + ms2 * ampsmooth2;
-    ms4 = ms4 * (1.0 - ampsmooth2) + ms3 * ampsmooth2;
+    const float ampsmooth2 = powf(ampsmooth, 0.2f) * 0.3f;
+    ms2 = ms2 * (1.0f - ampsmooth2) + ms1 * ampsmooth2;
+    ms3 = ms3 * (1.0f - ampsmooth2) + ms2 * ampsmooth2;
+    ms4 = ms4 * (1.0f - ampsmooth2) + ms3 * ampsmooth2;
     const float rms = (sqrt(ms4)) * ampsns;
 
     const float frl = Filter::getrealfreq(freq + lfol + rms);
@@ -98,10 +98,10 @@ void DynamicFilter::out(const Stereo<float *> &smp)
 void DynamicFilter::cleanup()
 {
     reinitfilter();
-    ms1 = 0.0;
-    ms2 = 0.0;
-    ms3 = 0.0;
-    ms4 = 0.0;
+    ms1 = 0.0f;
+    ms2 = 0.0f;
+    ms3 = 0.0f;
+    ms4 = 0.0f;
 }
 
 
@@ -112,26 +112,26 @@ void DynamicFilter::cleanup()
 void DynamicFilter::setdepth(unsigned char Pdepth)
 {
     this->Pdepth = Pdepth;
-    depth = pow((Pdepth / 127.0), 2.0);
+    depth = powf((Pdepth / 127.0f), 2.0f);
 }
 
 
 void DynamicFilter::setvolume(unsigned char Pvolume)
 {
     this->Pvolume = Pvolume;
-    outvolume     = Pvolume / 127.0;
+    outvolume     = Pvolume / 127.0f;
     if(insertion == 0)
-        volume = 1.0;
+        volume = 1.0f;
     else
         volume = outvolume;
 }
 
 void DynamicFilter::setampsns(unsigned char Pampsns)
 {
-    ampsns = pow(Pampsns / 127.0, 2.5) * 10.0;
+    ampsns = powf(Pampsns / 127.0f, 2.5f) * 10.0f;
     if(Pampsnsinv != 0)
         ampsns = -ampsns;
-    ampsmooth     = exp(-Pampsmooth / 127.0 * 10.0) * 0.99;
+    ampsmooth     = expf(-Pampsmooth / 127.0f * 10.0f) * 0.99f;
     this->Pampsns = Pampsns;
 }
 

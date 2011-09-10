@@ -110,7 +110,7 @@ extern int OSCIL_SIZE;
 /*
  * How is applied the velocity sensing
  */
-#define VELOCITY_MAX_SCALE 8.0
+#define VELOCITY_MAX_SCALE 8.0f
 
 /*
  * The maximum length of instrument's name
@@ -138,22 +138,22 @@ extern int OSCIL_SIZE;
 #define FF_MAX_FORMANTS 12
 #define FF_MAX_SEQUENCE 8
 
-#define LOG_2 0.693147181
-#define PI 3.1415926536
-#define LOG_10 2.302585093
+#define LOG_2 0.693147181f
+#define PI 3.1415926536f
+#define LOG_10 2.302585093f
 
 /*
  * The threshold for the amplitude interpolation used if the amplitude
  * is changed (by LFO's or Envelope's). If the change of the amplitude
  * is below this, the amplitude is not interpolated
  */
-#define AMPLITUDE_INTERPOLATION_THRESHOLD 0.0001
+#define AMPLITUDE_INTERPOLATION_THRESHOLD 0.0001f
 
 /*
  * How the amplitude threshold is computed
  */
-#define ABOVE_AMPLITUDE_THRESHOLD(a, b) ((2.0 * fabs((b) - (a)) \
-                                          / (fabs((b) + (a) + 0.0000000001))) > \
+#define ABOVE_AMPLITUDE_THRESHOLD(a, b) ((2.0f * fabs((b) - (a)) \
+                                          / (fabs((b) + (a) + 0.0000000001f))) > \
                                          AMPLITUDE_INTERPOLATION_THRESHOLD)
 
 /*
@@ -168,13 +168,13 @@ extern int OSCIL_SIZE;
 /*
  * dB
  */
-#define dB2rap(dB) ((exp((dB) * LOG_10 / 20.0)))
-#define rap2dB(rap) ((20 * log(rap) / LOG_10))
+#define dB2rap(dB) ((expf((dB) * LOG_10 / 20.0f)))
+#define rap2dB(rap) ((20 * logf(rap) / LOG_10))
 
 /*
- * The random generator (0.0..1.0)
+ * The random generator (0.0f..1.0f)
  */
-#define RND (rand() / (RAND_MAX * 1.0))
+#define RND (rand() / (RAND_MAX * 1.0f))
 
 #define ZERO(data, size) {char *data_ = (char *) data; for(int i = 0; \
                                                            i < size; \
@@ -184,7 +184,7 @@ extern int OSCIL_SIZE;
                                    for(int i = 0; \
                                        i < size; \
                                        i++) \
-                                       data_[i] = 0.0;}
+                                       data_[i] = 0.0f;}
 
 enum ONOFFTYPE {
     OFF = 0, ON = 1
@@ -209,10 +209,10 @@ enum LegatoMsg {
 #ifdef ASM_F2I_YES
 #define F2I(f, \
             i) __asm__ __volatile__ ("fistpl %0" : "=m" (i) : "t" (f \
-                                                                   - 0.49999999) \
+                                                                   - 0.49999999f) \
                                      : "st");
 #else
-#define F2I(f, i) (i) = ((f > 0) ? ((int)(f)) : ((int)(f - 1.0)));
+#define F2I(f, i) (i) = ((f > 0) ? ((int)(f)) : ((int)(f - 1.0f)));
 #endif
 
 

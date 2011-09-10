@@ -50,16 +50,16 @@ void PADnote::setup(float freq, float velocity,int portamento_, int midinote, bo
     if(pars->Pfixedfreq == 0)
         basefreq = freq;
     else {
-        basefreq = 440.0;
+        basefreq = 440.0f;
         int fixedfreqET = pars->PfixedfreqET;
         if(fixedfreqET != 0) { //if the frequency varies according the keyboard note
             float tmp =
                 (midinote
-                 - 69.0) / 12.0 * (pow(2.0, (fixedfreqET - 1) / 63.0) - 1.0);
+                 - 69.0f) / 12.0f * (powf(2.0f, (fixedfreqET - 1) / 63.0f) - 1.0f);
             if(fixedfreqET <= 64)
-                basefreq *= pow(2.0, tmp);
+                basefreq *= powf(2.0f, tmp);
             else
-                basefreq *= pow(3.0, tmp);
+                basefreq *= powf(3.0f, tmp);
         }
     }
 
@@ -72,13 +72,13 @@ void PADnote::setup(float freq, float velocity,int portamento_, int midinote, bo
 
 
     //find out the closest note
-    float logfreq = log(basefreq * pow(2.0, NoteGlobalPar.Detune / 1200.0));
-    float mindist = fabs(logfreq - log(pars->sample[0].basefreq + 0.0001));
+    float logfreq = logf(basefreq * powf(2.0f, NoteGlobalPar.Detune / 1200.0f));
+    float mindist = fabs(logfreq - logf(pars->sample[0].basefreq + 0.0001f));
     nsample = 0;
     for(int i = 1; i < PAD_MAX_SAMPLES; ++i) {
         if(pars->sample[i].smp == NULL)
             break;
-        float dist = fabs(logfreq - log(pars->sample[i].basefreq + 0.0001));
+        float dist = fabs(logfreq - logf(pars->sample[i].basefreq + 0.0001f));
 
         if(dist < mindist) {
             nsample = i;
@@ -97,18 +97,18 @@ void PADnote::setup(float freq, float velocity,int portamento_, int midinote, bo
             poshi_r = (poshi_l + size / 2) % size;
         else
             poshi_r = poshi_l;
-        poslo   = 0.0;
+        poslo   = 0.0f;
     }
 
 
     if(pars->PPanning == 0)
         NoteGlobalPar.Panning = RND;
     else
-        NoteGlobalPar.Panning = pars->PPanning / 128.0;
+        NoteGlobalPar.Panning = pars->PPanning / 128.0f;
 
     NoteGlobalPar.FilterCenterPitch = pars->GlobalFilter->getfreq() //center freq
-                                      + pars->PFilterVelocityScale / 127.0
-                                      * 6.0                                //velocity sensing
+                                      + pars->PFilterVelocityScale / 127.0f
+                                      * 6.0f                                //velocity sensing
                                       * (VelF(velocity,
                                               pars->
                                               PFilterVelocityScaleFunction) - 1);
@@ -116,14 +116,14 @@ void PADnote::setup(float freq, float velocity,int portamento_, int midinote, bo
     if(!legato) {
         if(pars->PPunchStrength != 0) {
             NoteGlobalPar.Punch.Enabled      = 1;
-            NoteGlobalPar.Punch.t = 1.0; //start from 1.0 and to 0.0
+            NoteGlobalPar.Punch.t = 1.0f; //start from 1.0f and to 0.0f
             NoteGlobalPar.Punch.initialvalue =
-                ((pow(10, 1.5 * pars->PPunchStrength / 127.0) - 1.0)
+                ((powf(10, 1.5f * pars->PPunchStrength / 127.0f) - 1.0f)
                  * VelF(velocity,
                      pars->PPunchVelocitySensing));
-            float time    = pow(10, 3.0 * pars->PPunchTime / 127.0) / 10000.0; //0.1 .. 100 ms
-            float stretch = pow(440.0 / freq, pars->PPunchStretch / 64.0);
-            NoteGlobalPar.Punch.dt = 1.0 / (time * SAMPLE_RATE * stretch);
+            float time    = powf(10, 3.0f * pars->PPunchTime / 127.0f) / 10000.0f; //0.1f .. 100 ms
+            float stretch = powf(440.0f / freq, pars->PPunchStretch / 64.0f);
+            NoteGlobalPar.Punch.dt = 1.0f / (time * SAMPLE_RATE * stretch);
         }
         else
             NoteGlobalPar.Punch.Enabled = 0;
@@ -135,7 +135,7 @@ void PADnote::setup(float freq, float velocity,int portamento_, int midinote, bo
         NoteGlobalPar.AmpLfo = new LFO(pars->AmpLfo, basefreq);
     }
 
-    NoteGlobalPar.Volume = 4.0 * pow(0.1, 3.0 * (1.0 - pars->PVolume / 96.0)) //-60 dB .. 0 dB
+    NoteGlobalPar.Volume = 4.0f * powf(0.1f, 3.0f * (1.0f - pars->PVolume / 96.0f)) //-60 dB .. 0 dB
                            * VelF(velocity, pars->PAmpVelocityScaleFunction); //velocity sensing
 
     NoteGlobalPar.AmpEnvelope->envout_dB(); //discard the first envelope output
@@ -193,19 +193,19 @@ inline void PADnote::fadein(float *smps)
 {
     int zerocrossings = 0;
     for(int i = 1; i < SOUND_BUFFER_SIZE; ++i)
-        if((smps[i - 1] < 0.0) && (smps[i] > 0.0))
+        if((smps[i - 1] < 0.0f) && (smps[i] > 0.0f))
             zerocrossings++;                                  //this is only the possitive crossings
 
-    float tmp = (SOUND_BUFFER_SIZE - 1.0) / (zerocrossings + 1) / 3.0;
-    if(tmp < 8.0)
-        tmp = 8.0;
+    float tmp = (SOUND_BUFFER_SIZE - 1.0f) / (zerocrossings + 1) / 3.0f;
+    if(tmp < 8.0f)
+        tmp = 8.0f;
 
     int n;
     F2I(tmp, n); //how many samples is the fade-in
     if(n > SOUND_BUFFER_SIZE)
         n = SOUND_BUFFER_SIZE;
     for(int i = 0; i < n; ++i) { //fade-in
-        float tmp = 0.5 - cos((float)i / (float) n * PI) * 0.5;
+        float tmp = 0.5f - cosf((float)i / (float) n * PI) * 0.5f;
         smps[i] *= tmp;
     }
 }
@@ -214,7 +214,7 @@ inline void PADnote::fadein(float *smps)
 void PADnote::computecurrentparameters()
 {
     float globalpitch, globalfilterpitch;
-    globalpitch = 0.01 * (NoteGlobalPar.FreqEnvelope->envout()
+    globalpitch = 0.01f * (NoteGlobalPar.FreqEnvelope->envout()
                           + NoteGlobalPar.FreqLfo->lfoout()
                           * ctl->modwheel.relmod + NoteGlobalPar.Detune);
     globaloldamplitude = globalnewamplitude;
@@ -236,7 +236,7 @@ void PADnote::computecurrentparameters()
     NoteGlobalPar.GlobalFilterR->setfreq_and_q(tmpfilterfreq, globalfilterq);
 
     //compute the portamento, if it is used by this note
-    float portamentofreqrap = 1.0;
+    float portamentofreqrap = 1.0f;
     if(portamento != 0) { //this voice use portamento
         portamentofreqrap = ctl->portamento.freqrap;
         if(ctl->portamento.used == 0) //the portamento has finished
@@ -245,7 +245,7 @@ void PADnote::computecurrentparameters()
     }
 
     realfreq = basefreq * portamentofreqrap
-               * pow(2.0, globalpitch / 12.0) * ctl->pitchwheel.relfreq;
+               * powf(2.0f, globalpitch / 12.0f) * ctl->pitchwheel.relfreq;
 }
 
 
@@ -264,18 +264,18 @@ int PADnote::Compute_Linear(float *outl,
         poshi_l += freqhi;
         poshi_r += freqhi;
         poslo   += freqlo;
-        if(poslo >= 1.0) {
+        if(poslo >= 1.0f) {
             poshi_l += 1;
             poshi_r += 1;
-            poslo   -= 1.0;
+            poslo   -= 1.0f;
         }
         if(poshi_l >= size)
             poshi_l %= size;
         if(poshi_r >= size)
             poshi_r %= size;
 
-        outl[i] = smps[poshi_l] * (1.0 - poslo) + smps[poshi_l + 1] * poslo;
-        outr[i] = smps[poshi_r] * (1.0 - poslo) + smps[poshi_r + 1] * poslo;
+        outl[i] = smps[poshi_l] * (1.0f - poslo) + smps[poshi_l + 1] * poslo;
+        outr[i] = smps[poshi_r] * (1.0f - poslo) + smps[poshi_r + 1] * poslo;
     }
     return 1;
 }
@@ -295,10 +295,10 @@ int PADnote::Compute_Cubic(float *outl,
         poshi_l += freqhi;
         poshi_r += freqhi;
         poslo   += freqlo;
-        if(poslo >= 1.0) {
+        if(poslo >= 1.0f) {
             poshi_l += 1;
             poshi_r += 1;
-            poslo   -= 1.0;
+            poslo   -= 1.0f;
         }
         if(poshi_l >= size)
             poshi_l %= size;
@@ -311,18 +311,18 @@ int PADnote::Compute_Cubic(float *outl,
         x0      = smps[poshi_l + 1];
         x1      = smps[poshi_l + 2];
         x2      = smps[poshi_l + 3];
-        a       = (3.0 * (x0 - x1) - xm1 + x2) * 0.5;
-        b       = 2.0 * x1 + xm1 - (5.0 * x0 + x2) * 0.5;
-        c       = (x1 - xm1) * 0.5;
+        a       = (3.0f * (x0 - x1) - xm1 + x2) * 0.5f;
+        b       = 2.0f * x1 + xm1 - (5.0f * x0 + x2) * 0.5f;
+        c       = (x1 - xm1) * 0.5f;
         outl[i] = (((a * poslo) + b) * poslo + c) * poslo + x0;
         //right
         xm1     = smps[poshi_r];
         x0      = smps[poshi_r + 1];
         x1      = smps[poshi_r + 2];
         x2      = smps[poshi_r + 3];
-        a       = (3.0 * (x0 - x1) - xm1 + x2) * 0.5;
-        b       = 2.0 * x1 + xm1 - (5.0 * x0 + x2) * 0.5;
-        c       = (x1 - xm1) * 0.5;
+        a       = (3.0f * (x0 - x1) - xm1 + x2) * 0.5f;
+        b       = 2.0f * x1 + xm1 - (5.0f * x0 + x2) * 0.5f;
+        c       = (x1 - xm1) * 0.5f;
         outr[i] = (((a * poslo) + b) * poslo + c) * poslo + x0;
     }
     return 1;
@@ -335,8 +335,8 @@ int PADnote::noteout(float *outl, float *outr)
     float *smps = pars->sample[nsample].smp;
     if(smps == NULL) {
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-            outl[i] = 0.0;
-            outr[i] = 0.0;
+            outl[i] = 0.0f;
+            outr[i] = 0.0f;
         }
         return 1;
     }
@@ -367,11 +367,11 @@ int PADnote::noteout(float *outl, float *outr)
     if(NoteGlobalPar.Punch.Enabled != 0) {
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             float punchamp = NoteGlobalPar.Punch.initialvalue
-                                * NoteGlobalPar.Punch.t + 1.0;
+                                * NoteGlobalPar.Punch.t + 1.0f;
             outl[i] *= punchamp;
             outr[i] *= punchamp;
             NoteGlobalPar.Punch.t -= NoteGlobalPar.Punch.dt;
-            if(NoteGlobalPar.Punch.t < 0.0) {
+            if(NoteGlobalPar.Punch.t < 0.0f) {
                 NoteGlobalPar.Punch.Enabled = 0;
                 break;
             }
@@ -386,13 +386,13 @@ int PADnote::noteout(float *outl, float *outr)
                                                     i,
                                                     SOUND_BUFFER_SIZE);
             outl[i] *= tmpvol * NoteGlobalPar.Panning;
-            outr[i] *= tmpvol * (1.0 - NoteGlobalPar.Panning);
+            outr[i] *= tmpvol * (1.0f - NoteGlobalPar.Panning);
         }
     }
     else {
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             outl[i] *= globalnewamplitude * NoteGlobalPar.Panning;
-            outr[i] *= globalnewamplitude * (1.0 - NoteGlobalPar.Panning);
+            outr[i] *= globalnewamplitude * (1.0f - NoteGlobalPar.Panning);
         }
     }
 
@@ -404,7 +404,7 @@ int PADnote::noteout(float *outl, float *outr)
     // If it does, disable the note
     if(NoteGlobalPar.AmpEnvelope->finished() != 0) {
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) { //fade-out
-            float tmp = 1.0 - (float)i / (float)SOUND_BUFFER_SIZE;
+            float tmp = 1.0f - (float)i / (float)SOUND_BUFFER_SIZE;
             outl[i] *= tmp;
             outr[i] *= tmp;
         }

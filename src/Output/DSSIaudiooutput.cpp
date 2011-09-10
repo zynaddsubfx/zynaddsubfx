@@ -605,7 +605,7 @@ DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate)
 
     srand(time(NULL));
     denormalkillbuf=new float [SOUND_BUFFER_SIZE];
-    for (int i=0;i<SOUND_BUFFER_SIZE;i++) denormalkillbuf[i]=(RND-0.5)*1e-16;
+    for (int i=0;i<SOUND_BUFFER_SIZE;i++) denormalkillbuf[i]=(RND-0.5f)*1e-16;
 
     this->master = new Master();
 }

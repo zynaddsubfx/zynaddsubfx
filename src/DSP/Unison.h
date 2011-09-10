@@ -24,8 +24,8 @@
 #include <stdlib.h>
 #include "../globals.h"
 
-#define UNISON_FREQ_SPAN 2.0
-//how much the unison frequencies varies (always >= 1.0)
+#define UNISON_FREQ_SPAN 2.0f
+//how much the unison frequencies varies (always >= 1.0f)
 
 class Unison
 {
@@ -51,11 +51,11 @@ class Unison
             float relative_amplitude;
             float lin_fpos, lin_ffreq;
             UnisonVoice() {
-                position = RND * 1.8 - 0.9;
-                realpos1 = 0.0;
-                realpos2 = 0.0;
-                step     = 0.0;
-                relative_amplitude = 1.0;
+                position = RND * 1.8f - 0.9f;
+                realpos1 = 0.0f;
+                realpos2 = 0.0f;
+                step     = 0.0f;
+                relative_amplitude = 1.0f;
             }
         } *uv;
         int       update_period_samples, update_period_sample_k;

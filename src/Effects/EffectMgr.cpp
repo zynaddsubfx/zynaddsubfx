@@ -49,8 +49,8 @@ EffectMgr::EffectMgr(int insertion_, pthread_mutex_t *mutex_)
 //    efxoutl=new float[SOUND_BUFFER_SIZE];
 //    efxoutr=new float[SOUND_BUFFER_SIZE];
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-        efxoutl[i] = 0.0;
-        efxoutr[i] = 0.0;
+        efxoutl[i] = 0.0f;
+        efxoutr[i] = 0.0f;
     }
 //    filterpars=NULL;
 //    dryonly=false;
@@ -82,8 +82,8 @@ void EffectMgr::changeeffect(int nefx_)
         return;
     nefx = nefx_;
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-        efxoutl[i] = 0.0;
-        efxoutr[i] = 0.0;
+        efxoutl[i] = 0.0f;
+        efxoutr[i] = 0.0f;
     }
 
     if(efx != NULL)
@@ -213,10 +213,10 @@ void EffectMgr::out(float *smpsl, float *smpsr)
     if(efx == NULL) {
         if(insertion == 0)
             for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-                smpsl[i]   = 0.0;
-                smpsr[i]   = 0.0;
-                efxoutl[i] = 0.0;
-                efxoutr[i] = 0.0;
+                smpsl[i]   = 0.0f;
+                smpsr[i]   = 0.0f;
+                efxoutl[i] = 0.0f;
+                efxoutr[i] = 0.0f;
             }
         ;
         return;
@@ -224,8 +224,8 @@ void EffectMgr::out(float *smpsl, float *smpsr)
     for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         smpsl[i]  += denormalkillbuf[i];
         smpsr[i]  += denormalkillbuf[i];
-        efxoutl[i] = 0.0;
-        efxoutr[i] = 0.0;
+        efxoutl[i] = 0.0f;
+        efxoutr[i] = 0.0f;
     }
     efx->out(smpsl, smpsr);
 
@@ -243,13 +243,13 @@ void EffectMgr::out(float *smpsl, float *smpsr)
     //Insertion effect
     if(insertion != 0) {
         float v1, v2;
-        if(volume < 0.5) {
-            v1 = 1.0;
-            v2 = volume * 2.0;
+        if(volume < 0.5f) {
+            v1 = 1.0f;
+            v2 = volume * 2.0f;
         }
         else {
-            v1 = (1.0 - volume) * 2.0;
-            v2 = 1.0;
+            v1 = (1.0f - volume) * 2.0f;
+            v2 = 1.0f;
         }
         if((nefx == 1) || (nefx == 2))
             v2 *= v2;                    //for Reverb and Echo, the wet function is not liniar
@@ -271,8 +271,8 @@ void EffectMgr::out(float *smpsl, float *smpsr)
     }
     else {  //System effect
         for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-            efxoutl[i] *= 2.0 * volume;
-            efxoutr[i] *= 2.0 * volume;
+            efxoutl[i] *= 2.0f * volume;
+            efxoutr[i] *= 2.0f * volume;
             smpsl[i]    = efxoutl[i];
             smpsr[i]    = efxoutr[i];
         }
@@ -285,7 +285,7 @@ void EffectMgr::out(float *smpsl, float *smpsr)
 float EffectMgr::sysefxgetvolume()
 {
     if(efx == NULL)
-        return 1.0;
+        return 1.0f;
     else
         return efx->outvolume;
 }
@@ -299,7 +299,7 @@ float EffectMgr::getEQfreqresponse(float freq)
     if(nefx == 7)
         return efx->getfreqresponse(freq);
     else
-        return 0.0;
+        return 0.0f;
 }
 
 

@@ -100,7 +100,7 @@ void *thread3(void *v)
                 break;
         }
 #endif //LASH
-        Fl::wait(0.1);
+        Fl::wait(0.1f);
     }
 
 #elif defined QT_GUI
@@ -139,7 +139,7 @@ void initprogram(int argc, char **argv)
     cerr << std::fixed;
     cerr << "\nSample Rate = \t\t" << SAMPLE_RATE << endl;
     cerr << "Sound Buffer Size = \t" << SOUND_BUFFER_SIZE << " samples" << endl;
-    cerr << "Internal latency = \t" << SOUND_BUFFER_SIZE * 1000.0
+    cerr << "Internal latency = \t" << SOUND_BUFFER_SIZE * 1000.0f
     / SAMPLE_RATE << " ms" << endl;
     cerr << "ADsynth Oscil.Size = \t" << OSCIL_SIZE << " samples" << endl;
 
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
     //produce denormal buf
     denormalkillbuf = new float [SOUND_BUFFER_SIZE];
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
-        denormalkillbuf[i] = (RND - 0.5) * 1e-16;
+        denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 
     /* Parse command-line options */
     struct option opts[] = {
@@ -276,7 +276,7 @@ int main(int argc, char *argv[])
                 OSCIL_SIZE = tmp = atoi(optarguments);
             if(OSCIL_SIZE < MAX_AD_HARMONICS * 2)
                 OSCIL_SIZE = MAX_AD_HARMONICS * 2;
-            OSCIL_SIZE = (int) pow(2, ceil(log(OSCIL_SIZE - 1.0) / log(2.0)));
+            OSCIL_SIZE = (int) powf(2, ceil(logf(OSCIL_SIZE - 1.0f) / logf(2.0f)));
             if(tmp != OSCIL_SIZE) {
                 cerr << "OSCIL_SIZE is wrong (must be 2^n) or too small. Adjusting to "
                      <<  OSCIL_SIZE << "." << endl;

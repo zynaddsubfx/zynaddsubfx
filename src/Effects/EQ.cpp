@@ -33,8 +33,8 @@ EQ::EQ(const int &insertion_, float *efxoutl_, float *efxoutr_)
         filter[i].Pgain   = 64;
         filter[i].Pq      = 64;
         filter[i].Pstages = 0;
-        filter[i].l = new AnalogFilter(6, 1000.0, 1.0, 0);
-        filter[i].r = new AnalogFilter(6, 1000.0, 1.0, 0);
+        filter[i].l = new AnalogFilter(6, 1000.0f, 1.0f, 0);
+        filter[i].r = new AnalogFilter(6, 1000.0f, 1.0f, 0);
     }
     //default values
     Pvolume = 50;
@@ -78,9 +78,9 @@ void EQ::setvolume(unsigned char Pvolume)
 {
     this->Pvolume = Pvolume;
 
-    outvolume     = pow(0.005, (1.0 - Pvolume / 127.0)) * 10.0;
+    outvolume     = powf(0.005f, (1.0f - Pvolume / 127.0f)) * 10.0f;
     if(insertion == 0)
-        volume = 1.0;
+        volume = 1.0f;
     else
         volume = outvolume;
     ;
@@ -134,19 +134,19 @@ void EQ::changepar(int npar, unsigned char value)
         break;
     case 1:
         filter[nb].Pfreq = value;
-        tmp = 600.0 * pow(30.0, (value - 64.0) / 64.0);
+        tmp = 600.0f * powf(30.0f, (value - 64.0f) / 64.0f);
         filter[nb].l->setfreq(tmp);
         filter[nb].r->setfreq(tmp);
         break;
     case 2:
         filter[nb].Pgain = value;
-        tmp = 30.0 * (value - 64.0) / 64.0;
+        tmp = 30.0f * (value - 64.0f) / 64.0f;
         filter[nb].l->setgain(tmp);
         filter[nb].r->setgain(tmp);
         break;
     case 3:
         filter[nb].Pq = value;
-        tmp = pow(30.0, (value - 64.0) / 64.0);
+        tmp = powf(30.0f, (value - 64.0f) / 64.0f);
         filter[nb].l->setq(tmp);
         filter[nb].r->setq(tmp);
         break;
@@ -201,7 +201,7 @@ unsigned char EQ::getpar(int npar) const
 
 float EQ::getfreqresponse(float freq)
 {
-    float resp = 1.0;
+    float resp = 1.0f;
 
     for(int i = 0; i < MAX_EQ_BANDS; ++i) {
         if(filter[i].Ptype == 0)

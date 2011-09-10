@@ -30,8 +30,8 @@ Unison::Unison(int update_period_samples_, float max_delay_sec_) {
         max_delay = 10;
     delay_buffer = new float[max_delay];
     delay_k      = 0;
-    base_freq    = 1.0;
-    unison_bandwidth_cents = 10.0;
+    base_freq    = 1.0f;
+    unison_bandwidth_cents = 10.0f;
 
     ZERO_float(delay_buffer, max_delay);
 
@@ -66,9 +66,9 @@ void Unison::set_base_frequency(float freq) {
 
 void Unison::set_bandwidth(float bandwidth) {
     if(bandwidth < 0)
-        bandwidth = 0.0;
-    if(bandwidth > 1200.0)
-        bandwidth = 1200.0;
+        bandwidth = 0.0f;
+    if(bandwidth > 1200.0f)
+        bandwidth = 1200.0f;
 
     printf("bandwidth %g\n", bandwidth);
 #warning \
@@ -84,19 +84,19 @@ void Unison::update_parameters() {
                                      / (float) update_period_samples;
 //	printf("#%g, %g\n",increments_per_second,base_freq);
     for(int i = 0; i < unison_size; ++i) {
-        float base   = pow(UNISON_FREQ_SPAN, RND * 2.0 - 1.0);
+        float base   = powf(UNISON_FREQ_SPAN, RND * 2.0f - 1.0f);
         uv[i].relative_amplitude = base;
         float period = base / base_freq;
-        float m      = 4.0 / (period * increments_per_second);
-        if(RND < 0.5)
+        float m      = 4.0f / (period * increments_per_second);
+        if(RND < 0.5f)
             m = -m;
         uv[i].step = m;
 //		printf("%g %g\n",uv[i].relative_amplitude,period);
     }
 
-    float max_speed = pow(2.0, unison_bandwidth_cents / 1200.0);
-    unison_amplitude_samples = 0.125
-                               * (max_speed - 1.0) * SAMPLE_RATE / base_freq;
+    float max_speed = powf(2.0f, unison_bandwidth_cents / 1200.0f);
+    unison_amplitude_samples = 0.125f
+                               * (max_speed - 1.0f) * SAMPLE_RATE / base_freq;
     printf("unison_amplitude_samples %g\n", unison_amplitude_samples);
 
 #warning \
@@ -113,23 +113,23 @@ void Unison::process(int bufsize, float *inbuf, float *outbuf) {
     if(!outbuf)
         outbuf = inbuf;
 
-    float volume    = 1.0 / sqrt(unison_size);
-    float xpos_step = 1.0 / (float) update_period_samples;
+    float volume    = 1.0f / sqrt(unison_size);
+    float xpos_step = 1.0f / (float) update_period_samples;
     float xpos      = (float) update_period_sample_k * xpos_step;
     for(int i = 0; i < bufsize; ++i) {
         if((update_period_sample_k++) >= update_period_samples) {
             update_unison_data();
             update_period_sample_k = 0;
-            xpos = 0.0;
+            xpos = 0.0f;
         }
         xpos += xpos_step;
-        float in   = inbuf[i], out = 0.0;
+        float in   = inbuf[i], out = 0.0f;
 
-        float sign = 1.0;
+        float sign = 1.0f;
         for(int k = 0; k < unison_size; ++k) {
             float vpos = uv[k].realpos1
-                            * (1.0 - xpos) + uv[k].realpos2 * xpos;     //optimize
-            float pos  = delay_k + max_delay - vpos - 1.0; //optimize
+                            * (1.0f - xpos) + uv[k].realpos2 * xpos;     //optimize
+            float pos  = delay_k + max_delay - vpos - 1.0f; //optimize
             int      posi;
             float posf;
             F2I(pos, posi); //optimize!
@@ -137,7 +137,7 @@ void Unison::process(int bufsize, float *inbuf, float *outbuf) {
                 posi -= max_delay;
             posf = pos - floor(pos);
             out +=
-                ((1.0
+                ((1.0f
                   - posf) * delay_buffer[posi] + posf
                  * delay_buffer[posi + 1]) * sign;
             sign = -sign;
@@ -158,22 +158,22 @@ void Unison::update_unison_data() {
         float pos  = uv[k].position;
         float step = uv[k].step;
         pos += step;
-        if(pos <= -1.0) {
-            pos  = -1.0;
+        if(pos <= -1.0f) {
+            pos  = -1.0f;
             step = -step;
         }
-        if(pos >= 1.0) {
-            pos  = 1.0;
+        if(pos >= 1.0f) {
+            pos  = 1.0f;
             step = -step;
         }
-        float vibratto_val = (pos - 0.333333333 * pos * pos * pos) * 1.5; //make the vibratto lfo smoother
+        float vibratto_val = (pos - 0.333333333f * pos * pos * pos) * 1.5f; //make the vibratto lfo smoother
 #warning \
         I will use relative amplitude, so the delay might be bigger than the whole buffer
 #warning \
         I have to enlarge (reallocate) the buffer to make place for the whole delay
-        float newval = 1.0 + 0.5
+        float newval = 1.0f + 0.5f
                           * (vibratto_val
-                             + 1.0) * unison_amplitude_samples
+                             + 1.0f) * unison_amplitude_samples
                           * uv[k].relative_amplitude;
 
         if(first_time)

@@ -32,7 +32,7 @@
 //Globals
 
 /**FM amplitude tune*/
-#define FM_AMP_MULTIPLIER 14.71280603
+#define FM_AMP_MULTIPLIER 14.71280603f
 
 #define OSCIL_SMP_EXTRA_SAMPLES 5
 
@@ -206,9 +206,9 @@ class ADnote :public SynthNote
             *   AMPLITUDE PARAMETERS   *
             ***************************/
 
-            /* Panning 0.0=left, 0.5 - center, 1.0 = right */
+            /* Panning 0.0f=left, 0.5f - center, 1.0f = right */
             float  Panning;
-            float  Volume; // [-1.0 .. 1.0]
+            float  Volume; // [-1.0f .. 1.0f]
 
             Envelope *AmpEnvelope;
             LFO      *AmpLfo;
@@ -259,7 +259,7 @@ class ADnote :public SynthNote
         //the size of unison for a single voice
         int unison_size[NUM_VOICES];
 
-        //the stereo spread of the unison subvoices (0.0=mono,1.0=max)
+        //the stereo spread of the unison subvoices (0.0f=mono,1.0f=max)
         float unison_stereo_spread[NUM_VOICES];
 
         //fractional part (skip)
@@ -274,7 +274,7 @@ class ADnote :public SynthNote
         //the unison base_value
         float *unison_base_freq_rap[NUM_VOICES];
 
-        //how the unison subvoice's frequency is changed (1.0 for no change)
+        //how the unison subvoice's frequency is changed (1.0f for no change)
         float *unison_freq_rap[NUM_VOICES];
 
         //which subvoice has phase inverted
@@ -284,7 +284,7 @@ class ADnote :public SynthNote
         struct {
             float  amplitude; //amplitude which be added to unison_freq_rap
             float *step; //value which increments the position
-            float *position; //between -1.0 and 1.0
+            float *position; //between -1.0f and 1.0f
         } unison_vibratto[NUM_VOICES];
 
 

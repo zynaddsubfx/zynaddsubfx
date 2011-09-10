@@ -28,7 +28,7 @@
 #include "../Samples/Sample.h"
 #include "../Misc/Stereo.h"
 
-#define MAX_CHORUS_DELAY 250.0 //ms
+#define MAX_CHORUS_DELAY 250.0f //ms
 
 /**Chorus and Flange effects*/
 class Chorus:public Effect

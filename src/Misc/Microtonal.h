@@ -122,8 +122,8 @@ class Microtonal
         struct {
             unsigned char type; //1 for cents or 2 for division
 
-            // the real tuning (eg. +1.05946 for one halftone)
-            // or 2.0 for one octave
+            // the real tuning (eg. +1.05946f for one halftone)
+            // or 2.0f for one octave
             float tuning;
 
             //the real tunning is x1/x2

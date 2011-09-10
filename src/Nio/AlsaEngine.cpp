@@ -242,9 +242,9 @@ short *AlsaEngine::interleave(const Stereo<float *> &smps)
     double scaled;
     for (int frame = 0; frame < bufferSize; ++frame)
     {   // with a nod to libsamplerate ...
-        scaled = smps.l[frame] * (8.0 * 0x10000000);
+        scaled = smps.l[frame] * (8.0f * 0x10000000);
         shortInterleaved[idx++] = (short int)(lrint(scaled) >> 16);
-        scaled = smps.r[frame] * (8.0 * 0x10000000);
+        scaled = smps.r[frame] * (8.0f * 0x10000000);
         shortInterleaved[idx++] = (short int)(lrint(scaled) >> 16);
     }
     return shortInterleaved;

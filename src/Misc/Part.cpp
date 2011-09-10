@@ -66,7 +66,7 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
     }
 
     killallnotes = 0;
-    oldfreq      = -1.0;
+    oldfreq      = -1.0f;
 
     for(int i = 0; i < POLIPHONY; ++i) {
         partnote[i].status = KEY_OFF;
@@ -83,7 +83,7 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
 
     Pname      = new unsigned char [PART_MAX_NAME_LEN];
 
-    oldvolumel = oldvolumer = 0.5;
+    oldvolumel = oldvolumer = 0.5f;
     lastnote   = -1;
     lastpos    = 0; // lastpos will store previously used NoteOn(...)'s pos.
     lastlegatomodevalid = false; // To store previous legatomodevalid value.
@@ -156,16 +156,16 @@ void Part::cleanup(bool final)
     for(int k = 0; k < POLIPHONY; ++k)
         KillNotePos(k);
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-        partoutl[i] = final ? 0.0 : denormalkillbuf[i];
-        partoutr[i] = final ? 0.0 : denormalkillbuf[i];
+        partoutl[i] = final ? 0.0f : denormalkillbuf[i];
+        partoutr[i] = final ? 0.0f : denormalkillbuf[i];
     }
     ctl.resetall();
     for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx)
         partefx[nefx]->cleanup();
     for(int n = 0; n < NUM_PART_EFX + 1; ++n) {
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-            partfxinputl[n][i] = final ? 0.0 : denormalkillbuf[i];
-            partfxinputr[n][i] = final ? 0.0 : denormalkillbuf[i];
+            partfxinputl[n][i] = final ? 0.0f : denormalkillbuf[i];
+            partfxinputr[n][i] = final ? 0.0f : denormalkillbuf[i];
         }
     }
 }
@@ -302,15 +302,15 @@ void Part::NoteOn(unsigned char note,
         }
 
         //this computes the velocity sensing of the part
-        float vel = VelF(velocity / 127.0, Pvelsns);
+        float vel = VelF(velocity / 127.0f, Pvelsns);
 
         //compute the velocity offset
-        vel += (Pveloffs - 64.0) / 64.0;
-        if(vel < 0.0)
-            vel = 0.0;
+        vel += (Pveloffs - 64.0f) / 64.0f;
+        if(vel < 0.0f)
+            vel = 0.0f;
         else
-        if(vel > 1.0)
-            vel = 1.0;
+        if(vel > 1.0f)
+            vel = 1.0f;
 
         //compute the keyshift
         int partkeyshift = (int)Pkeyshift - 64;
@@ -320,15 +320,15 @@ void Part::NoteOn(unsigned char note,
         float notebasefreq;
         if(Pdrummode == 0) {
             notebasefreq = microtonal->getnotefreq(note, keyshift);
-            if(notebasefreq < 0.0)
+            if(notebasefreq < 0.0f)
                 return;                  //the key is no mapped
         }
         else
-            notebasefreq = 440.0 * pow(2.0, (note - 69.0) / 12.0);
+            notebasefreq = 440.0f * powf(2.0f, (note - 69.0f) / 12.0f);
         ;
 
         //Portamento
-        if(oldfreq < 1.0)
+        if(oldfreq < 1.0f)
             oldfreq = notebasefreq;           //this is only the first note is played
 
         // For Mono/Legato: Force Portamento Off on first
@@ -635,10 +635,10 @@ void Part::SetController(unsigned int type, int par)
             if(kit[item].adpars == NULL)
                 continue;
             kit[item].adpars->GlobalPar.Reson->
-            sendcontroller(C_resonance_center, 1.0);
+            sendcontroller(C_resonance_center, 1.0f);
 
             kit[item].adpars->GlobalPar.Reson->
-            sendcontroller(C_resonance_bandwidth, 1.0);
+            sendcontroller(C_resonance_bandwidth, 1.0f);
         }
         //more update to add here if I add controllers
         break;
@@ -849,8 +849,8 @@ void Part::ComputePartSmps()
 {
     for(unsigned nefx = 0; nefx < NUM_PART_EFX + 1; ++nefx) {
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-            partfxinputl[nefx][i] = 0.0;
-            partfxinputr[nefx][i] = 0.0;
+            partfxinputl[nefx][i] = 0.0f;
+            partfxinputr[nefx][i] = 0.0f;
         }
     }
 
@@ -909,18 +909,18 @@ void Part::ComputePartSmps()
 void Part::setPvolume(char Pvolume_)
 {
     Pvolume = Pvolume_;
-    volume  = dB2rap((Pvolume - 96.0) / 96.0 * 40.0) * ctl.expression.relvolume;
+    volume  = dB2rap((Pvolume - 96.0f) / 96.0f * 40.0f) * ctl.expression.relvolume;
 }
 
 void Part::setPpanning(char Ppanning_)
 {
     Ppanning = Ppanning_;
-    panning  = Ppanning / 127.0 + ctl.panning.pan;
-    if(panning < 0.0)
-        panning = 0.0;
+    panning  = Ppanning / 127.0f + ctl.panning.pan;
+    if(panning < 0.0f)
+        panning = 0.0f;
     else
-    if(panning > 1.0)
-        panning = 1.0;
+    if(panning > 1.0f)
+        panning = 1.0f;
 }
 
 /*

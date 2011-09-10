@@ -32,7 +32,7 @@ using namespace std;
 Sample::Sample()
     :bufferSize(1),buffer(new float[1])
 {
-    buffer[0] = 0.0;
+    buffer[0] = 0.0f;
 }
 
 Sample::Sample(const Sample &smp)
@@ -105,7 +105,7 @@ bool Sample::operator==(const Sample &smp) const
  * @param xb X of point b
  * @return estimated Y of test point
  */
-float linearEstimate(float ya, float yb, float xt, float xa = 0.0, float xb =1.0)
+float linearEstimate(float ya, float yb, float xt, float xa = 0.0f, float xb =1.0f)
 {
 #warning TODO this could be done with a good bit less computation
     //Lets make this simple by normalizing the x axis
@@ -130,7 +130,7 @@ void Sample::resample(const unsigned int rate, const unsigned int nrate)
     if(rate == nrate)
         return; //no resampling here
     else {//resampling occurs here
-        float ratio = (nrate * 1.0) / (rate * 1.0);
+        float ratio = (nrate * 1.0f) / (rate * 1.0f);
 
         int    nBufferSize = (int)bufferSize * ratio;
         float *nBuffer     = new float[nBufferSize];
@@ -171,7 +171,7 @@ Sample Sample::subSample(int a, int b) const
 
 float Sample::max() const
 {
-    float max = -1500; //a good low considering that samples should store values -1.0 to 1.0
+    float max = -1500; //a good low considering that samples should store values -1.0f to 1.0f
     for(int i = 0; i < bufferSize; ++i)
         if(buffer[i] > max)
             max = buffer[i];
@@ -180,7 +180,7 @@ float Sample::max() const
 
 float Sample::min() const
 {
-    float min = 1500; //a good high considering that samples should store values -1.0 to 1.0
+    float min = 1500; //a good high considering that samples should store values -1.0f to 1.0f
     for(int i = 0; i < bufferSize; ++i)
         if(buffer[i] < min)
             min = buffer[i];
