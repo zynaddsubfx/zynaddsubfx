@@ -22,7 +22,7 @@
 #ifndef UNISON_H
 #define UNISON_H
 #include <stdlib.h>
-#include "../globals.h"
+#include "../Misc/Util.h"
 
 #define UNISON_FREQ_SPAN 2.0f
 //how much the unison frequencies varies (always >= 1.0f)

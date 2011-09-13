@@ -852,8 +852,8 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
 
     //Harmonic Amplitude Randomness
     if((freqHz > 0.1f) && (!ADvsPAD)) {
-        unsigned int realrnd = rand();
-        srand(randseed);
+        unsigned int realrnd = prng();
+        sprng(randseed);
         float power     = Pamprandpower / 127.0f;
         float normalize = 1.0f / (1.2f - power);
         switch(Pamprandtype) {
@@ -872,7 +872,7 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
                     * normalize;
             break;
         }
-        srand(realrnd + 1);
+        sprng(realrnd + 1);
     }
 
     if((freqHz > 0.1f) && (resonance != 0))

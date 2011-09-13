@@ -20,10 +20,11 @@
 
 */
 
+#include "FilterParams.h"
+#include "../Misc/Util.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "FilterParams.h"
 
 FilterParams::FilterParams(unsigned char Ptype_,
                            unsigned char Pfreq_,

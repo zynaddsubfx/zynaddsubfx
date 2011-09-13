@@ -111,19 +111,19 @@ class SubNoteTest:public CxxTest::TestSuite
 
             note->noteout(outL, outR);
             sampleCount += SOUND_BUFFER_SIZE;
-            TS_ASSERT_DELTA(outL[255], 0.0022f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], 0.0016f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += SOUND_BUFFER_SIZE;
-            TS_ASSERT_DELTA(outL[255], -0.0020f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], -0.0000f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += SOUND_BUFFER_SIZE;
-            TS_ASSERT_DELTA(outL[255], 0.0010f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], -0.0013f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += SOUND_BUFFER_SIZE;
-            TS_ASSERT_DELTA(outL[255], 0.0005f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], -0.0002f, 0.0001f);
 
             while(!note->finished()) {
                 note->noteout(outL, outR);

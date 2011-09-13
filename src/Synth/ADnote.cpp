@@ -93,7 +93,7 @@ ADnote::ADnote(ADnoteParameters *pars,
         NoteGlobalPar.Punch.Enabled = 0;
 
     for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
-        pars->VoicePar[nvoice].OscilSmp->newrandseed(rand());
+        pars->VoicePar[nvoice].OscilSmp->newrandseed(prng());
         NoteVoicePar[nvoice].OscilSmp = NULL;
         NoteVoicePar[nvoice].FMSmp    = NULL;
         NoteVoicePar[nvoice].VoiceOut = NULL;
@@ -275,7 +275,7 @@ ADnote::ADnote(ADnoteParameters *pars,
         if(pars->VoicePar[nvoice].Pextoscil != -1)
             vc = pars->VoicePar[nvoice].Pextoscil;
         if(!pars->GlobalPar.Hrandgrouping)
-            pars->VoicePar[vc].OscilSmp->newrandseed(rand());
+            pars->VoicePar[vc].OscilSmp->newrandseed(prng());
         int oscposhi_start =
             pars->VoicePar[vc].OscilSmp->get(NoteVoicePar[nvoice].OscilSmp,
                                              getvoicebasefreq(nvoice),
@@ -478,7 +478,7 @@ void ADnote::legatonote(float freq, float velocity, int portamento_,
         if(pars->VoicePar[nvoice].Pextoscil != -1)
             vc = pars->VoicePar[nvoice].Pextoscil;
         if(!pars->GlobalPar.Hrandgrouping)
-            pars->VoicePar[vc].OscilSmp->newrandseed(rand());
+            pars->VoicePar[vc].OscilSmp->newrandseed(prng());
 
         pars->VoicePar[vc].OscilSmp->get(NoteVoicePar[nvoice].OscilSmp,
                                          getvoicebasefreq(nvoice),
@@ -605,7 +605,7 @@ void ADnote::legatonote(float freq, float velocity, int portamento_,
         /* Voice Modulation Parameters Init */
         if((NoteVoicePar[nvoice].FMEnabled != NONE)
            && (NoteVoicePar[nvoice].FMVoice < 0)) {
-            partparams->VoicePar[nvoice].FMSmp->newrandseed(rand());
+            partparams->VoicePar[nvoice].FMSmp->newrandseed(prng());
 
             //Perform Anti-aliasing only on MORPH or RING MODULATION
 
@@ -614,7 +614,7 @@ void ADnote::legatonote(float freq, float velocity, int portamento_,
                 vc = partparams->VoicePar[nvoice].PextFMoscil;
 
             if(!partparams->GlobalPar.Hrandgrouping)
-                partparams->VoicePar[vc].FMSmp->newrandseed(rand());
+                partparams->VoicePar[vc].FMSmp->newrandseed(prng());
 
             for(int i = 0; i < OSCIL_SMP_EXTRA_SAMPLES; ++i)
                 NoteVoicePar[nvoice].FMSmp[OSCIL_SIZE + i] = 
@@ -777,7 +777,7 @@ void ADnote::initparameters()
 
         /* Voice Modulation Parameters Init */
         if((vce.FMEnabled != NONE) && (vce.FMVoice < 0)) {
-            param.FMSmp->newrandseed(rand());
+            param.FMSmp->newrandseed(prng());
             vce.FMSmp = new float[OSCIL_SIZE + OSCIL_SMP_EXTRA_SAMPLES];
 
             //Perform Anti-aliasing only on MORPH or RING MODULATION
@@ -793,7 +793,7 @@ void ADnote::initparameters()
                 tmp = getFMvoicebasefreq(nvoice);
 
             if(!partparams->GlobalPar.Hrandgrouping)
-                partparams->VoicePar[vc].FMSmp->newrandseed(rand());
+                partparams->VoicePar[vc].FMSmp->newrandseed(prng());
 
             for(int k = 0; k < unison_size[nvoice]; ++k)
                 oscposhiFM[nvoice][k] = (oscposhi[nvoice][k]

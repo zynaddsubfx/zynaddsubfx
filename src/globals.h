@@ -24,6 +24,7 @@
 
 #ifndef GLOBALS_H
 #define GLOBALS_H
+#include <stdint.h>
 
 /**Sampling rate*/
 extern int SAMPLE_RATE;
@@ -170,11 +171,6 @@ extern int OSCIL_SIZE;
  */
 #define dB2rap(dB) ((expf((dB) * LOG_10 / 20.0f)))
 #define rap2dB(rap) ((20 * logf(rap) / LOG_10))
-
-/*
- * The random generator (0.0f..1.0f)
- */
-#define RND (rand() / (RAND_MAX * 1.0f))
 
 #define ZERO(data, size) {char *data_ = (char *) data; for(int i = 0; \
                                                            i < size; \

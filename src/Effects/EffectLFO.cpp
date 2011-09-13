@@ -20,11 +20,11 @@
 
 */
 
+#include "EffectLFO.h"
+#include "../Misc/Util.h"
+
 #include <cstdlib>
 #include <cmath>
-
-#include "EffectLFO.h"
-
 
 EffectLFO::EffectLFO()
 {

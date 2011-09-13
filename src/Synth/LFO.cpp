@@ -20,12 +20,12 @@
 
 */
 
+#include "LFO.h"
+#include "../Misc/Util.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-
-#include "LFO.h"
-
 
 LFO::LFO(LFOParams *lfopars, float basefreq)
 {

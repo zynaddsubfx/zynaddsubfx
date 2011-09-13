@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
     OSCIL_SIZE  = config.cfg.OscilSize;
     swaplr      = config.cfg.SwapStereo;
 
-    srand(time(NULL));
+    sprng(time(NULL));
     //produce denormal buf
     denormalkillbuf = new float [SOUND_BUFFER_SIZE];
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)

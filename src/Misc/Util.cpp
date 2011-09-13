@@ -35,9 +35,10 @@
 #include <sched.h>
 
 
-int SAMPLE_RATE = 44100;
+int SAMPLE_RATE       = 44100;
 int SOUND_BUFFER_SIZE = 256;
-int OSCIL_SIZE  = 1024;
+int OSCIL_SIZE        = 1024;
+prng_t prng_state     = 0x1234;
 
 Config    config;
 float *denormalkillbuf;

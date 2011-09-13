@@ -27,10 +27,11 @@
 //this file contains code used from trivial_synth.c from
 //the DSSI (published by Steve Harris under public domain) as a template.
 
-#include <string.h>
 #include "DSSIaudiooutput.h"
 #include "../Misc/Config.h"
 #include "../Misc/Bank.h"
+#include "../Misc/Util.h"
+#include <string.h>
 #include <limits.h>
 
 using std::string;
@@ -603,7 +604,7 @@ DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate)
 
     config.init();
 
-    srand(time(NULL));
+    sprng(time(NULL));
     denormalkillbuf=new float [SOUND_BUFFER_SIZE];
     for (int i=0;i<SOUND_BUFFER_SIZE;i++) denormalkillbuf[i]=(RND-0.5f)*1e-16;
 

@@ -20,7 +20,7 @@
 
 */
 
-#include "../globals.h"
+#include "../Misc/Util.h"
 
 #include <cstdlib>
 #include <cstdio>
@@ -31,11 +31,11 @@ class RandTest:public CxxTest::TestSuite
     public:
         void testPRNG(void) {
             //verify RND returns expected pattern when unseeded
-            TS_ASSERT_DELTA(RND, 0.840188f, 0.00001f);
-            TS_ASSERT_DELTA(RND, 0.394383f, 0.00001f);
-            TS_ASSERT_DELTA(RND, 0.783099f, 0.00001f);
-            TS_ASSERT_DELTA(RND, 0.798440f, 0.00001f);
-            TS_ASSERT_DELTA(RND, 0.911647f, 0.00001f);
+            TS_ASSERT_DELTA(RND, 0.607781, 0.00001);
+            TS_ASSERT_DELTA(RND, 0.591761, 0.00001);
+            TS_ASSERT_DELTA(RND, 0.186133, 0.00001);
+            TS_ASSERT_DELTA(RND, 0.286319, 0.00001);
+            TS_ASSERT_DELTA(RND, 0.511766, 0.00001);
         }
 };
 
