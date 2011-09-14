@@ -379,8 +379,8 @@ void Reverb::settype(unsigned char Ptype)
     bandwidth = NULL;
     if(Ptype == 2) { //bandwidth
         bandwidth = new Unison(SOUND_BUFFER_SIZE / 4 + 1, 2.0f);
-        bandwidth->set_size(50);
-        bandwidth->set_base_frequency(1.0f);
+        bandwidth->setSize(50);
+        bandwidth->setBaseFrequency(1.0f);
 #warning sa schimb size-ul
     }
 }
@@ -402,7 +402,7 @@ void Reverb::setbandwidth(unsigned char Pbandwidth) {
     this->Pbandwidth = Pbandwidth;
     float v = Pbandwidth / 127.0f;
     if(bandwidth)
-        bandwidth->set_bandwidth(powf(v, 2.0f) * 200.0f);
+        bandwidth->setBandwidth(powf(v, 2.0f) * 200.0f);
 }
 
 void Reverb::setpreset(unsigned char npreset)

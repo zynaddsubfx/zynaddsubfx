@@ -28,22 +28,19 @@
 #include "../Misc/Util.h"
 #include "SVFilter.h"
 
-SVFilter::SVFilter(unsigned char Ftype,
-                   float Ffreq,
-                   float Fq,
+SVFilter::SVFilter(unsigned char Ftype, float Ffreq, float Fq,
                    unsigned char Fstages)
+    :type(Ftype),
+      stages(Fstages),
+      freq(Ffreq),
+      q(Fq),
+      gain(1.0f),
+      needsinterpolation(false),
+      firsttime(true)
 {
-    assert(Ftype < 4);
-    stages  = Fstages;
-    type    = Ftype;
-    freq    = Ffreq;
-    q       = Fq;
-    gain    = 1.0f;
-    outgain = 1.0f;
-    needsinterpolation = false;
-    firsttime = true;
     if(stages >= MAX_FILTER_STAGES)
         stages = MAX_FILTER_STAGES;
+    outgain = 1.0f;
     cleanup();
     setfreq_and_q(Ffreq, Fq);
 }
@@ -53,24 +50,20 @@ SVFilter::~SVFilter()
 
 void SVFilter::cleanup()
 {
-    for(int i = 0; i < MAX_FILTER_STAGES + 1; ++i) {
-        st[i].low   = 0.0f;
-        st[i].high  = 0.0f;
-        st[i].band  = 0.0f;
-        st[i].notch = 0.0f;
-    }
+    for(int i = 0; i < MAX_FILTER_STAGES + 1; ++i)
+        st[i].low = st[i].high = st[i].band = st[i].notch = 0.0f;
     oldabovenq = false;
     abovenq    = false;
 }
 
-void SVFilter::computefiltercoefs()
+void SVFilter::computefiltercoefs(void)
 {
     par.f = freq / SAMPLE_RATE * 4.0f;
     if(par.f > 0.99999f)
         par.f = 0.99999f;
-    par.q      = 1.0f - atanf(sqrt(q)) * 2.0f / PI;
+    par.q      = 1.0f - atanf(sqrtf(q)) * 2.0f / PI;
     par.q      = powf(par.q, 1.0f / (stages + 1));
-    par.q_sqrt = sqrt(par.q);
+    par.q_sqrt = sqrtf(par.q);
 }
 
 
@@ -89,9 +82,9 @@ void SVFilter::setfreq(float frequency)
 
     //if the frequency is changed fast, it needs interpolation
     if((rap > 3.0f) || nyquistthresh) { //(now, filter and coeficients backup)
-        ipar = par;
         if(!firsttime)
             needsinterpolation = true;
+        ipar = par;
     }
     freq = frequency;
     computefiltercoefs();
@@ -156,8 +149,7 @@ void SVFilter::singlefilterout(float *smp, fstage &x, parameters &par)
         x.high  = par.q_sqrt * smp[i] - x.low - par.q * x.band;
         x.band  = par.f * x.high + x.band;
         x.notch = x.high + x.low;
-
-        smp[i] = *out;
+        smp[i]  = *out;
     }
 }
 

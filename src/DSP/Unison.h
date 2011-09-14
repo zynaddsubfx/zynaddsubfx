@@ -21,11 +21,11 @@
 
 #ifndef UNISON_H
 #define UNISON_H
-#include <stdlib.h>
+
 #include "../Misc/Util.h"
 
+//how much the unison frequencies varies (always >= 1.0)
 #define UNISON_FREQ_SPAN 2.0f
-//how much the unison frequencies varies (always >= 1.0f)
 
 class Unison
 {
@@ -33,23 +33,26 @@ class Unison
         Unison(int update_period_samples_, float max_delay_sec_);
         ~Unison();
 
-        void set_size(int new_size);
-        void set_base_frequency(float freq);
-        void set_bandwidth(float bandwidth_cents);
+        void setSize(int new_size);
+        void setBaseFrequency(float freq);
+        void setBandwidth(float bandwidth_cents);
 
         void process(int bufsize, float *inbuf, float *outbuf = NULL);
 
     private:
-        void update_parameters();
-        void update_unison_data();
+        void updateParameters(void);
+        void updateUnisonData(void);
 
         int   unison_size;
         float base_freq;
         struct UnisonVoice {
-            float step, position; //base LFO
-            float realpos1, realpos2; //the position regarding samples
+            float step;     //base LFO
+            float position;
+            float realpos1; //the position regarding samples
+            float realpos2;
             float relative_amplitude;
-            float lin_fpos, lin_ffreq;
+            float lin_fpos;
+            float lin_ffreq;
             UnisonVoice() {
                  position = RND * 1.8f - 0.9f;
                  realpos1 = 0.0f;
@@ -58,7 +61,9 @@ class Unison
                  relative_amplitude = 1.0f;
             }
         } *uv;
-        int    update_period_samples, update_period_sample_k;
+
+        int    update_period_samples;
+        int    update_period_sample_k;
         int    max_delay, delay_k;
         bool   first_time;
         float *delay_buffer;

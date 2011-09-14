@@ -96,17 +96,16 @@ void FormantFilter::setpos(float input)
         slowinput = slowinput
                     * (1.0f - formantslowness) + input * formantslowness;
 
-    if((fabs(oldinput - input) < 0.001f) && (fabs(slowinput - input) < 0.001f)
-       && (fabs(Qfactor - oldQfactor) < 0.001f)) {
-//	oldinput=input; daca setez asta, o sa faca probleme la schimbari foarte lente
+    if((fabsf(oldinput - input) < 0.001f) && (fabsf(slowinput - input) < 0.001f)
+       && (fabsf(Qfactor - oldQfactor) < 0.001f)) {
+        //	oldinput=input; daca setez asta, o sa faca probleme la schimbari foarte lente
         firsttime = 0;
         return;
     }
     else
         oldinput = input;
 
-
-    float pos = fmod(input * sequencestretch, 1.0f);
+    float pos = fmodf(input * sequencestretch, 1.0f);
     if(pos < 0.0f)
         pos += 1.0f;
 
@@ -115,7 +114,7 @@ void FormantFilter::setpos(float input)
     if(p1 < 0)
         p1 += sequencesize;
 
-    pos = fmod(pos * sequencesize, 1.0f);
+    pos = fmodf(pos * sequencesize, 1.0f);
     if(pos < 0.0f)
         pos = 0.0f;
     else
@@ -131,14 +130,14 @@ void FormantFilter::setpos(float input)
 
     if(firsttime != 0) {
         for(int i = 0; i < numformants; ++i) {
-            currentformants[i].freq = formantpar[p1][i].freq
-                                      * (1.0f
-                                         - pos) + formantpar[p2][i].freq * pos;
-            currentformants[i].amp = formantpar[p1][i].amp
-                                     * (1.0f
-                                        - pos) + formantpar[p2][i].amp * pos;
-            currentformants[i].q = formantpar[p1][i].q
-                                   * (1.0f - pos) + formantpar[p2][i].q * pos;
+            currentformants[i].freq =
+                formantpar[p1][i].freq
+                * (1.0f - pos) + formantpar[p2][i].freq * pos;
+            currentformants[i].amp =
+                formantpar[p1][i].amp
+                * (1.0f - pos) + formantpar[p2][i].amp * pos;
+            currentformants[i].q =
+                formantpar[p1][i].q * (1.0f - pos) + formantpar[p2][i].q * pos;
             formant[i]->setfreq_and_q(currentformants[i].freq,
                                       currentformants[i].q * Qfactor);
             oldformantamp[i] = currentformants[i].amp;
@@ -147,26 +146,22 @@ void FormantFilter::setpos(float input)
     }
     else
         for(int i = 0; i < numformants; ++i) {
-            currentformants[i].freq = currentformants[i].freq
-                                      * (1.0f - formantslowness)
-                                      + (formantpar[p1][i].freq
-                                         * (1.0f
-                                            - pos) + formantpar[p2][i].freq
-                                         * pos) * formantslowness;
+            currentformants[i].freq =
+                currentformants[i].freq * (1.0f - formantslowness)
+                + (formantpar[p1][i].freq
+                        * (1.0f - pos) + formantpar[p2][i].freq * pos)
+                * formantslowness;
 
-            currentformants[i].amp = currentformants[i].amp
-                                     * (1.0f - formantslowness)
-                                     + (formantpar[p1][i].amp
-                                        * (1.0f
-                                           - pos) + formantpar[p2][i].amp
-                                        * pos) * formantslowness;
+            currentformants[i].amp =
+                currentformants[i].amp * (1.0f - formantslowness)
+                + (formantpar[p1][i].amp * (1.0f - pos)
+                        + formantpar[p2][i].amp * pos) * formantslowness;
 
             currentformants[i].q = currentformants[i].q
-                                   * (1.0f - formantslowness)
-                                   + (formantpar[p1][i].q
-                                      * (1.0f
-                                         - pos) + formantpar[p2][i].q
-                                      * pos) * formantslowness;
+                * (1.0f - formantslowness)
+                + (formantpar[p1][i].q * (1.0f - pos)
+                        + formantpar[p2][i].q * pos) * formantslowness;
+
 
             formant[i]->setfreq_and_q(currentformants[i].freq,
                                       currentformants[i].q * Qfactor);

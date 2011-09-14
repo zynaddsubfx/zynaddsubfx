@@ -19,36 +19,38 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 */
 
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstring>
+
 #include "Unison.h"
 
-Unison::Unison(int update_period_samples_, float max_delay_sec_) {
-    update_period_samples = update_period_samples_;
-    max_delay = (int)(max_delay_sec_ * (float)SAMPLE_RATE + 1);
+Unison::Unison(int update_period_samples_, float max_delay_sec_)
+    :unison_size(0),
+    base_freq(1.0f),
+    uv(NULL),
+    update_period_samples(update_period_samples_),
+    update_period_sample_k(0),
+    max_delay((int)(max_delay_sec_ * (float)SAMPLE_RATE + 1)),
+    delay_k(0),
+    first_time(false),
+    delay_buffer(NULL),
+    unison_amplitude_samples(0.0f),
+    unison_bandwidth_cents(10.0f)
+{
     if(max_delay < 10)
         max_delay = 10;
     delay_buffer = new float[max_delay];
-    delay_k      = 0;
-    base_freq    = 1.0f;
-    unison_bandwidth_cents = 10.0f;
-
-    ZERO_float(delay_buffer, max_delay);
-
-    uv = NULL;
-    update_period_sample_k = 0;
-    first_time = 0;
-
-    set_size(1);
+    memset(delay_buffer, 0, max_delay * sizeof(float));
+    setSize(1);
 }
 
 Unison::~Unison() {
     delete [] delay_buffer;
-    if(uv)
-        delete [] uv;
+    delete [] uv;
 }
 
-void Unison::set_size(int new_size) {
+void Unison::setSize(int new_size)
+{
     if(new_size < 1)
         new_size = 1;
     unison_size = new_size;
@@ -56,28 +58,30 @@ void Unison::set_size(int new_size) {
         delete [] uv;
     uv = new UnisonVoice[unison_size];
     first_time = true;
-    update_parameters();
+    updateParameters();
 }
 
-void Unison::set_base_frequency(float freq) {
+void Unison::setBaseFrequency(float freq)
+{
     base_freq = freq;
-    update_parameters();
+    updateParameters();
 }
 
-void Unison::set_bandwidth(float bandwidth) {
+void Unison::setBandwidth(float bandwidth)
+{
     if(bandwidth < 0)
         bandwidth = 0.0f;
     if(bandwidth > 1200.0f)
         bandwidth = 1200.0f;
 
-    printf("bandwidth %g\n", bandwidth);
 #warning \
     : todo: if bandwidth is too small the audio will be self canceled (because of the sign change of the outputs)
     unison_bandwidth_cents = bandwidth;
-    update_parameters();
+    updateParameters();
 }
 
-void Unison::update_parameters() {
+void Unison::updateParameters(void)
+{
     if(!uv)
         return;
     float increments_per_second = SAMPLE_RATE
@@ -95,47 +99,44 @@ void Unison::update_parameters() {
     }
 
     float max_speed = powf(2.0f, unison_bandwidth_cents / 1200.0f);
-    unison_amplitude_samples = 0.125f
-                               * (max_speed - 1.0f) * SAMPLE_RATE / base_freq;
-    printf("unison_amplitude_samples %g\n", unison_amplitude_samples);
+    unison_amplitude_samples = 0.125f * (max_speed - 1.0f)
+        * SAMPLE_RATE / base_freq;
 
 #warning \
     todo: test if unison_amplitude_samples is to big and reallocate bigger memory
     if(unison_amplitude_samples >= max_delay - 1)
         unison_amplitude_samples = max_delay - 2;
 
-    update_unison_data();
+    updateUnisonData();
 }
 
-void Unison::process(int bufsize, float *inbuf, float *outbuf) {
+void Unison::process(int bufsize, float *inbuf, float *outbuf)
+{
     if(!uv)
         return;
     if(!outbuf)
         outbuf = inbuf;
 
-    float volume    = 1.0f / sqrt(unison_size);
+    float volume    = 1.0f / sqrtf(unison_size);
     float xpos_step = 1.0f / (float) update_period_samples;
     float xpos      = (float) update_period_sample_k * xpos_step;
     for(int i = 0; i < bufsize; ++i) {
-        if((update_period_sample_k++) >= update_period_samples) {
-            update_unison_data();
+        if(update_period_sample_k++ >= update_period_samples) {
+            updateUnisonData();
             update_period_sample_k = 0;
             xpos = 0.0f;
         }
         xpos += xpos_step;
-        float in = inbuf[i], out = 0.0f;
-
+        float in   = inbuf[i], out = 0.0f;
         float sign = 1.0f;
         for(int k = 0; k < unison_size; ++k) {
-            float vpos = uv[k].realpos1
-                         * (1.0f - xpos) + uv[k].realpos2 * xpos;        //optimize
-            float pos = delay_k + max_delay - vpos - 1.0f;  //optimize
+            float vpos = uv[k].realpos1 * (1.0f - xpos) + uv[k].realpos2 * xpos;        //optimize
+            float pos  = (float)(delay_k + max_delay) - vpos - 1.0f;
             int   posi;
-            float posf;
             F2I(pos, posi); //optimize!
             if(posi >= max_delay)
                 posi -= max_delay;
-            posf = pos - floor(pos);
+            float posf = pos - floorf(pos);
             out +=
                 ((1.0f
                   - posf) * delay_buffer[posi] + posf
@@ -145,12 +146,12 @@ void Unison::process(int bufsize, float *inbuf, float *outbuf) {
         outbuf[i] = out * volume;
 //		printf("%d %g\n",i,outbuf[i]);
         delay_buffer[delay_k] = in;
-        if((++delay_k) >= max_delay)
-            delay_k = 0;
+        delay_k = (++delay_k < max_delay) ? delay_k : 0;
     }
 }
 
-void Unison::update_unison_data() {
+void Unison::updateUnisonData()
+{
     if(!uv)
         return;
 
@@ -162,7 +163,7 @@ void Unison::update_unison_data() {
             pos  = -1.0f;
             step = -step;
         }
-        if(pos >= 1.0f) {
+        else if(pos >= 1.0f) {
             pos  = 1.0f;
             step = -step;
         }
@@ -172,9 +173,8 @@ void Unison::update_unison_data() {
 #warning \
         I have to enlarge (reallocate) the buffer to make place for the whole delay
         float newval = 1.0f + 0.5f
-                       * (vibratto_val
-                          + 1.0f) * unison_amplitude_samples
-                       * uv[k].relative_amplitude;
+            * (vibratto_val + 1.0f) * unison_amplitude_samples
+            * uv[k].relative_amplitude;
 
         if(first_time)
             uv[k].realpos1 = uv[k].realpos2 = newval;
@@ -186,6 +186,5 @@ void Unison::update_unison_data() {
         uv[k].position = pos;
         uv[k].step     = step;
     }
-    if(first_time)
-        first_time = false;
+    first_time = false;
 }

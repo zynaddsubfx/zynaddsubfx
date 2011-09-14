@@ -38,9 +38,13 @@ class FormantFilter:public Filter
         void setq(float q_);
         void setgain(float dBgain);
 
-        void cleanup();
+        void cleanup(void);
+
     private:
-        class AnalogFilter * formant[FF_MAX_FORMANTS];
+        void setpos(float input);
+
+
+        class AnalogFilter *formant[FF_MAX_FORMANTS];
 
         struct {
             float freq, amp, q; //frequency,amplitude,Q
@@ -57,8 +61,6 @@ class FormantFilter:public Filter
         float oldinput, slowinput;
         float Qfactor, formantslowness, oldQfactor;
         float vowelclearness, sequencestretch;
-
-        void setpos(float input);
 };
 
 #endif

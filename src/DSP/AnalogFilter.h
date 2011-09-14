@@ -34,9 +34,7 @@
 class AnalogFilter:public Filter
 {
     public:
-        AnalogFilter(unsigned char Ftype,
-                     float Ffreq,
-                     float Fq,
+        AnalogFilter(unsigned char Ftype, float Ffreq, float Fq,
                      unsigned char Fstages);
         ~AnalogFilter();
         void filterout(float *smp);
@@ -66,15 +64,15 @@ class AnalogFilter:public Filter
         //Apply IIR filter to Samples, with coefficients, and past history
         void singlefilterout(float *smp, fstage &hist, const Coeff &coeff);
         //Update coeff and order
-        void computefiltercoefs();
+        void computefiltercoefs(void);
 
-        int   type;      //The type of the filter (LPF1,HPF1,LPF2,HPF2...)
-        int   stages;    //how many times the filter is applied (0->1,1->2,etc.)
+        int   type;   //The type of the filter (LPF1,HPF1,LPF2,HPF2...)
+        int   stages; //how many times the filter is applied (0->1,1->2,etc.)
         float freq;   //Frequency given in Hz
         float q;      //Q factor (resonance or Q factor)
         float gain;   //the gain of the filter (if are shelf/peak) filters
 
-        int order;       //the order of the filter (number of poles)
+        int order; //the order of the filter (number of poles)
 
         bool needsinterpolation,      //Interpolation between coeff changes
              firsttime;               //First Iteration of filter
