@@ -64,9 +64,9 @@ struct ADnoteGlobalParam {
     unsigned short int PCoarseDetune; //coarse detune+octave
     unsigned char      PDetuneType; //detune type
 
-    unsigned char      PBandwidth; //how much the relative fine detunes of the voices are changed
+    unsigned char PBandwidth;      //how much the relative fine detunes of the voices are changed
 
-    EnvelopeParams    *FreqEnvelope; //Frequency Envelope
+    EnvelopeParams *FreqEnvelope;    //Frequency Envelope
 
     LFOParams *FreqLfo; //Frequency LFO
 
@@ -78,18 +78,18 @@ struct ADnoteGlobalParam {
               1 - left
              64 - center
             127 - right */
-    unsigned char   PPanning;
+    unsigned char PPanning;
 
-    unsigned char   PVolume;
+    unsigned char PVolume;
 
-    unsigned char   PAmpVelocityScaleFunction;
+    unsigned char PAmpVelocityScaleFunction;
 
     EnvelopeParams *AmpEnvelope;
 
-    LFOParams      *AmpLfo;
+    LFOParams *AmpLfo;
 
-    unsigned char   PPunchStrength, PPunchTime, PPunchStretch,
-                    PPunchVelocitySensing;
+    unsigned char PPunchStrength, PPunchTime, PPunchStretch,
+                  PPunchVelocitySensing;
 
     /******************************************
     *        FILTER GLOBAL PARAMETERS        *
@@ -100,11 +100,11 @@ struct ADnoteGlobalParam {
     unsigned char PFilterVelocityScale;
 
     // filter velocity sensing
-    unsigned char   PFilterVelocityScaleFunction;
+    unsigned char PFilterVelocityScaleFunction;
 
     EnvelopeParams *FilterEnvelope;
 
-    LFOParams      *FilterLfo;
+    LFOParams *FilterLfo;
 
     // RESONANCE
     Resonance *Reson;
@@ -120,7 +120,7 @@ struct ADnoteGlobalParam {
 /***********************************************************/
 struct ADnoteVoiceParam {
     void getfromXML(XMLwrapper *xml, unsigned nvoice);
-    void add2XML(XMLwrapper *xml,bool fmoscilused);
+    void add2XML(XMLwrapper *xml, bool fmoscilused);
     void defaults();
     void enable(FFTwrapper *fft, Resonance *Reson);
     void kill();
@@ -285,7 +285,7 @@ struct ADnoteVoiceParam {
     EnvelopeParams *FMAmpEnvelope;
 };
 
-class ADnoteParameters : public PresetsArray
+class ADnoteParameters:public PresetsArray
 {
     public:
         ADnoteParameters(FFTwrapper *fft_);
@@ -314,4 +314,3 @@ class ADnoteParameters : public PresetsArray
 };
 
 #endif
-

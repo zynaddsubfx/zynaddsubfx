@@ -66,10 +66,10 @@ void Alienwah::out(const Stereo<float *> &smp)
         //left
         complex<float> tmp = clfol * x + oldclfol * x1;
 
-        complex<float>out = tmp * oldl[oldk];
+        complex<float> out = tmp * oldl[oldk];
         out.real() += (1 - fabs(fb)) * smp.l[i] * pangainL;
 
-        oldl[oldk]  = out;
+        oldl[oldk] = out;
         float l = out.real() * 10.0f * (fb + 0.1f);
 
         //right
@@ -78,7 +78,7 @@ void Alienwah::out(const Stereo<float *> &smp)
         out = tmp * oldr[oldk];
         out.real() += (1 - fabs(fb)) * smp.r[i] * pangainR;
 
-        oldr[oldk]  = out;
+        oldr[oldk] = out;
         float r = out.real() * 10.0f * (fb + 0.1f);
 
 
@@ -164,13 +164,13 @@ void Alienwah::setpreset(unsigned char npreset)
     const int     NUM_PRESETS = 4;
     unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //AlienWah1
-        {127, 64,  70, 0,   0,   62,  60,   105,  25,  0, 64},
+        {127, 64, 70, 0,   0, 62,  60,  105, 25, 0, 64},
         //AlienWah2
-        {127, 64,  73, 106, 0,   101, 60,   105,  17,  0, 64},
+        {127, 64, 73, 106, 0, 101, 60,  105, 17, 0, 64},
         //AlienWah3
-        {127, 64,  63, 0,   1,   100, 112,  105,  31,  0, 42},
+        {127, 64, 63, 0,   1, 100, 112, 105, 31, 0, 42},
         //AlienWah4
-        {93,  64,  25, 0,   1,   66,  101,  11,   47,  0, 86}
+        {93,  64, 25, 0,   1, 66,  101, 11,  47, 0, 86}
     };
 
     if(npreset >= NUM_PRESETS)

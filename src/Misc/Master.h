@@ -33,13 +33,15 @@
 #include "Dump.h"
 #include "XMLwrapper.h"
 
-typedef enum { MUTEX_TRYLOCK, MUTEX_LOCK, MUTEX_UNLOCK } lockset;
+typedef enum {
+    MUTEX_TRYLOCK, MUTEX_LOCK, MUTEX_UNLOCK
+} lockset;
 
 extern Dump dump;
 
 typedef struct vuData_t {
     float outpeakl, outpeakr, maxoutpeakl, maxoutpeakr,
-             rmspeakl, rmspeakr;
+          rmspeakl, rmspeakr;
     int clipped;
 } vuData;
 
@@ -142,15 +144,15 @@ class Master
 
         //peaks for part VU-meters
         /**\todo synchronize this with a mutex*/
-        float      vuoutpeakpart[NUM_MIDI_PARTS];
+        float vuoutpeakpart[NUM_MIDI_PARTS];
         unsigned char fakepeakpart[NUM_MIDI_PARTS]; //this is used to compute the "peak" when the part is disabled
 
         Controller ctl;
-        bool swaplr; //if L and R are swapped
+        bool       swaplr; //if L and R are swapped
 
         //other objects
         Microtonal microtonal;
-        Bank bank;
+        Bank       bank;
 
         FFTwrapper     *fft;
         pthread_mutex_t mutex;
@@ -158,14 +160,13 @@ class Master
 
 
     private:
-        bool nullRun;
+        bool   nullRun;
         vuData vu;
-        float volume;
-        float sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
-        float sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
-        int keyshift;
+        float  volume;
+        float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
+        float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
+        int    keyshift;
 };
 
 
 #endif
-

@@ -43,33 +43,34 @@ class SynthNote
         virtual int finished() const = 0;
 
         virtual void legatonote(float freq, float velocity,
-                int portamento_, int midinote_, bool externcall) = 0;
+                                int portamento_, int midinote_,
+                                bool externcall) = 0;
     protected:
         // Legato transitions
-        class Legato{
+        class Legato
+        {
             public:
                 Legato(float freq, float vel, int port,
-                        int note, bool quiet);
+                       int note, bool quiet);
 
                 void apply(SynthNote &note, float *outl, float *outr);
                 int update(float freq, float velocity, int portamento_,
-                        int midinote_, bool externalcall);
+                           int midinote_, bool externalcall);
 
             private:
                 bool      silent;
-                float  lastfreq;
+                float     lastfreq;
                 LegatoMsg msg;
-                int decounter;
+                int       decounter;
                 struct { // Fade In/Out vars
-                    int      length;
+                    int   length;
                     float m, step;
                 } fade;
                 struct { // Note parameters
                     float freq, vel;
-                    int      portamento, midinote;
+                    int   portamento, midinote;
                 } param;
         } legato;
 };
 
 #endif
-

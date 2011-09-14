@@ -156,4 +156,3 @@ class SubNoteTest:public CxxTest::TestSuite
         }
 #endif
 };
-

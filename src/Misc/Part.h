@@ -132,7 +132,7 @@ class Part
         float *partoutr; //Right channel output of the part
 
         float *partfxinputl[NUM_PART_EFX + 1], //Left and right signal that pass thru part effects;
-                 *partfxinputr[NUM_PART_EFX + 1]; //partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
+        *partfxinputr[NUM_PART_EFX + 1];          //partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
 
         enum NoteStatus {
             KEY_OFF, KEY_PLAYING, KEY_RELASED_AND_SUSTAINED, KEY_RELASED
@@ -165,10 +165,10 @@ class Part
             int note; //if there is no note playing, the "note"=-1
             int itemsplaying;
             struct {
-                SynthNote  *adnote,
-                           *subnote,
-                           *padnote;
-                int      sendtoparteffect;
+                SynthNote *adnote,
+                *subnote,
+                *padnote;
+                int sendtoparteffect;
             } kititem[NUM_KIT_ITEMS];
             int time;
         };
@@ -189,10 +189,9 @@ class Part
 
         PartNotes partnote[POLIPHONY];
 
-        float    oldfreq; //this is used for portamento
+        float oldfreq;    //this is used for portamento
         Microtonal *microtonal;
         FFTwrapper *fft;
 };
 
 #endif
-

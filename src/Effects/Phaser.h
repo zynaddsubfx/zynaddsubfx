@@ -45,7 +45,7 @@ class Phaser:public Effect
 
     private:
         //Phaser parameters
-        EffectLFO lfo;              //Phaser modulator
+        EffectLFO     lfo;          //Phaser modulator
         unsigned char Pvolume;      //Used to set wet/dry mix
         unsigned char Pdistortion;  //Model distortion added by FET element
         unsigned char Pdepth;       //Depth of phaser sweep
@@ -69,14 +69,14 @@ class Phaser:public Effect
         void setphase(unsigned char Pphase);
 
         //Internal Variables
-        bool barber; //Barber pole phasing flag
+        bool  barber; //Barber pole phasing flag
         float distortion, width, offsetpct;
         float feedback, depth, phase;
         Stereo<float *> old, xn1, yn1;
-        Stereo<float> diff, oldgain, fb;
+        Stereo<float>   diff, oldgain, fb;
         float invperiod;
         float offset[12];
-        
+
         float mis;
         float Rmin;     // 3N5457 typical on resistance at Vgs = 0
         float Rmax;     // Resistor parallel to FET
@@ -89,11 +89,10 @@ class Phaser:public Effect
         void AnalogPhase(const Stereo<float *> &input);
         //analog case
         float applyPhase(float x, float g, float fb,
-                            float &hpf, float *yn1, float *xn1);
+                         float &hpf, float *yn1, float *xn1);
 
         void normalPhase(const Stereo<float *> &input);
         float applyPhase(float x, float g, float *old);
 };
 
 #endif
-

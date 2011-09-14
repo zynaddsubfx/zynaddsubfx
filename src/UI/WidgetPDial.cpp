@@ -15,22 +15,23 @@
 
 using namespace std;
 
-class TipWin : public Fl_Menu_Window {
+class TipWin:public Fl_Menu_Window
+{
     public:
         TipWin();
         void draw();
         void showValue(float f);
-        void setText(const char * c);
+        void setText(const char *c);
         void showText();
     private:
         void redraw();
         const char *getStr() const;
         string tip;
         string text;
-        bool textmode;
+        bool   textmode;
 };
 
-TipWin::TipWin():Fl_Menu_Window(1,1)
+TipWin::TipWin():Fl_Menu_Window(1, 1)
 {
     set_override();
     end();
@@ -44,7 +45,8 @@ void TipWin::draw()
     fl_font(labelfont(), labelsize());
 
     //Draw the current string
-    fl_draw(getStr(), 3, 3, w()-6, h()-6, Fl_Align(FL_ALIGN_LEFT|FL_ALIGN_WRAP));
+    fl_draw(getStr(), 3, 3, w() - 6, h() - 6,
+            Fl_Align(FL_ALIGN_LEFT | FL_ALIGN_WRAP));
 }
 
 void TipWin::showValue(float f)
@@ -54,22 +56,22 @@ void TipWin::showValue(float f)
     snprintf(tmp, 9, "%.2f", f);
     tip = tmp;
 
-    textmode=false;
+    textmode = false;
     redraw();
     show();
 }
 
-void TipWin::setText(const char * c)
+void TipWin::setText(const char *c)
 {
-    text = c;
-    textmode=true;
+    text     = c;
+    textmode = true;
     redraw();
 }
 
 void TipWin::showText()
 {
     if(!text.empty()) {
-        textmode=true;
+        textmode = true;
         redraw();
         show();
     }
@@ -95,8 +97,8 @@ const char *TipWin::getStr() const
 
 //static int numobj = 0;
 
-WidgetPDial::WidgetPDial(int x,int y, int w, int h, const char *label)
-    :Fl_Dial(x,y,w,h,label),oldvalue(0.0f),pos(false),textset(false)
+WidgetPDial::WidgetPDial(int x, int y, int w, int h, const char *label)
+    :Fl_Dial(x, y, w, h, label), oldvalue(0.0f), pos(false), textset(false)
 {
     //cout << "[" << label << "] There are now " << ++numobj << endl;
     Fl_Group *save = Fl_Group::current();
@@ -113,24 +115,25 @@ WidgetPDial::~WidgetPDial()
 
 int WidgetPDial::handle(int event)
 {
-    double dragsize, min=minimum(),max=maximum();
-    int my;
+    double dragsize, min = minimum(), max = maximum();
+    int    my;
 
-    switch (event){
+    switch(event) {
         case FL_PUSH:
-            oldvalue=value();
+            oldvalue = value();
         case FL_DRAG:
             getPos();
             tipwin->showValue(value());
-            my=-(Fl::event_y()-y()-h()/2);
+            my = -(Fl::event_y() - y() - h() / 2);
 
-            dragsize=200.0f;
-            if (Fl::event_state(FL_BUTTON1)==0)
-                dragsize*=10;
+            dragsize = 200.0f;
+            if(Fl::event_state(FL_BUTTON1) == 0)
+                dragsize *= 10;
 
-            value(limit(oldvalue+my/dragsize*(max-min),min,max));
+            value(limit(oldvalue + my / dragsize * (max - min), min, max));
             value_damage();
-            if (this->when()!=0) do_callback();
+            if(this->when() != 0)
+                do_callback();
             return 1;
         case FL_ENTER:
             getPos();
@@ -144,7 +147,7 @@ int WidgetPDial::handle(int event)
         case FL_RELEASE:
             tipwin->hide();
             resetPos();
-            if (this->when()==0)
+            if(this->when() == 0)
                 do_callback();
             return 1;
             break;
@@ -152,87 +155,92 @@ int WidgetPDial::handle(int event)
     return 0;
 }
 
-void WidgetPDial::drawgradient(int cx,int cy,int sx,double m1,double m2)
+void WidgetPDial::drawgradient(int cx, int cy, int sx, double m1, double m2)
 {
-    for (int i=(int)(m1*sx);i<(int)(m2*sx);i++){
-        double tmp=1.0f-powf(i*1.0f/sx,2.0f);
-        pdialcolor(140+(int) (tmp*90),140+(int)(tmp*90),140+(int) (tmp*100));
-        fl_arc(cx+sx/2-i/2,cy+sx/2-i/2,i,i,0,360);
+    for(int i = (int)(m1 * sx); i < (int)(m2 * sx); i++) {
+        double tmp = 1.0f - powf(i * 1.0f / sx, 2.0f);
+        pdialcolor(140
+                   + (int) (tmp
+                            * 90), 140
+                   + (int)(tmp * 90), 140 + (int) (tmp * 100));
+        fl_arc(cx + sx / 2 - i / 2, cy + sx / 2 - i / 2, i, i, 0, 360);
     }
 }
 
 void WidgetPDial::draw()
 {
-    int cx=x(),cy=y(),sx=w(),sy=h();
+    int cx = x(), cy = y(), sx = w(), sy = h();
 
     //clears the button face
-    pdialcolor(190,190,200);
-    fl_pie(cx-1,cy-1,sx+2,sy+2,0,360);
+    pdialcolor(190, 190, 200);
+    fl_pie(cx - 1, cy - 1, sx + 2, sy + 2, 0, 360);
 
     //Draws the button face (gradinet)
-    drawgradient(cx,cy,sx,0.5f,1.0f);
+    drawgradient(cx, cy, sx, 0.5f, 1.0f);
 
-    double val=(value()-minimum())/(maximum()-minimum());
+    double val = (value() - minimum()) / (maximum() - minimum());
 
     //draws the scale
-    pdialcolor(220,220,250);
-    double a1=angle1(),a2=angle2();
-    for (int i=0;i<12;i++){
-        double a=-i/12.0f*360.0f-val*(a2-a1)-a1;
-        fl_pie(cx,cy,sx,sy,a+270-3,a+3+270);
-    };
+    pdialcolor(220, 220, 250);
+    double a1 = angle1(), a2 = angle2();
+    for(int i = 0; i < 12; i++) {
+        double a = -i / 12.0f * 360.0f - val * (a2 - a1) - a1;
+        fl_pie(cx, cy, sx, sy, a + 270 - 3, a + 3 + 270);
+    }
 
-    drawgradient(cx,cy,sx,0.0f,0.75f);
+    drawgradient(cx, cy, sx, 0.0f, 0.75f);
 
     //draws the value
-    double a=-(a2-a1)*val-a1;
+    double a = -(a2 - a1) * val - a1;
 
     //draws the max and min points
-    pdialcolor(0,100,200);
-    int xp=(int)(cx+sx/2.0f+sx/2.0f*sinf(angle1()/180.0f*3.141592f));
-    int yp=(int)(cy+sy/2.0f+sy/2.0f*cosf(angle1()/180.0f*3.141592f));
-    fl_pie(xp-2,yp-2,4,4,0,360);
+    pdialcolor(0, 100, 200);
+    int xp =
+        (int)(cx + sx / 2.0f + sx / 2.0f * sinf(angle1() / 180.0f * 3.141592f));
+    int yp =
+        (int)(cy + sy / 2.0f + sy / 2.0f * cosf(angle1() / 180.0f * 3.141592f));
+    fl_pie(xp - 2, yp - 2, 4, 4, 0, 360);
 
-    xp=(int)(cx+sx/2.0f+sx/2.0f*sinf(angle2()/180.0f*3.141592f));
-    yp=(int)(cy+sy/2.0f+sy/2.0f*cosf(angle2()/180.0f*3.141592f));
-    fl_pie(xp-2,yp-2,4,4,0,360);
+    xp = (int)(cx + sx / 2.0f + sx / 2.0f * sinf(angle2() / 180.0f * 3.141592f));
+    yp = (int)(cy + sy / 2.0f + sy / 2.0f * cosf(angle2() / 180.0f * 3.141592f));
+    fl_pie(xp - 2, yp - 2, 4, 4, 0, 360);
 
     fl_push_matrix();
 
-    fl_translate(cx+sx/2,cy+sy/2);
-    fl_rotate(a-90.0f);
+    fl_translate(cx + sx / 2, cy + sy / 2);
+    fl_rotate(a - 90.0f);
 
-    fl_translate(sx/2,0);
+    fl_translate(sx / 2, 0);
 
     fl_begin_polygon();
-    pdialcolor(0,0,0);
-    fl_vertex(-10,-4);
-    fl_vertex(-10,4);
-    fl_vertex(0,0);
+    pdialcolor(0, 0, 0);
+    fl_vertex(-10, -4);
+    fl_vertex(-10, 4);
+    fl_vertex(0, 0);
     fl_end_polygon();
 
     fl_pop_matrix();
 }
 
-void WidgetPDial::pdialcolor(int r,int g,int b)
+void WidgetPDial::pdialcolor(int r, int g, int b)
 {
-    if (active_r())
-        fl_color(r,g,b);
+    if(active_r())
+        fl_color(r, g, b);
     else
-        fl_color(160-(160-r)/3,160-(160-b)/3,160-(160-b)/3);
+        fl_color(160 - (160 - r) / 3, 160 - (160 - b) / 3, 160 - (160 - b) / 3);
 }
 
-void WidgetPDial::tooltip(const char * c)
+void WidgetPDial::tooltip(const char *c)
 {
     tipwin->setText(c);
-    textset=true;
+    textset = true;
 }
 
 void WidgetPDial::getPos()
 {
     if(!pos) {
-        tipwin->position(Fl::event_x_root(), Fl::event_y_root()+20);
-        pos=true;
+        tipwin->position(Fl::event_x_root(), Fl::event_y_root() + 20);
+        pos = true;
     }
 }
 

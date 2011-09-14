@@ -40,7 +40,7 @@ class OscilGen:public Presets
 
         /**do the antialiasing(cut off higher freqs.),apply randomness and do a IFFT*/
         //returns where should I start getting samples, used in block type randomness
-        short get(float *smps, float freqHz, int resonance=0);
+        short get(float *smps, float freqHz, int resonance = 0);
         //if freqHz is smaller than 0, return the "un-randomized" sample for UI
 
         void getbasefunction(float *smps);
@@ -79,7 +79,7 @@ class OscilGen:public Presets
 
         unsigned char Pbasefuncmodulation; //what modulation is applied to the basefunc
         unsigned char Pbasefuncmodulationpar1, Pbasefuncmodulationpar2,
-                      Pbasefuncmodulationpar3;//the parameter of the base function modulation
+                      Pbasefuncmodulationpar3; //the parameter of the base function modulation
 
         /*the Randomness:
           64=no randomness
@@ -159,18 +159,17 @@ class OscilGen:public Presets
 
         fft_t *basefuncFFTfreqs; //Base Function Frequencies
         fft_t *oscilFFTfreqs; //Oscillator Frequencies - this is different than the hamonics set-up by the user, it may contains time-domain data if the antialiasing is turned off
-        int      oscilprepared; //1 if the oscil is prepared, 0 if it is not prepared and is need to call ::prepare() before ::get()
+        int    oscilprepared;   //1 if the oscil is prepared, 0 if it is not prepared and is need to call ::prepare() before ::get()
 
         Resonance *res;
 
         unsigned int randseed;
 };
 
-typedef float(*filter_func)(unsigned int, float, float);
+typedef float (*filter_func)(unsigned int, float, float);
 filter_func getFilter(unsigned char func);
-typedef float(*base_func)(float,float);
+typedef float (*base_func)(float, float);
 base_func getBaseFunction(unsigned char func);
 
 
 #endif
-

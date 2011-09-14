@@ -26,7 +26,7 @@
 using namespace std;
 
 WavEngine::WavEngine()
-    :AudioOut(), file(NULL), buffer(SAMPLE_RATE*4), pThread(NULL)
+    :AudioOut(), file(NULL), buffer(SAMPLE_RATE * 4), pThread(NULL)
 {
     sem_init(&work, PTHREAD_PROCESS_PRIVATE, 0);
 }
@@ -92,7 +92,9 @@ void WavEngine::newFile(WavFile *_file)
 
     //check state
     if(!file->good())
-        cerr << "ERROR: WavEngine handed bad file output WavEngine::newFile()" << endl;
+        cerr
+        << "ERROR: WavEngine handed bad file output WavEngine::newFile()"
+        << endl;
 }
 
 void WavEngine::destroyFile()
@@ -104,21 +106,24 @@ void WavEngine::destroyFile()
 
 void *WavEngine::_AudioThread(void *arg)
 {
-    return (static_cast<WavEngine*>(arg))->AudioThread();
+    return (static_cast<WavEngine *>(arg))->AudioThread();
 }
 
 void *WavEngine::AudioThread()
 {
-    short *recordbuf_16bit = new short[2*SOUND_BUFFER_SIZE];
+    short *recordbuf_16bit = new short[2 * SOUND_BUFFER_SIZE];
 
-    while(!sem_wait(&work) && pThread)
-    {
+    while(!sem_wait(&work) && pThread) {
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-            float left=0.0f, right=0.0f;
+            float left = 0.0f, right = 0.0f;
             buffer.pop(left);
             buffer.pop(right);
-            recordbuf_16bit[2*i]   = limit((int)(left  * 32767.0f), -32768, 32767);
-            recordbuf_16bit[2*i+1] = limit((int)(right * 32767.0f), -32768, 32767);
+            recordbuf_16bit[2 * i] = limit((int)(left * 32767.0f),
+                                           -32768,
+                                           32767);
+            recordbuf_16bit[2 * i + 1] = limit((int)(right * 32767.0f),
+                                               -32768,
+                                               32767);
         }
         file->writeStereoSamples(SOUND_BUFFER_SIZE, recordbuf_16bit);
     }
@@ -127,4 +132,3 @@ void *WavEngine::AudioThread()
 
     return NULL;
 }
-

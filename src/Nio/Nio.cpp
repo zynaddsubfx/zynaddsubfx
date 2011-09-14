@@ -14,11 +14,11 @@ Nio &Nio::getInstance()
 }
 
 Nio::Nio()
-:autoConnect(false),
-    in(InMgr::getInstance()),//Enable input wrapper
-    out(OutMgr::getInstance()),//Initialize the Output Systems
-    eng(EngineMgr::getInstance()),//Initialize The Engines
-    postfix("")//no default postfix
+    :autoConnect(false),
+      in(InMgr::getInstance()), //Enable input wrapper
+      out(OutMgr::getInstance()), //Initialize the Output Systems
+      eng(EngineMgr::getInstance()), //Initialize The Engines
+      postfix("") //no default postfix
 {}
 
 Nio::~Nio()
@@ -28,14 +28,14 @@ Nio::~Nio()
 
 bool Nio::start()
 {
-    return eng.start();//Drivers start your engines!
+    return eng.start(); //Drivers start your engines!
 }
 
 void Nio::stop()
 {
     eng.stop();
 }
-    
+
 int Nio::setDefaultSource(string name)
 {
     if(name.empty())
@@ -47,27 +47,26 @@ int Nio::setDefaultSource(string name)
     }
     return 0;
 }
-    
+
 
 int Nio::setDefaultSink(string name)
 {
     if(name.empty())
         return 0;
 
-    if(!eng.setOutDefault(name)) {
+    if(!eng.setOutDefault(name))
         cerr << "There is no output for " << name << endl;
-    }
     return 0;
 }
 
 bool Nio::setSource(string name)
 {
-     return in.setSource(name);
+    return in.setSource(name);
 }
 
 bool Nio::setSink(string name)
 {
-     return out.setSink(name);
+    return out.setSink(name);
 }
 
 void Nio::setPostfix(std::string post)
@@ -80,12 +79,12 @@ std::string Nio::getPostfix(void) const
     return postfix;
 }
 
-        
+
 set<string> Nio::getSources() const
 {
     set<string> sources;
     for(list<Engine *>::iterator itr = eng.engines.begin();
-            itr != eng.engines.end(); ++itr)
+        itr != eng.engines.end(); ++itr)
         if(dynamic_cast<MidiIn *>(*itr))
             sources.insert((*itr)->name);
     return sources;
@@ -95,19 +94,18 @@ set<string> Nio::getSinks() const
 {
     set<string> sinks;
     for(list<Engine *>::iterator itr = eng.engines.begin();
-            itr != eng.engines.end(); ++itr)
+        itr != eng.engines.end(); ++itr)
         if(dynamic_cast<AudioOut *>(*itr))
             sinks.insert((*itr)->name);
     return sinks;
 }
-        
+
 string Nio::getSource() const
 {
-     return in.getSource();
+    return in.getSource();
 }
 
 string Nio::getSink() const
 {
-     return out.getSink();
+    return out.getSink();
 }
-

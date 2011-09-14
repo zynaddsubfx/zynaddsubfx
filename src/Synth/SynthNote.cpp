@@ -3,7 +3,7 @@
 #include <cstring>
 
 SynthNote::SynthNote(float freq, float vel, int port, int note, bool quiet)
-    :legato(freq,vel,port,note,quiet)
+    :legato(freq, vel, port, note, quiet)
 {}
 
 SynthNote::Legato::Legato(float freq, float vel, int port,
@@ -11,13 +11,13 @@ SynthNote::Legato::Legato(float freq, float vel, int port,
 {
     // Initialise some legato-specific vars
     msg = LM_Norm;
-    fade.length      = (int)(SAMPLE_RATE * 0.005f); // 0.005f seems ok.
+    fade.length = (int)(SAMPLE_RATE * 0.005f);      // 0.005f seems ok.
     if(fade.length < 1)
         fade.length = 1;                    // (if something's fishy)
-    fade.step        = (1.0f / fade.length);
-    decounter        = -10;
-    param.freq       = freq;
-    param.vel        = vel;
+    fade.step  = (1.0f / fade.length);
+    decounter  = -10;
+    param.freq = freq;
+    param.vel  = vel;
     param.portamento = port;
     param.midinote   = note;
     lastfreq = 0.0f;
@@ -25,7 +25,7 @@ SynthNote::Legato::Legato(float freq, float vel, int port,
 }
 
 int SynthNote::Legato::update(float freq, float velocity, int portamento_,
-                               int midinote_, bool externcall)
+                              int midinote_, bool externcall)
 {
     if(externcall)
         msg = LM_Norm;
@@ -60,69 +60,68 @@ void SynthNote::Legato::apply(SynthNote &note, float *outl, float *outr)
             memset(outr, 0, SOUND_BUFFER_SIZE * sizeof(float));
         }
     switch(msg) {
-    case LM_CatchUp:  // Continue the catch-up...
-        if(decounter == -10)
-            decounter = fade.length;
-        //Yea, could be done without the loop...
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-            decounter--;
-            if(decounter < 1) {
-                // Catching-up done, we can finally set
-                // the note to the actual parameters.
-                decounter = -10;
-                msg = LM_ToNorm;
-                note.legatonote(param.freq, param.vel, param.portamento,
-                                param.midinote, false);
-                break;
-            }
-        }
-        break;
-    case LM_FadeIn:  // Fade-in
-        if(decounter == -10)
-            decounter = fade.length;
-        silent = false;
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-            decounter--;
-            if(decounter < 1) {
-                decounter = -10;
-                msg = LM_Norm;
-                break;
-            }
-            fade.m += fade.step;
-            outl[i] *= fade.m;
-            outr[i] *= fade.m;
-        }
-        break;
-    case LM_FadeOut:  // Fade-out, then set the catch-up
-        if(decounter == -10)
-            decounter = fade.length;
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-            decounter--;
-            if(decounter < 1) {
-                for(int j = i; j < SOUND_BUFFER_SIZE; ++j) {
-                    outl[j] = 0.0f;
-                    outr[j] = 0.0f;
-                }
-                decounter = -10;
-                silent    = true;
-                // Fading-out done, now set the catch-up :
+        case LM_CatchUp: // Continue the catch-up...
+            if(decounter == -10)
                 decounter = fade.length;
-                msg = LM_CatchUp;
-                //This freq should make this now silent note to catch-up/resync
-                //with the heard note for the same length it stayed at the
-                //previous freq during the fadeout.
-                float catchupfreq = param.freq * (param.freq / lastfreq);
-                note.legatonote(catchupfreq, param.vel, param.portamento,
-                                param.midinote, false);
-                break;
+            //Yea, could be done without the loop...
+            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+                decounter--;
+                if(decounter < 1) {
+                    // Catching-up done, we can finally set
+                    // the note to the actual parameters.
+                    decounter = -10;
+                    msg = LM_ToNorm;
+                    note.legatonote(param.freq, param.vel, param.portamento,
+                                    param.midinote, false);
+                    break;
+                }
             }
-            fade.m -= fade.step;
-            outl[i] *= fade.m;
-            outr[i] *= fade.m;
-        }
-        break;
-    default:
-        break;
+            break;
+        case LM_FadeIn: // Fade-in
+            if(decounter == -10)
+                decounter = fade.length;
+            silent = false;
+            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+                decounter--;
+                if(decounter < 1) {
+                    decounter = -10;
+                    msg = LM_Norm;
+                    break;
+                }
+                fade.m  += fade.step;
+                outl[i] *= fade.m;
+                outr[i] *= fade.m;
+            }
+            break;
+        case LM_FadeOut: // Fade-out, then set the catch-up
+            if(decounter == -10)
+                decounter = fade.length;
+            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+                decounter--;
+                if(decounter < 1) {
+                    for(int j = i; j < SOUND_BUFFER_SIZE; ++j) {
+                        outl[j] = 0.0f;
+                        outr[j] = 0.0f;
+                    }
+                    decounter = -10;
+                    silent    = true;
+                    // Fading-out done, now set the catch-up :
+                    decounter = fade.length;
+                    msg = LM_CatchUp;
+                    //This freq should make this now silent note to catch-up/resync
+                    //with the heard note for the same length it stayed at the
+                    //previous freq during the fadeout.
+                    float catchupfreq = param.freq * (param.freq / lastfreq);
+                    note.legatonote(catchupfreq, param.vel, param.portamento,
+                                    param.midinote, false);
+                    break;
+                }
+                fade.m  -= fade.step;
+                outl[i] *= fade.m;
+                outr[i] *= fade.m;
+            }
+            break;
+        default:
+            break;
     }
 }
-

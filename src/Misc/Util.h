@@ -36,8 +36,8 @@ bool fileexists(const char *filename);
 
 #define N_DETUNE_TYPES 4 //the number of detune types
 extern float getdetune(unsigned char type,
-                          unsigned short int coarsedetune,
-                          unsigned short int finedetune);
+                       unsigned short int coarsedetune,
+                       unsigned short int finedetune);
 
 /**Try to set current thread to realtime priority program priority
  * \todo see if the right pid is being sent
@@ -81,39 +81,38 @@ T stringTo(const char *x)
     return ans;
 }
 
-template <class T>
+template<class T>
 T limit(T val, T min, T max)
 {
-    return (val < min ? min : (val > max ? max : val));
-}
+    return (val<min ? min : (val> max ? max : val));
+                }
 
 //Random number generator
 
-typedef uint32_t prng_t;
-extern prng_t prng_state;
+                typedef uint32_t prng_t;
+                extern prng_t prng_state;
 
 // Portable Pseudo-Random Number Generator
-inline prng_t prng_r(prng_t &p)
-{
-    return (p = p * 1103515245 + 12345);
-}
+                inline prng_t prng_r(prng_t & p)
+                {
+                    return p = p * 1103515245 + 12345;
+                }
 
-inline prng_t prng(void)
-{
-    return prng_r(prng_state)&0x7fffffff;
-}
+                inline prng_t prng(void)
+                {
+                    return prng_r(prng_state) & 0x7fffffff;
+                }
 
-inline void sprng(prng_t p)
-{
-    prng_state = p;
-}
+                inline void sprng(prng_t p)
+                {
+                    prng_state = p;
+                }
 
 /*
  * The random generator (0.0f..1.0f)
  */
-# define INT32_MAX		(2147483647)
+# define INT32_MAX      (2147483647)
 #define RND (prng() / (INT32_MAX * 1.0f))
 
 
 #endif
-

@@ -25,7 +25,7 @@
 #include "../globals.h"
 #include "LFOParams.h"
 
-int LFOParams::time;
+int LFOParams:: time;
 
 LFOParams::LFOParams(char Pfreq_,
                      char Pintensity_,
@@ -37,17 +37,17 @@ LFOParams::LFOParams(char Pfreq_,
                      char fel_):Presets()
 {
     switch(fel_) {
-    case 0:
-        setpresettype("Plfofrequency");
-        break;
-    case 1:
-        setpresettype("Plfoamplitude");
-        break;
-    case 2:
-        setpresettype("Plfofilter");
-        break;
+        case 0:
+            setpresettype("Plfofrequency");
+            break;
+        case 1:
+            setpresettype("Plfoamplitude");
+            break;
+        case 2:
+            setpresettype("Plfofilter");
+            break;
     }
-    Dfreq = Pfreq_;
+    Dfreq       = Pfreq_;
     Dintensity  = Pintensity_;
     Dstartphase = Pstartphase_;
     DLFOtype    = PLFOtype_;
@@ -65,7 +65,7 @@ LFOParams::~LFOParams()
 
 void LFOParams::defaults()
 {
-    Pfreq = Dfreq / 127.0f;
+    Pfreq       = Dfreq / 127.0f;
     Pintensity  = Dintensity;
     Pstartphase = Dstartphase;
     PLFOtype    = DLFOtype;
@@ -92,7 +92,7 @@ void LFOParams::add2XML(XMLwrapper *xml)
 
 void LFOParams::getfromXML(XMLwrapper *xml)
 {
-    Pfreq = xml->getparreal("freq", Pfreq, 0.0f, 1.0f);
+    Pfreq       = xml->getparreal("freq", Pfreq, 0.0f, 1.0f);
     Pintensity  = xml->getpar127("intensity", Pintensity);
     Pstartphase = xml->getpar127("start_phase", Pstartphase);
     PLFOtype    = xml->getpar127("lfo_type", PLFOtype);
@@ -102,4 +102,3 @@ void LFOParams::getfromXML(XMLwrapper *xml)
     Pstretch    = xml->getpar127("stretch", Pstretch);
     Pcontinous  = xml->getparbool("continous", Pcontinous);
 }
-

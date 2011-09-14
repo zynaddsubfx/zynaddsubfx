@@ -125,12 +125,12 @@ void Reverb::processmono(int ch, float *output, float *inputbuf)
     for(int j = REV_COMBS * ch; j < REV_COMBS * (ch + 1); ++j) {
         int &ck = combk[j];
         const int comblength = comblen[j];
-        float &lpcombj = lpcomb[j];
+        float    &lpcombj    = lpcomb[j];
 
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             float fbout = comb[j][ck] * combfb[j];
-            fbout = fbout * (1.0f - lohifb) + lpcombj * lohifb;
-            lpcombj     = fbout;
+            fbout   = fbout * (1.0f - lohifb) + lpcombj * lohifb;
+            lpcombj = fbout;
 
             comb[j][ck] = inputbuf[i] + fbout;
             output[i]  += fbout;
@@ -165,7 +165,7 @@ void Reverb::out(const Stereo<float *> &smp)
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
         inputbuf[i] = (smp.l[i] + smp.r[i]) / 2.0f;
 
-    if(idelay != NULL) {
+    if(idelay != NULL)
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             //Initial delay r
             float tmp = inputbuf[i] + idelay[idelayk] * idelayfb;
@@ -175,7 +175,6 @@ void Reverb::out(const Stereo<float *> &smp)
             if(idelayk >= idelaylen)
                 idelayk = 0;
         }
-    }
 
     if(bandwidth)
         bandwidth->process(SOUND_BUFFER_SIZE, inputbuf);
@@ -221,7 +220,7 @@ void Reverb::setvolume(unsigned char Pvolume)
 
 void Reverb::settime(unsigned char Ptime)
 {
-    int      i;
+    int   i;
     float t;
     this->Ptime = Ptime;
     t = powf(60.0f, (float)Ptime / 127.0f) - 0.97f;
@@ -229,7 +228,7 @@ void Reverb::settime(unsigned char Ptime)
     for(i = 0; i < REV_COMBS * 2; ++i)
         combfb[i] =
             -expf((float)comblen[i] / (float)SAMPLE_RATE * logf(0.001f) / t);
-        //the feedback is negative because it removes the DC
+    //the feedback is negative because it removes the DC
 }
 
 void Reverb::setlohidamp(unsigned char Plohidamp)
@@ -260,7 +259,7 @@ void Reverb::setidelay(unsigned char Pidelay)
 
     if(idelay != NULL)
         delete [] idelay;
-    idelay    = NULL;
+    idelay = NULL;
 
     idelaylen = (int) (SAMPLE_RATE * delay / 1000);
     if(idelaylen > 1) {
@@ -353,7 +352,7 @@ void Reverb::settype(unsigned char Ptype)
         lpcomb[i]  = 0;
         if(comb[i] != NULL)
             delete [] comb[i];
-        comb[i]    = new float[comblen[i]];
+        comb[i] = new float[comblen[i]];
     }
 
     for(int i = 0; i < REV_APS * 2; ++i) {
@@ -361,17 +360,17 @@ void Reverb::settype(unsigned char Ptype)
             tmp = 500 + (int)(RND * 500);
         else
             tmp = aptunings[Ptype][i % REV_APS];
-        tmp     *= roomsize;
+        tmp *= roomsize;
         if(i > REV_APS)
             tmp += 23.0f;
-        tmp     *= SAMPLE_RATE / 44100.0f; //adjust the combs according to the samplerate
+        tmp *= SAMPLE_RATE / 44100.0f;     //adjust the combs according to the samplerate
         if(tmp < 10)
             tmp = 10;
         aplen[i] = (int) tmp;
         apk[i]   = 0;
         if(ap[i] != NULL)
             delete [] ap[i];
-        ap[i]    = new float[aplen[i]];
+        ap[i] = new float[aplen[i]];
     }
     settime(Ptime);
     cleanup();
@@ -412,31 +411,31 @@ void Reverb::setpreset(unsigned char npreset)
     const int     NUM_PRESETS = 13;
     unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Cathedral1
-        {80,  64,  63,  24,  0,  0,  0, 85,  5,  83,   1,  64,  20 },
+        {80,  64, 63,  24, 0,  0, 0, 85,  5,  83,  1, 64,  20 },
         //Cathedral2
-        {80,  64,  69,  35,  0,  0,  0, 127, 0,  71,   0,  64,  20 },
+        {80,  64, 69,  35, 0,  0, 0, 127, 0,  71,  0, 64,  20 },
         //Cathedral3
-        {80,  64,  69,  24,  0,  0,  0, 127, 75, 78,   1,  85,  20 },
+        {80,  64, 69,  24, 0,  0, 0, 127, 75, 78,  1, 85,  20 },
         //Hall1
-        {90,  64,  51,  10,  0,  0,  0, 127, 21, 78,   1,  64,  20 },
+        {90,  64, 51,  10, 0,  0, 0, 127, 21, 78,  1, 64,  20 },
         //Hall2
-        {90,  64,  53,  20,  0,  0,  0, 127, 75, 71,   1,  64,  20 },
+        {90,  64, 53,  20, 0,  0, 0, 127, 75, 71,  1, 64,  20 },
         //Room1
-        {100, 64,  33,  0,   0,  0,  0, 127, 0,  106,  0,  30,  20 },
+        {100, 64, 33,  0,  0,  0, 0, 127, 0,  106, 0, 30,  20 },
         //Room2
-        {100, 64,  21,  26,  0,  0,  0, 62,  0,  77,   1,  45,  20 },
+        {100, 64, 21,  26, 0,  0, 0, 62,  0,  77,  1, 45,  20 },
         //Basement
-        {110, 64,  14,  0,   0,  0,  0, 127, 5,  71,   0,  25,  20 },
+        {110, 64, 14,  0,  0,  0, 0, 127, 5,  71,  0, 25,  20 },
         //Tunnel
-        {85,  80,  84,  20,  42, 0,  0, 51,  0,  78,   1,  105, 20 },
+        {85,  80, 84,  20, 42, 0, 0, 51,  0,  78,  1, 105, 20 },
         //Echoed1
-        {95,  64,  26,  60,  71, 0,  0, 114, 0,  64,   1,  64,  20 },
+        {95,  64, 26,  60, 71, 0, 0, 114, 0,  64,  1, 64,  20 },
         //Echoed2
-        {90,  64,  40,  88,  71, 0,  0, 114, 0,  88,   1,  64,  20 },
+        {90,  64, 40,  88, 71, 0, 0, 114, 0,  88,  1, 64,  20 },
         //VeryLong1
-        {90,  64,  93,  15,  0,  0,  0, 114, 0,  77,   0,  95,  20 },
+        {90,  64, 93,  15, 0,  0, 0, 114, 0,  77,  0, 95,  20 },
         //VeryLong2
-        {90,  64,  111, 30,  0,  0,  0, 114, 90, 74,   1,  80,  20 }
+        {90,  64, 111, 30, 0,  0, 0, 114, 90, 74,  1, 80,  20 }
     };
 
     if(npreset >= NUM_PRESETS)

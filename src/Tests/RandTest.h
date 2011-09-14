@@ -38,5 +38,3 @@ class RandTest:public CxxTest::TestSuite
             TS_ASSERT_DELTA(RND, 0.511766, 0.00001);
         }
 };
-
-

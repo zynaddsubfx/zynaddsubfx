@@ -102,8 +102,8 @@ XMLwrapper::XMLwrapper()
 
     minimal = true;
 
-    node    = tree = mxmlNewElement(MXML_NO_PARENT,
-                                    "?xml version=\"1.0f\" encoding=\"UTF-8\"?");
+    node = tree = mxmlNewElement(MXML_NO_PARENT,
+                                 "?xml version=\"1.0f\" encoding=\"UTF-8\"?");
     /*  for mxml 2.1f (and older)
         tree=mxmlNewElement(MXML_NO_PARENT,"?xml");
         mxmlElementSetAttr(tree,"version","1.0f");
@@ -315,7 +315,8 @@ int XMLwrapper::loadXMLfile(const string &filename)
     if(xmldata == NULL)
         return -1; //the file could not be loaded or uncompressed
 
-    root = tree = mxmlLoadString(NULL, trimLeadingWhite(xmldata), MXML_OPAQUE_CALLBACK);
+    root = tree = mxmlLoadString(NULL, trimLeadingWhite(
+                                     xmldata), MXML_OPAQUE_CALLBACK);
 
     delete[] xmldata;
 
@@ -384,7 +385,8 @@ bool XMLwrapper::putXMLdata(const char *xmldata)
     if(xmldata == NULL)
         return false;
 
-    root = tree = mxmlLoadString(NULL, trimLeadingWhite(xmldata), MXML_OPAQUE_CALLBACK);
+    root = tree = mxmlLoadString(NULL, trimLeadingWhite(
+                                     xmldata), MXML_OPAQUE_CALLBACK);
     if(tree == NULL)
         return false;
 
@@ -578,9 +580,9 @@ float XMLwrapper::getparreal(const char *name, float defaultpar) const
 }
 
 float XMLwrapper::getparreal(const char *name,
-                                float defaultpar,
-                                float min,
-                                float max) const
+                             float defaultpar,
+                             float min,
+                             float max) const
 {
     float result = getparreal(name, defaultpar);
 
@@ -619,4 +621,3 @@ mxml_node_t *XMLwrapper::addparams(const char *name, unsigned int params,
     }
     return element;
 }
-

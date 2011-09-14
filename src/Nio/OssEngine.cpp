@@ -65,7 +65,7 @@ bool OssEngine::openAudio()
     int snd_fragment   = 0x00080009; //fragment size (?);
     int snd_stereo     = 1; //stereo;
     int snd_format     = AFMT_S16_LE;
-    int snd_samplerate = SAMPLE_RATE;;
+    int snd_samplerate = SAMPLE_RATE;
 
     audio.handle = open(config.cfg.LinuxOSSWaveOutDev, O_WRONLY, 0);
     if(audio.handle == -1) {
@@ -79,7 +79,7 @@ bool OssEngine::openAudio()
     ioctl(audio.handle, SNDCTL_DSP_SPEED, &snd_samplerate);
     ioctl(audio.handle, SNDCTL_DSP_SAMPLESIZE, &snd_bitsize);
     ioctl(audio.handle, SNDCTL_DSP_SETFRAGMENT, &snd_fragment);
-    
+
     if(!getMidiEn()) {
         pthread_attr_t attr;
         pthread_attr_init(&attr);
@@ -102,7 +102,7 @@ void OssEngine::stopAudio()
         pthread_join(*engThread, NULL);
     delete engThread;
     engThread = NULL;
-    
+
     close(handle);
 }
 
@@ -159,15 +159,14 @@ bool OssEngine::openMidi()
 {
     int handle = midi.handle;
     if(handle != -1)
-        return true;//already open
+        return true; //already open
 
     handle = open(config.cfg.LinuxOSSSeqInDev, O_RDONLY, 0);
 
-    if(-1 == handle) {
+    if(-1 == handle)
         return false;
-    }
     midi.handle = handle;
-   
+
     if(!getAudioEn()) {
         pthread_attr_t attr;
         pthread_attr_init(&attr);
@@ -186,29 +185,27 @@ void OssEngine::stopMidi()
         return;
 
     midi.handle = -1;
-    
+
     if(!getAudioEn() && engThread) {
         pthread_join(*engThread, NULL);
         delete engThread;
         engThread = NULL;
     }
-    
+
     close(handle);
 }
 
 void *OssEngine::_thread(void *arg)
 {
-    return (static_cast<OssEngine*>(arg))->thread();
+    return (static_cast<OssEngine *>(arg))->thread();
 }
 
 void *OssEngine::thread()
 {
     unsigned char tmp[4] = {0, 0, 0, 0};
     set_realtime();
-    while (getAudioEn() || getMidiEn())
-    {
-        if(getAudioEn())
-        {
+    while(getAudioEn() || getMidiEn()) {
+        if(getAudioEn()) {
             const Stereo<float *> smps = getNext();
 
             float l, r;
@@ -219,13 +216,13 @@ void *OssEngine::thread()
                 if(l < -1.0f)
                     l = -1.0f;
                 else
-                    if(l > 1.0f)
-                        l = 1.0f;
+                if(l > 1.0f)
+                    l = 1.0f;
                 if(r < -1.0f)
                     r = -1.0f;
                 else
-                    if(r > 1.0f)
-                        r = 1.0f;
+                if(r > 1.0f)
+                    r = 1.0f;
 
                 audio.smps[i * 2]     = (short int) (l * 32767.0f);
                 audio.smps[i * 2 + 1] = (short int) (r * 32767.0f);
@@ -238,33 +235,36 @@ void *OssEngine::thread()
         }
 
         //Collect up to 30 midi events
-        for (int k = 0; k < 30 && getMidiEn(); ++k) {
+        for(int k = 0; k < 30 && getMidiEn(); ++k) {
             static char escaped;
 
             memset(tmp, 0, 4);
 
-            if (escaped) {
-                tmp[0] = escaped;
+            if(escaped) {
+                tmp[0]  = escaped;
                 escaped = 0;
-            } else {
+            }
+            else {
                 getMidi(tmp);
-                if (!(tmp[0] & 0x80))
+                if(!(tmp[0] & 0x80))
                     continue;
             }
             getMidi(tmp + 1);
-            if (tmp[1] & 0x80) {
+            if(tmp[1] & 0x80) {
                 escaped = tmp[1];
-                tmp[1] = 0;
-            } else {
+                tmp[1]  = 0;
+            }
+            else {
                 getMidi(tmp + 2);
-                if (tmp[2] & 0x80) {
+                if(tmp[2] & 0x80) {
                     escaped = tmp[2];
-                    tmp[2] = 0;
-                } else {
+                    tmp[2]  = 0;
+                }
+                else {
                     getMidi(tmp + 3);
-                    if (tmp[3] & 0x80) {
+                    if(tmp[3] & 0x80) {
                         escaped = tmp[3];
-                        tmp[3] = 0;
+                        tmp[3]  = 0;
                     }
                 }
             }
@@ -279,4 +279,3 @@ void OssEngine::getMidi(unsigned char *midiPtr)
 {
     read(midi.handle, midiPtr, 1);
 }
-

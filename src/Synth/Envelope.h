@@ -42,17 +42,17 @@ class Envelope
          * @return returns 1 if the envelope is finished*/
         bool finished() const;
     private:
-        int      envpoints;
-        int      envsustain; //"-1" means disabled
+        int   envpoints;
+        int   envsustain;    //"-1" means disabled
         float envdt[MAX_ENVELOPE_POINTS]; //millisecons
         float envval[MAX_ENVELOPE_POINTS]; // [0.0f .. 1.0f]
         float envstretch;
-        int      linearenvelope;
+        int   linearenvelope;
 
-        int      currentpoint; //current envelope point (starts from 1)
-        int      forcedrelase;
-        bool     keyreleased; //if the key was released
-        bool     envfinish;
+        int   currentpoint;    //current envelope point (starts from 1)
+        int   forcedrelase;
+        bool  keyreleased;    //if the key was released
+        bool  envfinish;
         float t; // the time from the last point
         float inct; // the time increment
         float envoutval; //used to do the forced release
@@ -60,4 +60,3 @@ class Envelope
 
 
 #endif
-

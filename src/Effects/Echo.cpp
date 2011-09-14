@@ -53,8 +53,8 @@ Echo::~Echo()
  */
 void Echo::cleanup()
 {
-    memset(delay.l,0,MAX_DELAY*SAMPLE_RATE*sizeof(float));
-    memset(delay.r,0,MAX_DELAY*SAMPLE_RATE*sizeof(float));
+    memset(delay.l, 0, MAX_DELAY * SAMPLE_RATE * sizeof(float));
+    memset(delay.r, 0, MAX_DELAY * SAMPLE_RATE * sizeof(float));
     old = Stereo<float>(0.0f);
 }
 
@@ -75,8 +75,8 @@ void Echo::initdelays()
     //number of seconds to delay right chan
     float dr = avgDelay + lrdelay;
 
-    ndelta.l = max(1,(int) (dl * SAMPLE_RATE));
-    ndelta.r = max(1,(int) (dr * SAMPLE_RATE));
+    ndelta.l = max(1, (int) (dl * SAMPLE_RATE));
+    ndelta.r = max(1, (int) (dr * SAMPLE_RATE));
 }
 
 void Echo::out(const Stereo<float *> &input)
@@ -96,20 +96,28 @@ void Echo::out(const Stereo<float *> &input)
         rdl = input.r[i] * pangainR - rdl * fb;
 
         //LowPass Filter
-        old.l = delay.l[(pos.l+delta.l)%(MAX_DELAY * SAMPLE_RATE)] =  ldl * hidamp + old.l * (1.0f - hidamp);
-        old.r = delay.r[(pos.r+delta.r)%(MAX_DELAY * SAMPLE_RATE)] =  rdl * hidamp + old.r * (1.0f - hidamp);
+        old.l =
+            delay.l[(pos.l
+                     + delta.l)
+                    % (MAX_DELAY
+                       * SAMPLE_RATE)] = ldl * hidamp + old.l * (1.0f - hidamp);
+        old.r =
+            delay.r[(pos.r
+                     + delta.r)
+                    % (MAX_DELAY
+                       * SAMPLE_RATE)] = rdl * hidamp + old.r * (1.0f - hidamp);
 
         //increment
-        ++pos.l;// += delta.l;
-        ++pos.r;// += delta.r;
+        ++pos.l; // += delta.l;
+        ++pos.r; // += delta.r;
 
         //ensure that pos is still in bounds
         pos.l %= MAX_DELAY * SAMPLE_RATE;
         pos.r %= MAX_DELAY * SAMPLE_RATE;
 
         //adjust delay if needed
-        delta.l = (15*delta.l + ndelta.l)/16;
-        delta.r = (15*delta.r + ndelta.r)/16;
+        delta.l = (15 * delta.l + ndelta.l) / 16;
+        delta.r = (15 * delta.r + ndelta.r) / 16;
     }
 }
 
@@ -133,8 +141,8 @@ void Echo::setvolume(unsigned char Pvolume)
 
 void Echo::setdelay(unsigned char Pdelay)
 {
-    this->Pdelay=Pdelay;
-    avgDelay=(Pdelay/127.0f*1.5f);//0 .. 1.5f sec
+    this->Pdelay = Pdelay;
+    avgDelay     = (Pdelay / 127.0f * 1.5f); //0 .. 1.5f sec
     initdelays();
 }
 
@@ -169,23 +177,23 @@ void Echo::setpreset(unsigned char npreset)
     const int     NUM_PRESETS = 9;
     unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Echo 1
-        {67, 64, 35,  64,   30,   59,   0  },
+        {67, 64, 35,  64,  30,  59, 0      },
         //Echo 2
-        {67, 64, 21,  64,   30,   59,   0  },
+        {67, 64, 21,  64,  30,  59, 0      },
         //Echo 3
-        {67, 75, 60,  64,   30,   59,   10 },
+        {67, 75, 60,  64,  30,  59, 10     },
         //Simple Echo
-        {67, 60, 44,  64,   30,   0,    0  },
+        {67, 60, 44,  64,  30,  0,  0      },
         //Canyon
-        {67, 60, 102, 50,   30,   82,   48 },
+        {67, 60, 102, 50,  30,  82, 48     },
         //Panning Echo 1
-        {67, 64, 44,  17,   0,    82,   24 },
+        {67, 64, 44,  17,  0,   82, 24     },
         //Panning Echo 2
-        {81, 60, 46,  118,  100,  68,   18 },
+        {81, 60, 46,  118, 100, 68, 18     },
         //Panning Echo 3
-        {81, 60, 26,  100,  127,  67,   36 },
+        {81, 60, 26,  100, 127, 67, 36     },
         //Feedback Echo
-        {62, 64, 28,  64,   100,  90,   55 }
+        {62, 64, 28,  64,  100, 90, 55     }
     };
 
 

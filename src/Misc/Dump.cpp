@@ -107,12 +107,12 @@ void Dump::dumpcontroller(char chan, unsigned int type, int par)
     if(file == NULL)
         return;
     switch(type) {
-    case C_pitchwheel:
-        fprintf(file, "P %d -> %d %d\n", tick, chan, par);
-        break;
-    default:
-        fprintf(file, "C %d -> %d %d %d\n", tick, chan, type, par);
-        break;
+        case C_pitchwheel:
+            fprintf(file, "P %d -> %d %d\n", tick, chan, par);
+            break;
+        default:
+            fprintf(file, "C %d -> %d %d %d\n", tick, chan, type, par);
+            break;
     }
 #ifndef JACKAUDIOOUT
     if(k++ > 25) {
@@ -121,4 +121,3 @@ void Dump::dumpcontroller(char chan, unsigned int type, int par)
     }
 #endif
 }
-

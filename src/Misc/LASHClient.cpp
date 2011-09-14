@@ -101,4 +101,3 @@ void LASHClient::confirmevent(Event event)
     if(event == Restore)
         lash_send_event(client, lash_event_new_with_type(LASH_Restore_File));
 }
-

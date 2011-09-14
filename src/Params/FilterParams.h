@@ -27,7 +27,7 @@
 #include "../Misc/XMLwrapper.h"
 #include "PresetsArray.h"
 
-class FilterParams : public PresetsArray
+class FilterParams:public PresetsArray
 {
     public:
         FilterParams(unsigned char Ptype_,
@@ -100,4 +100,3 @@ class FilterParams : public PresetsArray
 };
 
 #endif
-

@@ -15,9 +15,9 @@ class AdNoteTest:public CxxTest::TestSuite
 {
     public:
 
-        ADnote *note;
-        Master *master;
-        FFTwrapper *fft;
+        ADnote       *note;
+        Master       *master;
+        FFTwrapper   *fft;
         Controller   *controller;
         unsigned char testnote;
 
@@ -170,4 +170,3 @@ class AdNoteTest:public CxxTest::TestSuite
         }
 #endif
 };
-

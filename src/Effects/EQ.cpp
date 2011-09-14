@@ -78,7 +78,7 @@ void EQ::setvolume(unsigned char Pvolume)
 {
     this->Pvolume = Pvolume;
 
-    outvolume     = powf(0.005f, (1.0f - Pvolume / 127.0f)) * 10.0f;
+    outvolume = powf(0.005f, (1.0f - Pvolume / 127.0f)) * 10.0f;
     if(insertion == 0)
         volume = 1.0f;
     else
@@ -109,9 +109,9 @@ void EQ::setpreset(unsigned char npreset)
 void EQ::changepar(int npar, unsigned char value)
 {
     switch(npar) {
-    case 0:
-        setvolume(value);
-        break;
+        case 0:
+            setvolume(value);
+            break;
     }
     if(npar < 10)
         return;
@@ -123,49 +123,49 @@ void EQ::changepar(int npar, unsigned char value)
 
     float tmp;
     switch(bp) {
-    case 0:
-        filter[nb].Ptype = value;
-        if(value > 9)
-            filter[nb].Ptype = 0;       //has to be changed if more filters will be added
-        if(filter[nb].Ptype != 0) {
-            filter[nb].l->settype(value - 1);
-            filter[nb].r->settype(value - 1);
-        }
-        break;
-    case 1:
-        filter[nb].Pfreq = value;
-        tmp = 600.0f * powf(30.0f, (value - 64.0f) / 64.0f);
-        filter[nb].l->setfreq(tmp);
-        filter[nb].r->setfreq(tmp);
-        break;
-    case 2:
-        filter[nb].Pgain = value;
-        tmp = 30.0f * (value - 64.0f) / 64.0f;
-        filter[nb].l->setgain(tmp);
-        filter[nb].r->setgain(tmp);
-        break;
-    case 3:
-        filter[nb].Pq = value;
-        tmp = powf(30.0f, (value - 64.0f) / 64.0f);
-        filter[nb].l->setq(tmp);
-        filter[nb].r->setq(tmp);
-        break;
-    case 4:
-        filter[nb].Pstages = value;
-        if(value >= MAX_FILTER_STAGES)
-            filter[nb].Pstages = MAX_FILTER_STAGES - 1;
-        filter[nb].l->setstages(value);
-        filter[nb].r->setstages(value);
-        break;
+        case 0:
+            filter[nb].Ptype = value;
+            if(value > 9)
+                filter[nb].Ptype = 0;   //has to be changed if more filters will be added
+            if(filter[nb].Ptype != 0) {
+                filter[nb].l->settype(value - 1);
+                filter[nb].r->settype(value - 1);
+            }
+            break;
+        case 1:
+            filter[nb].Pfreq = value;
+            tmp = 600.0f * powf(30.0f, (value - 64.0f) / 64.0f);
+            filter[nb].l->setfreq(tmp);
+            filter[nb].r->setfreq(tmp);
+            break;
+        case 2:
+            filter[nb].Pgain = value;
+            tmp = 30.0f * (value - 64.0f) / 64.0f;
+            filter[nb].l->setgain(tmp);
+            filter[nb].r->setgain(tmp);
+            break;
+        case 3:
+            filter[nb].Pq = value;
+            tmp = powf(30.0f, (value - 64.0f) / 64.0f);
+            filter[nb].l->setq(tmp);
+            filter[nb].r->setq(tmp);
+            break;
+        case 4:
+            filter[nb].Pstages = value;
+            if(value >= MAX_FILTER_STAGES)
+                filter[nb].Pstages = MAX_FILTER_STAGES - 1;
+            filter[nb].l->setstages(value);
+            filter[nb].r->setstages(value);
+            break;
     }
 }
 
 unsigned char EQ::getpar(int npar) const
 {
     switch(npar) {
-    case 0:
-        return Pvolume;
-        break;
+        case 0:
+            return Pvolume;
+            break;
     }
 
     if(npar < 10)
@@ -176,21 +176,21 @@ unsigned char EQ::getpar(int npar) const
         return 0;
     int bp = npar % 5; //band paramenter
     switch(bp) {
-    case 0:
-        return filter[nb].Ptype;
-        break;
-    case 1:
-        return filter[nb].Pfreq;
-        break;
-    case 2:
-        return filter[nb].Pgain;
-        break;
-    case 3:
-        return filter[nb].Pq;
-        break;
-    case 4:
-        return filter[nb].Pstages;
-        break;
+        case 0:
+            return filter[nb].Ptype;
+            break;
+        case 1:
+            return filter[nb].Pfreq;
+            break;
+        case 2:
+            return filter[nb].Pgain;
+            break;
+        case 3:
+            return filter[nb].Pq;
+            break;
+        case 4:
+            return filter[nb].Pstages;
+            break;
     }
 
     return 0; //in case of bogus parameter number
@@ -210,4 +210,3 @@ float EQ::getfreqresponse(float freq)
     }
     return rap2dB(resp * outvolume);
 }
-

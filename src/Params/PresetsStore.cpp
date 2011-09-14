@@ -101,8 +101,8 @@ void PresetsStore::rescanforpresets(const string &type)
             continue;
 
         //open directory
-        string  dirname = config.cfg.presetsDirList[i];
-        DIR    *dir     = opendir(dirname.c_str());
+        string dirname = config.cfg.presetsDirList[i];
+        DIR   *dir     = opendir(dirname.c_str());
         if(dir == NULL)
             continue;
         struct dirent *fn;
@@ -168,7 +168,7 @@ bool PresetsStore::pastepreset(XMLwrapper *xml, unsigned int npreset)
     string filename = presets[npreset].file;
     if(filename.empty())
         return false;
-    bool result    = (xml->loadXMLfile(filename) >= 0);
+    bool result = (xml->loadXMLfile(filename) >= 0);
     return result;
 }
 
@@ -182,4 +182,3 @@ void PresetsStore::deletepreset(unsigned int npreset)
         return;
     remove(filename.c_str());
 }
-

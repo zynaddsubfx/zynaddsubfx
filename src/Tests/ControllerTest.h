@@ -69,4 +69,3 @@ class ControllerTest:public CxxTest::TestSuite
     private:
         Controller *testCtl;
 };
-

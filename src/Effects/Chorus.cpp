@@ -79,7 +79,6 @@ void Chorus::out(const Stereo<float *> &input)
     dr2 = getdelay(lfor);
 
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-
         float inl = input.l[i];
         float inr = input.r[i];
         //LRcross
@@ -110,7 +109,7 @@ void Chorus::out(const Stereo<float *> &input)
         mdel = (dr1 * (SOUND_BUFFER_SIZE - i) + dr2 * i) / SOUND_BUFFER_SIZE;
         if(++drk >= maxdelay)
             drk = 0;
-        tmp  = drk * 1.0f - mdel + maxdelay * 2.0f; //where should I get the sample from
+        tmp = drk * 1.0f - mdel + maxdelay * 2.0f;  //where should I get the sample from
 
         F2I(tmp, dlhi);
         dlhi %= maxdelay;
@@ -180,25 +179,25 @@ void Chorus::setpreset(unsigned char npreset)
     const int     NUM_PRESETS = 10;
     unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Chorus1
-        {64, 64, 50, 0,   0,   90,   40,  85,  64,    119,   0,    0  },
+        {64, 64, 50, 0,   0, 90, 40,  85, 64,  119, 0, 0  },
         //Chorus2
-        {64, 64, 45, 0,   0,   98,   56,  90,  64,    19,    0,    0  },
+        {64, 64, 45, 0,   0, 98, 56,  90, 64,  19,  0, 0  },
         //Chorus3
-        {64, 64, 29, 0,   1,   42,   97,  95,  90,    127,   0,    0  },
+        {64, 64, 29, 0,   1, 42, 97,  95, 90,  127, 0, 0  },
         //Celeste1
-        {64, 64, 26, 0,   0,   42,   115, 18,  90,    127,   0,    0  },
+        {64, 64, 26, 0,   0, 42, 115, 18, 90,  127, 0, 0  },
         //Celeste2
-        {64, 64, 29, 117, 0,   50,   115, 9,   31,    127,   0,    1  },
+        {64, 64, 29, 117, 0, 50, 115, 9,  31,  127, 0, 1  },
         //Flange1
-        {64, 64, 57, 0,   0,   60,   23,  3,   62,    0,     0,    0  },
+        {64, 64, 57, 0,   0, 60, 23,  3,  62,  0,   0, 0  },
         //Flange2
-        {64, 64, 33, 34,  1,   40,   35,  3,   109,   0,     0,    0  },
+        {64, 64, 33, 34,  1, 40, 35,  3,  109, 0,   0, 0  },
         //Flange3
-        {64, 64, 53, 34,  1,   94,   35,  3,   54,    0,     0,    1  },
+        {64, 64, 53, 34,  1, 94, 35,  3,  54,  0,   0, 1  },
         //Flange4
-        {64, 64, 40, 0,   1,   62,   12,  19,  97,    0,     0,    0  },
+        {64, 64, 40, 0,   1, 62, 12,  19, 97,  0,   0, 0  },
         //Flange5
-        {64, 64, 55, 105, 0,   24,   39,  19,  17,    0,     0,    1  }
+        {64, 64, 55, 105, 0, 24, 39,  19, 17,  0,   0, 1  }
     };
 
     if(npreset >= NUM_PRESETS)
@@ -273,4 +272,3 @@ unsigned char Chorus::getpar(int npar) const
         default: return 0;
     }
 }
-

@@ -30,7 +30,7 @@
 #include "../Params/Controller.h"
 
 /**The "pad" synthesizer*/
-class PADnote :public SynthNote
+class PADnote:public SynthNote
 {
     public:
         PADnote(PADnoteParameters *parameters,
@@ -49,18 +49,18 @@ class PADnote :public SynthNote
         int finished() const;
         void relasekey();
     private:
-        void setup(float freq, float velocity,int portamento_,
-                   int midinote, bool legato=false);
+        void setup(float freq, float velocity, int portamento_,
+                   int midinote, bool legato = false);
         void fadein(float *smps);
         void computecurrentparameters();
         bool finished_;
         PADnoteParameters *pars;
 
-        int      poshi_l, poshi_r;
+        int   poshi_l, poshi_r;
         float poslo;
 
         float basefreq;
-        bool     firsttime, released;
+        bool  firsttime, released;
 
         int nsample, portamento;
 
@@ -78,7 +78,7 @@ class PADnote :public SynthNote
             /******************************************
             *     FREQUENCY GLOBAL PARAMETERS        *
             ******************************************/
-            float  Detune; //cents
+            float Detune;  //cents
 
             Envelope *FreqEnvelope;
             LFO      *FreqLfo;
@@ -86,37 +86,36 @@ class PADnote :public SynthNote
             /********************************************
              *     AMPLITUDE GLOBAL PARAMETERS          *
              ********************************************/
-            float  Volume; // [ 0 .. 1 ]
+            float Volume;  // [ 0 .. 1 ]
 
-            float  Panning; // [ 0 .. 1 ]
+            float Panning;  // [ 0 .. 1 ]
 
             Envelope *AmpEnvelope;
             LFO      *AmpLfo;
 
             struct {
-                int      Enabled;
+                int   Enabled;
                 float initialvalue, dt, t;
             } Punch;
 
             /******************************************
             *        FILTER GLOBAL PARAMETERS        *
             ******************************************/
-            class Filter   *GlobalFilterL, *GlobalFilterR;
+            class Filter *GlobalFilterL, *GlobalFilterR;
 
-            float  FilterCenterPitch; //octaves
-            float  FilterQ;
-            float  FilterFreqTracking;
+            float FilterCenterPitch;  //octaves
+            float FilterQ;
+            float FilterFreqTracking;
 
             Envelope *FilterEnvelope;
 
-            LFO      *FilterLfo;
+            LFO *FilterLfo;
         } NoteGlobalPar;
 
 
-        float    globaloldamplitude, globalnewamplitude, velocity, realfreq;
+        float globaloldamplitude, globalnewamplitude, velocity, realfreq;
         Controller *ctl;
 };
 
 
 #endif
-

@@ -29,12 +29,12 @@
 FilterParams::FilterParams(unsigned char Ptype_,
                            unsigned char Pfreq_,
                            unsigned char Pq_)
-    : PresetsArray()
+    :PresetsArray()
 {
     setpresettype("Pfilter");
-    Dtype   = Ptype_;
-    Dfreq   = Pfreq_;
-    Dq      = Pq_;
+    Dtype = Ptype_;
+    Dfreq = Pfreq_;
+    Dq    = Pq_;
 
     changed = false;
     defaults();
@@ -46,14 +46,14 @@ FilterParams::~FilterParams()
 
 void FilterParams::defaults()
 {
-    Ptype      = Dtype;
-    Pfreq      = Dfreq;
-    Pq         = Dq;
+    Ptype = Dtype;
+    Pfreq = Dfreq;
+    Pq    = Dq;
 
     Pstages    = 0;
     Pfreqtrack = 64;
-    Pgain     = 64;
-    Pcategory = 0;
+    Pgain      = 64;
+    Pcategory  = 0;
 
     Pnumformants     = 3;
     Pformantslowness = 64;
@@ -67,9 +67,9 @@ void FilterParams::defaults()
 
     Psequencestretch  = 40;
     Psequencereversed = 0;
-    Pcenterfreq = 64; //1 kHz
-    Poctavesfreq      = 64;
-    Pvowelclearness   = 64;
+    Pcenterfreq     = 64; //1 kHz
+    Poctavesfreq    = 64;
+    Pvowelclearness = 64;
 }
 
 void FilterParams::defaults(int n)
@@ -94,24 +94,23 @@ void FilterParams::getfromFilterParams(FilterParams *pars)
     if(pars == NULL)
         return;
 
-    Ptype      = pars->Ptype;
-    Pfreq      = pars->Pfreq;
-    Pq         = pars->Pq;
+    Ptype = pars->Ptype;
+    Pfreq = pars->Pfreq;
+    Pq    = pars->Pq;
 
     Pstages    = pars->Pstages;
     Pfreqtrack = pars->Pfreqtrack;
-    Pgain     = pars->Pgain;
-    Pcategory = pars->Pcategory;
+    Pgain      = pars->Pgain;
+    Pcategory  = pars->Pcategory;
 
     Pnumformants     = pars->Pnumformants;
     Pformantslowness = pars->Pformantslowness;
-    for(int j = 0; j < FF_MAX_VOWELS; ++j) {
+    for(int j = 0; j < FF_MAX_VOWELS; ++j)
         for(int i = 0; i < FF_MAX_FORMANTS; ++i) {
             Pvowels[j].formants[i].freq = pars->Pvowels[j].formants[i].freq;
             Pvowels[j].formants[i].q    = pars->Pvowels[j].formants[i].q;
             Pvowels[j].formants[i].amp  = pars->Pvowels[j].formants[i].amp;
         }
-    }
 
     Psequencesize = pars->Psequencesize;
     for(int i = 0; i < FF_MAX_SEQUENCE; ++i)
@@ -119,9 +118,9 @@ void FilterParams::getfromFilterParams(FilterParams *pars)
 
     Psequencestretch  = pars->Psequencestretch;
     Psequencereversed = pars->Psequencereversed;
-    Pcenterfreq = pars->Pcenterfreq;
-    Poctavesfreq      = pars->Poctavesfreq;
-    Pvowelclearness   = pars->Pvowelclearness;
+    Pcenterfreq     = pars->Pcenterfreq;
+    Poctavesfreq    = pars->Poctavesfreq;
+    Pvowelclearness = pars->Pvowelclearness;
 }
 
 
@@ -202,7 +201,8 @@ void FilterParams::formantfilterH(int nvowel, int nfreqs, float *freqs)
         filter_q    = getformantq(Pvowels[nvowel].formants[nformant].q) * getq();
         if(Pstages > 0)
             filter_q =
-                (filter_q > 1.0f ? powf(filter_q, 1.0f / (Pstages + 1)) : filter_q);
+                (filter_q >
+                 1.0f ? powf(filter_q, 1.0f / (Pstages + 1)) : filter_q);
 
         filter_amp = getformantamp(Pvowels[nvowel].formants[nformant].amp);
 
@@ -213,11 +213,11 @@ void FilterParams::formantfilterH(int nvowel, int nfreqs, float *freqs)
             cs    = cosf(omega);
             alpha = sn / (2 * filter_q);
             float tmp = 1 + alpha;
-            c[0]  = alpha / tmp *sqrt(filter_q + 1);
-            c[1]  = 0;
-            c[2]  = -alpha / tmp *sqrt(filter_q + 1);
-            d[1]  = -2 * cs / tmp * (-1);
-            d[2]  = (1 - alpha) / tmp * (-1);
+            c[0] = alpha / tmp *sqrt(filter_q + 1);
+            c[1] = 0;
+            c[2] = -alpha / tmp *sqrt(filter_q + 1);
+            d[1] = -2 * cs / tmp * (-1);
+            d[2] = (1 - alpha) / tmp * (-1);
         }
         else
             continue;
@@ -339,11 +339,11 @@ void FilterParams::getfromXMLsection(XMLwrapper *xml, int n)
             "freq",
             Pvowels[nvowel
             ].formants[nformant].freq);
-        Pvowels[nvowel].formants[nformant].amp  = xml->getpar127(
+        Pvowels[nvowel].formants[nformant].amp = xml->getpar127(
             "amp",
             Pvowels[nvowel
             ].formants[nformant].amp);
-        Pvowels[nvowel].formants[nformant].q    =
+        Pvowels[nvowel].formants[nformant].q =
             xml->getpar127("q", Pvowels[nvowel].formants[nformant].q);
         xml->exitbranch();
     }
@@ -352,10 +352,10 @@ void FilterParams::getfromXMLsection(XMLwrapper *xml, int n)
 void FilterParams::getfromXML(XMLwrapper *xml)
 {
     //filter parameters
-    Pcategory  = xml->getpar127("category", Pcategory);
-    Ptype      = xml->getpar127("type", Ptype);
-    Pfreq      = xml->getpar127("freq", Pfreq);
-    Pq = xml->getpar127("q", Pq);
+    Pcategory = xml->getpar127("category", Pcategory);
+    Ptype     = xml->getpar127("type", Ptype);
+    Pfreq     = xml->getpar127("freq", Pfreq);
+    Pq         = xml->getpar127("q", Pq);
     Pstages    = xml->getpar127("stages", Pstages);
     Pfreqtrack = xml->getpar127("freq_track", Pfreqtrack);
     Pgain      = xml->getpar127("gain", Pgain);
@@ -390,4 +390,3 @@ void FilterParams::getfromXML(XMLwrapper *xml)
         xml->exitbranch();
     }
 }
-

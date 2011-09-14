@@ -31,12 +31,11 @@ using namespace std;
 #include "AudioOut.h"
 
 AudioOut::AudioOut()
-    :samplerate(SAMPLE_RATE),bufferSize(SOUND_BUFFER_SIZE)
+    :samplerate(SAMPLE_RATE), bufferSize(SOUND_BUFFER_SIZE)
 {}
 
 AudioOut::~AudioOut()
-{
-}
+{}
 
 void AudioOut::setSamplerate(int _samplerate)
 {

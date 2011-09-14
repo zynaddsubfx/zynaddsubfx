@@ -37,7 +37,7 @@
 #define OSCIL_SMP_EXTRA_SAMPLES 5
 
 /**The "additive" synthesizer*/
-class ADnote :public SynthNote
+class ADnote:public SynthNote
 {
     public:
         /**Constructor.
@@ -114,7 +114,7 @@ class ADnote :public SynthNote
         //GLOBALS
         ADnoteParameters *partparams;
         unsigned char     stereo; //if the note is stereo (allows note Panning)
-        int      midinote;
+        int   midinote;
         float velocity, basefreq;
 
         ONOFFTYPE   NoteEnabled;
@@ -132,7 +132,7 @@ class ADnote :public SynthNote
             /******************************************
             *     FREQUENCY GLOBAL PARAMETERS        *
             ******************************************/
-            float  Detune; //cents
+            float Detune;  //cents
 
             Envelope *FreqEnvelope;
             LFO      *FreqLfo;
@@ -140,30 +140,30 @@ class ADnote :public SynthNote
             /********************************************
             *     AMPLITUDE GLOBAL PARAMETERS          *
             ********************************************/
-            float  Volume; // [ 0 .. 1 ]
+            float Volume;  // [ 0 .. 1 ]
 
-            float  Panning; // [ 0 .. 1 ]
+            float Panning;  // [ 0 .. 1 ]
 
             Envelope *AmpEnvelope;
             LFO      *AmpLfo;
 
             struct {
-                int      Enabled;
+                int   Enabled;
                 float initialvalue, dt, t;
             } Punch;
 
             /******************************************
             *        FILTER GLOBAL PARAMETERS        *
             ******************************************/
-            class Filter   *GlobalFilterL, *GlobalFilterR;
+            class Filter *GlobalFilterL, *GlobalFilterR;
 
-            float  FilterCenterPitch; //octaves
-            float  FilterQ;
-            float  FilterFreqTracking;
+            float FilterCenterPitch;  //octaves
+            float FilterQ;
+            float FilterFreqTracking;
 
             Envelope *FilterEnvelope;
 
-            LFO      *FilterLfo;
+            LFO *FilterLfo;
         } NoteGlobalPar;
 
 
@@ -171,7 +171,7 @@ class ADnote :public SynthNote
         /***********************************************************/
         /*                    VOICE PARAMETERS                     */
         /***********************************************************/
-        struct Voice{
+        struct Voice {
             void releasekey();
             void kill();
             /* If the voice is enabled */
@@ -196,7 +196,7 @@ class ADnote :public SynthNote
             int fixedfreqET; //if the "fixed" frequency varies according to the note (ET)
 
             // cents = basefreq*VoiceDetune
-            float  Detune, FineDetune;
+            float Detune, FineDetune;
 
             Envelope *FreqEnvelope;
             LFO      *FreqLfo;
@@ -207,8 +207,8 @@ class ADnote :public SynthNote
             ***************************/
 
             /* Panning 0.0f=left, 0.5f - center, 1.0f = right */
-            float  Panning;
-            float  Volume; // [-1.0f .. 1.0f]
+            float Panning;
+            float Volume;  // [-1.0f .. 1.0f]
 
             Envelope *AmpEnvelope;
             LFO      *AmpLfo;
@@ -217,11 +217,11 @@ class ADnote :public SynthNote
             *   FILTER PARAMETERS    *
             *************************/
 
-            class Filter   *VoiceFilterL;
-            class Filter   *VoiceFilterR;
+            class Filter *VoiceFilterL;
+            class Filter *VoiceFilterR;
 
-            float  FilterCenterPitch; /* Filter center Pitch*/
-            float  FilterFreqTracking;
+            float FilterCenterPitch;  /* Filter center Pitch*/
+            float FilterFreqTracking;
 
             Envelope *FilterEnvelope;
             LFO      *FilterLfo;
@@ -233,7 +233,7 @@ class ADnote :public SynthNote
 
             FMTYPE FMEnabled;
 
-            int    FMVoice;
+            int FMVoice;
 
             // Voice Output used by other voices if use this as modullator
             float *VoiceOut;
@@ -241,8 +241,8 @@ class ADnote :public SynthNote
             /* Wave of the Voice */
             float *FMSmp;
 
-            float  FMVolume;
-            float  FMDetune; //in cents
+            float FMVolume;
+            float FMDetune;  //in cents
 
             Envelope *FMFreqEnvelope;
             Envelope *FMAmpEnvelope;
@@ -293,17 +293,17 @@ class ADnote :public SynthNote
 
         //used to compute and interpolate the amplitudes of voices and modullators
         float oldamplitude[NUM_VOICES],
-                 newamplitude[NUM_VOICES],
-                 FMoldamplitude[NUM_VOICES],
-                 FMnewamplitude[NUM_VOICES];
+              newamplitude[NUM_VOICES],
+              FMoldamplitude[NUM_VOICES],
+              FMnewamplitude[NUM_VOICES];
 
         //used by Frequency Modulation (for integration)
         float *FMoldsmp[NUM_VOICES];
 
         //temporary buffer
-        float *tmpwavel;
-        float *tmpwaver;
-        int max_unison;
+        float  *tmpwavel;
+        float  *tmpwaver;
+        int     max_unison;
         float **tmpwave_unison;
 
         //Filter bypass samples
@@ -323,4 +323,3 @@ class ADnote :public SynthNote
 };
 
 #endif
-

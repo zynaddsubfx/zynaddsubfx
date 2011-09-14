@@ -6,21 +6,21 @@
 
 using namespace std;
 
-ostream &operator<<(ostream &out, const MidiEvent& ev)
+ostream &operator<<(ostream &out, const MidiEvent &ev)
 {
     if(ev.type == M_NOTE)
-        out << "MidiNote: note("     << ev.num      << ")\n"
-            << "          channel("  << ev.channel  << ")\n"
-            << "          velocity(" << ev.value    << ")";
+        out << "MidiNote: note(" << ev.num << ")\n"
+            << "          channel(" << ev.channel << ")\n"
+            << "          velocity(" << ev.value << ")";
     else
-        out << "MidiCtl: controller(" << ev.num     << ")\n"
-            << "         channel("    << ev.channel << ")\n"
-            << "         value("      << ev.value   << ")";
+        out << "MidiCtl: controller(" << ev.num << ")\n"
+            << "         channel(" << ev.channel << ")\n"
+            << "         value(" << ev.value << ")";
     return out;
 }
 
 MidiEvent::MidiEvent()
-    :channel(0),type(0),num(0),value(0)
+    :channel(0), type(0), num(0), value(0)
 {}
 
 InMgr &InMgr::getInstance()
@@ -106,4 +106,3 @@ MidiIn *InMgr::getIn(string name)
     EngineMgr &eng = EngineMgr::getInstance();
     return dynamic_cast<MidiIn *>(eng.getEng(name));
 }
-

@@ -27,7 +27,7 @@
 #include "../globals.h"
 #include "AudioOut.h"
 
-class PaEngine: public AudioOut
+class PaEngine:public AudioOut
 {
     public:
         PaEngine();
@@ -40,10 +40,12 @@ class PaEngine: public AudioOut
         bool getAudioEn() const;
 
     protected:
-        static int PAprocess(const void *inputBuffer, void *outputBuffer,
-                unsigned long framesPerBuffer,
-                const PaStreamCallbackTimeInfo *outTime, PaStreamCallbackFlags flags,
-                void *userData);
+        static int PAprocess(const void *inputBuffer,
+                             void *outputBuffer,
+                             unsigned long framesPerBuffer,
+                             const PaStreamCallbackTimeInfo *outTime,
+                             PaStreamCallbackFlags flags,
+                             void *userData);
         int process(float *out, unsigned long framesPerBuffer);
     private:
         PaStream *stream;
@@ -53,4 +55,3 @@ class PaEngine: public AudioOut
 void PAfinish();
 
 #endif
-

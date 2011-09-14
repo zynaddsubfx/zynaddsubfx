@@ -29,7 +29,7 @@
 #include "SafeQueue.h"
 
 class WavFile;
-class WavEngine: public AudioOut
+class WavEngine:public AudioOut
 {
     public:
         WavEngine();
@@ -39,8 +39,8 @@ class WavEngine: public AudioOut
         bool Start();
         void Stop();
 
-        void setAudioEn(bool /*nval*/){};
-        bool getAudioEn() const{return true;};
+        void setAudioEn(bool /*nval*/) {}
+        bool getAudioEn() const {return true;}
 
         void push(Stereo<float *> smps, size_t len);
 
@@ -53,10 +53,9 @@ class WavEngine: public AudioOut
 
     private:
         WavFile *file;
-        sem_t work;
+        sem_t    work;
         SafeQueue<float> buffer;
 
         pthread_t *pThread;
 };
 #endif
-

@@ -22,8 +22,7 @@
 #define STEREO_H
 
 template<class T>
-struct Stereo
-{
+struct Stereo {
     public:
         Stereo(const T &left, const T &right);
 
@@ -39,4 +38,3 @@ struct Stereo
 };
 #include "Stereo.cpp"
 #endif
-

@@ -7,15 +7,15 @@ using namespace std;
 class OscilGenTest:public CxxTest::TestSuite
 {
     public:
-        float freq;
+        float  freq;
         float *outR, *outL;
         FFTwrapper *fft;
-        OscilGen  *oscil;
+        OscilGen   *oscil;
 
         void setUp() {
             //First the sensible settings and variables that have to be set:
             SOUND_BUFFER_SIZE = 256;
-            OSCIL_SIZE        = 1024;
+            OSCIL_SIZE = 1024;
 
             outL = new float[OSCIL_SIZE];
             outR = new float[OSCIL_SIZE];
@@ -55,7 +55,7 @@ class OscilGenTest:public CxxTest::TestSuite
             const char testnote = 50;
             freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
         }
-        
+
         void tearDown() {
             delete oscil;
             delete fft;
@@ -74,7 +74,7 @@ class OscilGenTest:public CxxTest::TestSuite
         void testOutput(void)
         {
             oscil->get(outL, freq);
-            TS_ASSERT_DELTA(outL[23],  -0.044547f, 0.0001f);
+            TS_ASSERT_DELTA(outL[23], -0.044547f, 0.0001f);
             TS_ASSERT_DELTA(outL[129], -0.018169f, 0.0001f);
             TS_ASSERT_DELTA(outL[586], 0.045647f, 0.0001f);
             TS_ASSERT_DELTA(outL[1023], -0.038334f, 0.0001f);
@@ -104,7 +104,7 @@ class OscilGenTest:public CxxTest::TestSuite
 
             printf("OscilGenTest: %f seconds for %d prepares.\n",
                    (static_cast<float>(t_off - t_on)) / CLOCKS_PER_SEC, samps);
-            
+
             t_on = clock(); // timer before calling func
             for(int i = 0; i < samps; ++i)
                 oscil->get(outL, freq);

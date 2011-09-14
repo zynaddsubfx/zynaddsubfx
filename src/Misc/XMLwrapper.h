@@ -205,9 +205,9 @@ class XMLwrapper
          * @param max The maximum value
          */
         float getparreal(const char *name,
-                            float defaultpar,
-                            float min,
-                            float max) const;
+                         float defaultpar,
+                         float min,
+                         float max) const;
 
         bool minimal; /**<false if all parameters will be stored (used only for clipboard)*/
 
@@ -269,4 +269,3 @@ class XMLwrapper
 };
 
 #endif
-

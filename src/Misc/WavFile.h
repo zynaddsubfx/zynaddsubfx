@@ -42,4 +42,3 @@ class WavFile
         FILE *file;
 };
 #endif
-

@@ -5,13 +5,12 @@
 #include <semaphore.h>
 #include "SafeQueue.h"
 
-enum midi_type{
+enum midi_type {
     M_NOTE = 1,
     M_CONTROLLER = 2
 };    //type=1 for note, type=2 for controller
 
-struct MidiEvent
-{
+struct MidiEvent {
     MidiEvent();
     int channel; //the midi channel for the event
     int type;    //type=1 for note, type=2 for controller
@@ -41,11 +40,10 @@ class InMgr
         class MidiIn *getIn(std::string name);
         SafeQueue<MidiEvent> queue;
         sem_t work;
-        class MidiIn *current;
+        class MidiIn * current;
 
         /**the link to the rest of zyn*/
-        class Master &master;
+        class Master & master;
 };
 
 #endif
-

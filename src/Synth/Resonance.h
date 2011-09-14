@@ -68,4 +68,3 @@ class Resonance:public Presets
 };
 
 #endif
-

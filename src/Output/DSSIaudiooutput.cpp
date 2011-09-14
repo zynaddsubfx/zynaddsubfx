@@ -43,7 +43,9 @@ using std::vector;
 // LADSPA is essentially a C handle based API; This plug-in implementation is
 // a C++ OO one so we need stub functions to map from C API calls to C++ object
 // method calls.
-void DSSIaudiooutput::stub_connectPort(LADSPA_Handle instance, unsigned long port, LADSPA_Data * data)
+void DSSIaudiooutput::stub_connectPort(LADSPA_Handle instance,
+                                       unsigned long port,
+                                       LADSPA_Data *data)
 {
     getInstance(instance)->connectPort(port, data);
 }
@@ -53,7 +55,8 @@ void DSSIaudiooutput::stub_activate(LADSPA_Handle instance)
     getInstance(instance)->activate();
 }
 
-void DSSIaudiooutput::stub_run(LADSPA_Handle instance, unsigned long sample_count)
+void DSSIaudiooutput::stub_run(LADSPA_Handle instance,
+                               unsigned long sample_count)
 {
     getInstance(instance)->run(sample_count);
 }
@@ -66,7 +69,7 @@ void DSSIaudiooutput::stub_deactivate(LADSPA_Handle instance)
 
 void DSSIaudiooutput::stub_cleanup(LADSPA_Handle instance)
 {
-    DSSIaudiooutput* plugin_instance = getInstance(instance);
+    DSSIaudiooutput *plugin_instance = getInstance(instance);
     plugin_instance->cleanup();
     delete plugin_instance;
 }
@@ -83,23 +86,30 @@ const LADSPA_Descriptor *ladspa_descriptor(unsigned long index)
 // DSSI is essentially a C handle based API; This plug-in implementation is
 // a C++ OO one so we need stub functions to map from C API calls to C++ object
 // method calls.
-const DSSI_Program_Descriptor* DSSIaudiooutput::stub_getProgram (LADSPA_Handle instance, unsigned long index)
+const DSSI_Program_Descriptor *DSSIaudiooutput::stub_getProgram(
+    LADSPA_Handle instance,
+    unsigned long index)
 {
     return getInstance(instance)->getProgram(index);
 }
 
-void DSSIaudiooutput::stub_selectProgram(LADSPA_Handle instance, unsigned long bank, unsigned long program)
+void DSSIaudiooutput::stub_selectProgram(LADSPA_Handle instance,
+                                         unsigned long bank,
+                                         unsigned long program)
 {
     getInstance(instance)->selectProgram(bank, program);
 }
 
-int DSSIaudiooutput::stub_getMidiControllerForPort(LADSPA_Handle instance, unsigned long port)
+int DSSIaudiooutput::stub_getMidiControllerForPort(LADSPA_Handle instance,
+                                                   unsigned long port)
 {
     return getInstance(instance)->getMidiControllerForPort(port);
 }
 
-void DSSIaudiooutput::stub_runSynth(LADSPA_Handle instance, unsigned long sample_count,
-                  snd_seq_event_t *events, unsigned long event_count)
+void DSSIaudiooutput::stub_runSynth(LADSPA_Handle instance,
+                                    unsigned long sample_count,
+                                    snd_seq_event_t *events,
+                                    unsigned long event_count)
 {
     getInstance(instance)->runSynth(sample_count, events, event_count);
 }
@@ -129,16 +139,13 @@ const DSSI_Descriptor *dssi_descriptor(unsigned long index)
  * @param s_rate [in] the sample rate
  * @return the plug-in instance handle if successful else NULL
  */
-LADSPA_Handle DSSIaudiooutput::instantiate(const LADSPA_Descriptor * descriptor, unsigned long s_rate)
+LADSPA_Handle DSSIaudiooutput::instantiate(const LADSPA_Descriptor *descriptor,
+                                           unsigned long s_rate)
 {
     if(descriptor->UniqueID == dssiDescriptor->LADSPA_Plugin->UniqueID)
-    {
         return (LADSPA_Handle)(new DSSIaudiooutput(s_rate));
-    }
     else
-    {
         return NULL;
-    }
 }
 
 /**
@@ -159,15 +166,15 @@ LADSPA_Handle DSSIaudiooutput::instantiate(const LADSPA_Descriptor * descriptor,
  * @param port [in] the port to be connected
  * @param data [in] the data buffer to write to / read from
  */
-void DSSIaudiooutput::connectPort(unsigned long port, LADSPA_Data * data)
+void DSSIaudiooutput::connectPort(unsigned long port, LADSPA_Data *data)
 {
-    switch (port) {
-    case 0:
-        outl = data;
-        break;
-    case 1:
-        outr = data;
-        break;
+    switch(port) {
+        case 0:
+            outl = data;
+            break;
+        case 1:
+            outr = data;
+            break;
     }
 }
 
@@ -188,8 +195,7 @@ void DSSIaudiooutput::connectPort(unsigned long port, LADSPA_Data * data)
  * too much code here seems to cause time-out problems in jack-dssi-host.
 */
 void DSSIaudiooutput::activate()
-{
-}
+{}
 
 /**
  * Runs an instance of a plug-in for a block.
@@ -208,7 +214,7 @@ void DSSIaudiooutput::activate()
  */
 void DSSIaudiooutput::run(unsigned long sample_count)
 {
-    runSynth(sample_count,NULL,(unsigned long)0);
+    runSynth(sample_count, NULL, (unsigned long)0);
 }
 
 /**
@@ -223,9 +229,7 @@ void DSSIaudiooutput::run(unsigned long sample_count)
  * Currently this function does nothing.
  */
 void DSSIaudiooutput::deactivate()
-{
-
-}
+{}
 
 /**
  * Deletes a plug-in instance that is no longer required.
@@ -242,8 +246,7 @@ void DSSIaudiooutput::deactivate()
  * Currently cleanup is deferred to the destructor that is invoked after cleanup()
  */
 void DSSIaudiooutput::cleanup()
-{
-}
+{}
 
 /**
  * Initial entry point for the LADSPA plug-in library.
@@ -263,9 +266,10 @@ void DSSIaudiooutput::cleanup()
  * @param index [in] the index number of the plug-in within the library.
  * @return if index is in range, a pointer to the plug-in descriptor is returned, else NULL
  */
-const LADSPA_Descriptor* DSSIaudiooutput::getLadspaDescriptor(unsigned long index)
+const LADSPA_Descriptor *DSSIaudiooutput::getLadspaDescriptor(
+    unsigned long index)
 {
-    if(index > 0 || dssiDescriptor == NULL)
+    if((index > 0) || (dssiDescriptor == NULL))
         return NULL;
     else
         return dssiDescriptor->LADSPA_Plugin;
@@ -302,7 +306,7 @@ const LADSPA_Descriptor* DSSIaudiooutput::getLadspaDescriptor(unsigned long inde
  * guaranteed to be valid only until the next call to get_program,
  * deactivate, or configure, on the same plug-in instance, or NULL if index is out of range.
  */
-const DSSI_Program_Descriptor* DSSIaudiooutput::getProgram (unsigned long index)
+const DSSI_Program_Descriptor *DSSIaudiooutput::getProgram(unsigned long index)
 {
     static DSSI_Program_Descriptor retVal;
 
@@ -310,20 +314,17 @@ const DSSI_Program_Descriptor* DSSIaudiooutput::getProgram (unsigned long index)
     initBanks();
 
     /* Make sure that the bank containing the instrument has been mapped */
-    while (index >= programMap.size() && mapNextBank())
+    while(index >= programMap.size() && mapNextBank())
         /* DO NOTHING MORE */;
 
     if(index >= programMap.size())
-    {
         /* No more instruments */
         return NULL;
-    }
-    else
-    {
+    else {
         /* OK, return the instrument */
-        retVal.Name =  programMap[index].name.c_str();
+        retVal.Name    = programMap[index].name.c_str();
         retVal.Program = programMap[index].program;
-        retVal.Bank = programMap[index].bank;
+        retVal.Bank    = programMap[index].bank;
         return &retVal;
     }
 }
@@ -349,11 +350,9 @@ void DSSIaudiooutput::selectProgram(unsigned long bank, unsigned long program)
 {
     initBanks();
 //    cerr << "selectProgram(" << (bank & 0x7F) << ':' << ((bank >> 7) & 0x7F) << "," << program  << ")" << '\n';
-    if(bank <  master->bank.banks.size() && program < BANK_SIZE)
-    {
-        const std::string bankdir = master->bank.banks[ bank ].dir;
-        if(!bankdir.empty())
-        {
+    if((bank < master->bank.banks.size()) && (program < BANK_SIZE)) {
+        const std::string bankdir = master->bank.banks[bank].dir;
+        if(!bankdir.empty()) {
             pthread_mutex_lock(&master->mutex);
 
             /* We have to turn off the CheckPADsynth functionality, else
@@ -422,55 +421,58 @@ int DSSIaudiooutput::getMidiControllerForPort(unsigned long port)
  * events.
  * @param event_count [in] the number of entries in the `events` block
  */
-void DSSIaudiooutput::runSynth(unsigned long sample_count, snd_seq_event_t *events, unsigned long event_count)
+void DSSIaudiooutput::runSynth(unsigned long sample_count,
+                               snd_seq_event_t *events,
+                               unsigned long event_count)
 {
-    unsigned long from_frame = 0;
-    unsigned long event_index = 0;
+    unsigned long from_frame       = 0;
+    unsigned long event_index      = 0;
     unsigned long next_event_frame = 0;
     unsigned long to_frame = 0;
     pthread_mutex_lock(&master->mutex);
 
     do {
         /* Find the time of the next event, if any */
-        if(events == NULL || event_index >= event_count)
+        if((events == NULL) || (event_index >= event_count))
             next_event_frame = ULONG_MAX;
         else
             next_event_frame = events[event_index].time.tick;
 
         /* find the end of the sub-sample to be processed this time round... */
         /* if the next event falls within the desired sample interval... */
-        if(next_event_frame < sample_count && next_event_frame >= to_frame)
+        if((next_event_frame < sample_count) && (next_event_frame >= to_frame))
             /* set the end to be at that event */
             to_frame = next_event_frame;
         else
             /* ...else go for the whole remaining sample */
             to_frame = sample_count;
-        if(from_frame<to_frame)
-        {
+        if(from_frame < to_frame) {
             // call master to fill from `from_frame` to `to_frame`:
-            master->GetAudioOutSamples(to_frame - from_frame, (int)sampleRate, &(outl[from_frame]), &(outr[from_frame]));
+            master->GetAudioOutSamples(to_frame - from_frame,
+                                       (int)sampleRate,
+                                       &(outl[from_frame]),
+                                       &(outr[from_frame]));
             // next sub-sample please...
             from_frame = to_frame;
         }
 
         // Now process any event(s) at the current timing point
-        while(events != NULL && event_index < event_count && events[event_index].time.tick == to_frame)
-        {
+        while(events != NULL && event_index < event_count
+              && events[event_index].time.tick == to_frame) {
             if(events[event_index].type == SND_SEQ_EVENT_NOTEON)
-            {
-                master->noteOn(events[event_index].data.note.channel, events[event_index].data.note.note, events[event_index].data.note.velocity);
-            }
-            else if(events[event_index].type == SND_SEQ_EVENT_NOTEOFF)
-            {
-                master->noteOff(events[event_index].data.note.channel, events[event_index].data.note.note);
-            }
-            else if(events[event_index].type == SND_SEQ_EVENT_CONTROLLER)
-            {
-                master->setController(events[event_index].data.control.channel, events[event_index].data.control.param, events[event_index].data.control.value);
-            }
+                master->noteOn(events[event_index].data.note.channel,
+                               events[event_index].data.note.note,
+                               events[event_index].data.note.velocity);
             else
-            {
-            }
+            if(events[event_index].type == SND_SEQ_EVENT_NOTEOFF)
+                master->noteOff(events[event_index].data.note.channel,
+                                events[event_index].data.note.note);
+            else
+            if(events[event_index].type == SND_SEQ_EVENT_CONTROLLER)
+                master->setController(events[event_index].data.control.channel,
+                                      events[event_index].data.control.param,
+                                      events[event_index].data.control.value);
+            else {}
             event_index++;
         }
 
@@ -497,9 +499,9 @@ void DSSIaudiooutput::runSynth(unsigned long sample_count, snd_seq_event_t *even
  * @param index [in] the index number of the plug-in within the library.
  * @return if index is in range, a pointer to the plug-in descriptor is returned, else NULL
  */
-const DSSI_Descriptor* DSSIaudiooutput::getDssiDescriptor(unsigned long index)
+const DSSI_Descriptor *DSSIaudiooutput::getDssiDescriptor(unsigned long index)
 {
-    if(index > 0 || dssiDescriptor == NULL)
+    if((index > 0) || (dssiDescriptor == NULL))
         return NULL;
     else
         return dssiDescriptor;
@@ -510,64 +512,67 @@ const DSSI_Descriptor* DSSIaudiooutput::getDssiDescriptor(unsigned long index)
 //
 
 // Initialise the DSSI descriptor, statically:
-DSSI_Descriptor* DSSIaudiooutput::dssiDescriptor = DSSIaudiooutput::initDssiDescriptor();
+DSSI_Descriptor *DSSIaudiooutput:: dssiDescriptor =
+    DSSIaudiooutput::initDssiDescriptor();
 
 /**
  * Initializes the DSSI (and LADSPA) descriptor, returning it is an object.
  */
-DSSI_Descriptor* DSSIaudiooutput::initDssiDescriptor()
+DSSI_Descriptor *DSSIaudiooutput::initDssiDescriptor()
 {
-    DSSI_Descriptor* newDssiDescriptor = new DSSI_Descriptor;
+    DSSI_Descriptor *newDssiDescriptor = new DSSI_Descriptor;
 
-    LADSPA_PortDescriptor* newPortDescriptors;
-    const char** newPortNames;
-    LADSPA_PortRangeHint* newPortRangeHints;
+    LADSPA_PortDescriptor *newPortDescriptors;
+    const char **newPortNames;
+    LADSPA_PortRangeHint *newPortRangeHints;
 
-    if (newDssiDescriptor)
-    {
-        LADSPA_Descriptor* newLadspaDescriptor = new LADSPA_Descriptor;
-        if (newLadspaDescriptor)
-        {
-            newLadspaDescriptor->UniqueID = 100;
-            newLadspaDescriptor->Label = "ZASF";
+    if(newDssiDescriptor) {
+        LADSPA_Descriptor *newLadspaDescriptor = new LADSPA_Descriptor;
+        if(newLadspaDescriptor) {
+            newLadspaDescriptor->UniqueID   = 100;
+            newLadspaDescriptor->Label      = "ZASF";
             newLadspaDescriptor->Properties = 0;
-            newLadspaDescriptor->Name = "ZynAddSubFX";
-            newLadspaDescriptor->Maker = "Nasca Octavian Paul <zynaddsubfx@yahoo.com>";
+            newLadspaDescriptor->Name  = "ZynAddSubFX";
+            newLadspaDescriptor->Maker =
+                "Nasca Octavian Paul <zynaddsubfx@yahoo.com>";
             newLadspaDescriptor->Copyright = "GNU General Public License v.2";
             newLadspaDescriptor->PortCount = 2;
 
-            newPortNames = new const char *[newLadspaDescriptor->PortCount];
+            newPortNames    = new const char *[newLadspaDescriptor->PortCount];
             newPortNames[0] = "Output L";
             newPortNames[1] = "Output R";
             newLadspaDescriptor->PortNames = newPortNames;
 
-            newPortDescriptors = new LADSPA_PortDescriptor[newLadspaDescriptor->PortCount];
+            newPortDescriptors =
+                new LADSPA_PortDescriptor[newLadspaDescriptor->PortCount];
             newPortDescriptors[0] = LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO;
             newPortDescriptors[1] = LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO;
             newLadspaDescriptor->PortDescriptors = newPortDescriptors;
 
-            newPortRangeHints = new LADSPA_PortRangeHint[newLadspaDescriptor->PortCount];
+            newPortRangeHints =
+                new LADSPA_PortRangeHint[newLadspaDescriptor->PortCount];
             newPortRangeHints[0].HintDescriptor = 0;
             newPortRangeHints[1].HintDescriptor = 0;
             newLadspaDescriptor->PortRangeHints = newPortRangeHints;
 
-            newLadspaDescriptor->activate = stub_activate;
-            newLadspaDescriptor->cleanup = stub_cleanup;
+            newLadspaDescriptor->activate     = stub_activate;
+            newLadspaDescriptor->cleanup      = stub_cleanup;
             newLadspaDescriptor->connect_port = stub_connectPort;
-            newLadspaDescriptor->deactivate = stub_deactivate;
-            newLadspaDescriptor->instantiate = instantiate;
+            newLadspaDescriptor->deactivate   = stub_deactivate;
+            newLadspaDescriptor->instantiate  = instantiate;
             newLadspaDescriptor->run = stub_run;
             newLadspaDescriptor->run_adding = NULL;
             newLadspaDescriptor->set_run_adding_gain = NULL;
         }
-        newDssiDescriptor->LADSPA_Plugin = newLadspaDescriptor;
+        newDssiDescriptor->LADSPA_Plugin    = newLadspaDescriptor;
         newDssiDescriptor->DSSI_API_Version = 1;
-        newDssiDescriptor->configure = NULL;
+        newDssiDescriptor->configure   = NULL;
         newDssiDescriptor->get_program = stub_getProgram;
-        newDssiDescriptor->get_midi_controller_for_port = stub_getMidiControllerForPort;
-        newDssiDescriptor->select_program = stub_selectProgram;
-        newDssiDescriptor->run_synth = stub_runSynth;
-        newDssiDescriptor->run_synth_adding = NULL;
+        newDssiDescriptor->get_midi_controller_for_port =
+            stub_getMidiControllerForPort;
+        newDssiDescriptor->select_program      = stub_selectProgram;
+        newDssiDescriptor->run_synth           = stub_runSynth;
+        newDssiDescriptor->run_synth_adding    = NULL;
         newDssiDescriptor->run_multiple_synths = NULL;
         newDssiDescriptor->run_multiple_synths_adding = NULL;
     }
@@ -583,9 +588,9 @@ DSSI_Descriptor* DSSIaudiooutput::initDssiDescriptor()
  * @param instance [in]
  * @return the instance
  */
-DSSIaudiooutput* DSSIaudiooutput::getInstance(LADSPA_Handle instance)
+DSSIaudiooutput *DSSIaudiooutput::getInstance(LADSPA_Handle instance)
 {
-    return (DSSIaudiooutput*)(instance);
+    return (DSSIaudiooutput *)(instance);
 }
 
 /**
@@ -597,16 +602,17 @@ DSSIaudiooutput* DSSIaudiooutput::getInstance(LADSPA_Handle instance)
  */
 DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate)
 {
-    SAMPLE_RATE  = sampleRate;
+    SAMPLE_RATE = sampleRate;
 
-    this->sampleRate = sampleRate;
+    this->sampleRate  = sampleRate;
     this->banksInited = false;
 
     config.init();
 
     sprng(time(NULL));
-    denormalkillbuf=new float [SOUND_BUFFER_SIZE];
-    for (int i=0;i<SOUND_BUFFER_SIZE;i++) denormalkillbuf[i]=(RND-0.5f)*1e-16;
+    denormalkillbuf = new float [SOUND_BUFFER_SIZE];
+    for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
+        denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 
     this->master = new Master();
 }
@@ -616,16 +622,14 @@ DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate)
  * @return
  */
 DSSIaudiooutput::~DSSIaudiooutput()
-{
-}
+{}
 
 /**
  * Ensures the list of bank (directories) has been initialised.
  */
 void DSSIaudiooutput::initBanks(void)
 {
-    if(!banksInited)
-    {
+    if(!banksInited) {
         pthread_mutex_lock(&master->mutex);
         master->bank.rescanforbanks();
         banksInited = true;
@@ -641,20 +645,22 @@ void DSSIaudiooutput::initBanks(void)
  * @param _name [in] instrument / sample name
  * @return
  */
-DSSIaudiooutput::ProgramDescriptor::ProgramDescriptor(unsigned long _bank, unsigned long _program, char* _name) :
-            bank(_bank), program(_program), name(_name)
-{
-}
+DSSIaudiooutput::ProgramDescriptor::ProgramDescriptor(unsigned long _bank,
+                                                      unsigned long _program,
+                                                      char *_name)
+    :bank(_bank), program(_program), name(_name)
+{}
 
 /**
  * The map of programs available; held as a single shared statically allocated object.
  */
-vector <DSSIaudiooutput::ProgramDescriptor> DSSIaudiooutput::programMap = vector<DSSIaudiooutput::ProgramDescriptor>();
+vector<DSSIaudiooutput::ProgramDescriptor> DSSIaudiooutput:: programMap =
+    vector<DSSIaudiooutput::ProgramDescriptor>();
 
 /**
  * Index controlling the map of banks
  */
-long DSSIaudiooutput::bankNoToMap = 1;
+long DSSIaudiooutput:: bankNoToMap = 1;
 
 /**
  * Queries and maps the next available bank of instruments.
@@ -666,25 +672,22 @@ long DSSIaudiooutput::bankNoToMap = 1;
 bool DSSIaudiooutput::mapNextBank()
 {
     pthread_mutex_lock(&master->mutex);
-    Bank& bank = master->bank;
-    bool retval;
-    if(bankNoToMap >= (int)bank.banks.size() || bank.banks[bankNoToMap].dir.empty())
-    {
+    Bank &bank = master->bank;
+    bool  retval;
+    if((bankNoToMap >= (int)bank.banks.size())
+       || bank.banks[bankNoToMap].dir.empty())
         retval = false;
-    }
-    else
-    {
+    else {
         bank.loadbank(bank.banks[bankNoToMap].dir);
-        for(unsigned long instrument = 0; instrument < BANK_SIZE; ++instrument)
-        {
+        for(unsigned long instrument = 0; instrument < BANK_SIZE;
+            ++instrument) {
             string insName = bank.getname(instrument);
-            if(!insName.empty() && insName[0] != '\0' && insName[0] != ' ')
-            {
-                programMap.push_back(ProgramDescriptor(bankNoToMap,instrument,
-                            const_cast<char*>(insName.c_str())));
-            }
+            if(!insName.empty() && (insName[0] != '\0') && (insName[0] != ' '))
+                programMap.push_back(ProgramDescriptor(bankNoToMap, instrument,
+                                                       const_cast<char *>(
+                                                           insName.c_str())));
         }
-        bankNoToMap ++;
+        bankNoToMap++;
         retval = true;
     }
     pthread_mutex_unlock(&master->mutex);

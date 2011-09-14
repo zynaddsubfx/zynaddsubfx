@@ -82,9 +82,9 @@ class Effect
             return freq;
         }
 
-        unsigned char   Ppreset; /**<Currently used preset*/
-        float *const efxoutl; /**<Effect out Left Channel*/
-        float *const efxoutr; /**<Effect out Right Channel*/
+        unsigned char Ppreset;   /**<Currently used preset*/
+        float *const  efxoutl; /**<Effect out Left Channel*/
+        float *const  efxoutr; /**<Effect out Right Channel*/
         /**\todo make efxoutl and efxoutr private and replace them with a Stereo<float*>*/
 
         float outvolume;/**<This is the volume of effect and is public because
@@ -107,7 +107,7 @@ class Effect
         const bool insertion;/**<If Effect is an insertion effect, insertion=1
                                *otherwise, it should be insertion=0*/
         //panning parameters
-        char Ppanning;
+        char  Ppanning;
         float pangainL;
         float pangainR;
         char  Plrcross; // L/R mix
@@ -115,4 +115,3 @@ class Effect
 };
 
 #endif
-

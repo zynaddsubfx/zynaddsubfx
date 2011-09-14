@@ -43,4 +43,3 @@ class Atomic
 };
 #include "Atomic.cpp"
 #endif
-

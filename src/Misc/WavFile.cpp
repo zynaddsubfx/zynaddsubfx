@@ -26,14 +26,14 @@ using namespace std;
 
 WavFile::WavFile(string filename, int samplerate, int channels)
     :sampleswritten(0), samplerate(samplerate), channels(channels),
-     file(fopen(filename.c_str(), "w"))
+      file(fopen(filename.c_str(), "w"))
 
 {
     if(file) {
         cout << "INFO: Making space for wave file header" << endl;
         //making space for the header written at destruction
         char tmp[44];
-        memset(tmp, 0, 44*sizeof(char));
+        memset(tmp, 0, 44 * sizeof(char));
         fwrite(tmp, 1, 44, file);
     }
 }
@@ -53,15 +53,15 @@ WavFile::~WavFile()
         fwrite("WAVEfmt ", 8, 1, file);
         chunksize = 16;
         fwrite(&chunksize, 4, 1, file);
-        unsigned short int formattag     = 1; //uncompresed wave
+        unsigned short int formattag = 1;     //uncompresed wave
         fwrite(&formattag, 2, 1, file);
-        unsigned short int nchannels     = channels; //stereo
+        unsigned short int nchannels = channels;     //stereo
         fwrite(&nchannels, 2, 1, file);
-        unsigned int samplerate_         = samplerate; //samplerate
+        unsigned int samplerate_ = samplerate;         //samplerate
         fwrite(&samplerate_, 4, 1, file);
-        unsigned int bytespersec         = samplerate * 2 * channels; //bytes/sec
+        unsigned int bytespersec = samplerate * 2 * channels;         //bytes/sec
         fwrite(&bytespersec, 4, 1, file);
-        unsigned short int blockalign    = 2 * channels; //2 channels * 16 bits/8
+        unsigned short int blockalign = 2 * channels;    //2 channels * 16 bits/8
         fwrite(&blockalign, 2, 1, file);
         unsigned short int bitspersample = 16;
         fwrite(&bitspersample, 2, 1, file);
@@ -95,4 +95,3 @@ void WavFile::writeMonoSamples(int nsmps, short int *smps)
         sampleswritten += nsmps;
     }
 }
-

@@ -64,33 +64,30 @@ EngineMgr::EngineMgr()
 
     defaultOut = dynamic_cast<AudioOut *>(defaultEng);
 
-    defaultIn  = dynamic_cast<MidiIn *>(defaultEng);
-};
+    defaultIn = dynamic_cast<MidiIn *>(defaultEng);
+}
 
 EngineMgr::~EngineMgr()
 {
-    for(list<Engine*>::iterator itr = engines.begin();
-            itr != engines.end(); ++itr) {
-            delete *itr;
-    }
+    for(list<Engine *>::iterator itr = engines.begin();
+        itr != engines.end(); ++itr)
+        delete *itr;
 }
 
 Engine *EngineMgr::getEng(string name)
 {
     transform(name.begin(), name.end(), name.begin(), ::toupper);
-    for(list<Engine*>::iterator itr = engines.begin();
-            itr != engines.end(); ++itr) {
-        if((*itr)->name == name) {
+    for(list<Engine *>::iterator itr = engines.begin();
+        itr != engines.end(); ++itr)
+        if((*itr)->name == name)
             return *itr;
-        }
-    }
     return NULL;
 }
 
 bool EngineMgr::start()
 {
     bool expected = true;
-    if(!(defaultOut&&defaultIn)) {
+    if(!(defaultOut && defaultIn)) {
         cerr << "ERROR: It looks like someone broke the Nio Output\n"
              << "       Attempting to recover by defaulting to the\n"
              << "       Null Engine." << endl;
@@ -98,32 +95,31 @@ bool EngineMgr::start()
         defaultIn  = dynamic_cast<MidiIn *>(getEng("NULL"));
     }
 
-    OutMgr::getInstance().currentOut = defaultOut;
-    InMgr::getInstance().current     = defaultIn;
+    OutMgr::getInstance(). currentOut = defaultOut;
+    InMgr::getInstance().  current    = defaultIn;
 
     //open up the default output(s)
     cout << "Starting Audio: " << defaultOut->name << endl;
     defaultOut->setAudioEn(true);
-    if(defaultOut->getAudioEn()) {
+    if(defaultOut->getAudioEn())
         cout << "Audio Started" << endl;
-    }
-    else { 
+    else {
         expected = false;
         cerr << "ERROR: The default audio output failed to open!" << endl;
-        OutMgr::getInstance().currentOut = dynamic_cast<AudioOut *>(getEng("NULL"));
-        OutMgr::getInstance().currentOut->setAudioEn(true);
+        OutMgr::getInstance(). currentOut =
+            dynamic_cast<AudioOut *>(getEng("NULL"));
+        OutMgr::getInstance(). currentOut->setAudioEn(true);
     }
 
     cout << "Starting MIDI: " << defaultIn->name << endl;
     defaultIn->setMidiEn(true);
-    if(defaultIn->getMidiEn()) {
+    if(defaultIn->getMidiEn())
         cout << "MIDI Started" << endl;
-    }
     else { //recover
         expected = false;
         cerr << "ERROR: The default MIDI input failed to open!" << endl;
-        InMgr::getInstance().current = dynamic_cast<MidiIn *>(getEng("NULL"));
-        InMgr::getInstance().current->setMidiEn(true);
+        InMgr::getInstance(). current = dynamic_cast<MidiIn *>(getEng("NULL"));
+        InMgr::getInstance(). current->setMidiEn(true);
     }
 
     //Show if expected drivers were booted
@@ -132,29 +128,27 @@ bool EngineMgr::start()
 
 void EngineMgr::stop()
 {
-    for(list<Engine*>::iterator itr = engines.begin();
-            itr != engines.end(); ++itr)
+    for(list<Engine *>::iterator itr = engines.begin();
+        itr != engines.end(); ++itr)
         (*itr)->Stop();
 }
 
 bool EngineMgr::setInDefault(string name)
 {
-        MidiIn *chosen;
-        if((chosen = dynamic_cast<MidiIn *>(getEng(name)))){ //got the input
-                 defaultIn = chosen;
-                 return true;
-        }
-        return false;
+    MidiIn *chosen;
+    if((chosen = dynamic_cast<MidiIn *>(getEng(name)))) {    //got the input
+        defaultIn = chosen;
+        return true;
+    }
+    return false;
 }
 
 bool EngineMgr::setOutDefault(string name)
 {
-        AudioOut *chosen;
-        if((chosen = dynamic_cast<AudioOut *>(getEng(name)))){ //got the output
-                 defaultOut = chosen;
-                 return true;
-        }
-        return false;
+    AudioOut *chosen;
+    if((chosen = dynamic_cast<AudioOut *>(getEng(name)))) {    //got the output
+        defaultOut = chosen;
+        return true;
+    }
+    return false;
 }
-
-

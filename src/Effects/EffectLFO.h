@@ -45,9 +45,8 @@ class EffectLFO
         float ampl1, ampl2, ampr1, ampr2; //necessary for "randomness"
         float lfointensity;
         float lfornd;
-        char     lfotype; /**\todo GET RID OF CHAR (replace with short or enum)*/
+        char  lfotype;    /**\todo GET RID OF CHAR (replace with short or enum)*/
 };
 
 
 #endif
-

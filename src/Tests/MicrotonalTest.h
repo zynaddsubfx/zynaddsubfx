@@ -87,7 +87,7 @@ class MicrotonalTest:public CxxTest::TestSuite
             xml.endbranch();
             xml.endbranch();
 
-            char      *tmp = xml.getXMLdata();
+            char *tmp = xml.getXMLdata();
             Microtonal other;
 
             other.Penabled = 1;
@@ -129,7 +129,7 @@ class MicrotonalTest:public CxxTest::TestSuite
             //the tuning is from old documentation for "Intense Diatonic" scale
             const char *tuning[7] =
             {"9/8", "5/4", "4/3", "3/2", "5/3", "15/8", "2/1"};
-            const int numTunings  = 7;
+            const int numTunings = 7;
             //for(int i=0;i<20;++i)
             //    cout << i << ':' << testMicro->getnotefreq(i,0) << endl;
             //    go to middle key and verify the proportions
@@ -140,4 +140,3 @@ class MicrotonalTest:public CxxTest::TestSuite
     private:
         Microtonal *testMicro;
 };
-

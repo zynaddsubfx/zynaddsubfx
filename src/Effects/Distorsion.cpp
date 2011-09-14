@@ -38,13 +38,13 @@ Distorsion::Distorsion(const int &insertion_,
 
     //default values
     Pvolume = 50;
-    Pdrive        = 90;
-    Plevel        = 64;
-    Ptype         = 0;
-    Pnegate       = 0;
-    Plpf          = 127;
-    Phpf          = 0;
-    Pstereo       = 0;
+    Pdrive  = 90;
+    Plevel  = 64;
+    Ptype   = 0;
+    Pnegate = 0;
+    Plpf    = 127;
+    Phpf    = 0;
+    Pstereo = 0;
     Pprefiltering = 0;
 
     setpreset(Ppreset);
@@ -91,23 +91,21 @@ void Distorsion::applyfilters(float *efxoutl, float *efxoutr)
  */
 void Distorsion::out(const Stereo<float *> &smp)
 {
-    int      i;
+    int   i;
     float l, r, lout, rout;
 
     float inputvol = powf(5.0f, (Pdrive - 32.0f) / 127.0f);
     if(Pnegate != 0)
         inputvol *= -1.0f;
 
-    if(Pstereo != 0) { //Stereo
+    if(Pstereo != 0)   //Stereo
         for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             efxoutl[i] = smp.l[i] * inputvol * pangainL;
             efxoutr[i] = smp.r[i] * inputvol * pangainR;
         }
-    }
-    else {
+    else
         for(i = 0; i < SOUND_BUFFER_SIZE; ++i)
             efxoutl[i] = (smp.l[i] * pangainL + smp.r[i] * pangainR) * inputvol;
-    }
 
     if(Pprefiltering != 0)
         applyfilters(efxoutl, efxoutr);
@@ -180,17 +178,17 @@ void Distorsion::setpreset(unsigned char npreset)
     const int     NUM_PRESETS = 6;
     unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Overdrive 1
-        {127, 64,  35,  56, 70, 0, 0, 96,  0,   0,   0  },
+        {127, 64, 35, 56, 70, 0, 0, 96,  0,   0, 0  },
         //Overdrive 2
-        {127, 64,  35,  29, 75, 1, 0, 127, 0,   0,   0  },
+        {127, 64, 35, 29, 75, 1, 0, 127, 0,   0, 0  },
         //A. Exciter 1
-        {64,  64,  35,  75, 80, 5, 0, 127, 105, 1,   0  },
+        {64,  64, 35, 75, 80, 5, 0, 127, 105, 1, 0  },
         //A. Exciter 2
-        {64,  64,  35,  85, 62, 1, 0, 127, 118, 1,   0  },
+        {64,  64, 35, 85, 62, 1, 0, 127, 118, 1, 0  },
         //Guitar Amp
-        {127, 64,  35,  63, 75, 2, 0, 55,  0,   0,   0  },
+        {127, 64, 35, 63, 75, 2, 0, 55,  0,   0, 0  },
         //Quantisize
-        {127, 64,  35,  88, 75, 4, 0, 127, 0,   1,   0  }
+        {127, 64, 35, 88, 75, 4, 0, 127, 0,   1, 0  }
     };
 
 
@@ -267,4 +265,3 @@ unsigned char Distorsion::getpar(int npar) const
         default: return 0;
     }
 }
-

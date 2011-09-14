@@ -85,7 +85,7 @@ class EffectMgr:public Presets
         void seteffectpar_nolock(int npar, unsigned char value);
         unsigned char geteffectpar(int npar);
         const bool insertion; /**<1 if the effect is connected as insertion effect*/
-        float  *efxoutl, *efxoutr;
+        float     *efxoutl, *efxoutr;
 
         /**used by UI
              * \todo needs to be decoupled*/
@@ -101,4 +101,3 @@ class EffectMgr:public Presets
 };
 
 #endif
-

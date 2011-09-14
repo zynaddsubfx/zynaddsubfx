@@ -76,4 +76,3 @@ class Sample
         float *buffer;
 };
 #endif
-

@@ -46,9 +46,9 @@ class Config
             std::string DumpFile;
             std::string bankRootDirList[MAX_BANK_ROOT_DIRS], currentBankDir;
             std::string presetsDirList[MAX_BANK_ROOT_DIRS];
-            int   CheckPADsynth;
-            int   UserInterfaceMode;
-            int   VirKeybLayout;
+            int CheckPADsynth;
+            int UserInterfaceMode;
+            int VirKeybLayout;
             std::string LinuxALSAaudioDev;
             std::string nameTag;
         } cfg;
@@ -71,4 +71,3 @@ class Config
         void getConfigFileName(char *name, int namesize);
 };
 #endif
-

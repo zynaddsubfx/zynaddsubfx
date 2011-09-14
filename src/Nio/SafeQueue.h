@@ -7,7 +7,7 @@
 /**
  * C++ thread safe lockless queue
  * Based off of jack's ringbuffer*/
-template <class T>
+template<class T>
 class SafeQueue
 {
     public:

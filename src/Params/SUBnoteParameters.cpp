@@ -29,7 +29,7 @@ SUBnoteParameters::SUBnoteParameters():Presets()
     setpresettype("Psubsyth");
     AmpEnvelope = new EnvelopeParams(64, 1);
     AmpEnvelope->ADSRinit_dB(0, 40, 127, 25);
-    FreqEnvelope      = new EnvelopeParams(64, 0);
+    FreqEnvelope = new EnvelopeParams(64, 0);
     FreqEnvelope->ASRinit(30, 50, 64, 60);
     BandWidthEnvelope = new EnvelopeParams(64, 0);
     BandWidthEnvelope->ASRinit_bw(100, 70, 64, 60);
@@ -48,16 +48,16 @@ void SUBnoteParameters::defaults()
     PPanning = 64;
     PAmpVelocityScaleFunction = 90;
 
-    Pfixedfreq    = 0;
-    PfixedfreqET  = 0;
-    Pnumstages    = 2;
-    Pbandwidth    = 40;
-    Phmagtype     = 0;
-    Pbwscale      = 64;
-    Pstereo       = 1;
-    Pstart        = 1;
+    Pfixedfreq   = 0;
+    PfixedfreqET = 0;
+    Pnumstages   = 2;
+    Pbandwidth   = 40;
+    Phmagtype    = 0;
+    Pbwscale     = 64;
+    Pstereo      = 1;
+    Pstart = 1;
 
-    PDetune       = 8192;
+    PDetune = 8192;
     PCoarseDetune = 0;
     PDetuneType   = 1;
     PFreqEnvelopeEnabled      = 0;
@@ -198,15 +198,15 @@ void SUBnoteParameters::getfromXML(XMLwrapper *xml)
     }
 
     if(xml->enterbranch("FREQUENCY_PARAMETERS")) {
-        Pfixedfreq    = xml->getparbool("fixed_freq", Pfixedfreq);
-        PfixedfreqET  = xml->getpar127("fixed_freq_et", PfixedfreqET);
+        Pfixedfreq   = xml->getparbool("fixed_freq", Pfixedfreq);
+        PfixedfreqET = xml->getpar127("fixed_freq_et", PfixedfreqET);
 
-        PDetune       = xml->getpar("detune", PDetune, 0, 16383);
+        PDetune = xml->getpar("detune", PDetune, 0, 16383);
         PCoarseDetune = xml->getpar("coarse_detune", PCoarseDetune, 0, 16383);
         PDetuneType   = xml->getpar127("detune_type", PDetuneType);
 
-        Pbandwidth    = xml->getpar127("bandwidth", Pbandwidth);
-        Pbwscale      = xml->getpar127("bandwidth_scale", Pbwscale);
+        Pbandwidth = xml->getpar127("bandwidth", Pbandwidth);
+        Pbwscale   = xml->getpar127("bandwidth_scale", Pbwscale);
 
         PFreqEnvelopeEnabled = xml->getparbool("freq_envelope_enabled",
                                                PFreqEnvelopeEnabled);
@@ -248,4 +248,3 @@ void SUBnoteParameters::getfromXML(XMLwrapper *xml)
         xml->exitbranch();
     }
 }
-

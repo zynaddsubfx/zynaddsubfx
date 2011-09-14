@@ -46,7 +46,7 @@ int Recorder::preparefile(std::string filename_, int overwrite)
             return 1;
     }
 
-    OutMgr::getInstance().wave->newFile(new WavFile(filename_, SAMPLE_RATE, 2));
+    OutMgr::getInstance(). wave->newFile(new WavFile(filename_, SAMPLE_RATE, 2));
 
     status = 1; //ready
 
@@ -61,15 +61,15 @@ void Recorder::start()
 
 void Recorder::stop()
 {
-    OutMgr::getInstance().wave->Stop();
-    OutMgr::getInstance().wave->destroyFile();
+    OutMgr::getInstance(). wave->Stop();
+    OutMgr::getInstance(). wave->destroyFile();
     status = 0;
 }
 
 void Recorder::pause()
 {
     status = 0;
-    OutMgr::getInstance().wave->Stop();
+    OutMgr::getInstance(). wave->Stop();
 }
 
 int Recorder::recording()
@@ -83,9 +83,8 @@ int Recorder::recording()
 void Recorder::triggernow()
 {
     if(status == 2) {
-        if(notetrigger!=1) {
+        if(notetrigger != 1)
             OutMgr::getInstance().wave->Start();
-        }
         notetrigger = 1;
     }
 }

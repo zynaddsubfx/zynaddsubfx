@@ -30,17 +30,21 @@ PADnote::PADnote(PADnoteParameters *parameters,
                  int portamento_,
                  int midinote,
                  bool besilent)
-:SynthNote(freq, velocity, portamento_, midinote, besilent)
+    :SynthNote(freq, velocity, portamento_, midinote, besilent)
 {
     pars = parameters;
 
-    ctl       = ctl_;
+    ctl = ctl_;
     firsttime = true;
     setup(freq, velocity, portamento_, midinote);
 }
 
 
-void PADnote::setup(float freq, float velocity,int portamento_, int midinote, bool legato)
+void PADnote::setup(float freq,
+                    float velocity,
+                    int portamento_,
+                    int midinote,
+                    bool legato)
 {
     portamento     = portamento_;
     this->velocity = velocity;
@@ -55,7 +59,8 @@ void PADnote::setup(float freq, float velocity,int portamento_, int midinote, bo
         if(fixedfreqET != 0) { //if the frequency varies according the keyboard note
             float tmp =
                 (midinote
-                 - 69.0f) / 12.0f * (powf(2.0f, (fixedfreqET - 1) / 63.0f) - 1.0f);
+                 - 69.0f) / 12.0f
+                * (powf(2.0f, (fixedfreqET - 1) / 63.0f) - 1.0f);
             if(fixedfreqET <= 64)
                 basefreq *= powf(2.0f, tmp);
             else
@@ -91,13 +96,13 @@ void PADnote::setup(float freq, float velocity,int portamento_, int midinote, bo
         size = 1;
 
 
-    if(!legato) {//not sure
+    if(!legato) { //not sure
         poshi_l = (int)(RND * (size - 1));
         if(pars->PStereo != 0)
             poshi_r = (poshi_l + size / 2) % size;
         else
             poshi_r = poshi_l;
-        poslo   = 0.0f;
+        poslo = 0.0f;
     }
 
 
@@ -115,13 +120,14 @@ void PADnote::setup(float freq, float velocity,int portamento_, int midinote, bo
 
     if(!legato) {
         if(pars->PPunchStrength != 0) {
-            NoteGlobalPar.Punch.Enabled      = 1;
+            NoteGlobalPar.Punch.Enabled = 1;
             NoteGlobalPar.Punch.t = 1.0f; //start from 1.0f and to 0.0f
             NoteGlobalPar.Punch.initialvalue =
                 ((powf(10, 1.5f * pars->PPunchStrength / 127.0f) - 1.0f)
                  * VelF(velocity,
-                     pars->PPunchVelocitySensing));
-            float time    = powf(10, 3.0f * pars->PPunchTime / 127.0f) / 10000.0f; //0.1f .. 100 ms
+                        pars->PPunchVelocitySensing));
+            float time =
+                powf(10, 3.0f * pars->PPunchTime / 127.0f) / 10000.0f;             //0.1f .. 100 ms
             float stretch = powf(440.0f / freq, pars->PPunchStretch / 64.0f);
             NoteGlobalPar.Punch.dt = 1.0f / (time * SAMPLE_RATE * stretch);
         }
@@ -131,11 +137,12 @@ void PADnote::setup(float freq, float velocity,int portamento_, int midinote, bo
         NoteGlobalPar.FreqEnvelope = new Envelope(pars->FreqEnvelope, basefreq);
         NoteGlobalPar.FreqLfo      = new LFO(pars->FreqLfo, basefreq);
 
-        NoteGlobalPar.AmpEnvelope  = new Envelope(pars->AmpEnvelope, basefreq);
-        NoteGlobalPar.AmpLfo = new LFO(pars->AmpLfo, basefreq);
+        NoteGlobalPar.AmpEnvelope = new Envelope(pars->AmpEnvelope, basefreq);
+        NoteGlobalPar.AmpLfo      = new LFO(pars->AmpLfo, basefreq);
     }
 
-    NoteGlobalPar.Volume = 4.0f * powf(0.1f, 3.0f * (1.0f - pars->PVolume / 96.0f)) //-60 dB .. 0 dB
+    NoteGlobalPar.Volume = 4.0f
+                           * powf(0.1f, 3.0f * (1.0f - pars->PVolume / 96.0f))      //-60 dB .. 0 dB
                            * VelF(velocity, pars->PAmpVelocityScaleFunction); //velocity sensing
 
     NoteGlobalPar.AmpEnvelope->envout_dB(); //discard the first envelope output
@@ -145,12 +152,12 @@ void PADnote::setup(float freq, float velocity,int portamento_, int midinote, bo
                                               * NoteGlobalPar.AmpLfo->amplfoout();
 
     if(!legato) {
-        NoteGlobalPar.GlobalFilterL  = Filter::generate(pars->GlobalFilter);
-        NoteGlobalPar.GlobalFilterR  = Filter::generate(pars->GlobalFilter);
+        NoteGlobalPar.GlobalFilterL = Filter::generate(pars->GlobalFilter);
+        NoteGlobalPar.GlobalFilterR = Filter::generate(pars->GlobalFilter);
 
         NoteGlobalPar.FilterEnvelope = new Envelope(pars->FilterEnvelope,
-                                                        basefreq);
-        NoteGlobalPar.FilterLfo      = new LFO(pars->FilterLfo, basefreq);
+                                                    basefreq);
+        NoteGlobalPar.FilterLfo = new LFO(pars->FilterLfo, basefreq);
     }
     NoteGlobalPar.FilterQ = pars->GlobalFilter->getq();
     NoteGlobalPar.FilterFreqTracking = pars->GlobalFilter->getfreqtracking(
@@ -163,10 +170,10 @@ void PADnote::setup(float freq, float velocity,int portamento_, int midinote, bo
 }
 
 void PADnote::legatonote(float freq,
-                            float velocity,
-                            int portamento_,
-                            int midinote,
-                            bool externcall)
+                         float velocity,
+                         int portamento_,
+                         int midinote,
+                         bool externcall)
 {
     // Manage legato stuff
     if(legato.update(freq, velocity, portamento_, midinote, externcall))
@@ -215,8 +222,8 @@ void PADnote::computecurrentparameters()
 {
     float globalpitch, globalfilterpitch;
     globalpitch = 0.01f * (NoteGlobalPar.FreqEnvelope->envout()
-                          + NoteGlobalPar.FreqLfo->lfoout()
-                          * ctl->modwheel.relmod + NoteGlobalPar.Detune);
+                           + NoteGlobalPar.FreqLfo->lfoout()
+                           * ctl->modwheel.relmod + NoteGlobalPar.Detune);
     globaloldamplitude = globalnewamplitude;
     globalnewamplitude = NoteGlobalPar.Volume
                          * NoteGlobalPar.AmpEnvelope->envout_dB()
@@ -227,7 +234,7 @@ void PADnote::computecurrentparameters()
                         + NoteGlobalPar.FilterCenterPitch;
 
     float tmpfilterfreq = globalfilterpitch + ctl->filtercutoff.relfreq
-                             + NoteGlobalPar.FilterFreqTracking;
+                          + NoteGlobalPar.FilterFreqTracking;
 
     tmpfilterfreq = Filter::getrealfreq(tmpfilterfreq);
 
@@ -289,7 +296,7 @@ int PADnote::Compute_Cubic(float *outl,
         finished_ = true;
         return 1;
     }
-    int      size = pars->sample[nsample].size;
+    int   size = pars->sample[nsample].size;
     float xm1, x0, x1, x2, a, b, c;
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         poshi_l += freqhi;
@@ -344,7 +351,7 @@ int PADnote::noteout(float *outl, float *outr)
 
 
     float freqrap = realfreq / smpfreq;
-    int      freqhi  = (int) (floor(freqrap));
+    int   freqhi  = (int) (floor(freqrap));
     float freqlo  = freqrap - floor(freqrap);
 
 
@@ -364,10 +371,10 @@ int PADnote::noteout(float *outl, float *outr)
     NoteGlobalPar.GlobalFilterR->filterout(outr);
 
     //Apply the punch
-    if(NoteGlobalPar.Punch.Enabled != 0) {
+    if(NoteGlobalPar.Punch.Enabled != 0)
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             float punchamp = NoteGlobalPar.Punch.initialvalue
-                                * NoteGlobalPar.Punch.t + 1.0f;
+                             * NoteGlobalPar.Punch.t + 1.0f;
             outl[i] *= punchamp;
             outr[i] *= punchamp;
             NoteGlobalPar.Punch.t -= NoteGlobalPar.Punch.dt;
@@ -376,29 +383,26 @@ int PADnote::noteout(float *outl, float *outr)
                 break;
             }
         }
-    }
 
-    if(ABOVE_AMPLITUDE_THRESHOLD(globaloldamplitude, globalnewamplitude)) {
+    if(ABOVE_AMPLITUDE_THRESHOLD(globaloldamplitude, globalnewamplitude))
         // Amplitude Interpolation
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             float tmpvol = INTERPOLATE_AMPLITUDE(globaloldamplitude,
-                                                    globalnewamplitude,
-                                                    i,
-                                                    SOUND_BUFFER_SIZE);
+                                                 globalnewamplitude,
+                                                 i,
+                                                 SOUND_BUFFER_SIZE);
             outl[i] *= tmpvol * NoteGlobalPar.Panning;
             outr[i] *= tmpvol * (1.0f - NoteGlobalPar.Panning);
         }
-    }
-    else {
+    else
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             outl[i] *= globalnewamplitude * NoteGlobalPar.Panning;
             outr[i] *= globalnewamplitude * (1.0f - NoteGlobalPar.Panning);
         }
-    }
 
 
     // Apply legato-specific sound signal modifications
-    legato.apply(*this,outl,outr);
+    legato.apply(*this, outl, outr);
 
     // Check if the global amplitude is finished.
     // If it does, disable the note
@@ -425,4 +429,3 @@ void PADnote::relasekey()
     NoteGlobalPar.FilterEnvelope->relasekey();
     NoteGlobalPar.AmpEnvelope->relasekey();
 }
-

@@ -59,14 +59,14 @@ using namespace std;
 
 pthread_t thr3, thr4;
 Master   *master;
-int  swaplr    = 0; //1 for left-right swapping
+int       swaplr = 0; //1 for left-right swapping
 
 #if LASH
 #include "Misc/LASHClient.h"
 LASHClient *lash = NULL;
 #endif
 
-int     Pexitprogram = 0; //if the UI set this to 1, the program will exit
+int Pexitprogram = 0;     //if the UI set this to 1, the program will exit
 
 /*
  * User Interface thread
@@ -175,7 +175,6 @@ void exitprogram()
 
 int main(int argc, char *argv[])
 {
-
     config.init();
     dump.startnow();
     int noui = 0;
@@ -185,14 +184,14 @@ int main(int argc, char *argv[])
     cerr << "Compiled: " << __DATE__ << " " << __TIME__ << endl;
     cerr << "This program is free software (GNU GPL v.2 or later) and \n";
     cerr << "it comes with ABSOLUTELY NO WARRANTY.\n" << endl;
-	if(argc == 1)
-    cerr << "Try 'zynaddsubfx --help' for command-line options." << endl;
+    if(argc == 1)
+        cerr << "Try 'zynaddsubfx --help' for command-line options." << endl;
 
     /* Get the settings from the Config*/
     SAMPLE_RATE = config.cfg.SampleRate;
     SOUND_BUFFER_SIZE = config.cfg.SoundBufferSize;
-    OSCIL_SIZE  = config.cfg.OscilSize;
-    swaplr      = config.cfg.SwapStereo;
+    OSCIL_SIZE = config.cfg.OscilSize;
+    swaplr     = config.cfg.SwapStereo;
 
     sprng(time(NULL));
     //produce denormal buf
@@ -202,21 +201,51 @@ int main(int argc, char *argv[])
 
     /* Parse command-line options */
     struct option opts[] = {
-        {"load", 2, NULL, 'l'},
-        {"load-instrument", 2, NULL, 'L'},
-        {"sample-rate", 2, NULL, 'r'},
-        {"buffer-size", 2, NULL, 'b'},
-        {"oscil-size", 2, NULL, 'o'},
-        {"dump", 2, NULL, 'D'},
-        {"swap", 2, NULL, 'S'},
-        {"no-gui", 2, NULL, 'U'},
-        {"dummy", 2, NULL, 'Y'},
-        {"help", 2, NULL, 'h'},
-        {"named", 1, NULL, 'N'},
-        {"auto-connect", 0, NULL, 'a'},
-        {"output", 1, NULL, 'O'},
-        {"input", 1, NULL, 'I'},
-        {0, 0, 0, 0}
+        {
+            "load", 2, NULL, 'l'
+        },
+        {
+            "load-instrument", 2, NULL, 'L'
+        },
+        {
+            "sample-rate", 2, NULL, 'r'
+        },
+        {
+            "buffer-size", 2, NULL, 'b'
+        },
+        {
+            "oscil-size", 2, NULL, 'o'
+        },
+        {
+            "dump", 2, NULL, 'D'
+        },
+        {
+            "swap", 2, NULL, 'S'
+        },
+        {
+            "no-gui", 2, NULL, 'U'
+        },
+        {
+            "dummy", 2, NULL, 'Y'
+        },
+        {
+            "help", 2, NULL, 'h'
+        },
+        {
+            "named", 1, NULL, 'N'
+        },
+        {
+            "auto-connect", 0, NULL, 'a'
+        },
+        {
+            "output", 1, NULL, 'O'
+        },
+        {
+            "input", 1, NULL, 'I'
+        },
+        {
+            0, 0, 0, 0
+        }
     };
     opterr = 0;
     int option_index = 0, opt, exitwithhelp = 0;
@@ -227,89 +256,97 @@ int main(int argc, char *argv[])
         int tmp = 0;
 
         /**\todo check this process for a small memory leak*/
-        opt = getopt_long(argc, argv, "l:L:r:b:o:I:O:N:haSDUY", opts, &option_index);
+        opt = getopt_long(argc,
+                          argv,
+                          "l:L:r:b:o:I:O:N:haSDUY",
+                          opts,
+                          &option_index);
         char *optarguments = optarg;
 
-#define GETOP(x) if(optarguments) x = optarguments
-#define GETOPNUM(x) if(optarguments) x = atoi(optarguments)
+#define GETOP(x) if(optarguments) \
+        x = optarguments
+#define GETOPNUM(x) if(optarguments) \
+        x = atoi(optarguments)
 
 
         if(opt == -1)
             break;
 
         switch(opt) {
-        case 'h':
-            exitwithhelp = 1;
-            break;
-        case 'Y':/* this command a dummy command (has NO effect)
+            case 'h':
+                exitwithhelp = 1;
+                break;
+            case 'Y':/* this command a dummy command (has NO effect)
                 and is used because I need for NSIS installer
             (NSIS sometimes forces a command line for a
             program, even if I don't need that; eg. when
             I want to add a icon to a shortcut.
               */
-            break;
-        case 'U':
-            noui = 1;
-            break;
-        case 'l':
-            GETOP(loadfile);
-            break;
-        case 'L':
-            GETOP(loadinstrument);
-            break;
-        case 'r':
-            GETOPNUM(SAMPLE_RATE);
-            if(SAMPLE_RATE <  4000) {
-                cerr << "ERROR:Incorrect sample rate: " << optarguments << endl;
-                exit(1);
-            }
-            break;
-        case 'b':
-            GETOPNUM(SOUND_BUFFER_SIZE);
-            if(SOUND_BUFFER_SIZE < 2) {
-                cerr << "ERROR:Incorrect buffer size: " << optarguments << endl;
-                exit(1);
-            }
-            break;
-        case 'o':
-            if(optarguments)
-                OSCIL_SIZE = tmp = atoi(optarguments);
-            if(OSCIL_SIZE < MAX_AD_HARMONICS * 2)
-                OSCIL_SIZE = MAX_AD_HARMONICS * 2;
-            OSCIL_SIZE = (int) powf(2, ceil(logf(OSCIL_SIZE - 1.0f) / logf(2.0f)));
-            if(tmp != OSCIL_SIZE) {
-                cerr << "OSCIL_SIZE is wrong (must be 2^n) or too small. Adjusting to "
-                     <<  OSCIL_SIZE << "." << endl;
-            }
-            break;
-        case 'S':
-            swaplr = 1;
-            break;
-        case 'D':
-            dump.startnow();
-            break;
-        case 'N':
-            Nio::getInstance().setPostfix(optarguments);
-            break;
-        case 'I':
-            if(optarguments) {
-                if(Nio::getInstance().setDefaultSource(optarguments))
+                break;
+            case 'U':
+                noui = 1;
+                break;
+            case 'l':
+                GETOP(loadfile);
+                break;
+            case 'L':
+                GETOP(loadinstrument);
+                break;
+            case 'r':
+                GETOPNUM(SAMPLE_RATE);
+                if(SAMPLE_RATE < 4000) {
+                    cerr << "ERROR:Incorrect sample rate: " << optarguments
+                         << endl;
                     exit(1);
-            }
-            break;
-        case 'O':
-            if(optarguments) {
-                if(Nio::getInstance().setDefaultSink(optarguments))
+                }
+                break;
+            case 'b':
+                GETOPNUM(SOUND_BUFFER_SIZE);
+                if(SOUND_BUFFER_SIZE < 2) {
+                    cerr << "ERROR:Incorrect buffer size: " << optarguments
+                         << endl;
                     exit(1);
-            }
-            break;
-        case 'a':
-            Nio::getInstance().autoConnect = true;
-            break;
-        case '?':
-            cerr << "ERROR:Bad option or parameter.\n" << endl;
-            exitwithhelp = 1;
-            break;
+                }
+                break;
+            case 'o':
+                if(optarguments)
+                    OSCIL_SIZE = tmp = atoi(optarguments);
+                if(OSCIL_SIZE < MAX_AD_HARMONICS * 2)
+                    OSCIL_SIZE = MAX_AD_HARMONICS * 2;
+                OSCIL_SIZE =
+                    (int) powf(2, ceil(logf(OSCIL_SIZE - 1.0f) / logf(2.0f)));
+                if(tmp != OSCIL_SIZE)
+                    cerr
+                    <<
+                    "OSCIL_SIZE is wrong (must be 2^n) or too small. Adjusting to "
+                    << OSCIL_SIZE << "." << endl;
+                break;
+            case 'S':
+                swaplr = 1;
+                break;
+            case 'D':
+                dump.startnow();
+                break;
+            case 'N':
+                Nio::getInstance().setPostfix(optarguments);
+                break;
+            case 'I':
+                if(optarguments)
+                    if(Nio::getInstance().setDefaultSource(optarguments))
+                        exit(1);
+                break;
+            case 'O':
+                if(optarguments)
+                    if(Nio::getInstance().setDefaultSink(optarguments))
+                        exit(1);
+                break;
+            case 'a':
+                Nio::getInstance().autoConnect = true;
+                break;
+            case '?':
+                cerr << "ERROR:Bad option or parameter.\n" << endl;
+                exitwithhelp = 1;
+                break;
         }
     }
 
@@ -319,11 +356,13 @@ int main(int argc, char *argv[])
              << "  -l file, --load=FILE\t\t\t Loads a .xmz file\n"
              << "  -L file, --load-instrument=FILE\t Loads a .xiz file\n"
              << "  -r SR, --sample-rate=SR\t\t Set the sample rate SR\n"
-             << "  -b BS, --buffer-size=SR\t\t Set the buffer size (granularity)\n"
+             <<
+        "  -b BS, --buffer-size=SR\t\t Set the buffer size (granularity)\n"
              << "  -o OS, --oscil-size=OS\t\t Set the ADsynth oscil. size\n"
              << "  -S , --swap\t\t\t\t Swap Left <--> Right\n"
              << "  -D , --dump\t\t\t\t Dumps midi note ON/OFF commands\n"
-             << "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
+             <<
+        "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
              << "  -N , --named\t\t\t\t Postfix IO Name when possible\n"
              << "  -a , --auto-connect\t\t\t AutoConnect when using JACK\n"
              << "  -O , --output\t\t\t\t Set Output Engine\n"
@@ -332,7 +371,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    initprogram(argc,argv);
+    initprogram(argc, argv);
 
 #if 0 //TODO update this code
 #ifdef USE_LASH
@@ -363,7 +402,8 @@ int main(int argc, char *argv[])
 
     if(!loadinstrument.empty()) {
         int loadtopart = 0;
-        int tmp = master->part[loadtopart]->loadXMLinstrument(loadinstrument.c_str());
+        int tmp = master->part[loadtopart]->loadXMLinstrument(
+            loadinstrument.c_str());
         if(tmp < 0) {
             cerr << "ERROR: Could not load instrument file "
                  << loadinstrument << '.' << endl;
@@ -380,7 +420,7 @@ int main(int argc, char *argv[])
 
 #ifndef DISABLE_GUI
     if(noui == 0)
-        pthread_create(&thr3, NULL, thread3, (void*)!ioGood);
+        pthread_create(&thr3, NULL, thread3, (void *)!ioGood);
 #endif
 
     //TODO look into a conditional variable here, it seems to match usage

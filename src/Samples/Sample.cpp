@@ -19,7 +19,7 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 */
 #include <cmath>
-#include <cstring>//for memcpy/memset
+#include <cstring> //for memcpy/memset
 
 #include <iostream>
 #include "Sample.h"
@@ -30,7 +30,7 @@ using namespace std;
 /**\TODO start using pointer math here as these will be Frequency called
  * functions throughout the code*/
 Sample::Sample()
-    :bufferSize(1),buffer(new float[1])
+    :bufferSize(1), buffer(new float[1])
 {
     buffer[0] = 0.0f;
 }
@@ -105,7 +105,11 @@ bool Sample::operator==(const Sample &smp) const
  * @param xb X of point b
  * @return estimated Y of test point
  */
-float linearEstimate(float ya, float yb, float xt, float xa = 0.0f, float xb =1.0f)
+float linearEstimate(float ya,
+                     float yb,
+                     float xt,
+                     float xa = 0.0f,
+                     float xb = 1.0f)
 {
 #warning TODO this could be done with a good bit less computation
     //Lets make this simple by normalizing the x axis
@@ -121,7 +125,7 @@ float linearEstimate(float ya, float yb, float xt, float xa = 0.0f, float xb =1.
 
     //Now xa=0 xb=1 0<=xt<=1
     //simpily use y=mx+b
-    return (yb-ya) * xt + ya;
+    return (yb - ya) * xt + ya;
 }
 
 
@@ -129,7 +133,7 @@ void Sample::resample(const unsigned int rate, const unsigned int nrate)
 {
     if(rate == nrate)
         return; //no resampling here
-    else {//resampling occurs here
+    else { //resampling occurs here
         float ratio = (nrate * 1.0f) / (rate * 1.0f);
 
         int    nBufferSize = (int)bufferSize * ratio;
@@ -137,11 +141,11 @@ void Sample::resample(const unsigned int rate, const unsigned int nrate)
 
         //addition is done to avoid 0 edge case
         for(int i = 0; i < nBufferSize; ++i)
-            nBuffer[i] = linearEstimate(buffer[(int)floor(i/ratio)],
-                                        buffer[(int)ceil((i+1)/ratio)],
+            nBuffer[i] = linearEstimate(buffer[(int)floor(i / ratio)],
+                                        buffer[(int)ceil((i + 1) / ratio)],
                                         i,
-                                        floor(i/ratio),
-                                        ceil((i+1)/ratio));
+                                        floor(i / ratio),
+                                        ceil((i + 1) / ratio));
 
         //put the new data in
         delete[]  buffer;
@@ -152,8 +156,8 @@ void Sample::resample(const unsigned int rate, const unsigned int nrate)
 
 Sample &Sample::append(const Sample &smp)
 {
-    int nbufferSize = bufferSize + smp.bufferSize;
-    float *nbuffer  = new float[nbufferSize];
+    int    nbufferSize = bufferSize + smp.bufferSize;
+    float *nbuffer     = new float[nbufferSize];
 
     memcpy(nbuffer, buffer, bufferSize * sizeof(float));
     memcpy(nbuffer + bufferSize, smp.buffer, smp.bufferSize * sizeof(float));
@@ -166,7 +170,7 @@ Sample &Sample::append(const Sample &smp)
 
 Sample Sample::subSample(int a, int b) const
 {
-    return Sample(b-a, buffer+a);
+    return Sample(b - a, buffer + a);
 }
 
 float Sample::max() const
@@ -195,4 +199,3 @@ float Sample::absMax() const
             max = fabs(buffer[i]);
     return max;
 }
-

@@ -54,4 +54,3 @@ class Presets
 };
 
 #endif
-

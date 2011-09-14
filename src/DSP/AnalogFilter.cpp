@@ -74,7 +74,7 @@ void AnalogFilter::cleanup()
 void AnalogFilter::computefiltercoefs()
 {
     float tmp;
-    bool     zerocoefs = false; //this is used if the freq is too high
+    bool  zerocoefs = false;    //this is used if the freq is too high
 
     //do not allow frequencies bigger than samplerate/2
     float freq = this->freq;
@@ -103,196 +103,198 @@ void AnalogFilter::computefiltercoefs()
 
     //General Constants
     const float omega = 2 * PI * freq / SAMPLE_RATE;
-    const float sn = sinf(omega), cs = cosf(omega);
-    float alpha, beta;
+    const float sn    = sinf(omega), cs = cosf(omega);
+    float       alpha, beta;
 
     //most of theese are implementations of
     //the "Cookbook formulae for audio EQ" by Robert Bristow-Johnson
     //The original location of the Cookbook is:
     //http://www.harmony-central.com/Computer/Programming/Audio-EQ-Cookbook.txt
     switch(type) {
-    case 0: //LPF 1 pole
-        if(!zerocoefs)
-            tmp = expf(-2.0f * PI * freq / SAMPLE_RATE);
-        else
-            tmp = 0.0f;
-        c[0]  = 1.0f - tmp;
-        c[1]  = 0.0f;
-        c[2]  = 0.0f;
-        d[1]  = tmp;
-        d[2]  = 0.0f;
-        order = 1;
-        break;
-    case 1: //HPF 1 pole
-        if(!zerocoefs)
-            tmp = expf(-2.0f * PI * freq / SAMPLE_RATE);
-        else
-            tmp = 0.0f;
-        c[0]  = (1.0f + tmp) / 2.0f;
-        c[1]  = -(1.0f + tmp) / 2.0f;
-        c[2]  = 0.0f;
-        d[1]  = tmp;
-        d[2]  = 0.0f;
-        order = 1;
-        break;
-    case 2: //LPF 2 poles
-        if(!zerocoefs) {
-            alpha = sn / (2 * tmpq);
-            tmp   = 1 + alpha;
-            c[0]  = (1.0f - cs) / 2.0f / tmp;
-            c[1]  = (1.0f - cs) / tmp;
-            c[2]  = (1.0f - cs) / 2.0f / tmp;
-            d[1]  = -2 * cs / tmp * (-1);
-            d[2]  = (1 - alpha) / tmp * (-1);
-        }
-        else {
-            c[0] = 1.0f;
-            c[1] = 0.0f;
-            c[2] = 0.0f;
-            d[1] = 0.0f;
-            d[2] = 0.0f;
-        }
-        order = 2;
-        break;
-    case 3: //HPF 2 poles
-        if(!zerocoefs) {
-            alpha = sn / (2 * tmpq);
-            tmp   = 1 + alpha;
-            c[0]  = (1.0f + cs) / 2.0f / tmp;
-            c[1]  = -(1.0f + cs) / tmp;
-            c[2]  = (1.0f + cs) / 2.0f / tmp;
-            d[1]  = -2 * cs / tmp * (-1);
-            d[2]  = (1 - alpha) / tmp * (-1);
-        }
-        else {
-            c[0] = 0.0f;
-            c[1] = 0.0f;
-            c[2] = 0.0f;
-            d[1] = 0.0f;
-            d[2] = 0.0f;
-        }
-        order = 2;
-        break;
-    case 4: //BPF 2 poles
-        if(!zerocoefs) {
-            alpha = sn / (2 * tmpq);
-            tmp   = 1 + alpha;
-            c[0]  = alpha / tmp *sqrt(tmpq + 1);
-            c[1]  = 0;
-            c[2]  = -alpha / tmp *sqrt(tmpq + 1);
-            d[1]  = -2 * cs / tmp * (-1);
-            d[2]  = (1 - alpha) / tmp * (-1);
-        }
-        else {
-            c[0] = 0.0f;
-            c[1] = 0.0f;
-            c[2] = 0.0f;
-            d[1] = 0.0f;
-            d[2] = 0.0f;
-        }
-        order = 2;
-        break;
-    case 5: //NOTCH 2 poles
-        if(!zerocoefs) {
-            alpha = sn / (2 * sqrt(tmpq));
-            tmp   = 1 + alpha;
-            c[0]  = 1 / tmp;
-            c[1]  = -2 * cs / tmp;
-            c[2]  = 1 / tmp;
-            d[1]  = -2 * cs / tmp * (-1);
-            d[2]  = (1 - alpha) / tmp * (-1);
-        }
-        else {
-            c[0] = 1.0f;
-            c[1] = 0.0f;
-            c[2] = 0.0f;
-            d[1] = 0.0f;
-            d[2] = 0.0f;
-        }
-        order = 2;
-        break;
-    case 6: //PEAK (2 poles)
-        if(!zerocoefs) {
-            tmpq *= 3.0f;
-            alpha = sn / (2 * tmpq);
-            tmp   = 1 + alpha / tmpgain;
-            c[0]  = (1.0f + alpha * tmpgain) / tmp;
-            c[1]  = (-2.0f * cs) / tmp;
-            c[2]  = (1.0f - alpha * tmpgain) / tmp;
-            d[1]  = -2 * cs / tmp * (-1);
-            d[2]  = (1 - alpha / tmpgain) / tmp * (-1);
-        }
-        else {
-            c[0] = 1.0f;
-            c[1] = 0.0f;
-            c[2] = 0.0f;
-            d[1] = 0.0f;
-            d[2] = 0.0f;
-        }
-        order = 2;
-        break;
-    case 7: //Low Shelf - 2 poles
-        if(!zerocoefs) {
-            tmpq  = sqrt(tmpq);
-            alpha = sn / (2 * tmpq);
-            beta  = sqrt(tmpgain) / tmpq;
-            tmp   = (tmpgain + 1.0f) + (tmpgain - 1.0f) * cs + beta * sn;
+        case 0: //LPF 1 pole
+            if(!zerocoefs)
+                tmp = expf(-2.0f * PI * freq / SAMPLE_RATE);
+            else
+                tmp = 0.0f;
+            c[0]  = 1.0f - tmp;
+            c[1]  = 0.0f;
+            c[2]  = 0.0f;
+            d[1]  = tmp;
+            d[2]  = 0.0f;
+            order = 1;
+            break;
+        case 1: //HPF 1 pole
+            if(!zerocoefs)
+                tmp = expf(-2.0f * PI * freq / SAMPLE_RATE);
+            else
+                tmp = 0.0f;
+            c[0]  = (1.0f + tmp) / 2.0f;
+            c[1]  = -(1.0f + tmp) / 2.0f;
+            c[2]  = 0.0f;
+            d[1]  = tmp;
+            d[2]  = 0.0f;
+            order = 1;
+            break;
+        case 2: //LPF 2 poles
+            if(!zerocoefs) {
+                alpha = sn / (2 * tmpq);
+                tmp   = 1 + alpha;
+                c[0]  = (1.0f - cs) / 2.0f / tmp;
+                c[1]  = (1.0f - cs) / tmp;
+                c[2]  = (1.0f - cs) / 2.0f / tmp;
+                d[1]  = -2 * cs / tmp * (-1);
+                d[2]  = (1 - alpha) / tmp * (-1);
+            }
+            else {
+                c[0] = 1.0f;
+                c[1] = 0.0f;
+                c[2] = 0.0f;
+                d[1] = 0.0f;
+                d[2] = 0.0f;
+            }
+            order = 2;
+            break;
+        case 3: //HPF 2 poles
+            if(!zerocoefs) {
+                alpha = sn / (2 * tmpq);
+                tmp   = 1 + alpha;
+                c[0]  = (1.0f + cs) / 2.0f / tmp;
+                c[1]  = -(1.0f + cs) / tmp;
+                c[2]  = (1.0f + cs) / 2.0f / tmp;
+                d[1]  = -2 * cs / tmp * (-1);
+                d[2]  = (1 - alpha) / tmp * (-1);
+            }
+            else {
+                c[0] = 0.0f;
+                c[1] = 0.0f;
+                c[2] = 0.0f;
+                d[1] = 0.0f;
+                d[2] = 0.0f;
+            }
+            order = 2;
+            break;
+        case 4: //BPF 2 poles
+            if(!zerocoefs) {
+                alpha = sn / (2 * tmpq);
+                tmp   = 1 + alpha;
+                c[0]  = alpha / tmp *sqrt(tmpq + 1);
+                c[1]  = 0;
+                c[2]  = -alpha / tmp *sqrt(tmpq + 1);
+                d[1]  = -2 * cs / tmp * (-1);
+                d[2]  = (1 - alpha) / tmp * (-1);
+            }
+            else {
+                c[0] = 0.0f;
+                c[1] = 0.0f;
+                c[2] = 0.0f;
+                d[1] = 0.0f;
+                d[2] = 0.0f;
+            }
+            order = 2;
+            break;
+        case 5: //NOTCH 2 poles
+            if(!zerocoefs) {
+                alpha = sn / (2 * sqrt(tmpq));
+                tmp   = 1 + alpha;
+                c[0]  = 1 / tmp;
+                c[1]  = -2 * cs / tmp;
+                c[2]  = 1 / tmp;
+                d[1]  = -2 * cs / tmp * (-1);
+                d[2]  = (1 - alpha) / tmp * (-1);
+            }
+            else {
+                c[0] = 1.0f;
+                c[1] = 0.0f;
+                c[2] = 0.0f;
+                d[1] = 0.0f;
+                d[2] = 0.0f;
+            }
+            order = 2;
+            break;
+        case 6: //PEAK (2 poles)
+            if(!zerocoefs) {
+                tmpq *= 3.0f;
+                alpha = sn / (2 * tmpq);
+                tmp   = 1 + alpha / tmpgain;
+                c[0]  = (1.0f + alpha * tmpgain) / tmp;
+                c[1]  = (-2.0f * cs) / tmp;
+                c[2]  = (1.0f - alpha * tmpgain) / tmp;
+                d[1]  = -2 * cs / tmp * (-1);
+                d[2]  = (1 - alpha / tmpgain) / tmp * (-1);
+            }
+            else {
+                c[0] = 1.0f;
+                c[1] = 0.0f;
+                c[2] = 0.0f;
+                d[1] = 0.0f;
+                d[2] = 0.0f;
+            }
+            order = 2;
+            break;
+        case 7: //Low Shelf - 2 poles
+            if(!zerocoefs) {
+                tmpq  = sqrt(tmpq);
+                alpha = sn / (2 * tmpq);
+                beta  = sqrt(tmpgain) / tmpq;
+                tmp   = (tmpgain + 1.0f) + (tmpgain - 1.0f) * cs + beta * sn;
 
-            c[0]  = tmpgain
-                    * ((tmpgain
-                        + 1.0f) - (tmpgain - 1.0f) * cs + beta * sn) / tmp;
-            c[1]  = 2.0f * tmpgain
-                    * ((tmpgain - 1.0f) - (tmpgain + 1.0f) * cs) / tmp;
-            c[2]  = tmpgain
-                    * ((tmpgain
-                        + 1.0f) - (tmpgain - 1.0f) * cs - beta * sn) / tmp;
-            d[1]  = -2.0f * ((tmpgain - 1.0f) + (tmpgain + 1.0f) * cs) / tmp * (-1);
-            d[2]  =
-                ((tmpgain
-                  + 1.0f) + (tmpgain - 1.0f) * cs - beta * sn) / tmp * (-1);
-        }
-        else {
-            c[0] = tmpgain;
-            c[1] = 0.0f;
-            c[2] = 0.0f;
-            d[1] = 0.0f;
-            d[2] = 0.0f;
-        }
-        order = 2;
-        break;
-    case 8: //High Shelf - 2 poles
-        if(!zerocoefs) {
-            tmpq  = sqrt(tmpq);
-            alpha = sn / (2 * tmpq);
-            beta  = sqrt(tmpgain) / tmpq;
-            tmp   = (tmpgain + 1.0f) - (tmpgain - 1.0f) * cs + beta * sn;
+                c[0] = tmpgain
+                       * ((tmpgain
+                           + 1.0f) - (tmpgain - 1.0f) * cs + beta * sn) / tmp;
+                c[1] = 2.0f * tmpgain
+                       * ((tmpgain - 1.0f) - (tmpgain + 1.0f) * cs) / tmp;
+                c[2] = tmpgain
+                       * ((tmpgain
+                           + 1.0f) - (tmpgain - 1.0f) * cs - beta * sn) / tmp;
+                d[1] = -2.0f
+                       * ((tmpgain - 1.0f) + (tmpgain + 1.0f) * cs) / tmp * (-1);
+                d[2] =
+                    ((tmpgain
+                      + 1.0f) + (tmpgain - 1.0f) * cs - beta * sn) / tmp * (-1);
+            }
+            else {
+                c[0] = tmpgain;
+                c[1] = 0.0f;
+                c[2] = 0.0f;
+                d[1] = 0.0f;
+                d[2] = 0.0f;
+            }
+            order = 2;
+            break;
+        case 8: //High Shelf - 2 poles
+            if(!zerocoefs) {
+                tmpq  = sqrt(tmpq);
+                alpha = sn / (2 * tmpq);
+                beta  = sqrt(tmpgain) / tmpq;
+                tmp   = (tmpgain + 1.0f) - (tmpgain - 1.0f) * cs + beta * sn;
 
-            c[0]  = tmpgain
-                    * ((tmpgain
-                        + 1.0f) + (tmpgain - 1.0f) * cs + beta * sn) / tmp;
-            c[1]  = -2.0f * tmpgain
-                    * ((tmpgain - 1.0f) + (tmpgain + 1.0f) * cs) / tmp;
-            c[2]  = tmpgain
-                    * ((tmpgain
-                        + 1.0f) + (tmpgain - 1.0f) * cs - beta * sn) / tmp;
-            d[1]  = 2.0f * ((tmpgain - 1.0f) - (tmpgain + 1.0f) * cs) / tmp * (-1);
-            d[2]  =
-                ((tmpgain
-                  + 1.0f) - (tmpgain - 1.0f) * cs - beta * sn) / tmp * (-1);
-        }
-        else {
-            c[0] = 1.0f;
-            c[1] = 0.0f;
-            c[2] = 0.0f;
-            d[1] = 0.0f;
-            d[2] = 0.0f;
-        }
-        order = 2;
-        break;
-    default: //wrong type
-        type = 0;
-        computefiltercoefs();
-        break;
+                c[0] = tmpgain
+                       * ((tmpgain
+                           + 1.0f) + (tmpgain - 1.0f) * cs + beta * sn) / tmp;
+                c[1] = -2.0f * tmpgain
+                       * ((tmpgain - 1.0f) + (tmpgain + 1.0f) * cs) / tmp;
+                c[2] = tmpgain
+                       * ((tmpgain
+                           + 1.0f) + (tmpgain - 1.0f) * cs - beta * sn) / tmp;
+                d[1] = 2.0f
+                       * ((tmpgain - 1.0f) - (tmpgain + 1.0f) * cs) / tmp * (-1);
+                d[2] =
+                    ((tmpgain
+                      + 1.0f) - (tmpgain - 1.0f) * cs - beta * sn) / tmp * (-1);
+            }
+            else {
+                c[0] = 1.0f;
+                c[1] = 0.0f;
+                c[2] = 0.0f;
+                d[1] = 0.0f;
+                d[2] = 0.0f;
+            }
+            order = 2;
+            break;
+        default: //wrong type
+            type = 0;
+            computefiltercoefs();
+            break;
     }
 }
 
@@ -313,13 +315,13 @@ void AnalogFilter::setfreq(float frequency)
 
     //if the frequency is changed fast, it needs interpolation
     if((rap > 3.0f) || nyquistthresh) { //(now, filter and coeficients backup)
-        oldCoeff   = coeff;
+        oldCoeff = coeff;
         for(int i = 0; i < MAX_FILTER_STAGES + 1; ++i)
             oldHistory[i] = history[i];
         if(!firsttime)
             needsinterpolation = true;
     }
-    freq      = frequency;
+    freq = frequency;
     computefiltercoefs();
     firsttime = false;
 }
@@ -360,27 +362,25 @@ void AnalogFilter::setstages(int stages_)
 void AnalogFilter::singlefilterout(float *smp, fstage &hist,
                                    const Coeff &coeff)
 {
-    if(order == 1) { //First order filter
+    if(order == 1)   //First order filter
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-            float y0 =    smp[i]*coeff.c[0] + hist.x1*coeff.c[1]
-                          + hist.y1*coeff.d[1];
+            float y0 = smp[i] * coeff.c[0] + hist.x1 * coeff.c[1]
+                       + hist.y1 * coeff.d[1];
             hist.y1 = y0;
             hist.x1 = smp[i];
             smp[i]  = y0;
         }
-    }
-    if(order == 2) { //Second order filter
+    if(order == 2)   //Second order filter
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-            float y0 =    smp[i]*coeff.c[0] + hist.x1*coeff.c[1]
-                          + hist.x2*coeff.c[2] + hist.y1*coeff.d[1]
-                          + hist.y2*coeff.d[2];
+            float y0 = smp[i] * coeff.c[0] + hist.x1 * coeff.c[1]
+                       + hist.x2 * coeff.c[2] + hist.y1 * coeff.d[1]
+                       + hist.y2 * coeff.d[2];
             hist.y2 = hist.y1;
             hist.y1 = y0;
             hist.x2 = hist.x1;
             hist.x1 = smp[i];
             smp[i]  = y0;
         }
-    }
 }
 void AnalogFilter::filterout(float *smp)
 {
@@ -425,4 +425,3 @@ float AnalogFilter::H(float freq)
     h = h / (x * x + y * y);
     return powf(h, (stages + 1.0f) / 2.0f);
 }
-

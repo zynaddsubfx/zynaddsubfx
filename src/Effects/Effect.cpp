@@ -29,12 +29,12 @@ Effect::Effect(bool insertion_, float *const efxoutl_,
                float *const efxoutr_, FilterParams *filterpars_,
                const unsigned char &Ppreset_)
     :Ppreset(Ppreset_), efxoutl(efxoutl_), efxoutr(efxoutr_),
-      filterpars(filterpars_), insertion(insertion_) 
+      filterpars(filterpars_), insertion(insertion_)
 {}
 
 void Effect::out(float *const smpsl, float *const smpsr)
 {
-    out(Stereo<float *>(smpsl,smpsr));
+    out(Stereo<float *>(smpsl, smpsr));
 }
 
 void Effect::crossover(float &a, float &b, float crossover)
@@ -56,5 +56,5 @@ void Effect::setpanning(char Ppanning_)
 void Effect::setlrcross(char Plrcross_)
 {
     Plrcross = Plrcross_;
-    lrcross = (float)Plrcross / 127.0f;
+    lrcross  = (float)Plrcross / 127.0f;
 }

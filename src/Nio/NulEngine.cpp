@@ -37,7 +37,7 @@ NulEngine::NulEngine()
 
 void *NulEngine::_AudioThread(void *arg)
 {
-    return (static_cast<NulEngine*>(arg))->AudioThread();
+    return (static_cast<NulEngine *>(arg))->AudioThread();
 }
 
 void *NulEngine::AudioThread()
@@ -52,9 +52,9 @@ void *NulEngine::AudioThread()
             playing_until.tv_usec = now.tv_usec;
             playing_until.tv_sec  = now.tv_sec;
         }
-        else  {
+        else {
             remaining = (playing_until.tv_usec - now.tv_usec)
-                + (playing_until.tv_sec - now.tv_sec) * 1000000;
+                        + (playing_until.tv_sec - now.tv_sec) * 1000000;
             if(remaining > 10000) //Don't sleep() less than 10ms.
                 //This will add latency...
                 usleep(remaining - 10000);
@@ -71,8 +71,7 @@ void *NulEngine::AudioThread()
 }
 
 NulEngine::~NulEngine()
-{
-}
+{}
 
 bool NulEngine::Start()
 {
@@ -89,7 +88,7 @@ void NulEngine::setAudioEn(bool nval)
 {
     if(nval) {
         if(!getAudioEn()) {
-            pthread_t *thread = new pthread_t;
+            pthread_t     *thread = new pthread_t;
             pthread_attr_t attr;
             pthread_attr_init(&attr);
             pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
@@ -97,13 +96,12 @@ void NulEngine::setAudioEn(bool nval)
             pthread_create(pThread, &attr, _AudioThread, this);
         }
     }
-    else {
-        if(getAudioEn()) {
-            pthread_t *thread = pThread;
-            pThread = NULL;
-            pthread_join(*thread, NULL);
-            delete thread;
-        }
+    else
+    if(getAudioEn()) {
+        pthread_t *thread = pThread;
+        pThread = NULL;
+        pthread_join(*thread, NULL);
+        delete thread;
     }
 }
 
@@ -111,4 +109,3 @@ bool NulEngine::getAudioEn() const
 {
     return pThread;
 }
-

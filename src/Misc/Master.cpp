@@ -44,7 +44,7 @@ Master::Master()
     pthread_mutex_init(&vumutex, NULL);
     fft = new FFTwrapper(OSCIL_SIZE);
 
-    shutup     = 0;
+    shutup = 0;
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
         vuoutpeakpart[npart] = 1e-9;
         fakepeakpart[npart]  = 0;
@@ -99,8 +99,7 @@ void Master::defaults()
 
 bool Master::mutexLock(lockset request)
 {
-    switch (request)
-    {
+    switch(request) {
         case MUTEX_TRYLOCK:
             return !pthread_mutex_trylock(&mutex);
         case MUTEX_LOCK:
@@ -123,13 +122,12 @@ Master &Master::getInstance()
 void Master::noteOn(char chan, char note, char velocity)
 {
     if(velocity) {
-        for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
+        for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
             if(chan == part[npart]->Prcvchn) {
                 fakepeakpart[npart] = velocity * 2;
                 if(part[npart]->Penabled)
                     part[npart]->NoteOn(note, velocity, keyshift);
             }
-        }
     }
     else
         this->noteOff(chan, note);
@@ -159,16 +157,16 @@ void Master::setController(char chan, int type, int par)
         if(ctl.getnrpn(&parhi, &parlo, &valhi, &vallo) == 0) //this is NRPN
             //fprintf(stderr,"rcv. NRPN: %d %d %d %d\n",parhi,parlo,valhi,vallo);
             switch(parhi) {
-            case 0x04: //System Effects
-                if(parlo < NUM_SYS_EFX)
-                    sysefx[parlo]->seteffectpar_nolock(valhi, vallo);
-                ;
-                break;
-            case 0x08: //Insertion Effects
-                if(parlo < NUM_INS_EFX)
-                    insefx[parlo]->seteffectpar_nolock(valhi, vallo);
-                ;
-                break;
+                case 0x04: //System Effects
+                    if(parlo < NUM_SYS_EFX)
+                        sysefx[parlo]->seteffectpar_nolock(valhi, vallo);
+                    ;
+                    break;
+                case 0x08: //Insertion Effects
+                    if(parlo < NUM_INS_EFX)
+                        insefx[parlo]->seteffectpar_nolock(valhi, vallo);
+                    ;
+                    break;
             }
         ;
     }
@@ -220,7 +218,7 @@ void Master::vuUpdate(const float *outl, const float *outr)
         vuoutpeakpart[npart] = 1.0e-12f;
         if(part[npart]->Penabled != 0) {
             float *outl = part[npart]->partoutl,
-                     *outr = part[npart]->partoutr;
+            *outr = part[npart]->partoutr;
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
                 float tmp = fabs(outl[i] + outr[i]);
                 if(tmp > vuoutpeakpart[npart])
@@ -229,8 +227,8 @@ void Master::vuUpdate(const float *outl, const float *outr)
             vuoutpeakpart[npart] *= volume;
         }
         else
-            if(fakepeakpart[npart] > 1)
-                fakepeakpart[npart]--;
+        if(fakepeakpart[npart] > 1)
+            fakepeakpart[npart]--;
     }
 }
 
@@ -264,7 +262,7 @@ void Master::AudioOut(float *outl, float *outr)
 {
     //Swaps the Left channel with Right Channel
     if(swaplr)
-        swap(outl,outr);
+        swap(outl, outr);
 
     //clean up the output samples (should not be needed?)
     memset(outl, 0, sizeof(float) * SOUND_BUFFER_SIZE);
@@ -276,14 +274,13 @@ void Master::AudioOut(float *outl, float *outr)
             part[npart]->ComputePartSmps();
 
     //Insertion effects
-    for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx) {
+    for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
         if(Pinsparts[nefx] >= 0) {
             int efxpart = Pinsparts[nefx];
             if(part[efxpart]->Penabled)
                 insefx[nefx]->out(part[efxpart]->partoutl,
                                   part[efxpart]->partoutr);
         }
-    }
 
 
     //Apply the part volumes and pannings (after insertion effects)
@@ -292,10 +289,10 @@ void Master::AudioOut(float *outl, float *outr)
             continue;
 
         Stereo<float> newvol(part[npart]->volume),
-                         oldvol(part[npart]->oldvolumel,
-                                part[npart]->oldvolumer);
+        oldvol(part[npart]->oldvolumel,
+               part[npart]->oldvolumer);
 
-        float pan      = part[npart]->panning;
+        float pan = part[npart]->panning;
         if(pan < 0.5f)
             newvol.l *= pan * 2.0f;
         else
@@ -306,21 +303,20 @@ void Master::AudioOut(float *outl, float *outr)
            || ABOVE_AMPLITUDE_THRESHOLD(oldvol.r, newvol.r)) {
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
                 Stereo<float> vol(INTERPOLATE_AMPLITUDE(oldvol.l, newvol.l,
-                                                       i, SOUND_BUFFER_SIZE),
-                                     INTERPOLATE_AMPLITUDE(oldvol.r, newvol.r,
-                                                       i, SOUND_BUFFER_SIZE));
+                                                        i, SOUND_BUFFER_SIZE),
+                                  INTERPOLATE_AMPLITUDE(oldvol.r, newvol.r,
+                                                        i, SOUND_BUFFER_SIZE));
                 part[npart]->partoutl[i] *= vol.l;
                 part[npart]->partoutr[i] *= vol.r;
             }
             part[npart]->oldvolumel = newvol.l;
             part[npart]->oldvolumer = newvol.r;
         }
-        else {
+        else
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) { //the volume did not changed
                 part[npart]->partoutl[i] *= newvol.l;
                 part[npart]->partoutr[i] *= newvol.r;
             }
-        }
     }
 
 
@@ -354,7 +350,7 @@ void Master::AudioOut(float *outl, float *outr)
         }
 
         // system effect send to next ones
-        for(int nefxfrom = 0; nefxfrom < nefx; ++nefxfrom) {
+        for(int nefxfrom = 0; nefxfrom < nefx; ++nefxfrom)
             if(Psysefxsend[nefxfrom][nefx] != 0) {
                 const float vol = sysefxsend[nefxfrom][nefx];
                 for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
@@ -362,7 +358,6 @@ void Master::AudioOut(float *outl, float *outr)
                     tmpmixr[i] += sysefx[nefxfrom]->efxoutr[i] * vol;
                 }
             }
-        }
 
         sysefx[nefx]->out(tmpmixl, tmpmixr);
 
@@ -378,14 +373,12 @@ void Master::AudioOut(float *outl, float *outr)
     }
 
     //Mix all parts
-    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
-        if(part[npart]->Penabled) { //only mix active parts
+    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+        if(part[npart]->Penabled)   //only mix active parts
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) { //the volume did not changed
                 outl[i] += part[npart]->partoutl[i];
                 outr[i] += part[npart]->partoutr[i];
             }
-        }
-    }
 
     //Insertion effects for Master Out
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
@@ -429,7 +422,7 @@ void Master::GetAudioOutSamples(size_t nsamples,
                                 float *outr)
 {
     static float *bufl = new float[SOUND_BUFFER_SIZE],
-                 *bufr = new float[SOUND_BUFFER_SIZE];
+    *bufr = new float[SOUND_BUFFER_SIZE];
     static off_t  off  = 0;
     static size_t smps = 0;
 
@@ -444,21 +437,22 @@ void Master::GetAudioOutSamples(size_t nsamples,
     while(nsamples) {
         //use all available samples
         if(nsamples >= smps) {
-            memcpy(outl+out_off, bufl+off, sizeof(float) * smps);
-            memcpy(outr+out_off, bufr+off, sizeof(float) * smps);
+            memcpy(outl + out_off, bufl + off, sizeof(float) * smps);
+            memcpy(outr + out_off, bufr + off, sizeof(float) * smps);
 
             //generate samples
             AudioOut(bufl, bufr);
-            off = 0;
+            off  = 0;
             smps = SOUND_BUFFER_SIZE;
 
             out_off  += smps;
             nsamples -= smps;
-        } else { //use some samples
-            memcpy(outl+out_off, bufl+off, sizeof(float) * nsamples);
-            memcpy(outr+out_off, bufr+off, sizeof(float) * nsamples);
-            smps -= nsamples;
-            off  += nsamples;
+        }
+        else {   //use some samples
+            memcpy(outl + out_off, bufl + off, sizeof(float) * nsamples);
+            memcpy(outr + out_off, bufr + off, sizeof(float) * nsamples);
+            smps    -= nsamples;
+            off     += nsamples;
             nsamples = 0;
         }
     }
@@ -751,4 +745,3 @@ void Master::getfromXML(XMLwrapper *xml)
         xml->exitbranch();
     }
 }
-

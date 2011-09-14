@@ -101,4 +101,3 @@ class SUBnoteParameters:public Presets
 };
 
 #endif
-

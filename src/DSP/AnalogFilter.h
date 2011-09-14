@@ -53,13 +53,13 @@ class AnalogFilter:public Filter
 
     private:
         struct fstage {
-            float x1, x2;//Input History
-            float y1, y2;//Output History
+            float x1, x2; //Input History
+            float y1, y2; //Output History
         } history[MAX_FILTER_STAGES + 1], oldHistory[MAX_FILTER_STAGES + 1];
 
         struct Coeff {
             float c[3], //Feed Forward
-                     d[3]; //Feed Back
+                  d[3];    //Feed Back
         } coeff, oldCoeff;
         //old coeffs are used for interpolation when paremeters change quickly
 
@@ -68,21 +68,20 @@ class AnalogFilter:public Filter
         //Update coeff and order
         void computefiltercoefs();
 
-        int      type;   //The type of the filter (LPF1,HPF1,LPF2,HPF2...)
-        int      stages; //how many times the filter is applied (0->1,1->2,etc.)
+        int   type;      //The type of the filter (LPF1,HPF1,LPF2,HPF2...)
+        int   stages;    //how many times the filter is applied (0->1,1->2,etc.)
         float freq;   //Frequency given in Hz
         float q;      //Q factor (resonance or Q factor)
         float gain;   //the gain of the filter (if are shelf/peak) filters
 
         int order;       //the order of the filter (number of poles)
 
-        bool     needsinterpolation,  //Interpolation between coeff changes
-                 firsttime;           //First Iteration of filter
-        bool     abovenq,             //if the frequency is above the nyquist
-                 oldabovenq;          //if the last time was above nyquist
+        bool needsinterpolation,      //Interpolation between coeff changes
+             firsttime;               //First Iteration of filter
+        bool abovenq,                 //if the frequency is above the nyquist
+             oldabovenq;              //if the last time was above nyquist
                                       //(used to see if it needs interpolation)
 };
 
 
 #endif
-

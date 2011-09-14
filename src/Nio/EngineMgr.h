@@ -41,4 +41,3 @@ class EngineMgr
         EngineMgr();
 };
 #endif
-

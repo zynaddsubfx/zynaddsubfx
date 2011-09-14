@@ -89,34 +89,34 @@ void EffectMgr::changeeffect(int nefx_)
     if(efx != NULL)
         delete efx;
     switch(nefx) {  /**\todo replace leaky abstraction*/
-    case 1:
-        efx = new Reverb(insertion, efxoutl, efxoutr);
-        break;
-    case 2:
-        efx = new Echo(insertion, efxoutl, efxoutr);
-        break;
-    case 3:
-        efx = new Chorus(insertion, efxoutl, efxoutr);
-        break;
-    case 4:
-        efx = new Phaser(insertion, efxoutl, efxoutr);
-        break;
-    case 5:
-        efx = new Alienwah(insertion, efxoutl, efxoutr);
-        break;
-    case 6:
-        efx = new Distorsion(insertion, efxoutl, efxoutr);
-        break;
-    case 7:
-        efx = new EQ(insertion, efxoutl, efxoutr);
-        break;
-    case 8:
-        efx = new DynamicFilter(insertion, efxoutl, efxoutr);
-        break;
-    //put more effect here
-    default:
-        efx = NULL;
-        break; //no effect (thru)
+        case 1:
+            efx = new Reverb(insertion, efxoutl, efxoutr);
+            break;
+        case 2:
+            efx = new Echo(insertion, efxoutl, efxoutr);
+            break;
+        case 3:
+            efx = new Chorus(insertion, efxoutl, efxoutr);
+            break;
+        case 4:
+            efx = new Phaser(insertion, efxoutl, efxoutr);
+            break;
+        case 5:
+            efx = new Alienwah(insertion, efxoutl, efxoutr);
+            break;
+        case 6:
+            efx = new Distorsion(insertion, efxoutl, efxoutr);
+            break;
+        case 7:
+            efx = new EQ(insertion, efxoutl, efxoutr);
+            break;
+        case 8:
+            efx = new DynamicFilter(insertion, efxoutl, efxoutr);
+            break;
+        //put more effect here
+        default:
+            efx = NULL;
+            break; //no effect (thru)
     }
 
     if(efx != NULL)
@@ -254,29 +254,26 @@ void EffectMgr::out(float *smpsl, float *smpsr)
         if((nefx == 1) || (nefx == 2))
             v2 *= v2;                    //for Reverb and Echo, the wet function is not liniar
 
-        if(dryonly) { //this is used for instrument effect only
+        if(dryonly)   //this is used for instrument effect only
             for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
                 smpsl[i]   *= v1;
                 smpsr[i]   *= v1;
                 efxoutl[i] *= v2;
                 efxoutr[i] *= v2;
             }
-        }
-        else {  //normal instrument/insertion effect
+        else    //normal instrument/insertion effect
             for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
                 smpsl[i] = smpsl[i] * v1 + efxoutl[i] * v2;
                 smpsr[i] = smpsr[i] * v1 + efxoutr[i] * v2;
             }
-        }
     }
-    else {  //System effect
+    else    //System effect
         for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             efxoutl[i] *= 2.0f * volume;
             efxoutr[i] *= 2.0f * volume;
             smpsl[i]    = efxoutl[i];
             smpsr[i]    = efxoutr[i];
         }
-    }
 }
 
 /*
@@ -354,14 +351,12 @@ void EffectMgr::getfromXML(XMLwrapper *xml)
             seteffectpar_nolock(n, xml->getpar127("par", par));
             xml->exitbranch();
         }
-        if(filterpars != NULL) {
+        if(filterpars != NULL)
             if(xml->enterbranch("FILTER")) {
                 filterpars->getfromXML(xml);
                 xml->exitbranch();
             }
-        }
         xml->exitbranch();
     }
     cleanup();
 }
-

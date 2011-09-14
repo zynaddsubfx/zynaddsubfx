@@ -5,21 +5,22 @@
 #include <FL/Fl_Dial.H>
 
 
-class WidgetPDial : public Fl_Dial {
+class WidgetPDial:public Fl_Dial
+{
     public:
-        WidgetPDial(int x,int y, int w, int h, const char *label=0);
+        WidgetPDial(int x, int y, int w, int h, const char *label = 0);
         ~WidgetPDial();
         int handle(int event);
-        void drawgradient(int cx,int cy,int sx,double m1,double m2);
+        void drawgradient(int cx, int cy, int sx, double m1, double m2);
         void draw();
-        void pdialcolor(int r,int g,int b);
-        void tooltip(const char * c);
+        void pdialcolor(int r, int g, int b);
+        void tooltip(const char *c);
     private:
         void getPos();
         void resetPos();
         double oldvalue;
-        bool pos;
-        bool textset;
-        class TipWin *tipwin;
+        bool   pos;
+        bool   textset;
+        class TipWin * tipwin;
 };
 #endif

@@ -31,11 +31,11 @@
 
 typedef jack_default_audio_sample_t jsample_t;
 
-class JackEngine : public AudioOut, MidiIn
+class JackEngine:public AudioOut, MidiIn
 {
     public:
         JackEngine();
-        ~JackEngine() { };
+        ~JackEngine() { }
 
         bool Start();
         void Stop();
@@ -46,8 +46,8 @@ class JackEngine : public AudioOut, MidiIn
         void setAudioEn(bool nval);
         bool getAudioEn() const;
 
-        unsigned int getSamplerate() { return audio.jackSamplerate; };
-        unsigned int getBuffersize() { return audio.jackNframes; };
+        unsigned int getSamplerate() { return audio.jackSamplerate; }
+        unsigned int getBuffersize() { return audio.jackNframes; }
 
         std::string clientName();
         int clientId();
@@ -72,14 +72,14 @@ class JackEngine : public AudioOut, MidiIn
         bool openMidi();
         void stopMidi();
 
-        jack_client_t      *jackClient;
-        struct audio{
-            unsigned int  jackSamplerate;
-            unsigned int  jackNframes;
-            jack_port_t  *ports[2];
-            jsample_t    *portBuffs[2];
+        jack_client_t *jackClient;
+        struct audio {
+            unsigned int jackSamplerate;
+            unsigned int jackNframes;
+            jack_port_t *ports[2];
+            jsample_t   *portBuffs[2];
         } audio;
-        struct midi{
+        struct midi {
             jack_port_t *inport;
         } midi;
 

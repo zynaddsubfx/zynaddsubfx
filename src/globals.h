@@ -154,7 +154,8 @@ extern int OSCIL_SIZE;
  * How the amplitude threshold is computed
  */
 #define ABOVE_AMPLITUDE_THRESHOLD(a, b) ((2.0f * fabs((b) - (a)) \
-                                          / (fabs((b) + (a) + 0.0000000001f))) > \
+                                          / (fabs((b) + (a) \
+                                                  + 0.0000000001f))) > \
                                          AMPLITUDE_INTERPOLATION_THRESHOLD)
 
 /*
@@ -177,10 +178,10 @@ extern int OSCIL_SIZE;
                                                            i++) \
                               data_[i] = 0;}
 #define ZERO_float(data, size) {float *data_ = (float *) data; \
-                                   for(int i = 0; \
-                                       i < size; \
-                                       i++) \
-                                       data_[i] = 0.0f;}
+                                for(int i = 0; \
+                                    i < size; \
+                                    i++) \
+                                    data_[i] = 0.0f;}
 
 enum ONOFFTYPE {
     OFF = 0, ON = 1
@@ -205,7 +206,8 @@ enum LegatoMsg {
 #ifdef ASM_F2I_YES
 #define F2I(f, \
             i) __asm__ __volatile__ ("fistpl %0" : "=m" (i) : "t" (f \
-                                                                   - 0.49999999f) \
+                                                                   - \
+                                                                   0.49999999f) \
                                      : "st");
 #else
 #define F2I(f, i) (i) = ((f > 0) ? ((int)(f)) : ((int)(f - 1.0f)));
@@ -218,4 +220,3 @@ enum LegatoMsg {
 #endif
 
 #endif
-

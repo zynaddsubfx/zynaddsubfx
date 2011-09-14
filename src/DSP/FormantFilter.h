@@ -40,7 +40,7 @@ class FormantFilter:public Filter
 
         void cleanup();
     private:
-        class AnalogFilter *formant[FF_MAX_FORMANTS];
+        class AnalogFilter * formant[FF_MAX_FORMANTS];
 
         struct {
             float freq, amp, q; //frequency,amplitude,Q
@@ -53,7 +53,7 @@ class FormantFilter:public Filter
 
         float oldformantamp[FF_MAX_FORMANTS];
 
-        int      sequencesize, numformants, firsttime;
+        int   sequencesize, numformants, firsttime;
         float oldinput, slowinput;
         float Qfactor, formantslowness, oldQfactor;
         float vowelclearness, sequencestretch;
@@ -62,4 +62,3 @@ class FormantFilter:public Filter
 };
 
 #endif
-

@@ -78,4 +78,3 @@ class Alienwah:public Effect
 };
 
 #endif
-

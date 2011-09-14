@@ -27,7 +27,7 @@
 #include "../globals.h"
 #include "Engine.h"
 
-class AudioOut : public virtual Engine
+class AudioOut:public virtual Engine
 {
     public:
         AudioOut();
@@ -46,8 +46,8 @@ class AudioOut : public virtual Engine
         void bufferingSize(int nBuffering);
         int bufferingSize();
 
-        virtual void setAudioEn(bool nval)=0;
-        virtual bool getAudioEn() const=0;
+        virtual void setAudioEn(bool nval) = 0;
+        virtual bool getAudioEn() const    = 0;
 
     protected:
         /**Get the next sample for output.
@@ -59,4 +59,3 @@ class AudioOut : public virtual Engine
 };
 
 #endif
-

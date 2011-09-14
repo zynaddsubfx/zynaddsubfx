@@ -99,11 +99,11 @@ class Echo:public Effect
         void setdryonly();
     private:
         //Parameters
-        char     Pvolume;  /**<#1 Volume or Dry/Wetness*/
-        char     Pdelay;   /**<#3 Delay of the Echo*/
-        char     Plrdelay; /**<#4 L/R delay difference*/
-        char     Pfb;      /**<#6Feedback*/
-        char     Phidamp;  /**<#7Dampening of the Echo*/
+        char Pvolume;      /**<#1 Volume or Dry/Wetness*/
+        char Pdelay;       /**<#3 Delay of the Echo*/
+        char Plrdelay;     /**<#4 L/R delay difference*/
+        char Pfb;          /**<#6Feedback*/
+        char Phidamp;      /**<#7Dampening of the Echo*/
 
         void setvolume(unsigned char Pvolume);
         void setdelay(unsigned char Pdelay);
@@ -115,13 +115,13 @@ class Echo:public Effect
         float fb, hidamp;
         //Left/Right delay lengths
         Stereo<int> delayTime;
-        float lrdelay;
-        float avgDelay;
+        float       lrdelay;
+        float       avgDelay;
 
         void initdelays();
         //2 channel ring buffer
         Stereo<float *> delay;
-        Stereo<float> old;
+        Stereo<float>   old;
 
         //position of reading/writing from delaysample
         Stereo<int> pos;
@@ -131,4 +131,3 @@ class Echo:public Effect
 };
 
 #endif
-

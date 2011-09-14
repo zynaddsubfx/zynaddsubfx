@@ -24,7 +24,7 @@
 #define FFT_WRAPPER_H
 #include <fftw3.h>
 #include <complex>
-typedef double fftw_real;
+typedef double                  fftw_real;
 typedef std::complex<fftw_real> fft_t;
 
 /**A wrapper for the FFTW library (Fast Fourier Transforms)*/
@@ -42,12 +42,11 @@ class FFTwrapper
         void smps2freqs(const float *smps, fft_t *freqs);
         void freqs2smps(const fft_t *freqs, float *smps);
     private:
-        int     fftsize;
+        int fftsize;
         fftw_real    *time;
         fftw_complex *fft;
-        fftw_plan planfftw, planfftw_inv;
+        fftw_plan     planfftw, planfftw_inv;
 };
 
 void FFT_cleanup();
 #endif
-

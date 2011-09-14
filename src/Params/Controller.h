@@ -74,59 +74,59 @@ class Controller
 
         // Controllers values
         struct { //Pitch Wheel
-            int       data;
+            int data;
             short int bendrange; //bendrange is in cents
-            float  relfreq; //the relative frequency (default is 1.0f)
+            float     relfreq; //the relative frequency (default is 1.0f)
         } pitchwheel;
 
         struct { //Expression
-            int           data;
-            float      relvolume;
+            int   data;
+            float relvolume;
             unsigned char receive;
         } expression;
 
         struct { //Panning
-            int           data;
-            float      pan;
+            int   data;
+            float pan;
             unsigned char depth;
         } panning;
 
 
         struct { //Filter cutoff
-            int           data;
-            float      relfreq;
+            int   data;
+            float relfreq;
             unsigned char depth;
         } filtercutoff;
 
         struct { //Filter Q
-            int           data;
-            float      relq;
+            int   data;
+            float relq;
             unsigned char depth;
         } filterq;
 
         struct { //Bandwidth
-            int           data;
-            float      relbw;
+            int   data;
+            float relbw;
             unsigned char depth;
             unsigned char exponential;
         } bandwidth;
 
         struct { //Modulation Wheel
-            int           data;
-            float      relmod;
+            int   data;
+            float relmod;
             unsigned char depth;
             unsigned char exponential;
         } modwheel;
 
         struct { //FM amplitude
-            int           data;
-            float      relamp;
+            int   data;
+            float relamp;
             unsigned char receive;
         } fmamp;
 
         struct { //Volume
-            int           data;
-            float      volume;
+            int   data;
+            float volume;
             unsigned char receive;
         } volume;
 
@@ -179,7 +179,7 @@ class Controller
              * This will be linear with respect to x.*/
             float freqrap;
             /**this is used by the Part for knowing which note uses the portamento*/
-            int      noteusing;
+            int noteusing;
             /**if a the portamento is used by a note
              * \todo see if this can be a bool*/
             int used;
@@ -195,14 +195,14 @@ class Controller
         } portamento;
 
         struct { //Resonance Center Frequency
-            int           data;
-            float      relcenter;
+            int   data;
+            float relcenter;
             unsigned char depth;
         } resonancecenter;
 
         struct { //Resonance Bandwidth
-            int           data;
-            float      relbw;
+            int   data;
+            float relbw;
             unsigned char depth;
         } resonancebandwidth;
 
@@ -218,4 +218,3 @@ class Controller
 };
 
 #endif
-

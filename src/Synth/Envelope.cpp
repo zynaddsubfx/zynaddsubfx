@@ -27,7 +27,7 @@
 Envelope::Envelope(EnvelopeParams *envpars, float basefreq)
 {
     int i;
-    envpoints      = envpars->Penvpoints;
+    envpoints = envpars->Penvpoints;
     if(envpoints > MAX_ENVELOPE_POINTS)
         envpoints = MAX_ENVELOPE_POINTS;
     envsustain     = (envpars->Penvsustain == 0) ? -1 : envpars->Penvsustain;
@@ -56,35 +56,36 @@ Envelope::Envelope(EnvelopeParams *envpars, float basefreq)
             envdt[i] = 2.0f; //any value larger than 1
 
         switch(mode) {
-        case 2:
-            envval[i] = (1.0f - envpars->Penvval[i] / 127.0f) * -40;
-            break;
-        case 3:
-            envval[i] =
-                (powf(2, 6.0f
-                     * fabs(envpars->Penvval[i] - 64.0f) / 64.0f) - 1.0f) * 100.0f;
-            if(envpars->Penvval[i] < 64)
-                envval[i] = -envval[i];
-            break;
-        case 4:
-            envval[i] = (envpars->Penvval[i] - 64.0f) / 64.0f * 6.0f; //6 octaves (filtru)
-            break;
-        case 5:
-            envval[i] = (envpars->Penvval[i] - 64.0f) / 64.0f * 10;
-            break;
-        default:
-            envval[i] = envpars->Penvval[i] / 127.0f;
+            case 2:
+                envval[i] = (1.0f - envpars->Penvval[i] / 127.0f) * -40;
+                break;
+            case 3:
+                envval[i] =
+                    (powf(2, 6.0f
+                          * fabs(envpars->Penvval[i]
+                                 - 64.0f) / 64.0f) - 1.0f) * 100.0f;
+                if(envpars->Penvval[i] < 64)
+                    envval[i] = -envval[i];
+                break;
+            case 4:
+                envval[i] = (envpars->Penvval[i] - 64.0f) / 64.0f * 6.0f; //6 octaves (filtru)
+                break;
+            case 5:
+                envval[i] = (envpars->Penvval[i] - 64.0f) / 64.0f * 10;
+                break;
+            default:
+                envval[i] = envpars->Penvval[i] / 127.0f;
         }
     }
 
-    envdt[0]     = 1.0f;
+    envdt[0] = 1.0f;
 
     currentpoint = 1; //the envelope starts from 1
     keyreleased  = false;
     t = 0.0f;
-    envfinish    = false;
-    inct = envdt[1];
-    envoutval    = 0.0f;
+    envfinish = false;
+    inct      = envdt[1];
+    envoutval = 0.0f;
 }
 
 Envelope::~Envelope()
@@ -141,8 +142,8 @@ float Envelope::envout()
     if(inct >= 1.0f)
         out = envval[currentpoint];
     else
-        out = envval[currentpoint - 1] +
-             (envval[currentpoint] - envval[currentpoint - 1]) * t;
+        out = envval[currentpoint - 1]
+              + (envval[currentpoint] - envval[currentpoint - 1]) * t;
 
     t += inct;
     if(t >= 1.0f) {
@@ -172,12 +173,12 @@ float Envelope::envout_dB()
         float v2 = dB2rap(envval[1]);
         out = v1 + (v2 - v1) * t;
 
-        t  += inct;
+        t += inct;
         if(t >= 1.0f) {
             t    = 0.0f;
             inct = envdt[2];
             currentpoint++;
-            out  = v2;
+            out = v2;
         }
 
         if(out > 0.001f)
@@ -195,4 +196,3 @@ bool Envelope::finished() const
 {
     return envfinish;
 }
-

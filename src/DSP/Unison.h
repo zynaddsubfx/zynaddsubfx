@@ -43,7 +43,7 @@ class Unison
         void update_parameters();
         void update_unison_data();
 
-        int      unison_size;
+        int   unison_size;
         float base_freq;
         struct UnisonVoice {
             float step, position; //base LFO
@@ -51,19 +51,18 @@ class Unison
             float relative_amplitude;
             float lin_fpos, lin_ffreq;
             UnisonVoice() {
-                position = RND * 1.8f - 0.9f;
-                realpos1 = 0.0f;
-                realpos2 = 0.0f;
-                step     = 0.0f;
-                relative_amplitude = 1.0f;
+                 position = RND * 1.8f - 0.9f;
+                 realpos1 = 0.0f;
+                 realpos2 = 0.0f;
+                 step     = 0.0f;
+                 relative_amplitude = 1.0f;
             }
         } *uv;
-        int       update_period_samples, update_period_sample_k;
-        int       max_delay, delay_k;
-        bool      first_time;
+        int    update_period_samples, update_period_sample_k;
+        int    max_delay, delay_k;
+        bool   first_time;
         float *delay_buffer;
         float  unison_amplitude_samples;
         float  unison_bandwidth_cents;
 };
 #endif
-

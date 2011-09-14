@@ -40,13 +40,15 @@ class XMLwrapperTest:public CxxTest::TestSuite
 
         //here to verify that no leaks occur
         void testLoad() {
-            string location = string(SOURCE_DIR) + string("/Tests/guitar-adnote.xmz");
+            string location = string(SOURCE_DIR) + string(
+                "/Tests/guitar-adnote.xmz");
             xmla->loadXMLfile(location);
         }
 
         void testAnotherLoad()
         {
-            string dat = "\n<?xml version=\"1.0f\" encoding=\"UTF-8\"?>\n\
+            string dat =
+                "\n<?xml version=\"1.0f\" encoding=\"UTF-8\"?>\n\
 <!DOCTYPE ZynAddSubFX-data>\n\
 <ZynAddSubFX-data version-major=\"2\" version-minor=\"4\"\n\
 version-revision=\"1\" ZynAddSubFX-author=\"Nasca Octavian Paul\">\n\
@@ -64,4 +66,3 @@ version-revision=\"1\" ZynAddSubFX-author=\"Nasca Octavian Paul\">\n\
         XMLwrapper *xmla;
         XMLwrapper *xmlb;
 };
-

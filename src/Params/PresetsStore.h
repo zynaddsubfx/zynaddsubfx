@@ -45,7 +45,7 @@ class PresetsStore
 
         struct presetstruct {
             presetstruct(std::string _file, std::string _name)
-                :file(_file),name(_name){};
+                :file(_file), name(_name) {}
             bool operator<(const presetstruct &b) const;
             std::string file;
             std::string name;
@@ -64,4 +64,3 @@ class PresetsStore
 };
 
 extern PresetsStore presetsstore;
-

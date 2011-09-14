@@ -55,8 +55,8 @@ class SVFilter:public Filter
 
         void singlefilterout(float *smp, fstage &x, parameters &par);
         void computefiltercoefs();
-        int      type;   //The type of the filter (LPF1,HPF1,LPF2,HPF2...)
-        int      stages; //how many times the filter is applied (0->1,1->2,etc.)
+        int   type;      //The type of the filter (LPF1,HPF1,LPF2,HPF2...)
+        int   stages;    //how many times the filter is applied (0->1,1->2,etc.)
         float freq;   //Frequency given in Hz
         float q;      //Q factor (resonance or Q factor)
         float gain;   //the gain of the filter (if are shelf/peak) filters
@@ -68,4 +68,3 @@ class SVFilter:public Filter
 
 
 #endif
-

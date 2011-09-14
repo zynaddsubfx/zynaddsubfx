@@ -28,7 +28,7 @@
 #include "AudioOut.h"
 #include "MidiIn.h"
 
-class OssEngine: public AudioOut, MidiIn
+class OssEngine:public AudioOut, MidiIn
 {
     public:
         OssEngine();
@@ -55,7 +55,7 @@ class OssEngine: public AudioOut, MidiIn
         bool openAudio();
         void stopAudio();
 
-        struct audio{
+        struct audio {
             int handle;
             short int *smps; //Samples to be sent to soundcard
             bool en;
@@ -66,12 +66,11 @@ class OssEngine: public AudioOut, MidiIn
         void stopMidi();
         void getMidi(unsigned char *midiPtr);
 
-        struct midi{
-            int handle;
+        struct midi {
+            int  handle;
             bool en;
             bool run;
         } midi;
 };
 
 #endif
-

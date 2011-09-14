@@ -54,4 +54,3 @@ class EQ:public Effect
 
 
 #endif
-

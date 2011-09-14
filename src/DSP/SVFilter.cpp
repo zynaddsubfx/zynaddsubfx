@@ -33,13 +33,13 @@ SVFilter::SVFilter(unsigned char Ftype,
                    float Fq,
                    unsigned char Fstages)
 {
-    assert(Ftype<4);
-    stages    = Fstages;
-    type      = Ftype;
-    freq      = Ffreq;
-    q         = Fq;
-    gain      = 1.0f;
-    outgain   = 1.0f;
+    assert(Ftype < 4);
+    stages  = Fstages;
+    type    = Ftype;
+    freq    = Ffreq;
+    q       = Fq;
+    gain    = 1.0f;
+    outgain = 1.0f;
     needsinterpolation = false;
     firsttime = true;
     if(stages >= MAX_FILTER_STAGES)
@@ -65,7 +65,7 @@ void SVFilter::cleanup()
 
 void SVFilter::computefiltercoefs()
 {
-    par.f      = freq / SAMPLE_RATE * 4.0f;
+    par.f = freq / SAMPLE_RATE * 4.0f;
     if(par.f > 0.99999f)
         par.f = 0.99999f;
     par.q      = 1.0f - atanf(sqrt(q)) * 2.0f / PI;
@@ -88,12 +88,12 @@ void SVFilter::setfreq(float frequency)
     bool nyquistthresh = (abovenq ^ oldabovenq);
 
     //if the frequency is changed fast, it needs interpolation
-    if((rap > 3.0f) || nyquistthresh) {//(now, filter and coeficients backup)
+    if((rap > 3.0f) || nyquistthresh) { //(now, filter and coeficients backup)
         ipar = par;
         if(!firsttime)
             needsinterpolation = true;
     }
-    freq      = frequency;
+    freq = frequency;
     computefiltercoefs();
     firsttime = false;
 }
@@ -135,20 +135,20 @@ void SVFilter::singlefilterout(float *smp, fstage &x, parameters &par)
 {
     float *out = NULL;
     switch(type) {
-    case 0:
-        out = &x.low;
-        break;
-    case 1:
-        out = &x.high;
-        break;
-    case 2:
-        out = &x.band;
-        break;
-    case 3:
-        out = &x.notch;
-        break;
-    default:
-        errx(1, "Impossible SVFilter type encountered [%d]", type);
+        case 0:
+            out = &x.low;
+            break;
+        case 1:
+            out = &x.high;
+            break;
+        case 2:
+            out = &x.band;
+            break;
+        case 3:
+            out = &x.notch;
+            break;
+        default:
+            errx(1, "Impossible SVFilter type encountered [%d]", type);
     }
 
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
@@ -157,7 +157,7 @@ void SVFilter::singlefilterout(float *smp, fstage &x, parameters &par)
         x.band  = par.f * x.high + x.band;
         x.notch = x.high + x.low;
 
-        smp[i]  = *out;
+        smp[i] = *out;
     }
 }
 
@@ -184,4 +184,3 @@ void SVFilter::filterout(float *smp)
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
         smp[i] *= outgain;
 }
-

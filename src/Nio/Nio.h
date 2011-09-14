@@ -1,10 +1,10 @@
-#ifndef NIO_H 
+#ifndef NIO_H
 #define NIO_H
 #include <string>
 #include <set>
 
 /**Interface to Nio Subsystem
- * 
+ *
  * Should be only externally included header */
 class Nio
 {
@@ -34,11 +34,10 @@ class Nio
     private:
         Nio();
 
-        class InMgr     &in;
-        class OutMgr    &out;
-        class EngineMgr &eng;
+        class InMgr & in;
+        class OutMgr & out;
+        class EngineMgr & eng;
         std::string postfix;
 };
 
 #endif
-

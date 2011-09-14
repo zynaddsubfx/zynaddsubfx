@@ -45,13 +45,13 @@ bool PaEngine::Start()
 
     PaStreamParameters outputParameters;
     outputParameters.device = Pa_GetDefaultOutputDevice();
-    if (outputParameters.device == paNoDevice) {
+    if(outputParameters.device == paNoDevice) {
         cerr << "Error: No default output device." << endl;
         Pa_Terminate();
         return false;
     }
-    outputParameters.channelCount = 2; /* stereo output */
-    outputParameters.sampleFormat = paFloat32; /* 32 bit floating point output */
+    outputParameters.channelCount     = 2; /* stereo output */
+    outputParameters.sampleFormat     = paFloat32; /* 32 bit floating point output */
     outputParameters.suggestedLatency =
         Pa_GetDeviceInfo(outputParameters.device)->defaultLowOutputLatency;
     outputParameters.hostApiSpecificStreamInfo = NULL;
@@ -82,10 +82,12 @@ bool PaEngine::getAudioEn() const
     return stream;
 }
 
-int PaEngine::PAprocess(const void *inputBuffer, void *outputBuffer,
-        unsigned long framesPerBuffer,
-        const PaStreamCallbackTimeInfo *outTime, PaStreamCallbackFlags flags,
-        void *userData)
+int PaEngine::PAprocess(const void *inputBuffer,
+                        void *outputBuffer,
+                        unsigned long framesPerBuffer,
+                        const PaStreamCallbackTimeInfo *outTime,
+                        PaStreamCallbackFlags flags,
+                        void *userData)
 {
     (void) inputBuffer;
     (void) outTime;
@@ -114,4 +116,3 @@ void PaEngine::Stop()
     stream = NULL;
     Pa_Terminate();
 }
-

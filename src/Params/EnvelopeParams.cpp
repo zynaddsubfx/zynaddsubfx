@@ -43,7 +43,7 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
         Penvdt[i]  = 32;
         Penvval[i] = 64;
     }
-    Penvdt[0] = 0; //no used
+    Penvdt[0]       = 0; //no used
     Penvsustain     = 1;
     Penvpoints      = 1;
     Envmode         = 1;
@@ -149,57 +149,57 @@ void EnvelopeParams::ASRinit_bw(char A_val, char A_dt, char R_val, char R_dt)
 void EnvelopeParams::converttofree()
 {
     switch(Envmode) {
-    case 1:
-        Penvpoints  = 4;
-        Penvsustain = 2;
-        Penvval[0]  = 0;
-        Penvdt[1]   = PA_dt;
-        Penvval[1]  = 127;
-        Penvdt[2]   = PD_dt;
-        Penvval[2]  = PS_val;
-        Penvdt[3]   = PR_dt;
-        Penvval[3]  = 0;
-        break;
-    case 2:
-        Penvpoints  = 4;
-        Penvsustain = 2;
-        Penvval[0]  = 0;
-        Penvdt[1]   = PA_dt;
-        Penvval[1]  = 127;
-        Penvdt[2]   = PD_dt;
-        Penvval[2]  = PS_val;
-        Penvdt[3]   = PR_dt;
-        Penvval[3]  = 0;
-        break;
-    case 3:
-        Penvpoints  = 3;
-        Penvsustain = 1;
-        Penvval[0]  = PA_val;
-        Penvdt[1]   = PA_dt;
-        Penvval[1]  = 64;
-        Penvdt[2]   = PR_dt;
-        Penvval[2]  = PR_val;
-        break;
-    case 4:
-        Penvpoints  = 4;
-        Penvsustain = 2;
-        Penvval[0]  = PA_val;
-        Penvdt[1]   = PA_dt;
-        Penvval[1]  = PD_val;
-        Penvdt[2]   = PD_dt;
-        Penvval[2]  = 64;
-        Penvdt[3]   = PR_dt;
-        Penvval[3]  = PR_val;
-        break;
-    case 5:
-        Penvpoints  = 3;
-        Penvsustain = 1;
-        Penvval[0]  = PA_val;
-        Penvdt[1]   = PA_dt;
-        Penvval[1]  = 64;
-        Penvdt[2]   = PR_dt;
-        Penvval[2]  = PR_val;
-        break;
+        case 1:
+            Penvpoints  = 4;
+            Penvsustain = 2;
+            Penvval[0]  = 0;
+            Penvdt[1]   = PA_dt;
+            Penvval[1]  = 127;
+            Penvdt[2]   = PD_dt;
+            Penvval[2]  = PS_val;
+            Penvdt[3]   = PR_dt;
+            Penvval[3]  = 0;
+            break;
+        case 2:
+            Penvpoints  = 4;
+            Penvsustain = 2;
+            Penvval[0]  = 0;
+            Penvdt[1]   = PA_dt;
+            Penvval[1]  = 127;
+            Penvdt[2]   = PD_dt;
+            Penvval[2]  = PS_val;
+            Penvdt[3]   = PR_dt;
+            Penvval[3]  = 0;
+            break;
+        case 3:
+            Penvpoints  = 3;
+            Penvsustain = 1;
+            Penvval[0]  = PA_val;
+            Penvdt[1]   = PA_dt;
+            Penvval[1]  = 64;
+            Penvdt[2]   = PR_dt;
+            Penvval[2]  = PR_val;
+            break;
+        case 4:
+            Penvpoints  = 4;
+            Penvsustain = 2;
+            Penvval[0]  = PA_val;
+            Penvdt[1]   = PA_dt;
+            Penvval[1]  = PD_val;
+            Penvdt[2]   = PD_dt;
+            Penvval[2]  = 64;
+            Penvdt[3]   = PR_dt;
+            Penvval[3]  = PR_val;
+            break;
+        case 5:
+            Penvpoints  = 3;
+            Penvsustain = 1;
+            Penvval[0]  = PA_val;
+            Penvdt[1]   = PA_dt;
+            Penvval[1]  = 64;
+            Penvdt[2]   = PR_dt;
+            Penvval[2]  = PR_val;
+            break;
     }
 }
 
@@ -222,7 +222,7 @@ void EnvelopeParams::add2XML(XMLwrapper *xml)
     xml->addpar("S_val", PS_val);
     xml->addpar("R_val", PR_val);
 
-    if((Pfreemode != 0) || (!xml->minimal)) {
+    if((Pfreemode != 0) || (!xml->minimal))
         for(int i = 0; i < Penvpoints; ++i) {
             xml->beginbranch("POINT", i);
             if(i != 0)
@@ -230,14 +230,13 @@ void EnvelopeParams::add2XML(XMLwrapper *xml)
             xml->addpar("val", Penvval[i]);
             xml->endbranch();
         }
-    }
 }
 
 
 
 void EnvelopeParams::getfromXML(XMLwrapper *xml)
 {
-    Pfreemode = xml->getparbool("free_mode", Pfreemode);
+    Pfreemode       = xml->getparbool("free_mode", Pfreemode);
     Penvpoints      = xml->getpar127("env_points", Penvpoints);
     Penvsustain     = xml->getpar127("env_sustain", Penvsustain);
     Penvstretch     = xml->getpar127("env_stretch", Penvstretch);
@@ -295,4 +294,3 @@ void EnvelopeParams::store2defaults()
     DS_val = PS_val;
     DR_val = PR_val;
 }
-

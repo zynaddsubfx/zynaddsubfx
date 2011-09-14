@@ -59,17 +59,17 @@ void FFTwrapper::smps2freqs(const float *smps, fft_t *freqs)
     fftw_execute(planfftw);
 
     //Grab data
-    memcpy((void*)freqs, (const void*)fft, fftsize*sizeof(double));
+    memcpy((void *)freqs, (const void *)fft, fftsize * sizeof(double));
 }
 
 void FFTwrapper::freqs2smps(const fft_t *freqs, float *smps)
 {
     //Load data
-    memcpy( (void*)fft, (const void*)freqs, fftsize*sizeof(double));
+    memcpy((void *)fft, (const void *)freqs, fftsize * sizeof(double));
 
     //clear unused freq channel
-    fft[fftsize/2][0] = 0.0f;
-    fft[fftsize/2][1] = 0.0f;
+    fft[fftsize / 2][0] = 0.0f;
+    fft[fftsize / 2][1] = 0.0f;
 
     //IDFT
     fftw_execute(planfftw_inv);
@@ -83,4 +83,3 @@ void FFT_cleanup()
 {
     fftw_cleanup();
 }
-

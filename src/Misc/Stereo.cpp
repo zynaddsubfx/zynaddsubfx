@@ -36,4 +36,3 @@ Stereo<T> &Stereo<T>::operator=(const Stereo<T> &nstr)
     r = nstr.r;
     return *this;
 }
-

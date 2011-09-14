@@ -25,7 +25,7 @@
 
 Unison::Unison(int update_period_samples_, float max_delay_sec_) {
     update_period_samples = update_period_samples_;
-    max_delay    = (int)(max_delay_sec_ * (float)SAMPLE_RATE + 1);
+    max_delay = (int)(max_delay_sec_ * (float)SAMPLE_RATE + 1);
     if(max_delay < 10)
         max_delay = 10;
     delay_buffer = new float[max_delay];
@@ -81,10 +81,10 @@ void Unison::update_parameters() {
     if(!uv)
         return;
     float increments_per_second = SAMPLE_RATE
-                                     / (float) update_period_samples;
+                                  / (float) update_period_samples;
 //	printf("#%g, %g\n",increments_per_second,base_freq);
     for(int i = 0; i < unison_size; ++i) {
-        float base   = powf(UNISON_FREQ_SPAN, RND * 2.0f - 1.0f);
+        float base = powf(UNISON_FREQ_SPAN, RND * 2.0f - 1.0f);
         uv[i].relative_amplitude = base;
         float period = base / base_freq;
         float m      = 4.0f / (period * increments_per_second);
@@ -123,14 +123,14 @@ void Unison::process(int bufsize, float *inbuf, float *outbuf) {
             xpos = 0.0f;
         }
         xpos += xpos_step;
-        float in   = inbuf[i], out = 0.0f;
+        float in = inbuf[i], out = 0.0f;
 
         float sign = 1.0f;
         for(int k = 0; k < unison_size; ++k) {
             float vpos = uv[k].realpos1
-                            * (1.0f - xpos) + uv[k].realpos2 * xpos;     //optimize
-            float pos  = delay_k + max_delay - vpos - 1.0f; //optimize
-            int      posi;
+                         * (1.0f - xpos) + uv[k].realpos2 * xpos;        //optimize
+            float pos = delay_k + max_delay - vpos - 1.0f;  //optimize
+            int   posi;
             float posf;
             F2I(pos, posi); //optimize!
             if(posi >= max_delay)
@@ -172,13 +172,13 @@ void Unison::update_unison_data() {
 #warning \
         I have to enlarge (reallocate) the buffer to make place for the whole delay
         float newval = 1.0f + 0.5f
-                          * (vibratto_val
-                             + 1.0f) * unison_amplitude_samples
-                          * uv[k].relative_amplitude;
+                       * (vibratto_val
+                          + 1.0f) * unison_amplitude_samples
+                       * uv[k].relative_amplitude;
 
         if(first_time)
             uv[k].realpos1 = uv[k].realpos2 = newval;
-        else{
+        else {
             uv[k].realpos1 = uv[k].realpos2;
             uv[k].realpos2 = newval;
         }
@@ -189,4 +189,3 @@ void Unison::update_unison_data() {
     if(first_time)
         first_time = false;
 }
-

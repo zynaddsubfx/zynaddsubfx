@@ -40,8 +40,8 @@ void Resonance::defaults()
     Pcenterfreq  = 64; //1 kHz
     Poctavesfreq = 64;
     Pprotectthefundamental = 0;
-    ctlcenter    = 1.0f;
-    ctlbw = 1.0f;
+    ctlcenter = 1.0f;
+    ctlbw     = 1.0f;
     for(int i = 0; i < N_RES_POINTS; ++i)
         Prespoints[i] = 64;
 }
@@ -64,8 +64,8 @@ void Resonance::applyres(int n, fft_t *fftdata, float freq)
     if(Penabled == 0)
         return;             //if the resonance is disabled
     float sum = 0.0f,
-             l1  = logf(getfreqx(0.0f) * ctlcenter),
-             l2  = logf(2.0f) * getoctavesfreq() * ctlbw;
+          l1  = logf(getfreqx(0.0f) * ctlcenter),
+          l2  = logf(2.0f) * getoctavesfreq() * ctlbw;
 
     for(int i = 0; i < N_RES_POINTS; ++i)
         if(sum < Prespoints[i])
@@ -80,14 +80,14 @@ void Resonance::applyres(int n, fft_t *fftdata, float freq)
 
         x *= N_RES_POINTS;
         float dx = x - floor(x);
-        x  = floor(x);
-        int kx1     = (int)x;
+        x = floor(x);
+        int kx1 = (int)x;
         if(kx1 >= N_RES_POINTS)
             kx1 = N_RES_POINTS - 1;
-        int kx2     = kx1 + 1;
+        int kx2 = kx1 + 1;
         if(kx2 >= N_RES_POINTS)
             kx2 = N_RES_POINTS - 1;
-        float y  =
+        float y =
             (Prespoints[kx1]
              * (1.0f - dx) + Prespoints[kx2] * dx) / 127.0f - sum / 127.0f;
 
@@ -107,7 +107,7 @@ void Resonance::applyres(int n, fft_t *fftdata, float freq)
 float Resonance::getfreqresponse(float freq)
 {
     float l1 = logf(getfreqx(0.0f) * ctlcenter),
-             l2 = logf(2.0f) * getoctavesfreq() * ctlbw, sum = 0.0f;
+          l2 = logf(2.0f) * getoctavesfreq() * ctlbw, sum = 0.0f;
 
     for(int i = 0; i < N_RES_POINTS; ++i)
         if(sum < Prespoints[i])
@@ -119,12 +119,12 @@ float Resonance::getfreqresponse(float freq)
     if(x < 0.0f)
         x = 0.0f;
     x *= N_RES_POINTS;
-    float dx     = x - floor(x);
-    x  = floor(x);
-    int kx1         = (int)x;
+    float dx = x - floor(x);
+    x = floor(x);
+    int kx1 = (int)x;
     if(kx1 >= N_RES_POINTS)
         kx1 = N_RES_POINTS - 1;
-    int kx2         = kx1 + 1;
+    int kx2 = kx1 + 1;
     if(kx2 >= N_RES_POINTS)
         kx2 = N_RES_POINTS - 1;
     float result =
@@ -178,7 +178,7 @@ void Resonance::randomize(int type)
 void Resonance::interpolatepeaks(int type)
 {
     int x1 = 0, y1 = Prespoints[0];
-    for(int i = 1; i < N_RES_POINTS; ++i) {
+    for(int i = 1; i < N_RES_POINTS; ++i)
         if((Prespoints[i] != 64) || (i + 1 == N_RES_POINTS)) {
             int y2 = Prespoints[i];
             for(int k = 0; k < i - x1; ++k) {
@@ -190,7 +190,6 @@ void Resonance::interpolatepeaks(int type)
             x1 = i;
             y1 = y2;
         }
-    }
 }
 
 /*
@@ -261,7 +260,7 @@ void Resonance::add2XML(XMLwrapper *xml)
 
 void Resonance::getfromXML(XMLwrapper *xml)
 {
-    Penabled     = xml->getparbool("enabled", Penabled);
+    Penabled = xml->getparbool("enabled", Penabled);
 
     PmaxdB       = xml->getpar127("max_db", PmaxdB);
     Pcenterfreq  = xml->getpar127("center_freq", Pcenterfreq);
@@ -275,4 +274,3 @@ void Resonance::getfromXML(XMLwrapper *xml)
         xml->exitbranch();
     }
 }
-

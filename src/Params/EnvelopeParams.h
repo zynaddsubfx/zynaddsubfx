@@ -87,4 +87,3 @@ class EnvelopeParams:public Presets
 };
 
 #endif
-

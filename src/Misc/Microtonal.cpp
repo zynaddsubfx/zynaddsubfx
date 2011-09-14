@@ -37,11 +37,11 @@ void Microtonal::defaults()
 {
     Pinvertupdown = 0;
     Pinvertupdowncenter = 60;
-    octavesize          = 12;
-    Penabled            = 0;
-    PAnote          = 69;
-    PAfreq          = 440.0f;
-    Pscaleshift     = 64;
+    octavesize  = 12;
+    Penabled    = 0;
+    PAnote      = 69;
+    PAfreq      = 440.0f;
+    Pscaleshift = 64;
 
     Pfirstkey       = 0;
     Plastkey        = 127;
@@ -56,10 +56,10 @@ void Microtonal::defaults()
         octave[i].tuning = tmpoctave[i].tuning = powf(
                                2,
                                (i % octavesize
-                                                      + 1) / 12.0f);
-        octave[i].type   = tmpoctave[i].type = 1;
-        octave[i].x1     = tmpoctave[i].x1 = (i % octavesize + 1) * 100;
-        octave[i].x2     = tmpoctave[i].x2 = 0;
+                                + 1) / 12.0f);
+        octave[i].type = tmpoctave[i].type = 1;
+        octave[i].x1   = tmpoctave[i].x1 = (i % octavesize + 1) * 100;
+        octave[i].x2   = tmpoctave[i].x2 = 0;
     }
     octave[11].type = 2;
     octave[11].x1   = 2;
@@ -106,12 +106,13 @@ float Microtonal::getnotefreq(int note, int keyshift) const
         note = (int) Pinvertupdowncenter * 2 - note;
 
     //compute global fine detune
-    float globalfinedetunerap = powf(2.0f, (Pglobalfinedetune - 64.0f) / 1200.0f); //-64.0f .. 63.0f cents
+    float globalfinedetunerap = powf(2.0f,
+                                     (Pglobalfinedetune - 64.0f) / 1200.0f);       //-64.0f .. 63.0f cents
 
     if(Penabled == 0)
         return powf(2.0f,
-                   (note - PAnote
-                    + keyshift) / 12.0f) * PAfreq * globalfinedetunerap;                      //12tET
+                    (note - PAnote
+                     + keyshift) / 12.0f) * PAfreq * globalfinedetunerap;                     //12tET
 
     int scaleshift =
         ((int)Pscaleshift - 64 + (int) octavesize * 100) % octavesize;
@@ -145,7 +146,8 @@ float Microtonal::getnotefreq(int note, int keyshift) const
              0) ? (1.0f) : (octave[(deltanote - 1) % octavesize].tuning);
         if(deltanote != 0)
             rap_anote_middlenote *=
-                powf(octave[octavesize - 1].tuning, (deltanote - 1) / octavesize);
+                powf(octave[octavesize - 1].tuning,
+                     (deltanote - 1) / octavesize);
         if(minus != 0)
             rap_anote_middlenote = 1.0f / rap_anote_middlenote;
 
@@ -178,14 +180,14 @@ float Microtonal::getnotefreq(int note, int keyshift) const
         return freq * rap_keyshift;
     }
     else {  //if the mapping is disabled
-        int nt = note - PAnote + scaleshift;
-        int ntkey     = (nt + (int)octavesize * 100) % octavesize;
-        int ntoct     = (nt - ntkey) / octavesize;
+        int nt    = note - PAnote + scaleshift;
+        int ntkey = (nt + (int)octavesize * 100) % octavesize;
+        int ntoct = (nt - ntkey) / octavesize;
 
         float oct  = octave[octavesize - 1].tuning;
         float freq =
             octave[(ntkey + octavesize - 1) % octavesize].tuning *powf(oct,
-                                                                      ntoct)
+                                                                       ntoct)
             * PAfreq;
         if(ntkey == 0)
             freq /= oct;
@@ -254,7 +256,7 @@ bool Microtonal::operator!=(const Microtonal &micro) const
  */
 int Microtonal::linetotunings(unsigned int nline, const char *line)
 {
-    int      x1 = -1, x2 = -1, type = -1;
+    int   x1 = -1, x2 = -1, type = -1;
     float x  = -1.0f, tmp, tuning = 1.0f;
     if(strstr(line, "/") == NULL) {
         if(strstr(line, ".") == NULL) { // M case (M=M/1)
@@ -288,16 +290,16 @@ int Microtonal::linetotunings(unsigned int nline, const char *line)
         x    = ((float) x1) / x2;
     }
     switch(type) {
-    case 1:
-        x1     = (int) floor(x);
-        tmp    = fmod(x, 1.0f);
-        x2     = (int) (floor(tmp * 1e6));
-        tuning = powf(2.0f, x / 1200.0f);
-        break;
-    case 2:
-        x      = ((float)x1) / x2;
-        tuning = x;
-        break;
+        case 1:
+            x1     = (int) floor(x);
+            tmp    = fmod(x, 1.0f);
+            x2     = (int) (floor(tmp * 1e6));
+            tuning = powf(2.0f, x / 1200.0f);
+            break;
+        case 2:
+            x      = ((float)x1) / x2;
+            tuning = x;
+            break;
     }
 
     tmpoctave[nline].tuning = tuning;
@@ -684,4 +686,3 @@ int Microtonal::loadXML(const char *filename)
     delete (xml);
     return 0;
 }
-

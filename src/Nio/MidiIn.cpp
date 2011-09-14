@@ -24,12 +24,13 @@
 #include "../globals.h"
 #include "InMgr.h"
 
-void MidiIn::midiProcess(unsigned char head, unsigned char num, unsigned char value)
+void MidiIn::midiProcess(unsigned char head,
+                         unsigned char num,
+                         unsigned char value)
 {
-    MidiEvent ev;
+    MidiEvent     ev;
     unsigned char chan = head & 0x0f;
-    switch(head & 0xf0)
-    {
+    switch(head & 0xf0) {
         case 0x80: //Note Off
             ev.type    = M_NOTE;
             ev.channel = chan;

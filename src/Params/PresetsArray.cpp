@@ -95,12 +95,11 @@ void PresetsArray::paste(int npreset)
             return;
         }
     }
-    else {
-        if(!presetsstore.pastepreset(xml, npreset)) {
-            delete (xml);
-            nelement = -1;
-            return;
-        }
+    else
+    if(!presetsstore.pastepreset(xml, npreset)) {
+        delete (xml);
+        nelement = -1;
+        return;
     }
 
     if(xml->enterbranch(type) == 0) {
@@ -135,4 +134,3 @@ void PresetsArray::setelement(int n)
 {
     nelement = n;
 }
-

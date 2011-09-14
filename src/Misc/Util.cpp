@@ -35,12 +35,12 @@
 #include <sched.h>
 
 
-int SAMPLE_RATE       = 44100;
-int SOUND_BUFFER_SIZE = 256;
-int OSCIL_SIZE        = 1024;
-prng_t prng_state     = 0x1234;
+int    SAMPLE_RATE = 44100;
+int    SOUND_BUFFER_SIZE = 256;
+int    OSCIL_SIZE = 1024;
+prng_t prng_state = 0x1234;
 
-Config    config;
+Config config;
 float *denormalkillbuf;
 
 
@@ -61,12 +61,12 @@ float VelF(float velocity, unsigned char scaling)
  * Get the detune in cents
  */
 float getdetune(unsigned char type,
-                   unsigned short int coarsedetune,
-                   unsigned short int finedetune)
+                unsigned short int coarsedetune,
+                unsigned short int finedetune)
 {
     float det = 0.0f, octdet = 0.0f, cdet = 0.0f, findet = 0.0f;
     //Get Octave
-    int octave   = coarsedetune / 1024;
+    int octave = coarsedetune / 1024;
     if(octave >= 8)
         octave -= 16;
     octdet = octave * 1200.0f;
@@ -80,23 +80,24 @@ float getdetune(unsigned char type,
 
     switch(type) {
 //	case 1: is used for the default (see below)
-    case 2:
-        cdet   = fabs(cdetune * 10.0f);
-        findet = fabs(fdetune / 8192.0f) * 10.0f;
-        break;
-    case 3:
-        cdet   = fabs(cdetune * 100);
-        findet = powf(10, fabs(fdetune / 8192.0f) * 3.0f) / 10.0f - 0.1f;
-        break;
-    case 4:
-        cdet   = fabs(cdetune * 701.95500087f); //perfect fifth
-        findet = (powf(2, fabs(fdetune / 8192.0f) * 12.0f) - 1.0f) / 4095 * 1200;
-        break;
-    //case ...: need to update N_DETUNE_TYPES, if you'll add more
-    default:
-        cdet   = fabs(cdetune * 50.0f);
-        findet = fabs(fdetune / 8192.0f) * 35.0f; //almost like "Paul's Sound Designer 2"
-        break;
+        case 2:
+            cdet   = fabs(cdetune * 10.0f);
+            findet = fabs(fdetune / 8192.0f) * 10.0f;
+            break;
+        case 3:
+            cdet   = fabs(cdetune * 100);
+            findet = powf(10, fabs(fdetune / 8192.0f) * 3.0f) / 10.0f - 0.1f;
+            break;
+        case 4:
+            cdet   = fabs(cdetune * 701.95500087f); //perfect fifth
+            findet =
+                (powf(2, fabs(fdetune / 8192.0f) * 12.0f) - 1.0f) / 4095 * 1200;
+            break;
+        //case ...: need to update N_DETUNE_TYPES, if you'll add more
+        default:
+            cdet   = fabs(cdetune * 50.0f);
+            findet = fabs(fdetune / 8192.0f) * 35.0f; //almost like "Paul's Sound Designer 2"
+            break;
     }
     if(finedetune < 8192)
         findet = -findet;
@@ -152,26 +153,25 @@ void invSignal(float *sig, size_t len)
 //Some memory pools for short term buffer use
 //(avoid the use of new in RT thread(s))
 
-struct pool_entry{
-    bool free;
+struct pool_entry {
+    bool   free;
     float *dat;
 };
 typedef std::vector<pool_entry> pool_t;
-typedef pool_t::iterator pool_itr_t;
+typedef pool_t::iterator        pool_itr_t;
 
 pool_t pool;
 
 float *getTmpBuffer()
 {
-    for(pool_itr_t itr = pool.begin(); itr != pool.end(); ++itr) {
+    for(pool_itr_t itr = pool.begin(); itr != pool.end(); ++itr)
         if(itr->free) { //Use Pool
             itr->free = false;
             return itr->dat;
         }
-    }
     pool_entry p; //Extend Pool
     p.free = false;
-    p.dat = new float[SOUND_BUFFER_SIZE];
+    p.dat  = new float[SOUND_BUFFER_SIZE];
     pool.push_back(p);
 
     return p.dat;
@@ -179,23 +179,24 @@ float *getTmpBuffer()
 
 void returnTmpBuffer(float *buf)
 {
-    for(pool_itr_t itr = pool.begin(); itr != pool.end(); ++itr) {
+    for(pool_itr_t itr = pool.begin(); itr != pool.end(); ++itr)
         if(itr->dat == buf) { //Return to Pool
             itr->free = true;
             return;
         }
-    }
-    fprintf(stderr,"ERROR: invalid buffer returned %s %d\n",__FILE__,__LINE__);
+    fprintf(stderr,
+            "ERROR: invalid buffer returned %s %d\n",
+            __FILE__,
+            __LINE__);
 }
 
 void clearTmpBuffers(void)
 {
     for(pool_itr_t itr = pool.begin(); itr != pool.end(); ++itr) {
         if(!itr->free) //Warn about used buffers
-            warn("Temporary buffer (%p) about to be freed may be in use", itr->dat);
+            warn("Temporary buffer (%p) about to be freed may be in use",
+                 itr->dat);
         delete [] itr->dat;
     }
     pool.clear();
 }
-
-

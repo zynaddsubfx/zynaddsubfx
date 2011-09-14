@@ -28,9 +28,9 @@
 
 EffectLFO::EffectLFO()
 {
-    xl          = 0.0f;
-    xr          = 0.0f;
-    Pfreq       = 40;
+    xl    = 0.0f;
+    xr    = 0.0f;
+    Pfreq = 40;
     Prandomness = 0;
     PLFOtype    = 0;
     Pstereo     = 96;
@@ -68,7 +68,7 @@ void EffectLFO::updateparams()
         PLFOtype = 1;          //this has to be updated if more lfo's are added
     lfotype = PLFOtype;
 
-    xr      = fmod(xl + (Pstereo - 64.0f) / 127.0f + 1.0f, 1.0f);
+    xr = fmod(xl + (Pstereo - 64.0f) / 127.0f + 1.0f, 1.0f);
 }
 
 
@@ -79,18 +79,18 @@ float EffectLFO::getlfoshape(float x)
 {
     float out;
     switch(lfotype) {
-    case 1: //EffectLFO_TRIANGLE
-        if((x > 0.0f) && (x < 0.25f))
-            out = 4.0f * x;
-        else
-        if((x > 0.25f) && (x < 0.75f))
-            out = 2 - 4 * x;
-        else
-            out = 4.0f * x - 4.0f;
-        break;
-    /**\todo more to be added here; also ::updateparams() need to be updated (to allow more lfotypes)*/
-    default:
-        out = cosf(x * 2 * PI); //EffectLFO_SINE
+        case 1: //EffectLFO_TRIANGLE
+            if((x > 0.0f) && (x < 0.25f))
+                out = 4.0f * x;
+            else
+            if((x > 0.25f) && (x < 0.75f))
+                out = 2 - 4 * x;
+            else
+                out = 4.0f * x - 4.0f;
+            break;
+        /**\todo more to be added here; also ::updateparams() need to be updated (to allow more lfotypes)*/
+        default:
+            out = cosf(x * 2 * PI); //EffectLFO_SINE
     }
     return out;
 }
@@ -113,10 +113,10 @@ void EffectLFO::effectlfoout(float *outl, float *outr)
     }
     *outl = (out + 1.0f) * 0.5f;
 
-    out   = getlfoshape(xr);
+    out = getlfoshape(xr);
     if((lfotype == 0) || (lfotype == 1))
         out *= (ampr1 + xr * (ampr2 - ampr1));
-    xr   += incx;
+    xr += incx;
     if(xr > 1.0f) {
         xr   -= 1.0f;
         ampr1 = ampr2;
@@ -124,4 +124,3 @@ void EffectLFO::effectlfoout(float *outl, float *outr)
     }
     *outr = (out + 1.0f) * 0.5f;
 }
-

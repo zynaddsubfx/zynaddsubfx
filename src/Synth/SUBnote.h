@@ -30,7 +30,7 @@
 #include "Envelope.h"
 #include "../DSP/Filter.h"
 
-class SUBnote :public SynthNote
+class SUBnote:public SynthNote
 {
     public:
         SUBnote(SUBnoteParameters *parameters, Controller *ctl_, float freq,
@@ -45,7 +45,11 @@ class SUBnote :public SynthNote
         int finished() const;
     private:
 
-        void setup(float freq, float velocity, int portamento_, int midinote, bool legato=false);
+        void setup(float freq,
+                   float velocity,
+                   int portamento_,
+                   int midinote,
+                   bool legato = false);
         void computecurrentparameters();
         void initparameters(float freq);
         void KillNote();
@@ -53,13 +57,13 @@ class SUBnote :public SynthNote
         SUBnoteParameters *pars;
 
         //parameters
-        int stereo;
-        int numstages; //number of stages of filters
-        int numharmonics; //number of harmonics (after the too higher hamonics are removed)
-        int firstnumharmonics; //To keep track of the first note's numharmonics value, useful in legato mode.
-        int start; //how the harmonics start
-        float  basefreq;
-        float  panning;
+        int       stereo;
+        int       numstages; //number of stages of filters
+        int       numharmonics; //number of harmonics (after the too higher hamonics are removed)
+        int       firstnumharmonics; //To keep track of the first note's numharmonics value, useful in legato mode.
+        int       start; //how the harmonics start
+        float     basefreq;
+        float     panning;
         Envelope *AmpEnvelope;
         Envelope *FreqEnvelope;
         Envelope *BandWidthEnvelope;
@@ -70,8 +74,8 @@ class SUBnote :public SynthNote
 
         //internal values
         ONOFFTYPE NoteEnabled;
-        int      firsttick, portamento;
-        float volume, oldamplitude, newamplitude;
+        int       firsttick, portamento;
+        float     volume, oldamplitude, newamplitude;
 
         float GlobalFilterCenterPitch; //octaves
         float GlobalFilterFreqTracking;
@@ -97,9 +101,8 @@ class SUBnote :public SynthNote
         bpfilter *lfilter, *rfilter;
 
         Controller *ctl;
-        int      oldpitchwheel, oldbandwidth;
+        int   oldpitchwheel, oldbandwidth;
         float globalfiltercenterq;
 };
 
 #endif
-

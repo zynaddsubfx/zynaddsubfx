@@ -58,10 +58,9 @@ class DynamicFilter:public Effect
         //Internal Values
         float depth, ampsns, ampsmooth;
 
-        class Filter *filterl, *filterr;
+        class Filter * filterl, *filterr;
 
         float ms1, ms2, ms3, ms4; //mean squares
 };
 
 #endif
-

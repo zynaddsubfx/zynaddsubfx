@@ -38,7 +38,8 @@ class EchoTest:public CxxTest::TestSuite
             outR = new float[SOUND_BUFFER_SIZE];
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
                 outR[i] = 0.0f;
-            input  = new Stereo<float *>(new float[SOUND_BUFFER_SIZE],new float[SOUND_BUFFER_SIZE]);
+            input = new Stereo<float *>(new float[SOUND_BUFFER_SIZE],
+                                        new float[SOUND_BUFFER_SIZE]);
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
                 input->l[i] = input->r[i] = 0.0f;
             testFX = new Echo(true, outL, outR);
@@ -91,7 +92,6 @@ class EchoTest:public CxxTest::TestSuite
         }
         //Insures that the proper decay occurs with high feedback
         void testDecaywFb() {
-
             //flood with high input
             for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
                 input->r[i] = input->l[i] = 1.0f;
@@ -120,4 +120,3 @@ class EchoTest:public CxxTest::TestSuite
         float *outR, *outL;
         Echo  *testFX;
 };
-

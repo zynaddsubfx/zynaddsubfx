@@ -36,29 +36,29 @@ void Config::init()
 {
     maxstringsize = MAX_STRING_SIZE; //for ui
     //defaults
-    cfg.SampleRate = 44100;
-    cfg.SoundBufferSize    = 256;
-    cfg.OscilSize          = 1024;
-    cfg.SwapStereo         = 0;
+    cfg.SampleRate      = 44100;
+    cfg.SoundBufferSize = 256;
+    cfg.OscilSize  = 1024;
+    cfg.SwapStereo = 0;
 
     cfg.LinuxOSSWaveOutDev = new char[MAX_STRING_SIZE];
     snprintf(cfg.LinuxOSSWaveOutDev, MAX_STRING_SIZE, "/dev/dsp");
-    cfg.LinuxOSSSeqInDev   = new char[MAX_STRING_SIZE];
+    cfg.LinuxOSSSeqInDev = new char[MAX_STRING_SIZE];
     snprintf(cfg.LinuxOSSSeqInDev, MAX_STRING_SIZE, "/dev/sequencer");
 
     cfg.DumpFile = "zynaddsubfx_dump.txt";
 
-    cfg.WindowsWaveOutId  = 0;
-    cfg.WindowsMidiInId   = 0;
+    cfg.WindowsWaveOutId = 0;
+    cfg.WindowsMidiInId  = 0;
 
-    cfg.BankUIAutoClose   = 0;
-    cfg.DumpNotesToFile   = 0;
-    cfg.DumpAppend        = 1;
+    cfg.BankUIAutoClose = 0;
+    cfg.DumpNotesToFile = 0;
+    cfg.DumpAppend      = 1;
 
-    cfg.GzipCompression   = 3;
+    cfg.GzipCompression = 3;
 
-    cfg.Interpolation     = 0;
-    cfg.CheckPADsynth     = 1;
+    cfg.Interpolation = 0;
+    cfg.CheckPADsynth = 1;
 
     cfg.UserInterfaceMode = 0;
     cfg.VirKeybLayout     = 1;
@@ -129,7 +129,7 @@ void Config::clearbankrootdirlist()
 void Config::clearpresetsdirlist()
 {
     for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
-            cfg.presetsDirList[i].clear();
+        cfg.presetsDirList[i].clear();
 }
 
 void Config::readConfig(const char *filename)
@@ -138,96 +138,94 @@ void Config::readConfig(const char *filename)
     if(xmlcfg.loadXMLfile(filename) < 0)
         return;
     if(xmlcfg.enterbranch("CONFIGURATION")) {
-        cfg.SampleRate      = xmlcfg.getpar("sample_rate",
-                                             cfg.SampleRate,
-                                             4000,
-                                             1024000);
+        cfg.SampleRate = xmlcfg.getpar("sample_rate",
+                                       cfg.SampleRate,
+                                       4000,
+                                       1024000);
         cfg.SoundBufferSize = xmlcfg.getpar("sound_buffer_size",
-                                             cfg.SoundBufferSize,
-                                             16,
-                                             8192);
+                                            cfg.SoundBufferSize,
+                                            16,
+                                            8192);
         cfg.OscilSize = xmlcfg.getpar("oscil_size",
-                                       cfg.OscilSize,
-                                       MAX_AD_HARMONICS * 2,
-                                       131072);
-        cfg.SwapStereo      = xmlcfg.getpar("swap_stereo",
-                                             cfg.SwapStereo,
-                                             0,
-                                             1);
+                                      cfg.OscilSize,
+                                      MAX_AD_HARMONICS * 2,
+                                      131072);
+        cfg.SwapStereo = xmlcfg.getpar("swap_stereo",
+                                       cfg.SwapStereo,
+                                       0,
+                                       1);
         cfg.BankUIAutoClose = xmlcfg.getpar("bank_window_auto_close",
-                                             cfg.BankUIAutoClose,
-                                             0,
-                                             1);
+                                            cfg.BankUIAutoClose,
+                                            0,
+                                            1);
 
         cfg.DumpNotesToFile = xmlcfg.getpar("dump_notes_to_file",
-                                             cfg.DumpNotesToFile,
-                                             0,
-                                             1);
-        cfg.DumpAppend      = xmlcfg.getpar("dump_append",
-                                             cfg.DumpAppend,
-                                             0,
-                                             1);
+                                            cfg.DumpNotesToFile,
+                                            0,
+                                            1);
+        cfg.DumpAppend = xmlcfg.getpar("dump_append",
+                                       cfg.DumpAppend,
+                                       0,
+                                       1);
         cfg.DumpFile = xmlcfg.getparstr("dump_file", "");
 
         cfg.GzipCompression = xmlcfg.getpar("gzip_compression",
-                                             cfg.GzipCompression,
-                                             0,
-                                             9);
+                                            cfg.GzipCompression,
+                                            0,
+                                            9);
 
         cfg.currentBankDir = xmlcfg.getparstr("bank_current", "");
-        cfg.Interpolation = xmlcfg.getpar("interpolation",
+        cfg.Interpolation  = xmlcfg.getpar("interpolation",
                                            cfg.Interpolation,
                                            0,
                                            1);
 
         cfg.CheckPADsynth = xmlcfg.getpar("check_pad_synth",
-                                           cfg.CheckPADsynth,
-                                           0,
-                                           1);
+                                          cfg.CheckPADsynth,
+                                          0,
+                                          1);
 
 
         cfg.UserInterfaceMode = xmlcfg.getpar("user_interface_mode",
-                                               cfg.UserInterfaceMode,
-                                               0,
-                                               2);
-        cfg.VirKeybLayout     = xmlcfg.getpar("virtual_keyboard_layout",
-                                               cfg.VirKeybLayout,
-                                               0,
-                                               10);
+                                              cfg.UserInterfaceMode,
+                                              0,
+                                              2);
+        cfg.VirKeybLayout = xmlcfg.getpar("virtual_keyboard_layout",
+                                          cfg.VirKeybLayout,
+                                          0,
+                                          10);
 
         //get bankroot dirs
-        for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i) {
+        for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
             if(xmlcfg.enterbranch("BANKROOT", i)) {
                 cfg.bankRootDirList[i] = xmlcfg.getparstr("bank_root", "");
                 xmlcfg.exitbranch();
             }
-        }
 
         //get preset root dirs
-        for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i) {
+        for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
             if(xmlcfg.enterbranch("PRESETSROOT", i)) {
                 cfg.presetsDirList[i] = xmlcfg.getparstr("presets_root", "");
                 xmlcfg.exitbranch();
             }
-        }
 
         //linux stuff
         xmlcfg.getparstr("linux_oss_wave_out_dev",
-                          cfg.LinuxOSSWaveOutDev,
-                          MAX_STRING_SIZE);
+                         cfg.LinuxOSSWaveOutDev,
+                         MAX_STRING_SIZE);
         xmlcfg.getparstr("linux_oss_seq_in_dev",
-                          cfg.LinuxOSSSeqInDev,
-                          MAX_STRING_SIZE);
+                         cfg.LinuxOSSSeqInDev,
+                         MAX_STRING_SIZE);
 
         //windows stuff
         cfg.WindowsWaveOutId = xmlcfg.getpar("windows_wave_out_id",
-                                              cfg.WindowsWaveOutId,
-                                              0,
-                                              winwavemax);
-        cfg.WindowsMidiInId  = xmlcfg.getpar("windows_midi_in_id",
-                                              cfg.WindowsMidiInId,
-                                              0,
-                                              winmidimax);
+                                             cfg.WindowsWaveOutId,
+                                             0,
+                                             winwavemax);
+        cfg.WindowsMidiInId = xmlcfg.getpar("windows_midi_in_id",
+                                            cfg.WindowsMidiInId,
+                                            0,
+                                            winmidimax);
 
         xmlcfg.exitbranch();
     }
@@ -300,4 +298,3 @@ void Config::getConfigFileName(char *name, int namesize)
     name[0] = 0;
     snprintf(name, namesize, "%s%s", getenv("HOME"), "/.zynaddsubfxXML.cfg");
 }
-

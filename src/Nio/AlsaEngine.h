@@ -31,20 +31,20 @@
 #include "OutMgr.h"
 #include "../Misc/Stereo.h"
 
-class AlsaEngine : public AudioOut, MidiIn
+class AlsaEngine:public AudioOut, MidiIn
 {
     public:
         AlsaEngine();
         ~AlsaEngine();
-        
+
         bool Start();
         void Stop();
-        
+
         void setAudioEn(bool nval);
         bool getAudioEn() const;
         void setMidiEn(bool nval);
         bool getMidiEn() const;
-        
+
     protected:
         void *AudioThread();
         static void *_AudioThread(void *arg);
@@ -60,20 +60,20 @@ class AlsaEngine : public AudioOut, MidiIn
         short *interleave(const Stereo<float *> &smps);
 
         struct {
-            std::string  device;
-            snd_seq_t   *handle;
-            int          alsaId;
-            pthread_t    pThread;
+            std::string device;
+            snd_seq_t  *handle;
+            int alsaId;
+            pthread_t pThread;
         } midi;
 
         struct {
             snd_pcm_t *handle;
             snd_pcm_hw_params_t *params;
-            unsigned int sampleRate;
+            unsigned int      sampleRate;
             snd_pcm_uframes_t frames;
-            unsigned int periods;
-            short *buffer;
-            pthread_t    pThread;
+            unsigned int      periods;
+            short    *buffer;
+            pthread_t pThread;
         } audio;
 
         void *processAudio();

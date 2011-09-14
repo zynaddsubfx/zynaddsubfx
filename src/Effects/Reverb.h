@@ -99,19 +99,19 @@ class Reverb:public Effect
 
         float erbalance;
         //Parameters
-        int      lohidamptype; /**<0=disable,1=highdamp(lowpass),2=lowdamp(highpass)*/
-        int      idelaylen, rdelaylen;
-        int      idelayk;
-        float lohifb, idelayfb, roomsize, rs; //rs is used to "normalise" the volume according to the roomsize
-        int      comblen[REV_COMBS * 2];
-        int      aplen[REV_APS * 2];
-        Unison  *bandwidth;
+        int     lohidamptype;  /**<0=disable,1=highdamp(lowpass),2=lowdamp(highpass)*/
+        int     idelaylen, rdelaylen;
+        int     idelayk;
+        float   lohifb, idelayfb, roomsize, rs; //rs is used to "normalise" the volume according to the roomsize
+        int     comblen[REV_COMBS * 2];
+        int     aplen[REV_APS * 2];
+        Unison *bandwidth;
 
         //Internal Variables
 
         float *comb[REV_COMBS * 2];
 
-        int      combk[REV_COMBS * 2];
+        int   combk[REV_COMBS * 2];
         float combfb[REV_COMBS * 2]; /**<feedback-ul fiecarui filtru "comb"*/
         float lpcomb[REV_COMBS * 2]; /**<pentru Filtrul LowPass*/
 
@@ -119,11 +119,10 @@ class Reverb:public Effect
 
         int apk[REV_APS * 2];
 
-        float     *idelay;
-        class AnalogFilter *lpf, *hpf; //filters
+        float *idelay;
+        class AnalogFilter * lpf, *hpf; //filters
 
         void processmono(int ch, float *output, float *inputbuf);
 };
 
 #endif
-

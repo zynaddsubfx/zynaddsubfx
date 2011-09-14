@@ -29,7 +29,7 @@
 #include "AudioOut.h"
 #include "MidiIn.h"
 
-class NulEngine: public AudioOut, MidiIn
+class NulEngine:public AudioOut, MidiIn
 {
     public:
         NulEngine();
@@ -41,8 +41,8 @@ class NulEngine: public AudioOut, MidiIn
         void setAudioEn(bool nval);
         bool getAudioEn() const;
 
-        void setMidiEn(bool){};
-        bool getMidiEn() const{return true;};
+        void setMidiEn(bool) {}
+        bool getMidiEn() const {return true;}
 
     protected:
         void *AudioThread();
@@ -50,8 +50,7 @@ class NulEngine: public AudioOut, MidiIn
 
     private:
         struct timeval playing_until;
-        pthread_t *pThread;
+        pthread_t     *pThread;
 };
 
 #endif
-
