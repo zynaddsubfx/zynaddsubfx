@@ -1,8 +1,8 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0103 
+version 1.0110 
 header_name {.h} 
 code_name {.cxx}
-decl {\#include <FL/Fl_Box.h>} {public
+decl {\#include <FL/Fl_Box.H>} {selected public
 } 
 
 decl {\#include <stdlib.h>} {public
@@ -68,7 +68,7 @@ class ControllerUI {} {
       label {Midi Controller}
       callback {o->hide();
 exit(0);}
-      xywh {210 213 340 410} hide
+      xywh {210 213 340 410} type Double hide
     } {
       Fl_Counter {} {
         label {Output Channel}
@@ -85,27 +85,27 @@ exit(0);}
 refreshvalues();}
         xywh {10 50 75 20} down_box BORDER_BOX
       } {
-        menuitem {} {
+        MenuItem {} {
           label {But.1 X}
           xywh {0 0 100 20} labelfont 1 labelsize 12
         }
-        menuitem {} {
+        MenuItem {} {
           label {But.1 Y}
           xywh {10 10 100 20} labelfont 1 labelsize 12 divider
         }
-        menuitem {} {
+        MenuItem {} {
           label {But.2 X}
           xywh {10 10 100 20} labelfont 1 labelsize 12
         }
-        menuitem {} {
+        MenuItem {} {
           label {But.2 Y}
           xywh {20 20 100 20} labelfont 1 labelsize 12 divider
         }
-        menuitem {} {
+        MenuItem {} {
           label {But.3 X}
           xywh {20 20 100 20} labelfont 1 labelsize 12
         }
-        menuitem {} {
+        MenuItem {} {
           label {But.3 Y}
           xywh {30 30 100 20} labelfont 1 labelsize 12
         }
@@ -125,19 +125,19 @@ refreshvalues();}
 refreshvalues();}
         xywh {95 13 60 20} down_box BORDER_BOX labelsize 10 align 5
       } {
-        menuitem {} {
+        MenuItem {} {
           label OFF
           xywh {30 30 100 20} labelfont 1 labelsize 12
         }
-        menuitem {} {
+        MenuItem {} {
           label {Ctl.}
           xywh {20 20 100 20} labelfont 1 labelsize 12
         }
-        menuitem {} {
+        MenuItem {} {
           label RPN
           xywh {30 30 100 20} labelfont 1 labelsize 12 deactivate
         }
-        menuitem {} {
+        MenuItem {} {
           label NRPN
           xywh {40 40 100 20} labelfont 1 labelsize 12
         }
@@ -204,8 +204,7 @@ if (controller->pars[nbut].mode==1) ctlgroup->activate();
    else ctlgroup->deactivate();
 
 if (controller->pars[nbut].mode==3) nrpngroup->activate();
-   else nrpngroup->deactivate();} {selected
-    }
+   else nrpngroup->deactivate();} {}
   }
   Function {ControllerUI(Controller *controller_)} {} {
     code {nbut=0;
