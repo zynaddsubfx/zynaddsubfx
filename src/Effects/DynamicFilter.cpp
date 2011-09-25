@@ -24,13 +24,15 @@
 #include "DynamicFilter.h"
 #include "../DSP/Filter.h"
 
-DynamicFilter::DynamicFilter(int insertion_,
-                             float *efxoutl_,
-                             float *efxoutr_)
+DynamicFilter::DynamicFilter(bool insertion_, float *efxoutl_, float *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, new FilterParams(0, 64, 64), 0),
-      Pvolume(110), Pdepth(0), Pampsns(90),
-      Pampsnsinv(0), Pampsmooth(60),
-      filterl(NULL), filterr(NULL)
+      Pvolume(110),
+      Pdepth(0),
+      Pampsns(90),
+      Pampsnsinv(0),
+      Pampsmooth(60),
+      filterl(NULL),
+      filterr(NULL)
 {
     setpreset(Ppreset);
     cleanup();
@@ -44,9 +46,7 @@ DynamicFilter::~DynamicFilter()
 }
 
 
-/*
- * Apply the effect
- */
+// Apply the effect
 void DynamicFilter::out(const Stereo<float *> &smp)
 {
     if(filterpars->changed) {
@@ -65,7 +65,7 @@ void DynamicFilter::out(const Stereo<float *> &smp)
         efxoutl[i] = smp.l[i];
         efxoutr[i] = smp.r[i];
 
-        const float x = (fabs(smp.l[i]) + fabs(smp.l[i])) * 0.5f;
+        const float x = (fabsf(smp.l[i]) + fabsf(smp.l[i])) * 0.5f;
         ms1 = ms1 * (1.0f - ampsmooth) + x * ampsmooth + 1e-10;
     }
 
@@ -73,14 +73,13 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     ms2 = ms2 * (1.0f - ampsmooth2) + ms1 * ampsmooth2;
     ms3 = ms3 * (1.0f - ampsmooth2) + ms2 * ampsmooth2;
     ms4 = ms4 * (1.0f - ampsmooth2) + ms3 * ampsmooth2;
-    const float rms = (sqrt(ms4)) * ampsns;
+    const float rms = (sqrtf(ms4)) * ampsns;
 
     const float frl = Filter::getrealfreq(freq + lfol + rms);
     const float frr = Filter::getrealfreq(freq + lfor + rms);
 
     filterl->setfreq_and_q(frl, q);
     filterr->setfreq_and_q(frr, q);
-
 
     filterl->filterout(efxoutl);
     filterr->filterout(efxoutr);
@@ -92,55 +91,45 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     }
 }
 
-/*
- * Cleanup the effect
- */
-void DynamicFilter::cleanup()
+// Cleanup the effect
+void DynamicFilter::cleanup(void)
 {
     reinitfilter();
-    ms1 = 0.0f;
-    ms2 = 0.0f;
-    ms3 = 0.0f;
-    ms4 = 0.0f;
+    ms1 = ms2 = ms3 = ms4 = 0.0f;
 }
 
 
-/*
- * Parameter control
- */
-
-void DynamicFilter::setdepth(unsigned char Pdepth)
+//Parameter control
+void DynamicFilter::setdepth(unsigned char _Pdepth)
 {
-    this->Pdepth = Pdepth;
-    depth = powf((Pdepth / 127.0f), 2.0f);
+    Pdepth = _Pdepth;
+    depth  = powf(Pdepth / 127.0f, 2.0f);
 }
 
 
-void DynamicFilter::setvolume(unsigned char Pvolume)
+void DynamicFilter::setvolume(unsigned char _Pvolume)
 {
-    this->Pvolume = Pvolume;
-    outvolume     = Pvolume / 127.0f;
-    if(insertion == 0)
+    Pvolume   = _Pvolume;
+    outvolume = Pvolume / 127.0f;
+    if(!insertion)
         volume = 1.0f;
     else
         volume = outvolume;
 }
 
-void DynamicFilter::setampsns(unsigned char Pampsns)
+void DynamicFilter::setampsns(unsigned char _Pampsns)
 {
-    ampsns = powf(Pampsns / 127.0f, 2.5f) * 10.0f;
-    if(Pampsnsinv != 0)
+    Pampsns = _Pampsns;
+    ampsns  = powf(Pampsns / 127.0f, 2.5f) * 10.0f;
+    if(Pampsnsinv)
         ampsns = -ampsns;
-    ampsmooth     = expf(-Pampsmooth / 127.0f * 10.0f) * 0.99f;
-    this->Pampsns = Pampsns;
+    ampsmooth = expf(-Pampsmooth / 127.0f * 10.0f) * 0.99f;
 }
 
-void DynamicFilter::reinitfilter()
+void DynamicFilter::reinitfilter(void)
 {
-    if(filterl != NULL)
-        delete (filterl);
-    if(filterr != NULL)
-        delete (filterr);
+    delete filterl;
+    delete filterr;
     filterl = Filter::generate(filterpars);
     filterr = Filter::generate(filterpars);
 }
@@ -168,6 +157,7 @@ void DynamicFilter::setpreset(unsigned char npreset)
         changepar(n, presets[npreset][n]);
 
     filterpars->defaults();
+
     switch(npreset) {
         case 0:
             filterpars->Pcategory = 0;
@@ -254,10 +244,9 @@ void DynamicFilter::setpreset(unsigned char npreset)
 //	    for (int i=0;i<5;i++){
 //		printf("freq=%d  amp=%d  q=%d\n",filterpars->Pvowels[0].formants[i].freq,filterpars->Pvowels[0].formants[i].amp,filterpars->Pvowels[0].formants[i].q);
 //	    };
-    if(insertion == 0)
-        changepar(0, presets[npreset][0] / 2);           //lower the volume if this is system effect
+    if(insertion == 0) //lower the volume if this is system effect
+        changepar(0, presets[npreset][0] * 0.5f);
     Ppreset = npreset;
-
     reinitfilter();
 }
 

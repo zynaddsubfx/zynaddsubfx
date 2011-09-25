@@ -23,10 +23,10 @@
 #include <cmath>
 #include "Alienwah.h"
 
-Alienwah::Alienwah(const int &insertion_,
-                   float *const efxoutl_,
-                   float *const efxoutr_)
-    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0), oldl(NULL), oldr(NULL)
+Alienwah::Alienwah(bool insertion_, float *const efxoutl_, float *const efxoutr_)
+    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
+    oldl(NULL),
+    oldr(NULL)
 {
     setpreset(Ppreset);
     cleanup();
@@ -43,9 +43,7 @@ Alienwah::~Alienwah()
 }
 
 
-/*
- * Apply the effect
- */
+//Apply the effect
 void Alienwah::out(const Stereo<float *> &smp)
 {
     float lfol, lfor; //Left/Right LFOs
@@ -93,10 +91,8 @@ void Alienwah::out(const Stereo<float *> &smp)
     oldclfor = clfor;
 }
 
-/*
- * Cleanup the effect
- */
-void Alienwah::cleanup()
+//Cleanup the effect
+void Alienwah::cleanup(void)
 {
     for(int i = 0; i < Pdelay; ++i) {
         oldl[i] = complex<float>(0.0f, 0.0f);
@@ -106,55 +102,49 @@ void Alienwah::cleanup()
 }
 
 
-/*
- * Parameter control
- */
-
-void Alienwah::setdepth(unsigned char Pdepth)
+//Parameter control
+void Alienwah::setdepth(unsigned char _Pdepth)
 {
-    this->Pdepth = Pdepth;
-    depth = (Pdepth / 127.0f);
+    Pdepth = _Pdepth;
+    depth  = Pdepth / 127.0f;
 }
 
-void Alienwah::setfb(unsigned char Pfb)
+void Alienwah::setfb(unsigned char _Pfb)
 {
-    this->Pfb = Pfb;
-    fb = fabs((Pfb - 64.0f) / 64.1f);
-    fb = sqrt(fb);
+    Pfb = _Pfb;
+    fb  = fabs((Pfb - 64.0f) / 64.1f);
+    fb  = sqrtf(fb);
     if(fb < 0.4f)
         fb = 0.4f;
     if(Pfb < 64)
         fb = -fb;
 }
 
-void Alienwah::setvolume(unsigned char Pvolume)
+void Alienwah::setvolume(unsigned char _Pvolume)
 {
-    this->Pvolume = Pvolume;
-    outvolume     = Pvolume / 127.0f;
+    Pvolume   = _Pvolume;
+    outvolume = Pvolume / 127.0f;
     if(insertion == 0)
         volume = 1.0f;
     else
         volume = outvolume;
 }
 
-void Alienwah::setphase(unsigned char Pphase)
+void Alienwah::setphase(unsigned char _Pphase)
 {
-    this->Pphase = Pphase;
-    phase = (Pphase - 64.0f) / 64.0f * PI;
+    Pphase = _Pphase;
+    phase  = (Pphase - 64.0f) / 64.0f * PI;
 }
 
-void Alienwah::setdelay(unsigned char Pdelay)
+void Alienwah::setdelay(unsigned char _Pdelay)
 {
     if(oldl != NULL)
         delete [] oldl;
     if(oldr != NULL)
         delete [] oldr;
-    if(Pdelay >= MAX_ALIENWAH_DELAY)
-        this->Pdelay = MAX_ALIENWAH_DELAY;
-    else
-        this->Pdelay = Pdelay;
-    oldl = new complex<float>[Pdelay];
-    oldr = new complex<float>[Pdelay];
+    Pdelay = (_Pdelay >= MAX_ALIENWAH_DELAY) ? MAX_ALIENWAH_DELAY : _Pdelay;
+    oldl   = new complex<float>[Pdelay];
+    oldr   = new complex<float>[Pdelay];
     cleanup();
 }
 

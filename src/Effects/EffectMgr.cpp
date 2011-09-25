@@ -34,61 +34,47 @@
 #include <iostream>
 using namespace std;
 
-EffectMgr::EffectMgr(int insertion_, pthread_mutex_t *mutex_)
+EffectMgr::EffectMgr(const bool insertion_, pthread_mutex_t *mutex_)
     :insertion(insertion_),
       efxoutl(new float[SOUND_BUFFER_SIZE]),
       efxoutr(new float[SOUND_BUFFER_SIZE]),
-      filterpars(NULL), nefx(0), efx(NULL), mutex(mutex_), dryonly(false)
+      filterpars(NULL),
+      nefx(0),
+      efx(NULL),
+      mutex(mutex_),
+      dryonly(false)
 {
-    setpresettype("Peffect"); /**\todo Figure out what this is doing
-                               * , as it might be another leaky abstraction.*/
-//    efx=NULL;
-//    nefx=0;
-//    insertion=insertion_;
-//    mutex=mutex_;
-//    efxoutl=new float[SOUND_BUFFER_SIZE];
-//    efxoutr=new float[SOUND_BUFFER_SIZE];
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-        efxoutl[i] = 0.0f;
-        efxoutr[i] = 0.0f;
-    }
-//    filterpars=NULL;
-//    dryonly=false;
+    setpresettype("Peffect");
+    memset(efxoutl, 0, SOUND_BUFFER_SIZE * sizeof(float));
+    memset(efxoutr, 0, SOUND_BUFFER_SIZE * sizeof(float));
     defaults();
 }
 
 
 EffectMgr::~EffectMgr()
 {
-    if(efx != NULL)
-        delete efx;
+    delete efx;
     delete [] efxoutl;
     delete [] efxoutr;
 }
 
-void EffectMgr::defaults()
+void EffectMgr::defaults(void)
 {
     changeeffect(0);
     setdryonly(false);
 }
 
-/*
- * Change the effect
- */
-void EffectMgr::changeeffect(int nefx_)
+//Change the effect
+void EffectMgr::changeeffect(int _nefx)
 {
     cleanup();
-    if(nefx == nefx_)
+    if(nefx == _nefx)
         return;
-    nefx = nefx_;
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-        efxoutl[i] = 0.0f;
-        efxoutr[i] = 0.0f;
-    }
-
-    if(efx != NULL)
-        delete efx;
-    switch(nefx) {  /**\todo replace leaky abstraction*/
+    nefx = _nefx;
+    memset(efxoutl, 0, SOUND_BUFFER_SIZE * sizeof(float));
+    memset(efxoutr, 0, SOUND_BUFFER_SIZE * sizeof(float));
+    delete efx;
+    switch(nefx) {
         case 1:
             efx = new Reverb(insertion, efxoutl, efxoutr);
             break;
@@ -119,52 +105,41 @@ void EffectMgr::changeeffect(int nefx_)
             break; //no effect (thru)
     }
 
-    if(efx != NULL)
+    if(efx)
         filterpars = efx->filterpars;
 }
 
-/*
- * Obtain the effect number
- */
-int EffectMgr::geteffect()
+//Obtain the effect number
+int EffectMgr::geteffect(void)
 {
     return nefx;
 }
 
-/*
- * Cleanup the current effect
- */
-void EffectMgr::cleanup()
+// Cleanup the current effect
+void EffectMgr::cleanup(void)
 {
-    if(efx != NULL)
+    if(efx)
         efx->cleanup();
 }
 
 
-/*
- * Get the preset of the current effect
- */
-
-unsigned char EffectMgr::getpreset()
+// Get the preset of the current effect
+unsigned char EffectMgr::getpreset(void)
 {
-    if(efx != NULL)
+    if(efx)
         return efx->Ppreset;
     else
         return 0;
 }
 
-/*
- * Change the preset of the current effect
- */
+// Change the preset of the current effect
 void EffectMgr::changepreset_nolock(unsigned char npreset)
 {
-    if(efx != NULL)
+    if(efx)
         efx->setpreset(npreset);
 }
 
-/*
- * Change the preset of the current effect(with thread locking)
- */
+//Change the preset of the current effect(with thread locking)
 void EffectMgr::changepreset(unsigned char npreset)
 {
     pthread_mutex_lock(mutex);
@@ -173,19 +148,15 @@ void EffectMgr::changepreset(unsigned char npreset)
 }
 
 
-/*
- * Change a parameter of the current effect
- */
+//Change a parameter of the current effect
 void EffectMgr::seteffectpar_nolock(int npar, unsigned char value)
 {
-    if(efx == NULL)
+    if(!efx)
         return;
     efx->changepar(npar, value);
 }
 
-/*
- * Change a parameter of the current effect (with thread locking)
- */
+// Change a parameter of the current effect (with thread locking)
 void EffectMgr::seteffectpar(int npar, unsigned char value)
 {
     pthread_mutex_lock(mutex);
@@ -193,35 +164,29 @@ void EffectMgr::seteffectpar(int npar, unsigned char value)
     pthread_mutex_unlock(mutex);
 }
 
-/*
- * Get a parameter of the current effect
- */
+//Get a parameter of the current effect
 unsigned char EffectMgr::geteffectpar(int npar)
 {
-    if(efx == NULL)
+    if(!efx)
         return 0;
     return efx->getpar(npar);
 }
 
-
-/*
- * Apply the effect
- */
+// Apply the effect
 void EffectMgr::out(float *smpsl, float *smpsr)
 {
-    int i;
-    if(efx == NULL) {
-        if(insertion == 0)
-            for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+    if(!efx) {
+        if(!insertion) {
+            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
                 smpsl[i]   = 0.0f;
                 smpsr[i]   = 0.0f;
                 efxoutl[i] = 0.0f;
                 efxoutr[i] = 0.0f;
             }
-        ;
+        }
         return;
     }
-    for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         smpsl[i]  += denormalkillbuf[i];
         smpsr[i]  += denormalkillbuf[i];
         efxoutl[i] = 0.0f;
@@ -232,11 +197,8 @@ void EffectMgr::out(float *smpsl, float *smpsr)
     float volume = efx->volume;
 
     if(nefx == 7) { //this is need only for the EQ effect
-        /**\todo figure out why*/
-        for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-            smpsl[i] = efxoutl[i];
-            smpsr[i] = efxoutr[i];
-        }
+        memcpy(smpsl, efxoutl, SOUND_BUFFER_SIZE * sizeof(float));
+        memcpy(smpsr, efxoutr, SOUND_BUFFER_SIZE * sizeof(float));
         return;
     }
 
@@ -252,23 +214,23 @@ void EffectMgr::out(float *smpsl, float *smpsr)
             v2 = 1.0f;
         }
         if((nefx == 1) || (nefx == 2))
-            v2 *= v2;                    //for Reverb and Echo, the wet function is not liniar
+            v2 *= v2; //for Reverb and Echo, the wet function is not liniar
 
         if(dryonly)   //this is used for instrument effect only
-            for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
                 smpsl[i]   *= v1;
                 smpsr[i]   *= v1;
                 efxoutl[i] *= v2;
                 efxoutr[i] *= v2;
             }
-        else    //normal instrument/insertion effect
-            for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+        else // normal instrument/insertion effect
+            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
                 smpsl[i] = smpsl[i] * v1 + efxoutl[i] * v2;
                 smpsr[i] = smpsr[i] * v1 + efxoutr[i] * v2;
             }
     }
-    else    //System effect
-        for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+    else // System effect
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             efxoutl[i] *= 2.0f * volume;
             efxoutr[i] *= 2.0f * volume;
             smpsl[i]    = efxoutl[i];
@@ -276,27 +238,18 @@ void EffectMgr::out(float *smpsl, float *smpsr)
         }
 }
 
-/*
- * Get the effect volume for the system effect
- */
-float EffectMgr::sysefxgetvolume()
+
+// Get the effect volume for the system effect
+float EffectMgr::sysefxgetvolume(void)
 {
-    if(efx == NULL)
-        return 1.0f;
-    else
-        return efx->outvolume;
+    return (!efx) ? 1.0f : efx->outvolume;
 }
 
 
-/*
- * Get the EQ response
- */
+// Get the EQ response
 float EffectMgr::getEQfreqresponse(float freq)
 {
-    if(nefx == 7)
-        return efx->getfreqresponse(freq);
-    else
-        return 0.0f;
+    return (nefx == 7) ? efx->getfreqresponse(freq) : 0.0f;
 }
 
 
@@ -309,14 +262,12 @@ void EffectMgr::add2XML(XMLwrapper *xml)
 {
     xml->addpar("type", geteffect());
 
-    if((efx == NULL) || (geteffect() == 0))
+    if(!efx || !geteffect())
         return;
     xml->addpar("preset", efx->Ppreset);
 
     xml->beginbranch("EFFECT_PARAMETERS");
     for(int n = 0; n < 128; ++n) {
-        /**\todo evaluate who should oversee saving
-             * and loading of parameters*/
         int par = geteffectpar(n);
         if(par == 0)
             continue;
@@ -324,7 +275,7 @@ void EffectMgr::add2XML(XMLwrapper *xml)
         xml->addpar("par", par);
         xml->endbranch();
     }
-    if(filterpars != NULL) {
+    if(filterpars) {
         xml->beginbranch("FILTER");
         filterpars->add2XML(xml);
         xml->endbranch();
@@ -336,7 +287,7 @@ void EffectMgr::getfromXML(XMLwrapper *xml)
 {
     changeeffect(xml->getpar127("type", geteffect()));
 
-    if((efx == NULL) || (geteffect() == 0))
+    if(!efx || !geteffect())
         return;
 
     efx->Ppreset = xml->getpar127("preset", efx->Ppreset);
@@ -346,12 +297,11 @@ void EffectMgr::getfromXML(XMLwrapper *xml)
             seteffectpar_nolock(n, 0); //erase effect parameter
             if(xml->enterbranch("par_no", n) == 0)
                 continue;
-
             int par = geteffectpar(n);
             seteffectpar_nolock(n, xml->getpar127("par", par));
             xml->exitbranch();
         }
-        if(filterpars != NULL)
+        if(filterpars)
             if(xml->enterbranch("FILTER")) {
                 filterpars->getfromXML(xml);
                 xml->exitbranch();

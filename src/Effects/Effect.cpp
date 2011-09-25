@@ -25,11 +25,13 @@
 #include "../Params/FilterParams.h"
 #include <cmath>
 
-Effect::Effect(bool insertion_, float *const efxoutl_,
-               float *const efxoutr_, FilterParams *filterpars_,
-               const unsigned char &Ppreset_)
-    :Ppreset(Ppreset_), efxoutl(efxoutl_), efxoutr(efxoutr_),
-      filterpars(filterpars_), insertion(insertion_)
+Effect::Effect(bool insertion_, float *efxoutl_, float *efxoutr_,
+        FilterParams *filterpars_, unsigned char Ppreset_)
+    :Ppreset(Ppreset_),
+    efxoutl(efxoutl_),
+    efxoutr(efxoutr_),
+    filterpars(filterpars_),
+    insertion(insertion_)
 {}
 
 void Effect::out(float *const smpsl, float *const smpsr)

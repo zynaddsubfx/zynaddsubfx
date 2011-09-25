@@ -23,7 +23,6 @@
 #ifndef ECHO_H
 #define ECHO_H
 
-#include "../globals.h"
 #include "Effect.h"
 #include "../Misc/Stereo.h"
 #include "../Samples/Sample.h"
@@ -32,32 +31,11 @@
 class Echo:public Effect
 {
     public:
-
-        /**
-         * The Constructor For Echo
-         * @param insertion_ integer to determine if Echo is an insertion effect
-         * or not
-         * @param efxoutl_ Effect out Left Channel
-         * @param efxoutr_ Effect out Right Channel
-         * @return An initialized Echo Object
-         */
-        Echo(const int &insertion_,
-             float *const efxoutl_,
-             float *const efxoutr_);
-
-        /**
-         * The destructor
-         */
+        Echo(bool insertion_, float *efxoutl_, float *efxoutr_);
         ~Echo();
 
         void out(const Stereo<float *> &input);
-
-        /**
-         * Sets the state of Echo to the specified preset
-         * @param npreset number of chosen preset
-         */
         void setpreset(unsigned char npreset);
-
         /**
          * Sets the value of the chosen variable
          *
@@ -89,27 +67,21 @@ class Echo:public Effect
          * @return value of parameter
          */
         unsigned char getpar(int npar) const;
-
-        int getnumparams();
-
-        /**Zeros out the state of the Echo*/
-        void cleanup();
-
-        /**\todo This function needs to be implemented or the  prototype should be removed*/
-        void setdryonly();
+        int getnumparams(void);
+        void cleanup(void);
     private:
         //Parameters
-        char Pvolume;      /**<#1 Volume or Dry/Wetness*/
-        char Pdelay;       /**<#3 Delay of the Echo*/
-        char Plrdelay;     /**<#4 L/R delay difference*/
-        char Pfb;          /**<#6Feedback*/
-        char Phidamp;      /**<#7Dampening of the Echo*/
+        unsigned char Pvolume;  /**<#1 Volume or Dry/Wetness*/
+        unsigned char Pdelay;   /**<#3 Delay of the Echo*/
+        unsigned char Plrdelay; /**<#4 L/R delay difference*/
+        unsigned char Pfb;      /**<#6Feedback*/
+        unsigned char Phidamp;  /**<#7Dampening of the Echo*/
 
-        void setvolume(unsigned char Pvolume);
-        void setdelay(unsigned char Pdelay);
-        void setlrdelay(unsigned char Plrdelay);
-        void setfb(unsigned char Pfb);
-        void sethidamp(unsigned char Phidamp);
+        void setvolume(unsigned char _Pvolume);
+        void setdelay(unsigned char _Pdelay);
+        void setlrdelay(unsigned char _Plrdelay);
+        void setfb(unsigned char _Pfb);
+        void sethidamp(unsigned char _Phidamp);
 
         //Real Parameters
         float fb, hidamp;
@@ -118,7 +90,7 @@ class Echo:public Effect
         float       lrdelay;
         float       avgDelay;
 
-        void initdelays();
+        void initdelays(void);
         //2 channel ring buffer
         Stereo<float *> delay;
         Stereo<float>   old;

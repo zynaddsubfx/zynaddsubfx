@@ -22,7 +22,6 @@
 
 #ifndef CHORUS_H
 #define CHORUS_H
-#include "../globals.h"
 #include "Effect.h"
 #include "EffectLFO.h"
 #include "../Samples/Sample.h"
@@ -34,7 +33,7 @@
 class Chorus:public Effect
 {
     public:
-        Chorus(const int &insetion_, float *efxoutl_, float *efxoutr_);
+        Chorus(bool insertion_, float *efxoutl_, float *efxoutr_);
         /**Destructor*/
         ~Chorus();
         void out(const Stereo<float *> &input);
@@ -77,31 +76,31 @@ class Chorus:public Effect
          * @return the value of the parameter
          */
         unsigned char getpar(int npar) const;
-        void cleanup();
+        void cleanup(void);
 
     private:
         //Chorus Parameters
-        EffectLFO     lfo; //lfo-ul chorus
         unsigned char Pvolume;
-        unsigned char Pdepth; //the depth of the Chorus(ms)
-        unsigned char Pdelay; //the delay (ms)
-        unsigned char Pfb; //feedback
+        unsigned char Pdepth;      //the depth of the Chorus(ms)
+        unsigned char Pdelay;      //the delay (ms)
+        unsigned char Pfb;         //feedback
         unsigned char Pflangemode; //how the LFO is scaled, to result chorus or flange
-        unsigned char Poutsub; //if I wish to substract the output instead of the adding it
+        unsigned char Poutsub;     //if I wish to substract the output instead of the adding it
+        EffectLFO     lfo;         //lfo-ul chorus
 
 
         //Parameter Controls
-        void setvolume(unsigned char Pvolume);
-        void setdepth(unsigned char Pdepth);
-        void setdelay(unsigned char Pdelay);
-        void setfb(unsigned char Pfb);
+        void setvolume(unsigned char _Pvolume);
+        void setdepth(unsigned char _Pdepth);
+        void setdelay(unsigned char _Pdelay);
+        void setfb(unsigned char _Pfb);
 
         //Internal Values
         float depth, delay, fb;
         float dl1, dl2, dr1, dr2, lfol, lfor;
         int   maxdelay;
         Stereo<Sample> delaySample;
-        int dlk, drk, dlhi, dlhi2;
+        int   dlk, drk, dlhi, dlhi2;
         float getdelay(float xlfo);
         float dllo, mdel;
 };

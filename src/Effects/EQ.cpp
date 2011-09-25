@@ -24,7 +24,7 @@
 #include "EQ.h"
 #include "../DSP/AnalogFilter.h"
 
-EQ::EQ(const int &insertion_, float *efxoutl_, float *efxoutr_)
+EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0)
 {
     for(int i = 0; i < MAX_EQ_BANDS; ++i) {
@@ -43,10 +43,9 @@ EQ::EQ(const int &insertion_, float *efxoutl_, float *efxoutr_)
     cleanup();
 }
 
-EQ::~EQ()
-{}
 
-void EQ::cleanup()
+// Cleanup the effect
+void EQ::cleanup(void)
 {
     for(int i = 0; i < MAX_EQ_BANDS; ++i) {
         filter[i].l->cleanup();
@@ -54,15 +53,15 @@ void EQ::cleanup()
     }
 }
 
+//Effect output
 void EQ::out(const Stereo<float *> &smp)
 {
-    int i;
-    for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
         efxoutl[i] = smp.l[i] * volume;
         efxoutr[i] = smp.r[i] * volume;
     }
 
-    for(i = 0; i < MAX_EQ_BANDS; ++i) {
+    for(int i = 0; i < MAX_EQ_BANDS; ++i) {
         if(filter[i].Ptype == 0)
             continue;
         filter[i].l->filterout(efxoutl);
@@ -71,19 +70,12 @@ void EQ::out(const Stereo<float *> &smp)
 }
 
 
-/*
- * Parameter control
- */
-void EQ::setvolume(unsigned char Pvolume)
+//Parameter control
+void EQ::setvolume(unsigned char _Pvolume)
 {
-    this->Pvolume = Pvolume;
-
+    Pvolume   = _Pvolume;
     outvolume = powf(0.005f, (1.0f - Pvolume / 127.0f)) * 10.0f;
-    if(insertion == 0)
-        volume = 1.0f;
-    else
-        volume = outvolume;
-    ;
+    volume    = (!insertion) ? 1.0f : outvolume;
 }
 
 
@@ -92,10 +84,8 @@ void EQ::setpreset(unsigned char npreset)
     const int     PRESET_SIZE = 1;
     const int     NUM_PRESETS = 2;
     unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
-        //EQ 1
-        {67},
-        //EQ 2
-        {67}
+        {67}, //EQ 1
+        {67}  //EQ 2
     };
 
     if(npreset >= NUM_PRESETS)
@@ -126,7 +116,7 @@ void EQ::changepar(int npar, unsigned char value)
         case 0:
             filter[nb].Ptype = value;
             if(value > 9)
-                filter[nb].Ptype = 0;   //has to be changed if more filters will be added
+                filter[nb].Ptype = 0; //has to be changed if more filters will be added
             if(filter[nb].Ptype != 0) {
                 filter[nb].l->settype(value - 1);
                 filter[nb].r->settype(value - 1);
@@ -191,18 +181,14 @@ unsigned char EQ::getpar(int npar) const
         case 4:
             return filter[nb].Pstages;
             break;
+        default: return 0; //in case of bogus parameter number
     }
-
-    return 0; //in case of bogus parameter number
 }
-
-
 
 
 float EQ::getfreqresponse(float freq)
 {
     float resp = 1.0f;
-
     for(int i = 0; i < MAX_EQ_BANDS; ++i) {
         if(filter[i].Ptype == 0)
             continue;

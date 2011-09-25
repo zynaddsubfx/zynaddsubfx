@@ -23,26 +23,26 @@
 #ifndef EQ_H
 #define EQ_H
 
-#include "../globals.h"
 #include "Effect.h"
 
 /**EQ Effect*/
 class EQ:public Effect
 {
     public:
-        EQ(const int &insertion_, float *efxoutl_, float *efxoutr_);
-        ~EQ();
+        EQ(bool insertion_, float *efxoutl_, float *efxoutr_);
+        ~EQ() {};
         void out(const Stereo<float *> &smp);
         void setpreset(unsigned char npreset);
         void changepar(int npar, unsigned char value);
         unsigned char getpar(int npar) const;
-        void cleanup();
+        void cleanup(void);
         float getfreqresponse(float freq);
+
     private:
         //Parameters
-        unsigned char Pvolume; /**<Volume*/
+        unsigned char Pvolume;
 
-        void setvolume(unsigned char Pvolume);
+        void setvolume(unsigned char _Pvolume);
 
         struct {
             //parameters
@@ -51,6 +51,5 @@ class EQ:public Effect
             class AnalogFilter *l, *r;
         } filter[MAX_EQ_BANDS];
 };
-
 
 #endif

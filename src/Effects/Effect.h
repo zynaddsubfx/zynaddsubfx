@@ -36,20 +36,14 @@ class Effect
     public:
         /**
          * Effect Constructor
-         * @param insertion_ 1 when it is an insertion Effect and 0 when it
-         * is not an insertion Effect
+         * @param insertion_ 1 when it is an insertion Effect
          * @param efxoutl_ Effect output buffer Left channel
          * @param efxoutr_ Effect output buffer Right channel
          * @param filterpars_ pointer to FilterParams array
          * @param Ppreset_ chosen preset
          * @return Initialized Effect object*/
-        Effect(bool insertion_, float *const efxoutl_,
-               float *const efxoutr_, FilterParams *filterpars_,
-               const unsigned char &Ppreset_);
-        /**Deconstructor
-         *
-         * Deconstructs the Effect and releases any resouces that it has
-         * allocated for itself*/
+        Effect(bool insertion_, float *efxoutl_, float *efxoutr_,
+                FilterParams *filterpars_, unsigned char Ppreset_);
         virtual ~Effect() {}
         /**
          * Choose a preset
@@ -76,17 +70,12 @@ class Effect
         void out(float *const smpsl, float *const smpsr);
         virtual void out(const Stereo<float *> &smp) = 0;
         /**Reset the state of the effect*/
-        virtual void cleanup() {}
-        /**This is only used for EQ (for user interface)*/
-        virtual float getfreqresponse(float freq) {
-            return freq;
-        }
+        virtual void cleanup(void) {}
+        virtual float getfreqresponse(float freq) { return freq; }
 
         unsigned char Ppreset;   /**<Currently used preset*/
         float *const  efxoutl; /**<Effect out Left Channel*/
         float *const  efxoutr; /**<Effect out Right Channel*/
-        /**\todo make efxoutl and efxoutr private and replace them with a Stereo<float*>*/
-
         float outvolume;/**<This is the volume of effect and is public because
                           * it is needed in system effects.
                           * The out volume of such effects are always 1.0f, so
@@ -104,8 +93,7 @@ class Effect
         void setpanning(char Ppanning_);
         void setlrcross(char Plrcross_);
 
-        const bool insertion;/**<If Effect is an insertion effect, insertion=1
-                               *otherwise, it should be insertion=0*/
+        const bool insertion;
         //panning parameters
         char  Ppanning;
         float pangainL;

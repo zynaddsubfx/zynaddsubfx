@@ -25,28 +25,22 @@
 #include "../Misc/WaveShapeSmps.h"
 #include <cmath>
 
-Distorsion::Distorsion(const int &insertion_,
-                       float *efxoutl_,
-                       float *efxoutr_)
-    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0)
+Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_)
+    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
+    Pvolume(50),
+    Pdrive(90),
+    Plevel(64),
+    Ptype(0),
+    Pnegate(0),
+    Plpf(127),
+    Phpf(0),
+    Pstereo(0),
+    Pprefiltering(0)
 {
     lpfl = new AnalogFilter(2, 22000, 1, 0);
     lpfr = new AnalogFilter(2, 22000, 1, 0);
     hpfl = new AnalogFilter(3, 20, 1, 0);
     hpfr = new AnalogFilter(3, 20, 1, 0);
-
-
-    //default values
-    Pvolume = 50;
-    Pdrive  = 90;
-    Plevel  = 64;
-    Ptype   = 0;
-    Pnegate = 0;
-    Plpf    = 127;
-    Phpf    = 0;
-    Pstereo = 0;
-    Pprefiltering = 0;
-
     setpreset(Ppreset);
     cleanup();
 }
@@ -59,10 +53,8 @@ Distorsion::~Distorsion()
     delete hpfr;
 }
 
-/*
- * Cleanup the effect
- */
-void Distorsion::cleanup()
+//Cleanup the effect
+void Distorsion::cleanup(void)
 {
     lpfl->cleanup();
     hpfl->cleanup();
@@ -71,10 +63,7 @@ void Distorsion::cleanup()
 }
 
 
-/*
- * Apply the filters
- */
-
+//Apply the filters
 void Distorsion::applyfilters(float *efxoutl, float *efxoutr)
 {
     lpfl->filterout(efxoutl);
@@ -86,48 +75,41 @@ void Distorsion::applyfilters(float *efxoutl, float *efxoutr)
 }
 
 
-/*
- * Effect output
- */
+//Effect output
 void Distorsion::out(const Stereo<float *> &smp)
 {
-    int   i;
-    float l, r, lout, rout;
-
     float inputvol = powf(5.0f, (Pdrive - 32.0f) / 127.0f);
-    if(Pnegate != 0)
+    if(Pnegate)
         inputvol *= -1.0f;
 
-    if(Pstereo != 0)   //Stereo
-        for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+    if(Pstereo) //Stereo
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             efxoutl[i] = smp.l[i] * inputvol * pangainL;
             efxoutr[i] = smp.r[i] * inputvol * pangainR;
         }
-    else
-        for(i = 0; i < SOUND_BUFFER_SIZE; ++i)
+    else //Mono
+        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
             efxoutl[i] = (smp.l[i] * pangainL + smp.r[i] * pangainR) * inputvol;
 
-    if(Pprefiltering != 0)
+    if(Pprefiltering)
         applyfilters(efxoutl, efxoutr);
 
-    //no optimised, yet (no look table)
     waveShapeSmps(SOUND_BUFFER_SIZE, efxoutl, Ptype + 1, Pdrive);
-    if(Pstereo != 0)
+    if(Pstereo)
         waveShapeSmps(SOUND_BUFFER_SIZE, efxoutr, Ptype + 1, Pdrive);
 
-    if(Pprefiltering == 0)
+    if(!Pprefiltering)
         applyfilters(efxoutl, efxoutr);
 
-    if(Pstereo == 0)
-        for(i = 0; i < SOUND_BUFFER_SIZE; ++i)
-            efxoutr[i] = efxoutl[i];
+    if(!Pstereo)
+        memcpy(efxoutr, efxoutl, SOUND_BUFFER_SIZE * sizeof(float));
 
     float level = dB2rap(60.0f * Plevel / 127.0f - 40.0f);
-    for(i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-        lout = efxoutl[i];
-        rout = efxoutr[i];
-        l    = lout * (1.0f - lrcross) + rout * lrcross;
-        r    = rout * (1.0f - lrcross) + lout * lrcross;
+    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+        float lout = efxoutl[i];
+        float rout = efxoutr[i];
+        float l    = lout * (1.0f - lrcross) + rout * lrcross;
+        float r    = rout * (1.0f - lrcross) + lout * lrcross;
         lout = l;
         rout = r;
 
@@ -137,12 +119,10 @@ void Distorsion::out(const Stereo<float *> &smp)
 }
 
 
-/*
- * Parameter control
- */
-void Distorsion::setvolume(unsigned char Pvolume)
+//Parameter control
+void Distorsion::setvolume(unsigned char _Pvolume)
 {
-    this->Pvolume = Pvolume;
+    Pvolume = _Pvolume;
 
     if(insertion == 0) {
         outvolume = powf(0.01f, (1.0f - Pvolume / 127.0f)) * 4.0f;
@@ -150,22 +130,21 @@ void Distorsion::setvolume(unsigned char Pvolume)
     }
     else
         volume = outvolume = Pvolume / 127.0f;
-    ;
     if(Pvolume == 0)
         cleanup();
 }
 
-void Distorsion::setlpf(unsigned char Plpf)
+void Distorsion::setlpf(unsigned char _Plpf)
 {
-    this->Plpf = Plpf;
-    float fr = expf(powf(Plpf / 127.0f, 0.5f) * logf(25000.0f)) + 40;
+    Plpf = _Plpf;
+    float fr = expf(powf(Plpf / 127.0f, 0.5f) * logf(25000.0f)) + 40.0f;
     lpfl->setfreq(fr);
     lpfr->setfreq(fr);
 }
 
-void Distorsion::sethpf(unsigned char Phpf)
+void Distorsion::sethpf(unsigned char _Phpf)
 {
-    this->Phpf = Phpf;
+    Phpf = _Phpf;
     float fr = expf(powf(Phpf / 127.0f, 0.5f) * logf(25000.0f)) + 20.0f;
     hpfl->setfreq(fr);
     hpfr->setfreq(fr);
@@ -178,26 +157,25 @@ void Distorsion::setpreset(unsigned char npreset)
     const int     NUM_PRESETS = 6;
     unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Overdrive 1
-        {127, 64, 35, 56, 70, 0, 0, 96,  0,   0, 0  },
+        {127, 64, 35, 56, 70, 0, 0, 96,  0,   0, 0},
         //Overdrive 2
-        {127, 64, 35, 29, 75, 1, 0, 127, 0,   0, 0  },
+        {127, 64, 35, 29, 75, 1, 0, 127, 0,   0, 0},
         //A. Exciter 1
-        {64,  64, 35, 75, 80, 5, 0, 127, 105, 1, 0  },
+        {64,  64, 35, 75, 80, 5, 0, 127, 105, 1, 0},
         //A. Exciter 2
-        {64,  64, 35, 85, 62, 1, 0, 127, 118, 1, 0  },
+        {64,  64, 35, 85, 62, 1, 0, 127, 118, 1, 0},
         //Guitar Amp
-        {127, 64, 35, 63, 75, 2, 0, 55,  0,   0, 0  },
+        {127, 64, 35, 63, 75, 2, 0, 55,  0,   0, 0},
         //Quantisize
-        {127, 64, 35, 88, 75, 4, 0, 127, 0,   1, 0  }
+        {127, 64, 35, 88, 75, 4, 0, 127, 0,   1, 0}
     };
-
 
     if(npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
     for(int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
-    if(insertion == 0)
-        changepar(0, (int) (presets[npreset][0] / 1.5f));           //lower the volume if this is system effect
+    if(!insertion) //lower the volume if this is system effect
+        changepar(0, (int) (presets[npreset][0] / 1.5f));           
     Ppreset = npreset;
     cleanup();
 }
@@ -262,6 +240,6 @@ unsigned char Distorsion::getpar(int npar) const
         case 8:  return Phpf;
         case 9:  return Pstereo;
         case 10: return Pprefiltering;
-        default: return 0;
+        default: return 0; //in case of bogus parameter number
     }
 }

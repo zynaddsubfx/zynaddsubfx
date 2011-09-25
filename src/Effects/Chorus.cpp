@@ -26,18 +26,15 @@
 
 using namespace std;
 
-Chorus::Chorus(const int &insertion_,
-               float *const efxoutl_,
-               float *const efxoutr_)
+Chorus::Chorus(bool insertion_, float *const efxoutl_, float *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
-      maxdelay((int)(MAX_CHORUS_DELAY / 1000.0f * SAMPLE_RATE)),
-      delaySample(maxdelay)
+    maxdelay((int)(MAX_CHORUS_DELAY / 1000.0f * SAMPLE_RATE)),
+    delaySample(maxdelay)
 {
     dlk = 0;
     drk = 0;
-
     setpreset(Ppreset);
-
+    changepar(1, 64);
     lfo.effectlfoout(&lfol, &lfor);
     dl2 = getdelay(lfol);
     dr2 = getdelay(lfor);
@@ -46,28 +43,23 @@ Chorus::Chorus(const int &insertion_,
 
 Chorus::~Chorus() {}
 
-/*
- * get the delay value in samples; xlfo is the current lfo value
- */
+//get the delay value in samples; xlfo is the current lfo value
 float Chorus::getdelay(float xlfo)
 {
-    float result;
-    if(Pflangemode == 0)
-        result = (delay + xlfo * depth) * SAMPLE_RATE;
-    else
-        result = 0;
+    float result =
+        (Pflangemode) ? 0 : (delay + xlfo * depth) * SAMPLE_RATE;
 
-    //check if it is too big delay(caused bu errornous setdelay() and setdepth()
-    /**\todo fix setdelay() and setdepth(), so this error cannot occur*/
+    //check if delay is too big (caused by bad setdelay() and setdepth()
     if((result + 0.5f) >= maxdelay) {
-        cerr
-        <<
-        "WARNING: Chorus.cpp::getdelay(..) too big delay (see setdelay and setdepth funcs.)\n";
+        cerr <<
+            "WARNING: Chorus.cpp::getdelay(..) too big delay (see setdelay and setdepth funcs.)"
+        << endl;
         result = maxdelay - 1.0f;
     }
     return result;
 }
 
+//Apply the effect
 void Chorus::out(const Stereo<float *> &input)
 {
     const float one = 1.0f;
@@ -79,12 +71,12 @@ void Chorus::out(const Stereo<float *> &input)
     dr2 = getdelay(lfor);
 
     for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-        float inl = input.l[i];
-        float inr = input.r[i];
+        float inL = input.l[i];
+        float inR = input.r[i];
         //LRcross
-        Stereo<float> tmpc(inl, inr);
-        inl = tmpc.l * (1.0f - lrcross) + tmpc.r * lrcross;
-        inr = tmpc.r * (1.0f - lrcross) + tmpc.l * lrcross;
+        Stereo<float> tmpc(inL, inR);
+        inL = tmpc.l * (1.0f - lrcross) + tmpc.r * lrcross;
+        inR = tmpc.r * (1.0f - lrcross) + tmpc.l * lrcross;
 
         //Left channel
 
@@ -97,11 +89,11 @@ void Chorus::out(const Stereo<float *> &input)
         F2I(tmp, dlhi);
         dlhi %= maxdelay;
 
-        dlhi2      = (dlhi - 1 + maxdelay) % maxdelay;
-        dllo       = 1.0f - fmod(tmp, one);
-        efxoutl[i] = delaySample.l[dlhi2] * dllo + delaySample.l[dlhi]
-                     * (1.0f - dllo);
-        delaySample.l[dlk] = inl + efxoutl[i] * fb;
+        dlhi2       = (dlhi - 1 + maxdelay) % maxdelay;
+        dllo        = 1.0f - fmod(tmp, one);
+        efxoutl[i]  = delaySample.l[dlhi2] * dllo + delaySample.l[dlhi]
+            * (1.0f - dllo);
+        delaySample.l[dlk] = inL + efxoutl[i] * fb;
 
         //Right channel
 
@@ -109,19 +101,19 @@ void Chorus::out(const Stereo<float *> &input)
         mdel = (dr1 * (SOUND_BUFFER_SIZE - i) + dr2 * i) / SOUND_BUFFER_SIZE;
         if(++drk >= maxdelay)
             drk = 0;
-        tmp = drk * 1.0f - mdel + maxdelay * 2.0f;  //where should I get the sample from
+        tmp = drk * 1.0f - mdel + maxdelay * 2.0f; //where should I get the sample from
 
         F2I(tmp, dlhi);
         dlhi %= maxdelay;
 
-        dlhi2      = (dlhi - 1 + maxdelay) % maxdelay;
-        dllo       = 1.0f - fmod(tmp, one);
-        efxoutr[i] = delaySample.r[dlhi2] * dllo + delaySample.r[dlhi]
+        dlhi2       = (dlhi - 1 + maxdelay) % maxdelay;
+        dllo        = 1.0f - fmodf(tmp, one);
+        efxoutr[i]  = delaySample.r[dlhi2] * dllo + delaySample.r[dlhi]
                      * (1.0f - dllo);
-        delaySample.r[dlk] = inr + efxoutr[i] * fb;
+        delaySample.r[dlk] = inR + efxoutr[i] * fb;
     }
 
-    if(Poutsub != 0)
+    if(Poutsub)
         for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
             efxoutl[i] *= -1.0f;
             efxoutr[i] *= -1.0f;
@@ -133,43 +125,37 @@ void Chorus::out(const Stereo<float *> &input)
     }
 }
 
-/*
- * Cleanup the effect
- */
-void Chorus::cleanup()
+//Cleanup the effect
+void Chorus::cleanup(void)
 {
     delaySample.l.clear();
     delaySample.r.clear();
 }
 
-/*
- * Parameter control
- */
-void Chorus::setdepth(unsigned char Pdepth)
+//Parameter control
+void Chorus::setdepth(unsigned char _Pdepth)
 {
-    this->Pdepth = Pdepth;
-    depth = (powf(8.0f, (Pdepth / 127.0f) * 2.0f) - 1.0f) / 1000.0f; //seconds
+    Pdepth = _Pdepth;
+    depth  = (powf(8.0f, (Pdepth / 127.0f) * 2.0f) - 1.0f) / 1000.0f; //seconds
 }
 
-void Chorus::setdelay(unsigned char Pdelay)
+void Chorus::setdelay(unsigned char _Pdelay)
 {
-    this->Pdelay = Pdelay;
-    delay = (powf(10.0f, (Pdelay / 127.0f) * 2.0f) - 1.0f) / 1000.0f; //seconds
+    Pdelay = _Pdelay;
+    delay  = (powf(10.0f, (Pdelay / 127.0f) * 2.0f) - 1.0f) / 1000.0f; //seconds
 }
 
-void Chorus::setfb(unsigned char Pfb)
+void Chorus::setfb(unsigned char _Pfb)
 {
-    this->Pfb = Pfb;
-    fb = (Pfb - 64.0f) / 64.1f;
+    Pfb = _Pfb;
+    fb  = (Pfb - 64.0f) / 64.1f;
 }
-void Chorus::setvolume(unsigned char Pvolume)
+
+void Chorus::setvolume(unsigned char _Pvolume)
 {
-    this->Pvolume = Pvolume;
-    outvolume     = Pvolume / 127.0f;
-    if(insertion == 0)
-        volume = 1.0f;
-    else
-        volume = outvolume;
+    Pvolume   = _Pvolume;
+    outvolume = Pvolume / 127.0f;
+    volume    = (!insertion) ? 1.0f : outvolume;
 }
 
 
@@ -179,25 +165,25 @@ void Chorus::setpreset(unsigned char npreset)
     const int     NUM_PRESETS = 10;
     unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Chorus1
-        {64, 64, 50, 0,   0, 90, 40,  85, 64,  119, 0, 0  },
+        {64, 64, 50, 0,   0, 90, 40,  85, 64,  119, 0, 0},
         //Chorus2
-        {64, 64, 45, 0,   0, 98, 56,  90, 64,  19,  0, 0  },
+        {64, 64, 45, 0,   0, 98, 56,  90, 64,  19,  0, 0},
         //Chorus3
-        {64, 64, 29, 0,   1, 42, 97,  95, 90,  127, 0, 0  },
+        {64, 64, 29, 0,   1, 42, 97,  95, 90,  127, 0, 0},
         //Celeste1
-        {64, 64, 26, 0,   0, 42, 115, 18, 90,  127, 0, 0  },
+        {64, 64, 26, 0,   0, 42, 115, 18, 90,  127, 0, 0},
         //Celeste2
-        {64, 64, 29, 117, 0, 50, 115, 9,  31,  127, 0, 1  },
+        {64, 64, 29, 117, 0, 50, 115, 9,  31,  127, 0, 1},
         //Flange1
-        {64, 64, 57, 0,   0, 60, 23,  3,  62,  0,   0, 0  },
+        {64, 64, 57, 0,   0, 60, 23,  3,  62,  0,   0, 0},
         //Flange2
-        {64, 64, 33, 34,  1, 40, 35,  3,  109, 0,   0, 0  },
+        {64, 64, 33, 34,  1, 40, 35,  3,  109, 0,   0, 0},
         //Flange3
-        {64, 64, 53, 34,  1, 94, 35,  3,  54,  0,   0, 1  },
+        {64, 64, 53, 34,  1, 94, 35,  3,  54,  0,   0, 1},
         //Flange4
-        {64, 64, 40, 0,   1, 62, 12,  19, 97,  0,   0, 0  },
+        {64, 64, 40, 0,   1, 62, 12,  19, 97,  0,   0, 0},
         //Flange5
-        {64, 64, 55, 105, 0, 24, 39,  19, 17,  0,   0, 1  }
+        {64, 64, 55, 105, 0, 24, 39,  19, 17,  0,   0, 1}
     };
 
     if(npreset >= NUM_PRESETS)

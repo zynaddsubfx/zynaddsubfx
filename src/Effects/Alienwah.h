@@ -22,8 +22,8 @@
 
 #ifndef ALIENWAH_H
 #define ALIENWAH_H
+
 #include <complex>
-#include "../globals.h"
 #include "Effect.h"
 #include "EffectLFO.h"
 
@@ -37,12 +37,12 @@ class Alienwah:public Effect
     public:
         /**
          * Constructor
-         * @param insetion_ 1 for insertion Effect, 0 for others
+         * @param insertion_ true for insertion Effect
          * @param efxoutl_ Pointer to Alienwah's left channel output buffer
          * @param efxoutr_ Pointer to Alienwah's left channel output buffer
          * @return Initialized Alienwah
          */
-        Alienwah(const int &insetion_,
+        Alienwah(bool insertion_,
                  float *const efxoutl_,
                  float *const efxoutr_);
         ~Alienwah();
@@ -51,24 +51,24 @@ class Alienwah:public Effect
         void setpreset(unsigned char npreset);
         void changepar(int npar, unsigned char value);
         unsigned char getpar(int npar) const;
-        void cleanup();
+        void cleanup(void);
 
     private:
         //Alienwah Parameters
-        EffectLFO     lfo; //lfo-ul Alienwah
+        EffectLFO     lfo;      //lfo-ul Alienwah
         unsigned char Pvolume;
-        unsigned char Pdepth; //the depth of the Alienwah
-        unsigned char Pfb; //feedback
+        unsigned char Pdepth;   //the depth of the Alienwah
+        unsigned char Pfb;      //feedback
         unsigned char Pdelay;
         unsigned char Pphase;
 
 
         //Control Parameters
-        void setvolume(unsigned char Pvolume);
-        void setdepth(unsigned char Pdepth);
-        void setfb(unsigned char Pfb);
-        void setdelay(unsigned char Pdelay);
-        void setphase(unsigned char Pphase);
+        void setvolume(unsigned char _Pvolume);
+        void setdepth(unsigned char _Pdepth);
+        void setfb(unsigned char _Pfb);
+        void setdelay(unsigned char _Pdelay);
+        void setphase(unsigned char _Pphase);
 
         //Internal Values
         float fb, depth, phase;

@@ -23,24 +23,23 @@
 #ifndef DISTORSION_H
 #define DISTORSION_H
 
-#include "../globals.h"
 #include "Effect.h"
 
 /**Distortion Effect*/
 class Distorsion:public Effect
 {
     public:
-        Distorsion(const int &insertion, float *efxoutl_, float *efxoutr_);
+        Distorsion(bool insertion, float *efxoutl_, float *efxoutr_);
         ~Distorsion();
         void out(const Stereo<float *> &smp);
         void setpreset(unsigned char npreset);
         void changepar(int npar, unsigned char value);
         unsigned char getpar(int npar) const;
-        void cleanup();
+        void cleanup(void);
         void applyfilters(float *efxoutl, float *efxoutr);
 
     private:
-        //Parametrii
+        //Parameters
         unsigned char Pvolume;       //Volume or E/R
         unsigned char Pdrive;        //the input amplification
         unsigned char Plevel;        //the output amplification
@@ -48,16 +47,15 @@ class Distorsion:public Effect
         unsigned char Pnegate;       //if the input is negated
         unsigned char Plpf;          //lowpass filter
         unsigned char Phpf;          //highpass filter
-        unsigned char Pstereo;       //0=mono,1=stereo
+        unsigned char Pstereo;       //0=mono, 1=stereo
         unsigned char Pprefiltering; //if you want to do the filtering before the distorsion
 
-        void setvolume(unsigned char Pvolume);
-        void setlpf(unsigned char Plpf);
-        void sethpf(unsigned char Phpf);
+        void setvolume(unsigned char _Pvolume);
+        void setlpf(unsigned char _Plpf);
+        void sethpf(unsigned char _Phpf);
 
         //Real Parameters
-        class AnalogFilter * lpfl, *lpfr, *hpfl, *hpfr;
+        class AnalogFilter *lpfl, *lpfr, *hpfl, *hpfr;
 };
-
 
 #endif

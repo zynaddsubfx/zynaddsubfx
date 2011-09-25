@@ -22,7 +22,7 @@
 
 #ifndef DYNAMICFILTER_H
 #define DYNAMICFILTER_H
-#include "../globals.h"
+
 #include "Effect.h"
 #include "EffectLFO.h"
 
@@ -30,36 +30,35 @@
 class DynamicFilter:public Effect
 {
     public:
-        DynamicFilter(int insetion_, float *efxoutl_, float *efxoutr_);
+        DynamicFilter(bool insertion_, float *efxoutl_, float *efxoutr_);
         ~DynamicFilter();
         void out(const Stereo<float *> &smp);
 
         void setpreset(unsigned char npreset);
         void changepar(int npar, unsigned char value);
         unsigned char getpar(int npar) const;
-        void cleanup();
+        void cleanup(void);
 
     private:
         //Parametrii DynamicFilter
         EffectLFO     lfo;          //lfo-ul DynamicFilter
         unsigned char Pvolume;      //Volume
-        unsigned char Pdepth;       //the depth of the lfo of the DynamicFilter
+        unsigned char Pdepth;       //the depth of the lfo
         unsigned char Pampsns;      //how the filter varies according to the input amplitude
         unsigned char Pampsnsinv;   //if the filter freq is lowered if the input amplitude rises
         unsigned char Pampsmooth;   //how smooth the input amplitude changes the filter
 
         //Parameter Control
-        void setvolume(unsigned char Pvolume);
-        void setdepth(unsigned char Pdepth);
-        void setampsns(unsigned char Pampsns);
+        void setvolume(unsigned char _Pvolume);
+        void setdepth(unsigned char _Pdepth);
+        void setampsns(unsigned char _Pampsns);
 
-        void reinitfilter();
+        void reinitfilter(void);
 
         //Internal Values
         float depth, ampsns, ampsmooth;
 
-        class Filter * filterl, *filterr;
-
+        class Filter *filterl, *filterr;
         float ms1, ms2, ms3, ms4; //mean squares
 };
 
