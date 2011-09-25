@@ -1,5 +1,5 @@
 Add Synth
-=========
+---------
 
 Additive Synthesis is one of the three major synthesis engines available in
 ZynAddSubFX.
@@ -7,7 +7,7 @@ Overall it adds together several voices with an oscillator as their sound
 source.
 
 High Level (Global)
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 From a high level perspective, Add synth can be understood with this block
 diagram:
@@ -24,7 +24,7 @@ This could lead one to think that ad-note is just a bunch of minor
 postprocessing and at this level much of the sound generation is hidden.
 
 Voices
-------
+~~~~~~
 
 The voice gives access to a similar setup to the global parameters and then some
 more, such as the modulator, oscillator, and unison features.
@@ -32,7 +32,7 @@ more, such as the modulator, oscillator, and unison features.
 image:images/ad-voice.png[]
 
 Modulation
-~~~~~~~~~~
+^^^^^^^^^^
 
 Within the options for modulation, one can select:
 * Morph
@@ -42,5 +42,8 @@ Within the options for modulation, one can select:
 * Disabled
 
 Unison
-~~~~~~
+^^^^^^
+
+Unison is useful in creating the chorus like sound of many simultaneous
+oscillators
 

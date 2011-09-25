@@ -8,7 +8,7 @@ all:$(OBJECTS)
 	convert $(<:.tex=.dvi) -resize 200% -trim $@
 	rm $(<:.tex=.dvi) $(<:.tex=.log) $(<:.tex=.aux)
 
-.PHONY
+.PHONY: clean
 clean:
 	rm -f *.png *~
 

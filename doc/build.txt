@@ -1,8 +1,8 @@
 Appendix B: Building ZynAddSubFX
-================================
+--------------------------------
 
 Introduction to CMake
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 ********************************************************************
 Note: This section is mostly copied from the OpenSceneGraph wiki, at:
@@ -15,7 +15,7 @@ from this a platform-specific build system. This build system can be in
 the form of VisualStudio project files, Unix Makefiles or XCode project
 files. CMake is able to automatically locate external dependencies, and
 allows you to toggle on/off module compilation and configure various
-build options. 
+build options.
 
 The use of a unified build system has allowed to avoid build breakages
 that were common in the previous build method of maintaining three
@@ -29,7 +29,7 @@ to use the development version of ZynAddSubFX and help contribute
 to its testing and refinement, leading to a high-quality code base.
 
 Quick start guide
------------------
+~~~~~~~~~~~~~~~~~
 
 For the impatient ones, here is a quick guide on how to immediately
 build ZynAddSubFX from source.

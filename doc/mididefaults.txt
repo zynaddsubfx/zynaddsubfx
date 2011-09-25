@@ -1,5 +1,5 @@
 Appendex A: MIDI Defaults
-=========================
+-------------------------
 
 .Default MIDI Connections
 [literal]
@@ -7,7 +7,7 @@ Appendex A: MIDI Defaults
 007 - Volume
 010 - Pan
 011 - Expression
-064 - Sustain 
+064 - Sustain
 065 - Portamento Enable
 071 - Filter Q
 074 - Filter Cutoff

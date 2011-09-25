@@ -1,14 +1,13 @@
 Envelopes
-=========
-:Author: Paul Nasca
+---------
 
 Introduction
-------------
+~~~~~~~~~~~~
 Envelopes control how the amplitude, the frequency, or the
 filter changes over time.
 
 Amplitude Envelopes
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 These envelopes controls the amplitude of the sound.
 In ZynAddSubFX, amplitude envelopes can be linear or logarithmic. 
@@ -27,7 +26,7 @@ After this, the last stage take place.
 
 
 Frequency Envelopes
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 These envelopes controls the frequency (more exactly, the pitch) of
 the oscillators.
@@ -48,7 +47,7 @@ to a certain
 value
 
 Filter Envelopes
-----------------
+~~~~~~~~~~~~~~~~
 These envelopes controls the cutoff frequency of the filters and are divided
 into
 
@@ -60,7 +59,7 @@ image:images/envelope3.png[Alt Text]
 * *Release*: this stage begins on Note Off and glides the filter cutoff frequency of the note to a certain value 
 
 Freemode Envelopes
-------------------
+~~~~~~~~~~~~~~~~~~
 
 For all envelope there is a mode that allows the user to set an arbitrary number of stages and control points. This mode is called Freemode.
 
@@ -69,7 +68,7 @@ image:images/envelope4.png[Alt Text]
 Only stage that always remains defined is the Sustain, where the envelopes freezes until a Note Off event.
 
 User Interface
---------------
+~~~~~~~~~~~~~~
 All the envelope types has some common controls:
 
 * *E*: Shows a window that you can view the real envelope shape or convert to free mode to edit it

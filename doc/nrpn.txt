@@ -1,6 +1,5 @@
 NRPN (Non Registered Parameters Number)
-=======================================
-:Author: Paul Nasca
+---------------------------------------
 
 NRPNs can control all system and insertion effect parameters.
 For example, you may change the reverb time when playing to keyboard or
@@ -42,7 +41,7 @@ Most parameters has the range from 0 to 127.
 When parameters have another range, it is written as [low...high] .
 
 Reverb
-------
+~~~~~~
 
 [verse]
 +[orange]#00 - Volume or Dry/Wet (FC)#
@@ -59,7 +58,7 @@ Reverb
 [red]#11 - Room Size (AC)#+
 
 Echo
-----
+~~~~
 
 [verse]
 +[orange]#00 - Volume or Dry/Wet (FC)#
@@ -72,7 +71,7 @@ Echo
 
 
 Chorus
-------
+~~~~~~
 
 [verse]
 +[orange]#00 - Volume or Dry/Wet (FC)#
@@ -89,7 +88,7 @@ Chorus
 [red]#11 - Mode [0..1] (0=add, 1=subtract) (AC)#+
 
 Phaser
-------
+~~~~~~
 
 [verse]
 +[orange]#00 - Volume or Dry/Wet (FC)#
@@ -106,7 +105,7 @@ Phaser
 11 - Phase+
 
 AlienWah
---------
+~~~~~~~~
 
 [verse]
 +[orange]#00 - Volume or Dry/Wet (FC)#
@@ -122,7 +121,7 @@ AlienWah
 10 - Phase+
 
 Distorsion
-----------
+~~~~~~~~~~
 
 [verse]
 +[orange]#00 - Volume or Dry/Wet (FC)#
@@ -137,7 +136,7 @@ Distorsion
 09 - Mode [0.1] (0=mono,1=stereo)+
 
 EQ
---
+~~
 
 [verse]
 +[orange]#00 - Gain (FC)#+

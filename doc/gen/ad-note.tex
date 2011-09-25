@@ -4,9 +4,9 @@
 \begin{document}
 \begin{pspicture}[showgrid=false](-5,-3)(12,3)
 \psset{framesize=2 .65}
-\psfblock[fillstyle=solid,fillcolor=green](-4,1){inFq}{Note Fq.}
-\psfblock[fillstyle=solid,fillcolor=yellow](-4,0){lfoFq}{Fq. LFO}
-\psfblock[fillstyle=solid,fillcolor=red](-4,-1){envFq}{Fq. Env.}
+\psfblock(-4,1){inFq}{Note Fq.}
+\psfblock(-4,0){lfoFq}{Fq. LFO}
+\psfblock(-4,-1){envFq}{Fq. Env.}
 
 \dotnode(-2.5,1){dot1}
 \dotnode(-2.5,0){dot2}
@@ -17,14 +17,14 @@
 
 \psfblock(2,0){flt}{Filter}
 
-\psfblock[fillstyle=solid,fillcolor=red](1,-2){envFl}{Filter Env.}
-\psfblock[fillstyle=solid,fillcolor=yellow](3,-2){lfoFl}{Filter LFO}
+\psfblock(1,-2){envFl}{Filter Env.}
+\psfblock(3,-2){lfoFl}{Filter LFO}
 
 \pspolygon(4,1)(6,0)(4,-1)
 \psfblock[linecolor=white](5,0){amp}{Amp}
 
-\psfblock[fillstyle=solid,fillcolor=red](4,2){envAmp}{Amp. Env.}
-\psfblock[fillstyle=solid,fillcolor=yellow](6,2){lfoAmp}{Amp. LFO}
+\psfblock(4,2){envAmp}{Amp. Env.}
+\psfblock(6,2){lfoAmp}{Amp. LFO}
 
 \psfblock(7.5,0){pnch}{Punch}
 

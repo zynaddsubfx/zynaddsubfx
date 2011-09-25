@@ -1,11 +1,10 @@
 Controller
-=========
-:Author: Paul Nasca
+---------
 
 image::./images/uicontroller.png[]
 
 General
--------
+~~~~~~~
 
 * *ModWh*: Modullation Wheel depth
 * *Exp MWh*: Exponental Modulation Wheel (changes modulation scale to
@@ -22,7 +21,7 @@ General
 * *PWheelB.Rng (cents)*: Pitch Wheel Bend Range (cents; 100 cents = 1 halftone)
 
 Portamento
-----------
+~~~~~~~~~~
 
 * *Rcv.*: If the part receives portamento On/Off (65) controller
 * *time*: The duration of the portamento
@@ -39,7 +38,7 @@ NOTE: The threshold refers to the frequencies and not to MIDI notes
 
 
 Proportinal Portamento
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^
 ////
 TODO: add graphs to explain prp.rate and prp. depth
 ////
@@ -49,7 +48,7 @@ TODO: add graphs to explain prp.rate and prp. depth
 * *Prp. Dpth*: The divergence from 
 
 Resonance
----------
+~~~~~~~~~
 
 * *CFdpth*: resonance center controller depth
 * *BWdpth*: resonance bandwidth controller depth 

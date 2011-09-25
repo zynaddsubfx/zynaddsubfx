@@ -1,9 +1,9 @@
 LFO
-===
+---
 :author: Paul Nasca
 
 Introduction
-------------
+~~~~~~~~~~~~
 
 "LFO" means Low Frequency Oscillator.
 These oscillators are not used to make sounds by themselves, but they changes
@@ -46,7 +46,7 @@ notes) to zero (the LFO frequency will be the same on all notes) to positive
 stretch (the LFO frequency will be increased on higher notes).
 
 User Interface
---------------
+~~~~~~~~~~~~~~
 
 In ZynAddSubFX, LFO parameters are shown as:
 
