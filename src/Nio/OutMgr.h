@@ -1,7 +1,6 @@
 #ifndef OUTMGR_H
 #define OUTMGR_H
 
-#include "../globals.h"
 #include "../Misc/Stereo.h"
 #include <list>
 #include <string>

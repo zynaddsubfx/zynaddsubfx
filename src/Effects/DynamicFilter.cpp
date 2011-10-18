@@ -61,7 +61,7 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     const float freq = filterpars->getfreq();
     const float q    = filterpars->getq();
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+    for(int i = 0; i < synth->buffersize; ++i) {
         efxoutl[i] = smp.l[i];
         efxoutr[i] = smp.r[i];
 
@@ -85,7 +85,7 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     filterr->filterout(efxoutr);
 
     //panning
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+    for(int i = 0; i < synth->buffersize; ++i) {
         efxoutl[i] *= pangainL;
         efxoutr[i] *= pangainR;
     }

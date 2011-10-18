@@ -9,6 +9,7 @@
 #include "../Synth/SUBnote.h"
 #include "../Params/Presets.h"
 #include "../globals.h"
+SYNTH_T *synth;
 
 using namespace std;
 
@@ -25,20 +26,21 @@ class SubNoteTest:public CxxTest::TestSuite
         float *outR, *outL;
 
         void setUp() {
+            synth = new SYNTH_T;
             //First the sensible settings and variables that have to be set:
-            SOUND_BUFFER_SIZE = 256;
+            synth->buffersize = 256;
 
-            outL = new float[SOUND_BUFFER_SIZE];
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+            outL = new float[synth->buffersize];
+            for(int i = 0; i < synth->buffersize; ++i)
                 *(outL + i) = 0;
-            outR = new float[SOUND_BUFFER_SIZE];
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+            outR = new float[synth->buffersize];
+            for(int i = 0; i < synth->buffersize; ++i)
                 *(outR + i) = 0;
 
             //next the bad global variables that for some reason have not been properly placed in some
             //initialization routine, but rather exist as cryptic oneliners in main.cpp:
-            denormalkillbuf = new float[SOUND_BUFFER_SIZE];
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+            denormalkillbuf = new float[synth->buffersize];
+            for(int i = 0; i < synth->buffersize; ++i)
                 denormalkillbuf[i] = 0;
 
             //prepare the default settings
@@ -83,6 +85,7 @@ class SubNoteTest:public CxxTest::TestSuite
             delete [] outR;
             delete [] denormalkillbuf;
             clearTmpBuffers();
+            delete synth;
         }
 
         void testDefaults() {
@@ -98,11 +101,11 @@ class SubNoteTest:public CxxTest::TestSuite
 #endif
             note->noteout(outL, outR);
 #ifdef WRITE_OUTPUT
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+            for(int i = 0; i < synth->buffersize; ++i)
                 file << outL[i] << std::endl;
 
 #endif
-            sampleCount += SOUND_BUFFER_SIZE;
+            sampleCount += synth->buffersize;
 
             TS_ASSERT_DELTA(outL[255], 0.0000f, 0.0001f);
 
@@ -110,29 +113,29 @@ class SubNoteTest:public CxxTest::TestSuite
 
 
             note->noteout(outL, outR);
-            sampleCount += SOUND_BUFFER_SIZE;
+            sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], 0.0016f, 0.0001f);
 
             note->noteout(outL, outR);
-            sampleCount += SOUND_BUFFER_SIZE;
+            sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], -0.0000f, 0.0001f);
 
             note->noteout(outL, outR);
-            sampleCount += SOUND_BUFFER_SIZE;
+            sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], -0.0013f, 0.0001f);
 
             note->noteout(outL, outR);
-            sampleCount += SOUND_BUFFER_SIZE;
+            sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], -0.0002f, 0.0001f);
 
             while(!note->finished()) {
                 note->noteout(outL, outR);
 #ifdef WRITE_OUTPUT
-                for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+                for(int i = 0; i < synth->buffersize; ++i)
                     file << outL[i] << std::endl;
 
 #endif
-                sampleCount += SOUND_BUFFER_SIZE;
+                sampleCount += synth->buffersize;
             }
 #ifdef WRITE_OUTPUT
             file.close();

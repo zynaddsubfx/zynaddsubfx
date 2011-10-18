@@ -7,9 +7,11 @@
 #include "../Misc/Util.h"
 #include "../Synth/ADnote.h"
 #include "../Params/Presets.h"
+#include "../DSP/FFTwrapper.h"
 #include "../globals.h"
 
 using namespace std;
+SYNTH_T *synth;
 
 class AdNoteTest:public CxxTest::TestSuite
 {
@@ -26,24 +28,25 @@ class AdNoteTest:public CxxTest::TestSuite
 
         void setUp() {
             //First the sensible settings and variables that have to be set:
-            SOUND_BUFFER_SIZE = 256;
+            synth = new SYNTH_T;
+            synth->buffersize = 256;
 
-            outL = new float[SOUND_BUFFER_SIZE];
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+            outL = new float[synth->buffersize];
+            for(int i = 0; i < synth->buffersize; ++i)
                 *(outL + i) = 0;
-            outR = new float[SOUND_BUFFER_SIZE];
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+            outR = new float[synth->buffersize];
+            for(int i = 0; i < synth->buffersize; ++i)
                 *(outR + i) = 0;
 
             //next the bad global variables that for some reason have not been properly placed in some
             //initialization routine, but rather exist as cryptic oneliners in main.cpp:
-            denormalkillbuf = new float[SOUND_BUFFER_SIZE];
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+            denormalkillbuf = new float[synth->buffersize];
+            for(int i = 0; i < synth->buffersize; ++i)
                 denormalkillbuf[i] = 0;
 
             //phew, glad to get thouse out of my way. took me a lot of sweat and gdb to get this far...
 
-            fft = new FFTwrapper(OSCIL_SIZE);
+            fft = new FFTwrapper(synth->oscilsize);
             //prepare the default settings
             ADnoteParameters *defaultPreset = new ADnoteParameters(fft);
 
@@ -100,6 +103,7 @@ class AdNoteTest:public CxxTest::TestSuite
             delete [] outR;
             delete [] denormalkillbuf;
             FFT_cleanup();
+            delete synth;
         }
 
         void testDefaults() {
@@ -112,11 +116,11 @@ class AdNoteTest:public CxxTest::TestSuite
 #endif
             note->noteout(outL, outR);
 #ifdef WRITE_OUTPUT
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+            for(int i = 0; i < synth->buffersize; ++i)
                 file << outL[i] << std::endl;
 
 #endif
-            sampleCount += SOUND_BUFFER_SIZE;
+            sampleCount += synth->buffersize;
 
             TS_ASSERT_DELTA(outL[255], 0.254609f, 0.0001f);
 
@@ -124,29 +128,29 @@ class AdNoteTest:public CxxTest::TestSuite
 
 
             note->noteout(outL, outR);
-            sampleCount += SOUND_BUFFER_SIZE;
+            sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], -0.102197f, 0.0001f);
 
             note->noteout(outL, outR);
-            sampleCount += SOUND_BUFFER_SIZE;
+            sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], -0.111422f, 0.0001f);
 
             note->noteout(outL, outR);
-            sampleCount += SOUND_BUFFER_SIZE;
+            sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], -0.021375f, 0.0001f);
 
             note->noteout(outL, outR);
-            sampleCount += SOUND_BUFFER_SIZE;
+            sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], 0.149882f, 0.0001f);
 
             while(!note->finished()) {
                 note->noteout(outL, outR);
 #ifdef WRITE_OUTPUT
-                for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+                for(int i = 0; i < synth->buffersize; ++i)
                     file << outL[i] << std::endl;
 
 #endif
-                sampleCount += SOUND_BUFFER_SIZE;
+                sampleCount += synth->buffersize;
             }
 #ifdef WRITE_OUTPUT
             file.close();

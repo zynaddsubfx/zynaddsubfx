@@ -1,6 +1,8 @@
 #include <cxxtest/TestSuite.h>
 #include <string>
 #include "../Synth/OscilGen.h"
+#include "../globals.h"
+SYNTH_T *synth;
 
 using namespace std;
 
@@ -13,23 +15,24 @@ class OscilGenTest:public CxxTest::TestSuite
         OscilGen   *oscil;
 
         void setUp() {
+            synth = new SYNTH_T;
             //First the sensible settings and variables that have to be set:
-            SOUND_BUFFER_SIZE = 256;
-            OSCIL_SIZE = 1024;
+            synth->buffersize = 256;
+            synth->oscilsize = 1024;
 
-            outL = new float[OSCIL_SIZE];
-            outR = new float[OSCIL_SIZE];
-            memset(outL, 0, sizeof(float) * OSCIL_SIZE);
-            memset(outR, 0, sizeof(float) * OSCIL_SIZE);
+            outL = new float[synth->oscilsize];
+            outR = new float[synth->oscilsize];
+            memset(outL, 0, sizeof(float) * synth->oscilsize);
+            memset(outR, 0, sizeof(float) * synth->oscilsize);
 
             //next the bad global variables that for some reason have not been properly placed in some
             //initialization routine, but rather exist as cryptic oneliners in main.cpp:
-            denormalkillbuf = new float[SOUND_BUFFER_SIZE];
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+            denormalkillbuf = new float[synth->buffersize];
+            for(int i = 0; i < synth->buffersize; ++i)
                 denormalkillbuf[i] = 0;
 
             //prepare the default settings
-            fft   = new FFTwrapper(OSCIL_SIZE);
+            fft   = new FFTwrapper(synth->oscilsize);
             oscil = new OscilGen(fft, NULL);
 
             //Assert defaults [TODO]
@@ -63,6 +66,7 @@ class OscilGenTest:public CxxTest::TestSuite
             delete[] outR;
             delete[] denormalkillbuf;
             FFT_cleanup();
+            delete synth;
         }
 
         //verifies that initialization occurs
@@ -82,7 +86,7 @@ class OscilGenTest:public CxxTest::TestSuite
 
         void testSpectrum(void)
         {
-            oscil->getspectrum(OSCIL_SIZE / 2, outR, 1);
+            oscil->getspectrum(synth->oscilsize / 2, outR, 1);
             TS_ASSERT_DELTA(outR[0], 350.698059f, 0.0001f);
             TS_ASSERT_DELTA(outR[1], 228.889267f, 0.0001f);
             TS_ASSERT_DELTA(outR[2], 62.187931f, 0.0001f);

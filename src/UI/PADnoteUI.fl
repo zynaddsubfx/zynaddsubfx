@@ -146,7 +146,7 @@ for (int i=1;i<maxharmonic;i++){
 
 
 
-int n=OSCIL_SIZE/2;
+int n=synth->oscilsize/2;
 float spc[n];
 for (int i=0;i<n;i++) spc[i]=0.0;
 

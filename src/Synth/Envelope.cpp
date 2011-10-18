@@ -38,7 +38,7 @@ Envelope::Envelope(EnvelopeParams *envpars, float basefreq)
     if(envpars->Pfreemode == 0)
         envpars->converttofree();
 
-    float bufferdt = SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
+    float bufferdt = synth->buffersize_f / synth->samplerate_f;
 
     int mode = envpars->Envmode;
 

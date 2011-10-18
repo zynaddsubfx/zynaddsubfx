@@ -6,7 +6,7 @@ decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {}
 
 decl {//License: GNU GPL version 2 or later} {} 
 
-decl {\#include <stdlib.h>} {selected public
+decl {\#include <stdlib.h>} {public
 } 
 
 decl {\#include <FL/fl_draw.H>} {public
@@ -19,6 +19,9 @@ decl {\#include "../globals.h"} {public
 } 
 
 decl {\#include "../Misc/Master.h"} {public
+} 
+
+decl {\#include "../Misc/Util.h"} {selected public
 } 
 
 decl {\#include "WidgetPDial.h"} {public

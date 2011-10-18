@@ -37,6 +37,8 @@
 #include <errno.h>
 
 #include "Config.h"
+#include "Util.h"
+#include "Part.h"
 
 #define INSTRUMENT_EXTENSION ".xiz"
 

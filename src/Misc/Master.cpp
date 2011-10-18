@@ -23,8 +23,11 @@
 
 #include "Master.h"
 
+#include "Part.h"
+
 #include "../Params/LFOParams.h"
 #include "../Effects/EffectMgr.h"
+#include "../DSP/FFTwrapper.h"
 
 #include <stdio.h>
 #include <sys/stat.h>
@@ -42,7 +45,7 @@ Master::Master()
 
     pthread_mutex_init(&mutex, NULL);
     pthread_mutex_init(&vumutex, NULL);
-    fft = new FFTwrapper(OSCIL_SIZE);
+    fft = new FFTwrapper(synth->oscilsize);
 
     shutup = 0;
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
@@ -190,7 +193,7 @@ void Master::vuUpdate(const float *outl, const float *outr)
     //Peak computation (for vumeters)
     vu.outpeakl = 1e-12;
     vu.outpeakr = 1e-12;
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+    for(int i = 0; i < synth->buffersize; ++i) {
         if(fabs(outl[i]) > vu.outpeakl)
             vu.outpeakl = fabs(outl[i]);
         if(fabs(outr[i]) > vu.outpeakr)
@@ -206,12 +209,12 @@ void Master::vuUpdate(const float *outl, const float *outr)
     //RMS Peak computation (for vumeters)
     vu.rmspeakl = 1e-12;
     vu.rmspeakr = 1e-12;
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+    for(int i = 0; i < synth->buffersize; ++i) {
         vu.rmspeakl += outl[i] * outl[i];
         vu.rmspeakr += outr[i] * outr[i];
     }
-    vu.rmspeakl = sqrt(vu.rmspeakl / SOUND_BUFFER_SIZE);
-    vu.rmspeakr = sqrt(vu.rmspeakr / SOUND_BUFFER_SIZE);
+    vu.rmspeakl = sqrt(vu.rmspeakl / synth->buffersize);
+    vu.rmspeakr = sqrt(vu.rmspeakr / synth->buffersize);
 
     //Part Peak computation (for Part vumeters or fake part vumeters)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
@@ -219,7 +222,7 @@ void Master::vuUpdate(const float *outl, const float *outr)
         if(part[npart]->Penabled != 0) {
             float *outl = part[npart]->partoutl,
             *outr = part[npart]->partoutr;
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+            for(int i = 0; i < synth->buffersize; ++i) {
                 float tmp = fabs(outl[i] + outr[i]);
                 if(tmp > vuoutpeakpart[npart])
                     vuoutpeakpart[npart] = tmp;
@@ -265,8 +268,8 @@ void Master::AudioOut(float *outl, float *outr)
         swap(outl, outr);
 
     //clean up the output samples (should not be needed?)
-    memset(outl, 0, sizeof(float) * SOUND_BUFFER_SIZE);
-    memset(outr, 0, sizeof(float) * SOUND_BUFFER_SIZE);
+    memset(outl, 0, synth->bufferbytes);
+    memset(outr, 0, synth->bufferbytes);
 
     //Compute part samples and store them part[npart]->partoutl,partoutr
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
@@ -301,11 +304,11 @@ void Master::AudioOut(float *outl, float *outr)
         //the volume or the panning has changed and needs interpolation
         if(ABOVE_AMPLITUDE_THRESHOLD(oldvol.l, newvol.l)
            || ABOVE_AMPLITUDE_THRESHOLD(oldvol.r, newvol.r)) {
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+            for(int i = 0; i < synth->buffersize; ++i) {
                 Stereo<float> vol(INTERPOLATE_AMPLITUDE(oldvol.l, newvol.l,
-                                                        i, SOUND_BUFFER_SIZE),
+                                                        i, synth->buffersize),
                                   INTERPOLATE_AMPLITUDE(oldvol.r, newvol.r,
-                                                        i, SOUND_BUFFER_SIZE));
+                                                        i, synth->buffersize));
                 part[npart]->partoutl[i] *= vol.l;
                 part[npart]->partoutr[i] *= vol.r;
             }
@@ -313,7 +316,7 @@ void Master::AudioOut(float *outl, float *outr)
             part[npart]->oldvolumer = newvol.r;
         }
         else
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) { //the volume did not changed
+            for(int i = 0; i < synth->buffersize; ++i) { //the volume did not changed
                 part[npart]->partoutl[i] *= newvol.l;
                 part[npart]->partoutr[i] *= newvol.r;
             }
@@ -328,8 +331,8 @@ void Master::AudioOut(float *outl, float *outr)
         float *tmpmixl = getTmpBuffer();
         float *tmpmixr = getTmpBuffer();
         //Clean up the samples used by the system effects
-        memset(tmpmixl, 0, sizeof(float) * SOUND_BUFFER_SIZE);
-        memset(tmpmixr, 0, sizeof(float) * SOUND_BUFFER_SIZE);
+        memset(tmpmixl, 0, synth->bufferbytes);
+        memset(tmpmixr, 0, synth->bufferbytes);
 
         //Mix the channels according to the part settings about System Effect
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
@@ -343,7 +346,7 @@ void Master::AudioOut(float *outl, float *outr)
 
             //the output volume of each part to system effect
             const float vol = sysefxvol[nefx][npart];
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+            for(int i = 0; i < synth->buffersize; ++i) {
                 tmpmixl[i] += part[npart]->partoutl[i] * vol;
                 tmpmixr[i] += part[npart]->partoutr[i] * vol;
             }
@@ -353,7 +356,7 @@ void Master::AudioOut(float *outl, float *outr)
         for(int nefxfrom = 0; nefxfrom < nefx; ++nefxfrom)
             if(Psysefxsend[nefxfrom][nefx] != 0) {
                 const float vol = sysefxsend[nefxfrom][nefx];
-                for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+                for(int i = 0; i < synth->buffersize; ++i) {
                     tmpmixl[i] += sysefx[nefxfrom]->efxoutl[i] * vol;
                     tmpmixr[i] += sysefx[nefxfrom]->efxoutr[i] * vol;
                 }
@@ -363,7 +366,7 @@ void Master::AudioOut(float *outl, float *outr)
 
         //Add the System Effect to sound output
         const float outvol = sysefx[nefx]->sysefxgetvolume();
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+        for(int i = 0; i < synth->buffersize; ++i) {
             outl[i] += tmpmixl[i] * outvol;
             outr[i] += tmpmixr[i] * outvol;
         }
@@ -375,7 +378,7 @@ void Master::AudioOut(float *outl, float *outr)
     //Mix all parts
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         if(part[npart]->Penabled)   //only mix active parts
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) { //the volume did not changed
+            for(int i = 0; i < synth->buffersize; ++i) { //the volume did not changed
                 outl[i] += part[npart]->partoutl[i];
                 outr[i] += part[npart]->partoutr[i];
             }
@@ -387,7 +390,7 @@ void Master::AudioOut(float *outl, float *outr)
 
 
     //Master Volume
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+    for(int i = 0; i < synth->buffersize; ++i) {
         outl[i] *= volume;
         outr[i] *= volume;
     }
@@ -399,9 +402,8 @@ void Master::AudioOut(float *outl, float *outr)
 
     //Shutup if it is asked (with fade-out)
     if(shutup) {
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-            float tmp =
-                (SOUND_BUFFER_SIZE - i) / (float) SOUND_BUFFER_SIZE;
+        for(int i = 0; i < synth->buffersize; ++i) {
+            float tmp = (synth->buffersize_f - i) / synth->buffersize_f;
             outl[i] *= tmp;
             outr[i] *= tmp;
         }
@@ -421,16 +423,16 @@ void Master::GetAudioOutSamples(size_t nsamples,
                                 float *outl,
                                 float *outr)
 {
-    static float *bufl = new float[SOUND_BUFFER_SIZE],
-    *bufr = new float[SOUND_BUFFER_SIZE];
+    static float *bufl = new float[synth->buffersize],
+    *bufr = new float[synth->buffersize];
     static off_t  off  = 0;
     static size_t smps = 0;
 
     off_t out_off = 0;
 
     //Fail when resampling rather than doing a poor job
-    if(SAMPLE_RATE != samplerate) {
-        printf("darn it: %d vs %d\n", SAMPLE_RATE, samplerate);
+    if(synth->samplerate != samplerate) {
+        printf("darn it: %d vs %d\n", synth->samplerate, samplerate);
         return;
     }
 
@@ -443,7 +445,7 @@ void Master::GetAudioOutSamples(size_t nsamples,
             //generate samples
             AudioOut(bufl, bufr);
             off  = 0;
-            smps = SOUND_BUFFER_SIZE;
+            smps = synth->buffersize;
 
             out_off  += smps;
             nsamples -= smps;

@@ -58,7 +58,7 @@ void invSignal(float *sig, size_t len);
 
 //Memory pool for temporary buffers
 //No allocation in *normal* case
-//All should be sized to SOUND_BUFFER_SIZE
+//All should be sized to synth->buffersize
 float *getTmpBuffer();
 void returnTmpBuffer(float *buf);
 void clearTmpBuffers(void);
@@ -85,28 +85,28 @@ template<class T>
 T limit(T val, T min, T max)
 {
     return (val<min ? min : (val> max ? max : val));
-                }
+}
 
 //Random number generator
 
-                typedef uint32_t prng_t;
-                extern prng_t prng_state;
+typedef uint32_t prng_t;
+extern prng_t prng_state;
 
 // Portable Pseudo-Random Number Generator
-                inline prng_t prng_r(prng_t & p)
-                {
-                    return p = p * 1103515245 + 12345;
-                }
+inline prng_t prng_r(prng_t & p)
+{
+    return p = p * 1103515245 + 12345;
+}
 
-                inline prng_t prng(void)
-                {
-                    return prng_r(prng_state) & 0x7fffffff;
-                }
+inline prng_t prng(void)
+{
+    return prng_r(prng_state) & 0x7fffffff;
+}
 
-                inline void sprng(prng_t p)
-                {
-                    prng_state = p;
-                }
+inline void sprng(prng_t p)
+{
+    prng_state = p;
+}
 
 /*
  * The random generator (0.0f..1.0f)

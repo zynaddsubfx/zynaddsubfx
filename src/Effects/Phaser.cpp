@@ -72,8 +72,8 @@ void Phaser::analog_setup()
     Rmx       = Rmin / Rmax;
     Rconst    = 1.0f + Rmx; // Handle parallel resistor relationship
     C         = 0.00000005f; // 50 nF
-    CFs       = (float) 2.0f * (float)SAMPLE_RATE * C;
-    invperiod = 1.0f / ((float) SOUND_BUFFER_SIZE);
+    CFs       = 2.0f * synth->samplerate_f * C;
+    invperiod = 1.0f / synth->buffersize_f;
 }
 
 Phaser::~Phaser()
@@ -129,7 +129,7 @@ void Phaser::AnalogPhase(const Stereo<float *> &input)
     g = oldgain;
     oldgain = mod;
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+    for(int i = 0; i < synth->buffersize; ++i) {
         g.l += diff.l; // Linear interpolation between LFO samples
         g.r += diff.r;
 
@@ -151,8 +151,8 @@ void Phaser::AnalogPhase(const Stereo<float *> &input)
     }
 
     if(Poutsub) {
-        invSignal(efxoutl, SOUND_BUFFER_SIZE);
-        invSignal(efxoutr, SOUND_BUFFER_SIZE);
+        invSignal(efxoutl, synth->buffersize);
+        invSignal(efxoutr, synth->buffersize);
     }
 }
 
@@ -202,8 +202,8 @@ void Phaser::normalPhase(const Stereo<float *> &input)
     gain.l = limit(gain.l, ZERO_, ONE_);
     gain.r = limit(gain.r, ZERO_, ONE_);
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-        float x  = (float) i / SOUND_BUFFER_SIZE;
+    for(int i = 0; i < synth->buffersize; ++i) {
+        float x  = (float) i / synth->buffersize_f;
         float x1 = 1.0f - x;
         //TODO think about making panning an external feature
         Stereo<float> xn(input.l[i] * pangainL + fb.l,
@@ -227,8 +227,8 @@ void Phaser::normalPhase(const Stereo<float *> &input)
     oldgain = gain;
 
     if(Poutsub) {
-        invSignal(efxoutl, SOUND_BUFFER_SIZE);
-        invSignal(efxoutr, SOUND_BUFFER_SIZE);
+        invSignal(efxoutl, synth->buffersize);
+        invSignal(efxoutr, synth->buffersize);
     }
 }
 

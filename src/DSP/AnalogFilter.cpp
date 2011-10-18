@@ -74,8 +74,8 @@ void AnalogFilter::computefiltercoefs(void)
 
     //do not allow frequencies bigger than samplerate/2
     float freq = this->freq;
-    if(freq > (SAMPLE_RATE / 2 - 500.0f)) {
-        freq      = SAMPLE_RATE / 2 - 500.0f;
+    if(freq > (synth->halfsamplerate_f - 500.0f)) {
+        freq      = synth->halfsamplerate_f - 500.0f;
         zerocoefs = true;
     }
     if(freq < 0.1f)
@@ -98,7 +98,7 @@ void AnalogFilter::computefiltercoefs(void)
     float *d = coeff.d;
 
     //General Constants
-    const float omega = 2 * PI * freq / SAMPLE_RATE;
+    const float omega = 2 * PI * freq / synth->samplerate_f;
     const float sn    = sinf(omega), cs = cosf(omega);
     float       alpha, beta;
 
@@ -109,7 +109,7 @@ void AnalogFilter::computefiltercoefs(void)
     switch(type) {
         case 0: //LPF 1 pole
             if(!zerocoefs)
-                tmp = expf(-2.0f * PI * freq / SAMPLE_RATE);
+                tmp = expf(-2.0f * PI * freq / synth->samplerate_f);
             else
                 tmp = 0.0f;
             c[0]  = 1.0f - tmp;
@@ -121,7 +121,7 @@ void AnalogFilter::computefiltercoefs(void)
             break;
         case 1: //HPF 1 pole
             if(!zerocoefs)
-                tmp = expf(-2.0f * PI * freq / SAMPLE_RATE);
+                tmp = expf(-2.0f * PI * freq / synth->samplerate_f);
             else
                 tmp = 0.0f;
             c[0]  = (1.0f + tmp) / 2.0f;
@@ -276,7 +276,7 @@ void AnalogFilter::setfreq(float frequency)
         rap = 1.0f / rap;
 
     oldabovenq = abovenq;
-    abovenq    = frequency > (SAMPLE_RATE / 2 - 500.0f);
+    abovenq    = frequency > (synth->halfsamplerate_f - 500.0f);
 
     bool nyquistthresh = (abovenq ^ oldabovenq);
 
@@ -331,7 +331,7 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist,
                                    const Coeff &coeff)
 {
     if(order == 1)   //First order filter
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+        for(int i = 0; i < synth->buffersize; ++i) {
             float y0 = smp[i] * coeff.c[0] + hist.x1 * coeff.c[1]
                        + hist.y1 * coeff.d[1];
             hist.y1 = y0;
@@ -339,7 +339,7 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist,
             smp[i]  = y0;
         }
     if(order == 2) //Second order filter
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+        for(int i = 0; i < synth->buffersize; ++i) {
             float y0 = smp[i] * coeff.c[0] + hist.x1 * coeff.c[1]
                        + hist.x2 * coeff.c[2] + hist.y1 * coeff.d[1]
                        + hist.y2 * coeff.d[2];
@@ -359,26 +359,26 @@ void AnalogFilter::filterout(float *smp)
     if(needsinterpolation) {
         //Merge Filter at old coeff with new coeff
         float *ismp = getTmpBuffer();
-        memcpy(ismp, smp, sizeof(float) * SOUND_BUFFER_SIZE);
+        memcpy(ismp, smp, synth->bufferbytes);
 
         for(int i = 0; i < stages + 1; ++i)
             singlefilterout(ismp, oldHistory[i], oldCoeff);
 
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-            float x = i / (float) SOUND_BUFFER_SIZE;
+        for(int i = 0; i < synth->buffersize; ++i) {
+            float x = (float)i / synth->buffersize_f;
             smp[i] = ismp[i] * (1.0f - x) + smp[i] * x;
         }
         returnTmpBuffer(ismp);
         needsinterpolation = false;
     }
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+    for(int i = 0; i < synth->buffersize; ++i)
         smp[i] *= outgain;
 }
 
 float AnalogFilter::H(float freq)
 {
-    float fr = freq / SAMPLE_RATE * PI * 2.0f;
+    float fr = freq / synth->samplerate_f * PI * 2.0f;
     float x  = coeff.c[0], y = 0.0f;
     for(int n = 1; n < 3; ++n) {
         x += cosf(n * fr) * coeff.c[n];

@@ -46,8 +46,8 @@ OssEngine::OssEngine()
     midi.handle  = -1;
     audio.handle = -1;
 
-    audio.smps = new short[SOUND_BUFFER_SIZE * 2];
-    memset(audio.smps, 0, sizeof(short) * SOUND_BUFFER_SIZE * 2);
+    audio.smps = new short[synth->buffersize * 2];
+    memset(audio.smps, 0, synth->bufferbytes);
 }
 
 OssEngine::~OssEngine()
@@ -65,7 +65,7 @@ bool OssEngine::openAudio()
     int snd_fragment   = 0x00080009; //fragment size (?);
     int snd_stereo     = 1; //stereo;
     int snd_format     = AFMT_S16_LE;
-    int snd_samplerate = SAMPLE_RATE;
+    int snd_samplerate = synth->samplerate;
 
     audio.handle = open(config.cfg.LinuxOSSWaveOutDev, O_WRONLY, 0);
     if(audio.handle == -1) {
@@ -209,7 +209,7 @@ void *OssEngine::thread()
             const Stereo<float *> smps = getNext();
 
             float l, r;
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+            for(int i = 0; i < synth->buffersize; ++i) {
                 l = smps.l[i];
                 r = smps.r[i];
 
@@ -229,7 +229,7 @@ void *OssEngine::thread()
             }
             int handle = audio.handle;
             if(handle != -1)
-                write(handle, audio.smps, SOUND_BUFFER_SIZE * 4); // *2 because is 16 bit, again * 2 because is stereo
+                write(handle, audio.smps, synth->buffersize * 4); // *2 because is 16 bit, again * 2 because is stereo
             else
                 break;
         }

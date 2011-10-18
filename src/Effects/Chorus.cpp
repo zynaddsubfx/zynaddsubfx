@@ -28,7 +28,7 @@ using namespace std;
 
 Chorus::Chorus(bool insertion_, float *const efxoutl_, float *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
-    maxdelay((int)(MAX_CHORUS_DELAY / 1000.0f * SAMPLE_RATE)),
+    maxdelay((int)(MAX_CHORUS_DELAY / 1000.0f * synth->samplerate_f)),
     delaySample(maxdelay)
 {
     dlk = 0;
@@ -47,7 +47,7 @@ Chorus::~Chorus() {}
 float Chorus::getdelay(float xlfo)
 {
     float result =
-        (Pflangemode) ? 0 : (delay + xlfo * depth) * SAMPLE_RATE;
+        (Pflangemode) ? 0 : (delay + xlfo * depth) * synth->samplerate_f;
 
     //check if delay is too big (caused by bad setdelay() and setdepth()
     if((result + 0.5f) >= maxdelay) {
@@ -70,7 +70,7 @@ void Chorus::out(const Stereo<float *> &input)
     dl2 = getdelay(lfol);
     dr2 = getdelay(lfor);
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+    for(int i = 0; i < synth->buffersize; ++i) {
         float inL = input.l[i];
         float inR = input.r[i];
         //LRcross
@@ -81,7 +81,7 @@ void Chorus::out(const Stereo<float *> &input)
         //Left channel
 
         //compute the delay in samples using linear interpolation between the lfo delays
-        mdel = (dl1 * (SOUND_BUFFER_SIZE - i) + dl2 * i) / SOUND_BUFFER_SIZE;
+        mdel = (dl1 * (synth->buffersize - i) + dl2 * i) / synth->buffersize;
         if(++dlk >= maxdelay)
             dlk = 0;
         float tmp = dlk - mdel + maxdelay * 2.0f; //where should I get the sample from
@@ -98,7 +98,7 @@ void Chorus::out(const Stereo<float *> &input)
         //Right channel
 
         //compute the delay in samples using linear interpolation between the lfo delays
-        mdel = (dr1 * (SOUND_BUFFER_SIZE - i) + dr2 * i) / SOUND_BUFFER_SIZE;
+        mdel = (dr1 * (synth->buffersize - i) + dr2 * i) / synth->buffersize_f;
         if(++drk >= maxdelay)
             drk = 0;
         tmp = drk * 1.0f - mdel + maxdelay * 2.0f; //where should I get the sample from
@@ -114,12 +114,12 @@ void Chorus::out(const Stereo<float *> &input)
     }
 
     if(Poutsub)
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+        for(int i = 0; i < synth->buffersize; ++i) {
             efxoutl[i] *= -1.0f;
             efxoutr[i] *= -1.0f;
         }
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+    for(int i = 0; i < synth->buffersize; ++i) {
         efxoutl[i] *= pangainL;
         efxoutr[i] *= pangainR;
     }

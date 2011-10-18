@@ -204,24 +204,24 @@ void FormantFilter::filterout(float *smp)
 {
     float *inbuffer = getTmpBuffer();
 
-    memcpy(inbuffer, smp, sizeof(float) * SOUND_BUFFER_SIZE);
-    memset(smp, 0, sizeof(float) * SOUND_BUFFER_SIZE);
+    memcpy(inbuffer, smp, synth->bufferbytes);
+    memset(smp, 0, synth->bufferbytes);
 
     for(int j = 0; j < numformants; ++j) {
         float *tmpbuf = getTmpBuffer();
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+        for(int i = 0; i < synth->buffersize; ++i)
             tmpbuf[i] = inbuffer[i] * outgain;
         formant[j]->filterout(tmpbuf);
 
         if(ABOVE_AMPLITUDE_THRESHOLD(oldformantamp[j], currentformants[j].amp))
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+            for(int i = 0; i < synth->buffersize; ++i)
                 smp[i] += tmpbuf[i]
                           * INTERPOLATE_AMPLITUDE(oldformantamp[j],
                                                   currentformants[j].amp,
                                                   i,
-                                                  SOUND_BUFFER_SIZE);
+                                                  synth->buffersize);
         else
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+            for(int i = 0; i < synth->buffersize; ++i)
                 smp[i] += tmpbuf[i] * currentformants[j].amp;
         returnTmpBuffer(tmpbuf);
         oldformantamp[j] = currentformants[j].amp;

@@ -207,8 +207,8 @@ void FilterParams::formantfilterH(int nvowel, int nfreqs, float *freqs)
         filter_amp = getformantamp(Pvowels[nvowel].formants[nformant].amp);
 
 
-        if(filter_freq <= (SAMPLE_RATE / 2 - 100.0f)) {
-            omega = 2 * PI * filter_freq / SAMPLE_RATE;
+        if(filter_freq <= (synth->samplerate / 2 - 100.0f)) {
+            omega = 2 * PI * filter_freq / synth->samplerate_f;
             sn    = sinf(omega);
             cs    = cosf(omega);
             alpha = sn / (2 * filter_q);
@@ -225,12 +225,12 @@ void FilterParams::formantfilterH(int nvowel, int nfreqs, float *freqs)
 
         for(int i = 0; i < nfreqs; ++i) {
             float freq = getfreqx(i / (float) nfreqs);
-            if(freq > SAMPLE_RATE / 2) {
+            if(freq > synth->samplerate / 2) {
                 for(int tmp = i; tmp < nfreqs; ++tmp)
                     freqs[tmp] = 0.0f;
                 break;
             }
-            float fr = freq / SAMPLE_RATE * PI * 2.0f;
+            float fr = freq / synth->samplerate * PI * 2.0f;
             float x  = c[0], y = 0.0f;
             for(int n = 1; n < 3; ++n) {
                 x += cosf(n * fr) * c[n];

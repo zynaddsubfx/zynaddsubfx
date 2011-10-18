@@ -25,6 +25,8 @@
 #include <cstring>
 #include <string>
 #include <cstdio>
+#include "../globals.h"
+SYNTH_T *synth;
 
 using namespace std;
 
@@ -32,11 +34,13 @@ class MicrotonalTest:public CxxTest::TestSuite
 {
     public:
         void setUp() {
+            synth = new SYNTH_T;
             testMicro = new Microtonal();
         }
 
         void tearDown() {
             delete testMicro;
+            delete synth;
         }
 
         //Verifies that the object is initialized correctly

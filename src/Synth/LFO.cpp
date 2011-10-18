@@ -36,7 +36,7 @@ LFO::LFO(LFOParams *lfopars, float basefreq)
 
     float lfofreq =
         (powf(2, lfopars->Pfreq * 10.0f) - 1.0f) / 12.0f * lfostretch;
-    incx = fabs(lfofreq) * (float)SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
+    incx = fabs(lfofreq) * synth->buffersize_f / synth->samplerate_f;
 
     if(lfopars->Pcontinous == 0) {
         if(lfopars->Pstartphase == 0)
@@ -154,7 +154,7 @@ float LFO::lfoout()
         }
     }
     else
-        lfodelay -= (float)SOUND_BUFFER_SIZE / (float)SAMPLE_RATE;
+        lfodelay -= synth->buffersize_f / synth->samplerate_f;
     return out;
 }
 

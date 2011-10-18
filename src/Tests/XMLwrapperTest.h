@@ -22,6 +22,8 @@
 #include <cxxtest/TestSuite.h>
 #include "../Misc/XMLwrapper.h"
 #include <string>
+#include "../globals.h"
+SYNTH_T *synth;
 using namespace std;
 
 class XMLwrapperTest:public CxxTest::TestSuite

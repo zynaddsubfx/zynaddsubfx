@@ -31,7 +31,7 @@ using namespace std;
 #include "AudioOut.h"
 
 AudioOut::AudioOut()
-    :samplerate(SAMPLE_RATE), bufferSize(SOUND_BUFFER_SIZE)
+    :samplerate(synth->samplerate), bufferSize(synth->buffersize)
 {}
 
 AudioOut::~AudioOut()

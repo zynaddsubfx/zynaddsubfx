@@ -83,29 +83,29 @@ void Distorsion::out(const Stereo<float *> &smp)
         inputvol *= -1.0f;
 
     if(Pstereo) //Stereo
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+        for(int i = 0; i < synth->buffersize; ++i) {
             efxoutl[i] = smp.l[i] * inputvol * pangainL;
             efxoutr[i] = smp.r[i] * inputvol * pangainR;
         }
     else //Mono
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+        for(int i = 0; i < synth->buffersize; ++i)
             efxoutl[i] = (smp.l[i] * pangainL + smp.r[i] * pangainR) * inputvol;
 
     if(Pprefiltering)
         applyfilters(efxoutl, efxoutr);
 
-    waveShapeSmps(SOUND_BUFFER_SIZE, efxoutl, Ptype + 1, Pdrive);
+    waveShapeSmps(synth->buffersize, efxoutl, Ptype + 1, Pdrive);
     if(Pstereo)
-        waveShapeSmps(SOUND_BUFFER_SIZE, efxoutr, Ptype + 1, Pdrive);
+        waveShapeSmps(synth->buffersize, efxoutr, Ptype + 1, Pdrive);
 
     if(!Pprefiltering)
         applyfilters(efxoutl, efxoutr);
 
     if(!Pstereo)
-        memcpy(efxoutr, efxoutl, SOUND_BUFFER_SIZE * sizeof(float));
+        memcpy(efxoutr, efxoutl, synth->bufferbytes);
 
     float level = dB2rap(60.0f * Plevel / 127.0f - 40.0f);
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+    for(int i = 0; i < synth->buffersize; ++i) {
         float lout = efxoutl[i];
         float rout = efxoutr[i];
         float l    = lout * (1.0f - lrcross) + rout * lrcross;

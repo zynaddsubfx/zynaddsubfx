@@ -30,7 +30,7 @@ Unison::Unison(int update_period_samples_, float max_delay_sec_)
     uv(NULL),
     update_period_samples(update_period_samples_),
     update_period_sample_k(0),
-    max_delay((int)(max_delay_sec_ * (float)SAMPLE_RATE + 1)),
+    max_delay((int)(synth->samplerate_f * max_delay_sec_) + 1),
     delay_k(0),
     first_time(false),
     delay_buffer(NULL),
@@ -84,15 +84,15 @@ void Unison::updateParameters(void)
 {
     if(!uv)
         return;
-    float increments_per_second = SAMPLE_RATE
+    float increments_per_second = synth->samplerate_f
                                   / (float) update_period_samples;
 //	printf("#%g, %g\n",increments_per_second,base_freq);
     for(int i = 0; i < unison_size; ++i) {
-        float base = powf(UNISON_FREQ_SPAN, RND * 2.0f - 1.0f);
+        float base = powf(UNISON_FREQ_SPAN, synth->numRandom() * 2.0f - 1.0f);
         uv[i].relative_amplitude = base;
         float period = base / base_freq;
         float m      = 4.0f / (period * increments_per_second);
-        if(RND < 0.5f)
+        if(synth->numRandom() < 0.5f)
             m = -m;
         uv[i].step = m;
 //		printf("%g %g\n",uv[i].relative_amplitude,period);
@@ -100,7 +100,7 @@ void Unison::updateParameters(void)
 
     float max_speed = powf(2.0f, unison_bandwidth_cents / 1200.0f);
     unison_amplitude_samples = 0.125f * (max_speed - 1.0f)
-        * SAMPLE_RATE / base_freq;
+        * synth->samplerate_f / base_freq;
 
 #warning \
     todo: test if unison_amplitude_samples is to big and reallocate bigger memory

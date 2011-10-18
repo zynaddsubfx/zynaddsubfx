@@ -26,26 +26,6 @@
 #define GLOBALS_H
 #include <stdint.h>
 
-/**Sampling rate*/
-extern int SAMPLE_RATE;
-
-/**
- * The size of a sound buffer (or the granularity)
- * All internal transfer of sound data use buffer of this size
- * All parameters are constant during this period of time, exception
- * some parameters(like amplitudes) which are linear interpolated.
- * If you increase this you'll ecounter big latencies, but if you
- * decrease this the CPU requirements gets high.
- */
-extern int SOUND_BUFFER_SIZE;
-
-
-/**
- * The size of ADnote Oscillator
- * Decrease this => poor quality
- * Increase this => CPU requirements gets high (only at start of the note)
- */
-extern int OSCIL_SIZE;
 
 /**
  * The number of harmonics of additive synth
@@ -219,4 +199,51 @@ enum LegatoMsg {
 #define O_BINARY 0
 #endif
 
+//temporary include for synth->{samplerate/buffersize} members
+struct SYNTH_T
+{
+    SYNTH_T(void)
+        :samplerate(44100), buffersize(256), oscilsize(1024)
+    {
+        alias();
+    }
+
+    /**Sampling rate*/
+    unsigned int samplerate;
+
+    /**
+     * The size of a sound buffer (or the granularity)
+     * All internal transfer of sound data use buffer of this size
+     * All parameters are constant during this period of time, exception
+     * some parameters(like amplitudes) which are linear interpolated.
+     * If you increase this you'll ecounter big latencies, but if you
+     * decrease this the CPU requirements gets high.
+     */
+    int   buffersize;
+
+    /**
+     * The size of ADnote Oscillator
+     * Decrease this => poor quality
+     * Increase this => CPU requirements gets high (only at start of the note)
+     */
+    int   oscilsize;
+
+    //Alias for above terms
+    float samplerate_f;
+    float halfsamplerate_f;
+    float buffersize_f;
+    int   bufferbytes;
+    float oscilsize_f;
+
+    inline void alias(void)
+    {
+        halfsamplerate_f = (samplerate_f = samplerate) / 2.0f;
+        buffersize_f = buffersize;
+        bufferbytes = buffersize * sizeof(float);
+        oscilsize_f = oscilsize;
+    }
+    float numRandom(void) const; //defined in Util.cpp for now
+};
+
+extern SYNTH_T *synth;
 #endif

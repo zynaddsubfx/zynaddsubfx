@@ -23,11 +23,11 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <cassert>
+#include <cstring>
 
 #include "Nio.h"
 #include "InMgr.h"
 
-#include "../Misc/Master.h"
 #include "JackEngine.h"
 
 using namespace std;

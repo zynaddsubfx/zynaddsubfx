@@ -2,8 +2,7 @@
 version 1.0110 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {selected
-} 
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
 
 decl {//License: GNU GPL version 2 or later} {} 
 
@@ -25,10 +24,16 @@ decl {\#include <FL/Fl_File_Chooser.H>} {public
 decl {\#include "../Misc/Master.h"} {public
 } 
 
+decl {\#include "../Misc/Part.h"} {selected public
+} 
+
 decl {\#include "../Misc/Bank.h"} {public
 } 
 
 decl {\#include "../Misc/Config.h"} {public
+} 
+
+decl {\#include "../Misc/Util.h"} {public
 } 
 
 class BankProcess_ {} {

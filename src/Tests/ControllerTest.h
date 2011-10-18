@@ -22,16 +22,20 @@
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 #include "../Params/Controller.h"
+#include "../globals.h"
+SYNTH_T *synth;
 
 class ControllerTest:public CxxTest::TestSuite
 {
     public:
         void setUp() {
+            synth = new SYNTH_T;
             testCtl = new Controller();
         }
 
         void tearDown() {
             delete testCtl;
+            delete synth;
         }
 
 

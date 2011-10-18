@@ -28,7 +28,6 @@
 #include "../globals.h"
 #include "../Params/Controller.h"
 #include "../Misc/Microtonal.h"
-#include "../DSP/FFTwrapper.h"
 
 #include <list> // For the monomemnotes list.
 
@@ -38,6 +37,7 @@ class SUBnoteParameters;
 class PADnoteParameters;
 class SynthNote;
 class XMLWrapper;
+class FFTwrapper;
 
 /** Part implementation*/
 class Part

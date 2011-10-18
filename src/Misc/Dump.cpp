@@ -37,13 +37,10 @@ Dump::Dump()
 Dump::~Dump()
 {
     if(file != NULL) {
-        double duration = (double)tick * (double) SOUND_BUFFER_SIZE
-                          / (double) SAMPLE_RATE;
-        fprintf(
-            file,
+        int duration = tick * synth->buffersize_f / synth->samplerate_f;
+        fprintf(file,
             "\n# statistics: duration = %d seconds; keyspressed = %d\n\n\n\n",
-            (int) duration,
-            keyspressed);
+            duration, keyspressed);
         fclose(file);
     }
 }
@@ -66,11 +63,10 @@ void Dump::startnow()
         time_t tm = time(NULL);
 
         fprintf(file, "#date/time = %s\n", ctime(&tm));
-        fprintf(file,
-                "#1 tick = %g milliseconds\n",
-                SOUND_BUFFER_SIZE * 1000.0f / SAMPLE_RATE);
-        fprintf(file, "SAMPLERATE = %d\n", SAMPLE_RATE);
-        fprintf(file, "TICKSIZE = %d #samples\n", SOUND_BUFFER_SIZE);
+        fprintf(file, "#1 tick = %g milliseconds\n",
+                synth->buffersize_f * 1000.0f / synth->samplerate_f);
+        fprintf(file, "SAMPLERATE = %d\n", synth->samplerate);
+        fprintf(file, "TICKSIZE = %d #samples\n", synth->buffersize);
         fprintf(file, "\n\nSTART\n");
     }
 }

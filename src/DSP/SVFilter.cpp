@@ -58,7 +58,7 @@ void SVFilter::cleanup()
 
 void SVFilter::computefiltercoefs(void)
 {
-    par.f = freq / SAMPLE_RATE * 4.0f;
+    par.f = freq / synth->samplerate_f * 4.0f;
     if(par.f > 0.99999f)
         par.f = 0.99999f;
     par.q      = 1.0f - atanf(sqrtf(q)) * 2.0f / PI;
@@ -76,7 +76,7 @@ void SVFilter::setfreq(float frequency)
         rap = 1.0f / rap;
 
     oldabovenq = abovenq;
-    abovenq    = frequency > (SAMPLE_RATE / 2 - 500.0f);
+    abovenq    = frequency > (synth->samplerate_f / 2 - 500.0f);
 
     bool nyquistthresh = (abovenq ^ oldabovenq);
 
@@ -144,7 +144,7 @@ void SVFilter::singlefilterout(float *smp, fstage &x, parameters &par)
             errx(1, "Impossible SVFilter type encountered [%d]", type);
     }
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+    for(int i = 0; i < synth->buffersize; ++i) {
         x.low   = x.low + par.f * x.band;
         x.high  = par.q_sqrt * smp[i] - x.low - par.q * x.band;
         x.band  = par.f * x.high + x.band;
@@ -160,19 +160,19 @@ void SVFilter::filterout(float *smp)
 
     if(needsinterpolation) {
         float *ismp = getTmpBuffer();
-        memcpy(ismp, smp, sizeof(float) * SOUND_BUFFER_SIZE);
+        memcpy(ismp, smp, synth->bufferbytes);
 
         for(int i = 0; i < stages + 1; ++i)
             singlefilterout(ismp, st[i], ipar);
 
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
-            float x = i / (float) SOUND_BUFFER_SIZE;
+        for(int i = 0; i < synth->buffersize; ++i) {
+            float x = i / synth->buffersize_f;
             smp[i] = ismp[i] * (1.0f - x) + smp[i] * x;
         }
         returnTmpBuffer(ismp);
         needsinterpolation = false;
     }
 
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+    for(int i = 0; i < synth->buffersize; ++i)
         smp[i] *= outgain;
 }

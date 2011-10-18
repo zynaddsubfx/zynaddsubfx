@@ -60,8 +60,8 @@ bool PaEngine::Start()
     Pa_OpenStream(&stream,
                   NULL,
                   &outputParameters,
-                  SAMPLE_RATE,
-                  SOUND_BUFFER_SIZE,
+                  synth->samplerate,
+                  synth->buffersize,
                   NULL,
                   PAprocess,
                   (void *) this);

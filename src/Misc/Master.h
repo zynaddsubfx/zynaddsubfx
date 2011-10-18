@@ -23,15 +23,15 @@
 
 #ifndef MASTER_H
 #define MASTER_H
-
 #include "../globals.h"
 #include "Microtonal.h"
 
 #include "Bank.h"
 #include "Recorder.h"
-#include "Part.h"
 #include "Dump.h"
 #include "XMLwrapper.h"
+
+#include "../Params/Controller.h"
 
 typedef enum {
     MUTEX_TRYLOCK, MUTEX_LOCK, MUTEX_UNLOCK
@@ -111,9 +111,10 @@ class Master
         void partonoff(int npart, int what);
 
         /**parts \todo see if this can be made to be dynamic*/
-        Part *part[NUM_MIDI_PARTS];
+        class Part *part[NUM_MIDI_PARTS];
 
         //parameters
+
         unsigned char Pvolume;
         unsigned char Pkeyshift;
         unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
@@ -126,8 +127,8 @@ class Master
         void setPsysefxsend(int Pefxfrom, int Pefxto, char Pvol);
 
         //effects
-        EffectMgr *sysefx[NUM_SYS_EFX]; //system
-        EffectMgr *insefx[NUM_INS_EFX]; //insertion
+        class EffectMgr *sysefx[NUM_SYS_EFX]; //system
+        class EffectMgr *insefx[NUM_INS_EFX]; //insertion
 //      void swapcopyeffects(int what,int type,int neff1,int neff2);
 
         //HDD recorder
@@ -154,7 +155,7 @@ class Master
         Microtonal microtonal;
         Bank       bank;
 
-        FFTwrapper     *fft;
+        class FFTwrapper     *fft;
         pthread_mutex_t mutex;
         pthread_mutex_t vumutex;
 
@@ -167,6 +168,5 @@ class Master
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
         int    keyshift;
 };
-
 
 #endif

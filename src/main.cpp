@@ -59,6 +59,7 @@ using namespace std;
 
 pthread_t thr3, thr4;
 Master   *master;
+SYNTH_T  *synth;
 int       swaplr = 0; //1 for left-right swapping
 
 #if LASH
@@ -137,11 +138,11 @@ void initprogram(int argc, char **argv)
 
     cerr.precision(1);
     cerr << std::fixed;
-    cerr << "\nSample Rate = \t\t" << SAMPLE_RATE << endl;
-    cerr << "Sound Buffer Size = \t" << SOUND_BUFFER_SIZE << " samples" << endl;
-    cerr << "Internal latency = \t" << SOUND_BUFFER_SIZE * 1000.0f
-    / SAMPLE_RATE << " ms" << endl;
-    cerr << "ADsynth Oscil.Size = \t" << OSCIL_SIZE << " samples" << endl;
+    cerr << "\nSample Rate = \t\t" << synth->samplerate << endl;
+    cerr << "Sound Buffer Size = \t" << synth->buffersize << " samples" << endl;
+    cerr << "Internal latency = \t" << synth->buffersize_f * 1000.0f /
+        synth->samplerate_f << " ms" << endl;
+    cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
 
 
     master = &Master::getInstance();
@@ -175,6 +176,7 @@ void exitprogram()
 
 int main(int argc, char *argv[])
 {
+    synth = new SYNTH_T;
     config.init();
     dump.startnow();
     int noui = 0;
@@ -188,15 +190,17 @@ int main(int argc, char *argv[])
         cerr << "Try 'zynaddsubfx --help' for command-line options." << endl;
 
     /* Get the settings from the Config*/
-    SAMPLE_RATE = config.cfg.SampleRate;
-    SOUND_BUFFER_SIZE = config.cfg.SoundBufferSize;
-    OSCIL_SIZE = config.cfg.OscilSize;
+    synth->samplerate = config.cfg.SampleRate;
+    synth->buffersize = config.cfg.SoundBufferSize;
+    synth->oscilsize  = config.cfg.OscilSize;
     swaplr     = config.cfg.SwapStereo;
+
+    synth->alias(); //build aliases
 
     sprng(time(NULL));
     //produce denormal buf
-    denormalkillbuf = new float [SOUND_BUFFER_SIZE];
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+    denormalkillbuf = new float [synth->buffersize];
+    for(int i = 0; i < synth->buffersize; ++i)
         denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 
     /* Parse command-line options */
@@ -293,16 +297,16 @@ int main(int argc, char *argv[])
                 GETOP(loadinstrument);
                 break;
             case 'r':
-                GETOPNUM(SAMPLE_RATE);
-                if(SAMPLE_RATE < 4000) {
+                GETOPNUM(synth->samplerate);
+                if(synth->samplerate < 4000) {
                     cerr << "ERROR:Incorrect sample rate: " << optarguments
                          << endl;
                     exit(1);
                 }
                 break;
             case 'b':
-                GETOPNUM(SOUND_BUFFER_SIZE);
-                if(SOUND_BUFFER_SIZE < 2) {
+                GETOPNUM(synth->buffersize);
+                if(synth->buffersize < 2) {
                     cerr << "ERROR:Incorrect buffer size: " << optarguments
                          << endl;
                     exit(1);
@@ -310,16 +314,16 @@ int main(int argc, char *argv[])
                 break;
             case 'o':
                 if(optarguments)
-                    OSCIL_SIZE = tmp = atoi(optarguments);
-                if(OSCIL_SIZE < MAX_AD_HARMONICS * 2)
-                    OSCIL_SIZE = MAX_AD_HARMONICS * 2;
-                OSCIL_SIZE =
-                    (int) powf(2, ceil(logf(OSCIL_SIZE - 1.0f) / logf(2.0f)));
-                if(tmp != OSCIL_SIZE)
+                    synth->oscilsize = tmp = atoi(optarguments);
+                if(synth->oscilsize < MAX_AD_HARMONICS * 2)
+                    synth->oscilsize = MAX_AD_HARMONICS * 2;
+                synth->oscilsize =
+                    (int) powf(2, ceil(logf(synth->oscilsize - 1.0f) / logf(2.0f)));
+                if(tmp != synth->oscilsize)
                     cerr
                     <<
-                    "OSCIL_SIZE is wrong (must be 2^n) or too small. Adjusting to "
-                    << OSCIL_SIZE << "." << endl;
+                    "synth->oscilsize is wrong (must be 2^n) or too small. Adjusting to "
+                    << synth->oscilsize << "." << endl;
                 break;
             case 'S':
                 swaplr = 1;

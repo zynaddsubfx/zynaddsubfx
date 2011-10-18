@@ -35,9 +35,6 @@
 #include <sched.h>
 
 
-int    SAMPLE_RATE = 44100;
-int    SOUND_BUFFER_SIZE = 256;
-int    OSCIL_SIZE = 1024;
 prng_t prng_state = 0x1234;
 
 Config config;
@@ -171,7 +168,7 @@ float *getTmpBuffer()
         }
     pool_entry p; //Extend Pool
     p.free = false;
-    p.dat  = new float[SOUND_BUFFER_SIZE];
+    p.dat  = new float[synth->buffersize];
     pool.push_back(p);
 
     return p.dat;
@@ -199,4 +196,9 @@ void clearTmpBuffers(void)
         delete [] itr->dat;
     }
     pool.clear();
+}
+
+float SYNTH_T::numRandom() const
+{
+    return RND;
 }

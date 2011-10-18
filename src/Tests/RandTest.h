@@ -21,6 +21,7 @@
 */
 
 #include "../Misc/Util.h"
+SYNTH_T *synth;
 
 #include <cstdlib>
 #include <cstdio>

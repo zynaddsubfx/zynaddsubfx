@@ -29,8 +29,8 @@ OutMgr::OutMgr()
     master     = Master::getInstance();
 
     //init samples
-    outr = new float[SOUND_BUFFER_SIZE];
-    outl = new float[SOUND_BUFFER_SIZE];
+    outr = new float[synth->buffersize];
+    outl = new float[synth->buffersize];
 }
 
 OutMgr::~OutMgr()
@@ -119,27 +119,25 @@ string OutMgr::getSink() const
 void OutMgr::addSmps(float *l, float *r)
 {
     //allow wave file to syphon off stream
-    wave->push(Stereo<float *>(l, r), SOUND_BUFFER_SIZE);
+    wave->push(Stereo<float *>(l, r), synth->buffersize);
 
-    if(currentOut->getSampleRate() != SAMPLE_RATE) { //we need to resample
+    if(currentOut->getSampleRate() != synth->samplerate) { //we need to resample
         //cout << "BAD RESAMPLING" << endl;
-        Stereo<Sample> smps(Sample(SOUND_BUFFER_SIZE, l), Sample(
-                                SOUND_BUFFER_SIZE,
+        Stereo<Sample> smps(Sample(synth->buffersize, l), Sample(
+                                synth->buffersize,
                                 r));
-        smps.l.resample(SAMPLE_RATE, currentOut->getSampleRate());
-        smps.r.resample(SAMPLE_RATE, currentOut->getSampleRate());
-        memcpy(priBuffCurrent.l, smps.l.c_buf(), SOUND_BUFFER_SIZE
-               * sizeof(float));
-        memcpy(priBuffCurrent.r, smps.r.c_buf(), SOUND_BUFFER_SIZE
-               * sizeof(float));
+        smps.l.resample(synth->samplerate, currentOut->getSampleRate());
+        smps.r.resample(synth->samplerate, currentOut->getSampleRate());
+        memcpy(priBuffCurrent.l, smps.l.c_buf(), synth->bufferbytes);
+        memcpy(priBuffCurrent.r, smps.r.c_buf(), synth->bufferbytes);
     }
     else { //just copy the samples
-        memcpy(priBuffCurrent.l, l, SOUND_BUFFER_SIZE * sizeof(float));
-        memcpy(priBuffCurrent.r, r, SOUND_BUFFER_SIZE * sizeof(float));
+        memcpy(priBuffCurrent.l, l, synth->bufferbytes);
+        memcpy(priBuffCurrent.r, r, synth->bufferbytes);
     }
-    priBuffCurrent.l += SOUND_BUFFER_SIZE;
-    priBuffCurrent.r += SOUND_BUFFER_SIZE;
-    stales += SOUND_BUFFER_SIZE;
+    priBuffCurrent.l += synth->buffersize;
+    priBuffCurrent.r += synth->buffersize;
+    stales += synth->buffersize;
 }
 
 void OutMgr::removeStaleSmps()

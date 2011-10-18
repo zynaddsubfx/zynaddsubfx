@@ -106,7 +106,7 @@ void SUBnote::setup(float freq,
     for(int n = 0; n < MAX_SUB_HARMONICS; ++n) {
         if(pars->Phmag[n] == 0)
             continue;
-        if(n * basefreq > SAMPLE_RATE / 2.0f)
+        if(n * basefreq > synth->samplerate_f / 2.0f)
             break;                            //remove the freqs above the Nyquist freq
         pos[harmonics++] = n;
     }
@@ -260,11 +260,11 @@ void SUBnote::computefiltercoefs(bpfilter &filter,
                                  float bw,
                                  float gain)
 {
-    if(freq > SAMPLE_RATE / 2.0f - 200.0f)
-        freq = SAMPLE_RATE / 2.0f - 200.0f;
+    if(freq > synth->samplerate_f / 2.0f - 200.0f)
+        freq = synth->samplerate_f / 2.0f - 200.0f;
 
 
-    float omega = 2.0f * PI * freq / SAMPLE_RATE;
+    float omega = 2.0f * PI * freq / synth->samplerate_f;
     float sn    = sinf(omega);
     float cs    = cosf(omega);
     float alpha = sn * sinh(LOG_2 / 2.0f * bw * omega / sn);
@@ -303,11 +303,11 @@ void SUBnote::initfilter(bpfilter &filter,
         if(start == 1)
             a *= RND;
         filter.yn1 = a * cosf(p);
-        filter.yn2 = a * cosf(p + freq * 2.0f * PI / SAMPLE_RATE);
+        filter.yn2 = a * cosf(p + freq * 2.0f * PI / synth->samplerate_f);
 
         //correct the error of computation the start amplitude
         //at very high frequencies
-        if(freq > SAMPLE_RATE * 0.96f) {
+        if(freq > synth->samplerate_f * 0.96f) {
             filter.yn1 = 0.0f;
             filter.yn2 = 0.0f;
         }
@@ -335,8 +335,8 @@ inline float SUBnote::SubFilter(bpfilter &filter, const float input) const
 
 void SUBnote::filter(bpfilter &filter, float *smps)
 {
-    assert(SOUND_BUFFER_SIZE % 8 == 0);
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i += 8) {
+    assert(synth->buffersize % 8 == 0);
+    for(int i = 0; i < synth->buffersize; i += 8) {
         smps[i]     = SubFilter(filter, smps[i]);
         smps[i + 1] = SubFilter(filter, smps[i + 1]);
         smps[i + 2] = SubFilter(filter, smps[i + 2]);
@@ -463,8 +463,8 @@ void SUBnote::computecurrentparameters()
  */
 int SUBnote::noteout(float *outl, float *outr)
 {
-    memcpy(outl, denormalkillbuf, SOUND_BUFFER_SIZE * sizeof(float));
-    memcpy(outr, denormalkillbuf, SOUND_BUFFER_SIZE * sizeof(float));
+    memcpy(outl, denormalkillbuf, synth->bufferbytes);
+    memcpy(outr, denormalkillbuf, synth->bufferbytes);
 
     if(NoteEnabled == OFF)
         return 0;
@@ -472,13 +472,13 @@ int SUBnote::noteout(float *outl, float *outr)
     float *tmprnd = getTmpBuffer();
     float *tmpsmp = getTmpBuffer();
     //left channel
-    for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+    for(int i = 0; i < synth->buffersize; ++i)
         tmprnd[i] = RND * 2.0f - 1.0f;
     for(int n = 0; n < numharmonics; ++n) {
-        memcpy(tmpsmp, tmprnd, SOUND_BUFFER_SIZE * sizeof(float));
+        memcpy(tmpsmp, tmprnd, synth->bufferbytes);
         for(int nph = 0; nph < numstages; ++nph)
             filter(lfilter[nph + n * numstages], tmpsmp);
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+        for(int i = 0; i < synth->buffersize; ++i)
             outl[i] += tmpsmp[i];
     }
 
@@ -487,27 +487,27 @@ int SUBnote::noteout(float *outl, float *outr)
 
     //right channel
     if(stereo != 0) {
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+        for(int i = 0; i < synth->buffersize; ++i)
             tmprnd[i] = RND * 2.0f - 1.0f;
         for(int n = 0; n < numharmonics; ++n) {
-            memcpy(tmpsmp, tmprnd, SOUND_BUFFER_SIZE * sizeof(float));
+            memcpy(tmpsmp, tmprnd, synth->bufferbytes);
             for(int nph = 0; nph < numstages; ++nph)
                 filter(rfilter[nph + n * numstages], tmpsmp);
-            for(int i = 0; i < SOUND_BUFFER_SIZE; ++i)
+            for(int i = 0; i < synth->buffersize; ++i)
                 outr[i] += tmpsmp[i];
         }
         if(GlobalFilterR != NULL)
             GlobalFilterR->filterout(&outr[0]);
     }
     else
-        memcpy(outr, outl, SOUND_BUFFER_SIZE * sizeof(float));
+        memcpy(outr, outl, synth->bufferbytes);
     returnTmpBuffer(tmprnd);
     returnTmpBuffer(tmpsmp);
 
     if(firsttick != 0) {
         int n = 10;
-        if(n > SOUND_BUFFER_SIZE)
-            n = SOUND_BUFFER_SIZE;
+        if(n > synth->buffersize)
+            n = synth->buffersize;
         for(int i = 0; i < n; ++i) {
             float ampfadein = 0.5f - 0.5f * cosf(
                 (float) i / (float) n * PI);
@@ -519,16 +519,16 @@ int SUBnote::noteout(float *outl, float *outr)
 
     if(ABOVE_AMPLITUDE_THRESHOLD(oldamplitude, newamplitude))
         // Amplitude interpolation
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+        for(int i = 0; i < synth->buffersize; ++i) {
             float tmpvol = INTERPOLATE_AMPLITUDE(oldamplitude,
                                                  newamplitude,
                                                  i,
-                                                 SOUND_BUFFER_SIZE);
+                                                 synth->buffersize);
             outl[i] *= tmpvol * panning;
             outr[i] *= tmpvol * (1.0f - panning);
         }
     else
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) {
+        for(int i = 0; i < synth->buffersize; ++i) {
             outl[i] *= newamplitude * panning;
             outr[i] *= newamplitude * (1.0f - panning);
         }
@@ -541,8 +541,8 @@ int SUBnote::noteout(float *outl, float *outr)
 
     // Check if the note needs to be computed more
     if(AmpEnvelope->finished() != 0) {
-        for(int i = 0; i < SOUND_BUFFER_SIZE; ++i) { //fade-out
-            float tmp = 1.0f - (float)i / (float)SOUND_BUFFER_SIZE;
+        for(int i = 0; i < synth->buffersize; ++i) { //fade-out
+            float tmp = 1.0f - (float)i / synth->buffersize_f;
             outl[i] *= tmp;
             outr[i] *= tmp;
         }
