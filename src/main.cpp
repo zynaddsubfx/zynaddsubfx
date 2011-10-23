@@ -32,6 +32,7 @@
 #include <getopt.h>
 
 #include "Misc/Master.h"
+#include "Misc/Part.h"
 #include "Misc/Util.h"
 #include "Misc/Dump.h"
 extern Dump dump;
