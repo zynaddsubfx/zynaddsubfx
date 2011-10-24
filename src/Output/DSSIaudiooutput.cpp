@@ -593,6 +593,8 @@ DSSIaudiooutput *DSSIaudiooutput::getInstance(LADSPA_Handle instance)
     return (DSSIaudiooutput *)(instance);
 }
 
+SYNTH_T *synth;
+
 /**
  * The private sole constructor for the DSSIaudiooutput class.
  *
@@ -602,7 +604,8 @@ DSSIaudiooutput *DSSIaudiooutput::getInstance(LADSPA_Handle instance)
  */
 DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate)
 {
-    SAMPLE_RATE = sampleRate;
+    synth = new SYNTH_T;
+    synth->samplerate = sampleRate;
 
     this->sampleRate  = sampleRate;
     this->banksInited = false;
@@ -610,8 +613,8 @@ DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate)
     config.init();
 
     sprng(time(NULL));
-    denormalkillbuf = new float [SOUND_BUFFER_SIZE];
-    for(int i = 0; i < SOUND_BUFFER_SIZE; i++)
+    denormalkillbuf = new float [synth->buffersize];
+    for(int i = 0; i < synth->buffersize; i++)
         denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 
     this->master = new Master();
