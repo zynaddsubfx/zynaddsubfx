@@ -84,6 +84,7 @@ void InMgr::flush()
             break;
 
         case M_PGMCHANGE:
+            master.setProgram(ev.channel, ev.num);
             break;
         }
     }
