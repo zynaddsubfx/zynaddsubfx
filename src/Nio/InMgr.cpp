@@ -8,14 +8,25 @@ using namespace std;
 
 ostream &operator<<(ostream &out, const MidiEvent &ev)
 {
-    if(ev.type == M_NOTE)
+    switch(ev.type) {
+    case M_NOTE:
         out << "MidiNote: note(" << ev.num << ")\n"
             << "          channel(" << ev.channel << ")\n"
             << "          velocity(" << ev.value << ")";
-    else
+        break;
+
+    case M_CONTROLLER:
         out << "MidiCtl: controller(" << ev.num << ")\n"
             << "         channel(" << ev.channel << ")\n"
             << "         value(" << ev.value << ")";
+        break;
+
+    case M_PGMCHANGE:
+        out << "PgmChange: program(" << ev.num << ")\n"
+            << "           channel(" << ev.channel << ")";
+        break;
+    }
+
     return out;
 }
 
@@ -57,17 +68,23 @@ void InMgr::flush()
         queue.pop(ev);
         cout << ev << endl;
 
-        if(M_NOTE == ev.type) {
+        switch(ev.type) {
+        case M_NOTE:
             dump.dumpnote(ev.channel, ev.num, ev.value);
 
             if(ev.value)
                 master.noteOn(ev.channel, ev.num, ev.value);
             else
                 master.noteOff(ev.channel, ev.num);
-        }
-        else {
+            break;
+
+        case M_CONTROLLER:
             dump.dumpcontroller(ev.channel, ev.num, ev.value);
             master.setController(ev.channel, ev.num, ev.value);
+            break;
+
+        case M_PGMCHANGE:
+            break;
         }
     }
 }
