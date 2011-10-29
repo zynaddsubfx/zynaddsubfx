@@ -152,6 +152,13 @@ void *AlsaEngine::MidiThread(void)
                 InMgr::getInstance().putEvent(ev);
                 break;
 
+            case SND_SEQ_EVENT_PGMCHANGE:
+                ev.type    = M_PGMCHANGE;
+                ev.channel = event->data.control.channel;
+                ev.num     = event->data.control.value;
+                InMgr::getInstance().putEvent(ev);
+                break;
+
             case SND_SEQ_EVENT_RESET: // reset to power-on state
                 ev.type    = M_CONTROLLER;
                 ev.channel = event->data.control.channel;

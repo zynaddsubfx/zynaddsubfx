@@ -360,6 +360,13 @@ void JackEngine::handleMidi(unsigned long frames)
                 InMgr::getInstance().putEvent(ev);
                 break;
 
+            case 0xC0: /* program change */
+                ev.type  = M_PGMCHANGE;
+                ev.num   = midi_data[1];
+                ev.value = 0;
+                InMgr::getInstance().putEvent(ev);
+                break;
+
             case 0xE0: /* pitch bend */
                 ev.type  = M_CONTROLLER;
                 ev.num   = C_pitchwheel;

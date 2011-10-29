@@ -52,6 +52,13 @@ void MidiIn::midiProcess(unsigned char head,
             ev.value   = value;
             InMgr::getInstance().putEvent(ev);
             break;
+        case 0xc0: //Program Change
+            ev.type    = M_PGMCHANGE;
+            ev.channel = chan;
+            ev.num     = num;
+            ev.value   = 0;
+            InMgr::getInstance().putEvent(ev);
+            break;
         case 0xe0: //Pitch Wheel
             ev.type    = M_CONTROLLER;
             ev.channel = chan;
