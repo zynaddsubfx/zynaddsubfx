@@ -195,9 +195,18 @@ void Master::setController(char chan, int type, int par)
 
 void Master::setProgram(char chan, unsigned int pgm)
 {
-    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        if(chan == part[npart]->Prcvchn)
+    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
+        if(chan == part[npart]->Prcvchn) {
             bank.loadfromslot(pgm, part[npart]);
+
+            //Hack to get pad note parameters to update
+            //this is not real time safe and makes assumptions about the calling
+            //convention of this function...
+            pthread_mutex_unlock(&mutex);
+            part[npart]->applyparameters();
+            pthread_mutex_lock(&mutex);
+        }
+    }
 }
 
 void Master::vuUpdate(const float *outl, const float *outr)
