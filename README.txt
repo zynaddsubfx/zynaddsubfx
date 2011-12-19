@@ -26,58 +26,49 @@ ZynAddSubFX is also available on many Internet sites like:
 
 Requirements:
 -------------
-           - a fast computer
-           - Linux (tested with RedHat 7.2,7.3,etc.) or Windows
-           - FFTW 3.x.x  - necessary for Fast Fourier computations
-           - MXML-2.5 library from www.minixml.org
-           - zlib library from http://www.zlib.org - this exists in most Linux distributions
-               - (for Linux) OpenSoundSystem (OSS) (if you don't have ALSA, only)
-           - (for Windows) pthreads, portaudio
+- a fast computer
+- Linux or Windows
+- FFTW 3.x.x  - necessary for Fast Fourier computations
+- MXML-2.5 or more recent library from www.minixml.org
+- zlib library from http://www.zlib.org
+- (for Linux) OpenSoundSystem (OSS) (if you don't have ALSA, only)
+- (for Windows) pthreads, portaudio
 
 Not required, but recommended:
----------------------------
-
-    - FLTK 1.x.x (tested with fltk 1.1.0, 1.1.1, 1.1.2,etc.)
-    - ALSA 0.9.x or later (with OSS emulation, if you don't use JACK)
-    - JACK - if you want to use it you must enable compilation for JACK in Makefile.inc
-    - a VST host for the VST version [For more information see:
-      http://www.kvraudio.com/forum/viewtopic.php?t=268277&sid=95be0b6c9909300d566006428bcbb97d]
+------------------------------
+- FLTK 1.x.x (tested with fltk 1.1.0, 1.1.1, 1.1.2,etc.)
+- ALSA 0.9.x or later (with OSS emulation, if you don't use JACK)
+- JACK
+- a VST host for the VST version [For more information see:
+  http://www.kvraudio.com/forum/viewtopic.php?t=268277&sid=95be0b6c9909300d566006428bcbb97d]
 
 Compilation:
 ------------
-    For the main program see doc/build.txt .
+    For the main program see doc/build.txt.
     To compile the Spliter, run "make" from the "Spliter" directory.
     To compile the Controller, run "make" from the "Controller" directory.
 
 Running on LINUX
 ----------------
-  *AUDIO OUTPUT
-   A) OSS (Open Sound System)
-   B) JACK (JACK Audio Connection Kit)
+Under linux there are several options for both audio output and MIDI input.
+Defaults are set at compile time and the desired backend can be set when starting ZynAddSubFX with the '-I' and '-O' options.
+The currently supported backends are:
 
-  *MIDI INPUT*
-    There are 2 possibilities of midi inputs (depends on what you have chosen in Makefile.inc to use - OSS or ALSA).
-    A) ALSA (Advanced Linux Sound Architecture)
-    1) Launch ZynAddSubFX
-    2) ZynAddSubFX will make a virtual MIDI port.
-    You can connect other midi devices (like a real MIDI keyboard, midi sequencers which supports ALSA or virtual keyboard - like vkeybd).
-    To connect, use "aconnect" or "alsa-patch-bay"; usualy the port of ZynAddSubFX is 128:0 or 129:0.
-    3) You are ready to play
+- Audio Output
+    * ALSA (Advanced Linux Sound Architecture)
+    * OSS (Open Sound System)
+    * JACK (JACK Audio Connection Kit)
+    * Port Audio
 
-    It is possible to use midi sequencer/other software that doesn't supports ALSA with ZynAddSubFX, but this is a bit more complicated.
-    Search on Internet for "HOWTO Use MIDI Sequencers With Softsynths" by Frank Barknecht, if you want to do this.
-
-
-    B) OSS (Open Sound System)
-       1) Launch ZynAddSubFX
-       2) Connect the MIDI keyboard
-
-       As you have seen the OSS option needs a real midi keyboard. If you don't have it, you can download/install ALSA from www.alsa-project.org
+- MIDI Input
+    * ALSA
+    * OSS
+    * JACK
 
 Running on WINDOWS
 ------------------
 NOTE: At this time only older versions of ZynAddSubFX were compiled on windows
-      See older versions on sf.net
+      See older versions on sf.net (ie version 2.2.1)
     If you launch zynaddsubfx.exe and nothing happens, you need pthreadGC.dll  in the same directory (or windows directory). The dll files are distribuited with ZynAddSubFX windows binaries.
     It might be possible that the latency will be very high. If this happens, you have to set the environment variable PA_MIN_LATENCY_MSEC to a value that represents the latency in miliseconds.
     Eg: (in autoexec.bat or launched before running ZynAddSubFX) "set PA_MIN_LATENCY_MSEC=50"
@@ -85,6 +76,7 @@ NOTE: At this time only older versions of ZynAddSubFX were compiled on windows
     If you have more cards, you can select the desired card where you can play audio with the environment variable "PA_RECOMMENDED_OUTPUT_DEVICE"
     Eg: "set PA_RECOMMENDED_OUTPUT_DEVICE=1"
     A better way to set all of this, I will put on next versions.
+
 
 Please send me instruments,banks,master settings,songs(midi+...xmz files) done with ZynAddSubFX. I'll appreciate this.
 

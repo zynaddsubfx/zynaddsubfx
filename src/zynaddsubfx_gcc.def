@@ -1,3 +1,0 @@
-LIBRARY			ZYNADDSUBFX
-DESCRIPTION		'ZynAddSubFX for VST'
-EXPORTS			main=main_plugin

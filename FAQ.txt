@@ -23,5 +23,5 @@ A3) Look in src/globals.h and change there these values. You don't have to chang
 
 
 Q4) How do I enable Jack support on ZynAddSubFX ?
-A4) Look in "Makefile.inc" from "src/" directory for more information. It is highly recommended that the Jack samplerate to be equal to ZynAddSubFX samplerate (SAMPLE_RATE from globals.h), otherwise the resampling will be done and this will decrease the quality a bit.
+A4) If your system has the jack libraries installed, ZynAddSubFX should automatically build with jack support. It is highly recommended that the Jack samplerate to be equal to ZynAddSubFX samplerate (SAMPLE_RATE from globals.h), otherwise the resampling will be done and this will decrease the quality a bit.
 
