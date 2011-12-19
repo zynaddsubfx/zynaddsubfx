@@ -12,7 +12,7 @@ CXXTEST_ADD_TEST(SUBnoteTest SubNoteTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/SubNote
 CXXTEST_ADD_TEST(OscilGenTest OscilGenTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/OscilGenTest.h)
 CXXTEST_ADD_TEST(RandTest RandTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/RandTest.h)
 
-set(test_lib ${NONGUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARY})
+set(test_lib ${NONGUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARY} pthread)
 message(STATUS "Linking tests with: ${test_lib}")
 target_link_libraries(ADnoteTest     ${test_lib})
 target_link_libraries(SUBnoteTest    ${test_lib})
