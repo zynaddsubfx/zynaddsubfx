@@ -21,16 +21,6 @@ pkg_search_module(LASH lash-1.0)
 mark_as_advanced(LASH_LIBRARIES)
 pkg_search_module(DSSI dssi>=0.9.0)
 mark_as_advanced(DSSI_LIBRARIES)
-#simple cxxtest find until cmake 2.6 support is changed
-find_path(CXXTEST_INCLUDE_DIR cxxtest/TestSuite.h)
-message(STATUS "searching for cxxtest...")
-if(CXXTEST_INCLUDE_DIR)
-    message(STATUS "Found CxxTest: ${CXXTEST_INCLUDE_DIR}")
-    set(CXXTEST_FOUND true)
-else()
-    message(STATUS "CxxTest not found...")
-    set(CXXTEST_FOUND false)
-endif()
 
 ######### Settings ###########
 # NOTE: These cache variables should normally not be changed in this
