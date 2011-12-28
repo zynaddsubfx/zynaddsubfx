@@ -47,6 +47,9 @@ SET (DssiEnable ${DSSI_FOUND} CACHE BOOL
 # Now, handle the incoming settings and set define flags/variables based
 # on this
 
+# Add version information
+add_definitions(-DVERSION="${VERSION}")
+
 if (GuiModule STREQUAL qt AND QT_FOUND)
 	set (QtGui TRUE)
 elseif(GuiModule STREQUAL fltk AND FLTK_FOUND)

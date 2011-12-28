@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
     dump.startnow();
     int noui = 0;
     cerr
-    << "\nZynAddSubFX - Copyright (c) 2002-2009 Nasca Octavian Paul and others"
+    << "\nZynAddSubFX - Copyright (c) 2002-2011 Nasca Octavian Paul and others"
     << endl;
     cerr << "Compiled: " << __DATE__ << " " << __TIME__ << endl;
     cerr << "This program is free software (GNU GPL v.2 or later) and \n";
@@ -237,6 +237,9 @@ int main(int argc, char *argv[])
             "help", 2, NULL, 'h'
         },
         {
+            "version",2,NULL,'v'
+        },
+        {
             "named", 1, NULL, 'N'
         },
         {
@@ -253,7 +256,7 @@ int main(int argc, char *argv[])
         }
     };
     opterr = 0;
-    int option_index = 0, opt, exitwithhelp = 0;
+    int option_index = 0, opt, exitwithhelp = 0, exitwithversion = 0;
 
     string loadfile, loadinstrument;
 
@@ -263,7 +266,7 @@ int main(int argc, char *argv[])
         /**\todo check this process for a small memory leak*/
         opt = getopt_long(argc,
                           argv,
-                          "l:L:r:b:o:I:O:N:haSDUY",
+                          "l:L:r:b:o:I:O:N:hvaSDUY",
                           opts,
                           &option_index);
         char *optarguments = optarg;
@@ -280,6 +283,9 @@ int main(int argc, char *argv[])
         switch(opt) {
             case 'h':
                 exitwithhelp = 1;
+                break;
+            case 'v':
+                exitwithversion = 1;
                 break;
             case 'Y':/* this command a dummy command (has NO effect)
                 and is used because I need for NSIS installer
@@ -355,9 +361,14 @@ int main(int argc, char *argv[])
         }
     }
 
+    if(exitwithversion) {
+        cout << "Version: " << VERSION << endl;
+        return 0;
+    }
     if(exitwithhelp != 0) {
         cout << "Usage: zynaddsubfx [OPTION]\n\n"
              << "  -h , --help \t\t\t\t Display command-line help and exit\n"
+             << "  -v , --version \t\t\t Display version and exit\n"
              << "  -l file, --load=FILE\t\t\t Loads a .xmz file\n"
              << "  -L file, --load-instrument=FILE\t Loads a .xiz file\n"
              << "  -r SR, --sample-rate=SR\t\t Set the sample rate SR\n"
