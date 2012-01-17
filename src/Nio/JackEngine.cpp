@@ -171,6 +171,9 @@ bool JackEngine::openAudio()
     if((NULL != audio.ports[0]) && (NULL != audio.ports[1])) {
         audio.jackSamplerate = jack_get_sample_rate(jackClient);
         audio.jackNframes    = jack_get_buffer_size(jackClient);
+        samplerate = audio.jackSamplerate;
+        bufferSize = audio.jackNframes;
+
 
         //Attempt to autoConnect when specified
         if(Nio::autoConnect) {

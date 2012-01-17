@@ -46,8 +46,7 @@ class JackEngine:public AudioOut, MidiIn
         void setAudioEn(bool nval);
         bool getAudioEn() const;
 
-        unsigned int getSamplerate() { return audio.jackSamplerate; }
-        unsigned int getBuffersize() { return audio.jackNframes; }
+        int getBuffersize() { return audio.jackNframes; }
 
         std::string clientName();
         int clientId();

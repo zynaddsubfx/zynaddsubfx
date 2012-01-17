@@ -1,6 +1,7 @@
 #include "OutMgr.h"
 #include <algorithm>
 #include <iostream>
+#include <cassert>
 #include "AudioOut.h"
 #include "Engine.h"
 #include "EngineMgr.h"
@@ -68,10 +69,7 @@ const Stereo<float *> OutMgr::tick(unsigned int frameSize)
         pthread_mutex_unlock(&(master.mutex));
         addSmps(outl, outr);
     }
-    Stereo<float *> ans = priBuffCurrent;
-    ans.l -= frameSize;
-    ans.r -= frameSize;
-    //cout << storedSmps() << '=' << frameSize << endl;
+    stales = frameSize;
     return priBuf;
 }
 
@@ -118,28 +116,50 @@ string OutMgr::getSink() const
     return "ERROR";
 }
 
+//performs linear interpolation
+static float interpolate(const float *data, size_t len, float pos)
+{
+    assert(len > (size_t)pos+1);
+    const int l_pos = (int)pos,
+              r_pos = l_pos + 1;
+    const float leftness = pos - l_pos;
+    return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
+}
+
+//perform a cheap linear interpolation for resampling
+//This will result in some distortion at frame boundries
+//returns number of samples produced
+static size_t resample(float *dest, const float *src, float s_in, float s_out, size_t elms)
+{
+    size_t out_elms = elms*s_out/s_in;
+    float r_pos = 0.0f;
+    for(int i = 0; i < (int)out_elms; ++i, r_pos += s_in/s_out)
+        dest[i] = interpolate(src, elms, r_pos);
+
+    return out_elms;
+}
+
 void OutMgr::addSmps(float *l, float *r)
 {
     //allow wave file to syphon off stream
     wave->push(Stereo<float *>(l, r), synth->buffersize);
 
-    if(currentOut->getSampleRate() != (size_t)synth->samplerate) { //we need to resample
-        //cout << "BAD RESAMPLING" << endl;
-        Stereo<Sample> smps(Sample(synth->buffersize, l), Sample(
-                                synth->buffersize,
-                                r));
-        smps.l.resample(synth->samplerate, currentOut->getSampleRate());
-        smps.r.resample(synth->samplerate, currentOut->getSampleRate());
-        memcpy(priBuffCurrent.l, smps.l.c_buf(), synth->bufferbytes);
-        memcpy(priBuffCurrent.r, smps.r.c_buf(), synth->bufferbytes);
+    const int s_out  = currentOut->getSampleRate(),
+              s_sys = synth->samplerate;
+
+    if(s_out != s_sys) { //we need to resample
+        const size_t steps = resample(priBuffCurrent.l, l, s_sys, s_out, synth->buffersize);
+        resample(priBuffCurrent.r, r, s_sys, s_out, synth->buffersize);
+
+        priBuffCurrent.l += steps;
+        priBuffCurrent.r += steps;
     }
     else { //just copy the samples
         memcpy(priBuffCurrent.l, l, synth->bufferbytes);
         memcpy(priBuffCurrent.r, r, synth->bufferbytes);
+        priBuffCurrent.l += synth->buffersize;
+        priBuffCurrent.r += synth->buffersize;
     }
-    priBuffCurrent.l += synth->buffersize;
-    priBuffCurrent.r += synth->buffersize;
-    stales += synth->buffersize;
 }
 
 void OutMgr::removeStaleSmps()
@@ -147,9 +167,19 @@ void OutMgr::removeStaleSmps()
     if(!stales)
         return;
 
-    //memset is possibly unneeded
-    memset(priBuf.l, '0', 4096 * sizeof(float));
-    memset(priBuf.r, '0', 4096 * sizeof(float));
-    priBuffCurrent = priBuf;
+    const int leftover = storedSmps() - stales;
+
+    assert(leftover>-1);
+
+    //leftover samples [seen at very low latencies]
+    if(leftover) {
+        memmove(priBuf.l, priBuffCurrent.l - leftover, leftover * sizeof(float));
+        memmove(priBuf.r, priBuffCurrent.r - leftover, leftover * sizeof(float));
+        priBuffCurrent.l = priBuf.l + leftover;
+        priBuffCurrent.r = priBuf.r + leftover;
+    }
+    else
+        priBuffCurrent = priBuf;
+
     stales = 0;
 }
