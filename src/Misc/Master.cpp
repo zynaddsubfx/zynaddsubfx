@@ -34,10 +34,16 @@
 #include <sys/types.h>
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 
 #include <unistd.h>
 
 using namespace std;
+
+vuData::vuData(void)
+    :outpeakl(0.0f), outpeakr(0.0f), maxoutpeakl(0.0f), maxoutpeakr(0.0f),
+    rmspeakl(0.0f), rmspeakr(0.0f), clipped(0)
+{}
 
 Master::Master()
 {
@@ -234,8 +240,8 @@ void Master::vuUpdate(const float *outl, const float *outr)
         vu.rmspeakl += outl[i] * outl[i];
         vu.rmspeakr += outr[i] * outr[i];
     }
-    vu.rmspeakl = sqrt(vu.rmspeakl / synth->buffersize);
-    vu.rmspeakr = sqrt(vu.rmspeakr / synth->buffersize);
+    vu.rmspeakl = sqrt(vu.rmspeakl / synth->buffersize_f);
+    vu.rmspeakr = sqrt(vu.rmspeakr / synth->buffersize_f);
 
     //Part Peak computation (for Part vumeters or fake part vumeters)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {

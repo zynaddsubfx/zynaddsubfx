@@ -39,11 +39,12 @@ typedef enum {
 
 extern Dump dump;
 
-typedef struct vuData_t {
+struct vuData {
+    vuData(void);
     float outpeakl, outpeakr, maxoutpeakl, maxoutpeakr,
           rmspeakl, rmspeakr;
     int clipped;
-} vuData;
+};
 
 
 /** It sends Midi Messages to Parts, receives samples from parts,
