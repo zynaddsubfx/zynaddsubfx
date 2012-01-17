@@ -1,6 +1,7 @@
 #include "EngineMgr.h"
 #include <algorithm>
 #include <iostream>
+#include "Nio.h"
 #include "InMgr.h"
 #include "OutMgr.h"
 #include "AudioOut.h"
@@ -65,6 +66,13 @@ EngineMgr::EngineMgr()
     defaultOut = dynamic_cast<AudioOut *>(defaultEng);
 
     defaultIn = dynamic_cast<MidiIn *>(defaultEng);
+
+    //Accept command line options
+    if(!Nio::defaultSink.empty())
+        setOutDefault(Nio::defaultSink);
+
+    if(!Nio::defaultSource.empty())
+        setInDefault(Nio::defaultSource);
 }
 
 EngineMgr::~EngineMgr()
@@ -140,6 +148,11 @@ bool EngineMgr::setInDefault(string name)
         defaultIn = chosen;
         return true;
     }
+
+    //Warn user
+    cerr << "Error: " << name << " is not a recognized MIDI input source" << endl;
+    cerr << "       Defaulting to the NULL input source" << endl;
+
     return false;
 }
 
@@ -150,5 +163,9 @@ bool EngineMgr::setOutDefault(string name)
         defaultOut = chosen;
         return true;
     }
+
+    //Warn user
+    cerr << "Error: " << name << " is not a recognized audio backend" << endl;
+    cerr << "       Defaulting to the NULL audio backend" << endl;
     return false;
 }

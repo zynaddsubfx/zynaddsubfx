@@ -121,8 +121,11 @@ bool Master::mutexLock(lockset request)
 
 Master &Master::getInstance()
 {
-    static Master instance;
-    return instance;
+    static Master *instance = NULL;
+    if(!instance)
+        instance = new Master;
+
+    return *instance;
 }
 
 /*

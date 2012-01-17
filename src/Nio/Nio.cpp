@@ -5,68 +5,54 @@
 #include "MidiIn.h"
 #include "AudioOut.h"
 #include <iostream>
-using namespace std;
+#include <algorithm>
+using std::string;
+using std::set;
+using std::cerr;
+using std::endl;
 
-Nio &Nio::getInstance()
-{
-    static Nio instance;
-    return instance;
-}
+InMgr     *in  = NULL;
+OutMgr    *out = NULL;
+EngineMgr *eng = NULL;
+string     postfix;
 
-Nio::Nio()
-    :autoConnect(false),
-      in(InMgr::getInstance()), //Enable input wrapper
-      out(OutMgr::getInstance()), //Initialize the Output Systems
-      eng(EngineMgr::getInstance()), //Initialize The Engines
-      postfix("") //no default postfix
-{}
-
-Nio::~Nio()
-{
-    stop();
-}
+bool   Nio::autoConnect = false;
+string Nio::defaultSource;
+string Nio::defaultSink;
 
 bool Nio::start()
 {
-    return eng.start(); //Drivers start your engines!
+    in  = &InMgr::getInstance(); //Enable input wrapper
+    out = &OutMgr::getInstance(); //Initialize the Output Systems
+    eng = &EngineMgr::getInstance(); //Initialize The Engines
+    return eng->start();
 }
 
 void Nio::stop()
 {
-    eng.stop();
+    eng->stop();
 }
 
-int Nio::setDefaultSource(string name)
+void Nio::setDefaultSource(string name)
 {
-    if(name.empty())
-        return 0;
-
-    if(!eng.setInDefault(name)) {
-        cerr << "There is no input for " << name << endl;
-        return false;
-    }
-    return 0;
+    std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+    defaultSource = name;
 }
 
-
-int Nio::setDefaultSink(string name)
+void Nio::setDefaultSink(string name)
 {
-    if(name.empty())
-        return 0;
-
-    if(!eng.setOutDefault(name))
-        cerr << "There is no output for " << name << endl;
-    return 0;
+    std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+    defaultSink = name;
 }
 
 bool Nio::setSource(string name)
 {
-    return in.setSource(name);
+    return in->setSource(name);
 }
 
 bool Nio::setSink(string name)
 {
-    return out.setSink(name);
+    return out->setSink(name);
 }
 
 void Nio::setPostfix(std::string post)
@@ -74,38 +60,37 @@ void Nio::setPostfix(std::string post)
     postfix = post;
 }
 
-std::string Nio::getPostfix(void) const
+std::string Nio::getPostfix(void)
 {
     return postfix;
 }
 
-
-set<string> Nio::getSources() const
+set<string> Nio::getSources(void)
 {
     set<string> sources;
-    for(list<Engine *>::iterator itr = eng.engines.begin();
-        itr != eng.engines.end(); ++itr)
+    for(std::list<Engine *>::iterator itr = eng->engines.begin();
+        itr != eng->engines.end(); ++itr)
         if(dynamic_cast<MidiIn *>(*itr))
             sources.insert((*itr)->name);
     return sources;
 }
 
-set<string> Nio::getSinks() const
+set<string> Nio::getSinks(void)
 {
     set<string> sinks;
-    for(list<Engine *>::iterator itr = eng.engines.begin();
-        itr != eng.engines.end(); ++itr)
+    for(std::list<Engine *>::iterator itr = eng->engines.begin();
+        itr != eng->engines.end(); ++itr)
         if(dynamic_cast<AudioOut *>(*itr))
             sinks.insert((*itr)->name);
     return sinks;
 }
 
-string Nio::getSource() const
+string Nio::getSource()
 {
-    return in.getSource();
+    return in->getSource();
 }
 
-string Nio::getSink() const
+string Nio::getSink()
 {
-    return out.getSink();
+    return out->getSink();
 }

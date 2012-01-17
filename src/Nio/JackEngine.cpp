@@ -53,7 +53,7 @@ bool JackEngine::connectServer(string server)
 
 
     string clientname = "zynaddsubfx";
-    string postfix    = Nio::getInstance().getPostfix();
+    string postfix    = Nio::getPostfix();
     if(!postfix.empty())
         clientname += "_" + postfix;
     jack_status_t jackstatus;
@@ -74,8 +74,6 @@ bool JackEngine::connectServer(string server)
         cerr << "Error, failed to open jack client on server: " << server
              << " status " << jackstatus << endl;
     return false;
-
-    return true;
 }
 
 bool JackEngine::connectJack()
@@ -175,7 +173,7 @@ bool JackEngine::openAudio()
         audio.jackNframes    = jack_get_buffer_size(jackClient);
 
         //Attempt to autoConnect when specified
-        if(Nio::getInstance().autoConnect) {
+        if(Nio::autoConnect) {
             const char **outPorts = jack_get_ports(
                 jackClient,
                 NULL,

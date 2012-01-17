@@ -162,7 +162,7 @@ void exitprogram()
     pthread_mutex_lock(&master->mutex);
     pthread_mutex_unlock(&master->mutex);
 
-    Nio::getInstance().stop();
+    Nio::stop();
 
 #ifndef DISABLE_GUI
     delete ui;
@@ -199,10 +199,6 @@ int main(int argc, char *argv[])
     synth->alias(); //build aliases
 
     sprng(time(NULL));
-    //produce denormal buf
-    denormalkillbuf = new float [synth->buffersize];
-    for(int i = 0; i < synth->buffersize; ++i)
-        denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 
     /* Parse command-line options */
     struct option opts[] = {
@@ -339,20 +335,18 @@ int main(int argc, char *argv[])
                 dump.startnow();
                 break;
             case 'N':
-                Nio::getInstance().setPostfix(optarguments);
+                Nio::setPostfix(optarguments);
                 break;
             case 'I':
                 if(optarguments)
-                    if(Nio::getInstance().setDefaultSource(optarguments))
-                        exit(1);
+                    Nio::setDefaultSource(optarguments);
                 break;
             case 'O':
                 if(optarguments)
-                    if(Nio::getInstance().setDefaultSink(optarguments))
-                        exit(1);
+                    Nio::setDefaultSink(optarguments);
                 break;
             case 'a':
-                Nio::getInstance().autoConnect = true;
+                Nio::autoConnect = true;
                 break;
             case '?':
                 cerr << "ERROR:Bad option or parameter.\n" << endl;
@@ -360,6 +354,8 @@ int main(int argc, char *argv[])
                 break;
         }
     }
+
+    synth->alias();
 
     if(exitwithversion) {
         cout << "Version: " << VERSION << endl;
@@ -386,6 +382,11 @@ int main(int argc, char *argv[])
 
         return 0;
     }
+
+    //produce denormal buf
+    denormalkillbuf = new float [synth->buffersize];
+    for(int i = 0; i < synth->buffersize; ++i)
+        denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 
     initprogram(argc, argv);
 
@@ -432,7 +433,7 @@ int main(int argc, char *argv[])
     }
 
     //Run the Nio system
-    bool ioGood = Nio::getInstance().start();
+    bool ioGood = Nio::start();
 
 #ifndef DISABLE_GUI
     if(noui == 0)

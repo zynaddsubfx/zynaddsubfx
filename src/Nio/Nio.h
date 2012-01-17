@@ -6,38 +6,29 @@
 /**Interface to Nio Subsystem
  *
  * Should be only externally included header */
-class Nio
+namespace Nio
 {
-    public:
-        static Nio &getInstance();
-        ~Nio();
+    bool start(void);
+    void stop(void);
 
-        bool start();
-        void stop();
+    void setDefaultSource(std::string name);
+    void setDefaultSink(std::string name);
 
-        int setDefaultSource(std::string name);
-        int setDefaultSink(std::string name);
+    bool setSource(std::string name);
+    bool setSink(std::string name);
 
-        bool setSource(std::string name);
-        bool setSink(std::string name);
+    void setPostfix(std::string post);
+    std::string getPostfix(void);
 
-        void setPostfix(std::string post);
-        std::string getPostfix(void) const;
+    std::set<std::string> getSources(void);
+    std::set<std::string> getSinks(void);
 
-        std::set<std::string> getSources() const;
-        std::set<std::string> getSinks() const;
+    std::string getSource(void);
+    std::string getSink(void);
 
-        std::string getSource() const;
-        std::string getSink()   const;
-
-        bool autoConnect;
-    private:
-        Nio();
-
-        class InMgr & in;
-        class OutMgr & out;
-        class EngineMgr & eng;
-        std::string postfix;
+    extern bool autoConnect;
+    extern std::string defaultSource;
+    extern std::string defaultSink;
 };
 
 #endif

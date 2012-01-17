@@ -31,6 +31,8 @@ OutMgr::OutMgr()
     //init samples
     outr = new float[synth->buffersize];
     outl = new float[synth->buffersize];
+    memset(outl, 0, synth->bufferbytes);
+    memset(outr, 0, synth->bufferbytes);
 }
 
 OutMgr::~OutMgr()
@@ -121,7 +123,7 @@ void OutMgr::addSmps(float *l, float *r)
     //allow wave file to syphon off stream
     wave->push(Stereo<float *>(l, r), synth->buffersize);
 
-    if(currentOut->getSampleRate() != synth->samplerate) { //we need to resample
+    if(currentOut->getSampleRate() != (size_t)synth->samplerate) { //we need to resample
         //cout << "BAD RESAMPLING" << endl;
         Stereo<Sample> smps(Sample(synth->buffersize, l), Sample(
                                 synth->buffersize,
