@@ -1266,7 +1266,28 @@ FUNC(sqr)
     return -atanf(sinf(x * 2.0f * PI) * a);
 }
 
+FUNC(spike)
+{
+    float b = a * 0.66666; // the width of the range: if a == 0.5, b == 0.33333
+
+    if(x < 0.5){
+        if(x < (0.5 - (b / 2.0))) return 0.0;
+        else {
+            x = (x + (b / 2) - 0.5) * (2.0 / b); // shift to zero, and expand to range from 0 to 1
+            return x * (2.0 / b); // this is the slope: 1 / (b / 2)
+        }
+    }
+    else {
+      if(x > (0.5 + (b / 2.0))) return 0.0;
+      else {
+          x = (x - 0.5) * (2.0 / b);
+          return (1 - x) * (2.0 / b);
+      }
+    }
+}
+
 typedef float (*base_func)(float, float);
+
 base_func getBaseFunction(unsigned char func)
 {
     if(!func)
@@ -1276,7 +1297,7 @@ base_func getBaseFunction(unsigned char func)
         return NULL;
 
     func--;
-    assert(func < 13);
+    assert(func < 14);
     base_func functions[] = {
         basefunc_triangle,
         basefunc_pulse,
@@ -1291,6 +1312,7 @@ base_func getBaseFunction(unsigned char func)
         basefunc_absstretchsine,
         basefunc_chebyshev,
         basefunc_sqr,
+        basefunc_spike,
     };
     return functions[func];
 }
