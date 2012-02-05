@@ -24,7 +24,6 @@
 #define CHORUS_H
 #include "Effect.h"
 #include "EffectLFO.h"
-#include "../Samples/Sample.h"
 #include "../Misc/Stereo.h"
 
 #define MAX_CHORUS_DELAY 250.0f //ms
@@ -99,10 +98,9 @@ class Chorus:public Effect
         float depth, delay, fb;
         float dl1, dl2, dr1, dr2, lfol, lfor;
         int   maxdelay;
-        Stereo<Sample> delaySample;
-        int   dlk, drk, dlhi, dlhi2;
+        Stereo<float*> delaySample;
+        int   dlk, drk, dlhi;
         float getdelay(float xlfo);
-        float dllo, mdel;
 };
 
 #endif

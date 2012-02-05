@@ -22,6 +22,7 @@
 
 #include "Util.h"
 #include <vector>
+#include <cassert>
 #include <math.h>
 #include <stdio.h>
 #include <err.h>
@@ -201,4 +202,21 @@ void clearTmpBuffers(void)
 float SYNTH_T::numRandom() const
 {
     return RND;
+}
+
+float interpolate(const float *data, size_t len, float pos)
+{
+    assert(len > (size_t)pos+1);
+    const int l_pos = (int)pos,
+              r_pos = l_pos + 1;
+    const float leftness = pos - l_pos;
+    return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
+}
+
+float cinterpolate(const float *data, size_t len, float pos)
+{
+    const int l_pos = ((int)pos) % len,
+              r_pos = (l_pos + 1) % len;
+    const float leftness = pos - l_pos;
+    return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
 }

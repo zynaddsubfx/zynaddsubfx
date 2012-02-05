@@ -9,7 +9,6 @@
 #include "WavEngine.h"
 #include "../Misc/Master.h"
 #include "../Misc/Util.h" //for set_realtime()
-#include "../Samples/Sample.h" //for resampling
 
 using namespace std;
 
@@ -114,16 +113,6 @@ string OutMgr::getSink() const
         return "ERROR";
     }
     return "ERROR";
-}
-
-//performs linear interpolation
-static float interpolate(const float *data, size_t len, float pos)
-{
-    assert(len > (size_t)pos+1);
-    const int l_pos = (int)pos,
-              r_pos = l_pos + 1;
-    const float leftness = pos - l_pos;
-    return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
 }
 
 //perform a cheap linear interpolation for resampling

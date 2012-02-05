@@ -25,7 +25,6 @@
 
 #include "Effect.h"
 #include "../Misc/Stereo.h"
-#include "../Samples/Sample.h"
 
 /**Echo Effect*/
 class Echo:public Effect

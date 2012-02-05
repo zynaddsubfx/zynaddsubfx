@@ -220,7 +220,6 @@ set(NONGUI_LIBRARIES
 	zynaddsubfx_effect
 	zynaddsubfx_params
 	zynaddsubfx_dsp
-	zynaddsubfx_samples
 	zynaddsubfx_nio
 	)
 
@@ -229,7 +228,6 @@ add_subdirectory(Synth)
 add_subdirectory(Effects)
 add_subdirectory(Params)
 add_subdirectory(DSP)
-add_subdirectory(Samples)
 if(CompileTests)
 	add_subdirectory(Tests)
 endif(CompileTests)
