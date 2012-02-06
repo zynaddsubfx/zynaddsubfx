@@ -248,13 +248,16 @@ int main(int argc, char *argv[])
             "input", 1, NULL, 'I'
         },
         {
+            "exec-after-init", 1, NULL, 'e'
+        },
+        {
             0, 0, 0, 0
         }
     };
     opterr = 0;
     int option_index = 0, opt, exitwithhelp = 0, exitwithversion = 0;
 
-    string loadfile, loadinstrument;
+    string loadfile, loadinstrument, execAfterInit;
 
     while(1) {
         int tmp = 0;
@@ -262,7 +265,7 @@ int main(int argc, char *argv[])
         /**\todo check this process for a small memory leak*/
         opt = getopt_long(argc,
                           argv,
-                          "l:L:r:b:o:I:O:N:hvaSDUY",
+                          "l:L:r:b:o:I:O:N:e:hvaSDUY",
                           opts,
                           &option_index);
         char *optarguments = optarg;
@@ -348,6 +351,9 @@ int main(int argc, char *argv[])
             case 'a':
                 Nio::autoConnect = true;
                 break;
+            case 'e':
+                GETOP(execAfterInit);
+                break;
             case '?':
                 cerr << "ERROR:Bad option or parameter.\n" << endl;
                 exitwithhelp = 1;
@@ -378,7 +384,9 @@ int main(int argc, char *argv[])
              << "  -N , --named\t\t\t\t Postfix IO Name when possible\n"
              << "  -a , --auto-connect\t\t\t AutoConnect when using JACK\n"
              << "  -O , --output\t\t\t\t Set Output Engine\n"
-             << "  -I , --input\t\t\t\t Set Input Engine" << endl;
+             << "  -I , --input\t\t\t\t Set Input Engine\n"
+             << "  -e , --exec-after-init\t\t Run post-initialization script\n"
+             << endl;
 
         return 0;
     }
@@ -439,6 +447,13 @@ int main(int argc, char *argv[])
     if(noui == 0)
         pthread_create(&thr3, NULL, thread3, (void *)!ioGood);
 #endif
+
+    if(!execAfterInit.empty()) {
+        cout << "Executing user supplied command: " << execAfterInit << endl;
+        if(system(execAfterInit.c_str()) == -1)
+            cerr << "Command Failed..." << endl;
+    }
+
 
     //TODO look into a conditional variable here, it seems to match usage
     while(Pexitprogram == 0) {
