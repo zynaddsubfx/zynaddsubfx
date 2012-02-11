@@ -1001,4 +1001,18 @@
 
 17 Aug 2010 (Paul Nasca)
 	   - small bugix on adsynth.cpp
-	   
+
+22 May 2010 (Mark McCurry)
+	  - Mergin Nio backend
+
+18 Aug 2011 (Mark McCurry)
+	  - Fixing DSSI subsystem
+
+29 Oct 2011 (Damien Goutte-Gattat)
+	  - Added Bank select midi support
+
+05 Feb 2012 (Liven Moors)
+	  - Added spike waveform to oscilator options
+
+06 Feb 2012 (Mark McCurry)
+	  - Adding --exec-after-init option

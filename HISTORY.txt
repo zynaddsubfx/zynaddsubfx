@@ -1,3 +1,12 @@
+2.4.2
+        - New IO backend support
+        - MIDI bank select
+        - Spike waveform
+        - Faster subsynth
+        - --exec-after-init flag
+        - Version information compiled in
+        - Misc Bug fixes
+
 2.4.1 (27 Jun 2010)
         - Azerty layout
         - XML bug fixes
