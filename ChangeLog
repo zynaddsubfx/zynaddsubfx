@@ -1016,3 +1016,6 @@
 
 06 Feb 2012 (Mark McCurry)
 	  - Adding --exec-after-init option
+
+22 Feb 2012 (Liven Moors)
+	  - Added circle waveform to oscilator options

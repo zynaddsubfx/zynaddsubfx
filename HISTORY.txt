@@ -1,7 +1,7 @@
 2.4.2
         - New IO backend support
         - MIDI bank select
-        - Spike waveform
+        - Spike/Circle waveform
         - Faster subsynth
         - --exec-after-init flag
         - Version information compiled in

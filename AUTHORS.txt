@@ -20,5 +20,5 @@ Contributors:
         Ryan Billing (APhaser)
         Hans Petter Selasky (OSS Midi, FreeBSD support)
         Damien Goutte-Gattat (Bank select midi support)
-        Lieven Moors (Spike waveform)
+        Lieven Moors (Spike/Circle waveform)
 

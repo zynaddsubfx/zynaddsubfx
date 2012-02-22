@@ -1286,6 +1286,27 @@ FUNC(spike)
     }
 }
 
+FUNC(circle)
+{
+    // a is parameter: 0 -> 0.5 -> 1 // O.5 = circle
+    float b, y;
+
+    b = 2 - (a * 2); // b goes from 2 to 0
+    x = x * 4;
+
+    if (x < 2){
+        x = x - 1; // x goes from -1 to 1
+        if ((x < -b) || (x > b)) y = 0;
+        else y = sqrt(1 - (pow(x, 2) / pow(b, 2))); // normally * a^2, but a stays 1
+    }
+    else{
+        x = x - 3; // x goes from -1 to 1 as well
+        if ((x < -b) || (x > b)) y = 0;
+        else y = -sqrt(1 - (pow(x, 2) / pow(b, 2)));
+    }
+    return y;
+}
+
 typedef float (*base_func)(float, float);
 
 base_func getBaseFunction(unsigned char func)
@@ -1297,7 +1318,7 @@ base_func getBaseFunction(unsigned char func)
         return NULL;
 
     func--;
-    assert(func < 14);
+    assert(func < 15);
     base_func functions[] = {
         basefunc_triangle,
         basefunc_pulse,
@@ -1313,6 +1334,7 @@ base_func getBaseFunction(unsigned char func)
         basefunc_chebyshev,
         basefunc_sqr,
         basefunc_spike,
+        basefunc_circle,
     };
     return functions[func];
 }

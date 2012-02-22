@@ -517,6 +517,10 @@ if ((oscil->Pcurrentbasefunc==0)||(oscil->Pcurrentbasefunc==127)) basefuncmodula
             label Spike
             xywh {122 122 100 20} labelfont 1 labelsize 11
           }
+          MenuItem {} {
+            label Circle
+            xywh {122 122 100 20} labelfont 1 labelsize 11
+          }
         }
         Fl_Box {} {
           label {Base Func.}
