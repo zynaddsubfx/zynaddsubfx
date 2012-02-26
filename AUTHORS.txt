@@ -18,7 +18,7 @@ Contributors:
         Alan Calvert (Portions of New IO)
         Stephen Parry (DSSI rebuild)
         Ryan Billing (APhaser)
-        Hans Petter Selasky (OSS Midi, FreeBSD support)
+        Hans Petter Selasky (OSS Midi, FreeBSD support, Bank UI bug fix)
         Damien Goutte-Gattat (Bank select midi support)
         Lieven Moors (Spike/Circle waveform)
 
