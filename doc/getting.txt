@@ -28,6 +28,10 @@ In order to get a copy of the ZynAddSubFX source code, all that needs to be done
 git clone git://zynaddsubfx.git.sourceforge.net/gitroot/zynaddsubfx/zynaddsubfx
 
 cd zynaddsubfx
+
+#Download additional resources
+git submodule init
+git submodule update
 ---------------------------------------------
 
 You should now be in the directory of the source code.
