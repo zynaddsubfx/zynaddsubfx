@@ -15,6 +15,7 @@
 #endif
 #if JACK
 #include "JackEngine.h"
+#include "JackMultiEngine.h"
 #endif
 #if PORTAUDIO
 #include "PaEngine.h"
@@ -54,6 +55,7 @@ EngineMgr::EngineMgr()
 #else
     engines.push_back(new JackEngine());
 #endif
+    engines.push_back(new JackMultiEngine());
 #endif
 #if PORTAUDIO
 #if PORTAUDIO_DEFAULT
