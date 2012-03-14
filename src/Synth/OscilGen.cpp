@@ -615,7 +615,7 @@ void OscilGen::prepare()
 
     clearAll(oscilFFTfreqs);
     if(Pcurrentbasefunc == 0)   //the sine case
-        for(int i = 0; i < MAX_AD_HARMONICS; ++i) {
+        for(int i = 0; i < MAX_AD_HARMONICS - 1; ++i) {
             oscilFFTfreqs[i
                           + 1].real() = -hmag[i]
                                         * sinf(hphase[i] * (i + 1)) / 2.0f;
