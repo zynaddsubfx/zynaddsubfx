@@ -90,7 +90,7 @@ void Chorus::out(const Stereo<float *> &input)
             dlk = 0;
         float tmp = dlk - mdel + maxdelay * 2.0f; //where should I get the sample from
 
-        F2I(tmp, dlhi);
+        dlhi = (int) tmp;
         dlhi %= maxdelay;
 
         float dlhi2       = (dlhi - 1 + maxdelay) % maxdelay;
@@ -107,7 +107,7 @@ void Chorus::out(const Stereo<float *> &input)
             drk = 0;
         tmp = drk * 1.0f - mdel + maxdelay * 2.0f; //where should I get the sample from
 
-        F2I(tmp, dlhi);
+        dlhi = (int) tmp;
         dlhi %= maxdelay;
 
         dlhi2       = (dlhi - 1 + maxdelay) % maxdelay;
