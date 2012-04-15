@@ -66,7 +66,7 @@ void InMgr::flush()
     MidiEvent ev;
     while(!sem_trywait(&work)) {
         queue.pop(ev);
-        cout << ev << endl;
+        //cout << ev << endl;
 
         switch(ev.type) {
         case M_NOTE:
