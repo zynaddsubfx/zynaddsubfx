@@ -23,6 +23,7 @@
 #include "NulEngine.h"
 #include "../globals.h"
 
+#include <unistd.h>
 #include <iostream>
 
 using namespace std;
