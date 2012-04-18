@@ -1,7 +1,7 @@
 
 .PHONY: subdirs gen
 
-all: gen-files xhtml chunked pdf
+all: gen-files man xhtml chunked pdf
 
 gen-files:
 	cd gen; make
@@ -36,6 +36,9 @@ pdf:
 	mv tmp.tex zynaddsubfx.tex
 	pdflatex zynaddsubfx.tex
 	pdflatex zynaddsubfx.tex
+
+man: zynaddsubfx.1.txt
+	a2x -f manpage zynaddsubfx.1.txt
 
 clean:
 	rm -f *~ *html *pdf *xml *tex *log zynaddsubfx.chunked/images
