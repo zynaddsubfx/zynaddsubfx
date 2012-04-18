@@ -8,12 +8,12 @@ gen-files:
 
 
 xhtml: zynaddsubfx.txt envelope.txt intro.txt lfo.txt
-	asciidoc -a numbered -a toc -b xhtml11 \
+	asciidoc -a numbered -a toc -b html5 \
 		zynaddsubfx.txt
 
 chunked:
 	asciidoc --doctype=article   -b docbook \
-	         --conf-file=myconf.conf zynaddsubfx.txt
+	          zynaddsubfx.txt
 	rm -rf ./zynaddsubfx.chunked
 	mkdir ./zynaddsubfx.chunked
 	rm -f "./zynaddsubfx.chunked/*.html"
@@ -29,7 +29,7 @@ chunked:
 		 "./zynaddsubfx.xml" \
 
 pdf:
-	asciidoc -b latex --conf-file=myconf.conf zynaddsubfx.txt
+	asciidoc -b latex zynaddsubfx.txt
 	grep -v figure zynaddsubfx.tex | \
 	sed -e 's~^\\includegraphics~\\par\\noindent\{\} \\includegraphics~' | \
 	sed -e 's~includegraphics\[\]~includegraphics[scale=0.5]~' > tmp.tex

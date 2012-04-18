@@ -1,39 +1,50 @@
-\documentclass[11pt]{report}
-\pagestyle{empty}
-\usepackage{pst-sigsys}
-\usepackage{auto-pst-pdf}
+\documentclass{standalone}
+\usepackage{tikz}
+\usetikzlibrary{matrix,shapes,chains,scopes}
 \begin{document}
-\begin{pspicture}[showgrid=false](0,-1)(11,2)
+\input{fig.sty}
+
+\begin{tikzpicture}[
+    point/.style={coordinate},
+    every on chain/.style={rounded corners}]
     %Style
-    \psset{framesize=1 .65}
-    \psset{style=Arrow}
 
-    %In/Out
-    \rput(0,0){\rnode{in}{$x[n]$}}
-    \rput(11,0){\rnode{out}{$y[n]$}}
+    \matrix[row sep=5mm, column sep=5mm] {
+    &
+    \node        (fb)  {$f_b$};&
+    \node        (del) {$Delay$};
+    &&&&& \\
+    &
+    \node[op]    (pb1) {$\times$};&
+    \node[block] (pb2) {$z^{-n}$}; &
+    &&&& \\
 
-    %feedback loop
-    \pscircleop(1,0){fbcomb}
-    \pnode(2.5,0){decoration}
-    \psfblock(2.5,1){delay}{$z^{-n}$}
-    \rput(2.5,1.5){delaylen}
-    \pscircleop[operation=times](1,1){fb}
-    \rput(1,1.55){feedback}
-    \nclist{ncline}{decoration,delay,fb,fbcomb}
+    \node           (p1) {$x[n]$}; &
+    \node[op]       (p2) {$+$}; &
+    \node[point]    (p3) {};&
+    \node[block]    (p4) {HP/LP}; &
+    \node[block]    (p5) {Comb Filter}; &
+    \node[block]    (p6) {Allpass}; &
+    \node           (p7) {$y[n]$}; \\
+    };
 
-    %Filter
-    \psfblock(4,0){fil}{Filter}
-    \rput(4,.5){LP/HP}
+    \draw[->] (fb) -- (pb1);
+    \draw[->] (del) -- (pb2);
+    { [start chain=trunk]
+    \chainin (p1)[join=by tip];
+    \chainin (p2)[join=by tip] ;
+    \chainin (p3)[join=by {}];
+    %\chainin[join by={}] (p3);
+    { [start branch]
+    \chainin (pb2)[join=by tip];
+    \chainin (pb1)[join=by tip];
+    \chainin (p2)[join=by tip];
+    }
+    \chainin (p4)[join=by tip];
+    \chainin (p5)[join=by tip];
+    \chainin (p6)[join=by tip];
+    \chainin (p7)[join=by tip];
+    }
 
-    %Magic (aka, I am not sure if I read the code right)
-    \psfblock[framesize=1.9 .65](6,0){comb}{Comb Filter}
-    \psfblock[framesize=1.9 .65](8.5,0){pass}{All Passr}
-    
-    %Panning
-    \pscircleop[operation=times] (10,0){pan}
-    \rput(10,0.5){Panning}
-
-    %Connections
-    \nclist{ncline}{in,fbcomb,fil,comb,pass,pan,out}
-\end{pspicture}
+\end{tikzpicture}
 \end{document}

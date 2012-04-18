@@ -5,7 +5,7 @@ all:$(OBJECTS)
 
 %.png: %.tex
 	pdflatex -shell-escape $<
-	convert $(<:.tex=.pdf) -density 300 -trim $@
+	convert -trim -density 300 $(<:.tex=.pdf) $@
 	rm -f $(<:.tex=.pdf) $(<:.tex=.log) $(<:.tex=.aux) $(<:.tex=-pic*) $(<:.tex=.pgf-plot*)
 
 .PHONY: clean

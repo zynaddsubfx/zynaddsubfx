@@ -1,0 +1,27 @@
+Effects
+-------
+
+Chorus
+~~~~~~
+
+image::./gen/chorus.png[width="700"]
+
+Distort
+~~~~~~~
+
+image::./gen/distort.png[width="700"]
+
+Dynamic Filter
+~~~~~~~~~~~~~
+
+image::./gen/dynamic.png[width="700"]
+
+Echo
+~~~~
+
+image::./gen/echo.png[width="700"]
+
+Reverb
+~~~~~~
+
+image::./gen/reverb.png[width="700"]
