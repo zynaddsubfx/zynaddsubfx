@@ -1,49 +1,37 @@
-\documentclass[11pt]{report}
-\pagestyle{empty}
-\usepackage{pst-sigsys}
+\documentclass{standalone}
+\usepackage{tikz}
+\usetikzlibrary{matrix,shapes,chains,scopes}
 \begin{document}
-\begin{pspicture}[showgrid=false](-5,-3)(12,3)
-\psset{framesize=2 .65}
-\psfblock(-4,1){inFq}{Note Fq.}
-\psfblock(-4,0){lfoFq}{Fq. LFO}
-\psfblock(-4,-1){envFq}{Fq. Env.}
+\input{fig.sty}
+\begin{tikzpicture}
+    \matrix (mtx) [matrix of nodes, row sep=5mm, column sep=5mm] {
+    &
+    |[lfo]| Freq LFO   &
+    |[lfo]| Filter LFO &
+    |[lfo]| Amp LFO    &
+    &\\
+    |[block]| Base Fq. &
+    |[block]| Voices   &
+    |[block]| Filter   &
+    |[block, shape=isosceles triangle]| Volume &
+    {Output} \\
+    &
+    |[env]| Freq Env&
+    |[env]| Filter Env&
+    |[env]| Amp Env&\\
+    };
 
-\dotnode(-2.5,1){dot1}
-\dotnode(-2.5,0){dot2}
-\dotnode(-2.5,-1){dot3}
-
-\psfblock(-1,0){vce}{Voices}
-
-
-\psfblock(2,0){flt}{Filter}
-
-\psfblock(1,-2){envFl}{Filter Env.}
-\psfblock(3,-2){lfoFl}{Filter LFO}
-
-\pspolygon(4,1)(6,0)(4,-1)
-\psfblock[linecolor=white](5,0){amp}{Amp}
-
-\psfblock(4,2){envAmp}{Amp. Env.}
-\psfblock(6,2){lfoAmp}{Amp. LFO}
-
-\psfblock(7.5,0){pnch}{Punch}
-
-\psfblock(10,0){out}{Output}
-
-\ncline{inFq}{dot1}
-\ncline{dot1}{dot2}
-\ncline{lfoFq}{dot2}
-\ncline{dot3}{dot2}
-\ncline{envFq}{dot3}
-
-\dotnode(2,-1){fltdot}
-\ncline{envFl}{fltdot}
-\ncline{lfoFl}{fltdot}
-\ncline{fltdot}{flt}
-\dotnode(5,1){ampdot}
-\ncline{lfoAmp}{ampdot}
-\ncline{envAmp}{ampdot}
-\ncline{ampdot}{amp}
-\nclist[arrows=->]{ncline}{dot2,vce,flt,amp,pnch,out}
-\end{pspicture}
+    { [start chain=trunk]
+    \chainin (mtx-2-1)[join=by tip];
+    \chainin (mtx-2-2)[join=by tip];
+    \chainin (mtx-2-3)[join=by tip];
+    \chainin (mtx-2-4)[join=by tip];
+    \chainin (mtx-2-5)[join=by tip];
+    }
+    \foreach \i in {2,3,4}
+    {
+        \draw[->] (mtx-1-\i) -- (mtx-2-\i);
+        \draw[->] (mtx-3-\i) -- (mtx-2-\i);
+    }
+\end{tikzpicture}
 \end{document}
