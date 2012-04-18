@@ -8,6 +8,7 @@
  * Should be only externally included header */
 namespace Nio
 {
+    void init(void);
     bool start(void);
     void stop(void);
 

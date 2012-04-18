@@ -21,6 +21,8 @@ pkg_search_module(LASH lash-1.0)
 mark_as_advanced(LASH_LIBRARIES)
 pkg_search_module(DSSI dssi>=0.9.0)
 mark_as_advanced(DSSI_LIBRARIES)
+pkg_search_module(LIBLO liblo>=0.26)
+mark_as_advanced(LIBLO_LIBRARIES)
 
 ######### Settings ###########
 # NOTE: These cache variables should normally not be changed in this
@@ -42,7 +44,8 @@ SET (LashEnable ${LASH_FOUND} CACHE BOOL
     "Enable LASH Audio Session Handler")
 SET (DssiEnable ${DSSI_FOUND} CACHE BOOL
     "Enable DSSI Plugin compilation")
-
+SET (LibloEnable ${LIBLO_FOUND} CACHE BOOL
+    "Enable Liblo")
 
 # Now, handle the incoming settings and set define flags/variables based
 # on this
@@ -128,6 +131,13 @@ if(LashEnable)
 	list(APPEND AUDIO_LIBRARIES ${LASH_LIBRARIES})
 	list(APPEND AUDIO_LIBRARY_DIRS ${LASH_LIBRARY_DIRS})
 	message(STATUS "Compiling with lash")
+endif()
+if(LibloEnable)
+	include_directories(${LIBLO_INCLUDE_DIRS})
+	add_definitions(-DUSE_NSM=1)
+	list(APPEND AUDIO_LIBRARIES ${LIBLO_LIBRARIES})
+	list(APPEND AUDIO_LIBRARY_DIRS ${LIBLO_LIBRARY_DIRS})
+	message(STATUS "Compiling with liblo")
 endif()
 
 # other include directories
