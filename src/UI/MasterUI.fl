@@ -183,9 +183,9 @@ if ((maxdbr>MIN_DB-20)){
 int ox=x(); int oy=y(); int lx=w(); int ly=h();
 
 if (!active_r()){
-  pthread_mutex_lock(&master->mutex);
+  pthread_mutex_lock(&master->vumutex);
    int fakedb=master->fakepeakpart[npart];
-  pthread_mutex_unlock(&master->mutex);
+  pthread_mutex_unlock(&master->vumutex);
   fl_rectf(ox,oy,lx,ly,140,140,140);
   if (fakedb>0){
     fakedb=(int)(fakedb/255.0*ly)+4;
@@ -196,9 +196,9 @@ if (!active_r()){
 };
 
 //draw the vu lines
-pthread_mutex_lock(&master->mutex);
+pthread_mutex_lock(&master->vumutex);
  float db=rap2dB(master->vuoutpeakpart[npart]);
-pthread_mutex_unlock(&master->mutex);
+pthread_mutex_unlock(&master->vumutex);
 
 db=(MIN_DB-db)/MIN_DB; 
 if (db<0.0) db=0.0;
