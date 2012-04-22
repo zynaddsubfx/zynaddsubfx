@@ -3,15 +3,15 @@ message(STATUS "Checking Include Path" $ENV{CMAKE_INCLUDE_PATH} ${CMAKE_INCLUDE_
 message(STATUS "Checking Library Path" $ENV{CMAKE_LIBRARY_PATH} ${CMAKE_LIBRARY_PATH})
 
 #Dependency check
-find_package(zlib REQUIRED)
-find_package(fftw REQUIRED)
-find_package(MXML REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(zlib REQUIRED)
+pkg_check_modules(FFTW REQUIRED fftw3)
+pkg_check_modules(MXML REQUIRED mxml)
 find_package(Threads   REQUIRED)
 find_package(OSS)
 find_package(Alsa)
-find_package(JACK)
-find_package(PortAudio)
+pkg_check_modules(JACK jack)
+pkg_check_modules(PORTAUDIO portaudio-2.0>=19)
 set(FLTK_SKIP_OPENGL true)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
@@ -26,7 +26,7 @@ mark_as_advanced(DSSI_LIBRARIES)
 # NOTE: These cache variables should normally not be changed in this
 # file, but either in in CMakeCache.txt before compile, or by passing
 # parameters directly into cmake using the -D flag.
-SET (DefaultOutput oss CACHE STRING
+SET (DefaultOutput alsa CACHE STRING
     "Default Output module: [null, alsa, oss, jack, portaudio]")
 SET (GuiModule fltk CACHE STRING "GUI module, either fltk, qt or off")
 SET (CompileTests ${CXXTEST_FOUND} CACHE BOOL "whether tests should be compiled in or not")
@@ -62,9 +62,6 @@ else  ()
 	message(STATUS "GUI module defaulting to off")
 endif()
 
-if(NOT PKG_CONFIG_FOUND)
-    message(FATAL_ERROR "pkg-config not found")
-endif(NOT PKG_CONFIG_FOUND)
 
 #Build Flags
 option (BuildForAMD_X86_64 "Build for AMD x86_64 system" OFF)
@@ -265,7 +262,7 @@ if (DssiEnable)
 		${NONGUI_LIBRARIES}
 		${ZLIB_LIBRARIES}
 		${FFTW_LIBRARY}
-		${MXML_LIBRARY}
+        ${MXML_LIBRARIES}
 		${NIO_LIBRARIES}
 		${AUDIO_LIBRARIES}
 		${OS_LIBRARIES}
@@ -277,7 +274,7 @@ if (DssiEnable)
 	endif ()
 endif()
 
-message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARY} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")
+message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")
 install(TARGETS zynaddsubfx
 	RUNTIME DESTINATION bin
 	)
