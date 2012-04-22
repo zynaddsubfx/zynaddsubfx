@@ -26,7 +26,9 @@ mark_as_advanced(DSSI_LIBRARIES)
 # NOTE: These cache variables should normally not be changed in this
 # file, but either in in CMakeCache.txt before compile, or by passing
 # parameters directly into cmake using the -D flag.
-SET (DefaultOutput alsa CACHE STRING
+SET (DefaultInput alsa CACHE STRING
+    "Default Input module: [null, alsa, oss, jack]")
+SET (DefaultOutput jack CACHE STRING
     "Default Output module: [null, alsa, oss, jack, portaudio]")
 SET (GuiModule fltk CACHE STRING "GUI module, either fltk, qt or off")
 SET (CompileTests ${CXXTEST_FOUND} CACHE BOOL "whether tests should be compiled in or not")

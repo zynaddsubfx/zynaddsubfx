@@ -17,15 +17,8 @@ set(zynaddsubfx_nio_SRCS
 
 set(zynaddsubfx_nio_lib )
 
-if (DefaultOutput STREQUAL alsa)
-        add_definitions(-DALSA_DEFAULT=1)
-elseif(DefaultOutput STREQUAL oss)
-        add_definitions(-DOSS_DEFAULT=1)
-elseif(DefaultOutput STREQUAL jack)
-        add_definitions(-DJACK_DEFAULT=1)
-elseif(DefaultOutput STREQUAL portaudio)
-        add_definitions(-DPORTAUDIO_DEFAULT=1)
-endif()
+add_definitions(-DOUT_DEFAULT="${DefaultOutput}")
+add_definitions(-DIN_DEFAULT="${DefaultInput}")
 
 if(JackEnable)
     include_directories(${JACK_INCLUDE_DIR})
