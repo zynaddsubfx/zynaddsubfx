@@ -26,6 +26,9 @@ namespace Nio
     std::string getSource(void);
     std::string getSink(void);
 
+    //Get the prefered sample rate from jack (if running)
+    void preferedSampleRate(unsigned &rate);
+
     extern bool autoConnect;
     extern std::string defaultSource;
     extern std::string defaultSink;

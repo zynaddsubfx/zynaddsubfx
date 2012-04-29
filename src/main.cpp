@@ -194,7 +194,9 @@ int main(int argc, char *argv[])
     synth->samplerate = config.cfg.SampleRate;
     synth->buffersize = config.cfg.SoundBufferSize;
     synth->oscilsize  = config.cfg.OscilSize;
-    swaplr     = config.cfg.SwapStereo;
+    swaplr            = config.cfg.SwapStereo;
+
+    Nio::preferedSampleRate(synth->samplerate);
 
     synth->alias(); //build aliases
 

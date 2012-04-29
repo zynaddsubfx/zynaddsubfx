@@ -94,3 +94,19 @@ string Nio::getSink()
 {
     return out->getSink();
 }
+
+#if JACK
+#include <jack/jack.h>
+void Nio::preferedSampleRate(unsigned &rate)
+{
+    jack_client_t *client = jack_client_open("temp-client",
+            JackNoStartServer, 0);
+    if(client) {
+        rate = jack_get_sample_rate(client);
+        jack_client_close(client);
+    }
+}
+#else
+void Nio::preferedSampleRate(unsigned &)
+{}
+#endif
