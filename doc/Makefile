@@ -29,13 +29,7 @@ chunked:
 		 "./zynaddsubfx.xml" \
 
 pdf:
-	asciidoc -b latex zynaddsubfx.txt
-	grep -v figure zynaddsubfx.tex | \
-	sed -e 's~^\\includegraphics~\\par\\noindent\{\} \\includegraphics~' | \
-	sed -e 's~includegraphics\[\]~includegraphics[scale=0.5]~' > tmp.tex
-	mv tmp.tex zynaddsubfx.tex
-	pdflatex zynaddsubfx.tex
-	pdflatex zynaddsubfx.tex
+	a2x -f pdf zynaddsubfx.txt
 
 man: zynaddsubfx.1.txt
 	a2x -f manpage zynaddsubfx.1.txt
