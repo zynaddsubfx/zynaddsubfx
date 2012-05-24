@@ -37,6 +37,8 @@
 #include "Misc/Dump.h"
 extern Dump dump;
 
+#include <FL/Fl.H>
+
 //Nio System
 #include "Nio/Nio.h"
 
@@ -58,63 +60,25 @@ MasterUI *ui;
 
 using namespace std;
 
-pthread_t thr3, thr4;
+pthread_t thr4;
 Master   *master;
 SYNTH_T  *synth;
 int       swaplr = 0; //1 for left-right swapping
+
+int Pexitprogram = 0;     //if the UI set this to 1, the program will exit
 
 #if LASH
 #include "Misc/LASHClient.h"
 LASHClient *lash = NULL;
 #endif
 
-int Pexitprogram = 0;     //if the UI set this to 1, the program will exit
+#if USE_NSM
+#include "Misc/NSM.H"
 
-/*
- * User Interface thread
- */
-void *thread3(void *v)
-{
-#ifndef DISABLE_GUI
+NSM_Client *nsm = 0;
+#endif
 
-#ifdef FLTK_GUI
-
-    if(v)
-        fl_alert("Default IO did not initialize.\nDefaulting to NULL backend.");
-    ui = new MasterUI(master, &Pexitprogram);
-    ui->showUI();
-
-    while(Pexitprogram == 0) {
-#if LASH
-        string filename;
-        switch(lash->checkevents(filename)) {
-            case LASHClient::Save:
-                ui->do_save_master(filename.c_str());
-                lash->confirmevent(LASHClient::Save);
-                break;
-            case LASHClient::Restore:
-                ui->do_load_master(filename.c_str());
-                lash->confirmevent(LASHClient::Restore);
-                break;
-            case LASHClient::Quit:
-                Pexitprogram = 1;
-            default:
-                break;
-        }
-#endif //LASH
-        Fl::wait(0.1f);
-    }
-
-#elif defined QT_GUI
-    app = new QApplication(0, 0);
-    ui  = new MasterUI(master, 0);
-    ui->show();
-    app->exec();
-#endif //defined QT_GUI
-
-#endif //DISABLE_GUI
-    return 0;
-}
+char *instance_name = 0;
 
 void exitprogram();
 
@@ -122,21 +86,13 @@ void exitprogram();
 void sigterm_exit(int /*sig*/)
 {
     Pexitprogram = 1;
-    sleep(1);
-    exitprogram();
-    exit(0);
 }
-
 
 /*
  * Program initialisation
  */
 void initprogram(int argc, char **argv)
 {
-#if LASH
-    lash = new LASHClient(&argc, &argv);
-#endif
-
     cerr.precision(1);
     cerr << std::fixed;
     cerr << "\nSample Rate = \t\t" << synth->samplerate << endl;
@@ -167,9 +123,13 @@ void exitprogram()
 #ifndef DISABLE_GUI
     delete ui;
 #endif
-
 #if LASH
-    delete lash;
+    if ( lash )
+        delete lash;
+#endif
+#if USE_NSM
+    if ( nsm )
+        delete nsm;
 #endif
 
     delete [] denormalkillbuf;
@@ -182,8 +142,8 @@ int main(int argc, char *argv[])
     dump.startnow();
     int noui = 0;
     cerr
-    << "\nZynAddSubFX - Copyright (c) 2002-2011 Nasca Octavian Paul and others"
-    << endl;
+        << "\nZynAddSubFX - Copyright (c) 2002-2011 Nasca Octavian Paul and others"
+        << endl;
     cerr << "Compiled: " << __DATE__ << " " << __TIME__ << endl;
     cerr << "This program is free software (GNU GPL v.2 or later) and \n";
     cerr << "it comes with ABSOLUTELY NO WARRANTY.\n" << endl;
@@ -272,10 +232,10 @@ int main(int argc, char *argv[])
                           &option_index);
         char *optarguments = optarg;
 
-#define GETOP(x) if(optarguments) \
-        x = optarguments
-#define GETOPNUM(x) if(optarguments) \
-        x = atoi(optarguments)
+#define GETOP(x) if(optarguments)               \
+            x = optarguments
+#define GETOPNUM(x) if(optarguments)            \
+            x = atoi(optarguments)
 
 
         if(opt == -1)
@@ -289,11 +249,11 @@ int main(int argc, char *argv[])
                 exitwithversion = 1;
                 break;
             case 'Y':/* this command a dummy command (has NO effect)
-                and is used because I need for NSIS installer
-            (NSIS sometimes forces a command line for a
-            program, even if I don't need that; eg. when
-            I want to add a icon to a shortcut.
-              */
+                        and is used because I need for NSIS installer
+                        (NSIS sometimes forces a command line for a
+                        program, even if I don't need that; eg. when
+                        I want to add a icon to a shortcut.
+                     */
                 break;
             case 'U':
                 noui = 1;
@@ -329,9 +289,9 @@ int main(int argc, char *argv[])
                     (int) powf(2, ceil(logf(synth->oscilsize - 1.0f) / logf(2.0f)));
                 if(tmp != synth->oscilsize)
                     cerr
-                    <<
-                    "synth->oscilsize is wrong (must be 2^n) or too small. Adjusting to "
-                    << synth->oscilsize << "." << endl;
+                        <<
+                        "synth->oscilsize is wrong (must be 2^n) or too small. Adjusting to "
+                        << synth->oscilsize << "." << endl;
                 break;
             case 'S':
                 swaplr = 1;
@@ -377,12 +337,12 @@ int main(int argc, char *argv[])
              << "  -L file, --load-instrument=FILE\t Loads a .xiz file\n"
              << "  -r SR, --sample-rate=SR\t\t Set the sample rate SR\n"
              <<
-        "  -b BS, --buffer-size=SR\t\t Set the buffer size (granularity)\n"
+            "  -b BS, --buffer-size=SR\t\t Set the buffer size (granularity)\n"
              << "  -o OS, --oscil-size=OS\t\t Set the ADsynth oscil. size\n"
              << "  -S , --swap\t\t\t\t Swap Left <--> Right\n"
              << "  -D , --dump\t\t\t\t Dumps midi note ON/OFF commands\n"
              <<
-        "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
+            "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
              << "  -N , --named\t\t\t\t Postfix IO Name when possible\n"
              << "  -a , --auto-connect\t\t\t AutoConnect when using JACK\n"
              << "  -O , --output\t\t\t\t Set Output Engine\n"
@@ -399,20 +359,6 @@ int main(int argc, char *argv[])
         denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 
     initprogram(argc, argv);
-
-#if 0 //TODO update this code
-#ifdef USE_LASH
-#ifdef ALSAMIDIIN
-    ALSAMidiIn *alsamidi = dynamic_cast<ALSAMidiIn *>(Midi);
-    if(alsamidi)
-        lash->setalsaid(alsamidi->getalsaid());
-#endif
-#ifdef JACKAUDIOOUT
-    lash->setjackname(JACKgetname());
-#endif
-#endif
-#endif
-
 
     if(!loadfile.empty()) {
         int tmp = master->loadXML(loadfile.c_str());
@@ -445,11 +391,6 @@ int main(int argc, char *argv[])
     //Run the Nio system
     bool ioGood = Nio::start();
 
-#ifndef DISABLE_GUI
-    if(noui == 0)
-        pthread_create(&thr3, NULL, thread3, (void *)!ioGood);
-#endif
-
     if(!execAfterInit.empty()) {
         cout << "Executing user supplied command: " << execAfterInit << endl;
         if(system(execAfterInit.c_str()) == -1)
@@ -457,9 +398,91 @@ int main(int argc, char *argv[])
     }
 
 
-    //TODO look into a conditional variable here, it seems to match usage
-    while(Pexitprogram == 0) {
+#ifndef DISABLE_GUI
+    ui = new MasterUI(master, &Pexitprogram);
+
+    if(!noui)
+    {
+        ui->showUI();
+
+        if(!ioGood)
+            fl_alert("Default IO did not initialize.\nDefaulting to NULL backend.");
+    }
+
+#endif
+
+#ifndef DISABLE_GUI
+#if USE_NSM
+    char *nsm_url = getenv( "NSM_URL" );
+
+    if ( nsm_url )
+    {
+        nsm = new NSM_Client;
+
+        if ( ! nsm->init( nsm_url ) )
+        {
+            nsm->announce( "ZynAddSubFX", ":switch:", argv[0] );
+        }
+        else
+        {
+            delete nsm;
+            nsm = NULL;
+        }
+    }
+#endif
+#endif
+
+#if USE_NSM
+    if ( ! nsm )
+#endif
+    {
+#if LASH
+    lash = new LASHClient(&argc, &argv);
+#ifndef DISABLE_GUI
+    ui->sm_indicator1->value(1);
+    ui->sm_indicator2->value(1);
+    ui->sm_indicator1->tooltip( "LASH" );
+    ui->sm_indicator2->tooltip( "LASH" );
+#endif
+#endif
+    }
+
+    while(Pexitprogram == 0)
+    {
+#ifndef DISABLE_GUI
+#if USE_NSM
+        if ( nsm )
+        {
+            nsm->check();
+            goto done;
+        }
+#endif
+#if LASH
+        {
+            string filename;
+            switch(lash->checkevents(filename)) {
+                case LASHClient::Save:
+                    ui->do_save_master(filename.c_str());
+                    lash->confirmevent(LASHClient::Save);
+                    break;
+                case LASHClient::Restore:
+                    ui->do_load_master(filename.c_str());
+                    lash->confirmevent(LASHClient::Restore);
+                    break;
+                case LASHClient::Quit:
+                    Pexitprogram = 1;
+                default:
+                    break;
+            }
+        }
+#endif //LASH
+
+    done:
+
+        Fl::wait(0.1f);
+#else
         usleep(100000);
+#endif
     }
 
     exitprogram();

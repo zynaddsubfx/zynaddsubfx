@@ -20,11 +20,16 @@ bool   Nio::autoConnect = false;
 string Nio::defaultSource;
 string Nio::defaultSink;
 
-bool Nio::start()
+void Nio::init ( void )
 {
     in  = &InMgr::getInstance(); //Enable input wrapper
     out = &OutMgr::getInstance(); //Initialize the Output Systems
     eng = &EngineMgr::getInstance(); //Initialize The Engines
+}
+
+bool Nio::start()
+{
+    init();
     return eng->start();
 }
 
