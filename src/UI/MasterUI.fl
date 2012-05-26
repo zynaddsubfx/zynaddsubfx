@@ -1,71 +1,69 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2009 Nasca Octavian Paul} {private local
+decl {//Copyright (c) 2002-2009 Nasca Octavian Paul} {} 
+
+decl {//License: GNU GPL version 2 or later} {} 
+
+decl {\#include <stdlib.h>} {public
 } 
 
-decl {//License: GNU GPL version 2 or later} {private local
+decl {\#include <stdio.h>} {public
 } 
 
-decl {\#include <stdlib.h>} {public local
+decl {\#include <string.h>} {public
 } 
 
-decl {\#include <stdio.h>} {public local
+decl {\#include "WidgetPDial.h"} {public
 } 
 
-decl {\#include <string.h>} {public local
+decl {\#include "ADnoteUI.h"} {public
 } 
 
-decl {\#include "WidgetPDial.h"} {public local
+decl {\#include "SUBnoteUI.h"} {public
 } 
 
-decl {\#include "ADnoteUI.h"} {public local
+decl {\#include "EffUI.h"} {public
 } 
 
-decl {\#include "SUBnoteUI.h"} {public local
+decl {\#include "VirKeyboard.h"} {public
 } 
 
-decl {\#include "EffUI.h"} {public local
+decl {\#include "ConfigUI.h"} {public
 } 
 
-decl {\#include "VirKeyboard.h"} {public local
+decl {\#include "BankUI.h"} {public
 } 
 
-decl {\#include "ConfigUI.h"} {public local
+decl {\#include "PartUI.h"} {public
 } 
 
-decl {\#include "BankUI.h"} {public local
+decl {\#include "MicrotonalUI.h"} {public
 } 
 
-decl {\#include "PartUI.h"} {public local
-} 
-
-decl {\#include "MicrotonalUI.h"} {public local
-} 
-
-decl {\#include "PresetsUI.h"} {public local
+decl {\#include "PresetsUI.h"} {public
 } 
 
 decl {\#include "NioUI.h"} {public global
 } 
 
-decl {\#include "../Misc/Master.h"} {public local
+decl {\#include "../Misc/Master.h"} {public
 } 
 
-decl {\#include "../Misc/Part.h"} {public local
+decl {\#include "../Misc/Part.h"} {public
 } 
 
-decl {\#include "../Misc/Util.h"} {public local
+decl {\#include "../Misc/Util.h"} {public
 } 
 
 decl {\#if USE_NSM
 \#include "../Misc/NSM.H"
 extern NSM_Client *nsm;
-\#endif} {public local
+\#endif} {public
 } 
 
-decl {\#include "../globals.h"} {public local
+decl {\#include "../globals.h"} {public
 } 
 
 class VUMeter {: {public Fl_Box}
@@ -259,14 +257,10 @@ Fl::add_timeout(1.0/18.0,tick,v);//18 fps} {}
 };
 return(1);} {}
   }
-  decl {Master *master;} {private local
-  }
-  decl {int npart;} {private local
-  }
-  decl {float olddbl,olddbr;} {private local
-  }
-  decl {float oldrmsdbl,oldrmsdbr;} {private local
-  }
+  decl {Master *master;} {}
+  decl {int npart;} {}
+  decl {float olddbl,olddbr;} {}
+  decl {float oldrmsdbl,oldrmsdbr;} {}
 } 
 
 class SysEffSend {: {public WidgetPDial}
@@ -302,12 +296,9 @@ this->copy_label(tmp);} {}
 
 return(WidgetPDial::handle(event));} {}
   }
-  decl {Master *master;} {private local
-  }
-  decl {int neff1;} {private local
-  }
-  decl {int neff2;} {private local
-  }
+  decl {Master *master;} {}
+  decl {int neff1;} {}
+  decl {int neff2;} {}
 } 
 
 class Panellistitem {: {public Fl_Group}
@@ -425,12 +416,9 @@ panellistitemgroup->redraw();} {}
     code {panellistitem->hide();
 //delete(panellistitem);} {}
   }
-  decl {int npart;} {private local
-  }
-  decl {Master *master;} {private local
-  }
-  decl {BankUI *bankui;} {private local
-  }
+  decl {int npart;} {}
+  decl {Master *master;} {}
+  decl {BankUI *bankui;} {}
 } 
 
 class MasterUI {open
@@ -453,7 +441,7 @@ nsm && nsm->is_active()
     *exitprogram=1;
 };
 \#endif} open
-      xywh {1333 248 390 465} type Double xclass zynaddsubfx visible
+      xywh {887 248 390 465} type Double xclass zynaddsubfx visible
     } {
       Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
@@ -1858,30 +1846,17 @@ virkeys->midich=master->part[npart]->Prcvchn;
 simplerefresh();
 bankui->hide();} {}
   }
-  decl {Master *master;} {private local
-  }
-  decl {MicrotonalUI *microtonalui;} {private local
-  }
-  decl {BankUI *bankui;} {private local
-  }
-  decl {int ninseff,npart;} {private local
-  }
-  decl {int nsyseff;} {private local
-  }
-  decl {int *exitprogram;} {private local
-  }
-  decl {SysEffSend *syseffsend[NUM_SYS_EFX][NUM_SYS_EFX];} {private local
-  }
-  decl {VirKeyboard *virkeyboard;} {private local
-  }
-  decl {ConfigUI *configui;} {private local
-  }
-  decl {int swapefftype;} {private local
-  }
-  decl {char masterwindowlabel[100];} {private local
-  }
-  decl {Panellistitem *panellistitem[NUM_MIDI_PARTS];} {private local
-  }
-  decl {NioUI nioui;} {private local
-  }
+  decl {Master *master;} {}
+  decl {MicrotonalUI *microtonalui;} {}
+  decl {BankUI *bankui;} {}
+  decl {int ninseff,npart;} {}
+  decl {int nsyseff;} {}
+  decl {int *exitprogram;} {}
+  decl {SysEffSend *syseffsend[NUM_SYS_EFX][NUM_SYS_EFX];} {}
+  decl {VirKeyboard *virkeyboard;} {}
+  decl {ConfigUI *configui;} {}
+  decl {int swapefftype;} {}
+  decl {char masterwindowlabel[100];} {}
+  decl {Panellistitem *panellistitem[NUM_MIDI_PARTS];} {}
+  decl {NioUI nioui;} {}
 } 
