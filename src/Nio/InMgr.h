@@ -8,8 +8,10 @@
 enum midi_type {
     M_NOTE = 1,
     M_CONTROLLER = 2,
-    M_PGMCHANGE  = 3
+    M_PGMCHANGE  = 3,
+    M_PRESSURE   = 4
 };    //type=1 for note, type=2 for controller, type=3 for program change
+//type=4 for polyphonic aftertouch
 
 struct MidiEvent {
     MidiEvent();

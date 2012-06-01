@@ -157,6 +157,22 @@ void Master::noteOff(char chan, char note)
 }
 
 /*
+ * Pressure Messages (velocity=0 for NoteOff)
+ */
+void Master::polyphonicAftertouch(char chan, char note, char velocity)
+{
+    if(velocity) {
+        for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+            if(chan == part[npart]->Prcvchn)
+                if(part[npart]->Penabled)
+                    part[npart]->PolyphonicAftertouch(note, velocity, keyshift);
+
+    }
+    else
+        this->noteOff(chan, note);
+}
+
+/*
  * Controllers
  */
 void Master::setController(char chan, int type, int par)

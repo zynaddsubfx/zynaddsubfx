@@ -56,6 +56,9 @@ class Part
                     unsigned char velocity,
                     int masterkeyshift);
         void NoteOff(unsigned char note);
+        void PolyphonicAftertouch(unsigned char note,
+                                  unsigned char velocity,
+                                  int masterkeyshift);
         void AllNotesOff(); //panic
         void SetController(unsigned int type, int par);
         void RelaseSustainedKeys(); //this is called when the sustain pedal is relased

@@ -368,6 +368,13 @@ void JackEngine::handleMidi(unsigned long frames)
                 InMgr::getInstance().putEvent(ev);
                 break;
 
+            case 0xA0: /* pressure, aftertouch */
+                ev.type  = M_PRESSURE;
+                ev.num   = midi_data[1];
+                ev.value = midi_data[2];
+                InMgr::getInstance().putEvent(ev);
+                break;
+
             case 0xB0: /* controller */
                 ev.type  = M_CONTROLLER;
                 ev.num   = midi_data[1];

@@ -645,6 +645,58 @@ void Part::NoteOff(unsigned char note) //relase the key
         }
 }
 
+void Part::PolyphonicAftertouch(unsigned char note,
+                                unsigned char velocity,
+                                int masterkeyshift)
+{
+    if(!Pnoteon || (note < Pminkey) || (note > Pmaxkey))
+        return;
+    if(Pdrummode)
+        return;
+
+    // MonoMem stuff:
+    if(!Ppolymode)   // if Poly is off
+
+        monomem[note].velocity = velocity;       // Store this note's velocity.
+
+
+    for(int i = 0; i < POLIPHONY; ++i)
+        if((partnote[i].note == note) && (partnote[i].status == KEY_PLAYING)) {
+            /* update velocity */
+            // compute the velocity offset
+            float vel =
+                VelF(velocity / 127.0f, Pvelsns) + (Pveloffs - 64.0f) / 64.0f;
+            vel = (vel < 0.0f) ? 0.0f : vel;
+            vel = (vel > 1.0f) ? 1.0f : vel;
+
+            if(!Pkitmode) { // "normal mode"
+                if(kit[0].Padenabled)
+                    partnote[i].kititem[0].adnote->setVelocity(vel);
+                if(kit[0].Psubenabled)
+                    partnote[i].kititem[0].subnote->setVelocity(vel);
+                if(kit[0].Ppadenabled)
+                    partnote[i].kititem[0].padnote->setVelocity(vel);
+            }
+            else     // "kit mode"
+                for(int item = 0; item < NUM_KIT_ITEMS; ++item) {
+                    if(kit[item].Pmuted)
+                        continue;
+                    if((note < kit[item].Pminkey)
+                       || (note > kit[item].Pmaxkey))
+                        continue;
+
+                    int ci = partnote[i].itemsplaying; // ci=current item
+                    if(kit[item].Padenabled)
+                        partnote[i].kititem[item].adnote->setVelocity(vel);
+                    if(kit[item].Psubenabled)
+                        partnote[i].kititem[item].subnote->setVelocity(vel);
+                    if(kit[item].Ppadenabled)
+                        partnote[i].kititem[item].padnote->setVelocity(vel);
+                }
+        }
+
+}
+
 /*
  * Controllers
  */

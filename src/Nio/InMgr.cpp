@@ -86,6 +86,9 @@ void InMgr::flush()
             case M_PGMCHANGE:
                 master.setProgram(ev.channel, ev.num);
                 break;
+            case M_PRESSURE:
+                master.polyphonicAftertouch(ev.channel, ev.num, ev.value);
+                break;
         }
     }
 }

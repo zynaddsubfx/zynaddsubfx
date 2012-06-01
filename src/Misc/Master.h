@@ -91,6 +91,7 @@ class Master
         //Midi IN
         void noteOn(char chan, char note, char velocity);
         void noteOff(char chan, char note);
+        void polyphonicAftertouch(char chan, char note, char velocity);
         void setController(char chan, int type, int par);
         void setProgram(char chan, unsigned int pgm);
         //void NRPN...
