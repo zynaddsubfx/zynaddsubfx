@@ -59,7 +59,7 @@ OssEngine::~OssEngine()
 bool OssEngine::openAudio()
 {
     if(audio.handle != -1)
-        return true; //already open
+        return true;  //already open
 
     int snd_bitsize    = 16;
     int snd_fragment   = 0x00080009; //fragment size (?);
@@ -159,7 +159,7 @@ bool OssEngine::openMidi()
 {
     int handle = midi.handle;
     if(handle != -1)
-        return true; //already open
+        return true;  //already open
 
     handle = open(config.cfg.LinuxOSSSeqInDev, O_RDONLY, 0);
 
@@ -229,7 +229,7 @@ void *OssEngine::thread()
             }
             int handle = audio.handle;
             if(handle != -1)
-                write(handle, audio.smps, synth->buffersize * 4); // *2 because is 16 bit, again * 2 because is stereo
+                write(handle, audio.smps, synth->buffersize * 4);  // *2 because is 16 bit, again * 2 because is stereo
             else
                 break;
         }

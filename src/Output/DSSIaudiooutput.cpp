@@ -512,7 +512,7 @@ const DSSI_Descriptor *DSSIaudiooutput::getDssiDescriptor(unsigned long index)
 //
 
 // Initialise the DSSI descriptor, statically:
-DSSI_Descriptor *DSSIaudiooutput:: dssiDescriptor =
+DSSI_Descriptor *DSSIaudiooutput::dssiDescriptor =
     DSSIaudiooutput::initDssiDescriptor();
 
 /**
@@ -657,13 +657,13 @@ DSSIaudiooutput::ProgramDescriptor::ProgramDescriptor(unsigned long _bank,
 /**
  * The map of programs available; held as a single shared statically allocated object.
  */
-vector<DSSIaudiooutput::ProgramDescriptor> DSSIaudiooutput:: programMap =
+vector<DSSIaudiooutput::ProgramDescriptor> DSSIaudiooutput::programMap =
     vector<DSSIaudiooutput::ProgramDescriptor>();
 
 /**
  * Index controlling the map of banks
  */
-long DSSIaudiooutput:: bankNoToMap = 1;
+long DSSIaudiooutput::bankNoToMap = 1;
 
 /**
  * Queries and maps the next available bank of instruments.

@@ -32,7 +32,7 @@ NioUI::NioUI()
         string      source   = Nio::getSource();
         int midival = 0;
         for(set<string>::iterator itr = midiList.begin();
-                itr != midiList.end(); ++itr) {
+            itr != midiList.end(); ++itr) {
             midi->add(itr->c_str());
             if(*itr == source)
                 midival = midi->size() - 2;
@@ -46,7 +46,7 @@ NioUI::NioUI()
         string      sink      = Nio::getSink();
         int audioval = 0;
         for(set<string>::iterator itr = audioList.begin();
-                itr != audioList.end(); ++itr) {
+            itr != audioList.end(); ++itr) {
             audio->add(itr->c_str());
             if(*itr == sink)
                 audioval = audio->size() - 2;

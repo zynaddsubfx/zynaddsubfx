@@ -458,7 +458,8 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
         if(ibw > profilesize) { //if the bandwidth is larger than the profilesize
             float rap   = sqrt((float)profilesize / (float)ibw);
             int   cfreq =
-                (int) (realfreq / (synth->samplerate_f * 0.5f) * size) - ibw / 2;
+                (int) (realfreq
+                       / (synth->samplerate_f * 0.5f) * size) - ibw / 2;
             for(int i = 0; i < ibw; ++i) {
                 int src    = (int)(i * rap * rap);
                 int spfreq = i + cfreq;

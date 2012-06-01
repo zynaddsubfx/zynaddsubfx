@@ -60,22 +60,22 @@ bool JackEngine::connectServer(string server)
     jack_status_t jackstatus;
     bool use_server_name = server.size() && server.compare("default") != 0;
     jack_options_t jopts = (jack_options_t)
-                           (((! instance_name && use_server_name) ? JackServerName :
+                           (((!instance_name
+                              && use_server_name) ? JackServerName :
                              JackNullOption)
                             | ((autostart_jack) ? JackNullOption :
                                JackNoStartServer));
 
-    if ( instance_name )
-    {
-            jackClient = jack_client_open(instance_name, jopts, &jackstatus);
-    }
-    else
-    {
+    if(instance_name)
+        jackClient = jack_client_open(instance_name, jopts, &jackstatus);
+    else {
         if(use_server_name)
-            jackClient = jack_client_open(clientname.c_str(), jopts, &jackstatus,
-                                          server.c_str());
+            jackClient = jack_client_open(
+                clientname.c_str(), jopts, &jackstatus,
+                server.c_str());
         else
-            jackClient = jack_client_open(clientname.c_str(), jopts, &jackstatus);
+            jackClient = jack_client_open(
+                clientname.c_str(), jopts, &jackstatus);
     }
 
 
@@ -308,7 +308,7 @@ bool JackEngine::processAudio(jack_nframes_t nframes)
     return true;
 }
 
-int JackEngine::_xrunCallback(void * /*/arg*/)
+int JackEngine::_xrunCallback(void *)
 {
     cerr << "Jack reports xrun" << endl;
     return 0;

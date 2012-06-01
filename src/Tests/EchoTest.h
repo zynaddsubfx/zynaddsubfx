@@ -34,7 +34,7 @@ class EchoTest:public CxxTest::TestSuite
     public:
         void setUp() {
             synth = new SYNTH_T;
-            outL = new float[synth->buffersize];
+            outL  = new float[synth->buffersize];
             for(int i = 0; i < synth->buffersize; ++i)
                 outL[i] = 0.0f;
             outR = new float[synth->buffersize];

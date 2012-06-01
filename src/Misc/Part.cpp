@@ -227,7 +227,7 @@ void Part::NoteOn(unsigned char note,
                          I'm not sure why though... */
         if((partnote[lastpos].status != KEY_PLAYING)
            && (partnote[lastpos].status != KEY_RELASED_AND_SUSTAINED))
-            ismonofirstnote = true; // No other keys are held or sustained.
+            ismonofirstnote = true;  // No other keys are held or sustained.
     }
     else
     // Poly mode is On so just make sure the list is empty.
@@ -394,7 +394,7 @@ void Part::NoteOn(unsigned char note,
 
                     if((lastnotecopy < kit[item].Pminkey)
                        || (lastnotecopy > kit[item].Pmaxkey))
-                        continue; // We will not perform legato across 2 key regions.
+                        continue;  // We will not perform legato across 2 key regions.
 
                     partnote[pos].kititem[ci].sendtoparteffect =
                         (kit[item].Psendtoparteffect <
@@ -635,7 +635,7 @@ void Part::NoteOff(unsigned char note) //relase the key
         if((partnote[i].status == KEY_PLAYING) && (partnote[i].note == note)) {
             if(ctl.sustain.sustain == 0) { //the sustain pedal is not pushed
                 if((Ppolymode == 0) && (not monomemnotes.empty()))
-                    MonoMemRenote(); // To play most recent still held note.
+                    MonoMemRenote();  // To play most recent still held note.
                 else
                     RelaseNotePos(i);
                 /// break;
@@ -745,7 +745,7 @@ void Part::RelaseSustainedKeys()
     // Let's call MonoMemRenote() on some conditions:
     if((Ppolymode == 0) && (not monomemnotes.empty()))
         if(monomemnotes.back() != lastnote) // Sustain controller manipulation would cause repeated same note respawn without this check.
-            MonoMemRenote(); // To play most recent still held note.
+            MonoMemRenote();  // To play most recent still held note.
 
     for(int i = 0; i < POLIPHONY; ++i)
         if(partnote[i].status == KEY_RELASED_AND_SUSTAINED)

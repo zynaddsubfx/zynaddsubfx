@@ -29,7 +29,7 @@ class ControllerTest:public CxxTest::TestSuite
 {
     public:
         void setUp() {
-            synth = new SYNTH_T;
+            synth   = new SYNTH_T;
             testCtl = new Controller();
         }
 

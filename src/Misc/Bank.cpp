@@ -219,7 +219,7 @@ int Bank::loadbank(string bankdirname)
         }
 
         if((startname + 1) < strlen(filename))
-            startname++; //to take out the "-"
+            startname++;  //to take out the "-"
 
         string name = filename;
 
@@ -408,7 +408,7 @@ int Bank::addtobank(int pos, string filename, string name)
 {
     if((pos >= 0) && (pos < BANK_SIZE)) {
         if(ins[pos].used)
-            pos = -1; //force it to find a new free position
+            pos = -1;  //force it to find a new free position
     }
     else
     if(pos >= BANK_SIZE)
@@ -423,7 +423,7 @@ int Bank::addtobank(int pos, string filename, string name)
             }
 
     if(pos < 0)
-        return -1; //the bank is full
+        return -1;  //the bank is full
 
     deletefrombank(pos);
 

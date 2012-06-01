@@ -98,8 +98,8 @@ class Chorus:public Effect
         float depth, delay, fb;
         float dl1, dl2, dr1, dr2, lfol, lfor;
         int   maxdelay;
-        Stereo<float*> delaySample;
-        int   dlk, drk, dlhi;
+        Stereo<float *> delaySample;
+        int dlk, drk, dlhi;
         float getdelay(float xlfo);
 };
 

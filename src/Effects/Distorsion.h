@@ -55,7 +55,7 @@ class Distorsion:public Effect
         void sethpf(unsigned char _Phpf);
 
         //Real Parameters
-        class AnalogFilter *lpfl, *lpfr, *hpfl, *hpfr;
+        class AnalogFilter * lpfl, *lpfr, *hpfl, *hpfr;
 };
 
 #endif

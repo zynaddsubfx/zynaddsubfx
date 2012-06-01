@@ -101,7 +101,7 @@ class PADnote:public SynthNote
             /******************************************
             *        FILTER GLOBAL PARAMETERS        *
             ******************************************/
-            class Filter *GlobalFilterL, *GlobalFilterR;
+            class Filter * GlobalFilterL, *GlobalFilterR;
 
             float FilterCenterPitch;  //octaves
             float FilterQ;

@@ -46,7 +46,8 @@ int Recorder::preparefile(std::string filename_, int overwrite)
             return 1;
     }
 
-    OutMgr::getInstance(). wave->newFile(new WavFile(filename_, synth->samplerate, 2));
+    OutMgr::getInstance(). wave->newFile(new WavFile(filename_,
+                                                     synth->samplerate, 2));
 
     status = 1; //ready
 

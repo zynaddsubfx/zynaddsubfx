@@ -116,7 +116,7 @@ void EQ::changepar(int npar, unsigned char value)
         case 0:
             filter[nb].Ptype = value;
             if(value > 9)
-                filter[nb].Ptype = 0; //has to be changed if more filters will be added
+                filter[nb].Ptype = 0;  //has to be changed if more filters will be added
             if(filter[nb].Ptype != 0) {
                 filter[nb].l->settype(value - 1);
                 filter[nb].r->settype(value - 1);

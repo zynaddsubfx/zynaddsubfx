@@ -42,7 +42,7 @@ using namespace std;
 
 vuData::vuData(void)
     :outpeakl(0.0f), outpeakr(0.0f), maxoutpeakl(0.0f), maxoutpeakr(0.0f),
-    rmspeakl(0.0f), rmspeakr(0.0f), clipped(0)
+      rmspeakl(0.0f), rmspeakr(0.0f), clipped(0)
 {}
 
 Master::Master()
@@ -182,7 +182,8 @@ void Master::setController(char chan, int type, int par)
             }
         ;
     }
-    else if(type == C_bankselectmsb) { // Change current bank
+    else
+    if(type == C_bankselectmsb) {      // Change current bank
         if(((unsigned int)par < bank.banks.size())
            && (bank.banks[par].dir != bank.bankfiletitle))
             bank.loadbank(bank.banks[par].dir);
@@ -204,7 +205,7 @@ void Master::setController(char chan, int type, int par)
 
 void Master::setProgram(char chan, unsigned int pgm)
 {
-    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
+    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         if(chan == part[npart]->Prcvchn) {
             bank.loadfromslot(pgm, part[npart]);
 
@@ -215,7 +216,6 @@ void Master::setProgram(char chan, unsigned int pgm)
             part[npart]->applyparameters();
             pthread_mutex_lock(&mutex);
         }
-    }
 }
 
 void Master::vuUpdate(const float *outl, const float *outr)
@@ -356,7 +356,7 @@ void Master::AudioOut(float *outl, float *outr)
     //System effects
     for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx) {
         if(sysefx[nefx]->geteffect() == 0)
-            continue; //the effect is disabled
+            continue;  //the effect is disabled
 
         float *tmpmixl = getTmpBuffer();
         float *tmpmixr = getTmpBuffer();

@@ -396,7 +396,7 @@ void SUBnote::computecurrentparameters()
         if(portamento != 0) { //portamento is used
             envfreq *= ctl->portamento.freqrap;
             if(ctl->portamento.used == 0) //the portamento has finished
-                portamento = 0; //this note is no longer "portamented"
+                portamento = 0;  //this note is no longer "portamented"
             ;
         }
 

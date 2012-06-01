@@ -166,8 +166,8 @@ class Part
             int itemsplaying;
             struct {
                 SynthNote *adnote,
-                *subnote,
-                *padnote;
+                   *subnote,
+                   *padnote;
                 int sendtoparteffect;
             } kititem[NUM_KIT_ITEMS];
             int time;

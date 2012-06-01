@@ -33,94 +33,100 @@ extern int Pexitprogram;
 extern MasterUI *ui;
 
 extern NSM_Client *nsm;
-extern char *instance_name;
+extern char       *instance_name;
 
-NSM_Client::NSM_Client ( )
+NSM_Client::NSM_Client()
 {
     project_filename = 0;
-    display_name = 0;
+    display_name     = 0;
 }
 
-int command_open ( const char *name, const char *display_name, const char *client_id, char **out_msg );
-int command_save ( char **out_msg );
+int command_open(const char *name,
+                 const char *display_name,
+                 const char *client_id,
+                 char **out_msg);
+int command_save(char **out_msg);
 
 int
-NSM_Client::command_save ( char **out_msg )
+NSM_Client::command_save(char **out_msg)
 {
     int r = ERR_OK;
 
-    ui->do_save_master( project_filename );
-    
+    ui->do_save_master(project_filename);
+
     return r;
 }
 
 int
-NSM_Client::command_open ( const char *name, const char *display_name, const char *client_id, char **out_msg )
+NSM_Client::command_open(const char *name,
+                         const char *display_name,
+                         const char *client_id,
+                         char **out_msg)
 {
     Nio::stop();
 
-    if ( instance_name )
-        free( instance_name );
-    
-    instance_name = strdup( client_id );
+    if(instance_name)
+        free(instance_name);
+
+    instance_name = strdup(client_id);
 
     Nio::start();
 
     char *new_filename;
-    
-    asprintf( &new_filename, "%s.xmz", name );
+
+    asprintf(&new_filename, "%s.xmz", name);
 
     struct stat st;
 
     int r = ERR_OK;
 
-    if ( 0 == stat( new_filename, &st ) )
-    {
-        if ( ui->do_load_master_unconditional( new_filename, display_name ) < 0 )
-        {
-            *out_msg = strdup( "Failed to load for unknown reason" );
+    if(0 == stat(new_filename, &st)) {
+        if(ui->do_load_master_unconditional(new_filename, display_name) < 0) {
+            *out_msg = strdup("Failed to load for unknown reason");
             r = ERR_GENERAL;
 
             return r;
         }
     }
     else
-    {
         ui->do_new_master_unconditional();
-    }
 
-    if ( project_filename )
-        free( project_filename );
+    if(project_filename)
+        free(project_filename);
 
-    if ( this->display_name )
-        free( this->display_name );
-        
+    if(this->display_name)
+        free(this->display_name);
+
     project_filename = new_filename;
 
-    this->display_name = strdup( display_name );
+    this->display_name = strdup(display_name);
 
     return r;
 }
 
 void
-NSM_Client::command_active ( bool active )
+NSM_Client::command_active(bool active)
 {
-    if ( active )
-    {
-        const_cast<Fl_Menu_Item *>( ui->mastermenu->find_item( "&File/&Open Parameters..." ) )->deactivate();
-        const_cast<Fl_Menu_Item *>( ui->simplemastermenu->find_item( "&File/&Open Parameters..." ) )->deactivate();
+    if(active) {
+        const_cast<Fl_Menu_Item *>(ui->mastermenu->find_item(
+                                       "&File/&Open Parameters..."))->
+        deactivate();
+        const_cast<Fl_Menu_Item *>(ui->simplemastermenu->find_item(
+                                       "&File/&Open Parameters..."))->
+        deactivate();
         ui->sm_indicator1->value(1);
         ui->sm_indicator2->value(1);
-        ui->sm_indicator1->tooltip( session_manager_name() );
-        ui->sm_indicator2->tooltip( session_manager_name() );
+        ui->sm_indicator1->tooltip(session_manager_name());
+        ui->sm_indicator2->tooltip(session_manager_name());
     }
-    else
-    {
-        const_cast<Fl_Menu_Item *>( ui->mastermenu->find_item( "&File/&Open Parameters..." ) )->activate();
-        const_cast<Fl_Menu_Item *>( ui->simplemastermenu->find_item( "&File/&Open Parameters..." ) )->activate();
+    else {
+        const_cast<Fl_Menu_Item *>(ui->mastermenu->find_item(
+                                       "&File/&Open Parameters..."))->activate();
+        const_cast<Fl_Menu_Item *>(ui->simplemastermenu->find_item(
+                                       "&File/&Open Parameters..."))->activate();
         ui->sm_indicator1->value(0);
         ui->sm_indicator2->value(0);
-        ui->sm_indicator1->tooltip( NULL );
-        ui->sm_indicator2->tooltip( NULL );
+        ui->sm_indicator1->tooltip(NULL);
+        ui->sm_indicator2->tooltip(NULL);
     }
 }

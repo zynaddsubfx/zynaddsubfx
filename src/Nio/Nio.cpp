@@ -16,11 +16,11 @@ OutMgr    *out = NULL;
 EngineMgr *eng = NULL;
 string     postfix;
 
-bool   Nio::autoConnect = false;
+bool   Nio::autoConnect   = false;
 string Nio::defaultSource = IN_DEFAULT;
-string Nio::defaultSink = OUT_DEFAULT;
+string Nio::defaultSink   = OUT_DEFAULT;
 
-void Nio::init ( void )
+void Nio::init(void)
 {
     in  = &InMgr::getInstance(); //Enable input wrapper
     out = &OutMgr::getInstance(); //Initialize the Output Systems
@@ -105,7 +105,7 @@ string Nio::getSink()
 void Nio::preferedSampleRate(unsigned &rate)
 {
     jack_client_t *client = jack_client_open("temp-client",
-            JackNoStartServer, 0);
+                                             JackNoStartServer, 0);
     if(client) {
         rate = jack_get_sample_rate(client);
         jack_client_close(client);

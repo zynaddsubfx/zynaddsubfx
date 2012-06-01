@@ -186,8 +186,8 @@ float Microtonal::getnotefreq(int note, int keyshift) const
 
         float oct  = octave[octavesize - 1].tuning;
         float freq =
-            octave[(ntkey + octavesize - 1) % octavesize].tuning *powf(oct,
-                                                                       ntoct)
+            octave[(ntkey + octavesize - 1) % octavesize].tuning * powf(oct,
+                                                                        ntoct)
             * PAfreq;
         if(ntkey == 0)
             freq /= oct;
@@ -209,11 +209,11 @@ bool Microtonal::operator!=(const Microtonal &micro) const
     //A simple macro to test equality MiCRotonal EQuals (not the perfect
     //approach, but good enough)
 #define MCREQ(x) if(x != micro.x) \
-        return true;
+        return true
 
     //for floats
 #define FMCREQ(x) if(!((x < micro.x + 0.0001f) && (x > micro.x - 0.0001f))) \
-        return true;
+        return true
 
     MCREQ(Pinvertupdown);
     MCREQ(Pinvertupdowncenter);

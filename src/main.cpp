@@ -97,8 +97,8 @@ void initprogram(int argc, char **argv)
     cerr << std::fixed;
     cerr << "\nSample Rate = \t\t" << synth->samplerate << endl;
     cerr << "Sound Buffer Size = \t" << synth->buffersize << " samples" << endl;
-    cerr << "Internal latency = \t" << synth->buffersize_f * 1000.0f /
-        synth->samplerate_f << " ms" << endl;
+    cerr << "Internal latency = \t" << synth->buffersize_f * 1000.0f
+    / synth->samplerate_f << " ms" << endl;
     cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
 
 
@@ -124,11 +124,11 @@ void exitprogram()
     delete ui;
 #endif
 #if LASH
-    if ( lash )
+    if(lash)
         delete lash;
 #endif
 #if USE_NSM
-    if ( nsm )
+    if(nsm)
         delete nsm;
 #endif
 
@@ -142,8 +142,8 @@ int main(int argc, char *argv[])
     dump.startnow();
     int noui = 0;
     cerr
-        << "\nZynAddSubFX - Copyright (c) 2002-2011 Nasca Octavian Paul and others"
-        << endl;
+    << "\nZynAddSubFX - Copyright (c) 2002-2011 Nasca Octavian Paul and others"
+    << endl;
     cerr << "Compiled: " << __DATE__ << " " << __TIME__ << endl;
     cerr << "This program is free software (GNU GPL v.2 or later) and \n";
     cerr << "it comes with ABSOLUTELY NO WARRANTY.\n" << endl;
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
     synth->samplerate = config.cfg.SampleRate;
     synth->buffersize = config.cfg.SoundBufferSize;
     synth->oscilsize  = config.cfg.OscilSize;
-    swaplr            = config.cfg.SwapStereo;
+    swaplr = config.cfg.SwapStereo;
 
     Nio::preferedSampleRate(synth->samplerate);
 
@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
             "help", 2, NULL, 'h'
         },
         {
-            "version",2,NULL,'v'
+            "version", 2, NULL, 'v'
         },
         {
             "named", 1, NULL, 'N'
@@ -232,10 +232,10 @@ int main(int argc, char *argv[])
                           &option_index);
         char *optarguments = optarg;
 
-#define GETOP(x) if(optarguments)               \
-            x = optarguments
-#define GETOPNUM(x) if(optarguments)            \
-            x = atoi(optarguments)
+#define GETOP(x) if(optarguments) \
+        x = optarguments
+#define GETOPNUM(x) if(optarguments) \
+        x = atoi(optarguments)
 
 
         if(opt == -1)
@@ -248,7 +248,7 @@ int main(int argc, char *argv[])
             case 'v':
                 exitwithversion = 1;
                 break;
-            case 'Y':/* this command a dummy command (has NO effect)
+            case 'Y': /* this command a dummy command (has NO effect)
                         and is used because I need for NSIS installer
                         (NSIS sometimes forces a command line for a
                         program, even if I don't need that; eg. when
@@ -286,12 +286,13 @@ int main(int argc, char *argv[])
                 if(synth->oscilsize < MAX_AD_HARMONICS * 2)
                     synth->oscilsize = MAX_AD_HARMONICS * 2;
                 synth->oscilsize =
-                    (int) powf(2, ceil(logf(synth->oscilsize - 1.0f) / logf(2.0f)));
+                    (int) powf(2,
+                               ceil(logf(synth->oscilsize - 1.0f) / logf(2.0f)));
                 if(tmp != synth->oscilsize)
                     cerr
-                        <<
-                        "synth->oscilsize is wrong (must be 2^n) or too small. Adjusting to "
-                        << synth->oscilsize << "." << endl;
+                    <<
+                    "synth->oscilsize is wrong (must be 2^n) or too small. Adjusting to "
+                    << synth->oscilsize << "." << endl;
                 break;
             case 'S':
                 swaplr = 1;
@@ -337,12 +338,12 @@ int main(int argc, char *argv[])
              << "  -L file, --load-instrument=FILE\t Loads a .xiz file\n"
              << "  -r SR, --sample-rate=SR\t\t Set the sample rate SR\n"
              <<
-            "  -b BS, --buffer-size=SR\t\t Set the buffer size (granularity)\n"
+        "  -b BS, --buffer-size=SR\t\t Set the buffer size (granularity)\n"
              << "  -o OS, --oscil-size=OS\t\t Set the ADsynth oscil. size\n"
              << "  -S , --swap\t\t\t\t Swap Left <--> Right\n"
              << "  -D , --dump\t\t\t\t Dumps midi note ON/OFF commands\n"
              <<
-            "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
+        "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
              << "  -N , --named\t\t\t\t Postfix IO Name when possible\n"
              << "  -a , --auto-connect\t\t\t AutoConnect when using JACK\n"
              << "  -O , --output\t\t\t\t Set Output Engine\n"
@@ -401,30 +402,26 @@ int main(int argc, char *argv[])
 #ifndef DISABLE_GUI
     ui = new MasterUI(master, &Pexitprogram);
 
-    if(!noui)
-    {
+    if(!noui) {
         ui->showUI();
 
         if(!ioGood)
-            fl_alert("Default IO did not initialize.\nDefaulting to NULL backend.");
+            fl_alert(
+                "Default IO did not initialize.\nDefaulting to NULL backend.");
     }
 
 #endif
 
 #ifndef DISABLE_GUI
 #if USE_NSM
-    char *nsm_url = getenv( "NSM_URL" );
+    char *nsm_url = getenv("NSM_URL");
 
-    if ( nsm_url )
-    {
+    if(nsm_url) {
         nsm = new NSM_Client;
 
-        if ( ! nsm->init( nsm_url ) )
-        {
-            nsm->announce( "ZynAddSubFX", ":switch:", argv[0] );
-        }
-        else
-        {
+        if(!nsm->init(nsm_url))
+            nsm->announce("ZynAddSubFX", ":switch:", argv[0]);
+        else {
             delete nsm;
             nsm = NULL;
         }
@@ -433,26 +430,24 @@ int main(int argc, char *argv[])
 #endif
 
 #if USE_NSM
-    if ( ! nsm )
+    if(!nsm)
 #endif
     {
 #if LASH
-    lash = new LASHClient(&argc, &argv);
+        lash = new LASHClient(&argc, &argv);
 #ifndef DISABLE_GUI
-    ui->sm_indicator1->value(1);
-    ui->sm_indicator2->value(1);
-    ui->sm_indicator1->tooltip( "LASH" );
-    ui->sm_indicator2->tooltip( "LASH" );
+        ui->sm_indicator1->value(1);
+        ui->sm_indicator2->value(1);
+        ui->sm_indicator1->tooltip("LASH");
+        ui->sm_indicator2->tooltip("LASH");
 #endif
 #endif
     }
 
-    while(Pexitprogram == 0)
-    {
+    while(Pexitprogram == 0) {
 #ifndef DISABLE_GUI
 #if USE_NSM
-        if ( nsm )
-        {
+        if(nsm) {
             nsm->check();
             goto done;
         }
@@ -477,7 +472,7 @@ int main(int argc, char *argv[])
         }
 #endif //LASH
 
-    done:
+done:
 
         Fl::wait(0.1f);
 #else

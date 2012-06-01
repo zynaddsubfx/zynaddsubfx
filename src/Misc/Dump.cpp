@@ -38,9 +38,11 @@ Dump::~Dump()
 {
     if(file != NULL) {
         int duration = tick * synth->buffersize_f / synth->samplerate_f;
-        fprintf(file,
+        fprintf(
+            file,
             "\n# statistics: duration = %d seconds; keyspressed = %d\n\n\n\n",
-            duration, keyspressed);
+            duration,
+            keyspressed);
         fclose(file);
     }
 }
@@ -86,7 +88,7 @@ void Dump::dumpnote(char chan, char note, char vel)
     if(vel == 0)
         fprintf(file, "n %d -> %d %d \n", tick, chan, note);    //note off
     else
-        fprintf(file, "N %d -> %d %d %d \n", tick, chan, note, vel); //note on
+        fprintf(file, "N %d -> %d %d %d \n", tick, chan, note, vel);  //note on
 
     if(vel != 0)
         keyspressed++;

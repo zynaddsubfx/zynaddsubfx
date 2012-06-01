@@ -113,7 +113,7 @@ class Master
         void partonoff(int npart, int what);
 
         /**parts \todo see if this can be made to be dynamic*/
-        class Part *part[NUM_MIDI_PARTS];
+        class Part * part[NUM_MIDI_PARTS];
 
         //parameters
 
@@ -129,8 +129,8 @@ class Master
         void setPsysefxsend(int Pefxfrom, int Pefxto, char Pvol);
 
         //effects
-        class EffectMgr *sysefx[NUM_SYS_EFX]; //system
-        class EffectMgr *insefx[NUM_INS_EFX]; //insertion
+        class EffectMgr * sysefx[NUM_SYS_EFX]; //system
+        class EffectMgr * insefx[NUM_INS_EFX]; //insertion
 //      void swapcopyeffects(int what,int type,int neff1,int neff2);
 
         //HDD recorder
@@ -157,7 +157,7 @@ class Master
         Microtonal microtonal;
         Bank       bank;
 
-        class FFTwrapper     *fft;
+        class FFTwrapper * fft;
         pthread_mutex_t mutex;
         pthread_mutex_t vumutex;
 

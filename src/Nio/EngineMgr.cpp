@@ -134,7 +134,8 @@ bool EngineMgr::setInDefault(string name)
     }
 
     //Warn user
-    cerr << "Error: " << name << " is not a recognized MIDI input source" << endl;
+    cerr << "Error: " << name << " is not a recognized MIDI input source"
+         << endl;
     cerr << "       Defaulting to the NULL input source" << endl;
 
     return false;

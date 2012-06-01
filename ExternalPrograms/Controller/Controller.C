@@ -77,9 +77,8 @@ void Controller::send(int npar, float xval) {
                    * (pars[npar].val2 - pars[npar].val1
                       - 1.0) * 0.9999 + pars[npar].val1 + 1.0);
     switch(pars[npar].mode) {
-    case 1: sendcontroller(pars[npar].ctl.par, val); break;
-    //case 2:break;
-    case 3: sendnrpn(npar, val); break;
+        case 1: sendcontroller(pars[npar].ctl.par, val); break;
+        //case 2:break;
+        case 3: sendnrpn(npar, val); break;
     }
 }
-

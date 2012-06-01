@@ -26,16 +26,16 @@
 
 Unison::Unison(int update_period_samples_, float max_delay_sec_)
     :unison_size(0),
-    base_freq(1.0f),
-    uv(NULL),
-    update_period_samples(update_period_samples_),
-    update_period_sample_k(0),
-    max_delay((int)(synth->samplerate_f * max_delay_sec_) + 1),
-    delay_k(0),
-    first_time(false),
-    delay_buffer(NULL),
-    unison_amplitude_samples(0.0f),
-    unison_bandwidth_cents(10.0f)
+      base_freq(1.0f),
+      uv(NULL),
+      update_period_samples(update_period_samples_),
+      update_period_sample_k(0),
+      max_delay((int)(synth->samplerate_f * max_delay_sec_) + 1),
+      delay_k(0),
+      first_time(false),
+      delay_buffer(NULL),
+      unison_amplitude_samples(0.0f),
+      unison_bandwidth_cents(10.0f)
 {
     if(max_delay < 10)
         max_delay = 10;
@@ -100,7 +100,7 @@ void Unison::updateParameters(void)
 
     float max_speed = powf(2.0f, unison_bandwidth_cents / 1200.0f);
     unison_amplitude_samples = 0.125f * (max_speed - 1.0f)
-        * synth->samplerate_f / base_freq;
+                               * synth->samplerate_f / base_freq;
 
 #warning \
     todo: test if unison_amplitude_samples is to big and reallocate bigger memory
@@ -163,7 +163,8 @@ void Unison::updateUnisonData()
             pos  = -1.0f;
             step = -step;
         }
-        else if(pos >= 1.0f) {
+        else
+        if(pos >= 1.0f) {
             pos  = 1.0f;
             step = -step;
         }
@@ -173,8 +174,8 @@ void Unison::updateUnisonData()
 #warning \
         I have to enlarge (reallocate) the buffer to make place for the whole delay
         float newval = 1.0f + 0.5f
-            * (vibratto_val + 1.0f) * unison_amplitude_samples
-            * uv[k].relative_amplitude;
+                       * (vibratto_val + 1.0f) * unison_amplitude_samples
+                       * uv[k].relative_amplitude;
 
         if(first_time)
             uv[k].realpos1 = uv[k].realpos2 = newval;

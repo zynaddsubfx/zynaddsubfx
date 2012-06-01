@@ -18,7 +18,7 @@ class OscilGenTest:public CxxTest::TestSuite
             synth = new SYNTH_T;
             //First the sensible settings and variables that have to be set:
             synth->buffersize = 256;
-            synth->oscilsize = 1024;
+            synth->oscilsize  = 1024;
 
             outL = new float[synth->oscilsize];
             outR = new float[synth->oscilsize];

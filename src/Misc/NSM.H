@@ -22,21 +22,24 @@
 #if USE_NSM
 #include "NSM/Client.H"
 
-class NSM_Client : public NSM::Client
+class NSM_Client:public NSM::Client
 {
-public:
+    public:
 
-    char *project_filename;
-    char *display_name;
+        char *project_filename;
+        char *display_name;
 
-    NSM_Client ( );
-    ~NSM_Client ( ) { };
-    
-protected:
+        NSM_Client();
+        ~NSM_Client() { }
 
-    int command_open ( const char *name, const char *display_name, const char *client_id, char **out_msg );
-    int command_save ( char **out_msg );
+    protected:
 
-    void command_active ( bool active );
+        int command_open(const char *name,
+                         const char *display_name,
+                         const char *client_id,
+                         char **out_msg);
+        int command_save(char **out_msg);
+
+        void command_active(bool active);
 };
 #endif

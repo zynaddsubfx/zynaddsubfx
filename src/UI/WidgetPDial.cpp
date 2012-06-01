@@ -81,7 +81,7 @@ void TipWin::redraw()
 {
     // Recalc size of window
     fl_font(labelfont(), labelsize());
-    int W=0, H=0;
+    int W = 0, H = 0;
     fl_measure(getStr(), W, H, 0);
     //provide a bit of extra space
     W += 8;

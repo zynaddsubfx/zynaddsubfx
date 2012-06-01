@@ -69,7 +69,7 @@ class EffectMgr:public Presets
         unsigned char geteffectpar(int npar);
 
         const bool insertion;
-        float *efxoutl, *efxoutr;
+        float     *efxoutl, *efxoutr;
 
         // used by UI
         float getEQfreqresponse(float freq);
@@ -80,7 +80,7 @@ class EffectMgr:public Presets
         int     nefx;
         Effect *efx;
         pthread_mutex_t *mutex;
-        bool    dryonly;
+        bool dryonly;
 };
 
 #endif

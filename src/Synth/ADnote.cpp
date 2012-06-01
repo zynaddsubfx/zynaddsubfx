@@ -164,8 +164,8 @@ ADnote::ADnote(ADnoteParameters *pars,
             (unison_real_spread - 1.0f) * unison_vibratto_a;
 
         float increments_per_second = synth->samplerate_f / synth->buffersize_f;
-        float vibratto_base_period = 0.25f
-                                     * powf(
+        float vibratto_base_period  = 0.25f
+                                      * powf(
             2.0f,
             (1.0f
              - pars->VoicePar[nvoice].
@@ -440,7 +440,7 @@ void ADnote::legatonote(float freq, float velocity, int portamento_,
 
     for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
         if(NoteVoicePar[nvoice].Enabled == OFF)
-            continue; //(gf) Stay the same as first note in legato.
+            continue;  //(gf) Stay the same as first note in legato.
 
         NoteVoicePar[nvoice].fixedfreq   = pars->VoicePar[nvoice].Pfixedfreq;
         NoteVoicePar[nvoice].fixedfreqET = pars->VoicePar[nvoice].PfixedfreqET;
@@ -591,7 +591,7 @@ void ADnote::legatonote(float freq, float velocity, int portamento_,
             NoteVoicePar[nvoice].Volume = -NoteVoicePar[nvoice].Volume;
 
         if(partparams->VoicePar[nvoice].PPanning == 0)
-            NoteVoicePar[nvoice].Panning = RND; // random panning
+            NoteVoicePar[nvoice].Panning = RND;  // random panning
         else
             NoteVoicePar[nvoice].Panning =
                 partparams->VoicePar[nvoice].PPanning / 128.0f;
@@ -744,7 +744,7 @@ void ADnote::initparameters()
             vce.Volume = -vce.Volume;
 
         if(param.PPanning == 0)
-            vce.Panning = RND; // random panning
+            vce.Panning = RND;  // random panning
         else
             vce.Panning = param.PPanning / 128.0f;
 
@@ -812,7 +812,8 @@ void ADnote::initparameters()
                 vce.FMSmp[synth->oscilsize + i] = vce.FMSmp[i];
             int oscposhiFM_add =
                 (int)((param.PFMoscilphase
-                       - 64.0f) / 128.0f * synth->oscilsize + synth->oscilsize * 4);
+                       - 64.0f) / 128.0f * synth->oscilsize
+                      + synth->oscilsize * 4);
             for(int k = 0; k < unison_size[nvoice]; ++k) {
                 oscposhiFM[nvoice][k] += oscposhiFM_add;
                 oscposhiFM[nvoice][k] %= synth->oscilsize;
@@ -924,7 +925,7 @@ float ADnote::getvoicebasefreq(int nvoice) const
                    + NoteGlobalPar.Detune / 100.0f;
 
     if(NoteVoicePar[nvoice].fixedfreq == 0)
-        return this->basefreq *powf(2, detune / 12.0f);
+        return this->basefreq * powf(2, detune / 12.0f);
     else { //the fixed freq is enabled
         float fixedfreq   = 440.0f;
         int   fixedfreqET = NoteVoicePar[nvoice].fixedfreqET;
@@ -986,7 +987,7 @@ void ADnote::computecurrentparameters()
     if(portamento != 0) { //this voice use portamento
         portamentofreqrap = ctl->portamento.freqrap;
         if(ctl->portamento.used == 0) //the portamento has finished
-            portamento = 0; //this note is no longer "portamented"
+            portamento = 0;  //this note is no longer "portamented"
     }
 
     //compute parameters for all voices
@@ -1082,7 +1083,7 @@ inline void ADnote::fadein(float *smps) const
     int zerocrossings = 0;
     for(int i = 1; i < synth->buffersize; ++i)
         if((smps[i - 1] < 0.0f) && (smps[i] > 0.0f))
-            zerocrossings++; //this is only the possitive crossings
+            zerocrossings++;  //this is only the possitive crossings
 
     float tmp = (synth->buffersize_f - 1.0f) / (zerocrossings + 1) / 3.0f;
     if(tmp < 8.0f)
@@ -1342,8 +1343,8 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
 
     //normalize: makes all sample-rates, oscil_sizes to produce same sound
     if(FMmode != 0) { //Frequency modulation
-        float normalize = synth->oscilsize_f / 262144.0f * 44100.0f 
-                        / synth->samplerate_f;
+        float normalize = synth->oscilsize_f / 262144.0f * 44100.0f
+                          / synth->samplerate_f;
         for(int k = 0; k < unison_size[nvoice]; ++k) {
             float *tw    = tmpwave_unison[k];
             float  fmold = FMoldsmp[nvoice][k];
@@ -1733,9 +1734,9 @@ void ADnote::Voice::releasekey()
 }
 
 template<class T>
-static inline void nullify(T &t) {delete t; t = NULL;}
+static inline void nullify(T &t) {delete t; t = NULL; }
 template<class T>
-static inline void arrayNullify(T &t) {delete [] t; t = NULL;}
+static inline void arrayNullify(T &t) {delete [] t; t = NULL; }
 
 void ADnote::Voice::kill()
 {

@@ -62,7 +62,8 @@ void *NulEngine::AudioThread()
             if(remaining < 0)
                 cerr << "WARNING - too late" << endl;
         }
-        playing_until.tv_usec += synth->buffersize * 1000000 / synth->samplerate;
+        playing_until.tv_usec += synth->buffersize * 1000000
+                                 / synth->samplerate;
         if(remaining < 0)
             playing_until.tv_usec -= remaining;
         playing_until.tv_sec  += playing_until.tv_usec / 1000000;

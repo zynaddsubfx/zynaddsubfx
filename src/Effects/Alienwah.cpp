@@ -25,8 +25,8 @@
 
 Alienwah::Alienwah(bool insertion_, float *efxoutl_, float *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
-    oldl(NULL),
-    oldr(NULL)
+      oldl(NULL),
+      oldr(NULL)
 {
     setpreset(Ppreset);
     cleanup();
@@ -168,7 +168,7 @@ void Alienwah::setpreset(unsigned char npreset)
     for(int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
     if(insertion == 0)
-        changepar(0, presets[npreset][0] / 2); //lower the volume if this is system effect
+        changepar(0, presets[npreset][0] / 2);  //lower the volume if this is system effect
     Ppreset = npreset;
 }
 

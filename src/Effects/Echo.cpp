@@ -98,9 +98,9 @@ void Echo::out(const Stereo<float *> &input)
 
         //LowPass Filter
         old.l = delay.l[(pos.l + delta.l) % (MAX_DELAY * synth->samplerate)] =
-            ldl * hidamp + old.l * (1.0f - hidamp);
+                    ldl * hidamp + old.l * (1.0f - hidamp);
         old.r = delay.r[(pos.r + delta.r) % (MAX_DELAY * synth->samplerate)] =
-            rdl * hidamp + old.r * (1.0f - hidamp);
+                    rdl * hidamp + old.r * (1.0f - hidamp);
 
         //increment
         ++pos.l; // += delta.l;
@@ -184,7 +184,7 @@ void Echo::setpreset(unsigned char npreset)
     for(int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
     if(insertion)
-        setvolume(presets[npreset][0] / 2); //lower the volume if this is insertion effect
+        setvolume(presets[npreset][0] / 2);  //lower the volume if this is insertion effect
     Ppreset = npreset;
 }
 
