@@ -632,8 +632,14 @@ void Microtonal::getfromXML(XMLwrapper *xml)
 
                 if(octave[i].x2 != 0)
                     octave[i].type = 2;
-                else
+                else {
                     octave[i].type = 1;
+                    //populate fields for display
+                    float x = logf(octave[i].tuning) / LOG_2 * 1200.0f;
+                    octave[i].x1 = (int) floor(x);
+                    octave[i].x2 = (int) (floor(fmodf(x, 1.0f) * 1e6));
+                }
+
 
                 xml->exitbranch();
             }
