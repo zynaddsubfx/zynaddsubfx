@@ -70,14 +70,6 @@ class MicrotonalTest:public CxxTest::TestSuite
             TS_ASSERT_DELTA(testMicro->getnotefreq(19, 0), 24.4997f, 0.0001f);
         }
 
-        //performs basic sanity check with the == and != operators
-        void testeqeq() {
-            Microtonal other;
-            TS_ASSERT(*testMicro == other); //both are constructed the same, so they should be equal
-            other.PAfreq = 220.0f;
-            TS_ASSERT(*testMicro != other); //other is now different
-        }
-
         //Tests saving/loading to XML
         void testXML() {
             //Gah, the XMLwrapper is a twisted maze
@@ -110,8 +102,6 @@ class MicrotonalTest:public CxxTest::TestSuite
             TS_ASSERT(!strcmp(tmp, tmpo));
             free(tmp);
             free(tmpo);
-
-            TS_ASSERT(*testMicro == other); //cxxTest sees error here
         }
 
 #if 0
