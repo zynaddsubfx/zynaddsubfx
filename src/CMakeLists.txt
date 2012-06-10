@@ -167,10 +167,7 @@ else (BuildForDebug)
 	message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_RELEASE}")
 endif (BuildForDebug)
 
-if (DssiEnable)
-	add_definitions(-fPIC)
-endif()
-
+add_definitions(-fPIC)
 
 if(FLTK_FOUND)
 	mark_as_advanced(FORCE FLTK_BASE_LIBRARY)
