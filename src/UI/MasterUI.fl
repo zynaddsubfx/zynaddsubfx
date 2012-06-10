@@ -58,7 +58,7 @@ decl {\#include "../Misc/Util.h"} {public
 } 
 
 decl {\#if USE_NSM
-\#include "../Misc/NSM.H"
+\#include "NSM.H"
 extern NSM_Client *nsm;
 \#endif} {public
 } 

@@ -20,9 +20,9 @@
 
 #include "NSM.H"
 
-#include <Nio/Nio.h>
+#include "../Nio/Nio.h"
 
-#include "../UI/MasterUI.h"
+#include "MasterUI.h"
 #include <FL/Fl.H>
 #include <stdio.h>
 #include <sys/stat.h>

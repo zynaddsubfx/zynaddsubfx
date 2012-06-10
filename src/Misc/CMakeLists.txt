@@ -19,16 +19,9 @@ set(zynaddsubfx_misc_SRCS
 if(LashEnable)
     set(zynaddsubfx_misc_SRCS ${zynaddsubfx_misc_SRCS} LASHClient.cpp)
 endif()
-if(LibloEnable)
-    set(zynaddsubfx_misc_SRCS ${zynaddsubfx_misc_SRCS} NSM.C NSM/Client.C)
-endif()
 
 add_library(zynaddsubfx_misc STATIC
 	${zynaddsubfx_misc_SRCS}
 	)
-
-if(LibloEnable)
-    add_dependencies(zynaddsubfx_misc zynaddsubfx_gui)
-endif()
 
 target_link_libraries(zynaddsubfx_misc zynaddsubfx_nio)

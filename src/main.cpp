@@ -73,7 +73,7 @@ LASHClient *lash = NULL;
 #endif
 
 #if USE_NSM
-#include "Misc/NSM.H"
+#include "UI/NSM.H"
 
 NSM_Client *nsm = 0;
 #endif

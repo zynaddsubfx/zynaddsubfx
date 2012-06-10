@@ -22,6 +22,10 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 set_source_files_properties(UI/MasterUI.h PROPERTIES GENERATED 1)
 fltk_wrap_ui(zynaddsubfx_gui ${UI_fl_files})
 
+if(LibloEnable)
+    set(zynaddsubfx_gui_FLTK_UI_SRCS ${zynaddsubfx_gui_FLTK_UI_SRCS} NSM.C NSM/Client.C)
+endif()
+
 add_library(zynaddsubfx_gui STATIC
 	${UI_objs}
 	${zynaddsubfx_gui_FLTK_UI_SRCS}
