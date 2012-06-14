@@ -21,6 +21,7 @@
 
 #include <cmath>
 #include <cstring>
+#include <err.h>
 
 #include "Unison.h"
 
@@ -74,8 +75,10 @@ void Unison::setBandwidth(float bandwidth)
     if(bandwidth > 1200.0f)
         bandwidth = 1200.0f;
 
-#warning \
-    : todo: if bandwidth is too small the audio will be self canceled (because of the sign change of the outputs)
+    /* If the bandwidth is too small, the audio may cancel itself out
+     * (due to the sign change of the outputs)
+     * TODO figure out the acceptable lower bound and codify it
+     */
     unison_bandwidth_cents = bandwidth;
     updateParameters();
 }
@@ -102,10 +105,13 @@ void Unison::updateParameters(void)
     unison_amplitude_samples = 0.125f * (max_speed - 1.0f)
                                * synth->samplerate_f / base_freq;
 
-#warning \
-    todo: test if unison_amplitude_samples is to big and reallocate bigger memory
-    if(unison_amplitude_samples >= max_delay - 1)
+    //If functions exceed this limit, they should have requested a bigguer delay
+    //and thus are buggy
+    if(unison_amplitude_samples >= max_delay - 1) {
+        warnx("BUG: Unison amplitude samples too big");
+        warnx("Unision max_delay should be larger");
         unison_amplitude_samples = max_delay - 2;
+    }
 
     updateUnisonData();
 }
@@ -169,10 +175,10 @@ void Unison::updateUnisonData()
             step = -step;
         }
         float vibratto_val = (pos - 0.333333333f * pos * pos * pos) * 1.5f; //make the vibratto lfo smoother
-#warning \
-        I will use relative amplitude, so the delay might be bigger than the whole buffer
-#warning \
-        I have to enlarge (reallocate) the buffer to make place for the whole delay
+
+        //Relative amplitude is utilized, so the delay may be larger than the
+        //whole buffer, if the buffer is too small, this indicates a buggy call
+        //to Unison()
         float newval = 1.0f + 0.5f
                        * (vibratto_val + 1.0f) * unison_amplitude_samples
                        * uv[k].relative_amplitude;

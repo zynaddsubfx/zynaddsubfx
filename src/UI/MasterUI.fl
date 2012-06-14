@@ -430,13 +430,13 @@ class MasterUI {open
       callback {\#ifdef VSTAUDIOOUT
 fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
 \#else
-if (
+if ((
 \#if USE_NSM 
-nsm && nsm->is_active()
+(nsm && nsm->is_active())
 \#else
 0
 \#endif
- || fl_choice("Exit and leave the unsaved data?","No","Yes",NULL)) {
+ || fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))) {
     config.save();
     *exitprogram=1;
 };

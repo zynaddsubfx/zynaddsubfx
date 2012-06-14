@@ -50,6 +50,7 @@ int command_save(char **out_msg);
 int
 NSM_Client::command_save(char **out_msg)
 {
+    (void) out_msg;
     int r = ERR_OK;
 
     ui->do_save_master(project_filename);

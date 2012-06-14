@@ -91,7 +91,7 @@ void sigterm_exit(int /*sig*/)
 /*
  * Program initialisation
  */
-void initprogram(int argc, char **argv)
+void initprogram(void)
 {
     cerr.precision(1);
     cerr << std::fixed;
@@ -359,7 +359,7 @@ int main(int argc, char *argv[])
     for(int i = 0; i < synth->buffersize; ++i)
         denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 
-    initprogram(argc, argv);
+    initprogram();
 
     if(!loadfile.empty()) {
         int tmp = master->loadXML(loadfile.c_str());

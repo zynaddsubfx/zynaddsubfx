@@ -468,7 +468,7 @@ void Master::AudioOut(float *outl, float *outr)
 //TODO review the respective code from yoshimi for this
 //If memory serves correctly, libsamplerate was used
 void Master::GetAudioOutSamples(size_t nsamples,
-                                int samplerate,
+                                unsigned samplerate,
                                 float *outl,
                                 float *outr)
 {

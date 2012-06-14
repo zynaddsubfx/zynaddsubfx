@@ -650,6 +650,7 @@ void Part::PolyphonicAftertouch(unsigned char note,
                                 unsigned char velocity,
                                 int masterkeyshift)
 {
+    (void) masterkeyshift;
     if(!Pnoteon || (note < Pminkey) || (note > Pmaxkey))
         return;
     if(Pdrummode)
@@ -686,7 +687,6 @@ void Part::PolyphonicAftertouch(unsigned char note,
                        || (note > kit[item].Pmaxkey))
                         continue;
 
-                    int ci = partnote[i].itemsplaying; // ci=current item
                     if(kit[item].Padenabled)
                         partnote[i].kititem[item].adnote->setVelocity(vel);
                     if(kit[item].Psubenabled)

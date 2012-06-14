@@ -90,4 +90,4 @@ void Recorder::triggernow()
     }
 }
 
-#warning todo move recorder inside nio system
+//TODO move recorder inside nio system
