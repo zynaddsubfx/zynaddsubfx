@@ -318,9 +318,12 @@ void Master::AudioOut(float *outl, float *outr)
     memset(outr, 0, synth->bufferbytes);
 
     //Compute part samples and store them part[npart]->partoutl,partoutr
-    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        if(part[npart]->Penabled != 0)
+    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
+        if(part[npart]->Penabled != 0 && !pthread_mutex_trylock(&part[npart]->load_mutex)) {
             part[npart]->ComputePartSmps();
+            pthread_mutex_unlock(&part[npart]->load_mutex);
+        }
+    }
 
     //Insertion effects
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)

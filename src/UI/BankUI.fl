@@ -262,9 +262,9 @@ if ((what==2)&&(bank->emptyslot(slot)==0)&&(mode!=4)) {//Rename slot
 };
 
 if ((what==1)&&(mode==1)&&(!bank->emptyslot(slot))){//Reads from slot
-    pthread_mutex_lock(&master->mutex);
+    pthread_mutex_lock(&master->part[*npart]->load_mutex);
      bank->loadfromslot(slot,master->part[*npart]);
-    pthread_mutex_unlock(&master->mutex);
+    pthread_mutex_unlock(&master->part[*npart]->load_mutex);
     master->part[*npart]->applyparameters();
     snprintf((char *)master->part[*npart]->Pname,PART_MAX_NAME_LEN,"%s",bank->getname(slot).c_str());
      cbwig->do_callback();
@@ -278,9 +278,9 @@ if ((what==1)&&(mode==2)){//save(write) to slot
      if (!bank->emptyslot(slot)){
        if (!fl_choice("Overwrite the slot no. %d ?","No","Yes",NULL,slot+1)) goto nooverwriteslot;
       };
-       pthread_mutex_lock(&master->mutex);
+       pthread_mutex_lock(&master->part[*npart]->load_mutex);
         bank->savetoslot(slot,master->part[*npart]);
-       pthread_mutex_unlock(&master->mutex);
+       pthread_mutex_unlock(&master->part[*npart]->load_mutex);
 
        bs[slot]->refresh();
        mode=1;readbutton->value(1);writebutton->value(0);
