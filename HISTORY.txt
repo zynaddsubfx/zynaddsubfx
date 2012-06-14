@@ -1,4 +1,11 @@
-2.4.2 (26 Feb 2011)
+2.4.3 (15 Jun 2012)
+        - Non-session manager support
+        - Midi aftertouch support
+        - Documentation additions
+        - Somewhat more sane Nio defaults
+        - Misc bug fixes
+
+2.4.2 (26 Feb 2012)
         - New IO backend support
         - MIDI bank select
         - Spike/Circle waveform

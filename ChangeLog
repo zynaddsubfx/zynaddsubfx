@@ -1019,3 +1019,18 @@
 
 22 Feb 2012 (Liven Moors)
 	  - Added circle waveform to oscilator options
+
+26 Mar 2012 (Mark McCurry)
+	  - Fixed Segfault in Oscillgen
+
+27 Mar 2012 (Mark McCurry)
+	  - Fixed chorus noise bug
+
+14 Apr 2012 (Mark McCurry)
+	  - Removed Nio debugging code
+
+18 Apr 2012 (Jonathan Liles)
+	  - Added Non-session-manager support
+
+31 Mar 2012 (Olaf Schulz)
+	  - Added Midi aftertouch support
