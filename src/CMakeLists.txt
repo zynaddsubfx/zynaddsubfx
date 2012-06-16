@@ -28,10 +28,6 @@ mark_as_advanced(LIBLO_LIBRARIES)
 # NOTE: These cache variables should normally not be changed in this
 # file, but either in in CMakeCache.txt before compile, or by passing
 # parameters directly into cmake using the -D flag.
-SET (DefaultInput alsa CACHE STRING
-    "Default Input module: [null, alsa, oss, jack]")
-SET (DefaultOutput jack CACHE STRING
-    "Default Output module: [null, alsa, oss, jack, portaudio]")
 SET (GuiModule fltk CACHE STRING "GUI module, either fltk, qt or off")
 SET (CompileTests ${CXXTEST_FOUND} CACHE BOOL "whether tests should be compiled in or not")
 SET (AlsaEnable ${ALSA_FOUND} CACHE BOOL
@@ -54,6 +50,40 @@ SET (LibloEnable ${LIBLO_FOUND} CACHE BOOL
 
 # Add version information
 add_definitions(-DVERSION="${VERSION}")
+
+# Give a good guess on the best Input/Output default backends
+if (JackEnable)
+    SET (DefaultOutput jack CACHE STRING
+        "Default Output module: [null, alsa, oss, jack, portaudio]")
+    # Override with perhaps more helpful midi backends
+    if (AlsaEnable)
+        SET (DefaultInput alsa CACHE STRING
+            "Default Input module: [null, alsa, oss, jack]")
+    elseif (OssEnable)
+        SET (DefaultInput oss CACHE STRING
+            "Default Input module: [null, alsa, oss, jack]")
+    else ()
+        SET (DefaultInput jack CACHE STRING
+            "Default Input module: [null, alsa, oss, jack]")
+    endif ()
+elseif (AlsaEnable)
+    SET (DefaultOutput alsa CACHE STRING
+        "Default Output module: [null, alsa, oss, jack, portaudio]")
+    SET (DefaultInput alsa CACHE STRING
+        "Default Input module: [null, alsa, oss, jack]")
+elseif (OssEnable)
+    SET (DefaultOutput oss CACHE STRING
+        "Default Output module: [null, alsa, oss, jack, portaudio]")
+    SET (DefaultInput oss CACHE STRING
+        "Default Input module: [null, alsa, oss, jack]")
+else()
+    SET (DefaultOutput null CACHE STRING
+        "Default Output module: [null, alsa, oss, jack, portaudio]")
+    SET (DefaultInput null CACHE STRING
+        "Default Input module: [null, alsa, oss, jack]")
+endif()
+
+
 
 if (GuiModule STREQUAL qt AND QT_FOUND)
 	set (QtGui TRUE)
