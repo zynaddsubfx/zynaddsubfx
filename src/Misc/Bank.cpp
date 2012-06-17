@@ -175,6 +175,7 @@ void Bank::loadfromslot(unsigned int ninstrument, Part *part)
     if(emptyslot(ninstrument))
         return;
 
+    part->AllNotesOff();
     part->defaultsinstrument();
 
     part->loadXMLinstrument(ins[ninstrument].filename.c_str());
