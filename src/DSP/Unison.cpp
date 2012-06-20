@@ -140,13 +140,14 @@ void Unison::process(int bufsize, float *inbuf, float *outbuf)
             float pos  = (float)(delay_k + max_delay) - vpos - 1.0f;
             int   posi;
             F2I(pos, posi); //optimize!
+            int posi_next = posi + 1;
             if(posi >= max_delay)
                 posi -= max_delay;
+            if(posi_next >= max_delay)
+                posi_next -= max_delay;
             float posf = pos - floorf(pos);
-            out +=
-                ((1.0f
-                  - posf) * delay_buffer[posi] + posf
-                 * delay_buffer[posi + 1]) * sign;
+            out += ((1.0f - posf) * delay_buffer[posi] + posf
+                 * delay_buffer[posi_next]) * sign;
             sign = -sign;
         }
         outbuf[i] = out * volume;
