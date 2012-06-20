@@ -1792,6 +1792,8 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
     GlobalFilterL = Filter::generate(param.GlobalFilter);
     if(stereo)
         GlobalFilterR = Filter::generate(param.GlobalFilter);
+    else
+        GlobalFilterR = NULL;
 
     FilterEnvelope = new Envelope(param.FilterEnvelope, basefreq);
     FilterLfo      = new LFO(param.FilterLfo, basefreq);
