@@ -91,6 +91,7 @@ void Bank::setname(unsigned int ninstrument, const string &newname, int newslot)
 
     string newfilename;
     char   tmpfilename[100 + 1];
+    tmpfilename[100] = 0;
 
     if(newslot >= 0)
         snprintf(tmpfilename, 100, "%4d-%s", newslot + 1, newname.c_str());
@@ -107,7 +108,7 @@ void Bank::setname(unsigned int ninstrument, const string &newname, int newslot)
     rename(ins[ninstrument].filename.c_str(), newfilename.c_str());
 
     ins[ninstrument].filename = newfilename;
-    ins[ninstrument].name     = legalizeFilename(tmpfilename); //TODO limit name to PART_MAX_NAME_LEN
+    ins[ninstrument].name     = newname;
 }
 
 /*
@@ -164,7 +165,7 @@ void Bank::savetoslot(unsigned int ninstrument, Part *part)
 
     remove(filename.c_str());
     part->saveXML(filename.c_str());
-    addtobank(ninstrument, legalizeFilename(tmpfilename), (char *) part->Pname);
+    addtobank(ninstrument, legalizeFilename(tmpfilename) + ".xiz", (char *) part->Pname);
 }
 
 /*
