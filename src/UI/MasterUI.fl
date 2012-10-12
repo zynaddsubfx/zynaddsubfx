@@ -457,7 +457,17 @@ if ((
           }
           MenuItem {} {
             label {&Open Parameters...}
-            callback {do_load_master();}
+            callback {\#if USE_NSM
+            if ( nsm && nsm->is_active() )
+            {
+                do_load_master();
+                do_save_master( nsm->project_filename );
+            }
+            else
+\#endif
+            {
+                do_load_master();
+            }}  
             xywh {20 20 100 20}
           }
           MenuItem {} {
