@@ -209,7 +209,7 @@ o->redraw();}
         callback {microtonal->Penabled=(int) o->value();
 if (microtonal->Penabled==0) microtonalgroup->deactivate();
    else microtonalgroup->activate();}
-        xywh {3 3 102 45} box PLASTIC_UP_BOX down_box DOWN_BOX labelfont 1 labelsize 11 align 148
+        xywh {3 3 102 45} box UP_BOX down_box DOWN_BOX labelfont 1 labelsize 11 align 148
         code0 {o->value(microtonal->Penabled);}
       }
     }

@@ -1,54 +1,62 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0110 
+version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {selected
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
 } 
 
-decl {//License: GNU GPL version 2 or later} {} 
-
-decl {\#include "../Synth/OscilGen.h"} {public
+decl {//License: GNU GPL version 2 or later} {private local
 } 
 
-decl {\#include "../Misc/Util.h"} {public
+decl {\#include "../Synth/OscilGen.h"} {public local
 } 
 
-decl {\#include "../Misc/Master.h"} {public
+decl {\#include "../Misc/Util.h"} {public local
 } 
 
-decl {\#include "ResonanceUI.h"} {public
+decl {\#include "../Misc/Master.h"} {public local
 } 
 
-decl {\#include <FL/Fl_Box.H>} {public
+decl {\#include "ResonanceUI.h"} {public local
 } 
 
-decl {\#include <FL/Fl_Group.H>} {public
+decl {\#include <FL/Fl_Box.H>} {public local
 } 
 
-decl {\#include <FL/Fl_Slider.H>} {public
+decl {\#include <FL/Fl_Group.H>} {public local
 } 
 
-decl {\#include <math.h>} {} 
-
-decl {\#include <stdio.h>} {} 
-
-decl {\#include <stdlib.h>} {} 
-
-decl {\#include <string.h>} {} 
-
-decl {\#include "WidgetPDial.h"} {public
+decl {\#include <FL/Fl_Slider.H>} {public local
 } 
 
-decl {\#include "EnvelopeUI.h"} {public
+decl {\#include <math.h>} {private local
 } 
 
-decl {\#include "LFOUI.h"} {public
+decl {\#include <stdio.h>} {private local
 } 
 
-decl {\#include "FilterUI.h"} {public
+decl {\#include <stdlib.h>} {private local
 } 
 
-decl {\#include "PresetsUI.h"} {public
+decl {\#include <string.h>} {private local
+} 
+
+decl {\#include "WidgetPDial.h"} {public local
+} 
+
+decl {\#include "EnvelopeUI.h"} {public local
+} 
+
+decl {\#include "LFOUI.h"} {public local
+} 
+
+decl {\#include "FilterUI.h"} {public local
+} 
+
+decl {\#include "PresetsUI.h"} {public local
+} 
+
+decl {\#include <FL/fl_draw.H>} {public local
 } 
 
 class OscilSpectrum {: {public Fl_Box}
@@ -122,9 +130,12 @@ for (i=0;i<n;i++){
 }
 delete [] spc;} {}
   }
-  decl {OscilGen *oscil;} {}
-  decl {int oscbase;} {}
-  decl {Master *master;} {}
+  decl {OscilGen *oscil;} {private local
+  }
+  decl {int oscbase;} {private local
+  }
+  decl {Master *master;} {private local
+  }
 } 
 
 class PSlider {: {public Fl_Slider}
@@ -157,12 +168,14 @@ return(1);} {}
   }
 } 
 
-class Oscilloscope {: {public Fl_Box}
+class Oscilloscope {open : {public Fl_Box}
 } {
-  Function {Oscilloscope(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
+  Function {Oscilloscope(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {open
+  } {
     code {oscil=NULL;
 phase=64;
-oscbase=0;} {}
+oscbase=0;
+box(FL_FLAT_BOX);} {}
   }
   Function {init(OscilGen *oscil_,Master *master_)} {} {
     code {oscil=oscil_;
@@ -179,7 +192,8 @@ oscbase=oscbase_;
 phase=phase_;
 master=master_;} {}
   }
-  Function {draw()} {} {
+  Function {draw()} {open
+  } {
     code {int ox=x(),oy=y(),lx=w(),ly=h()-1,i;
 float smps[synth->oscilsize];
 pthread_mutex_lock(&master->mutex);
@@ -188,7 +202,7 @@ if (oscbase==0) oscil->get(smps,-1.0);
 pthread_mutex_unlock(&master->mutex);
 
 if (damage()!=1){
- fl_color(0,0,0);
+ fl_color( fl_color_average( FL_BLACK, FL_BACKGROUND_COLOR, 0.5 ));
  fl_rectf(ox,oy,lx,ly);
 };
 
@@ -220,32 +234,40 @@ fl_line_style(0,1);
 fl_line(ox+2,oy+ly/2,ox+lx-2,oy+ly/2);
 if (this->active_r()) fl_color(this->parent()->selection_color());
     else fl_color(this->parent()->labelcolor());
-int lw=1;
+    
+fl_color( fl_color_add_alpha( fl_color(), 127 ) );
+
+int lw=2;
 //if ((lx<135)||(ly<135)) lw=1;
-fl_line_style(0,lw);
-int ph=(int)((phase-64.0)/128.0*synth->oscilsize+synth->oscilsize);
+fl_line_style(FL_SOLID,lw);
+fl_begin_line();
+double ph=((phase-64.0)/128.0*synth->oscilsize+synth->oscilsize);
 for (i=1;i<lx;i++){
-   int k1=(int)((float)synth->oscilsize*(i-1)/lx)+ph;
-   int k2=(int)((float)synth->oscilsize*i/lx)+ph;
-   float y1=smps[k1%synth->oscilsize]/max;
-   float y2=smps[k2%synth->oscilsize]/max;
-   fl_line(i-1+ox,(int)(y1*ly/2.0)+oy+ly/2,i+ox,(int)(y2*ly/2.0)+oy+ly/2);
-};} {}
+   int k2=(synth->oscilsize*i/lx)+ph;
+   double y2=smps[k2%synth->oscilsize]/max;
+   fl_vertex(i+ox,y2*ly/2.0+oy+ly/2);
+};
+fl_end_line();
+
+fl_line_style(FL_SOLID,0);} {}
   }
-  decl {OscilGen *oscil;} {}
-  decl {int oscbase;} {}
-  decl {int phase;} {public
+  decl {OscilGen *oscil;} {private local
   }
-  decl {Master *master;} {}
+  decl {int oscbase;} {private local
+  }
+  decl {int phase;} {public local
+  }
+  decl {Master *master;} {private local
+  }
 } 
 
 class Oscilharmonic {: {public Fl_Group}
 } {
-  Function {make_window()} {private
+  Function {make_window()} {open private
   } {
-    Fl_Window harmonic {
-      private xywh {328 166 90 225} type Double hide
-      class Fl_Group
+    Fl_Window harmonic {open
+      private xywh {335 236 100 225} type Double box NO_BOX
+      class Fl_Group visible
     } {
       Fl_Slider mag {
         callback {int x=64;
@@ -270,7 +292,7 @@ if (cbwidget!=NULL) {
 	applybutton->color(FL_RED);
 	applybutton->redraw();
 };}
-        xywh {0 15 15 115} type {Vert Knob} box FLAT_BOX selection_color 222 maximum 127 step 1 value 64
+        xywh {0 15 15 115} type {Vert Knob} box NO_BOX selection_color 222 maximum 127 step 1 value 64
         code0 {o->value(127-oscil->Phmag[n]);}
         code1 {if (oscil->Phmag[n]==64) o->selection_color(0);}
         class PSlider
@@ -292,7 +314,7 @@ if (cbwidget!=NULL) {
 	applybutton->color(FL_RED);
 	applybutton->redraw();
 };}
-        xywh {0 135 15 75} type {Vert Knob} box FLAT_BOX selection_color 222 maximum 127 step 1 value 64
+        xywh {0 135 15 75} type {Vert Knob} box NO_BOX selection_color 222 maximum 127 step 1 value 64
         code0 {o->value(oscil->Phphase[n]);}
         class PSlider
       }
@@ -344,20 +366,26 @@ if (oscil->Phmag[n]==64) mag->selection_color(0);
     code {harmonic->hide();
 //delete(harmonic);} {}
   }
-  decl {OscilGen *oscil;} {}
-  decl {Fl_Group *display;} {}
-  decl {int n;} {}
-  decl {Fl_Widget *oldosc,*cbwidget,*applybutton;} {}
-  decl {Master *master;} {}
+  decl {OscilGen *oscil;} {private local
+  }
+  decl {Fl_Group *display;} {private local
+  }
+  decl {int n;} {private local
+  }
+  decl {Fl_Widget *oldosc,*cbwidget,*applybutton;} {private local
+  }
+  decl {Master *master;} {private local
+  }
 } 
 
-class OscilEditor {: {public PresetsUI_}
+class OscilEditor {open : {public PresetsUI_}
 } {
-  Function {make_window()} {} {
+  Function {make_window()} {open
+  } {
     Fl_Window osceditUI {
-      label {ADsynth Oscillator Editor}
-      xywh {131 90 735 595} type Double hide
-      code0 {if (oscil->ADvsPAD) o->label("PADsynth Harmonic Content Editor");}
+      label {ADsynth Oscillator Editor} open
+      xywh {544 170 735 595} type Double
+      code0 {if (oscil->ADvsPAD) o->label("PADsynth Harmonic Content Editor");} visible
     } {
       Fl_Button applybutton {
         label Apply
@@ -372,7 +400,7 @@ if (cbapplywidget!=NULL) {
         code0 {if (!oscil->ADvsPAD) o->hide();}
       }
       Fl_Group oscildisplaygroup {
-        xywh {5 5 360 300} box ENGRAVED_FRAME
+        xywh {5 5 360 300} box UP_FRAME
       } {
         Fl_Group {} {open
           xywh {10 85 350 190} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
@@ -381,14 +409,14 @@ if (cbapplywidget!=NULL) {
         } {}
         Fl_Box {} {
           label Oscillator
-          xywh {120 10 110 20} box FLAT_BOX labelfont 1
+          xywh {120 10 110 20} labelfont 1
         }
         Fl_Value_Slider rndslider {
           label rnd
           callback {oscil->Prand=(int)o->value()+64;
 oscildisplaygroup->redraw();
 oldosc->redraw();}
-          tooltip {Oscilator Phase Randomness: smaller than 0 is "group", larger than 0 is for each harmonic} xywh {140 285 100 10} type {Horz Knob} box FLAT_BOX labelsize 10 align 5 minimum -64 maximum 63 step 1
+          tooltip {Oscilator Phase Randomness: smaller than 0 is "group", larger than 0 is for each harmonic} xywh {140 285 100 10} type {Horz Knob} box NO_BOX labelsize 10 align 5 minimum -64 maximum 63 step 1
           code0 {if (oscil->ADvsPAD) o->hide();}
         }
         Fl_Group {} {open
@@ -397,7 +425,7 @@ oldosc->redraw();}
           code1 {spc->init(oscil,0,master);}
         } {}
         Fl_Group {} {
-          xywh {246 277 115 25} box ENGRAVED_BOX
+          xywh {246 277 115 25} box UP_FRAME
           code0 {if (oscil->ADvsPAD) o->hide();}
         } {
           Fl_Choice hrndtype {
@@ -425,12 +453,8 @@ oldosc->redraw();}
           }
         }
       }
-      Fl_Box {} {
-        label {Base Func.}
-        xywh {495 15 110 20} box FLAT_BOX labelfont 1
-      }
-      Fl_Group basefuncdisplaygroup {
-        xywh {365 5 360 300} box ENGRAVED_FRAME
+      Fl_Group basefuncdisplaygroup {open selected
+        xywh {365 5 360 300} box UP_FRAME
       } {
         Fl_Group {} {
           xywh {370 85 350 190} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
@@ -524,7 +548,7 @@ if ((oscil->Pcurrentbasefunc==0)||(oscil->Pcurrentbasefunc==127)) basefuncmodula
         }
         Fl_Box {} {
           label {Base Func.}
-          xywh {480 10 110 20} box FLAT_BOX labelfont 1
+          xywh {480 10 110 20} labelfont 1
         }
         Fl_Group {} {open
           xywh {370 30 350 50} box THIN_DOWN_BOX color 32 selection_color 218 labelcolor 63
@@ -536,7 +560,7 @@ if ((oscil->Pcurrentbasefunc==0)||(oscil->Pcurrentbasefunc==127)) basefuncmodula
           xywh {490 285 25 15} labelsize 12 minimum -63 maximum 63 step 1
         }
         Fl_Group basefuncmodulation {
-          xywh {550 276 169 25} box ENGRAVED_BOX
+          xywh {550 276 169 25} box UP_FRAME
           code0 {if ((oscil->Pcurrentbasefunc==0)||(oscil->Pcurrentbasefunc==127)) basefuncmodulation->deactivate();}
         } {
           Fl_Choice bfmodtype {
@@ -684,7 +708,7 @@ redrawoscil();}
         xywh {670 505 55 15} box THIN_UP_BOX labelfont 1 labelsize 11
       }
       Fl_Group {} {
-        xywh {135 308 150 30} box ENGRAVED_BOX
+        xywh {135 308 150 30} box UP_FRAME
       } {
         Fl_Choice wshbutton {
           label {Wsh.}
@@ -770,7 +794,7 @@ redrawoscil();}
         tooltip {Auto clear when using the oscillator as base function} xywh {95 313 35 20} box THIN_UP_BOX value 1 labelfont 1 labelsize 10
       }
       Fl_Group {} {
-        xywh {285 308 155 30} box ENGRAVED_BOX
+        xywh {285 308 155 30} box UP_FRAME
       } {
         Fl_Choice fltbutton {
           label Filter
@@ -859,7 +883,7 @@ redrawoscil();}
         }
       }
       Fl_Group {} {
-        xywh {590 308 135 30} box ENGRAVED_BOX
+        xywh {590 308 135 30} box UP_FRAME
       } {
         Fl_Choice sabutton {
           label {Sp.adj.}
@@ -892,7 +916,7 @@ redrawoscil();}
         }
       }
       Fl_Group {} {
-        xywh {665 340 65 65} box ENGRAVED_BOX
+        xywh {665 340 65 65} box UP_FRAME
       } {
         Fl_Counter harmonicshiftcounter {
           label {Harmonic Shift}
@@ -914,8 +938,8 @@ redrawoscil();}
           xywh {670 385 20 15} box THIN_UP_BOX labelfont 1 labelsize 10
         }
       }
-      Fl_Group {} {
-        xywh {665 410 65 90} box ENGRAVED_FRAME
+      Fl_Group {} {open
+        xywh {665 410 65 90} box UP_FRAME
       } {
         Fl_Choice adhrtype {
           label {Adpt.Harm.}
@@ -977,11 +1001,11 @@ redrawoscil();}
         Fl_Slider adhrpar {
           callback {oscil->Padaptiveharmonicspar=(int)o->value();
 redrawoscil();}
-          xywh {670 445 55 10} type {Horz Knob} box FLAT_BOX maximum 100 step 1 value 50
+          xywh {670 445 55 10} type {Horz Knob} box NO_BOX maximum 100 step 1 value 50
         }
       }
       Fl_Group {} {
-        xywh {440 308 150 30} box ENGRAVED_BOX
+        xywh {440 308 150 30} box UP_FRAME
       } {
         Fl_Choice modtype {
           label {Mod.}
@@ -1051,7 +1075,7 @@ refresh();}
         xywh {700 545 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
       }
       Fl_Scroll _this_has_to_be_the_last {
-        xywh {5 340 660 250} type HORIZONTAL box ENGRAVED_BOX
+        xywh {5 340 660 250} type HORIZONTAL box FLAT_BOX
       } {
         Fl_Pack harmonics {open
           xywh {10 345 650 225} type HORIZONTAL
@@ -1136,8 +1160,12 @@ if (cbwidget!=NULL) {
       applybutton->redraw();
 };} {}
   }
-  decl {OscilGen *oscil;} {}
-  decl {Fl_Widget *oldosc,*cbwidget,*cbapplywidget;} {}
-  decl {Oscilharmonic *h[MAX_AD_HARMONICS];} {}
-  decl {Master *master;} {}
+  decl {OscilGen *oscil;} {private local
+  }
+  decl {Fl_Widget *oldosc,*cbwidget,*cbapplywidget;} {private local
+  }
+  decl {Oscilharmonic *h[MAX_AD_HARMONICS];} {private local
+  }
+  decl {Master *master;} {private local
+  }
 } 

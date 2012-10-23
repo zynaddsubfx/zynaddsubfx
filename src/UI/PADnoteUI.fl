@@ -1,52 +1,56 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {\#include "../Params/PADnoteParameters.h"} {public
+decl {\#include "../Params/PADnoteParameters.h"} {public local
 } 
 
-decl {\#include "../Misc/Util.h"} {public
+decl {\#include "../Misc/Util.h"} {public local
 } 
 
-decl {\#include "../Misc/Master.h"} {public
+decl {\#include "../Misc/Master.h"} {public local
 } 
 
-decl {\#include "ResonanceUI.h"} {public
+decl {\#include "ResonanceUI.h"} {public local
 } 
 
-decl {\#include <FL/Fl_Box.H>} {public
+decl {\#include <FL/Fl_Box.H>} {public local
 } 
 
-decl {\#include <FL/Fl_Group.H>} {public
+decl {\#include <FL/Fl_Group.H>} {public local
 } 
 
-decl {\#include <FL/Fl_File_Chooser.H>} {public
+decl {\#include <FL/Fl_File_Chooser.H>} {public local
 } 
 
-decl {\#include <math.h>} {} 
-
-decl {\#include <stdio.h>} {} 
-
-decl {\#include <stdlib.h>} {} 
-
-decl {\#include <string.h>} {} 
-
-decl {\#include "WidgetPDial.h"} {public
+decl {\#include <math.h>} {private local
 } 
 
-decl {\#include "EnvelopeUI.h"} {public
+decl {\#include <stdio.h>} {private local
 } 
 
-decl {\#include "LFOUI.h"} {public
+decl {\#include <stdlib.h>} {private local
 } 
 
-decl {\#include "FilterUI.h"} {public
+decl {\#include <string.h>} {private local
 } 
 
-decl {\#include "OscilGenUI.h"} {public
+decl {\#include "WidgetPDial.h"} {public local
 } 
 
-decl {\#include "PresetsUI.h"} {public
+decl {\#include "EnvelopeUI.h"} {public local
+} 
+
+decl {\#include "LFOUI.h"} {public local
+} 
+
+decl {\#include "FilterUI.h"} {public local
+} 
+
+decl {\#include "OscilGenUI.h"} {public local
+} 
+
+decl {\#include "PresetsUI.h"} {public local
 } 
 
 class PADnoteHarmonicProfile {: {public Fl_Box}
@@ -69,16 +73,18 @@ bool active=active_r();
 //draw the equivalent bandwidth
 if (active) fl_color(220,220,220);
  else fl_color(160,165,165);
-fl_line_style(0);
+fl_line_style(FL_DASH);
 int rbw=(int)(realbw*(lx-1.0)/2.0);
-for (int i=lx/2-rbw;i<(lx/2+rbw);i++) fl_line(ox+i,oy,ox+i,oy+ly-1);
+fl_begin_line();
+for (int i=lx/2-rbw;i<(lx/2+rbw);i++) { fl_vertex(ox+i,oy); }
+fl_end_line();
 
-fl_line_style(0);
+fl_line_style(FL_DASH);
 if (active) fl_color(200,200,200);
  else  fl_color(160,160,160);
 for (int i=1;i<10;i++){
 	int kx=(int)(lx/10.0*i);
-	fl_line(ox+kx,oy,ox+kx,oy+ly-1);
+	fl_line( ox + kx, oy, ox + kx, oy + ly - 1 );
 };
 for (int i=1;i<5;i++){
 	int ky=(int)(ly/5.0*i);
@@ -87,22 +93,39 @@ for (int i=1;i<5;i++){
 
 
 fl_color(120,120,120);
-fl_line_style(FL_DOT);
+fl_line_style(FL_DASH);
 fl_line(ox+lx/2,oy,ox+lx/2,oy+ly);
 
 //draw the graph
-fl_line_style(0);
+fl_line_style(FL_SOLID);
 int old=0;
-for (int i=0;i<lx;i++){
-   int val=(int) ((ly-2)*smps[i]);
+
    if (active) fl_color(180,210,240);
       else fl_color(150,150,155);
-   fl_line(ox+i,oy+ly-1,ox+i,oy+ly-1-val);
-   if (active) fl_color(0,0,100);
-       else fl_color(150,150,150);
-   if (i>0) fl_line(ox+i-1,oy+ly-2-old,ox+i,oy+ly-2-val);
+
+fl_color( fl_color_add_alpha( fl_color(), 127 ) );
+
+fl_begin_polygon();
+fl_vertex( ox, oy + h() );
+for (int i=0;i<lx;i++){
+   int val=(int) ((ly-2)*smps[i]);
+ 
+//   fl_vertex(ox+i,oy+ly-1);
+   fl_vertex(ox+i,oy+ly-1-val);
+
+  // if (active) fl_color(0,0,100);
+  //     else fl_color(150,150,150);
+
+//   if (i>0)
+//	{
+//	 fl_vertex(ox+i-1,oy+ly-2-old);
+//	fl_vertex(ox+i,oy+ly-2-val);
+//	}
+
    old=val;   
 };
+fl_vertex( ox + w(), oy + h() );
+fl_end_polygon();
 
 
 fl_line_style(FL_DASH);
@@ -113,8 +136,9 @@ fl_line(ox+lx/2+rbw,oy,ox+lx/2+rbw,oy+ly-1);
 
 fl_line_style(0);} {}
   }
-  decl {Master *master;} {}
-  decl {PADnoteParameters *pars;} {public
+  decl {Master *master;} {private local
+  }
+  decl {PADnoteParameters *pars;} {public local
   }
 } 
 
@@ -208,8 +232,9 @@ for (int i=0;i<lx;i++){
       
 };} {}
   }
-  decl {Master *master;} {}
-  decl {PADnoteParameters *pars;} {public
+  decl {Master *master;} {private local
+  }
+  decl {PADnoteParameters *pars;} {public local
   }
 } 
 
@@ -227,19 +252,19 @@ make_window();} {}
   } {
     Fl_Window padnotewindow {
       label {PAD synth Parameters} open
-      xywh {281 302 535 450} type Double visible
+      xywh {291 369 535 435} type Double visible
     } {
       Fl_Tabs {} {
         callback {if (o->value()!=harmonicstructuregroup) applybutton->hide();
-	else applybutton->show();}
-        xywh {0 0 535 395}
+	else applybutton->show();} open
+        xywh {0 0 535 395} box UP_FRAME
       } {
         Fl_Group harmonicstructuregroup {
-          label {Harmonic Structure}
-          xywh {0 20 535 375} box ENGRAVED_BOX
+          label {Harmonic Structure} open selected
+          xywh {0 20 535 375} box UP_FRAME
         } {
           Fl_Group bwprofilegroup {
-            xywh {5 30 90 260} box ENGRAVED_BOX
+            xywh {5 30 90 260} box UP_FRAME
             code0 {if (pars->Pmode!=0) o->deactivate();}
           } {
             Fl_Dial hpbasepar1 {
@@ -450,7 +475,7 @@ cbwidget->do_callback();}
             code1 {if (pars->Pmode!=0) o->deactivate();}
           }
           Fl_Group {} {
-            xywh {315 295 215 45} box ENGRAVED_BOX
+            xywh {315 295 215 45} box UP_FRAME
           } {
             Fl_Choice hrpostype {
               label OvertonesPosition
@@ -559,7 +584,7 @@ cbwidget->do_callback();}
             }
           }
           Fl_Group overtonepos {
-            xywh {5 345 525 45} box FLAT_BOX color 54 selection_color 218 labelcolor 63
+            xywh {5 345 525 45} box FLAT_BOX color 51 selection_color 218 labelcolor 63
             code0 {PADnoteOvertonePosition *opui=new PADnoteOvertonePosition(o->x(),o->y(),o->w(),o->h(),"");}
             code1 {opui->init(pars,master);}
           } {}
@@ -720,7 +745,7 @@ cbwidget->do_callback();}
             }
           }
           Fl_Group hprofile {
-            xywh {100 45 430 90} box FLAT_BOX color 54 selection_color 218 labelcolor 63
+            xywh {100 45 430 90} box FLAT_BOX color 51 selection_color 218 labelcolor 63
             code0 {PADnoteHarmonicProfile *hpui=new PADnoteHarmonicProfile(o->x(),o->y(),o->w(),o->h(),"");}
             code1 {hpui->init(pars,master);}
             code2 {if (pars->Pmode!=0) { o->deactivate(); o->color(48);};}
@@ -768,12 +793,12 @@ cbwidget->do_callback();}
           }
         }
         Fl_Group {} {
-          label {Envelopes&LFOs}
-          xywh {0 20 535 375} box ENGRAVED_BOX hide
+          label {Envelopes&LFOs} open
+          xywh {0 20 535 375} box UP_FRAME hide
         } {
           Fl_Group {} {
             label FREQUENCY
-            xywh {5 275 525 115} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
+            xywh {5 275 525 115} box UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
           } {
             Fl_Group freqenv {
               label {PADSynth - Frequency Envelope} open
@@ -798,7 +823,7 @@ pars->PCoarseDetune = k*1024+
 if (k<0) k+=1024;
 pars->PCoarseDetune = k+
    (pars->PCoarseDetune/1024)*1024;}
-              tooltip {Coarse Detune} xywh {455 365 60 20} labelsize 10 align 5 minimum -64 maximum 63 step 1 textfont 1 textsize 11
+              tooltip {Coarse Detune} xywh {455 365 70 20} type Simple labelsize 10 align 5 minimum -64 maximum 63 step 1 textfont 1 textsize 11
               code0 {int k=pars->PCoarseDetune%1024;}
               code1 {if (k>=512) k-=1024;}
               code2 {o->value(k);}
@@ -813,7 +838,7 @@ pars->PCoarseDetune = k+
             Fl_Slider detune {
               callback {pars->PDetune=(int)o->value()+8192;
 detunevalueoutput->do_callback();}
-              tooltip {Fine Detune (cents)} xywh {60 295 295 15} type {Horz Knob} box FLAT_BOX minimum -8192 maximum 8191 step 1
+              tooltip {Fine Detune (cents)} xywh {60 295 295 15} type {Horz Knob} box NO_BOX minimum -8192 maximum 8191 step 1
               code0 {o->value(pars->PDetune-8192);}
             }
             Fl_Value_Output detunevalueoutput {
@@ -826,7 +851,7 @@ detunevalueoutput->do_callback();}
               label {Detune Type}
               callback {pars->PDetuneType=(int) o->value()+1;
 detunevalueoutput->do_callback();} open
-              xywh {450 335 75 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
+              xywh {450 330 75 20} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
               code0 {o->add("L35cents");o->add("L10cents");o->add("E100cents");o->add("E1200cents");}
               code1 {o->value(pars->PDetuneType-1);}
             } {}
@@ -850,18 +875,18 @@ if (x==0) fixedfreqetdial->deactivate();
           }
           Fl_Group {} {
             label AMPLITUDE
-            xywh {5 25 240 250} box THIN_UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
+            xywh {5 25 240 250} box UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
           } {
             Fl_Value_Slider volume {
               label Vol
               callback {pars->PVolume=(int)o->value();}
-              tooltip Volume xywh {10 50 160 15} type {Horz Knob} box FLAT_BOX labelsize 11 align 8 maximum 127 step 1
+              tooltip Volume xywh {10 50 160 15} type {Horz Knob} box NO_BOX labelsize 11 align 8 maximum 127 step 1
               code0 {o->value(pars->PVolume);}
             }
             Fl_Value_Slider vsns {
               label {V.Sns}
               callback {pars->PAmpVelocityScaleFunction=(int) o->value();}
-              tooltip {Velocity Sensing Function (rightmost to disable)} xywh {10 70 160 15} type {Horz Knob} box FLAT_BOX labelsize 11 align 8 maximum 127 step 1
+              tooltip {Velocity Sensing Function (rightmost to disable)} xywh {10 70 160 15} type {Horz Knob} box NO_BOX labelsize 11 align 8 maximum 127 step 1
               code0 {o->value(pars->PAmpVelocityScaleFunction);}
             }
             Fl_Dial pan {
@@ -921,7 +946,7 @@ hprofile->redraw();}
           }
           Fl_Group {} {
             label FILTER
-            xywh {245 25 285 250} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
+            xywh {245 25 285 250} box UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
           } {
             Fl_Group filterenv {
               label {PADSynth - Filter Envelope} open
@@ -956,23 +981,23 @@ if (resui!=NULL) {
 	resui->applybutton->color(FL_GRAY);
 	resui->applybutton->redraw();
 };}
-        xywh {45 405 185 40} box THIN_UP_BOX labelfont 1 labelsize 16
+        xywh {300 400 135 30} box THIN_UP_BOX
         code0 {o->color(FL_RED);}
       }
       Fl_Button {} {
         label Close
         callback {padnotewindow->hide();}
-        xywh {320 405 175 40} box THIN_UP_BOX labelsize 17
+        xywh {440 400 90 30} box THIN_UP_BOX
       }
       Fl_Button {} {
         label C
         callback {presetsui->copy(pars);}
-        xywh {240 430 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
+        xywh {65 400 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
       }
       Fl_Button {} {
         label P
         callback {presetsui->paste(pars,this);}
-        xywh {270 430 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
+        xywh {95 400 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
       }
       Fl_Button {} {
         label export
@@ -983,8 +1008,8 @@ fl_filename_setext(filename,"");
 
 
 
-pars->export2wav(filename);} selected
-        tooltip {export samples as wav file} xywh {240 405 55 15} box THIN_UP_BOX color 255 labelsize 11 align 128
+pars->export2wav(filename);}
+        tooltip {export samples as wav file} xywh {5 400 55 30} box THIN_UP_BOX color 51 labelsize 11 align 128
       }
     }
   }
@@ -1088,14 +1113,14 @@ delete(resui);
 padnotewindow->hide();
 delete(padnotewindow);} {}
   }
-  decl {PADnoteParameters *pars;} {public
+  decl {PADnoteParameters *pars;} {public local
   }
-  decl {Master *master;} {public
+  decl {Master *master;} {public local
   }
-  decl {OscilEditor *oscui;} {public
+  decl {OscilEditor *oscui;} {public local
   }
-  decl {Oscilloscope *osc;} {public
+  decl {Oscilloscope *osc;} {public local
   }
-  decl {ResonanceUI *resui;} {public
+  decl {ResonanceUI *resui;} {public local
   }
 } 

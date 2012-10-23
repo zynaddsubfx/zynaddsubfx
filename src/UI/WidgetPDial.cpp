@@ -115,6 +115,9 @@ WidgetPDial::~WidgetPDial()
 
 int WidgetPDial::handle(int event)
 {
+#ifdef NTK_GUI
+    return Fl_Dial::handle( event );
+#else
     double dragsize, min = minimum(), max = maximum();
     int    my;
 
@@ -153,30 +156,42 @@ int WidgetPDial::handle(int event)
             break;
     }
     return 0;
+#endif
 }
 
 void WidgetPDial::drawgradient(int cx, int cy, int sx, double m1, double m2)
 {
+#ifdef NTK_GUI
+    return;
+#else
     for(int i = (int)(m1 * sx); i < (int)(m2 * sx); i++) {
         double tmp = 1.0f - powf(i * 1.0f / sx, 2.0f);
         pdialcolor(140
                    + (int) (tmp
                             * 90), 140
                    + (int)(tmp * 90), 140 + (int) (tmp * 100));
-        fl_arc(cx + sx / 2 - i / 2, cy + sx / 2 - i / 2, i, i, 0, 360);
+        fl_arc(cx + sx / 2 - i / 2, cy + sx / 2 - i / 2, i, i, 0, 360 );
     }
+#endif
 }
 
 void WidgetPDial::draw()
 {
+#ifdef NTK_GUI
+    box( FL_NO_BOX );
+
+    Fl_Dial::draw();
+    
+    return;
+#else
     int cx = x(), cy = y(), sx = w(), sy = h();
 
     //clears the button face
     pdialcolor(190, 190, 200);
     fl_pie(cx - 1, cy - 1, sx + 2, sy + 2, 0, 360);
 
-    //Draws the button face (gradinet)
-    drawgradient(cx, cy, sx, 0.5f, 1.0f);
+    /* //Draws the button face (gradinet) */
+    drawgradient(cx, cy, sx, 0.5f, 1.0f); 
 
     double val = (value() - minimum()) / (maximum() - minimum());
 
@@ -189,6 +204,8 @@ void WidgetPDial::draw()
     }
 
     drawgradient(cx, cy, sx, 0.0f, 0.75f);
+
+
 
     //draws the value
     double a = -(a2 - a1) * val - a1;
@@ -220,6 +237,7 @@ void WidgetPDial::draw()
     fl_end_polygon();
 
     fl_pop_matrix();
+#endif
 }
 
 void WidgetPDial::pdialcolor(int r, int g, int b)

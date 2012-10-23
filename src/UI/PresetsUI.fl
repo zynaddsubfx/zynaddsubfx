@@ -39,7 +39,7 @@ pastewin->hide();delete(pastewin);} {}
   Function {make_window()} {} {
     Fl_Window copywin {
       label {Copy to Clipboard/Preset}
-      xywh {190 173 265 430} type Double box PLASTIC_THIN_UP_BOX color 238 hide modal
+      xywh {190 173 265 430} type Double box THIN_UP_BOX color 238 hide modal
     } {
       Fl_Browser copybrowse {
         callback {int val=o->value();
@@ -93,7 +93,7 @@ if (strlen(tmp)>0) {
     }
     Fl_Window pastewin {
       label {Paste from Clipboard/Preset}
-      xywh {463 173 265 430} type Double box PLASTIC_THIN_UP_BOX color 238 hide modal
+      xywh {463 173 265 430} type Double box THIN_UP_BOX color 238 hide modal
     } {
       Fl_Browser pastebrowse {
         callback {if (o->value()==0) {

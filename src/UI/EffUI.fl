@@ -1,39 +1,44 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
-
-decl {//License: GNU GPL version 2 or later} {} 
-
-decl {\#include <stdlib.h>} {public
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
 } 
 
-decl {\#include <stdio.h>} {public
+decl {//License: GNU GPL version 2 or later} {private local
 } 
 
-decl {\#include <string.h>} {public
+decl {\#include <stdlib.h>} {public local
 } 
 
-decl {\#include "../globals.h"} {public
+decl {\#include <stdio.h>} {public local
 } 
 
-decl {\#include "WidgetPDial.h"} {public
+decl {\#include <string.h>} {public local
 } 
 
-decl {\#include "EnvelopeUI.h"} {public
+decl {\#include "../globals.h"} {public local
 } 
 
-decl {\#include "FilterUI.h"} {public
+decl {\#include "WidgetPDial.h"} {public local
 } 
 
-decl {\#include "../Misc/Util.h"} {public
+decl {\#include "EnvelopeUI.h"} {public local
 } 
 
-decl {\#include "../Effects/EffectMgr.h"} {public
+decl {\#include "FilterUI.h"} {public local
 } 
 
-decl {\#include "PresetsUI.h"} {public
+decl {\#include "../Misc/Util.h"} {public local
+} 
+
+decl {\#include "../Effects/EffectMgr.h"} {public local
+} 
+
+decl {\#include "PresetsUI.h"} {public local
+} 
+
+decl {\#include "common.H"} {public local
 } 
 
 class EQGraph {: {public Fl_Box}
@@ -65,16 +70,17 @@ if ((freqx>0.0)&&(freqx<1.0))
    x()+(int) (freqx*w()),y()+h());} {}
   }
   Function {draw()} {} {
-    code {int ox=x(),oy=y(),lx=w(),ly=h(),i,iy,oiy;
+    code {int ox=x(),oy=y(),lx=w(),ly=h(),i;
+    double iy,oiy;
 float freqx;
 
-if (active_r()) fl_color(0,70,150);
-       else fl_color(80,120,160);
+if (active_r()) fl_color(fl_darker(FL_GRAY));
+       else fl_color(FL_GRAY);
 fl_rectf(ox,oy,lx,ly);
 
 
 //draw the lines
-fl_color(FL_GRAY);
+fl_color(fl_lighter( FL_GRAY));
 
 fl_line_style(FL_SOLID);
 fl_line(ox+2,oy+ly/2,ox+lx-2,oy+ly/2);
@@ -115,19 +121,23 @@ for (i=1;i<GY;i++){
 //draw the frequency response
 if (active_r()) fl_color(FL_YELLOW);
        else fl_color(200,200,80);
-fl_line_style(FL_SOLID);
+fl_line_style(FL_SOLID,2);
+fl_color( fl_color_add_alpha( fl_color(), 127 ) );
 oiy=getresponse(ly,getfreqx(0.0));
+fl_begin_line();
 for (i=1;i<lx;i++){
    float frq=getfreqx(i/(float) lx);
    if (frq>synth->samplerate/2) break;
    iy=getresponse(ly,frq);
    if ((oiy>=0) && (oiy<ly) &&
        (iy>=0) && (iy<ly) )
-        fl_line(ox+i-1,oy+ly-oiy,ox+i,oy+ly-iy);
+        fl_vertex(ox+i,oy+ly-iy);
    oiy=iy;
-};} {}
+};
+fl_end_line();
+fl_line_style(FL_SOLID,0);} {}
   }
-  Function {getresponse(int maxy,float freq)} {return_type int
+  Function {getresponse(int maxy,float freq)} {return_type double
   } {
     code {float dbresp=eff->getEQfreqresponse(freq);
 int idbresp=(int) ((dbresp/maxdB+1.0)*maxy/2.0);
@@ -148,14 +158,17 @@ return(20.0*pow((float)1000.0,x));} {}
     code {if (freq<0.00001) freq=0.00001;
 return(log(freq/20.0)/log(1000.0));} {}
   }
-  decl {int oldx,oldy;} {}
-  decl {float khzval;} {public
+  decl {int oldx,oldy;} {private local
   }
-  decl {EffectMgr *eff;} {}
-  decl {int maxdB;} {}
+  decl {float khzval;} {public local
+  }
+  decl {EffectMgr *eff;} {private local
+  }
+  decl {int maxdB;} {private local
+  }
 } 
 
-class EffUI {: {public Fl_Group,public PresetsUI_}
+class EffUI {open : {public Fl_Group,public PresetsUI_}
 } {
   Function {EffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {eff=NULL;
@@ -177,26 +190,23 @@ if (filterwindow!=NULL){
 	delete(filterwindow);
 };} {}
   }
-  Function {make_null_window()} {} {
+  Function {make_null_window()} {open
+  } {
     Fl_Window effnullwindow {
-      xywh {216 539 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
-    } {
-      Fl_Text_Display {} {
-        label {No Effect}
-        xywh {120 35 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 labelcolor 43 align 8
-      }
-    }
+      label {No Effect}
+      xywh {857 824 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19 align 16
+      code0 {set_module_parameters(o);}
+      class Fl_Group visible
+    } {}
   }
-  Function {make_reverb_window()} {} {
+  Function {make_reverb_window()} {open
+  } {
     Fl_Window effreverbwindow {
-      xywh {343 337 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
+      label Reverb
+      xywh {353 452 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19 align 25
+      code0 {set_module_parameters(o);}
+      class Fl_Group visible
     } {
-      Fl_Text_Display {} {
-        label {Reverb }
-        xywh {275 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
-      }
       Fl_Choice revp {
         label Preset
         callback {eff->changepreset((int)o->value());
@@ -349,10 +359,13 @@ eff->seteffectpar(11,x);}
       }
     }
   }
-  Function {make_echo_window()} {} {
+  Function {make_echo_window()} {open
+  } {
     Fl_Window effechowindow {
-      xywh {318 364 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
+      label Echo
+      xywh {1101 647 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19 align 25
+      code0 {set_module_parameters(o);}
+      class Fl_Group visible
     } {
       Fl_Choice echop {
         label Preset
@@ -396,10 +409,6 @@ refresh(eff);}
           label {Feedback Echo}
           xywh {100 100 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-      }
-      Fl_Text_Display {} {
-        label Echo
-        xywh {295 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial echop0 {
         label Vol
@@ -445,10 +454,13 @@ refresh(eff);}
       }
     }
   }
-  Function {make_chorus_window()} {} {
+  Function {make_chorus_window()} {open
+  } {
     Fl_Window effchoruswindow {
-      xywh {372 287 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
+      label Chorus open
+      xywh {628 830 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19 align 25
+      code0 {set_module_parameters(o);}
+      class Fl_Group visible
     } {
       Fl_Choice chorusp {
         label Preset
@@ -496,10 +508,6 @@ refresh(eff);}
           label {Flange 5}
           xywh {110 110 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-      }
-      Fl_Text_Display {} {
-        label Chorus
-        xywh {265 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial chorusp0 {
         label Vol
@@ -564,7 +572,7 @@ refresh(eff);}
       Fl_Check_Button chorusp11 {
         label Substract
         callback {eff->seteffectpar(11,(int) o->value());}
-        tooltip {inverts the output} xywh {185 10 70 20} box THIN_UP_BOX down_box DOWN_BOX color 230 labelfont 1 labelsize 10
+        tooltip {inverts the output} xywh {185 10 70 20} box THIN_UP_BOX down_box DOWN_BOX color 51 labelsize 10
       }
       Fl_Choice chorusp4 {
         label {LFO type}
@@ -582,10 +590,13 @@ refresh(eff);}
       }
     }
   }
-  Function {make_phaser_window()} {} {
+  Function {make_phaser_window()} {open
+  } {
     Fl_Window effphaserwindow {
-      xywh {75 25 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
+      label Phaser selected
+      xywh {77 48 380 95} type Double box UP_BOX color 221 labelfont 1 labelsize 19 align 25
+      code0 {set_module_parameters(o);}
+      class Fl_Group visible
     } {
       Fl_Choice phaserp {
         label Preset
@@ -638,13 +649,9 @@ refresh(eff);}
           xywh {80 80 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
         MenuItem {} {
-          label {APhaser 6} selected
+          label {APhaser 6}
           xywh {90 90 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-      }
-      Fl_Text_Display {} {
-        label Phaser
-        xywh {275 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial phaserp0 {
         label Vol
@@ -743,10 +750,13 @@ refresh(eff);}
       }
     }
   }
-  Function {make_alienwah_window()} {} {
+  Function {make_alienwah_window()} {open
+  } {
     Fl_Window effalienwahwindow {
-      xywh {538 250 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
+      label AlienWah
+      xywh {715 462 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19 align 25
+      code0 {set_module_parameters(o);}
+      class Fl_Group visible
     } {
       Fl_Choice awp {
         label Preset
@@ -770,10 +780,6 @@ refresh(eff);}
           label {Alienwah 4}
           xywh {70 70 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-      }
-      Fl_Text_Display {} {
-        label AlienWah
-        xywh {245 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial awp0 {
         label Vol
@@ -851,10 +857,13 @@ refresh(eff);}
       }
     }
   }
-  Function {make_distorsion_window()} {} {
+  Function {make_distorsion_window()} {open
+  } {
     Fl_Window effdistorsionwindow {
-      xywh {409 143 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
+      label Distortion
+      xywh {695 261 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19 align 25
+      code0 {set_module_parameters(o);}
+      class Fl_Group visible
     } {
       Fl_Choice distp {
         label Preset
@@ -886,10 +895,6 @@ refresh(eff);}
           label Quantisize
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-      }
-      Fl_Text_Display {} {
-        label Distortion
-        xywh {230 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial distp0 {
         label Vol
@@ -1012,15 +1017,14 @@ refresh(eff);}
       }
     }
   }
-  Function {make_eq_window()} {} {
+  Function {make_eq_window()} {open
+  } {
     Fl_Window effeqwindow {
-      xywh {258 307 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
+      label EQ open
+      xywh {668 658 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19 align 25
+      code0 {set_module_parameters(o);}
+      class Fl_Group visible
     } {
-      Fl_Text_Display {} {
-        label EQ
-        xywh {320 10 15 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
-      }
       Fl_Dial eqp0 {
         label Gain
         callback {eff->seteffectpar(0,(int) o->value());
@@ -1143,16 +1147,19 @@ eqgraph->redraw();}
         }
       }
       Fl_Box eqgraph {
-        xywh {45 10 190 75} box BORDER_BOX color 178
+        xywh {45 10 190 75} box BORDER_BOX color 50
         code0 {o->init(eff);}
         class EQGraph
       }
     }
   }
-  Function {make_dynamicfilter_window()} {} {
+  Function {make_dynamicfilter_window()} {open
+  } {
     Fl_Window effdynamicfilterwindow {
-      xywh {570 56 380 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
+      label DynFilter open
+      xywh {808 520 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19 align 25
+      code0 {set_module_parameters(o);}
+      class Fl_Group visible
     } {
       Fl_Choice dfp {
         label Preset
@@ -1180,10 +1187,6 @@ refresh(eff);}
           label VocalMorph2
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-      }
-      Fl_Text_Display {} {
-        label DynFilter
-        xywh {245 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial dfp0 {
         label Vol
@@ -1238,10 +1241,10 @@ refresh(eff);}
       Fl_Button {} {
         label Filter
         callback {filterwindow->show();}
-        xywh {115 10 55 25} box PLASTIC_THIN_UP_BOX
+        xywh {115 10 55 25} box THIN_UP_BOX
       }
       Fl_Group {} {
-        xywh {270 40 105 45} box BORDER_BOX color 181
+        xywh {270 40 105 45} box UP_FRAME color 51
       } {
         Fl_Dial dfp7 {
           label {A.S.}
@@ -1263,10 +1266,12 @@ refresh(eff);}
       }
     }
   }
-  Function {make_filter_window()} {} {
+  Function {make_filter_window()} {open
+  } {
     Fl_Window filterwindow {
       label {Filter Parameters for DynFilter Eff.}
-      xywh {212 170 290 110} type Double hide
+      xywh {1454 437 290 110} type Double
+      code0 {set_module_parameters(o);} visible
     } {
       Fl_Group {} {
         label {DynFilter effect  - Filter}
@@ -1468,11 +1473,13 @@ this->show();} {}
   } {
     code {refresh(eff);} {}
   }
-  decl {EffectMgr *eff;} {}
-  decl {int eqband;} {}
+  decl {EffectMgr *eff;} {private local
+  }
+  decl {int eqband;} {private local
+  }
 } 
 
-class SimpleEffUI {: {public Fl_Group,public PresetsUI_}
+class SimpleEffUI {open : {public Fl_Group,public PresetsUI_}
 } {
   Function {SimpleEffUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {eff=NULL;} {}
@@ -1488,32 +1495,29 @@ effdistorsionwindow->hide();//delete (effdistorsionwindow);
 effeqwindow->hide();//delete (effeqwindow);
 effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);} {}
   }
-  Function {make_null_window()} {} {
+  Function {make_null_window()} {open
+  } {
     Fl_Window effnullwindow {
-      xywh {539 150 230 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
-    } {
-      Fl_Text_Display {} {
-        label {No Effect}
-        xywh {25 35 35 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 labelcolor 43 align 8
-      }
-    }
+      label {No Effect} open
+      xywh {1073 571 230 95} type Double box UP_BOX color 221 labelfont 1 labelsize 19 align 16
+      code0 {set_module_parameters(o);}
+      class Fl_Group visible
+    } {}
   }
-  Function {make_reverb_window()} {} {
+  Function {make_reverb_window()} {open
+  } {
     Fl_Window effreverbwindow {
-      xywh {398 298 230 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
+      label Reverb open
+      xywh {1183 279 230 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19 align 25
+      code3 {set_module_parameters(o);}
+      class Fl_Group visible
     } {
-      Fl_Text_Display {} {
-        label {Reverb }
-        xywh {115 10 20 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
-      }
       Fl_Choice revp {
         label Preset
         callback {eff->changepreset((int)o->value());
 
 refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 90 15} down_box BORDER_BOX color 47 selection_color 0 labelfont 1 labelsize 10 labelcolor 55 align 5 textfont 1 textsize 10 textcolor 7
       } {
         MenuItem {} {
           label {Cathedral 1}
@@ -1594,16 +1598,19 @@ refresh(eff);}
       }
     }
   }
-  Function {make_echo_window()} {} {
+  Function {make_echo_window()} {open
+  } {
     Fl_Window effechowindow {
-      xywh {243 350 230 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
+      label Echo open
+      xywh {404 639 230 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19 align 25
+      code3 {set_module_parameters(o);}
+      class Fl_Group visible
     } {
       Fl_Choice echop {
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {11 15 95 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {11 15 95 15} down_box BORDER_BOX color 47 selection_color 0 labelfont 1 labelsize 10 labelcolor 55 align 5 textfont 1 textsize 10 textcolor 7
       } {
         MenuItem {} {
           label {Echo 1}
@@ -1642,10 +1649,6 @@ refresh(eff);}
           xywh {100 100 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
-      Fl_Text_Display {} {
-        label Echo
-        xywh {145 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
-      }
       Fl_Dial echop0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
@@ -1666,16 +1669,19 @@ refresh(eff);}
       }
     }
   }
-  Function {make_chorus_window()} {} {
+  Function {make_chorus_window()} {open
+  } {
     Fl_Window effchoruswindow {
-      xywh {234 353 230 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
+      label Chorus open
+      xywh {680 647 230 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19 align 25
+      code3 {set_module_parameters(o);}
+      class Fl_Group visible
     } {
       Fl_Choice chorusp {
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 90 15} down_box BORDER_BOX color 47 selection_color 0 labelfont 1 labelsize 10 labelcolor 55 align 5 textfont 1 textsize 10 textcolor 7
       } {
         MenuItem {} {
           label {Chorus 1}
@@ -1718,10 +1724,6 @@ refresh(eff);}
           xywh {110 110 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
-      Fl_Text_Display {} {
-        label Chorus
-        xywh {120 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
-      }
       Fl_Dial chorusp0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
@@ -1760,16 +1762,19 @@ refresh(eff);}
       }
     }
   }
-  Function {make_phaser_window()} {} {
+  Function {make_phaser_window()} {open
+  } {
     Fl_Window effphaserwindow {
-      xywh {661 430 230 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
+      label Phaser open
+      xywh {1485 647 230 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19 align 25
+      code3 {set_module_parameters(o);}
+      class Fl_Group visible
     } {
       Fl_Choice phaserp {
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 90 15} down_box BORDER_BOX color 47 selection_color 0 labelfont 1 labelsize 10 labelcolor 55 align 5 textfont 1 textsize 10 textcolor 7
       } {
         MenuItem {} {
           label {Phaser 1}
@@ -1795,10 +1800,6 @@ refresh(eff);}
           label {Phaser 6}
           xywh {80 80 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-      }
-      Fl_Text_Display {} {
-        label Phaser
-        xywh {125 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial phaserp0 {
         label Vol
@@ -1838,16 +1839,19 @@ refresh(eff);}
       }
     }
   }
-  Function {make_alienwah_window()} {} {
+  Function {make_alienwah_window()} {open
+  } {
     Fl_Window effalienwahwindow {
-      xywh {367 170 230 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
+      label AlienWah open
+      xywh {379 296 230 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19 align 25
+      code3 {set_module_parameters(o);}
+      class Fl_Group visible
     } {
       Fl_Choice awp {
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 90 15} down_box BORDER_BOX color 47 selection_color 0 labelfont 1 labelsize 10 labelcolor 55 align 5 textfont 1 textsize 10 textcolor 7
       } {
         MenuItem {} {
           label {Alienwah 1}
@@ -1865,10 +1869,6 @@ refresh(eff);}
           label {Alienwah 4}
           xywh {70 70 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-      }
-      Fl_Text_Display {} {
-        label AlienWah
-        xywh {100 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
       }
       Fl_Dial awp0 {
         label Vol
@@ -1896,16 +1896,19 @@ refresh(eff);}
       }
     }
   }
-  Function {make_distorsion_window()} {} {
+  Function {make_distorsion_window()} {open
+  } {
     Fl_Window effdistorsionwindow {
-      xywh {353 412 230 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
+      label Distortion open
+      xywh {456 797 230 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19 align 25
+      code3 {set_module_parameters(o);}
+      class Fl_Group visible
     } {
       Fl_Choice distp {
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {11 15 95 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {11 15 95 15} down_box BORDER_BOX color 47 selection_color 0 labelfont 1 labelsize 10 labelcolor 55 align 5 textfont 1 textsize 10 textcolor 7
       } {
         MenuItem {} {
           label {Overdrive 1}
@@ -1931,10 +1934,6 @@ refresh(eff);}
           label Quantisize
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
-      }
-      Fl_Text_Display {} {
-        label Distortion
-        xywh {110 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 16 align 8
       }
       Fl_Dial distp0 {
         label Vol
@@ -2024,15 +2023,14 @@ refresh(eff);}
       }
     }
   }
-  Function {make_eq_window()} {} {
+  Function {make_eq_window()} {open
+  } {
     Fl_Window effeqwindow {
-      xywh {318 309 230 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
+      label EQ open
+      xywh {1366 827 230 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19 align 25
+      code3 {set_module_parameters(o);}
+      class Fl_Group visible
     } {
-      Fl_Text_Display {} {
-        label EQ
-        xywh {170 5 15 25} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
-      }
       Fl_Counter bandcounter {
         label Band
         callback {eqband=(int) o->value();
@@ -2062,7 +2060,7 @@ stagescounter->value(dbl);}
         code0 {o->bounds(0,MAX_EQ_BANDS-1);}
       }
       Fl_Group bandgroup {
-        xywh {5 5 75 85} box ENGRAVED_FRAME
+        xywh {5 5 75 85} box UP_FRAME
         code0 {if (eff->geteffectpar(10)==0) o->deactivate();}
       } {
         Fl_Dial freqdial {
@@ -2148,22 +2146,25 @@ eqgraph->redraw();}
         }
       }
       Fl_Box eqgraph {
-        xywh {85 35 140 55} box BORDER_BOX color 178
+        xywh {85 35 140 55} box BORDER_BOX color 50
         code0 {o->init(eff);}
         class EQGraph
       }
     }
   }
-  Function {make_dynamicfilter_window()} {} {
+  Function {make_dynamicfilter_window()} {open
+  } {
     Fl_Window effdynamicfilterwindow {
-      xywh {475 471 230 95} type Double box PLASTIC_UP_BOX color 221 labelfont 1 hide
-      class Fl_Group
+      label DynFilter open
+      xywh {1347 465 230 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19 align 25
+      code3 {set_module_parameters(o);}
+      class Fl_Group visible
     } {
       Fl_Choice dfp {
         label Preset
         callback {eff->changepreset((int)o->value());
 refresh(eff);}
-        xywh {10 15 90 15} down_box BORDER_BOX color 14 selection_color 0 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10 textcolor 7
+        xywh {10 15 90 15} down_box BORDER_BOX color 47 selection_color 0 labelfont 1 labelsize 10 labelcolor 55 align 5 textfont 1 textsize 10 textcolor 7
       } {
         MenuItem {} {
           label WahWah
@@ -2186,10 +2187,6 @@ refresh(eff);}
           xywh {60 60 100 20} labelfont 1 labelsize 10 labelcolor 7
         }
       }
-      Fl_Text_Display {} {
-        label DynFilter
-        xywh {100 10 10 20} box NO_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 8
-      }
       Fl_Dial dfp0 {
         label Vol
         callback {eff->seteffectpar(0,(int) o->value());}
@@ -2209,7 +2206,7 @@ refresh(eff);}
         class WidgetPDial
       }
       Fl_Group {} {
-        xywh {115 40 65 45} box BORDER_BOX color 181
+        xywh {115 40 65 45} box UP_FRAME
       } {
         Fl_Dial dfp7 {
           label {A.S.}
@@ -2226,7 +2223,8 @@ refresh(eff);}
       }
     }
   }
-  Function {init(EffectMgr *eff_)} {} {
+  Function {init(EffectMgr *eff_)} {open
+  } {
     code {eff=eff_;
 
 make_null_window();
@@ -2356,6 +2354,8 @@ this->show();} {}
   Function {refresh()} {} {
     code {refresh(eff);} {}
   }
-  decl {EffectMgr *eff;} {}
-  decl {int eqband;} {}
+  decl {EffectMgr *eff;} {private local
+  }
+  decl {int eqband;} {private local
+  }
 } 

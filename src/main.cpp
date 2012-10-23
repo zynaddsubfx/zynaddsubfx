@@ -20,6 +20,10 @@
 
 */
 
+#include <FL/Fl.H>
+
+#include "UI/common.H"
+
 #include <iostream>
 #include <cmath>
 #include <cctype>
@@ -37,7 +41,6 @@
 #include "Misc/Dump.h"
 extern Dump dump;
 
-#include <FL/Fl.H>
 
 //Nio System
 #include "Nio/Nio.h"
@@ -50,8 +53,12 @@ extern Dump dump;
 QApplication *app;
 
 #elif defined FLTK_GUI
-
 #include "UI/MasterUI.h"
+#elif defined NTK_GUI
+#include "UI/MasterUI.h"
+#include <FL/Fl_Shared_Image.H>
+#include <FL/Fl_Tiled_Image.H>
+#include <FL/Fl_Dial.H>
 #endif // FLTK_GUI
 
 MasterUI *ui;
@@ -87,6 +94,30 @@ void sigterm_exit(int /*sig*/)
 {
     Pexitprogram = 1;
 }
+
+
+#ifndef DISABLE_GUI
+
+#ifdef NTK_GUI
+static Fl_Tiled_Image *module_backdrop;
+#endif
+
+void
+set_module_parameters ( Fl_Widget *o )
+{
+#ifdef NTK_GUI
+    o->box( FL_DOWN_FRAME );
+    o->align( o->align() | FL_ALIGN_IMAGE_BACKDROP );
+    o->color( FL_BLACK );
+    o->image( module_backdrop );
+    o->labeltype( FL_SHADOW_LABEL );
+#else
+    o->box( FL_UP_BOX );
+    o->color( FL_CYAN );
+    o->labeltype( FL_EMBOSSED_LABEL );
+#endif
+}
+#endif
 
 /*
  * Program initialisation
@@ -400,9 +431,25 @@ int main(int argc, char *argv[])
 
 
 #ifndef DISABLE_GUI
-    ui = new MasterUI(master, &Pexitprogram);
 
-    if(!noui) {
+#ifdef NTK_GUI
+    fl_register_images();
+
+    Fl_Dial::default_style( Fl_Dial::PIXMAP_DIAL );
+    Fl_Dial::default_image( Fl_Shared_Image::get( PIXMAP_PATH "/knob.png" ) );
+
+    Fl::scheme_bg( new Fl_Tiled_Image( Fl_Shared_Image::get( PIXMAP_PATH "/window_backdrop.png" )));
+    module_backdrop = new Fl_Tiled_Image( Fl_Shared_Image::get( PIXMAP_PATH "/module_backdrop.png" ));
+
+    Fl::background(  50, 50, 50 );
+    Fl::background2(  70, 70, 70 );
+    Fl::foreground( 255,255,255 );
+#endif
+
+    ui = new MasterUI(master, &Pexitprogram);
+    
+    if ( !noui) 
+    {
         ui->showUI();
 
         if(!ioGood)

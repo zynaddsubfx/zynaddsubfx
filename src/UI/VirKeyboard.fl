@@ -1,55 +1,77 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0110 
+version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
-
-decl {//License: GNU GPL version 2 or later} {} 
-
-decl {\#include <stdlib.h>} {public
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
 } 
 
-decl {\#include <FL/fl_draw.H>} {public
+decl {//License: GNU GPL version 2 or later} {private local
 } 
 
-decl {\#include <FL/Fl_Box.H>} {public
+decl {\#include <stdlib.h>} {public local
 } 
 
-decl {\#include "../globals.h"} {public
+decl {\#include <FL/fl_draw.H>} {public local
 } 
 
-decl {\#include "../Misc/Master.h"} {public
+decl {\#include <FL/Fl_Box.H>} {public local
 } 
 
-decl {\#include "../Misc/Util.h"} {selected public
+decl {\#include "../globals.h"} {public local
 } 
 
-decl {\#include "WidgetPDial.h"} {public
+decl {\#include "../Misc/Master.h"} {public local
 } 
 
-decl {const int keyspos[12]={0,-1,1,-2,2,3,-4,4,-5,5,-6,6};} {} 
+decl {\#include "../Misc/Util.h"} {public local
+} 
 
-decl {const int keysoct1qwerty[]={'q','2','w','3','e','r','5','t','6','y','7','u','i','9','o','0','p','[','=',']','\\\\',FL_Enter,0};} {} 
+decl {\#include "WidgetPDial.h"} {public local
+} 
 
-decl {const int keysoct2qwerty[]={'z','s','x','d','c','v','g','b','h','n','j','m',',','l','.',';','/',0};} {} 
+decl {\#include "common.H"} {public local
+} 
 
-decl {const int keysoct1dw[]={'\\'','2',',','3','.','p','5','y','6','f','7','g','c','9','r','0','l','/',']','=','\\\\',FL_Enter,0};} {} 
+decl {\#ifdef NTK_GUI
+     \#include "FL/Fl_Shared_Image.H"
+     \#endif} {public local
+} 
 
-decl {const int keysoct2dw[]={';','o','q','e','j','k','i','x','d','b','h','m','w','n','v','s','z',0};} {} 
+decl {const int keyspos[12]={0,-1,1,-2,2,3,-4,4,-5,5,-6,6};} {private local
+} 
 
-decl {const int keysoct1qwertz[]={'q','2','w','3','e','r','5','t','6','z','7','u','i','9','o','0','p',252,'\\'','+','\\\\',FL_Enter,0};} {} 
+decl {const int keysoct1qwerty[]={'q','2','w','3','e','r','5','t','6','y','7','u','i','9','o','0','p','[','=',']','\\\\',FL_Enter,0};} {private local
+} 
 
-decl {const int keysoct2qwertz[]={'y','s','x','d','c','v','g','b','h','n','j','m',',','l','.',246,'-',0};} {} 
+decl {const int keysoct2qwerty[]={'z','s','x','d','c','v','g','b','h','n','j','m',',','l','.',';','/',0};} {private local
+} 
 
-decl {const int keysoct1az[]={'a',233,'z','\\"','e','r','(','t','-','y',232,'u','i',231,'o',224,'p',65106,'=','$',0};} {} 
+decl {const int keysoct1dw[]={'\\'','2',',','3','.','p','5','y','6','f','7','g','c','9','r','0','l','/',']','=','\\\\',FL_Enter,0};} {private local
+} 
 
-decl {const int keysoct2az[]={'w','s','x','d','c','v','g','b','h','n','j',',',';','l',':','m','!',0};} {} 
+decl {const int keysoct2dw[]={';','o','q','e','j','k','i','x','d','b','h','m','w','n','v','s','z',0};} {private local
+} 
+
+decl {const int keysoct1qwertz[]={'q','2','w','3','e','r','5','t','6','z','7','u','i','9','o','0','p',252,'\\'','+','\\\\',FL_Enter,0};} {private local
+} 
+
+decl {const int keysoct2qwertz[]={'y','s','x','d','c','v','g','b','h','n','j','m',',','l','.',246,'-',0};} {private local
+} 
+
+decl {const int keysoct1az[]={'a',233,'z','\\"','e','r','(','t','-','y',232,'u','i',231,'o',224,'p',65106,'=','$',0};} {private local
+} 
+
+decl {const int keysoct2az[]={'w','s','x','d','c','v','g','b','h','n','j',',',';','l',':','m','!',0};} {private local
+} 
 
 class VirKeys {: {public Fl_Box}
 } {
-  decl {static const int N_OCT=6;} {}
-  decl {static const int SIZE_WHITE=14;} {}
-  decl {static const int SIZE_BLACK=8;} {}
+  decl {static const int N_OCT=6;} {private local
+  }
+  decl {static const int SIZE_WHITE=14;} {private local
+  }
+  decl {static const int SIZE_BLACK=8;} {private local
+  }
   Function {VirKeys(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
     code {master=NULL;} {}
   }
@@ -67,6 +89,43 @@ rndvelocity=0;} {}
   Function {draw()} {} {
     code {int ox=x(),oy=y(),lx=w(),ly=h()-1,i;
 
+\#ifdef NTK_GUI
+ Fl_Image *white_up = Fl_Shared_Image::get( PIXMAP_PATH "white_key.png" );
+ Fl_Image *white_down = Fl_Shared_Image::get( PIXMAP_PATH "white_key_pressed.png" );
+ Fl_Image *black_up = Fl_Shared_Image::get( PIXMAP_PATH "black_key.png" );
+ Fl_Image *black_down = Fl_Shared_Image::get( PIXMAP_PATH "black_key_pressed.png" );
+
+Fl_Image *key;
+
+for (i=0;i<N_OCT*12;i++) {
+   int noct=i/12;
+   int kv=keyspos[i%12];
+
+   if (kv>=0){//white keys
+     if (pressed[i]==0)
+         key = white_up;
+        else
+         key = white_down;
+
+      key->draw( ox + (kv + 7 * noct ) * white_up->w() + 3, oy );
+   } 
+}
+
+for (i=0;i<N_OCT*12;i++){
+   int noct=i/12;
+   int kv=keyspos[i%12];
+
+   if ( kv < 0 ) {
+     kv=keyspos[(i+1)%12];
+     if (pressed[i]==0)
+       key = black_up;
+     else
+       key = black_down;
+
+       key->draw( ox + (kv + 7 * noct ) * white_up->w() - black_up->w() / 2 + 2, oy );
+   }
+}
+\#else
 if (damage()!=1){
  fl_color(250,240,230);
  fl_rectf(ox,oy,lx,ly);
@@ -80,8 +139,8 @@ if (damage()!=1){
    if ((ik==1)||(ik==2)||(ik==4)||(ik==5)||(ik==6)) 
      fl_rectf(ox+i*SIZE_WHITE-SIZE_BLACK/2,oy,
               SIZE_BLACK+1,ly*3/5);
- };
-};
+ }
+}
 
 
 for (i=0;i<N_OCT*12;i++){
@@ -101,8 +160,10 @@ for (i=0;i<N_OCT*12;i++){
         else fl_color(FL_BLUE);
      fl_rectf(ox+(kv+7*noct)*SIZE_WHITE-SIZE_BLACK/2+2,oy+2,
               SIZE_BLACK-3,ly*3/5-5);
-   };
-};} {}
+   }
+}
+\#endif
+} {}
   }
   Function {handle(int event)} {return_type int
   } {
@@ -225,25 +286,29 @@ pthread_mutex_unlock(&master->mutex);} {}
   Function {relaseallkeys(int type)} {} {
     code {for (int i=0;i<N_OCT*12;i++) relasekey(i,type);} {}
   }
-  decl {Master *master;} {}
-  decl {int pressed[N_OCT*12+1];} {}
-  decl {unsigned char midich;} {public
+  decl {Master *master;} {private local
   }
-  decl {unsigned char midivel;} {public
+  decl {int pressed[N_OCT*12+1];} {private local
   }
-  decl {char midioct,keyoct1,keyoct2;} {public
+  decl {unsigned char midich;} {public local
   }
-  decl {unsigned char rndvelocity;} {public
+  decl {unsigned char midivel;} {public local
+  }
+  decl {char midioct,keyoct1,keyoct2;} {public local
+  }
+  decl {unsigned char rndvelocity;} {public local
   }
 } 
 
-class VirKeyboard {} {
-  Function {make_window()} {} {
+class VirKeyboard {open
+} {
+  Function {make_window()} {open
+  } {
     Fl_Window virkeyboardwindow {
       label {Virtual Keyboard - ZynAddSubFX}
       callback {relaseallkeys();
-virkeyboardwindow->hide();}
-      xywh {95 563 650 130} type Double hide
+virkeyboardwindow->hide();} open
+      xywh {97 574 650 130} type Double visible
     } {
       Fl_Box virkeys {
         label Keyboard
@@ -270,8 +335,8 @@ virkeys->take_focus();}
       Fl_Value_Slider {} {
         label Vel
         callback {virkeys->midivel=(int) o->value();
-virkeys->take_focus();}
-        tooltip Velocity xywh {95 105 100 15} type {Horz Knob} box FLAT_BOX labelsize 10 align 5 minimum 1 maximum 127 step 1
+virkeys->take_focus();} selected
+        tooltip Velocity xywh {95 105 100 15} type {Horz Knob} box NO_BOX labelsize 10 align 5 minimum 1 maximum 127 step 1
         code0 {o->value(virkeys->midivel);}
       }
       Fl_Counter {} {
@@ -378,7 +443,7 @@ virkeys->take_focus();}
 master->setController(virkeys->midich,C_pitchwheel,-(int) o->value());
 pthread_mutex_unlock(&master->mutex);
 virkeys->take_focus();}
-        tooltip {Pitch Wheel} xywh {625 10 20 95} box PLASTIC_UP_BOX labelsize 8 align 1 when 3 minimum -8192 maximum 8192 step 64
+        tooltip {Pitch Wheel} xywh {625 10 20 95} box UP_BOX labelsize 8 align 1 when 3 minimum -8192 maximum 8192 step 64
       }
       Fl_Button {} {
         label R
@@ -418,6 +483,8 @@ make_window();} {}
   Function {relaseallkeys()} {} {
     code {virkeys->relaseallkeys(0);} {}
   }
-  decl {Master *master;} {}
-  decl {int midictl;} {}
+  decl {Master *master;} {private local
+  }
+  decl {int midictl;} {private local
+  }
 } 

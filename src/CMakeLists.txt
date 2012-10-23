@@ -13,6 +13,7 @@ find_package(Alsa)
 pkg_check_modules(JACK jack)
 pkg_check_modules(PORTAUDIO portaudio-2.0>=19)
 set(FLTK_SKIP_OPENGL true)
+find_package(NTK)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
 find_package(CxxTest)
@@ -90,6 +91,8 @@ endif()
 
 if (GuiModule STREQUAL qt AND QT_FOUND)
 	set (QtGui TRUE)
+elseif(GuiModule STREQUAL ntk AND NTK_FOUND)
+	set (NtkGui TRUE)
 elseif(GuiModule STREQUAL fltk AND FLTK_FOUND)
 	set (FltkGui TRUE)
 elseif(GuiModule STREQUAL off)
@@ -214,25 +217,62 @@ if(FLTK_FOUND)
 	mark_as_advanced(FORCE FLTK_MATH_LIBRARY)
 endif(FLTK_FOUND)
 
+if(NTK_FOUND)
+	mark_as_advanced(FORCE NTK_BASE_LIBRARY)
+	mark_as_advanced(FORCE NTK_CONFIG_SCRIPT)
+	mark_as_advanced(FORCE NTK_DIR)
+	mark_as_advanced(FORCE NTK_FLUID_EXECUTABLE)
+	mark_as_advanced(FORCE NTK_FORMS_LIBRARY)
+	mark_as_advanced(FORCE NTK_GL_LIBRARY)
+	mark_as_advanced(FORCE NTK_IMAGES_LIBRARY)
+	mark_as_advanced(FORCE NTK_INCLUDE_DIR)
+	mark_as_advanced(FORCE NTK_MATH_LIBRARY)
+endif(NTK_FOUND)
+
 if(FltkGui)
 	#UGLY WORKAROUND
-	find_program (MYFLTK_CONFIG fltk-config)
-	if (MYFLTK_CONFIG)
-		execute_process (COMMAND ${MYFLTK_CONFIG} --ldflags OUTPUT_VARIABLE MYFLTK_LDFLAGS)
-		string(STRIP ${MYFLTK_LDFLAGS} MYFLTK_LIBRARIES)
+	find_program (FLTK_CONFIG fltk-config)
+	if (FLTK_CONFIG)
+		execute_process (COMMAND ${FLTK_CONFIG} --use-images --ldflags OUTPUT_VARIABLE FLTK_LDFLAGS)
+		string(STRIP ${FLTK_LDFLAGS} FLTK_LIBRARIES)
 	endif()
 
-	message(STATUS ${MYFLTK_LDFLAGS})
+	message(STATUS ${FLTK_LDFLAGS})
 
 
-	set(GUI_LIBRARIES ${FLTK_LIBRARIES} ${MYFLTK_LIBRARIES} ${OPENGL_LIBRARIES} zynaddsubfx_gui)
+	set(GUI_LIBRARIES ${FLTK_LIBRARIES} ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES} zynaddsubfx_gui)
 
 	add_definitions(-DFLTK_GUI)
-
-	message(STATUS "Will build fltk gui")
+	message(STATUS "Will build FLTK gui")
 
 	include_directories(
 			${FLTK_INCLUDE_DIR}
+			"${CMAKE_CURRENT_SOURCE_DIR}/UI"
+			"${CMAKE_CURRENT_BINARY_DIR}/UI"
+			)
+
+	add_subdirectory(UI)
+endif()
+
+if(NtkGui)
+	#UGLY WORKAROUND
+	find_program (NTK_CONFIG ntk-config)
+	if (NTK_CONFIG)
+		execute_process (COMMAND ${NTK_CONFIG} --use-images --ldflags OUTPUT_VARIABLE NTK_LDFLAGS)
+		string(STRIP ${NTK_LDFLAGS} NTK_LIBRARIES)
+	endif()
+
+	message(STATUS ${NTK_LDFLAGS})
+
+
+	set(GUI_LIBRARIES ${NTK_LIBRARIES} ${NTK_LIBRARIES} ${OPENGL_LIBRARIES} zynaddsubfx_gui)
+
+	add_definitions(-DNTK_GUI)
+
+	message(STATUS "Will build NTK gui")
+
+	include_directories(
+			${NTK_INCLUDE_DIR}
 			"${CMAKE_CURRENT_SOURCE_DIR}/UI"
 			"${CMAKE_CURRENT_BINARY_DIR}/UI"
 			)
@@ -244,7 +284,7 @@ endif()
 # Following this should be only general compilation code, and no mention
 # of module-specific variables
 
-link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS})
+link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS} ${NTK_LIBRARY_DIRS})
 
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
@@ -322,5 +362,10 @@ message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARIES
 install(TARGETS zynaddsubfx
 	RUNTIME DESTINATION bin
 	)
+
+if(NtkGui)
+install(DIRECTORY ../pixmaps DESTINATION share/zynaddsubfx)
+add_definitions(-DPIXMAP_PATH="${CMAKE_INSTALL_PREFIX}/share/zynaddsubfx/pixmaps/")
+endif(NtkGui)
 
 include(CTest)
