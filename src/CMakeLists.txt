@@ -16,6 +16,9 @@ set(FLTK_SKIP_OPENGL true)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
 find_package(CxxTest)
+if(CXXTEST_FOUND)
+    set(CXXTEST_USE_PYTHON TRUE)
+endif()
 # lash
 pkg_search_module(LASH lash-1.0)
 mark_as_advanced(LASH_LIBRARIES)
