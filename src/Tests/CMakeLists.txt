@@ -14,11 +14,7 @@ CXXTEST_ADD_TEST(RandTest RandTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/RandTest.h)
 
 #Extra libraries added to make test and full compilation use the same library
 #links for quirky compilers
-set(test_lib ${NONGUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW_LIBRARIES} ${MXML_LIBRARIES}
-	${NIO_LIBRARIES}
-	${AUDIO_LIBRARIES}
-	${OS_LIBRARIES}
-    pthread)
+set(test_lib zynaddsubfx_core ${ZLIB_LIBRARY} ${FFTW_LIBRARIES} ${MXML_LIBRARIES} pthread)
 
 message(STATUS "Linking tests with: ${test_lib}")
 target_link_libraries(ADnoteTest     ${test_lib})

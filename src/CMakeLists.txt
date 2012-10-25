@@ -272,27 +272,32 @@ if(CompileTests)
 endif(CompileTests)
 add_subdirectory(Nio)
 
-set(zynaddsubfx_SRCS
-	main.cpp
+add_library(zynaddsubfx_core STATIC
+	${zynaddsubfx_dsp_SRCS}
+	${zynaddsubfx_effect_SRCS}
+	${zynaddsubfx_misc_SRCS}
+	${zynaddsubfx_params_SRCS}
+	${zynaddsubfx_synth_SRCS}
 	)
+
+target_link_libraries(zynaddsubfx_core
+	${ZLIB_LIBRARIES}
+	${FFTW_LIBRARIES}
+	${MXML_LIBRARIES}
+	${OS_LIBRARIES}
+	pthread)
 
 message(STATUS "using link directories: ${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS}")
 
 
-add_executable(zynaddsubfx
-	${zynaddsubfx_SRCS}
-)
+add_executable(zynaddsubfx main.cpp)
 
 target_link_libraries(zynaddsubfx
-	${NONGUI_LIBRARIES}
+	zynaddsubfx_nio
+    zynaddsubfx_core
 	${GUI_LIBRARIES}
-	${ZLIB_LIBRARIES}
-	${FFTW_LIBRARIES}
-	${MXML_LIBRARIES}
 	${NIO_LIBRARIES}
 	${AUDIO_LIBRARIES}
-	${OS_LIBRARIES}
-	pthread
 	)
 
 if (DssiEnable)
@@ -301,7 +306,7 @@ if (DssiEnable)
 		)
 
 	target_link_libraries(zynaddsubfx_dssi
-		${NONGUI_LIBRARIES}
+        zynaddsubfx_lib
 		${ZLIB_LIBRARIES}
 		${FFTW_LIBRARY}
         ${MXML_LIBRARIES}
