@@ -306,10 +306,7 @@ if (DssiEnable)
 		)
 
 	target_link_libraries(zynaddsubfx_dssi
-        zynaddsubfx_lib
-		${ZLIB_LIBRARIES}
-		${FFTW_LIBRARY}
-        ${MXML_LIBRARIES}
+        zynaddsubfx_core
 		${NIO_LIBRARIES}
 		${AUDIO_LIBRARIES}
 		${OS_LIBRARIES}
