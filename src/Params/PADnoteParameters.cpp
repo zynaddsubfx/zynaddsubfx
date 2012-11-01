@@ -477,7 +477,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
                 float idfreq = i / (float)profilesize - 0.5f;
                 idfreq *= ibw;
                 int   spfreq  = (int) (idfreq + ibasefreq);
-                float fspfreq = fmod((double)idfreq + ibasefreq, 1.0f);
+                float fspfreq = fmodf((float)idfreq + ibasefreq, 1.0f);
                 if(spfreq <= 0)
                     continue;
                 if(spfreq >= size - 1)
