@@ -160,10 +160,10 @@ const int maxharmonic=64;
 
 
 for (int i=1;i<maxharmonic;i++){
-	fl_color(200,200,200);
+	fl_color(100,100,100);
 	fl_line_style(FL_DOT);
 	if (i%5==0) fl_line_style(0);
-	if (i%10==0) fl_color(160,160,160);
+	if (i%10==0) fl_color(120,120,120);
 	int kx=(int)(lx/(float)maxharmonic*i);
 	fl_line(ox+kx,oy,ox+kx,oy+ly);
 };

@@ -324,7 +324,7 @@ class Panellistitem {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window panellistitem {open
-      private xywh {602 665 100 260} type Double box NO_BOX
+      private xywh {605 688 100 260} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group panellistitemgroup {open
@@ -463,7 +463,7 @@ if ((
     *exitprogram=1;
 };
 \#endif} open
-      xywh {623 378 390 545} type Double align 80 xclass zynaddsubfx visible
+      xywh {77 347 390 525} type Double align 80 xclass zynaddsubfx visible
     } {
       Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
@@ -728,10 +728,10 @@ pthread_mutex_unlock(&master->mutex);}
         xywh {280 29 105 53} color 90 labelfont 1
       }
       Fl_Group partuigroup {open
-        xywh {0 332 390 183}
+        xywh {0 310 390 205}
       } {
-        Fl_Group partui {open
-          xywh {4 335 383 175}
+        Fl_Group partui {open selected
+          xywh {0 310 383 175}
           code0 {o->init(master->part[0],master,0,bankui);}
           code1 {o->show();}
           class PartUI
@@ -987,11 +987,11 @@ mastermenu->redraw();}
         }
       }
       Fl_Group {} {open
-        xywh {1 512 389 33}
+        xywh {1 490 389 55}
       } {
         Fl_Box {} {
           label {VU-Meter}
-          xywh {5 515 380 30} box FLAT_BOX color 48 selection_color 75
+          xywh {5 490 380 30} box FLAT_BOX color 48 selection_color 75
           code0 {o->init(master,-1);}
           class VUMeter
         }
@@ -1141,7 +1141,7 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL)) {
 	*exitprogram=1;
 };
 \#endif} open
-      xywh {277 216 600 335} type Double align 80 visible
+      xywh {280 239 600 335} type Double align 80 visible
     } {
       Fl_Menu_Bar simplemastermenu {
         xywh {0 0 690 25}
@@ -1331,7 +1331,7 @@ simplemaxkcounter->do_callback();}
           code1 {o->value(master->part[npart]->Pkeyshift-64);}
         }
         Fl_Dial simplesyseffsend {
-          callback {master->setPsysefxvol(npart,nsyseff,(int) o->value());} selected
+          callback {master->setPsysefxvol(npart,nsyseff,(int) o->value());}
           xywh {300 160 30 30} maximum 127 step 1
           class WidgetPDial
         }

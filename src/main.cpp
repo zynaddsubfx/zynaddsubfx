@@ -112,7 +112,7 @@ set_module_parameters ( Fl_Widget *o )
     o->image( module_backdrop );
     o->labeltype( FL_SHADOW_LABEL );
 #else
-    o->box( FL_UP_BOX );
+    o->box( FL_PLASTIC_UP_BOX );
     o->color( FL_CYAN );
     o->labeltype( FL_EMBOSSED_LABEL );
 #endif
@@ -435,11 +435,22 @@ int main(int argc, char *argv[])
 #ifdef NTK_GUI
     fl_register_images();
 
-    Fl_Dial::default_style( Fl_Dial::PIXMAP_DIAL );
-    Fl_Dial::default_image( Fl_Shared_Image::get( PIXMAP_PATH "/knob.png" ) );
+    Fl_Dial::default_style(Fl_Dial::PIXMAP_DIAL);
 
-    Fl::scheme_bg( new Fl_Tiled_Image( Fl_Shared_Image::get( PIXMAP_PATH "/window_backdrop.png" )));
-    module_backdrop = new Fl_Tiled_Image( Fl_Shared_Image::get( PIXMAP_PATH "/module_backdrop.png" ));
+    if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/knob.png"))
+        Fl_Dial::default_image(img);
+    else
+        Fl_Dial::default_image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/knob.png"));
+
+    if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/window_backdrop.png"))
+        Fl::scheme_bg(new Fl_Tiled_Image(img));
+    else
+        Fl::scheme_bg(new Fl_Tiled_Image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/window_backdrop.png")));
+
+    if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/module_backdrop.png"))
+        module_backdrop = new Fl_Tiled_Image(img);
+    else
+        module_backdrop = new Fl_Tiled_Image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/module_backdrop.png"));
 
     Fl::background(  50, 50, 50 );
     Fl::background2(  70, 70, 70 );
@@ -521,7 +532,7 @@ int main(int argc, char *argv[])
 
 done:
 
-        Fl::wait(0.1f);
+        Fl::wait(0.02f);
 #else
         usleep(100000);
 #endif
