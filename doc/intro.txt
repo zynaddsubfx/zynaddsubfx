@@ -33,6 +33,27 @@ For basic usage, you will want to use the button to the right of the enabled
 label.
 This button will allow for one to select the desired instrument from the banks
 that ZynAddSubFX has available.
-To play notes in ZynAddSubFX, either utilize the builtin virtual keyboard or
-connect your keyboard to the system and use aconnect to connect it to
-ZynAddSubFX (assuming that ALSA was used).
+To play notes in ZynAddSubFX, either utilize the builtin virtual keyboard
+(accessible via the vK button) or connect your keyboard to the system and use
+*aconnect* to connect it to ZynAddSubFX (assuming that ALSA was used).
+
+This main window provides access to a number of more advanced features.
+Some of these features are:
+
+* System Effects
+* Insertion Effects
+* Recording
+* Part Settings (instrument level settings)
+* Master Settings
+* Microtonal Settings
+
+For instance to use the recording feature, a wave file must be selected from the
+recording menu and then the recording can be started with the record button and
+stopped with the stop button.
+This is a simple and quick way of recording some samples from ZynAddSubFX,
+though there are more full featured options available via JACK recording tools.
+
+NOTE: After hitting record, the wave file will not start recording until a new
+key has been pressed via either an external midi source or the virtual keyboard
+Both system and insertion effects can be accessed, the properties are available as well as properties of each
+instrument.
