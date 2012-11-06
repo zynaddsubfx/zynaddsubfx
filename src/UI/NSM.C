@@ -105,7 +105,7 @@ NSM_Client::command_open(const char *name,
     return r;
 }
 
-static void save_callback(Fl_Widget *w, void *v)
+static void save_callback(Fl_Widget *, void *v)
 {
     MasterUI *ui = static_cast<MasterUI*>(v);
     ui->do_save_master();
@@ -118,17 +118,22 @@ NSM_Client::command_active(bool active)
         Fl_Menu_Item *m;
         //TODO see if there is a cleaner way of doing this without voiding
         //constness
-        if(m=const_cast<Fl_Menu_Item *>(ui->mastermenu->find_item(
-                                       "&File/&Open Parameters...")))
+        if((m=const_cast<Fl_Menu_Item *>(ui->mastermenu->find_item(
+                                       "&File/&Open Parameters..."))))
             m->label("&Import Parameters...");
-        if(m=const_cast<Fl_Menu_Item *>(ui->simplemastermenu->find_item(
-                                       "&File/&Open Parameters...")))
+        if((m=const_cast<Fl_Menu_Item *>(ui->simplemastermenu->find_item(
+                                       "&File/&Open Parameters..."))))
             m->label("&Import Parameters...");
 
         //TODO get this menu entry inserted at the right point
-        if(!ui->mastermenu->find_item("&File/&Export Parameters..."))
+        if((m=const_cast<Fl_Menu_Item *>(ui->mastermenu->find_item("&File/&Export Parameters..."))))
+            m->show();
+        else
             ui->mastermenu->add("&File/&Export Parameters...",0,save_callback,ui);
-        if(!ui->simplemastermenu->find_item("&File/&Export Parameters..."))
+
+        if((m=const_cast<Fl_Menu_Item *>(ui->simplemastermenu->find_item("&File/&Export Parameters..."))))
+            m->show();
+        else
             ui->simplemastermenu->add("&File/&Export Parameters...",0,save_callback,ui);
 
         ui->sm_indicator1->value(1);
@@ -138,19 +143,17 @@ NSM_Client::command_active(bool active)
     }
     else {
         Fl_Menu_Item *m;
-        if(m=const_cast<Fl_Menu_Item *>(ui->mastermenu->find_item(
-                                       "&File/&Import Parameters...")))
+        if((m=const_cast<Fl_Menu_Item *>(ui->mastermenu->find_item(
+                                       "&File/&Import Parameters..."))))
             m->label("&Open Parameters...");
-        if(m=const_cast<Fl_Menu_Item *>(ui->simplemastermenu->find_item(
-                                       "&File/&Open Parameters...")))
+        if((m=const_cast<Fl_Menu_Item *>(ui->simplemastermenu->find_item(
+                                       "&File/&Open Parameters..."))))
             m->label("&Open Parameters...");
 
-        int m_idx=ui->mastermenu->find_index("&File/&Export Parameters...");
-        if(m_idx==-1)
-            ui->mastermenu->remove(m_idx);
-        m_idx=ui->simplemastermenu->find_index("&File/&Export Parameters...");
-        if(m_idx==-1)
-            ui->simplemastermenu->remove(m_idx);
+        if((m=const_cast<Fl_Menu_Item *>(ui->mastermenu->find_item("&File/&Export Parameters..."))))
+            m->hide();
+        if((m=const_cast<Fl_Menu_Item *>(ui->simplemastermenu->find_item("&File/&Export Parameters..."))))
+            m->hide();
 
         ui->sm_indicator1->value(0);
         ui->sm_indicator2->value(0);
