@@ -1,47 +1,45 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
+
+decl {//License: GNU GPL version 2 or later} {} 
+
+decl {\#include <stdlib.h>} {public
 } 
 
-decl {//License: GNU GPL version 2 or later} {private local
+decl {\#include <stdio.h>} {public
 } 
 
-decl {\#include <stdlib.h>} {public local
+decl {\#include <string.h>} {public
 } 
 
-decl {\#include <stdio.h>} {public local
+decl {\#include "WidgetPDial.h"} {public
 } 
 
-decl {\#include <string.h>} {public local
+decl {\#include "EffUI.h"} {public
 } 
 
-decl {\#include "WidgetPDial.h"} {public local
+decl {\#include "BankUI.h"} {public
 } 
 
-decl {\#include "EffUI.h"} {public local
+decl {\#include "ADnoteUI.h"} {public
 } 
 
-decl {\#include "BankUI.h"} {public local
+decl {\#include "SUBnoteUI.h"} {public
 } 
 
-decl {\#include "ADnoteUI.h"} {public local
+decl {\#include "PADnoteUI.h"} {public
 } 
 
-decl {\#include "SUBnoteUI.h"} {public local
+decl {\#include "../Misc/Config.h"} {public
 } 
 
-decl {\#include "PADnoteUI.h"} {public local
+decl {\#include "../Misc/Master.h"} {public
 } 
 
-decl {\#include "../Misc/Config.h"} {public local
-} 
-
-decl {\#include "../Misc/Master.h"} {public local
-} 
-
-decl {\#include "../Misc/Part.h"} {public local
+decl {\#include "../Misc/Part.h"} {public
 } 
 
 class PartSysEffSend {open : {public Fl_Group}
@@ -49,7 +47,7 @@ class PartSysEffSend {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window syseffsend {
-      private xywh {586 106 100 100} type Double box NO_BOX
+      private xywh {589 129 100 100} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Dial {} {
@@ -80,12 +78,9 @@ end();} {}
     code {syseffsend->hide();
 //delete(syseffsend);} {}
   }
-  decl {Master *master;} {private local
-  }
-  decl {int neff;} {private local
-  }
-  decl {int npart;} {private local
-  }
+  decl {Master *master;} {}
+  decl {int neff;} {}
+  decl {int npart;} {}
 } 
 
 class PartKitItem {open : {public Fl_Group}
@@ -93,7 +88,7 @@ class PartKitItem {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window partkititem {
-      private xywh {470 383 670 100} type Double box NO_BOX
+      private xywh {473 406 670 100} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group partkititemgroup {
@@ -267,16 +262,11 @@ end();} {}
     code {partkititem->hide();
 //delete(partkititem);} {}
   }
-  decl {Part *part;} {private local
-  }
-  decl {int n;} {private local
-  }
-  decl {Master *master;} {private local
-  }
-  decl {char label[10];} {private local
-  }
-  decl {class PartUI *partui;} {private local
-  }
+  decl {Part *part;} {}
+  decl {int n;} {}
+  decl {Master *master;} {}
+  decl {char label[10];} {}
+  decl {class PartUI *partui;} {}
 } 
 
 class PartUI {open : {public Fl_Group}
@@ -284,7 +274,7 @@ class PartUI {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window partgroup {open
-      private xywh {685 241 385 180} type Double box NO_BOX
+      private xywh {688 264 385 180} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group partgroupui {open
@@ -462,7 +452,7 @@ if (part->Penabled==0) partgroupui->deactivate();
     }
     Fl_Window ctlwindow {
       label Controllers open
-      private xywh {779 238 500 130} type Double box NO_BOX visible
+      private xywh {777 261 500 130} type Double box NO_BOX visible
     } {
       Fl_Check_Button {} {
         label Expr
@@ -645,7 +635,7 @@ else {propta->deactivate();proptb->deactivate();}}
     }
     Fl_Window partfx {
       label {Part's Insert Effects} selected
-      private xywh {551 637 390 145} type Double box NO_BOX visible
+      private xywh {554 660 390 145} type Double box NO_BOX visible
     } {
       Fl_Counter inseffnocounter {
         label {FX No.}
@@ -766,7 +756,7 @@ pthread_mutex_unlock(&master->mutex);}
     }
     Fl_Window instrumentkitlist {
       label {Instrument Kit} open
-      xywh {583 543 670 370} type Double box NO_BOX visible
+      xywh {586 566 670 370} type Double box NO_BOX visible
     } {
       Fl_Button {} {
         label {Close Window}
@@ -847,7 +837,7 @@ if (part->Pkitmode==0) {
     }
     Fl_Window instrumenteditwindow {
       label {Instrument Edit} open
-      xywh {244 602 395 360} type Double box NO_BOX visible
+      xywh {247 621 395 360} type Double box NO_BOX visible
     } {
       Fl_Group {} {
         xywh {0 220 395 110} box UP_FRAME
@@ -1116,26 +1106,15 @@ delete(instrumentkitlist);
 instrumenteditwindow->hide();
 delete(instrumenteditwindow);} {}
   }
-  decl {Part *part;} {private local
-  }
-  decl {Master *master;} {private local
-  }
-  decl {BankUI *bankui;} {private local
-  }
-  decl {ADnoteUI *adnoteui;} {private local
-  }
-  decl {SUBnoteUI *subnoteui;} {private local
-  }
-  decl {PADnoteUI *padnoteui;} {private local
-  }
-  decl {PartSysEffSend *psyef[NUM_SYS_EFX];} {private local
-  }
-  decl {int npart;} {private local
-  }
-  decl {int ninseff;} {private local
-  }
-  decl {int lastkititem;} {private local
-  }
-  decl {PartKitItem *partkititem[NUM_KIT_ITEMS];} {private local
-  }
+  decl {Part *part;} {}
+  decl {Master *master;} {}
+  decl {BankUI *bankui;} {}
+  decl {ADnoteUI *adnoteui;} {}
+  decl {SUBnoteUI *subnoteui;} {}
+  decl {PADnoteUI *padnoteui;} {}
+  decl {PartSysEffSend *psyef[NUM_SYS_EFX];} {}
+  decl {int npart;} {}
+  decl {int ninseff;} {}
+  decl {int lastkititem;} {}
+  decl {PartKitItem *partkititem[NUM_KIT_ITEMS];} {}
 } 

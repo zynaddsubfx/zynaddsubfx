@@ -1,62 +1,56 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
+
+decl {//License: GNU GPL version 2 or later} {} 
+
+decl {\#include "../Synth/OscilGen.h"} {public
 } 
 
-decl {//License: GNU GPL version 2 or later} {private local
+decl {\#include "../Misc/Util.h"} {public
 } 
 
-decl {\#include "../Synth/OscilGen.h"} {public local
+decl {\#include "../Misc/Master.h"} {public
 } 
 
-decl {\#include "../Misc/Util.h"} {public local
+decl {\#include "ResonanceUI.h"} {public
 } 
 
-decl {\#include "../Misc/Master.h"} {public local
+decl {\#include <FL/Fl_Box.H>} {public
 } 
 
-decl {\#include "ResonanceUI.h"} {public local
+decl {\#include <FL/Fl_Group.H>} {public
 } 
 
-decl {\#include <FL/Fl_Box.H>} {public local
+decl {\#include <FL/Fl_Slider.H>} {public
 } 
 
-decl {\#include <FL/Fl_Group.H>} {public local
+decl {\#include <math.h>} {} 
+
+decl {\#include <stdio.h>} {} 
+
+decl {\#include <stdlib.h>} {} 
+
+decl {\#include <string.h>} {} 
+
+decl {\#include "WidgetPDial.h"} {public
 } 
 
-decl {\#include <FL/Fl_Slider.H>} {public local
+decl {\#include "EnvelopeUI.h"} {public
 } 
 
-decl {\#include <math.h>} {private local
+decl {\#include "LFOUI.h"} {public
 } 
 
-decl {\#include <stdio.h>} {private local
+decl {\#include "FilterUI.h"} {public
 } 
 
-decl {\#include <stdlib.h>} {private local
+decl {\#include "PresetsUI.h"} {public
 } 
 
-decl {\#include <string.h>} {private local
-} 
-
-decl {\#include "WidgetPDial.h"} {public local
-} 
-
-decl {\#include "EnvelopeUI.h"} {public local
-} 
-
-decl {\#include "LFOUI.h"} {public local
-} 
-
-decl {\#include "FilterUI.h"} {public local
-} 
-
-decl {\#include "PresetsUI.h"} {public local
-} 
-
-decl {\#include <FL/fl_draw.H>} {public local
+decl {\#include <FL/fl_draw.H>} {public
 } 
 
 class OscilSpectrum {: {public Fl_Box}
@@ -130,12 +124,9 @@ for (i=0;i<n;i++){
 }
 delete [] spc;} {}
   }
-  decl {OscilGen *oscil;} {private local
-  }
-  decl {int oscbase;} {private local
-  }
-  decl {Master *master;} {private local
-  }
+  decl {OscilGen *oscil;} {}
+  decl {int oscbase;} {}
+  decl {Master *master;} {}
 } 
 
 class PSlider {: {public Fl_Slider}
@@ -251,14 +242,11 @@ fl_end_line();
 
 fl_line_style(FL_SOLID,0);} {}
   }
-  decl {OscilGen *oscil;} {private local
+  decl {OscilGen *oscil;} {}
+  decl {int oscbase;} {}
+  decl {int phase;} {public
   }
-  decl {int oscbase;} {private local
-  }
-  decl {int phase;} {public local
-  }
-  decl {Master *master;} {private local
-  }
+  decl {Master *master;} {}
 } 
 
 class Oscilharmonic {: {public Fl_Group}
@@ -266,7 +254,7 @@ class Oscilharmonic {: {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window harmonic {open
-      private xywh {335 236 100 225} type Double box NO_BOX
+      private xywh {338 259 100 225} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Slider mag {
@@ -366,16 +354,11 @@ if (oscil->Phmag[n]==64) mag->selection_color(0);
     code {harmonic->hide();
 //delete(harmonic);} {}
   }
-  decl {OscilGen *oscil;} {private local
-  }
-  decl {Fl_Group *display;} {private local
-  }
-  decl {int n;} {private local
-  }
-  decl {Fl_Widget *oldosc,*cbwidget,*applybutton;} {private local
-  }
-  decl {Master *master;} {private local
-  }
+  decl {OscilGen *oscil;} {}
+  decl {Fl_Group *display;} {}
+  decl {int n;} {}
+  decl {Fl_Widget *oldosc,*cbwidget,*applybutton;} {}
+  decl {Master *master;} {}
 } 
 
 class OscilEditor {open : {public PresetsUI_}
@@ -384,7 +367,7 @@ class OscilEditor {open : {public PresetsUI_}
   } {
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor} open
-      xywh {544 170 735 595} type Double
+      xywh {542 193 735 595} type Double
       code0 {if (oscil->ADvsPAD) o->label("PADsynth Harmonic Content Editor");} visible
     } {
       Fl_Button applybutton {
@@ -1160,12 +1143,8 @@ if (cbwidget!=NULL) {
       applybutton->redraw();
 };} {}
   }
-  decl {OscilGen *oscil;} {private local
-  }
-  decl {Fl_Widget *oldosc,*cbwidget,*cbapplywidget;} {private local
-  }
-  decl {Oscilharmonic *h[MAX_AD_HARMONICS];} {private local
-  }
-  decl {Master *master;} {private local
-  }
+  decl {OscilGen *oscil;} {}
+  decl {Fl_Widget *oldosc,*cbwidget,*cbapplywidget;} {}
+  decl {Oscilharmonic *h[MAX_AD_HARMONICS];} {}
+  decl {Master *master;} {}
 } 

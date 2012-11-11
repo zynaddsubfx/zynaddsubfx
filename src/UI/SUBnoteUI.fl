@@ -1,41 +1,39 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
+
+decl {//License: GNU GPL version 2 or later} {} 
+
+decl {\#include <stdlib.h>} {public
 } 
 
-decl {//License: GNU GPL version 2 or later} {private local
+decl {\#include <stdio.h>} {public
 } 
 
-decl {\#include <stdlib.h>} {public local
+decl {\#include <string.h>} {public
 } 
 
-decl {\#include <stdio.h>} {public local
+decl {\#include "../globals.h"} {public
 } 
 
-decl {\#include <string.h>} {public local
+decl {\#include "WidgetPDial.h"} {public
 } 
 
-decl {\#include "../globals.h"} {public local
+decl {\#include "EnvelopeUI.h"} {public
 } 
 
-decl {\#include "WidgetPDial.h"} {public local
+decl {\#include "FilterUI.h"} {public
 } 
 
-decl {\#include "EnvelopeUI.h"} {public local
+decl {\#include "../Misc/Util.h"} {public
 } 
 
-decl {\#include "FilterUI.h"} {public local
+decl {\#include "../Params/SUBnoteParameters.h"} {public
 } 
 
-decl {\#include "../Misc/Util.h"} {public local
-} 
-
-decl {\#include "../Params/SUBnoteParameters.h"} {public local
-} 
-
-decl {\#include "PresetsUI.h"} {public local
+decl {\#include "PresetsUI.h"} {public
 } 
 
 class SUBnoteharmonic {: {public Fl_Group}
@@ -101,10 +99,8 @@ bw->value(127-pars->Phrelbw[n]);} {}
 hide();
 //delete(harmonic);} {}
   }
-  decl {SUBnoteParameters *pars;} {private local
-  }
-  decl {int n;} {private local
-  }
+  decl {SUBnoteParameters *pars;} {}
+  decl {int n;} {}
 } 
 
 class SUBnoteUI {open : {public PresetsUI_}
@@ -113,7 +109,7 @@ class SUBnoteUI {open : {public PresetsUI_}
   } {
     Fl_Window SUBparameters {
       label {SUBsynth Parameters} open
-      xywh {544 466 735 390} type Double visible
+      xywh {542 489 735 390} type Double visible
     } {
       Fl_Scroll {} {
         label scroll open
@@ -449,8 +445,6 @@ make_window();} {}
 SUBparameters->hide();
 delete(SUBparameters);} {}
   }
-  decl {SUBnoteParameters *pars;} {private local
-  }
-  decl {SUBnoteharmonic *h[MAX_SUB_HARMONICS];} {private local
-  }
+  decl {SUBnoteParameters *pars;} {}
+  decl {SUBnoteharmonic *h[MAX_SUB_HARMONICS];} {}
 } 

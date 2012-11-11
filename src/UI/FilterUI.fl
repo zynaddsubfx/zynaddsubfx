@@ -1,47 +1,44 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
+
+decl {//License: GNU GPL version 2 or later} {} 
+
+decl {\#include "WidgetPDial.h"} {public
 } 
 
-decl {//License: GNU GPL version 2 or later} {private local
+decl {\#include <cmath>} {} 
+
+decl {\#include <stdio.h>} {global
 } 
 
-decl {\#include "WidgetPDial.h"} {public local
+decl {\#include <stdlib.h>} {global
 } 
 
-decl {\#include <cmath>} {private local
+decl {\#include "../globals.h"} {public
 } 
 
-decl {\#include <stdio.h>} {private global
+decl {\#include <FL/Fl_Group.H>} {public
 } 
 
-decl {\#include <stdlib.h>} {private global
+decl {\#include "../Params/FilterParams.h"} {public
 } 
 
-decl {\#include "../globals.h"} {public local
+decl {\#include <FL/Fl_Box.H>} {public
 } 
 
-decl {\#include <FL/Fl_Group.H>} {public local
+decl {\#include <FL/fl_draw.H>} {public
 } 
 
-decl {\#include "../Params/FilterParams.h"} {public local
+decl {\#include <FL/fl_ask.H>} {public
 } 
 
-decl {\#include <FL/Fl_Box.H>} {public local
+decl {\#include "PresetsUI.h"} {public
 } 
 
-decl {\#include <FL/fl_draw.H>} {public local
-} 
-
-decl {\#include <FL/fl_ask.H>} {public local
-} 
-
-decl {\#include "PresetsUI.h"} {public local
-} 
-
-decl {\#include "common.H"} {public local
+decl {\#include "common.H"} {public
 } 
 
 class FormantFilterGraph {open : {public Fl_Box}
@@ -155,14 +152,10 @@ fl_line_style(FL_SOLID,0);} {}
   Function {~FormantFilterGraph()} {} {
     code {delete [] graphpoints;} {}
   }
-  decl {FilterParams *pars;} {private local
-  }
-  decl {int oldx,oldy;} {private local
-  }
-  decl {int *nvowel,*nformant;} {private local
-  }
-  decl {float *graphpoints;} {private local
-  }
+  decl {FilterParams *pars;} {}
+  decl {int oldx,oldy;} {}
+  decl {int *nvowel,*nformant;} {}
+  decl {float *graphpoints;} {}
 } 
 
 class FilterUI {open : {public Fl_Group,PresetsUI_}
@@ -183,7 +176,7 @@ delete (formantparswindow);} {}
   Function {make_window()} {open
   } {
     Fl_Window filterui {open
-      xywh {495 323 275 70} type Double color 50 labelfont 1
+      xywh {498 346 275 70} type Double color 50 labelfont 1
       class Fl_Group visible
     } {
       Fl_Group filterparamswindow {
@@ -353,7 +346,7 @@ pars->changed=true;} open
   } {
     Fl_Window formantparswindow {
       label {Formant Filter Parameters} selected
-      xywh {515 450 700 205} type Double visible
+      xywh {518 473 700 205} type Double visible
     } {
       Fl_Group {} {
         xywh {485 47 105 113} box THIN_UP_BOX
@@ -639,10 +632,7 @@ formant_q_dial->when(0);
 formant_amp_dial->when(0);
 strchdial->when(0);} {}
   }
-  decl {FilterParams *pars;} {private local
-  }
-  decl {unsigned char *velsnsamp,*velsns;} {private local
-  }
-  decl {int nvowel,nformant,nseqpos;} {private local
-  }
+  decl {FilterParams *pars;} {}
+  decl {unsigned char *velsnsamp,*velsns;} {}
+  decl {int nvowel,nformant,nseqpos;} {}
 } 

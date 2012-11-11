@@ -1,41 +1,39 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
+
+decl {//License: GNU GPL version 2 or later} {} 
+
+decl {\#include <stdlib.h>} {public
 } 
 
-decl {//License: GNU GPL version 2 or later} {private local
+decl {\#include <stdio.h>} {public
 } 
 
-decl {\#include <stdlib.h>} {public local
+decl {\#include <string.h>} {public
 } 
 
-decl {\#include <stdio.h>} {public local
+decl {\#include <FL/Fl_Button.H>} {public
 } 
 
-decl {\#include <string.h>} {public local
+decl {\#include <FL/Fl_File_Chooser.H>} {public
 } 
 
-decl {\#include <FL/Fl_Button.H>} {public local
+decl {\#include "../Misc/Master.h"} {public
 } 
 
-decl {\#include <FL/Fl_File_Chooser.H>} {public local
+decl {\#include "../Misc/Part.h"} {public
 } 
 
-decl {\#include "../Misc/Master.h"} {public local
+decl {\#include "../Misc/Bank.h"} {public
 } 
 
-decl {\#include "../Misc/Part.h"} {public local
+decl {\#include "../Misc/Config.h"} {public
 } 
 
-decl {\#include "../Misc/Bank.h"} {public local
-} 
-
-decl {\#include "../Misc/Config.h"} {public local
-} 
-
-decl {\#include "../Misc/Util.h"} {public local
+decl {\#include "../Misc/Util.h"} {public
 } 
 
 class BankProcess_ {} {
@@ -43,7 +41,7 @@ class BankProcess_ {} {
   } {
     code {;} {}
   }
-  decl {Bank *bank;} {public local
+  decl {Bank *bank;} {public
   }
 } 
 
@@ -54,7 +52,8 @@ class BankSlot {open : {public Fl_Button,BankProcess_}
     code {what=NULL;
 whatslot=NULL;
 nslot=0;
-nselected=NULL;} {}
+nselected=NULL;} {selected
+    }
   }
   Function {handle(int event)} {return_type int
   } {
@@ -101,12 +100,9 @@ if (*nselected==nslot)
 
 copy_label(bank->getnamenumbered(nslot).c_str());} {}
   }
-  decl {int *what,*whatslot,nslot,highlight, *nselected;} {private local
-  }
-  decl {void (BankProcess_:: *fnc)(void);} {private local
-  }
-  decl {BankProcess_ *bp;} {private local
-  }
+  decl {int *what,*whatslot,nslot,highlight, *nselected;} {}
+  decl {void (BankProcess_:: *fnc)(void);} {}
+  decl {BankProcess_ *bp;} {}
 } 
 
 class BankUI {open : {public BankProcess_}
@@ -114,8 +110,8 @@ class BankUI {open : {public BankProcess_}
   Function {make_window()} {open
   } {
     Fl_Window bankuiwindow {
-      label Bank selected
-      xywh {807 447 785 575} type Double
+      label Bank
+      xywh {492 406 785 575} type Double
       code0 {o->label(bank->bankfiletitle.c_str());}
       code1 {if (bank->bankfiletitle.empty()) o->label ("Choose a bank from the bank list on the left (or go to settings if to configure the bank location) or choose 'New Bank...' to make a new bank.");} visible
     } {
@@ -362,16 +358,11 @@ removeselection();
 if (beginnerui) modeselect->hide();
 	else modeselect->show();} {}
   }
-  decl {BankSlot *bs[BANK_SIZE];} {private local
-  }
-  decl {int slot,what;//"what"=what button is pressed} {private local
-  }
-  decl {int mode,*npart,nselected;} {private local
-  }
-  decl {Master *master;} {private local
-  }
-  decl {void (BankProcess_::* fnc)(void);} {private local
-  }
-  decl {Fl_Valuator *cbwig;} {public local
+  decl {BankSlot *bs[BANK_SIZE];} {}
+  decl {int slot,what;//"what"=what button is pressed} {}
+  decl {int mode,*npart,nselected;} {}
+  decl {Master *master;} {}
+  decl {void (BankProcess_::* fnc)(void);} {}
+  decl {Fl_Valuator *cbwig;} {public
   }
 } 

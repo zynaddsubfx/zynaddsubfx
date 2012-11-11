@@ -1,44 +1,42 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
+
+decl {//License: GNU GPL version 2 or later} {} 
+
+decl {\#include "WidgetPDial.h"} {public
 } 
 
-decl {//License: GNU GPL version 2 or later} {private local
+decl {\#include <stdio.h>} {public
 } 
 
-decl {\#include "WidgetPDial.h"} {public local
+decl {\#include <stdlib.h>} {public
 } 
 
-decl {\#include <stdio.h>} {public local
+decl {\#include "../globals.h"} {public
 } 
 
-decl {\#include <stdlib.h>} {public local
+decl {\#include <FL/Fl_Group.H>} {public
 } 
 
-decl {\#include "../globals.h"} {public local
+decl {\#include "../Params/EnvelopeParams.h"} {public
 } 
 
-decl {\#include <FL/Fl_Group.H>} {public local
+decl {\#include <FL/Fl_Box.H>} {public
 } 
 
-decl {\#include "../Params/EnvelopeParams.h"} {public local
+decl {\#include <FL/fl_draw.H>} {public
 } 
 
-decl {\#include <FL/Fl_Box.H>} {public local
+decl {\#include <FL/fl_ask.H>} {public
 } 
 
-decl {\#include <FL/fl_draw.H>} {public local
+decl {\#include "PresetsUI.h"} {public
 } 
 
-decl {\#include <FL/fl_ask.H>} {public local
-} 
-
-decl {\#include "PresetsUI.h"} {public local
-} 
-
-decl {\#include "common.H"} {public local
+decl {\#include "common.H"} {public
 } 
 
 class EnvelopeFreeEdit {: {public Fl_Box}
@@ -192,15 +190,11 @@ if ((event==FL_DRAG)&&(currentpoint>=0)){
 
 return(1);} {}
   }
-  decl {Fl_Box *pair;} {private local
-  }
-  decl {EnvelopeParams *env;} {private local
-  }
-  decl {int oldx,oldy;} {private local
-  }
-  decl {int currentpoint,cpx,cpdt;} {private local
-  }
-  decl {int lastpoint;} {public local
+  decl {Fl_Box *pair;} {}
+  decl {EnvelopeParams *env;} {}
+  decl {int oldx,oldy;} {}
+  decl {int currentpoint,cpx,cpdt;} {}
+  decl {int lastpoint;} {public
   }
 } 
 
@@ -225,7 +219,7 @@ delete (freemodeeditwindow);} {}
   } {
     Fl_Window freemodeeditwindow {
       label Envelope
-      xywh {948 246 575 180} type Double visible
+      xywh {702 269 575 180} type Double visible
     } {
       Fl_Box freeedit {
         label Envelope
@@ -347,7 +341,7 @@ envfree->redraw();}
   Function {make_ADSR_window()} {open
   } {
     Fl_Window envADSR {open
-      xywh {341 765 205 70} type Double color 50 labelfont 1
+      xywh {344 788 205 70} type Double color 50 labelfont 1
       class Fl_Group visible
     } {
       Fl_Group {} {
@@ -427,7 +421,7 @@ freeedit->redraw();}
   Function {make_ASR_window()} {open
   } {
     Fl_Window envASR {open
-      xywh {645 644 210 70} type Double
+      xywh {648 667 210 70} type Double
       class Fl_Group visible
     } {
       Fl_Group {} {
@@ -501,7 +495,7 @@ freeedit->redraw();}
   Function {make_ADSRfilter_window()} {open
   } {
     Fl_Window envADSRfilter {open selected
-      xywh {624 546 275 70} type Double color 50 labelfont 1
+      xywh {627 569 275 70} type Double color 50 labelfont 1
       class Fl_Group visible
     } {
       Fl_Group {} {
@@ -591,7 +585,7 @@ freeedit->redraw();}
   Function {make_ASRbw_window()} {open
   } {
     Fl_Window envASRbw {open
-      xywh {359 619 210 71} type Double
+      xywh {362 642 210 70} type Double
       code0 {set_module_parameters(o);}
       class Fl_Group visible
     } {
@@ -666,7 +660,7 @@ freeedit->redraw();}
   Function {make_free_window()} {open
   } {
     Fl_Window envfree {open
-      xywh {373 413 205 70} type Double color 50 labelfont 1 resizable
+      xywh {376 436 205 70} type Double color 50 labelfont 1 resizable
       code0 {set_module_parameters(o);}
       class Fl_Group visible
     } {
@@ -869,8 +863,6 @@ envwindow->resize(this->x(),this->y(),this->w(),this->h());
 
 envwindow->show();} {}
   }
-  decl {EnvelopeParams *env;} {private local
-  }
-  decl {Fl_Group *envwindow;} {private local
-  }
+  decl {EnvelopeParams *env;} {}
+  decl {Fl_Group *envwindow;} {}
 } 

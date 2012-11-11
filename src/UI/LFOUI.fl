@@ -1,44 +1,42 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
+
+decl {//License: GNU GPL version 2 or later} {} 
+
+decl {\#include "WidgetPDial.h"} {public
 } 
 
-decl {//License: GNU GPL version 2 or later} {private local
+decl {\#include <stdio.h>} {public
 } 
 
-decl {\#include "WidgetPDial.h"} {public local
+decl {\#include <stdlib.h>} {public
 } 
 
-decl {\#include <stdio.h>} {public local
+decl {\#include "../globals.h"} {public
 } 
 
-decl {\#include <stdlib.h>} {public local
+decl {\#include <FL/Fl_Group.H>} {public
 } 
 
-decl {\#include "../globals.h"} {public local
+decl {\#include "../Params/LFOParams.h"} {public
 } 
 
-decl {\#include <FL/Fl_Group.H>} {public local
+decl {\#include <FL/Fl_Box.H>} {public
 } 
 
-decl {\#include "../Params/LFOParams.h"} {public local
+decl {\#include <FL/fl_draw.H>} {public
 } 
 
-decl {\#include <FL/Fl_Box.H>} {public local
+decl {\#include <FL/fl_ask.H>} {public
 } 
 
-decl {\#include <FL/fl_draw.H>} {public local
+decl {\#include "PresetsUI.h"} {public
 } 
 
-decl {\#include <FL/fl_ask.H>} {public local
-} 
-
-decl {\#include "PresetsUI.h"} {public local
-} 
-
-decl {\#include "common.H"} {public local
+decl {\#include "common.H"} {public
 } 
 
 class LFOUI {open : {public Fl_Group, PresetsUI_}
@@ -54,7 +52,7 @@ hide();
   Function {make_window()} {open
   } {
     Fl_Window lfoui {open selected
-      xywh {627 328 230 70} type Double color 50 labelfont 1
+      xywh {630 351 230 70} type Double color 50 labelfont 1
       class Fl_Group visible
     } {
       Fl_Group lfoparamswindow {
@@ -179,6 +177,5 @@ lfoui->resize(this->x(),this->y(),this->w(),this->h());
 
 lfoparamswindow->label(this->label());} {}
   }
-  decl {LFOParams *pars;} {private local
-  }
+  decl {LFOParams *pars;} {}
 } 

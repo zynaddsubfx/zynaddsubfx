@@ -1,41 +1,35 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
+
+decl {//License: GNU GPL version 2 or later} {} 
+
+decl {\#include <FL/Fl_Box.H>} {public
 } 
 
-decl {//License: GNU GPL version 2 or later} {private local
+decl {\#include <FL/fl_draw.H>} {public
 } 
 
-decl {\#include <FL/Fl_Box.H>} {public local
+decl {\#include <FL/Fl_Value_Output.H>} {public
 } 
 
-decl {\#include <FL/fl_draw.H>} {public local
+decl {\#include <math.h>} {} 
+
+decl {\#include <stdio.h>} {} 
+
+decl {\#include <stdlib.h>} {} 
+
+decl {\#include <string.h>} {} 
+
+decl {\#include "../Synth/Resonance.h"} {public
 } 
 
-decl {\#include <FL/Fl_Value_Output.H>} {public local
+decl {\#include "WidgetPDial.h"} {public
 } 
 
-decl {\#include <math.h>} {private local
-} 
-
-decl {\#include <stdio.h>} {private local
-} 
-
-decl {\#include <stdlib.h>} {private local
-} 
-
-decl {\#include <string.h>} {private local
-} 
-
-decl {\#include "../Synth/Resonance.h"} {public local
-} 
-
-decl {\#include "WidgetPDial.h"} {public local
-} 
-
-decl {\#include "PresetsUI.h"} {public local
+decl {\#include "PresetsUI.h"} {public
 } 
 
 class ResonanceGraph {open : {public Fl_Box}
@@ -187,18 +181,13 @@ return(1);} {}
     code {this->cbwidget=cbwidget;
 this->applybutton=applybutton;} {}
   }
-  decl {Fl_Value_Output *khzvalue;} {private local
+  decl {Fl_Value_Output *khzvalue;} {}
+  decl {Fl_Value_Output *dbvalue;} {}
+  decl {Resonance *respar;} {}
+  decl {int oldx,oldy;} {}
+  decl {float khzval;} {public
   }
-  decl {Fl_Value_Output *dbvalue;} {private local
-  }
-  decl {Resonance *respar;} {private local
-  }
-  decl {int oldx,oldy;} {private local
-  }
-  decl {float khzval;} {public local
-  }
-  decl {Fl_Widget *cbwidget,*applybutton;} {private local
-  }
+  decl {Fl_Widget *cbwidget,*applybutton;} {}
 } 
 
 class ResonanceUI {open : PresetsUI_
@@ -402,10 +391,8 @@ p1st->value(respar->Pprotectthefundamental);
 
 rg->redraw();} {}
   }
-  decl {Resonance *respar;} {public local
+  decl {Resonance *respar;} {public
   }
-  decl {ResonanceGraph *rg;} {private local
-  }
-  decl {Fl_Widget *cbwidget,*cbapplywidget;} {private local
-  }
+  decl {ResonanceGraph *rg;} {}
+  decl {Fl_Widget *cbwidget,*cbapplywidget;} {}
 } 

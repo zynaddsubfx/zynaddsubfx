@@ -1,59 +1,53 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
+
+decl {//License: GNU GPL version 2 or later} {} 
+
+decl {\#include "../Params/ADnoteParameters.h"} {public
 } 
 
-decl {//License: GNU GPL version 2 or later} {private local
+decl {\#include "../Misc/Util.h"} {public
 } 
 
-decl {\#include "../Params/ADnoteParameters.h"} {public local
+decl {\#include "../Misc/Master.h"} {public
 } 
 
-decl {\#include "../Misc/Util.h"} {public local
+decl {\#include "ResonanceUI.h"} {public
 } 
 
-decl {\#include "../Misc/Master.h"} {public local
+decl {\#include <FL/Fl_Box.H>} {public
 } 
 
-decl {\#include "ResonanceUI.h"} {public local
+decl {\#include <FL/Fl_Group.H>} {public
 } 
 
-decl {\#include <FL/Fl_Box.H>} {public local
+decl {\#include <math.h>} {} 
+
+decl {\#include <stdio.h>} {} 
+
+decl {\#include <stdlib.h>} {} 
+
+decl {\#include <string.h>} {} 
+
+decl {\#include "WidgetPDial.h"} {public
 } 
 
-decl {\#include <FL/Fl_Group.H>} {public local
+decl {\#include "EnvelopeUI.h"} {public
 } 
 
-decl {\#include <math.h>} {private local
+decl {\#include "LFOUI.h"} {public
 } 
 
-decl {\#include <stdio.h>} {private local
+decl {\#include "FilterUI.h"} {public
 } 
 
-decl {\#include <stdlib.h>} {private local
+decl {\#include "OscilGenUI.h"} {public
 } 
 
-decl {\#include <string.h>} {private local
-} 
-
-decl {\#include "WidgetPDial.h"} {public local
-} 
-
-decl {\#include "EnvelopeUI.h"} {public local
-} 
-
-decl {\#include "LFOUI.h"} {public local
-} 
-
-decl {\#include "FilterUI.h"} {public local
-} 
-
-decl {\#include "OscilGenUI.h"} {public local
-} 
-
-decl {\#include "PresetsUI.h"} {public local
+decl {\#include "PresetsUI.h"} {public
 } 
 
 class ADvoicelistitem {open : {public Fl_Group}
@@ -61,7 +55,7 @@ class ADvoicelistitem {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window ADnoteVoiceListItem {open
-      private xywh {259 713 615 100} type Double box UP_FRAME
+      private xywh {262 736 615 100} type Double box UP_FRAME
       class Fl_Group visible
     } {
       Fl_Group voicelistitemgroup {
@@ -172,14 +166,10 @@ ADnoteVoiceListItem->redraw();} {}
     code {ADnoteVoiceListItem->hide();
 //delete(ADnoteVoiceListItem);} {}
   }
-  decl {ADnoteParameters *pars;} {private local
-  }
-  decl {int nvoice;} {private local
-  }
-  decl {Oscilloscope *osc;} {private local
-  }
-  decl {Master *master;} {private local
-  }
+  decl {ADnoteParameters *pars;} {}
+  decl {int nvoice;} {}
+  decl {Oscilloscope *osc;} {}
+  decl {Master *master;} {}
 } 
 
 class ADvoiceUI {open : {public Fl_Group}
@@ -188,7 +178,7 @@ class ADvoiceUI {open : {public Fl_Group}
   } {
     Fl_Window ADnoteVoiceParameters {
       label Voice open
-      xywh {81 282 765 590} type Double box NO_BOX
+      xywh {84 305 765 590} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group voiceparametersgroup {open
@@ -808,18 +798,12 @@ if (oscedit!=NULL) {
 };
 //delete (ADnoteVoiceParameters);} {}
   }
-  decl {int nvoice;} {private local
-  }
-  decl {ADnoteParameters *pars;} {private local
-  }
-  decl {OscilEditor *oscedit;} {private local
-  }
-  decl {Oscilloscope *osc;} {private local
-  }
-  decl {Oscilloscope *oscFM;} {private local
-  }
-  decl {Master *master;} {private local
-  }
+  decl {int nvoice;} {}
+  decl {ADnoteParameters *pars;} {}
+  decl {OscilEditor *oscedit;} {}
+  decl {Oscilloscope *osc;} {}
+  decl {Oscilloscope *oscFM;} {}
+  decl {Master *master;} {}
 } 
 
 class ADnoteUI {open : {public PresetsUI_}
@@ -828,7 +812,7 @@ class ADnoteUI {open : {public PresetsUI_}
   } {
     Fl_Window ADnoteGlobalParameters {
       label {ADsynth Global Parameters of the Instrument} open
-      xywh {454 296 540 430} type Double visible
+      xywh {457 319 540 430} type Double visible
     } {
       Fl_Group {} {
         label FREQUENCY open
@@ -1037,7 +1021,7 @@ resui->resonancewindow->show();}
     }
     Fl_Window ADnoteVoice {
       label {ADsynth Voice Parameters} open
-      xywh {907 477 765 620} type Double visible
+      xywh {512 361 765 620} type Double visible
     } {
       Fl_Group advoice {
         xywh {0 0 765 585}
@@ -1170,14 +1154,9 @@ for (int i=0;i<NUM_VOICES;i++) voicelistitem[i]->refreshlist();
 resui->refresh();
 currentvoicecounter->do_callback();} {}
   }
-  decl {ADnoteParameters *pars;} {private local
-  }
-  decl {ResonanceUI *resui;} {private local
-  }
-  decl {Master *master;} {private local
-  }
-  decl {int nvoice;} {private local
-  }
-  decl {ADvoicelistitem *voicelistitem[NUM_VOICES];} {private local
-  }
+  decl {ADnoteParameters *pars;} {}
+  decl {ResonanceUI *resui;} {}
+  decl {Master *master;} {}
+  decl {int nvoice;} {}
+  decl {ADvoicelistitem *voicelistitem[NUM_VOICES];} {}
 } 

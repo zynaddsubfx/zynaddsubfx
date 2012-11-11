@@ -1,44 +1,42 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
+
+decl {//License: GNU GPL version 2 or later} {} 
+
+decl {\#include <stdlib.h>} {public
 } 
 
-decl {//License: GNU GPL version 2 or later} {private local
+decl {\#include <stdio.h>} {public
 } 
 
-decl {\#include <stdlib.h>} {public local
+decl {\#include <string.h>} {public
 } 
 
-decl {\#include <stdio.h>} {public local
+decl {\#include "../globals.h"} {public
 } 
 
-decl {\#include <string.h>} {public local
+decl {\#include "WidgetPDial.h"} {public
 } 
 
-decl {\#include "../globals.h"} {public local
+decl {\#include "EnvelopeUI.h"} {public
 } 
 
-decl {\#include "WidgetPDial.h"} {public local
+decl {\#include "FilterUI.h"} {public
 } 
 
-decl {\#include "EnvelopeUI.h"} {public local
+decl {\#include "../Misc/Util.h"} {public
 } 
 
-decl {\#include "FilterUI.h"} {public local
+decl {\#include "../Effects/EffectMgr.h"} {public
 } 
 
-decl {\#include "../Misc/Util.h"} {public local
+decl {\#include "PresetsUI.h"} {public
 } 
 
-decl {\#include "../Effects/EffectMgr.h"} {public local
-} 
-
-decl {\#include "PresetsUI.h"} {public local
-} 
-
-decl {\#include "common.H"} {public local
+decl {\#include "common.H"} {public
 } 
 
 class EQGraph {: {public Fl_Box}
@@ -158,14 +156,11 @@ return(20.0*pow((float)1000.0,x));} {}
     code {if (freq<0.00001) freq=0.00001;
 return(log(freq/20.0)/log(1000.0));} {}
   }
-  decl {int oldx,oldy;} {private local
+  decl {int oldx,oldy;} {}
+  decl {float khzval;} {public
   }
-  decl {float khzval;} {public local
-  }
-  decl {EffectMgr *eff;} {private local
-  }
-  decl {int maxdB;} {private local
-  }
+  decl {EffectMgr *eff;} {}
+  decl {int maxdB;} {}
 } 
 
 class EffUI {open : {public Fl_Group,public PresetsUI_}
@@ -1473,10 +1468,8 @@ this->show();} {}
   } {
     code {refresh(eff);} {}
   }
-  decl {EffectMgr *eff;} {private local
-  }
-  decl {int eqband;} {private local
-  }
+  decl {EffectMgr *eff;} {}
+  decl {int eqband;} {}
 } 
 
 class SimpleEffUI {open : {public Fl_Group,public PresetsUI_}
@@ -2354,8 +2347,6 @@ this->show();} {}
   Function {refresh()} {} {
     code {refresh(eff);} {}
   }
-  decl {EffectMgr *eff;} {private local
-  }
-  decl {int eqband;} {private local
-  }
+  decl {EffectMgr *eff;} {}
+  decl {int eqband;} {}
 } 
