@@ -94,8 +94,6 @@ fl_line(ox+lx/2,oy,ox+lx/2,oy+ly);
 
 //draw the graph
 fl_line_style(FL_SOLID);
-int old=0;
-
    if (active) fl_color(180,210,240);
       else fl_color(150,150,155);
 
@@ -117,8 +115,6 @@ for (int i=0;i<lx;i++){
 //	 fl_vertex(ox+i-1,oy+ly-2-old);
 //	fl_vertex(ox+i,oy+ly-2-val);
 //	}
-
-   old=val;   
 };
 fl_vertex( ox + w(), oy + h() );
 fl_end_polygon();

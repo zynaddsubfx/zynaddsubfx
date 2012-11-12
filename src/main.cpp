@@ -530,7 +530,9 @@ int main(int argc, char *argv[])
         }
 #endif //LASH
 
+#if USE_NSM
 done:
+#endif
 
         Fl::wait(0.02f);
 #else
