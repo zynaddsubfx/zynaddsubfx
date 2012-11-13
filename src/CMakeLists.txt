@@ -13,7 +13,8 @@ find_package(Alsa)
 pkg_check_modules(JACK jack)
 pkg_check_modules(PORTAUDIO portaudio-2.0>=19)
 set(FLTK_SKIP_OPENGL true)
-find_package(NTK)
+pkg_check_modules(NTK ntk)
+pkg_check_modules(NTK_IMAGES ntk_images)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
 find_package(CxxTest)
@@ -255,24 +256,19 @@ if(FltkGui)
 endif()
 
 if(NtkGui)
-	#UGLY WORKAROUND
-	find_program (NTK_CONFIG ntk-config)
-	if (NTK_CONFIG)
-		execute_process (COMMAND ${NTK_CONFIG} --use-images --ldflags OUTPUT_VARIABLE NTK_LDFLAGS)
-		string(STRIP ${NTK_LDFLAGS} NTK_LIBRARIES)
-	endif()
 
-	message(STATUS ${NTK_LDFLAGS})
+        find_program( FLTK_FLUID_EXECUTABLE ntk-fluid)
+        
+	message(STATUS ${NTK_LDFLAGS} ${NTK_IMAGES_LDFLAGS})
 
-
-	set(GUI_LIBRARIES ${NTK_LIBRARIES} ${NTK_LIBRARIES} ${OPENGL_LIBRARIES} zynaddsubfx_gui)
+	set(GUI_LIBRARIES ${NTK_LIBRARIES} ${NTK_IMAGES_LIBRARIES} ${OPENGL_LIBRARIES} zynaddsubfx_gui)
 
 	add_definitions(-DNTK_GUI)
 
 	message(STATUS "Will build NTK gui")
 
 	include_directories(
-			${NTK_INCLUDE_DIR}
+			${NTK_INCLUDE_DIRS}
 			"${CMAKE_CURRENT_SOURCE_DIR}/UI"
 			"${CMAKE_CURRENT_BINARY_DIR}/UI"
 			)
