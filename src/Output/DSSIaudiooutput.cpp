@@ -37,6 +37,18 @@
 using std::string;
 using std::vector;
 
+//Dummy variables and functions for linking purposes
+const char *instance_name = 0;
+class WavFile;
+namespace Nio {
+    bool start(void){return 1;};
+    void stop(void){};
+    void waveNew(WavFile *){}
+    void waveStart(void){}
+    void waveStop(void){}
+    void waveEnd(void){}
+}
+
 //
 // Static stubs for LADSPA member functions
 //

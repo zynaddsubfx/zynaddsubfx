@@ -3,6 +3,8 @@
 #include <string>
 #include <set>
 
+class WavFile;
+
 /**Interface to Nio Subsystem
  *
  * Should be only externally included header */
@@ -29,6 +31,13 @@ namespace Nio
 
     //Get the prefered sample rate from jack (if running)
     void preferedSampleRate(unsigned &rate);
+
+
+    //Wave writing
+    void waveNew(class WavFile *wave);
+    void waveStart(void);
+    void waveStop(void);
+    void waveEnd(void);
 
     extern bool autoConnect;
     extern std::string defaultSource;

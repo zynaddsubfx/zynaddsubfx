@@ -4,6 +4,7 @@
 #include "EngineMgr.h"
 #include "MidiIn.h"
 #include "AudioOut.h"
+#include "WavEngine.h"
 #include <iostream>
 #include <algorithm>
 using std::string;
@@ -115,3 +116,23 @@ void Nio::preferedSampleRate(unsigned &rate)
 void Nio::preferedSampleRate(unsigned &)
 {}
 #endif
+
+void Nio::waveNew(class WavFile *wave)
+{
+    out->wave->newFile(wave);
+}
+
+void Nio::waveStart(void)
+{
+    out->wave->Start();
+}
+
+void Nio::waveStop(void)
+{
+    out->wave->Stop();
+}
+
+void Nio::waveEnd(void)
+{
+    out->wave->destroyFile();
+}

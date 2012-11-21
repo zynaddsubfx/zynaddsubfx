@@ -343,8 +343,6 @@ if (DssiEnable)
 
 	target_link_libraries(zynaddsubfx_dssi
         zynaddsubfx_core
-		${NIO_LIBRARIES}
-		${AUDIO_LIBRARIES}
 		${OS_LIBRARIES}
 		)
 	if (${CMAKE_SIZEOF_VOID_P} EQUAL "8")
