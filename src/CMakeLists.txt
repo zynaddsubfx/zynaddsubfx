@@ -329,8 +329,8 @@ message(STATUS "using link directories: ${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIR
 add_executable(zynaddsubfx main.cpp)
 
 target_link_libraries(zynaddsubfx
-	zynaddsubfx_nio
     zynaddsubfx_core
+	zynaddsubfx_nio
 	${GUI_LIBRARIES}
 	${NIO_LIBRARIES}
 	${AUDIO_LIBRARIES}

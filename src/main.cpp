@@ -35,6 +35,7 @@
 
 #include <getopt.h>
 
+#include "DSP/FFTwrapper.h"
 #include "Misc/Master.h"
 #include "Misc/Part.h"
 #include "Misc/Util.h"
@@ -164,6 +165,7 @@ void exitprogram()
 #endif
 
     delete [] denormalkillbuf;
+    FFT_cleanup();
 }
 
 int main(int argc, char *argv[])

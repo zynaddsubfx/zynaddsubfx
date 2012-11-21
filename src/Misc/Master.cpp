@@ -519,7 +519,6 @@ Master::~Master()
         delete sysefx[nefx];
 
     delete fft;
-    FFT_cleanup();
 
     pthread_mutex_destroy(&mutex);
     pthread_mutex_destroy(&vumutex);
