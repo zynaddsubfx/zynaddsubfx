@@ -437,8 +437,8 @@ class MasterUI {open
   } {
     Fl_Window masterwindow {
       label zynaddsubfx
-      callback {\#ifdef VSTAUDIOOUT
-fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
+      callback {\#ifdef PLUGINVERSION
+fl_alert("ZynAddSubFX could not be closed this way, because it's a plugin. Please use the host aplication to close it.");
 \#else
 if ((
 \#if USE_NSM 
@@ -1121,8 +1121,8 @@ updatepanel();}
     }
     Fl_Window simplemasterwindow {
       label ZynAddSubFX
-      callback {\#ifdef VSTAUDIOOUT
-fl_alert("ZynAddSubFX could not be closed this way, because it's a VST plugin. Please use the host aplication to close it.");
+      callback {\#ifdef PLUGINVERSION
+fl_alert("ZynAddSubFX could not be closed this way, because it's a plugin. Please use the host aplication to close it.");
 \#else
 if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL)) {
 	config.save();
