@@ -29,6 +29,8 @@
 #include "../Effects/EffectMgr.h"
 #include "../DSP/FFTwrapper.h"
 
+#include <rtosc/ports.h>
+#include <rtosc/thread-link.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -39,6 +41,31 @@
 #include <unistd.h>
 
 using namespace std;
+using rtosc::Ports;
+using rtosc::RtData;
+
+template<class T>
+T lim(T min, T max, T val)
+{
+    return val<max?(val>min?val:min):max;
+}
+//floating point parameter - with lookup code
+#define PARAMF(type, var, name, scale, _min, _max, desc) \
+{#name"::f", #scale "," # _min "," #_max ":'parameter':" desc, 0, \
+    [](const char *m, RtData d) { \
+        if(rtosc_narguments(m)==0) {\
+            bToU->write("/display", "sf", d.loc, ((type*)d.obj)->var); \
+        } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='f') {\
+            ((type*)d.obj)->var = lim<float>(_min,_max,rtosc_argument(m,0).f); \
+            bToU->write(d.loc, "f", ((type*)d.obj)->var);}}}
+
+static Ports localports = {
+    {"echo", ":'hidden':Hidden port to echo messages", 0, [](const char *m, RtData) {
+       bToU->raw_write(m-1);}},
+    PARAMF(Master, volume, volume, log, 0.01, 4.42, "Master Volume"),
+};
+
+Ports &Master::ports = localports;
 
 vuData::vuData(void)
     :outpeakl(0.0f), outpeakr(0.0f), maxoutpeakl(0.0f), maxoutpeakr(0.0f),
@@ -319,6 +346,11 @@ void Master::partonoff(int npart, int what)
  */
 void Master::AudioOut(float *outl, float *outr)
 {
+    //Handle user events TODO move me to a proper location
+    char loc_buf[1024];
+    while(uToB->hasNext())
+        ports.dispatch(loc_buf, 1024, uToB->read()+1, this);
+
     //Swaps the Left channel with Right Channel
     if(swaplr)
         swap(outl, outr);

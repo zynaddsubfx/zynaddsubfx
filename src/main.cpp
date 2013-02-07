@@ -35,6 +35,10 @@
 
 #include <getopt.h>
 
+#include <lo/lo.h>
+#include <rtosc/ports.h>
+#include <rtosc/thread-link.h>
+
 #include "DSP/FFTwrapper.h"
 #include "Misc/Master.h"
 #include "Misc/Part.h"
@@ -96,6 +100,122 @@ void sigterm_exit(int /*sig*/)
     Pexitprogram = 1;
 }
 
+void error_cb(int i, const char *m, const char *loc)
+{
+    fprintf(stderr, "liblo :-( %d-%s@%s\n",i,m,loc);
+}
+
+lo_server server;
+rtosc::ThreadLink *bToU = new rtosc::ThreadLink(1024,1024);
+rtosc::ThreadLink *uToB = new rtosc::ThreadLink(1024,1024);
+string last_url, curr_url;
+
+void path_search(const char *m)
+{
+    using rtosc::Ports;
+    using rtosc::Port;
+
+    //assumed upper bound of 32 ports (may need to be resized)
+    char         types[65];
+    rtosc_arg_t  args[64];
+    size_t       pos    = 0;
+    const Ports *ports  = NULL;
+    const Port  *port   = NULL;
+    const char  *str    = rtosc_argument(m,0).s;
+    const char  *needle = rtosc_argument(m,1).s;
+
+    //zero out data
+    memset(types, 0, sizeof(types));
+    memset(args,  0, sizeof(args));
+
+    if(!*str) {
+        ports = &Master::ports;
+    } else {
+        const Port *port = Master::ports.apropos(rtosc_argument(m,0).s);
+        if(port)
+            ports = port->ports;
+    }
+
+    if(ports) {
+        //RTness not confirmed here
+        for(const Port &p:*ports) {
+            if(strstr(p.name, needle)!=p.name)
+                continue;
+            types[pos]    = types[pos+1] = 's';
+            args[pos++].s = p.name;
+            args[pos++].s = p.metadata;
+        }
+    }
+
+    //Reply to requester
+    char buffer[1024];
+    size_t length = rtosc_amessage(buffer, 1024, "/paths", types, args);
+    if(length) {
+        lo_message msg  = lo_message_deserialise((void*)buffer, length, NULL);
+        lo_address addr = lo_address_new_from_url(last_url.c_str());
+        if(addr)
+            lo_send_message(addr, buffer, msg);
+    }
+}
+
+int handler_function(const char *path, const char *types, lo_arg **argv,
+        int argc, lo_message msg, void *user_data)
+{
+    lo_address addr = lo_message_get_source(msg);
+    if(addr) {
+        const char *tmp = lo_address_get_url(addr);
+        if(tmp != last_url) {
+            uToB->write("/echo", "ss", "OSC_URL", tmp);
+            last_url = tmp;
+        }
+
+    }
+
+    char buffer[2048];
+    memset(buffer, 0, sizeof(buffer));
+    size_t size = 2048;
+    lo_message_serialise(msg, path, buffer, &size);
+    if(!strcmp(buffer, "/path-search") && !strcmp("ss", rtosc_argument_string(buffer))) {
+        path_search(buffer);
+    } else
+        uToB->raw_write(buffer);
+
+    return 0;
+}
+
+void osc_setup(void)
+{
+    server = lo_server_new_with_proto(NULL, LO_UDP, error_cb);
+    lo_server_add_method(server, NULL, NULL, handler_function, NULL);
+    fprintf(stderr, "lo server running on %d\n", lo_server_get_port(server));
+}
+
+/**
+ * - Fetches liblo messages and forward them to the backend
+ * - Grabs backend messages and distributes them to the frontends
+ */
+void osc_check(void)
+{
+    lo_server_recv_noblock(server, 100);
+    while(bToU->hasNext()) {
+        const char *rtmsg = bToU->read();
+        if(!strcmp(rtmsg, "/echo")
+                && !strcmp(rtosc_argument_string(rtmsg),"ss")
+                && !strcmp(rtosc_argument(rtmsg,0).s, "OSC_URL"))
+            curr_url = rtosc_argument(rtmsg,1).s;
+        else {
+            lo_message msg  = lo_message_deserialise((void*)rtmsg,
+                    rtosc_message_length(rtmsg, bToU->buffer_size()), NULL);
+
+            //Send to known url
+            if(!curr_url.empty()) {
+                lo_address addr = lo_address_new_from_url(curr_url.c_str());
+                lo_send_message(addr, rtmsg, msg);
+            }
+        }
+    }
+}
+
 
 #ifndef DISABLE_GUI
 
@@ -139,6 +259,8 @@ void initprogram(void)
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
+
+    osc_setup();
 }
 
 /*
@@ -536,6 +658,8 @@ int main(int argc, char *argv[])
 #if USE_NSM
 done:
 #endif
+
+        osc_check();
 
         Fl::wait(0.02f);
 #else

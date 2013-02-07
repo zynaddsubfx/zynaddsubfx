@@ -164,10 +164,11 @@ class Master
         pthread_mutex_t vumutex;
 
 
+        static rtosc::Ports &ports;
+        float  volume;
     private:
         bool   nullRun;
         vuData vu;
-        float  volume;
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
         int    keyshift;
