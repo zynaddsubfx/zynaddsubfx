@@ -144,11 +144,8 @@ class Master
 
         //peaks for VU-meter
         void vuresetpeaks();
-        //get VU-meter data
-        vuData getVuData();
 
         //peaks for part VU-meters
-        /**\todo synchronize this with a mutex*/
         float vuoutpeakpart[NUM_MIDI_PARTS];
         unsigned char fakepeakpart[NUM_MIDI_PARTS]; //this is used to compute the "peak" when the part is disabled
 
@@ -161,14 +158,14 @@ class Master
 
         class FFTwrapper * fft;
         pthread_mutex_t mutex;
-        pthread_mutex_t vumutex;
-
 
         static rtosc::Ports &ports;
         float  volume;
+
+        //Statistics on output levels
+        vuData vu;
     private:
         bool   nullRun;
-        vuData vu;
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
         int    keyshift;

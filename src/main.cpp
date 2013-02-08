@@ -20,9 +20,6 @@
 
 */
 
-#include <FL/Fl.H>
-
-#include "UI/common.H"
 
 #include <iostream>
 #include <cmath>
@@ -46,29 +43,17 @@
 #include "Misc/Dump.h"
 extern Dump dump;
 
-
 //Nio System
 #include "Nio/Nio.h"
 
-#ifndef DISABLE_GUI
-#ifdef QT_GUI
+//GUI System
+#include "UI/Fl_Osc_Interface.h"
+#include "UI/Connection.h"
+GUI::ui_handle_t gui;
 
-#include <QApplication>
-#include "masterui.h"
-QApplication *app;
-
-#elif defined FLTK_GUI
-#include "UI/MasterUI.h"
-#elif defined NTK_GUI
-#include "UI/MasterUI.h"
-#include <FL/Fl_Shared_Image.H>
-#include <FL/Fl_Tiled_Image.H>
-#include <FL/Fl_Dial.H>
-#endif // FLTK_GUI
-
-MasterUI *ui;
-
-#endif //DISABLE_GUI
+//The Glue
+rtosc::ThreadLink *bToU = new rtosc::ThreadLink(1024,1024);
+rtosc::ThreadLink *uToB = new rtosc::ThreadLink(1024,1024);
 
 using namespace std;
 
@@ -106,8 +91,6 @@ void error_cb(int i, const char *m, const char *loc)
 }
 
 lo_server server;
-rtosc::ThreadLink *bToU = new rtosc::ThreadLink(1024,1024);
-rtosc::ThreadLink *uToB = new rtosc::ThreadLink(1024,1024);
 string last_url, curr_url;
 
 void path_search(const char *m)
@@ -196,14 +179,16 @@ void osc_setup(void)
  */
 void osc_check(void)
 {
-    lo_server_recv_noblock(server, 100);
+    lo_server_recv_noblock(server, 0);
     while(bToU->hasNext()) {
         const char *rtmsg = bToU->read();
         if(!strcmp(rtmsg, "/echo")
                 && !strcmp(rtosc_argument_string(rtmsg),"ss")
                 && !strcmp(rtosc_argument(rtmsg,0).s, "OSC_URL"))
             curr_url = rtosc_argument(rtmsg,1).s;
-        else {
+        else if(curr_url == "GUI") {
+            GUI::raiseUi(gui, bToU->read());
+        } else{
             lo_message msg  = lo_message_deserialise((void*)rtmsg,
                     rtosc_message_length(rtmsg, bToU->buffer_size()), NULL);
 
@@ -217,28 +202,6 @@ void osc_check(void)
 }
 
 
-#ifndef DISABLE_GUI
-
-#ifdef NTK_GUI
-static Fl_Tiled_Image *module_backdrop;
-#endif
-
-void
-set_module_parameters ( Fl_Widget *o )
-{
-#ifdef NTK_GUI
-    o->box( FL_DOWN_FRAME );
-    o->align( o->align() | FL_ALIGN_IMAGE_BACKDROP );
-    o->color( FL_BLACK );
-    o->image( module_backdrop );
-    o->labeltype( FL_SHADOW_LABEL );
-#else
-    o->box( FL_PLASTIC_UP_BOX );
-    o->color( FL_CYAN );
-    o->labeltype( FL_EMBOSSED_LABEL );
-#endif
-}
-#endif
 
 /*
  * Program initialisation
@@ -263,6 +226,21 @@ void initprogram(void)
     osc_setup();
 }
 
+class UI_Interface:public Fl_Osc_Interface
+{
+    void requestValue(string s)
+    {
+        if(last_url != "GUI") {
+            uToB->write("/echo", "ss", "OSC_URL", "GUI");
+            last_url = "GUI";
+        }
+
+        uToB->write(s.c_str(),"");
+
+    }
+} ui_link;
+
+
 /*
  * Program exit
  */
@@ -274,9 +252,7 @@ void exitprogram()
 
     Nio::stop();
 
-#ifndef DISABLE_GUI
-    delete ui;
-#endif
+    GUI::destroyUi(gui);
 #if LASH
     if(lash)
         delete lash;
@@ -555,47 +531,16 @@ int main(int argc, char *argv[])
     }
 
 
-#ifndef DISABLE_GUI
+    gui = GUI::createUi(&ui_link, master, &Pexitprogram);
 
-#ifdef NTK_GUI
-    fl_register_images();
-
-    Fl_Dial::default_style(Fl_Dial::PIXMAP_DIAL);
-
-    if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/knob.png"))
-        Fl_Dial::default_image(img);
-    else
-        Fl_Dial::default_image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/knob.png"));
-
-    if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/window_backdrop.png"))
-        Fl::scheme_bg(new Fl_Tiled_Image(img));
-    else
-        Fl::scheme_bg(new Fl_Tiled_Image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/window_backdrop.png")));
-
-    if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/module_backdrop.png"))
-        module_backdrop = new Fl_Tiled_Image(img);
-    else
-        module_backdrop = new Fl_Tiled_Image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/module_backdrop.png"));
-
-    Fl::background(  50, 50, 50 );
-    Fl::background2(  70, 70, 70 );
-    Fl::foreground( 255,255,255 );
-#endif
-
-    ui = new MasterUI(master, &Pexitprogram);
-    
-    if ( !noui) 
+    if(!noui)
     {
-        ui->showUI();
-
+        GUI::raiseUi(gui, "/show",  "T");
         if(!ioGood)
-            fl_alert(
-                "Default IO did not initialize.\nDefaulting to NULL backend.");
+            GUI::raiseUi(gui, "/alert", "s",
+                    "Default IO did not initialize.\nDefaulting to NULL backend.");
     }
 
-#endif
-
-#ifndef DISABLE_GUI
 #if USE_NSM
     char *nsm_url = getenv("NSM_URL");
 
@@ -610,7 +555,6 @@ int main(int argc, char *argv[])
         }
     }
 #endif
-#endif
 
 #if USE_NSM
     if(!nsm)
@@ -618,17 +562,11 @@ int main(int argc, char *argv[])
     {
 #if LASH
         lash = new LASHClient(&argc, &argv);
-#ifndef DISABLE_GUI
-        ui->sm_indicator1->value(1);
-        ui->sm_indicator2->value(1);
-        ui->sm_indicator1->tooltip("LASH");
-        ui->sm_indicator2->tooltip("LASH");
-#endif
+        GUI::raiseUi(gui, "/session-type", "s", "LASH");
 #endif
     }
 
     while(Pexitprogram == 0) {
-#ifndef DISABLE_GUI
 #if USE_NSM
         if(nsm) {
             nsm->check();
@@ -640,11 +578,11 @@ int main(int argc, char *argv[])
             string filename;
             switch(lash->checkevents(filename)) {
                 case LASHClient::Save:
-                    ui->do_save_master(filename.c_str());
+                    GUI::raiseUi(gui, "/save-master", "s", filename.c_str());
                     lash->confirmevent(LASHClient::Save);
                     break;
                 case LASHClient::Restore:
-                    ui->do_load_master(filename.c_str());
+                    GUI::raiseUi(gui, "/load-master", "s", filename.c_str());
                     lash->confirmevent(LASHClient::Restore);
                     break;
                 case LASHClient::Quit:
@@ -658,13 +596,8 @@ int main(int argc, char *argv[])
 #if USE_NSM
 done:
 #endif
-
         osc_check();
-
-        Fl::wait(0.02f);
-#else
-        usleep(100000);
-#endif
+        GUI::tickUi(gui);
     }
 
     exitprogram();

@@ -1,278 +1,83 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0110 
+version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2009 Nasca Octavian Paul} {} 
-
-decl {//License: GNU GPL version 2 or later} {} 
-
-decl {\#include <stdlib.h>} {public
+decl {//Copyright (c) 2002-2009 Nasca Octavian Paul} {private local
 } 
 
-decl {\#include <stdio.h>} {public
+decl {//License: GNU GPL version 2 or later} {private local
 } 
 
-decl {\#include <string.h>} {public
+decl {\#include <stdlib.h>} {public local
 } 
 
-decl {\#include "WidgetPDial.h"} {public
+decl {\#include <stdio.h>} {public local
 } 
 
-decl {\#include "ADnoteUI.h"} {public
+decl {\#include <string.h>} {public local
 } 
 
-decl {\#include "SUBnoteUI.h"} {public
+decl {\#include "WidgetPDial.h"} {public local
 } 
 
-decl {\#include "EffUI.h"} {public
+decl {\#include "ADnoteUI.h"} {public local
 } 
 
-decl {\#include "VirKeyboard.h"} {public
+decl {\#include "SUBnoteUI.h"} {public local
 } 
 
-decl {\#include "ConfigUI.h"} {public
+decl {\#include "EffUI.h"} {public local
 } 
 
-decl {\#include "BankUI.h"} {public
+decl {\#include "VirKeyboard.h"} {public local
 } 
 
-decl {\#include "PartUI.h"} {public
+decl {\#include "ConfigUI.h"} {public local
 } 
 
-decl {\#include "MicrotonalUI.h"} {public
+decl {\#include "BankUI.h"} {public local
 } 
 
-decl {\#include "PresetsUI.h"} {public
+decl {\#include "PartUI.h"} {public local
+} 
+
+decl {\#include "MicrotonalUI.h"} {public local
+} 
+
+decl {\#include "PresetsUI.h"} {public local
 } 
 
 decl {\#include "NioUI.h"} {public global
 } 
 
-decl {\#include "../Misc/Master.h"} {public
+decl {\#include "VuPartMeter.h"} {public local
 } 
 
-decl {\#include "../Misc/Part.h"} {public
+decl {\#include "VuMasterMeter.h"} {public local
 } 
 
-decl {\#include "../Misc/Util.h"} {public
+decl {\#include "../Misc/Master.h"} {public local
 } 
 
-decl {\#include "common.H"} {public
+decl {\#include "../Misc/Part.h"} {public local
+} 
+
+decl {\#include "../Misc/Util.h"} {public local
+} 
+
+decl {\#include "common.H"} {public local
 } 
 
 decl {\#if USE_NSM
 \#include "NSM.H"
 extern NSM_Client *nsm;
-\#endif} {public
+\#endif} {public local
 } 
 
-decl {\#include "../globals.h"} {public
+decl {\#include "../globals.h"} {public local
 } 
 
-class VUMeter {: {public Fl_Box}
-} {
-  Function {VUMeter(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
-    code {master=NULL;
-npart=-1;} {}
-  }
-  Function {init(Master *master_,int part_)} {} {
-    code {//the "part_" parameters sets the part (if it is >=0), else it sets the master
-master=master_;
-label(NULL);
-npart=part_;
-olddbl=0.0;
-olddbr=0.0;
-oldrmsdbl=0.0;
-oldrmsdbr=0.0;} {}
-  }
-  Function {draw_master()} {} {
-    code {\#define MIN_DB (-48)
-
-int ox=x(); int oy=y(); int lx=w(); int ly=h();
-
-vuData data = master->getVuData();
-
-//pthread_mutex_lock(&master->mutex);
-float dbl=rap2dB(data.outpeakl);
-float dbr=rap2dB(data.outpeakr);
-float rmsdbl=rap2dB(data.rmspeakl);
-float rmsdbr=rap2dB(data.rmspeakr);
-float maxdbl=rap2dB(data.maxoutpeakl);
-float maxdbr=rap2dB(data.maxoutpeakr);
-int clipped=data.clipped;
-//pthread_mutex_unlock(&master->mutex);
-
-dbl=(MIN_DB-dbl)/MIN_DB; 
-if (dbl<0.0) dbl=0.0;
-  else if (dbl>1.0)dbl=1.0;
-
-dbr=(MIN_DB-dbr)/MIN_DB; 
-if (dbr<0.0) dbr=0.0;
-  else if (dbr>1.0) dbr=1.0; 
-
-dbl=dbl*0.4+olddbl*0.6;
-dbr=dbr*0.4+olddbr*0.6;
-
-if ( damage() & FL_DAMAGE_USER1 )
-{
-        if ( olddbl == dbl && olddbr == dbr )
-             return;
-}
-
-olddbl=dbl;
-olddbr=dbr;
-
-\#define VULENX (lx-35)
-\#define VULENY (ly/2-3)
-
-dbl*=VULENX;dbr*=VULENX;
-
-int idbl=(int) dbl;
-int idbr=(int) dbr;
-
-//compute RMS - start
-rmsdbl=(MIN_DB-rmsdbl)/MIN_DB; 
-if (rmsdbl<0.0) rmsdbl=0.0;
-  else if (rmsdbl>1.0) rmsdbl=1.0;
-
-rmsdbr=(MIN_DB-rmsdbr)/MIN_DB; 
-if (rmsdbr<0.0) rmsdbr=0.0;
-  else if (rmsdbr>1.0) rmsdbr=1.0; 
-
-rmsdbl=rmsdbl*0.4+oldrmsdbl*0.6;
-rmsdbr=rmsdbr*0.4+oldrmsdbr*0.6;
-
-oldrmsdbl=rmsdbl;
-oldrmsdbr=rmsdbr;
-
-
-rmsdbl*=VULENX;rmsdbr*=VULENX;
-
-int irmsdbl=(int) rmsdbl;
-int irmsdbr=(int) rmsdbr;
-//compute RMS - end
-
-
-
-//draw the vu-meter lines
-//db
-fl_rectf(ox,oy,idbr,VULENY,0,200,255);
-fl_rectf(ox,oy+ly/2,idbl,VULENY,0,200,255);
-//black
-fl_rectf(ox+idbr,oy,VULENX-idbr,VULENY,0,0,0);
-fl_rectf(ox+idbl,oy+ly/2,VULENX-idbl,VULENY,0,0,0);
-
-//draw the scales
-float  tmp=VULENX*1.0/MIN_DB;
-for (int i=1;i<1-MIN_DB;i++){
-   int tx=VULENX+(int) (tmp*i);
-   fl_rectf(ox+tx,oy,1,VULENY+ly/2,0,160,200);
-   if (i%5==0) fl_rectf(ox+tx,oy,1,VULENY+ly/2,0,230,240);
-   if (i%10==0) fl_rectf(ox+tx-1,oy,2,VULENY+ly/2,0,225,255);
-};
-
-//rms
-if (irmsdbr>2) fl_rectf(ox+irmsdbr-1,oy,3,VULENY,255,255,0);
-if (irmsdbl>2) fl_rectf(ox+irmsdbl-1,oy+ly/2,3,VULENY,255,255,0);
-
-
-//draw the red box if clipping has occured
-if (clipped==0) fl_rectf(ox+VULENX+2,oy+1,lx-VULENX-3,ly-4,0,0,10);
-           else fl_rectf(ox+VULENX+2,oy+1,lx-VULENX-3,ly-4,250,10,10);
-
-//draw the maxdB 
-fl_font(FL_HELVETICA|FL_BOLD,10);
-fl_color(255,255,255);
-char tmpstr[10];
-if ((maxdbl>MIN_DB-20)){
-  snprintf((char *)&tmpstr,10,"%ddB",(int)maxdbr);
-  fl_draw(tmpstr,ox+VULENX+1,oy+1,lx-VULENX-1,VULENY,FL_ALIGN_RIGHT,NULL,0);
-};
-if ((maxdbr>MIN_DB-20)){
-  snprintf((char *)&tmpstr,10,"%ddB",(int)maxdbl);
-  fl_draw(tmpstr,ox+VULENX+1,oy+ly/2+1,lx-VULENX-1,VULENY,FL_ALIGN_RIGHT,NULL,0);
-};} {}
-  }
-  Function {draw_part()} {} {
-    code {\#define MIN_DB (-48)
-int ox=x(); int oy=y(); int lx=w(); int ly=h();
-
-if (!active_r()){
-  pthread_mutex_lock(&master->vumutex);
-   int fakedb=master->fakepeakpart[npart];
-  pthread_mutex_unlock(&master->vumutex);
-  fl_rectf(ox,oy,lx,ly,140,140,140);
-  if (fakedb>0){
-    fakedb=(int)(fakedb/255.0*ly)+4;
-    fl_rectf(ox+2,oy+ly-fakedb,lx-4,fakedb,0,0,0);
-  };
-  
-  return;
-};
-
-//draw the vu lines
-pthread_mutex_lock(&master->vumutex);
- float db=rap2dB(master->vuoutpeakpart[npart]);
-pthread_mutex_unlock(&master->vumutex);
-
-db=(MIN_DB-db)/MIN_DB; 
-if (db<0.0) db=0.0;
-  else if (db>1.0) db=1.0;
-
-db*=ly-2;
-
-int idb=(int) db;
-
-fl_rectf(ox,oy+ly-idb,lx,idb,0,200,255);
-fl_rectf(ox,oy,lx,ly-idb,0,0,0);
-
-
-//draw the scales
-float  tmp=ly*1.0/MIN_DB;
- for (int i=1;i<1-MIN_DB;i++){
-    int ty=ly+(int) (tmp*i);
-    if (i%5==0) fl_rectf(ox,oy+ly-ty,lx,1,0,160,200);
-    if (i%10==0) fl_rectf(ox,oy+ly-ty,lx,1,0,230,240);
-};} {}
-  }
-  Function {draw()} {} {
-    code {if (npart>=0) draw_part();
-   else draw_master();} {}
-  }
-  Function {tickdraw(VUMeter *o)} {return_type {static void}
-  } {
-    code {o->damage(FL_DAMAGE_USER1);} {}
-  }
-  Function {tick(void *v)} {return_type {static void}
-  } {
-    code {tickdraw((VUMeter *) v);
-          Fl::repeat_timeout(1.0/18.0,tick,v);//18 fps} {}
-  }
-  Function {handle(int event)} {return_type int
-  } {
-    code {switch(event){
-   case FL_SHOW:
-             Fl::add_timeout(1.0/18.0,tick,this);
-             break;
-   case FL_HIDE:
-             Fl::remove_timeout(tick,this);
-             break;
-   case FL_PUSH:
-             if (npart>=0) break;
-             pthread_mutex_lock(&master->mutex);
-             master->vuresetpeaks();
-             pthread_mutex_unlock(&master->mutex);
-             break;
-};
-return(1);} {}
-  }
-  decl {Master *master;} {}
-  decl {int npart;} {}
-  decl {float olddbl,olddbr;} {}
-  decl {float oldrmsdbl,oldrmsdbr;} {}
-} 
-
-class SysEffSend {open : {public WidgetPDial}
+class SysEffSend {: {public WidgetPDial}
 } {
   Function {SysEffSend(int x,int y, int w, int h, const char *label=0):WidgetPDial(x,y,w,h,label)} {} {
     code {master=NULL;
@@ -305,9 +110,12 @@ this->copy_label(tmp);} {}
 
 return(WidgetPDial::handle(event));} {}
   }
-  decl {Master *master;} {}
-  decl {int neff1;} {}
-  decl {int neff2;} {}
+  decl {Master *master;} {private local
+  }
+  decl {int neff1;} {private local
+  }
+  decl {int neff2;} {private local
+  }
 } 
 
 class Panellistitem {open : {public Fl_Group}
@@ -315,7 +123,7 @@ class Panellistitem {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window panellistitem {open
-      private xywh {608 711 100 260} type Double box NO_BOX
+      private xywh {620 721 100 260} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group panellistitemgroup {open
@@ -323,14 +131,13 @@ class Panellistitem {open : {public Fl_Group}
         code0 {if (master->part[npart]->Penabled==0) o->deactivate();}
         code1 {set_module_parameters( o );}
       } {
-        Fl_Group {} {
+        Fl_Group {} {open
           xywh {45 65 15 110} box ENGRAVED_FRAME
         } {
-          Fl_Box {} {
+          Fl_Box partvu {
             label {V U}
             xywh {45 65 15 110} box FLAT_BOX color 0 selection_color 75 labelcolor 55 align 128
-            code0 {o->init(master,npart);}
-            class VUMeter
+            class VuPartMeter
           }
         }
         Fl_Button partname {
@@ -426,9 +233,12 @@ panellistitemgroup->redraw();} {}
     code {panellistitem->hide();
 //delete(panellistitem);} {}
   }
-  decl {int npart;} {}
-  decl {Master *master;} {}
-  decl {BankUI *bankui;} {}
+  decl {int npart;} {private local
+  }
+  decl {Master *master;} {private local
+  }
+  decl {BankUI *bankui;} {private local
+  }
 } 
 
 class MasterUI {open
@@ -450,8 +260,8 @@ if ((
     config.save();
     *exitprogram=1;
 };
-\#endif} open
-      xywh {80 370 390 525} type Double xclass zynaddsubfx visible
+\#endif}
+      xywh {92 456 390 525} type Double xclass zynaddsubfx visible
     } {
       Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
@@ -715,21 +525,21 @@ master->shutup=1;
 pthread_mutex_unlock(&master->mutex);}
         xywh {280 29 105 53} color 90 labelfont 1
       }
-      Fl_Group partuigroup {open
+      Fl_Group partuigroup {
         xywh {0 310 390 205}
       } {
-        Fl_Group partui {open selected
+        Fl_Group partui {open
           xywh {0 310 383 175}
           code0 {o->init(master->part[0],master,0,bankui);}
           code1 {o->show();}
           class PartUI
         } {}
       }
-      Fl_Tabs {} {open
+      Fl_Tabs {} {
         xywh {0 145 390 165} box UP_FRAME
       } {
         Fl_Group {} {
-          label {System Effects} open
+          label {System Effects}
           xywh {0 162 390 145} labelsize 15 align 9
         } {
           Fl_Counter syseffnocounter {
@@ -787,7 +597,7 @@ syseffectui->refresh(master->sysefx[nsyseff]);}
               xywh {90 90 100 20} labelfont 1 labelsize 10
             }
           }
-          Fl_Group syseffectuigroup {open
+          Fl_Group syseffectuigroup {
             xywh {5 203 380 95} color 48
           } {
             Fl_Group syseffectui {
@@ -815,7 +625,7 @@ pthread_mutex_unlock(&master->mutex);}
           }
         }
         Fl_Group {} {
-          label {Insertion Effects} open
+          label {Insertion Effects}
           xywh {0 165 390 145} labelsize 15 align 9 hide
         } {
           Fl_Counter inseffnocounter {
@@ -886,7 +696,7 @@ inseffectui->show();}
               xywh {100 100 100 20} labelfont 1 labelsize 10
             }
           }
-          Fl_Group inseffectuigroup {open
+          Fl_Group inseffectuigroup {
             xywh {5 205 380 95} box FLAT_BOX color 48
           } {
             Fl_Group inseffectui {
@@ -974,14 +784,14 @@ mastermenu->redraw();}
           xywh {192 66 30 15} labelfont 1 labelsize 10 deactivate
         }
       }
-      Fl_Group {} {open
+      Fl_Group {} {
         xywh {1 490 389 55}
       } {
-        Fl_Box {} {
+        Fl_Box mastervu {
           label {VU-Meter}
           xywh {5 490 380 30} box FLAT_BOX color 48 selection_color 75
-          code0 {o->init(master,-1);}
-          class VUMeter
+          code0 {o->init(osc);}
+          class VuMasterMeter
         }
       }
       Fl_Check_Button nrpnbutton {
@@ -1013,7 +823,7 @@ simplenpartcounter->do_callback();}
         callback {virkeyboard->show();}
         tooltip {Virtual Keyboard} xywh {280 87 40 23} color 51 labelfont 1
       }
-      Fl_Group {} {open
+      Fl_Group {} {
         xywh {85 32 55 110} box UP_FRAME
       } {
         Fl_Button {} {
@@ -1088,21 +898,21 @@ GNU General Public License for details.}
       }
     }
     Fl_Window panelwindow {
-      label {ZynAddSubFX Panel}
-      xywh {89 59 630 635} type Double hide
+      label {ZynAddSubFX Panel} open
+      xywh {95 105 630 635} type Double visible
     } {
-      Fl_Scroll {} {
+      Fl_Scroll {} {open
         xywh {0 5 570 310} type HORIZONTAL box THIN_UP_BOX
       } {
-        Fl_Pack {} {
+        Fl_Pack {} {open
           xywh {5 10 560 285} type HORIZONTAL
           code0 {for (int i=0;i<NUM_MIDI_PARTS/2;i++){panellistitem[i]=new Panellistitem(0,0,70,260,"");panellistitem[i]->init(master,i,bankui);}}
         } {}
       }
-      Fl_Scroll {} {
+      Fl_Scroll {} {open
         xywh {0 320 570 310} type HORIZONTAL box THIN_UP_BOX
       } {
-        Fl_Pack {} {
+        Fl_Pack {} {open
           xywh {5 325 560 285} type HORIZONTAL
           code0 {for (int i=NUM_MIDI_PARTS/2;i<NUM_MIDI_PARTS;i++){panellistitem[i]=new Panellistitem(0,0,70,260,"");panellistitem[i]->init(master,i,bankui);}}
         } {}
@@ -1128,8 +938,8 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL)) {
 	config.save();
 	*exitprogram=1;
 };
-\#endif} open
-      xywh {283 262 600 335} type Double visible
+\#endif}
+      xywh {295 354 600 335} type Double visible
     } {
       Fl_Menu_Bar simplemastermenu {
         xywh {0 0 690 25}
@@ -1229,7 +1039,7 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an
           }
         }
       }
-      Fl_Group simplelistitemgroup {open
+      Fl_Group simplelistitemgroup {
         private xywh {125 65 215 145} box UP_FRAME
         code0 {if (master->part[npart]->Penabled==0) o->deactivate();}
       } {
@@ -1354,14 +1164,14 @@ o->redraw();}
         code0 {o->init(master);}
         class VirKeys
       }
-      Fl_Group {} {open
+      Fl_Group {} {
         xywh {340 30 255 185}
       } {
-        Fl_Tabs {} {open
+        Fl_Tabs {} {
           xywh {345 35 245 175} box UP_FRAME align 18
         } {
           Fl_Group {} {
-            label {System Effects} open
+            label {System Effects}
             xywh {345 55 245 155} box UP_FRAME labelfont 1 labelsize 12 align 18
           } {
             Fl_Counter simplesyseffnocounter {
@@ -1420,7 +1230,7 @@ simplesyseffectui->refresh(master->sysefx[nsyseff]);}
                 xywh {100 100 100 20} labelfont 1 labelsize 10
               }
             }
-            Fl_Group simplesyseffectuigroup {open
+            Fl_Group simplesyseffectuigroup {
               xywh {350 95 235 95} color 48
             } {
               Fl_Group simplesyseffectui {
@@ -1552,14 +1362,14 @@ pthread_mutex_unlock(&master->mutex);}
           }
         }
       }
-      Fl_Group {} {open
+      Fl_Group {} {
         xywh {5 300 590 30} box ENGRAVED_FRAME
       } {
-        Fl_Box {} {
+        Fl_Box simplemastervu {
           label {VU-Meter}
           xywh {5 300 590 30} box FLAT_BOX color 41 selection_color 75
-          code0 {o->init(master,-1);}
-          class VUMeter
+          code0 {o->init(osc);}
+          class VuMasterMeter
         }
       }
       Fl_Dial simplemastervolumedial {
@@ -1679,9 +1489,10 @@ masterwindowlabel[99]='\\0';
 masterwindow->label(&masterwindowlabel[0]);
 simplemasterwindow->label(&masterwindowlabel[0]);} {}
   }
-  Function {MasterUI(Master *master_,int *exitprogram_)} {} {
+  Function {MasterUI(Master *master_,int *exitprogram_, class Fl_Osc_Interface *osc_)} {} {
     code {master=master_;
 exitprogram=exitprogram_;
+osc=osc_;
 ninseff=0;
 nsyseff=0;
 npart=0;
@@ -1870,17 +1681,32 @@ virkeys->midich=master->part[npart]->Prcvchn;
 simplerefresh();
 bankui->hide();} {}
   }
-  decl {Master *master;} {}
-  decl {MicrotonalUI *microtonalui;} {}
-  decl {BankUI *bankui;} {}
-  decl {int ninseff,npart;} {}
-  decl {int nsyseff;} {}
-  decl {int *exitprogram;} {}
-  decl {SysEffSend *syseffsend[NUM_SYS_EFX][NUM_SYS_EFX];} {}
-  decl {VirKeyboard *virkeyboard;} {}
-  decl {ConfigUI *configui;} {}
-  decl {int swapefftype;} {}
-  decl {char masterwindowlabel[100];} {}
-  decl {Panellistitem *panellistitem[NUM_MIDI_PARTS];} {}
-  decl {NioUI nioui;} {}
+  decl {Master *master;} {private local
+  }
+  decl {MicrotonalUI *microtonalui;} {private local
+  }
+  decl {BankUI *bankui;} {private local
+  }
+  decl {int ninseff,npart;} {private local
+  }
+  decl {int nsyseff;} {private local
+  }
+  decl {int *exitprogram;} {private local
+  }
+  decl {SysEffSend *syseffsend[NUM_SYS_EFX][NUM_SYS_EFX];} {private local
+  }
+  decl {VirKeyboard *virkeyboard;} {private local
+  }
+  decl {ConfigUI *configui;} {private local
+  }
+  decl {int swapefftype;} {private local
+  }
+  decl {char masterwindowlabel[100];} {private local
+  }
+  decl {Panellistitem *panellistitem[NUM_MIDI_PARTS];} {selected public local
+  }
+  decl {NioUI nioui;} {private local
+  }
+  decl {class Fl_Osc_Interface *osc;} {private local
+  }
 } 

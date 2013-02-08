@@ -62,6 +62,12 @@ T lim(T min, T max, T val)
 static Ports localports = {
     {"echo", ":'hidden':Hidden port to echo messages", 0, [](const char *m, RtData) {
        bToU->raw_write(m-1);}},
+    {"get-vu", "::", 0, [](const char *, RtData d) {
+       Master *m = (Master*)d.obj;
+       bToU->write("/vu-meter", "bb", sizeof(m->vu), &m->vu, sizeof(float)*NUM_MIDI_PARTS, m->vuoutpeakpart);}},
+    {"reset-vu", "::", 0, [](const char *, RtData d) {
+       Master *m = (Master*)d.obj;
+       m->vuresetpeaks();}},
     PARAMF(Master, volume, volume, log, 0.01, 4.42, "Master Volume"),
 };
 
@@ -79,7 +85,6 @@ Master::Master()
     swaplr = 0;
 
     pthread_mutex_init(&mutex, NULL);
-    pthread_mutex_init(&vumutex, NULL);
     fft = new FFTwrapper(synth->oscilsize);
 
     shutup = 0;
@@ -486,10 +491,7 @@ void Master::AudioOut(float *outl, float *outr)
         outr[i] *= volume;
     }
 
-    if(!pthread_mutex_trylock(&vumutex)) {
-        vuUpdate(outl, outr);
-        pthread_mutex_unlock(&vumutex);
-    }
+    vuUpdate(outl, outr);
 
     //Shutup if it is asked (with fade-out)
     if(shutup) {
@@ -563,7 +565,6 @@ Master::~Master()
     delete fft;
 
     pthread_mutex_destroy(&mutex);
-    pthread_mutex_destroy(&vumutex);
 }
 
 
@@ -619,22 +620,11 @@ void Master::ShutUp()
  */
 void Master::vuresetpeaks()
 {
-    pthread_mutex_lock(&vumutex);
     vu.outpeakl    = 1e-9;
     vu.outpeakr    = 1e-9;
     vu.maxoutpeakl = 1e-9;
     vu.maxoutpeakr = 1e-9;
     vu.clipped     = 0;
-    pthread_mutex_unlock(&vumutex);
-}
-
-vuData Master::getVuData()
-{
-    vuData tmp;
-    pthread_mutex_lock(&vumutex);
-    tmp = vu;
-    pthread_mutex_unlock(&vumutex);
-    return tmp;
 }
 
 void Master::applyparameters(bool lockmutex)
