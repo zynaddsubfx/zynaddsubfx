@@ -55,8 +55,8 @@ void Controller::sendcontroller(int par, unsigned char val) {
 void Controller::sendnrpn(int npar, unsigned char val) {
 //    fprintf(stderr,"NRPN: %d %d %d %d\n",pars[npar].nrpn.cpar,pars[npar].nrpn.fpar,pars[npar].nrpn.cval,val);
 
-    sendcontroller(0x99, pars[npar].nrpn.cpar);
-    sendcontroller(0x98, pars[npar].nrpn.fpar);
+    sendcontroller(0x63, pars[npar].nrpn.cpar);
+    sendcontroller(0x62, pars[npar].nrpn.fpar);
     sendcontroller(0x06, pars[npar].nrpn.cval);
     sendcontroller(0x26, val);
 //    fprintf(stderr,"------------\n\n");
