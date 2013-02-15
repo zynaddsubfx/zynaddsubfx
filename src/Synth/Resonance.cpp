@@ -19,9 +19,10 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 */
 
-#include <math.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
 #include "Resonance.h"
+#include "../Misc/Util.h"
 
 Resonance::Resonance():Presets()
 {
@@ -29,11 +30,11 @@ Resonance::Resonance():Presets()
     defaults();
 }
 
-Resonance::~Resonance()
+Resonance::~Resonance(void)
 {}
 
 
-void Resonance::defaults()
+void Resonance::defaults(void)
 {
     Penabled     = 0;
     PmaxdB       = 20;
@@ -59,37 +60,27 @@ void Resonance::setpoint(int n, unsigned char p)
 /*
  * Apply the resonance to FFT data
  */
-void Resonance::applyres(int n, fft_t *fftdata, float freq)
+void Resonance::applyres(int n, fft_t *fftdata, float freq) const
 {
     if(Penabled == 0)
         return;             //if the resonance is disabled
-    float sum = 0.0f,
-          l1  = logf(getfreqx(0.0f) * ctlcenter),
-          l2  = logf(2.0f) * getoctavesfreq() * ctlbw;
 
-    for(int i = 0; i < N_RES_POINTS; ++i)
-        if(sum < Prespoints[i])
-            sum = Prespoints[i];
-    if(sum < 1.0f)
-        sum = 1.0f;
+    const float l1  = logf(getfreqx(0.0f) * ctlcenter),
+                l2  = logf(2.0f) * getoctavesfreq() * ctlbw;
+
+    //Provide an upper bound for resonance
+    const float upper =
+        limit<float>(array_max(Prespoints, N_RES_POINTS), 1.0f, INFINITY);
 
     for(int i = 1; i < n; ++i) {
-        float x = (logf(freq * i) - l1) / l2; //compute where the n-th hamonics fits to the graph
-        if(x < 0.0f)
-            x = 0.0f;
-
-        x *= N_RES_POINTS;
-        float dx = x - floor(x);
-        x = floor(x);
-        int kx1 = (int)x;
-        if(kx1 >= N_RES_POINTS)
-            kx1 = N_RES_POINTS - 1;
-        int kx2 = kx1 + 1;
-        if(kx2 >= N_RES_POINTS)
-            kx2 = N_RES_POINTS - 1;
+        //compute where the n-th hamonics fits to the graph
+        const float x  = limit((logf(freq) - l1) / l2, 0.0f, INFINITY) * N_RES_POINTS;
+        const float dx = x - floor(x);
+        const int kx1  = limit<int>(floor(x), 0, N_RES_POINTS - 1);
+        const int kx2  = limit<int>(kx1 + 1,  0, N_RES_POINTS - 1);
         float y =
-            (Prespoints[kx1]
-             * (1.0f - dx) + Prespoints[kx2] * dx) / 127.0f - sum / 127.0f;
+            ((Prespoints[kx1] * (1.0f - dx) + Prespoints[kx2] * dx)
+             - upper) / 127.0f;
 
         y = powf(10.0f, y * PmaxdB / 20.0f);
 
@@ -103,35 +94,28 @@ void Resonance::applyres(int n, fft_t *fftdata, float freq)
 /*
  * Gets the response at the frequency "freq"
  */
-
-float Resonance::getfreqresponse(float freq)
+//Requires
+// - resonance data
+// - max resonance
+// - mapping from resonance data to frequency
+float Resonance::getfreqresponse(float freq) const
 {
-    float l1 = logf(getfreqx(0.0f) * ctlcenter),
-          l2 = logf(2.0f) * getoctavesfreq() * ctlbw, sum = 0.0f;
+    const float l1 = logf(getfreqx(0.0f) * ctlcenter),
+                l2 = logf(2.0f) * getoctavesfreq() * ctlbw;
 
-    for(int i = 0; i < N_RES_POINTS; ++i)
-        if(sum < Prespoints[i])
-            sum = Prespoints[i];
-    if(sum < 1.0f)
-        sum = 1.0f;
+    //Provide an upper bound for resonance
+    const float upper =
+        limit<float>(array_max(Prespoints, N_RES_POINTS), 1.0f, INFINITY);
 
-    float x = (logf(freq) - l1) / l2; //compute where the n-th hamonics fits to the graph
-    if(x < 0.0f)
-        x = 0.0f;
-    x *= N_RES_POINTS;
-    float dx = x - floor(x);
-    x = floor(x);
-    int kx1 = (int)x;
-    if(kx1 >= N_RES_POINTS)
-        kx1 = N_RES_POINTS - 1;
-    int kx2 = kx1 + 1;
-    if(kx2 >= N_RES_POINTS)
-        kx2 = N_RES_POINTS - 1;
-    float result =
-        (Prespoints[kx1]
-         * (1.0f - dx) + Prespoints[kx2] * dx) / 127.0f - sum / 127.0f;
-    result = powf(10.0f, result * PmaxdB / 20.0f);
-    return result;
+    //compute where the n-th hamonics fits to the graph
+    const float x   = limit((logf(freq) - l1) / l2, 0.0f, INFINITY) * N_RES_POINTS;
+    const float dx  = x - floor(x);
+    const int   kx1 = limit<int>(floor(x), 0, N_RES_POINTS - 1);
+    const int   kx2 = limit<int>(kx1 + 1,  0, N_RES_POINTS - 1);
+    //Interpolate
+    const float result =
+        ((Prespoints[kx1] * (1.0f - dx) + Prespoints[kx2] * dx) - upper) / 127.0f;
+    return powf(10.0f, result * PmaxdB / 20.0f);
 }
 
 
@@ -195,18 +179,16 @@ void Resonance::interpolatepeaks(int type)
 /*
  * Get the frequency from x, where x is [0..1]; x is the x coordinate
  */
-float Resonance::getfreqx(float x)
+float Resonance::getfreqx(float x) const
 {
-    if(x > 1.0f)
-        x = 1.0f;
-    float octf = powf(2.0f, getoctavesfreq());
-    return getcenterfreq() / sqrt(octf) * powf(octf, x);
+    const float octf = powf(2.0f, getoctavesfreq());
+    return getcenterfreq() / sqrt(octf) * powf(octf, limit(x, 0.0f, 1.0f));
 }
 
 /*
  * Get the x coordinate from frequency (used by the UI)
  */
-float Resonance::getfreqpos(float freq)
+float Resonance::getfreqpos(float freq) const
 {
     return (logf(freq) - logf(getfreqx(0.0f))) / logf(2.0f) / getoctavesfreq();
 }
@@ -214,7 +196,7 @@ float Resonance::getfreqpos(float freq)
 /*
  * Get the center frequency of the resonance graph
  */
-float Resonance::getcenterfreq()
+float Resonance::getcenterfreq() const
 {
     return 10000.0f * powf(10, -(1.0f - Pcenterfreq / 127.0f) * 2.0f);
 }
@@ -222,7 +204,7 @@ float Resonance::getcenterfreq()
 /*
  * Get the number of octave that the resonance functions applies to
  */
-float Resonance::getoctavesfreq()
+float Resonance::getoctavesfreq() const
 {
     return 0.25f + 10.0f * Poctavesfreq / 127.0f;
 }
@@ -234,9 +216,6 @@ void Resonance::sendcontroller(MidiControllers ctl, float par)
     else
         ctlbw = par;
 }
-
-
-
 
 void Resonance::add2XML(XMLwrapper *xml)
 {

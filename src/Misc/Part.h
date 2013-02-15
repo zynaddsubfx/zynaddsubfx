@@ -30,6 +30,7 @@
 #include "../Misc/Microtonal.h"
 
 #include <list> // For the monomemnotes list.
+#include <pthread.h>
 
 class EffectMgr;
 class ADnoteParameters;
@@ -81,7 +82,7 @@ class Part
         void defaults();
         void defaultsinstrument();
 
-        void applyparameters(bool lockmutex = true);
+        void applyparameters(void);
 
         void getfromXML(XMLwrapper *xml);
         void getfromXMLinstrument(XMLwrapper *xml);
@@ -89,7 +90,7 @@ class Part
         void cleanup(bool final = false);
 
         //the part's kit
-        struct {
+        struct Kit {
             unsigned char      Penabled, Pmuted, Pminkey, Pmaxkey;
             unsigned char     *Pname;
             unsigned char      Padenabled, Psubenabled, Ppadenabled;
@@ -97,6 +98,8 @@ class Part
             ADnoteParameters  *adpars;
             SUBnoteParameters *subpars;
             PADnoteParameters *padpars;
+
+            static rtosc::Ports &ports;
         } kit[NUM_KIT_ITEMS];
 
 
@@ -152,9 +155,11 @@ class Part
 
 
         pthread_mutex_t *mutex;
-        pthread_mutex_t load_mutex;
+        pthread_mutex_t  load_mutex;
 
         int lastnote;
+
+        static rtosc::Ports &ports;
 
     private:
         void RunNote(unsigned k);

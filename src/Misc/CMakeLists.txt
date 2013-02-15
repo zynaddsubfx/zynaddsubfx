@@ -11,6 +11,7 @@ set(zynaddsubfx_misc_SRCS
 	Misc/XMLwrapper.cpp
 	Misc/Recorder.cpp
 	Misc/WavFile.cpp
+    Misc/MiddleWare.cpp
 	Misc/WaveShapeSmps.cpp
 )
 

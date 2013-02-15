@@ -73,7 +73,10 @@ class Master
         /**loads all settings from a XML file
          * @return 0 for ok or -1 if there is an error*/
         int loadXML(const char *filename);
-        void applyparameters(bool lockmutex = true);
+
+        /**Regenerate PADsynth and other non-RT parameters
+         * It is NOT SAFE to call this from a RT context*/
+        void applyparameters(void);
 
         void getfromXML(XMLwrapper *xml);
 

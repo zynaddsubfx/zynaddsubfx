@@ -35,6 +35,7 @@
 #include <lo/lo.h>
 #include <rtosc/ports.h>
 #include <rtosc/thread-link.h>
+#include "Params/PADnoteParameters.h"
 
 #include "DSP/FFTwrapper.h"
 #include "Misc/Master.h"

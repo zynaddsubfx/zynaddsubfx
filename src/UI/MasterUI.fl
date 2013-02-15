@@ -530,7 +530,7 @@ pthread_mutex_unlock(&master->mutex);}
       } {
         Fl_Group partui {open
           xywh {0 310 383 175}
-          code0 {o->init(master->part[0],master,0,bankui);}
+          code0 {o->init(master->part[0],"/part0/", master,0,bankui);}
           code1 {o->show();}
           class PartUI
         } {}
@@ -806,7 +806,9 @@ partuigroup->remove(partui);
 delete partui;
 partui=new PartUI(0,0,765,525);
 partuigroup->add(partui);
-partui->init(master->part[nval],master,nval,bankui);
+char buffer[1024];
+snprintf(buffer, 1024, "/part%d/", nval);
+partui->init(master->part[nval], buffer, master, nval, bankui);
 partui->redraw();
 o->redraw();
 npart=nval;
@@ -1586,7 +1588,7 @@ simplesyseffsend->value(master->Psysefxvol[nsyseff][npart]);} {}
     //load the data
     int result=master->loadXML(filename);
     
-    master->applyparameters(false);
+    master->applyparameters();
     pthread_mutex_unlock(&master->mutex);
     
     npartcounter->value(1);

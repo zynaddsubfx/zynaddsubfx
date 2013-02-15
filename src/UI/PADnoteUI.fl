@@ -1,52 +1,62 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0110 
+version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {\#include "../Params/PADnoteParameters.h"} {public
+decl {\#include "../Params/PADnoteParameters.h"} {public local
 } 
 
-decl {\#include "../Misc/Util.h"} {public
+decl {\#include "../Misc/Util.h"} {public local
 } 
 
-decl {\#include "../Misc/Master.h"} {public
+decl {\#include "../Misc/Master.h"} {public local
 } 
 
-decl {\#include "ResonanceUI.h"} {public
+decl {\#include "../Misc/MiddleWare.h"} {public local
 } 
 
-decl {\#include <FL/Fl_Box.H>} {public
+decl {\#include "ResonanceUI.h"} {public local
 } 
 
-decl {\#include <FL/Fl_Group.H>} {public
+decl {\#include <FL/Fl_Box.H>} {public local
 } 
 
-decl {\#include <FL/Fl_File_Chooser.H>} {public
+decl {\#include <FL/Fl_Group.H>} {public local
 } 
 
-decl {\#include <math.h>} {} 
-
-decl {\#include <stdio.h>} {} 
-
-decl {\#include <stdlib.h>} {} 
-
-decl {\#include <string.h>} {} 
-
-decl {\#include "WidgetPDial.h"} {public
+decl {\#include <FL/Fl_File_Chooser.H>} {public local
 } 
 
-decl {\#include "EnvelopeUI.h"} {public
+decl {\#include <math.h>} {private local
 } 
 
-decl {\#include "LFOUI.h"} {public
+decl {\#include <stdio.h>} {private local
 } 
 
-decl {\#include "FilterUI.h"} {public
+decl {\#include <stdlib.h>} {private local
 } 
 
-decl {\#include "OscilGenUI.h"} {public
+decl {\#include <string.h>} {private local
 } 
 
-decl {\#include "PresetsUI.h"} {public
+decl {\#include <string>} {selected public local
+} 
+
+decl {\#include "WidgetPDial.h"} {public local
+} 
+
+decl {\#include "EnvelopeUI.h"} {public local
+} 
+
+decl {\#include "LFOUI.h"} {public local
+} 
+
+decl {\#include "FilterUI.h"} {public local
+} 
+
+decl {\#include "OscilGenUI.h"} {public local
+} 
+
+decl {\#include "PresetsUI.h"} {public local
 } 
 
 class PADnoteHarmonicProfile {: {public Fl_Box}
@@ -128,8 +138,9 @@ fl_line(ox+lx/2+rbw,oy,ox+lx/2+rbw,oy+ly-1);
 
 fl_line_style(0);} {}
   }
-  decl {Master *master;} {}
-  decl {PADnoteParameters *pars;} {public
+  decl {Master *master;} {private local
+  }
+  decl {PADnoteParameters *pars;} {public local
   }
 } 
 
@@ -223,16 +234,18 @@ for (int i=0;i<lx;i++){
       
 };} {}
   }
-  decl {Master *master;} {}
-  decl {PADnoteParameters *pars;} {public
+  decl {Master *master;} {private local
+  }
+  decl {PADnoteParameters *pars;} {public local
   }
 } 
 
 class PADnoteUI {open : {public PresetsUI_}
 } {
-  Function {PADnoteUI(PADnoteParameters *parameters,Master *master_)} {open
+  Function {PADnoteUI(PADnoteParameters *parameters, std::string location_, Master *master_)} {open
   } {
-    code {pars=parameters;
+    code {location=location_;
+pars=parameters;
 master=master_;
 oscui=NULL;
 resui=new ResonanceUI(pars->resonance);
@@ -242,7 +255,7 @@ make_window();} {}
   } {
     Fl_Window padnotewindow {
       label {PAD synth Parameters} open
-      xywh {294 392 535 435} type Double visible
+      xywh {297 415 535 435} type Double visible
     } {
       Fl_Tabs {} {
         callback {if (o->value()!=harmonicstructuregroup) applybutton->hide();
@@ -250,7 +263,7 @@ make_window();} {}
         xywh {0 0 535 395} box UP_FRAME
       } {
         Fl_Group harmonicstructuregroup {
-          label {Harmonic Structure} open selected
+          label {Harmonic Structure} open
           xywh {0 20 535 375} box UP_FRAME
         } {
           Fl_Group bwprofilegroup {
@@ -961,7 +974,7 @@ hprofile->redraw();}
       }
       Fl_Button applybutton {
         label {Apply Changes}
-        callback {pars->applyparameters(true);
+        callback {MiddleWare::preparePadSynth(location.c_str(), pars);
 o->color(FL_GRAY);
 if (oscui!=NULL) {
 	oscui->applybutton->color(FL_GRAY);
@@ -1092,7 +1105,7 @@ hprofile->redraw();
 overtonepos->redraw();
 
 osc->redraw();
-pars->applyparameters(true);
+MiddleWare::preparePadSynth(location.c_str(), pars);
 applybutton->color(FL_GRAY);
 applybutton->parent()->redraw();} {}
   }
@@ -1103,14 +1116,16 @@ delete(resui);
 padnotewindow->hide();
 delete(padnotewindow);} {}
   }
-  decl {PADnoteParameters *pars;} {public
+  decl {PADnoteParameters *pars;} {public local
   }
-  decl {Master *master;} {public
+  decl {Master *master;} {public local
   }
-  decl {OscilEditor *oscui;} {public
+  decl {OscilEditor *oscui;} {public local
   }
-  decl {Oscilloscope *osc;} {public
+  decl {Oscilloscope *osc;} {public local
   }
-  decl {ResonanceUI *resui;} {public
+  decl {ResonanceUI *resui;} {public local
+  }
+  decl {std::string location;} {private local
   }
 } 

@@ -44,21 +44,6 @@ using namespace std;
 using rtosc::Ports;
 using rtosc::RtData;
 
-template<class T>
-T lim(T min, T max, T val)
-{
-    return val<max?(val>min?val:min):max;
-}
-//floating point parameter - with lookup code
-#define PARAMF(type, var, name, scale, _min, _max, desc) \
-{#name"::f", #scale "," # _min "," #_max ":'parameter':" desc, 0, \
-    [](const char *m, RtData d) { \
-        if(rtosc_narguments(m)==0) {\
-            bToU->write("/display", "sf", d.loc, ((type*)d.obj)->var); \
-        } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='f') {\
-            ((type*)d.obj)->var = lim<float>(_min,_max,rtosc_argument(m,0).f); \
-            bToU->write(d.loc, "f", ((type*)d.obj)->var);}}}
-
 static Ports localports = {
     {"echo", ":'hidden':Hidden port to echo messages", 0, [](const char *m, RtData) {
        bToU->raw_write(m-1);}},
@@ -69,6 +54,7 @@ static Ports localports = {
        Master *m = (Master*)d.obj;
        m->vuresetpeaks();}},
     PARAMF(Master, volume, volume, log, 0.01, 4.42, "Master Volume"),
+    RECURSP(Master, Part, part, part, 16, "Part"),//NUM_MIDI_PARTS
 };
 
 Ports &Master::ports = localports;
@@ -627,10 +613,10 @@ void Master::vuresetpeaks()
     vu.clipped     = 0;
 }
 
-void Master::applyparameters(bool lockmutex)
+void Master::applyparameters(void)
 {
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        part[npart]->applyparameters(lockmutex);
+        part[npart]->applyparameters();
 }
 
 void Master::add2XML(XMLwrapper *xml)

@@ -36,6 +36,22 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <rtosc/ports.h>
+
+using rtosc::Ports;
+using rtosc::RtData;
+
+static Ports partPorts = {
+    RECURS(Part, Part::Kit, kit, kit, 16, "Kit"),//NUM_KIT_ITEMS
+};
+
+static Ports kitPorts = {
+    RECURP(Part::Kit, PADnoteParameters, padpars, padpars, "Padnote parameters"),
+};
+
+Ports &Part::Kit::ports = kitPorts;
+Ports &Part::ports = partPorts;
+
 Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
 {
     microtonal = microtonal_;
@@ -54,7 +70,7 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
 
     kit[0].adpars  = new ADnoteParameters(fft);
     kit[0].subpars = new SUBnoteParameters();
-    kit[0].padpars = new PADnoteParameters(fft, mutex);
+    kit[0].padpars = new PADnoteParameters(fft);
 
     //Part's Insertion Effects init
     for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
@@ -1079,7 +1095,7 @@ void Part::setkititemstatus(int kititem, int Penabled_)
         if(kit[kititem].subpars == NULL)
             kit[kititem].subpars = new SUBnoteParameters();
         if(kit[kititem].padpars == NULL)
-            kit[kititem].padpars = new PADnoteParameters(fft, mutex);
+            kit[kititem].padpars = new PADnoteParameters(fft);
     }
 
     if(resetallnotes)
@@ -1199,7 +1215,7 @@ int Part::saveXML(const char *filename)
     return result;
 }
 
-int Part::loadXMLinstrument(const char *filename) /*{*/
+int Part::loadXMLinstrument(const char *filename)
 {
     XMLwrapper *xml = new XMLwrapper();
     if(xml->loadXMLfile(filename) < 0) {
@@ -1214,14 +1230,14 @@ int Part::loadXMLinstrument(const char *filename) /*{*/
 
     delete (xml);
     return 0;
-} /*}*/
+}
 
-void Part::applyparameters(bool lockmutex) /*{*/
+void Part::applyparameters(void)
 {
     for(int n = 0; n < NUM_KIT_ITEMS; ++n)
-        if((kit[n].padpars != NULL) && (kit[n].Ppadenabled != 0))
-            kit[n].padpars->applyparameters(lockmutex);
-} /*}*/
+        if(kit[n].Ppadenabled && kit[n].padpars)
+            kit[n].padpars->applyparameters();
+}
 
 void Part::getfromXMLinstrument(XMLwrapper *xml)
 {

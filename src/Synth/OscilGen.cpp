@@ -904,6 +904,31 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
         return 0;
 }
 
+///*
+// * Get the oscillator function's harmonics
+// */
+//void OscilGen::getPad(float *smps, float freqHz)
+//{
+//    if(needPrepare())
+//        prepare();
+//
+//    clearAll(outoscilFFTfreqs);
+//
+//    const int nyquist = (synth->oscilsize / 2);
+//
+//    //Process harmonics
+//    for(int i = 1; i < nyquist - 1; ++i)
+//        outoscilFFTfreqs[i] = oscilFFTfreqs[i];
+//
+//    adaptiveharmonic(outoscilFFTfreqs, freqHz);
+//    adaptiveharmonicpostprocess(&outoscilFFTfreqs[1], nyquist - 1);
+//
+//    rmsNormalize(outoscilFFTfreqs);
+//
+//    for(int i = 1; i < nyquist; ++i)
+//        smps[i - 1] = abs(outoscilFFTfreqs, i);
+//}
+//
 
 /*
  * Get the spectrum of the oscillator for the UI
