@@ -332,6 +332,36 @@ void Master::partonoff(int npart, int what)
     }
 }
 
+class DataObj:public rtosc::RtData
+{
+    public:
+        DataObj(char *loc_, size_t loc_size_, void *obj_, rtosc::ThreadLink *bToU_)
+        {
+            memset(loc_, 0, sizeof(loc_size_));
+            loc      = loc_;
+            loc_size = loc_size_;
+            obj      = obj_;
+            bToU     = bToU_;
+        }
+
+        virtual void reply(const char *path, const char *args, ...)
+        {
+            va_list va;
+            va_start(va,args);
+            char *buffer = bToU->buffer();
+            rtosc_vmessage(buffer,bToU->buffer_size(),path,args,va);
+            bToU->raw_write(buffer);
+        }
+        virtual void reply(const char *msg)
+        {
+            bToU->raw_write(msg);
+        }
+        //virtual void broadcast(const char *path, const char *args, ...){(void)path;(void)args;};
+        //virtual void broadcast(const char *msg){(void)msg;};
+    private:
+        rtosc::ThreadLink *bToU;
+};
+
 /*
  * Master audio out (the final sound)
  */
@@ -339,8 +369,15 @@ void Master::AudioOut(float *outl, float *outr)
 {
     //Handle user events TODO move me to a proper location
     char loc_buf[1024];
-    while(uToB->hasNext())
-        ports.dispatch(loc_buf, 1024, uToB->read()+1, this);
+    DataObj d{loc_buf, 1024, this, bToU};
+    int events = 0;
+    while(uToB->hasNext()) {
+        ports.dispatch(uToB->read()+1, d);
+        events++;
+        //printf("backend: '%s'\n", uToB->peak());
+    }
+    if(events>1)
+        fprintf(stderr, "backend: %d events per cycle\n",events);
 
     //Swaps the Left channel with Right Channel
     if(swaplr)

@@ -17,7 +17,7 @@ decl {\#include <stdio.h>} {public local
 decl {\#include <string.h>} {public local
 } 
 
-decl {\#include <string>} {selected public local
+decl {\#include <string>} {public local
 } 
 
 decl {\#include "WidgetPDial.h"} {public local
@@ -52,7 +52,7 @@ class PartSysEffSend {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window syseffsend {
-      private xywh {592 152 100 100} type Double box NO_BOX
+      private xywh {598 198 100 100} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Dial {} {
@@ -96,7 +96,7 @@ class PartKitItem {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window partkititem {
-      private xywh {476 429 670 100} type Double box NO_BOX
+      private xywh {482 475 670 100} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group partkititemgroup {
@@ -287,7 +287,7 @@ class PartUI {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window partgroup {open
-      private xywh {691 287 385 180} type Double box NO_BOX
+      private xywh {697 333 385 180} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group partgroupui {open
@@ -465,7 +465,7 @@ if (part->Penabled==0) partgroupui->deactivate();
     }
     Fl_Window ctlwindow {
       label Controllers open
-      private xywh {777 284 500 130} type Double box NO_BOX visible
+      private xywh {777 330 500 130} type Double box NO_BOX visible
     } {
       Fl_Check_Button {} {
         label Expr
@@ -648,7 +648,7 @@ else {propta->deactivate();proptb->deactivate();}}
     }
     Fl_Window partfx {
       label {Part's Insert Effects}
-      private xywh {557 683 390 145} type Double box NO_BOX visible
+      private xywh {563 729 390 145} type Double box NO_BOX visible
     } {
       Fl_Counter inseffnocounter {
         label {FX No.}
@@ -769,7 +769,7 @@ pthread_mutex_unlock(&master->mutex);}
     }
     Fl_Window instrumentkitlist {
       label {Instrument Kit} open
-      xywh {589 589 670 370} type Double box NO_BOX visible
+      xywh {595 611 670 370} type Double box NO_BOX visible
     } {
       Fl_Button {} {
         label {Close Window}
@@ -850,7 +850,7 @@ if (part->Pkitmode==0) {
     }
     Fl_Window instrumenteditwindow {
       label {Instrument Edit} open
-      xywh {250 621 395 360} type Double box NO_BOX visible
+      xywh {256 621 395 360} type Double box NO_BOX visible
     } {
       Fl_Group {} {
         xywh {0 220 395 110} box UP_FRAME
@@ -1026,20 +1026,27 @@ if (x==0) subeditbutton->deactivate();
       }
     }
   }
-  Function {PartUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
+  Function {PartUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {open
+  } {
     code {part=NULL;
 adnoteui=NULL;
 subnoteui=NULL;
 padnoteui=NULL;
 lastkititem=-1;} {}
   }
-  Function {init(Part *part_, std::string part_path_, Master *master_,int npart_,BankUI *bankui_)} {} {
-    code {bankui=bankui_;
-    part_path = part_path_;
+  Function {init(Part *part_, std::string part_path_, Master *master_,int npart_,BankUI *bankui_, std::string loc_, Fl_Osc_Interface *osc_)} {open
+  } {
+    code {assert(osc_);
+assert(!loc_.empty());
+
+bankui=bankui_;
+part_path = part_path_;
 part=part_;
 npart=npart_;
 master=master_;
 ninseff=0;
+osc=osc_;
+loc=loc_;
 
 make_window();
 partgroup->position(this->parent()->x()+2,this->parent()->y()+2);
@@ -1065,9 +1072,11 @@ while (klimits[k]!=0){
 };
 
 if (val==-1) val=k;
-keylimitlist->value(val);} {}
+keylimitlist->value(val);} {selected
+    }
   }
-  Function {showparameters(int kititem,int engine)} {} {
+  Function {showparameters(int kititem,int engine)} {open
+  } {
     code {if (engine==-1){//this is used if I want to clear the engine from the part
    if (kititem==lastkititem) kititem=-1;
          else kititem=lastkititem;
@@ -1083,8 +1092,8 @@ if (kititem!=lastkititem){
     if (kititem>=NUM_KIT_ITEMS) return;//bad kit item
     if (kititem<0) return;
 
-    if (part->kit[kititem].adpars!=NULL) 
-      adnoteui=new ADnoteUI(part->kit[kititem].adpars,master);
+    if (part->kit[kititem].adpars!=NULL)
+      adnoteui=new ADnoteUI(part->kit[kititem].adpars,master, loc+"kit"+to_s(kititem)+"/adpars/", osc);
 
     if (part->kit[kititem].subpars!=NULL) 
        subnoteui=new SUBnoteUI(part->kit[kititem].subpars);
@@ -1092,7 +1101,7 @@ if (kititem!=lastkititem){
     if (part->kit[kititem].padpars!=NULL) {
       char buffer[1024];
       snprintf(buffer, 1024, "%skit%d/padpars/", part_path.c_str(), kititem); 
-      padnoteui=new PADnoteUI(part->kit[kititem].padpars, buffer, master);
+      padnoteui=new PADnoteUI(part->kit[kititem].padpars, buffer, osc, master);
       }
 
 };
@@ -1146,5 +1155,9 @@ delete(instrumenteditwindow);} {}
   decl {PartKitItem *partkititem[NUM_KIT_ITEMS];} {private local
   }
   decl {std::string part_path;} {private local
+  }
+  decl {std::string loc;} {private local
+  }
+  decl {Fl_Osc_Interface *osc;} {private local
   }
 } 

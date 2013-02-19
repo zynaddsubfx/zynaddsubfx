@@ -1,53 +1,62 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0110 
+version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
-
-decl {//License: GNU GPL version 2 or later} {} 
-
-decl {\#include "../Params/ADnoteParameters.h"} {public
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
 } 
 
-decl {\#include "../Misc/Util.h"} {public
+decl {//License: GNU GPL version 2 or later} {private local
 } 
 
-decl {\#include "../Misc/Master.h"} {public
+decl {\#include "../Params/ADnoteParameters.h"} {public local
 } 
 
-decl {\#include "ResonanceUI.h"} {public
+decl {\#include "../Misc/Util.h"} {public local
 } 
 
-decl {\#include <FL/Fl_Box.H>} {public
+decl {\#include "../Misc/Master.h"} {public local
 } 
 
-decl {\#include <FL/Fl_Group.H>} {public
+decl {\#include "ResonanceUI.h"} {public local
 } 
 
-decl {\#include <math.h>} {} 
-
-decl {\#include <stdio.h>} {} 
-
-decl {\#include <stdlib.h>} {} 
-
-decl {\#include <string.h>} {} 
-
-decl {\#include "WidgetPDial.h"} {public
+decl {\#include <FL/Fl_Box.H>} {public local
 } 
 
-decl {\#include "EnvelopeUI.h"} {public
+decl {\#include <FL/Fl_Group.H>} {public local
 } 
 
-decl {\#include "LFOUI.h"} {public
+decl {\#include <math.h>} {private local
 } 
 
-decl {\#include "FilterUI.h"} {public
+decl {\#include <stdio.h>} {private local
 } 
 
-decl {\#include "OscilGenUI.h"} {public
+decl {\#include <stdlib.h>} {private local
 } 
 
-decl {\#include "PresetsUI.h"} {public
+decl {\#include <string.h>} {private local
+} 
+
+decl {\#include "WidgetPDial.h"} {public local
+} 
+
+decl {\#include "Fl_Oscilloscope.h"} {public local
+} 
+
+decl {\#include "EnvelopeUI.h"} {public local
+} 
+
+decl {\#include "LFOUI.h"} {public local
+} 
+
+decl {\#include "FilterUI.h"} {public local
+} 
+
+decl {\#include "OscilGenUI.h"} {public local
+} 
+
+decl {\#include "PresetsUI.h"} {public local
 } 
 
 class ADvoicelistitem {open : {public Fl_Group}
@@ -55,10 +64,10 @@ class ADvoicelistitem {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window ADnoteVoiceListItem {open
-      private xywh {262 736 615 100} type Double box UP_FRAME
+      private xywh {310 881 615 100} type Double box UP_FRAME
       class Fl_Group visible
     } {
-      Fl_Group voicelistitemgroup {
+      Fl_Group voicelistitemgroup {open
         private xywh {50 0 570 25}
         code0 {if (pars->VoicePar[nvoice].Enabled==0) o->deactivate();}
       } {
@@ -85,9 +94,10 @@ class ADvoicelistitem {open : {public Fl_Group}
         }
         Fl_Group voiceoscil {open
           xywh {60 5 30 20} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
-          code0 {osc=new Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
-          code1 {osc->init(pars->VoicePar[nvoice].OscilSmp,0,pars->VoicePar[nvoice].Poscilphase,master);}
-          code2 {if (pars->VoicePar[nvoice].Pextoscil != -1) {osc->init(pars->VoicePar[pars->VoicePar[nvoice].Pextoscil].OscilSmp,master);}}
+          code0 {osc=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
+          code1 {voiceoscil->osc=osc_i;voiceoscil->pane_name=loc;osc->init(false);//osc->init(pars->VoicePar[nvoice].OscilSmp,0,pars->VoicePar[nvoice].Poscilphase,master);}
+          code2 {if (pars->VoicePar[nvoice].Pextoscil != -1) {/*osc->init(pars->VoicePar[pars->VoicePar[nvoice].Pextoscil].OscilSmp,master);*/ osc->init(false);}}
+          class Fl_Osc_Group
         } {}
         Fl_Value_Output detunevalueoutput {
           callback {o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
@@ -133,19 +143,27 @@ o->redraw();}
       }
     }
   }
-  Function {ADvoicelistitem(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
+  Function {ADvoicelistitem(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {open
+  } {
     code {nvoice=0;
 pars=NULL;} {}
   }
-  Function {init(ADnoteParameters *parameters,int nvoice_,Master *master_)} {} {
-    code {pars=parameters;
+  Function {init(ADnoteParameters *parameters,int nvoice_,Master *master_, std::string loc_, Fl_Osc_Interface *osc_)} {open
+  } {
+    code {assert(osc_);
+assert(!loc_.empty());
+
+pars=parameters;
 nvoice=nvoice_;
 master=master_;
+osc_i = osc_;
+loc   = loc_;
 make_window();
 ADnoteVoiceListItem->show();
 end();} {}
   }
-  Function {refreshlist()} {} {
+  Function {refreshlist()} {open
+  } {
     code {voiceenabled->value(pars->VoicePar[nvoice].Enabled);
 voiceresonanceenabled->value(pars->VoicePar[nvoice].Presonance);
 voicevolume->value(pars->VoicePar[nvoice].PVolume);
@@ -153,9 +171,12 @@ voicedetune->value(pars->VoicePar[nvoice].PDetune-8192);
 voicepanning->value(pars->VoicePar[nvoice].PPanning);
 voicelfofreq->value(pars->VoicePar[nvoice].FreqLfo->Pintensity);
 if (pars->VoicePar[nvoice].Pextoscil != -1) {
-  osc->init(pars->VoicePar[pars->VoicePar[nvoice].Pextoscil].OscilSmp,0,pars->VoicePar[nvoice].Poscilphase,master);
-} else 
-  osc->init(pars->VoicePar[nvoice].OscilSmp,0,pars->VoicePar[nvoice].Poscilphase,master);
+  //osc->init(pars->VoicePar[pars->VoicePar[nvoice].Pextoscil].OscilSmp,0,pars->VoicePar[nvoice].Poscilphase,master);
+  osc->init(false);
+} else {
+  //osc->init(pars->VoicePar[nvoice].OscilSmp,0,pars->VoicePar[nvoice].Poscilphase,master);
+  osc->init(false);
+}
 if (pars->VoicePar[nvoice].Enabled==0) voicelistitemgroup->deactivate();
     else voicelistitemgroup->activate();
 detunevalueoutput->do_callback();
@@ -166,10 +187,18 @@ ADnoteVoiceListItem->redraw();} {}
     code {ADnoteVoiceListItem->hide();
 //delete(ADnoteVoiceListItem);} {}
   }
-  decl {ADnoteParameters *pars;} {}
-  decl {int nvoice;} {}
-  decl {Oscilloscope *osc;} {}
-  decl {Master *master;} {}
+  decl {ADnoteParameters *pars;} {private local
+  }
+  decl {int nvoice;} {private local
+  }
+  decl {Fl_Oscilloscope *osc;} {private local
+  }
+  decl {Master *master;} {private local
+  }
+  decl {Fl_Osc_Interface *osc_i;} {private local
+  }
+  decl {std::string loc;} {private local
+  }
 } 
 
 class ADvoiceUI {open : {public Fl_Group}
@@ -178,7 +207,7 @@ class ADvoiceUI {open : {public Fl_Group}
   } {
     Fl_Window ADnoteVoiceParameters {
       label Voice open
-      xywh {84 305 765 590} type Double box NO_BOX
+      xywh {502 391 765 590} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group voiceparametersgroup {open
@@ -302,9 +331,11 @@ o->redraw();}
             } {
               Fl_Group fmoscil {open
                 xywh {535 440 220 140} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
-                code0 {oscFM=new Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
-                code1 {int nv=nvoice; if (pars->VoicePar[nvoice].PextFMoscil>=0) nv=pars->VoicePar[nvoice].PextFMoscil;}
-                code2 {oscFM->init(pars->VoicePar[nv].FMSmp,0,pars->VoicePar[nvoice].PFMoscilphase,master);}
+                code0 {oscFM=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
+                code1 {//int nv=nvoice; if (pars->VoicePar[nvoice].PextFMoscil>=0) nv=pars->VoicePar[nvoice].PextFMoscil;}
+                code2 {fmoscil->pane_name = loc+"oscil-mod/";fmoscil->osc = osc_i;//oscFM->init(pars->VoicePar[nv].FMSmp,0,pars->VoicePar[nvoice].PFMoscilphase,master);}
+                code3 {oscFM->parent(fmoscil);oscFM->init(false);oscFM->update();}
+                class Fl_Osc_Group
               } {}
               Fl_Box {} {
                 label {Mod.Oscillator}
@@ -317,7 +348,7 @@ o->redraw();}
 int nv=nvoice;
 if (pars->VoicePar[nvoice].PextFMoscil>=0) nv=pars->VoicePar[nvoice].PextFMoscil;
 
-oscedit=new OscilEditor(pars->VoicePar[nv].FMSmp,fmoscil,NULL,NULL,master);}
+oscedit=new OscilEditor(pars->VoicePar[nv].FMSmp,fmoscil,NULL,NULL,loc+"oscil-mod/", osc_i);}
                 xywh {700 380 55 15} box THIN_UP_BOX labelfont 1 labelsize 11
                 code0 {if (pars->VoicePar[nvoice].PextFMoscil>=0) o->labelcolor(FL_BLUE);}
               }
@@ -333,10 +364,12 @@ fmoscil->redraw();}
                 label Use
                 callback {pars->VoicePar[nvoice].PextFMoscil=(int)o->value()-1;
 if ((int) o->value() != 0) {
-    oscFM->init(pars->VoicePar[(int) o->value()-1].FMSmp,master);
+    //oscFM->init(pars->VoicePar[(int) o->value()-1].FMSmp,master);
+    oscFM->init(false);
     changeFMoscilbutton->labelcolor(FL_BLUE);
 } else { 
-    oscFM->init(pars->VoicePar[nvoice].FMSmp,master);
+    //oscFM->init(pars->VoicePar[nvoice].FMSmp,master);
+    oscFM->init(false);
     changeFMoscilbutton->labelcolor(FL_BLACK);
 };
 voiceFMparametersgroup->redraw();} open
@@ -497,9 +530,11 @@ detunevalueoutput->do_callback();} open
           }
           Fl_Group voiceoscil {
             xywh {80 390 445 145} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
-            code0 {osc=new Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
-            code1 {int nv=nvoice; if (pars->VoicePar[nvoice].Pextoscil>=0) nv=pars->VoicePar[nvoice].Pextoscil;}
-            code2 {osc->init(pars->VoicePar[nv].OscilSmp,0,pars->VoicePar[nvoice].Poscilphase,master);}
+            code0 {osc=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
+            code1 {voiceoscil->pane_name = loc+"oscil/";//int nv=nvoice; if (pars->VoicePar[nvoice].Pextoscil>=0) nv=pars->VoicePar[nvoice].Pextoscil;}
+            code2 {voiceoscil->osc = osc_i;//osc->init(pars->VoicePar[nv].OscilSmp,0,pars->VoicePar[nvoice].Poscilphase,master);}
+            code3 {osc->parent(voiceoscil); osc->init(false);}
+            class Fl_Osc_Group
           } {}
           Fl_Button changevoiceoscilbutton {
             label Change
@@ -508,7 +543,7 @@ detunevalueoutput->do_callback();} open
 int nv=nvoice;
 if (pars->VoicePar[nvoice].Pextoscil>=0) nv=pars->VoicePar[nvoice].Pextoscil;
 
-oscedit=new OscilEditor(pars->VoicePar[nv].OscilSmp,voiceoscil,NULL,NULL,master);}
+oscedit=new OscilEditor(pars->VoicePar[nv].OscilSmp,voiceoscil,NULL,NULL,loc+"oscil/", osc_i);}
             xywh {5 490 65 20} box THIN_UP_BOX labelfont 1 labelsize 11
             code0 {if (pars->VoicePar[nvoice].Pextoscil>=0) o->labelcolor(FL_BLUE);}
           }
@@ -534,10 +569,12 @@ voiceoscil->redraw();}
             label {Use Oscil.}
             callback {pars->VoicePar[nvoice].Pextoscil=(int)o->value()-1;
 if ((int) o->value() != 0) {
-    osc->init(pars->VoicePar[(int) o->value()-1].OscilSmp,master);
+    //osc->init(pars->VoicePar[(int) o->value()-1].OscilSmp,master);
+    osc->init(false);
     changevoiceoscilbutton->labelcolor(FL_BLUE);
 } else { 
-    osc->init(pars->VoicePar[nvoice].OscilSmp,master);
+    //osc->init(pars->VoicePar[nvoice].OscilSmp,master);
+    osc->init(false);
     changevoiceoscilbutton->labelcolor(FL_BLACK);
 };
 
@@ -780,11 +817,15 @@ o->redraw();}
 pars=NULL;
 oscedit=NULL;} {}
   }
-  Function {init(ADnoteParameters *parameters,int nvoice_,Master *master_)} {open
+  Function {init(ADnoteParameters *parameters,int nvoice_,Master *master_, std::string loc_, Fl_Osc_Interface *osc_)} {open
   } {
-    code {pars=parameters;
+    code {assert(osc_);
+assert(!loc_.empty());
+pars=parameters;
 nvoice=nvoice_;
 master=master_;
+loc=loc_;
+osc_i=osc_;
 make_window();
 end();
 ADnoteVoiceParameters->show();} {}
@@ -793,17 +834,26 @@ ADnoteVoiceParameters->show();} {}
   } {
     code {ADnoteVoiceParameters->hide();
 hide();
-if (oscedit!=NULL) {
-    delete(oscedit);
-};
-//delete (ADnoteVoiceParameters);} {}
+delete(oscedit);
+//delete (ADnoteVoiceParameters);} {selected
+    }
   }
-  decl {int nvoice;} {}
-  decl {ADnoteParameters *pars;} {}
-  decl {OscilEditor *oscedit;} {}
-  decl {Oscilloscope *osc;} {}
-  decl {Oscilloscope *oscFM;} {}
-  decl {Master *master;} {}
+  decl {int nvoice;} {private local
+  }
+  decl {ADnoteParameters *pars;} {private local
+  }
+  decl {OscilEditor *oscedit;} {private local
+  }
+  decl {Fl_Oscilloscope *osc;} {private local
+  }
+  decl {Fl_Oscilloscope *oscFM;} {private local
+  }
+  decl {Master *master;} {private local
+  }
+  decl {std::string loc;} {private local
+  }
+  decl {Fl_Osc_Interface *osc_i;} {private local
+  }
 } 
 
 class ADnoteUI {open : {public PresetsUI_}
@@ -812,7 +862,7 @@ class ADnoteUI {open : {public PresetsUI_}
   } {
     Fl_Window ADnoteGlobalParameters {
       label {ADsynth Global Parameters of the Instrument} open
-      xywh {457 319 540 430} type Double visible
+      xywh {505 551 540 430} type Double visible
     } {
       Fl_Group {} {
         label FREQUENCY open
@@ -956,7 +1006,7 @@ for (int i=0;i<NUM_VOICES;i++){
         }
       }
       Fl_Group {} {
-        label FILTER open selected
+        label FILTER open
         xywh {250 5 285 265} box UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
       } {
         Fl_Group filterenv {
@@ -1021,11 +1071,11 @@ resui->resonancewindow->show();}
     }
     Fl_Window ADnoteVoice {
       label {ADsynth Voice Parameters} open
-      xywh {512 361 765 620} type Double visible
+      xywh {4 361 765 620} type Double visible
     } {
-      Fl_Group advoice {
+      Fl_Group advoice {open
         xywh {0 0 765 585}
-        code0 {o->init(pars,nvoice,master);}
+        code0 {o->init(pars,nvoice,master,loc+"voice"+to_s(nvoice)+"/", osc);}
         code1 {o->show();}
         class ADvoiceUI
       } {}
@@ -1042,7 +1092,7 @@ ADnoteVoice->remove(advoice);
 delete advoice;
 advoice=new ADvoiceUI(0,0,765,585);
 ADnoteVoice->add(advoice);
-advoice->init(pars,nvoice,master);
+advoice->init(pars,nvoice,master,loc+"voice"+to_s(nvoice)+"/", osc);
 advoice->show();
 ADnoteVoice->redraw();}
         xywh {10 590 130 25} type Simple labelfont 1 align 8 minimum 0 maximum 2 step 1 value 1 textfont 1 textsize 13
@@ -1060,7 +1110,7 @@ ADnoteVoice->redraw();}
       }
     }
     Fl_Window ADnoteVoiceList {
-      label {ADsynth Voices list}
+      label {ADsynth Voices list} open
       xywh {32 266 650 260} type Double hide
     } {
       Fl_Text_Display {} {
@@ -1097,16 +1147,22 @@ ADnoteVoice->redraw();}
       } {
         Fl_Pack {} {open
           xywh {0 20 620 210}
-          code0 {for (int i=0;i<NUM_VOICES;i++){voicelistitem[i]=new ADvoicelistitem(0,0,620,25,"");voicelistitem[i]->init(pars,i,master);}}
+          code0 {for (int i=0;i<NUM_VOICES;i++){voicelistitem[i]=new ADvoicelistitem(0,0,620,25,"");voicelistitem[i]->init(pars,i,master,loc+"voice"+to_s(i)+"/oscil/",osc);}}
         } {}
       }
     }
   }
-  Function {ADnoteUI(ADnoteParameters *parameters,Master *master_)} {} {
-    code {pars=parameters;
+  Function {ADnoteUI(ADnoteParameters *parameters,Master *master_, std::string loc_, Fl_Osc_Interface *osc_)} {open
+  } {
+    code {assert(osc_);
+assert(!loc_.empty());
+
+pars=parameters;
 master=master_;
 nvoice=0;
 resui=new ResonanceUI(pars->GlobalPar.Reson);
+loc=loc_;
+osc=osc_;
 make_window();} {}
   }
   Function {~ADnoteUI()} {} {
@@ -1118,7 +1174,8 @@ delete(ADnoteGlobalParameters);
 delete(ADnoteVoice);
 delete(resui);} {}
   }
-  Function {refresh()} {} {
+  Function {refresh()} {open
+  } {
     code {volume->value(pars->GlobalPar.PVolume);
 vsns->value(pars->GlobalPar.PAmpVelocityScaleFunction);
 pan->value(pars->GlobalPar.PPanning);
@@ -1154,9 +1211,18 @@ for (int i=0;i<NUM_VOICES;i++) voicelistitem[i]->refreshlist();
 resui->refresh();
 currentvoicecounter->do_callback();} {}
   }
-  decl {ADnoteParameters *pars;} {}
-  decl {ResonanceUI *resui;} {}
-  decl {Master *master;} {}
-  decl {int nvoice;} {}
-  decl {ADvoicelistitem *voicelistitem[NUM_VOICES];} {}
+  decl {ADnoteParameters *pars;} {private local
+  }
+  decl {ResonanceUI *resui;} {private local
+  }
+  decl {Master *master;} {private local
+  }
+  decl {int nvoice;} {private local
+  }
+  decl {ADvoicelistitem *voicelistitem[NUM_VOICES];} {private local
+  }
+  decl {std::string loc;} {private local
+  }
+  decl {Fl_Osc_Interface *osc;} {private local
+  }
 } 

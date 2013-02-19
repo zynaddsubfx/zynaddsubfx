@@ -28,6 +28,7 @@
 
 static rtosc::Ports localPorts =
 {
+    RECURP(PADnoteParameters, OscilGen, oscil, oscilgen, "Oscillator"),
     {"sample#64:ifb", "::Nothing to see here", 0,
         [](const char *m, rtosc::RtData d)
         {

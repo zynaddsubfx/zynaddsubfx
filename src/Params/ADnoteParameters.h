@@ -111,6 +111,8 @@ struct ADnoteGlobalParam {
 
     //how the randomness is applied to the harmonics on more voices using the same oscillator
     unsigned char Hrandgrouping;
+
+    static rtosc::Ports &ports;
 };
 
 
@@ -283,6 +285,8 @@ struct ADnoteVoiceParam {
     /* Frequency Envelope of the Modullator */
     unsigned char   PFMAmpEnvelopeEnabled;
     EnvelopeParams *FMAmpEnvelope;
+
+    static rtosc::Ports &ports;
 };
 
 class ADnoteParameters:public PresetsArray
@@ -302,6 +306,7 @@ class ADnoteParameters:public PresetsArray
         float getUnisonFrequencySpreadCents(int nvoice);
         int get_unison_size_index(int nvoice);
         void set_unison_size_index(int nvoice, int index);
+        static rtosc::Ports &ports;
     private:
         void defaults(int n); //n is the nvoice
 

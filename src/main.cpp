@@ -22,6 +22,7 @@
 
 
 #include <iostream>
+#include <map>
 #include <cmath>
 #include <cctype>
 #include <algorithm>
@@ -49,12 +50,13 @@ extern Dump dump;
 
 //GUI System
 #include "UI/Fl_Osc_Interface.h"
+#include "UI/Fl_Osc_Widget.H"
 #include "UI/Connection.h"
 GUI::ui_handle_t gui;
 
 //The Glue
-rtosc::ThreadLink *bToU = new rtosc::ThreadLink(1024,1024);
-rtosc::ThreadLink *uToB = new rtosc::ThreadLink(1024,1024);
+rtosc::ThreadLink *bToU = new rtosc::ThreadLink(4096*2,1024);
+rtosc::ThreadLink *uToB = new rtosc::ThreadLink(4096*2,1024);
 
 using namespace std;
 
@@ -229,16 +231,53 @@ void initprogram(void)
 
 class UI_Interface:public Fl_Osc_Interface
 {
-    void requestValue(string s)
-    {
-        if(last_url != "GUI") {
-            uToB->write("/echo", "ss", "OSC_URL", "GUI");
+    public:
+        void requestValue(string s) override
+        {
+            //Fl_Osc_Interface::requestValue(s);
+            if(last_url != "GUI") {
+                uToB->write("/echo", "ss", "OSC_URL", "GUI");
             last_url = "GUI";
+            }
+
+            uToB->write(s.c_str(),"");
         }
 
-        uToB->write(s.c_str(),"");
+        void writeValue(string s, char c)
+        {
+            Fl_Osc_Interface::writeValue(s,c);
+            uToB->write(s.c_str(), "c", c);
+        }
 
-    }
+        void createLink(string s, class Fl_Osc_Widget*w) override
+        {
+            Fl_Osc_Interface::createLink(s,w);
+            map.insert(std::pair<string,Fl_Osc_Widget*>(s,w));
+        }
+
+        void removeLink(string s, class Fl_Osc_Widget*w) override
+        {
+            for(auto i = map.begin(); i != map.end(); ++i) {
+                if(i->first == s && i->second == w)
+                    map.erase(i);
+            }
+            printf("[%d] removing '%s' (%p)...\n", map.size(), s.c_str(), w);
+        }
+
+        virtual void tryLink(const char *msg) override
+        {
+            for(auto pair:map) {
+                //printf("'%s' :=> '%p'\n", pair.first.c_str(), pair.second);
+                if(pair.first == msg) {
+                    //printf("Possible location for application of '%s' is '%p'\n", msg, pair.second);
+                    if(!strcmp(rtosc_argument_string(msg), "b"))
+                        pair.second->OSC_value(rtosc_argument(msg,0).b.len,rtosc_argument(msg,0).b.data);
+                }
+            }
+        };
+
+    private:
+        std::multimap<string,Fl_Osc_Widget*> map;
 } ui_link;
 
 

@@ -123,7 +123,7 @@ class Panellistitem {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window panellistitem {open
-      private xywh {620 721 100 260} type Double box NO_BOX
+      private xywh {623 721 100 260} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group panellistitemgroup {open
@@ -261,7 +261,7 @@ if ((
     *exitprogram=1;
 };
 \#endif}
-      xywh {92 456 390 525} type Double xclass zynaddsubfx visible
+      xywh {95 456 390 525} type Double xclass zynaddsubfx visible
     } {
       Fl_Menu_Bar mastermenu {
         xywh {-5 0 690 25}
@@ -530,7 +530,7 @@ pthread_mutex_unlock(&master->mutex);}
       } {
         Fl_Group partui {open
           xywh {0 310 383 175}
-          code0 {o->init(master->part[0],"/part0/", master,0,bankui);}
+          code0 {o->init(master->part[0],"/part0/", master,0,bankui,"/part0/", osc);}
           code1 {o->show();}
           class PartUI
         } {}
@@ -808,7 +808,7 @@ partui=new PartUI(0,0,765,525);
 partuigroup->add(partui);
 char buffer[1024];
 snprintf(buffer, 1024, "/part%d/", nval);
-partui->init(master->part[nval], buffer, master, nval, bankui);
+partui->init(master->part[nval], buffer, master, nval, bankui, "/part"+to_s(nval)+"/", osc);
 partui->redraw();
 o->redraw();
 npart=nval;
@@ -901,7 +901,7 @@ GNU General Public License for details.}
     }
     Fl_Window panelwindow {
       label {ZynAddSubFX Panel} open
-      xywh {95 105 630 635} type Double visible
+      xywh {98 128 630 635} type Double visible
     } {
       Fl_Scroll {} {open
         xywh {0 5 570 310} type HORIZONTAL box THIN_UP_BOX
@@ -941,7 +941,7 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL)) {
 	*exitprogram=1;
 };
 \#endif}
-      xywh {295 354 600 335} type Double visible
+      xywh {298 377 600 335} type Double visible
     } {
       Fl_Menu_Bar simplemastermenu {
         xywh {0 0 690 25}
@@ -1705,10 +1705,10 @@ bankui->hide();} {}
   }
   decl {char masterwindowlabel[100];} {private local
   }
-  decl {Panellistitem *panellistitem[NUM_MIDI_PARTS];} {selected public local
+  decl {Panellistitem *panellistitem[NUM_MIDI_PARTS];} {public local
   }
   decl {NioUI nioui;} {private local
   }
-  decl {class Fl_Osc_Interface *osc;} {private local
+  decl {class Fl_Osc_Interface *osc;} {selected public local
   }
 } 

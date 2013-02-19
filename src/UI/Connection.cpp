@@ -77,10 +77,10 @@ void GUI::destroyUi(ui_handle_t ui)
 
 #define BEGIN(x) {x,"",NULL,[](const char *m, rtosc::RtData d){ \
     MasterUI *ui   = static_cast<MasterUI*>(d.obj); \
-    rtosc_arg_t a0 = rtosc_argument(m,0); \
-    rtosc_arg_t a1 = rtosc_argument(m,1); \
-    rtosc_arg_t a2 = rtosc_argument(m,2); \
-    rtosc_arg_t a3 = rtosc_argument(m,3);
+    rtosc_arg_t a0 = rtosc_argument(m,0);
+    //rtosc_arg_t a1 = rtosc_argument(m,1); \
+    //rtosc_arg_t a2 = rtosc_argument(m,2); \
+    //rtosc_arg_t a3 = rtosc_argument(m,3);
 #define END }},
 
 //DSL based ports
@@ -106,6 +106,7 @@ static rtosc::Ports ports = {
         ui->do_load_master(a0.s);
     } END
     BEGIN("vu-meter:bb") {
+        rtosc_arg_t a1 = rtosc_argument(m,1);
         if(a0.b.len == sizeof(vuData) &&
                 a1.b.len == sizeof(float)*NUM_MIDI_PARTS) {
             //Refresh the primary VU meters
@@ -121,8 +122,16 @@ static rtosc::Ports ports = {
 
 void GUI::raiseUi(ui_handle_t gui, const char *message)
 {
+    MasterUI *mui = (MasterUI*)gui;
+    mui->osc->tryLink(message);
+    //printf("got message for UI '%s'\n", message);
     char buffer[1024];
-    ports.dispatch(buffer, sizeof(buffer), message+1, gui);
+    memset(buffer, 0, sizeof(buffer));
+    rtosc::RtData d;
+    d.loc = buffer;
+    d.loc_size = 1024;
+    d.obj = gui;
+    ports.dispatch(message+1, d);
 }
 
 void GUI::raiseUi(ui_handle_t gui, const char *dest, const char *args, ...)

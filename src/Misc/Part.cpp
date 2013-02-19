@@ -47,6 +47,8 @@ static Ports partPorts = {
 
 static Ports kitPorts = {
     RECURP(Part::Kit, PADnoteParameters, padpars, padpars, "Padnote parameters"),
+    RECURP(Part::Kit, ADnoteParameters, adpars, adpars, "Adnote parameters"),
+    RECURP(Part::Kit, SUBnoteParameters, subpars, subpars, "Adnote parameters"),
 };
 
 Ports &Part::Kit::ports = kitPorts;

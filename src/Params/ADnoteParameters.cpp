@@ -33,6 +33,30 @@
 #include "../Synth/Resonance.h"
 #include "FilterParams.h"
 
+#include <rtosc/ports.h>
+using rtosc::Ports;
+using rtosc::RtData;
+
+#define EXPAND(x) x
+
+static Ports voicePorts = {
+    RECURP(ADnoteVoiceParam, OscilGen, oscil, OscilSmp, "Primary Oscillator"),
+    RECURP(ADnoteVoiceParam, OscilGen, oscil-mod, FMSmp, "Modulating Oscillator"),
+};
+
+static Ports globalPorts = {
+    PARAMC(ADnoteGlobalParam, PPanning, panning, "Panning (0 random, 1 left, 127 right)")
+};
+
+static Ports adPorts = {//XXX 16 should not be hard coded
+    RECURS(ADnoteParameters, ADnoteVoiceParam, voice, VoicePar, 16, "Voice Parameters"),
+    RECUR(ADnoteParameters, ADnoteGlobalParam, global, GlobalPar, "Adnote Parameters"),
+};
+
+Ports &ADnoteParameters::ports  = adPorts;
+Ports &ADnoteVoiceParam::ports  = voicePorts;
+Ports &ADnoteGlobalParam::ports = globalPorts;
+
 int ADnote_unison_sizes[] =
 {1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 0};
 

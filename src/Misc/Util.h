@@ -72,6 +72,12 @@ std::string stringFrom(T x)
 }
 
 template<class T>
+std::string to_s(T x)
+{
+    return stringFrom(x);
+}
+
+template<class T>
 T stringTo(const char *x)
 {
     std::string str = x != NULL ? x : "0"; //should work for the basic float/int
@@ -80,6 +86,8 @@ T stringTo(const char *x)
     ss >> ans;
     return ans;
 }
+
+
 
 template<class T>
 T limit(T val, T min, T max)
@@ -142,40 +150,51 @@ const char *message_snip(const char *m);
 ///floating point parameter - with lookup code
 #define PARAMF(type, var, name, scale, _min, _max, desc) \
 {#name"::f", #scale "," # _min "," #_max ":'parameter':" desc, 0, \
-    [](const char *m, RtData d) { \
+    [](const char *m, rtosc::RtData &d) { \
         if(rtosc_narguments(m)==0) {\
-            bToU->write("/display", "sf", d.loc, ((type*)d.obj)->var); \
+            d.reply(d.loc, "f", ((type*)d.obj)->var); \
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='f') {\
             ((type*)d.obj)->var = limit<float>(_min,_max,rtosc_argument(m,0).f); \
-            bToU->write(d.loc, "f", ((type*)d.obj)->var);}}}
+            d.broadcast(d.loc, "f", ((type*)d.obj)->var);}}}
+
+///character parameter - with lookup code
+#define PARAMC(type, var, name, desc) \
+{#name"::c", ":'old-param':" desc, 0, \
+    [](const char *m, rtosc::RtData &d) { \
+        if(rtosc_narguments(m)==0) {\
+            d.reply(d.loc, "c", ((type*)d.obj)->var); \
+        } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='c') {\
+            ((type*)d.obj)->var = limit<char>(0,127,rtosc_argument(m,0).i); \
+            d.broadcast(d.loc, "c", ((type*)d.obj)->var);}}}
 
 ///Recur - perform a simple recursion
 #define RECUR(type, cast, name, var, desc) \
-{#name"/", ":'recursion':" desc, &cast::ports, [](const char *m, RtData d){\
-    cast::ports.dispatch(d.loc, d.loc_size, message_snip(m),\
-            &(((type*)d.obj)->var));}}
+{#name"/", ":'recursion':" desc, &cast::ports, [](const char *m, rtosc::RtData &d){\
+    d.obj = &(((type*)d.obj)->var); \
+    cast::ports.dispatch(message_snip(m), d);}}
 
 ///Recurs - perform a ranged recursion
 #define RECURS(type, cast, name, var, length, desc) \
-{#name "#" #length "/", ":'recursion':" desc, &cast::ports, [](const char *m, RtData d){ \
-    const char *mm = m; \
-    while(!isdigit(*mm))++mm; \
-        cast::ports.dispatch(d.loc, d.loc_size, message_snip(m), \
-                &(((type*)d.obj)->var)[atoi(mm)]);}}
+{#name "#" #length "/", ":'recursion':" desc, &cast::ports, \
+    [](const char *m, rtosc::RtData &d){ \
+        const char *mm = m; \
+        while(!isdigit(*mm))++mm; \
+        d.obj = &(((type*)d.obj)->var)[atoi(mm)]; \
+        cast::ports.dispatch(message_snip(m), d);}}
 
 ///Recur - perform a simple recursion (on pointer member)
 #define RECURP(type, cast, name, var, desc) \
-{#name"/", ":'recursion':" desc, &cast::ports, [](const char *m, RtData d){\
-    cast::ports.dispatch(d.loc, d.loc_size, message_snip(m),\
-            (((type*)d.obj)->var));}}
+{#name"/", ":'recursion':" desc, &cast::ports, [](const char *m, rtosc::RtData &d){\
+    d.obj = (((type*)d.obj)->var); \
+    cast::ports.dispatch(message_snip(m), d);}}
 
 ///Recurs - perform a ranged recursion (on pointer array member)
 #define RECURSP(type, cast, name, var, length, desc) \
-{#name "#" #length "/", ":'recursion':" desc, &cast::ports, [](const char *m, RtData d){ \
-    const char *mm = m; \
-    while(!isdigit(*mm))++mm; \
-        cast::ports.dispatch(d.loc, d.loc_size, message_snip(m), \
-                (((type*)d.obj)->var)[atoi(mm)]);}}
-
+{#name "#" #length "/", ":'recursion':" desc, &cast::ports, \
+    [](const char *m, rtosc::RtData &d){ \
+        const char *mm = m; \
+        while(!isdigit(*mm))++mm; \
+        d.obj = (((type*)d.obj)->var)[atoi(mm)]; \
+        cast::ports.dispatch(message_snip(m), d);}}
 
 #endif

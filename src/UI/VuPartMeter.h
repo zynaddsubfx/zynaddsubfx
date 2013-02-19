@@ -5,7 +5,7 @@ class VuPartMeter: public VuMeter
 {
     public:
         VuPartMeter(int x,int y, int w, int h, const char *label=0)
-            :VuMeter(x,y,w,h,label)
+            :VuMeter(x,y,w,h,label), db(0.0f)
         {}
 
         void draw(void)

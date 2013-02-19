@@ -24,6 +24,13 @@
 #include "SUBnoteParameters.h"
 #include <stdio.h>
 
+#include <rtosc/ports.h>
+
+static rtosc::Ports localPorts = {
+};
+
+rtosc::Ports &SUBnoteParameters::ports = localPorts;
+
 SUBnoteParameters::SUBnoteParameters():Presets()
 {
     setpresettype("Psubsyth");

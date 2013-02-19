@@ -110,6 +110,8 @@ class OscilGen:public Presets
 
         bool ADvsPAD; //if it is used by ADsynth or by PADsynth
 
+        static rtosc::Ports &ports;
+
     private:
         //This array stores some termporary data and it has OSCIL_SIZE elements
         float *tmpsmps;

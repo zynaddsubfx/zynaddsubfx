@@ -28,6 +28,73 @@
 #include <math.h>
 #include <stdio.h>
 
+#include <rtosc/ports.h>
+
+static rtosc::Ports localPorts = {
+    {"prepare:", "::Ensures Output of Oscillator is in sync with parameters",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            ((OscilGen*)d.obj)->prepare();
+        }},
+    {"convert2sine:", "::Translates waveform into FS",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            ((OscilGen*)d.obj)->convert2sine();
+        }},
+    {"phase#128::c", "::Sets harmonic phase",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            const char *mm = m;
+            while(*mm && !isdigit(*mm)) ++mm;
+            unsigned char &phase = ((OscilGen*)d.obj)->Phphase[atoi(mm)];
+            if(!rtosc_narguments(m))
+                d.reply(d.loc, "c", phase);
+            else
+                phase = rtosc_argument(m,0).i;
+        }},
+    {"magnitude#128::c", "::Sets harmonic magnitude",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            const char *mm = m;
+            while(*mm && !isdigit(*mm)) ++mm;
+            unsigned char &mag = ((OscilGen*)d.obj)->Phmag[atoi(mm)];
+            if(!rtosc_narguments(m))
+                d.reply(d.loc, "c", mag);
+            else
+                mag = rtosc_argument(m,0).i;
+        }},
+    {"base-spectrum:", "::Returns spectrum of base waveshape",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            const unsigned n = synth->oscilsize / 2;
+            float *spc = getTmpBuffer();
+            ((OscilGen*)d.obj)->getspectrum(n,spc,1);
+            d.reply(d.loc, "b", n*sizeof(float), spc);
+            returnTmpBuffer(spc);
+        }},
+    {"base-waveform:", "::Returns base waveshape points",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            const unsigned n = synth->oscilsize;
+            float *smps = getTmpBuffer();
+            ((OscilGen*)d.obj)->getcurrentbasefunction(smps);
+            d.reply(d.loc, "b", n*sizeof(float), smps);
+            returnTmpBuffer(smps);
+        }},
+    {"spectrum:", "::Returns spectrum of waveform",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            const unsigned n = synth->oscilsize / 2;
+            float *spc = getTmpBuffer();
+            ((OscilGen*)d.obj)->getspectrum(n,spc,0);
+            d.reply(d.loc, "b", n*sizeof(float), spc);
+            returnTmpBuffer(spc);
+        }},
+    {"waveform:", "::Returns waveform points",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            const unsigned n = synth->oscilsize;
+            float *smps = getTmpBuffer();
+            ((OscilGen*)d.obj)->get(smps,-1.0);
+            d.reply(d.loc, "b", n*sizeof(float), smps);
+            returnTmpBuffer(smps);
+        }},
+};
+
+rtosc::Ports &OscilGen::ports = localPorts;
+
 
 //operations on FFTfreqs
 inline void clearAll(fft_t *freqs)
@@ -659,6 +726,11 @@ void OscilGen::prepare()
     oscilprepared = 1;
 }
 
+fft_t operator*(float a, fft_t b)
+{
+    return std::complex<float>(a*b.real(), a*b.imag());
+}
+
 void OscilGen::adaptiveharmonic(fft_t *f, float freq)
 {
     if(Padaptiveharmonics == 0 /*||(freq<1.0f)*/)
@@ -687,41 +759,22 @@ void OscilGen::adaptiveharmonic(fft_t *f, float freq)
     }
 
     for(int i = 0; i < synth->oscilsize / 2 - 2; ++i) {
-        float h    = i * rap;
-        int   high = (int)(i * rap);
-        float low  = fmod(h, 1.0f);
+        const int   high = (int)(i * rap);
+        const float low  = fmod(i * rap, 1.0f);
 
         if(high >= (synth->oscilsize / 2 - 2))
             break;
-        else {
-            if(down) {
-                f[high] =
-                    std::complex<float>(f[high].real() + inf[i].real() * (1.0f - low),
-                            f[high].imag() + inf[i].imag() * (1.0f - low));
 
-                f[high + 1] = std::complex<float>(f[high + 1].real() + inf[i].real() * low,
-                        f[high + 1].imag() + inf[i].imag() * low);
-            }
-            else {
-                hc = inf[high].real()
-                     * (1.0f - low) + inf[high + 1].real() * low;
-                hs = inf[high].imag()
-                     * (1.0f - low) + inf[high + 1].imag() * low;
-            }
-            if(fabs(hc) < 0.000001f)
-                hc = 0.0f;
-            if(fabs(hs) < 0.000001f)
-                hs = 0.0f;
+        if(down) {
+            f[high] += (1.0f - low) * inf[i];
+            f[high + 1] += low * inf[i];
         }
-
-        if(!down) {
-            if(i == 0) { //corect the aplitude of the first harmonic
-                hc *= rap;
-                hs *= rap;
-            }
-            f[i] = fft_t(hc, hs);
+        else {
+            f[i] = (1.0f - low) * inf[high] + low * inf[high + 1];
         }
     }
+    if(!down)//corect the aplitude of the first harmonic
+        f[0] *= rap;
 
     f[1] += f[0];
     clearDC(f);

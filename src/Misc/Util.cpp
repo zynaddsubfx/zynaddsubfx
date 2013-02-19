@@ -160,6 +160,11 @@ typedef pool_t::iterator        pool_itr_t;
 
 pool_t pool;
 
+static unsigned max(unsigned a, unsigned b)
+{
+    return a>b?a:b;
+}
+
 float *getTmpBuffer()
 {
     for(pool_itr_t itr = pool.begin(); itr != pool.end(); ++itr)
@@ -169,7 +174,7 @@ float *getTmpBuffer()
         }
     pool_entry p; //Extend Pool
     p.free = false;
-    p.dat  = new float[synth->buffersize];
+    p.dat  = new float[max(synth->buffersize, synth->oscilsize)];
     pool.push_back(p);
 
     return p.dat;

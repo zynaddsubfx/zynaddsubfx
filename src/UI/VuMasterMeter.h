@@ -6,7 +6,11 @@ class VuMasterMeter: public VuMeter
 {
     public:
         VuMasterMeter(int x,int y, int w, int h, const char *label=0)
-        :VuMeter(x,y,w,h,label),osc(NULL)
+        :VuMeter(x,y,w,h,label),
+        olddbl(0.0f),olddbr(0.0f),
+        oldrmsdbl(0.0f),oldrmsdbr(0.0f),
+        dbl(0.0f),dbr(0.0f),rmsdbl(0.0f),rmsdbr(0.0f),maxdbl(0.0f),maxdbr(0.0f),
+        clipped(0),osc(NULL)
         {}
 
         void init(Fl_Osc_Interface *_osc)
@@ -27,10 +31,10 @@ class VuMasterMeter: public VuMeter
                     osc->requestValue("/reset-vu");
                     break;
             }
-            
+
             return 1;
         }
-        
+
         static void tick(void *v)
         {
             Fl::repeat_timeout(1.0/18.0,tick,v);//18 fps
