@@ -1,15 +1,140 @@
 Effects
 -------
 
+Effects are, generally, blackboxes that transform audio signals in a specified way. More exactly, the only input data for an effect in Zynaddsubfx is:
+
+* an array of samples, which is read *on line*
+* the current system time (used for LFOs)
+
+The output is the transformed array of samples.
+
+NOTE: As described, effects have no information about anything else. For example, key presses are not recognized. Therefore, pressing a key does not initiate the LFO. Phase nobs will always be relative to a *global* LFO, which is only dependent on the system time.
+
+ZynAddSubFx has 3 types of effects:
+
+* System Effects
+* Insertion Effects
+* Instrument Effects
+
+TODO: Describe these 3 types.
+
+General topics
+~~~~~~~~~~~~~~
+
+* *Wetness* determines the mix of the results of the effect and its input. This mix is made the effects output. If an effect is wet, it means that nothing of the input signal is bypassing the effect. If it is dry, then the effect has no effect.
+* *Filter stages* are the number of times that this filter is applied in series. So, if this number is 1, you simply have this one filter. If it is two, the sound first passes the filter, and the results then pass the same filter again. In ZynAddSubFx, the wetness is applied after all stages were passed.
+
+TODO: Can you make a diagram for these two, please?
+
+Equalizer
+~~~~~~~~~
+
+An equalizer is a filter effect that applies different volume to different frequencies of the input signal. http://en.wikipedia.org/wiki/Filter_%28signal_processing%29[Wikipedia] has some information about filters. Also, most of ZynAddSubFx's implementations follow the http://www.harmony-central.com/Computer/Programming/Audio-EQ-Cookbook.txt["Cookbook formulae for audio EQ"] by Robert Bristow-Johnson.
+
+There are different types of filters. The number of poles ... TODO
+
+ZynAddSubFx offers the following filters:
+
+* LPF 1 means Low Pass Filter with one pole. TODO: more description
+* LPF 2 means Low Pass Filter with two poles.
+* HPF 1 means High Pass Filter with one pole.
+* HPF 2 means High Pass Filter with two poles.
+* BPF 2 means Band Pass Filter with two poles.
+* NF 2 means Notch Filter with two poles
+* PK 2 means Peak Filter with two poles.
+* LS 2 Means Low Shelf with two poles.
+* HS 2 means High Shelf with two poles.
+
+TODO: describe other nobs...
+
 Chorus
 ~~~~~~
 
+Introduction
+^^^^^^^^^^^^
+
+In a chorus, there are many people. Even if each of them sings at exactly the same frequency, all their voices usually sound different. We say the have a different timbre. Timbre is the way we perceive sound and makes us differ between different music instruments. This is, physically, achieved by varying both the amplitude envelope and the frequency spectrum. Multiple sounds with slightly different timbre make a sound more shimmering, or powerful. This is the chorus effect.
+
+The chorus effect can be achieved by multiple people singing together. In a concert, there are many instruments, resulting in the same effect. When making electronic music, we only have an input wave and have to generate these different timbres by ourselves.
+
+Description
+^^^^^^^^^^^
+
+We explain the functionality in a diagram and list the components below.
+
 image::./gen/chorus.png[width="700"]
+
+We explain it in detail:
+
+* First, crossover is applied. The *LR Mix* wheel lets you set the amount. If you set it to the highest possible value, you will always have a stereo input.
+* ...
+* Next, the singal can be negated, If the *Neg* Checkbox is activated, the amplitude is multiplied by -1.
+* Finally, *Panning* is applied.
 
 Distort
 ~~~~~~~
 
+Introduction
+^^^^^^^^^^^^
+
+Distortion means, in general, altering a signal. Natural instruments usually produce sine like waves. A wave is transformed in an unnatural way when distortion is used. The most distorted waves are pulse waves. It is typical for distortion to add overtones to a sound. Distortion often increases the power and the http://en.wikipedia.org/wiki/Loudness[loudness] of a signal, while the db level is not increased.
+
+Distortion can happen in many situations when working with audio. Often, this is not wanted. In classical music, for example, distortion does not occur naturally. However, distortion can also be a wanted effect. It is typical for Rock guitars, but also present in electronic music, mostly in Dubstep and DrumNBass. Distortion is an important topic in the http://en.wikipedia.org/wiki/Loudness_war[Loudness War].
+
+NOTE: As distortion increases loudness, distorted music can cause ear damage at lower volume levels. Thus, you might want to use it a bit careful.
+
+Description
+^^^^^^^^^^^
+
+We explain the functionality in a diagram and list the components below.
+
 image::./gen/distort.png[width="700"]
+
+* Negation is the first thing to happen. If the *Neg* Checkbox is activated, the amplitude is multiplied by -1.
+* Panning is applied. Note, however, that you have to activate the Stereo Checkbox, labeled *St*, before.
+* Pre amplification is done next. The amount can be changed using the *Drive* nob. Indeed, this is the amount of distortion. For example, if you clip a signal, the louder the input gets, the more distortion you will get. This can have different meanings for different types of distortion, as described below.
+* Before applying the waveshape, or afterwards, you can apply Highpass and Lowpass filters. The type is HPF2 or LPF2, meaning butterworth lowpasses. They are labeled *HPF* and *LPF*. Whether this is done before, or after the waveshape, depends on the checkbox labeled *PF*.
+* The next step is the wave shape. This defines how the wave is actually modified. The *Type* ComboBox lets you define how. We will discuss some types below.
+* After the wave shape, we scale the level again. This is called output amplification. You can change the value using the *Level* wheel.
+* Crossover is the last step. This is controlled by the wheel *LR Mix* and means that afterwards, a percentage of the left side is applied to the right side, and, synchronously, the other way round. It is a kind of interpolation between left and right. If you set the LR Mix to the highest possible value, you will always have a stereo output.
+
+********************************************************************
+One practical reason for using filters afterwards is that distortion can lead to waves with undesired high frequency parts. Those can be filtered out using the HPF.
+A reason for using filters before applying is to achieve multiband distortion. ZynAddSubFx has no "real" multiband distortion by now, however.
+********************************************************************
+
+For a few types of distortion we will make a description below. Please note that you can get a very good impression for this using the *Wsh* ComboBox in the Oscillator editor.
+
+Atan & Sigmoid
+^^^^^^^^^^^^^^
+
+This is the default setting. It is an easy way to apply loudness to a wave without getting undesired effects. Thus, it can be used both for making instruments that sound like "real" ones, but also for electronic music. The transformation turns, roughly said, every amplitude into a square amplitude. Thus, sine, power, pulse and triangle turn into a usual square wave, while a saw turns into a phased square wave. A chirp wave turns into a kind of phase modulated square wave.
+
+Quants
+^^^^^^
+
+Quantization can be seen as an unnatural effect, which is often used for electronic music. The transformation is similar to building the http://en.wikipedia.org/wiki/Riemann_sum[lower sum] of a wave, mathematically said. This means that the transformation effect turns your "endless high" sampled wave into only a few samples. For more information, read http://en.wikipedia.org/wiki/Quantization_%28sound_processing%29[Wikipedia's article].
+
+The more distortion you will apply, the less samples will be used. Indeed, this is equivalent to say that more input amplification is used. To see this, here is a small sample of code, where "ws" is the (correctly scaled amount of input amplification, and "n" the number of original samples.
+
+---------------------------------
+for(i = 0; i < n; ++i)
+  smps[i] = floor(smps[i] / ws + 0.5f) * ws;
+---------------------------------
+
+********************************************************************
+This kind of distortion might remind you of gaming console sound. Let's say we have a computer which is not able to play sounds with many samples. Therefore, it can only play sounds with a low sample rate. This leads to exactly this effect.
+********************************************************************
+
+NOTE: If you turn on quantisation very high, you might be confused that, especially high notes, make no sound. The reason is simple: High frequencies are "forgotten" if you sample with only few samples. Also, the sign of an amplitude can be forgotten. This behaviour might make some quantisations a bit unexpected.
+
+
+Limiting & Clipping
+^^^^^^^^^^^^^^^^^^^
+
+Limiting usually means that for a signal, the amplitude is modified because it exceeds its maximum value. Overdrive, as often used for guitars, is often achieved by limiting: It happens because an amplifier "overdrives" the maximum amplitude it can deliver. For more general information, you can try http://en.wikipedia.org/wiki/Limiting[Wikipedia].
+
+ZynAddSubFx has two types of limiting. Soft limiting, here as *Lmt*, means that the sound may not exceed a certain value. If the amplitude does so, it will simply be reduced to the limiting value. Hard limiting, is also called clipping and abbreviated *Clip*. This means that if the maximum is exceeded, instead of being constant at the limiting value, the original signal still has some influence on the output signal. Still, it does not exceed the limiting value. For ZynAddSubFx, a signal exeeding the limiting value will continue to grow "in the negative".
 
 Dynamic Filter
 ~~~~~~~~~~~~~
