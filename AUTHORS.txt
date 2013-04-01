@@ -23,4 +23,6 @@ Contributors:
         Lieven Moors (Spike/Circle waveform)
         Olaf Schulz (MIDI Aftertouch support)
         Jonathan Liles (NSM & NTK support)
+        Johannes Lorenz (Effect Documentation)
+        Ilario Glasgo (Italian Doc Translation)
 
