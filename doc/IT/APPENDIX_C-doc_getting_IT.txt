@@ -8,7 +8,7 @@ SourceForge::
 Distribuition::
     apt/yum/others
 Git::
-    git://zynaddsubfx.git.sourceforge.net/gitroot/zynaddsubfx/zynaddsubfx
+    git clone git://git.code.sf.net/p/zynaddsubfx/code zynaddsubfxg
 
 Introduzione a Git
 ~~~~~~~~~~~~~~~~~~~
@@ -24,7 +24,7 @@ Ottenere il codice sorgente
 Per avere una copia dei sorgenti di ZynAddSubFX tutto il necessario da fare è:
 
 ---------------------------------------------
-git clone git://zynaddsubfx.git.sourceforge.net/gitroot/zynaddsubfx/zynaddsubfx
+git clone git://git.code.sf.net/p/zynaddsubfx/code zynaddsubfx
 
 cd zynaddsubfx
 
