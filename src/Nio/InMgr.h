@@ -37,6 +37,8 @@ class InMgr
 
         std::string getSource() const;
 
+        void setMaster(class Master *master);
+
         friend class EngineMgr;
     private:
         InMgr();
@@ -46,7 +48,7 @@ class InMgr
         class MidiIn * current;
 
         /**the link to the rest of zyn*/
-        class Master & master;
+        class Master *master;
 };
 
 #endif

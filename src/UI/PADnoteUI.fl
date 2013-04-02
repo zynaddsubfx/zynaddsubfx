@@ -253,14 +253,13 @@ master=master_;
 oscui=NULL;
 osc_i = osc_;
 resui=new ResonanceUI(pars->resonance);
-make_window();} {selected
-    }
+make_window();} {}
   }
   Function {make_window()} {open
   } {
     Fl_Window padnotewindow {
       label {PAD synth Parameters} open
-      xywh {303 461 535 435} type Double visible
+      xywh {306 484 535 435} type Double visible
     } {
       Fl_Tabs {} {
         callback {if (o->value()!=harmonicstructuregroup) applybutton->hide();
@@ -980,7 +979,8 @@ hprofile->redraw();}
       }
       Fl_Button applybutton {
         label {Apply Changes}
-        callback {MiddleWare::preparePadSynth(location.c_str(), pars);
+        callback {osc_i->requestValue(location+"prepare");
+//MiddleWare::preparePadSynth(location.c_str(), pars);
 o->color(FL_GRAY);
 if (oscui!=NULL) {
 	oscui->applybutton->color(FL_GRAY);
@@ -989,7 +989,7 @@ if (oscui!=NULL) {
 if (resui!=NULL) {
 	resui->applybutton->color(FL_GRAY);
 	resui->applybutton->redraw();
-};}
+};} selected
         xywh {300 400 135 30} box THIN_UP_BOX
         code0 {o->color(FL_RED);}
       }

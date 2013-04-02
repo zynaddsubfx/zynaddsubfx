@@ -105,7 +105,7 @@ class Part
 
         //Part parameters
         void setkeylimit(unsigned char Pkeylimit);
-        void setkititemstatus(int kititem, int Penabled_);
+        void setkititemstatus(unsigned kititem, bool Penabled_);
 
         unsigned char Penabled; /**<if the part is enabled*/
         unsigned char Pvolume; /**<part volume*/

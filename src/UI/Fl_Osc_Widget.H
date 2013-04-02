@@ -13,6 +13,7 @@ class Fl_Osc_Widget
         virtual void OSC_value(float) {}
         virtual void OSC_value(bool) {}
         virtual void OSC_value(int) {}
+        virtual void OSC_value(char) {}
         virtual void OSC_value(unsigned,void*) {}
 
         std::string loc;

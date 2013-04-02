@@ -1,10 +1,18 @@
 #pragma once
-class PADnoteParameters;
-//Link between realtime and non-realtime layers
-namespace MiddleWare
-{
-static void preparePadSynth(const char *path, PADnoteParameters *p);
-};
 
-//XXX Odd Odd compiler behavior has made this hack necessary (darn you linker)
-#include "MiddleWare.cpp"
+//Link between realtime and non-realtime layers
+class MiddleWare
+{
+    public:
+        MiddleWare(void);
+        ~MiddleWare(void);
+        //return internal master pointer
+        class Master *spawnMaster(void);
+        class Fl_Osc_Interface *spawnUiApi(void);
+        void setUiCallback(void(*cb)(void*,const char *),void *ui);
+        void tick(void);
+
+        static void preparePadSynth(const char *, class PADnoteParameters *){};
+    private:
+        struct MiddleWareImpl *impl;
+};

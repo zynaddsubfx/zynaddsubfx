@@ -71,12 +71,13 @@ decl {\#include "PresetsUI.h"} {public local
 decl {\#include <FL/fl_draw.H>} {public local
 } 
 
-class PSlider {open : {public Fl_Slider}
+class PSlider {open : {public Fl_Slider, public Fl_Osc_Widget}
 } {
-  Function {PSlider(int x,int y, int w, int h, const char *label=0):Fl_Slider(x,y,w,h,label)} {} {
-    code {;} {}
+  Function {PSlider(int x,int y, int w, int h, const char *label=0):Fl_Slider(x,y,w,h,label)} {open
+  } {
+    code {phase=false;} {}
   }
-  Function {handle(int event)} {return_type int
+  Function {handle(int event)} {open return_type int
   } {
     code {int X=x(),Y=y(),W=w(),H=h();
 
@@ -103,6 +104,15 @@ return(1);} {}
   }
   decl {Fl_Osc_Interface *osc} {public local
   }
+  Function {OSC_value(char c)} {open return_type void
+  } {
+    code {if(phase)
+    value(c);
+else
+    value(127-c);} {}
+  }
+  decl {bool phase;} {selected public local
+  }
 } 
 
 class Oscilharmonic {open : {public Fl_Group}
@@ -110,7 +120,7 @@ class Oscilharmonic {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window harmonic {open
-      private xywh {392 673 100 225} type Double box NO_BOX
+      private xywh {398 719 100 225} type Double box NO_BOX
       class Fl_Osc_Group visible
     } {
       Fl_Slider mag {
@@ -137,7 +147,7 @@ if (cbwidget!=NULL) {
 	applybutton->redraw();
 };}
         xywh {0 15 15 115} type {Vert Knob} box NO_BOX selection_color 222 maximum 127 step 1 value 64
-        code0 {//o->value(127-oscil->Phmag[n]);}
+        code0 {o->phase=false;//o->value(127-oscil->Phmag[n]);}
         code1 {//if (oscil->Phmag[n]==64) o->selection_color(0);}
         class PSlider
       }
@@ -159,7 +169,7 @@ if (cbwidget!=NULL) {
 	applybutton->redraw();
 };}
         xywh {0 135 15 75} type {Vert Knob} box NO_BOX selection_color 222 maximum 127 step 1 value 64
-        code0 {//o->value(oscil->Phphase[n]);}
+        code0 {o->phase=true;//o->value(oscil->Phphase[n]);}
         class PSlider
       }
       Fl_Box {} {
@@ -204,8 +214,10 @@ mag->loc = loc;
 phase->osc = osc;
 phase->loc = loc;
 
-//osc->requestValue(loc+"magnitude"+to_s(n));
-//osc->requestValue(loc+"phase"+to_s(n));
+osc->createLink(loc+"magnitude"+to_s(n), mag);
+osc->createLink(loc+"phase"+to_s(n), phase);
+osc->requestValue(loc+"magnitude"+to_s(n));
+osc->requestValue(loc+"phase"+to_s(n));
 end();
 harmonic->show();} {}
   }
@@ -219,9 +231,13 @@ if (mag->value()==64)
 else
     mag->selection_color(222);} {}
   }
-  Function {~Oscilharmonic()} {} {
-    code {harmonic->hide();
-//delete(harmonic);} {}
+  Function {~Oscilharmonic()} {open
+  } {
+    code {osc->removeLink(loc+"magnitude"+to_s(n), mag);
+osc->removeLink(loc+"phase"+to_s(n), phase);
+
+harmonic->hide();
+delete harmonic;} {}
   }
   decl {Fl_Group *display;} {private local
   }
@@ -241,10 +257,10 @@ class OscilEditor {open : {public PresetsUI_}
   } {
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor} open
-      xywh {341 339 735 595} type Double
+      xywh {347 385 735 595} type Double
       code0 {if (oscil->ADvsPAD) o->label("PADsynth Harmonic Content Editor");} visible
     } {
-      Fl_Group dummy {open selected
+      Fl_Group dummy {open
         xywh {25 25 15 15} color 32 selection_color 71 labelcolor 179
         code0 {dummy->pane_name = loc;}
         code1 {dummy->osc = osc;}
@@ -974,7 +990,8 @@ osceditUI->show();} {}
   Function {~OscilEditor()} {open
   } {
     code {osceditUI->hide();
-//for (int i=0;i<MAX_AD_HARMONICS;i++) delete (h[i]);
+for (int i=0; i<MAX_AD_HARMONICS; ++i)
+    delete h[i];
 
 delete oscilo;
 delete oscilo_base;

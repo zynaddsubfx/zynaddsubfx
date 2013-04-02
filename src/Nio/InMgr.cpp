@@ -41,7 +41,7 @@ InMgr &InMgr::getInstance()
 }
 
 InMgr::InMgr()
-    :queue(100), master(Master::getInstance())
+    :queue(100), master(NULL)
 {
     current = NULL;
     sem_init(&work, PTHREAD_PROCESS_PRIVATE, 0);
@@ -73,21 +73,21 @@ void InMgr::flush()
                 dump.dumpnote(ev.channel, ev.num, ev.value);
 
                 if(ev.value)
-                    master.noteOn(ev.channel, ev.num, ev.value);
+                    master->noteOn(ev.channel, ev.num, ev.value);
                 else
-                    master.noteOff(ev.channel, ev.num);
+                    master->noteOff(ev.channel, ev.num);
                 break;
 
             case M_CONTROLLER:
                 dump.dumpcontroller(ev.channel, ev.num, ev.value);
-                master.setController(ev.channel, ev.num, ev.value);
+                master->setController(ev.channel, ev.num, ev.value);
                 break;
 
             case M_PGMCHANGE:
-                master.setProgram(ev.channel, ev.num);
+                master->setProgram(ev.channel, ev.num);
                 break;
             case M_PRESSURE:
-                master.polyphonicAftertouch(ev.channel, ev.num, ev.value);
+                master->polyphonicAftertouch(ev.channel, ev.num, ev.value);
                 break;
         }
     }
@@ -126,4 +126,9 @@ MidiIn *InMgr::getIn(string name)
 {
     EngineMgr &eng = EngineMgr::getInstance();
     return dynamic_cast<MidiIn *>(eng.getEng(name));
+}
+
+void InMgr::setMaster(Master *master_)
+{
+    master = master_;
 }

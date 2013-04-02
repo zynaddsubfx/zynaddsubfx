@@ -49,18 +49,15 @@ extern Dump dump;
 #include "Nio/Nio.h"
 
 //GUI System
-#include "UI/Fl_Osc_Interface.h"
-#include "UI/Fl_Osc_Widget.H"
 #include "UI/Connection.h"
 GUI::ui_handle_t gui;
 
-//The Glue
-rtosc::ThreadLink *bToU = new rtosc::ThreadLink(4096*2,1024);
-rtosc::ThreadLink *uToB = new rtosc::ThreadLink(4096*2,1024);
+//Glue Layer
+#include "Misc/MiddleWare.h"
+MiddleWare *middleware;
 
 using namespace std;
 
-pthread_t thr4;
 Master   *master;
 SYNTH_T  *synth;
 int       swaplr = 0; //1 for left-right swapping
@@ -88,124 +85,6 @@ void sigterm_exit(int /*sig*/)
     Pexitprogram = 1;
 }
 
-void error_cb(int i, const char *m, const char *loc)
-{
-    fprintf(stderr, "liblo :-( %d-%s@%s\n",i,m,loc);
-}
-
-lo_server server;
-string last_url, curr_url;
-
-void path_search(const char *m)
-{
-    using rtosc::Ports;
-    using rtosc::Port;
-
-    //assumed upper bound of 32 ports (may need to be resized)
-    char         types[65];
-    rtosc_arg_t  args[64];
-    size_t       pos    = 0;
-    const Ports *ports  = NULL;
-    const Port  *port   = NULL;
-    const char  *str    = rtosc_argument(m,0).s;
-    const char  *needle = rtosc_argument(m,1).s;
-
-    //zero out data
-    memset(types, 0, sizeof(types));
-    memset(args,  0, sizeof(args));
-
-    if(!*str) {
-        ports = &Master::ports;
-    } else {
-        const Port *port = Master::ports.apropos(rtosc_argument(m,0).s);
-        if(port)
-            ports = port->ports;
-    }
-
-    if(ports) {
-        //RTness not confirmed here
-        for(const Port &p:*ports) {
-            if(strstr(p.name, needle)!=p.name)
-                continue;
-            types[pos]    = types[pos+1] = 's';
-            args[pos++].s = p.name;
-            args[pos++].s = p.metadata;
-        }
-    }
-
-    //Reply to requester
-    char buffer[1024];
-    size_t length = rtosc_amessage(buffer, 1024, "/paths", types, args);
-    if(length) {
-        lo_message msg  = lo_message_deserialise((void*)buffer, length, NULL);
-        lo_address addr = lo_address_new_from_url(last_url.c_str());
-        if(addr)
-            lo_send_message(addr, buffer, msg);
-    }
-}
-
-int handler_function(const char *path, const char *types, lo_arg **argv,
-        int argc, lo_message msg, void *user_data)
-{
-    lo_address addr = lo_message_get_source(msg);
-    if(addr) {
-        const char *tmp = lo_address_get_url(addr);
-        if(tmp != last_url) {
-            uToB->write("/echo", "ss", "OSC_URL", tmp);
-            last_url = tmp;
-        }
-
-    }
-
-    char buffer[2048];
-    memset(buffer, 0, sizeof(buffer));
-    size_t size = 2048;
-    lo_message_serialise(msg, path, buffer, &size);
-    if(!strcmp(buffer, "/path-search") && !strcmp("ss", rtosc_argument_string(buffer))) {
-        path_search(buffer);
-    } else
-        uToB->raw_write(buffer);
-
-    return 0;
-}
-
-void osc_setup(void)
-{
-    server = lo_server_new_with_proto(NULL, LO_UDP, error_cb);
-    lo_server_add_method(server, NULL, NULL, handler_function, NULL);
-    fprintf(stderr, "lo server running on %d\n", lo_server_get_port(server));
-}
-
-/**
- * - Fetches liblo messages and forward them to the backend
- * - Grabs backend messages and distributes them to the frontends
- */
-void osc_check(void)
-{
-    lo_server_recv_noblock(server, 0);
-    while(bToU->hasNext()) {
-        const char *rtmsg = bToU->read();
-        if(!strcmp(rtmsg, "/echo")
-                && !strcmp(rtosc_argument_string(rtmsg),"ss")
-                && !strcmp(rtosc_argument(rtmsg,0).s, "OSC_URL"))
-            curr_url = rtosc_argument(rtmsg,1).s;
-        else if(curr_url == "GUI") {
-            GUI::raiseUi(gui, bToU->read());
-        } else{
-            lo_message msg  = lo_message_deserialise((void*)rtmsg,
-                    rtosc_message_length(rtmsg, bToU->buffer_size()), NULL);
-
-            //Send to known url
-            if(!curr_url.empty()) {
-                lo_address addr = lo_address_new_from_url(curr_url.c_str());
-                lo_send_message(addr, rtmsg, msg);
-            }
-        }
-    }
-}
-
-
-
 /*
  * Program initialisation
  */
@@ -220,66 +99,14 @@ void initprogram(void)
     cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
 
 
-    master = &Master::getInstance();
+    middleware = new MiddleWare();
+    master = middleware->spawnMaster();
     master->swaplr = swaplr;
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
-
-    osc_setup();
+    Nio::init(master);
 }
-
-class UI_Interface:public Fl_Osc_Interface
-{
-    public:
-        void requestValue(string s) override
-        {
-            //Fl_Osc_Interface::requestValue(s);
-            if(last_url != "GUI") {
-                uToB->write("/echo", "ss", "OSC_URL", "GUI");
-            last_url = "GUI";
-            }
-
-            uToB->write(s.c_str(),"");
-        }
-
-        void writeValue(string s, char c)
-        {
-            Fl_Osc_Interface::writeValue(s,c);
-            uToB->write(s.c_str(), "c", c);
-        }
-
-        void createLink(string s, class Fl_Osc_Widget*w) override
-        {
-            Fl_Osc_Interface::createLink(s,w);
-            map.insert(std::pair<string,Fl_Osc_Widget*>(s,w));
-        }
-
-        void removeLink(string s, class Fl_Osc_Widget*w) override
-        {
-            for(auto i = map.begin(); i != map.end(); ++i) {
-                if(i->first == s && i->second == w)
-                    map.erase(i);
-            }
-            printf("[%d] removing '%s' (%p)...\n", map.size(), s.c_str(), w);
-        }
-
-        virtual void tryLink(const char *msg) override
-        {
-            for(auto pair:map) {
-                //printf("'%s' :=> '%p'\n", pair.first.c_str(), pair.second);
-                if(pair.first == msg) {
-                    //printf("Possible location for application of '%s' is '%p'\n", msg, pair.second);
-                    if(!strcmp(rtosc_argument_string(msg), "b"))
-                        pair.second->OSC_value(rtosc_argument(msg,0).b.len,rtosc_argument(msg,0).b.data);
-                }
-            }
-        };
-
-    private:
-        std::multimap<string,Fl_Osc_Widget*> map;
-} ui_link;
-
 
 /*
  * Program exit
@@ -304,7 +131,6 @@ void exitprogram()
 
     delete [] denormalkillbuf;
     FFT_cleanup();
-    Master::deleteInstance();
 }
 
 int main(int argc, char *argv[])
@@ -314,7 +140,7 @@ int main(int argc, char *argv[])
     dump.startnow();
     int noui = 0;
     cerr
-    << "\nZynAddSubFX - Copyright (c) 2002-2011 Nasca Octavian Paul and others"
+    << "\nZynAddSubFX - Copyright (c) 2002-2013 Nasca Octavian Paul and others"
     << endl;
     cerr << "Compiled: " << __DATE__ << " " << __TIME__ << endl;
     cerr << "This program is free software (GNU GPL v.2 or later) and \n";
@@ -571,7 +397,8 @@ int main(int argc, char *argv[])
     }
 
 
-    gui = GUI::createUi(&ui_link, master, &Pexitprogram);
+    gui = GUI::createUi(middleware->spawnUiApi(), master, &Pexitprogram);
+    middleware->setUiCallback(GUI::raiseUi, gui);
 
     if(!noui)
     {
@@ -636,8 +463,8 @@ int main(int argc, char *argv[])
 #if USE_NSM
 done:
 #endif
-        osc_check();
         GUI::tickUi(gui);
+        middleware->tick();
     }
 
     exitprogram();

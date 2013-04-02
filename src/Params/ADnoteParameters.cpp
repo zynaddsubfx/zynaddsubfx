@@ -40,8 +40,8 @@ using rtosc::RtData;
 #define EXPAND(x) x
 
 static Ports voicePorts = {
-    RECURP(ADnoteVoiceParam, OscilGen, oscil, OscilSmp, "Primary Oscillator"),
-    RECURP(ADnoteVoiceParam, OscilGen, oscil-mod, FMSmp, "Modulating Oscillator"),
+    RECURP(ADnoteVoiceParam, OscilGen, oscil,     OscilSmp, "Primary Oscillator"),
+    RECURP(ADnoteVoiceParam, OscilGen, mod-oscil, FMSmp,    "Modulating Oscillator"),
 };
 
 static Ports globalPorts = {

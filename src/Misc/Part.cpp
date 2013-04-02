@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <cassert>
 
 #include <rtosc/ports.h>
 
@@ -43,12 +44,32 @@ using rtosc::RtData;
 
 static Ports partPorts = {
     RECURS(Part, Part::Kit, kit, kit, 16, "Kit"),//NUM_KIT_ITEMS
+    //{"kit#16::T:F", "::Enables or disables kit item", 0,
+    //    [](const char *m, RtData &d) {
+    //        Part *p = (Part*)d.obj;
+    //        unsigned kitid = -1;
+    //        //Note that this event will be captured before transmitted, thus
+    //        //reply/broadcast don't matter
+    //        for(int i=0; i<VOICES; ++i) {
+    //            d.reply("/middleware/oscil", "siisb", loc, kitid, i, "oscil"
+    //                    sizeof(OscilGen*),
+    //                    p->kit[kitid]->adpars->voice[i]->OscilSmp);
+    //            d.reply("/middleware/oscil", "siisb", loc, kitid, i, "oscil-mod"
+    //                    sizeof(OscilGen*),
+    //                    p->kit[kitid]->adpars->voice[i]->somethingelse);
+    //        }
+    //        d.reply("/middleware/pad", "sib", loc, kitid,
+    //                sizeof(PADnoteParameters*),
+    //                p->kit[kitid]->padpars)
+    //    }}
 };
 
 static Ports kitPorts = {
     RECURP(Part::Kit, PADnoteParameters, padpars, padpars, "Padnote parameters"),
     RECURP(Part::Kit, ADnoteParameters, adpars, adpars, "Adnote parameters"),
     RECURP(Part::Kit, SUBnoteParameters, subpars, subpars, "Adnote parameters"),
+    //{"padpars:b", "::", 0
+    //    [](
 };
 
 Ports &Part::Kit::ports = kitPorts;
@@ -65,14 +86,13 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
 
     for(int n = 0; n < NUM_KIT_ITEMS; ++n) {
         kit[n].Pname   = new unsigned char [PART_MAX_NAME_LEN];
-        kit[n].adpars  = NULL;
-        kit[n].subpars = NULL;
-        kit[n].padpars = NULL;
+        //XXX this is wasting memory, but making interfacing with the back
+        //layers more nice, if this seems to increase memory usage figure out a
+        //sane way of tracking the changing pointers (otherwise enjoy the bloat)
+        kit[n].adpars  = new ADnoteParameters(fft);
+        kit[n].subpars = new SUBnoteParameters();
+        kit[n].padpars = new PADnoteParameters(fft);
     }
-
-    kit[0].adpars  = new ADnoteParameters(fft);
-    kit[0].subpars = new SUBnoteParameters();
-    kit[0].padpars = new PADnoteParameters(fft);
 
     //Part's Insertion Effects init
     for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
@@ -87,6 +107,7 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
 
     killallnotes = 0;
     oldfreq      = -1.0f;
+
 
     for(int i = 0; i < POLIPHONY; ++i) {
         partnote[i].status = KEY_OFF;
@@ -952,14 +973,12 @@ void Part::RunNote(unsigned int k)
 
         for(unsigned type = 0; type < 3; ++type) {
             //Select a note
-            SynthNote **note;
+            SynthNote **note = NULL;
             if(type == 0)
                 note = &partnote[k].kititem[item].adnote;
-            else
-            if(type == 1)
+            else if(type == 1)
                 note = &partnote[k].kititem[item].subnote;
-            else
-            if(type == 2)
+            else if(type == 2)
                 note = &partnote[k].kititem[item].padnote;
 
             //Process if it exists
@@ -1067,42 +1086,42 @@ void Part::setPpanning(char Ppanning_)
         panning = 1.0f;
 }
 
+template<class T>
+static inline void nullify(T &t) {delete t; t = NULL; }
+
 /*
  * Enable or disable a kit item
  */
-void Part::setkititemstatus(int kititem, int Penabled_)
+void Part::setkititemstatus(unsigned kititem, bool Penabled_)
 {
+    //nonexistent kit item and the first kit item is always enabled
     if((kititem == 0) || (kititem >= NUM_KIT_ITEMS))
-        return;                                        //nonexistent kit item and the first kit item is always enabled
-    kit[kititem].Penabled = Penabled_;
+        return;
 
-    bool resetallnotes = false;
+    Kit &kkit = kit[kititem];
+
+    //no need to update if
+    if(kkit.Penabled == Penabled_)
+        return;
+    kkit.Penabled = Penabled_;
+
     if(Penabled_ == 0) {
-        if(kit[kititem].adpars != NULL)
-            delete (kit[kititem].adpars);
-        if(kit[kititem].subpars != NULL)
-            delete (kit[kititem].subpars);
-        if(kit[kititem].padpars != NULL) {
-            delete (kit[kititem].padpars);
-            resetallnotes = true;
-        }
-        kit[kititem].adpars   = NULL;
-        kit[kititem].subpars  = NULL;
-        kit[kititem].padpars  = NULL;
-        kit[kititem].Pname[0] = '\0';
-    }
-    else {
-        if(kit[kititem].adpars == NULL)
-            kit[kititem].adpars = new ADnoteParameters(fft);
-        if(kit[kititem].subpars == NULL)
-            kit[kititem].subpars = new SUBnoteParameters();
-        if(kit[kititem].padpars == NULL)
-            kit[kititem].padpars = new PADnoteParameters(fft);
-    }
+        //nullify(kkit.adpars);
+        //nullify(kkit.subpars);
+        //nullify(kkit.padpars);
+        kkit.Pname[0] = '\0';
 
-    if(resetallnotes)
+        //Reset notes s.t. stale buffers will not get read
         for(int k = 0; k < POLIPHONY; ++k)
             KillNotePos(k);
+    }
+    else {
+        //All parameters must be NULL in this case
+        //assert(!(kkit.adpars || kkit.subpars || kkit.padpars));
+        //kkit.adpars  = new ADnoteParameters(fft);
+        //kkit.subpars = new SUBnoteParameters();
+        //kkit.padpars = new PADnoteParameters(fft);
+    }
 }
 
 void Part::add2XMLinstrument(XMLwrapper *xml)

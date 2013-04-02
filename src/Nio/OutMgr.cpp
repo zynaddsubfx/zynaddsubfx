@@ -22,11 +22,10 @@ OutMgr::OutMgr()
     :wave(new WavEngine()),
       priBuf(new float[4096],
              new float[4096]), priBuffCurrent(priBuf),
-      master(Master::getInstance())
+      master(NULL)
 {
     currentOut = NULL;
     stales     = 0;
-    master     = Master::getInstance();
 
     //init samples
     outr = new float[synth->buffersize];
@@ -57,17 +56,19 @@ OutMgr::~OutMgr()
  */
 const Stereo<float *> OutMgr::tick(unsigned int frameSize)
 {
-    pthread_mutex_lock(&(master.mutex));
+    if(pthread_mutex_trylock(&(master->mutex))) {
+        puts("failed to get the mater mutex...");
+        pthread_mutex_lock(&(master->mutex));
+    }
+
     InMgr::getInstance().flush();
-    pthread_mutex_unlock(&(master.mutex));
     //SysEv->execute();
     removeStaleSmps();
     while(frameSize > storedSmps()) {
-        pthread_mutex_lock(&(master.mutex));
-        master.AudioOut(outl, outr);
-        pthread_mutex_unlock(&(master.mutex));
+        master->AudioOut(outl, outr);
         addSmps(outl, outr);
     }
+    pthread_mutex_unlock(&(master->mutex));
     stales = frameSize;
     return priBuf;
 }
@@ -113,6 +114,11 @@ string OutMgr::getSink() const
         return "ERROR";
     }
     return "ERROR";
+}
+
+void OutMgr::setMaster(Master *master_)
+{
+    master=master_;
 }
 
 //perform a cheap linear interpolation for resampling

@@ -57,9 +57,6 @@ class Master
         /** Destructor*/
         ~Master();
 
-        static Master &getInstance();
-        static void deleteInstance();
-
         /**Saves all settings to a XML file
          * @return 0 for ok or <0 if there is an error*/
         int saveXML(const char *filename);

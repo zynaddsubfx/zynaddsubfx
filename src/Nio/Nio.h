@@ -4,13 +4,14 @@
 #include <set>
 
 class WavFile;
+class Master;
 
 /**Interface to Nio Subsystem
  *
  * Should be only externally included header */
 namespace Nio
 {
-    void init(void);
+    void init(Master *master);
     bool start(void);
     void stop(void);
 

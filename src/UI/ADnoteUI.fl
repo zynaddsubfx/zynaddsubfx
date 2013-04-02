@@ -333,7 +333,7 @@ o->redraw();}
                 xywh {535 440 220 140} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
                 code0 {oscFM=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
                 code1 {//int nv=nvoice; if (pars->VoicePar[nvoice].PextFMoscil>=0) nv=pars->VoicePar[nvoice].PextFMoscil;}
-                code2 {fmoscil->pane_name = loc+"oscil-mod/";fmoscil->osc = osc_i;//oscFM->init(pars->VoicePar[nv].FMSmp,0,pars->VoicePar[nvoice].PFMoscilphase,master);}
+                code2 {fmoscil->pane_name = loc+"mod-oscil/";fmoscil->osc = osc_i;//oscFM->init(pars->VoicePar[nv].FMSmp,0,pars->VoicePar[nvoice].PFMoscilphase,master);}
                 code3 {oscFM->parent(fmoscil);oscFM->init(false);oscFM->update();}
                 class Fl_Osc_Group
               } {}
@@ -348,7 +348,7 @@ o->redraw();}
 int nv=nvoice;
 if (pars->VoicePar[nvoice].PextFMoscil>=0) nv=pars->VoicePar[nvoice].PextFMoscil;
 
-oscedit=new OscilEditor(pars->VoicePar[nv].FMSmp,fmoscil,NULL,NULL,loc+"oscil-mod/", osc_i);}
+oscedit=new OscilEditor(pars->VoicePar[nv].FMSmp,fmoscil,NULL,NULL,loc+"mod-oscil/", osc_i);}
                 xywh {700 380 55 15} box THIN_UP_BOX labelfont 1 labelsize 11
                 code0 {if (pars->VoicePar[nvoice].PextFMoscil>=0) o->labelcolor(FL_BLUE);}
               }
