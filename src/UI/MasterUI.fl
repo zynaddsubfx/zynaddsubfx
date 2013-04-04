@@ -1505,7 +1505,7 @@ for (int i=0;i<NUM_SYS_EFX;i++)
 
 microtonalui=new MicrotonalUI(&master->microtonal);
 virkeyboard=new VirKeyboard(master);
-bankui=new BankUI(master,&npart);
+bankui=new BankUI(master, &npart, osc);
 configui=new ConfigUI();
 
 make_window();

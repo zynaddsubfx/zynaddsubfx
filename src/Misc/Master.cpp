@@ -53,6 +53,11 @@ static Ports localports = {
     {"reset-vu", "::", 0, [](const char *, RtData d) {
        Master *m = (Master*)d.obj;
        m->vuresetpeaks();}},
+    {"load-part:ib", "::", 0, [](const char *msg, RtData d) {
+       Master *m = (Master*)d.obj;
+       m->part[rtosc_argument(msg, 0).i] = *(Part**)rtosc_argument(msg, 1).b.data;
+       printf("part %d is now pointer %p\n", rtosc_argument(msg, 0).i, *(Part**)rtosc_argument(msg, 1).b.data);}},
+
     PARAMF(Master, volume, volume, log, 0.01, 4.42, "Master Volume"),
     RECURSP(Master, Part, part, part, 16, "Part"),//NUM_MIDI_PARTS
 };
@@ -355,7 +360,7 @@ void Master::AudioOut(float *outl, float *outr)
     while(uToB->hasNext()) {
         ports.dispatch(uToB->read()+1, d);
         events++;
-        //printf("backend: '%s'\n", uToB->peak());
+        //fprintf(stderr, "backend: '%s'<%s>\n", uToB->peak(), rtosc_argument_string(uToB->peak()));
     }
     if(events>1)
         fprintf(stderr, "backend: %d events per cycle\n",events);

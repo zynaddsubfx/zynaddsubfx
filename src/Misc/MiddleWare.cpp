@@ -143,6 +143,7 @@ void osc_check(cb_t cb, void *ui)
 }
 
 
+
 void preparePadSynth(string path, PADnoteParameters *p)
 {
     printf("preparing padsynth parameters\n");
@@ -337,6 +338,36 @@ struct MiddleWareImpl
         delete osc;
     }
 
+    void loadPart(const char *msg, Master *master)
+    {
+        fprintf(stderr, "loading a part!!\n");
+        //Load the part
+        Part *p = new Part(&master->microtonal, master->fft, &master->mutex);
+        unsigned npart = rtosc_argument(msg, 0).i;
+        p->loadXMLinstrument(rtosc_argument(msg, 1).s);
+        p->applyparameters();
+
+        //Update the resource locators
+        string base = "/part"+to_s(npart)+"/kit";
+        for(int j=0; j < NUM_KIT_ITEMS; ++j) {
+            objmap[base+to_s(j)+"/padpars/"] =
+                p->kit[j].padpars;
+            objmap[base+to_s(j)+"/padpars/oscil/"] =
+                p->kit[j].padpars->oscilgen;
+            for(int k=0; k<NUM_VOICES; ++k) {
+                objmap[base+to_s(j)+"/adpars/voice"+to_s(k)+"/oscil/"] =
+                    p->kit[j].adpars->VoicePar[k].OscilSmp;
+                objmap[base+to_s(j)+"/adpars/voice"+to_s(k)+"/oscil-mod/"] =
+                    p->kit[j].adpars->VoicePar[k].FMSmp;
+            }
+        }
+
+        //Give it to the backend and wait for the old part to return for
+        //deallocation
+        //printf("writing something to the location called '%s'\n", msg);
+        uToB->write("/load-part", "ib", npart, sizeof(Part*), &p);
+    }
+
     void tick(void)
     {
         osc_check(cb, ui);
@@ -366,31 +397,37 @@ struct MiddleWareImpl
         if(!last_path)
             return;
 
+        //printf("watching '%s' go by\n", msg);
         //Get the object resource locator
         string obj_rl(msg, last_path+1);
-        if(objmap.find(obj_rl) == objmap.end()) {
+        if(objmap.find(obj_rl) != objmap.end()) {
+            //try some over simplified pattern matching
+            if(strstr(msg, "oscil/"))
+                handleOscil(obj_rl, last_path+1, objmap[obj_rl]);
+            //else if(strstr(obj_rl.c_str(), "kititem"))
+            //    handleKitItem(obj_rl, objmap[obj_rl],atoi(rindex(msg,'m')+1),rtosc_argument(msg,0).T);
+            else if(strstr(msg, "padpars/prepare"))
+                preparePadSynth(obj_rl,(PADnoteParameters *) objmap[obj_rl]);
+            else //just forward the message
+                uToB->raw_write(msg);
+        } else if(strstr(msg, "load-part"))
+            loadPart(msg, master);
+        else
             uToB->raw_write(msg);
-            return;
-        }
-
-
-        //try some over simplified pattern matching
-        if(strstr(msg, "oscil/"))
-            handleOscil(obj_rl, last_path+1, objmap[obj_rl]);
-        //else if(strstr(obj_rl.c_str(), "kititem"))
-        //    handleKitItem(obj_rl, objmap[obj_rl],atoi(rindex(msg,'m')+1),rtosc_argument(msg,0).T);
-        else if(strstr(msg, "padpars/prepare"))
-            preparePadSynth(obj_rl,(PADnoteParameters *) objmap[obj_rl]);
-        else {//just forward the message
-            uToB->raw_write(msg);
-        }
     }
+
 
     void write(const char *path, const char *args, ...)
     {
         //We have a free buffer in the threadlink, so use it
         va_list va;
         va_start(va, args);
+        write(path, args, va);
+    }
+    
+    void write(const char *path, const char *args, va_list va)
+    {
+        //printf("is that a '%s' I see there?\n", path);
         char *buffer = uToB->buffer();
         unsigned len = uToB->buffer_size();
         bool success = rtosc_vmessage(buffer, len, path, args, va);
@@ -448,6 +485,19 @@ class UI_Interface:public Fl_Osc_Interface
             }
 
             impl->write(s.c_str(),"");
+        }
+        
+        void write(string s, const char *args, ...) override
+        {
+            va_list va;
+            va_start(va, args);
+            impl->write(s.c_str(), args, va);
+        }
+
+        void writeValue(string s, string ss) override
+        {
+            Fl_Osc_Interface::writeValue(s,ss);
+            impl->write(s.c_str(), "s", ss.c_str());
         }
 
         void writeValue(string s, char c) override

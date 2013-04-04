@@ -1,39 +1,44 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0110 
+version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
-
-decl {//License: GNU GPL version 2 or later} {} 
-
-decl {\#include <stdlib.h>} {public
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
 } 
 
-decl {\#include <stdio.h>} {public
+decl {//License: GNU GPL version 2 or later} {private local
 } 
 
-decl {\#include <string.h>} {public
+decl {\#include <stdlib.h>} {public local
 } 
 
-decl {\#include <FL/Fl_Button.H>} {public
+decl {\#include <stdio.h>} {public local
 } 
 
-decl {\#include <FL/Fl_File_Chooser.H>} {public
+decl {\#include <string.h>} {public local
 } 
 
-decl {\#include "../Misc/Master.h"} {public
+decl {\#include <FL/Fl_Button.H>} {public local
 } 
 
-decl {\#include "../Misc/Part.h"} {public
+decl {\#include <FL/Fl_File_Chooser.H>} {public local
 } 
 
-decl {\#include "../Misc/Bank.h"} {public
+decl {\#include "Fl_Osc_Interface.h"} {public local
 } 
 
-decl {\#include "../Misc/Config.h"} {public
+decl {\#include "../Misc/Master.h"} {public local
 } 
 
-decl {\#include "../Misc/Util.h"} {public
+decl {\#include "../Misc/Part.h"} {public local
+} 
+
+decl {\#include "../Misc/Bank.h"} {public local
+} 
+
+decl {\#include "../Misc/Config.h"} {public local
+} 
+
+decl {\#include "../Misc/Util.h"} {public local
 } 
 
 class BankProcess_ {} {
@@ -41,7 +46,7 @@ class BankProcess_ {} {
   } {
     code {;} {}
   }
-  decl {Bank *bank;} {public
+  decl {Bank *bank;} {public local
   }
 } 
 
@@ -52,10 +57,9 @@ class BankSlot {open : {public Fl_Button,BankProcess_}
     code {what=NULL;
 whatslot=NULL;
 nslot=0;
-nselected=NULL;} {selected
-    }
+nselected=NULL;} {}
   }
-  Function {handle(int event)} {return_type int
+  Function {handle(int event)} {open return_type int
   } {
     code {if (what==NULL) return(0);
 if (Fl::event_inside(this)){
@@ -100,9 +104,12 @@ if (*nselected==nslot)
 
 copy_label(bank->getnamenumbered(nslot).c_str());} {}
   }
-  decl {int *what,*whatslot,nslot,highlight, *nselected;} {}
-  decl {void (BankProcess_:: *fnc)(void);} {}
-  decl {BankProcess_ *bp;} {}
+  decl {int *what,*whatslot,nslot,highlight, *nselected;} {private local
+  }
+  decl {void (BankProcess_:: *fnc)(void);} {private local
+  }
+  decl {BankProcess_ *bp;} {private local
+  }
 } 
 
 class BankUI {open : {public BankProcess_}
@@ -228,10 +235,11 @@ refreshmainwindow();}
       }
     }
   }
-  Function {BankUI(Master *master_,int *npart_)} {} {
+  Function {BankUI(Master *master_,int *npart_, Fl_Osc_Interface *osc_)} {} {
     code {fnc=&BankProcess_::process;
 master=master_;
 npart=npart_;
+osc  =osc_;
 bank=&master_->bank;
 what=0;
 nselected=-1;
@@ -254,7 +262,7 @@ simplesetmode(config.cfg.UserInterfaceMode==2);} {}
     code {cbwig=cbwig_;
 rescan_for_banks();} {}
   }
-  Function {process()} {return_type void
+  Function {process()} {open return_type void
   } {
     code {int slot=this->slot;
 
@@ -265,11 +273,17 @@ if ((what==2)&&(bank->emptyslot(slot)==0)&&(mode!=4)) {//Rename slot
 };
 
 if ((what==1)&&(mode==1)&&(!bank->emptyslot(slot))){//Reads from slot
-    pthread_mutex_lock(&master->part[*npart]->load_mutex);
-     bank->loadfromslot(slot,master->part[*npart]);
-    pthread_mutex_unlock(&master->part[*npart]->load_mutex);
-    master->part[*npart]->applyparameters();
-    snprintf((char *)master->part[*npart]->Pname,PART_MAX_NAME_LEN,"%s",bank->getname(slot).c_str());
+    //pthread_mutex_lock(&master->part[*npart]->load_mutex);
+    // bank->loadfromslot(slot,master->part[*npart]);
+    //pthread_mutex_unlock(&master->part[*npart]->load_mutex);
+    //master->part[*npart]->applyparameters();
+    //snprintf((char *)master->part[*npart]->Pname,PART_MAX_NAME_LEN,"%s",bank->getname(slot).c_str());
+    printf("throwing load to middleware\\n");
+    printf("osc is '%p'\\n", osc);
+    osc->write("/load-part", "is", *npart, bank->ins[slot].filename.c_str());
+    printf("something should be showing up...\\n");
+    osc->writeValue("/part"+to_s(*npart)+"/name", bank->getname(slot));
+    printf("fake load of part '%d' with name '%s' from slot '%d'\\n", *npart, bank->getname(slot).c_str(), slot);
      cbwig->do_callback();
      
      if (config.cfg.BankUIAutoClose!=0)
@@ -316,7 +330,8 @@ if (mode==4){//swap
         bs[slot]->refresh();
     };
 };
-if (mode!=4) refreshmainwindow();} {}
+if (mode!=4) refreshmainwindow();} {selected
+    }
   }
   Function {refreshmainwindow()} {} {
     code {bankuiwindow->label(bank->bankfiletitle.c_str());
@@ -358,11 +373,18 @@ removeselection();
 if (beginnerui) modeselect->hide();
 	else modeselect->show();} {}
   }
-  decl {BankSlot *bs[BANK_SIZE];} {}
-  decl {int slot,what;//"what"=what button is pressed} {}
-  decl {int mode,*npart,nselected;} {}
-  decl {Master *master;} {}
-  decl {void (BankProcess_::* fnc)(void);} {}
-  decl {Fl_Valuator *cbwig;} {public
+  decl {BankSlot *bs[BANK_SIZE];} {private local
+  }
+  decl {int slot,what;//"what"=what button is pressed} {private local
+  }
+  decl {int mode,*npart,nselected;} {private local
+  }
+  decl {Master *master;} {private local
+  }
+  decl {void (BankProcess_::* fnc)(void);} {private local
+  }
+  decl {Fl_Osc_Interface *osc;} {private local
+  }
+  decl {Fl_Valuator *cbwig;} {public local
   }
 } 

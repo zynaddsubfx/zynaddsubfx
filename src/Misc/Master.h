@@ -154,7 +154,9 @@ class Master
 
         //other objects
         Microtonal microtonal;
-        Bank       bank;
+
+        //Strictly Non-RT instrument bank object
+        Bank bank;
 
         class FFTwrapper * fft;
         pthread_mutex_t mutex;

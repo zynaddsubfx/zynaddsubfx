@@ -38,9 +38,10 @@ class Bank
         ~Bank();
         std::string getname(unsigned int ninstrument);
         std::string getnamenumbered(unsigned int ninstrument);
+        //if newslot==-1 then this is ignored, else it will be put on that slot
         void setname(unsigned int ninstrument,
                      const std::string &newname,
-                     int newslot);                                                       //if newslot==-1 then this is ignored, else it will be put on that slot
+                     int newslot);
         bool isPADsynth_used(unsigned int ninstrument);
 
         /**returns true when slot is empty*/
@@ -85,6 +86,7 @@ class Bank
 
         std::string defaultinsname;
 
+    public:
         struct ins_t {
             ins_t();
             bool used;
@@ -94,6 +96,7 @@ class Bank
                 bool PADsynth_used;
             } info;
         } ins[BANK_SIZE];
+    private:
 
         std::string dirname;
 
