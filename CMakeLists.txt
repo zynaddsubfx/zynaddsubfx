@@ -11,3 +11,9 @@ add_subdirectory(src)
 install(FILES AUTHORS.txt COPYING FAQ.txt HISTORY.txt README.txt
 	DESTINATION share/doc/zynaddsubfx
 	)
+install(FILES zynaddsubfx-jack.desktop zynaddsubfx-alsa.desktop
+    DESTINATION share/applications)
+install(FILES zynaddsubfx.svg
+    DESTINATION share/pixmaps)
+install(DIRECTORY instruments/banks
+    DESTINATION share/zynaddsubfx)
