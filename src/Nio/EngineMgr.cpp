@@ -43,7 +43,6 @@ EngineMgr::EngineMgr()
 #endif
 #if JACK
     engines.push_back(new JackEngine());
-#endif
     engines.push_back(new JackMultiEngine());
 #endif
 #if PORTAUDIO
