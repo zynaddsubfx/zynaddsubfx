@@ -62,7 +62,7 @@ bool PaEngine::Start()
                   &outputParameters,
                   synth->samplerate,
                   synth->buffersize,
-                  NULL,
+                  0,
                   PAprocess,
                   (void *) this);
     Pa_StartStream(stream);

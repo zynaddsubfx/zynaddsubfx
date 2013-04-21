@@ -4,26 +4,28 @@ Zynaddsubfx
 
 This documentation is a work in progress
 
-include::./intro.txt[]
+include::intro.txt[]
 
-include::./filter.txt[]
+include::filter.txt[]
 
-include::./lfo.txt[]
+include::lfo.txt[]
 
-include::./envelope.txt[]
+include::envelope.txt[]
 
-include::./adsynth.txt[]
+include::adsynth.txt[]
 
-include::./controller.txt[]
+include::controller.txt[]
+
+include::effects.txt[]
 
 /////////////////////////////
-include::./nrpn.txt[]
+include::nrpn.txt[]
 /////////////////////////////
 
-include::./saving.txt[]
+include::saving.txt[]
 
-include::./mididefaults.txt[]
+include::mididefaults.txt[]
 
-include::./build.txt[]
+include::build.txt[]
 
-include::./getting.txt[]
+include::getting.txt[]

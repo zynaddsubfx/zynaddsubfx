@@ -2,7 +2,7 @@
   ZynAddSubFX - a software synthesizer
 
   ControllerTest.h - CxxTest for Params/Controller
-  Copyright (C) 2009-2009 Mark McCurry
+  Copyright (C) 2009-2011 Mark McCurry
   Author: Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@ class ControllerTest:public CxxTest::TestSuite
 {
     public:
         void setUp() {
-            synth = new SYNTH_T;
+            synth   = new SYNTH_T;
             testCtl = new Controller();
         }
 

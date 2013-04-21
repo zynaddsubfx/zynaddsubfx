@@ -28,8 +28,8 @@ using namespace std;
 
 Chorus::Chorus(bool insertion_, float *const efxoutl_, float *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
-    maxdelay((int)(MAX_CHORUS_DELAY / 1000.0f * synth->samplerate_f)),
-    delaySample(new float[maxdelay], new float[maxdelay])
+      maxdelay((int)(MAX_CHORUS_DELAY / 1000.0f * synth->samplerate_f)),
+      delaySample(new float[maxdelay], new float[maxdelay])
 {
     dlk = 0;
     drk = 0;
@@ -55,8 +55,9 @@ float Chorus::getdelay(float xlfo)
 
     //check if delay is too big (caused by bad setdelay() and setdepth()
     if((result + 0.5f) >= maxdelay) {
-        cerr <<
-            "WARNING: Chorus.cpp::getdelay(..) too big delay (see setdelay and setdepth funcs.)"
+        cerr
+        <<
+        "WARNING: Chorus.cpp::getdelay(..) too big delay (see setdelay and setdepth funcs.)"
         << endl;
         result = maxdelay - 1.0f;
     }
@@ -85,18 +86,20 @@ void Chorus::out(const Stereo<float *> &input)
         //Left channel
 
         //compute the delay in samples using linear interpolation between the lfo delays
-        float mdel = (dl1 * (synth->buffersize - i) + dl2 * i) / synth->buffersize_f;
+        float mdel =
+            (dl1 * (synth->buffersize - i) + dl2 * i) / synth->buffersize_f;
         if(++dlk >= maxdelay)
             dlk = 0;
         float tmp = dlk - mdel + maxdelay * 2.0f; //where should I get the sample from
 
-        F2I(tmp, dlhi);
+        dlhi  = (int) tmp;
         dlhi %= maxdelay;
 
-        float dlhi2       = (dlhi - 1 + maxdelay) % maxdelay;
-        float dllo        = 1.0f - fmod(tmp, one);
-        efxoutl[i]  = cinterpolate(delaySample.l, maxdelay, dlhi2) * dllo +
-                      cinterpolate(delaySample.l, maxdelay, dlhi) * (1.0f - dllo);
+        float dlhi2 = (dlhi - 1 + maxdelay) % maxdelay;
+        float dllo  = 1.0f - fmod(tmp, one);
+        efxoutl[i] = cinterpolate(delaySample.l, maxdelay, dlhi2) * dllo
+                     + cinterpolate(delaySample.l, maxdelay,
+                                    dlhi) * (1.0f - dllo);
         delaySample.l[dlk] = inL + efxoutl[i] * fb;
 
         //Right channel
@@ -107,13 +110,14 @@ void Chorus::out(const Stereo<float *> &input)
             drk = 0;
         tmp = drk * 1.0f - mdel + maxdelay * 2.0f; //where should I get the sample from
 
-        F2I(tmp, dlhi);
+        dlhi  = (int) tmp;
         dlhi %= maxdelay;
 
-        dlhi2       = (dlhi - 1 + maxdelay) % maxdelay;
-        dllo        = 1.0f - fmodf(tmp, one);
-        efxoutr[i]  = cinterpolate(delaySample.r, maxdelay, dlhi2) * dllo +
-                      cinterpolate(delaySample.r, maxdelay, dlhi) * (1.0f - dllo);
+        dlhi2      = (dlhi - 1 + maxdelay) % maxdelay;
+        dllo       = 1.0f - fmodf(tmp, one);
+        efxoutr[i] = cinterpolate(delaySample.r, maxdelay, dlhi2) * dllo
+                     + cinterpolate(delaySample.r, maxdelay,
+                                    dlhi) * (1.0f - dllo);
         delaySample.r[dlk] = inR + efxoutr[i] * fb;
     }
 

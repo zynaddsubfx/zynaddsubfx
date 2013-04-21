@@ -56,6 +56,9 @@ class Part
                     unsigned char velocity,
                     int masterkeyshift);
         void NoteOff(unsigned char note);
+        void PolyphonicAftertouch(unsigned char note,
+                                  unsigned char velocity,
+                                  int masterkeyshift);
         void AllNotesOff(); //panic
         void SetController(unsigned int type, int par);
         void RelaseSustainedKeys(); //this is called when the sustain pedal is relased
@@ -149,6 +152,7 @@ class Part
 
 
         pthread_mutex_t *mutex;
+        pthread_mutex_t load_mutex;
 
         int lastnote;
 
@@ -166,8 +170,8 @@ class Part
             int itemsplaying;
             struct {
                 SynthNote *adnote,
-                *subnote,
-                *padnote;
+                   *subnote,
+                   *padnote;
                 int sendtoparteffect;
             } kititem[NUM_KIT_ITEMS];
             int time;

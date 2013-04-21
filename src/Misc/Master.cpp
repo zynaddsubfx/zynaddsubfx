@@ -42,12 +42,18 @@ using namespace std;
 
 vuData::vuData(void)
     :outpeakl(0.0f), outpeakr(0.0f), maxoutpeakl(0.0f), maxoutpeakr(0.0f),
-    rmspeakl(0.0f), rmspeakr(0.0f), clipped(0)
+      rmspeakl(0.0f), rmspeakr(0.0f), clipped(0)
 {}
+
+static Master* masterInstance = NULL;
 
 Master::Master()
 {
     swaplr = 0;
+    off  = 0;
+    smps = 0;
+    bufl = new float[synth->buffersize];
+    bufr = new float[synth->buffersize];
 
     pthread_mutex_init(&mutex, NULL);
     pthread_mutex_init(&vumutex, NULL);
@@ -121,11 +127,19 @@ bool Master::mutexLock(lockset request)
 
 Master &Master::getInstance()
 {
-    static Master *instance = NULL;
-    if(!instance)
-        instance = new Master;
+    if (!masterInstance)
+        masterInstance = new Master;
 
-    return *instance;
+    return *masterInstance;
+}
+
+void Master::deleteInstance()
+{
+    if (masterInstance)
+    {
+        delete masterInstance;
+        masterInstance = NULL;
+    }
 }
 
 /*
@@ -157,6 +171,22 @@ void Master::noteOff(char chan, char note)
 }
 
 /*
+ * Pressure Messages (velocity=0 for NoteOff)
+ */
+void Master::polyphonicAftertouch(char chan, char note, char velocity)
+{
+    if(velocity) {
+        for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+            if(chan == part[npart]->Prcvchn)
+                if(part[npart]->Penabled)
+                    part[npart]->PolyphonicAftertouch(note, velocity, keyshift);
+
+    }
+    else
+        this->noteOff(chan, note);
+}
+
+/*
  * Controllers
  */
 void Master::setController(char chan, int type, int par)
@@ -182,7 +212,8 @@ void Master::setController(char chan, int type, int par)
             }
         ;
     }
-    else if(type == C_bankselectmsb) { // Change current bank
+    else
+    if(type == C_bankselectmsb) {      // Change current bank
         if(((unsigned int)par < bank.banks.size())
            && (bank.banks[par].dir != bank.bankfiletitle))
             bank.loadbank(bank.banks[par].dir);
@@ -204,7 +235,7 @@ void Master::setController(char chan, int type, int par)
 
 void Master::setProgram(char chan, unsigned int pgm)
 {
-    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
+    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         if(chan == part[npart]->Prcvchn) {
             bank.loadfromslot(pgm, part[npart]);
 
@@ -215,7 +246,6 @@ void Master::setProgram(char chan, unsigned int pgm)
             part[npart]->applyparameters();
             pthread_mutex_lock(&mutex);
         }
-    }
 }
 
 void Master::vuUpdate(const float *outl, const float *outr)
@@ -302,9 +332,12 @@ void Master::AudioOut(float *outl, float *outr)
     memset(outr, 0, synth->bufferbytes);
 
     //Compute part samples and store them part[npart]->partoutl,partoutr
-    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        if(part[npart]->Penabled != 0)
+    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
+        if(part[npart]->Penabled != 0 && !pthread_mutex_trylock(&part[npart]->load_mutex)) {
             part[npart]->ComputePartSmps();
+            pthread_mutex_unlock(&part[npart]->load_mutex);
+        }
+    }
 
     //Insertion effects
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
@@ -356,7 +389,7 @@ void Master::AudioOut(float *outl, float *outr)
     //System effects
     for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx) {
         if(sysefx[nefx]->geteffect() == 0)
-            continue; //the effect is disabled
+            continue;  //the effect is disabled
 
         float *tmpmixl = getTmpBuffer();
         float *tmpmixr = getTmpBuffer();
@@ -449,15 +482,10 @@ void Master::AudioOut(float *outl, float *outr)
 //TODO review the respective code from yoshimi for this
 //If memory serves correctly, libsamplerate was used
 void Master::GetAudioOutSamples(size_t nsamples,
-                                int samplerate,
+                                unsigned samplerate,
                                 float *outl,
                                 float *outr)
 {
-    static float *bufl = new float[synth->buffersize],
-    *bufr = new float[synth->buffersize];
-    static off_t  off  = 0;
-    static size_t smps = 0;
-
     off_t out_off = 0;
 
     //Fail when resampling rather than doing a poor job
@@ -471,14 +499,13 @@ void Master::GetAudioOutSamples(size_t nsamples,
         if(nsamples >= smps) {
             memcpy(outl + out_off, bufl + off, sizeof(float) * smps);
             memcpy(outr + out_off, bufr + off, sizeof(float) * smps);
+            nsamples -= smps;
 
             //generate samples
             AudioOut(bufl, bufr);
             off  = 0;
-            smps = synth->buffersize;
-
             out_off  += smps;
-            nsamples -= smps;
+            smps = synth->buffersize;
         }
         else {   //use some samples
             memcpy(outl + out_off, bufl + off, sizeof(float) * nsamples);
@@ -492,6 +519,9 @@ void Master::GetAudioOutSamples(size_t nsamples,
 
 Master::~Master()
 {
+    delete []bufl;
+    delete []bufr;
+
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         delete part[npart];
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
@@ -500,7 +530,6 @@ Master::~Master()
         delete sysefx[nefx];
 
     delete fft;
-    FFT_cleanup();
 
     pthread_mutex_destroy(&mutex);
     pthread_mutex_destroy(&vumutex);

@@ -129,7 +129,8 @@ void PADnote::setup(float freq,
             float time =
                 powf(10, 3.0f * pars->PPunchTime / 127.0f) / 10000.0f;             //0.1f .. 100 ms
             float stretch = powf(440.0f / freq, pars->PPunchStretch / 64.0f);
-            NoteGlobalPar.Punch.dt = 1.0f / (time * synth->samplerate_f * stretch);
+            NoteGlobalPar.Punch.dt = 1.0f
+                                     / (time * synth->samplerate_f * stretch);
         }
         else
             NoteGlobalPar.Punch.Enabled = 0;
@@ -247,7 +248,7 @@ void PADnote::computecurrentparameters()
     if(portamento != 0) { //this voice use portamento
         portamentofreqrap = ctl->portamento.freqrap;
         if(ctl->portamento.used == 0) //the portamento has finished
-            portamento = 0; //this note is no longer "portamented"
+            portamento = 0;  //this note is no longer "portamented"
         ;
     }
 

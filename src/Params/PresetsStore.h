@@ -20,6 +20,9 @@
 
 */
 
+#ifndef PRESETSTORE_H
+#define PRESETSTORE_H
+
 #include <string>
 #include <vector>
 #include "../Misc/XMLwrapper.h"
@@ -64,3 +67,4 @@ class PresetsStore
 };
 
 extern PresetsStore presetsstore;
+#endif

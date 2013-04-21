@@ -42,7 +42,7 @@ class NulEngine:public AudioOut, MidiIn
         bool getAudioEn() const;
 
         void setMidiEn(bool) {}
-        bool getMidiEn() const {return true;}
+        bool getMidiEn() const {return true; }
 
     protected:
         void *AudioThread();

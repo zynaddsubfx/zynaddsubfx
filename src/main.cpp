@@ -20,6 +20,10 @@
 
 */
 
+#include <FL/Fl.H>
+
+#include "UI/common.H"
+
 #include <iostream>
 #include <cmath>
 #include <cctype>
@@ -31,11 +35,13 @@
 
 #include <getopt.h>
 
+#include "DSP/FFTwrapper.h"
 #include "Misc/Master.h"
 #include "Misc/Part.h"
 #include "Misc/Util.h"
 #include "Misc/Dump.h"
 extern Dump dump;
+
 
 //Nio System
 #include "Nio/Nio.h"
@@ -48,8 +54,12 @@ extern Dump dump;
 QApplication *app;
 
 #elif defined FLTK_GUI
-
 #include "UI/MasterUI.h"
+#elif defined NTK_GUI
+#include "UI/MasterUI.h"
+#include <FL/Fl_Shared_Image.H>
+#include <FL/Fl_Tiled_Image.H>
+#include <FL/Fl_Dial.H>
 #endif // FLTK_GUI
 
 MasterUI *ui;
@@ -58,63 +68,25 @@ MasterUI *ui;
 
 using namespace std;
 
-pthread_t thr3, thr4;
+pthread_t thr4;
 Master   *master;
 SYNTH_T  *synth;
 int       swaplr = 0; //1 for left-right swapping
+
+int Pexitprogram = 0;     //if the UI set this to 1, the program will exit
 
 #if LASH
 #include "Misc/LASHClient.h"
 LASHClient *lash = NULL;
 #endif
 
-int Pexitprogram = 0;     //if the UI set this to 1, the program will exit
+#if USE_NSM
+#include "UI/NSM.H"
 
-/*
- * User Interface thread
- */
-void *thread3(void *v)
-{
-#ifndef DISABLE_GUI
+NSM_Client *nsm = 0;
+#endif
 
-#ifdef FLTK_GUI
-
-    if(v)
-        fl_alert("Default IO did not initialize.\nDefaulting to NULL backend.");
-    ui = new MasterUI(master, &Pexitprogram);
-    ui->showUI();
-
-    while(Pexitprogram == 0) {
-#if LASH
-        string filename;
-        switch(lash->checkevents(filename)) {
-            case LASHClient::Save:
-                ui->do_save_master(filename.c_str());
-                lash->confirmevent(LASHClient::Save);
-                break;
-            case LASHClient::Restore:
-                ui->do_load_master(filename.c_str());
-                lash->confirmevent(LASHClient::Restore);
-                break;
-            case LASHClient::Quit:
-                Pexitprogram = 1;
-            default:
-                break;
-        }
-#endif //LASH
-        Fl::wait(0.1f);
-    }
-
-#elif defined QT_GUI
-    app = new QApplication(0, 0);
-    ui  = new MasterUI(master, 0);
-    ui->show();
-    app->exec();
-#endif //defined QT_GUI
-
-#endif //DISABLE_GUI
-    return 0;
-}
+char *instance_name = 0;
 
 void exitprogram();
 
@@ -122,27 +94,43 @@ void exitprogram();
 void sigterm_exit(int /*sig*/)
 {
     Pexitprogram = 1;
-    sleep(1);
-    exitprogram();
-    exit(0);
 }
 
+
+#ifndef DISABLE_GUI
+
+#ifdef NTK_GUI
+static Fl_Tiled_Image *module_backdrop;
+#endif
+
+void
+set_module_parameters ( Fl_Widget *o )
+{
+#ifdef NTK_GUI
+    o->box( FL_DOWN_FRAME );
+    o->align( o->align() | FL_ALIGN_IMAGE_BACKDROP );
+    o->color( FL_BLACK );
+    o->image( module_backdrop );
+    o->labeltype( FL_SHADOW_LABEL );
+#else
+    o->box( FL_PLASTIC_UP_BOX );
+    o->color( FL_CYAN );
+    o->labeltype( FL_EMBOSSED_LABEL );
+#endif
+}
+#endif
 
 /*
  * Program initialisation
  */
-void initprogram(int argc, char **argv)
+void initprogram(void)
 {
-#if LASH
-    lash = new LASHClient(&argc, &argv);
-#endif
-
     cerr.precision(1);
     cerr << std::fixed;
     cerr << "\nSample Rate = \t\t" << synth->samplerate << endl;
     cerr << "Sound Buffer Size = \t" << synth->buffersize << " samples" << endl;
-    cerr << "Internal latency = \t" << synth->buffersize_f * 1000.0f /
-        synth->samplerate_f << " ms" << endl;
+    cerr << "Internal latency = \t" << synth->buffersize_f * 1000.0f
+    / synth->samplerate_f << " ms" << endl;
     cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
 
 
@@ -167,12 +155,18 @@ void exitprogram()
 #ifndef DISABLE_GUI
     delete ui;
 #endif
-
 #if LASH
-    delete lash;
+    if(lash)
+        delete lash;
+#endif
+#if USE_NSM
+    if(nsm)
+        delete nsm;
 #endif
 
     delete [] denormalkillbuf;
+    FFT_cleanup();
+    Master::deleteInstance();
 }
 
 int main(int argc, char *argv[])
@@ -194,7 +188,9 @@ int main(int argc, char *argv[])
     synth->samplerate = config.cfg.SampleRate;
     synth->buffersize = config.cfg.SoundBufferSize;
     synth->oscilsize  = config.cfg.OscilSize;
-    swaplr     = config.cfg.SwapStereo;
+    swaplr = config.cfg.SwapStereo;
+
+    Nio::preferedSampleRate(synth->samplerate);
 
     synth->alias(); //build aliases
 
@@ -233,7 +229,7 @@ int main(int argc, char *argv[])
             "help", 2, NULL, 'h'
         },
         {
-            "version",2,NULL,'v'
+            "version", 2, NULL, 'v'
         },
         {
             "named", 1, NULL, 'N'
@@ -286,12 +282,12 @@ int main(int argc, char *argv[])
             case 'v':
                 exitwithversion = 1;
                 break;
-            case 'Y':/* this command a dummy command (has NO effect)
-                and is used because I need for NSIS installer
-            (NSIS sometimes forces a command line for a
-            program, even if I don't need that; eg. when
-            I want to add a icon to a shortcut.
-              */
+            case 'Y': /* this command a dummy command (has NO effect)
+                        and is used because I need for NSIS installer
+                        (NSIS sometimes forces a command line for a
+                        program, even if I don't need that; eg. when
+                        I want to add a icon to a shortcut.
+                     */
                 break;
             case 'U':
                 noui = 1;
@@ -324,7 +320,8 @@ int main(int argc, char *argv[])
                 if(synth->oscilsize < MAX_AD_HARMONICS * 2)
                     synth->oscilsize = MAX_AD_HARMONICS * 2;
                 synth->oscilsize =
-                    (int) powf(2, ceil(logf(synth->oscilsize - 1.0f) / logf(2.0f)));
+                    (int) powf(2,
+                               ceil(logf(synth->oscilsize - 1.0f) / logf(2.0f)));
                 if(tmp != synth->oscilsize)
                     cerr
                     <<
@@ -396,21 +393,7 @@ int main(int argc, char *argv[])
     for(int i = 0; i < synth->buffersize; ++i)
         denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 
-    initprogram(argc, argv);
-
-#if 0 //TODO update this code
-#ifdef USE_LASH
-#ifdef ALSAMIDIIN
-    ALSAMidiIn *alsamidi = dynamic_cast<ALSAMidiIn *>(Midi);
-    if(alsamidi)
-        lash->setalsaid(alsamidi->getalsaid());
-#endif
-#ifdef JACKAUDIOOUT
-    lash->setjackname(JACKgetname());
-#endif
-#endif
-#endif
-
+    initprogram();
 
     if(!loadfile.empty()) {
         int tmp = master->loadXML(loadfile.c_str());
@@ -443,11 +426,6 @@ int main(int argc, char *argv[])
     //Run the Nio system
     bool ioGood = Nio::start();
 
-#ifndef DISABLE_GUI
-    if(noui == 0)
-        pthread_create(&thr3, NULL, thread3, (void *)!ioGood);
-#endif
-
     if(!execAfterInit.empty()) {
         cout << "Executing user supplied command: " << execAfterInit << endl;
         if(system(execAfterInit.c_str()) == -1)
@@ -455,9 +433,114 @@ int main(int argc, char *argv[])
     }
 
 
-    //TODO look into a conditional variable here, it seems to match usage
+#ifndef DISABLE_GUI
+
+#ifdef NTK_GUI
+    fl_register_images();
+
+    Fl_Dial::default_style(Fl_Dial::PIXMAP_DIAL);
+
+    if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/knob.png"))
+        Fl_Dial::default_image(img);
+    else
+        Fl_Dial::default_image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/knob.png"));
+
+    if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/window_backdrop.png"))
+        Fl::scheme_bg(new Fl_Tiled_Image(img));
+    else
+        Fl::scheme_bg(new Fl_Tiled_Image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/window_backdrop.png")));
+
+    if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/module_backdrop.png"))
+        module_backdrop = new Fl_Tiled_Image(img);
+    else
+        module_backdrop = new Fl_Tiled_Image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/module_backdrop.png"));
+
+    Fl::background(  50, 50, 50 );
+    Fl::background2(  70, 70, 70 );
+    Fl::foreground( 255,255,255 );
+#endif
+
+    ui = new MasterUI(master, &Pexitprogram);
+    
+    if ( !noui) 
+    {
+        ui->showUI();
+
+        if(!ioGood)
+            fl_alert(
+                "Default IO did not initialize.\nDefaulting to NULL backend.");
+    }
+
+#endif
+
+#ifndef DISABLE_GUI
+#if USE_NSM
+    char *nsm_url = getenv("NSM_URL");
+
+    if(nsm_url) {
+        nsm = new NSM_Client;
+
+        if(!nsm->init(nsm_url))
+            nsm->announce("ZynAddSubFX", ":switch:", argv[0]);
+        else {
+            delete nsm;
+            nsm = NULL;
+        }
+    }
+#endif
+#endif
+
+#if USE_NSM
+    if(!nsm)
+#endif
+    {
+#if LASH
+        lash = new LASHClient(&argc, &argv);
+#ifndef DISABLE_GUI
+        ui->sm_indicator1->value(1);
+        ui->sm_indicator2->value(1);
+        ui->sm_indicator1->tooltip("LASH");
+        ui->sm_indicator2->tooltip("LASH");
+#endif
+#endif
+    }
+
     while(Pexitprogram == 0) {
+#ifndef DISABLE_GUI
+#if USE_NSM
+        if(nsm) {
+            nsm->check();
+            goto done;
+        }
+#endif
+#if LASH
+        {
+            string filename;
+            switch(lash->checkevents(filename)) {
+                case LASHClient::Save:
+                    ui->do_save_master(filename.c_str());
+                    lash->confirmevent(LASHClient::Save);
+                    break;
+                case LASHClient::Restore:
+                    ui->do_load_master(filename.c_str());
+                    lash->confirmevent(LASHClient::Restore);
+                    break;
+                case LASHClient::Quit:
+                    Pexitprogram = 1;
+                default:
+                    break;
+            }
+        }
+#endif //LASH
+
+#if USE_NSM
+done:
+#endif
+
+        Fl::wait(0.02f);
+#else
         usleep(100000);
+#endif
     }
 
     exitprogram();

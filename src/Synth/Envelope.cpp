@@ -53,7 +53,7 @@ Envelope::Envelope(EnvelopeParams *envpars, float basefreq)
         if(tmp > bufferdt)
             envdt[i] = bufferdt / tmp;
         else
-            envdt[i] = 2.0f; //any value larger than 1
+            envdt[i] = 2.0f;  //any value larger than 1
 
         switch(mode) {
             case 2:

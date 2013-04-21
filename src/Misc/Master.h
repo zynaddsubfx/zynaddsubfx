@@ -58,6 +58,7 @@ class Master
         ~Master();
 
         static Master &getInstance();
+        static void deleteInstance();
 
         /**Saves all settings to a XML file
          * @return 0 for ok or <0 if there is an error*/
@@ -91,6 +92,7 @@ class Master
         //Midi IN
         void noteOn(char chan, char note, char velocity);
         void noteOff(char chan, char note);
+        void polyphonicAftertouch(char chan, char note, char velocity);
         void setController(char chan, int type, int par);
         void setProgram(char chan, unsigned int pgm);
         //void NRPN...
@@ -105,7 +107,7 @@ class Master
         void AudioOut(float *outl, float *outr);
         /**Audio Output (for callback mode). This allows the program to be controled by an external program*/
         void GetAudioOutSamples(size_t nsamples,
-                                int samplerate,
+                                unsigned samplerate,
                                 float *outl,
                                 float *outr);
 
@@ -113,7 +115,7 @@ class Master
         void partonoff(int npart, int what);
 
         /**parts \todo see if this can be made to be dynamic*/
-        class Part *part[NUM_MIDI_PARTS];
+        class Part * part[NUM_MIDI_PARTS];
 
         //parameters
 
@@ -129,8 +131,8 @@ class Master
         void setPsysefxsend(int Pefxfrom, int Pefxto, char Pvol);
 
         //effects
-        class EffectMgr *sysefx[NUM_SYS_EFX]; //system
-        class EffectMgr *insefx[NUM_INS_EFX]; //insertion
+        class EffectMgr * sysefx[NUM_SYS_EFX]; //system
+        class EffectMgr * insefx[NUM_INS_EFX]; //insertion
 //      void swapcopyeffects(int what,int type,int neff1,int neff2);
 
         //HDD recorder
@@ -157,7 +159,7 @@ class Master
         Microtonal microtonal;
         Bank       bank;
 
-        class FFTwrapper     *fft;
+        class FFTwrapper * fft;
         pthread_mutex_t mutex;
         pthread_mutex_t vumutex;
 
@@ -169,6 +171,12 @@ class Master
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
         int    keyshift;
+
+        //information relevent to generating plugin audio samples
+        float *bufl;
+        float *bufr;
+        off_t  off;
+        size_t smps;
 };
 
 #endif

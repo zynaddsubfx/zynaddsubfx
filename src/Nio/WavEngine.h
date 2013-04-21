@@ -40,7 +40,7 @@ class WavEngine:public AudioOut
         void Stop();
 
         void setAudioEn(bool /*nval*/) {}
-        bool getAudioEn() const {return true;}
+        bool getAudioEn() const {return true; }
 
         void push(Stereo<float *> smps, size_t len);
 

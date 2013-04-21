@@ -176,14 +176,13 @@ unsigned char EffectMgr::geteffectpar(int npar)
 void EffectMgr::out(float *smpsl, float *smpsr)
 {
     if(!efx) {
-        if(!insertion) {
+        if(!insertion)
             for(int i = 0; i < synth->buffersize; ++i) {
                 smpsl[i]   = 0.0f;
                 smpsr[i]   = 0.0f;
                 efxoutl[i] = 0.0f;
                 efxoutr[i] = 0.0f;
             }
-        }
         return;
     }
     for(int i = 0; i < synth->buffersize; ++i) {
@@ -214,7 +213,7 @@ void EffectMgr::out(float *smpsl, float *smpsr)
             v2 = 1.0f;
         }
         if((nefx == 1) || (nefx == 2))
-            v2 *= v2; //for Reverb and Echo, the wet function is not liniar
+            v2 *= v2;  //for Reverb and Echo, the wet function is not liniar
 
         if(dryonly)   //this is used for instrument effect only
             for(int i = 0; i < synth->buffersize; ++i) {

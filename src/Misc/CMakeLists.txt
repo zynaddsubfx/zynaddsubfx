@@ -1,25 +1,28 @@
 include_directories(${MXML_INCLUDE_DIR})
 
 set(zynaddsubfx_misc_SRCS
-	Bank.cpp
-	Config.cpp
-	Dump.cpp
-	Master.cpp
-	Microtonal.cpp
-	Part.cpp
-	Util.cpp
-	XMLwrapper.cpp
-	Recorder.cpp
-	WavFile.cpp
-	WaveShapeSmps.cpp
+	Misc/Bank.cpp
+	Misc/Config.cpp
+	Misc/Dump.cpp
+	Misc/Master.cpp
+	Misc/Microtonal.cpp
+	Misc/Part.cpp
+	Misc/Util.cpp
+	Misc/XMLwrapper.cpp
+	Misc/Recorder.cpp
+	Misc/WavFile.cpp
+	Misc/WaveShapeSmps.cpp
 )
 
+
+
 if(LashEnable)
-    set(zynaddsubfx_misc_SRCS ${zynaddsubfx_misc_SRCS} LASHClient.cpp)
+	set(zynaddsubfx_misc_SRCS
+		${zynaddsubfx_misc_SRCS}
+		Misc/LASHClient.cpp
+		PARENT_SCOPE)
+else()
+	set(zynaddsubfx_misc_SRCS
+		${zynaddsubfx_misc_SRCS}
+		PARENT_SCOPE)
 endif()
-
-add_library(zynaddsubfx_misc STATIC
-	${zynaddsubfx_misc_SRCS}
-	)
-
-target_link_libraries(zynaddsubfx_misc zynaddsubfx_nio)

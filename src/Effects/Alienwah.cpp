@@ -25,8 +25,8 @@
 
 Alienwah::Alienwah(bool insertion_, float *efxoutl_, float *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
-    oldl(NULL),
-    oldr(NULL)
+      oldl(NULL),
+      oldr(NULL)
 {
     setpreset(Ppreset);
     cleanup();
@@ -65,7 +65,7 @@ void Alienwah::out(const Stereo<float *> &smp)
         complex<float> tmp = clfol * x + oldclfol * x1;
 
         complex<float> out = tmp * oldl[oldk];
-        out.real() += (1 - fabs(fb)) * smp.l[i] * pangainL;
+        out += (1 - fabs(fb)) * smp.l[i] * pangainL;
 
         oldl[oldk] = out;
         float l = out.real() * 10.0f * (fb + 0.1f);
@@ -74,7 +74,7 @@ void Alienwah::out(const Stereo<float *> &smp)
         tmp = clfor * x + oldclfor * x1;
 
         out = tmp * oldr[oldk];
-        out.real() += (1 - fabs(fb)) * smp.r[i] * pangainR;
+        out += (1 - fabs(fb)) * smp.r[i] * pangainR;
 
         oldr[oldk] = out;
         float r = out.real() * 10.0f * (fb + 0.1f);
@@ -168,7 +168,7 @@ void Alienwah::setpreset(unsigned char npreset)
     for(int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
     if(insertion == 0)
-        changepar(0, presets[npreset][0] / 2); //lower the volume if this is system effect
+        changepar(0, presets[npreset][0] / 2);  //lower the volume if this is system effect
     Ppreset = npreset;
 }
 

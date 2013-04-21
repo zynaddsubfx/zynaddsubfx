@@ -89,7 +89,7 @@ void rmsNormalize(fft_t *freqs)
         sum += normal(freqs, i);
 
     if(sum < 0.000001f)
-        return; //data is all ~zero, do not amplify noise
+        return;  //data is all ~zero, do not amplify noise
 
     const float gain = 1.0f / sqrt(sum);
 
@@ -156,7 +156,7 @@ void OscilGen::defaults()
     if(ADvsPAD)
         Prand = 127;       //max phase randomness (usefull if the oscil will be imported to a ADsynth from a PADsynth
     else
-        Prand = 64; //no randomness
+        Prand = 64;  //no randomness
 
     Pcurrentbasefunc = 0;
     Pbasefuncpar     = 64;
@@ -615,13 +615,10 @@ void OscilGen::prepare()
 
     clearAll(oscilFFTfreqs);
     if(Pcurrentbasefunc == 0)   //the sine case
-        for(int i = 0; i < MAX_AD_HARMONICS; ++i) {
-            oscilFFTfreqs[i
-                          + 1].real() = -hmag[i]
-                                        * sinf(hphase[i] * (i + 1)) / 2.0f;
-            oscilFFTfreqs[i
-                          + 1].imag() = hmag[i]
-                                        * cosf(hphase[i] * (i + 1)) / 2.0f;
+        for(int i = 0; i < MAX_AD_HARMONICS - 1; ++i) {
+            oscilFFTfreqs[i + 1] =
+                std::complex<float>(-hmag[i] * sinf(hphase[i] * (i + 1)) / 2.0f,
+                        hmag[i] * cosf(hphase[i] * (i + 1)) / 2.0f);
         }
     else
         for(int j = 0; j < MAX_AD_HARMONICS; ++j) {
@@ -698,10 +695,12 @@ void OscilGen::adaptiveharmonic(fft_t *f, float freq)
             break;
         else {
             if(down) {
-                f[high].real()     += inf[i].real() * (1.0f - low);
-                f[high].imag()     += inf[i].imag() * (1.0f - low);
-                f[high + 1].real() += inf[i].real() * low;
-                f[high + 1].imag() += inf[i].imag() * low;
+                f[high] =
+                    std::complex<float>(f[high].real() + inf[i].real() * (1.0f - low),
+                            f[high].imag() + inf[i].imag() * (1.0f - low));
+
+                f[high + 1] = std::complex<float>(f[high + 1].real() + inf[i].real() * low,
+                        f[high + 1].imag() + inf[i].imag() * low);
             }
             else {
                 hc = inf[high].real()
@@ -746,7 +745,7 @@ void OscilGen::adaptiveharmonicpostprocess(fft_t *f, int size)
     if(Padaptiveharmonics == 2) { //2n+1
         for(int i = 0; i < size; ++i)
             if((i % 2) == 0)
-                f[i] += inf[i]; //i=0 pt prima armonica,etc.
+                f[i] += inf[i];  //i=0 pt prima armonica,etc.
     }
     else {  //celelalte moduri
         int nh = (Padaptiveharmonics - 3) / 2 + 2;
@@ -841,7 +840,8 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
             outoscilFFTfreqs[i] = oscilFFTfreqs[i];
 
         adaptiveharmonic(outoscilFFTfreqs, freqHz);
-        adaptiveharmonicpostprocess(&outoscilFFTfreqs[1], synth->oscilsize / 2 - 1);
+        adaptiveharmonicpostprocess(&outoscilFFTfreqs[1],
+                                    synth->oscilsize / 2 - 1);
 
         nyquist = realnyquist;
     }
@@ -927,7 +927,8 @@ void OscilGen::getspectrum(int n, float *spc, int what)
     if(what == 0) {
         for(int i = 0; i < n; ++i)
             outoscilFFTfreqs[i] = fft_t(spc[i], spc[i]);
-        memset(outoscilFFTfreqs + n, 0, (synth->oscilsize / 2 - n) * sizeof(fft_t));
+        memset(outoscilFFTfreqs + n, 0,
+               (synth->oscilsize / 2 - n) * sizeof(fft_t));
         adaptiveharmonic(outoscilFFTfreqs, 0.0f);
         adaptiveharmonicpostprocess(outoscilFFTfreqs, n - 1);
         for(int i = 0; i < n; ++i)
@@ -1110,8 +1111,9 @@ void OscilGen::getfromXML(XMLwrapper *xml)
     if(xml->enterbranch("BASE_FUNCTION")) {
         for(int i = 1; i < synth->oscilsize / 2; ++i)
             if(xml->enterbranch("BF_HARMONIC", i)) {
-                basefuncFFTfreqs[i].real() = xml->getparreal("cos", 0.0f);
-                basefuncFFTfreqs[i].imag() = xml->getparreal("sin", 0.0f);
+                basefuncFFTfreqs[i] =
+                    std::complex<float>(xml->getparreal("cos", 0.0f),
+                            xml->getparreal("sin", 0.0f));
                 xml->exitbranch();
             }
         xml->exitbranch();
@@ -1270,19 +1272,21 @@ FUNC(spike)
 {
     float b = a * 0.66666; // the width of the range: if a == 0.5, b == 0.33333
 
-    if(x < 0.5){
-        if(x < (0.5 - (b / 2.0))) return 0.0;
+    if(x < 0.5) {
+        if(x < (0.5 - (b / 2.0)))
+            return 0.0;
         else {
             x = (x + (b / 2) - 0.5) * (2.0 / b); // shift to zero, and expand to range from 0 to 1
             return x * (2.0 / b); // this is the slope: 1 / (b / 2)
         }
     }
     else {
-      if(x > (0.5 + (b / 2.0))) return 0.0;
-      else {
-          x = (x - 0.5) * (2.0 / b);
-          return (1 - x) * (2.0 / b);
-      }
+        if(x > (0.5 + (b / 2.0)))
+            return 0.0;
+        else {
+            x = (x - 0.5) * (2.0 / b);
+            return (1 - x) * (2.0 / b);
+        }
     }
 }
 
@@ -1294,15 +1298,19 @@ FUNC(circle)
     b = 2 - (a * 2); // b goes from 2 to 0
     x = x * 4;
 
-    if (x < 2){
+    if(x < 2) {
         x = x - 1; // x goes from -1 to 1
-        if ((x < -b) || (x > b)) y = 0;
-        else y = sqrt(1 - (pow(x, 2) / pow(b, 2))); // normally * a^2, but a stays 1
+        if((x < -b) || (x > b))
+            y = 0;
+        else
+            y = sqrt(1 - (pow(x, 2) / pow(b, 2)));  // normally * a^2, but a stays 1
     }
-    else{
+    else {
         x = x - 3; // x goes from -1 to 1 as well
-        if ((x < -b) || (x > b)) y = 0;
-        else y = -sqrt(1 - (pow(x, 2) / pow(b, 2)));
+        if((x < -b) || (x > b))
+            y = 0;
+        else
+            y = -sqrt(1 - (pow(x, 2) / pow(b, 2)));
     }
     return y;
 }

@@ -32,6 +32,8 @@
 
 using namespace std;
 
+extern char *instance_name;
+
 JackEngine::JackEngine()
     :AudioOut(), jackClient(NULL)
 {
@@ -51,7 +53,6 @@ bool JackEngine::connectServer(string server)
     if(jackClient)
         return true;
 
-
     string clientname = "zynaddsubfx";
     string postfix    = Nio::getPostfix();
     if(!postfix.empty())
@@ -59,15 +60,25 @@ bool JackEngine::connectServer(string server)
     jack_status_t jackstatus;
     bool use_server_name = server.size() && server.compare("default") != 0;
     jack_options_t jopts = (jack_options_t)
-                           (((use_server_name) ? JackServerName :
+                           (((!instance_name
+                              && use_server_name) ? JackServerName :
                              JackNullOption)
                             | ((autostart_jack) ? JackNullOption :
                                JackNoStartServer));
-    if(use_server_name)
-        jackClient = jack_client_open(clientname.c_str(), jopts, &jackstatus,
-                                      server.c_str());
-    else
-        jackClient = jack_client_open(clientname.c_str(), jopts, &jackstatus);
+
+    if(instance_name)
+        jackClient = jack_client_open(instance_name, jopts, &jackstatus);
+    else {
+        if(use_server_name)
+            jackClient = jack_client_open(
+                clientname.c_str(), jopts, &jackstatus,
+                server.c_str());
+        else
+            jackClient = jack_client_open(
+                clientname.c_str(), jopts, &jackstatus);
+    }
+
+
     if(NULL != jackClient)
         return true;
     else
@@ -107,6 +118,9 @@ bool JackEngine::connectJack()
 void JackEngine::disconnectJack()
 {
     if(jackClient) {
+        cout << "Deactivating and closing JACK client" << endl;
+
+        jack_deactivate(jackClient);
         jack_client_close(jackClient);
         jackClient = NULL;
     }
@@ -294,7 +308,7 @@ bool JackEngine::processAudio(jack_nframes_t nframes)
     return true;
 }
 
-int JackEngine::_xrunCallback(void * /*/arg*/)
+int JackEngine::_xrunCallback(void *)
 {
     cerr << "Jack reports xrun" << endl;
     return 0;
@@ -349,6 +363,13 @@ void JackEngine::handleMidi(unsigned long frames)
 
             case 0x90: /* note-on */
                 ev.type  = M_NOTE;
+                ev.num   = midi_data[1];
+                ev.value = midi_data[2];
+                InMgr::getInstance().putEvent(ev);
+                break;
+
+            case 0xA0: /* pressure, aftertouch */
+                ev.type  = M_PRESSURE;
                 ev.num   = midi_data[1];
                 ev.value = midi_data[2];
                 InMgr::getInstance().putEvent(ev);

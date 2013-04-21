@@ -136,6 +136,14 @@ void *AlsaEngine::MidiThread(void)
                 InMgr::getInstance().putEvent(ev);
                 break;
 
+            case SND_SEQ_EVENT_KEYPRESS:
+                ev.type    = M_PRESSURE;
+                ev.channel = event->data.note.channel;
+                ev.num     = event->data.note.note;
+                ev.value   = event->data.note.velocity;
+                InMgr::getInstance().putEvent(ev);
+                break;
+
             case SND_SEQ_EVENT_PITCHBEND:
                 ev.type    = M_CONTROLLER;
                 ev.channel = event->data.control.channel;

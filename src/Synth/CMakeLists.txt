@@ -1,17 +1,11 @@
 set(zynaddsubfx_synth_SRCS
-	SynthNote.cpp
-	ADnote.cpp
-	Envelope.cpp
-	LFO.cpp
-	OscilGen.cpp
-	PADnote.cpp
-	Resonance.cpp
-	SUBnote.cpp
+	Synth/SynthNote.cpp
+	Synth/ADnote.cpp
+	Synth/Envelope.cpp
+	Synth/LFO.cpp
+	Synth/OscilGen.cpp
+	Synth/PADnote.cpp
+	Synth/Resonance.cpp
+	Synth/SUBnote.cpp
+	PARENT_SCOPE
 )
-
-add_library(zynaddsubfx_synth STATIC
-	${zynaddsubfx_synth_SRCS} 
-	)
-
-target_link_libraries(zynaddsubfx_synth)
-

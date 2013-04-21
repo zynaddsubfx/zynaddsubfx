@@ -14,7 +14,7 @@ decl {\#include <cmath>} {}
 decl {\#include <stdio.h>} {global
 } 
 
-decl {\#include <stdlib.h>} {selected global
+decl {\#include <stdlib.h>} {global
 } 
 
 decl {\#include "../globals.h"} {public
@@ -38,7 +38,10 @@ decl {\#include <FL/fl_ask.H>} {public
 decl {\#include "PresetsUI.h"} {public
 } 
 
-class FormantFilterGraph {: {public Fl_Box}
+decl {\#include "common.H"} {public
+} 
+
+class FormantFilterGraph {open : {public Fl_Box}
 } {
   Function {FormantFilterGraph(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
     code {pars=NULL;
@@ -134,13 +137,17 @@ fl_line_style(FL_SOLID);
 
 pars->formantfilterH(*nvowel,lx,graphpoints);
 
+fl_line_style( FL_SOLID, 2 );
+fl_begin_line();
 oiy=(int) ((graphpoints[0]/maxdB+1.0)*ly/2.0);
 for (i=1;i<lx;i++){
-   int iy=(int) ((graphpoints[i]/maxdB+1.0)*ly/2.0);
+   double iy= ((graphpoints[i]/maxdB+1.0)*ly/2.0);
    if ((iy>=0)&&(oiy>=0)&&(iy<ly)&&(oiy<lx))
-      fl_line(ox+i-1,oy+ly-oiy,ox+i,oy+ly-iy);
+      fl_vertex(ox+i,oy+ly-iy);
    oiy=iy;
-};} {}
+};
+fl_end_line();
+fl_line_style(FL_SOLID,0);} {}
   }
   Function {~FormantFilterGraph()} {} {
     code {delete [] graphpoints;} {}
@@ -151,7 +158,7 @@ for (i=1;i<lx;i++){
   decl {float *graphpoints;} {}
 } 
 
-class FilterUI {: {public Fl_Group,PresetsUI_}
+class FilterUI {open : {public Fl_Group,PresetsUI_}
 } {
   Function {FilterUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {pars=NULL;
@@ -166,14 +173,16 @@ hide();
 //delete (filterui);
 delete (formantparswindow);} {}
   }
-  Function {make_window()} {} {
-    Fl_Window filterui {
-      xywh {211 312 275 75} type Double color 50 labelfont 1 hide
-      class Fl_Group
+  Function {make_window()} {open
+  } {
+    Fl_Window filterui {open
+      xywh {498 346 275 70} type Double color 50 labelfont 1
+      class Fl_Group visible
     } {
       Fl_Group filterparamswindow {
         label {Filter Parameters}
-        xywh {0 0 275 75} box PLASTIC_UP_BOX color 183 labeltype ENGRAVED_LABEL labelsize 10 align 17
+        xywh {0 0 275 75} box UP_FRAME color 183 labeltype ENGRAVED_LABEL labelsize 10 align 17
+        code0 {set_module_parameters( o );}
       } {
         Fl_Choice analogfiltertypechoice {
           label FilterType
@@ -319,7 +328,7 @@ pars->changed=true;} open
       Fl_Button editbutton {
         label Edit
         callback {formantparswindow->show();}
-        xywh {15 40 50 25} box PLASTIC_UP_BOX labelfont 1 labelsize 11
+        xywh {15 40 50 25} labelfont 1 labelsize 11
       }
       Fl_Button {} {
         label C
@@ -333,10 +342,11 @@ pars->changed=true;} open
       }
     }
   }
-  Function {make_formant_window()} {} {
+  Function {make_formant_window()} {open
+  } {
     Fl_Window formantparswindow {
-      label {Formant Filter Parameters}
-      xywh {47 301 700 205} type Double hide
+      label {Formant Filter Parameters} selected
+      xywh {518 473 700 205} type Double visible
     } {
       Fl_Group {} {
         xywh {485 47 105 113} box THIN_UP_BOX
@@ -511,7 +521,8 @@ pars->changed=true;}
       }
     }
   }
-  Function {update_formant_window()} {} {
+  Function {update_formant_window()} {open
+  } {
     code {formant_freq_dial->value(pars->Pvowels[nvowel].formants[nformant].freq);
 formant_q_dial->value(pars->Pvowels[nvowel].formants[nformant].q);
 formant_amp_dial->value(pars->Pvowels[nvowel].formants[nformant].amp);
@@ -592,7 +603,8 @@ formantparswindow->label(this->label());
 
 update_formant_window();} {}
   }
-  Function {switchcategory(int newcat)} {} {
+  Function {switchcategory(int newcat)} {open
+  } {
     code {if (pars->Pcategory!=newcat){
     pars->Pgain=64;
     gaindial->value(64);
@@ -605,7 +617,8 @@ pars->Pcategory=newcat;
 
 refresh();} {}
   }
-  Function {use_for_dynamic_filter()} {} {
+  Function {use_for_dynamic_filter()} {open
+  } {
     code {freqtrdial->deactivate();
 gaindial->when(0);
 

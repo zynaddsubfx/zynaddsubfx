@@ -1,34 +1,61 @@
 Filters
 -------
 :Author: Mark McCurry
-:Date: July 5, 2009
+:Date: June 24, 2012
 
-In ZynAddSubFX filters can be used at several different stages to
-increase or decrease a defined set of frequencys.
+ZynAddSubFX offers several different types of filters, which can be used to
+shape the spectrum of a signal.
+The primary parameters that affect the characteristics of the filter are the
+cutoff, resonance, filter stages, and the filter type.
 
-Types
-~~~~~
+* *Cutoff*: This value determines which frequency marks the changing point for
+            the filter. In a low pass filter, this value marks the point where
+            higher frequencies are attenuated.
+* *Resonance*: The resonance of a filter determines how much excess energy is
+               present at the cutoff frequency. In ZynAddSubFX, this is
+               represented by the Q-factor, which is defined to be the cutoff
+               frequency divided by the bandwidth. In other words higher Q
+               values result in a much more narrow resonant spike.
+* *Stages*: The number of stages in a given filter describes how sharply it is
+            able to make changes in the frequency response.
 
-ZynAddSubFX currently supports a wide set of filters that it can provide
+The basic 'analog' filters that ZynAddSubFX offers are shown below, with the
+center frequency being marked by the red line.
+The 'state variable' filters should look quite similar.
 
 image:images/filter0.png[]
 
-Values
-~~~~~~
+As previously mentioned, the Q value of a filter affects how concentrated the
+signal's energy is at the cutoff frequency; The result of differing Q values are
+below.
 
-Each of these filters will be affected by their Q values, number of poles, and
-cutoff values.
-
-The folowing diagram shows the frequency response under different Q values:
+TIP: For many classical analog sounds, high Q values were used on sweeping
+filters. A simple high Q low pass filter modulated by a strong envelope is
+usually sufficient to get a good sound.
 
 image:images/filter1.png[]
 
-The folowing diagram shows the frequency response under a different number of
-poles:
+Lastly, the affect of the order of the filter can be seen below.
+This is roughly synonymous with the number of stages of the filter.
+For more complex patches it is important to realize that the extra sharpness in
+the filter does not come for free as it requires many more calculations being
+performed; This phenomena is the most visible in subsynth, where it is easy to
+need several hundred filter stages to produce a given note.
 
 image:images/filter2.png[]
 
 User Interface
 ~~~~~~~~~~~~~~
 
-A picture of the UI will go here
+image:images/uifilter.png[]
+
+* *C.freq*: Cutoff frequency
+* *Q*: Level of resonance for the filter
+* *V.SnsA.*: Velocity sensing amount for filter cutoff
+* *V.Sns.*: Velocity sensing function
+* *freq.tr*: Frequency tracking amount. When this parameter is positive, higher
+             note frequencies shift the filter's cutoff frequency higher.
+* *gain*: Additional gain/attenuation for filter
+* *St*: Filter stages
+
+NOTE: TODO add a lengthy section on the formant filter setup

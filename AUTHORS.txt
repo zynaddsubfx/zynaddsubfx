@@ -21,4 +21,8 @@ Contributors:
         Hans Petter Selasky (OSS Midi, FreeBSD support, Bank UI bug fix)
         Damien Goutte-Gattat (Bank select midi support)
         Lieven Moors (Spike/Circle waveform)
+        Olaf Schulz (MIDI Aftertouch support)
+        Jonathan Liles (NSM & NTK support)
+        Johannes Lorenz (Effect Documentation)
+        Ilario Glasgo (Italian Doc Translation)
 

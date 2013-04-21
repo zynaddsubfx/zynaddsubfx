@@ -91,6 +91,7 @@ void Bank::setname(unsigned int ninstrument, const string &newname, int newslot)
 
     string newfilename;
     char   tmpfilename[100 + 1];
+    tmpfilename[100] = 0;
 
     if(newslot >= 0)
         snprintf(tmpfilename, 100, "%4d-%s", newslot + 1, newname.c_str());
@@ -107,7 +108,7 @@ void Bank::setname(unsigned int ninstrument, const string &newname, int newslot)
     rename(ins[ninstrument].filename.c_str(), newfilename.c_str());
 
     ins[ninstrument].filename = newfilename;
-    ins[ninstrument].name     = legalizeFilename(tmpfilename); //TODO limit name to PART_MAX_NAME_LEN
+    ins[ninstrument].name     = newname;
 }
 
 /*
@@ -164,7 +165,7 @@ void Bank::savetoslot(unsigned int ninstrument, Part *part)
 
     remove(filename.c_str());
     part->saveXML(filename.c_str());
-    addtobank(ninstrument, legalizeFilename(tmpfilename), (char *) part->Pname);
+    addtobank(ninstrument, legalizeFilename(tmpfilename) + ".xiz", (char *) part->Pname);
 }
 
 /*
@@ -175,6 +176,7 @@ void Bank::loadfromslot(unsigned int ninstrument, Part *part)
     if(emptyslot(ninstrument))
         return;
 
+    part->AllNotesOff();
     part->defaultsinstrument();
 
     part->loadXMLinstrument(ins[ninstrument].filename.c_str());
@@ -219,7 +221,7 @@ int Bank::loadbank(string bankdirname)
         }
 
         if((startname + 1) < strlen(filename))
-            startname++; //to take out the "-"
+            startname++;  //to take out the "-"
 
         string name = filename;
 
@@ -408,7 +410,7 @@ int Bank::addtobank(int pos, string filename, string name)
 {
     if((pos >= 0) && (pos < BANK_SIZE)) {
         if(ins[pos].used)
-            pos = -1; //force it to find a new free position
+            pos = -1;  //force it to find a new free position
     }
     else
     if(pos >= BANK_SIZE)
@@ -423,7 +425,7 @@ int Bank::addtobank(int pos, string filename, string name)
             }
 
     if(pos < 0)
-        return -1; //the bank is full
+        return -1;  //the bank is full
 
     deletefrombank(pos);
 

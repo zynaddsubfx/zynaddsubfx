@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0105 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
@@ -36,7 +36,10 @@ decl {\#include <FL/fl_ask.H>} {public
 decl {\#include "PresetsUI.h"} {public
 } 
 
-class LFOUI {: {public Fl_Group, PresetsUI_}
+decl {\#include "common.H"} {public
+} 
+
+class LFOUI {open : {public Fl_Group, PresetsUI_}
 } {
   Function {LFOUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {pars=NULL;} {}
@@ -46,14 +49,16 @@ class LFOUI {: {public Fl_Group, PresetsUI_}
 hide();
 //delete (lfoui);} {}
   }
-  Function {make_window()} {} {
-    Fl_Window lfoui {
-      xywh {66 328 230 70} type Double color 50 labelfont 1 hide
-      class Fl_Group
+  Function {make_window()} {open
+  } {
+    Fl_Window lfoui {open selected
+      xywh {630 351 230 70} type Double color 50 labelfont 1
+      class Fl_Group visible
     } {
       Fl_Group lfoparamswindow {
         label LFO
-        xywh {0 0 230 70} box PLASTIC_UP_BOX color 223 labeltype ENGRAVED_LABEL labelsize 10 align 17
+        xywh {0 0 230 70} box UP_BOX color 223 labeltype ENGRAVED_LABEL labelsize 10 align 17
+        code0 {set_module_parameters(o);}
       } {
         Fl_Dial freq {
           label {Freq.}
@@ -90,31 +95,31 @@ hide();
           callback {pars->PLFOtype=(int)o->value();}
           tooltip {LFO function} xywh {180 40 45 15} down_box BORDER_BOX labelsize 10 align 2 textsize 8
         } {
-          menuitem {} {
+          MenuItem {} {
             label SINE
             xywh {20 20 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label TRI
             xywh {30 30 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label SQR
             xywh {30 30 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label {R.up}
             xywh {40 40 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label {R.dn}
             xywh {50 50 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label E1dn
             xywh {60 60 100 20} labelfont 1 labelsize 10
           }
-          menuitem {} {
+          MenuItem {} {
             label E2dn
             xywh {70 70 100 20} labelfont 1 labelsize 10
           }
@@ -138,12 +143,12 @@ hide();
         }
         Fl_Button {} {
           label C
-          callback {presetsui->copy(pars);} selected
+          callback {presetsui->copy(pars);}
           xywh {145 10 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
         }
         Fl_Button {} {
           label P
-          callback {presetsui->paste(pars,this);} selected
+          callback {presetsui->paste(pars,this);}
           xywh {162 10 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
         }
       }

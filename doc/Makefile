@@ -1,19 +1,19 @@
 
 .PHONY: subdirs gen
 
-all: gen-files xhtml chunked pdf
+all: gen-files man xhtml chunked pdf
 
 gen-files:
 	cd gen; make
 
 
 xhtml: zynaddsubfx.txt envelope.txt intro.txt lfo.txt
-	asciidoc -a numbered -a toc -b xhtml11 \
+	asciidoc -a numbered -a toc -b html5 \
 		zynaddsubfx.txt
 
 chunked:
 	asciidoc --doctype=article   -b docbook \
-	         --conf-file=myconf.conf zynaddsubfx.txt
+	          zynaddsubfx.txt
 	rm -rf ./zynaddsubfx.chunked
 	mkdir ./zynaddsubfx.chunked
 	rm -f "./zynaddsubfx.chunked/*.html"
@@ -29,13 +29,10 @@ chunked:
 		 "./zynaddsubfx.xml" \
 
 pdf:
-	asciidoc -b latex --conf-file=myconf.conf zynaddsubfx.txt
-	grep -v figure zynaddsubfx.tex | \
-	sed -e 's~^\\includegraphics~\\par\\noindent\{\} \\includegraphics~' | \
-	sed -e 's~includegraphics\[\]~includegraphics[scale=0.5]~' > tmp.tex
-	mv tmp.tex zynaddsubfx.tex
-	pdflatex zynaddsubfx.tex
-	pdflatex zynaddsubfx.tex
+	a2x -f pdf zynaddsubfx.txt
+
+man: zynaddsubfx.1.txt
+	a2x -f manpage zynaddsubfx.1.txt
 
 clean:
 	rm -f *~ *html *pdf *xml *tex *log zynaddsubfx.chunked/images

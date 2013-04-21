@@ -31,45 +31,30 @@ EngineMgr &EngineMgr::getInstance()
 
 EngineMgr::EngineMgr()
 {
-    Engine *defaultEng = NULL;
+    Engine *defaultEng = new NulEngine();
 
     //conditional compiling mess (but contained)
-    engines.push_back(defaultEng = new NulEngine());
+    engines.push_back(defaultEng);
 #if OSS
-#if OSS_DEFAULT
-    engines.push_back(defaultEng = new OssEngine());
-#else
     engines.push_back(new OssEngine());
 #endif
-#endif
 #if ALSA
-#if ALSA_DEFAULT
-    engines.push_back(defaultEng = new AlsaEngine());
-#else
     engines.push_back(new AlsaEngine());
 #endif
-#endif
 #if JACK
-#if JACK_DEFAULT
-    engines.push_back(defaultEng = new JackEngine());
-#else
     engines.push_back(new JackEngine());
 #endif
     engines.push_back(new JackMultiEngine());
 #endif
 #if PORTAUDIO
-#if PORTAUDIO_DEFAULT
-    engines.push_back(defaultEng = new PaEngine());
-#else
     engines.push_back(new PaEngine());
-#endif
 #endif
 
     defaultOut = dynamic_cast<AudioOut *>(defaultEng);
 
     defaultIn = dynamic_cast<MidiIn *>(defaultEng);
 
-    //Accept command line options
+    //Accept command line/compile time options
     if(!Nio::defaultSink.empty())
         setOutDefault(Nio::defaultSink);
 
@@ -152,7 +137,8 @@ bool EngineMgr::setInDefault(string name)
     }
 
     //Warn user
-    cerr << "Error: " << name << " is not a recognized MIDI input source" << endl;
+    cerr << "Error: " << name << " is not a recognized MIDI input source"
+         << endl;
     cerr << "       Defaulting to the NULL input source" << endl;
 
     return false;

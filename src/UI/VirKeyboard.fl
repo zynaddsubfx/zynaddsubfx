@@ -21,10 +21,18 @@ decl {\#include "../globals.h"} {public
 decl {\#include "../Misc/Master.h"} {public
 } 
 
-decl {\#include "../Misc/Util.h"} {selected public
+decl {\#include "../Misc/Util.h"} {public
 } 
 
 decl {\#include "WidgetPDial.h"} {public
+} 
+
+decl {\#include "common.H"} {public
+} 
+
+decl {\#ifdef NTK_GUI
+     \#include "FL/Fl_Shared_Image.H"
+     \#endif} {public
 } 
 
 decl {const int keyspos[12]={0,-1,1,-2,2,3,-4,4,-5,5,-6,6};} {} 
@@ -67,6 +75,52 @@ rndvelocity=0;} {}
   Function {draw()} {} {
     code {int ox=x(),oy=y(),lx=w(),ly=h()-1,i;
 
+\#ifdef NTK_GUI
+ Fl_Image *white_up = Fl_Shared_Image::get( PIXMAP_PATH "white_key.png" );
+ Fl_Image *white_down = Fl_Shared_Image::get( PIXMAP_PATH "white_key_pressed.png" );
+ Fl_Image *black_up = Fl_Shared_Image::get( PIXMAP_PATH "black_key.png" );
+ Fl_Image *black_down = Fl_Shared_Image::get( PIXMAP_PATH "black_key_pressed.png" );
+
+
+//On error fetch everything from source directory
+if(!(white_up&&white_down&&black_up&&black_down)) {
+    white_up   = Fl_Shared_Image::get(SOURCE_DIR "/../../pixmaps/white_key.png");   
+    white_down = Fl_Shared_Image::get(SOURCE_DIR "/../../pixmaps/white_key_pressed.png");
+    black_up   = Fl_Shared_Image::get(SOURCE_DIR "/../../pixmaps/black_key.png");
+    black_down = Fl_Shared_Image::get(SOURCE_DIR "/../../pixmaps/black_key_pressed.png");
+}
+
+Fl_Image *key;
+
+for (i=0;i<N_OCT*12;i++) {
+   int noct=i/12;
+   int kv=keyspos[i%12];
+
+   if (kv>=0){//white keys
+     if (pressed[i]==0)
+         key = white_up;
+        else
+         key = white_down;
+
+      key->draw( ox + (kv + 7 * noct ) * white_up->w() + 3, oy );
+   } 
+}
+
+for (i=0;i<N_OCT*12;i++){
+   int noct=i/12;
+   int kv=keyspos[i%12];
+
+   if ( kv < 0 ) {
+     kv=keyspos[(i+1)%12];
+     if (pressed[i]==0)
+       key = black_up;
+     else
+       key = black_down;
+
+       key->draw( ox + (kv + 7 * noct ) * white_up->w() - black_up->w() / 2 + 2, oy );
+   }
+}
+\#else
 if (damage()!=1){
  fl_color(250,240,230);
  fl_rectf(ox,oy,lx,ly);
@@ -80,8 +134,8 @@ if (damage()!=1){
    if ((ik==1)||(ik==2)||(ik==4)||(ik==5)||(ik==6)) 
      fl_rectf(ox+i*SIZE_WHITE-SIZE_BLACK/2,oy,
               SIZE_BLACK+1,ly*3/5);
- };
-};
+ }
+}
 
 
 for (i=0;i<N_OCT*12;i++){
@@ -101,8 +155,9 @@ for (i=0;i<N_OCT*12;i++){
         else fl_color(FL_BLUE);
      fl_rectf(ox+(kv+7*noct)*SIZE_WHITE-SIZE_BLACK/2+2,oy+2,
               SIZE_BLACK-3,ly*3/5-5);
-   };
-};} {}
+   }
+}
+\#endif} {}
   }
   Function {handle(int event)} {return_type int
   } {
@@ -237,13 +292,15 @@ pthread_mutex_unlock(&master->mutex);} {}
   }
 } 
 
-class VirKeyboard {} {
-  Function {make_window()} {} {
+class VirKeyboard {open
+} {
+  Function {make_window()} {open
+  } {
     Fl_Window virkeyboardwindow {
       label {Virtual Keyboard - ZynAddSubFX}
       callback {relaseallkeys();
-virkeyboardwindow->hide();}
-      xywh {95 563 650 130} type Double hide
+virkeyboardwindow->hide();} open
+      xywh {100 597 650 130} type Double visible
     } {
       Fl_Box virkeys {
         label Keyboard
@@ -270,8 +327,8 @@ virkeys->take_focus();}
       Fl_Value_Slider {} {
         label Vel
         callback {virkeys->midivel=(int) o->value();
-virkeys->take_focus();}
-        tooltip Velocity xywh {95 105 100 15} type {Horz Knob} box FLAT_BOX labelsize 10 align 5 minimum 1 maximum 127 step 1
+virkeys->take_focus();} selected
+        tooltip Velocity xywh {95 105 100 15} type {Horz Knob} box NO_BOX labelsize 10 align 5 minimum 1 maximum 127 step 1
         code0 {o->value(virkeys->midivel);}
       }
       Fl_Counter {} {
@@ -378,7 +435,7 @@ virkeys->take_focus();}
 master->setController(virkeys->midich,C_pitchwheel,-(int) o->value());
 pthread_mutex_unlock(&master->mutex);
 virkeys->take_focus();}
-        tooltip {Pitch Wheel} xywh {625 10 20 95} box PLASTIC_UP_BOX labelsize 8 align 1 when 3 minimum -8192 maximum 8192 step 64
+        tooltip {Pitch Wheel} xywh {625 10 20 95} labelsize 8 align 1 when 3 minimum -8192 maximum 8192 step 64
       }
       Fl_Button {} {
         label R

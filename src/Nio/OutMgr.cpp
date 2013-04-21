@@ -118,11 +118,15 @@ string OutMgr::getSink() const
 //perform a cheap linear interpolation for resampling
 //This will result in some distortion at frame boundries
 //returns number of samples produced
-static size_t resample(float *dest, const float *src, float s_in, float s_out, size_t elms)
+static size_t resample(float *dest,
+                       const float *src,
+                       float s_in,
+                       float s_out,
+                       size_t elms)
 {
-    size_t out_elms = elms*s_out/s_in;
-    float r_pos = 0.0f;
-    for(int i = 0; i < (int)out_elms; ++i, r_pos += s_in/s_out)
+    size_t out_elms = elms * s_out / s_in;
+    float  r_pos    = 0.0f;
+    for(int i = 0; i < (int)out_elms; ++i, r_pos += s_in / s_out)
         dest[i] = interpolate(src, elms, r_pos);
 
     return out_elms;
@@ -133,11 +137,15 @@ void OutMgr::addSmps(float *l, float *r)
     //allow wave file to syphon off stream
     wave->push(Stereo<float *>(l, r), synth->buffersize);
 
-    const int s_out  = currentOut->getSampleRate(),
+    const int s_out = currentOut->getSampleRate(),
               s_sys = synth->samplerate;
 
     if(s_out != s_sys) { //we need to resample
-        const size_t steps = resample(priBuffCurrent.l, l, s_sys, s_out, synth->buffersize);
+        const size_t steps = resample(priBuffCurrent.l,
+                                      l,
+                                      s_sys,
+                                      s_out,
+                                      synth->buffersize);
         resample(priBuffCurrent.r, r, s_sys, s_out, synth->buffersize);
 
         priBuffCurrent.l += steps;
@@ -158,7 +166,7 @@ void OutMgr::removeStaleSmps()
 
     const int leftover = storedSmps() - stales;
 
-    assert(leftover>-1);
+    assert(leftover > -1);
 
     //leftover samples [seen at very low latencies]
     if(leftover) {

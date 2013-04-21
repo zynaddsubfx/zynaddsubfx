@@ -84,7 +84,7 @@ T stringTo(const char *x)
 template<class T>
 T limit(T val, T min, T max)
 {
-    return (val<min ? min : (val> max ? max : val));
+    return val < min ? min : (val > max ? max : val);
 }
 
 //Random number generator
@@ -93,7 +93,7 @@ typedef uint32_t prng_t;
 extern prng_t prng_state;
 
 // Portable Pseudo-Random Number Generator
-inline prng_t prng_r(prng_t & p)
+inline prng_t prng_r(prng_t &p)
 {
     return p = p * 1103515245 + 12345;
 }

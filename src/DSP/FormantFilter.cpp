@@ -149,18 +149,19 @@ void FormantFilter::setpos(float input)
             currentformants[i].freq =
                 currentformants[i].freq * (1.0f - formantslowness)
                 + (formantpar[p1][i].freq
-                        * (1.0f - pos) + formantpar[p2][i].freq * pos)
+                   * (1.0f - pos) + formantpar[p2][i].freq * pos)
                 * formantslowness;
 
             currentformants[i].amp =
                 currentformants[i].amp * (1.0f - formantslowness)
                 + (formantpar[p1][i].amp * (1.0f - pos)
-                        + formantpar[p2][i].amp * pos) * formantslowness;
+                   + formantpar[p2][i].amp * pos) * formantslowness;
 
             currentformants[i].q = currentformants[i].q
-                * (1.0f - formantslowness)
-                + (formantpar[p1][i].q * (1.0f - pos)
-                        + formantpar[p2][i].q * pos) * formantslowness;
+                                   * (1.0f - formantslowness)
+                                   + (formantpar[p1][i].q * (1.0f - pos)
+                                      + formantpar[p2][i].q
+                                      * pos) * formantslowness;
 
 
             formant[i]->setfreq_and_q(currentformants[i].freq,

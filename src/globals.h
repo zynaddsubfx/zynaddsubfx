@@ -156,12 +156,12 @@
 #define ZERO(data, size) {char *data_ = (char *) data; for(int i = 0; \
                                                            i < size; \
                                                            i++) \
-                              data_[i] = 0;}
+                              data_[i] = 0; }
 #define ZERO_float(data, size) {float *data_ = (float *) data; \
                                 for(int i = 0; \
                                     i < size; \
                                     i++) \
-                                    data_[i] = 0.0f;}
+                                    data_[i] = 0.0f; }
 
 enum ONOFFTYPE {
     OFF = 0, ON = 1
@@ -169,8 +169,8 @@ enum ONOFFTYPE {
 
 enum MidiControllers {
     C_bankselectmsb = 0, C_pitchwheel = 1000, C_NULL = 1001,
-    C_expression = 11, C_panning = 10, C_bankselectlsb = 32,
-    C_filtercutoff = 74, C_filterq = 71, C_bandwidth = 75, C_modwheel = 1,
+    C_expression    = 11, C_panning = 10, C_bankselectlsb = 32,
+    C_filtercutoff  = 74, C_filterq = 71, C_bandwidth = 75, C_modwheel = 1,
     C_fmamp  = 76,
     C_volume = 7, C_sustain = 64, C_allnotesoff = 123, C_allsoundsoff = 120,
     C_resetallcontrollers = 121,
@@ -201,8 +201,7 @@ enum LegatoMsg {
 #endif
 
 //temporary include for synth->{samplerate/buffersize} members
-struct SYNTH_T
-{
+struct SYNTH_T {
     SYNTH_T(void)
         :samplerate(44100), buffersize(256), oscilsize(1024)
     {
@@ -220,14 +219,14 @@ struct SYNTH_T
      * If you increase this you'll ecounter big latencies, but if you
      * decrease this the CPU requirements gets high.
      */
-    int   buffersize;
+    int buffersize;
 
     /**
      * The size of ADnote Oscillator
      * Decrease this => poor quality
      * Increase this => CPU requirements gets high (only at start of the note)
      */
-    int   oscilsize;
+    int oscilsize;
 
     //Alias for above terms
     float samplerate_f;
@@ -239,9 +238,9 @@ struct SYNTH_T
     inline void alias(void)
     {
         halfsamplerate_f = (samplerate_f = samplerate) / 2.0f;
-        buffersize_f = buffersize;
-        bufferbytes = buffersize * sizeof(float);
-        oscilsize_f = oscilsize;
+        buffersize_f     = buffersize;
+        bufferbytes      = buffersize * sizeof(float);
+        oscilsize_f      = oscilsize;
     }
     float numRandom(void) const; //defined in Util.cpp for now
 };

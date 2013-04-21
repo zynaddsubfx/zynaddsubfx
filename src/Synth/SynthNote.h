@@ -45,6 +45,8 @@ class SynthNote
         virtual void legatonote(float freq, float velocity,
                                 int portamento_, int midinote_,
                                 bool externcall) = 0;
+        /* For polyphonic aftertouch needed */
+        void setVelocity(float velocity_);
     protected:
         // Legato transitions
         class Legato
@@ -70,6 +72,14 @@ class SynthNote
                     float freq, vel;
                     int   portamento, midinote;
                 } param;
+
+            public: /* Some get routines for legatonote calls (aftertouch feature)*/
+                float getFreq() {return param.freq; }
+                float getVelocity() {return param.vel; }
+                int getPortamento() {return param.portamento; }
+                int getMidinote() {return param.midinote; }
+                void setSilent(bool silent_) {silent = silent_; }
+                void setDecounter(int decounter_) {decounter = decounter_; }
         } legato;
 };
 

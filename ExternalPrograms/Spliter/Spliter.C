@@ -10,11 +10,11 @@ int Pexitprogram;
 Spliter::Spliter() {
     //init
     Psplitpoint = 60;
-    Pchin = 0;
-    Pchout1     = 0;
-    Pchout2     = 1;
-    Poct1 = 0;
-    Poct2 = 0;
+    Pchin   = 0;
+    Pchout1 = 0;
+    Pchout2 = 1;
+    Poct1   = 0;
+    Poct2   = 0;
     //ALSA init
     snd_seq_open(&midi_in, "default", SND_SEQ_OPEN_INPUT, 0);
     snd_seq_open(&midi_out, "default", SND_SEQ_OPEN_OUTPUT, 0);
@@ -58,7 +58,7 @@ void Spliter::midievents() {
                 midievent->data.note.channel = Pchout1;
                 int tmp = midievent->data.note.note;
                 tmp += Poct1 * 12; if(tmp > 127)
-                    tmp = 127;if(tmp < 0)
+                    tmp = 127; if(tmp < 0)
                     tmp = 0;
                 midievent->data.note.note = tmp;
             }
@@ -66,7 +66,7 @@ void Spliter::midievents() {
                 midievent->data.note.channel = Pchout2;
                 int tmp = midievent->data.note.note;
                 tmp += Poct2 * 12; if(tmp > 127)
-                    tmp = 127;if(tmp < 0)
+                    tmp = 127; if(tmp < 0)
                     tmp = 0;
                 midievent->data.note.note = tmp;
             }
@@ -80,4 +80,3 @@ void Spliter::midievents() {
     }
     snd_seq_free_event(midievent);
 }
-

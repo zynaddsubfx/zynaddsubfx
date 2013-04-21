@@ -44,7 +44,7 @@ class FormantFilter:public Filter
         void setpos(float input);
 
 
-        class AnalogFilter *formant[FF_MAX_FORMANTS];
+        class AnalogFilter * formant[FF_MAX_FORMANTS];
 
         struct {
             float freq, amp, q; //frequency,amplitude,Q

@@ -37,6 +37,18 @@
 using std::string;
 using std::vector;
 
+//Dummy variables and functions for linking purposes
+const char *instance_name = 0;
+class WavFile;
+namespace Nio {
+    bool start(void){return 1;};
+    void stop(void){};
+    void waveNew(WavFile *){}
+    void waveStart(void){}
+    void waveStop(void){}
+    void waveEnd(void){}
+}
+
 //
 // Static stubs for LADSPA member functions
 //
@@ -512,7 +524,7 @@ const DSSI_Descriptor *DSSIaudiooutput::getDssiDescriptor(unsigned long index)
 //
 
 // Initialise the DSSI descriptor, statically:
-DSSI_Descriptor *DSSIaudiooutput:: dssiDescriptor =
+DSSI_Descriptor *DSSIaudiooutput::dssiDescriptor =
     DSSIaudiooutput::initDssiDescriptor();
 
 /**
@@ -617,6 +629,7 @@ DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate)
     for(int i = 0; i < synth->buffersize; i++)
         denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 
+    synth->alias();
     this->master = new Master();
 }
 
@@ -657,13 +670,13 @@ DSSIaudiooutput::ProgramDescriptor::ProgramDescriptor(unsigned long _bank,
 /**
  * The map of programs available; held as a single shared statically allocated object.
  */
-vector<DSSIaudiooutput::ProgramDescriptor> DSSIaudiooutput:: programMap =
+vector<DSSIaudiooutput::ProgramDescriptor> DSSIaudiooutput::programMap =
     vector<DSSIaudiooutput::ProgramDescriptor>();
 
 /**
  * Index controlling the map of banks
  */
-long DSSIaudiooutput:: bankNoToMap = 1;
+long DSSIaudiooutput::bankNoToMap = 1;
 
 /**
  * Queries and maps the next available bank of instruments.

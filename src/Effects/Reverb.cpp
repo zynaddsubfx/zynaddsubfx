@@ -29,7 +29,7 @@
 //todo: EarlyReflections, Prdelay, Perbalance
 
 Reverb::Reverb(bool insertion_, float *efxoutl_, float *efxoutr_)
-     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
+    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
       // defaults
       Pvolume(48),
       Ptime(64),
@@ -152,7 +152,7 @@ void Reverb::out(const Stereo<float *> &smp)
     for(int i = 0; i < synth->buffersize; ++i)
         inputbuf[i] = (smp.l[i] + smp.r[i]) / 2.0f;
 
-    if(idelay) {
+    if(idelay)
         for(int i = 0; i < synth->buffersize; ++i) {
             //Initial delay r
             float tmp = inputbuf[i] + idelay[idelayk] * idelayfb;
@@ -162,7 +162,6 @@ void Reverb::out(const Stereo<float *> &smp)
             if(idelayk >= idelaylen)
                 idelayk = 0;
         }
-    }
 
     if(bandwidth)
         bandwidth->process(synth->buffersize, inputbuf);
@@ -357,10 +356,13 @@ void Reverb::settype(unsigned char _Ptype)
     delete bandwidth;
     bandwidth = NULL;
     if(Ptype == 2) { //bandwidth
+        //TODO the size of the unison buffer may be too small, though this has
+        //not been verified yet.
+        //As this cannot be resized in a RT context, a good upper bound should
+        //be found
         bandwidth = new Unison(synth->buffersize / 4 + 1, 2.0f);
         bandwidth->setSize(50);
         bandwidth->setBaseFrequency(1.0f);
-#warning sa schimb size-ul
     }
     settime(Ptime);
     cleanup();
@@ -370,7 +372,7 @@ void Reverb::setroomsize(unsigned char _Proomsize)
 {
     Proomsize = _Proomsize;
     if(!Proomsize)
-        this->Proomsize = 64; //this is because the older versions consider roomsize=0
+        this->Proomsize = 64;  //this is because the older versions consider roomsize=0
     roomsize = (this->Proomsize - 64.0f) / 64.0f;
     if(roomsize > 0.0f)
         roomsize *= 2.0f;
@@ -425,7 +427,7 @@ void Reverb::setpreset(unsigned char npreset)
     for(int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
     if(insertion)
-        changepar(0, presets[npreset][0] / 2); //lower the volume if reverb is insertion effect
+        changepar(0, presets[npreset][0] / 2);  //lower the volume if reverb is insertion effect
     Ppreset = npreset;
 }
 

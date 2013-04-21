@@ -9,22 +9,22 @@ using namespace std;
 ostream &operator<<(ostream &out, const MidiEvent &ev)
 {
     switch(ev.type) {
-    case M_NOTE:
-        out << "MidiNote: note(" << ev.num << ")\n"
+        case M_NOTE:
+            out << "MidiNote: note(" << ev.num << ")\n"
             << "          channel(" << ev.channel << ")\n"
             << "          velocity(" << ev.value << ")";
-        break;
+            break;
 
-    case M_CONTROLLER:
-        out << "MidiCtl: controller(" << ev.num << ")\n"
+        case M_CONTROLLER:
+            out << "MidiCtl: controller(" << ev.num << ")\n"
             << "         channel(" << ev.channel << ")\n"
             << "         value(" << ev.value << ")";
-        break;
+            break;
 
-    case M_PGMCHANGE:
-        out << "PgmChange: program(" << ev.num << ")\n"
+        case M_PGMCHANGE:
+            out << "PgmChange: program(" << ev.num << ")\n"
             << "           channel(" << ev.channel << ")";
-        break;
+            break;
     }
 
     return out;
@@ -66,26 +66,29 @@ void InMgr::flush()
     MidiEvent ev;
     while(!sem_trywait(&work)) {
         queue.pop(ev);
-        cout << ev << endl;
+        //cout << ev << endl;
 
         switch(ev.type) {
-        case M_NOTE:
-            dump.dumpnote(ev.channel, ev.num, ev.value);
+            case M_NOTE:
+                dump.dumpnote(ev.channel, ev.num, ev.value);
 
-            if(ev.value)
-                master.noteOn(ev.channel, ev.num, ev.value);
-            else
-                master.noteOff(ev.channel, ev.num);
-            break;
+                if(ev.value)
+                    master.noteOn(ev.channel, ev.num, ev.value);
+                else
+                    master.noteOff(ev.channel, ev.num);
+                break;
 
-        case M_CONTROLLER:
-            dump.dumpcontroller(ev.channel, ev.num, ev.value);
-            master.setController(ev.channel, ev.num, ev.value);
-            break;
+            case M_CONTROLLER:
+                dump.dumpcontroller(ev.channel, ev.num, ev.value);
+                master.setController(ev.channel, ev.num, ev.value);
+                break;
 
-        case M_PGMCHANGE:
-            master.setProgram(ev.channel, ev.num);
-            break;
+            case M_PGMCHANGE:
+                master.setProgram(ev.channel, ev.num);
+                break;
+            case M_PRESSURE:
+                master.polyphonicAftertouch(ev.channel, ev.num, ev.value);
+                break;
         }
     }
 }

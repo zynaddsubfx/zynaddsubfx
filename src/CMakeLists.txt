@@ -3,32 +3,37 @@ message(STATUS "Checking Include Path" $ENV{CMAKE_INCLUDE_PATH} ${CMAKE_INCLUDE_
 message(STATUS "Checking Library Path" $ENV{CMAKE_LIBRARY_PATH} ${CMAKE_LIBRARY_PATH})
 
 #Dependency check
-find_package(zlib REQUIRED)
-find_package(fftw REQUIRED)
-find_package(MXML REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(zlib REQUIRED)
+pkg_check_modules(FFTW REQUIRED fftw3)
+pkg_check_modules(MXML REQUIRED mxml)
 find_package(Threads   REQUIRED)
 find_package(OSS)
 find_package(Alsa)
-find_package(JACK)
-find_package(PortAudio)
+pkg_check_modules(JACK jack)
+pkg_check_modules(PORTAUDIO portaudio-2.0>=19)
 set(FLTK_SKIP_OPENGL true)
+pkg_check_modules(NTK ntk)
+pkg_check_modules(NTK_IMAGES ntk_images)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
 find_package(CxxTest)
+if(CXXTEST_FOUND)
+    set(CXXTEST_USE_PYTHON TRUE)
+endif()
 # lash
 pkg_search_module(LASH lash-1.0)
 mark_as_advanced(LASH_LIBRARIES)
 pkg_search_module(DSSI dssi>=0.9.0)
 mark_as_advanced(DSSI_LIBRARIES)
+pkg_search_module(LIBLO liblo>=0.26)
+mark_as_advanced(LIBLO_LIBRARIES)
 
 ######### Settings ###########
 # NOTE: These cache variables should normally not be changed in this
 # file, but either in in CMakeCache.txt before compile, or by passing
 # parameters directly into cmake using the -D flag.
-SET (DefaultOutput oss CACHE STRING
-    "Default Output module: [null, alsa, oss, jack, portaudio]")
-SET (GuiModule fltk CACHE STRING "GUI module, either fltk, qt or off")
+SET (GuiModule fltk CACHE STRING "GUI module, either fltk, ntk or off")
 SET (CompileTests ${CXXTEST_FOUND} CACHE BOOL "whether tests should be compiled in or not")
 SET (AlsaEnable ${ALSA_FOUND} CACHE BOOL
     "Enable support for Advanced Linux Sound Architecture")
@@ -42,7 +47,8 @@ SET (LashEnable ${LASH_FOUND} CACHE BOOL
     "Enable LASH Audio Session Handler")
 SET (DssiEnable ${DSSI_FOUND} CACHE BOOL
     "Enable DSSI Plugin compilation")
-
+SET (LibloEnable ${LIBLO_FOUND} CACHE BOOL
+    "Enable Liblo")
 
 # Now, handle the incoming settings and set define flags/variables based
 # on this
@@ -50,8 +56,44 @@ SET (DssiEnable ${DSSI_FOUND} CACHE BOOL
 # Add version information
 add_definitions(-DVERSION="${VERSION}")
 
+# Give a good guess on the best Input/Output default backends
+if (JackEnable)
+    SET (DefaultOutput jack CACHE STRING
+        "Default Output module: [null, alsa, oss, jack, portaudio]")
+    # Override with perhaps more helpful midi backends
+    if (AlsaEnable)
+        SET (DefaultInput alsa CACHE STRING
+            "Default Input module: [null, alsa, oss, jack]")
+    elseif (OssEnable)
+        SET (DefaultInput oss CACHE STRING
+            "Default Input module: [null, alsa, oss, jack]")
+    else ()
+        SET (DefaultInput jack CACHE STRING
+            "Default Input module: [null, alsa, oss, jack]")
+    endif ()
+elseif (AlsaEnable)
+    SET (DefaultOutput alsa CACHE STRING
+        "Default Output module: [null, alsa, oss, jack, portaudio]")
+    SET (DefaultInput alsa CACHE STRING
+        "Default Input module: [null, alsa, oss, jack]")
+elseif (OssEnable)
+    SET (DefaultOutput oss CACHE STRING
+        "Default Output module: [null, alsa, oss, jack, portaudio]")
+    SET (DefaultInput oss CACHE STRING
+        "Default Input module: [null, alsa, oss, jack]")
+else()
+    SET (DefaultOutput null CACHE STRING
+        "Default Output module: [null, alsa, oss, jack, portaudio]")
+    SET (DefaultInput null CACHE STRING
+        "Default Input module: [null, alsa, oss, jack]")
+endif()
+
+
+
 if (GuiModule STREQUAL qt AND QT_FOUND)
 	set (QtGui TRUE)
+elseif(GuiModule STREQUAL ntk AND NTK_FOUND)
+	set (NtkGui TRUE)
 elseif(GuiModule STREQUAL fltk AND FLTK_FOUND)
 	set (FltkGui TRUE)
 elseif(GuiModule STREQUAL off)
@@ -62,9 +104,6 @@ else  ()
 	message(STATUS "GUI module defaulting to off")
 endif()
 
-if(NOT PKG_CONFIG_FOUND)
-    message(FATAL_ERROR "pkg-config not found")
-endif(NOT PKG_CONFIG_FOUND)
 
 #Build Flags
 option (BuildForAMD_X86_64 "Build for AMD x86_64 system" OFF)
@@ -129,6 +168,13 @@ if(LashEnable)
 	list(APPEND AUDIO_LIBRARY_DIRS ${LASH_LIBRARY_DIRS})
 	message(STATUS "Compiling with lash")
 endif()
+if(LibloEnable)
+	include_directories(${LIBLO_INCLUDE_DIRS})
+	add_definitions(-DUSE_NSM=1)
+	list(APPEND AUDIO_LIBRARIES ${LIBLO_LIBRARIES})
+	list(APPEND AUDIO_LIBRARY_DIRS ${LIBLO_LIBRARY_DIRS})
+	message(STATUS "Compiling with liblo")
+endif()
 
 # other include directories
 include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS})
@@ -158,10 +204,7 @@ else (BuildForDebug)
 	message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_RELEASE}")
 endif (BuildForDebug)
 
-if (DssiEnable)
-	add_definitions(-fPIC)
-endif()
-
+add_definitions(-fPIC)
 
 if(FLTK_FOUND)
 	mark_as_advanced(FORCE FLTK_BASE_LIBRARY)
@@ -175,25 +218,57 @@ if(FLTK_FOUND)
 	mark_as_advanced(FORCE FLTK_MATH_LIBRARY)
 endif(FLTK_FOUND)
 
+if(NTK_FOUND)
+	mark_as_advanced(FORCE NTK_BASE_LIBRARY)
+	mark_as_advanced(FORCE NTK_CONFIG_SCRIPT)
+	mark_as_advanced(FORCE NTK_DIR)
+	mark_as_advanced(FORCE FLTK_FLUID_EXECUTABLE)
+	mark_as_advanced(FORCE NTK_FORMS_LIBRARY)
+	mark_as_advanced(FORCE NTK_GL_LIBRARY)
+	mark_as_advanced(FORCE NTK_IMAGES_LIBRARY)
+	mark_as_advanced(FORCE NTK_INCLUDE_DIR)
+	mark_as_advanced(FORCE NTK_MATH_LIBRARY)
+endif(NTK_FOUND)
+
 if(FltkGui)
 	#UGLY WORKAROUND
-	find_program (MYFLTK_CONFIG fltk-config)
-	if (MYFLTK_CONFIG)
-		execute_process (COMMAND ${MYFLTK_CONFIG} --ldflags OUTPUT_VARIABLE MYFLTK_LDFLAGS)
-		string(STRIP ${MYFLTK_LDFLAGS} MYFLTK_LIBRARIES)
+	find_program (FLTK_CONFIG fltk-config)
+	if (FLTK_CONFIG)
+		execute_process (COMMAND ${FLTK_CONFIG} --use-images --ldflags OUTPUT_VARIABLE FLTK_LDFLAGS)
+		string(STRIP ${FLTK_LDFLAGS} FLTK_LIBRARIES)
 	endif()
 
-	message(STATUS ${MYFLTK_LDFLAGS})
+	message(STATUS ${FLTK_LDFLAGS})
 
 
-	set(GUI_LIBRARIES ${FLTK_LIBRARIES} ${MYFLTK_LIBRARIES} ${OPENGL_LIBRARIES} zynaddsubfx_gui)
+	set(GUI_LIBRARIES ${FLTK_LIBRARIES} ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES} zynaddsubfx_gui)
 
 	add_definitions(-DFLTK_GUI)
-
-	message(STATUS "Will build fltk gui")
+	message(STATUS "Will build FLTK gui")
 
 	include_directories(
 			${FLTK_INCLUDE_DIR}
+			"${CMAKE_CURRENT_SOURCE_DIR}/UI"
+			"${CMAKE_CURRENT_BINARY_DIR}/UI"
+			)
+
+	add_subdirectory(UI)
+endif()
+
+if(NtkGui)
+
+        find_program( FLTK_FLUID_EXECUTABLE ntk-fluid)
+        
+	message(STATUS ${NTK_LDFLAGS} ${NTK_IMAGES_LDFLAGS})
+
+	set(GUI_LIBRARIES ${NTK_LIBRARIES} ${NTK_IMAGES_LIBRARIES} ${OPENGL_LIBRARIES} zynaddsubfx_gui)
+
+	add_definitions(-DNTK_GUI)
+
+	message(STATUS "Will build NTK gui")
+
+	include_directories(
+			${NTK_INCLUDE_DIRS}
 			"${CMAKE_CURRENT_SOURCE_DIR}/UI"
 			"${CMAKE_CURRENT_BINARY_DIR}/UI"
 			)
@@ -205,7 +280,7 @@ endif()
 # Following this should be only general compilation code, and no mention
 # of module-specific variables
 
-link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS})
+link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS} ${NTK_LIBRARY_DIRS})
 
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
@@ -228,32 +303,38 @@ add_subdirectory(Synth)
 add_subdirectory(Effects)
 add_subdirectory(Params)
 add_subdirectory(DSP)
+add_subdirectory(Nio)
+
+add_library(zynaddsubfx_core STATIC
+	${zynaddsubfx_dsp_SRCS}
+	${zynaddsubfx_effect_SRCS}
+	${zynaddsubfx_misc_SRCS}
+	${zynaddsubfx_params_SRCS}
+	${zynaddsubfx_synth_SRCS}
+	)
+
+target_link_libraries(zynaddsubfx_core
+	${ZLIB_LIBRARIES}
+	${FFTW_LIBRARIES}
+	${MXML_LIBRARIES}
+	${OS_LIBRARIES}
+	pthread)
+
 if(CompileTests)
 	add_subdirectory(Tests)
 endif(CompileTests)
-add_subdirectory(Nio)
-
-set(zynaddsubfx_SRCS
-	main.cpp
-	)
 
 message(STATUS "using link directories: ${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS}")
 
 
-add_executable(zynaddsubfx
-	${zynaddsubfx_SRCS}
-)
+add_executable(zynaddsubfx main.cpp)
 
 target_link_libraries(zynaddsubfx
-	${NONGUI_LIBRARIES}
+    zynaddsubfx_core
+	zynaddsubfx_nio
 	${GUI_LIBRARIES}
-	${ZLIB_LIBRARIES}
-	${FFTW_LIBRARIES}
-	${MXML_LIBRARIES}
 	${NIO_LIBRARIES}
 	${AUDIO_LIBRARIES}
-	${OS_LIBRARIES}
-	pthread
 	)
 
 if (DssiEnable)
@@ -262,12 +343,7 @@ if (DssiEnable)
 		)
 
 	target_link_libraries(zynaddsubfx_dssi
-		${NONGUI_LIBRARIES}
-		${ZLIB_LIBRARIES}
-		${FFTW_LIBRARY}
-		${MXML_LIBRARY}
-		${NIO_LIBRARIES}
-		${AUDIO_LIBRARIES}
+        zynaddsubfx_core
 		${OS_LIBRARIES}
 		)
 	if (${CMAKE_SIZEOF_VOID_P} EQUAL "8")
@@ -277,9 +353,15 @@ if (DssiEnable)
 	endif ()
 endif()
 
-message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARY} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")
+message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")
 install(TARGETS zynaddsubfx
 	RUNTIME DESTINATION bin
 	)
+
+if(NtkGui)
+install(DIRECTORY ../pixmaps DESTINATION share/zynaddsubfx)
+add_definitions(-DPIXMAP_PATH="${CMAKE_INSTALL_PREFIX}/share/zynaddsubfx/pixmaps/")
+add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+endif(NtkGui)
 
 include(CTest)

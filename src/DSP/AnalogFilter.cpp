@@ -45,7 +45,7 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
     if(stages >= MAX_FILTER_STAGES)
         stages = MAX_FILTER_STAGES;
     cleanup();
-    firsttime  = false;
+    firsttime = false;
     setfreq_and_q(Ffreq, Fq);
     firsttime  = true;
     coeff.d[0] = 0; //this is not used
@@ -223,9 +223,9 @@ void AnalogFilter::computefiltercoefs(void)
                        * ((tmpgain
                            + 1.0f) - (tmpgain - 1.0f) * cs - beta * sn) / tmp;
                 d[1] = -2.0f * ((tmpgain - 1.0f) + (tmpgain + 1.0f) * cs)
-                    / tmp * -1.0f;
+                       / tmp * -1.0f;
                 d[2] = ((tmpgain + 1.0f) + (tmpgain - 1.0f) * cs - beta * sn)
-                    / tmp * -1.0f;
+                       / tmp * -1.0f;
             }
             else {
                 c[0] = tmpgain;
@@ -249,9 +249,9 @@ void AnalogFilter::computefiltercoefs(void)
                        * ((tmpgain
                            + 1.0f) + (tmpgain - 1.0f) * cs - beta * sn) / tmp;
                 d[1] = 2.0f * ((tmpgain - 1.0f) - (tmpgain + 1.0f) * cs)
-                    / tmp * -1.0f;
+                       / tmp * -1.0f;
                 d[2] = ((tmpgain + 1.0f) - (tmpgain - 1.0f) * cs - beta * sn)
-                    / tmp * -1.0f;
+                       / tmp * -1.0f;
             }
             else {
                 c[0] = 1.0f;

@@ -2,7 +2,7 @@
   ZynAddSubFX - a software synthesizer
 
   MicrotonalTest.h - CxxTest for Misc/Microtonal
-  Copyright (C) 2009-2009 Mark McCurry
+  Copyright (C) 2009-2012 Mark McCurry
   Author: Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
@@ -34,7 +34,7 @@ class MicrotonalTest:public CxxTest::TestSuite
 {
     public:
         void setUp() {
-            synth = new SYNTH_T;
+            synth     = new SYNTH_T;
             testMicro = new Microtonal();
         }
 
@@ -70,14 +70,6 @@ class MicrotonalTest:public CxxTest::TestSuite
             TS_ASSERT_DELTA(testMicro->getnotefreq(19, 0), 24.4997f, 0.0001f);
         }
 
-        //performs basic sanity check with the == and != operators
-        void testeqeq() {
-            Microtonal other;
-            TS_ASSERT(*testMicro == other); //both are constructed the same, so they should be equal
-            other.PAfreq = 220.0f;
-            TS_ASSERT(*testMicro != other); //other is now different
-        }
-
         //Tests saving/loading to XML
         void testXML() {
             //Gah, the XMLwrapper is a twisted maze
@@ -110,8 +102,6 @@ class MicrotonalTest:public CxxTest::TestSuite
             TS_ASSERT(!strcmp(tmp, tmpo));
             free(tmp);
             free(tmpo);
-
-            TS_ASSERT(*testMicro == other); //cxxTest sees error here
         }
 
 #if 0

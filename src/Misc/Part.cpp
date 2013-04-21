@@ -41,6 +41,7 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
     microtonal = microtonal_;
     fft      = fft_;
     mutex    = mutex_;
+    pthread_mutex_init(&load_mutex, NULL);
     partoutl = new float [synth->buffersize];
     partoutr = new float [synth->buffersize];
 
@@ -227,7 +228,7 @@ void Part::NoteOn(unsigned char note,
                          I'm not sure why though... */
         if((partnote[lastpos].status != KEY_PLAYING)
            && (partnote[lastpos].status != KEY_RELASED_AND_SUSTAINED))
-            ismonofirstnote = true; // No other keys are held or sustained.
+            ismonofirstnote = true;  // No other keys are held or sustained.
     }
     else
     // Poly mode is On so just make sure the list is empty.
@@ -394,7 +395,7 @@ void Part::NoteOn(unsigned char note,
 
                     if((lastnotecopy < kit[item].Pminkey)
                        || (lastnotecopy > kit[item].Pmaxkey))
-                        continue; // We will not perform legato across 2 key regions.
+                        continue;  // We will not perform legato across 2 key regions.
 
                     partnote[pos].kititem[ci].sendtoparteffect =
                         (kit[item].Psendtoparteffect <
@@ -635,7 +636,7 @@ void Part::NoteOff(unsigned char note) //relase the key
         if((partnote[i].status == KEY_PLAYING) && (partnote[i].note == note)) {
             if(ctl.sustain.sustain == 0) { //the sustain pedal is not pushed
                 if((Ppolymode == 0) && (not monomemnotes.empty()))
-                    MonoMemRenote(); // To play most recent still held note.
+                    MonoMemRenote();  // To play most recent still held note.
                 else
                     RelaseNotePos(i);
                 /// break;
@@ -643,6 +644,58 @@ void Part::NoteOff(unsigned char note) //relase the key
             else    //the sustain pedal is pushed
                 partnote[i].status = KEY_RELASED_AND_SUSTAINED;
         }
+}
+
+void Part::PolyphonicAftertouch(unsigned char note,
+                                unsigned char velocity,
+                                int masterkeyshift)
+{
+    (void) masterkeyshift;
+    if(!Pnoteon || (note < Pminkey) || (note > Pmaxkey))
+        return;
+    if(Pdrummode)
+        return;
+
+    // MonoMem stuff:
+    if(!Ppolymode)   // if Poly is off
+
+        monomem[note].velocity = velocity;       // Store this note's velocity.
+
+
+    for(int i = 0; i < POLIPHONY; ++i)
+        if((partnote[i].note == note) && (partnote[i].status == KEY_PLAYING)) {
+            /* update velocity */
+            // compute the velocity offset
+            float vel =
+                VelF(velocity / 127.0f, Pvelsns) + (Pveloffs - 64.0f) / 64.0f;
+            vel = (vel < 0.0f) ? 0.0f : vel;
+            vel = (vel > 1.0f) ? 1.0f : vel;
+
+            if(!Pkitmode) { // "normal mode"
+                if(kit[0].Padenabled)
+                    partnote[i].kititem[0].adnote->setVelocity(vel);
+                if(kit[0].Psubenabled)
+                    partnote[i].kititem[0].subnote->setVelocity(vel);
+                if(kit[0].Ppadenabled)
+                    partnote[i].kititem[0].padnote->setVelocity(vel);
+            }
+            else     // "kit mode"
+                for(int item = 0; item < NUM_KIT_ITEMS; ++item) {
+                    if(kit[item].Pmuted)
+                        continue;
+                    if((note < kit[item].Pminkey)
+                       || (note > kit[item].Pmaxkey))
+                        continue;
+
+                    if(kit[item].Padenabled)
+                        partnote[i].kititem[item].adnote->setVelocity(vel);
+                    if(kit[item].Psubenabled)
+                        partnote[i].kititem[item].subnote->setVelocity(vel);
+                    if(kit[item].Ppadenabled)
+                        partnote[i].kititem[item].padnote->setVelocity(vel);
+                }
+        }
+
 }
 
 /*
@@ -745,7 +798,7 @@ void Part::RelaseSustainedKeys()
     // Let's call MonoMemRenote() on some conditions:
     if((Ppolymode == 0) && (not monomemnotes.empty()))
         if(monomemnotes.back() != lastnote) // Sustain controller manipulation would cause repeated same note respawn without this check.
-            MonoMemRenote(); // To play most recent still held note.
+            MonoMemRenote();  // To play most recent still held note.
 
     for(int i = 0; i < POLIPHONY; ++i)
         if(partnote[i].status == KEY_RELASED_AND_SUSTAINED)
@@ -1001,7 +1054,7 @@ void Part::setPpanning(char Ppanning_)
  */
 void Part::setkititemstatus(int kititem, int Penabled_)
 {
-    if((kititem == 0) && (kititem >= NUM_KIT_ITEMS))
+    if((kititem == 0) || (kititem >= NUM_KIT_ITEMS))
         return;                                        //nonexistent kit item and the first kit item is always enabled
     kit[kititem].Penabled = Penabled_;
 

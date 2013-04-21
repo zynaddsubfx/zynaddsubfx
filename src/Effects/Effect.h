@@ -43,7 +43,7 @@ class Effect
          * @param Ppreset_ chosen preset
          * @return Initialized Effect object*/
         Effect(bool insertion_, float *efxoutl_, float *efxoutr_,
-                FilterParams *filterpars_, unsigned char Ppreset_);
+               FilterParams *filterpars_, unsigned char Ppreset_);
         virtual ~Effect() {}
         /**
          * Choose a preset
@@ -76,7 +76,7 @@ class Effect
         unsigned char Ppreset;   /**<Currently used preset*/
         float *const  efxoutl; /**<Effect out Left Channel*/
         float *const  efxoutr; /**<Effect out Right Channel*/
-        float outvolume;/**<This is the volume of effect and is public because
+        float outvolume; /**<This is the volume of effect and is public because
                           * it is needed in system effects.
                           * The out volume of such effects are always 1.0f, so
                           * this setting tells me how is the volume to the

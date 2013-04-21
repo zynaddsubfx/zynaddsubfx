@@ -45,6 +45,13 @@ void MidiIn::midiProcess(unsigned char head,
             ev.value   = value;
             InMgr::getInstance().putEvent(ev);
             break;
+        case 0xA0: /* pressure, aftertouch */
+            ev.type    = M_PRESSURE;
+            ev.channel = chan;
+            ev.num     = num;
+            ev.value   = value;
+            InMgr::getInstance().putEvent(ev);
+            break;
         case 0xb0: //Controller
             ev.type    = M_CONTROLLER;
             ev.channel = chan;

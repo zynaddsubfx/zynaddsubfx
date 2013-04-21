@@ -125,3 +125,10 @@ void SynthNote::Legato::apply(SynthNote &note, float *outl, float *outr)
             break;
     }
 }
+
+void SynthNote::setVelocity(float velocity_) {
+    legato.setSilent(true); //Let legato.update(...) returns 0.
+    legatonote(legato.getFreq(), velocity_,
+               legato.getPortamento(), legato.getMidinote(), true);
+    legato.setDecounter(0); //avoid chopping sound due fade-in
+}

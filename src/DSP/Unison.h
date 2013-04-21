@@ -54,11 +54,11 @@ class Unison
             float lin_fpos;
             float lin_ffreq;
             UnisonVoice() {
-                 position = RND * 1.8f - 0.9f;
-                 realpos1 = 0.0f;
-                 realpos2 = 0.0f;
-                 step     = 0.0f;
-                 relative_amplitude = 1.0f;
+                position = RND * 1.8f - 0.9f;
+                realpos1 = 0.0f;
+                realpos2 = 0.0f;
+                step     = 0.0f;
+                relative_amplitude = 1.0f;
             }
         } *uv;
 

@@ -4,6 +4,7 @@
 #include "EngineMgr.h"
 #include "MidiIn.h"
 #include "AudioOut.h"
+#include "WavEngine.h"
 #include <iostream>
 #include <algorithm>
 using std::string;
@@ -16,15 +17,20 @@ OutMgr    *out = NULL;
 EngineMgr *eng = NULL;
 string     postfix;
 
-bool   Nio::autoConnect = false;
-string Nio::defaultSource;
-string Nio::defaultSink;
+bool   Nio::autoConnect   = false;
+string Nio::defaultSource = IN_DEFAULT;
+string Nio::defaultSink   = OUT_DEFAULT;
 
-bool Nio::start()
+void Nio::init(void)
 {
     in  = &InMgr::getInstance(); //Enable input wrapper
     out = &OutMgr::getInstance(); //Initialize the Output Systems
     eng = &EngineMgr::getInstance(); //Initialize The Engines
+}
+
+bool Nio::start()
+{
+    init();
     return eng->start();
 }
 
@@ -93,4 +99,40 @@ string Nio::getSource()
 string Nio::getSink()
 {
     return out->getSink();
+}
+
+#if JACK
+#include <jack/jack.h>
+void Nio::preferedSampleRate(unsigned &rate)
+{
+    jack_client_t *client = jack_client_open("temp-client",
+                                             JackNoStartServer, 0);
+    if(client) {
+        rate = jack_get_sample_rate(client);
+        jack_client_close(client);
+    }
+}
+#else
+void Nio::preferedSampleRate(unsigned &)
+{}
+#endif
+
+void Nio::waveNew(class WavFile *wave)
+{
+    out->wave->newFile(wave);
+}
+
+void Nio::waveStart(void)
+{
+    out->wave->Start();
+}
+
+void Nio::waveStop(void)
+{
+    out->wave->Stop();
+}
+
+void Nio::waveEnd(void)
+{
+    out->wave->destroyFile();
 }

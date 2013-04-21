@@ -27,15 +27,15 @@
 
 Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_)
     :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0),
-    Pvolume(50),
-    Pdrive(90),
-    Plevel(64),
-    Ptype(0),
-    Pnegate(0),
-    Plpf(127),
-    Phpf(0),
-    Pstereo(0),
-    Pprefiltering(0)
+      Pvolume(50),
+      Pdrive(90),
+      Plevel(64),
+      Ptype(0),
+      Pnegate(0),
+      Plpf(127),
+      Phpf(0),
+      Pstereo(0),
+      Pprefiltering(0)
 {
     lpfl = new AnalogFilter(2, 22000, 1, 0);
     lpfr = new AnalogFilter(2, 22000, 1, 0);
@@ -175,7 +175,7 @@ void Distorsion::setpreset(unsigned char npreset)
     for(int n = 0; n < PRESET_SIZE; ++n)
         changepar(n, presets[npreset][n]);
     if(!insertion) //lower the volume if this is system effect
-        changepar(0, (int) (presets[npreset][0] / 1.5f));           
+        changepar(0, (int) (presets[npreset][0] / 1.5f));
     Ppreset = npreset;
     cleanup();
 }
@@ -201,7 +201,7 @@ void Distorsion::changepar(int npar, unsigned char value)
             break;
         case 5:
             if(value > 13)
-                Ptype = 13; //this must be increased if more distorsion types are added
+                Ptype = 13;  //this must be increased if more distorsion types are added
             else
                 Ptype = value;
             break;

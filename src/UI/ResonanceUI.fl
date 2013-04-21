@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0110 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
@@ -32,7 +32,7 @@ decl {\#include "WidgetPDial.h"} {public
 decl {\#include "PresetsUI.h"} {public
 } 
 
-class ResonanceGraph {: {public Fl_Box}
+class ResonanceGraph {open : {public Fl_Box}
 } {
   Function {ResonanceGraph(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
     code {respar=NULL;
@@ -46,7 +46,8 @@ dbvalue=dbvalue_;
 oldx=-1;
 khzval=-1;} {}
   }
-  Function {draw_freq_line(float freq,int type)} {} {
+  Function {draw_freq_line(float freq,int type)} {open
+  } {
     code {float freqx=respar->getfreqpos(freq);
 switch(type){
   case 0:fl_line_style(FL_SOLID);break;
@@ -59,11 +60,12 @@ if ((freqx>0.0)&&(freqx<1.0))
    fl_line(x()+(int) (freqx*w()),y(),
    x()+(int) (freqx*w()),y()+h());} {}
   }
-  Function {draw()} {} {
+  Function {draw()} {open
+  } {
     code {int ox=x(),oy=y(),lx=w(),ly=h(),i,ix,iy,oiy;
 float freqx;
 
-fl_color(FL_BLACK);
+fl_color(FL_DARK1);
 fl_rectf(ox,oy,lx,ly);
 
 
@@ -106,14 +108,18 @@ for (i=1;i<GY;i++){
 
 //draw the data
 fl_color(FL_RED);
-fl_line_style(FL_SOLID);
+fl_line_style(FL_SOLID,2);
+fl_begin_line();
 oiy=(int)(respar->Prespoints[0]/128.0*ly);
 for (i=1;i<N_RES_POINTS;i++){
    ix=(int)(i*1.0/N_RES_POINTS*lx);
-   iy=(int)(respar->Prespoints[i]/128.0*ly);
-   fl_line(ox+ix-1,oy+ly-oiy,ox+ix,oy+ly-iy);
+   iy=(respar->Prespoints[i]/128.0*ly);
+   fl_vertex(ox+ix,oy+ly-oiy);
    oiy=iy;
-};} {}
+};
+fl_end_line();
+fl_line_style(FL_SOLID,0);} {selected
+    }
   }
   Function {handle(int event)} {return_type int
   } {
@@ -189,7 +195,7 @@ class ResonanceUI {open : PresetsUI_
   Function {make_window()} {open
   } {
     Fl_Window resonancewindow {
-      label Resonance selected
+      label Resonance open
       xywh {120 70 780 305} type Double hide
     } {
       Fl_Value_Output khzvalue {
