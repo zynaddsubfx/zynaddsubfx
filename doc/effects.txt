@@ -401,29 +401,55 @@ Introduction
 The echo effect, also known as
 http://en.wikipedia.org/wiki/Delay_%28audio_effect%29[delay effect], simulates
 the natural reflection of a sound. The listener can hear the sound multiple
-times, usually decreasing in volume.
+times, usually decreasing in volume. Echos can be useful to fill empty parts of
+your songs with.
 
 In ZynAddSubFX, the echo is basically implemented as the addition of the
-current sound and a delayed version of it. TODO: Talk about dampening and LPFs.
+current sound and a delayed version of it. The delay is implemented as in the
+picture below. First, to the effect input, we add the delayed signal. Then,
+they pass an LP1. This shall simulate the effect of dampening, which means that
+low and especially high frequencies get lost earlier over distance than low
+frequencies do. Next, the sound is delayed, and then it will be output and added
+to the input.
 
 image::./gen/echo.png[width="700", title="The echo effect includes a feedback
 line, labeled as $z^{-n}$, and a delay."]
 
+********************************************************************
+The exact formula in the source code for the dampening effect is as follows:
+
+latexmath:[$Y(t) := (1-d) \cdot X(t) + d \cdot Y(t-1)$],
+
+where latexmath:[t] be the time index for the input
+buffer, latexmath:[d] be the dampening amount and latexmath:[X,Y] be the input,
+respective the output of the dampening. This solves to
+
+latexmath:[$Y(z) = Z(Y(t)) = (1-d) \cdot X(z) + d \cdot Y(z) \cdot z^{-1}$]
+
+latexmath:[$\Leftrightarrow H(z) := \frac{Y(z)}{X(z)} = \frac{1-d}{1 -
+d \cdot z^{-1}}$]
+
+which is used in latexmath:[$Y(z) = H(z) \cdot X(z)$]. So latexmath:[$H(z)$] is
+indeed a filter, and by looking at it, we see that it is an LP1. Note that
+infinite looping for d=1 is impossible.
+********************************************************************
+
 Description
 ^^^^^^^^^^^
 
-* First, *Pan* lets you apply panning of the input. Set it to 0.0 to only pan
+* *Pan* lets you apply panning of the input. Set it to 0.0 to only pan
 the input to the right side.
-* In the next step, the delayed buffer is added. We will discuss how it is
-generated soon.
-* Next, a Lowpass filter is applied. This shall simulate 
-
-
-* First, Crossover is applied. Set the *LRc.* to 1.0 to completely switch left
-and right input, to 0.5 to mix both as stereo, or to 0.0 to have no crossing
-effect.
-
-
+* *Delay* sets the time for one delay.
+* *LRdl.* means Left-Right-Delay. If it is set to the middle, then both sides
+are delayed equally. If not, then the left echo comes earlier and the right
+echo comes (the same amount) later than the average echo; or the other way
+round. Set the knob to 0 to hear on the right first.
+* *LRc.* applies crossover. Set it to 1.0 to completely switch left and right
+input, to 0.5 to mix both as stereo, or to 0.0 to have no crossing effect.
+* Feedback describes how much of the delay is added back to the input. Set
+*Fb.* to the maximum to hear an infinite echo.
+* The *Damp* value lets the LP1 reject higher frequencies earlier if
+increased.
 
 Reverb
 ~~~~~~
@@ -439,16 +465,37 @@ different ways, arriving at the listener at different times.
 
 In music, reverbs are popular in many ways. Reverbs with large room size can be
 used to emulate sounds like in live concerts. This is useful for voices, pads,
-and especially hand claps. A small room size can simulate the sound board of
-string instruments, like guitars or pianos.
+and hand claps. A small room size can simulate the sound board of string
+instruments, like guitars or pianos.
 
-While the initial delay for an echo is given by, the echo delay, for the
-reverb, we need a seperate controller for that. TODO: Talk about dampening.
+As mentioned, a reverb consists of permanent echo. The reverb in ZynAddSubFx is
+more complex than the echo. After the delaying, comb filters and then allpass
+filters are being applied. These make the resulting sound more realistic. The
+parameters for these filters depend on the roomsize. For details, consider the
+information about https://ccrma.stanford.edu/~jos/pasp/Freeverb.html[Freeverb].
 
 image::./gen/reverb.png[width="700", "The reverb, being similar to the echo."]
 
 Description
 ^^^^^^^^^^^
 
-(TODO)
+* The *Type* ComboBox lets you select a reverb type:
+** *Freeverb* is a preset. It was proposed by Jezar at Dreampoint.
+** *Bandwidth* has the same parameters for the comb and allpass filters, but it
+applies a unison before the LP/HP. The unison's bandwidth can be set using *bw*.
+** Random chooses a random layout for comb and allpass each time the type or
+the roomsize is being changed.
+* The roomsize (*R.S.*) defines parameters only for the comb and allpass
+filters.
+* *Time* controls how long the whole reverb shall take, including how slow the
+volume is decreased.
+* The initial delay (*I.del*) is the time which the sounds need at least to
+return to the user. The initial delay feedback (*I.delfb*) says how much of the
+delayed sound is added to the input.
+* Low pass filter (*LPF*) and high pass filter (*HPF*) can be applied before
+the comb filters.
+* The dampening control (*Damp*) currently only allows to damp low frequencies.
+Its parameters are being used by the comb and allpass filters.
+* *Pan* lets you apply panning. This is the last thing to happen. Set it to 0.0
+to only hear output on the right side.
 
