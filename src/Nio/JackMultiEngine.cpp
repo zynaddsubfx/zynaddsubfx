@@ -96,14 +96,14 @@ bool JackMultiEngine::Start(void)
         JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput | JackPortIsTerminal, 0)
     //Create the master wet port
 
-    impl->ports[0] = JACK_REGISTER("wet_l");
-    impl->ports[1] = JACK_REGISTER("wet_r");
+    impl->ports[0] = JACK_REGISTER("out-L");
+    impl->ports[1] = JACK_REGISTER("out-R");
 
     //Create all part's outputs
     for(int i = 0; i < NUM_MIDI_PARTS * 2; i += 2) {
-        snprintf(portName, 19, "part_%dl", i / 2);
+        snprintf(portName, 19, "part%d/out-L", i / 2);
         impl->ports[2 + i] = JACK_REGISTER(portName);
-        snprintf(portName, 19, "part_%dr", i / 2);
+        snprintf(portName, 19, "part%d/out-R", i / 2);
         impl->ports[3 + i] = JACK_REGISTER(portName);
     }
 

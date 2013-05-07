@@ -125,13 +125,6 @@ set_module_parameters ( Fl_Widget *o )
  */
 void initprogram(void)
 {
-    cerr.precision(1);
-    cerr << std::fixed;
-    cerr << "\nSample Rate = \t\t" << synth->samplerate << endl;
-    cerr << "Sound Buffer Size = \t" << synth->buffersize << " samples" << endl;
-    cerr << "Internal latency = \t" << synth->buffersize_f * 1000.0f
-    / synth->samplerate_f << " ms" << endl;
-    cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
 
 
     master = &Master::getInstance();
@@ -425,6 +418,14 @@ int main(int argc, char *argv[])
 
     //Run the Nio system
     bool ioGood = Nio::start();
+    
+    cerr.precision(1);
+    cerr << std::fixed;
+    cerr << "\nSample Rate = \t\t" << synth->samplerate << endl;
+    cerr << "Sound Buffer Size = \t" << synth->buffersize << " samples" << endl;
+    cerr << "Internal latency = \t" << synth->buffersize_f * 1000.0f
+    / synth->samplerate_f << " ms" << endl;
+    cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
 
     if(!execAfterInit.empty()) {
         cout << "Executing user supplied command: " << execAfterInit << endl;
