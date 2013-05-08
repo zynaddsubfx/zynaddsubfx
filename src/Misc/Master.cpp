@@ -45,18 +45,22 @@ using rtosc::Ports;
 using rtosc::RtData;
 
 static Ports localports = {
-    {"echo", ":'hidden':Hidden port to echo messages", 0, [](const char *m, RtData) {
+    {"echo", ":'hidden':Hidden port to echo messages", 0, [](const char *m, RtData&) {
        bToU->raw_write(m-1);}},
-    {"get-vu", "::", 0, [](const char *, RtData d) {
+    {"get-vu", "::", 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
        bToU->write("/vu-meter", "bb", sizeof(m->vu), &m->vu, sizeof(float)*NUM_MIDI_PARTS, m->vuoutpeakpart);}},
-    {"reset-vu", "::", 0, [](const char *, RtData d) {
+    {"reset-vu", "::", 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
        m->vuresetpeaks();}},
-    {"load-part:ib", "::", 0, [](const char *msg, RtData d) {
-       Master *m = (Master*)d.obj;
-       m->part[rtosc_argument(msg, 0).i] = *(Part**)rtosc_argument(msg, 1).b.data;
-       printf("part %d is now pointer %p\n", rtosc_argument(msg, 0).i, *(Part**)rtosc_argument(msg, 1).b.data);}},
+    {"load-part:ib", "::", 0, [](const char *msg, RtData &d) {
+       Master *m =  (Master*)d.obj;
+       Part   *p = *(Part**)rtosc_argument(msg, 1).b.data;
+       int     i = rtosc_argument(msg, 0).i;
+       m->part[i]->cloneTraits(*p);
+       d.reply("/free", "sb", "Part", sizeof(void*), &p);
+       m->part[i] = p;
+       printf("part %d is now pointer %p\n", i, p);}},
 
     PARAMF(Master, volume, volume, log, 0.01, 4.42, "Master Volume"),
     RECURSP(Master, Part, part, part, 16, "Part"),//NUM_MIDI_PARTS
@@ -336,7 +340,8 @@ class DataObj:public rtosc::RtData
             va_start(va,args);
             char *buffer = bToU->buffer();
             rtosc_vmessage(buffer,bToU->buffer_size(),path,args,va);
-            bToU->raw_write(buffer);
+            printf("sending reply of '%s'\n", buffer);
+            reply(buffer);
         }
         virtual void reply(const char *msg)
         {

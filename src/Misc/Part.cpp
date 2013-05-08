@@ -131,6 +131,30 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
 
     defaults();
 }
+        
+void Part::cloneTraits(Part &p) const
+{
+#define CLONE(x) p.x = this->x
+    CLONE(Penabled);
+
+    p.setPvolume(this->Pvolume);
+    p.setPpanning(this->Ppanning);
+
+    CLONE(Pminkey);
+    CLONE(Pmaxkey);
+    CLONE(Pkeyshift);
+    CLONE(Prcvchn);
+
+    CLONE(Pvelsns);
+    CLONE(Pveloffs);
+
+    CLONE(Pnoteon);
+    CLONE(Ppolymode);
+    CLONE(Plegatomode);
+    CLONE(Pkeylimit);
+
+    CLONE(ctl);
+}
 
 void Part::defaults()
 {
@@ -605,10 +629,12 @@ void Part::NoteOn(unsigned char note,
 
                 // Spawn another note (but silent) if legatomodevalid==true
                 if(legatomodevalid) {
+
+                    //if this parameter is 127 for "unprocessed"
                     partnote[posb].kititem[ci].sendtoparteffect =
                         (kit[item].Psendtoparteffect <
                          NUM_PART_EFX ? kit[item].Psendtoparteffect :
-                         NUM_PART_EFX);                                                                                                                 //if this parameter is 127 for "unprocessed"
+                         NUM_PART_EFX);
 
                     if((kit[item].adpars != NULL)
                        && ((kit[item].Padenabled) != 0))
@@ -619,7 +645,7 @@ void Part::NoteOn(unsigned char note,
                             vel,
                             portamento,
                             note,
-                            true);                                            //true for silent.
+                            true);//true for silent.
                     if((kit[item].subpars != NULL)
                        && ((kit[item].Psubenabled) != 0))
                         partnote[posb].kititem[ci].subnote =
@@ -665,13 +691,11 @@ void Part::NoteOn(unsigned char note,
  */
 void Part::NoteOff(unsigned char note) //relase the key
 {
-    int i;
-
     // This note is released, so we remove it from the list.
-    if(not monomemnotes.empty())
+    if(!monomemnotes.empty())
         monomemnotes.remove(note);
 
-    for(i = POLIPHONY - 1; i >= 0; i--) //first note in, is first out if there are same note multiple times
+    for(int i = POLIPHONY - 1; i >= 0; i--) //first note in, is first out if there are same note multiple times
         if((partnote[i].status == KEY_PLAYING) && (partnote[i].note == note)) {
             if(ctl.sustain.sustain == 0) { //the sustain pedal is not pushed
                 if((Ppolymode == 0) && (not monomemnotes.empty()))

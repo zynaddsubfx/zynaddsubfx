@@ -114,6 +114,17 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
 
 typedef void(*cb_t)(void*,const char*);
 
+
+void deallocate(const char *str, void *v)
+{
+    if(!strcmp(str, "Part"))
+        delete (Part*)v;
+    else
+        fprintf(stderr, "Unknown type '%s', leaking pointer %p!!\n", str, v);
+}
+
+
+
 /**
  * - Fetches liblo messages and forward them to the backend
  * - Grabs backend messages and distributes them to the frontends
@@ -123,12 +134,16 @@ void osc_check(cb_t cb, void *ui)
     lo_server_recv_noblock(server, 0);
     while(bToU->hasNext()) {
         const char *rtmsg = bToU->read();
+        puts(rtmsg);
         if(!strcmp(rtmsg, "/echo")
                 && !strcmp(rtosc_argument_string(rtmsg),"ss")
                 && !strcmp(rtosc_argument(rtmsg,0).s, "OSC_URL"))
             curr_url = rtosc_argument(rtmsg,1).s;
-        else if(curr_url == "GUI") {
-            cb(ui, bToU->read()); //GUI::raiseUi(gui, bToU->read());
+        else if(!strcmp(rtmsg, "/free")
+                && !strcmp(rtosc_argument_string(rtmsg),"sb")) {
+            printf("got a '%s' pointer for deallocation...\n", rtosc_argument(rtmsg, 0).s);
+        } else if(curr_url == "GUI") {
+            cb(ui, rtmsg); //GUI::raiseUi(gui, bToU->read());
         } else{
             lo_message msg  = lo_message_deserialise((void*)rtmsg,
                     rtosc_message_length(rtmsg, bToU->buffer_size()), NULL);

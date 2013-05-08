@@ -52,6 +52,9 @@ class Part
         /**Destructor*/
         ~Part();
 
+        // Copy misc parameters not stored in .xiz format
+        void cloneTraits(Part &part) const;
+
         // Midi commands implemented
         void NoteOn(unsigned char note,
                     unsigned char velocity,
@@ -67,8 +70,6 @@ class Part
 
         /* The synthesizer part output */
         void ComputePartSmps(); //Part output
-
-        //instrumentonly: 0 - save all, 1 - save only instrumnet, 2 - save only instrument without the name(used in bank)
 
 
         //saves the instrument settings to a XML file
