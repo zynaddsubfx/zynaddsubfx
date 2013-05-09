@@ -27,7 +27,7 @@
 #include <stdint.h>
 
 //Forward declarations
-namespace rtosc{class Ports; class ThreadLink;};
+namespace rtosc{struct Ports; class ThreadLink;};
 extern rtosc::ThreadLink *bToU;
 extern rtosc::ThreadLink *uToB;
 

@@ -32,8 +32,7 @@ class Fl_Oscilloscope : public Fl_Box, Fl_Osc_Widget
 
         void init(bool base_waveform_p)
         {
-            Fl_Group     *g  = dynamic_cast<Fl_Group*>(parent());
-            Fl_Osc_Group *og = dynamic_cast<Fl_Osc_Group*>(g);
+            Fl_Osc_Pane *og  = fetch_osc_pane(this);
             assert(og);
 
             loc = og->pane_name + (base_waveform_p ? "base-waveform": "waveform");
@@ -49,8 +48,9 @@ class Fl_Oscilloscope : public Fl_Box, Fl_Osc_Widget
             osc->requestValue(loc);
         }
 
-        void OSC_value(unsigned N, void *data) override
+        virtual void OSC_value(unsigned N, void *data) override
         {
+            fprintf(stderr, "(oscl) OSC_value(%d,%p)\n", N, data);
             assert(N==(unsigned)(synth->oscilsize*4));
 
             memcpy(smps, data, N);
@@ -122,5 +122,16 @@ class Fl_Oscilloscope : public Fl_Box, Fl_Osc_Widget
         int phase;
 
     private:
+        Fl_Osc_Pane *fetch_osc_pane(Fl_Widget *w)
+        {
+            if(!w)
+                return NULL;
+
+            Fl_Osc_Pane *pane = dynamic_cast<Fl_Osc_Pane*>(w->parent());
+            if(pane)
+                return pane;
+            return fetch_osc_pane(w->parent());
+        }
+
         float *smps;
 };

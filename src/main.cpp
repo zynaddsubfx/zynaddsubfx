@@ -79,6 +79,8 @@ char *instance_name = 0;
 
 void exitprogram();
 
+extern int main_thread;
+
 //cleanup on signaled exit
 void sigterm_exit(int /*sig*/)
 {
@@ -120,6 +122,7 @@ void exitprogram()
     Nio::stop();
 
     GUI::destroyUi(gui);
+    delete middleware;
 #if LASH
     if(lash)
         delete lash;
@@ -135,6 +138,7 @@ void exitprogram()
 
 int main(int argc, char *argv[])
 {
+    main_thread =  (long int)syscall(224);
     synth = new SYNTH_T;
     config.init();
     dump.startnow();

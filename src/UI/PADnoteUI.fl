@@ -259,7 +259,7 @@ make_window();} {}
   } {
     Fl_Window padnotewindow {
       label {PAD synth Parameters} open
-      xywh {306 484 535 435} type Double visible
+      xywh {252 515 535 435} type Double visible
     } {
       Fl_Tabs {} {
         callback {if (o->value()!=harmonicstructuregroup) applybutton->hide();
@@ -441,7 +441,7 @@ cbwidget->do_callback();}
               class WidgetPDial
             }
           }
-          Fl_Group oscilgroup {
+          Fl_Group oscilgroup {open
             xywh {100 155 270 135} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179 align 6
             code0 {osc=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
             code1 {oscilgroup->pane_name = location+"oscil/"; oscilgroup->osc = osc_i;osc->init(false);//pars->oscilgen,master);}
@@ -450,14 +450,14 @@ cbwidget->do_callback();}
           Fl_Button {} {
             label Change
             callback {if (oscui!=NULL) delete (oscui);
-oscui=new OscilEditor(pars->oscilgen,osc,cbwidget,applybutton,location+"oscil/",osc_i);}
+oscui=new OscilEditor(cbwidget,applybutton,location+"oscil/",osc_i);}
             xywh {375 270 60 20} box THIN_UP_BOX labelfont 1 labelsize 11
           }
           Fl_Box cbwidget {
             label {Harmonic Content}
             callback {overtonepos->redraw();
 applybutton->color(FL_RED);
-applybutton->redraw();}
+applybutton->redraw();} selected
             xywh {125 135 205 20} align 16
           }
           Fl_Button {} {
@@ -989,7 +989,7 @@ if (oscui!=NULL) {
 if (resui!=NULL) {
 	resui->applybutton->color(FL_GRAY);
 	resui->applybutton->redraw();
-};} selected
+};}
         xywh {300 400 135 30} box THIN_UP_BOX
         code0 {o->color(FL_RED);}
       }

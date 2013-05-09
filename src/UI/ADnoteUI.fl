@@ -64,7 +64,7 @@ class ADvoicelistitem {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window ADnoteVoiceListItem {open
-      private xywh {310 881 615 100} type Double box UP_FRAME
+      private xywh {316 881 615 100} type Double box UP_FRAME
       class Fl_Group visible
     } {
       Fl_Group voicelistitemgroup {open
@@ -207,7 +207,7 @@ class ADvoiceUI {open : {public Fl_Group}
   } {
     Fl_Window ADnoteVoiceParameters {
       label Voice open
-      xywh {502 391 765 590} type Double box NO_BOX
+      xywh {508 391 765 590} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group voiceparametersgroup {open
@@ -343,12 +343,14 @@ o->redraw();}
               }
               Fl_Button changeFMoscilbutton {
                 label Change
-                callback {if (oscedit!=NULL) delete(oscedit);
+                callback {if (oscedit!=NULL)
+    delete(oscedit);
 
 int nv=nvoice;
-if (pars->VoicePar[nvoice].PextFMoscil>=0) nv=pars->VoicePar[nvoice].PextFMoscil;
+if (pars->VoicePar[nvoice].PextFMoscil>=0)
+    nv=pars->VoicePar[nvoice].PextFMoscil;
 
-oscedit=new OscilEditor(pars->VoicePar[nv].FMSmp,fmoscil,NULL,NULL,loc+"mod-oscil/", osc_i);}
+oscedit=new OscilEditor(NULL,NULL,loc+"mod-oscil/", osc_i);}
                 xywh {700 380 55 15} box THIN_UP_BOX labelfont 1 labelsize 11
                 code0 {if (pars->VoicePar[nvoice].PextFMoscil>=0) o->labelcolor(FL_BLUE);}
               }
@@ -541,9 +543,10 @@ detunevalueoutput->do_callback();} open
             callback {if (oscedit!=NULL) delete(oscedit);
 
 int nv=nvoice;
-if (pars->VoicePar[nvoice].Pextoscil>=0) nv=pars->VoicePar[nvoice].Pextoscil;
+if(pars->VoicePar[nvoice].Pextoscil>=0)
+    nv=pars->VoicePar[nvoice].Pextoscil;
 
-oscedit=new OscilEditor(pars->VoicePar[nv].OscilSmp,voiceoscil,NULL,NULL,loc+"oscil/", osc_i);}
+oscedit=new OscilEditor(NULL,NULL,loc+"oscil/", osc_i);} selected
             xywh {5 490 65 20} box THIN_UP_BOX labelfont 1 labelsize 11
             code0 {if (pars->VoicePar[nvoice].Pextoscil>=0) o->labelcolor(FL_BLUE);}
           }
@@ -835,8 +838,7 @@ ADnoteVoiceParameters->show();} {}
     code {ADnoteVoiceParameters->hide();
 hide();
 delete(oscedit);
-//delete (ADnoteVoiceParameters);} {selected
-    }
+//delete (ADnoteVoiceParameters);} {}
   }
   decl {int nvoice;} {private local
   }
@@ -862,7 +864,7 @@ class ADnoteUI {open : {public PresetsUI_}
   } {
     Fl_Window ADnoteGlobalParameters {
       label {ADsynth Global Parameters of the Instrument} open
-      xywh {505 551 540 430} type Double visible
+      xywh {511 551 540 430} type Double visible
     } {
       Fl_Group {} {
         label FREQUENCY open
@@ -1071,7 +1073,7 @@ resui->resonancewindow->show();}
     }
     Fl_Window ADnoteVoice {
       label {ADsynth Voice Parameters} open
-      xywh {4 361 765 620} type Double visible
+      xywh {312 361 765 620} type Double visible
     } {
       Fl_Group advoice {open
         xywh {0 0 765 585}

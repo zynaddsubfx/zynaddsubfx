@@ -361,11 +361,16 @@ void Master::AudioOut(float *outl, float *outr)
     //Handle user events TODO move me to a proper location
     char loc_buf[1024];
     DataObj d{loc_buf, 1024, this, bToU};
+    memset(loc_buf, sizeof(loc_buf), 0);
     int events = 0;
     while(uToB->hasNext()) {
+        d.matches = 0;
+        //fprintf(stderr, "address '%s'\n", uToB->peak());
         ports.dispatch(uToB->read()+1, d);
         events++;
-        //fprintf(stderr, "backend: '%s'<%s>\n", uToB->peak(), rtosc_argument_string(uToB->peak()));
+        if(!d.matches)
+            fprintf(stderr, "Unknown address '%s'\n", uToB->peak());
+        fprintf(stderr, "backend: '%s'<%s>\n", uToB->peak(), rtosc_argument_string(uToB->peak()));
     }
     if(events>1)
         fprintf(stderr, "backend: %d events per cycle\n",events);

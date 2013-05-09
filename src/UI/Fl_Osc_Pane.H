@@ -5,6 +5,9 @@
 class Fl_Osc_Pane
 {
     public:
+        Fl_Osc_Pane(void)
+            :osc(NULL), pane_name()
+        {}
         class Fl_Osc_Interface *osc;
         std::string pane_name;
 };

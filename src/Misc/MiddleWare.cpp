@@ -8,6 +8,8 @@
 #include <rtosc/ports.h>
 #include <lo/lo.h>
 
+#include <unistd.h>
+
 #include "../UI/Fl_Osc_Interface.h"
 #include "../UI/Fl_Osc_Widget.H"
 
@@ -117,8 +119,11 @@ typedef void(*cb_t)(void*,const char*);
 
 void deallocate(const char *str, void *v)
 {
+    printf("deallocating a '%s' at '%p'\n", str, v);
     if(!strcmp(str, "Part"))
         delete (Part*)v;
+    if(!strcmp(str, "fft_t"))
+        delete[] (fft_t*)v;
     else
         fprintf(stderr, "Unknown type '%s', leaking pointer %p!!\n", str, v);
 }
@@ -141,7 +146,7 @@ void osc_check(cb_t cb, void *ui)
             curr_url = rtosc_argument(rtmsg,1).s;
         else if(!strcmp(rtmsg, "/free")
                 && !strcmp(rtosc_argument_string(rtmsg),"sb")) {
-            printf("got a '%s' pointer for deallocation...\n", rtosc_argument(rtmsg, 0).s);
+            deallocate(rtosc_argument(rtmsg, 0).s, *((void**)rtosc_argument(rtmsg, 1).b.data));
         } else if(curr_url == "GUI") {
             cb(ui, rtmsg); //GUI::raiseUi(gui, bToU->read());
         } else{
@@ -190,83 +195,6 @@ void preparePadSynth(string path, PADnoteParameters *p)
 //    {"prepare:", "", 0, }
 //};
 
-static rtosc::Ports oscilPorts = {
-    {"phase#128::c", "::Sets harmonic phase",
-        NULL, [](const char *m, rtosc::RtData &d) {
-            const char *mm = m;
-            while(*mm && !isdigit(*mm)) ++mm;
-            unsigned char &phase = ((OscilGen*)d.obj)->Phphase[atoi(mm)];
-            if(!rtosc_narguments(m))
-                d.reply(d.loc, "c", phase);
-            else
-                phase = rtosc_argument(m,0).i;
-        }},
-    {"magnitude#128::c", "::Sets harmonic magnitude",
-        NULL, [](const char *m, rtosc::RtData &d) {
-            //printf("I'm at '%s'\n", d.loc);
-            const char *mm = m;
-            while(*mm && !isdigit(*mm)) ++mm;
-            unsigned char &mag = ((OscilGen*)d.obj)->Phmag[atoi(mm)];
-            if(!rtosc_narguments(m))
-                d.reply(d.loc, "c", mag);
-            else
-                mag = rtosc_argument(m,0).i;
-        }},
-    {"base-spectrum:", "::Returns spectrum of base waveshape",
-        NULL, [](const char *m, rtosc::RtData &d) {
-            const unsigned n = synth->oscilsize / 2;
-            float *spc = new float[n];
-            memset(spc, 0, 4*n);
-            ((OscilGen*)d.obj)->getspectrum(n,spc,1);
-            d.reply(d.loc, "b", n*sizeof(float), spc);
-            delete[] spc;
-        }},
-    {"base-waveform:", "::Returns base waveshape points",
-        NULL, [](const char *m, rtosc::RtData &d) {
-            const unsigned n = synth->oscilsize;
-            float *smps = new float[n];
-            memset(smps, 0, 4*n);
-            ((OscilGen*)d.obj)->getcurrentbasefunction(smps);
-            d.reply(d.loc, "b", n*sizeof(float), smps);
-            delete[] smps;
-        }},
-    {"spectrum:", "::Returns spectrum of waveform",
-        NULL, [](const char *m, rtosc::RtData &d) {
-            const unsigned n = synth->oscilsize / 2;
-            float *spc = new float[n];
-            memset(spc, 0, 4*n);
-            ((OscilGen*)d.obj)->getspectrum(n,spc,0);
-            d.reply(d.loc, "b", n*sizeof(float), spc);
-            delete[] spc;
-        }},
-    {"waveform:", "::Returns waveform points",
-        NULL, [](const char *m, rtosc::RtData &d) {
-            const unsigned n = synth->oscilsize;
-            float *smps = new float[n];
-            memset(smps, 0, 4*n);
-            OscilGen *o = ((OscilGen*)d.obj);
-            //printf("%d\n", o->needPrepare());
-            ((OscilGen*)d.obj)->get(smps,-1.0);
-            //printf("wave: %f %f %f %f\n", smps[0], smps[1], smps[2], smps[3]);
-            d.reply(d.loc, "b", n*sizeof(float), smps);
-            delete[] smps;
-        }},
-    {"prepare:", "::Performs setup operation to oscillator",
-        NULL, [](const char *m, rtosc::RtData &d) {
-            OscilGen &o = *(OscilGen*)d.obj;
-            fft_t *data = new fft_t[synth->oscilsize / 2];
-            o.prepare(data);
-            printf("sending '%p' of fft data\n", data);
-            uToB->write(d.loc, "b",
-                    sizeof(fft_t*), &data);
-            o.pendingfreqs = data;
-        }},
-    {"convert2sine:", "::Translates waveform into FS",
-        NULL, [](const char *m, rtosc::RtData &d) {
-            ((OscilGen*)d.obj)->convert2sine();
-        }},
-};
-
 class DummyDataObj:public rtosc::RtData
 {
     public:
@@ -274,6 +202,9 @@ class DummyDataObj:public rtosc::RtData
                 Fl_Osc_Interface *osc_)
         {
             memset(loc_, 0, sizeof(loc_size_));
+            //XXX Possible bug in rtosc using this buffer
+            buffer = new char[4*4096];
+            memset(buffer, 0, 4*4096);
             loc      = loc_;
             loc_size = loc_size_;
             obj      = obj_;
@@ -281,25 +212,41 @@ class DummyDataObj:public rtosc::RtData
             ui       = ui_;
             osc      = osc_;
         }
+        ~DummyDataObj(void)
+        {
+            delete[] buffer;
+        }
 
         virtual void reply(const char *path, const char *args, ...)
         {
             //printf("reply building '%s'\n", path);
             va_list va;
             va_start(va,args);
-            char *buffer = bToU->buffer();
-            rtosc_vmessage(buffer,bToU->buffer_size(),path,args,va);
-            reply(buffer);
+            if(!strcmp(path, "/forward")) { //forward the information to the backend
+                args++;
+                path = va_arg(va, const char *);
+                fprintf(stderr, "forwarding information to the backend on '%s'<%s>\n",
+                        path, args);
+                rtosc_vmessage(buffer,4*4096,path,args,va);
+                uToB->raw_write(buffer);
+            } else {
+                printf("path = '%s' args = '%s'\n", path, args);
+                printf("buffer = '%p'\n", buffer);
+                rtosc_vmessage(buffer,4*4096,path,args,va);
+                printf("buffer = '%s'\n", buffer);
+                reply(buffer);
+            }
         }
         virtual void reply(const char *msg)
         {
-            //printf("reply used for '%s'\n", msg);
+            printf("reply used for '%s'\n", msg);
             osc->tryLink(msg);
             cb(ui, msg);
         }
         //virtual void broadcast(const char *path, const char *args, ...){(void)path;(void)args;};
         //virtual void broadcast(const char *msg){(void)msg;};
     private:
+        char *buffer;
         cb_t cb;
         void *ui;
         Fl_Osc_Interface *osc;
@@ -388,13 +335,27 @@ struct MiddleWareImpl
         osc_check(cb, ui);
     }
 
-    void handleOscil(string path, const char *msg, void *v)
+    bool handleOscil(string path, const char *msg, void *v)
     {
         char buffer[1024];
+        memset(buffer, 0, sizeof(buffer));
         DummyDataObj d(buffer, 1024, v, cb, ui, osc);
         strcpy(buffer, path.c_str());
-        printf("location buffer contains '%s'\n", d.loc);
-        oscilPorts.dispatch(msg, d);
+
+        for(auto &p:OscilGen::ports.ports) {
+            if(strstr(p.name,msg) && strstr(p.metadata, "realtime") &&
+                    !strcmp("b", rtosc_argument_string(msg))) {
+                printf("sending along packet '%s'...\n", msg);
+                return false;
+            }
+        }
+
+        OscilGen::ports.dispatch(msg, d);
+        if(!d.matches)
+            fprintf(stderr, "Unknown location '%s%s'<%s>\n",
+                    path.c_str(), msg, rtosc_argument_string(msg));
+
+        return true;
     }
 
     /* Should handle the following paths specially
@@ -408,6 +369,8 @@ struct MiddleWareImpl
      */
     void handleMsg(const char *msg)
     {
+        assert(!strstr(msg,"free"));
+        printf("middleware: '%s'\n", msg);
         const char *last_path = rindex(msg, '/');
         if(!last_path)
             return;
@@ -417,11 +380,12 @@ struct MiddleWareImpl
         string obj_rl(msg, last_path+1);
         if(objmap.find(obj_rl) != objmap.end()) {
             //try some over simplified pattern matching
-            if(strstr(msg, "oscil/"))
-                handleOscil(obj_rl, last_path+1, objmap[obj_rl]);
+            if(strstr(msg, "oscil/")) {
+                if(!handleOscil(obj_rl, last_path+1, objmap[obj_rl]))
+                    uToB->raw_write(msg);
             //else if(strstr(obj_rl.c_str(), "kititem"))
             //    handleKitItem(obj_rl, objmap[obj_rl],atoi(rindex(msg,'m')+1),rtosc_argument(msg,0).T);
-            else if(strstr(msg, "padpars/prepare"))
+            } else if(strstr(msg, "padpars/prepare"))
                 preparePadSynth(obj_rl,(PADnoteParameters *) objmap[obj_rl]);
             else //just forward the message
                 uToB->raw_write(msg);
@@ -439,7 +403,7 @@ struct MiddleWareImpl
         va_start(va, args);
         write(path, args, va);
     }
-    
+
     void write(const char *path, const char *args, va_list va)
     {
         //printf("is that a '%s' I see there?\n", path);
@@ -473,7 +437,7 @@ struct MiddleWareImpl
     //this assumption is broken
     Master *master;
 
-    //The ONLY means that any chunk of code should have for interacting with the
+    //The ONLY means that any chunk of UI code should have for interacting with the
     //backend
     Fl_Osc_Interface *osc;
 
@@ -501,7 +465,7 @@ class UI_Interface:public Fl_Osc_Interface
 
             impl->write(s.c_str(),"");
         }
-        
+
         void write(string s, const char *args, ...) override
         {
             va_list va;
@@ -530,8 +494,10 @@ class UI_Interface:public Fl_Osc_Interface
         void removeLink(string s, class Fl_Osc_Widget*w) override
         {
             for(auto i = map.begin(); i != map.end(); ++i) {
-                if(i->first == s && i->second == w)
+                if(i->first == s && i->second == w) {
                     map.erase(i);
+                    break;
+                }
             }
             printf("[%d] removing '%s' (%p)...\n", map.size(), s.c_str(), w);
         }
@@ -542,10 +508,13 @@ class UI_Interface:public Fl_Osc_Interface
                 if(pair.first == msg) {
                     const char *arg_str = rtosc_argument_string(msg);
                     //printf("Possible location for application of '%s' is '%p'\n", msg, pair.second);
-                    if(!strcmp(arg_str, "b"))
+                    if(!strcmp(arg_str, "b")) {
+                        printf("'%s' matches '%s' ala blob\n", pair.first.c_str(), msg);
+                        fprintf(stderr, "tossing blob params %d %p (%p)\n", rtosc_argument(msg,0).b.len,rtosc_argument(msg,0).b.data, pair.second);
                         pair.second->OSC_value(rtosc_argument(msg,0).b.len,rtosc_argument(msg,0).b.data);
-                    else if(!strcmp(arg_str, "c")) {
+                    } else if(!strcmp(arg_str, "c")) {
                         printf("'%s' => '%d'\n", msg, rtosc_argument(msg,0).i);
+                        fprintf(stderr, "tossing char to %p\n", pair.second);
                         pair.second->OSC_value((char)rtosc_argument(msg,0).i);
                     }
                 }

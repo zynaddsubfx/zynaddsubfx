@@ -23,20 +23,149 @@
 #include "OscilGen.h"
 #include "../Misc/WaveShapeSmps.h"
 
+int main_thread = 0;
 #include <cassert>
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <stddef.h>
+
+#include <unistd.h>
+#include <sys/syscall.h>
 
 #include <rtosc/ports.h>
 
+template<int i>
+void simpleset(const char *m, rtosc::RtData &d)
+{
+    unsigned char *addr = ((unsigned char*) d.obj)+i;
+    if(!rtosc_narguments(m))
+        d.reply(d.loc, "c", *addr);
+    else
+        *addr = rtosc_argument(m, 0).i;
+}
+#undef  PARAMC
+#define PARAMC(x) rtosc::Port{#x "::c", "::", NULL, \
+    simpleset<__builtin_offsetof(class OscilGen, P##x)>}
+
 static rtosc::Ports localPorts = {
-    {"prepare:b", ":'pointer':Sets prepared fft data",
+    PARAMC(hmagtype),
+    PARAMC(currentbasefunc),
+    PARAMC(basefuncpar),
+    PARAMC(basefuncpar),
+    PARAMC(basefuncmodulation),
+    PARAMC(basefuncmodulationpar1),
+    PARAMC(basefuncmodulationpar2),
+    PARAMC(basefuncmodulationpar3),
+    PARAMC(waveshaping),
+    PARAMC(waveshapingfunction),
+    PARAMC(filtertype),
+    PARAMC(filterpar1),
+    PARAMC(filterpar2),
+    PARAMC(filterbeforews),
+    PARAMC(satype),
+    PARAMC(sapar),
+    //FIXME missing int stuff
+    PARAMC(modulation),
+    PARAMC(modulationpar1),
+    PARAMC(modulationpar2),
+    PARAMC(modulationpar3),
+    //FIXME realtime parameters lurking below
+    PARAMC(rand),
+    PARAMC(amprandpower),
+    PARAMC(amprandtype),
+    PARAMC(adaptiveharmonics),
+    PARAMC(adaptiveharmonicsbasefreq),
+    PARAMC(adaptiveharmonicspower),
+    PARAMC(adaptiveharmonicspar),
+
+    {"phase#128::c", "::Sets harmonic phase",
         NULL, [](const char *m, rtosc::RtData &d) {
+            const char *mm = m;
+            while(*mm && !isdigit(*mm)) ++mm;
+            unsigned char &phase = ((OscilGen*)d.obj)->Phphase[atoi(mm)];
+            if(!rtosc_narguments(m))
+                d.reply(d.loc, "c", phase);
+            else
+                phase = rtosc_argument(m,0).i;
+        }},
+    {"magnitude#128::c", "::Sets harmonic magnitude",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            //printf("I'm at '%s'\n", d.loc);
+            const char *mm = m;
+            while(*mm && !isdigit(*mm)) ++mm;
+            unsigned char &mag = ((OscilGen*)d.obj)->Phmag[atoi(mm)];
+            if(!rtosc_narguments(m))
+                d.reply(d.loc, "c", mag);
+            else
+                mag = rtosc_argument(m,0).i;
+        }},
+    {"base-spectrum:", "::Returns spectrum of base waveshape",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            const unsigned n = synth->oscilsize / 2;
+            float *spc = new float[n];
+            memset(spc, 0, 4*n);
+            ((OscilGen*)d.obj)->getspectrum(n,spc,1);
+            d.reply(d.loc, "b", n*sizeof(float), spc);
+            delete[] spc;
+        }},
+    {"base-waveform:", "::Returns base waveshape points",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            const unsigned n = synth->oscilsize;
+            float *smps = new float[n];
+            memset(smps, 0, 4*n);
+            ((OscilGen*)d.obj)->getcurrentbasefunction(smps);
+            d.reply(d.loc, "b", n*sizeof(float), smps);
+            delete[] smps;
+        }},
+    {"spectrum:", "::Returns spectrum of waveform",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            const unsigned n = synth->oscilsize / 2;
+            float *spc = new float[n];
+            memset(spc, 0, 4*n);
+            ((OscilGen*)d.obj)->getspectrum(n,spc,0);
+            d.reply(d.loc, "b", n*sizeof(float), spc);
+            delete[] spc;
+        }},
+    {"waveform:", "::Returns waveform points",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            const unsigned n = synth->oscilsize;
+            float *smps = new float[n];
+            memset(smps, 0, 4*n);
+            OscilGen *o = ((OscilGen*)d.obj);
+            //printf("%d\n", o->needPrepare());
+            ((OscilGen*)d.obj)->get(smps,-1.0);
+            //printf("wave: %f %f %f %f\n", smps[0], smps[1], smps[2], smps[3]);
+            d.reply(d.loc, "b", n*sizeof(float), smps);
+            delete[] smps;
+        }},
+    {"prepare:", "::Performs setup operation to oscillator",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            fprintf(stderr, "prepare: got a message from '%s'\n", m);
+            OscilGen &o = *(OscilGen*)d.obj;
+            fft_t *data = new fft_t[synth->oscilsize / 2];
+            o.prepare(data);
+            fprintf(stderr, "sending '%p' of fft data\n", data);
+            d.reply("/forward", "sb", d.loc, sizeof(fft_t*), &data);
+            o.pendingfreqs = data;
+        }},
+    {"convert2sine:", "::Translates waveform into FS",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            ((OscilGen*)d.obj)->convert2sine();
+        }},
+    {"prepare:b", ":'pointer','realtime':Sets prepared fft data",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            fprintf(stderr, "prepare:b got a message from '%s'\n", m);
+            OscilGen &o = *(OscilGen*)d.obj;
             assert(rtosc_argument(m,0).b.len == sizeof(void*));
-            ((OscilGen*)d.obj)->oscilFFTfreqs =
-                *(fft_t**)rtosc_argument(m,0).b.data;
-        }},//XXX memory leak
+            d.reply("/free", "sb", "fft_t", sizeof(void*), &o.oscilFFTfreqs);
+            fprintf(stderr, "\n\n");
+            fprintf(stderr, "The ID of this of this thread is: %ld\n", (long int)syscall(224));
+            fprintf(stderr, "o.oscilFFTfreqs = %p\n", o.oscilFFTfreqs);
+            assert(main_thread != syscall(224));
+            assert(o.oscilFFTfreqs !=*(fft_t**)rtosc_argument(m,0).b.data);
+            o.oscilFFTfreqs = *(fft_t**)rtosc_argument(m,0).b.data;
+        }},
 };
 
 rtosc::Ports &OscilGen::ports = localPorts;

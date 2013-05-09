@@ -16,8 +16,7 @@ class Fl_OscilSpectrum : public Fl_Box, Fl_Osc_Widget
 
         void init(bool base_spectrum_p)
         {
-            Fl_Group     *g  = dynamic_cast<Fl_Group*>(parent());
-            Fl_Osc_Group *og = dynamic_cast<Fl_Osc_Group*>(g);
+            Fl_Osc_Pane *og  = fetch_osc_pane(this);
             assert(og);
 
             loc = og->pane_name + (base_spectrum_p ? "base-spectrum": "spectrum");
@@ -25,16 +24,17 @@ class Fl_OscilSpectrum : public Fl_Box, Fl_Osc_Widget
             assert(osc);
 
             osc->createLink(loc, (Fl_Osc_Widget*) this);
-            osc->requestValue(loc);
+            update();
         }
 
         void update(void)
         {
-            osc->write(loc, "i", nsamples);
+            osc->requestValue(loc);
         }
 
-        void OSC_value(unsigned N, void *data) override
+        virtual void OSC_value(unsigned N, void *data) override
         {
+            fprintf(stderr, "(spec) OSC_value(%d,%p)\n", N, data);
             assert(!(N%4));
             const size_t new_samples = N / 4;
 
@@ -114,6 +114,17 @@ class Fl_OscilSpectrum : public Fl_Box, Fl_Osc_Widget
             }
         }
     private:
+        Fl_Osc_Pane *fetch_osc_pane(Fl_Widget *w)
+        {
+            if(!w)
+                return NULL;
+
+            Fl_Osc_Pane *pane = dynamic_cast<Fl_Osc_Pane*>(w->parent());
+            if(pane)
+                return pane;
+            return fetch_osc_pane(w->parent());
+        }
+
         size_t nsamples;
         float *spc;
 }; 
