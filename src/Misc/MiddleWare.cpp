@@ -230,10 +230,10 @@ class DummyDataObj:public rtosc::RtData
                 rtosc_vmessage(buffer,4*4096,path,args,va);
                 uToB->raw_write(buffer);
             } else {
-                printf("path = '%s' args = '%s'\n", path, args);
-                printf("buffer = '%p'\n", buffer);
+                //printf("path = '%s' args = '%s'\n", path, args);
+                //printf("buffer = '%p'\n", buffer);
                 rtosc_vmessage(buffer,4*4096,path,args,va);
-                printf("buffer = '%s'\n", buffer);
+                //printf("buffer = '%s'\n", buffer);
                 reply(buffer);
             }
         }
@@ -335,6 +335,29 @@ struct MiddleWareImpl
         osc_check(cb, ui);
     }
 
+    bool handlePAD(string path, const char *msg, void *v)
+    {
+        char buffer[1024];
+        memset(buffer, 0, sizeof(buffer));
+        DummyDataObj d(buffer, 1024, v, cb, ui, osc);
+        strcpy(buffer, path.c_str());
+
+        //for(auto &p:OscilGen::ports.ports) {
+        //    if(strstr(p.name,msg) && strstr(p.metadata, "realtime") &&
+        //            !strcmp("b", rtosc_argument_string(msg))) {
+        //        printf("sending along packet '%s'...\n", msg);
+        //        return false;
+        //    }
+        //}
+
+        PADnoteParameters::ports.dispatch(msg, d);
+        if(!d.matches)
+            fprintf(stderr, "Unknown location '%s%s'<%s>\n",
+                    path.c_str(), msg, rtosc_argument_string(msg));
+
+        return true;
+    }
+
     bool handleOscil(string path, const char *msg, void *v)
     {
         char buffer[1024];
@@ -345,7 +368,7 @@ struct MiddleWareImpl
         for(auto &p:OscilGen::ports.ports) {
             if(strstr(p.name,msg) && strstr(p.metadata, "realtime") &&
                     !strcmp("b", rtosc_argument_string(msg))) {
-                printf("sending along packet '%s'...\n", msg);
+                //printf("sending along packet '%s'...\n", msg);
                 return false;
             }
         }
@@ -370,7 +393,9 @@ struct MiddleWareImpl
     void handleMsg(const char *msg)
     {
         assert(!strstr(msg,"free"));
+        fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 6 + 30, 0 + 40);
         printf("middleware: '%s'\n", msg);
+        fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
         const char *last_path = rindex(msg, '/');
         if(!last_path)
             return;
@@ -387,6 +412,9 @@ struct MiddleWareImpl
             //    handleKitItem(obj_rl, objmap[obj_rl],atoi(rindex(msg,'m')+1),rtosc_argument(msg,0).T);
             } else if(strstr(msg, "padpars/prepare"))
                 preparePadSynth(obj_rl,(PADnoteParameters *) objmap[obj_rl]);
+            else if(strstr(msg, "padpars"))
+                if(!handlePAD(obj_rl, last_path+1, objmap[obj_rl]))
+                    uToB->raw_write(msg);
             else //just forward the message
                 uToB->raw_write(msg);
         } else if(strstr(msg, "load-part"))
@@ -475,13 +503,17 @@ class UI_Interface:public Fl_Osc_Interface
 
         void writeValue(string s, string ss) override
         {
-            Fl_Osc_Interface::writeValue(s,ss);
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
+            fprintf(stderr, "writevalue<string>(%s,%s)\n", s.c_str(),ss.c_str());
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             impl->write(s.c_str(), "s", ss.c_str());
         }
 
         void writeValue(string s, char c) override
         {
-            Fl_Osc_Interface::writeValue(s,c);
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
+            fprintf(stderr, "writevalue<char>(%s,%d)\n", s.c_str(),c);
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             impl->write(s.c_str(), "c", c);
         }
 
@@ -504,18 +536,25 @@ class UI_Interface:public Fl_Osc_Interface
 
         void tryLink(const char *msg) override
         {
+            const char *handle = rindex(msg,'/');
+            if(handle)
+                ++handle;
+
             for(auto pair:map) {
                 if(pair.first == msg) {
                     const char *arg_str = rtosc_argument_string(msg);
                     //printf("Possible location for application of '%s' is '%p'\n", msg, pair.second);
                     if(!strcmp(arg_str, "b")) {
-                        printf("'%s' matches '%s' ala blob\n", pair.first.c_str(), msg);
-                        fprintf(stderr, "tossing blob params %d %p (%p)\n", rtosc_argument(msg,0).b.len,rtosc_argument(msg,0).b.data, pair.second);
-                        pair.second->OSC_value(rtosc_argument(msg,0).b.len,rtosc_argument(msg,0).b.data);
+                        //printf("'%s' matches '%s' ala blob\n", pair.first.c_str(), msg);
+                        //fprintf(stderr, "tossing blob params %d %p (%p)\n", rtosc_argument(msg,0).b.len,rtosc_argument(msg,0).b.data, pair.second);
+                        pair.second->OSC_value(rtosc_argument(msg,0).b.len,
+                                rtosc_argument(msg,0).b.data,
+                                handle);
                     } else if(!strcmp(arg_str, "c")) {
-                        printf("'%s' => '%d'\n", msg, rtosc_argument(msg,0).i);
-                        fprintf(stderr, "tossing char to %p\n", pair.second);
-                        pair.second->OSC_value((char)rtosc_argument(msg,0).i);
+                        //printf("'%s' => '%d'\n", msg, rtosc_argument(msg,0).i);
+                        //fprintf(stderr, "tossing char to %p\n", pair.second);
+                        pair.second->OSC_value((char)rtosc_argument(msg,0).i,
+                                handle);
                     }
                 }
             }

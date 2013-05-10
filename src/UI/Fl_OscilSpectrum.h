@@ -114,16 +114,6 @@ class Fl_OscilSpectrum : public Fl_Box, Fl_Osc_Widget
             }
         }
     private:
-        Fl_Osc_Pane *fetch_osc_pane(Fl_Widget *w)
-        {
-            if(!w)
-                return NULL;
-
-            Fl_Osc_Pane *pane = dynamic_cast<Fl_Osc_Pane*>(w->parent());
-            if(pane)
-                return pane;
-            return fetch_osc_pane(w->parent());
-        }
 
         size_t nsamples;
         float *spc;

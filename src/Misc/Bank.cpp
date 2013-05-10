@@ -434,13 +434,13 @@ int Bank::addtobank(int pos, string filename, string name)
     ins[pos].filename = dirname + '/' + filename;
 
     //see if PADsynth is used
-    if(config.cfg.CheckPADsynth) {
-        XMLwrapper xml;
-        xml.loadXMLfile(ins[pos].filename);
+    //if(config.cfg.CheckPADsynth) {
+    //    XMLwrapper xml;
+    //    xml.loadXMLfile(ins[pos].filename);
 
-        ins[pos].info.PADsynth_used = xml.hasPadSynth();
-    }
-    else
+     //   ins[pos].info.PADsynth_used = xml.hasPadSynth();
+    //}
+    //else
         ins[pos].info.PADsynth_used = false;
 
     return 0;

@@ -26,9 +26,74 @@
 
 #include <rtosc/ports.h>
 
+
+#define PC(x) PARAMC(PADnoteParameters, P##x, x, "undocumented")
+
+template<int i>
+void simpleset(const char *m, rtosc::RtData &d)
+{
+    unsigned char *addr = ((unsigned char*) d.obj)+i;
+    if(!rtosc_narguments(m))
+        d.reply(d.loc, "c", *addr);
+    else
+        *addr = rtosc_argument(m, 0).i;
+}
+#define P_C(x) rtosc::Port{#x "::c", "::", NULL, \
+    simpleset<__builtin_offsetof(class PADnoteParameters, P##x)>}
 static rtosc::Ports localPorts =
 {
     RECURP(PADnoteParameters, OscilGen, oscil, oscilgen, "Oscillator"),
+    PARAMC(PADnoteParameters, Pmode, mode,
+            "0 - bandwidth, 1 - discrete 2 - continious"),
+    PC(hp.base.type),
+    PC(hp.base.par1),
+    PC(hp.freqmult),
+    PC(hp.modulator.par1),
+    PC(hp.modulator.freq),
+    PC(hp.width),
+    PC(hp.amp.mode),
+    PC(hp.amp.type),
+    PC(hp.amp.par1),
+    PC(hp.amp.par2),
+    //TODO autoscale
+    PC(hp.onehalf),
+
+    PC(bandwidth),
+    PC(bwscale),
+
+    PC(hrpos.type),
+    P_C(hrpos.par1),
+    P_C(hrpos.par2),
+    P_C(hrpos.par3),
+
+    PC(quality.samplesize),
+    PC(quality.basenote),
+    PC(quality.oct),
+    PC(quality.smpoct),
+
+    PC(fixedfreq),
+    PC(fixedfreqET),
+    //TODO detune, coarse detune
+    PC(DetuneType),
+
+    {"nhr:", "::Returns the harmonic shifts",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            PADnoteParameters *p = ((PADnoteParameters*)d.obj);
+            const unsigned n = synth->oscilsize / 2;
+            float *tmp = new float[n];
+            for(int i=1; i<n; ++i)
+                tmp[i] = p->getNhr(i);
+            d.reply(d.loc, "b", n*sizeof(float), tmp);
+            delete[] tmp;}},
+    {"profile:i", "::UI display of the harmonic profile",
+        NULL, [](const char *m, rtosc::RtData &d) {
+            PADnoteParameters *p = ((PADnoteParameters*)d.obj);
+            const unsigned n = rtosc_argument(m, 0).i;
+            float *tmp = new float[n];
+            float realbw = p->getprofile(tmp, n);
+            d.reply(d.loc, "b", n*sizeof(float), tmp);
+            d.reply(d.loc, "i", realbw);
+            delete[] tmp;}},
     {"sample#64:ifb", "::Nothing to see here", 0,
         [](const char *m, rtosc::RtData d)
         {

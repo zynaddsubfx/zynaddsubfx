@@ -141,11 +141,11 @@ static rtosc::Ports localPorts = {
         }},
     {"prepare:", "::Performs setup operation to oscillator",
         NULL, [](const char *m, rtosc::RtData &d) {
-            fprintf(stderr, "prepare: got a message from '%s'\n", m);
+            //fprintf(stderr, "prepare: got a message from '%s'\n", m);
             OscilGen &o = *(OscilGen*)d.obj;
             fft_t *data = new fft_t[synth->oscilsize / 2];
             o.prepare(data);
-            fprintf(stderr, "sending '%p' of fft data\n", data);
+            //fprintf(stderr, "sending '%p' of fft data\n", data);
             d.reply("/forward", "sb", d.loc, sizeof(fft_t*), &data);
             o.pendingfreqs = data;
         }},
@@ -155,13 +155,13 @@ static rtosc::Ports localPorts = {
         }},
     {"prepare:b", ":'pointer','realtime':Sets prepared fft data",
         NULL, [](const char *m, rtosc::RtData &d) {
-            fprintf(stderr, "prepare:b got a message from '%s'\n", m);
+            //fprintf(stderr, "prepare:b got a message from '%s'\n", m);
             OscilGen &o = *(OscilGen*)d.obj;
             assert(rtosc_argument(m,0).b.len == sizeof(void*));
             d.reply("/free", "sb", "fft_t", sizeof(void*), &o.oscilFFTfreqs);
-            fprintf(stderr, "\n\n");
-            fprintf(stderr, "The ID of this of this thread is: %ld\n", (long int)syscall(224));
-            fprintf(stderr, "o.oscilFFTfreqs = %p\n", o.oscilFFTfreqs);
+            //fprintf(stderr, "\n\n");
+            //fprintf(stderr, "The ID of this of this thread is: %ld\n", (long int)syscall(224));
+            //fprintf(stderr, "o.oscilFFTfreqs = %p\n", o.oscilFFTfreqs);
             assert(main_thread != syscall(224));
             assert(o.oscilFFTfreqs !=*(fft_t**)rtosc_argument(m,0).b.data);
             o.oscilFFTfreqs = *(fft_t**)rtosc_argument(m,0).b.data;

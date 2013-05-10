@@ -111,7 +111,7 @@ class Oscilharmonic {: {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window harmonic {open
-      private xywh {461 756 100 225} type Double box NO_BOX
+      private xywh {464 756 100 225} type Double box NO_BOX
       class Fl_Osc_Group visible
     } {
       Fl_Slider mag {
@@ -131,11 +131,7 @@ if (x==64) o->selection_color(0);
  o->osc->requestValue(o->loc+"waveform");
 
 display->redraw();
-if (cbwidget!=NULL) {
-	cbwidget->do_callback();
-	applybutton->color(FL_RED);
-	applybutton->redraw();
-};}
+}
         xywh {0 15 15 115} type {Vert Knob} box NO_BOX selection_color 222 maximum 127 step 1 value 64
         code0 {o->phase=false;//o->value(127-oscil->Phmag[n]);}
         code1 {//if (oscil->Phmag[n]==64) o->selection_color(0);}
@@ -152,11 +148,7 @@ o->osc->requestValue(o->loc+"spectrum");
 o->osc->requestValue(o->loc+"waveform");
 
 display->redraw();
-if (cbwidget!=NULL) {
-	cbwidget->do_callback();
-	applybutton->color(FL_RED);
-	applybutton->redraw();
-};}
+}
         xywh {0 135 15 75} type {Vert Knob} box NO_BOX selection_color 222 maximum 127 step 1 value 64
         code0 {o->phase=true;//o->value(oscil->Phphase[n]);}
         class PSlider
@@ -182,18 +174,15 @@ if (cbwidget!=NULL) {
   Function {Oscilharmonic(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
     code {n=0;
 display=NULL;
-applybutton=NULL;
-cbwidget=NULL;} {}
+} {}
   }
-  Function {init(int n_,Fl_Group *display_,Fl_Widget *cbwidget_,Fl_Widget *applybutton_, std::string loc_, Fl_Osc_Interface *osc_)} {open
+  Function {init(int n_,Fl_Group *display_, std::string loc_, Fl_Osc_Interface *osc_)} {open
   } {
     code {assert(osc_);
 assert(!loc_.empty());
 
 n=n_;
 display=display_;
-cbwidget=cbwidget_;
-applybutton=applybutton_;
 osc = osc_;
 loc = loc_;
 make_window();
@@ -231,8 +220,6 @@ delete harmonic;} {}
   }
   decl {int n;} {private local
   }
-  decl {Fl_Widget *cbwidget,*applybutton;} {private local
-  }
   decl {Fl_Osc_Interface *osc;} {private local
   }
   decl {std::string loc;} {private local
@@ -245,7 +232,7 @@ class OscilEditor {open : {public PresetsUI_}
   } {
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor} open
-      xywh {67 214 735 595} type Double
+      xywh {52 386 735 595} type Double
       code0 {//if (oscil->ADvsPAD) o->label("PADsynth Harmonic Content Editor");} visible
     } {
       Fl_Group dummy {open
@@ -254,15 +241,15 @@ class OscilEditor {open : {public PresetsUI_}
       } {
         Fl_Button applybutton {
           label Apply
-          callback {applybutton->color(FL_GRAY);
-applybutton->redraw();
-if (cbapplywidget!=NULL) {
-	cbapplywidget->do_callback();
-	cbapplywidget->color(FL_GRAY);
-	cbapplywidget->redraw();
-};}
+          callback {//applybutton->color(FL_GRAY);
+//applybutton->redraw();
+//if (cbapplywidget!=NULL) {
+//	cbapplywidget->do_callback();
+//	cbapplywidget->color(FL_GRAY);
+//	cbapplywidget->redraw();
+//};} selected
           xywh {305 285 60 20} box THIN_UP_BOX labelfont 1
-          code0 {//if (!oscil->ADvsPAD) o->hide();}
+          code0 {if(adnotep) o->hide();}
           code1 {dummy->pane_name = loc;}
           code2 {dummy->osc = osc;}
         }
@@ -290,9 +277,9 @@ oscildisplaygroup->redraw();}
             code0 {oscils=new Fl_OscilSpectrum(o->x(),o->y(),o->w(),o->h(),"");}
             code1 {oscils->parent(o);oscils->init(false);}
           } {}
-          Fl_Group {} {
+          Fl_Group {} {open
             xywh {251 282 115 25} box UP_FRAME
-            code0 {//if (oscil->ADvsPAD) o->hide();}
+            code0 {if (!adnotep) o->hide();}
           } {
             Fl_Choice hrndtype {
               label {H.rnd}
@@ -325,7 +312,7 @@ oscildisplaygroup->redraw();}
             callback {//oscil->Phmagtype=(int) o->value();
 basefuncdisplaygroup->redraw();
 
-redrawoscil();} selected
+redrawoscil();}
             xywh {75 285 65 20} down_box BORDER_BOX labelsize 11 when 1 textsize 11
             code0 {o->init("hmagtype");}
             class Fl_Osc_Choice
@@ -952,19 +939,18 @@ refresh();}
         } {
           Fl_Pack harmonics {open
             xywh {15 350 650 225} type HORIZONTAL
-            code0 {for (int i=0;i<MAX_AD_HARMONICS;i++){h[i]=new Oscilharmonic(0,0,20,o->h(),"");h[i]->init(i,oscildisplaygroup,cbwidget,applybutton,loc,osc);}}
+            code0 {for (int i=0;i<MAX_AD_HARMONICS;i++){h[i]=new Oscilharmonic(0,0,20,o->h(),"");h[i]->init(i,oscildisplaygroup,loc,osc);}}
           } {}
         }
       }
     }
   }
-  Function {OscilEditor(Fl_Widget *cbwidget_,Fl_Widget *cbapplywidget_, std::string loc_, Fl_Osc_Interface *osc_)} {open
+  Function {OscilEditor(bool adnotep_, std::string loc_, Fl_Osc_Interface *osc_)} {open
   } {
     code {assert(osc_);
 assert(!loc_.empty());
 
-cbwidget=cbwidget_;
-cbapplywidget=cbapplywidget_;
+adnotep = adnotep_;
 osc = osc_;
 loc = loc_;
 
@@ -1049,13 +1035,7 @@ oscils_base->update();
 
 //oscildisplaygroup->redraw();
 //basefuncdisplaygroup->redraw();
-if (cbwidget!=NULL) {
-      cbwidget->do_callback();
-      applybutton->color(FL_RED);
-      applybutton->redraw();
-};} {}
-  }
-  decl {Fl_Widget *cbwidget,*cbapplywidget;} {private local
+} {}
   }
   decl {Oscilharmonic *h[MAX_AD_HARMONICS];} {private local
   }
@@ -1066,5 +1046,7 @@ if (cbwidget!=NULL) {
   decl {Fl_Oscilloscope *oscilo, *oscilo_base;} {private local
   }
   decl {Fl_OscilSpectrum *oscils, *oscils_base;} {private local
+  }
+  decl {bool adnotep;} {private local
   }
 } 

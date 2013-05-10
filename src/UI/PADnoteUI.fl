@@ -56,188 +56,13 @@ decl {\#include "FilterUI.h"} {public local
 decl {\#include "OscilGenUI.h"} {public local
 } 
 
+decl {\#include "Fl_PADnoteOvertonePosition.h"} {public local
+} 
+
+decl {\#include "Fl_PADnoteHarmonicProfile.h"} {public local
+} 
+
 decl {\#include "PresetsUI.h"} {public local
-} 
-
-class PADnoteHarmonicProfile {: {public Fl_Box}
-} {
-  Function {PADnoteHarmonicProfile(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
-    code {pars=NULL;} {}
-  }
-  Function {init(PADnoteParameters *pars,Master *master_)} {} {
-    code {master=master_;
-this->pars=pars;} {}
-  }
-  Function {draw()} {} {
-    code {int ox=x(),oy=y(),lx=w(),ly=h();
-if (!visible()) return;
-float smps[lx];
-
-float realbw=pars->getprofile(smps,lx);
-bool active=active_r();
-
-//draw the equivalent bandwidth
-if (active) fl_color(220,220,220);
- else fl_color(160,165,165);
-fl_line_style(FL_DASH);
-int rbw=(int)(realbw*(lx-1.0)/2.0);
-fl_begin_line();
-for (int i=lx/2-rbw;i<(lx/2+rbw);i++) { fl_vertex(ox+i,oy); }
-fl_end_line();
-
-fl_line_style(FL_DASH);
-if (active) fl_color(200,200,200);
- else  fl_color(160,160,160);
-for (int i=1;i<10;i++){
-	int kx=(int)(lx/10.0*i);
-	fl_line( ox + kx, oy, ox + kx, oy + ly - 1 );
-};
-for (int i=1;i<5;i++){
-	int ky=(int)(ly/5.0*i);
-	fl_line(ox,oy+ly-ky,ox+lx,oy+ly-ky-1);
-};
-
-
-fl_color(120,120,120);
-fl_line_style(FL_DASH);
-fl_line(ox+lx/2,oy,ox+lx/2,oy+ly);
-
-//draw the graph
-fl_line_style(FL_SOLID);
-   if (active) fl_color(180,210,240);
-      else fl_color(150,150,155);
-
-fl_color( fl_color_add_alpha( fl_color(), 127 ) );
-
-fl_begin_polygon();
-fl_vertex( ox, oy + h() );
-for (int i=0;i<lx;i++){
-   int val=(int) ((ly-2)*smps[i]);
- 
-//   fl_vertex(ox+i,oy+ly-1);
-   fl_vertex(ox+i,oy+ly-1-val);
-
-  // if (active) fl_color(0,0,100);
-  //     else fl_color(150,150,150);
-
-//   if (i>0)
-//	{
-//	 fl_vertex(ox+i-1,oy+ly-2-old);
-//	fl_vertex(ox+i,oy+ly-2-val);
-//	}
-};
-fl_vertex( ox + w(), oy + h() );
-fl_end_polygon();
-
-
-fl_line_style(FL_DASH);
-if (active) fl_color(0,100,220);
-    else fl_color(150,160,170);
-fl_line(ox+lx/2-rbw,oy,ox+lx/2-rbw,oy+ly-1);
-fl_line(ox+lx/2+rbw,oy,ox+lx/2+rbw,oy+ly-1);
-
-fl_line_style(0);} {}
-  }
-  decl {Master *master;} {private local
-  }
-  decl {PADnoteParameters *pars;} {public local
-  }
-} 
-
-class PADnoteOvertonePosition {: {public Fl_Box}
-} {
-  Function {PADnoteOvertonePosition(int x,int y, int w, int h, const char *label=0):Fl_Box(x,y,w,h,label)} {} {
-    code {pars=NULL;} {}
-  }
-  Function {init(PADnoteParameters *pars,Master *master_)} {} {
-    code {master=master_;
-this->pars=pars;} {}
-  }
-  Function {draw()} {} {
-    code {if (!visible()) return;
-const int maxdb=60;
-
-int ox=x(),oy=y(),lx=w(),ly=h();
-const int maxharmonic=64;
-
-
-for (int i=1;i<maxharmonic;i++){
-	fl_color(100,100,100);
-	fl_line_style(FL_DOT);
-	if (i%5==0) fl_line_style(0);
-	if (i%10==0) fl_color(120,120,120);
-	int kx=(int)(lx/(float)maxharmonic*i);
-	fl_line(ox+kx,oy,ox+kx,oy+ly);
-};
-
-
-
-int n=synth->oscilsize/2;
-float spc[n];
-for (int i=0;i<n;i++) spc[i]=0.0;
-
-pthread_mutex_lock(&master->mutex);
-pars->oscilgen->getspectrum(n,spc,0);
-pthread_mutex_unlock(&master->mutex);
-
-
-//normalize
-float max=0;
-for (int i=0;i<n;i++){
-   float x=fabs(spc[i]);
-   if (max<x) max=x;
-}
-if (max<0.000001) max=1.0;
-max=max*1.05;
-
-float spectrum[lx];
-for (int i=0;i<lx;i++) spectrum[i]=0;
-
-
-for (int i=1;i<n;i++){
-	float nhr=pars->getNhr(i);
-	int kx=(int)(lx/(float)maxharmonic*nhr);
-	if ((kx<0)||(kx>lx)) continue;
-
-        spectrum[kx]=spc[i-1]/max+1e-9;
-
-};
-
-fl_color(180,0,0);
-fl_line_style(0);
-
-if (pars->Pmode==2){
-   int old=0;
-   for (int i=1;i<lx;i++){
-	if ((spectrum[i]>1e-10)||(i==(lx-1))){
-		int delta=i-old;
-		float val1=spectrum[old];
-		float val2=spectrum[i];
-
-		float idelta=1.0/delta;
-		for (int j=0;j<delta;j++){
-			float x=idelta*j;
-			spectrum[old+j]=val1*(1.0-x)+val2*x;
-		};
-		old=i;
-	};
-      
-   };
-};
-
-for (int i=0;i<lx;i++){
-	float x=spectrum[i];
-        if (x>dB2rap(-maxdb)) x=rap2dB(x)/maxdb+1;
-             else continue;
-       	int yy=(int)(x*ly);
-	fl_line(ox+i,oy+ly-1-yy,ox+i,oy+ly-1);
-      
-};} {}
-  }
-  decl {Master *master;} {private local
-  }
-  decl {PADnoteParameters *pars;} {public local
-  }
 } 
 
 class PADnoteUI {open : {public PresetsUI_}
@@ -259,7 +84,7 @@ make_window();} {}
   } {
     Fl_Window padnotewindow {
       label {PAD synth Parameters} open
-      xywh {252 515 535 435} type Double visible
+      xywh {40 232 535 435} type Double visible
     } {
       Fl_Tabs {} {
         callback {if (o->value()!=harmonicstructuregroup) applybutton->hide();
@@ -269,19 +94,20 @@ make_window();} {}
         Fl_Group harmonicstructuregroup {
           label {Harmonic Structure} open
           xywh {0 20 535 375} box UP_FRAME
+          class Fl_Osc_Group
         } {
-          Fl_Group bwprofilegroup {
+          Fl_Group bwprofilegroup {open
             xywh {5 30 90 260} box UP_FRAME
             code0 {if (pars->Pmode!=0) o->deactivate();}
           } {
             Fl_Dial hpbasepar1 {
               label Width
-              callback {pars->Php.base.par1=(int) o->value();
-hprofile->redraw();
+              callback {hpui->update();
 cbwidget->do_callback();}
               xywh {20 75 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
-              code0 {o->value(pars->Php.base.par1);}
-              class WidgetPDial
+              code1 {harmonicstructuregroup->osc = osc_i; harmonicstructuregroup->pane_name = location;}
+              code2 {o->init("hp.base.par1");}
+              class Fl_Osc_Dial
             }
             Fl_Choice hpbasetype {
               label {Base Type}
@@ -306,30 +132,27 @@ cbwidget->do_callback();}
             }
             Fl_Dial hpfreqmult {
               label FreqMlt
-              callback {pars->Php.freqmult=(int) o->value();
-hprofile->redraw();
+              callback {hpui->update();
 cbwidget->do_callback();}
               xywh {55 75 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
-              code0 {o->value(pars->Php.freqmult);}
-              class WidgetPDial
+              code0 {o->init("hp.freqmult");}
+              class Fl_Osc_Dial
             }
             Fl_Dial hpmpar1 {
               label Str
-              callback {pars->Php.modulator.par1=(int) o->value();
-hprofile->redraw();
+              callback {hpui->update();
 cbwidget->do_callback();}
               xywh {15 115 20 20} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
-              code0 {o->value(pars->Php.modulator.par1);}
-              class WidgetPDial
+              code0 {o->init("hp.modulator.par1");}
+              class Fl_Osc_Dial
             }
             Fl_Dial hpmfreq {
               label SFreq
-              callback {pars->Php.modulator.freq=(int) o->value();
-hprofile->redraw();
+              callback {hpui->update();
 cbwidget->do_callback();}
               xywh {40 115 20 20} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
-              code0 {o->value(pars->Php.modulator.freq);}
-              class WidgetPDial
+              code0 {o->init("hp.modulator.freq");}
+              class Fl_Osc_Dial
             }
             Fl_Group {} {
               xywh {10 160 80 105} box BORDER_BOX
@@ -361,11 +184,11 @@ cbwidget->do_callback();}
               }
               Fl_Choice hpampmode {
                 label AmpMode
-                callback {pars->Php.amp.mode=o->value();
-hprofile->redraw();
+                callback {hpui->update();
 cbwidget->do_callback();}
                 xywh {15 205 70 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
-                code0 {o->value(pars->Php.amp.mode);}
+                code0 {o->init("hp.amp.mode");}
+                class Fl_Osc_Choice
               } {
                 MenuItem {} {
                   label Sum
@@ -386,21 +209,19 @@ cbwidget->do_callback();}
               }
               Fl_Dial hpamppar1 {
                 label Par1
-                callback {pars->Php.amp.par1=(int) o->value();
-hprofile->redraw();
+                callback {hpui->update();
 cbwidget->do_callback();}
                 xywh {15 235 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
-                code0 {o->value(pars->Php.amp.par1);}
-                class WidgetPDial
+                code0 {o->init("hp.amp.par1");}
+                class Fl_Osc_Dial
               }
               Fl_Dial hpamppar2 {
                 label Par2
-                callback {pars->Php.amp.par2=(int) o->value();
-hprofile->redraw();
+                callback {hpui->update();
 cbwidget->do_callback();}
                 xywh {55 235 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
-                code0 {o->value(pars->Php.amp.par2);}
-                class WidgetPDial
+                code0 {o->init("hp.amp.par2");}
+                class Fl_Osc_Dial
               }
             }
             Fl_Check_Button hpautoscale {
@@ -433,12 +254,11 @@ cbwidget->do_callback();}
             }
             Fl_Dial hpwidth {
               label Size
-              callback {pars->Php.width=(int) o->value();
-hprofile->redraw();
+              callback {hpui->update();
 cbwidget->do_callback();}
               xywh {65 115 20 20} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
-              code0 {o->value(pars->Php.width);}
-              class WidgetPDial
+              code0 {o->init("hp.width");}
+              class Fl_Osc_Dial
             }
           }
           Fl_Group oscilgroup {open
@@ -450,14 +270,14 @@ cbwidget->do_callback();}
           Fl_Button {} {
             label Change
             callback {if (oscui!=NULL) delete (oscui);
-oscui=new OscilEditor(cbwidget,applybutton,location+"oscil/",osc_i);}
+oscui=new OscilEditor(false, location+"oscil/",osc_i);}
             xywh {375 270 60 20} box THIN_UP_BOX labelfont 1 labelsize 11
           }
           Fl_Box cbwidget {
             label {Harmonic Content}
-            callback {overtonepos->redraw();
+            callback {opui->update();
 applybutton->color(FL_RED);
-applybutton->redraw();} selected
+applybutton->redraw();}
             xywh {125 135 205 20} align 16
           }
           Fl_Button {} {
@@ -482,13 +302,13 @@ cbwidget->do_callback();}
             code0 {o->value(pars->setPbandwidth(pars->Pbandwidth));}
             code1 {if (pars->Pmode!=0) o->deactivate();}
           }
-          Fl_Group {} {
+          Fl_Group {} {open
             xywh {315 295 215 45} box UP_FRAME
           } {
             Fl_Choice hrpostype {
               label OvertonesPosition
               callback {pars->Phrpos.type=o->value();
-overtonepos->redraw();
+opui->update();
 cbwidget->do_callback();}
               xywh {325 310 80 20} down_box BORDER_BOX labelsize 10 align 5 textsize 11
               code0 {o->value(pars->Phrpos.type);}
@@ -524,30 +344,27 @@ cbwidget->do_callback();}
             }
             Fl_Dial hrpospar1 {
               label Par1
-              callback {pars->Phrpos.par1=(int) o->value();
-overtonepos->redraw();
+              callback {opui->update();
 cbwidget->do_callback();}
               xywh {425 310 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 255 step 1
-              code0 {o->value(pars->Phrpos.par1);}
-              class WidgetPDial
+              code0 {o->init("hrpos.par1");}
+              class Fl_Osc_Dial
             }
             Fl_Dial hrpospar2 {
               label Par2
-              callback {pars->Phrpos.par2=(int) o->value();
-overtonepos->redraw();
+              callback {opui->update();
 cbwidget->do_callback();}
               xywh {460 310 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 255 step 1
-              code0 {o->value(pars->Phrpos.par2);}
-              class WidgetPDial
+              code0 {o->init("hrpos.par2");}
+              class Fl_Osc_Dial
             }
             Fl_Dial hrpospar3 {
               label ForceH
-              callback {pars->Phrpos.par3=(int) o->value();
-overtonepos->redraw();
+              callback {opui->update();
 cbwidget->do_callback();}
               xywh {495 310 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 255 step 1
-              code0 {o->value(pars->Phrpos.par3);}
-              class WidgetPDial
+              code0 {o->init("hrpos.par3");}
+              class Fl_Osc_Dial
             }
           }
           Fl_Choice bwscale {
@@ -593,8 +410,8 @@ cbwidget->do_callback();}
           }
           Fl_Group overtonepos {
             xywh {5 345 525 45} box FLAT_BOX color 51 selection_color 218 labelcolor 63
-            code0 {PADnoteOvertonePosition *opui=new PADnoteOvertonePosition(o->x(),o->y(),o->w(),o->h(),"");}
-            code1 {opui->init(pars,master);}
+            code0 {opui=new PADnoteOvertonePosition(o->x(),o->y(),o->w(),o->h(),"");}
+            code1 {opui->init();}
           } {}
           Fl_Choice qsamplesize {
             label {Sample Size}
@@ -711,7 +528,7 @@ cbwidget->do_callback();}
           Fl_Choice qbasenote {
             label base
             callback {pars->Pquality.basenote=(int) o->value();
-cbwidget->do_callback();}
+cbwidget->do_callback();} selected
             xywh {375 155 50 20} down_box BORDER_BOX labelsize 11 align 5 textsize 11
             code0 {o->value(pars->Pquality.basenote);}
           } {
@@ -754,8 +571,8 @@ cbwidget->do_callback();}
           }
           Fl_Group hprofile {
             xywh {100 45 430 90} box FLAT_BOX color 51 selection_color 218 labelcolor 63
-            code0 {PADnoteHarmonicProfile *hpui=new PADnoteHarmonicProfile(o->x(),o->y(),o->w(),o->h(),"");}
-            code1 {hpui->init(pars,master);}
+            code0 {hpui=new PADnoteHarmonicProfile(o->x(),o->y(),o->w(),o->h(),"");}
+            code1 {hpui->init();}
             code2 {if (pars->Pmode!=0) { o->deactivate(); o->color(48);};}
           } {}
           Fl_Box {} {
@@ -1109,7 +926,7 @@ hrpospar2->value(pars->Phrpos.par2);
 hrpospar3->value(pars->Phrpos.par3);
 
 hprofile->redraw();
-overtonepos->redraw();
+opui->update();
 
 osc->redraw();
 MiddleWare::preparePadSynth(location.c_str(), pars);
@@ -1136,5 +953,9 @@ delete(padnotewindow);} {}
   decl {std::string location;} {private local
   }
   decl {Fl_Osc_Interface *osc_i;} {private local
+  }
+  decl {PADnoteHarmonicProfile *hpui;} {private local
+  }
+  decl {PADnoteOvertonePosition *opui;} {private local
   }
 } 

@@ -154,7 +154,7 @@ const char *message_snip(const char *m);
         if(rtosc_narguments(m)==0) {\
             d.reply(d.loc, "f", ((type*)d.obj)->var); \
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='f') {\
-            ((type*)d.obj)->var = limit<float>(_min,_max,rtosc_argument(m,0).f); \
+            ((type*)d.obj)->var = limit<float>(rtosc_argument(m,0).f,_min,_max); \
             d.broadcast(d.loc, "f", ((type*)d.obj)->var);}}}
 
 ///character parameter - with lookup code
@@ -164,7 +164,10 @@ const char *message_snip(const char *m);
         if(rtosc_narguments(m)==0) {\
             d.reply(d.loc, "c", ((type*)d.obj)->var); \
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='c') {\
-            ((type*)d.obj)->var = limit<char>(0,127,rtosc_argument(m,0).i); \
+            printf("looking at value %d\n", rtosc_argument(m,0).i); \
+            printf("limited value is %d\n", limit<char>(0,127,rtosc_argument(m,0).i)); \
+            ((type*)d.obj)->var = limit<char>(rtosc_argument(m,0).i,0,127); \
+            printf("set " #var" to value %d\n", ((type*)d.obj)->var); \
             d.broadcast(d.loc, "c", ((type*)d.obj)->var);}}}
 
 ///Recur - perform a simple recursion

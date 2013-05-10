@@ -364,13 +364,20 @@ void Master::AudioOut(float *outl, float *outr)
     memset(loc_buf, sizeof(loc_buf), 0);
     int events = 0;
     while(uToB->hasNext()) {
+        const char *msg = uToB->read();
+        fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
+        fprintf(stderr, "backend: '%s'<%s>\n", msg,
+                rtosc_argument_string(msg));
+        fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
         d.matches = 0;
         //fprintf(stderr, "address '%s'\n", uToB->peak());
-        ports.dispatch(uToB->read()+1, d);
+        ports.dispatch(msg+1, d);
         events++;
-        if(!d.matches)
+        if(!d.matches) {
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
             fprintf(stderr, "Unknown address '%s'\n", uToB->peak());
-        fprintf(stderr, "backend: '%s'<%s>\n", uToB->peak(), rtosc_argument_string(uToB->peak()));
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        }
     }
     if(events>1)
         fprintf(stderr, "backend: %d events per cycle\n",events);
