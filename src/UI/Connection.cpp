@@ -6,6 +6,7 @@
 #include <rtosc/ports.h>
 
 #include <FL/Fl.H>
+#include "Fl_Osc_Tree.H"
 #include "common.H"
 #include "MasterUI.h"
 
@@ -67,7 +68,14 @@ ui_handle_t GUI::createUi(Fl_Osc_Interface *osc, void *master, void *exit)
     Fl::background2(70, 70,  70);
     Fl::foreground(255, 255, 255);
 #endif
-    
+
+    Fl_Window *midi_win = new Fl_Double_Window(400, 400, "Midi connections");
+    Fl_Osc_Tree *tree   = new Fl_Osc_Tree(0,0,400,400);
+    midi_win->resizable(tree);
+    tree->root_ports    = &Master::ports;
+    tree->osc           = osc;
+    midi_win->show();
+
     return (void*) (ui = new MasterUI((Master*)master, (int*)exit, osc));
 }
 void GUI::destroyUi(ui_handle_t ui)

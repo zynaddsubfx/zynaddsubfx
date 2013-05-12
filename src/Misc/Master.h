@@ -25,6 +25,7 @@
 #define MASTER_H
 #include "../globals.h"
 #include "Microtonal.h"
+#include <rtosc/miditable.h>
 
 #include "Bank.h"
 #include "Recorder.h"
@@ -166,11 +167,14 @@ class Master
 
         //Statistics on output levels
         vuData vu;
+
+        rtosc::MidiTable<64,64> midi;
     private:
         bool   nullRun;
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
         int    keyshift;
+
 };
 
 #endif

@@ -139,7 +139,7 @@ void osc_check(cb_t cb, void *ui)
     lo_server_recv_noblock(server, 0);
     while(bToU->hasNext()) {
         const char *rtmsg = bToU->read();
-        puts(rtmsg);
+        printf("return: got a '%s'\n", rtmsg);
         if(!strcmp(rtmsg, "/echo")
                 && !strcmp(rtosc_argument_string(rtmsg),"ss")
                 && !strcmp(rtosc_argument(rtmsg,0).s, "OSC_URL"))
@@ -393,9 +393,9 @@ struct MiddleWareImpl
     void handleMsg(const char *msg)
     {
         assert(!strstr(msg,"free"));
-        fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 6 + 30, 0 + 40);
-        printf("middleware: '%s'\n", msg);
-        fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 6 + 30, 0 + 40);
+        fprintf(stdout, "middleware: '%s'\n", msg);
+        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
         const char *last_path = rindex(msg, '/');
         if(!last_path)
             return;
@@ -536,6 +536,8 @@ class UI_Interface:public Fl_Osc_Interface
 
         void tryLink(const char *msg) override
         {
+
+            printf("trying the link for a '%s'\\n", msg);
             const char *handle = rindex(msg,'/');
             if(handle)
                 ++handle;

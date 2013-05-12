@@ -61,12 +61,69 @@ static Ports localports = {
        d.reply("/free", "sb", "Part", sizeof(void*), &p);
        m->part[i] = p;
        printf("part %d is now pointer %p\n", i, p);}},
-
-    PARAMF(Master, volume, volume, log, 0.01, 4.42, "Master Volume"),
+    {"volume::c", ":'old-param':", 0,
+        [](const char *m, rtosc::RtData &d) {
+        if(rtosc_narguments(m)==0) {
+            d.reply(d.loc, "c", ((Master*)d.obj)->Pvolume);
+        } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='c') {
+            printf("looking at value %d\n", rtosc_argument(m,0).i);
+            printf("limited value is %d\n", limit<char>(
+                        rtosc_argument(m,0).i, 0,127));
+            ((Master*)d.obj)->setPvolume(limit<char>(rtosc_argument(m,0).i,0,127));
+            printf("sets volume to value %d\n", ((Master*)d.obj)->Pvolume);
+            d.broadcast(d.loc, "c", ((Master*)d.obj)->Pvolume);}}},
     RECURSP(Master, Part, part, part, 16, "Part"),//NUM_MIDI_PARTS
+
+    {"register:iis","::", 0,
+        [](const char *m,RtData &d){
+            Master *M =  (Master*)d.obj;
+            M->midi.addElm(rtosc_argument(m,0).i, rtosc_argument(m,1).i,rtosc_argument(m,2).s);}},
+    {"learn:s", "::", 0,
+        [](const char *m, RtData &d){
+            Master *M =  (Master*)d.obj;
+            printf("learning '%s'\n", rtosc_argument(m,0).s);
+            M->midi.learn(rtosc_argument(m,0).s);}}
 };
 
 Ports &Master::ports = localports;
+Master *the_master;
+
+class DataObj:public rtosc::RtData
+{
+    public:
+        DataObj(char *loc_, size_t loc_size_, void *obj_, rtosc::ThreadLink *bToU_)
+        {
+            memset(loc_, 0, sizeof(loc_size_));
+            loc      = loc_;
+            loc_size = loc_size_;
+            obj      = obj_;
+            bToU     = bToU_;
+        }
+
+        virtual void reply(const char *path, const char *args, ...)
+        {
+            va_list va;
+            va_start(va,args);
+            char *buffer = bToU->buffer();
+            rtosc_vmessage(buffer,bToU->buffer_size(),path,args,va);
+            printf("sending reply of '%s'\n", buffer);
+            reply(buffer);
+        }
+        virtual void reply(const char *msg)
+        {
+            bToU->raw_write(msg);
+        }
+        virtual void broadcast(const char *path, const char *args, ...) override{
+            va_list va;
+            va_start(va,args);
+            char *buffer = bToU->buffer();
+            rtosc_vmessage(buffer,bToU->buffer_size(),path,args,va);
+            printf("sending reply of '%s'\n\n", buffer);
+            reply(buffer);}
+        virtual void broadcast(const char *msg) override{reply(msg);};
+    private:
+        rtosc::ThreadLink *bToU;
+};
 
 vuData::vuData(void)
     :outpeakl(0.0f), outpeakr(0.0f), maxoutpeakl(0.0f), maxoutpeakr(0.0f),
@@ -74,7 +131,9 @@ vuData::vuData(void)
 {}
 
 Master::Master()
+:midi(Master::ports)
 {
+    the_master = this;
     swaplr = 0;
 
     pthread_mutex_init(&mutex, NULL);
@@ -99,6 +158,14 @@ Master::Master()
 
 
     defaults();
+
+    midi.event_cb = [](const char *m)
+    {
+        char loc_buf[1024];
+        DataObj d{loc_buf, 1024, the_master, bToU};
+        memset(loc_buf, sizeof(loc_buf), 0);
+        Master::ports.dispatch(m+1, d);
+    };
 }
 
 void Master::defaults()
@@ -195,26 +262,23 @@ void Master::polyphonicAftertouch(char chan, char note, char velocity)
  */
 void Master::setController(char chan, int type, int par)
 {
+    midi.process(chan,type,par);
     if((type == C_dataentryhi) || (type == C_dataentrylo)
        || (type == C_nrpnhi) || (type == C_nrpnlo)) { //Process RPN and NRPN by the Master (ignore the chan)
         ctl.setparameternumber(type, par);
 
         int parhi = -1, parlo = -1, valhi = -1, vallo = -1;
         if(ctl.getnrpn(&parhi, &parlo, &valhi, &vallo) == 0) //this is NRPN
-            //fprintf(stderr,"rcv. NRPN: %d %d %d %d\n",parhi,parlo,valhi,vallo);
             switch(parhi) {
                 case 0x04: //System Effects
                     if(parlo < NUM_SYS_EFX)
                         sysefx[parlo]->seteffectpar_nolock(valhi, vallo);
-                    ;
                     break;
                 case 0x08: //Insertion Effects
                     if(parlo < NUM_INS_EFX)
                         insefx[parlo]->seteffectpar_nolock(valhi, vallo);
-                    ;
                     break;
             }
-        ;
     }
     else
     if(type == C_bankselectmsb) {      // Change current bank
@@ -226,7 +290,6 @@ void Master::setController(char chan, int type, int par)
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) //Send the controller to all part assigned to the channel
             if((chan == part[npart]->Prcvchn) && (part[npart]->Penabled != 0))
                 part[npart]->SetController(type, par);
-        ;
 
         if(type == C_allsoundsoff) { //cleanup insertion/system FX
             for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
@@ -322,36 +385,6 @@ void Master::partonoff(int npart, int what)
     }
 }
 
-class DataObj:public rtosc::RtData
-{
-    public:
-        DataObj(char *loc_, size_t loc_size_, void *obj_, rtosc::ThreadLink *bToU_)
-        {
-            memset(loc_, 0, sizeof(loc_size_));
-            loc      = loc_;
-            loc_size = loc_size_;
-            obj      = obj_;
-            bToU     = bToU_;
-        }
-
-        virtual void reply(const char *path, const char *args, ...)
-        {
-            va_list va;
-            va_start(va,args);
-            char *buffer = bToU->buffer();
-            rtosc_vmessage(buffer,bToU->buffer_size(),path,args,va);
-            printf("sending reply of '%s'\n", buffer);
-            reply(buffer);
-        }
-        virtual void reply(const char *msg)
-        {
-            bToU->raw_write(msg);
-        }
-        //virtual void broadcast(const char *path, const char *args, ...){(void)path;(void)args;};
-        //virtual void broadcast(const char *msg){(void)msg;};
-    private:
-        rtosc::ThreadLink *bToU;
-};
 
 /*
  * Master audio out (the final sound)
@@ -365,12 +398,12 @@ void Master::AudioOut(float *outl, float *outr)
     int events = 0;
     while(uToB->hasNext()) {
         const char *msg = uToB->read();
-        fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
-        fprintf(stderr, "backend: '%s'<%s>\n", msg,
-                rtosc_argument_string(msg));
-        fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        //fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
+        //fprintf(stdout, "backend: '%s'<%s>\n", msg,
+        //        rtosc_argument_string(msg));
+        //fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
         d.matches = 0;
-        //fprintf(stderr, "address '%s'\n", uToB->peak());
+        //fprintf(stdout, "address '%s'\n", uToB->peak());
         ports.dispatch(msg+1, d);
         events++;
         if(!d.matches) {
