@@ -537,7 +537,7 @@ class UI_Interface:public Fl_Osc_Interface
         void tryLink(const char *msg) override
         {
 
-            printf("trying the link for a '%s'\\n", msg);
+            printf("trying the link for a '%s'\n", msg);
             const char *handle = rindex(msg,'/');
             if(handle)
                 ++handle;

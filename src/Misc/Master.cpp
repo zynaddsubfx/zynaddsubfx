@@ -164,7 +164,13 @@ Master::Master()
         char loc_buf[1024];
         DataObj d{loc_buf, 1024, the_master, bToU};
         memset(loc_buf, sizeof(loc_buf), 0);
+        printf("sending an event to the owner of '%s'\n", m);
         Master::ports.dispatch(m+1, d);
+    };
+
+    midi.error_cb = [](const char *a, const char *b)
+    {
+        fprintf(stderr, "MIDI- got an error '%s' -- '%s'\n");
     };
 }
 

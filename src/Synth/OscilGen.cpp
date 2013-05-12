@@ -35,49 +35,50 @@ int main_thread = 0;
 
 #include <rtosc/ports.h>
 
-template<int i>
-void simpleset(const char *m, rtosc::RtData &d)
-{
-    unsigned char *addr = ((unsigned char*) d.obj)+i;
-    if(!rtosc_narguments(m))
-        d.reply(d.loc, "c", *addr);
-    else
-        *addr = rtosc_argument(m, 0).i;
-}
-#undef  PARAMC
-#define PARAMC(x) rtosc::Port{#x "::c", "::", NULL, \
-    simpleset<__builtin_offsetof(class OscilGen, P##x)>}
+//template<int i>
+//void simpleset(const char *m, rtosc::RtData &d)
+//{
+//    unsigned char *addr = ((unsigned char*) d.obj)+i;
+//    if(!rtosc_narguments(m))
+//        d.reply(d.loc, "c", *addr);
+//    else
+//        *addr = rtosc_argument(m, 0).i;
+//}
+//#undef  PARAMC
+//#define PARAMC(x) rtosc::Port{#x "::c", "::", NULL, \
+//    simpleset<__builtin_offsetof(class OscilGen, P##x)>}
+#define PC(x) PARAMC(OscilGen, P##x, x, "")
 
 static rtosc::Ports localPorts = {
-    PARAMC(hmagtype),
-    PARAMC(currentbasefunc),
-    PARAMC(basefuncpar),
-    PARAMC(basefuncpar),
-    PARAMC(basefuncmodulation),
-    PARAMC(basefuncmodulationpar1),
-    PARAMC(basefuncmodulationpar2),
-    PARAMC(basefuncmodulationpar3),
-    PARAMC(waveshaping),
-    PARAMC(waveshapingfunction),
-    PARAMC(filtertype),
-    PARAMC(filterpar1),
-    PARAMC(filterpar2),
-    PARAMC(filterbeforews),
-    PARAMC(satype),
-    PARAMC(sapar),
+    PC(hmagtype),
+    PC(currentbasefunc),
+    PC(basefuncpar),
+    PC(basefuncpar),
+    PC(basefuncmodulation),
+    PC(basefuncmodulationpar1),
+    PC(basefuncmodulationpar2),
+    PC(basefuncmodulationpar3),
+    PC(waveshaping),
+    PC(waveshapingfunction),
+    PC(filtertype),
+    PC(filterpar1),
+    PC(filterpar2),
+    PC(filterbeforews),
+    PC(satype),
+    PC(sapar),
     //FIXME missing int stuff
-    PARAMC(modulation),
-    PARAMC(modulationpar1),
-    PARAMC(modulationpar2),
-    PARAMC(modulationpar3),
+    PC(modulation),
+    PC(modulationpar1),
+    PC(modulationpar2),
+    PC(modulationpar3),
     //FIXME realtime parameters lurking below
-    PARAMC(rand),
-    PARAMC(amprandpower),
-    PARAMC(amprandtype),
-    PARAMC(adaptiveharmonics),
-    PARAMC(adaptiveharmonicsbasefreq),
-    PARAMC(adaptiveharmonicspower),
-    PARAMC(adaptiveharmonicspar),
+    PC(rand),
+    PC(amprandpower),
+    PC(amprandtype),
+    PC(adaptiveharmonics),
+    PC(adaptiveharmonicsbasefreq),
+    PC(adaptiveharmonicspower),
+    PC(adaptiveharmonicspar),
 
     {"phase#128::c", "::Sets harmonic phase",
         NULL, [](const char *m, rtosc::RtData &d) {

@@ -16,6 +16,22 @@ class Fl_Osc_Tree: public Fl_Tree
             callback(Fl_Osc_Tree::cb, NULL);
         }
 
+        void sprout(std::string s)
+        {
+            if(s[s.length()-1] == '/') {
+                attach(s);
+                attach(s+"nil");
+                close(s.c_str());
+            } else
+                attach(s);
+        }
+
+        void attach(std::string s)
+        {
+            if(!find_item(s.c_str()))
+                add(s.c_str());
+        }
+
         static void cb(Fl_Widget *w, void*)
         {
             using namespace rtosc;
@@ -37,20 +53,30 @@ class Fl_Osc_Tree: public Fl_Tree
             if(reason==3) //Populate fields
             {
                 const Ports &p = *Fl_Osc_Tree::subtree_lookup(t->root_ports,pathname+1);
+                printf("ok, I got the tree\n");
                 if(auto *i = t->find_item((std::string(pathname)+"/"+"nil").c_str()))
                     t->remove(i);
                 for(const Port &port : p) {
-                    bool subnodes = index(port.name, '/');
-                    string path = std::string(pathname)+"/"+port.name;
-                    if(subnodes) {
-                        if(!t->find_item(path.c_str()))
-                            t->add(path.c_str());
-                        if(!t->find_item((path+"nil").c_str()))
-                            t->add((path+"nil").c_str());
-                        t->close(path.c_str());
+                    printf("handling '%s'\n", port.name);
+                    const bool subnodes   = index(port.name, '/');
+                    const bool enumerated = index(port.name, '#');
+                    const string path = std::string(pathname)+"/"+port.name;
+                    if(!enumerated) {
+                        t->sprout(path);
                     } else {
-                        if(!t->find_item(path.c_str()))
-                            t->add(path.c_str());
+                        char tmpa[1024];
+                        char tmpb[1024];
+                        strncpy(tmpa, path.c_str(), 1024);
+                        char *pound = index(tmpa, '#');
+                        int N = atoi(pound+1);
+                        *pound = 0;
+                        char terminal = subnodes ? '/' : '\0';
+
+                        for(int i = 0; i < N; ++i) {
+                            snprintf(tmpb, 1024, "%s%d%c",
+                                    tmpa, i, terminal);
+                            t->sprout(tmpb);
+                        }
                     }
                 }
 
@@ -70,8 +96,9 @@ class Fl_Osc_Tree: public Fl_Tree
                 const char *name  = port.name;
                 if(!index(name, '/'))//only accept objects that will have subports
                     continue;
-                if(s.substr(0,strlen(name)) == name) {
-                    return subtree_lookup(port.ports, s.substr(strlen(name)));
+                if(rtosc_match(name, s.c_str())) {
+                    return subtree_lookup(port.ports,
+                            s.substr(index(s.c_str(), '/')-s.c_str()+1));
                 }
             }
 
