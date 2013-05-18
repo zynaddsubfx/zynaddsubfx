@@ -189,7 +189,7 @@ add_definitions(
 	 -Wextra
 	 )
 if(NOT AVOID_ASM)
-	message(STATUS "Compiling with x86 assembly support")
+	message(STATUS "Compiling with x86 opcode support")
     add_definitions(-DASM_F2I_YES)
 endif()
 
