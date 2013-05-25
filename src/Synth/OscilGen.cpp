@@ -618,7 +618,7 @@ void OscilGen::prepare()
     if(Pcurrentbasefunc == 0)   //the sine case
         for(int i = 0; i < MAX_AD_HARMONICS - 1; ++i) {
             oscilFFTfreqs[i + 1] =
-                std::complex<float>(-hmag[i] * sinf(hphase[i] * (i + 1)) / 2.0f,
+                std::complex<fftw_real>(-hmag[i] * sinf(hphase[i] * (i + 1)) / 2.0f,
                         hmag[i] * cosf(hphase[i] * (i + 1)) / 2.0f);
         }
     else
@@ -1113,7 +1113,7 @@ void OscilGen::getfromXML(XMLwrapper *xml)
         for(int i = 1; i < synth->oscilsize / 2; ++i)
             if(xml->enterbranch("BF_HARMONIC", i)) {
                 basefuncFFTfreqs[i] =
-                    std::complex<float>(xml->getparreal("cos", 0.0f),
+                    std::complex<fftw_real>(xml->getparreal("cos", 0.0f),
                             xml->getparreal("sin", 0.0f));
                 xml->exitbranch();
             }
