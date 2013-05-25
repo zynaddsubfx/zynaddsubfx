@@ -23,7 +23,9 @@
 #ifndef NUL_ENGINE_H
 #define NUL_ENGINE_H
 
+#ifndef _MSC_VER
 #include <sys/time.h>
+#endif
 #include <pthread.h>
 #include "../globals.h"
 #include "AudioOut.h"

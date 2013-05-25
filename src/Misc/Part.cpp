@@ -254,7 +254,7 @@ void Part::NoteOn(unsigned char note,
         else {
             // Legato mode is on and applicable.
             legatomodevalid = true;
-            if((not ismonofirstnote) && (lastlegatomodevalid)) {
+            if((!ismonofirstnote) && (lastlegatomodevalid)) {
                 // At least one other key is held or sustained, and the
                 // previous note was played while in valid legato mode.
                 doinglegato = true; // So we'll do a legato note.
@@ -337,7 +337,7 @@ void Part::NoteOn(unsigned char note,
         // still held down or sustained for the Portamento to activate
         // (that's like Legato).
         int portamento = 0;
-        if((Ppolymode != 0) || (not ismonofirstnote))
+        if((Ppolymode != 0) || (!ismonofirstnote))
             // I added a third argument to the
             // ctl.initportamento(...) function to be able
             // to tell it if we're doing a legato note.
@@ -629,13 +629,13 @@ void Part::NoteOff(unsigned char note) //relase the key
     int i;
 
     // This note is released, so we remove it from the list.
-    if(not monomemnotes.empty())
+    if(!monomemnotes.empty())
         monomemnotes.remove(note);
 
     for(i = POLIPHONY - 1; i >= 0; i--) //first note in, is first out if there are same note multiple times
         if((partnote[i].status == KEY_PLAYING) && (partnote[i].note == note)) {
             if(ctl.sustain.sustain == 0) { //the sustain pedal is not pushed
-                if((Ppolymode == 0) && (not monomemnotes.empty()))
+                if((Ppolymode == 0) && (!monomemnotes.empty()))
                     MonoMemRenote();  // To play most recent still held note.
                 else
                     RelaseNotePos(i);
@@ -796,7 +796,7 @@ void Part::SetController(unsigned int type, int par)
 void Part::RelaseSustainedKeys()
 {
     // Let's call MonoMemRenote() on some conditions:
-    if((Ppolymode == 0) && (not monomemnotes.empty()))
+    if((Ppolymode == 0) && (!monomemnotes.empty()))
         if(monomemnotes.back() != lastnote) // Sustain controller manipulation would cause repeated same note respawn without this check.
             MonoMemRenote();  // To play most recent still held note.
 
