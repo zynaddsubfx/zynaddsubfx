@@ -198,9 +198,7 @@ endif()
 include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS})
 
 add_definitions(
-	 -g #TODO #todo put in a better location
 	 -Wall
-	 -Wextra
 	 )
 if(NOT AVOID_ASM)
 	message(STATUS "Compiling with x86 opcode support")
