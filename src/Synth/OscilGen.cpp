@@ -533,7 +533,10 @@ void OscilGen::spectrumadjust()
                     mag = 1.0f;
                 break;
         }
-        oscilFFTfreqs[i] = std::polar<fftw_real>(mag, phase);
+        //XXX hack to get VC to accept the code
+        std::complex<float> tmp = std::polar<float>(mag, phase);
+        oscilFFTfreqs[i].real() = tmp.real();
+        oscilFFTfreqs[i].imag() = tmp.imag();
     }
 }
 
