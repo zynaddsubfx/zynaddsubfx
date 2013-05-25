@@ -20,8 +20,6 @@
 
 */
 
-#include <FL/Fl.H>
-
 #include "UI/common.H"
 
 #include <iostream>
@@ -33,7 +31,9 @@
 #include <unistd.h>
 #include <pthread.h>
 
+#ifndef _MSC_VER
 #include <getopt.h>
+#endif
 
 #include "DSP/FFTwrapper.h"
 #include "Misc/Master.h"
@@ -54,8 +54,10 @@ extern Dump dump;
 QApplication *app;
 
 #elif defined FLTK_GUI
+#include <FL/Fl.H>
 #include "UI/MasterUI.h"
 #elif defined NTK_GUI
+#include <FL/Fl.H>
 #include "UI/MasterUI.h"
 #include <FL/Fl_Shared_Image.H>
 #include <FL/Fl_Tiled_Image.H>
@@ -255,6 +257,7 @@ int main(int argc, char *argv[])
 
     string loadfile, loadinstrument, execAfterInit;
 
+#ifndef _MSC_VER
     while(1) {
         int tmp = 0;
 
@@ -357,6 +360,7 @@ int main(int argc, char *argv[])
                 break;
         }
     }
+#endif
 
     synth->alias();
 
