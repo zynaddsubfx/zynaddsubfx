@@ -349,13 +349,13 @@ add_executable(zynaddsubfx main.cpp)
 target_link_libraries(zynaddsubfx
     zynaddsubfx_core
 	zynaddsubfx_nio
-	${ZLIB_LIBRARIES}
-	${FFTW_LIBRARIES}
-	${MXML_LIBRARIES}
-    ${PTHREAD_LIBRARIES}
 	${GUI_LIBRARIES}
 	${NIO_LIBRARIES}
 	${AUDIO_LIBRARIES}
+	${ZLIB_LIBRARY}
+	${FFTW_LIBRARIES}
+	${MXML_LIBRARIES}
+    ${PTHREAD_LIBRARIES}
 	)
 
 if (DssiEnable)
@@ -374,7 +374,7 @@ if (DssiEnable)
 	endif ()
 endif()
 
-message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARIES} ${PTHREAD_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")
+message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW_LIBRARIES} ${MXML_LIBRARIES} ${PTHREAD_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")
 install(TARGETS zynaddsubfx
 	RUNTIME DESTINATION bin
 	)
