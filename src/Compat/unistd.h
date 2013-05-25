@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 #include <io.h>
-#include <getopt.h> /* getopt from: http://www.pwilson.net/sample.html. */
+//#include <getopt.h> /* getopt from: http://www.pwilson.net/sample.html. */
 #include <process.h> /* for getpid() and the exec..() family */
 
 #define srandom srand
