@@ -697,10 +697,10 @@ void OscilGen::adaptiveharmonic(fft_t *f, float freq)
         else {
             if(down) {
                 f[high] =
-                    std::complex<fft_real>(f[high].real() + inf[i].real() * (1.0f - low),
+                    std::complex<fftw_real>(f[high].real() + inf[i].real() * (1.0f - low),
                             f[high].imag() + inf[i].imag() * (1.0f - low));
 
-                f[high + 1] = std::complex<fft_real>(f[high + 1].real() + inf[i].real() * low,
+                f[high + 1] = std::complex<fftw_real>(f[high + 1].real() + inf[i].real() * low,
                         f[high + 1].imag() + inf[i].imag() * low);
             }
             else {
