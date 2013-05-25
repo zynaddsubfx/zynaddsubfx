@@ -76,7 +76,7 @@ void FFTwrapper::freqs2smps(const fft_t *freqs, float *smps)
 
     //Grab data
     for(int i = 0; i < fftsize; ++i)
-        smps[i] = static_cast<float>(time[i]);
+        smps[i] = static_cast<fftw_real>(time[i]);
 }
 
 void FFT_cleanup()
