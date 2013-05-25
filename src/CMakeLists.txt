@@ -195,7 +195,7 @@ if(LibloEnable)
 endif()
 
 # other include directories
-include_directories(${ZLIB_INCLUDE_DIRS} ${FFTW_INCLUDE_DIRS} ${PTHREAD_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS} ${PTHREAD_INCLUDE_DIRS})
+include_directories(${ZLIB_INCLUDE_DIRS} ${FFTW_INCLUDE_DIRS} ${PTHREAD_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS} ${PTHREAD_INCLUDE_DIRS} "${CMAKE_CURRENT_SOURCE_DIR}/Compat")
 
 if(NOT AVOID_ASM)
 	message(STATUS "Compiling with x86 opcode support")
