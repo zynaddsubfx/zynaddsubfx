@@ -24,6 +24,7 @@
 #ifndef MASTER_H
 #define MASTER_H
 #include "../globals.h"
+#include <pthread.h>
 #include "Microtonal.h"
 
 #include "Bank.h"
