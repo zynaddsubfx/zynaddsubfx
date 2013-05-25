@@ -6,6 +6,7 @@
  *  Please add functionality as neeeded 
  */
 
+#include <windows.h>
 #include <stdlib.h>
 #include <io.h>
 //#include <getopt.h> /* getopt from: http://www.pwilson.net/sample.html. */
