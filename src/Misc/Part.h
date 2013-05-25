@@ -38,7 +38,7 @@ class PADnoteParameters;
 class SynthNote;
 class XMLWrapper;
 class FFTwrapper;
-class Microtonal
+class Microtonal;
 struct pthread_mutex_t;
 
 /** Part implementation*/
