@@ -14,7 +14,7 @@ find_path (PTHREAD_INCLUDE_DIRS
     PATHS "C:/Program Files/pthread/include"
     NAMES pthread.h sched.h semaphore.h)
 
-find_library (PTHREAD_LIBRARY_DIRS
+find_library (PTHREAD_LIBRARIES
     PATHS "C:/Program Files/pthread/lib/x86"
     NAMES pthread pthreadVC2 libpthreadVC2)
 
