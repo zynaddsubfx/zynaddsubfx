@@ -343,6 +343,7 @@ if(CompileTests)
 	add_subdirectory(Tests)
 endif(CompileTests)
 
+message(STATUS "using include directories: ${AUDIO_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${FFTW_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS} ${PTHREAD_INCLUDE_DIRS} ${FLTK_INCLUDE_DIRS}")
 message(STATUS "using link directories: ${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${PTHREAD_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS}")
 
 
