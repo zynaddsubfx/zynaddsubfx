@@ -47,7 +47,7 @@ struct vuData {
     int clipped;
 };
 
-class FFTWrapper;
+class FFTwrapper;
 
 /** It sends Midi Messages to Parts, receives samples from parts,
  *  process them with system/insertion effects and mix them */
