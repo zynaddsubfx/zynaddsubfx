@@ -12,7 +12,7 @@ else()
     find_package(FFTW REQUIRED)
     find_package(MXML REQUIRED)
 endif()
-find_package(Threads   REQUIRED)
+find_package(PTHREAD REQUIRED)
 find_package(OSS)
 find_package(Alsa)
 if(PKG_CONFIG_FOUND)
@@ -195,7 +195,7 @@ if(LibloEnable)
 endif()
 
 # other include directories
-include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS})
+include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS} ${PTHREAD_INCLUDE_DIRS})
 
 add_definitions(
 	 -Wall
@@ -336,14 +336,14 @@ target_link_libraries(zynaddsubfx_core
 	${ZLIB_LIBRARIES}
 	${FFTW_LIBRARIES}
 	${MXML_LIBRARIES}
-	${OS_LIBRARIES}
-	pthread)
+    ${PTHREAD_LIBRARIES}
+	${OS_LIBRARIES})
 
 if(CompileTests)
 	add_subdirectory(Tests)
 endif(CompileTests)
 
-message(STATUS "using link directories: ${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS}")
+message(STATUS "using link directories: ${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${PTHREAD_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS}")
 
 
 add_executable(zynaddsubfx main.cpp)
@@ -372,7 +372,7 @@ if (DssiEnable)
 	endif ()
 endif()
 
-message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")
+message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARIES} ${PTHREAD_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")
 install(TARGETS zynaddsubfx
 	RUNTIME DESTINATION bin
 	)
