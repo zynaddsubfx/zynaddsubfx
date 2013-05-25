@@ -62,10 +62,12 @@ void Echo::cleanup(void)
     old = Stereo<float>(0.0f);
 }
 
+#ifndef max
 inline int max(int a, int b)
 {
     return a > b ? a : b;
 }
+#endif
 
 //Initialize the delays
 void Echo::initdelays(void)

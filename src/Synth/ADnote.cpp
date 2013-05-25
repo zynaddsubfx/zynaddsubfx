@@ -134,8 +134,8 @@ ADnote::ADnote(ADnoteParameters *pars,
             };
                 break;
             default: { //unison for more than 2 subvoices
-                float unison_values = new float[unison];
-                float min = -1e-6, max = 1e-6;
+                float *unison_values = new float[unison];
+                float  min = -1e-6, max = 1e-6;
                 for(int k = 0; k < unison; ++k) {
                     float step = (k / (float) (unison - 1)) * 2.0f - 1.0f; //this makes the unison spread more uniform
                     float val  = step + (RND * 2.0f - 1.0f) / (unison - 1);

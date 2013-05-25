@@ -202,7 +202,7 @@ void OscilGen::defaults()
 void OscilGen::convert2sine()
 {
     float  mag[MAX_AD_HARMONICS], phase[MAX_AD_HARMONICS];
-    float  oscil = new float[synth->oscilsize];
+    float *oscil = new float[synth->oscilsize];
     fft_t *freqs = new fft_t[synth->oscilsize / 2];
 
     get(oscil, -1.0f);
