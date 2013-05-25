@@ -349,6 +349,10 @@ add_executable(zynaddsubfx main.cpp)
 target_link_libraries(zynaddsubfx
     zynaddsubfx_core
 	zynaddsubfx_nio
+	${ZLIB_LIBRARIES}
+	${FFTW_LIBRARIES}
+	${MXML_LIBRARIES}
+    ${PTHREAD_LIBRARIES}
 	${GUI_LIBRARIES}
 	${NIO_LIBRARIES}
 	${AUDIO_LIBRARIES}
