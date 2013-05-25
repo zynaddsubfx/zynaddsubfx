@@ -11,12 +11,12 @@ if (FFTW_INCLUDES)
 endif (FFTW_INCLUDES)
 
 find_path (FFTW_INCLUDES 
-    PATH "C:/Program Files/fftw"
+    PATHS "C:/Program Files/fftw"
     NAMES fftw3.h)
 
 find_library (FFTW_LIBRARIES 
-    PATH "C:/Program Files/fftw"
-    NAMES fftw3)
+    PATHS "C:/Program Files/fftw"
+    NAMES fftw3 fftw3-3 libfftw3-3)
 
 # handle the QUIETLY and REQUIRED arguments and set FFTW_FOUND to TRUE if
 # all listed variables are TRUE
