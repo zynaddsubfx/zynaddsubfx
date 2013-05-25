@@ -47,6 +47,7 @@ struct vuData {
     int clipped;
 };
 
+class FFTWrapper;
 
 /** It sends Midi Messages to Parts, receives samples from parts,
  *  process them with system/insertion effects and mix them */
@@ -160,7 +161,7 @@ class Master
         Microtonal microtonal;
         Bank       bank;
 
-        class FFTwrapper * fft;
+        FFTwrapper * fft;
         pthread_mutex_t mutex;
         pthread_mutex_t vumutex;
 

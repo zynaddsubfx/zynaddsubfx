@@ -195,6 +195,9 @@ enum LegatoMsg {
 #define F2I(f, i) i = (int) (f)
 #endif
 
+#if _MSC_VER
+#define snprintf _snprintf
+#endif
 
 
 #ifndef  O_BINARY

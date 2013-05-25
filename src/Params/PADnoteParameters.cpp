@@ -389,10 +389,11 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
                                                        int profilesize,
                                                        float bwadjust)
 {
+    //XXX FIXME resolve windows induced leaks
     for(int i = 0; i < size; ++i)
         spectrum[i] = 0.0f;
 
-    float harmonics[synth->oscilsize / 2];
+    float harmonics = new float[synth->oscilsize / 2];
     for(int i = 0; i < synth->oscilsize / 2; ++i)
         harmonics[i] = 0.0f;
     //get the harmonic structure from the oscillator (I am using the frequency amplitudes, only)
@@ -500,7 +501,7 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
     for(int i = 0; i < size; ++i)
         spectrum[i] = 0.0f;
 
-    float harmonics[synth->oscilsize / 2];
+    float harmonics = new float[synth->oscilsize / 2];
     for(int i = 0; i < synth->oscilsize / 2; ++i)
         harmonics[i] = 0.0f;
     //get the harmonic structure from the oscillator (I am using the frequency amplitudes, only)
@@ -560,9 +561,9 @@ void PADnoteParameters::applyparameters(bool lockmutex)
 {
     const int samplesize   = (((int) 1) << (Pquality.samplesize + 14));
     int       spectrumsize = samplesize / 2;
-    float     spectrum[spectrumsize];
+    float     spectrum = new float[spectrumsize];
     int       profilesize = 512;
-    float     profile[profilesize];
+    float     profile  = new float[profilesize];
 
 
     float bwadjust = getprofile(profile, profilesize);
@@ -588,7 +589,7 @@ void PADnoteParameters::applyparameters(bool lockmutex)
     FFTwrapper *fft      = new FFTwrapper(samplesize);
     fft_t      *fftfreqs = new fft_t[samplesize / 2];
 
-    float adj[samplemax]; //this is used to compute frequency relation to the base frequency
+    float adj = new float[samplemax]; //this is used to compute frequency relation to the base frequency
     for(int nsample = 0; nsample < samplemax; ++nsample)
         adj[nsample] = (Pquality.oct + 1.0f) * (float)nsample / samplemax;
     for(int nsample = 0; nsample < samplemax; ++nsample) {

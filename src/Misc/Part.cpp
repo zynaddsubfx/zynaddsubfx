@@ -232,7 +232,7 @@ void Part::NoteOn(unsigned char note,
     }
     else
     // Poly mode is On so just make sure the list is empty.
-    if(not monomemnotes.empty())
+    if(!monomemnotes.empty())
         monomemnotes.clear();
 
     lastnote = note;
