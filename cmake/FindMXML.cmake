@@ -6,9 +6,11 @@
 SET(MXML_FOUND FALSE)
 
 FIND_PATH(MXML_INCLUDE_DIR
+    PATHS "C:/Program Files/mxml"
     NAMES mxml.h)
 FIND_LIBRARY(MXML_LIBRARIES
-    NAMES mxml)
+    PATHS "C:/Program Files/mxml"
+    NAMES mxml mxml1)
 
 # handle the QUIETLY and REQUIRED arguments and set MXML_FOUND to TRUE if 
 # all listed variables are TRUE

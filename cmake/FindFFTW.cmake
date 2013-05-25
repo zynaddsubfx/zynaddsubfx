@@ -10,11 +10,11 @@ if (FFTW_INCLUDES)
     set (FFTW_FIND_QUIETLY TRUE)
 endif (FFTW_INCLUDES)
 
-find_path (FFTW_INCLUDES 
+find_path (FFTW_INCLUDES
     PATHS "C:/Program Files/fftw"
     NAMES fftw3.h)
 
-find_library (FFTW_LIBRARIES 
+find_library (FFTW_LIBRARIES
     PATHS "C:/Program Files/fftw"
     NAMES fftw3 fftw3-3 libfftw3-3)
 
