@@ -191,7 +191,8 @@ enum LegatoMsg {
                                                                    0.49999999f) \
                                      : "st");
 #else
-#define F2I(f, i) (i) = ((f > 0) ? ((int)(f)) : ((int)(f - 1.0f)));
+//#define F2I(f, i) (i) = ((f > 0) ? ((int)(f)) : ((int)(f - 1.0f)));
+#define F2I(f, i) i = (int) (f)
 #endif
 
 

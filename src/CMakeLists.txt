@@ -195,11 +195,8 @@ if(LibloEnable)
 endif()
 
 # other include directories
-include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS} ${PTHREAD_INCLUDE_DIRS})
+include_directories(${ZLIB_INCLUDE_DIRS} ${FFTW_INCLUDE_DIRS} ${PTHREAD_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS} ${PTHREAD_INCLUDE_DIRS})
 
-add_definitions(
-	 -Wall
-	 )
 if(NOT AVOID_ASM)
 	message(STATUS "Compiling with x86 opcode support")
     add_definitions(-DASM_F2I_YES)
