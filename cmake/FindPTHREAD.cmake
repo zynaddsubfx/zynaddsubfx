@@ -1,20 +1,20 @@
 # - Find PTHREAD
 # Find the native pthreads includes and library
 #
-# PTHREAD_INCLUDES - where to find pthread.h
-# PTHREAD_LIBRARIES - List of libraries when using pthread.
-# PTHREAD_FOUND - True if pthread found.
+# PTHREAD_INCLUDE_DIRS - where to find pthread.h
+# PTHREAD_LIBRARIES    - List of libraries when using pthread.
+# PTHREAD_FOUND        - True if pthread found.
 
-if (PTHREAD_INCLUDES)
+if (PTHREAD_INCLUDE_DIRS)
     # Already in cache, be silent
     set (PTHREAD_FIND_QUIETLY TRUE)
-endif (PTHREAD_INCLUDES)
+endif (PTHREAD_INCLUDE_DIRS)
 
-find_path (PTHREAD_INCLUDES
+find_path (PTHREAD_INCLUDE_DIRS
     PATHS "C:/Program Files/pthread/include"
     NAMES pthread.h sched.h semaphore.h)
 
-find_library (PTHREAD_LIBRARIES
+find_library (PTHREAD_LIBRARY_DIRS
     PATHS "C:/Program Files/pthread/lib/x64"
     NAMES pthread pthreadVC2 libpthreadVC2)
 
@@ -22,6 +22,6 @@ find_library (PTHREAD_LIBRARIES
 # all listed variables are TRUE
 include (FindPackageHandleStandardArgs)
 find_package_handle_standard_args (PTHREAD DEFAULT_MSG PTHREAD_LIBRARIES
-    PTHREAD_INCLUDES)
+    PTHREAD_INCLUDE_DIRS)
 
-mark_as_advanced (PTHREAD_LIBRARIES PTHREAD_INCLUDES)
+mark_as_advanced (PTHREAD_LIBRARIES PTHREAD_INCLUDE_DIRS)
