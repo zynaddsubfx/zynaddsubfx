@@ -198,6 +198,11 @@ int main(int argc, char *argv[])
 
     sprng(time(NULL));
 
+    int option_index = 0, opt, exitwithhelp = 0, exitwithversion = 0;
+
+    string loadfile, loadinstrument, execAfterInit;
+
+#ifndef _MSC_VER
     /* Parse command-line options */
     struct option opts[] = {
         {
@@ -253,11 +258,7 @@ int main(int argc, char *argv[])
         }
     };
     opterr = 0;
-    int option_index = 0, opt, exitwithhelp = 0, exitwithversion = 0;
 
-    string loadfile, loadinstrument, execAfterInit;
-
-#ifndef _MSC_VER
     while(1) {
         int tmp = 0;
 
