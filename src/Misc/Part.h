@@ -29,6 +29,7 @@
 #include "../Params/Controller.h"
 #include "../Misc/Microtonal.h"
 
+#include <pthread.h>
 #include <list> // For the monomemnotes list.
 
 class EffectMgr;
@@ -39,7 +40,6 @@ class SynthNote;
 class XMLWrapper;
 class FFTwrapper;
 class Microtonal;
-struct pthread_mutex_t;
 
 /** Part implementation*/
 class Part
