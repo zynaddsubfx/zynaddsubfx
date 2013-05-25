@@ -27,7 +27,7 @@ FIND_PATH(ZLIB_INCLUDE_DIR
     PATHS "C:/Program Files/zlib/include"
     NAMES zlib.h)
 
-SET(ZLIB_NAMES z zlib zdll)
+SET(ZLIB_NAMES zlibstatic z zlib zdll)
 FIND_LIBRARY(ZLIB_LIBRARY
     PATHS "C:/Program Files/zlib/lib"
     NAMES ${ZLIB_NAMES} )
