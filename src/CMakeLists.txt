@@ -3,18 +3,26 @@ message(STATUS "Checking Include Path" $ENV{CMAKE_INCLUDE_PATH} ${CMAKE_INCLUDE_
 message(STATUS "Checking Library Path" $ENV{CMAKE_LIBRARY_PATH} ${CMAKE_LIBRARY_PATH})
 
 #Dependency check
-find_package(PkgConfig REQUIRED)
+find_package(PkgConfig)
 find_package(zlib REQUIRED)
-pkg_check_modules(FFTW REQUIRED fftw3)
-pkg_check_modules(MXML REQUIRED mxml)
+if(PKG_CONFIG_FOUND)
+    pkg_check_modules(FFTW REQUIRED fftw3)
+    pkg_check_modules(MXML REQUIRED mxml)
+else()
+    find_package(FFTW REQUIRED)
+    find_package(MXML REQUIRED)
+endif()
 find_package(Threads   REQUIRED)
 find_package(OSS)
 find_package(Alsa)
-pkg_check_modules(JACK jack)
-pkg_check_modules(PORTAUDIO portaudio-2.0>=19)
+if(PKG_CONFIG_FOUND)
+    pkg_check_modules(JACK jack)
+    pkg_check_modules(PORTAUDIO portaudio-2.0>=19)
+    pkg_check_modules(NTK ntk)
+    pkg_check_modules(NTK_IMAGES ntk_images)
+endif()
+
 set(FLTK_SKIP_OPENGL true)
-pkg_check_modules(NTK ntk)
-pkg_check_modules(NTK_IMAGES ntk_images)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
 find_package(CxxTest)
@@ -22,16 +30,22 @@ if(CXXTEST_FOUND)
     set(CXXTEST_USE_PYTHON TRUE)
 endif()
 # lash
-pkg_search_module(LASH lash-1.0)
-mark_as_advanced(LASH_LIBRARIES)
-pkg_search_module(DSSI dssi>=0.9.0)
-mark_as_advanced(DSSI_LIBRARIES)
-pkg_search_module(LIBLO liblo>=0.26)
-mark_as_advanced(LIBLO_LIBRARIES)
+if(PKG_CONFIG_FOUND)
+    pkg_search_module(LASH lash-1.0)
+    mark_as_advanced(LASH_LIBRARIES)
+    pkg_search_module(DSSI dssi>=0.9.0)
+    mark_as_advanced(DSSI_LIBRARIES)
+    pkg_search_module(LIBLO liblo>=0.26)
+    mark_as_advanced(LIBLO_LIBRARIES)
 
-execute_process(COMMAND echo fistpl 0
-                COMMAND as -
-                ERROR_VARIABLE AVOID_ASM)
+    #If the system does not have pkg-config, I'll bet it does not have
+    #a gnu assembler sitting around
+    execute_process(COMMAND echo fistpl 0
+        COMMAND as -
+        ERROR_VARIABLE AVOID_ASM)
+else()
+    set(AVOID_ASM TRUE)
+endif()
 
 ######### Settings ###########
 # NOTE: These cache variables should normally not be changed in this
