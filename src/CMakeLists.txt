@@ -142,7 +142,7 @@ set (BuildOptions_X86_64Core2
 
 set (BuildOptionsBasic
     #"-O3 -msse -msse2 -mfpmath=sse -ffast-math -fomit-frame-pointer"
-    "/NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:msvcrt.lib /NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:msvcrtd.lib /MT /O2 /Ob2 /D NDEBUG "
+    "/MT /O2 /Ob2 /D NDEBUG"
     CACHE STRING "basic X86 complier options"
 )
 
