@@ -202,6 +202,9 @@ if(NOT AVOID_ASM)
     add_definitions(-DASM_F2I_YES)
 endif()
 
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX
+    ${CMAKE_CURRENT_SOURCE_DIR}/../cxx_flag_overrides.cmake)
+
 if (BuildForDebug)
 	set (CMAKE_BUILD_TYPE "Debug")
 	set (CMAKE_CXX_FLAGS_DEBUG ${BuildOptionsDebug})
