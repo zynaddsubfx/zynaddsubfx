@@ -141,7 +141,8 @@ set (BuildOptions_X86_64Core2
 )
 
 set (BuildOptionsBasic
-    "-O3 -msse -msse2 -mfpmath=sse -ffast-math -fomit-frame-pointer"
+    #"-O3 -msse -msse2 -mfpmath=sse -ffast-math -fomit-frame-pointer"
+    "\MT"
     CACHE STRING "basic X86 complier options"
 )
 
@@ -217,7 +218,7 @@ else (BuildForDebug)
 		if (BuildForCore2_X86_64)
 			set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptions_X86_64Core2})
 		else (BuildForCore2_X86_64)
-            set (CMAKE_CXX_FLAGS_RELEASE "/MT " ${BuildOptionsBasic})
+			set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptionsBasic})
 		endif (BuildForCore2_X86_64)
 	endif (BuildForAMD_X86_64)
 	message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_RELEASE}")
