@@ -303,7 +303,7 @@ include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
 	)
 
-add_definition(-DPTW32_STATIC_LIB)
+add_definitions(-DPTW32_STATIC_LIB)
 
 
 set(NONGUI_LIBRARIES
