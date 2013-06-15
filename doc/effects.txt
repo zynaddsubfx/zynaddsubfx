@@ -499,3 +499,30 @@ Its parameters are being used by the comb and allpass filters.
 * *Pan* lets you apply panning. This is the last thing to happen. Set it to 0.0
 to only hear output on the right side.
 
+
+Phaser
+~~~~~~
+
+The Phaser is a special dynamic filter. The result is a sweeping sound, which is
+often used on instruments with a large frequency band, like guitars or strings.
+This makes it typical for genres like rock or funk, where it is often modulated
+with a pedal, or for giving strings a warm, relaxing character. In ZynAddSubFX,
+the phaser can currently only be modulated with an LFO.
+
+The audio signal is split into two paths. One path remains unchanged. The other
+one is sent to a delay line. The delay time (the so called *phase*) is made
+dependent on the frequency. Therefore, an all-pass filter is applied to the
+signal, which *preserves* the amplitude, but determins the delay time. In the
+end, both paths are added.
+
+The following picture describes how this works on white noise. Light blue
+signalises that the frequency is not present at the current time, and dark blue
+signalises the opposite. The dark blue peaks appear if the delay time is very
+short, because then, the second path almost equals the first one, which results
+in duplication of the signal. If the delay line is very long, then it is --- in
+the case of white noise --- totally at random whether the delayed signal
+currently duplicates the unchanged path, or whether it cancels it out to zero.
+This random effect results in white noise between the clear blue structures.
+
+image::./images/phaser-spectrogram.jpg[width="700", title="Spectrogram of an
+8-stage phaser modulated by a sine LFO applied to white noise."]
