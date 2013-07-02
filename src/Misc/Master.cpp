@@ -58,7 +58,7 @@ static Ports localports = {
        Part   *p = *(Part**)rtosc_argument(msg, 1).b.data;
        int     i = rtosc_argument(msg, 0).i;
        m->part[i]->cloneTraits(*p);
-       d.reply("/free", "sb", "Part", sizeof(void*), &p);
+       d.reply("/free", "sb", "Part", sizeof(void*), &m->part[i]);
        m->part[i] = p;
        printf("part %d is now pointer %p\n", i, p);}},
     {"volume::c", ":'old-param':", 0,
@@ -170,7 +170,7 @@ Master::Master()
 
     midi.error_cb = [](const char *a, const char *b)
     {
-        fprintf(stderr, "MIDI- got an error '%s' -- '%s'\n");
+        fprintf(stderr, "MIDI- got an error '%s' -- '%s'\n",a,b);
     };
 }
 

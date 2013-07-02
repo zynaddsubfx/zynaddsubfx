@@ -25,8 +25,30 @@
 #include <stdio.h>
 
 #include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
 
+#define rObject SUBnoteParameters
+using namespace rtosc;
 static rtosc::Ports localPorts = {
+    rToggle(Pstereo, "Stereo Enable"),
+    rParam(PVolume,  "Volume"),
+    rParam(PPanning, "Left Right Panning"),
+    rParam(PAmpVelocityScaleFunction, "Amplitude Velocity Sensing function"),
+    rParamI(PDetune, "Detune in detune type units"),
+    rParamI(PCoarseDetune, "Coarse Detune"),
+    //Real values needed
+    //rOption(PDetuneType, rOptions("100 cents", "200 cents", "500 cents")),
+    rToggle(PFreqEnvelopeEnabled, "Enable for Frequency Envelope"),
+    //rRecur(FreqEnvelope, EnvelopeParams),
+    //rToggle(),//continue
+    rToggle(Pfixedfreq, "Base frequency fixed frequency enable"),
+    rParam(PfixedfreqET, "Equal temeperate control for fixed frequency operation"),
+    rParam(Pnumstages, rMap(min, 1), rMap(max, 5), "Number of filter stages"),
+    rParam(Pbandwidth, "Bandwidth of filters"),
+    rArray(Phmag, MAX_SUB_HARMONICS, "Harmonic magnitudes"),
+    rArray(Phrelbw, MAX_SUB_HARMONICS, "Relative bandwidth"),
+    rParam(Pbwscale, "Bandwidth scaling with frequency"),
+    //rOption(Pstart, rOptions("zero", "random", "ones")),
 };
 
 rtosc::Ports &SUBnoteParameters::ports = localPorts;

@@ -62,9 +62,9 @@ static rtosc::Ports localPorts =
     PC(bwscale),
 
     PC(hrpos.type),
-    P_C(hrpos.par1),
-    P_C(hrpos.par2),
-    P_C(hrpos.par3),
+    PC(hrpos.par1),
+    PC(hrpos.par2),
+    PC(hrpos.par3),
 
     PC(quality.samplesize),
     PC(quality.basenote),
@@ -77,11 +77,11 @@ static rtosc::Ports localPorts =
     PC(DetuneType),
 
     {"nhr:", "::Returns the harmonic shifts",
-        NULL, [](const char *m, rtosc::RtData &d) {
+        NULL, [](const char *, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
             const unsigned n = synth->oscilsize / 2;
             float *tmp = new float[n];
-            for(int i=1; i<n; ++i)
+            for(unsigned i=1; i<n; ++i)
                 tmp[i] = p->getNhr(i);
             d.reply(d.loc, "b", n*sizeof(float), tmp);
             delete[] tmp;}},

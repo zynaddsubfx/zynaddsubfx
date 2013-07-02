@@ -322,7 +322,7 @@ target_link_libraries(zynaddsubfx_core
 	${MXML_LIBRARIES}
 	${OS_LIBRARIES}
 	pthread
-    rtosc)
+    rtosc rtosc-cpp)
 
 message(STATUS "using link directories: ${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS}")
 

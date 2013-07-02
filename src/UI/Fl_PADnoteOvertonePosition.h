@@ -1,4 +1,10 @@
 #include <cstring>
+#include <cassert>
+#include <FL/Fl.H>
+#include <FL/Fl_Box.H>
+#include "../globals.h"
+#include "Fl_Osc_Widget.H"
+#include "Fl_Osc_Interface.h"
 
 class PADnoteOvertonePosition: public Fl_Box, Fl_Osc_Widget
 {
@@ -100,11 +106,12 @@ class PADnoteOvertonePosition: public Fl_Box, Fl_Osc_Widget
         void regenerateOvertones(void)
         {
             const int ox=x(),oy=y(),lx=w(),ly=h();
+            (void)ox;(void)oy;(void)lx;(void)ly;
             const int maxharmonic=64;
 
             memset(spectrum, 0, lx*sizeof(float));
 
-            for (int i=1;i<nsamples;i++){
+            for (unsigned i=1;i<nsamples;i++){
                 int kx=(int)(lx/(float)maxharmonic*nhr[i]);
                 if ((kx<0)||(kx>=lx)) continue;
 

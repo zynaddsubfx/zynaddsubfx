@@ -168,7 +168,7 @@ class Master
         //Statistics on output levels
         vuData vu;
 
-        rtosc::MidiTable<1024,64> midi;
+        rtosc::MidiTable midi;//<1024,64>
     private:
         bool   nullRun;
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];

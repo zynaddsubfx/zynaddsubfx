@@ -3,6 +3,11 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 project(zynaddsubfx)
 set(VERSION "2.4.3")
 
+
+#Include RTOSC
+add_subdirectory(rtosc)
+include_directories(rtosc/include)
+
 enable_testing()
 include(CTestConfig.cmake)
 #Currently the only directory that uses cmake
