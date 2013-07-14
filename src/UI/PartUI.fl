@@ -1093,7 +1093,7 @@ if (kititem!=lastkititem){
     if (kititem<0) return;
 
     if (part->kit[kititem].adpars!=NULL)
-      adnoteui=new ADnoteUI(part->kit[kititem].adpars,master, loc+"kit"+to_s(kititem)+"/adpars/", osc);
+      adnoteui=new ADnoteUI(part->kit[kititem].adpars, loc+"kit"+to_s(kititem)+"/adpars/", osc);
 
     if (part->kit[kititem].subpars!=NULL) 
        subnoteui=new SUBnoteUI(part->kit[kititem].subpars);
@@ -1101,7 +1101,7 @@ if (kititem!=lastkititem){
     if (part->kit[kititem].padpars!=NULL) {
       char buffer[1024];
       snprintf(buffer, 1024, "%skit%d/padpars/", part_path.c_str(), kititem); 
-      padnoteui=new PADnoteUI(part->kit[kititem].padpars, buffer, osc, master);
+      padnoteui=new PADnoteUI(part->kit[kititem].padpars, buffer, osc);
       }
 
 };

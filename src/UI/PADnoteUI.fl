@@ -67,14 +67,13 @@ decl {\#include "PresetsUI.h"} {public local
 
 class PADnoteUI {open : {public PresetsUI_}
 } {
-  Function {PADnoteUI(PADnoteParameters *parameters, std::string location_, Fl_Osc_Interface *osc_, Master *master_)} {open
+  Function {PADnoteUI(PADnoteParameters *parameters, std::string location_, Fl_Osc_Interface *osc_)} {open
   } {
     code {assert(osc_);
 assert(!location_.empty());
 
 location=location_;
 pars=parameters;
-master=master_;
 oscui=NULL;
 osc_i = osc_;
 resui=new ResonanceUI(pars->resonance);
@@ -264,7 +263,7 @@ cbwidget->do_callback();}
           Fl_Group oscilgroup {open
             xywh {100 155 270 135} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179 align 6
             code0 {osc=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
-            code1 {oscilgroup->pane_name = location+"oscil/"; oscilgroup->osc = osc_i;osc->init(false);//pars->oscilgen,master);}
+            code1 {oscilgroup->pane_name = location+"oscil/"; oscilgroup->osc = osc_i;osc->init(false);}
             class Fl_Osc_Group
           } {}
           Fl_Button {} {
@@ -941,8 +940,6 @@ padnotewindow->hide();
 delete(padnotewindow);} {}
   }
   decl {PADnoteParameters *pars;} {public local
-  }
-  decl {Master *master;} {public local
   }
   decl {OscilEditor *oscui;} {public local
   }

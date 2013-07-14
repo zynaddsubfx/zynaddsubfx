@@ -519,13 +519,7 @@ if (autoclearbutton->value()){
    sabutton->do_callback();
 };
 
-//pthread_mutex_lock(&master->mutex);
-// for (int i=0;i<MAX_AD_HARMONICS;i++){
-//   if (oscil->Phmag[i]==64) h[i]->mag->selection_color(0);
-//      else h[i]->mag->selection_color(222);
-// };
  osc->requestValue(loc+"prepare");
-//pthread_mutex_unlock(&master->mutex);
 
 basefuncdisplaygroup->redraw();
 redrawoscil();}
