@@ -45,15 +45,16 @@ using rtosc::Ports;
 using rtosc::RtData;
 
 static Ports localports = {
-    {"echo", ":'hidden':Hidden port to echo messages", 0, [](const char *m, RtData&) {
+    RECURSP(Master, Part, part, part, 16, "Part"),//NUM_MIDI_PARTS
+    {"echo", "=doc\0:Hidden port to echo messages\0", 0, [](const char *m, RtData&) {
        bToU->raw_write(m-1);}},
-    {"get-vu", "::", 0, [](const char *, RtData &d) {
+    {"get-vu", "", 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
        bToU->write("/vu-meter", "bb", sizeof(m->vu), &m->vu, sizeof(float)*NUM_MIDI_PARTS, m->vuoutpeakpart);}},
-    {"reset-vu", "::", 0, [](const char *, RtData &d) {
+    {"reset-vu", "", 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
        m->vuresetpeaks();}},
-    {"load-part:ib", "::", 0, [](const char *msg, RtData &d) {
+    {"load-part:ib", "", 0, [](const char *msg, RtData &d) {
        Master *m =  (Master*)d.obj;
        Part   *p = *(Part**)rtosc_argument(msg, 1).b.data;
        int     i = rtosc_argument(msg, 0).i;
@@ -61,7 +62,7 @@ static Ports localports = {
        d.reply("/free", "sb", "Part", sizeof(void*), &m->part[i]);
        m->part[i] = p;
        printf("part %d is now pointer %p\n", i, p);}},
-    {"volume::c", ":'old-param':", 0,
+    {"volume::c", "", 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "c", ((Master*)d.obj)->Pvolume);
@@ -72,13 +73,28 @@ static Ports localports = {
             ((Master*)d.obj)->setPvolume(limit<char>(rtosc_argument(m,0).i,0,127));
             printf("sets volume to value %d\n", ((Master*)d.obj)->Pvolume);
             d.broadcast(d.loc, "c", ((Master*)d.obj)->Pvolume);}}},
-    RECURSP(Master, Part, part, part, 16, "Part"),//NUM_MIDI_PARTS
 
-    {"register:iis","::", 0,
+    {"noteOn:ccc", "", 0,
+        [](const char *m,RtData &d){
+            Master *M =  (Master*)d.obj;
+            M->noteOn(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
+
+    {"noteOff:cc", "", 0,
+        [](const char *m,RtData &d){
+            Master *M =  (Master*)d.obj;
+            M->noteOff(rtosc_argument(m,0).i,rtosc_argument(m,1).i);}},
+
+    {"setController:ccc", "", 0,
+        [](const char *m,RtData &d){
+            Master *M =  (Master*)d.obj;
+            M->setController(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
+
+
+    {"register:iis","", 0,
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
             M->midi.addElm(rtosc_argument(m,0).i, rtosc_argument(m,1).i,rtosc_argument(m,2).s);}},
-    {"learn:s", "::", 0,
+    {"learn:s", "", 0,
         [](const char *m, RtData &d){
             Master *M =  (Master*)d.obj;
             printf("learning '%s'\n", rtosc_argument(m,0).s);
