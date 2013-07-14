@@ -43,6 +43,9 @@ void simpleset(const char *m, rtosc::RtData &d)
 static rtosc::Ports localPorts =
 {
     RECURP(PADnoteParameters, OscilGen, oscil, oscilgen, "Oscillator"),
+    RECURP(PADnoteParameters, LFOParams, FreqLfo,   FreqLfo, "Frequency LFO"),
+    RECURP(PADnoteParameters, LFOParams, AmpLfo,    AmpLfo,   "Amplitude LFO"),
+    RECURP(PADnoteParameters, LFOParams, FilterLfo, FilterLfo, "Filter LFO"),
     PARAMC(PADnoteParameters, Pmode, mode,
             "0 - bandwidth, 1 - discrete 2 - continious"),
     PC(hp.base.type),

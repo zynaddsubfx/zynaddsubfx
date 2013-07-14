@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0302 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
@@ -18,6 +18,9 @@ decl {\#include "../Misc/Master.h"} {public local
 } 
 
 decl {\#include "ResonanceUI.h"} {public local
+} 
+
+decl {\#include "Fl_Osc_Slider.H"} {public local
 } 
 
 decl {\#include <FL/Fl_Box.H>} {public local
@@ -64,12 +67,13 @@ class ADvoicelistitem {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window ADnoteVoiceListItem {open
-      private xywh {319 881 615 100} type Double box UP_FRAME
+      private xywh {334 881 615 100} type Double box UP_FRAME
       class Fl_Group visible
     } {
       Fl_Group voicelistitemgroup {open
         private xywh {50 0 570 25}
         code0 {if (pars->VoicePar[nvoice].Enabled==0) o->deactivate();}
+        class Fl_Osc_Group
       } {
         Fl_Value_Slider voicevolume {
           callback {pars->VoicePar[nvoice].PVolume=(int)o->value();}
@@ -82,9 +86,9 @@ class ADvoicelistitem {open : {public Fl_Group}
           code0 {o->value(pars->VoicePar[nvoice].Presonance);}
         }
         Fl_Value_Slider voicelfofreq {
-          callback {pars->VoicePar[nvoice].FreqLfo->Pintensity=(int)o->value();}
           tooltip {Frequency LFO amount} xywh {500 5 115 20} type {Horz Knob} box NO_BOX labelsize 8 align 5 maximum 127 step 1
-          code0 {o->value(pars->VoicePar[nvoice].FreqLfo->Pintensity);}
+          code0 {o->init(osc_i,  loc+"FreqLfo/Pintensity");}
+          class Fl_Osc_Slider
         }
         Fl_Dial voicepanning {
           callback {pars->VoicePar[nvoice].PPanning=(int) o->value();}
@@ -95,7 +99,7 @@ class ADvoicelistitem {open : {public Fl_Group}
         Fl_Group voiceoscil {open
           xywh {60 5 30 20} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
           code0 {osc=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
-          code1 {voiceoscil->osc=osc_i;voiceoscil->pane_name=loc;osc->init(false);//osc->init(pars->VoicePar[nvoice].OscilSmp,0,pars->VoicePar[nvoice].Poscilphase,master);}
+          code1 {voiceoscil->osc=osc_i;voiceoscil->pane_name=loc+"oscil/";osc->init(false);//osc->init(pars->VoicePar[nvoice].OscilSmp,0,pars->VoicePar[nvoice].Poscilphase,master);}
           code2 {if (pars->VoicePar[nvoice].Pextoscil != -1) {/*osc->init(pars->VoicePar[pars->VoicePar[nvoice].Pextoscil].OscilSmp,master);*/ osc->init(false);}}
           class Fl_Osc_Group
         } {}
@@ -169,7 +173,7 @@ voiceresonanceenabled->value(pars->VoicePar[nvoice].Presonance);
 voicevolume->value(pars->VoicePar[nvoice].PVolume);
 voicedetune->value(pars->VoicePar[nvoice].PDetune-8192);
 voicepanning->value(pars->VoicePar[nvoice].PPanning);
-voicelfofreq->value(pars->VoicePar[nvoice].FreqLfo->Pintensity);
+//voicelfofreq->value(pars->VoicePar[nvoice].FreqLfo->Pintensity);
 if (pars->VoicePar[nvoice].Pextoscil != -1) {
   //osc->init(pars->VoicePar[pars->VoicePar[nvoice].Pextoscil].OscilSmp,0,pars->VoicePar[nvoice].Poscilphase,master);
   osc->init(false);
@@ -201,13 +205,12 @@ ADnoteVoiceListItem->redraw();} {}
   }
 } 
 
-class ADvoiceUI {open : {public Fl_Group}
+class ADvoiceUI {: {public Fl_Group}
 } {
-  Function {make_window()} {open
-  } {
+  Function {make_window()} {} {
     Fl_Window ADnoteVoiceParameters {
       label Voice open
-      xywh {511 391 765 590} type Double box NO_BOX
+      xywh {512 391 765 590} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group voiceparametersgroup {open
@@ -350,7 +353,7 @@ int nv=nvoice;
 if (pars->VoicePar[nvoice].PextFMoscil>=0)
     nv=pars->VoicePar[nvoice].PextFMoscil;
 
-oscedit=new OscilEditor(true, loc+"mod-oscil/", osc_i);} selected
+oscedit=new OscilEditor(true, loc+"mod-oscil/", osc_i);}
                 xywh {700 380 55 15} box THIN_UP_BOX labelfont 1 labelsize 11
                 code0 {if (pars->VoicePar[nvoice].PextFMoscil>=0) o->labelcolor(FL_BLUE);}
               }
@@ -434,7 +437,7 @@ o->redraw();}
             }
           }
           Fl_Group {} {
-            label FREQUENCY
+            label FREQUENCY open
             xywh {5 265 525 120} box UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
           } {
             Fl_Group voicefreqenvgroup {
@@ -456,7 +459,7 @@ o->redraw();}
             Fl_Group voicefreqlfogroup {
               label {Frequency LFO     } open
               xywh {220 305 230 70} box FLAT_BOX color 47 align 144
-              code0 {o->init(pars->VoicePar[nvoice].FreqLfo);}
+              code0 {o->init(osc_i, loc+"FreqLfo/");}
               code1 {if (pars->VoicePar[nvoice].PFreqLfoEnabled==0) o->deactivate();}
               class LFOUI
             } {}
@@ -683,7 +686,7 @@ o->redraw();}
           Fl_Group voiceamplfogroup {
             label {Amplitude LFO     } open
             xywh {10 180 230 75} box FLAT_BOX color 47 align 144
-            code0 {o->init(pars->VoicePar[nvoice].AmpLfo);}
+            code0 {o->init(osc_i, loc + "AmpLfo/");}
             code1 {if (pars->VoicePar[nvoice].PAmpLfoEnabled==0) o->deactivate();}
             class LFOUI
           } {}
@@ -733,7 +736,7 @@ o->redraw();}
           Fl_Group voicefilterlfogroup {
             label {Filter LFO     } open
             xywh {250 190 230 70} box FLAT_BOX color 47 align 144
-            code0 {o->init(pars->VoicePar[nvoice].FilterLfo);}
+            code0 {o->init(osc_i, loc + "FilterLfo/");}
             code1 {if (pars->VoicePar[nvoice].PFilterLfoEnabled==0) o->deactivate();}
             class LFOUI
           } {}
@@ -864,7 +867,7 @@ class ADnoteUI {open : {public PresetsUI_}
   } {
     Fl_Window ADnoteGlobalParameters {
       label {ADsynth Global Parameters of the Instrument} open
-      xywh {514 551 540 430} type Double visible
+      xywh {676 551 540 430} type Double visible
     } {
       Fl_Group {} {
         label FREQUENCY open
@@ -900,7 +903,7 @@ pars->GlobalPar.PCoarseDetune = k+
         Fl_Group freqlfo {
           label {Frequency LFO     } open
           xywh {220 320 230 70} box FLAT_BOX color 47 align 144
-          code0 {o->init(pars->GlobalPar.FreqLfo);}
+          code0 {o->init(osc, loc + "global/FreqLfo/");}
           class LFOUI
         } {}
         Fl_Slider freq {
@@ -938,7 +941,7 @@ for (int i=0;i<NUM_VOICES;i++){
         }
       }
       Fl_Group {} {
-        label AMPLITUDE
+        label AMPLITUDE open
         xywh {5 5 240 260} box UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
       } {
         Fl_Value_Slider volume {
@@ -997,7 +1000,7 @@ for (int i=0;i<NUM_VOICES;i++){
         Fl_Group amplfo {
           label {Amplitude LFO          } open
           xywh {10 150 230 70} box FLAT_BOX color 47 align 144
-          code0 {o->init(pars->GlobalPar.AmpLfo);}
+          code0 {o->init(osc, loc + "global/AmpLfo/");}
           class LFOUI
         } {}
         Fl_Check_Button rndgrp {
@@ -1020,7 +1023,7 @@ for (int i=0;i<NUM_VOICES;i++){
         Fl_Group filterlfo {
           label {Filter LFO} open
           xywh {255 195 230 70} box FLAT_BOX color 47 align 144
-          code0 {o->init(pars->GlobalPar.FilterLfo);}
+          code0 {o->init(osc, loc + "global/FilterLfo/");}
           class LFOUI
         } {}
         Fl_Group filterui {
@@ -1073,11 +1076,11 @@ resui->resonancewindow->show();}
     }
     Fl_Window ADnoteVoice {
       label {ADsynth Voice Parameters} open
-      xywh {315 361 765 620} type Double visible
+      xywh {36 321 765 620} type Double visible
     } {
       Fl_Group advoice {open
         xywh {0 0 765 585}
-        code0 {o->init(pars,nvoice,master,loc+"voice"+to_s(nvoice)+"/", osc);}
+        code0 {o->init(pars,nvoice,master,loc+"voice"+to_s(nvoice)+"/", osc);/*Here*/}
         code1 {o->show();}
         class ADvoiceUI
       } {}
@@ -1149,7 +1152,7 @@ ADnoteVoice->redraw();}
       } {
         Fl_Pack {} {open
           xywh {0 20 620 210}
-          code0 {for (int i=0;i<NUM_VOICES;i++){voicelistitem[i]=new ADvoicelistitem(0,0,620,25,"");voicelistitem[i]->init(pars,i,master,loc+"voice"+to_s(i)+"/oscil/",osc);}}
+          code0 {for (int i=0;i<NUM_VOICES;i++){voicelistitem[i]=new ADvoicelistitem(0,0,620,25,"");voicelistitem[i]->init(pars,i,master,loc+"voice"+to_s(i)+"/",osc);}}
         } {}
       }
     }
@@ -1167,14 +1170,16 @@ loc=loc_;
 osc=osc_;
 make_window();} {}
   }
-  Function {~ADnoteUI()} {} {
+  Function {~ADnoteUI()} {open
+  } {
     code {ADnoteVoiceList->hide();
 ADnoteGlobalParameters->hide();
 ADnoteVoice->hide();
-delete(ADnoteVoiceList);
-delete(ADnoteGlobalParameters);
-delete(ADnoteVoice);
-delete(resui);} {}
+delete ADnoteVoiceList;
+delete ADnoteGlobalParameters;
+delete ADnoteVoice;
+delete resui;} {selected
+    }
   }
   Function {refresh()} {open
   } {

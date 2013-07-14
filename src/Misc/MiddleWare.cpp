@@ -139,7 +139,7 @@ void osc_check(cb_t cb, void *ui)
     lo_server_recv_noblock(server, 0);
     while(bToU->hasNext()) {
         const char *rtmsg = bToU->read();
-        printf("return: got a '%s'\n", rtmsg);
+        //printf("return: got a '%s'\n", rtmsg);
         if(!strcmp(rtmsg, "/echo")
                 && !strcmp(rtosc_argument_string(rtmsg),"ss")
                 && !strcmp(rtosc_argument(rtmsg,0).s, "OSC_URL"))
@@ -296,9 +296,13 @@ struct MiddleWareImpl
 
     ~MiddleWareImpl(void)
     {
+        warnMemoryLeaks();
+
         delete master;
         delete osc;
     }
+
+    void warnMemoryLeaks(void);
 
     void loadPart(const char *msg, Master *master)
     {
@@ -393,9 +397,9 @@ struct MiddleWareImpl
     void handleMsg(const char *msg)
     {
         assert(!strstr(msg,"free"));
-        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 6 + 30, 0 + 40);
-        fprintf(stdout, "middleware: '%s'\n", msg);
-        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        //fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 6 + 30, 0 + 40);
+        //fprintf(stdout, "middleware: '%s'\n", msg);
+        //fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
         const char *last_path = rindex(msg, '/');
         if(!last_path)
             return;
@@ -516,9 +520,18 @@ class UI_Interface:public Fl_Osc_Interface
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             impl->write(s.c_str(), "c", c);
         }
+        
+        void writeValue(string s, float f) override
+        {
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
+            fprintf(stderr, "writevalue<float>(%s,%f)\n", s.c_str(),f);
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+            impl->write(s.c_str(), "f", f);
+        }
 
         void createLink(string s, class Fl_Osc_Widget*w) override
         {
+            assert(s.length() != 0);
             Fl_Osc_Interface::createLink(s,w);
             map.insert(std::pair<string,Fl_Osc_Widget*>(s,w));
         }
@@ -537,7 +550,7 @@ class UI_Interface:public Fl_Osc_Interface
         void tryLink(const char *msg) override
         {
 
-            printf("trying the link for a '%s'\n", msg);
+            //printf("trying the link for a '%s'\n", msg);
             const char *handle = rindex(msg,'/');
             if(handle)
                 ++handle;
@@ -557,15 +570,34 @@ class UI_Interface:public Fl_Osc_Interface
                         //fprintf(stderr, "tossing char to %p\n", pair.second);
                         pair.second->OSC_value((char)rtosc_argument(msg,0).i,
                                 handle);
+                    } else if(!strcmp(arg_str, "f")) {
+                        //printf("'%s' => '%d'\n", msg, rtosc_argument(msg,0).i);
+                        //fprintf(stderr, "tossing char to %p\n", pair.second);
+                        pair.second->OSC_value((float)rtosc_argument(msg,0).f,
+                                handle);
                     }
                 }
             }
         };
 
+        void dumpLookupTable(void)
+        {
+            for(auto i = map.begin(); i != map.end(); ++i) {
+                printf("Known control  '%s' (%p)...\n", i->first.c_str(), i->second);
+            }
+        }
+
+
     private:
         std::multimap<string,Fl_Osc_Widget*> map;
         MiddleWareImpl *impl;
 };
+    
+void MiddleWareImpl::warnMemoryLeaks(void)
+{
+    UI_Interface *o = (UI_Interface*)osc;
+    o->dumpLookupTable();
+}
 
 Fl_Osc_Interface *genOscInterface(struct MiddleWareImpl *impl)
 {

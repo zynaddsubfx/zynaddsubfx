@@ -35,6 +35,10 @@ add_library(zynaddsubfx_gui STATIC
         NioUI.cpp
         WidgetPDial.cpp
         Fl_Osc_Dial.cpp
+        Fl_Osc_DialF.cpp
+        Fl_Osc_Slider.cpp
+        Fl_Osc_Button.cpp
+        Fl_Osc_Check.cpp
         Fl_Osc_Choice.cpp
         Connection.cpp
 	)

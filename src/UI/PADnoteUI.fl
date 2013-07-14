@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0302 
 header_name {.h} 
 code_name {.cc}
 decl {\#include "../Params/PADnoteParameters.h"} {public local
@@ -84,7 +84,7 @@ make_window();} {}
   } {
     Fl_Window padnotewindow {
       label {PAD synth Parameters} open
-      xywh {40 232 535 435} type Double visible
+      xywh {49 301 535 435} type Double visible
     } {
       Fl_Tabs {} {
         callback {if (o->value()!=harmonicstructuregroup) applybutton->hide();
@@ -93,7 +93,7 @@ make_window();} {}
       } {
         Fl_Group harmonicstructuregroup {
           label {Harmonic Structure} open
-          xywh {0 20 535 375} box UP_FRAME
+          xywh {0 20 535 375} box UP_FRAME hide
           class Fl_Osc_Group
         } {
           Fl_Group bwprofilegroup {open
@@ -528,7 +528,7 @@ cbwidget->do_callback();}
           Fl_Choice qbasenote {
             label base
             callback {pars->Pquality.basenote=(int) o->value();
-cbwidget->do_callback();} selected
+cbwidget->do_callback();}
             xywh {375 155 50 20} down_box BORDER_BOX labelsize 11 align 5 textsize 11
             code0 {o->value(pars->Pquality.basenote);}
           } {
@@ -619,10 +619,10 @@ cbwidget->do_callback();}
         }
         Fl_Group {} {
           label {Envelopes&LFOs} open
-          xywh {0 20 535 375} box UP_FRAME hide
+          xywh {0 20 535 375} box UP_FRAME
         } {
           Fl_Group {} {
-            label FREQUENCY
+            label FREQUENCY open
             xywh {5 275 525 115} box UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
           } {
             Fl_Group freqenv {
@@ -655,9 +655,9 @@ pars->PCoarseDetune = k+
               code3 {o->lstep(10);}
             }
             Fl_Group freqlfo {
-              label {Frequency LFO     } open
+              label {Frequency LFO     } open selected
               xywh {215 315 230 70} box FLAT_BOX color 47 align 144
-              code0 {o->init(pars->FreqLfo);}
+              code0 {o->init(osc_i, location + "FreqLfo/");}
               class LFOUI
             } {}
             Fl_Slider detune {
@@ -699,7 +699,7 @@ if (x==0) fixedfreqetdial->deactivate();
             }
           }
           Fl_Group {} {
-            label AMPLITUDE
+            label AMPLITUDE open
             xywh {5 25 240 250} box UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
           } {
             Fl_Value_Slider volume {
@@ -758,7 +758,7 @@ if (x==0) fixedfreqetdial->deactivate();
             Fl_Group amplfo {
               label {Amplitude LFO     } open
               xywh {10 165 230 70} box FLAT_BOX color 47 align 144
-              code0 {o->init(pars->AmpLfo);}
+              code0 {o->init(osc_i, location+"AmpLfo/");}
               class LFOUI
             } {}
             Fl_Check_Button stereo {
@@ -770,7 +770,7 @@ hprofile->redraw();}
             }
           }
           Fl_Group {} {
-            label FILTER
+            label FILTER open
             xywh {245 25 285 250} box UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 17
           } {
             Fl_Group filterenv {
@@ -782,7 +782,7 @@ hprofile->redraw();}
             Fl_Group filterlfo {
               label {Filter LFO     } open
               xywh {250 200 230 70} box FLAT_BOX color 47 align 144
-              code0 {o->init(pars->FilterLfo);}
+              code0 {o->init(osc_i, location+"FilterLfo/");}
               class LFOUI
             } {}
             Fl_Group filterui {
