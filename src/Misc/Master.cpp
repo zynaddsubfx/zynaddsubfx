@@ -222,19 +222,6 @@ void Master::defaults()
     ShutUp();
 }
 
-bool Master::mutexLock(lockset request)
-{
-    switch(request) {
-        case MUTEX_TRYLOCK:
-            return !pthread_mutex_trylock(&mutex);
-        case MUTEX_LOCK:
-            return !pthread_mutex_lock(&mutex);
-        case MUTEX_UNLOCK:
-            return !pthread_mutex_unlock(&mutex);
-    }
-    return false;
-}
-
 /*
  * Note On Messages (velocity=0 for NoteOff)
  */
