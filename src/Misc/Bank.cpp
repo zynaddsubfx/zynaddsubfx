@@ -23,13 +23,12 @@
 */
 
 #include "Bank.h"
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <algorithm>
-#include <iostream>
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -121,10 +120,7 @@ bool Bank::emptyslot(unsigned int ninstrument)
     if(ins[ninstrument].filename.empty())
         return true;
 
-    if(ins[ninstrument].used)
-        return false;
-    else
-        return true;
+    return false;
 }
 
 /*
@@ -275,6 +271,7 @@ int Bank::newbank(string newbankdirname)
  */
 int Bank::locked()
 {
+    //XXX Fixme
     return dirname.empty();
 }
 
@@ -409,7 +406,7 @@ void Bank::clearbank()
 int Bank::addtobank(int pos, string filename, string name)
 {
     if((pos >= 0) && (pos < BANK_SIZE)) {
-        if(ins[pos].used)
+        if(!ins[pos].filename.empty())
             pos = -1;  //force it to find a new free position
     }
     else
@@ -419,7 +416,7 @@ int Bank::addtobank(int pos, string filename, string name)
 
     if(pos < 0)   //find a free position
         for(int i = BANK_SIZE - 1; i >= 0; i--)
-            if(!ins[i].used) {
+            if(ins[i].filename.empty()) {
                 pos = i;
                 break;
             }
@@ -429,31 +426,10 @@ int Bank::addtobank(int pos, string filename, string name)
 
     deletefrombank(pos);
 
-    ins[pos].used     = true;
     ins[pos].name     = name;
     ins[pos].filename = dirname + '/' + filename;
-
-    //see if PADsynth is used
-    //if(config.cfg.CheckPADsynth) {
-    //    XMLwrapper xml;
-    //    xml.loadXMLfile(ins[pos].filename);
-
-     //   ins[pos].info.PADsynth_used = xml.hasPadSynth();
-    //}
-    //else
-        ins[pos].info.PADsynth_used = false;
-
     return 0;
 }
-
-bool Bank::isPADsynth_used(unsigned int ninstrument)
-{
-    if(config.cfg.CheckPADsynth == 0)
-        return 0;
-    else
-        return ins[ninstrument].info.PADsynth_used;
-}
-
 
 void Bank::deletefrombank(int pos)
 {
@@ -463,7 +439,5 @@ void Bank::deletefrombank(int pos)
 }
 
 Bank::ins_t::ins_t()
-    :used(false), name(""), filename("")
-{
-    info.PADsynth_used = false;
-}
+    :name(""), filename("")
+{}

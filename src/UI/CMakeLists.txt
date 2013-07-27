@@ -40,6 +40,7 @@ add_library(zynaddsubfx_gui STATIC
         Fl_Osc_Button.cpp
         Fl_Osc_Check.cpp
         Fl_Osc_Choice.cpp
+        BankView.cpp
         Connection.cpp
 	)
 

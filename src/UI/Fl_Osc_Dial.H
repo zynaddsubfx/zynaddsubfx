@@ -13,6 +13,7 @@ class Fl_Osc_Dial:public WidgetPDial, Fl_Osc_Widget
         void init(const char *path);
         //void OSC_value(float);
         void OSC_value(char);
+        using Fl_Osc_Widget::OSC_value;
 
         //Refetch parameter information
         void update(void);

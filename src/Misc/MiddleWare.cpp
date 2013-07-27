@@ -122,7 +122,7 @@ void deallocate(const char *str, void *v)
     printf("deallocating a '%s' at '%p'\n", str, v);
     if(!strcmp(str, "Part"))
         delete (Part*)v;
-    if(!strcmp(str, "fft_t"))
+    else if(!strcmp(str, "fft_t"))
         delete[] (fft_t*)v;
     else
         fprintf(stderr, "Unknown type '%s', leaking pointer %p!!\n", str, v);
@@ -184,6 +184,24 @@ void preparePadSynth(string path, PADnoteParameters *p)
         uToB->write((path+to_s(i)).c_str(), "ifb",
                 0, 440.0f, sizeof(float*), NULL);
     }
+}
+
+void refreshBankView(const Bank &bank, unsigned loc, Fl_Osc_Interface *osc)
+{
+    puts("bank response...");
+
+    if(loc >= BANK_SIZE)
+        return;
+
+    char response[2048];
+    if(!rtosc_message(response, 1024, "/bankview", "iss",
+                loc, bank.ins[loc].name.c_str(),
+                bank.ins[loc].filename.c_str()))
+        errx(1, "Failure to handle bank update properly...");
+
+
+    osc->tryLink(response);
+    puts("response sent...");
 }
 
 //
@@ -310,6 +328,7 @@ struct MiddleWareImpl
         //Load the part
         Part *p = new Part(&master->microtonal, master->fft, &master->mutex);
         unsigned npart = rtosc_argument(msg, 0).i;
+        fprintf(stderr, "Part is stored in '%s'\n", rtosc_argument(msg, 1).s);
         p->loadXMLinstrument(rtosc_argument(msg, 1).s);
         p->applyparameters();
 
@@ -404,10 +423,16 @@ struct MiddleWareImpl
         if(!last_path)
             return;
 
+
         //printf("watching '%s' go by\n", msg);
         //Get the object resource locator
         string obj_rl(msg, last_path+1);
-        if(objmap.find(obj_rl) != objmap.end()) {
+        //XXX Utilize object map for this as well
+        //This dereference will become unsafe when loading new master instances
+        //is supported
+        if(!strcmp(msg, "/refresh_bank") && !strcmp(rtosc_argument_string(msg), "i"))
+            refreshBankView(master->bank, rtosc_argument(msg,0).i, osc);
+        else if(objmap.find(obj_rl) != objmap.end()) {
             //try some over simplified pattern matching
             if(strstr(msg, "oscil/")) {
                 if(!handleOscil(obj_rl, last_path+1, objmap[obj_rl]))
@@ -550,7 +575,7 @@ class UI_Interface:public Fl_Osc_Interface
         void tryLink(const char *msg) override
         {
 
-            //printf("trying the link for a '%s'\n", msg);
+            printf("trying the link for a '%s'\n", msg);
             const char *handle = rindex(msg,'/');
             if(handle)
                 ++handle;
@@ -558,6 +583,10 @@ class UI_Interface:public Fl_Osc_Interface
             for(auto pair:map) {
                 if(pair.first == msg) {
                     const char *arg_str = rtosc_argument_string(msg);
+
+                    //Always provide the raw message
+                    pair.second->OSC_raw(msg);
+
                     //printf("Possible location for application of '%s' is '%p'\n", msg, pair.second);
                     if(!strcmp(arg_str, "b")) {
                         //printf("'%s' matches '%s' ala blob\n", pair.first.c_str(), msg);

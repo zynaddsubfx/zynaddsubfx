@@ -23,6 +23,9 @@ class Fl_Osc_Widget
         virtual void OSC_value(unsigned x, void *v, const char *)
         {OSC_value(x,v);}
 
+        virtual void OSC_raw(const char *)
+        {}
+
         Fl_Osc_Pane *fetch_osc_pane(Fl_Widget *w)
         {
             if(!w)

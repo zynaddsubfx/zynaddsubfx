@@ -42,7 +42,6 @@ class Bank
         void setname(unsigned int ninstrument,
                      const std::string &newname,
                      int newslot);
-        bool isPADsynth_used(unsigned int ninstrument);
 
         /**returns true when slot is empty*/
         bool emptyslot(unsigned int ninstrument);
@@ -72,6 +71,13 @@ class Bank
         };
 
         std::vector<bankstruct> banks;
+        
+        struct ins_t {
+            ins_t(void);
+            std::string name;
+            //All valid instruments must have a non-empty filename
+            std::string filename;
+        } ins[BANK_SIZE];
 
     private:
 
@@ -86,16 +92,6 @@ class Bank
 
         std::string defaultinsname;
 
-    public:
-        struct ins_t {
-            ins_t();
-            bool used;
-            std::string name;
-            std::string filename;
-            struct {
-                bool PADsynth_used;
-            } info;
-        } ins[BANK_SIZE];
     private:
 
         std::string dirname;
