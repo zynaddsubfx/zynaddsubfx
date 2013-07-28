@@ -34,12 +34,16 @@ add_library(zynaddsubfx_gui STATIC
 	${zynaddsubfx_gui_FLTK_UI_SRCS}
         NioUI.cpp
         WidgetPDial.cpp
+        Fl_Osc_Widget.cpp
         Fl_Osc_Dial.cpp
         Fl_Osc_DialF.cpp
         Fl_Osc_Slider.cpp
         Fl_Osc_Button.cpp
         Fl_Osc_Check.cpp
         Fl_Osc_Choice.cpp
+        Fl_Osc_Roller.cpp
+        Fl_Osc_Output.cpp
+        Fl_Resonance_Graph.cpp
         BankView.cpp
         Connection.cpp
 	)

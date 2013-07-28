@@ -24,6 +24,31 @@
 #include "Resonance.h"
 #include "../Misc/Util.h"
 
+#include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
+
+#define rObject Resonance
+
+using namespace rtosc;
+rtosc::Ports Resonance::ports = {
+    rToggle(Penabled, "resonance enable"),
+    rToggle(Pprotectthefundamental, "Disable resonance filter on first harmonic"),
+    rParams(Prespoints, N_RES_POINTS, "Resonance data points"),
+    rParam(PmaxdB, "how many dB the signal may be amplified"),
+    rParam(Pcenterfreq, "Center frequency"),
+    rParam(Poctavesfreq, "The number of octaves..."),
+    rActioni(randomize, rMap(min,0), rMap(max, 2), "Randomize frequency response"),
+    rActioni(interpolatepeaks, rMap(min,0), rMap(max, 2), "Generate response from peak values"),
+    rAction(smooth, "Smooth out frequency response"),
+    rAction(zero,   "Reset frequency response"),
+    //UI Value listeners
+    {"centerfreq:", "", NULL, [](const char *, RtData &d)
+        {d.reply(d.loc, "f", ((rObject*)d.obj)->getcenterfreq());}},
+    {"octavesfreq:", "", NULL, [](const char *, RtData &d)
+        {d.reply(d.loc, "f", ((rObject*)d.obj)->getoctavesfreq());}},
+                                                                
+};
+
 Resonance::Resonance():Presets()
 {
     setpresettype("Presonance");
@@ -122,7 +147,7 @@ float Resonance::getfreqresponse(float freq) const
 /*
  * Smooth the resonance function
  */
-void Resonance::smooth()
+void Resonance::smooth(void)
 {
     float old = Prespoints[0];
     for(int i = 0; i < N_RES_POINTS; ++i) {
@@ -154,6 +179,12 @@ void Resonance::randomize(int type)
             r = (int)(RND * 127.0f);
     }
     smooth();
+}
+
+void Resonance::zero(void)
+{
+    for(int i=0; i<N_RES_POINTS; ++i) 
+        setpoint(i,64);
 }
 
 /*

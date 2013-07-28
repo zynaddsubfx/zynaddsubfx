@@ -9,10 +9,11 @@ class Fl_Osc_Interface
         virtual ~Fl_Osc_Interface(void){};
         //It is assumed that you want to have a registry for all of these
         //elements
-        virtual void createLink(string s, class Fl_Osc_Widget *w)
-        {printf("linking %s (%p)...\n", s.c_str(), w);};
+        virtual void createLink(string, class Fl_Osc_Widget *) {};
         virtual void renameLink(string,string,class Fl_Osc_Widget*){};
-        virtual void removeLink(string s,class Fl_Osc_Widget*){printf("removing '%s'...\n", s.c_str());};
+        virtual void removeLink(string,class Fl_Osc_Widget*){};
+        virtual void removeLink(class Fl_Osc_Widget*){};
+
         //and to be able to give them events
         virtual void tryLink(const char *){};
 
@@ -24,4 +25,5 @@ class Fl_Osc_Interface
         virtual void writeValue(string, bool){};
         virtual void writeValue(string, string){};
         virtual void write(string, const char *, ...) {};//{printf("write: '%s'\n", s.c_str());};
+        virtual void writeRaw(const char *) {}
 };

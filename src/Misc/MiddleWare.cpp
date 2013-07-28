@@ -441,10 +441,10 @@ struct MiddleWareImpl
             //    handleKitItem(obj_rl, objmap[obj_rl],atoi(rindex(msg,'m')+1),rtosc_argument(msg,0).T);
             } else if(strstr(msg, "padpars/prepare"))
                 preparePadSynth(obj_rl,(PADnoteParameters *) objmap[obj_rl]);
-            else if(strstr(msg, "padpars"))
+            else if(strstr(msg, "padpars")) {
                 if(!handlePAD(obj_rl, last_path+1, objmap[obj_rl]))
                     uToB->raw_write(msg);
-            else //just forward the message
+            } else //just forward the message
                 uToB->raw_write(msg);
         } else if(strstr(msg, "load-part"))
             loadPart(msg, master);
@@ -530,6 +530,11 @@ class UI_Interface:public Fl_Osc_Interface
             impl->write(s.c_str(), args, va);
         }
 
+        void writeRaw(const char *msg) override
+        {
+            impl->handleMsg(msg);
+        }
+
         void writeValue(string s, string ss) override
         {
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
@@ -572,10 +577,30 @@ class UI_Interface:public Fl_Osc_Interface
             printf("[%d] removing '%s' (%p)...\n", map.size(), s.c_str(), w);
         }
 
+        virtual void removeLink(class Fl_Osc_Widget *w)
+        {
+            bool processing = true;
+            while(processing)
+            {
+                //Verify Iterator invalidation sillyness
+                processing = false;//Exit if no new elements are found
+                for(auto i = map.begin(); i != map.end(); ++i) {
+                    if(i->second == w) {
+                        printf("[%d] removing '%s' (%p)...\n", map.size()-1,
+                                i->first.c_str(), w);
+                        map.erase(i);
+                        processing = true;
+                        break;
+                    }
+                }
+            }
+        }
+
         void tryLink(const char *msg) override
         {
 
-            printf("trying the link for a '%s'\n", msg);
+            if(strcmp(msg, "/vu-meter"))//Ignore repeated message
+                printf("trying the link for a '%s'\n", msg);
             const char *handle = rindex(msg,'/');
             if(handle)
                 ++handle;

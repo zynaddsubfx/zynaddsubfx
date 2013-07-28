@@ -407,10 +407,13 @@ void Master::AudioOut(float *outl, float *outr)
     int events = 0;
     while(uToB->hasNext()) {
         const char *msg = uToB->read();
-        //fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
-        //fprintf(stdout, "backend: '%s'<%s>\n", msg,
-        //        rtosc_argument_string(msg));
-        //fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        //XXX yes, this is not realtime safe, but it is useful...
+        if(strcmp(msg, "/get-vu")) {
+            fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
+            fprintf(stdout, "backend: '%s'<%s>\n", msg,
+                    rtosc_argument_string(msg));
+            fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        }
         d.matches = 0;
         //fprintf(stdout, "address '%s'\n", uToB->peak());
         ports.dispatch(msg+1, d);

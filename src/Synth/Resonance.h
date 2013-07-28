@@ -40,12 +40,14 @@ class Resonance:public Presets
         void smooth(void);
         void interpolatepeaks(int type);
         void randomize(int type);
+        void zero(void);
 
         void add2XML(XMLwrapper *xml);
         void defaults(void);
         void getfromXML(XMLwrapper *xml);
 
 
+        //TODO remove unused methods
         float getfreqpos(float freq) const;
         float getfreqx(float x) const;
         float getfreqresponse(float freq) const;
@@ -64,7 +66,7 @@ class Resonance:public Presets
         float ctlcenter; //center frequency(relative)
         float ctlbw; //bandwidth(relative)
 
-    private:
+        static rtosc::Ports ports;
 };
 
 #endif

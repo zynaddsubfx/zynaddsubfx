@@ -64,7 +64,7 @@ class ADvoicelistitem {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window ADnoteVoiceListItem {open
-      private xywh {334 881 615 100} type Double box UP_FRAME
+      private xywh {337 881 615 100} type Double box UP_FRAME
       class Fl_Group visible
     } {
       Fl_Group voicelistitemgroup {open
@@ -852,7 +852,7 @@ class ADnoteUI {open : {public PresetsUI_}
   } {
     Fl_Window ADnoteGlobalParameters {
       label {ADsynth Global Parameters of the Instrument} open
-      xywh {676 551 540 430} type Double visible
+      xywh {679 551 540 430} type Double visible
     } {
       Fl_Group {} {
         label FREQUENCY open
@@ -1061,7 +1061,7 @@ resui->resonancewindow->show();}
     }
     Fl_Window ADnoteVoice {
       label {ADsynth Voice Parameters} open
-      xywh {36 321 765 620} type Double visible
+      xywh {39 344 765 620} type Double visible
     } {
       Fl_Group advoice {open
         xywh {0 0 765 585}
@@ -1149,10 +1149,11 @@ assert(!loc_.empty());
 
 pars=parameters;
 nvoice=0;
-resui=new ResonanceUI(pars->GlobalPar.Reson);
+resui=new ResonanceUI(osc_, loc_+"global/Reson/");
 loc=loc_;
 osc=osc_;
-make_window();} {}
+make_window();} {selected
+    }
   }
   Function {~ADnoteUI()} {open
   } {
@@ -1162,8 +1163,7 @@ ADnoteVoice->hide();
 delete ADnoteVoiceList;
 delete ADnoteGlobalParameters;
 delete ADnoteVoice;
-delete resui;} {selected
-    }
+delete resui;} {}
   }
   Function {refresh()} {open
   } {

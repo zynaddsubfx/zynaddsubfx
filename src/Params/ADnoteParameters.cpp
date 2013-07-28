@@ -49,6 +49,7 @@ static Ports voicePorts = {
 
 static Ports globalPorts = {
     PARAMC(ADnoteGlobalParam, PPanning, panning, "Panning (0 random, 1 left, 127 right)"),
+    RECURP(ADnoteGlobalParam, Resonance, Reson,   Reson, "Resonance"),
     RECURP(ADnoteGlobalParam, LFOParams, FreqLfo, FreqLfo, "Frequency LFO"),
     RECURP(ADnoteGlobalParam, LFOParams, AmpLfo, AmpLfo, "Amplitude LFO"),
     RECURP(ADnoteGlobalParam, LFOParams, FilterLfo, FilterLfo, "Filter LFO"),

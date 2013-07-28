@@ -8,28 +8,27 @@
 #include <sstream>
 
 Fl_Osc_Button::Fl_Osc_Button(int X, int Y, int W, int H, const char *label)
-    :Fl_Button(X,Y,W,H,label), Fl_Osc_Widget()
+    :Fl_Button(X,Y,W,H,label), Fl_Osc_Widget(this)
 {
-    callback(Fl_Osc_Button::_cb);
+    //callback(Fl_Osc_Button::_cb);
 
-    Fl_Osc_Pane *pane = dynamic_cast<Fl_Osc_Pane*>(parent());
-    assert(pane);
-    osc = pane->osc;
-    assert(osc);
-    osc->createLink(full_path, this);
-    osc->requestValue(full_path);
+    //Fl_Osc_Pane *pane = dynamic_cast<Fl_Osc_Pane*>(parent());
+    //assert(pane);
+    //osc = pane->osc;
+    //assert(osc);
+    //osc->createLink(full_path, this);
+    //osc->requestValue(full_path);
 }
 
 Fl_Osc_Button::~Fl_Osc_Button(void)
-{
-    osc->removeLink(full_path, this);
-}
+{}
 
 void Fl_Osc_Button::OSC_value(bool v)
 {
     Fl_Button::value(v);
 }
 
+/*
 void Fl_Osc_Button::init(std::string path)
 {
     Fl_Osc_Pane *pane = fetch_osc_pane(this);
@@ -55,3 +54,4 @@ void Fl_Osc_Button::_cb(Fl_Widget *w, void *)
 {
     static_cast<Fl_Osc_Button*>(w)->cb();
 }
+*/

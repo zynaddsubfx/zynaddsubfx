@@ -76,14 +76,15 @@ location=location_;
 pars=parameters;
 oscui=NULL;
 osc_i = osc_;
-resui=new ResonanceUI(pars->resonance);
-make_window();} {}
+resui=new ResonanceUI(osc_i, location+"resonance/");
+make_window();} {selected
+    }
   }
   Function {make_window()} {open
   } {
     Fl_Window padnotewindow {
       label {PAD synth Parameters} open
-      xywh {49 301 535 435} type Double visible
+      xywh {52 324 535 435} type Double hide
     } {
       Fl_Tabs {} {
         callback {if (o->value()!=harmonicstructuregroup) applybutton->hide();
@@ -92,7 +93,7 @@ make_window();} {}
       } {
         Fl_Group harmonicstructuregroup {
           label {Harmonic Structure} open
-          xywh {0 20 535 375} box UP_FRAME hide
+          xywh {0 20 535 375} box UP_FRAME
           class Fl_Osc_Group
         } {
           Fl_Group bwprofilegroup {open
@@ -618,7 +619,7 @@ cbwidget->do_callback();}
         }
         Fl_Group {} {
           label {Envelopes&LFOs} open
-          xywh {0 20 535 375} box UP_FRAME
+          xywh {0 20 535 375} box UP_FRAME hide
         } {
           Fl_Group {} {
             label FREQUENCY open
@@ -654,7 +655,7 @@ pars->PCoarseDetune = k+
               code3 {o->lstep(10);}
             }
             Fl_Group freqlfo {
-              label {Frequency LFO     } open selected
+              label {Frequency LFO     } open
               xywh {215 315 230 70} box FLAT_BOX color 47 align 144
               code0 {o->init(osc_i, location + "FreqLfo/");}
               class LFOUI

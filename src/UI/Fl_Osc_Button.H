@@ -5,7 +5,7 @@
 
 using std::string; //yes this is bad form FIXME
 
-class Fl_Osc_Button:public Fl_Button, Fl_Osc_Widget
+class Fl_Osc_Button:public Fl_Button, public Fl_Osc_Widget
 {
 
     public:
@@ -14,12 +14,9 @@ class Fl_Osc_Button:public Fl_Button, Fl_Osc_Widget
         virtual ~Fl_Osc_Button(void);
         virtual void OSC_value(bool);
 
-        void init(Fl_Osc_Interface *, std::string);
-        void init(std::string);
+        //void init(Fl_Osc_Interface *, std::string);
+        //void init(std::string);
 
-        void cb(void);
-        static void _cb(Fl_Widget *w, void *);
-    private:
-        class Fl_Osc_Interface *osc;
-        std::string full_path;
+        //void cb(void);
+        //static void _cb(Fl_Widget *w, void *);
 };
