@@ -1,6 +1,6 @@
 [submodule "instruments"]
 	path = instruments
-	url = git://zynaddsubfx.git.sourceforge.net/gitroot/zynaddsubfx/instruments
+	url = git://git.code.sf.net/p/zynaddsubfx/instruments
 [submodule "rtosc"]
 	path = rtosc
 	url = https://github.com/fundamental/rtosc
