@@ -34,10 +34,12 @@
 #include "FilterParams.h"
 
 #include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
 using rtosc::Ports;
 using rtosc::RtData;
 
 #define EXPAND(x) x
+#define rObject ADnoteVoiceParam
 
 static Ports voicePorts = {
     RECURP(ADnoteVoiceParam, OscilGen, oscil,     OscilSmp, "Primary Oscillator"),
@@ -45,6 +47,11 @@ static Ports voicePorts = {
     RECURP(ADnoteVoiceParam, LFOParams, FreqLfo, FreqLfo, "Frequency LFO"),
     RECURP(ADnoteVoiceParam, LFOParams, AmpLfo, AmpLfo, "Amplitude LFO"),
     RECURP(ADnoteVoiceParam, LFOParams, FilterLfo, FilterLfo, "Filter LFO"),
+    rRecurp(FreqEnvelope,   "Frequency Envelope"),
+    rRecurp(AmpEnvelope,    "Amplitude Envelope"),
+    rRecurp(FilterEnvelope, "Filter Envelope"),
+    rRecurp(FMFreqEnvelope, "Modulator Frequency Envelope"),
+    rRecurp(FMAmpEnvelope,  "Modulator Amplitude Envelope"),
 };
 
 static Ports globalPorts = {
@@ -53,6 +60,9 @@ static Ports globalPorts = {
     RECURP(ADnoteGlobalParam, LFOParams, FreqLfo, FreqLfo, "Frequency LFO"),
     RECURP(ADnoteGlobalParam, LFOParams, AmpLfo, AmpLfo, "Amplitude LFO"),
     RECURP(ADnoteGlobalParam, LFOParams, FilterLfo, FilterLfo, "Filter LFO"),
+    RECURP(ADnoteGlobalParam,  EnvelopeParams, FreqEnvelope, FreqEnvelope, "Frequency Envelope"),
+    RECURP(ADnoteGlobalParam,  EnvelopeParams, AmpEnvelope, AmpEnvelope, "Frequency Envelope"),
+    RECURP(ADnoteGlobalParam,  EnvelopeParams, FilterEnvelope, FilterEnvelope, "Frequency Envelope"),
 };
 
 static Ports adPorts = {//XXX 16 should not be hard coded

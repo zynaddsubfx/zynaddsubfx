@@ -1,39 +1,41 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0110 
+version 1.0302 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {} 
-
-decl {//License: GNU GPL version 2 or later} {} 
-
-decl {\#include <stdlib.h>} {public
+decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
 } 
 
-decl {\#include <stdio.h>} {public
+decl {//License: GNU GPL version 2 or later} {private local
 } 
 
-decl {\#include <string.h>} {public
+decl {\#include <stdlib.h>} {public local
 } 
 
-decl {\#include "../globals.h"} {public
+decl {\#include <stdio.h>} {public local
 } 
 
-decl {\#include "WidgetPDial.h"} {public
+decl {\#include <string.h>} {public local
 } 
 
-decl {\#include "EnvelopeUI.h"} {public
+decl {\#include "../globals.h"} {public local
 } 
 
-decl {\#include "FilterUI.h"} {public
+decl {\#include "WidgetPDial.h"} {public local
 } 
 
-decl {\#include "../Misc/Util.h"} {public
+decl {\#include "EnvelopeUI.h"} {public local
 } 
 
-decl {\#include "../Params/SUBnoteParameters.h"} {public
+decl {\#include "FilterUI.h"} {public local
 } 
 
-decl {\#include "PresetsUI.h"} {public
+decl {\#include "../Misc/Util.h"} {public local
+} 
+
+decl {\#include "../Params/SUBnoteParameters.h"} {public local
+} 
+
+decl {\#include "PresetsUI.h"} {public local
 } 
 
 class SUBnoteharmonic {: {public Fl_Group}
@@ -99,8 +101,10 @@ bw->value(127-pars->Phrelbw[n]);} {}
 hide();
 //delete(harmonic);} {}
   }
-  decl {SUBnoteParameters *pars;} {}
-  decl {int n;} {}
+  decl {SUBnoteParameters *pars;} {private local
+  }
+  decl {int n;} {private local
+  }
 } 
 
 class SUBnoteUI {open : {public PresetsUI_}
@@ -109,7 +113,8 @@ class SUBnoteUI {open : {public PresetsUI_}
   } {
     Fl_Window SUBparameters {
       label {SUBsynth Parameters} open
-      xywh {542 489 735 390} type Double visible
+      xywh {542 512 735 390} type Double
+      class Fl_Osc_Window visible
     } {
       Fl_Scroll {} {
         label scroll open
@@ -151,7 +156,7 @@ class SUBnoteUI {open : {public PresetsUI_}
         Fl_Group ampenv {
           label {SUBsynth - Amplitude Envelope} open
           xywh {10 65 205 70} box FLAT_BOX color 51 align 144
-          code0 {o->init(pars->AmpEnvelope);}
+          code0 {o->init(ENV_ADSR, osc, loc + "AmpEnvelope/");}
           class EnvelopeUI
         } {}
       }
@@ -218,7 +223,7 @@ class SUBnoteUI {open : {public PresetsUI_}
         Fl_Group freqenvelopegroup {
           label {SUBsynth - Frequency Envelope} open
           xywh {445 65 205 70} box FLAT_BOX color 51 align 144
-          code0 {o->init(pars->FreqEnvelope);}
+          code0 {o->init(ENV_ASR, osc, loc + "FreqEnvelope/");}
           code1 {if (pars->PFreqEnvelopeEnabled==0) o->deactivate();}
           class EnvelopeUI
         } {}
@@ -293,7 +298,7 @@ detunevalueoutput->do_callback();} open
       }
       Fl_Check_Button stereo {
         label Stereo
-        callback {pars->Pstereo=(int) o->value();} selected
+        callback {pars->Pstereo=(int) o->value();}
         xywh {440 325 55 35} box THIN_UP_BOX down_box DOWN_BOX labelsize 10
         code0 {o->value(pars->Pstereo);}
       }
@@ -315,9 +320,9 @@ SUBparameters->redraw();}
         xywh {220 5 220 135} box UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 align 17
       } {
         Fl_Group bandwidthenvelopegroup {
-          label {SUBsynth - BandWidth Envelope} open
+          label {SUBsynth - BandWidth Envelope} open selected
           xywh {225 65 205 70} box FLAT_BOX color 51 align 144
-          code0 {o->init(pars->BandWidthEnvelope);}
+          code0 {o->init(ENV_ADSR_BW, osc, loc + "BandWidthEnvelope/");}
           code1 {if (pars->PBandWidthEnvelopeEnabled==0) o->deactivate();}
           class EnvelopeUI
         } {}
@@ -352,7 +357,7 @@ bandwidthsettingsui->redraw();}
         Fl_Group filterenv {
           label {SUBsynth - Filter Envelope} open
           xywh {445 250 275 70} box FLAT_BOX color 51 align 144
-          code0 {o->init(pars->GlobalFilterEnvelope);}
+          code0 {o->init(ENV_ADSR_FILTER, osc, loc + "GlobalFilterEnvelope/");}
           class EnvelopeUI
         } {}
         Fl_Group filterui {
@@ -436,8 +441,10 @@ freqenvelopegroup->refresh();
 filterui->refresh();
 filterenv->refresh();} {}
   }
-  Function {SUBnoteUI(SUBnoteParameters *parameters)} {} {
+  Function {SUBnoteUI(SUBnoteParameters *parameters, Fl_Osc_Interface *osc_, std::string loc_)} {} {
     code {pars=parameters;
+    osc = osc_;
+    loc = loc_;
 make_window();} {}
   }
   Function {~SUBnoteUI()} {} {
@@ -445,6 +452,12 @@ make_window();} {}
 SUBparameters->hide();
 delete(SUBparameters);} {}
   }
-  decl {SUBnoteParameters *pars;} {}
-  decl {SUBnoteharmonic *h[MAX_SUB_HARMONICS];} {}
+  decl {Fl_Osc_Interface *osc;} {private local
+  }
+  decl {std::string loc;} {private local
+  }
+  decl {SUBnoteParameters *pars;} {private local
+  }
+  decl {SUBnoteharmonic *h[MAX_SUB_HARMONICS];} {private local
+  }
 } 

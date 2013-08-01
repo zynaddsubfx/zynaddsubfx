@@ -20,17 +20,78 @@
 
 */
 
-#include <stdio.h>
+#include <cmath>
+#include <cstdlib>
+#include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
 
-#include <math.h>
-#include <stdlib.h>
 #include "EnvelopeParams.h"
 
-EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
-                               unsigned char Pforcedrelease_):Presets()
-{
-    int i;
+#define rObject EnvelopeParams
+using namespace rtosc;
 
+static rtosc::Ports localPorts = {
+    rToggle(Pfreemode, "Complex Envelope Definitions"),
+    rParam(Penvpoints, rProp(internal), "Number of points in complex definition"),
+    rParam(Penvsustain, rProp(internal), "Location of the sustain point"),
+    rParams(Penvdt,  MAX_ENVELOPE_POINTS, "Envelope Delay Times"),
+    rParams(Penvval, MAX_ENVELOPE_POINTS, "Envelope Values"),
+    rParam(Penvstretch, "Stretch with respect to frequency"),
+    rToggle(Pforcedrelease, "Force Envelope to fully evaluate"),
+    rToggle(Plinearenvelope, "Linear or Logarithmic Envelopes"),
+    rParam(PA_dt,  "Attack Time"),
+    rParam(PA_val, "Attack Value"),
+    rParam(PD_dt,  "Decay Time"),
+    rParam(PD_val, "Decay Value"),
+    rParam(PS_val, "Sustain Value"),
+    rParam(PR_dt,  "Release Time"),
+    rParam(PR_val, "Release Value"),
+
+    {"addPoint:i", rProp(internal), NULL, [](const char *msg, RtData &d)
+        {
+            EnvelopeParams *env = (rObject*) d.obj;
+            const int curpoint = rtosc_argument(msg, 0).i;
+            //int curpoint=freeedit->lastpoint;
+            if (curpoint<0 || curpoint>env->Penvpoints || env->Penvpoints>=MAX_ENVELOPE_POINTS)
+                return;
+
+            for (int i=env->Penvpoints; i>=curpoint+1; i--) {
+                env->Penvdt[i]=env->Penvdt[i-1];
+                env->Penvval[i]=env->Penvval[i-1];
+            }
+
+            if (curpoint==0) {
+                env->Penvdt[1]=64;
+            }
+
+            env->Penvpoints++;
+            if (curpoint<=env->Penvsustain) env->Penvsustain++;
+        }},
+    {"delPoint:i", rProp(internal), NULL, [](const char *msg, RtData &d)
+        {
+            EnvelopeParams *env = (rObject*) d.obj;
+            const int curpoint=rtosc_argument(msg, 0).i;
+            if(curpoint<1 || curpoint>=env->Penvpoints-1 || env->Penvpoints<=3)
+                return;
+
+            for (int i=curpoint+1;i<env->Penvpoints;i++){
+                env->Penvdt[i-1]=env->Penvdt[i];
+                env->Penvval[i-1]=env->Penvval[i];
+            };
+
+            env->Penvpoints--;
+
+            if (curpoint<=env->Penvsustain)
+                env->Penvsustain--;
+
+        }},
+};
+
+rtosc::Ports &EnvelopeParams::ports = localPorts;
+
+EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
+        unsigned char Pforcedrelease_):Presets()
+{
     PA_dt  = 10;
     PD_dt  = 10;
     PR_dt  = 10;
@@ -39,7 +100,7 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
     PS_val = 64;
     PR_val = 64;
 
-    for(i = 0; i < MAX_ENVELOPE_POINTS; ++i) {
+    for(int i = 0; i < MAX_ENVELOPE_POINTS; ++i) {
         Penvdt[i]  = 32;
         Penvval[i] = 64;
     }
@@ -58,10 +119,14 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
 EnvelopeParams::~EnvelopeParams()
 {}
 
-float EnvelopeParams::getdt(char i)
+float EnvelopeParams::getdt(char i) const
 {
-    float result = (powf(2.0f, Penvdt[(int)i] / 127.0f * 12.0f) - 1.0f) * 10.0f; //miliseconds
-    return result;
+    return EnvelopeParams::dt(Penvdt[(int)i]);
+}
+
+float EnvelopeParams::dt(char val)
+{
+    return (powf(2.0f, val / 127.0f * 12.0f) - 1.0f) * 10.0f; //miliseconds
 }
 
 

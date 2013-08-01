@@ -47,6 +47,7 @@ void Fl_Osc_Dial::init(const char *path)
     Fl_Osc_Pane *pane = fetch_osc_pane(this);
     assert(pane);
     osc = pane->osc;
+    assert(osc);
     full_path = pane->pane_name + path;
     osc->createLink(full_path, this);
     osc->requestValue(full_path);

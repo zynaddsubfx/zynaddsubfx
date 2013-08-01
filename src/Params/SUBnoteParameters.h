@@ -25,10 +25,10 @@
 
 #include "../globals.h"
 #include "../Misc/XMLwrapper.h"
-#include "EnvelopeParams.h"
 #include "FilterParams.h"
 #include "Presets.h"
 
+class EnvelopeParams;
 class SUBnoteParameters:public Presets
 {
     public:

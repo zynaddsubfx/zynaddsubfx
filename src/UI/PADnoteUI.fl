@@ -628,7 +628,7 @@ cbwidget->do_callback();}
             Fl_Group freqenv {
               label {PADSynth - Frequency Envelope} open
               xywh {10 315 205 70} box FLAT_BOX color 51 align 144
-              code0 {o->init(pars->FreqEnvelope);}
+              code0 {o->init(ENV_ASR, osc_i, location + "FreqEnvelope/");}
               class EnvelopeUI
             } {}
             Fl_Counter octave {
@@ -752,7 +752,7 @@ if (x==0) fixedfreqetdial->deactivate();
             Fl_Group ampenv {
               label {PADSynth - Amplitude Envelope} open
               xywh {10 95 205 70} box FLAT_BOX color 51 align 144
-              code0 {o->init(pars->AmpEnvelope);}
+              code0 {o->init(ENV_ADSR, osc_i, location + "AmpEnvelope/");}
               class EnvelopeUI
             } {}
             Fl_Group amplfo {
@@ -776,7 +776,7 @@ hprofile->redraw();}
             Fl_Group filterenv {
               label {PADSynth - Filter Envelope} open
               xywh {250 130 275 70} box FLAT_BOX color 51 align 144
-              code0 {o->init(pars->FilterEnvelope);}
+              code0 {o->init(ENV_ADSR_FILTER, osc_i, location + "FilterEnvelope/");}
               class EnvelopeUI
             } {}
             Fl_Group filterlfo {

@@ -1092,13 +1092,14 @@ if (kititem!=lastkititem){
     if (kititem>=NUM_KIT_ITEMS) return;//bad kit item
     if (kititem<0) return;
 
-    if (part->kit[kititem].adpars!=NULL)
+    if (part->kit[kititem].adpars)
       adnoteui=new ADnoteUI(part->kit[kititem].adpars, loc+"kit"+to_s(kititem)+"/adpars/", osc);
 
-    if (part->kit[kititem].subpars!=NULL) 
-       subnoteui=new SUBnoteUI(part->kit[kititem].subpars);
+    if (part->kit[kititem].subpars) 
+       subnoteui=new SUBnoteUI(part->kit[kititem].subpars,
+       osc, loc+"kit"+to_s(kititem)+"/subpars/");
 
-    if (part->kit[kititem].padpars!=NULL) {
+    if (part->kit[kititem].padpars) {
       char buffer[1024];
       snprintf(buffer, 1024, "%skit%d/padpars/", part_path.c_str(), kititem); 
       padnoteui=new PADnoteUI(part->kit[kititem].padpars, buffer, osc);

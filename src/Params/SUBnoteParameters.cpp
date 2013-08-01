@@ -22,6 +22,7 @@
 
 #include "../globals.h"
 #include "SUBnoteParameters.h"
+#include "EnvelopeParams.h"
 #include <stdio.h>
 
 #include <rtosc/ports.h>
@@ -48,6 +49,10 @@ static rtosc::Ports localPorts = {
     rArray(Phmag, MAX_SUB_HARMONICS, "Harmonic magnitudes"),
     rArray(Phrelbw, MAX_SUB_HARMONICS, "Relative bandwidth"),
     rParam(Pbwscale, "Bandwidth scaling with frequency"),
+    rRecurp(AmpEnvelope,          "Amplitude envelope"),
+    rRecurp(FreqEnvelope,         "Frequency Envelope"),
+    rRecurp(BandWidthEnvelope,    "Bandwidth Envelope"),
+    rRecurp(GlobalFilterEnvelope, "Post Filter Envelope"),
     //rOption(Pstart, rOptions("zero", "random", "ones")),
 };
 

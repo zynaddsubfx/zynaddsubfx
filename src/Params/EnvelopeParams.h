@@ -52,7 +52,8 @@ class EnvelopeParams:public Presets
         void defaults();
         void getfromXML(XMLwrapper *xml);
 
-        float getdt(char i);
+        float getdt(char i) const;
+        static float dt(char val);
 
         /* MIDI Parameters */
         unsigned char Pfreemode; //1 daca este in modul free sau 0 daca este in mod ADSR,ASR,...
@@ -75,6 +76,7 @@ class EnvelopeParams:public Presets
         // 4 for ADSR_filter parameters (filter parameters)
         // 5 for ASR_bw parameters (bandwidth parameters)
 
+        static rtosc::Ports &ports;
     private:
         void store2defaults();
 
