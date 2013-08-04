@@ -49,6 +49,11 @@ void Fl_Osc_Widget::oscWrite(std::string path, const char *args, ...)
         osc->writeRaw(buffer);
     else
         puts("Dangerous Event ommision");
+    //Try to pretty print basic events
+    if(!strcmp(args, "c") || !strcmp(args, "i"))
+        printf("Args = ['%d']\n", rtosc_argument(buffer, 0).i);
+    if(!strcmp(args, "f"))
+        printf("Args = ['%f']\n", rtosc_argument(buffer, 0).f);
 }
 
 void Fl_Osc_Widget::oscWrite(std::string path)

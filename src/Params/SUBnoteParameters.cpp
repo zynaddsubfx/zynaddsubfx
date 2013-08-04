@@ -40,6 +40,10 @@ static rtosc::Ports localPorts = {
     //Real values needed
     //rOption(PDetuneType, rOptions("100 cents", "200 cents", "500 cents")),
     rToggle(PFreqEnvelopeEnabled, "Enable for Frequency Envelope"),
+    rToggle(PBandWidthEnvelopeEnabled, "Enable for Bandwidth Envelope"),
+    rToggle(PGlobalFilterEnabled, "Enable for Global Filter"),
+    rParam(PGlobalFilterVelocityScale, "Filter Velocity Magnitude"),
+    rParam(PGlobalFilterVelocityScaleFunction, "Filter Velocity Function Shape"),
     //rRecur(FreqEnvelope, EnvelopeParams),
     //rToggle(),//continue
     rToggle(Pfixedfreq, "Base frequency fixed frequency enable"),
@@ -53,6 +57,7 @@ static rtosc::Ports localPorts = {
     rRecurp(FreqEnvelope,         "Frequency Envelope"),
     rRecurp(BandWidthEnvelope,    "Bandwidth Envelope"),
     rRecurp(GlobalFilterEnvelope, "Post Filter Envelope"),
+    rRecurp(GlobalFilter,         "Post Filter"),
     //rOption(Pstart, rOptions("zero", "random", "ones")),
 };
 

@@ -716,7 +716,8 @@ inseffectui->refresh(part->partefx[ninseff]);}
       } {
         Fl_Group inseffectui {
           xywh {5 5 380 95}
-          code0 {o->init(part->partefx[ninseff]);}
+          code0 {o->init(part->partefx[ninseff],
+          osc, loc + "InsEffect/");}
           class EffUI
         } {}
       }

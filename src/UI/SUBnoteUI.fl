@@ -363,7 +363,7 @@ bandwidthsettingsui->redraw();}
         Fl_Group filterui {
           label {SUBsynthl - Filter} open
           xywh {445 165 275 75} box FLAT_BOX color 50 align 144
-          code0 {o->init(pars->GlobalFilter,&pars->PGlobalFilterVelocityScale,&pars->PGlobalFilterVelocityScaleFunction);}
+          code0 {o->init(loc + "PGlobalFilter" , osc, loc + "GlobalFilter/");}
           class FilterUI
         } {}
       }

@@ -788,7 +788,8 @@ hprofile->redraw();}
             Fl_Group filterui {
               label {PADsynth - Filter} open
               xywh {250 55 275 75} box FLAT_BOX color 50 align 144
-              code0 {o->init(pars->GlobalFilter,&pars->PFilterVelocityScale,&pars->PFilterVelocityScaleFunction);}
+              code0 {o->init(location + "PFilter",
+              osc_i, location + "GlobalFilter/");}
               class FilterUI
             } {}
           }

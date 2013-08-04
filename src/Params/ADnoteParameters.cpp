@@ -52,7 +52,11 @@ static Ports voicePorts = {
     rRecurp(FilterEnvelope, "Filter Envelope"),
     rRecurp(FMFreqEnvelope, "Modulator Frequency Envelope"),
     rRecurp(FMAmpEnvelope,  "Modulator Amplitude Envelope"),
+    rRecurp(VoiceFilter,    "Optional Voice Filter"),
 };
+
+#undef  rObject
+#define rObject ADnoteGlobalParam
 
 static Ports globalPorts = {
     PARAMC(ADnoteGlobalParam, PPanning, panning, "Panning (0 random, 1 left, 127 right)"),
@@ -63,6 +67,34 @@ static Ports globalPorts = {
     RECURP(ADnoteGlobalParam,  EnvelopeParams, FreqEnvelope, FreqEnvelope, "Frequency Envelope"),
     RECURP(ADnoteGlobalParam,  EnvelopeParams, AmpEnvelope, AmpEnvelope, "Frequency Envelope"),
     RECURP(ADnoteGlobalParam,  EnvelopeParams, FilterEnvelope, FilterEnvelope, "Frequency Envelope"),
+    RECURP(ADnoteGlobalParam, FilterParams, GlobalFilter, GlobalFilter, "Filter"),
+    rToggle(PStereo, "Mono/Stereo Enable"),
+
+    //Frequency
+    rParam(PDetune, "Fine Detune"),
+    rParam(PCoarseDetune, "Coarse Detune"),
+    rParam(PDetuneType,   "Detune Scaling Type"),
+    rParam(PBandwidth,    "Relative Fine Detune Gain"),
+
+    //Amplitude
+    //TODO move panning here
+    rParam(PVolume, "volume control"),
+    rParam(PAmpVelocityScaleFunction, "Volume Velocity Control"),
+
+    rParam(PPunchStrength, "Punch Strength"),
+    rParam(PPunchTime, "UNKNOWN"),
+    rParam(PPunchStretch, "How Punch changes with note frequency"),
+    rParam(PPunchVelocitySensing, "Punch Velocity control"),
+
+    //Filter
+    rParam(PFilterVelocityScale, "Filter Velocity Magnitude"),
+    rParam(PFilterVelocityScaleFunction, "Filter Velocity Function Shape"),
+
+
+    //Resonance
+    rParam(Hrandgrouping, "How randomness is applied to multiple voices using the same oscil"),
+
+
 };
 
 static Ports adPorts = {//XXX 16 should not be hard coded

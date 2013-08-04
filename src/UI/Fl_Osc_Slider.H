@@ -15,14 +15,19 @@ class Fl_Osc_Slider:public Fl_Slider, Fl_Osc_Widget
 
         virtual ~Fl_Osc_Slider(void);
         void OSC_value(float);
-        void init(Fl_Osc_Interface *, std::string);
-        void init(std::string);
+        void init(std::string, char type = 'f');
+
+        //Refetch parameter information
+        void update(void);
+        void callback(Fl_Callback *cb, void *p = NULL);
 
         void cb(void);
         static void _cb(Fl_Widget *w, void *);
     private:
         string label_str;
         std::string full_path;
+        std::string path;
         double real_value;
-        class Fl_Osc_Interface *osc;
+        char osc_type;
+        std::pair<Fl_Callback*, void*> cb_data;
 };

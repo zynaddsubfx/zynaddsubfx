@@ -63,8 +63,8 @@ class FilterParams:public PresetsArray
         unsigned char Pvowelclearness; //how vowels are kept clean (how much try to avoid "mixed" vowels)
         unsigned char Pcenterfreq, Poctavesfreq; //the center frequency of the res. func., and the number of octaves
 
-        struct {
-            struct {
+        struct Pvowels_t {
+            struct formants_t {
                 unsigned char freq, amp, q; //frequency,amplitude,Q
             } formants[FF_MAX_FORMANTS];
         } Pvowels[FF_MAX_VOWELS];
@@ -90,6 +90,7 @@ class FilterParams:public PresetsArray
 
         bool changed;
 
+        static rtosc::Ports ports;
     private:
         void defaults(int n);
 

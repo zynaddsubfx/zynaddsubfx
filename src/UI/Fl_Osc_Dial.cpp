@@ -7,18 +7,7 @@
 #include <cassert>
 #include <sstream>
 
-template<typename A, typename B>
-B string_cast(const A &a)
-{
-    std::stringstream s;
-    s.precision(3);
-    B b;
-    s << " " << a << " ";
-    s >> b;
-    return b;
-}
-
-static void callback_fn(Fl_Widget *w, void *v)
+static void callback_fn(Fl_Widget *w, void *)
 {
     ((Fl_Osc_Dial*)w)->cb();
 }
@@ -42,21 +31,31 @@ Fl_Osc_Dial::Fl_Osc_Dial(int X, int Y, int W, int H, const char *label)
 }
 
 
-void Fl_Osc_Dial::init(const char *path)
+void Fl_Osc_Dial::init(const char *path_)
 {
     Fl_Osc_Pane *pane = fetch_osc_pane(this);
     assert(pane);
     osc = pane->osc;
     assert(osc);
+    loc = pane->pane_name;
+    path = path_;
     full_path = pane->pane_name + path;
-    osc->createLink(full_path, this);
-    osc->requestValue(full_path);
+    oscRegister(path_);
 };
+        
+void Fl_Osc_Dial::alt_init(std::string base, std::string path_)
+{
+    Fl_Osc_Pane *pane = fetch_osc_pane(this);
+    assert(pane);
+    osc = pane->osc;
+    assert(osc);
+    loc  = base;
+    full_path = loc + path_;
+    oscRegister(path_.c_str());
+}
 
 Fl_Osc_Dial::~Fl_Osc_Dial(void)
-{
-    osc->removeLink(full_path, this);
-}
+{}
 
 void Fl_Osc_Dial::callback(Fl_Callback *cb, void *p)
 {
@@ -67,12 +66,6 @@ void Fl_Osc_Dial::callback(Fl_Callback *cb, void *p)
 void Fl_Osc_Dial::OSC_value(char v)
 {
     value(v+minimum());
-//    real_value = v;
-//    const float val = Fl_Osc_Widget::inv_translate(v, metadata.c_str());
-//    Fl_Dial::value(val);
-//label_str = string_cast<int,string>(v);
-//    label("                ");
-//    label(label_str.c_str());
 }
         
 void Fl_Osc_Dial::update(void)
@@ -84,11 +77,8 @@ void Fl_Osc_Dial::cb(void)
 {
     assert(osc);
 
-    osc->writeValue(full_path, (char)(value()-minimum()));
+    oscWrite(path, "c", (char)(value()-minimum()));
     
     if(cb_data.first)
         cb_data.first(this, cb_data.second);
-//    label_str = string_cast<float,string>(val);
-//    label("                ");
-//    label(label_str.c_str());
 }

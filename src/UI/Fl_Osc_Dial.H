@@ -10,6 +10,12 @@ class Fl_Osc_Dial:public WidgetPDial, Fl_Osc_Widget
     public:
         Fl_Osc_Dial(int X, int Y, int W, int H, const char *label = NULL);
         virtual ~Fl_Osc_Dial(void);
+
+        //Hack to get non-local controls up and running
+        void alt_init(std::string base, std::string path_);
+
+
+        //Normal Initialization
         void init(const char *path);
         //void OSC_value(float);
         void OSC_value(char);
@@ -22,6 +28,6 @@ class Fl_Osc_Dial:public WidgetPDial, Fl_Osc_Widget
         void cb(void);
     private:
         std::string full_path;
-        class Fl_Osc_Interface *osc;
+        std::string path;
         std::pair<Fl_Callback*, void*> cb_data;
 };

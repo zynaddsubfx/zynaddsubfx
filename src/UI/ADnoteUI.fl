@@ -75,7 +75,8 @@ class ADvoicelistitem {open : {public Fl_Group}
         Fl_Value_Slider voicevolume {
           callback {pars->VoicePar[nvoice].PVolume=(int)o->value();}
           tooltip Volume xywh {90 5 115 20} type {Horz Knob} box NO_BOX labelsize 8 align 5 maximum 127 step 1
-          code0 {o->value(pars->VoicePar[nvoice].PVolume);}
+          code0 {voicelistitemgroup->osc=osc_i;voicelistitemgroup->pane_name=loc;}
+          code1 {o->value(pars->VoicePar[nvoice].PVolume);}
         }
         Fl_Check_Button voiceresonanceenabled {
           callback {pars->VoicePar[nvoice].Presonance=(int)o->value();}
@@ -84,7 +85,7 @@ class ADvoicelistitem {open : {public Fl_Group}
         }
         Fl_Value_Slider voicelfofreq {
           tooltip {Frequency LFO amount} xywh {500 5 115 20} type {Horz Knob} box NO_BOX labelsize 8 align 5 maximum 127 step 1
-          code0 {o->init(osc_i,  loc+"FreqLfo/Pintensity");}
+          code0 {o->init("FreqLfo/Pintensity");}
           class Fl_Osc_Slider
         }
         Fl_Dial voicepanning {
@@ -96,7 +97,7 @@ class ADvoicelistitem {open : {public Fl_Group}
         Fl_Group voiceoscil {open
           xywh {60 5 30 20} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
           code0 {osc=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
-          code1 {voiceoscil->osc=osc_i;voiceoscil->pane_name=loc+"oscil/";osc->init(false);}
+          code1 {osc->init(false, "oscil/");}
           code2 {if (pars->VoicePar[nvoice].Pextoscil != -1) { osc->init(false);}}
           class Fl_Osc_Group
         } {}
@@ -706,7 +707,7 @@ o->redraw();}
           Fl_Group {} {
             label {ADsynth Voice - Filter} open
             xywh {250 30 275 75} box FLAT_BOX color 50 align 144
-            code0 {o->init(pars->VoicePar[nvoice].VoiceFilter,NULL,NULL);}
+            code0 {o->init("", osc_i, loc + "VoiceFilter/");}
             class FilterUI
           } {}
           Fl_Group voicefilterenvgroup {
@@ -1019,7 +1020,8 @@ for (int i=0;i<NUM_VOICES;i++){
         Fl_Group filterui {
           label {ADsynth Global - Filter} open
           xywh {255 35 275 75} box FLAT_BOX color 50 align 144
-          code0 {o->init(pars->GlobalPar.GlobalFilter,&pars->GlobalPar.PFilterVelocityScale,&pars->GlobalPar.PFilterVelocityScaleFunction);}
+          code0 {o->init(loc + "global/PFilter",
+          osc, loc + "global/GlobalFilter/");}
           class FilterUI
         } {}
       }

@@ -610,7 +610,7 @@ syseffectui->refresh(master->sysefx[nsyseff]);}
             } {
               Fl_Group syseffectui {
                 xywh {10 208 380 95}
-                code0 {o->init(master->sysefx[nsyseff]);}
+                code0 {o->init(master->sysefx[nsyseff], osc, "/SysEffect/");}
                 class EffUI
               } {}
             }
@@ -709,7 +709,7 @@ inseffectui->show();}
             } {
               Fl_Group inseffectui {
                 xywh {10 210 380 90} box UP_FRAME
-                code0 {o->init(master->insefx[ninseff]);}
+                code0 {o->init(master->insefx[ninseff], osc, "/InsEffect/");}
                 code1 {if (master->Pinsparts[ninseff]== -1) o->deactivate();}
                 class EffUI
               } {}

@@ -30,12 +30,12 @@ class Fl_Oscilloscope : public Fl_Box, Fl_Osc_Widget
             osc->removeLink(loc, this);
         }
 
-        void init(bool base_waveform_p)
+        void init(bool base_waveform_p, std::string loc = "")
         {
             Fl_Osc_Pane *og  = fetch_osc_pane(this);
             assert(og);
 
-            loc = og->pane_name + (base_waveform_p ? "base-waveform": "waveform");
+            loc = og->pane_name + loc + (base_waveform_p ? "base-waveform": "waveform");
             osc = og->osc;
             assert(osc);
 

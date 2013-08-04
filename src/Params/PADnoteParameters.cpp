@@ -25,9 +25,11 @@
 #include <cstdio>
 
 #include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
+using namespace rtosc;
 
 
-#define PC(x) PARAMC(PADnoteParameters, P##x, x, "undocumented")
+#define PC(x) PARAMC(PADnoteParameters, P##x, P##x, "undocumented")
 
 template<int i>
 void simpleset(const char *m, rtosc::RtData &d)
@@ -38,6 +40,9 @@ void simpleset(const char *m, rtosc::RtData &d)
     else
         *addr = rtosc_argument(m, 0).i;
 }
+
+#define rObject PADnoteParameters
+
 #define P_C(x) rtosc::Port{#x "::c", "::", NULL, \
     simpleset<__builtin_offsetof(class PADnoteParameters, P##x)>}
 static rtosc::Ports localPorts =
@@ -53,6 +58,7 @@ static rtosc::Ports localPorts =
             "Amplitude Envelope"),
     RECURP(PADnoteParameters, EnvelopeParams, FilterEnvelope, FilterEnvelope,
             "Filter Envelope"),
+    rRecurp(GlobalFilter, "Post Filter"),
     PARAMC(PADnoteParameters, Pmode, mode,
             "0 - bandwidth, 1 - discrete 2 - continious"),
     PC(hp.base.type),
@@ -85,6 +91,16 @@ static rtosc::Ports localPorts =
     PC(fixedfreqET),
     //TODO detune, coarse detune
     PC(DetuneType),
+    PC(Stereo),
+    PC(Panning),
+    PC(AmpVelocityScaleFunction),
+    PC(PunchStretch),
+    PC(PunchTime),
+    PC(PunchStretch),
+    PC(PunchVelocitySensing),
+    PC(FilterVelocityScale),
+    PC(FilterVelocityScaleFunction),
+
 
     {"nhr:", "::Returns the harmonic shifts",
         NULL, [](const char *, rtosc::RtData &d) {
