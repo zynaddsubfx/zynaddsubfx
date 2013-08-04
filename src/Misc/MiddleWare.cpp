@@ -605,8 +605,11 @@ class UI_Interface:public Fl_Osc_Interface
             if(handle)
                 ++handle;
 
+            int found_count = 0;
+
             for(auto pair:map) {
                 if(pair.first == msg) {
+                    found_count++;
                     const char *arg_str = rtosc_argument_string(msg);
 
                     //Always provide the raw message
@@ -631,6 +634,14 @@ class UI_Interface:public Fl_Osc_Interface
                                 handle);
                     }
                 }
+            }
+
+            if(found_count == 0 
+                    && strcmp(msg, "/vu-meter")
+                    && strcmp(msg, "undo_change")) {
+                fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
+                fprintf(stderr, "Unknown widget '%s'\n", msg);
+                fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             }
         };
 
