@@ -1,4 +1,4 @@
-#include "Fl_Osc_Slider.H"
+#include "Fl_Osc_VSlider.H"
 #include "Fl_Osc_Interface.h"
 #include "Fl_Osc_Pane.H"
 #include <cstdlib>
@@ -7,29 +7,34 @@
 #include <cassert>
 #include <sstream>
 
-Fl_Osc_Slider::Fl_Osc_Slider(int X, int Y, int W, int H, const char *label)
-    :Fl_Slider(X,Y,W,H,label), Fl_Osc_Widget(this), cb_data(NULL, NULL)
+Fl_Osc_VSlider::Fl_Osc_VSlider(int X, int Y, int W, int H, const char *label)
+    :Fl_Value_Slider(X,Y,W,H,label), Fl_Osc_Widget(this), cb_data(NULL, NULL)
 {
     //bounds(0.0f,1.0f);
-    Fl_Slider::callback(Fl_Osc_Slider::_cb);
+    Fl_Slider::callback(Fl_Osc_VSlider::_cb);
 }
 
-void Fl_Osc_Slider::init(std::string path_, char type_)
+void Fl_Osc_VSlider::init(std::string path_, char type_)
 {
     osc_type = type_;
     path = path_;
     oscRegister(path.c_str());
 }
 
-Fl_Osc_Slider::~Fl_Osc_Slider(void)
+Fl_Osc_VSlider::~Fl_Osc_VSlider(void)
 {}
 
-void Fl_Osc_Slider::OSC_value(float v)
+void Fl_Osc_VSlider::OSC_value(char v)
 {
     Fl_Slider::value(v+minimum());
 }
 
-void Fl_Osc_Slider::cb(void)
+void Fl_Osc_VSlider::OSC_value(float v)
+{
+    Fl_Slider::value(v+minimum());
+}
+
+void Fl_Osc_VSlider::cb(void)
 {
     const float val = Fl_Slider::value();
     if(osc_type == 'f')
@@ -44,18 +49,18 @@ void Fl_Osc_Slider::cb(void)
         cb_data.first(this, cb_data.second);
 }
 
-void Fl_Osc_Slider::callback(Fl_Callback *cb, void *p)
+void Fl_Osc_VSlider::callback(Fl_Callback *cb, void *p)
 {
     cb_data.first = cb;
     cb_data.second = p;
 }
 
-void Fl_Osc_Slider::update(void)
+void Fl_Osc_VSlider::update(void)
 {
     oscWrite(path, "");
 }
 
-void Fl_Osc_Slider::_cb(Fl_Widget *w, void *)
+void Fl_Osc_VSlider::_cb(Fl_Widget *w, void *)
 {
-    static_cast<Fl_Osc_Slider*>(w)->cb();
+    static_cast<Fl_Osc_VSlider*>(w)->cb();
 }

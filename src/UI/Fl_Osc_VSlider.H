@@ -1,21 +1,20 @@
 #pragma once
-#include <FL/Fl_Slider.H>
+#include <FL/Fl_Value_Slider.H>
 #include "Fl_Osc_Widget.H"
 #include <string>
 
 using std::string; //yes this is bad form FIXME
 
-class Fl_Osc_Slider:public Fl_Slider, public Fl_Osc_Widget
+class Fl_Osc_VSlider:public Fl_Value_Slider, Fl_Osc_Widget
 {
 
     public:
-        Fl_Osc_Slider(int X, int Y, int W, int H, const char *label = NULL);
-       // string name,
-        //        const char *metadata);
+        Fl_Osc_VSlider(int X, int Y, int W, int H, const char *label = NULL);
 
-        virtual ~Fl_Osc_Slider(void);
+        virtual ~Fl_Osc_VSlider(void);
+        void OSC_value(char);
         void OSC_value(float);
-        void init(std::string, char type = 'f');
+        void init(std::string, char type = 'c');
 
         //Refetch parameter information
         void update(void);

@@ -3,13 +3,14 @@
 #include "Fl_Osc_Widget.H"
 #include <string>
 
-class Fl_Osc_Choice:public Fl_Choice, Fl_Osc_Widget
+class Fl_Osc_Choice:public Fl_Choice, public Fl_Osc_Widget
 {
 
     public:
         Fl_Osc_Choice(int X, int Y, int W, int H, const char *label = NULL);
         virtual ~Fl_Osc_Choice(void);
-        void init(const char *path);
+        //Base is for braindead choices that don't actually start at zero
+        void init(const char *path, int base =0);
 
 
         //void OSC_value(float);
@@ -22,5 +23,6 @@ class Fl_Osc_Choice:public Fl_Choice, Fl_Osc_Widget
         void cb(void);
     private:
         std::string path;
+        int min;
         std::pair<Fl_Callback*, void*> cb_data;
 };

@@ -38,6 +38,7 @@ add_library(zynaddsubfx_gui STATIC
         Fl_Osc_Dial.cpp
         Fl_Osc_DialF.cpp
         Fl_Osc_Slider.cpp
+        Fl_Osc_VSlider.cpp
         Fl_Osc_Button.cpp
         Fl_Osc_Check.cpp
         Fl_Osc_Choice.cpp

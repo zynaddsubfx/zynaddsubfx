@@ -17,12 +17,13 @@ class Fl_Osc_Check:public Fl_Check_Button, public Fl_Osc_Widget
         virtual void OSC_value(bool);
         using Fl_Osc_Widget::OSC_value;
 
-        void init(Fl_Osc_Interface *osc, std::string loc);
-        void init(std::string loc);
+        void init(std::string loc, char type = 'T');
         void update(void);
+        void callback(Fl_Callback *cb, void *p = NULL);
         void cb(void);
         static void _cb(Fl_Widget *w, void *);
     private:
-        class Fl_Osc_Interface *osc;
-        std::string full_path;
+        std::string path;
+        std::pair<Fl_Callback*, void*> cb_data;
+        char type;
 };

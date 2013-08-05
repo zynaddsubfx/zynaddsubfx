@@ -54,6 +54,10 @@ void Fl_Osc_Widget::oscWrite(std::string path, const char *args, ...)
         printf("Args = ['%d']\n", rtosc_argument(buffer, 0).i);
     if(!strcmp(args, "f"))
         printf("Args = ['%f']\n", rtosc_argument(buffer, 0).f);
+    if(!strcmp(args, "T"))
+        printf("Args = [True]\n");
+    if(!strcmp(args, "F"))
+        printf("Args = [False]\n");
 }
 
 void Fl_Osc_Widget::oscWrite(std::string path)

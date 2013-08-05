@@ -1097,8 +1097,7 @@ if (kititem!=lastkititem){
       adnoteui=new ADnoteUI(part->kit[kititem].adpars, loc+"kit"+to_s(kititem)+"/adpars/", osc);
 
     if (part->kit[kititem].subpars) 
-       subnoteui=new SUBnoteUI(part->kit[kititem].subpars,
-       osc, loc+"kit"+to_s(kititem)+"/subpars/");
+       subnoteui=new SUBnoteUI(osc, loc+"kit"+to_s(kititem)+"/subpars/");
 
     if (part->kit[kititem].padpars) {
       char buffer[1024];

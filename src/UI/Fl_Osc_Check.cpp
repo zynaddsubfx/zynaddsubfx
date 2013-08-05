@@ -8,44 +8,42 @@
 #include <sstream>
 
 Fl_Osc_Check::Fl_Osc_Check(int X, int Y, int W, int H, const char *label)
-    :Fl_Check_Button(X,Y,W,H,label), Fl_Osc_Widget()
+    :Fl_Check_Button(X,Y,W,H,label), Fl_Osc_Widget(this), cb_data(NULL, NULL)
 {
-    callback(Fl_Osc_Check::_cb);
+    Fl_Check_Button::callback(Fl_Osc_Check::_cb);
 }
 
 Fl_Osc_Check::~Fl_Osc_Check(void)
-{
-    osc->removeLink(full_path, this);
-}
+{}
 
 void Fl_Osc_Check::OSC_value(bool v)
 {
     Fl_Check_Button::value(v);
 }
 
-void Fl_Osc_Check::init(std::string path)
+void Fl_Osc_Check::init(std::string path, char type)
 {
-    Fl_Osc_Pane *pane = fetch_osc_pane(this);
-    assert(pane);
-    osc = pane->osc;
-    init(osc,path);
-}
-
-void Fl_Osc_Check::init(Fl_Osc_Interface *osc, std::string path)
-{
-    Fl_Osc_Pane *pane = fetch_osc_pane(this);
-    full_path = pane->pane_name + path;
-    osc->createLink(full_path, this);
-    osc->requestValue(full_path);
+    this->path = path;
+    this->type = type;
+    oscRegister(path.c_str());
 }
 
 void Fl_Osc_Check::cb(void)
 {
-    osc->writeValue(full_path, (bool) value());
+    if(type == 'T')
+        oscWrite(path, value() ? "T" : "F");
+    else
+        oscWrite(path, "c", value());
 }
 
 void Fl_Osc_Check::update(void)
 {}
+
+void Fl_Osc_Check::callback(Fl_Callback *cb, void *p)
+{
+    cb_data.first = cb;
+    cb_data.second = p;
+}
 
 void Fl_Osc_Check::_cb(Fl_Widget *w, void *)
 {
