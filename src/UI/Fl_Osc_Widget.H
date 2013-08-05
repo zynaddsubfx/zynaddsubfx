@@ -23,6 +23,7 @@ class Fl_Osc_Widget
         //labeled forwarding methods
         virtual void OSC_value(float x, const char *);
         virtual void OSC_value(bool x, const char *);
+        virtual void OSC_value(int x, const char *);
         virtual void OSC_value(char x, const char *);
         virtual void OSC_value(unsigned x, void *v, const char *);
 

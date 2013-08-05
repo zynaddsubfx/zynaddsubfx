@@ -62,7 +62,6 @@ class PADnoteOvertonePosition: public Fl_Box, Fl_Osc_Widget
         virtual void OSC_value(unsigned N, void *data, const char *name)
             override
         {
-            printf("why hello there, I seem to have a '%s'\n", name);
             assert(N==(4*nsamples));
             float *d = (float*)data;
             if(!strcmp(name, "spectrum"))
@@ -74,7 +73,6 @@ class PADnoteOvertonePosition: public Fl_Box, Fl_Osc_Widget
         }
         virtual void OSC_value(char x, const char *name) override
         {
-            printf("whyy hello there, I seem to have a '%s'\n", name);
             assert(!strcmp(name, "mode"));
             mode = x;
             regenerateOvertones();

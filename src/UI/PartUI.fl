@@ -1102,7 +1102,7 @@ if (kititem!=lastkititem){
     if (part->kit[kititem].padpars) {
       char buffer[1024];
       snprintf(buffer, 1024, "%skit%d/padpars/", part_path.c_str(), kititem); 
-      padnoteui=new PADnoteUI(part->kit[kititem].padpars, buffer, osc);
+      padnoteui=new PADnoteUI(buffer, osc);
       }
 
 };

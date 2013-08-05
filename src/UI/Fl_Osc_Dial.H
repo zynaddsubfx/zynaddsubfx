@@ -4,7 +4,7 @@
 #include "Fl_Osc_Widget.H"
 #include <string>
 
-class Fl_Osc_Dial:public WidgetPDial, Fl_Osc_Widget
+class Fl_Osc_Dial:public WidgetPDial, public Fl_Osc_Widget
 {
 
     public:
@@ -18,6 +18,7 @@ class Fl_Osc_Dial:public WidgetPDial, Fl_Osc_Widget
         //Normal Initialization
         void init(const char *path);
         //void OSC_value(float);
+        void OSC_value(int);
         void OSC_value(char);
         using Fl_Osc_Widget::OSC_value;
 

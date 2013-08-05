@@ -24,7 +24,7 @@ Fl_Osc_Pane *fetch_osc_pane(Fl_Widget *w)
 }
 
 Fl_Osc_Dial::Fl_Osc_Dial(int X, int Y, int W, int H, const char *label)
-    :WidgetPDial(X,Y,W,H, label), Fl_Osc_Widget()
+    :WidgetPDial(X,Y,W,H, label), Fl_Osc_Widget(this)
 {
     bounds(0.0, 127.0f);
     WidgetPDial::callback(callback_fn);
@@ -33,13 +33,9 @@ Fl_Osc_Dial::Fl_Osc_Dial(int X, int Y, int W, int H, const char *label)
 
 void Fl_Osc_Dial::init(const char *path_)
 {
-    Fl_Osc_Pane *pane = fetch_osc_pane(this);
-    assert(pane);
-    osc = pane->osc;
     assert(osc);
-    loc = pane->pane_name;
     path = path_;
-    full_path = pane->pane_name + path;
+    full_path = loc + path;
     oscRegister(path_);
 };
         
@@ -63,6 +59,11 @@ void Fl_Osc_Dial::callback(Fl_Callback *cb, void *p)
     cb_data.second = p;
 }
 
+void Fl_Osc_Dial::OSC_value(int v)
+{
+    value(v+minimum());
+}
+
 void Fl_Osc_Dial::OSC_value(char v)
 {
     value(v+minimum());
@@ -77,7 +78,10 @@ void Fl_Osc_Dial::cb(void)
 {
     assert(osc);
 
-    oscWrite(path, "c", (char)(value()-minimum()));
+    if((maximum()-minimum()) == 127 || (maximum()-minimum()) == 255)
+        oscWrite(path, "c", (char)(value()-minimum()));
+    else
+        oscWrite(path, "i", (int)(value()-minimum()));
     
     if(cb_data.first)
         cb_data.first(this, cb_data.second);

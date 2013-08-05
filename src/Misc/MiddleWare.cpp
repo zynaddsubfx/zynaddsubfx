@@ -374,9 +374,12 @@ struct MiddleWareImpl
         //}
 
         PADnoteParameters::ports.dispatch(msg, d);
-        if(!d.matches)
+        if(!d.matches) {
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
             fprintf(stderr, "Unknown location '%s%s'<%s>\n",
                     path.c_str(), msg, rtosc_argument_string(msg));
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        }
 
         return true;
     }
@@ -397,9 +400,12 @@ struct MiddleWareImpl
         }
 
         OscilGen::ports.dispatch(msg, d);
-        if(!d.matches)
+        if(!d.matches) {
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
             fprintf(stderr, "Unknown location '%s%s'<%s>\n",
                     path.c_str(), msg, rtosc_argument_string(msg));
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        }
 
         return true;
     }
@@ -626,6 +632,11 @@ class UI_Interface:public Fl_Osc_Interface
                         //printf("'%s' => '%d'\n", msg, rtosc_argument(msg,0).i);
                         //fprintf(stderr, "tossing char to %p\n", pair.second);
                         pair.second->OSC_value((char)rtosc_argument(msg,0).i,
+                                handle);
+                    } else if(!strcmp(arg_str, "i")) {
+                        //printf("'%s' => '%d'\n", msg, rtosc_argument(msg,0).i);
+                        //fprintf(stderr, "tossing char to %p\n", pair.second);
+                        pair.second->OSC_value((int)rtosc_argument(msg,0).i,
                                 handle);
                     } else if(!strcmp(arg_str, "f")) {
                         //printf("'%s' => '%d'\n", msg, rtosc_argument(msg,0).i);

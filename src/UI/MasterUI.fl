@@ -510,11 +510,13 @@ if (result!=0) fl_alert("Error: Could not save the file.");}
             }
           }
         }
+        Fl_Box dummy {
+          code0 {win_root->osc = osc;}
+          code1 {win_root->pane_name = "/";}
+        }
         Fl_Dial mastervolumedial {
           label {Master Volume}
           tooltip {Master Volume} xywh {20 37 55 55} box ROUND_UP_BOX labelsize 9 align 130 maximum 127 step 1
-          code0 {win_root->osc = osc;}
-          code1 {win_root->pane_name = "/";}
           code2 {o->init("volume");}
           class Fl_Osc_Dial
         }

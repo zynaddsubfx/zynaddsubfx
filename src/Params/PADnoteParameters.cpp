@@ -61,6 +61,7 @@ static rtosc::Ports localPorts =
     rRecurp(GlobalFilter, "Post Filter"),
     PARAMC(PADnoteParameters, Pmode, mode,
             "0 - bandwidth, 1 - discrete 2 - continious"),
+    PC(Volume),
     PC(hp.base.type),
     PC(hp.base.par1),
     PC(hp.freqmult),
@@ -101,8 +102,23 @@ static rtosc::Ports localPorts =
     PC(FilterVelocityScale),
     PC(FilterVelocityScaleFunction),
 
+    {"Pbandwidth::i:c", NULL, NULL,
+        [](const char *msg, rtosc::RtData &d) {
+            PADnoteParameters *p = ((PADnoteParameters*)d.obj);
+            if(rtosc_narguments(msg)) {
+                p->setPbandwidth(rtosc_argument(msg, 0).i);
+            } else {
+                d.reply(d.loc, "i", p->Pbandwidth);
+            }}},
+    
+    {"bandwidthvalue:", NULL, NULL,
+        [](const char *, rtosc::RtData &d) {
+            PADnoteParameters *p = ((PADnoteParameters*)d.obj);
+            d.reply(d.loc, "f", p->setPbandwidth(p->Pbandwidth));
+        }},
 
-    {"nhr:", "::Returns the harmonic shifts",
+
+    {"nhr:", rDoc("Returns the harmonic shifts"),
         NULL, [](const char *, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
             const unsigned n = synth->oscilsize / 2;
@@ -111,7 +127,7 @@ static rtosc::Ports localPorts =
                 tmp[i] = p->getNhr(i);
             d.reply(d.loc, "b", n*sizeof(float), tmp);
             delete[] tmp;}},
-    {"profile:i", "::UI display of the harmonic profile",
+    {"profile:i", rDoc("UI display of the harmonic profile"),
         NULL, [](const char *m, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
             const unsigned n = rtosc_argument(m, 0).i;
@@ -120,7 +136,7 @@ static rtosc::Ports localPorts =
             d.reply(d.loc, "b", n*sizeof(float), tmp);
             d.reply(d.loc, "i", realbw);
             delete[] tmp;}},
-    {"sample#64:ifb", "::Nothing to see here", 0,
+    {"sample#64:ifb", rDoc("Nothing to see here"), 0,
         [](const char *m, rtosc::RtData d)
         {
             PADnoteParameters *p = (PADnoteParameters*)d.obj;
@@ -132,6 +148,38 @@ static rtosc::Ports localPorts =
             p->sample[n].smp      = *(float**)rtosc_argument(m,2).b.data;
 
             //XXX TODO memory managment (deallocation of smp buffer)
+        }},
+    //weird stuff for PCoarseDetune
+    {"detunevalue:", NULL, NULL, [](const char *, RtData &d)
+        {
+            PADnoteParameters *obj = (PADnoteParameters *)d.obj;
+            d.reply(d.loc, "f", getdetune(obj->PDetuneType, 0, obj->PDetune));
+        }},
+    {"octave::c:i", NULL, NULL, [](const char *msg, RtData &d)
+        {
+            PADnoteParameters *obj = (PADnoteParameters *)d.obj;
+            if(!rtosc_narguments(msg)) {
+                int k=obj->PCoarseDetune/1024;
+                if (k>=8) k-=16;
+                d.reply(d.loc, "i", k);
+            } else {
+                int k=(int) rtosc_argument(msg, 0).i;
+                if (k<0) k+=16;
+                obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
+            }
+        }},
+    {"coarsedetune::c:i", NULL, NULL, [](const char *msg, RtData &d)
+        {
+            PADnoteParameters *obj = (PADnoteParameters *)d.obj;
+            if(!rtosc_narguments(msg)) {
+                int k=obj->PCoarseDetune%1024;
+                if (k>=512) k-=1024;
+                d.reply(d.loc, "i", k);
+            } else {
+                int k=(int) rtosc_argument(msg, 0).i;
+                if (k<0) k+=1024;
+                obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
+            }
         }},
 };
 
