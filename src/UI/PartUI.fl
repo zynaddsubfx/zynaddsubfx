@@ -1084,9 +1084,9 @@ keylimitlist->value(val);} {selected
 };
 
 if (kititem!=lastkititem){
-    if (adnoteui!=NULL) delete (adnoteui);
-    if (subnoteui!=NULL) delete (subnoteui);   
-    if (padnoteui!=NULL) delete (padnoteui);
+    delete adnoteui;
+    delete subnoteui;   
+    delete padnoteui;
     adnoteui=NULL;subnoteui=NULL;padnoteui=NULL;
     lastkititem=kititem;
 
@@ -1094,15 +1094,13 @@ if (kititem!=lastkititem){
     if (kititem<0) return;
 
     if (part->kit[kititem].adpars)
-      adnoteui=new ADnoteUI(part->kit[kititem].adpars, loc+"kit"+to_s(kititem)+"/adpars/", osc);
+      adnoteui=new ADnoteUI(loc+"kit"+to_s(kititem)+"/adpars/", osc);
 
     if (part->kit[kititem].subpars) 
        subnoteui=new SUBnoteUI(osc, loc+"kit"+to_s(kititem)+"/subpars/");
 
     if (part->kit[kititem].padpars) {
-      char buffer[1024];
-      snprintf(buffer, 1024, "%skit%d/padpars/", part_path.c_str(), kititem); 
-      padnoteui=new PADnoteUI(buffer, osc);
+      padnoteui=new PADnoteUI(loc+"kit"+to_s(kititem)+"/padpars", osc);
       }
 
 };
@@ -1114,9 +1112,10 @@ if ((engine==1)&&(subnoteui!=NULL)) subnoteui->SUBparameters->show();
 if ((engine==2)&&(adnoteui!=NULL)) padnoteui->padnotewindow->show();} {}
   }
   Function {~PartUI()} {} {
-    code {if (adnoteui!=NULL) delete (adnoteui);
-if (subnoteui!=NULL) delete (subnoteui);
-if (padnoteui!=NULL) delete (padnoteui);
+    code {
+delete adnoteui;
+delete subnoteui;
+delete padnoteui;
 
 partgroup->hide();
 //delete(partgroup);
