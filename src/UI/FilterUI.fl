@@ -65,9 +65,9 @@ decl {\#include "common.H"} {public local
 decl {\#include "FormantFilterGraph.H"} {public local
 } 
 
-class FilterUI {open : {public Fl_Group,PresetsUI_}
+class FilterUI {open : {public Fl_Osc_Group,PresetsUI_}
 } {
-  Function {FilterUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
+  Function {FilterUI(int x,int y, int w, int h, const char *label=0):Fl_Osc_Group(x,y,w,h,label)} {} {
     code {nvowel=0;nformant=0;nseqpos=0;} {}
   }
   Function {~FilterUI()} {} {
@@ -87,8 +87,6 @@ delete (formantparswindow);} {}
         label P
         callback {/*presetsui->paste(pars,this);*/}
         xywh {203 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
-        code0 {filterui->osc = osc;}
-        code1 {filterui->base = loc;}
       }
       Fl_Group filterparamswindow {
         label {Filter Parameters}
@@ -254,7 +252,7 @@ delete (formantparswindow);} {}
         callback {/*presetsui->paste(pars,this,nvowel);*/}
         xywh {665 25 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
         code0 {formantparswindow->osc = osc;}
-        code1 {formantparswindow->base = loc;}
+        code1 {formantparswindow->base = loc();}
       }
       Fl_Group {} {open
         xywh {485 47 105 113} box THIN_UP_BOX
@@ -263,7 +261,7 @@ delete (formantparswindow);} {}
         Fl_Counter {} {
           label {Formant }
           callback {nformant=(int) o->value();
-          formantparsgroup->rebase(loc+"Pvowels"+to_s(nvowel)+"/Pformants"+to_s(nformant)+"/");
+          formantparsgroup->rebase(loc()+"Pvowels"+to_s(nvowel)+"/Pformants"+to_s(nformant)+"/");
 update_formant_window();
 formantfiltergraph->redraw();}
           xywh {545 80 40 15} type Simple labelfont 1 labelsize 10 align 4 minimum 0 maximum 127 step 1 textsize 10
@@ -273,7 +271,7 @@ formantfiltergraph->redraw();}
         Fl_Counter {} {
           label {Vowel no.}
           callback {nvowel=(int) o->value();
-          formantparsgroup->rebase(loc+"Pvowels"+to_s(nvowel)+"/Pformants"+to_s(nformant)+"/");
+          formantparsgroup->rebase(loc()+"Pvowels"+to_s(nvowel)+"/Pformants"+to_s(nformant)+"/");
 update_formant_window();
 formantfiltergraph->redraw();}
           xywh {545 55 40 20} type Simple labelfont 1 labelsize 10 align 4 minimum 0 maximum 127 step 1 textfont 1 textsize 11
@@ -467,10 +465,20 @@ if ((categ==0)||(categ==2)) {
 
 filterparamswindow->redraw();} {}
   }
-  Function {init(std::string alt_root_, Fl_Osc_Interface *osc_, std::string loc_)} {} {
+  Function {rebase(std::string new_base)} {open
+  } {
+    code {
+    printf("\\n\\n\\n\\nRABBIT HORSE\\n\\n\\n\\n");
+    printf("\\nNEW BASE: '%s'\\n", (new_base+ext).c_str());
+    Fl_Osc_Group::rebase(new_base);
+    formantparswindow->rebase(new_base+ext);
+  } {}
+  }
+  Function {init(std::string alt_root_, Fl_Osc_Interface *osc_, std::string base_, std::string ext_)} {} {
     code {alt_root = alt_root_;
-osc = osc_;
-loc = loc_;
+osc  = osc_;
+base = base_;
+ext  = ext_;
 
 assert(osc);
 
@@ -511,9 +519,5 @@ strchdial->when(0);} {}
   decl {std::string alt_root;} {private local
   }
   decl {int nvowel,nformant,nseqpos;} {private local
-  }
-  decl {Fl_Osc_Interface *osc;} {private local
-  }
-  decl {std::string loc;} {private local
   }
 } 

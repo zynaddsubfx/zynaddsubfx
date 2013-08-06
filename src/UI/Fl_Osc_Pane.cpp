@@ -28,8 +28,10 @@ void Fl_Osc_Window::rebase(std::string new_base)
     unsigned nchildren = this->children();
     for(unsigned i=0; i < nchildren; ++i) {
         Fl_Widget *widget = this->child(i);
-        if(Fl_Osc_Widget *o = dynamic_cast<Fl_Osc_Widget*>(widget))
+        if(Fl_Osc_Widget *o = dynamic_cast<Fl_Osc_Widget*>(widget)) {
+            printf("Osc_Window rebasing widget...\n");
             o->rebase(new_base);
+        }
         if(dynamic_cast<Fl_Osc_Group*>(widget))
             printf("Fl_Osc_Group\n");
     }
@@ -52,7 +54,7 @@ Fl_Osc_Group::Fl_Osc_Group(int x, int y, int w, int h, const char *L)
 {
     if(auto *p = find_osc_pane(this)) {
         osc  = p->osc;
-        base = p->base;
+        base = p->loc();
         assert(osc);
     }
 };
@@ -63,14 +65,26 @@ std::string Fl_Osc_Group::loc(void) const
     return base + ext;
 }
 
+static void nested_rebase(Fl_Group *g, std::string new_base)
+{
+    unsigned nchildren = g->children();
+    for(unsigned i=0; i < nchildren; ++i) {
+        Fl_Widget *widget = g->child(i);
+        if(Fl_Osc_Widget *o = dynamic_cast<Fl_Osc_Widget*>(widget)) {
+            printf("nested_rebase rebasing widget...\n");
+            o->rebase(new_base);
+        } else if(Fl_Osc_Group *o = dynamic_cast<Fl_Osc_Group*>(widget)) {
+            printf("Fl_Osc_Group\n");
+            o->rebase(new_base);
+        } else if(Fl_Group *o = dynamic_cast<Fl_Group*>(widget)) {
+            printf("nested_rebase recur...\n");
+            nested_rebase(o, new_base);
+        }
+
+    }
+}
+
 void Fl_Osc_Group::rebase(std::string new_base)
 {
-    unsigned nchildren = this->children();
-    for(unsigned i=0; i < nchildren; ++i) {
-        Fl_Widget *widget = this->child(i);
-        if(Fl_Osc_Widget *o = dynamic_cast<Fl_Osc_Widget*>(widget))
-            o->rebase(new_base);
-        if(dynamic_cast<Fl_Osc_Group*>(widget))
-            printf("Fl_Osc_Group\n");
-    }
+    nested_rebase(this, new_base+ext);
 }

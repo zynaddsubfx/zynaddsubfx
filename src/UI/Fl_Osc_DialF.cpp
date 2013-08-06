@@ -47,15 +47,13 @@ void Fl_Osc_DialF::init(const char *path)
     Fl_Osc_Pane *pane = fetch_osc_pane(this);
     assert(pane);
     osc = pane->osc;
-    full_path = pane->base + path;
-    osc->createLink(full_path, this);
-    osc->requestValue(full_path);
+    ext = path;
+    loc = pane->base;
+    oscRegister(path);
 };
 
 Fl_Osc_DialF::~Fl_Osc_DialF(void)
-{
-    osc->removeLink(full_path, this);
-}
+{}
 
 void Fl_Osc_DialF::callback(Fl_Callback *cb, void *p)
 {
@@ -65,20 +63,19 @@ void Fl_Osc_DialF::callback(Fl_Callback *cb, void *p)
 
 void Fl_Osc_DialF::OSC_value(float v)
 {
-    printf("Got a value of floating %f\n", v);
     value(v);
 }
         
 void Fl_Osc_DialF::update(void)
 {
-    osc->requestValue(full_path);
+    oscWrite(ext);
 }
 
 void Fl_Osc_DialF::cb(void)
 {
     assert(osc);
 
-    osc->writeValue(full_path, (float)value());
+    oscWrite(ext, "f", (float)value());
     
     if(cb_data.first)
         cb_data.first(this, cb_data.second);

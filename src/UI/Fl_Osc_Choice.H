@@ -22,7 +22,6 @@ class Fl_Osc_Choice:public Fl_Choice, public Fl_Osc_Widget
         
         void cb(void);
     private:
-        std::string path;
         int min;
         std::pair<Fl_Callback*, void*> cb_data;
 };

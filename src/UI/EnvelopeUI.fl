@@ -53,9 +53,9 @@ decl {\#include "common.H"} {public local
 decl {\#include "EnvelopeFreeEdit.h"} {public local
 } 
 
-class EnvelopeUI {open : {public Fl_Group,PresetsUI_}
+class EnvelopeUI {open : {public Fl_Osc_Group,PresetsUI_}
 } {
-  Function {EnvelopeUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
+  Function {EnvelopeUI(int x,int y, int w, int h, const char *label=0):Fl_Osc_Group(x,y,w,h,label)} {} {
     code {
 freemodeeditwindow=NULL;
 envADSR=NULL;
@@ -81,7 +81,7 @@ delete (freemodeeditwindow);} {}
         label C
         callback {/*presetsui->copy(env);*/}
         xywh {465 160 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
-        code0 {freemodeeditwindow->osc = osc; freemodeeditwindow->base = loc;}
+        code0 {freemodeeditwindow->osc = osc; freemodeeditwindow->base = loc();}
       }
       Fl_Button {} {
         label P
@@ -191,7 +191,6 @@ envfree->redraw();}
           label P
           callback {/*presetsui->paste(env,this);*/}
           xywh {167 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
-          code0 {envADSR->osc = osc; envADSR->base = loc;}
         }
         Fl_Dial e1adt {
           label {A.dt}
@@ -262,7 +261,6 @@ envfree->redraw();}
           label C
           callback {/*presetsui->copy(env);*/}
           xywh {155 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
-          code0 {envASR->osc = osc; envASR->base = loc;}
         }
         Fl_Button {} {
           label P
@@ -337,7 +335,6 @@ envfree->redraw();}
           label P
           callback {/*presetsui->paste(env,this);*/}
           xywh {237 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
-          code0 {envADSRfilter->osc = osc; envADSRfilter->base = loc;}
         }
         Fl_Dial e3aval {
           label {A.val}
@@ -417,7 +414,6 @@ envfree->redraw();}
           label C
           callback {/*presetsui->copy(env);*/}
           xywh {155 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
-          code0 {envASRbw->osc = osc; envASRbw->base = loc;}
         }
         Fl_Button {} {
           label P
@@ -488,7 +484,6 @@ envfree->redraw();}
           label E
           callback {freemodeeditwindow->show();}
           xywh {185 5 15 15} labelfont 1 labelsize 10
-          code0 {envfree->osc = osc; envfree->base = loc;}
         }
         Fl_Box freeeditsmall {
           label Envelope
@@ -510,11 +505,12 @@ envfree->redraw();}
       }
     }
   }
-  Function {init(int env_type, Fl_Osc_Interface *osc_, std::string loc_)} {open selected
+  Function {init(int env_type, Fl_Osc_Interface *osc_, std::string base_, std::string ext_)} {open selected
   } {
     code {
-    osc = osc_;
-    loc = loc_;
+    osc  = osc_;
+    base = base_;
+    ext  = ext_;
     Envmode = env_type;
     Pfreemode = false;
     Penvsustain = false;
@@ -523,7 +519,6 @@ envfree->redraw();}
     Pforcedrelease = 0;
     Plinearenvelope = 0;
     assert(osc);
-    assert(!loc.empty());
 make_ADSR_window();
 make_ASR_window();
 make_ADSRfilter_window();
@@ -545,6 +540,15 @@ freeedit->setpair(freeeditsmall);
 
 
 refresh();} {}
+  }
+  Function {rebase(std::string new_base)} {open
+  } {
+    code {
+    printf("\\n\\n\\n\\nCAT DOG\\n\\n\\n\\n");
+    printf("\\nNEW BASE: '%s'\\n", (new_base+ext).c_str());
+    Fl_Osc_Group::rebase(new_base);
+    freemodeeditwindow->rebase(new_base+ext);
+  } {}
   }
   Function {reinit()} {open
   } {
@@ -669,10 +673,6 @@ envwindow->show();} {}
   decl {int Pforcedrelease;}{private local
   }
   decl {int Plinearenvelope;}{private local
-  }
-  decl {Fl_Osc_Interface *osc;}{private local
-  }
-  decl {std::string loc;}{private local
   }
   decl {Fl_Group *envwindow;} {private local
   }

@@ -20,8 +20,8 @@ class Fl_Osc_Window:public Fl_Double_Window, public Fl_Osc_Pane
         Fl_Osc_Window(int w, int h, const char *L=0);
 
         void init(Fl_Osc_Interface *osc_, std::string loc_);
-        std::string loc(void) const;
-        void rebase(std::string new_base);
+        virtual std::string loc(void) const;
+        virtual void rebase(std::string new_base);
 };
 
 
@@ -32,8 +32,8 @@ class Fl_Osc_Group:public Fl_Osc_Pane, public Fl_Group
 
         std::string ext;
 
-        std::string loc(void) const;
-        void rebase(std::string new_base);
+        virtual std::string loc(void) const;
+        virtual void rebase(std::string new_base);
 };
 #endif
 

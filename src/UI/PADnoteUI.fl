@@ -79,7 +79,9 @@ location=location_;
 oscui=NULL;
 osc_i = osc_;
 resui=new ResonanceUI(osc_i, location+"resonance/");
-make_window();} {selected
+initialized = false;
+make_window();
+initialized = true;} {selected
     }
   }
   Function {make_window()} {open
@@ -110,7 +112,7 @@ make_window();} {selected
           } {
             Fl_Dial hpbasepar1 {
               label Width
-              callback {hpui->update();
+              callback {if(hpui) hpui->update();
 cbwidget->do_callback();}
               xywh {20 75 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
               code2 {o->init("Php.base.par1");}
@@ -118,8 +120,8 @@ cbwidget->do_callback();}
             }
             Fl_Choice hpbasetype {
               label {Base Type}
-              callback {hprofile->redraw();
-cbwidget->do_callback();}
+              callback {if(initialized) {hprofile->redraw();
+cbwidget->do_callback();}}
               xywh {15 45 75 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
               code0 {o->init("Php.base.type");}
               class Fl_Osc_Choice
@@ -166,8 +168,8 @@ cbwidget->do_callback();}
             } {
               Fl_Choice hpamptype {
                 label AmpMultiplier
-                callback {hprofile->redraw();
-cbwidget->do_callback();}
+                callback {if(initialized) {hprofile->redraw();
+cbwidget->do_callback();}}
                 xywh {15 175 70 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
                 code0 {o->init("Php.amp.type");}
                 class Fl_Osc_Choice
@@ -191,8 +193,8 @@ cbwidget->do_callback();}
               }
               Fl_Choice hpampmode {
                 label AmpMode
-                callback {hpui->update();
-cbwidget->do_callback();}
+                callback {if(initialized) {hpui->update();
+cbwidget->do_callback();}}
                 xywh {15 205 70 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
                 code0 {o->init("Php.amp.mode");}
                 class Fl_Osc_Choice
@@ -240,8 +242,8 @@ cbwidget->do_callback();}
               class Fl_Osc_Check
             }
             Fl_Choice hponehalf {
-              callback {hprofile->redraw();
-cbwidget->do_callback();}
+              callback {if(initialized) {hprofile->redraw();
+cbwidget->do_callback();}}
               xywh {10 143 80 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
               code0 {o->init("Php.onehalf");}
               class Fl_Osc_Choice
@@ -312,8 +314,8 @@ resui->setcbwidget(cbwidget,applybutton);}
           } {
             Fl_Choice hrpostype {
               label OvertonesPosition
-              callback {opui->update();
-cbwidget->do_callback();}
+              callback {if(initialized) {opui->update();
+cbwidget->do_callback();}}
               xywh {325 310 80 20} down_box BORDER_BOX labelsize 10 align 5 textsize 11
               code0 {o->init("Phrpos.type");}
               class Fl_Osc_Choice
@@ -375,7 +377,7 @@ cbwidget->do_callback();}
           }
           Fl_Choice bwscale {
             label {Bandwidth Scale}
-            callback {cbwidget->do_callback();}
+            callback {if(initialized) {cbwidget->do_callback();}}
             xywh {120 305 80 20} down_box BORDER_BOX labelsize 10 align 5 textsize 11
             code0 {o->init("Pbwscale");}
             class Fl_Osc_Choice
@@ -420,7 +422,7 @@ cbwidget->do_callback();}
           } {}
           Fl_Choice qsamplesize {
             label {Sample Size}
-            callback {cbwidget->do_callback();}
+            callback {if(initialized) {cbwidget->do_callback();}}
             xywh {375 190 115 20} down_box BORDER_BOX labelsize 10 align 5 textsize 11
             code0 {o->init("Pquality.samplesize");}
             class Fl_Osc_Choice
@@ -456,7 +458,7 @@ cbwidget->do_callback();}
           }
           Fl_Choice qsmpoct {
             label {smp/oct}
-            callback {cbwidget->do_callback();}
+            callback {if(initialized) cbwidget->do_callback();}
             xywh {430 155 45 20} down_box BORDER_BOX labelsize 11 align 5 textsize 11
             code0 {o->init("Pquality.smpoct");}
             class Fl_Osc_Choice
@@ -492,7 +494,7 @@ cbwidget->do_callback();}
           }
           Fl_Choice qoct {
             label {no.oct}
-            callback {cbwidget->do_callback();}
+            callback {if(initialized) cbwidget->do_callback();}
             xywh {480 155 45 20} down_box BORDER_BOX labelsize 11 align 5 textsize 11
             code0 {o->init("Pquality.oct");}
             class Fl_Osc_Choice
@@ -532,7 +534,7 @@ cbwidget->do_callback();}
           }
           Fl_Choice qbasenote {
             label base
-            callback {cbwidget->do_callback();}
+            callback {if(initialized) cbwidget->do_callback();}
             xywh {375 155 50 20} down_box BORDER_BOX labelsize 11 align 5 textsize 11
             code0 {o->init("Pquality.basenote");}
             class Fl_Osc_Choice
@@ -633,7 +635,7 @@ cbwidget->do_callback();}
             Fl_Group freqenv {
               label {PADSynth - Frequency Envelope} open
               xywh {10 315 205 70} box FLAT_BOX color 51 align 144
-              code0 {o->init(ENV_ASR, osc_i, location + "FreqEnvelope/");}
+              code0 {o->init(ENV_ASR, osc_i, location, "FreqEnvelope/");}
               class EnvelopeUI
             } {}
             Fl_Counter octave {
@@ -652,7 +654,7 @@ cbwidget->do_callback();}
             Fl_Group freqlfo {
               label {Frequency LFO     } open
               xywh {215 315 230 70} box FLAT_BOX color 47 align 144
-              code0 {o->init(osc_i, location + "FreqLfo/");}
+              code0 {o->init(osc_i, location, "FreqLfo/");}
               class LFOUI
             } {}
             Fl_Slider detune {
@@ -739,13 +741,13 @@ cbwidget->do_callback();}
             Fl_Group ampenv {
               label {PADSynth - Amplitude Envelope} open
               xywh {10 95 205 70} box FLAT_BOX color 51 align 144
-              code0 {o->init(ENV_ADSR, osc_i, location + "AmpEnvelope/");}
+              code0 {o->init(ENV_ADSR, osc_i, location, "AmpEnvelope/");}
               class EnvelopeUI
             } {}
             Fl_Group amplfo {
               label {Amplitude LFO     } open
               xywh {10 165 230 70} box FLAT_BOX color 47 align 144
-              code0 {o->init(osc_i, location+"AmpLfo/");}
+              code0 {o->init(osc_i, location, "AmpLfo/");}
               class LFOUI
             } {}
             Fl_Check_Button stereo {
@@ -763,20 +765,20 @@ cbwidget->do_callback();}
             Fl_Group filterenv {
               label {PADSynth - Filter Envelope} open
               xywh {250 130 275 70} box FLAT_BOX color 51 align 144
-              code0 {o->init(ENV_ADSR_FILTER, osc_i, location + "FilterEnvelope/");}
+              code0 {o->init(ENV_ADSR_FILTER, osc_i, location, "FilterEnvelope/");}
               class EnvelopeUI
             } {}
             Fl_Group filterlfo {
               label {Filter LFO     } open
               xywh {250 200 230 70} box FLAT_BOX color 47 align 144
-              code0 {o->init(osc_i, location+"FilterLfo/");}
+              code0 {o->init(osc_i, location, "FilterLfo/");}
               class LFOUI
             } {}
             Fl_Group filterui {
               label {PADsynth - Filter} open
               xywh {250 55 275 75} box FLAT_BOX color 50 align 144
               code0 {o->init(location + "PFilter",
-              osc_i, location + "GlobalFilter/");}
+              osc_i, location, "GlobalFilter/");}
               class FilterUI
             } {}
           }
@@ -874,6 +876,8 @@ padnotewindow->hide();
 delete(padnotewindow);} {}
   }
   decl {OscilEditor *oscui;} {public local
+  }
+  decl {bool initialized;}{private local
   }
   decl {Fl_Oscilloscope *osc;} {public local
   }

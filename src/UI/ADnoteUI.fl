@@ -79,7 +79,7 @@ class ADvoicelistitem {open : {public Fl_Osc_Group}
   Function {make_window()} {open private
   } {
     Fl_Window ADnoteVoiceListItem {open
-      private xywh {340 881 615 100} type Double box UP_FRAME
+      private xywh {346 881 615 100} type Double box UP_FRAME
       class Fl_Osc_Group visible
     } {
       Fl_Box {} {
@@ -213,9 +213,9 @@ class ADvoiceUI {open : {public Fl_Group}
       class Fl_Osc_Group visible
     } {
       Fl_Box {} {
-        label label selected
+        label label
         xywh {25 25 35 16}
-        code0 {ADnoteVoiceParameters->base = loc;}
+        code0 {ADnoteVoiceParameters->base = base+"voice"+to_s(nvoice)+"/";}
         code1 {ADnoteVoiceParameters->osc = osc_i;}
       }
       Fl_Group voiceparametersgroup {open
@@ -235,7 +235,7 @@ class ADvoiceUI {open : {public Fl_Group}
               Fl_Group voiceFMfreqenvgroup {
                 label {ADSynth Modulator - Frequency Envelope}
                 xywh {540 300 210 70} box FLAT_BOX color 51 align 144
-                code0 {o->init(ENV_ASR, osc_i, loc + "FMFreqEnvelope/");}
+                code0 {o->init(ENV_ASR, osc_i, loc, "FMFreqEnvelope/");}
                 class EnvelopeUI
               } {}
               Fl_Check_Button {} {
@@ -302,7 +302,7 @@ o->redraw();}
                 label {ADSynth Modulator - Amplitude Envelope} open
                 xywh {540 145 205 70} box FLAT_BOX color 51 align 144
                 code0 {o->init(//pars->VoicePar[nvoice].FMAmpEnvelope,
-                ENV_ADSR, osc_i, loc + "FMAmpEnvelope/");}
+                ENV_ADSR, osc_i, loc, "FMAmpEnvelope/");}
                 class EnvelopeUI
               } {}
               Fl_Check_Button {} {
@@ -434,7 +434,7 @@ o->redraw();}
               label {ADSynth Voice - Frequency Envelope} open
               xywh {10 305 205 70} box FLAT_BOX color 51 align 144
               code0 {o->init(//pars->VoicePar[nvoice].FreqEnvelope,
-              ENV_ASR, osc_i, loc + "FreqEnvelope/");}
+              ENV_ASR, osc_i, loc, "FreqEnvelope/");}
               class EnvelopeUI
             } {}
             Fl_Check_Button {} {
@@ -449,7 +449,7 @@ o->redraw();}
             Fl_Group voicefreqlfogroup {
               label {Frequency LFO     } open
               xywh {220 305 230 70} box FLAT_BOX color 47 align 144
-              code0 {o->init(osc_i, loc+"FreqLfo/");}
+              code0 {o->init(osc_i, loc,"FreqLfo/");}
               class LFOUI
             } {}
             Fl_Check_Button {} {
@@ -635,7 +635,7 @@ voiceonbutton->redraw();} open
             label {ADSynth Voice - Amplitude Envelope} open
             xywh {10 105 205 70} box FLAT_BOX color 51 align 144
             code0 {o->init(//pars->VoicePar[nvoice].AmpEnvelope,
-            ENV_ADSR, osc_i, loc + "AmpEnvelope/");}
+            ENV_ADSR, osc_i, loc, "AmpEnvelope/");}
             class EnvelopeUI
           } {}
           Fl_Dial {} {
@@ -656,7 +656,7 @@ o->redraw();}
           Fl_Group voiceamplfogroup {
             label {Amplitude LFO     } open
             xywh {10 180 230 75} box FLAT_BOX color 47 align 144
-            code0 {o->init(osc_i, loc + "AmpLfo/");}
+            code0 {o->init(osc_i, loc, "AmpLfo/");}
             class LFOUI
           } {}
           Fl_Check_Button {} {
@@ -682,14 +682,14 @@ o->redraw();}
           Fl_Group {} {
             label {ADsynth Voice - Filter} open
             xywh {250 30 275 75} box FLAT_BOX color 50 align 144
-            code0 {o->init("", osc_i, loc + "VoiceFilter/");}
+            code0 {o->init("", osc_i, loc, "VoiceFilter/");}
             class FilterUI
           } {}
           Fl_Group voicefilterenvgroup {
             label {ADSynth Voice - Filter Envelope} open
             xywh {250 115 275 70} box FLAT_BOX color 51 align 144
             code0 {o->init(//pars->VoicePar[nvoice].FilterEnvelope,
-            ENV_ADSR_FILTER, osc_i, loc + "FilterEnvelope/");}
+            ENV_ADSR_FILTER, osc_i, loc, "FilterEnvelope/");}
             class EnvelopeUI
           } {}
           Fl_Check_Button {} {
@@ -704,7 +704,7 @@ o->redraw();}
           Fl_Group voicefilterlfogroup {
             label {Filter LFO     } open
             xywh {250 190 230 70} box FLAT_BOX color 47 align 144
-            code0 {o->init(osc_i, loc + "FilterLfo/");}
+            code0 {o->init(osc_i, loc, "FilterLfo/");}
             class LFOUI
           } {}
           Fl_Check_Button {} {
@@ -794,7 +794,8 @@ oscedit=NULL;} {}
 assert(!loc_.empty());
 pars=parameters;
 nvoice=nvoice_;
-loc=loc_;
+loc=loc_+"voice"+to_s(nvoice)+"/";
+base = loc_;
 osc_i=osc_;
 make_window();
 end();
@@ -806,6 +807,12 @@ ADnoteVoiceParameters->show();} {}
 hide();
 delete(oscedit);
 //delete (ADnoteVoiceParameters);} {}
+  }
+  Function {change_voice(int nvoice_)} {open
+  } {
+    code {nvoice = nvoice_;
+ADnoteVoiceParameters->rebase(base+"voice"+to_s(nvoice)+"/");} {selected
+    }
   }
   decl {int nvoice;} {private local
   }
@@ -819,6 +826,8 @@ delete(oscedit);
   }
   decl {std::string loc;} {private local
   }
+  decl {std::string base;} {private local
+  }
   decl {Fl_Osc_Interface *osc_i;} {private local
   }
 } 
@@ -829,7 +838,7 @@ class ADnoteUI {open : {public PresetsUI_}
   } {
     Fl_Window ADnoteGlobalParameters {
       label {ADsynth Global Parameters of the Instrument} open
-      xywh {682 551 540 430} type Double
+      xywh {688 551 540 430} type Double
       class Fl_Osc_Window visible
     } {
       Fl_Box {} {
@@ -843,7 +852,7 @@ class ADnoteUI {open : {public PresetsUI_}
         Fl_Group freqenv {
           label {ADSynth Global - Frequency Envelope} open
           xywh {10 320 205 70} box FLAT_BOX color 51 align 144
-          code0 {o->init(ENV_ASR, osc, loc + "global/FreqEnvelope/");}
+          code0 {o->init(ENV_ASR, osc, loc, "global/FreqEnvelope/");}
           class EnvelopeUI
         } {}
         Fl_Counter octave {
@@ -862,7 +871,7 @@ class ADnoteUI {open : {public PresetsUI_}
         Fl_Group freqlfo {
           label {Frequency LFO     } open
           xywh {220 320 230 70} box FLAT_BOX color 47 align 144
-          code0 {o->init(osc, loc + "global/FreqLfo/");}
+          code0 {o->init(osc, loc, "global/FreqLfo/");}
           class LFOUI
         } {}
         Fl_Slider detune {
@@ -948,13 +957,13 @@ for (int i=0;i<NUM_VOICES;i++){
         Fl_Group ampenv {
           label {ADSynth Global - Amplitude Envelope} open
           xywh {10 75 205 70} box FLAT_BOX color 51 align 144
-          code0 {o->init(ENV_ADSR, osc, loc + "global/AmpEnvelope/");}
+          code0 {o->init(ENV_ADSR, osc, loc, "global/AmpEnvelope/");}
           class EnvelopeUI
         } {}
         Fl_Group amplfo {
           label {Amplitude LFO          } open
           xywh {10 150 230 70} box FLAT_BOX color 47 align 144
-          code0 {o->init(osc, loc + "global/AmpLfo/");}
+          code0 {o->init(osc, loc, "global/AmpLfo/");}
           class LFOUI
         } {}
         Fl_Check_Button rndgrp {
@@ -971,20 +980,20 @@ for (int i=0;i<NUM_VOICES;i++){
         Fl_Group filterenv {
           label {ADSynth Global - Filter Envelope} open
           xywh {255 118 275 70} box FLAT_BOX color 51 align 144
-          code0 {o->init(ENV_ADSR_FILTER, osc, loc + "global/FilterEnvelope/");}
+          code0 {o->init(ENV_ADSR_FILTER, osc, loc, "global/FilterEnvelope/");}
           class EnvelopeUI
         } {}
         Fl_Group filterlfo {
           label {Filter LFO} open
           xywh {255 195 230 70} box FLAT_BOX color 47 align 144
-          code0 {o->init(osc, loc + "global/FilterLfo/");}
+          code0 {o->init(osc, loc, "global/FilterLfo/");}
           class LFOUI
         } {}
         Fl_Group filterui {
           label {ADsynth Global - Filter} open
           xywh {255 35 275 75} box FLAT_BOX color 50 align 144
           code0 {o->init(loc + "global/PFilter",
-          osc, loc + "global/GlobalFilter/");}
+          osc, loc, "global/GlobalFilter/");}
           class FilterUI
         } {}
       }
@@ -1031,7 +1040,7 @@ resui->resonancewindow->show();}
     }
     Fl_Window ADnoteVoice {
       label {ADsynth Voice Parameters} open
-      xywh {42 361 765 620} type Double
+      xywh {48 361 765 620} type Double
       class Fl_Osc_Window visible
     } {
       Fl_Box {} {
@@ -1041,7 +1050,7 @@ resui->resonancewindow->show();}
       }
       Fl_Group advoice {open
         xywh {0 0 765 585}
-        code0 {o->init(pars,nvoice,loc+"voice"+to_s(nvoice)+"/", osc);/*Here*/}
+        code0 {o->init(pars,nvoice,loc, osc);}
         code1 {o->show();}
         class ADvoiceUI
       } {}
@@ -1053,6 +1062,7 @@ resui->resonancewindow->show();}
       Fl_Counter currentvoicecounter {
         label {Current Voice}
         callback {nvoice=(int)o->value()-1;
+/*
 advoice->hide();
 ADnoteVoice->remove(advoice);
 delete advoice;
@@ -1060,7 +1070,9 @@ advoice=new ADvoiceUI(0,0,765,585);
 ADnoteVoice->add(advoice);
 advoice->init(pars,nvoice,loc+"voice"+to_s(nvoice)+"/", osc);
 advoice->show();
-ADnoteVoice->redraw();}
+ADnoteVoice->redraw();
+*/
+advoice->change_voice(nvoice);}
         xywh {10 590 130 25} type Simple labelfont 1 align 8 minimum 0 maximum 2 step 1 value 1 textfont 1 textsize 13
         code0 {o->bounds(1,NUM_VOICES);}
       }

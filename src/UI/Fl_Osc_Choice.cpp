@@ -33,7 +33,7 @@ Fl_Osc_Choice::Fl_Osc_Choice(int X, int Y, int W, int H, const char *label)
 void Fl_Osc_Choice::init(const char *path_, int base)
 {
     min = base;
-    path = path_;
+    ext = path_;
     Fl_Osc_Pane *pane = fetch_osc_pane(this);
     assert(pane);
     assert(pane->osc);
@@ -46,7 +46,6 @@ Fl_Osc_Choice::~Fl_Osc_Choice(void)
         
 void Fl_Osc_Choice::callback(Fl_Callback *cb, void *p)
 {
-    puts("Fl_Osc_Choice cb");
     cb_data.first = cb;
     cb_data.second = p;
 }
@@ -54,12 +53,14 @@ void Fl_Osc_Choice::callback(Fl_Callback *cb, void *p)
 void Fl_Osc_Choice::OSC_value(char v)
 {
     value(v-min);
+    if(cb_data.first)
+        cb_data.first(this, cb_data.second);
 }
 
 void Fl_Osc_Choice::cb(void)
 {
     assert(osc);
-    oscWrite(path, "c", value()+min);
+    oscWrite(ext, "c", value()+min);
     if(cb_data.first)
         cb_data.first(this, cb_data.second);
 }
@@ -67,6 +68,6 @@ void Fl_Osc_Choice::cb(void)
 void Fl_Osc_Choice::update(void)
 {
     assert(osc);
-    oscWrite(path);
+    oscWrite(ext);
 }
 

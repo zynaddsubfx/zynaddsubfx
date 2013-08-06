@@ -204,7 +204,7 @@ class SUBnoteUI {open : {public PresetsUI_}
         Fl_Group ampenv {
           label {SUBsynth - Amplitude Envelope} open
           xywh {10 65 205 70} box FLAT_BOX color 51 align 144
-          code0 {o->init(ENV_ADSR, osc, loc + "AmpEnvelope/");}
+          code0 {o->init(ENV_ADSR, osc, loc, "AmpEnvelope/");}
           class EnvelopeUI
         } {}
       }
@@ -271,7 +271,7 @@ class SUBnoteUI {open : {public PresetsUI_}
         Fl_Group freqenvelopegroup {
           label {SUBsynth - Frequency Envelope} open
           xywh {445 65 205 70} box FLAT_BOX color 51 align 144
-          code0 {o->init(ENV_ASR, osc, loc + "FreqEnvelope/");}
+          code0 {o->init(ENV_ASR, osc, loc, "FreqEnvelope/");}
           class EnvelopeUI
         } {}
         Fl_Check_Button freqee {
@@ -358,7 +358,7 @@ SUBparameters->redraw();}
         Fl_Group bandwidthenvelopegroup {
           label {SUBsynth - BandWidth Envelope} open selected
           xywh {225 65 205 70} box FLAT_BOX color 51 align 144
-          code0 {o->init(ENV_ADSR_BW, osc, loc + "BandWidthEnvelope/");}
+          code0 {o->init(ENV_ADSR_BW, osc, loc, "BandWidthEnvelope/");}
           class EnvelopeUI
         } {}
         Fl_Check_Button bwee {
@@ -391,13 +391,13 @@ bandwidthsettingsui->redraw();}
         Fl_Group filterenv {
           label {SUBsynth - Filter Envelope} open
           xywh {445 250 275 70} box FLAT_BOX color 51 align 144
-          code0 {o->init(ENV_ADSR_FILTER, osc, loc + "GlobalFilterEnvelope/");}
+          code0 {o->init(ENV_ADSR_FILTER, osc, loc, "GlobalFilterEnvelope/");}
           class EnvelopeUI
         } {}
         Fl_Group filterui {
           label {SUBsynthl - Filter} open
           xywh {445 165 275 75} box FLAT_BOX color 50 align 144
-          code0 {o->init(loc + "PGlobalFilter" , osc, loc + "GlobalFilter/");}
+          code0 {o->init(loc + "PGlobalFilter" , osc, loc, "GlobalFilter/");}
           class FilterUI
         } {}
       }

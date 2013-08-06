@@ -23,7 +23,6 @@ class Fl_Osc_Check:public Fl_Check_Button, public Fl_Osc_Widget
         void cb(void);
         static void _cb(Fl_Widget *w, void *);
     private:
-        std::string path;
         std::pair<Fl_Callback*, void*> cb_data;
         char type;
 };

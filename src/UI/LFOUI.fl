@@ -41,9 +41,9 @@ decl {\#include "PresetsUI.h"} {public local
 decl {\#include "common.H"} {public local
 } 
 
-class LFOUI {open : {public Fl_Group, PresetsUI_}
+class LFOUI {open : {public Fl_Osc_Group, PresetsUI_}
 } {
-  Function {LFOUI(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {open
+  Function {LFOUI(int x,int y, int w, int h, const char *label=0):Fl_Osc_Group(x,y,w,h,label)} {open
   } {
     code {} {}
   }
@@ -67,7 +67,7 @@ hide();} {}
         Fl_Dial freq {
           label {Freq.} selected
           tooltip {LFO Frequency} xywh {5 20 30 30} box ROUND_UP_BOX labelsize 10 step 1e-05
-          code0 {lfoparamswindow->osc=osc;lfoparamswindow->base=loc;o->init("Pfreq");}
+          code0 {o->init("Pfreq");}
           class Fl_Osc_DialF
         }
         Fl_Dial intensity {
@@ -172,9 +172,10 @@ randomness->update();
 freqrand->update();
 LFOtype->update();} {}
   }
-  Function {init(Fl_Osc_Interface *osc_, std::string loc_)} {open
+  Function {init(Fl_Osc_Interface *osc_, std::string base_, std::string ext_)} {open
   } {
-    code {loc = loc_;
+    code {base = base_;
+    ext = ext_;
 osc = osc_;
 
 make_window();
@@ -185,9 +186,5 @@ refresh();
 lfoui->resize(this->x(),this->y(),this->w(),this->h());
 
 lfoparamswindow->label(this->label());} {}
-  }
-  decl {Fl_Osc_Interface *osc;} {private local
-  }
-  decl {std::string loc;} {private local
   }
 } 

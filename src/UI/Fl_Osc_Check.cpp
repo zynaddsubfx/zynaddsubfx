@@ -26,7 +26,7 @@ void Fl_Osc_Check::OSC_value(bool v)
 
 void Fl_Osc_Check::init(std::string path, char type)
 {
-    this->path = path;
+    this->ext = path;
     this->type = type;
     oscRegister(path.c_str());
 }
@@ -34,9 +34,9 @@ void Fl_Osc_Check::init(std::string path, char type)
 void Fl_Osc_Check::cb(void)
 {
     if(type == 'T')
-        oscWrite(path, value() ? "T" : "F");
+        oscWrite(ext, value() ? "T" : "F");
     else
-        oscWrite(path, "c", value());
+        oscWrite(ext, "c", value());
 
     if(cb_data.first)
         cb_data.first(this, cb_data.second);
