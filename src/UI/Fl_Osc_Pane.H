@@ -13,7 +13,7 @@ class Fl_Osc_Pane
         std::string pane_name;
 };
 
-class Fl_Osc_Window:public Fl_Osc_Pane, public Fl_Double_Window
+class Fl_Osc_Window:public Fl_Double_Window, public Fl_Osc_Pane
 {
     public:
         Fl_Osc_Window(int w, int h, const char *L=0)
@@ -48,6 +48,7 @@ class Fl_Osc_Group:public Fl_Osc_Pane, public Fl_Group
             if(auto *p = find_osc_pane(this)) {
                 osc = p->osc;
                 pane_name = p->pane_name;
+                assert(osc);
             }
         };
 };

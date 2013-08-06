@@ -53,6 +53,93 @@ static Ports voicePorts = {
     rRecurp(FMFreqEnvelope, "Modulator Frequency Envelope"),
     rRecurp(FMAmpEnvelope,  "Modulator Amplitude Envelope"),
     rRecurp(VoiceFilter,    "Optional Voice Filter"),
+
+    rToggle(Enabled, "Voice Enable"),
+    rParam(Unison_size, "Number of subvoices"),
+    rParam(Unison_frequency_spread, "Subvoice detune"),
+    rParam(Unison_stereo_spread, "Subvoice L/R Separation"),
+    rParam(Unison_vibratto, "Subvoice vibratto"),
+    rParam(Unison_vibratto_speed, "Subvoice vibratto speed"),
+    rOption(Unison_invert_phase, rOptions(none, random, 50%, 33%, 25%), "Subvoice Phases"),
+    rOption(Type, rOptions(Sound,Noise), "Type of Sound"),
+    rParam(PDelay, "Voice Startup Delay"),
+    rToggle(Presonance, "Resonance Enable"),
+    rParam(Pextoscil, "External Oscilator Selection"),
+    rParam(PextFMoscil, "External FM Oscilator Selection"),
+    rParam(Poscilphase, "Oscillator Phase"),
+    rParam(PFMoscilphase, "FM Oscillator Phase"),
+    rToggle(Pfilterbypass, "Filter Bypass"),
+
+    //Freq Stuff
+    rToggle(Pfixedfreq,           "If frequency is fixed"),
+    rParam(PfixedfreqET,          "Equal Tempermant Parameter"),
+    rParamI(PDetune,              "Fine Detune"),
+    rParamI(PCoarseDetune,        "Coarse Detune"),
+    rParam(PDetuneType,           "Magnitude of Detune"),
+    rToggle(PFreqEnvelopeEnabled, "Frequency Envelope Enable"),
+    rToggle(PFreqLfoEnabled,      "Frequency LFO Enable"),
+
+    //Amplitude Stuff
+    rParam(PPanning,                  "Panning"),
+    rParam(PVolume,                   "Volume"),
+    rToggle(PVolumeminus,             "Signal Inverter"), //do we really need this??
+    rParam(PAmpVelocityScaleFunction, "Velocity Sensing"),
+    rToggle(PAmpEnvelopeEnabled,      "Amplitude Envelope Enable"),
+    rToggle(PAmpLfoEnabled,           "Amplitude LFO Enable"),
+
+    //Filter Stuff
+    rToggle(PFilterEnabled,         "Filter Enable"),
+    rToggle(PFilterEnvelopeEnabled, "Filter Envelope Enable"),
+    rToggle(PFilterLfoEnabled,      "Filter LFO Enable"),
+
+
+    //Modulator Stuff
+    rToggle(PFMEnabled,              "Modulator Enable"),
+    rParamI(PFMVoice,                "Modulator Oscillator Selection"),
+    rParam(PFMVolume,                "Modulator Magnitude"),
+    rParam(PFMVolumeDamp,            "Modulator HF dampening"),
+    rParam(PFMVelocityScaleFunction, "Modulator Velocity Function"),
+    rParamI(PFMDetune,               "Modulator Fine Detune"),
+    rParamI(PFMCoarseDetune,         "Modulator Coarse Detune"),
+    rParam(PFMDetuneType,            "Modulator Detune Magnitude"),
+    rToggle(PFMFreqEnvelopeEnabled,  "Modulator Frequency Envelope"),
+    rToggle(PFMAmpEnvelopeEnabled,   "Modulator Amplitude Envelope"),
+
+    
+    //weird stuff for PCoarseDetune
+    {"detunevalue:", NULL, NULL, [](const char *, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            //TODO check if this is accurate or if PCoarseDetune is utilized
+            //TODO do the same for the other engines
+            d.reply(d.loc, "f", getdetune(obj->PDetuneType, 0, obj->PDetune));
+        }},
+    {"octave::c:i", NULL, NULL, [](const char *msg, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            if(!rtosc_narguments(msg)) {
+                int k=obj->PCoarseDetune/1024;
+                if (k>=8) k-=16;
+                d.reply(d.loc, "i", k);
+            } else {
+                int k=(int) rtosc_argument(msg, 0).i;
+                if (k<0) k+=16;
+                obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
+            }
+        }},
+    {"coarsedetune::c:i", NULL, NULL, [](const char *msg, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            if(!rtosc_narguments(msg)) {
+                int k=obj->PCoarseDetune%1024;
+                if (k>=512) k-=1024;
+                d.reply(d.loc, "i", k);
+            } else {
+                int k=(int) rtosc_argument(msg, 0).i;
+                if (k<0) k+=1024;
+                obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
+            }
+        }},
 };
 
 #undef  rObject
@@ -71,8 +158,8 @@ static Ports globalPorts = {
     rToggle(PStereo, "Mono/Stereo Enable"),
 
     //Frequency
-    rParam(PDetune, "Fine Detune"),
-    rParam(PCoarseDetune, "Coarse Detune"),
+    rParamI(PDetune,       "Fine Detune"),
+    rParamI(PCoarseDetune, "Coarse Detune"),
     rParam(PDetuneType,   "Detune Scaling Type"),
     rParam(PBandwidth,    "Relative Fine Detune Gain"),
 
@@ -94,6 +181,38 @@ static Ports globalPorts = {
     //Resonance
     rParam(Hrandgrouping, "How randomness is applied to multiple voices using the same oscil"),
 
+    //weird stuff for PCoarseDetune
+    {"detunevalue:", NULL, NULL, [](const char *, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            d.reply(d.loc, "f", getdetune(obj->PDetuneType, 0, obj->PDetune));
+        }},
+    {"octave::c:i", NULL, NULL, [](const char *msg, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            if(!rtosc_narguments(msg)) {
+                int k=obj->PCoarseDetune/1024;
+                if (k>=8) k-=16;
+                d.reply(d.loc, "i", k);
+            } else {
+                int k=(int) rtosc_argument(msg, 0).i;
+                if (k<0) k+=16;
+                obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
+            }
+        }},
+    {"coarsedetune::c:i", NULL, NULL, [](const char *msg, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            if(!rtosc_narguments(msg)) {
+                int k=obj->PCoarseDetune%1024;
+                if (k>=512) k-=1024;
+                d.reply(d.loc, "i", k);
+            } else {
+                int k=(int) rtosc_argument(msg, 0).i;
+                if (k<0) k+=1024;
+                obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
+            }
+        }},
 
 };
 
