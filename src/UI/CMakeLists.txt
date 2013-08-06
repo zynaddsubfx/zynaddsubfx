@@ -34,6 +34,7 @@ add_library(zynaddsubfx_gui STATIC
 	${zynaddsubfx_gui_FLTK_UI_SRCS}
         NioUI.cpp
         WidgetPDial.cpp
+        Fl_Osc_Pane.cpp
         Fl_Osc_Widget.cpp
         Fl_Osc_Dial.cpp
         Fl_Osc_DialF.cpp

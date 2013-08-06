@@ -300,10 +300,6 @@ void FormantFilterGraph::formantfilterH(int nvowel, int nfreqs, float *freqs)
         else
             freqs[i] = -90.0f;
     }
-
-    for(int i = 0; i < nfreqs; ++i) {
-        printf("[%d] => %f\n", i, freqs[i]);
-    }
 }
 
 /*

@@ -67,7 +67,7 @@ hide();} {}
         Fl_Dial freq {
           label {Freq.} selected
           tooltip {LFO Frequency} xywh {5 20 30 30} box ROUND_UP_BOX labelsize 10 step 1e-05
-          code0 {lfoparamswindow->osc=osc;lfoparamswindow->pane_name=loc;o->init("Pfreq");}
+          code0 {lfoparamswindow->osc=osc;lfoparamswindow->base=loc;o->init("Pfreq");}
           class Fl_Osc_DialF
         }
         Fl_Dial intensity {

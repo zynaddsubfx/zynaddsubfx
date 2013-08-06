@@ -18,7 +18,10 @@ Fl_Osc_Check::~Fl_Osc_Check(void)
 
 void Fl_Osc_Check::OSC_value(bool v)
 {
-    Fl_Check_Button::value(v);
+    value(v);
+
+    if(cb_data.first)
+        cb_data.first(this, cb_data.second);
 }
 
 void Fl_Osc_Check::init(std::string path, char type)
@@ -34,6 +37,9 @@ void Fl_Osc_Check::cb(void)
         oscWrite(path, value() ? "T" : "F");
     else
         oscWrite(path, "c", value());
+
+    if(cb_data.first)
+        cb_data.first(this, cb_data.second);
 }
 
 void Fl_Osc_Check::update(void)

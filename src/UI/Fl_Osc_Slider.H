@@ -15,6 +15,7 @@ class Fl_Osc_Slider:public Fl_Slider, public Fl_Osc_Widget
 
         virtual ~Fl_Osc_Slider(void);
         void OSC_value(float);
+        void OSC_value(char);
         void init(std::string, char type = 'f');
 
         //Refetch parameter information

@@ -16,6 +16,7 @@ class Fl_Osc_Widget
 
         //Callback methods
         virtual void OSC_value(float);
+        virtual void OSC_value(bool);
         virtual void OSC_value(int);
         virtual void OSC_value(char);
         virtual void OSC_value(unsigned,void*);
@@ -30,13 +31,18 @@ class Fl_Osc_Widget
         //Raw messages
         virtual void OSC_raw(const char *);
         
-        
         //Widget methods
         void oscWrite(std::string path, const char *args, ...);
         void oscWrite(std::string path);
         void oscRegister(const char *path);
 
+        //Smoothly change the base path
+        void rebase(std::string new_base);
+
+        //Base path
         std::string loc;
+        //Extension
+        std::string ext;
         Fl_Osc_Interface *osc;
     protected:
         Fl_Osc_Pane *fetch_osc_pane(Fl_Widget *w);

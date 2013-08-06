@@ -37,7 +37,7 @@ class PADnoteOvertonePosition: public Fl_Box, Fl_Osc_Widget
             Fl_Osc_Pane *og  = fetch_osc_pane(this);
             assert(og);
 
-            base_path = og->pane_name;
+            base_path = og->base;
             osc = og->osc;
             assert(osc);
 

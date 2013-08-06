@@ -35,16 +35,20 @@ class Fl_Oscilloscope : public Fl_Box, Fl_Osc_Widget
             Fl_Osc_Pane *og  = fetch_osc_pane(this);
             assert(og);
 
-            loc = og->pane_name + loc + (base_waveform_p ? "base-waveform": "waveform");
+            loc = og->base + loc + (base_waveform_p ? "base-waveform": "waveform");
             osc = og->osc;
             assert(osc);
 
+            printf("\n\n\n");
+            printf("HELLO I AM HIM AT ADDRESS '%s'\n", loc.c_str());
+            printf("\n\n\n");
             osc->createLink(loc, this);
             osc->requestValue(loc);
         }
 
         void update(void)
         {
+            printf("HELLO I AM HIM UPDATING AT ADDRESS '%s'\n", loc.c_str());
             osc->requestValue(loc);
         }
 

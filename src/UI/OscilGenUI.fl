@@ -247,7 +247,7 @@ class OscilEditor {open : {public PresetsUI_}
 //};}
           xywh {305 285 60 20} box THIN_UP_BOX labelfont 1
           code0 {if(adnotep) o->hide();}
-          code1 {dummy->pane_name = loc;}
+          code1 {dummy->base = loc;}
           code2 {dummy->osc = osc;}
         }
         Fl_Group oscildisplaygroup {open
@@ -338,7 +338,7 @@ redrawoscil();}
         }
         Fl_Group basefuncdisplaygroup {open
           xywh {370 10 360 300} box UP_FRAME
-          code0 {o->pane_name = loc;}
+          code0 {o->base = loc;}
           code1 {o->osc = osc;}
           code2 {assert(osc);}
           class Fl_Osc_Group

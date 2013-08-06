@@ -29,6 +29,11 @@ void Fl_Osc_Slider::OSC_value(float v)
     Fl_Slider::value(v+minimum());
 }
 
+void Fl_Osc_Slider::OSC_value(char v)
+{
+    Fl_Slider::value(v+minimum());
+}
+
 void Fl_Osc_Slider::cb(void)
 {
     const float val = Fl_Slider::value();

@@ -34,8 +34,7 @@ Fl_Osc_Dial::Fl_Osc_Dial(int X, int Y, int W, int H, const char *label)
 void Fl_Osc_Dial::init(const char *path_)
 {
     assert(osc);
-    path = path_;
-    full_path = loc + path;
+    ext = path_;
     oscRegister(path_);
 };
         
@@ -46,7 +45,6 @@ void Fl_Osc_Dial::alt_init(std::string base, std::string path_)
     osc = pane->osc;
     assert(osc);
     loc  = base;
-    full_path = loc + path_;
     oscRegister(path_.c_str());
 }
 
@@ -71,7 +69,7 @@ void Fl_Osc_Dial::OSC_value(char v)
         
 void Fl_Osc_Dial::update(void)
 {
-    osc->requestValue(full_path);
+    osc->requestValue(loc+ext);
 }
 
 void Fl_Osc_Dial::cb(void)
@@ -79,9 +77,9 @@ void Fl_Osc_Dial::cb(void)
     assert(osc);
 
     if((maximum()-minimum()) == 127 || (maximum()-minimum()) == 255)
-        oscWrite(path, "c", (char)(value()-minimum()));
+        oscWrite(ext, "c", (char)(value()-minimum()));
     else
-        oscWrite(path, "i", (int)(value()-minimum()));
+        oscWrite(ext, "i", (int)(value()-minimum()));
     
     if(cb_data.first)
         cb_data.first(this, cb_data.second);

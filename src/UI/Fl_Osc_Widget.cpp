@@ -10,7 +10,7 @@ Fl_Osc_Widget:: Fl_Osc_Widget(Fl_Widget *self)
     assert(fetch_osc_pane(self));
     if(auto *pane = fetch_osc_pane(self)) {
         osc = pane->osc;
-        loc = pane->pane_name;
+        loc = pane->loc();
     }
     assert(osc);
 }
@@ -22,6 +22,7 @@ Fl_Osc_Widget::~Fl_Osc_Widget(void)
 };
 
 void Fl_Osc_Widget::OSC_value(float) {}
+void Fl_Osc_Widget::OSC_value(bool) {}
 void Fl_Osc_Widget::OSC_value(int) {}
 void Fl_Osc_Widget::OSC_value(char) {}
 void Fl_Osc_Widget::OSC_value(unsigned,void*) {}
@@ -81,4 +82,12 @@ Fl_Osc_Pane *Fl_Osc_Widget::fetch_osc_pane(Fl_Widget *w)
     if(pane)
         return pane;
     return fetch_osc_pane(w->parent());
+}
+
+
+void Fl_Osc_Widget::rebase(std::string new_base)
+{
+    osc->renameLink(loc+ext, new_base+ext, this);
+    loc = new_base;
+    osc->requestValue(loc+ext);
 }

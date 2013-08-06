@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FL_OSC_PANE_H
+#define FL_OSC_PANE_H
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Double_Window.H>
 #include <string>
@@ -6,51 +7,33 @@
 class Fl_Osc_Pane
 {
     public:
-        Fl_Osc_Pane(void)
-            :osc(NULL), pane_name()
-        {}
+        Fl_Osc_Pane(void);
         class Fl_Osc_Interface *osc;
-        std::string pane_name;
+        std::string base;
+        virtual std::string loc(void) const = 0;
+        virtual void rebase(std::string new_base) = 0;
 };
 
 class Fl_Osc_Window:public Fl_Double_Window, public Fl_Osc_Pane
 {
     public:
-        Fl_Osc_Window(int w, int h, const char *L=0)
-            :Fl_Double_Window(w,h,L)
-        {}
+        Fl_Osc_Window(int w, int h, const char *L=0);
 
-        void init(Fl_Osc_Interface *osc_, std::string loc_)
-        {
-            osc       = osc_;
-            pane_name = loc_;
-        }
+        void init(Fl_Osc_Interface *osc_, std::string loc_);
+        std::string loc(void) const;
+        void rebase(std::string new_base);
 };
 
-static Fl_Osc_Pane *find_osc_pane(Fl_Widget *root)
-{
-    if(!root)
-        return NULL;
-    Fl_Group *next = root->parent();
-
-    if(auto *p = dynamic_cast<Fl_Osc_Pane*>(next))
-        return p;
-    else
-        return find_osc_pane(next);
-}
 
 class Fl_Osc_Group:public Fl_Osc_Pane, public Fl_Group
 {
     public:
-        Fl_Osc_Group(int x, int y, int w, int h, const char *L=0)
-            :Fl_Group(x,y,w,h,L)
-        {
-            if(auto *p = find_osc_pane(this)) {
-                osc = p->osc;
-                pane_name = p->pane_name;
-                assert(osc);
-            }
-        };
-};
+        Fl_Osc_Group(int x, int y, int w, int h, const char *L=0);
 
+        std::string ext;
+
+        std::string loc(void) const;
+        void rebase(std::string new_base);
+};
+#endif
 

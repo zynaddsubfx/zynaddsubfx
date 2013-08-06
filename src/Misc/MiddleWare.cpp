@@ -572,6 +572,14 @@ class UI_Interface:public Fl_Osc_Interface
             map.insert(std::pair<string,Fl_Osc_Widget*>(s,w));
         }
 
+        void renameLink(string old, string newer, Fl_Osc_Widget *w) override
+        {
+            fprintf(stderr, "renameLink('%s','%s',%p)\n",
+                    old.c_str(), newer.c_str(), w);
+            removeLink(old, w);
+            createLink(newer, w);
+        }
+
         void removeLink(string s, class Fl_Osc_Widget*w) override
         {
             for(auto i = map.begin(); i != map.end(); ++i) {
@@ -606,7 +614,7 @@ class UI_Interface:public Fl_Osc_Interface
         {
 
             if(strcmp(msg, "/vu-meter"))//Ignore repeated message
-                printf("trying the link for a '%s'\n", msg);
+                printf("trying the link for a '%s'<%s>\n", msg, rtosc_argument_string(msg));
             const char *handle = rindex(msg,'/');
             if(handle)
                 ++handle;
@@ -643,6 +651,8 @@ class UI_Interface:public Fl_Osc_Interface
                         //fprintf(stderr, "tossing char to %p\n", pair.second);
                         pair.second->OSC_value((float)rtosc_argument(msg,0).f,
                                 handle);
+                    } else if(!strcmp(arg_str, "T") || !strcmp(arg_str, "F")) {
+                        pair.second->OSC_value((bool)rtosc_argument(msg,0).T, handle);
                     }
                 }
             }

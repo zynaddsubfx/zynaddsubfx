@@ -81,7 +81,7 @@ delete (freemodeeditwindow);} {}
         label C
         callback {/*presetsui->copy(env);*/}
         xywh {465 160 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
-        code0 {freemodeeditwindow->osc = osc; freemodeeditwindow->pane_name = loc;}
+        code0 {freemodeeditwindow->osc = osc; freemodeeditwindow->base = loc;}
       }
       Fl_Button {} {
         label P
@@ -191,7 +191,7 @@ envfree->redraw();}
           label P
           callback {/*presetsui->paste(env,this);*/}
           xywh {167 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
-          code0 {envADSR->osc = osc; envADSR->pane_name = loc;}
+          code0 {envADSR->osc = osc; envADSR->base = loc;}
         }
         Fl_Dial e1adt {
           label {A.dt}
@@ -262,7 +262,7 @@ envfree->redraw();}
           label C
           callback {/*presetsui->copy(env);*/}
           xywh {155 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
-          code0 {envASR->osc = osc; envASR->pane_name = loc;}
+          code0 {envASR->osc = osc; envASR->base = loc;}
         }
         Fl_Button {} {
           label P
@@ -337,7 +337,7 @@ envfree->redraw();}
           label P
           callback {/*presetsui->paste(env,this);*/}
           xywh {237 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
-          code0 {envADSRfilter->osc = osc; envADSRfilter->pane_name = loc;}
+          code0 {envADSRfilter->osc = osc; envADSRfilter->base = loc;}
         }
         Fl_Dial e3aval {
           label {A.val}
@@ -417,7 +417,7 @@ envfree->redraw();}
           label C
           callback {/*presetsui->copy(env);*/}
           xywh {155 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
-          code0 {envASRbw->osc = osc; envASRbw->pane_name = loc;}
+          code0 {envASRbw->osc = osc; envASRbw->base = loc;}
         }
         Fl_Button {} {
           label P
@@ -488,7 +488,7 @@ envfree->redraw();}
           label E
           callback {freemodeeditwindow->show();}
           xywh {185 5 15 15} labelfont 1 labelsize 10
-          code0 {envfree->osc = osc; envfree->pane_name = loc;}
+          code0 {envfree->osc = osc; envfree->base = loc;}
         }
         Fl_Box freeeditsmall {
           label Envelope

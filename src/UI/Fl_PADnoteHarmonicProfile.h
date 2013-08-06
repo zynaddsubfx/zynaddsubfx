@@ -19,7 +19,7 @@ class PADnoteHarmonicProfile: public Fl_Box, public Fl_Osc_Widget
             Fl_Osc_Pane *og  = fetch_osc_pane(this);
             assert(og);
 
-            loc = og->pane_name + "profile";
+            loc = og->base + "profile";
             osc = og->osc;
             assert(osc);
 

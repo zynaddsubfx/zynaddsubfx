@@ -28,7 +28,5 @@ class Fl_Osc_Dial:public WidgetPDial, public Fl_Osc_Widget
 
         void cb(void);
     private:
-        std::string full_path;
-        std::string path;
         std::pair<Fl_Callback*, void*> cb_data;
 };

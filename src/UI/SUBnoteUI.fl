@@ -131,17 +131,17 @@ if (Fl::event_button1()) x=127-(int)o->value();
 make_window();
 harmonic->show();
 
-osc->createLink(pane_name+"Phmag"+to_s(n), mag);
-osc->createLink(pane_name+"Phrelbw"+to_s(n), bw);
-osc->requestValue(pane_name+"Phmag"+to_s(n));
-osc->requestValue(pane_name+"Phrelbw"+to_s(n));
+osc->createLink(base+"Phmag"+to_s(n), mag);
+osc->createLink(base+"Phrelbw"+to_s(n), bw);
+osc->requestValue(base+"Phmag"+to_s(n));
+osc->requestValue(base+"Phrelbw"+to_s(n));
 
 end();} {}
   }
   Function {refresh()} {} {
     code {
-osc->requestValue(pane_name+"Phmag"+to_s(n));
-osc->requestValue(pane_name+"Phrelbw"+to_s(n));} {}
+osc->requestValue(base+"Phmag"+to_s(n));
+osc->requestValue(base+"Phrelbw"+to_s(n));} {}
   }
   Function {~SUBnoteharmonic()} {} {
     code {harmonic->hide();
@@ -163,7 +163,7 @@ class SUBnoteUI {open : {public PresetsUI_}
     } {
       Fl_Box {} {
         xywh {0 0 0 0} box FLAT_BOX color 45
-        code0 {SUBparameters->osc = osc; SUBparameters->pane_name = loc;}
+        code0 {SUBparameters->osc = osc; SUBparameters->base = loc;}
       }
       Fl_Scroll {} {
         label scroll open

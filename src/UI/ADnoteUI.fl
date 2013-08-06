@@ -84,7 +84,7 @@ class ADvoicelistitem {open : {public Fl_Osc_Group}
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
-        code0 {ADnoteVoiceListItem->pane_name = loc;}
+        code0 {ADnoteVoiceListItem->base = loc;}
       }
       Fl_Group voicelistitemgroup {open
         private xywh {50 0 570 25}
@@ -215,7 +215,7 @@ class ADvoiceUI {open : {public Fl_Group}
       Fl_Box {} {
         label label selected
         xywh {25 25 35 16}
-        code0 {ADnoteVoiceParameters->pane_name = loc;}
+        code0 {ADnoteVoiceParameters->base = loc;}
         code1 {ADnoteVoiceParameters->osc = osc_i;}
       }
       Fl_Group voiceparametersgroup {open
@@ -328,7 +328,7 @@ o->redraw();}
                 xywh {535 440 220 140} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
                 code0 {oscFM=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
                 code1 {//int nv=nvoice; if (pars->VoicePar[nvoice].PextFMoscil>=0) nv=pars->VoicePar[nvoice].PextFMoscil;}
-                code2 {fmoscil->pane_name = loc+"mod-oscil/";fmoscil->osc = osc_i;}
+                code2 {fmoscil->base = loc; fmoscil->ext="mod-oscil/";fmoscil->osc = osc_i;}
                 code3 {oscFM->parent(fmoscil);oscFM->init(false);oscFM->update();}
                 class Fl_Osc_Group
               } {}
@@ -512,7 +512,7 @@ o->redraw();}
           Fl_Group voiceoscil {
             xywh {80 390 445 145} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
             code0 {osc=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
-            code1 {voiceoscil->pane_name = loc+"oscil/";//int nv=nvoice; if (pars->VoicePar[nvoice].Pextoscil>=0) nv=pars->VoicePar[nvoice].Pextoscil;}
+            code1 {voiceoscil->base = loc;voiceoscil->ext="oscil/";//int nv=nvoice; if (pars->VoicePar[nvoice].Pextoscil>=0) nv=pars->VoicePar[nvoice].Pextoscil;}
             code2 {voiceoscil->osc = osc_i;}
             code3 {osc->parent(voiceoscil); osc->init(false);}
             class Fl_Osc_Group
@@ -834,7 +834,7 @@ class ADnoteUI {open : {public PresetsUI_}
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
-        code0 {ADnoteGlobalParameters->pane_name = loc + "global/"; ADnoteGlobalParameters->osc = osc;}
+        code0 {ADnoteGlobalParameters->base = loc + "global/"; ADnoteGlobalParameters->osc = osc;}
       }
       Fl_Group {} {
         label FREQUENCY open
@@ -1036,7 +1036,7 @@ resui->resonancewindow->show();}
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
-        code0 {ADnoteVoice->pane_name = loc;}
+        code0 {ADnoteVoice->base = loc;}
         code1 {ADnoteVoice->osc       = osc;}
       }
       Fl_Group advoice {open
@@ -1082,8 +1082,8 @@ ADnoteVoice->redraw();}
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
-        code0 {ADnoteVoiceList->pane_name = loc;}
-        code1 {ADnoteVoiceList->osc       = osc;}
+        code0 {ADnoteVoiceList->base = loc;}
+        code1 {ADnoteVoiceList->osc  = osc;}
       }
       Fl_Text_Display {} {
         label {No.}

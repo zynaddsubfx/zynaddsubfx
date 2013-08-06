@@ -19,7 +19,7 @@ class Fl_OscilSpectrum : public Fl_Box, Fl_Osc_Widget
             Fl_Osc_Pane *og  = fetch_osc_pane(this);
             assert(og);
 
-            loc = og->pane_name + (base_spectrum_p ? "base-spectrum": "spectrum");
+            loc = og->base + (base_spectrum_p ? "base-spectrum": "spectrum");
             osc = og->osc;
             assert(osc);
 
@@ -34,7 +34,6 @@ class Fl_OscilSpectrum : public Fl_Box, Fl_Osc_Widget
 
         virtual void OSC_value(unsigned N, void *data) override
         {
-            fprintf(stderr, "(spec) OSC_value(%d,%p)\n", N, data);
             assert(!(N%4));
             const size_t new_samples = N / 4;
 

@@ -91,7 +91,7 @@ make_window();} {selected
     } {
 
       Fl_Box dummy {
-        code0 {padnotewindow->osc = osc_i; padnotewindow->pane_name = location;}
+        code0 {padnotewindow->osc = osc_i; padnotewindow->base = location;}
         code1 {puts("dummy setup done...");}
       }
       Fl_Tabs {} {
@@ -271,7 +271,7 @@ cbwidget->do_callback();}
           Fl_Group oscilgroup {open
             xywh {100 155 270 135} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179 align 6
             code0 {osc=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
-            code1 {oscilgroup->pane_name = location+"oscil/"; oscilgroup->osc = osc_i;osc->init(false);}
+            code1 {oscilgroup->base = location; oscilgroup->ext="oscil/"; oscilgroup->osc = osc_i;osc->init(false);}
             class Fl_Osc_Group
           } {}
           Fl_Button {} {

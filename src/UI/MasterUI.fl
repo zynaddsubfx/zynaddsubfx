@@ -512,7 +512,7 @@ if (result!=0) fl_alert("Error: Could not save the file.");}
         }
         Fl_Box dummy {
           code0 {win_root->osc = osc;}
-          code1 {win_root->pane_name = "/";}
+          code1 {win_root->base = "/";}
         }
         Fl_Dial mastervolumedial {
           label {Master Volume}
