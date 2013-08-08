@@ -214,6 +214,7 @@ class Controller
             unsigned char receive; //this is saved to disk by Master
         } NRPN;
 
+        static rtosc::Ports ports;
     private:
 };
 

@@ -178,7 +178,6 @@ void BankView::init(Fl_Osc_Interface *osc_, BankViewControls *bvc_, int npart_)
     osc = osc_;
     bvc = bvc_;
     npart = npart_;
-    printf("BankView initialization...\n");
 
     osc->createLink("/bankview", this);
 
@@ -281,9 +280,6 @@ void BankView::OSC_raw(const char *msg)
 
     if(0 <= nslot && nslot < 160)
         slots[nslot]->update(name, fname);
-
-
-    puts("Got a BankView event...");
 }
 
 void BankView::refresh(void)

@@ -38,12 +38,29 @@
 #include <cassert>
 
 #include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
 
 using rtosc::Ports;
 using rtosc::RtData;
 
+#define rObject Part
 static Ports partPorts = {
     RECURS(Part, Part::Kit, kit, kit, 16, "Kit"),//NUM_KIT_ITEMS
+    rRecur(ctl,       "Controller"),
+    rToggle(Penabled, "Part enable"),
+    rParam(Pvolume, "Part Volume"),
+    rParam(Pminkey, "Min Used Key"),
+    rParam(Pmaxkey, "Max Used Key"),
+    rParam(Pkeyshift, "Part keyshift"),
+    rParam(Prcvchn,  "Active MIDI channel"),
+    rParam(Ppanning, "Set Panning"),
+    rParam(Pvelsns,   "Velocity sensing"),
+    rParam(Pveloffs,  "Velocity offset"),
+    rToggle(Pnoteon,  "If the channel accepts note on events"),
+    rToggle(Pdrummode, "Drum mode enable"),
+    rToggle(Ppolymode,  "Polyphoney mode"),
+    rToggle(Plegatomode, "Legato enable"),
+    rParam(Pkeylimit,   "Key limit per part"),
     //{"kit#16::T:F", "::Enables or disables kit item", 0,
     //    [](const char *m, RtData &d) {
     //        Part *p = (Part*)d.obj;
@@ -64,10 +81,20 @@ static Ports partPorts = {
     //    }}
 };
 
+#undef  rObject
+#define rObject Part::Kit
 static Ports kitPorts = {
     RECURP(Part::Kit, PADnoteParameters, padpars, padpars, "Padnote parameters"),
     RECURP(Part::Kit, ADnoteParameters, adpars, adpars, "Adnote parameters"),
     RECURP(Part::Kit, SUBnoteParameters, subpars, subpars, "Adnote parameters"),
+    rToggle(Penabled, "Kit item enable"),
+    rToggle(Pmuted,   "Kit item mute"),
+    rParam(Pminkey,   "Kit item min key"),
+    rParam(Pmaxkey,   "Kit item max key"),
+    rToggle(Padenabled, "ADsynth enable"),
+    rToggle(Psubenabled, "SUBsynth enable"),
+    rToggle(Ppadenabled, "PADsynth enable"),
+    rParam(Psendtoparteffect, "Effect Levels"),
     //{"padpars:b", "::", 0
     //    [](
 };

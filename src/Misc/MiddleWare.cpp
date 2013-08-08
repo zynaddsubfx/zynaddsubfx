@@ -188,8 +188,6 @@ void preparePadSynth(string path, PADnoteParameters *p)
 
 void refreshBankView(const Bank &bank, unsigned loc, Fl_Osc_Interface *osc)
 {
-    puts("bank response...");
-
     if(loc >= BANK_SIZE)
         return;
 
@@ -201,7 +199,6 @@ void refreshBankView(const Bank &bank, unsigned loc, Fl_Osc_Interface *osc)
 
 
     osc->tryLink(response);
-    puts("response sent...");
 }
 
 //

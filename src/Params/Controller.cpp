@@ -21,8 +21,31 @@
 */
 
 #include "Controller.h"
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
+
+#include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
+using namespace rtosc;
+
+#define rObject Controller
+rtosc::Ports Controller::ports = {
+    rToggle(expression.receive, "Expression MIDI Receive"),
+    rToggle(bandwidth.exponential, "Bandwidth ???"),
+    rToggle(fmamp.receive,      "FM amplitude MIDI Receive"),
+    rToggle(volume.receive,     "Volume MIDI Receive"),
+    rToggle(sustain.receive,    "Sustain MIDI Receive"),
+    rToggle(portamento.receive, "Portamento MIDI Receive"),
+    rToggle(portamento.portamento, "UNDOCUMENTED"),
+    rParam(portamento.time, "Portamento Length"),
+    rToggle(portamento.proportional, "If all portamentos are proportional to the distance they span"),
+    rParam(portamento.propRate, "Portamento proportional rate"),
+    rParam(portamento.propDepth, "Portamento proportional depth"),
+    rParam(portamento.pitchthresh, "Threshold for portamento"),
+    rToggle(portamento.pitchthreshtype, "Type of threshold"),
+    rParam(portamento.updowntimestretch, "UNDOCUMENTED"),
+};
+
 
 Controller::Controller()
 {
