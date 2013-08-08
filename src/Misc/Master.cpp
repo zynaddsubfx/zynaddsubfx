@@ -46,6 +46,8 @@ using rtosc::RtData;
 
 static Ports localports = {
     RECURSP(Master, Part, part, part, 16, "Part"),//NUM_MIDI_PARTS
+    RECURSP(Master, EffectMgr, sysefx, sysefx, 4, "System Effect"),//NUM_SYS_EFX
+    RECURSP(Master, EffectMgr, insefx, insefx, 8, "Insertion Effect"),//NUM_INS_EFX
     {"echo", "=doc\0:Hidden port to echo messages\0", 0, [](const char *m, RtData&) {
        bToU->raw_write(m-1);}},
     {"get-vu", "", 0, [](const char *, RtData &d) {
@@ -166,11 +168,11 @@ Master::Master()
 
     //Insertion Effects init
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
-        insefx[nefx] = new EffectMgr(1, &mutex);
+        insefx[nefx] = new EffectMgr(1);
 
     //System Effects init
     for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
-        sysefx[nefx] = new EffectMgr(0, &mutex);
+        sysefx[nefx] = new EffectMgr(0);
 
 
     defaults();

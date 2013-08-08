@@ -254,7 +254,8 @@ class DummyDataObj:public rtosc::RtData
         }
         virtual void reply(const char *msg)
         {
-            printf("reply used for '%s'\n", msg);
+            //DEBUG
+            //printf("reply used for '%s'\n", msg);
             osc->tryLink(msg);
             cb(ui, msg);
         }
@@ -610,8 +611,9 @@ class UI_Interface:public Fl_Osc_Interface
         void tryLink(const char *msg) override
         {
 
-            if(strcmp(msg, "/vu-meter"))//Ignore repeated message
-                printf("trying the link for a '%s'<%s>\n", msg, rtosc_argument_string(msg));
+            //DEBUG
+            //if(strcmp(msg, "/vu-meter"))//Ignore repeated message
+            //    printf("trying the link for a '%s'<%s>\n", msg, rtosc_argument_string(msg));
             const char *handle = rindex(msg,'/');
             if(handle)
                 ++handle;
@@ -626,26 +628,17 @@ class UI_Interface:public Fl_Osc_Interface
                     //Always provide the raw message
                     pair.second->OSC_raw(msg);
 
-                    //printf("Possible location for application of '%s' is '%p'\n", msg, pair.second);
                     if(!strcmp(arg_str, "b")) {
-                        //printf("'%s' matches '%s' ala blob\n", pair.first.c_str(), msg);
-                        //fprintf(stderr, "tossing blob params %d %p (%p)\n", rtosc_argument(msg,0).b.len,rtosc_argument(msg,0).b.data, pair.second);
                         pair.second->OSC_value(rtosc_argument(msg,0).b.len,
                                 rtosc_argument(msg,0).b.data,
                                 handle);
                     } else if(!strcmp(arg_str, "c")) {
-                        //printf("'%s' => '%d'\n", msg, rtosc_argument(msg,0).i);
-                        //fprintf(stderr, "tossing char to %p\n", pair.second);
                         pair.second->OSC_value((char)rtosc_argument(msg,0).i,
                                 handle);
                     } else if(!strcmp(arg_str, "i")) {
-                        //printf("'%s' => '%d'\n", msg, rtosc_argument(msg,0).i);
-                        //fprintf(stderr, "tossing char to %p\n", pair.second);
                         pair.second->OSC_value((int)rtosc_argument(msg,0).i,
                                 handle);
                     } else if(!strcmp(arg_str, "f")) {
-                        //printf("'%s' => '%d'\n", msg, rtosc_argument(msg,0).i);
-                        //fprintf(stderr, "tossing char to %p\n", pair.second);
                         pair.second->OSC_value((float)rtosc_argument(msg,0).f,
                                 handle);
                     } else if(!strcmp(arg_str, "T") || !strcmp(arg_str, "F")) {

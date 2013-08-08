@@ -126,7 +126,7 @@ class Panellistitem {open : {public Fl_Osc_Group}
   Function {make_window()} {open private
   } {
     Fl_Window panellistitem {open
-      private xywh {635 721 100 260} type Double box NO_BOX
+      private xywh {638 721 100 260} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group panellistitemgroup {open
@@ -249,7 +249,7 @@ if ((
     *exitprogram=1;
 };
 \#endif} open
-      xywh {330 365 390 525} type Double xclass zynaddsubfx visible
+      xywh {333 388 390 525} type Double xclass zynaddsubfx visible
     } {
       Fl_Group win_root {open
         xywh {0 0 390 525}
@@ -530,7 +530,7 @@ if (result!=0) fl_alert("Error: Could not save the file.");}
             class PartUI
           } {}
         }
-        Fl_Tabs {} {
+        Fl_Tabs {} {open
           xywh {5 150 390 165} box UP_FRAME
         } {
           Fl_Group {} {
@@ -594,10 +594,15 @@ syseffectui->refresh(master->sysefx[nsyseff]);}
             }
             Fl_Group syseffectuigroup {
               xywh {10 208 380 95} color 48
+              class Fl_Osc_Group
             } {
+              Fl_Box {} {
+                xywh {0 0 0 0}
+                code0 {syseffectuigroup->ext = "sysefx0/";}
+              }
               Fl_Group syseffectui {
                 xywh {10 208 380 95}
-                code0 {o->init(master->sysefx[nsyseff], osc, "/SysEffect/");}
+                code0 {o->init(master->sysefx[nsyseff]);}
                 class EffUI
               } {}
             }
@@ -620,7 +625,7 @@ pthread_mutex_unlock(&master->mutex);*/}
             }
           }
           Fl_Group {} {
-            label {Insertion Effects}
+            label {Insertion Effects} open
             xywh {5 170 390 145} labelsize 15 align 9
           } {
             Fl_Counter inseffnocounter {
@@ -691,12 +696,17 @@ inseffectui->show();}
                 xywh {105 105 100 20} labelfont 1 labelsize 10
               }
             }
-            Fl_Group inseffectuigroup {
+            Fl_Group inseffectuigroup {open selected
               xywh {10 210 380 95} box FLAT_BOX color 48
+              class Fl_Osc_Group
             } {
+              Fl_Box {} {
+                xywh {0 0 0 0}
+                code0 {inseffectuigroup->ext = "insefx0/";}
+              }
               Fl_Group inseffectui {
                 xywh {10 210 380 90} box UP_FRAME
-                code0 {o->init(master->insefx[ninseff], osc, "/InsEffect/");}
+                code0 {o->init(master->insefx[ninseff]);}
                 code1 {if (master->Pinsparts[ninseff]== -1) o->deactivate();}
                 class EffUI
               } {}
@@ -812,7 +822,7 @@ partui->rebase("/part"+to_s(npart)+"/");
 
 updatepanel();
 simplenpartcounter->value(nval+1);
-simplenpartcounter->do_callback();} selected
+simplenpartcounter->do_callback();}
           tooltip {The part number} xywh {10 317 50 18} type Simple labelfont 1 minimum 0 maximum 127 step 1 value 1 textfont 1
           code0 {o->bounds(1,NUM_MIDI_PARTS);}
           code1 {bankui->init(o);}
@@ -898,7 +908,7 @@ GNU General Public License for details.}
     }
     Fl_Window panelwindow {
       label {ZynAddSubFX Panel} open
-      xywh {618 230 630 635} type Double
+      xywh {621 253 630 635} type Double
       class Fl_Osc_Window visible
     } {
       Fl_Box {} {
@@ -944,13 +954,13 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL)) {
 	*exitprogram=1;
 };
 \#endif}
-      xywh {661 384 600 335} type Double
+      xywh {664 407 600 335} type Double
       class Fl_Osc_Window visible
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
         code0 {simplemasterwindow->osc  = osc;}
-        code1 {simplemasterwindow->base = "/make/it/stop/";}
+        code1 {simplemasterwindow->base = "/";}
       }
       Fl_Menu_Bar simplemastermenu {
         xywh {0 0 690 25}
@@ -1243,7 +1253,12 @@ simplesyseffectui->refresh(master->sysefx[nsyseff]);}
             }
             Fl_Group simplesyseffectuigroup {
               xywh {350 95 235 95} color 48
+              class Fl_Osc_Group
             } {
+              Fl_Box {} {
+                xywh {0 0 0 0}
+                code0 {simplesyseffectuigroup->ext = "sysefx0/";}
+              }
               Fl_Group simplesyseffectui {
                 xywh {350 95 234 95}
                 code0 {o->init(master->sysefx[nsyseff]);}
@@ -1337,7 +1352,12 @@ simpleinseffectui->show();}
             }
             Fl_Group simpleinseffectuigroup {
               xywh {350 95 234 95} box FLAT_BOX color 48
+              class Fl_Osc_Group
             } {
+              Fl_Box {} {
+                xywh {0 0 0 0}
+                code0 {simpleinseffectuigroup->ext = "insefx0/";}
+              }
               Fl_Group simpleinseffectui {
                 xywh {350 95 234 95}
                 code0 {o->init(master->insefx[ninseff]);}

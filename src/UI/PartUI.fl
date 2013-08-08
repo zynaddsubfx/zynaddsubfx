@@ -450,9 +450,9 @@ part->setkeylimit(val);} open
       }
       Fl_Check_Button {} {
         label Enabled
-        callback {pthread_mutex_lock(&master->mutex);
-master->partonoff(npart,(int) o->value());
-pthread_mutex_unlock(&master->mutex);
+        callback {//pthread_mutex_lock(&master->mutex);
+//master->partonoff(npart,(int) o->value());
+//pthread_mutex_unlock(&master->mutex);
 if (part->Penabled==0) partgroupui->deactivate();
     else partgroupui->activate();}
         xywh {90 5 75 20} down_box DOWN_BOX labelfont 1 labelsize 11
@@ -663,7 +663,8 @@ sendtochoice->value(x);}
       }
       Fl_Choice insefftype {
         label EffType
-        callback {pthread_mutex_lock(part->mutex);
+        callback {
+        pthread_mutex_lock(part->mutex);
 part->partefx[ninseff]->changeeffect((int) o->value());
 pthread_mutex_unlock(part->mutex);
 inseffectui->refresh(part->partefx[ninseff]);}
@@ -709,10 +710,15 @@ inseffectui->refresh(part->partefx[ninseff]);}
       }
       Fl_Group inseffectuigroup {
         xywh {5 5 380 100} box FLAT_BOX color 48
+        class Fl_Osc_Group
       } {
+        Fl_Box {} {
+          xywh {0 0 0 0}
+          code0 {inseffectuigroup->ext = "partefx0/";}
+        }
         Fl_Group inseffectui {
           xywh {5 5 380 95}
-          code0 {o->init(part->partefx[ninseff], osc, loc + "InsEffect/");}
+          code0 {o->init(part->partefx[ninseff]);}
           class EffUI
         } {}
       }

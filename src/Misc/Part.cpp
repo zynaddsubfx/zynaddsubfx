@@ -46,6 +46,7 @@ using rtosc::RtData;
 #define rObject Part
 static Ports partPorts = {
     RECURS(Part, Part::Kit, kit, kit, 16, "Kit"),//NUM_KIT_ITEMS
+    RECURSP(Part, EffectMgr, partefx, partefx, 3, "Part Effect"),
     rRecur(ctl,       "Controller"),
     rToggle(Penabled, "Part enable"),
     rParam(Pvolume, "Part Volume"),
@@ -123,7 +124,7 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
 
     //Part's Insertion Effects init
     for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
-        partefx[nefx]    = new EffectMgr(1, mutex);
+        partefx[nefx]    = new EffectMgr(1);
         Pefxbypass[nefx] = false;
     }
 

@@ -48,7 +48,13 @@ class EQ:public Effect
             //parameters
             unsigned char Ptype, Pfreq, Pgain, Pq, Pstages;
             //internal values
-            class AnalogFilter * l, *r;
+            
+            /* TODO
+             * The analog filters here really ought to be dumbed down some as
+             * you are just looking to do a batch convolution in the end
+             * Perhaps some static functions to do the filter design?
+             */
+            class AnalogFilter *l, *r;
         } filter[MAX_EQ_BANDS];
 };
 

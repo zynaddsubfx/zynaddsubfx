@@ -20,6 +20,10 @@
 
 */
 
+#include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
+
+
 #include "EffectMgr.h"
 #include "Effect.h"
 #include "Reverb.h"
@@ -29,19 +33,41 @@
 #include "EQ.h"
 #include "DynamicFilter.h"
 #include "../Misc/XMLwrapper.h"
+#include "../Misc/Util.h"
 #include "../Params/FilterParams.h"
 
-#include <iostream>
-using namespace std;
 
-EffectMgr::EffectMgr(const bool insertion_, pthread_mutex_t *mutex_)
+rtosc::Ports EffectMgr::ports = {
+    RECURP(EffectMgr, FilterParams, Filter, filterpars, "Filter Parameter for Dynamic Filter"),
+    {"parameter#64::c", rProp(alias), NULL, [](const char *msg, rtosc::RtData &d)
+        {
+            EffectMgr *eff = (EffectMgr*)d.obj;
+            const char *mm = msg;
+            while(!isdigit(*mm))++mm;
+
+            if(!rtosc_narguments(msg))
+                d.reply(d.loc, "c", eff->geteffectpar(atoi(mm)));
+            else
+                eff->seteffectpar_nolock(atoi(mm), rtosc_argument(msg, 0).i);
+        }},
+    {"preset::c", rProp(alias), NULL, [](const char *msg, rtosc::RtData &d)
+        {
+            EffectMgr *eff = (EffectMgr*)d.obj;
+            if(!rtosc_narguments(msg))
+                d.reply(d.loc, "c", eff->getpreset());
+            else
+                eff->changepreset_nolock(rtosc_argument(msg, 0).i);
+        }},
+
+};
+
+EffectMgr::EffectMgr(const bool insertion_)
     :insertion(insertion_),
       efxoutl(new float[synth->buffersize]),
       efxoutr(new float[synth->buffersize]),
       filterpars(NULL),
       nefx(0),
       efx(NULL),
-      mutex(mutex_),
       dryonly(false)
 {
     setpresettype("Peffect");
@@ -67,6 +93,10 @@ void EffectMgr::defaults(void)
 //Change the effect
 void EffectMgr::changeeffect(int _nefx)
 {
+    //TODO there should be a sane way to upper bound the memory of every effect
+    //and just use placement new to eliminate any allocation/deallocation when
+    //chaning effects
+    
     cleanup();
     if(nefx == _nefx)
         return;
@@ -142,9 +172,7 @@ void EffectMgr::changepreset_nolock(unsigned char npreset)
 //Change the preset of the current effect(with thread locking)
 void EffectMgr::changepreset(unsigned char npreset)
 {
-    pthread_mutex_lock(mutex);
-    changepreset_nolock(npreset);
-    pthread_mutex_unlock(mutex);
+    abort();
 }
 
 
@@ -159,9 +187,7 @@ void EffectMgr::seteffectpar_nolock(int npar, unsigned char value)
 // Change a parameter of the current effect (with thread locking)
 void EffectMgr::seteffectpar(int npar, unsigned char value)
 {
-    pthread_mutex_lock(mutex);
-    seteffectpar_nolock(npar, value);
-    pthread_mutex_unlock(mutex);
+    abort();
 }
 
 //Get a parameter of the current effect
