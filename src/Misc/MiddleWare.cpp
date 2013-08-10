@@ -68,15 +68,26 @@ void path_search(const char *m)
         for(const Port &p:*ports) {
             if(strstr(p.name, needle)!=p.name)
                 continue;
-            types[pos]    = types[pos+1] = 's';
+            printf("Reporting '%s'\n", p.name);
+            types[pos]    = 's';
             args[pos++].s = p.name;
-            args[pos++].s = p.metadata;
+            types[pos]    = 'b';
+            if(p.metadata && *p.metadata) {
+                args[pos].b.data = (unsigned char*) p.metadata;
+                auto tmp = rtosc::Port::MetaContainer(p.metadata);
+                args[pos++].b.len  = tmp.length();
+            } else {
+                args[pos].b.data = (unsigned char*) NULL;
+                args[pos++].b.len  = 0;
+            }
         }
     }
 
+
     //Reply to requester
-    char buffer[1024];
-    size_t length = rtosc_amessage(buffer, 1024, "/paths", types, args);
+    char buffer[1024*4];
+    size_t length = rtosc_amessage(buffer, sizeof(buffer), "/paths", types, args);
+    printf("ARG COUNT = %d\n", rtosc_narguments(buffer));
     if(length) {
         lo_message msg  = lo_message_deserialise((void*)buffer, length, NULL);
         lo_address addr = lo_address_new_from_url(last_url.c_str());

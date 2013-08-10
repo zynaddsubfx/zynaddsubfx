@@ -26,7 +26,7 @@ pkg_search_module(LASH lash-1.0)
 mark_as_advanced(LASH_LIBRARIES)
 pkg_search_module(DSSI dssi>=0.9.0)
 mark_as_advanced(DSSI_LIBRARIES)
-pkg_search_module(LIBLO liblo>=0.26)
+pkg_search_module(LIBLO liblo>=0.26 REQUIRED)
 mark_as_advanced(LIBLO_LIBRARIES)
 
 ######### Settings ###########
