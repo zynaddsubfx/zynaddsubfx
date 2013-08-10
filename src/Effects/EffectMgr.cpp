@@ -58,8 +58,21 @@ rtosc::Ports EffectMgr::ports = {
             else
                 eff->changepreset_nolock(rtosc_argument(msg, 0).i);
         }},
-
+    {"eq-coeffs:", rProp(internal), NULL, [](const char *, rtosc::RtData &d)
+        {
+            EffectMgr *eff = (EffectMgr*)d.obj;
+            if(eff->nefx != 7)
+                return;
+            EQ *eq = (EQ*)eff->efx;
+            float a[MAX_EQ_BANDS*MAX_FILTER_STAGES*2+1];
+            float b[MAX_EQ_BANDS*MAX_FILTER_STAGES*2+1];
+            memset(a, 0, sizeof(a));
+            memset(b, 0, sizeof(b));
+            eq->getFilter(a,b);
+            d.reply(d.loc, "bb", sizeof(a), a, sizeof(b), b);
+        }},
 };
+
 
 EffectMgr::EffectMgr(const bool insertion_)
     :insertion(insertion_),

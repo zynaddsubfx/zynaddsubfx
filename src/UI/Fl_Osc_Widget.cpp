@@ -91,3 +91,10 @@ void Fl_Osc_Widget::rebase(std::string new_base)
     loc = new_base;
     osc->requestValue(loc+ext);
 }
+
+void Fl_Osc_Widget::oscMove(std::string new_ext)
+{
+    osc->renameLink(loc+ext, loc+new_ext, this);
+    ext = new_ext;
+    osc->requestValue(loc+ext);
+}

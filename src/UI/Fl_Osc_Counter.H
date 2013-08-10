@@ -3,7 +3,7 @@
 #include "Fl_Osc_Widget.H"
 #include <string>
 
-class Fl_Osc_Counter: public Fl_Counter, Fl_Osc_Widget
+class Fl_Osc_Counter: public Fl_Counter, public Fl_Osc_Widget
 {
     public:
         Fl_Osc_Counter(int x, int y, int w, int h, const char *label=0);

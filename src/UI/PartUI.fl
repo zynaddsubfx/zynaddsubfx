@@ -651,7 +651,7 @@ else {propta->deactivate();proptb->deactivate();}}
         callback {ninseff=(int) o->value()-1;
 insefftype->value(part->partefx[ninseff]->geteffect());
 //insefftype->do_callback();
-inseffectui->refresh(part->partefx[ninseff]);
+inseffectui->refresh();
 int x=part->Pefxroute[ninseff];
 if (x==127) x=1;
 bypasseff->value(part->Pefxbypass[ninseff]);
@@ -667,7 +667,8 @@ sendtochoice->value(x);}
         pthread_mutex_lock(part->mutex);
 part->partefx[ninseff]->changeeffect((int) o->value());
 pthread_mutex_unlock(part->mutex);
-inseffectui->refresh(part->partefx[ninseff]);}
+inseffectui->efftype = o->value();
+inseffectui->refresh();}
         xywh {155 110 70 15} down_box BORDER_BOX labelsize 10 align 6
         code0 {o->value(part->partefx[ninseff]->geteffect());}
       } {
@@ -718,7 +719,7 @@ inseffectui->refresh(part->partefx[ninseff]);}
         }
         Fl_Group inseffectui {
           xywh {5 5 380 95}
-          code0 {o->init(part->partefx[ninseff]);}
+          code0 {o->init(true);}
           class EffUI
         } {}
       }

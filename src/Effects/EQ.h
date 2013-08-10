@@ -38,6 +38,8 @@ class EQ:public Effect
         void cleanup(void);
         float getfreqresponse(float freq);
 
+        void getFilter(float *a/*[MAX_EQ_BANDS*MAX_FILTER_STAGES*2+1]*/,
+                       float *b/*[MAX_EQ_BANDS*MAX_FILTER_STAGES*2+1]*/) const;
     private:
         //Parameters
         unsigned char Pvolume;

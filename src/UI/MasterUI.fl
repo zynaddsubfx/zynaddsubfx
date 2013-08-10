@@ -541,7 +541,7 @@ if (result!=0) fl_alert("Error: Could not save the file.");}
               label {Sys.Effect No.}
               callback {nsyseff=(int) o->value()-1;
 sysefftype->value(master->sysefx[nsyseff]->geteffect());
-syseffectui->refresh(master->sysefx[nsyseff]);}
+syseffectui->refresh();}
               xywh {10 186 80 22} type Simple labelfont 1 labelsize 10 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
               code0 {o->bounds(1,NUM_SYS_EFX);}
               code1 {o->value(nsyseff+1);}
@@ -551,7 +551,8 @@ syseffectui->refresh(master->sysefx[nsyseff]);}
               callback {pthread_mutex_lock(&master->mutex);
 master->sysefx[nsyseff]->changeeffect((int) o->value());
 pthread_mutex_unlock(&master->mutex);
-syseffectui->refresh(master->sysefx[nsyseff]);}
+syseffectui->efftype = o->value();
+syseffectui->refresh();}
               xywh {290 181 100 22} down_box BORDER_BOX labelsize 10
               code0 {o->value(master->sysefx[nsyseff]->geteffect());}
             } {
@@ -602,7 +603,7 @@ syseffectui->refresh(master->sysefx[nsyseff]);}
               }
               Fl_Group syseffectui {
                 xywh {10 208 380 95}
-                code0 {o->init(master->sysefx[nsyseff]);}
+                code0 {o->init(false);}
                 class EffUI
               } {}
             }
@@ -633,7 +634,7 @@ pthread_mutex_unlock(&master->mutex);*/}
               callback {ninseff=(int) o->value()-1;
 insefftype->value(master->insefx[ninseff]->geteffect());
 inseffpart->value(master->Pinsparts[ninseff]+2);
-inseffectui->refresh(master->insefx[ninseff]);
+inseffectui->refresh();
 
 if (master->Pinsparts[ninseff]!=-1) {
         insefftype->activate();
@@ -653,7 +654,8 @@ if (master->Pinsparts[ninseff]!=-1) {
               callback {pthread_mutex_lock(&master->mutex);
 master->insefx[ninseff]->changeeffect((int) o->value());
 pthread_mutex_unlock(&master->mutex);
-inseffectui->refresh(master->insefx[ninseff]);
+inseffectui->efftype = o->value();
+inseffectui->refresh();
 inseffectui->show();}
               xywh {290 178 100 22} down_box BORDER_BOX labelsize 10
               code0 {o->value(master->insefx[ninseff]->geteffect());}
@@ -706,7 +708,7 @@ inseffectui->show();}
               }
               Fl_Group inseffectui {
                 xywh {10 210 380 90} box UP_FRAME
-                code0 {o->init(master->insefx[ninseff]);}
+                code0 {o->init(true);}
                 code1 {if (master->Pinsparts[ninseff]== -1) o->deactivate();}
                 class EffUI
               } {}
@@ -1199,7 +1201,7 @@ o->redraw();}
               label {Sys.Effect No.}
               callback {nsyseff=(int) o->value()-1;
 simplesysefftype->value(master->sysefx[nsyseff]->geteffect());
-simplesyseffectui->refresh(master->sysefx[nsyseff]);
+simplesyseffectui->refresh();
 simplerefresh();}
               xywh {350 75 80 20} type Simple labelfont 1 labelsize 10 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
               code0 {o->bounds(1,NUM_SYS_EFX);}
@@ -1210,7 +1212,8 @@ simplerefresh();}
               callback {pthread_mutex_lock(&master->mutex);
 master->sysefx[nsyseff]->changeeffect((int) o->value());
 pthread_mutex_unlock(&master->mutex);
-simplesyseffectui->refresh(master->sysefx[nsyseff]);}
+simplesyseffectui->efftype = o->value();
+simplesyseffectui->refresh();}
               xywh {515 80 70 15} down_box BORDER_BOX labelsize 10 align 5
               code0 {o->value(master->sysefx[nsyseff]->geteffect());}
             } {
@@ -1261,7 +1264,7 @@ simplesyseffectui->refresh(master->sysefx[nsyseff]);}
               }
               Fl_Group simplesyseffectui {
                 xywh {350 95 234 95}
-                code0 {o->init(master->sysefx[nsyseff]);}
+                code0 {o->init(false);}
                 class SimpleEffUI
               } {}
             }
@@ -1287,7 +1290,7 @@ pthread_mutex_unlock(&master->mutex);}
               callback {ninseff=(int) o->value()-1;
 simpleinsefftype->value(master->insefx[ninseff]->geteffect());
 simpleinseffpart->value(master->Pinsparts[ninseff]+2);
-simpleinseffectui->refresh(master->insefx[ninseff]);
+simpleinseffectui->refresh();
 
 if (master->Pinsparts[ninseff]!=-1) {
         simpleinsefftype->activate();
@@ -1307,7 +1310,8 @@ if (master->Pinsparts[ninseff]!=-1) {
               callback {pthread_mutex_lock(&master->mutex);
 master->insefx[ninseff]->changeeffect((int) o->value());
 pthread_mutex_unlock(&master->mutex);
-simpleinseffectui->refresh(master->insefx[ninseff]);
+simpleinseffectui->efftype = o->value();
+simpleinseffectui->refresh();
 simpleinseffectui->show();}
               xywh {515 80 70 15} down_box BORDER_BOX labelsize 10 align 5
               code0 {o->value(master->insefx[ninseff]->geteffect());}
@@ -1360,7 +1364,7 @@ simpleinseffectui->show();}
               }
               Fl_Group simpleinseffectui {
                 xywh {350 95 234 95}
-                code0 {o->init(master->insefx[ninseff]);}
+                code0 {o->init(true);}
                 code1 {if (master->Pinsparts[ninseff]== -1) o->deactivate();}
                 class SimpleEffUI
               } {}

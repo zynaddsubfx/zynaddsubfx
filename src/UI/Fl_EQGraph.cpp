@@ -5,17 +5,34 @@
 #include "../Effects/EffectMgr.h"
 #include "../globals.h"
 
+#include <rtosc/rtosc.h>
+
 #define MAX_DB 30
 
 Fl_EQGraph::Fl_EQGraph(int x,int y, int w, int h, const char *label)
-    :Fl_Box(x,y,w,h,label)
+    :Fl_Box(x,y,w,h,label), Fl_Osc_Widget(this)
 {
-    num = new float [3*MAX_EQ_BANDS*MAX_FILTER_STAGES];
-    dem = new float [3*MAX_EQ_BANDS*MAX_FILTER_STAGES];
+    memset(num, 0, sizeof(num));
+    memset(dem, 0, sizeof(dem));
+    num[0] = 1;
+    dem[0] = 1;
+    oscRegister("eq-coeffs");
 }
 
 Fl_EQGraph::~Fl_EQGraph(void)
 {}
+
+void Fl_EQGraph::OSC_raw(const char *msg)
+{
+    memcpy(dem, rtosc_argument(msg, 0).b.data, sizeof(dem));
+    memcpy(num, rtosc_argument(msg, 1).b.data, sizeof(dem));
+    redraw();
+}
+
+void Fl_EQGraph::update(void)
+{
+    oscWrite("eq-coeffs");
+}
 
 void Fl_EQGraph::draw_freq_line(float freq, int type)
 {
@@ -48,7 +65,7 @@ void Fl_EQGraph::draw(void)
 
 
     //draw the lines
-    fl_color(fl_lighter( FL_GRAY));
+    fl_color(fl_lighter(FL_GRAY));
 
     fl_line_style(FL_SOLID);
     fl_line(ox+2,oy+ly/2,ox+lx-2,oy+ly/2);
@@ -120,14 +137,12 @@ double Fl_EQGraph::getresponse(int maxy,float freq) const
     std::complex<float> dem_res = 0;
          
 
-    for(int i = 0; i < 3*MAX_EQ_BANDS*MAX_FILTER_STAGES; ++i) {
-        num_res += std::polar(num[i], i*angle);
-        dem_res += std::polar(dem[i], i*angle);
+    for(int i = 0; i < MAX_EQ_BANDS*MAX_FILTER_STAGES*2+1; ++i) {
+        num_res += std::polar<float>(num[i], i*angle);
+        dem_res += std::polar<float>(dem[i], i*angle);
     }
 
-    float dbresp=abs(num_res/dem_res);//eff->getEQfreqresponse(freq);
-
-
+    float dbresp=20*log(abs(num_res/dem_res))/log(10);
 
     //rescale
     return (int) ((dbresp/MAX_DB+1.0)*maxy/2.0);

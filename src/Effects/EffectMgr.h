@@ -77,9 +77,9 @@ class EffectMgr:public Presets
         FilterParams *filterpars;
 
         static rtosc::Ports ports;
-    private:
         int     nefx;
         Effect *efx;
+    private:
         bool dryonly;
 };
 

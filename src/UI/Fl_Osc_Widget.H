@@ -38,6 +38,7 @@ class Fl_Osc_Widget
 
         //Smoothly change the base path
         void rebase(std::string new_base);
+        void oscMove(std::string new_ext);
 
         //Base path
         std::string loc;
