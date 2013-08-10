@@ -4,11 +4,12 @@
 all: gen-files man xhtml chunked pdf
 
 gen-files:
-	cd gen; make
+#	cd gen; make
 
 
 xhtml: zynaddsubfx.txt envelope.txt intro.txt lfo.txt
 	asciidoc -a numbered -a toc -b html5 \
+		-a latexmath \
 		zynaddsubfx.txt
 
 chunked:
