@@ -41,7 +41,7 @@ set_module_parameters ( Fl_Widget *o )
 #endif
 }
 
-ui_handle_t GUI::createUi(Fl_Osc_Interface *osc, void *master, void *exit)
+ui_handle_t GUI::createUi(Fl_Osc_Interface *osc, void *exit)
 {
     ::osc = osc;
 #ifdef NTK_GUI
@@ -76,7 +76,7 @@ ui_handle_t GUI::createUi(Fl_Osc_Interface *osc, void *master, void *exit)
     tree->osc           = osc;
     midi_win->show();
 
-    return (void*) (ui = new MasterUI((Master*)master, (int*)exit, osc));
+    return (void*) (ui = new MasterUI((int*)exit, osc));
 }
 void GUI::destroyUi(ui_handle_t ui)
 {

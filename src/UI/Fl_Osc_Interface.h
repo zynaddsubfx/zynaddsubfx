@@ -24,6 +24,7 @@ class Fl_Osc_Interface
         virtual void writeValue(string, int){};
         virtual void writeValue(string, bool){};
         virtual void writeValue(string, string){};
+        virtual void write(string s) {write(s, "");};//{printf("write: '%s'\n", s.c_str());};
         virtual void write(string, const char *, ...) {};//{printf("write: '%s'\n", s.c_str());};
         virtual void writeRaw(const char *) {}
 };

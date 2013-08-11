@@ -51,8 +51,8 @@ class BankUI {open
     Fl_Window bankuiwindow {
       label Bank open
       xywh {492 406 785 575} type Double
-      code0 {o->label(bank->bankfiletitle.c_str());}
-      code1 {if (bank->bankfiletitle.empty()) o->label ("Choose a bank from the bank list on the left (or go to settings if to configure the bank location) or choose 'New Bank...' to make a new bank.");} visible
+      code0 {/*o->label(bank->bankfiletitle.c_str());*/}
+      code1 {/*if (bank->bankfiletitle.empty()) o->label ("Choose a bank from the bank list on the left (or go to settings if to configure the bank location) or choose 'New Bank...' to make a new bank.");*/} visible
     } {
       Fl_Button {} {
         label Close
@@ -75,9 +75,8 @@ dirname=fl_input("New empty Bank:");
 if (dirname==NULL) return;
 
 
-int result=bank->newbank(dirname);
-
-if (result!=0) fl_alert("Error: Could not make a new bank (directory)..");
+osc->write("/newbank", "s", dirname);
+/*if (result!=0) fl_alert("Error: Could not make a new bank (directory)..");*/
 
 refreshmainwindow();}
         xywh {685 5 93 25} labelfont 1 labelsize 11 align 128
@@ -90,11 +89,11 @@ refreshmainwindow();}
       }
       Fl_Choice banklist {
         callback {int n=o->value();
-std::string dirname=bank->banks[n].dir;
+std::string dirname="";/*bank->banks[n].dir;*/
 if (dirname.empty()) return;
-
-if (bank->loadbank(dirname)==2)
-       fl_alert("Error: Could not load the bank from the directory\\n%s.",dirname.c_str());
+osc->write("/loadbank", "s", dirname.c_str());
+/*if (bank->loadbank(dirname)==2)
+       fl_alert("Error: Could not load the bank from the directory\\n%s.",dirname.c_str());*/
 refreshmainwindow();}
         xywh {5 8 220 20} down_box BORDER_BOX labelfont 1 align 0 textfont 1 textsize 11
       } {}
@@ -106,11 +105,10 @@ banklist->value(0);}
       }
     }
   }
-  Function {BankUI(Master *master_,int *npart_, Fl_Osc_Interface *osc_)} {open
+  Function {BankUI(int *npart_, Fl_Osc_Interface *osc_)} {open
   } {
     code {npart=*npart_;
 osc  =osc_;
-bank=&master_->bank;
 make_window();
 bankview->init(osc, modeselect, *npart_);} {}
   }
@@ -139,17 +137,19 @@ rescan_for_banks();} {}
   }
   Function {refreshmainwindow()} {open
   } {
-    code {bankuiwindow->label(bank->bankfiletitle.c_str());
+    code {/*bankuiwindow->label(bank->bankfiletitle.c_str());*/
 bankview->refresh();} {}
   }
   Function {rescan_for_banks()} {open
   } {
     code {banklist->clear();
-bank->rescanforbanks();
+    osc->write("/rescanforbanks");
 
+/*
 for (unsigned int i=0;i<bank->banks.size();i++) {
      banklist->add(bank->banks[i].name.c_str());
 }
+*/
 if (banklist->size() == 0)
      banklist->add(" ");} {}
   }
@@ -163,7 +163,5 @@ if (banklist->size() == 0)
   decl {Fl_Valuator *cbwig;} {public local
   }
   decl {int npart;} {private local
-  }
-  decl {Bank *bank;} {private local
   }
 } 

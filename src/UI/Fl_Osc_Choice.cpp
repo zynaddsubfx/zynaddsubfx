@@ -30,7 +30,7 @@ Fl_Osc_Choice::Fl_Osc_Choice(int X, int Y, int W, int H, const char *label)
     Fl_Choice::callback(callback_fn, NULL);
 }
 
-void Fl_Osc_Choice::init(const char *path_, int base)
+void Fl_Osc_Choice::init(std::string path_, int base)
 {
     min = base;
     ext = path_;
@@ -38,7 +38,7 @@ void Fl_Osc_Choice::init(const char *path_, int base)
     assert(pane);
     assert(pane->osc);
     osc = pane->osc;
-    oscRegister(path_);
+    oscRegister(path_.c_str());
 };
 
 Fl_Osc_Choice::~Fl_Osc_Choice(void)

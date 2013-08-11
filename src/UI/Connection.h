@@ -7,7 +7,7 @@ namespace GUI
 {
 typedef void *ui_handle_t;
 
-ui_handle_t createUi(Fl_Osc_Interface *osc, void *master, void *exit);
+ui_handle_t createUi(Fl_Osc_Interface *osc, void *exit);
 void destroyUi(ui_handle_t);
 void raiseUi(ui_handle_t, const char *);
 void raiseUi(ui_handle_t, const char *, const char *, ...);

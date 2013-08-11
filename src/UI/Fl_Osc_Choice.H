@@ -10,7 +10,7 @@ class Fl_Osc_Choice:public Fl_Choice, public Fl_Osc_Widget
         Fl_Osc_Choice(int X, int Y, int W, int H, const char *label = NULL);
         virtual ~Fl_Osc_Choice(void);
         //Base is for braindead choices that don't actually start at zero
-        void init(const char *path, int base =0);
+        void init(std::string path, int base =0);
 
 
         //void OSC_value(float);

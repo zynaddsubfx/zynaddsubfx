@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
     }
 
 
-    gui = GUI::createUi(middleware->spawnUiApi(), master, &Pexitprogram);
+    gui = GUI::createUi(middleware->spawnUiApi(), &Pexitprogram);
     middleware->setUiCallback(GUI::raiseUi, gui);
 
     if(!noui)
