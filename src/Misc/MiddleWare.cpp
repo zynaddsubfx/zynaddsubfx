@@ -661,7 +661,8 @@ class UI_Interface:public Fl_Osc_Interface
             if(found_count == 0 
                     && strcmp(msg, "/vu-meter")
                     && strcmp(msg, "undo_change")
-                    && !strstr(msg, "parameter")) {
+                    && !strstr(msg, "parameter")
+                    && !strstr(msg, "Prespoint")) {
                 fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
                 fprintf(stderr, "Unknown widget '%s'\n", msg);
                 fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);

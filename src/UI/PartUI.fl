@@ -1038,7 +1038,7 @@ if (kititem!=lastkititem){
        subnoteui=new SUBnoteUI(osc, loc+"kit"+to_s(kititem)+"/subpars/");
 
     if(padsynenabledcheck->value())
-      padnoteui=new PADnoteUI(loc+"kit"+to_s(kititem)+"/padpars", osc);
+      padnoteui=new PADnoteUI(loc+"kit"+to_s(kititem)+"/padpars/", osc);
 };
 
 

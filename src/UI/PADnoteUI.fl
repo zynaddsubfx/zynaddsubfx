@@ -235,8 +235,10 @@ cbwidget->do_callback();}
             }
             Fl_Check_Button hpautoscale {
               label autoscale
-              callback {hprofile->redraw();
-cbwidget->do_callback();}
+              callback {
+              if(initialized) {
+                  hprofile->redraw();
+              cbwidget->do_callback();}}
               xywh {10 270 60 15} down_box DOWN_BOX labelsize 10
               code0 {o->init("Php.autoscale");}
               class Fl_Osc_Check
@@ -272,8 +274,8 @@ cbwidget->do_callback();}
           }
           Fl_Group oscilgroup {open
             xywh {100 155 270 135} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179 align 6
-            code0 {osc=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
-            code1 {oscilgroup->base = location; oscilgroup->ext="oscil/"; oscilgroup->osc = osc_i;osc->init(false);}
+            code0 {oscilgroup->base = location; oscilgroup->ext="oscil/"; oscilgroup->osc = osc_i;}
+            code1 {osc=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");osc->init(false);}
             class Fl_Osc_Group
           } {}
           Fl_Button {} {

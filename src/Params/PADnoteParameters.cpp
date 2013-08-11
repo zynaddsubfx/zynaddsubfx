@@ -72,7 +72,7 @@ static rtosc::Ports localPorts =
     PC(hp.amp.type),
     PC(hp.amp.par1),
     PC(hp.amp.par2),
-    //TODO autoscale
+    rToggle(Php.autoscale, "Autoscaling Harmonics"),
     PC(hp.onehalf),
 
     PC(bandwidth),
@@ -95,7 +95,7 @@ static rtosc::Ports localPorts =
     PC(Stereo),
     PC(Panning),
     PC(AmpVelocityScaleFunction),
-    PC(PunchStretch),
+    PC(PunchStrength),
     PC(PunchTime),
     PC(PunchStretch),
     PC(PunchVelocitySensing),
