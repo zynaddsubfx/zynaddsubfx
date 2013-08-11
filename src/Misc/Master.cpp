@@ -30,6 +30,7 @@
 #include "../DSP/FFTwrapper.h"
 
 #include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
 #include <rtosc/thread-link.h>
 #include <stdio.h>
 #include <sys/stat.h>
@@ -41,14 +42,15 @@
 #include <unistd.h>
 
 using namespace std;
-using rtosc::Ports;
-using rtosc::RtData;
+using namespace rtosc;
+#define rObject Master
 
 static Ports localports = {
     RECURSP(Master, Part, part, part, 16, "Part"),//NUM_MIDI_PARTS
     RECURSP(Master, EffectMgr, sysefx, sysefx, 4, "System Effect"),//NUM_SYS_EFX
     RECURSP(Master, EffectMgr, insefx, insefx, 8, "Insertion Effect"),//NUM_INS_EFX
-    {"echo", "=doc\0:Hidden port to echo messages\0", 0, [](const char *m, RtData&) {
+    rRecur(microtonal, "Micrtonal Mapping Functionality"),
+    {"echo", "=documentation\0:Hidden port to echo messages\0", 0, [](const char *m, RtData&) {
        bToU->raw_write(m-1);}},
     {"get-vu", "", 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;

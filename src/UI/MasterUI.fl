@@ -312,7 +312,7 @@ pthread_mutex_unlock(&master->mutex);
 
 
  delete microtonalui;  
- microtonalui=new MicrotonalUI(&master->microtonal);
+ microtonalui=new MicrotonalUI(osc, "/microtonal/");
 
 if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not a scale file.");
       else if (result<0) fl_alert("Error: Could not load the file.");}
@@ -1533,7 +1533,7 @@ for (int i=0;i<NUM_SYS_EFX;i++)
    for (int j=0;j<NUM_SYS_EFX;j++)
      syseffsend[i][j]=NULL;
 
-microtonalui=new MicrotonalUI(&master->microtonal);
+microtonalui=new MicrotonalUI(osc, "/microtonal/");
 virkeyboard=new VirKeyboard(osc, "/");
 bankui=new BankUI(master, &npart, osc);
 configui=new ConfigUI();
@@ -1693,7 +1693,7 @@ inseffnocounter->do_callback();
 masterkeyshiftcounter->value(master->Pkeyshift-64);
 mastervolumedial->value(master->Pvolume);    
 globalfinedetuneslider->value(master->microtonal.Pglobalfinedetune);   
-microtonalui=new MicrotonalUI(&master->microtonal);
+microtonalui=new MicrotonalUI(osc, "/microtonal/");
 nrpnbutton->value(master->ctl.NRPN.receive);
 updatesendwindow();
 updatepanel();

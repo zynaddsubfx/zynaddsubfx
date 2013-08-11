@@ -47,6 +47,7 @@ add_library(zynaddsubfx_gui STATIC
         Fl_Osc_Output.cpp
         Fl_Osc_Counter.cpp
         Fl_Osc_Input.cpp
+        Fl_Osc_Value.cpp
         Fl_Resonance_Graph.cpp
         Fl_EQGraph.cpp
         FormantFilterGraph.cpp

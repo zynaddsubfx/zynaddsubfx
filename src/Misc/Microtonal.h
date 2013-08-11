@@ -101,9 +101,9 @@ class Microtonal
         void texttomapping(const char *text);
 
         /**Name of Microtonal tuning*/
-        unsigned char *Pname;
+        char Pname[MICROTONAL_MAX_NAME_LEN];
         /**Comment about the tuning*/
-        unsigned char *Pcomment;
+        char Pcomment[MICROTONAL_MAX_NAME_LEN];
 
         void add2XML(XMLwrapper *xml) const;
         void getfromXML(XMLwrapper *xml);
@@ -114,6 +114,7 @@ class Microtonal
         bool operator==(const Microtonal &micro) const;
         bool operator!=(const Microtonal &micro) const;
 
+        static rtosc::Ports ports;
     private:
         int linetotunings(unsigned int nline, const char *line);
         int loadline(FILE *file, char *line); //loads a line from the text file, while ignoring the lines beggining with "!"

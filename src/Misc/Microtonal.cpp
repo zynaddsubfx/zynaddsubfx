@@ -36,19 +36,22 @@
 #define MAX_LINE_SIZE 80
 
 #define rObject Microtonal
+using namespace rtosc;
 
 /**
+ * TODO
  * Consider how much of this should really exist on the rt side of things.
  * All the rt side needs is a function to map notes at various keyshifts to
  * frequencies, which does not require this many parameters...
+ *
+ * A good lookup table should be a good finalization of this
  */
-/*
-rtosc::Ports ports = {
+rtosc::Ports Microtonal::ports = {
     rToggle(Pinvertupdown, "key mapping inverse"),
     rParam(Pinvertupdowncenter, "center of the inversion"),
     rToggle(Penabled, "Enable for microtonal mode"),
     rParam(PAnote, "The note for 'A'"),
-    //rParamF(PAfreq) (check)
+    rParamF(PAfreq, "Frequency of the 'A' note"),
     rParam(Pscaleshift, "UNDOCUMENTED"),
     rParam(Pfirstkey, "First key to retune"),
     rParam(Plastkey,  "Last key to retune"),
@@ -58,16 +61,16 @@ rtosc::Ports ports = {
     rParam(Pmapsize, "UNDOCUMENTED"),
     rToggle(Pmappingenabled, "Mapping Enable"),
 
+    rParams(Pmapping, "UNDOCUMENTED"),
+    rParam(Pglobalfinedetune, "Fine detune for all notes"),
 
-    rString(Pname, )
+    rString(Pname, MICROTONAL_MAX_NAME_LEN, "Microtonal Name"),
+    rString(Pcomment, MICROTONAL_MAX_NAME_LEN, "Microtonal Name"),
 };
-*/
 
 
 Microtonal::Microtonal()
 {
-    Pname    = new unsigned char[MICROTONAL_MAX_NAME_LEN];
-    Pcomment = new unsigned char[MICROTONAL_MAX_NAME_LEN];
     defaults();
 }
 
@@ -114,10 +117,7 @@ void Microtonal::defaults()
 }
 
 Microtonal::~Microtonal()
-{
-    delete [] Pname;
-    delete [] Pcomment;
-}
+{}
 
 /*
  * Get the size of the octave

@@ -1,3 +1,4 @@
+#pragma once
 #include <FL/Fl_Input.H>
 #include "Fl_Osc_Widget.H"
 
