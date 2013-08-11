@@ -62,6 +62,11 @@ static Ports partPorts = {
     rToggle(Ppolymode,  "Polyphoney mode"),
     rToggle(Plegatomode, "Legato enable"),
     rParam(Pkeylimit,   "Key limit per part"),
+    {"captureMin:", NULL, NULL, [](const char *, RtData &r)
+        {Part *p = (Part*)r.obj; p->Pminkey = p->lastnote;}},
+    {"captureMax:", NULL, NULL, [](const char *, RtData &r)
+        {Part *p = (Part*)r.obj; p->Pmaxkey = p->lastnote;}},
+
     //{"kit#16::T:F", "::Enables or disables kit item", 0,
     //    [](const char *m, RtData &d) {
     //        Part *p = (Part*)d.obj;
