@@ -8,7 +8,7 @@
 #include <sstream>
 
 Fl_Osc_Check::Fl_Osc_Check(int X, int Y, int W, int H, const char *label)
-    :Fl_Check_Button(X,Y,W,H,label), Fl_Osc_Widget(this), cb_data(NULL, NULL)
+    :Fl_Check_Button(X,Y,W,H,label), Fl_Osc_Widget(this), is_osc(false), cb_data(NULL, NULL)
 {
     Fl_Check_Button::callback(Fl_Osc_Check::_cb);
 }
@@ -20,8 +20,10 @@ void Fl_Osc_Check::OSC_value(bool v)
 {
     value(v);
 
+    is_osc = true;
     if(cb_data.first)
         cb_data.first(this, cb_data.second);
+    is_osc = false;
 }
 
 void Fl_Osc_Check::init(std::string path, char type)
@@ -33,13 +35,15 @@ void Fl_Osc_Check::init(std::string path, char type)
 
 void Fl_Osc_Check::cb(void)
 {
+    //Order is significant for takeback style callbacks
+    if(cb_data.first)
+        cb_data.first(this, cb_data.second);
+
+
     if(type == 'T')
         oscWrite(ext, value() ? "T" : "F");
     else
         oscWrite(ext, "c", value());
-
-    if(cb_data.first)
-        cb_data.first(this, cb_data.second);
 }
 
 void Fl_Osc_Check::update(void)

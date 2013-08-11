@@ -22,6 +22,7 @@ class Fl_Osc_Check:public Fl_Check_Button, public Fl_Osc_Widget
         void callback(Fl_Callback *cb, void *p = NULL);
         void cb(void);
         static void _cb(Fl_Widget *w, void *);
+        int is_osc;
     private:
         std::pair<Fl_Callback*, void*> cb_data;
         char type;

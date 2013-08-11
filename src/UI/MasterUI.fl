@@ -525,7 +525,7 @@ if (result!=0) fl_alert("Error: Could not save the file.");}
         } {
           Fl_Group partui {open
             xywh {5 315 383 175}
-            code0 {o->init(master->part[0],"/part0/", master,0,bankui,"/part0/", osc);}
+            code0 {o->init("/part0/", 0,bankui,"/part0/", osc);}
             code1 {o->show();}
             class PartUI
           } {}
@@ -1124,17 +1124,15 @@ if (master->part[npart]->Pminkey>master->part[npart]->Pmaxkey) o->textcolor(FL_R
         }
         Fl_Button {} {
           label m
-          callback {if (master->part[npart]->lastnote>=0) simpleminkcounter->value(master->part[npart]->lastnote);
-simpleminkcounter->do_callback();
-simplemaxkcounter->do_callback();}
+          callback {o->oscWrite("grabMinNote");}
           tooltip {set the minimum key to the last pressed key} xywh {230 188 15 12} box THIN_UP_BOX labelsize 10
+          class Fl_Osc_Button
         }
         Fl_Button {} {
           label M
-          callback {if (master->part[npart]->lastnote>=0) simplemaxkcounter->value(master->part[npart]->lastnote);
-simplemaxkcounter->do_callback();
-simpleminkcounter->do_callback();}
+          callback {o->oscWrite("grabMaxNote");}
           tooltip {set the maximum key to the last pressed key} xywh {260 188 15 12} box THIN_UP_BOX labelsize 10
+          class Fl_Osc_Button
         }
         Fl_Button {} {
           label R

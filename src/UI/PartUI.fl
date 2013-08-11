@@ -60,24 +60,21 @@ class PartSysEffSend {open : {public Fl_Group}
     } {
       Fl_Dial {} {
         label 01
-        callback {master->setPsysefxvol(npart,neff,(int) o->value());}
         xywh {0 0 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 align 130 maximum 127 step 1
         code0 {o->size(25,25);}
-        code1 {o->value(master->Psysefxvol[neff][npart]);}
+        code1 {o->init("sysefx"+to_s(neff)+"/part"+to_s(npart)+"/");}
         code2 {char tmp[10];snprintf(tmp,10,"%d",neff+1);o->copy_label(tmp);}
-        class WidgetPDial
+        class Fl_Osc_Dial
       }
     }
   }
   Function {PartSysEffSend(int x,int y, int w, int h, const char *label=0):Fl_Group(x,y,w,h,label)} {} {
-    code {master=NULL;
-neff=0;
+    code {neff=0;
 npart=0;} {}
   }
-  Function {init(Master *master_,int npart_,int neff_)} {} {
+  Function {init(int npart_,int neff_)} {} {
     code {npart=npart_;
 neff=neff_;
-master=master_;
 make_window();
 syseffsend->show();
 end();} {}
@@ -85,8 +82,6 @@ end();} {}
   Function {~PartSysEffSend()} {} {
     code {syseffsend->hide();
 //delete(syseffsend);} {}
-  }
-  decl {Master *master;} {private local
   }
   decl {int neff;} {private local
   }
@@ -117,17 +112,15 @@ class PartKitItem {open : {public Fl_Osc_Group}
         }
         Fl_Button {} {
           label m
-          callback {if (part->lastnote>=0) minkcounter->value(part->lastnote);
-minkcounter->do_callback();
-maxkcounter->do_callback();}
+          callback {o->oscWrite("grabMinKey");}
           tooltip {set the minimum key to the last pressed key} xywh {285 3 15 12} box THIN_UP_BOX labelsize 10
+          class Fl_Osc_Button
         }
         Fl_Button {} {
           label M
-          callback {if (part->lastnote>=0) maxkcounter->value(part->lastnote);
-maxkcounter->do_callback();
-minkcounter->do_callback();}
+          callback {o->oscWrite("grabMaxKey");}
           tooltip {set the maximum key to the last pressed key} xywh {315 3 15 12} box THIN_UP_BOX labelsize 10
+          class Fl_Osc_Button
         }
         Fl_Button {} {
           label R
@@ -159,12 +152,11 @@ maxkcounter->do_callback();}
           code0 {o->init("Pmaxkey");}
           class Fl_Osc_Counter
         }
-        Fl_Button labelbutton {
+        Fl_Input labelbutton {
           label {Bass Drum}
-          callback {const char *tmp=fl_input("Kit item name:",(const char *)part->kit[n].Pname);
-if (tmp!=NULL) snprintf((char *)part->kit[n].Pname,PART_MAX_NAME_LEN,"%s",tmp);}
-          xywh {90 0 130 15} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 10 align 20
-          code0 {o->label((char *)part->kit[n].Pname);}
+          xywh {90 0 130 15} box THIN_DOWN_BOX labelfont 1 labelsize 10 align 20
+          code0 {o->init("Pname");}
+          class Fl_Osc_Input
         }
         Fl_Check_Button adcheck {
           callback {if (o->value()!=0) adeditbutton->activate();
@@ -183,11 +175,10 @@ if (tmp!=NULL) snprintf((char *)part->kit[n].Pname,PART_MAX_NAME_LEN,"%s",tmp);}
           class Fl_Osc_Check
         }
         Fl_Choice sendtoeffect {
-          callback {if (o->value()!=0) part->kit[n].Psendtoparteffect=(int)o->value()-1;
-    else part->kit[n].Psendtoparteffect=127;} open
           xywh {615 0 45 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
           code0 {o->add("OFF");char nrstr[10]; for(int i=0;i<NUM_PART_EFX;i++){sprintf(nrstr,"FX%d",i+1);o->add(nrstr);};}
-          code1 {o->value(part->kit[n].Psendtoparteffect+1);if (part->kit[n].Psendtoparteffect==127) o->value(0);}
+          code1 {o->init("Psendtoparteffect");//TODO check semantics}
+          class Fl_Osc_Choice
         } {}
         Fl_Button padeditbutton {
           label edit
@@ -207,17 +198,17 @@ if (tmp!=NULL) snprintf((char *)part->kit[n].Pname,PART_MAX_NAME_LEN,"%s",tmp);}
       Fl_Check_Button enabledcheck {
         label 01
         callback {int answer=1;
-if (o->value()==0) answer=fl_choice("Delete the item?","No","Yes",NULL);
-if (answer!=0){
-pthread_mutex_lock(&master->mutex);
- part->setkititemstatus(n,(int) o->value());
-pthread_mutex_unlock(&master->mutex);
+        //TODO special case
+if (o->value()==0 && !o->is_osc)
+    answer=fl_choice("Delete the item?","No","Yes",NULL);
+if(!answer)
+    o->value(true);
 
 if (o->value()==0) partkititemgroup->deactivate();
 else partkititemgroup->activate();
 o->redraw();
 partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0
-} else o->value(1);}
+}
         private xywh {30 0 20 15} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 4
         code0 {snprintf(label,10,"%d",n+1);o->label(label);}
         code1 {o->init("Penabled");}
@@ -227,38 +218,16 @@ partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0
     }
   }
   Function {PartKitItem(int x,int y, int w, int h, const char *label=0):Fl_Osc_Group(x,y,w,h,label)} {} {
-    code {n=0;
-part=NULL;} {}
+    code {n=0;} {}
   }
   Function {refresh()} {} {
-    code {enabledcheck->value(part->kit[n].Penabled);
-if (part->kit[n].Penabled==0) partkititemgroup->deactivate();
-else partkititemgroup->activate();
-
-labelbutton->label((char *)part->kit[n].Pname);
-sendtoeffect->value(part->kit[n].Psendtoparteffect+1);
-if (part->kit[n].Psendtoparteffect==127) sendtoeffect->value(0);
-
-this->redraw();} {
-      callback {int answer=1;
-if (o->value()==0) answer=fl_choice("Delete the item?","No","Yes",NULL);
-if (answer!=0){
-pthread_mutex_lock(&master->mutex);
- part->setkititemstatus(n,(int) o->value());
-pthread_mutex_unlock(&master->mutex);
-
-if (o->value()==0) partkititemgroup->deactivate();
-else partkititemgroup->activate();
-o->redraw();
-partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0
-} else o->value(1);}
+    code {this->redraw();} {
+      callback {}
     }
   }
-  Function {init(Part *part_,int n_,Master *master_,class PartUI *partui_)} {} {
-    code {part=part_;
-n=n_;
+  Function {init(int n_,class PartUI *partui_)} {} {
+    code {n=n_;
 partui=partui_;
-master=master_;
 make_window();
 //partkititem->show();
 end();} {}
@@ -266,11 +235,7 @@ end();} {}
   Function {~PartKitItem()} {} {
     code {} {}
   }
-  decl {Part *part;} {private local
-  }
   decl {int n;} {private local
-  }
-  decl {Master *master;} {private local
   }
   decl {char label[10];} {private local
   }
@@ -308,21 +273,22 @@ class PartUI {open : {public Fl_Osc_Group}
           Fl_Pack {} {open
             xywh {171 96 115 35} type HORIZONTAL
             code0 {o->spacing(5);}
-            code1 {for (int i=0;i<NUM_SYS_EFX;i++){psyef[i]=new PartSysEffSend(0,0,25,35,"");psyef[i]->init(master,npart,i);}}
+            code1 {for (int i=0;i<NUM_SYS_EFX;i++){psyef[i]=new PartSysEffSend(0,0,25,35,"");psyef[i]->init(npart,i);}}
           } {}
         }
         Fl_Button {} {
           label {Grand Piano}
           callback {int event=Fl::event_button();
 if (event==FL_RIGHT_MOUSE){
-   const char *tmp=fl_input("Instrument name:",(const char *)part->Pname);
-   if (tmp!=NULL) snprintf((char *)part->Pname,PART_MAX_NAME_LEN,"%s",tmp);
+   fprintf(stderr, "Unimplemented...\\n");
+   /*const char *tmp=fl_input("Instrument name:",(const char *)part->Pname);*/
+   /*if (tmp!=NULL) snprintf((char *)part->Pname,PART_MAX_NAME_LEN,"%s",tmp);*/
 } else {
   if (event==FL_LEFT_MOUSE) bankui->show();
        else instrumenteditwindow->show();
 };}
           tooltip {left mousebutton - to choose/save/.. from/to bank or right mousebutton to change the name or middle button to change the instrument information} xywh {195 5 185 20} box UP_FRAME down_box DOWN_FRAME labelfont 1 labelsize 11 align 84
-          code0 {o->label((char *)part->Pname);}
+          code0 {/*o->label((char *)part->Pname);*/}
         }
         Fl_Box {} {
           label {To Sys.Efx.}
@@ -421,42 +387,28 @@ if (minkcounter->value() > maxkcounter->value()) o->textcolor(FL_RED);
         } {}
         Fl_Choice keylimitlist {
           label KLmt
-          callback {int val=0;
+          callback {
+          //TODO special case
+          int val=0;
 val=atoi(o->text());
-part->setkeylimit(val);} open
+osc->write("/setkeylimit", "i", val);} open
           tooltip {Key Limit} xywh {215 155 50 20} down_box BORDER_BOX labelsize 10 align 8 textfont 1 textsize 10
         } {}
         Fl_Choice {} {
           label {Mode :}
-          callback {if ((int) o->value()==0){ /* Poly (implies no legato) */
-  part->Ppolymode=1;
-  part->Plegatomode=0;
-} else {
-  if ((int) o->value()==1){ /* Mono (implies no legato) */
-    part->Ppolymode=0;
-    part->Plegatomode=0;
-  } else {
-    if ((int) o->value()==2){ /* Legato (implies mono) */
-      part->Ppolymode=0;
-      part->Plegatomode=1;
-    };
-  };
-};} open
           tooltip {Poly, Mono or Legato mode} xywh {80 130 64 18} down_box BORDER_BOX labelfont 1 labelsize 11 textfont 1 textsize 10
           code0 {o->add("Poly"); o->add("Mono"); o->add("Legato");}
-          code1 {if (part->Ppolymode!=0) o->value(0); else o->value(1);}
-          code2 {if (part->Ppolymode==0 && part->Plegatomode!=0) o->value(2);}
+          code1 {o->init("polyType");}
+          class Fl_Osc_Choice
         } {}
       }
       Fl_Check_Button {} {
         label Enabled
-        callback {//pthread_mutex_lock(&master->mutex);
-//master->partonoff(npart,(int) o->value());
-//pthread_mutex_unlock(&master->mutex);
-if (part->Penabled==0) partgroupui->deactivate();
+        callback { if (o->value()==0) partgroupui->deactivate();
     else partgroupui->activate();}
         xywh {90 5 75 20} down_box DOWN_BOX labelfont 1 labelsize 11
-        code0 {o->value(part->Penabled);}
+        code0 {o->init("Penabled");}
+        class Fl_Osc_Check
       }
     }
     Fl_Window ctlwindow {
@@ -526,13 +478,15 @@ if (part->Penabled==0) partgroupui->deactivate();
       }
       Fl_Check_Button {} {
         label Sustain
-        callback {part->ctl.sustain.receive=(int) o->value();
-if (part->ctl.sustain.receive==0) {
-  part->RelaseSustainedKeys();
-  part->ctl.setsustain(0);
-};}
+        callback {
+        //TODO
+            /*if (ctl.sustain.receive==0) {
+                RelaseSustainedKeys();
+                ctl.setsustain(0);
+            };*/}
         tooltip {Sustain pedal enable} xywh {205 80 60 20} box THIN_UP_BOX down_box DOWN_BOX labelsize 10
-        code0 {o->value(part->ctl.sustain.receive);}
+        code0 {o->init("sustain.receive");}
+        class Fl_Osc_Check
       }
       Fl_Button {} {
         label Close
@@ -597,13 +551,11 @@ if (part->ctl.sustain.receive==0) {
         }
         Fl_Check_Button {} {
           label {Proprt.}
-          callback {part->ctl.portamento.proportional=(int) o->value();
-if(o->value()){propta->activate();proptb->activate();}
+          callback {if(o->value()){propta->activate();proptb->activate();}
 else {propta->deactivate();proptb->deactivate();}}
           tooltip {Enable Proportinal Portamento (over fixed Portamento)} xywh {285 40 50 15} box THIN_UP_BOX down_box DOWN_BOX labelsize 9
-          code0 {o->value(part->ctl.portamento.proportional);}
-          code1 {if(o->value()){propta->activate();proptb->activate();}}
-          code2 {else {propta->deactivate();proptb->deactivate();}}
+          code0 {o->init("portamento.proportional");}
+          class Fl_Osc_Check
         }
       }
       Fl_Group {} {
@@ -649,12 +601,11 @@ else {propta->deactivate();proptb->deactivate();}}
       Fl_Counter inseffnocounter {
         label {FX No.}
         callback {ninseff=(int) o->value()-1;
-insefftype->value(part->partefx[ninseff]->geteffect());
+/*insefftype->value(part->partefx[ninseff]->geteffect());*/
 //insefftype->do_callback();
 inseffectui->refresh();
-int x=part->Pefxroute[ninseff];
+int x=127;/*part->Pefxroute[ninseff];*/
 if (x==127) x=1;
-bypasseff->value(part->Pefxbypass[ninseff]);
 
 sendtochoice->value(x);}
         xywh {5 110 80 20} type Simple labelfont 1 align 6 minimum 1 maximum 127 step 1 textfont 1
@@ -664,13 +615,11 @@ sendtochoice->value(x);}
       Fl_Choice insefftype {
         label EffType
         callback {
-        pthread_mutex_lock(part->mutex);
-part->partefx[ninseff]->changeeffect((int) o->value());
-pthread_mutex_unlock(part->mutex);
 inseffectui->efftype = o->value();
 inseffectui->refresh();}
         xywh {155 110 70 15} down_box BORDER_BOX labelsize 10 align 6
-        code0 {o->value(part->partefx[ninseff]->geteffect());}
+        code0 {o->init(("partefx"+to_s(ninseff)+"/efftype").c_str());}
+        class Fl_Osc_Choice
       } {
         MenuItem {} {
           label {No Effect}
@@ -730,13 +679,14 @@ inseffectui->refresh();}
       }
       Fl_Choice sendtochoice {
         label {Send To.}
-        callback {int x=(int) o->value();
+        callback {/*int x=(int) o->value();
 part->Pefxroute[ninseff]=x;
 if (x==2) part->partefx[ninseff]->setdryonly(true);
-	else part->partefx[ninseff]->setdryonly(false);}
+	else part->partefx[ninseff]->setdryonly(false);*/}
         xywh {235 110 80 15} down_box BORDER_BOX labelsize 10 align 6
-        code0 {int x=part->Pefxroute[ninseff]; if (x==127) x=1;}
-        code1 {o->value(x);}
+        code0 {/*int x=part->Pefxroute[ninseff]; if (x==127) x=1;*/}
+        code1 {o->init(("Pefxroute"+to_s(ninseff)).c_str());}
+        class Fl_Osc_Choice
       } {
         MenuItem {} {
           label {Next Effect}
@@ -788,7 +738,7 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
       } {
         Fl_Pack {} {
           xywh {0 20 670 320}
-          code0 {for (int i=0;i<NUM_KIT_ITEMS;i++){partkititem[i]=new PartKitItem(0,0,670,20,"");partkititem[i]->init(part,i,master,this);}}
+          code0 {for (int i=0;i<NUM_KIT_ITEMS;i++){partkititem[i]=new PartKitItem(0,0,670,20,"");partkititem[i]->init(i,this);}}
         } {}
       }
       Fl_Box {} {
@@ -1030,13 +980,12 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
   }
   Function {PartUI(int x,int y, int w, int h, const char *label=0):Fl_Osc_Group(x,y,w,h,label)} {open
   } {
-    code {part=NULL;
-adnoteui=NULL;
+    code {adnoteui=NULL;
 subnoteui=NULL;
 padnoteui=NULL;
 lastkititem=-1;} {}
   }
-  Function {init(Part *part_, std::string part_path_, Master *master_,int npart_,BankUI *bankui_, std::string loc_, Fl_Osc_Interface *osc_)} {open
+  Function {init(std::string part_path_, int npart_,BankUI *bankui_, std::string loc_, Fl_Osc_Interface *osc_)} {open
   } {
     code {assert(osc_);
 assert(!loc_.empty());
@@ -1045,9 +994,7 @@ bankui=bankui_;
 part_path = part_path_;
 base = part_path;
 osc  = osc;
-part=part_;
 npart=npart_;
-master=master_;
 ninseff=0;
 osc=osc_;
 loc=loc_;
@@ -1070,7 +1017,7 @@ while (klimits[k]!=0){
 	sprintf(tmp,"%d",klimits[k]);
 	keylimitlist->add(tmp);
 	if (val==-1){
-		if (klimits[k]>part->Pkeylimit) val=k;
+		/*if (klimits[k]>part->Pkeylimit) val=k;*/
 	};
 	k++;
 };
@@ -1093,19 +1040,17 @@ if (kititem!=lastkititem){
     adnoteui=NULL;subnoteui=NULL;padnoteui=NULL;
     lastkititem=kititem;
 
-    if (kititem>=NUM_KIT_ITEMS) return;//bad kit item
-    if (kititem<0) return;
+    if(kititem>=NUM_KIT_ITEMS) return;//bad kit item
+    if(kititem<0) return;
 
-    if (part->kit[kititem].adpars)
+    if(adsynenabledcheck->value())
       adnoteui=new ADnoteUI(loc+"kit"+to_s(kititem)+"/adpars/", osc);
 
-    if (part->kit[kititem].subpars) 
+    if(subsynenabledcheck->value()) 
        subnoteui=new SUBnoteUI(osc, loc+"kit"+to_s(kititem)+"/subpars/");
 
-    if (part->kit[kititem].padpars) {
+    if(padsynenabledcheck->value())
       padnoteui=new PADnoteUI(loc+"kit"+to_s(kititem)+"/padpars", osc);
-      }
-
 };
 
 
@@ -1134,10 +1079,6 @@ delete(instrumentkitlist);
 
 instrumenteditwindow->hide();
 delete(instrumenteditwindow);} {}
-  }
-  decl {Part *part;} {private local
-  }
-  decl {Master *master;} {private local
   }
   decl {BankUI *bankui;} {private local
   }

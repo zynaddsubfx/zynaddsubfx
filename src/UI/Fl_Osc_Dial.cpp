@@ -31,11 +31,11 @@ Fl_Osc_Dial::Fl_Osc_Dial(int X, int Y, int W, int H, const char *label)
 }
 
 
-void Fl_Osc_Dial::init(const char *path_)
+void Fl_Osc_Dial::init(std::string path_)
 {
     assert(osc);
     ext = path_;
-    oscRegister(path_);
+    oscRegister(path_.c_str());
 };
         
 void Fl_Osc_Dial::alt_init(std::string base, std::string path_)

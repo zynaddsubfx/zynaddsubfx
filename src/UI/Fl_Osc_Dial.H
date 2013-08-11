@@ -16,7 +16,7 @@ class Fl_Osc_Dial:public WidgetPDial, public Fl_Osc_Widget
 
 
         //Normal Initialization
-        void init(const char *path);
+        void init(std::string path);
         //void OSC_value(float);
         void OSC_value(int);
         void OSC_value(char);
