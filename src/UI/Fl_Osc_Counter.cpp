@@ -16,16 +16,22 @@ void Fl_Osc_Counter::update(void)
     oscWrite(path);
 }
 
-void Fl_Osc_Counter::init(const char *path_)
+void Fl_Osc_Counter::init(const char *path_, char type_)
 {
     oscRegister(path_);
     path = path_;
+    cb_type = type_;
 }
 
 void Fl_Osc_Counter::callback(Fl_Callback *cb, void *p)
 {
     cb_data.first = cb;
     cb_data.second = p;
+}
+
+void Fl_Osc_Counter::OSC_value(int v)
+{
+    value(v);
 }
 
 void Fl_Osc_Counter::OSC_value(char v)
@@ -37,7 +43,10 @@ void Fl_Osc_Counter::cb(void)
 {
     assert(osc);
 
-    oscWrite(path, "c", (char)(value()));
+    if(cb_type == 'c')
+        oscWrite(path, "c", (char)(value()));
+    else
+        oscWrite(path, "i", (int)value());
     
     if(cb_data.first)
         cb_data.first(this, cb_data.second);

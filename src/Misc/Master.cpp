@@ -50,6 +50,7 @@ static Ports localports = {
     RECURSP(Master, EffectMgr, sysefx, sysefx, 4, "System Effect"),//NUM_SYS_EFX
     RECURSP(Master, EffectMgr, insefx, insefx, 8, "Insertion Effect"),//NUM_INS_EFX
     rRecur(microtonal, "Micrtonal Mapping Functionality"),
+    rParam(Pkeyshift,  "Global Key Shift"),
     {"echo", "=documentation\0:Hidden port to echo messages\0", 0, [](const char *m, RtData&) {
        bToU->raw_write(m-1);}},
     {"get-vu", "", 0, [](const char *, RtData &d) {

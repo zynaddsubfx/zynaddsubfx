@@ -30,8 +30,15 @@ using namespace rtosc;
 
 #define rObject Controller
 rtosc::Ports Controller::ports = {
+    rParam(panning.depth, "Depth of Panning MIDI Control"),
+    rParam(filtercutoff.depth, "Depth of Filter Cutoff MIDI Control"),
+    rParam(filterq.depth, "Depth of Filter Q MIDI Control"),
+    rParam(bandwidth.depth, "Depth of Bandwidth MIDI Control"),
+    rToggle(bandwidth.exponential, "Bandwidth Exponential Mode"),
+    rParam(modwheel.depth, "Depth of Modwheel MIDI Control"),
+    rToggle(modwheel.exponential, "Modwheel Exponential Mode"),
+    rParamI(pitchwheel.bendrange, "Range of MIDI Pitch Wheel"),
     rToggle(expression.receive, "Expression MIDI Receive"),
-    rToggle(bandwidth.exponential, "Bandwidth ???"),
     rToggle(fmamp.receive,      "FM amplitude MIDI Receive"),
     rToggle(volume.receive,     "Volume MIDI Receive"),
     rToggle(sustain.receive,    "Sustain MIDI Receive"),
@@ -44,6 +51,10 @@ rtosc::Ports Controller::ports = {
     rParam(portamento.pitchthresh, "Threshold for portamento"),
     rToggle(portamento.pitchthreshtype, "Type of threshold"),
     rParam(portamento.updowntimestretch, "UNDOCUMENTED"),
+    rParam(resonancecenter.depth, "Resonance Center MIDI Depth"),
+    rParam(resonancebandwidth.depth, "Resonance Bandwidth MIDI Depth"),
+    rToggle(NRPN.receive, "NRPN MIDI Enable"),
+    rAction(defaults),
 };
 
 

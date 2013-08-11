@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0302 
 header_name {.h} 
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
@@ -55,7 +55,7 @@ class PartSysEffSend {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window syseffsend {
-      private xywh {598 198 100 100} type Double box NO_BOX
+      private xywh {601 221 100 100} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Dial {} {
@@ -94,7 +94,7 @@ class PartKitItem {open : {public Fl_Osc_Group}
   Function {make_window()} {open private
   } {
     Fl_Window partkititem {
-      private xywh {482 475 670 100} type Double box NO_BOX
+      private xywh {485 498 670 100} type Double box NO_BOX
       class Fl_Osc_Group visible
     } {
       Fl_Group partkititemgroup {
@@ -207,8 +207,7 @@ if(!answer)
 if (o->value()==0) partkititemgroup->deactivate();
 else partkititemgroup->activate();
 o->redraw();
-partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0
-}
+partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0}
         private xywh {30 0 20 15} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 4
         code0 {snprintf(label,10,"%d",n+1);o->label(label);}
         code1 {o->init("Penabled");}
@@ -221,9 +220,7 @@ partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0
     code {n=0;} {}
   }
   Function {refresh()} {} {
-    code {this->redraw();} {
-      callback {}
-    }
+    code {this->redraw();} {}
   }
   Function {init(int n_,class PartUI *partui_)} {} {
     code {n=n_;
@@ -248,7 +245,7 @@ class PartUI {open : {public Fl_Osc_Group}
   Function {make_window()} {open private
   } {
     Fl_Window partgroup {open
-      private xywh {697 333 385 180} type Double box NO_BOX
+      private xywh {700 356 385 180} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group partgroupui {open
@@ -310,9 +307,7 @@ if (event==FL_RIGHT_MOUSE){
         }
         Fl_Counter maxkcounter {
           label {Max.k}
-          callback {
-
-if (minkcounter->value() > maxkcounter->value()) o->textcolor(FL_RED);
+          callback {if (minkcounter->value() > maxkcounter->value()) o->textcolor(FL_RED);
  else o->textcolor(FL_BLACK);}
           tooltip {Maximum key (that the part receives NoteOn messages)} xywh {340 125 40 15} type Simple labelfont 1 labelsize 10 minimum 0 maximum 127 step 1 textsize 10
           code0 {o->init("Pmaxkey");}
@@ -344,7 +339,7 @@ if (minkcounter->value() > maxkcounter->value()) o->textcolor(FL_RED);
         Fl_Check_Button {} {
           label Portamento
           tooltip {Enable/Disable the portamento} xywh {95 155 88 20} down_box DOWN_BOX labelfont 1 labelsize 11
-          code0 {o->init("portamento.portamento");}
+          code0 {o->init("ctl/portamento.portamento");}
           class Fl_Osc_Check
         }
         Fl_Button {} {
@@ -354,8 +349,7 @@ if (minkcounter->value() > maxkcounter->value()) o->textcolor(FL_RED);
         }
         Fl_Button {} {
           label m
-          callback {
-          o->oscWrite("captureMin");
+          callback {o->oscWrite("captureMin");
           o->oscWrite("Pminkey");
           o->oscWrite("Pmaxkey");}
           tooltip {set the minimum key to the last pressed key} xywh {315 155 15 12} box THIN_UP_BOX labelsize 10
@@ -363,8 +357,7 @@ if (minkcounter->value() > maxkcounter->value()) o->textcolor(FL_RED);
         }
         Fl_Button {} {
           label M
-          callback {
-          o->oscWrite("captureMax");
+          callback {o->oscWrite("captureMax");
           o->oscWrite("Pminkey");
           o->oscWrite("Pmaxkey");}
           tooltip {set the maximum key to the last pressed key} xywh {345 155 15 12} box THIN_UP_BOX labelsize 10
@@ -372,8 +365,7 @@ if (minkcounter->value() > maxkcounter->value()) o->textcolor(FL_RED);
         }
         Fl_Button {} {
           label R
-          callback {
-          o->oscWrite("Pminkey", "c", 0);
+          callback {o->oscWrite("Pminkey", "c", 0);
           o->oscWrite("Pmaxkey", "c", 127);}
           tooltip {reset the minimum key to 0 and maximum key to 127} xywh {330 155 15 12} box THIN_UP_BOX labelfont 1 labelsize 10
           class Fl_Osc_Button
@@ -387,8 +379,7 @@ if (minkcounter->value() > maxkcounter->value()) o->textcolor(FL_RED);
         } {}
         Fl_Choice keylimitlist {
           label KLmt
-          callback {
-          //TODO special case
+          callback {//TODO special case
           int val=0;
 val=atoi(o->text());
 osc->write("/setkeylimit", "i", val);} open
@@ -404,7 +395,7 @@ osc->write("/setkeylimit", "i", val);} open
       }
       Fl_Check_Button {} {
         label Enabled
-        callback { if (o->value()==0) partgroupui->deactivate();
+        callback {if (o->value()==0) partgroupui->deactivate();
     else partgroupui->activate();}
         xywh {90 5 75 20} down_box DOWN_BOX labelfont 1 labelsize 11
         code0 {o->init("Penabled");}
@@ -413,8 +404,8 @@ osc->write("/setkeylimit", "i", val);} open
     }
     Fl_Window ctlwindow {
       label Controllers open
-      private xywh {777 330 500 130} type Double box NO_BOX visible
-      class Fl_Osc_Window
+      private xywh {777 353 500 130} type Double box NO_BOX
+      class Fl_Osc_Window visible
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
@@ -460,7 +451,7 @@ osc->write("/setkeylimit", "i", val);} open
       Fl_Counter {} {
         label {PWheelB.Rng (cents)}
         tooltip {Pitch Wheel Bend Range (cents)} xywh {165 15 110 20} labelsize 10 align 1 minimum -6400 maximum 6400 step 1
-        code0 {o->init("pitchwheel.bendrange");}
+        code0 {o->init("pitchwheel.bendrange", 'i');}
         code1 {o->lstep(100);}
         class Fl_Osc_Counter
       }
@@ -478,8 +469,7 @@ osc->write("/setkeylimit", "i", val);} open
       }
       Fl_Check_Button {} {
         label Sustain
-        callback {
-        //TODO
+        callback {//TODO
             /*if (ctl.sustain.receive==0) {
                 RelaseSustainedKeys();
                 ctl.setsustain(0);
@@ -495,12 +485,12 @@ osc->write("/setkeylimit", "i", val);} open
       }
       Fl_Button {} {
         label {Reset all controllers}
-        callback {o->oscWrite("resetControllers");//part->SetController(C_resetallcontrollers,0);}
+        callback {o->oscWrite("defaults");//part->SetController(C_resetallcontrollers,0);}
         xywh {5 107 210 20} box THIN_UP_BOX
         class Fl_Osc_Button
       }
       Fl_Group {} {
-        label Portamento
+        label Portamento open
         xywh {280 15 160 90} box UP_FRAME labelsize 10
       } {
         Fl_Check_Button {} {
@@ -516,10 +506,10 @@ osc->write("/setkeylimit", "i", val);} open
           class Fl_Osc_Dial
         }
         Fl_Counter {} {
-          label thresh
+          label thresh selected
           tooltip {Minimum or max. difference of the notes in order to do the portamento (x 100 cents)} xywh {340 20 50 20} type Simple labelsize 10 minimum 0 maximum 127 step 1
           code0 {o->init("portamento.pitchthresh");}
-          class Fl_Osc_Dial
+          class Fl_Osc_Counter
         }
         Fl_Check_Button {} {
           label {th.type}
@@ -590,8 +580,8 @@ else {propta->deactivate();proptb->deactivate();}}
     }
     Fl_Window partfx {
       label {Part's Insert Effects}
-      private xywh {563 729 390 145} type Double box NO_BOX visible
-      class Fl_Osc_Window
+      private xywh {566 752 390 145} type Double box NO_BOX
+      class Fl_Osc_Window visible
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
@@ -614,8 +604,7 @@ sendtochoice->value(x);}
       }
       Fl_Choice insefftype {
         label EffType
-        callback {
-inseffectui->efftype = o->value();
+        callback {inseffectui->efftype = o->value();
 inseffectui->refresh();}
         xywh {155 110 70 15} down_box BORDER_BOX labelsize 10 align 6
         code0 {o->init(("partefx"+to_s(ninseff)+"/efftype").c_str());}
@@ -720,8 +709,8 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
     }
     Fl_Window instrumentkitlist {
       label {Instrument Kit} open
-      xywh {595 611 670 370} type Double box NO_BOX visible
-      class Fl_Osc_Window
+      xywh {598 611 670 370} type Double box NO_BOX
+      class Fl_Osc_Window visible
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
@@ -802,8 +791,8 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
     }
     Fl_Window instrumenteditwindow {
       label {Instrument Edit} open
-      xywh {256 621 395 360} type Double box NO_BOX visible
-      class Fl_Osc_Window
+      xywh {259 621 395 360} type Double box NO_BOX
+      class Fl_Osc_Window visible
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
@@ -837,7 +826,7 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
         } {
           Fl_Check_Button adsynenabledcheck {
             label Enabled
-            callback { if (o->value()==0) adeditbutton->deactivate();
+            callback {if (o->value()==0) adeditbutton->deactivate();
      else adeditbutton->activate();}
             tooltip {enable/disable ADsynth} xywh {15 255 80 20} box UP_BOX down_box DOWN_BOX color 51 selection_color 51 labelfont 1 labelsize 11
             code1 {o->init("Padenabled");}
@@ -1023,8 +1012,7 @@ while (klimits[k]!=0){
 };
 
 if (val==-1) val=k;
-keylimitlist->value(val);} {selected
-    }
+keylimitlist->value(val);} {}
   }
   Function {showparameters(int kititem,int engine)} {open
   } {
@@ -1060,8 +1048,7 @@ if ((engine==1)&&(subnoteui!=NULL)) subnoteui->SUBparameters->show();
 if ((engine==2)&&(adnoteui!=NULL)) padnoteui->padnotewindow->show();} {}
   }
   Function {~PartUI()} {} {
-    code {
-delete adnoteui;
+    code {delete adnoteui;
 delete subnoteui;
 delete padnoteui;
 
