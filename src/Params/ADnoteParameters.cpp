@@ -164,7 +164,7 @@ static Ports globalPorts = {
     rParam(PBandwidth,    "Relative Fine Detune Gain"),
 
     //Amplitude
-    //TODO move panning here
+    rParam(PPanning, "Panning of ADsynth"),
     rParam(PVolume, "volume control"),
     rParam(PAmpVelocityScaleFunction, "Volume Velocity Control"),
 

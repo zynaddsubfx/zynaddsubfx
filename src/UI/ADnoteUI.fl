@@ -718,8 +718,8 @@ o->redraw();}
           code0 {char tmp[10];snprintf(tmp,10,"%d",nvoice+1);o->label(strdup(tmp));}
         } {}
         Fl_Choice {} {
-          callback {if (o->value()==0) voicemodegroup->activate();
-  else voicemodegroup->deactivate();}
+          callback {if (o->value()==0){ voicemodegroup->activate(); noiselabel->hide();}
+  else{ voicemodegroup->deactivate(); noiselabel->show();}}
           tooltip {Oscillator Type (sound/noise)} xywh {5 515 65 20} down_box BORDER_BOX labelsize 10 textfont 1 textsize 10
           code0 {o->init("Type");}
           class Fl_Osc_Choice
@@ -762,12 +762,6 @@ bypassfiltercheckbutton->redraw();}
         Fl_Box noiselabel {
           label {White Noise}
           xywh {150 430 300 65} labelfont 1 labelsize 50 labelcolor 7
-        }
-        Fl_Check_Button {} {
-          callback {if (o->value()==0) noiselabel->hide(); else noiselabel->show();}
-          xywh {0 0 0 0}
-          code0 {o->init("Type");}
-          class Fl_Osc_Check
         }
       }
       Fl_Check_Button voiceonbutton {
