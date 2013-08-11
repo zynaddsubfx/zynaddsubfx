@@ -9,6 +9,7 @@
 #include "common.H"
 #include <cassert>
 #include <cstdio>
+#include "../globals.h"
 
 class Fl_Osc_Group;
 //Consider merging in Fl_OscilSpectrum
@@ -16,7 +17,7 @@ class Fl_Oscilloscope : public Fl_Box, Fl_Osc_Widget
 {
     public:
         Fl_Oscilloscope(int x,int y, int w, int h, const char *label=0)
-            :Fl_Box(x,y,w,h,label)
+            :Fl_Box(x,y,w,h,label), Fl_Osc_Widget(this)
         {
             smps = new float[synth->oscilsize];
             memset(smps, 0, synth->oscilsize*sizeof(float));
@@ -27,34 +28,23 @@ class Fl_Oscilloscope : public Fl_Box, Fl_Osc_Widget
         ~Fl_Oscilloscope(void)
         {
             delete[] smps;
-            osc->removeLink(loc, this);
         }
 
-        void init(bool base_waveform_p, std::string loc = "")
+        void init(bool base_waveform_p)
         {
-            Fl_Osc_Pane *og  = fetch_osc_pane(this);
-            assert(og);
-
-            loc = og->base + loc + (base_waveform_p ? "base-waveform": "waveform");
-            osc = og->osc;
+            fprintf(stderr, "PARENT BASE LEADS TO '%s'\n", loc.c_str());
+            ext = (base_waveform_p ? "base-waveform": "waveform");
             assert(osc);
-
-            printf("\n\n\n");
-            printf("HELLO I AM HIM AT ADDRESS '%s'\n", loc.c_str());
-            printf("\n\n\n");
-            osc->createLink(loc, this);
-            osc->requestValue(loc);
+            oscRegister(ext.c_str());
         }
 
         void update(void)
         {
-            printf("HELLO I AM HIM UPDATING AT ADDRESS '%s'\n", loc.c_str());
-            osc->requestValue(loc);
+            oscWrite(ext);
         }
 
         virtual void OSC_value(unsigned N, void *data) override
         {
-            fprintf(stderr, "(oscl) OSC_value(%d,%p)\n", N, data);
             assert(N==(unsigned)(synth->oscilsize*4));
 
             memcpy(smps, data, N);

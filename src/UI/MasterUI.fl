@@ -162,7 +162,7 @@ bankui->show();}
       }
       Fl_Check_Button partenabled {
         label 01
-        callback {o->oscWrite("partonoff", o->value() ? "T" : "F");
+        callback {o->oscWrite("Penabled", o->value() ? "T" : "F");
 if ((int) o->value()==0) panellistitemgroup->deactivate();
   else {
     panellistitemgroup->activate();

@@ -307,8 +307,6 @@ oscildisplaygroup->redraw();}
           Fl_Choice magtype {
             label {Mag.Type}
             callback {//oscil->Phmagtype=(int) o->value();
-basefuncdisplaygroup->redraw();
-
 redrawoscil();}
             xywh {75 285 65 20} down_box BORDER_BOX labelsize 11 when 1 textsize 11
             code0 {o->init("hmagtype");}
@@ -938,8 +936,10 @@ refresh();}
   }
   Function {OscilEditor(bool adnotep_, std::string loc_, Fl_Osc_Interface *osc_)} {open
   } {
-    code {assert(osc_);
+    code { assert(osc_);
 assert(!loc_.empty());
+
+initialized = false;
 
 adnotep = adnotep_;
 osc = osc_;
@@ -951,6 +951,7 @@ oscils = NULL;
 oscils_base = NULL;
 
 make_window();
+initialized = true;
 
 refresh();
 osceditUI->show();} {}
@@ -1017,7 +1018,10 @@ redrawoscil();} {}
   }
   Function {redrawoscil()} {open
   } {
-    code {//get data from backend
+    code {
+    if(!initialized) //Must have been called during initialization
+        return;
+    //get data from backend
 osc->requestValue(loc+"prepare");
 oscilo->update();
 oscils->update();
@@ -1038,5 +1042,7 @@ oscils_base->update();
   decl {Fl_OscilSpectrum *oscils, *oscils_base;} {private local
   }
   decl {bool adnotep;} {private local
+  }
+  decl {bool initialized;} {private local
   }
 } 

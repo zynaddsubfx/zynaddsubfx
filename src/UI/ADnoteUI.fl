@@ -112,8 +112,9 @@ class ADvoicelistitem {open : {public Fl_Osc_Group}
         }
         Fl_Group voiceoscil {open
           xywh {60 5 30 20} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
-          code0 {oscil=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
-          code1 {oscil->init(false, "oscil/");}
+          code0 {voiceoscil->ext = "oscil/";}
+          code1 {oscil=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
+          code2 {oscil->init(false);}
           class Fl_Osc_Group
         } {}
         Fl_Value_Output detunevalueoutput {
@@ -321,10 +322,10 @@ o->redraw();}
             } {
               Fl_Group fmoscil {open
                 xywh {535 440 220 140} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
-                code0 {oscFM=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
-                code1 {//int nv=nvoice; if (pars->VoicePar[nvoice].PextFMoscil>=0) nv=pars->VoicePar[nvoice].PextFMoscil;}
-                code2 {fmoscil->base = loc; fmoscil->ext="mod-oscil/";fmoscil->osc = osc_i;}
-                code3 {oscFM->parent(fmoscil);oscFM->init(false);oscFM->update();}
+                code0 {fmoscil->base = loc; fmoscil->ext="mod-oscil/";fmoscil->osc = osc_i;fmoscil->begin();}
+                code1 {oscFM=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
+                code2 {//int nv=nvoice; if (pars->VoicePar[nvoice].PextFMoscil>=0) nv=pars->VoicePar[nvoice].PextFMoscil;}
+                code3 {oscFM->parent(fmoscil);oscFM->init(false);oscFM->update();fmoscil->end();}
                 class Fl_Osc_Group
               } {}
               Fl_Box {} {
@@ -505,10 +506,10 @@ o->redraw();}
           }
           Fl_Group voiceoscil {
             xywh {80 390 445 145} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179
-            code0 {osc=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
-            code1 {voiceoscil->base = loc;voiceoscil->ext="oscil/";//int nv=nvoice; if (extoscil->value()>=0) nv=extoscil->value();}
+            code0 {voiceoscil->base = loc;voiceoscil->ext="oscil/";voiceoscil->begin();//int nv=nvoice; if (extoscil->value()>=0) nv=extoscil->value();}
+            code1 {osc=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");}
             code2 {voiceoscil->osc = osc_i;}
-            code3 {osc->parent(voiceoscil); osc->init(false);}
+            code3 {osc->parent(voiceoscil); osc->init(false);voiceoscil->end();}
             class Fl_Osc_Group
           } {}
           Fl_Button changevoiceoscilbutton {
