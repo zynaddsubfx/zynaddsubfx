@@ -45,8 +45,8 @@ using rtosc::RtData;
 
 #define rObject Part
 static Ports partPorts = {
-    RECURS(Part, Part::Kit, kit, kit, 16, "Kit"),//NUM_KIT_ITEMS
-    RECURSP(Part, EffectMgr, partefx, partefx, 3, "Part Effect"),
+    rRecurs(kit, 16, "Kit"),//NUM_KIT_ITEMS
+    rRecursp(partefx, 3, "Part Effect"),
     rRecur(ctl,       "Controller"),
     rToggle(Penabled, "Part enable"),
     rParam(Pvolume, "Part Volume"),
@@ -90,9 +90,9 @@ static Ports partPorts = {
 #undef  rObject
 #define rObject Part::Kit
 static Ports kitPorts = {
-    RECURP(Part::Kit, PADnoteParameters, padpars, padpars, "Padnote parameters"),
-    RECURP(Part::Kit, ADnoteParameters, adpars, adpars, "Adnote parameters"),
-    RECURP(Part::Kit, SUBnoteParameters, subpars, subpars, "Adnote parameters"),
+    rRecurp(padpars, "Padnote parameters"),
+    rRecurp(adpars, "Adnote parameters"),
+    rRecurp(subpars, "Adnote parameters"),
     rToggle(Penabled, "Kit item enable"),
     rToggle(Pmuted,   "Kit item mute"),
     rParam(Pminkey,   "Kit item min key"),

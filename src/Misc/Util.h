@@ -149,7 +149,7 @@ const char *message_snip(const char *m);
 
 ///floating point parameter - with lookup code
 #define PARAMF(type, var, name, scale, _min, _max, desc) \
-{#name"::f", #scale "," # _min "," #_max ":'parameter':" desc, 0, \
+{#name"::f", ":parameter\0:documentation\0=" desc "\0", 0, \
     [](const char *m, rtosc::RtData &d) { \
         if(rtosc_narguments(m)==0) {\
             d.reply(d.loc, "f", ((type*)d.obj)->var); \
@@ -159,7 +159,7 @@ const char *message_snip(const char *m);
 
 ///character parameter - with lookup code
 #define PARAMC(type, var, name, desc) \
-{#name"::c", ":'old-param':" desc, 0, \
+{#name"::c", ":parameter\0:old-param\0:documentation\0=" desc"\0", 0, \
     [](const char *m, rtosc::RtData &d) { \
         if(rtosc_narguments(m)==0) {\
             d.reply(d.loc, "c", ((type*)d.obj)->var); \
@@ -169,13 +169,13 @@ const char *message_snip(const char *m);
 
 ///Recur - perform a simple recursion
 #define RECUR(type, cast, name, var, desc) \
-{#name"/", ":'recursion':" desc, &cast::ports, [](const char *m, rtosc::RtData &d){\
+{#name"/", ":recursion\0:documentation\0=" desc"\0", &cast::ports, [](const char *m, rtosc::RtData &d){\
     d.obj = &(((type*)d.obj)->var); \
     cast::ports.dispatch(message_snip(m), d);}}
 
 ///Recurs - perform a ranged recursion
 #define RECURS(type, cast, name, var, length, desc) \
-{#name "#" #length "/", ":'recursion':" desc, &cast::ports, \
+{#name "#" #length "/", ":recursion\0:documentation\0=" desc"\0", &cast::ports, \
     [](const char *m, rtosc::RtData &d){ \
         const char *mm = m; \
         while(!isdigit(*mm))++mm; \
@@ -184,13 +184,13 @@ const char *message_snip(const char *m);
 
 ///Recur - perform a simple recursion (on pointer member)
 #define RECURP(type, cast, name, var, desc) \
-{#name"/", ":'recursion':" desc, &cast::ports, [](const char *m, rtosc::RtData &d){\
+{#name"/", ":recursion\0:documentation\0=" desc"\0", &cast::ports, [](const char *m, rtosc::RtData &d){\
     d.obj = (((type*)d.obj)->var); \
     cast::ports.dispatch(message_snip(m), d);}}
 
 ///Recurs - perform a ranged recursion (on pointer array member)
 #define RECURSP(type, cast, name, var, length, desc) \
-{#name "#" #length "/", ":'recursion':" desc, &cast::ports, \
+{#name "#" #length "/", ":recursion\0:documentation\0=" desc"\0", &cast::ports, \
     [](const char *m, rtosc::RtData &d){ \
         const char *mm = m; \
         while(!isdigit(*mm))++mm; \

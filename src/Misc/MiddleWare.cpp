@@ -44,8 +44,8 @@ void path_search(const char *m)
     using rtosc::Port;
 
     //assumed upper bound of 32 ports (may need to be resized)
-    char         types[65];
-    rtosc_arg_t  args[64];
+    char         types[129];
+    rtosc_arg_t  args[128];
     size_t       pos    = 0;
     const Ports *ports  = NULL;
     const char  *str    = rtosc_argument(m,0).s;
@@ -68,7 +68,6 @@ void path_search(const char *m)
         for(const Port &p:*ports) {
             if(strstr(p.name, needle)!=p.name)
                 continue;
-            printf("Reporting '%s'\n", p.name);
             types[pos]    = 's';
             args[pos++].s = p.name;
             types[pos]    = 'b';
@@ -84,10 +83,9 @@ void path_search(const char *m)
     }
 
 
-    //Reply to requester
-    char buffer[1024*4];
+    //Reply to requester [wow, these messages are getting huge...]
+    char buffer[1024*20];
     size_t length = rtosc_amessage(buffer, sizeof(buffer), "/paths", types, args);
-    printf("ARG COUNT = %d\n", rtosc_narguments(buffer));
     if(length) {
         lo_message msg  = lo_message_deserialise((void*)buffer, length, NULL);
         lo_address addr = lo_address_new_from_url(last_url.c_str());
