@@ -166,10 +166,11 @@ bankui->show();}
 if ((int) o->value()==0) panellistitemgroup->deactivate();
   else {
     panellistitemgroup->activate();
+    /*
     if ((int)bankui->cbwig->value()!=(npart+1)){
        bankui->cbwig->value(npart+1);
        bankui->cbwig->do_callback();
-    };
+    };*/
 };
 
 o->redraw();}

@@ -55,7 +55,7 @@ class PartSysEffSend {open : {public Fl_Group}
   Function {make_window()} {open private
   } {
     Fl_Window syseffsend {
-      private xywh {601 221 100 100} type Double box NO_BOX
+      private xywh {604 244 100 100} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Dial {} {
@@ -94,7 +94,7 @@ class PartKitItem {open : {public Fl_Osc_Group}
   Function {make_window()} {open private
   } {
     Fl_Window partkititem {
-      private xywh {485 498 670 100} type Double box NO_BOX
+      private xywh {488 521 670 100} type Double box NO_BOX
       class Fl_Osc_Group visible
     } {
       Fl_Group partkititemgroup {
@@ -244,12 +244,13 @@ class PartUI {open : {public Fl_Osc_Group}
 } {
   Function {make_window()} {open private
   } {
-    Fl_Window partgroup {open
-      private xywh {700 356 385 180} type Double box NO_BOX
+    Fl_Window partgroup {
+      private xywh {703 379 385 180} type Double box NO_BOX
       class Fl_Group visible
     } {
       Fl_Group partgroupui {open
         xywh {0 0 385 180}
+        class Fl_Osc_Group
       } {
         Fl_Dial {} {
           label Pan
@@ -403,8 +404,8 @@ osc->write("/setkeylimit", "i", val);} open
       }
     }
     Fl_Window ctlwindow {
-      label Controllers open
-      private xywh {777 353 500 130} type Double box NO_BOX
+      label Controllers
+      private xywh {777 376 500 130} type Double box NO_BOX
       class Fl_Osc_Window visible
     } {
       Fl_Box {} {
@@ -492,6 +493,7 @@ osc->write("/setkeylimit", "i", val);} open
       Fl_Group {} {
         label Portamento open
         xywh {280 15 160 90} box UP_FRAME labelsize 10
+        class Fl_Osc_Group
       } {
         Fl_Check_Button {} {
           label Rcv
@@ -506,7 +508,7 @@ osc->write("/setkeylimit", "i", val);} open
           class Fl_Osc_Dial
         }
         Fl_Counter {} {
-          label thresh selected
+          label thresh
           tooltip {Minimum or max. difference of the notes in order to do the portamento (x 100 cents)} xywh {340 20 50 20} type Simple labelsize 10 minimum 0 maximum 127 step 1
           code0 {o->init("portamento.pitchthresh");}
           class Fl_Osc_Counter
@@ -551,6 +553,7 @@ else {propta->deactivate();proptb->deactivate();}}
       Fl_Group {} {
         label Resonance
         xywh {445 15 50 90} box UP_FRAME labelsize 10
+        class Fl_Osc_Group
       } {
         Fl_Dial {} {
           label BWdpth
@@ -580,7 +583,7 @@ else {propta->deactivate();proptb->deactivate();}}
     }
     Fl_Window partfx {
       label {Part's Insert Effects}
-      private xywh {566 752 390 145} type Double box NO_BOX
+      private xywh {569 775 390 145} type Double box NO_BOX
       class Fl_Osc_Window visible
     } {
       Fl_Box {} {
@@ -708,8 +711,8 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
       }
     }
     Fl_Window instrumentkitlist {
-      label {Instrument Kit} open
-      xywh {598 611 670 370} type Double box NO_BOX
+      label {Instrument Kit}
+      xywh {601 611 670 370} type Double box NO_BOX
       class Fl_Osc_Window visible
     } {
       Fl_Box {} {
@@ -791,17 +794,22 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
     }
     Fl_Window instrumenteditwindow {
       label {Instrument Edit} open
-      xywh {259 621 395 360} type Double box NO_BOX
+      xywh {262 621 395 360} type Double box NO_BOX
       class Fl_Osc_Window visible
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
         code0 {instrumenteditwindow->osc = osc;}
-        code1 {instrumenteditwindow->base = "/part"+to_s(npart)+"/kit0/";}
+        code1 {instrumenteditwindow->base = "/part"+to_s(npart)+"/";}
       }
-      Fl_Group {} {
+      Fl_Group editgroup {
         xywh {0 220 395 110} box UP_FRAME
+        class Fl_Osc_Group
       } {
+        Fl_Box {} {
+          xywh {0 0 0 0}
+          code0 {editgroup->ext = "kit0/";}
+        }
         Fl_Group {} {
           label PADsynth
           xywh {205 245 100 80} box ENGRAVED_FRAME labelfont 1
@@ -1090,5 +1098,16 @@ delete(instrumenteditwindow);} {}
   decl {std::string loc;} {private local
   }
   decl {Fl_Osc_Interface *osc;} {private local
+  }
+  Function {rebase(std::string new_loc)} {open
+  } {
+    code {
+    loc = new_loc;
+    partgroupui->rebase(new_loc);
+ctlwindow->rebase(new_loc+"ctl/");
+partfx->rebase(new_loc);
+instrumentkitlist->rebase(new_loc);
+instrumenteditwindow->rebase(new_loc);} {selected
+    }
   }
 } 
