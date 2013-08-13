@@ -10,4 +10,6 @@ class Fl_Osc_Input: public Fl_Input, public Fl_Osc_Widget
         
         //Normal Initialization
         void init(const char *path);
+
+        virtual void OSC_value(const char *value) override;
 };

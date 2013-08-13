@@ -26,6 +26,7 @@ void Fl_Osc_Widget::OSC_value(bool) {}
 void Fl_Osc_Widget::OSC_value(int) {}
 void Fl_Osc_Widget::OSC_value(char) {}
 void Fl_Osc_Widget::OSC_value(unsigned,void*) {}
+void Fl_Osc_Widget::OSC_value(const char *) {}
 
 //labeled forwarding methods
 void Fl_Osc_Widget::OSC_value(float x, const char *) {OSC_value(x);}
@@ -33,6 +34,7 @@ void Fl_Osc_Widget::OSC_value(bool x, const char *) {OSC_value(x);}
 void Fl_Osc_Widget::OSC_value(int x, const char *) {OSC_value(x);}
 void Fl_Osc_Widget::OSC_value(char x, const char *) {OSC_value(x);}
 void Fl_Osc_Widget::OSC_value(unsigned x, void *v, const char *) {OSC_value(x,v);}
+void Fl_Osc_Widget::OSC_value(const char *x, const char *) {OSC_value(x);}
 
 void Fl_Osc_Widget::OSC_raw(const char *)
 {}

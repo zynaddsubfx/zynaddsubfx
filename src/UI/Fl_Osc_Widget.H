@@ -20,6 +20,7 @@ class Fl_Osc_Widget
         virtual void OSC_value(int);
         virtual void OSC_value(char);
         virtual void OSC_value(unsigned,void*);
+        virtual void OSC_value(const char *);
 
         //labeled forwarding methods
         virtual void OSC_value(float x, const char *);
@@ -27,6 +28,7 @@ class Fl_Osc_Widget
         virtual void OSC_value(int x, const char *);
         virtual void OSC_value(char x, const char *);
         virtual void OSC_value(unsigned x, void *v, const char *);
+        virtual void OSC_value(const char *x, const char *);
 
         //Raw messages
         virtual void OSC_raw(const char *);

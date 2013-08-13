@@ -13,3 +13,8 @@ void Fl_Osc_Input::init(const char *path)
     ext = path;
     oscRegister(path);
 }
+
+void Fl_Osc_Input::OSC_value(const char *v)
+{
+    value(v);
+}

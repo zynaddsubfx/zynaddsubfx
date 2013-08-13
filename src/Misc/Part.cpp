@@ -62,6 +62,9 @@ static Ports partPorts = {
     rToggle(Ppolymode,  "Polyphoney mode"),
     rToggle(Plegatomode, "Legato enable"),
     rParam(Pkeylimit,   "Key limit per part"),
+    rParam(info.Ptype, "Class of Instrument"),
+    rString(info.Pauthor, MAX_INFO_TEXT_SIZE, "Instrument Author"),
+    rString(info.Pcomments, MAX_INFO_TEXT_SIZE, "Instrument Comments"),
     {"captureMin:", NULL, NULL, [](const char *, RtData &r)
         {Part *p = (Part*)r.obj; p->Pminkey = p->lastnote;}},
     {"captureMax:", NULL, NULL, [](const char *, RtData &r)
@@ -101,6 +104,7 @@ static Ports kitPorts = {
     rToggle(Psubenabled, "SUBsynth enable"),
     rToggle(Ppadenabled, "PADsynth enable"),
     rParam(Psendtoparteffect, "Effect Levels"),
+    rString(Pname, PART_MAX_NAME_LEN, "Kit User Specified Label"),
     //{"padpars:b", "::", 0
     //    [](
 };
@@ -117,7 +121,7 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_)
     partoutr = new float [synth->buffersize];
 
     for(int n = 0; n < NUM_KIT_ITEMS; ++n) {
-        kit[n].Pname   = new unsigned char [PART_MAX_NAME_LEN];
+        kit[n].Pname   = new char [PART_MAX_NAME_LEN];
         //XXX this is wasting memory, but making interfacing with the back
         //layers more nice, if this seems to increase memory usage figure out a
         //sane way of tracking the changing pointers (otherwise enjoy the bloat)

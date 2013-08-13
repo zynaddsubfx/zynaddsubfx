@@ -92,7 +92,7 @@ class Part
         //the part's kit
         struct Kit {
             unsigned char      Penabled, Pmuted, Pminkey, Pmaxkey;
-            unsigned char     *Pname;
+            char              *Pname;
             unsigned char      Padenabled, Psubenabled, Ppadenabled;
             unsigned char      Psendtoparteffect;
             ADnoteParameters  *adpars;
@@ -129,8 +129,8 @@ class Part
         unsigned char *Pname; //name of the instrument
         struct { //instrument additional information
             unsigned char Ptype;
-            unsigned char Pauthor[MAX_INFO_TEXT_SIZE + 1];
-            unsigned char Pcomments[MAX_INFO_TEXT_SIZE + 1];
+            char          Pauthor[MAX_INFO_TEXT_SIZE + 1];
+            char          Pcomments[MAX_INFO_TEXT_SIZE + 1];
         } info;
 
 
