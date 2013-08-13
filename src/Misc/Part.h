@@ -46,9 +46,8 @@ class Part
     public:
         /**Constructor
          * @param microtonal_ Pointer to the microtonal object
-         * @param fft_ Pointer to the FFTwrapper
-         * @param mutex_ Pointer to the master pthread_mutex_t*/
-        Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_);
+         * @param fft_ Pointer to the FFTwrapper*/
+        Part(Microtonal *microtonal_, FFTwrapper *fft_);
         /**Destructor*/
         ~Part();
 
@@ -155,7 +154,6 @@ class Part
         bool Pefxbypass[NUM_PART_EFX]; //if the effects are bypassed
 
 
-        pthread_mutex_t *mutex;
         pthread_mutex_t  load_mutex;
 
         int lastnote;

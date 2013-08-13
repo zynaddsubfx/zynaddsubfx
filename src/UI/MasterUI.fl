@@ -1009,7 +1009,12 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an
       }
       Fl_Group simplelistitemgroup {
         private xywh {125 65 215 145} box UP_FRAME
+        class Fl_Osc_Group
       } {
+        Fl_Box {} {
+          xywh {0 0 0 0}
+          code0 {simplelistitemgroup->ext = "part0/";}
+        }
         Fl_Button partname {
           callback {if ((int)bankui->cbwig->value()!=(npart+1)){
    bankui->cbwig->value(npart+1);

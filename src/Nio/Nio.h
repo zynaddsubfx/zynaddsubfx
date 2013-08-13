@@ -33,6 +33,8 @@ namespace Nio
     //Get the prefered sample rate from jack (if running)
     void preferedSampleRate(unsigned &rate);
 
+    //Complete Master Swaps to ONLY BE CALLED FROM RT CONTEXT
+    void masterSwap(Master *master);
 
     //Wave writing
     void waveNew(class WavFile *wave);

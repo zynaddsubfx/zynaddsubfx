@@ -131,6 +131,8 @@ void deallocate(const char *str, void *v)
     printf("deallocating a '%s' at '%p'\n", str, v);
     if(!strcmp(str, "Part"))
         delete (Part*)v;
+    if(!strcmp(str, "Master"))
+        delete (Master*)v;
     else if(!strcmp(str, "fft_t"))
         delete[] (fft_t*)v;
     else
@@ -333,7 +335,7 @@ struct MiddleWareImpl
     {
         fprintf(stderr, "loading a part!!\n");
         //Load the part
-        Part *p = new Part(&master->microtonal, master->fft, &master->mutex);
+        Part *p = new Part(&master->microtonal, master->fft);
         unsigned npart = rtosc_argument(msg, 0).i;
         fprintf(stderr, "Part is stored in '%s'\n", rtosc_argument(msg, 1).s);
         p->loadXMLinstrument(rtosc_argument(msg, 1).s);
@@ -358,6 +360,36 @@ struct MiddleWareImpl
         //deallocation
         //printf("writing something to the location called '%s'\n", msg);
         uToB->write("/load-part", "ib", npart, sizeof(Part*), &p);
+    }
+
+    //Well, you don't get much crazier than changing out all of your RT
+    //structures at once... TODO error handling
+    void loadMaster(const char *filename)
+    {
+        Master *m = new Master();
+        m->loadXML(filename);
+        m->applyparameters();
+
+        //Update resource locator table
+        objmap.clear();
+        for(int i=0; i < NUM_MIDI_PARTS; ++i) {
+            for(int j=0; j < NUM_KIT_ITEMS; ++j) {
+                objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/padpars/"] =
+                    m->part[i]->kit[j].padpars;
+                objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/padpars/oscil/"] =
+                    m->part[i]->kit[j].padpars->oscilgen;
+                for(int k=0; k<NUM_VOICES; ++k) {
+                    objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/adpars/voice"+to_s(k)+"/oscil/"] =
+                        m->part[i]->kit[j].adpars->VoicePar[k].OscilSmp;
+                    objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/adpars/voice"+to_s(k)+"/oscil-mod/"] =
+                        m->part[i]->kit[j].adpars->VoicePar[k].FMSmp;
+                }
+            }
+        }
+        //Give it to the backend and wait for the old part to return for
+        //deallocation
+        //printf("writing something to the location called '%s'\n", msg);
+        uToB->write("/load-master", "b", sizeof(Master*), &m);
     }
 
     void tick(void)
@@ -459,6 +491,8 @@ struct MiddleWareImpl
                     uToB->raw_write(msg);
             } else //just forward the message
                 uToB->raw_write(msg);
+        } else if(strstr(msg, "load_xmz")) {
+            loadMaster(rtosc_argument(msg,0).s);
         } else if(strstr(msg, "load-part"))
             loadPart(msg, master);
         else

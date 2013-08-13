@@ -115,10 +115,6 @@ void initprogram(void)
  */
 void exitprogram()
 {
-    //ensure that everything has stopped with the mutex wait
-    pthread_mutex_lock(&master->mutex);
-    pthread_mutex_unlock(&master->mutex);
-
     Nio::stop();
 
     GUI::destroyUi(gui);

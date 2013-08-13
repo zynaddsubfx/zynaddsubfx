@@ -28,6 +28,7 @@
 #include "../Params/LFOParams.h"
 #include "../Effects/EffectMgr.h"
 #include "../DSP/FFTwrapper.h"
+#include "../Nio/Nio.h"
 
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
@@ -167,7 +168,7 @@ Master::Master()
     }
 
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        part[npart] = new Part(&microtonal, fft, &mutex);
+        part[npart] = new Part(&microtonal, fft);
 
     //Insertion Effects init
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
@@ -412,6 +413,16 @@ void Master::AudioOut(float *outl, float *outr)
     int events = 0;
     while(uToB->hasNext()) {
         const char *msg = uToB->read();
+
+        if(!strcmp(msg, "/load-master")) {
+            Master *this_master = this;
+            Master *new_master  = *(Master**)rtosc_argument(msg, 0).b.data;
+            new_master->AudioOut(outl, outr);
+            Nio::masterSwap(new_master);
+            bToU->write("/free", "sb", "Master", sizeof(Master*), &this_master);
+            return;
+        }
+
         //XXX yes, this is not realtime safe, but it is useful...
         if(strcmp(msg, "/get-vu")) {
             fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);

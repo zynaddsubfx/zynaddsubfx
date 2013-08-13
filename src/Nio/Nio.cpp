@@ -122,6 +122,12 @@ void Nio::preferedSampleRate(unsigned &)
 {}
 #endif
 
+void Nio::masterSwap(Master *master)
+{
+    in->setMaster(master);
+    out->setMaster(master);
+}
+
 void Nio::waveNew(class WavFile *wave)
 {
     out->wave->newFile(wave);
