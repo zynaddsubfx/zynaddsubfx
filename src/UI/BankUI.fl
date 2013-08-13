@@ -53,7 +53,13 @@ class BankUI {open
       xywh {492 406 785 575} type Double
       code0 {/*o->label(bank->bankfiletitle.c_str());*/}
       code1 {/*if (bank->bankfiletitle.empty()) o->label ("Choose a bank from the bank list on the left (or go to settings if to configure the bank location) or choose 'New Bank...' to make a new bank.");*/} visible
+      class Fl_Osc_Window
     } {
+      Fl_Box {} {
+        xywh {0 0 0 0}
+        code0 {bankuiwindow->osc = osc;}
+        code1 {bankuiwindow->base = "/";}
+      }
       Fl_Button {} {
         label Close
         callback {bankuiwindow->hide();}
@@ -88,14 +94,16 @@ refreshmainwindow();}
         code0 {o->value(config.cfg.BankUIAutoClose);}
       }
       Fl_Choice banklist {
-        callback {int n=o->value();
-std::string dirname="";/*bank->banks[n].dir;*/
-if (dirname.empty()) return;
-osc->write("/loadbank", "s", dirname.c_str());
+        callback { //int n=o->value();
+//std::string dirname="";/*bank->banks[n].dir;*/
+//if (dirname.empty()) return;
+//osc->write("/loadbank", "s", dirname.c_str());
 /*if (bank->loadbank(dirname)==2)
        fl_alert("Error: Could not load the bank from the directory\\n%s.",dirname.c_str());*/
 refreshmainwindow();}
         xywh {5 8 220 20} down_box BORDER_BOX labelfont 1 align 0 textfont 1 textsize 11
+        code0 {o->init("loadbank");}
+        class BankList
       } {}
       Fl_Button {} {
         label {Refresh bank list}

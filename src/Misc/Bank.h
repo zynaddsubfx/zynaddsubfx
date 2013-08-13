@@ -91,9 +91,6 @@ class Bank
         void clearbank();
 
         std::string defaultinsname;
-
-    private:
-
         std::string dirname;
 
         void scanrootdir(std::string rootdir); //scans a root dir for banks

@@ -2,6 +2,7 @@
 #define BANKVIEW_H
 
 #include "Fl_Osc_Widget.H"
+#include "Fl_Osc_Choice.H"
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Button.H>
 #include <string>
@@ -11,6 +12,14 @@
 class Bank;
 class BankView;
 class Fl_Light_Button;
+
+class BankList : public Fl_Osc_Choice
+{
+    public:
+        BankList(int x,int y, int w, int h, const char *label=0);
+        void init(std::string path);
+        void OSC_raw(const char *msg);
+};
 
 class BankSlot : public Fl_Button
 {

@@ -131,7 +131,7 @@ void deallocate(const char *str, void *v)
     printf("deallocating a '%s' at '%p'\n", str, v);
     if(!strcmp(str, "Part"))
         delete (Part*)v;
-    if(!strcmp(str, "Master"))
+    else if(!strcmp(str, "Master"))
         delete (Master*)v;
     else if(!strcmp(str, "fft_t"))
         delete[] (fft_t*)v;
@@ -210,6 +210,32 @@ void refreshBankView(const Bank &bank, unsigned loc, Fl_Osc_Interface *osc)
 
 
     osc->tryLink(response);
+}
+
+void bankList(Bank &bank, Fl_Osc_Interface *osc)
+{
+    char response[2048];
+    int i = 0;
+
+    for(auto &elm : bank.banks) {
+        if(!rtosc_message(response, 2048, "/bank-list", "iss",
+                    i++, elm.name.c_str(), elm.dir.c_str()))
+            errx(1, "Failure to handle bank update properly...");
+        osc->tryLink(response);
+    }
+}
+
+void rescanForBanks(Bank &bank, Fl_Osc_Interface *osc)
+{
+    bank.rescanforbanks();
+    bankList(bank, osc);
+}
+
+void loadBank(Bank &bank, int pos, Fl_Osc_Interface *osc)
+{
+    bank.loadbank(bank.banks[pos].dir);
+    for(int i=0; i<BANK_SIZE; ++i)
+        refreshBankView(bank, i, osc);
 }
 
 //
@@ -386,6 +412,9 @@ struct MiddleWareImpl
                 }
             }
         }
+
+        master = m;
+
         //Give it to the backend and wait for the old part to return for
         //deallocation
         //printf("writing something to the location called '%s'\n", msg);
@@ -472,12 +501,16 @@ struct MiddleWareImpl
         //printf("watching '%s' go by\n", msg);
         //Get the object resource locator
         string obj_rl(msg, last_path+1);
-        //XXX Utilize object map for this as well
-        //This dereference will become unsafe when loading new master instances
-        //is supported
-        if(!strcmp(msg, "/refresh_bank") && !strcmp(rtosc_argument_string(msg), "i"))
+
+        if(!strcmp(msg, "/refresh_bank") && !strcmp(rtosc_argument_string(msg), "i")) {
             refreshBankView(master->bank, rtosc_argument(msg,0).i, osc);
-        else if(objmap.find(obj_rl) != objmap.end()) {
+        } else if(!strcmp(msg, "/bank-list") && !strcmp(rtosc_argument_string(msg), "")) {
+            bankList(master->bank, osc);
+        } else if(!strcmp(msg, "/rescanforbanks") && !strcmp(rtosc_argument_string(msg), "")) {
+            rescanForBanks(master->bank, osc);
+        } else if(!strcmp(msg, "/loadbank") && !strcmp(rtosc_argument_string(msg), "c")) {
+            loadBank(master->bank, rtosc_argument(msg, 0).i, osc);
+        } else if(objmap.find(obj_rl) != objmap.end()) {
             //try some over simplified pattern matching
             if(strstr(msg, "oscil/")) {
                 if(!handleOscil(obj_rl, last_path+1, objmap[obj_rl]))
@@ -615,7 +648,7 @@ class UI_Interface:public Fl_Osc_Interface
 
         void renameLink(string old, string newer, Fl_Osc_Widget *w) override
         {
-            fprintf(stderr, "renameLink('%s','%s',%p)\n",
+            fprintf(stdout, "renameLink('%s','%s',%p)\n",
                     old.c_str(), newer.c_str(), w);
             removeLink(old, w);
             createLink(newer, w);
@@ -678,6 +711,9 @@ class UI_Interface:public Fl_Osc_Interface
                     } else if(!strcmp(arg_str, "c")) {
                         pair.second->OSC_value((char)rtosc_argument(msg,0).i,
                                 handle);
+                    } else if(!strcmp(arg_str, "s")) {
+                        pair.second->OSC_value((const char*)rtosc_argument(msg,0).s,
+                                handle);
                     } else if(!strcmp(arg_str, "i")) {
                         pair.second->OSC_value((int)rtosc_argument(msg,0).i,
                                 handle);
@@ -690,7 +726,7 @@ class UI_Interface:public Fl_Osc_Interface
                 }
             }
 
-            if(found_count == 0 
+            if(found_count == 0
                     && strcmp(msg, "/vu-meter")
                     && strcmp(msg, "undo_change")
                     && !strstr(msg, "parameter")
@@ -713,7 +749,7 @@ class UI_Interface:public Fl_Osc_Interface
         std::multimap<string,Fl_Osc_Widget*> map;
         MiddleWareImpl *impl;
 };
-    
+
 void MiddleWareImpl::warnMemoryLeaks(void)
 {
     UI_Interface *o = (UI_Interface*)osc;

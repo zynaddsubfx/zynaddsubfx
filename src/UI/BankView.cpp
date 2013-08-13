@@ -8,6 +8,31 @@
 #include <cstring>
 #include <cassert>
 
+BankList::BankList(int x,int y, int w, int h, const char *label)
+    :Fl_Osc_Choice(x,y,w,h,label)
+{}
+
+void BankList::init(std::string path)
+{
+    ext = path;
+    oscRegister(path.c_str());
+    osc->createLink("/bank-list", this);
+}
+
+void BankList::OSC_raw(const char *msg)
+{
+    if(strcmp(msg, "/bank-list"))
+        return;
+
+    const int   pos  = rtosc_argument(msg, 0).i;
+    const char *path = rtosc_argument(msg, 1).s;
+
+    if(pos == 0)
+        this->clear();
+
+    this->add(path);
+}
+
 BankSlot::BankSlot(int x,int y, int w, int h, const char *label)
 :Fl_Button(x,y,w,h,label), nslot(-1)
 {
