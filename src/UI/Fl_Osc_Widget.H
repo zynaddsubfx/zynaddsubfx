@@ -37,7 +37,7 @@ class Fl_Osc_Widget
         void oscRegister(const char *path);
 
         //Smoothly change the base path
-        void rebase(std::string new_base);
+        virtual void rebase(std::string new_base);
         void oscMove(std::string new_ext);
 
         //Base path

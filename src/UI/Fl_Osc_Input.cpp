@@ -9,4 +9,7 @@ Fl_Osc_Input::~Fl_Osc_Input(void)
 {}
 
 void Fl_Osc_Input::init(const char *path)
-{}
+{
+    ext = path;
+    oscRegister(path);
+}

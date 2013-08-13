@@ -14,6 +14,8 @@ class Fl_Osc_Button:public Fl_Button, public Fl_Osc_Widget
         virtual ~Fl_Osc_Button(void);
         virtual void OSC_value(bool);
 
+        virtual void rebase(std::string) override;
+
         //void init(Fl_Osc_Interface *, std::string);
         //void init(std::string);
 

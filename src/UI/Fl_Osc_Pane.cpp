@@ -29,13 +29,10 @@ static void nested_rebase(Fl_Group *g, std::string new_base)
     for(unsigned i=0; i < nchildren; ++i) {
         Fl_Widget *widget = g->child(i);
         if(Fl_Osc_Widget *o = dynamic_cast<Fl_Osc_Widget*>(widget)) {
-            printf("nested_rebase rebasing widget...\n");
             o->rebase(new_base);
         } else if(Fl_Osc_Group *o = dynamic_cast<Fl_Osc_Group*>(widget)) {
-            printf("Fl_Osc_Group\n");
             o->rebase(new_base);
         } else if(Fl_Group *o = dynamic_cast<Fl_Group*>(widget)) {
-            printf("nested_rebase recur...\n");
             nested_rebase(o, new_base);
         }
 

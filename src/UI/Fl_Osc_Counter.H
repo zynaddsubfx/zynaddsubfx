@@ -19,6 +19,5 @@ class Fl_Osc_Counter: public Fl_Counter, public Fl_Osc_Widget
         void cb(void);
         char cb_type;
     private:
-        std::string path;
         std::pair<Fl_Callback*, void*> cb_data;
 };

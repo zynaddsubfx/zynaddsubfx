@@ -13,13 +13,13 @@ Fl_Osc_Counter::Fl_Osc_Counter(int x, int y, int w, int h, const char *label)
 
 void Fl_Osc_Counter::update(void)
 {
-    oscWrite(path);
+    oscWrite(ext);
 }
 
 void Fl_Osc_Counter::init(const char *path_, char type_)
 {
     oscRegister(path_);
-    path = path_;
+    ext = path_;
     cb_type = type_;
 }
 
@@ -44,9 +44,9 @@ void Fl_Osc_Counter::cb(void)
     assert(osc);
 
     if(cb_type == 'c')
-        oscWrite(path, "c", (char)(value()));
+        oscWrite(ext, "c", (char)(value()));
     else
-        oscWrite(path, "i", (int)value());
+        oscWrite(ext, "i", (int)value());
     
     if(cb_data.first)
         cb_data.first(this, cb_data.second);
