@@ -71,6 +71,22 @@ rtosc::Ports EffectMgr::ports = {
             eq->getFilter(a,b);
             d.reply(d.loc, "bb", sizeof(a), a, sizeof(b), b);
         }},
+    {"efftype:b", rProp(internal), NULL, [](const char *msg, rtosc::RtData &d)
+        {
+            EffectMgr *eff  = (EffectMgr*)d.obj;
+            EffectMgr *eff_ = *(EffectMgr**)rtosc_argument(msg,0).b.data;
+
+            //Lets trade data
+            std::swap(eff->nefx,eff_->nefx);
+            std::swap(eff->efx,eff_->efx);
+            std::swap(eff->filterpars,eff_->filterpars);
+            std::swap(eff->efxoutl, eff_->efxoutl);
+            std::swap(eff->efxoutr, eff_->efxoutr);
+
+            //Return the old data for distruction
+            d.reply("/free", "sb", "EffectMgr", sizeof(EffectMgr*), &eff_);
+        }},
+
 };
 
 

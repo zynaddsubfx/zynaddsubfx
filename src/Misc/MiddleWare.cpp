@@ -19,6 +19,7 @@
 #include "Part.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Params/PADnoteParameters.h"
+#include "../Effects/EffectMgr.h"
 
 #include <string>
 
@@ -133,6 +134,8 @@ void deallocate(const char *str, void *v)
         delete (Part*)v;
     else if(!strcmp(str, "Master"))
         delete (Master*)v;
+    else if(!strcmp(str, "EffectMgr"))
+        delete (EffectMgr*)v;
     else if(!strcmp(str, "fft_t"))
         delete[] (fft_t*)v;
     else
@@ -236,6 +239,15 @@ void loadBank(Bank &bank, int pos, Fl_Osc_Interface *osc)
     bank.loadbank(bank.banks[pos].dir);
     for(int i=0; i<BANK_SIZE; ++i)
         refreshBankView(bank, i, osc);
+}
+
+void createEffect(const char *msg)
+{
+    const bool insertion = !strstr(msg, "sysefx");
+    const int  efftype   = rtosc_argument(msg, 0).i;
+    EffectMgr *em        = new EffectMgr(insertion);
+    em->changeeffect(efftype);
+    uToB->write(msg, "b", sizeof(EffectMgr*), &em);
 }
 
 //
@@ -510,6 +522,8 @@ struct MiddleWareImpl
             rescanForBanks(master->bank, osc);
         } else if(!strcmp(msg, "/loadbank") && !strcmp(rtosc_argument_string(msg), "c")) {
             loadBank(master->bank, rtosc_argument(msg, 0).i, osc);
+        } else if(strstr(msg, "efftype") && !strcmp(rtosc_argument_string(msg), "c")) {
+            createEffect(msg);
         } else if(objmap.find(obj_rl) != objmap.end()) {
             //try some over simplified pattern matching
             if(strstr(msg, "oscil/")) {
