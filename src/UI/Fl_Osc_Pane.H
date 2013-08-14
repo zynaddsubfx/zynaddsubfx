@@ -33,7 +33,8 @@ class Fl_Osc_Group:public Fl_Osc_Pane, public Fl_Group
         std::string ext;
 
         virtual std::string loc(void) const;
-        virtual void rebase(std::string new_base);
+        virtual void reext(std::string new_base);
+        virtual void rebase(std::string new_ext);
 };
 #endif
 

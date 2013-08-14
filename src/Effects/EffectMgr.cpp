@@ -71,6 +71,11 @@ rtosc::Ports EffectMgr::ports = {
             eq->getFilter(a,b);
             d.reply(d.loc, "bb", sizeof(a), a, sizeof(b), b);
         }},
+    {"efftype:", rProp(internal), NULL, [](const char *, rtosc::RtData &d)
+        {
+            EffectMgr *eff  = (EffectMgr*)d.obj;
+            d.reply(d.loc, "c", eff->nefx);
+        }},
     {"efftype:b", rProp(internal), NULL, [](const char *msg, rtosc::RtData &d)
         {
             EffectMgr *eff  = (EffectMgr*)d.obj;

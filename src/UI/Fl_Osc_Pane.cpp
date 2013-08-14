@@ -86,4 +86,11 @@ std::string Fl_Osc_Group::loc(void) const
 void Fl_Osc_Group::rebase(std::string new_base)
 {
     nested_rebase(this, new_base+ext);
+    base = new_base;
+}
+
+void Fl_Osc_Group::reext(std::string new_ext)
+{
+    nested_rebase(this, base+new_ext);
+    ext = new_ext;
 }

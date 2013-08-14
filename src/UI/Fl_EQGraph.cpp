@@ -16,6 +16,7 @@ Fl_EQGraph::Fl_EQGraph(int x,int y, int w, int h, const char *label)
     memset(dem, 0, sizeof(dem));
     num[0] = 1;
     dem[0] = 1;
+    ext = "eq-coeffs";
     oscRegister("eq-coeffs");
 }
 

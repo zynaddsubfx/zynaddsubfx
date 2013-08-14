@@ -489,6 +489,8 @@ if (fl_choice("The file *might* exist. \\nOverwrite it?","No","Yes",NULL)) {
             Fl_Counter syseffnocounter {
               label {Sys.Effect No.}
               callback {nsyseff=(int) o->value()-1;
+              syseffectuigroup->reext("sysefx"+to_s(nsyseff)+"/");
+              sysefftype->oscMove("sysefx"+to_s(nsyseff)+"/efftype");
 syseffectui->refresh();}
               xywh {10 186 80 22} type Simple labelfont 1 labelsize 10 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
               code0 {o->bounds(1,NUM_SYS_EFX);}
@@ -578,6 +580,10 @@ pthread_mutex_unlock(&master->mutex);*/}
             Fl_Counter inseffnocounter {
               label {Ins.Effect No.}
               callback {ninseff=(int) o->value()-1;
+              insefftype->oscMove("insefx"+to_s(ninseff)+"/efftype");
+              inseffectuigroup->reext("insefx"+to_s(ninseff)+"/");
+              inseffpart->oscMove("Pinsparts"+to_s(ninseff));
+
               /*
 insefftype->value(master->insefx[ninseff]->geteffect());
 inseffpart->value(master->Pinsparts[ninseff]+2);
@@ -600,13 +606,15 @@ if (master->Pinsparts[ninseff]!=-1) {
               label EffType
               callback {/*pthread_mutex_lock(&master->mutex);
 master->insefx[ninseff]->changeeffect((int) o->value());
-pthread_mutex_unlock(&master->mutex);
+pthread_mutex_unlock(&master->mutex);*/
 inseffectui->efftype = o->value();
 inseffectui->refresh();
-inseffectui->show();*/}
+inseffectui->show();}
               xywh {290 178 100 22} down_box BORDER_BOX labelsize 10
               code0 {/*o->value(master->insefx[ninseff]->geteffect());*/}
               code1 {/*if (master->Pinsparts[ninseff]== -1) o->deactivate();*/}
+              code2 {o->init("insefx"+to_s(ninseff)+"/efftype");}
+              class Fl_Osc_Choice
             } {
               MenuItem {} {
                 label {No Effect}
@@ -1157,7 +1165,7 @@ pthread_mutex_unlock(&master->mutex);
 simplesyseffectui->efftype = o->value();
 simplesyseffectui->refresh();*/}
               xywh {515 80 70 15} down_box BORDER_BOX labelsize 10 align 5
-              code0 {o->init("/bad_location");}
+              code0 {o->init("sysefx"+to_s(nsyseff)+"/efftype");}
               class Fl_Osc_Choice
             } {
               MenuItem {} {
@@ -1260,6 +1268,8 @@ simpleinseffectui->show();}
               xywh {515 80 70 15} down_box BORDER_BOX labelsize 10 align 5
               code0 {/*o->value(master->insefx[ninseff]->geteffect());*/}
               code1 {/*if (master->Pinsparts[ninseff]== -1) o->deactivate();*/}
+              code2 {o->init("insefx"+to_s(ninseff)+"/efftype");}
+              class Fl_Osc_Choice
             } {
               MenuItem {} {
                 label {No Effect}

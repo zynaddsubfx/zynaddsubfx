@@ -594,6 +594,8 @@ else {propta->deactivate();proptb->deactivate();}}
       Fl_Counter inseffnocounter {
         label {FX No.}
         callback {ninseff=(int) o->value()-1;
+        insefftype->oscMove("partefx"+to_s(ninseff)+"/efftype");
+        inseffectuigroup->reext("partefx"+to_s(ninseff)+"/");
 /*insefftype->value(part->partefx[ninseff]->geteffect());*/
 //insefftype->do_callback();
 inseffectui->refresh();
