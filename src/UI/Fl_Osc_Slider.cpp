@@ -7,6 +7,11 @@
 #include <cassert>
 #include <sstream>
 
+static double min__(double a, double b)
+{
+    return a<b?a:b;
+}
+
 Fl_Osc_Slider::Fl_Osc_Slider(int X, int Y, int W, int H, const char *label)
     :Fl_Slider(X,Y,W,H,label), Fl_Osc_Widget(this), cb_data(NULL, NULL)
 {
@@ -26,23 +31,26 @@ Fl_Osc_Slider::~Fl_Osc_Slider(void)
 
 void Fl_Osc_Slider::OSC_value(float v)
 {
-    Fl_Slider::value(v+minimum());
+    const float min_ = min__(minimum(), maximum());//flipped sliders
+    Fl_Slider::value(v+min_);
 }
 
 void Fl_Osc_Slider::OSC_value(char v)
 {
-    Fl_Slider::value(v+minimum());
+    const float min_ = min__(minimum(), maximum());//flipped sliders
+    Fl_Slider::value(v+min_);
 }
 
 void Fl_Osc_Slider::cb(void)
 {
+    const float min_ = min__(minimum(), maximum());//flipped sliders
     const float val = Fl_Slider::value();
     if(osc_type == 'f')
-        oscWrite(path, "f", val-minimum());
+        oscWrite(path, "f", val-min_);
     else if(osc_type == 'i')
-        oscWrite(path, "i", (int)(val-minimum()));
+        oscWrite(path, "i", (int)(val-min_));
     else
-        oscWrite(path, "c", (char)(val-minimum()));
+        oscWrite(path, "c", (char)(val-min_));
     //OSC_value(val);
     
     if(cb_data.first)
