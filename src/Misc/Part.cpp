@@ -69,6 +69,28 @@ static Ports partPorts = {
         {Part *p = (Part*)r.obj; p->Pminkey = p->lastnote;}},
     {"captureMax:", NULL, NULL, [](const char *, RtData &r)
         {Part *p = (Part*)r.obj; p->Pmaxkey = p->lastnote;}},
+    {"polyType::c:i", NULL, NULL, [](const char *msg, RtData &d)
+        {
+            Part *p = (Part*)d.obj;
+            if(!rtosc_narguments(msg)) {
+                int res = 0;
+                if(!p->Ppolymode)
+                    res = p->Plegatomode ? 2 : 1;
+                d.reply(d.loc, "c", res);
+                return;
+            }
+
+            int i = rtosc_argument(msg, 0).i;
+            if(i == 0) {
+                p->Ppolymode = 1;
+                p->Plegatomode = 0;
+            } else if(i==1) {
+                p->Ppolymode = 0;
+                p->Plegatomode = 0;
+            } else {
+                p->Ppolymode = 0;
+                p->Plegatomode = 1;
+            }}},
 
     //{"kit#16::T:F", "::Enables or disables kit item", 0,
     //    [](const char *m, RtData &d) {

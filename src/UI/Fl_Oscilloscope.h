@@ -32,7 +32,6 @@ class Fl_Oscilloscope : public Fl_Box, Fl_Osc_Widget
 
         void init(bool base_waveform_p)
         {
-            fprintf(stderr, "PARENT BASE LEADS TO '%s'\n", loc.c_str());
             ext = (base_waveform_p ? "base-waveform": "waveform");
             assert(osc);
             oscRegister(ext.c_str());

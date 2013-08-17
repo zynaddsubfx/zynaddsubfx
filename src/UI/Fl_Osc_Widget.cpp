@@ -76,6 +76,11 @@ void Fl_Osc_Widget::oscRegister(const char *path)
     osc->requestValue(loc+path);
 }
 
+void Fl_Osc_Widget::update(void)
+{
+    osc->requestValue(loc+ext);
+}
+
 Fl_Osc_Pane *Fl_Osc_Widget::fetch_osc_pane(Fl_Widget *w)
 {
     if(!w)

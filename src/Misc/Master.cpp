@@ -129,7 +129,6 @@ class DataObj:public rtosc::RtData
             va_start(va,args);
             char *buffer = bToU->buffer();
             rtosc_vmessage(buffer,bToU->buffer_size(),path,args,va);
-            printf("sending reply of '%s'\n", buffer);
             reply(buffer);
         }
         virtual void reply(const char *msg)
@@ -141,7 +140,6 @@ class DataObj:public rtosc::RtData
             va_start(va,args);
             char *buffer = bToU->buffer();
             rtosc_vmessage(buffer,bToU->buffer_size(),path,args,va);
-            printf("sending reply of '%s'\n\n", buffer);
             reply(buffer);}
         virtual void broadcast(const char *msg) override{reply(msg);};
     private:
@@ -412,7 +410,7 @@ void Master::AudioOut(float *outl, float *outr)
     DataObj d{loc_buf, 1024, this, bToU};
     memset(loc_buf, sizeof(loc_buf), 0);
     int events = 0;
-    while(uToB->hasNext()) {
+    while(uToB->hasNext() && events < 10) {
         const char *msg = uToB->read();
 
         if(!strcmp(msg, "/load-master")) {
@@ -425,7 +423,7 @@ void Master::AudioOut(float *outl, float *outr)
         }
 
         //XXX yes, this is not realtime safe, but it is useful...
-        if(strcmp(msg, "/get-vu")) {
+        if(strcmp(msg, "/get-vu") && false) {
             fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
             fprintf(stdout, "backend: '%s'<%s>\n", msg,
                     rtosc_argument_string(msg));
@@ -435,14 +433,15 @@ void Master::AudioOut(float *outl, float *outr)
         //fprintf(stdout, "address '%s'\n", uToB->peak());
         ports.dispatch(msg+1, d);
         events++;
-        if(!d.matches) {
+        if(!d.matches && false) {
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
             fprintf(stderr, "Unknown address '%s'\n", uToB->peak());
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
         }
     }
-    if(events>1)
+    if(events>1 && false)
         fprintf(stderr, "backend: %d events per cycle\n",events);
+        
 
     //Swaps the Left channel with Right Channel
     if(swaplr)

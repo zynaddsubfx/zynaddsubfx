@@ -94,7 +94,7 @@ static Ports voicePorts = {
 
 
     //Modulator Stuff
-    rToggle(PFMEnabled,              "Modulator Enable"),
+    rParam(PFMEnabled,              "Modulator Enable/Type"),
     rParamI(PFMVoice,                "Modulator Oscillator Selection"),
     rParam(PFMVolume,                "Modulator Magnitude"),
     rParam(PFMVolumeDamp,            "Modulator HF dampening"),

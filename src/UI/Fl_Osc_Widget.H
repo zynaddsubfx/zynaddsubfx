@@ -38,6 +38,9 @@ class Fl_Osc_Widget
         void oscWrite(std::string path);
         void oscRegister(const char *path);
 
+        //Forces an update of parameters as they have become stale somehow
+        virtual void update(void);
+
         //Smoothly change the base path
         virtual void rebase(std::string new_base);
         void oscMove(std::string new_ext);

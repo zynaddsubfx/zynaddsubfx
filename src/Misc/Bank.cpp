@@ -102,7 +102,7 @@ void Bank::setname(unsigned int ninstrument, const string &newname, int newslot)
         if(tmpfilename[i] == ' ')
             tmpfilename[i] = '0';
 
-    newfilename = dirname + '/' + legalizeFilename(tmpfilename) + ".xiz";
+    newfilename = dirname + legalizeFilename(tmpfilename) + ".xiz";
 
     rename(ins[ninstrument].filename.c_str(), newfilename.c_str());
 
@@ -427,7 +427,7 @@ int Bank::addtobank(int pos, string filename, string name)
     deletefrombank(pos);
 
     ins[pos].name     = name;
-    ins[pos].filename = dirname + '/' + filename;
+    ins[pos].filename = dirname + filename;
     return 0;
 }
 

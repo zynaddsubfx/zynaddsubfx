@@ -17,6 +17,9 @@ class Fl_Osc_Interface
         //and to be able to give them events
         virtual void tryLink(const char *){};
 
+        //Damage the values of a collection of widgets
+        virtual void damage(const char*){};
+
         //Communication link
         virtual void requestValue(string s) { printf("request: '%s'...\n", s.c_str()); };
         virtual void writeValue(string s, float f){printf("%s -> %f\n",s.c_str(), f); };

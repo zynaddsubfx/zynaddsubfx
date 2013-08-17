@@ -823,8 +823,10 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
           }
           Fl_Check_Button padsynenabledcheck {
             label Enabled
-            callback {if (o->value()==0) padeditbutton->deactivate();
-     else padeditbutton->activate();}
+            callback {if (o->value()==0){ delete padnoteui; padnoteui = NULL; padeditbutton->deactivate();}
+else {
+      padnoteui=new PADnoteUI(loc+"kit0/padpars/", osc);
+     padeditbutton->activate();}}
             tooltip {enable/disable PADsynth} xywh {215 255 80 20} box UP_BOX down_box DOWN_BOX color 51 selection_color 51 labelfont 1 labelsize 11
             code1 {o->init("Ppadenabled");}
             class Fl_Osc_Check
@@ -1034,8 +1036,7 @@ keylimitlist->value(val);} {}
 if (kititem!=lastkititem){
     delete adnoteui;
     delete subnoteui;   
-    delete padnoteui;
-    adnoteui=NULL;subnoteui=NULL;padnoteui=NULL;
+    adnoteui=NULL;subnoteui=NULL;
     lastkititem=kititem;
 
     if(kititem>=NUM_KIT_ITEMS) return;//bad kit item
@@ -1046,16 +1047,13 @@ if (kititem!=lastkititem){
 
     if(subsynenabledcheck->value()) 
        subnoteui=new SUBnoteUI(osc, loc+"kit"+to_s(kititem)+"/subpars/");
-
-    if(padsynenabledcheck->value())
-      padnoteui=new PADnoteUI(loc+"kit"+to_s(kititem)+"/padpars/", osc);
 };
 
 
 
-if ((engine==0)&&(adnoteui!=NULL)) adnoteui->ADnoteGlobalParameters->show();
-if ((engine==1)&&(subnoteui!=NULL)) subnoteui->SUBparameters->show();
-if ((engine==2)&&(adnoteui!=NULL)) padnoteui->padnotewindow->show();} {}
+if ((engine==0)&&adnoteui) adnoteui->ADnoteGlobalParameters->show();
+if ((engine==1)&&subnoteui) subnoteui->SUBparameters->show();
+if ((engine==2)&&padnoteui) padnoteui->padnotewindow->show();} {}
   }
   Function {~PartUI()} {} {
     code {delete adnoteui;

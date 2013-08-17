@@ -150,30 +150,6 @@ void deallocate(const char *str, void *v)
  */
 void osc_check(cb_t cb, void *ui)
 {
-    lo_server_recv_noblock(server, 0);
-    while(bToU->hasNext()) {
-        const char *rtmsg = bToU->read();
-        //printf("return: got a '%s'\n", rtmsg);
-        if(!strcmp(rtmsg, "/echo")
-                && !strcmp(rtosc_argument_string(rtmsg),"ss")
-                && !strcmp(rtosc_argument(rtmsg,0).s, "OSC_URL"))
-            curr_url = rtosc_argument(rtmsg,1).s;
-        else if(!strcmp(rtmsg, "/free")
-                && !strcmp(rtosc_argument_string(rtmsg),"sb")) {
-            deallocate(rtosc_argument(rtmsg, 0).s, *((void**)rtosc_argument(rtmsg, 1).b.data));
-        } else if(curr_url == "GUI") {
-            cb(ui, rtmsg); //GUI::raiseUi(gui, bToU->read());
-        } else{
-            lo_message msg  = lo_message_deserialise((void*)rtmsg,
-                    rtosc_message_length(rtmsg, bToU->buffer_size()), NULL);
-
-            //Send to known url
-            if(!curr_url.empty()) {
-                lo_address addr = lo_address_new_from_url(curr_url.c_str());
-                lo_send_message(addr, rtmsg, msg);
-            }
-        }
-    }
 }
 
 
@@ -352,7 +328,7 @@ struct MiddleWareImpl
                 for(int k=0; k<NUM_VOICES; ++k) {
                     objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/adpars/voice"+to_s(k)+"/oscil/"] =
                         master->part[i]->kit[j].adpars->VoicePar[k].OscilSmp;
-                    objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/adpars/voice"+to_s(k)+"/oscil-mod/"] =
+                    objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/adpars/voice"+to_s(k)+"/mod-oscil/"] =
                         master->part[i]->kit[j].adpars->VoicePar[k].FMSmp;
                 }
             }
@@ -369,14 +345,15 @@ struct MiddleWareImpl
 
     void warnMemoryLeaks(void);
 
-    void loadPart(const char *msg, Master *master)
+    void loadPart(int npart, const char *filename, Master *master, Fl_Osc_Interface *osc)
     {
-        fprintf(stderr, "loading a part!!\n");
+        //fprintf(stderr, "loading a part!!\n");
         //Load the part
         Part *p = new Part(&master->microtonal, master->fft);
-        unsigned npart = rtosc_argument(msg, 0).i;
-        fprintf(stderr, "Part is stored in '%s'\n", rtosc_argument(msg, 1).s);
-        p->loadXMLinstrument(rtosc_argument(msg, 1).s);
+        //fprintf(stderr, "Part[%d] is stored in '%s'\n", npart, filename);
+        if(p->loadXMLinstrument(filename))
+            fprintf(stderr, "FAILED TO LOAD PART!!\n");
+
         p->applyparameters();
 
         //Update the resource locators
@@ -389,7 +366,7 @@ struct MiddleWareImpl
             for(int k=0; k<NUM_VOICES; ++k) {
                 objmap[base+to_s(j)+"/adpars/voice"+to_s(k)+"/oscil/"] =
                     p->kit[j].adpars->VoicePar[k].OscilSmp;
-                objmap[base+to_s(j)+"/adpars/voice"+to_s(k)+"/oscil-mod/"] =
+                objmap[base+to_s(j)+"/adpars/voice"+to_s(k)+"/mod-oscil/"] =
                     p->kit[j].adpars->VoicePar[k].FMSmp;
             }
         }
@@ -398,6 +375,7 @@ struct MiddleWareImpl
         //deallocation
         //printf("writing something to the location called '%s'\n", msg);
         uToB->write("/load-part", "ib", npart, sizeof(Part*), &p);
+        osc->damage(("/part"+to_s(npart)+"/").c_str());
     }
 
     //Well, you don't get much crazier than changing out all of your RT
@@ -419,7 +397,7 @@ struct MiddleWareImpl
                 for(int k=0; k<NUM_VOICES; ++k) {
                     objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/adpars/voice"+to_s(k)+"/oscil/"] =
                         m->part[i]->kit[j].adpars->VoicePar[k].OscilSmp;
-                    objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/adpars/voice"+to_s(k)+"/oscil-mod/"] =
+                    objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/adpars/voice"+to_s(k)+"/mod-oscil/"] =
                         m->part[i]->kit[j].adpars->VoicePar[k].FMSmp;
                 }
             }
@@ -435,7 +413,33 @@ struct MiddleWareImpl
 
     void tick(void)
     {
-        osc_check(cb, ui);
+        lo_server_recv_noblock(server, 0);
+        while(bToU->hasNext()) {
+            const char *rtmsg = bToU->read();
+            //printf("return: got a '%s'\n", rtmsg);
+            if(!strcmp(rtmsg, "/echo")
+                    && !strcmp(rtosc_argument_string(rtmsg),"ss")
+                    && !strcmp(rtosc_argument(rtmsg,0).s, "OSC_URL"))
+                curr_url = rtosc_argument(rtmsg,1).s;
+            else if(!strcmp(rtmsg, "/free")
+                    && !strcmp(rtosc_argument_string(rtmsg),"sb")) {
+                deallocate(rtosc_argument(rtmsg, 0).s, *((void**)rtosc_argument(rtmsg, 1).b.data));
+            } else if(!strcmp(rtmsg, "/setprogram")
+                    && !strcmp(rtosc_argument_string(rtmsg),"cc")) {
+                loadPart(rtosc_argument(rtmsg,0).i, master->bank.ins[rtosc_argument(rtmsg,1).i].filename.c_str(), master, osc);
+            } else if(curr_url == "GUI") {
+                cb(ui, rtmsg); //GUI::raiseUi(gui, bToU->read());
+            } else{
+                lo_message msg  = lo_message_deserialise((void*)rtmsg,
+                        rtosc_message_length(rtmsg, bToU->buffer_size()), NULL);
+
+                //Send to known url
+                if(!curr_url.empty()) {
+                    lo_address addr = lo_address_new_from_url(curr_url.c_str());
+                    lo_send_message(addr, rtmsg, msg);
+                }
+            }
+        }
     }
 
     bool handlePAD(string path, const char *msg, void *v)
@@ -455,10 +459,10 @@ struct MiddleWareImpl
 
         PADnoteParameters::ports.dispatch(msg, d);
         if(!d.matches) {
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
-            fprintf(stderr, "Unknown location '%s%s'<%s>\n",
-                    path.c_str(), msg, rtosc_argument_string(msg));
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
+            //fprintf(stderr, "Unknown location '%s%s'<%s>\n",
+            //        path.c_str(), msg, rtosc_argument_string(msg));
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
         }
 
         return true;
@@ -481,10 +485,10 @@ struct MiddleWareImpl
 
         OscilGen::ports.dispatch(msg, d);
         if(!d.matches) {
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
-            fprintf(stderr, "Unknown location '%s%s'<%s>\n",
-                    path.c_str(), msg, rtosc_argument_string(msg));
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
+            //fprintf(stderr, "Unknown location '%s%s'<%s>\n",
+            //        path.c_str(), msg, rtosc_argument_string(msg));
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
         }
 
         return true;
@@ -538,10 +542,10 @@ struct MiddleWareImpl
                     uToB->raw_write(msg);
             } else //just forward the message
                 uToB->raw_write(msg);
-        } else if(strstr(msg, "load_xmz")) {
+        } else if(strstr(msg, "load_xmz") && !strcmp(rtosc_argument_string(msg), "s")) {
             loadMaster(rtosc_argument(msg,0).s);
-        } else if(strstr(msg, "load-part"))
-            loadPart(msg, master);
+        } else if(strstr(msg, "load-part") && !strcmp(rtosc_argument_string(msg), "is"))
+            loadPart(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master, osc);
         else
             uToB->raw_write(msg);
     }
@@ -698,12 +702,22 @@ class UI_Interface:public Fl_Osc_Interface
             }
         }
 
+        //A very simplistic implementation of a UI agnostic refresh method
+        virtual void damage(const char *path)
+        {
+            for(auto pair:map) {
+                if(strstr(pair.first.c_str(), path)) {
+                    pair.second->update();
+                }
+            }
+        }
+
         void tryLink(const char *msg) override
         {
 
             //DEBUG
-            //if(strcmp(msg, "/vu-meter"))//Ignore repeated message
-            //    printf("trying the link for a '%s'<%s>\n", msg, rtosc_argument_string(msg));
+            if(strcmp(msg, "/vu-meter"))//Ignore repeated message
+                printf("trying the link for a '%s'<%s>\n", msg, rtosc_argument_string(msg));
             const char *handle = rindex(msg,'/');
             if(handle)
                 ++handle;
@@ -745,9 +759,9 @@ class UI_Interface:public Fl_Osc_Interface
                     && strcmp(msg, "undo_change")
                     && !strstr(msg, "parameter")
                     && !strstr(msg, "Prespoint")) {
-                fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
-                fprintf(stderr, "Unknown widget '%s'\n", msg);
-                fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+                //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
+                //fprintf(stderr, "Unknown widget '%s'\n", msg);
+                //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             }
         };
 

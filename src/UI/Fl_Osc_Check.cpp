@@ -46,9 +46,6 @@ void Fl_Osc_Check::cb(void)
         oscWrite(ext, "c", value());
 }
 
-void Fl_Osc_Check::update(void)
-{}
-
 void Fl_Osc_Check::callback(Fl_Callback *cb, void *p)
 {
     cb_data.first = cb;

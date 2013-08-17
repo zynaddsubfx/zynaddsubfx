@@ -2,6 +2,7 @@
 #include "MidiIn.h"
 #include "EngineMgr.h"
 #include "../Misc/Master.h"
+#include <rtosc/thread-link.h>
 #include <iostream>
 
 using namespace std;
@@ -84,8 +85,10 @@ void InMgr::flush()
                 break;
 
             case M_PGMCHANGE:
-                master->setProgram(ev.channel, ev.num);
+                //FIXME channel is only interpreted as part number here
+                bToU->write("/setprogram", "cc", ev.channel, ev.num);
                 break;
+
             case M_PRESSURE:
                 master->polyphonicAftertouch(ev.channel, ev.num, ev.value);
                 break;
