@@ -506,6 +506,7 @@ struct MiddleWareImpl
     void handleMsg(const char *msg)
     {
         assert(!strstr(msg,"free"));
+        assert(msg && *msg && rindex(msg, '/')[1]);
         //fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 6 + 30, 0 + 40);
         //fprintf(stdout, "middleware: '%s'\n", msg);
         //fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
@@ -680,7 +681,7 @@ class UI_Interface:public Fl_Osc_Interface
                     break;
                 }
             }
-            printf("[%d] removing '%s' (%p)...\n", map.size(), s.c_str(), w);
+            //printf("[%d] removing '%s' (%p)...\n", map.size(), s.c_str(), w);
         }
 
         virtual void removeLink(class Fl_Osc_Widget *w)
@@ -692,8 +693,8 @@ class UI_Interface:public Fl_Osc_Interface
                 processing = false;//Exit if no new elements are found
                 for(auto i = map.begin(); i != map.end(); ++i) {
                     if(i->second == w) {
-                        printf("[%d] removing '%s' (%p)...\n", map.size()-1,
-                                i->first.c_str(), w);
+                        //printf("[%d] removing '%s' (%p)...\n", map.size()-1,
+                        //        i->first.c_str(), w);
                         map.erase(i);
                         processing = true;
                         break;
@@ -716,8 +717,8 @@ class UI_Interface:public Fl_Osc_Interface
         {
 
             //DEBUG
-            if(strcmp(msg, "/vu-meter"))//Ignore repeated message
-                printf("trying the link for a '%s'<%s>\n", msg, rtosc_argument_string(msg));
+            //if(strcmp(msg, "/vu-meter"))//Ignore repeated message
+            //    printf("trying the link for a '%s'<%s>\n", msg, rtosc_argument_string(msg));
             const char *handle = rindex(msg,'/');
             if(handle)
                 ++handle;

@@ -21,11 +21,14 @@ class EnvelopeFreeEdit : public Fl_Box, Fl_Osc_Widget
         int handle(int event);
 
         void draw(void);
-        void OSC_raw(const char *msg) const;
+        void OSC_raw(const char *msg) override;
         void update(void);
 
 
         int lastpoint;
+
+        //How many points
+        char Penvpoints;
     private:
         int getpointx(int n) const;
         int getpointy(int n) const;
@@ -37,8 +40,6 @@ class EnvelopeFreeEdit : public Fl_Box, Fl_Osc_Widget
         //cursor state
         int currentpoint, cpx, cpdt;
 
-        //How many points
-        char Penvpoints;
         //The Points
         char Penvdt[MAX_ENVELOPE_POINTS];
         char Penvval[MAX_ENVELOPE_POINTS];

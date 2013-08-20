@@ -43,8 +43,8 @@ void Fl_Osc_Widget::OSC_raw(const char *)
 void Fl_Osc_Widget::oscWrite(std::string path, const char *args, ...)
 {
     char buffer[1024];
-    puts("writing OSC");
-    printf("Path = '%s'\n", path.c_str());
+    //puts("writing OSC");
+    //printf("Path = '%s'\n", path.c_str());
     assert(!path.empty());
 
     va_list va;
@@ -54,15 +54,15 @@ void Fl_Osc_Widget::oscWrite(std::string path, const char *args, ...)
         osc->writeRaw(buffer);
     else
         puts("Dangerous Event ommision");
-    //Try to pretty print basic events
-    if(!strcmp(args, "c") || !strcmp(args, "i"))
-        printf("Args = ['%d']\n", rtosc_argument(buffer, 0).i);
-    if(!strcmp(args, "f"))
-        printf("Args = ['%f']\n", rtosc_argument(buffer, 0).f);
-    if(!strcmp(args, "T"))
-        printf("Args = [True]\n");
-    if(!strcmp(args, "F"))
-        printf("Args = [False]\n");
+    ////Try to pretty print basic events
+    //if(!strcmp(args, "c") || !strcmp(args, "i"))
+    //    printf("Args = ['%d']\n", rtosc_argument(buffer, 0).i);
+    //if(!strcmp(args, "f"))
+    //    printf("Args = ['%f']\n", rtosc_argument(buffer, 0).f);
+    //if(!strcmp(args, "T"))
+    //    printf("Args = [True]\n");
+    //if(!strcmp(args, "F"))
+    //    printf("Args = [False]\n");
 }
 
 void Fl_Osc_Widget::oscWrite(std::string path)

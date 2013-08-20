@@ -3,6 +3,8 @@
 #include <FL/Fl.H>
 #include <FL/fl_draw.H>
 #include <cstdlib>
+#include <cassert>
+#include <rtosc/rtosc.h>
 
 EnvelopeFreeEdit::EnvelopeFreeEdit(int x,int y, int w, int h, const char *label)
 :Fl_Box(x,y,w,h,label), Fl_Osc_Widget(this)
@@ -21,8 +23,25 @@ void EnvelopeFreeEdit::init(void)
     oscRegister("Penvsustain");
 }
 
-void EnvelopeFreeEdit::OSC_raw(const char *msg) const
-{}
+void EnvelopeFreeEdit::OSC_raw(const char *msg)
+{
+    const char *args = rtosc_argument_string(msg);
+    if(strstr(msg,"Penvpoints") && !strcmp(args, "c")) {
+        Penvpoints = rtosc_argument(msg, 0).i;
+    } else if(strstr(msg,"Penvdt") && !strcmp(args, "b")) {
+        rtosc_blob_t b = rtosc_argument(msg, 0).b;
+        assert(b.len == MAX_ENVELOPE_POINTS);
+        memcpy(Penvdt, b.data, MAX_ENVELOPE_POINTS);
+    } else if(strstr(msg,"Penvval") && !strcmp(args, "b")) {
+        rtosc_blob_t b = rtosc_argument(msg, 0).b;
+        assert(b.len == MAX_ENVELOPE_POINTS);
+        memcpy(Penvval, b.data, MAX_ENVELOPE_POINTS);
+    } else if(strstr(msg,"Penvsustain") && !strcmp(args, "c")) {
+        Penvsustain = rtosc_argument(msg, 0).i;
+    }
+    redraw();
+    do_callback();
+}
 
 void EnvelopeFreeEdit::setpair(Fl_Box *pair_)
 {
@@ -62,7 +81,7 @@ int EnvelopeFreeEdit::getnearest(int x,int y) const
         int distance=abs(x-getpointx(i))+abs(y-getpointy(i));
         if (distance<nearestval) {
             nearestpoint=i;
-            nearestval=distance;  
+            nearestval=distance;
         }
     }
 
@@ -167,17 +186,18 @@ int EnvelopeFreeEdit::handle(int event)
 
     if (event==FL_DRAG && currentpoint>=0){
         int ny=limit(127-(int) (y_*127.0/h()), 0, 127);
-        
+
         Penvval[currentpoint]=ny;
 
         const int dx=(int)((x_-cpx)*0.1);
         const int newdt=limit(cpdt+dx,0,127);
-        
+
         if(currentpoint!=0)
             Penvdt[currentpoint]=newdt;
         else
             Penvdt[currentpoint]=0;
 
+        oscWrite(to_s("Penvdt")+to_s(currentpoint), "c", newdt);
         redraw();
 
         if(pair)
@@ -190,4 +210,8 @@ int EnvelopeFreeEdit::handle(int event)
 
 void EnvelopeFreeEdit::update(void)
 {
+    oscWrite("Penvpoints");
+    oscWrite("Penvdt");
+    oscWrite("Penvval");
+    oscWrite("Penvsustain");
 }
