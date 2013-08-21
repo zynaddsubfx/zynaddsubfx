@@ -45,7 +45,6 @@ void Fl_Osc_Widget::oscWrite(std::string path, const char *args, ...)
     char buffer[1024];
     //puts("writing OSC");
     //printf("Path = '%s'\n", path.c_str());
-    assert(!path.empty());
 
     va_list va;
     va_start(va, args);
