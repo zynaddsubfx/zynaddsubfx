@@ -33,7 +33,9 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#ifdef HAVE_SCHEDULER
 #include <sched.h>
+#endif
 
 
 prng_t prng_state = 0x1234;
@@ -119,12 +121,14 @@ bool fileexists(const char *filename)
 
 void set_realtime()
 {
+#ifdef HAVE_SCHEDULER
     sched_param sc;
     sc.sched_priority = 60;
     //if you want get "sched_setscheduler undeclared" from compilation,
     //you can safely remove the folowing line:
     sched_setscheduler(0, SCHED_FIFO, &sc);
     //if (err==0) printf("Real-time");
+#endif
 }
 
 void os_sleep(long length)
