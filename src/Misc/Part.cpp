@@ -672,11 +672,11 @@ void Part::PolyphonicAftertouch(unsigned char note,
             vel = (vel > 1.0f) ? 1.0f : vel;
 
             if(!Pkitmode) { // "normal mode"
-                if(kit[0].Padenabled)
+                if(kit[0].Padenabled && partnote[i].kititem[0].adnote)
                     partnote[i].kititem[0].adnote->setVelocity(vel);
-                if(kit[0].Psubenabled)
+                if(kit[0].Psubenabled && partnote[i].kititem[0].subnote)
                     partnote[i].kititem[0].subnote->setVelocity(vel);
-                if(kit[0].Ppadenabled)
+                if(kit[0].Ppadenabled && partnote[i].kititem[0].padnote)
                     partnote[i].kititem[0].padnote->setVelocity(vel);
             }
             else     // "kit mode"
@@ -687,11 +687,11 @@ void Part::PolyphonicAftertouch(unsigned char note,
                        || (note > kit[item].Pmaxkey))
                         continue;
 
-                    if(kit[item].Padenabled)
+                    if(kit[item].Padenabled && partnote[i].kititem[item].adnote)
                         partnote[i].kititem[item].adnote->setVelocity(vel);
-                    if(kit[item].Psubenabled)
+                    if(kit[item].Psubenabled && partnote[i].kititem[item].subnote)
                         partnote[i].kititem[item].subnote->setVelocity(vel);
-                    if(kit[item].Ppadenabled)
+                    if(kit[item].Ppadenabled && partnote[i].kititem[item].padnote)
                         partnote[i].kititem[item].padnote->setVelocity(vel);
                 }
         }
