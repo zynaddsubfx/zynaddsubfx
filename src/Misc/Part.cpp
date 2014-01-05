@@ -934,14 +934,12 @@ void Part::RunNote(unsigned int k)
 
         for(unsigned type = 0; type < 3; ++type) {
             //Select a note
-            SynthNote **note;
+            SynthNote **note = NULL;
             if(type == 0)
                 note = &partnote[k].kititem[item].adnote;
-            else
-            if(type == 1)
+            else if(type == 1)
                 note = &partnote[k].kititem[item].subnote;
-            else
-            if(type == 2)
+            else if(type == 2)
                 note = &partnote[k].kititem[item].padnote;
 
             //Process if it exists
