@@ -3,6 +3,7 @@
 #define SAFEQUEUE_H
 #include <cstdlib>
 #include <semaphore.h>
+#include <pthread.h>
 
 /**
  * C++ thread safe lockless queue

@@ -62,8 +62,13 @@ SET (LibloEnable ${LIBLO_FOUND} CACHE BOOL
 # Add version information
 add_definitions(-DVERSION="${VERSION}")
 
-# Add scheduler function existance info (OSX compatiability)
-add_definitions(-DHAVE_SCHEDULER=${HAVE_SCHEDULER})
+message(STATUS "Building on a '${CMAKE_SYSTEM_NAME}' System")
+
+if(NOT "Darwin" STREQUAL ${CMAKE_SYSTEM_NAME})
+    # Add scheduler function existance info (OSX compatiability)
+    add_definitions(-DHAVE_SCHEDULER=${HAVE_SCHEDULER})
+endif()
+
 
 # Give a good guess on the best Input/Output default backends
 if (JackEnable)
