@@ -285,10 +285,9 @@ int JackEngine::processCallback(jack_nframes_t nframes)
 {
     bool okaudio = true;
 
+    handleMidi(nframes);
     if((NULL != audio.ports[0]) && (NULL != audio.ports[1]))
         okaudio = processAudio(nframes);
-    if(okaudio)
-        handleMidi(nframes);
     return okaudio ? 0 : -1;
 }
 
