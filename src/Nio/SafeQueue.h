@@ -21,6 +21,7 @@ class SafeQueue
         /**Returns 0 for normal
          * Returns -1 on error*/
         int push(const T &in);
+        int peak(T &out) const;
         int pop(T &out);
 
         //clears reading space
