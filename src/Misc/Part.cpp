@@ -138,7 +138,6 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_)
 {
     microtonal = microtonal_;
     fft      = fft_;
-    pthread_mutex_init(&load_mutex, NULL);
     partoutl = new float [synth->buffersize];
     partoutr = new float [synth->buffersize];
 

@@ -339,7 +339,7 @@ target_link_libraries(zynaddsubfx
 	${AUDIO_LIBRARIES}
 	)
 
-if (DssiEnable)
+if (DssiEnable AND FALSE)
 	add_library(zynaddsubfx_dssi SHARED
 		Output/DSSIaudiooutput.cpp
 		)

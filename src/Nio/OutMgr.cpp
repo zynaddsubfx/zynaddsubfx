@@ -56,11 +56,6 @@ OutMgr::~OutMgr()
  */
 const Stereo<float *> OutMgr::tick(unsigned int frameSize)
 {
-    if(pthread_mutex_trylock(&(master->mutex))) {
-        puts("failed to get the mater mutex...");
-        pthread_mutex_lock(&(master->mutex));
-    }
-
     InMgr::getInstance().flush();
     //SysEv->execute();
     removeStaleSmps();
@@ -68,7 +63,6 @@ const Stereo<float *> OutMgr::tick(unsigned int frameSize)
         master->AudioOut(outl, outr);
         addSmps(outl, outr);
     }
-    pthread_mutex_unlock(&(master->mutex));
     stales = frameSize;
     return priBuf;
 }

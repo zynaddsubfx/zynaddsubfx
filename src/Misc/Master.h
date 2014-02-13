@@ -85,7 +85,6 @@ class Master
         void noteOff(char chan, char note);
         void polyphonicAftertouch(char chan, char note, char velocity);
         void setController(char chan, int type, int par);
-        void setProgram(char chan, unsigned int pgm);
         //void NRPN...
 
 
@@ -150,7 +149,6 @@ class Master
         Bank bank;
 
         class FFTwrapper * fft;
-        pthread_mutex_t mutex;
 
         static rtosc::Ports &ports;
         float  volume;

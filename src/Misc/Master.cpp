@@ -162,7 +162,6 @@ Master::Master()
     the_master = this;
     swaplr = 0;
 
-    pthread_mutex_init(&mutex, NULL);
     fft = new FFTwrapper(synth->oscilsize);
 
     shutup = 0;
@@ -319,21 +318,6 @@ void Master::setController(char chan, int type, int par)
     }
 }
 
-void Master::setProgram(char chan, unsigned int pgm)
-{
-    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        if(chan == part[npart]->Prcvchn) {
-            bank.loadfromslot(pgm, part[npart]);
-
-            //Hack to get pad note parameters to update
-            //this is not real time safe and makes assumptions about the calling
-            //convention of this function...
-            pthread_mutex_unlock(&mutex);
-            part[npart]->applyparameters();
-            pthread_mutex_lock(&mutex);
-        }
-}
-
 void Master::vuUpdate(const float *outl, const float *outr)
 {
     //Peak computation (for vumeters)
@@ -457,12 +441,9 @@ void Master::AudioOut(float *outl, float *outr)
     memset(outr, 0, synth->bufferbytes);
 
     //Compute part samples and store them part[npart]->partoutl,partoutr
-    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
-        if(part[npart]->Penabled != 0 && !pthread_mutex_trylock(&part[npart]->load_mutex)) {
+    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+        if(part[npart]->Penabled)
             part[npart]->ComputePartSmps();
-            pthread_mutex_unlock(&part[npart]->load_mutex);
-        }
-    }
 
     //Insertion effects
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
@@ -655,8 +636,6 @@ Master::~Master()
         delete sysefx[nefx];
 
     delete fft;
-
-    pthread_mutex_destroy(&mutex);
 }
 
 
@@ -786,9 +765,7 @@ int Master::getalldata(char **data)
 
     xml->beginbranch("MASTER");
 
-    pthread_mutex_lock(&mutex);
     add2XML(xml);
-    pthread_mutex_unlock(&mutex);
 
     xml->endbranch();
 
@@ -808,9 +785,7 @@ void Master::putalldata(char *data, int /*size*/)
     if(xml->enterbranch("MASTER") == 0)
         return;
 
-    pthread_mutex_lock(&mutex);
     getfromXML(xml);
-    pthread_mutex_unlock(&mutex);
 
     xml->exitbranch();
 
