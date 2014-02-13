@@ -157,6 +157,8 @@ class Master
         vuData vu;
 
         rtosc::MidiTable midi;//<1024,64>
+
+        bool   frozenState;//read-only parameters for threadsafe actions
     private:
         bool   nullRun;
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];

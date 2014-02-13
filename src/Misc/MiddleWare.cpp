@@ -22,6 +22,7 @@
 #include "../Effects/EffectMgr.h"
 
 #include <string>
+#include <atomic>
 
 #include <err.h>
 
@@ -148,9 +149,9 @@ void deallocate(const char *str, void *v)
  * - Fetches liblo messages and forward them to the backend
  * - Grabs backend messages and distributes them to the frontends
  */
-void osc_check(cb_t cb, void *ui)
-{
-}
+//void osc_check(cb_t cb, void *ui)
+//{
+//}
 
 
 
@@ -344,6 +345,70 @@ struct MiddleWareImpl
     }
 
     void warnMemoryLeaks(void);
+        
+    /** Threading When Saving
+     *  ----------------------
+     *
+     * Procedure Middleware: 
+     *   1) Middleware sends /freeze_state to backend
+     *   2) Middleware waits on /state_frozen from backend
+     *      All intervening commands are held for out of order execution
+     *   3) Aquire memory
+     *      At this time by the memory barrier we are guarenteed that all old
+     *      writes are done and assuming the freezing logic is sound, then it is
+     *      impossible for any other parameter to change at this time
+     *   3) Middleware performs saving operation
+     *   4) Middleware sends /thaw_state to backend
+     *   5) Restore in order execution
+     *
+     * Procedure Backend:
+     *   1) Observe /freeze_state and disable all mutating events (MIDI CC)
+     *   2) Run a memory release to ensure that all writes are complete
+     *   3) Send /state_frozen to Middleware
+     *   time...
+     *   4) Observe /thaw_state and resume normal processing
+     */
+
+
+    void saveMaster(const char *filename)
+    {
+        //Copy is needed as filename WILL get trashed during the rest of the run
+        std::string fname = filename;
+        printf("saving master('%s')\n", filename);
+        uToB->write("/freeze_state","");
+
+        std::list<const char *> fico;
+        int tries = 0;
+        while(tries++ < 10000) {
+            if(!bToU->hasNext()) {
+                usleep(500);
+                continue;
+            }
+            const char *msg = bToU->read();
+            if(!strcmp("/state_frozen", msg))
+                break;
+            size_t bytes = rtosc_message_length(msg, bToU->buffer_size());
+            char *save_buf = new char[bytes];
+            memcpy(save_buf, msg, bytes);
+            fico.push_back(save_buf);
+        }
+
+        assert(tries < 10000);//if this happens, the backend must be dead
+
+        std::atomic_thread_fence(std::memory_order_acquire);
+
+        //Now it is safe to do any read only operation
+
+        int res = master->saveXML(fname.c_str());
+        printf("results: '%s' '%d'\n",fname.c_str(), res);
+        
+        //Now to resume normal operations
+        uToB->write("/thaw_state","");
+        for(auto x:fico) {
+            uToB->raw_write(x);
+            delete [] x;
+        }
+    }
 
     void loadPart(int npart, const char *filename, Master *master, Fl_Osc_Interface *osc)
     {
@@ -412,40 +477,26 @@ struct MiddleWareImpl
     }
 
     bool broadcast = false;
-    void tick(void)
-    {
-        lo_server_recv_noblock(server, 0);
-        while(bToU->hasNext()) {
-            const char *rtmsg = bToU->read();
-            //printf("return: got a '%s'\n", rtmsg);
-            if(!strcmp(rtmsg, "/echo")
-                    && !strcmp(rtosc_argument_string(rtmsg),"ss")
-                    && !strcmp(rtosc_argument(rtmsg,0).s, "OSC_URL"))
-                curr_url = rtosc_argument(rtmsg,1).s;
-            else if(!strcmp(rtmsg, "/free")
-                    && !strcmp(rtosc_argument_string(rtmsg),"sb")) {
-                deallocate(rtosc_argument(rtmsg, 0).s, *((void**)rtosc_argument(rtmsg, 1).b.data));
-            } else if(!strcmp(rtmsg, "/setprogram")
-                    && !strcmp(rtosc_argument_string(rtmsg),"cc")) {
-                loadPart(rtosc_argument(rtmsg,0).i, master->bank.ins[rtosc_argument(rtmsg,1).i].filename.c_str(), master, osc);
-            } else if(!strcmp(rtmsg, "/broadcast")) {
-                broadcast = true;
-            } else if(broadcast) {
-                broadcast = false;
-                cb(ui, rtmsg);
-                if(curr_url != "GUI") {
-                    lo_message msg  = lo_message_deserialise((void*)rtmsg,
-                            rtosc_message_length(rtmsg, bToU->buffer_size()), NULL);
 
-                    //Send to known url
-                    if(!curr_url.empty()) {
-                        lo_address addr = lo_address_new_from_url(curr_url.c_str());
-                        lo_send_message(addr, rtmsg, msg);
-                    }
-                }
-            } else if(curr_url == "GUI") {
-                cb(ui, rtmsg); //GUI::raiseUi(gui, bToU->read());
-            } else{
+    void bToUhandle(const char *rtmsg)
+    {
+        //printf("return: got a '%s'\n", rtmsg);
+        if(!strcmp(rtmsg, "/echo")
+                && !strcmp(rtosc_argument_string(rtmsg),"ss")
+                && !strcmp(rtosc_argument(rtmsg,0).s, "OSC_URL"))
+            curr_url = rtosc_argument(rtmsg,1).s;
+        else if(!strcmp(rtmsg, "/free")
+                && !strcmp(rtosc_argument_string(rtmsg),"sb")) {
+            deallocate(rtosc_argument(rtmsg, 0).s, *((void**)rtosc_argument(rtmsg, 1).b.data));
+        } else if(!strcmp(rtmsg, "/setprogram")
+                && !strcmp(rtosc_argument_string(rtmsg),"cc")) {
+            loadPart(rtosc_argument(rtmsg,0).i, master->bank.ins[rtosc_argument(rtmsg,1).i].filename.c_str(), master, osc);
+        } else if(!strcmp(rtmsg, "/broadcast")) {
+            broadcast = true;
+        } else if(broadcast) {
+            broadcast = false;
+            cb(ui, rtmsg);
+            if(curr_url != "GUI") {
                 lo_message msg  = lo_message_deserialise((void*)rtmsg,
                         rtosc_message_length(rtmsg, bToU->buffer_size()), NULL);
 
@@ -455,6 +506,26 @@ struct MiddleWareImpl
                     lo_send_message(addr, rtmsg, msg);
                 }
             }
+        } else if(curr_url == "GUI") {
+            cb(ui, rtmsg); //GUI::raiseUi(gui, bToU->read());
+        } else{
+            lo_message msg  = lo_message_deserialise((void*)rtmsg,
+                    rtosc_message_length(rtmsg, bToU->buffer_size()), NULL);
+
+            //Send to known url
+            if(!curr_url.empty()) {
+                lo_address addr = lo_address_new_from_url(curr_url.c_str());
+                lo_send_message(addr, rtmsg, msg);
+            }
+        }
+    }
+
+    void tick(void)
+    {
+        lo_server_recv_noblock(server, 0);
+        while(bToU->hasNext()) {
+            const char *rtmsg = bToU->read();
+            bToUhandle(rtmsg);
         }
     }
 
@@ -559,7 +630,9 @@ struct MiddleWareImpl
                     uToB->raw_write(msg);
             } else //just forward the message
                 uToB->raw_write(msg);
-        } else if(strstr(msg, "load_xmz") && !strcmp(rtosc_argument_string(msg), "s")) {
+        } else if(strstr(msg, "/save_xmz") && !strcmp(rtosc_argument_string(msg), "s")) {
+            saveMaster(rtosc_argument(msg,0).s);
+        } else if(strstr(msg, "/load_xmz") && !strcmp(rtosc_argument_string(msg), "s")) {
             loadMaster(rtosc_argument(msg,0).s);
         } else if(strstr(msg, "load-part") && !strcmp(rtosc_argument_string(msg), "is"))
             loadPart(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master, osc);

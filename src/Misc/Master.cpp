@@ -39,6 +39,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
+#include <atomic>
 
 #include <unistd.h>
 
@@ -95,8 +96,16 @@ static Ports localports = {
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
             M->setController(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
-
-
+    {"freeze_state:", rDoc("Internal Read-only Mode"), 0,
+        [](const char *,RtData &d) {
+            Master *M =  (Master*)d.obj;
+            std::atomic_thread_fence(std::memory_order_release);
+            M->frozenState = true;
+            d.reply("/state_frozen");}},
+    {"thaw_state:", rDoc("Internal Read-only Mode"), 0,
+        [](const char *,RtData &d) {
+            Master *M =  (Master*)d.obj;
+            M->frozenState = false;}},
     {"register:iis", rDoc("MIDI Mapping Registration"), 0,
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
@@ -157,7 +166,7 @@ vuData::vuData(void)
 {}
 
 Master::Master()
-:midi(Master::ports)
+:midi(Master::ports), frozenState(false)
 {
     the_master = this;
     swaplr = 0;
@@ -280,6 +289,8 @@ void Master::polyphonicAftertouch(char chan, char note, char velocity)
  */
 void Master::setController(char chan, int type, int par)
 {
+    if(frozenState)
+        return;
     midi.process(chan,type,par);
     if((type == C_dataentryhi) || (type == C_dataentrylo)
        || (type == C_nrpnhi) || (type == C_nrpnlo)) { //Process RPN and NRPN by the Master (ignore the chan)
