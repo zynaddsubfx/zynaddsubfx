@@ -138,10 +138,15 @@ class DataObj:public rtosc::RtData
         virtual void broadcast(const char *path, const char *args, ...) override{
             va_list va;
             va_start(va,args);
+            reply("/broadcast");
             char *buffer = bToU->buffer();
             rtosc_vmessage(buffer,bToU->buffer_size(),path,args,va);
             reply(buffer);}
-        virtual void broadcast(const char *msg) override{reply(msg);};
+        virtual void broadcast(const char *msg) override
+        {
+            reply("/broadcast");
+            reply(msg);
+        };
     private:
         rtosc::ThreadLink *bToU;
 };

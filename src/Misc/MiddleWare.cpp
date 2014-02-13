@@ -411,6 +411,7 @@ struct MiddleWareImpl
         uToB->write("/load-master", "b", sizeof(Master*), &m);
     }
 
+    bool broadcast = false;
     void tick(void)
     {
         lo_server_recv_noblock(server, 0);
@@ -427,6 +428,21 @@ struct MiddleWareImpl
             } else if(!strcmp(rtmsg, "/setprogram")
                     && !strcmp(rtosc_argument_string(rtmsg),"cc")) {
                 loadPart(rtosc_argument(rtmsg,0).i, master->bank.ins[rtosc_argument(rtmsg,1).i].filename.c_str(), master, osc);
+            } else if(!strcmp(rtmsg, "/broadcast")) {
+                broadcast = true;
+            } else if(broadcast) {
+                broadcast = false;
+                cb(ui, rtmsg);
+                if(curr_url != "GUI") {
+                    lo_message msg  = lo_message_deserialise((void*)rtmsg,
+                            rtosc_message_length(rtmsg, bToU->buffer_size()), NULL);
+
+                    //Send to known url
+                    if(!curr_url.empty()) {
+                        lo_address addr = lo_address_new_from_url(curr_url.c_str());
+                        lo_send_message(addr, rtmsg, msg);
+                    }
+                }
             } else if(curr_url == "GUI") {
                 cb(ui, rtmsg); //GUI::raiseUi(gui, bToU->read());
             } else{
