@@ -647,6 +647,9 @@ class UI_Interface:public Fl_Osc_Interface
 
         void writeRaw(const char *msg) override
         {
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
+            fprintf(stderr, "write(%s)\n", msg);
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             impl->handleMsg(msg);
         }
 
@@ -784,6 +787,8 @@ class UI_Interface:public Fl_Osc_Interface
 
         void dumpLookupTable(void)
         {
+            if(map.size() != 0)
+                printf("Leaked controls:\n");
             for(auto i = map.begin(); i != map.end(); ++i) {
                 printf("Known control  '%s' (%p)...\n", i->first.c_str(), i->second);
             }

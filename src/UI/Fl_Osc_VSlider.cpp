@@ -17,8 +17,8 @@ Fl_Osc_VSlider::Fl_Osc_VSlider(int X, int Y, int W, int H, const char *label)
 void Fl_Osc_VSlider::init(std::string path_, char type_)
 {
     osc_type = type_;
-    path = path_;
-    oscRegister(path.c_str());
+    ext = path_;
+    oscRegister(ext.c_str());
 }
 
 Fl_Osc_VSlider::~Fl_Osc_VSlider(void)
@@ -38,11 +38,11 @@ void Fl_Osc_VSlider::cb(void)
 {
     const float val = Fl_Slider::value();
     if(osc_type == 'f')
-        oscWrite(path, "f", val-minimum());
+        oscWrite(ext, "f", val-minimum());
     else if(osc_type == 'i')
-        oscWrite(path, "i", (int)(val-minimum()));
+        oscWrite(ext, "i", (int)(val-minimum()));
     else
-        oscWrite(path, "c", (char)(val-minimum()));
+        oscWrite(ext, "c", (char)(val-minimum()));
     //OSC_value(val);
     
     if(cb_data.first)
@@ -57,7 +57,7 @@ void Fl_Osc_VSlider::callback(Fl_Callback *cb, void *p)
 
 void Fl_Osc_VSlider::update(void)
 {
-    oscWrite(path, "");
+    oscWrite(ext, "");
 }
 
 void Fl_Osc_VSlider::_cb(Fl_Widget *w, void *)

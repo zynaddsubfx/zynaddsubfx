@@ -201,15 +201,15 @@ delete (formantparswindow);} {}
         Fl_Dial vsnsadial {
           label {V.SnsA.}
           tooltip {Velocity sensing amount of the Filter} xywh {145 25 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
-          code0 {if(!alt_root.empty()) o->alt_init(alt_root, "VelocityScale");}
-          code1 {else {o->deactivate(); o->value(127);}}
+          code0 {if(!alt_root.empty()) o->alt_init(alt_root, "VelocityScale"); }
+          code1 {else {o->deactivate(); o->value(127);o->mark_dead();}}
           class Fl_Osc_Dial
         }
         Fl_Dial vsnsdial {
           label {V.Sns.}
           tooltip {Velocity Sensing Function of the Filter} xywh {180 25 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
-          code0 {if(!alt_root.empty()) o->alt_init(alt_root, "VelocityScaleFunction");}
-          code1 {else {o->deactivate(); o->value(127);}}
+          code0 {if(!alt_root.empty()) o->alt_init(alt_root, "VelocityScaleFunction"); }
+          code1 {else {o->deactivate(); o->value(127);o->mark_dead();}}
           class Fl_Osc_Dial
         }
         Fl_Dial gaindial {

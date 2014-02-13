@@ -26,7 +26,12 @@ class Fl_Osc_Dial:public WidgetPDial, public Fl_Osc_Widget
         void update(void);
         void callback(Fl_Callback *cb, void *p = NULL);
 
+        void mark_dead(void);
+        virtual void rebase(std::string new_base) override;
+
         void cb(void);
     private:
+        bool alt_style;
+        bool dead;
         std::pair<Fl_Callback*, void*> cb_data;
 };

@@ -105,3 +105,9 @@ void Fl_Osc_Widget::oscMove(std::string new_ext)
     ext = new_ext;
     osc->requestValue(loc+ext);
 }
+
+void Fl_Osc_Widget::oscMove(std::string old_loc, std::string new_loc)
+{
+    osc->renameLink(old_loc, new_loc, this);
+    osc->requestValue(new_loc);
+}

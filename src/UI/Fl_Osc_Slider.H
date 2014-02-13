@@ -3,8 +3,6 @@
 #include "Fl_Osc_Widget.H"
 #include <string>
 
-using std::string; //yes this is bad form FIXME
-
 class Fl_Osc_Slider:public Fl_Slider, public Fl_Osc_Widget
 {
 
@@ -14,8 +12,9 @@ class Fl_Osc_Slider:public Fl_Slider, public Fl_Osc_Widget
         //        const char *metadata);
 
         virtual ~Fl_Osc_Slider(void);
-        void OSC_value(float);
-        void OSC_value(char);
+        void OSC_value(int) override;
+        void OSC_value(float) override;
+        void OSC_value(char) override;
         void init(std::string, char type = 'f');
 
         //Refetch parameter information
@@ -25,9 +24,6 @@ class Fl_Osc_Slider:public Fl_Slider, public Fl_Osc_Widget
         void cb(void);
         static void _cb(Fl_Widget *w, void *);
     private:
-        string label_str;
-        std::string full_path;
-        std::string path;
         double real_value;
         char osc_type;
         std::pair<Fl_Callback*, void*> cb_data;

@@ -3,9 +3,7 @@
 #include "Fl_Osc_Widget.H"
 #include <string>
 
-using std::string; //yes this is bad form FIXME
-
-class Fl_Osc_VSlider:public Fl_Value_Slider, Fl_Osc_Widget
+class Fl_Osc_VSlider:public Fl_Value_Slider, public Fl_Osc_Widget
 {
 
     public:
@@ -23,9 +21,6 @@ class Fl_Osc_VSlider:public Fl_Value_Slider, Fl_Osc_Widget
         void cb(void);
         static void _cb(Fl_Widget *w, void *);
     private:
-        string label_str;
-        std::string full_path;
-        std::string path;
         double real_value;
         char osc_type;
         std::pair<Fl_Callback*, void*> cb_data;
