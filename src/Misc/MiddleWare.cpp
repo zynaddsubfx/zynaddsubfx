@@ -22,6 +22,7 @@
 #include "../Effects/EffectMgr.h"
 
 #include <string>
+#include <future>
 #include <atomic>
 
 #include <err.h>
@@ -315,6 +316,7 @@ struct MiddleWareImpl
 
         //dummy callback for starters
         cb = [](void*, const char*){};
+        idle = 0;
 
         master = new Master();
         osc    = genOscInterface(this);
@@ -412,14 +414,30 @@ struct MiddleWareImpl
 
     void loadPart(int npart, const char *filename, Master *master, Fl_Osc_Interface *osc)
     {
+        printf("loading part...\n");
+        auto alloc = std::async(std::launch::async, 
+                [master,filename](){Part *p = new Part(&master->microtonal, master->fft);
+                if(p->loadXMLinstrument(filename))
+                fprintf(stderr, "FAILED TO LOAD PART!!\n");
+
+                p->applyparameters();
+                return p;});
         //fprintf(stderr, "loading a part!!\n");
         //Load the part
-        Part *p = new Part(&master->microtonal, master->fft);
+        if(idle) {
+            while(alloc.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
+                printf("idle...\n");
+                idle();
+            }
+        } else
+            printf("no idle\n");
+        printf("part allocated...\n");
+        Part *p = alloc.get();//new Part(&master->microtonal, master->fft);
         //fprintf(stderr, "Part[%d] is stored in '%s'\n", npart, filename);
-        if(p->loadXMLinstrument(filename))
-            fprintf(stderr, "FAILED TO LOAD PART!!\n");
+        //if(p->loadXMLinstrument(filename))
+        //    fprintf(stderr, "FAILED TO LOAD PART!!\n");
 
-        p->applyparameters();
+        //p->applyparameters();
 
         //Update the resource locators
         string base = "/part"+to_s(npart)+"/kit";
@@ -480,7 +498,7 @@ struct MiddleWareImpl
 
     void bToUhandle(const char *rtmsg)
     {
-        //printf("return: got a '%s'\n", rtmsg);
+        printf("return: got a '%s'\n", rtmsg);
         if(!strcmp(rtmsg, "/echo")
                 && !strcmp(rtosc_argument_string(rtmsg),"ss")
                 && !strcmp(rtosc_argument(rtmsg,0).s, "OSC_URL"))
@@ -686,6 +704,7 @@ struct MiddleWareImpl
     //backend
     Fl_Osc_Interface *osc;
 
+    void(*idle)(void);
     cb_t cb;
     void *ui;
 };
@@ -908,5 +927,10 @@ void MiddleWare::setUiCallback(void(*cb)(void*,const char *),void *ui)
 {
     impl->cb = cb;
     impl->ui = ui;
+}
+
+void MiddleWare::setIdleCallback(void(*cb)(void))
+{
+    impl->idle = cb;
 }
 

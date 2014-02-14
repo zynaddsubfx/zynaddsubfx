@@ -10,6 +10,7 @@ class MiddleWare
         class Master *spawnMaster(void);
         class Fl_Osc_Interface *spawnUiApi(void);
         void setUiCallback(void(*cb)(void*,const char *),void *ui);
+        void setIdleCallback(void(*cb)(void));
         void tick(void);
 
         static void preparePadSynth(const char *, class PADnoteParameters *){};

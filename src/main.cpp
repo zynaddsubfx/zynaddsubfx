@@ -84,6 +84,8 @@ extern int main_thread;
 //cleanup on signaled exit
 void sigterm_exit(int /*sig*/)
 {
+    if(Pexitprogram)
+        exit(1);
     Pexitprogram = 1;
 }
 
@@ -399,6 +401,7 @@ int main(int argc, char *argv[])
 
     gui = GUI::createUi(middleware->spawnUiApi(), &Pexitprogram);
     middleware->setUiCallback(GUI::raiseUi, gui);
+    middleware->setIdleCallback([](){GUI::tickUi(gui);});
 
     if(!noui)
     {
