@@ -371,12 +371,9 @@ struct MiddleWareImpl
      *   4) Observe /thaw_state and resume normal processing
      */
 
-
-    void saveMaster(const char *filename)
+    void doReadOnlyOp(std::function<void()> read_only_fn)
     {
         //Copy is needed as filename WILL get trashed during the rest of the run
-        std::string fname = filename;
-        printf("saving master('%s')\n", filename);
         uToB->write("/freeze_state","");
 
         std::list<const char *> fico;
@@ -400,16 +397,35 @@ struct MiddleWareImpl
         std::atomic_thread_fence(std::memory_order_acquire);
 
         //Now it is safe to do any read only operation
+        read_only_fn();
 
-        int res = master->saveXML(fname.c_str());
-        printf("results: '%s' '%d'\n",fname.c_str(), res);
-        
         //Now to resume normal operations
         uToB->write("/thaw_state","");
         for(auto x:fico) {
             uToB->raw_write(x);
             delete [] x;
         }
+    }
+
+
+    void saveMaster(const char *filename)
+    {
+        //Copy is needed as filename WILL get trashed during the rest of the run
+        std::string fname = filename;
+        printf("saving master('%s')\n", filename);
+        doReadOnlyOp([this,fname](){
+                int res = master->saveXML(fname.c_str());
+                printf("results: '%s' '%d'\n",fname.c_str(), res);});
+    }
+
+    void savePart(int npart, const char *filename)
+    {
+        //Copy is needed as filename WILL get trashed during the rest of the run
+        std::string fname = filename;
+        printf("saving part(%d,'%s')\n", npart, filename);
+        doReadOnlyOp([this,fname,npart](){
+                int res = master->part[npart]->saveXML(fname.c_str());
+                printf("results: '%s' '%d'\n",fname.c_str(), res);});
     }
 
     void loadPart(int npart, const char *filename, Master *master, Fl_Osc_Interface *osc)
@@ -650,8 +666,12 @@ struct MiddleWareImpl
                 uToB->raw_write(msg);
         } else if(strstr(msg, "/save_xmz") && !strcmp(rtosc_argument_string(msg), "s")) {
             saveMaster(rtosc_argument(msg,0).s);
+        } else if(strstr(msg, "/save_xiz") && !strcmp(rtosc_argument_string(msg), "is")) {
+            savePart(rtosc_argument(msg,0).i,rtosc_argument(msg,1).s);
         } else if(strstr(msg, "/load_xmz") && !strcmp(rtosc_argument_string(msg), "s")) {
             loadMaster(rtosc_argument(msg,0).s);
+        } else if(!strcmp(msg, "/load_xiz") && !strcmp(rtosc_argument_string(msg), "is")) {
+            loadPart(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master, osc);
         } else if(strstr(msg, "load-part") && !strcmp(rtosc_argument_string(msg), "is"))
             loadPart(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master, osc);
         else

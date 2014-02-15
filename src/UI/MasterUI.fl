@@ -363,7 +363,7 @@ filename=fl_file_chooser("Load:","({*.xiz})",NULL,0);
 if (filename==NULL) return;
 
 
-osc->write("/load_xiz", "si", filename, npart);
+osc->write("/load_xiz", "is", npart, filename);
 npartcounter->do_callback();
 updatepanel();
 
@@ -387,7 +387,7 @@ if (result) {
        
 };
 
-osc->write("/save_xiz", "si", filename, npart);
+osc->write("/save_xiz", "is", npart, filename);
 /*if (result<0) fl_alert("Error: Could not save the file.");*/
 }
               xywh {25 25 100 20} divider
