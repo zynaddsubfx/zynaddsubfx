@@ -498,7 +498,7 @@ struct MiddleWareImpl
 
     void bToUhandle(const char *rtmsg)
     {
-        printf("return: got a '%s'\n", rtmsg);
+        printf(".");fflush(stdout);//return: got a '%s'\n", rtmsg);
         if(!strcmp(rtmsg, "/echo")
                 && !strcmp(rtosc_argument_string(rtmsg),"ss")
                 && !strcmp(rtosc_argument(rtmsg,0).s, "OSC_URL"))
@@ -740,7 +740,8 @@ class UI_Interface:public Fl_Osc_Interface
         void writeRaw(const char *msg) override
         {
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
-            fprintf(stderr, "write(%s)\n", msg);
+            fprintf(stderr, ".");
+            //fprintf(stderr, "write(%s)\n", msg);
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             impl->handleMsg(msg);
         }
@@ -836,33 +837,33 @@ class UI_Interface:public Fl_Osc_Interface
 
             int found_count = 0;
 
-            for(auto pair:map) {
-                if(pair.first == msg) {
-                    found_count++;
-                    const char *arg_str = rtosc_argument_string(msg);
+            auto range = map.equal_range(msg);
+            for(auto itr = range.first; itr != range.second; ++itr) {
+                auto widget = itr->second;
+                found_count++;
+                const char *arg_str = rtosc_argument_string(msg);
 
-                    //Always provide the raw message
-                    pair.second->OSC_raw(msg);
+                //Always provide the raw message
+                widget->OSC_raw(msg);
 
-                    if(!strcmp(arg_str, "b")) {
-                        pair.second->OSC_value(rtosc_argument(msg,0).b.len,
-                                rtosc_argument(msg,0).b.data,
-                                handle);
-                    } else if(!strcmp(arg_str, "c")) {
-                        pair.second->OSC_value((char)rtosc_argument(msg,0).i,
-                                handle);
-                    } else if(!strcmp(arg_str, "s")) {
-                        pair.second->OSC_value((const char*)rtosc_argument(msg,0).s,
-                                handle);
-                    } else if(!strcmp(arg_str, "i")) {
-                        pair.second->OSC_value((int)rtosc_argument(msg,0).i,
-                                handle);
-                    } else if(!strcmp(arg_str, "f")) {
-                        pair.second->OSC_value((float)rtosc_argument(msg,0).f,
-                                handle);
-                    } else if(!strcmp(arg_str, "T") || !strcmp(arg_str, "F")) {
-                        pair.second->OSC_value((bool)rtosc_argument(msg,0).T, handle);
-                    }
+                if(!strcmp(arg_str, "b")) {
+                    widget->OSC_value(rtosc_argument(msg,0).b.len,
+                            rtosc_argument(msg,0).b.data,
+                            handle);
+                } else if(!strcmp(arg_str, "c")) {
+                    widget->OSC_value((char)rtosc_argument(msg,0).i,
+                            handle);
+                } else if(!strcmp(arg_str, "s")) {
+                    widget->OSC_value((const char*)rtosc_argument(msg,0).s,
+                            handle);
+                } else if(!strcmp(arg_str, "i")) {
+                    widget->OSC_value((int)rtosc_argument(msg,0).i,
+                            handle);
+                } else if(!strcmp(arg_str, "f")) {
+                    widget->OSC_value((float)rtosc_argument(msg,0).f,
+                            handle);
+                } else if(!strcmp(arg_str, "T") || !strcmp(arg_str, "F")) {
+                    widget->OSC_value((bool)rtosc_argument(msg,0).T, handle);
                 }
             }
 

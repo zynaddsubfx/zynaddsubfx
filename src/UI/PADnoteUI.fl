@@ -875,7 +875,7 @@ applybutton->parent()->redraw();} {}
 delete(resui);
 
 padnotewindow->hide();
-delete(padnotewindow);} {}
+delete padnotewindow;} {}
   }
   decl {OscilEditor *oscui;} {public local
   }

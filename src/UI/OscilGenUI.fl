@@ -91,10 +91,6 @@ if (!Fl::event_inside(X,Y,W,H)) {
 
 return(1);} {}
   }
-  decl {std::string loc;} {public local
-  }
-  decl {Fl_Osc_Interface *osc} {public local
-  }
   Function {OSC_value(char c)} {open return_type void
   } {
     code {if(phase)

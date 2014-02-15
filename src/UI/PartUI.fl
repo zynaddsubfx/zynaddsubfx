@@ -823,10 +823,8 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
           }
           Fl_Check_Button padsynenabledcheck {
             label Enabled
-            callback {if (o->value()==0){ delete padnoteui; padnoteui = NULL; padeditbutton->deactivate();}
-else {
-      padnoteui=new PADnoteUI(loc+"kit0/padpars/", osc);
-     padeditbutton->activate();}}
+            callback {if (o->value()==0) padeditbutton->deactivate();
+                else padeditbutton->activate();}
             tooltip {enable/disable PADsynth} xywh {215 255 80 20} box UP_BOX down_box DOWN_BOX color 51 selection_color 51 labelfont 1 labelsize 11
             code1 {o->init("Ppadenabled");}
             class Fl_Osc_Check
@@ -1028,32 +1026,35 @@ keylimitlist->value(val);} {}
   }
   Function {showparameters(int kititem,int engine)} {open
   } {
-    code {if (engine==-1){//this is used if I want to clear the engine from the part
-   if (kititem==lastkititem) kititem=-1;
-         else kititem=lastkititem;
-};
+    code {
+if (engine==-1){//this is used if I want to clear the engine from the part
+    if (kititem==lastkititem) kititem=-1;
+    else kititem=lastkititem;
+}
 
 if (kititem!=lastkititem){
     delete adnoteui;
     delete subnoteui;   
-    adnoteui=NULL;subnoteui=NULL;
+    delete padnoteui;
+    adnoteui=NULL;subnoteui=NULL;padnoteui=NULL;
     lastkititem=kititem;
 
     if(kititem>=NUM_KIT_ITEMS) return;//bad kit item
     if(kititem<0) return;
+}
 
-    if(adsynenabledcheck->value())
-      adnoteui=new ADnoteUI(loc+"kit"+to_s(kititem)+"/adpars/", osc);
+if(!adnoteui  && adsynenabledcheck->value())
+    adnoteui=new ADnoteUI(loc+"kit"+to_s(kititem)+"/adpars/", osc);
 
-    if(subsynenabledcheck->value()) 
-       subnoteui=new SUBnoteUI(osc, loc+"kit"+to_s(kititem)+"/subpars/");
-};
+if(!subnoteui && subsynenabledcheck->value()) 
+    subnoteui=new SUBnoteUI(osc, loc+"kit"+to_s(kititem)+"/subpars/");
 
+if(!padnoteui && padsynenabledcheck->value()) 
+    padnoteui=new PADnoteUI(loc+"kit"+to_s(kititem)+"/padpars/", osc);
 
-
-if ((engine==0)&&adnoteui) adnoteui->ADnoteGlobalParameters->show();
-if ((engine==1)&&subnoteui) subnoteui->SUBparameters->show();
-if ((engine==2)&&padnoteui) padnoteui->padnotewindow->show();} {}
+if (engine==0&&adnoteui) adnoteui->ADnoteGlobalParameters->show();
+if (engine==1&&subnoteui) subnoteui->SUBparameters->show();
+if (engine==2&&padnoteui) padnoteui->padnotewindow->show();} {}
   }
   Function {~PartUI()} {} {
     code {delete adnoteui;
