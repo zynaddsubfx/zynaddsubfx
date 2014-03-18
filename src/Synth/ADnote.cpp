@@ -40,7 +40,7 @@ ADnote::ADnote(ADnoteParameters *pars,
                int portamento_,
                int midinote_,
                bool besilent)
-    :SynthNote(freq, velocity, portamento_, midinote, besilent)
+    :SynthNote(freq, velocity, portamento_, midinote_, besilent)
 {
     tmpwavel = new float [synth->buffersize];
     tmpwaver = new float [synth->buffersize];
