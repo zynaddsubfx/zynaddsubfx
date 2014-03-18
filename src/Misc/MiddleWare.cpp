@@ -794,13 +794,14 @@ class UI_Interface:public Fl_Osc_Interface
         {
             assert(s.length() != 0);
             Fl_Osc_Interface::createLink(s,w);
+            assert(!strstr(s.c_str(), "/part0/kit-1"));
             map.insert(std::pair<string,Fl_Osc_Widget*>(s,w));
         }
 
         void renameLink(string old, string newer, Fl_Osc_Widget *w) override
         {
-            fprintf(stdout, "renameLink('%s','%s',%p)\n",
-                    old.c_str(), newer.c_str(), w);
+            //fprintf(stdout, "renameLink('%s','%s',%p)\n",
+            //        old.c_str(), newer.c_str(), w);
             removeLink(old, w);
             createLink(newer, w);
         }
@@ -838,9 +839,16 @@ class UI_Interface:public Fl_Osc_Interface
         //A very simplistic implementation of a UI agnostic refresh method
         virtual void damage(const char *path)
         {
+            printf("\n\nDamage(\"%s\")\n", path);
             for(auto pair:map) {
                 if(strstr(pair.first.c_str(), path)) {
-                    pair.second->update();
+                    auto *tmp = dynamic_cast<Fl_Widget*>(pair.second);
+                    if(tmp)
+                        printf("%x, %d %d [%s]\n", (int)pair.second, tmp->visible_r(), tmp->visible(), pair.first.c_str());
+                    else
+                        printf("%x, (NULL)[%s]\n", (int)pair.second,pair.first.c_str());
+                    if(!tmp || tmp->visible_r())
+                        pair.second->update();
                 }
             }
         }
