@@ -141,7 +141,13 @@ ADnote::ADnote(ADnoteParameters *pars,
                 for(int k = 0; k < unison; ++k) {
                     float step = (k / (float) (unison - 1)) * 2.0f - 1.0f; //this makes the unison spread more uniform
                     float val  = step + (RND * 2.0f - 1.0f) / (unison - 1);
-                    unison_values[k] = limit(val, min, max);
+                    unison_values[k] = val;
+                    if (min > val) {
+                        min = val;
+                    }
+                    if (max < val) {
+                        max = val;
+                    }
                 }
                 float diff = max - min;
                 for(int k = 0; k < unison; ++k) {
