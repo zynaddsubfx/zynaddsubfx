@@ -71,6 +71,14 @@ if (!Fl::event_inside(X,Y,W,H)) {
 
 return(1);} {}
   }
+  Function {rebase(std::string new_base)} {return_type void
+  } {
+      code {} {}
+      }
+  Function {update()} {return_type void
+  } {
+      code {} {}
+      }
   Function {OSC_value(char c)} {open return_type void
   } {
     code {value(127-c);} {}
