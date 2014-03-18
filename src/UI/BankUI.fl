@@ -118,7 +118,7 @@ banklist->value(0);}
     code {npart=*npart_;
 osc  =osc_;
 make_window();
-bankview->init(osc, modeselect, *npart_);} {}
+bankview->init(osc, modeselect, npart_);} {}
   }
   Function {~BankUI()} {open return_type virtual
   } {

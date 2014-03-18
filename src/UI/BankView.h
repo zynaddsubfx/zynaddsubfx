@@ -73,7 +73,7 @@ class BankView: public Fl_Group, public Fl_Osc_Widget
     public:
         BankView(int x,int y, int w, int h, const char *label=0);
         ~BankView(void);
-        void init(Fl_Osc_Interface *osc_, BankViewControls *bvc_, int npart_);
+        void init(Fl_Osc_Interface *osc_, BankViewControls *bvc_, int *npart_);
 
         void react(int event, int slot);
 
@@ -90,7 +90,7 @@ class BankView: public Fl_Group, public Fl_Osc_Widget
         //XXX TODO locked banks...
         int mode;
         int nselected;
-        int npart;
+        int *npart;
 };
 
 #endif

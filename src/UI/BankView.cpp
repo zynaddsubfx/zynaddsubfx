@@ -196,7 +196,7 @@ BankView::~BankView(void)
         osc->removeLink("/bankview", this);
 }
 
-void BankView::init(Fl_Osc_Interface *osc_, BankViewControls *bvc_, int npart_)
+void BankView::init(Fl_Osc_Interface *osc_, BankViewControls *bvc_, int *npart_)
 {
     assert(osc_);
 
@@ -259,8 +259,8 @@ void BankView::react(int event, int nslot)
     //Reads from slot
     if ((event==1)&&(mode==1)&&(!slot.empty())){
         printf("Loading a part #%d with file '%s'\n", nslot, slot.filename());
-        osc->write("/load-part", "is", npart, slot.filename());
-        osc->writeValue("/part"+to_s(npart)+"/name", slot.name());
+        osc->write("/load-part", "is", *npart, slot.filename());
+        osc->writeValue("/part"+to_s(*npart)+"/name", slot.name());
     }
 
     //save(write) to slot
