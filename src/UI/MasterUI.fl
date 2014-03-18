@@ -137,6 +137,8 @@ class Panellistitem {open : {public Fl_Osc_Group}
 };
 bankui->show();}
           xywh {5 27 60 30} box THIN_DOWN_BOX down_box FLAT_BOX labelfont 1 labelsize 10 align 208
+          code0 {o->ext = "Pname";o->oscRegister("Pname");}
+          class PartNameButton
         }
         Fl_Slider partvolume {
           xywh {10 65 30 110} type {Vert Knob} box NO_BOX minimum 127 maximum 0 step 1 value 127
@@ -198,7 +200,7 @@ panellistitem->show();
 end();} {}
   }
   Function {refresh()} {} {
-    code {partname->label("NAME TODO");
+    code {
 
 if ((int)bankui->cbwig->value()!=(npart+1))
    panellistitemgroup->color(fl_rgb_color(160,160,160));
