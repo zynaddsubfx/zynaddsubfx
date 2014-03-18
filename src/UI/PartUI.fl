@@ -400,7 +400,7 @@ osc->write("/setkeylimit", "i", val);} open
           class Fl_Osc_Choice
         } {}
       }
-      Fl_Check_Button {} {
+      Fl_Check_Button partenablebutton {
         label Enabled
         callback {if (o->value()==0) partgroupui->deactivate();
     else partgroupui->activate();}
@@ -1119,7 +1119,9 @@ delete(instrumenteditwindow);} {}
 ctlwindow->rebase(new_loc+"ctl/");
 partfx->rebase(new_loc);
 instrumentkitlist->rebase(new_loc);
-instrumenteditwindow->rebase(new_loc);} {selected
+instrumenteditwindow->rebase(new_loc);
+partenablebutton->rebase(new_loc);
+} {selected
     }
   }
 } 
