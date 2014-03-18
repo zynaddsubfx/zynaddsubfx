@@ -65,6 +65,7 @@ static Ports partPorts = {
     rParam(info.Ptype, "Class of Instrument"),
     rString(info.Pauthor, MAX_INFO_TEXT_SIZE, "Instrument Author"),
     rString(info.Pcomments, MAX_INFO_TEXT_SIZE, "Instrument Comments"),
+    rString(Pname, PART_MAX_NAME_LEN, "Kit User Specified Label"),
     {"captureMin:", NULL, NULL, [](const char *, RtData &r)
         {Part *p = (Part*)r.obj; p->Pminkey = p->lastnote;}},
     {"captureMax:", NULL, NULL, [](const char *, RtData &r)
@@ -179,7 +180,7 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_)
     }
     cleanup();
 
-    Pname = new unsigned char [PART_MAX_NAME_LEN];
+    Pname = new char[PART_MAX_NAME_LEN];
 
     oldvolumel = oldvolumer = 0.5f;
     lastnote   = -1;

@@ -59,6 +59,9 @@ decl {\#include "Fl_Osc_Dial.H"} {private local
 decl {\#include "VuMasterMeter.h"} {public local
 } 
 
+decl {\#include "PartNameButton.h"} {public local
+} 
+
 decl {\#include "../Misc/Master.h"} {public local
 } 
 
@@ -1030,6 +1033,8 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an
 };
 bankui->show();}
           xywh {130 72 205 18} box THIN_DOWN_BOX down_box FLAT_BOX color 50 labelfont 1 labelsize 11 align 208
+          code0 {o->ext = "Pname";o->oscRegister("Pname");}
+          class PartNameButton
         }
         Fl_Slider partpanning {
           label Pan
