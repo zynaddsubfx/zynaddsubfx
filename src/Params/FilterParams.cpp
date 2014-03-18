@@ -32,6 +32,9 @@
 
 using namespace rtosc;
 
+// g++ 4.8 needs this variable saved separately, otherwise it segfaults
+constexpr int sizeof_pvowels = sizeof(FilterParams::Pvowels);
+
 #define rObject FilterParams::Pvowels_t::formants_t
 static rtosc::Ports subsubports = {
     rParam(freq, "Formant frequency"),
@@ -82,7 +85,7 @@ rtosc::Ports FilterParams::ports = {
     {"Pvowels", NULL, NULL,
         [](const char *, RtData &d) {
             FilterParams *obj = (FilterParams *) d.obj;
-            d.reply(d.loc, "b", sizeof(FilterParams::Pvowels), obj->Pvowels);
+            d.reply(d.loc, "b", sizeof_pvowels, obj->Pvowels);
         }},
 
     {"Pvowels#" STRINGIFY(FF_MAX_VOWELS) "/", NULL, &subports,
