@@ -104,10 +104,6 @@ class PartKitItem {open : {public Fl_Osc_Group}
         private xywh {55 0 605 20}
         class Fl_Osc_Group
       } {
-        Fl_Box {} {
-          xywh {0 0 0 0}
-          code0 {partkititemgroup->ext = "kit"+to_s(n)+"/";}
-        }
         Fl_Counter minkcounter {
           xywh {225 0 55 15} type Simple minimum 0 maximum 128 step 1
           code0 {o->init("Pminkey");}
@@ -227,6 +223,7 @@ partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0}
   }
   Function {init(int n_,class PartUI *partui_)} {} {
     code {n=n_;
+        ext = "kit"+to_s(n)+"/";
 partui=partui_;
 make_window();
 //partkititem->show();
@@ -738,7 +735,7 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
       } {
         Fl_Pack {} {
           xywh {0 20 670 320}
-          code0 {for (int i=0;i<NUM_KIT_ITEMS;i++){partkititem[i]=new PartKitItem(0,0,670,20,"");partkititem[i]->init(i,this);}}
+          code0 {for (int i=0;i<NUM_KIT_ITEMS;i++){partkititem[i]=new PartKitItem(0,0,670,20);partkititem[i]->init(i,this);}}
         } {}
       }
       Fl_Box {} {
