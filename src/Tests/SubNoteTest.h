@@ -106,7 +106,6 @@ class SubNoteTest:public CxxTest::TestSuite
             delete [] outL;
             delete [] outR;
             delete [] denormalkillbuf;
-            clearTmpBuffers();
             delete synth;
         }
 
