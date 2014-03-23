@@ -403,7 +403,7 @@ void DSSIaudiooutput::selectProgram(unsigned long bank, unsigned long program)
  * @param port [in] the input controller port
  * @return the CC and NRPN values shifted and ORed together.
  */
-int DSSIaudiooutput::getMidiControllerForPort(unsigned long port)
+int DSSIaudiooutput::getMidiControllerForPort(unsigned long /*port*/)
 {
     return DSSI_NONE;
 }
