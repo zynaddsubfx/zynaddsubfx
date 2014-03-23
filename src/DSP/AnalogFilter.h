@@ -35,7 +35,7 @@ class AnalogFilter:public Filter
 {
     public:
         AnalogFilter(unsigned char Ftype, float Ffreq, float Fq,
-                     unsigned char Fstages);
+                     unsigned char Fstages, unsigned int srate, int bufsize);
         ~AnalogFilter();
         void filterout(float *smp);
         void setfreq(float frequency);

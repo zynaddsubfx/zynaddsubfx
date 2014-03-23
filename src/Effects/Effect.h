@@ -43,7 +43,8 @@ class Effect
          * @param Ppreset_ chosen preset
          * @return Initialized Effect object*/
         Effect(bool insertion_, float *efxoutl_, float *efxoutr_,
-               FilterParams *filterpars_, unsigned char Ppreset_);
+               FilterParams *filterpars_, unsigned char Ppreset_,
+               unsigned int srate, int bufsize);
         virtual ~Effect() {}
         /**
          * Choose a preset
@@ -100,6 +101,24 @@ class Effect
         float pangainR;
         char  Plrcross; // L/R mix
         float lrcross;
+
+        // current setup
+        unsigned int samplerate;
+        int buffersize;
+
+        // alias for above terms
+        float samplerate_f;
+        float halfsamplerate_f;
+        float buffersize_f;
+        int   bufferbytes;
+
+        inline void alias()
+        {
+            samplerate_f     = samplerate;
+            halfsamplerate_f = samplerate_f / 2.0f;
+            buffersize_f     = buffersize;
+            bufferbytes      = buffersize * sizeof(float);
+        }
 };
 
 #endif

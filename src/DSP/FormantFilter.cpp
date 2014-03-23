@@ -27,11 +27,12 @@
 #include "AnalogFilter.h"
 #include "../Params/FilterParams.h"
 
-FormantFilter::FormantFilter(FilterParams *pars)
+FormantFilter::FormantFilter(FilterParams *pars, unsigned int srate, int bufsize)
+    : Filter(srate, bufsize)
 {
     numformants = pars->Pnumformants;
     for(int i = 0; i < numformants; ++i)
-        formant[i] = new AnalogFilter(4 /*BPF*/, 1000.0f, 10.0f, pars->Pstages);
+        formant[i] = new AnalogFilter(4 /*BPF*/, 1000.0f, 10.0f, pars->Pstages, srate, bufsize);
     cleanup();
 
     for(int j = 0; j < FF_MAX_VOWELS; ++j)
@@ -203,29 +204,27 @@ void FormantFilter::setfreq_and_q(float frequency, float q_)
 
 void FormantFilter::filterout(float *smp)
 {
-    float *inbuffer = getTmpBuffer();
+    float inbuffer[buffersize];
 
-    memcpy(inbuffer, smp, synth->bufferbytes);
-    memset(smp, 0, synth->bufferbytes);
+    memcpy(inbuffer, smp, bufferbytes);
+    memset(smp, 0, bufferbytes);
 
     for(int j = 0; j < numformants; ++j) {
-        float *tmpbuf = getTmpBuffer();
-        for(int i = 0; i < synth->buffersize; ++i)
+        float tmpbuf[buffersize];
+        for(int i = 0; i < buffersize; ++i)
             tmpbuf[i] = inbuffer[i] * outgain;
         formant[j]->filterout(tmpbuf);
 
         if(ABOVE_AMPLITUDE_THRESHOLD(oldformantamp[j], currentformants[j].amp))
-            for(int i = 0; i < synth->buffersize; ++i)
+            for(int i = 0; i < buffersize; ++i)
                 smp[i] += tmpbuf[i]
                           * INTERPOLATE_AMPLITUDE(oldformantamp[j],
                                                   currentformants[j].amp,
                                                   i,
-                                                  synth->buffersize);
+                                                  buffersize);
         else
-            for(int i = 0; i < synth->buffersize; ++i)
+            for(int i = 0; i < buffersize; ++i)
                 smp[i] += tmpbuf[i] * currentformants[j].amp;
-        returnTmpBuffer(tmpbuf);
         oldformantamp[j] = currentformants[j].amp;
     }
-    returnTmpBuffer(inbuffer);
 }

@@ -29,8 +29,9 @@
 #include "SVFilter.h"
 
 SVFilter::SVFilter(unsigned char Ftype, float Ffreq, float Fq,
-                   unsigned char Fstages)
-    :type(Ftype),
+                   unsigned char Fstages, unsigned int srate, int bufsize)
+    :Filter(srate, bufsize),
+      type(Ftype),
       stages(Fstages),
       freq(Ffreq),
       q(Fq),
@@ -58,7 +59,7 @@ void SVFilter::cleanup()
 
 void SVFilter::computefiltercoefs(void)
 {
-    par.f = freq / synth->samplerate_f * 4.0f;
+    par.f = freq / samplerate_f * 4.0f;
     if(par.f > 0.99999f)
         par.f = 0.99999f;
     par.q      = 1.0f - atanf(sqrtf(q)) * 2.0f / PI;
@@ -76,7 +77,7 @@ void SVFilter::setfreq(float frequency)
         rap = 1.0f / rap;
 
     oldabovenq = abovenq;
-    abovenq    = frequency > (synth->samplerate_f / 2 - 500.0f);
+    abovenq    = frequency > (samplerate_f / 2 - 500.0f);
 
     bool nyquistthresh = (abovenq ^ oldabovenq);
 
@@ -144,7 +145,7 @@ void SVFilter::singlefilterout(float *smp, fstage &x, parameters &par)
             errx(1, "Impossible SVFilter type encountered [%d]", type);
     }
 
-    for(int i = 0; i < synth->buffersize; ++i) {
+    for(int i = 0; i < buffersize; ++i) {
         x.low   = x.low + par.f * x.band;
         x.high  = par.q_sqrt * smp[i] - x.low - par.q * x.band;
         x.band  = par.f * x.high + x.band;
@@ -159,20 +160,19 @@ void SVFilter::filterout(float *smp)
         singlefilterout(smp, st[i], par);
 
     if(needsinterpolation) {
-        float *ismp = getTmpBuffer();
-        memcpy(ismp, smp, synth->bufferbytes);
+        float ismp[buffersize];
+        memcpy(ismp, smp, bufferbytes);
 
         for(int i = 0; i < stages + 1; ++i)
             singlefilterout(ismp, st[i], ipar);
 
-        for(int i = 0; i < synth->buffersize; ++i) {
-            float x = i / synth->buffersize_f;
+        for(int i = 0; i < buffersize; ++i) {
+            float x = i / buffersize_f;
             smp[i] = ismp[i] * (1.0f - x) + smp[i] * x;
         }
-        returnTmpBuffer(ismp);
         needsinterpolation = false;
     }
 
-    for(int i = 0; i < synth->buffersize; ++i)
+    for(int i = 0; i < buffersize; ++i)
         smp[i] *= outgain;
 }

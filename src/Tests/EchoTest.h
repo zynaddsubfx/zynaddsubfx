@@ -45,7 +45,7 @@ class EchoTest:public CxxTest::TestSuite
                                         new float[synth->buffersize]);
             for(int i = 0; i < synth->buffersize; ++i)
                 input->l[i] = input->r[i] = 0.0f;
-            testFX = new Echo(true, outL, outR);
+            testFX = new Echo(true, outL, outR, 44100, 256);
         }
 
         void tearDown() {
