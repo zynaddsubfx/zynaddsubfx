@@ -12,7 +12,7 @@ The output is the transformed array of samples.
 
 NOTE: As described, effects have no information about anything else. For
 example, key presses are not recognized. Therefore, pressing a key does not
-initiate the LFO. Phase nobs will always be relative to a *global* LFO, which is
+initiate the LFO. Phase knobs will always be relative to a *global* LFO, which is
 only dependent on the system time.
 
 ZynAddSubFX has 3 types of effects:
@@ -49,11 +49,12 @@ sine wave.
 and its influence.
 ** *Rnd* is the LFO amplitude's randomness
 ** *St.df* lets you determine how much left and right LFO are phase shifted.
-64.0f means stereo, higher values increase the right LFO relatively to the left
+64.0 means stereo, higher values increase the right LFO relatively to the left
 one.
 ********************************************************************
 Hint: Keep in mind that Effects that can be controlled by LFO can also be 
-controlled arbitrary: Set the LFO depth to zero and manipulate the phase knob.
+controlled arbitrary: Set the LFO depth to zero and manipulate the phase knob
+(e.g. with NRPNs or maybe via OSC in the future).
 ********************************************************************
 
 Equalizer
@@ -97,7 +98,7 @@ them effectless.
 2 poles. This can be compared to real physical objects that have more gain at
 their resonance frequency.
 * *St.* lets you define multiple filter stages. This is equivalent to having
-multiple copies of the same filter.
+multiple copies of the same filter in sequence.
 
 Chorus
 ~~~~~~
@@ -190,7 +191,7 @@ different types of distortions, as described below.
 ********************************************************************
 The filters are practical. A reason for using them afterwards is that distortion
 can lead to waves with undesired high frequency parts. Those can be filtered out
-using the HPF. A reason for using filters before applying is to achieve
+using the LPF. A reason for using filters before applying is to achieve
 multiband distortion. ZynAddSubFX has no "real" multiband distortion by now,
 however.
 ********************************************************************
@@ -221,11 +222,11 @@ Stereo Checkbox, labeled *St*, before.
 * Pre amplification is done next. The amount can be changed using the
 *Drive* nob. Indeed, this is the amount of distortion. For example, if you clip
 a signal, the louder the input gets, the more distortion you will get. This can
-have different meanings for different types of distortion, as described below.
-* *HPF* and *LPF* are lowpasses with 2 poles. Whether they are used before or
+have different meanings for different types of distortion, as described above.
+* *HPF* and *LPF* are filters with 2 poles. Whether they are used before or
 after the waveshape, depends on the checkbox labeled *PF*.
 * The next step is the wave shape. This defines how the wave is
-actuallymodified. The *Type* ComboBox lets you define how. We will discuss some
+actually modified. The *Type* ComboBox lets you define how. We will discuss some
 types below.
 * After the wave shape, we scale the level again. This is called
 output amplification. You can change the value using the *Level* knob.
@@ -256,7 +257,7 @@ the parameters into two classes:
 give the filter its basic settings.
 * *Effect Parameters* are the other ones that control how the filter changes.
 
-The filter basically works like this. The input signal is passed through a
+The filter basically works like this: The input signal is passed through a
 filter which dynamically changes its frequency. The frequency is an additive of:
 
 * the filter's base frequency
@@ -270,7 +271,7 @@ The amplitude of the input wave is not the current amplitude, but the so called
 https://en.wikipedia.org/wiki/Root_mean_square["Root Mean Square (RMS)"] value.
 This means that we build a mean on the current amplitude and the past values.
 How much the new amplitude takes influence is determined by the *Amplitude
-Smoothness*.
+Smoothness* (see below).
 
 ********************************************************************
 RMS value plays an important role in the term loudness. A fully distorted
@@ -281,15 +282,19 @@ this into account, depending on the smoothness.
 Usage
 ^^^^^
 
-* The following 4 knobs (*Freq*, *Rnd*, *LFO Type*, *St.df*) control the LFO.
-* These knobs let you control the way how the RMS value of the amplitudes is
-measured.
-** *A.M* sets the Amplitude Smoothness (this is described below).
+* The 4 knobs in the middle (*Freq*, *Rnd*, *LFO Type*, *St.df*) control the
+LFO.
+* Two knobs let you control the way how the RMS value of the amplitudes is
+measured:
+** *A.M* sets the Amplitude Smoothness (this is described above). The higher
+you set this value, the more slow will the filter react.
 ** *A.Inv.*, if being set, negates the (absolute) RMS value. This will lower
-the filter frequency instead of increasing it.
-* The following controls defined the Mix of the LFO and the amplitude.
-** *A.S* sets the Amplitude Sensing
-** *LfoD* sets the LFO depth
+the filter frequency instead of increasing it. Note that this will not have
+much effect if the effects input is not very loud.
+* The following controls define the mix of the LFO and the amplitude.
+** *A.S* sets the Amplitude Sensing (i.e. how much influence the amplitude
+shall have).
+** *LfoD* sets the LFO depth.
 * The filter button lets you choose the filter type.
 * After the input signal has passed through the filter, *Pan* can apply
 panning.
@@ -311,9 +316,9 @@ Function
 
 In ZynAddSubFX, the echo is basically implemented as the addition of the
 current sound and a delayed version of it. The delay is implemented as in the
-picture below. First, to the effect input, we add the delayed signal. Then,
+picture below. First, we add the delayed signal to the effect input. Then,
 they pass an LP1. This shall simulate the effect of dampening, which means that
-low and especially high frequencies get lost earlier over distance than low
+low and especially high frequencies get lost earlier over distance than middle
 frequencies do. Next, the sound is delayed, and then it will be output and added
 to the input.
 
@@ -350,7 +355,8 @@ echo comes (the same amount) later than the average echo; or the other way
 round. Set the knob to 0 to hear on the right first.
 * *LRc.* applies crossover.
 * Feedback describes how much of the delay is added back to the input. Set
-*Fb.* to the maximum to hear an infinite echo.
+*Fb.* to the maximum to hear an infinite echo, or to the minimum to just
+hear a single repeat.
 * The *Damp* value lets the LP1 reject higher frequencies earlier if
 increased.
 
@@ -416,11 +422,7 @@ dynamic filter. The result is a sweeping
 sound, which is
 often used on instruments with a large frequency band, like guitars or strings.
 This makes it typical for genres like rock or funk, where it is often modulated
-with a pedal, or for giving strings a warm, relaxing character.
-
-In ZynAddSubFX, the phaser can currently be modulated with an LFO. However, you
-can also turn the LFO depth to zero and instead control the phase. This can be
-done with the phase knob, or MIDI's NRPNs.
+with a pedal, but also for giving strings a warm, relaxing character.
 
 Function
 ^^^^^^^^
@@ -428,7 +430,7 @@ Function
 The audio signal is split into two paths. One path remains unchanged. The other
 one is sent to a delay line. The delay time (the so called *phase*) is made
 dependent on the frequency. Therefore, an all-pass filter is applied to the
-signal, which *preserves* the amplitude, but determins the delay time. In the
+signal, which *preserves* the amplitude, but determines the delay time. In the
 end, both paths are added.
 
 The following picture describes how this works on white noise. Light blue
@@ -447,6 +449,7 @@ Phaser Types
 ^^^^^^^^^^^^
 
 ZynAddSubFX offers different types of phasers:
+
 * Analog and "normal" phasers. Analog phasers are more complicated. They sound
 punchier, while normal phasers sound more fluently. However, analog filters
 usually need more filter stages to reach a characteristic sound.
@@ -462,17 +465,19 @@ Description
 ^^^^^^^^^^^
 
 For the normal phaser, first, the LFO is generated:
+
 * There are 4 controls (*Freq*,*Rnd*,*LFO tpye*,*St.df*) that define the 
 LFO.
 * *Phase* and *Depth* are applied afterwards in the usual way (TODO: I don't 
 understand the code here for the normal phase...). For the analog phaser, 
 *Phase* is not implemented, yet.
 ** If *hyp* is being set, then the LFO function is being squared.
+
 Next, the input is being used.
+
 * *Analog* decides whether the phaser is analog or "normal".
-* First, *Pan* applies panning to the original input in every loop (TODO: ask 
-to optimize this).
-* Next, barber pole phasing is being applied (Analog only)
+* First, *Pan* applies panning to the original input in every loop.
+* Next, barber pole phasing is being applied (Analog only).
 * *Fb* applies feedback. The last sound buffer element is (after 
 phasing) multiplied by this value and then added to the current one. For normal 
 filter, the value is added before, for analog after the first phasing stage.
