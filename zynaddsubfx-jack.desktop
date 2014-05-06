@@ -5,4 +5,4 @@ Exec=zynaddsubfx -I jack -O jack
 Icon=zynaddsubfx
 Terminal=false
 Type=Application
-Categories=Application;AudioVideo;
+Categories=AudioVideo;Audio;

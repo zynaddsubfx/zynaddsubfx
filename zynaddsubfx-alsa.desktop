@@ -5,4 +5,4 @@ Exec=zynaddsubfx -I alsa -O alsa
 Icon=zynaddsubfx
 Terminal=false
 Type=Application
-Categories=Application;AudioVideo;
+Categories=AudioVideo;Audio;
