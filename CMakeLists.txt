@@ -17,3 +17,5 @@ install(FILES zynaddsubfx.svg
     DESTINATION share/pixmaps)
 install(DIRECTORY instruments/banks
     DESTINATION share/zynaddsubfx)
+install(DIRECTORY instruments/examples
+    DESTINATION share/zynaddsubfx)
