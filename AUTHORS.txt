@@ -25,7 +25,7 @@ Contributors:
         Jonathan Liles (NSM & NTK support)
         Johannes Lorenz (Effect Documentation)
         Ilario Glasgo (Italian Doc Translation)
-        Christopher Oliver (Unison Regrssion Fix, presets fix)
+        Christopher Oliver (Unison + presets fix, mousewheel support)
         Filipe Coelho (Globals Cleanup)
         Andre Sklenar (UI Pixmaps)
 

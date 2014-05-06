@@ -126,7 +126,6 @@ int WidgetPDial::handle(int event)
             oldvalue = value();
         case FL_DRAG:
             getPos();
-            tipwin->showValue(value());
             my = -(Fl::event_y() - y() - h() / 2);
 
             dragsize = 200.0f;
@@ -134,6 +133,22 @@ int WidgetPDial::handle(int event)
                 dragsize *= 10;
 
             value(limit(oldvalue + my / dragsize * (max - min), min, max));
+            tipwin->showValue(value());
+            value_damage();
+            if(this->when() != 0)
+                do_callback();
+            return 1;
+        case FL_MOUSEWHEEL:
+            if (Fl::belowmouse() != this)
+                return 1;
+            my = - Fl::event_dy();
+
+            dragsize = 200.0f;
+            if(Fl::event_state(FL_CTRL) != 0)
+                dragsize *= 10;
+
+            value(limit(value() + my / dragsize * (max - min), min, max));
+            tipwin->showValue(value());
             value_damage();
             if(this->when() != 0)
                 do_callback();
