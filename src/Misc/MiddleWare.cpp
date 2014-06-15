@@ -170,7 +170,7 @@ void preparePadSynth(string path, PADnoteParameters *p)
             printf("sending info to '%s'\n", (path+to_s(N)).c_str());
             uToB->write((path+to_s(N)).c_str(), "ifb",
                 s.size, s.basefreq, sizeof(float*), &s.smp);
-            });
+            }, []{return false;});
     //clear out unused samples
     for(unsigned i = max+1; i < PAD_MAX_SAMPLES; ++i) {
         uToB->write((path+to_s(i)).c_str(), "ifb",
@@ -336,6 +336,12 @@ struct MiddleWareImpl
                 }
             }
         }
+
+        //Null out Load IDs
+        for(int i=0; i < NUM_MIDI_PARTS; ++i) {
+            pending_load[i] = 0;
+            actual_load[i] = 0;
+        }
     }
 
     ~MiddleWareImpl(void)
@@ -431,12 +437,18 @@ struct MiddleWareImpl
     void loadPart(int npart, const char *filename, Master *master, Fl_Osc_Interface *osc)
     {
         printf("loading part...\n");
+        actual_load[npart]++;
+
+        if(actual_load[npart] != pending_load[npart])
+            return;
+        assert(actual_load[npart] <= pending_load[npart]);
+
         auto alloc = std::async(std::launch::async, 
-                [master,filename](){Part *p = new Part(&master->microtonal, master->fft);
+                [master,filename,this,npart](){Part *p = new Part(&master->microtonal, master->fft);
                 if(p->loadXMLinstrument(filename))
                 fprintf(stderr, "FAILED TO LOAD PART!!\n");
 
-                p->applyparameters();
+                p->applyparameters([this,npart]{printf("%d vs %d\n", (int)actual_load[npart], (int)pending_load[npart]);return actual_load[npart] != pending_load[npart];});
                 return p;});
         //fprintf(stderr, "loading a part!!\n");
         //Load the part
@@ -671,10 +683,12 @@ struct MiddleWareImpl
         } else if(strstr(msg, "/load_xmz") && !strcmp(rtosc_argument_string(msg), "s")) {
             loadMaster(rtosc_argument(msg,0).s);
         } else if(!strcmp(msg, "/load_xiz") && !strcmp(rtosc_argument_string(msg), "is")) {
+            pending_load[rtosc_argument(msg,0).i]++;
             loadPart(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master, osc);
-        } else if(strstr(msg, "load-part") && !strcmp(rtosc_argument_string(msg), "is"))
+        } else if(strstr(msg, "load-part") && !strcmp(rtosc_argument_string(msg), "is")) {
+            pending_load[rtosc_argument(msg,0).i]++;
             loadPart(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master, osc);
-        else
+        } else
             uToB->raw_write(msg);
     }
 
@@ -727,6 +741,9 @@ struct MiddleWareImpl
     void(*idle)(void);
     cb_t cb;
     void *ui;
+
+    std::atomic_int pending_load[NUM_MIDI_PARTS];
+    std::atomic_int actual_load[NUM_MIDI_PARTS];
 };
 
 /**
@@ -839,14 +856,14 @@ class UI_Interface:public Fl_Osc_Interface
         //A very simplistic implementation of a UI agnostic refresh method
         virtual void damage(const char *path)
         {
-            printf("\n\nDamage(\"%s\")\n", path);
+            //printf("\n\nDamage(\"%s\")\n", path);
             for(auto pair:map) {
                 if(strstr(pair.first.c_str(), path)) {
                     auto *tmp = dynamic_cast<Fl_Widget*>(pair.second);
-                    if(tmp)
-                        printf("%x, %d %d [%s]\n", (int)pair.second, tmp->visible_r(), tmp->visible(), pair.first.c_str());
-                    else
-                        printf("%x, (NULL)[%s]\n", (int)pair.second,pair.first.c_str());
+                    //if(tmp)
+                    //    printf("%x, %d %d [%s]\n", (int)pair.second, tmp->visible_r(), tmp->visible(), pair.first.c_str());
+                    //else
+                    //    printf("%x, (NULL)[%s]\n", (int)pair.second,pair.first.c_str());
                     if(!tmp || tmp->visible_r())
                         pair.second->update();
                 }
@@ -952,6 +969,7 @@ void MiddleWare::tick(void)
 {
     impl->tick();
 }
+
 void MiddleWare::setUiCallback(void(*cb)(void*,const char *),void *ui)
 {
     impl->cb = cb;
@@ -963,3 +981,7 @@ void MiddleWare::setIdleCallback(void(*cb)(void))
     impl->idle = cb;
 }
 
+void MiddleWare::pendingSetProgram(int part)
+{
+    impl->pending_load[part]++;
+}

@@ -12,6 +12,7 @@ class MiddleWare
         void setUiCallback(void(*cb)(void*,const char *),void *ui);
         void setIdleCallback(void(*cb)(void));
         void tick(void);
+        void pendingSetProgram(int part);
 
         static void preparePadSynth(const char *, class PADnoteParameters *){};
     private:

@@ -29,6 +29,7 @@
 #include "../Params/Controller.h"
 #include "../Misc/Microtonal.h"
 
+#include <functional>
 #include <list> // For the monomemnotes list.
 
 class EffectMgr;
@@ -82,6 +83,7 @@ class Part
         void defaultsinstrument();
 
         void applyparameters(void);
+        void applyparameters(std::function<bool()> do_abort);
 
         void getfromXML(XMLwrapper *xml);
         void getfromXMLinstrument(XMLwrapper *xml);

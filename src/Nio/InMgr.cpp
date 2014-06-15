@@ -2,10 +2,14 @@
 #include "MidiIn.h"
 #include "EngineMgr.h"
 #include "../Misc/Master.h"
+#include "../Misc/Part.h"
+#include "../Misc/MiddleWare.h"
 #include <rtosc/thread-link.h>
 #include <iostream>
 
 using namespace std;
+
+extern MiddleWare *middleware;
 
 ostream &operator<<(ostream &out, const MidiEvent &ev)
 {
@@ -85,8 +89,13 @@ void InMgr::flush()
                 break;
 
             case M_PGMCHANGE:
-                //FIXME channel is only interpreted as part number here
-                bToU->write("/setprogram", "cc", ev.channel, ev.num);
+                for(int i=0; i < NUM_MIDI_PARTS; ++i) {
+                    //set the program of the parts assigned to the midi channel
+                    if(master->part[i]->Prcvchn == ev.channel) {
+                        bToU->write("/setprogram", "cc", i, ev.num);
+                        middleware->pendingSetProgram(i);
+                    }
+                }
                 break;
 
             case M_PRESSURE:

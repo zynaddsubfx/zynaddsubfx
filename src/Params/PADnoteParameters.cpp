@@ -703,15 +703,23 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
 /*
  * Applies the parameters (i.e. computes all the samples, based on parameters);
  */
-void PADnoteParameters::applyparameters(void)
+void PADnoteParameters::applyparameters()
 {
+    applyparameters([]{return false;});
+}
+
+void PADnoteParameters::applyparameters(std::function<bool()> do_abort)
+{
+    if(do_abort())
+        return;
     unsigned max = 0;
     sampleGenerator([&max,this]
             (unsigned N, PADnoteParameters::Sample &smp) {
             delete[] sample[N].smp;
             sample[N] = smp;
             max = max < N ? N : max;
-            });
+            },
+            do_abort);
 
     //Delete remaining unused samples
     for(unsigned i = max; i < PAD_MAX_SAMPLES; ++i)
@@ -724,7 +732,8 @@ void PADnoteParameters::applyparameters(void)
 // - Pquality.oct
 // - Pquality.smpoct
 // - spectrum at various frequencies (oodles of data)
-void PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb)
+void PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
+        std::function<bool()> do_abort)
 {
     const int samplesize   = (((int) 1) << (Pquality.samplesize + 14));
     const int spectrumsize = samplesize / 2;
@@ -760,6 +769,8 @@ void PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb)
     for(int nsample = 0; nsample < samplemax; ++nsample)
         adj[nsample] = (Pquality.oct + 1.0f) * (float)nsample / samplemax;
     for(int nsample = 0; nsample < samplemax; ++nsample) {
+        if(do_abort())
+            goto exit;
         const float basefreqadjust =
             powf(2.0f, adj[nsample] - adj[samplemax - 1] * 0.5f);
 
@@ -808,6 +819,7 @@ void PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb)
         newsample.basefreq = basefreq * basefreqadjust;
         cb(nsample, newsample);
     }
+exit:
 
     //Cleanup
     delete (fft);

@@ -1337,9 +1337,14 @@ int Part::loadXMLinstrument(const char *filename)
 
 void Part::applyparameters(void)
 {
+    applyparameters([]{return false;});
+}
+
+void Part::applyparameters(std::function<bool()> do_abort)
+{
     for(int n = 0; n < NUM_KIT_ITEMS; ++n)
         if(kit[n].Ppadenabled && kit[n].padpars)
-            kit[n].padpars->applyparameters();
+            kit[n].padpars->applyparameters(do_abort);
 }
 
 void Part::getfromXMLinstrument(XMLwrapper *xml)

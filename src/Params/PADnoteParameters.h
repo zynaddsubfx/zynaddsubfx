@@ -156,6 +156,7 @@ class PADnoteParameters:public Presets
         float getNhr(int n); //gets the n-th overtone position relatively to N harmonic
 
         void applyparameters(void);
+        void applyparameters(std::function<bool()> do_abort);
         void export2wav(std::string basefilename);
 
         OscilGen  *oscilgen;
@@ -169,7 +170,8 @@ class PADnoteParameters:public Presets
         } sample[PAD_MAX_SAMPLES];
 
         typedef std::function<void(int,PADnoteParameters::Sample&)> callback;
-        void sampleGenerator(PADnoteParameters::callback cb);
+        void sampleGenerator(PADnoteParameters::callback cb,
+                             std::function<bool()> do_abort);
 
         static rtosc::Ports &ports;
 
