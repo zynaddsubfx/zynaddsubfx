@@ -504,10 +504,10 @@ void OscilGen::spectrumadjust()
                 par = powf(8.0f, par);
             break;
         case 2:
-            par = powf(10.0f, (1.0f - par) * 3.0f) * 0.25f;
+            par = powf(10.0f, (1.0f - par) * 3.0f) * 0.001f;
             break;
         case 3:
-            par = powf(10.0f, (1.0f - par) * 3.0f) * 0.25f;
+            par = powf(10.0f, (1.0f - par) * 3.0f) * 0.001f;
             break;
     }
 
