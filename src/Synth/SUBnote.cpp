@@ -101,12 +101,13 @@ void SUBnote::setup(float freq,
         GlobalFilterEnvelope = NULL;
     }
 
-    //select only harmonics that desire to compute
     int harmonics = 0;
+
+    //select only harmonics that desire to compute
     for(int n = 0; n < MAX_SUB_HARMONICS; ++n) {
         if(pars->Phmag[n] == 0)
             continue;
-        if(n * basefreq > synth->samplerate_f / 2.0f)
+        if(basefreq * pars->POvertoneFreqMult[n] > synth->samplerate_f / 2.0f)
             break;                            //remove the freqs above the Nyquist freq
         pos[harmonics++] = n;
     }
@@ -136,7 +137,7 @@ void SUBnote::setup(float freq,
     float reduceamp = 0.0f;
 
     for(int n = 0; n < numharmonics; ++n) {
-        float freq = basefreq * (pos[n] + 1);
+        float freq =  basefreq * pars->POvertoneFreqMult[pos[n]];
 
         //the bandwidth is not absolute(Hz); it is relative to frequency
         float bw =
