@@ -162,9 +162,13 @@ if (lastpoint>=0){
     code {int x_=Fl::event_x()-x();
 int y_=Fl::event_y()-y();
 
+// Some window magic makes us lose focus, so reassert it.
+if (event==FL_ENTER)
+    Fl::focus(this);
+
 if ((event==FL_KEYDOWN || event==FL_KEYUP)){
-    int key = Fl::event_key();
-    if (key==FL_Control_L || key==FL_Control_R){
+   int key = Fl::event_key();
+   if (key==FL_Control_L || key==FL_Control_R){
         ctrldown = (event==FL_KEYDOWN);
         redraw();
         if (pair!=NULL) pair->redraw();
@@ -808,9 +812,17 @@ if ((env->Pfreemode==0)||(env->Envmode>2)) linearenvelopecheck->hide();
 
 forcedreleasecheck->value(env->Pforcedrelease);
 if (env->Pfreemode==0) forcedreleasecheck->hide();
+	else forcedreleasecheck->show();
+
+if (env->Pfreemode==0){
+	addpoint->hide();
+	deletepoint->hide();
+} else {
+	addpoint->show();
+	deletepoint->show();
+}
 
 freeedit->redraw();
-
 
 if (env->Pfreemode==0){
    switch(env->Envmode){
