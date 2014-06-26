@@ -516,7 +516,7 @@ void OscilGen::spectrumadjust()
 
     for(int i = 0; i < synth->oscilsize / 2; ++i) {
         float mag   = abs(oscilFFTfreqs, i);
-        float phase = arg(oscilFFTfreqs, i);
+        float phase = M_PI_2 - arg(oscilFFTfreqs, i);
 
         switch(Psatype) {
             case 1:
