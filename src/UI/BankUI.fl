@@ -89,7 +89,7 @@ refresh();} {}
     code {if (bank->emptyslot(nslot))
     color(46);
 else if (bank->isPADsynth_used(nslot)) 
-    color(26);
+    color(124);
 else 
     color(51);
 
