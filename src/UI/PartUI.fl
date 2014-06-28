@@ -744,14 +744,14 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
       Fl_Button {} {
         label C
         callback {presetsui->copy(part->partefx[ninseff]);}
-        xywh {90 127 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
+        xywh {90 127 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Button {} {
         label P
         callback {pthread_mutex_lock(&master->mutex);
 presetsui->paste(part->partefx[ninseff],inseffectui);
 pthread_mutex_unlock(&master->mutex);}
-        xywh {120 127 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
+        xywh {120 127 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
     }
     Fl_Window instrumentkitlist {

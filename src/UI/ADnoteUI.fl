@@ -117,7 +117,7 @@ detunevalueoutput->do_callback();}
   voicelfofreq->deactivate();
   voiceoscil->deactivate();
 };}
-          xywh {65 5 20 20} labelfont 1 labelsize 13 labelcolor 7
+          xywh {65 5 20 20} labelfont 1 labelsize 13 labelcolor 53
           code0 {if (pars->VoicePar[nvoice].Type==0) o->hide();}
         }
       }
@@ -767,7 +767,7 @@ bypassfiltercheckbutton->redraw();}
         Fl_Box noiselabel {
           label {White Noise}
           callback {if (pars->VoicePar[nvoice].Type==0) o->hide(); else o->show();}
-          xywh {150 430 300 65} labelfont 1 labelsize 50 labelcolor 7
+          xywh {150 430 300 65} labelfont 1 labelsize 50 labelcolor 53
           code0 {if (pars->VoicePar[nvoice].Type==0) o->hide(); else o->show();}
         }
       }
@@ -1018,12 +1018,12 @@ resui->resonancewindow->show();}
       Fl_Button {} {
         label C
         callback {presetsui->copyArray(pars);}
-        xywh {405 405 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
+        xywh {405 405 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Button {} {
         label P
         callback {presetsui->pasteArray(pars,this);}
-        xywh {435 405 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
+        xywh {435 405 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
     }
     Fl_Window ADnoteVoice {
@@ -1058,12 +1058,12 @@ ADnoteVoice->redraw();}
       Fl_Button {} {
         label C
         callback {presetsui->copy(pars,nvoice);}
-        xywh {705 609 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
+        xywh {705 609 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Button {} {
         label P
         callback {presetsui->paste(pars,this,nvoice);}
-        xywh {735 609 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
+        xywh {735 609 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
     }
     Fl_Window ADnoteVoiceList {

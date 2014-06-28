@@ -360,12 +360,12 @@ envfree->redraw();}
       Fl_Button {} {
         label C
         callback {presetsui->copy(env);}
-        xywh {465 160 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+        xywh {465 160 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 55
       }
       Fl_Button {} {
         label P
         callback {presetsui->paste(env,this);}
-        xywh {482 160 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+        xywh {482 160 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 55
       }
     }
   }
@@ -439,12 +439,12 @@ freeedit->redraw();}
         Fl_Button {} {
           label C
           callback {presetsui->copy(env);}
-          xywh {150 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+          xywh {150 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 55
         }
         Fl_Button {} {
           label P
           callback {presetsui->paste(env,this);}
-          xywh {167 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+          xywh {167 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 55
         }
       }
     }
@@ -508,12 +508,12 @@ freeedit->redraw();}
         Fl_Button {} {
           label C
           callback {presetsui->copy(env);}
-          xywh {155 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+          xywh {155 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 55
         }
         Fl_Button {} {
           label P
           callback {presetsui->paste(env,this);}
-          xywh {172 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+          xywh {172 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 55
         }
       }
       Fl_Button {} {
@@ -603,12 +603,12 @@ freeedit->redraw();}
         Fl_Button {} {
           label C
           callback {presetsui->copy(env);}
-          xywh {220 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+          xywh {220 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 55
         }
         Fl_Button {} {
           label P
           callback {presetsui->paste(env,this);}
-          xywh {237 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+          xywh {237 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 55
         }
       }
     }
@@ -673,12 +673,12 @@ freeedit->redraw();}
         Fl_Button {} {
           label C
           callback {presetsui->copy(env);}
-          xywh {155 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+          xywh {155 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 55
         }
         Fl_Button {} {
           label P
           callback {presetsui->paste(env,this);}
-          xywh {172 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+          xywh {172 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 55
         }
       }
       Fl_Button {} {
@@ -715,12 +715,12 @@ freeedit->redraw();}
         Fl_Button {} {
           label C
           callback {presetsui->copy(env);}
-          xywh {150 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+          xywh {150 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 55
         }
         Fl_Button {} {
           label P
           callback {presetsui->paste(env,this);}
-          xywh {167 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
+          xywh {167 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 55
         }
       }
     }

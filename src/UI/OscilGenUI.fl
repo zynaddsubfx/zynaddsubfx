@@ -1050,12 +1050,12 @@ refresh();}
       Fl_Button {} {
         label C
         callback {presetsui->copy(oscil);}
-        xywh {670 545 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
+        xywh {670 545 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Button {} {
         label P
         callback {presetsui->paste(oscil,this);}
-        xywh {700 545 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
+        xywh {700 545 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Scroll _this_has_to_be_the_last {
         xywh {5 340 660 250} type HORIZONTAL box FLAT_BOX
