@@ -312,7 +312,7 @@ sustaincounter->maximum(env->Penvpoints-2);}
         xywh {200 155 80 20} box THIN_UP_BOX labelsize 11
         code0 {if (env->Pfreemode==0) o->hide();}
       }
-      Fl_Light_Button freemodebutton {
+      Fl_Check_Button freemodebutton {
         label FreeMode
         callback {reinit();
 
