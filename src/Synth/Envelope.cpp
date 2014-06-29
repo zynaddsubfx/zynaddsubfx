@@ -160,7 +160,7 @@ float Envelope::envout()
 }
 
 inline float Envelope::env_dB2rap(float db) {
-    return (exp10f((db) / 20.0f) - 0.01)/.99f;
+    return (powf(10.0f, db / 20.0f) - 0.01)/.99f;
 }
 
 inline float Envelope::env_rap2dB(float rap) {
