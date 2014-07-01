@@ -27,6 +27,7 @@
 
 #include "../globals.h"
 #include "Microtonal.h"
+#include <rtosc/miditable.h>
 
 #include "Bank.h"
 #include "Recorder.h"
@@ -34,10 +35,6 @@
 #include "XMLwrapper.h"
 
 #include "../Params/Controller.h"
-
-typedef enum {
-    MUTEX_TRYLOCK, MUTEX_LOCK, MUTEX_UNLOCK
-} lockset;
 
 extern Dump dump;
 
@@ -59,9 +56,6 @@ class Master
         /** Destructor*/
         ~Master();
 
-        static Master &getInstance();
-        static void deleteInstance();
-
         /**Saves all settings to a XML file
          * @return 0 for ok or <0 if there is an error*/
         int saveXML(const char *filename);
@@ -75,7 +69,10 @@ class Master
         /**loads all settings from a XML file
          * @return 0 for ok or -1 if there is an error*/
         int loadXML(const char *filename);
-        void applyparameters(bool lockmutex = true);
+
+        /**Regenerate PADsynth and other non-RT parameters
+         * It is NOT SAFE to call this from a RT context*/
+        void applyparameters(void);
 
         void getfromXML(XMLwrapper *xml);
 
@@ -85,18 +82,11 @@ class Master
         /**put all data from the *data array to zynaddsubfx parameters (used for VST)*/
         void putalldata(char *data, int size);
 
-        //Mutex control
-        /**Control the Master's mutex state.
-         * @param lockset either trylock, lock, or unlock.
-         * @return true when successful false otherwise.*/
-        bool mutexLock(lockset request);
-
         //Midi IN
         void noteOn(char chan, char note, char velocity);
         void noteOff(char chan, char note);
         void polyphonicAftertouch(char chan, char note, char velocity);
         void setController(char chan, int type, int par);
-        void setProgram(char chan, unsigned int pgm);
         //void NRPN...
 
 
@@ -146,11 +136,8 @@ class Master
 
         //peaks for VU-meter
         void vuresetpeaks();
-        //get VU-meter data
-        vuData getVuData();
 
         //peaks for part VU-meters
-        /**\todo synchronize this with a mutex*/
         float vuoutpeakpart[NUM_MIDI_PARTS];
         unsigned char fakepeakpart[NUM_MIDI_PARTS]; //this is used to compute the "peak" when the part is disabled
 
@@ -159,16 +146,22 @@ class Master
 
         //other objects
         Microtonal microtonal;
-        Bank       bank;
+
+        //Strictly Non-RT instrument bank object
+        Bank bank;
 
         class FFTwrapper * fft;
-        pthread_mutex_t mutex;
-        pthread_mutex_t vumutex;
 
-
-    private:
-        vuData vu;
+        static rtosc::Ports &ports;
         float  volume;
+
+        //Statistics on output levels
+        vuData vu;
+
+        rtosc::MidiTable midi;//<1024,64>
+
+        bool   frozenState;//read-only parameters for threadsafe actions
+    private:
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
         int    keyshift;

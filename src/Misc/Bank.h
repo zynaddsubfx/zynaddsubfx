@@ -38,10 +38,10 @@ class Bank
         ~Bank();
         std::string getname(unsigned int ninstrument);
         std::string getnamenumbered(unsigned int ninstrument);
+        //if newslot==-1 then this is ignored, else it will be put on that slot
         void setname(unsigned int ninstrument,
                      const std::string &newname,
-                     int newslot);                                                       //if newslot==-1 then this is ignored, else it will be put on that slot
-        bool isPADsynth_used(unsigned int ninstrument);
+                     int newslot);
 
         /**returns true when slot is empty*/
         bool emptyslot(unsigned int ninstrument);
@@ -71,6 +71,13 @@ class Bank
         };
 
         std::vector<bankstruct> banks;
+        
+        struct ins_t {
+            ins_t(void);
+            std::string name;
+            //All valid instruments must have a non-empty filename
+            std::string filename;
+        } ins[BANK_SIZE];
 
     private:
 
@@ -84,17 +91,6 @@ class Bank
         void clearbank();
 
         std::string defaultinsname;
-
-        struct ins_t {
-            ins_t();
-            bool used;
-            std::string name;
-            std::string filename;
-            struct {
-                bool PADsynth_used;
-            } info;
-        } ins[BANK_SIZE];
-
         std::string dirname;
 
         void scanrootdir(std::string rootdir); //scans a root dir for banks

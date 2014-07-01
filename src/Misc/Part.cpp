@@ -35,30 +35,126 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <cassert>
 
-Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
+#include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
+
+using rtosc::Ports;
+using rtosc::RtData;
+
+#define rObject Part
+static Ports partPorts = {
+    rRecurs(kit, 16, "Kit"),//NUM_KIT_ITEMS
+    rRecursp(partefx, 3, "Part Effect"),
+    rRecur(ctl,       "Controller"),
+    rToggle(Penabled, "Part enable"),
+    rParam(Pvolume, "Part Volume"),
+    rParam(Pminkey, "Min Used Key"),
+    rParam(Pmaxkey, "Max Used Key"),
+    rParam(Pkeyshift, "Part keyshift"),
+    rParam(Prcvchn,  "Active MIDI channel"),
+    rParam(Ppanning, "Set Panning"),
+    rParam(Pvelsns,   "Velocity sensing"),
+    rParam(Pveloffs,  "Velocity offset"),
+    rToggle(Pnoteon,  "If the channel accepts note on events"),
+    rToggle(Pdrummode, "Drum mode enable"),
+    rToggle(Ppolymode,  "Polyphoney mode"),
+    rToggle(Plegatomode, "Legato enable"),
+    rParam(Pkeylimit,   "Key limit per part"),
+    rParam(info.Ptype, "Class of Instrument"),
+    rString(info.Pauthor, MAX_INFO_TEXT_SIZE, "Instrument Author"),
+    rString(info.Pcomments, MAX_INFO_TEXT_SIZE, "Instrument Comments"),
+    rString(Pname, PART_MAX_NAME_LEN, "Kit User Specified Label"),
+    {"captureMin:", NULL, NULL, [](const char *, RtData &r)
+        {Part *p = (Part*)r.obj; p->Pminkey = p->lastnote;}},
+    {"captureMax:", NULL, NULL, [](const char *, RtData &r)
+        {Part *p = (Part*)r.obj; p->Pmaxkey = p->lastnote;}},
+    {"polyType::c:i", NULL, NULL, [](const char *msg, RtData &d)
+        {
+            Part *p = (Part*)d.obj;
+            if(!rtosc_narguments(msg)) {
+                int res = 0;
+                if(!p->Ppolymode)
+                    res = p->Plegatomode ? 2 : 1;
+                d.reply(d.loc, "c", res);
+                return;
+            }
+
+            int i = rtosc_argument(msg, 0).i;
+            if(i == 0) {
+                p->Ppolymode = 1;
+                p->Plegatomode = 0;
+            } else if(i==1) {
+                p->Ppolymode = 0;
+                p->Plegatomode = 0;
+            } else {
+                p->Ppolymode = 0;
+                p->Plegatomode = 1;
+            }}},
+
+    //{"kit#16::T:F", "::Enables or disables kit item", 0,
+    //    [](const char *m, RtData &d) {
+    //        Part *p = (Part*)d.obj;
+    //        unsigned kitid = -1;
+    //        //Note that this event will be captured before transmitted, thus
+    //        //reply/broadcast don't matter
+    //        for(int i=0; i<VOICES; ++i) {
+    //            d.reply("/middleware/oscil", "siisb", loc, kitid, i, "oscil"
+    //                    sizeof(OscilGen*),
+    //                    p->kit[kitid]->adpars->voice[i]->OscilSmp);
+    //            d.reply("/middleware/oscil", "siisb", loc, kitid, i, "oscil-mod"
+    //                    sizeof(OscilGen*),
+    //                    p->kit[kitid]->adpars->voice[i]->somethingelse);
+    //        }
+    //        d.reply("/middleware/pad", "sib", loc, kitid,
+    //                sizeof(PADnoteParameters*),
+    //                p->kit[kitid]->padpars)
+    //    }}
+};
+
+#undef  rObject
+#define rObject Part::Kit
+static Ports kitPorts = {
+    rRecurp(padpars, "Padnote parameters"),
+    rRecurp(adpars, "Adnote parameters"),
+    rRecurp(subpars, "Adnote parameters"),
+    rToggle(Penabled, "Kit item enable"),
+    rToggle(Pmuted,   "Kit item mute"),
+    rParam(Pminkey,   "Kit item min key"),
+    rParam(Pmaxkey,   "Kit item max key"),
+    rToggle(Padenabled, "ADsynth enable"),
+    rToggle(Psubenabled, "SUBsynth enable"),
+    rToggle(Ppadenabled, "PADsynth enable"),
+    rParam(Psendtoparteffect, "Effect Levels"),
+    rString(Pname, PART_MAX_NAME_LEN, "Kit User Specified Label"),
+    //{"padpars:b", "::", 0
+    //    [](
+};
+
+Ports &Part::Kit::ports = kitPorts;
+Ports &Part::ports = partPorts;
+
+Part::Part(Microtonal *microtonal_, FFTwrapper *fft_)
 {
     microtonal = microtonal_;
     fft      = fft_;
-    mutex    = mutex_;
-    pthread_mutex_init(&load_mutex, NULL);
     partoutl = new float [synth->buffersize];
     partoutr = new float [synth->buffersize];
 
     for(int n = 0; n < NUM_KIT_ITEMS; ++n) {
-        kit[n].Pname   = new unsigned char [PART_MAX_NAME_LEN];
-        kit[n].adpars  = NULL;
-        kit[n].subpars = NULL;
-        kit[n].padpars = NULL;
+        kit[n].Pname   = new char [PART_MAX_NAME_LEN];
+        //XXX this is wasting memory, but making interfacing with the back
+        //layers more nice, if this seems to increase memory usage figure out a
+        //sane way of tracking the changing pointers (otherwise enjoy the bloat)
+        kit[n].adpars  = new ADnoteParameters(fft);
+        kit[n].subpars = new SUBnoteParameters();
+        kit[n].padpars = new PADnoteParameters(fft);
     }
-
-    kit[0].adpars  = new ADnoteParameters(fft);
-    kit[0].subpars = new SUBnoteParameters();
-    kit[0].padpars = new PADnoteParameters(fft, mutex);
 
     //Part's Insertion Effects init
     for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
-        partefx[nefx]    = new EffectMgr(1, mutex);
+        partefx[nefx]    = new EffectMgr(1);
         Pefxbypass[nefx] = false;
     }
 
@@ -69,6 +165,7 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
 
     killallnotes = 0;
     oldfreq      = -1.0f;
+
 
     for(int i = 0; i < POLIPHONY; ++i) {
         partnote[i].status = KEY_OFF;
@@ -83,7 +180,7 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
     }
     cleanup();
 
-    Pname = new unsigned char [PART_MAX_NAME_LEN];
+    Pname = new char[PART_MAX_NAME_LEN];
 
     oldvolumel = oldvolumer = 0.5f;
     lastnote   = -1;
@@ -91,6 +188,30 @@ Part::Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_)
     lastlegatomodevalid = false; // To store previous legatomodevalid value.
 
     defaults();
+}
+        
+void Part::cloneTraits(Part &p) const
+{
+#define CLONE(x) p.x = this->x
+    CLONE(Penabled);
+
+    p.setPvolume(this->Pvolume);
+    p.setPpanning(this->Ppanning);
+
+    CLONE(Pminkey);
+    CLONE(Pmaxkey);
+    CLONE(Pkeyshift);
+    CLONE(Prcvchn);
+
+    CLONE(Pvelsns);
+    CLONE(Pveloffs);
+
+    CLONE(Pnoteon);
+    CLONE(Ppolymode);
+    CLONE(Plegatomode);
+    CLONE(Pkeylimit);
+
+    CLONE(ctl);
 }
 
 void Part::defaults()
@@ -566,10 +687,12 @@ void Part::NoteOn(unsigned char note,
 
                 // Spawn another note (but silent) if legatomodevalid==true
                 if(legatomodevalid) {
+
+                    //if this parameter is 127 for "unprocessed"
                     partnote[posb].kititem[ci].sendtoparteffect =
                         (kit[item].Psendtoparteffect <
                          NUM_PART_EFX ? kit[item].Psendtoparteffect :
-                         NUM_PART_EFX);                                                                                                                 //if this parameter is 127 for "unprocessed"
+                         NUM_PART_EFX);
 
                     if((kit[item].adpars != NULL)
                        && ((kit[item].Padenabled) != 0))
@@ -580,7 +703,7 @@ void Part::NoteOn(unsigned char note,
                             vel,
                             portamento,
                             note,
-                            true);                                            //true for silent.
+                            true);//true for silent.
                     if((kit[item].subpars != NULL)
                        && ((kit[item].Psubenabled) != 0))
                         partnote[posb].kititem[ci].subnote =
@@ -626,13 +749,11 @@ void Part::NoteOn(unsigned char note,
  */
 void Part::NoteOff(unsigned char note) //relase the key
 {
-    int i;
-
     // This note is released, so we remove it from the list.
-    if(not monomemnotes.empty())
+    if(!monomemnotes.empty())
         monomemnotes.remove(note);
 
-    for(i = POLIPHONY - 1; i >= 0; i--) //first note in, is first out if there are same note multiple times
+    for(int i = POLIPHONY - 1; i >= 0; i--) //first note in, is first out if there are same note multiple times
         if((partnote[i].status == KEY_PLAYING) && (partnote[i].note == note)) {
             if(ctl.sustain.sustain == 0) { //the sustain pedal is not pushed
                 if((Ppolymode == 0) && (not monomemnotes.empty()))
@@ -1045,42 +1166,42 @@ void Part::setPpanning(char Ppanning_)
         panning = 1.0f;
 }
 
+template<class T>
+static inline void nullify(T &t) {delete t; t = NULL; }
+
 /*
  * Enable or disable a kit item
  */
-void Part::setkititemstatus(int kititem, int Penabled_)
+void Part::setkititemstatus(unsigned kititem, bool Penabled_)
 {
+    //nonexistent kit item and the first kit item is always enabled
     if((kititem == 0) || (kititem >= NUM_KIT_ITEMS))
-        return;                                        //nonexistent kit item and the first kit item is always enabled
-    kit[kititem].Penabled = Penabled_;
+        return;
 
-    bool resetallnotes = false;
+    Kit &kkit = kit[kititem];
+
+    //no need to update if
+    if(kkit.Penabled == Penabled_)
+        return;
+    kkit.Penabled = Penabled_;
+
     if(Penabled_ == 0) {
-        if(kit[kititem].adpars != NULL)
-            delete (kit[kititem].adpars);
-        if(kit[kititem].subpars != NULL)
-            delete (kit[kititem].subpars);
-        if(kit[kititem].padpars != NULL) {
-            delete (kit[kititem].padpars);
-            resetallnotes = true;
-        }
-        kit[kititem].adpars   = NULL;
-        kit[kititem].subpars  = NULL;
-        kit[kititem].padpars  = NULL;
-        kit[kititem].Pname[0] = '\0';
-    }
-    else {
-        if(kit[kititem].adpars == NULL)
-            kit[kititem].adpars = new ADnoteParameters(fft);
-        if(kit[kititem].subpars == NULL)
-            kit[kititem].subpars = new SUBnoteParameters();
-        if(kit[kititem].padpars == NULL)
-            kit[kititem].padpars = new PADnoteParameters(fft, mutex);
-    }
+        //nullify(kkit.adpars);
+        //nullify(kkit.subpars);
+        //nullify(kkit.padpars);
+        kkit.Pname[0] = '\0';
 
-    if(resetallnotes)
+        //Reset notes s.t. stale buffers will not get read
         for(int k = 0; k < POLIPHONY; ++k)
             KillNotePos(k);
+    }
+    else {
+        //All parameters must be NULL in this case
+        //assert(!(kkit.adpars || kkit.subpars || kkit.padpars));
+        //kkit.adpars  = new ADnoteParameters(fft);
+        //kkit.subpars = new SUBnoteParameters();
+        //kkit.padpars = new PADnoteParameters(fft);
+    }
 }
 
 void Part::add2XMLinstrument(XMLwrapper *xml)
@@ -1195,7 +1316,7 @@ int Part::saveXML(const char *filename)
     return result;
 }
 
-int Part::loadXMLinstrument(const char *filename) /*{*/
+int Part::loadXMLinstrument(const char *filename)
 {
     XMLwrapper *xml = new XMLwrapper();
     if(xml->loadXMLfile(filename) < 0) {
@@ -1210,14 +1331,19 @@ int Part::loadXMLinstrument(const char *filename) /*{*/
 
     delete (xml);
     return 0;
-} /*}*/
+}
 
-void Part::applyparameters(bool lockmutex) /*{*/
+void Part::applyparameters(void)
+{
+    applyparameters([]{return false;});
+}
+
+void Part::applyparameters(std::function<bool()> do_abort)
 {
     for(int n = 0; n < NUM_KIT_ITEMS; ++n)
-        if((kit[n].padpars != NULL) && (kit[n].Ppadenabled != 0))
-            kit[n].padpars->applyparameters(lockmutex);
-} /*}*/
+        if(kit[n].Ppadenabled && kit[n].padpars)
+            kit[n].padpars->applyparameters(do_abort);
+}
 
 void Part::getfromXMLinstrument(XMLwrapper *xml)
 {

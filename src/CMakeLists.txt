@@ -26,7 +26,7 @@ pkg_search_module(LASH lash-1.0)
 mark_as_advanced(LASH_LIBRARIES)
 pkg_search_module(DSSI dssi>=0.9.0)
 mark_as_advanced(DSSI_LIBRARIES)
-pkg_search_module(LIBLO liblo>=0.26)
+pkg_search_module(LIBLO liblo>=0.26 REQUIRED)
 mark_as_advanced(LIBLO_LIBRARIES)
 
 CHECK_FUNCTION_EXISTS(sched_setscheduler HAVE_SCHEDULER)
@@ -127,22 +127,22 @@ option (BuildForDebug "Include gdb debugging support" OFF)
 set(CMAKE_BUILD_TYPE "Release")
 
 set (BuildOptions_x86_64AMD
-    "-O3 -march=athlon64 -m64 -Wall -ffast-math -fno-finite-math-only -fomit-frame-pointer"
+    "-std=c++0x -O3 -march=athlon64 -m64 -Wall -ffast-math -fno-finite-math-only -fomit-frame-pointer"
   CACHE STRING "X86_64 compiler options"
 )
 
 set (BuildOptions_X86_64Core2
-    "-O3 -march=core2 -m64 -Wall -ffast-math -fno-finite-math-only -fomit-frame-pointer"
+    "-std=c++0x -O3 -march=core2 -m64 -Wall -ffast-math -fno-finite-math-only -fomit-frame-pointer"
   CACHE STRING "X86_64 compiler options"
 )
 
 set (BuildOptionsBasic
-    "-O3 -msse -msse2 -mfpmath=sse -ffast-math -fomit-frame-pointer"
+    "-std=c++0x -O3 -msse -msse2 -mfpmath=sse -ffast-math -fomit-frame-pointer"
     CACHE STRING "basic X86 complier options"
 )
 
 set (BuildOptionsDebug
-    "-O0 -g3 -ggdb -Wall -Wpointer-arith" CACHE STRING "Debug build flags")
+    "-std=c++0x -O0 -g3 -ggdb -Wall -Wpointer-arith" CACHE STRING "Debug build flags")
 
 ########### Settings dependant code ###########
 # From here on, the setting variables have  been prepared so concentrate
@@ -335,7 +335,8 @@ target_link_libraries(zynaddsubfx_core
 	${FFTW_LIBRARIES}
 	${MXML_LIBRARIES}
 	${OS_LIBRARIES}
-	pthread)
+	pthread
+    rtosc rtosc-cpp)
 
 if(CompileTests)
 	add_subdirectory(Tests)
@@ -346,15 +347,17 @@ message(STATUS "using link directories: ${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIR
 
 add_executable(zynaddsubfx main.cpp)
 
+#Warning: the required ordering of these to get proper linking depends upon the
+#         phase of the moon
 target_link_libraries(zynaddsubfx
+	${GUI_LIBRARIES}
     zynaddsubfx_core
 	zynaddsubfx_nio
-	${GUI_LIBRARIES}
 	${NIO_LIBRARIES}
 	${AUDIO_LIBRARIES}
 	)
 
-if (DssiEnable)
+if (DssiEnable AND FALSE)
 	add_library(zynaddsubfx_dssi SHARED
 		Output/DSSIaudiooutput.cpp
 		)

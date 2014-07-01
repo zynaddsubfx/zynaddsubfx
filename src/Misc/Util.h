@@ -65,6 +65,12 @@ std::string stringFrom(T x)
 }
 
 template<class T>
+std::string to_s(T x)
+{
+    return stringFrom(x);
+}
+
+template<class T>
 T stringTo(const char *x)
 {
     std::string str = x != NULL ? x : "0"; //should work for the basic float/int
@@ -74,10 +80,23 @@ T stringTo(const char *x)
     return ans;
 }
 
+
+
 template<class T>
 T limit(T val, T min, T max)
 {
     return val < min ? min : (val > max ? max : val);
+}
+
+template<class T>
+T array_max(const T *data, size_t len)
+{
+    T max = 0;
+
+    for(unsigned i = 0; i < len; ++i)
+        if(max < data[i])
+            max = data[i];
+    return max;
 }
 
 //Random number generator
@@ -112,5 +131,63 @@ float interpolate(const float *data, size_t len, float pos);
 
 //Linear circular interpolation
 float cinterpolate(const float *data, size_t len, float pos);
+
+/**
+ * Port macros - these produce easy and regular port definitions for common
+ * types
+ */
+
+///trims a path in recursions
+const char *message_snip(const char *m);
+
+///floating point parameter - with lookup code
+#define PARAMF(type, var, name, scale, _min, _max, desc) \
+{#name"::f", ":parameter\0:documentation\0=" desc "\0", 0, \
+    [](const char *m, rtosc::RtData &d) { \
+        if(rtosc_narguments(m)==0) {\
+            d.reply(d.loc, "f", ((type*)d.obj)->var); \
+        } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='f') {\
+            ((type*)d.obj)->var = limit<float>(rtosc_argument(m,0).f,_min,_max); \
+            d.broadcast(d.loc, "f", ((type*)d.obj)->var);}}}
+
+///character parameter - with lookup code
+#define PARAMC(type, var, name, desc) \
+{#name"::c", ":parameter\0:old-param\0:documentation\0=" desc"\0", 0, \
+    [](const char *m, rtosc::RtData &d) { \
+        if(rtosc_narguments(m)==0) {\
+            d.reply(d.loc, "c", ((type*)d.obj)->var); \
+        } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='c') {\
+            ((type*)d.obj)->var = limit<char>(rtosc_argument(m,0).i,0,127); \
+            d.broadcast(d.loc, "c", ((type*)d.obj)->var);}}}
+
+///Recur - perform a simple recursion
+#define RECUR(type, cast, name, var, desc) \
+{#name"/", ":recursion\0:documentation\0=" desc"\0", &cast::ports, [](const char *m, rtosc::RtData &d){\
+    d.obj = &(((type*)d.obj)->var); \
+    cast::ports.dispatch(message_snip(m), d);}}
+
+///Recurs - perform a ranged recursion
+#define RECURS(type, cast, name, var, length, desc) \
+{#name "#" #length "/", ":recursion\0:documentation\0=" desc"\0", &cast::ports, \
+    [](const char *m, rtosc::RtData &d){ \
+        const char *mm = m; \
+        while(!isdigit(*mm))++mm; \
+        d.obj = &(((type*)d.obj)->var)[atoi(mm)]; \
+        cast::ports.dispatch(message_snip(m), d);}}
+
+///Recur - perform a simple recursion (on pointer member)
+#define RECURP(type, cast, name, var, desc) \
+{#name"/", ":recursion\0:documentation\0=" desc"\0", &cast::ports, [](const char *m, rtosc::RtData &d){\
+    d.obj = (((type*)d.obj)->var); \
+    cast::ports.dispatch(message_snip(m), d);}}
+
+///Recurs - perform a ranged recursion (on pointer array member)
+#define RECURSP(type, cast, name, var, length, desc) \
+{#name "#" #length "/", ":recursion\0:documentation\0=" desc"\0", &cast::ports, \
+    [](const char *m, rtosc::RtData &d){ \
+        const char *mm = m; \
+        while(!isdigit(*mm))++mm; \
+        d.obj = (((type*)d.obj)->var)[atoi(mm)]; \
+        cast::ports.dispatch(message_snip(m), d);}}
 
 #endif

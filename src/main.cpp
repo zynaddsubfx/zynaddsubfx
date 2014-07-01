@@ -20,11 +20,9 @@
 
 */
 
-#include <FL/Fl.H>
-
-#include "UI/common.H"
 
 #include <iostream>
+#include <map>
 #include <cmath>
 #include <cctype>
 #include <algorithm>
@@ -35,6 +33,11 @@
 
 #include <getopt.h>
 
+#include <lo/lo.h>
+#include <rtosc/ports.h>
+#include <rtosc/thread-link.h>
+#include "Params/PADnoteParameters.h"
+
 #include "DSP/FFTwrapper.h"
 #include "Misc/Master.h"
 #include "Misc/Part.h"
@@ -42,34 +45,19 @@
 #include "Misc/Dump.h"
 extern Dump dump;
 
-
 //Nio System
 #include "Nio/Nio.h"
 
-#ifndef DISABLE_GUI
-#ifdef QT_GUI
+//GUI System
+#include "UI/Connection.h"
+GUI::ui_handle_t gui;
 
-#include <QApplication>
-#include "masterui.h"
-QApplication *app;
-
-#elif defined FLTK_GUI
-#include "UI/MasterUI.h"
-#elif defined NTK_GUI
-#include "UI/MasterUI.h"
-#include <FL/Fl_Shared_Image.H>
-#include <FL/Fl_Tiled_Image.H>
-#include <FL/Fl_Dial.H>
-#include <FL/Fl_Tooltip.H>
-#endif // FLTK_GUI
-
-MasterUI *ui;
-
-#endif //DISABLE_GUI
+//Glue Layer
+#include "Misc/MiddleWare.h"
+MiddleWare *middleware;
 
 using namespace std;
 
-pthread_t thr4;
 Master   *master;
 SYNTH_T  *synth;
 int       swaplr = 0; //1 for left-right swapping
@@ -91,35 +79,15 @@ char *instance_name = 0;
 
 void exitprogram();
 
+extern int main_thread;
+
 //cleanup on signaled exit
 void sigterm_exit(int /*sig*/)
 {
+    if(Pexitprogram)
+        exit(1);
     Pexitprogram = 1;
 }
-
-
-#ifndef DISABLE_GUI
-
-#ifdef NTK_GUI
-static Fl_Tiled_Image *module_backdrop;
-#endif
-
-void
-set_module_parameters ( Fl_Widget *o )
-{
-#ifdef NTK_GUI
-    o->box( FL_DOWN_FRAME );
-    o->align( o->align() | FL_ALIGN_IMAGE_BACKDROP );
-    o->color( FL_BLACK );
-    o->image( module_backdrop );
-    o->labeltype( FL_SHADOW_LABEL );
-#else
-    o->box( FL_PLASTIC_UP_BOX );
-    o->color( FL_CYAN );
-    o->labeltype( FL_EMBOSSED_LABEL );
-#endif
-}
-#endif
 
 /*
  * Program initialisation
@@ -135,11 +103,13 @@ void initprogram(void)
     cerr << "ADsynth Oscil.Size = \t" << synth->oscilsize << " samples" << endl;
 
 
-    master = &Master::getInstance();
+    middleware = new MiddleWare();
+    master = middleware->spawnMaster();
     master->swaplr = swaplr;
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
+    Nio::init(master);
 }
 
 /*
@@ -147,15 +117,10 @@ void initprogram(void)
  */
 void exitprogram()
 {
-    //ensure that everything has stopped with the mutex wait
-    pthread_mutex_lock(&master->mutex);
-    pthread_mutex_unlock(&master->mutex);
-
     Nio::stop();
 
-#ifndef DISABLE_GUI
-    delete ui;
-#endif
+    GUI::destroyUi(gui);
+    delete middleware;
 #if LASH
     if(lash)
         delete lash;
@@ -167,17 +132,17 @@ void exitprogram()
 
     delete [] denormalkillbuf;
     FFT_cleanup();
-    Master::deleteInstance();
 }
 
 int main(int argc, char *argv[])
 {
+    main_thread =  (long int)syscall(224);
     synth = new SYNTH_T;
     config.init();
     dump.startnow();
     int noui = 0;
     cerr
-    << "\nZynAddSubFX - Copyright (c) 2002-2011 Nasca Octavian Paul and others"
+    << "\nZynAddSubFX - Copyright (c) 2002-2013 Nasca Octavian Paul and others"
     << endl;
     cerr
     << "                Copyright (c) 2009-2014 Mark McCurry [active maintainer]"
@@ -437,49 +402,18 @@ int main(int argc, char *argv[])
     }
 
 
-#ifndef DISABLE_GUI
+    gui = GUI::createUi(middleware->spawnUiApi(), &Pexitprogram);
+    middleware->setUiCallback(GUI::raiseUi, gui);
+    middleware->setIdleCallback([](){GUI::tickUi(gui);});
 
-#ifdef NTK_GUI
-    fl_register_images();
-
-    Fl_Tooltip::textcolor(0x0);
-
-    Fl_Dial::default_style(Fl_Dial::PIXMAP_DIAL);
-
-    if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/knob.png"))
-        Fl_Dial::default_image(img);
-    else
-        Fl_Dial::default_image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/knob.png"));
-
-    if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/window_backdrop.png"))
-        Fl::scheme_bg(new Fl_Tiled_Image(img));
-    else
-        Fl::scheme_bg(new Fl_Tiled_Image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/window_backdrop.png")));
-
-    if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/module_backdrop.png"))
-        module_backdrop = new Fl_Tiled_Image(img);
-    else
-        module_backdrop = new Fl_Tiled_Image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/module_backdrop.png"));
-
-    Fl::background(  50, 50, 50 );
-    Fl::background2(  70, 70, 70 );
-    Fl::foreground( 255,255,255 );
-#endif
-
-    ui = new MasterUI(master, &Pexitprogram);
-    
-    if ( !noui) 
+    if(!noui)
     {
-        ui->showUI();
-
+        GUI::raiseUi(gui, "/show",  "T");
         if(!ioGood)
-            fl_alert(
-                "Default IO did not initialize.\nDefaulting to NULL backend.");
+            GUI::raiseUi(gui, "/alert", "s",
+                    "Default IO did not initialize.\nDefaulting to NULL backend.");
     }
 
-#endif
-
-#ifndef DISABLE_GUI
 #if USE_NSM
     char *nsm_url = getenv("NSM_URL");
 
@@ -494,7 +428,6 @@ int main(int argc, char *argv[])
         }
     }
 #endif
-#endif
 
 #if USE_NSM
     if(!nsm)
@@ -502,17 +435,11 @@ int main(int argc, char *argv[])
     {
 #if LASH
         lash = new LASHClient(&argc, &argv);
-#ifndef DISABLE_GUI
-        ui->sm_indicator1->value(1);
-        ui->sm_indicator2->value(1);
-        ui->sm_indicator1->tooltip("LASH");
-        ui->sm_indicator2->tooltip("LASH");
-#endif
+        GUI::raiseUi(gui, "/session-type", "s", "LASH");
 #endif
     }
 
     while(Pexitprogram == 0) {
-#ifndef DISABLE_GUI
 #if USE_NSM
         if(nsm) {
             nsm->check();
@@ -524,11 +451,11 @@ int main(int argc, char *argv[])
             string filename;
             switch(lash->checkevents(filename)) {
                 case LASHClient::Save:
-                    ui->do_save_master(filename.c_str());
+                    GUI::raiseUi(gui, "/save-master", "s", filename.c_str());
                     lash->confirmevent(LASHClient::Save);
                     break;
                 case LASHClient::Restore:
-                    ui->do_load_master(filename.c_str());
+                    GUI::raiseUi(gui, "/load-master", "s", filename.c_str());
                     lash->confirmevent(LASHClient::Restore);
                     break;
                 case LASHClient::Quit:
@@ -542,11 +469,8 @@ int main(int argc, char *argv[])
 #if USE_NSM
 done:
 #endif
-
-        Fl::wait(0.02f);
-#else
-        usleep(100000);
-#endif
+        GUI::tickUi(gui);
+        middleware->tick();
     }
 
     exitprogram();

@@ -48,6 +48,12 @@ class AnalogFilter:public Filter
         void cleanup();
 
         float H(float freq); //Obtains the response for a given frequency
+        
+        
+        struct Coeff {
+            float c[3], //Feed Forward
+                  d[3];    //Feed Back
+        } coeff, oldCoeff;
 
     private:
         struct fstage {
@@ -55,10 +61,6 @@ class AnalogFilter:public Filter
             float y1, y2; //Output History
         } history[MAX_FILTER_STAGES + 1], oldHistory[MAX_FILTER_STAGES + 1];
 
-        struct Coeff {
-            float c[3], //Feed Forward
-                  d[3];    //Feed Back
-        } coeff, oldCoeff;
         //old coeffs are used for interpolation when paremeters change quickly
 
         //Apply IIR filter to Samples, with coefficients, and past history

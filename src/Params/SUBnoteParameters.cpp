@@ -22,8 +22,92 @@
 
 #include "../globals.h"
 #include "SUBnoteParameters.h"
+#include "EnvelopeParams.h"
+#include "../Misc/Util.h"
 #include <stdio.h>
 #include <cmath>
+
+#include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
+
+#define rObject SUBnoteParameters
+using namespace rtosc;
+static rtosc::Ports localPorts = {
+    rToggle(Pstereo, "Stereo Enable"),
+    rParam(PVolume,  "Volume"),
+    rParam(PPanning, "Left Right Panning"),
+    rParam(PAmpVelocityScaleFunction, "Amplitude Velocity Sensing function"),
+    rParamI(PDetune, "Detune in detune type units"),
+    rParamI(PCoarseDetune, "Coarse Detune"),
+    //Real values needed
+    rOption(PDetuneType, rOptions("100 cents", "200 cents", "500 cents"), "Detune Scale"),
+    rToggle(PFreqEnvelopeEnabled, "Enable for Frequency Envelope"),
+    rToggle(PBandWidthEnvelopeEnabled, "Enable for Bandwidth Envelope"),
+    rToggle(PGlobalFilterEnabled, "Enable for Global Filter"),
+    rParam(PGlobalFilterVelocityScale, "Filter Velocity Magnitude"),
+    rParam(PGlobalFilterVelocityScaleFunction, "Filter Velocity Function Shape"),
+    //rRecur(FreqEnvelope, EnvelopeParams),
+    //rToggle(),//continue
+    rToggle(Pfixedfreq, "Base frequency fixed frequency enable"),
+    rParam(PfixedfreqET, "Equal temeperate control for fixed frequency operation"),
+    rParam(Pnumstages, rMap(min, 1), rMap(max, 5), "Number of filter stages"),
+    rParam(Pbandwidth, "Bandwidth of filters"),
+    rParam(Phmagtype, "How the magnitudes are computed (0=linear,1=-60dB,2=-60dB)"),
+    rArray(Phmag, MAX_SUB_HARMONICS, "Harmonic magnitudes"),
+    rArray(Phrelbw, MAX_SUB_HARMONICS, "Relative bandwidth"),
+    rParam(Pbwscale, "Bandwidth scaling with frequency"),
+    rRecurp(AmpEnvelope,          "Amplitude envelope"),
+    rRecurp(FreqEnvelope,         "Frequency Envelope"),
+    rRecurp(BandWidthEnvelope,    "Bandwidth Envelope"),
+    rRecurp(GlobalFilterEnvelope, "Post Filter Envelope"),
+    rRecurp(GlobalFilter,         "Post Filter"),
+    rOption(Pstart, rOptions("zero", "random", "ones"), "How harmonics are initialized"),
+
+    {"clear:", NULL, NULL, [](const char *, RtData &d)
+        {
+            SUBnoteParameters *obj = (SUBnoteParameters *)d.obj;
+            for(int i=0; i<MAX_SUB_HARMONICS; ++i) {
+                obj->Phmag[i]   = 0;
+                obj->Phrelbw[i] = 64;
+            }
+            obj->Phmag[0] = 127;
+        }},
+    {"detunevalue:", NULL, NULL, [](const char *, RtData &d)
+        {
+            SUBnoteParameters *obj = (SUBnoteParameters *)d.obj;
+            d.reply(d.loc, "f", getdetune(obj->PDetuneType, 0, obj->PDetune));
+        }},
+    //weird stuff for PCoarseDetune
+    {"octave::c:i", NULL, NULL, [](const char *msg, RtData &d)
+        {
+            SUBnoteParameters *obj = (SUBnoteParameters *)d.obj;
+            if(!rtosc_narguments(msg)) {
+                int k=obj->PCoarseDetune/1024;
+                if (k>=8) k-=16;
+                d.reply(d.loc, "i", k);
+            } else {
+                int k=(int) rtosc_argument(msg, 0).i;
+                if (k<0) k+=16;
+                obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
+            }
+        }},
+    {"coarsedetune::c:i", NULL, NULL, [](const char *msg, RtData &d)
+        {
+            SUBnoteParameters *obj = (SUBnoteParameters *)d.obj;
+            if(!rtosc_narguments(msg)) {
+                int k=obj->PCoarseDetune%1024;
+                if (k>=512) k-=1024;
+                d.reply(d.loc, "i", k);
+            } else {
+                int k=(int) rtosc_argument(msg, 0).i;
+                if (k<0) k+=1024;
+                obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
+            }
+        }},
+
+};
+
+rtosc::Ports &SUBnoteParameters::ports = localPorts;
 
 SUBnoteParameters::SUBnoteParameters():Presets()
 {

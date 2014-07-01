@@ -71,7 +71,7 @@ class PadNoteTest:public CxxTest::TestSuite
 
             fft = new FFTwrapper(synth->oscilsize);
             //prepare the default settings
-            PADnoteParameters *defaultPreset = new PADnoteParameters(fft,NULL);
+            PADnoteParameters *defaultPreset = new PADnoteParameters(fft);
 
 
             //Assert defaults
@@ -92,7 +92,7 @@ class PadNoteTest:public CxxTest::TestSuite
 
 
             //defaultPreset->defaults();
-            defaultPreset->applyparameters(false);
+            defaultPreset->applyparameters();
 
             //verify xml was loaded
             ///TS_ASSERT(defaultPreset->VoicePar[1].Enabled);
@@ -151,7 +151,7 @@ class PadNoteTest:public CxxTest::TestSuite
 #endif
             sampleCount += synth->buffersize;
 
-            TS_ASSERT_DELTA(outL[255], 0.0660f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], 0.0660f, 0.0005f);
 
 
             note->relasekey();
@@ -159,7 +159,7 @@ class PadNoteTest:public CxxTest::TestSuite
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.0729f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], -0.0729f, 0.0005f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;

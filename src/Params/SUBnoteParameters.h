@@ -25,10 +25,10 @@
 
 #include "../globals.h"
 #include "../Misc/XMLwrapper.h"
-#include "EnvelopeParams.h"
 #include "FilterParams.h"
 #include "Presets.h"
 
+class EnvelopeParams;
 class SUBnoteParameters:public Presets
 {
     public:
@@ -105,7 +105,7 @@ class SUBnoteParameters:public Presets
         //how the harmonics start("0"=0,"1"=random,"2"=1)
         unsigned char Pstart;
 
-
+        static rtosc::Ports &ports;
     private:
 };
 

@@ -43,7 +43,7 @@ class XMLwrapper;
 class EffectMgr:public Presets
 {
     public:
-        EffectMgr(const bool insertion_, pthread_mutex_t *mutex_);
+        EffectMgr(const bool insertion_);
         ~EffectMgr();
 
         void add2XML(XMLwrapper *xml);
@@ -76,10 +76,10 @@ class EffectMgr:public Presets
 
         FilterParams *filterpars;
 
-    private:
+        static rtosc::Ports ports;
         int     nefx;
         Effect *efx;
-        pthread_mutex_t *mutex;
+    private:
         bool dryonly;
 };
 

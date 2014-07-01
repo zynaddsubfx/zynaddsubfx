@@ -26,6 +26,10 @@
 #define GLOBALS_H
 #include <stdint.h>
 
+//Forward declarations
+namespace rtosc{struct Ports; class ThreadLink;};
+extern rtosc::ThreadLink *bToU;
+extern rtosc::ThreadLink *uToB;
 
 /**
  * The number of harmonics of additive synth

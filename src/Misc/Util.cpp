@@ -173,3 +173,9 @@ float cinterpolate(const float *data, size_t len, float pos)
     const float leftness = pos - l_pos;
     return data[l_pos] * leftness + data[r_pos] * (1.0f - leftness);
 }
+
+const char *message_snip(const char *m)
+{
+    while(*m && *m!='/')++m;
+    return *m?m+1:m;
+}

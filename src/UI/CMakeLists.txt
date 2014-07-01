@@ -34,6 +34,27 @@ add_library(zynaddsubfx_gui STATIC
 	${zynaddsubfx_gui_FLTK_UI_SRCS}
         NioUI.cpp
         WidgetPDial.cpp
+        PartNameButton.cpp
+        Fl_Osc_Pane.cpp
+        Fl_Osc_Widget.cpp
+        Fl_Osc_Dial.cpp
+        Fl_Osc_DialF.cpp
+        Fl_Osc_Slider.cpp
+        Fl_Osc_VSlider.cpp
+        Fl_Osc_Button.cpp
+        Fl_Osc_Check.cpp
+        Fl_Osc_Choice.cpp
+        Fl_Osc_Roller.cpp
+        Fl_Osc_Output.cpp
+        Fl_Osc_Counter.cpp
+        Fl_Osc_Input.cpp
+        Fl_Osc_Value.cpp
+        Fl_Resonance_Graph.cpp
+        Fl_EQGraph.cpp
+        FormantFilterGraph.cpp
+        EnvelopeFreeEdit.cpp
+        BankView.cpp
+        Connection.cpp
 	)
 
 if(NtkGui)

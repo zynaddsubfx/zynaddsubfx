@@ -30,6 +30,7 @@
 #include "../Misc/Microtonal.h"
 
 #include <pthread.h>
+#include <functional>
 #include <list> // For the monomemnotes list.
 
 class EffectMgr;
@@ -46,11 +47,13 @@ class Part
     public:
         /**Constructor
          * @param microtonal_ Pointer to the microtonal object
-         * @param fft_ Pointer to the FFTwrapper
-         * @param mutex_ Pointer to the master pthread_mutex_t*/
-        Part(Microtonal *microtonal_, FFTwrapper *fft_, pthread_mutex_t *mutex_);
+         * @param fft_ Pointer to the FFTwrapper*/
+        Part(Microtonal *microtonal_, FFTwrapper *fft_);
         /**Destructor*/
         ~Part();
+
+        // Copy misc parameters not stored in .xiz format
+        void cloneTraits(Part &part) const;
 
         // Midi commands implemented
         void NoteOn(unsigned char note,
@@ -68,8 +71,6 @@ class Part
         /* The synthesizer part output */
         void ComputePartSmps(); //Part output
 
-        //instrumentonly: 0 - save all, 1 - save only instrumnet, 2 - save only instrument without the name(used in bank)
-
 
         //saves the instrument settings to a XML file
         //returns 0 for ok or <0 if there is an error
@@ -82,7 +83,8 @@ class Part
         void defaults();
         void defaultsinstrument();
 
-        void applyparameters(bool lockmutex = true);
+        void applyparameters(void);
+        void applyparameters(std::function<bool()> do_abort);
 
         void getfromXML(XMLwrapper *xml);
         void getfromXMLinstrument(XMLwrapper *xml);
@@ -90,20 +92,22 @@ class Part
         void cleanup(bool final = false);
 
         //the part's kit
-        struct {
+        struct Kit {
             unsigned char      Penabled, Pmuted, Pminkey, Pmaxkey;
-            unsigned char     *Pname;
+            char              *Pname;
             unsigned char      Padenabled, Psubenabled, Ppadenabled;
             unsigned char      Psendtoparteffect;
             ADnoteParameters  *adpars;
             SUBnoteParameters *subpars;
             PADnoteParameters *padpars;
+
+            static rtosc::Ports &ports;
         } kit[NUM_KIT_ITEMS];
 
 
         //Part parameters
         void setkeylimit(unsigned char Pkeylimit);
-        void setkititemstatus(int kititem, int Penabled_);
+        void setkititemstatus(unsigned kititem, bool Penabled_);
 
         unsigned char Penabled; /**<if the part is enabled*/
         unsigned char Pvolume; /**<part volume*/
@@ -124,11 +128,11 @@ class Part
         unsigned char Plegatomode; // 0=normal, 1=legato
         unsigned char Pkeylimit; //how many keys are alowed to be played same time (0=off), the older will be relased
 
-        unsigned char *Pname; //name of the instrument
+        char *Pname; //name of the instrument
         struct { //instrument additional information
             unsigned char Ptype;
-            unsigned char Pauthor[MAX_INFO_TEXT_SIZE + 1];
-            unsigned char Pcomments[MAX_INFO_TEXT_SIZE + 1];
+            char          Pauthor[MAX_INFO_TEXT_SIZE + 1];
+            char          Pcomments[MAX_INFO_TEXT_SIZE + 1];
         } info;
 
 
@@ -151,11 +155,9 @@ class Part
         unsigned char Pefxroute[NUM_PART_EFX]; //how the effect's output is routed(to next effect/to out)
         bool Pefxbypass[NUM_PART_EFX]; //if the effects are bypassed
 
-
-        pthread_mutex_t *mutex;
-        pthread_mutex_t load_mutex;
-
         int lastnote;
+
+        static rtosc::Ports &ports;
 
     private:
         void RunNote(unsigned k);
