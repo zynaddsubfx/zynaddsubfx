@@ -17,7 +17,7 @@ CXXTEST_ADD_TEST(UnisonTest UnisonTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/UnisonTes
 
 #Extra libraries added to make test and full compilation use the same library
 #links for quirky compilers
-set(test_lib zynaddsubfx_core ${ZLIB_LIBRARY} ${FFTW_LIBRARIES} ${MXML_LIBRARIES} pthread)
+set(test_lib zynaddsubfx_core ${GUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW_LIBRARIES} ${MXML_LIBRARIES} pthread)
 
 message(STATUS "Linking tests with: ${test_lib}")
 target_link_libraries(ADnoteTest     ${test_lib})
@@ -30,6 +30,8 @@ target_link_libraries(XMLwrapperTest ${test_lib})
 target_link_libraries(RandTest       ${test_lib})
 target_link_libraries(PADnoteTest    ${test_lib})
 target_link_libraries(PluginTest     zynaddsubfx_core zynaddsubfx_nio
-    ${OS_LIBRARIES} ${AUDIO_LIBRARIES})
+    ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
 target_link_libraries(UnisonTest    ${test_lib})
+
+message(STATUS "Plugin Test ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}")
 

@@ -627,7 +627,7 @@ linearenvelopecheck->value(Plinearenvelope);
 
     forcedreleasecheck->value(Pforcedrelease);
 
-if (env->Pfreemode==0){
+if (Pfreemode==0){
 	addpoint->hide();
 	deletepoint->hide();
 } else {

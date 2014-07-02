@@ -438,7 +438,7 @@ globalfiltergroup->redraw();}
           callback {/*pars->POvertoneSpread.type = (int)o->value();
 pars->updateFrequencyMultipliers();*/} open
           xywh {450 190 80 20} down_box BORDER_BOX labelsize 10 align 5 textsize 10
-          code0 {o->value(pars->POvertoneSpread.type);}
+          code0 {/*o->value(pars->POvertoneSpread.type);*/}
         } {
           MenuItem {} {
             label Harmonic

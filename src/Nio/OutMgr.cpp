@@ -62,7 +62,7 @@ const Stereo<float *> OutMgr::tick(unsigned int frameSize)
         if(!midi.empty()) {
             midi.flush(i*synth->buffersize, (i+1)*synth->buffersize);
         }
-        master.AudioOut(outl, outr);
+        master->AudioOut(outl, outr);
         addSmps(outl, outr);
         i++;
     }

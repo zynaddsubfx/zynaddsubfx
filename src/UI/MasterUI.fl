@@ -925,6 +925,7 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))
 };
 } open
       xywh {661 384 600 335} type Double visible
+      class Fl_Osc_Window
     } {
       Fl_Box {} {
         xywh {0 0 0 0}

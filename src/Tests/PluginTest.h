@@ -25,6 +25,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "../Misc/MiddleWare.h"
 #include "../Misc/Master.h"
 #include "../Misc/Util.h"
 #include "../globals.h"
@@ -33,6 +34,7 @@ SYNTH_T *synth;
 using namespace std;
 
 char *instance_name=(char*)"";
+MiddleWare *middleware;
 
 class PluginTest:public CxxTest::TestSuite
 {

@@ -610,9 +610,9 @@ voiceonbutton->redraw();} open
             }
             Fl_Dial {} {
               label {Ph.rand}
-              callback {pars->VoicePar[nvoice].Unison_phase_randomness=(int)o->value();}
+              callback {/*pars->VoicePar[nvoice].Unison_phase_randomness=(int)o->value();*/}
               tooltip {Phase randomness} xywh {280 555 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
-              code0 {o->value(pars->VoicePar[nvoice].Unison_phase_randomness);}
+              code0 {/*o->value(pars->VoicePar[nvoice].Unison_phase_randomness);*/}
               class WidgetPDial
             }
           }

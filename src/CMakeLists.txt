@@ -350,9 +350,9 @@ add_executable(zynaddsubfx main.cpp)
 #Warning: the required ordering of these to get proper linking depends upon the
 #         phase of the moon
 target_link_libraries(zynaddsubfx
-	${GUI_LIBRARIES}
     zynaddsubfx_core
 	zynaddsubfx_nio
+	${GUI_LIBRARIES}
 	${NIO_LIBRARIES}
 	${AUDIO_LIBRARIES}
 	)
