@@ -165,7 +165,7 @@ if(OssEnable)
 endif(OssEnable)
 
 if(PaEnable)
-	include_directories(${PORTAUDIO_INCLUDE_DIR})
+	include_directories(${PORTAUDIO_INCLUDEDIR} /usr/lib/blam/bax)
 	add_definitions(-DPORTAUDIO=1)
 	list(APPEND AUDIO_LIBRARIES ${PORTAUDIO_LIBRARIES})
 	list(APPEND AUDIO_LIBRARY_DIRS ${PORTAUDIO_LIBRARY_DIRS})
