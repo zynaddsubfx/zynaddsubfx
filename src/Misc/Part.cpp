@@ -49,7 +49,11 @@ static Ports partPorts = {
     rRecursp(partefx, 3, "Part Effect"),
     rRecur(ctl,       "Controller"),
     rToggle(Penabled, "Part enable"),
+#undef rChangeCb
+#define rChangeCb obj->setPvolume(obj->Pvolume);
     rParam(Pvolume, "Part Volume"),
+#undef rChangeCb
+#define rChangeCb
     rParam(Pminkey, "Min Used Key"),
     rParam(Pmaxkey, "Max Used Key"),
     rParam(Pkeyshift, "Part keyshift"),
