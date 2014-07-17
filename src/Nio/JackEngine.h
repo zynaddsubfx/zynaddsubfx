@@ -78,6 +78,9 @@ class JackEngine:public AudioOut, MidiIn
             jack_port_t *ports[2];
             jsample_t   *portBuffs[2];
         } audio;
+        struct osc {
+            jack_port_t *oscport;
+        } osc;
         struct midi {
             jack_port_t *inport;
             bool         jack_sync;

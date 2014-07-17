@@ -118,6 +118,11 @@ void OutMgr::setMaster(Master *master_)
     master=master_;
 }
 
+void OutMgr::applyOscEventRt(const char *msg)
+{
+    master->applyOscEvent(msg);
+}
+
 //perform a cheap linear interpolation for resampling
 //This will result in some distortion at frame boundries
 //returns number of samples produced

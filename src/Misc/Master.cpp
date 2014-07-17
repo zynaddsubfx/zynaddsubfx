@@ -212,6 +212,17 @@ Master::Master()
     };
 }
 
+void Master::applyOscEvent(const char *msg)
+{
+    char loc_buf[1024];
+    DataObj d{loc_buf, 1024, this, bToU};
+    memset(loc_buf, sizeof(loc_buf), 0);
+    d.matches = 0;
+    ports.dispatch(msg+1, d);
+    if(d.matches == 0)
+        fprintf(stderr, "Unknown path '%s'\n", msg);
+}
+
 void Master::defaults()
 {
     volume = 1.0f;

@@ -42,6 +42,7 @@ class OutMgr
         friend class EngineMgr;
 
         void setMaster(class Master *master_);
+        void applyOscEventRt(const char *msg);
     private:
         OutMgr();
         void addSmps(float *l, float *r);

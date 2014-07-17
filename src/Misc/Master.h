@@ -56,6 +56,8 @@ class Master
         /** Destructor*/
         ~Master();
 
+        void applyOscEvent(const char *event);
+
         /**Saves all settings to a XML file
          * @return 0 for ok or <0 if there is an error*/
         int saveXML(const char *filename);

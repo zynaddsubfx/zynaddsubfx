@@ -2,30 +2,33 @@
     JackEngine.cpp
 
     Copyright 2009, Alan Calvert
+    Copyright 2014, Mark McCurry
 
-    This file is part of yoshimi, which is free software: you can
+    This file is part of ZynAddSubFX, which is free software: you can
     redistribute it and/or modify it under the terms of the GNU General
     Public License as published by the Free Software Foundation, either
     version 3 of the License, or (at your option) any later version.
 
-    yoshimi is distributed in the hope that it will be useful,
+    ZynAddSubFX is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with yoshimi.  If not, see <http://www.gnu.org/licenses/>.
+    along with ZynAddSubFX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <iostream>
 
 #include <jack/midiport.h>
+#include "jack_osc.h"
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <cassert>
 #include <cstring>
 
 #include "Nio.h"
+#include "OutMgr.h"
 #include "InMgr.h"
 
 #include "JackEngine.h"
@@ -213,6 +216,8 @@ bool JackEngine::openAudio()
                 cerr << "Warning, No outputs to autoconnect to" << endl;
         }
         midi.jack_sync = true;
+        osc.oscport = jack_port_register(jackClient, "osc",
+                JACK_DEFAULT_OSC_TYPE, JackPortIsInput, 0);
         return true;
     }
     else
@@ -230,6 +235,8 @@ void JackEngine::stopAudio()
             jack_port_unregister(jackClient, port);
     }
     midi.jack_sync = false;
+    if(osc.oscport)
+        jack_port_unregister(jackClient, osc.oscport);
     if(!getMidiEn())
         disconnectJack();
 }
@@ -293,6 +300,20 @@ int JackEngine::processCallback(jack_nframes_t nframes)
 
 bool JackEngine::processAudio(jack_nframes_t nframes)
 {
+    //handle rt osc events first
+    void   *oscport    = jack_port_get_buffer(osc.oscport, nframes);
+    size_t osc_packets = jack_osc_get_event_count(oscport);
+
+    for(int i = 0; i < osc_packets; ++i) {
+        jack_osc_event_t event;
+        if(jack_osc_event_get(&event, oscport, i))
+            continue;
+        if(*event.buffer!='/') //Bundles are unhandled
+            continue;
+        //TODO validate message length
+        OutMgr::getInstance().applyOscEventRt((char*)event.buffer);
+    }
+
     for(int port = 0; port < 2; ++port) {
         audio.portBuffs[port] =
             (jsample_t *)jack_port_get_buffer(audio.ports[port], nframes);
