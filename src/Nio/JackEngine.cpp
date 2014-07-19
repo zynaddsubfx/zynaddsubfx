@@ -21,6 +21,9 @@
 #include <iostream>
 
 #include <jack/midiport.h>
+#ifdef JACK_HAS_METADATA_API
+# include <jack/metadata.h>
+#endif // JACK_HAS_METADATA_API
 #include "jack_osc.h"
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -218,6 +221,10 @@ bool JackEngine::openAudio()
         midi.jack_sync = true;
         osc.oscport = jack_port_register(jackClient, "osc",
                 JACK_DEFAULT_OSC_TYPE, JackPortIsInput, 0);
+#ifdef JACK_HAS_METADATA_API
+        jack_uuid_t uuid = jack_port_uuid(osc.oscport);
+        jack_set_property(jackClient, uuid, "http://jackaudio.org/metadata/event-types", JACK_EVENT_TYPE__OSC, "text/plain");
+#endif // JACK_HAS_METADATA_API
         return true;
     }
     else
@@ -235,8 +242,13 @@ void JackEngine::stopAudio()
             jack_port_unregister(jackClient, port);
     }
     midi.jack_sync = false;
-    if(osc.oscport)
+    if(osc.oscport) {
         jack_port_unregister(jackClient, osc.oscport);
+#ifdef JACK_HAS_METADATA_API
+        jack_uuid_t uuid = jack_port_uuid(osc.oscport);
+        jack_remove_property(jackClient, uuid, "http://jackaudio.org/metadata/event-types");
+#endif // JACK_HAS_METADATA_API
+    }
     if(!getMidiEn())
         disconnectJack();
 }

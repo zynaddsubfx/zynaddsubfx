@@ -24,6 +24,11 @@ if(JackEnable)
     include_directories(${JACK_INCLUDE_DIR})
     list(APPEND zynaddsubfx_nio_SRCS JackEngine.cpp)
     list(APPEND zynaddsubfx_nio_lib ${JACK_LIBRARIES})
+
+    CHECK_INCLUDE_FILES("jack/metadata.h" JACK_HAS_METADATA_API)
+    if(JACK_HAS_METADATA_API)
+        add_definitions(-DJACK_HAS_METADATA_API)
+    endif(JACK_HAS_METADATA_API)
 endif(JackEnable)
 
 if(PaEnable)
