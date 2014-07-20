@@ -58,7 +58,7 @@ add_library(zynaddsubfx_gui STATIC
 	)
 
 if(NtkGui)
-  target_link_libraries(zynaddsubfx_gui ${NTK_LIBRARIES})
+  target_link_libraries(zynaddsubfx_gui ${NTK_LIBRARIES} ${NTK_IMAGES_LIBRARIES})
 endif(NtkGui)
 
 if(FltkGui)
