@@ -80,6 +80,9 @@ void BankSlot::update(const char *name__, const char *fname__)
     label(labelstr);
    
     color(empty() ? 46 : 51);
+#ifdef NTK_GUI
+    redraw();
+#endif
 }
 
 bool BankSlot::empty(void) const
