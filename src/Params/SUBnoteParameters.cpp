@@ -63,7 +63,7 @@ static rtosc::Ports localPorts = {
     rRecurp(GlobalFilter,         "Post Filter"),
     rOption(Pstart, rOptions("zero", "random", "ones"), "How harmonics are initialized"),
 
-    {"clear:", NULL, NULL, [](const char *, RtData &d)
+    {"clear:", rDoc("Reset all harmonics to equal bandwidth/zero amplitude"), NULL, [](const char *, RtData &d)
         {
             SUBnoteParameters *obj = (SUBnoteParameters *)d.obj;
             for(int i=0; i<MAX_SUB_HARMONICS; ++i) {
@@ -72,13 +72,13 @@ static rtosc::Ports localPorts = {
             }
             obj->Phmag[0] = 127;
         }},
-    {"detunevalue:", NULL, NULL, [](const char *, RtData &d)
+    {"detunevalue:", rDoc("Get note detune value"), NULL, [](const char *, RtData &d)
         {
             SUBnoteParameters *obj = (SUBnoteParameters *)d.obj;
             d.reply(d.loc, "f", getdetune(obj->PDetuneType, 0, obj->PDetune));
         }},
     //weird stuff for PCoarseDetune
-    {"octave::c:i", NULL, NULL, [](const char *msg, RtData &d)
+    {"octave::c:i", rDoc("Note octave shift"), NULL, [](const char *msg, RtData &d)
         {
             SUBnoteParameters *obj = (SUBnoteParameters *)d.obj;
             if(!rtosc_narguments(msg)) {
@@ -91,7 +91,7 @@ static rtosc::Ports localPorts = {
                 obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
             }
         }},
-    {"coarsedetune::c:i", NULL, NULL, [](const char *msg, RtData &d)
+    {"coarsedetune::c:i", rDoc("Note coarse detune"), NULL, [](const char *msg, RtData &d)
         {
             SUBnoteParameters *obj = (SUBnoteParameters *)d.obj;
             if(!rtosc_narguments(msg)) {

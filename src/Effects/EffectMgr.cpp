@@ -39,7 +39,8 @@
 
 rtosc::Ports EffectMgr::ports = {
     RECURP(EffectMgr, FilterParams, Filter, filterpars, "Filter Parameter for Dynamic Filter"),
-    {"parameter#64::c", rProp(alias), NULL, [](const char *msg, rtosc::RtData &d)
+    {"parameter#64::c", rProp(alias) rDoc("Parameter Accessor"), NULL,
+        [](const char *msg, rtosc::RtData &d)
         {
             EffectMgr *eff = (EffectMgr*)d.obj;
             const char *mm = msg;
@@ -50,7 +51,8 @@ rtosc::Ports EffectMgr::ports = {
             else
                 eff->seteffectpar_nolock(atoi(mm), rtosc_argument(msg, 0).i);
         }},
-    {"preset::c", rProp(alias), NULL, [](const char *msg, rtosc::RtData &d)
+    {"preset::c", rProp(alias) rDoc("Effect Preset Selector"), NULL,
+        [](const char *msg, rtosc::RtData &d)
         {
             EffectMgr *eff = (EffectMgr*)d.obj;
             if(!rtosc_narguments(msg))
@@ -58,7 +60,8 @@ rtosc::Ports EffectMgr::ports = {
             else
                 eff->changepreset_nolock(rtosc_argument(msg, 0).i);
         }},
-    {"eq-coeffs:", rProp(internal), NULL, [](const char *, rtosc::RtData &d)
+    {"eq-coeffs:", rProp(internal) rDoc("Get equalizer Coefficients"), NULL,
+        [](const char *, rtosc::RtData &d)
         {
             EffectMgr *eff = (EffectMgr*)d.obj;
             if(eff->nefx != 7)
@@ -71,12 +74,13 @@ rtosc::Ports EffectMgr::ports = {
             eq->getFilter(a,b);
             d.reply(d.loc, "bb", sizeof(a), a, sizeof(b), b);
         }},
-    {"efftype:", rProp(internal), NULL, [](const char *, rtosc::RtData &d)
+    {"efftype:", rProp(internal) rDoc("Get Effect Type"), NULL, [](const char *, rtosc::RtData &d)
         {
             EffectMgr *eff  = (EffectMgr*)d.obj;
             d.reply(d.loc, "c", eff->nefx);
         }},
-    {"efftype:b", rProp(internal), NULL, [](const char *msg, rtosc::RtData &d)
+    {"efftype:b", rProp(internal) rDoc("Pointer swap EffectMgr"), NULL,
+        [](const char *msg, rtosc::RtData &d)
         {
             EffectMgr *eff  = (EffectMgr*)d.obj;
             EffectMgr *eff_ = *(EffectMgr**)rtosc_argument(msg,0).b.data;

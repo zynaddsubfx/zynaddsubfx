@@ -42,9 +42,11 @@ rtosc::Ports Resonance::ports = {
     rAction(smooth, "Smooth out frequency response"),
     rAction(zero,   "Reset frequency response"),
     //UI Value listeners
-    {"centerfreq:", "", NULL, [](const char *, RtData &d)
+    {"centerfreq:", rDoc("Get center frequency"),  NULL,
+        [](const char *, RtData &d)
         {d.reply(d.loc, "f", ((rObject*)d.obj)->getcenterfreq());}},
-    {"octavesfreq:", "", NULL, [](const char *, RtData &d)
+    {"octavesfreq:", rDoc("Get center freq of graph"), NULL,
+            [](const char *, RtData &d)
         {d.reply(d.loc, "f", ((rObject*)d.obj)->getoctavesfreq());}},
                                                                 
 };

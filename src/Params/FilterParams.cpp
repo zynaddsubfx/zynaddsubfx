@@ -82,7 +82,7 @@ rtosc::Ports FilterParams::ports = {
     //{"Psequence#" FF_MAX_SEQUENCE "/nvowel", "", NULL, [](){}},
     
     //UI reader
-    {"Pvowels", NULL, NULL,
+    {"Pvowels:", rDoc("Get Formant Vowels"), NULL,
         [](const char *, RtData &d) {
             FilterParams *obj = (FilterParams *) d.obj;
             d.reply(d.loc, "b", sizeof_pvowels, obj->Pvowels);

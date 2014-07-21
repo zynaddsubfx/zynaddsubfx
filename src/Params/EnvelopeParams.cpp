@@ -47,7 +47,7 @@ static rtosc::Ports localPorts = {
     rParam(PR_dt,  "Release Time"),
     rParam(PR_val, "Release Value"),
 
-    {"addPoint:i", rProp(internal), NULL, [](const char *msg, RtData &d)
+    {"addPoint:i", rProp(internal) rDoc("Add point to envelope"), NULL, [](const char *msg, RtData &d)
         {
             EnvelopeParams *env = (rObject*) d.obj;
             const int curpoint = rtosc_argument(msg, 0).i;
@@ -67,7 +67,7 @@ static rtosc::Ports localPorts = {
             env->Penvpoints++;
             if (curpoint<=env->Penvsustain) env->Penvsustain++;
         }},
-    {"delPoint:i", rProp(internal), NULL, [](const char *msg, RtData &d)
+    {"delPoint:i", rProp(internal) rDoc("Delete Envelope Point"), NULL, [](const char *msg, RtData &d)
         {
             EnvelopeParams *env = (rObject*) d.obj;
             const int curpoint=rtosc_argument(msg, 0).i;
