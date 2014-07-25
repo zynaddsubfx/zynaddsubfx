@@ -34,6 +34,8 @@ set_module_parameters ( Fl_Widget *o )
     o->color( FL_BLACK );
     o->image( module_backdrop );
     o->labeltype( FL_SHADOW_LABEL );
+    o->parent()->labeltype(FL_NO_LABEL);
+    o->parent()->box(FL_NO_BOX);
 #else
     o->box( FL_PLASTIC_UP_BOX );
     o->color( FL_CYAN );
