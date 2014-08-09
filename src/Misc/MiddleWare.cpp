@@ -306,13 +306,34 @@ class DummyDataObj:public rtosc::RtData
 static Fl_Osc_Interface *genOscInterface(struct MiddleWareImpl*);
 
 /* Implementation */
-struct MiddleWareImpl
+class MiddleWareImpl
 {
+    std::string get_tmp_file_name()
+    {
+         std::string tmp_file_name = "/tmp/zynaddsubfx_";
+         tmp_file_name += std::to_string(getpid());
+	 return tmp_file_name;
+    }
+public:
     MiddleWareImpl(void)
     {
         server = lo_server_new_with_proto(NULL, LO_UDP, liblo_error_cb);
         lo_server_add_method(server, NULL, NULL, handler_function, NULL);
         fprintf(stderr, "lo server running on %d\n", lo_server_get_port(server));
+        
+        {
+            std::string tmp_file_name = get_tmp_file_name();
+            if(0 == access(tmp_file_name.c_str(), F_OK)) {
+                fprintf(stderr, "Error: Cannot overwrite file %s. "
+                    "You should probably remove it.", tmp_file_name.c_str());
+                exit(EXIT_FAILURE);
+            }
+            FILE* tmp_fp = fopen(tmp_file_name.c_str(), "w");
+            if(!tmp_fp)
+                 fprintf(stderr, "Warning: could not create new file %s.\n", tmp_file_name.c_str());
+            fprintf(tmp_fp, "%d", (int)lo_server_get_port(server));
+            fclose(tmp_fp);
+        }
 
         //dummy callback for starters
         cb = [](void*, const char*){};
@@ -346,6 +367,8 @@ struct MiddleWareImpl
 
     ~MiddleWareImpl(void)
     {
+        remove(get_tmp_file_name().c_str());
+        
         warnMemoryLeaks();
 
         delete master;
