@@ -89,7 +89,8 @@ class SysEffSend {: {public Fl_Osc_Dial}
     code {} {}
   }
   Function {init(int neff1,int neff2)} {} {
-    code {//TODO figure out if this extra class is even needed
+    code {
+    //TODO figure out if this extra class is even needed
 minimum(0);
 maximum(127);
 step(1);
@@ -106,7 +107,7 @@ this->copy_label(tmp);} {}
   }
 } 
 
-class Panellistitem {: {public Fl_Osc_Group}
+class Panellistitem {open : {public Fl_Osc_Group}
 } {
   Function {make_window()} {open private
   } {
@@ -199,7 +200,9 @@ panellistitem->show();
 end();} {}
   }
   Function {refresh()} {} {
-    code {if ((int)bankui->cbwig->value()!=(npart+1))
+    code {
+
+if ((int)bankui->cbwig->value()!=(npart+1))
    panellistitemgroup->color(fl_rgb_color(160,160,160));
 else 
    panellistitemgroup->color(fl_rgb_color(50,190,240));
@@ -310,7 +313,8 @@ if (result) {
 
 osc->write("/save_xsz", "s", filename);
 
-/*if (result<0) fl_alert("Error: Could not save the file.");*/}
+/*if (result<0) fl_alert("Error: Could not save the file.");*/
+}
               xywh {30 30 100 20}
             }
             MenuItem {} {
@@ -386,7 +390,8 @@ if (result) {
 };
 
 osc->write("/save_xiz", "is", npart, filename);
-/*if (result<0) fl_alert("Error: Could not save the file.");*/}
+/*if (result<0) fl_alert("Error: Could not save the file.");*/
+}
               xywh {25 25 100 20} divider
             }
             MenuItem {} {
@@ -650,7 +655,7 @@ inseffectui->show();}
                 xywh {105 105 100 20} labelfont 1 labelsize 10
               }
             }
-            Fl_Group inseffectuigroup {open
+            Fl_Group inseffectuigroup {open selected
               xywh {10 210 380 95} box FLAT_BOX color 48
               class Fl_Osc_Group
             } {
@@ -915,9 +920,10 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))
 {
 	config.save();
 	*exitprogram=1;
-};} open
-      xywh {661 384 600 335} type Double
-      class Fl_Osc_Window visible
+};
+} open
+      xywh {661 384 600 335} type Double visible
+      class Fl_Osc_Window
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
@@ -1524,13 +1530,14 @@ delete selectuiwindow;} {}
 };} {}
   }
   Function {simplerefresh()} {} {
-    code {/*
+    code { 
+/*
      if (master->part[npart]->Pname[0]!=0) partname->label((char *)master->part[npart]->Pname);
      else partname->label("Click here to load a instrument");
      */
 
-simplelistitemgroup->redraw();} {}
-  }
+simplelistitemgroup->redraw();
+  }{}}
   Function {do_new_master_unconditional()} {} {
     code {delete microtonalui;
 
@@ -1546,7 +1553,8 @@ simplelistitemgroup->redraw();} {}
   }
   Function {do_load_master_unconditional(const char *filename, const char *display_name)} {return_type int
   } {
-    code {osc->write("/load_xmz", "s", filename);
+    code {
+    osc->write("/load_xmz", "s", filename);
     refresh_master_ui();
     updatepanel();
 
