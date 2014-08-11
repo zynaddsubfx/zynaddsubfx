@@ -308,11 +308,10 @@ static Fl_Osc_Interface *genOscInterface(struct MiddleWareImpl*);
 /* Implementation */
 class MiddleWareImpl
 {
-    std::string get_tmp_file_name()
+    //! returns file name to where UDP port is saved
+    std::string get_tmp_nam() const
     {
-         std::string tmp_file_name = "/tmp/zynaddsubfx_";
-         tmp_file_name += std::to_string(getpid());
-	 return tmp_file_name;
+         return "/tmp/zynaddsubfx_" + std::to_string(getpid());
     }
 public:
     MiddleWareImpl(void)
@@ -322,16 +321,18 @@ public:
         fprintf(stderr, "lo server running on %d\n", lo_server_get_port(server));
         
         {
-            std::string tmp_file_name = get_tmp_file_name();
-            if(0 == access(tmp_file_name.c_str(), F_OK)) {
+            std::string tmp_nam = get_tmp_nam();
+            if(0 == access(tmp_nam.c_str(), F_OK)) {
                 fprintf(stderr, "Error: Cannot overwrite file %s. "
-                    "You should probably remove it.", tmp_file_name.c_str());
+                    "You should probably remove it.", tmp_nam.c_str());
                 exit(EXIT_FAILURE);
             }
-            FILE* tmp_fp = fopen(tmp_file_name.c_str(), "w");
+            FILE* tmp_fp = fopen(tmp_nam.c_str(), "w");
             if(!tmp_fp)
-                 fprintf(stderr, "Warning: could not create new file %s.\n", tmp_file_name.c_str());
-            fprintf(tmp_fp, "%d", (int)lo_server_get_port(server));
+                fprintf(stderr, "Warning: could not create new file %s.\n",
+                    tmp_nam.c_str());
+            else
+                fprintf(tmp_fp, "%u", (unsigned)lo_server_get_port(server));
             fclose(tmp_fp);
         }
 
@@ -367,7 +368,7 @@ public:
 
     ~MiddleWareImpl(void)
     {
-        remove(get_tmp_file_name().c_str());
+        remove(get_tmp_nam().c_str());
         
         warnMemoryLeaks();
 
@@ -575,7 +576,7 @@ public:
                     lo_send_message(addr, rtmsg, msg);
                 }
             }
-        } else if(curr_url == "GUI") {
+        } else if(curr_url == "GUI" || !strcmp(rtmsg, "/close-ui")) {
             cb(ui, rtmsg); //GUI::raiseUi(gui, bToU->read());
         } else{
             lo_message msg  = lo_message_deserialise((void*)rtmsg,

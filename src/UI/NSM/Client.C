@@ -166,9 +166,7 @@ namespace NSM
     void
     Client::check(int timeout)
     {
-#ifdef LO_VERSION_GE_026
         if(lo_server_wait(_server, timeout))
-#endif
             while(lo_server_recv_noblock(_server, 0)) {}
     }
 

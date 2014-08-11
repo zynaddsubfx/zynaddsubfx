@@ -128,6 +128,9 @@ static rtosc::Ports ports = {
                 ui->panellistitem[i]->partvu->update(partvu[i]);
         }
     } END
+    BEGIN("close-ui") {
+        ui->close();
+    } END
 };
 
 void GUI::raiseUi(ui_handle_t gui, const char *message)
