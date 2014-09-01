@@ -214,9 +214,21 @@ void rescanForBanks(Bank &bank, Fl_Osc_Interface *osc)
 
 void loadBank(Bank &bank, int pos, Fl_Osc_Interface *osc)
 {
-    bank.loadbank(bank.banks[pos].dir);
-    for(int i=0; i<BANK_SIZE; ++i)
-        refreshBankView(bank, i, osc);
+    if(bank.bankpos != pos) {
+        bank.bankpos = pos;
+        bank.loadbank(bank.banks[pos].dir);
+        for(int i=0; i<BANK_SIZE; ++i)
+            refreshBankView(bank, i, osc);
+    }
+}
+
+void bankPos(Bank &bank, Fl_Osc_Interface *osc)
+{
+    char response[2048];
+
+    if(!rtosc_message(response, 2048, "/loadbank", "i", bank.bankpos))
+        errx(1, "Failure to handle bank update properly...");
+    osc->tryLink(response);
 }
 
 void createEffect(const char *msg)
@@ -684,6 +696,8 @@ public:
             rescanForBanks(master->bank, osc);
         } else if(!strcmp(msg, "/loadbank") && !strcmp(rtosc_argument_string(msg), "c")) {
             loadBank(master->bank, rtosc_argument(msg, 0).i, osc);
+        } else if(!strcmp(msg, "/loadbank") && !strcmp(rtosc_argument_string(msg), "")) {
+            bankPos(master->bank, osc);
         } else if(strstr(msg, "efftype") && !strcmp(rtosc_argument_string(msg), "c")) {
             createEffect(msg);
         } else if(objmap.find(obj_rl) != objmap.end()) {

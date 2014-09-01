@@ -72,6 +72,7 @@ class Bank
         };
 
         std::vector<bankstruct> banks;
+        int bankpos;
         
         struct ins_t {
             ins_t(void);

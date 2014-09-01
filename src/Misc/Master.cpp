@@ -70,6 +70,13 @@ static Ports localports = {
        d.reply("/free", "sb", "Part", sizeof(void*), &m->part[i]);
        m->part[i] = p;
        printf("part %d is now pointer %p\n", i, p);}},
+    {"Pvolume::c", rDoc("Master Volume"), 0,
+        [](const char *m, rtosc::RtData &d) {
+        if(rtosc_narguments(m)==0) {
+            d.reply(d.loc, "c", ((Master*)d.obj)->Pvolume);
+        } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='c') {
+            ((Master*)d.obj)->setPvolume(limit<char>(rtosc_argument(m,0).i,0,127));
+            d.broadcast(d.loc, "c", ((Master*)d.obj)->Pvolume);}}},
     {"volume::c", rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {

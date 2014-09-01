@@ -47,7 +47,7 @@
 using namespace std;
 
 Bank::Bank()
-    :defaultinsname(" ")
+    :bankpos(0), defaultinsname(" ")
 {
     clearbank();
     bankfiletitle = dirname;
