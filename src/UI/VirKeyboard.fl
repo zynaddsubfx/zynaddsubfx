@@ -370,7 +370,7 @@ virkeyboardwindow->hide();}
         label Cval
         callback {int ctl=midictl;
 
-osc->write("setController", "ccc", virkeys->midich,ctl,(int) o->value());
+osc->write("/setController", "ccc", virkeys->midich,ctl,(int) o->value());
 virkeys->take_focus();}
         tooltip {Controller value} xywh {605 10 15 115} type {Vert Fill} box ENGRAVED_BOX selection_color 229 labelsize 8 align 5 minimum 127 maximum 0 step 1 value 64 textsize 7
       }
@@ -450,7 +450,7 @@ virkeys->take_focus();}
       }
       Fl_Roller pitchwheelroller {
         label Pwh
-        callback {osc->write("setController", "ccc", virkeys->midich,C_pitchwheel,-(int) o->value());
+        callback {osc->write("/setController", "ccc", virkeys->midich,C_pitchwheel,-(int) o->value());
 virkeys->take_focus();}
         tooltip {Pitch Wheel} xywh {625 10 20 95} labelsize 8 align 1 when 3 minimum -8192 maximum 8192 step 64
       }

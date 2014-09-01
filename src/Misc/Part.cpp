@@ -62,6 +62,7 @@ static Ports partPorts = {
     rParam(Pvelsns,   "Velocity sensing"),
     rParam(Pveloffs,  "Velocity offset"),
     rToggle(Pnoteon,  "If the channel accepts note on events"),
+    rToggle(Pkitmode, "Kit mode enable"),
     rToggle(Pdrummode, "Drum mode enable"),
     rToggle(Ppolymode,  "Polyphoney mode"),
     rToggle(Plegatomode, "Legato enable"),
@@ -70,6 +71,8 @@ static Ports partPorts = {
     rString(info.Pauthor, MAX_INFO_TEXT_SIZE, "Instrument Author"),
     rString(info.Pcomments, MAX_INFO_TEXT_SIZE, "Instrument Comments"),
     rString(Pname, PART_MAX_NAME_LEN, "Kit User Specified Label"),
+    rArray(Pefxroute, NUM_PART_EFX,  "Effect Routing"),
+    rArrayT(Pefxbypass, NUM_PART_EFX, "If an effect is bypassed"),
     {"captureMin:", NULL, NULL, [](const char *, RtData &r)
         {Part *p = (Part*)r.obj; p->Pminkey = p->lastnote;}},
     {"captureMax:", NULL, NULL, [](const char *, RtData &r)
