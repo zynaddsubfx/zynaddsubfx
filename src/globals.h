@@ -26,6 +26,14 @@
 #define GLOBALS_H
 #include <stdint.h>
 
+#if defined(__clang__)
+#define REALTIME __attribute__((annotate("realtime")))
+#define NONREALTIME __attribute__((annotate("nonrealtime")))
+#else
+#define REALTIME
+#define NONREALTIME
+#endif
+
 //Forward declarations
 namespace rtosc{struct Ports; class ThreadLink;};
 extern rtosc::ThreadLink *bToU;

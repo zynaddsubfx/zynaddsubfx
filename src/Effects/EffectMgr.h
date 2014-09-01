@@ -47,24 +47,24 @@ class EffectMgr:public Presets
         ~EffectMgr();
 
         void add2XML(XMLwrapper *xml);
-        void defaults(void);
+        void defaults(void) REALTIME;
         void getfromXML(XMLwrapper *xml);
 
-        void out(float *smpsl, float *smpsr);
+        void out(float *smpsl, float *smpsr) REALTIME;
 
         void setdryonly(bool value);
 
         /**get the output(to speakers) volume of the systemeffect*/
         float sysefxgetvolume(void);
 
-        void cleanup(void);
+        void cleanup(void) REALTIME;
 
         void changeeffect(int nefx_);
         int geteffect(void);
-        void changepreset(unsigned char npreset);
+        void changepreset(unsigned char npreset) REALTIME;
         void changepreset_nolock(unsigned char npreset);
         unsigned char getpreset(void);
-        void seteffectpar(int npar, unsigned char value);
+        void seteffectpar(int npar, unsigned char value) REALTIME;
         void seteffectpar_nolock(int npar, unsigned char value);
         unsigned char geteffectpar(int npar);
 

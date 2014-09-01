@@ -53,23 +53,23 @@ class Part
         ~Part();
 
         // Copy misc parameters not stored in .xiz format
-        void cloneTraits(Part &part) const;
+        void cloneTraits(Part &part) const REALTIME;
 
         // Midi commands implemented
         void NoteOn(unsigned char note,
                     unsigned char velocity,
-                    int masterkeyshift);
-        void NoteOff(unsigned char note);
+                    int masterkeyshift) REALTIME;
+        void NoteOff(unsigned char note) REALTIME;
         void PolyphonicAftertouch(unsigned char note,
                                   unsigned char velocity,
-                                  int masterkeyshift);
-        void AllNotesOff(); //panic
-        void SetController(unsigned int type, int par);
-        void RelaseSustainedKeys(); //this is called when the sustain pedal is relased
-        void RelaseAllKeys(); //this is called on AllNotesOff controller
+                                  int masterkeyshift) REALTIME;
+        void AllNotesOff() REALTIME; //panic
+        void SetController(unsigned int type, int par) REALTIME;
+        void RelaseSustainedKeys() REALTIME; //this is called when the sustain pedal is relased
+        void RelaseAllKeys() REALTIME; //this is called on AllNotesOff controller
 
         /* The synthesizer part output */
-        void ComputePartSmps(); //Part output
+        void ComputePartSmps() REALTIME; //Part output
 
 
         //saves the instrument settings to a XML file

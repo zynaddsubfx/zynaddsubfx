@@ -25,6 +25,7 @@
 
 #include <string>
 #include <vector>
+#include "../globals.h"
 
 //entries in a bank
 #define BANK_SIZE 160
@@ -56,8 +57,8 @@ class Bank
         /**Swaps Slots*/
         void swapslot(unsigned int n1, unsigned int n2);
 
-        int loadbank(std::string bankdirname);
-        int newbank(std::string newbankdirname);
+        int loadbank(std::string bankdirname) NONREALTIME;
+        int newbank(std::string newbankdirname) NONREALTIME;
 
         std::string bankfiletitle; //this is shown on the UI of the bank (the title of the window)
         int locked();
