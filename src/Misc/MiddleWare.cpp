@@ -323,7 +323,7 @@ class MiddleWareImpl
     //! returns file name to where UDP port is saved
     std::string get_tmp_nam() const
     {
-         return "/tmp/zynaddsubfx_" + std::to_string(getpid());
+         return "/tmp/zynaddsubfx_" + to_s(getpid());
     }
 public:
     MiddleWareImpl(void)
