@@ -806,7 +806,7 @@ globalfinedetuneslider->do_callback();}
           Fl_Dial globalfinedetuneslider {
             label {Fine Detune}
             tooltip {global fine detune} xywh {95 73 45 45} box ROUND_UP_BOX labelsize 9 align 130 maximum 127 step 1 value 64
-            code0 {o->init("microtonal.Pglobalfinedetune");}
+            code0 {o->init("microtonal/Pglobalfinedetune");}
             class Fl_Osc_Dial
           }
         }
@@ -1393,7 +1393,7 @@ simpleglobalfinedetuneslider->do_callback();}
       Fl_Dial simpleglobalfinedetuneslider {
         label {Fine Detune}
         tooltip {global fine detune} xywh {80 50 30 30} box ROUND_UP_BOX labelsize 11 align 130 maximum 127 step 1 value 64
-        code0 {o->init("microtonal.Pglobalfinedetune");}
+        code0 {o->init("microtonal/Pglobalfinedetune");}
         class Fl_Osc_Dial
       }
       Fl_Counter simplenpartcounter {

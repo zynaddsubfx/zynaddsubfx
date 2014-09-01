@@ -53,7 +53,6 @@ static rtosc::Ports localPorts = {
     PC(hmagtype),
     PC(currentbasefunc),
     PC(basefuncpar),
-    PC(basefuncpar),
     PC(basefuncmodulation),
     PC(basefuncmodulationpar1),
     PC(basefuncmodulationpar2),

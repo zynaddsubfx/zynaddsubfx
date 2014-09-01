@@ -140,6 +140,41 @@ static Ports voicePorts = {
                 obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
             }
         }},
+    
+    //weird stuff for PCoarseDetune
+    {"FMdetunevalue:", NULL, NULL, [](const char *, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            //TODO check if this is accurate or if PCoarseDetune is utilized
+            //TODO do the same for the other engines
+            d.reply(d.loc, "f", getdetune(obj->PFMDetuneType, 0, obj->PFMDetune));
+        }},
+    {"FMoctave::c:i", NULL, NULL, [](const char *msg, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            if(!rtosc_narguments(msg)) {
+                int k=obj->PFMCoarseDetune/1024;
+                if (k>=8) k-=16;
+                d.reply(d.loc, "i", k);
+            } else {
+                int k=(int) rtosc_argument(msg, 0).i;
+                if (k<0) k+=16;
+                obj->PFMCoarseDetune = k*1024 + obj->PFMCoarseDetune%1024;
+            }
+        }},
+    {"FMcoarsedetune::c:i", NULL, NULL, [](const char *msg, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            if(!rtosc_narguments(msg)) {
+                int k=obj->PFMCoarseDetune%1024;
+                if (k>=512) k-=1024;
+                d.reply(d.loc, "i", k);
+            } else {
+                int k=(int) rtosc_argument(msg, 0).i;
+                if (k<0) k+=1024;
+                obj->PFMCoarseDetune = k + (obj->PFMCoarseDetune/1024)*1024;
+            }
+        }},
 };
 
 #undef  rObject

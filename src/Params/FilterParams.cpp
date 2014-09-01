@@ -102,6 +102,16 @@ rtosc::Ports FilterParams::ports = {
             if(rtosc_narguments(msg))
                 rChangeCb;
         }},
+    {"centerfreq:", NULL, NULL,
+        [](const char *, RtData &d) {
+            FilterParams *obj = (FilterParams *) d.obj;
+            d.reply(d.loc, "f", obj->getcenterfreq());
+        }},
+    {"octavesfreq:", NULL, NULL,
+        [](const char *, RtData &d) {
+            FilterParams *obj = (FilterParams *) d.obj;
+            d.reply(d.loc, "f", obj->getoctavesfreq());
+        }},
     //    "", NULL, [](){}},"/freq"
     //{"Pvowels#" FF_MAX_VOWELS "/formants#" FF_MAX_FORMANTS "/amp",
     //    "", NULL, [](){}},
