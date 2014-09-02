@@ -34,6 +34,7 @@ int main_thread = 0;
 #include <sys/syscall.h>
 
 #include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
 
 //template<int i>
 //void simpleset(const char *m, rtosc::RtData &d)
@@ -47,8 +48,9 @@ int main_thread = 0;
 //#undef  PARAMC
 //#define PARAMC(x) rtosc::Port{#x "::c", "::", NULL, \
 //    simpleset<__builtin_offsetof(class OscilGen, P##x)>}
-#define PC(x) PARAMC(OscilGen, P##x, x, "")
+#define PC(x) rParam(P##x, "undocumented oscilgen parameter")
 
+#define rObject OscilGen
 static rtosc::Ports localPorts = {
     PC(hmagtype),
     PC(currentbasefunc),

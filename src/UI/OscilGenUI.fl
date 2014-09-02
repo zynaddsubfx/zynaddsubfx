@@ -218,7 +218,6 @@ delete harmonic;} {}
   decl {std::string loc;} {private local
   }
 } 
-
 class OscilEditor {open : {public PresetsUI_}
 } {
   Function {make_window()} {open
@@ -276,9 +275,8 @@ oscildisplaygroup->redraw();}
           } {
             Fl_Choice hrndtype {
               label {H.rnd}
-              callback {//oscil->Pamprandtype=(int) o->value();}
               tooltip {Harmonic Amplitude Randomness} xywh {286 287 50 15} down_box BORDER_BOX labelsize 10 textsize 10
-              code0 {o->init("amprandtype");}
+              code0 {o->init("Pamprandtype");}
               class Fl_Osc_Choice
             } {
               MenuItem {} {
@@ -296,16 +294,15 @@ oscildisplaygroup->redraw();}
             }
             Fl_Dial hrnddial {
               tooltip {Oscillator's spectrum adjust parameter} xywh {345 285 18 18} maximum 127 step 1
-              code0 {o->init("amprandpower");}
+              code0 {o->init("Pamprandpower");}
               class Fl_Osc_Dial
             }
           }
           Fl_Choice magtype {
             label {Mag.Type}
-            callback {//oscil->Phmagtype=(int) o->value();
-redrawoscil();}
+            callback {redrawoscil();}
             xywh {75 285 65 20} down_box BORDER_BOX labelsize 11 when 1 textsize 11
-            code0 {o->init("hmagtype");}
+            code0 {o->init("Phmagtype");}
             class Fl_Osc_Choice
           } {
             MenuItem {} {
@@ -345,20 +342,20 @@ redrawoscil();}
           Fl_Dial bfslider {
             callback {redrawoscil();}
             tooltip {Base Function Parameter} xywh {525 285 20 20} minimum -64 maximum 63 step 1
-            code0 {o->init("basefuncpar");}
+            code0 {o->init("Pbasefuncpar");}
             class Fl_Osc_Dial
           }
           Fl_Choice bftype {
             label {Base.F..}
-            callback {//oscil->Pcurrentbasefunc=(int) o->value();
-
-basefuncdisplaygroup->redraw();
+            callback {basefuncdisplaygroup->redraw();
 redrawoscil();
 
-//if ((oscil->Pcurrentbasefunc==0)||(oscil->Pcurrentbasefunc==127)) basefuncmodulation->deactivate();
-      //else basefuncmodulation->activate();}
+if(!basefuncmodulation)
+return;
+if(o->value()==0||o->value()==127) basefuncmodulation->deactivate();
+else basefuncmodulation->activate();}
             xywh {375 290 90 15} down_box BORDER_BOX labelsize 10 align 5 when 1 textsize 11
-            code0 {o->init("currentbasefunc");}
+            code0 {o->init("Pcurrentbasefunc");}
             class Fl_Osc_Choice
           } {
             MenuItem {} {
@@ -441,15 +438,14 @@ redrawoscil();
           }
           Fl_Group basefuncmodulation {open
             xywh {555 281 169 25} box UP_FRAME
-            code0 {//if ((oscil->Pcurrentbasefunc==0)||(oscil->Pcurrentbasefunc==127)) basefuncmodulation->deactivate();}
-          } {
+            code0 {}
+            } {
             Fl_Choice bfmodtype {
               label {B.F.Mod.}
-              callback {//oscil->Pbasefuncmodulation=(int) o->value();
-basefuncdisplaygroup->redraw();
+              callback {basefuncdisplaygroup->redraw();
 redrawoscil();}
               tooltip {Base function modulation} xywh {604 286 50 15} down_box BORDER_BOX labelsize 10 when 1 textsize 10
-              code0 {o->init("basefuncmodulation");}
+              code0 {o->init("Pbasefuncmodulation");}
               class Fl_Osc_Choice
             } {
               MenuItem {} {
@@ -472,19 +468,19 @@ redrawoscil();}
             Fl_Dial bfmodpar1 {
               callback {redrawoscil();}
               tooltip {Oscillator's modulation parameter 1} xywh {664 286 15 15} maximum 127 step 1
-              code0 {o->init("basefuncmodulationpar1");}
+              code0 {o->init("Pbasefuncmodulationpar1");}
               class Fl_Osc_Dial
             }
             Fl_Dial bfmodpar2 {
               callback {redrawoscil();}
               tooltip {Oscillator's modulation parameter 2} xywh {684 286 15 15} maximum 127 step 1
-              code0 {o->init("basefuncmodulationpar2");}
+              code0 {o->init("Pbasefuncmodulationpar2");}
               class Fl_Osc_Dial
             }
             Fl_Dial bfmodpar3 {
               callback {redrawoscil();} selected
               tooltip {Oscillator's modulation parameter 3} xywh {704 286 15 15} maximum 127 step 1
-              code0 {o->init("basefuncmodulationpar3");}
+              code0 {o->init("Pbasefuncmodulationpar3");}
               class Fl_Osc_Dial
             }
           }
@@ -495,13 +491,9 @@ redrawoscil();}
 if (autoclearbutton->value()){
    for (int i=0;i<MAX_AD_HARMONICS;i++){
       h[i]->mag->value(64);
-      //oscil->Phmag[i]=64;
       h[i]->phase->value(64);
-      //oscil->Phphase[i]=64;
    };
-   //oscil->Phmag[0]=127;
 
-   //oscil->Pharmonicshift=0;
    harmonicshiftcounter->value(0);
 
    h[0]->mag->value(0);
@@ -530,11 +522,8 @@ redrawoscil();}
 
 for (int i=0;i<MAX_AD_HARMONICS;i++){
     h[i]->mag->value(64);
-    //oscil->Phmag[i]=64;
     h[i]->phase->value(64);
-    //oscil->Phphase[i]=64;
 };
-//oscil->Phmag[0]=127;
 h[0]->mag->value(0);
 
 //for (int i=0;i<MAX_AD_HARMONICS;i++){
@@ -552,11 +541,10 @@ redrawoscil();}
         } {
           Fl_Choice wshbutton {
             label {Wsh.}
-            callback {//oscil->Pwaveshapingfunction=(int) o->value();
-basefuncdisplaygroup->redraw();
+            callback {basefuncdisplaygroup->redraw();
 redrawoscil();}
             tooltip {Waveshaping function} xywh {170 320 55 20} down_box BORDER_BOX labelsize 10 when 1 textsize 10
-            code0 {o->init("waveshapingfunction");}
+            code0 {o->init("Pwaveshapingfunction");}
             class Fl_Osc_Choice
           } {
             MenuItem {} {
@@ -623,7 +611,7 @@ redrawoscil();}
           Fl_Dial wshpar {
             callback {redrawoscil();}
             tooltip {Waveshaping Parameter} xywh {265 318 20 20} minimum -64 maximum 63 step 1
-            code0 {o->init("waveshaping");}
+            code0 {o->init("Pwaveshaping");}
             class Fl_Osc_Dial
           }
           Fl_Value_Output wsparval {
@@ -639,11 +627,9 @@ redrawoscil();}
         } {
           Fl_Choice fltbutton {
             label Filter
-            callback {//oscil->Pfiltertype=(int) o->value();
-
-redrawoscil();}
+            callback {redrawoscil();}
             tooltip {Oscillator's filter type} xywh {320 318 50 20} down_box BORDER_BOX labelsize 10 when 1 textsize 10
-            code0 {o->init("filtertype");}
+            code0 {o->init("Pfiltertype");}
             class Fl_Osc_Choice
           } {
             MenuItem {} {
@@ -706,20 +692,18 @@ redrawoscil();}
           Fl_Dial filtervalue1 {
             callback {redrawoscil();}
             tooltip {Oscillator's filter parameter1} xywh {372 318 20 20} maximum 127 step 1
-            code0 {o->init("filterpar1");}
+            code0 {o->init("Pfilterpar1");}
             class Fl_Osc_Dial
           }
           Fl_Check_Button filterpref {
             label p
-            callback {//oscil->Pfilterbeforews=(int)o->value();
-
-redrawoscil();}
+            callback {redrawoscil();}
             tooltip {Apply the filter before the waveshaping} xywh {420 318 20 20} down_box DOWN_BOX labelsize 10 align 24
           }
           Fl_Dial filtervalue2 {
             callback {redrawoscil();}
             tooltip {Oscillator's filter parameter2} xywh {395 318 20 20} maximum 127 step 1
-            code0 {o->init("filterpar2");}
+            code0 {o->init("Pfilterpar2");}
             class Fl_Osc_Dial
           }
         }
@@ -728,10 +712,9 @@ redrawoscil();}
         } {
           Fl_Choice sabutton {
             label {Sp.adj.}
-            callback {//oscil->Psatype=(int) o->value();
-redrawoscil();}
+            callback {redrawoscil();}
             tooltip {Oscillator's spectrum adjust} xywh {635 318 60 20} down_box BORDER_BOX labelsize 10 when 1 textsize 10
-            code0 {o->init("satype");}
+            code0 {o->init("Psatype");}
             class Fl_Osc_Choice
           } {
             MenuItem {} {
@@ -754,7 +737,7 @@ redrawoscil();}
           Fl_Dial sadjpar {
             callback {redrawoscil();}
             tooltip {Oscillator's spectrum adjust parameter} xywh {700 318 20 20} maximum 127 step 1
-            code0 {o->init("sapar");}
+            code0 {o->init("Psapar");}
             class Fl_Osc_Dial
           }
         }
@@ -786,10 +769,9 @@ redrawoscil();}
         } {
           Fl_Choice adhrtype {
             label {Adpt.Harm.}
-            callback {//oscil->Padaptiveharmonics=(int) o->value();
-redrawoscil();}
+            callback {redrawoscil();}
             tooltip {The type of the addaptive harmonics} xywh {675 430 55 15} down_box BORDER_BOX labelsize 10 align 129 when 3 textsize 10
-            code0 {o->init("adaptiveharmonics");}
+            code0 {o->init("Padaptiveharmonics");}
             class Fl_Osc_Choice
           } {
             MenuItem {} {
@@ -833,14 +815,14 @@ redrawoscil();}
             label pow
             callback {redrawoscil();}
             tooltip {Adaptive harmonics power} xywh {705 465 25 25} labelsize 10 maximum 200 step 1
-            code0 {o->init("adaptiveharmonicspower");}
+            code0 {o->init("Padaptiveharmonicspower");}
             class Fl_Osc_Dial
           }
           Fl_Dial adhrbf {
             label baseF
             callback {redrawoscil();}
             tooltip {Adaptive harmonics base frequency} xywh {675 465 25 25} labelsize 10 maximum 255 step 1
-            code0 {o->init("adaptiveharmoicsbasefreq");}
+            code0 {o->init("Padaptiveharmoicsbasefreq");}
             class Fl_Osc_Dial
           }
           Fl_Slider adhrpar {
@@ -854,11 +836,9 @@ redrawoscil();}
         } {
           Fl_Choice modtype {
             label {Mod.}
-            callback {//oscil->Pmodulation=(int) o->value();
-
-redrawoscil();}
+            callback {redrawoscil();}
             tooltip modulation xywh {475 320 50 15} down_box BORDER_BOX labelsize 10 when 1 textsize 10
-            code0 {o->init("modtype");}
+            code0 {o->init("Pmodulation");}
             class Fl_Osc_Choice
           } {
             MenuItem {} {
@@ -881,19 +861,19 @@ redrawoscil();}
           Fl_Dial modpar1 {
             callback {redrawoscil();}
             tooltip {Oscillator's modulation parameter 1} xywh {535 320 15 15} maximum 127 step 1
-            code0 {o->init("modulationpar1");}
+            code0 {o->init("Pmodulationpar1");}
             class Fl_Osc_Dial
           }
           Fl_Dial modpar2 {
             callback {redrawoscil();}
             tooltip {Oscillator's modulation parameter 2} xywh {555 320 15 15} maximum 127 step 1
-            code0 {o->init("modulationpar2");}
+            code0 {o->init("Pmodulationpar2");}
             class Fl_Osc_Dial
           }
           Fl_Dial modpar3 {
             callback {redrawoscil();}
             tooltip {Oscillator's modulation parameter 3} xywh {575 320 15 15} maximum 127 step 1
-            code0 {o->init("modulationpar3");}
+            code0 {o->init("Pmodulationpar3");}
             class Fl_Osc_Dial
           }
         }
@@ -946,6 +926,16 @@ oscilo_base = NULL;
 oscils = NULL;
 oscils_base = NULL;
 
+osceditUI = NULL;
+dummy = NULL;
+applybutton = NULL;
+oscildisplaygroup = NULL;
+rndslider = NULL;
+hrndtype = NULL;
+magtype = NULL;
+basefuncdisplaygroup = NULL;
+bfslider = NULL;
+bftype = NULL;
 make_window();
 initialized = true;
 
@@ -966,44 +956,6 @@ delete osceditUI;} {}
   }
   Function {refresh()} {} {
     code {magtype->update();
-    ////rndslider->update();
-
-    ////hrndtype->update();
-    ////hrnddial->update();
-
-    ////bftype->update();
-    ////bfparval->update();
-    ////bfslider->update();
-
-    ////bfmodtype->update();
-    ////bfmodpar1->update();
-    ////bfmodpar2->update();
-    ////bfmodpar3->update();
-
-    ////wshbutton->update();
-    ////wsparval->update();
-    ////wshpar->update();
-
-    ////fltbutton->update();
-    ////filtervalue1->update();
-    ////filtervalue2->update();
-    ////filterpref->update();
-
-    ////modtype->update();
-    ////modpar1->update();
-    ////modpar2->update();
-    ////modpar3->update();
-
-    ////sabutton->update();
-    ////sadjpar->update();
-
-    ////harmonicshiftcounter->update();
-    ////harmonicshiftpre->update();
-
-    ////adhrtype->update();
-    ////adhrbf->update();
-    ////adhrpow->update();
-    ////adhrtype->update();
 
     for (int i=0;i<MAX_AD_HARMONICS;i++) h[i]->refresh();
 
@@ -1022,10 +974,7 @@ osc->requestValue(loc+"prepare");
 oscilo->update();
 oscils->update();
 oscilo_base->update();
-oscils_base->update();
-
-//oscildisplaygroup->redraw();
-//basefuncdisplaygroup->redraw();} {}
+oscils_base->update();} {}
   }
   decl {Oscilharmonic *h[MAX_AD_HARMONICS];} {private local
   }

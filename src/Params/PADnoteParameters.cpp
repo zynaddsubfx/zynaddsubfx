@@ -29,7 +29,7 @@
 using namespace rtosc;
 
 
-#define PC(x) PARAMC(PADnoteParameters, P##x, P##x, "undocumented")
+#define PC(x) rParam(P##x, "undocumented padnote parameter")
 
 template<int i>
 void simpleset(const char *m, rtosc::RtData &d)

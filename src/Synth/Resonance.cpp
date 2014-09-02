@@ -48,7 +48,6 @@ rtosc::Ports Resonance::ports = {
     {"octavesfreq:", rDoc("Get center freq of graph"), NULL,
             [](const char *, RtData &d)
         {d.reply(d.loc, "f", ((rObject*)d.obj)->getoctavesfreq());}},
-                                                                
 };
 
 Resonance::Resonance():Presets()
