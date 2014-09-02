@@ -331,7 +331,8 @@ int main(int argc, char *argv[])
                     ofstream outfile(optarguments);
                     s.prog_name    = "ZynAddSubFX";
                     s.p            = &Master::ports;
-                    s.uri          = "http://example.com/fake/url.xml";
+                    s.uri          = "http://example.com/fake/";
+                    s.doc_origin   = "http://example.com/fake/url.xml";
                     s.author_first = "Mark";
                     s.author_last  = "McCurry";
                     outfile << s;
