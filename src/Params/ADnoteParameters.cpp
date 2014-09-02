@@ -175,6 +175,13 @@ static Ports voicePorts = {
                 obj->PFMCoarseDetune = k + (obj->PFMCoarseDetune/1024)*1024;
             }
         }},
+
+    //Reader
+    {"unisonFrequencySpreadCents:", NULL, NULL, [](const char *, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            d.reply(d.loc, "f", obj->getUnisonFrequencySpreadCents());
+        }},
 };
 
 #undef  rObject
@@ -461,9 +468,11 @@ float ADnoteParameters::getBandwidthDetuneMultiplier()
  */
 
 float ADnoteParameters::getUnisonFrequencySpreadCents(int nvoice) {
-    float unison_spread = VoicePar[nvoice].Unison_frequency_spread / 127.0f;
-    unison_spread = powf(unison_spread * 2.0f, 2.0f) * 50.0f; //cents
-    return unison_spread;
+    return VoicePar[nvoice].getUnisonFrequencySpreadCents();
+}
+
+float ADnoteVoiceParam::getUnisonFrequencySpreadCents(void) const {
+    return powf(Unison_frequency_spread / 127.0 * 2.0f, 2.0f) * 50.0f; //cents
 }
 
 /*

@@ -123,9 +123,10 @@ struct ADnoteGlobalParam {
 struct ADnoteVoiceParam {
     void getfromXML(XMLwrapper *xml, unsigned nvoice);
     void add2XML(XMLwrapper *xml, bool fmoscilused);
-    void defaults();
+    void defaults(void);
     void enable(FFTwrapper *fft, Resonance *Reson);
-    void kill();
+    void kill(void);
+    float getUnisonFrequencySpreadCents(void) const;
     /** If the voice is enabled */
     unsigned char Enabled;
 
