@@ -22,6 +22,7 @@
 
 
 #include <iostream>
+#include <fstream>
 #include <map>
 #include <cmath>
 #include <cctype>
@@ -216,6 +217,9 @@ int main(int argc, char *argv[])
             "exec-after-init", 1, NULL, 'e'
         },
         {
+            "dump-oscdoc", 2, NULL, 'd'
+        },
+        {
             0, 0, 0, 0
         }
     };
@@ -320,6 +324,19 @@ int main(int argc, char *argv[])
             case 'e':
                 GETOP(execAfterInit);
                 break;
+            case 'd':
+                if(optarguments)
+                {
+                    rtosc::OscDocFormatter s;
+                    ofstream outfile(optarguments);
+                    s.prog_name    = "ZynAddSubFX";
+                    s.p            = &Master::ports;
+                    s.uri          = "http://example.com/fake/url.xml";
+                    s.author_first = "Mark";
+                    s.author_last  = "McCurry";
+                    outfile << s;
+                }
+                break;
             case '?':
                 cerr << "ERROR:Bad option or parameter.\n" << endl;
                 exitwithhelp = 1;
@@ -352,6 +369,7 @@ int main(int argc, char *argv[])
              << "  -O , --output\t\t\t\t Set Output Engine\n"
              << "  -I , --input\t\t\t\t Set Input Engine\n"
              << "  -e , --exec-after-init\t\t Run post-initialization script\n"
+             << "  -d , --dump-oscdoc=FILE\t\t Dump oscdoc xml to file\n"
              << endl;
 
         return 0;
