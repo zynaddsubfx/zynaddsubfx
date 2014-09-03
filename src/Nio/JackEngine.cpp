@@ -238,16 +238,18 @@ void JackEngine::stopAudio()
     for(int i = 0; i < 2; ++i) {
         jack_port_t *port = audio.ports[i];
         audio.ports[i] = NULL;
-        if(NULL != port)
+        if(jackClient != NULL && NULL != port)
             jack_port_unregister(jackClient, port);
     }
     midi.jack_sync = false;
     if(osc.oscport) {
-        jack_port_unregister(jackClient, osc.oscport);
+       if (jackClient != NULL) {
+               jack_port_unregister(jackClient, osc.oscport);
 #ifdef JACK_HAS_METADATA_API
-        jack_uuid_t uuid = jack_port_uuid(osc.oscport);
-        jack_remove_property(jackClient, uuid, "http://jackaudio.org/metadata/event-types");
+               jack_uuid_t uuid = jack_port_uuid(osc.oscport);
+               jack_remove_property(jackClient, uuid, "http://jackaudio.org/metadata/event-types");
 #endif // JACK_HAS_METADATA_API
+       }
     }
     if(!getMidiEn())
         disconnectJack();
