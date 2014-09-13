@@ -60,9 +60,8 @@ class SynthNote
         /**Release the key for the note and start release portion of envelopes.*/
         virtual void relasekey() = 0;
 
-        /**Return if note is finished.
-         * @return finished=1 unfinished=0*/
-        virtual int finished() const = 0;
+        /**Return if note is finished.*/
+        virtual bool finished() const = 0;
 
         virtual void legatonote(LegatoParams pars) = 0;
         /* For polyphonic aftertouch needed */

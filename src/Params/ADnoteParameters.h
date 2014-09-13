@@ -128,7 +128,7 @@ struct ADnoteVoiceParam {
     void kill(void);
     float getUnisonFrequencySpreadCents(void) const;
     /** If the voice is enabled */
-    unsigned char Enabled;
+    bool Enabled;
 
     /** How many subvoices are used in this voice */
     unsigned char Unison_size;
@@ -158,7 +158,7 @@ struct ADnoteVoiceParam {
     unsigned char PDelay;
 
     /** If the resonance is enabled for this voice */
-    unsigned char Presonance;
+    bool Presonance;
 
     // What external oscil should I use, -1 for internal OscilSmp&FMSmp
     short int Pextoscil, PextFMoscil;
@@ -195,11 +195,11 @@ struct ADnoteVoiceParam {
     unsigned char PDetuneType;
 
     /* Frequency Envelope */
-    unsigned char   PFreqEnvelopeEnabled;
+    bool PFreqEnvelopeEnabled;
     EnvelopeParams *FreqEnvelope;
 
     /* Frequency LFO */
-    unsigned char PFreqLfoEnabled;
+    bool PFreqLfoEnabled;
     LFOParams    *FreqLfo;
 
 
@@ -218,17 +218,17 @@ struct ADnoteVoiceParam {
     unsigned char PVolume;
 
     /* If the Volume negative */
-    unsigned char PVolumeminus;
+    bool PVolumeminus;
 
     /* Velocity sensing */
     unsigned char PAmpVelocityScaleFunction;
 
     /* Amplitude Envelope */
-    unsigned char   PAmpEnvelopeEnabled;
+    bool PAmpEnvelopeEnabled;
     EnvelopeParams *AmpEnvelope;
 
     /* Amplitude LFO */
-    unsigned char PAmpLfoEnabled;
+    bool PAmpLfoEnabled;
     LFOParams    *AmpLfo;
 
 
@@ -238,59 +238,60 @@ struct ADnoteVoiceParam {
     *************************/
 
     /* Voice Filter */
-    unsigned char PFilterEnabled;
+    bool PFilterEnabled;
     FilterParams *VoiceFilter;
 
     /* Filter Envelope */
-    unsigned char   PFilterEnvelopeEnabled;
+    bool PFilterEnvelopeEnabled;
     EnvelopeParams *FilterEnvelope;
 
     /* LFO Envelope */
-    unsigned char PFilterLfoEnabled;
+    bool PFilterLfoEnabled;
     LFOParams    *FilterLfo;
 
     /****************************
-    *   MODULLATOR PARAMETERS   *
+    *   MODULATOR PARAMETERS   *
     ****************************/
 
-    /* Modullator Parameters (0=off,1=Morph,2=RM,3=PM,4=FM.. */
+    /* Modulator Parameters (0=off,1=Morph,2=RM,3=PM,4=FM.. */
     unsigned char PFMEnabled;
 
-    /* Voice that I use as modullator instead of FMSmp.
+    /* Voice that I use as modulator instead of FMSmp.
        It is -1 if I use FMSmp(default).
        It maynot be equal or bigger than current voice */
     short int PFMVoice;
 
-    /* Modullator oscillator */
+    /* Modulator oscillator */
     OscilGen *FMSmp;
 
-    /* Modullator Volume */
+    /* Modulator Volume */
     unsigned char PFMVolume;
 
-    /* Modullator damping at higher frequencies */
+    /* Modulator damping at higher frequencies */
     unsigned char PFMVolumeDamp;
 
-    /* Modullator Velocity Sensing */
+    /* Modulator Velocity Sensing */
     unsigned char PFMVelocityScaleFunction;
 
-    /* Fine Detune of the Modullator*/
+    /* Fine Detune of the Modulator*/
     unsigned short int PFMDetune;
 
-    /* Coarse Detune of the Modullator */
+    /* Coarse Detune of the Modulator */
     unsigned short int PFMCoarseDetune;
 
     /* The detune type */
     unsigned char PFMDetuneType;
 
-    /* Frequency Envelope of the Modullator */
-    unsigned char   PFMFreqEnvelopeEnabled;
+    /* Frequency Envelope of the Modulator */
+    bool PFMFreqEnvelopeEnabled;
     EnvelopeParams *FMFreqEnvelope;
 
-    /* Frequency Envelope of the Modullator */
-    unsigned char   PFMAmpEnvelopeEnabled;
+    /* Frequency Envelope of the Modulator */
+    bool PFMAmpEnvelopeEnabled;
     EnvelopeParams *FMAmpEnvelope;
 
     static rtosc::Ports &ports;
+    ADnoteGlobalParam &parent;
 };
 
 class ADnoteParameters:public PresetsArray
@@ -311,6 +312,14 @@ class ADnoteParameters:public PresetsArray
         int get_unison_size_index(int nvoice);
         void set_unison_size_index(int nvoice, int index);
         static rtosc::Ports &ports;
+
+        //RT Sample data
+        size_t nsamples;
+        float  freqs[PAD_MAX_SAMPLES];
+        //TODO some cache analysis should really be done here
+        float *samples[NUM_VOICES][2][PAD_MAX_SAMPLES];
+
+
     private:
         void defaults(int n); //n is the nvoice
 

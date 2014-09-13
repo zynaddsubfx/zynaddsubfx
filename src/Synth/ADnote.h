@@ -52,7 +52,7 @@ class ADnote:public SynthNote
 
         int noteout(float *outl, float *outr);
         void relasekey();
-        int finished() const;
+        bool finished() const;
     private:
 
         /**Changes the frequency of an oscillator.

@@ -459,7 +459,7 @@ void Master::AudioOut(float *outl, float *outr)
         //fprintf(stdout, "address '%s'\n", uToB->peak());
         ports.dispatch(msg+1, d);
         events++;
-        if(!d.matches) {// && !ports.apropos(msg)) {
+        if(!d.matches && !ports.apropos(msg) && false) {
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
             fprintf(stderr, "Unknown address '%s'\n", uToB->peak());
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);

@@ -934,7 +934,7 @@ bool OscilGen::needPrepare(void)
 /*
  * Get the oscillator function
  */
-short int OscilGen::get(float *smps, float freqHz, int resonance)
+short int OscilGen::get(float *smps, float freqHz, bool resonance)
 {
     if(needPrepare())
         prepare();
@@ -977,7 +977,7 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
 
     // Randomness (each harmonic), the block type is computed
     // in ADnote by setting start position according to this setting
-    if((Prand > 64) && (freqHz >= 0.0f) && (!ADvsPAD)) {
+    if(Prand > 64 && freqHz >= 0.0f && !ADvsPAD) {
         const float rnd = PI * powf((Prand - 64.0f) / 64.0f, 2.0f);
         for(int i = 1; i < nyquist - 1; ++i) //to Nyquist only for AntiAliasing
             outoscilFFTfreqs[i] *=
@@ -1009,12 +1009,12 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
         sprng(realrnd + 1);
     }
 
-    if((freqHz > 0.1f) && (resonance != 0))
+    if(freqHz > 0.1f && resonance)
         res->applyres(nyquist - 1, outoscilFFTfreqs, freqHz);
 
     rmsNormalize(outoscilFFTfreqs);
 
-    if((ADvsPAD) && (freqHz > 0.1f)) //in this case the smps will contain the freqs
+    if(ADvsPAD && freqHz > 0.1f) //in this case the smps will contain the freqs
         for(int i = 1; i < synth->oscilsize / 2; ++i)
             smps[i - 1] = abs(outoscilFFTfreqs, i);
     else {
