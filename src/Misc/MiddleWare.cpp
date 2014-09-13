@@ -18,8 +18,8 @@
 #include "Master.h"
 #include "Part.h"
 #include "../Params/ADnoteParameters.h"
+#include "../Params/SUBnoteParameters.h"
 #include "../Params/PADnoteParameters.h"
-#include "../Effects/EffectMgr.h"
 
 #include <string>
 #include <future>
@@ -136,23 +136,11 @@ void deallocate(const char *str, void *v)
         delete (Part*)v;
     else if(!strcmp(str, "Master"))
         delete (Master*)v;
-    else if(!strcmp(str, "EffectMgr"))
-        delete (EffectMgr*)v;
     else if(!strcmp(str, "fft_t"))
         delete[] (fft_t*)v;
     else
         fprintf(stderr, "Unknown type '%s', leaking pointer %p!!\n", str, v);
 }
-
-
-
-/**
- * - Fetches liblo messages and forward them to the backend
- * - Grabs backend messages and distributes them to the frontends
- */
-//void osc_check(cb_t cb, void *ui)
-//{
-//}
 
 
 
@@ -231,24 +219,6 @@ void bankPos(Bank &bank, Fl_Osc_Interface *osc)
     osc->tryLink(response);
 }
 
-void createEffect(const char *msg)
-{
-    const bool insertion = !strstr(msg, "sysefx");
-    const int  efftype   = rtosc_argument(msg, 0).i;
-    EffectMgr *em        = new EffectMgr(insertion);
-    em->changeeffect(efftype);
-    uToB->write(msg, "b", sizeof(EffectMgr*), &em);
-}
-
-//
-//static rtosc::Ports padPorts= {
-//    {"prepare:", "::Prepares the padnote instance", 0, }
-//};
-//
-//static rtosc::Ports oscilPorts = {
-//    {"prepare:", "", 0, }
-//};
-
 class DummyDataObj:public rtosc::RtData
 {
     public:
@@ -308,12 +278,70 @@ class DummyDataObj:public rtosc::RtData
 };
 
 
-/**
- * Forwarding logic
- * if(!dispatch(msg, data))
- *     forward(msg)
- */
+//Storage For Objects which need to be interfaced with outside the realtime
+//thread (aka they have long lived operations which can be done out-of-band)
+struct NonRtObjStore
+{
+    std::map<std::string, void*> objmap;
 
+    void extractMaster(Master *master)
+    {
+        for(int i=0; i < NUM_MIDI_PARTS; ++i) {
+            extractPart(master->part[i], i);
+        }
+    }
+
+    void extractPart(Part *part, int i)
+    {
+        for(int j=0; j < NUM_KIT_ITEMS; ++j) {
+            std::string base = "/part"+to_s(i)+"/kit"+to_s(j)+"/";
+            auto &obj = part->kit[i];
+            if(obj.padpars) {
+                objmap[base+"padpars/"]       = obj.padpars;
+                objmap[base+"padpars/oscil/"] = obj.padpars->oscilgen;
+            } else {
+                objmap[base+"padpars/"]       = nullptr;
+                objmap[base+"padpars/oscil/"] = nullptr;
+            }
+
+            for(int k=0; k<NUM_VOICES; ++k) {
+                std::string nbase = base+"adpars/voice"+to_s(k)+"/";
+                if(obj.adpars) {
+                    auto &nobj = obj.adpars->VoicePar[k];
+                    objmap[nbase+"oscil/"]     = nobj.OscilSmp;
+                    objmap[nbase+"mod-oscil/"] = nobj.FMSmp;
+                } else {
+                    objmap[nbase+"oscil/"]     = nullptr;
+                    objmap[nbase+"mod-oscil/"] = nullptr;
+                }
+            }
+        }
+    }
+
+    void clear(void)
+    {
+        objmap.clear();
+    }
+
+    bool has(std::string loc)
+    {
+        return objmap.find(loc) != objmap.end();
+    }
+
+    void *get(std::string loc)
+    {
+        return objmap[loc];
+    }
+};
+
+//Parameter Storage Used For Controlled/Safe Allocations
+//(and possibly saving/loading)
+struct ParamStore
+{
+    ADnoteParameters  *add[NUM_MIDI_PARTS][NUM_KIT_ITEMS];
+    SUBnoteParameters *sub[NUM_MIDI_PARTS][NUM_KIT_ITEMS];
+    PADnoteParameters *pad[NUM_MIDI_PARTS][NUM_KIT_ITEMS];
+};
 
 static Fl_Osc_Interface *genOscInterface(struct MiddleWareImpl*);
 
@@ -356,20 +384,7 @@ public:
         osc    = genOscInterface(this);
 
         //Grab objects of interest from master
-        for(int i=0; i < NUM_MIDI_PARTS; ++i) {
-            for(int j=0; j < NUM_KIT_ITEMS; ++j) {
-                objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/padpars/"] =
-                    master->part[i]->kit[j].padpars;
-                objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/padpars/oscil/"] =
-                    master->part[i]->kit[j].padpars->oscilgen;
-                for(int k=0; k<NUM_VOICES; ++k) {
-                    objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/adpars/voice"+to_s(k)+"/oscil/"] =
-                        master->part[i]->kit[j].adpars->VoicePar[k].OscilSmp;
-                    objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/adpars/voice"+to_s(k)+"/mod-oscil/"] =
-                        master->part[i]->kit[j].adpars->VoicePar[k].FMSmp;
-                }
-            }
-        }
+        obj_store.extractMaster(master);
 
         //Null out Load IDs
         for(int i=0; i < NUM_MIDI_PARTS; ++i) {
@@ -472,7 +487,6 @@ public:
 
     void loadPart(int npart, const char *filename, Master *master, Fl_Osc_Interface *osc)
     {
-        printf("loading part...\n");
         actual_load[npart]++;
 
         if(actual_load[npart] != pending_load[npart])
@@ -480,43 +494,23 @@ public:
         assert(actual_load[npart] <= pending_load[npart]);
 
         auto alloc = std::async(std::launch::async, 
-                [master,filename,this,npart](){Part *p = new Part(&master->microtonal, master->fft);
+                [master,filename,this,npart](){Part *p = new Part(*master->memory, &master->microtonal, master->fft);
                 if(p->loadXMLinstrument(filename))
                 fprintf(stderr, "FAILED TO LOAD PART!!\n");
 
                 p->applyparameters([this,npart]{printf("%d vs %d\n", (int)actual_load[npart], (int)pending_load[npart]);return actual_load[npart] != pending_load[npart];});
                 return p;});
-        //fprintf(stderr, "loading a part!!\n");
+
         //Load the part
         if(idle) {
             while(alloc.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
-                printf("idle...\n");
                 idle();
             }
-        } else
-            printf("no idle\n");
-        printf("part allocated...\n");
-        Part *p = alloc.get();//new Part(&master->microtonal, master->fft);
-        //fprintf(stderr, "Part[%d] is stored in '%s'\n", npart, filename);
-        //if(p->loadXMLinstrument(filename))
-        //    fprintf(stderr, "FAILED TO LOAD PART!!\n");
-
-        //p->applyparameters();
-
-        //Update the resource locators
-        string base = "/part"+to_s(npart)+"/kit";
-        for(int j=0; j < NUM_KIT_ITEMS; ++j) {
-            objmap[base+to_s(j)+"/padpars/"] =
-                p->kit[j].padpars;
-            objmap[base+to_s(j)+"/padpars/oscil/"] =
-                p->kit[j].padpars->oscilgen;
-            for(int k=0; k<NUM_VOICES; ++k) {
-                objmap[base+to_s(j)+"/adpars/voice"+to_s(k)+"/oscil/"] =
-                    p->kit[j].adpars->VoicePar[k].OscilSmp;
-                objmap[base+to_s(j)+"/adpars/voice"+to_s(k)+"/mod-oscil/"] =
-                    p->kit[j].adpars->VoicePar[k].FMSmp;
-            }
         }
+
+        Part *p = alloc.get();
+
+        obj_store.extractPart(p, npart);
 
         //Give it to the backend and wait for the old part to return for
         //deallocation
@@ -534,21 +528,8 @@ public:
         m->applyparameters();
 
         //Update resource locator table
-        objmap.clear();
-        for(int i=0; i < NUM_MIDI_PARTS; ++i) {
-            for(int j=0; j < NUM_KIT_ITEMS; ++j) {
-                objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/padpars/"] =
-                    m->part[i]->kit[j].padpars;
-                objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/padpars/oscil/"] =
-                    m->part[i]->kit[j].padpars->oscilgen;
-                for(int k=0; k<NUM_VOICES; ++k) {
-                    objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/adpars/voice"+to_s(k)+"/oscil/"] =
-                        m->part[i]->kit[j].adpars->VoicePar[k].OscilSmp;
-                    objmap["/part"+to_s(i)+"/kit"+to_s(j)+"/adpars/voice"+to_s(k)+"/mod-oscil/"] =
-                        m->part[i]->kit[j].adpars->VoicePar[k].FMSmp;
-                }
-            }
-        }
+        obj_store.clear();
+        obj_store.extractMaster(m);
 
         master = m;
 
@@ -589,7 +570,7 @@ public:
                 }
             }
         } else if(curr_url == "GUI" || !strcmp(rtmsg, "/close-ui")) {
-            cb(ui, rtmsg); //GUI::raiseUi(gui, bToU->read());
+            cb(ui, rtmsg);
         } else{
             lo_message msg  = lo_message_deserialise((void*)rtmsg,
                     rtosc_message_length(rtmsg, bToU->buffer_size()), NULL);
@@ -618,20 +599,12 @@ public:
         DummyDataObj d(buffer, 1024, v, cb, ui, osc);
         strcpy(buffer, path.c_str());
 
-        //for(auto &p:OscilGen::ports.ports) {
-        //    if(strstr(p.name,msg) && strstr(p.metadata, "realtime") &&
-        //            !strcmp("b", rtosc_argument_string(msg))) {
-        //        printf("sending along packet '%s'...\n", msg);
-        //        return false;
-        //    }
-        //}
-
         PADnoteParameters::ports.dispatch(msg, d);
         if(!d.matches) {
-            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
-            //fprintf(stderr, "Unknown location '%s%s'<%s>\n",
-            //        path.c_str(), msg, rtosc_argument_string(msg));
-            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
+            fprintf(stderr, "Unknown location '%s%s'<%s>\n",
+                    path.c_str(), msg, rtosc_argument_string(msg));
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
         }
 
         return true;
@@ -698,19 +671,17 @@ public:
             loadBank(master->bank, rtosc_argument(msg, 0).i, osc);
         } else if(!strcmp(msg, "/loadbank") && !strcmp(rtosc_argument_string(msg), "")) {
             bankPos(master->bank, osc);
-        } else if(strstr(msg, "efftype") && !strcmp(rtosc_argument_string(msg), "c")) {
-            createEffect(msg);
-        } else if(objmap.find(obj_rl) != objmap.end()) {
+        } else if(obj_store.has(obj_rl)) {
             //try some over simplified pattern matching
             if(strstr(msg, "oscil/")) {
-                if(!handleOscil(obj_rl, last_path+1, objmap[obj_rl]))
+                if(!handleOscil(obj_rl, last_path+1, obj_store.get(obj_rl)))
                     uToB->raw_write(msg);
             //else if(strstr(obj_rl.c_str(), "kititem"))
             //    handleKitItem(obj_rl, objmap[obj_rl],atoi(rindex(msg,'m')+1),rtosc_argument(msg,0).T);
             } else if(strstr(msg, "padpars/prepare"))
-                preparePadSynth(obj_rl,(PADnoteParameters *) objmap[obj_rl]);
+                preparePadSynth(obj_rl,(PADnoteParameters *) obj_store.get(obj_rl));
             else if(strstr(msg, "padpars")) {
-                if(!handlePAD(obj_rl, last_path+1, objmap[obj_rl]))
+                if(!handlePAD(obj_rl, last_path+1, obj_store.get(obj_rl)))
                     uToB->raw_write(msg);
             } else //just forward the message
                 uToB->raw_write(msg);
@@ -766,7 +737,7 @@ public:
     /**
      * TODO These pointers may invalidate when part/master is loaded via xml
      */
-    std::map<std::string, void*> objmap;
+    NonRtObjStore obj_store;
 
     //This code will own the pointer to master, be prepared for odd things if
     //this assumption is broken
@@ -775,6 +746,15 @@ public:
     //The ONLY means that any chunk of UI code should have for interacting with the
     //backend
     Fl_Osc_Interface *osc;
+
+    //Information to keep track of which kit parts are active
+    //Two classes of events are observed
+    //
+    //1. When a kit transitions from inactive to active then a set of parameter
+    //   data must be allocated (no deallocation ever occurs here)
+    //2. When a part is rebuilt from a pointer swap all kit activity is set to
+    //   their new values
+    ParamStore kits;
 
     void(*idle)(void);
     cb_t cb;

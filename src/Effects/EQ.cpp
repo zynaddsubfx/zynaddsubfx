@@ -23,9 +23,10 @@
 #include <cmath>
 #include "EQ.h"
 #include "../DSP/AnalogFilter.h"
+#include "../Misc/Allocator.h"
 
-EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, unsigned int srate, int bufsize)
-    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, srate, bufsize)
+EQ::EQ(EffectParams pars)
+    :Effect(pars)
 {
     for(int i = 0; i < MAX_EQ_BANDS; ++i) {
         filter[i].Ptype   = 0;
@@ -33,8 +34,8 @@ EQ::EQ(bool insertion_, float *efxoutl_, float *efxoutr_, unsigned int srate, in
         filter[i].Pgain   = 64;
         filter[i].Pq      = 64;
         filter[i].Pstages = 0;
-        filter[i].l = new AnalogFilter(6, 1000.0f, 1.0f, 0, srate, bufsize);
-        filter[i].r = new AnalogFilter(6, 1000.0f, 1.0f, 0, srate, bufsize);
+        filter[i].l = memory.alloc<AnalogFilter>(6, 1000.0f, 1.0f, 0, pars.srate, pars.bufsize);
+        filter[i].r = memory.alloc<AnalogFilter>(6, 1000.0f, 1.0f, 0, pars.srate, pars.bufsize);
     }
     //default values
     Pvolume = 50;

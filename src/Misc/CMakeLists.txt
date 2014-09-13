@@ -13,6 +13,7 @@ set(zynaddsubfx_misc_SRCS
 	Misc/WavFile.cpp
 	Misc/WaveShapeSmps.cpp
     Misc/MiddleWare.cpp
+    Misc/Allocator.cpp
 )
 
 

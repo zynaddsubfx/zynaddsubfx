@@ -28,34 +28,27 @@
 
 #include "../globals.h"
 #include "../Misc/Util.h"
+#include "../Misc/Allocator.h"
 #include "../DSP/Filter.h"
 #include "OscilGen.h"
 #include "ADnote.h"
 
 
-ADnote::ADnote(ADnoteParameters *pars,
-               Controller *ctl_,
-               float freq,
-               float velocity,
-               int portamento_,
-               int midinote_,
-               bool besilent)
-    :SynthNote(freq, velocity, portamento_, midinote_, besilent)
+ADnote::ADnote(ADnoteParameters *pars, SynthParams &spars)
+    :SynthNote(spars)
 {
-    tmpwavel = new float [synth->buffersize];
-    tmpwaver = new float [synth->buffersize];
-    bypassl  = new float [synth->buffersize];
-    bypassr  = new float [synth->buffersize];
+    tmpwavel = memory.valloc<float>(synth->buffersize);
+    tmpwaver = memory.valloc<float>(synth->buffersize);
+    bypassl  = memory.valloc<float>(synth->buffersize);
+    bypassr  = memory.valloc<float>(synth->buffersize);
 
     partparams = pars;
-    ctl = ctl_;
-    portamento  = portamento_;
-    midinote    = midinote_;
+    ctl = &spars.ctl;
+    portamento  = spars.portamento;
+    midinote    = spars.note;
     NoteEnabled = ON;
-    basefreq    = freq;
-    if(velocity > 1.0f)
-        velocity = 1.0f;
-    this->velocity = velocity;
+    basefreq    = spars.frequency;
+    velocity    = spars.velocity;
     time   = 0.0f;
     stereo = pars->GlobalPar.PStereo;
 
@@ -86,7 +79,7 @@ ADnote::ADnote(ADnoteParameters *pars,
                     pars->GlobalPar.PPunchVelocitySensing));
         float time =
             powf(10, 3.0f * pars->GlobalPar.PPunchTime / 127.0f) / 10000.0f;   //0.1f .. 100 ms
-        float stretch = powf(440.0f / freq,
+        float stretch = powf(440.0f / spars.frequency,
                              pars->GlobalPar.PPunchStretch / 64.0f);
         NoteGlobalPar.Punch.dt = 1.0f / (time * synth->samplerate_f * stretch);
     }
@@ -116,9 +109,9 @@ ADnote::ADnote(ADnoteParameters *pars,
         //compute unison
         unison_size[nvoice] = unison;
 
-        unison_base_freq_rap[nvoice] = new float[unison];
-        unison_freq_rap[nvoice]      = new float[unison];
-        unison_invert_phase[nvoice]  = new bool[unison];
+        unison_base_freq_rap[nvoice] = memory.valloc<float>(unison);
+        unison_freq_rap[nvoice]      = memory.valloc<float>(unison);
+        unison_invert_phase[nvoice]  = memory.valloc<bool>(unison);
         float unison_spread = pars->getUnisonFrequencySpreadCents(
             nvoice);
         float unison_real_spread = powf(2.0f, (unison_spread * 0.5f) / 1200.0f);
@@ -166,8 +159,8 @@ ADnote::ADnote(ADnoteParameters *pars,
                                                   + (unison_base_freq_rap[
                                                          nvoice][k] - 1.0f)
                                                   * (1.0f - unison_vibratto_a);
-        unison_vibratto[nvoice].step      = new float[unison];
-        unison_vibratto[nvoice].position  = new float[unison];
+        unison_vibratto[nvoice].step      = memory.valloc<float>(unison);
+        unison_vibratto[nvoice].position  = memory.valloc<float>(unison);
         unison_vibratto[nvoice].amplitude =
             (unison_real_spread - 1.0f) * unison_vibratto_a;
 
@@ -216,14 +209,14 @@ ADnote::ADnote(ADnoteParameters *pars,
         }
 
 
-        oscfreqhi[nvoice]   = new int[unison];
-        oscfreqlo[nvoice]   = new float[unison];
-        oscfreqhiFM[nvoice] = new unsigned int[unison];
-        oscfreqloFM[nvoice] = new float[unison];
-        oscposhi[nvoice]    = new int[unison];
-        oscposlo[nvoice]    = new float[unison];
-        oscposhiFM[nvoice]  = new unsigned int[unison];
-        oscposloFM[nvoice]  = new float[unison];
+        oscfreqhi[nvoice]   = memory.valloc<int>(unison);
+        oscfreqlo[nvoice]   = memory.valloc<float>(unison);
+        oscfreqhiFM[nvoice] = memory.valloc<unsigned int>(unison);
+        oscfreqloFM[nvoice] = memory.valloc<float>(unison);
+        oscposhi[nvoice]    = memory.valloc<int>(unison);
+        oscposlo[nvoice]    = memory.valloc<float>(unison);
+        oscposhiFM[nvoice]  = memory.valloc<unsigned int>(unison);
+        oscposloFM[nvoice]  = memory.valloc<float>(unison);
 
         NoteVoicePar[nvoice].Enabled     = ON;
         NoteVoicePar[nvoice].fixedfreq   = pars->VoicePar[nvoice].Pfixedfreq;
@@ -276,7 +269,7 @@ ADnote::ADnote(ADnoteParameters *pars,
 
         //the extra points contains the first point
         NoteVoicePar[nvoice].OscilSmp =
-            new float[synth->oscilsize + OSCIL_SMP_EXTRA_SAMPLES];
+            memory.valloc<float>(synth->oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
 
         //Get the voice's oscil or external's voice oscil
         int vc = nvoice;
@@ -383,7 +376,7 @@ ADnote::ADnote(ADnoteParameters *pars,
             VelF(velocity,
                  partparams->VoicePar[nvoice].PFMVelocityScaleFunction);
 
-        FMoldsmp[nvoice] = new float [unison];
+        FMoldsmp[nvoice] = memory.valloc<float>(unison);
         for(int k = 0; k < unison; ++k)
             FMoldsmp[nvoice][k] = 0.0f;                     //this is for FM (integration)
 
@@ -400,9 +393,9 @@ ADnote::ADnote(ADnoteParameters *pars,
             max_unison = unison_size[nvoice];
 
 
-    tmpwave_unison = new float *[max_unison];
+    tmpwave_unison = memory.valloc<float*>(max_unison);
     for(int k = 0; k < max_unison; ++k) {
-        tmpwave_unison[k] = new float[synth->buffersize];
+        tmpwave_unison[k] = memory.valloc<float>(synth->buffersize);
         memset(tmpwave_unison[k], 0, synth->bufferbytes);
     }
 
@@ -413,22 +406,21 @@ ADnote::ADnote(ADnoteParameters *pars,
 // initparameters() stuck together with some lines removed so that it
 // only alter the already playing note (to perform legato). It is
 // possible I left stuff that is not required for this.
-void ADnote::legatonote(float freq, float velocity, int portamento_,
-                        int midinote_, bool externcall)
+void ADnote::legatonote(LegatoParams lpars)
 {
     ADnoteParameters *pars = partparams;
 
     // Manage legato stuff
-    if(legato.update(freq, velocity, portamento_, midinote_, externcall))
+    if(legato.update(lpars))
         return;
 
-    portamento = portamento_;
-    midinote   = midinote_;
-    basefreq   = freq;
+    portamento = lpars.portamento;
+    midinote   = lpars.midinote;
+    basefreq   = lpars.frequency;
 
     if(velocity > 1.0f)
         velocity = 1.0f;
-    this->velocity = velocity;
+    velocity = lpars.velocity;
 
     NoteGlobalPar.Detune = getdetune(pars->GlobalPar.PDetuneType,
                                      pars->GlobalPar.PCoarseDetune,
@@ -665,23 +657,23 @@ void ADnote::legatonote(float freq, float velocity, int portamento_,
  */
 void ADnote::KillVoice(int nvoice)
 {
-    delete [] oscfreqhi[nvoice];
-    delete [] oscfreqlo[nvoice];
-    delete [] oscfreqhiFM[nvoice];
-    delete [] oscfreqloFM[nvoice];
-    delete [] oscposhi[nvoice];
-    delete [] oscposlo[nvoice];
-    delete [] oscposhiFM[nvoice];
-    delete [] oscposloFM[nvoice];
+    memory.devalloc(oscfreqhi[nvoice]);
+    memory.devalloc(oscfreqlo[nvoice]);
+    memory.devalloc(oscfreqhiFM[nvoice]);
+    memory.devalloc(oscfreqloFM[nvoice]);
+    memory.devalloc(oscposhi[nvoice]);
+    memory.devalloc(oscposlo[nvoice]);
+    memory.devalloc(oscposhiFM[nvoice]);
+    memory.devalloc(oscposloFM[nvoice]);
 
-    delete [] unison_base_freq_rap[nvoice];
-    delete [] unison_freq_rap[nvoice];
-    delete [] unison_invert_phase[nvoice];
-    delete [] FMoldsmp[nvoice];
-    delete [] unison_vibratto[nvoice].step;
-    delete [] unison_vibratto[nvoice].position;
+    memory.devalloc(unison_base_freq_rap[nvoice]);
+    memory.devalloc(unison_freq_rap[nvoice]);
+    memory.devalloc(unison_invert_phase[nvoice]);
+    memory.devalloc(FMoldsmp[nvoice]);
+    memory.devalloc(unison_vibratto[nvoice].step);
+    memory.devalloc(unison_vibratto[nvoice].position);
 
-    NoteVoicePar[nvoice].kill();
+    NoteVoicePar[nvoice].kill(memory);
 }
 
 /*
@@ -694,11 +686,10 @@ void ADnote::KillNote()
             KillVoice(nvoice);
 
         if(NoteVoicePar[nvoice].VoiceOut)
-            delete NoteVoicePar[nvoice].VoiceOut;
-        NoteVoicePar[nvoice].VoiceOut = NULL;
+            memory.dealloc(NoteVoicePar[nvoice].VoiceOut);
     }
 
-    NoteGlobalPar.kill();
+    NoteGlobalPar.kill(memory);
 
     NoteEnabled = OFF;
 }
@@ -707,13 +698,13 @@ ADnote::~ADnote()
 {
     if(NoteEnabled == ON)
         KillNote();
-    delete [] tmpwavel;
-    delete [] tmpwaver;
-    delete [] bypassl;
-    delete [] bypassr;
+    memory.devalloc(tmpwavel);
+    memory.devalloc(tmpwaver);
+    memory.devalloc(bypassl);
+    memory.devalloc(bypassr);
     for(int k = 0; k < max_unison; ++k)
-        delete[] tmpwave_unison[k];
-    delete[] tmpwave_unison;
+        memory.devalloc(tmpwave_unison[k]);
+    memory.devalloc(tmpwave_unison);
 }
 
 
@@ -725,7 +716,8 @@ void ADnote::initparameters()
     int tmp[NUM_VOICES];
 
     // Global Parameters
-    NoteGlobalPar.initparameters(partparams->GlobalPar, basefreq, velocity,
+    NoteGlobalPar.initparameters(partparams->GlobalPar,
+                                 memory, basefreq, velocity,
                                  stereo);
 
     NoteGlobalPar.AmpEnvelope->envout_dB(); //discard the first envelope output
@@ -761,34 +753,34 @@ void ADnote::initparameters()
 
         newamplitude[nvoice] = 1.0f;
         if(param.PAmpEnvelopeEnabled) {
-            vce.AmpEnvelope = new Envelope(param.AmpEnvelope, basefreq);
+            vce.AmpEnvelope = memory.alloc<Envelope>(param.AmpEnvelope, basefreq);
             vce.AmpEnvelope->envout_dB(); //discard the first envelope sample
             newamplitude[nvoice] *= vce.AmpEnvelope->envout_dB();
         }
 
         if(param.PAmpLfoEnabled) {
-            vce.AmpLfo = new LFO(param.AmpLfo, basefreq);
+            vce.AmpLfo = memory.alloc<LFO>(param.AmpLfo, basefreq);
             newamplitude[nvoice] *= vce.AmpLfo->amplfoout();
         }
 
         /* Voice Frequency Parameters Init */
-        if(param.PFreqEnvelopeEnabled != 0)
-            vce.FreqEnvelope = new Envelope(param.FreqEnvelope, basefreq);
+        if(param.PFreqEnvelopeEnabled)
+            vce.FreqEnvelope = memory.alloc<Envelope>(param.FreqEnvelope, basefreq);
 
-        if(param.PFreqLfoEnabled != 0)
-            vce.FreqLfo = new LFO(param.FreqLfo, basefreq);
+        if(param.PFreqLfoEnabled)
+            vce.FreqLfo = memory.alloc<LFO>(param.FreqLfo, basefreq);
 
         /* Voice Filter Parameters Init */
         if(param.PFilterEnabled != 0) {
-            vce.VoiceFilterL = Filter::generate(param.VoiceFilter);
-            vce.VoiceFilterR = Filter::generate(param.VoiceFilter);
+            vce.VoiceFilterL = Filter::generate(memory, param.VoiceFilter);
+            vce.VoiceFilterR = Filter::generate(memory, param.VoiceFilter);
         }
 
-        if(param.PFilterEnvelopeEnabled != 0)
-            vce.FilterEnvelope = new Envelope(param.FilterEnvelope, basefreq);
+        if(param.PFilterEnvelopeEnabled)
+            vce.FilterEnvelope = memory.alloc<Envelope>(param.FilterEnvelope, basefreq);
 
-        if(param.PFilterLfoEnabled != 0)
-            vce.FilterLfo = new LFO(param.FilterLfo, basefreq);
+        if(param.PFilterLfoEnabled)
+            vce.FilterLfo = memory.alloc<LFO>(param.FilterLfo, basefreq);
 
         vce.FilterFreqTracking =
             param.VoiceFilter->getfreqtracking(basefreq);
@@ -796,7 +788,7 @@ void ADnote::initparameters()
         /* Voice Modulation Parameters Init */
         if((vce.FMEnabled != NONE) && (vce.FMVoice < 0)) {
             param.FMSmp->newrandseed(prng());
-            vce.FMSmp = new float[synth->oscilsize + OSCIL_SMP_EXTRA_SAMPLES];
+            vce.FMSmp = memory.valloc<float>(synth->oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
 
             //Perform Anti-aliasing only on MORPH or RING MODULATION
 
@@ -832,13 +824,13 @@ void ADnote::initparameters()
         }
 
         if(param.PFMFreqEnvelopeEnabled != 0)
-            vce.FMFreqEnvelope = new Envelope(param.FMFreqEnvelope, basefreq);
+            vce.FMFreqEnvelope = memory.alloc<Envelope>(param.FMFreqEnvelope, basefreq);
 
         FMnewamplitude[nvoice] = vce.FMVolume * ctl->fmamp.relamp;
 
         if(param.PFMAmpEnvelopeEnabled != 0) {
-            vce.FMAmpEnvelope = new Envelope(param.FMAmpEnvelope,
-                                             basefreq);
+            vce.FMAmpEnvelope =
+                memory.alloc<Envelope>(param.FMAmpEnvelope, basefreq);
             FMnewamplitude[nvoice] *= vce.FMAmpEnvelope->envout_dB();
         }
     }
@@ -848,7 +840,8 @@ void ADnote::initparameters()
             tmp[i] = 0;
         for(int i = nvoice + 1; i < NUM_VOICES; ++i)
             if((NoteVoicePar[i].FMVoice == nvoice) && (tmp[i] == 0)) {
-                NoteVoicePar[nvoice].VoiceOut = new float[synth->buffersize];
+                NoteVoicePar[nvoice].VoiceOut =
+                    memory.valloc<float>(synth->buffersize);
                 tmp[i] = 1;
             }
 
@@ -1753,29 +1746,22 @@ void ADnote::Voice::releasekey()
         FMAmpEnvelope->relasekey();
 }
 
-template<class T>
-static inline void nullify(T &t) {delete t; t = NULL; }
-template<class T>
-static inline void arrayNullify(T &t) {delete [] t; t = NULL; }
-
-void ADnote::Voice::kill()
+void ADnote::Voice::kill(Allocator &memory)
 {
-    arrayNullify(OscilSmp);
-    nullify(FreqEnvelope);
-    nullify(FreqLfo);
-    nullify(AmpEnvelope);
-    nullify(AmpLfo);
-    nullify(VoiceFilterL);
-    nullify(VoiceFilterR);
-    nullify(FilterEnvelope);
-    nullify(FilterLfo);
-    nullify(FMFreqEnvelope);
-    nullify(FMAmpEnvelope);
+    memory.devalloc(OscilSmp);
+    memory.dealloc(FreqEnvelope);
+    memory.dealloc(FreqLfo);
+    memory.dealloc(AmpEnvelope);
+    memory.dealloc(AmpLfo);
+    memory.dealloc(VoiceFilterL);
+    memory.dealloc(VoiceFilterR);
+    memory.dealloc(FilterEnvelope);
+    memory.dealloc(FilterLfo);
+    memory.dealloc(FMFreqEnvelope);
+    memory.dealloc(FMAmpEnvelope);
 
-    if((FMEnabled != NONE) && (FMVoice < 0)) {
-        delete[] FMSmp;
-        FMSmp = NULL;
-    }
+    if((FMEnabled != NONE) && (FMVoice < 0))
+        memory.devalloc(FMSmp);
 
     if(VoiceOut)
         memset(VoiceOut, 0, synth->bufferbytes);
@@ -1784,39 +1770,40 @@ void ADnote::Voice::kill()
     Enabled = OFF;
 }
 
-void ADnote::Global::kill()
+void ADnote::Global::kill(Allocator &memory)
 {
-    nullify(FreqEnvelope);
-    nullify(FreqLfo);
-    nullify(AmpEnvelope);
-    nullify(AmpLfo);
-    nullify(GlobalFilterL);
-    nullify(GlobalFilterR);
-    nullify(FilterEnvelope);
-    nullify(FilterLfo);
+    memory.dealloc(FreqEnvelope);
+    memory.dealloc(FreqLfo);
+    memory.dealloc(AmpEnvelope);
+    memory.dealloc(AmpLfo);
+    memory.dealloc(GlobalFilterL);
+    memory.dealloc(GlobalFilterR);
+    memory.dealloc(FilterEnvelope);
+    memory.dealloc(FilterLfo);
 }
 
 void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
+                                    class Allocator &memory,
                                     float basefreq, float velocity,
                                     bool stereo)
 {
-    FreqEnvelope = new Envelope(param.FreqEnvelope, basefreq);
-    FreqLfo      = new LFO(param.FreqLfo, basefreq);
+    FreqEnvelope = memory.alloc<Envelope>(param.FreqEnvelope, basefreq);
+    FreqLfo      = memory.alloc<LFO>(param.FreqLfo, basefreq);
 
-    AmpEnvelope = new Envelope(param.AmpEnvelope, basefreq);
-    AmpLfo      = new LFO(param.AmpLfo, basefreq);
+    AmpEnvelope = memory.alloc<Envelope>(param.AmpEnvelope, basefreq);
+    AmpLfo      = memory.alloc<LFO>(param.AmpLfo, basefreq);
 
     Volume = 4.0f * powf(0.1f, 3.0f * (1.0f - param.PVolume / 96.0f)) //-60 dB .. 0 dB
              * VelF(velocity, param.PAmpVelocityScaleFunction);     //sensing
 
-    GlobalFilterL = Filter::generate(param.GlobalFilter);
+    GlobalFilterL = Filter::generate(memory, param.GlobalFilter);
     if(stereo)
-        GlobalFilterR = Filter::generate(param.GlobalFilter);
+        GlobalFilterR = Filter::generate(memory, param.GlobalFilter);
     else
         GlobalFilterR = NULL;
 
-    FilterEnvelope = new Envelope(param.FilterEnvelope, basefreq);
-    FilterLfo      = new LFO(param.FilterLfo, basefreq);
+    FilterEnvelope = memory.alloc<Envelope>(param.FilterEnvelope, basefreq);
+    FilterLfo      = memory.alloc<LFO>(param.FilterLfo, basefreq);
     FilterQ = param.GlobalFilter->getq();
     FilterFreqTracking = param.GlobalFilter->getfreqtracking(basefreq);
 }

@@ -36,6 +36,7 @@
 
 #include "../Params/Controller.h"
 
+class Allocator;
 extern Dump dump;
 
 struct vuData {
@@ -74,13 +75,16 @@ class Master
 
         /**Regenerate PADsynth and other non-RT parameters
          * It is NOT SAFE to call this from a RT context*/
-        void applyparameters(void);
+        void applyparameters(void) NONREALTIME;
+
+        //This must be called prior-to/at-the-time-of RT insertion
+        void initialize_rt(void) REALTIME;
 
         void getfromXML(XMLwrapper *xml);
 
         /**get all data to a newly allocated array (used for VST)
          * @return the datasize*/
-        int getalldata(char **data);
+        int getalldata(char **data) NONREALTIME;
         /**put all data from the *data array to zynaddsubfx parameters (used for VST)*/
         void putalldata(char *data, int size);
 
@@ -163,6 +167,7 @@ class Master
         rtosc::MidiTable midi;//<1024,64>
 
         bool   frozenState;//read-only parameters for threadsafe actions
+        Allocator *memory;
     private:
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];

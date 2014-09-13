@@ -23,10 +23,11 @@
 #include "Distorsion.h"
 #include "../DSP/AnalogFilter.h"
 #include "../Misc/WaveShapeSmps.h"
+#include "../Misc/Allocator.h"
 #include <cmath>
 
-Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_, unsigned int srate, int bufsize)
-    :Effect(insertion_, efxoutl_, efxoutr_, NULL, 0, srate, bufsize),
+Distorsion::Distorsion(EffectParams pars)
+    :Effect(pars),
       Pvolume(50),
       Pdrive(90),
       Plevel(64),
@@ -37,20 +38,20 @@ Distorsion::Distorsion(bool insertion_, float *efxoutl_, float *efxoutr_, unsign
       Pstereo(0),
       Pprefiltering(0)
 {
-    lpfl = new AnalogFilter(2, 22000, 1, 0, srate, bufsize);
-    lpfr = new AnalogFilter(2, 22000, 1, 0, srate, bufsize);
-    hpfl = new AnalogFilter(3, 20, 1, 0, srate, bufsize);
-    hpfr = new AnalogFilter(3, 20, 1, 0, srate, bufsize);
+    lpfl = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
+    lpfr = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
+    hpfl = memory.alloc<AnalogFilter>(3, 20, 1, 0, pars.srate, pars.bufsize);
+    hpfr = memory.alloc<AnalogFilter>(3, 20, 1, 0, pars.srate, pars.bufsize);
     setpreset(Ppreset);
     cleanup();
 }
 
 Distorsion::~Distorsion()
 {
-    delete lpfl;
-    delete lpfr;
-    delete hpfl;
-    delete hpfr;
+    memory.dealloc(lpfl);
+    memory.dealloc(lpfr);
+    memory.dealloc(hpfl);
+    memory.dealloc(hpfr);
 }
 
 //Cleanup the effect

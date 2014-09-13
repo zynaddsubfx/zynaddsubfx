@@ -323,6 +323,7 @@ add_subdirectory(DSP)
 add_subdirectory(Nio)
 
 add_library(zynaddsubfx_core STATIC
+    ../tlsf/tlsf.c
 	${zynaddsubfx_dsp_SRCS}
 	${zynaddsubfx_effect_SRCS}
 	${zynaddsubfx_misc_SRCS}

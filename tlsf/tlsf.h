@@ -61,6 +61,11 @@ void tlsf_walk_pool(pool_t pool, tlsf_walker walker, void* user);
 int tlsf_check(tlsf_t tlsf);
 int tlsf_check_pool(pool_t pool);
 
+/* TODO add utilities for
+ * - Find Unused Pool Chunks
+ * - Define if the pool is running low
+ */
+
 #if defined(__cplusplus)
 };
 #endif

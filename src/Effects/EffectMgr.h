@@ -31,11 +31,11 @@
 class Effect;
 class FilterParams;
 class XMLwrapper;
+class Allocator;
 
 #include "Distorsion.h"
 #include "EQ.h"
 #include "DynamicFilter.h"
-#include "../Misc/XMLwrapper.h"
 #include "../Params/FilterParams.h"
 #include "../Params/Presets.h"
 
@@ -43,7 +43,7 @@ class XMLwrapper;
 class EffectMgr:public Presets
 {
     public:
-        EffectMgr(const bool insertion_);
+        EffectMgr(Allocator &alloc, const bool insertion_);
         ~EffectMgr();
 
         void add2XML(XMLwrapper *xml);
@@ -57,15 +57,17 @@ class EffectMgr:public Presets
         /**get the output(to speakers) volume of the systemeffect*/
         float sysefxgetvolume(void);
 
+        void init(void) REALTIME;
         void cleanup(void) REALTIME;
 
-        void changeeffect(int nefx_);
+        void changeeffectrt(int nefx_) REALTIME;
+        void changeeffect(int nefx_) NONREALTIME;
         int geteffect(void);
-        void changepreset(unsigned char npreset) REALTIME;
-        void changepreset_nolock(unsigned char npreset);
+        void changepreset(unsigned char npreset) NONREALTIME;
+        void changepresetrt(unsigned char npreset) REALTIME;
         unsigned char getpreset(void);
-        void seteffectpar(int npar, unsigned char value) REALTIME;
-        void seteffectpar_nolock(int npar, unsigned char value);
+        void seteffectpar(int npar, unsigned char value) NONREALTIME;
+        void seteffectparrt(int npar, unsigned char value) REALTIME;
         unsigned char geteffectpar(int npar);
 
         const bool insertion;
@@ -80,7 +82,14 @@ class EffectMgr:public Presets
         int     nefx;
         Effect *efx;
     private:
+
+        //Parameters Prior to initialization
+        char effect_id;
+        char preset;
+        char settings[128];
+
         bool dryonly;
+        Allocator &memory;
 };
 
 #endif

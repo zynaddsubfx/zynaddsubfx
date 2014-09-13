@@ -36,18 +36,6 @@ int main_thread = 0;
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
 
-//template<int i>
-//void simpleset(const char *m, rtosc::RtData &d)
-//{
-//    unsigned char *addr = ((unsigned char*) d.obj)+i;
-//    if(!rtosc_narguments(m))
-//        d.reply(d.loc, "c", *addr);
-//    else
-//        *addr = rtosc_argument(m, 0).i;
-//}
-//#undef  PARAMC
-//#define PARAMC(x) rtosc::Port{#x "::c", "::", NULL, \
-//    simpleset<__builtin_offsetof(class OscilGen, P##x)>}
 #define PC(x) rParam(P##x, "undocumented oscilgen parameter")
 
 #define rObject OscilGen
@@ -81,7 +69,8 @@ static rtosc::Ports localPorts = {
     PC(adaptiveharmonicspower),
     PC(adaptiveharmonicspar),
 
-    {"phase#128::c", "::Sets harmonic phase",
+    //TODO update to rArray and test
+    {"phase#128::c", rDoc("Sets harmonic phase"),
         NULL, [](const char *m, rtosc::RtData &d) {
             const char *mm = m;
             while(*mm && !isdigit(*mm)) ++mm;
@@ -91,7 +80,8 @@ static rtosc::Ports localPorts = {
             else
                 phase = rtosc_argument(m,0).i;
         }},
-    {"magnitude#128::c", "::Sets harmonic magnitude",
+    //TODO update to rArray and test
+    {"magnitude#128::c", rDoc("Sets harmonic magnitude"),
         NULL, [](const char *m, rtosc::RtData &d) {
             //printf("I'm at '%s'\n", d.loc);
             const char *mm = m;
@@ -102,7 +92,7 @@ static rtosc::Ports localPorts = {
             else
                 mag = rtosc_argument(m,0).i;
         }},
-    {"base-spectrum:", "::Returns spectrum of base waveshape",
+    {"base-spectrum:", rDoc("Returns spectrum of base waveshape"),
         NULL, [](const char *m, rtosc::RtData &d) {
             const unsigned n = synth->oscilsize / 2;
             float *spc = new float[n];
@@ -111,7 +101,7 @@ static rtosc::Ports localPorts = {
             d.reply(d.loc, "b", n*sizeof(float), spc);
             delete[] spc;
         }},
-    {"base-waveform:", "::Returns base waveshape points",
+    {"base-waveform:", rDoc("Returns base waveshape points"),
         NULL, [](const char *m, rtosc::RtData &d) {
             const unsigned n = synth->oscilsize;
             float *smps = new float[n];
@@ -120,7 +110,7 @@ static rtosc::Ports localPorts = {
             d.reply(d.loc, "b", n*sizeof(float), smps);
             delete[] smps;
         }},
-    {"spectrum:", "::Returns spectrum of waveform",
+    {"spectrum:", rDoc("Returns spectrum of waveform"),
         NULL, [](const char *m, rtosc::RtData &d) {
             const unsigned n = synth->oscilsize / 2;
             float *spc = new float[n];
@@ -129,7 +119,7 @@ static rtosc::Ports localPorts = {
             d.reply(d.loc, "b", n*sizeof(float), spc);
             delete[] spc;
         }},
-    {"waveform:", "::Returns waveform points",
+    {"waveform:", rDoc("Returns waveform points"),
         NULL, [](const char *m, rtosc::RtData &d) {
             const unsigned n = synth->oscilsize;
             float *smps = new float[n];
@@ -141,7 +131,7 @@ static rtosc::Ports localPorts = {
             d.reply(d.loc, "b", n*sizeof(float), smps);
             delete[] smps;
         }},
-    {"prepare:", "::Performs setup operation to oscillator",
+    {"prepare:", rDoc("Performs setup operation to oscillator"),
         NULL, [](const char *m, rtosc::RtData &d) {
             //fprintf(stderr, "prepare: got a message from '%s'\n", m);
             OscilGen &o = *(OscilGen*)d.obj;
@@ -151,11 +141,11 @@ static rtosc::Ports localPorts = {
             d.reply("/forward", "sb", d.loc, sizeof(fft_t*), &data);
             o.pendingfreqs = data;
         }},
-    {"convert2sine:", "::Translates waveform into FS",
+    {"convert2sine:", rDoc("Translates waveform into FS"),
         NULL, [](const char *m, rtosc::RtData &d) {
             ((OscilGen*)d.obj)->convert2sine();
         }},
-    {"prepare:b", ":'pointer','realtime':Sets prepared fft data",
+    {"prepare:b", rProp(internal) rProp(pointer) rDoc("Sets prepared fft data"),
         NULL, [](const char *m, rtosc::RtData &d) {
             //fprintf(stderr, "prepare:b got a message from '%s'\n", m);
             OscilGen &o = *(OscilGen*)d.obj;

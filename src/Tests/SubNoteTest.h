@@ -27,6 +27,7 @@
 #include <ctime>
 #include <string>
 #include "../Misc/Master.h"
+#include "../Misc/Allocator.h"
 #include "../Misc/Util.h"
 #include "../Synth/SUBnote.h"
 #include "../Params/Presets.h"
@@ -43,6 +44,7 @@ class SubNoteTest:public CxxTest::TestSuite
         Master       *master;
         Controller   *controller;
         unsigned char testnote;
+        Allocator     memory;
 
 
         float *outR, *outL;
@@ -84,13 +86,8 @@ class SubNoteTest:public CxxTest::TestSuite
             testnote = 50;
             float freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
 
-            note = new SUBnote(defaultPreset,
-                               controller,
-                               freq,
-                               120,
-                               0,
-                               testnote,
-                               false);
+            SynthParams pars{memory, *controller, freq, 120, 0, testnote, false};
+            note = new SUBnote(defaultPreset, pars);
             delete wrap;
             delete defaultPreset;
         }

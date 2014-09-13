@@ -33,12 +33,10 @@
 class SUBnote:public SynthNote
 {
     public:
-        SUBnote(SUBnoteParameters *parameters, Controller *ctl_, float freq,
-                float velocity, int portamento_, int midinote, bool besilent);
+        SUBnote(SUBnoteParameters *parameters, SynthParams pars);
         ~SUBnote();
 
-        void legatonote(float freq, float velocity, int portamento_,
-                        int midinote, bool externcall);
+        void legatonote(LegatoParams pars);
 
         int noteout(float *outl, float *outr); //note output,return 0 if the note is finished
         void relasekey();
@@ -57,7 +55,7 @@ class SUBnote:public SynthNote
         SUBnoteParameters *pars;
 
         //parameters
-        int       stereo;
+        bool       stereo;
         int       numstages; //number of stages of filters
         int       numharmonics; //number of harmonics (after the too higher hamonics are removed)
         int       firstnumharmonics; //To keep track of the first note's numharmonics value, useful in legato mode.

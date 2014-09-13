@@ -28,6 +28,7 @@
 #include "../Params/LFOParams.h"
 #include "../Effects/EffectMgr.h"
 #include "../DSP/FFTwrapper.h"
+#include "../Misc/Allocator.h"
 #include "../Nio/Nio.h"
 
 #include <rtosc/ports.h>
@@ -177,6 +178,7 @@ vuData::vuData(void)
 Master::Master()
 :midi(Master::ports), frozenState(false)
 {
+    memory = new Allocator();
     the_master = this;
     swaplr = 0;
     off  = 0;
@@ -193,15 +195,15 @@ Master::Master()
     }
 
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        part[npart] = new Part(&microtonal, fft);
+        part[npart] = new Part(*memory, &microtonal, fft);
 
     //Insertion Effects init
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
-        insefx[nefx] = new EffectMgr(1);
+        insefx[nefx] = new EffectMgr(*memory, 1);
 
     //System Effects init
     for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
-        sysefx[nefx] = new EffectMgr(0);
+        sysefx[nefx] = new EffectMgr(*memory, 0);
 
 
     defaults();
@@ -325,11 +327,11 @@ void Master::setController(char chan, int type, int par)
             switch(parhi) {
                 case 0x04: //System Effects
                     if(parlo < NUM_SYS_EFX)
-                        sysefx[parlo]->seteffectpar_nolock(valhi, vallo);
+                        sysefx[parlo]->seteffectparrt(valhi, vallo);
                     break;
                 case 0x08: //Insertion Effects
                     if(parlo < NUM_INS_EFX)
-                        insefx[parlo]->seteffectpar_nolock(valhi, vallo);
+                        insefx[parlo]->seteffectparrt(valhi, vallo);
                     break;
             }
     }
@@ -457,7 +459,7 @@ void Master::AudioOut(float *outl, float *outr)
         //fprintf(stdout, "address '%s'\n", uToB->peak());
         ports.dispatch(msg+1, d);
         events++;
-        if(!d.matches && !ports.apropos(msg)) {
+        if(!d.matches) {// && !ports.apropos(msg)) {
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
             fprintf(stderr, "Unknown address '%s'\n", uToB->peak());
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
@@ -492,7 +494,7 @@ void Master::AudioOut(float *outl, float *outr)
 
     //Apply the part volumes and pannings (after insertion effects)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
-        if(part[npart]->Penabled == 0)
+        if(part[npart]->Penabled)
             continue;
 
         Stereo<float> newvol(part[npart]->volume),
@@ -731,6 +733,17 @@ void Master::applyparameters(void)
 {
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         part[npart]->applyparameters();
+}
+
+void Master::initialize_rt(void)
+{
+    for(int i=0; i<NUM_SYS_EFX; ++i)
+        sysefx[i]->init();
+    for(int i=0; i<NUM_INS_EFX; ++i)
+        insefx[i]->init();
+
+    for(int i=0; i<NUM_MIDI_PARTS; ++i)
+        part[i]->initialize_rt();
 }
 
 void Master::add2XML(XMLwrapper *xml)

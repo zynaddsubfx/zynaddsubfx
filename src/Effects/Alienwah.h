@@ -35,17 +35,7 @@ using namespace std;
 class Alienwah:public Effect
 {
     public:
-        /**
-         * Constructor
-         * @param insertion_ true for insertion Effect
-         * @param efxoutl_ Pointer to Alienwah's left channel output buffer
-         * @param efxoutr_ Pointer to Alienwah's left channel output buffer
-         * @return Initialized Alienwah
-         */
-        Alienwah(bool insertion_,
-                 float *const efxoutl_,
-                 float *const efxoutr_,
-                 unsigned int srate, int bufsize);
+        Alienwah(EffectParams pars);
         ~Alienwah();
         void out(const Stereo<float *> &smp);
 

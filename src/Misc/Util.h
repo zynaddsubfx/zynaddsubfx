@@ -89,6 +89,12 @@ T limit(T val, T min, T max)
 }
 
 template<class T>
+bool inRange(T val, T min, T max)
+{
+    return val >= min && val <= max;
+}
+
+template<class T>
 T array_max(const T *data, size_t len)
 {
     T max = 0;

@@ -27,20 +27,15 @@
 #include "../globals.h"
 #include "SUBnote.h"
 #include "../Misc/Util.h"
+#include "../Misc/Allocator.h"
 
-SUBnote::SUBnote(SUBnoteParameters *parameters,
-                 Controller *ctl_,
-                 float freq,
-                 float velocity,
-                 int portamento_,
-                 int midinote,
-                 bool besilent)
-    :SynthNote(freq, velocity, portamento_, midinote, besilent)
+SUBnote::SUBnote(SUBnoteParameters *parameters, SynthParams spars)
+    :SynthNote(spars)
 {
     pars = parameters;
-    ctl  = ctl_;
+    ctl  = &spars.ctl;
     NoteEnabled = ON;
-    setup(freq, velocity, portamento_, midinote);
+    setup(spars.frequency, spars.velocity, spars.portamento, spars.note);
 }
 
 void SUBnote::setup(float freq,
@@ -70,7 +65,7 @@ void SUBnote::setup(float freq,
     else {
         basefreq = 440.0f;
         int fixedfreqET = pars->PfixedfreqET;
-        if(fixedfreqET != 0) { //if the frequency varies according the keyboard note
+        if(fixedfreqET) { //if the frequency varies according the keyboard note
             float tmp =
                 (midinote
                  - 69.0f) / 12.0f
@@ -126,9 +121,9 @@ void SUBnote::setup(float freq,
 
 
     if(!legato) {
-        lfilter = new bpfilter[numstages * numharmonics];
-        if(stereo != 0)
-            rfilter = new bpfilter[numstages * numharmonics];
+        lfilter = memory.valloc<bpfilter>(numstages * numharmonics);
+        if(stereo)
+            rfilter = memory.valloc<bpfilter>(numstages * numharmonics);
     }
 
     //how much the amplitude is normalised (because the harmonics)
@@ -205,7 +200,7 @@ void SUBnote::setup(float freq,
         else
             freq *= basefreq / 440.0f;
 
-        if(pars->PGlobalFilterEnabled != 0) {
+        if(pars->PGlobalFilterEnabled) {
             globalfiltercenterq      = pars->GlobalFilter->getq();
             GlobalFilterFreqTracking = pars->GlobalFilter->getfreqtracking(
                 basefreq);
@@ -215,14 +210,14 @@ void SUBnote::setup(float freq,
     oldamplitude = newamplitude;
 }
 
-void SUBnote::legatonote(float freq, float velocity, int portamento_,
-                         int midinote, bool externcall)
+void SUBnote::legatonote(LegatoParams pars)
 {
     // Manage legato stuff
-    if(legato.update(freq, velocity, portamento_, midinote, externcall))
+    if(legato.update(pars))
         return;
 
-    setup(freq, velocity, portamento_, midinote, true);
+    setup(pars.frequency, pars.velocity, pars.portamento, pars.midinote,
+            true);
 }
 
 SUBnote::~SUBnote()
@@ -237,17 +232,15 @@ SUBnote::~SUBnote()
 void SUBnote::KillNote()
 {
     if(NoteEnabled != OFF) {
-        delete [] lfilter;
-        lfilter = NULL;
-        if(stereo != 0)
-            delete [] rfilter;
-        rfilter = NULL;
-        delete AmpEnvelope;
-        delete FreqEnvelope;
-        delete BandWidthEnvelope;
-        delete GlobalFilterL;
-        delete GlobalFilterR;
-        delete GlobalFilterEnvelope;
+        memory.devalloc(numstages * numharmonics, lfilter);
+        if(stereo)
+            memory.devalloc(numstages * numharmonics, rfilter);
+        memory.dealloc(AmpEnvelope);
+        memory.dealloc(FreqEnvelope);
+        memory.dealloc(BandWidthEnvelope);
+        memory.dealloc(GlobalFilterL);
+        memory.dealloc(GlobalFilterR);
+        memory.dealloc(GlobalFilterEnvelope);
         NoteEnabled = OFF;
     }
 }
@@ -367,22 +360,21 @@ void SUBnote::filter(bpfilter &filter, float *smps)
  */
 void SUBnote::initparameters(float freq)
 {
-    AmpEnvelope = new Envelope(pars->AmpEnvelope, freq);
-    if(pars->PFreqEnvelopeEnabled != 0)
-        FreqEnvelope = new Envelope(pars->FreqEnvelope, freq);
+    AmpEnvelope = memory.alloc<Envelope>(pars->AmpEnvelope, freq);
+    if(pars->PFreqEnvelopeEnabled)
+        FreqEnvelope = memory.alloc<Envelope>(pars->FreqEnvelope, freq);
     else
         FreqEnvelope = NULL;
-    if(pars->PBandWidthEnvelopeEnabled != 0)
-        BandWidthEnvelope = new Envelope(pars->BandWidthEnvelope, freq);
+    if(pars->PBandWidthEnvelopeEnabled)
+        BandWidthEnvelope = memory.alloc<Envelope>(pars->BandWidthEnvelope, freq);
     else
         BandWidthEnvelope = NULL;
-    if(pars->PGlobalFilterEnabled != 0) {
+    if(pars->PGlobalFilterEnabled) {
         globalfiltercenterq = pars->GlobalFilter->getq();
-        GlobalFilterL = Filter::generate(pars->GlobalFilter);
+        GlobalFilterL = Filter::generate(memory, pars->GlobalFilter);
         if(stereo)
-            GlobalFilterR = Filter::generate(pars->GlobalFilter);
-        GlobalFilterEnvelope = new Envelope(pars->GlobalFilterEnvelope,
-                                            freq);
+            GlobalFilterR = Filter::generate(memory, pars->GlobalFilter);
+        GlobalFilterEnvelope = memory.alloc<Envelope>(pars->GlobalFilterEnvelope, freq);
         GlobalFilterFreqTracking = pars->GlobalFilter->getfreqtracking(basefreq);
     }
     computecurrentparameters();

@@ -25,6 +25,7 @@
 #include <malloc.h>
 #include "../Misc/Part.h"
 #include "../Misc/Util.h"
+#include "../Misc/Allocator.h"
 #include "../Params/Presets.h"
 #include "../DSP/FFTwrapper.h"
 #include "../globals.h"
@@ -54,6 +55,7 @@ class RtAllocTest:public CxxTest::TestSuite
         Part *part;
         Microtonal   *micro;
         FFTwrapper   *fft;
+        Allocator     memory;
         float *outR, *outL;
 
         void setUp() {
@@ -68,7 +70,7 @@ class RtAllocTest:public CxxTest::TestSuite
             //phew, glad to get thouse out of my way. took me a lot of sweat and gdb to get this far...
             fft = new FFTwrapper(synth->oscilsize);
             micro = new Microtonal();
-            part = new Part(micro, fft);
+            part = new Part(memory, micro, fft);
             part->partoutl = new float[synth->buffersize];
             part->partoutr = new float[synth->buffersize];
             //prepare the default settings

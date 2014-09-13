@@ -33,17 +33,10 @@
 class PADnote:public SynthNote
 {
     public:
-        PADnote(PADnoteParameters *parameters,
-                Controller *ctl_,
-                float freq,
-                float velocity,
-                int portamento_,
-                int midinote,
-                bool besilent);
+        PADnote(PADnoteParameters *parameters, SynthParams pars);
         ~PADnote();
 
-        void legatonote(float freq, float velocity, int portamento_,
-                        int midinote, bool externcall);
+        void legatonote(LegatoParams pars);
 
         int noteout(float *outl, float *outr);
         int finished() const;
@@ -114,7 +107,7 @@ class PADnote:public SynthNote
 
 
         float globaloldamplitude, globalnewamplitude, velocity, realfreq;
-        Controller *ctl;
+        Controller &ctl;
 };
 
 

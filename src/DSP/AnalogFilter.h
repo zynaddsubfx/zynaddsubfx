@@ -48,8 +48,8 @@ class AnalogFilter:public Filter
         void cleanup();
 
         float H(float freq); //Obtains the response for a given frequency
-        
-        
+
+
         struct Coeff {
             float c[3], //Feed Forward
                   d[3];    //Feed Back
