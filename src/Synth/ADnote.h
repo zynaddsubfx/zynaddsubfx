@@ -27,7 +27,6 @@
 #include "Envelope.h"
 #include "LFO.h"
 #include "../Params/ADnoteParameters.h"
-#include "../Params/Controller.h"
 
 //Globals
 
@@ -99,18 +98,9 @@ class ADnote:public SynthNote
         /**Generate Noise Samples for Voice*/
         inline void ComputeVoiceNoise(int nvoice);
 
-        /**Fadein in a way that removes clicks but keep sound "punchy"*/
-        inline void fadein(float *smps) const;
-
-
         //GLOBALS
         ADnoteParameters *partparams;
-        unsigned char     stereo; //if the note is stereo (allows note Panning)
-        int   midinote;
-        float velocity, basefreq;
-
-        ONOFFTYPE   NoteEnabled;
-        Controller *ctl;
+        bool stereo; //if the note is stereo (allows note Panning)
 
         /*****************************************************************/
         /*                    GLOBAL PARAMETERS                          */
@@ -122,41 +112,11 @@ class ADnote:public SynthNote
                                 class Allocator &memory,
                                 float basefreq, float velocity,
                                 bool stereo);
-            /******************************************
-            *     FREQUENCY GLOBAL PARAMETERS        *
-            ******************************************/
-            float Detune;  //cents
-
-            Envelope *FreqEnvelope;
-            LFO      *FreqLfo;
-
-            /********************************************
-            *     AMPLITUDE GLOBAL PARAMETERS          *
-            ********************************************/
-            float Volume;  // [ 0 .. 1 ]
-
-            float Panning;  // [ 0 .. 1 ]
-
-            Envelope *AmpEnvelope;
-            LFO      *AmpLfo;
-
-            struct {
-                int   Enabled;
-                float initialvalue, dt, t;
-            } Punch;
-
-            /******************************************
-            *        FILTER GLOBAL PARAMETERS        *
-            ******************************************/
-            class Filter * GlobalFilterL, *GlobalFilterR;
-
-            float FilterCenterPitch;  //octaves
-            float FilterQ;
-            float FilterFreqTracking;
-
-            Envelope *FilterEnvelope;
-
+            LFO *FreqLfo;
+            LFO *AmpLfo;
             LFO *FilterLfo;
+
+            PunchState Punch;
         } NoteGlobalPar;
 
 
@@ -168,7 +128,7 @@ class ADnote:public SynthNote
             void releasekey();
             void kill(Allocator &memory);
             /* If the voice is enabled */
-            ONOFFTYPE Enabled;
+            bool Enabled;
 
             /* Voice Type (sound/noise)*/
             int noisetype;
@@ -185,7 +145,7 @@ class ADnote:public SynthNote
             /************************************
             *     FREQUENCY PARAMETERS          *
             ************************************/
-            int fixedfreq; //if the frequency is fixed to 440 Hz
+            bool fixedfreq; //if the frequency is fixed to 440 Hz
             int fixedfreqET; //if the "fixed" frequency varies according to the note (ET)
 
             // cents = basefreq*VoiceDetune
@@ -249,49 +209,55 @@ class ADnote:public SynthNote
         //time from the start of the note
         float time;
 
-        //the size of unison for a single voice
-        int unison_size[NUM_VOICES];
-
-        //the stereo spread of the unison subvoices (0.0f=mono,1.0f=max)
-        float unison_stereo_spread[NUM_VOICES];
-
-        //fractional part (skip)
-        float *oscposlo[NUM_VOICES], *oscfreqlo[NUM_VOICES];
-
-        //integer part (skip)
-        int *oscposhi[NUM_VOICES], *oscfreqhi[NUM_VOICES];
-
-        //fractional part (skip) of the Modullator
-        float *oscposloFM[NUM_VOICES], *oscfreqloFM[NUM_VOICES];
-
-        //the unison base_value
-        float *unison_base_freq_rap[NUM_VOICES];
-
-        //how the unison subvoice's frequency is changed (1.0f for no change)
-        float *unison_freq_rap[NUM_VOICES];
-
-        //which subvoice has phase inverted
-        bool *unison_invert_phase[NUM_VOICES];
-
-        //unison vibratto
         struct {
-            float  amplitude; //amplitude which be added to unison_freq_rap
-            float *step; //value which increments the position
-            float *position; //between -1.0f and 1.0f
-        } unison_vibratto[NUM_VOICES];
+            //the size of unison for a single voice
+            int unison_size;
+
+            //the stereo spread of the unison subvoices (0.0f=mono,1.0f=max)
+            float unison_stereo_spread;
+
+            //fractional part (skip)
+            float *oscposlo, *oscfreqlo;
+
+            //integer part (skip)
+            int *oscposhi, *oscfreqhi;
+
+            //fractional part (skip) of the Modullator
+            float *oscposloFM, *oscfreqloFM;
+
+            //the unison base_value
+            float *unison_base_freq_rap;
+
+            //how the unison subvoice's frequency is changed (1.0f for no change)
+            float *unison_freq_rap;
+
+            //which subvoice has phase inverted
+            bool *unison_invert_phase;
+
+            //unison vibratto
+            struct {
+                float  amplitude; //amplitude which be added to unison_freq_rap
+                float *step; //value which increments the position
+                float *position; //between -1.0f and 1.0f
+            } unison_vibratto;
 
 
-        //integer part (skip) of the Modullator
-        unsigned int *oscposhiFM[NUM_VOICES], *oscfreqhiFM[NUM_VOICES];
+            //integer part (skip) of the Modullator
+            unsigned int *oscposhiFM, *oscfreqhiFM;
 
-        //used to compute and interpolate the amplitudes of voices and modullators
-        float oldamplitude[NUM_VOICES],
-              newamplitude[NUM_VOICES],
-              FMoldamplitude[NUM_VOICES],
-              FMnewamplitude[NUM_VOICES];
+            //used to compute and interpolate the amplitudes of voices and modullators
+            float oldamplitude,
+                  newamplitude,
+                  FMoldamplitude,
+                  FMnewamplitude;
 
-        //used by Frequency Modulation (for integration)
-        float *FMoldsmp[NUM_VOICES];
+            //used by Frequency Modulation (for integration)
+            float *FMoldsmp;
+
+            //if it is the first tick (used to fade in the sound)
+            bool firsttick;
+        } NoteVoiceInternals[NUM_VOICES];
+
 
         //temporary buffer
         float  *tmpwavel;
@@ -302,17 +268,15 @@ class ADnote:public SynthNote
         //Filter bypass samples
         float *bypassl, *bypassr;
 
-        //interpolate the amplitudes
-        float globaloldamplitude, globalnewamplitude;
 
-        //1 - if it is the fitst tick (used to fade in the sound)
-        char firsttick[NUM_VOICES];
 
         //1 if the note has portamento
-        int portamento;
+        bool portamento;
 
         //how the fine detunes are made bigger or smaller
         float bandwidthDetuneMultiplier;
+
+        const int oscSize;
 };
 
 #endif

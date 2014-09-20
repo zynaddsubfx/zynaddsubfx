@@ -1,11 +1,32 @@
 #include "SynthNote.h"
 #include "../globals.h"
+#include "../Params/Controller.h"
+#include "../Misc/Util.h"
+#include <cmath>
 #include <cstring>
 
+                
+void PunchState::init(char Strength, char VelocitySensing,
+        char Time, char Stretch, float velocity, float freq)
+{
+        if(Strength) {
+            Enabled = 1;
+            t = 1.0f; //start from 1.0f and to 0.0f
+            initialvalue = (powf(10, 1.5f * Strength / 127.0f) - 1.0f)
+                 * VelF(velocity, VelocitySensing);
+            //0.1 to 100 ms 
+            float time = powf(10, 3.0f * Time / 127.0f) / 10000.0f;
+            float stretch = powf(440.0f / freq, Stretch / 64.0f);
+            dt = 1.0f / (time * synth->samplerate_f * stretch);
+        }
+        else
+            Enabled = 0;
+}
 SynthNote::SynthNote(SynthParams &pars)
     :legato(pars.frequency, pars.velocity, pars.portamento,
             pars.note, pars.quiet),
-     memory(pars.memory)
+     memory(pars.memory),
+     ctl(pars.ctl)
 {}
 
 SynthNote::Legato::Legato(float freq, float vel, int port,
@@ -136,3 +157,144 @@ void SynthNote::setVelocity(float velocity_) {
     legatonote(pars);
     legato.setDecounter(0); //avoid chopping sound due fade-in
 }
+
+void SynthNote::fadeinCheap(float *smpl, float *smpr) const
+{
+    int n = 10;
+    if(n > synth->buffersize)
+        n = synth->buffersize;
+    for(int i = 0; i < n; ++i) {
+        float ampfadein = 0.5f - 0.5f * cosf(i / (PI * n));
+        smpl[i] *= ampfadein;
+        smpr[i] *= ampfadein;
+    }
+}
+
+void SynthNote::fadein(float *smps) const
+{
+    int zerocrossings = 0;
+    for(int i = 1; i < synth->buffersize; ++i)
+        if(smps[i - 1] < 0.0f && smps[i] > 0.0f)
+            zerocrossings++;  //this is only the possitive crossings
+
+    float tmp = (synth->buffersize_f - 1.0f) / (zerocrossings + 1) / 3.0f;
+    if(tmp < 8.0f)
+        tmp = 8.0f;
+
+    int n;
+    F2I(tmp, n); //how many samples is the fade-in
+    if(n > synth->buffersize)
+        n = synth->buffersize;
+    for(int i = 0; i < n; ++i) { //fade-in
+        float tmp = 0.5f - cosf((float)i / (float) n * PI) * 0.5f;
+        smps[i] *= tmp;
+    }
+}
+
+void SynthNote::fadeout(float *smps) const
+{
+    for(int i = 0; i < synth->buffersize; ++i)
+        smps[i] *= 1.0f - (float)i / synth->buffersize_f;
+}
+
+void SynthNote::applyPunch(float *outl, float *outr, PunchState &Punch)
+{
+    if(Punch.Enabled)
+        for(int i = 0; i < synth->buffersize; ++i) {
+            float punchamp = Punch.initialvalue
+                             * Punch.t + 1.0f;
+            outl[i] *= punchamp;
+            outr[i] *= punchamp;
+            Punch.t -= Punch.dt;
+            if(Punch.t < 0.0f) {
+                Punch.Enabled = false;
+                break;
+            }
+        }
+}
+
+void SynthNote::applyPanning(float *outl, float *outr, float oldamp, float newamp,
+                             float panl, float panr)
+{
+    if(ABOVE_AMPLITUDE_THRESHOLD(oldamp, newamp))
+        // Amplitude Interpolation
+        for(int i = 0; i < synth->buffersize; ++i) {
+            float tmpvol = INTERPOLATE_AMPLITUDE(oldamp,
+                                                 newamp,
+                                                 i,
+                                                 synth->buffersize);
+            outl[i] *= tmpvol * panl;
+            outr[i] *= tmpvol * panr;
+        }
+    else
+        for(int i = 0; i < synth->buffersize; ++i) {
+            outl[i] *= newamp * panl;
+            outr[i] *= newamp * panr;
+        }
+
+}
+        
+void SynthNote::applyAmp(float *outl, float *outr, float oldamp, float newamp)
+{
+    //TODO see if removing this "rest" bit of the algorithm does anything
+    //noteworthy
+    //it would look like it does not, however all sorts of odd things might make
+    //a difference
+    if(ABOVE_AMPLITUDE_THRESHOLD(oldamp, newamp)) {
+        int rest = synth->buffersize;
+        //test if the amplitude if raising and the difference is high
+        if((newamp > oldamp) && ((newamp - oldamp) > 0.25f)) {
+            rest = 10;
+            if(rest > synth->buffersize)
+                rest = synth->buffersize;
+            for(int i = 0; i < synth->buffersize - rest; ++i)
+                outl[i] *= oldamp;
+            if(outr)
+                for(int i = 0; i < synth->buffersize - rest; ++i)
+                    outr[i] *= oldamp;
+        }
+        // Amplitude interpolation
+        for(int i = 0; i < rest; ++i) {
+            float amp = INTERPOLATE_AMPLITUDE(oldamp, newamp, i, rest);
+            outl[i + (synth->buffersize - rest)] *= amp;
+            if(outr)
+                outr[i + (synth->buffersize - rest)] *= amp;
+        }
+    }
+    else {
+        for(int i = 0; i < synth->buffersize; ++i)
+            outl[i] *= newamp;
+        if(outr)
+            for(int i = 0; i < synth->buffersize; ++i)
+                outr[i] *= newamp;
+    }
+}
+
+float SynthNote::applyFixedFreqET(bool fixedfreq_, float basefreq, int fixedfreqET,
+         float detune, int midinote) const
+{
+    if(fixedfreq_) {
+        float fixedfreq   = 440.0f;
+        if(fixedfreqET != 0) { //if the frequency varies according the keyboard note
+            float tmp = (midinote - 69.0f) / 12.0f
+                * (powf(2.0f, (fixedfreqET - 1) / 63.0f) - 1.0f);
+            if(fixedfreqET <= 64)
+                fixedfreq *= powf(2.0f, tmp);
+            else
+                fixedfreq *= powf(3.0f, tmp);
+        }
+        return fixedfreq * powf(2.0f, detune / 12.0f);
+    } else
+        return basefreq * powf(2, detune / 12.0f);
+}
+
+float SynthNote::getPortamento(bool &portamento) const
+{
+    if(portamento) { //this voice use portamento
+        if(!ctl.portamento.used) //the portamento has finished
+            portamento = false;  //this note is no longer "portamented"
+        return ctl.portamento.freqrap;
+    }
+    return 1.0;
+}
+

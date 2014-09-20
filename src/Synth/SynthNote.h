@@ -26,6 +26,7 @@
 
 class Allocator;
 class Controller;
+class Envelope;
 struct SynthParams
 {
     Allocator &memory;   //Memory Allocator for the Note to use
@@ -45,6 +46,12 @@ struct LegatoParams
     int midinote;
     bool externcall;
 };
+struct PunchState {
+    void init(char Strength, char VelocitySensing,
+            char Time, char Stretch, float velocity, float freq);
+    bool   Enabled;
+    float initialvalue, dt, t;
+}; 
 
 class SynthNote
 {
@@ -66,7 +73,19 @@ class SynthNote
         virtual void legatonote(LegatoParams pars) = 0;
         /* For polyphonic aftertouch needed */
         void setVelocity(float velocity_);
+
     protected:
+        /**Fadein in a way that removes clicks but keep sound "punchy"*/
+        void fadein(float *smps) const;
+        void fadeinCheap(float *smpl, float *smpr) const;
+        void fadeout(float *smps) const;
+        void applyPunch(float *outl, float *outr, PunchState &p);
+        void applyPanning(float *outl, float *outr, float oldamp, float newamp,
+                          float panl, float panr);
+        void applyAmp(float *outl, float *outr, float oldamp, float newamp);
+        float applyFixedFreqET(bool fixedfreq, float basefreq, int fixedfreqET, float detune, int midinote) const;
+        float getPortamento(bool &portamento) const;
+
         // Legato transitions
         class Legato
         {
@@ -101,8 +120,50 @@ class SynthNote
                 void setDecounter(int decounter_) {decounter = decounter_; }
         } legato;
 
+        /************************************
+         * Global Parameters Common To Each *
+         ************************************/
+            
+        /******************************************
+         *     FREQUENCY GLOBAL PARAMETERS        *
+         ******************************************/
+        float Detune;   //cents
+        float basefreq;
+        Envelope *FreqEnvelope;
+
+
+        /********************************************
+         *     AMPLITUDE GLOBAL PARAMETERS          *
+         ********************************************/
+        float volume;   // [ 0 .. 1 ]
+        float panning;  // [ 0 .. 1 ]
+            
+        Envelope *AmpEnvelope;
+            
+        /******************************************
+         *        FILTER GLOBAL PARAMETERS        *
+         ******************************************/
+        class Filter * GlobalFilterL, *GlobalFilterR;
+
+        Envelope *FilterEnvelope;
+        float FilterCenterPitch;  //octaves
+        float FilterQ;
+        float FilterFreqTracking;
+
+
+        /******************************************
+         *        OTHER  GLOBAL PARAMETERS        *
+         ******************************************/
+        float velocity;
+        int midinote;
+        float oldamplitude, newamplitude;
+        bool  firsttick, portamento;
+        bool  NoteEnabled;
+
+
         //Realtime Safe Memory Allocator For notes
         class Allocator &memory;
+        const Controller &ctl;
 };
 
 #endif

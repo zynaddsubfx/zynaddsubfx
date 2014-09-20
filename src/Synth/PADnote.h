@@ -39,23 +39,22 @@ class PADnote:public SynthNote
         void legatonote(LegatoParams pars);
 
         int noteout(float *outl, float *outr);
-        int finished() const;
+        bool finished() const;
         void relasekey();
     private:
-        void setup(float freq, float velocity, int portamento_,
+        void setup(float freq, float velocity, bool portamento_,
                    int midinote, bool legato = false);
-        void fadein(float *smps);
         void computecurrentparameters();
         bool finished_;
-        PADnoteParameters *pars;
+        const PADnoteParameters &pars;
 
         int   poshi_l, poshi_r;
         float poslo;
 
-        float basefreq;
-        bool  firsttime, released;
+        bool  firsttime;
 
-        int nsample, portamento;
+        int nsample;
+        bool portamento;
 
         int Compute_Linear(float *outl,
                            float *outr,
@@ -68,46 +67,15 @@ class PADnote:public SynthNote
 
 
         struct {
-            /******************************************
-            *     FREQUENCY GLOBAL PARAMETERS        *
-            ******************************************/
-            float Detune;  //cents
+            PunchState Punch;
 
-            Envelope *FreqEnvelope;
-            LFO      *FreqLfo;
-
-            /********************************************
-             *     AMPLITUDE GLOBAL PARAMETERS          *
-             ********************************************/
-            float Volume;  // [ 0 .. 1 ]
-
-            float Panning;  // [ 0 .. 1 ]
-
-            Envelope *AmpEnvelope;
-            LFO      *AmpLfo;
-
-            struct {
-                int   Enabled;
-                float initialvalue, dt, t;
-            } Punch;
-
-            /******************************************
-            *        FILTER GLOBAL PARAMETERS        *
-            ******************************************/
-            class Filter * GlobalFilterL, *GlobalFilterR;
-
-            float FilterCenterPitch;  //octaves
-            float FilterQ;
-            float FilterFreqTracking;
-
-            Envelope *FilterEnvelope;
-
+            LFO *FreqLfo;
+            LFO *AmpLfo;
             LFO *FilterLfo;
         } NoteGlobalPar;
 
 
-        float globaloldamplitude, globalnewamplitude, velocity, realfreq;
-        Controller &ctl;
+        float realfreq;
 };
 
 

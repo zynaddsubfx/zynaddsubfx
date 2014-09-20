@@ -32,6 +32,7 @@
 #include "../Synth/ADnote.h"
 #include "../Synth/OscilGen.h"
 #include "../Params/Presets.h"
+#include "../Params/Controller.h"
 #include "../DSP/FFTwrapper.h"
 #include "../globals.h"
 SYNTH_T *synth;

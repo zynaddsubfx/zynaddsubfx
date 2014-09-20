@@ -291,7 +291,7 @@ struct ADnoteVoiceParam {
     EnvelopeParams *FMAmpEnvelope;
 
     static rtosc::Ports &ports;
-    ADnoteGlobalParam &parent;
+    ADnoteGlobalParam *parent;
 };
 
 class ADnoteParameters:public PresetsArray
@@ -319,6 +319,13 @@ class ADnoteParameters:public PresetsArray
         //TODO some cache analysis should really be done here
         float *samples[NUM_VOICES][2][PAD_MAX_SAMPLES];
 
+        //Needs Oscillator+Resonance+Resonance Enable+Rand Seeding
+        void rebuildSamples();
+
+        short getVoiceOsc(unsigned voice, float *smps,
+                          float freq, bool res=false);
+        short getVoiceMod(unsigned voice, float *smps,
+                          float freq, bool res=false);
 
     private:
         void defaults(int n); //n is the nvoice

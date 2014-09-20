@@ -959,7 +959,7 @@ short int OscilGen::get(float *smps, float freqHz, bool resonance)
     {
         int realnyquist = nyquist;
 
-        if(Padaptiveharmonics != 0)
+        if(Padaptiveharmonics)
             nyquist = synth->oscilsize / 2;
         for(int i = 1; i < nyquist - 1; ++i)
             outoscilFFTfreqs[i] = input[i];
@@ -985,7 +985,7 @@ short int OscilGen::get(float *smps, float freqHz, bool resonance)
     }
 
     //Harmonic Amplitude Randomness
-    if((freqHz > 0.1f) && (!ADvsPAD)) {
+    if(freqHz > 0.1f && !ADvsPAD) {
         unsigned int realrnd = prng();
         sprng(randseed);
         float power     = Pamprandpower / 127.0f;
@@ -1009,7 +1009,7 @@ short int OscilGen::get(float *smps, float freqHz, bool resonance)
         sprng(realrnd + 1);
     }
 
-    if(freqHz > 0.1f && resonance)
+    if(freqHz > 0.1f && resonance && res)
         res->applyres(nyquist - 1, outoscilFFTfreqs, freqHz);
 
     rmsNormalize(outoscilFFTfreqs);
@@ -1020,8 +1020,12 @@ short int OscilGen::get(float *smps, float freqHz, bool resonance)
     else {
         fft->freqs2smps(outoscilFFTfreqs, smps);
         for(int i = 0; i < synth->oscilsize; ++i)
-            smps[i] *= 0.25f;                     //correct the amplitude
+            smps[i] *= 0.25f; //correct the amplitude
     }
+
+    //printf("\n");
+    //for(int i=0; i<synth->oscilsize/2; ++i)
+    //    printf("%c", norm(outoscilFFTfreqs[i]) > 0.001 ? 'x' : 'o');
 
     if(Prand < 64)
         return outpos;

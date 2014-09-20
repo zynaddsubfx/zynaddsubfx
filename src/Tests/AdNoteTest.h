@@ -30,7 +30,9 @@
 #include "../Misc/Master.h"
 #include "../Misc/Util.h"
 #include "../Misc/Allocator.h"
+#define private public
 #include "../Synth/ADnote.h"
+#undef private
 #include "../Params/Presets.h"
 #include "../DSP/FFTwrapper.h"
 #include "../globals.h"
@@ -108,13 +110,12 @@ class AdNoteTest:public CxxTest::TestSuite
 
             note = new ADnote(defaultPreset, pars);
 
+            for(int i=0; i<100; ++i)
+                defaultPreset->rebuildSamples();
+
+
             delete defaultPreset;
             delete wrap;
-        }
-
-        void willNoteBeRunButIsHereForLinkingReasonsHowsThisForCamelCaseEh()
-        {
-            master = new Master();
         }
 
         void tearDown() {
@@ -130,7 +131,7 @@ class AdNoteTest:public CxxTest::TestSuite
 
         void testDefaults() {
             int sampleCount = 0;
-
+            
 //#define WRITE_OUTPUT
 
 #ifdef WRITE_OUTPUT
@@ -184,7 +185,7 @@ class AdNoteTest:public CxxTest::TestSuite
 #define OUTPUT_PROFILE
 #ifdef OUTPUT_PROFILE
         void testSpeed() {
-            const int samps = 15000;
+            const int samps = 15;
 
             int t_on = clock(); // timer before calling func
             for(int i = 0; i < samps; ++i)

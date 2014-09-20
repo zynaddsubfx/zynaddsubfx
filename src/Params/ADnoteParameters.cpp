@@ -300,6 +300,47 @@ ADnoteGlobalParam::ADnoteGlobalParam()
     Reson     = new Resonance();
 }
 
+void ADnoteParameters::rebuildSamples(void)
+{
+    //Assume MAX Quality for the time being
+    const int samplesize = synth->oscilsize;
+    const int osc_extra  = 5;
+    //Capture A-4 to A+5
+    const int nsmps = 10;
+    for(int i=0; i<NUM_VOICES; ++i) {
+        auto &voice = VoicePar[i];
+        auto &osc   = voice.OscilSmp;
+        auto &mosc  = voice.FMSmp;
+        auto &res   = voice.Presonance;
+        for(int j=0; j<nsmps; ++j) {
+            const float freq = 440.0*powf(2.0f, j-4);
+            samples[i][0][j] = new float[samplesize+osc_extra];
+            memset(samples[i][0][j], 0, samplesize+osc_extra);
+            if(osc)
+                osc->get(samples[i][0][j], freq, res);
+        }
+        for(int j=0; j<nsmps; ++j) {
+            const float freq = 440.0*powf(2.0f, j-4);
+            samples[i][1][j] = new float[samplesize+osc_extra];
+            memset(samples[i][1][j], 0, samplesize+osc_extra);
+            if(mosc)
+                mosc->get(samples[i][0][j], freq, res);
+        }
+    }
+}
+
+short ADnoteParameters::getVoiceOsc(unsigned voice, float *smps,
+        float freq, bool res)
+{
+    return VoicePar[voice].OscilSmp->get(smps, freq, res);
+}
+
+short ADnoteParameters::getVoiceMod(unsigned voice, float *smps,
+        float freq, bool res)
+{
+    return VoicePar[voice].FMSmp->get(smps, freq, res);
+}
+
 void ADnoteParameters::defaults()
 {
     //Default Parameters
@@ -308,7 +349,7 @@ void ADnoteParameters::defaults()
     for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
         defaults(nvoice);
 
-    VoicePar[0].Enabled = 1;
+    VoicePar[0].Enabled = true;
 }
 
 void ADnoteGlobalParam::defaults()
@@ -353,7 +394,7 @@ void ADnoteParameters::defaults(int n)
 
 void ADnoteVoiceParam::defaults()
 {
-    Enabled = 0;
+    Enabled = false;
 
     Unison_size = 1;
     Unison_frequency_spread = 60;

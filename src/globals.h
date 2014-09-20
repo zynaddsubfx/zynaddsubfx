@@ -175,10 +175,6 @@ extern rtosc::ThreadLink *uToB;
                                     i++) \
                                     data_[i] = 0.0f; }
 
-enum ONOFFTYPE {
-    OFF = 0, ON = 1
-};
-
 enum MidiControllers {
     C_bankselectmsb = 0, C_pitchwheel = 1000, C_NULL = 1001,
     C_expression    = 11, C_panning = 10, C_bankselectlsb = 32,

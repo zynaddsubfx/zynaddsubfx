@@ -40,7 +40,7 @@ class SUBnote:public SynthNote
 
         int noteout(float *outl, float *outr); //note output,return 0 if the note is finished
         void relasekey();
-        int finished() const;
+        bool finished() const;
     private:
 
         void setup(float freq,
@@ -55,29 +55,14 @@ class SUBnote:public SynthNote
         SUBnoteParameters *pars;
 
         //parameters
-        bool       stereo;
+        bool      stereo;
         int       numstages; //number of stages of filters
         int       numharmonics; //number of harmonics (after the too higher hamonics are removed)
         int       firstnumharmonics; //To keep track of the first note's numharmonics value, useful in legato mode.
         int       start; //how the harmonics start
-        float     basefreq;
-        float     panning;
-        Envelope *AmpEnvelope;
-        Envelope *FreqEnvelope;
         Envelope *BandWidthEnvelope;
 
-        Filter *GlobalFilterL, *GlobalFilterR;
-
-        Envelope *GlobalFilterEnvelope;
-
         //internal values
-        ONOFFTYPE NoteEnabled;
-        int       firsttick, portamento;
-        float     volume, oldamplitude, newamplitude;
-
-        float GlobalFilterCenterPitch; //octaves
-        float GlobalFilterFreqTracking;
-
         struct bpfilter {
             float freq, bw, amp; //filter parameters
             float a1, a2, b0, b2; //filter coefs. b1=0
@@ -101,9 +86,7 @@ class SUBnote:public SynthNote
         float overtone_rolloff[MAX_SUB_HARMONICS];
         float overtone_freq[MAX_SUB_HARMONICS];
 
-        Controller *ctl;
         int   oldpitchwheel, oldbandwidth;
-        float globalfiltercenterq;
 };
 
 #endif
