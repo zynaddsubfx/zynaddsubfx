@@ -38,16 +38,18 @@ void Fl_Osc_Counter::OSC_value(char v)
 {
     value(v);
 }
-        
+
 void Fl_Osc_Counter::cb(void)
 {
     assert(osc);
 
-    if(cb_type == 'c')
-        oscWrite(ext, "c", (char)(value()));
+    if(cb_type == 'c') {
+	fprintf(stderr, "invalid `c' from counter %s%s, using `i'\n", loc.c_str(), ext.c_str());
+	oscWrite(ext, "i", (int)(value()));
+    }
     else
-        oscWrite(ext, "i", (int)value());
-    
+	oscWrite(ext, "i", (int)value());
+
     if(cb_data.first)
         cb_data.first(this, cb_data.second);
 }

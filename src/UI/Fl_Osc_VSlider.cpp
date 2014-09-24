@@ -41,8 +41,10 @@ void Fl_Osc_VSlider::cb(void)
         oscWrite(ext, "f", val-minimum());
     else if(osc_type == 'i')
         oscWrite(ext, "i", (int)(val-minimum()));
-    else
-        oscWrite(ext, "c", (char)(val-minimum()));
+    else {
+	fprintf(stderr, "invalid `c' from vslider %s%s, using `i'\n", loc.c_str(), ext.c_str());
+	oscWrite(ext, "i", (int)(val-minimum()));
+    }
     //OSC_value(val);
     
     if(cb_data.first)

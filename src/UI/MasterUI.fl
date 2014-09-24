@@ -142,7 +142,7 @@ bankui->show();}
         }
         Fl_Slider partvolume {
           xywh {10 65 30 110} type {Vert Knob} box NO_BOX minimum 127 maximum 0 step 1 value 127
-          code0 {o->init("Pvolume", 'c');}
+          code0 {o->init("Pvolume", 'i');}
           class Fl_Osc_Slider
         }
         Fl_Dial partpanning {
@@ -1038,7 +1038,7 @@ bankui->show();}
         Fl_Slider partpanning {
           label Pan
           xywh {185 95 145 15} type {Horz Knob} box NO_BOX labelsize 11 maximum 127 step 1 value 64
-          code0 {o->init("Ppanning",'c');}
+          code0 {o->init("Ppanning",'i');}
           class Fl_Osc_Slider
         }
         Fl_Choice partrcv {

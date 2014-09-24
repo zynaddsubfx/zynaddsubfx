@@ -285,7 +285,7 @@ o->redraw();}
               Fl_Value_Slider {} {
                 label Vol
                 tooltip Volume xywh {540 80 160 15} type {Horz Knob} box NO_BOX labelsize 11 align 8 maximum 127 step 1
-                code0 {o->init("PFMVolume", 'c');}
+                code0 {o->init("PFMVolume", 'i');}
                 class Fl_Osc_Slider
               }
               Fl_Value_Slider {} {
@@ -313,7 +313,7 @@ o->redraw();}
               Fl_Value_Slider {} {
                 label {F.Damp}
                 tooltip {Modulator Damp at Higher frequency} xywh {540 120 160 15} type {Horz Knob} box NO_BOX labelsize 11 align 8 minimum -64 maximum 63 step 1
-                code0 {o->init("PFMVolumeDamp",'c');}
+                code0 {o->init("PFMVolumeDamp",'i');}
                 class Fl_Osc_Slider
               }
             }
@@ -350,7 +350,7 @@ oscedit=new OscilEditor(true, loc+"mod-oscil/", osc_i);}
                 callback {oscFM->phase=64-(int) o->value();
 fmoscil->redraw();}
                 xywh {645 415 105 15} type {Horz Knob} box NO_BOX labelsize 10 align 5 minimum -64 maximum 63 step 1
-                code0 {o->init("PFMoscilphase", 'c');}
+                code0 {o->init("PFMoscilphase", 'i');}
                 class Fl_Osc_Slider
               }
               Fl_Choice extFMoscil {
@@ -383,7 +383,7 @@ voiceFMparametersgroup->redraw();} open
               xywh {635 40 85 20} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
               code0 {o->add("OFF");}
               code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"ExtMod.%2d",i+1);o->add(tmp);};}
-              code2 {o->init("PFMVoice",-1);}
+              code2 {o->init("PFMVoice", -1);}
               code3 {if ((int) o->value() != 0) {modoscil->deactivate();modfrequency->deactivate();}}
               class Fl_Osc_Choice
             } {}
@@ -532,7 +532,7 @@ o->redraw();}
             callback {osc->phase=64-(int) o->value();
 voiceoscil->redraw();}
             xywh {10 435 65 10} type {Horz Knob} box NO_BOX labelsize 10 align 5 minimum -64 maximum 63 step 1
-            code0 {o->init("Poscilphase", 'c');}
+            code0 {o->init("Poscilphase", 'i');}
             class Fl_Osc_Slider
           }
           Fl_Check_Button {} {
@@ -593,7 +593,7 @@ voiceonbutton->redraw();} open
               label {Frequency Spread}
               callback {//unisonspreadoutput->do_callback();}
               tooltip {Frequency Spread of the Unison} xywh {95 562 125 13} type {Horz Knob} box NO_BOX labelsize 12 align 1 maximum 127 step 1 value 64
-              code0 {o->init("Unison_frequency_spread", 'c');}
+              code0 {o->init("Unison_frequency_spread", 'i');}
               class Fl_Osc_Slider
             }
             Fl_Value_Output unisonspreadoutput {

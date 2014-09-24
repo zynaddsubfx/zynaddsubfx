@@ -78,9 +78,10 @@ void Fl_Osc_Dial::cb(void)
 {
     assert(osc);
 
-    if((maximum()-minimum()) == 127 || (maximum()-minimum()) == 255)
-        oscWrite(ext, "c", (char)(value()-minimum()));
-    else
+/*    if((maximum()-minimum()) == 127 || (maximum()-minimum()) == 255) {
+	oscWrite(ext, "i", (int)(value()-minimum()));
+    }
+    else*/
         oscWrite(ext, "i", (int)(value()-minimum()));
     
     if(cb_data.first)

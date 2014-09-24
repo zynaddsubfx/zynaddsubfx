@@ -60,7 +60,7 @@ void Fl_Osc_Choice::OSC_value(char v)
 void Fl_Osc_Choice::cb(void)
 {
     assert(osc);
-    oscWrite(ext, "c", value()+min);
+    oscWrite(ext, "i", value()+min);
     if(cb_data.first)
         cb_data.first(this, cb_data.second);
 }

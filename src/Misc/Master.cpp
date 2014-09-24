@@ -71,14 +71,14 @@ static Ports localports = {
        d.reply("/free", "sb", "Part", sizeof(void*), &m->part[i]);
        m->part[i] = p;
        printf("part %d is now pointer %p\n", i, p);}},
-    {"Pvolume::c", rDoc("Master Volume"), 0,
+    {"Pvolume::i", rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "c", ((Master*)d.obj)->Pvolume);
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='c') {
             ((Master*)d.obj)->setPvolume(limit<char>(rtosc_argument(m,0).i,0,127));
             d.broadcast(d.loc, "c", ((Master*)d.obj)->Pvolume);}}},
-    {"volume::c", rDoc("Master Volume"), 0,
+    {"volume::i", rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "c", ((Master*)d.obj)->Pvolume);
@@ -90,17 +90,17 @@ static Ports localports = {
             printf("sets volume to value %d\n", ((Master*)d.obj)->Pvolume);
             d.broadcast(d.loc, "c", ((Master*)d.obj)->Pvolume);}}},
 
-    {"noteOn:ccc", rDoc("Noteon Event"), 0,
+    {"noteOn:iii", rDoc("Noteon Event"), 0,
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
             M->noteOn(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
 
-    {"noteOff:cc", rDoc("Noteoff Event"), 0,
+    {"noteOff:ii", rDoc("Noteoff Event"), 0,
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
             M->noteOff(rtosc_argument(m,0).i,rtosc_argument(m,1).i);}},
 
-    {"setController:ccc", rDoc("MIDI CC Event"), 0,
+    {"setController:iii", rDoc("MIDI CC Event"), 0,
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
             M->setController(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
@@ -425,6 +425,57 @@ void Master::partonoff(int npart, int what)
     }
 }
 
+template <class T>
+struct def_skip
+{
+	static void skip(const char*& argptr) { argptr += sizeof(T); }
+};
+
+template <class T>
+struct str_skip
+{
+	static void skip(const char*& argptr) { while(argptr++); /*TODO: 4 padding */ }
+};
+
+template<class T, class Display = T, template<class T> class SkipsizeFunc = def_skip>
+void _dump_prim_arg(const char*& argptr, std::ostream& os)
+{
+	os << ' ' << (Display)*(const T*)argptr;
+	SkipsizeFunc<T>::skip(argptr);
+}
+
+void dump_msg(const char* ptr, std::ostream& os = std::cerr)
+{
+	assert(*ptr == '/');
+	os << ptr;
+
+	while(*++ptr) ; // skip address
+	while(!*++ptr) ; // skip 0s
+
+	assert(*ptr == ',');
+	os << ' ' << (ptr + 1);
+
+	const char* argptr = ptr;
+	while(*++argptr) ; // skip type string
+	while(!*++argptr) ; // skip 0s
+
+	char c;
+	while((c = *++ptr))
+	{
+		switch(c)
+		{
+			case 'i':
+				_dump_prim_arg<int32_t>(argptr, os); break;
+			case 'c':
+				_dump_prim_arg<int32_t, char>(argptr, os); break;
+		//	case 's':
+		//		_dump_prim_arg<char, const char*>(argptr, os); break;
+			default:
+				exit(1);
+		}
+	}
+
+}
 
 /*
  * Master audio out (the final sound)
@@ -457,11 +508,17 @@ void Master::AudioOut(float *outl, float *outr)
         }
         d.matches = 0;
         //fprintf(stdout, "address '%s'\n", uToB->peak());
-        ports.dispatch(msg+1, d);
+	ports.dispatch(msg+1, d);
         events++;
         if(!d.matches) {// && !ports.apropos(msg)) {
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
             fprintf(stderr, "Unknown address '%s'\n", uToB->peak());
+	    if(strstr(msg, "PFMVelocity"))
+	     dump_msg(msg);
+	    if(ports.apropos(msg))
+	     fprintf(stderr, "  -> best match: '%s'\n", ports.apropos(msg)->name);
+	    if(ports.apropos(msg+1))
+	     fprintf(stderr, "  -> best match: '%s'\n", ports.apropos(msg+1)->name);
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
         }
     }

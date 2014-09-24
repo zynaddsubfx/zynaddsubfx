@@ -280,7 +280,7 @@ if (rndvelocity!=0){
   vel=midivel*(127.0-rndvelocity)/127.0+RND*rndvelocity;
 };
 
-osc->write(loc+"noteOn", "ccc", midich,nk+midioct*12,(int)vel);} {}
+osc->write(loc+"noteOn", "iii", midich,nk+midioct*12,(int)vel);} {}
   }
   Function {relasekey(int nk,int type)} {} {
     code {if ((nk<0)||(nk>=N_OCT*12)) return;
@@ -292,7 +292,7 @@ pressed[nk]=0;
 
 damage(1);
 
-osc->write(loc+"noteOff", "cc", midich,nk+12*midioct);} {}
+osc->write(loc+"noteOff", "ii", midich,nk+12*midioct);} {}
   }
   Function {relaseallkeys(int type)} {} {
     code {for (int i=0;i<N_OCT*12;i++) relasekey(i,type);} {}

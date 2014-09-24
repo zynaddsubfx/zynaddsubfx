@@ -389,13 +389,13 @@ formantfiltergraph->redraw();}
       Fl_Slider cfknob {
         callback {/*formantfiltergraph->redraw();*/}
         xywh {551 167 84 15} type {Horz Knob} box FLAT_BOX maximum 127
-        code0 {o->init("Pcenterfreq", 'c');}
+        code0 {o->init("Pcenterfreq", 'i');}
         class Fl_Osc_Slider
       }
       Fl_Slider octknob {
         callback {/*formantfiltergraph->redraw();*/}
         xywh {551 185 84 15} type {Horz Knob} box FLAT_BOX maximum 127
-        code0 {o->init("Poctavesfreq", 'c');}
+        code0 {o->init("Poctavesfreq", 'i');}
         class Fl_Osc_Slider
       }
       Fl_Box formantfiltergraph {

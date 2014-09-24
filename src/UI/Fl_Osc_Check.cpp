@@ -42,8 +42,11 @@ void Fl_Osc_Check::cb(void)
 
     if(type == 'T')
         oscWrite(ext, value() ? "T" : "F");
-    else
-        oscWrite(ext, "c", value());
+    else {
+	if(type=='c')
+	    fprintf(stderr, "invalid `c' from checkbox %s%s, using `i'\n", loc.c_str(), ext.c_str());
+	oscWrite(ext, "i", value());
+    }
 }
 
 void Fl_Osc_Check::callback(Fl_Callback *cb, void *p)

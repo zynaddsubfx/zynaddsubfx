@@ -705,7 +705,7 @@ cbwidget->do_callback();}
             Fl_Value_Slider volume {
               label Vol
               tooltip Volume xywh {10 50 160 15} type {Horz Knob} box NO_BOX labelsize 11 align 8 maximum 127 step 1
-              code0 {o->init("PVolume", 'c');}
+              code0 {o->init("PVolume", 'i');}
               class Fl_Osc_VSlider
             }
             Fl_Value_Slider vsns {

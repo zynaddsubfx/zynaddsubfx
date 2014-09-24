@@ -55,8 +55,10 @@ void Fl_Osc_Slider::cb(void)
         oscWrite(ext, "f", val-min_);
     else if(osc_type == 'i')
         oscWrite(ext, "i", (int)(val-min_));
-    else
-        oscWrite(ext, "c", (char)(val-min_));
+    else {
+	fprintf(stderr, "invalid `c' from slider %s%s, using `i'\n", loc.c_str(), ext.c_str());
+	oscWrite(ext, "i", (int)(val-min_));
+    }
     //OSC_value(val);
     
     if(cb_data.first)

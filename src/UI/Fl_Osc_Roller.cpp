@@ -45,7 +45,7 @@ void Fl_Osc_Roller::update(void)
 
 void Fl_Osc_Roller::cb(void)
 {
-    oscWrite(name, "c", (unsigned char)value());
+    oscWrite(name, "i", (int)value());
     
     if(cb_data.first)
         cb_data.first(this, cb_data.second);
