@@ -23,6 +23,7 @@
 #include <math.h>
 #include <stdio.h>
 #include "../globals.h"
+#include "../Misc/Util.h"
 #include "LFOParams.h"
 
 #include <rtosc/port-sugar.h>
@@ -33,14 +34,14 @@ using namespace rtosc;
 #define rObject LFOParams
 static rtosc::Ports _ports = {
     rParamF(Pfreq, "frequency of LFO"),
-    rParam(Pintensity, "Intensity of LFO"),
-    rParam(Pstartphase, rSpecial(random), "Starting Phase"),
+    rParamZyn(Pintensity, "Intensity of LFO"),
+    rParamZyn(Pstartphase, rSpecial(random), "Starting Phase"),
     rOption(PLFOtype,"Shape of LFO"),
-    rParam(Prandomness, rSpecial(disable), "Amplitude Randomness"),
-    rParam(Pfreqrand, rSpecial(disable), "Frequency Randomness"),
-    rParam(Pdelay, rSpecial(disable), "Delay before LFO start"),
+    rParamZyn(Prandomness, rSpecial(disable), "Amplitude Randomness"),
+    rParamZyn(Pfreqrand, rSpecial(disable), "Frequency Randomness"),
+    rParamZyn(Pdelay, rSpecial(disable), "Delay before LFO start"),
     rToggle(Pcontinous, "Enable for global operation"),
-    rParam(Pstretch, rCentered, "Note frequency stretch"),
+    rParamZyn(Pstretch, rCentered, "Note frequency stretch"),
 };
 
 rtosc::Ports &LFOParams::ports = _ports;

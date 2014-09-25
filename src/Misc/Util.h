@@ -148,6 +148,9 @@ float cinterpolate(const float *data, size_t len, float pos);
 ///trims a path in recursions
 const char *message_snip(const char *m);
 
+#define rParamZyn(name, ...) \
+  {STRINGIFY(name) "::i",  rProp(parameter) rMap(min, 0) rMap(max, 127) DOC(__VA_ARGS__), NULL, rParamCb(name)}
+
 ///floating point parameter - with lookup code
 #define PARAMF(type, var, name, scale, _min, _max, desc) \
 {#name"::f", ":parameter\0:documentation\0=" desc "\0", 0, \

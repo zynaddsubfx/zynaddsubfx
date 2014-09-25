@@ -26,26 +26,27 @@
 #include <rtosc/port-sugar.h>
 
 #include "EnvelopeParams.h"
+#include "../Misc/Util.h"
 
 #define rObject EnvelopeParams
 using namespace rtosc;
 
 static rtosc::Ports localPorts = {
     rToggle(Pfreemode, "Complex Envelope Definitions"),
-    rParam(Penvpoints, rProp(internal), "Number of points in complex definition"),
-    rParam(Penvsustain, rProp(internal), "Location of the sustain point"),
+    rParamZyn(Penvpoints, rProp(internal), "Number of points in complex definition"),
+    rParamZyn(Penvsustain, rProp(internal), "Location of the sustain point"),
     rParams(Penvdt,  MAX_ENVELOPE_POINTS, "Envelope Delay Times"),
     rParams(Penvval, MAX_ENVELOPE_POINTS, "Envelope Values"),
-    rParam(Penvstretch, "Stretch with respect to frequency"),
+    rParamZyn(Penvstretch, "Stretch with respect to frequency"),
     rToggle(Pforcedrelease, "Force Envelope to fully evaluate"),
     rToggle(Plinearenvelope, "Linear or Logarithmic Envelopes"),
-    rParam(PA_dt,  "Attack Time"),
-    rParam(PA_val, "Attack Value"),
-    rParam(PD_dt,  "Decay Time"),
-    rParam(PD_val, "Decay Value"),
-    rParam(PS_val, "Sustain Value"),
-    rParam(PR_dt,  "Release Time"),
-    rParam(PR_val, "Release Value"),
+    rParamZyn(PA_dt,  "Attack Time"),
+    rParamZyn(PA_val, "Attack Value"),
+    rParamZyn(PD_dt,  "Decay Time"),
+    rParamZyn(PD_val, "Decay Value"),
+    rParamZyn(PS_val, "Sustain Value"),
+    rParamZyn(PR_dt,  "Release Time"),
+    rParamZyn(PR_val, "Release Value"),
 
     {"addPoint:i", rProp(internal) rDoc("Add point to envelope"), NULL, [](const char *msg, RtData &d)
         {

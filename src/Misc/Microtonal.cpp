@@ -48,21 +48,21 @@ using namespace rtosc;
  */
 rtosc::Ports Microtonal::ports = {
     rToggle(Pinvertupdown, "key mapping inverse"),
-    rParam(Pinvertupdowncenter, "center of the inversion"),
+    rParamZyn(Pinvertupdowncenter, "center of the inversion"),
     rToggle(Penabled, "Enable for microtonal mode"),
-    rParam(PAnote, "The note for 'A'"),
+    rParamZyn(PAnote, "The note for 'A'"),
     rParamF(PAfreq, "Frequency of the 'A' note"),
-    rParam(Pscaleshift, "UNDOCUMENTED"),
-    rParam(Pfirstkey, "First key to retune"),
-    rParam(Plastkey,  "Last key to retune"),
-    rParam(Pmiddlenote, "Scale degree 0 note"),
+    rParamZyn(Pscaleshift, "UNDOCUMENTED"),
+    rParamZyn(Pfirstkey, "First key to retune"),
+    rParamZyn(Plastkey,  "Last key to retune"),
+    rParamZyn(Pmiddlenote, "Scale degree 0 note"),
 
     //TODO check to see if this should be exposed
-    rParam(Pmapsize, "UNDOCUMENTED"),
+    rParamZyn(Pmapsize, "UNDOCUMENTED"),
     rToggle(Pmappingenabled, "Mapping Enable"),
 
     rParams(Pmapping, "UNDOCUMENTED"),
-    rParam(Pglobalfinedetune, "Fine detune for all notes"),
+    rParamZyn(Pglobalfinedetune, "Fine detune for all notes"),
 
     rString(Pname, MICROTONAL_MAX_NAME_LEN, "Microtonal Name"),
     rString(Pcomment, MICROTONAL_MAX_NAME_LEN, "Microtonal Name"),

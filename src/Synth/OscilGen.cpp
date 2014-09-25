@@ -36,7 +36,7 @@ int main_thread = 0;
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
 
-#define PC(x) rParam(P##x, "undocumented oscilgen parameter")
+#define PC(x) rParamZyn(P##x, "undocumented oscilgen parameter")
 
 #define rObject OscilGen
 static rtosc::Ports localPorts = {

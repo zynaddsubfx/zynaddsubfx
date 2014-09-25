@@ -21,6 +21,7 @@
 */
 
 #include "Controller.h"
+#include "../Misc/Util.h"
 #include <cmath>
 #include <cstdio>
 
@@ -30,12 +31,12 @@ using namespace rtosc;
 
 #define rObject Controller
 rtosc::Ports Controller::ports = {
-    rParam(panning.depth, "Depth of Panning MIDI Control"),
-    rParam(filtercutoff.depth, "Depth of Filter Cutoff MIDI Control"),
-    rParam(filterq.depth, "Depth of Filter Q MIDI Control"),
-    rParam(bandwidth.depth, "Depth of Bandwidth MIDI Control"),
+    rParamZyn(panning.depth, "Depth of Panning MIDI Control"),
+    rParamZyn(filtercutoff.depth, "Depth of Filter Cutoff MIDI Control"),
+    rParamZyn(filterq.depth, "Depth of Filter Q MIDI Control"),
+    rParamZyn(bandwidth.depth, "Depth of Bandwidth MIDI Control"),
     rToggle(bandwidth.exponential, "Bandwidth Exponential Mode"),
-    rParam(modwheel.depth, "Depth of Modwheel MIDI Control"),
+    rParamZyn(modwheel.depth, "Depth of Modwheel MIDI Control"),
     rToggle(modwheel.exponential, "Modwheel Exponential Mode"),
     rParamI(pitchwheel.bendrange, "Range of MIDI Pitch Wheel"),
     rToggle(expression.receive, "Expression MIDI Receive"),
@@ -44,15 +45,15 @@ rtosc::Ports Controller::ports = {
     rToggle(sustain.receive,    "Sustain MIDI Receive"),
     rToggle(portamento.receive, "Portamento MIDI Receive"),
     rToggle(portamento.portamento, "UNDOCUMENTED"),
-    rParam(portamento.time, "Portamento Length"),
+    rParamZyn(portamento.time, "Portamento Length"),
     rToggle(portamento.proportional, "If all portamentos are proportional to the distance they span"),
-    rParam(portamento.propRate, "Portamento proportional rate"),
-    rParam(portamento.propDepth, "Portamento proportional depth"),
-    rParam(portamento.pitchthresh, "Threshold for portamento"),
+    rParamZyn(portamento.propRate, "Portamento proportional rate"),
+    rParamZyn(portamento.propDepth, "Portamento proportional depth"),
+    rParamZyn(portamento.pitchthresh, "Threshold for portamento"),
     rToggle(portamento.pitchthreshtype, "Type of threshold"),
-    rParam(portamento.updowntimestretch, "UNDOCUMENTED"),
-    rParam(resonancecenter.depth, "Resonance Center MIDI Depth"),
-    rParam(resonancebandwidth.depth, "Resonance Bandwidth MIDI Depth"),
+    rParamZyn(portamento.updowntimestretch, "UNDOCUMENTED"),
+    rParamZyn(resonancecenter.depth, "Resonance Center MIDI Depth"),
+    rParamZyn(resonancebandwidth.depth, "Resonance Bandwidth MIDI Depth"),
     rToggle(NRPN.receive, "NRPN MIDI Enable"),
     rAction(defaults),
 };
