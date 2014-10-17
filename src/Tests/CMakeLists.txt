@@ -15,6 +15,8 @@ CXXTEST_ADD_TEST(PADnoteTest PadNoteTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/PadNote
 CXXTEST_ADD_TEST(PluginTest PluginTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/PluginTest.h)
 CXXTEST_ADD_TEST(UnisonTest UnisonTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/UnisonTest.h)
 #CXXTEST_ADD_TEST(RtAllocTest RtAllocTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/RtAllocTest.h)
+CXXTEST_ADD_TEST(AllocatorTest AllocatorTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/AllocatorTest.h)
 
 #Extra libraries added to make test and full compilation use the same library
 #links for quirky compilers
@@ -34,6 +36,7 @@ target_link_libraries(PluginTest     zynaddsubfx_core zynaddsubfx_nio
     ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
 target_link_libraries(UnisonTest    ${test_lib})
 #target_link_libraries(RtAllocTest    ${test_lib})
+target_link_libraries(AllocatorTest    ${test_lib})
 
 #message(STATUS "Plugin Test ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}")
 
