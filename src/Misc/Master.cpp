@@ -440,7 +440,7 @@ struct str_skip
 	static void skip(const char*& argptr) { while(argptr++); /*TODO: 4 padding */ }
 };
 
-template<class T, class Display = T, class SkipsizeFunc = def_skip>
+template<class T, class Display = T, template<class TMP> class SkipsizeFunc = def_skip>
 void _dump_prim_arg(const char*& argptr, std::ostream& os)
 {
 	os << ' ' << (Display)*(const T*)argptr;

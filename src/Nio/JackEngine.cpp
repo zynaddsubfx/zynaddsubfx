@@ -318,7 +318,7 @@ bool JackEngine::processAudio(jack_nframes_t nframes)
     void   *oscport    = jack_port_get_buffer(osc.oscport, nframes);
     size_t osc_packets = jack_osc_get_event_count(oscport);
 
-    for(int i = 0; i < osc_packets; ++i) {
+    for(size_t i = 0; i < osc_packets; ++i) {
         jack_osc_event_t event;
         if(jack_osc_event_get(&event, oscport, i))
             continue;

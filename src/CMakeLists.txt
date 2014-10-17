@@ -127,26 +127,36 @@ option (BuildForDebug "Include gdb debugging support" OFF)
 set(CMAKE_BUILD_TYPE "Release")
 
 set (BuildOptions_x86_64AMD
-    "-std=c++0x -O3 -march=athlon64 -m64 -Wall -ffast-math -fno-finite-math-only -fomit-frame-pointer"
+    "-std=c++11 -O3 -march=athlon64 -m64 -Wall -Wno-unused-parameter -ffast-math -fno-finite-math-only -fomit-frame-pointer"
   CACHE STRING "X86_64 compiler options"
 )
 
 set (BuildOptions_X86_64Core2
-    "-std=c++0x -O3 -march=core2 -m64 -Wall -ffast-math -fno-finite-math-only -fomit-frame-pointer"
+    "-std=c++11 -O3 -march=core2 -m64 -Wall -Wno-unused-parameter -ffast-math -fno-finite-math-only -fomit-frame-pointer"
   CACHE STRING "X86_64 compiler options"
 )
 
 set (BuildOptionsBasic
-    "-std=c++0x -O3 -msse -msse2 -mfpmath=sse -ffast-math -fomit-frame-pointer"
+    "-std=c++11 -Wno-unused-parameter -O3 -msse -msse2 -mfpmath=sse -ffast-math -fomit-frame-pointer"
     CACHE STRING "basic X86 complier options"
 )
 
 set (BuildOptionsDebug
-    "-std=c++0x -O0 -g3 -ggdb -Wall -Wpointer-arith" CACHE STRING "Debug build flags")
+    "-std=c++11 -O0 -g3 -ggdb -Wall -Wno-unused-parameter -Wpointer-arith" CACHE STRING "Debug build flags")
 
 ########### Settings dependant code ###########
 # From here on, the setting variables have  been prepared so concentrate
 # on the actual compiling.
+
+# To avoid a conflict if PortAudio v1 is installed, the linker directory
+# of portaudio must be specified first, so that xxx/lib/portaudio2 is
+# searched before xxx/lib where PortAudio v1 gets installed.
+if(PaEnable)
+	include_directories(${PORTAUDIO_INCLUDE_DIRS})
+	add_definitions(-DPORTAUDIO=1)
+	list(APPEND AUDIO_LIBRARIES ${PORTAUDIO_LIBRARIES})
+	list(APPEND AUDIO_LIBRARY_DIRS ${PORTAUDIO_LIBRARY_DIRS})
+endif()
 
 if(AlsaEnable)
 	list(APPEND AUDIO_LIBRARIES ${ASOUND_LIBRARY})
@@ -163,13 +173,6 @@ endif(JackEnable)
 if(OssEnable)
 	add_definitions(-DOSS=1)
 endif(OssEnable)
-
-if(PaEnable)
-	include_directories(${PORTAUDIO_INCLUDEDIR} /usr/lib/blam/bax)
-	add_definitions(-DPORTAUDIO=1)
-	list(APPEND AUDIO_LIBRARIES ${PORTAUDIO_LIBRARIES})
-	list(APPEND AUDIO_LIBRARY_DIRS ${PORTAUDIO_LIBRARY_DIRS})
-endif()
 
 if (CompileTests)
 	ENABLE_TESTING()

@@ -15,7 +15,7 @@ set(zynaddsubfx_nio_SRCS
     Nio.cpp
     )
 
-set(zynaddsubfx_nio_lib )
+set(zynaddsubfx_nio_lib)
 
 add_definitions(-DOUT_DEFAULT="${DefaultOutput}")
 add_definitions(-DIN_DEFAULT="${DefaultInput}")
@@ -32,7 +32,7 @@ if(JackEnable)
 endif(JackEnable)
 
 if(PaEnable)
-    include_directories(${PORTAUDIO_INCLUDE_DIR})
+    include_directories(${PORTAUDIO_INCLUDE_DIRS})
     list(APPEND zynaddsubfx_nio_SRCS PaEngine.cpp)
     list(APPEND zynaddsubfx_nio_lib ${PORTAUDIO_LIBRARIES})
 endif(PaEnable)

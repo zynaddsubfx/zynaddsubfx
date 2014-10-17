@@ -16,5 +16,5 @@ class MiddleWare
 
         static void preparePadSynth(const char *, class PADnoteParameters *){};
     private:
-        struct MiddleWareImpl *impl;
+        class MiddleWareImpl *impl;
 };

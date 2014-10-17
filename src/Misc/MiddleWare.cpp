@@ -343,7 +343,7 @@ struct ParamStore
     PADnoteParameters *pad[NUM_MIDI_PARTS][NUM_KIT_ITEMS];
 };
 
-static Fl_Osc_Interface *genOscInterface(struct MiddleWareImpl*);
+static Fl_Osc_Interface *genOscInterface(class MiddleWareImpl*);
 
 /* Implementation */
 class MiddleWareImpl
@@ -667,7 +667,7 @@ public:
             bankList(master->bank, osc);
         } else if(!strcmp(msg, "/rescanforbanks") && !strcmp(rtosc_argument_string(msg), "")) {
             rescanForBanks(master->bank, osc);
-        } else if(!strcmp(msg, "/loadbank") && !strcmp(rtosc_argument_string(msg), "c")) {
+        } else if(!strcmp(msg, "/loadbank") && !strcmp(rtosc_argument_string(msg), "i")) {
             loadBank(master->bank, rtosc_argument(msg, 0).i, osc);
         } else if(!strcmp(msg, "/loadbank") && !strcmp(rtosc_argument_string(msg), "")) {
             bankPos(master->bank, osc);
@@ -962,7 +962,7 @@ void MiddleWareImpl::warnMemoryLeaks(void)
     o->dumpLookupTable();
 }
 
-Fl_Osc_Interface *genOscInterface(struct MiddleWareImpl *impl)
+Fl_Osc_Interface *genOscInterface(class MiddleWareImpl *impl)
 {
     return new UI_Interface(impl);
 }
