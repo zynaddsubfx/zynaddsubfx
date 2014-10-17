@@ -117,7 +117,8 @@ class Microtonal
         static rtosc::Ports ports;
     private:
         int linetotunings(unsigned int nline, const char *line);
-        int loadline(FILE *file, char *line); //loads a line from the text file, while ignoring the lines beggining with "!"
+        //loads a line from the text file, while ignoring the lines beggining with "!"
+        int loadline(FILE *file, char *line);
         //Grab a 0..127 integer from the provided descriptor
         unsigned char octavesize;
         struct {
