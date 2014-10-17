@@ -36,6 +36,7 @@ DynamicFilter::DynamicFilter(EffectParams pars)
       filterl(NULL),
       filterr(NULL)
 {
+    filterpars = memory.alloc<FilterParams>(0,0,0);
     setpreset(Ppreset);
     cleanup();
 }

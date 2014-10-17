@@ -179,7 +179,7 @@ void EffectMgr::changeeffectrt(int _nefx)
 
 void EffectMgr::changeeffect(int _nefx)
 {
-    effect_id = 0;
+    effect_id = _nefx;
     preset    = 0;
     memset(settings, 0, sizeof(settings));
 }
@@ -193,10 +193,18 @@ int EffectMgr::geteffect(void)
 // Initialize An Effect in RT context
 void EffectMgr::init(void)
 {
+    //printf("Initializing Effect(%d)\n", effect_id);
     changeeffectrt(effect_id);
     changepresetrt(preset);
     for(int i=0; i<128; ++i)
         seteffectparrt(i, settings[i]);
+}
+
+//Strip effect manager of it's realtime memory
+void EffectMgr::kill(void)
+{
+    //printf("Killing Effect(%d)\n", effect_id);
+    memory.dealloc(efx);
 }
 
 // Cleanup the current effect

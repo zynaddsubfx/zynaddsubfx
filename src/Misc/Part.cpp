@@ -1199,6 +1199,12 @@ void Part::initialize_rt(void)
         partefx[i]->init();
 }
 
+void Part::kill_rt(void)
+{
+    for(int i=0; i<NUM_PART_EFX; ++i)
+        partefx[i]->kill();
+}
+
 void Part::getfromXMLinstrument(XMLwrapper *xml)
 {
     if(xml->enterbranch("INFO")) {

@@ -88,6 +88,7 @@ class Part
         void applyparameters(std::function<bool()> do_abort) NONREALTIME;
 
         void initialize_rt(void) REALTIME;
+        void kill_rt(void) REALTIME;
 
         void getfromXML(XMLwrapper *xml);
         void getfromXMLinstrument(XMLwrapper *xml);

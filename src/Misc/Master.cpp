@@ -55,7 +55,7 @@ static Ports localports = {
     rRecur(microtonal, "Micrtonal Mapping Functionality"),
     rParamZyn(Pkeyshift,  "Global Key Shift"),
     rParams(Pinsparts, NUM_INS_EFX, "Part to insert part onto"),
-    {"echo", "=documentation\0:Hidden port to echo messages\0", 0, [](const char *m, RtData&) {
+    {"echo", rDoc("Hidden port to echo messages"), 0, [](const char *m, RtData&) {
        bToU->raw_write(m-1);}},
     {"get-vu", rDoc("Grab VU Data"), 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
@@ -68,8 +68,10 @@ static Ports localports = {
        Part   *p = *(Part**)rtosc_argument(msg, 1).b.data;
        int     i = rtosc_argument(msg, 0).i;
        m->part[i]->cloneTraits(*p);
+       m->part[i]->kill_rt();
        d.reply("/free", "sb", "Part", sizeof(void*), &m->part[i]);
        m->part[i] = p;
+       p->initialize_rt();
        printf("part %d is now pointer %p\n", i, p);}},
     {"Pvolume::i", rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
@@ -484,6 +486,8 @@ void dump_msg(const char* ptr, std::ostream& os = std::cerr)
  */
 void Master::AudioOut(float *outl, float *outr)
 {
+    if(memory->lowMemory(4,1024*1024))
+        printf("LOW MEMORY OHOH NOONONONONOOOOOOOO!!\n");
     //Handle user events TODO move me to a proper location
     char loc_buf[1024];
     DataObj d{loc_buf, 1024, this, bToU};

@@ -58,6 +58,7 @@ class EffectMgr:public Presets
         float sysefxgetvolume(void);
 
         void init(void) REALTIME;
+        void kill(void) REALTIME;
         void cleanup(void) REALTIME;
 
         void changeeffectrt(int nefx_) REALTIME;
