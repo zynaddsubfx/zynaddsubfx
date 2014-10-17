@@ -425,6 +425,7 @@ void Master::partonoff(int npart, int what)
     }
 }
 
+#if 0
 template <class T>
 struct def_skip
 {
@@ -437,7 +438,7 @@ struct str_skip
 	static void skip(const char*& argptr) { while(argptr++); /*TODO: 4 padding */ }
 };
 
-template<class T, class Display = T, template<class T> class SkipsizeFunc = def_skip>
+template<class T, class Display = T, class SkipsizeFunc = def_skip>
 void _dump_prim_arg(const char*& argptr, std::ostream& os)
 {
 	os << ' ' << (Display)*(const T*)argptr;
@@ -476,6 +477,7 @@ void dump_msg(const char* ptr, std::ostream& os = std::cerr)
 	}
 
 }
+#endif
 
 /*
  * Master audio out (the final sound)
@@ -508,17 +510,19 @@ void Master::AudioOut(float *outl, float *outr)
         }
         d.matches = 0;
         //fprintf(stdout, "address '%s'\n", uToB->peak());
-	ports.dispatch(msg+1, d);
+        ports.dispatch(msg+1, d);
         events++;
         if(!d.matches) {// && !ports.apropos(msg)) {
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
             fprintf(stderr, "Unknown address '%s'\n", uToB->peak());
-	    if(strstr(msg, "PFMVelocity"))
-	     dump_msg(msg);
-	    if(ports.apropos(msg))
-	     fprintf(stderr, "  -> best match: '%s'\n", ports.apropos(msg)->name);
-	    if(ports.apropos(msg+1))
-	     fprintf(stderr, "  -> best match: '%s'\n", ports.apropos(msg+1)->name);
+#if 0
+            if(strstr(msg, "PFMVelocity"))
+                dump_msg(msg);
+            if(ports.apropos(msg))
+                fprintf(stderr, "  -> best match: '%s'\n", ports.apropos(msg)->name);
+            if(ports.apropos(msg+1))
+                fprintf(stderr, "  -> best match: '%s'\n", ports.apropos(msg+1)->name);
+#endif
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
         }
     }
