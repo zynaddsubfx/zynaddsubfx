@@ -27,6 +27,7 @@ void BankList::OSC_raw(const char *msg)
     const int   pos  = rtosc_argument(msg, 0).i;
     const char *path = rtosc_argument(msg, 1).s;
 
+    value(0);
     if(pos == 0)
         this->clear();
 
