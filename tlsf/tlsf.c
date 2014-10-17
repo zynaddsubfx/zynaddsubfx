@@ -561,6 +561,9 @@ static block_header_t* block_locate_free(control_t* control, size_t size)
 	{
 		mapping_search(size, &fl, &sl);
 		block = search_suitable_block(control, &fl, &sl);
+		if(block && !block->size)
+			block = NULL;
+
 	}
 
 	if (block)
