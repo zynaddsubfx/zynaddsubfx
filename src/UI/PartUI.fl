@@ -65,8 +65,9 @@ class PartSysEffSend {open : {public Fl_Group}
         label 01
         xywh {0 0 25 25} box ROUND_UP_BOX labelfont 1 labelsize 10 align 130 maximum 127 step 1
         code0 {o->size(25,25);}
-        code1 {o->init("sysefx"+to_s(neff)+"/part"+to_s(npart)+"/dummy");}
-        code2 {char tmp[10];snprintf(tmp,10,"%d",neff+1);o->copy_label(tmp);}
+        code1 {o->alt_init("/","Psysefxvol"+to_s(neff)+"/part"+to_s(npart));}
+        code2 {o->mark_dead();}
+        code3 {char tmp[10];snprintf(tmp,10,"%d",neff+1);o->copy_label(tmp);}
         class Fl_Osc_Dial
       }
     }

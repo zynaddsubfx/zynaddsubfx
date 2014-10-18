@@ -764,7 +764,7 @@ mastermenu->redraw();}
         Fl_Check_Button nrpnbutton {
           label NRPN
           tooltip {Receive NRPNs} xywh {15 120 60 25} down_box DOWN_BOX labelsize 12
-          code0 {o->init("ctl.NRPN.receive");}
+          code0 {o->init("ctl/NRPN.receive");}
           class Fl_Osc_Check
         }
         Fl_Counter npartcounter {

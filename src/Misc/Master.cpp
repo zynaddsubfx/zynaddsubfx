@@ -48,11 +48,39 @@ using namespace std;
 using namespace rtosc;
 #define rObject Master
 
+static Ports sysefxPort =
+{
+    {"part#" STRINGIFY(NUM_MIDI_PARTS) "::i", 0, 0, [](const char *m, RtData&d)
+        {
+            //ok, this is going to be an ugly workaround
+            //we know that if we are here the message previously MUST have
+            //matched Psysefxvol#/
+            //and the number is one or two digits at most
+            const char *index_1 = m;
+            index_1 -=2;
+            assert(isdigit(*index_1));
+            if(isdigit(index_1[-1]))
+                index_1--;
+            int ind1 = atoi(index_1);
+
+            //Now get the second index like normal
+            while(!isdigit(*m)) m++;
+            int ind2 = atoi(m);
+            Master &mast = *(Master*)d.obj;
+
+            if(rtosc_narguments(m))
+                mast.setPsysefxvol(ind2, ind1, rtosc_argument(m,0).i);
+            else
+                d.reply(d.loc, "i", mast.Psysefxvol[ind2][ind1]);
+        }}
+};
+
 static Ports localports = {
     rRecursp(part, 16, "Part"),//NUM_MIDI_PARTS
     rRecursp(sysefx, 4, "System Effect"),//NUM_SYS_EFX
     rRecursp(insefx, 8, "Insertion Effect"),//NUM_INS_EFX
     rRecur(microtonal, "Micrtonal Mapping Functionality"),
+    rRecur(ctl, "Controller"),
     rParamZyn(Pkeyshift,  "Global Key Shift"),
     rParams(Pinsparts, NUM_INS_EFX, "Part to insert part onto"),
     {"echo", rDoc("Hidden port to echo messages"), 0, [](const char *m, RtData&) {
@@ -76,21 +104,27 @@ static Ports localports = {
     {"Pvolume::i", rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {
-            d.reply(d.loc, "c", ((Master*)d.obj)->Pvolume);
+            d.reply(d.loc, "i", ((Master*)d.obj)->Pvolume);
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='c') {
             ((Master*)d.obj)->setPvolume(limit<char>(rtosc_argument(m,0).i,0,127));
-            d.broadcast(d.loc, "c", ((Master*)d.obj)->Pvolume);}}},
+            d.broadcast(d.loc, "i", ((Master*)d.obj)->Pvolume);}}},
     {"volume::i", rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {
-            d.reply(d.loc, "c", ((Master*)d.obj)->Pvolume);
-        } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='c') {
-            printf("looking at value %d\n", rtosc_argument(m,0).i);
-            printf("limited value is %d\n", limit<char>(
-                        rtosc_argument(m,0).i, 0,127));
+            d.reply(d.loc, "i", ((Master*)d.obj)->Pvolume);
+        } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
+            //printf("looking at value %d\n", rtosc_argument(m,0).i);
+            //printf("limited value is %d\n", limit<char>(
+            //            rtosc_argument(m,0).i, 0,127));
             ((Master*)d.obj)->setPvolume(limit<char>(rtosc_argument(m,0).i,0,127));
-            printf("sets volume to value %d\n", ((Master*)d.obj)->Pvolume);
-            d.broadcast(d.loc, "c", ((Master*)d.obj)->Pvolume);}}},
+            //printf("sets volume to value %d\n", ((Master*)d.obj)->Pvolume);
+            d.broadcast(d.loc, "i", ((Master*)d.obj)->Pvolume);}}},
+    {"Psysefxvol#" STRINGIFY(NUM_SYS_EFX) "/::i", 0, &sysefxPort,
+        [](const char *msg, rtosc::RtData &d) {
+            SNIP;
+            sysefxPort.dispatch(msg, d);
+        }},
+    //    unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
 
     {"noteOn:iii", rDoc("Noteon Event"), 0,
         [](const char *m,RtData &d){
@@ -128,6 +162,8 @@ static Ports localports = {
     {"close-ui", rDoc("Request to close any connection named \"GUI\""), 0, [](const char *, RtData &) {
        bToU->write("/close-ui", "");}},  
 };
+
+
 
 Ports &Master::ports = localports;
 Master *the_master;
@@ -559,7 +595,7 @@ void Master::AudioOut(float *outl, float *outr)
 
     //Apply the part volumes and pannings (after insertion effects)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
-        if(part[npart]->Penabled)
+        if(!part[npart]->Penabled)
             continue;
 
         Stereo<float> newvol(part[npart]->volume),
@@ -571,6 +607,8 @@ void Master::AudioOut(float *outl, float *outr)
             newvol.l *= pan * 2.0f;
         else
             newvol.r *= (1.0f - pan) * 2.0f;
+        //if(npart==0)
+        //printf("[%d]vol = %f->%f\n", npart, oldvol.l, newvol.l);
 
         //the volume or the panning has changed and needs interpolation
         if(ABOVE_AMPLITUDE_THRESHOLD(oldvol.l, newvol.l)
@@ -586,11 +624,12 @@ void Master::AudioOut(float *outl, float *outr)
             part[npart]->oldvolumel = newvol.l;
             part[npart]->oldvolumer = newvol.r;
         }
-        else
+        else {
             for(int i = 0; i < synth->buffersize; ++i) { //the volume did not changed
                 part[npart]->partoutl[i] *= newvol.l;
                 part[npart]->partoutr[i] *= newvol.r;
             }
+        }
     }
 
 
