@@ -1203,6 +1203,8 @@ void Part::kill_rt(void)
 {
     for(int i=0; i<NUM_PART_EFX; ++i)
         partefx[i]->kill();
+    for(int k = 0; k < POLIPHONY; ++k)
+        KillNotePos(k);
 }
 
 void Part::getfromXMLinstrument(XMLwrapper *xml)
