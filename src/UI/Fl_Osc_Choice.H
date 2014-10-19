@@ -14,7 +14,8 @@ class Fl_Osc_Choice:public Fl_Choice, public Fl_Osc_Widget
 
 
         //void OSC_value(float);
-	void OSC_value(char);
+        void OSC_value(int);
+        void OSC_value(char);
 
         //Refetch parameter information
         void update(void);

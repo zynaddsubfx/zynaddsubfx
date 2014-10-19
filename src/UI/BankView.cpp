@@ -313,6 +313,10 @@ void BankView::OSC_raw(const char *msg)
 
 void BankView::refresh(void)
 {
+    //Odd case during initialization
+    if(!osc)
+        return;
+
     for(int i=0; i<160; ++i)
         osc->write("/refresh_bank", "i", i);
 }

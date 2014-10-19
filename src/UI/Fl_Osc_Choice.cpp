@@ -50,11 +50,16 @@ void Fl_Osc_Choice::callback(Fl_Callback *cb, void *p)
     cb_data.second = p;
 }
 
-void Fl_Osc_Choice::OSC_value(char v)
+void Fl_Osc_Choice::OSC_value(int v)
 {
     value(v-min);
     if(cb_data.first)
         cb_data.first(this, cb_data.second);
+}
+
+void Fl_Osc_Choice::OSC_value(char v)
+{
+    OSC_value((int)v);
 }
 
 void Fl_Osc_Choice::cb(void)
