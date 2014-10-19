@@ -98,4 +98,5 @@ void FFT_cleanup()
     fftw_cleanup();
     pthread_mutex_destroy(mutex);
     delete mutex;
+    mutex = NULL;
 }
