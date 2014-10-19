@@ -160,7 +160,16 @@ static Ports localports = {
             printf("learning '%s'\n", rtosc_argument(m,0).s);
             M->midi.learn(rtosc_argument(m,0).s);}},
     {"close-ui", rDoc("Request to close any connection named \"GUI\""), 0, [](const char *, RtData &) {
-       bToU->write("/close-ui", "");}},  
+       bToU->write("/close-ui", "");}},
+    {"add-rt-memory:bi", rProp(internal) rDoc("Add Additional Memory To RT MemPool"), 0,
+        [](const char *msg, RtData &d)
+        {
+            Master &m = *(Master*)d.obj;
+            char   *mem = *(char**)rtosc_argument(msg, 0).b.data;
+            int     i = rtosc_argument(msg, 1).i;
+            m.memory->addMemory(mem, i);
+            m.pendingMemory = false;
+        }},
 };
 
 
@@ -214,7 +223,7 @@ vuData::vuData(void)
 {}
 
 Master::Master()
-:midi(Master::ports), frozenState(false)
+:midi(Master::ports), frozenState(false), pendingMemory(false)
 {
     memory = new Allocator();
     the_master = this;
@@ -522,8 +531,15 @@ void dump_msg(const char* ptr, std::ostream& os = std::cerr)
  */
 void Master::AudioOut(float *outl, float *outr)
 {
-    if(memory->lowMemory(4,1024*1024))
+    //Danger Limits
+    if(memory->lowMemory(2,1024*1024))
         printf("LOW MEMORY OHOH NOONONONONOOOOOOOO!!\n");
+    //Normal Limits
+    if(!pendingMemory && memory->lowMemory(4,1024*1024)) {
+        printf("Requesting more memory\n");
+        bToU->write("/request-memory", "");
+        pendingMemory = true;
+    }
     //Handle user events TODO move me to a proper location
     char loc_buf[1024];
     DataObj d{loc_buf, 1024, this, bToU};

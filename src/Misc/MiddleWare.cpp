@@ -551,6 +551,12 @@ public:
         else if(!strcmp(rtmsg, "/free")
                 && !strcmp(rtosc_argument_string(rtmsg),"sb")) {
             deallocate(rtosc_argument(rtmsg, 0).s, *((void**)rtosc_argument(rtmsg, 1).b.data));
+        } else if(!strcmp(rtmsg, "/request-memory")) {
+            //Generate out more memory for the RT memory pool
+            //5MBi chunk
+            size_t N  = 5*1024*1024;
+            void *mem = malloc(N);
+            uToB->write("/add-rt-memory", "bi", sizeof(void*), &mem, N);
         } else if(!strcmp(rtmsg, "/setprogram")
                 && !strcmp(rtosc_argument_string(rtmsg),"cc")) {
             loadPart(rtosc_argument(rtmsg,0).i, master->bank.ins[rtosc_argument(rtmsg,1).i].filename.c_str(), master, osc);
