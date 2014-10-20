@@ -31,7 +31,7 @@ class Allocator;
 class FormantFilter:public Filter
 {
     public:
-        FormantFilter(class FilterParams *pars, Allocator &alloc, unsigned int srate, int bufsize);
+        FormantFilter(class FilterParams *pars, Allocator *alloc, unsigned int srate, int bufsize);
         ~FormantFilter();
         void filterout(float *smp);
         void setfreq(float frequency);

@@ -52,7 +52,7 @@ Filter *Filter::generate(Allocator &memory, FilterParams *pars,
     Filter *filter;
     switch(pars->Pcategory) {
         case 1:
-            filter = memory.alloc<FormantFilter>(pars, memory, srate, bufsize);
+            filter = memory.alloc<FormantFilter>(pars, &memory, srate, bufsize);
             break;
         case 2:
             filter = memory.alloc<SVFilter>(Ftype, 1000.0f, pars->getq(), Fstages, srate, bufsize);

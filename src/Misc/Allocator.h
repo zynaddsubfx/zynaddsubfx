@@ -4,6 +4,7 @@ class Allocator
 {
     public:
         Allocator(void);
+        Allocator(const Allocator&) = delete;
         ~Allocator(void);
         void *alloc_mem(size_t mem_size);
         void dealloc_mem(void *memory);
