@@ -27,6 +27,7 @@
 #include <fstream>
 #include <ctime>
 #include <string>
+#define private public
 #include "../Misc/Master.h"
 #include "../Misc/Util.h"
 #include "../Misc/Allocator.h"
@@ -37,11 +38,15 @@
 SYNTH_T *synth;
 
 using namespace std;
+#ifndef SOURCE_DIR
+#define SOURCE_DIR "BE QUIET COMPILER"
+#endif
 
 class PadNoteTest:public CxxTest::TestSuite
 {
     public:
         PADnote      *note;
+        PADnoteParameters *pars;
         Master       *master;
         FFTwrapper   *fft;
         Controller   *controller;
@@ -73,7 +78,7 @@ class PadNoteTest:public CxxTest::TestSuite
 
             fft = new FFTwrapper(synth->oscilsize);
             //prepare the default settings
-            PADnoteParameters *defaultPreset = new PADnoteParameters(fft);
+            pars = new PADnoteParameters(fft);
 
 
             //Assert defaults
@@ -90,11 +95,11 @@ class PadNoteTest:public CxxTest::TestSuite
             TS_ASSERT(wrap->enterbranch("INSTRUMENT_KIT"));
             TS_ASSERT(wrap->enterbranch("INSTRUMENT_KIT_ITEM", 0));
             TS_ASSERT(wrap->enterbranch("PAD_SYNTH_PARAMETERS"));
-            defaultPreset->getfromXML(wrap);
+            pars->getfromXML(wrap);
 
 
             //defaultPreset->defaults();
-            defaultPreset->applyparameters();
+            pars->applyparameters();
 
             //verify xml was loaded
             ///TS_ASSERT(defaultPreset->VoicePar[1].Enabled);
@@ -106,9 +111,9 @@ class PadNoteTest:public CxxTest::TestSuite
             //lets go with.... 50! as a nice note
             testnote = 50;
             float freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
-            SynthParams pars{memory, *controller, freq, 120, 0, testnote, false};
+            SynthParams pars_{memory, *controller, freq, 120, 0, testnote, false};
 
-            note = new PADnote(defaultPreset, pars);
+            note = new PADnote(pars, pars_);
 
             //delete defaultPreset;
             delete wrap;
@@ -129,6 +134,7 @@ class PadNoteTest:public CxxTest::TestSuite
             FFT_cleanup();
             delete synth;
         }
+
 
         void testDefaults() {
             int sampleCount = 0;
@@ -185,6 +191,41 @@ class PadNoteTest:public CxxTest::TestSuite
 #endif
 
             TS_ASSERT_EQUALS(sampleCount, 2304);
+        }
+
+        void testSetup() {
+            for(int i=0; i<7; ++i)
+                TS_ASSERT(pars->sample[i].smp);
+            for(int i=7; i<PAD_MAX_SAMPLES; ++i)
+                TS_ASSERT(!pars->sample[i].smp);
+
+            TS_ASSERT_DELTA(pars->sample[0].smp[0],  -0.057407f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[1],  -0.050704f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[2],  -0.076559f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[3],  -0.069974f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[4],  -0.053268f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[5],  -0.025702f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[6],  -0.021064f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[7],   0.002593f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[8],   0.049286f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[9],   0.031929f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[10],  0.044527f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[11],  0.040447f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[12],  0.022108f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[13],  0.005787f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[14], -0.008430f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[15], -0.009642f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[16], -0.018427f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[17], -0.052831f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[18], -0.058690f, 0.0005f);
+            TS_ASSERT_DELTA(pars->sample[0].smp[19], -0.090954f, 0.0005f);
+
+            TS_ASSERT_EQUALS(pars->PVolume, 90);
+            TS_ASSERT(pars->oscilgen);
+            TS_ASSERT(pars->resonance);
+
+            TS_ASSERT_DELTA(note->NoteGlobalPar.Volume, 2.597527f, 0.001f);
+            TS_ASSERT_DELTA(note->NoteGlobalPar.Panning, 0.500000f, 0.01f);
         }
 
 #define OUTPUT_PROFILE
