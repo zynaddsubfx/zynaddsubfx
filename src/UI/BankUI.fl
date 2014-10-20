@@ -102,7 +102,8 @@ refreshmainwindow();}
        fl_alert("Error: Could not load the bank from the directory\\n%s.",dirname.c_str());*/
 refreshmainwindow();}
         xywh {5 8 220 20} down_box BORDER_BOX labelfont 1 align 0 textfont 1 textsize 11
-        code0 {o->init("loadbank");}
+        code0 {bankview->init(osc, modeselect, npart);}
+        code1 {o->init("loadbank");}
         class BankList
       } {}
       Fl_Button {} {
@@ -115,10 +116,10 @@ banklist->value(0);}
   }
   Function {BankUI(int *npart_, Fl_Osc_Interface *osc_)} {open
   } {
-    code {npart=*npart_;
+    code {npart=npart_;
 osc  =osc_;
 make_window();
-bankview->init(osc, modeselect, npart_);} {}
+} {}
   }
   Function {~BankUI()} {open return_type virtual
   } {
@@ -170,6 +171,6 @@ if (banklist->size() == 0)
   }
   decl {Fl_Valuator *cbwig;} {public local
   }
-  decl {int npart;} {private local
+  decl {int *npart;} {private local
   }
 } 

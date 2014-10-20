@@ -313,6 +313,7 @@ void BankView::OSC_raw(const char *msg)
 
 void BankView::refresh(void)
 {
+    assert(osc);
     //Odd case during initialization
     if(!osc)
         return;
