@@ -582,9 +582,9 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
                                                        int profilesize,
                                                        float bwadjust)
 {
-    float harmonics[synth->oscilsize / 2];
+    float harmonics[synth->oscilsize];
     memset(spectrum, 0, sizeof(float) * size);
-    memset(harmonics, 0, sizeof(float) * (synth->oscilsize / 2));
+    memset(harmonics, 0, sizeof(float) * synth->oscilsize);
 
     //get the harmonic structure from the oscillator (I am using the frequency amplitudes, only)
     oscilgen->get(harmonics, basefreq, false);
@@ -656,9 +656,9 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
                                                     int size,
                                                     float basefreq)
 {
-    float harmonics[synth->oscilsize / 2];
+    float harmonics[synth->oscilsize];
     memset(spectrum,  0, sizeof(float) * size);
-    memset(harmonics, 0, sizeof(float) * (synth->oscilsize / 2));
+    memset(harmonics, 0, sizeof(float) * synth->oscilsize);
 
     //get the harmonic structure from the oscillator (I am using the frequency amplitudes, only)
     oscilgen->get(harmonics, basefreq, false);
