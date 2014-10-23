@@ -6,15 +6,18 @@ class MiddleWare
     public:
         MiddleWare(void);
         ~MiddleWare(void);
-        //return internal master pointer
+        //returns internal master pointer
         class Master *spawnMaster(void);
+        //return  UI interface
         class Fl_Osc_Interface *spawnUiApi(void);
+        //Set callback to push UI events to
         void setUiCallback(void(*cb)(void*,const char *),void *ui);
+        //Set callback to run while busy
         void setIdleCallback(void(*cb)(void));
+        //Handle events
         void tick(void);
+        //Indicate that a program will be loaded on a known part
         void pendingSetProgram(int part);
-
-        static void preparePadSynth(const char *, class PADnoteParameters *){};
     private:
         class MiddleWareImpl *impl;
 };
