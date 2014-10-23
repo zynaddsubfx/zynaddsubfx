@@ -118,9 +118,9 @@ class ADvoicelistitem {open : {public Fl_Osc_Group}
           class Fl_Osc_Group
         } {}
         Fl_Value_Output detunevalueoutput {
-          callback {/*o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());*/}
           xywh {265 5 45 20} labelsize 10 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 10
-          code0 {/*o->value(getdetune(pars->VoicePar[nvoice].PDetuneType,0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());*/}
+          code0 {o->init("detunevalue");}
+          class Fl_Osc_Output
         }
         Fl_Slider voicedetune {
           callback {//detunevalueoutput->do_callback();}
@@ -337,13 +337,13 @@ o->redraw();}
                 callback {if (oscedit!=NULL)
     delete(oscedit);
 
-int nv=nvoice;
-if (extFMoscil->value()>=0)
-    nv=extFMoscil->value();
+//int nv=nvoice;
+//if (extFMoscil->value()>=0)
+//    nv=extFMoscil->value();
 
 oscedit=new OscilEditor(true, loc+"mod-oscil/", osc_i);}
                 xywh {700 380 55 15} box THIN_UP_BOX labelfont 1 labelsize 11
-                code0 {/*if (extFMoscil->value()>=0) o->labelcolor(FL_BLUE);*/}
+                code0 {(void)o;/*if (extFMoscil->value()>=0) o->labelcolor(FL_BLUE);*/}
               }
               Fl_Slider {} {
                 label Phase
@@ -478,8 +478,9 @@ o->redraw();}
             }
             Fl_Value_Output detunevalueoutput {
               label Detune
-              callback {//o->value(getdetune((pars->VoicePar[nvoice].PDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PDetuneType),0,pars->VoicePar[nvoice].PDetune)*pars->getBandwidthDetuneMultiplier());}
+              code0 {o->init("detunevalue");}
               xywh {10 287 45 15} labelsize 10 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 10
+              class Fl_Osc_Output
             }
             Fl_Check_Button {} {
               label 440Hz
@@ -515,13 +516,12 @@ o->redraw();}
           Fl_Button changevoiceoscilbutton {
             label Change
             callback {delete oscedit;
-                int nv=nvoice;
-                if(extoscil->value()>=0)
-                    nv=extoscil->value();
+                //if(extoscil->value()>=0)
+                //    nv=extoscil->value();
 
                 oscedit=new OscilEditor(true,loc+"oscil/", osc_i);}
             xywh {5 490 65 20} box THIN_UP_BOX labelfont 1 labelsize 11
-            code0 {/*if (extoscil->value()>=0) o->labelcolor(FL_BLUE);*/}
+            code0 {(void)o;/*if (extoscil->value()>=0) o->labelcolor(FL_BLUE);*/}
           }
           Fl_Box {} {
             label {Voice Oscillator}

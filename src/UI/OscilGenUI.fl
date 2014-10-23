@@ -225,7 +225,7 @@ class OscilEditor {open : {public PresetsUI_}
     Fl_Window osceditUI {
       label {ADsynth Oscillator Editor} open
       xywh {52 100 735 595} type Double
-      code0 {//if (oscil->ADvsPAD) o->label("PADsynth Harmonic Content Editor");} visible
+      code0 {(void)o;//if (oscil->ADvsPAD) o->label("PADsynth Harmonic Content Editor");} visible
     } {
       Fl_Group dummy {open
         xywh {0 0 735 595} box FLAT_BOX
@@ -259,10 +259,10 @@ class OscilEditor {open : {public PresetsUI_}
           }
           Fl_Value_Slider rndslider {
             label rnd
-            callback {//oscil->Prand=(int)o->value()+64;
+            callback {(void)o;//oscil->Prand=(int)o->value()+64;
 oscildisplaygroup->redraw();}
             tooltip {Oscilator Phase Randomness: smaller than 0 is "group", larger than 0 is for each harmonic} xywh {145 290 100 10} type {Horz Knob} box NO_BOX labelsize 10 align 5 minimum -64 maximum 63 step 1
-            code0 {//if (oscil->ADvsPAD) o->hide();}
+            code0 {(void)o;//if (oscil->ADvsPAD) o->hide();}
           }
           Fl_Group {} {open
             xywh {15 35 350 50} box THIN_DOWN_BOX color 32 selection_color 218 labelcolor 63

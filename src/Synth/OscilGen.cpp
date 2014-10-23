@@ -124,9 +124,9 @@ static rtosc::Ports localPorts = {
             const unsigned n = synth->oscilsize;
             float *smps = new float[n];
             memset(smps, 0, 4*n);
-            OscilGen *o = ((OscilGen*)d.obj);
+            OscilGen &o = *((OscilGen*)d.obj);
             //printf("%d\n", o->needPrepare());
-            ((OscilGen*)d.obj)->get(smps,-1.0);
+            o.get(smps,-1.0);
             //printf("wave: %f %f %f %f\n", smps[0], smps[1], smps[2], smps[3]);
             d.reply(d.loc, "b", n*sizeof(float), smps);
             delete[] smps;

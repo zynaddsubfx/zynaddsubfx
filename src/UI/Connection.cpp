@@ -17,7 +17,7 @@
 #endif // NTK_GUI
 
 using namespace GUI;
-MasterUI *ui;
+class MasterUI *ui;
 
 Fl_Osc_Interface *osc;//TODO: the scope of this should be narrowed
 
@@ -89,10 +89,13 @@ void GUI::destroyUi(ui_handle_t ui)
 
 #define BEGIN(x) {x,"",NULL,[](const char *m, rtosc::RtData d){ \
     MasterUI *ui   = static_cast<MasterUI*>(d.obj); \
-    rtosc_arg_t a0 = rtosc_argument(m,0);
-    //rtosc_arg_t a1 = rtosc_argument(m,1); \
-    //rtosc_arg_t a2 = rtosc_argument(m,2); \
-    //rtosc_arg_t a3 = rtosc_argument(m,3);
+    rtosc_arg_t a0 = {0}, a1 = {0}; \
+    if(rtosc_narguments(m) > 0) \
+        a0 = rtosc_argument(m,0); \
+    if(rtosc_narguments(m) > 1) \
+        a1 = rtosc_argument(m,1); \
+    (void)ui;(void)a1;(void)a0;
+
 #define END }},
 
 //DSL based ports
@@ -118,7 +121,6 @@ static rtosc::Ports ports = {
         ui->do_load_master(a0.s);
     } END
     BEGIN("vu-meter:bb") {
-        rtosc_arg_t a1 = rtosc_argument(m,1);
         if(a0.b.len == sizeof(vuData) &&
                 a1.b.len == sizeof(float)*NUM_MIDI_PARTS) {
             //Refresh the primary VU meters

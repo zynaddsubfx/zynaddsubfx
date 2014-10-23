@@ -101,7 +101,7 @@ sustaincounter->update();
 //sustaincounter->value(Penvsustain);
 //sustaincounter->maximum(Penvpoints-2);}
         xywh {115 155 80 20} box THIN_UP_BOX labelsize 11
-        code0 {//if (Pfreemode==0) o->hide();}
+        code0 {(void)o;//if (Pfreemode==0) o->hide();}
         class Fl_Osc_Button
       }
       Fl_Box freeedit {
@@ -121,7 +121,7 @@ sustaincounter->update();
 //sustaincounter->value(Penvsustain);
 //sustaincounter->maximum(Penvpoints-2);}
         xywh {200 155 80 20} box THIN_UP_BOX labelsize 11
-        code0 {//if (Pfreemode==0) o->hide();}
+        code0 {(void)o;//if (Pfreemode==0) o->hide();}
         class Fl_Osc_Button
       }
       Fl_Check_Button freemodebutton {
