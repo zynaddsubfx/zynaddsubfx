@@ -138,7 +138,7 @@ void Distorsion::setvolume(unsigned char _Pvolume)
 void Distorsion::setlpf(unsigned char _Plpf)
 {
     Plpf = _Plpf;
-    float fr = expf(powf(Plpf / 127.0f, 0.5f) * logf(25000.0f)) + 40.0f;
+    float fr = expf(sqrtf(Plpf / 127.0f) * logf(25000.0f)) + 40.0f;
     lpfl->setfreq(fr);
     lpfr->setfreq(fr);
 }
@@ -146,7 +146,7 @@ void Distorsion::setlpf(unsigned char _Plpf)
 void Distorsion::sethpf(unsigned char _Phpf)
 {
     Phpf = _Phpf;
-    float fr = expf(powf(Phpf / 127.0f, 0.5f) * logf(25000.0f)) + 20.0f;
+    float fr = expf(sqrtf(Phpf / 127.0f) * logf(25000.0f)) + 20.0f;
     hpfl->setfreq(fr);
     hpfr->setfreq(fr);
 }
