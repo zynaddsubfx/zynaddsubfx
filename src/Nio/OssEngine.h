@@ -28,6 +28,20 @@
 #include "AudioOut.h"
 #include "MidiIn.h"
 
+struct OssMidiParse {
+        unsigned char *temp_cmd;
+        unsigned char temp_0[4];
+        unsigned char temp_1[4];
+        unsigned char state;
+#define OSSMIDI_ST_UNKNOWN   0          /* scan for command */
+#define OSSMIDI_ST_1PARAM    1
+#define OSSMIDI_ST_2PARAM_1  2
+#define OSSMIDI_ST_2PARAM_2  3
+#define OSSMIDI_ST_SYSEX_0   4
+#define OSSMIDI_ST_SYSEX_1   5
+#define OSSMIDI_ST_SYSEX_2   6
+};
+
 class OssEngine:public AudioOut, MidiIn
 {
     public:
@@ -43,13 +57,16 @@ class OssEngine:public AudioOut, MidiIn
         void setMidiEn(bool nval);
         bool getMidiEn() const;
 
-
     protected:
-        void *thread();
-        static void *_thread(void *arg);
+        void *audioThreadCb();
+        static void *_audioThreadCb(void *arg);
+
+        void *midiThreadCb();
+        static void *_midiThreadCb(void *arg);
 
     private:
-        pthread_t *engThread;
+        pthread_t *audioThread;
+        pthread_t *midiThread;
 
         //Audio
         bool openAudio();
@@ -64,9 +81,9 @@ class OssEngine:public AudioOut, MidiIn
         //Midi
         bool openMidi();
         void stopMidi();
-        void getMidi(unsigned char *midiPtr);
 
         struct midi {
+            struct OssMidiParse state;
             int  handle;
             bool en;
             bool run;
