@@ -137,7 +137,7 @@ static rtosc::Ports localPorts =
             d.reply(d.loc, "i", realbw);
             delete[] tmp;}},
     {"sample#64:ifb", rDoc("Nothing to see here"), 0,
-        [](const char *m, rtosc::RtData d)
+        [](const char *m, rtosc::RtData &d)
         {
             PADnoteParameters *p = (PADnoteParameters*)d.obj;
             const char *mm = m;
