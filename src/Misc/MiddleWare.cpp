@@ -701,7 +701,7 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
 {
     assert(strcmp(rtmsg, "/part0/kit0/Ppadenableda"));
     //Dump Incomming Events For Debugging
-    if(strcmp(rtmsg, "/vu-meter") && true) {
+    if(strcmp(rtmsg, "/vu-meter") && false) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 1 + 30, 0 + 40);
         fprintf(stdout, "frontend: '%s'<%s>\n", rtmsg,
                 rtosc_argument_string(rtmsg));
