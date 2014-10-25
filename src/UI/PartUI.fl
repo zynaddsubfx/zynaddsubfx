@@ -1057,13 +1057,13 @@ if (kititem!=lastkititem){
     if(kititem<0) return;
 }
 
-if(!adnoteui  && adsynenabledcheck->value())
+if(!adnoteui  && engine==0)//adsynenabledcheck->value())
     adnoteui=new ADnoteUI(loc+"kit"+to_s(kititem)+"/adpars/", osc);
 
-if(!subnoteui && subsynenabledcheck->value()) 
+if(!subnoteui && engine==1)//subsynenabledcheck->value()) 
     subnoteui=new SUBnoteUI(osc, loc+"kit"+to_s(kititem)+"/subpars/");
 
-if(!padnoteui && padsynenabledcheck->value()) 
+if(!padnoteui && engine==2)//padsynenabledcheck->value()) 
     padnoteui=new PADnoteUI(loc+"kit"+to_s(kititem)+"/padpars/", osc);
 
 if (engine==0&&adnoteui) adnoteui->ADnoteGlobalParameters->show();

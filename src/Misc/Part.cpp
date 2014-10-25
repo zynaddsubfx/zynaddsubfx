@@ -138,7 +138,25 @@ static Ports kitPorts = {
     rToggle(Ppadenabled, "PADsynth enable"),
     rParamZyn(Psendtoparteffect, "Effect Levels"),
     rString(Pname, PART_MAX_NAME_LEN, "Kit User Specified Label"),
-    //{"padpars:b", "::", 0
+    {"padpars-data:b", rProp(internal), 0, 
+        [](const char *msg, RtData &d) {
+            rObject &o = *(rObject*)d.obj;
+            assert(o.padpars == NULL);
+            o.padpars = *(decltype(o.padpars)*)rtosc_argument(msg, 0).b.data;
+        }},
+    {"adpars-data:b", rProp(internal), 0, 
+        [](const char *msg, RtData &d) {
+            rObject &o = *(rObject*)d.obj;
+            assert(o.adpars == NULL);
+            o.adpars = *(decltype(o.adpars)*)rtosc_argument(msg, 0).b.data;
+        }},
+    {"subpars-data:b", rProp(internal), 0, 
+        [](const char *msg, RtData &d) {
+            rObject &o = *(rObject*)d.obj;
+            assert(o.subpars == NULL);
+            o.subpars = *(decltype(o.subpars)*)rtosc_argument(msg, 0).b.data;
+        }},
+
     //    [](
 };
 
@@ -1038,9 +1056,9 @@ void Part::setkititemstatus(unsigned kititem, bool Penabled_)
     kkit.Penabled = Penabled_;
 
     if(!Penabled_) {
-        memory.dealloc(kkit.adpars);
-        memory.dealloc(kkit.subpars);
-        memory.dealloc(kkit.padpars);
+        delete kkit.adpars;
+        delete kkit.subpars;
+        delete kkit.padpars;
         kkit.Pname[0] = '\0';
 
         //Reset notes s.t. stale buffers will not get read

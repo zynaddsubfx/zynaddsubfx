@@ -329,26 +329,39 @@ struct NonRtObjStore
     void extractPart(Part *part, int i)
     {
         for(int j=0; j < NUM_KIT_ITEMS; ++j) {
-            std::string base = "/part"+to_s(i)+"/kit"+to_s(j)+"/";
             auto &obj = part->kit[i];
-            if(obj.padpars) {
-                objmap[base+"padpars/"]       = obj.padpars;
-                objmap[base+"padpars/oscil/"] = obj.padpars->oscilgen;
+            extractAD(obj.adpars, i, j);
+            extractPAD(obj.padpars, i, j);
+        }
+    }
+
+    void extractAD(ADnoteParameters *adpars, int i, int j)
+    {
+        std::string base = "/part"+to_s(i)+"/kit"+to_s(j)+"/";
+        for(int k=0; k<NUM_VOICES; ++k) {
+            std::string nbase = base+"adpars/voice"+to_s(k)+"/";
+            if(adpars) {
+                auto &nobj = adpars->VoicePar[k];
+                objmap[nbase+"oscil/"]     = nobj.OscilSmp;
+                objmap[nbase+"mod-oscil/"] = nobj.FMSmp;
+            } else {
+                objmap[nbase+"oscil/"]     = nullptr;
+                objmap[nbase+"mod-oscil/"] = nullptr;
+            }
+        }
+    }
+
+    void extractPAD(PADnoteParameters *padpars, int i, int j)
+    {
+        std::string base = "/part"+to_s(i)+"/kit"+to_s(j)+"/";
+        for(int k=0; k<NUM_VOICES; ++k) {
+            std::string base = "/part"+to_s(i)+"/kit"+to_s(j)+"/";
+            if(padpars) {
+                objmap[base+"padpars/"]       = padpars;
+                objmap[base+"padpars/oscil/"] = padpars->oscilgen;
             } else {
                 objmap[base+"padpars/"]       = nullptr;
                 objmap[base+"padpars/oscil/"] = nullptr;
-            }
-
-            for(int k=0; k<NUM_VOICES; ++k) {
-                std::string nbase = base+"adpars/voice"+to_s(k)+"/";
-                if(obj.adpars) {
-                    auto &nobj = obj.adpars->VoicePar[k];
-                    objmap[nbase+"oscil/"]     = nobj.OscilSmp;
-                    objmap[nbase+"mod-oscil/"] = nobj.FMSmp;
-                } else {
-                    objmap[nbase+"oscil/"]     = nullptr;
-                    objmap[nbase+"mod-oscil/"] = nullptr;
-                }
             }
         }
     }
@@ -384,6 +397,23 @@ struct NonRtObjStore
  ******************************************************************************/
 struct ParamStore
 {
+    ParamStore(void)
+    {
+        memset(add, 0, sizeof(add));
+        memset(pad, 0, sizeof(pad));
+        memset(sub, 0, sizeof(sub));
+    }
+
+    void extractPart(Part *part, int i)
+    {
+        for(int j=0; j < NUM_KIT_ITEMS; ++j) {
+            auto kit = part->kit[j];
+            add[i][j] = kit.adpars;
+            sub[i][j] = kit.subpars;
+            pad[i][j] = kit.padpars;
+        }
+    }
+
     ADnoteParameters  *add[NUM_MIDI_PARTS][NUM_KIT_ITEMS];
     SUBnoteParameters *sub[NUM_MIDI_PARTS][NUM_KIT_ITEMS];
     PADnoteParameters *pad[NUM_MIDI_PARTS][NUM_KIT_ITEMS];
@@ -460,6 +490,7 @@ public:
         Part *p = alloc.get();
 
         obj_store.extractPart(p, npart);
+        kits.extractPart(p, npart);
 
         //Give it to the backend and wait for the old part to return for
         //deallocation
@@ -518,6 +549,9 @@ public:
     }
 
     bool handleOscil(string path, const char *msg, void *v);
+
+    void kitEnable(const char *msg);
+    void kitEnable(int part, int kit, int type);
 
     // Handle an event with special cases
     void handleMsg(const char *msg);
@@ -665,6 +699,7 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
 
 void MiddleWareImpl::bToUhandle(const char *rtmsg)
 {
+    assert(strcmp(rtmsg, "/part0/kit0/Ppadenableda"));
     //Dump Incomming Events For Debugging
     if(strcmp(rtmsg, "/vu-meter") && true) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 1 + 30, 0 + 40);
@@ -747,6 +782,64 @@ bool MiddleWareImpl::handleOscil(string path, const char *msg, void *v)
     return true;
 }
 
+//Allocate kits on a as needed basis
+void MiddleWareImpl::kitEnable(const char *msg)
+{
+    const string argv = rtosc_argument_string(msg);
+    if(argv != "T")
+        return;
+    //Extract fields from:
+    //BASE/part#/kit#/Pxxxenabled
+    int type = -1;
+    if(strstr(msg, "Padenabled"))
+        type = 0;
+    else if(strstr(msg, "Ppadenabled"))
+        type = 1;
+    else if(strstr(msg, "Psubenabled"))
+        type = 2;
+
+    if(type == -1)
+        return;
+
+    const char *tmp = strstr(msg, "part");
+
+    if(tmp == NULL)
+        return;
+
+    const int part = atoi(tmp+4);
+
+    tmp = strstr(msg, "kit");
+
+    if(tmp == NULL)
+        return;
+
+    const int kit = atoi(tmp+3);
+
+    kitEnable(part, kit, type);
+}
+
+void MiddleWareImpl::kitEnable(int part, int kit, int type)
+{
+    printf("attempting a kit enable\n");
+    string url = "/part"+to_s(part)+"/kit"+to_s(kit)+"/";
+    void *ptr = NULL;
+    if(type == 0 && kits.add[part][kit] == NULL) {
+        ptr = kits.add[part][kit] = new ADnoteParameters(master->fft);
+        url += "adpars-data";
+        obj_store.extractAD(kits.add[part][kit], part, kit);
+    } else if(type == 1 && kits.pad[part][kit] == NULL) {
+        ptr = kits.pad[part][kit] = new PADnoteParameters(master->fft);
+        url += "padpars-data";
+        obj_store.extractPAD(kits.pad[part][kit], part, kit);
+    } else if(type == 2 && kits.sub[part][kit] == NULL) {
+        ptr = kits.sub[part][kit] = new SUBnoteParameters();
+        url += "subpars-data";
+    }
+
+    //Send the new memory
+    if(ptr)
+        uToB->write(url.c_str(), "b", sizeof(void*), &ptr);
+}
 
 /* BASE/part#/kititem#
  * BASE/part#/kit#/adpars/voice#/oscil/\*
@@ -806,6 +899,9 @@ void MiddleWareImpl::handleMsg(const char *msg)
     } else if(strstr(msg, "load-part") && !strcmp(rtosc_argument_string(msg), "is")) {
         pending_load[rtosc_argument(msg,0).i]++;
         loadPart(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master, osc);
+    } else if(strstr(msg, "Padenabled") || strstr(msg, "Ppadenabled") || strstr(msg, "Psubenabled")) {
+        kitEnable(msg);
+        uToB->raw_write(msg);
     } else
         uToB->raw_write(msg);
 }
