@@ -665,7 +665,7 @@ void OscilGen::spectrumadjust(fft_t *freqs)
                     mag = 1.0f;
                 break;
         }
-        freqs[i] = std::polar<fftw_real>(mag, phase);
+        freqs[i] = FFTpolar<fftw_real>(mag, phase);
     }
 }
 
@@ -766,7 +766,7 @@ void OscilGen::prepare(fft_t *freqs)
                 int k = i * (j + 1);
                 if(k >= synth->oscilsize / 2)
                     break;
-                freqs[k] += basefuncFFTfreqs[i] * std::polar<fftw_real>(
+                freqs[k] += basefuncFFTfreqs[i] * FFTpolar<fftw_real>(
                     hmag[j],
                     hphase[j] * k);
             }
@@ -981,7 +981,7 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
         const float rnd = PI * powf((Prand - 64.0f) / 64.0f, 2.0f);
         for(int i = 1; i < nyquist - 1; ++i) //to Nyquist only for AntiAliasing
             outoscilFFTfreqs[i] *=
-                std::polar<fftw_real>(1.0f, (float)(rnd * i * RND));
+                FFTpolar<fftw_real>(1.0f, (float)(rnd * i * RND));
     }
 
     //Harmonic Amplitude Randomness

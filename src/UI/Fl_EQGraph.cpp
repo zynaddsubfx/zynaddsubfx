@@ -3,6 +3,7 @@
 #include "Fl_EQGraph.H"
 #include "common.H"
 #include "../Effects/EffectMgr.h"
+#include "../DSP/FFTwrapper.h"
 #include "../globals.h"
 
 #include <rtosc/rtosc.h>
@@ -139,8 +140,8 @@ double Fl_EQGraph::getresponse(int maxy,float freq) const
          
 
     for(int i = 0; i < MAX_EQ_BANDS*MAX_FILTER_STAGES*2+1; ++i) {
-        num_res += std::polar<float>(num[i], i*angle);
-        dem_res += std::polar<float>(dem[i], i*angle);
+        num_res += FFTpolar<float>(num[i], i*angle);
+        dem_res += FFTpolar<float>(dem[i], i*angle);
     }
 
     float dbresp=20*log(abs(num_res/dem_res))/log(10);

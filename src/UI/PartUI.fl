@@ -996,7 +996,6 @@ assert(!loc_.empty());
 bankui=bankui_;
 part_path = part_path_;
 base = part_path;
-osc  = osc;
 npart=npart_;
 ninseff=0;
 osc=osc_;

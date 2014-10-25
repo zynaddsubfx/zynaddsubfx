@@ -253,7 +253,7 @@ void Reverb::sethpf(unsigned char _Phpf)
     if(Phpf == 0) { //No HighPass
         memory.dealloc(hpf);
     } else {
-        float fr = expf(powf(Phpf / 127.0f, 0.5f) * logf(10000.0f)) + 20.0f;
+        float fr = expf(sqrtf(Phpf / 127.0f) * logf(10000.0f)) + 20.0f;
         if(hpf == NULL)
             hpf = memory.alloc<AnalogFilter>(3, fr, 1, 0, samplerate, buffersize);
         else
@@ -267,7 +267,7 @@ void Reverb::setlpf(unsigned char _Plpf)
     if(Plpf == 127) { //No LowPass
         memory.dealloc(lpf);
     } else {
-        float fr = expf(powf(Plpf / 127.0f, 0.5f) * logf(25000.0f)) + 40.0f;
+        float fr = expf(sqrtf(Plpf / 127.0f) * logf(25000.0f)) + 40.0f;
         if(!lpf)
             lpf = memory.alloc<AnalogFilter>(2, fr, 1, 0, samplerate, buffersize);
         else
