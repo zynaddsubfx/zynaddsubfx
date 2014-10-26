@@ -13,7 +13,7 @@
 
 class Fl_Osc_Group;
 //Consider merging in Fl_OscilSpectrum
-class Fl_Oscilloscope : public Fl_Box, Fl_Osc_Widget
+class Fl_Oscilloscope : public Fl_Box, public Fl_Osc_Widget
 {
     public:
         Fl_Oscilloscope(int x,int y, int w, int h, const char *label=0)

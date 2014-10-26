@@ -808,6 +808,7 @@ delete(oscedit);
   Function {change_voice(int nvoice_)} {open
   } {
     code {nvoice = nvoice_;
+    loc = base+"voice"+to_s(nvoice)+"/";
 ADnoteVoiceParameters->rebase(base+"voice"+to_s(nvoice)+"/");} {selected
     }
   }
