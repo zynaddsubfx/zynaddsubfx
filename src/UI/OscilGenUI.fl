@@ -355,7 +355,6 @@ return;
 if(o->value()==0||o->value()==127) basefuncmodulation->deactivate();
 else basefuncmodulation->activate();}
             xywh {375 290 90 15} down_box BORDER_BOX labelsize 10 align 5 when 1 textsize 11
-            code0 {o->init("Pcurrentbasefunc");}
             class Fl_Osc_Choice
           } {
             MenuItem {} {
@@ -937,6 +936,7 @@ basefuncdisplaygroup = NULL;
 bfslider = NULL;
 bftype = NULL;
 make_window();
+bftype->init("Pcurrentbasefunc");
 initialized = true;
 
 refresh();
