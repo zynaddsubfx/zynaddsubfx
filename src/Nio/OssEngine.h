@@ -74,8 +74,13 @@ class OssEngine:public AudioOut, MidiIn
 
         struct audio {
             int handle;
-            short int *smps; //Samples to be sent to soundcard
+            union {
+                /* Samples to be sent to soundcard */
+                short int *ps16;
+                int *ps32;
+            } smps;
             bool en;
+            bool is32bit;
         } audio;
 
         //Midi

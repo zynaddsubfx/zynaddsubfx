@@ -187,15 +187,16 @@ OssEngine::OssEngine()
     midi.handle  = -1;
     audio.handle = -1;
 
-    audio.smps = new short[synth->buffersize * 2];
-    memset(audio.smps, 0, synth->bufferbytes);
+    /* allocate worst case audio buffer */
+    audio.smps.ps32 = new int[synth->buffersize * 2];
+    memset(audio.smps.ps32, 0, sizeof(int) * synth->buffersize * 2);
     memset(&midi.state, 0, sizeof(midi.state));
 }
 
 OssEngine::~OssEngine()
 {
     Stop();
-    delete [] audio.smps;
+    delete [] audio.smps.ps32;
 }
 
 bool OssEngine::openAudio()
@@ -203,10 +204,8 @@ bool OssEngine::openAudio()
     if(audio.handle != -1)
         return true;  //already open
 
-    int snd_bitsize    = 16;
     int snd_fragment   = 0x00080009; //fragment size (?);
     int snd_stereo     = 1; //stereo;
-    int snd_format     = AFMT_S16_LE;
     int snd_samplerate = synth->samplerate;
 
     const char *device = getenv("DSP_DEVICE");
@@ -221,10 +220,37 @@ bool OssEngine::openAudio()
         return false;
     }
     ioctl(audio.handle, SNDCTL_DSP_RESET, NULL);
-    ioctl(audio.handle, SNDCTL_DSP_SETFMT, &snd_format);
+
+    /* Figure out the correct format first */
+#if defined(AFMT_S16_NE) && defined(AFMT_S32_NE)
+    int snd_format32 = AFMT_S32_NE;
+    int snd_format16 = AFMT_S16_NE;
+#elif defined(BYTE_ORDER) && defined(LITTLE_ENDIAN)
+#if BYTE_ORDER == LITTLE_ENDIAN
+    int snd_format32 = AFMT_S32_LE;
+    int snd_format16 = AFMT_S16_LE;
+#else
+    int snd_format32 = AFMT_S32_BE;
+    int snd_format16 = AFMT_S16_BE;
+#endif
+#else
+    int snd_format32 = AFMT_S32_LE;
+    int snd_format16 = AFMT_S16_LE;
+#endif
+
+    if (ioctl(audio.handle, SNDCTL_DSP_SETFMT, &snd_format32) == 0) {
+	audio.is32bit = true;
+    } else if (ioctl(audio.handle, SNDCTL_DSP_SETFMT, &snd_format16) == 0) {
+	audio.is32bit = false;
+    } else {
+	cerr << "ERROR - I cannot set DSP format for "
+	     << device << '.' << endl;
+	close(audio.handle);
+	audio.handle = -1;
+	return false;
+    }
     ioctl(audio.handle, SNDCTL_DSP_STEREO, &snd_stereo);
     ioctl(audio.handle, SNDCTL_DSP_SPEED, &snd_samplerate);
-    ioctl(audio.handle, SNDCTL_DSP_SAMPLESIZE, &snd_bitsize);
     ioctl(audio.handle, SNDCTL_DSP_SETFRAGMENT, &snd_fragment);
 
     pthread_attr_t attr;
@@ -380,8 +406,13 @@ void *OssEngine::audioThreadCb()
                 if(r > 1.0f)
                     r = 1.0f;
 
-            audio.smps[i * 2]     = (short int) (l * 32767.0f);
-            audio.smps[i * 2 + 1] = (short int) (r * 32767.0f);
+	    if (audio.is32bit) {
+		audio.smps.ps32[i * 2]     = (int) (l * 2147483647.0f);
+		audio.smps.ps32[i * 2 + 1] = (int) (r * 2147483647.0f);
+	    } else {	/* 16bit */
+		audio.smps.ps16[i * 2]     = (short int) (l * 32767.0f);
+		audio.smps.ps16[i * 2 + 1] = (short int) (r * 32767.0f);
+	    }
         }
 
         int error;
@@ -390,8 +421,13 @@ void *OssEngine::audioThreadCb()
             int handle = audio.handle;
             if(handle == -1)
                 goto done;
-            /* 2x because is 16 bit, again 2x because it is stereo */
-            error = write(handle, audio.smps, synth->buffersize * 4);
+	    if (audio.is32bit) {
+		/* 4x because it is 32 bit, again 2x because it is stereo */
+		error = write(handle, audio.smps.ps32, synth->buffersize * 8);
+	    } else {
+		/* 2x because it is 16 bit, again 2x because it is stereo */
+		error = write(handle, audio.smps.ps16, synth->buffersize * 4);
+	    }
         } while (error == -1 && errno == EINTR);
 
         if(error == -1)
