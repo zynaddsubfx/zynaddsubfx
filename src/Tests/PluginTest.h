@@ -110,7 +110,7 @@ class PluginTest:public CxxTest::TestSuite
             master[0]->putalldata((char*)fdata.c_str(), fdata.length());
             int res = master[0]->getalldata(&result);
 
-            TS_ASSERT_EQUALS(fdata.length()+1, res);
+            TS_ASSERT_EQUALS((int)(fdata.length()+1), res);
             TS_ASSERT(fdata == result);
         }
 
