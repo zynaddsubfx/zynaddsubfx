@@ -983,6 +983,7 @@ int Master::loadXML(const char *filename)
     xml->exitbranch();
 
     delete (xml);
+    initialize_rt();
     return 0;
 }
 
