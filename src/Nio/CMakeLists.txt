@@ -43,7 +43,7 @@ if(AlsaEnable)
 endif(AlsaEnable)
 
 if(OssEnable)
-    list(APPEND zynaddsubfx_nio_SRCS OssEngine.cpp)
+    list(APPEND zynaddsubfx_nio_SRCS OssEngine.cpp OssMultiEngine.cpp)
 endif(OssEnable)
 
 

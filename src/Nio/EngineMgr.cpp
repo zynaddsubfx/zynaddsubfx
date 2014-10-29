@@ -9,6 +9,7 @@
 #include "NulEngine.h"
 #if OSS
 #include "OssEngine.h"
+#include "OssMultiEngine.h"
 #endif
 #if ALSA
 #include "AlsaEngine.h"
@@ -36,6 +37,7 @@ EngineMgr::EngineMgr()
     engines.push_back(defaultEng);
 #if OSS
     engines.push_back(new OssEngine());
+    engines.push_back(new OssMultiEngine());
 #endif
 #if ALSA
     engines.push_back(new AlsaEngine());
