@@ -38,8 +38,8 @@ Alienwah::Alienwah(EffectParams pars)
 
 Alienwah::~Alienwah()
 {
-    delete [] oldl;
-    delete [] oldr;
+    memory.devalloc(oldl);
+    memory.devalloc(oldr);
 }
 
 
