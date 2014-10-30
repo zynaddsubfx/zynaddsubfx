@@ -74,6 +74,7 @@ class OssEngine:public AudioOut, MidiIn
 
         struct audio {
             int handle;
+            int buffersize;
             union {
                 /* Samples to be sent to soundcard */
                 short int *ps16;

@@ -201,10 +201,12 @@ OssEngine::~OssEngine()
 
 bool OssEngine::openAudio()
 {
+    int x;
+
     if(audio.handle != -1)
         return true;  //already open
 
-    int snd_fragment   = 0x00080009; //fragment size (?);
+    int snd_fragment;
     int snd_stereo     = 1; //stereo;
     int snd_samplerate = synth->samplerate;
 
@@ -245,12 +247,30 @@ bool OssEngine::openAudio()
     } else {
 	cerr << "ERROR - I cannot set DSP format for "
 	     << device << '.' << endl;
-	close(audio.handle);
-	audio.handle = -1;
-	return false;
+	goto error;
     }
     ioctl(audio.handle, SNDCTL_DSP_STEREO, &snd_stereo);
     ioctl(audio.handle, SNDCTL_DSP_SPEED, &snd_samplerate);
+
+    if (snd_samplerate != (int)synth->samplerate) {
+        cerr << "ERROR - Cannot set samplerate for "
+             << device << ". " << snd_samplerate
+             << " != " << synth->samplerate << endl;
+        goto error;
+    }
+
+    /* compute buffer size for 16-bit stereo samples */
+    audio.buffersize = 4 * synth->buffersize;
+    if (audio.is32bit)
+        audio.buffersize *= 2;
+
+    for (x = 4; x < 20; x++) {
+        if ((1 << x) >= audio.buffersize)
+                break;
+    }
+
+    snd_fragment = 0x20000 | x;         /* 2x buffer */
+
     ioctl(audio.handle, SNDCTL_DSP_SETFRAGMENT, &snd_fragment);
 
     pthread_attr_t attr;
@@ -260,6 +280,11 @@ bool OssEngine::openAudio()
     pthread_create(audioThread, &attr, _audioThreadCb, this);
 
     return true;
+
+error:
+    close(audio.handle);
+    audio.handle = -1;
+    return false;
 }
 
 void OssEngine::stopAudio()
@@ -421,13 +446,7 @@ void *OssEngine::audioThreadCb()
             int handle = audio.handle;
             if(handle == -1)
                 goto done;
-	    if (audio.is32bit) {
-		/* 4x because it is 32 bit, again 2x because it is stereo */
-		error = write(handle, audio.smps.ps32, synth->buffersize * 8);
-	    } else {
-		/* 2x because it is 16 bit, again 2x because it is stereo */
-		error = write(handle, audio.smps.ps16, synth->buffersize * 4);
-	    }
+	    error = write(handle, audio.smps.ps32, audio.buffersize);
         } while (error == -1 && errno == EINTR);
 
         if(error == -1)
