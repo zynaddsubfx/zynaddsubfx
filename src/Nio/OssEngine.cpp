@@ -212,7 +212,7 @@ bool OssEngine::openAudio()
 
     const char *device = getenv("DSP_DEVICE");
     if(device == NULL)
-	device = config.cfg.LinuxOSSWaveOutDev;
+        device = config.cfg.LinuxOSSWaveOutDev;
 
     /* NOTE: PIPEs and FIFOs can block when opening them */
     audio.handle = open(device, O_WRONLY, O_NONBLOCK);
@@ -224,6 +224,9 @@ bool OssEngine::openAudio()
     ioctl(audio.handle, SNDCTL_DSP_RESET, NULL);
 
     /* Figure out the correct format first */
+#ifdef __linux__
+    int snd_format16 = AFMT_S16_NE;
+#else
 #if defined(AFMT_S16_NE) && defined(AFMT_S32_NE)
     int snd_format32 = AFMT_S32_NE;
     int snd_format16 = AFMT_S16_NE;
@@ -239,15 +242,21 @@ bool OssEngine::openAudio()
     int snd_format32 = AFMT_S32_LE;
     int snd_format16 = AFMT_S16_LE;
 #endif
+#endif
 
-    if (ioctl(audio.handle, SNDCTL_DSP_SETFMT, &snd_format32) == 0) {
-	audio.is32bit = true;
+#ifdef __linux__
+#define SND_32_INIT -1
+#else
+#define SND_32_INIT ioctl(audio.handle, SNDCTL_DSP_SETFMT, &snd_format32)
+#endif
+    if (SND_32_INIT == 0) {
+        audio.is32bit = true;
     } else if (ioctl(audio.handle, SNDCTL_DSP_SETFMT, &snd_format16) == 0) {
-	audio.is32bit = false;
+        audio.is32bit = false;
     } else {
-	cerr << "ERROR - I cannot set DSP format for "
-	     << device << '.' << endl;
-	goto error;
+        cerr << "ERROR - I cannot set DSP format for "
+            << device << '.' << endl;
+        goto error;
     }
     ioctl(audio.handle, SNDCTL_DSP_STEREO, &snd_stereo);
     ioctl(audio.handle, SNDCTL_DSP_SPEED, &snd_samplerate);
@@ -359,7 +368,7 @@ bool OssEngine::openMidi()
 
     const char *device = getenv("MIDI_DEVICE");
     if(device == NULL)
-	device = config.cfg.LinuxOSSSeqInDev;
+        device = config.cfg.LinuxOSSSeqInDev;
 
     /* NOTE: PIPEs and FIFOs can block when opening them */
     handle = open(device, O_RDONLY, O_NONBLOCK);
@@ -431,13 +440,13 @@ void *OssEngine::audioThreadCb()
                 if(r > 1.0f)
                     r = 1.0f;
 
-	    if (audio.is32bit) {
-		audio.smps.ps32[i * 2]     = (int) (l * 2147483647.0f);
-		audio.smps.ps32[i * 2 + 1] = (int) (r * 2147483647.0f);
-	    } else {	/* 16bit */
-		audio.smps.ps16[i * 2]     = (short int) (l * 32767.0f);
-		audio.smps.ps16[i * 2 + 1] = (short int) (r * 32767.0f);
-	    }
+            if (audio.is32bit) {
+                audio.smps.ps32[i * 2]     = (int) (l * 2147483647.0f);
+                audio.smps.ps32[i * 2 + 1] = (int) (r * 2147483647.0f);
+            } else {/* 16bit */
+                audio.smps.ps16[i * 2]     = (short int) (l * 32767.0f);
+                audio.smps.ps16[i * 2 + 1] = (short int) (r * 32767.0f);
+            }
         }
 
         int error;
@@ -446,7 +455,7 @@ void *OssEngine::audioThreadCb()
             int handle = audio.handle;
             if(handle == -1)
                 goto done;
-	    error = write(handle, audio.smps.ps32, audio.buffersize);
+            error = write(handle, audio.smps.ps32, audio.buffersize);
         } while (error == -1 && errno == EINTR);
 
         if(error == -1)

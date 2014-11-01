@@ -1,21 +1,21 @@
 /*
-  ZynAddSubFX - a software synthesizer
+   ZynAddSubFX - a software synthesizer
 
-  OssMultiEngine.h - Multi channel audio output for Open Sound System
-  Copyright (C) 2014 Hans Petter Selasky
+   OssMultiEngine.h - Multi channel audio output for Open Sound System
+   Copyright (C) 2014 Hans Petter Selasky
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License
-  as published by the Free Software Foundation.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of version 2 of the GNU General Public License
+   as published by the Free Software Foundation.
 
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License (version 2 or later) for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License (version 2 or later) for more details.
 
-  You should have received a copy of the GNU General Public License (version 2)
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+   You should have received a copy of the GNU General Public License (version 2)
+   along with this program; if not, write to the Free Software Foundation,
+   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 */
 
@@ -28,40 +28,40 @@
 
 class OssMultiEngine : public AudioOut
 {
-public:
-	OssMultiEngine();
-	~OssMultiEngine();
+    public:
+        OssMultiEngine();
+        ~OssMultiEngine();
 
-	bool Start();
-	void Stop();
+        bool Start();
+        void Stop();
 
-	void setAudioEn(bool nval);
-	bool getAudioEn() const;
+        void setAudioEn(bool nval);
+        bool getAudioEn() const;
 
-protected:
-	void *audioThreadCb();
-	static void *_audioThreadCb(void *arg);
+    protected:
+        void *audioThreadCb();
+        static void *_audioThreadCb(void *arg);
 
-private:
-	pthread_t audioThread;
+    private:
+        pthread_t audioThread;
 
-	/* Audio */
-	bool openAudio();
-	void stopAudio();
+        /* Audio */
+        bool openAudio();
+        void stopAudio();
 
-	int handle;
-	int maxbuffersize;
-	int buffersize;
-	int channels;
+        int handle;
+        int maxbuffersize;
+        int buffersize;
+        int channels;
 
-	union {
-		/* Samples to be sent to soundcard */
-		short int *ps16;
-		int *ps32;
-	} smps;
+        union {
+            /* Samples to be sent to soundcard */
+            short int *ps16;
+            int *ps32;
+        } smps;
 
-	bool en;
-	bool is32bit;
+        bool en;
+        bool is32bit;
 };
 
 #endif
