@@ -38,5 +38,9 @@ target_link_libraries(UnisonTest    ${test_lib})
 #target_link_libraries(RtAllocTest    ${test_lib})
 target_link_libraries(AllocatorTest    ${test_lib})
 
+#Testbed app
+add_executable(ins-test InstrumentStats.cpp)
+target_link_libraries(ins-test ${test_lib})
+
 #message(STATUS "Plugin Test ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}")
 
