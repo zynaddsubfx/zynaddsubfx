@@ -18,7 +18,7 @@ MiddleWare *middleware;
 
 float *outL, *outR;
 Allocator  alloc;
-Microtonal micro;
+Microtonal microtonal;
 FFTwrapper fft(1024);
 Part *p;
 
@@ -55,7 +55,7 @@ void setup() {
     denormalkillbuf = new float[synth->buffersize];
     for(int i = 0; i < synth->buffersize; ++i)
         denormalkillbuf[i] = 0;
-    p = new Part(alloc, &micro, &fft);
+    p = new Part(alloc, &microtonal, &fft);
 }
 
 void load(string s)
