@@ -337,8 +337,7 @@ void Reverb::settype(unsigned char _Ptype)
         memory.devalloc(ap[i]);
         ap[i] = memory.valloc<float>(aplen[i]);
     }
-    delete bandwidth;
-    bandwidth = NULL;
+    memory.dealloc(bandwidth);
     if(Ptype == 2) { //bandwidth
         //TODO the size of the unison buffer may be too small, though this has
         //not been verified yet.
