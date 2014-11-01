@@ -92,35 +92,15 @@ OssMultiEngine :: openAudio()
     ioctl(handle, SNDCTL_DSP_RESET, 0);
 
     /* Figure out the correct format first */
-#ifdef __linux__
     int snd_format16 = AFMT_S16_NE;
-#else
-#if defined(AFMT_S16_NE) && defined(AFMT_S32_NE)
+
+#ifdef AFMT_S32_NE
     int snd_format32 = AFMT_S32_NE;
-    int snd_format16 = AFMT_S16_NE;
-#elif defined(BYTE_ORDER) && defined(LITTLE_ENDIAN)
-#if BYTE_ORDER == LITTLE_ENDIAN
-    int snd_format32 = AFMT_S32_LE;
-    int snd_format16 = AFMT_S16_LE;
-#else
-    int snd_format32 = AFMT_S32_BE;
-    int snd_format16 = AFMT_S16_BE;
-#endif
-#else
-    int snd_format32 = AFMT_S32_LE;
-    int snd_format16 = AFMT_S16_LE;
-#endif
-#endif
-
-#ifdef __linux__
-#define SND_32_INIT -1
-#else
-#define SND_32_INIT ioctl(audio.handle, SNDCTL_DSP_SETFMT, &snd_format32)
-#endif
-
-    if (SND_32_INIT == 0) {
+    if (ioctl(handle, SNDCTL_DSP_SETFMT, &snd_format32) == 0) {
         is32bit = true;
-    } else if (ioctl(handle, SNDCTL_DSP_SETFMT, &snd_format16) == 0) {
+    } else
+#endif
+    if (ioctl(handle, SNDCTL_DSP_SETFMT, &snd_format16) == 0) {
         is32bit = false;
     } else {
         cerr << "ERROR - Cannot set DSP format for "
