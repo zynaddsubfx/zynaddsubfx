@@ -370,8 +370,8 @@ if (event==FL_RIGHT_MOUSE){
         }
         Fl_Button {} {
           label R
-          callback {o->oscWrite("Pminkey", "c", 0);
-          o->oscWrite("Pmaxkey", "c", 127);}
+          callback {o->oscWrite("Pminkey", "i", 0);
+          o->oscWrite("Pmaxkey", "i", 127);}
           tooltip {reset the minimum key to 0 and maximum key to 127} xywh {330 155 15 12} box THIN_UP_BOX labelfont 1 labelsize 10
           class Fl_Osc_Button
         }
@@ -389,6 +389,7 @@ if (event==FL_RIGHT_MOUSE){
 val=atoi(o->text());
 osc->write("/setkeylimit", "i", val);} open
           tooltip {Key Limit} xywh {215 155 50 20} down_box BORDER_BOX labelsize 10 align 8 textfont 1 textsize 10
+          class Fl_Osc_Choice
         } {}
         Fl_Choice {} {
           label {Mode :}

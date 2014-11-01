@@ -388,7 +388,7 @@ bandwidthsettingsui->redraw();}
         Fl_Value_Slider bwidthscale {
           label {B.Width Scale}
           tooltip {How much I increase the BandWidth according to lower/higher harmonics} xywh {345 40 90 15} type {Horz Knob} box NO_BOX labelsize 10 align 1 minimum -64 maximum 63 step 1
-          code0 {o->init("Pbwscale");}
+          code0 {o->init("Pbwscale",'i');}
           class Fl_Osc_Slider
         }
       }

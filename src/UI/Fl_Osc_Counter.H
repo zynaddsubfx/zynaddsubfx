@@ -7,7 +7,7 @@ class Fl_Osc_Counter: public Fl_Counter, public Fl_Osc_Widget
 {
     public:
         Fl_Osc_Counter(int x, int y, int w, int h, const char *label=0);
-        void init(const char *path_, char type_ = 'c');
+        void init(const char *path_, char type_ = 'i');
         void OSC_value(char);
         void OSC_value(int);
         using Fl_Osc_Widget::OSC_value;
