@@ -389,7 +389,6 @@ if (event==FL_RIGHT_MOUSE){
 val=atoi(o->text());
 osc->write("/setkeylimit", "i", val);} open
           tooltip {Key Limit} xywh {215 155 50 20} down_box BORDER_BOX labelsize 10 align 8 textfont 1 textsize 10
-          class Fl_Osc_Choice
         } {}
         Fl_Choice {} {
           label {Mode :}
