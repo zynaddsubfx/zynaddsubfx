@@ -140,6 +140,11 @@ static Ports localports = {
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
             M->setController(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
+    {"Panic:", rDoc("Stop All Sound"), 0,
+        [](const char *, RtData &d) {
+            Master &M =  *(Master*)d.obj;
+            M.ShutUp();
+        }},
     {"freeze_state:", rDoc("Internal Read-only Mode"), 0,
         [](const char *,RtData &d) {
             Master *M =  (Master*)d.obj;
