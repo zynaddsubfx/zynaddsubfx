@@ -16,6 +16,13 @@ using namespace std;
 char *instance_name=(char*)"";
 MiddleWare *middleware;
 
+enum RunMode {
+    MODE_PROFILE,
+    MODE_TEST,
+};
+
+RunMode mode;
+
 float *outL, *outR;
 Allocator  alloc;
 Microtonal microtonal;
@@ -42,6 +49,8 @@ void setup() {
     synth->buffersize = 256;
     synth->samplerate = 48000;
     synth->alias();
+    //for those patches that are just really big
+    alloc.addMemory(malloc(1024*1024),1024*1024);
 
     outL  = new float[1024];
     for(int i = 0; i < synth->buffersize; ++i)
@@ -65,7 +74,8 @@ void load(string s)
     p->applyparameters();
     p->initialize_rt();
     double t_off = toc();
-    printf("%f, ", t_off - t_on);
+    if(mode == MODE_PROFILE)
+        printf("%f, ", t_off - t_on);
 }
 
 void noteOn()
@@ -74,7 +84,8 @@ void noteOn()
     for(int i=40; i<100; ++i)
         p->NoteOn(i,100,0);
     double t_off = toc(); // timer when func returns
-    printf("%f, ", t_off - t_on);
+    if(mode == MODE_PROFILE)
+        printf("%f, ", t_off - t_on);
 }
 
 void speed()
@@ -82,11 +93,15 @@ void speed()
     const int samps = 150;
 
     double t_on = tic(); // timer before calling func
-    for(int i = 0; i < samps; ++i)
+    for(int i = 0; i < samps; ++i) {
         p->ComputePartSmps();
+        if(mode==MODE_TEST)
+            printf("%f, %f, ", p->partoutl[0], p->partoutr[0]);
+    }
     double t_off = toc(); // timer when func returns
 
-    printf("%f, %d, ", t_off - t_on, samps*synth->buffersize);
+    if(mode==MODE_PROFILE)
+        printf("%f, %d, ", t_off - t_on, samps*synth->buffersize);
 }
 
 void noteOff()
@@ -95,7 +110,14 @@ void noteOff()
     p->AllNotesOff();
     p->ComputePartSmps();
     double t_off = toc(); // timer when func returns
-    printf("%f", t_off - t_on);
+    if(mode == MODE_PROFILE)
+        printf("%f, ", t_off - t_on);
+}
+
+void memUsage()
+{
+    if(mode == MODE_PROFILE)
+        printf("%lld", alloc.totalAlloced());
 }
 
 int main(int argc, char **argv)
@@ -105,10 +127,12 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    mode = MODE_TEST;
     setup();
     load(argv[1]);
     noteOn();
     speed();
     noteOff();
+    memUsage();
     printf("\n");
 }
