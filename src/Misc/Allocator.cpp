@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <cstdlib>
+#include <cassert>
 #include <utility>
 #include <cstdio>
 #include "../../tlsf/tlsf.h"
@@ -20,12 +21,13 @@ void *data(next_t *n)
 
 struct AllocatorImpl
 {
-    void *tlsf = 0;;
+    void *tlsf = 0;
 
     //singly linked list of memory pools
     //XXX this may violate alignment on some platforms if malloc doesn't return
     //nice values
     next_t *pools = 0;
+    unsigned long long totalAlloced = 0;
 };
 
 Allocator::Allocator(void)
@@ -54,6 +56,7 @@ Allocator::~Allocator(void)
 
 void *Allocator::alloc_mem(size_t mem_size)
 {
+    impl->totalAlloced += mem_size;
     void *mem = tlsf_malloc(impl->tlsf, mem_size);
     //printf("Allocator.malloc(%p, %d) = %p\n", impl, mem_size, mem);
     //void *mem = malloc(mem_size);
@@ -62,7 +65,7 @@ void *Allocator::alloc_mem(size_t mem_size)
 }
 void Allocator::dealloc_mem(void *memory)
 {
-    //fprintf(stderr, "Freeing memory (%p)\n", memory);
+    //printf("dealloc_mem(%d)\n", tlsf_block_size(memory));
     tlsf_free(impl->tlsf, memory);
     //free(memory);
 }
@@ -119,24 +122,20 @@ static const size_t block_header_free_bit = 1 << 0;
 bool Allocator::memFree(void *pool)
 {
     size_t bh_shift = sizeof(next_t)+sizeof(size_t);
-    //printf("memFree(%p)\n", pool);
+    //Assume that memory is free to start with
     bool isFree = true;
+    //Get the block header from the pool
     block_header_t &bh  = *(block_header_t*)((char*)pool+bh_shift);
-    //printf("size_test = %x\n", 50*1024*1024);
-    //printf("size1     = %x\n", bh.size);
+    //The first block must be free
     if((bh.size&block_header_free_bit) == 0)
         isFree = false;
-    //printf("Step 1 = %d\n", isFree);
     block_header_t &bhn = *(block_header_t*)
         (((char*)&bh)+((bh.size&~0x3)+bh_shift-2*sizeof(size_t)));
-    //printf("size2     = %x\n", bhn.size);
+    //The next block must be 'non-free' and zero length
     if((bhn.size&block_header_free_bit) != 0)
         isFree = false;
-    //printf("Step 2 = %d\n", isFree);
     if((bhn.size&~0x3) != 0)
         isFree = false;
-    //printf("Step 3 = %d\n", isFree);
-    //printf("Result = %d\n\n", isFree);
 
     return isFree;
 }
@@ -162,6 +161,12 @@ int Allocator::freePools()
         n = n->next;
     }
     return i;
+}
+
+
+unsigned long long Allocator::totalAlloced()
+{
+    return impl->totalAlloced;
 }
 
 /*

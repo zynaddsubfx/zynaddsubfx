@@ -62,10 +62,10 @@ class Allocator
             }
         }
 
-    void addMemory(void *, size_t mem_size);//{(void)mem_size;};
+    void addMemory(void *, size_t mem_size);
 
     //Return true if the current pool cannot allocate n chunks of chunk_size
-    bool lowMemory(unsigned n, size_t chunk_size);//{(void)n;(void)chunk_size; return false;};
+    bool lowMemory(unsigned n, size_t chunk_size);
     bool memFree(void *pool);
 
     //returns number of pools
@@ -73,28 +73,10 @@ class Allocator
 
     int freePools();
 
+    unsigned long long totalAlloced();
+
     struct AllocatorImpl *impl;
 };
-
-//Memory that could either be from the heap or from the realtime allocator
-//This should be avoided when possible, but it's not clear if it can be avoided
-//in all cases
-//template<class T>
-//class HeapRtMem
-//{
-//};
-
-
-//A helper class used to perform a series of allocations speculatively to verify
-//that there is enough memory for a set transation to occur.
-//Stuff will get weird if this ends up failing, but it will be able to at least
-//detect where there is an issue
-//class StaticAllocFreeVerifyier
-//{
-//    void *scratch_buf[4096];
-//    unsigned alloc_count;
-//};
-
 
 /**
  * General notes on Memory Allocation Within ZynAddSubFX
