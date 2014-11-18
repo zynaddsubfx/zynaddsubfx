@@ -152,9 +152,9 @@ static rtosc::Ports localPorts = {
             assert(rtosc_argument(m,0).b.len == sizeof(void*));
             d.reply("/free", "sb", "fft_t", sizeof(void*), &o.oscilFFTfreqs);
             //fprintf(stderr, "\n\n");
-            //fprintf(stderr, "The ID of this of this thread is: %ld\n", (long int)syscall(224));
+            //fprintf(stderr, "The ID of this of this thread is: %ld\n", (long int)syscall(SYS_gettid));
             //fprintf(stderr, "o.oscilFFTfreqs = %p\n", o.oscilFFTfreqs);
-            assert(main_thread != syscall(224));
+            assert(main_thread != syscall(SYS_gettid));
             assert(o.oscilFFTfreqs !=*(fft_t**)rtosc_argument(m,0).b.data);
             o.oscilFFTfreqs = *(fft_t**)rtosc_argument(m,0).b.data;
         }},

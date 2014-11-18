@@ -31,6 +31,7 @@
 
 #include <unistd.h>
 #include <pthread.h>
+#include <sys/syscall.h>
 
 #include <getopt.h>
 
@@ -137,7 +138,7 @@ void exitprogram()
 
 int main(int argc, char *argv[])
 {
-    main_thread =  (long int)syscall(224);
+    main_thread =  (long int)syscall(SYS_gettid);
     synth = new SYNTH_T;
     config.init();
     dump.startnow();
