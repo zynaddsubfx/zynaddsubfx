@@ -48,7 +48,7 @@ rtosc::Ports EffectMgr::ports = {
             while(!isdigit(*mm))++mm;
 
             if(!rtosc_narguments(msg))
-                d.reply(d.loc, "i", eff->geteffectpar(atoi(mm)));
+                d.reply(d.loc, "i", eff->geteffectparrt(atoi(mm)));
             else 
                 eff->seteffectparrt(atoi(mm), rtosc_argument(msg, 0).i);
         }},
@@ -264,6 +264,13 @@ unsigned char EffectMgr::geteffectpar(int npar)
     if(npar<128)
         return settings[npar];
 
+    if(!efx)
+        return 0;
+    return efx->getpar(npar);
+}
+
+unsigned char EffectMgr::geteffectparrt(int npar)
+{
     if(!efx)
         return 0;
     return efx->getpar(npar);

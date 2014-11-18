@@ -70,6 +70,7 @@ class EffectMgr:public Presets
         void seteffectpar(int npar, unsigned char value) NONREALTIME;
         void seteffectparrt(int npar, unsigned char value) REALTIME;
         unsigned char geteffectpar(int npar);
+        unsigned char geteffectparrt(int npar) REALTIME;
 
         const bool insertion;
         float     *efxoutl, *efxoutr;
