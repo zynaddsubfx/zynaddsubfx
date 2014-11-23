@@ -23,18 +23,19 @@
 #include "OscilGen.h"
 #include "../Misc/WaveShapeSmps.h"
 
-int main_thread = 0;
 #include <cassert>
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
 #include <stddef.h>
+#include <pthread.h>
 
 #include <unistd.h>
-#include <sys/syscall.h>
 
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
+
+pthread_t main_thread;
 
 #define PC(x) rParamZyn(P##x, "undocumented oscilgen parameter")
 
@@ -152,9 +153,9 @@ static rtosc::Ports localPorts = {
             assert(rtosc_argument(m,0).b.len == sizeof(void*));
             d.reply("/free", "sb", "fft_t", sizeof(void*), &o.oscilFFTfreqs);
             //fprintf(stderr, "\n\n");
-            //fprintf(stderr, "The ID of this of this thread is: %ld\n", (long int)syscall(SYS_gettid));
+            //fprintf(stderr, "The ID of this of this thread is: %ld\n", (long)pthread_self());
             //fprintf(stderr, "o.oscilFFTfreqs = %p\n", o.oscilFFTfreqs);
-            assert(main_thread != syscall(SYS_gettid));
+            assert(main_thread != pthread_self());
             assert(o.oscilFFTfreqs !=*(fft_t**)rtosc_argument(m,0).b.data);
             o.oscilFFTfreqs = *(fft_t**)rtosc_argument(m,0).b.data;
         }},
