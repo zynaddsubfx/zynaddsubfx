@@ -427,13 +427,13 @@ static Fl_Osc_Interface *genOscInterface(class MiddleWareImpl*);
 class MiddleWareImpl
 {
     static constexpr const char* tmp_nam_prefix = "/tmp/zynaddsubfx_";
-    
+
     //! returns file name to where UDP port is saved
     std::string get_tmp_nam() const
     {
          return tmp_nam_prefix + to_s(getpid());
     }
-    
+
     void create_tmp_file(unsigned server_port)
     {
         std::string tmp_nam = get_tmp_nam();
@@ -450,7 +450,7 @@ class MiddleWareImpl
             fprintf(tmp_fp, "%u", server_port);
         fclose(tmp_fp);
     }
-    
+
     void clean_up_tmp_nams() const
     {
         DIR *dir;
@@ -465,10 +465,10 @@ class MiddleWareImpl
                     std::string pid = name.substr(strlen(tmp_nam_prefix));
                     std::string proc_file = "/proc/" + std::move(pid) +
                                             "/comm";
-                    
+
                     std::ifstream ifs(proc_file);
                     bool remove = false;
-                    
+
                     if(!ifs.good())
                     {
                         fprintf(stderr, "Note: trying to remove %s - the "
@@ -492,12 +492,12 @@ class MiddleWareImpl
                             remove = true;
                         }
                     }
-                    
-                    
+
+
                     if(remove)
                     {
                         // make sure this file contains only one unsigned
-                        unsigned udp_port; 
+                        unsigned udp_port;
                         std::ifstream ifs2(name);
                         if(!ifs2.good())
                             fprintf(stderr, "Warning: could not open %s.\n",
@@ -517,8 +517,8 @@ class MiddleWareImpl
                                                     "%s.\n", name.c_str());
                             }
                         }
-                    } 
-                       
+                    }
+
                     /* one might want to connect to zyn here,
                        but it is not necessary:
                     lo_address la = lo_address_new(nullptr, udp_port.c_str());
