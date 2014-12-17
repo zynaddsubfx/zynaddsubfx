@@ -149,7 +149,7 @@ float cinterpolate(const float *data, size_t len, float pos);
 const char *message_snip(const char *m);
 
 #define rParamZyn(name, ...) \
-  {STRINGIFY(name) "::i",  rProp(parameter) rMap(min, 0) rMap(max, 127) DOC(__VA_ARGS__), NULL, rParamCb(name)}
+  {STRINGIFY(name) "::i",  rProp(parameter) rMap(min, 0) rMap(max, 127) DOC(__VA_ARGS__), NULL, rParamICb(name)}
 
 ///floating point parameter - with lookup code
 #define PARAMF(type, var, name, scale, _min, _max, desc) \
