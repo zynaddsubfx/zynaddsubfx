@@ -82,7 +82,7 @@ static Ports localports = {
     rRecur(microtonal, "Micrtonal Mapping Functionality"),
     rRecur(ctl, "Controller"),
     rParamZyn(Pkeyshift,  "Global Key Shift"),
-    rParams(Pinsparts, NUM_INS_EFX, "Part to insert part onto"),
+    rArrayI(Pinsparts, NUM_INS_EFX, "Part to insert part onto"),
     {"echo", rDoc("Hidden port to echo messages"), 0, [](const char *m, RtData&) {
        bToU->raw_write(m-1);}},
     {"get-vu", rDoc("Grab VU Data"), 0, [](const char *, RtData &d) {
@@ -187,7 +187,7 @@ class DataObj:public rtosc::RtData
     public:
         DataObj(char *loc_, size_t loc_size_, void *obj_, rtosc::ThreadLink *bToU_)
         {
-            memset(loc_, 0, sizeof(loc_size_));
+            memset(loc_, 0, loc_size_);
             loc      = loc_;
             loc_size = loc_size_;
             obj      = obj_;
@@ -468,7 +468,6 @@ void Master::partonoff(int npart, int what)
         for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx) {
             if(Pinsparts[nefx] == npart)
                 insefx[nefx]->cleanup();
-            ;
         }
     }
     else {  //enabled
