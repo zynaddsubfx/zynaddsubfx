@@ -1248,6 +1248,11 @@ void MiddleWare::tick(void)
     impl->tick();
 }
 
+void MiddleWare::doReadOnlyOp(std::function<void()> fn)
+{
+    impl->doReadOnlyOp(fn);
+}
+
 void MiddleWare::setUiCallback(void(*cb)(void*,const char *),void *ui)
 {
     impl->cb = cb;
@@ -1257,6 +1262,11 @@ void MiddleWare::setUiCallback(void(*cb)(void*,const char *),void *ui)
 void MiddleWare::setIdleCallback(void(*cb)(void))
 {
     impl->idle = cb;
+}
+        
+void MiddleWare::transmitMsg(const char *msg)
+{
+    impl->handleMsg(msg);
 }
 
 void MiddleWare::pendingSetProgram(int part)

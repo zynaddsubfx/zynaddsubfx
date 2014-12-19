@@ -40,6 +40,7 @@
 #include "Params/PADnoteParameters.h"
 
 #include "DSP/FFTwrapper.h"
+#include "Misc/PresetExtractor.h"
 #include "Misc/Master.h"
 #include "Misc/Part.h"
 #include "Misc/Util.h"
@@ -424,6 +425,7 @@ int main(int argc, char *argv[])
     gui = GUI::createUi(middleware->spawnUiApi(), &Pexitprogram);
     middleware->setUiCallback(GUI::raiseUi, gui);
     middleware->setIdleCallback([](){GUI::tickUi(gui);});
+    middlewarepointer = middleware;
 
     if(!noui)
     {

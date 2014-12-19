@@ -78,13 +78,13 @@ delete (freemodeeditwindow);} {}
     } {
       Fl_Button {} {
         label C
-        callback {/*presetsui->copy(env);*/}
+        callback {presetsui->copy(freemodeeditwindow->loc());}
         xywh {465 160 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
         code0 {freemodeeditwindow->osc = osc; freemodeeditwindow->base = loc();}
       }
       Fl_Button {} {
         label P
-        callback {/*presetsui->paste(env,this);*/}
+        callback {presetsui->paste(freemodeeditwindow->loc(),this);}
         xywh {482 160 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
       }
       Fl_Button addpoint {
@@ -184,12 +184,12 @@ envfree->redraw();}
       } {
         Fl_Button {} {
           label C
-          callback {/*presetsui->copy(env);*/}
+          callback {presetsui->copy(envADSR->loc());}
           xywh {150 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
         }
         Fl_Button {} {
           label P
-          callback {/*presetsui->paste(env,this);*/}
+          callback {presetsui->paste(envADSR->loc(),this);}
           xywh {167 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
         }
         Fl_Dial e1adt {
@@ -258,12 +258,12 @@ envfree->redraw();}
       } {
         Fl_Button {} {
           label C
-          callback {/*presetsui->copy(env);*/}
+          callback {presetsui->copy(envASR->loc());}
           xywh {155 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
         }
         Fl_Button {} {
           label P
-          callback {/*presetsui->paste(env,this);*/}
+          callback {presetsui->paste(envASR->loc(),this);}
           xywh {172 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
         }
         Fl_Dial e2aval {
@@ -326,12 +326,12 @@ envfree->redraw();}
       } {
         Fl_Button {} {
           label C
-          callback {/*presetsui->copy(env);*/}
+          callback {presetsui->copy(envADSRfilter->loc());}
           xywh {220 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
         }
         Fl_Button {} {
           label P
-          callback {/*presetsui->paste(env,this);*/}
+          callback {presetsui->paste(envADSRfilter->loc(),this);}
           xywh {237 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
         }
         Fl_Dial e3aval {
@@ -409,12 +409,12 @@ envfree->redraw();}
       } {
         Fl_Button {} {
           label C
-          callback {/*presetsui->copy(env);*/}
+          callback {presetsui->copy(envASRbw->loc());}
           xywh {155 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
         }
         Fl_Button {} {
           label P
-          callback {/*presetsui->paste(env,this);*/}
+          callback {presetsui->paste(envASRbw->loc(),this);}
           xywh {172 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
         }
         Fl_Dial e4aval {
@@ -490,12 +490,12 @@ envfree->redraw();}
         }
         Fl_Button {} {
           label C
-          callback {/*presetsui->copy(env);*/}
+          callback {presetsui->copy(envfree->loc());}
           xywh {150 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 55
         }
         Fl_Button {} {
           label P
-          callback {/*presetsui->paste(env,this);*/}
+          callback {presetsui->paste(envfree->loc(),this);}
           xywh {167 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 55
         }
       }

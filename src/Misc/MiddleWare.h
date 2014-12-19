@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 
 //Link between realtime and non-realtime layers
 class MiddleWare
@@ -16,6 +17,10 @@ class MiddleWare
         void setIdleCallback(void(*cb)(void));
         //Handle events
         void tick(void);
+        //Do A Readonly Operation (For Parameter Copy)
+        void doReadOnlyOp(std::function<void()>);
+        //Handle a rtosc Message
+        void transmitMsg(const char *);
         //Indicate that a program will be loaded on a known part
         void pendingSetProgram(int part);
     private:

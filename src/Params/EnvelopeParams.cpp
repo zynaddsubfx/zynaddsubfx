@@ -32,6 +32,8 @@
 using namespace rtosc;
 
 static rtosc::Ports localPorts = {
+    rSelf(EnvelopeParams),
+    rPaste(),
     rToggle(Pfreemode, "Complex Envelope Definitions"),
     rParamZyn(Penvpoints, rProp(internal), "Number of points in complex definition"),
     rParamZyn(Penvsustain, rProp(internal), "Location of the sustain point"),
@@ -119,6 +121,14 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
 
 EnvelopeParams::~EnvelopeParams()
 {}
+
+void EnvelopeParams::paste(const EnvelopeParams &ep)
+{
+    //Avoid undefined behavior
+    if(&ep == this)
+        return;
+    memcpy((char*)this, (const char*)&ep, sizeof(*this));
+}
 
 float EnvelopeParams::getdt(char i) const
 {

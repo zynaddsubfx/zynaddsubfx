@@ -33,9 +33,10 @@
 class EnvelopeParams:public Presets
 {
     public:
-        EnvelopeParams(unsigned char Penvstretch_,
-                       unsigned char Pforcedrelease_);
+        EnvelopeParams(unsigned char Penvstretch_=64,
+                       unsigned char Pforcedrelease_=0);
         ~EnvelopeParams();
+        void paste(const EnvelopeParams &ep);
         void ADSRinit(char A_dt, char D_dt, char S_val, char R_dt);
         void ADSRinit_dB(char A_dt, char D_dt, char S_val, char R_dt);
         void ASRinit(char A_val, char A_dt, char R_val, char R_dt);
