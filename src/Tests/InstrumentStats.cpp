@@ -67,10 +67,18 @@ void setup() {
     p = new Part(alloc, &microtonal, &fft);
 }
 
-void load(string s)
+void xml(string s)
 {
     double t_on = tic();
     p->loadXMLinstrument(s.c_str());
+    double t_off = toc();
+    if(mode == MODE_PROFILE)
+        printf("%f, ", t_off - t_on);
+}
+
+void load()
+{
+    double t_on = tic();
     p->applyparameters();
     p->initialize_rt();
     double t_off = toc();
@@ -127,9 +135,10 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    mode = MODE_TEST;
+    mode = MODE_PROFILE;
     setup();
-    load(argv[1]);
+    xml(argv[1]);
+    load();
     noteOn();
     speed();
     noteOff();
