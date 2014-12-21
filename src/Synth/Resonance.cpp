@@ -100,7 +100,7 @@ void Resonance::applyres(int n, fft_t *fftdata, float freq) const
 
     for(int i = 1; i < n; ++i) {
         //compute where the n-th hamonics fits to the graph
-        const float x  = limit((logf(freq) - l1) / l2, 0.0f, INFINITY) * N_RES_POINTS;
+        const float x  = limit((logf(freq*i) - l1) / l2, 0.0f, INFINITY) * N_RES_POINTS;
         const float dx = x - floor(x);
         const int kx1  = limit<int>(floor(x), 0, N_RES_POINTS - 1);
         const int kx2  = limit<int>(kx1 + 1,  0, N_RES_POINTS - 1);
