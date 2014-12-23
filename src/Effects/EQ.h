@@ -30,7 +30,7 @@ class EQ:public Effect
 {
     public:
         EQ(EffectParams pars);
-        ~EQ() {}
+        ~EQ();
         void out(const Stereo<float *> &smp);
         void setpreset(unsigned char npreset);
         void changepar(int npar, unsigned char value);

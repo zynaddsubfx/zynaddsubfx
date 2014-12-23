@@ -791,6 +791,7 @@ Master::~Master()
         delete sysefx[nefx];
 
     delete fft;
+    delete memory;
 }
 
 

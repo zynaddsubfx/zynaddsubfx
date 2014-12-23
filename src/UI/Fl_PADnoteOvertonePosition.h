@@ -30,6 +30,8 @@ class PADnoteOvertonePosition: public Fl_Box, Fl_Osc_Widget
             osc->removeLink(base_path + "mode",
                     (Fl_Osc_Widget*) this);
             delete [] spc;
+            delete [] nhr;
+            delete [] spectrum;
         }
 
         void init(void)

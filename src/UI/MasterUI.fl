@@ -1620,6 +1620,7 @@ npart=0;
 npartcounter->do_callback();
 syseffnocounter->do_callback();
 inseffnocounter->do_callback();
+delete microtonalui;
 microtonalui=new MicrotonalUI(osc, "/microtonal/");
 updatesendwindow();
 updatepanel();

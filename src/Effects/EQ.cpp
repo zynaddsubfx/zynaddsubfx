@@ -44,6 +44,13 @@ EQ::EQ(EffectParams pars)
     cleanup();
 }
 
+EQ::~EQ()
+{
+       for(int i = 0; i < MAX_EQ_BANDS; ++i) {
+           memory.dealloc(filter[i].l);
+           memory.dealloc(filter[i].r);
+       }
+}
 
 // Cleanup the effect
 void EQ::cleanup(void)
