@@ -5,6 +5,19 @@ set(VERSION "2.4.4")
 
 
 #Include RTOSC
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/rtosc/CMakeLists.txt")
+    message(STATUS "RTOSC NOT FOUND")
+    message(STATUS "Attempting to checkout submodule")
+    find_package(Git REQUIRED)
+    execute_process(COMMAND git submodule update --init)
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/rtosc/CMakeLists.txt")
+        message(FATAL_ERROR "FAILED TO CHECKOUT RTOSC\n"
+        "please check file permissions and your network")
+    endif()
+else()
+    message(STATUS "Found Rtosc Submodule...")
+endif()
+
 add_subdirectory(rtosc)
 include_directories(rtosc/include)
 
