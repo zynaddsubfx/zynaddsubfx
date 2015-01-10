@@ -201,6 +201,7 @@ class DataObj:public rtosc::RtData
             char *buffer = bToU->buffer();
             rtosc_vmessage(buffer,bToU->buffer_size(),path,args,va);
             reply(buffer);
+            va_end(va);
         }
         virtual void reply(const char *msg)
         {
@@ -212,7 +213,9 @@ class DataObj:public rtosc::RtData
             reply("/broadcast");
             char *buffer = bToU->buffer();
             rtosc_vmessage(buffer,bToU->buffer_size(),path,args,va);
-            reply(buffer);}
+            reply(buffer);
+            va_end(va);
+        }
         virtual void broadcast(const char *msg) override
         {
             reply("/broadcast");

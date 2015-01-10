@@ -99,12 +99,11 @@ bool JackEngine::connectJack()
     connectServer("");
     if(NULL != jackClient) {
         setBufferSize(jack_get_buffer_size(jackClient));
-        int chk;
         jack_set_error_function(_errorCallback);
         jack_set_info_function(_infoCallback);
         if(jack_set_buffer_size_callback(jackClient, _bufferSizeCallback, this))
             cerr << "Error setting the bufferSize callback" << endl;
-        if((chk = jack_set_xrun_callback(jackClient, _xrunCallback, this)))
+        if((jack_set_xrun_callback(jackClient, _xrunCallback, this)))
             cerr << "Error setting jack xrun callback" << endl;
         if(jack_set_process_callback(jackClient, _processCallback, this)) {
             cerr << "Error, JackEngine failed to set process callback" << endl;

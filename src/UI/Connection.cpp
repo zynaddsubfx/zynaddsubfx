@@ -158,6 +158,7 @@ void GUI::raiseUi(ui_handle_t gui, const char *dest, const char *args, ...)
     va_start(va,args);
     if(rtosc_vmessage(buffer,1024,dest,args,va))
         raiseUi(gui, buffer);
+    va_end(va);
 }
 
 void GUI::tickUi(ui_handle_t)

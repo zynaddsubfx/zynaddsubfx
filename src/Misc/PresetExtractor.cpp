@@ -46,6 +46,7 @@ class Capture:public rtosc::RtData
             va_start(va,args);
             char *buffer = msgbuf;
             rtosc_vmessage(buffer,sizeof(msgbuf),path,args,va);
+            va_end(va);
         }
         char msgbuf[1024];
         char locbuf[1024];

@@ -285,6 +285,7 @@ class DummyDataObj:public rtosc::RtData
                 //printf("buffer = '%s'\n", buffer);
                 reply(buffer);
             }
+            va_end(va);
         }
         virtual void reply(const char *msg)
         {
@@ -357,7 +358,6 @@ struct NonRtObjStore
     {
         std::string base = "/part"+to_s(i)+"/kit"+to_s(j)+"/";
         for(int k=0; k<NUM_VOICES; ++k) {
-            std::string base = "/part"+to_s(i)+"/kit"+to_s(j)+"/";
             if(padpars) {
                 objmap[base+"padpars/"]       = padpars;
                 objmap[base+"padpars/oscil/"] = padpars->oscilgen;
@@ -1002,6 +1002,7 @@ void MiddleWareImpl::write(const char *path, const char *args, ...)
     va_list va;
     va_start(va, args);
     write(path, args, va);
+    va_end(va);
 }
 
 void MiddleWareImpl::write(const char *path, const char *args, va_list va)
@@ -1048,6 +1049,7 @@ class UI_Interface:public Fl_Osc_Interface
             va_list va;
             va_start(va, args);
             impl->write(s.c_str(), args, va);
+            va_end(va);
         }
 
         void writeRaw(const char *msg) override
@@ -1201,10 +1203,11 @@ class UI_Interface:public Fl_Osc_Interface
 
         void dumpLookupTable(void)
         {
-            if(map.size() != 0)
+            if(!map.empty()) {
                 printf("Leaked controls:\n");
-            for(auto i = map.begin(); i != map.end(); ++i) {
-                printf("Known control  '%s' (%p)...\n", i->first.c_str(), i->second);
+                for(auto i = map.begin(); i != map.end(); ++i) {
+                    printf("Known control  '%s' (%p)...\n", i->first.c_str(), i->second);
+                }
             }
         }
 

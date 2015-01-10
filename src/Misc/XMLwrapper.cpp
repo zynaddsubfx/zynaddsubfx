@@ -311,7 +311,7 @@ int XMLwrapper::loadXMLfile(const string &filename)
         mxmlDelete(tree);
     tree = NULL;
 
-    const char *xmldata = doloadfile(filename.c_str());
+    const char *xmldata = doloadfile(filename);
     if(xmldata == NULL)
         return -1;  //the file could not be loaded or uncompressed
 
@@ -618,6 +618,7 @@ mxml_node_t *XMLwrapper::addparams(const char *name, unsigned int params,
                      << ParamName << "=\"" << ParamValue << "\"" << endl;
             mxmlElementSetAttr(element, ParamName, ParamValue);
         }
+        va_end(variableList);
     }
     return element;
 }
