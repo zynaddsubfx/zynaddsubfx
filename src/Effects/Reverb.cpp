@@ -40,6 +40,7 @@ Reverb::Reverb(EffectParams pars)
       Ptype(1),
       Proomsize(64),
       Pbandwidth(30),
+      idelaylen(0),
       roomsize(1.0f),
       rs(1.0f),
       bandwidth(NULL),
@@ -230,10 +231,13 @@ void Reverb::setidelay(unsigned char _Pidelay)
 {
     Pidelay = _Pidelay;
     float delay = powf(50.0f * Pidelay / 127.0f, 2.0f) - 1.0f;
+    int newDelayLen = (int) (samplerate_f * delay / 1000);
+    if(newDelayLen == idelaylen)
+        return;
 
     memory.devalloc(idelay);
 
-    idelaylen = (int) (samplerate_f * delay / 1000);
+    idelaylen = newDelayLen;
     if(idelaylen > 1) {
         idelayk = 0;
         idelay  = memory.valloc<float>(idelaylen);
@@ -314,11 +318,13 @@ void Reverb::settype(unsigned char _Ptype)
         tmp *= samplerate_adjust; //adjust the combs according to the samplerate
         if(tmp < 10.0f)
             tmp = 10.0f;
-        comblen[i] = (int) tmp;
         combk[i]   = 0;
         lpcomb[i]  = 0;
-        memory.devalloc(comb[i]);
-        comb[i] = memory.valloc<float>(comblen[i]);
+        if(comblen[i] != (int)tmp || comb[i] == NULL) {
+            comblen[i] = (int) tmp;
+            memory.devalloc(comb[i]);
+            comb[i] = memory.valloc<float>(comblen[i]);
+        }
     }
 
     for(int i = 0; i < REV_APS * 2; ++i) {
@@ -332,10 +338,12 @@ void Reverb::settype(unsigned char _Ptype)
         tmp *= samplerate_adjust; //adjust the combs according to the samplerate
         if(tmp < 10)
             tmp = 10;
-        aplen[i] = (int) tmp;
         apk[i]   = 0;
-        memory.devalloc(ap[i]);
-        ap[i] = memory.valloc<float>(aplen[i]);
+        if(aplen[i] != (int)tmp || ap[i] == NULL) {
+            aplen[i] = (int) tmp;
+            memory.devalloc(ap[i]);
+            ap[i] = memory.valloc<float>(aplen[i]);
+        }
     }
     memory.dealloc(bandwidth);
     if(Ptype == 2) { //bandwidth
@@ -343,7 +351,7 @@ void Reverb::settype(unsigned char _Ptype)
         //not been verified yet.
         //As this cannot be resized in a RT context, a good upper bound should
         //be found
-        bandwidth = memory.alloc<Unison>(buffersize / 4 + 1, 2.0f, samplerate_f);
+        bandwidth = memory.alloc<Unison>(&memory, buffersize / 4 + 1, 2.0f, samplerate_f);
         bandwidth->setSize(50);
         bandwidth->setBaseFrequency(1.0f);
     }
