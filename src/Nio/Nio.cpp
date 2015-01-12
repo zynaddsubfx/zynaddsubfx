@@ -12,6 +12,13 @@ using std::set;
 using std::cerr;
 using std::endl;
 
+#ifndef IN_DEFAULT
+#define IN_DEFAULT "NULL"
+#endif
+#ifndef OUT_DEFAULT
+#define OUT_DEFAULT "NULL"
+#endif
+
 InMgr     *in  = NULL;
 OutMgr    *out = NULL;
 EngineMgr *eng = NULL;
