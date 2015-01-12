@@ -1292,76 +1292,72 @@ inline void ADnote::ComputeVoiceOscillatorRingModulation(int nvoice)
         }
 }
 
-
-
 /*
  * Computes the Oscillator (Phase Modulation or Frequency Modulation)
  */
 inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                                                               int FMmode)
 {
-    int   carposhi = 0;
-    int   i, FMmodfreqhi = 0;
-    float FMmodfreqlo = 0, carposlo = 0;
-
-    if(NoteVoicePar[nvoice].FMVoice >= 0)
+    if(NoteVoicePar[nvoice].FMVoice >= 0) {
         //if I use VoiceOut[] as modulator
         for(int k = 0; k < unison_size[nvoice]; ++k) {
             float *tw = tmpwave_unison[k];
-            memcpy(tw, NoteVoicePar[NoteVoicePar[nvoice].FMVoice].VoiceOut,
-                   synth->bufferbytes);
+            const float *smps = NoteVoicePar[NoteVoicePar[nvoice].FMVoice].VoiceOut;
+            memcpy(tw, smps, synth->bufferbytes);
         }
-    else
+    } else {
         //Compute the modulator and store it in tmpwave_unison[][]
         for(int k = 0; k < unison_size[nvoice]; ++k) {
             int    poshiFM  = oscposhiFM[nvoice][k];
-            float  posloFM  = oscposloFM[nvoice][k];
+            int    posloFM  = oscposloFM[nvoice][k]  * (1<<24);
             int    freqhiFM = oscfreqhiFM[nvoice][k];
-            float  freqloFM = oscfreqloFM[nvoice][k];
+            int    freqloFM = oscfreqloFM[nvoice][k] * (1<<24);
             float *tw = tmpwave_unison[k];
+            const float *smps = NoteVoicePar[nvoice].FMSmp;
 
-            for(i = 0; i < synth->buffersize; ++i) {
-                tw[i] =
-                    (NoteVoicePar[nvoice].FMSmp[poshiFM] * (1.0f - posloFM)
-                     + NoteVoicePar[nvoice].FMSmp[poshiFM + 1] * posloFM);
+            for(int i = 0; i < synth->buffersize; ++i) {
+                tw[i] = (smps[poshiFM] * ((1<<24) - posloFM)
+                     + smps[poshiFM + 1] * posloFM) / (1.0f*(1<<24));
                 posloFM += freqloFM;
-                if(posloFM >= 1.0f) {
-                    posloFM = fmod(posloFM, 1.0f);
+                if(posloFM >= (1<<24)) {
+                    posloFM &= 0xffffff;//fmod(posloFM, 1.0f);
                     poshiFM++;
                 }
                 poshiFM += freqhiFM;
                 poshiFM &= synth->oscilsize - 1;
             }
             oscposhiFM[nvoice][k] = poshiFM;
-            oscposloFM[nvoice][k] = posloFM;
+            oscposloFM[nvoice][k] = posloFM/((1<<24)*1.0f);
         }
+    }
     // Amplitude interpolation
     if(ABOVE_AMPLITUDE_THRESHOLD(FMoldamplitude[nvoice],
-                                 FMnewamplitude[nvoice]))
+                                 FMnewamplitude[nvoice])) {
         for(int k = 0; k < unison_size[nvoice]; ++k) {
             float *tw = tmpwave_unison[k];
-            for(i = 0; i < synth->buffersize; ++i)
+            for(int i = 0; i < synth->buffersize; ++i)
                 tw[i] *= INTERPOLATE_AMPLITUDE(FMoldamplitude[nvoice],
                                                FMnewamplitude[nvoice],
                                                i,
                                                synth->buffersize);
         }
-    else
+    } else {
         for(int k = 0; k < unison_size[nvoice]; ++k) {
             float *tw = tmpwave_unison[k];
-            for(i = 0; i < synth->buffersize; ++i)
+            for(int i = 0; i < synth->buffersize; ++i)
                 tw[i] *= FMnewamplitude[nvoice];
         }
+    }
 
 
     //normalize: makes all sample-rates, oscil_sizes to produce same sound
     if(FMmode != 0) { //Frequency modulation
-        float normalize = synth->oscilsize_f / 262144.0f * 44100.0f
+        const float normalize = synth->oscilsize_f / 262144.0f * 44100.0f
                           / synth->samplerate_f;
         for(int k = 0; k < unison_size[nvoice]; ++k) {
             float *tw    = tmpwave_unison[k];
             float  fmold = FMoldsmp[nvoice][k];
-            for(i = 0; i < synth->buffersize; ++i) {
+            for(int i = 0; i < synth->buffersize; ++i) {
                 fmold = fmod(fmold + tw[i] * normalize, synth->oscilsize);
                 tw[i] = fmold;
             }
@@ -1369,46 +1365,46 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
         }
     }
     else {  //Phase modulation
-        float normalize = synth->oscilsize_f / 262144.0f;
+        const float normalize = synth->oscilsize_f / 262144.0f;
         for(int k = 0; k < unison_size[nvoice]; ++k) {
             float *tw = tmpwave_unison[k];
-            for(i = 0; i < synth->buffersize; ++i)
+            for(int i = 0; i < synth->buffersize; ++i)
                 tw[i] *= normalize;
         }
     }
 
     //do the modulation
     for(int k = 0; k < unison_size[nvoice]; ++k) {
+        float *smps   = NoteVoicePar[nvoice].OscilSmp;
         float *tw     = tmpwave_unison[k];
         int    poshi  = oscposhi[nvoice][k];
-        float  poslo  = oscposlo[nvoice][k];
+        int    poslo  = oscposlo[nvoice][k] * (1<<24);
         int    freqhi = oscfreqhi[nvoice][k];
-        float  freqlo = oscfreqlo[nvoice][k];
+        int    freqlo = oscfreqlo[nvoice][k] * (1<<24);
 
-        for(i = 0; i < synth->buffersize; ++i) {
+        for(int i = 0; i < synth->buffersize; ++i) {
+            int FMmodfreqhi = 0;
             F2I(tw[i], FMmodfreqhi);
-            FMmodfreqlo = fmod(tw[i] + 0.0000000001f, 1.0f);
+            float FMmodfreqlo = tw[i]-FMmodfreqhi;//fmod(tw[i] /*+ 0.0000000001f*/, 1.0f);
             if(FMmodfreqhi < 0)
                 FMmodfreqlo++;
 
             //carrier
-            carposhi = poshi + FMmodfreqhi;
-            carposlo = poslo + FMmodfreqlo;
+            int carposhi = poshi + FMmodfreqhi;
+            int carposlo = poslo + FMmodfreqlo;
 
-            if(carposlo >= 1.0f) {
+            if(carposlo >= (1<<24)) {
                 carposhi++;
-                carposlo = fmod(carposlo, 1.0f);
+                carposlo &= 0xffffff;//fmod(carposlo, 1.0f);
             }
             carposhi &= (synth->oscilsize - 1);
 
-            tw[i] = NoteVoicePar[nvoice].OscilSmp[carposhi]
-                    * (1.0f - carposlo)
-                    + NoteVoicePar[nvoice].OscilSmp[carposhi
-                                                    + 1] * carposlo;
+            tw[i] = (smps[carposhi] * ((1<<24) - carposlo)
+                    + smps[carposhi + 1] * carposlo)/(1.0f*(1<<24));
 
             poslo += freqlo;
-            if(poslo >= 1.0f) {
-                poslo = fmod(poslo, 1.0f);
+            if(poslo >= (1<<24)) {
+                poslo &= 0xffffff;//fmod(poslo, 1.0f);
                 poshi++;
             }
 
@@ -1416,7 +1412,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             poshi &= synth->oscilsize - 1;
         }
         oscposhi[nvoice][k] = poshi;
-        oscposlo[nvoice][k] = poslo;
+        oscposlo[nvoice][k] = (poslo)/((1<<24)*1.0f);
     }
 }
 
