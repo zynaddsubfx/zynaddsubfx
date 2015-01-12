@@ -392,9 +392,9 @@ void Master::setController(char chan, int type, int par)
     }
     else
     if(type == C_bankselectmsb) {      // Change current bank
-        if(((unsigned int)par < bank.banks.size())
-           && (bank.banks[par].dir != bank.bankfiletitle))
-            bank.loadbank(bank.banks[par].dir);
+        //if(((unsigned int)par < bank.banks.size())
+        //   && (bank.banks[par].dir != bank.bankfiletitle))
+        //    bank.loadbank(bank.banks[par].dir);
     }
     else {  //other controllers
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) //Send the controller to all part assigned to the channel
