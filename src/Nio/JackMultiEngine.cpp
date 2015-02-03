@@ -30,9 +30,11 @@
 #include "Nio.h"
 #include "../Misc/Master.h"
 #include "../Misc/Part.h"
+#include "../Misc/MiddleWare.h"
 
 #include "JackMultiEngine.h"
 
+extern MiddleWare *middleware;
 using std::string;
 
 struct jack_multi
@@ -146,13 +148,13 @@ int JackMultiEngine::processAudio(jack_nframes_t nframes)
     memcpy(buffers[1], smp.r, synth->bufferbytes);
 
     //Gather other samples from individual parts
-    Master &master = Master::getInstance();
+    Master &master = *middleware->spawnMaster();
     for(int i = 0; i < NUM_MIDI_PARTS; ++i) {
         memcpy(buffers[2*i + 2], master.part[i]->partoutl, synth->bufferbytes);
         memcpy(buffers[2*i + 3], master.part[i]->partoutr, synth->bufferbytes);
     }
 
-    return true;
+    return false;
 }
 
 void JackMultiEngine::Stop()
