@@ -22,7 +22,7 @@ add_definitions(-DIN_DEFAULT="${DefaultInput}")
 
 if(JackEnable)
     include_directories(${JACK_INCLUDE_DIR})
-    list(APPEND zynaddsubfx_nio_SRCS JackEngine.cpp)
+    list(APPEND zynaddsubfx_nio_SRCS JackEngine.cpp JackMultiEngine.cpp)
     list(APPEND zynaddsubfx_nio_lib ${JACK_LIBRARIES})
 
     CHECK_INCLUDE_FILES("jack/metadata.h" JACK_HAS_METADATA_API)
