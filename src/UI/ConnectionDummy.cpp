@@ -1,7 +1,9 @@
-
-ui_handle_t createUi(message_cb, void *Master, void *exit)
+#include "Connection.h"
+#include <unistd.h>
+namespace GUI {
+ui_handle_t createUi(Fl_Osc_Interface*, void *exit)
 {
-    return NULL;
+    return 0;
 }
 void destroyUi(ui_handle_t)
 {
@@ -16,3 +18,4 @@ void tickUi(ui_handle_t)
 {
     usleep(100000);
 }
+};

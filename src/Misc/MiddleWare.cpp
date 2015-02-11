@@ -1139,6 +1139,7 @@ class UI_Interface:public Fl_Osc_Interface
         //A very simplistic implementation of a UI agnostic refresh method
         virtual void damage(const char *path)
         {
+#ifndef NO_UI
             //printf("\n\nDamage(\"%s\")\n", path);
             for(auto pair:map) {
                 if(strstr(pair.first.c_str(), path)) {
@@ -1151,6 +1152,7 @@ class UI_Interface:public Fl_Osc_Interface
                         pair.second->update();
                 }
             }
+#endif
         }
 
         void tryLink(const char *msg) override

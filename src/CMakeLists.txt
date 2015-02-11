@@ -296,6 +296,15 @@ if(NtkGui)
 	add_subdirectory(UI)
 endif()
 
+if(NOT FltkGui AND NOT NtkGui)
+    if(LibloEnable)
+        set(NSM_WORKAROUND UI/NSM.C UI/NSM/Client.C)
+    endif()
+    add_library(zynaddsubfx_gui_dummy STATIC UI/ConnectionDummy.cpp ${NSM_WORKAROUND})
+    set(GUI_LIBRARIES zynaddsubfx_gui_dummy)
+    add_definitions(-DNO_UI=1)
+endif()
+
 ########### General section ##############
 # Following this should be only general compilation code, and no mention
 # of module-specific variables

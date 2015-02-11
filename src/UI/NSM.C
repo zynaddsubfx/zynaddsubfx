@@ -22,7 +22,6 @@
 
 #include "../Nio/Nio.h"
 
-#include "MasterUI.h"
 #include <FL/Fl.H>
 #include <stdio.h>
 #include <sys/stat.h>
@@ -30,7 +29,10 @@
 #include <unistd.h>
 
 extern int Pexitprogram;
+#ifndef NO_UI
+#include "MasterUI.h"
 extern MasterUI *ui;
+#endif
 
 extern NSM_Client *nsm;
 extern char       *instance_name;
@@ -53,7 +55,9 @@ NSM_Client::command_save(char **out_msg)
     (void) out_msg;
     int r = ERR_OK;
 
+#ifndef NO_UI 
     ui->do_save_master(project_filename);
+#endif
 
     return r;
 }
@@ -81,6 +85,7 @@ NSM_Client::command_open(const char *name,
 
     int r = ERR_OK;
 
+#ifndef NO_UI
     if(0 == stat(new_filename, &st)) {
         if(ui->do_load_master_unconditional(new_filename, display_name) < 0) {
             *out_msg = strdup("Failed to load for unknown reason");
@@ -91,6 +96,7 @@ NSM_Client::command_open(const char *name,
     }
     else
         ui->do_new_master_unconditional();
+#endif
 
     if(project_filename)
         free(project_filename);
@@ -107,13 +113,16 @@ NSM_Client::command_open(const char *name,
 
 static void save_callback(Fl_Widget *, void *v)
 {
+#ifndef NO_UI
     MasterUI *ui = static_cast<MasterUI*>(v);
     ui->do_save_master();
+#endif
 }
 
 void
 NSM_Client::command_active(bool active)
 {
+#ifndef NO_UI 
     if(active) {
         Fl_Menu_Item *m;
         //TODO see if there is a cleaner way of doing this without voiding
@@ -160,4 +169,5 @@ NSM_Client::command_active(bool active)
         ui->sm_indicator1->tooltip(NULL);
         ui->sm_indicator2->tooltip(NULL);
     }
+#endif
 }
