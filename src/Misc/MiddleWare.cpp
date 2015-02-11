@@ -790,6 +790,7 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
 void MiddleWareImpl::bToUhandle(const char *rtmsg)
 {
     assert(strcmp(rtmsg, "/part0/kit0/Ppadenableda"));
+    assert(strcmp(rtmsg, "/ze_state"));
     //Dump Incomming Events For Debugging
     if(strcmp(rtmsg, "/vu-meter") && false) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 1 + 30, 0 + 40);
@@ -942,7 +943,7 @@ void MiddleWareImpl::handleMsg(const char *msg)
     assert(!strstr(msg,"free"));
     assert(msg && *msg && rindex(msg, '/')[1]);
     //fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 6 + 30, 0 + 40);
-    //fprintf(stdout, "middleware: '%s'\n", msg);
+    //fprintf(stdout, "middleware: '%s':%s\n", msg, rtosc_argument_string(msg));
     //fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
     const char *last_path = rindex(msg, '/');
     if(!last_path)
@@ -1048,6 +1049,10 @@ class UI_Interface:public Fl_Osc_Interface
         {
             va_list va;
             va_start(va, args);
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
+            ////fprintf(stderr, ".");
+            //fprintf(stderr, "write(%s:%s)\n", s.c_str(), args);
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             impl->write(s.c_str(), args, va);
             va_end(va);
         }
@@ -1055,8 +1060,8 @@ class UI_Interface:public Fl_Osc_Interface
         void writeRaw(const char *msg) override
         {
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
-            fprintf(stderr, ".");
-            //fprintf(stderr, "write(%s)\n", msg);
+            //fprintf(stderr, ".");
+            fprintf(stderr, "rawWrite(%s:%s)\n", msg, rtosc_argument_string(msg));
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             impl->handleMsg(msg);
         }
@@ -1095,8 +1100,8 @@ class UI_Interface:public Fl_Osc_Interface
 
         void renameLink(string old, string newer, Fl_Osc_Widget *w) override
         {
-            //fprintf(stdout, "renameLink('%s','%s',%p)\n",
-            //        old.c_str(), newer.c_str(), w);
+            fprintf(stdout, "renameLink('%s','%s',%p)\n",
+                    old.c_str(), newer.c_str(), w);
             removeLink(old, w);
             createLink(newer, w);
         }

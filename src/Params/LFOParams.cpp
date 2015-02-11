@@ -33,6 +33,8 @@ using namespace rtosc;
 
 #define rObject LFOParams
 static rtosc::Ports _ports = {
+    rSelf(LFOParams),
+    rPaste(),
     rParamF(Pfreq, "frequency of LFO"),
     rParamZyn(Pintensity, "Intensity of LFO"),
     rParamZyn(Pstartphase, rSpecial(random), "Starting Phase"),
@@ -47,6 +49,21 @@ static rtosc::Ports _ports = {
 rtosc::Ports &LFOParams::ports = _ports;
 
 int LFOParams::time;
+
+LFOParams::LFOParams()
+{
+    Dfreq       = 64;
+    Dintensity  = 0;
+    Dstartphase = 0;
+    DLFOtype    = 0;
+    Drandomness = 0;
+    Ddelay      = 0;
+    Dcontinous  = 0;
+    fel  = 0;
+    time = 0;
+
+    defaults();
+}
 
 LFOParams::LFOParams(char Pfreq_,
                      char Pintensity_,
@@ -122,4 +139,12 @@ void LFOParams::getfromXML(XMLwrapper *xml)
     Pdelay      = xml->getpar127("delay", Pdelay);
     Pstretch    = xml->getpar127("stretch", Pstretch);
     Pcontinous  = xml->getparbool("continous", Pcontinous);
+}
+
+void LFOParams::paste(LFOParams &x)
+{
+    //Avoid undefined behavior
+    if(&x == this)
+        return;
+    memcpy((char*)this, (const char*)&x, sizeof(*this));
 }

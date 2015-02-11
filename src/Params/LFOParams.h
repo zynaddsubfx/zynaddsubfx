@@ -29,6 +29,7 @@
 class LFOParams:public Presets
 {
     public:
+        LFOParams();
         LFOParams(char Pfreq_,
                   char Pintensity_,
                   char Pstartphase_,
@@ -43,6 +44,7 @@ class LFOParams:public Presets
         void defaults();
         /**Loads the LFO from the xml*/
         void getfromXML(XMLwrapper *xml);
+        void paste(LFOParams &);
 
         /*  MIDI Parameters*/
         float Pfreq;      /**<frequency*/

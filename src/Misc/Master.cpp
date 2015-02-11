@@ -100,12 +100,13 @@ static Ports localports = {
        d.reply("/free", "sb", "Part", sizeof(void*), &m->part[i]);
        m->part[i] = p;
        p->initialize_rt();
-       printf("part %d is now pointer %p\n", i, p);}},
+       //printf("part %d is now pointer %p\n", i, p);
+                                                                                                          }},
     {"Pvolume::i", rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "i", ((Master*)d.obj)->Pvolume);
-        } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='c') {
+        } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
             ((Master*)d.obj)->setPvolume(limit<char>(rtosc_argument(m,0).i,0,127));
             d.broadcast(d.loc, "i", ((Master*)d.obj)->Pvolume);}}},
     {"volume::i", rDoc("Master Volume"), 0,
@@ -532,6 +533,7 @@ void dump_msg(const char* ptr, std::ostream& os = std::cerr)
 
 }
 #endif
+int msg_id=0;
 
 /*
  * Master audio out (the final sound)
@@ -567,7 +569,7 @@ void Master::AudioOut(float *outl, float *outr)
         //XXX yes, this is not realtime safe, but it is useful...
         if(strcmp(msg, "/get-vu") && false) {
             fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
-            fprintf(stdout, "backend: '%s'<%s>\n", msg,
+            fprintf(stdout, "backend[%d]: '%s'<%s>\n", msg_id++, msg,
                     rtosc_argument_string(msg));
             fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
         }
@@ -577,7 +579,7 @@ void Master::AudioOut(float *outl, float *outr)
         events++;
         if(!d.matches) {// && !ports.apropos(msg)) {
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
-            fprintf(stderr, "Unknown address '%s'\n", uToB->peak());
+            fprintf(stderr, "Unknown address<BACKEND> '%s:%s'\n", uToB->peak(), rtosc_argument_string(uToB->peak()));
 #if 0
             if(strstr(msg, "PFMVelocity"))
                 dump_msg(msg);

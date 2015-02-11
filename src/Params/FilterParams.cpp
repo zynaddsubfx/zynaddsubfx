@@ -61,6 +61,8 @@ static rtosc::Ports subports = {
 #undef  rChangeCb
 #define rChangeCb obj->changed = true;
 rtosc::Ports FilterParams::ports = {
+    rSelf(FilterParams),
+    rPaste(),
     rParamZyn(Pcategory,   "Class of filter"),
     rParamZyn(Ptype,       "Filter Type"),
     rParamZyn(Pfreq,        "Center Freq"),
@@ -80,7 +82,7 @@ rtosc::Ports FilterParams::ports = {
     rToggle(Psequencereversed, "If the modulator input is inverted"),
 
     //{"Psequence#" FF_MAX_SEQUENCE "/nvowel", "", NULL, [](){}},
-    
+
     //UI reader
     {"Pvowels:", rDoc("Get Formant Vowels"), NULL,
         [](const char *, RtData &d) {
@@ -98,7 +100,7 @@ rtosc::Ports FilterParams::ports = {
             FilterParams *obj = (FilterParams *) d.obj;
             d.obj = (void*)&obj->Pvowels[idx];
             subports.dispatch(msg, d);
-            
+
             if(rtosc_narguments(msg))
                 rChangeCb;
         }},
@@ -121,6 +123,10 @@ rtosc::Ports FilterParams::ports = {
 
 
 
+FilterParams::FilterParams()
+    :FilterParams(0,64,64)
+{
+}
 FilterParams::FilterParams(unsigned char Ptype_,
                            unsigned char Pfreq_,
                            unsigned char Pq_)
@@ -488,4 +494,12 @@ void FilterParams::getfromXML(XMLwrapper *xml)
         }
         xml->exitbranch();
     }
+}
+
+void FilterParams::paste(FilterParams &x)
+{
+    //Avoid undefined behavior
+    if(&x == this)
+        return;
+    memcpy((char*)this, (const char*)&x, sizeof(*this));
 }

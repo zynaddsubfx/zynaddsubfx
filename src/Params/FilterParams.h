@@ -30,6 +30,7 @@
 class FilterParams:public PresetsArray
 {
     public:
+        FilterParams();
         FilterParams(unsigned char Ptype_,
                      unsigned char Pfreq,
                      unsigned char Pq_);
@@ -40,6 +41,7 @@ class FilterParams:public PresetsArray
         void defaults();
         void getfromXML(XMLwrapper *xml);
         void getfromXMLsection(XMLwrapper *xml, int n);
+        void paste(FilterParams &);
 
 
         void getfromFilterParams(FilterParams *pars);

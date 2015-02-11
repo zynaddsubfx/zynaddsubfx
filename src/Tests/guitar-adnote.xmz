@@ -3284,10 +3284,6 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_real name="cos" value="-0.00259324" />
 <par_real name="sin" value="0.00159791" />
 </BF_HARMONIC>
-<BF_HARMONIC id="509">
-<par_real name="cos" value="-9.35799e-07" />
-<par_real name="sin" value="-4.35678e-05" />
-</BF_HARMONIC>
 <BF_HARMONIC id="510">
 <par_real name="cos" value="-0.00690247" />
 <par_real name="sin" value="0.000466586" />

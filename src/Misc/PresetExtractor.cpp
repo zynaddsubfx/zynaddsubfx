@@ -111,12 +111,20 @@ void doClassPaste(std::string type, MiddleWare &mw, string url, string data)
 {
     if(type == "EnvelopeParams")
         doPaste<EnvelopeParams>(mw, url, data);
+    if(type == "LFOParams")
+        doPaste<LFOParams>(mw, url, data);
+    if(type == "FilterParams")
+        doPaste<FilterParams>(mw, url, data);
 }
 
 std::string doClassCopy(std::string type, MiddleWare &mw, string url)
 {
     if(type == "EnvelopeParams")
         return doCopy<EnvelopeParams>(mw, url);
+    if(type == "LFOParams")
+        return doCopy<LFOParams>(mw, url);
+    if(type == "FilterParams")
+        return doCopy<FilterParams>(mw, url);
     return "UNDEF";
 }
 
