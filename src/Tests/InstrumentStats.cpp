@@ -7,6 +7,7 @@
 #include "../Misc/Part.h"
 #include "../Misc/Util.h"
 #include "../Misc/Allocator.h"
+#include "../Misc/Microtonal.h"
 #include "../DSP/FFTwrapper.h"
 #include "../globals.h"
 SYNTH_T *synth;

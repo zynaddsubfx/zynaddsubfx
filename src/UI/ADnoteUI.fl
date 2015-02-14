@@ -10,10 +10,6 @@ decl {//License: GNU GPL version 2 or later} {private local
 
 decl {\#include "../Params/ADnoteParameters.h"} {public local
 } 
-
-decl {\#include "../Misc/Util.h"} {public local
-} 
-
 decl {\#include "ResonanceUI.h"} {public local
 } 
 
@@ -26,16 +22,16 @@ decl {\#include <FL/Fl_Box.H>} {public local
 decl {\#include <FL/Fl_Group.H>} {public local
 } 
 
-decl {\#include <math.h>} {private local
+decl {\#include <cmath>} {private local
 } 
 
-decl {\#include <stdio.h>} {private local
+decl {\#include <cstdio>} {private local
 } 
 
-decl {\#include <stdlib.h>} {private local
+decl {\#include <cstdlib>} {private local
 } 
 
-decl {\#include <string.h>} {private local
+decl {\#include <cstring>} {private local
 } 
 
 decl {\#include "Fl_Osc_Pane.H"} {public local

@@ -46,14 +46,19 @@ class  SUBnoteParameters;
 class  PADnoteParameters;
 class  SynthNote;
 
+class  Allocator;
+
 class  Microtonal;
 class  XMLwrapper;
 class  Resonance;
 class  FFTwrapper;
+class  EnvelopeParams;
 class  LFOParams;
 class  FilterParams;
+
 class  LFO;
 class  Envelope;
+class  OscilGen;
 
 class  Controller;
 class  Master;

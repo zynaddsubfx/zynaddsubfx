@@ -30,6 +30,7 @@
 #include "../Misc/Allocator.h"
 #include "../Misc/Util.h"
 #include "../Synth/SUBnote.h"
+#include "../Params/SUBnoteParameters.h"
 #include "../Params/Presets.h"
 #include "../globals.h"
 SYNTH_T *synth;

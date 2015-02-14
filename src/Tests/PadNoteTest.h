@@ -32,6 +32,8 @@
 #include "../Misc/Util.h"
 #include "../Misc/Allocator.h"
 #include "../Synth/PADnote.h"
+#include "../Synth/OscilGen.h"
+#include "../Params/PADnoteParameters.h"
 #include "../Params/Presets.h"
 #include "../DSP/FFTwrapper.h"
 #include "../globals.h"

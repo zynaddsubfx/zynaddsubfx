@@ -26,6 +26,10 @@
 #include <cassert>
 #include "../globals.h"
 #include "SUBnote.h"
+#include "Envelope.h"
+#include "../Params/Controller.h"
+#include "../Params/SUBnoteParameters.h"
+#include "../Params/FilterParams.h"
 #include "../Misc/Util.h"
 #include "../Misc/Allocator.h"
 

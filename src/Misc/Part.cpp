@@ -29,13 +29,16 @@
 #include "../Params/ADnoteParameters.h"
 #include "../Params/SUBnoteParameters.h"
 #include "../Params/PADnoteParameters.h"
+#include "../Synth/Resonance.h"
+#include "../Synth/SynthNote.h"
 #include "../Synth/ADnote.h"
 #include "../Synth/SUBnote.h"
 #include "../Synth/PADnote.h"
 #include "../DSP/FFTwrapper.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include "../Misc/Util.h"
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 #include <cassert>
 
 #include <rtosc/ports.h>
@@ -1035,9 +1038,6 @@ void Part::setPpanning(char Ppanning_)
     Ppanning = Ppanning_;
     panning  = limit(Ppanning / 127.0f + ctl.panning.pan, 0.0f, 1.0f);
 }
-
-template<class T>
-static inline void nullify(T &t) {delete t; t = NULL; }
 
 /*
  * Enable or disable a kit item

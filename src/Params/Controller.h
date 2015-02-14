@@ -25,7 +25,6 @@
 #define CONTROLLER_H
 
 #include "../globals.h"
-#include "../Misc/XMLwrapper.h"
 
 /**(Midi) Controllers implementation*/
 class Controller

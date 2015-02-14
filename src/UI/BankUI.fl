@@ -8,13 +8,13 @@ decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
 decl {//License: GNU GPL version 2 or later} {private local
 } 
 
-decl {\#include <stdlib.h>} {public local
+decl {\#include <cstdlib>} {public local
 } 
 
-decl {\#include <stdio.h>} {public local
+decl {\#include <cstdio>} {public local
 } 
 
-decl {\#include <string.h>} {public local
+decl {\#include <cstring>} {public local
 } 
 
 decl {\#include <FL/Fl_Button.H>} {public local
@@ -24,18 +24,6 @@ decl {\#include <FL/Fl_File_Chooser.H>} {public local
 } 
 
 decl {\#include "Fl_Osc_Interface.h"} {public local
-} 
-
-decl {\#include "../Misc/Master.h"} {public local
-} 
-
-decl {\#include "../Misc/Part.h"} {public local
-} 
-
-decl {\#include "../Misc/Bank.h"} {public local
-} 
-
-decl {\#include "../Misc/Config.h"} {public local
 } 
 
 decl {\#include "../Misc/Util.h"} {public local

@@ -8,7 +8,7 @@ decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
 decl {//License: GNU GPL version 2 or later} {private local
 } 
 
-decl {\#include <stdlib.h>} {public local
+decl {\#include <cstdlib>} {public local
 } 
 
 decl {\#include <FL/fl_draw.H>} {public local

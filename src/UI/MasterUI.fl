@@ -62,15 +62,6 @@ decl {\#include "VuMasterMeter.h"} {public local
 decl {\#include "PartNameButton.h"} {public local
 } 
 
-decl {\#include "../Misc/Master.h"} {public local
-} 
-
-decl {\#include "../Misc/Part.h"} {public local
-} 
-
-decl {\#include "../Misc/Util.h"} {public local
-} 
-
 decl {\#include "common.H"} {public local
 } 
 

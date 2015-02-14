@@ -19,11 +19,14 @@
 
 #include <map>
 
+#include "Util.h"
 #include "Master.h"
 #include "Part.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Params/SUBnoteParameters.h"
 #include "../Params/PADnoteParameters.h"
+#include "../DSP/FFTwrapper.h"
+#include "../Synth/OscilGen.h"
 
 #include <string>
 #include <future>

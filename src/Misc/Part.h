@@ -27,20 +27,9 @@
 
 #include "../globals.h"
 #include "../Params/Controller.h"
-#include "../Misc/Microtonal.h"
 
-#include <pthread.h>
 #include <functional>
 #include <list> // For the monomemnotes list.
-
-class EffectMgr;
-class ADnoteParameters;
-class SUBnoteParameters;
-class PADnoteParameters;
-class SynthNote;
-class XMLWrapper;
-class FFTwrapper;
-class Allocator;
 
 /** Part implementation*/
 class Part

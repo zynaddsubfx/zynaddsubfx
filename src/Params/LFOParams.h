@@ -23,8 +23,8 @@
 #ifndef LFO_PARAMS_H
 #define LFO_PARAMS_H
 
-#include "../Misc/XMLwrapper.h"
 #include "Presets.h"
+class XMLwrapper;
 
 class LFOParams:public Presets
 {

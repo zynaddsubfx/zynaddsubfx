@@ -5,15 +5,6 @@ code_name {.cc}
 decl {\#include "../Params/PADnoteParameters.h"} {public local
 } 
 
-decl {\#include "../Misc/Util.h"} {public local
-} 
-
-decl {\#include "../Misc/Master.h"} {public local
-} 
-
-decl {\#include "../Misc/MiddleWare.h"} {public local
-} 
-
 decl {\#include "ResonanceUI.h"} {public local
 } 
 

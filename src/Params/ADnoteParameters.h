@@ -23,17 +23,8 @@
 #ifndef AD_NOTE_PARAMETERS_H
 #define AD_NOTE_PARAMETERS_H
 
-
 #include "../globals.h"
-#include "../Misc/Util.h"
 #include "PresetsArray.h"
-
-class EnvelopeParams;
-class LFOParams;
-class FilterParams;
-class Resonance;
-class OscilGen;
-class FFTwrapper;
 
 enum FMTYPE {
     NONE, MORPH, RING_MOD, PHASE_MOD, FREQ_MOD, PITCH_MOD

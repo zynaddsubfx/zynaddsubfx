@@ -25,9 +25,6 @@
 
 #include "SynthNote.h"
 #include "../globals.h"
-#include "../Params/SUBnoteParameters.h"
-#include "../Params/Controller.h"
-#include "Envelope.h"
 #include "../DSP/Filter.h"
 
 class SUBnote:public SynthNote

@@ -20,10 +20,11 @@
 
 */
 
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
 #include "../globals.h"
 #include "../Misc/Util.h"
+#include "../Misc/XMLwrapper.h"
 #include "LFOParams.h"
 
 #include <rtosc/port-sugar.h>

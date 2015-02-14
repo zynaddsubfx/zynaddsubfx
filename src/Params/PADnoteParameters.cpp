@@ -21,6 +21,11 @@
 */
 #include <cmath>
 #include "PADnoteParameters.h"
+#include "FilterParams.h"
+#include "EnvelopeParams.h"
+#include "LFOParams.h"
+#include "../Synth/Resonance.h"
+#include "../Synth/OscilGen.h"
 #include "../Misc/WavFile.h"
 #include <cstdio>
 

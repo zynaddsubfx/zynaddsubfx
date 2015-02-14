@@ -22,6 +22,7 @@
 
 #include "Controller.h"
 #include "../Misc/Util.h"
+#include "../Misc/XMLwrapper.h"
 #include <cmath>
 #include <cstdio>
 

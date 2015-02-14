@@ -23,8 +23,9 @@
 #include "../globals.h"
 #include "SUBnoteParameters.h"
 #include "EnvelopeParams.h"
+#include "FilterParams.h"
 #include "../Misc/Util.h"
-#include <stdio.h>
+#include <cstdio>
 #include <cmath>
 
 #include <rtosc/ports.h>

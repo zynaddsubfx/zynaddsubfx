@@ -23,11 +23,8 @@
 
 #include "SynthNote.h"
 #include "../globals.h"
-#include "../Params/PADnoteParameters.h"
-#include "../Params/Controller.h"
 #include "Envelope.h"
 #include "LFO.h"
-#include "../Params/Controller.h"
 
 /**The "pad" synthesizer*/
 class PADnote:public SynthNote

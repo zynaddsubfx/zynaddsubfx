@@ -30,6 +30,8 @@
 #include "../Misc/Util.h"
 #include "../Misc/Allocator.h"
 #include "../DSP/Filter.h"
+#include "../Params/ADnoteParameters.h"
+#include "../Params/FilterParams.h"
 #include "OscilGen.h"
 #include "ADnote.h"
 

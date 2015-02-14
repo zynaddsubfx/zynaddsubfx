@@ -24,11 +24,8 @@
 #define SUB_NOTE_PARAMETERS_H
 
 #include "../globals.h"
-#include "../Misc/XMLwrapper.h"
-#include "FilterParams.h"
 #include "Presets.h"
 
-class EnvelopeParams;
 class SUBnoteParameters:public Presets
 {
     public:
@@ -106,7 +103,6 @@ class SUBnoteParameters:public Presets
         unsigned char Pstart;
 
         static rtosc::Ports &ports;
-    private:
 };
 
 #endif

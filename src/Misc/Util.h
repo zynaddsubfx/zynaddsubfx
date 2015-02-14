@@ -26,8 +26,12 @@
 #include <string>
 #include <sstream>
 #include <stdint.h>
+#include <algorithm>
 #include "Config.h"
 #include "../globals.h"
+
+using std::min;
+using std::max;
 
 //Velocity Sensing function
 extern float VelF(float velocity, unsigned char scaling);
@@ -148,6 +152,10 @@ float cinterpolate(const float *data, size_t len, float pos);
 ///trims a path in recursions
 const char *message_snip(const char *m);
 
+template<class T>
+static inline void nullify(T &t) {delete t; t = NULL; }
+template<class T>
+static inline void arrayNullify(T &t) {delete [] t; t = NULL; }
 #define rParamZyn(name, ...) \
   {STRINGIFY(name) "::i",  rProp(parameter) rMap(min, 0) rMap(max, 127) DOC(__VA_ARGS__), NULL, rParamICb(name)}
 

@@ -18,11 +18,15 @@
   along with this program; if not, write to the Free Software Foundation,
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 */
-#include <math.h>
+#include <cmath>
 #include "PADnote.h"
 #include "../Misc/Config.h"
 #include "../Misc/Allocator.h"
 #include "../DSP/Filter.h"
+#include "../Params/PADnoteParameters.h"
+#include "../Params/Controller.h"
+#include "../Params/FilterParams.h"
+#include "../Misc/Util.h"
 
 PADnote::PADnote(PADnoteParameters *parameters,
                  SynthParams pars)
