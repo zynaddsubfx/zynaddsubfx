@@ -24,10 +24,7 @@
 #define OSCIL_GEN_H
 
 #include "../globals.h"
-#include "../Misc/XMLwrapper.h"
-#include "../DSP/FFTwrapper.h"
 #include "../Params/Presets.h"
-#include "Resonance.h"
 
 class OscilGen:public Presets
 {

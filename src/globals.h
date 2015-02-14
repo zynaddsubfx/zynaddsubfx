@@ -48,6 +48,7 @@ class  SynthNote;
 
 class  Microtonal;
 class  XMLwrapper;
+class  Resonance;
 class  FFTwrapper;
 class  LFOParams;
 class  FilterParams;
@@ -57,6 +58,12 @@ class  Envelope;
 class  Controller;
 class  Master;
 class  Part;
+
+namespace std {
+    template<class T> struct complex;
+};
+typedef double fftw_real;
+typedef std::complex<fftw_real> fft_t;
 
 /**
  * The number of harmonics of additive synth
@@ -153,6 +160,12 @@ class  Part;
 #define LOG_2 0.693147181f
 #define PI 3.1415926536f
 #define LOG_10 2.302585093f
+
+/*
+ * Envelope Limits
+ */
+#define MAX_ENVELOPE_POINTS 40
+#define MIN_ENVELOPE_DB -400
 
 /*
  * The threshold for the amplitude interpolation used if the amplitude

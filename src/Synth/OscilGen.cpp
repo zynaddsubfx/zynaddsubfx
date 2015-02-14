@@ -21,14 +21,15 @@
 */
 
 #include "OscilGen.h"
+#include "../DSP/FFTwrapper.h"
+#include "../Synth/Resonance.h"
 #include "../Misc/WaveShapeSmps.h"
 
 #include <cassert>
-#include <stdlib.h>
-#include <math.h>
-#include <stdio.h>
-#include <stddef.h>
-#include <pthread.h>
+#include <cstdlib>
+#include <cmath>
+#include <cstdio>
+#include <cstddef>
 
 #include <unistd.h>
 

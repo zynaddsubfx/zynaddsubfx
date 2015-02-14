@@ -130,10 +130,10 @@ void PADnote::setup(float freq,
         else
             NoteGlobalPar.Punch.Enabled = 0;
 
-        NoteGlobalPar.FreqEnvelope = memory.alloc<Envelope>(pars->FreqEnvelope, basefreq);
+        NoteGlobalPar.FreqEnvelope = memory.alloc<Envelope>(*pars->FreqEnvelope, basefreq);
         NoteGlobalPar.FreqLfo      = memory.alloc<LFO>(*pars->FreqLfo, basefreq);
 
-        NoteGlobalPar.AmpEnvelope = memory.alloc<Envelope>(pars->AmpEnvelope, basefreq);
+        NoteGlobalPar.AmpEnvelope = memory.alloc<Envelope>(*pars->AmpEnvelope, basefreq);
         NoteGlobalPar.AmpLfo      = memory.alloc<LFO>(*pars->AmpLfo, basefreq);
     }
 
@@ -151,7 +151,7 @@ void PADnote::setup(float freq,
         NoteGlobalPar.GlobalFilterL = Filter::generate(memory, pars->GlobalFilter);
         NoteGlobalPar.GlobalFilterR = Filter::generate(memory, pars->GlobalFilter);
 
-        NoteGlobalPar.FilterEnvelope = memory.alloc<Envelope>(pars->FilterEnvelope, basefreq);
+        NoteGlobalPar.FilterEnvelope = memory.alloc<Envelope>(*pars->FilterEnvelope, basefreq);
         NoteGlobalPar.FilterLfo      = memory.alloc<LFO>(*pars->FilterLfo, basefreq);
     }
     NoteGlobalPar.FilterQ = pars->GlobalFilter->getq();

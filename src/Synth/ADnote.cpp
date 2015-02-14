@@ -753,7 +753,7 @@ void ADnote::initparameters()
 
         newamplitude[nvoice] = 1.0f;
         if(param.PAmpEnvelopeEnabled) {
-            vce.AmpEnvelope = memory.alloc<Envelope>(param.AmpEnvelope, basefreq);
+            vce.AmpEnvelope = memory.alloc<Envelope>(*param.AmpEnvelope, basefreq);
             vce.AmpEnvelope->envout_dB(); //discard the first envelope sample
             newamplitude[nvoice] *= vce.AmpEnvelope->envout_dB();
         }
@@ -765,7 +765,7 @@ void ADnote::initparameters()
 
         /* Voice Frequency Parameters Init */
         if(param.PFreqEnvelopeEnabled)
-            vce.FreqEnvelope = memory.alloc<Envelope>(param.FreqEnvelope, basefreq);
+            vce.FreqEnvelope = memory.alloc<Envelope>(*param.FreqEnvelope, basefreq);
 
         if(param.PFreqLfoEnabled)
             vce.FreqLfo = memory.alloc<LFO>(*param.FreqLfo, basefreq);
@@ -777,7 +777,7 @@ void ADnote::initparameters()
         }
 
         if(param.PFilterEnvelopeEnabled)
-            vce.FilterEnvelope = memory.alloc<Envelope>(param.FilterEnvelope, basefreq);
+            vce.FilterEnvelope = memory.alloc<Envelope>(*param.FilterEnvelope, basefreq);
 
         if(param.PFilterLfoEnabled)
             vce.FilterLfo = memory.alloc<LFO>(*param.FilterLfo, basefreq);
@@ -823,14 +823,14 @@ void ADnote::initparameters()
             }
         }
 
-        if(param.PFMFreqEnvelopeEnabled != 0)
-            vce.FMFreqEnvelope = memory.alloc<Envelope>(param.FMFreqEnvelope, basefreq);
+        if(param.PFMFreqEnvelopeEnabled)
+            vce.FMFreqEnvelope = memory.alloc<Envelope>(*param.FMFreqEnvelope, basefreq);
 
         FMnewamplitude[nvoice] = vce.FMVolume * ctl->fmamp.relamp;
 
-        if(param.PFMAmpEnvelopeEnabled != 0) {
+        if(param.PFMAmpEnvelopeEnabled ) {
             vce.FMAmpEnvelope =
-                memory.alloc<Envelope>(param.FMAmpEnvelope, basefreq);
+                memory.alloc<Envelope>(*param.FMAmpEnvelope, basefreq);
             FMnewamplitude[nvoice] *= vce.FMAmpEnvelope->envout_dB();
         }
     }
@@ -1010,10 +1010,10 @@ void ADnote::computecurrentparameters()
         oldamplitude[nvoice] = newamplitude[nvoice];
         newamplitude[nvoice] = 1.0f;
 
-        if(NoteVoicePar[nvoice].AmpEnvelope != NULL)
+        if(NoteVoicePar[nvoice].AmpEnvelope)
             newamplitude[nvoice] *= NoteVoicePar[nvoice].AmpEnvelope->envout_dB();
 
-        if(NoteVoicePar[nvoice].AmpLfo != NULL)
+        if(NoteVoicePar[nvoice].AmpLfo)
             newamplitude[nvoice] *= NoteVoicePar[nvoice].AmpLfo->amplfoout();
 
         /****************/
@@ -1783,10 +1783,10 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
                                     float basefreq, float velocity,
                                     bool stereo)
 {
-    FreqEnvelope = memory.alloc<Envelope>(param.FreqEnvelope, basefreq);
+    FreqEnvelope = memory.alloc<Envelope>(*param.FreqEnvelope, basefreq);
     FreqLfo      = memory.alloc<LFO>(*param.FreqLfo, basefreq);
 
-    AmpEnvelope = memory.alloc<Envelope>(param.AmpEnvelope, basefreq);
+    AmpEnvelope = memory.alloc<Envelope>(*param.AmpEnvelope, basefreq);
     AmpLfo      = memory.alloc<LFO>(*param.AmpLfo, basefreq);
 
     Volume = 4.0f * powf(0.1f, 3.0f * (1.0f - param.PVolume / 96.0f)) //-60 dB .. 0 dB
@@ -1798,7 +1798,7 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
     else
         GlobalFilterR = NULL;
 
-    FilterEnvelope = memory.alloc<Envelope>(param.FilterEnvelope, basefreq);
+    FilterEnvelope = memory.alloc<Envelope>(*param.FilterEnvelope, basefreq);
     FilterLfo      = memory.alloc<LFO>(*param.FilterLfo, basefreq);
     FilterQ = param.GlobalFilter->getq();
     FilterFreqTracking = param.GlobalFilter->getfreqtracking(basefreq);
