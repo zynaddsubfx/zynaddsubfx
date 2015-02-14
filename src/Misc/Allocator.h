@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <utility>
 
 class Allocator
 {
@@ -10,22 +11,22 @@ class Allocator
         void dealloc_mem(void *memory);
 
         template <typename T, typename... Ts>
-        T *alloc(Ts... ts)
+        T *alloc(Ts&&... ts)
         {
             void *data = alloc_mem(sizeof(T));
             if(!data)
                 return nullptr;
-            return new (data) T(ts...);
+            return new (data) T(std::forward<Ts>(ts)...);
         }
 
         template <typename T, typename... Ts>
-        T *valloc(size_t len, Ts... ts)
+        T *valloc(size_t len, Ts&&... ts)
         {
             T *data = (T*)alloc_mem(len*sizeof(T));
             if(!data)
                 return nullptr;
             for(unsigned i=0; i<len; ++i)
-                new ((void*)&data[i]) T(ts...);
+                new ((void*)&data[i]) T(std::forward<Ts>(ts)...);
 
             return data;
         }

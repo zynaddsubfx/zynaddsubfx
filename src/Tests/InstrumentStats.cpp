@@ -135,7 +135,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    mode = MODE_PROFILE;
+    mode = MODE_TEST;
     setup();
     xml(argv[1]);
     load();

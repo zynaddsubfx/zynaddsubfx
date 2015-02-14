@@ -24,7 +24,6 @@
 
 #ifndef GLOBALS_H
 #define GLOBALS_H
-#include <stdint.h>
 
 #if defined(__clang__)
 #define REALTIME __attribute__((annotate("realtime")))
@@ -38,6 +37,26 @@
 namespace rtosc{struct Ports; class ThreadLink;};
 extern rtosc::ThreadLink *bToU;
 extern rtosc::ThreadLink *uToB;
+
+//Forward Declarations
+class  EffectMgr;
+class  ADnoteParameters;
+struct ADnoteGlobalParam;
+class  SUBnoteParameters;
+class  PADnoteParameters;
+class  SynthNote;
+
+class  Microtonal;
+class  XMLwrapper;
+class  FFTwrapper;
+class  LFOParams;
+class  FilterParams;
+class  LFO;
+class  Envelope;
+
+class  Controller;
+class  Master;
+class  Part;
 
 /**
  * The number of harmonics of additive synth

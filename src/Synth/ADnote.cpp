@@ -759,7 +759,7 @@ void ADnote::initparameters()
         }
 
         if(param.PAmpLfoEnabled) {
-            vce.AmpLfo = memory.alloc<LFO>(param.AmpLfo, basefreq);
+            vce.AmpLfo = memory.alloc<LFO>(*param.AmpLfo, basefreq);
             newamplitude[nvoice] *= vce.AmpLfo->amplfoout();
         }
 
@@ -768,7 +768,7 @@ void ADnote::initparameters()
             vce.FreqEnvelope = memory.alloc<Envelope>(param.FreqEnvelope, basefreq);
 
         if(param.PFreqLfoEnabled)
-            vce.FreqLfo = memory.alloc<LFO>(param.FreqLfo, basefreq);
+            vce.FreqLfo = memory.alloc<LFO>(*param.FreqLfo, basefreq);
 
         /* Voice Filter Parameters Init */
         if(param.PFilterEnabled != 0) {
@@ -780,7 +780,7 @@ void ADnote::initparameters()
             vce.FilterEnvelope = memory.alloc<Envelope>(param.FilterEnvelope, basefreq);
 
         if(param.PFilterLfoEnabled)
-            vce.FilterLfo = memory.alloc<LFO>(param.FilterLfo, basefreq);
+            vce.FilterLfo = memory.alloc<LFO>(*param.FilterLfo, basefreq);
 
         vce.FilterFreqTracking =
             param.VoiceFilter->getfreqtracking(basefreq);
@@ -1784,10 +1784,10 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
                                     bool stereo)
 {
     FreqEnvelope = memory.alloc<Envelope>(param.FreqEnvelope, basefreq);
-    FreqLfo      = memory.alloc<LFO>(param.FreqLfo, basefreq);
+    FreqLfo      = memory.alloc<LFO>(*param.FreqLfo, basefreq);
 
     AmpEnvelope = memory.alloc<Envelope>(param.AmpEnvelope, basefreq);
-    AmpLfo      = memory.alloc<LFO>(param.AmpLfo, basefreq);
+    AmpLfo      = memory.alloc<LFO>(*param.AmpLfo, basefreq);
 
     Volume = 4.0f * powf(0.1f, 3.0f * (1.0f - param.PVolume / 96.0f)) //-60 dB .. 0 dB
              * VelF(velocity, param.PAmpVelocityScaleFunction);     //sensing
@@ -1799,7 +1799,7 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
         GlobalFilterR = NULL;
 
     FilterEnvelope = memory.alloc<Envelope>(param.FilterEnvelope, basefreq);
-    FilterLfo      = memory.alloc<LFO>(param.FilterLfo, basefreq);
+    FilterLfo      = memory.alloc<LFO>(*param.FilterLfo, basefreq);
     FilterQ = param.GlobalFilter->getq();
     FilterFreqTracking = param.GlobalFilter->getfreqtracking(basefreq);
 }
