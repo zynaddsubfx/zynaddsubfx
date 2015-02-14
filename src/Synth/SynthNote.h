@@ -67,6 +67,7 @@ class SynthNote
         /* For polyphonic aftertouch needed */
         void setVelocity(float velocity_);
     protected:
+        const Controller &ctl;
         // Legato transitions
         class Legato
         {
