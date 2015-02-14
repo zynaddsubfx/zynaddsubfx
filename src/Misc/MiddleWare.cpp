@@ -31,6 +31,7 @@
 #include <string>
 #include <future>
 #include <atomic>
+#include <list>
 
 #include <err.h>
 

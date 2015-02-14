@@ -29,7 +29,6 @@
 #include "../Params/Controller.h"
 
 #include <functional>
-#include <list> // For the monomemnotes list.
 
 /** Part implementation*/
 class Part
@@ -176,7 +175,13 @@ class Part
         bool lastlegatomodevalid; // To keep track of previous legatomodevalid.
 
         // MonoMem stuff
-        std::list<unsigned char> monomemnotes; // A list to remember held notes.
+        void monomemPush(char note);
+        void monomemPop(char note);
+        char monomemBack(void) const;
+        bool monomemEmpty(void) const;
+        void monomemClear(void);
+
+        short monomemnotes[256]; // A list to remember held notes.
         struct {
             unsigned char velocity;
             int mkeyshift; // I'm not sure masterkeyshift should be remembered.
