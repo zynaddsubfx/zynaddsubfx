@@ -39,7 +39,13 @@ execute_process(COMMAND echo fistpl 0
 # NOTE: These cache variables should normally not be changed in this
 # file, but either in in CMakeCache.txt before compile, or by passing
 # parameters directly into cmake using the -D flag.
-SET (GuiModule fltk CACHE STRING "GUI module, either fltk, ntk or off")
+if(NTK_FOUND)
+  SET (GuiModule ntk CACHE STRING "GUI module, either fltk, ntk or off")
+elseif(FLTK_FOUND)
+  SET (GuiModule fltk CACHE STRING "GUI module, either fltk, ntk or off")
+else()
+  SET (GuiModule off CACHE STRING "GUI module, either fltk, ntk or off")
+endif()
 SET (CompileTests ${CXXTEST_FOUND} CACHE BOOL "whether tests should be compiled in or not")
 SET (AlsaEnable ${ALSA_FOUND} CACHE BOOL
     "Enable support for Advanced Linux Sound Architecture")
@@ -188,7 +194,7 @@ endif()
 if(LibloEnable)
 	include_directories(${LIBLO_INCLUDE_DIRS})
 	add_definitions(-DUSE_NSM=1)
-	list(APPEND AUDIO_LIBRARIES ${LIBLO_LIBRARIES})
+        list(APPEND AUDIO_LIBRARIES ${LIBLO_LDFLAGS})
 	list(APPEND AUDIO_LIBRARY_DIRS ${LIBLO_LIBRARY_DIRS})
 	message(STATUS "Compiling with liblo")
 endif()

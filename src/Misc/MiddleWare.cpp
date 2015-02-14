@@ -13,7 +13,9 @@
 #include <dirent.h>
 
 #include "../UI/Fl_Osc_Interface.h"
+#ifndef NO_UI
 #include "../UI/Fl_Osc_Widget.H"
+#endif
 
 #include <map>
 
@@ -29,6 +31,7 @@
 
 #include <err.h>
 
+using std::string;
 rtosc::ThreadLink *bToU = new rtosc::ThreadLink(4096*2,1024);
 rtosc::ThreadLink *uToB = new rtosc::ThreadLink(4096*2,1024);
 

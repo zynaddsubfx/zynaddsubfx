@@ -22,8 +22,11 @@
 
 #include "../Nio/Nio.h"
 
+#ifndef NO_UI
 #include <FL/Fl.H>
-#include <stdio.h>
+#endif
+#include <cstdio>
+#include <cstring>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -111,13 +114,13 @@ NSM_Client::command_open(const char *name,
     return r;
 }
 
+#ifndef NO_UI
 static void save_callback(Fl_Widget *, void *v)
 {
-#ifndef NO_UI
     MasterUI *ui = static_cast<MasterUI*>(v);
     ui->do_save_master();
-#endif
 }
+#endif
 
 void
 NSM_Client::command_active(bool active)
