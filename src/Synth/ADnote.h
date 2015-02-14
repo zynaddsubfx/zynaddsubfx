@@ -104,13 +104,12 @@ class ADnote:public SynthNote
 
 
         //GLOBALS
-        ADnoteParameters *partparams;
+        ADnoteParameters &pars;
         unsigned char     stereo; //if the note is stereo (allows note Panning)
         int   midinote;
         float velocity, basefreq;
 
         ONOFFTYPE   NoteEnabled;
-        Controller *ctl;
 
         /*****************************************************************/
         /*                    GLOBAL PARAMETERS                          */
