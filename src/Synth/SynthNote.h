@@ -67,7 +67,6 @@ class SynthNote
         /* For polyphonic aftertouch needed */
         void setVelocity(float velocity_);
     protected:
-        const Controller &ctl;
         // Legato transitions
         class Legato
         {
@@ -104,6 +103,7 @@ class SynthNote
 
         //Realtime Safe Memory Allocator For notes
         class Allocator &memory;
+        const Controller &ctl;
 };
 
 #endif

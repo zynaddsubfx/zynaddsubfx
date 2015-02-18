@@ -745,13 +745,13 @@ redrawoscil();}
         } {
           Fl_Counter harmonicshiftcounter {
             label {Harmonic Shift}
-            callback {//oscil->Pharmonicshift=(int)o->value();
+            callback {(void)o;//oscil->Pharmonicshift=(int)o->value();
 redrawoscil();}
             xywh {675 370 55 15} type Simple labelsize 10 align 129 minimum -64 maximum 64 step 1 textfont 1 textsize 10
           }
           Fl_Check_Button harmonicshiftpre {
             label preH
-            callback {//oscil->Pharmonicshiftfirst=(int)o->value();
+            callback {(void)o;//oscil->Pharmonicshiftfirst=(int)o->value();
 redrawoscil();}
             tooltip {Apply the harmonic shift before the waveshaping and filtering} xywh {695 390 34 15} down_box DOWN_BOX labelsize 10 align 24
           }
@@ -825,7 +825,7 @@ redrawoscil();}
             class Fl_Osc_Dial
           }
           Fl_Slider adhrpar {
-            callback {//oscil->Padaptiveharmonicspar=(int)o->value();
+            callback {(void)o;//oscil->Padaptiveharmonicspar=(int)o->value();
 redrawoscil();}
             xywh {675 450 55 10} type {Horz Knob} box NO_BOX maximum 100 step 1 value 50
           }

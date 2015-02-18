@@ -677,7 +677,7 @@ inseffectui->refresh();}
       }
       Fl_Choice sendtochoice {
         label {Send To.}
-        callback {/*int x=(int) o->value();
+        callback {(void)o;/*int x=(int) o->value();
 part->Pefxroute[ninseff]=x;
 if (x==2) part->partefx[ninseff]->setdryonly(true);
 	else part->partefx[ninseff]->setdryonly(false);*/}

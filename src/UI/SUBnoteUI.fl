@@ -435,10 +435,10 @@ globalfiltergroup->redraw();}
       } {
         Fl_Choice spreadtype {
           label OvertonesPosition
-          callback {/*pars->POvertoneSpread.type = (int)o->value();
+          callback {(void)o;/*pars->POvertoneSpread.type = (int)o->value();
 pars->updateFrequencyMultipliers();*/} open
           xywh {450 190 80 20} down_box BORDER_BOX labelsize 10 align 5 textsize 10
-          code0 {/*o->value(pars->POvertoneSpread.type);*/}
+          code0 {(void)o;/*o->value(pars->POvertoneSpread.type);*/}
         } {
           MenuItem {} {
             label Harmonic
@@ -475,26 +475,26 @@ pars->updateFrequencyMultipliers();*/} open
         }
         Fl_Dial spreadpar1 {
           label Par1
-          callback {/*pars->POvertoneSpread.par1 = o->value();
+          callback {(void)o;/*pars->POvertoneSpread.par1 = o->value();
 pars->updateFrequencyMultipliers();*/}
           xywh {548 173 30 30} box ROUND_UP_BOX labelsize 10 maximum 255 step 1
-          code0 {/*o->value(pars->POvertoneSpread.par1);*/}
+          code0 {(void)o;/*o->value(pars->POvertoneSpread.par1);*/}
           class WidgetPDial
         }
         Fl_Dial spreadpar2 {
           label Par2
-          callback {/*pars->POvertoneSpread.par2 = o->value();
+          callback {(void)o;/*pars->POvertoneSpread.par2 = o->value();
 pars->updateFrequencyMultipliers();*/}
           xywh {583 173 30 30} box ROUND_UP_BOX labelsize 10 maximum 255 step 1
-          code0 {/*o->value(pars->POvertoneSpread.par2);*/}
+          code0 {(void)o;/*o->value(pars->POvertoneSpread.par2);*/}
           class WidgetPDial
         }
         Fl_Dial spreadpar3 {
           label ForceH
-          callback {/*pars->POvertoneSpread.par3 = o->value();
+          callback {(void)o;/*pars->POvertoneSpread.par3 = o->value();
 pars->updateFrequencyMultipliers();*/}
           xywh {618 173 30 30} box ROUND_UP_BOX labelsize 10 maximum 255 step 1
-          code0 {/*o->value(pars->POvertoneSpread.par3);*/}
+          code0 {(void)o;/*o->value(pars->POvertoneSpread.par3);*/}
           class WidgetPDial
         }
       }

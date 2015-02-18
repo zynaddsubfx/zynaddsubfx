@@ -160,13 +160,9 @@ freeedit->redraw();}
       }
       Fl_Counter sustaincounter {
         label Sust
-        callback {//Penvsustain=(int) o->value();
-freeedit->redraw();
+        callback {freeedit->redraw();
 envfree->redraw();}
         tooltip {Sustain (0 is disabled)} xywh {315 155 40 15} type Simple labelsize 11 align 4 minimum 0 maximum 127 step 1
-        code0 {//o->value(Penvsustain);}
-        code1 {//if (Pfreemode==0) o->hide();}
-        code2 {//o->maximum(Penvpoints-2);}
         code3 {o->init("Penvsustain");}
         class Fl_Osc_Counter
       }

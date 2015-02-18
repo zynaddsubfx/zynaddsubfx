@@ -294,8 +294,7 @@ formantfiltergraph->redraw();}
           }
           Fl_Dial formant_freq_dial {
             label freq
-            callback {//pars->Pvowels[nvowel].formants[nformant].freq=(int) o->value();
-                formantfiltergraph->update();}
+            callback {formantfiltergraph->update();}
             tooltip {Formant frequency} xywh {495 115 25 25} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
             code0 {//TODO get widget renaming working here!!!}
             code1 {o->init("freq");}
@@ -303,16 +302,14 @@ formantfiltergraph->redraw();}
           }
           Fl_Dial formant_q_dial {
             label Q
-            callback {//pars->Pvowels[nvowel].formants[nformant].q=(int) o->value();
-formantfiltergraph->update();}
+            callback {formantfiltergraph->update();}
             tooltip {Formant's Q} xywh {525 115 24 25} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
             code0 {o->init("q");}
             class Fl_Osc_Dial
           }
           Fl_Dial formant_amp_dial {
             label amp
-            callback {//pars->Pvowels[nvowel].formants[nformant].amp=(int) o->value();
-formantfiltergraph->update();}
+            callback {formantfiltergraph->update();}
             tooltip {Formant amplitude} xywh {555 115 24 25} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
             code0 {o->init("amp");}
             class Fl_Osc_Dial
@@ -340,7 +337,7 @@ formantfiltergraph->update();}
         }
         Fl_Counter vowel_counter {
           label Vowel
-          callback {//pars->Psequence[nseqpos].nvowel=(int) o->value(); pars->changed=true;}
+          callback {(void)o;//pars->Psequence[nseqpos].nvowel=(int) o->value(); pars->changed=true;}
           xywh {640 97 40 15} type Simple labelsize 10 align 1 minimum 0 maximum 127 step 1 textsize 10
           code0 {o->bounds(0,FF_MAX_VOWELS-1);}
         }
@@ -504,6 +501,7 @@ update_formant_window();} {}
   } {
     code {
     //TODO update Pgain & filter type on switch Pgain=64;
+    (void) newcat;
 refresh();} {}
   }
   Function {use_for_dynamic_filter()} {open

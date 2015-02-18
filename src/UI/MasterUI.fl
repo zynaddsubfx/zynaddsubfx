@@ -1154,11 +1154,6 @@ simplerefresh();}
             }
             Fl_Choice simplesysefftype {
               label EffType
-              callback {/*pthread_mutex_lock(&master->mutex);
-master->sysefx[nsyseff]->changeeffect((int) o->value());
-pthread_mutex_unlock(&master->mutex);
-simplesyseffectui->efftype = o->value();
-simplesyseffectui->refresh();*/}
               xywh {515 80 70 15} down_box BORDER_BOX labelsize 10 align 5
               code0 {o->init("sysefx"+to_s(nsyseff)+"/efftype");}
               class Fl_Osc_Choice

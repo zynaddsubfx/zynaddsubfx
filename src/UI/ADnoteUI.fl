@@ -260,7 +260,7 @@ o->redraw();}
               }
               Fl_Value_Output fmdetunevalueoutput {
                 label Detune
-                callback {//o->value(getdetune((pars->VoicePar[nvoice].PFMDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PFMDetuneType),0,pars->VoicePar[nvoice].PFMDetune));}
+                callback {(void)o;//o->value(getdetune((pars->VoicePar[nvoice].PFMDetuneType==0)?(pars->GlobalPar.PDetuneType) : (pars->VoicePar[nvoice].PFMDetuneType),0,pars->VoicePar[nvoice].PFMDetune));}
                 xywh {540 245 45 18} labelsize 8 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 8
                 code0 {o->init("FMdetunevalue");}
                 class Fl_Osc_Output
@@ -566,7 +566,7 @@ voiceonbutton->redraw();} open
             }
             Fl_Choice {} {
               label Unison
-              callback {//pars->set_unison_size_index(nvoice,(int) o->value());} open
+              callback {(void)o;//pars->set_unison_size_index(nvoice,(int) o->value());} open
               tooltip {Unison size} xywh {10 560 75 20} down_box BORDER_BOX labelfont 1 align 5 textfont 1 textsize 10
               code0 {o->add("OFF");char tmp[100];for (int i=1;ADnote_unison_sizes[i];i++){snprintf(tmp,100,"size %d",ADnote_unison_sizes[i]);o->add(tmp);};}
               code1 {o->init("Unison_size");//pars->get_unison_size_index(nvoice));}
@@ -606,7 +606,7 @@ voiceonbutton->redraw();} open
             }
             Fl_Dial {} {
               label {Ph.rand}
-              callback {/*pars->VoicePar[nvoice].Unison_phase_randomness=(int)o->value();*/}
+              callback {(void)o;/*pars->VoicePar[nvoice].Unison_phase_randomness=(int)o->value();*/}
               tooltip {Phase randomness} xywh {280 555 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
               code0 {/*o->value(pars->VoicePar[nvoice].Unison_phase_randomness);*/}
               class WidgetPDial

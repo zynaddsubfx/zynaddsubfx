@@ -153,6 +153,7 @@ class PresetsUI {} {
     Function {copy(std::string url_)} {} {
         code {copybutton->activate();
             copypbutton->deactivate();
+            (void) url_;
 
             this->pui=NULL;
             bool but=(Fl::event_button()!=FL_LEFT_MOUSE);

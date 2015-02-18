@@ -89,6 +89,7 @@ std::string doCopy(MiddleWare &mw, string url)
 template<class T>
 void doPaste(MiddleWare &mw, string url, string data)
 {
+    (void) data;
     if(clip.length() < 20)
         return;
 
@@ -159,17 +160,21 @@ Clipboard clipboardCopy(MiddleWare &mw, string url)
 
 void clipBoardPaste(const char *url, Clipboard clip)
 {
+    (void) url;
+    (void) clip;
 }
 
 MiddleWare *middlewarepointer;
 void presetCopy(std::string url, std::string name)
 {
+    (void) name;
     clip = doClassCopy(getUrlType(url), *middlewarepointer, url);
     printf("PresetCopy()\n");
     printf("clip = ``%s''\n", clip.c_str());
 }
 void presetPaste(std::string url, std::string name)
 {
+    (void) name;
     doClassPaste(getUrlType(url), *middlewarepointer, url, clip);
     printf("PresetPaste()\n");
 }

@@ -130,9 +130,8 @@ FilterParams::FilterParams()
 FilterParams::FilterParams(unsigned char Ptype_,
                            unsigned char Pfreq_,
                            unsigned char Pq_)
-    :PresetsArray()
 {
-    setpresettype("Pfilter");
+    //setpresettype("Pfilter");
     Dtype = Ptype_;
     Dfreq = Pfreq_;
     Dq    = Pq_;

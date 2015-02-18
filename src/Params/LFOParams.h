@@ -26,7 +26,7 @@
 #include "Presets.h"
 class XMLwrapper;
 
-class LFOParams:public Presets
+class LFOParams
 {
     public:
         LFOParams();

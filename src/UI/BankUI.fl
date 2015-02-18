@@ -80,13 +80,7 @@ refreshmainwindow();}
         code0 {o->value(config.cfg.BankUIAutoClose);}
       }
       Fl_Choice banklist {
-        callback { //int n=o->value();
-//std::string dirname="";/*bank->banks[n].dir;*/
-//if (dirname.empty()) return;
-//osc->write("/loadbank", "s", dirname.c_str());
-/*if (bank->loadbank(dirname)==2)
-       fl_alert("Error: Could not load the bank from the directory\\n%s.",dirname.c_str());*/
-refreshmainwindow();}
+        callback {refreshmainwindow();}
         xywh {5 8 220 20} down_box BORDER_BOX labelfont 1 align 0 textfont 1 textsize 11
         code0 {bankview->init(osc, modeselect, npart);}
         code1 {o->init("loadbank");}

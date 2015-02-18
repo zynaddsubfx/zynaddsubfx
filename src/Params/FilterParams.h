@@ -27,7 +27,7 @@
 #include "../Misc/XMLwrapper.h"
 #include "PresetsArray.h"
 
-class FilterParams:public PresetsArray
+class FilterParams
 {
     public:
         FilterParams();
