@@ -51,6 +51,18 @@ static rtosc::Ports localPorts = {
     //rToggle(),//continue
     rToggle(Pfixedfreq, "Base frequency fixed frequency enable"),
     rParamZyn(PfixedfreqET, "Equal temeperate control for fixed frequency operation"),
+#undef rChangeCb
+#define rChangeCb obj->updateFrequencyMultipliers();
+    rParamI(POvertoneSpread.type, rMap(min, 0), rMap(max, 7),
+            "Spread of harmonic frequencies"),
+    rParamI(POvertoneSpread.par1, rMap(min, 0), rMap(max, 255),
+            "Overtone Parameter"),
+    rParamI(POvertoneSpread.par2, rMap(min, 0), rMap(max, 255),
+            "Overtone Parameter"),
+    rParamI(POvertoneSpread.par3, rMap(min, 0), rMap(max, 255),
+            "Overtone Parameter"),
+#undef rChangeCb
+#define rChangeCb
     rParamZyn(Pnumstages, rMap(min, 1), rMap(max, 5), "Number of filter stages"),
     rParamZyn(Pbandwidth, "Bandwidth of filters"),
     rParamZyn(Phmagtype, "How the magnitudes are computed (0=linear,1=-60dB,2=-60dB)"),

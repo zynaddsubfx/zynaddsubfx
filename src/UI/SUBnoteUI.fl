@@ -435,10 +435,9 @@ globalfiltergroup->redraw();}
       } {
         Fl_Choice spreadtype {
           label OvertonesPosition
-          callback {(void)o;/*pars->POvertoneSpread.type = (int)o->value();
-pars->updateFrequencyMultipliers();*/} open
           xywh {450 190 80 20} down_box BORDER_BOX labelsize 10 align 5 textsize 10
-          code0 {(void)o;/*o->value(pars->POvertoneSpread.type);*/}
+          code0 {o->init("POvertoneSpread.type");}
+          class Fl_Osc_Choice
         } {
           MenuItem {} {
             label Harmonic
@@ -475,27 +474,21 @@ pars->updateFrequencyMultipliers();*/} open
         }
         Fl_Dial spreadpar1 {
           label Par1
-          callback {(void)o;/*pars->POvertoneSpread.par1 = o->value();
-pars->updateFrequencyMultipliers();*/}
           xywh {548 173 30 30} box ROUND_UP_BOX labelsize 10 maximum 255 step 1
-          code0 {(void)o;/*o->value(pars->POvertoneSpread.par1);*/}
-          class WidgetPDial
+          code0 {o->init("POvertoneSpread.par1");}
+          class Fl_Osc_Dial
         }
         Fl_Dial spreadpar2 {
           label Par2
-          callback {(void)o;/*pars->POvertoneSpread.par2 = o->value();
-pars->updateFrequencyMultipliers();*/}
           xywh {583 173 30 30} box ROUND_UP_BOX labelsize 10 maximum 255 step 1
-          code0 {(void)o;/*o->value(pars->POvertoneSpread.par2);*/}
-          class WidgetPDial
+          code0 {o->init("POvertoneSpread.par2");}
+          class Fl_Osc_Dial
         }
         Fl_Dial spreadpar3 {
           label ForceH
-          callback {(void)o;/*pars->POvertoneSpread.par3 = o->value();
-pars->updateFrequencyMultipliers();*/}
           xywh {618 173 30 30} box ROUND_UP_BOX labelsize 10 maximum 255 step 1
-          code0 {(void)o;/*o->value(pars->POvertoneSpread.par3);*/}
-          class WidgetPDial
+          code0 {o->init("POvertoneSpread.par3");}
+          class Fl_Osc_Dial
         }
       }
     }
