@@ -88,7 +88,6 @@ class BankView: public Fl_Group, public Fl_Osc_Widget
         std::string loc;
 
         //XXX TODO locked banks...
-        int mode;
         int nselected;
         int *npart;
 };

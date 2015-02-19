@@ -104,7 +104,7 @@ static rtosc::Ports ports = {
         ui->showUI();
     } END
     BEGIN("alert:s") {
-        fl_alert(a0.s);
+        fl_alert("%s",a0.s);
     } END
     BEGIN("session-type:s") {
         if(strcmp(a0.s,"LASH"))

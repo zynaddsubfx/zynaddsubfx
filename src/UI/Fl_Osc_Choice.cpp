@@ -7,18 +7,7 @@
 #include <cassert>
 #include <sstream>
 
-static Fl_Osc_Pane *fetch_osc_pane(Fl_Widget *w)
-{
-    if(!w)
-        return NULL;
-
-    Fl_Osc_Pane *pane = dynamic_cast<Fl_Osc_Pane*>(w->parent());
-    if(pane)
-        return pane;
-    return fetch_osc_pane(w->parent());
-}
-
-static void callback_fn(Fl_Widget *w, void *v)
+static void callback_fn(Fl_Widget *w, void *)
 {
     ((Fl_Osc_Choice*)w)->cb();
 }

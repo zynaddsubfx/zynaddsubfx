@@ -9,4 +9,7 @@ Fl_Osc_Value::~Fl_Osc_Value(void)
 {}
 
 void Fl_Osc_Value::init(const char *path)
-{}
+{
+    (void)path;
+}
+

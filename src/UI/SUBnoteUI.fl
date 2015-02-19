@@ -73,7 +73,7 @@ return(1);} {}
   }
   Function {rebase(std::string new_base)} {return_type void
   } {
-      code {} {}
+      code {(void) new_base;} {}
       }
   Function {update()} {return_type void
   } {

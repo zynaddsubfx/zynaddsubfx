@@ -5,7 +5,7 @@
 #include <cassert>
 #include <sstream>
 
-static void callback_fn(Fl_Widget *w, void *v)
+static void callback_fn(Fl_Widget *w, void *)
 {
     ((Fl_Osc_Output*)w)->cb();
 }

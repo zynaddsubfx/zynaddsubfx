@@ -18,20 +18,9 @@ B string_cast(const A &a)
     return b;
 }
 
-static void callback_fn(Fl_Widget *w, void *v)
+static void callback_fn(Fl_Widget *w, void *)
 {
     ((Fl_Osc_DialF*)w)->cb();
-}
-
-static Fl_Osc_Pane *fetch_osc_pane(Fl_Widget *w)
-{
-    if(!w)
-        return NULL;
-
-    Fl_Osc_Pane *pane = dynamic_cast<Fl_Osc_Pane*>(w->parent());
-    if(pane)
-        return pane;
-    return fetch_osc_pane(w->parent());
 }
 
 Fl_Osc_DialF::Fl_Osc_DialF(int X, int Y, int W, int H, const char *label)

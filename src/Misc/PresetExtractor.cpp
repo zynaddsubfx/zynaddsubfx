@@ -41,7 +41,7 @@ class Capture:public rtosc::RtData
         virtual void reply(const char *path, const char *args, ...)
         {
             printf("reply(%p)(%s)(%s)...\n", msgbuf, path, args);
-            printf("size is %d\n", sizeof(msgbuf));
+            //printf("size is %d\n", sizeof(msgbuf));
             va_list va;
             va_start(va,args);
             char *buffer = msgbuf;

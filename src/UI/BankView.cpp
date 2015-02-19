@@ -150,13 +150,6 @@ static int modeCb(const char *label)
     return -1;
 }
 
-static void control_widget_cb(Fl_Light_Button *button, void *bvc_)
-{
-    BankViewControls *bvc = (BankViewControls*)bvc_;
-    bvc->mode(modeCb(button->label()));
-    //TODO removeselection?
-}
-
 BankViewControls::BankViewControls(int x, int y, int w, int h, const char *label)
     :Fl_Group(x,y,w,h,label)
 {
