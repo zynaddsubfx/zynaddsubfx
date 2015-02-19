@@ -676,7 +676,7 @@ if ((int) o->value()==1){
               xywh {100 188 80 22} down_box BORDER_BOX labelfont 1 labelsize 10 align 5 textsize 10
               code0 {o->add("Master Out");o->add("Off");}
               code1 {char tmp[50]; for (int i=0;i<NUM_MIDI_PARTS;i++) {sprintf(tmp,"Part %2d",i+1);o->add(tmp);};}
-              code3 {o->init("Pinsparts"+to_s(ninseff),2);}
+              code3 {o->init("Pinsparts"+to_s(ninseff),-2);}
               class Fl_Osc_Choice
             } {}
             Fl_Button {} {
