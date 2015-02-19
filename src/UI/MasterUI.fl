@@ -452,7 +452,7 @@ if (fl_choice("The file *might* exist. \\nOverwrite it?","No","Yes",NULL)) {
           label {Master KeyShift}
           xywh {155 102 120 23} type Simple labelsize 9 minimum -64 maximum 64 step 1
           code0 {o->lstep(12);}
-          code1 {o->init("Pkeyshift");}
+          code1 {o->init("Pkeyshift",'i',-64);}
           class Fl_Osc_Counter
         }
         Fl_Button {} {
@@ -1096,7 +1096,7 @@ simplemaxkcounter->do_callback();}
           label KeyShift
           xywh {280 120 50 20} type Simple labelsize 11 minimum -64 maximum 64 step 1
           code0 {o->lstep(12);}
-          code1 {o->init("Pkeyshift");}
+          code1 {o->init("Pkeyshift", 'i', -64);}
           class Fl_Osc_Counter
         }
         Fl_Dial simplesyseffsend {
@@ -1360,7 +1360,7 @@ pthread_mutex_unlock(&master->mutex);*/}
         label {Master KeyShift}
         xywh {15 110 90 20} labelsize 11 minimum -64 maximum 64 step 1
         code0 {o->lstep(12);}
-        code1 {o->init("Pkeyshift");}
+        code1 {o->init("Pkeyshift",'i',-64);}
         class Fl_Osc_Counter
       }
       Fl_Button {} {

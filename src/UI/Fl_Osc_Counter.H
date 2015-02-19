@@ -7,7 +7,7 @@ class Fl_Osc_Counter: public Fl_Counter, public Fl_Osc_Widget
 {
     public:
         Fl_Osc_Counter(int x, int y, int w, int h, const char *label=0);
-        void init(const char *path_, char type_ = 'i');
+        void init(const char *path_, char type_ = 'i', int display_off = 0);
         void OSC_value(char);
         void OSC_value(int);
         using Fl_Osc_Widget::OSC_value;
@@ -19,5 +19,6 @@ class Fl_Osc_Counter: public Fl_Counter, public Fl_Osc_Widget
         void cb(void);
         char cb_type;
     private:
+        int offset;
         std::pair<Fl_Callback*, void*> cb_data;
 };
