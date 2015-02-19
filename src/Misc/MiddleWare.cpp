@@ -949,6 +949,8 @@ void MiddleWareImpl::handleMsg(const char *msg)
 {
     assert(!strstr(msg,"free"));
     assert(msg && *msg && rindex(msg, '/')[1]);
+    assert(strcmp(msg, "/part0/Psysefxvol"));
+    assert(strcmp(msg, "/Penabled"));
     //fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 6 + 30, 0 + 40);
     //fprintf(stdout, "middleware: '%s':%s\n", msg, rtosc_argument_string(msg));
     //fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);

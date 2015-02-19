@@ -1101,7 +1101,7 @@ simplemaxkcounter->do_callback();}
         }
         Fl_Dial simplesyseffsend {
           xywh {300 160 30 30} maximum 127 step 1
-          code0 {o->init("Psysefxvol");}
+          code0 {o->alt_init("/","Psysefxvol"+to_s(nsyseff)+"/part"+to_s(npart));}
           class Fl_Osc_Dial
         }
         Fl_Box {} {
@@ -1123,7 +1123,7 @@ simplemaxkcounter->do_callback();}
 o->redraw();}
         private xywh {250 40 85 20} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 24
         code0 {//char tmp[10];snprintf(tmp,10,"%d",npart+1);o->copy_label(tmp);}
-        code1 {o->init("Penabled");}
+        code1 {o->init("part0/Penabled");}
         class Fl_Osc_Check
       }
       Fl_Box virkeys {
@@ -1147,6 +1147,9 @@ o->redraw();}
               callback {nsyseff=(int) o->value()-1;
 /*simplesysefftype->value(master->sysefx[nsyseff]->geteffect());*/
 simplesyseffectui->refresh();
+simplesysefftype->oscMove("sysefx"+to_s(nsyseff)+"/efftype");
+simplesyseffectuigroup->rebase("sysefx"+to_s(nsyseff));
+simplesyseffsend->oscMove("/","Psysefxvol"+to_s(nsyseff)+"/part"+to_s(npart));
 simplerefresh();}
               xywh {350 75 80 20} type Simple labelfont 1 labelsize 10 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
               code0 {o->bounds(1,NUM_SYS_EFX);}
@@ -1388,6 +1391,8 @@ simpleglobalfinedetuneslider->do_callback();}
 npartcounter->value(o->value());
 npart=(int) o->value()-1;
 
+simplelistitemgroup->rebase("part"+to_s(npart)+"/");
+partenabled->oscMove("part"+to_s(npart)+"/Penabled");
 simplerefresh();}
         tooltip {The part number} xywh {170 40 70 20} type Simple labelfont 1 align 4 minimum 0 maximum 127 step 1 value 1 textfont 1
         code0 {o->bounds(1,NUM_MIDI_PARTS);}
