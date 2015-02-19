@@ -28,6 +28,11 @@ void Fl_Osc_VSlider::OSC_value(char v)
 {
     Fl_Slider::value(v+minimum());
 }
+        
+void Fl_Osc_VSlider::OSC_value(int v)
+{
+    Fl_Slider::value(v+minimum());
+}
 
 void Fl_Osc_VSlider::OSC_value(float v)
 {

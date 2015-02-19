@@ -11,6 +11,7 @@ class Fl_Osc_VSlider:public Fl_Value_Slider, public Fl_Osc_Widget
 
         virtual ~Fl_Osc_VSlider(void);
         void OSC_value(char);
+        void OSC_value(int);
         void OSC_value(float);
 	void init(std::string, char type = 'i');
 
