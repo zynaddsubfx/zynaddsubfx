@@ -21,10 +21,10 @@ decl {\#include "../globals.h"} {public local
 } 
 
 decl {\#include "Fl_Osc_VSlider.H"} {public local
-}
+} 
 
 decl {\#include "Fl_Osc_Dial.H"} {public local
-}
+} 
 
 decl {\#include "EnvelopeUI.h"} {public local
 } 
@@ -73,12 +73,12 @@ return(1);} {}
   }
   Function {rebase(std::string new_base)} {return_type void
   } {
-      code {(void) new_base;} {}
-      }
+    code {(void) new_base;} {}
+  }
   Function {update()} {return_type void
   } {
-      code {} {}
-      }
+    code {} {}
+  }
   Function {OSC_value(char c)} {open return_type void
   } {
     code {value(127-c);} {}
@@ -96,8 +96,7 @@ class SUBnoteharmonic {: {public Fl_Osc_Group}
       class Fl_Osc_Group
     } {
       Fl_Slider mag {
-        callback {
-        //TODO consider unifying this with the OscilGenUI display stuff
+        callback {//TODO consider unifying this with the OscilGenUI display stuff
         int x=0;
 if (Fl::event_button1() || Fl::event() == FL_MOUSEWHEEL) x=127-(int)o->value();
    else o->value(127-x);
@@ -147,8 +146,7 @@ osc->requestValue(base+"Phrelbw"+to_s(n));
 end();} {}
   }
   Function {refresh()} {} {
-    code {
-osc->requestValue(base+"Phmag"+to_s(n));
+    code {osc->requestValue(base+"Phmag"+to_s(n));
 osc->requestValue(base+"Phrelbw"+to_s(n));} {}
   }
   Function {~SUBnoteharmonic()} {} {
@@ -166,7 +164,7 @@ class SUBnoteUI {open : {public PresetsUI_}
   } {
     Fl_Window SUBparameters {
       label {SUBsynth Parameters} open
-      xywh {542 512 735 470} type Double
+      xywh {542 511 735 470} type Double
       class Fl_Osc_Window visible
     } {
       Fl_Box {} {
@@ -175,7 +173,7 @@ class SUBnoteUI {open : {public PresetsUI_}
       }
       Fl_Scroll {} {
         label scroll open
-        xywh {5 140 434 325} type HORIZONTAL box FLAT_BOX labeltype NO_LABEL
+        xywh {5 140 434 330} type HORIZONTAL box FLAT_BOX labeltype NO_LABEL
       } {
         Fl_Pack harmonics {open
           xywh {5 145 425 325} type HORIZONTAL
@@ -253,8 +251,8 @@ class SUBnoteUI {open : {public PresetsUI_}
           }
         }
         Fl_Choice start {
-          label Start
-          xywh {670 412 50 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 1 textsize 11
+          label Start selected
+          xywh {670 420 50 15} down_box BORDER_BOX labelfont 1 labelsize 10 align 1 textsize 11
           code0 {o->init("Pstart");}
           class Fl_Osc_Choice
         } {
@@ -284,7 +282,7 @@ class SUBnoteUI {open : {public PresetsUI_}
         } {}
         Fl_Check_Button freqee {
           label Enabled
-          callback { if (o->value()==0) freqenvelopegroup->deactivate();
+          callback {if (o->value()==0) freqenvelopegroup->deactivate();
               else freqenvelopegroup->activate();
 o->show();
 freqsettingsui->redraw();}
@@ -348,8 +346,7 @@ freqsettingsui->redraw();}
       }
       Fl_Button {} {
         label Clear
-        callback {
-        o->oscWrite("clear");
+        callback {o->oscWrite("clear");
         for (int i=0;i<MAX_SUB_HARMONICS;i++){
     h[i]->mag->value(127);
     h[i]->bw->value(64);
@@ -364,7 +361,7 @@ SUBparameters->redraw();}
         xywh {220 5 220 135} box UP_FRAME labeltype EMBOSSED_LABEL labelfont 1 align 17
       } {
         Fl_Group bandwidthenvelopegroup {
-          label {SUBsynth - BandWidth Envelope} open selected
+          label {SUBsynth - BandWidth Envelope} open
           xywh {225 65 205 70} box FLAT_BOX color 51 align 144
           code0 {o->init(ENV_ADSR_BW, osc, loc, "BandWidthEnvelope/");}
           class EnvelopeUI
@@ -468,7 +465,7 @@ globalfiltergroup->redraw();}
             xywh {50 50 34 20} labelfont 1 labelsize 11
           }
           MenuItem {} {
-            label Shift selected
+            label Shift
             xywh {20 20 34 20} labelfont 1 labelsize 11
           }
         }
@@ -494,8 +491,7 @@ globalfiltergroup->redraw();}
     }
   }
   Function {refresh()} {} {
-    code {
-//bwee->show();
+    code {//bwee->show();
 //bandwidthsettingsui->redraw();
 
 //freqee->show();
