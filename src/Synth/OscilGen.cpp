@@ -57,7 +57,8 @@ static rtosc::Ports localPorts = {
     PC(filterbeforews),
     PC(satype),
     PC(sapar),
-    //FIXME missing int stuff
+    rParamI(Pharmonicshift, "Amount of shift on harmonics"),
+    rToggle(Pharmonicshiftfirst, "If harmonics are shifted before waveshaping/filtering"),
     PC(modulation),
     PC(modulationpar1),
     PC(modulationpar2),
