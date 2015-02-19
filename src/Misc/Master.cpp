@@ -75,6 +75,30 @@ static Ports sysefxPort =
         }}
 };
 
+static Ports sysefsendto = 
+{
+    {"to#" STRINGIFY(NUM_SYS_EFX) "::i", 0, 0, [](const char *m, RtData&d)
+        {
+            //same ugly workaround as before
+            const char *index_1 = m;
+            index_1 -=2;
+            assert(isdigit(*index_1));
+            if(isdigit(index_1[-1]))
+                index_1--;
+            int ind1 = atoi(index_1);
+
+            //Now get the second index like normal
+            while(!isdigit(*m)) m++;
+            int ind2 = atoi(m);
+            Master &master = *(Master*)d.obj;
+
+            if(rtosc_narguments(m))
+                master.setPsysefxsend(ind1, ind2, rtosc_argument(m,0).i);
+            else
+                d.reply(d.loc, "i", master.Psysefxsend[ind1][ind2]);
+        }}
+};
+
 static Ports localports = {
     rRecursp(part, 16, "Part"),//NUM_MIDI_PARTS
     rRecursp(sysefx, 4, "System Effect"),//NUM_SYS_EFX
@@ -125,7 +149,11 @@ static Ports localports = {
             SNIP;
             sysefxPort.dispatch(msg, d);
         }},
-    //    unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
+    {"sysefxfrom#" STRINGIFY(NUM_SYS_EFX) "/", rDoc("Routing Between System Effects"), &sysefsendto,
+        [](const char *msg, RtData&d) {
+            SNIP;
+            sysefsendto.dispatch(msg, d);
+        }},
 
     {"noteOn:iii", rDoc("Noteon Event"), 0,
         [](const char *m,RtData &d){

@@ -848,12 +848,12 @@ GNU General Public License for details.}
       Fl_Box {} {
         xywh {0 0 0 0}
         code0 {syseffsendwindow->osc = osc; assert(osc);}
-        code1 {syseffsendwindow->base = "/sysefx/";}
+        code1 {syseffsendwindow->base = "";}
       }
       Fl_Scroll syseffscroll {open
         xywh {0 45 120 170} box FLAT_BOX resizable
         code0 {syseffsendwindow->begin();for (int neff1=0;neff1<NUM_SYS_EFX;neff1++) for (int neff2=neff1+1;neff2<NUM_SYS_EFX;neff2++)}
-        code1 {{syseffsend[neff1][neff2]=new SysEffSend(o->x()+(neff2-1)*35,o->y()+15+neff1*50,30,30);syseffsend[neff1][neff2]->label("aaa");syseffsend[neff1][neff2]->init(neff1,neff2);};syseffsendwindow->end();}
+        code1 {{syseffsend[neff1][neff2]=new Fl_Osc_Dial(o->x()+(neff2-1)*35,o->y()+15+neff1*50,30,30);syseffsend[neff1][neff2]->label(strdup((to_s(neff1) + "->" + to_s(neff2)).c_str()));syseffsend[neff1][neff2]->init("/sysefxfrom"+to_s(neff1)+"/to"+to_s(neff2));};syseffsendwindow->end();}
       } {}
       Fl_Button {} {
         label Close
@@ -1632,7 +1632,7 @@ bankui->hide();} {}
   }
   decl {int *exitprogram;} {private local
   }
-  decl {SysEffSend *syseffsend[NUM_SYS_EFX][NUM_SYS_EFX];} {private local
+  decl {Fl_Osc_Dial *syseffsend[NUM_SYS_EFX][NUM_SYS_EFX];} {private local
   }
   decl {VirKeyboard *virkeyboard;} {private local
   }
