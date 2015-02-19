@@ -37,7 +37,7 @@ class BankSlot : public Fl_Button
         std::string name_;
         std::string filename_;
         char labelstr[128];
-        int nslot; 
+        int nslot;
         BankView *bv;
 };
 
@@ -56,7 +56,7 @@ class BankViewControls: public Fl_Group
         Fl_Light_Button *write;
         Fl_Light_Button *clear;
         Fl_Light_Button *swap;
-        
+
         //1 -> read
         //2 -> write
         //3 -> clear

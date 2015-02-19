@@ -51,7 +51,15 @@ Bank::Bank()
 {
     clearbank();
     bankfiletitle = dirname;
+    rescanforbanks();
     loadbank(config.cfg.currentBankDir);
+
+    for(unsigned i=0; i<banks.size(); ++i) {
+        if(banks[i].dir == config.cfg.currentBankDir) {
+            bankpos = i;
+            break;
+        }
+    }
 }
 
 Bank::~Bank()

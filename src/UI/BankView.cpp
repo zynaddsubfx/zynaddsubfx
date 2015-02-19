@@ -21,17 +21,21 @@ void BankList::init(std::string path)
 
 void BankList::OSC_raw(const char *msg)
 {
-    if(strcmp(msg, "/bank-list"))
-        return;
+    if(!strcmp(msg, "/bank-list")) {
 
-    const int   pos  = rtosc_argument(msg, 0).i;
-    const char *path = rtosc_argument(msg, 1).s;
+        const int   pos  = rtosc_argument(msg, 0).i;
+        const char *path = rtosc_argument(msg, 1).s;
 
-    value(0);
-    if(pos == 0)
-        this->clear();
+        value(0);
+        if(pos == 0)
+            this->clear();
 
-    this->add(path);
+        this->add(path);
+        osc->write("/loadbank");
+    }
+    if(!strcmp(msg, "/loadbank")) {
+        value(rtosc_argument(msg, 0).i);
+    }
 }
 
 BankSlot::BankSlot(int x,int y, int w, int h, const char *label)
@@ -79,7 +83,7 @@ void BankSlot::update(const char *name__, const char *fname__)
     filename_ = fname__;
     snprintf(labelstr, 127, "%d. %s", nslot, name_.c_str());
     label(labelstr);
-   
+
     color(empty() ? 46 : 51);
 #ifdef NTK_GUI
     redraw();
@@ -124,13 +128,13 @@ highlight=0;
    void BankSlot::refresh() {
    if (bank->emptyslot(nslot))
    color(46);
-   else if (bank->isPADsynth_used(nslot)) 
+   else if (bank->isPADsynth_used(nslot))
    color(26);
-   else 
+   else
    color(51);
 
 
-   if (*nselected==nslot) 
+   if (*nselected==nslot)
    color(6);
 
 
@@ -150,6 +154,12 @@ static int modeCb(const char *label)
     return -1;
 }
 
+static void modeButtonCb(Fl_Widget *w, void *v)
+{
+    BankViewControls *bvc = (BankViewControls*)v;
+    bvc->mode(modeCb(w->label()));
+}
+
 BankViewControls::BankViewControls(int x, int y, int w, int h, const char *label)
     :Fl_Group(x,y,w,h,label)
 {
@@ -162,6 +172,10 @@ BankViewControls::BankViewControls(int x, int y, int w, int h, const char *label
     write = new Fl_Light_Button(x+m+1*W, y+m, W-2*m, h-2*m, "Write");
     clear = new Fl_Light_Button(x+m+2*W, y+m, W-2*m, h-2*m, "Clear");
     swap  = new Fl_Light_Button(x+m+3*W, y+m, W-2*m, h-2*m, "Swap");
+    read->callback(modeButtonCb, this);
+    write->callback(modeButtonCb, this);
+    clear->callback(modeButtonCb, this);
+    swap->callback(modeButtonCb, this);
     mode(1);
 }
 
@@ -270,7 +284,7 @@ void BankView::react(int event, int nslot)
         //bank->savetoslot(slot,master->part[*npart]);
         //pthread_mutex_unlock(&master->part[*npart]->load_mutex);
 
-        bvc->mode(1);//readbutton->value(1);writebutton->value(0);
+        bvc->mode(1);
     }
 
 
