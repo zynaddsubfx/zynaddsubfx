@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <dirent.h>
 
+#include "../UI/Connection.h"
 #include "../UI/Fl_Osc_Interface.h"
 #ifndef NO_UI
 #include "../UI/Fl_Osc_Widget.H"
@@ -549,6 +550,53 @@ public:
     //Apply function while parameters are write locked
     void doReadOnlyOp(std::function<void()> read_only_fn);
 
+
+    void saveBankSlot(int npart, int nslot, Master *master, Fl_Osc_Interface *osc)
+    {
+        int err = 0;
+        doReadOnlyOp([master,nslot,npart,&err](){
+                err = master->bank.savetoslot(nslot, master->part[npart]);});
+        if(err) {
+            char buffer[1024];
+            rtosc_message(buffer, 1024, "/alert", "s",
+                    "Failed To Save To Bank Slot, please check file permissions");
+            GUI::raiseUi(ui, buffer);
+        }
+    }
+
+    void renameBankSlot(int slot, string name, Master *master, Fl_Osc_Interface *osc)
+    {
+        int err = master->bank.setname(slot, name, -1);
+        if(err) {
+            char buffer[1024];
+            rtosc_message(buffer, 1024, "/alert", "s",
+                    "Failed To Rename Bank Slot, please check file permissions");
+            GUI::raiseUi(ui, buffer);
+        }
+    }
+
+    void swapBankSlot(int slota, int slotb, Master *master, Fl_Osc_Interface *osc)
+    {
+        int err = master->bank.swapslot(slota, slotb);
+        if(err) {
+            char buffer[1024];
+            rtosc_message(buffer, 1024, "/alert", "s",
+                    "Failed To Swap Bank Slots, please check file permissions");
+            GUI::raiseUi(ui, buffer);
+        }
+    }
+
+    void clearBankSlot(int slot, Master *master, Fl_Osc_Interface *osc)
+    {
+        int err = master->bank.clearslot(slot);
+        if(err) {
+            char buffer[1024];
+            rtosc_message(buffer, 1024, "/alert", "s",
+                    "Failed To Clear Bank Slot, please check file permissions");
+            GUI::raiseUi(ui, buffer);
+        }
+    }
+
     void saveMaster(const char *filename)
     {
         //Copy is needed as filename WILL get trashed during the rest of the run
@@ -999,6 +1047,14 @@ void MiddleWareImpl::handleMsg(const char *msg)
     } else if(strstr(msg, "load-part") && !strcmp(rtosc_argument_string(msg), "is")) {
         pending_load[rtosc_argument(msg,0).i]++;
         loadPart(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master, osc);
+    } else if(strstr(msg, "save-bank-part") && !strcmp(rtosc_argument_string(msg), "ii")) {
+        saveBankSlot(rtosc_argument(msg,0).i, rtosc_argument(msg,1).i, master, osc);
+    } else if(strstr(msg, "bank-rename") && !strcmp(rtosc_argument_string(msg), "is")) {
+        renameBankSlot(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master, osc);
+    } else if(strstr(msg, "swap-bank-slots") && !strcmp(rtosc_argument_string(msg), "ii")) {
+        swapBankSlot(rtosc_argument(msg,0).i, rtosc_argument(msg,1).i, master, osc);
+    } else if(strstr(msg, "clear-bank-slot") && !strcmp(rtosc_argument_string(msg), "i")) {
+        clearBankSlot(rtosc_argument(msg,0).i, master, osc);
     } else if(strstr(msg, "Padenabled") || strstr(msg, "Ppadenabled") || strstr(msg, "Psubenabled")) {
         kitEnable(msg);
         uToB->raw_write(msg);

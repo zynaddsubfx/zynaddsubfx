@@ -91,10 +91,10 @@ string Bank::getnamenumbered(unsigned int ninstrument)
 /*
  * Changes the name of an instrument (and the filename)
  */
-void Bank::setname(unsigned int ninstrument, const string &newname, int newslot)
+int Bank::setname(unsigned int ninstrument, const string &newname, int newslot)
 {
     if(emptyslot(ninstrument))
-        return;
+        return 0;
 
     string newfilename;
     char   tmpfilename[100 + 1];
@@ -112,10 +112,13 @@ void Bank::setname(unsigned int ninstrument, const string &newname, int newslot)
 
     newfilename = dirname + legalizeFilename(tmpfilename) + ".xiz";
 
-    rename(ins[ninstrument].filename.c_str(), newfilename.c_str());
+    int err = rename(ins[ninstrument].filename.c_str(), newfilename.c_str());
+    if(err)
+        return err;
 
     ins[ninstrument].filename = newfilename;
     ins[ninstrument].name     = newname;
+    return err;
 }
 
 /*
@@ -134,21 +137,31 @@ bool Bank::emptyslot(unsigned int ninstrument)
 /*
  * Removes the instrument from the bank
  */
-void Bank::clearslot(unsigned int ninstrument)
+int Bank::clearslot(unsigned int ninstrument)
 {
     if(emptyslot(ninstrument))
-        return;
+        return 0;
 
-    remove(ins[ninstrument].filename.c_str());
-    deletefrombank(ninstrument);
+    //no error when no file
+    FILE *f = fopen(ins[ninstrument].filename.c_str(), "r");
+    if(!f)
+        return 0;
+    fclose(f);
+
+    int err = remove(ins[ninstrument].filename.c_str());
+    if(!err)
+        deletefrombank(ninstrument);
+    return err;
 }
 
 /*
  * Save the instrument to a slot
  */
-void Bank::savetoslot(unsigned int ninstrument, Part *part)
+int Bank::savetoslot(unsigned int ninstrument, Part *part)
 {
-    clearslot(ninstrument);
+    int err = clearslot(ninstrument);
+    if(err)
+        return err;
 
     const int maxfilename = 200;
     char      tmpfilename[maxfilename + 20];
@@ -167,23 +180,35 @@ void Bank::savetoslot(unsigned int ninstrument, Part *part)
 
     string filename = dirname + '/' + legalizeFilename(tmpfilename) + ".xiz";
 
-    remove(filename.c_str());
-    part->saveXML(filename.c_str());
+    FILE *f = fopen(filename.c_str(), "r");
+    if(f) {
+        fclose(f);
+
+        err = remove(filename.c_str());
+        if(err)
+            return err;
+    }
+
+    err = part->saveXML(filename.c_str());
+    if(err)
+        return err;
     addtobank(ninstrument, legalizeFilename(tmpfilename) + ".xiz", (char *) part->Pname);
+    return 0;
 }
 
 /*
  * Loads the instrument from the bank
  */
-void Bank::loadfromslot(unsigned int ninstrument, Part *part)
+int Bank::loadfromslot(unsigned int ninstrument, Part *part)
 {
     if(emptyslot(ninstrument))
-        return;
+        return 0;
 
     part->AllNotesOff();
     part->defaultsinstrument();
 
     part->loadXMLinstrument(ins[ninstrument].filename.c_str());
+    return 0;
 }
 
 /*
@@ -286,17 +311,20 @@ int Bank::locked()
 /*
  * Swaps a slot with another
  */
-void Bank::swapslot(unsigned int n1, unsigned int n2)
+int Bank::swapslot(unsigned int n1, unsigned int n2)
 {
+    int err = 0;
     if((n1 == n2) || (locked()))
-        return;
+        return 0;
     if(emptyslot(n1) && (emptyslot(n2)))
-        return;
+        return 0;
     if(emptyslot(n1)) //change n1 to n2 in order to make
         swap(n1, n2);
 
     if(emptyslot(n2)) { //this is just a movement from slot1 to slot2
-        setname(n1, getname(n1), n2);
+        err |= setname(n1, getname(n1), n2);
+        if(err)
+            return err;
         ins[n2] = ins[n1];
         ins[n1] = ins_t();
     }
@@ -304,10 +332,13 @@ void Bank::swapslot(unsigned int n1, unsigned int n2)
         if(ins[n1].name == ins[n2].name) //change the name of the second instrument if the name are equal
             ins[n2].name += "2";
 
-        setname(n1, getname(n1), n2);
-        setname(n2, getname(n2), n1);
+        err |= setname(n1, getname(n1), n2);
+        err |= setname(n2, getname(n2), n1);
+        if(err)
+            return err;
         swap(ins[n2], ins[n1]);
     }
+    return err;
 }
 
 

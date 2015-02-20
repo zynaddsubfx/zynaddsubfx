@@ -191,13 +191,14 @@ void BankViewControls::mode(int m)
     assert(0 <= M && M <= 3);
     Fl_Button *buttons[4]{read, write, clear, swap};
 
-    for(int i=0; i<3; ++i)
+    for(int i=0; i<4; ++i)
         buttons[i]->value(i==M);
 }
 
 
 BankView::BankView(int x,int y, int w, int h, const char *label)
-    :Fl_Group(x,y,w,h,label)
+    :Fl_Group(x,y,w,h,label), bvc(NULL), slots{0}, osc(0),
+    loc(""), nselected(-1), npart(0)
 {}
 
 
@@ -256,16 +257,17 @@ void BankView::init(Fl_Osc_Interface *osc_, BankViewControls *bvc_, int *npart_)
  */
 void BankView::react(int event, int nslot)
 {
-    printf("reacting...\n");
     BankSlot &slot = *slots[nslot];
     const bool isempty = slot.empty();
     const int  mode    = bvc->mode();
-    printf("mode = %d\n", mode);
 
     //Rename slot
-    if (event==2 && !isempty && mode!=4)
-        if(const char *name=fl_input("Slot (instrument) name:", slot.name()))
+    if (event==2 && !isempty && mode!=4) {
+        if(const char *name=fl_input("Slot (instrument) name:", slot.name())) {
             osc->write("/bank-rename", "is", nslot, name);
+            osc->write("/refresh_bank", "i", nslot);
+        }
+    }
 
     //Reads from slot
     if ((event==1)&&(mode==1)&&(!slot.empty())){
@@ -279,7 +281,8 @@ void BankView::react(int event, int nslot)
         if(!isempty && !fl_choice("Overwrite the slot no. %d ?","No","Yes",NULL,nslot+1))
             return;
 
-        osc->write("/save-bank-part", "i", npart);
+        osc->write("/save-bank-part", "ii", *npart, nslot);
+        osc->write("/refresh_bank", "i", nslot);
         //pthread_mutex_lock(&master->part[*npart]->load_mutex);
         //bank->savetoslot(slot,master->part[*npart]);
         //pthread_mutex_unlock(&master->part[*npart]->load_mutex);
@@ -289,14 +292,19 @@ void BankView::react(int event, int nslot)
 
 
     //Clears the slot
-    if(event==1 && mode==3 && !isempty)
-        if (fl_choice("Clear the slot no. %d ?","No","Yes",NULL, nslot+1))
+    if(event==1 && mode==3 && !isempty) {
+        if (fl_choice("Clear the slot no. %d ?","No","Yes",NULL, nslot+1)) {
             osc->write("/clear-bank-slot", "i", nslot);
+            osc->write("/refresh_bank", "i", nslot);
+        }
+    }
 
     //Swap
     if(mode==4) {
         if(event==1 && nselected>=0){
             osc->write("/swap-bank-slots", "ii", nselected, nslot);
+            osc->write("/refresh_bank", "i", nslot);
+            osc->write("/refresh_bank", "i", nselected);
             //bank->swapslot(nselected,slot);
             nselected=-1;
         } else if(nselected<0 || event==2) {

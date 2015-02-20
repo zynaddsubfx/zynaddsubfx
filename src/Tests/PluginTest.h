@@ -27,9 +27,13 @@
 #include <string>
 #include "../Misc/MiddleWare.h"
 #include "../Misc/Master.h"
+#include "../Misc/PresetExtractor.h"
+#include "../Misc/PresetExtractor.cpp"
 #include "../Misc/Util.h"
 #include "../globals.h"
+#include "../UI/NSM.H"
 SYNTH_T *synth;
+NSM_Client *nsm = 0;
 
 using namespace std;
 

@@ -40,7 +40,7 @@ class Bank
         std::string getname(unsigned int ninstrument);
         std::string getnamenumbered(unsigned int ninstrument);
         //if newslot==-1 then this is ignored, else it will be put on that slot
-        void setname(unsigned int ninstrument,
+        int setname(unsigned int ninstrument,
                      const std::string &newname,
                      int newslot);
 
@@ -48,14 +48,14 @@ class Bank
         bool emptyslot(unsigned int ninstrument);
 
         /**Empties out the selected slot*/
-        void clearslot(unsigned int ninstrument);
+        int clearslot(unsigned int ninstrument);
         /**Saves the given Part to slot*/
-        void savetoslot(unsigned int ninstrument, class Part * part);
+        int savetoslot(unsigned int ninstrument, class Part * part);
         /**Loads the given slot into a Part*/
-        void loadfromslot(unsigned int ninstrument, class Part * part);
+        int loadfromslot(unsigned int ninstrument, class Part * part);
 
         /**Swaps Slots*/
-        void swapslot(unsigned int n1, unsigned int n2);
+        int swapslot(unsigned int n1, unsigned int n2);
 
         int loadbank(std::string bankdirname) NONREALTIME;
         int newbank(std::string newbankdirname) NONREALTIME;
