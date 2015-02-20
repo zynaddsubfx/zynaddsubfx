@@ -80,8 +80,7 @@ class SysEffSend {: {public Fl_Osc_Dial}
     code {} {}
   }
   Function {init(int neff1,int neff2)} {} {
-    code {
-    //TODO figure out if this extra class is even needed
+    code {//TODO figure out if this extra class is even needed
 minimum(0);
 maximum(127);
 step(1);
@@ -191,9 +190,7 @@ panellistitem->show();
 end();} {}
   }
   Function {refresh()} {} {
-    code {
-
-if ((int)bankui->cbwig->value()!=(npart+1))
+    code {if ((int)bankui->cbwig->value()!=(npart+1))
    panellistitemgroup->color(fl_rgb_color(160,160,160));
 else 
    panellistitemgroup->color(fl_rgb_color(50,190,240));
@@ -304,8 +301,7 @@ if (result) {
 
 osc->write("/save_xsz", "s", filename);
 
-/*if (result<0) fl_alert("Error: Could not save the file.");*/
-}
+/*if (result<0) fl_alert("Error: Could not save the file.");*/}
               xywh {30 30 100 20}
             }
             MenuItem {} {
@@ -381,8 +377,7 @@ if (result) {
 };
 
 osc->write("/save_xiz", "is", npart, filename);
-/*if (result<0) fl_alert("Error: Could not save the file.");*/
-}
+/*if (result<0) fl_alert("Error: Could not save the file.");*/}
               xywh {25 25 100 20} divider
             }
             MenuItem {} {
@@ -476,8 +471,8 @@ if (fl_choice("The file *might* exist. \\nOverwrite it?","No","Yes",NULL)) {
           xywh {5 150 390 165} box UP_FRAME
         } {
           Fl_Group {} {
-            label {System Effects}
-            xywh {5 167 390 145} labelsize 15 align 9 hide
+            label {System Effects} open
+            xywh {5 167 390 145} labelsize 15 align 9
           } {
             Fl_Counter syseffnocounter {
               label {Sys.Effect No.}
@@ -556,19 +551,19 @@ syseffectui->refresh();}
             Fl_Button {} {
               label C
               callback {/*presetsui->copy(master->sysefx[nsyseff]);*/}
-              xywh {185 192 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
+              xywh {185 192 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7 hide
             }
             Fl_Button {} {
               label P
               callback {/*pthread_mutex_lock(&master->mutex);
 presetsui->paste(master->sysefx[nsyseff],syseffectui);
-pthread_mutex_unlock(&master->mutex);*/}
-              xywh {215 192 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
+pthread_mutex_unlock(&master->mutex);*/} selected
+              xywh {215 192 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55 hide
             }
           }
           Fl_Group {} {
             label {Insertion Effects} open
-            xywh {5 170 390 145} labelsize 15 align 9
+            xywh {5 170 390 145} labelsize 15 align 9 hide
           } {
             Fl_Counter inseffnocounter {
               label {Ins.Effect No.}
@@ -646,7 +641,7 @@ inseffectui->show();}
                 xywh {105 105 100 20} labelfont 1 labelsize 10
               }
             }
-            Fl_Group inseffectuigroup {open selected
+            Fl_Group inseffectuigroup {open
               xywh {10 210 380 95} box FLAT_BOX color 48
               class Fl_Osc_Group
             } {
@@ -682,14 +677,14 @@ if ((int) o->value()==1){
             Fl_Button {} {
               label C
               callback {/*presetsui->copy(master->insefx[ninseff]);*/}
-              xywh {185 190 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
+              xywh {185 190 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55 hide
             }
             Fl_Button {} {
               label P
               callback {/*pthread_mutex_lock(&master->mutex);
 presetsui->paste(master->insefx[ninseff],inseffectui);
 pthread_mutex_unlock(&master->mutex);*/}
-              xywh {215 190 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
+              xywh {215 190 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55 hide
             }
           }
         }
@@ -911,10 +906,9 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))
 {
 	config.save();
 	*exitprogram=1;
-};
-} open
-      xywh {661 384 600 335} type Double visible
-      class Fl_Osc_Window
+};} open
+      xywh {661 384 600 335} type Double
+      class Fl_Osc_Window visible
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
@@ -1521,14 +1515,13 @@ delete selectuiwindow;} {}
 };} {}
   }
   Function {simplerefresh()} {} {
-    code { 
-/*
+    code {/*
      if (master->part[npart]->Pname[0]!=0) partname->label((char *)master->part[npart]->Pname);
      else partname->label("Click here to load a instrument");
      */
 
-simplelistitemgroup->redraw();
-  }{}}
+simplelistitemgroup->redraw();} {}
+  }
   Function {do_new_master_unconditional()} {} {
     code {delete microtonalui;
 
@@ -1544,8 +1537,7 @@ simplelistitemgroup->redraw();
   }
   Function {do_load_master_unconditional(const char *filename, const char *display_name)} {return_type int
   } {
-    code {
-    osc->write("/load_xmz", "s", filename);
+    code {osc->write("/load_xmz", "s", filename);
     refresh_master_ui();
     updatepanel();
 
@@ -1656,7 +1648,6 @@ bankui->hide();} {}
   Function {close()} {open return_type void
   } {
     code {config.save();
-*exitprogram=1;} {selected
-    }
+*exitprogram=1;} {}
   }
 } 
