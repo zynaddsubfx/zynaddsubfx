@@ -266,7 +266,7 @@ delete (formantparswindow);} {}
         Fl_Counter {} {
           label {Formant }
           callback {nformant=(int) o->value();
-          formantparsgroup->rebase(loc()+"Pvowels"+to_s(nvowel)+"/Pformants"+to_s(nformant)+"/");
+          formantparsgroup->reext("Pvowels"+to_s(nvowel)+"/Pformants"+to_s(nformant)+"/");
 update_formant_window();
 formantfiltergraph->redraw();}
           xywh {545 80 40 15} type Simple labelfont 1 labelsize 10 align 4 minimum 0 maximum 127 step 1 textsize 10
@@ -276,7 +276,7 @@ formantfiltergraph->redraw();}
         Fl_Counter {} {
           label {Vowel no.}
           callback {nvowel=(int) o->value();
-          formantparsgroup->rebase(loc()+"Pvowels"+to_s(nvowel)+"/Pformants"+to_s(nformant)+"/");
+          formantparsgroup->reext("Pvowels"+to_s(nvowel)+"/Pformants"+to_s(nformant)+"/");
 update_formant_window();
 formantfiltergraph->redraw();}
           xywh {545 55 40 20} type Simple labelfont 1 labelsize 10 align 4 minimum 0 maximum 127 step 1 textfont 1 textsize 11
@@ -470,10 +470,7 @@ filterparamswindow->redraw();} {}
   Function {rebase(std::string new_base)} {open
   } {
     code {
-    printf("\\n\\n\\n\\nRABBIT HORSE\\n\\n\\n\\n");
-    printf("\\nNEW BASE: '%s'\\n", (new_base+ext).c_str());
     Fl_Osc_Group::rebase(new_base);
-    formantparswindow->rebase(new_base+ext);
   } {}
   }
   Function {init(std::string alt_root_, Fl_Osc_Interface *osc_, std::string base_, std::string ext_)} {} {
