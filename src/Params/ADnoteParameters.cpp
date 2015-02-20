@@ -56,6 +56,7 @@ static Ports voicePorts = {
 
     rToggle(Enabled, "Voice Enable"),
     rParamZyn(Unison_size, "Number of subvoices"),
+    rParamZyn(Unison_phase_randomness, "Phase Randomness"),
     rParamZyn(Unison_frequency_spread, "Subvoice detune"),
     rParamZyn(Unison_stereo_spread, "Subvoice L/R Separation"),
     rParamZyn(Unison_vibratto, "Subvoice vibratto"),
