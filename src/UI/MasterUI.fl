@@ -17,6 +17,9 @@ decl {\#include <stdio.h>} {public local
 decl {\#include <string.h>} {public local
 } 
 
+decl {\#include "zynaddsubfx.xbm"} {private local
+} 
+
 decl {\#include "WidgetPDial.h"} {public local
 } 
 
@@ -1480,6 +1483,11 @@ bankui=new BankUI(&npart, osc);
 configui=new ConfigUI();
 
 make_window();
+fl_open_display();
+
+Pixmap p = XCreateBitmapFromData(fl_display, DefaultRootWindow(fl_display),
+                                 (char*)zynaddsubfx_bits, zynaddsubfx_width, zynaddsubfx_height);
+masterwindow->icon((char *)p);
 presetsui=new PresetsUI();
 setfilelabel(NULL);
 swapefftype=0;
