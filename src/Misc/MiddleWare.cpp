@@ -661,8 +661,10 @@ public:
     void loadMaster(const char *filename)
     {
         Master *m = new Master();
-        m->loadXML(filename);
-        m->applyparameters();
+        if(filename) {
+            m->loadXML(filename);
+            m->applyparameters();
+        }
 
         //Update resource locator table
         obj_store.clear();
@@ -1049,6 +1051,8 @@ void MiddleWareImpl::handleMsg(const char *msg)
         savePart(rtosc_argument(msg,0).i,rtosc_argument(msg,1).s);
     } else if(strstr(msg, "/load_xmz") && !strcmp(rtosc_argument_string(msg), "s")) {
         loadMaster(rtosc_argument(msg,0).s);
+    } else if(strstr(msg, "/reset_master") && !strcmp(rtosc_argument_string(msg), "")) {
+        loadMaster(NULL);
     } else if(!strcmp(msg, "/load_xiz") && !strcmp(rtosc_argument_string(msg), "is")) {
         pending_load[rtosc_argument(msg,0).i]++;
         loadPart(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master, osc);

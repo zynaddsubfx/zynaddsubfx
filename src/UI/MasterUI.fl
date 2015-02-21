@@ -1532,6 +1532,7 @@ simplelistitemgroup->redraw();} {}
   }
   Function {do_new_master_unconditional()} {} {
     code {delete microtonalui;
+microtonalui=new MicrotonalUI(osc, "/microtonal/");
 
     osc->write("/reset_master");
        npartcounter->value(1);
