@@ -176,7 +176,7 @@ maxkcounter->do_callback();}
         }
         Fl_Choice sendtoeffect {
           xywh {615 0 45 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
-          code0 {o->add("OFF");char nrstr[10]; for(int i=0;i<NUM_PART_EFX;i++){sprintf(nrstr,"FX%d",i+1);o->add(nrstr);};}
+          code0 {char nrstr[10]; for(int i=0;i<NUM_PART_EFX;i++){sprintf(nrstr,"FX%d",i+1);o->add(nrstr);};o->add("OFF");}
           code1 {o->init("Psendtoparteffect");//TODO check semantics}
           class Fl_Osc_Choice
         } {}

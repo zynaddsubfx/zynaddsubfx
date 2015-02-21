@@ -67,7 +67,7 @@ static Ports partPorts = {
     rParamZyn(Pveloffs,  "Velocity offset"),
     rToggle(Pnoteon,  "If the channel accepts note on events"),
     //TODO FIXME Change to 0=OFF 1=MULTI 2=SINGLE
-    rToggle(Pkitmode, "Kit mode enable"),
+    rParamI(Pkitmode, "Kit mode enable"),
     rToggle(Pdrummode, "Drum mode enable"),
     rToggle(Ppolymode,  "Polyphoney mode"),
     rToggle(Plegatomode, "Legato enable"),
