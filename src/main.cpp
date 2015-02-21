@@ -401,6 +401,7 @@ int main(int argc, char *argv[])
         }
         else {
             master->part[loadtopart]->applyparameters();
+            master->part[loadtopart]->initialize_rt();
             cout << "Instrument file loaded." << endl;
         }
     }
