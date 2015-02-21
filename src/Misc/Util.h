@@ -198,7 +198,7 @@ static inline void arrayNullify(T &t) {delete [] t; t = NULL; }
 #define RECURP(type, cast, name, var, desc) \
 {#name"/", ":recursion\0:documentation\0=" desc"\0", &cast::ports, [](const char *m, rtosc::RtData &d){\
     d.obj = (((type*)d.obj)->var); \
-    cast::ports.dispatch(message_snip(m), d);}}
+    if(d.obj) cast::ports.dispatch(message_snip(m), d);}}
 
 ///Recurs - perform a ranged recursion (on pointer array member)
 #define RECURSP(type, cast, name, var, length, desc) \

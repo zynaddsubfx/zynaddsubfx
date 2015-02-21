@@ -692,6 +692,8 @@ public:
 
     bool handlePAD(string path, const char *msg, void *v)
     {
+        if(!v)
+            return true;
         char buffer[1024];
         memset(buffer, 0, sizeof(buffer));
         DummyDataObj d(buffer, 1024, v, cb, ui, osc);
