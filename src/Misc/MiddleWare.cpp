@@ -667,6 +667,8 @@ public:
         //Update resource locator table
         obj_store.clear();
         obj_store.extractMaster(m);
+        for(int i=0; i<NUM_MIDI_PARTS; ++i)
+            kits.extractPart(m->part[i], i);
 
         master = m;
 
@@ -999,6 +1001,10 @@ void MiddleWareImpl::handleMsg(const char *msg)
     assert(msg && *msg && rindex(msg, '/')[1]);
     assert(strcmp(msg, "/part0/Psysefxvol"));
     assert(strcmp(msg, "/Penabled"));
+    assert(strcmp(msg, "part0/part0/Ppanning"));
+    assert(strcmp(msg, "sysefx0sysefx0/preset"));
+    assert(strcmp(msg, "/sysefx0preset"));
+    assert(strcmp(msg, "Psysefxvol0/part0"));
     //fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 6 + 30, 0 + 40);
     //fprintf(stdout, "middleware: '%s':%s\n", msg, rtosc_argument_string(msg));
     //fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
