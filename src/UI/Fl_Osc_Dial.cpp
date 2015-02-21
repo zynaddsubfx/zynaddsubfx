@@ -96,7 +96,7 @@ void Fl_Osc_Dial::mark_dead(void)
         
 void Fl_Osc_Dial::rebase(std::string new_base)
 {
-    if(dead)
+    if(dead || loc == "/")
         return;
     if(!alt_style) {
         Fl_Osc_Widget::rebase(new_base);

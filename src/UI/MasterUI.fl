@@ -1145,8 +1145,8 @@ o->redraw();}
 /*simplesysefftype->value(master->sysefx[nsyseff]->geteffect());*/
 simplesyseffectui->refresh();
 simplesysefftype->oscMove("sysefx"+to_s(nsyseff)+"/efftype");
-simplesyseffectuigroup->rebase("sysefx"+to_s(nsyseff));
-simplesyseffsend->oscMove("/","Psysefxvol"+to_s(nsyseff)+"/part"+to_s(npart));
+simplesyseffectuigroup->reext("sysefx"+to_s(nsyseff)+"/");
+simplesyseffsend->oscMove("Psysefxvol"+to_s(nsyseff)+"/part"+to_s(npart));
 simplerefresh();}
               xywh {350 75 80 20} type Simple labelfont 1 labelsize 10 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
               code0 {o->bounds(1,NUM_SYS_EFX);}
@@ -1388,7 +1388,7 @@ simpleglobalfinedetuneslider->do_callback();}
 npartcounter->value(o->value());
 npart=(int) o->value()-1;
 
-simplelistitemgroup->rebase("part"+to_s(npart)+"/");
+simplelistitemgroup->reext("part"+to_s(npart)+"/");
 partenabled->oscMove("part"+to_s(npart)+"/Penabled");
 simplerefresh();}
         tooltip {The part number} xywh {170 40 70 20} type Simple labelfont 1 align 4 minimum 0 maximum 127 step 1 value 1 textfont 1
