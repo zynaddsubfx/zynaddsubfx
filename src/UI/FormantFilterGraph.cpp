@@ -33,7 +33,7 @@ void FormantFilterGraph::init(int *nvowel_,int *nformant_)
     oscRegister("Pq");
 }
 
-void FormantFilterGraph::OSC_value(char x, const char *loc)
+void FormantFilterGraph::OSC_value(int x, const char *loc)
 {
     if(strstr(loc, "Pnumformants"))
         Pnumformants = x;
@@ -64,14 +64,14 @@ void FormantFilterGraph::draw_freq_line(float freq,int type)
         case 0:fl_line_style(FL_SOLID);break;
         case 1:fl_line_style(FL_DOT);break;
         case 2:fl_line_style(FL_DASH);break;
-    }; 
+    };
 
 
     if ((freqx>0.0)&&(freqx<1.0))
         fl_line(x()+(int) (freqx*w()),y(),
                 x()+(int) (freqx*w()),y()+h());
 }
-    
+
 void FormantFilterGraph::update(void)
 {
     oscWrite("Pvowels");
@@ -109,7 +109,7 @@ void FormantFilterGraph::draw()
         if(i==1){
             draw_freq_line(i*100.0,0);
             draw_freq_line(i*1000.0,0);
-        }else 
+        }else
             if (i==5){
                 draw_freq_line(i*100.0,2);
                 draw_freq_line(i*1000.0,2);
@@ -241,8 +241,8 @@ void FormantFilterGraph::formantfilterH(int nvowel, int nfreqs, float *freqs)
 
         const float filter_amp = getformantamp(Pvowels[nvowel].formants[nformant].amp);
 
-        printf("NFORMANT %d\n", nformant);
-        printf("CHARACTERISTICS: FREQ %f Q %f AMP %f\n", filter_freq, filter_q, filter_amp);
+        //printf("NFORMANT %d\n", nformant);
+        //printf("CHARACTERISTICS: FREQ %f Q %f AMP %f\n", filter_freq, filter_q, filter_amp);
 
 
         if(filter_freq <= (synth->samplerate / 2 - 100.0f)) {
