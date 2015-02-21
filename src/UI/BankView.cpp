@@ -198,7 +198,7 @@ void BankViewControls::mode(int m)
 
 BankView::BankView(int x,int y, int w, int h, const char *label)
     :Fl_Group(x,y,w,h,label), bvc(NULL), slots{0}, osc(0),
-    loc(""), nselected(-1), npart(0)
+    loc(""), nselected(-1), npart(0), cbwig_(0)
 {}
 
 
@@ -274,6 +274,8 @@ void BankView::react(int event, int nslot)
         printf("Loading a part #%d with file '%s'\n", nslot, slot.filename());
         osc->write("/load-part", "is", *npart, slot.filename());
         osc->writeValue("/part"+to_s(*npart)+"/name", slot.name());
+        if(cbwig_)
+            cbwig_->do_callback();
     }
 
     //save(write) to slot
@@ -324,6 +326,11 @@ void BankView::OSC_raw(const char *msg)
 
     if(0 <= nslot && nslot < 160)
         slots[nslot]->update(name, fname);
+}
+        
+void BankView::cbwig(Fl_Widget *w)
+{
+    cbwig_ = w;
 }
 
 void BankView::refresh(void)

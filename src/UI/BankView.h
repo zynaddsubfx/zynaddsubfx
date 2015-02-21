@@ -78,6 +78,7 @@ class BankView: public Fl_Group, public Fl_Osc_Widget
         void react(int event, int slot);
 
         virtual void OSC_raw(const char *msg) override;
+        void cbwig(Fl_Widget *w);
 
         void refresh(void);
     private:
@@ -90,6 +91,8 @@ class BankView: public Fl_Group, public Fl_Osc_Widget
         //XXX TODO locked banks...
         int nselected;
         int *npart;
+
+        Fl_Widget *cbwig_;
 };
 
 #endif

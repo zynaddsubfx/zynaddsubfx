@@ -118,6 +118,7 @@ simplesetmode(config.cfg.UserInterfaceMode==2);} {}
   Function {init(Fl_Valuator *cbwig_)} {open
   } {
     code {cbwig=cbwig_;
+    bankview->cbwig(cbwig);
 rescan_for_banks();} {}
   }
   Function {process()} {open return_type void
