@@ -4,7 +4,7 @@
 #include "Fl_Osc_Widget.H"
 #include "Fl_Osc_Choice.H"
 #include <FL/Fl_Group.H>
-#include <FL/Fl_Button.H>
+#include <FL/Fl_Check_Button.H>
 #include <string>
 
 #include "common.H"
@@ -52,10 +52,10 @@ class BankViewControls: public Fl_Group
         void mode(int);
 
     private:
-        Fl_Light_Button *read;
-        Fl_Light_Button *write;
-        Fl_Light_Button *clear;
-        Fl_Light_Button *swap;
+        Fl_Check_Button *read;
+        Fl_Check_Button *write;
+        Fl_Check_Button *clear;
+        Fl_Check_Button *swap;
 
         //1 -> read
         //2 -> write

@@ -1,7 +1,7 @@
 #include "BankView.h"
 #include "../Misc/Util.h"
 #include <FL/Fl.H>
-#include <FL/Fl_Light_Button.H>
+#include <FL/Fl_Check_Button.H>
 #include <FL/fl_ask.H>
 #include <rtosc/rtosc.h>
 #include <cstdio>
@@ -168,10 +168,14 @@ BankViewControls::BankViewControls(int x, int y, int w, int h, const char *label
     //Width per elm
     const float W = w/4;
 
-    read  = new Fl_Light_Button(x+m+0*W, y+m, W-2*m, h-2*m, "Read");
-    write = new Fl_Light_Button(x+m+1*W, y+m, W-2*m, h-2*m, "Write");
-    clear = new Fl_Light_Button(x+m+2*W, y+m, W-2*m, h-2*m, "Clear");
-    swap  = new Fl_Light_Button(x+m+3*W, y+m, W-2*m, h-2*m, "Swap");
+    read  = new Fl_Check_Button(x+m+0*W, y+m, W-2*m, h-2*m, "Read");
+    write = new Fl_Check_Button(x+m+1*W, y+m, W-2*m, h-2*m, "Write");
+    clear = new Fl_Check_Button(x+m+2*W, y+m, W-2*m, h-2*m, "Clear");
+    swap  = new Fl_Check_Button(x+m+3*W, y+m, W-2*m, h-2*m, "Swap");
+    read->box(FL_BORDER_BOX);
+    write->box(FL_BORDER_BOX);
+    clear->box(FL_BORDER_BOX);
+    swap->box(FL_BORDER_BOX);
     read->callback(modeButtonCb, this);
     write->callback(modeButtonCb, this);
     clear->callback(modeButtonCb, this);
