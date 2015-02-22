@@ -26,6 +26,9 @@ class Fl_Osc_Dial:public WidgetPDial, public Fl_Osc_Widget
         void update(void);
         void callback(Fl_Callback *cb, void *p = NULL);
 
+        //Midi learn handler
+        int handle(int);
+
         void mark_dead(void);
         virtual void rebase(std::string new_base) override;
 
