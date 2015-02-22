@@ -4,6 +4,7 @@
 
 #include <rtosc/rtosc.h>
 #include <rtosc/ports.h>
+#include <rtosc/undo-history.h>
 
 #include <FL/Fl.H>
 #include "Fl_Osc_Tree.H"
@@ -18,12 +19,27 @@
 
 using namespace GUI;
 class MasterUI *ui;
+extern rtosc::UndoHistory undo;
 
 Fl_Osc_Interface *osc;//TODO: the scope of this should be narrowed
 
 #ifdef NTK_GUI
 static Fl_Tiled_Image *module_backdrop;
 #endif
+
+int undo_redo_handler(int)
+{
+    const bool undo_ = Fl::event_ctrl() && Fl::event_key() == 'z';
+    const bool redo = Fl::event_ctrl() && Fl::event_key() == 'r';
+    if(undo_) {
+        printf("Trying to undo an action\n");
+        undo.seekHistory(-1);
+    } else if(redo) {
+        printf("Trying to redo an action\n");
+        undo.seekHistory(+1);
+    }
+    return undo_ || redo;
+}
 
 void
 set_module_parameters ( Fl_Widget *o )
@@ -80,6 +96,7 @@ ui_handle_t GUI::createUi(Fl_Osc_Interface *osc, void *exit)
     tree->osc           = osc;
     midi_win->show();
 
+    Fl::add_handler(undo_redo_handler);
     return (void*) (ui = new MasterUI((int*)exit, osc));
 }
 void GUI::destroyUi(ui_handle_t ui)
@@ -136,6 +153,7 @@ static rtosc::Ports ports = {
         ui->close();
     } END
 };
+
 
 void GUI::raiseUi(ui_handle_t gui, const char *message)
 {

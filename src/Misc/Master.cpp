@@ -204,6 +204,10 @@ static Ports localports = {
             m.memory->addMemory(mem, i);
             m.pendingMemory = false;
         }},
+    {"undo_pause",0,0,[](const char *, rtosc::RtData &d)
+        {d.reply("/undo_pause", "");}},
+    {"undo_resume",0,0,[](const char *, rtosc::RtData &d)
+        {d.reply("/undo_resume", "");}},
 };
 
 

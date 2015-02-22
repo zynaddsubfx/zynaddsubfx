@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <fstream>
 
+#include <rtosc/undo-history.h>
 #include <rtosc/thread-link.h>
 #include <rtosc/ports.h>
 #include <lo/lo.h>
@@ -39,6 +40,7 @@
 using std::string;
 rtosc::ThreadLink *bToU = new rtosc::ThreadLink(4096*2,1024);
 rtosc::ThreadLink *uToB = new rtosc::ThreadLink(4096*2,1024);
+rtosc::UndoHistory undo;
 
 /******************************************************************************
  *                        LIBLO And Reflection Code                           *
@@ -681,6 +683,8 @@ public:
 
     //If currently broadcasting messages
     bool broadcast = false;
+    //If accepting undo events as user driven
+    bool recording_undo = true;
     void bToUhandle(const char *rtmsg);
 
     void tick(void)
@@ -778,6 +782,17 @@ MiddleWareImpl::MiddleWareImpl(void)
         pending_load[i] = 0;
         actual_load[i] = 0;
     }
+
+    //Setup Undo
+    undo.setCallback([this](const char *msg) {
+            printf("undo callback <%s>\n", msg);
+            char buf[1024];
+            rtosc_message(buf, 1024, "/undo_pause","");
+            handleMsg(buf);
+            handleMsg(msg);
+            rtosc_message(buf, 1024, "/undo_resume","");
+            handleMsg(buf);
+            });
 }
 MiddleWareImpl::~MiddleWareImpl(void)
 {
@@ -879,6 +894,12 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
     } else if(!strcmp(rtmsg, "/setprogram")
             && !strcmp(rtosc_argument_string(rtmsg),"cc")) {
         loadPart(rtosc_argument(rtmsg,0).i, master->bank.ins[rtosc_argument(rtmsg,1).i].filename.c_str(), master, osc);
+    } else if(!strcmp("/undo_pause", rtmsg)) {
+        recording_undo = false;
+    } else if(!strcmp("/undo_resume", rtmsg)) {
+        recording_undo = true;
+    } else if(!strcmp("undo_change", rtmsg) && recording_undo) {
+        undo.recordEvent(rtmsg);
     } else if(!strcmp(rtmsg, "/broadcast")) {
         broadcast = true;
     } else if(broadcast) {
