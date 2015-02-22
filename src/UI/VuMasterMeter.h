@@ -29,10 +29,10 @@ class VuMasterMeter: public VuMeter
                     break;
                 case FL_PUSH:
                     osc->requestValue("/reset-vu");
-                    break;
+                    return 1;
             }
 
-            return 1;
+            return 0;
         }
 
         static void tick(void *v)
