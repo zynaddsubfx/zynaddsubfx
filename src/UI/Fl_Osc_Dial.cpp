@@ -104,7 +104,6 @@ void Fl_Osc_Dial::mark_dead(void)
     dead = true;
 }
 
-
 void Fl_Osc_Dial::rebase(std::string new_base)
 {
     if(dead || loc == "/")

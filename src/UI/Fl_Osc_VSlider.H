@@ -18,6 +18,9 @@ class Fl_Osc_VSlider:public Fl_Value_Slider, public Fl_Osc_Widget
         //Refetch parameter information
         void update(void);
         void callback(Fl_Callback *cb, void *p = NULL);
+        
+        //MIDI Learn
+        int handle(int);
 
         void cb(void);
         static void _cb(Fl_Widget *w, void *);

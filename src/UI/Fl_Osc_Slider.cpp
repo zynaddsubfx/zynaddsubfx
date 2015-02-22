@@ -1,3 +1,4 @@
+#include <FL/Fl.H>
 #include "Fl_Osc_Slider.H"
 #include "Fl_Osc_Interface.h"
 #include "Fl_Osc_Pane.H"
@@ -60,7 +61,7 @@ void Fl_Osc_Slider::cb(void)
 	oscWrite(ext, "i", (int)(val-min_));
     }
     //OSC_value(val);
-    
+
     if(cb_data.first)
         cb_data.first(this, cb_data.second);
 }
@@ -69,6 +70,16 @@ void Fl_Osc_Slider::callback(Fl_Callback *cb, void *p)
 {
     cb_data.first = cb;
     cb_data.second = p;
+}
+
+int Fl_Osc_Slider::handle(int ev)
+{
+    if(ev == FL_PUSH && Fl::event_state(FL_BUTTON2)) {
+        printf("Trying to learn...\n");
+        osc->write("/learn", "s", (loc+ext).c_str());
+        return 1;
+    }
+    return Fl_Slider::handle(ev);
 }
 
 void Fl_Osc_Slider::update(void)
