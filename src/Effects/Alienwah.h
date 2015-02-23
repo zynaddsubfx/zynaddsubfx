@@ -23,9 +23,9 @@
 #ifndef ALIENWAH_H
 #define ALIENWAH_H
 
-#include <complex>
 #include "Effect.h"
 #include "EffectLFO.h"
+#include <complex>
 
 using namespace std;
 
