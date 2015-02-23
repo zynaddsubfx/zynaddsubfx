@@ -24,8 +24,7 @@
 #define FFT_WRAPPER_H
 #include <fftw3.h>
 #include <complex>
-typedef double                  fftw_real;
-typedef std::complex<fftw_real> fft_t;
+#include "../globals.h"
 
 /**A wrapper for the FFTW library (Fast Fourier Transforms)*/
 class FFTwrapper
