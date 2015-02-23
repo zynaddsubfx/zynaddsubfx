@@ -3,6 +3,7 @@ message(STATUS "Checking Include Path" $ENV{CMAKE_INCLUDE_PATH} ${CMAKE_INCLUDE_
 message(STATUS "Checking Library Path" $ENV{CMAKE_LIBRARY_PATH} ${CMAKE_LIBRARY_PATH})
 
 #Dependency check
+include(CheckFunctionExists)
 find_package(PkgConfig REQUIRED)
 find_package(zlib REQUIRED)
 pkg_check_modules(FFTW REQUIRED fftw3)
