@@ -727,7 +727,7 @@ mastermenu->redraw();}
             class Fl_Osc_Button
           }
           Fl_Button pausebutton {
-            label {@||}
+            label {| |}
             callback {o->deactivate();
 o->oscWrite("HDDRecorder/pause");
 recordbutton->activate();
