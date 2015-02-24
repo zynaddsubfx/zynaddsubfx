@@ -64,7 +64,7 @@ class  Controller;
 class  Master;
 class  Part;
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__FreeBSD__)
 #include <complex>
 #else
 namespace std {
