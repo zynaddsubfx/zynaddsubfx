@@ -26,7 +26,7 @@ include(CTestConfig.cmake)
 #Currently the only directory that uses cmake
 add_subdirectory(src)
 
-install(FILES AUTHORS.txt COPYING FAQ.txt HISTORY.txt README.txt
+install(FILES AUTHORS.txt COPYING FAQ.txt HISTORY.txt README.adoc
 	DESTINATION share/doc/zynaddsubfx
 	)
 install(FILES zynaddsubfx-jack.desktop zynaddsubfx-alsa.desktop
