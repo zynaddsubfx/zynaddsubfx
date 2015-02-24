@@ -64,9 +64,14 @@ class  Controller;
 class  Master;
 class  Part;
 
+#ifdef __APPLE__
+#include <complex>
+#else
 namespace std {
     template<class T> struct complex;
 };
+#endif
+
 typedef double fftw_real;
 typedef std::complex<fftw_real> fft_t;
 

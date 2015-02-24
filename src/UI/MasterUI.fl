@@ -1485,11 +1485,11 @@ configui=new ConfigUI();
 make_window();
 fl_open_display();
 
-#ifndef __APPLE__
+\#ifndef __APPLE__
 Pixmap p = XCreateBitmapFromData(fl_display, DefaultRootWindow(fl_display),
                                  (char*)zynaddsubfx_bits, zynaddsubfx_width, zynaddsubfx_height);
 masterwindow->icon((char *)p);
-#endif
+\#endif
 presetsui=new PresetsUI();
 setfilelabel(NULL);
 swapefftype=0;
