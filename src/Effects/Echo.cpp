@@ -80,6 +80,7 @@ void Echo::initdelays(void)
 
     ndelta.l = max(1, (int) (dl * samplerate));
     ndelta.r = max(1, (int) (dr * samplerate));
+    delta = ndelta;
 }
 
 //Effect output
