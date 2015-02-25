@@ -65,7 +65,9 @@ void Fl_Osc_VSlider::callback(Fl_Callback *cb, void *p)
 
 int Fl_Osc_VSlider::handle(int ev)
 {
-    if(ev == FL_PUSH && Fl::event_state(FL_BUTTON2)) {
+    bool middle_mouse = (ev == FL_PUSH && Fl::event_state(FL_BUTTON2));
+    bool ctl_click    = (ev == FL_PUSH && Fl::event_state(FL_BUTTON1) && Fl::event_ctrl());
+    if(middle_mouse || ctl_click) {
         printf("Trying to learn...\n");
         osc->write("/learn", "s", (loc+ext).c_str());
         return 1;
