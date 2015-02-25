@@ -150,7 +150,7 @@ typedef void(*cb_t)(void*,const char*);
  *****************************************************************************/
 void deallocate(const char *str, void *v)
 {
-    printf("deallocating a '%s' at '%p'\n", str, v);
+    //printf("deallocating a '%s' at '%p'\n", str, v);
     if(!strcmp(str, "Part"))
         delete (Part*)v;
     else if(!strcmp(str, "Master"))
@@ -168,7 +168,7 @@ void deallocate(const char *str, void *v)
 
 void preparePadSynth(string path, PADnoteParameters *p)
 {
-    printf("preparing padsynth parameters\n");
+    //printf("preparing padsynth parameters\n");
     assert(!path.empty());
     path += "sample";
 
@@ -284,8 +284,8 @@ class DummyDataObj:public rtosc::RtData
             if(!strcmp(path, "/forward")) { //forward the information to the backend
                 args++;
                 path = va_arg(va, const char *);
-                fprintf(stderr, "forwarding information to the backend on '%s'<%s>\n",
-                        path, args);
+                //fprintf(stderr, "forwarding information to the backend on '%s'<%s>\n",
+                //        path, args);
                 rtosc_vmessage(buffer,4*4096,path,args,va);
                 uToB->raw_write(buffer);
             } else {
@@ -603,20 +603,22 @@ public:
     {
         //Copy is needed as filename WILL get trashed during the rest of the run
         std::string fname = filename;
-        printf("saving master('%s')\n", filename);
+        //printf("saving master('%s')\n", filename);
         doReadOnlyOp([this,fname](){
                 int res = master->saveXML(fname.c_str());
-                printf("results: '%s' '%d'\n",fname.c_str(), res);});
+                (void)res;
+                /*printf("results: '%s' '%d'\n",fname.c_str(), res);*/});
     }
 
     void savePart(int npart, const char *filename)
     {
         //Copy is needed as filename WILL get trashed during the rest of the run
         std::string fname = filename;
-        printf("saving part(%d,'%s')\n", npart, filename);
+        //printf("saving part(%d,'%s')\n", npart, filename);
         doReadOnlyOp([this,fname,npart](){
                 int res = master->part[npart]->saveXML(fname.c_str());
-                printf("results: '%s' '%d'\n",fname.c_str(), res);});
+                (void)res;
+                /*printf("results: '%s' '%d'\n",fname.c_str(), res);*/});
     }
 
     void loadPart(int npart, const char *filename, Master *master, Fl_Osc_Interface *osc)
@@ -631,7 +633,7 @@ public:
                 [master,filename,this,npart](){
                 Part *p = new Part(*master->memory, &master->microtonal, master->fft);
                 if(p->loadXMLinstrument(filename))
-                fprintf(stderr, "FAILED TO LOAD PART!!\n");
+                fprintf(stderr, "Warning: failed to load part!\n");
 
                 auto isLateLoad = [this,npart]{
                 return actual_load[npart] != pending_load[npart];
@@ -785,7 +787,7 @@ MiddleWareImpl::MiddleWareImpl(void)
 
     //Setup Undo
     undo.setCallback([this](const char *msg) {
-            printf("undo callback <%s>\n", msg);
+           // printf("undo callback <%s>\n", msg);
             char buf[1024];
             rtosc_message(buf, 1024, "/undo_pause","");
             handleMsg(buf);
@@ -993,7 +995,7 @@ void MiddleWareImpl::kitEnable(const char *msg)
 
 void MiddleWareImpl::kitEnable(int part, int kit, int type)
 {
-    printf("attempting a kit enable\n");
+   // printf("attempting a kit enable\n");
     string url = "/part"+to_s(part)+"/kit"+to_s(kit)+"/";
     void *ptr = NULL;
     if(type == 0 && kits.add[part][kit] == NULL) {
@@ -1157,34 +1159,34 @@ class UI_Interface:public Fl_Osc_Interface
 
         void writeRaw(const char *msg) override
         {
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
-            //fprintf(stderr, ".");
-            fprintf(stderr, "rawWrite(%s:%s)\n", msg, rtosc_argument_string(msg));
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
+            ////fprintf(stderr, ".");
+            //fprintf(stderr, "rawWrite(%s:%s)\n", msg, rtosc_argument_string(msg));
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             impl->handleMsg(msg);
         }
 
         void writeValue(string s, string ss) override
         {
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
-            fprintf(stderr, "writevalue<string>(%s,%s)\n", s.c_str(),ss.c_str());
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
+            //fprintf(stderr, "writevalue<string>(%s,%s)\n", s.c_str(),ss.c_str());
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             impl->write(s.c_str(), "s", ss.c_str());
         }
 
         void writeValue(string s, char c) override
         {
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
-            fprintf(stderr, "writevalue<char>(%s,%d)\n", s.c_str(),c);
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
+            //fprintf(stderr, "writevalue<char>(%s,%d)\n", s.c_str(),c);
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             impl->write(s.c_str(), "c", c);
         }
 
         void writeValue(string s, float f) override
         {
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
-            fprintf(stderr, "writevalue<float>(%s,%f)\n", s.c_str(),f);
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
+            //fprintf(stderr, "writevalue<float>(%s,%f)\n", s.c_str(),f);
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             impl->write(s.c_str(), "f", f);
         }
 
@@ -1198,8 +1200,8 @@ class UI_Interface:public Fl_Osc_Interface
 
         void renameLink(string old, string newer, Fl_Osc_Widget *w) override
         {
-            fprintf(stdout, "renameLink('%s','%s',%p)\n",
-                    old.c_str(), newer.c_str(), w);
+            //fprintf(stdout, "renameLink('%s','%s',%p)\n",
+            //        old.c_str(), newer.c_str(), w);
             removeLink(old, w);
             createLink(newer, w);
         }
