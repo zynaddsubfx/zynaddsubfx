@@ -89,12 +89,12 @@ ui_handle_t GUI::createUi(Fl_Osc_Interface *osc, void *exit)
     Fl::foreground(255, 255, 255);
 #endif
 
-    Fl_Window *midi_win = new Fl_Double_Window(400, 400, "Midi connections");
-    Fl_Osc_Tree *tree   = new Fl_Osc_Tree(0,0,400,400);
-    midi_win->resizable(tree);
-    tree->root_ports    = &Master::ports;
-    tree->osc           = osc;
-    midi_win->show();
+    //Fl_Window *midi_win = new Fl_Double_Window(400, 400, "Midi connections");
+    //Fl_Osc_Tree *tree   = new Fl_Osc_Tree(0,0,400,400);
+    //midi_win->resizable(tree);
+    //tree->root_ports    = &Master::ports;
+    //tree->osc           = osc;
+    //midi_win->show();
 
     Fl::add_handler(undo_redo_handler);
     return (void*) (ui = new MasterUI((int*)exit, osc));
