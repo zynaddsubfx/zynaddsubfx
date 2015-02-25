@@ -83,6 +83,9 @@ void BankSlot::update(const char *name__, const char *fname__)
     filename_ = fname__;
     snprintf(labelstr, 127, "%d. %s", nslot, name_.c_str());
     label(labelstr);
+    
+    if(name_.empty())
+        label("");
 
     color(empty() ? 46 : 51);
 #ifdef NTK_GUI

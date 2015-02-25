@@ -58,6 +58,7 @@ class BankUI {open
       Fl_Group modeselect {open
         xywh {5 528 425 42} box ENGRAVED_BOX
         class BankViewControls
+        code0 {o->box(FL_UP_BOX);}
       } {}
       Fl_Button {} {
         label {New Bank...}
