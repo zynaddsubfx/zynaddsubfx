@@ -1105,7 +1105,7 @@ simplemaxkcounter->do_callback();}
         }
         Fl_Dial simplesyseffsend {
           xywh {300 160 30 30} maximum 127 step 1
-          code0 {o->alt_init("/","Psysefxvol"+to_s(nsyseff)+"/part"+to_s(npart));}
+          code0 {o->alt_init("/","Psysefxvol"+to_s(nsyseff-1)+"/part"+to_s(npart));}
           class Fl_Osc_Dial
         }
         Fl_Box {} {
@@ -1161,6 +1161,10 @@ simplerefresh();}
             }
             Fl_Choice simplesysefftype {
               label EffType
+              callback {
+              simplesyseffectui->efftype = o->value();
+simplesyseffectui->refresh();
+              }
               xywh {515 80 70 15} down_box BORDER_BOX labelsize 10 align 5
               code0 {o->init("sysefx"+to_s(nsyseff)+"/efftype");}
               class Fl_Osc_Choice
@@ -1213,6 +1217,7 @@ simplerefresh();}
               Fl_Group simplesyseffectui {
                 xywh {350 95 234 95}
                 code0 {o->init(false);}
+                code1 {o->refresh();}
                 class SimpleEffUI
               } {}
             }
@@ -1238,6 +1243,8 @@ pthread_mutex_unlock(&master->mutex);*/}
               callback {ninseff=(int) o->value()-1;
 /*simpleinsefftype->value(master->insefx[ninseff]->geteffect());
 simpleinseffpart->value(master->Pinsparts[ninseff]+2);*/
+simpleinseffectuigroup->reext("insefx"+to_s(ninseff)+"/");
+simpleinsefftype->oscMove("insefx"+to_s(ninseff)+"/efftype");
 simpleinseffectui->refresh();
 
 /*

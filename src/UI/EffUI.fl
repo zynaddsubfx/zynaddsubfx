@@ -1260,7 +1260,7 @@ this->show();} {selected
 
 class SimpleEffUI {open : {public Fl_Osc_Group,public PresetsUI_}
 } {
-  Function {SimpleEffUI(int x,int y, int w, int h, const char *label=0):Fl_Osc_Group(x,y,w,h,label)} {} {
+  Function {SimpleEffUI(int x,int y, int w, int h, const char *label=0):Fl_Osc_Group(x,y,w,h,label),efftype(0)} {} {
     code {} {}
   }
   Function {~SimpleEffUI()} {} {
