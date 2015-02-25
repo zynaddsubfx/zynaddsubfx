@@ -97,8 +97,8 @@ const char *mxmlElementGetAttr(const mxml_node_t *node, const char *name)
 XMLwrapper::XMLwrapper()
 {
     version.Major    = 2;
-    version.Minor    = 4;
-    version.Revision = 4;
+    version.Minor    = 5;
+    version.Revision = 0;
 
     minimal = true;
 

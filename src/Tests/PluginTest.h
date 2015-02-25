@@ -109,7 +109,7 @@ class PluginTest:public CxxTest::TestSuite
         void testLoadSave(void)
         {
             const string fname = string(SOURCE_DIR) + "/guitar-adnote.xmz";
-            const string fdata = string("\n") + loadfile(fname);
+            const string fdata = loadfile(fname);
             char *result = NULL;
             master[0]->putalldata((char*)fdata.c_str(), fdata.length());
             int res = master[0]->getalldata(&result);
