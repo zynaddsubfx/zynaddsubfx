@@ -18,6 +18,7 @@ else()
     message(STATUS "Found Rtosc Submodule...")
 endif()
 
+set(RTOSC_NO_INSTALL TRUE)
 add_subdirectory(rtosc)
 include_directories(rtosc/include)
 

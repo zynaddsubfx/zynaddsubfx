@@ -301,7 +301,7 @@ Master::Master()
         char loc_buf[1024];
         DataObj d{loc_buf, 1024, the_master, bToU};
         memset(loc_buf, sizeof(loc_buf), 0);
-        printf("sending an event to the owner of '%s'\n", m);
+        //printf("sending an event to the owner of '%s'\n", m);
         Master::ports.dispatch(m+1, d);
     };
 
