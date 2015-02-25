@@ -193,7 +193,14 @@ panellistitem->show();
 end();} {}
   }
   Function {refresh()} {} {
-    code {if ((int)bankui->cbwig->value()!=(npart+1))
+    code {
+    partenabled->update();
+    partrcv->update();
+    partpanning->update();
+    partvolume->update();
+    partname->update();
+    
+    if ((int)bankui->cbwig->value()!=(npart+1))
    panellistitemgroup->color(fl_rgb_color(160,160,160));
 else 
    panellistitemgroup->color(fl_rgb_color(50,190,240));
