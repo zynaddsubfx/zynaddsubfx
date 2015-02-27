@@ -342,7 +342,7 @@ struct NonRtObjStore
     void extractPart(Part *part, int i)
     {
         for(int j=0; j < NUM_KIT_ITEMS; ++j) {
-            auto &obj = part->kit[i];
+            auto &obj = part->kit[j];
             extractAD(obj.adpars, i, j);
             extractPAD(obj.padpars, i, j);
         }
@@ -937,6 +937,8 @@ bool MiddleWareImpl::handleOscil(string path, const char *msg, void *v)
     memset(buffer, 0, sizeof(buffer));
     DummyDataObj d(buffer, 1024, v, cb, ui, osc);
     strcpy(buffer, path.c_str());
+    if(!v)
+        return true;
 
     for(auto &p:OscilGen::ports.ports) {
         if(strstr(p.name,msg) && strstr(p.metadata, "realtime") &&
