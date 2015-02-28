@@ -70,10 +70,12 @@ class Fl_OscilSpectrum : public Fl_Box, Fl_Osc_Widget
             int n=lx/GX-1;
             if (n>synth->oscilsize/2)
                 n=synth->oscilsize/2;
+                
+            fl_rectf(ox,oy,lx,ly,0,0,0);
 
             //draw
             if(this->active_r()) 
-                fl_color(this->parent()->labelcolor());
+                fl_color(0,0,255);
             else 
                 fl_color(this->parent()->color());
             fl_line_style(FL_DOT);
@@ -93,7 +95,7 @@ class Fl_OscilSpectrum : public Fl_Box, Fl_Osc_Widget
             }
 
             if (this->active_r())
-                fl_color(this->parent()->selection_color());
+                fl_color(0,255,0);
             else
                 fl_color(this->parent()->color());
             fl_line_style(0);
