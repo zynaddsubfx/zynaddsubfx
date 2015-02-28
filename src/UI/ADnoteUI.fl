@@ -585,7 +585,7 @@ voiceonbutton->redraw();} open
             } {}
             Fl_Slider {} {
               label {Frequency Spread}
-              callback {//unisonspreadoutput->do_callback();}
+              callback {unisonspreadoutput->update();}
               tooltip {Frequency Spread of the Unison} xywh {95 562 125 13} type {Horz Knob} box NO_BOX labelsize 12 align 1 maximum 127 step 1 value 64
               code0 {o->init("Unison_frequency_spread", 'i');}
               class Fl_Osc_Slider
@@ -712,7 +712,7 @@ o->redraw();}
             class Fl_Osc_Check
           }
         }
-        Fl_Group {} {
+        Fl_Group activeVoiceID {
           label 01
           xywh {5 5 55 35} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 16
           code0 {char tmp[10];snprintf(tmp,10,"%d",nvoice+1);o->label(strdup(tmp));}
@@ -802,6 +802,8 @@ delete(oscedit);
   } {
     code {nvoice = nvoice_;
     loc = base+"voice"+to_s(nvoice)+"/";
+    char tmp[10];snprintf(tmp,10,"%d",nvoice+1);
+    activeVoiceID->label(strdup(tmp));
 ADnoteVoiceParameters->rebase(base+"voice"+to_s(nvoice)+"/");} {selected
     }
   }

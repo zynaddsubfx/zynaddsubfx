@@ -534,9 +534,7 @@ refresh();} {}
   }
   Function {rebase(std::string new_base)} {open
   } {
-    code {printf("\\n\\n\\n\\nCAT DOG\\n\\n\\n\\n");
-    printf("\\nNEW BASE: '%s'\\n", (new_base+ext).c_str());
-    Fl_Osc_Group::rebase(new_base);
+    code {Fl_Osc_Group::rebase(new_base);
     freemodeeditwindow->rebase(new_base+ext);} {}
   }
   Function {reinit()} {open
