@@ -22,11 +22,12 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 set_source_files_properties(UI/MasterUI.h PROPERTIES GENERATED 1)
 fltk_wrap_ui(zynaddsubfx_gui ${UI_fl_files})
 
-add_definitions(-DPIXMAP_PATH="${CMAKE_INSTALL_PREFIX}/share/zynaddsubfx/pixmaps/")
-add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
-
 if(LibloEnable)
     set(zynaddsubfx_gui_FLTK_UI_SRCS ${zynaddsubfx_gui_FLTK_UI_SRCS} NSM.C NSM/Client.C)
+endif()
+if(NtkGui)
+    add_definitions(-DPIXMAP_PATH="${CMAKE_INSTALL_PREFIX}/share/zynaddsubfx/pixmaps/")
+    add_definitions(-DSOURCE_DIR="${CMAKE_SOURCE_DIR}")
 endif()
 
 add_library(zynaddsubfx_gui STATIC

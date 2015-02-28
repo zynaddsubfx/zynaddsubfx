@@ -397,11 +397,8 @@ message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARIES
 install(TARGETS zynaddsubfx
 	RUNTIME DESTINATION bin
 	)
-
 if(NtkGui)
 install(DIRECTORY ../pixmaps DESTINATION share/zynaddsubfx)
-add_definitions(-DPIXMAP_PATH="${CMAKE_INSTALL_PREFIX}/share/zynaddsubfx/pixmaps/")
-add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 endif(NtkGui)
 
 include(CTest)

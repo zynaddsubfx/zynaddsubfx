@@ -15,6 +15,7 @@
 #include <FL/Fl_Shared_Image.H>
 #include <FL/Fl_Tiled_Image.H>
 #include <FL/Fl_Dial.H>
+#include <err.h>
 #endif // NTK_GUI
 
 using namespace GUI;
@@ -71,18 +72,25 @@ ui_handle_t GUI::createUi(Fl_Osc_Interface *osc, void *exit)
 
     if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/knob.png"))
         Fl_Dial::default_image(img);
+    else if(Fl_Shared_Image *img = Fl_Shared_Image::get(SOURCE_DIR "/pixmaps/knob.png"))
+        Fl_Dial::default_image(img);
     else
-        Fl_Dial::default_image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/knob.png"));
+        errx(1, "ERROR: Cannot find pixmaps/knob.png");
+
 
     if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/window_backdrop.png"))
         Fl::scheme_bg(new Fl_Tiled_Image(img));
+    else if(Fl_Shared_Image *img = Fl_Shared_Image::get(SOURCE_DIR "/pixmaps/window_backdrop.png"))
+        Fl::scheme_bg(new Fl_Tiled_Image(img));
     else
-        Fl::scheme_bg(new Fl_Tiled_Image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/window_backdrop.png")));
+        errx(1, "ERROR: Cannot find pixmaps/window_backdrop.png");
 
     if(Fl_Shared_Image *img = Fl_Shared_Image::get(PIXMAP_PATH "/module_backdrop.png"))
         module_backdrop = new Fl_Tiled_Image(img);
+    else if(Fl_Shared_Image *img = Fl_Shared_Image::get(SOURCE_DIR "/pixmaps/module_backdrop.png"))
+        module_backdrop = new Fl_Tiled_Image(img);
     else
-        module_backdrop = new Fl_Tiled_Image(Fl_Shared_Image::get(SOURCE_DIR "/../pixmaps/module_backdrop.png"));
+        errx(1, "ERROR: Cannot find pixmaps/module_backdrop");
 
     Fl::background(50,  50,  50);
     Fl::background2(70, 70,  70);
