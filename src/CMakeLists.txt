@@ -268,7 +268,7 @@ if(FltkGui)
 	message(STATUS ${FLTK_LDFLAGS})
 
 
-	set(GUI_LIBRARIES ${FLTK_LIBRARIES} ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES} zynaddsubfx_gui)
+	set(GUI_LIBRARIES zynaddsubfx_gui ${FLTK_LIBRARIES} ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
 
 	add_definitions(-DFLTK_GUI)
 	message(STATUS "Will build FLTK gui")
@@ -288,7 +288,7 @@ if(NtkGui)
         
 	message(STATUS ${NTK_LDFLAGS} ${NTK_IMAGES_LDFLAGS})
 
-	set(GUI_LIBRARIES ${NTK_LIBRARIES} ${NTK_IMAGES_LIBRARIES} ${OPENGL_LIBRARIES} zynaddsubfx_gui)
+	set(GUI_LIBRARIES zynaddsubfx_gui ${NTK_LIBRARIES} ${NTK_IMAGES_LIBRARIES} ${OPENGL_LIBRARIES})
 
 	add_definitions(-DNTK_GUI)
 
