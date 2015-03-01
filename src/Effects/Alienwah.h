@@ -27,8 +27,6 @@
 #include "EffectLFO.h"
 #include <complex>
 
-using namespace std;
-
 #define MAX_ALIENWAH_DELAY 100
 
 /**"AlienWah" Effect*/
@@ -63,8 +61,8 @@ class Alienwah:public Effect
 
         //Internal Values
         float fb, depth, phase;
-        complex<float> *oldl, *oldr;
-        complex<float>  oldclfol, oldclfor;
+        std::complex<float> *oldl, *oldr;
+        std::complex<float>  oldclfol, oldclfor;
         int oldk;
 };
 
