@@ -31,6 +31,8 @@
 
 using namespace rtosc;
 rtosc::Ports Resonance::ports = {
+    rSelf(Resonance),
+    rPaste(),
     rToggle(Penabled, "resonance enable"),
     rToggle(Pprotectthefundamental, "Disable resonance filter on first harmonic"),
     rParams(Prespoints, N_RES_POINTS, "Resonance data points"),
@@ -247,6 +249,11 @@ void Resonance::sendcontroller(MidiControllers ctl, float par)
         ctlcenter = par;
     else
         ctlbw = par;
+}
+
+void Resonance::paste(Resonance &r)
+{
+    memcpy((char*)this, (char*)&r, sizeof(r));
 }
 
 void Resonance::add2XML(XMLwrapper *xml)

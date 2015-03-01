@@ -42,6 +42,7 @@ class Resonance:public Presets
         void randomize(int type);
         void zero(void);
 
+        void paste(Resonance &r);
         void add2XML(XMLwrapper *xml);
         void defaults(void);
         void getfromXML(XMLwrapper *xml);

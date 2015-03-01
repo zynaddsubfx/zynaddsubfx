@@ -50,6 +50,7 @@ class OscilGen:public Presets
         /**convert oscil to base function*/
         void useasbase();
 
+        void paste(OscilGen &o);
         void add2XML(XMLwrapper *xml);
         void defaults();
         void getfromXML(XMLwrapper *xml);

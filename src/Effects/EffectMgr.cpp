@@ -38,7 +38,10 @@
 #include "../Misc/Allocator.h"
 
 
+#define rObject EffectMgr
 rtosc::Ports EffectMgr::ports = {
+    rSelf(EffectMgr),
+    rPaste(),
     RECURP(EffectMgr, FilterParams, Filter, filterpars, "Filter Parameter for Dynamic Filter"),
     {"parameter#64::i", rProp(alias) rDoc("Parameter Accessor"), NULL,
         [](const char *msg, rtosc::RtData &d)
@@ -359,6 +362,15 @@ float EffectMgr::getEQfreqresponse(float freq)
 void EffectMgr::setdryonly(bool value)
 {
     dryonly = value;
+}
+
+void EffectMgr::paste(EffectMgr &e)
+{
+    changeeffectrt(e.nefx);
+    changepresetrt(e.preset);
+    for(int i=0;i<128;++i){
+        seteffectparrt(e.settings[i], i);
+    }
 }
 
 void EffectMgr::add2XML(XMLwrapper *xml)

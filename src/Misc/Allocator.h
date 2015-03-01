@@ -79,6 +79,8 @@ class Allocator
     struct AllocatorImpl *impl;
 };
 
+extern Allocator DummyAlloc;
+
 /**
  * General notes on Memory Allocation Within ZynAddSubFX
  * -----------------------------------------------------

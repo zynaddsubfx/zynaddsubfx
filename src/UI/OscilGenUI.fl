@@ -897,14 +897,12 @@ refresh();}
         }
         Fl_Button {} {
           label C
-          callback {//presetsui->copy(oscil);
-//TODO FIXME}
+          callback {presetsui->copy(dummy->loc());}
           xywh {675 550 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
         }
         Fl_Button {} {
           label P
-          callback {//presetsui->paste(oscil,this);
-//TODO FIXME}
+          callback {presetsui->paste(dummy->loc(), this);}
           xywh {705 550 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
         }
         Fl_Scroll _this_has_to_be_the_last {

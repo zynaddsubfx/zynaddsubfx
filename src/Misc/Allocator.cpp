@@ -6,6 +6,9 @@
 #include "../../tlsf/tlsf.h"
 #include "Allocator.h"
 
+//Used for dummy allocations
+Allocator DummyAlloc;
+
 //recursive type class to avoid void *v = *(void**)v style casting
 struct next_t
 {

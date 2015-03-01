@@ -46,6 +46,7 @@ class EffectMgr:public Presets
         EffectMgr(Allocator &alloc, const bool insertion_);
         ~EffectMgr();
 
+        void paste(EffectMgr &e);
         void add2XML(XMLwrapper *xml);
         void defaults(void) REALTIME;
         void getfromXML(XMLwrapper *xml);

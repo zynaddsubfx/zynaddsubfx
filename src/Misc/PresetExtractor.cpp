@@ -6,6 +6,10 @@
 
 #include "../Misc/Master.h"
 #include "../Misc/Util.h"
+#include "../Misc/Allocator.h"
+#include "../Effects/EffectMgr.h"
+#include "../Synth/OscilGen.h"
+#include "../Synth/Resonance.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Params/EnvelopeParams.h"
 #include "../Params/FilterParams.h"
@@ -86,46 +90,85 @@ std::string doCopy(MiddleWare &mw, string url)
     return xml.getXMLdata();
 }
 
-template<class T>
-void doPaste(MiddleWare &mw, string url, string data)
+template<class T, typename... Ts>
+void doPaste(MiddleWare &mw, string url, string data, Ts&&... args)
 {
     (void) data;
     if(clip.length() < 20)
         return;
 
     //Generate a new object
-    T *t = new T();
+    T *t = new T(std::forward<Ts>(args)...);
     XMLwrapper xml;
     xml.putXMLdata(clip.data());
     t->getfromXML(&xml);
 
     //Send the pointer
+    string path = url+"paste";
     char buffer[1024];
-    rtosc_message(buffer, 1024, (url+"paste").c_str(), "b", sizeof(void*), &t);
+    rtosc_message(buffer, 1024, path.c_str(), "b", sizeof(void*), &t);
+    if(!Master::ports.apropos(path.c_str()))
+        fprintf(stderr, "Warning: Missing Paste URL: '%s'\n", path.c_str());
     printf("Sending info to '%s'\n", buffer);
     mw.transmitMsg(buffer);
 
     //Let the pointer be reclaimed later
 }
 
+//../Synth/OscilGen.h
+//../Params/ADnoteParameters.h
+//../Params/Controller.h
+//../Params/EnvelopeParams.h
+//../Params/FilterParams.h
+//../Params/LFOParams.h
+//../Params/PADnoteParameters.h
+//../Params/Presets.h
+//../Params/PresetsArray.h
+//../Params/PresetsStore.h
+//../Params/SUBnoteParameters.h
+//../Effects/Effect.h
 void doClassPaste(std::string type, MiddleWare &mw, string url, string data)
 {
     if(type == "EnvelopeParams")
         doPaste<EnvelopeParams>(mw, url, data);
-    if(type == "LFOParams")
+    else if(type == "LFOParams")
         doPaste<LFOParams>(mw, url, data);
-    if(type == "FilterParams")
+    else if(type == "FilterParams")
         doPaste<FilterParams>(mw, url, data);
+    else if(type == "ADnoteParameters")
+        doPaste<ADnoteParameters>(mw, url, data, (FFTwrapper*)NULL);
+    else if(type == "PADnoteParameters")
+        doPaste<PADnoteParameters>(mw, url, data, (FFTwrapper*)NULL);
+    else if(type == "SUBnoteParameters")
+        doPaste<SUBnoteParameters>(mw, url, data);
+    else if(type == "OscilGen")
+        doPaste<OscilGen>(mw, url, data, (FFTwrapper*)NULL, (Resonance*)NULL);
+    else if(type == "Resonance")
+        doPaste<Resonance>(mw, url, data);
+    else if(type == "EffectMgr")
+        doPaste<EffectMgr>(mw, url, data, DummyAlloc, false);
 }
 
 std::string doClassCopy(std::string type, MiddleWare &mw, string url)
 {
     if(type == "EnvelopeParams")
         return doCopy<EnvelopeParams>(mw, url);
-    if(type == "LFOParams")
+    else if(type == "LFOParams")
         return doCopy<LFOParams>(mw, url);
-    if(type == "FilterParams")
+    else if(type == "FilterParams")
         return doCopy<FilterParams>(mw, url);
+    else if(type == "ADnoteParameters")
+        return doCopy<ADnoteParameters>(mw, url);
+    else if(type == "PADnoteParameters")
+        return doCopy<PADnoteParameters>(mw, url);
+    else if(type == "SUBnoteParameters")
+        return doCopy<SUBnoteParameters>(mw, url);
+    else if(type == "OscilGen")
+        return doCopy<OscilGen>(mw, url);
+    else if(type == "Resonance")
+        return doCopy<Resonance>(mw, url);
+    else if(type == "EffectMgr")
+        doCopy<EffectMgr>(mw, url);
     return "UNDEF";
 }
 
@@ -133,12 +176,31 @@ std::string getUrlType(std::string url)
 {
     printf("Searching for '%s'\n", (url+"self").c_str());
     auto self = Master::ports.apropos((url+"self").c_str());
+    if(!self)
+        fprintf(stderr, "Warning: URL Metadata Not Found For '%s'\n", url.c_str());
+
     if(self)
         return self->meta()["class"];
     else
         return "";
 }
 
+void doClassArrayPaste(std::string type, MiddleWare &mw, string url, string data, int idx)
+{
+    if(type == "ADnoteVoiceParam")
+        ;
+    else if(type == "FilterParams")
+        ;
+}
+
+std::string doClassArrayCopy(std::string type, MiddleWare &mw, string url, int idx)
+{
+    if(type == "ADnoteVoiceParam")
+        return "UNDEF";
+    else if(type == "FilterParams")
+        return "UNDEF";
+    return "UNDEF";
+}
 
 
 /*****************************************************************************

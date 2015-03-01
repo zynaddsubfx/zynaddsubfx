@@ -42,6 +42,8 @@ pthread_t main_thread;
 
 #define rObject OscilGen
 static rtosc::Ports localPorts = {
+    rSelf(OscilGen),
+    rPaste(),
     PC(hmagtype),
     PC(currentbasefunc),
     PC(basefuncpar),
@@ -238,7 +240,7 @@ void rmsNormalize(fft_t *freqs)
 
 OscilGen::OscilGen(FFTwrapper *fft_, Resonance *res_):Presets()
 {
-    assert(fft_);
+    //assert(fft_);
 
     setpresettype("Poscilgen");
     fft = fft_;
@@ -1112,6 +1114,30 @@ void OscilGen::getcurrentbasefunction(float *smps)
         fft->freqs2smps(basefuncFFTfreqs, smps);
     else
         getbasefunction(smps);   //the sine case
+}
+
+#define PRESERVE(x) decltype(this->x) x = this->x
+#define RESTORE(x)  this->x = x
+void OscilGen::paste(OscilGen &o)
+{
+    //XXX Figure out a better implementation of this sensitive to RT issues...
+    //Preserve Pointer Elements
+    PRESERVE(oscilFFTfreqs);
+    PRESERVE(pendingfreqs);
+    PRESERVE(tmpsmps);
+    PRESERVE(outoscilFFTfreqs);
+    PRESERVE(fft);
+    PRESERVE(basefuncFFTfreqs);
+    PRESERVE(res);
+    memcpy((char*)this, (char*)&o, sizeof(*this));
+    RESTORE(oscilFFTfreqs);
+    RESTORE(pendingfreqs);
+    RESTORE(tmpsmps);
+    RESTORE(outoscilFFTfreqs);
+    RESTORE(fft);
+    RESTORE(basefuncFFTfreqs);
+    RESTORE(res);
+    this->prepare();
 }
 
 void OscilGen::add2XML(XMLwrapper *xml)
