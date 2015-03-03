@@ -43,6 +43,7 @@ class WavFile;
 namespace Nio {
     bool start(void){return 1;};
     void stop(void){};
+    void masterSwap(Master *){};
     void waveNew(WavFile *){}
     void waveStart(void){}
     void waveStop(void){}
@@ -365,24 +366,11 @@ void DSSIaudiooutput::selectProgram(unsigned long bank, unsigned long program)
     if((bank < master->bank.banks.size()) && (program < BANK_SIZE)) {
         const std::string bankdir = master->bank.banks[bank].dir;
         if(!bankdir.empty()) {
-            pthread_mutex_lock(&master->mutex);
-
-            /* We have to turn off the CheckPADsynth functionality, else
-             * the program change takes way too long and we get timeouts
-             * and hence zombies (!) */
-            int save = config.cfg.CheckPADsynth;
-            config.cfg.CheckPADsynth = 0;
-
             /* Load the bank... */
             master->bank.loadbank(bankdir);
 
-            /* restore the CheckPADsynth flag */
-            config.cfg.CheckPADsynth = save;
-
             /* Now load the instrument... */
             master->bank.loadfromslot((unsigned int)program, master->part[0]);
-
-            pthread_mutex_unlock(&master->mutex);
         }
     }
 }
@@ -441,7 +429,6 @@ void DSSIaudiooutput::runSynth(unsigned long sample_count,
     unsigned long event_index      = 0;
     unsigned long next_event_frame = 0;
     unsigned long to_frame = 0;
-    pthread_mutex_lock(&master->mutex);
 
     do {
         /* Find the time of the next event, if any */
@@ -491,7 +478,6 @@ void DSSIaudiooutput::runSynth(unsigned long sample_count,
         // Keep going until we have the desired total length of sample...
     } while(to_frame < sample_count);
 
-    pthread_mutex_unlock(&master->mutex);
 }
 
 /**
@@ -547,7 +533,7 @@ DSSI_Descriptor *DSSIaudiooutput::initDssiDescriptor()
             newLadspaDescriptor->Name  = "ZynAddSubFX";
             newLadspaDescriptor->Maker =
                 "Nasca Octavian Paul <zynaddsubfx@yahoo.com>";
-            newLadspaDescriptor->Copyright = "GNU General Public License v.2";
+            newLadspaDescriptor->Copyright = "GNU General Public License v2";
             newLadspaDescriptor->PortCount = 2;
 
             newPortNames    = new const char *[newLadspaDescriptor->PortCount];
@@ -646,10 +632,8 @@ DSSIaudiooutput::~DSSIaudiooutput()
 void DSSIaudiooutput::initBanks(void)
 {
     if(!banksInited) {
-        pthread_mutex_lock(&master->mutex);
         master->bank.rescanforbanks();
         banksInited = true;
-        pthread_mutex_unlock(&master->mutex);
     }
 }
 
@@ -687,7 +671,6 @@ long DSSIaudiooutput::bankNoToMap = 1;
  */
 bool DSSIaudiooutput::mapNextBank()
 {
-    pthread_mutex_lock(&master->mutex);
     Bank &bank = master->bank;
     bool  retval;
     if((bankNoToMap >= (int)bank.banks.size())
@@ -706,6 +689,5 @@ bool DSSIaudiooutput::mapNextBank()
         bankNoToMap++;
         retval = true;
     }
-    pthread_mutex_unlock(&master->mutex);
     return retval;
 }

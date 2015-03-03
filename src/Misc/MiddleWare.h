@@ -19,10 +19,17 @@ class MiddleWare
         void tick(void);
         //Do A Readonly Operation (For Parameter Copy)
         void doReadOnlyOp(std::function<void()>);
-        //Handle a rtosc Message
+        //Handle a rtosc Message uToB
         void transmitMsg(const char *);
+        //Handle a rtosc Message uToB
+        void transmitMsg(const char *, const char *args, ...);
+        //Handle a rtosc Message uToB
+        void transmitMsg(const char *, const char *args, va_list va);
         //Indicate that a program will be loaded on a known part
         void pendingSetProgram(int part);
+        //Get/Set the active bToU url
+        std::string activeUrl(void);
+        void activeUrl(std::string u);
     private:
         class MiddleWareImpl *impl;
 };

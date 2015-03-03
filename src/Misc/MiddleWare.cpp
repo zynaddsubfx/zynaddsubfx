@@ -15,9 +15,6 @@
 
 #include "../UI/Connection.h"
 #include "../UI/Fl_Osc_Interface.h"
-#ifndef NO_UI
-#include "../UI/Fl_Osc_Widget.H"
-#endif
 
 #include <map>
 
@@ -431,8 +428,6 @@ struct ParamStore
     PADnoteParameters *pad[NUM_MIDI_PARTS][NUM_KIT_ITEMS];
 };
 
-static Fl_Osc_Interface *genOscInterface(class MiddleWareImpl*);
-
 /* Implementation */
 class MiddleWareImpl
 {
@@ -544,7 +539,7 @@ class MiddleWareImpl
     }
 
 public:
-    MiddleWareImpl(void);
+    MiddleWareImpl(MiddleWare *mw);
     ~MiddleWareImpl(void);
 
     void warnMemoryLeaks(void);
@@ -760,7 +755,7 @@ public:
     std::atomic_int actual_load[NUM_MIDI_PARTS];
 };
 
-MiddleWareImpl::MiddleWareImpl(void)
+MiddleWareImpl::MiddleWareImpl(MiddleWare *mw)
 {
     server = lo_server_new_with_proto(NULL, LO_UDP, liblo_error_cb);
     lo_server_add_method(server, NULL, NULL, handler_function, NULL);
@@ -774,7 +769,7 @@ MiddleWareImpl::MiddleWareImpl(void)
     idle = 0;
 
     master = new Master();
-    osc    = genOscInterface(this);
+    osc    = GUI::genOscInterface(mw);
 
     //Grab objects of interest from master
     obj_store.extractMaster(master);
@@ -1122,226 +1117,14 @@ void MiddleWareImpl::write(const char *path, const char *args, va_list va)
         warnx("Failed to write message to '%s'", path);
 }
 
-/******************************************************************************
- *    OSC Interface For User Interface                                        *
- *                                                                            *
- *    This is a largely out of date section of code                           *
- *    Most type specific write methods are no longer used                     *
- *    See UI/Fl_Osc_* to see what is actually used in this interface          *
- ******************************************************************************/
-class UI_Interface:public Fl_Osc_Interface
-{
-    public:
-        UI_Interface(MiddleWareImpl *impl_)
-            :impl(impl_)
-        {}
-
-        void requestValue(string s) override
-        {
-            //Fl_Osc_Interface::requestValue(s);
-            if(last_url != "GUI") {
-                impl->write("/echo", "ss", "OSC_URL", "GUI");
-                last_url = "GUI";
-            }
-
-            impl->write(s.c_str(),"");
-        }
-
-        void write(string s, const char *args, ...) override
-        {
-            va_list va;
-            va_start(va, args);
-            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
-            ////fprintf(stderr, ".");
-            //fprintf(stderr, "write(%s:%s)\n", s.c_str(), args);
-            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
-            impl->write(s.c_str(), args, va);
-            va_end(va);
-        }
-
-        void writeRaw(const char *msg) override
-        {
-            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
-            ////fprintf(stderr, ".");
-            //fprintf(stderr, "rawWrite(%s:%s)\n", msg, rtosc_argument_string(msg));
-            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
-            impl->handleMsg(msg);
-        }
-
-        void writeValue(string s, string ss) override
-        {
-            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
-            //fprintf(stderr, "writevalue<string>(%s,%s)\n", s.c_str(),ss.c_str());
-            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
-            impl->write(s.c_str(), "s", ss.c_str());
-        }
-
-        void writeValue(string s, char c) override
-        {
-            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
-            //fprintf(stderr, "writevalue<char>(%s,%d)\n", s.c_str(),c);
-            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
-            impl->write(s.c_str(), "c", c);
-        }
-
-        void writeValue(string s, float f) override
-        {
-            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
-            //fprintf(stderr, "writevalue<float>(%s,%f)\n", s.c_str(),f);
-            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
-            impl->write(s.c_str(), "f", f);
-        }
-
-        void createLink(string s, class Fl_Osc_Widget*w) override
-        {
-            assert(s.length() != 0);
-            Fl_Osc_Interface::createLink(s,w);
-            assert(!strstr(s.c_str(), "/part0/kit-1"));
-            map.insert(std::pair<string,Fl_Osc_Widget*>(s,w));
-        }
-
-        void renameLink(string old, string newer, Fl_Osc_Widget *w) override
-        {
-            //fprintf(stdout, "renameLink('%s','%s',%p)\n",
-            //        old.c_str(), newer.c_str(), w);
-            removeLink(old, w);
-            createLink(newer, w);
-        }
-
-        void removeLink(string s, class Fl_Osc_Widget*w) override
-        {
-            for(auto i = map.begin(); i != map.end(); ++i) {
-                if(i->first == s && i->second == w) {
-                    map.erase(i);
-                    break;
-                }
-            }
-            //printf("[%d] removing '%s' (%p)...\n", map.size(), s.c_str(), w);
-        }
-
-        virtual void removeLink(class Fl_Osc_Widget *w)
-        {
-            bool processing = true;
-            while(processing)
-            {
-                //Verify Iterator invalidation sillyness
-                processing = false;//Exit if no new elements are found
-                for(auto i = map.begin(); i != map.end(); ++i) {
-                    if(i->second == w) {
-                        //printf("[%d] removing '%s' (%p)...\n", map.size()-1,
-                        //        i->first.c_str(), w);
-                        map.erase(i);
-                        processing = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        //A very simplistic implementation of a UI agnostic refresh method
-        virtual void damage(const char *path)
-        {
-#ifndef NO_UI
-            //printf("\n\nDamage(\"%s\")\n", path);
-            for(auto pair:map) {
-                if(strstr(pair.first.c_str(), path)) {
-                    auto *tmp = dynamic_cast<Fl_Widget*>(pair.second);
-                    //if(tmp)
-                    //    printf("%x, %d %d [%s]\n", (int)pair.second, tmp->visible_r(), tmp->visible(), pair.first.c_str());
-                    //else
-                    //    printf("%x, (NULL)[%s]\n", (int)pair.second,pair.first.c_str());
-                    if(!tmp || tmp->visible_r())
-                        pair.second->update();
-                }
-            }
-#endif
-        }
-
-        void tryLink(const char *msg) override
-        {
-
-            //DEBUG
-            //if(strcmp(msg, "/vu-meter"))//Ignore repeated message
-            //    printf("trying the link for a '%s'<%s>\n", msg, rtosc_argument_string(msg));
-            const char *handle = rindex(msg,'/');
-            if(handle)
-                ++handle;
-
-            int found_count = 0;
-
-            auto range = map.equal_range(msg);
-            for(auto itr = range.first; itr != range.second; ++itr) {
-                auto widget = itr->second;
-                found_count++;
-                const char *arg_str = rtosc_argument_string(msg);
-
-                //Always provide the raw message
-                widget->OSC_raw(msg);
-
-                if(!strcmp(arg_str, "b")) {
-                    widget->OSC_value(rtosc_argument(msg,0).b.len,
-                            rtosc_argument(msg,0).b.data,
-                            handle);
-                } else if(!strcmp(arg_str, "c")) {
-                    widget->OSC_value((char)rtosc_argument(msg,0).i,
-                            handle);
-                } else if(!strcmp(arg_str, "s")) {
-                    widget->OSC_value((const char*)rtosc_argument(msg,0).s,
-                            handle);
-                } else if(!strcmp(arg_str, "i")) {
-                    widget->OSC_value((int)rtosc_argument(msg,0).i,
-                            handle);
-                } else if(!strcmp(arg_str, "f")) {
-                    widget->OSC_value((float)rtosc_argument(msg,0).f,
-                            handle);
-                } else if(!strcmp(arg_str, "T") || !strcmp(arg_str, "F")) {
-                    widget->OSC_value((bool)rtosc_argument(msg,0).T, handle);
-                }
-            }
-
-            if(found_count == 0
-                    && strcmp(msg, "/vu-meter")
-                    && strcmp(msg, "undo_change")
-                    && !strstr(msg, "parameter")
-                    && !strstr(msg, "Prespoint")) {
-                //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
-                //fprintf(stderr, "Unknown widget '%s'\n", msg);
-                //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
-            }
-        };
-
-        void dumpLookupTable(void)
-        {
-            if(!map.empty()) {
-                printf("Leaked controls:\n");
-                for(auto i = map.begin(); i != map.end(); ++i) {
-                    printf("Known control  '%s' (%p)...\n", i->first.c_str(), i->second);
-                }
-            }
-        }
-
-
-    private:
-        std::multimap<string,Fl_Osc_Widget*> map;
-        MiddleWareImpl *impl;
-};
-
 void MiddleWareImpl::warnMemoryLeaks(void)
-{
-    UI_Interface *o = (UI_Interface*)osc;
-    o->dumpLookupTable();
-}
-
-Fl_Osc_Interface *genOscInterface(class MiddleWareImpl *impl)
-{
-    return new UI_Interface(impl);
-}
+{}
 
 /******************************************************************************
  *                         MidleWare Forwarding Stubs                         *
  ******************************************************************************/
     MiddleWare::MiddleWare(void)
-:impl(new MiddleWareImpl())
+:impl(new MiddleWareImpl(this))
 {}
 MiddleWare::~MiddleWare(void)
 {
@@ -1380,8 +1163,35 @@ void MiddleWare::transmitMsg(const char *msg)
 {
     impl->handleMsg(msg);
 }
+        
+void MiddleWare::transmitMsg(const char *path, const char *args, ...)
+{
+    char buffer[1024];
+    va_list va;
+    va_start(va,args);
+    if(rtosc_vmessage(buffer,1024,path,args,va))
+        transmitMsg(buffer);
+    va_end(va);
+}
+
+void MiddleWare::transmitMsg(const char *path, const char *args, va_list va)
+{
+    char buffer[1024];
+    if(rtosc_vmessage(buffer, 1024, path, args, va))
+        transmitMsg(buffer);
+}
 
 void MiddleWare::pendingSetProgram(int part)
 {
     impl->pending_load[part]++;
+}
+
+std::string MiddleWare::activeUrl(void)
+{
+    return last_url;
+}
+
+void MiddleWare::activeUrl(std::string u)
+{
+    last_url = u;
 }

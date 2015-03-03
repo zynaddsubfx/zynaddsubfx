@@ -18,4 +18,8 @@ void tickUi(ui_handle_t)
 {
     usleep(100000);
 }
+Fl_Osc_Interface *genOscInterface(MiddleWare*)
+{
+    return NULL;
+}
 };
