@@ -238,34 +238,34 @@ class UI_Interface:public Fl_Osc_Interface
 
         void writeRaw(const char *msg) override
         {
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
-            //fprintf(stderr, ".");
-            fprintf(stderr, "rawWrite(%s:%s)\n", msg, rtosc_argument_string(msg));
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
+            ////fprintf(stderr, ".");
+            //fprintf(stderr, "rawWrite(%s:%s)\n", msg, rtosc_argument_string(msg));
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             impl->transmitMsg(msg);
         }
 
         void writeValue(string s, string ss) override
         {
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
-            fprintf(stderr, "writevalue<string>(%s,%s)\n", s.c_str(),ss.c_str());
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
+            //fprintf(stderr, "writevalue<string>(%s,%s)\n", s.c_str(),ss.c_str());
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             impl->transmitMsg(s.c_str(), "s", ss.c_str());
         }
 
         void writeValue(string s, char c) override
         {
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
-            fprintf(stderr, "writevalue<char>(%s,%d)\n", s.c_str(),c);
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
+            //fprintf(stderr, "writevalue<char>(%s,%d)\n", s.c_str(),c);
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             impl->transmitMsg(s.c_str(), "c", c);
         }
 
         void writeValue(string s, float f) override
         {
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
-            fprintf(stderr, "writevalue<float>(%s,%f)\n", s.c_str(),f);
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
+            //fprintf(stderr, "writevalue<float>(%s,%f)\n", s.c_str(),f);
+            //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
             impl->transmitMsg(s.c_str(), "f", f);
         }
 

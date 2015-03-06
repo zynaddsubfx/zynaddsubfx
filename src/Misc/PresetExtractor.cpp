@@ -115,18 +115,13 @@ void doPaste(MiddleWare &mw, string url, string data, Ts&&... args)
     //Let the pointer be reclaimed later
 }
 
-//../Synth/OscilGen.h
-//../Params/ADnoteParameters.h
-//../Params/Controller.h
-//../Params/EnvelopeParams.h
-//../Params/FilterParams.h
-//../Params/LFOParams.h
-//../Params/PADnoteParameters.h
-//../Params/Presets.h
-//../Params/PresetsArray.h
-//../Params/PresetsStore.h
-//../Params/SUBnoteParameters.h
-//../Effects/Effect.h
+/*
+ * Dispatch to class specific operators
+ *
+ * Oscilgen and PADnoteParameters have mixed RT/non-RT parameters and require
+ * extra handling.
+ * See MiddleWare.cpp for these specifics
+ */
 void doClassPaste(std::string type, MiddleWare &mw, string url, string data)
 {
     if(type == "EnvelopeParams")

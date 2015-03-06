@@ -418,12 +418,12 @@ globalfiltergroup->redraw();}
       }
       Fl_Button {} {
         label C
-        callback {/*presetsui->copy(pars);*/}
+        callback {presetsui->copy(SUBparameters->loc());}
         xywh {540 451 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Button {} {
         label P
-        callback {/*presetsui->paste(pars,this);*/}
+        callback {presetsui->paste(SUBparameters->loc(),this);}
         xywh {570 451 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Group {} {

@@ -929,6 +929,7 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
 
 bool MiddleWareImpl::handleOscil(string path, const char *msg, void *v)
 {
+    printf("handleOscil...\n");
     char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
     DummyDataObj d(buffer, 1024, v, cb, ui, osc);
@@ -936,11 +937,17 @@ bool MiddleWareImpl::handleOscil(string path, const char *msg, void *v)
     if(!v)
         return true;
 
-    for(auto &p:OscilGen::ports.ports) {
-        if(strstr(p.name,msg) && strstr(p.metadata, "realtime") &&
-                !strcmp("b", rtosc_argument_string(msg))) {
-            //printf("sending along packet '%s'...\n", msg);
-            return false;
+    //Paste To Non-Realtime Parameters and then forward
+    if(strstr(msg, "paste") && !strstr(msg, "padpars")) {
+    }
+
+    if(!strstr(msg, "padpars")) {
+        for(auto &p:OscilGen::ports.ports) {
+            if(strstr(p.name,msg) && strstr(p.metadata, "realtime") &&
+                    !strcmp("b", rtosc_argument_string(msg))) {
+                //printf("sending along packet '%s'...\n", msg);
+                return false;
+            }
         }
     }
 
@@ -1176,6 +1183,8 @@ void MiddleWare::transmitMsg(const char *path, const char *args, ...)
     va_start(va,args);
     if(rtosc_vmessage(buffer,1024,path,args,va))
         transmitMsg(buffer);
+    else
+        fprintf(stderr, "Error in transmitMsg(...)\n");
     va_end(va);
 }
 
@@ -1184,6 +1193,8 @@ void MiddleWare::transmitMsg(const char *path, const char *args, va_list va)
     char buffer[1024];
     if(rtosc_vmessage(buffer, 1024, path, args, va))
         transmitMsg(buffer);
+    else
+        fprintf(stderr, "Error in transmitMsg(va)n");
 }
 
 void MiddleWare::pendingSetProgram(int part)

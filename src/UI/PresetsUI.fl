@@ -150,6 +150,12 @@ class PresetsUI {} {
             }
         }
     }
+    Function {copyArray(std::string url_)} {} {
+    code {} {}}
+    Function {pasteArray(std::string url_, PresetsUI_ *pui)} {} {
+    code {} {}}
+    Function {paste(std::string url_, PresetsUI_ *pui, int idx)} {} {code {} {}}
+    Function {copy(std::string url_, int idx)} {} {code {} {}}
     Function {copy(std::string url_)} {} {
         code {copybutton->activate();
             copypbutton->deactivate();

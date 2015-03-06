@@ -804,12 +804,12 @@ if (resui!=NULL) {
       }
       Fl_Button {} {
         label C
-        callback {/*presetsui->copy(pars);*/}
+        callback {presetsui->copy(padnotewindow->loc());}
         xywh {65 400 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Button {} {
         label P
-        callback {/*presetsui->paste(pars,this);*/}
+        callback {presetsui->paste(padnotewindow->loc(),this);}
         xywh {95 400 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Button {} {
