@@ -652,7 +652,8 @@ public:
         //Give it to the backend and wait for the old part to return for
         //deallocation
         uToB->write("/load-part", "ib", npart, sizeof(Part*), &p);
-        osc->damage(("/part"+to_s(npart)+"/").c_str());
+        if(osc)
+            osc->damage(("/part"+to_s(npart)+"/").c_str());
     }
 
     //Well, you don't get much crazier than changing out all of your RT
@@ -1079,6 +1080,10 @@ void MiddleWareImpl::handleMsg(const char *msg)
     } else if(strstr(msg, "load-part") && !strcmp(rtosc_argument_string(msg), "is")) {
         pending_load[rtosc_argument(msg,0).i]++;
         loadPart(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master, osc);
+    } else if(!strcmp(msg, "/setprogram")
+            && !strcmp(rtosc_argument_string(msg),"c")) {
+        pending_load[0]++;
+        loadPart(0, master->bank.ins[rtosc_argument(msg,0).i].filename.c_str(), master, osc);
     } else if(strstr(msg, "save-bank-part") && !strcmp(rtosc_argument_string(msg), "ii")) {
         saveBankSlot(rtosc_argument(msg,0).i, rtosc_argument(msg,1).i, master, osc);
     } else if(strstr(msg, "bank-rename") && !strcmp(rtosc_argument_string(msg), "is")) {

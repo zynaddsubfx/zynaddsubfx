@@ -28,9 +28,12 @@
 //the DSSI (published by Steve Harris under public domain) as a template.
 
 #include "DSSIaudiooutput.h"
+#include "../Misc/Master.h"
 #include "../Misc/Config.h"
 #include "../Misc/Bank.h"
 #include "../Misc/Util.h"
+#include <rtosc/thread-link.h>
+#include <unistd.h>
 #include <string.h>
 #include <limits.h>
 
@@ -361,18 +364,9 @@ const DSSI_Program_Descriptor *DSSIaudiooutput::getProgram(unsigned long index)
  */
 void DSSIaudiooutput::selectProgram(unsigned long bank, unsigned long program)
 {
-    initBanks();
-//    cerr << "selectProgram(" << (bank & 0x7F) << ':' << ((bank >> 7) & 0x7F) << "," << program  << ")" << '\n';
-    if((bank < master->bank.banks.size()) && (program < BANK_SIZE)) {
-        const std::string bankdir = master->bank.banks[bank].dir;
-        if(!bankdir.empty()) {
-            /* Load the bank... */
-            master->bank.loadbank(bankdir);
-
-            /* Now load the instrument... */
-            master->bank.loadfromslot((unsigned int)program, master->part[0]);
-        }
-    }
+    middleware->pendingSetProgram(0);
+    extern rtosc::ThreadLink *bToU;
+    bToU->write("/setprogram", "cc", 0, program);
 }
 
 /**
@@ -429,6 +423,8 @@ void DSSIaudiooutput::runSynth(unsigned long sample_count,
     unsigned long event_index      = 0;
     unsigned long next_event_frame = 0;
     unsigned long to_frame = 0;
+
+    Master *master = middleware->spawnMaster();
 
     do {
         /* Find the time of the next event, if any */
@@ -616,7 +612,13 @@ DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate)
         denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 
     synth->alias();
-    this->master = new Master();
+    middleware = new MiddleWare();
+    initBanks();
+    loadThread = new std::thread([this]() {
+            while(middleware) {
+            middleware->tick();
+            usleep(1000);
+            }});
 }
 
 /**
@@ -624,7 +626,13 @@ DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate)
  * @return
  */
 DSSIaudiooutput::~DSSIaudiooutput()
-{}
+{
+    auto *tmp = middleware;
+    middleware = 0;
+    loadThread->join();
+    delete tmp;
+    delete loadThread;
+}
 
 /**
  * Ensures the list of bank (directories) has been initialised.
@@ -632,7 +640,7 @@ DSSIaudiooutput::~DSSIaudiooutput()
 void DSSIaudiooutput::initBanks(void)
 {
     if(!banksInited) {
-        master->bank.rescanforbanks();
+        middleware->spawnMaster()->bank.rescanforbanks();
         banksInited = true;
     }
 }
@@ -671,7 +679,7 @@ long DSSIaudiooutput::bankNoToMap = 1;
  */
 bool DSSIaudiooutput::mapNextBank()
 {
-    Bank &bank = master->bank;
+    Bank &bank = middleware->spawnMaster()->bank;
     bool  retval;
     if((bankNoToMap >= (int)bank.banks.size())
        || bank.banks[bankNoToMap].dir.empty())
