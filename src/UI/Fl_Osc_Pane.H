@@ -22,6 +22,7 @@ class Fl_Osc_Window:public Fl_Double_Window, public Fl_Osc_Pane
         void init(Fl_Osc_Interface *osc_, std::string loc_);
         virtual std::string loc(void) const;
         virtual void rebase(std::string new_base);
+        void update();
 };
 
 

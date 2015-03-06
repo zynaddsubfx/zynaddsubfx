@@ -418,12 +418,12 @@ globalfiltergroup->redraw();}
       }
       Fl_Button {} {
         label C
-        callback {presetsui->copy(SUBparameters->loc());}
+        callback {presetsui->copy(loc);}
         xywh {540 451 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Button {} {
         label P
-        callback {presetsui->paste(SUBparameters->loc(),this);}
+        callback {presetsui->paste(loc,this);}
         xywh {570 451 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Group {} {
@@ -491,20 +491,14 @@ globalfiltergroup->redraw();}
     }
   }
   Function {refresh()} {} {
-    code {//bwee->show();
-//bandwidthsettingsui->redraw();
-
-//freqee->show();
-//freqsettingsui->redraw();
-
-//filtere->show();
-globalfiltergroup->redraw();
-
-ampenv->refresh();
-bandwidthenvelopegroup->refresh();
-freqenvelopegroup->refresh();
-filterui->refresh();
-filterenv->refresh();} {}
+    code {
+SUBparameters->update();
+//globalfiltergroup->redraw();
+//ampenv->refresh();
+//bandwidthenvelopegroup->refresh();
+//freqenvelopegroup->refresh();
+//filterui->refresh();
+//filterenv->refresh();} {}
   }
   Function {SUBnoteUI(Fl_Osc_Interface *osc_, std::string loc_)} {} {
     code {osc = osc_;

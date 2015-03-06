@@ -36,6 +36,7 @@ class SUBnoteParameters:public Presets
         void defaults();
         void getfromXML(XMLwrapper *xml);
         void updateFrequencyMultipliers(void);
+        void paste(SUBnoteParameters &sub);
 
         //Parameters
         //AMPLITUDE PARAMETRERS

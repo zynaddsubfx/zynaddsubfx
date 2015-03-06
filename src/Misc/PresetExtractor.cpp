@@ -169,6 +169,7 @@ std::string doClassCopy(std::string type, MiddleWare &mw, string url)
 
 std::string getUrlType(std::string url)
 {
+    assert(!url.empty());
     printf("Searching for '%s'\n", (url+"self").c_str());
     auto self = Master::ports.apropos((url+"self").c_str());
     if(!self)

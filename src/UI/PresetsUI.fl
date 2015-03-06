@@ -166,7 +166,7 @@ class PresetsUI {} {
             presetname->cut(0,presetname->maximum_size());
 
             if(but) {
-                presetCopy(url, "");
+                presetCopy(url_, "");
             } else {
                 rescan();
                 copytypetext->label(presetClipboardType().c_str());

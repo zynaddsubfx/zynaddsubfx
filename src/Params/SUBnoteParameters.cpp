@@ -34,6 +34,8 @@
 #define rObject SUBnoteParameters
 using namespace rtosc;
 static rtosc::Ports localPorts = {
+    rSelf(SUBnoteParameters),
+    rPaste(),
     rToggle(Pstereo, "Stereo Enable"),
     rParamZyn(PVolume,  "Volume"),
     rParamZyn(PPanning, "Left Right Panning"),
@@ -334,6 +336,57 @@ void SUBnoteParameters::updateFrequencyMultipliers(void) {
     }
 }
 
+#define doPaste(x) this->x = sub.x;
+#define doPPaste(x) this->x->paste(*sub.x);
+void SUBnoteParameters::paste(SUBnoteParameters &sub)
+{
+    doPaste(Pstereo);
+    doPaste(PVolume);
+    doPaste(PPanning);
+    doPaste(PAmpVelocityScaleFunction);
+    doPPaste(AmpEnvelope);
+
+    //Frequency Parameters
+    doPaste(PDetune);
+    doPaste(PCoarseDetune);
+    doPaste(PDetuneType);
+    doPaste(PFreqEnvelopeEnabled);
+    doPPaste(FreqEnvelope);
+    doPaste(PBandWidthEnvelopeEnabled);
+    doPPaste(BandWidthEnvelope);
+
+    //Filter Parameters (Global)
+    doPaste(PGlobalFilterEnabled);
+    doPPaste(GlobalFilter);
+    doPaste(PGlobalFilterVelocityScale);
+    doPaste(PGlobalFilterVelocityScaleFunction);
+    doPPaste(GlobalFilterEnvelope);
+
+
+    //Other Parameters
+    doPaste(Pfixedfreq);
+    doPaste(PfixedfreqET);
+    doPaste(POvertoneSpread.type);
+    doPaste(POvertoneSpread.par1);
+    doPaste(POvertoneSpread.par2);
+    doPaste(POvertoneSpread.par3);
+
+    for(int i=0; i<MAX_SUB_HARMONICS; ++i)
+        doPaste(POvertoneFreqMult[i]);
+
+    doPaste(Pnumstages);
+    doPaste(Pbandwidth);
+    doPaste(Phmagtype);
+
+    for(int i=0; i<MAX_SUB_HARMONICS; ++i) {
+        doPaste(Phmag[i]);
+        doPaste(Phrelbw[i]);
+    }
+
+    doPaste(Pbwscale);
+    doPaste(Pstart);
+}
+
 void SUBnoteParameters::getfromXML(XMLwrapper *xml)
 {
     Pnumstages = xml->getpar127("num_stages", Pnumstages);
@@ -357,7 +410,7 @@ void SUBnoteParameters::getfromXML(XMLwrapper *xml)
         PVolume  = xml->getpar127("volume", PVolume);
         PPanning = xml->getpar127("panning", PPanning);
         PAmpVelocityScaleFunction = xml->getpar127("velocity_sensing",
-                                                   PAmpVelocityScaleFunction);
+                PAmpVelocityScaleFunction);
         if(xml->enterbranch("AMPLITUDE_ENVELOPE")) {
             AmpEnvelope->getfromXML(xml);
             xml->exitbranch();
@@ -386,15 +439,15 @@ void SUBnoteParameters::getfromXML(XMLwrapper *xml)
         Pbwscale   = xml->getpar127("bandwidth_scale", Pbwscale);
 
         PFreqEnvelopeEnabled = xml->getparbool("freq_envelope_enabled",
-                                               PFreqEnvelopeEnabled);
+                PFreqEnvelopeEnabled);
         if(xml->enterbranch("FREQUENCY_ENVELOPE")) {
             FreqEnvelope->getfromXML(xml);
             xml->exitbranch();
         }
 
         PBandWidthEnvelopeEnabled = xml->getparbool(
-            "band_width_envelope_enabled",
-            PBandWidthEnvelopeEnabled);
+                "band_width_envelope_enabled",
+                PBandWidthEnvelopeEnabled);
         if(xml->enterbranch("BANDWIDTH_ENVELOPE")) {
             BandWidthEnvelope->getfromXML(xml);
             xml->exitbranch();
@@ -411,11 +464,11 @@ void SUBnoteParameters::getfromXML(XMLwrapper *xml)
         }
 
         PGlobalFilterVelocityScaleFunction = xml->getpar127(
-            "filter_velocity_sensing",
-            PGlobalFilterVelocityScaleFunction);
+                "filter_velocity_sensing",
+                PGlobalFilterVelocityScaleFunction);
         PGlobalFilterVelocityScale = xml->getpar127(
-            "filter_velocity_sensing_amplitude",
-            PGlobalFilterVelocityScale);
+                "filter_velocity_sensing_amplitude",
+                PGlobalFilterVelocityScale);
 
         if(xml->enterbranch("FILTER_ENVELOPE")) {
             GlobalFilterEnvelope->getfromXML(xml);

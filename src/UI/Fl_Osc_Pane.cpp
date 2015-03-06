@@ -23,6 +23,33 @@ std::string Fl_Osc_Window::loc(void) const
     return base;
 }
 
+static void nested_update(Fl_Group *g)
+{
+    unsigned nchildren = g->children();
+    for(unsigned i=0; i < nchildren; ++i) {
+        Fl_Widget *widget = g->child(i);
+        if(Fl_Osc_Widget *o = dynamic_cast<Fl_Osc_Widget*>(widget)) {
+            o->update();
+        } else if(Fl_Group *o = dynamic_cast<Fl_Group*>(widget)) {
+            nested_update(o);
+        }
+
+    }
+}
+
+void Fl_Osc_Window::update(void)
+{
+    unsigned nchildren = this->children();
+    for(unsigned i=0; i < nchildren; ++i) {
+        Fl_Widget *widget = this->child(i);
+        if(Fl_Osc_Widget *o = dynamic_cast<Fl_Osc_Widget*>(widget)) {
+            o->update();
+        }
+        if(dynamic_cast<Fl_Group*>(widget))
+            nested_update(dynamic_cast<Fl_Group*>(widget));
+    }
+}
+
 static void nested_rebase(Fl_Group *g, std::string new_base)
 {
     unsigned nchildren = g->children();
