@@ -105,10 +105,10 @@ rndvelocity=0;} {selected
 
 //On error fetch everything from source directory
 if(!(white_up&&white_down&&black_up&&black_down)) {
-    white_up   = Fl_Shared_Image::get(SOURCE_DIR "/../../pixmaps/white_key.png");   
-    white_down = Fl_Shared_Image::get(SOURCE_DIR "/../../pixmaps/white_key_pressed.png");
-    black_up   = Fl_Shared_Image::get(SOURCE_DIR "/../../pixmaps/black_key.png");
-    black_down = Fl_Shared_Image::get(SOURCE_DIR "/../../pixmaps/black_key_pressed.png");
+    white_up   = Fl_Shared_Image::get(SOURCE_DIR "/pixmaps/white_key.png");
+    white_down = Fl_Shared_Image::get(SOURCE_DIR "/pixmaps/white_key_pressed.png");
+    black_up   = Fl_Shared_Image::get(SOURCE_DIR "/pixmaps/black_key.png");
+    black_down = Fl_Shared_Image::get(SOURCE_DIR "/pixmaps/black_key_pressed.png");
 }
 
 Fl_Image *key;
