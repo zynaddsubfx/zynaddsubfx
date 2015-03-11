@@ -827,7 +827,6 @@ MiddleWareImpl::~MiddleWareImpl(void)
 
 void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
 {
-    //Copy is needed as filename WILL get trashed during the rest of the run
     uToB->write("/freeze_state","");
 
     std::list<const char *> fico;

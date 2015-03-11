@@ -179,7 +179,7 @@ static Ports localports = {
             Master *M =  (Master*)d.obj;
             std::atomic_thread_fence(std::memory_order_release);
             M->frozenState = true;
-            d.reply("/state_frozen");}},
+            d.reply("/state_frozen", "");}},
     {"thaw_state:", rDoc("Internal Read-only Mode"), 0,
         [](const char *,RtData &d) {
             Master *M =  (Master*)d.obj;
@@ -227,7 +227,7 @@ class DataObj:public rtosc::RtData
             bToU     = bToU_;
         }
 
-        virtual void reply(const char *path, const char *args, ...)
+        virtual void reply(const char *path, const char *args, ...) override
         {
             va_list va;
             va_start(va,args);
@@ -236,14 +236,16 @@ class DataObj:public rtosc::RtData
             reply(buffer);
             va_end(va);
         }
-        virtual void reply(const char *msg)
+        virtual void reply(const char *msg) override
         {
+            if(rtosc_message_length(msg, -1) == 0)
+                fprintf(stderr, "Warning: Invalid Rtosc message '%s'\n", msg);
             bToU->raw_write(msg);
         }
         virtual void broadcast(const char *path, const char *args, ...) override{
             va_list va;
             va_start(va,args);
-            reply("/broadcast");
+            reply("/broadcast", "");
             char *buffer = bToU->buffer();
             rtosc_vmessage(buffer,bToU->buffer_size(),path,args,va);
             reply(buffer);
