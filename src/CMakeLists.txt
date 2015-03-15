@@ -408,7 +408,12 @@ message(STATUS)
 message(STATUS "Building on a '${CMAKE_SYSTEM_NAME}' System")
 
 
-macro(package_status foundvar pkg state color)
+macro(package_status foundvar pkg state)#optional color
+    set (extra_macro_args ${ARGN})
+    list(LENGTH extra_macro_args num_extra_args)
+    if (${num_extra_args} GREATER 0)
+        list(GET extra_macro_args 0 color)
+    endif ()
     if(${foundvar})
         message(STATUS "${pkg} -- ${Green}${state}${ColorReset}")
     else()
