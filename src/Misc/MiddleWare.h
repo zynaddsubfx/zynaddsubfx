@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <cstdarg>
 
 //Link between realtime and non-realtime layers
 class MiddleWare

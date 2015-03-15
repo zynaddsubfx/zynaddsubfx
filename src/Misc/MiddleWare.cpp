@@ -3,7 +3,6 @@
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
-#include <cstdarg>
 #include <fstream>
 
 #include <rtosc/undo-history.h>
