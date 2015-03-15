@@ -123,7 +123,7 @@ static rtosc::Ports localPorts =
         }},
 
 
-    {"nhr:", rDoc("Returns the harmonic shifts"),
+    {"nhr:", rProp(non-realtime) rDoc("Returns the harmonic shifts"),
         NULL, [](const char *, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
             const unsigned n = synth->oscilsize / 2;
@@ -132,7 +132,7 @@ static rtosc::Ports localPorts =
                 tmp[i] = p->getNhr(i);
             d.reply(d.loc, "b", n*sizeof(float), tmp);
             delete[] tmp;}},
-    {"profile:i", rDoc("UI display of the harmonic profile"),
+    {"profile:i", rProp(non-realtime) rDoc("UI display of the harmonic profile"),
         NULL, [](const char *m, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
             const unsigned n = rtosc_argument(m, 0).i;

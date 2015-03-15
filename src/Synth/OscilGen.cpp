@@ -97,7 +97,7 @@ static rtosc::Ports localPorts = {
             else
                 mag = rtosc_argument(m,0).i;
         }},
-    {"base-spectrum:", rDoc("Returns spectrum of base waveshape"),
+    {"base-spectrum:", rProp(non-realtime) rDoc("Returns spectrum of base waveshape"),
         NULL, [](const char *, rtosc::RtData &d) {
             const unsigned n = synth->oscilsize / 2;
             float *spc = new float[n];
@@ -106,7 +106,7 @@ static rtosc::Ports localPorts = {
             d.reply(d.loc, "b", n*sizeof(float), spc);
             delete[] spc;
         }},
-    {"base-waveform:", rDoc("Returns base waveshape points"),
+    {"base-waveform:", rProp(non-realtime) rDoc("Returns base waveshape points"),
         NULL, [](const char *, rtosc::RtData &d) {
             const unsigned n = synth->oscilsize;
             float *smps = new float[n];
@@ -115,7 +115,7 @@ static rtosc::Ports localPorts = {
             d.reply(d.loc, "b", n*sizeof(float), smps);
             delete[] smps;
         }},
-    {"spectrum:", rDoc("Returns spectrum of waveform"),
+    {"spectrum:", rProp(non-realtime) rDoc("Returns spectrum of waveform"),
         NULL, [](const char *, rtosc::RtData &d) {
             const unsigned n = synth->oscilsize / 2;
             float *spc = new float[n];
@@ -124,7 +124,7 @@ static rtosc::Ports localPorts = {
             d.reply(d.loc, "b", n*sizeof(float), spc);
             delete[] spc;
         }},
-    {"waveform:", rDoc("Returns waveform points"),
+    {"waveform:", rProp(non-realtime) rDoc("Returns waveform points"),
         NULL, [](const char *, rtosc::RtData &d) {
             const unsigned n = synth->oscilsize;
             float *smps = new float[n];
@@ -136,7 +136,7 @@ static rtosc::Ports localPorts = {
             d.reply(d.loc, "b", n*sizeof(float), smps);
             delete[] smps;
         }},
-    {"prepare:", rDoc("Performs setup operation to oscillator"),
+    {"prepare:", rProp(non-realtime) rDoc("Performs setup operation to oscillator"),
         NULL, [](const char *, rtosc::RtData &d) {
             //fprintf(stderr, "prepare: got a message from '%s'\n", m);
             OscilGen &o = *(OscilGen*)d.obj;
@@ -146,11 +146,11 @@ static rtosc::Ports localPorts = {
             d.reply("/forward", "sb", d.loc, sizeof(fft_t*), &data);
             o.pendingfreqs = data;
         }},
-    {"convert2sine:", rDoc("Translates waveform into FS"),
+    {"convert2sine:", rProp(non-realtime) rDoc("Translates waveform into FS"),
         NULL, [](const char *, rtosc::RtData &d) {
             ((OscilGen*)d.obj)->convert2sine();
         }},
-    {"prepare:b", rProp(internal) rProp(pointer) rDoc("Sets prepared fft data"),
+    {"prepare:b", rProp(internal) rProp(non-realtime) rProp(pointer) rDoc("Sets prepared fft data"),
         NULL, [](const char *m, rtosc::RtData &d) {
             //fprintf(stderr, "prepare:b got a message from '%s'\n", m);
             OscilGen &o = *(OscilGen*)d.obj;
