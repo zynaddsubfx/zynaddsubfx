@@ -69,8 +69,6 @@ SET (LibloEnable ${LIBLO_FOUND} CACHE BOOL
 # Add version information
 add_definitions(-DVERSION="${VERSION}")
 
-message(STATUS "Building on a '${CMAKE_SYSTEM_NAME}' System")
-
 if(NOT "Darwin" STREQUAL ${CMAKE_SYSTEM_NAME})
     # Add scheduler function existance info (OSX compatiability)
     add_definitions(-DHAVE_SCHEDULER=${HAVE_SCHEDULER})
@@ -362,8 +360,6 @@ if(CompileTests)
 	add_subdirectory(Tests)
 endif(CompileTests)
 
-message(STATUS "using link directories: ${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS}")
-
 
 add_executable(zynaddsubfx main.cpp)
 
@@ -394,12 +390,45 @@ if (DssiEnable)
 	endif ()
 endif()
 
-message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")
 install(TARGETS zynaddsubfx
 	RUNTIME DESTINATION bin
 	)
 if(NtkGui)
-install(DIRECTORY ../pixmaps DESTINATION share/zynaddsubfx)
+    install(DIRECTORY ../pixmaps DESTINATION share/zynaddsubfx)
 endif(NtkGui)
 
 include(CTest)
+
+
+##Summarize The Full Configuration
+message(STATUS)
+message(STATUS "${ColorBold}ZynAddSubFX Build Configuration")
+message(STATUS             "===============================${ColorReset}")
+message(STATUS)
+message(STATUS "Building on a '${CMAKE_SYSTEM_NAME}' System")
+
+
+macro(package_status foundvar pkg state color)
+    if(${foundvar})
+        message(STATUS "${pkg} -- ${Green}${state}${ColorReset}")
+    else()
+        message(STATUS "${pkg} -- ${color}NOT ${state}${ColorReset}")
+    endif()
+endmacro()
+
+package_status(PKG_CONFIG_FOUND "PkgConfig" "found"   ${Red})
+package_status(ZLIB_FOUND       "zlib     " "found"   ${Red})
+package_status(MXML_FOUND       "mxml     " "found"   ${Red})
+package_status(FFTW_FOUND       "fftw3    " "found"   ${Red})
+package_status(OssEnable        "OSS      " "enabled" ${Yellow})
+package_status(AlsaEnable       "ALSA     " "enabled" ${Yellow})
+package_status(JackEnable       "JACK     " "enabled" ${Yellow})
+package_status(PaEnable         "PA       " "enabled" ${Yellow})
+package_status(CXXTEST_FOUND    "CxxTest  " "found"   ${Yellow})
+#TODO GUI MODULE
+package_status(LASH_FOUND       "Lash     " "enabled" ${Yellow})
+package_status(DSSI_FOUND       "DSSI     " "enabled" ${Yellow})
+package_status(LIBLO_FOUND      "liblo    " "enabled" ${Red})
+package_status(FLTK_FOUND       "fltk     " "found"   ${Yellow})
+package_status(NTK_FOUND        "ntk      " "found"   ${Yellow})
+message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")

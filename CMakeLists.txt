@@ -19,6 +19,7 @@ else()
 endif()
 
 set(RTOSC_NO_INSTALL TRUE)
+include("rtosc/cmake/ColorMessage.cmake")
 add_subdirectory(rtosc)
 include_directories(rtosc/include)
 
