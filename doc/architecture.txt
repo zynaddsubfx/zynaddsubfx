@@ -1,0 +1,155 @@
+ZynAddSubFX Architecture
+========================
+:author: Mark McCurry
+
+In order to understand how to effectively navigate the source code and to
+better understand the relationships between the internal components of
+ZynAddSubFX.
+To start off, the coarsest division of the codebase can be in breaking the
+source into three areas:
+
+Backend::
+    Realtime Data and Audio/Midi Handling
+Middware::
+    Non-Realtime algorithms used to initialize realtime data and communication
+    core
+UI::
+    Any User Interface (graphical or otherwise) that binds to a middleware
+    instance in order to permit modification of any parameters used in
+    synthesis.
+
+These three components communicate to each other _almost_ exclusively through
+the use of OSC messages using librtosc or liblo.
+In this document, I hope to define all of the edge cases where communication
+(by design) does not use message passing as interactions are somewhat
+complicated lock free operations.
+
+Before getting into each layer's details, the following threads may exist:
+
+Main Thread::
+    The original program thread, responsible for repeatedly polling events
+    from NSM, LASH, general in-process UI, and middleware
+Middleware Helper Thread::
+    Responsible for handling any procedures which may block normal event
+    processing such as XML de-serialization
+Audio Output Thread::
+    Thread responsible for performing synthesis and passing it to driver level
+    API for the sound to be output
+MIDI  Input  Thread::
+    Thread responsible for handling midi events. This thread is only active if
+    the audio output and the midi input drivers are not the same type.
+
+Now for the meat of things:
+
+The Backend
+-----------
+
+Historically the realtime side of things has revolved around a single instance
+of the aptly named class 'Master', which is the host to numerous
+implementation pointers and instances of all Parts which in turn contain more
+parameters and notes.
+This instance generally assumes that it is in full control of all of its data
+and it gets regularly called from the IO subsystem to produce some output
+audio in increments of some set block size.
+All classes that operate under a given instance of 'Master' assume that they
+have a fixed:
+
+Buffer Size::
+    Unit of time to calculate at once and interval to perform interpolations
+    over
+Oscillator Size::
+    Size of the Additive Synthesis Oscillator Interpolation Buffer
+Sample Rate::
+    Number of samples per second
+Allocator::
+    Source for memory allocations from a resizable memory pool
+
+Changing any of these essentially requires rebuilding all child data
+structures at the moment.
+
+Most of the children objects can be placed into the categories:
+
+Parameter Objects::
+    Objects which contain serialize able parameters for synthesis and little to
+    no complex math
+Synthesis Objects::
+    Objects which initialize with parameter objects and generate output audio or
+    control values for other synthesis objects
+Container Objects::
+    Objects which are responsible for organizing a variety of synthesis and
+    parameter objects and for routing the outputs of each child object to the
+    right destination (e.g. 'Part' and 'Master')
+Hybrid Objects::
+    Objects which have _Odd_ divisions between what is a parameter, and what
+    is destined for synthesis (e.g. 'PADnoteParameters' and 'OscilGen')
+
+The normal behavior of these objects can be seen by observing a call of
+_OutMgr::tick_ which first flushes the midi queue possibly constructing a few
+new notes via _Part::NoteOn_, then _Master::AudioOut_ is called.
+This is the root of the synthesis calls, but before anything is synthesized,
+OSC messages are dispatched which typically update system parameter and
+coefficients which cannot be calculated in realtime such as padnote based
+wavetables.
+Most data is allocated on the initialization of the add/sub/pad synthesis
+engine, however anything which cannot be bounded easily then is allocated via
+the tlsf based allocator.
+
+
+The MiddleWare
+--------------
+
+Now in the previous section, details on how exactly messages were delivered
+was only vaguely mentioned.
+Anything unclear should hopefully be clarified here. 
+The primary message handling is taken care of by two ring buffers 'uToB' and
+'bToU' which are, respectively, the user interface to backend and the backend
+to user interface ringbuffers.
+Additionally, Middleware handles non-realtime processing, such as 'Oscilgen'
+and 'PADnoteParameters'.
+
+To handle these cases, any message from a user interface is intercepted.
+Non-realtime requests are handled in middleware itself and other messages are
+forwarded along.
+This permits some internal messages to be sent that the UI has never directly
+requested.
+A similar process occurs for messages originating from the backend.
+
+A large portion of the middleware code is designed to manage up-to-date
+pointers to the internal datastructures, in order to avoid directly accessing
+anything via the pointer to the 'Master' datastructure.
+
+Loading
+~~~~~~~
+
+In order to avoid access to the backend datastructures typically a replacement
+object is sent to the backend to be copied from or from which a pointer swap
+can occur.
+
+Saving
+~~~~~~
+
+This is where the nice pristine hands off approach sadly comes to an end.
+There simply isn't an effective means of capturing all parameters without
+taking a large amount of time.
+In order to permit the serialization of parameter objects, the backend is 
+partially 'frozen'.
+This essentially prevents the backend from processing most messages from the
+user interface and when this occurs the parameters which are too be serialized
+can be guaranteed to be constant and thus safe to access across threads.
+This class of read-only-operation can be seen as used in parameter copy/paste
+operations and in saving full instances as well as instruments.
+
+
+The User Interface
+------------------
+
+From an architectural standpoint the important thing to note about the user
+interface is that virtual every widget has a location which is composed of a
+base path and a path extension.
+Most messages going to a widget are solely to this widget's one location
+(occasionally they're to a few associated paths).
+
+This structure makes it possible for a set of widgets to get relocated
+(rebase/reext) to another path.
+This occurs quite frequently (e.g. "/part0/PVolume" -> "/part1/PVolume") and
+it may be the occasional source of bugs.
