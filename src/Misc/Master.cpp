@@ -99,7 +99,7 @@ static Ports sysefsendto =
         }}
 };
 
-static Ports localports = {
+Ports Master::ports = {
     rRecursp(part, 16, "Part"),//NUM_MIDI_PARTS
     rRecursp(sysefx, 4, "System Effect"),//NUM_SYS_EFX
     rRecursp(insefx, 8, "Insertion Effect"),//NUM_INS_EFX
@@ -211,8 +211,6 @@ static Ports localports = {
 };
 
 
-
-Ports &Master::ports = localports;
 Master *the_master;
 
 class DataObj:public rtosc::RtData

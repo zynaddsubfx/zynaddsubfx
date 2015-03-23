@@ -41,7 +41,7 @@ pthread_t main_thread;
 #define PC(x) rParamZyn(P##x, "undocumented oscilgen parameter")
 
 #define rObject OscilGen
-static rtosc::Ports localPorts = {
+rtosc::Ports OscilGen::ports = {
     rSelf(OscilGen),
     rPaste(),
     PC(hmagtype),
@@ -164,8 +164,6 @@ static rtosc::Ports localPorts = {
             o.oscilFFTfreqs = *(fft_t**)rtosc_argument(m,0).b.data;
         }},
 };
-
-rtosc::Ports &OscilGen::ports = localPorts;
 
 
 //operations on FFTfreqs

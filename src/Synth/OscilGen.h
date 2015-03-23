@@ -24,6 +24,7 @@
 #define OSCIL_GEN_H
 
 #include "../globals.h"
+#include <rtosc/ports.h>
 #include "../Params/Presets.h"
 
 class OscilGen:public Presets
@@ -113,7 +114,7 @@ class OscilGen:public Presets
 
         bool ADvsPAD; //if it is used by ADsynth or by PADsynth
 
-        static rtosc::Ports &ports;
+        static rtosc::Ports ports;
 
         /* Oscillator Frequencies -
          *  this is different than the hamonics set-up by the user,

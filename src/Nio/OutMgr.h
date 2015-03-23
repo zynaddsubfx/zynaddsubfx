@@ -15,7 +15,7 @@ class OutMgr
         ~OutMgr();
 
         /**Execute a tick*/
-        const Stereo<float *> tick(unsigned int frameSize);
+        const Stereo<float *> tick(unsigned int frameSize) __attribute__((annotate("realtime")));
 
         /**Request a new set of samples
          * @param n number of requested samples (defaults to 1)

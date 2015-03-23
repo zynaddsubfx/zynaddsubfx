@@ -130,8 +130,12 @@ void GUI::destroyUi(ui_handle_t ui)
 
 #define END }},
 
+struct uiPorts {
+    static rtosc::Ports ports;
+};
+
 //DSL based ports
-static rtosc::Ports ports = {
+rtosc::Ports uiPorts::ports = {
     BEGIN("show:T") {
         ui->showUI();
     } END
@@ -181,7 +185,7 @@ void GUI::raiseUi(ui_handle_t gui, const char *message)
     d.loc = buffer;
     d.loc_size = 1024;
     d.obj = gui;
-    ports.dispatch(message+1, d);
+    uiPorts::ports.dispatch(message+1, d);
 }
 
 void GUI::raiseUi(ui_handle_t gui, const char *dest, const char *args, ...)

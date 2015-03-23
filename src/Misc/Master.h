@@ -26,6 +26,7 @@
 #include "../globals.h"
 #include "Microtonal.h"
 #include <rtosc/miditable.h>
+#include <rtosc/ports.h>
 
 #include "Bank.h"
 #include "Recorder.h"
@@ -155,7 +156,7 @@ class Master
 
         class FFTwrapper * fft;
 
-        static rtosc::Ports &ports;
+        static rtosc::Ports ports;
         float  volume;
 
         //Statistics on output levels
