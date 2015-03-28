@@ -52,6 +52,9 @@ void set_realtime();
 /**Os independent sleep in microsecond*/
 void os_sleep(long length);
 
+//! returns pid padded to maximum pid lenght, posix conform
+std::string os_pid_as_padded_string();
+
 std::string legalizeFilename(std::string filename);
 
 extern float *denormalkillbuf; /**<the buffer to add noise in order to avoid denormalisation*/

@@ -30,10 +30,13 @@
 #include <sys/stat.h>
 #include <cassert>
 #include <cstring>
+#include <unistd.h> // access()
+#include <fstream> // std::istream
 
 #include "Nio.h"
 #include "OutMgr.h"
 #include "InMgr.h"
+#include "Misc/Util.h"
 
 #include "JackEngine.h"
 
@@ -65,6 +68,8 @@ bool JackEngine::connectServer(string server)
     string postfix    = Nio::getPostfix();
     if(!postfix.empty())
         clientname += "_" + postfix;
+    clientname += "_" + os_pid_as_padded_string();
+
     jack_status_t jackstatus;
     bool use_server_name = server.size() && server.compare("default") != 0;
     jack_options_t jopts = (jack_options_t)
