@@ -24,9 +24,10 @@ OutMgr    *out = NULL;
 EngineMgr *eng = NULL;
 string     postfix;
 
-bool   Nio::autoConnect   = false;
-string Nio::defaultSource = IN_DEFAULT;
-string Nio::defaultSink   = OUT_DEFAULT;
+bool   Nio::autoConnect     = false;
+bool   Nio::pidInClientName = false;
+string Nio::defaultSource   = IN_DEFAULT;
+string Nio::defaultSink     = OUT_DEFAULT;
 
 void Nio::init(class Master *master)
 {

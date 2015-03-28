@@ -83,7 +83,8 @@ bool JackMultiEngine::Start(void)
     string postfix    = Nio::getPostfix();
     if(!postfix.empty())
         clientname += "_" + postfix;
-    clientname += "_" + os_pid_as_padded_string();
+    if(Nio::pidInClientName)
+        clientname += "_" + os_pid_as_padded_string();
     jack_status_t jackstatus;
 
     impl->client = jack_client_open(clientname.c_str(), JackNullOption, &jackstatus);

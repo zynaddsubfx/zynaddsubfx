@@ -68,7 +68,8 @@ bool JackEngine::connectServer(string server)
     string postfix    = Nio::getPostfix();
     if(!postfix.empty())
         clientname += "_" + postfix;
-    clientname += "_" + os_pid_as_padded_string();
+    if(Nio::pidInClientName)
+        clientname += "_" + os_pid_as_padded_string();
 
     jack_status_t jackstatus;
     bool use_server_name = server.size() && server.compare("default") != 0;
