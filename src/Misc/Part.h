@@ -54,8 +54,8 @@ class Part
                                   int masterkeyshift) REALTIME;
         void AllNotesOff() REALTIME; //panic
         void SetController(unsigned int type, int par) REALTIME;
-        void RelaseSustainedKeys() REALTIME; //this is called when the sustain pedal is relased
-        void RelaseAllKeys() REALTIME; //this is called on AllNotesOff controller
+        void ReleaseSustainedKeys() REALTIME; //this is called when the sustain pedal is released
+        void ReleaseAllKeys() REALTIME; //this is called on AllNotesOff controller
 
         /* The synthesizer part output */
         void ComputePartSmps() REALTIME; //Part output
@@ -119,7 +119,7 @@ class Part
 
         bool Ppolymode; //Part mode - 0=monophonic , 1=polyphonic
         bool Plegatomode; // 0=normal, 1=legato
-        unsigned char Pkeylimit; //how many keys are alowed to be played same time (0=off), the older will be relased
+        unsigned char Pkeylimit; //how many keys are alowed to be played same time (0=off), the older will be released
 
         char *Pname; //name of the instrument
         struct { //instrument additional information
@@ -136,7 +136,7 @@ class Part
         *partfxinputr[NUM_PART_EFX + 1];          //partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
 
         enum NoteStatus {
-            KEY_OFF, KEY_PLAYING, KEY_RELASED_AND_SUSTAINED, KEY_RELASED
+            KEY_OFF, KEY_PLAYING, KEY_RELEASED_AND_SUSTAINED, KEY_RELEASED
         };
 
         float volume, oldvolumel, oldvolumer; //this is applied by Master
@@ -155,7 +155,7 @@ class Part
     private:
         void RunNote(unsigned k);
         void KillNotePos(int pos);
-        void RelaseNotePos(int pos);
+        void ReleaseNotePos(int pos);
         void MonoMemRenote(); // MonoMem stuff.
 
         int killallnotes; //is set to 1 if I want to kill all notes
@@ -191,7 +191,7 @@ class Part
            store the velocity and masterkeyshift values of a given note (the list only store note values).
            For example 'monomem[note].velocity' would be the velocity value of the note 'note'.*/
 
-        PartNotes partnote[POLIPHONY];
+        PartNotes partnote[POLYPHONY];
 
         float oldfreq;    //this is used for portamento
         Microtonal *microtonal;

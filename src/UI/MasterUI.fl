@@ -462,7 +462,7 @@ if (fl_choice("The file *might* exist. \\nOverwrite it?","No","Yes",NULL)) {
         }
         Fl_Button {} {
           label {Panic!}
-          callback {virkeyboard->relaseallkeys();
+          callback {virkeyboard->releaseallkeys();
           o->oscWrite("Panic");}
           xywh {285 34 105 53} color 90 labelfont 1
           class Fl_Osc_Button
@@ -1034,7 +1034,7 @@ bankui->show();}
         }
         Fl_Choice partrcv {
           label {Midi Channel Receive}
-          callback {virkeys->relaseallkeys(0);
+          callback {virkeys->releaseallkeys(0);
 virkeys->midich=(int) o->value();} open
           tooltip {receive from Midi channel} xywh {140 157 65 18} down_box BORDER_BOX labelsize 10 align 130 textfont 1
           code0 {char nrstr[10]; for(int i=0;i<NUM_MIDI_CHANNELS;i++){sprintf(nrstr,"Ch%d",i+1);if (i!=9) o->add(nrstr); else o->add("Dr10");};}
@@ -1375,7 +1375,7 @@ pthread_mutex_unlock(&master->mutex);*/}
       }
       Fl_Button {} {
         label {Stop ALL sounds!}
-        callback {virkeyboard->relaseallkeys();
+        callback {virkeyboard->releaseallkeys();
         o->oscWrite("Panic");}
         xywh {5 149 115 31} color 90 labelfont 1 labelsize 10
         class Fl_Osc_Button
@@ -1394,7 +1394,7 @@ simpleglobalfinedetuneslider->do_callback();}
       }
       Fl_Counter simplenpartcounter {
         label Part
-        callback {virkeys->relaseallkeys(0);
+        callback {virkeys->releaseallkeys(0);
 npartcounter->value(o->value());
 npart=(int) o->value()-1;
 
@@ -1406,7 +1406,7 @@ simplerefresh();}
       }
       Fl_Counter {} {
         label {Keyb.Oct.}
-        callback {virkeys->relaseallkeys(0);
+        callback {virkeys->releaseallkeys(0);
 virkeys->midioct=(int) o->value();
 virkeys->take_focus();}
         tooltip {Midi Octave} xywh {5 190 55 20} type Simple labelsize 11 align 8 when 6 minimum 0 maximum 5 step 1 textfont 1 textsize 11

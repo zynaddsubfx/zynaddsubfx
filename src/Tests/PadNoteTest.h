@@ -161,7 +161,7 @@ class PadNoteTest:public CxxTest::TestSuite
             TS_ASSERT_DELTA(outL[255], 0.0660f, 0.0005f);
 
 
-            note->relasekey();
+            note->releasekey();
 
 
             note->noteout(outL, outR);

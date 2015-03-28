@@ -200,7 +200,7 @@ Part::Part(Allocator &alloc, Microtonal *microtonal_, FFTwrapper *fft_)
     oldfreq      = -1.0f;
 
 
-    for(int i = 0; i < POLIPHONY; ++i) {
+    for(int i = 0; i < POLYPHONY; ++i) {
         partnote[i].status = KEY_OFF;
         partnote[i].note   = -1;
         partnote[i].itemsplaying = 0;
@@ -307,7 +307,7 @@ void Part::defaultsinstrument()
  */
 void Part::cleanup(bool final_)
 {
-    for(int k = 0; k < POLIPHONY; ++k)
+    for(int k = 0; k < POLYPHONY; ++k)
         KillNotePos(k);
     for(int i = 0; i < synth->buffersize; ++i) {
         partoutl[i] = final_ ? 0.0f : denormalkillbuf[i];
@@ -352,7 +352,7 @@ void Part::NoteOn(unsigned char note,
                   int masterkeyshift)
 {
     // Legato and MonoMem used vars:
-    int  posb = POLIPHONY - 1; // Just a dummy initial value.
+    int  posb = POLYPHONY - 1; // Just a dummy initial value.
     bool legatomodevalid = false; //true when legato mode is determined applicable.
     bool doinglegato     = false; // true when we determined we do a legato note.
     bool ismonofirstnote = false; /*(In Mono/Legato) true when we determined
@@ -368,7 +368,7 @@ void Part::NoteOn(unsigned char note,
         monomem[note].velocity  = velocity; // Store this note's velocity.
         monomem[note].mkeyshift = masterkeyshift; /* Store masterkeyshift too*/
         if((partnote[lastpos].status != KEY_PLAYING)
-           && (partnote[lastpos].status != KEY_RELASED_AND_SUSTAINED))
+           && (partnote[lastpos].status != KEY_RELEASED_AND_SUSTAINED))
             ismonofirstnote = true;  // No other keys are held or sustained.
     } else if(!monomemEmpty())
         monomemClear();
@@ -376,7 +376,7 @@ void Part::NoteOn(unsigned char note,
     lastnote = note;
 
     int pos = -1;
-    for(int i = 0; i < POLIPHONY; ++i)
+    for(int i = 0; i < POLYPHONY; ++i)
         if(partnote[i].status == KEY_OFF) {
             pos = i;
             break;
@@ -401,14 +401,14 @@ void Part::NoteOn(unsigned char note,
             }
             else {
                 // Legato mode is valid, but this is only a first note.
-                for(int i = 0; i < POLIPHONY; ++i)
+                for(int i = 0; i < POLYPHONY; ++i)
                     if((partnote[i].status == KEY_PLAYING)
-                       || (partnote[i].status == KEY_RELASED_AND_SUSTAINED))
-                        RelaseNotePos(i);
+                       || (partnote[i].status == KEY_RELEASED_AND_SUSTAINED))
+                        ReleaseNotePos(i);
 
                 // Set posb
-                posb = (pos + 1) % POLIPHONY; //We really want it (if the following fails)
-                for(int i = 0; i < POLIPHONY; ++i)
+                posb = (pos + 1) % POLYPHONY; //We really want it (if the following fails)
+                for(int i = 0; i < POLYPHONY; ++i)
                     if((partnote[i].status == KEY_OFF) && (pos != i)) {
                         posb = i;
                         break;
@@ -419,17 +419,17 @@ void Part::NoteOn(unsigned char note,
     }
     else     // Legato mode is either off or non-applicable.
     if(!Ppolymode) {   //if the mode is 'mono' turn off all other notes
-        for(int i = 0; i < POLIPHONY; ++i)
+        for(int i = 0; i < POLYPHONY; ++i)
             if(partnote[i].status == KEY_PLAYING)
-                RelaseNotePos(i);
-        RelaseSustainedKeys();
+                ReleaseNotePos(i);
+        ReleaseSustainedKeys();
     }
     lastlegatomodevalid = legatomodevalid;
 
     if(pos == -1)
         fprintf(stderr,
                 "%s",
-                "NOTES TOO MANY (> POLIPHONY) - (Part.cpp::NoteOn(..))\n");
+                "NOTES TOO MANY (> POLYPHONY) - (Part.cpp::NoteOn(..))\n");
     else {
         //start the note
         partnote[pos].status = KEY_PLAYING;
@@ -639,29 +639,29 @@ void Part::NoteOn(unsigned char note,
             }
     }
 
-    //this only relase the keys if there is maximum number of keys allowed
+    //this only release the keys if there is maximum number of keys allowed
     setkeylimit(Pkeylimit);
 }
 
 /*
  * Note Off Messages
  */
-void Part::NoteOff(unsigned char note) //relase the key
+void Part::NoteOff(unsigned char note) //release the key
 {
     // This note is released, so we remove it from the list.
     if(!monomemEmpty())
         monomemPop(note);
 
-    for(int i = POLIPHONY - 1; i >= 0; i--) //first note in, is first out if there are same note multiple times
+    for(int i = POLYPHONY - 1; i >= 0; i--) //first note in, is first out if there are same note multiple times
         if((partnote[i].status == KEY_PLAYING) && (partnote[i].note == note)) {
             if(!ctl.sustain.sustain) { //the sustain pedal is not pushed
                 if(!Ppolymode && !monomemEmpty())
                     MonoMemRenote();//Play most recent still active note
                 else
-                    RelaseNotePos(i);
+                    ReleaseNotePos(i);
             }
             else    //the sustain pedal is pushed
-                partnote[i].status = KEY_RELASED_AND_SUSTAINED;
+                partnote[i].status = KEY_RELEASED_AND_SUSTAINED;
         }
 }
 
@@ -679,7 +679,7 @@ void Part::PolyphonicAftertouch(unsigned char note,
         monomem[note].velocity = velocity;       // Store this note's velocity.
 
 
-    for(int i = 0; i < POLIPHONY; ++i)
+    for(int i = 0; i < POLYPHONY; ++i)
         if((partnote[i].note == note) && (partnote[i].status == KEY_PLAYING)) {
             /* update velocity */
             // compute the velocity offset
@@ -755,14 +755,14 @@ void Part::SetController(unsigned int type, int par)
         case C_sustain:
             ctl.setsustain(par);
             if(ctl.sustain.sustain == 0)
-                RelaseSustainedKeys();
+                ReleaseSustainedKeys();
             break;
         case C_allsoundsoff:
             AllNotesOff(); //Panic
             break;
         case C_resetallcontrollers:
             ctl.resetall();
-            RelaseSustainedKeys();
+            ReleaseSustainedKeys();
             if(ctl.volume.receive != 0)
                 volume = ctl.volume.volume;
             else
@@ -782,7 +782,7 @@ void Part::SetController(unsigned int type, int par)
             //more update to add here if I add controllers
             break;
         case C_allnotesoff:
-            RelaseAllKeys();
+            ReleaseAllKeys();
             break;
         case C_resonance_center:
             ctl.setresonancecenter(par);
@@ -802,31 +802,31 @@ void Part::SetController(unsigned int type, int par)
     }
 }
 /*
- * Relase the sustained keys
+ * Release the sustained keys
  */
 
-void Part::RelaseSustainedKeys()
+void Part::ReleaseSustainedKeys()
 {
     // Let's call MonoMemRenote() on some conditions:
     if(Ppolymode == 0 && !monomemEmpty())
         if(monomemBack() != lastnote) // Sustain controller manipulation would cause repeated same note respawn without this check.
             MonoMemRenote();  // To play most recent still held note.
 
-    for(int i = 0; i < POLIPHONY; ++i)
-        if(partnote[i].status == KEY_RELASED_AND_SUSTAINED)
-            RelaseNotePos(i);
+    for(int i = 0; i < POLYPHONY; ++i)
+        if(partnote[i].status == KEY_RELEASED_AND_SUSTAINED)
+            ReleaseNotePos(i);
 }
 
 /*
- * Relase all keys
+ * Release all keys
  */
 
-void Part::RelaseAllKeys()
+void Part::ReleaseAllKeys()
 {
-    for(int i = 0; i < POLIPHONY; ++i)
-        if((partnote[i].status != KEY_RELASED)
+    for(int i = 0; i < POLYPHONY; ++i)
+        if((partnote[i].status != KEY_RELEASED)
            && (partnote[i].status != KEY_OFF)) //thanks to Frank Neumann
-            RelaseNotePos(i);
+            ReleaseNotePos(i);
 }
 
 // Call NoteOn(...) with the most recent still held key as new note
@@ -836,7 +836,7 @@ void Part::MonoMemRenote()
     unsigned char mmrtempnote = monomemBack(); // Last list element.
     monomemPop(mmrtempnote); // We remove it, will be added again in NoteOn(...).
     if(Pnoteon == 0)
-        RelaseNotePos(lastpos);
+        ReleaseNotePos(lastpos);
     else
         NoteOn(mmrtempnote, monomem[mmrtempnote].velocity,
                monomem[mmrtempnote].mkeyshift);
@@ -845,19 +845,19 @@ void Part::MonoMemRenote()
 /*
  * Release note at position
  */
-void Part::RelaseNotePos(int pos)
+void Part::ReleaseNotePos(int pos)
 {
     for(int j = 0; j < NUM_KIT_ITEMS; ++j) {
         if(partnote[pos].kititem[j].adnote)
-            partnote[pos].kititem[j].adnote->relasekey();
+            partnote[pos].kititem[j].adnote->releasekey();
 
         if(partnote[pos].kititem[j].subnote)
-            partnote[pos].kititem[j].subnote->relasekey();
+            partnote[pos].kititem[j].subnote->releasekey();
 
         if(partnote[pos].kititem[j].padnote)
-            partnote[pos].kititem[j].padnote->relasekey();
+            partnote[pos].kititem[j].padnote->releasekey();
     }
-    partnote[pos].status = KEY_RELASED;
+    partnote[pos].status = KEY_RELEASED;
 }
 
 
@@ -891,26 +891,26 @@ void Part::setkeylimit(unsigned char Pkeylimit)
     this->Pkeylimit = Pkeylimit;
     int keylimit = Pkeylimit;
     if(keylimit == 0)
-        keylimit = POLIPHONY - 5;
+        keylimit = POLYPHONY - 5;
 
     //release old keys if the number of notes>keylimit
     if(Ppolymode != 0) {
         int notecount = 0;
-        for(int i = 0; i < POLIPHONY; ++i)
-            if((partnote[i].status == KEY_PLAYING) || (partnote[i].status == KEY_RELASED_AND_SUSTAINED))
+        for(int i = 0; i < POLYPHONY; ++i)
+            if((partnote[i].status == KEY_PLAYING) || (partnote[i].status == KEY_RELEASED_AND_SUSTAINED))
                 notecount++;
 
         int oldestnotepos = -1;
         if(notecount > keylimit)   //find out the oldest note
-            for(int i = 0; i < POLIPHONY; ++i) {
+            for(int i = 0; i < POLYPHONY; ++i) {
                 int maxtime = 0;
-                if(((partnote[i].status == KEY_PLAYING) || (partnote[i].status == KEY_RELASED_AND_SUSTAINED)) && (partnote[i].time > maxtime)) {
+                if(((partnote[i].status == KEY_PLAYING) || (partnote[i].status == KEY_RELEASED_AND_SUSTAINED)) && (partnote[i].time > maxtime)) {
                     maxtime = partnote[i].time;
                     oldestnotepos = i;
                 }
             }
         if(oldestnotepos != -1)
-            RelaseNotePos(oldestnotepos);
+            ReleaseNotePos(oldestnotepos);
     }
 }
 
@@ -973,7 +973,7 @@ void Part::ComputePartSmps()
             partfxinputr[nefx][i] = 0.0f;
         }
 
-    for(unsigned k = 0; k < POLIPHONY; ++k) {
+    for(unsigned k = 0; k < POLYPHONY; ++k) {
         if(partnote[k].status == KEY_OFF)
             continue;
         partnote[k].time++;
@@ -1009,7 +1009,7 @@ void Part::ComputePartSmps()
             partoutl[i] *= tmp;
             partoutr[i] *= tmp;
         }
-        for(int k = 0; k < POLIPHONY; ++k)
+        for(int k = 0; k < POLYPHONY; ++k)
             KillNotePos(k);
         killallnotes = false;
         for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx)
@@ -1057,7 +1057,7 @@ void Part::setkititemstatus(unsigned kititem, bool Penabled_)
         kkit.Pname[0] = '\0';
 
         //Reset notes s.t. stale buffers will not get read
-        for(int k = 0; k < POLIPHONY; ++k)
+        for(int k = 0; k < POLYPHONY; ++k)
             KillNotePos(k);
     }
     else {
@@ -1216,7 +1216,7 @@ void Part::kill_rt(void)
 {
     for(int i=0; i<NUM_PART_EFX; ++i)
         partefx[i]->kill();
-    for(int k = 0; k < POLIPHONY; ++k)
+    for(int k = 0; k < POLYPHONY; ++k)
         KillNotePos(k);
 }
 

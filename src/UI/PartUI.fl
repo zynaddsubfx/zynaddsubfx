@@ -476,7 +476,7 @@ osc->write("/setkeylimit", "i", val);} open
         label Sustain
         callback {//TODO
             /*if (ctl.sustain.receive==0) {
-                RelaseSustainedKeys();
+                ReleaseSustainedKeys();
                 ctl.setsustain(0);
             };*/}
         tooltip {Sustain pedal enable} xywh {205 80 60 20} box THIN_UP_BOX down_box DOWN_BOX labelsize 10

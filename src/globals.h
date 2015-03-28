@@ -110,9 +110,9 @@ typedef std::complex<fftw_real> fft_t;
 #define NUM_VOICES 8
 
 /*
- * The poliphony (notes)
+ * The polyphony (notes)
  */
-#define POLIPHONY 60
+#define POLYPHONY 60
 
 /*
  * Number of system effects

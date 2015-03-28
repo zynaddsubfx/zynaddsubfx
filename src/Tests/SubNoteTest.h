@@ -128,7 +128,7 @@ class SubNoteTest:public CxxTest::TestSuite
 
             TS_ASSERT_DELTA(outL[255], 0.0000f, 0.0001f);
 
-            note->relasekey();
+            note->releasekey();
 
 
             note->noteout(outL, outR);
