@@ -5,7 +5,7 @@ compiler:
     - clang
 
 before_install:
-    - sudo apt-get update && sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev
+    - sudo apt-get update && sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev liblo-dev
 
 script:
     - mkdir build && cd build
