@@ -4,12 +4,11 @@ compiler:
     - gcc
 
 before_install:
-    - if [ "$CXX" == "g++" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
-
-install:
-    - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-4.8; fi
-    - if [ "$CXX" == "g++" ]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50; fi
-    - sudo apt-get update && sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev liblo-dev
+    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+    - sudo apt-get -qq update
+    - sudo apt-get -qq install g++-4.8
+    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
+    - sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev liblo-dev
 
 script:
     - mkdir build && cd build
