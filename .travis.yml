@@ -1,0 +1,14 @@
+language: cpp
+
+compiler:
+    - gcc
+    - clang
+
+before_install:
+    - sudo apt-get update && sudo apt-get install zlib-dev mxml-dev fftw3-dev cxxtest
+
+script:
+    - mkdir build && cd build
+    - cmake ..
+    - make
+    - ctest --output-on-failure
