@@ -172,6 +172,8 @@ static rtosc::Ports ports = {
 
 void GUI::raiseUi(ui_handle_t gui, const char *message)
 {
+    if(!gui)
+        return;
     MasterUI *mui = (MasterUI*)gui;
     mui->osc->tryLink(message);
     //printf("got message for UI '%s'\n", message);

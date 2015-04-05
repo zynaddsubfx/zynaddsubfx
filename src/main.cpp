@@ -432,7 +432,9 @@ int main(int argc, char *argv[])
     }
 
 
-    gui = GUI::createUi(middleware->spawnUiApi(), &Pexitprogram);
+    gui = NULL;
+    if(!noui)
+        gui = GUI::createUi(middleware->spawnUiApi(), &Pexitprogram);
     middleware->setUiCallback(GUI::raiseUi, gui);
     middleware->setIdleCallback([](){GUI::tickUi(gui);});
     middlewarepointer = middleware;
