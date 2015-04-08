@@ -235,7 +235,7 @@ class ADvoiceUI {open : {public Fl_Group}
                 callback {if (o->value()==0) voiceFMfreqenvgroup->deactivate();
 else voiceFMfreqenvgroup->activate();
 o->redraw();}
-                tooltip {Forced Relase} xywh {545 305 50 10} down_box DOWN_BOX labelfont 1 labelsize 11
+                tooltip {Forced Release} xywh {545 305 50 10} down_box DOWN_BOX labelfont 1 labelsize 11
                 code0 {o->init("PFMFreqEnvelopeEnabled");}
                 class Fl_Osc_Check
               }
@@ -301,7 +301,7 @@ o->redraw();}
                 callback {if (o->value()==0) voiceFMampenvgroup->deactivate();
 else voiceFMampenvgroup->activate();
 o->redraw();}
-                tooltip {Forced Relase} xywh {545 150 50 10} down_box DOWN_BOX labelfont 1 labelsize 11
+                tooltip {Forced Release} xywh {545 150 50 10} down_box DOWN_BOX labelfont 1 labelsize 11
                 code0 {o->init("PFMAmpEnvelopeEnabled");}
                 class Fl_Osc_Check
               }
@@ -433,7 +433,7 @@ o->redraw();}
               callback {if (o->value()==0) voicefreqenvgroup->deactivate();
 else voicefreqenvgroup->activate();
 o->redraw();}
-              tooltip {Forced Relase} xywh {15 310 50 10} down_box DOWN_BOX labelfont 1 labelsize 11
+              tooltip {Forced Release} xywh {15 310 50 10} down_box DOWN_BOX labelfont 1 labelsize 11
               code0 {o->init("PFreqEnvelopeEnabled");}
               class Fl_Osc_Check
             }
@@ -448,7 +448,7 @@ o->redraw();}
               callback {if (o->value()==0) voicefreqlfogroup->deactivate();
 else voicefreqlfogroup->activate();
 o->redraw();}
-              tooltip {Forced Relase} xywh {225 311 55 10} down_box DOWN_BOX labelfont 1 labelsize 11
+              tooltip {Forced Release} xywh {225 311 55 10} down_box DOWN_BOX labelfont 1 labelsize 11
               code0 {o->init("PFreqLfoEnabled");}
               class Fl_Osc_Check
             }
@@ -644,7 +644,7 @@ voiceonbutton->redraw();} open
             callback {if (o->value()==0) voiceampenvgroup->deactivate();
 else voiceampenvgroup->activate();
 o->redraw();}
-            tooltip {Forced Relase} xywh {15 110 50 10} down_box DOWN_BOX labelfont 1 labelsize 11
+            tooltip {Forced Release} xywh {15 110 50 10} down_box DOWN_BOX labelfont 1 labelsize 11
             code0 {o->init("PAmpEnvelopeEnabled");}
             class Fl_Osc_Check
           }
@@ -659,7 +659,7 @@ o->redraw();}
             callback {if (o->value()==0) voiceamplfogroup->deactivate();
 else voiceamplfogroup->activate();
 o->redraw();}
-            tooltip {Forced Relase} xywh {15 185 55 10} down_box DOWN_BOX labelfont 1 labelsize 11
+            tooltip {Forced Release} xywh {15 185 55 10} down_box DOWN_BOX labelfont 1 labelsize 11
             code0 {o->init("PAmpLfoEnabled");}
             class Fl_Osc_Check
           }
@@ -692,7 +692,7 @@ o->redraw();}
             callback {if (o->value()==0) voicefilterenvgroup->deactivate();
 else voicefilterenvgroup->activate();
 o->redraw();}
-            tooltip {Forced Relase} xywh {255 119 55 10} down_box DOWN_BOX labelfont 1 labelsize 11
+            tooltip {Forced Release} xywh {255 119 55 10} down_box DOWN_BOX labelfont 1 labelsize 11
             code0 {o->init("PFilterEnvelopeEnabled");}
             class Fl_Osc_Check
           }
@@ -707,7 +707,7 @@ o->redraw();}
             callback {if (o->value()==0) voicefilterlfogroup->deactivate();
 else voicefilterlfogroup->activate();
 o->redraw();}
-            tooltip {Forced Relase} xywh {255 196 55 10} down_box DOWN_BOX labelfont 1 labelsize 11
+            tooltip {Forced Release} xywh {255 196 55 10} down_box DOWN_BOX labelfont 1 labelsize 11
             code0 {o->init("PFilterLfoEnabled");}
             class Fl_Osc_Check
           }

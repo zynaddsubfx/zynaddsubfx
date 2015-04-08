@@ -34,7 +34,7 @@ class Envelope
         Envelope(class EnvelopeParams &pars, float basefreq);
         /**Destructor*/
         ~Envelope();
-        void relasekey();
+        void releasekey();
         float envout();
         float envout_dB();
         /**Determines the status of the Envelope
@@ -51,7 +51,7 @@ class Envelope
         int   linearenvelope;
 
         int   currentpoint;    //current envelope point (starts from 1)
-        int   forcedrelase;
+        int   forcedrelease;
         bool  keyreleased;    //if the key was released
         bool  envfinish;
         float t; // the time from the last point

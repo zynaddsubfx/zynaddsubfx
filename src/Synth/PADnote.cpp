@@ -413,9 +413,9 @@ int PADnote::finished() const
     return finished_;
 }
 
-void PADnote::relasekey()
+void PADnote::releasekey()
 {
-    NoteGlobalPar.FreqEnvelope->relasekey();
-    NoteGlobalPar.FilterEnvelope->relasekey();
-    NoteGlobalPar.AmpEnvelope->relasekey();
+    NoteGlobalPar.FreqEnvelope->releasekey();
+    NoteGlobalPar.FilterEnvelope->releasekey();
+    NoteGlobalPar.AmpEnvelope->releasekey();
 }

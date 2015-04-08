@@ -134,7 +134,7 @@ freeedit->redraw();}
       }
       Fl_Check_Button forcedreleasecheck {
         label frcR
-        tooltip {Forced Relase} xywh {410 165 40 15} down_box DOWN_BOX labelsize 10
+        tooltip {Forced Release} xywh {410 165 40 15} down_box DOWN_BOX labelsize 10
         code0 {o->init("Pforcedrelease");}
         code1 {//TODO if (Pfreemode==0) o->hide();}
         class Fl_Osc_Check
@@ -218,7 +218,7 @@ envfree->redraw();}
         }
         Fl_Check_Button e1forcedrelease {
           label frcR
-          tooltip {Forced Relase} xywh {180 35 20 15} down_box DOWN_BOX labelsize 10 align 6
+          tooltip {Forced Release} xywh {180 35 20 15} down_box DOWN_BOX labelsize 10 align 6
           code0 {o->init("Pforcedrelease");}
           class Fl_Osc_Check
         }
@@ -380,7 +380,7 @@ envfree->redraw();}
         }
         Fl_Check_Button e3forcedrelease {
           label frcR
-          tooltip {Forced Relase} xywh {250 30 15 20} down_box DOWN_BOX labelsize 10 align 6
+          tooltip {Forced Release} xywh {250 30 15 20} down_box DOWN_BOX labelsize 10 align 6
           code0 {o->init("Pforcedrelease");}
           class Fl_Osc_Check
         }

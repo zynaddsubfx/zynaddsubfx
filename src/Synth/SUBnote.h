@@ -36,7 +36,7 @@ class SUBnote:public SynthNote
         void legatonote(LegatoParams pars);
 
         int noteout(float *outl, float *outr); //note output,return 0 if the note is finished
-        void relasekey();
+        void releasekey();
         int finished() const;
     private:
 

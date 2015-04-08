@@ -578,17 +578,17 @@ int SUBnote::noteout(float *outl, float *outr)
 }
 
 /*
- * Relase Key (Note Off)
+ * Release Key (Note Off)
  */
-void SUBnote::relasekey()
+void SUBnote::releasekey()
 {
-    AmpEnvelope->relasekey();
+    AmpEnvelope->releasekey();
     if(FreqEnvelope)
-        FreqEnvelope->relasekey();
+        FreqEnvelope->releasekey();
     if(BandWidthEnvelope)
-        BandWidthEnvelope->relasekey();
+        BandWidthEnvelope->releasekey();
     if(GlobalFilterEnvelope)
-        GlobalFilterEnvelope->relasekey();
+        GlobalFilterEnvelope->releasekey();
 }
 
 /*

@@ -37,7 +37,7 @@ class PADnote:public SynthNote
 
         int noteout(float *outl, float *outr);
         int finished() const;
-        void relasekey();
+        void releasekey();
     private:
         void setup(float freq, float velocity, int portamento_,
                    int midinote, bool legato = false);

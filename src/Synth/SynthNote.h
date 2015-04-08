@@ -57,7 +57,7 @@ class SynthNote
 
         //TODO fix this spelling error [noisey commit]
         /**Release the key for the note and start release portion of envelopes.*/
-        virtual void relasekey() = 0;
+        virtual void releasekey() = 0;
 
         /**Return if note is finished.
          * @return finished=1 unfinished=0*/

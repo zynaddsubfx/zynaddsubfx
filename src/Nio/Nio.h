@@ -43,6 +43,7 @@ namespace Nio
     void waveEnd(void);
 
     extern bool autoConnect;
+    extern bool pidInClientName;
     extern std::string defaultSource;
     extern std::string defaultSink;
 };

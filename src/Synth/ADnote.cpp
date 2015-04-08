@@ -1694,15 +1694,15 @@ int ADnote::noteout(float *outl, float *outr)
 
 
 /*
- * Relase the key (NoteOff)
+ * Release the key (NoteOff)
  */
-void ADnote::relasekey()
+void ADnote::releasekey()
 {
     for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
         NoteVoicePar[nvoice].releasekey();
-    NoteGlobalPar.FreqEnvelope->relasekey();
-    NoteGlobalPar.FilterEnvelope->relasekey();
-    NoteGlobalPar.AmpEnvelope->relasekey();
+    NoteGlobalPar.FreqEnvelope->releasekey();
+    NoteGlobalPar.FilterEnvelope->releasekey();
+    NoteGlobalPar.AmpEnvelope->releasekey();
 }
 
 /*
@@ -1721,15 +1721,15 @@ void ADnote::Voice::releasekey()
     if(!Enabled)
         return;
     if(AmpEnvelope)
-        AmpEnvelope->relasekey();
+        AmpEnvelope->releasekey();
     if(FreqEnvelope)
-        FreqEnvelope->relasekey();
+        FreqEnvelope->releasekey();
     if(FilterEnvelope)
-        FilterEnvelope->relasekey();
+        FilterEnvelope->releasekey();
     if(FMFreqEnvelope)
-        FMFreqEnvelope->relasekey();
+        FMFreqEnvelope->releasekey();
     if(FMAmpEnvelope)
-        FMAmpEnvelope->relasekey();
+        FMAmpEnvelope->releasekey();
 }
 
 void ADnote::Voice::kill(Allocator &memory)

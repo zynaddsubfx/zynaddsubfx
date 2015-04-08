@@ -221,10 +221,10 @@ if ((event==FL_PUSH)||(event==FL_DRAG)||(event==FL_RELEASE)){
 
    if ((event==FL_PUSH)&&(Fl::event_shift()!=0)) {
        if (pressed[kpos]==0) presskey(kpos,0,1);
-          else relasekey(kpos,1);
+          else releasekey(kpos,1);
    };
    if ((event==FL_RELEASE)&&(Fl::event_shift()==0))
-        relaseallkeys(1);
+        releaseallkeys(1);
    take_focus();
 };
 
@@ -255,7 +255,7 @@ if ((event==FL_KEYDOWN)||(event==FL_KEYUP)){
    if (kpos==-1) return(0);
    if ((event==FL_KEYUP) && (Fl::event_key(key)==0) && (Fl::get_key(key)!=0)) return(0);
    if (event==FL_KEYDOWN) presskey(kpos,0,2);
-      else relasekey(kpos,2);
+      else releasekey(kpos,2);
 };
 
 return(1);} {}
@@ -265,13 +265,13 @@ return(1);} {}
 //when the user uses the shift key
 if (nk>=N_OCT*12) return;
 if ((nk<0)&&(exclusive==0)) {
-  relaseallkeys(type);
+  releaseallkeys(type);
   return;
 };
 if (nk<0) return;
 if (pressed[nk]!=0) return;//the key is already pressed
 
-if (exclusive!=0) relaseallkeys(type);
+if (exclusive!=0) releaseallkeys(type);
 pressed[nk]=type;
 
 damage(1);
@@ -282,7 +282,7 @@ if (rndvelocity!=0){
 
 osc->write(loc+"noteOn", "iii", midich,nk+midioct*12,(int)vel);} {}
   }
-  Function {relasekey(int nk,int type)} {} {
+  Function {releasekey(int nk,int type)} {} {
     code {if ((nk<0)||(nk>=N_OCT*12)) return;
 if (pressed[nk]==0) return;//the key is not pressed
 if ((type!=0)&&(pressed[nk]!=type)) return;
@@ -294,8 +294,8 @@ damage(1);
 
 osc->write(loc+"noteOff", "ii", midich,nk+12*midioct);} {}
   }
-  Function {relaseallkeys(int type)} {} {
-    code {for (int i=0;i<N_OCT*12;i++) relasekey(i,type);} {}
+  Function {releaseallkeys(int type)} {} {
+    code {for (int i=0;i<N_OCT*12;i++) releasekey(i,type);} {}
   }
   decl {int pressed[N_OCT*12+1];} {private local
   }
@@ -319,7 +319,7 @@ class VirKeyboard {open
   } {
     Fl_Window virkeyboardwindow {
       label {Virtual Keyboard - ZynAddSubFX}
-      callback {relaseallkeys();
+      callback {releaseallkeys();
 virkeyboardwindow->hide();} open
       xywh {103 620 650 130} type Double visible
     } {
@@ -331,7 +331,7 @@ virkeyboardwindow->hide();} open
       }
       Fl_Counter {} {
         label {"qwer.." Oct}
-        callback {relaseallkeys();
+        callback {releaseallkeys();
 virkeys->keyoct1=(int) o->value();
 virkeys->take_focus();}
         tooltip {keys "q2w3er5t6y..." octave} xywh {380 95 45 15} type Simple labelsize 10 align 4 when 6 minimum 0 maximum 5 step 1 textfont 1 textsize 10
@@ -339,7 +339,7 @@ virkeys->take_focus();}
       }
       Fl_Counter {} {
         label {"zxcv.." Oct}
-        callback {relaseallkeys();
+        callback {releaseallkeys();
 virkeys->keyoct2=(int) o->value();
 virkeys->take_focus();}
         tooltip {keys "zsxdcvgbh..." octave} xywh {380 110 45 15} type Simple labelsize 10 align 4 when 6 minimum 0 maximum 5 step 1 textfont 1 textsize 10
@@ -354,7 +354,7 @@ virkeys->take_focus();}
       }
       Fl_Counter {} {
         label {Oct.}
-        callback {relaseallkeys();
+        callback {releaseallkeys();
 virkeys->midioct=(int) o->value();
 virkeys->take_focus();}
         tooltip {Midi Octave} xywh {255 100 55 20} type Simple labelsize 11 align 4 when 6 minimum 0 maximum 5 step 1 textfont 1 textsize 11
@@ -362,7 +362,7 @@ virkeys->take_focus();}
       }
       Fl_Button {} {
         label Close
-        callback {relaseallkeys();
+        callback {releaseallkeys();
 virkeyboardwindow->hide();}
         xywh {545 105 55 20} box THIN_UP_BOX
       }
@@ -469,7 +469,7 @@ pitchwheelroller->do_callback();}
       }
       Fl_Choice partrcv {
         label {MIDI Ch.}
-        callback {relaseallkeys();
+        callback {releaseallkeys();
 virkeys->midich=(int) o->value();
 virkeys->take_focus();} open
         tooltip {Send to Midi Channel} xywh {20 105 65 20} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
@@ -493,9 +493,9 @@ make_window();} {}
   } {
     code {virkeyboardwindow->show();} {}
   }
-  Function {relaseallkeys()} {open
+  Function {releaseallkeys()} {open
   } {
-    code {virkeys->relaseallkeys(0);} {}
+    code {virkeys->releaseallkeys(0);} {}
   }
   decl {int midictl;} {private local
   }

@@ -51,7 +51,7 @@ class ADnote:public SynthNote
         void legatonote(LegatoParams pars);
 
         int noteout(float *outl, float *outr);
-        void relasekey();
+        void releasekey();
         int finished() const;
     private:
 

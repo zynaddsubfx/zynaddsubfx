@@ -202,6 +202,9 @@ int main(int argc, char *argv[])
             "auto-connect", 0, NULL, 'a'
         },
         {
+            "pid-in-client-name", 0, NULL, 'p'
+        },
+        {
             "output", 1, NULL, 'O'
         },
         {
@@ -228,7 +231,7 @@ int main(int argc, char *argv[])
         /**\todo check this process for a small memory leak*/
         opt = getopt_long(argc,
                           argv,
-                          "l:L:r:b:o:I:O:N:e:hvaSDUY",
+                          "l:L:r:b:o:I:O:N:e:hvapSDUY",
                           opts,
                           &option_index);
         char *optarguments = optarg;
@@ -315,6 +318,9 @@ int main(int argc, char *argv[])
             case 'a':
                 Nio::autoConnect = true;
                 break;
+            case 'p':
+                Nio::pidInClientName = true;
+                break;
             case 'e':
                 GETOP(execAfterInit);
                 break;
@@ -361,6 +367,8 @@ int main(int argc, char *argv[])
         "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
              << "  -N , --named\t\t\t\t Postfix IO Name when possible\n"
              << "  -a , --auto-connect\t\t\t AutoConnect when using JACK\n"
+             << "  -p , --pid-in-client-name\t\t Append PID to (JACK) "
+                "client name\n"
              << "  -O , --output\t\t\t\t Set Output Engine\n"
              << "  -I , --input\t\t\t\t Set Input Engine\n"
              << "  -e , --exec-after-init\t\t Run post-initialization script\n"
@@ -424,7 +432,9 @@ int main(int argc, char *argv[])
     }
 
 
-    gui = GUI::createUi(middleware->spawnUiApi(), &Pexitprogram);
+    gui = NULL;
+    if(!noui)
+        gui = GUI::createUi(middleware->spawnUiApi(), &Pexitprogram);
     middleware->setUiCallback(GUI::raiseUi, gui);
     middleware->setIdleCallback([](){GUI::tickUi(gui);});
     middlewarepointer = middleware;
