@@ -364,9 +364,7 @@ const DSSI_Program_Descriptor *DSSIaudiooutput::getProgram(unsigned long index)
  */
 void DSSIaudiooutput::selectProgram(unsigned long bank, unsigned long program)
 {
-    middleware->pendingSetProgram(0);
-    extern rtosc::ThreadLink *bToU;
-    bToU->write("/setprogram", "cc", 0, program);
+    middleware->pendingSetProgram(0, program);
 }
 
 /**
