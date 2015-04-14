@@ -812,6 +812,9 @@ MiddleWareImpl::~MiddleWareImpl(void)
 
     delete master;
     delete osc;
+    delete bToU;
+    delete uToB;
+
 }
 
 /** Threading When Saving
