@@ -9,11 +9,8 @@ before_install:
     - sudo apt-get -qq install g++-4.8
     - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
     - sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev
-    - git clone https://github.com/radarsat1/liblo
-    - cd liblo
-    - git checkout 0.28
-    - sudo apt-get install autoconf automake
-    - ./autogen.sh
+    - wget http://downloads.sourceforge.net/liblo/liblo-0.28.tar.gz
+    - tar xvf liblo-0.28.tar.gz && cd liblo-0.28
     - ./configure && make && sudo make install
     - cd ..
 
