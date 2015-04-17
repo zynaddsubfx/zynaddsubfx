@@ -590,7 +590,7 @@ void Master::AudioOut(float *outl, float *outr)
     DataObj d{loc_buf, 1024, this, bToU};
     memset(loc_buf, 0, sizeof(loc_buf));
     int events = 0;
-    while(uToB->hasNext() && events < 10) {
+    while(uToB && uToB->hasNext() && events < 10) {
         const char *msg = uToB->read();
 
         if(!strcmp(msg, "/load-master")) {
