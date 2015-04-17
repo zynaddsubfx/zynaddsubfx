@@ -12,8 +12,10 @@ before_install:
     - git clone https://github.com/radarsat1/liblo
     - cd liblo
     - git checkout 0.28
+    - sudo apt-get install autoconf automake
     - ./autogen.sh
     - ./configure && make && sudo make install
+    - cd ..
 
 
 script:
