@@ -57,6 +57,9 @@ static Ports partPorts = {
 #define rChangeCb obj->setPvolume(obj->Pvolume);
     rParamZyn(Pvolume, "Part Volume"),
 #undef rChangeCb
+#define rChangeCb obj->setkeylimit(obj->Pkeylimit);
+    rParamZyn(Pkeylimit,   "Key limit per part"),
+#undef rChangeCb
 #define rChangeCb
     rParamZyn(Pminkey, "Min Used Key"),
     rParamZyn(Pmaxkey, "Max Used Key"),
@@ -71,7 +74,6 @@ static Ports partPorts = {
     rToggle(Pdrummode, "Drum mode enable"),
     rToggle(Ppolymode,  "Polyphoney mode"),
     rToggle(Plegatomode, "Legato enable"),
-    rParamZyn(Pkeylimit,   "Key limit per part"),
     rParamZyn(info.Ptype, "Class of Instrument"),
     rString(info.Pauthor, MAX_INFO_TEXT_SIZE, "Instrument Author"),
     rString(info.Pcomments, MAX_INFO_TEXT_SIZE, "Instrument Comments"),

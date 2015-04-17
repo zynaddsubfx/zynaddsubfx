@@ -280,7 +280,8 @@ class PartUI {open : {public Fl_Osc_Group}
           callback {int event=Fl::event_button();
 if (event==FL_RIGHT_MOUSE){
    fprintf(stderr, "Unimplemented...\\n");
-   /*const char *tmp=fl_input("Instrument name:",(const char *)part->Pname);*/
+   const char *tmp=fl_input("Instrument name:",o->label());
+   o->oscWrite("Pname", "s", tmp);
    /*if (tmp!=NULL) snprintf((char *)part->Pname,PART_MAX_NAME_LEN,"%s",tmp);*/
 } else {
   if (event==FL_LEFT_MOUSE) bankui->show();
@@ -382,14 +383,14 @@ if (event==FL_RIGHT_MOUSE){
           code1 {o->init("Prcvchn");}
           class Fl_Osc_Choice
         } {}
-        Fl_Choice keylimitlist {
+        Fl_Counter keylimitlist {
           label KLmt
-          callback {//TODO special case
-          int val=0;
-val=atoi(o->text());
-osc->write("/setkeylimit", "i", val);} open
-          tooltip {Key Limit} xywh {215 155 50 20} down_box BORDER_BOX labelsize 10 align 8 textfont 1 textsize 10
-        } {}
+          tooltip {Key Limit} xywh {215 155 50 20} labelsize 10 align 8 textfont 1 textsize 10
+          code0 {o->init("Pkeylimit",'i');}
+          code1 {o->step(1.0,10.0);}
+          code2 {o->range(0,127);}
+          class Fl_Osc_Counter
+        }
         Fl_Choice {} {
           label {Mode :}
           tooltip {Poly, Mono or Legato mode} xywh {80 130 64 18} down_box BORDER_BOX labelfont 1 labelsize 11 textfont 1 textsize 10
@@ -1014,24 +1015,7 @@ end();
 
 
 //if (config.ui.showinstrumentinfo!=0) instrumenteditwindow->show();
-
-int klimits[]={1,2,3,4,5,6,7,8,9,10,15,20,30,50,100,0};
-
-keylimitlist->add("OFF");
-int k=0;
-int val=-1;
-char tmp[10];
-while (klimits[k]!=0){
-	sprintf(tmp,"%d",klimits[k]);
-	keylimitlist->add(tmp);
-	if (val==-1){
-		/*if (klimits[k]>part->Pkeylimit) val=k;*/
-	};
-	k++;
-};
-
-if (val==-1) val=k;
-keylimitlist->value(val);} {}
+} {}
   }
   Function {showparameters(int kititem,int engine)} {open
   } {
