@@ -99,7 +99,7 @@ static Ports sysefsendto =
         }}
 };
 
-Ports Master::ports = {
+static Ports master_ports = {
     rRecursp(part, 16, "Part"),//NUM_MIDI_PARTS
     rRecursp(sysefx, 4, "System Effect"),//NUM_SYS_EFX
     rRecursp(insefx, 8, "Insertion Effect"),//NUM_INS_EFX
@@ -209,6 +209,7 @@ Ports Master::ports = {
     {"undo_resume",0,0,[](const char *, rtosc::RtData &d)
         {d.reply("/undo_resume", "");}},
 };
+Ports &Master::ports = master_ports;
 
 //XXX HACKS
 Master *the_master;
