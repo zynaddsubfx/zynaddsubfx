@@ -221,6 +221,7 @@ class UI_Interface:public Fl_Osc_Interface
 
         void requestValue(string s) override
         {
+            assert(s!="/Psysefxvol-1/part0");
             //Fl_Osc_Interface::requestValue(s);
             if(impl->activeUrl() != "GUI") {
                 impl->transmitMsg("/echo", "ss", "OSC_URL", "GUI");

@@ -1101,7 +1101,7 @@ simplemaxkcounter->do_callback();}
         }
         Fl_Dial simplesyseffsend {
           xywh {300 160 30 30} maximum 127 step 1
-          code0 {o->alt_init("/","Psysefxvol"+to_s(nsyseff-1)+"/part"+to_s(npart));}
+          code0 {o->alt_init("/","Psysefxvol"+to_s(nsyseff)+"/part"+to_s(npart));}
           class Fl_Osc_Dial
         }
         Fl_Box {} {
