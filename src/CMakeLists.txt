@@ -194,7 +194,7 @@ endif()
 if(LibloEnable)
 	include_directories(${LIBLO_INCLUDE_DIRS})
 	add_definitions(-DUSE_NSM=1)
-        list(APPEND AUDIO_LIBRARIES ${LIBLO_LDFLAGS})
+    list(APPEND AUDIO_LIBRARIES ${LIBLO_LIBRARIES})
 	list(APPEND AUDIO_LIBRARY_DIRS ${LIBLO_LIBRARY_DIRS})
 	message(STATUS "Compiling with liblo")
 endif()
@@ -389,6 +389,7 @@ if (DssiEnable)
 	target_link_libraries(zynaddsubfx_dssi
         zynaddsubfx_core
 		${OS_LIBRARIES}
+        ${LIBLO_LIBRARIES}
 		)
 	if (${CMAKE_SIZEOF_VOID_P} EQUAL "8")
 		install(TARGETS zynaddsubfx_dssi LIBRARY DESTINATION lib64/dssi/)
