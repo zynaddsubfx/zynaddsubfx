@@ -193,6 +193,10 @@ static Ports master_ports = {
             Master *M =  (Master*)d.obj;
             printf("learning '%s'\n", rtosc_argument(m,0).s);
             M->midi.learn(rtosc_argument(m,0).s);}},
+    {"unlearn:s", rDoc("Remove Learning for specified address"), 0,
+        [](const char *m, RtData &d){
+            Master *M =  (Master*)d.obj;
+            M->midi.clear_entry(rtosc_argument(m,0).s);}},
     {"close-ui", rDoc("Request to close any connection named \"GUI\""), 0, [](const char *, RtData &d) {
        d.reply("/close-ui", "");}},
     {"add-rt-memory:bi", rProp(internal) rDoc("Add Additional Memory To RT MemPool"), 0,

@@ -74,11 +74,15 @@ void Fl_Osc_Slider::callback(Fl_Callback *cb, void *p)
 
 int Fl_Osc_Slider::handle(int ev)
 {
-    bool middle_mouse = (ev == FL_PUSH && Fl::event_state(FL_BUTTON2));
+    bool middle_mouse = (ev == FL_PUSH && Fl::event_state(FL_BUTTON2) && !Fl::event_shift());
     bool ctl_click    = (ev == FL_PUSH && Fl::event_state(FL_BUTTON1) && Fl::event_ctrl());
+    bool shift_middle = (ev == FL_PUSH && Fl::event_state(FL_BUTTON2) && Fl::event_shift());
     if(middle_mouse || ctl_click) {
         printf("Trying to learn...\n");
         osc->write("/learn", "s", (loc+ext).c_str());
+        return 1;
+    } else if(shift_middle) {
+        osc->write("/unlearn", "s", (loc+ext).c_str());
         return 1;
     }
     return Fl_Slider::handle(ev);
