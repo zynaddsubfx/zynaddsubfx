@@ -58,7 +58,7 @@ static Ports partPorts = {
     rParamZyn(Pvolume, "Part Volume"),
 #undef rChangeCb
 #define rChangeCb obj->setkeylimit(obj->Pkeylimit);
-    rParamZyn(Pkeylimit,   "Key limit per part"),
+    rParamI(Pkeylimit, rProp(parameter), rMap(min,0), rMap(max, POLYPHONY), "Key limit per part"),
 #undef rChangeCb
 #define rChangeCb
     rParamZyn(Pminkey, "Min Used Key"),
@@ -143,19 +143,19 @@ static Ports kitPorts = {
     rToggle(Ppadenabled, "PADsynth enable"),
     rParamZyn(Psendtoparteffect, "Effect Levels"),
     rString(Pname, PART_MAX_NAME_LEN, "Kit User Specified Label"),
-    {"padpars-data:b", rProp(internal), 0, 
+    {"padpars-data:b", rProp(internal), 0,
         [](const char *msg, RtData &d) {
             rObject &o = *(rObject*)d.obj;
             assert(o.padpars == NULL);
             o.padpars = *(decltype(o.padpars)*)rtosc_argument(msg, 0).b.data;
         }},
-    {"adpars-data:b", rProp(internal), 0, 
+    {"adpars-data:b", rProp(internal), 0,
         [](const char *msg, RtData &d) {
             rObject &o = *(rObject*)d.obj;
             assert(o.adpars == NULL);
             o.adpars = *(decltype(o.adpars)*)rtosc_argument(msg, 0).b.data;
         }},
-    {"subpars-data:b", rProp(internal), 0, 
+    {"subpars-data:b", rProp(internal), 0,
         [](const char *msg, RtData &d) {
             rObject &o = *(rObject*)d.obj;
             assert(o.subpars == NULL);
@@ -184,7 +184,7 @@ Part::Part(Allocator &alloc, Microtonal *microtonal_, FFTwrapper *fft_)
         kit[n].subpars = nullptr;
         kit[n].padpars = nullptr;
     }
-        
+
     kit[0].adpars  = new ADnoteParameters(fft);
 
     //Part's Insertion Effects init
@@ -224,7 +224,7 @@ Part::Part(Allocator &alloc, Microtonal *microtonal_, FFTwrapper *fft_)
 
     defaults();
 }
-        
+
 void Part::cloneTraits(Part &p) const
 {
 #define CLONE(x) p.x = this->x
@@ -626,7 +626,7 @@ void Part::NoteOn(unsigned char note,
                         note2.subnote =
                             memory.alloc<SUBnote>(kit[item].subpars, pars);
                     if(kit[item].padpars && kit[item].Ppadenabled)
-                        note2.padnote = 
+                        note2.padnote =
                             memory.alloc<PADnote>(kit[item].padpars, pars);
 
                     if(kit[item].adpars || kit[item].subpars || kit[item].padpars)
