@@ -70,7 +70,6 @@ if (filterwindow!=NULL){
   }
   Function {make_null_window()} {} {
     Fl_Window effnullwindow {
-      label {No Effect}
       xywh {621 881 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
@@ -78,7 +77,6 @@ if (filterwindow!=NULL){
   }
   Function {make_reverb_window()} {} {
     Fl_Window effreverbwindow {
-      label Reverb open
       xywh {386 705 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
@@ -233,7 +231,6 @@ if (filterwindow!=NULL){
   }
   Function {make_echo_window()} {} {
     Fl_Window effechowindow {
-      label Echo
       xywh {897 680 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
@@ -327,7 +324,6 @@ if (filterwindow!=NULL){
   }
   Function {make_chorus_window()} {} {
     Fl_Window effchoruswindow {
-      label Chorus open
       xywh {476 811 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
@@ -464,7 +460,6 @@ if (filterwindow!=NULL){
   }
   Function {make_phaser_window()} {} {
     Fl_Window effphaserwindow {
-      label Phaser open
       xywh {110 301 380 95} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
@@ -628,7 +623,6 @@ if (filterwindow!=NULL){
   }
   Function {make_alienwah_window()} {} {
     Fl_Window effalienwahwindow {
-      label AlienWah
       xywh {262 422 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
@@ -736,7 +730,6 @@ if (filterwindow!=NULL){
   }
   Function {make_distorsion_window()} {} {
     Fl_Window effdistorsionwindow {
-      label Distortion open
       xywh {553 286 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
@@ -899,7 +892,6 @@ if (filterwindow!=NULL){
   }
   Function {make_eq_window()} {} {
     Fl_Window effeqwindow {
-      label EQ open
       xywh {691 881 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
@@ -1018,7 +1010,6 @@ eqgraph->update();}
   }
   Function {make_dynamicfilter_window()} {} {
     Fl_Window effdynamicfilterwindow {
-      label DynFilter open
       xywh {828 359 380 100} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
@@ -1276,7 +1267,6 @@ effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);} {}
   }
   Function {make_null_window()} {} {
     Fl_Window effnullwindow {
-      label {No Effect} open
       xywh {1047 824 230 95} type Double box UP_BOX color 221 labelfont 1 labelsize 19
       code0 {set_module_parameters(o);}
       class Fl_Group visible
@@ -1284,7 +1274,6 @@ effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);} {}
   }
   Function {make_reverb_window()} {} {
     Fl_Window effreverbwindow {
-      label Reverb open
       xywh {1047 532 230 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19
       code3 {set_module_parameters(o);}
       class Fl_Group visible
@@ -1376,7 +1365,6 @@ effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);} {}
   }
   Function {make_echo_window()} {} {
     Fl_Window effechowindow {
-      label Echo open
       xywh {437 881 230 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19
       code3 {set_module_parameters(o);}
       class Fl_Group visible
@@ -1446,7 +1434,6 @@ effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);} {}
   }
   Function {make_chorus_window()} {} {
     Fl_Window effchoruswindow {
-      label Chorus open
       xywh {728 657 230 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19
       code3 {set_module_parameters(o);}
       class Fl_Group visible
@@ -1538,7 +1525,6 @@ effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);} {}
   }
   Function {make_phaser_window()} {} {
     Fl_Window effphaserwindow {
-      label Phaser open
       xywh {1047 881 230 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19
       code3 {set_module_parameters(o);}
       class Fl_Group visible
@@ -1615,7 +1601,6 @@ effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);} {}
   }
   Function {make_alienwah_window()} {} {
     Fl_Window effalienwahwindow {
-      label AlienWah open
       xywh {412 549 230 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19
       code3 {set_module_parameters(o);}
       class Fl_Group visible
@@ -1672,7 +1657,6 @@ effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);} {}
   }
   Function {make_distorsion_window()} {} {
     Fl_Window effdistorsionwindow {
-      label Distortion open
       xywh {88 881 230 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19
       code3 {set_module_parameters(o);}
       class Fl_Group visible
@@ -1799,7 +1783,6 @@ effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);} {}
   }
   Function {make_eq_window()} {} {
     Fl_Window effeqwindow {
-      label EQ open
       xywh {1047 881 230 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19
       code3 {set_module_parameters(o);}
       class Fl_Group visible
@@ -1911,7 +1894,6 @@ eqgraph->redraw();}
   }
   Function {make_dynamicfilter_window()} {} {
     Fl_Window effdynamicfilterwindow {
-      label DynFilter open
       xywh {974 596 230 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19
       code3 {set_module_parameters(o);}
       class Fl_Group visible

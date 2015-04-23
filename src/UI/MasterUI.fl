@@ -561,12 +561,12 @@ syseffectui->refresh();}
             Fl_Button {} {
               label C
               callback {presetsui->copy("/sysefx"+to_s(nsyseff)+"/");}
-              xywh {185 192 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7 hide
+              xywh {185 192 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
             }
             Fl_Button {} {
               label P
               callback { presetsui->paste("/sysefx"+to_s(nsyseff)+"/",syseffectui);} selected
-              xywh {215 192 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55 hide
+              xywh {215 192 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
             }
           }
           Fl_Group {} {
@@ -685,12 +685,12 @@ if ((int) o->value()==1){
             Fl_Button {} {
               label C
               callback {presetsui->copy(inseffectuigroup->loc());}
-              xywh {185 190 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55 hide
+              xywh {185 190 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
             }
             Fl_Button {} {
               label P
               callback {presetsui->paste(inseffectuigroup->loc(),inseffectui);}
-              xywh {215 190 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55 hide
+              xywh {215 190 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
             }
           }
         }
