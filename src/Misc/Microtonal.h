@@ -114,7 +114,7 @@ class Microtonal
         bool operator==(const Microtonal &micro) const;
         bool operator!=(const Microtonal &micro) const;
 
-        static rtosc::Ports ports;
+        static const rtosc::Ports ports;
     private:
         int linetotunings(unsigned int nline, const char *line);
         //loads a line from the text file, while ignoring the lines beggining with "!"

@@ -46,7 +46,7 @@ using namespace rtosc;
  *
  * A good lookup table should be a good finalization of this
  */
-rtosc::Ports Microtonal::ports = {
+const rtosc::Ports Microtonal::ports = {
     rToggle(Pinvertupdown, "key mapping inverse"),
     rParamZyn(Pinvertupdowncenter, "center of the inversion"),
     rToggle(Penabled, "Enable for microtonal mode"),

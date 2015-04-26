@@ -31,7 +31,7 @@
 #define rObject EnvelopeParams
 using namespace rtosc;
 
-static rtosc::Ports localPorts = {
+static const rtosc::Ports localPorts = {
     rSelf(EnvelopeParams),
     rPaste(),
     rToggle(Pfreemode, "Complex Envelope Definitions"),
@@ -90,7 +90,7 @@ static rtosc::Ports localPorts = {
         }},
 };
 
-rtosc::Ports &EnvelopeParams::ports = localPorts;
+const rtosc::Ports &EnvelopeParams::ports = localPorts;
 
 EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
         unsigned char Pforcedrelease_)

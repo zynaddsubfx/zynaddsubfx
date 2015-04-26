@@ -41,7 +41,7 @@ using rtosc::RtData;
 #define EXPAND(x) x
 #define rObject ADnoteVoiceParam
 
-static Ports voicePorts = {
+static const Ports voicePorts = {
     RECURP(ADnoteVoiceParam, OscilGen, oscil,     OscilSmp, "Primary Oscillator"),
     RECURP(ADnoteVoiceParam, OscilGen, mod-oscil, FMSmp,    "Modulating Oscillator"),
     RECURP(ADnoteVoiceParam, LFOParams, FreqLfo, FreqLfo, "Frequency LFO"),
@@ -188,7 +188,7 @@ static Ports voicePorts = {
 #undef  rObject
 #define rObject ADnoteGlobalParam
 
-static Ports globalPorts = {
+static const Ports globalPorts = {
     PARAMC(ADnoteGlobalParam, PPanning, panning, "Panning (0 random, 1 left, 127 right)"),
     RECURP(ADnoteGlobalParam, Resonance, Reson,   Reson, "Resonance"),
     RECURP(ADnoteGlobalParam, LFOParams, FreqLfo, FreqLfo, "Frequency LFO"),
@@ -259,14 +259,14 @@ static Ports globalPorts = {
 
 };
 
-static Ports adPorts = {//XXX 16 should not be hard coded
+static const Ports adPorts = {//XXX 16 should not be hard coded
     RECURS(ADnoteParameters, ADnoteVoiceParam, voice, VoicePar, 16, "Voice Parameters"),
     RECUR(ADnoteParameters, ADnoteGlobalParam, global, GlobalPar, "Adnote Parameters"),
 };
 
-Ports &ADnoteParameters::ports  = adPorts;
-Ports &ADnoteVoiceParam::ports  = voicePorts;
-Ports &ADnoteGlobalParam::ports = globalPorts;
+const Ports &ADnoteParameters::ports  = adPorts;
+const Ports &ADnoteVoiceParam::ports  = voicePorts;
+const Ports &ADnoteGlobalParam::ports = globalPorts;
 
 int ADnote_unison_sizes[] =
 {1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 0};

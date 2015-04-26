@@ -39,7 +39,7 @@
 
 
 #define rObject EffectMgr
-rtosc::Ports EffectMgr::ports = {
+const rtosc::Ports EffectMgr::ports = {
     rSelf(EffectMgr),
     rPaste(),
     RECURP(EffectMgr, FilterParams, Filter, filterpars, "Filter Parameter for Dynamic Filter"),

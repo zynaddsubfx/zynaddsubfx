@@ -33,7 +33,7 @@ using namespace rtosc;
 
 
 #define rObject LFOParams
-static rtosc::Ports _ports = {
+static const rtosc::Ports _ports = {
     rSelf(LFOParams),
     rPaste(),
     rParamF(Pfreq, "frequency of LFO"),
@@ -47,7 +47,7 @@ static rtosc::Ports _ports = {
     rParamZyn(Pstretch, rCentered, "Note frequency stretch"),
 };
 
-rtosc::Ports &LFOParams::ports = _ports;
+const rtosc::Ports &LFOParams::ports = _ports;
 
 int LFOParams::time;
 

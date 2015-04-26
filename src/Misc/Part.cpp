@@ -48,7 +48,7 @@ using rtosc::Ports;
 using rtosc::RtData;
 
 #define rObject Part
-static Ports partPorts = {
+static const Ports partPorts = {
     rRecurs(kit, 16, "Kit"),//NUM_KIT_ITEMS
     rRecursp(partefx, 3, "Part Effect"),
     rRecur(ctl,       "Controller"),
@@ -130,7 +130,7 @@ static Ports partPorts = {
 
 #undef  rObject
 #define rObject Part::Kit
-static Ports kitPorts = {
+static const Ports kitPorts = {
     rRecurp(padpars, "Padnote parameters"),
     rRecurp(adpars, "Adnote parameters"),
     rRecurp(subpars, "Adnote parameters"),
@@ -165,8 +165,8 @@ static Ports kitPorts = {
     //    [](
 };
 
-Ports &Part::Kit::ports = kitPorts;
-Ports &Part::ports = partPorts;
+const Ports &Part::Kit::ports = kitPorts;
+const Ports &Part::ports = partPorts;
 
 Part::Part(Allocator &alloc, Microtonal *microtonal_, FFTwrapper *fft_)
     :memory(alloc)

@@ -81,7 +81,7 @@ class EffectMgr:public Presets
 
         FilterParams *filterpars;
 
-        static rtosc::Ports ports;
+        static const rtosc::Ports ports;
         int     nefx;
         Effect *efx;
     private:

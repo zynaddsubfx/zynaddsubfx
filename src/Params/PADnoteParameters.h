@@ -165,7 +165,7 @@ class PADnoteParameters:public Presets
         void sampleGenerator(PADnoteParameters::callback cb,
                              std::function<bool()> do_abort);
 
-        static rtosc::Ports &ports;
+        static const rtosc::Ports &ports;
 
     private:
         void generatespectrum_bandwidthMode(float *spectrum,

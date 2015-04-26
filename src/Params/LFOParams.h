@@ -60,7 +60,7 @@ class LFOParams
         int fel; //what kind is the LFO (0 - frequency, 1 - amplitude, 2 - filter)
         static int time; //is used by Pcontinous parameter
 
-        static rtosc::Ports &ports;
+        static const rtosc::Ports &ports;
 
     private:
         /* Default parameters */

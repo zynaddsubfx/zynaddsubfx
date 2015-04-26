@@ -94,7 +94,7 @@ class Part
             SUBnoteParameters *subpars;
             PADnoteParameters *padpars;
 
-            static rtosc::Ports &ports;
+            const static rtosc::Ports &ports;
         } kit[NUM_KIT_ITEMS];
 
 
@@ -150,7 +150,7 @@ class Part
 
         int lastnote;
 
-        static rtosc::Ports &ports;
+        const static rtosc::Ports &ports;
 
     private:
         void RunNote(unsigned k);

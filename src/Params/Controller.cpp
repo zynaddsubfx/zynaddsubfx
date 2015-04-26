@@ -31,7 +31,7 @@
 using namespace rtosc;
 
 #define rObject Controller
-rtosc::Ports Controller::ports = {
+const rtosc::Ports Controller::ports = {
     rParamZyn(panning.depth, "Depth of Panning MIDI Control"),
     rParamZyn(filtercutoff.depth, "Depth of Filter Cutoff MIDI Control"),
     rParamZyn(filterq.depth, "Depth of Filter Q MIDI Control"),

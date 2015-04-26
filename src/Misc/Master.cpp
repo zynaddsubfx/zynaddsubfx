@@ -48,7 +48,7 @@ using namespace std;
 using namespace rtosc;
 #define rObject Master
 
-static Ports sysefxPort =
+static const Ports sysefxPort =
 {
     {"part#" STRINGIFY(NUM_MIDI_PARTS) "::i", 0, 0, [](const char *m, RtData&d)
         {
@@ -75,7 +75,7 @@ static Ports sysefxPort =
         }}
 };
 
-static Ports sysefsendto = 
+static const Ports sysefsendto =
 {
     {"to#" STRINGIFY(NUM_SYS_EFX) "::i", 0, 0, [](const char *m, RtData&d)
         {
@@ -99,7 +99,7 @@ static Ports sysefsendto =
         }}
 };
 
-static Ports master_ports = {
+static const Ports master_ports = {
     rRecursp(part, 16, "Part"),//NUM_MIDI_PARTS
     rRecursp(sysefx, 4, "System Effect"),//NUM_SYS_EFX
     rRecursp(insefx, 8, "Insertion Effect"),//NUM_INS_EFX
@@ -213,7 +213,7 @@ static Ports master_ports = {
     {"undo_resume",0,0,[](const char *, rtosc::RtData &d)
         {d.reply("/undo_resume", "");}},
 };
-Ports &Master::ports = master_ports;
+const Ports &Master::ports = master_ports;
 
 //XXX HACKS
 Master *the_master;

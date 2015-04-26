@@ -92,7 +92,7 @@ class FilterParams
 
         bool changed;
 
-        static rtosc::Ports ports;
+        static const rtosc::Ports ports;
     private:
         void defaults(int n);
 

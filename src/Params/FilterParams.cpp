@@ -36,14 +36,14 @@ using namespace rtosc;
 constexpr int sizeof_pvowels = sizeof(FilterParams::Pvowels);
 
 #define rObject FilterParams::Pvowels_t::formants_t
-static rtosc::Ports subsubports = {
+static const rtosc::Ports subsubports = {
     rParamZyn(freq, "Formant frequency"),
     rParamZyn(amp,  "Strength of formant"),
     rParamZyn(q,    "Quality Factor"),
 };
 #undef rObject
 
-static rtosc::Ports subports = {
+static const rtosc::Ports subports = {
     {"Pformants#" STRINGIFY(FF_MAX_FORMANTS) "/", NULL, &subsubports,
         [](const char *msg, RtData &d) {
             const char *mm = msg;
@@ -60,7 +60,7 @@ static rtosc::Ports subports = {
 #define rObject FilterParams
 #undef  rChangeCb
 #define rChangeCb obj->changed = true;
-rtosc::Ports FilterParams::ports = {
+const rtosc::Ports FilterParams::ports = {
     rSelf(FilterParams),
     rPaste(),
     rParamZyn(Pcategory,   "Class of filter"),

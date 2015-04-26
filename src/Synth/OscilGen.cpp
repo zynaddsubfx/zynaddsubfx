@@ -41,7 +41,7 @@ pthread_t main_thread;
 #define PC(x) rParamZyn(P##x, "undocumented oscilgen parameter")
 
 #define rObject OscilGen
-rtosc::Ports OscilGen::ports = {
+const rtosc::Ports OscilGen::ports = {
     rSelf(OscilGen),
     rPaste(),
     PC(hmagtype),

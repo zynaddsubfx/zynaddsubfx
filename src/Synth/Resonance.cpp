@@ -30,7 +30,7 @@
 #define rObject Resonance
 
 using namespace rtosc;
-rtosc::Ports Resonance::ports = {
+const rtosc::Ports Resonance::ports = {
     rSelf(Resonance),
     rPaste(),
     rToggle(Penabled, "resonance enable"),

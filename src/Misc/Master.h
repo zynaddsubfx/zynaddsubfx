@@ -156,7 +156,7 @@ class Master
 
         class FFTwrapper * fft;
 
-        static rtosc::Ports &ports;
+        static const rtosc::Ports &ports;
         float  volume;
 
         //Statistics on output levels

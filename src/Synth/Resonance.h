@@ -67,7 +67,7 @@ class Resonance:public Presets
         float ctlcenter; //center frequency(relative)
         float ctlbw; //bandwidth(relative)
 
-        static rtosc::Ports ports;
+        static const rtosc::Ports ports;
 };
 
 #endif
