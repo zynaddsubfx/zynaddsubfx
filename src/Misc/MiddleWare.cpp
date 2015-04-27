@@ -36,7 +36,6 @@
 
 using std::string;
 extern rtosc::ThreadLink *the_bToU;//XXX
-rtosc::UndoHistory undo;
 
 /******************************************************************************
  *                        LIBLO And Reflection Code                           *
@@ -45,15 +44,12 @@ rtosc::UndoHistory undo;
  * Thus, changes in the current interface sending messages can be encoded     *
  * into the stream via events which simply echo back the active interface     *
  ******************************************************************************/
-static lo_server server;
-static string last_url, curr_url;
-
 static void liblo_error_cb(int i, const char *m, const char *loc)
 {
     fprintf(stderr, "liblo :-( %d-%s@%s\n",i,m,loc);
 }
 
-void path_search(const char *m)
+void path_search(const char *m, const char *url)
 {
     using rtosc::Ports;
     using rtosc::Port;
@@ -102,8 +98,8 @@ void path_search(const char *m)
     char buffer[1024*20];
     size_t length = rtosc_amessage(buffer, sizeof(buffer), "/paths", types, args);
     if(length) {
-	lo_message msg  = lo_message_deserialise((void*)buffer, length, NULL);
-        lo_address addr = lo_address_new_from_url(last_url.c_str());
+        lo_message msg  = lo_message_deserialise((void*)buffer, length, NULL);
+        lo_address addr = lo_address_new_from_url(url);
         if(addr)
             lo_send_message(addr, buffer, msg);
     }
@@ -119,9 +115,9 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
     lo_address addr = lo_message_get_source(msg);
     if(addr) {
         const char *tmp = lo_address_get_url(addr);
-        if(tmp != last_url) {
+        if(tmp != mw->activeUrl()) {
             mw->transmitMsg("/echo", "ss", "OSC_URL", tmp);
-            last_url = tmp;
+            mw->activeUrl(tmp);
         }
 
     }
@@ -131,7 +127,7 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
     size_t size = 2048;
     lo_message_serialise(msg, path, buffer, &size);
     if(!strcmp(buffer, "/path-search") && !strcmp("ss", rtosc_argument_string(buffer))) {
-        path_search(buffer);
+        path_search(buffer, mw->activeUrl().c_str());
     } else
         mw->transmitMsg(buffer);
 
@@ -758,9 +754,15 @@ public:
     std::atomic_int pending_load[NUM_MIDI_PARTS];
     std::atomic_int actual_load[NUM_MIDI_PARTS];
 
+    rtosc::UndoHistory undo;
+
     //Link To the Realtime
     rtosc::ThreadLink *bToU;
     rtosc::ThreadLink *uToB;
+
+    //LIBLO
+    lo_server server;
+    string last_url, curr_url;
 };
 
 MiddleWareImpl::MiddleWareImpl(MiddleWare *mw)
@@ -1075,7 +1077,7 @@ void MiddleWareImpl::handleMsg(const char *msg)
         bankPos(master->bank, osc);
     } else if(obj_store.has(obj_rl)) {
         //try some over simplified pattern matching
-        if(strstr(msg, "oscil/")) {
+        if(strstr(msg, "oscilgen/") || strstr(msg, "FMSmp/") || strstr(msg, "OscilSmp/")) {
             if(!handleOscil(obj_rl, last_path+1, obj_store.get(obj_rl)))
                 uToB->raw_write(msg);
             //else if(strstr(obj_rl.c_str(), "kititem"))
@@ -1116,6 +1118,10 @@ void MiddleWareImpl::handleMsg(const char *msg)
     } else if(strstr(msg, "Padenabled") || strstr(msg, "Ppadenabled") || strstr(msg, "Psubenabled")) {
         kitEnable(msg);
         uToB->raw_write(msg);
+    } else if(!strcmp(msg, "/undo")) {
+        undo.seekHistory(-1);
+    } else if(!strcmp(msg, "/redo")) {
+        undo.seekHistory(+1);
     } else
         uToB->raw_write(msg);
 }
@@ -1219,10 +1225,10 @@ void MiddleWare::pendingSetProgram(int part, int program)
 
 std::string MiddleWare::activeUrl(void)
 {
-    return last_url;
+    return impl->last_url;
 }
 
 void MiddleWare::activeUrl(std::string u)
 {
-    last_url = u;
+    impl->last_url = u;
 }

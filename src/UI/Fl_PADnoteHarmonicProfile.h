@@ -31,7 +31,7 @@ class PADnoteHarmonicProfile: public Fl_Box, public Fl_Osc_Widget
         {
             osc->write(loc, "i", w());
         }
-        
+
         void OSC_value(unsigned N, void *data, const char *name) override
         {
             assert(!strcmp(name, "profile"));
@@ -122,4 +122,4 @@ class PADnoteHarmonicProfile: public Fl_Box, public Fl_Osc_Widget
     private:
         float *smps;
         float realbw;
-}; 
+};

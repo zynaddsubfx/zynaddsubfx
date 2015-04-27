@@ -265,14 +265,14 @@ cbwidget->do_callback();}
           }
           Fl_Group oscilgroup {open
             xywh {100 155 270 135} box THIN_DOWN_BOX color 32 selection_color 71 labelcolor 179 align 6
-            code0 {oscilgroup->base = location; oscilgroup->ext="oscil/"; oscilgroup->osc = osc_i;}
+            code0 {oscilgroup->base = location; oscilgroup->ext="oscilgen/"; oscilgroup->osc = osc_i;}
             code1 {osc=new Fl_Oscilloscope(o->x(),o->y(),o->w(),o->h(),"");osc->init(false);}
             class Fl_Osc_Group
           } {}
           Fl_Button {} {
             label Change
             callback {if (oscui!=NULL) delete (oscui);
-oscui=new OscilEditor(false, location+"oscil/",osc_i);}
+oscui=new OscilEditor(false, location+"oscilgen/",osc_i);}
             xywh {375 270 60 20} box THIN_UP_BOX labelfont 1 labelsize 11
           }
           Fl_Box cbwidget {

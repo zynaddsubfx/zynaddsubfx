@@ -32,7 +32,7 @@ void Fl_Osc_Choice::init(std::string path_, int base)
 
 Fl_Osc_Choice::~Fl_Osc_Choice(void)
 {}
-        
+
 void Fl_Osc_Choice::callback(Fl_Callback *cb, void *p)
 {
     cb_data.first = cb;
@@ -41,6 +41,8 @@ void Fl_Osc_Choice::callback(Fl_Callback *cb, void *p)
 
 void Fl_Osc_Choice::OSC_value(int v)
 {
+    if(v-min == value())
+        return;
     value(v-min);
     if(cb_data.first)
         cb_data.first(this, cb_data.second);

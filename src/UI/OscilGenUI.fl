@@ -829,7 +829,7 @@ redrawoscil();}
             label baseF
             callback {redrawoscil();}
             tooltip {Adaptive harmonics base frequency} xywh {675 465 25 25} labelsize 10 maximum 255 step 1
-            code0 {o->init("Padaptiveharmoicsbasefreq");}
+            code0 {o->init("Padaptiveharmonicsbasefreq");}
             class Fl_Osc_Dial
           }
           Fl_Slider adhrpar {

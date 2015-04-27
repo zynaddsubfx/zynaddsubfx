@@ -39,10 +39,10 @@
 
 
 #define rObject EffectMgr
-const rtosc::Ports EffectMgr::ports = {
+static const rtosc::Ports local_ports = {
     rSelf(EffectMgr),
     rPaste(),
-    RECURP(EffectMgr, FilterParams, Filter, filterpars, "Filter Parameter for Dynamic Filter"),
+    rRecurp(filterpars, "Filter Parameter for Dynamic Filter"),
     {"parameter#64::i", rProp(alias) rDoc("Parameter Accessor"), NULL,
         [](const char *msg, rtosc::RtData &d)
         {
@@ -106,6 +106,7 @@ const rtosc::Ports EffectMgr::ports = {
 
 };
 
+const rtosc::Ports &EffectMgr::ports = local_ports;
 
 EffectMgr::EffectMgr(Allocator &alloc, const bool insertion_)
     :insertion(insertion_),

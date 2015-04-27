@@ -52,20 +52,16 @@ void simpleset(const char *m, rtosc::RtData &d)
     simpleset<__builtin_offsetof(class PADnoteParameters, P##x)>}
 static const rtosc::Ports localPorts =
 {
-    RECURP(PADnoteParameters, OscilGen, oscil, oscilgen, "Oscillator"),
-    RECURP(PADnoteParameters, LFOParams, FreqLfo,   FreqLfo, "Frequency LFO"),
-    RECURP(PADnoteParameters, LFOParams, AmpLfo,    AmpLfo,   "Amplitude LFO"),
-    RECURP(PADnoteParameters, LFOParams, FilterLfo, FilterLfo, "Filter LFO"),
-    RECURP(PADnoteParameters, Resonance, resonance, resonance, "Resonance"),
-    RECURP(PADnoteParameters, EnvelopeParams, FreqEnvelope, FreqEnvelope,
-            "Frequency Envelope"),
-    RECURP(PADnoteParameters, EnvelopeParams, AmpEnvelope, AmpEnvelope,
-            "Amplitude Envelope"),
-    RECURP(PADnoteParameters, EnvelopeParams, FilterEnvelope, FilterEnvelope,
-            "Filter Envelope"),
+    rRecurp(oscilgen, "Oscillator"),
+    rRecurp(FreqLfo, "Frequency LFO"),
+    rRecurp(AmpLfo,   "Amplitude LFO"),
+    rRecurp(FilterLfo, "Filter LFO"),
+    rRecurp(resonance, "Resonance"),
+    rRecurp(FreqEnvelope, "Frequency Envelope"),
+    rRecurp(AmpEnvelope, "Amplitude Envelope"),
+    rRecurp(FilterEnvelope, "Filter Envelope"),
     rRecurp(GlobalFilter, "Post Filter"),
-    PARAMC(PADnoteParameters, Pmode, mode,
-            "0 - bandwidth, 1 - discrete 2 - continious"),
+    rParamI(Pmode, rMap(min, 0), rMap(max, 2), "0 - bandwidth, 1 - discrete 2 - continious"),
     PC(Volume),
     PC(hp.base.type),
     PC(hp.base.par1),
@@ -106,6 +102,10 @@ static const rtosc::Ports localPorts =
     PC(PunchVelocitySensing),
     PC(FilterVelocityScale),
     PC(FilterVelocityScaleFunction),
+
+    rParamI(PDetune,        "Fine Detune"),
+    rParamI(PCoarseDetune,  "Coarse Detune"),
+    rParamZyn(PDetuneType,  "Magnitude of Detune"),
 
     {"Pbandwidth::i:c", NULL, NULL,
         [](const char *msg, rtosc::RtData &d) {

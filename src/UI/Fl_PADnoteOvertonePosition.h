@@ -23,11 +23,11 @@ class PADnoteOvertonePosition: public Fl_Box, Fl_Osc_Widget
 
         ~PADnoteOvertonePosition(void)
         {
-            osc->removeLink(base_path + "oscil/spectrum",
+            osc->removeLink(base_path + "oscilgen/spectrum",
                     (Fl_Osc_Widget*) this);
             osc->removeLink(base_path + "nhr",
                     (Fl_Osc_Widget*) this);
-            osc->removeLink(base_path + "mode",
+            osc->removeLink(base_path + "Pmode",
                     (Fl_Osc_Widget*) this);
             delete [] spc;
             delete [] nhr;
@@ -45,9 +45,9 @@ class PADnoteOvertonePosition: public Fl_Box, Fl_Osc_Widget
 
             osc->createLink(base_path + "nhr",
                     (Fl_Osc_Widget*) this);
-            osc->createLink(base_path + "oscil/spectrum",
+            osc->createLink(base_path + "oscilgen/spectrum",
                     (Fl_Osc_Widget*) this);
-            osc->createLink(base_path + "mode",
+            osc->createLink(base_path + "Pmode",
                     (Fl_Osc_Widget*) this);
 
             fprintf(stderr, "registered at my location '%s'\n", (base_path + "nhr").c_str());
@@ -56,9 +56,10 @@ class PADnoteOvertonePosition: public Fl_Box, Fl_Osc_Widget
 
         void update(void)
         {
+            printf("Update...\n");
             osc->requestValue(base_path + "nhr");
-            osc->requestValue(base_path + "oscil/spectrum");
-            osc->requestValue(base_path + "mode");
+            osc->requestValue(base_path + "oscilgen/spectrum");
+            osc->requestValue(base_path + "Pmode");
         }
 
         virtual void OSC_value(unsigned N, void *data, const char *name)
@@ -73,9 +74,9 @@ class PADnoteOvertonePosition: public Fl_Box, Fl_Osc_Widget
             else
                 assert(false);
         }
-        virtual void OSC_value(char x, const char *name) override
+        virtual void OSC_value(int x, const char *name) override
         {
-            assert(!strcmp(name, "mode"));
+            assert(!strcmp(name, "Pmode"));
             mode = x;
             regenerateOvertones();
         }

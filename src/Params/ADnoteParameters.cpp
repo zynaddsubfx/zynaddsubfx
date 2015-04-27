@@ -42,11 +42,11 @@ using rtosc::RtData;
 #define rObject ADnoteVoiceParam
 
 static const Ports voicePorts = {
-    RECURP(ADnoteVoiceParam, OscilGen, oscil,     OscilSmp, "Primary Oscillator"),
-    RECURP(ADnoteVoiceParam, OscilGen, mod-oscil, FMSmp,    "Modulating Oscillator"),
-    RECURP(ADnoteVoiceParam, LFOParams, FreqLfo, FreqLfo, "Frequency LFO"),
-    RECURP(ADnoteVoiceParam, LFOParams, AmpLfo, AmpLfo, "Amplitude LFO"),
-    RECURP(ADnoteVoiceParam, LFOParams, FilterLfo, FilterLfo, "Filter LFO"),
+    rRecurp(OscilSmp, "Primary Oscillator"),
+    rRecurp(FMSmp,    "Modulating Oscillator"),
+    rRecurp(FreqLfo, "Frequency LFO"),
+    rRecurp(AmpLfo, "Amplitude LFO"),
+    rRecurp(FilterLfo, "Filter LFO"),
     rRecurp(FreqEnvelope,   "Frequency Envelope"),
     rRecurp(AmpEnvelope,    "Amplitude Envelope"),
     rRecurp(FilterEnvelope, "Filter Envelope"),
@@ -189,15 +189,15 @@ static const Ports voicePorts = {
 #define rObject ADnoteGlobalParam
 
 static const Ports globalPorts = {
-    PARAMC(ADnoteGlobalParam, PPanning, panning, "Panning (0 random, 1 left, 127 right)"),
-    RECURP(ADnoteGlobalParam, Resonance, Reson,   Reson, "Resonance"),
-    RECURP(ADnoteGlobalParam, LFOParams, FreqLfo, FreqLfo, "Frequency LFO"),
-    RECURP(ADnoteGlobalParam, LFOParams, AmpLfo, AmpLfo, "Amplitude LFO"),
-    RECURP(ADnoteGlobalParam, LFOParams, FilterLfo, FilterLfo, "Filter LFO"),
-    RECURP(ADnoteGlobalParam,  EnvelopeParams, FreqEnvelope, FreqEnvelope, "Frequency Envelope"),
-    RECURP(ADnoteGlobalParam,  EnvelopeParams, AmpEnvelope, AmpEnvelope, "Frequency Envelope"),
-    RECURP(ADnoteGlobalParam,  EnvelopeParams, FilterEnvelope, FilterEnvelope, "Frequency Envelope"),
-    RECURP(ADnoteGlobalParam, FilterParams, GlobalFilter, GlobalFilter, "Filter"),
+    rParamZyn(PPanning, "Panning (0 random, 1 left, 127 right)"),
+    rRecurp(Reson, "Resonance"),
+    rRecurp(FreqLfo, "Frequency LFO"),
+    rRecurp(AmpLfo, "Amplitude LFO"),
+    rRecurp(FilterLfo, "Filter LFO"),
+    rRecurp(FreqEnvelope, "Frequency Envelope"),
+    rRecurp(AmpEnvelope, "Frequency Envelope"),
+    rRecurp(FilterEnvelope, "Frequency Envelope"),
+    rRecurp(GlobalFilter, "Filter"),
     rToggle(PStereo, "Mono/Stereo Enable"),
 
     //Frequency
@@ -259,9 +259,11 @@ static const Ports globalPorts = {
 
 };
 
+#undef  rObject
+#define rObject ADnoteParameters
 static const Ports adPorts = {//XXX 16 should not be hard coded
-    RECURS(ADnoteParameters, ADnoteVoiceParam, voice, VoicePar, 16, "Voice Parameters"),
-    RECUR(ADnoteParameters, ADnoteGlobalParam, global, GlobalPar, "Adnote Parameters"),
+    rRecurs(VoicePar, NUM_VOICES),
+    rRecur(GlobalPar, "Adnote Parameters"),
 };
 
 const Ports &ADnoteParameters::ports  = adPorts;
