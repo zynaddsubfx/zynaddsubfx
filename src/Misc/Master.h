@@ -30,12 +30,10 @@
 
 #include "Bank.h"
 #include "Recorder.h"
-#include "Dump.h"
 
 #include "../Params/Controller.h"
 
 class Allocator;
-extern Dump dump;
 
 struct vuData {
     vuData(void);

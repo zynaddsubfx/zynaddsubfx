@@ -781,8 +781,6 @@ void Master::AudioOut(float *outl, float *outr)
 
     //update the LFO's time
     LFOParams::time++;
-
-    dump.inctick();
 }
 
 //TODO review the respective code from yoshimi for this

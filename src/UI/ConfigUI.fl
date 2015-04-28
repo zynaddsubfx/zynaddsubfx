@@ -26,12 +26,6 @@ decl {\#include "../globals.h"} {public local
 decl {\#include "../Misc/Util.h"} {public local
 } 
 
-decl {\#include "../Misc/Dump.h"} {public local
-} 
-
-decl {extern Dump dump;} {public local
-} 
-
 class ConfigUI {} {
   Function {make_window()} {} {
     Fl_Window configwindow {
@@ -164,29 +158,6 @@ config.cfg.SoundBufferSize=strtoul(o->value(),&tmp,10);}
           Fl_Box {} {
             label {Read the Readme.txt for other settings}
             xywh {10 280 240 15} labelfont 1 labelsize 11 align 128
-          }
-          Fl_Group {} {
-            xywh {15 125 230 85} box ENGRAVED_BOX
-          } {
-            Fl_File_Input {} {
-              label {Dump File}
-              callback {config.cfg.DumpFile = o->value();}
-              xywh {20 170 220 35} align 5
-              code0 {o->insert(config.cfg.DumpFile.c_str());}
-            }
-            Fl_Check_Button {} {
-              label {Dump notes}
-              callback {config.cfg.DumpNotesToFile=(int) o->value();
-dump.startnow();//this has effect only if this option was disabled}
-              xywh {20 130 110 20} down_box DOWN_BOX
-              code0 {o->value(config.cfg.DumpNotesToFile);}
-            }
-            Fl_Check_Button {} {
-              label Append
-              callback {config.cfg.DumpAppend=(int) o->value();}
-              xywh {160 130 80 20} down_box DOWN_BOX
-              code0 {o->value(config.cfg.DumpAppend);}
-            }
           }
           Fl_Counter {} {
             label {XML compression level}

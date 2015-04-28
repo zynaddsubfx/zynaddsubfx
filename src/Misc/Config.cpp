@@ -46,14 +46,10 @@ void Config::init()
     cfg.LinuxOSSSeqInDev = new char[MAX_STRING_SIZE];
     snprintf(cfg.LinuxOSSSeqInDev, MAX_STRING_SIZE, "/dev/sequencer");
 
-    cfg.DumpFile = "zynaddsubfx_dump.txt";
-
     cfg.WindowsWaveOutId = 0;
     cfg.WindowsMidiInId  = 0;
 
     cfg.BankUIAutoClose = 0;
-    cfg.DumpNotesToFile = 0;
-    cfg.DumpAppend      = 1;
 
     cfg.GzipCompression = 3;
 
@@ -168,16 +164,6 @@ void Config::readConfig(const char *filename)
                                             0,
                                             1);
 
-        cfg.DumpNotesToFile = xmlcfg.getpar("dump_notes_to_file",
-                                            cfg.DumpNotesToFile,
-                                            0,
-                                            1);
-        cfg.DumpAppend = xmlcfg.getpar("dump_append",
-                                       cfg.DumpAppend,
-                                       0,
-                                       1);
-        cfg.DumpFile = xmlcfg.getparstr("dump_file", "");
-
         cfg.GzipCompression = xmlcfg.getpar("gzip_compression",
                                             cfg.GzipCompression,
                                             0,
@@ -258,10 +244,6 @@ void Config::saveConfig(const char *filename)
     xmlcfg->addpar("oscil_size", cfg.OscilSize);
     xmlcfg->addpar("swap_stereo", cfg.SwapStereo);
     xmlcfg->addpar("bank_window_auto_close", cfg.BankUIAutoClose);
-
-    xmlcfg->addpar("dump_notes_to_file", cfg.DumpNotesToFile);
-    xmlcfg->addpar("dump_append", cfg.DumpAppend);
-    xmlcfg->addparstr("dump_file", cfg.DumpFile);
 
     xmlcfg->addpar("gzip_compression", cfg.GzipCompression);
 

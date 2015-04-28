@@ -44,8 +44,6 @@
 #include "Misc/Master.h"
 #include "Misc/Part.h"
 #include "Misc/Util.h"
-#include "Misc/Dump.h"
-extern Dump dump;
 
 //Nio System
 #include "Nio/Nio.h"
@@ -134,7 +132,6 @@ int main(int argc, char *argv[])
     main_thread = pthread_self();
     synth = new SYNTH_T;
     config.init();
-    dump.startnow();
     int noui = 0;
     cerr
     << "\nZynAddSubFX - Copyright (c) 2002-2013 Nasca Octavian Paul and others"
@@ -176,9 +173,6 @@ int main(int argc, char *argv[])
         },
         {
             "oscil-size", 2, NULL, 'o'
-        },
-        {
-            "dump", 2, NULL, 'D'
         },
         {
             "swap", 2, NULL, 'S'
@@ -301,9 +295,6 @@ int main(int argc, char *argv[])
             case 'S':
                 swaplr = 1;
                 break;
-            case 'D':
-                dump.startnow();
-                break;
             case 'N':
                 Nio::setPostfix(optarguments);
                 break;
@@ -362,7 +353,6 @@ int main(int argc, char *argv[])
         "  -b BS, --buffer-size=SR\t\t Set the buffer size (granularity)\n"
              << "  -o OS, --oscil-size=OS\t\t Set the ADsynth oscil. size\n"
              << "  -S , --swap\t\t\t\t Swap Left <--> Right\n"
-             << "  -D , --dump\t\t\t\t Dumps midi note ON/OFF commands\n"
              <<
         "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
              << "  -N , --named\t\t\t\t Postfix IO Name when possible\n"

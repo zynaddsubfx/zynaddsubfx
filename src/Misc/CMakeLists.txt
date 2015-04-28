@@ -3,7 +3,6 @@ include_directories(${MXML_INCLUDE_DIR})
 set(zynaddsubfx_misc_SRCS
 	Misc/Bank.cpp
 	Misc/Config.cpp
-	Misc/Dump.cpp
 	Misc/Master.cpp
 	Misc/Microtonal.cpp
 	Misc/Part.cpp

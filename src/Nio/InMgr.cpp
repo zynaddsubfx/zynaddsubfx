@@ -81,8 +81,6 @@ void InMgr::flush(unsigned frameStart, unsigned frameStop)
 
         switch(ev.type) {
             case M_NOTE:
-                dump.dumpnote(ev.channel, ev.num, ev.value);
-
                 if(ev.value)
                     master->noteOn(ev.channel, ev.num, ev.value);
                 else
@@ -90,7 +88,6 @@ void InMgr::flush(unsigned frameStart, unsigned frameStop)
                 break;
 
             case M_CONTROLLER:
-                dump.dumpcontroller(ev.channel, ev.num, ev.value);
                 master->setController(ev.channel, ev.num, ev.value);
                 break;
 

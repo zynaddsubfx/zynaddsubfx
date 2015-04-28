@@ -40,10 +40,8 @@ class Config
             int   SampleRate, SoundBufferSize, OscilSize, SwapStereo;
             int   WindowsWaveOutId, WindowsMidiInId;
             int   BankUIAutoClose;
-            int   DumpNotesToFile, DumpAppend;
             int   GzipCompression;
             int   Interpolation;
-            std::string DumpFile;
             std::string bankRootDirList[MAX_BANK_ROOT_DIRS], currentBankDir;
             std::string presetsDirList[MAX_BANK_ROOT_DIRS];
             int CheckPADsynth;
