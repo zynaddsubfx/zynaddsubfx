@@ -436,7 +436,7 @@ if (fl_choice("The file *might* exist. \\nOverwrite it?","No","Yes",NULL)) {
 	masterwindow->hide();
 	refresh_master_ui();
 	simplemasterwindow->show();
-	config.cfg.UserInterfaceMode=2;
+    osc->write("/cfg.UserInterfaceMode", "i", 2);
 };}
               xywh {15 15 100 20}
             }
@@ -910,7 +910,6 @@ updatepanel();}
 if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))
 \#endif
 {
-	config.save();
 	*exitprogram=1;
 };} open
       xywh {661 384 600 335} type Double
@@ -1002,7 +1001,7 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an
 	simplemasterwindow->hide();
 	refresh_master_ui();
 	masterwindow->show();
-	config.cfg.UserInterfaceMode=1;
+    osc->write("/cfg.UserInterfaceMode", "i", 1);
 };}
             xywh {0 0 100 20}
           }
@@ -1432,7 +1431,8 @@ virkeys->take_focus();}
       }
       Fl_Button {} {
         label Advanced
-        callback {config.cfg.UserInterfaceMode=1;
+        callback {
+        osc->write("/cfg.UserInterfaceMode", "i", 1);
 masterwindow->show();
 selectuiwindow->hide();}
         xywh {10 165 100 35} color 229 labelfont 1 labelsize 16
@@ -1445,7 +1445,7 @@ selectuiwindow->hide();}
         label Beginner
         callback {simplemasterwindow->show();
 selectuiwindow->hide();
-config.cfg.UserInterfaceMode=2;}
+osc->write("/cfg.UserInterfaceMode", "i", 2);}
         xywh {10 80 100 65} color 238 labelfont 1 labelsize 16
       }
       Fl_Box {} {
@@ -1490,7 +1490,7 @@ for (int i=0;i<NUM_SYS_EFX;i++)
 microtonalui=new MicrotonalUI(osc, "/microtonal/");
 virkeyboard=new VirKeyboard(osc, "/");
 bankui=new BankUI(&npart, osc);
-configui=new ConfigUI();
+configui=new ConfigUI(osc);
 
 make_window();
 fl_open_display();
@@ -1524,8 +1524,8 @@ delete presetsui;
 delete panelwindow;
 delete selectuiwindow;} {}
   }
-  Function {showUI()} {} {
-    code {switch (config.cfg.UserInterfaceMode){
+  Function {showUI(int UIMode)} {} {
+    code {switch (UIMode){
 	case 0:selectuiwindow->show();
 	break;
 	case 1:masterwindow->show();
@@ -1668,7 +1668,6 @@ bankui->hide();} {}
   }
   Function {close()} {open return_type void
   } {
-    code {config.save();
-*exitprogram=1;} {}
+    code {*exitprogram=1;} {}
   }
 } 

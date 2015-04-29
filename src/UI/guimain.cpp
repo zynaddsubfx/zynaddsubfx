@@ -1,3 +1,63 @@
+/*
+  ZynAddSubFX - a software synthesizer
+
+  guimain.cpp  -  Main file of synthesizer GUI
+  Copyright (C) 2015 Mark McCurry
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of version 2 of the GNU General Public License
+  as published by the Free Software Foundation.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License (version 2 or later) for more details.
+
+  You should have received a copy of the GNU General Public License (version 2)
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+
+*/
+
+#include <lo/lo.h>
+#include <string>
+
+//GUI System
+#include "Connection.h"
+#include "NSM.H"
+
+#include <sys/stat.h>
+GUI::ui_handle_t gui = 0;
+#if USE_NSM
+NSM_Client *nsm = 0;
+#endif
+lo_server server;
+std::string sendtourl;
+
+int ADnote_unison_sizes[] =
+{1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 0};
+
+/*
+ * Program exit
+ */
+void exitprogram()
+{
+    GUI::destroyUi(gui);
+}
+
+bool fileexists(const char *filename)
+{
+    struct stat tmp;
+    int result = stat(filename, &tmp);
+    if(result >= 0)
+        return true;
+
+    return false;
+}
+
+int Pexitprogram = 0;
+
+
 #include "Connection.h"
 #include "Fl_Osc_Interface.h"
 #include "../globals.h"
@@ -11,7 +71,6 @@
 #include "Fl_Osc_Tree.H"
 #include "common.H"
 #include "MasterUI.h"
-#include "../Misc/MiddleWare.h"
 
 #ifdef NTK_GUI
 #include <FL/Fl_Shared_Image.H>
@@ -25,7 +84,7 @@
 #endif
 
 using namespace GUI;
-class MasterUI *ui;
+class MasterUI *ui=0;
 
 #ifdef NTK_GUI
 static Fl_Tiled_Image *module_backdrop;
@@ -149,8 +208,10 @@ rtosc::Ports uiPorts::ports = {
         ui->do_load_master(a0.s);
     } END
     BEGIN("vu-meter:bb") {
+        printf("Vu meter handler...\n");
         if(a0.b.len == sizeof(vuData) &&
                 a1.b.len == sizeof(float)*NUM_MIDI_PARTS) {
+            printf("Normal behavior...\n");
             //Refresh the primary VU meters
             ui->simplemastervu->update((vuData*)a0.b.data);
             ui->mastervu->update((vuData*)a0.b.data);
@@ -172,7 +233,7 @@ void GUI::raiseUi(ui_handle_t gui, const char *message)
         return;
     MasterUI *mui = (MasterUI*)gui;
     mui->osc->tryLink(message);
-    //printf("got message for UI '%s'\n", message);
+    printf("got message for UI '%s:%s'\n", message, rtosc_argument_string(message));
     char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
     rtosc::RtData d;
@@ -207,20 +268,44 @@ void GUI::tickUi(ui_handle_t)
 class UI_Interface:public Fl_Osc_Interface
 {
     public:
-        UI_Interface(MiddleWare *impl_)
-            :impl(impl_)
+        UI_Interface()
         {}
+
+        void transmitMsg(const char *path, const char *args, ...)
+        {
+            char buffer[1024];
+            va_list va;
+            va_start(va,args);
+            if(rtosc_vmessage(buffer,1024,path,args,va))
+                transmitMsg(buffer);
+            else
+                fprintf(stderr, "Error in transmitMsg(...)\n");
+            va_end(va);
+        }
+
+        void transmitMsg(const char *rtmsg)
+        {
+            //Send to known url
+            if(!sendtourl.empty()) {
+                lo_message msg  = lo_message_deserialise((void*)rtmsg,
+                        rtosc_message_length(rtmsg, rtosc_message_length(rtmsg,-1)), NULL);
+                lo_address addr = lo_address_new_from_url(sendtourl.c_str());
+                lo_send_message(addr, rtmsg, msg);
+            }
+        }
 
         void requestValue(string s) override
         {
+            //printf("Request Value '%s'\n", s.c_str());
             assert(s!="/Psysefxvol-1/part0");
             //Fl_Osc_Interface::requestValue(s);
+            /*
             if(impl->activeUrl() != "GUI") {
                 impl->transmitMsg("/echo", "ss", "OSC_URL", "GUI");
                 impl->activeUrl("GUI");
-            }
+            }*/
 
-            impl->transmitMsg(s.c_str(),"");
+            transmitMsg(s.c_str(),"");
         }
 
         void write(string s, const char *args, ...) override
@@ -231,7 +316,7 @@ class UI_Interface:public Fl_Osc_Interface
             ////fprintf(stderr, ".");
             //fprintf(stderr, "write(%s:%s)\n", s.c_str(), args);
             //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
-            impl->transmitMsg(s.c_str(), args, va);
+            transmitMsg(s.c_str(), args, va);
             va_end(va);
         }
 
@@ -241,7 +326,7 @@ class UI_Interface:public Fl_Osc_Interface
             ////fprintf(stderr, ".");
             //fprintf(stderr, "rawWrite(%s:%s)\n", msg, rtosc_argument_string(msg));
             //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
-            impl->transmitMsg(msg);
+            transmitMsg(msg);
         }
 
         void writeValue(string s, string ss) override
@@ -249,7 +334,7 @@ class UI_Interface:public Fl_Osc_Interface
             //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
             //fprintf(stderr, "writevalue<string>(%s,%s)\n", s.c_str(),ss.c_str());
             //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
-            impl->transmitMsg(s.c_str(), "s", ss.c_str());
+            transmitMsg(s.c_str(), "s", ss.c_str());
         }
 
         void writeValue(string s, char c) override
@@ -257,7 +342,7 @@ class UI_Interface:public Fl_Osc_Interface
             //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
             //fprintf(stderr, "writevalue<char>(%s,%d)\n", s.c_str(),c);
             //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
-            impl->transmitMsg(s.c_str(), "c", c);
+            transmitMsg(s.c_str(), "c", c);
         }
 
         void writeValue(string s, float f) override
@@ -265,7 +350,7 @@ class UI_Interface:public Fl_Osc_Interface
             //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 4 + 30, 0 + 40);
             //fprintf(stderr, "writevalue<float>(%s,%f)\n", s.c_str(),f);
             //fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
-            impl->transmitMsg(s.c_str(), "f", f);
+            transmitMsg(s.c_str(), "f", f);
         }
 
         void createLink(string s, class Fl_Osc_Widget*w) override
@@ -317,7 +402,6 @@ class UI_Interface:public Fl_Osc_Interface
         //A very simplistic implementation of a UI agnostic refresh method
         virtual void damage(const char *path) override
         {
-#ifndef NO_UI
             //printf("\n\nDamage(\"%s\")\n", path);
             for(auto pair:map) {
                 if(strstr(pair.first.c_str(), path)) {
@@ -330,7 +414,6 @@ class UI_Interface:public Fl_Osc_Interface
                         pair.second->update();
                 }
             }
-#endif
         }
 
         void tryLink(const char *msg) override
@@ -399,11 +482,52 @@ class UI_Interface:public Fl_Osc_Interface
 
     private:
         std::multimap<string,Fl_Osc_Widget*> map;
-        MiddleWare *impl;
 };
 
-Fl_Osc_Interface *GUI::genOscInterface(MiddleWare *mw)
+Fl_Osc_Interface *GUI::genOscInterface(MiddleWare *)
 {
-    return new UI_Interface(mw);
+    return new UI_Interface();
 }
 
+static void liblo_error_cb(int i, const char *m, const char *loc)
+{
+    fprintf(stderr, "liblo :-( %d-%s@%s\n",i,m,loc);
+}
+
+static int handler_function(const char *path, const char *types, lo_arg **argv,
+        int argc, lo_message msg, void *user_data)
+{
+    (void) types;
+    (void) argv;
+    (void) argc;
+    (void) user_data;
+    char buffer[2048];
+    memset(buffer, 0, sizeof(buffer));
+    size_t size = 2048;
+    lo_message_serialise(msg, path, buffer, &size);
+    raiseUi(gui, buffer);
+
+    return 0;
+}
+
+int main(int argc, char *argv[])
+{
+    //Startup Liblo Link
+    if(argc == 2) {
+        server = lo_server_new_with_proto(NULL, LO_UDP, liblo_error_cb);
+        lo_server_add_method(server, NULL, NULL, handler_function, 0);
+        sendtourl = argv[1];
+    }
+    
+    gui = GUI::createUi(new UI_Interface(), &Pexitprogram);
+
+    GUI::raiseUi(gui, "/show",  "i", 1);
+    while(Pexitprogram == 0) {
+        if(server)
+            while(lo_server_recv_noblock(server, 0));
+        GUI::tickUi(gui);
+    }
+
+    exitprogram();
+    return 0;
+}

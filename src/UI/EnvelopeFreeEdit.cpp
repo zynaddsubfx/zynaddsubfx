@@ -88,9 +88,14 @@ int EnvelopeFreeEdit::getnearest(int x,int y) const
     return nearestpoint;
 }
 
+static float dt(char val)
+{
+    return (powf(2.0f, val / 127.0f * 12.0f) - 1.0f) * 10.0f; //miliseconds
+}
+
 float EnvelopeFreeEdit::getdt(int i) const
 {
-    return EnvelopeParams::dt(Penvdt[i]);
+    return dt(Penvdt[i]);
 }
 
 void EnvelopeFreeEdit::draw(void)

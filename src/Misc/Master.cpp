@@ -607,7 +607,7 @@ void Master::AudioOut(float *outl, float *outr)
         }
 
         //XXX yes, this is not realtime safe, but it is useful...
-        if(strcmp(msg, "/get-vu") && false) {
+        if(strcmp(msg, "/get-vu") && true) {
             fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
             fprintf(stdout, "backend[%d]: '%s'<%s>\n", msg_id++, msg,
                     rtosc_argument_string(msg));

@@ -111,6 +111,7 @@ void initprogram(void)
 void exitprogram()
 {
     Nio::stop();
+    config.save();
 
     GUI::destroyUi(gui);
     delete middleware;
@@ -431,7 +432,7 @@ int main(int argc, char *argv[])
 
     if(!noui)
     {
-        GUI::raiseUi(gui, "/show",  "T");
+        GUI::raiseUi(gui, "/show",  "i", config.cfg.UserInterfaceMode);
         if(!ioGood)
             GUI::raiseUi(gui, "/alert", "s",
                     "Default IO did not initialize.\nDefaulting to NULL backend.");

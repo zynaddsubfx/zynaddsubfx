@@ -3,8 +3,6 @@
 #include "Fl_Osc_Widget.H"
 #include <string>
 
-using std::string; //yes this is bad form FIXME
-
 class Fl_Osc_Button:public Fl_Button, public Fl_Osc_Widget
 {
 

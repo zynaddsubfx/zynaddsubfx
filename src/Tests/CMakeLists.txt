@@ -33,6 +33,7 @@ target_link_libraries(XMLwrapperTest ${test_lib})
 target_link_libraries(RandTest       ${test_lib})
 target_link_libraries(PADnoteTest    ${test_lib})
 target_link_libraries(PluginTest     zynaddsubfx_core zynaddsubfx_nio
+    zynaddsubfx_gui_bridge
     ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
 target_link_libraries(UnisonTest    ${test_lib})
 #target_link_libraries(RtAllocTest    ${test_lib})

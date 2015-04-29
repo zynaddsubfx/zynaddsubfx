@@ -30,6 +30,12 @@ if(NtkGui)
     add_definitions(-DSOURCE_DIR="${CMAKE_SOURCE_DIR}")
 endif()
 
+if(FltkGui)
+    add_executable(zynaddsubfx_ext_gui guimain.cpp)
+    target_link_libraries(zynaddsubfx_ext_gui zynaddsubfx_gui ${FLTK_LIBRARIES}
+        ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES} ${X11_LIBRARIES} ${LIBLO_LIBRARIES} rtosc rtosc-cpp)
+endif()
+
 add_library(zynaddsubfx_gui STATIC
 	${UI_objs}
 	${zynaddsubfx_gui_FLTK_UI_SRCS}
@@ -55,8 +61,9 @@ add_library(zynaddsubfx_gui STATIC
         FormantFilterGraph.cpp
         EnvelopeFreeEdit.cpp
         BankView.cpp
-        Connection.cpp
 	)
+add_library(zynaddsubfx_gui_bridge STATIC
+    Connection.cpp)
 
 if(NtkGui)
   target_link_libraries(zynaddsubfx_gui ${NTK_LIBRARIES} ${NTK_IMAGES_LIBRARIES})

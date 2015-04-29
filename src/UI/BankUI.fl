@@ -26,6 +26,9 @@ decl {\#include <FL/Fl_File_Chooser.H>} {public local
 decl {\#include "Fl_Osc_Interface.h"} {public local
 } 
 
+decl {\#include "Fl_Osc_Check.H"} {public local
+} 
+
 decl {\#include "../Misc/Util.h"} {public local
 } 
 
@@ -76,9 +79,9 @@ refreshmainwindow();}
       }
       Fl_Check_Button {} {
         label {auto close}
-        callback {config.cfg.BankUIAutoClose=(int) o->value();}
         tooltip {automatically close the bank window if the instrument is loaded} xywh {705 529 60 15} down_box DOWN_BOX labelsize 10
-        code0 {o->value(config.cfg.BankUIAutoClose);}
+        code0 {o->init("cfg.BankUIAutoClose");}
+        class Fl_Osc_Check
       }
       Fl_Choice banklist {
         callback {refreshmainwindow();}
@@ -109,8 +112,7 @@ delete bankuiwindow;} {}
   }
   Function {show()} {open
   } {
-    code {bankuiwindow->show();
-simplesetmode(config.cfg.UserInterfaceMode==2);} {}
+    code {bankuiwindow->show();} {}
   }
   Function {hide()} {open
   } {
@@ -128,26 +130,15 @@ rescan_for_banks();} {}
   }
   Function {refreshmainwindow()} {open
   } {
-    code {/*bankuiwindow->label(bank->bankfiletitle.c_str());*/
+    code {
 bankview->refresh();} {}
   }
   Function {rescan_for_banks()} {open
   } {
     code {banklist->clear();
     osc->write("/rescanforbanks");
-
-/*
-for (unsigned int i=0;i<bank->banks.size();i++) {
-     banklist->add(bank->banks[i].name.c_str());
-}
-*/
 if (banklist->size() == 0)
      banklist->add(" ");} {}
-  }
-  Function {simplesetmode(bool beginnerui)} {open
-  } {
-    code {if (beginnerui) modeselect->hide();
-	else modeselect->show();} {}
   }
   decl {Fl_Osc_Interface *osc;} {private local
   }

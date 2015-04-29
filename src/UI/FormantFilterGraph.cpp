@@ -243,10 +243,11 @@ void FormantFilterGraph::formantfilterH(int nvowel, int nfreqs, float *freqs)
 
         //printf("NFORMANT %d\n", nformant);
         //printf("CHARACTERISTICS: FREQ %f Q %f AMP %f\n", filter_freq, filter_q, filter_amp);
+        const float SampleRate = 48000.0f;
 
 
-        if(filter_freq <= (synth->samplerate / 2 - 100.0f)) {
-            const float omega = 2 * PI * filter_freq / synth->samplerate_f;
+        if(filter_freq <= (SampleRate / 2 - 100.0f)) {
+            const float omega = 2 * PI * filter_freq / SampleRate;
             const float sn    = sinf(omega);
             const float cs    = cosf(omega);
             const float alpha = sn / (2 * filter_q);
@@ -265,14 +266,14 @@ void FormantFilterGraph::formantfilterH(int nvowel, int nfreqs, float *freqs)
             const float freq = getfreqx(i / (float) nfreqs);
 
             //Discard frequencies above nyquist rate
-            if(freq > synth->samplerate / 2) {
+            if(freq > SampleRate / 2) {
                 for(int tmp = i; tmp < nfreqs; ++tmp)
                     freqs[tmp] = 0.0f;
                 break;
             }
 
             //Convert to normalized frequency
-            const float fr = freq / synth->samplerate * PI * 2.0f;
+            const float fr = freq / SampleRate * PI * 2.0f;
 
             //Evaluate Complex domain ratio
             float x  = c[0], y = 0.0f;

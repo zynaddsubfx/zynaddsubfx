@@ -10,15 +10,13 @@ class PADnoteOvertonePosition: public Fl_Box, Fl_Osc_Widget
 {
     public:
         PADnoteOvertonePosition(int x,int y, int w, int h, const char *label=0)
-            :Fl_Box(x,y,w,h,label), nsamples(synth->oscilsize/2), 
-            spc(new float[synth->oscilsize/2]), 
-            nhr(new float[synth->oscilsize/2]), 
+            :Fl_Box(x,y,w,h,label), nsamples(0),
+            spc(0),
+            nhr(0),
             spectrum(new float[w]),
             mode(0), osc(NULL)
         {
             memset(spectrum, 0, w*sizeof(float));
-            memset(spc, 0, synth->oscilsize/2*sizeof(float));
-            memset(nhr, 0, synth->oscilsize/2*sizeof(float));
         }
 
         ~PADnoteOvertonePosition(void)
@@ -42,6 +40,9 @@ class PADnoteOvertonePosition: public Fl_Box, Fl_Osc_Widget
             base_path = og->base;
             osc = og->osc;
             assert(osc);
+            
+            osc->createLink("/oscilsize", (Fl_Osc_Widget*) this);
+            osc->requestValue("/oscilsize");
 
             osc->createLink(base_path + "nhr",
                     (Fl_Osc_Widget*) this);
@@ -76,9 +77,18 @@ class PADnoteOvertonePosition: public Fl_Box, Fl_Osc_Widget
         }
         virtual void OSC_value(int x, const char *name) override
         {
-            assert(!strcmp(name, "Pmode"));
-            mode = x;
-            regenerateOvertones();
+            if(!strcmp(name, "Pmode")) {
+                mode = x;
+                regenerateOvertones();
+            } else if(!strcmp(name, "oscilsize")) {
+                nsamples = x/2;
+                delete [] spc;
+                delete [] nhr;
+                spc = new float[nsamples];
+                nhr = new float[nsamples];
+                memset(spc, 0, nsamples*sizeof(float));
+                memset(nhr, 0, nsamples*sizeof(float));
+            }
         }
 
     private:

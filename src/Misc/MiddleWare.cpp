@@ -126,6 +126,7 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
     memset(buffer, 0, sizeof(buffer));
     size_t size = 2048;
     lo_message_serialise(msg, path, buffer, &size);
+    printf("Liblo<%s>\n", buffer);
     if(!strcmp(buffer, "/path-search") && !strcmp("ss", rtosc_argument_string(buffer))) {
         path_search(buffer, mw->activeUrl().c_str());
     } else
@@ -686,7 +687,7 @@ public:
 
     void tick(void)
     {
-        lo_server_recv_noblock(server, 0);
+        while(lo_server_recv_noblock(server, 0));
         while(bToU->hasNext()) {
             const char *rtmsg = bToU->read();
             bToUhandle(rtmsg);
@@ -788,6 +789,11 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw)
 
     //Grab objects of interest from master
     obj_store.extractMaster(master);
+
+    //Load Part Status
+    for(int i=0; i < NUM_MIDI_PARTS; ++i) {
+        kits.extractPart(master->part[i], i);
+    }
 
     //Null out Load IDs
     for(int i=0; i < NUM_MIDI_PARTS; ++i) {
@@ -993,11 +999,13 @@ void MiddleWareImpl::kitEnable(const char *msg)
         type = 1;
     else if(strstr(msg, "Psubenabled"))
         type = 2;
+    printf("type='%d'\n", type);
 
     if(type == -1)
         return;
 
     const char *tmp = strstr(msg, "part");
+    printf("part='%s'\n", tmp);
 
     if(tmp == NULL)
         return;
@@ -1005,6 +1013,7 @@ void MiddleWareImpl::kitEnable(const char *msg)
     const int part = atoi(tmp+4);
 
     tmp = strstr(msg, "kit");
+    printf("kit='%s'\n", tmp);
 
     if(tmp == NULL)
         return;
@@ -1016,7 +1025,7 @@ void MiddleWareImpl::kitEnable(const char *msg)
 
 void MiddleWareImpl::kitEnable(int part, int kit, int type)
 {
-   // printf("attempting a kit enable\n");
+    printf("attempting a kit enable<%d,%d,%d>\n", part, kit, type);
     string url = "/part"+to_s(part)+"/kit"+to_s(kit)+"/";
     void *ptr = NULL;
     if(type == 0 && kits.add[part][kit] == NULL) {

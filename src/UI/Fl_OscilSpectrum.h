@@ -1,4 +1,7 @@
 #include <cassert>
+#include <FL/Fl_Box.H>
+#include <FL/Fl.H>
+#include "Fl_Osc_Widget.H"
 
 //consider merging with Fl_Oscilloscope
 class Fl_OscilSpectrum : public Fl_Box, Fl_Osc_Widget
@@ -68,8 +71,8 @@ class Fl_OscilSpectrum : public Fl_Box, Fl_Osc_Widget
             const int maxdb=60;//must be multiple of 10
             const int GX=2;
             int n=lx/GX-1;
-            if (n>synth->oscilsize/2)
-                n=synth->oscilsize/2;
+            if (n>(int)nsamples)
+                n=nsamples;
                 
             fl_rectf(ox,oy,lx,ly,0,0,0);
 

@@ -19,19 +19,58 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 */
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
 
+#include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
 
 #include "Config.h"
 #include "XMLwrapper.h"
 
-using namespace std;
+#define rStdString(name, len, ...) \
+    {STRINGIFY(name) "::s", rMap(length, len) DOC(__VA_ARGS__), NULL, rStringCb(name,len)}
+#define rStdStringCb(name, length) rBOIL_BEGIN \
+        if(!strcmp("", args)) {\
+            data.reply(loc, "s", obj->name); \
+        } else { \
+            strncpy(obj->name, rtosc_argument(msg, 0).s, length); \
+            data.broadcast(loc, "s", obj->name);\
+            rChangeCb \
+        } rBOIL_END
+
+
+
+
+#if 0
+#define rObject Config
+rtosc::Ports port = {
+    rString(cfg.LinuxOSSWaveOutDev),
+    rString(cfg.LinuxOSSSeqInDev),
+    rParamI(cfg.SampleRate),
+    rParamI(cfg.SoundBufferSize),
+    rParamI(cfg.OscilSize),
+    rToggle(cfg.SwapStereo),
+    rToggle(cfg.BankUIAutoClose),
+    rParamI(cfg.GzipCompression),
+    rParamI(cfg.Interpolation),
+    rArrayS(cfg.bankRootDirList,MAX_BANK_ROOT_DIRS),
+    rString(cfg.currentBankDir),
+    rArrayS(cfg.presetsDirList,MAX_BANK_ROOT_DIRS),
+    rToggle(cfg.CheckPADsynth),
+    rToggle(cfg.IgnoreProgramChange),
+    rParamI(cfg.UserInterfaceMode),
+    rParamI(cfg.VirKeybLayout),
+    rParamS(cfg.LinuxALSAaudioDev),
+    rParamS(cfg.nameTag)
+};
+#endif
 
 Config::Config()
 {}
+
 void Config::init()
 {
     maxstringsize = MAX_STRING_SIZE; //for ui

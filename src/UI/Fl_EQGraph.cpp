@@ -11,13 +11,15 @@
 #define MAX_DB 30
 
 Fl_EQGraph::Fl_EQGraph(int x,int y, int w, int h, const char *label)
-    :Fl_Box(x,y,w,h,label), Fl_Osc_Widget(this)
+    :Fl_Box(x,y,w,h,label), Fl_Osc_Widget(this), samplerate(48000)
 {
     memset(num, 0, sizeof(num));
     memset(dem, 0, sizeof(dem));
     num[0] = 1;
     dem[0] = 1;
     ext = "eq-coeffs";
+    osc->createLink("/samplerate", this);
+    osc->requestValue("/samplerate");
     oscRegister("eq-coeffs");
 }
 
@@ -26,9 +28,13 @@ Fl_EQGraph::~Fl_EQGraph(void)
 
 void Fl_EQGraph::OSC_raw(const char *msg)
 {
-    memcpy(dem, rtosc_argument(msg, 0).b.data, sizeof(dem));
-    memcpy(num, rtosc_argument(msg, 1).b.data, sizeof(dem));
-    redraw();
+    if(strstr(msg, "samplerate") && !strcmp("f", rtosc_argument_string(msg))) {
+        samplerate = rtosc_argument(msg, 0).f;
+    } else {
+        memcpy(dem, rtosc_argument(msg, 0).b.data, sizeof(dem));
+        memcpy(num, rtosc_argument(msg, 1).b.data, sizeof(dem));
+        redraw();
+    }
 }
 
 void Fl_EQGraph::update(void)
@@ -114,7 +120,7 @@ void Fl_EQGraph::draw(void)
     fl_begin_line();
     for (i=1;i<lx;i++){
         float frq=getfreqx(i/(float) lx);
-        if (frq>synth->samplerate/2) break;
+        if (frq>samplerate/2) break;
         iy=getresponse(ly,frq);
         if ((oiy>=0) && (oiy<ly) &&
                 (iy>=0) && (iy<ly) )
@@ -134,7 +140,7 @@ void Fl_EQGraph::draw(void)
  */
 double Fl_EQGraph::getresponse(int maxy,float freq) const
 {
-    const float angle = 2*PI*freq/synth->samplerate_f;
+    const float angle = 2*PI*freq/samplerate;
     std::complex<float> num_res = 0;
     std::complex<float> dem_res = 0;
          

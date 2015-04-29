@@ -312,8 +312,7 @@ if(NOT FltkGui AND NOT NtkGui)
     if(LibloEnable)
         set(NSM_WORKAROUND UI/NSM.C UI/NSM/Client.C)
     endif()
-    add_library(zynaddsubfx_gui_dummy STATIC UI/ConnectionDummy.cpp ${NSM_WORKAROUND})
-    set(GUI_LIBRARIES zynaddsubfx_gui_dummy)
+    add_library(zynaddsubfx_gui_bridge STATIC UI/ConnectionDummy.cpp ${NSM_WORKAROUND})
     add_definitions(-DNO_UI=1)
 endif()
 
@@ -375,6 +374,7 @@ add_executable(zynaddsubfx main.cpp)
 target_link_libraries(zynaddsubfx
     zynaddsubfx_core
 	zynaddsubfx_nio
+    zynaddsubfx_gui_bridge
 	${GUI_LIBRARIES}
 	${NIO_LIBRARIES}
 	${AUDIO_LIBRARIES}
