@@ -64,6 +64,8 @@ add_library(zynaddsubfx_gui STATIC
 	)
 add_library(zynaddsubfx_gui_bridge STATIC
     Connection.cpp)
+add_dependencies(zynaddsubfx_gui_bridge zynaddsubfx_gui)
+
 
 if(NtkGui)
   target_link_libraries(zynaddsubfx_gui ${NTK_LIBRARIES} ${NTK_IMAGES_LIBRARIES})
