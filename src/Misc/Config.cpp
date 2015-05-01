@@ -44,11 +44,11 @@
 
 
 
-#if 0
+#if 1
 #define rObject Config
-rtosc::Ports port = {
-    rString(cfg.LinuxOSSWaveOutDev),
-    rString(cfg.LinuxOSSSeqInDev),
+static rtosc::Ports ports = {
+    //rString(cfg.LinuxOSSWaveOutDev),
+    //rString(cfg.LinuxOSSSeqInDev),
     rParamI(cfg.SampleRate),
     rParamI(cfg.SoundBufferSize),
     rParamI(cfg.OscilSize),
@@ -56,16 +56,68 @@ rtosc::Ports port = {
     rToggle(cfg.BankUIAutoClose),
     rParamI(cfg.GzipCompression),
     rParamI(cfg.Interpolation),
-    rArrayS(cfg.bankRootDirList,MAX_BANK_ROOT_DIRS),
-    rString(cfg.currentBankDir),
-    rArrayS(cfg.presetsDirList,MAX_BANK_ROOT_DIRS),
+    {"cfg.presetsDirList", 0, 0,
+        [](const char *msg, rtosc::RtData &d)
+        {
+            Config &c = *(Config*)d.obj;
+            if(rtosc_narguments(msg) != 0)
+                return;
+            char         types[MAX_BANK_ROOT_DIRS+1];
+            rtosc_arg_t  args[MAX_BANK_ROOT_DIRS];
+            size_t       pos    = 0;
+
+            //zero out data
+            memset(types, 0, sizeof(types));
+            memset(args,  0, sizeof(args));
+
+            for(int i=0; i<MAX_BANK_ROOT_DIRS; ++i) {
+                if(!c.cfg.presetsDirList[i].empty()) {
+                    types[pos] = 's';
+                    args[pos].s  = c.cfg.presetsDirList[i].c_str();
+                    pos++;
+                }
+            }
+            char buffer[1024*5];
+            rtosc_amessage(buffer, sizeof(buffer), d.loc, types, args);
+            d.reply(buffer);
+        }},
+    {"cfg.bankRootDirList", 0, 0,
+        [](const char *msg, rtosc::RtData &d)
+        {
+            Config &c = *(Config*)d.obj;
+            if(rtosc_narguments(msg) != 0)
+                return;
+            char         types[MAX_BANK_ROOT_DIRS+1];
+            rtosc_arg_t  args[MAX_BANK_ROOT_DIRS];
+            size_t       pos    = 0;
+
+            //zero out data
+            memset(types, 0, sizeof(types));
+            memset(args,  0, sizeof(args));
+
+            for(int i=0; i<MAX_BANK_ROOT_DIRS; ++i) {
+                if(!c.cfg.bankRootDirList[i].empty()) {
+                    types[pos] = 's';
+                    args[pos].s  = c.cfg.bankRootDirList[i].c_str();
+                    pos++;
+                }
+            }
+            char buffer[1024*5];
+            rtosc_amessage(buffer, sizeof(buffer), d.loc, types, args);
+            d.reply(buffer);
+        }},
+
+    //rArrayS(cfg.bankRootDirList,MAX_BANK_ROOT_DIRS),
+    //rString(cfg.currentBankDir),
+    //rArrayS(cfg.presetsDirList,MAX_BANK_ROOT_DIRS),
     rToggle(cfg.CheckPADsynth),
     rToggle(cfg.IgnoreProgramChange),
     rParamI(cfg.UserInterfaceMode),
     rParamI(cfg.VirKeybLayout),
-    rParamS(cfg.LinuxALSAaudioDev),
-    rParamS(cfg.nameTag)
+    //rParamS(cfg.LinuxALSAaudioDev),
+    //rParamS(cfg.nameTag)
 };
+rtosc::Ports &Config::ports = ::ports;
 #endif
 
 Config::Config()

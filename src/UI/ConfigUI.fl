@@ -35,6 +35,9 @@ decl {\#include "Fl_Osc_Check.H"} {public local
 decl {\#include "Fl_Osc_Input.H"} {public local
 } 
 
+decl {\#include "Fl_Osc_ListView.H"} {public local
+} 
+
 decl {\#include "../globals.h"} {public local
 } 
 
@@ -45,15 +48,14 @@ class ConfigUI {} {
   Function {make_window()} {} {
     Fl_Window configwindow {
       label {ZynAddSubFX Settings}
-      callback {writebankcfg();
-o->hide();}
+      callback {o->hide();}
       xywh {554 443 510 370} type Double visible
       class Fl_Osc_Window
     } {
       Fl_Box dummy {
         xywh {25 25 25 25}
         code0 {configwindow->osc = osc;}
-        code1 {configwindow->base = "/";}
+        code1 {configwindow->base = "/config/";}
       }
       Fl_Tabs {} {
         xywh {5 5 500 330}
@@ -189,6 +191,8 @@ o->hide();}
           Fl_Browser rootsbrowse {
             callback {activatebutton_rootdir(o->value()!=0);}
             xywh {15 35 485 220} type Hold
+            code0 {o->init("cfg.bankRootDirList");}
+            class Fl_Osc_ListView
           }
           Fl_Button {} {
             label {Add root directory...}
@@ -196,13 +200,13 @@ o->hide();}
 dirname=fl_dir_chooser("Add a root directory for banks:",NULL,0);
 if (dirname==NULL) return;
 
-rootsbrowse->add(dirname);}
+rootsbrowse->append(dirname);}
             xywh {15 265 80 35} box THIN_UP_BOX align 128
           }
           Fl_Button removerootdirbutton {
             label {Remove root dir...}
             callback {if (rootsbrowse->value()!=0) {
-   rootsbrowse->remove(rootsbrowse->value());
+   rootsbrowse->doRemove(rootsbrowse->value());
 };
 activatebutton_rootdir(false);}
             xywh {105 265 80 35} box THIN_UP_BOX align 128
@@ -213,7 +217,7 @@ activatebutton_rootdir(false);}
             callback {int n=rootsbrowse->value();
 
 if (n!=0) {
-   rootsbrowse->move(1,n);
+   rootsbrowse->doMove(1,n);
    rootsbrowse->value(1);
    rootsbrowse->redraw();
 };
@@ -229,6 +233,8 @@ activatebutton_rootdir(true);}
           Fl_Browser presetbrowse {
             callback {activatebutton_presetdir(o->value()!=0);}
             xywh {15 35 485 220} type Hold
+            code0 {o->init("cfg.presetsDirList");}
+            class Fl_Osc_ListView
           }
           Fl_Button {} {
             label {Add preset directory...}
@@ -265,9 +271,7 @@ activatebutton_presetdir(true);}
       }
       Fl_Button {} {
         label Close
-        callback {configwindow->hide();
-writebankcfg();
-writepresetcfg();}
+        callback {configwindow->hide();}
         xywh {200 345 105 20} box THIN_UP_BOX
       }
     }
@@ -275,9 +279,7 @@ writepresetcfg();}
   Function {ConfigUI(Fl_Osc_Interface *osc_)} {} {
     code {
     osc = osc_;
-    make_window();
-readbankcfg();
-readpresetcfg();} {}
+    make_window();} {}
   }
   Function {activatebutton_rootdir(bool active)} {} {
     code {if (active) {
@@ -296,40 +298,6 @@ readpresetcfg();} {}
 	removepresetbutton->deactivate();
 	makedefaultpresetbutton->deactivate();
 };} {}
-  }
-  Function {readbankcfg()} {} {
-    code {rootsbrowse->clear();
-
-//for (int i=0;i<MAX_BANK_ROOT_DIRS;i++){
-//  if (!config.cfg.bankRootDirList[i].empty())
-//    rootsbrowse->add(config.cfg.bankRootDirList[i].c_str());
-//};
-} {}
-  }
-  Function {writebankcfg()} {} {
-    code {
-//config.clearbankrootdirlist();
-//
-//for (int n=0;n<rootsbrowse->size();n++){ 
-//     config.cfg.bankRootDirList[n] = rootsbrowse->text(n+1);
-//};
-} {}
-  }
-  Function {readpresetcfg()} {} {
-    code {presetbrowse->clear();
-
-//for(int i=0;i<MAX_BANK_ROOT_DIRS;i++){
-//  if(!config.cfg.presetsDirList[i].empty())
-//   presetbrowse->add(config.cfg.presetsDirList[i].c_str());
-//};
-} {}
-  }
-  Function {writepresetcfg()} {} {
-    code {
-//config.clearpresetsdirlist();
-//
-//for (int n=0;n<presetbrowse->size();n++)
-//     config.cfg.presetsDirList[n] = presetbrowse->text(n+1);} {}
   }
   Function {show()} {} {
     code {configwindow->show();} {}

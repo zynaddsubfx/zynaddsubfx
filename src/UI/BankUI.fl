@@ -80,7 +80,7 @@ refreshmainwindow();}
       Fl_Check_Button {} {
         label {auto close}
         tooltip {automatically close the bank window if the instrument is loaded} xywh {705 529 60 15} down_box DOWN_BOX labelsize 10
-        code0 {o->init("cfg.BankUIAutoClose");}
+        code0 {o->init("config/cfg.BankUIAutoClose");}
         class Fl_Osc_Check
       }
       Fl_Choice banklist {

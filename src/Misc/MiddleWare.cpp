@@ -714,6 +714,22 @@ public:
         return true;
     }
 
+    void handleConfig(const char *msg)
+    {
+        char buffer[1024];
+        memset(buffer, 0, sizeof(buffer));
+        DummyDataObj d(buffer, 1024, (void*)&config, cb, ui, osc, uToB);
+        strcpy(buffer, "/config/");
+
+        Config::ports.dispatch(msg+8, d);
+        if(!d.matches) {
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
+            fprintf(stderr, "Unknown location '%s'<%s>\n",
+                    msg, rtosc_argument_string(msg));
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        }
+    }
+
     bool handleOscil(string path, const char *msg, void *v);
 
     void kitEnable(const char *msg);
@@ -1124,6 +1140,8 @@ void MiddleWareImpl::handleMsg(const char *msg)
         swapBankSlot(rtosc_argument(msg,0).i, rtosc_argument(msg,1).i, master, osc);
     } else if(strstr(msg, "clear-bank-slot") && !strcmp(rtosc_argument_string(msg), "i")) {
         clearBankSlot(rtosc_argument(msg,0).i, master, osc);
+    } else if(strstr(msg, "/config/")) {
+        handleConfig(msg);
     } else if(strstr(msg, "Padenabled") || strstr(msg, "Ppadenabled") || strstr(msg, "Psubenabled")) {
         kitEnable(msg);
         uToB->raw_write(msg);

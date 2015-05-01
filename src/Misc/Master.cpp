@@ -208,6 +208,10 @@ static const Ports master_ports = {
             m.memory->addMemory(mem, i);
             m.pendingMemory = false;
         }},
+    {"samplerate:", rMap(unit, Hz) rDoc("Synthesizer Global Sample Rate"), 0, [](const char *, RtData &d) {
+            //Master &m = *(Master*)d.obj;
+            d.reply("/samplerate", "f", synth->samplerate_f);
+        }},
     {"undo_pause",0,0,[](const char *, rtosc::RtData &d)
         {d.reply("/undo_pause", "");}},
     {"undo_resume",0,0,[](const char *, rtosc::RtData &d)
@@ -607,7 +611,7 @@ void Master::AudioOut(float *outl, float *outr)
         }
 
         //XXX yes, this is not realtime safe, but it is useful...
-        if(strcmp(msg, "/get-vu") && true) {
+        if(strcmp(msg, "/get-vu") && false) {
             fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
             fprintf(stdout, "backend[%d]: '%s'<%s>\n", msg_id++, msg,
                     rtosc_argument_string(msg));
