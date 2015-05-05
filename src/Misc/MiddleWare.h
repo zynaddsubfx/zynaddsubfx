@@ -7,7 +7,7 @@
 class MiddleWare
 {
     public:
-        MiddleWare(void);
+        MiddleWare(int prefered_port = -1);
         ~MiddleWare(void);
         //returns internal master pointer
         class Master *spawnMaster(void);

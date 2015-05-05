@@ -92,11 +92,9 @@ void sigterm_exit(int /*sig*/)
 /*
  * Program initialisation
  */
-void initprogram(void)
+void initprogram(int prefered_port)
 {
-
-
-    middleware = new MiddleWare();
+    middleware = new MiddleWare(prefered_port);
     master = middleware->spawnMaster();
     master->swaplr = swaplr;
 
@@ -200,6 +198,9 @@ int main(int argc, char *argv[])
             "pid-in-client-name", 0, NULL, 'p'
         },
         {
+            "prefered-port", 1, NULL, 'P',
+        },
+        {
             "output", 1, NULL, 'O'
         },
         {
@@ -217,6 +218,7 @@ int main(int argc, char *argv[])
     };
     opterr = 0;
     int option_index = 0, opt, exitwithhelp = 0, exitwithversion = 0;
+    int prefered_port = -1;
 
     string loadfile, loadinstrument, execAfterInit;
 
@@ -226,7 +228,7 @@ int main(int argc, char *argv[])
         /**\todo check this process for a small memory leak*/
         opt = getopt_long(argc,
                           argv,
-                          "l:L:r:b:o:I:O:N:e:hvapSDUY",
+                          "l:L:r:b:o:I:O:N:e:P:hvapSDUY",
                           opts,
                           &option_index);
         char *optarguments = optarg;
@@ -313,6 +315,10 @@ int main(int argc, char *argv[])
             case 'p':
                 Nio::pidInClientName = true;
                 break;
+            case 'P':
+                if(optarguments)
+                    prefered_port = atoi(optarguments);
+                break;
             case 'e':
                 GETOP(execAfterInit);
                 break;
@@ -360,6 +366,7 @@ int main(int argc, char *argv[])
              << "  -a , --auto-connect\t\t\t AutoConnect when using JACK\n"
              << "  -p , --pid-in-client-name\t\t Append PID to (JACK) "
                 "client name\n"
+             << "  -P , --prefered-port\t\t\t Prefered OSC Port\n"
              << "  -O , --output\t\t\t\t Set Output Engine\n"
              << "  -I , --input\t\t\t\t Set Input Engine\n"
              << "  -e , --exec-after-init\t\t Run post-initialization script\n"
@@ -374,7 +381,7 @@ int main(int argc, char *argv[])
     for(int i = 0; i < synth->buffersize; ++i)
         denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 
-    initprogram();
+    initprogram(prefered_port);
 
     if(!loadfile.empty()) {
         int tmp = master->loadXML(loadfile.c_str());

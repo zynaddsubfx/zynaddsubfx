@@ -537,7 +537,7 @@ class MiddleWareImpl
     }
 
 public:
-    MiddleWareImpl(MiddleWare *mw);
+    MiddleWareImpl(MiddleWare *mw, int prefered_port);
     ~MiddleWareImpl(void);
 
     void warnMemoryLeaks(void);
@@ -782,11 +782,14 @@ public:
     string last_url, curr_url;
 };
 
-MiddleWareImpl::MiddleWareImpl(MiddleWare *mw)
+MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, int prefered_port)
 {
     bToU = new rtosc::ThreadLink(4096*2,1024);
     uToB = new rtosc::ThreadLink(4096*2,1024);
-    server = lo_server_new_with_proto(NULL, LO_UDP, liblo_error_cb);
+    if(prefered_port != -1)
+        server = lo_server_new_with_proto(to_s(prefered_port).c_str(), LO_UDP, liblo_error_cb);
+    else
+        server = lo_server_new_with_proto(NULL, LO_UDP, liblo_error_cb);
     lo_server_add_method(server, NULL, NULL, handler_function, mw);
     fprintf(stderr, "lo server running on %d\n", lo_server_get_port(server));
 
@@ -1182,8 +1185,8 @@ void MiddleWareImpl::warnMemoryLeaks(void)
 /******************************************************************************
  *                         MidleWare Forwarding Stubs                         *
  ******************************************************************************/
-    MiddleWare::MiddleWare(void)
-:impl(new MiddleWareImpl(this))
+MiddleWare::MiddleWare(int prefered_port)
+:impl(new MiddleWareImpl(this, prefered_port))
 {}
 MiddleWare::~MiddleWare(void)
 {
