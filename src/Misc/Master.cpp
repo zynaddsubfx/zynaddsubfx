@@ -592,7 +592,7 @@ void Master::AudioOut(float *outl, float *outr)
 {
     //Danger Limits
     if(memory->lowMemory(2,1024*1024))
-        printf("LOW MEMORY OHOH NOONONONONOOOOOOOO!!\n");
+        printf("QUITE LOW MEMORY IN THE RT POOL BE PREPARED FOR WEIRD BEHAVIOR!!\n");
     //Normal Limits
     if(!pendingMemory && memory->lowMemory(4,1024*1024)) {
         printf("Requesting more memory\n");
