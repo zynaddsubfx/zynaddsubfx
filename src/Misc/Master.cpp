@@ -30,6 +30,7 @@
 #include "../DSP/FFTwrapper.h"
 #include "../Misc/Allocator.h"
 #include "../Nio/Nio.h"
+#include "PresetExtractor.h"
 
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
@@ -216,6 +217,11 @@ static const Ports master_ports = {
         {d.reply("/undo_pause", "");}},
     {"undo_resume",0,0,[](const char *, rtosc::RtData &d)
         {d.reply("/undo_resume", "");}},
+    {"config/", 0, &Config::ports, [](const char *, rtosc::RtData &){}},
+    {"presets/", 0, &preset_ports, rBOIL_BEGIN
+        SNIP
+            preset_ports.dispatch(msg, data);
+        rBOIL_END},
 };
 const Ports &Master::ports = master_ports;
 

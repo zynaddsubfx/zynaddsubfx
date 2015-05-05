@@ -49,14 +49,14 @@
 static rtosc::Ports ports = {
     //rString(cfg.LinuxOSSWaveOutDev),
     //rString(cfg.LinuxOSSSeqInDev),
-    rParamI(cfg.SampleRate),
-    rParamI(cfg.SoundBufferSize),
-    rParamI(cfg.OscilSize),
-    rToggle(cfg.SwapStereo),
-    rToggle(cfg.BankUIAutoClose),
-    rParamI(cfg.GzipCompression),
-    rParamI(cfg.Interpolation),
-    {"cfg.presetsDirList", 0, 0,
+    rParamI(cfg.SampleRate, "samples of audio per second"),
+    rParamI(cfg.SoundBufferSize, "Size of processed audio buffer"),
+    rParamI(cfg.OscilSize, "Size Of Oscillator Wavetable"),
+    rToggle(cfg.SwapStereo, "Swap Left And Right Channels"),
+    rToggle(cfg.BankUIAutoClose, "Automatic Closing of BackUI After Patch Selection"),
+    rParamI(cfg.GzipCompression, "Level of Gzip Compression For Save Files"),
+    rParamI(cfg.Interpolation, "Level of Interpolation, Linear/Cubic"),
+    {"cfg.presetsDirList", rProp(parameter) rDoc("list of preset search directories"), 0,
         [](const char *msg, rtosc::RtData &d)
         {
             Config &c = *(Config*)d.obj;
@@ -81,7 +81,7 @@ static rtosc::Ports ports = {
             rtosc_amessage(buffer, sizeof(buffer), d.loc, types, args);
             d.reply(buffer);
         }},
-    {"cfg.bankRootDirList", 0, 0,
+    {"cfg.bankRootDirList", rProp(parameter) rDoc("list of bank search directories"), 0,
         [](const char *msg, rtosc::RtData &d)
         {
             Config &c = *(Config*)d.obj;
@@ -110,10 +110,10 @@ static rtosc::Ports ports = {
     //rArrayS(cfg.bankRootDirList,MAX_BANK_ROOT_DIRS),
     //rString(cfg.currentBankDir),
     //rArrayS(cfg.presetsDirList,MAX_BANK_ROOT_DIRS),
-    rToggle(cfg.CheckPADsynth),
-    rToggle(cfg.IgnoreProgramChange),
-    rParamI(cfg.UserInterfaceMode),
-    rParamI(cfg.VirKeybLayout),
+    rToggle(cfg.CheckPADsynth, "Old Check For PADsynth functionality within a patch"),
+    rToggle(cfg.IgnoreProgramChange, "Ignore MIDI Program Change Events"),
+    rParamI(cfg.UserInterfaceMode,   "Beginner/Advanced Mode Select"),
+    rParamI(cfg.VirKeybLayout,       "Keyboard Layout For Virtual Piano Keyboard"),
     //rParamS(cfg.LinuxALSAaudioDev),
     //rParamS(cfg.nameTag)
 };

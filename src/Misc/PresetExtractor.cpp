@@ -21,8 +21,50 @@
 #include "../Params/SUBnoteParameters.h"
 #include "../Misc/MiddleWare.h"
 #include "PresetExtractor.h"
+#include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
 #include <string>
 using std::string;
+
+
+const rtosc::Ports preset_ports
+{
+    {"find-presets:s", rDoc("Find associated presets with a given type"), 0,
+        [](const char *msg, rtosc::RtData &d) {
+            d.reply(d.loc, "s", "No Presets Found...");
+        }},
+    {"add-preset:ss", rDoc("Add a preset <1> with associated name <2>"), 0,
+        [](const char *msg, rtosc::RtData &d) {
+            d.reply("/alert", "s", "Preset Could Not Be added...");
+        }},
+    {"delete-preset:s", rDoc("Add a preset <1> with associated name <2>"), 0,
+        [](const char *msg, rtosc::RtData &d) {
+            d.reply("/alert", "s", "Preset Could Not Be added...");
+        }},
+    {"clipboard-type:", rDoc("Current Preset Type In the Clipboard"), 0,
+        [](const char *msg, rtosc::RtData &d) {
+            d.reply("/alert", "s", "Unknown clipboard type...");
+        }},
+    {"clipboard-value:", rDoc("Current Value In the Clipboard"), 0,
+        [](const char *msg, rtosc::RtData &d) {
+            d.reply("/alert", "s", "Unknown clipboard type...");
+        }},
+    {"apply-preset:ss", rDoc("Apply preset file or 'clipboard' to the given OSC path"), 0,
+        [](const char *msg, rtosc::RtData &d) {
+            d.reply("/alert", "s", "Mismatched Clipboard Type...");
+        }},
+    {"set-clipboard:ss", rDoc("Set the current data in the clipboard"), 0,
+        [](const char *msg, rtosc::RtData &d) {
+            d.reply("/alert", "s", "Clipboard is unusable...");
+        }},
+};
+
+//Translate newer symbols to old preset types
+std::vector<string> translate_preset_types(std::string metatype)
+{
+    std::vector<string> results;
+    return results;
+}
 
 
 /*****************************************************************************

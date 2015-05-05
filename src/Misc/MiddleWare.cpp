@@ -126,10 +126,9 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
     memset(buffer, 0, sizeof(buffer));
     size_t size = 2048;
     lo_message_serialise(msg, path, buffer, &size);
-    printf("Liblo<%s>\n", buffer);
     if(!strcmp(buffer, "/path-search") && !strcmp("ss", rtosc_argument_string(buffer))) {
         path_search(buffer, mw->activeUrl().c_str());
-    } else
+    } else if(buffer[0]=='/')
         mw->transmitMsg(buffer);
 
     return 0;
@@ -251,8 +250,8 @@ void bankPos(Bank &bank, Fl_Osc_Interface *osc)
 class DummyDataObj:public rtosc::RtData
 {
     public:
-        DummyDataObj(char *loc_, size_t loc_size_, void *obj_, cb_t cb_, void *ui_,
-                Fl_Osc_Interface *osc_, rtosc::ThreadLink *uToB_)
+        DummyDataObj(char *loc_, size_t loc_size_, void *obj_, MiddleWareImpl *mwi_,
+                rtosc::ThreadLink *uToB_)
         {
             memset(loc_, 0, sizeof(loc_size_));
             buffer = new char[4*4096];
@@ -260,9 +259,7 @@ class DummyDataObj:public rtosc::RtData
             loc      = loc_;
             loc_size = loc_size_;
             obj      = obj_;
-            cb       = cb_;
-            ui       = ui_;
-            osc      = osc_;
+            mwi      = mwi_;
             uToB     = uToB_;
         }
         ~DummyDataObj(void)
@@ -291,20 +288,12 @@ class DummyDataObj:public rtosc::RtData
             }
             va_end(va);
         }
-        virtual void reply(const char *msg)
-        {
-            //DEBUG
-            //printf("reply used for '%s'\n", msg);
-            osc->tryLink(msg);
-            cb(ui, msg);
-        }
+        virtual void reply(const char *msg);
         //virtual void broadcast(const char *path, const char *args, ...){(void)path;(void)args;};
         //virtual void broadcast(const char *msg){(void)msg;};
     private:
         char *buffer;
-        cb_t cb;
-        void *ui;
-        Fl_Osc_Interface *osc;
+        MiddleWareImpl   *mwi;
         rtosc::ThreadLink *uToB;
 };
 
@@ -700,7 +689,7 @@ public:
             return true;
         char buffer[1024];
         memset(buffer, 0, sizeof(buffer));
-        DummyDataObj d(buffer, 1024, v, cb, ui, osc, uToB);
+        DummyDataObj d(buffer, 1024, v, this, uToB);
         strcpy(buffer, path.c_str());
 
         PADnoteParameters::ports.dispatch(msg, d);
@@ -718,7 +707,7 @@ public:
     {
         char buffer[1024];
         memset(buffer, 0, sizeof(buffer));
-        DummyDataObj d(buffer, 1024, (void*)&config, cb, ui, osc, uToB);
+        DummyDataObj d(buffer, 1024, (void*)&config, this, uToB);
         strcpy(buffer, "/config/");
 
         Config::ports.dispatch(msg+8, d);
@@ -830,6 +819,11 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, int prefered_port)
             rtosc_message(buf, 1024, "/undo_resume","");
             handleMsg(buf);
             });
+}
+        
+void DummyDataObj::reply(const char *msg)
+{
+    mwi->bToUhandle(msg);
 }
 MiddleWareImpl::~MiddleWareImpl(void)
 {
@@ -973,7 +967,7 @@ bool MiddleWareImpl::handleOscil(string path, const char *msg, void *v)
     printf("handleOscil...\n");
     char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
-    DummyDataObj d(buffer, 1024, v, cb, ui, osc, uToB);
+    DummyDataObj d(buffer, 1024, v, this, uToB);
     strcpy(buffer, path.c_str());
     if(!v)
         return true;
