@@ -35,9 +35,10 @@ class PresetsArray:public Presets
         virtual ~PresetsArray();
 
         void copy(PresetsStore &ps, const char *name); /**<if name==NULL, the clipboard is used*/
+        void copy(PresetsStore &ps, int elm, const char *name); /**<if name==NULL, the clipboard is used*/
         //void paste(PresetsStore &ps, int npreset); //npreset==0 for clipboard
         //bool checkclipboardtype(PresetsStore &ps);
-        void setelement(int n);
+        //void setelement(int n);
     protected:
         void setpresettype(const char *type);
     private:
@@ -45,7 +46,6 @@ class PresetsArray:public Presets
         //virtual void getfromXMLsection(XMLwrapper *xml, int n) = 0;
         //virtual void defaults() = 0;
         //virtual void defaults(int n) = 0;
-        int nelement;
 };
 
 #endif

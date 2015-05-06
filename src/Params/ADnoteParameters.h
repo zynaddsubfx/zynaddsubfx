@@ -308,15 +308,14 @@ class ADnoteParameters:public PresetsArray
         int get_unison_size_index(int nvoice) const;
         void set_unison_size_index(int nvoice, int index);
         static const rtosc::Ports &ports;
-    private:
         void defaults(int n); //n is the nvoice
+        void add2XMLsection(XMLwrapper *xml, int n);
+        void getfromXMLsection(XMLwrapper *xml, int n);
+    private:
 
         void EnableVoice(int nvoice);
         void KillVoice(int nvoice);
         FFTwrapper *fft;
-
-        void add2XMLsection(XMLwrapper *xml, int n);
-        void getfromXMLsection(XMLwrapper *xml, int n);
 };
 
 #endif

@@ -33,7 +33,6 @@ using namespace rtosc;
 
 static const rtosc::Ports localPorts = {
     rSelf(EnvelopeParams),
-    rPresetType,
     rPaste,
     rToggle(Pfreemode, "Complex Envelope Definitions"),
     rParamZyn(Penvpoints, rProp(internal), "Number of points in complex definition"),

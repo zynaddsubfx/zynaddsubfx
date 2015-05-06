@@ -28,7 +28,6 @@
 PresetsArray::PresetsArray()
 {
     type[0]  = 0;
-    nelement = -1;
 }
 
 PresetsArray::~PresetsArray()
@@ -40,6 +39,11 @@ void PresetsArray::setpresettype(const char *type)
 }
 
 void PresetsArray::copy(PresetsStore &ps, const char *name)
+{
+    copy(ps, -1, name);
+}
+
+void PresetsArray::copy(PresetsStore &ps, int nelement, const char *name)
 {
     XMLwrapper xml;
 
@@ -66,8 +70,6 @@ void PresetsArray::copy(PresetsStore &ps, const char *name)
         ps.copyclipboard(xml, type);
     else
         ps.copypreset(xml, type, name);
-
-    nelement = -1;
 }
 
 #if 0
@@ -133,8 +135,3 @@ bool PresetsArray::checkclipboardtype(PresetsStore &ps)
 //
 //    presetsstore.rescanforpresets(type);
 //}
-
-void PresetsArray::setelement(int n)
-{
-    nelement = n;
-}

@@ -171,6 +171,8 @@ void GUI::raiseUi(ui_handle_t gui, const char *message)
     if(!gui)
         return;
     MasterUI *mui = (MasterUI*)gui;
+    if(string("/damage") == message && rtosc_type(message, 0) == 's')
+        mui->osc->damage(rtosc_argument(message,0).s);
     mui->osc->tryLink(message);
     //printf("got message for UI '%s'\n", message);
     char buffer[1024];
@@ -318,7 +320,7 @@ class UI_Interface:public Fl_Osc_Interface
         virtual void damage(const char *path) override
         {
 #ifndef NO_UI
-            //printf("\n\nDamage(\"%s\")\n", path);
+            printf("\n\nDamage(\"%s\")\n", path);
             for(auto pair:map) {
                 if(strstr(pair.first.c_str(), path)) {
                     auto *tmp = dynamic_cast<Fl_Widget*>(pair.second);
@@ -326,8 +328,10 @@ class UI_Interface:public Fl_Osc_Interface
                     //    printf("%x, %d %d [%s]\n", (int)pair.second, tmp->visible_r(), tmp->visible(), pair.first.c_str());
                     //else
                     //    printf("%x, (NULL)[%s]\n", (int)pair.second,pair.first.c_str());
-                    if(!tmp || tmp->visible_r())
+                    if(!tmp || tmp->visible_r()) {
+                        printf("*");
                         pair.second->update();
+                    }
                 }
             }
 #endif

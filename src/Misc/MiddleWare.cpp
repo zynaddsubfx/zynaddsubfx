@@ -130,7 +130,7 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
     lo_message_serialise(msg, path, buffer, &size);
     if(!strcmp(buffer, "/path-search") && !strcmp("ss", rtosc_argument_string(buffer))) {
         path_search(buffer, mw->activeUrl().c_str());
-    } else if(buffer[0]=='/')
+    } else if(buffer[0]=='/' && rindex(buffer, '/')[1])
         mw->transmitMsg(buffer);
 
     return 0;
@@ -421,6 +421,7 @@ struct ParamStore
 class MiddleWareImpl
 {
     static constexpr const char* tmp_nam_prefix = "/tmp/zynaddsubfx_";
+    MiddleWare *parent;
 
     //! returns file name to where UDP port is saved
     std::string get_tmp_nam() const
@@ -709,13 +710,20 @@ public:
     {
         char buffer[1024];
         memset(buffer, 0, sizeof(buffer));
-        DummyDataObj d(buffer, 1024, (void*)&presetsstore, this, uToB);
+        DummyDataObj d(buffer, 1024, (void*)parent, this, uToB);
         strcpy(buffer, "/presets/");
 
         //012345678
         ///presets/
         real_preset_ports.dispatch(msg+9, d);
         printf("Something <%s>\n", msg+9);
+        if(strstr(msg, "paste") && rtosc_argument_string(msg)[0] == 's') {
+            char buffer[1024];
+            rtosc_message(buffer, 1024, "/damage", "s",
+                    rtosc_argument(msg, 0).s);
+            GUI::raiseUi(ui, buffer);
+        }
+
 
         if(!d.matches) {
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
@@ -794,6 +802,7 @@ public:
 };
 
 MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, int prefered_port)
+    :parent(mw)
 {
     bToU = new rtosc::ThreadLink(4096*2,1024);
     uToB = new rtosc::ThreadLink(4096*2,1024);

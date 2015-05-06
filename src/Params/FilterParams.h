@@ -91,11 +91,13 @@ class FilterParams:public PresetsArray
         float getformantamp(unsigned char amp);
         float getformantq(unsigned char q);
 
+        void defaults(int n);
+
+
         bool changed;
 
         static const rtosc::Ports ports;
     private:
-        void defaults(int n);
 
         //stored default parameters
         unsigned char Dtype;

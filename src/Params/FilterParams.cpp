@@ -62,7 +62,6 @@ static const rtosc::Ports subports = {
 #define rChangeCb obj->changed = true;
 const rtosc::Ports FilterParams::ports = {
     rSelf(FilterParams),
-    rPresetType,
     rPaste,
     rArrayPaste,
     rParamZyn(Pcategory,   "Class of filter"),

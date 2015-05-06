@@ -53,7 +53,6 @@ class PresetsStore
 
         void scanforpresets();
 
-    private:
         struct {
             std::string data;
             std::string type;

@@ -11,12 +11,12 @@ struct Clipboard {
 
 Clipboard clipboardCopy(class MiddleWare &mw, std::string url);
 
-void presetCopy(std::string url, std::string name);
-void presetPaste(std::string url, std::string name);
+void presetCopy(MiddleWare &mw, std::string url, std::string name);
+void presetPaste(MiddleWare &mw, std::string url, std::string name);
+void presetCopyArray(MiddleWare &mw, std::string url,  int field, std::string name);
+void presetPasteArray(MiddleWare &mw, std::string url, int field, std::string name);
 void presetPaste(std::string url, int);
 void presetDelete(int);
 void presetRescan();
 std::string presetClipboardType();
 bool presetCheckClipboardType();
-
-extern MiddleWare *middlewarepointer;

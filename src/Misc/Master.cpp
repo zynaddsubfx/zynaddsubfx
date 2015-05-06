@@ -213,6 +213,11 @@ static const Ports master_ports = {
             //Master &m = *(Master*)d.obj;
             d.reply("/samplerate", "f", synth->samplerate_f);
         }},
+    {"oscilsize:", rDoc("Synthesizer Global Oscillator Size"), 0, [](const char *, RtData &d) {
+            //Master &m = *(Master*)d.obj;
+            d.reply("/oscilsize", "f", synth->oscilsize_f);
+            d.reply("/oscilsize", "i", synth->oscilsize);
+        }},
     {"undo_pause",0,0,[](const char *, rtosc::RtData &d)
         {d.reply("/undo_pause", "");}},
     {"undo_resume",0,0,[](const char *, rtosc::RtData &d)

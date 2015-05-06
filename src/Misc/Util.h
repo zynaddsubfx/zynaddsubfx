@@ -164,13 +164,11 @@ static inline void arrayNullify(T &t) {delete [] t; t = NULL; }
     [](const char *, rtosc::RtData &d){ \
         d.reply(d.loc, "b", sizeof(d.obj), &d.obj);}}\
 
-#define rPresetType \
+#define rPaste \
 {"preset-type", rProp(internal), 0, \
     [](const char *, rtosc::RtData &d){ \
         rObject *obj = (rObject*)d.obj; \
-        d.reply(d.loc, "s", obj->type);}}
-
-#define rPaste \
+        d.reply(d.loc, "s", obj->type);}},\
 {"paste:b", rProp(internal) rDoc("paste port"), 0, \
     [](const char *m, rtosc::RtData &d){ \
         printf("rPaste...\n"); \

@@ -35,7 +35,6 @@ using namespace rtosc;
 #define rObject LFOParams
 static const rtosc::Ports _ports = {
     rSelf(LFOParams),
-    rPresetType,
     rPaste,
     rParamF(Pfreq, "frequency of LFO"),
     rParamZyn(Pintensity, "Intensity of LFO"),

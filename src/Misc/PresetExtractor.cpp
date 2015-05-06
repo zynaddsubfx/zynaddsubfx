@@ -41,48 +41,60 @@ const rtosc::Ports real_preset_ports =
                         pre[i].type.c_str());
 
         }},
-    {"copy:s", 0, 0,
+    {"copy:s:ss:si:ssi", 0, 0,
         [](const char *msg, rtosc::RtData &d) {
-            presetCopy(rtosc_argument(msg, 0).s, "");
+            MiddleWare &mw = *(MiddleWare*)d.obj;
+            std::string args = rtosc_argument_string(msg);
             d.reply(d.loc, "s", "clipboard copy...");
+            printf("\nClipboard Copy...\n");
+            if(args == "s")
+                presetCopy(mw, rtosc_argument(msg, 0).s, "");
+            else if(args == "ss")
+                presetCopy(mw, rtosc_argument(msg, 0).s,
+                            rtosc_argument(msg, 1).s);
+            else if(args == "si")
+                presetCopyArray(mw, rtosc_argument(msg, 0).s,
+                            rtosc_argument(msg, 1).i, "");
+            else if(args == "ssi")
+                presetCopyArray(mw, rtosc_argument(msg, 0).s,
+                            rtosc_argument(msg, 2).i, rtosc_argument(msg, 1).s);
+            else
+                assert(false && "bad arguments");
         }},
-    {"paste:s", 0, 0,
+    {"paste:s:ss:si:ssi", 0, 0,
         [](const char *msg, rtosc::RtData &d) {
-            presetPaste(rtosc_argument(msg, 0).s, "");
+            MiddleWare &mw = *(MiddleWare*)d.obj;
+            std::string args = rtosc_argument_string(msg);
             d.reply(d.loc, "s", "clipboard paste...");
+            printf("\nClipboard Paste...\n");
+            if(args == "s")
+                presetPaste(mw, rtosc_argument(msg, 0).s, "");
+            else if(args == "ss")
+                presetPaste(mw, rtosc_argument(msg, 0).s,
+                            rtosc_argument(msg, 1).s);
+            else if(args == "si")
+                presetPasteArray(mw, rtosc_argument(msg, 0).s,
+                            rtosc_argument(msg, 1).i, "");
+            else if(args == "ssi")
+                presetPasteArray(mw, rtosc_argument(msg, 0).s,
+                            rtosc_argument(msg, 2).i, rtosc_argument(msg, 1).s);
+            else
+                assert(false && "bad arguments");
         }},
+    {"clipboard-type:", 0, 0,
+        [](const char *msg, rtosc::RtData &d) {
+            d.reply(d.loc, "s", presetsstore.clipboard.type.c_str());
+        }},
+
 };
 
 
 const rtosc::Ports preset_ports
 {
     {"scan-for-presets:", rDoc("Scan For Presets"), 0, dummy},
-    {"copy:s",  rDoc("Copy URL To Clipboard"), 0, dummy},
-    {"paste:s", rDoc("Copy URL To Clipboard"), 0, dummy},
-    {"add-preset:ss", rDoc("Add a preset <1> with associated name <2>"), 0,
-        [](const char *msg, rtosc::RtData &d) {
-            d.reply("/alert", "s", "Preset Could Not Be added...");
-        }},
-    {"delete-preset:s", rDoc("Add a preset <1> with associated name <2>"), 0,
-        [](const char *msg, rtosc::RtData &d) {
-            d.reply("/alert", "s", "Preset Could Not Be added...");
-        }},
-    {"clipboard-type:", rDoc("Current Preset Type In the Clipboard"), 0,
-        [](const char *msg, rtosc::RtData &d) {
-            d.reply("/alert", "s", "Unknown clipboard type...");
-        }},
-    {"clipboard-value:", rDoc("Current Value In the Clipboard"), 0,
-        [](const char *msg, rtosc::RtData &d) {
-            d.reply("/alert", "s", "Unknown clipboard type...");
-        }},
-    {"apply-preset:ss", rDoc("Apply preset file or 'clipboard' to the given OSC path"), 0,
-        [](const char *msg, rtosc::RtData &d) {
-            d.reply("/alert", "s", "Mismatched Clipboard Type...");
-        }},
-    {"set-clipboard:ss", rDoc("Set the current data in the clipboard"), 0,
-        [](const char *msg, rtosc::RtData &d) {
-            d.reply("/alert", "s", "Clipboard is unusable...");
-        }},
+    {"copy:s:ss:si:ssi",  rDoc("Copy <s> URL to <s> Name/Clipboard from subfield <i>"), 0, dummy},
+    {"paste:s:ss:si:ssi", rDoc("Paste <s> URL to <s> Name/Clipboard from subfield <i>"), 0, dummy},
+    {"clipboard-type:",   rDoc("Type Stored In Clipboard"), 0, dummy}
 };
 
 //Relevant types to keep in mind
@@ -114,8 +126,6 @@ std::vector<string> translate_preset_types(std::string metatype)
 /*****************************************************************************
  *                     Implementation Methods                                *
  *****************************************************************************/
-static string clip;
-
 class Capture:public rtosc::RtData
 {
     public:
@@ -144,6 +154,21 @@ class Capture:public rtosc::RtData
 
 template <class T>
 T capture(Master *m, std::string url);
+
+template <>
+std::string capture(Master *m, std::string url)
+{
+    Capture c(m);
+    char query[1024];
+    rtosc_message(query, 1024, url.c_str(), "");
+    Master::ports.dispatch(query+1,c);
+    if(rtosc_message_length(c.msgbuf, sizeof(c.msgbuf))) {
+        if(rtosc_type(c.msgbuf, 0) == 's')
+            return rtosc_argument(c.msgbuf,0).s;
+    }
+
+    return "";
+}
 
 template <>
 void *capture(Master *m, std::string url)
@@ -178,22 +203,72 @@ std::string doCopy(MiddleWare &mw, string url)
 }
 
 template<class T, typename... Ts>
-void doPaste(MiddleWare &mw, string url, string data, Ts&&... args)
+void doPaste(MiddleWare &mw, string url, string type, string data, Ts&&... args)
 {
-    (void) data;
-    if(clip.length() < 20)
+    printf("Do Paste<%d>\n", data.size());
+    if(data.length() < 20)
         return;
 
     //Generate a new object
     T *t = new T(std::forward<Ts>(args)...);
     XMLwrapper xml;
-    xml.putXMLdata(clip.data());
+    xml.putXMLdata(data.data());
+    
+    if(xml.enterbranch(type) == 0)
+        return;
+
     t->getfromXML(&xml);
 
     //Send the pointer
     string path = url+"paste";
     char buffer[1024];
     rtosc_message(buffer, 1024, path.c_str(), "b", sizeof(void*), &t);
+    if(!Master::ports.apropos(path.c_str()))
+        fprintf(stderr, "Warning: Missing Paste URL: '%s'\n", path.c_str());
+    printf("Sending info to '%s'\n", buffer);
+    mw.transmitMsg(buffer);
+
+    //Let the pointer be reclaimed later
+}
+
+template<class T>
+std::string doArrayCopy(MiddleWare &mw, int field, string url)
+{
+    XMLwrapper xml;
+    mw.doReadOnlyOp([&xml, url, field, &mw](){
+        Master *m = mw.spawnMaster();
+        //Get the pointer
+        T *t = (T*)capture<void*>(m, url+"self");
+        //Extract Via mxml
+        t->copy(presetsstore, field, NULL);
+    });
+
+    return "";//xml.getXMLdata();
+}
+
+template<class T, typename... Ts>
+void doArrayPaste(MiddleWare &mw, int field, string url, string type, string data, Ts&&... args)
+{
+    if(data.length() < 20)
+        return;
+
+    //Generate a new object
+    T *t = new T(std::forward<Ts>(args)...);
+
+    XMLwrapper xml;
+    xml.putXMLdata(data.c_str());
+    if(xml.enterbranch(type) == 0) {
+        delete t;
+        return;
+    }
+    t->defaults(field);
+    t->getfromXMLsection(&xml, field);
+    xml.exitbranch();
+
+    //Send the pointer
+    string path = url+"paste-array";
+    char buffer[1024];
+    rtosc_message(buffer, 1024, path.c_str(), "bi", sizeof(void*), &t, field);
     if(!Master::ports.apropos(path.c_str()))
         fprintf(stderr, "Warning: Missing Paste URL: '%s'\n", path.c_str());
     printf("Sending info to '%s'\n", buffer);
@@ -209,26 +284,30 @@ void doPaste(MiddleWare &mw, string url, string data, Ts&&... args)
  * extra handling.
  * See MiddleWare.cpp for these specifics
  */
-void doClassPaste(std::string type, MiddleWare &mw, string url, string data)
+void doClassPaste(std::string type, std::string type_, MiddleWare &mw, string url, string data)
 {
+    printf("Class Paste\n");
     if(type == "EnvelopeParams")
-        doPaste<EnvelopeParams>(mw, url, data);
+        doPaste<EnvelopeParams>(mw, url, type_, data);
     else if(type == "LFOParams")
-        doPaste<LFOParams>(mw, url, data);
+        doPaste<LFOParams>(mw, url, type_, data);
     else if(type == "FilterParams")
-        doPaste<FilterParams>(mw, url, data);
+        doPaste<FilterParams>(mw, url, type_, data);
     else if(type == "ADnoteParameters")
-        doPaste<ADnoteParameters>(mw, url, data, (FFTwrapper*)NULL);
+        doPaste<ADnoteParameters>(mw, url, type_, data, (FFTwrapper*)NULL);
     else if(type == "PADnoteParameters")
-        doPaste<PADnoteParameters>(mw, url, data, (FFTwrapper*)NULL);
+        doPaste<PADnoteParameters>(mw, url, type_, data, (FFTwrapper*)NULL);
     else if(type == "SUBnoteParameters")
-        doPaste<SUBnoteParameters>(mw, url, data);
+        doPaste<SUBnoteParameters>(mw, url, type_, data);
     else if(type == "OscilGen")
-        doPaste<OscilGen>(mw, url, data, (FFTwrapper*)NULL, (Resonance*)NULL);
+        doPaste<OscilGen>(mw, url, type_, data, (FFTwrapper*)NULL, (Resonance*)NULL);
     else if(type == "Resonance")
-        doPaste<Resonance>(mw, url, data);
+        doPaste<Resonance>(mw, url, type_, data);
     else if(type == "EffectMgr")
-        doPaste<EffectMgr>(mw, url, data, DummyAlloc, false);
+        doPaste<EffectMgr>(mw, url, type_, data, DummyAlloc, false);
+    else {
+        fprintf(stderr, "Warning: Unknown type<%s> from url<%s>\n", type.c_str(), url.c_str());
+    }
 }
 
 std::string doClassCopy(std::string type, MiddleWare &mw, string url)
@@ -254,6 +333,37 @@ std::string doClassCopy(std::string type, MiddleWare &mw, string url)
     return "UNDEF";
 }
 
+void doClassArrayPaste(std::string type, std::string type_, int field, MiddleWare &mw, string url, string data)
+{
+    if(type == "FilterParams")
+        doArrayPaste<FilterParams>(mw, field, url, type_, data);
+    else if(type == "ADnoteParameters")
+        doArrayPaste<ADnoteParameters>(mw, field, url, type_, data, (FFTwrapper*)NULL);
+}
+
+std::string doClassArrayCopy(std::string type, int field, MiddleWare &mw, string url)
+{
+    if(type == "FilterParams")
+        return doArrayCopy<FilterParams>(mw, field, url);
+    else if(type == "ADnoteParameters")
+        return doArrayCopy<ADnoteParameters>(mw, field, url);
+    return "UNDEF";
+}
+
+//This is an abuse of the readonly op, but one that might look reasonable from a
+//user perspective...
+std::string getUrlPresetType(std::string url, MiddleWare &mw)
+{
+    std::string result;
+    mw.doReadOnlyOp([url, &result, &mw](){
+        Master *m = mw.spawnMaster();
+        //Get the pointer
+        result = capture<std::string>(m, url+"preset-type");
+    });
+    printf("preset type = %s\n", result.c_str());
+    return result;
+}
+
 std::string getUrlType(std::string url)
 {
     assert(!url.empty());
@@ -266,23 +376,6 @@ std::string getUrlType(std::string url)
         return self->meta()["class"];
     else
         return "";
-}
-
-void doClassArrayPaste(std::string type, MiddleWare &mw, string url, string data, int idx)
-{
-    if(type == "ADnoteVoiceParam")
-        ;
-    else if(type == "FilterParams")
-        ;
-}
-
-std::string doClassArrayCopy(std::string type, MiddleWare &mw, string url, int idx)
-{
-    if(type == "ADnoteVoiceParam")
-        return "UNDEF";
-    else if(type == "FilterParams")
-        return "UNDEF";
-    return "UNDEF";
 }
 
 
@@ -309,25 +402,37 @@ void clipBoardPaste(const char *url, Clipboard clip)
     (void) clip;
 }
 
-MiddleWare *middlewarepointer;
-void presetCopy(std::string url, std::string name)
+void presetCopy(MiddleWare &mw, std::string url, std::string name)
 {
     (void) name;
-    clip = doClassCopy(getUrlType(url), *middlewarepointer, url);
+    doClassCopy(getUrlType(url), mw, url);
     printf("PresetCopy()\n");
-    printf("clip = ``%s''\n", clip.c_str());
 }
-void presetPaste(std::string url, std::string name)
+void presetPaste(MiddleWare &mw, std::string url, std::string name)
 {
     (void) name;
-    doClassPaste(getUrlType(url), *middlewarepointer, url, clip);
     printf("PresetPaste()\n");
+    doClassPaste(getUrlType(url), getUrlPresetType(url, mw), mw, url, presetsstore.clipboard.data);
 }
+void presetCopyArray(MiddleWare &mw, std::string url, int field, std::string name)
+{
+    (void) name;
+    printf("PresetArrayCopy()\n");
+    doClassArrayCopy(getUrlType(url), field, mw, url);
+}
+void presetPasteArray(MiddleWare &mw, std::string url, int field, std::string name)
+{
+    (void) name;
+    printf("PresetArrayPaste()\n");
+    doClassArrayPaste(getUrlType(url), getUrlPresetType(url, mw), field, mw, url, presetsstore.clipboard.data);
+}
+#if 0
 void presetPaste(std::string url, int)
 {
-    doClassPaste(getUrlType(url), *middlewarepointer, url, clip);
     printf("PresetPaste()\n");
+    doClassPaste(getUrlType(url), *middlewarepointer, url, presetsstore.clipboard.data);
 }
+#endif
 void presetDelete(int)
 {
     printf("PresetDelete()\n");
