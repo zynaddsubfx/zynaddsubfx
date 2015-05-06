@@ -21,6 +21,8 @@
 #include "Util.h"
 #include "Master.h"
 #include "Part.h"
+#include "PresetExtractor.h"
+#include "../Params/PresetsStore.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Params/SUBnoteParameters.h"
 #include "../Params/PADnoteParameters.h"
@@ -703,6 +705,26 @@ public:
         return true;
     }
 
+    void handlePresets(const char *msg)
+    {
+        char buffer[1024];
+        memset(buffer, 0, sizeof(buffer));
+        DummyDataObj d(buffer, 1024, (void*)&presetsstore, this, uToB);
+        strcpy(buffer, "/presets/");
+
+        //012345678
+        ///presets/
+        real_preset_ports.dispatch(msg+9, d);
+        printf("Something <%s>\n", msg+9);
+
+        if(!d.matches) {
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
+            fprintf(stderr, "Unknown location '%s'<%s>\n",
+                    msg, rtosc_argument_string(msg));
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        }
+    }
+
     void handleConfig(const char *msg)
     {
         char buffer[1024];
@@ -820,7 +842,7 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, int prefered_port)
             handleMsg(buf);
             });
 }
-        
+
 void DummyDataObj::reply(const char *msg)
 {
     mwi->bToUhandle(msg);
@@ -1139,6 +1161,8 @@ void MiddleWareImpl::handleMsg(const char *msg)
         clearBankSlot(rtosc_argument(msg,0).i, master, osc);
     } else if(strstr(msg, "/config/")) {
         handleConfig(msg);
+    } else if(strstr(msg, "/presets/")) {
+        handlePresets(msg);
     } else if(strstr(msg, "Padenabled") || strstr(msg, "Ppadenabled") || strstr(msg, "Psubenabled")) {
         kitEnable(msg);
         uToB->raw_write(msg);
@@ -1214,12 +1238,12 @@ void MiddleWare::setIdleCallback(void(*cb)(void))
 {
     impl->idle = cb;
 }
-        
+
 void MiddleWare::transmitMsg(const char *msg)
 {
     impl->handleMsg(msg);
 }
-        
+
 void MiddleWare::transmitMsg(const char *path, const char *args, ...)
 {
     char buffer[1024];

@@ -27,7 +27,7 @@
 #include "../Misc/XMLwrapper.h"
 #include "PresetsArray.h"
 
-class FilterParams
+class FilterParams:public PresetsArray
 {
     public:
         FilterParams();
@@ -42,6 +42,7 @@ class FilterParams
         void getfromXML(XMLwrapper *xml);
         void getfromXMLsection(XMLwrapper *xml, int n);
         void paste(FilterParams &);
+        void pasteArray(FilterParams &, int section);
 
 
         void getfromFilterParams(FilterParams *pars);

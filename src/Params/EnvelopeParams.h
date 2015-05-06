@@ -27,7 +27,7 @@
 #include "../Misc/XMLwrapper.h"
 #include "Presets.h"
 
-class EnvelopeParams
+class EnvelopeParams:public Presets
 {
     public:
         EnvelopeParams(unsigned char Penvstretch_=64,

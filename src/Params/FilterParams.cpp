@@ -62,7 +62,9 @@ static const rtosc::Ports subports = {
 #define rChangeCb obj->changed = true;
 const rtosc::Ports FilterParams::ports = {
     rSelf(FilterParams),
-    rPaste(),
+    rPresetType,
+    rPaste,
+    rArrayPaste,
     rParamZyn(Pcategory,   "Class of filter"),
     rParamZyn(Ptype,       "Filter Type"),
     rParamZyn(Pfreq,        "Center Freq"),
@@ -501,4 +503,15 @@ void FilterParams::paste(FilterParams &x)
     if(&x == this)
         return;
     memcpy((char*)this, (const char*)&x, sizeof(*this));
+}
+
+void FilterParams::pasteArray(FilterParams &x, int nvowel)
+{
+    for(int nformant = 0; nformant < FF_MAX_FORMANTS; ++nformant) {
+        auto &self   = Pvowels[nvowel].formants[nformant];
+        auto &update = x.Pvowels[nvowel].formants[nformant];
+        self.freq = update.freq;
+        self.amp  = update.amp;
+        self.q    = update.q;
+    }
 }

@@ -2,6 +2,7 @@
 #include <string>
 #include <rtosc/ports.h>
 
+extern const rtosc::Ports real_preset_ports;
 extern const rtosc::Ports preset_ports;
 struct Clipboard {
     std::string data;

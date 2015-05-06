@@ -23,10 +23,12 @@
 #ifndef LFO_PARAMS_H
 #define LFO_PARAMS_H
 
+#include <rtosc/ports.h>
 #include "Presets.h"
+
 class XMLwrapper;
 
-class LFOParams
+class LFOParams:public Presets
 {
     public:
         LFOParams();
@@ -61,7 +63,6 @@ class LFOParams
         static int time; //is used by Pcontinous parameter
 
         static const rtosc::Ports &ports;
-
     private:
         /* Default parameters */
         unsigned char Dfreq;

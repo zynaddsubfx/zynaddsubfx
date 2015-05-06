@@ -20,6 +20,7 @@
 
 */
 
+#include "PresetsStore.h"
 #include "PresetsArray.h"
 #include <string.h>
 
@@ -38,13 +39,13 @@ void PresetsArray::setpresettype(const char *type)
     strcpy(this->type, type);
 }
 
-void PresetsArray::copy(const char *name)
+void PresetsArray::copy(PresetsStore &ps, const char *name)
 {
-    XMLwrapper *xml = new XMLwrapper();
+    XMLwrapper xml;
 
     //used only for the clipboard
     if(name == NULL)
-        xml->minimal = false;
+        xml.minimal = false;
 
     char type[MAX_PRESETTYPE_SIZE];
     strcpy(type, this->type);
@@ -53,25 +54,24 @@ void PresetsArray::copy(const char *name)
     if(name == NULL)
         if(strstr(type, "Plfo") != NULL)
             strcpy(type, "Plfo");
-    ;
 
-    xml->beginbranch(type);
+    xml.beginbranch(type);
     if(nelement == -1)
-        add2XML(xml);
+        add2XML(&xml);
     else
-        add2XMLsection(xml, nelement);
-    xml->endbranch();
+        add2XMLsection(&xml, nelement);
+    xml.endbranch();
 
     if(name == NULL)
-        presetsstore.copyclipboard(xml, type);
+        ps.copyclipboard(xml, type);
     else
-        presetsstore.copypreset(xml, type, name);
+        ps.copypreset(xml, type, name);
 
-    delete (xml);
     nelement = -1;
 }
 
-void PresetsArray::paste(int npreset)
+#if 0
+void PresetsArray::paste(PresetsStore &ps, int npreset)
 {
     char type[MAX_PRESETTYPE_SIZE];
     strcpy(type, this->type);
@@ -80,65 +80,59 @@ void PresetsArray::paste(int npreset)
     if(npreset == 0)
         if(strstr(type, "Plfo") != NULL)
             strcpy(type, "Plfo");
-    ;
 
-    XMLwrapper *xml = new XMLwrapper();
+    XMLwrapper xml;
     if(npreset == 0) {
-        if(!checkclipboardtype()) {
-            nelement = -1;
-            delete (xml);
-            return;
-        }
-        if(!presetsstore.pasteclipboard(xml)) {
-            delete (xml);
+        if(!checkclipboardtype(ps)) {
             nelement = -1;
             return;
         }
-    }
-    else
-    if(!presetsstore.pastepreset(xml, npreset)) {
-        delete (xml);
+        if(!ps.pasteclipboard(xml)) {
+            nelement = -1;
+            return;
+        }
+    } else if(!ps.pastepreset(xml, npreset)) {
         nelement = -1;
         return;
     }
 
-    if(xml->enterbranch(type) == 0) {
+    if(xml.enterbranch(type) == 0) {
         nelement = -1;
         return;
     }
     if(nelement == -1) {
         defaults();
-        getfromXML(xml);
-    }
-    else {
+        getfromXML(&xml);
+    } else {
         defaults(nelement);
-        getfromXMLsection(xml, nelement);
+        getfromXMLsection(&xml, nelement);
     }
-    xml->exitbranch();
+    xml.exitbranch();
 
-    delete (xml);
     nelement = -1;
 }
 
-bool PresetsArray::checkclipboardtype()
+
+bool PresetsArray::checkclipboardtype(PresetsStore &ps)
 {
     char type[MAX_PRESETTYPE_SIZE];
     strcpy(type, this->type);
     if(nelement != -1)
         strcat(type, "n");
 
-    return presetsstore.checkclipboardtype(type);
+    return ps.checkclipboardtype(type);
 }
+#endif
 
-void PresetsArray::rescanforpresets()
-{
-    char type[MAX_PRESETTYPE_SIZE];
-    strcpy(type, this->type);
-    if(nelement != -1)
-        strcat(type, "n");
-
-    presetsstore.rescanforpresets(type);
-}
+//void PresetsArray::rescanforpresets()
+//{
+//    char type[MAX_PRESETTYPE_SIZE];
+//    strcpy(type, this->type);
+//    if(nelement != -1)
+//        strcat(type, "n");
+//
+//    presetsstore.rescanforpresets(type);
+//}
 
 void PresetsArray::setelement(int n)
 {

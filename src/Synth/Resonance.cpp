@@ -32,7 +32,7 @@
 using namespace rtosc;
 const rtosc::Ports Resonance::ports = {
     rSelf(Resonance),
-    rPaste(),
+    rPaste,
     rToggle(Penabled, "resonance enable"),
     rToggle(Pprotectthefundamental, "Disable resonance filter on first harmonic"),
     rParams(Prespoints, N_RES_POINTS, "Resonance data points"),

@@ -262,6 +262,9 @@ static const Ports globalPorts = {
 #undef  rObject
 #define rObject ADnoteParameters
 static const Ports adPorts = {//XXX 16 should not be hard coded
+    rSelf(ADnoteParameters),
+    rPaste,
+    rArrayPaste,
     rRecurs(VoicePar, NUM_VOICES),
     rRecur(GlobalPar, "Adnote Parameters"),
 };
@@ -893,6 +896,137 @@ void ADnoteParameters::getfromXMLsection(XMLwrapper *xml, int n)
     VoicePar[nvoice].getfromXML(xml, nvoice);
 }
 
+void ADnoteParameters::paste(ADnoteParameters &a)
+{
+    this->GlobalPar.paste(a.GlobalPar);
+    for(int i=0; i<NUM_VOICES; ++i)
+        this->VoicePar[i].paste(a.VoicePar[i]);
+}
+
+void ADnoteParameters::pasteArray(ADnoteParameters &a, int nvoice)
+{
+    if(nvoice >= NUM_VOICES)
+        return;
+
+    VoicePar[nvoice].paste(a.VoicePar[0]);
+}
+
+#define copy(x) this->x = a.x
+#define RCopy(x) this->x->paste(*a.x)
+void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
+{
+    //Come on C++ get some darn reflection, this is horrible
+
+    copy(Enabled);
+    copy(Unison_size);
+    copy(Unison_frequency_spread);
+    copy(Unison_stereo_spread);
+    copy(Unison_vibratto);
+    copy(Unison_vibratto_speed);
+    copy(Unison_invert_phase);
+    copy(Unison_phase_randomness);
+    copy(Type);
+    copy(PDelay);
+    copy(Presonance);
+    copy(Pextoscil);
+    copy(PextFMoscil);
+    copy(Poscilphase);
+    copy(PFMoscilphase);
+    copy(PFilterEnabled);
+    copy(Pfilterbypass);
+    copy(PFMEnabled);
+
+    RCopy(OscilSmp);
+
+
+    copy(PPanning);
+    copy(PVolume);
+    copy(PVolumeminus);
+    copy(PAmpVelocityScaleFunction);
+    copy(PAmpEnvelopeEnabled);
+
+    RCopy(AmpEnvelope);
+
+    copy(PAmpLfoEnabled);
+
+    RCopy(AmpLfo);
+
+    copy(Pfixedfreq);
+    copy(PfixedfreqET);
+    copy(PDetune);
+    copy(PCoarseDetune);
+    copy(PDetuneType);
+    copy(PFreqEnvelopeEnabled);
+
+    RCopy(FreqEnvelope);
+
+    copy(PFreqLfoEnabled);
+
+    RCopy(FreqLfo);
+
+    RCopy(VoiceFilter);
+
+    copy(PFilterEnvelopeEnabled);
+
+    RCopy(FilterEnvelope);
+
+    copy(PFilterLfoEnabled);
+
+    RCopy(FilterLfo);
+
+    copy(PFMVoice);
+    copy(PFMVolume);
+    copy(PFMVolumeDamp);
+    copy(PFMVelocityScaleFunction);
+
+    copy(PFMAmpEnvelopeEnabled);
+
+    RCopy(FMAmpEnvelope);
+
+    copy(PFMDetune);
+    copy(PFMCoarseDetune);
+    copy(PFMDetuneType);
+    copy(PFMFreqEnvelopeEnabled);
+
+
+    RCopy(FMFreqEnvelope);
+
+    RCopy(FMSmp);
+}
+
+void ADnoteGlobalParam::paste(ADnoteGlobalParam &a)
+{
+    copy(PStereo);
+
+    copy(PVolume);
+    copy(PPanning);
+    copy(PAmpVelocityScaleFunction);
+
+    copy(PPunchStrength);
+    copy(PPunchTime);
+    copy(PPunchStretch);
+    copy(PPunchVelocitySensing);
+    copy(Hrandgrouping);
+
+    RCopy(AmpEnvelope);
+    RCopy(AmpLfo);
+
+    copy(PDetune);
+    copy(PCoarseDetune);
+    copy(PDetuneType);
+    copy(PBandwidth);
+
+    RCopy(FreqEnvelope);
+    RCopy(FreqLfo);
+
+    copy(PFilterVelocityScale);
+    copy(PFilterVelocityScaleFunction);
+
+    RCopy(GlobalFilter);
+    RCopy(FilterEnvelope);
+    RCopy(FilterLfo);
+    RCopy(Reson);
+}
 
 void ADnoteVoiceParam::getfromXML(XMLwrapper *xml, unsigned nvoice)
 {

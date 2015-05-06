@@ -41,6 +41,7 @@ struct ADnoteGlobalParam {
     void defaults();
     void add2XML(XMLwrapper *xml);
     void getfromXML(XMLwrapper *xml);
+    void paste(ADnoteGlobalParam &a);
     /* The instrument type  - MONO/STEREO
     If the mode is MONO, the panning of voices are not used
     Stereo=1, Mono=0. */
@@ -114,6 +115,7 @@ struct ADnoteGlobalParam {
 struct ADnoteVoiceParam {
     void getfromXML(XMLwrapper *xml, unsigned nvoice);
     void add2XML(XMLwrapper *xml, bool fmoscilused);
+    void paste(ADnoteVoiceParam &p);
     void defaults(void);
     void enable(FFTwrapper *fft, Resonance *Reson);
     void kill(void);
@@ -296,6 +298,10 @@ class ADnoteParameters:public PresetsArray
         void defaults();
         void add2XML(XMLwrapper *xml);
         void getfromXML(XMLwrapper *xml);
+
+        void paste(ADnoteParameters &a);
+        void pasteArray(ADnoteParameters &a, int section);
+
 
         float getBandwidthDetuneMultiplier() const;
         float getUnisonFrequencySpreadCents(int nvoice) const;

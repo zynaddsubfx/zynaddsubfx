@@ -163,6 +163,8 @@ typedef std::complex<fftw_real> fft_t;
 #define FF_MAX_FORMANTS 12
 #define FF_MAX_SEQUENCE 8
 
+#define MAX_PRESETTYPE_SIZE 30
+
 #define LOG_2 0.693147181f
 #define PI 3.1415926536f
 #define LOG_10 2.302585093f

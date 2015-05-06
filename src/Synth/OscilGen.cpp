@@ -43,7 +43,7 @@ pthread_t main_thread;
 #define rObject OscilGen
 const rtosc::Ports OscilGen::ports = {
     rSelf(OscilGen),
-    rPaste(),
+    rPaste,
     PC(hmagtype),
     PC(currentbasefunc),
     PC(basefuncpar),

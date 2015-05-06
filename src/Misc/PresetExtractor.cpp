@@ -26,13 +26,39 @@
 #include <string>
 using std::string;
 
+static void dummy(const char *, rtosc::RtData&) {}
+
+const rtosc::Ports real_preset_ports =
+{
+    {"scan-for-presets:", 0, 0,
+        [](const char *msg, rtosc::RtData &d) {
+            presetsstore.scanforpresets();
+            auto &pre = presetsstore.presets;
+            for(unsigned i=0; i<pre.size();++i)
+                d.reply(d.loc, "isss", i,
+                        pre[i].file.c_str(),
+                        pre[i].name.c_str(),
+                        pre[i].type.c_str());
+
+        }},
+    {"copy:s", 0, 0,
+        [](const char *msg, rtosc::RtData &d) {
+            presetCopy(rtosc_argument(msg, 0).s, "");
+            d.reply(d.loc, "s", "clipboard copy...");
+        }},
+    {"paste:s", 0, 0,
+        [](const char *msg, rtosc::RtData &d) {
+            presetPaste(rtosc_argument(msg, 0).s, "");
+            d.reply(d.loc, "s", "clipboard paste...");
+        }},
+};
+
 
 const rtosc::Ports preset_ports
 {
-    {"find-presets:s", rDoc("Find associated presets with a given type"), 0,
-        [](const char *msg, rtosc::RtData &d) {
-            d.reply(d.loc, "s", "No Presets Found...");
-        }},
+    {"scan-for-presets:", rDoc("Scan For Presets"), 0, dummy},
+    {"copy:s",  rDoc("Copy URL To Clipboard"), 0, dummy},
+    {"paste:s", rDoc("Copy URL To Clipboard"), 0, dummy},
     {"add-preset:ss", rDoc("Add a preset <1> with associated name <2>"), 0,
         [](const char *msg, rtosc::RtData &d) {
             d.reply("/alert", "s", "Preset Could Not Be added...");
@@ -58,6 +84,24 @@ const rtosc::Ports preset_ports
             d.reply("/alert", "s", "Clipboard is unusable...");
         }},
 };
+
+//Relevant types to keep in mind
+//Effects/EffectMgr.cpp:    setpresettype("Peffect");
+//Params/ADnoteParameters.cpp:    setpresettype("Padsynth");
+//Params/EnvelopeParams.cpp:    //setpresettype("Penvamplitude");
+//Params/EnvelopeParams.cpp:    //setpresettype("Penvamplitude");
+//Params/EnvelopeParams.cpp:    //setpresettype("Penvfrequency");
+//Params/EnvelopeParams.cpp:    //setpresettype("Penvfilter");
+//Params/EnvelopeParams.cpp:    //setpresettype("Penvbandwidth");
+//Params/FilterParams.cpp:    //setpresettype("Pfilter");
+//Params/LFOParams.cpp:    //        setpresettype("Plfofrequency");
+//Params/LFOParams.cpp:    //        setpresettype("Plfoamplitude");
+//Params/LFOParams.cpp:    //        setpresettype("Plfofilter");
+//Params/PADnoteParameters.cpp:    setpresettype("Ppadsynth");
+//Params/SUBnoteParameters.cpp:    setpresettype("Psubsynth");
+//Synth/OscilGen.cpp:    setpresettype("Poscilgen");
+//Synth/Resonance.cpp:    setpresettype("Presonance");
+
 
 //Translate newer symbols to old preset types
 std::vector<string> translate_preset_types(std::string metatype)
@@ -126,10 +170,11 @@ std::string doCopy(MiddleWare &mw, string url)
         //Get the pointer
         T *t = (T*)capture<void*>(m, url+"self");
         //Extract Via mxml
-        t->add2XML(&xml);
+        //t->add2XML(&xml);
+        t->copy(presetsstore, NULL);
     });
 
-    return xml.getXMLdata();
+    return "";//xml.getXMLdata();
 }
 
 template<class T, typename... Ts>

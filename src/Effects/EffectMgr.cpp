@@ -41,7 +41,7 @@
 #define rObject EffectMgr
 static const rtosc::Ports local_ports = {
     rSelf(EffectMgr),
-    rPaste(),
+    rPaste,
     rRecurp(filterpars, "Filter Parameter for Dynamic Filter"),
     {"parameter#64::i", rProp(alias) rDoc("Parameter Accessor"), NULL,
         [](const char *msg, rtosc::RtData &d)

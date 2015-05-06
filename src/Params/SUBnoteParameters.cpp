@@ -35,7 +35,7 @@
 using namespace rtosc;
 static const rtosc::Ports localPorts = {
     rSelf(SUBnoteParameters),
-    rPaste(),
+    rPaste,
     rToggle(Pstereo, "Stereo Enable"),
     rParamZyn(PVolume,  "Volume"),
     rParamZyn(PPanning, "Left Right Panning"),
