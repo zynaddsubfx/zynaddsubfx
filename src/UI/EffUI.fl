@@ -1130,7 +1130,7 @@ eqgraph->update();}
       Fl_Group {} {
         label {DynFilter effect  - Filter}
         xywh {5 5 275 75} box FLAT_BOX color 50 align 144
-        code0 {o->init("",osc, loc(), "Filter/");}
+        code0 {o->init("",osc, loc(), "filterpars/");}
         code1 {o->use_for_dynamic_filter();}
         class FilterUI
       } {}
