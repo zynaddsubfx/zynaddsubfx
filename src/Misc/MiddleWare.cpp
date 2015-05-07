@@ -675,7 +675,7 @@ public:
     bool broadcast = false;
     //If accepting undo events as user driven
     bool recording_undo = true;
-    void bToUhandle(const char *rtmsg);
+    void bToUhandle(const char *rtmsg, bool dummy=false);
 
     void tick(void)
     {
@@ -854,7 +854,7 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, int prefered_port)
 
 void DummyDataObj::reply(const char *msg)
 {
-    mwi->bToUhandle(msg);
+    mwi->bToUhandle(msg, true);
 }
 MiddleWareImpl::~MiddleWareImpl(void)
 {
@@ -927,7 +927,7 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
     }
 }
 
-void MiddleWareImpl::bToUhandle(const char *rtmsg)
+void MiddleWareImpl::bToUhandle(const char *rtmsg, bool dummy)
 {
     assert(strcmp(rtmsg, "/part0/kit0/Ppadenableda"));
     assert(strcmp(rtmsg, "/ze_state"));
@@ -979,7 +979,7 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
                 lo_send_message(addr, rtmsg, msg);
             }
         }
-    } else if(curr_url == "GUI" || !strcmp(rtmsg, "/close-ui")) {
+    } else if((dummy?last_url:curr_url) == "GUI" || !strcmp(rtmsg, "/close-ui")) {
         cb(ui, rtmsg);
     } else{
         lo_message msg  = lo_message_deserialise((void*)rtmsg,
@@ -987,7 +987,7 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
 
         //Send to known url
         if(!curr_url.empty()) {
-            lo_address addr = lo_address_new_from_url(curr_url.c_str());
+            lo_address addr = lo_address_new_from_url(dummy?last_url.c_str():curr_url.c_str());
             lo_send_message(addr, rtmsg, msg);
         }
     }
