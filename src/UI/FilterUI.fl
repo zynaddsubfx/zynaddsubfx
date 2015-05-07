@@ -235,12 +235,12 @@ delete (formantparswindow);} {}
       }
       Fl_Button {} {
         label C
-        callback {presetsui->copyArray(filterui->loc());}
+        callback {presetsui->copy(filterui->loc());}
         xywh {186 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 55
       }
       Fl_Button {} {
         label P
-        callback {presetsui->pasteArray(filterui->loc(),this);}
+        callback {presetsui->paste(filterui->loc(),this);}
         xywh {203 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 55
       }
     }

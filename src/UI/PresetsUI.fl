@@ -37,12 +37,21 @@ class PresetsUI {} {
             listmodel.callback = [this](Osc_ListModel::list_t list) {
                 copybrowse->clear();
                 pastebrowse->clear();
+                printf("adding entries<%s>...\\n", datamodel.value.c_str());
+                if(datamodel.value.empty())
+                    return; 
                 for(unsigned i=0;i<list.size();++i){
+                    std::string type = std::get<2>(list[i]);
+                    bool same = datamodel.value.substr(1) == type;
+                    same |= strstr(type.c_str(), "Plfo") && strstr(datamodel.value.c_str(), "Plfo");
+                    if(!same)
+                        continue;
                     copybrowse->add(std::get<1>(list[i]).c_str());
                     pastebrowse->add(std::get<1>(list[i]).c_str());
             }};
             datamodel.callback = [this](Osc_DataModel::value_t val) {
                 printf("Value = %s\\n", val.c_str());
+                listmodel.update("/presets/scan-for-presets");
             };
         
         } {}
@@ -161,12 +170,12 @@ class PresetsUI {} {
             }
         }
     }
-    Function {copyArray(std::string url_)} {} {
-    code {} {}}
-    Function {pasteArray(std::string url_, PresetsUI_ *pui)} {} {
-    code {} {}}
-    Function {paste(std::string url_, PresetsUI_ *pui, int idx)} {} {code {} {}}
-    Function {copy(std::string url_, int idx)} {} {code {} {}}
+    Function {paste(std::string url_, PresetsUI_ *pui, int idx)} {} {code {
+    printf("UNIMPLEMENTED PASTE\\n");
+    } {}}
+    Function {copy(std::string url_, int idx)} {} {code {
+    printf("UNIMPLEMENTED COPY\\n");
+    } {}}
     Function {copy(std::string url_)} {} {
         code {copybutton->activate();
             copypbutton->deactivate();
@@ -207,8 +216,8 @@ class PresetsUI {} {
         code {copybrowse->clear();
             pastebrowse->clear();
 
+            printf("Datamodel Update...");
             datamodel.update(url+"preset-type");
-            listmodel.update("/presets/scan-for-presets");
             /*presetRescan();*/
 
             /*

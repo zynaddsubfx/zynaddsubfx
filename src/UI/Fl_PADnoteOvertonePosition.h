@@ -66,6 +66,15 @@ class PADnoteOvertonePosition: public Fl_Box, Fl_Osc_Widget
         virtual void OSC_value(unsigned N, void *data, const char *name)
             override
         {
+            if(N/4 != nsamples) {
+                nsamples = N/4;
+                delete [] spc;
+                delete [] nhr;
+                spc = new float[nsamples];
+                nhr = new float[nsamples];
+                memset(spc, 0, nsamples*sizeof(float));
+                memset(nhr, 0, nsamples*sizeof(float));
+            }
             assert(N==(4*nsamples));
             float *d = (float*)data;
             if(!strcmp(name, "spectrum"))
