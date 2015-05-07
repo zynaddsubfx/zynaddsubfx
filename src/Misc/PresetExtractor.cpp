@@ -227,32 +227,29 @@ void doPaste(MiddleWare &mw, string url, string type, XMLwrapper &xml, Ts&&... a
 }
 
 template<class T>
-std::string doArrayCopy(MiddleWare &mw, int field, string url)
+std::string doArrayCopy(MiddleWare &mw, int field, string url, string name)
 {
     XMLwrapper xml;
-    mw.doReadOnlyOp([&xml, url, field, &mw](){
+    printf("Getting info from '%s'<%d>\n", url.c_str(), field);
+    mw.doReadOnlyOp([&xml, url, field, name, &mw](){
         Master *m = mw.spawnMaster();
         //Get the pointer
         T *t = (T*)capture<void*>(m, url+"self");
         //Extract Via mxml
-        t->copy(presetsstore, field, NULL);
+        t->copy(presetsstore, field, name.empty()?NULL:name.c_str());
     });
 
     return "";//xml.getXMLdata();
 }
 
 template<class T, typename... Ts>
-void doArrayPaste(MiddleWare &mw, int field, string url, string type, string data, Ts&&... args)
+void doArrayPaste(MiddleWare &mw, int field, string url, string type,
+        XMLwrapper &xml, Ts&&... args)
 {
-    if(data.length() < 20)
-        return;
-
     //Generate a new object
     T *t = new T(std::forward<Ts>(args)...);
 
-    XMLwrapper xml;
-    xml.putXMLdata(data.c_str());
-    if(xml.enterbranch(type) == 0) {
+    if(xml.enterbranch(type+"n") == 0) {
         delete t;
         return;
     }
@@ -266,7 +263,7 @@ void doArrayPaste(MiddleWare &mw, int field, string url, string type, string dat
     rtosc_message(buffer, 1024, path.c_str(), "bi", sizeof(void*), &t, field);
     if(!Master::ports.apropos(path.c_str()))
         fprintf(stderr, "Warning: Missing Paste URL: '%s'\n", path.c_str());
-    printf("Sending info to '%s'\n", buffer);
+    printf("Sending info to '%s'<%d>\n", buffer, field);
     mw.transmitMsg(buffer);
 
     //Let the pointer be reclaimed later
@@ -328,7 +325,8 @@ std::string doClassCopy(std::string type, MiddleWare &mw, string url, string nam
     return "UNDEF";
 }
 
-void doClassArrayPaste(std::string type, std::string type_, int field, MiddleWare &mw, string url, string data)
+void doClassArrayPaste(std::string type, std::string type_, int field, MiddleWare &mw, string url,
+        XMLwrapper &data)
 {
     if(type == "FilterParams")
         doArrayPaste<FilterParams>(mw, field, url, type_, data);
@@ -336,12 +334,12 @@ void doClassArrayPaste(std::string type, std::string type_, int field, MiddleWar
         doArrayPaste<ADnoteParameters>(mw, field, url, type_, data, (FFTwrapper*)NULL);
 }
 
-std::string doClassArrayCopy(std::string type, int field, MiddleWare &mw, string url)
+std::string doClassArrayCopy(std::string type, int field, MiddleWare &mw, string url, string name)
 {
     if(type == "FilterParams")
-        return doArrayCopy<FilterParams>(mw, field, url);
+        return doArrayCopy<FilterParams>(mw, field, url, name);
     else if(type == "ADnoteParameters")
-        return doArrayCopy<ADnoteParameters>(mw, field, url);
+        return doArrayCopy<ADnoteParameters>(mw, field, url, name);
     return "UNDEF";
 }
 
@@ -428,13 +426,26 @@ void presetCopyArray(MiddleWare &mw, std::string url, int field, std::string nam
 {
     (void) name;
     printf("PresetArrayCopy()\n");
-    doClassArrayCopy(getUrlType(url), field, mw, url);
+    doClassArrayCopy(getUrlType(url), field, mw, url, name);
 }
 void presetPasteArray(MiddleWare &mw, std::string url, int field, std::string name)
 {
     (void) name;
     printf("PresetArrayPaste()\n");
-    doClassArrayPaste(getUrlType(url), getUrlPresetType(url, mw), field, mw, url, presetsstore.clipboard.data);
+    string data = "";
+    XMLwrapper xml;
+    if(name.empty()) {
+        data = presetsstore.clipboard.data;
+        if(data.length() < 20)
+            return;
+        if(!xml.putXMLdata(data.c_str()))
+            return;
+    } else {
+        if(xml.loadXMLfile(name))
+            return;
+    }
+    printf("Performing Paste...\n");
+    doClassArrayPaste(getUrlType(url), getUrlPresetType(url, mw), field, mw, url, xml);
 }
 #if 0
 void presetPaste(std::string url, int)

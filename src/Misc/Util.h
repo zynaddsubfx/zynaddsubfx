@@ -177,11 +177,11 @@ static inline void arrayNullify(T &t) {delete [] t; t = NULL; }
         o.paste(paste);}}
 
 #define rArrayPaste \
-{"array-paste:ib", rProp(internal) rDoc("array paste port"), 0, \
+{"paste-array:bi", rProp(internal) rDoc("array paste port"), 0, \
     [](const char *m, rtosc::RtData &d){ \
         printf("rArrayPaste...\n"); \
         rObject &paste = **(rObject **)rtosc_argument(m,0).b.data; \
-        int field = rtosc_argument(m,1).d; \
+        int field = rtosc_argument(m,1).i; \
         rObject &o = *(rObject*)d.obj;\
         o.pasteArray(paste,field);}}
 

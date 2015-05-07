@@ -908,7 +908,7 @@ void ADnoteParameters::pasteArray(ADnoteParameters &a, int nvoice)
     if(nvoice >= NUM_VOICES)
         return;
 
-    VoicePar[nvoice].paste(a.VoicePar[0]);
+    VoicePar[nvoice].paste(a.VoicePar[nvoice]);
 }
 
 #define copy(x) this->x = a.x

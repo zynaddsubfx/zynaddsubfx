@@ -33,7 +33,9 @@ class PresetsUI_ {} {
 
 class PresetsUI {} {
     Function {PresetsUI(Fl_Osc_Interface *osc_):listmodel(osc_), datamodel(osc_)} {} {
-        code {osc = osc_;make_window();
+        code {osc = osc_;
+            arraymode = false;
+            make_window();
             listmodel.callback = [this](Osc_ListModel::list_t list) {
                 copybrowse->clear();
                 pastebrowse->clear();
@@ -43,8 +45,11 @@ class PresetsUI {} {
                     return; 
                 for(unsigned i=0;i<list.size();++i){
                     std::string type = std::get<2>(list[i]);
-                    bool same = datamodel.value.substr(1) == type;
-                    same |= strstr(type.c_str(), "Plfo") && strstr(datamodel.value.c_str(), "Plfo");
+                    std::string comp = datamodel.value.substr(1);
+                    if(arraymode)
+                        comp += "n";
+                    bool same = comp == type;
+                    same |= strstr(type.c_str(), "Plfo") && strstr(comp.c_str(), "Plfo");
                     if(!same)
                         continue;
                     files.push_back(std::get<0>(list[i]));
@@ -82,7 +87,10 @@ class PresetsUI {} {
                 callback {const char *tmp=presetname->value();
                     if (tmp!=NULL) {
                         if (strlen(tmp)>0){
-                            osc->write("/presets/copy", "ss", url.c_str(), tmp);
+                            if(arraymode)
+                                osc->write("/presets/copy", "ssi", url.c_str(), tmp, arrayidx);
+                            else
+                                osc->write("/presets/copy", "ss", url.c_str(), tmp);
                             copywin->hide();
                         };
                     };}
@@ -91,7 +99,10 @@ class PresetsUI {} {
             Fl_Button copybutton {
                 label {Copy to Clipboard}
                 callback {
-                    osc->write("/presets/copy", "s", url.c_str());
+                    if(arraymode)
+                        osc->write("/presets/copy", "si", url.c_str(), arrayidx);
+                    else
+                        osc->write("/presets/copy", "s", url.c_str());
                     copywin->hide();}
                 xywh {25 385 90 35} box THIN_UP_BOX align 192
             }
@@ -138,7 +149,10 @@ class PresetsUI {} {
                 label {Paste from Preset}
                 callback {int n=pastebrowse->value()-1;
                     if (n>=0){
-                        osc->write("/presets/paste", "ss", url.c_str(), files[n].c_str());
+                        if(arraymode)
+                            osc->write("/presets/paste", "ssi", url.c_str(), files[n].c_str(), arrayidx);
+                        else
+                            osc->write("/presets/paste", "ss", url.c_str(), files[n].c_str());
                     }
                     pastewin->hide();
                     pui->refresh();}
@@ -147,7 +161,10 @@ class PresetsUI {} {
             Fl_Button pastebutton {
                 label {Paste from Clipboard}
                 callback {
-                    osc->write("/presets/paste", "s", url.c_str());
+                    if(arraymode)
+                        osc->write("/presets/paste", "si", url.c_str(), arrayidx);
+                    else
+                        osc->write("/presets/paste", "s", url.c_str());
                     pastewin->hide();
                     pui->refresh();}
                 xywh {25 385 90 35} box THIN_UP_BOX align 192
@@ -178,14 +195,44 @@ class PresetsUI {} {
         }
     }
     Function {paste(std::string url_, PresetsUI_ *pui, int idx)} {} {code {
-    printf("UNIMPLEMENTED PASTE\\n");
+    url = url_;
+    this->pui=pui;
+    bool but=(Fl::event_button()!=FL_LEFT_MOUSE);
+    pastepbutton->deactivate();
+    deletepbutton->deactivate();
+    arraymode = true;
+    arrayidx  = idx;
+
+    if(but) {
+        osc->write("/presets/paste", "si", url.c_str(), idx);
+        pui->refresh();
+    } else {
+        rescan(url_);
+        pastewin->show();
+    }
     } {}}
     Function {copy(std::string url_, int idx)} {} {code {
-    printf("UNIMPLEMENTED COPY\\n");
+        copybutton->activate();
+        copypbutton->deactivate();
+        arraymode = true;
+        arrayidx  = idx;
+        url = url_;
+        this->pui=NULL;
+        bool but=(Fl::event_button()!=FL_LEFT_MOUSE);
+        presetname->cut(0,presetname->maximum_size());
+
+        if(but) {
+            osc->write("/presets/copy", "si", url_.c_str(), idx);
+        } else {
+            rescan(url_);
+            copywin->show();
+        }
     } {}}
     Function {copy(std::string url_)} {} {
-        code {copybutton->activate();
+        code {
+            copybutton->activate();
             copypbutton->deactivate();
+            arraymode = false;
 
             url = url_;
             this->pui=NULL;
@@ -206,6 +253,7 @@ class PresetsUI {} {
             bool but=(Fl::event_button()!=FL_LEFT_MOUSE);
             pastepbutton->deactivate();
             deletepbutton->deactivate();
+            arraymode = false;
 
             if(but) {
                 osc->write("/presets/paste", "s", url.c_str());
@@ -232,6 +280,10 @@ class PresetsUI {} {
     decl {Osc_DataModel datamodel;} {public local
     }
     decl {std::vector<std::string> files;} {public local
+    }
+    decl {bool arraymode;} {public local
+    }
+    decl {int arrayidx;} {public local
     }
     decl {PresetsUI_ *pui;} {public local
     }

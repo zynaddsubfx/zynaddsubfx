@@ -506,6 +506,7 @@ void FilterParams::paste(FilterParams &x)
 
 void FilterParams::pasteArray(FilterParams &x, int nvowel)
 {
+    printf("FilterParameters::pasting-an-array<%d>\n", nvowel);
     for(int nformant = 0; nformant < FF_MAX_FORMANTS; ++nformant) {
         auto &self   = Pvowels[nvowel].formants[nformant];
         auto &update = x.Pvowels[nvowel].formants[nformant];

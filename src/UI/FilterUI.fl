@@ -85,7 +85,7 @@ delete (formantparswindow);} {}
     } {
       Fl_Button {} {
         label P
-        callback {/*presetsui->paste(pars,this);*/}
+        callback {presetsui->paste(filterui->loc(),this);}
         xywh {203 5 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
       }
       Fl_Group filterparamswindow {
@@ -254,7 +254,7 @@ delete (formantparswindow);} {}
     } {
       Fl_Button {} {
         label P
-        callback {presetsui->paste(loc(),this,nvowel);}
+        callback {presetsui->paste(filterui->loc(),this,nvowel);}
         xywh {665 25 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
         code0 {formantparswindow->osc = osc;}
         code1 {formantparswindow->base = loc();}
@@ -413,7 +413,7 @@ formantfiltergraph->redraw();}
       }
       Fl_Button {} {
         label C
-        callback {presetsui->copy(formantparsgroup->loc(),nvowel);}
+        callback {presetsui->copy(filterui->loc(),nvowel);}
         xywh {635 25 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Box {} {
