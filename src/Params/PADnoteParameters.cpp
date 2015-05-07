@@ -76,7 +76,6 @@ static const rtosc::Ports localPorts =
     rToggle(Php.autoscale, "Autoscaling Harmonics"),
     PC(hp.onehalf),
 
-    PC(bandwidth),
     PC(bwscale),
 
     PC(hrpos.type),
@@ -107,7 +106,7 @@ static const rtosc::Ports localPorts =
     rParamI(PCoarseDetune,  "Coarse Detune"),
     rParamZyn(PDetuneType,  "Magnitude of Detune"),
 
-    {"Pbandwidth::i:c", NULL, NULL,
+    {"Pbandwidth::i", rProp(parameter) rDoc("Bandwith Of Harmonics"), NULL,
         [](const char *msg, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
             if(rtosc_narguments(msg)) {
