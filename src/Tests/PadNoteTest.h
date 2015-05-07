@@ -31,6 +31,7 @@
 #include "../Misc/Master.h"
 #include "../Misc/Util.h"
 #include "../Misc/Allocator.h"
+#include "../Misc/XMLwrapper.h"
 #include "../Synth/PADnote.h"
 #include "../Synth/OscilGen.h"
 #include "../Params/PADnoteParameters.h"

@@ -29,6 +29,7 @@
 #include "../Misc/Master.h"
 #include "../Misc/Allocator.h"
 #include "../Misc/Util.h"
+#include "../Misc/XMLwrapper.h"
 #include "../Synth/SUBnote.h"
 #include "../Params/SUBnoteParameters.h"
 #include "../Params/Presets.h"
