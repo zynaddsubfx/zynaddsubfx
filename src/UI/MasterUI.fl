@@ -1500,7 +1500,8 @@ Pixmap p = XCreateBitmapFromData(fl_display, DefaultRootWindow(fl_display),
                                  (char*)zynaddsubfx_bits, zynaddsubfx_width, zynaddsubfx_height);
 masterwindow->icon((char *)p);
 \#endif
-presetsui=new PresetsUI();
+assert(osc);
+presetsui=new PresetsUI(osc);
 setfilelabel(NULL);
 swapefftype=0;
 simplerefresh();} {}

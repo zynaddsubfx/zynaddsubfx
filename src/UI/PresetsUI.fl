@@ -14,6 +14,12 @@ decl {\#include <cstdlib>} {public
 decl {\#include <string>} {public
 } 
 
+decl {\#include "Osc_ListModel.h"} {public
+} 
+
+decl {\#include "Osc_DataModel.h"} {public
+} 
+
 class PresetsUI_ {} {
     Function {refresh()} {open return_type {virtual void}
     } {
@@ -26,8 +32,20 @@ class PresetsUI_ {} {
 } 
 
 class PresetsUI {} {
-    Function {PresetsUI()} {} {
-        code {make_window();} {}
+    Function {PresetsUI(Fl_Osc_Interface *osc_):listmodel(osc_), datamodel(osc_)} {} {
+        code {osc = osc_;make_window();
+            listmodel.callback = [this](Osc_ListModel::list_t list) {
+                copybrowse->clear();
+                pastebrowse->clear();
+                for(unsigned i=0;i<list.size();++i){
+                    copybrowse->add(std::get<1>(list[i]).c_str());
+                    pastebrowse->add(std::get<1>(list[i]).c_str());
+            }};
+            datamodel.callback = [this](Osc_DataModel::value_t val) {
+                printf("Value = %s\\n", val.c_str());
+            };
+        
+        } {}
     }
     Function {~PresetsUI()} {} {
         code {copywin->hide();delete(copywin);
@@ -137,7 +155,7 @@ class PresetsUI {} {
                         if (n!=0) {
                             /*presetDelete(n);*/
                         }
-                        rescan();
+                        rescan(url);
                     } selected
                 xywh {180 355 75 20} box THIN_UP_BOX
             }
@@ -152,8 +170,8 @@ class PresetsUI {} {
     Function {copy(std::string url_)} {} {
         code {copybutton->activate();
             copypbutton->deactivate();
-            (void) url_;
 
+            url = url_;
             this->pui=NULL;
             bool but=(Fl::event_button()!=FL_LEFT_MOUSE);
             presetname->cut(0,presetname->maximum_size());
@@ -161,7 +179,7 @@ class PresetsUI {} {
             if(but) {
                 /*presetCopy(url_, "");*/
             } else {
-                rescan();
+                rescan(url_);
                 /*copytypetext->label(presetClipboardType().c_str());*/
                 copywin->show();
             };} {}
@@ -178,16 +196,19 @@ class PresetsUI {} {
                 /*presetPaste(url, 0);*/
                 pui->refresh();
             } else {
-                rescan();
+                rescan(url_);
                 /*pastetypetext->label(presetClipboardType().c_str());
                 if (presetCheckClipboardType()) pastebutton->activate();
                 else pastebutton->deactivate();*/
                 pastewin->show();
             };} {}
     }
-    Function {rescan()} {} {
+    Function {rescan(std::string url)} {} {
         code {copybrowse->clear();
             pastebrowse->clear();
+
+            datamodel.update(url+"preset-type");
+            listmodel.update("/presets/scan-for-presets");
             /*presetRescan();*/
 
             /*
@@ -201,6 +222,12 @@ class PresetsUI {} {
             } {}
     }
     decl {std::string url;} {public local
+    }
+    decl {Fl_Osc_Interface *osc;} {public local
+    }
+    decl {Osc_ListModel listmodel;} {public local
+    }
+    decl {Osc_DataModel datamodel;} {public local
     }
     decl {PresetsUI_ *pui;} {public local
     }

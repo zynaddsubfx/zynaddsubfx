@@ -34,6 +34,7 @@ const rtosc::Ports real_preset_ports =
         [](const char *msg, rtosc::RtData &d) {
             presetsstore.scanforpresets();
             auto &pre = presetsstore.presets;
+            d.reply(d.loc, "i", pre.size());
             for(unsigned i=0; i<pre.size();++i)
                 d.reply(d.loc, "isss", i,
                         pre[i].file.c_str(),

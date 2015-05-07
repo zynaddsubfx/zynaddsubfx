@@ -5,6 +5,11 @@ Fl_Osc_Widget::Fl_Osc_Widget(void) //Deprecated
 :loc(), osc(NULL)
 {}
 
+Fl_Osc_Widget::Fl_Osc_Widget(std::string loc_, Fl_Osc_Interface *osc_)
+:loc(loc_), osc(osc_)
+{
+    assert(osc);
+}
 Fl_Osc_Widget:: Fl_Osc_Widget(Fl_Widget *self)
 {
     assert(fetch_osc_pane(self));

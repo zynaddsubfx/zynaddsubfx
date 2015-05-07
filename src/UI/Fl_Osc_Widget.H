@@ -12,6 +12,7 @@ class Fl_Osc_Widget
     public:
         Fl_Osc_Widget(void); //Deprecated
         Fl_Osc_Widget(Fl_Widget *self);
+        Fl_Osc_Widget(std::string loc, Fl_Osc_Interface *osc);
         virtual ~Fl_Osc_Widget(void);
 
         //Callback methods
