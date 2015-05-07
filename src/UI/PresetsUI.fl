@@ -183,10 +183,10 @@ class PresetsUI {} {
             }
             Fl_Button deletepbutton {
                 label Delete
-                    callback {int n=pastebrowse->value();
+                    callback {int n=pastebrowse->value()-1;
 
-                        if (n!=0) {
-                            /*presetDelete(n);*/
+                        if (n>=0) {
+                            osc->write("/presets/delete", "s", files[n].c_str());
                         }
                         rescan(url);
                     } selected

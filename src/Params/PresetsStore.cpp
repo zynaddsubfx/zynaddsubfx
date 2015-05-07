@@ -178,3 +178,14 @@ void PresetsStore::deletepreset(unsigned int npreset)
         return;
     remove(filename.c_str());
 }
+
+void PresetsStore::deletepreset(std::string filename)
+{
+    for(int i=0; i<(int)presets.size(); ++i) {
+        if(presets[i].file == filename) {
+            presets.erase(presets.begin()+i);
+            remove(filename.c_str());
+            return;
+        }
+    }
+}
