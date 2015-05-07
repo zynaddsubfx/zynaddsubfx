@@ -94,7 +94,7 @@ const rtosc::Ports preset_ports
 {
     {"scan-for-presets:", rDoc("Scan For Presets"), 0, dummy},
     {"copy:s:ss:si:ssi",  rDoc("Copy <s> URL to <s> Name/Clipboard from subfield <i>"), 0, dummy},
-    {"paste:s:ss:si:ssi", rDoc("Paste <s> URL to <s> Name/Clipboard from subfield <i>"), 0, dummy},
+    {"paste:s:ss:si:ssi", rDoc("Paste <s> URL to <s> File-Name/Clipboard from subfield <i>"), 0, dummy},
     {"clipboard-type:",   rDoc("Type Stored In Clipboard"), 0, dummy}
 };
 
@@ -188,32 +188,26 @@ void *capture(Master *m, std::string url)
 }
 
 template<class T>
-std::string doCopy(MiddleWare &mw, string url)
+std::string doCopy(MiddleWare &mw, string url, string name)
 {
     XMLwrapper xml;
-    mw.doReadOnlyOp([&xml, url,&mw](){
+    mw.doReadOnlyOp([&xml, url, name, &mw](){
         Master *m = mw.spawnMaster();
         //Get the pointer
         T *t = (T*)capture<void*>(m, url+"self");
         //Extract Via mxml
         //t->add2XML(&xml);
-        t->copy(presetsstore, NULL);
+        t->copy(presetsstore, name.empty()? NULL:name.c_str());
     });
 
     return "";//xml.getXMLdata();
 }
 
 template<class T, typename... Ts>
-void doPaste(MiddleWare &mw, string url, string type, string data, Ts&&... args)
+void doPaste(MiddleWare &mw, string url, string type, XMLwrapper &xml, Ts&&... args)
 {
-    printf("Do Paste<%d>\n", data.size());
-    if(data.length() < 20)
-        return;
-
     //Generate a new object
     T *t = new T(std::forward<Ts>(args)...);
-    XMLwrapper xml;
-    xml.putXMLdata(data.data());
     
     if(xml.enterbranch(type) == 0)
         return;
@@ -285,7 +279,7 @@ void doArrayPaste(MiddleWare &mw, int field, string url, string type, string dat
  * extra handling.
  * See MiddleWare.cpp for these specifics
  */
-void doClassPaste(std::string type, std::string type_, MiddleWare &mw, string url, string data)
+void doClassPaste(std::string type, std::string type_, MiddleWare &mw, string url, XMLwrapper &data)
 {
     printf("Class Paste\n");
     if(type == "EnvelopeParams")
@@ -311,26 +305,26 @@ void doClassPaste(std::string type, std::string type_, MiddleWare &mw, string ur
     }
 }
 
-std::string doClassCopy(std::string type, MiddleWare &mw, string url)
+std::string doClassCopy(std::string type, MiddleWare &mw, string url, string name)
 {
     if(type == "EnvelopeParams")
-        return doCopy<EnvelopeParams>(mw, url);
+        return doCopy<EnvelopeParams>(mw, url, name);
     else if(type == "LFOParams")
-        return doCopy<LFOParams>(mw, url);
+        return doCopy<LFOParams>(mw, url, name);
     else if(type == "FilterParams")
-        return doCopy<FilterParams>(mw, url);
+        return doCopy<FilterParams>(mw, url, name);
     else if(type == "ADnoteParameters")
-        return doCopy<ADnoteParameters>(mw, url);
+        return doCopy<ADnoteParameters>(mw, url, name);
     else if(type == "PADnoteParameters")
-        return doCopy<PADnoteParameters>(mw, url);
+        return doCopy<PADnoteParameters>(mw, url, name);
     else if(type == "SUBnoteParameters")
-        return doCopy<SUBnoteParameters>(mw, url);
+        return doCopy<SUBnoteParameters>(mw, url, name);
     else if(type == "OscilGen")
-        return doCopy<OscilGen>(mw, url);
+        return doCopy<OscilGen>(mw, url, name);
     else if(type == "Resonance")
-        return doCopy<Resonance>(mw, url);
+        return doCopy<Resonance>(mw, url, name);
     else if(type == "EffectMgr")
-        doCopy<EffectMgr>(mw, url);
+        doCopy<EffectMgr>(mw, url, name);
     return "UNDEF";
 }
 
@@ -384,6 +378,7 @@ std::string getUrlType(std::string url)
  *                            API Stubs                                      *
  *****************************************************************************/
 
+#if 0
 Clipboard clipboardCopy(MiddleWare &mw, string url)
 {
     //Identify The Self Type of the Object
@@ -402,18 +397,32 @@ void clipBoardPaste(const char *url, Clipboard clip)
     (void) url;
     (void) clip;
 }
+#endif
 
 void presetCopy(MiddleWare &mw, std::string url, std::string name)
 {
     (void) name;
-    doClassCopy(getUrlType(url), mw, url);
+    doClassCopy(getUrlType(url), mw, url, name);
     printf("PresetCopy()\n");
 }
 void presetPaste(MiddleWare &mw, std::string url, std::string name)
 {
     (void) name;
     printf("PresetPaste()\n");
-    doClassPaste(getUrlType(url), getUrlPresetType(url, mw), mw, url, presetsstore.clipboard.data);
+    string data = "";
+    XMLwrapper xml;
+    if(name.empty()) {
+        data = presetsstore.clipboard.data;
+        if(data.length() < 20)
+            return;
+        if(!xml.putXMLdata(data.c_str()))
+            return;
+    } else {
+        if(xml.loadXMLfile(name))
+            return;
+    }
+
+    doClassPaste(getUrlType(url), getUrlPresetType(url, mw), mw, url, xml);
 }
 void presetCopyArray(MiddleWare &mw, std::string url, int field, std::string name)
 {
