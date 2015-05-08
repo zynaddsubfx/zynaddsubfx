@@ -1,3 +1,18 @@
+2.5.1 (25 May 2015)
+        - Add Colorized CMake Configuration
+        - Add PID option for jack
+        - Add OSC port option
+        - Add MIDI unlearn
+        - Add External UI Compilation
+        - Fix No Install NTK Build
+        - Fix Linker Issues
+        - Fix Presets/Copy/Paste
+        - Fix JACK Samplerate Check When JACK Isn't Running
+        - Remove Dump
+        - Remove Some Globals synth/uToB/bToU/etc
+        - Adjust BankUI Ascetic
+        - Other Misc Bug Fixes
+
 2.5.0 (25 Feb 2015)
         - Add Rtosc
         - Add tlsf RT Memory Allocator
