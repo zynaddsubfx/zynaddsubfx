@@ -171,7 +171,7 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::ThreadLink *uToB)
             (unsigned N, PADnoteParameters::Sample &s)
             {
             max = max<N ? N : max;
-            printf("sending info to '%s'\n", (path+to_s(N)).c_str());
+            //printf("sending info to '%s'\n", (path+to_s(N)).c_str());
             uToB->write((path+to_s(N)).c_str(), "ifb",
                 s.size, s.basefreq, sizeof(float*), &s.smp);
             }, []{return false;});
@@ -716,7 +716,7 @@ public:
         //012345678
         ///presets/
         real_preset_ports.dispatch(msg+9, d);
-        printf("Something <%s>\n", msg+9);
+        //printf("Something <%s>\n", msg+9);
         if(strstr(msg, "paste") && rtosc_argument_string(msg)[0] == 's') {
             char buffer[1024];
             rtosc_message(buffer, 1024, "/damage", "s",
@@ -943,7 +943,7 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg, bool dummy)
     }
 
     //Activity dot
-    printf(".");fflush(stdout);
+    //printf(".");fflush(stdout);
 
     if(!strcmp(rtmsg, "/echo")
             && !strcmp(rtosc_argument_string(rtmsg),"ss")
@@ -998,7 +998,7 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg, bool dummy)
 
 bool MiddleWareImpl::handleOscil(string path, const char *msg, void *v)
 {
-    printf("handleOscil...\n");
+    //printf("handleOscil...\n");
     char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
     DummyDataObj d(buffer, 1024, v, this, uToB);
@@ -1046,13 +1046,11 @@ void MiddleWareImpl::kitEnable(const char *msg)
         type = 1;
     else if(strstr(msg, "Psubenabled"))
         type = 2;
-    printf("type='%d'\n", type);
 
     if(type == -1)
         return;
 
     const char *tmp = strstr(msg, "part");
-    printf("part='%s'\n", tmp);
 
     if(tmp == NULL)
         return;
@@ -1060,7 +1058,6 @@ void MiddleWareImpl::kitEnable(const char *msg)
     const int part = atoi(tmp+4);
 
     tmp = strstr(msg, "kit");
-    printf("kit='%s'\n", tmp);
 
     if(tmp == NULL)
         return;
@@ -1072,7 +1069,7 @@ void MiddleWareImpl::kitEnable(const char *msg)
 
 void MiddleWareImpl::kitEnable(int part, int kit, int type)
 {
-    printf("attempting a kit enable<%d,%d,%d>\n", part, kit, type);
+    //printf("attempting a kit enable<%d,%d,%d>\n", part, kit, type);
     string url = "/part"+to_s(part)+"/kit"+to_s(kit)+"/";
     void *ptr = NULL;
     if(type == 0 && kits.add[part][kit] == NULL) {

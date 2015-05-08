@@ -44,6 +44,8 @@ class Fl_Oscilloscope : public Fl_Box, public Fl_Osc_Widget
 
         virtual void OSC_value(int smp)
         {
+            if(smp == oscilsize)
+                return;
             oscilsize = smp;
             delete []smps;
             smps = new float[oscilsize];

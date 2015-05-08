@@ -51,13 +51,11 @@ class PADnoteOvertonePosition: public Fl_Box, Fl_Osc_Widget
             osc->createLink(base_path + "Pmode",
                     (Fl_Osc_Widget*) this);
 
-            fprintf(stderr, "registered at my location '%s'\n", (base_path + "nhr").c_str());
             update();
         }
 
         void update(void)
         {
-            printf("Update...\n");
             osc->requestValue(base_path + "nhr");
             osc->requestValue(base_path + "oscilgen/spectrum");
             osc->requestValue(base_path + "Pmode");
