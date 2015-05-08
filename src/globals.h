@@ -287,6 +287,10 @@ struct SYNTH_T {
     int   bufferbytes;
     float oscilsize_f;
 
+    float dt(void) const
+    {
+        return buffersize_f / samplerate_f;
+    }
     inline void alias(void)
     {
         halfsamplerate_f = (samplerate_f = samplerate) / 2.0f;
@@ -296,6 +300,4 @@ struct SYNTH_T {
     }
     static float numRandom(void); //defined in Util.cpp for now
 };
-
-extern SYNTH_T *synth;
 #endif

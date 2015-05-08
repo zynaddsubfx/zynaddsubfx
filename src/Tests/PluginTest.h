@@ -63,7 +63,7 @@ class PluginTest:public CxxTest::TestSuite
                 denormalkillbuf[i] = 0;
 
             for(int i = 0; i < 16; ++i)
-                master[i] = new Master();
+                master[i] = new Master(*synth);
         }
 
         void tearDown() {

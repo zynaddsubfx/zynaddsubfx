@@ -108,19 +108,20 @@ static const rtosc::Ports local_ports = {
 
 const rtosc::Ports &EffectMgr::ports = local_ports;
 
-EffectMgr::EffectMgr(Allocator &alloc, const bool insertion_)
+EffectMgr::EffectMgr(Allocator &alloc, const SYNTH_T &synth_, const bool insertion_)
     :insertion(insertion_),
-      efxoutl(new float[synth->buffersize]),
-      efxoutr(new float[synth->buffersize]),
+      efxoutl(new float[synth_.buffersize]),
+      efxoutr(new float[synth_.buffersize]),
       filterpars(NULL),
       nefx(0),
       efx(NULL),
       dryonly(false),
-      memory(alloc)
+      memory(alloc),
+      synth(synth_)
 {
     setpresettype("Peffect");
-    memset(efxoutl, 0, synth->bufferbytes);
-    memset(efxoutr, 0, synth->bufferbytes);
+    memset(efxoutl, 0, synth.bufferbytes);
+    memset(efxoutr, 0, synth.bufferbytes);
     memset(settings, 0, sizeof(settings));
     defaults();
 }
@@ -146,11 +147,11 @@ void EffectMgr::changeeffectrt(int _nefx)
     if(nefx == _nefx && efx != NULL)
         return;
     nefx = _nefx;
-    memset(efxoutl, 0, synth->bufferbytes);
-    memset(efxoutr, 0, synth->bufferbytes);
+    memset(efxoutl, 0, synth.bufferbytes);
+    memset(efxoutr, 0, synth.bufferbytes);
     memory.dealloc(efx);
     EffectParams pars(memory, insertion, efxoutl, efxoutr, 0,
-            synth->samplerate, synth->buffersize);
+            synth.samplerate, synth.buffersize);
     switch(nefx) {
         case 1:
             efx = memory.alloc<Reverb>(pars);
@@ -285,7 +286,7 @@ void EffectMgr::out(float *smpsl, float *smpsr)
 {
     if(!efx) {
         if(!insertion)
-            for(int i = 0; i < synth->buffersize; ++i) {
+            for(int i = 0; i < synth.buffersize; ++i) {
                 smpsl[i]   = 0.0f;
                 smpsr[i]   = 0.0f;
                 efxoutl[i] = 0.0f;
@@ -293,7 +294,7 @@ void EffectMgr::out(float *smpsl, float *smpsr)
             }
         return;
     }
-    for(int i = 0; i < synth->buffersize; ++i) {
+    for(int i = 0; i < synth.buffersize; ++i) {
         smpsl[i]  += denormalkillbuf[i];
         smpsr[i]  += denormalkillbuf[i];
         efxoutl[i] = 0.0f;
@@ -304,8 +305,8 @@ void EffectMgr::out(float *smpsl, float *smpsr)
     float volume = efx->volume;
 
     if(nefx == 7) { //this is need only for the EQ effect
-        memcpy(smpsl, efxoutl, synth->bufferbytes);
-        memcpy(smpsr, efxoutr, synth->bufferbytes);
+        memcpy(smpsl, efxoutl, synth.bufferbytes);
+        memcpy(smpsr, efxoutr, synth.bufferbytes);
         return;
     }
 
@@ -324,20 +325,20 @@ void EffectMgr::out(float *smpsl, float *smpsr)
             v2 *= v2;  //for Reverb and Echo, the wet function is not liniar
 
         if(dryonly)   //this is used for instrument effect only
-            for(int i = 0; i < synth->buffersize; ++i) {
+            for(int i = 0; i < synth.buffersize; ++i) {
                 smpsl[i]   *= v1;
                 smpsr[i]   *= v1;
                 efxoutl[i] *= v2;
                 efxoutr[i] *= v2;
             }
         else // normal instrument/insertion effect
-            for(int i = 0; i < synth->buffersize; ++i) {
+            for(int i = 0; i < synth.buffersize; ++i) {
                 smpsl[i] = smpsl[i] * v1 + efxoutl[i] * v2;
                 smpsr[i] = smpsr[i] * v1 + efxoutr[i] * v2;
             }
     }
     else // System effect
-        for(int i = 0; i < synth->buffersize; ++i) {
+        for(int i = 0; i < synth.buffersize; ++i) {
             efxoutl[i] *= 2.0f * volume;
             efxoutr[i] *= 2.0f * volume;
             smpsl[i]    = efxoutl[i];

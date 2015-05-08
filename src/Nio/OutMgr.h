@@ -8,10 +8,11 @@
 
 
 class AudioOut;
+struct SYNTH_T;
 class OutMgr
 {
     public:
-        static OutMgr &getInstance();
+        static OutMgr &getInstance(const SYNTH_T *synth=NULL);
         ~OutMgr();
 
         /**Execute a tick*/
@@ -44,7 +45,7 @@ class OutMgr
         void setMaster(class Master *master_);
         void applyOscEventRt(const char *msg);
     private:
-        OutMgr();
+        OutMgr(const SYNTH_T *synth);
         void addSmps(float *l, float *r);
         unsigned int  storedSmps() const {return priBuffCurrent.l - priBuf.l; }
         void removeStaleSmps();
@@ -62,6 +63,7 @@ class OutMgr
         class Master *master;
 
         int stales;
+        const SYNTH_T &synth;
 };
 
 #endif

@@ -34,7 +34,7 @@ class LFO
          * @param lfopars pointer to a LFOParams object
          * @param basefreq base frequency of LFO
          */
-        LFO(const LFOParams &lfopars, float basefreq);
+        LFO(const LFOParams &lfopars, float basefreq, float dt);
         /**Deconstructor*/
         ~LFO();
         float lfoout();
@@ -46,6 +46,7 @@ class LFO
         float lfointensity;
         float lfornd, lfofreqrnd;
         float lfodelay;
+        const float dt;
         /**\todo see if an enum would be better here*/
         char lfotype;
         int  freqrndenabled;

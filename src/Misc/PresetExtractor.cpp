@@ -291,17 +291,17 @@ void doClassPaste(std::string type, std::string type_, MiddleWare &mw, string ur
     else if(type == "FilterParams")
         doPaste<FilterParams>(mw, url, type_, data);
     else if(type == "ADnoteParameters")
-        doPaste<ADnoteParameters>(mw, url, type_, data, (FFTwrapper*)NULL);
+        doPaste<ADnoteParameters>(mw, url, type_, data, mw.getSynth(), (FFTwrapper*)NULL);
     else if(type == "PADnoteParameters")
-        doPaste<PADnoteParameters>(mw, url, type_, data, (FFTwrapper*)NULL);
+        doPaste<PADnoteParameters>(mw, url, type_, data, mw.getSynth(), (FFTwrapper*)NULL);
     else if(type == "SUBnoteParameters")
         doPaste<SUBnoteParameters>(mw, url, type_, data);
     else if(type == "OscilGen")
-        doPaste<OscilGen>(mw, url, type_, data, (FFTwrapper*)NULL, (Resonance*)NULL);
+        doPaste<OscilGen>(mw, url, type_, data, mw.getSynth(), (FFTwrapper*)NULL, (Resonance*)NULL);
     else if(type == "Resonance")
         doPaste<Resonance>(mw, url, type_, data);
     else if(type == "EffectMgr")
-        doPaste<EffectMgr>(mw, url, type_, data, DummyAlloc, false);
+        doPaste<EffectMgr>(mw, url, type_, data, DummyAlloc, mw.getSynth(), false);
     else {
         fprintf(stderr, "Warning: Unknown type<%s> from url<%s>\n", type.c_str(), url.c_str());
     }
@@ -336,7 +336,7 @@ void doClassArrayPaste(std::string type, std::string type_, int field, MiddleWar
     if(type == "FilterParams")
         doArrayPaste<FilterParams>(mw, field, url, type_, data);
     else if(type == "ADnoteParameters")
-        doArrayPaste<ADnoteParameters>(mw, field, url, type_, data, (FFTwrapper*)NULL);
+        doArrayPaste<ADnoteParameters>(mw, field, url, type_, data, mw.getSynth(), (FFTwrapper*)NULL);
 }
 
 std::string doClassArrayCopy(std::string type, int field, MiddleWare &mw, string url, string name)

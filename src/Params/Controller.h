@@ -30,7 +30,8 @@
 class Controller
 {
     public:
-        Controller();
+        Controller(const SYNTH_T &synth);
+        Controller&operator=(const Controller &c);
         ~Controller();
         void resetall();
 
@@ -215,6 +216,7 @@ class Controller
 
         static const rtosc::Ports ports;
     private:
+        const SYNTH_T &synth;
 };
 
 #endif

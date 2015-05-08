@@ -118,6 +118,7 @@ class ADnote:public SynthNote
         struct Global {
             void kill(Allocator &memory);
             void initparameters(const ADnoteGlobalParam &param,
+                                const SYNTH_T &synth,
                                 class Allocator &memory,
                                 float basefreq, float velocity,
                                 bool stereo);
@@ -165,7 +166,7 @@ class ADnote:public SynthNote
         /***********************************************************/
         struct Voice {
             void releasekey();
-            void kill(Allocator &memory);
+            void kill(Allocator &memory, const SYNTH_T &synth);
             /* If the voice is enabled */
             ONOFFTYPE Enabled;
 

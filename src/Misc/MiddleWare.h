@@ -3,11 +3,12 @@
 #include <cstdarg>
 #include <string>
 
+struct SYNTH_T;
 //Link between realtime and non-realtime layers
 class MiddleWare
 {
     public:
-        MiddleWare(int prefered_port = -1);
+        MiddleWare(SYNTH_T synth, int prefered_port = -1);
         ~MiddleWare(void);
         //returns internal master pointer
         class Master *spawnMaster(void);
@@ -32,6 +33,8 @@ class MiddleWare
         //Get/Set the active bToU url
         std::string activeUrl(void);
         void activeUrl(std::string u);
+        //View Synthesis Parameters
+        const SYNTH_T &getSynth(void) const;
     private:
         class MiddleWareImpl *impl;
 };

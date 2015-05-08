@@ -529,7 +529,7 @@ class MiddleWareImpl
     }
 
 public:
-    MiddleWareImpl(MiddleWare *mw, int prefered_port);
+    MiddleWareImpl(MiddleWare *mw, SYNTH_T synth, int prefered_port);
     ~MiddleWareImpl(void);
 
     void warnMemoryLeaks(void);
@@ -616,7 +616,7 @@ public:
 
         auto alloc = std::async(std::launch::async,
                 [master,filename,this,npart](){
-                Part *p = new Part(*master->memory, &master->microtonal, master->fft);
+                Part *p = new Part(*master->memory, synth, &master->microtonal, master->fft);
                 if(p->loadXMLinstrument(filename))
                 fprintf(stderr, "Warning: failed to load part!\n");
 
@@ -650,7 +650,7 @@ public:
     //structures at once... TODO error handling
     void loadMaster(const char *filename)
     {
-        Master *m = new Master();
+        Master *m = new Master(synth);
         m->uToB = uToB;
         m->bToU = bToU;
         if(filename) {
@@ -799,10 +799,13 @@ public:
     //LIBLO
     lo_server server;
     string last_url, curr_url;
+
+    //Synthesis Rate Parameters
+    const SYNTH_T synth;
 };
 
-MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, int prefered_port)
-    :parent(mw)
+MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_, int prefered_port)
+    :parent(mw), synth(synth_)
 {
     bToU = new rtosc::ThreadLink(4096*2,1024);
     uToB = new rtosc::ThreadLink(4096*2,1024);
@@ -821,7 +824,7 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, int prefered_port)
     idle = 0;
 
     the_bToU = bToU;
-    master = new Master();
+    master = new Master(synth);
     master->bToU = bToU;
     master->uToB = uToB;
     osc    = GUI::genOscInterface(mw);
@@ -1073,11 +1076,11 @@ void MiddleWareImpl::kitEnable(int part, int kit, int type)
     string url = "/part"+to_s(part)+"/kit"+to_s(kit)+"/";
     void *ptr = NULL;
     if(type == 0 && kits.add[part][kit] == NULL) {
-        ptr = kits.add[part][kit] = new ADnoteParameters(master->fft);
+        ptr = kits.add[part][kit] = new ADnoteParameters(synth, master->fft);
         url += "adpars-data";
         obj_store.extractAD(kits.add[part][kit], part, kit);
     } else if(type == 1 && kits.pad[part][kit] == NULL) {
-        ptr = kits.pad[part][kit] = new PADnoteParameters(master->fft);
+        ptr = kits.pad[part][kit] = new PADnoteParameters(synth, master->fft);
         url += "padpars-data";
         obj_store.extractPAD(kits.pad[part][kit], part, kit);
     } else if(type == 2 && kits.sub[part][kit] == NULL) {
@@ -1212,8 +1215,8 @@ void MiddleWareImpl::warnMemoryLeaks(void)
 /******************************************************************************
  *                         MidleWare Forwarding Stubs                         *
  ******************************************************************************/
-MiddleWare::MiddleWare(int prefered_port)
-:impl(new MiddleWareImpl(this, prefered_port))
+MiddleWare::MiddleWare(SYNTH_T synth, int prefered_port)
+:impl(new MiddleWareImpl(this, synth, prefered_port))
 {}
 MiddleWare::~MiddleWare(void)
 {
@@ -1288,4 +1291,9 @@ std::string MiddleWare::activeUrl(void)
 void MiddleWare::activeUrl(std::string u)
 {
     impl->last_url = u;
+}
+        
+const SYNTH_T &MiddleWare::getSynth(void) const
+{
+    return impl->synth;
 }

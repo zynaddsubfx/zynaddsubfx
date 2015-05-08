@@ -20,8 +20,9 @@
 
 */
 
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
+#include <cassert>
 
 #include "Filter.h"
 #include "AnalogFilter.h"
@@ -41,10 +42,8 @@ Filter::Filter(unsigned int srate, int bufsize)
 Filter *Filter::generate(Allocator &memory, FilterParams *pars,
         unsigned int srate, int bufsize)
 {
-    if (srate == 0)
-        srate = synth->samplerate;
-    if (bufsize == 0)
-        bufsize = synth->buffersize;
+    assert(srate != 0);
+    assert(bufsize != 0);
 
     unsigned char Ftype   = pars->Ptype;
     unsigned char Fstages = pars->Pstages;

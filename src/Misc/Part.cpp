@@ -168,13 +168,13 @@ static const Ports kitPorts = {
 const Ports &Part::Kit::ports = kitPorts;
 const Ports &Part::ports = partPorts;
 
-Part::Part(Allocator &alloc, Microtonal *microtonal_, FFTwrapper *fft_)
-    :memory(alloc)
+Part::Part(Allocator &alloc, const SYNTH_T &synth_, Microtonal *microtonal_, FFTwrapper *fft_)
+    :ctl(synth_), memory(alloc), synth(synth_)
 {
     microtonal = microtonal_;
     fft      = fft_;
-    partoutl = new float [synth->buffersize];
-    partoutr = new float [synth->buffersize];
+    partoutl = new float [synth.buffersize];
+    partoutr = new float [synth.buffersize];
 
     monomemClear();
 
@@ -185,17 +185,17 @@ Part::Part(Allocator &alloc, Microtonal *microtonal_, FFTwrapper *fft_)
         kit[n].padpars = nullptr;
     }
 
-    kit[0].adpars  = new ADnoteParameters(fft);
+    kit[0].adpars  = new ADnoteParameters(synth, fft);
 
     //Part's Insertion Effects init
     for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
-        partefx[nefx]    = new EffectMgr(memory, 1);
+        partefx[nefx]    = new EffectMgr(memory, synth, 1);
         Pefxbypass[nefx] = false;
     }
 
     for(int n = 0; n < NUM_PART_EFX + 1; ++n) {
-        partfxinputl[n] = new float [synth->buffersize];
-        partfxinputr[n] = new float [synth->buffersize];
+        partfxinputl[n] = new float [synth.buffersize];
+        partfxinputr[n] = new float [synth.buffersize];
     }
 
     killallnotes = false;
@@ -311,7 +311,7 @@ void Part::cleanup(bool final_)
 {
     for(int k = 0; k < POLYPHONY; ++k)
         KillNotePos(k);
-    for(int i = 0; i < synth->buffersize; ++i) {
+    for(int i = 0; i < synth.buffersize; ++i) {
         partoutl[i] = final_ ? 0.0f : denormalkillbuf[i];
         partoutr[i] = final_ ? 0.0f : denormalkillbuf[i];
     }
@@ -319,7 +319,7 @@ void Part::cleanup(bool final_)
     for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx)
         partefx[nefx]->cleanup();
     for(int n = 0; n < NUM_PART_EFX + 1; ++n)
-        for(int i = 0; i < synth->buffersize; ++i) {
+        for(int i = 0; i < synth.buffersize; ++i) {
             partfxinputl[n][i] = final_ ? 0.0f : denormalkillbuf[i];
             partfxinputr[n][i] = final_ ? 0.0f : denormalkillbuf[i];
         }
@@ -553,7 +553,7 @@ void Part::NoteOn(unsigned char note,
 
         if(Pkitmode == 0) { //init the notes for the "normal mode"
             partnote[pos].kititem[0].sendtoparteffect = 0;
-            SynthParams pars{memory, ctl, notebasefreq, vel, (bool) portamento, note, false};
+            SynthParams pars{memory, ctl, synth, notebasefreq, vel, (bool) portamento, note, false};
 
             if(kit[0].Padenabled)
                 partnote[pos].kititem[0].adnote =
@@ -599,7 +599,7 @@ void Part::NoteOn(unsigned char note,
                 //if this parameter is 127 for "unprocessed"
                 note1.sendtoparteffect = limit((int)kit[item].Psendtoparteffect, 0, NUM_PART_EFX);
 
-                SynthParams pars{memory, ctl, notebasefreq, vel, (bool) portamento, note, false};
+                SynthParams pars{memory, ctl, synth, notebasefreq, vel, (bool) portamento, note, false};
 
                 if(kit[item].adpars && kit[item].Padenabled)
                     note1.adnote =
@@ -946,13 +946,13 @@ void Part::RunNote(unsigned int k)
                 continue;
             noteplay++;
 
-            float tmpoutr[synth->buffersize];
-            float tmpoutl[synth->buffersize];
+            float tmpoutr[synth.buffersize];
+            float tmpoutl[synth.buffersize];
             (*note)->noteout(&tmpoutl[0], &tmpoutr[0]);
 
             if((*note)->finished())
                 memory.dealloc(*note);
-            for(int i = 0; i < synth->buffersize; ++i) { //add the note to part(mix)
+            for(int i = 0; i < synth.buffersize; ++i) { //add the note to part(mix)
                 partfxinputl[sendcurrenttofx][i] += tmpoutl[i];
                 partfxinputr[sendcurrenttofx][i] += tmpoutr[i];
             }
@@ -970,7 +970,7 @@ void Part::RunNote(unsigned int k)
 void Part::ComputePartSmps()
 {
     for(unsigned nefx = 0; nefx < NUM_PART_EFX + 1; ++nefx)
-        for(int i = 0; i < synth->buffersize; ++i) {
+        for(int i = 0; i < synth.buffersize; ++i) {
             partfxinputl[nefx][i] = 0.0f;
             partfxinputr[nefx][i] = 0.0f;
         }
@@ -989,25 +989,25 @@ void Part::ComputePartSmps()
         if(!Pefxbypass[nefx]) {
             partefx[nefx]->out(partfxinputl[nefx], partfxinputr[nefx]);
             if(Pefxroute[nefx] == 2)
-                for(int i = 0; i < synth->buffersize; ++i) {
+                for(int i = 0; i < synth.buffersize; ++i) {
                     partfxinputl[nefx + 1][i] += partefx[nefx]->efxoutl[i];
                     partfxinputr[nefx + 1][i] += partefx[nefx]->efxoutr[i];
                 }
         }
         int routeto = ((Pefxroute[nefx] == 0) ? nefx + 1 : NUM_PART_EFX);
-        for(int i = 0; i < synth->buffersize; ++i) {
+        for(int i = 0; i < synth.buffersize; ++i) {
             partfxinputl[routeto][i] += partfxinputl[nefx][i];
             partfxinputr[routeto][i] += partfxinputr[nefx][i];
         }
     }
-    for(int i = 0; i < synth->buffersize; ++i) {
+    for(int i = 0; i < synth.buffersize; ++i) {
         partoutl[i] = partfxinputl[NUM_PART_EFX][i];
         partoutr[i] = partfxinputr[NUM_PART_EFX][i];
     }
 
     if(killallnotes) {
-        for(int i = 0; i < synth->buffersize; ++i) {
-            float tmp = (synth->buffersize_f - i) / synth->buffersize_f;
+        for(int i = 0; i < synth.buffersize; ++i) {
+            float tmp = (synth.buffersize_f - i) / synth.buffersize_f;
             partoutl[i] *= tmp;
             partoutr[i] *= tmp;
         }
@@ -1065,9 +1065,9 @@ void Part::setkititemstatus(unsigned kititem, bool Penabled_)
     else {
         //All parameters must be NULL in this case
         assert(!(kkit.adpars || kkit.subpars || kkit.padpars));
-        kkit.adpars  = new ADnoteParameters(fft);
+        kkit.adpars  = new ADnoteParameters(synth, fft);
         kkit.subpars = new SUBnoteParameters();
-        kkit.padpars = new PADnoteParameters(fft);
+        kkit.padpars = new PADnoteParameters(synth, fft);
     }
 }
 
@@ -1301,7 +1301,7 @@ void Part::getfromXMLinstrument(XMLwrapper *xml)
                                                 kit[i].Padenabled);
             if(xml->enterbranch("ADD_SYNTH_PARAMETERS")) {
                 if(!kit[i].adpars)
-                    kit[i].adpars = new ADnoteParameters(fft);
+                    kit[i].adpars = new ADnoteParameters(synth, fft);
                 kit[i].adpars->getfromXML(xml);
                 xml->exitbranch();
             }
@@ -1319,7 +1319,7 @@ void Part::getfromXMLinstrument(XMLwrapper *xml)
                                                  kit[i].Ppadenabled);
             if(xml->enterbranch("PAD_SYNTH_PARAMETERS")) {
                 if(!kit[i].padpars)
-                    kit[i].padpars = new PADnoteParameters(fft);
+                    kit[i].padpars = new PADnoteParameters(synth, fft);
                 kit[i].padpars->getfromXML(xml);
                 xml->exitbranch();
             }

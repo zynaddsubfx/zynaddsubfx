@@ -29,6 +29,7 @@ struct SynthParams
 {
     Allocator &memory;   //Memory Allocator for the Note to use
     Controller &ctl;
+    const SYNTH_T    &synth;
     float     frequency; //Note base frequency
     float     velocity;  //Velocity of the Note
     bool      portamento;//True if portamento is used for this note
@@ -71,7 +72,7 @@ class SynthNote
         class Legato
         {
             public:
-                Legato(float freq, float vel, int port,
+                Legato(const SYNTH_T &synth_, float freq, float vel, int port,
                        int note, bool quiet);
 
                 void apply(SynthNote &note, float *outl, float *outr);
@@ -91,6 +92,7 @@ class SynthNote
                     bool  portamento;
                     int   midinote;
                 } param;
+                const SYNTH_T &synth;
 
             public: /* Some get routines for legatonote calls (aftertouch feature)*/
                 float getFreq() {return param.freq; }
@@ -102,8 +104,9 @@ class SynthNote
         } legato;
 
         //Realtime Safe Memory Allocator For notes
-        class Allocator &memory;
+        class Allocator  &memory;
         const Controller &ctl;
+        const SYNTH_T    &synth;
 };
 
 #endif

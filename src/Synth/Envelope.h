@@ -31,7 +31,7 @@ class Envelope
     public:
 
         /**Constructor*/
-        Envelope(class EnvelopeParams &pars, float basefreq);
+        Envelope(class EnvelopeParams &pars, float basefreq, float dt);
         /**Destructor*/
         ~Envelope();
         void releasekey();

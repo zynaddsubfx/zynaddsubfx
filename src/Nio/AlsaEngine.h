@@ -35,7 +35,7 @@
 class AlsaEngine:public AudioOut, MidiIn
 {
     public:
-        AlsaEngine();
+        AlsaEngine(const SYNTH_T &synth);
         ~AlsaEngine();
 
         bool Start();

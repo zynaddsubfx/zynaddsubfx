@@ -24,7 +24,7 @@
 #include "Envelope.h"
 #include "../Params/EnvelopeParams.h"
 
-Envelope::Envelope(EnvelopeParams &pars, float basefreq)
+Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt)
 {
     envpoints = pars.Penvpoints;
     if(envpoints > MAX_ENVELOPE_POINTS)
@@ -36,8 +36,6 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq)
 
     if(!pars.Pfreemode)
         pars.converttofree();
-
-    const float bufferdt = synth->buffersize_f / synth->samplerate_f;
 
     int mode = pars.Envmode;
 

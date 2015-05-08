@@ -57,7 +57,7 @@ class OscilGenTest:public CxxTest::TestSuite
 
             //prepare the default settings
             fft   = new FFTwrapper(synth->oscilsize);
-            oscil = new OscilGen(fft, NULL);
+            oscil = new OscilGen(*synth, fft, NULL);
 
             //Assert defaults [TODO]
 

@@ -45,7 +45,7 @@ struct OssMidiParse {
 class OssEngine:public AudioOut, MidiIn
 {
     public:
-        OssEngine();
+        OssEngine(const SYNTH_T &synth);
         ~OssEngine();
 
         bool Start();

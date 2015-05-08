@@ -144,7 +144,7 @@ string InMgr::getSource() const
 
 MidiIn *InMgr::getIn(string name)
 {
-    EngineMgr &eng = EngineMgr::getInstance();
+    EngineMgr &eng = EngineMgr::getInstance(NULL);
     return dynamic_cast<MidiIn *>(eng.getEng(name));
 }
 

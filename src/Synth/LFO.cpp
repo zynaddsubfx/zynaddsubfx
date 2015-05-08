@@ -28,7 +28,8 @@
 #include <cstdio>
 #include <cmath>
 
-LFO::LFO(const LFOParams &lfopars, float basefreq)
+LFO::LFO(const LFOParams &lfopars, float basefreq, float dt_)
+    :dt(dt_)
 {
     int stretch = lfopars.Pstretch;
     if(stretch == 0)
@@ -39,7 +40,7 @@ LFO::LFO(const LFOParams &lfopars, float basefreq)
 
     float lfofreq =
         (powf(2, lfopars.Pfreq * 10.0f) - 1.0f) / 12.0f * lfostretch;
-    incx = fabs(lfofreq) * synth->buffersize_f / synth->samplerate_f;
+    incx = fabs(lfofreq) * dt;
 
     if(!lfopars.Pcontinous) {
         if(lfopars.Pstartphase == 0)
@@ -150,7 +151,7 @@ float LFO::lfoout()
         }
     }
     else
-        lfodelay -= synth->buffersize_f / synth->samplerate_f;
+        lfodelay -= dt;
     return out;
 }
 

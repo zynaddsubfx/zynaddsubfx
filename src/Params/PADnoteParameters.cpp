@@ -125,7 +125,7 @@ static const rtosc::Ports localPorts =
     {"nhr:", rProp(non-realtime) rDoc("Returns the harmonic shifts"),
         NULL, [](const char *, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
-            const unsigned n = synth->oscilsize / 2;
+            const unsigned n = p->synth.oscilsize / 2;
             float *tmp = new float[n];
             for(unsigned i=1; i<n; ++i)
                 tmp[i] = p->getNhr(i);
@@ -189,14 +189,15 @@ static const rtosc::Ports localPorts =
 
 const rtosc::Ports &PADnoteParameters::ports = localPorts;
 
-PADnoteParameters::PADnoteParameters(FFTwrapper *fft_):Presets()
+PADnoteParameters::PADnoteParameters(const SYNTH_T &synth_, FFTwrapper *fft_)
+    :Presets(), synth(synth_)
 {
     setpresettype("Ppadsynth");
 
     fft   = fft_;
 
     resonance = new Resonance();
-    oscilgen  = new OscilGen(fft_, resonance);
+    oscilgen  = new OscilGen(synth, fft_, resonance);
     oscilgen->ADvsPAD = true;
 
     FreqEnvelope = new EnvelopeParams(0, 0);
@@ -586,23 +587,23 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
                                                        int profilesize,
                                                        float bwadjust)
 {
-    float harmonics[synth->oscilsize];
+    float harmonics[synth.oscilsize];
     memset(spectrum, 0, sizeof(float) * size);
-    memset(harmonics, 0, sizeof(float) * synth->oscilsize);
+    memset(harmonics, 0, sizeof(float) * synth.oscilsize);
 
     //get the harmonic structure from the oscillator (I am using the frequency amplitudes, only)
     oscilgen->get(harmonics, basefreq, false);
 
     //normalize
-    normalize_max(harmonics, synth->oscilsize / 2);
+    normalize_max(harmonics, synth.oscilsize / 2);
 
     //Constants across harmonics
     const float power = Pbwscale_translate(Pbwscale);
     const float bandwidthcents = setPbandwidth(Pbandwidth);
 
-    for(int nh = 1; nh < synth->oscilsize / 2; ++nh) { //for each harmonic
+    for(int nh = 1; nh < synth.oscilsize / 2; ++nh) { //for each harmonic
         const float realfreq = getNhr(nh) * basefreq;
-        if(realfreq > synth->samplerate_f * 0.49999f)
+        if(realfreq > synth.samplerate_f * 0.49999f)
             break;
         if(realfreq < 20.0f)
             break;
@@ -613,7 +614,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
         const float bw =
             ((powf(2.0f, bandwidthcents / 1200.0f) - 1.0f) * basefreq / bwadjust)
             * powf(realfreq / basefreq, power);
-        const int ibw = (int)((bw / (synth->samplerate_f * 0.5f) * size)) + 1;
+        const int ibw = (int)((bw / (synth.samplerate_f * 0.5f) * size)) + 1;
 
         float amp = harmonics[nh - 1];
         if(resonance->Penabled)
@@ -623,7 +624,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
             const float rap   = sqrt((float)profilesize / (float)ibw);
             const int   cfreq =
                 (int) (realfreq
-                       / (synth->samplerate_f * 0.5f) * size) - ibw / 2;
+                       / (synth.samplerate_f * 0.5f) * size) - ibw / 2;
             for(int i = 0; i < ibw; ++i) {
                 const int src    = i * rap * rap;
                 const int spfreq = i + cfreq;
@@ -636,7 +637,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
         }
         else {  //if the bandwidth is smaller than the profilesize
             const float rap = sqrt((float)ibw / (float)profilesize);
-            const float ibasefreq = realfreq / (synth->samplerate_f * 0.5f) * size;
+            const float ibasefreq = realfreq / (synth.samplerate_f * 0.5f) * size;
             for(int i = 0; i < profilesize; ++i) {
                 const float idfreq = (i / (float)profilesize - 0.5f) * ibw;
                 const int   spfreq  = (int) (idfreq + ibasefreq);
@@ -660,21 +661,21 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
                                                     int size,
                                                     float basefreq)
 {
-    float harmonics[synth->oscilsize];
+    float harmonics[synth.oscilsize];
     memset(spectrum,  0, sizeof(float) * size);
-    memset(harmonics, 0, sizeof(float) * synth->oscilsize);
+    memset(harmonics, 0, sizeof(float) * synth.oscilsize);
 
     //get the harmonic structure from the oscillator (I am using the frequency amplitudes, only)
     oscilgen->get(harmonics, basefreq, false);
 
     //normalize
-    normalize_max(harmonics, synth->oscilsize / 2);
+    normalize_max(harmonics, synth.oscilsize / 2);
 
-    for(int nh = 1; nh < synth->oscilsize / 2; ++nh) { //for each harmonic
+    for(int nh = 1; nh < synth.oscilsize / 2; ++nh) { //for each harmonic
         const float realfreq = getNhr(nh) * basefreq;
 
         //take care of interpolation if frequency decreases
-        if(realfreq > synth->samplerate_f * 0.49999f)
+        if(realfreq > synth.samplerate_f * 0.49999f)
             break;
         if(realfreq < 20.0f)
             break;
@@ -683,7 +684,7 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
         float amp = harmonics[nh - 1];
         if(resonance->Penabled)
             amp *= resonance->getfreqresponse(realfreq);
-        const int cfreq = realfreq / (synth->samplerate_f * 0.5f) * size;
+        const int cfreq = realfreq / (synth.samplerate_f * 0.5f) * size;
 
         spectrum[cfreq] = amp + 1e-9;
     }
@@ -844,7 +845,7 @@ void PADnoteParameters::export2wav(std::string basefilename)
         char tmpstr[20];
         snprintf(tmpstr, 20, "_%02d", k + 1);
         std::string filename = basefilename + std::string(tmpstr) + ".wav";
-        WavFile     wav(filename, synth->samplerate, 1);
+        WavFile     wav(filename, synth.samplerate, 1);
         if(wav.good()) {
             int nsmps = sample[k].size;
             short int *smps = new short int[nsmps];

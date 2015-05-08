@@ -29,7 +29,7 @@
 class OssMultiEngine : public AudioOut
 {
     public:
-        OssMultiEngine();
+        OssMultiEngine(const SYNTH_T &synth);
         ~OssMultiEngine();
 
         bool Start();

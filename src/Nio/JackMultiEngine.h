@@ -27,7 +27,7 @@
 class JackMultiEngine:public AudioOut
 {
     public:
-        JackMultiEngine(void);
+        JackMultiEngine(const SYNTH_T &synth);
         ~JackMultiEngine(void);
 
         void setAudioEn(bool nval);

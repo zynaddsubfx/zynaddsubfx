@@ -29,10 +29,10 @@ using namespace std;
 #include "InMgr.h"
 #include "AlsaEngine.h"
 
-AlsaEngine::AlsaEngine()
-    :AudioOut()
+AlsaEngine::AlsaEngine(const SYNTH_T &synth)
+    :AudioOut(synth)
 {
-    audio.buffer = new short[synth->buffersize * 2];
+    audio.buffer = new short[synth.buffersize * 2];
     name = "ALSA";
     audio.handle = NULL;
 
@@ -296,7 +296,7 @@ bool AlsaEngine::openAudio()
     /* Two channels (stereo) */
     snd_pcm_hw_params_set_channels(audio.handle, audio.params, 2);
 
-    audio.sampleRate = synth->samplerate;
+    audio.sampleRate = synth.samplerate;
     snd_pcm_hw_params_set_rate_near(audio.handle, audio.params,
                                     &audio.sampleRate, NULL);
 
@@ -321,7 +321,7 @@ bool AlsaEngine::openAudio()
     /* latency = periodsize * periods / (rate * bytes_per_frame)     */
     snd_pcm_hw_params_set_buffer_size(audio.handle,
                                       audio.params,
-                                      synth->buffersize);
+                                      synth.buffersize);
 
     //snd_pcm_hw_params_get_period_size(audio.params, &audio.frames, NULL);
     //snd_pcm_hw_params_get_period_time(audio.params, &val, NULL);
@@ -353,7 +353,7 @@ void *AlsaEngine::processAudio()
     while(audio.handle) {
         audio.buffer = interleave(getNext());
         snd_pcm_t *handle = audio.handle;
-        int rc = snd_pcm_writei(handle, audio.buffer, synth->buffersize);
+        int rc = snd_pcm_writei(handle, audio.buffer, synth.buffersize);
         if(rc == -EPIPE) {
             /* EPIPE means underrun */
             cerr << "underrun occurred" << endl;

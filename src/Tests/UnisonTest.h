@@ -70,12 +70,12 @@ class AdNoteTest:public CxxTest::TestSuite
 
             fft = new FFTwrapper(BUF);
             //prepare the default settings
-            params = new ADnoteParameters(fft);
+            params = new ADnoteParameters(*synth, fft);
 
             //sawtooth to make things a bit more interesting
             params->VoicePar[0].OscilSmp->Pcurrentbasefunc = 3;
 
-            controller = new Controller();
+            controller = new Controller(*synth);
 
             //lets go with.... 50! as a nice note
             testnote = 50;
@@ -103,7 +103,7 @@ class AdNoteTest:public CxxTest::TestSuite
             params->VoicePar[0].Unison_vibratto_speed   = e;
             params->VoicePar[0].Unison_invert_phase     = f;
 
-            SynthParams pars{memory, *controller, freq, 120, 0, testnote, false};
+            SynthParams pars{memory, *controller, *synth, freq, 120, 0, testnote, false};
             note = new ADnote(params, pars);
             note->noteout(outL, outR);
             TS_ASSERT_DELTA(outL[80], values[0], 1e-5);

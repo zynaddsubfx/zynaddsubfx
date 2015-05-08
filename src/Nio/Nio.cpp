@@ -29,11 +29,11 @@ bool   Nio::pidInClientName = false;
 string Nio::defaultSource   = IN_DEFAULT;
 string Nio::defaultSink     = OUT_DEFAULT;
 
-void Nio::init(class Master *master)
+void Nio::init(const SYNTH_T &synth, class Master *master)
 {
     in  = &InMgr::getInstance(); //Enable input wrapper
-    out = &OutMgr::getInstance(); //Initialize the Output Systems
-    eng = &EngineMgr::getInstance(); //Initialize The Engines
+    out = &OutMgr::getInstance(&synth); //Initialize the Output Systems
+    eng = &EngineMgr::getInstance(&synth); //Initialize The Engines
 
     in->setMaster(master);
     out->setMaster(master);

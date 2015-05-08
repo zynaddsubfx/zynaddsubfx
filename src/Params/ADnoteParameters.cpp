@@ -276,7 +276,7 @@ const Ports &ADnoteGlobalParam::ports = globalPorts;
 int ADnote_unison_sizes[] =
 {1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 0};
 
-ADnoteParameters::ADnoteParameters(FFTwrapper *fft_)
+ADnoteParameters::ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_)
     :PresetsArray()
 {
     setpresettype("Padsynth");
@@ -284,7 +284,7 @@ ADnoteParameters::ADnoteParameters(FFTwrapper *fft_)
 
 
     for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
-        EnableVoice(nvoice);
+        EnableVoice(synth, nvoice);
 
     defaults();
 }
@@ -429,15 +429,15 @@ void ADnoteVoiceParam::defaults()
 /*
  * Init the voice parameters
  */
-void ADnoteParameters::EnableVoice(int nvoice)
+void ADnoteParameters::EnableVoice(const SYNTH_T &synth, int nvoice)
 {
-    VoicePar[nvoice].enable(fft, GlobalPar.Reson);
+    VoicePar[nvoice].enable(synth, fft, GlobalPar.Reson);
 }
 
-void ADnoteVoiceParam::enable(FFTwrapper *fft, Resonance *Reson)
+void ADnoteVoiceParam::enable(const SYNTH_T &synth, FFTwrapper *fft, Resonance *Reson)
 {
-    OscilSmp = new OscilGen(fft, Reson);
-    FMSmp    = new OscilGen(fft, NULL);
+    OscilSmp = new OscilGen(synth, fft, Reson);
+    FMSmp    = new OscilGen(synth, fft, NULL);
 
     AmpEnvelope = new EnvelopeParams(64, 1);
     AmpEnvelope->ADSRinit_dB(0, 100, 127, 100);

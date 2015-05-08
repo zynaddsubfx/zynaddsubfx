@@ -585,7 +585,6 @@ DSSIaudiooutput *DSSIaudiooutput::getInstance(LADSPA_Handle instance)
     return (DSSIaudiooutput *)(instance);
 }
 
-SYNTH_T *synth;
 
 /**
  * The private sole constructor for the DSSIaudiooutput class.
@@ -596,8 +595,8 @@ SYNTH_T *synth;
  */
 DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate)
 {
-    synth = new SYNTH_T;
-    synth->samplerate = sampleRate;
+    SYNTH_T synth;
+    synth.samplerate = sampleRate;
 
     this->sampleRate  = sampleRate;
     this->banksInited = false;
@@ -605,12 +604,12 @@ DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate)
     config.init();
 
     sprng(time(NULL));
-    denormalkillbuf = new float [synth->buffersize];
-    for(int i = 0; i < synth->buffersize; i++)
+    denormalkillbuf = new float [synth.buffersize];
+    for(int i = 0; i < synth.buffersize; i++)
         denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 
-    synth->alias();
-    middleware = new MiddleWare();
+    synth.alias();
+    middleware = new MiddleWare(synth);
     initBanks();
     loadThread = new std::thread([this]() {
             while(middleware) {

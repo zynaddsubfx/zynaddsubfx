@@ -85,8 +85,6 @@ class FilterParams:public PresetsArray
         float getfreqpos(float freq);
         float getfreqx(float x);
 
-        void formantfilterH(int nvowel, int nfreqs, float *freqs); //used by UI
-
         float getformantfreq(unsigned char freq);
         float getformantamp(unsigned char amp);
         float getformantq(unsigned char q);

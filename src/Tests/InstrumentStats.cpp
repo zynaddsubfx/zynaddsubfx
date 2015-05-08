@@ -65,7 +65,7 @@ void setup() {
     denormalkillbuf = new float[synth->buffersize];
     for(int i = 0; i < synth->buffersize; ++i)
         denormalkillbuf[i] = 0;
-    p = new Part(alloc, &microtonal, &fft);
+    p = new Part(alloc, *synth, &microtonal, &fft);
 }
 
 void xml(string s)

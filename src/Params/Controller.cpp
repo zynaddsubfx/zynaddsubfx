@@ -60,10 +60,18 @@ const rtosc::Ports Controller::ports = {
 };
 
 
-Controller::Controller()
+Controller::Controller(const SYNTH_T &synth_)
+    :synth(synth_)
 {
     defaults();
     resetall();
+}
+
+Controller &Controller::operator=(const Controller &c)
+{
+    //just pretend that undefined behavior doesn't exist...
+    memcpy(this, &c, sizeof(Controller));
+    return *this;
 }
 
 Controller::~Controller()
@@ -284,7 +292,7 @@ int Controller::initportamento(float oldfreq,
 
     //printf("%f->%f : Time %f\n",oldfreq,newfreq,portamentotime);
 
-    portamento.dx = synth->buffersize_f / (portamentotime * synth->samplerate_f);
+    portamento.dx = synth.buffersize_f / (portamentotime * synth.samplerate_f);
     portamento.origfreqrap = oldfreq / newfreq;
 
     float tmprap = ((portamento.origfreqrap > 1.0f) ?

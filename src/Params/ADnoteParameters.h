@@ -117,7 +117,7 @@ struct ADnoteVoiceParam {
     void add2XML(XMLwrapper *xml, bool fmoscilused);
     void paste(ADnoteVoiceParam &p);
     void defaults(void);
-    void enable(FFTwrapper *fft, Resonance *Reson);
+    void enable(const SYNTH_T &synth, FFTwrapper *fft, Resonance *Reson);
     void kill(void);
     float getUnisonFrequencySpreadCents(void) const;
     /** If the voice is enabled */
@@ -289,7 +289,7 @@ struct ADnoteVoiceParam {
 class ADnoteParameters:public PresetsArray
 {
     public:
-        ADnoteParameters(FFTwrapper *fft_);
+        ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_);
         ~ADnoteParameters();
 
         ADnoteGlobalParam GlobalPar;
@@ -313,7 +313,7 @@ class ADnoteParameters:public PresetsArray
         void getfromXMLsection(XMLwrapper *xml, int n);
     private:
 
-        void EnableVoice(int nvoice);
+        void EnableVoice(const SYNTH_T &synth, int nvoice);
         void KillVoice(int nvoice);
         FFTwrapper *fft;
 };

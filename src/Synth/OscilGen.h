@@ -30,7 +30,7 @@
 class OscilGen:public Presets
 {
     public:
-        OscilGen(FFTwrapper *fft_, Resonance *res_);
+        OscilGen(const SYNTH_T &synth, FFTwrapper *fft_, Resonance *res_);
         ~OscilGen();
 
         /**computes the full spectrum of oscil from harmonics,phases and basefunc*/
@@ -177,6 +177,8 @@ class OscilGen:public Presets
         Resonance *res;
 
         unsigned int randseed;
+    public:
+        const SYNTH_T &synth;
 };
 
 typedef float (*filter_func)(unsigned int, float, float);

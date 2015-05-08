@@ -42,7 +42,7 @@
 class PADnoteParameters:public Presets
 {
     public:
-        PADnoteParameters(FFTwrapper *fft_);
+        PADnoteParameters(const SYNTH_T &synth_, FFTwrapper *fft_);
         ~PADnoteParameters();
 
         void defaults();
@@ -181,6 +181,8 @@ class PADnoteParameters:public Presets
         void deletesample(int n);
 
         FFTwrapper *fft;
+    public:
+        const SYNTH_T &synth;
 };
 
 

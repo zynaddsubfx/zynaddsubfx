@@ -49,7 +49,7 @@ class Master
 {
     public:
         /** Constructor TODO make private*/
-        Master();
+        Master(const SYNTH_T &synth);
         /** Destructor*/
         ~Master();
 
@@ -167,6 +167,7 @@ class Master
         rtosc::ThreadLink *bToU;
         rtosc::ThreadLink *uToB;
         bool pendingMemory;
+        const SYNTH_T &synth;
     private:
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];

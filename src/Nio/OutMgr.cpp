@@ -12,26 +12,26 @@
 
 using namespace std;
 
-OutMgr &OutMgr::getInstance()
+OutMgr &OutMgr::getInstance(const SYNTH_T *synth)
 {
-    static OutMgr instance;
+    static OutMgr instance(synth);
     return instance;
 }
 
-OutMgr::OutMgr()
-    :wave(new WavEngine()),
+OutMgr::OutMgr(const SYNTH_T *synth_)
+    :wave(new WavEngine(*synth_)),
       priBuf(new float[4096],
              new float[4096]), priBuffCurrent(priBuf),
-      master(NULL)
+      master(NULL), stales(0), synth(*synth_)
 {
+    assert(synth_);
     currentOut = NULL;
-    stales     = 0;
 
     //init samples
-    outr = new float[synth->buffersize];
-    outl = new float[synth->buffersize];
-    memset(outl, 0, synth->bufferbytes);
-    memset(outr, 0, synth->bufferbytes);
+    outr = new float[synth.buffersize];
+    outl = new float[synth.buffersize];
+    memset(outl, 0, synth.bufferbytes);
+    memset(outr, 0, synth.bufferbytes);
 }
 
 OutMgr::~OutMgr()
@@ -60,7 +60,7 @@ const Stereo<float *> OutMgr::tick(unsigned int frameSize)
     int i=0;
     while(frameSize > storedSmps()) {
         if(!midi.empty()) {
-            midi.flush(i*synth->buffersize, (i+1)*synth->buffersize);
+            midi.flush(i*synth.buffersize, (i+1)*synth.buffersize);
         }
         master->AudioOut(outl, outr);
         addSmps(outl, outr);
@@ -143,27 +143,27 @@ static size_t resample(float *dest,
 void OutMgr::addSmps(float *l, float *r)
 {
     //allow wave file to syphon off stream
-    wave->push(Stereo<float *>(l, r), synth->buffersize);
+    wave->push(Stereo<float *>(l, r), synth.buffersize);
 
     const int s_out = currentOut->getSampleRate(),
-              s_sys = synth->samplerate;
+              s_sys = synth.samplerate;
 
     if(s_out != s_sys) { //we need to resample
         const size_t steps = resample(priBuffCurrent.l,
                                       l,
                                       s_sys,
                                       s_out,
-                                      synth->buffersize);
-        resample(priBuffCurrent.r, r, s_sys, s_out, synth->buffersize);
+                                      synth.buffersize);
+        resample(priBuffCurrent.r, r, s_sys, s_out, synth.buffersize);
 
         priBuffCurrent.l += steps;
         priBuffCurrent.r += steps;
     }
     else { //just copy the samples
-        memcpy(priBuffCurrent.l, l, synth->bufferbytes);
-        memcpy(priBuffCurrent.r, r, synth->bufferbytes);
-        priBuffCurrent.l += synth->buffersize;
-        priBuffCurrent.r += synth->buffersize;
+        memcpy(priBuffCurrent.l, l, synth.bufferbytes);
+        memcpy(priBuffCurrent.r, r, synth.bufferbytes);
+        priBuffCurrent.l += synth.buffersize;
+        priBuffCurrent.r += synth.buffersize;
     }
 }
 

@@ -82,21 +82,16 @@ class SubNoteTest:public CxxTest::TestSuite
             TS_ASSERT(wrap->enterbranch("SUB_SYNTH_PARAMETERS"));
             defaultPreset->getfromXML(wrap);
 
-            controller = new Controller();
+            controller = new Controller(*synth);
 
             //lets go with.... 50! as a nice note
             testnote = 50;
             float freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
 
-            SynthParams pars{memory, *controller, freq, 120, 0, testnote, false};
+            SynthParams pars{memory, *controller, *synth, freq, 120, 0, testnote, false};
             note = new SUBnote(defaultPreset, pars);
             delete wrap;
             delete defaultPreset;
-        }
-
-        void willNoteBeRunButIsHereForLinkingReasonsHowsThisForCamelCaseEh()
-        {
-            master = new Master();
         }
 
         void tearDown() {

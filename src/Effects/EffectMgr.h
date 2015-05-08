@@ -43,7 +43,7 @@ class Allocator;
 class EffectMgr:public Presets
 {
     public:
-        EffectMgr(Allocator &alloc, const bool insertion_);
+        EffectMgr(Allocator &alloc, const SYNTH_T &synth, const bool insertion_);
         ~EffectMgr();
 
         void paste(EffectMgr &e);
@@ -93,6 +93,7 @@ class EffectMgr:public Presets
 
         bool dryonly;
         Allocator &memory;
+        const SYNTH_T &synth;
 };
 
 #endif
