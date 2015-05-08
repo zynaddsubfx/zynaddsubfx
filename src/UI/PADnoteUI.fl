@@ -112,6 +112,7 @@ cbwidget->do_callback();}
             Fl_Choice hpbasetype {
               label {Base Type}
               callback {if(initialized) {hprofile->redraw();
+ hpui->update();
 cbwidget->do_callback();}}
               xywh {15 45 75 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
               code0 {o->init("Php.base.type");}
@@ -160,6 +161,7 @@ cbwidget->do_callback();}
               Fl_Choice hpamptype {
                 label AmpMultiplier
                 callback {if(initialized) {hprofile->redraw();
+                hpui->update();
 cbwidget->do_callback();}}
                 xywh {15 175 70 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
                 code0 {o->init("Php.amp.type");}
@@ -228,6 +230,7 @@ cbwidget->do_callback();}
               label autoscale
               callback {
               if(initialized) {
+                  hpui->update();
                   hprofile->redraw();
               cbwidget->do_callback();}}
               xywh {10 270 60 15} down_box DOWN_BOX labelsize 10
@@ -236,6 +239,7 @@ cbwidget->do_callback();}
             }
             Fl_Choice hponehalf {
               callback {if(initialized) {hprofile->redraw();
+hpui->update();
 cbwidget->do_callback();}}
               xywh {10 143 80 15} down_box BORDER_BOX labelsize 10 align 5 textsize 10
               code0 {o->init("Php.onehalf");}
