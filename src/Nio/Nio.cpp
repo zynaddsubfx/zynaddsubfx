@@ -119,7 +119,7 @@ string Nio::getSink()
 void Nio::preferedSampleRate(unsigned &rate)
 {
     //XXX hello non portable code
-    if(system("ps | grep jack"))
+    if(system("ps aux | grep jack"))
         return;
 
     jack_client_t *client = jack_client_open("temp-client",
