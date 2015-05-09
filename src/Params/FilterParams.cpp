@@ -121,6 +121,8 @@ const rtosc::Ports FilterParams::ports = {
     //{"Pvowels#" FF_MAX_VOWELS "/formants#" FF_MAX_FORMANTS "/q",
     //    "", NULL, [](){}},
 };
+#undef rChangeCb
+#define rChangeCb
 
 
 

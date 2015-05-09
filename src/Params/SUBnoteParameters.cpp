@@ -33,7 +33,7 @@
 
 #define rObject SUBnoteParameters
 using namespace rtosc;
-static const rtosc::Ports localPorts = {
+static const rtosc::Ports SUBnotePorts = {
     rSelf(SUBnoteParameters),
     rPaste,
     rToggle(Pstereo, "Stereo Enable"),
@@ -122,7 +122,7 @@ static const rtosc::Ports localPorts = {
 
 };
 
-const rtosc::Ports &SUBnoteParameters::ports = localPorts;
+const rtosc::Ports &SUBnoteParameters::ports = SUBnotePorts;
 
 SUBnoteParameters::SUBnoteParameters():Presets()
 {

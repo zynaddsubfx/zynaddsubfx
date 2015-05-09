@@ -50,7 +50,7 @@ void simpleset(const char *m, rtosc::RtData &d)
 
 #define P_C(x) rtosc::Port{#x "::c", "::", NULL, \
     simpleset<__builtin_offsetof(class PADnoteParameters, P##x)>}
-static const rtosc::Ports localPorts =
+static const rtosc::Ports PADnotePorts =
 {
     rRecurp(oscilgen, "Oscillator"),
     rRecurp(FreqLfo, "Frequency LFO"),
@@ -187,7 +187,7 @@ static const rtosc::Ports localPorts =
         }},
 };
 
-const rtosc::Ports &PADnoteParameters::ports = localPorts;
+const rtosc::Ports &PADnoteParameters::ports = PADnotePorts;
 
 PADnoteParameters::PADnoteParameters(const SYNTH_T &synth_, FFTwrapper *fft_)
     :Presets(), synth(synth_)
