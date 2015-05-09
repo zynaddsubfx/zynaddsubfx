@@ -629,7 +629,7 @@ void Part::NoteOn(unsigned char note,
 
                 // Spawn another note (but silent) if legatomodevalid==true
                 if(legatomodevalid) {
-                    auto &note2 = partnote[pos].kititem[ci];
+                    auto &note2 = partnote[posb].kititem[ci];
                     note2.sendtoparteffect = limit((int)kit[item].Psendtoparteffect, 0, NUM_PART_EFX);
 
                     pars.quiet = true;
