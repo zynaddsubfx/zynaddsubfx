@@ -106,6 +106,20 @@ static const Ports partPorts = {
                 p->Ppolymode = 0;
                 p->Plegatomode = 1;
             }}},
+    {"clear:", rProp(internal) rDoc("Reset Part To Defaults"), 0, [](const char *, RtData &d)
+        {
+            //XXX todo forward this event for middleware to handle
+            //Part *p = (Part*)d.obj;
+            //p->defaults();
+            //char part_loc[128];
+            //strcpy(part_loc, d.loc);
+            //char *end = strrchr(part_loc, '/');
+            //if(end)
+            //    end[1] = 0;
+
+            //d.broadcast("/damage", "s", part_loc);
+        }},
+
 
     //{"kit#16::T:F", "::Enables or disables kit item", 0,
     //    [](const char *m, RtData &d) {
