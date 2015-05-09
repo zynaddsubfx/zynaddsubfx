@@ -874,6 +874,8 @@ version-revision="0" ZynAddSubFX-author="Nasca Octavian Paul">
 </INSTRUMENT>
 <CONTROLLER>
 <par name="pitchwheel_bendrange" value="200" />
+<par name="pitchwheel_bendrange_down" value="0" />
+<par_bool name="pitchwheel_split" value="no" />
 <par_bool name="expression_receive" value="yes" />
 <par name="panning_depth" value="64" />
 <par name="filter_cutoff_depth" value="64" />
@@ -1138,6 +1140,8 @@ version-revision="0" ZynAddSubFX-author="Nasca Octavian Paul">
 </INSTRUMENT>
 <CONTROLLER>
 <par name="pitchwheel_bendrange" value="200" />
+<par name="pitchwheel_bendrange_down" value="0" />
+<par_bool name="pitchwheel_split" value="no" />
 <par_bool name="expression_receive" value="yes" />
 <par name="panning_depth" value="64" />
 <par name="filter_cutoff_depth" value="64" />
@@ -3491,6 +3495,8 @@ version-revision="0" ZynAddSubFX-author="Nasca Octavian Paul">
 </INSTRUMENT>
 <CONTROLLER>
 <par name="pitchwheel_bendrange" value="200" />
+<par name="pitchwheel_bendrange_down" value="0" />
+<par_bool name="pitchwheel_split" value="no" />
 <par_bool name="expression_receive" value="yes" />
 <par name="panning_depth" value="64" />
 <par name="filter_cutoff_depth" value="64" />
