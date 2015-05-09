@@ -4,6 +4,7 @@
         - Add OSC port option
         - Add MIDI unlearn
         - Add External UI Compilation
+        - Add Split Pitchblend
         - Fix No Install NTK Build
         - Fix Linker Issues
         - Fix Presets/Copy/Paste

@@ -39,7 +39,9 @@ const rtosc::Ports Controller::ports = {
     rToggle(bandwidth.exponential, "Bandwidth Exponential Mode"),
     rParamZyn(modwheel.depth, "Depth of Modwheel MIDI Control"),
     rToggle(modwheel.exponential, "Modwheel Exponential Mode"),
+    rToggle(pitchwheel.is_split, "If PitchWheel Has unified blendrange or not"),
     rParamI(pitchwheel.bendrange, "Range of MIDI Pitch Wheel"),
+    rParamI(pitchwheel.bendrange_down, "Lower Range of MIDI Pitch Wheel"),
     rToggle(expression.receive, "Expression MIDI Receive"),
     rToggle(fmamp.receive,      "FM amplitude MIDI Receive"),
     rToggle(volume.receive,     "Volume MIDI Receive"),
@@ -79,7 +81,9 @@ Controller::~Controller()
 
 void Controller::defaults()
 {
-    setpitchwheelbendrange(200); //2 halftones
+    pitchwheel.bendrange = 200; //2 halftones
+    pitchwheel.bendrange_down = 0; //Unused by default
+    pitchwheel.is_split   = false;
     expression.receive    = 1;
     panning.depth         = 64;
     filtercutoff.depth    = 64;
@@ -137,14 +141,12 @@ void Controller::setpitchwheel(int value)
 {
     pitchwheel.data = value;
     float cents = value / 8192.0f;
-    cents *= pitchwheel.bendrange;
+    if(pitchwheel.is_split && cents < 0)
+        cents *= pitchwheel.bendrange_down;
+    else
+        cents *= pitchwheel.bendrange;
     pitchwheel.relfreq = powf(2, cents / 1200.0f);
     //fprintf(stderr,"%ld %ld -> %.3f\n",pitchwheel.bendrange,pitchwheel.data,pitchwheel.relfreq);fflush(stderr);
-}
-
-void Controller::setpitchwheelbendrange(unsigned short int value)
-{
-    pitchwheel.bendrange = value;
 }
 
 void Controller::setexpression(int value)
@@ -385,6 +387,8 @@ void Controller::setparameternumber(unsigned int type, int value)
 void Controller::add2XML(XMLwrapper *xml)
 {
     xml->addpar("pitchwheel_bendrange", pitchwheel.bendrange);
+    xml->addpar("pitchwheel_bendrange_down", pitchwheel.bendrange_down);
+    xml->addparbool("pitchwheel_split", pitchwheel.is_split);
 
     xml->addparbool("expression_receive", expression.receive);
     xml->addpar("panning_depth", panning.depth);
@@ -417,6 +421,12 @@ void Controller::getfromXML(XMLwrapper *xml)
                                        pitchwheel.bendrange,
                                        -6400,
                                        6400);
+    pitchwheel.bendrange_down = xml->getpar("pitchwheel_bendrange_down",
+                                       pitchwheel.bendrange_down,
+                                       -6400,
+                                       6400);
+    pitchwheel.is_split = xml->getparbool("pitchwheel_split",
+                                          pitchwheel.is_split);
 
     expression.receive = xml->getparbool("expression_receive",
                                          expression.receive);
