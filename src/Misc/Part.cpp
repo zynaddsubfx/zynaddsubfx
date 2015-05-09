@@ -57,6 +57,9 @@ static const Ports partPorts = {
 #define rChangeCb obj->setPvolume(obj->Pvolume);
     rParamZyn(Pvolume, "Part Volume"),
 #undef rChangeCb
+#define rChangeCb obj->setPpanning(obj->Ppanning);
+    rParamZyn(Ppanning, "Set Panning"),
+#undef rChangeCb
 #define rChangeCb obj->setkeylimit(obj->Pkeylimit);
     rParamI(Pkeylimit, rProp(parameter), rMap(min,0), rMap(max, POLYPHONY), "Key limit per part"),
 #undef rChangeCb
@@ -65,7 +68,6 @@ static const Ports partPorts = {
     rParamZyn(Pmaxkey, "Max Used Key"),
     rParamZyn(Pkeyshift, "Part keyshift"),
     rParamZyn(Prcvchn,  "Active MIDI channel"),
-    rParamZyn(Ppanning, "Set Panning"),
     rParamZyn(Pvelsns,   "Velocity sensing"),
     rParamZyn(Pveloffs,  "Velocity offset"),
     rToggle(Pnoteon,  "If the channel accepts note on events"),
