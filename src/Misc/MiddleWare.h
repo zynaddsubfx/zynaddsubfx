@@ -4,12 +4,14 @@
 #include <string>
 
 struct SYNTH_T;
+class  Master;
 //Link between realtime and non-realtime layers
 class MiddleWare
 {
     public:
         MiddleWare(SYNTH_T synth, int prefered_port = -1);
         ~MiddleWare(void);
+        void updateResources(Master *m);
         //returns internal master pointer
         class Master *spawnMaster(void);
         //return  UI interface

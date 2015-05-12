@@ -682,16 +682,21 @@ public:
         }
 
         //Update resource locator table
-        obj_store.clear();
-        obj_store.extractMaster(m);
-        for(int i=0; i<NUM_MIDI_PARTS; ++i)
-            kits.extractPart(m->part[i], i);
+        updateResources(m);
 
         master = m;
 
         //Give it to the backend and wait for the old part to return for
         //deallocation
         uToB->write("/load-master", "b", sizeof(Master*), &m);
+    }
+
+    void updateResources(Master *m)
+    {
+        obj_store.clear();
+        obj_store.extractMaster(m);
+        for(int i=0; i<NUM_MIDI_PARTS; ++i)
+            kits.extractPart(m->part[i], i);
     }
 
     //If currently broadcasting messages
@@ -839,8 +844,10 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_, int prefered_port
     lo_server_add_method(server, NULL, NULL, handler_function, mw);
     fprintf(stderr, "lo server running on %d\n", lo_server_get_port(server));
 
+#ifndef CARLA_VERSION_STRING
     clean_up_tmp_nams();
     create_tmp_file((unsigned)lo_server_get_port(server));
+#endif
 
     //dummy callback for starters
     cb = [](void*, const char*){};
@@ -853,12 +860,7 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_, int prefered_port
     osc    = GUI::genOscInterface(mw);
 
     //Grab objects of interest from master
-    obj_store.extractMaster(master);
-
-    //Load Part Status
-    for(int i=0; i < NUM_MIDI_PARTS; ++i) {
-        kits.extractPart(master->part[i], i);
-    }
+    updateResources(master);
 
     //Null out Load IDs
     for(int i=0; i < NUM_MIDI_PARTS; ++i) {
@@ -1245,6 +1247,10 @@ MiddleWare::MiddleWare(SYNTH_T synth, int prefered_port)
 MiddleWare::~MiddleWare(void)
 {
     delete impl;
+}
+void MiddleWare::updateResources(Master *m)
+{
+    impl->updateResources(m);
 }
 Master *MiddleWare::spawnMaster(void)
 {
