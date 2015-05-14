@@ -969,8 +969,6 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
 
 void MiddleWareImpl::bToUhandle(const char *rtmsg, bool dummy)
 {
-    printf("bToUhandle(%s,%s)\n", last_url.c_str(), 
-            curr_url.c_str());
     assert(strcmp(rtmsg, "/part0/kit0/Ppadenableda"));
     assert(strcmp(rtmsg, "/ze_state"));
     //Dump Incomming Events For Debugging
