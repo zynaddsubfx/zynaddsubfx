@@ -622,7 +622,7 @@ void Master::AudioOut(float *outl, float *outr)
         }
 
         //XXX yes, this is not realtime safe, but it is useful...
-        if(strcmp(msg, "/get-vu") && false) {
+        if(strcmp(msg, "/get-vu") && true) {
             fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
             fprintf(stdout, "backend[%d]: '%s'<%s>\n", msg_id++, msg,
                     rtosc_argument_string(msg));
@@ -999,7 +999,7 @@ int Master::getalldata(char **data)
     return strlen(*data) + 1;
 }
 
-void Master::putalldata(char *data, int /*size*/)
+void Master::putalldata(const char *data)
 {
     XMLwrapper *xml = new XMLwrapper();
     if(!xml->putXMLdata(data)) {

@@ -636,7 +636,7 @@ public:
         //Load the part
         if(idle) {
             while(alloc.wait_for(std::chrono::seconds(0)) != std::future_status::ready) {
-                idle();
+                idle(idle_ptr);
             }
         }
 
@@ -685,6 +685,9 @@ public:
         updateResources(m);
 
         master = m;
+
+        if (mastercb)
+            mastercb(mastercb_ptr, m);
 
         //Give it to the backend and wait for the old part to return for
         //deallocation
@@ -809,7 +812,13 @@ public:
     ParamStore kits;
 
     //Callback When Waiting on async events
-    void(*idle)(void);
+    void(*idle)(void*);
+    void* idle_ptr;
+
+    //Callback When Master changes
+    void(*mastercb)(void*,Master*);
+    void* mastercb_ptr;
+
     //General UI callback
     cb_t cb;
     //UI handle
@@ -852,6 +861,9 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_, int prefered_port
     //dummy callback for starters
     cb = [](void*, const char*){};
     idle = 0;
+    idle_ptr = 0;
+    mastercb = 0;
+    mastercb_ptr = 0;
 
     the_bToU = bToU;
     master = new Master(synth);
@@ -957,6 +969,8 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
 
 void MiddleWareImpl::bToUhandle(const char *rtmsg, bool dummy)
 {
+    printf("bToUhandle(%s,%s)\n", last_url.c_str(), 
+            curr_url.c_str());
     assert(strcmp(rtmsg, "/part0/kit0/Ppadenableda"));
     assert(strcmp(rtmsg, "/ze_state"));
     //Dump Incomming Events For Debugging
@@ -996,7 +1010,24 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg, bool dummy)
         broadcast = true;
     } else if(broadcast) {
         broadcast = false;
+#ifdef CARLA_VERSION_STRING
+        if (!curr_url.empty()) // falktx: check added
+            cb(ui, rtmsg);
+
+        // falktx: changed curr_url to last_url
+        if(last_url != "GUI") {
+            lo_message msg  = lo_message_deserialise((void*)rtmsg,
+                    rtosc_message_length(rtmsg, bToU->buffer_size()), NULL);
+
+            //Send to known url
+            if(!last_url.empty()) {
+                lo_address addr = lo_address_new_from_url(last_url.c_str());
+                lo_send_message(addr, rtmsg, msg);
+            }
+        }
+#else
         cb(ui, rtmsg);
+
         if(curr_url != "GUI") {
             lo_message msg  = lo_message_deserialise((void*)rtmsg,
                     rtosc_message_length(rtmsg, bToU->buffer_size()), NULL);
@@ -1007,6 +1038,7 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg, bool dummy)
                 lo_send_message(addr, rtmsg, msg);
             }
         }
+#endif
     } else if((dummy?last_url:curr_url) == "GUI" || !strcmp(rtmsg, "/close-ui")) {
         cb(ui, rtmsg);
     } else{
@@ -1270,15 +1302,22 @@ void MiddleWare::doReadOnlyOp(std::function<void()> fn)
     impl->doReadOnlyOp(fn);
 }
 
-void MiddleWare::setUiCallback(void(*cb)(void*,const char *),void *ui)
+void MiddleWare::setUiCallback(void(*cb)(void*,const char *), void *ui)
 {
     impl->cb = cb;
     impl->ui = ui;
 }
 
-void MiddleWare::setIdleCallback(void(*cb)(void))
+void MiddleWare::setIdleCallback(void(*cb)(void*), void *ptr)
 {
-    impl->idle = cb;
+    impl->idle     = cb;
+    impl->idle_ptr = ptr;
+}
+
+void MiddleWare::setMasterChangedCallback(void(*cb)(void*,Master*), void *ptr)
+{
+    impl->mastercb     = cb;
+    impl->mastercb_ptr = ptr;
 }
 
 void MiddleWare::transmitMsg(const char *msg)
