@@ -441,7 +441,7 @@ class MiddleWareImpl
             ifs >> comm_name;
             return comm_name != "zynaddsubfx";
         }
-        return false;
+        return true;
     }
 
     //! returns file name to where UDP port is saved
@@ -850,7 +850,7 @@ public:
 };
 
 MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_, int prefered_port)
-    :parent(mw), synth(synth_), ui(0)
+    :parent(mw), ui(nullptr), synth(synth_)
 {
     bToU = new rtosc::ThreadLink(4096*2,1024);
     uToB = new rtosc::ThreadLink(4096*2,1024);
@@ -862,8 +862,6 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_, int prefered_port
     fprintf(stderr, "lo server running on %d\n", lo_server_get_port(server));
 
 #ifndef PLUGINVERSION
-    clean_up_tmp_nams();
-    create_tmp_file((unsigned)lo_server_get_port(server));
     if(!isPlugin()) {
         clean_up_tmp_nams();
         create_tmp_file((unsigned)lo_server_get_port(server));
