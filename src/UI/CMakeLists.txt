@@ -34,6 +34,10 @@ if(FltkGui)
     add_executable(zynaddsubfx_ext_gui guimain.cpp)
     target_link_libraries(zynaddsubfx_ext_gui zynaddsubfx_gui ${FLTK_LIBRARIES}
         ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES} ${X11_LIBRARIES} ${LIBLO_LIBRARIES} rtosc rtosc-cpp)
+elseif(NtkGui)
+    add_executable(zynaddsubfx_ext_gui guimain.cpp)
+    target_link_libraries(zynaddsubfx_ext_gui zynaddsubfx_gui ${NTK_LDFLAGS}
+        ${OPENGL_LIBRARIES} ${X11_LIBRARIES} ${LIBLO_LIBRARIES} rtosc rtosc-cpp)
 endif()
 
 add_library(zynaddsubfx_gui STATIC
