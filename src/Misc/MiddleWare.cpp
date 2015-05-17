@@ -431,6 +431,19 @@ class MiddleWareImpl
     static constexpr const char* tmp_nam_prefix = "/tmp/zynaddsubfx_";
     MiddleWare *parent;
 
+    //Detect if the name of the process is 'zynaddsubfx'
+    bool isPlugin()
+    {
+        std::string proc_file = "/proc/" + to_s(getpid()) + "/comm";
+        std::ifstream ifs(proc_file);
+        if(ifs.good()) {
+            std::string comm_name;
+            ifs >> comm_name;
+            return comm_name != "zynaddsubfx";
+        }
+        return false;
+    }
+
     //! returns file name to where UDP port is saved
     std::string get_tmp_nam() const
     {
@@ -626,7 +639,7 @@ public:
                 [master,filename,this,npart](){
                 Part *p = new Part(*master->memory, synth, &master->microtonal, master->fft);
                 if(p->loadXMLinstrument(filename))
-                fprintf(stderr, "Warning: failed to load part!\n");
+                    fprintf(stderr, "Warning: failed to load part<%s>!\n", filename);
 
                 auto isLateLoad = [this,npart]{
                 return actual_load[npart] != pending_load[npart];
@@ -837,7 +850,7 @@ public:
 };
 
 MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_, int prefered_port)
-    :parent(mw), synth(synth_)
+    :parent(mw), synth(synth_), ui(0)
 {
     bToU = new rtosc::ThreadLink(4096*2,1024);
     uToB = new rtosc::ThreadLink(4096*2,1024);
@@ -851,6 +864,10 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_, int prefered_port
 #ifndef PLUGINVERSION
     clean_up_tmp_nams();
     create_tmp_file((unsigned)lo_server_get_port(server));
+    if(!isPlugin()) {
+        clean_up_tmp_nams();
+        create_tmp_file((unsigned)lo_server_get_port(server));
+    }
 #endif
 
     //dummy callback for starters
@@ -896,6 +913,8 @@ MiddleWareImpl::~MiddleWareImpl(void)
     remove(get_tmp_nam().c_str());
 
     warnMemoryLeaks();
+
+    lo_server_free(server);
 
     delete master;
     delete osc;

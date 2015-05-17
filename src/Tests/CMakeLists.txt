@@ -13,6 +13,7 @@ CXXTEST_ADD_TEST(OscilGenTest OscilGenTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/Oscil
 CXXTEST_ADD_TEST(RandTest RandTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/RandTest.h)
 CXXTEST_ADD_TEST(PADnoteTest PadNoteTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/PadNoteTest.h)
 CXXTEST_ADD_TEST(PluginTest PluginTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/PluginTest.h)
+CXXTEST_ADD_TEST(MiddlewareTest MiddlewareTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/MiddlewareTest.h)
 CXXTEST_ADD_TEST(UnisonTest UnisonTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/UnisonTest.h)
 #CXXTEST_ADD_TEST(RtAllocTest RtAllocTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/RtAllocTest.h)
 CXXTEST_ADD_TEST(AllocatorTest AllocatorTest.cpp
@@ -33,6 +34,9 @@ target_link_libraries(XMLwrapperTest ${test_lib})
 target_link_libraries(RandTest       ${test_lib})
 target_link_libraries(PADnoteTest    ${test_lib})
 target_link_libraries(PluginTest     zynaddsubfx_core zynaddsubfx_nio
+    zynaddsubfx_gui_bridge
+    ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
+target_link_libraries(MiddlewareTest zynaddsubfx_core zynaddsubfx_nio
     zynaddsubfx_gui_bridge
     ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
 target_link_libraries(UnisonTest    ${test_lib})
