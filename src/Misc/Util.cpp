@@ -26,7 +26,6 @@
 #include <cmath>
 #include <cstdio>
 #include <fstream>
-#include <err.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -38,6 +37,9 @@
 #include <sched.h>
 #endif
 
+#ifndef errx
+#include <err.h>
+#endif
 
 prng_t prng_state = 0x1234;
 

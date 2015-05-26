@@ -24,9 +24,12 @@
 #include <cstdio>
 #include <cstring>
 #include <cassert>
-#include <err.h>
 #include "../Misc/Util.h"
 #include "SVFilter.h"
+
+#ifndef errx
+#include <err.h>
+#endif
 
 SVFilter::SVFilter(unsigned char Ftype, float Ffreq, float Fq,
                    unsigned char Fstages, unsigned int srate, int bufsize)

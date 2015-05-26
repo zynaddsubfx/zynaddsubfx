@@ -21,10 +21,13 @@
 
 #include <cmath>
 #include <cstring>
-#include <err.h>
 
 #include "../Misc/Allocator.h"
 #include "Unison.h"
+
+#ifndef errx
+#include <err.h>
+#endif
 
 Unison::Unison(Allocator *alloc_, int update_period_samples_, float max_delay_sec_, float srate_f)
     :unison_size(0),

@@ -34,7 +34,9 @@
 #include <atomic>
 #include <list>
 
+#ifndef errx
 #include <err.h>
+#endif
 
 using std::string;
 #ifndef PLUGINVERSION
