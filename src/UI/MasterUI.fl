@@ -17,7 +17,7 @@ decl {\#include <stdio.h>} {public local
 decl {\#include <string.h>} {public local
 } 
 
-decl {\#include "zynaddsubfx.xbm"} {private local
+decl {\#include "zynaddsubfx.xpm"} {private local
 } 
 
 decl {\#include "WidgetPDial.h"} {public local
@@ -71,6 +71,11 @@ decl {\#include "common.H"} {public local
 decl {\#if USE_NSM
 \#include "NSM.H"
 extern NSM_Client *nsm;
+\#endif} {public local
+} 
+
+decl {\#if __linux__
+\#include <X11/xpm.h>
 \#endif} {public local
 } 
 
@@ -1496,8 +1501,9 @@ make_window();
 fl_open_display();
 
 \#ifdef __linux__
-Pixmap p = XCreateBitmapFromData(fl_display, DefaultRootWindow(fl_display),
-                                 (char*)zynaddsubfx_bits, zynaddsubfx_width, zynaddsubfx_height);
+Pixmap p, mask;
+XCreatePixmapFromData(fl_display, DefaultRootWindow(fl_display),
+                                 (char**)zynaddsubfx_xpm, &p, &mask, NULL);
 masterwindow->icon((char *)p);
 \#endif
 assert(osc);

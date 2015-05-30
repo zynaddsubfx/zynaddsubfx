@@ -268,7 +268,7 @@ if(FltkGui)
 
 	set(GUI_LIBRARIES zynaddsubfx_gui ${FLTK_LIBRARIES} ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
     if(X11_FOUND)
-        set(GUI_LIBRARIES ${GUI_LIBRARIES} ${X11_LIBRARIES})
+        set(GUI_LIBRARIES ${GUI_LIBRARIES} ${X11_LIBRARIES} -lXpm)
     endif()
 
 	add_definitions(-DFLTK_GUI)
@@ -292,7 +292,7 @@ if(NtkGui)
 	set(GUI_LIBRARIES zynaddsubfx_gui ${NTK_LIBRARIES} ${NTK_IMAGES_LIBRARIES} ${OPENGL_LIBRARIES})
 
     if(X11_FOUND)
-        set(GUI_LIBRARIES ${GUI_LIBRARIES} ${X11_LIBRARIES})
+        set(GUI_LIBRARIES ${GUI_LIBRARIES} ${X11_LIBRARIES} -lXpm)
     endif()
 
 	add_definitions(-DNTK_GUI)
