@@ -116,6 +116,18 @@ static rtosc::Ports ports = {
     rParamI(cfg.VirKeybLayout,       "Keyboard Layout For Virtual Piano Keyboard"),
     //rParamS(cfg.LinuxALSAaudioDev),
     //rParamS(cfg.nameTag)
+    {"cfg.OscilPower::i", rDoc("Size Of Oscillator Wavetable"), 0,
+        [](const char *msg, rtosc::RtData &d)
+        {
+            Config &c = *(Config*)d.obj;
+            if(rtosc_narguments(msg) == 0) {
+                d.reply(d.loc, "i", (int)(log(c.cfg.OscilSize*1.0)/log(2.0)));
+                return;
+            }
+            float val = powf(2.0, rtosc_argument(msg, 0).i);
+            c.cfg.OscilSize = val;
+            d.broadcast(d.loc, "i", (int)(log(c.cfg.OscilSize*1.0)/log(2.0)));
+        }},
 };
 rtosc::Ports &Config::ports = ::ports;
 #endif
