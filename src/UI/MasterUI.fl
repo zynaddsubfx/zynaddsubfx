@@ -233,14 +233,14 @@ class MasterUI {open
  || fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))) {
     close();
 };} open
-      xywh {330 365 390 525} type Double xclass zynaddsubfx visible
+      xywh {330 365 400 525} type Double xclass zynaddsubfx visible
     } {
       Fl_Group win_root {open
-        xywh {0 0 390 525}
+        xywh {0 0 400 525}
         class Fl_Osc_Group
       } {
         Fl_Menu_Bar mastermenu {
-          xywh {0 5 690 25}
+          xywh {0 5 400 25}
         } {
           Submenu {} {
             label {&File}
