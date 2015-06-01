@@ -926,7 +926,7 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))
         code1 {simplemasterwindow->base = "/";}
       }
       Fl_Menu_Bar simplemastermenu {
-        xywh {0 0 690 25}
+        xywh {0 0 600 25}
       } {
         Submenu {} {
           label {&File}
