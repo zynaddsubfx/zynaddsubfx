@@ -8,6 +8,7 @@
 #include <rtosc/undo-history.h>
 #include <rtosc/thread-link.h>
 #include <rtosc/ports.h>
+#include <rtosc/typed-message.h>
 #include <lo/lo.h>
 
 #include <unistd.h>
@@ -28,6 +29,7 @@
 #include "../Params/PADnoteParameters.h"
 #include "../DSP/FFTwrapper.h"
 #include "../Synth/OscilGen.h"
+#include "../Nio/Nio.h"
 
 #include <string>
 #include <future>
@@ -427,6 +429,38 @@ struct ParamStore
     PADnoteParameters *pad[NUM_MIDI_PARTS][NUM_KIT_ITEMS];
 };
 
+//XXX perhaps move this to Nio
+//(there needs to be some standard Nio stub file for this sort of stuff)
+namespace Nio
+{
+    using std::get;
+    using rtosc::rtMsg;
+    rtosc::Ports ports = {
+        {"sink-list:", 0, 0, [](const char *msg, rtosc::RtData &d) {
+                auto list = Nio::getSinks();
+                char *ret = rtosc_splat(d.loc, list);
+                d.reply(ret);
+                delete [] ret;
+            }},
+        {"source-list:", 0, 0, [](const char *msg, rtosc::RtData &d) {
+                auto list = Nio::getSources();
+                char *ret = rtosc_splat(d.loc, list);
+                d.reply(ret);
+                delete [] ret;
+            }},
+        {"source::s", 0, 0, [](const char *msg, rtosc::RtData &d) {
+                if(rtosc_narguments(msg) == 0)
+                    d.reply(d.loc, "s", Nio::getSource().c_str());
+                else if(rtMsg<const char*> m{msg})
+                    Nio::setSource(get<0>(m));}},
+        {"sink::s", 0, 0, [](const char *msg, rtosc::RtData &d) {
+                if(rtosc_narguments(msg) == 0)
+                    d.reply(d.loc, "s", Nio::getSink().c_str());
+                else if(rtMsg<const char*> m{msg})
+                    Nio::setSink(get<0>(m));}},
+    };
+}
+
 /* Implementation */
 class MiddleWareImpl
 {
@@ -770,6 +804,22 @@ public:
         }
 
 
+        if(!d.matches) {
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
+            fprintf(stderr, "Unknown location '%s'<%s>\n",
+                    msg, rtosc_argument_string(msg));
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        }
+    }
+
+    void handleIo(const char *msg)
+    {
+        char buffer[1024];
+        memset(buffer, 0, sizeof(buffer));
+        DummyDataObj d(buffer, 1024, (void*)&config, this, uToB);
+        strcpy(buffer, "/io/");
+
+        Nio::ports.dispatch(msg+4, d);
         if(!d.matches) {
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
             fprintf(stderr, "Unknown location '%s'<%s>\n",
@@ -1243,6 +1293,8 @@ void MiddleWareImpl::handleMsg(const char *msg)
         handleConfig(msg);
     } else if(strstr(msg, "/presets/")) {
         handlePresets(msg);
+    } else if(strstr(msg, "/io/")) {
+        handleIo(msg);
     } else if(strstr(msg, "Padenabled") || strstr(msg, "Ppadenabled") || strstr(msg, "Psubenabled")) {
         kitEnable(msg);
         uToB->raw_write(msg);
@@ -1367,7 +1419,7 @@ void MiddleWare::activeUrl(std::string u)
 {
     impl->last_url = u;
 }
-        
+
 const SYNTH_T &MiddleWare::getSynth(void) const
 {
     return impl->synth;

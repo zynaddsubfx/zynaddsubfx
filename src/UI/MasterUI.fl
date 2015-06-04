@@ -1480,7 +1480,7 @@ masterwindowlabel[99]='\\0';
 masterwindow->label(&masterwindowlabel[0]);
 simplemasterwindow->label(&masterwindowlabel[0]);} {}
   }
-  Function {MasterUI(int *exitprogram_, class Fl_Osc_Interface *osc_)} {open
+  Function {MasterUI(int *exitprogram_, class Fl_Osc_Interface *osc_):nioui(osc_)} {open
   } {
     code {exitprogram=exitprogram_;
 osc=osc_;
