@@ -64,7 +64,7 @@ class Config
         void init();
         void save();
 
-        static rtosc::Ports &ports;
+        static const rtosc::Ports &ports;
     private:
         void readConfig(const char *filename);
         void saveConfig(const char *filename);

@@ -5,6 +5,8 @@
 
 struct SYNTH_T;
 class  Master;
+class PresetsStore;
+
 //Link between realtime and non-realtime layers
 class MiddleWare
 {
@@ -39,6 +41,9 @@ class MiddleWare
         const SYNTH_T &getSynth(void) const;
         //liblo stuff
         const char* getServerAddress(void) const;
+        
+        const PresetsStore& getPresetsStore() const;
+        PresetsStore& getPresetsStore();
     private:
         class MiddleWareImpl *impl;
 };

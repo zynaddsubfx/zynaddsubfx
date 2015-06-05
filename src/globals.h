@@ -265,9 +265,9 @@ struct SYNTH_T {
 
     /**
      * The size of a sound buffer (or the granularity)
-     * All internal transfer of sound data use buffer of this size
-     * All parameters are constant during this period of time, exception
-     * some parameters(like amplitudes) which are linear interpolated.
+     * All internal transfer of sound data use buffer of this size.
+     * All parameters are constant during this period of time, except
+     * some parameters(like amplitudes) which are linearly interpolated.
      * If you increase this you'll ecounter big latencies, but if you
      * decrease this the CPU requirements gets high.
      */

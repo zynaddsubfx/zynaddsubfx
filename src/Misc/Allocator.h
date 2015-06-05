@@ -68,14 +68,14 @@ class Allocator
 
     //Return true if the current pool cannot allocate n chunks of chunk_size
     bool lowMemory(unsigned n, size_t chunk_size);
-    bool memFree(void *pool);
+    bool memFree(void *pool) const;
 
     //returns number of pools
-    int memPools();
+    int memPools() const;
 
-    int freePools();
+    int freePools() const;
 
-    unsigned long long totalAlloced();
+    unsigned long long totalAlloced() const;
 
     struct AllocatorImpl *impl;
 };

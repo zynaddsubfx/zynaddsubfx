@@ -62,5 +62,5 @@ class PresetsStore
         void clearpresets();
 };
 
-extern PresetsStore presetsstore;
+//extern PresetsStore presetsstore;
 #endif

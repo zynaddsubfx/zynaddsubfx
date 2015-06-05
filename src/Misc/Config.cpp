@@ -46,7 +46,7 @@
 
 #if 1
 #define rObject Config
-static rtosc::Ports ports = {
+static const rtosc::Ports ports = {
     //rString(cfg.LinuxOSSWaveOutDev),
     //rString(cfg.LinuxOSSSeqInDev),
     rParamI(cfg.SampleRate, "samples of audio per second"),
@@ -145,7 +145,7 @@ static rtosc::Ports ports = {
             d.broadcast(d.loc, "i", (int)(log(c.cfg.OscilSize*1.0)/log(2.0)));
         }},
 };
-rtosc::Ports &Config::ports = ::ports;
+const rtosc::Ports &Config::ports = ::ports;
 #endif
 
 Config::Config()

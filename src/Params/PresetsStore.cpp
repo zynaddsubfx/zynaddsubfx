@@ -34,7 +34,7 @@
 using namespace std;
 
 //XXX to remove
-PresetsStore presetsstore;
+//PresetsStore presetsstore;
 
 PresetsStore::PresetsStore()
 {

@@ -124,7 +124,7 @@ typedef struct block_header_t
 static const size_t block_header_free_bit = 1 << 0;
 #endif
 
-bool Allocator::memFree(void *pool)
+bool Allocator::memFree(void *pool) const
 {
     size_t bh_shift = sizeof(next_t)+sizeof(size_t);
     //Assume that memory is free to start with
@@ -145,7 +145,7 @@ bool Allocator::memFree(void *pool)
     return isFree;
 }
 
-int Allocator::memPools()
+int Allocator::memPools() const
 {
     int i = 1;
     next_t *n = impl->pools;
@@ -156,7 +156,7 @@ int Allocator::memPools()
     return i;
 }
 
-int Allocator::freePools()
+int Allocator::freePools() const
 {
     int i = 0;
     next_t *n = impl->pools->next;
@@ -169,7 +169,7 @@ int Allocator::freePools()
 }
 
 
-unsigned long long Allocator::totalAlloced()
+unsigned long long Allocator::totalAlloced() const
 {
     return impl->totalAlloced;
 }

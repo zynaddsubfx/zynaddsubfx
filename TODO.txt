@@ -1,0 +1,11 @@
+(1) src/Params/LFOParams.h:        static int time; //is used by Pcontinous 
+parameter
+(2) src/DSP/FFTwrapper.cpp:static pthread_mutex_t *mutex = NULL;
+(3) src/Misc/MiddleWare.cpp:extern rtosc::ThreadLink *the_bToU;//XXX
+(4) src/Misc/Allocator.h:extern Allocator DummyAlloc;
+(5) src/Misc/Util.h:extern float *denormalkillbuf; /**<the buffer to add noise 
+in order to avoid denormalisation*/
+(6) src/Misc/Util.h:extern class Config config;
+(7) src/Misc/Util.h:extern prng_t prng_state;
+(8) src/Params/PresetsStore.h:extern PresetsStore presetsstore;
+

@@ -849,6 +849,8 @@ public:
 
     //Synthesis Rate Parameters
     const SYNTH_T synth;
+    
+    PresetsStore presetsstore;
 };
 
 MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_, int prefered_port)
@@ -1376,4 +1378,14 @@ const SYNTH_T &MiddleWare::getSynth(void) const
 const char* MiddleWare::getServerAddress(void) const
 {
     return lo_server_get_url(impl->server);
+}
+
+const PresetsStore& MiddleWare::getPresetsStore() const
+{
+    return impl->presetsstore;
+}
+
+PresetsStore& MiddleWare::getPresetsStore()
+{
+    return impl->presetsstore;
 }
