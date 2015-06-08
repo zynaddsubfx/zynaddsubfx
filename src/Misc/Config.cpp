@@ -237,7 +237,7 @@ Config::~Config()
 }
 
 
-void Config::save()
+void Config::save() const
 {
     char filename[MAX_STRING_SIZE];
     getConfigFileName(filename, MAX_STRING_SIZE);
@@ -352,7 +352,7 @@ void Config::readConfig(const char *filename)
     cfg.OscilSize = (int) powf(2, ceil(logf(cfg.OscilSize - 1.0f) / logf(2.0f)));
 }
 
-void Config::saveConfig(const char *filename)
+void Config::saveConfig(const char *filename) const
 {
     XMLwrapper *xmlcfg = new XMLwrapper();
 
@@ -401,15 +401,13 @@ void Config::saveConfig(const char *filename)
 
     xmlcfg->endbranch();
 
-    int tmp = cfg.GzipCompression;
-    cfg.GzipCompression = 0;
-    xmlcfg->saveXMLfile(filename);
-    cfg.GzipCompression = tmp;
+    // for some reason (which one?), the gzip compression is bashed to 0
+    xmlcfg->saveXMLfile(filename, 0);
 
     delete (xmlcfg);
 }
 
-void Config::getConfigFileName(char *name, int namesize)
+void Config::getConfigFileName(char *name, int namesize) const
 {
     name[0] = 0;
     snprintf(name, namesize, "%s%s", getenv("HOME"), "/.zynaddsubfxXML.cfg");

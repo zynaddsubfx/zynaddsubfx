@@ -62,12 +62,12 @@ class Config
         void clearbankrootdirlist();
         void clearpresetsdirlist();
         void init();
-        void save();
+        void save() const;
 
         static const rtosc::Ports &ports;
     private:
         void readConfig(const char *filename);
-        void saveConfig(const char *filename);
-        void getConfigFileName(char *name, int namesize);
+        void saveConfig(const char *filename) const;
+        void getConfigFileName(char *name, int namesize) const;
 };
 #endif

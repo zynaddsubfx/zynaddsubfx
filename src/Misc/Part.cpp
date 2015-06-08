@@ -1193,7 +1193,7 @@ int Part::saveXML(const char *filename)
     add2XMLinstrument(&xml);
     xml.endbranch();
 
-    int result = xml.saveXMLfile(filename);
+    int result = xml.saveXMLfile(filename, config.cfg.GzipCompression);
     return result;
 }
 

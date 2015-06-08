@@ -1044,7 +1044,7 @@ int Master::saveXML(const char *filename)
     add2XML(xml);
     xml->endbranch();
 
-    int result = xml->saveXMLfile(filename);
+    int result = xml->saveXMLfile(filename, config.cfg.GzipCompression);
     delete (xml);
     return result;
 }

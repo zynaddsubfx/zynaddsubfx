@@ -1,3 +1,4 @@
+Issues:
 (1) src/Params/LFOParams.h:        static int time; //is used by Pcontinous 
 parameter
 (2) src/DSP/FFTwrapper.cpp:static pthread_mutex_t *mutex = NULL;
@@ -8,4 +9,15 @@ in order to avoid denormalisation*/
 (6) src/Misc/Util.h:extern class Config config;
 (7) src/Misc/Util.h:extern prng_t prng_state;
 (8) src/Params/PresetsStore.h:extern PresetsStore presetsstore;
+
+Status:
+(1)
+(2)
+(3)
+(4)
+(5)
+(6)
+(7)
+(8) fixed + tested
+
 

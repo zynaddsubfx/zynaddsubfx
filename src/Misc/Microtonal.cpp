@@ -688,7 +688,7 @@ int Microtonal::saveXML(const char *filename) const
     add2XML(xml);
     xml->endbranch();
 
-    int result = xml->saveXMLfile(filename);
+    int result = xml->saveXMLfile(filename, config.cfg.GzipCompression);
     delete (xml);
     return result;
 }

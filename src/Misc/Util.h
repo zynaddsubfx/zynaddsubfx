@@ -28,7 +28,6 @@
 #include <stdint.h>
 #include <algorithm>
 #include "Config.h"
-#include "../globals.h"
 
 using std::min;
 using std::max;
