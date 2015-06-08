@@ -25,6 +25,8 @@
 
 #include "Part.h"
 
+#include "../Misc/Stereo.h"
+#include "../Misc/Util.h"
 #include "../Params/LFOParams.h"
 #include "../Effects/EffectMgr.h"
 #include "../DSP/FFTwrapper.h"
