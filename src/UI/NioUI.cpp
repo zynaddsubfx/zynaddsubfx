@@ -14,14 +14,14 @@
 
 using namespace std;
 
-static void callback_fn_choice(Fl_Widget *w, void *);
+static void callback_fn_choice_nio(Fl_Widget *w, void *);
 class Fl_Osc_StrChoice:public Fl_Choice, public Fl_Osc_Widget
 {
     public:
         Fl_Osc_StrChoice(int X, int Y, int W, int H, const char *label = NULL)
         :Fl_Choice(X,Y,W,H, label), Fl_Osc_Widget(this), cb_data(NULL, NULL)
         {
-            Fl_Choice::callback(callback_fn_choice, NULL);
+            Fl_Choice::callback(callback_fn_choice_nio, NULL);
         }
 
         virtual ~Fl_Osc_StrChoice(void) {};
@@ -69,7 +69,7 @@ class Fl_Osc_StrChoice:public Fl_Choice, public Fl_Osc_Widget
         int min;
         std::pair<Fl_Callback*, void*> cb_data;
 };
-static void callback_fn_choice(Fl_Widget *w, void *)
+static void callback_fn_choice_nio(Fl_Widget *w, void *)
 {
     ((Fl_Osc_StrChoice*)w)->cb();
 }
