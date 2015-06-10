@@ -56,8 +56,6 @@ std::string os_pid_as_padded_string();
 
 std::string legalizeFilename(std::string filename);
 
-extern float *denormalkillbuf; /**<the buffer to add noise in order to avoid denormalisation*/
-
 extern class Config config;
 
 void invSignal(float *sig, size_t len);

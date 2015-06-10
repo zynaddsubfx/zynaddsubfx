@@ -91,7 +91,7 @@ void sigterm_exit(int /*sig*/)
 /*
  * Program initialisation
  */
-void initprogram(SYNTH_T synth, int prefered_port)
+void initprogram(const SYNTH_T& synth, int prefered_port)
 {
     middleware = new MiddleWare(synth, prefered_port);
     master = middleware->spawnMaster();
@@ -121,7 +121,6 @@ void exitprogram()
         delete nsm;
 #endif
 
-    delete [] denormalkillbuf;
     FFT_cleanup();
 }
 
@@ -375,11 +374,6 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    //produce denormal buf
-    denormalkillbuf = new float [synth.buffersize];
-    for(int i = 0; i < synth.buffersize; ++i)
-        denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
-
     initprogram(synth, prefered_port);
 
     if(!loadfile.empty()) {
@@ -413,7 +407,7 @@ int main(int argc, char *argv[])
 
     //Run the Nio system
     bool ioGood = Nio::start();
-    
+
     cerr.precision(1);
     cerr << std::fixed;
     cerr << "\nSample Rate = \t\t" << synth.samplerate << endl;

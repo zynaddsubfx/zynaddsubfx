@@ -367,7 +367,7 @@ if(CompileTests)
 endif(CompileTests)
 
 
-add_executable(zynaddsubfx main.cpp)
+add_executable(zynaddsubfx main.cpp globals.cpp)
 
 #Warning: the required ordering of these to get proper linking depends upon the
 #         phase of the moon
@@ -384,6 +384,7 @@ if (DssiEnable)
 	add_library(zynaddsubfx_dssi SHARED
         UI/ConnectionDummy.cpp
 		Output/DSSIaudiooutput.cpp
+		globals.cpp
 		)
 
 	target_link_libraries(zynaddsubfx_dssi

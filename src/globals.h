@@ -254,11 +254,22 @@ enum LegatoMsg {
 
 //temporary include for synth->{samplerate/buffersize} members
 struct SYNTH_T {
+
     SYNTH_T(void)
         :samplerate(44100), buffersize(256), oscilsize(1024)
     {
         alias();
     }
+
+    ~SYNTH_T()
+    {
+        delete [] denormalkillbuf;
+    }
+
+    SYNTH_T(const SYNTH_T& ) = delete;
+
+    /** the buffer to add noise in order to avoid denormalisation */
+    float *denormalkillbuf = nullptr;
 
     /**Sampling rate*/
     unsigned int samplerate;
@@ -291,13 +302,7 @@ struct SYNTH_T {
     {
         return buffersize_f / samplerate_f;
     }
-    inline void alias(void)
-    {
-        halfsamplerate_f = (samplerate_f = samplerate) / 2.0f;
-        buffersize_f     = buffersize;
-        bufferbytes      = buffersize * sizeof(float);
-        oscilsize_f      = oscilsize;
-    }
+    void alias(void);
     static float numRandom(void); //defined in Util.cpp for now
 };
 #endif

@@ -552,7 +552,7 @@ class MiddleWareImpl
     }
 
 public:
-    MiddleWareImpl(MiddleWare *mw, SYNTH_T synth, int prefered_port);
+    MiddleWareImpl(MiddleWare *mw, const SYNTH_T &synth, int prefered_port);
     ~MiddleWareImpl(void);
 
     void warnMemoryLeaks(void);
@@ -848,12 +848,13 @@ public:
     string last_url, curr_url;
 
     //Synthesis Rate Parameters
-    const SYNTH_T synth;
+    const SYNTH_T& synth;
     
     PresetsStore presetsstore;
 };
 
-MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_, int prefered_port)
+MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, const SYNTH_T& synth_,
+    int prefered_port)
     :parent(mw), ui(nullptr), synth(synth_)
 {
     bToU = new rtosc::ThreadLink(4096*2,1024);
@@ -1287,7 +1288,7 @@ void MiddleWareImpl::warnMemoryLeaks(void)
 /******************************************************************************
  *                         MidleWare Forwarding Stubs                         *
  ******************************************************************************/
-MiddleWare::MiddleWare(SYNTH_T synth, int prefered_port)
+MiddleWare::MiddleWare(const SYNTH_T &synth, int prefered_port)
 :impl(new MiddleWareImpl(this, synth, prefered_port))
 {}
 MiddleWare::~MiddleWare(void)

@@ -44,8 +44,6 @@
 prng_t prng_state = 0x1234;
 
 Config config;
-float *denormalkillbuf;
-
 
 /*
  * Transform the velocity according the scaling parameter (velocity sensing)

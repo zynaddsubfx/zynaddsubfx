@@ -12,12 +12,12 @@ in order to avoid denormalisation*/
 
 Status:
 (1)
-(2)
-(3)
+(2) will be fixed with fftw3 (?), until then maybe use separate mutex?
+(3) will be fixed by fundamental
 (4)
-(5)
+(5) fixed + tested, but alias() behaviour is unclear yet
 (6)
-(7)
+(7) -> will not be fixed (should stay random)
 (8) fixed + tested
 
 
