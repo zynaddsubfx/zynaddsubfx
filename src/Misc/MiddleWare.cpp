@@ -1214,8 +1214,8 @@ void MiddleWareImpl::kitEnable(int part, int kit, int type)
  */
 void MiddleWareImpl::handleMsg(const char *msg)
 {
-    assert(!strstr(msg,"free"));
     assert(msg && *msg && rindex(msg, '/')[1]);
+    assert(strstr(msg,"free") == NULL || strstr(rtosc_argument_string(msg), "b") == NULL);
     assert(strcmp(msg, "/part0/Psysefxvol"));
     assert(strcmp(msg, "/Penabled"));
     assert(strcmp(msg, "part0/part0/Ppanning"));
