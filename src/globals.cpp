@@ -32,6 +32,9 @@ void SYNTH_T::alias()
     oscilsize_f      = oscilsize;
 
     //produce denormal buf
+    // note: once there will be more buffers, use a cleanup function
+    // for deleting the buffers and also call it in the dtor
+    delete[] denormalkillbuf;
     denormalkillbuf = new float [buffersize];
     for(int i = 0; i < buffersize; ++i)
         denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
