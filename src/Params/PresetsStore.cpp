@@ -30,13 +30,14 @@
 #include "PresetsStore.h"
 #include "../Misc/XMLwrapper.h"
 #include "../Misc/Util.h"
+#include "../Misc/Config.h"
 
 using namespace std;
 
 //XXX to remove
 //PresetsStore presetsstore;
 
-PresetsStore::PresetsStore()
+PresetsStore::PresetsStore(const Config& config) : config(config)
 {
 }
 

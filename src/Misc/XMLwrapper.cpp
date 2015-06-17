@@ -31,6 +31,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "globals.h"
 #include "Util.h"
 
 using namespace std;

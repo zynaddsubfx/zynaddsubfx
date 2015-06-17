@@ -550,9 +550,12 @@ class MiddleWareImpl
             fputs("Warning: can not read /tmp.\n", stderr);
         }
     }
-
+    
+    Config* const config;
+    
 public:
-    MiddleWareImpl(MiddleWare *mw, const SYNTH_T &synth, int prefered_port);
+    MiddleWareImpl(MiddleWare *mw, const SYNTH_T &synth, Config* config,
+                   int preferred_port);
     ~MiddleWareImpl(void);
 
     void warnMemoryLeaks(void);
@@ -639,7 +642,10 @@ public:
 
         auto alloc = std::async(std::launch::async,
                 [master,filename,this,npart](){
-                Part *p = new Part(*master->memory, synth, &master->microtonal, master->fft);
+                Part *p = new Part(*master->memory, synth,
+                                   config->cfg.GzipCompression,
+                                   config->cfg.Interpolation,
+                                   &master->microtonal, master->fft);
                 if(p->loadXMLinstrument(filename))
                     fprintf(stderr, "Warning: failed to load part<%s>!\n", filename);
 
@@ -673,7 +679,10 @@ public:
     {
         if(npart == -1)
             return;
-        Part *p = new Part(*master->memory, synth, &master->microtonal, master->fft);
+        Part *p = new Part(*master->memory, synth,
+                           config->cfg.GzipCompression,
+                           config->cfg.Interpolation,
+                           &master->microtonal, master->fft);
         p->applyparameters();
         obj_store.extractPart(p, npart);
         kits.extractPart(p, npart);
@@ -690,7 +699,7 @@ public:
     //structures at once... TODO error handling
     void loadMaster(const char *filename)
     {
-        Master *m = new Master(synth);
+        Master *m = new Master(synth, config);
         m->uToB = uToB;
         m->bToU = bToU;
         if(filename) {
@@ -782,7 +791,7 @@ public:
     {
         char buffer[1024];
         memset(buffer, 0, sizeof(buffer));
-        DummyDataObj d(buffer, 1024, (void*)&config, this, uToB);
+        DummyDataObj d(buffer, 1024, (void*)config, this, uToB);
         strcpy(buffer, "/config/");
 
         Config::ports.dispatch(msg+8, d);
@@ -854,13 +863,15 @@ public:
 };
 
 MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, const SYNTH_T& synth_,
-    int prefered_port)
-    :parent(mw), ui(nullptr), synth(synth_)
+    Config* config, int preferrred_port)
+    :parent(mw), config(config), ui(nullptr), synth(synth_),
+    presetsstore(*config)
 {
     bToU = new rtosc::ThreadLink(4096*2,1024);
     uToB = new rtosc::ThreadLink(4096*2,1024);
-    if(prefered_port != -1)
-        server = lo_server_new_with_proto(to_s(prefered_port).c_str(), LO_UDP, liblo_error_cb);
+    if(preferrred_port != -1)
+        server = lo_server_new_with_proto(to_s(preferrred_port).c_str(),
+                                          LO_UDP, liblo_error_cb);
     else
         server = lo_server_new_with_proto(NULL, LO_UDP, liblo_error_cb);
     lo_server_add_method(server, NULL, NULL, handler_function, mw);
@@ -881,7 +892,7 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, const SYNTH_T& synth_,
 #ifndef PLUGINVERSION
     the_bToU = bToU;
 #endif
-    master = new Master(synth);
+    master = new Master(synth, config);
     master->bToU = bToU;
     master->uToB = uToB;
     osc    = GUI::genOscInterface(mw);
@@ -1288,8 +1299,9 @@ void MiddleWareImpl::warnMemoryLeaks(void)
 /******************************************************************************
  *                         MidleWare Forwarding Stubs                         *
  ******************************************************************************/
-MiddleWare::MiddleWare(const SYNTH_T &synth, int prefered_port)
-:impl(new MiddleWareImpl(this, synth, prefered_port))
+MiddleWare::MiddleWare(const SYNTH_T &synth, Config* config,
+                       int preferred_port)
+:impl(new MiddleWareImpl(this, synth, config, preferred_port))
 {}
 MiddleWare::~MiddleWare(void)
 {

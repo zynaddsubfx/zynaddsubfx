@@ -20,6 +20,7 @@
 
 */
 
+#include "globals.h"
 #include "Util.h"
 #include <vector>
 #include <cassert>
@@ -42,8 +43,6 @@
 #endif
 
 prng_t prng_state = 0x1234;
-
-Config config;
 
 /*
  * Transform the velocity according the scaling parameter (velocity sensing)

@@ -184,8 +184,12 @@ static const Ports kitPorts = {
 const Ports &Part::Kit::ports = kitPorts;
 const Ports &Part::ports = partPorts;
 
-Part::Part(Allocator &alloc, const SYNTH_T &synth_, Microtonal *microtonal_, FFTwrapper *fft_)
-    :ctl(synth_), memory(alloc), synth(synth_)
+Part::Part(Allocator &alloc, const SYNTH_T &synth_,
+    const int &gzip_compression, const int &interpolation,
+    Microtonal *microtonal_, FFTwrapper *fft_)
+    :ctl(synth_), memory(alloc), synth(synth_),
+    gzip_compression(gzip_compression),
+    interpolation(interpolation)
 {
     microtonal = microtonal_;
     fft      = fft_;
@@ -579,7 +583,8 @@ void Part::NoteOn(unsigned char note,
                     memory.alloc<SUBnote>(kit[0].subpars, pars);
             if(kit[0].Ppadenabled)
                 partnote[pos].kititem[0].padnote =
-                    memory.alloc<PADnote>(kit[0].padpars, pars);
+                    memory.alloc<PADnote>(kit[0].padpars, pars,
+                                          interpolation);
 
 
             if(kit[0].Padenabled || kit[0].Psubenabled || kit[0].Ppadenabled)
@@ -598,7 +603,8 @@ void Part::NoteOn(unsigned char note,
                         memory.alloc<SUBnote>(kit[0].subpars, pars);
                 if(kit[0].Ppadenabled)
                     partnote[posb].kititem[0].padnote =
-                        memory.alloc<PADnote>(kit[0].padpars, pars);
+                        memory.alloc<PADnote>(kit[0].padpars, pars,
+                                              interpolation);
 
                 if(kit[0].Padenabled || kit[0].Psubenabled || kit[0].Ppadenabled)
                     partnote[posb].itemsplaying++;
@@ -627,7 +633,8 @@ void Part::NoteOn(unsigned char note,
 
                 if(kit[item].padpars && kit[item].Ppadenabled)
                     note1.padnote =
-                        memory.alloc<PADnote>(kit[item].padpars, pars);
+                        memory.alloc<PADnote>(kit[item].padpars, pars,
+                                              interpolation);
 
                 // Spawn another note (but silent) if legatomodevalid==true
                 if(legatomodevalid) {
@@ -643,7 +650,8 @@ void Part::NoteOn(unsigned char note,
                             memory.alloc<SUBnote>(kit[item].subpars, pars);
                     if(kit[item].padpars && kit[item].Ppadenabled)
                         note2.padnote =
-                            memory.alloc<PADnote>(kit[item].padpars, pars);
+                            memory.alloc<PADnote>(kit[item].padpars, pars,
+                                                  interpolation);
 
                     if(kit[item].adpars || kit[item].subpars || kit[item].padpars)
                         partnote[posb].itemsplaying++;
@@ -1193,7 +1201,7 @@ int Part::saveXML(const char *filename)
     add2XMLinstrument(&xml);
     xml.endbranch();
 
-    int result = xml.saveXMLfile(filename, config.cfg.GzipCompression);
+    int result = xml.saveXMLfile(filename, gzip_compression);
     return result;
 }
 

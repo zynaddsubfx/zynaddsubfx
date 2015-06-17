@@ -11,7 +11,8 @@ class PresetsStore;
 class MiddleWare
 {
     public:
-        MiddleWare(const SYNTH_T& synth, int prefered_port = -1);
+        MiddleWare(const SYNTH_T& synth, class Config *config,
+                   int preferred_port = -1);
         ~MiddleWare(void);
         void updateResources(Master *m);
         //returns internal master pointer

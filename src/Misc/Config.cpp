@@ -28,6 +28,7 @@
 #include <rtosc/port-sugar.h>
 
 #include "Config.h"
+#include "../src/globals.h"
 #include "XMLwrapper.h"
 
 #define rStdString(name, len, ...) \
@@ -160,10 +161,10 @@ void Config::init()
     cfg.OscilSize  = 1024;
     cfg.SwapStereo = 0;
 
-    cfg.LinuxOSSWaveOutDev = new char[MAX_STRING_SIZE];
-    snprintf(cfg.LinuxOSSWaveOutDev, MAX_STRING_SIZE, "/dev/dsp");
-    cfg.LinuxOSSSeqInDev = new char[MAX_STRING_SIZE];
-    snprintf(cfg.LinuxOSSSeqInDev, MAX_STRING_SIZE, "/dev/sequencer");
+    cfg.oss_devs.linux_wave_out = new char[MAX_STRING_SIZE];
+    snprintf(cfg.oss_devs.linux_wave_out, MAX_STRING_SIZE, "/dev/dsp");
+    cfg.oss_devs.linux_seq_in = new char[MAX_STRING_SIZE];
+    snprintf(cfg.oss_devs.linux_seq_in, MAX_STRING_SIZE, "/dev/sequencer");
 
     cfg.WindowsWaveOutId = 0;
     cfg.WindowsMidiInId  = 0;
@@ -228,8 +229,8 @@ void Config::init()
 
 Config::~Config()
 {
-    delete [] cfg.LinuxOSSWaveOutDev;
-    delete [] cfg.LinuxOSSSeqInDev;
+    delete [] cfg.oss_devs.linux_wave_out;
+    delete [] cfg.oss_devs.linux_seq_in;
 
     for(int i = 0; i < winmidimax; ++i)
         delete [] winmididevices[i].name;
@@ -330,10 +331,10 @@ void Config::readConfig(const char *filename)
 
         //linux stuff
         xmlcfg.getparstr("linux_oss_wave_out_dev",
-                         cfg.LinuxOSSWaveOutDev,
+                         cfg.oss_devs.linux_wave_out,
                          MAX_STRING_SIZE);
         xmlcfg.getparstr("linux_oss_seq_in_dev",
-                         cfg.LinuxOSSSeqInDev,
+                         cfg.oss_devs.linux_seq_in,
                          MAX_STRING_SIZE);
 
         //windows stuff
@@ -392,8 +393,8 @@ void Config::saveConfig(const char *filename) const
     xmlcfg->addpar("interpolation", cfg.Interpolation);
 
     //linux stuff
-    xmlcfg->addparstr("linux_oss_wave_out_dev", cfg.LinuxOSSWaveOutDev);
-    xmlcfg->addparstr("linux_oss_seq_in_dev", cfg.LinuxOSSSeqInDev);
+    xmlcfg->addparstr("linux_oss_wave_out_dev", cfg.oss_devs.linux_wave_out);
+    xmlcfg->addparstr("linux_oss_seq_in_dev", cfg.oss_devs.linux_seq_in);
 
     //windows stuff
     xmlcfg->addpar("windows_wave_out_id", cfg.WindowsWaveOutId);

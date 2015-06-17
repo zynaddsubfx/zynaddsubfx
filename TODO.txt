@@ -16,7 +16,7 @@ Status:
 (3) will be fixed by fundamental
 (4)
 (5) fixed + tested
-(6)
+(6) fixed + tested (only basic testing)
 (7) -> will not be fixed (should stay random)
 (8) fixed + tested
 

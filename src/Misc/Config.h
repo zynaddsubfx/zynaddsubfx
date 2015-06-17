@@ -22,21 +22,31 @@
 
 #ifndef CONFIG_H
 #define CONFIG_H
-#include "../globals.h"
+
 #include <string>
 #define MAX_STRING_SIZE 4000
 #define MAX_BANK_ROOT_DIRS 100
+
+namespace rtosc
+{
+    struct Ports;
+}
+
+struct oss_devs_t
+{
+    char *linux_wave_out, *linux_seq_in;
+};
 
 /**Configuration file functions*/
 class Config
 {
     public:
-        /** Constructor*/
         Config();
-        /** Destructor*/
+        Config(const Config& ) = delete;
         ~Config();
+        
         struct {
-            char *LinuxOSSWaveOutDev, *LinuxOSSSeqInDev;
+            oss_devs_t oss_devs;
             int   SampleRate, SoundBufferSize, OscilSize, SwapStereo;
             int   WindowsWaveOutId, WindowsMidiInId;
             int   BankUIAutoClose;

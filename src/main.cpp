@@ -76,7 +76,7 @@ NSM_Client *nsm = 0;
 
 char *instance_name = 0;
 
-void exitprogram();
+void exitprogram(const Config &config);
 
 extern pthread_t main_thread;
 
@@ -91,21 +91,21 @@ void sigterm_exit(int /*sig*/)
 /*
  * Program initialisation
  */
-void initprogram(const SYNTH_T& synth, int prefered_port)
+void initprogram(const SYNTH_T& synth, Config* config, int prefered_port)
 {
-    middleware = new MiddleWare(synth, prefered_port);
+    middleware = new MiddleWare(synth, config, prefered_port);
     master = middleware->spawnMaster();
     master->swaplr = swaplr;
 
     signal(SIGINT, sigterm_exit);
     signal(SIGTERM, sigterm_exit);
-    Nio::init(master->synth, master);
+    Nio::init(master->synth, config->cfg.oss_devs, master);
 }
 
 /*
  * Program exit
  */
-void exitprogram()
+void exitprogram(const Config& config)
 {
     Nio::stop();
     config.save();
@@ -128,6 +128,7 @@ int main(int argc, char *argv[])
 {
     main_thread = pthread_self();
     SYNTH_T synth;
+    Config config;
     config.init();
     int noui = 0;
     cerr
@@ -374,7 +375,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    initprogram(synth, prefered_port);
+    initprogram(synth, &config, prefered_port);
 
     if(!loadfile.empty()) {
         int tmp = master->loadXML(loadfile.c_str());
@@ -495,6 +496,6 @@ done:
         middleware->tick();
     }
 
-    exitprogram();
+    exitprogram(config);
     return 0;
 }
