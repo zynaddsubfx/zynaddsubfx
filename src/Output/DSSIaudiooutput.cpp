@@ -52,8 +52,8 @@ namespace Nio {
     void waveStart(void){}
     void waveStop(void){}
     void waveEnd(void){}
-    bool setSource(string){}
-    bool setSink(string){}
+    bool setSource(string){return true;}
+    bool setSink(string){return true;}
     set<string> getSources(void){return set<string>();}
     set<string> getSinks(void){return set<string>();}
     string getSource(void){return "";}
