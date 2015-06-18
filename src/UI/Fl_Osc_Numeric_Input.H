@@ -13,5 +13,5 @@ class Fl_Osc_Numeric_Input: public Fl_Input, public Fl_Osc_Widget
 
         virtual void OSC_value(int i) override;
         virtual void OSC_value(float f) override;
-        virtual void OSC_raw(const char *) override {printf("Fl_Osc_Numeric_Input\n");};
+        static void  numeric_callback(Fl_Widget *w);
 };
