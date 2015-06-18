@@ -35,6 +35,9 @@ decl {\#include "Fl_Osc_Check.H"} {public local
 decl {\#include "Fl_Osc_Input.H"} {public local
 } 
 
+decl {\#include "Fl_Osc_Numeric_Input.H"} {public local
+} 
+
 decl {\#include "Fl_Osc_ListView.H"} {public local
 } 
 
@@ -71,14 +74,14 @@ class ConfigUI {} {
             Fl_Input samplerateinput {
               xywh {115 50 60 20} type Int textfont 1
               code0 {o->init("cfg.SampleRate");}
-              class Fl_Osc_Input
+              class Fl_Osc_Numeric_Input
             }
           }
           Fl_Input {} {
             label {Buffer Size}
             tooltip {Internal Sound Buffer Size (samples)} xywh {190 45 60 20} type Int labelsize 11 align 129 textfont 1
             code0 {o->init("cfg.SoundBufferSize");}
-            class Fl_Osc_Input
+            class Fl_Osc_Numeric_Input
           }
           Fl_Check_Button {} {
             label {Swap Stereo }
