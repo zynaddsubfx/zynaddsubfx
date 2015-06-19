@@ -73,7 +73,8 @@ static const Ports partPorts = {
     rToggle(Pnoteon,  "If the channel accepts note on events"),
     //TODO FIXME Change to 0=OFF 1=MULTI 2=SINGLE
     rParamI(Pkitmode, "Kit mode enable"),
-    rToggle(Pdrummode, "Drum mode enable"),
+    rToggle(Pdrummode, "Drum mode enable\n"
+            "When drum mode is enabled all keys are mapped to 12tET and legato is disabled"),
     rToggle(Ppolymode,  "Polyphoney mode"),
     rToggle(Plegatomode, "Legato enable"),
     rParamZyn(info.Ptype, "Class of Instrument"),
@@ -362,6 +363,16 @@ Part::~Part()
     }
 }
 
+void assert_kit_sanity(const Part::Kit *kits)
+{
+    for(int i=0; i<NUM_KIT_ITEMS; ++i) {
+        //an enabled kit must have a corresponding parameter object
+        assert(!kits[i].Padenabled  || kits[i].adpars);
+        assert(!kits[i].Ppadenabled || kits[i].padpars);
+        assert(!kits[i].Psubenabled || kits[i].subpars);
+    }
+}
+
 /*
  * Note On Messages
  */
@@ -379,6 +390,8 @@ void Part::NoteOn(unsigned char note,
 
     if(!Pnoteon || !inRange(note, Pminkey, Pmaxkey))
         return;
+
+    assert_kit_sanity(kit);
 
     // MonoMem stuff:
     if(!Ppolymode) { // If Poly is off
@@ -401,7 +414,7 @@ void Part::NoteOn(unsigned char note,
         }
 
     if(Plegatomode && !Pdrummode) {
-        if(Ppolymode != 0) {
+        if(Ppolymode) {
             fprintf(
                 stderr,
                 "ZynAddSubFX WARNING: Poly and Legato modes are both On, that should not happen ! ... Disabling Legato mode ! - (Part.cpp::NoteOn(..))\n");
@@ -410,7 +423,7 @@ void Part::NoteOn(unsigned char note,
         else {
             // Legato mode is on and applicable.
             legatomodevalid = true;
-            if((not ismonofirstnote) && (lastlegatomodevalid)) {
+            if(!ismonofirstnote && lastlegatomodevalid) {
                 // At least one other key is held or sustained, and the
                 // previous note was played while in valid legato mode.
                 doinglegato = true; // So we'll do a legato note.

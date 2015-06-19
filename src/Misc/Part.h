@@ -115,6 +115,8 @@ class Part
         unsigned char Pveloffs; //velocity offset
         bool Pnoteon; //if the part receives NoteOn messages
         int Pkitmode; //if the kitmode is enabled
+
+        //XXX consider deprecating drum mode
         bool Pdrummode; //if all keys are mapped and the system is 12tET (used for drums)
 
         bool Ppolymode; //Part mode - 0=monophonic , 1=polyphonic

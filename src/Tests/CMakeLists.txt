@@ -18,6 +18,8 @@ CXXTEST_ADD_TEST(UnisonTest UnisonTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/UnisonTes
 #CXXTEST_ADD_TEST(RtAllocTest RtAllocTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/RtAllocTest.h)
 CXXTEST_ADD_TEST(AllocatorTest AllocatorTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/AllocatorTest.h)
+CXXTEST_ADD_TEST(KitTest KitTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/KitTest.h)
 
 #Extra libraries added to make test and full compilation use the same library
 #links for quirky compilers
@@ -42,6 +44,7 @@ target_link_libraries(MiddlewareTest zynaddsubfx_core zynaddsubfx_nio
 target_link_libraries(UnisonTest    ${test_lib})
 #target_link_libraries(RtAllocTest    ${test_lib})
 target_link_libraries(AllocatorTest    ${test_lib})
+target_link_libraries(KitTest    ${test_lib})
 
 #Testbed app
 add_executable(ins-test InstrumentStats.cpp)
