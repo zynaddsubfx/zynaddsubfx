@@ -43,7 +43,7 @@ static const rtosc::Ports local_ports = {
     rSelf(EffectMgr),
     rPaste,
     rRecurp(filterpars, "Filter Parameter for Dynamic Filter"),
-    {"parameter#64::i", rProp(alias) rDoc("Parameter Accessor"), NULL,
+    {"parameter#128::i", rProp(alias) rDoc("Parameter Accessor"), NULL,
         [](const char *msg, rtosc::RtData &d)
         {
             EffectMgr *eff = (EffectMgr*)d.obj;
@@ -146,7 +146,7 @@ void EffectMgr::defaults(void)
 }
 
 //Change the effect
-void EffectMgr::changeeffectrt(int _nefx)
+void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
 {
     cleanup();
     if(nefx == _nefx && efx != NULL)
@@ -190,6 +190,10 @@ void EffectMgr::changeeffectrt(int _nefx)
 
     if(efx)
         filterpars = efx->filterpars;
+
+    if(!avoidSmash)
+        for(int i=0; i<128; ++i)
+            settings[i] = geteffectparrt(i);
 }
 
 void EffectMgr::changeeffect(int _nefx)
@@ -208,8 +212,8 @@ int EffectMgr::geteffect(void)
 // Initialize An Effect in RT context
 void EffectMgr::init(void)
 {
-    changeeffectrt(nefx);
-    changepresetrt(preset);
+    changeeffectrt(nefx, true);
+    changepresetrt(preset, true);
     for(int i=0; i<128; ++i)
         seteffectparrt(i, settings[i]);
 }
@@ -245,11 +249,14 @@ void EffectMgr::changepreset(unsigned char npreset)
 }
 
 // Change the preset of the current effect
-void EffectMgr::changepresetrt(unsigned char npreset)
+void EffectMgr::changepresetrt(unsigned char npreset, bool avoidSmash)
 {
     preset = npreset;
     if(efx)
         efx->setpreset(npreset);
+    if(!avoidSmash)
+        for(int i=0; i<128; ++i)
+            settings[i] = geteffectparrt(i);
 }
 
 //Change a parameter of the current effect
@@ -373,11 +380,10 @@ void EffectMgr::setdryonly(bool value)
 
 void EffectMgr::paste(EffectMgr &e)
 {
-    changeeffectrt(e.nefx);
-    changepresetrt(e.preset);
-    for(int i=0;i<128;++i){
+    changeeffectrt(e.nefx, true);
+    changepresetrt(e.preset, true);
+    for(int i=0;i<128;++i)
         seteffectparrt(e.settings[i], i);
-    }
 }
 
 void EffectMgr::add2XML(XMLwrapper *xml)
