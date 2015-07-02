@@ -58,7 +58,6 @@ class PPSlider {: {public Fl_Slider, public Fl_Osc_Widget}
 	bool ctl_click    = (event == FL_PUSH && Fl::event_state(FL_BUTTON1) && Fl::event_ctrl());
 	bool shift_middle = (event == FL_PUSH && Fl::event_state(FL_BUTTON2) && Fl::event_shift());
 	if(middle_mouse || ctl_click) {
-		puts("Trying to learn...");
 		osc->write("/learn", "s", (loc+ext).c_str());
 		return 1;
 	} else if(shift_middle) {
@@ -153,9 +152,7 @@ if (Fl::event_button1() || Fl::event() == FL_MOUSEWHEEL) x=127-(int)o->value();
 make_window();
 harmonic->show();
 mag->ext = "Phmag" + to_s(n);
-puts((mag->loc + mag->ext).c_str());
 mag->oscRegister(mag->ext.c_str());
-puts((base + "Phrelbw"+to_s(n)).c_str());
 osc->createLink(base+"Phrelbw"+to_s(n), bw);
 osc->requestValue(base+"Phrelbw"+to_s(n));
 

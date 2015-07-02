@@ -52,8 +52,10 @@ static const rtosc::Ports local_ports = {
 
             if(!rtosc_narguments(msg))
                 d.reply(d.loc, "i", eff->geteffectparrt(atoi(mm)));
-            else 
+            else {
                 eff->seteffectparrt(atoi(mm), rtosc_argument(msg, 0).i);
+                d.broadcast(d.loc, "i", eff->geteffectparrt(atoi(mm)));
+            }
         }},
     {"preset::i", rProp(alias) rDoc("Effect Preset Selector"), NULL,
         [](const char *msg, rtosc::RtData &d)
@@ -61,8 +63,10 @@ static const rtosc::Ports local_ports = {
             EffectMgr *eff = (EffectMgr*)d.obj;
             if(!rtosc_narguments(msg))
                 d.reply(d.loc, "i", eff->getpreset());
-            else
+            else {
                 eff->changepresetrt(rtosc_argument(msg, 0).i);
+                d.broadcast(d.loc, "i", eff->getpreset());
+            }
         }},
     {"eq-coeffs:", rProp(internal) rDoc("Get equalizer Coefficients"), NULL,
         [](const char *, rtosc::RtData &d)
@@ -81,9 +85,10 @@ static const rtosc::Ports local_ports = {
     {"efftype::i", rDoc("Get Effect Type"), NULL, [](const char *m, rtosc::RtData &d)
         {
             EffectMgr *eff  = (EffectMgr*)d.obj;
-            if(rtosc_narguments(m)) 
+            if(rtosc_narguments(m))  {
                 eff->changeeffectrt(rtosc_argument(m,0).i);
-            else
+                d.broadcast(d.loc, "i", eff->nefx);
+            } else
                 d.reply(d.loc, "i", eff->nefx);
         }},
     {"efftype:b", rProp(internal) rDoc("Pointer swap EffectMgr"), NULL,
