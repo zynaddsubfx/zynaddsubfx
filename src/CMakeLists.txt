@@ -347,6 +347,7 @@ add_subdirectory(Nio)
 
 add_library(zynaddsubfx_core STATIC
     ../tlsf/tlsf.c
+    Containers/NotePool.cpp
 	${zynaddsubfx_dsp_SRCS}
 	${zynaddsubfx_effect_SRCS}
 	${zynaddsubfx_misc_SRCS}

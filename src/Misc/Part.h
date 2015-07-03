@@ -27,6 +27,7 @@
 
 #include "../globals.h"
 #include "../Params/Controller.h"
+#include "../Containers/NotePool.h"
 
 #include <functional>
 
@@ -94,6 +95,10 @@ class Part
             SUBnoteParameters *subpars;
             PADnoteParameters *padpars;
 
+            bool    active(void) const;
+            uint8_t sendto(void) const;
+            bool    validNote(char note) const;
+
             const static rtosc::Ports &ports;
         } kit[NUM_KIT_ITEMS];
 
@@ -155,25 +160,22 @@ class Part
         const static rtosc::Ports &ports;
 
     private:
-        void RunNote(unsigned k);
-        void KillNotePos(int pos);
-        void ReleaseNotePos(int pos);
         void MonoMemRenote(); // MonoMem stuff.
+        float getBaseFreq(int note, int keyshift) const;
+        float getVelocity(uint8_t velocity, uint8_t velocity_sense,
+                uint8_t velocity_offset) const;
+        void verifyKeyMode(void);
+        bool isPolyMode(void)   const {return Ppolymode;}
+        bool isMonoMode(void)   const {return !Ppolymode  && !Plegatomode;};
+        bool isLegatoMode(void) const {return Plegatomode && !Pdrummode;}
+        bool isNonKit(void)     const {return Pkitmode == 0;}
+        bool isMultiKit(void)   const {return Pkitmode == 1;}
+        bool isSingleKit(void)  const {return Pkitmode == 2;}
 
-        int killallnotes; //is set to 1 if I want to kill all notes
+        bool killallnotes;
 
-        struct PartNotes {
-            NoteStatus status;
-            int note; //if there is no note playing, the "note"=-1
-            int itemsplaying;
-            struct {
-                SynthNote *adnote, *subnote, *padnote;
-                int sendtoparteffect;
-            } kititem[NUM_KIT_ITEMS];
-            int time;
-        };
+        NotePool notePool;
 
-        int  lastpos, lastposb; // To keep track of previously used pos and posb.
         bool lastlegatomodevalid; // To keep track of previous legatomodevalid.
 
         // MonoMem stuff
@@ -192,8 +194,6 @@ class Part
            monomem[] is used in conjunction with the list to
            store the velocity and masterkeyshift values of a given note (the list only store note values).
            For example 'monomem[note].velocity' would be the velocity value of the note 'note'.*/
-
-        PartNotes partnote[POLYPHONY];
 
         float oldfreq;    //this is used for portamento
         Microtonal *microtonal;

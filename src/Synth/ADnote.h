@@ -53,6 +53,8 @@ class ADnote:public SynthNote
         int noteout(float *outl, float *outr);
         void releasekey();
         int finished() const;
+
+        virtual SynthNote *cloneLegato(void) override;
     private:
 
         /**Changes the frequency of an oscillator.

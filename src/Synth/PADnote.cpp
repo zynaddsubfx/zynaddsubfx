@@ -28,7 +28,7 @@
 #include "../Params/FilterParams.h"
 #include "../Misc/Util.h"
 
-PADnote::PADnote(PADnoteParameters *parameters,
+PADnote::PADnote(const PADnoteParameters *parameters,
                  SynthParams pars)
     :SynthNote(pars), pars(*parameters)
 {
@@ -164,6 +164,13 @@ void PADnote::setup(float freq,
         finished_ = true;
         return;
     }
+}
+
+SynthNote *PADnote::cloneLegato(void)
+{
+    SynthParams sp{memory, ctl, synth, legato.param.freq, velocity, 
+                   (bool)portamento, legato.param.midinote, true};
+    return memory.alloc<PADnote>(&pars, sp);
 }
 
 void PADnote::legatonote(LegatoParams pars)

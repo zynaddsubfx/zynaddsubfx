@@ -397,6 +397,13 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars)
     initparameters();
 }
 
+SynthNote *ADnote::cloneLegato(void)
+{
+    SynthParams sp{memory, ctl, synth, legato.param.freq, velocity, 
+                   (bool)portamento, legato.param.midinote, true};
+    return memory.alloc<ADnote>(&pars, sp);
+}
+
 // ADlegatonote: This function is (mostly) a copy of ADnote(...) and
 // initparameters() stuck together with some lines removed so that it
 // only alter the already playing note (to perform legato). It is

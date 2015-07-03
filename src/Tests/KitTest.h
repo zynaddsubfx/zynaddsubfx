@@ -52,22 +52,32 @@ class KitTest:public CxxTest::TestSuite
             part->NoteOn(64, 127, 0);
             part->NoteOn(65, 127, 0);
 
-            TS_ASSERT_EQUALS(part->partnote[0].status, Part::KEY_PLAYING);
-            TS_ASSERT_EQUALS(part->partnote[0].note, 64);
-            TS_ASSERT_EQUALS(part->partnote[0].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[0].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=Part::KEY_PLAYING,
+                    .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->partnote[1].status, Part::KEY_PLAYING);
-            TS_ASSERT_EQUALS(part->partnote[1].note, 65);
-            TS_ASSERT_EQUALS(part->partnote[1].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[1].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=65,
+                    .sendto=0,
+                    .size=1,
+                    .status=Part::KEY_PLAYING,
+                    .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->partnote[2].status, Part::KEY_OFF);
-            TS_ASSERT_EQUALS(part->partnote[2].note, -1);
+            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false}));
         }
 
         void testNoKitYesLegatoNoMono() {
@@ -75,26 +85,44 @@ class KitTest:public CxxTest::TestSuite
             part->Plegatomode = true;
             part->NoteOn(64, 127, 0);
             part->NoteOn(65, 127, 0);
-            TS_ASSERT_EQUALS(part->partnote[0].status, Part::KEY_PLAYING);
-            TS_ASSERT_EQUALS(part->partnote[0].note, 65);
-            TS_ASSERT_EQUALS(part->partnote[0].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[0].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].adnote->legato.silent, false);
 
+            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=65,
+                    .sendto=0,
+                    .size=1,
+                    .status=Part::KEY_PLAYING,
+                    .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->partnote[1].status, Part::KEY_PLAYING);
-            TS_ASSERT_EQUALS(part->partnote[1].note, 65);
-            TS_ASSERT_EQUALS(part->partnote[1].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[1].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].adnote->legato.silent, true);
+            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=65,
+                    .sendto=0,
+                    .size=1,
+                    .status=Part::KEY_PLAYING,
+                    .legatoMirror=false}));
 
+            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->partnote[2].status, Part::KEY_OFF);
-            TS_ASSERT_EQUALS(part->partnote[2].note, -1);
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[0].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].kit,  0)
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[1].note, nullptr);
+            if(part->notePool.sdesc[1].note)
+                TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, true);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  0)
         }
 
         void testNoKitNoLegatoYesMono() {
@@ -102,26 +130,44 @@ class KitTest:public CxxTest::TestSuite
             part->Plegatomode = false;
             part->NoteOn(64, 127, 0);
             part->NoteOn(65, 127, 0);
-            TS_ASSERT_EQUALS(part->partnote[0].status, Part::KEY_RELEASED);
-            TS_ASSERT_EQUALS(part->partnote[0].note, 64);
-            TS_ASSERT_EQUALS(part->partnote[0].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[0].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].adnote->legato.silent, false);
 
 
-            TS_ASSERT_EQUALS(part->partnote[1].status, Part::KEY_PLAYING);
-            TS_ASSERT_EQUALS(part->partnote[1].note, 65);
-            TS_ASSERT_EQUALS(part->partnote[1].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[1].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].adnote->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=Part::KEY_RELEASED,
+                    .legatoMirror=false}));
 
+            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=65,
+                    .sendto=0,
+                    .size=1,
+                    .status=Part::KEY_PLAYING,
+                    .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->partnote[2].status, Part::KEY_OFF);
-            TS_ASSERT_EQUALS(part->partnote[2].note, -1);
+            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[0].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].kit,  0)
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[1].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  0)
         }
 
         //Normal Kit
@@ -136,34 +182,58 @@ class KitTest:public CxxTest::TestSuite
             part->NoteOn(64, 127, 0);
             part->NoteOn(65, 127, 0);
 
-            TS_ASSERT_EQUALS(part->partnote[0].status, Part::KEY_PLAYING);
-            TS_ASSERT_EQUALS(part->partnote[0].note, 64);
-            TS_ASSERT_EQUALS(part->partnote[0].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[0].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_DIFFERS(part->partnote[0].kititem[1].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].subnote, nullptr);
+            part->notePool.dump();
 
-            TS_ASSERT_EQUALS(part->partnote[1].status, Part::KEY_PLAYING);
-            TS_ASSERT_EQUALS(part->partnote[1].note, 65);
-            TS_ASSERT_EQUALS(part->partnote[1].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[1].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_DIFFERS(part->partnote[1].kititem[1].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].subnote, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=2,
+                    .status=Part::KEY_PLAYING,
+                    .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->partnote[2].status, Part::KEY_OFF);
-            TS_ASSERT_EQUALS(part->partnote[2].note, -1);
+            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=65,
+                    .sendto=0,
+                    .size=2,
+                    .status=Part::KEY_PLAYING,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[0].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].kit,  0)
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[1].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  1)
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[2].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[2].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[2].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[2].kit,  0)
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[3].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[3].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[3].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[3].kit,  1)
+
+            TS_ASSERT_EQUALS(part->notePool.sdesc[4].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[4].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[4].kit,  0)
         }
 
         void testYesKitYesLegatoNoMono() {
@@ -177,38 +247,59 @@ class KitTest:public CxxTest::TestSuite
             part->Plegatomode = true;
             part->NoteOn(64, 127, 0);
             part->NoteOn(65, 127, 0);
-            TS_ASSERT_EQUALS(part->partnote[0].status, Part::KEY_PLAYING);
-            TS_ASSERT_EQUALS(part->partnote[0].note, 65);
-            TS_ASSERT_EQUALS(part->partnote[0].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[0].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_DIFFERS(part->partnote[0].kititem[1].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].adnote->legato.silent, false);
 
+            part->notePool.dump();
 
-            TS_ASSERT_EQUALS(part->partnote[1].status, Part::KEY_PLAYING);
-            TS_ASSERT_EQUALS(part->partnote[1].note, 65);
-            TS_ASSERT_EQUALS(part->partnote[1].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[1].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_DIFFERS(part->partnote[1].kititem[1].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].adnote->legato.silent, true);
+            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=65,
+                    .sendto=0,
+                    .size=2,
+                    .status=Part::KEY_PLAYING,
+                    .legatoMirror=false}));
 
+            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=65,
+                    .sendto=0,
+                    .size=2,
+                    .status=Part::KEY_PLAYING,
+                    .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->partnote[2].status, Part::KEY_OFF);
-            TS_ASSERT_EQUALS(part->partnote[2].note, -1);
+            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[0].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].kit,  0)
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[1].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  1)
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[2].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[2].note->legato.silent, true);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[2].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[2].kit,  0)
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[3].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[3].note->legato.silent, true);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[3].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[3].kit,  1)
+
+            TS_ASSERT_EQUALS(part->notePool.sdesc[4].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[4].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[4].kit,  0)
         }
 
         void testYesKitNoLegatoYesMono() {
@@ -222,38 +313,59 @@ class KitTest:public CxxTest::TestSuite
             part->Plegatomode = false;
             part->NoteOn(64, 127, 0);
             part->NoteOn(65, 127, 0);
-            TS_ASSERT_EQUALS(part->partnote[0].status, Part::KEY_RELEASED);
-            TS_ASSERT_EQUALS(part->partnote[0].note, 64);
-            TS_ASSERT_EQUALS(part->partnote[0].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[0].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_DIFFERS(part->partnote[0].kititem[1].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].adnote->legato.silent, false);
 
+            part->notePool.dump();
 
-            TS_ASSERT_EQUALS(part->partnote[1].status, Part::KEY_PLAYING);
-            TS_ASSERT_EQUALS(part->partnote[1].note, 65);
-            TS_ASSERT_EQUALS(part->partnote[1].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[1].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_DIFFERS(part->partnote[1].kititem[1].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].adnote->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=2,
+                    .status=Part::KEY_RELEASED,
+                    .legatoMirror=false}));
 
+            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=65,
+                    .sendto=0,
+                    .size=2,
+                    .status=Part::KEY_PLAYING,
+                    .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->partnote[2].status, Part::KEY_OFF);
-            TS_ASSERT_EQUALS(part->partnote[2].note, -1);
+            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[0].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].kit,  0)
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[1].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  1)
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[2].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[2].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[2].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[2].kit,  0)
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[3].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[3].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[3].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[3].kit,  1)
+
+            TS_ASSERT_EQUALS(part->notePool.sdesc[4].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[4].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[4].kit,  0)
         }
 
         //Single Kit
@@ -267,34 +379,48 @@ class KitTest:public CxxTest::TestSuite
             part->NoteOn(64, 127, 0);
             part->NoteOn(65, 127, 0);
 
-            TS_ASSERT_EQUALS(part->partnote[0].status, Part::KEY_PLAYING);
-            TS_ASSERT_EQUALS(part->partnote[0].note, 64);
-            TS_ASSERT_EQUALS(part->partnote[0].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[0].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[1].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].subnote, nullptr);
+            part->notePool.dump();
 
-            TS_ASSERT_EQUALS(part->partnote[1].status, Part::KEY_PLAYING);
-            TS_ASSERT_EQUALS(part->partnote[1].note, 65);
-            TS_ASSERT_EQUALS(part->partnote[1].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[1].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[1].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].subnote, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=Part::KEY_PLAYING,
+                    .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->partnote[2].status, Part::KEY_OFF);
-            TS_ASSERT_EQUALS(part->partnote[2].note, -1);
+            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=65,
+                    .sendto=0,
+                    .size=1,
+                    .status=Part::KEY_PLAYING,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[0].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].kit,  0)
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[1].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  0)
+
+            TS_ASSERT_EQUALS(part->notePool.sdesc[2].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[2].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[2].kit,  0)
         }
 
         void testSingleKitYesLegatoNoMono() {
@@ -308,38 +434,44 @@ class KitTest:public CxxTest::TestSuite
             part->Plegatomode = true;
             part->NoteOn(64, 127, 0);
             part->NoteOn(65, 127, 0);
-            TS_ASSERT_EQUALS(part->partnote[0].status, Part::KEY_PLAYING);
-            TS_ASSERT_EQUALS(part->partnote[0].note, 65);
-            TS_ASSERT_EQUALS(part->partnote[0].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[0].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[1].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].adnote->legato.silent, false);
 
+            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=65,
+                    .sendto=0,
+                    .size=1,
+                    .status=Part::KEY_PLAYING,
+                    .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->partnote[1].status, Part::KEY_PLAYING);
-            TS_ASSERT_EQUALS(part->partnote[1].note, 65);
-            TS_ASSERT_EQUALS(part->partnote[1].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[1].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[1].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].adnote->legato.silent, true);
+            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=65,
+                    .sendto=0,
+                    .size=1,
+                    .status=Part::KEY_PLAYING,
+                    .legatoMirror=false}));
 
+            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->partnote[2].status, Part::KEY_OFF);
-            TS_ASSERT_EQUALS(part->partnote[2].note, -1);
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[0].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].kit,  0)
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[1].note, nullptr);
+            if(part->notePool.sdesc[1].note)
+                TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, true);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  0)
         }
 
         void testSingleKitNoLegatoYesMono() {
@@ -353,38 +485,45 @@ class KitTest:public CxxTest::TestSuite
             part->Plegatomode = false;
             part->NoteOn(64, 127, 0);
             part->NoteOn(65, 127, 0);
-            TS_ASSERT_EQUALS(part->partnote[0].status, Part::KEY_RELEASED);
-            TS_ASSERT_EQUALS(part->partnote[0].note, 64);
-            TS_ASSERT_EQUALS(part->partnote[0].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[0].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[1].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[0].kititem[0].adnote->legato.silent, false);
 
 
-            TS_ASSERT_EQUALS(part->partnote[1].status, Part::KEY_PLAYING);
-            TS_ASSERT_EQUALS(part->partnote[1].note, 65);
-            TS_ASSERT_EQUALS(part->partnote[1].time, 0);
-            TS_ASSERT_DIFFERS(part->partnote[1].kititem[0].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[1].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[1].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].adnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[2].subnote, nullptr);
-            TS_ASSERT_EQUALS(part->partnote[1].kititem[0].adnote->legato.silent, false);
 
+            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=Part::KEY_RELEASED,
+                    .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->partnote[2].status, Part::KEY_OFF);
-            TS_ASSERT_EQUALS(part->partnote[2].note, -1);
+            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=65,
+                    .sendto=0,
+                    .size=1,
+                    .status=Part::KEY_PLAYING,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[0].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[0].kit,  0)
+
+            TS_ASSERT_DIFFERS(part->notePool.sdesc[1].note, nullptr);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, false);
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
+            TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  0)
         }
 
         void tearDown() {
