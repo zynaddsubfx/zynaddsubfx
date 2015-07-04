@@ -43,6 +43,8 @@ class  PADnoteParameters;
 class  SynthNote;
 
 class  Allocator;
+class  AbsTime;
+class  RelTime;
 
 class  Microtonal;
 class  XMLwrapper;

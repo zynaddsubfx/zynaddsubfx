@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cstdlib>
 #include <iostream>
+#include "../Misc/Time.h"
 #include "../Misc/Allocator.h"
 #include "../DSP/FFTwrapper.h"
 #include "../Misc/Microtonal.h"
@@ -23,6 +24,7 @@ class KitTest:public CxxTest::TestSuite
         FFTwrapper fft;
         Microtonal microtonal;
         Part *part;
+        AbsTime *time;
         float *outL, *outR;
     public:
         KitTest()
@@ -30,6 +32,7 @@ class KitTest:public CxxTest::TestSuite
         {}
         void setUp() {
             synth = new SYNTH_T;
+            time  = new AbsTime(*synth);
             denormalkillbuf = new float[synth->buffersize];
             outL  = new float[synth->buffersize];
             outR = new float[synth->buffersize];
@@ -38,7 +41,7 @@ class KitTest:public CxxTest::TestSuite
             memset(outR, 0, synth->bufferbytes);
 
 
-            part = new Part(alloc, *synth, &microtonal, &fft);
+            part = new Part(alloc, *synth, *time, &microtonal, &fft);
         }
 
         //Enumerate cases of:
@@ -531,6 +534,7 @@ class KitTest:public CxxTest::TestSuite
             delete[] denormalkillbuf;
             delete[] outL;
             delete[] outR;
+            delete time;
             delete synth;
         }
 };

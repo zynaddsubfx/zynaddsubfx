@@ -49,7 +49,6 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars)
     NoteEnabled = ON;
     basefreq    = spars.frequency;
     velocity    = spars.velocity;
-    time   = 0.0f;
     stereo = pars.GlobalPar.PStereo;
 
     NoteGlobalPar.Detune = getdetune(pars.GlobalPar.PDetuneType,
@@ -399,7 +398,7 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars)
 
 SynthNote *ADnote::cloneLegato(void)
 {
-    SynthParams sp{memory, ctl, synth, legato.param.freq, velocity, 
+    SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity, 
                    (bool)portamento, legato.param.midinote, true};
     return memory.alloc<ADnote>(&pars, sp);
 }
@@ -718,6 +717,7 @@ void ADnote::initparameters()
 
     // Global Parameters
     NoteGlobalPar.initparameters(pars.GlobalPar, synth,
+                                 time,
                                  memory, basefreq, velocity,
                                  stereo);
 
@@ -760,7 +760,7 @@ void ADnote::initparameters()
         }
 
         if(param.PAmpLfoEnabled) {
-            vce.AmpLfo = memory.alloc<LFO>(*param.AmpLfo, basefreq, synth.dt());
+            vce.AmpLfo = memory.alloc<LFO>(*param.AmpLfo, basefreq, time);
             newamplitude[nvoice] *= vce.AmpLfo->amplfoout();
         }
 
@@ -769,7 +769,7 @@ void ADnote::initparameters()
             vce.FreqEnvelope = memory.alloc<Envelope>(*param.FreqEnvelope, basefreq, synth.dt());
 
         if(param.PFreqLfoEnabled)
-            vce.FreqLfo = memory.alloc<LFO>(*param.FreqLfo, basefreq, synth.dt());
+            vce.FreqLfo = memory.alloc<LFO>(*param.FreqLfo, basefreq, time);
 
         /* Voice Filter Parameters Init */
         if(param.PFilterEnabled != 0) {
@@ -783,7 +783,7 @@ void ADnote::initparameters()
             vce.FilterEnvelope = memory.alloc<Envelope>(*param.FilterEnvelope, basefreq, synth.dt());
 
         if(param.PFilterLfoEnabled)
-            vce.FilterLfo = memory.alloc<LFO>(*param.FilterLfo, basefreq, synth.dt());
+            vce.FilterLfo = memory.alloc<LFO>(*param.FilterLfo, basefreq, time);
 
         vce.FilterFreqTracking =
             param.VoiceFilter->getfreqtracking(basefreq);
@@ -1078,7 +1078,6 @@ void ADnote::computecurrentparameters()
             }
         }
     }
-    time += synth.buffersize_f / synth.samplerate_f;
 }
 
 
@@ -1779,15 +1778,16 @@ void ADnote::Global::kill(Allocator &memory)
 
 void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
                                     const SYNTH_T &synth,
+                                    const AbsTime &time,
                                     class Allocator &memory,
                                     float basefreq, float velocity,
                                     bool stereo)
 {
     FreqEnvelope = memory.alloc<Envelope>(*param.FreqEnvelope, basefreq, synth.dt());
-    FreqLfo      = memory.alloc<LFO>(*param.FreqLfo, basefreq, synth.dt());
+    FreqLfo      = memory.alloc<LFO>(*param.FreqLfo, basefreq, time);
 
     AmpEnvelope = memory.alloc<Envelope>(*param.AmpEnvelope, basefreq, synth.dt());
-    AmpLfo      = memory.alloc<LFO>(*param.AmpLfo, basefreq, synth.dt());
+    AmpLfo      = memory.alloc<LFO>(*param.AmpLfo, basefreq, time);
 
     Volume = 4.0f * powf(0.1f, 3.0f * (1.0f - param.PVolume / 96.0f)) //-60 dB .. 0 dB
              * VelF(velocity, param.PAmpVelocityScaleFunction);     //sensing
@@ -1801,7 +1801,7 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
         GlobalFilterR = NULL;
 
     FilterEnvelope = memory.alloc<Envelope>(*param.FilterEnvelope, basefreq, synth.dt());
-    FilterLfo      = memory.alloc<LFO>(*param.FilterLfo, basefreq, synth.dt());
+    FilterLfo      = memory.alloc<LFO>(*param.FilterLfo, basefreq, time);
     FilterQ = param.GlobalFilter->getq();
     FilterFreqTracking = param.GlobalFilter->getfreqtracking(basefreq);
 }

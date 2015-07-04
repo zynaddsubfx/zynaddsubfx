@@ -53,6 +53,7 @@ class PadNoteTest:public CxxTest::TestSuite
         Master       *master;
         FFTwrapper   *fft;
         Controller   *controller;
+        AbsTime      *time;
         unsigned char testnote;
         Allocator     memory;
 
@@ -63,6 +64,8 @@ class PadNoteTest:public CxxTest::TestSuite
             synth = new SYNTH_T;
             //First the sensible settings and variables that have to be set:
             synth->buffersize = 256;
+            synth->alias();
+            time  = new AbsTime(*synth);
 
             outL = new float[synth->buffersize];
             for(int i = 0; i < synth->buffersize; ++i)
@@ -114,7 +117,7 @@ class PadNoteTest:public CxxTest::TestSuite
             //lets go with.... 50! as a nice note
             testnote = 50;
             float freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
-            SynthParams pars_{memory, *controller, *synth, freq, 120, 0, testnote, false};
+            SynthParams pars_{memory, *controller, *synth, *time, freq, 120, 0, testnote, false};
 
             note = new PADnote(pars, pars_);
         }

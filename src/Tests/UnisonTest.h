@@ -49,6 +49,7 @@ class AdNoteTest:public CxxTest::TestSuite
         Controller   *controller;
         unsigned char testnote;
         ADnoteParameters *params;
+        AbsTime  *time;
         Allocator memory;
         float freq;
 
@@ -59,6 +60,8 @@ class AdNoteTest:public CxxTest::TestSuite
             //First the sensible settings and variables that have to be set:
             synth = new SYNTH_T;
             synth->buffersize = BUF;
+            synth->alias();
+            time = new AbsTime(*synth);
 
             memset(outL,0,sizeof(outL));
             memset(outR,0,sizeof(outR));
@@ -89,6 +92,7 @@ class AdNoteTest:public CxxTest::TestSuite
             delete fft;
             delete [] denormalkillbuf;
             FFT_cleanup();
+            delete time;
             delete synth;
             delete params;
         }
@@ -103,7 +107,7 @@ class AdNoteTest:public CxxTest::TestSuite
             params->VoicePar[0].Unison_vibratto_speed   = e;
             params->VoicePar[0].Unison_invert_phase     = f;
 
-            SynthParams pars{memory, *controller, *synth, freq, 120, 0, testnote, false};
+            SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote, false};
             note = new ADnote(params, pars);
             note->noteout(outL, outR);
             TS_ASSERT_DELTA(outL[80], values[0], 1e-5);

@@ -287,7 +287,8 @@ vuData::vuData(void)
 {}
 
 Master::Master(const SYNTH_T &synth_)
-:HDDRecorder(synth_), ctl(synth_), midi(Master::ports), frozenState(false), pendingMemory(false), synth(synth_)
+:HDDRecorder(synth_), ctl(synth_), midi(Master::ports), frozenState(false), pendingMemory(false),
+    synth(synth_), time(synth)
 {
     bToU = NULL;
     uToB = NULL;
@@ -310,7 +311,7 @@ Master::Master(const SYNTH_T &synth_)
     }
 
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        part[npart] = new Part(*memory, synth, &microtonal, fft);
+        part[npart] = new Part(*memory, synth, time, &microtonal, fft);
 
     //Insertion Effects init
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
@@ -813,8 +814,8 @@ void Master::AudioOut(float *outl, float *outr)
         ShutUp();
     }
 
-    //update the LFO's time
-    LFOParams::time++;
+    //update the global frame timer
+    time++;
 }
 
 //TODO review the respective code from yoshimi for this

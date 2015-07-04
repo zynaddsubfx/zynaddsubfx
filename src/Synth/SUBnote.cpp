@@ -213,7 +213,7 @@ void SUBnote::setup(float freq,
 
 SynthNote *SUBnote::cloneLegato(void)
 {
-    SynthParams sp{memory, ctl, synth, legato.param.freq, velocity, 
+    SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity, 
                    (bool)portamento, legato.param.midinote, true};
     return memory.alloc<SUBnote>(&pars, sp);
 }

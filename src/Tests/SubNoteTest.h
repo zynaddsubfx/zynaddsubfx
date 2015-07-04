@@ -44,6 +44,7 @@ class SubNoteTest:public CxxTest::TestSuite
 
         SUBnote      *note;
         Master       *master;
+        AbsTime      *time;
         Controller   *controller;
         unsigned char testnote;
         Allocator     memory;
@@ -55,6 +56,8 @@ class SubNoteTest:public CxxTest::TestSuite
             synth = new SYNTH_T;
             //First the sensible settings and variables that have to be set:
             synth->buffersize = 256;
+            synth->alias();
+            time  = new AbsTime(*synth);
 
             outL = new float[synth->buffersize];
             for(int i = 0; i < synth->buffersize; ++i)
@@ -88,7 +91,7 @@ class SubNoteTest:public CxxTest::TestSuite
             testnote = 50;
             float freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
 
-            SynthParams pars{memory, *controller, *synth, freq, 120, 0, testnote, false};
+            SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote, false};
             note = new SUBnote(defaultPreset, pars);
             delete wrap;
             delete defaultPreset;
@@ -100,6 +103,7 @@ class SubNoteTest:public CxxTest::TestSuite
             delete [] outL;
             delete [] outR;
             delete [] denormalkillbuf;
+            delete time;
             delete synth;
         }
 

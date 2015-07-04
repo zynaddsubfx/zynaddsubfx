@@ -28,6 +28,7 @@
 #include <rtosc/miditable.h>
 #include <rtosc/ports.h>
 
+#include "Time.h"
 #include "Bank.h"
 #include "Recorder.h"
 
@@ -99,7 +100,8 @@ class Master
 
         /**Audio Output*/
         void AudioOut(float *outl, float *outr) REALTIME;
-        /**Audio Output (for callback mode). This allows the program to be controled by an external program*/
+        /**Audio Output (for callback mode).
+         * This allows the program to be controled by an external program*/
         void GetAudioOutSamples(size_t nsamples,
                                 unsigned samplerate,
                                 float *outl,
@@ -171,6 +173,7 @@ class Master
         rtosc::ThreadLink *uToB;
         bool pendingMemory;
         const SYNTH_T &synth;
+        AbsTime  time;
     private:
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];

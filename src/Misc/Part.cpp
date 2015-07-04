@@ -185,7 +185,8 @@ static const Ports kitPorts = {
 const Ports &Part::Kit::ports = kitPorts;
 const Ports &Part::ports = partPorts;
 
-Part::Part(Allocator &alloc, const SYNTH_T &synth_, Microtonal *microtonal_, FFTwrapper *fft_)
+Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
+        Microtonal *microtonal_, FFTwrapper *fft_)
     :
     Pdrummode(false),
     Ppolymode(true),
@@ -196,7 +197,8 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, Microtonal *microtonal_, FFT
     lastlegatomodevalid(false),
     microtonal(microtonal_), fft(fft_),
     memory(alloc),
-    synth(synth_)
+    synth(synth_),
+    time(time_)
 {
     monomemClear();
 
@@ -435,7 +437,7 @@ void Part::NoteOn(unsigned char note,
         if(Pkitmode != 0 && !item.validNote(note))
             continue;
 
-        SynthParams pars{memory, ctl, synth, notebasefreq, vel,
+        SynthParams pars{memory, ctl, synth, time, notebasefreq, vel,
             portamento, note, false};
         const int sendto = Pkitmode ? item.sendto() : 0;
 

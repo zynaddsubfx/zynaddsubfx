@@ -5,7 +5,7 @@
 SynthNote::SynthNote(SynthParams &pars)
     :memory(pars.memory),
     legato(pars.synth, pars.frequency, pars.velocity, pars.portamento,
-            pars.note, pars.quiet), ctl(pars.ctl), synth(pars.synth)
+            pars.note, pars.quiet), ctl(pars.ctl), synth(pars.synth), time(pars.time)
 {}
 
 SynthNote::Legato::Legato(const SYNTH_T &synth_, float freq, float vel, int port,

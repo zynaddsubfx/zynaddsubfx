@@ -670,7 +670,7 @@ public:
 
         auto alloc = std::async(std::launch::async,
                 [master,filename,this,npart](){
-                Part *p = new Part(*master->memory, synth, &master->microtonal, master->fft);
+                Part *p = new Part(*master->memory, synth, master->time, &master->microtonal, master->fft);
                 if(p->loadXMLinstrument(filename))
                     fprintf(stderr, "Warning: failed to load part<%s>!\n", filename);
 
@@ -704,7 +704,7 @@ public:
     {
         if(npart == -1)
             return;
-        Part *p = new Part(*master->memory, synth, &master->microtonal, master->fft);
+        Part *p = new Part(*master->memory, synth, master->time, &master->microtonal, master->fft);
         p->applyparameters();
         obj_store.extractPart(p, npart);
         kits.extractPart(p, npart);

@@ -30,6 +30,7 @@ struct SynthParams
     Allocator &memory;   //Memory Allocator for the Note to use
     const Controller &ctl;
     const SYNTH_T    &synth;
+    const AbsTime    &time;
     float     frequency; //Note base frequency
     float     velocity;  //Velocity of the Note
     bool      portamento;//True if portamento is used for this note
@@ -112,6 +113,7 @@ class SynthNote
 
         const Controller &ctl;
         const SYNTH_T    &synth;
+        const AbsTime    &time;
 };
 
 #endif

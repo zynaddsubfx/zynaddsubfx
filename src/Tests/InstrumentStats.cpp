@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "../Misc/Time.h"
 #include "../Misc/MiddleWare.h"
 #include "../Misc/Part.h"
 #include "../Misc/Util.h"
@@ -11,6 +12,7 @@
 #include "../DSP/FFTwrapper.h"
 #include "../globals.h"
 SYNTH_T *synth;
+AbsTime *time_;
 
 using namespace std;
 
@@ -50,6 +52,7 @@ void setup() {
     synth->buffersize = 256;
     synth->samplerate = 48000;
     synth->alias();
+    time_ = new AbsTime(*synth);
     //for those patches that are just really big
     alloc.addMemory(malloc(1024*1024),1024*1024);
 
@@ -65,7 +68,7 @@ void setup() {
     denormalkillbuf = new float[synth->buffersize];
     for(int i = 0; i < synth->buffersize; ++i)
         denormalkillbuf[i] = 0;
-    p = new Part(alloc, *synth, &microtonal, &fft);
+    p = new Part(alloc, *synth, *time_, &microtonal, &fft);
 }
 
 void xml(string s)
