@@ -1,4 +1,4 @@
-2.5.1 (18+ June 2015)
+2.5.1 (4 July 2015)
         - Add Colorized CMake Configuration
         - Add PID option for jack
         - Add OSC port option
