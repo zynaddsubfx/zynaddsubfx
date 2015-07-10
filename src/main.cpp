@@ -91,9 +91,9 @@ void sigterm_exit(int /*sig*/)
 /*
  * Program initialisation
  */
-void initprogram(const SYNTH_T& synth, Config* config, int prefered_port)
+void initprogram(SYNTH_T synth, Config* config, int prefered_port)
 {
-    middleware = new MiddleWare(synth, config, prefered_port);
+    middleware = new MiddleWare(std::move(synth), config, prefered_port);
     master = middleware->spawnMaster();
     master->swaplr = swaplr;
 
@@ -375,7 +375,14 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    initprogram(synth, &config, prefered_port);
+    cerr.precision(1);
+    cerr << std::fixed;
+    cerr << "\nSample Rate = \t\t" << synth.samplerate << endl;
+    cerr << "Sound Buffer Size = \t" << synth.buffersize << " samples" << endl;
+    cerr << "Internal latency = \t" << synth.dt() * 1000.0f << " ms" << endl;
+    cerr << "ADsynth Oscil.Size = \t" << synth.oscilsize << " samples" << endl;
+
+    initprogram(std::move(synth), &config, prefered_port);
 
     if(!loadfile.empty()) {
         int tmp = master->loadXML(loadfile.c_str());
@@ -408,13 +415,6 @@ int main(int argc, char *argv[])
 
     //Run the Nio system
     bool ioGood = Nio::start();
-
-    cerr.precision(1);
-    cerr << std::fixed;
-    cerr << "\nSample Rate = \t\t" << synth.samplerate << endl;
-    cerr << "Sound Buffer Size = \t" << synth.buffersize << " samples" << endl;
-    cerr << "Internal latency = \t" << synth.dt() * 1000.0f << " ms" << endl;
-    cerr << "ADsynth Oscil.Size = \t" << synth.oscilsize << " samples" << endl;
 
     if(!execAfterInit.empty()) {
         cout << "Executing user supplied command: " << execAfterInit << endl;

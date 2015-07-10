@@ -11,7 +11,7 @@ class PresetsStore;
 class MiddleWare
 {
     public:
-        MiddleWare(const SYNTH_T& synth, class Config *config,
+        MiddleWare(SYNTH_T synth, class Config *config,
                    int preferred_port = -1);
         ~MiddleWare(void);
         void updateResources(Master *m);
