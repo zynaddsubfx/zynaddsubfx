@@ -45,7 +45,7 @@ static const rtosc::Ports local_ports = {
     rSelf(EffectMgr),
     rPaste,
     rRecurp(filterpars, "Filter Parameter for Dynamic Filter"),
-    {"parameter#64::i", rProp(alias) rDoc("Parameter Accessor"), NULL,
+    {"parameter#128::i", rProp(alias) rDoc("Parameter Accessor"), NULL,
         [](const char *msg, rtosc::RtData &d)
         {
             EffectMgr *eff = (EffectMgr*)d.obj;
@@ -54,8 +54,10 @@ static const rtosc::Ports local_ports = {
 
             if(!rtosc_narguments(msg))
                 d.reply(d.loc, "i", eff->geteffectparrt(atoi(mm)));
-            else 
+            else {
                 eff->seteffectparrt(atoi(mm), rtosc_argument(msg, 0).i);
+                d.broadcast(d.loc, "i", eff->geteffectparrt(atoi(mm)));
+            }
         }},
     {"preset::i", rProp(alias) rDoc("Effect Preset Selector"), NULL,
         [](const char *msg, rtosc::RtData &d)
@@ -63,8 +65,10 @@ static const rtosc::Ports local_ports = {
             EffectMgr *eff = (EffectMgr*)d.obj;
             if(!rtosc_narguments(msg))
                 d.reply(d.loc, "i", eff->getpreset());
-            else
+            else {
                 eff->changepresetrt(rtosc_argument(msg, 0).i);
+                d.broadcast(d.loc, "i", eff->getpreset());
+            }
         }},
     {"eq-coeffs:", rProp(internal) rDoc("Get equalizer Coefficients"), NULL,
         [](const char *, rtosc::RtData &d)
@@ -83,9 +87,10 @@ static const rtosc::Ports local_ports = {
     {"efftype::i", rDoc("Get Effect Type"), NULL, [](const char *m, rtosc::RtData &d)
         {
             EffectMgr *eff  = (EffectMgr*)d.obj;
-            if(rtosc_narguments(m)) 
+            if(rtosc_narguments(m))  {
                 eff->changeeffectrt(rtosc_argument(m,0).i);
-            else
+                d.broadcast(d.loc, "i", eff->nefx);
+            } else
                 d.reply(d.loc, "i", eff->nefx);
         }},
     {"efftype:b", rProp(internal) rDoc("Pointer swap EffectMgr"), NULL,
@@ -143,7 +148,7 @@ void EffectMgr::defaults(void)
 }
 
 //Change the effect
-void EffectMgr::changeeffectrt(int _nefx)
+void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
 {
     cleanup();
     if(nefx == _nefx && efx != NULL)
@@ -187,6 +192,10 @@ void EffectMgr::changeeffectrt(int _nefx)
 
     if(efx)
         filterpars = efx->filterpars;
+
+    if(!avoidSmash)
+        for(int i=0; i<128; ++i)
+            settings[i] = geteffectparrt(i);
 }
 
 void EffectMgr::changeeffect(int _nefx)
@@ -205,8 +214,8 @@ int EffectMgr::geteffect(void)
 // Initialize An Effect in RT context
 void EffectMgr::init(void)
 {
-    changeeffectrt(nefx);
-    changepresetrt(preset);
+    changeeffectrt(nefx, true);
+    changepresetrt(preset, true);
     for(int i=0; i<128; ++i)
         seteffectparrt(i, settings[i]);
 }
@@ -242,11 +251,14 @@ void EffectMgr::changepreset(unsigned char npreset)
 }
 
 // Change the preset of the current effect
-void EffectMgr::changepresetrt(unsigned char npreset)
+void EffectMgr::changepresetrt(unsigned char npreset, bool avoidSmash)
 {
     preset = npreset;
     if(efx)
         efx->setpreset(npreset);
+    if(!avoidSmash)
+        for(int i=0; i<128; ++i)
+            settings[i] = geteffectparrt(i);
 }
 
 //Change a parameter of the current effect
@@ -370,11 +382,10 @@ void EffectMgr::setdryonly(bool value)
 
 void EffectMgr::paste(EffectMgr &e)
 {
-    changeeffectrt(e.nefx);
-    changepresetrt(e.preset);
-    for(int i=0;i<128;++i){
+    changeeffectrt(e.nefx, true);
+    changepresetrt(e.preset, true);
+    for(int i=0;i<128;++i)
         seteffectparrt(e.settings[i], i);
-    }
 }
 
 void EffectMgr::add2XML(XMLwrapper *xml)

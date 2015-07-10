@@ -17,7 +17,9 @@ decl {\#include <stdio.h>} {public local
 decl {\#include <string.h>} {public local
 } 
 
-decl {\#include "zynaddsubfx.xpm"} {private local
+decl {\#if defined(__linux__) && ! defined(PLUGINVERSION)
+\#include "zynaddsubfx.xpm"
+\#endif} {public local
 } 
 
 decl {\#include "WidgetPDial.h"} {public local
@@ -74,7 +76,7 @@ extern NSM_Client *nsm;
 \#endif} {public local
 } 
 
-decl {\#if __linux__
+decl {\#if defined(__linux__) && ! defined(PLUGINVERSION)
 \#include <X11/xpm.h>
 \#endif} {public local
 } 
@@ -1480,7 +1482,7 @@ masterwindowlabel[99]='\\0';
 masterwindow->label(&masterwindowlabel[0]);
 simplemasterwindow->label(&masterwindowlabel[0]);} {}
   }
-  Function {MasterUI(int *exitprogram_, class Fl_Osc_Interface *osc_)} {open
+  Function {MasterUI(int *exitprogram_, class Fl_Osc_Interface *osc_):nioui(osc_)} {open
   } {
     code {exitprogram=exitprogram_;
 osc=osc_;
@@ -1500,7 +1502,7 @@ configui=new ConfigUI(osc);
 make_window();
 fl_open_display();
 
-\#ifdef __linux__
+\#if defined(__linux__) && ! defined(PLUGINVERSION)
 Pixmap p, mask;
 XCreatePixmapFromData(fl_display, DefaultRootWindow(fl_display),
                                  (char**)zynaddsubfx_xpm, &p, &mask, NULL);

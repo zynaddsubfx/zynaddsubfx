@@ -8,6 +8,7 @@
 #include <rtosc/undo-history.h>
 #include <rtosc/thread-link.h>
 #include <rtosc/ports.h>
+#include <rtosc/typed-message.h>
 #include <lo/lo.h>
 
 #include <unistd.h>
@@ -28,6 +29,7 @@
 #include "../Params/PADnoteParameters.h"
 #include "../DSP/FFTwrapper.h"
 #include "../Synth/OscilGen.h"
+#include "../Nio/Nio.h"
 
 #include <string>
 #include <future>
@@ -196,7 +198,7 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::ThreadLink *uToB)
  * - Load Bank                                                               *
  * - Refresh List of Banks                                                   *
  *****************************************************************************/
-void refreshBankView(const Bank &bank, unsigned loc, Fl_Osc_Interface *osc)
+void refreshBankView(const Bank &bank, unsigned loc, std::function<void(const char*)> cb)
 {
     if(loc >= BANK_SIZE)
         return;
@@ -208,15 +210,12 @@ void refreshBankView(const Bank &bank, unsigned loc, Fl_Osc_Interface *osc)
         errx(1, "Failure to handle bank update properly...");
 
 
-    if (osc)
-    osc->tryLink(response);
+    if(cb)
+        cb(response);
 }
 
-void bankList(Bank &bank, Fl_Osc_Interface *osc)
+void bankList(Bank &bank, std::function<void(const char*)> cb)
 {
-    if (! osc)
-        return;
-
     char response[2048];
     int i = 0;
 
@@ -224,35 +223,35 @@ void bankList(Bank &bank, Fl_Osc_Interface *osc)
         if(!rtosc_message(response, 2048, "/bank-list", "iss",
                     i++, elm.name.c_str(), elm.dir.c_str()))
             errx(1, "Failure to handle bank update properly...");
-    if (osc)
-        osc->tryLink(response);
+        if(cb)
+            cb(response);
     }
 }
 
-void rescanForBanks(Bank &bank, Fl_Osc_Interface *osc)
+void rescanForBanks(Bank &bank, std::function<void(const char*)> cb)
 {
     bank.rescanforbanks();
-    bankList(bank, osc);
+    bankList(bank, cb);
 }
 
-void loadBank(Bank &bank, int pos, Fl_Osc_Interface *osc)
+void loadBank(Bank &bank, int pos, std::function<void(const char*)> cb)
 {
     if(bank.bankpos != pos) {
         bank.bankpos = pos;
         bank.loadbank(bank.banks[pos].dir);
         for(int i=0; i<BANK_SIZE; ++i)
-            refreshBankView(bank, i, osc);
+            refreshBankView(bank, i, cb);
     }
 }
 
-void bankPos(Bank &bank, Fl_Osc_Interface *osc)
+void bankPos(Bank &bank, std::function<void(const char *)> cb)
 {
     char response[2048];
 
     if(!rtosc_message(response, 2048, "/loadbank", "i", bank.bankpos))
         errx(1, "Failure to handle bank update properly...");
-    if(osc)
-        osc->tryLink(response);
+    if(cb)
+        cb(response);
 }
 
 /*****************************************************************************
@@ -348,14 +347,14 @@ struct NonRtObjStore
     {
         std::string base = "/part"+to_s(i)+"/kit"+to_s(j)+"/";
         for(int k=0; k<NUM_VOICES; ++k) {
-            std::string nbase = base+"adpars/voice"+to_s(k)+"/";
+            std::string nbase = base+"adpars/VoicePar"+to_s(k)+"/";
             if(adpars) {
                 auto &nobj = adpars->VoicePar[k];
-                objmap[nbase+"oscil/"]     = nobj.OscilSmp;
-                objmap[nbase+"mod-oscil/"] = nobj.FMSmp;
+                objmap[nbase+"OscilSmp/"]     = nobj.OscilSmp;
+                objmap[nbase+"FMSmp/"] = nobj.FMSmp;
             } else {
-                objmap[nbase+"oscil/"]     = nullptr;
-                objmap[nbase+"mod-oscil/"] = nullptr;
+                objmap[nbase+"OscilSmp/"] = nullptr;
+                objmap[nbase+"FMSmp/"]    = nullptr;
             }
         }
     }
@@ -366,10 +365,10 @@ struct NonRtObjStore
         for(int k=0; k<NUM_VOICES; ++k) {
             if(padpars) {
                 objmap[base+"padpars/"]       = padpars;
-                objmap[base+"padpars/oscil/"] = padpars->oscilgen;
+                objmap[base+"padpars/oscilgen/"] = padpars->oscilgen;
             } else {
                 objmap[base+"padpars/"]       = nullptr;
-                objmap[base+"padpars/oscil/"] = nullptr;
+                objmap[base+"padpars/oscilgen/"] = nullptr;
             }
         }
     }
@@ -426,6 +425,38 @@ struct ParamStore
     SUBnoteParameters *sub[NUM_MIDI_PARTS][NUM_KIT_ITEMS];
     PADnoteParameters *pad[NUM_MIDI_PARTS][NUM_KIT_ITEMS];
 };
+
+//XXX perhaps move this to Nio
+//(there needs to be some standard Nio stub file for this sort of stuff)
+namespace Nio
+{
+    using std::get;
+    using rtosc::rtMsg;
+    rtosc::Ports ports = {
+        {"sink-list:", 0, 0, [](const char *msg, rtosc::RtData &d) {
+                auto list = Nio::getSinks();
+                char *ret = rtosc_splat(d.loc, list);
+                d.reply(ret);
+                delete [] ret;
+            }},
+        {"source-list:", 0, 0, [](const char *msg, rtosc::RtData &d) {
+                auto list = Nio::getSources();
+                char *ret = rtosc_splat(d.loc, list);
+                d.reply(ret);
+                delete [] ret;
+            }},
+        {"source::s", 0, 0, [](const char *msg, rtosc::RtData &d) {
+                if(rtosc_narguments(msg) == 0)
+                    d.reply(d.loc, "s", Nio::getSource().c_str());
+                else if(rtMsg<const char*> m{msg})
+                    Nio::setSource(get<0>(m));}},
+        {"sink::s", 0, 0, [](const char *msg, rtosc::RtData &d) {
+                if(rtosc_narguments(msg) == 0)
+                    d.reply(d.loc, "s", Nio::getSink().c_str());
+                else if(rtMsg<const char*> m{msg})
+                    Nio::setSink(get<0>(m));}},
+    };
+}
 
 /* Implementation */
 class MiddleWareImpl
@@ -779,6 +810,22 @@ public:
         }
 
 
+        if(!d.matches) {
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
+            fprintf(stderr, "Unknown location '%s'<%s>\n",
+                    msg, rtosc_argument_string(msg));
+            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+        }
+    }
+
+    void handleIo(const char *msg)
+    {
+        char buffer[1024];
+        memset(buffer, 0, sizeof(buffer));
+        DummyDataObj d(buffer, 1024, (void*)&config, this, uToB);
+        strcpy(buffer, "/io/");
+
+        Nio::ports.dispatch(msg+4, d);
         if(!d.matches) {
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
             fprintf(stderr, "Unknown location '%s'<%s>\n",
@@ -1181,8 +1228,8 @@ void MiddleWareImpl::kitEnable(int part, int kit, int type)
  */
 void MiddleWareImpl::handleMsg(const char *msg)
 {
-    assert(!strstr(msg,"free"));
     assert(msg && *msg && rindex(msg, '/')[1]);
+    assert(strstr(msg,"free") == NULL || strstr(rtosc_argument_string(msg), "b") == NULL);
     assert(strcmp(msg, "/part0/Psysefxvol"));
     assert(strcmp(msg, "/Penabled"));
     assert(strcmp(msg, "part0/part0/Ppanning"));
@@ -1203,16 +1250,22 @@ void MiddleWareImpl::handleMsg(const char *msg)
     int npart = -1;
     char testchr = 0;
 
+    std::function<void(const char*)> bank_cb;
+    if(last_url == "GUI")
+        bank_cb = [this](const char *msg){if(osc)osc->tryLink(msg);};
+    else
+        bank_cb = [this](const char *msg){this->bToUhandle(msg, 1);};
+
     if(!strcmp(msg, "/refresh_bank") && !strcmp(rtosc_argument_string(msg), "i")) {
-        refreshBankView(master->bank, rtosc_argument(msg,0).i, osc);
+        refreshBankView(master->bank, rtosc_argument(msg,0).i, bank_cb);
     } else if(!strcmp(msg, "/bank-list") && !strcmp(rtosc_argument_string(msg), "")) {
-        bankList(master->bank, osc);
+        bankList(master->bank, bank_cb);
     } else if(!strcmp(msg, "/rescanforbanks") && !strcmp(rtosc_argument_string(msg), "")) {
-        rescanForBanks(master->bank, osc);
+        rescanForBanks(master->bank, bank_cb);
     } else if(!strcmp(msg, "/loadbank") && !strcmp(rtosc_argument_string(msg), "i")) {
-        loadBank(master->bank, rtosc_argument(msg, 0).i, osc);
+        loadBank(master->bank, rtosc_argument(msg, 0).i, bank_cb);
     } else if(!strcmp(msg, "/loadbank") && !strcmp(rtosc_argument_string(msg), "")) {
-        bankPos(master->bank, osc);
+        bankPos(master->bank, bank_cb);
     } else if(obj_store.has(obj_rl)) {
         //try some over simplified pattern matching
         if(strstr(msg, "oscilgen/") || strstr(msg, "FMSmp/") || strstr(msg, "OscilSmp/")) {
@@ -1257,6 +1310,8 @@ void MiddleWareImpl::handleMsg(const char *msg)
         handleConfig(msg);
     } else if(strstr(msg, "/presets/")) {
         handlePresets(msg);
+    } else if(strstr(msg, "/io/")) {
+        handleIo(msg);
     } else if(strstr(msg, "Padenabled") || strstr(msg, "Ppadenabled") || strstr(msg, "Psubenabled")) {
         kitEnable(msg);
         uToB->raw_write(msg);
@@ -1382,7 +1437,7 @@ void MiddleWare::activeUrl(std::string u)
 {
     impl->last_url = u;
 }
-        
+
 const SYNTH_T &MiddleWare::getSynth(void) const
 {
     return impl->synth;

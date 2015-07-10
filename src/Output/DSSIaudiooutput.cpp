@@ -37,6 +37,7 @@
 #include <string.h>
 #include <limits.h>
 
+using std::set;
 using std::string;
 using std::vector;
 
@@ -51,6 +52,12 @@ namespace Nio {
     void waveStart(void){}
     void waveStop(void){}
     void waveEnd(void){}
+    bool setSource(string){return true;}
+    bool setSink(string){return true;}
+    set<string> getSources(void){return set<string>();}
+    set<string> getSinks(void){return set<string>();}
+    string getSource(void){return "";}
+    string getSink(void){return "";}
 }
 
 //
