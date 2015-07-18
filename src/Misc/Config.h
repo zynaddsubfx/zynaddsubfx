@@ -32,8 +32,9 @@ namespace rtosc
     struct Ports;
 }
 
-struct oss_devs_t
+class oss_devs_t
 {
+public:
     char *linux_wave_out, *linux_seq_in;
 };
 

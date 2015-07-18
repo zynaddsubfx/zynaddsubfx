@@ -11,7 +11,7 @@ in order to avoid denormalisation*/
 (8) src/Params/PresetsStore.h:extern PresetsStore presetsstore;
 
 Status:
-(1)
+(1) will be fixed by fundamental
 (2) will be fixed with fftw3 (?), until then maybe use separate mutex?
 (3) will be fixed by fundamental
 (4)
