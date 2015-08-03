@@ -85,6 +85,7 @@ class Part
 
         //the part's kit
         struct Kit {
+            Part              *parent;
             bool               Penabled, Pmuted;
             unsigned char      Pminkey, Pmaxkey;
             char              *Pname;

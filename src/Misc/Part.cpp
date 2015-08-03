@@ -159,6 +159,10 @@ static const Ports kitPorts = {
     rToggle(Ppadenabled, "PADsynth enable"),
     rParamZyn(Psendtoparteffect, "Effect Levels"),
     rString(Pname, PART_MAX_NAME_LEN, "Kit User Specified Label"),
+    {"captureMin:", NULL, NULL, [](const char *, RtData &r)
+        {Part::Kit *p = (Part::Kit*)r.obj; p->Pminkey = p->parent->lastnote;}},
+    {"captureMax:", NULL, NULL, [](const char *, RtData &r)
+        {Part::Kit *p = (Part::Kit*)r.obj; p->Pmaxkey = p->parent->lastnote;}},
     {"padpars-data:b", rProp(internal), 0,
         [](const char *msg, RtData &d) {
             rObject &o = *(rObject*)d.obj;
@@ -195,6 +199,7 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, Microtonal *microtonal_, FFT
     monomemClear();
 
     for(int n = 0; n < NUM_KIT_ITEMS; ++n) {
+        kit[n].parent  = this;
         kit[n].Pname   = new char [PART_MAX_NAME_LEN];
         kit[n].adpars  = nullptr;
         kit[n].subpars = nullptr;
