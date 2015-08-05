@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=ZynAddSubFX - Alsa
 Comment=A powerful realtime software synthesizer
+Comment[fr]=Un synthétiseur logiciel temps-réel puissant
 Exec=zynaddsubfx -I alsa -O alsa
 Icon=zynaddsubfx
 Terminal=false
