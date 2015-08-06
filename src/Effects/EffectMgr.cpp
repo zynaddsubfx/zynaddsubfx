@@ -75,8 +75,8 @@ static const rtosc::Ports local_ports = {
             if(eff->nefx != 7)
                 return;
             EQ *eq = (EQ*)eff->efx;
-            float a[MAX_EQ_BANDS*MAX_FILTER_STAGES*2+1];
-            float b[MAX_EQ_BANDS*MAX_FILTER_STAGES*2+1];
+            float a[MAX_EQ_BANDS*MAX_FILTER_STAGES*3];
+            float b[MAX_EQ_BANDS*MAX_FILTER_STAGES*3];
             memset(a, 0, sizeof(a));
             memset(b, 0, sizeof(b));
             eq->getFilter(a,b);
