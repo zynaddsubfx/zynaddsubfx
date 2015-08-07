@@ -296,7 +296,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
 {
     bToU = NULL;
     uToB = NULL;
-    memory = new Allocator();
+    memory = new AllocatorClass();
     swaplr = 0;
     off  = 0;
     smps = 0;
