@@ -6,13 +6,13 @@ image::./images/uicontroller.png[]
 General
 ~~~~~~~
 
-* *ModWh*: Modullation Wheel depth
-* *Exp MWh*: Exponental Modulation Wheel (changes modulation scale to
-             exponental)
+* *ModWh*: Modulation Wheel depth
+* *Exp MWh*: Exponential Modulation Wheel (changes modulation scale to
+             exponential)
 * *BwDpth*: Bandwidth Depth
-* *Exp BW*: Exponental Bandwidth (changes badwidth scale to exponental)
+* *Exp BW*: Exponential Bandwidth (changes bandwidth scale to exponential)
 * *PanDpth*: Panning Depth
-* *FltQ*: Filter Q (ressonance) depth
+* *FltQ*: Filter Q (resonance) depth
 * *FltCut* Filter Cutoff frequency depth
 * *Expr*: enable/disable expression
 * *Vol*: enable/disable receiving volume controller
@@ -27,7 +27,7 @@ Portamento
 * *time*: The duration of the portamento
 * *thresh*: The threshold of the portamento.
 It represents the minimum or the maximum number of halftones
-(or hundried cents) required to start the portamento. 
+(or hundred cents) required to start the portamento. 
 The difference is computed between the last note and current note.
 * *th.type*: The threshold type.
 Checked means that the portamento activates when the difference of frequencies
@@ -37,13 +37,13 @@ NOTE: The threshold refers to the frequencies and not to MIDI notes
       (you should consider this if you use microtonal scales).
 
 
-Proportinal Portamento
+Proportional Portamento
 ^^^^^^^^^^^^^^^^^^^^^^
 ////
 TODO: add graphs to explain prp.rate and prp. depth
 ////
 
-* *Propt.*: If the portamento is proportinal to ratio of frequencies
+* *Propt.*: If the portamento is proportional to ratio of frequencies
 * *Prp. Rate*: Ratio needed to double the time of portamento
 * *Prp. Dpth*: The divergence from 
 
