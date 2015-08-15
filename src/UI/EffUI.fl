@@ -39,7 +39,13 @@ decl {\#include "../Misc/Util.h"} {public local
 } 
 
 decl {\#include "../Effects/EffectMgr.h"} {public local
-} 
+}
+
+decl {\#include "../Effects/Phaser.h" /* for macros only, TODO */} {public local
+}
+
+decl {\#include "../Effects/Alienwah.h" /* for macros only, TODO */ } {public local
+}
 
 decl {\#include "PresetsUI.h"} {public local
 } 

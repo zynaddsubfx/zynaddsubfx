@@ -26,12 +26,14 @@
 
 #include "EffectMgr.h"
 #include "Effect.h"
+#include "Alienwah.h"
 #include "Reverb.h"
 #include "Echo.h"
 #include "Chorus.h"
 #include "Distorsion.h"
 #include "EQ.h"
 #include "DynamicFilter.h"
+#include "Phaser.h"
 #include "../Misc/XMLwrapper.h"
 #include "../Misc/Util.h"
 #include "../Params/FilterParams.h"
@@ -307,8 +309,8 @@ void EffectMgr::out(float *smpsl, float *smpsr)
         return;
     }
     for(int i = 0; i < synth.buffersize; ++i) {
-        smpsl[i]  += denormalkillbuf[i];
-        smpsr[i]  += denormalkillbuf[i];
+        smpsl[i]  += synth.denormalkillbuf[i];
+        smpsr[i]  += synth.denormalkillbuf[i];
         efxoutl[i] = 0.0f;
         efxoutr[i] = 0.0f;
     }

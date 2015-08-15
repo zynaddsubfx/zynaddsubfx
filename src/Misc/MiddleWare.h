@@ -5,11 +5,14 @@
 
 struct SYNTH_T;
 class  Master;
+class PresetsStore;
+
 //Link between realtime and non-realtime layers
 class MiddleWare
 {
     public:
-        MiddleWare(SYNTH_T synth, int prefered_port = -1);
+        MiddleWare(SYNTH_T synth, class Config *config,
+                   int preferred_port = -1);
         ~MiddleWare(void);
         void updateResources(Master *m);
         //returns internal master pointer
@@ -39,6 +42,9 @@ class MiddleWare
         const SYNTH_T &getSynth(void) const;
         //liblo stuff
         const char* getServerAddress(void) const;
+        
+        const PresetsStore& getPresetsStore() const;
+        PresetsStore& getPresetsStore();
     private:
         class MiddleWareImpl *impl;
 };

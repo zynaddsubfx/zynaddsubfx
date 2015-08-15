@@ -17,21 +17,21 @@ image::gen/ad-note.png[scalewidth="50%",width="700"]
 The global level of adsynth is almost entirely composed of previously discussed
 elements.
 However a few new features appear here, this includes velocity sensing, punch,
-detune options and realative bandwidth , and resonance.
+detune options and relative bandwidth , and resonance.
 
 .AdSynth Global Window
 image::images/ad-global.png[]
 
 
-Velocity sensing is simply an exponental transformation from the note's velocity
+Velocity sensing is simply an exponential transformation from the note's velocity
 to some parameter change.
-The below diagram shows how the velocity senseing controls affects this
+The below diagram shows how the velocity sensing controls affects this
 translation over the whole range of possible note velocities.
 
 .Velocity Sensing Chart
 image::gen/velf.png[scalewidth="50%",width="600"]
 
-The puch of a note in AdSynth is a constant amplification to the output at the
+The punch of a note in AdSynth is a constant amplification to the output at the
 start of the note, with its length determined by the punch time and stretch and
 the amplitude being determined by the punch strength and velocity sensing.
 The relBW control in the frequency pane is effectively a multiplier for detuning
@@ -88,7 +88,7 @@ Waveshaping can be done using the *Wsh* area in the Oscillator editor.
 
 The type of distortion has much influence on how the overtones are being placed.
 Sometimes, you get a "fat" bass, and sometimes, high frequencies are added,
-makeing the sound "crystal clear".
+making the sound "crystal clear".
 
 Atan & Sigmoid
 ++++++++++++++
