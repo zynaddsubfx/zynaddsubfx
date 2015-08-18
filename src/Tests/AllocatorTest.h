@@ -37,7 +37,7 @@ class AllocatorTest:public CxxTest::TestSuite
         vector<void*> data;
 
         void setUp() {
-            memory_ = new Allocator();
+            memory_ = new AllocatorClass();
         }
 
         void tearDown() {

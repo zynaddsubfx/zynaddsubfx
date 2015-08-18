@@ -46,7 +46,7 @@ class SubNoteTest:public CxxTest::TestSuite
         Master       *master;
         Controller   *controller;
         unsigned char testnote;
-        Allocator     memory;
+        Alloc         memory;
 
 
         float *outR, *outL;
@@ -62,12 +62,6 @@ class SubNoteTest:public CxxTest::TestSuite
             outR = new float[synth->buffersize];
             for(int i = 0; i < synth->buffersize; ++i)
                 *(outR + i) = 0;
-
-            //next the bad global variables that for some reason have not been properly placed in some
-            //initialization routine, but rather exist as cryptic oneliners in main.cpp:
-            denormalkillbuf = new float[synth->buffersize];
-            for(int i = 0; i < synth->buffersize; ++i)
-                denormalkillbuf[i] = 0;
 
             //prepare the default settings
             SUBnoteParameters *defaultPreset = new SUBnoteParameters();
@@ -99,7 +93,6 @@ class SubNoteTest:public CxxTest::TestSuite
             delete note;
             delete [] outL;
             delete [] outR;
-            delete [] denormalkillbuf;
             delete synth;
         }
 

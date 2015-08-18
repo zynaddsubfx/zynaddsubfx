@@ -43,6 +43,7 @@ MiddleWare *middleware;
 class PluginTest:public CxxTest::TestSuite
 {
     public:
+        Config config;
         void setUp() {
             synth = new SYNTH_T;
             synth->buffersize = 256;
@@ -56,14 +57,8 @@ class PluginTest:public CxxTest::TestSuite
             for(int i = 0; i < synth->buffersize; ++i)
                 outR[i] = 0.0f;
 
-            //next the bad global variables that for some reason have not been properly placed in some
-            //initialization routine, but rather exist as cryptic oneliners in main.cpp:
-            denormalkillbuf = new float[synth->buffersize];
-            for(int i = 0; i < synth->buffersize; ++i)
-                denormalkillbuf[i] = 0;
-
             for(int i = 0; i < 16; ++i)
-                master[i] = new Master(*synth);
+                master[i] = new Master(*synth, &config);
         }
 
         void tearDown() {

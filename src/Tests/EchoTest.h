@@ -125,5 +125,5 @@ class EchoTest:public CxxTest::TestSuite
         Stereo<float *> *input;
         float *outR, *outL;
         Echo  *testFX;
-        Allocator alloc;
+        Alloc alloc;
 };

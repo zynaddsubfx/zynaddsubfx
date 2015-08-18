@@ -348,6 +348,7 @@ add_subdirectory(DSP)
 add_subdirectory(Nio)
 
 add_library(zynaddsubfx_core STATIC
+    globals.cpp
     ../tlsf/tlsf.c
 	${zynaddsubfx_dsp_SRCS}
 	${zynaddsubfx_effect_SRCS}
@@ -369,7 +370,7 @@ if(CompileTests)
 endif(CompileTests)
 
 
-add_executable(zynaddsubfx main.cpp globals.cpp)
+add_executable(zynaddsubfx main.cpp)
 
 #Warning: the required ordering of these to get proper linking depends upon the
 #         phase of the moon

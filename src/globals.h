@@ -280,7 +280,7 @@ struct SYNTH_T {
     SYNTH_T(void)
         :samplerate(44100), buffersize(256), oscilsize(1024)
     {
-        alias();
+        alias(false);
     }
 
     SYNTH_T(const SYNTH_T& ) = delete;
@@ -320,7 +320,7 @@ struct SYNTH_T {
     {
         return buffersize_f / samplerate_f;
     }
-    void alias(void);
+    void alias(bool randomize=true);
     static float numRandom(void); //defined in Util.cpp for now
 };
 #endif

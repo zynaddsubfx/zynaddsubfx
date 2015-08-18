@@ -42,6 +42,7 @@ char *instance_name=(char*)"";
 class PluginTest:public CxxTest::TestSuite
 {
     public:
+        Config config;
         void setUp() {
             synth = new SYNTH_T;
             synth->buffersize = 256;
@@ -55,14 +56,14 @@ class PluginTest:public CxxTest::TestSuite
             for(int i = 0; i < synth->buffersize; ++i)
                 outR[i] = 0.0f;
 
-            //next the bad global variables that for some reason have not been properly placed in some
-            //initialization routine, but rather exist as cryptic oneliners in main.cpp:
-            denormalkillbuf = new float[synth->buffersize];
-            for(int i = 0; i < synth->buffersize; ++i)
-                denormalkillbuf[i] = 0;
-
+            delete synth;
+            synth = NULL;
             for(int i = 0; i < 16; ++i) {
-                middleware[i] = new MiddleWare(*synth);
+                synth = new SYNTH_T;
+                synth->buffersize = 256;
+                synth->samplerate = 48000;
+                synth->alias();
+                middleware[i] = new MiddleWare(std::move(*synth), &config);
                 master[i] = middleware[i]->spawnMaster();
             }
         }
@@ -73,7 +74,6 @@ class PluginTest:public CxxTest::TestSuite
 
             delete[] outL;
             delete[] outR;
-            delete[] denormalkillbuf;
             delete synth;
         }
 

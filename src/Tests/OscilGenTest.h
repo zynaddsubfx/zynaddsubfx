@@ -49,12 +49,6 @@ class OscilGenTest:public CxxTest::TestSuite
             memset(outL, 0, sizeof(float) * synth->oscilsize);
             memset(outR, 0, sizeof(float) * synth->oscilsize);
 
-            //next the bad global variables that for some reason have not been properly placed in some
-            //initialization routine, but rather exist as cryptic oneliners in main.cpp:
-            denormalkillbuf = new float[synth->buffersize];
-            for(int i = 0; i < synth->buffersize; ++i)
-                denormalkillbuf[i] = 0;
-
             //prepare the default settings
             fft   = new FFTwrapper(synth->oscilsize);
             oscil = new OscilGen(*synth, fft, NULL);
@@ -88,7 +82,6 @@ class OscilGenTest:public CxxTest::TestSuite
             delete fft;
             delete[] outL;
             delete[] outR;
-            delete[] denormalkillbuf;
             FFT_cleanup();
             delete synth;
         }

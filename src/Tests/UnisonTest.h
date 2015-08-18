@@ -49,7 +49,7 @@ class AdNoteTest:public CxxTest::TestSuite
         Controller   *controller;
         unsigned char testnote;
         ADnoteParameters *params;
-        Allocator memory;
+        Alloc         memory;
         float freq;
 
 
@@ -63,11 +63,6 @@ class AdNoteTest:public CxxTest::TestSuite
             memset(outL,0,sizeof(outL));
             memset(outR,0,sizeof(outR));
 
-            //next the bad global variables that for some reason have not been properly placed in some
-            //initialization routine, but rather exist as cryptic oneliners in main.cpp:
-            denormalkillbuf = new float[BUF];
-            memset(denormalkillbuf, 0, sizeof(float)*BUF);
-
             fft = new FFTwrapper(BUF);
             //prepare the default settings
             params = new ADnoteParameters(*synth, fft);
@@ -80,14 +75,12 @@ class AdNoteTest:public CxxTest::TestSuite
             //lets go with.... 50! as a nice note
             testnote = 50;
             freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
-
         }
 
         void tearDown() {
             delete note;
             delete controller;
             delete fft;
-            delete [] denormalkillbuf;
             FFT_cleanup();
             delete synth;
             delete params;

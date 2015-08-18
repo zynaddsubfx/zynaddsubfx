@@ -42,14 +42,12 @@ using namespace std;
 class AdNoteTest:public CxxTest::TestSuite
 {
     public:
-
         ADnote       *note;
         Master       *master;
         FFTwrapper   *fft;
         Controller   *controller;
-        Allocator     memory;
+        Alloc         memory;
         unsigned char testnote;
-
 
         float *outR, *outL;
 
@@ -65,13 +63,6 @@ class AdNoteTest:public CxxTest::TestSuite
             for(int i = 0; i < synth->buffersize; ++i)
                 *(outR + i) = 0;
 
-            //next the bad global variables that for some reason have not been properly placed in some
-            //initialization routine, but rather exist as cryptic oneliners in main.cpp:
-            denormalkillbuf = new float[synth->buffersize];
-            for(int i = 0; i < synth->buffersize; ++i)
-                denormalkillbuf[i] = 0;
-
-            //phew, glad to get thouse out of my way. took me a lot of sweat and gdb to get this far...
 
             fft = new FFTwrapper(synth->oscilsize);
             //prepare the default settings
@@ -118,7 +109,6 @@ class AdNoteTest:public CxxTest::TestSuite
             delete fft;
             delete [] outL;
             delete [] outR;
-            delete [] denormalkillbuf;
             FFT_cleanup();
             delete synth;
         }

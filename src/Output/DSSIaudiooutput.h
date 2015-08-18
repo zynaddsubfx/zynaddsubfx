@@ -25,6 +25,7 @@
 #include <thread>
 
 #include "../globals.h"
+#include "../Misc/Config.h"
 #include "../Misc/MiddleWare.h"
 
 #include <dssi.h>
@@ -117,8 +118,8 @@ class DSSIaudiooutput
          */
         bool banksInited;
 
-        static
-        long bankNoToMap;
+        static long bankNoToMap;
+        Config config;
 };
 
 #endif
