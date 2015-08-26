@@ -3,7 +3,7 @@ Getting Started
 
 ZynAddSubFX is a fairly complex software synthesizer with a very large number of
 controls.
-As such, it is not alway obvious how to use ZynAddSubFX.
+As such, it is not always obvious how to use ZynAddSubFX.
 
 Many applications under Linux transport MIDI over ALSA and transmit audio over
 JACK.
@@ -21,7 +21,7 @@ Currently the beginner interface is deprecated, so the advanced one is
 recommended.
 
 Now you should be able to see ZynAddSubFX's main window, from which you can
-setup patches, effects, and general configurations, but more importatnly it
+setup patches, effects, and general configurations, but more importantly it
 provides links into the parameters of the patches.
 ZynAddSubFX is a powerful tool with a number of base patches, but its true power
 lies in the ability to make your own patches.

@@ -55,16 +55,17 @@ class PadNoteTest:public CxxTest::TestSuite
         Controller   *controller;
         AbsTime      *time;
         unsigned char testnote;
-        Allocator     memory;
+        Alloc         memory;
+        int           interpolation;
 
 
         float *outR, *outL;
 
         void setUp() {
+            interpolation = 0;
             synth = new SYNTH_T;
             //First the sensible settings and variables that have to be set:
             synth->buffersize = 256;
-            synth->alias();
             time  = new AbsTime(*synth);
 
             outL = new float[synth->buffersize];
@@ -74,13 +75,6 @@ class PadNoteTest:public CxxTest::TestSuite
             for(int i = 0; i < synth->buffersize; ++i)
                 *(outR + i) = 0;
 
-            //next the bad global variables that for some reason have not been properly placed in some
-            //initialization routine, but rather exist as cryptic oneliners in main.cpp:
-            denormalkillbuf = new float[synth->buffersize];
-            for(int i = 0; i < synth->buffersize; ++i)
-                denormalkillbuf[i] = 0;
-
-            //phew, glad to get thouse out of my way. took me a lot of sweat and gdb to get this far...
 
             fft = new FFTwrapper(synth->oscilsize);
             //prepare the default settings
@@ -119,7 +113,7 @@ class PadNoteTest:public CxxTest::TestSuite
             float freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
             SynthParams pars_{memory, *controller, *synth, *time, freq, 120, 0, testnote, false};
 
-            note = new PADnote(pars, pars_);
+            note = new PADnote(pars, pars_, interpolation);
         }
 
         void tearDown() {
@@ -128,7 +122,6 @@ class PadNoteTest:public CxxTest::TestSuite
             delete fft;
             delete [] outL;
             delete [] outR;
-            delete [] denormalkillbuf;
             delete pars;
             FFT_cleanup();
             delete synth;
@@ -138,7 +131,6 @@ class PadNoteTest:public CxxTest::TestSuite
             fft = NULL;
             outL = NULL;
             outR = NULL;
-            denormalkillbuf = NULL;
             pars = NULL;
             synth = NULL;
         }

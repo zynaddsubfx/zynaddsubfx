@@ -26,9 +26,10 @@ enum RunMode {
 
 RunMode mode;
 
+int compress = 0;
 float *outL, *outR;
-Allocator  alloc;
-Microtonal microtonal;
+Alloc      alloc;
+Microtonal microtonal(compress);
 FFTwrapper fft(1024);
 Part *p;
 
@@ -47,6 +48,7 @@ double toc()
     return tic();
 }
 
+int interp=1;
 void setup() {
     synth = new SYNTH_T;
     synth->buffersize = 256;
@@ -63,12 +65,7 @@ void setup() {
     for(int i = 0; i < synth->buffersize; ++i)
         outR[i] = 0.0f;
 
-    //next the bad global variables that for some reason have not been properly placed in some
-    //initialization routine, but rather exist as cryptic oneliners in main.cpp:
-    denormalkillbuf = new float[synth->buffersize];
-    for(int i = 0; i < synth->buffersize; ++i)
-        denormalkillbuf[i] = 0;
-    p = new Part(alloc, *synth, *time_, &microtonal, &fft);
+    p = new Part(alloc, *synth, *time_, compress, interp, &microtonal, &fft);
 }
 
 void xml(string s)

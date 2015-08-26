@@ -29,8 +29,8 @@
 #include "../Misc/Util.h"
 
 PADnote::PADnote(const PADnoteParameters *parameters,
-                 SynthParams pars)
-    :SynthNote(pars), pars(*parameters)
+                 SynthParams pars, const int& interpolation)
+    :SynthNote(pars), pars(*parameters), interpolation(interpolation)
 {
     firsttime = true;
     setup(pars.frequency, pars.velocity, pars.portamento, pars.note);
@@ -170,7 +170,7 @@ SynthNote *PADnote::cloneLegato(void)
 {
     SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity, 
                    (bool)portamento, legato.param.midinote, true};
-    return memory.alloc<PADnote>(&pars, sp);
+    return memory.alloc<PADnote>(&pars, sp, interpolation);
 }
 
 void PADnote::legatonote(LegatoParams pars)
@@ -354,7 +354,7 @@ int PADnote::noteout(float *outl, float *outr)
     float freqlo  = freqrap - floor(freqrap);
 
 
-    if(config.cfg.Interpolation)
+    if(interpolation)
         Compute_Cubic(outl, outr, freqhi, freqlo);
     else
         Compute_Linear(outl, outr, freqhi, freqlo);

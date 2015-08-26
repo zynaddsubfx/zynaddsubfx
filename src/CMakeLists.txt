@@ -4,9 +4,11 @@ message(STATUS "Checking Library Path" $ENV{CMAKE_LIBRARY_PATH} ${CMAKE_LIBRARY_
 
 #Dependency check
 include(CheckFunctionExists)
+include(CheckIncludeFile)
 find_package(PkgConfig REQUIRED)
 find_package(zlib REQUIRED)
 find_package(X11)
+check_include_file(X11/xpm.h HAS_XPM)
 pkg_check_modules(FFTW REQUIRED fftw3)
 pkg_check_modules(MXML REQUIRED mxml)
 find_package(Threads   REQUIRED)
@@ -267,7 +269,7 @@ if(FltkGui)
 
 
 	set(GUI_LIBRARIES zynaddsubfx_gui ${FLTK_LIBRARIES} ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
-    if(X11_FOUND)
+    if(X11_FOUND AND HAS_XPM)
         set(GUI_LIBRARIES ${GUI_LIBRARIES} ${X11_LIBRARIES} -lXpm)
     endif()
 
@@ -291,7 +293,7 @@ if(NtkGui)
 
 	set(GUI_LIBRARIES zynaddsubfx_gui ${NTK_LIBRARIES} ${NTK_IMAGES_LIBRARIES} ${OPENGL_LIBRARIES})
 
-    if(X11_FOUND)
+    if(X11_FOUND AND HAS_XPM)
         set(GUI_LIBRARIES ${GUI_LIBRARIES} ${X11_LIBRARIES} -lXpm)
     endif()
 
@@ -346,6 +348,7 @@ add_subdirectory(DSP)
 add_subdirectory(Nio)
 
 add_library(zynaddsubfx_core STATIC
+    globals.cpp
     ../tlsf/tlsf.c
     Containers/NotePool.cpp
 	${zynaddsubfx_dsp_SRCS}
@@ -385,6 +388,7 @@ if (DssiEnable)
 	add_library(zynaddsubfx_dssi SHARED
         UI/ConnectionDummy.cpp
 		Output/DSSIaudiooutput.cpp
+		globals.cpp
 		)
 
 	target_link_libraries(zynaddsubfx_dssi

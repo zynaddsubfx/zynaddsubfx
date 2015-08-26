@@ -29,7 +29,6 @@
 
 #include "DSSIaudiooutput.h"
 #include "../Misc/Master.h"
-#include "../Misc/Config.h"
 #include "../Misc/Bank.h"
 #include "../Misc/Util.h"
 #include <rtosc/thread-link.h>
@@ -611,12 +610,9 @@ DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate)
     config.init();
 
     sprng(time(NULL));
-    denormalkillbuf = new float [synth.buffersize];
-    for(int i = 0; i < synth.buffersize; i++)
-        denormalkillbuf[i] = (RND - 0.5f) * 1e-16;
 
     synth.alias();
-    middleware = new MiddleWare(synth);
+    middleware = new MiddleWare(std::move(synth), &config);
     initBanks();
     loadThread = new std::thread([this]() {
             while(middleware) {

@@ -13,14 +13,14 @@
 #include "../Misc/Part.h"
 #include "../globals.h"
 SYNTH_T *synth;
-extern float *denormalkillbuf;
+int dummy=0;
 
 using namespace std;
 
 class KitTest:public CxxTest::TestSuite
 {
     private:
-        Allocator alloc;
+        Alloc      alloc;
         FFTwrapper fft;
         Microtonal microtonal;
         Part *part;
@@ -28,20 +28,18 @@ class KitTest:public CxxTest::TestSuite
         float *outL, *outR;
     public:
         KitTest()
-            :fft(512)
+            :fft(512), microtonal(dummy)
         {}
         void setUp() {
             synth = new SYNTH_T;
             time  = new AbsTime(*synth);
-            denormalkillbuf = new float[synth->buffersize];
             outL  = new float[synth->buffersize];
             outR = new float[synth->buffersize];
-            memset(denormalkillbuf, 0, synth->bufferbytes);
             memset(outL, 0, synth->bufferbytes);
             memset(outR, 0, synth->bufferbytes);
 
 
-            part = new Part(alloc, *synth, *time, &microtonal, &fft);
+            part = new Part(alloc, *synth, *time, dummy, dummy, &microtonal, &fft);
         }
 
         //Enumerate cases of:
@@ -531,7 +529,6 @@ class KitTest:public CxxTest::TestSuite
 
         void tearDown() {
             delete part;
-            delete[] denormalkillbuf;
             delete[] outL;
             delete[] outR;
             delete time;

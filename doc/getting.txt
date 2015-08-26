@@ -5,7 +5,7 @@ Usually there are several methods to obtain a copy of ZynAddSubFX.
 
 SourceForge::
     http://sourceforge.net/projects/zynaddsubfx/files/
-Distribuition::
+Distribution::
     apt/yum/others
 Git::
     git clone git://git.code.sf.net/p/zynaddsubfx/code zynaddsubfx
@@ -14,7 +14,7 @@ Introduction to Git
 ~~~~~~~~~~~~~~~~~~~
 
 For those who want to live on the bleeding edge or who want to assist with
-making sure that the next release has fewer bugs, you will want to get aquanted
+making sure that the next release has fewer bugs, you will want to get acquainted
 with git.
 Git is used to manage the source code for this project and can be used to
 quickly and easily get an up-to-date copy of the source code.

@@ -7,6 +7,7 @@
 #include <cassert>
 
 NotePool::NotePool(void)
+    :needs_cleaning(0)
 {
     memset(ndesc, 0, sizeof(ndesc));
     memset(sdesc, 0, sizeof(ndesc));

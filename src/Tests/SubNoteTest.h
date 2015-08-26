@@ -47,7 +47,7 @@ class SubNoteTest:public CxxTest::TestSuite
         AbsTime      *time;
         Controller   *controller;
         unsigned char testnote;
-        Allocator     memory;
+        Alloc         memory;
 
 
         float *outR, *outL;
@@ -56,7 +56,6 @@ class SubNoteTest:public CxxTest::TestSuite
             synth = new SYNTH_T;
             //First the sensible settings and variables that have to be set:
             synth->buffersize = 256;
-            synth->alias();
             time  = new AbsTime(*synth);
 
             outL = new float[synth->buffersize];
@@ -65,12 +64,6 @@ class SubNoteTest:public CxxTest::TestSuite
             outR = new float[synth->buffersize];
             for(int i = 0; i < synth->buffersize; ++i)
                 *(outR + i) = 0;
-
-            //next the bad global variables that for some reason have not been properly placed in some
-            //initialization routine, but rather exist as cryptic oneliners in main.cpp:
-            denormalkillbuf = new float[synth->buffersize];
-            for(int i = 0; i < synth->buffersize; ++i)
-                denormalkillbuf[i] = 0;
 
             //prepare the default settings
             SUBnoteParameters *defaultPreset = new SUBnoteParameters();
@@ -102,7 +95,6 @@ class SubNoteTest:public CxxTest::TestSuite
             delete note;
             delete [] outL;
             delete [] outR;
-            delete [] denormalkillbuf;
             delete time;
             delete synth;
         }

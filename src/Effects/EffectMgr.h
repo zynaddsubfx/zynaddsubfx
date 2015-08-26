@@ -24,22 +24,15 @@
 
 #include <pthread.h>
 
-#include "Alienwah.h"
-#include "Phaser.h"
-#include "../Params/Presets.h"
-
 class Effect;
 class FilterParams;
 class XMLwrapper;
 class Allocator;
 
-#include "Distorsion.h"
-#include "EQ.h"
-#include "DynamicFilter.h"
 #include "../Params/FilterParams.h"
 #include "../Params/Presets.h"
 
-/**Effect manager, an interface betwen the program and effects*/
+/** Effect manager, an interface between the program and effects */
 class EffectMgr:public Presets
 {
     public:
@@ -62,11 +55,11 @@ class EffectMgr:public Presets
         void kill(void) REALTIME;
         void cleanup(void) REALTIME;
 
-        void changeeffectrt(int nefx_) REALTIME;
+        void changeeffectrt(int nefx_, bool avoidSmash=false) REALTIME;
         void changeeffect(int nefx_) NONREALTIME;
         int geteffect(void);
         void changepreset(unsigned char npreset) NONREALTIME;
-        void changepresetrt(unsigned char npreset) REALTIME;
+        void changepresetrt(unsigned char npreset, bool avoidSmash=false) REALTIME;
         unsigned char getpreset(void);
         void seteffectpar(int npar, unsigned char value) NONREALTIME;
         void seteffectparrt(int npar, unsigned char value) REALTIME;
