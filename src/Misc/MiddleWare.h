@@ -33,6 +33,8 @@ class MiddleWare
         void transmitMsg(const char *, const char *args, ...);
         //Handle a rtosc Message uToB
         void transmitMsg(const char *, const char *args, va_list va);
+        //Indicate that a bank will be loaded
+        void pendingSetBank(int bank);
         //Indicate that a program will be loaded on a known part
         void pendingSetProgram(int part, int program);
         //Get/Set the active bToU url

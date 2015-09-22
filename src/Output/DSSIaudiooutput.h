@@ -89,9 +89,6 @@ class DSSIaudiooutput
             unsigned long bank;
             unsigned long program;
             std::string   name;
-            ProgramDescriptor(unsigned long _bank,
-                              unsigned long _program,
-                              char *_name);
         };
 
     private:

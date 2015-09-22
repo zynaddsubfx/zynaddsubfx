@@ -370,6 +370,7 @@ const DSSI_Program_Descriptor *DSSIaudiooutput::getProgram(unsigned long index)
  */
 void DSSIaudiooutput::selectProgram(unsigned long bank, unsigned long program)
 {
+    middleware->pendingSetBank(bank);
     middleware->pendingSetProgram(0, program);
 }
 
@@ -646,20 +647,6 @@ void DSSIaudiooutput::initBanks(void)
 }
 
 /**
- * constructor for the internally used ProgramDescriptor class
- *
- * @param _bank [in] bank number
- * @param _program [in] program number
- * @param _name [in] instrument / sample name
- * @return
- */
-DSSIaudiooutput::ProgramDescriptor::ProgramDescriptor(unsigned long _bank,
-                                                      unsigned long _program,
-                                                      char *_name)
-    :bank(_bank), program(_program), name(_name)
-{}
-
-/**
  * The map of programs available; held as a single shared statically allocated object.
  */
 vector<DSSIaudiooutput::ProgramDescriptor> DSSIaudiooutput::programMap =
@@ -679,23 +666,21 @@ long DSSIaudiooutput::bankNoToMap = 1;
  */
 bool DSSIaudiooutput::mapNextBank()
 {
-    Bank &bank = middleware->spawnMaster()->bank;
-    bool  retval;
-    if((bankNoToMap >= (int)bank.banks.size())
-       || bank.banks[bankNoToMap].dir.empty())
-        retval = false;
+    Bank &bank  = middleware->spawnMaster()->bank;
+    auto &banks = bank.banks;
+    if(bankNoToMap >= (int)banks.size() || banks[bankNoToMap].dir.empty())
+        return false;
     else {
         bank.loadbank(bank.banks[bankNoToMap].dir);
-        for(unsigned long instrument = 0; instrument < BANK_SIZE;
-            ++instrument) {
+        for(int instrument = 0; instrument < BANK_SIZE; ++instrument) {
             string insName = bank.getname(instrument);
-            if(!insName.empty() && (insName[0] != '\0') && (insName[0] != ' '))
-                programMap.push_back(ProgramDescriptor(bankNoToMap, instrument,
-                                                       const_cast<char *>(
-                                                           insName.c_str())));
+            ProgramDescriptor prog{(unsigned long)bankNoToMap,
+                                   (unsigned long)instrument, insName};
+
+            if(!insName.empty() && insName[0] != '\0' && insName[0] != ' ')
+                programMap.push_back(prog);
         }
         bankNoToMap++;
-        retval = true;
+        return true;
     }
-    return retval;
 }

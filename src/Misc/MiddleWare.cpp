@@ -557,6 +557,13 @@ public:
                 /*printf("results: '%s' '%d'\n",fname.c_str(), res);*/});
     }
 
+    void loadPendingBank(int par, Bank &bank)
+    {
+        if(((unsigned int)par < bank.banks.size())
+           && (bank.banks[par].dir != bank.bankfiletitle))
+            bank.loadbank(bank.banks[par].dir);
+    }
+
     void loadPart(int npart, const char *filename, Master *master, Fl_Osc_Interface *osc)
     {
         actual_load[npart]++;
@@ -969,6 +976,9 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg, bool dummy)
     } else if(!strcmp(rtmsg, "/setprogram")
             && !strcmp(rtosc_argument_string(rtmsg),"cc")) {
         loadPart(rtosc_argument(rtmsg,0).i, master->bank.ins[rtosc_argument(rtmsg,1).i].filename.c_str(), master, osc);
+    } else if(!strcmp(rtmsg, "/setbank")
+            && !strcmp(rtosc_argument_string(rtmsg), "c")) {
+        loadPendingBank(rtosc_argument(rtmsg,0).i, master->bank);
     } else if(!strcmp("/undo_pause", rtmsg)) {
         recording_undo = false;
     } else if(!strcmp("/undo_resume", rtmsg)) {
@@ -1318,6 +1328,10 @@ void MiddleWare::transmitMsg(const char *path, const char *args, va_list va)
         fprintf(stderr, "Error in transmitMsg(va)n");
 }
 
+void MiddleWare::pendingSetBank(int bank)
+{
+    impl->bToU->write("/setbank", "c", bank);
+}
 void MiddleWare::pendingSetProgram(int part, int program)
 {
     impl->pending_load[part]++;
