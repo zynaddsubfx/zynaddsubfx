@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
     << "                Copyright (c) 2009-2014 Mark McCurry [active maintainer]"
     << endl;
     cerr << "Compiled: " << __DATE__ << " " << __TIME__ << endl;
-    cerr << "This program is free software (GNU GPL v.2 or later) and \n";
+    cerr << "This program is free software (GNU GPL v2 or later) and \n";
     cerr << "it comes with ABSOLUTELY NO WARRANTY.\n" << endl;
     if(argc == 1)
         cerr << "Try 'zynaddsubfx --help' for command-line options." << endl;

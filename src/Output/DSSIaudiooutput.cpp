@@ -534,7 +534,7 @@ DSSI_Descriptor *DSSIaudiooutput::initDssiDescriptor()
             newLadspaDescriptor->Name  = "ZynAddSubFX";
             newLadspaDescriptor->Maker =
                 "Nasca Octavian Paul <zynaddsubfx@yahoo.com>";
-            newLadspaDescriptor->Copyright = "GNU General Public License v2";
+            newLadspaDescriptor->Copyright = "GNU General Public License v2 or later";
             newLadspaDescriptor->PortCount = 2;
 
             newPortNames    = new const char *[newLadspaDescriptor->PortCount];
