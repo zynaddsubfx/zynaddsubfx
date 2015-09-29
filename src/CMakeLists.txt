@@ -5,6 +5,7 @@ message(STATUS "Checking Library Path" $ENV{CMAKE_LIBRARY_PATH} ${CMAKE_LIBRARY_
 #Dependency check
 include(CheckFunctionExists)
 include(CheckIncludeFile)
+include(CheckCXXSourceCompiles)
 find_package(PkgConfig REQUIRED)
 find_package(zlib REQUIRED)
 find_package(X11)
@@ -34,6 +35,15 @@ pkg_search_module(LIBLO liblo>=0.26 REQUIRED)
 mark_as_advanced(LIBLO_LIBRARIES)
 
 CHECK_FUNCTION_EXISTS(sched_setscheduler HAVE_SCHEDULER)
+set(CMAKE_REQUIRED_FLAGS "-std=c++11")
+CHECK_CXX_SOURCE_COMPILES(
+    "#include <future>
+    #if ATOMIC_INT_LOCK_FREE<2
+    #error unreliable atomics
+    #endif
+    int main(){return 0;}" HAVE_ASYNC)
+set(CMAKE_REQUIRED_FLAGS "")
+
 
 execute_process(COMMAND echo fistpl 0
                 COMMAND as -
@@ -76,6 +86,8 @@ if(NOT "Darwin" STREQUAL ${CMAKE_SYSTEM_NAME})
     # Add scheduler function existance info (OSX compatiability)
     add_definitions(-DHAVE_SCHEDULER=${HAVE_SCHEDULER})
 endif()
+
+add_definitions(-DHAVE_FUTURE=${HAVE_FUTURE})
 
 
 # Give a good guess on the best Input/Output default backends
@@ -450,4 +462,5 @@ package_status(LIBLO_FOUND      "liblo    " "enabled" ${Red})
 package_status(FLTK_FOUND       "fltk     " "found"   ${Yellow})
 package_status(NTK_FOUND        "ntk      " "found"   ${Yellow})
 package_status(X11_FOUND        "x11      " "found"   ${Yellow})
+package_status(HAVE_ASYNC       "c++ async" "usable"  ${Yellow})
 message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")

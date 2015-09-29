@@ -572,6 +572,8 @@ public:
             return;
         assert(actual_load[npart] <= pending_load[npart]);
 
+        //load part in async fashion when possible
+#if HAVE_ASYNC
         auto alloc = std::async(std::launch::async,
                 [master,filename,this,npart](){
                 Part *p = new Part(*master->memory, synth,
@@ -597,6 +599,20 @@ public:
         }
 
         Part *p = alloc.get();
+#else
+        Part *p = new Part(*master->memory, synth, master->time,
+                config->cfg.GzipCompression,
+                config->cfg.Interpolation,
+                &master->microtonal, master->fft);
+        if(p->loadXMLinstrument(filename))
+            fprintf(stderr, "Warning: failed to load part<%s>!\n", filename);
+
+        auto isLateLoad = [this,npart]{
+            return actual_load[npart] != pending_load[npart];
+        };
+
+        p->applyparameters(isLateLoad);
+#endif
 
         obj_store.extractPart(p, npart);
         kits.extractPart(p, npart);
