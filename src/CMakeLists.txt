@@ -87,7 +87,7 @@ if(NOT "Darwin" STREQUAL ${CMAKE_SYSTEM_NAME})
     add_definitions(-DHAVE_SCHEDULER=${HAVE_SCHEDULER})
 endif()
 
-add_definitions(-DHAVE_FUTURE=${HAVE_FUTURE})
+add_definitions(-DHAVE_ASYNC=${HAVE_ASYNC})
 
 
 # Give a good guess on the best Input/Output default backends
