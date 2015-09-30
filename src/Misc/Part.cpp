@@ -450,13 +450,13 @@ void Part::NoteOn(unsigned char note,
 
         if(item.Padenabled)
             notePool.insertNote(note, sendto,
-                    {memory.alloc<ADnote>(kit[0].adpars, pars), 0, i});
+                    {memory.alloc<ADnote>(kit[i].adpars, pars), 0, i});
         if(item.Psubenabled)
             notePool.insertNote(note, sendto,
-                    {memory.alloc<SUBnote>(kit[0].subpars, pars), 1, i});
+                    {memory.alloc<SUBnote>(kit[i].subpars, pars), 1, i});
         if(item.Ppadenabled)
             notePool.insertNote(note, sendto,
-                    {memory.alloc<PADnote>(kit[0].padpars, pars, interpolation), 2, i});
+                    {memory.alloc<PADnote>(kit[i].padpars, pars, interpolation), 2, i});
 
         //Partial Kit Use
         if(isNonKit() || (isSingleKit() && item.active()))
