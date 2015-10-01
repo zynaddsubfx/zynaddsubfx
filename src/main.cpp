@@ -212,6 +212,9 @@ int main(int argc, char *argv[])
             "dump-oscdoc", 2, NULL, 'd'
         },
         {
+            "ui-title", 1, NULL, 'u'
+        },
+        {
             0, 0, 0, 0
         }
     };
@@ -219,7 +222,7 @@ int main(int argc, char *argv[])
     int option_index = 0, opt, exitwithhelp = 0, exitwithversion = 0;
     int prefered_port = -1;
 
-    string loadfile, loadinstrument, execAfterInit;
+    string loadfile, loadinstrument, execAfterInit, ui_title;
 
     while(1) {
         int tmp = 0;
@@ -227,7 +230,7 @@ int main(int argc, char *argv[])
         /**\todo check this process for a small memory leak*/
         opt = getopt_long(argc,
                           argv,
-                          "l:L:r:b:o:I:O:N:e:P:hvapSDUY",
+                          "l:L:r:b:o:I:O:N:e:P:u:hvapSDUY",
                           opts,
                           &option_index);
         char *optarguments = optarg;
@@ -335,6 +338,10 @@ int main(int argc, char *argv[])
                     outfile << s;
                 }
                 break;
+            case 'u':
+                if(optarguments)
+                    ui_title = optarguments;
+                break;
             case '?':
                 cerr << "ERROR:Bad option or parameter.\n" << endl;
                 exitwithhelp = 1;
@@ -370,6 +377,7 @@ int main(int argc, char *argv[])
              << "  -I , --input\t\t\t\t Set Input Engine\n"
              << "  -e , --exec-after-init\t\t Run post-initialization script\n"
              << "  -d , --dump-oscdoc=FILE\t\t Dump oscdoc xml to file\n"
+             << "  -u , --ui-title=TITLE\t\t Extend UI Window Titles\n"
              << endl;
 
         return 0;
@@ -446,6 +454,10 @@ int main(int argc, char *argv[])
         GUI::raiseUi(gui, msg);
         delete [] msg;
     }
+
+    //set titles
+    if(!ui_title.empty())
+        GUI::raiseUi(gui, "/ui/title", "s", ui_title.c_str());
 
     if(!noui)
     {
