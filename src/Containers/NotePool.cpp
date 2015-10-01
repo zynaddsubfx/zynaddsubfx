@@ -109,7 +109,7 @@ void NotePool::applyLegato(LegatoParams &par)
 //Note that isn't KEY_PLAYING or KEY_RELASED_AND_SUSTAINING
 bool NotePool::existsRunningNote(void) const
 {
-    printf("runing note # =%d\n", getRunningNotes());
+    //printf("runing note # =%d\n", getRunningNotes());
     return getRunningNotes();
 }
 
@@ -188,7 +188,7 @@ void NotePool::kill(NoteDescriptor &d)
 
 void NotePool::kill(SynthDescriptor &s)
 {
-    printf("Kill synth...\n");
+    //printf("Kill synth...\n");
     s.note->memory.dealloc(s.note);
     needs_cleaning = true;
 }
@@ -212,8 +212,8 @@ void NotePool::cleanup(void)
     needs_cleaning = false;
     int new_length[POLYPHONY] = {0};
     int cur_length[POLYPHONY] = {0};
-    printf("Cleanup Start\n");
-    dump();
+    //printf("Cleanup Start\n");
+    //dump();
 
     //Identify the current length of all segments
     //and the lengths discarding invalid entries
@@ -260,8 +260,8 @@ void NotePool::cleanup(void)
                 sdesc[cum_new++] = sdesc[i];
         memset(sdesc+cum_new, 0, sizeof(*sdesc)*(POLYPHONY*EXPECTED_USAGE-cum_new));
     }
-    printf("Cleanup Done\n");
-    dump();
+    //printf("Cleanup Done\n");
+    //dump();
 }
 
 void NotePool::dump(void)
