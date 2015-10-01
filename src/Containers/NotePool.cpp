@@ -117,8 +117,9 @@ int NotePool::getRunningNotes(void) const
 {
     bool running[256] = {0};
     for(auto &desc:activeDesc()) {
-        printf("note!(%d)\n", desc.note);
-        running[desc.note] = true;
+        //printf("note!(%d)\n", desc.note);
+        if(desc.status == Part::KEY_PLAYING)
+            running[desc.note] = true;
     }
 
     int running_count = 0;
