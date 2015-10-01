@@ -834,7 +834,7 @@ class ADnoteUI {open : {public PresetsUI_}
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
-        code0 {ADnoteGlobalParameters->base = loc + "GlobalPar/"; ADnoteGlobalParameters->osc = osc;}
+        code0 {ADnoteGlobalParameters->init(osc, loc + "GlobalPar/");}
       }
       Fl_Group {} {
         label FREQUENCY open
@@ -1032,8 +1032,7 @@ resui->resonancewindow->show();}
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
-        code0 {ADnoteVoice->base = loc;}
-        code1 {ADnoteVoice->osc       = osc;}
+        code0 {ADnoteVoice->init(osc,loc);}
       }
       Fl_Group advoice {open
         xywh {0 0 765 595}
@@ -1071,8 +1070,7 @@ advoice->change_voice(nvoice);}
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
-        code0 {ADnoteVoiceList->base = loc;}
-        code1 {ADnoteVoiceList->osc  = osc;}
+        code0 {ADnoteVoiceList->init(osc, loc);}
       }
       Fl_Text_Display {} {
         label {No.}

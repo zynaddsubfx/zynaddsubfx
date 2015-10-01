@@ -9,13 +9,26 @@ Fl_Osc_Pane::Fl_Osc_Pane(void)
 
 
 Fl_Osc_Window::Fl_Osc_Window(int w, int h, const char *L)
-    :Fl_Double_Window(w,h,L)
+    :Fl_Double_Window(w,h,L), title_ext(NULL)
 {}
         
 void Fl_Osc_Window::init(Fl_Osc_Interface *osc_, std::string loc_)
 {
+    title_ext  = new Osc_DataModel(osc_);
+    title_ext->update("/ui/title");
+    title_ext->callback = [this](string next) {
+        title_new = title_orig + next;
+        this->label(title_new.c_str());
+    };
+    title_orig = label();
+
     osc   = osc_;
     base = loc_;
+}
+
+Fl_Osc_Window::~Fl_Osc_Window(void)
+{
+    delete title_ext;
 }
 
 std::string Fl_Osc_Window::loc(void) const

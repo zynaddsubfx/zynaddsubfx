@@ -29,6 +29,9 @@ decl {\#include "Fl_Osc_Check.H"} {public local
 decl {\#include "Fl_EQGraph.H"} {public local
 } 
 
+decl {\#include "Fl_Osc_Pane.H"} {public local
+}
+
 decl {\#include "EnvelopeUI.h"} {public local
 } 
 

@@ -11,6 +11,7 @@
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Text_Display.H>
 #include "Osc_SimpleListModel.h"
+#include "Fl_Osc_Pane.H"
 
 using namespace std;
 

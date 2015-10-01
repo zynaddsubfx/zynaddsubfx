@@ -241,7 +241,13 @@ class MasterUI {open
     close();
 };} open
       xywh {330 365 390 525} type Double xclass zynaddsubfx visible
+      class Fl_Osc_Window
     } {
+        Fl_Box dummy_again {
+          xywh {25 25 25 25}
+          code0 {masterwindow->init(osc, "");}
+        }
+
       Fl_Group win_root {open
         xywh {0 0 390 525}
         class Fl_Osc_Group
@@ -855,8 +861,7 @@ GNU General Public License for details.}
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
-        code0 {syseffsendwindow->osc = osc; assert(osc);}
-        code1 {syseffsendwindow->base = "";}
+        code0 {syseffsendwindow->init(osc,"");}
       }
       Fl_Scroll syseffscroll {open
         xywh {0 45 120 170} box FLAT_BOX resizable
@@ -880,8 +885,7 @@ GNU General Public License for details.}
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
-        code0 {panelwindow->osc  = osc;}
-        code1 {panelwindow->base = "/";}
+        code0 {panelwindow->init(osc,"/");}
       }
       Fl_Scroll {} {open
         xywh {0 5 570 310} type HORIZONTAL box THIN_UP_BOX
@@ -924,8 +928,7 @@ if (fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))
     } {
       Fl_Box {} {
         xywh {0 0 0 0}
-        code0 {simplemasterwindow->osc  = osc;}
-        code1 {simplemasterwindow->base = "/";}
+        code0 {simplemasterwindow->init(osc, "/");}
       }
       Fl_Menu_Bar simplemastermenu {
         xywh {0 0 600 25}
@@ -1427,6 +1430,7 @@ virkeys->take_focus();}
       label {User Interface mode}
       callback {*exitprogram=1;}
       xywh {342 246 430 250} type Double hide non_modal
+      class Fl_Osc_Window
     } {
       Fl_Box {} {
         label {Welcome to ZynAddSubFX}

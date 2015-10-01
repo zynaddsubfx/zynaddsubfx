@@ -1,4 +1,5 @@
 #include "Fl_Osc_ListView.H"
+#include "Fl_Osc_Pane.H"
 #include <cstdio>
 #include <rtosc/rtosc.h>
 

@@ -20,6 +20,9 @@ decl {\#include "Fl_Osc_Button.H"} {public local
 decl {\#include "Fl_Osc_Counter.H"} {public local
 } 
 
+decl {\#include "Fl_Osc_Pane.H"} {public local
+}
+
 decl {\#include <stdio.h>} {public local
 } 
 
@@ -80,7 +83,7 @@ delete (freemodeeditwindow);} {}
         label C
         callback {presetsui->copy(freemodeeditwindow->loc());}
         xywh {465 160 15 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 10 labelcolor 7
-        code0 {freemodeeditwindow->osc = osc; freemodeeditwindow->base = loc();}
+        code0 {freemodeeditwindow->init(osc, loc());}
       }
       Fl_Button {} {
         label P
