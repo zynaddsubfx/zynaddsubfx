@@ -567,7 +567,7 @@ voiceonbutton->redraw();} open
               label Unison
               tooltip {Unison size} xywh {10 560 75 20} down_box BORDER_BOX labelfont 1 align 5 textfont 1 textsize 10
               code0 {o->add("OFF");char tmp[100];for (int i=1;ADnote_unison_sizes[i];i++){snprintf(tmp,100,"size %d",ADnote_unison_sizes[i]);o->add(tmp);};}
-              code1 {o->init("Unison_size");}
+              code1 {o->init("Unison_size", 1);}
               class Fl_Osc_Choice
             } {}
             Fl_Dial {} {
