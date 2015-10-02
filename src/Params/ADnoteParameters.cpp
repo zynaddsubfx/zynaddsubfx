@@ -524,40 +524,6 @@ ADnoteParameters::~ADnoteParameters()
         KillVoice(nvoice);
 }
 
-int ADnoteParameters::get_unison_size_index(int nvoice) const
-{
-    int index = 0;
-    if(nvoice >= NUM_VOICES)
-        return 0;
-    int unison = VoicePar[nvoice].Unison_size;
-
-    while(1) {
-        if(ADnote_unison_sizes[index] >= unison)
-            return index;
-
-        if(ADnote_unison_sizes[index] == 0)
-            return index - 1;
-
-        index++;
-    }
-    return 0;
-}
-
-void ADnoteParameters::set_unison_size_index(int nvoice, int index) {
-    int unison = 1;
-    for(int i = 0; i <= index; ++i) {
-        unison = ADnote_unison_sizes[i];
-        if(unison == 0) {
-            unison = ADnote_unison_sizes[i - 1];
-            break;
-        }
-    }
-
-    VoicePar[nvoice].Unison_size = unison;
-}
-
-
-
 void ADnoteParameters::add2XMLsection(XMLwrapper *xml, int n)
 {
     int nvoice = n;
