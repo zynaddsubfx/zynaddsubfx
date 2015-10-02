@@ -62,12 +62,23 @@ static const rtosc::Ports local_ports = {
     {"preset::i", rProp(alias) rDoc("Effect Preset Selector"), NULL,
         [](const char *msg, rtosc::RtData &d)
         {
+            char loc[1024];
             EffectMgr *eff = (EffectMgr*)d.obj;
             if(!rtosc_narguments(msg))
                 d.reply(d.loc, "i", eff->getpreset());
             else {
                 eff->changepresetrt(rtosc_argument(msg, 0).i);
                 d.broadcast(d.loc, "i", eff->getpreset());
+
+                //update parameters as well
+                strncpy(loc, d.loc, 1024);
+                char *tail = rindex(loc, '/');
+                if(!tail)
+                    return;
+                for(int i=0;i<128;++i) {
+                    sprintf(tail+1, "parameter%d", i);
+                    d.broadcast(loc, "i", eff->geteffectparrt(i));
+                }
             }
         }},
     {"eq-coeffs:", rProp(internal) rDoc("Get equalizer Coefficients"), NULL,
