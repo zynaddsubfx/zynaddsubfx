@@ -124,20 +124,20 @@ class ADvoicelistitem {open : {public Fl_Osc_Group}
           code0 {o->init("PDetune",'i');}
           class Fl_Osc_Slider
         }
-        Fl_Box noiselabel {
+        Fl_Box whitenoiselabel {
           label N
           xywh {65 5 20 20} labelfont 1 labelsize 13 labelcolor 7
         }
         Fl_Check_Button noisehack {
           callback {if (o->value()==0) {
-  noiselabel->hide();
+  whitenoiselabel->hide();
   voiceresonanceenabled->activate();
   detunevalueoutput->activate();
   voicedetune->activate();
   voicelfofreq->activate();
   voiceoscil->activate();
 } else {
-  noiselabel->show();
+  whitenoiselabel->show();
   voiceresonanceenabled->deactivate();
   detunevalueoutput->deactivate();
   voicedetune->deactivate();
@@ -558,19 +558,6 @@ voiceonbutton->redraw();} open
             xywh {5 540 520 50} box UP_FRAME
           } {
             Fl_Dial {} {
-              label Stereo
-              tooltip {Stereo Spread} xywh {322 555 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
-              code0 {o->init("Unison_stereo_spread");}
-              class Fl_Osc_Dial
-            }
-            Fl_Counter {} {
-              label Unison
-              tooltip {Unison size} xywh {15 563 65 18} labelfont 1 align 5 minimum 1 maximum 64 step 1 value 1 textfont 1 textsize 11
-              code0 {o->init("Unison_size", 1);}
-	      code1 {o->lstep(5);}
-              class Fl_Osc_Counter
-            } {}
-            Fl_Dial {} {
               label Vibrato
               tooltip Vibrato xywh {364 555 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
               code0 {o->init("Unison_vibratto");}
@@ -718,8 +705,11 @@ o->redraw();}
           code0 {char tmp[10];snprintf(tmp,10,"%d",nvoice+1);o->label(strdup(tmp));}
         } {}
         Fl_Choice {} {
-          callback {if (o->value()==0){ voicemodegroup->activate(); noiselabel->hide();}
-  else{ voicemodegroup->deactivate(); noiselabel->show();}}
+          callback {switch (o->value()) {
+  case 0: voicemodegroup->activate(); whitenoiselabel->hide(); pinknoiselabel->hide(); break;
+  case 1: voicemodegroup->deactivate(); whitenoiselabel->show(); pinknoiselabel->hide(); break;
+  default: voicemodegroup->deactivate(); whitenoiselabel->hide(); pinknoiselabel->show(); break;
+}} open
           tooltip {Oscillator Type (sound/noise)} xywh {5 515 65 20} down_box BORDER_BOX labelsize 10 textfont 1 textsize 10
           code0 {o->init("Type");}
           class Fl_Osc_Choice
@@ -729,8 +719,12 @@ o->redraw();}
             xywh {5 5 100 20} labelfont 1 labelsize 11
           }
           MenuItem {} {
-            label NOISE
-            xywh {15 15 100 20} labelfont 1 labelsize 11 labelcolor 1
+            label White selected
+            xywh {15 15 100 20} labelfont 1 labelsize 11 labelcolor 55
+          }
+          MenuItem {} {
+            label Pink
+            xywh {25 25 100 20} labelfont 1 labelsize 11 labelcolor 211
           }
         }
         Fl_Check_Button bypassfiltercheckbutton {
@@ -759,9 +753,26 @@ bypassfiltercheckbutton->redraw();}
           code0 {o->init("PFilterEnabled");}
           class Fl_Osc_Check
         }
-        Fl_Box noiselabel {
+        Fl_Box whitenoiselabel {
           label {White Noise}
           xywh {150 430 300 65} labelfont 1 labelsize 50 labelcolor 53 hide
+        }
+        Fl_Box pinknoiselabel {
+          label {Pink Noise}
+          xywh {150 430 300 65} labelfont 1 labelsize 50 labelcolor 212 hide
+        }
+        Fl_Dial {} {
+          label Stereo
+          tooltip {Stereo Spread} xywh {327 560 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
+          code0 {o->init("Unison_stereo_spread");}
+          class Fl_Osc_Dial
+        }
+        Fl_Counter {} {
+          label Unison selected
+          tooltip {Unison size} xywh {20 568 65 18} labelfont 1 align 5 minimum 1 maximum 64 step 1 value 1 textfont 1 textsize 11
+          code0 {o->init("Unison_size", 1);}
+          code1 {o->lstep(5);}
+          class Fl_Osc_Counter
         }
       }
       Fl_Check_Button voiceonbutton {

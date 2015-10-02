@@ -86,6 +86,9 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars)
         NoteGlobalPar.Punch.Enabled = 0;
 
     for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
+        for (int i = 0; i < 14; i++)
+            pinking[nvoice][i] = 0.0;
+
         pars.VoicePar[nvoice].OscilSmp->newrandseed(prng());
         NoteVoicePar[nvoice].OscilSmp = NULL;
         NoteVoicePar[nvoice].FMSmp    = NULL;
@@ -104,6 +107,10 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars)
         int unison = pars.VoicePar[nvoice].Unison_size;
         if(unison < 1)
             unison = 1;
+
+	// Since noise unison of greater than two is touch goofy...
+	if (pars.VoicePar[nvoice].Type != 0 && unison > 2)
+	    unison = 2;
 
         //compute unison
         unison_size[nvoice] = unison;
@@ -1423,12 +1430,31 @@ inline void ADnote::ComputeVoiceOscillatorPitchModulation(int /*nvoice*/)
 /*
  * Computes the Noise
  */
-inline void ADnote::ComputeVoiceNoise(int nvoice)
+inline void ADnote::ComputeVoiceWhiteNoise(int nvoice)
 {
     for(int k = 0; k < unison_size[nvoice]; ++k) {
         float *tw = tmpwave_unison[k];
         for(int i = 0; i < synth.buffersize; ++i)
             tw[i] = RND * 2.0f - 1.0f;
+    }
+}
+
+inline void ADnote::ComputeVoicePinkNoise(int nvoice)
+{
+    for(int k = 0; k < unison_size[nvoice]; ++k) {
+        float *tw = tmpwave_unison[k];
+        float *f = &pinking[nvoice][k > 0 ? 7 : 0];
+        for(int i = 0; i < synth.buffersize; ++i) {
+	    float white = (RND-0.5)/4.0;
+	    f[0] = 0.99886*f[0]+white*0.0555179;
+	    f[1] = 0.99332*f[1]+white*0.0750759;
+	    f[2] = 0.96900*f[2]+white*0.1538520;
+	    f[3] = 0.86650*f[3]+white*0.3104856;
+	    f[4] = 0.55000*f[4]+white*0.5329522;
+	    f[5] = -0.7616*f[5]-white*0.0168980;
+	    tw[i] = f[0]+f[1]+f[2]+f[3]+f[4]+f[5]+f[6]+white*0.5362;
+	    f[6] = white*0.115926;
+        }
     }
 }
 
@@ -1454,27 +1480,34 @@ int ADnote::noteout(float *outl, float *outr)
         if((NoteVoicePar[nvoice].Enabled != ON)
            || (NoteVoicePar[nvoice].DelayTicks > 0))
             continue;
-        if(NoteVoicePar[nvoice].noisetype == 0) //voice mode=sound
-            switch(NoteVoicePar[nvoice].FMEnabled) {
-                case MORPH:
-                    ComputeVoiceOscillatorMorph(nvoice);
-                    break;
-                case RING_MOD:
-                    ComputeVoiceOscillatorRingModulation(nvoice);
-                    break;
-                case PHASE_MOD:
-                    ComputeVoiceOscillatorFrequencyModulation(nvoice, 0);
-                    break;
-                case FREQ_MOD:
-                    ComputeVoiceOscillatorFrequencyModulation(nvoice, 1);
-                    break;
-                //case PITCH_MOD:ComputeVoiceOscillatorPitchModulation(nvoice);break;
-                default:
-                    ComputeVoiceOscillator_LinearInterpolation(nvoice);
-                    //if (config.cfg.Interpolation) ComputeVoiceOscillator_CubicInterpolation(nvoice);
-            }
-        else
-            ComputeVoiceNoise(nvoice);
+        switch (NoteVoicePar[nvoice].noisetype) {
+            case 0: //voice mode=sound
+                switch(NoteVoicePar[nvoice].FMEnabled) {
+                    case MORPH:
+                        ComputeVoiceOscillatorMorph(nvoice);
+                        break;
+                    case RING_MOD:
+                        ComputeVoiceOscillatorRingModulation(nvoice);
+                        break;
+                    case PHASE_MOD:
+                        ComputeVoiceOscillatorFrequencyModulation(nvoice, 0);
+                        break;
+                    case FREQ_MOD:
+                        ComputeVoiceOscillatorFrequencyModulation(nvoice, 1);
+                        break;
+                    //case PITCH_MOD:ComputeVoiceOscillatorPitchModulation(nvoice);break;
+                    default:
+                        ComputeVoiceOscillator_LinearInterpolation(nvoice);
+                        //if (config.cfg.Interpolation) ComputeVoiceOscillator_CubicInterpolation(nvoice);
+                }
+                break;
+            case 1:
+                ComputeVoiceWhiteNoise(nvoice);
+                break;
+            default:
+                ComputeVoicePinkNoise(nvoice);
+                break;
+        }
         // Voice Processing
 
 
