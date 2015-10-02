@@ -563,12 +563,12 @@ voiceonbutton->redraw();} open
               code0 {o->init("Unison_stereo_spread");}
               class Fl_Osc_Dial
             }
-            Fl_Choice {} {
+            Fl_Counter {} {
               label Unison
-              tooltip {Unison size} xywh {10 560 75 20} down_box BORDER_BOX labelfont 1 align 5 textfont 1 textsize 10
-              code0 {o->add("OFF");char tmp[100];for (int i=1;ADnote_unison_sizes[i];i++){snprintf(tmp,100,"size %d",ADnote_unison_sizes[i]);o->add(tmp);};}
-              code1 {o->init("Unison_size", 1);}
-              class Fl_Osc_Choice
+              tooltip {Unison size} xywh {15 563 65 18} labelfont 1 align 5 minimum 1 maximum 64 step 1 value 1 textfont 1 textsize 11
+              code0 {o->init("Unison_size", 1);}
+	      code1 {o->lstep(5);}
+              class Fl_Osc_Counter
             } {}
             Fl_Dial {} {
               label Vibrato
