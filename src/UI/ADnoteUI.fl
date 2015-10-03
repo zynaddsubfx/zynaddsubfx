@@ -361,11 +361,11 @@ voiceFMparametersgroup->redraw();} open
                 xywh {560 410 75 20} down_box BORDER_BOX labelsize 10 textfont 1 textsize 10
                 code0 {o->add("Internal");}
                 code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"ExtM.%2d",i+1);o->add(tmp);};}
-                code3 {o->init("PextFMoscil",1);}
+                code3 {o->init("PextFMoscil",-1);}
                 class Fl_Osc_Choice
               } {}
             }
-            Fl_Choice {} {
+            Fl_Choice extMod {
               label {External Mod.}
               callback {if ((int) o->value() != 0) {
     modoscil->deactivate();
@@ -551,7 +551,7 @@ voiceonbutton->redraw();} open
             xywh {5 470 65 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
             code0 {o->add("Internal");}
             code1 {char tmp[50]; for (int i=0;i<nvoice;i++) {sprintf(tmp,"Ext.%2d",i+1);o->add(tmp);};}
-            code3 {o->init("Pextoscil",1);}
+            code3 {o->init("Pextoscil",-1);}
             class Fl_Osc_Choice
           } {}
           Fl_Group {} {open
@@ -567,9 +567,9 @@ voiceonbutton->redraw();} open
               label Unison
               tooltip {Unison size} xywh {15 563 65 18} labelfont 1 align 5 minimum 1 maximum 64 step 1 value 1 textfont 1 textsize 11
               code0 {o->init("Unison_size", 1);}
-	      code1 {o->lstep(5);}
+              code1 {o->lstep(5);}
               class Fl_Osc_Counter
-            } {}
+            }
             Fl_Dial {} {
               label Vibrato
               tooltip Vibrato xywh {364 555 25 25} box ROUND_UP_BOX labelsize 10 align 1 maximum 127 step 1
@@ -802,9 +802,29 @@ delete(oscedit);
   } {
     code {nvoice = nvoice_;
     loc = base+"VoicePar"+to_s(nvoice)+"/";
-    char tmp[10];snprintf(tmp,10,"%d",nvoice+1);
+    char tmp[50];snprintf(tmp,10,"%d",nvoice+1);
     activeVoiceID->label(strdup(tmp));
-ADnoteVoiceParameters->rebase(base+"VoicePar"+to_s(nvoice)+"/");} {selected
+    extoscil->clear();
+    extoscil->add("Internal");
+    for (int i=0;i<nvoice;i++) {
+        sprintf(tmp,"Ext.%2d",i+1);
+        extoscil->add(tmp);
+    };
+
+    extFMoscil->clear();
+    extFMoscil->add("Internal");
+    for (int i=0;i<nvoice;i++) {
+        sprintf(tmp,"ExtM.%2d",i+1);
+        extFMoscil->add(tmp);
+    }
+              
+    extMod->clear();
+    extMod->add("OFF");
+    for (int i=0;i<nvoice;i++) {
+        sprintf(tmp,"ExtMod.%2d",i+1);
+        extMod->add(tmp);
+    }
+    ADnoteVoiceParameters->rebase(base+"VoicePar"+to_s(nvoice)+"/");} {selected
     }
   }
   decl {int nvoice;} {private local
