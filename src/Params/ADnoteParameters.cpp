@@ -62,7 +62,7 @@ static const Ports voicePorts = {
     rParamZyn(Unison_vibratto, "Subvoice vibratto"),
     rParamZyn(Unison_vibratto_speed, "Subvoice vibratto speed"),
     rOption(Unison_invert_phase, rOptions(none, random, 50%, 33%, 25%), "Subvoice Phases"),
-    rOption(Type, rOptions(Sound,Noise), "Type of Sound"),
+    rOption(Type, rOptions(Sound,White,Pink), "Type of Sound"),
     rParamZyn(PDelay, "Voice Startup Delay"),
     rToggle(Presonance, "Resonance Enable"),
     rParamI(Pextoscil, rMap(min, -1), rMap(max, 16), "External Oscilator Selection"),

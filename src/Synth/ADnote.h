@@ -99,7 +99,8 @@ class ADnote:public SynthNote
         inline void ComputeVoiceOscillatorPitchModulation(int nvoice);
 
         /**Generate Noise Samples for Voice*/
-        inline void ComputeVoiceNoise(int nvoice);
+        inline void ComputeVoiceWhiteNoise(int nvoice);
+        inline void ComputeVoicePinkNoise(int nvoice);
 
         /**Fadein in a way that removes clicks but keep sound "punchy"*/
         inline void fadein(float *smps) const;
@@ -248,6 +249,9 @@ class ADnote:public SynthNote
         /********************************************************/
         /*    INTERNAL VALUES OF THE NOTE AND OF THE VOICES     */
         /********************************************************/
+
+	//pinking filter (Paul Kellet)
+	float pinking[NUM_VOICES][14]; 
 
         //the size of unison for a single voice
         int unison_size[NUM_VOICES];
