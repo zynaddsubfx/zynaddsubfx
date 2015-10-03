@@ -98,6 +98,8 @@ float EnvelopeFreeEdit::getdt(int i) const
     return dt(Penvdt[i]);
 }
 
+static bool ctrldown;
+
 void EnvelopeFreeEdit::draw(void)
 {
     int ox=x(),oy=y(),lx=w(),ly=h();
@@ -129,7 +131,7 @@ void EnvelopeFreeEdit::draw(void)
     for (int i=1; i<npoints; ++i){
         oldxx=xx;oldyy=yy;
         xx=getpointx(i);yy=getpointy(i);
-        if (i==currentpoint) fl_color(FL_RED);
+        if (i==currentpoint || ctrldown && i==lastpoint) fl_color(FL_RED);
         else fl_color(alb);
         fl_line(ox+oldxx,oy+oldyy,ox+xx,oy+yy);
         fl_rectf(ox+xx-3,oy+yy-3,6,6);
@@ -151,13 +153,13 @@ void EnvelopeFreeEdit::draw(void)
     //Show the envelope duration and the current line duration
     fl_font(FL_HELVETICA|FL_BOLD,10);
     float time=0.0;
-    if (currentpoint<=0){
+    if (currentpoint<=0 && (!ctrldown||lastpoint <= 0)){
         fl_color(alb);
         for(int i=1; i<npoints; ++i)
             time+=getdt(i);
     } else {
-        fl_color(255,0,0);
-        time=getdt(currentpoint);
+        fl_color(FL_RED);
+        time=getdt(lastpoint);
     }
     char tmpstr[20];
     if (time<1000.0)
@@ -165,12 +167,50 @@ void EnvelopeFreeEdit::draw(void)
     else
         snprintf((char *)&tmpstr,20,"%.2fs",time/1000.0);
     fl_draw(tmpstr,ox+lx-20,oy+ly-10,20,10,FL_ALIGN_RIGHT,NULL,0);
+    if (lastpoint>=0){
+        snprintf((char *)&tmpstr,20,"%d", Penvval[lastpoint]);
+        fl_draw(tmpstr,ox+lx-20,oy+ly-23,20,10,FL_ALIGN_RIGHT,NULL,0);
+    }
 }
 
 int EnvelopeFreeEdit::handle(int event)
 {
     const int x_=Fl::event_x()-x();
     const int y_=Fl::event_y()-y();
+
+    // Some window ops seem to lose us focus, so we miss the KEYDOWN events.
+    if (event==FL_ENTER)
+        Fl::focus(this);
+
+
+    if ((event==FL_KEYDOWN || event==FL_KEYUP)){
+        int key = Fl::event_key();
+        if (key==FL_Control_L || key==FL_Control_R){
+             ctrldown = (event==FL_KEYDOWN);
+             redraw();
+             if (pair!=NULL) pair->redraw();
+         }
+     }
+
+
+    if (event==FL_MOUSEWHEEL && lastpoint>=0) {
+        if (!ctrldown) {
+            int ny = Penvval[lastpoint] - Fl::event_dy();
+            ny = ny < 0 ? 0 : ny > 127 ? 127 : ny;
+            Penvval[lastpoint] = ny;
+            oscWrite(to_s("Penvval")+to_s(lastpoint), "c", ny);
+            oscWrite("Penvval","");
+        } else if (lastpoint > 0) {
+            int newdt = Fl::event_dy() + Penvdt[lastpoint];
+            newdt = newdt < 0 ? 0 : newdt > 127 ? 127 : newdt;
+            Penvdt[lastpoint] = newdt;
+            oscWrite(to_s("Penvdt")+to_s(lastpoint),  "c", newdt);
+            oscWrite("Penvdt","");
+        }
+        redraw();
+        if (pair!=NULL) pair->redraw();
+    }
+
 
     if (event==FL_PUSH) {
         currentpoint=getnearest(x_,y_);
