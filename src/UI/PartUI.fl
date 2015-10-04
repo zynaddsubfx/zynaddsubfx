@@ -1089,7 +1089,7 @@ delete(instrumenteditwindow);} {}
   }
   decl {BankUI *bankui;} {private local
   }
-  decl {ADnoteUI *adnoteui;} {private local
+  decl {ADnoteUI *adnoteui;} {selected public local
   }
   decl {SUBnoteUI *subnoteui;} {private local
   }
