@@ -177,83 +177,88 @@ int EnvelopeFreeEdit::handle(int event)
 {
     const int x_=Fl::event_x()-x();
     const int y_=Fl::event_y()-y();
+    static Fl_Widget *old_focus;
 
-    // Some window ops seem to lose us focus, so we miss the KEYDOWN events.
-    if (event==FL_ENTER)
-        Fl::focus(this);
+    switch(event) {
+      case FL_ENTER:
+	old_focus=Fl::focus();
+	Fl::focus(this);
+	break;
+      case FL_LEAVE:
+	Fl::focus(old_focus);
+	break;
+      case FL_KEYDOWN:
+      case FL_KEYUP:
+	{
+	  int key = Fl::event_key();
+	  if (key==FL_Control_L || key==FL_Control_R){
+	    ctrldown = (event==FL_KEYDOWN);
+	    redraw();
+	    if (pair!=NULL) pair->redraw();
+	  }
+	}
+	break;
+      case FL_PUSH:
+	  currentpoint=getnearest(x_,y_);
+	  cpx=x_;
+	  cpdt=Penvdt[currentpoint];
+	  lastpoint=currentpoint;
+	  redraw();
+	  if (pair)
+	      pair->redraw();
+	  return 1;
+      case FL_RELEASE:
+	  currentpoint=-1;
+	  redraw();
+	  if (pair)
+	      pair->redraw();
+	  return 1;
+      case FL_MOUSEWHEEL:
+	if (lastpoint>=0) {
+	    if (!ctrldown) {
+		int ny = Penvval[lastpoint] - Fl::event_dy();
+		ny = ny < 0 ? 0 : ny > 127 ? 127 : ny;
+		Penvval[lastpoint] = ny;
+		oscWrite(to_s("Penvval")+to_s(lastpoint), "c", ny);
+		oscWrite("Penvval","");
+	    } else if (lastpoint > 0) {
+		int newdt = Fl::event_dy() + Penvdt[lastpoint];
+		newdt = newdt < 0 ? 0 : newdt > 127 ? 127 : newdt;
+		Penvdt[lastpoint] = newdt;
+		oscWrite(to_s("Penvdt")+to_s(lastpoint),  "c", newdt);
+		oscWrite("Penvdt","");
+	    }
+	  redraw();
+	  if (pair!=NULL) pair->redraw();
+	  return 1;
+	}
+      case FL_DRAG:
+	if (currentpoint>=0){
+	  int ny=limit(127-(int) (y_*127.0/h()), 0, 127);
 
+	  Penvval[currentpoint]=ny;
 
-    if ((event==FL_KEYDOWN || event==FL_KEYUP)){
-        int key = Fl::event_key();
-        if (key==FL_Control_L || key==FL_Control_R){
-             ctrldown = (event==FL_KEYDOWN);
-             redraw();
-             if (pair!=NULL) pair->redraw();
-         }
-     }
+	  const int dx=(int)((x_-cpx)*0.1);
+	  const int newdt=limit(cpdt+dx,0,127);
 
+	  if(currentpoint!=0)
+	      Penvdt[currentpoint]=newdt;
+	  else
+	      Penvdt[currentpoint]=0;
 
-    if (event==FL_MOUSEWHEEL && lastpoint>=0) {
-        if (!ctrldown) {
-            int ny = Penvval[lastpoint] - Fl::event_dy();
-            ny = ny < 0 ? 0 : ny > 127 ? 127 : ny;
-            Penvval[lastpoint] = ny;
-            oscWrite(to_s("Penvval")+to_s(lastpoint), "c", ny);
-            oscWrite("Penvval","");
-        } else if (lastpoint > 0) {
-            int newdt = Fl::event_dy() + Penvdt[lastpoint];
-            newdt = newdt < 0 ? 0 : newdt > 127 ? 127 : newdt;
-            Penvdt[lastpoint] = newdt;
-            oscWrite(to_s("Penvdt")+to_s(lastpoint),  "c", newdt);
-            oscWrite("Penvdt","");
-        }
-        redraw();
-        if (pair!=NULL) pair->redraw();
+	  oscWrite(to_s("Penvval")+to_s(currentpoint), "c", ny);
+	  oscWrite(to_s("Penvdt")+to_s(currentpoint),  "c", newdt);
+	  oscWrite("Penvdt","");
+	  oscWrite("Penvval","");
+	  redraw();
+
+	  if(pair)
+	      pair->redraw();
+	  return 1;
+	}
     }
-
-
-    if (event==FL_PUSH) {
-        currentpoint=getnearest(x_,y_);
-        cpx=x_;
-        cpdt=Penvdt[currentpoint];
-        lastpoint=currentpoint;
-        redraw();
-        if (pair)
-            pair->redraw();
-    }
-
-    if (event==FL_RELEASE){
-        currentpoint=-1;
-        redraw();
-        if (pair)
-            pair->redraw();
-    }
-
-    if (event==FL_DRAG && currentpoint>=0){
-        int ny=limit(127-(int) (y_*127.0/h()), 0, 127);
-
-        Penvval[currentpoint]=ny;
-
-        const int dx=(int)((x_-cpx)*0.1);
-        const int newdt=limit(cpdt+dx,0,127);
-
-        if(currentpoint!=0)
-            Penvdt[currentpoint]=newdt;
-        else
-            Penvdt[currentpoint]=0;
-
-        oscWrite(to_s("Penvval")+to_s(currentpoint), "c", ny);
-        oscWrite(to_s("Penvdt")+to_s(currentpoint),  "c", newdt);
-        oscWrite("Penvdt","");
-        oscWrite("Penvval","");
-        redraw();
-
-        if(pair)
-            pair->redraw();
-    }
-
-
-    return 1;
+      // Needed to propagate undo/redo keys.
+    return 0;
 }
 
 void EnvelopeFreeEdit::update(void)
