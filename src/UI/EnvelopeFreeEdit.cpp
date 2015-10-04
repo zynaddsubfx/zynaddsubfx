@@ -21,6 +21,12 @@ void EnvelopeFreeEdit::init(void)
     oscRegister("Penvdt");
     oscRegister("Penvval");
     oscRegister("Penvsustain");
+
+    //register for non-bulk types
+    for(int i=0; i<MAX_ENVELOPE_POINTS; ++i) {
+        oscRegister((string("Penvdt") + to_s(i)).c_str());
+        oscRegister((string("Penvval") + to_s(i)).c_str());
+    }
 }
 
 void EnvelopeFreeEdit::OSC_raw(const char *msg)
@@ -36,6 +42,16 @@ void EnvelopeFreeEdit::OSC_raw(const char *msg)
         rtosc_blob_t b = rtosc_argument(msg, 0).b;
         assert(b.len == MAX_ENVELOPE_POINTS);
         memcpy(Penvval, b.data, MAX_ENVELOPE_POINTS);
+    } else if(strstr(msg, "Penvval") && !strcmp(args, "c")) {
+        const char *str = strstr(msg, "Penvval");
+        int id = atoi(str+7);
+        assert(0 <= id && id < MAX_ENVELOPE_POINTS);
+        Penvval[id] = rtosc_argument(msg, 0).i;
+    } else if(strstr(msg, "Penvdt") && !strcmp(args, "c")) {
+        const char *str = strstr(msg, "Penvdt");
+        int id = atoi(str+6);
+        assert(0 <= id && id < MAX_ENVELOPE_POINTS);
+        Penvdt[id] = rtosc_argument(msg, 0).i;
     } else if(strstr(msg,"Penvsustain") && !strcmp(args, "i")) {
         Penvsustain = rtosc_argument(msg, 0).i;
     }
@@ -275,6 +291,12 @@ void EnvelopeFreeEdit::rebase(std::string new_base)
     osc->renameLink(loc+"Penvdt", new_base+"Penvdt", this);
     osc->renameLink(loc+"Penvval",    new_base+"Penvval", this);
     osc->renameLink(loc+"Penvsustain", new_base+"Penvsustain", this);
+    for(int i=0; i<MAX_ENVELOPE_POINTS; ++i) {
+        string dt  = string("Penvdt")  + to_s(i);
+        string val = string("Penvval") + to_s(i);
+        osc->renameLink(loc+dt, new_base+dt, this);
+        osc->renameLink(loc+val, new_base+val, this);
+    }
     loc = new_base;
     update();
 }
