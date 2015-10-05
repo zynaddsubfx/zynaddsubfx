@@ -47,6 +47,4 @@ class EnvelopeFreeEdit : public Fl_Box, public Fl_Osc_Widget
         char Penvval[MAX_ENVELOPE_POINTS];
         //The Sustain point
         char Penvsustain;
-        //Are we a free mode editor?
-        char Pfreemode;
 };
