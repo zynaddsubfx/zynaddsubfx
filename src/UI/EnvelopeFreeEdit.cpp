@@ -21,6 +21,7 @@ void EnvelopeFreeEdit::init(void)
     oscRegister("Penvdt");
     oscRegister("Penvval");
     oscRegister("Penvsustain");
+    oscRegister("Pfreemode");
 
     //register for non-bulk types
     for(int i=0; i<MAX_ENVELOPE_POINTS; ++i) {
@@ -54,6 +55,8 @@ void EnvelopeFreeEdit::OSC_raw(const char *msg)
         Penvdt[id] = rtosc_argument(msg, 0).i;
     } else if(strstr(msg,"Penvsustain") && !strcmp(args, "i")) {
         Penvsustain = rtosc_argument(msg, 0).i;
+    } else if(strstr(msg,"Pfreemode")) {
+        Pfreemode = !strcmp(args, "T");
     }
     redraw();
     do_callback();
@@ -194,6 +197,9 @@ int EnvelopeFreeEdit::handle(int event)
     const int x_=Fl::event_x()-x();
     const int y_=Fl::event_y()-y();
     static Fl_Widget *old_focus;
+
+    if (!Pfreemode)
+        return 0;
 
     switch(event) {
       case FL_ENTER:
