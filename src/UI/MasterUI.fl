@@ -574,7 +574,7 @@ syseffectui->refresh();}
             Fl_Button {} {
               label C
               callback {presetsui->copy("/sysefx"+to_s(nsyseff)+"/");}
-              xywh {180 187 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 7
+              xywh {180 187 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
             }
             Fl_Button {} {
               label P
