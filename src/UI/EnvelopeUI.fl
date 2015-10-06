@@ -605,7 +605,8 @@ envfree->hide();
 
 if (freemodehack->value())
    envwindow=envfree;
-else
+else {
+   freemodeeditwindow->hide();
    switch(Envmode){
          case 1:
          case 2:
@@ -622,7 +623,8 @@ else
          break;
          default:
          break; 
-   };
+   }
+}
 
 assert(envwindow);
 envwindow->resize(this->x(),this->y(),this->w(),this->h());
