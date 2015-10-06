@@ -18,7 +18,8 @@
 //static int numobj = 0;
 
 WidgetPDial::WidgetPDial(int x, int y, int w, int h, const char *label)
-    :Fl_Dial(x, y, w, h, label), oldvalue(0.0f), pos(false), textset(false)
+  :Fl_Dial(x, y, w, h, label), oldvalue(0.0f), pos(false), textset(false),
+   value_offset(0.0), value_scale(0.0)
 {
     //cout << "[" << label << "] There are now " << ++numobj << endl;
     Fl_Group *save = Fl_Group::current();
@@ -182,4 +183,15 @@ void WidgetPDial::getPos()
 void WidgetPDial::resetPos()
 {
     pos = false;
+}
+
+void WidgetPDial::set_transform(float scale, float offset)
+{
+    value_offset = offset;
+    value_scale = scale;
+}
+
+float WidgetPDial::transform(float x)
+{
+    return value_scale * x + value_offset;
 }

@@ -14,7 +14,8 @@ class WidgetPDial:public Fl_Dial
         void draw();
         void pdialcolor(int r, int g, int b);
         void tooltip(const char *c);
-        float value_offset;
+	void set_transform(float scale = 1.0, float offset = 0.0);
+	float transform(float x);
     private:
         void getPos();
         void resetPos();
@@ -22,5 +23,7 @@ class WidgetPDial:public Fl_Dial
         bool   pos;
         bool   textset;
         class TipWin * tipwin;
+        float value_offset;
+        float value_scale;
 };
 #endif
