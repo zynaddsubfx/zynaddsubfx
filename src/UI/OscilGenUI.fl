@@ -495,7 +495,7 @@ redrawoscil();}
           label {Use as base}
           callback {//oscil->useasbase();
 if (autoclearbutton->value()){
-   for (int i=0;i<MAX_AD_HARMONICS;i++){
+   for (int i=0;i<(MAX_AD_HARMONICS - 1);i++){
       h[i]->mag->value(64);
       h[i]->mag->do_callback();
       h[i]->phase->value(64);
@@ -529,7 +529,7 @@ redrawoscil();}
           label Clear
           callback {if (!fl_choice("Clear the harmonics settings?","No","Yes",NULL)) return;
 
-for (int i=0;i<MAX_AD_HARMONICS;i++){
+for (int i=0;i<(MAX_AD_HARMONICS - 1);i++){
     h[i]->mag->value(64);
     h[i]->mag->do_callback();
     h[i]->phase->value(64);
@@ -538,7 +538,7 @@ for (int i=0;i<MAX_AD_HARMONICS;i++){
 h[0]->mag->value(0);
 h[0]->mag->do_callback();
 
-//for (int i=0;i<MAX_AD_HARMONICS;i++){
+//for (int i=0;i<(MAX_AD_HARMONICS - 1);i++){
 //  if (oscil->Phmag[i]==64) h[i]->mag->selection_color(0);
 //     else h[i]->mag->selection_color(222);
 //};
@@ -918,7 +918,7 @@ refresh();}
         } {
           Fl_Pack harmonics {open
             xywh {15 350 650 225} type HORIZONTAL
-            code0 {for (int i=0;i<MAX_AD_HARMONICS;i++){h[i]=new Oscilharmonic(0,0,20,o->h(),"");h[i]->init(i,oscildisplaygroup,loc,osc);}}
+            code0 {for (int i=0;i<(MAX_AD_HARMONICS - 1);i++){h[i]=new Oscilharmonic(0,0,20,o->h(),"");h[i]->init(i,oscildisplaygroup,loc,osc);}}
           } {}
         }
       }
@@ -963,7 +963,7 @@ osceditUI->show();} {}
   Function {~OscilEditor()} {open
   } {
     code {osceditUI->hide();
-for (int i=0; i<MAX_AD_HARMONICS; ++i)
+for (int i=0; i<(MAX_AD_HARMONICS - 1); ++i)
     delete h[i];
 
 delete oscilo;
@@ -975,7 +975,7 @@ delete osceditUI;} {}
   Function {refresh()} {} {
     code {magtype->update();
 
-    for (int i=0;i<MAX_AD_HARMONICS;i++) h[i]->refresh();
+    for (int i=0;i<(MAX_AD_HARMONICS - 1);i++) h[i]->refresh();
 
     osc->requestValue(loc+"prepare");
 
@@ -994,7 +994,7 @@ oscils->update();
 oscilo_base->update();
 oscils_base->update();} {}
   }
-  decl {Oscilharmonic *h[MAX_AD_HARMONICS];} {private local
+  decl {Oscilharmonic *h[(MAX_AD_HARMONICS - 1)];} {private local
   }
   decl {std::string loc;} {private local
   }
