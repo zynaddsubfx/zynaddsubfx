@@ -45,7 +45,7 @@ static const rtosc::Ports local_ports = {
     rSelf(EffectMgr),
     rPaste,
     rRecurp(filterpars, "Filter Parameter for Dynamic Filter"),
-    {"parameter#128::i", rProp(alias) rDoc("Parameter Accessor"), NULL,
+    {"parameter#128::i:T:F", rProp(alias) rDoc("Parameter Accessor"), NULL,
         [](const char *msg, rtosc::RtData &d)
         {
             EffectMgr *eff = (EffectMgr*)d.obj;
@@ -54,8 +54,14 @@ static const rtosc::Ports local_ports = {
 
             if(!rtosc_narguments(msg))
                 d.reply(d.loc, "i", eff->geteffectparrt(atoi(mm)));
-            else {
+            else if(rtosc_type(msg, 0) == 'i'){
                 eff->seteffectparrt(atoi(mm), rtosc_argument(msg, 0).i);
+                d.broadcast(d.loc, "i", eff->geteffectparrt(atoi(mm)));
+            } else if(rtosc_type(msg, 0) == 'T'){
+                eff->seteffectparrt(atoi(mm), 127);
+                d.broadcast(d.loc, "i", eff->geteffectparrt(atoi(mm)));
+            } else if(rtosc_type(msg, 0) == 'F'){
+                eff->seteffectparrt(atoi(mm), 0);
                 d.broadcast(d.loc, "i", eff->geteffectparrt(atoi(mm)));
             }
         }},
