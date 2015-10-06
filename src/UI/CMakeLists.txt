@@ -58,6 +58,7 @@ add_library(zynaddsubfx_gui STATIC
 	${UI_objs}
 	${zynaddsubfx_gui_FLTK_UI_SRCS}
         NioUI.cpp
+	TipWin.cpp
         WidgetPDial.cpp
         PartNameButton.cpp
         Fl_Osc_Pane.cpp
