@@ -105,6 +105,7 @@ WidgetPDial::WidgetPDial(int x, int y, int w, int h, const char *label)
     tipwin = new TipWin();
     tipwin->hide();
     Fl_Group::current(save);
+    value_offset=0;
 }
 
 WidgetPDial::~WidgetPDial()
@@ -133,7 +134,7 @@ int WidgetPDial::handle(int event)
                 dragsize *= 10;
 
             value(limit(oldvalue + my / dragsize * (max - min), min, max));
-            tipwin->showValue(value());
+            tipwin->showValue(value()+value_offset);
             value_damage();
             if(this->when() != 0)
                 do_callback();
@@ -148,7 +149,7 @@ int WidgetPDial::handle(int event)
                 dragsize *= 10;
 
             value(limit(value() + my / dragsize * (max - min), min, max));
-            tipwin->showValue(value());
+            tipwin->showValue(value()+value_offset);
             value_damage();
             if(this->when() != 0)
                 do_callback();

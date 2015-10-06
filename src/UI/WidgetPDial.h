@@ -14,6 +14,7 @@ class WidgetPDial:public Fl_Dial
         void draw();
         void pdialcolor(int r, int g, int b);
         void tooltip(const char *c);
+        float value_offset;
     private:
         void getPos();
         void resetPos();
