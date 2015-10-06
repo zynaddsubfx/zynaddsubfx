@@ -293,7 +293,7 @@ activatebutton_presetdir(true);}
     oscilsize->callback = [this](int i){
         oscilsize_widget->value(i-7);
     };
-    oscilsize->update("/config/cfg.OscilPower");
+    oscilsize->doUpdate("/config/cfg.OscilPower");
     
     } {}
   }

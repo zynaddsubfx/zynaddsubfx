@@ -147,8 +147,10 @@ void EnvelopeFreeEdit::draw(void)
     for (int i=1; i<npoints; ++i){
         oldxx=xx;oldyy=yy;
         xx=getpointx(i);yy=getpointy(i);
-        if (i==currentpoint || ctrldown && i==lastpoint) fl_color(FL_RED);
-        else fl_color(alb);
+        if (i==currentpoint || (ctrldown && i==lastpoint))
+            fl_color(FL_RED);
+        else
+            fl_color(alb);
         fl_line(ox+oldxx,oy+oldyy,ox+xx,oy+yy);
         fl_rectf(ox+xx-3,oy+yy-3,6,6);
     }

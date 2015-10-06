@@ -433,13 +433,13 @@ namespace Nio
     using std::get;
     using rtosc::rtMsg;
     rtosc::Ports ports = {
-        {"sink-list:", 0, 0, [](const char *msg, rtosc::RtData &d) {
+        {"sink-list:", 0, 0, [](const char *, rtosc::RtData &d) {
                 auto list = Nio::getSinks();
                 char *ret = rtosc_splat(d.loc, list);
                 d.reply(ret);
                 delete [] ret;
             }},
-        {"source-list:", 0, 0, [](const char *msg, rtosc::RtData &d) {
+        {"source-list:", 0, 0, [](const char *, rtosc::RtData &d) {
                 auto list = Nio::getSources();
                 char *ret = rtosc_splat(d.loc, list);
                 d.reply(ret);
@@ -489,7 +489,7 @@ public:
     void doReadOnlyOp(std::function<void()> read_only_fn);
 
 
-    void saveBankSlot(int npart, int nslot, Master *master, Fl_Osc_Interface *osc)
+    void saveBankSlot(int npart, int nslot, Master *master)
     {
         int err = 0;
         doReadOnlyOp([master,nslot,npart,&err](){
@@ -502,7 +502,7 @@ public:
         }
     }
 
-    void renameBankSlot(int slot, string name, Master *master, Fl_Osc_Interface *osc)
+    void renameBankSlot(int slot, string name, Master *master)
     {
         int err = master->bank.setname(slot, name, -1);
         if(err) {
@@ -513,7 +513,7 @@ public:
         }
     }
 
-    void swapBankSlot(int slota, int slotb, Master *master, Fl_Osc_Interface *osc)
+    void swapBankSlot(int slota, int slotb, Master *master)
     {
         int err = master->bank.swapslot(slota, slotb);
         if(err) {
@@ -524,7 +524,7 @@ public:
         }
     }
 
-    void clearBankSlot(int slot, Master *master, Fl_Osc_Interface *osc)
+    void clearBankSlot(int slot, Master *master)
     {
         int err = master->bank.clearslot(slot);
         if(err) {
@@ -564,7 +564,7 @@ public:
             bank.loadbank(bank.banks[par].dir);
     }
 
-    void loadPart(int npart, const char *filename, Master *master, Fl_Osc_Interface *osc)
+    void loadPart(int npart, const char *filename, Master *master)
     {
         actual_load[npart]++;
 
@@ -991,7 +991,7 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg, bool dummy)
         uToB->write("/add-rt-memory", "bi", sizeof(void*), &mem, N);
     } else if(!strcmp(rtmsg, "/setprogram")
             && !strcmp(rtosc_argument_string(rtmsg),"cc")) {
-        loadPart(rtosc_argument(rtmsg,0).i, master->bank.ins[rtosc_argument(rtmsg,1).i].filename.c_str(), master, osc);
+        loadPart(rtosc_argument(rtmsg,0).i, master->bank.ins[rtosc_argument(rtmsg,1).i].filename.c_str(), master);
     } else if(!strcmp(rtmsg, "/setbank")
             && !strcmp(rtosc_argument_string(rtmsg), "c")) {
         loadPendingBank(rtosc_argument(rtmsg,0).i, master->bank);
@@ -1212,22 +1212,22 @@ void MiddleWareImpl::handleMsg(const char *msg)
         loadMaster(NULL);
     } else if(!strcmp(msg, "/load_xiz") && !strcmp(rtosc_argument_string(msg), "is")) {
         pending_load[rtosc_argument(msg,0).i]++;
-        loadPart(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master, osc);
+        loadPart(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master);
     } else if(strstr(msg, "load-part") && !strcmp(rtosc_argument_string(msg), "is")) {
         pending_load[rtosc_argument(msg,0).i]++;
-        loadPart(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master, osc);
+        loadPart(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master);
     } else if(!strcmp(msg, "/setprogram")
             && !strcmp(rtosc_argument_string(msg),"c")) {
         pending_load[0]++;
-        loadPart(0, master->bank.ins[rtosc_argument(msg,0).i].filename.c_str(), master, osc);
+        loadPart(0, master->bank.ins[rtosc_argument(msg,0).i].filename.c_str(), master);
     } else if(strstr(msg, "save-bank-part") && !strcmp(rtosc_argument_string(msg), "ii")) {
-        saveBankSlot(rtosc_argument(msg,0).i, rtosc_argument(msg,1).i, master, osc);
+        saveBankSlot(rtosc_argument(msg,0).i, rtosc_argument(msg,1).i, master);
     } else if(strstr(msg, "bank-rename") && !strcmp(rtosc_argument_string(msg), "is")) {
-        renameBankSlot(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master, osc);
+        renameBankSlot(rtosc_argument(msg,0).i, rtosc_argument(msg,1).s, master);
     } else if(strstr(msg, "swap-bank-slots") && !strcmp(rtosc_argument_string(msg), "ii")) {
-        swapBankSlot(rtosc_argument(msg,0).i, rtosc_argument(msg,1).i, master, osc);
+        swapBankSlot(rtosc_argument(msg,0).i, rtosc_argument(msg,1).i, master);
     } else if(strstr(msg, "clear-bank-slot") && !strcmp(rtosc_argument_string(msg), "i")) {
-        clearBankSlot(rtosc_argument(msg,0).i, master, osc);
+        clearBankSlot(rtosc_argument(msg,0).i, master);
     } else if(strstr(msg, "/config/")) {
         handleConfig(msg);
     } else if(strstr(msg, "/presets/")) {

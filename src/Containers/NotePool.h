@@ -6,7 +6,7 @@
 //Expected upper bound of synths given that max polyphony is hit
 #define EXPECTED_USAGE 3
 
-class LegatoParams;
+struct LegatoParams;
 class NotePool
 {
     public:

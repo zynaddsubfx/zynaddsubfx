@@ -93,7 +93,7 @@ class AdNoteTest:public CxxTest::TestSuite
         void run_test(int a, int b, int c, int d, int e, int f, float values[4])
         {
             sprng(0);
-            params->set_unison_size_index(0,a);
+            //params->set_unison_size_index(0,a);
             params->VoicePar[0].Unison_frequency_spread = b;
             params->VoicePar[0].Unison_stereo_spread    = c;
             params->VoicePar[0].Unison_vibratto         = d;

@@ -15,7 +15,7 @@ Fl_Osc_Window::Fl_Osc_Window(int w, int h, const char *L)
 void Fl_Osc_Window::init(Fl_Osc_Interface *osc_, std::string loc_)
 {
     title_ext  = new Osc_DataModel(osc_);
-    title_ext->update("/ui/title");
+    title_ext->doUpdate("/ui/title");
     title_ext->callback = [this](string next) {
         title_new = title_orig + next;
         this->label(title_new.c_str());

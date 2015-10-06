@@ -292,7 +292,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     :HDDRecorder(synth_), ctl(synth_),
     microtonal(config->cfg.GzipCompression), bank(config),
     midi(Master::ports), frozenState(false), pendingMemory(false),
-    synth(synth_), gzip_compression(config->cfg.GzipCompression), time(synth)
+    synth(synth_), time(synth), gzip_compression(config->cfg.GzipCompression)
 {
     bToU = NULL;
     uToB = NULL;
