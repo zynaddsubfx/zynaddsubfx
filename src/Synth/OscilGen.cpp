@@ -635,6 +635,7 @@ void OscilGen::spectrumadjust(fft_t *freqs)
 {
     if(Psatype == 0)
         return;
+    dprintf(2, "Psapar = %f\n", (float)Psapar);
     float par = Psapar / 127.0f;
     switch(Psatype) {
         case 1:
@@ -652,12 +653,11 @@ void OscilGen::spectrumadjust(fft_t *freqs)
             break;
     }
 
-
     normalize(freqs, synth.oscilsize);
 
     for(int i = 0; i < synth.oscilsize / 2; ++i) {
-        float mag   = abs(oscilFFTfreqs, i);
-        float phase = M_PI_2 - arg(oscilFFTfreqs, i);
+        float mag   = abs(freqs, i);
+        float phase = M_PI_2 - arg(freqs, i);
 
         switch(Psatype) {
             case 1:
