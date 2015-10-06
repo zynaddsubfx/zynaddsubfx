@@ -170,9 +170,17 @@ o->redraw();}
       }
       Fl_Button {} {
         label edit
-        callback {ui->partui->adnoteui->ADnoteVoice->show();
-ui->partui->adnoteui->advoice->change_voice(nvoice);
-ui->partui->adnoteui->currentvoicecounter->value(nvoice+1);}
+        callback {
+class ADnoteUI *adnoteui = ui->partui->adnoteui;
+class ADvoiceUI *advoice = adnoteui->advoice;
+adnoteui->ADnoteVoice->show();
+advoice->change_voice(nvoice);
+adnoteui->currentvoicecounter->value(nvoice+1);
+if (advoice->mod_type->value() == 0)
+    advoice->voiceFMparametersgroup->deactivate();
+else
+    advoice->voiceFMparametersgroup->activate();
+}
         xywh {53 6 40 15} box THIN_UP_BOX labelsize 11
       }
     }
@@ -399,7 +407,7 @@ voiceFMparametersgroup->redraw();} open
               class Fl_Osc_Choice
             } {}
           }
-          Fl_Choice {} {
+          Fl_Choice mod_type {
             label {Type:}
             callback {if (o->value()==0) voiceFMparametersgroup->deactivate();
 else voiceFMparametersgroup->activate();
@@ -1047,7 +1055,12 @@ ADnoteVoiceList->show();}
       }
       Fl_Button {} {
         label {Show Voice Parameters}
-        callback {ADnoteVoice->show();}
+        callback {
+        if (advoice->mod_type->value() == 0)
+            advoice->voiceFMparametersgroup->deactivate();
+        else
+            advoice->voiceFMparametersgroup->activate();
+        ADnoteVoice->show();}
         xywh {5 400 170 25} labelsize 12
       }
       Fl_Button {} {
