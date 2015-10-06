@@ -635,7 +635,6 @@ void OscilGen::spectrumadjust(fft_t *freqs)
 {
     if(Psatype == 0)
         return;
-    dprintf(2, "Psapar = %f\n", (float)Psapar);
     float par = Psapar / 127.0f;
     switch(Psatype) {
         case 1:
