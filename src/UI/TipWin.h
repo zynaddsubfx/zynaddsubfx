@@ -1,3 +1,5 @@
+#ifndef TIPWIN_H
+#define TIPWIN_H
 using namespace std;
 
 class TipWin:public Fl_Menu_Window
@@ -15,3 +17,4 @@ class TipWin:public Fl_Menu_Window
         string text;
         bool   textmode;
 };
+#endif
