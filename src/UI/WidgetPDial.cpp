@@ -19,7 +19,7 @@
 
 WidgetPDial::WidgetPDial(int x, int y, int w, int h, const char *label)
   :Fl_Dial(x, y, w, h, label), oldvalue(0.0f), pos(false), textset(false),
-   value_offset(0.0), value_scale(0.0)
+   value_offset(0.0), value_scale(1.0)
 {
     //cout << "[" << label << "] There are now " << ++numobj << endl;
     Fl_Group *save = Fl_Group::current();
