@@ -55,7 +55,7 @@ int WidgetPDial::handle(int event)
                 dragsize *= 10;
 
             value(limit(oldvalue + my / dragsize * (max - min), min, max));
-            tipwin->showValue(value()+value_offset);
+            tipwin->showValue(transform(value()));
             value_damage();
             if(this->when() != 0)
                 do_callback();
@@ -70,7 +70,7 @@ int WidgetPDial::handle(int event)
                 dragsize *= 10;
 
             value(limit(value() + my / dragsize * (max - min), min, max));
-            tipwin->showValue(value()+value_offset);
+            tipwin->showValue(transform(value()));
             value_damage();
             if(this->when() != 0)
                 do_callback();
