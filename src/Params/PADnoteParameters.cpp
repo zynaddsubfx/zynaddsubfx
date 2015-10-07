@@ -90,8 +90,6 @@ static const rtosc::Ports PADnotePorts =
 
     PC(fixedfreq),
     PC(fixedfreqET),
-    //TODO detune, coarse detune
-    PC(DetuneType),
     PC(Stereo),
     PC(Panning),
     PC(AmpVelocityScaleFunction),
