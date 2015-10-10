@@ -1243,6 +1243,8 @@ void MiddleWareImpl::handleMsg(const char *msg)
         undo.seekHistory(-1);
     } else if(!strcmp(msg, "/redo")) {
         undo.seekHistory(+1);
+    } else if(!strcmp(msg, "/ui/title")) {
+        ;//drop the message into the abyss
     } else
         uToB->raw_write(msg);
 }
