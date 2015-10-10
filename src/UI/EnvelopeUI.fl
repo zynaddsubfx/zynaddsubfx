@@ -62,13 +62,13 @@ class PointButton {open : {public Fl_Button, public Fl_Osc_Widget}}
   } {
     code {} {}
   }
-  Function {Osc_value(bool v)} {open
+  Function {rebase(std::string new_base)} {open
   } {
-    code {Fl_Button::value(v);} {}
+    code {loc = new_base;} {}
   }
   Function {init(std::string path_)} {open
   } {
-    code {ext = path_; oscRegister(ext.c_str());} {}
+    code {ext = path_;} {}
   }
 }
 class EnvelopeUI {open : {public Fl_Osc_Group,PresetsUI_}
