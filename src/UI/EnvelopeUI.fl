@@ -56,6 +56,21 @@ decl {\#include "common.H"} {public local
 decl {\#include "EnvelopeFreeEdit.h"} {public local
 } 
 
+class PointButton {open : {public Fl_Button, public Fl_Osc_Widget}}
+{
+  Function {PointButton(int x,int y, int w, int h, const char *label=0):Fl_Button(x,y,w,h,label),Fl_Osc_Widget(this)} {open
+  } {
+    code {} {}
+  }
+  Function {Osc_value(bool v)} {open
+  } {
+    code {Fl_Button::value(v);} {}
+  }
+  Function {init(std::string path_)} {open
+  } {
+    code {ext = path_; oscRegister(ext.c_str());} {}
+  }
+}
 class EnvelopeUI {open : {public Fl_Osc_Group,PresetsUI_}
 } {
   Function {EnvelopeUI(int x,int y, int w, int h, const char *label=0):Fl_Osc_Group(x,y,w,h,label)} {} {
@@ -104,8 +119,8 @@ sustaincounter->update();
 //sustaincounter->value(Penvsustain);
 //sustaincounter->maximum(Penvpoints-2);}
         xywh {115 155 80 20} box THIN_UP_BOX labelsize 11
-        code0 {(void)o;//if (Pfreemode==0) o->hide();}
-        class Fl_Osc_Button
+        code0 {(void)o->init("addPoint");}
+        class PointButton
       }
       Fl_Box freeedit {
         label Envelope
@@ -124,8 +139,8 @@ sustaincounter->update();
 //sustaincounter->value(Penvsustain);
 //sustaincounter->maximum(Penvpoints-2);}
         xywh {200 155 80 20} box THIN_UP_BOX labelsize 11
-        code0 {(void)o;//if (Pfreemode==0) o->hide();}
-        class Fl_Osc_Button
+        code0 {(void)o->init("delPoint");}
+        class PointButton
       }
       Fl_Check_Button forcedreleasecheck {
         label frcR
