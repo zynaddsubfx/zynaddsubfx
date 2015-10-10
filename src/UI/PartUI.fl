@@ -724,12 +724,12 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
       }
       Fl_Button {} {
         label C
-        callback {presetsui->copy(partfx->loc());}
+        callback {presetsui->copy(partfx->loc()+"partefx"+to_s(ninseff)+"/");}
         xywh {90 127 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Button {} {
         label P
-        callback {presetsui->paste(partfx->loc(),inseffectui);}
+        callback {presetsui->paste(partfx->loc()+"partefx"+to_s(ninseff)+"/",inseffectui);}
         xywh {120 127 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
     }
