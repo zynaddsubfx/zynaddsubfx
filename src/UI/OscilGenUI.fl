@@ -493,7 +493,7 @@ redrawoscil();}
         }
         Fl_Button {} {
           label {Use as base}
-          callback {//oscil->useasbase();
+          callback {osc->requestValue(loc+"use-as-base");
 if (autoclearbutton->value()){
    for (int i=0;i<(MAX_AD_HARMONICS - 1);i++){
       h[i]->mag->value(64);

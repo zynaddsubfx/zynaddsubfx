@@ -153,6 +153,10 @@ const rtosc::Ports OscilGen::ports = {
         NULL, [](const char *, rtosc::RtData &d) {
             ((OscilGen*)d.obj)->convert2sine();
         }},
+    {"use-as-base:", rProp(non-realtime) rDoc("Translates current waveform into base"),
+        NULL, [](const char *, rtosc::RtData &d) {
+            ((OscilGen*)d.obj)->useasbase();
+        }},
     {"prepare:b", rProp(internal) rProp(non-realtime) rProp(pointer) rDoc("Sets prepared fft data"),
         NULL, [](const char *m, rtosc::RtData &d) {
             //fprintf(stderr, "prepare:b got a message from '%s'\n", m);
