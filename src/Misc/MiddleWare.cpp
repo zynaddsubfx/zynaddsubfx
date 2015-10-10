@@ -236,6 +236,11 @@ void rescanForBanks(Bank &bank, std::function<void(const char*)> cb)
 
 void loadBank(Bank &bank, int pos, std::function<void(const char*)> cb)
 {
+    char response[2048];
+    if(!rtosc_message(response, 2048, "/loadbank", "i", pos))
+        errx(1, "Failure to handle bank update properly...");
+    if(cb)
+        cb(response);
     if(bank.bankpos != pos) {
         bank.bankpos = pos;
         bank.loadbank(bank.banks[pos].dir);
@@ -1176,7 +1181,7 @@ void MiddleWareImpl::handleMsg(const char *msg)
     if(last_url == "GUI")
         bank_cb = [this](const char *msg){if(osc)osc->tryLink(msg);};
     else
-        bank_cb = [this](const char *msg){this->bToUhandle(msg, 1);};
+        bank_cb = [this](const char *msg){if(osc)osc->tryLink(msg);this->bToUhandle(msg, 1);};
 
     if(!strcmp(msg, "/refresh_bank") && !strcmp(rtosc_argument_string(msg), "i")) {
         refreshBankView(master->bank, rtosc_argument(msg,0).i, bank_cb);
