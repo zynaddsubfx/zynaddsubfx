@@ -402,7 +402,7 @@ void EffectMgr::paste(EffectMgr &e)
     changeeffectrt(e.nefx, true);
     changepresetrt(e.preset, true);
     for(int i=0;i<128;++i)
-        seteffectparrt(e.settings[i], i);
+        seteffectparrt(i, e.settings[i]);
 }
 
 void EffectMgr::add2XML(XMLwrapper *xml)
