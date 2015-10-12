@@ -658,7 +658,10 @@ public:
         m->uToB = uToB;
         m->bToU = bToU;
         if(filename) {
-            m->loadXML(filename);
+            if ( m->loadXML(filename) ) {
+                delete m;
+                return;
+            }
             m->applyparameters();
         }
 

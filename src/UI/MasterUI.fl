@@ -1508,7 +1508,15 @@ nsyseff=0;
 npart=0;
 last_xmz = new Osc_DataModel(osc);
 last_xmz->callback = [this](std::string filestr) {
-    strncpy(last_loaded, filestr.c_str(), XMZ_PATH_MAX);
+    const char *filename = filestr.c_str();
+    if (filename[0] != 0)
+       strncpy(last_loaded, filename, XMZ_PATH_MAX);
+    else if (loading_next[0] != 0) {
+       strncpy(last_loaded, loading_next, XMZ_PATH_MAX);
+       loading_next[0] = 0;
+    } else
+       last_loaded[0] = 0;
+    last_loaded[XMZ_PATH_MAX - 1] = 0;
     char *label = last_loaded[0] == 0 ? NULL
                   : ((label = strrchr(last_loaded, '/'))) ? label+1
 		  : last_loaded;
@@ -1582,7 +1590,7 @@ simplelistitemgroup->redraw();} {}
 microtonalui=new MicrotonalUI(osc, "/microtonal/");
 
     osc->write("/reset_master");
-       osc->write("/last_xmz", "s", "");
+       osc->write("/last_xmz");
        npartcounter->value(1);
        refresh_master_ui();
        updatepanel();} {}
@@ -1594,7 +1602,9 @@ microtonalui=new MicrotonalUI(osc, "/microtonal/");
   }
   Function {do_revert_changes_unconditional()} {return_type int
   } {
-    code {osc->write("/load_xmz", "s", last_loaded);
+    code {strncpy(loading_next, last_loaded, XMZ_PATH_MAX);
+    osc->write("/load_xmz", "s", last_loaded);
+    osc->write("/last_xmz");
     refresh_master_ui();
     updatepanel();
 
@@ -1610,8 +1620,9 @@ return 1;} {}
   }
   Function {do_load_master_unconditional(const char *filename, const char *display_name)} {return_type int
   } {
-    code {osc->write("/load_xmz", "s", filename);
-    osc->write("/last_xmz", "s", filename);
+    code {strncpy(loading_next, filename, XMZ_PATH_MAX);
+    osc->write("/load_xmz", "s", filename);
+    osc->write("/last_xmz");
     refresh_master_ui();
     updatepanel();
 
@@ -1722,6 +1733,8 @@ bankui->hide();} {}
   decl {class Fl_Osc_Interface *osc;} {public local
   }
   decl {char last_loaded[XMZ_PATH_MAX];} {public local
+  }
+  decl {char loading_next[XMZ_PATH_MAX];} {public local
   }
   Function {close()} {open return_type void
   } {

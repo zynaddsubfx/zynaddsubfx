@@ -402,8 +402,7 @@ int main(int argc, char *argv[])
         }
         else {
             strncpy(master->last_xmz, filename, XMZ_PATH_MAX);
-            if (master->last_xmz[XMZ_PATH_MAX-1] != 0)
-                master->last_xmz[0] = 0;
+            master->last_xmz[XMZ_PATH_MAX-1] = 0;
             master->applyparameters();
             cout << "Master file loaded." << endl;
         }
