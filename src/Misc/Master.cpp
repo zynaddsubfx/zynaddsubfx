@@ -103,6 +103,7 @@ static const Ports sysefsendto =
 };
 
 static const Ports master_ports = {
+    rString(last_xmz, XMZ_PATH_MAX, "File name for last name loaded if any."),
     rRecursp(part, 16, "Part"),//NUM_MIDI_PARTS
     rRecursp(sysefx, 4, "System Effect"),//NUM_SYS_EFX
     rRecursp(insefx, 8, "Insertion Effect"),//NUM_INS_EFX
@@ -306,6 +307,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     the_master = this;
 #endif
 
+    last_xmz[0] = 0;
     fft = new FFTwrapper(synth.oscilsize);
 
     shutup = 0;
@@ -1054,7 +1056,6 @@ int Master::saveXML(const char *filename)
     delete (xml);
     return result;
 }
-
 
 
 int Master::loadXML(const char *filename)

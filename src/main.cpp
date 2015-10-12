@@ -393,13 +393,17 @@ int main(int argc, char *argv[])
     initprogram(std::move(synth), &config, prefered_port);
 
     if(!loadfile.empty()) {
-        int tmp = master->loadXML(loadfile.c_str());
+        const char *filename = loadfile.c_str();
+        int tmp = master->loadXML(filename);
         if(tmp < 0) {
             cerr << "ERROR: Could not load master file " << loadfile
                  << "." << endl;
             exit(1);
         }
         else {
+            strncpy(master->last_xmz, filename, XMZ_PATH_MAX);
+            if (master->last_xmz[XMZ_PATH_MAX-1] != 0)
+                master->last_xmz[0] = 0;
             master->applyparameters();
             cout << "Master file loaded." << endl;
         }

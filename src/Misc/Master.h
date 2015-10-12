@@ -54,6 +54,8 @@ class Master
         /** Destructor*/
         ~Master();
 
+        char last_xmz[XMZ_PATH_MAX];
+
         void applyOscEvent(const char *event);
 
         /**Saves all settings to a XML file
@@ -64,7 +66,6 @@ class Master
         void add2XML(XMLwrapper *xml);
 
         void defaults();
-
 
         /**loads all settings from a XML file
          * @return 0 for ok or -1 if there is an error*/

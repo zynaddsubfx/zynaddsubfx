@@ -145,6 +145,14 @@ typedef std::complex<fftw_real> fft_t;
 #define PART_MAX_NAME_LEN 30
 
 /*
+ * The maximum we allow for an XMZ path
+ *
+ * Note that this is an ugly hack.  Finding a compile time path
+ * max portably is painful.
+ */
+#define XMZ_PATH_MAX 1024
+
+/*
  * The maximum number of bands of the equaliser
  */
 #define MAX_EQ_BANDS 8
