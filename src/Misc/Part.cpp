@@ -754,6 +754,7 @@ void Part::ComputePartSmps()
             partoutr[i] *= tmp;
         }
         notePool.killAllNotes();
+        monomemClear();
         killallnotes = false;
         for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx)
             partefx[nefx]->cleanup();
