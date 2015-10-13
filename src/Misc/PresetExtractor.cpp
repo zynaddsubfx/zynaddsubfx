@@ -99,8 +99,8 @@ const rtosc::Ports real_preset_ports =
 const rtosc::Ports preset_ports
 {
     {"scan-for-presets:", rDoc("Scan For Presets"), 0, dummy},
-    {"copy:s:ss:si:ssi",  rDoc("Copy <s> URL to <s> Name/Clipboard from subfield <i>"), 0, dummy},
-    {"paste:s:ss:si:ssi", rDoc("Paste <s> URL to <s> File-Name/Clipboard from subfield <i>"), 0, dummy},
+    {"copy:s:ss:si:ssi",  rDoc("Copy (s)URL to (s) Name/Clipboard from subfield (i)"), 0, dummy},
+    {"paste:s:ss:si:ssi", rDoc("Paste (s) URL to (s) File-Name/Clipboard from subfield (i)"), 0, dummy},
     {"clipboard-type:",   rDoc("Type Stored In Clipboard"), 0, dummy},
     {"delete:s", rDoc("Delete the given preset file"), 0, dummy},
 };

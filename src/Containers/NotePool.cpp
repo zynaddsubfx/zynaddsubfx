@@ -242,7 +242,7 @@ void NotePool::cleanup(void)
             ndesc[i].size = new_length[i];
             if(new_length[i] != 0)
                 ndesc[cum_new++] = ndesc[i];
-             else
+            else
                 ndesc[i].status = Part::KEY_OFF;
         }
         memset(ndesc+cum_new, 0, sizeof(*ndesc)*(POLYPHONY-cum_new));

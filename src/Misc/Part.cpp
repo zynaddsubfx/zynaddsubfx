@@ -83,11 +83,15 @@ static const Ports partPorts = {
     rString(Pname, PART_MAX_NAME_LEN, "Kit User Specified Label"),
     rArray(Pefxroute, NUM_PART_EFX,  "Effect Routing"),
     rArrayT(Pefxbypass, NUM_PART_EFX, "If an effect is bypassed"),
-    {"captureMin:", NULL, NULL, [](const char *, RtData &r)
+    {"captureMin:", rDoc("Capture minimum valid note"), NULL,
+        [](const char *, RtData &r)
         {Part *p = (Part*)r.obj; p->Pminkey = p->lastnote;}},
-    {"captureMax:", NULL, NULL, [](const char *, RtData &r)
+    {"captureMax:", rDoc("Capture maximum valid note"), NULL,
+        [](const char *, RtData &r)
         {Part *p = (Part*)r.obj; p->Pmaxkey = p->lastnote;}},
-    {"polyType::c:i", NULL, NULL, [](const char *msg, RtData &d)
+    {"polyType::c:i", rProp(parameter) rOptions(Polyphonic, Monophonic, Legato)
+        rDoc("synthesis polyphony type"), NULL,
+        [](const char *msg, RtData &d)
         {
             Part *p = (Part*)d.obj;
             if(!rtosc_narguments(msg)) {
@@ -109,7 +113,8 @@ static const Ports partPorts = {
                 p->Ppolymode = 0;
                 p->Plegatomode = 1;
             }}},
-    {"clear:", rProp(internal) rDoc("Reset Part To Defaults"), 0, [](const char *, RtData &d)
+    {"clear:", rProp(internal) rDoc("Reset Part To Defaults"), 0, 
+        [](const char *, RtData &d)
         {
             //XXX todo forward this event for middleware to handle
             //Part *p = (Part*)d.obj;
@@ -160,23 +165,24 @@ static const Ports kitPorts = {
     rToggle(Ppadenabled, "PADsynth enable"),
     rParamZyn(Psendtoparteffect, "Effect Levels"),
     rString(Pname, PART_MAX_NAME_LEN, "Kit User Specified Label"),
-    {"captureMin:", NULL, NULL, [](const char *, RtData &r)
+    {"captureMin:", rDoc("Capture minimum valid note"), NULL,
+        [](const char *, RtData &r)
         {Part::Kit *p = (Part::Kit*)r.obj; p->Pminkey = p->parent->lastnote;}},
-    {"captureMax:", NULL, NULL, [](const char *, RtData &r)
+    {"captureMax:", rDoc("Capture maximum valid note"), NULL, [](const char *, RtData &r)
         {Part::Kit *p = (Part::Kit*)r.obj; p->Pmaxkey = p->parent->lastnote;}},
-    {"padpars-data:b", rProp(internal), 0,
+    {"padpars-data:b", rProp(internal) rDoc("Set PADsynth data pointer"), 0,
         [](const char *msg, RtData &d) {
             rObject &o = *(rObject*)d.obj;
             assert(o.padpars == NULL);
             o.padpars = *(decltype(o.padpars)*)rtosc_argument(msg, 0).b.data;
         }},
-    {"adpars-data:b", rProp(internal), 0,
+    {"adpars-data:b", rProp(internal) rDoc("Set ADsynth data pointer"), 0,
         [](const char *msg, RtData &d) {
             rObject &o = *(rObject*)d.obj;
             assert(o.adpars == NULL);
             o.adpars = *(decltype(o.adpars)*)rtosc_argument(msg, 0).b.data;
         }},
-    {"subpars-data:b", rProp(internal), 0,
+    {"subpars-data:b", rProp(internal) rDoc("Set SUBsynth data pointer"), 0,
         [](const char *msg, RtData &d) {
             rObject &o = *(rObject*)d.obj;
             assert(o.subpars == NULL);

@@ -45,7 +45,8 @@ static const rtosc::Ports local_ports = {
     rSelf(EffectMgr),
     rPaste,
     rRecurp(filterpars, "Filter Parameter for Dynamic Filter"),
-    {"parameter#128::i:T:F", rProp(alias) rDoc("Parameter Accessor"), NULL,
+    {"parameter#128::i:T:F", rProp(parameter) rProp(alias) rDoc("Parameter Accessor"),
+        NULL,
         [](const char *msg, rtosc::RtData &d)
         {
             EffectMgr *eff = (EffectMgr*)d.obj;
@@ -65,7 +66,7 @@ static const rtosc::Ports local_ports = {
                 d.broadcast(d.loc, "i", eff->geteffectparrt(atoi(mm)));
             }
         }},
-    {"preset::i", rProp(alias) rDoc("Effect Preset Selector"), NULL,
+    {"preset::i", rProp(parameter) rProp(alias) rDoc("Effect Preset Selector"), NULL,
         [](const char *msg, rtosc::RtData &d)
         {
             char loc[1024];
@@ -101,7 +102,8 @@ static const rtosc::Ports local_ports = {
             eq->getFilter(a,b);
             d.reply(d.loc, "bb", sizeof(a), a, sizeof(b), b);
         }},
-    {"efftype::i", rDoc("Get Effect Type"), NULL, [](const char *m, rtosc::RtData &d)
+    {"efftype::i", rProp(parameter) rDoc("Get Effect Type"), NULL,
+        [](const char *m, rtosc::RtData &d)
         {
             EffectMgr *eff  = (EffectMgr*)d.obj;
             if(rtosc_narguments(m))  {

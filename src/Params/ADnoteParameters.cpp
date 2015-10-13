@@ -108,14 +108,16 @@ static const Ports voicePorts = {
 
     
     //weird stuff for PCoarseDetune
-    {"detunevalue:", NULL, NULL, [](const char *, RtData &d)
+    {"detunevalue:",  rMap(unit,cents) rDoc("Get detune in cents"), NULL,
+        [](const char *, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
             //TODO check if this is accurate or if PCoarseDetune is utilized
             //TODO do the same for the other engines
             d.reply(d.loc, "f", getdetune(obj->PDetuneType, 0, obj->PDetune));
         }},
-    {"octave::c:i", NULL, NULL, [](const char *msg, RtData &d)
+    {"octave::c:i", rProp(parameter) rDoc("Octave note offset"), NULL,
+        [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
             if(!rtosc_narguments(msg)) {
@@ -128,7 +130,8 @@ static const Ports voicePorts = {
                 obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
             }
         }},
-    {"coarsedetune::c:i", NULL, NULL, [](const char *msg, RtData &d)
+    {"coarsedetune::c:i", rProp(parameter) rDoc("Coarse note detune"), NULL,
+        [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
             if(!rtosc_narguments(msg)) {
@@ -143,14 +146,15 @@ static const Ports voicePorts = {
         }},
     
     //weird stuff for PCoarseDetune
-    {"FMdetunevalue:", NULL, NULL, [](const char *, RtData &d)
+    {"FMdetunevalue:", rMap(unit,cents) rDoc("Get modulator detune"), NULL, [](const char *, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
             //TODO check if this is accurate or if PCoarseDetune is utilized
             //TODO do the same for the other engines
             d.reply(d.loc, "f", getdetune(obj->PFMDetuneType, 0, obj->PFMDetune));
         }},
-    {"FMoctave::c:i", NULL, NULL, [](const char *msg, RtData &d)
+    {"FMoctave::c:i", rProp(parameter) rDoc("Octave note offset for modulator"), NULL,
+        [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
             if(!rtosc_narguments(msg)) {
@@ -163,7 +167,8 @@ static const Ports voicePorts = {
                 obj->PFMCoarseDetune = k*1024 + obj->PFMCoarseDetune%1024;
             }
         }},
-    {"FMcoarsedetune::c:i", NULL, NULL, [](const char *msg, RtData &d)
+    {"FMcoarsedetune::c:i", rProp(parameter) rDoc("Coarse note detune for modulator"),
+        NULL, [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
             if(!rtosc_narguments(msg)) {
@@ -178,7 +183,8 @@ static const Ports voicePorts = {
         }},
 
     //Reader
-    {"unisonFrequencySpreadCents:", NULL, NULL, [](const char *, RtData &d)
+    {"unisonFrequencySpreadCents:", rMap(unit,cents) rDoc("Unison Frequency Spread"),
+        NULL, [](const char *, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
             d.reply(d.loc, "f", obj->getUnisonFrequencySpreadCents());
@@ -224,12 +230,14 @@ static const Ports globalPorts = {
     rParamZyn(Hrandgrouping, "How randomness is applied to multiple voices using the same oscil"),
 
     //weird stuff for PCoarseDetune
-    {"detunevalue:", NULL, NULL, [](const char *, RtData &d)
+    {"detunevalue:", rMap(unit,cents) rDoc("Get detune in cents"), NULL,
+        [](const char *, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
             d.reply(d.loc, "f", getdetune(obj->PDetuneType, 0, obj->PDetune));
         }},
-    {"octave::c:i", NULL, NULL, [](const char *msg, RtData &d)
+    {"octave::c:i", rProp(parameter) rDoc("Octave note offset"), NULL,
+        [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
             if(!rtosc_narguments(msg)) {
@@ -242,7 +250,8 @@ static const Ports globalPorts = {
                 obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
             }
         }},
-    {"coarsedetune::c:i", NULL, NULL, [](const char *msg, RtData &d)
+    {"coarsedetune::c:i", rProp(parameter) rDoc("Coarse note detune"), NULL,
+        [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
             if(!rtosc_narguments(msg)) {
