@@ -44,35 +44,93 @@ pthread_t main_thread;
 const rtosc::Ports OscilGen::ports = {
     rSelf(OscilGen),
     rPaste,
-    PC(hmagtype),
-    PC(currentbasefunc),
-    PC(basefuncpar),
-    PC(basefuncmodulation),
-    PC(basefuncmodulationpar1),
-    PC(basefuncmodulationpar2),
-    PC(basefuncmodulationpar3),
-    PC(waveshaping),
-    PC(waveshapingfunction),
-    PC(filtertype),
+    //TODO ensure min/max
+    rOption(Phmagtype,
+            rOptions(linear,dB scale (-40),
+                     dB scale (-60), dB scale (-80),
+                     dB scale (-100)),
+            "Type of magnitude for harmonics"),
+    rOption(Pcurrentbasefunc,
+            rOptions(sine, triangle,
+                pulse,
+                saw,
+                power,
+                gauss,
+                diode,
+                abssine,
+                pulsesine,
+                stretchsine,
+                chirp,
+                absstretchsine,
+                chebyshev,
+                sqr,
+                spike,
+                circle), rOpt(127,use-as-base waveform),
+            "Base Waveform for harmonics"),
+    rParamZyn(Pbasefuncpar,
+            "Morph between possible base function shapes "
+            "(e.g. rising sawtooth vs a falling sawtooth)"),
+    rOption(Pbasefuncmodulation,
+            rOptions(None, Rev, Sine, Power),
+            "Modulation applied to Base function spectra"),
+    rParamZyn(Pbasefuncmodulationpar1,
+            "Base function modulation parameter"),
+    rParamZyn(Pbasefuncmodulationpar2,
+            "Base function modulation parameter"),
+    rParamZyn(Pbasefuncmodulationpar3,
+            "Base function modulation parameter"),
+    rParamZyn(Pwaveshaping, "Degree Of Waveshaping"),
+    rOption(Pwaveshapingfunction,
+            rOptions(Undistorted,
+                Arctangent,
+                Asymmetric,
+                Pow,
+                Sine,
+                Quantisize,
+                Zigzag,
+                Limiter,
+                Upper Limiter,
+                Lower Limiter,
+                Inverse Limiter,
+                Clip,
+                Asym2,
+                Pow2,
+                sigmoid), "Shape of distortion to be applied"),
+    rOption(Pfiltertype, rOptions(No Filter,
+            lp, hp1, hp1b, bp1, bs1, lp2, hp2, bp2, bs2,
+            cos, sin, low_shelf, s), "Harmonic Filter"),
     PC(filterpar1),
     PC(filterpar2),
-    PC(filterbeforews),
+    rToggle(Pfilterbeforews, "Filter before waveshaping spectra;"
+            "When enabled oscilfilter(freqs); then waveshape(freqs);, "
+            "otherwise waveshape(freqs); then oscilfilter(freqs);"),
     PC(satype),
-    PC(sapar),
+    rParamZyn(Psapar, "Spectral Adjustment Parameter"),
     rParamI(Pharmonicshift, "Amount of shift on harmonics"),
     rToggle(Pharmonicshiftfirst, "If harmonics are shifted before waveshaping/filtering"),
-    PC(modulation),
-    PC(modulationpar1),
-    PC(modulationpar2),
-    PC(modulationpar3),
+    rOption(Pmodulation, rOptions(None, Rev, Sine, Power),
+            "Frequency Modulation To Combined Spectra"),
+    rParamZyn(Pmodulationpar1,
+            "modulation parameter"),
+    rParamZyn(Pmodulationpar2,
+            "modulation parameter"),
+    rParamZyn(Pmodulationpar3,
+            "modulation parameter"),
     //FIXME realtime parameters lurking below
     PC(rand),
-    PC(amprandpower),
-    PC(amprandtype),
-    PC(adaptiveharmonics),
-    PC(adaptiveharmonicsbasefreq),
-    PC(adaptiveharmonicspower),
-    PC(adaptiveharmonicspar),
+    rParamZyn(Pamprandpower,
+            "Variance of harmonic randomness"),
+    rOption(Pamprandtype, rOptions(None, Pow, Sin),
+            "Harmonic random distribution to select from"),
+    rOption(Padaptiveharmonics,
+            rOptions(OFF, ON, Square, 2xSub, 2xAdd, 3xSub, 3xAdd, 4xSub, 4xAdd),
+            "Adaptive Harmonics Mode"),
+    rParamZyn(Padaptiveharmonicsbasefreq,
+            "Base frequency of adaptive harmonic (30..3000Hz)"),
+    rParamI(Padaptiveharmonicspower,rLinear(0,100),
+            rMap(unit,percent), "Adaptive Harmonic Strength"),
+    rParamZyn(Padaptiveharmonicspar,
+            "Adaptive Harmonics Postprocessing Power"),
 
     //TODO update to rArray and test
     {"phase#128::c", rProp(parameter) rDoc("Sets harmonic phase"),
@@ -389,64 +447,45 @@ void OscilGen::convert2sine()
  */
 void OscilGen::getbasefunction(float *smps)
 {
-    int   i;
     float par = (Pbasefuncpar + 0.5f) / 128.0f;
     if(Pbasefuncpar == 64)
         par = 0.5f;
 
-    float basefuncmodulationpar1 = Pbasefuncmodulationpar1 / 127.0f,
-          basefuncmodulationpar2 = Pbasefuncmodulationpar2 / 127.0f,
-          basefuncmodulationpar3 = Pbasefuncmodulationpar3 / 127.0f;
+    float p1 = Pbasefuncmodulationpar1 / 127.0f,
+          p2 = Pbasefuncmodulationpar2 / 127.0f,
+          p3 = Pbasefuncmodulationpar3 / 127.0f;
 
     switch(Pbasefuncmodulation) {
         case 1:
-            basefuncmodulationpar1 =
-                (powf(2, basefuncmodulationpar1 * 5.0f) - 1.0f) / 10.0f;
-            basefuncmodulationpar3 =
-                floor((powf(2, basefuncmodulationpar3 * 5.0f) - 1.0f));
-            if(basefuncmodulationpar3 < 0.9999f)
-                basefuncmodulationpar3 = -1.0f;
+            p1 = (powf(2, p1 * 5.0f) - 1.0f) / 10.0f;
+            p3 = floor(powf(2, p3 * 5.0f) - 1.0f);
+            if(p3 < 0.9999f)
+                p3 = -1.0f;
             break;
         case 2:
-            basefuncmodulationpar1 =
-                (powf(2, basefuncmodulationpar1 * 5.0f) - 1.0f) / 10.0f;
-            basefuncmodulationpar3 = 1.0f
-                                     + floor((powf(2, basefuncmodulationpar3
-                                                   * 5.0f) - 1.0f));
+            p1 = (powf(2, p1 * 5.0f) - 1.0f) / 10.0f;
+            p3 = 1.0f + floor(powf(2, p3 * 5.0f) - 1.0f);
             break;
         case 3:
-            basefuncmodulationpar1 =
-                (powf(2, basefuncmodulationpar1 * 7.0f) - 1.0f) / 10.0f;
-            basefuncmodulationpar3 = 0.01f
-                                     + (powf(2, basefuncmodulationpar3
-                                             * 16.0f) - 1.0f) / 10.0f;
+            p1 = (powf(2, p1 * 7.0f) - 1.0f) / 10.0f;
+            p3 = 0.01f + (powf(2, p3 * 16.0f) - 1.0f) / 10.0f;
             break;
     }
 
     base_func func = getBaseFunction(Pcurrentbasefunc);
 
-    for(i = 0; i < synth.oscilsize; ++i) {
+    for(int i = 0; i < synth.oscilsize; ++i) {
         float t = i * 1.0f / synth.oscilsize;
 
         switch(Pbasefuncmodulation) {
-            case 1:
-                t = t * basefuncmodulationpar3 + sinf(
-                    (t
-                     + basefuncmodulationpar2) * 2.0f
-                    * PI) * basefuncmodulationpar1;                              //rev
+            case 1: //rev
+                t = t * p3 + sinf((t + p2) * 2.0f * PI) * p1;
                 break;
-            case 2:
-                t = t + sinf(
-                    (t * basefuncmodulationpar3
-                     + basefuncmodulationpar2) * 2.0f
-                    * PI) * basefuncmodulationpar1;                              //sine
+            case 2: //sine
+                t += sinf( (t * p3 + p2) * 2.0f * PI) * p1;
                 break;
-            case 3:
-                t = t + powf((1.0f - cosf(
-                                  (t
-                                   + basefuncmodulationpar2) * 2.0f
-                                  * PI)) * 0.5f,
-                             basefuncmodulationpar3) * basefuncmodulationpar1; //power
+            case 3: //power
+                t += powf((1.0f - cosf((t + p2) * 2.0f * PI)) * 0.5f, p3) * p1;
                 break;
         }
 
@@ -786,13 +825,12 @@ void OscilGen::prepare(fft_t *freqs)
     if(Pharmonicshiftfirst != 0)
         shiftharmonics(freqs);
 
-    if(Pfilterbeforews == 0) {
-        waveshape(freqs);
-        oscilfilter(freqs);
-    }
-    else {
+    if(Pfilterbeforews) {
         oscilfilter(freqs);
         waveshape(freqs);
+    } else {
+        waveshape(freqs);
+        oscilfilter(freqs);
     }
 
     modulation(freqs);
@@ -879,9 +917,9 @@ void OscilGen::adaptiveharmonicpostprocess(fft_t *f, int size)
     if(Padaptiveharmonics == 2) { //2n+1
         for(int i = 0; i < size; ++i)
             if((i % 2) == 0)
-                f[i] += inf[i];  //i=0 pt prima armonica,etc.
+                f[i] += inf[i];  //i=0 first harmonic,etc.
     }
-    else {  //celelalte moduri
+    else {  //other ways
         int nh = (Padaptiveharmonics - 3) / 2 + 2;
         int sub_vs_add = (Padaptiveharmonics - 3) % 2;
         if(sub_vs_add == 0) {
