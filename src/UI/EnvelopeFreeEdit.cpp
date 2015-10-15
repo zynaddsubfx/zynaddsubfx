@@ -24,8 +24,8 @@ void EnvelopeFreeEdit::init(void)
 
     //register for non-bulk types
     for(int i=0; i<MAX_ENVELOPE_POINTS; ++i) {
-        oscRegister((string("Penvdt") + to_s(i)).c_str());
-        oscRegister((string("Penvval") + to_s(i)).c_str());
+        osc->createLink(loc+string("Penvdt") + to_s(i), this);
+        osc->createLink(loc+string("Penvval") + to_s(i), this);
     }
 }
 
