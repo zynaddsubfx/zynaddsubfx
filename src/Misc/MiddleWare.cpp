@@ -691,7 +691,8 @@ public:
 
     void tick(void)
     {
-        while(lo_server_recv_noblock(server, 0));
+        if(server)
+            while(lo_server_recv_noblock(server, 0));
         while(bToU->hasNext()) {
             const char *rtmsg = bToU->read();
             bToUhandle(rtmsg);
@@ -848,13 +849,19 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
                                           LO_UDP, liblo_error_cb);
     else
         server = lo_server_new_with_proto(NULL, LO_UDP, liblo_error_cb);
-    lo_server_add_method(server, NULL, NULL, handler_function, mw);
-    fprintf(stderr, "lo server running on %d\n", lo_server_get_port(server));
+
+    if(server) {
+        lo_server_add_method(server, NULL, NULL, handler_function, mw);
+        fprintf(stderr, "lo server running on %d\n", lo_server_get_port(server));
+    } else
+        fprintf(stderr, "lo server could not be started :-/\n");
+
 
 #ifndef PLUGINVERSION
     if(!isPlugin()) {
         clean_up_tmp_nams();
-        create_tmp_file((unsigned)lo_server_get_port(server));
+        if(server)
+            create_tmp_file((unsigned)lo_server_get_port(server));
     }
 #endif
 
@@ -902,7 +909,8 @@ MiddleWareImpl::~MiddleWareImpl(void)
 
     warnMemoryLeaks();
 
-    lo_server_free(server);
+    if(server)
+        lo_server_free(server);
 
     delete master;
     delete osc;
@@ -1381,7 +1389,10 @@ const SYNTH_T &MiddleWare::getSynth(void) const
 
 const char* MiddleWare::getServerAddress(void) const
 {
-    return lo_server_get_url(impl->server);
+    if(impl->server)
+        return lo_server_get_url(impl->server);
+    else
+        return "NULL";
 }
 
 const PresetsStore& MiddleWare::getPresetsStore() const
