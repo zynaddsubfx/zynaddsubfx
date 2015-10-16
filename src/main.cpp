@@ -392,7 +392,9 @@ int main(int argc, char *argv[])
 
     initprogram(std::move(synth), &config, prefered_port);
 
+    bool altered_master = false;
     if(!loadfile.empty()) {
+        altered_master = true;
         const char *filename = loadfile.c_str();
         int tmp = master->loadXML(filename);
         if(tmp < 0) {
@@ -409,6 +411,7 @@ int main(int argc, char *argv[])
     }
 
     if(!loadinstrument.empty()) {
+        altered_master = true;
         int loadtopart = 0;
         int tmp = master->part[loadtopart]->loadXMLinstrument(
             loadinstrument.c_str());
@@ -423,6 +426,9 @@ int main(int argc, char *argv[])
             cout << "Instrument file loaded." << endl;
         }
     }
+
+    if(altered_master)
+        middleware->updateResources(master);
 
     //Run the Nio system
     bool ioGood = Nio::start();
