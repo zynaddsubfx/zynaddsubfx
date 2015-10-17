@@ -178,7 +178,7 @@ envfree->redraw();}
       }
       Fl_Check_Button freemodehack {
           xywh {0 0 0 0} down_box DOWN_BOX
-          callback{refresh();}
+          callback{refresh_display();}
           code0 {o->init("Pfreemode");o->hide();}
           class Fl_Osc_Check
       }
@@ -568,7 +568,7 @@ freeeditsmall->setpair(freeedit);
 freeedit->setpair(freeeditsmall);
 
 
-refresh();} {}
+refresh_display();} {}
   }
   Function {rebase(std::string new_base)} {open
   } {
@@ -600,9 +600,16 @@ refresh();} {}
     show();
     freemodeeditwindow->position(winx,winy);} {}
   }
-  Function {refresh()} {open
+  Function {refresh()} { open }
+  { code {
+    freemodehack->oscWrite("Pfreemode");
+  } {}
+  }
+  Function {refresh_display()} {open
   } {
-    code {sustaincounter->value(Penvsustain);
+    code {
+
+    sustaincounter->value(Penvsustain);
     sustaincounter->maximum(Penvpoints-2);
 
     envstretchdial->value(Penvstretch);
@@ -618,9 +625,10 @@ envADSRfilter->hide();
 envASRbw->hide();
 envfree->hide();
 
-if (freemodehack->value())
+if (freemodehack->value()) {
    envwindow=envfree;
-else {
+   freeedit->update();
+} else {
    freemodeeditwindow->hide();
    switch(Envmode){
          case 1:
