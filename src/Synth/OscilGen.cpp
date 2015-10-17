@@ -125,10 +125,10 @@ const rtosc::Ports OscilGen::ports = {
     rOption(Padaptiveharmonics,
             rOptions(OFF, ON, Square, 2xSub, 2xAdd, 3xSub, 3xAdd, 4xSub, 4xAdd),
             "Adaptive Harmonics Mode"),
-    rParamZyn(Padaptiveharmonicsbasefreq,
+    rParamI(Padaptiveharmonicsbasefreq, rLinear(0,255),
             "Base frequency of adaptive harmonic (30..3000Hz)"),
-    rParamI(Padaptiveharmonicspower,rLinear(0,100),
-            rMap(unit,percent), "Adaptive Harmonic Strength"),
+    rParamI(Padaptiveharmonicspower,rLinear(0,200),
+            "Adaptive Harmonic Strength"),
     rParamZyn(Padaptiveharmonicspar,
             "Adaptive Harmonics Postprocessing Power"),
 
