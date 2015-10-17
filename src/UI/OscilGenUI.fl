@@ -346,9 +346,8 @@ oscildisplaygroup->redraw();}
             code1 {oscilo_base->parent(o);oscilo_base->init(true);}
           } {}
           Fl_Dial bfslider {
-            callback {redrawoscil();
-            bfparval->value(o->transform(o->value())) }
-            tooltip {Base Function Parameter} xywh {525 285 20 20} minimum 0 maximum 127 step 1
+            callback {redrawoscil(); bfparval->value(o->value());}
+            tooltip {Base Function Parameter} xywh {525 285 20 20} minimum -64 maximum 63 step 1
             code0 {o->init("Pbasefuncpar");}
             class Fl_Osc_Dial
           }
@@ -621,9 +620,8 @@ redrawoscil();}
             }
           }
           Fl_Dial wshpar {
-            callback {redrawoscil();
-            wsparval->value(o->transform(o->value())) }
-            tooltip {Waveshaping Parameter} xywh {265 318 20 20} minimum 0 maximum 127 step 1
+            callback {redrawoscil(); wsparval->value(o->value());}
+            tooltip {Waveshaping Parameter} xywh {265 318 20 20} minimum -64 maximum 63 step 1
             code0 {o->init("Pwaveshaping");}
             class Fl_Osc_Dial
           }
@@ -953,9 +951,6 @@ bftype = NULL;
 make_window();
 bftype->init("Pcurrentbasefunc");
 initialized = true;
-
-wshpar->set_transform(1,-64);
-bfslider->set_transform(1,-64);
 
 refresh();
 osceditUI->show();} {}
