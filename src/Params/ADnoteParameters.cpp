@@ -112,9 +112,12 @@ static const Ports voicePorts = {
         [](const char *, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
+            unsigned detuneType =
+            obj->PDetuneType == 0 ? *(obj->GlobalPDetuneType)
+            : obj->PDetuneType;
             //TODO check if this is accurate or if PCoarseDetune is utilized
             //TODO do the same for the other engines
-            d.reply(d.loc, "f", getdetune(obj->PDetuneType, 0, obj->PDetune));
+            d.reply(d.loc, "f", getdetune(detuneType, 0, obj->PDetune));
         }},
     {"octave::c:i", rProp(parameter) rDoc("Octave note offset"), NULL,
         [](const char *msg, RtData &d)
@@ -149,9 +152,12 @@ static const Ports voicePorts = {
     {"FMdetunevalue:", rMap(unit,cents) rDoc("Get modulator detune"), NULL, [](const char *, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
+            unsigned detuneType =
+            obj->PFMDetuneType == 0 ? *(obj->GlobalPDetuneType)
+            : obj->PFMDetuneType;
             //TODO check if this is accurate or if PCoarseDetune is utilized
             //TODO do the same for the other engines
-            d.reply(d.loc, "f", getdetune(obj->PFMDetuneType, 0, obj->PFMDetune));
+            d.reply(d.loc, "f", getdetune(detuneType, 0, obj->PFMDetune));
         }},
     {"FMoctave::c:i", rProp(parameter) rDoc("Octave note offset for modulator"), NULL,
         [](const char *msg, RtData &d)
@@ -288,8 +294,10 @@ ADnoteParameters::ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_)
     fft = fft_;
 
 
-    for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
+    for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
+        VoicePar[nvoice].GlobalPDetuneType = &GlobalPar.PDetuneType;
         EnableVoice(synth, nvoice);
+    }
 
     defaults();
 }

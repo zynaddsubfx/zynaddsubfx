@@ -282,6 +282,8 @@ struct ADnoteVoiceParam {
     unsigned char   PFMAmpEnvelopeEnabled;
     EnvelopeParams *FMAmpEnvelope;
 
+    unsigned char *GlobalPDetuneType;
+
     static const rtosc::Ports &ports;
 };
 

@@ -934,7 +934,10 @@ class ADnoteUI {open : {public PresetsUI_}
         }
         Fl_Choice detunetype {
           label {Detune Type}
-          callback {detunevalueoutput->update();} open
+          callback {detunevalueoutput->update();
+	  ui->partui->adnoteui->advoice->detunevalueoutput->update();
+	  ui->partui->adnoteui->advoice->fmdetunevalueoutput->update();
+	  } open
           xywh {455 340 75 15} down_box BORDER_BOX labelsize 10 align 5 textfont 1 textsize 10
           code0 {o->add("L35cents");o->add("L10cents");o->add("E100cents");o->add("E1200cents");}
           code1 {o->init("PDetuneType",1);}
