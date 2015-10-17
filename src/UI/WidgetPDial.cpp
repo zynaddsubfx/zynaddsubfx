@@ -66,7 +66,7 @@ int WidgetPDial::handle(int event)
             else
                 dragsize = Fl::event_button1() ? 200.0f : 2000.0f;
 
-            value(limit(oldvalue + dy / dragsize * (max - min), min, max));
+            value(clamp(oldvalue + dy / dragsize * (max - min)));
             tipwin->showValue(transform(value()));
             value_damage();
             if(this->when() != 0)
@@ -94,7 +94,7 @@ int WidgetPDial::handle(int event)
                 }
                 result = value() + dy / dragsize * (max - min);
             }
-            value(limit(result, min, max));
+            value(clamp(result));
 
             tipwin->showValue(transform(value()));
             value_damage();
@@ -113,7 +113,7 @@ int WidgetPDial::handle(int event)
         case FL_RELEASE:
             if (integer_step) {
                 int rounded = value() + 0.5;
-                value(limit((double)rounded,min,max));
+                value(clamp(rounded));
             }
             tipwin->hide();
             resetPos();

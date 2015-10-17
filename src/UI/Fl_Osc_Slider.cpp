@@ -112,7 +112,7 @@ int Fl_Osc_Slider::handle(int ev, int X, int Y, int W, int H)
             return 1;
         case FL_RELEASE:
             rounded = value() + 0.5;
-            value(limit((double)rounded,minimum(),maximum()));
+            value(clamp((double)rounded));
             if (Fl::event_clicks() == 1) {
                 Fl::event_clicks(0);
                 reset_requested = true;
@@ -138,7 +138,7 @@ int Fl_Osc_Slider::handle(int ev, int X, int Y, int W, int H)
     handled = Fl_Slider::handle(ev, X, Y, W, H);
     int delta = value() - old_value;
     if (ev == FL_DRAG && (delta < -1 || delta > 1)) {
-        value(old_value + (delta > 0 ? 1 : -1));
+        value(clamp((old_value + (delta > 0 ? 1 : -1))));
         value_damage();
         do_callback();
     }
