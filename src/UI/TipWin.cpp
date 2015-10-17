@@ -1,16 +1,19 @@
 #include <cstdio>
-#include <iostream>
 #include <cmath>
-#include <string>
 #include <FL/Fl_Tooltip.H>
-#include <FL/Fl_Menu_Window.H>
 #include <FL/fl_draw.H>
 #include "TipWin.h"
 
-TipWin::TipWin():Fl_Menu_Window(1, 1)
+TipWin::TipWin(void):Fl_Menu_Window(1, 1)
 {
+    strcpy(format, "%0.2f");
     set_override();
     end();
+}
+
+void TipWin::setRounding(unsigned int digits)
+{
+    format[3] = "0123456789"[digits < 9 ? digits : 9];
 }
 
 void TipWin::draw()
@@ -29,7 +32,7 @@ void TipWin::showValue(float f)
 {
     //convert the value to a string
     char tmp[10];
-    snprintf(tmp, 9, "%.2f", f);
+    snprintf(tmp, 9, format, f);
     tip = tmp;
 
     textmode = false;
