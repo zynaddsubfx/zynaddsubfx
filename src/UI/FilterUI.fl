@@ -473,6 +473,7 @@ filterparamswindow->redraw();} {}
   Function {rebase(std::string new_base)} {open
   } {
     code {
+    formantparswindow->rebase(new_base+"VoiceFilter/");
     Fl_Osc_Group::rebase(new_base);
   } {}
   }
