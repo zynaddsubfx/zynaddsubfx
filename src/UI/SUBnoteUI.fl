@@ -23,6 +23,9 @@ decl {\#include "../globals.h"} {public local
 decl {\#include "Fl_Osc_VSlider.H"} {public local
 } 
 
+decl {\#include "Fl_Osc_TSlider.H"} {public local
+} 
+
 decl {\#include "Fl_Osc_Dial.H"} {public local
 } 
 
@@ -40,6 +43,27 @@ decl {\#include "../Params/SUBnoteParameters.h"} {public local
 
 decl {\#include "PresetsUI.h"} {public local
 } 
+
+class SUBSlider {: {public Fl_Osc_TSlider}
+} {
+  Function {SUBSlider(int x,int y, int w, int h, const char *label=0)
+  :Fl_Osc_TSlider(x,y,w,h,label)} {open
+  } { code {}}
+   Function {OSC_value(char c)} {open return_type void
+   } { code {
+       value(127-c);
+       selection_color(value() == reset_value ? 0 : 222);	
+   } {} }
+  Function {cb(void)} {open return_type void
+  } {
+    code {
+	selection_color(value() == reset_value ? 0 : 222);	
+	oscWrite(ext, "c", (int)(127-Fl_Slider::value()));
+	if(cb_data.first)
+	    cb_data.first(this, cb_data.second);
+} {}
+   }
+}
 
 class PPSlider {: {public Fl_Slider, public Fl_Osc_Widget}
 } {
@@ -110,23 +134,12 @@ class SUBnoteharmonic {: {public Fl_Osc_Group}
       class Fl_Osc_Group
     } {
       Fl_Slider mag {
-        callback {//TODO consider unifying this with the OscilGenUI display stuff
-        int x=0;
-if (Fl::event_button1() || Fl::event() == FL_MOUSEWHEEL) x=127-(int)o->value();
-   else o->value(127-x);
-   o->osc->writeValue(o->loc + o->ext, (char) x);
-if (x==0) o->selection_color(0);
-    else o->selection_color(222);}
-        tooltip {harmonic's magnitude} xywh {0 15 10 135} type {Vert Knob} box FLAT_BOX selection_color 222 maximum 127 step 1 value 127
-        class PPSlider
+        tooltip {harmonic's magnitude} xywh {0 15 10 135} type {Vert Knob} box FLAT_BOX selection_color 0 maximum 127 step 1 value 127
+        class SUBSlider
       }
       Fl_Slider bw {
-        callback {int x=64;
-if (Fl::event_button1() || Fl::event() == FL_MOUSEWHEEL) x=127-(int)o->value();
-   else o->value(x);
-   o->osc->writeValue(o->loc + o->ext, (char) x)};
         tooltip {harmonic's bandwidth} xywh {0 157 10 130} type {Vert Knob} box FLAT_BOX selection_color 222 maximum 127 step 1 value 64
-        class PPSlider
+        class SUBSlider
       }
       Fl_Box {} {
         xywh {10 219 5 5} box FLAT_BOX color 45
@@ -151,10 +164,14 @@ if (Fl::event_button1() || Fl::event() == FL_MOUSEWHEEL) x=127-(int)o->value();
     code {n=n_;
 make_window();
 harmonic->show();
+mag->reset_value=127;
 mag->ext = "Phmag" + to_s(n);
 mag->oscRegister(mag->ext.c_str());
+mag->setTransform(-1, 127);
+bw->reset_value=63;
 bw->ext = "Phrelbw" + to_s(n);
 bw->oscRegister(bw->ext.c_str());
+bw->setTransform(-1, 63);
 osc->requestValue(base+"Phrelbw"+to_s(n));
 
 end();} {}
@@ -362,11 +379,12 @@ freqsettingsui->redraw();}
       Fl_Button {} {
         label Clear
         callback {o->oscWrite("clear");
-        for (int i=0;i<MAX_SUB_HARMONICS;i++){
-    h[i]->mag->value(127);
-    h[i]->bw->value(64);
+        for (int i=1;i<MAX_SUB_HARMONICS;i++){
+    h[i]->mag->oscWrite(h[i]->mag->ext, "c", 0);
+    h[i]->bw->oscWrite(h[i]->bw->ext, "c", 64);
 };
-h[0]->mag->value(0);
+h[0]->mag->oscWrite(h[0]->mag->ext, "c", 127);
+h[0]->bw->oscWrite(h[0]->bw->ext, "c", 64);
 SUBparameters->redraw();}
         tooltip {Clear the harmonics} xywh {445 446 70 20} box THIN_UP_BOX labelfont 1 labelsize 11
         class Fl_Osc_Button
@@ -401,7 +419,7 @@ bandwidthsettingsui->redraw();}
           label {B.Width Scale}
           tooltip {How much I increase the BandWidth according to lower/higher harmonics} xywh {345 40 90 15} type {Horz Knob} box NO_BOX labelsize 10 align 1 minimum -64 maximum 63 step 1
           code0 {o->init("Pbwscale",'i');}
-          class Fl_Osc_Slider
+          class Fl_Osc_TSlider
         }
       }
       Fl_Group globalfiltergroup {
