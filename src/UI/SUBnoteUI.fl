@@ -65,66 +65,6 @@ class SUBSlider {: {public Fl_Osc_TSlider}
    }
 }
 
-class PPSlider {: {public Fl_Slider, public Fl_Osc_Widget}
-} {
-  Function {PPSlider(int x,int y, int w, int h, const char *label=0):Fl_Slider(x,y,w,h,label),Fl_Osc_Widget(this)} {open
-  } {
-    code {//Shamelessly copied from OscilGenUI.fl TODO refactor
-    bw=false;} {}
-  }
-  Function {handle(int event)} {open return_type int
-  } {
-    code {int X=x(),Y=y(),W=w(),H=h();
-
-// catch any (un)learn event first
-{
-	bool middle_mouse = (event == FL_PUSH && Fl::event_state(FL_BUTTON2) && !Fl::event_shift());
-	bool ctl_click    = (event == FL_PUSH && Fl::event_state(FL_BUTTON1) && Fl::event_ctrl());
-	bool shift_middle = (event == FL_PUSH && Fl::event_state(FL_BUTTON2) && Fl::event_shift());
-	if(middle_mouse || ctl_click) {
-		osc->write("/learn", "s", (loc+ext).c_str());
-		return 1;
-	} else if(shift_middle) {
-		osc->write("/unlearn", "s", (loc+ext).c_str());
-		return 1;
-	}
-}
-
-if ((!Fl::event_buttons())|| (event==0)||(Fl::event_shift()==0)) return(Fl_Slider::handle(event));
-
-if (!Fl::event_inside(X,Y,W,H)) {
-	if (event==FL_DRAG){
-		Fl_Slider::handle(FL_RELEASE);
-		Fl_Slider::handle(FL_LEAVE);
-		deactivate();
-		activate();
-		return(1);	
-	}else{
-		return(Fl_Slider::handle(event));
-	};
-} else {
-	//Fl_Slider::handle(FL_FOCUS);
-	Fl_Slider::handle(FL_PUSH);
-};
-
-return(1);} {}
-  }
-  Function {rebase(std::string new_base)} {return_type void
-  } {
-    code {(void) new_base;} {}
-  }
-  Function {update()} {return_type void
-  } {
-    code {} {}
-  }
-  Function {OSC_value(char c)} {open return_type void
-  } {
-    code {value(127-c+fmodf(value(), 1.0f));} {}
-  }
-  decl {bool bw;} {public local
-  }
-} 
-
 class SUBnoteharmonic {: {public Fl_Osc_Group}
 } {
   Function {make_window()} {private
