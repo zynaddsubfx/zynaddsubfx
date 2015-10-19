@@ -81,10 +81,7 @@ class Fl_Oscilloscope : public Fl_Box, public Fl_Osc_Widget
         {
             int ox=x(),oy=y(),lx=w(),ly=h()-1;
 
-            if (ly < 32) {
-                fl_color(bkgnd);
-                fl_rectf(ox-1,oy-1,lx+2,ly+2);
-            } else if (damage()!=1) {
+            if (damage()!=1) {
                 fl_color(bkgnd);
                 fl_rectf(ox,oy,lx,ly);
             }
@@ -121,16 +118,16 @@ class Fl_Oscilloscope : public Fl_Box, public Fl_Osc_Widget
                 double ph=((phase-64.0)/128.0*oscilsize+oscilsize);
                 for (int i=1;i<lx;i++){
                     int k2=(oscilsize*i/lx)+ph;
-                    fl_vertex(i+ox,(smps[k2%oscilsize]+1)*ly/2+oy-0.5);
+                    fl_vertex(i+ox,(smps[k2%oscilsize]+1)*(ly-1)/2+oy+0.5);
                 }
                 fl_end_line();
             }
 
-            if (ly < 32) {
-                fl_color(bkgnd);
-                fl_line_style(FL_SOLID,1);
-                fl_rect(ox-1,oy-2,lx+2,ly+3);
-            }
+            // Erase stray pixels on margin
+            fl_color(bkgnd);
+            fl_line_style(FL_SOLID,1);
+            fl_rect(ox-1,oy-1,lx+2,ly+2);
+
             fl_line_style(FL_SOLID,0);
         }
 
