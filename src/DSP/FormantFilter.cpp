@@ -88,9 +88,17 @@ void FormantFilter::cleanup()
         formant[i]->cleanup();
 }
 
-void FormantFilter::setpos(float input)
+inline float log_2(float x)
+{
+    return logf(x) / logf(2.0f);
+}
+
+void FormantFilter::setpos(float frequency)
 {
     int p1, p2;
+
+    //Convert form real freq[Hz]
+    const float input = log_2(frequency) - 9.96578428f; //log2(1000)=9.95748f.
 
     if(firsttime != 0)
         slowinput = input;
@@ -173,17 +181,9 @@ void FormantFilter::setpos(float input)
     oldQfactor = Qfactor;
 }
 
-inline float log_2(float x)
-{
-    return logf(x) / logf(2.0f);
-}
-
 void FormantFilter::setfreq(float frequency)
 {
-    //Convert form real freq[Hz]
-    const float freq = log_2(frequency) - 9.96578428f; //log2(1000)=9.95748f.
-
-    setpos(freq);
+    setpos(frequency);
 }
 
 void FormantFilter::setq(float q_)
