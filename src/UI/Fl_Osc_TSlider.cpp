@@ -1,5 +1,5 @@
 #include <cmath>
-#include <Fl_Osc_TSlider.H>
+#include "Fl_Osc_TSlider.H"
 //Copyright (c) 2015 Christopher Oliver
 //License: GNU GPL version 2 or later
 
