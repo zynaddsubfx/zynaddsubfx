@@ -880,6 +880,9 @@ redrawoscil();}
           callback {if (!fl_choice("Convert to SINE?","No","Yes",NULL)) return;
 
 osc->requestValue(loc+"convert2sine");
+bftype->update();
+bfslider->value(0);
+bfslider->do_callback();
 
 redrawoscil();
 refresh();}
