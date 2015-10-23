@@ -232,6 +232,14 @@ else
     voicelfofreq->deactivate();
     voiceoscil->deactivate();
     };
+
+    ext_oscil = new Osc_IntModel(osc);
+    ext_oscil->callback = [this](int ext) {
+        if(ext == -1)
+            voiceoscil->reext("OscilSmp/");
+        else
+            voiceoscil->reext("../VoicePar"+to_s(ext)+"/OscilSmp/");
+    };
     nvoice=0;} {}
   }
   Function {init(int nvoice_, std::string loc_, Fl_Osc_Interface *osc_)} {open
@@ -240,6 +248,7 @@ else
 assert(!loc_.empty());
     voice_phase->doUpdate(loc_ + "Poscilphase");
     sound_type->doUpdate(loc_ + "Type");
+    ext_oscil->doUpdate(loc_ + "Pextoscil");
 
 nvoice=nvoice_;
 loc   = loc_;
@@ -256,8 +265,9 @@ ADnoteVoiceListItem->redraw();} {}
   }
   Function {~ADvoicelistitem()} {} {
     code {ADnoteVoiceListItem->hide();
-    osc->removeLink(voice_phase);
-    osc->removeLink(sound_type);
+    delete voice_phase;
+    delete sound_type;
+    delete ext_oscil;
     } {}
   }
   decl {int nvoice;} {private local
@@ -265,6 +275,8 @@ ADnoteVoiceListItem->redraw();} {}
   decl {class Osc_IntModel *voice_phase;} {private local
   }
   decl {class Osc_IntModel *sound_type;} {private local
+  }
+  decl {class Osc_IntModel *ext_oscil;} {private local
   }
   decl {Fl_Oscilloscope *oscil;} {private local
   }
@@ -588,12 +600,11 @@ o->redraw();}
           Fl_Button changevoiceoscilbutton {
             label Change
             callback {delete oscedit;
-                //if(extoscil->value()>=0)
-                //    nv=extoscil->value();
-
-                oscedit=new OscilEditor(true,loc+"OscilSmp/", osc_i);}
+                if(extoscil->value() == 0)
+                    oscedit=new OscilEditor(true,loc+"OscilSmp/", osc_i);
+                else
+                    oscedit=new OscilEditor(true,loc+"../VoicePar"+to_s(extoscil->value()-1)+"/OscilSmp/", osc_i);}
             xywh {5 490 65 20} box THIN_UP_BOX labelfont 1 labelsize 11
-            code0 {(void)o;/*if (extoscil->value()>=0) o->labelcolor(FL_BLUE);*/}
           }
           Fl_Box {} {
             label {Voice Oscillator}
@@ -622,6 +633,10 @@ voiceoscil->redraw();}
     osc->init(false);
     changevoiceoscilbutton->labelcolor(FL_BLACK);
 };
+if(o->value() == 0)
+voiceoscil->rebase(loc);
+else
+voiceoscil->rebase(loc+"../VoicePar"+to_s(o->value()-1)+"/");
 
 voiceparametersgroup->redraw();
 voiceonbutton->redraw();} open
