@@ -421,11 +421,10 @@ o->redraw();}
                 callback {if (oscedit!=NULL)
     delete(oscedit);
 
-//int nv=nvoice;
-//if (extFMoscil->value()>=0)
-//    nv=extFMoscil->value();
-
-oscedit=new OscilEditor(true, loc+"FMSmp/", osc_i);}
+                if(extFMoscil->value() == 0)
+                    oscedit=new OscilEditor(true,loc+"FMSmp/", osc_i);
+                else
+                    oscedit=new OscilEditor(true,loc+"../VoicePar"+to_s(extFMoscil->value()-1)+"/FMSmp/", osc_i);}
                 xywh {700 380 55 15} box THIN_UP_BOX labelfont 1 labelsize 11
                 code0 {(void)o;/*if (extFMoscil->value()>=0) o->labelcolor(FL_BLUE);*/}
               }
@@ -446,6 +445,10 @@ fmoscil->redraw();}
     oscFM->init(false);
     changeFMoscilbutton->labelcolor(FL_BLACK);
 };
+if(o->value() == 0)
+fmoscil->rebase(loc);
+else
+fmoscil->rebase(loc+"../VoicePar"+to_s(o->value()-1)+"/");
 voiceFMparametersgroup->redraw();} open
                 xywh {560 410 75 20} down_box BORDER_BOX labelsize 10 textfont 1 textsize 10
                 code0 {o->add("Internal");}
