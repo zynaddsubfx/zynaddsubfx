@@ -91,7 +91,7 @@ delete (freemodeeditwindow);} {}
   } {
     Fl_Window freemodeeditwindow {
       label Envelope open
-      xywh {702 801 575 180} type Double
+      xywh {702 801 575 180} type Double resizable
       class Fl_Osc_Window visible
     } {
       Fl_Button {} {
