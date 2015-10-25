@@ -138,13 +138,11 @@ maxkcounter->do_callback();}
           label edit
           callback {partui->showparameters(n,0);}
           xywh {420 0 40 15} box THIN_UP_BOX labelsize 11
-          code1 {if (n==0) o->hide();}
         }
         Fl_Button subeditbutton {
           label edit
           callback {partui->showparameters(n,1);}
           xywh {490 0 40 15} box THIN_UP_BOX labelsize 11
-          code1 {if (n==0) o->hide();}
         }
         Fl_Check_Button mutedcheck {
           private xywh {60 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
@@ -167,7 +165,6 @@ maxkcounter->do_callback();}
        else  adeditbutton->deactivate();}
           private xywh {400 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
           code0 {o->init("Padenabled");}
-          code1 {if (n==0) o->hide();}
           class Fl_Osc_Check
         }
         Fl_Check_Button subcheck {
@@ -175,7 +172,6 @@ maxkcounter->do_callback();}
        else  subeditbutton->deactivate();}
           private xywh {470 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
           code0 {o->init("Psubenabled");}
-          code1 {if (n==0) o->hide();}
           class Fl_Osc_Check
         }
         Fl_Choice sendtoeffect {
@@ -188,14 +184,12 @@ maxkcounter->do_callback();}
           label edit
           callback {partui->showparameters(n,2);}
           xywh {560 0 40 15} box THIN_UP_BOX labelsize 11
-          code1 {if (n==0) o->hide();}
         }
         Fl_Check_Button padcheck {
           callback {if (o->value()!=0) padeditbutton->activate();
        else padeditbutton->deactivate();}
           private xywh {540 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
           code0 {o->init("Ppadenabled");}
-          code1 {if (n==0) o->hide();}
           class Fl_Osc_Check
         }
       }
@@ -353,7 +347,12 @@ if (event==FL_RIGHT_MOUSE){
         }
         Fl_Button {} {
           label {Edit instrument}
-          callback {instrumenteditwindow->show();}
+          callback {
+          if (Fl::event_shift() || Fl::event_ctrl())
+              instrumentkitlist->show();
+          else
+              instrumenteditwindow->show();
+          }
           xywh {15 90 130 30} color 52 labelfont 1 labelsize 13
         }
         Fl_Button {} {
@@ -745,7 +744,7 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
       Fl_Button {} {
         label {Close Window}
         callback {instrumentkitlist->hide();}
-        xywh {375 350 160 20} box THIN_UP_BOX
+        xywh {255 350 160 20} box THIN_UP_BOX
       }
       Fl_Scroll kitlist {open
         xywh {0 15 670 330} type VERTICAL box UP_FRAME
@@ -801,10 +800,21 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
       }
       Fl_Check_Button {} {
         label {Drum mode}
-        xywh {285 350 70 15} down_box DOWN_BOX labelsize 10
+        xywh {125 350 80 15} down_box DOWN_BOX labelsize 10
         code0 {o->init("Pdrummode");}
         class Fl_Osc_Check
       }
+      Fl_Button {} {
+        label Comments
+        callback {instrumenteditwindow->show();}
+        xywh {481 350 106 20} box THIN_UP_BOX
+      }
+      Fl_Button {} {
+        label Effects
+        callback {partfx->show();} selected
+        xywh {600 350 70 20} box THIN_UP_BOX
+      }
+
       Fl_Box {} {
         label {FX.r.}
         xywh {620 0 30 15} labelfont 1 labelsize 11 align 18
