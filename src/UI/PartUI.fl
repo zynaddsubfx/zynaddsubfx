@@ -152,7 +152,7 @@ maxkcounter->do_callback();}
           xywh {490 0 40 15} box THIN_UP_BOX labelsize 11
         }
         Fl_Check_Button mutedcheck {
-          private xywh {60 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
+          public xywh {60 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
           code0 {o->init("Pmuted");}
           class Fl_Osc_Check
         }
@@ -232,6 +232,11 @@ partui->showparameters(n,-1);//use to delete the ui, if it is not to item 0}
         ext = "kit"+to_s(n)+"/";
 partui=partui_;
 make_window();
+if (n == 0)
+    mutedcheck->deactivate();
+else
+    deactivate();
+
 //partkititem->show();
 end();} {}
   }
@@ -787,7 +792,14 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
       }
       Fl_Choice {} {
         label Mode
-        callback {if (o->value()==0) { kitlist->deactivate(); } else { kitlist->activate(); };}
+        callback {if (o->value()==0) {
+		 for (int i=1;i<NUM_KIT_ITEMS;i++)
+		   partkititem[i]->deactivate();
+		 partkititem[0]->mutedcheck->deactivate();
+        } else {
+		 for (int i=1;i<NUM_KIT_ITEMS;i++)
+		   partkititem[i]->activate();
+                   partkititem[0]->mutedcheck->activate(); };}
         xywh {35 350 70 15} down_box BORDER_BOX labelsize 11 textfont 1 textsize 11
         code0 {o->init("Pkitmode");}
         class Fl_Osc_Choice
