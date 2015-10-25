@@ -1068,7 +1068,7 @@ lastkititem=kititem;
 if(kititem>=NUM_KIT_ITEMS) return 1;//bad kit item
 if(kititem<0) return 1;
 return 0;
-}}
+} {}}
 
 
   Function {showparameters(int kititem,int engine)} {open
@@ -1115,7 +1115,7 @@ if(adnoteui ||
 	else
 	    adnoteui->advoice->voiceFMparametersgroup->activate();
 	adnoteui->ADnoteVoice->show();
-    }}}
+    }} {}}
 
   Function {~PartUI()} {} {
     code {delete adnoteui;
