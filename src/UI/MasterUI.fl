@@ -1689,6 +1689,7 @@ char *tmp;
 if (result<0) fl_alert("Error: Could not save the file.");
 	else
 {
+    osc->write("/last_xmz", "s", filename);
 \#if USE_NSM
         if ( nsm && nsm->is_active() )
              setfilelabel( nsm->display_name );
