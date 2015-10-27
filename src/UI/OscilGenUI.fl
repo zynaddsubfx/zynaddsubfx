@@ -252,7 +252,7 @@ class OscilEditor {open : {public PresetsUI_}
             label rnd
             callback {}
             tooltip {Oscilator Phase Randomness: smaller than 0 is "group", larger than 0 is for each harmonic} xywh {145 290 100 10} type {Horz Knob} box NO_BOX labelsize 10 align 5 minimum -64 maximum 63 step 1
-            code0 {(void)o->init("Prand");//if (oscil->ADvsPAD) o->hide();}
+            code0 {(void)o->init("Prand"); if (!adnotep) o->hide();}
 	    class Fl_Osc_VSlider
           }
           Fl_Group {} {open
