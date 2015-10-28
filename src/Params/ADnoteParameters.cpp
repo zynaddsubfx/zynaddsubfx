@@ -223,6 +223,7 @@ static const Ports globalPorts = {
     rParamZyn(PVolume, "volume control"),
     rParamZyn(PAmpVelocityScaleFunction, "Volume Velocity Control"),
 
+    rParamZyn(Fadein_adjustment, "Adjustment for anti-pop strategy."),
     rParamZyn(PPunchStrength, "Punch Strength"),
     rParamZyn(PPunchTime, "UNKNOWN"),
     rParamZyn(PPunchStretch, "How Punch changes with note frequency"),
@@ -348,6 +349,7 @@ void ADnoteGlobalParam::defaults()
     PAmpVelocityScaleFunction = 64;
     AmpEnvelope->defaults();
     AmpLfo->defaults();
+    Fadein_adjustment = FADEIN_ADJUSTMENT_SCALE;
     PPunchStrength = 0;
     PPunchTime     = 60;
     PPunchStretch  = 64;
@@ -712,6 +714,7 @@ void ADnoteGlobalParam::add2XML(XMLwrapper *xml)
     xml->addpar("volume", PVolume);
     xml->addpar("panning", PPanning);
     xml->addpar("velocity_sensing", PAmpVelocityScaleFunction);
+    xml->addpar("fadein_adjustment", Fadein_adjustment);
     xml->addpar("punch_strength", PPunchStrength);
     xml->addpar("punch_time", PPunchTime);
     xml->addpar("punch_stretch", PPunchStretch);
@@ -788,6 +791,7 @@ void ADnoteGlobalParam::getfromXML(XMLwrapper *xml)
         PAmpVelocityScaleFunction = xml->getpar127("velocity_sensing",
                                                    PAmpVelocityScaleFunction);
 
+        Fadein_adjustment = xml->getpar127("fadein_adjustment", Fadein_adjustment);
         PPunchStrength = xml->getpar127("punch_strength", PPunchStrength);
         PPunchTime     = xml->getpar127("punch_time", PPunchTime);
         PPunchStretch  = xml->getpar127("punch_stretch", PPunchStretch);
@@ -982,6 +986,7 @@ void ADnoteGlobalParam::paste(ADnoteGlobalParam &a)
     copy(PPanning);
     copy(PAmpVelocityScaleFunction);
 
+    copy(Fadein_adjustment);
     copy(PPunchStrength);
     copy(PPunchTime);
     copy(PPunchStretch);
