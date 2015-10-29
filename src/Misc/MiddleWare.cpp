@@ -19,7 +19,6 @@
 #include <map>
 
 #include "Util.h"
-#include "TmpFileMgr.h"
 #include "Master.h"
 #include "Part.h"
 #include "PresetExtractor.h"
@@ -465,7 +464,7 @@ namespace Nio
 }
 
 /* Implementation */
-class MiddleWareImpl : TmpFileMgr
+class MiddleWareImpl
 {
     MiddleWare *parent;
 
@@ -858,14 +857,6 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
         fprintf(stderr, "lo server could not be started :-/\n");
 
 
-#ifndef PLUGINVERSION
-    if(!isPlugin()) {
-        clean_up_tmp_nams();
-        if(server)
-            create_tmp_file((unsigned)lo_server_get_port(server));
-    }
-#endif
-
     //dummy callback for starters
     cb = [](void*, const char*){};
     idle = 0;
@@ -906,8 +897,6 @@ void DummyDataObj::reply(const char *msg)
 }
 MiddleWareImpl::~MiddleWareImpl(void)
 {
-    remove(get_tmp_nam().c_str());
-
     warnMemoryLeaks();
 
     if(server)
