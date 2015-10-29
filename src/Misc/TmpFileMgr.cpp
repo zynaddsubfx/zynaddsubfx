@@ -9,13 +9,32 @@
 #include "Util.h"
 #include "TmpFileMgr.h"
 
+// This could be done during instantiation, but Middleware was to be untouched.
+static char *tmpdir;
+static char *tmp_nam_prefix;
+
+#define TMPNAM "/zynaddsubfx_"
+
+static void set_tmpdir()
+{
+    if ((tmpdir=getenv("TMPDIR")) == NULL)
+        tmpdir=(char *)"/tmp";
+    tmp_nam_prefix=(char *)malloc(sizeof(TMPNAM) + strlen(tmpdir));
+    strcpy(tmp_nam_prefix, tmpdir);
+    strcat(tmp_nam_prefix, TMPNAM);
+}
+
 std::string TmpFileMgr::get_tmp_nam() const
 {
+    if (tmpdir == NULL)
+        set_tmpdir();
      return tmp_nam_prefix + to_s(getpid());
 }
 
 void TmpFileMgr::create_tmp_file(unsigned server_port) const
 {
+    if (tmpdir == NULL)
+        set_tmpdir();
     std::string tmp_nam = get_tmp_nam();
     if(0 == access(tmp_nam.c_str(), F_OK)) {
         fprintf(stderr, "Error: Cannot overwrite file %s. "
@@ -26,20 +45,23 @@ void TmpFileMgr::create_tmp_file(unsigned server_port) const
     if(!tmp_fp)
         fprintf(stderr, "Warning: could not create new file %s.\n",
                 tmp_nam.c_str());
-    else
+    else {
         fprintf(tmp_fp, "%u", server_port);
-    fclose(tmp_fp);
+        fclose(tmp_fp);
+    }
 }
 
 void TmpFileMgr::clean_up_tmp_nams() const
 {
+    if (tmpdir == NULL)
+        set_tmpdir();
     DIR *dir;
     struct dirent *entry;
-    if ((dir = opendir ("/tmp/")) != nullptr)
+    if ((dir = opendir (tmpdir)) != nullptr)
     {
         while ((entry = readdir (dir)) != nullptr)
         {
-            std::string name = std::string("/tmp/") + entry->d_name;
+            std::string name = std::string(tmpdir) + "/" + entry->d_name;
             if(!name.compare(0, strlen(tmp_nam_prefix),tmp_nam_prefix))
             {
                 std::string pid = name.substr(strlen(tmp_nam_prefix));
@@ -109,6 +131,6 @@ void TmpFileMgr::clean_up_tmp_nams() const
         }
         closedir (dir);
     } else {
-        fputs("Warning: can not read /tmp.\n", stderr);
+        fprintf(stderr, "Warning: can not read %s.\n", tmpdir);
     }
 }

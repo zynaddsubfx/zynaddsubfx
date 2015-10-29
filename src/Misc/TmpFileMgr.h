@@ -5,8 +5,6 @@
 */
 class TmpFileMgr
 {
-    static constexpr const char* tmp_nam_prefix = "/tmp/zynaddsubfx_";
-
 public:
     //! returns file name to where UDP port is saved
     std::string get_tmp_nam() const;
