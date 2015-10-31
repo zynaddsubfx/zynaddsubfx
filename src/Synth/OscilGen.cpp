@@ -71,7 +71,7 @@ const rtosc::Ports OscilGen::ports = {
             "Morph between possible base function shapes "
             "(e.g. rising sawtooth vs a falling sawtooth)"),
     rOption(Pbasefuncmodulation,
-            rOptions(None, Rev, Sine, Power),
+            rOptions(None, Rev, Sine, Power, Chop),
             "Modulation applied to Base function spectra"),
     rParamZyn(Pbasefuncmodulationpar1,
             "Base function modulation parameter"),
@@ -486,6 +486,9 @@ void OscilGen::getbasefunction(float *smps)
             case 3: //power
                 t += powf((1.0f - cosf((t + p2) * 2.0f * PI)) * 0.5f, p3) * p1;
                 break;
+            case 4: //chop
+                t = t * (powf(2.0, Pbasefuncmodulationpar1/32.0 +
+                              Pbasefuncmodulationpar2/2048.0)) + p3;
         }
 
         t = t - floor(t);

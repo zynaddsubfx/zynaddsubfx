@@ -454,6 +454,10 @@ redrawoscil();}
                 label Pow
                 xywh {85 85 100 20} labelfont 1 labelsize 10
               }
+              MenuItem {} {
+                label Chop
+                xywh {95 95 100 20} labelfont 1 labelsize 10
+              }
             }
             Fl_Dial bfmodpar1 {
               callback {redrawoscil();}
