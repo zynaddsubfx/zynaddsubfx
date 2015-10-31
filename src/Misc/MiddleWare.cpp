@@ -189,67 +189,6 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::ThreadLink *uToB)
     }
 }
 
-
-/*****************************************************************************
- *                      Data Object for Non-RT Class Dispatch                *
- *****************************************************************************/
-
-class MwDataObj:public rtosc::RtData
-{
-    public:
-        MwDataObj(MiddleWareImpl *mwi_)
-        {
-            loc_size = 1024;
-            loc = new char[loc_size];
-            memset(loc, 0, loc_size);
-            buffer = new char[4*4096];
-            memset(buffer, 0, 4*4096);
-            obj       = mwi_;
-            mwi       = mwi_;
-            forwarded = false;
-        }
-
-        ~MwDataObj(void)
-        {
-            delete[] buffer;
-        }
-
-        //Replies and broadcasts go to the remote
-        
-        //Chain calls repeat the call into handle()
-
-        //Forward calls send the message directly to the realtime
-        virtual void reply(const char *path, const char *args, ...)
-        {
-            //printf("reply building '%s'\n", path);
-            va_list va;
-            va_start(va,args);
-            if(!strcmp(path, "/forward")) { //forward the information to the backend
-                args++;
-                path = va_arg(va, const char *);
-                rtosc_vmessage(buffer,4*4096,path,args,va);
-            } else {
-                rtosc_vmessage(buffer,4*4096,path,args,va);
-                reply(buffer);
-            }
-            va_end(va);
-        }
-        virtual void reply(const char *msg){};
-        //virtual void broadcast(const char *path, const char *args, ...){(void)path;(void)args;};
-        //virtual void broadcast(const char *msg){(void)msg;};
-        
-        virtual void forward(const char *) override
-        {
-            forwarded = true;
-        }
-        
-        bool forwarded;
-    private:
-        char *buffer;
-        MiddleWareImpl   *mwi;
-};
-
-
 /******************************************************************************
  *                      Non-RealTime Object Store                             *
  *                                                                            *
@@ -330,23 +269,22 @@ struct NonRtObjStore
     }
 
     void handleOscil(const char *msg, rtosc::RtData &d) {
+        string obj_rl(d.message, msg);
+        void *osc = get(obj_rl);
+        assert(osc);
+        strcpy(d.loc, obj_rl.c_str());
+        d.obj = osc;
+        OscilGen::non_realtime_ports.dispatch(msg, d);
     }
     void handlePad(const char *msg, rtosc::RtData &d) {
+        string obj_rl(d.message, msg);
+        printf("object resource locator = <%s>\n", obj_rl.c_str());
+        void *pad = get(obj_rl);
+        assert(pad);
+        strcpy(d.loc, obj_rl.c_str());
+        d.obj = pad;
+        PADnoteParameters::non_realtime_ports.dispatch(msg, d);
     }
-#if 0
-        if(strstr(msg, "oscilgen/") || strstr(msg, "FMSmp/") || strstr(msg, "OscilSmp/")) {
-            if(!handleOscil(obj_rl, last_path+1, obj_store.get(obj_rl)))
-                uToB->raw_write(msg);
-            //else if(strstr(obj_rl.c_str(), "kititem"))
-            //    handleKitItem(obj_rl, objmap[obj_rl],atoi(rindex(msg,'m')+1),rtosc_argument(msg,0).T);
-        } else if(strstr(msg, "padpars/prepare"))
-            preparePadSynth(obj_rl,(PADnoteParameters *) obj_store.get(obj_rl), uToB);
-        else if(strstr(msg, "padpars")) {
-            if(!handlePAD(obj_rl, last_path+1, obj_store.get(obj_rl)))
-                uToB->raw_write(msg);
-        } else //just forward the message
-            uToB->raw_write(msg);
-#endif 
 };
 
 /******************************************************************************
@@ -438,9 +376,8 @@ class MiddleWareImpl : TmpFileMgr
         return true;
     }
 
-    Config* const config;
-    
 public:
+    Config* const config;
     MiddleWareImpl(MiddleWare *mw, SYNTH_T synth, Config* config,
                    int preferred_port);
     ~MiddleWareImpl(void);
@@ -521,7 +458,7 @@ public:
 
         //Give it to the backend and wait for the old part to return for
         //deallocation
-        uToB->write("/load-part", "ib", npart, sizeof(Part*), &p);
+        parent->transmitMsg("/load-part", "ib", npart, sizeof(Part*), &p);
         GUI::raiseUi(ui, "/damage", "s", ("/part"+to_s(npart)+"/").c_str());
     }
 
@@ -541,7 +478,7 @@ public:
 
         //Give it to the backend and wait for the old part to return for
         //deallocation
-        uToB->write("/load-part", "ib", npart, sizeof(Part*), &p);
+        parent->transmitMsg("/load-part", "ib", npart, sizeof(Part*), &p);
         GUI::raiseUi(ui, "/damage", "s", ("/part"+to_s(npart)+"/").c_str());
     }
 
@@ -567,7 +504,7 @@ public:
 
         //Give it to the backend and wait for the old part to return for
         //deallocation
-        uToB->write("/load-master", "b", sizeof(Master*), &m);
+        parent->transmitMsg("/load-master", "b", sizeof(Master*), &m);
     }
 
     void updateResources(Master *m)
@@ -580,7 +517,10 @@ public:
 
     //If currently broadcasting messages
     bool broadcast = false;
+    //If message should be forwarded through snoop ports
     bool forward   = false;
+    //if message is in order or out-of-order execution
+    bool in_order  = false;
     //If accepting undo events as user driven
     bool recording_undo = true;
     void bToUhandle(const char *rtmsg);
@@ -608,6 +548,11 @@ public:
 
     // Send a message to a remote client
     void sendToRemote(const char *msg, std::string dest);
+    // Send a message to the current remote client
+    void sendToCurrentRemote(const char *msg)
+    {
+        sendToRemote(msg, in_order ? curr_url : last_url);
+    }
     // Broadcast a message to all listening remote clients
     void broadcastToRemote(const char *msg);
 
@@ -654,15 +599,78 @@ public:
 
     //Synthesis Rate Parameters
     const SYNTH_T synth;
-    
+
     PresetsStore presetsstore;
 };
+
+/*****************************************************************************
+ *                      Data Object for Non-RT Class Dispatch                *
+ *****************************************************************************/
+
+class MwDataObj:public rtosc::RtData
+{
+    public:
+        MwDataObj(MiddleWareImpl *mwi_)
+        {
+            loc_size = 1024;
+            loc = new char[loc_size];
+            memset(loc, 0, loc_size);
+            buffer = new char[4*4096];
+            memset(buffer, 0, 4*4096);
+            obj       = mwi_;
+            mwi       = mwi_;
+            forwarded = false;
+        }
+
+        ~MwDataObj(void)
+        {
+            delete[] buffer;
+        }
+
+        //Replies and broadcasts go to the remote
+
+        //Chain calls repeat the call into handle()
+
+        //Forward calls send the message directly to the realtime
+        virtual void reply(const char *path, const char *args, ...)
+        {
+            //printf("reply building '%s'\n", path);
+            va_list va;
+            va_start(va,args);
+            if(!strcmp(path, "/forward")) { //forward the information to the backend
+                args++;
+                path = va_arg(va, const char *);
+                rtosc_vmessage(buffer,4*4096,path,args,va);
+            } else {
+                rtosc_vmessage(buffer,4*4096,path,args,va);
+                reply(buffer);
+            }
+            va_end(va);
+        }
+        virtual void reply(const char *msg){
+            mwi->sendToCurrentRemote(msg);
+        };
+        //virtual void broadcast(const char *path, const char *args, ...){(void)path;(void)args;};
+        //virtual void broadcast(const char *msg){(void)msg;};
+
+        virtual void forward(const char *) override
+        {
+            forwarded = true;
+        }
+
+        bool forwarded;
+    private:
+        char *buffer;
+        MiddleWareImpl   *mwi;
+};
+
+
 
 
 static int extractInt(const char *msg)
 {
-    const char *mm = msg; 
-    while(*mm && !isdigit(*mm)) ++mm; 
+    const char *mm = msg;
+    while(*mm && !isdigit(*mm)) ++mm;
     if(isdigit(*mm))
         return atoi(mm);
     return -1;
@@ -716,7 +724,7 @@ rtosc::Ports bankPorts = {
         for(auto &elm : impl.banks)
             d.reply("/bank-list", "iss", i++, elm.name.c_str(), elm.dir.c_str());
         rEnd},
-    {"bank_select::i", 0, 0, 
+    {"bank_select::i", 0, 0,
         rBegin
            if(rtosc_narguments(msg)) {
                const int pos = rtosc_argument(msg, 0).i;
@@ -739,7 +747,7 @@ rtosc::Ports bankPorts = {
         const int part_id = rtosc_argument(msg, 0).i;
         const int slot    = rtosc_argument(msg, 1).i;
         //impl.saveBankSlot(part_id, slot, master);
-        
+
         //int err = 0;
         //doReadOnlyOp([master,nslot,npart,&err](){
         //        err = master->bank.savetoslot(nslot, master->part[npart]);});
@@ -800,20 +808,20 @@ rtosc::Ports bankPorts = {
  * BASE/part#/kit#/padpars/oscil/\*
  */
 static rtosc::Ports middwareSnoopPorts = {
-    {"part#16/kit#8/adpars/VoicePar#8/OscilSmp/", 0, 0,
+    {"part#16/kit#8/adpars/VoicePar#8/OscilSmp/", 0, &OscilGen::non_realtime_ports,
         rBegin;
         printf("snoop for oscilsmp\n");
-        impl.obj_store.handleOscil(msg, d);
+        impl.obj_store.handleOscil(chomp(chomp(chomp(chomp(chomp(msg))))), d);
         rEnd},
-    {"part#16/kit#8/adpars/VoicePar#8/FMSmp/", 0, 0,
+    {"part#16/kit#8/adpars/VoicePar#8/FMSmp/", 0, &OscilGen::non_realtime_ports,
         rBegin
         printf("snoop for fmsmp\n");
-        impl.obj_store.handleOscil(msg, d);
+        impl.obj_store.handleOscil(chomp(chomp(chomp(chomp(chomp(msg))))), d);
         rEnd},
-    {"part#16/kit#8/padpars/", 0, 0,
+    {"part#16/kit#8/padpars/", 0, &PADnoteParameters::non_realtime_ports,
         rBegin
         printf("snoop for padpars\n");
-        impl.obj_store.handlePad(msg, d);
+        impl.obj_store.handlePad(chomp(chomp(chomp(msg))), d);
         rEnd},
     {"bank/", 0, &bankPorts,
         rBegin;
@@ -821,9 +829,12 @@ static rtosc::Ports middwareSnoopPorts = {
         d.obj = &impl.master->bank;
         bankPorts.dispatch(chomp(msg),d);
         rEnd},
-    {"config/", 0, &Config::ports,            [](const char *msg, RtData &d) {
+    {"config/", 0, &Config::ports,
+        rBegin;
         printf("config port\n");
-        Config::ports.dispatch(chomp(msg), d);}},
+        d.obj = impl.config;
+        Config::ports.dispatch(chomp(msg), d);
+        rEnd},
     {"presets/", 0,  &real_preset_ports,          [](const char *msg, RtData &d) {
         printf("presets port\n");
         MiddleWareImpl *obj = (MiddleWareImpl*)d.obj;
@@ -898,11 +909,11 @@ static rtosc::Ports middwareSnoopPorts = {
         impl.undo.seekHistory(+1);
         rEnd},
     //drop this message into the abyss
-    {"/ui/title:", 0, 0, [](const char *msg, RtData &d) {}}
+    {"ui/title:", 0, 0, [](const char *msg, RtData &d) {}}
 };
 
 static rtosc::Ports middlewareReplyPorts = {
-    {"echo:ss", 0, 0, 
+    {"echo:ss", 0, 0,
         rBegin;
         const char *type = rtosc_argument(msg, 0).s;
         const char *url  = rtosc_argument(msg, 1).s;
@@ -912,7 +923,7 @@ static rtosc::Ports middlewareReplyPorts = {
     {"free:sb", 0, 0,
         rBegin;
         const char *type = rtosc_argument(msg, 0).s;
-        void       *ptr  = rtosc_argument(msg, 1).b.data;
+        void       *ptr  = *(void**)rtosc_argument(msg, 1).b.data;
         deallocate(type, ptr);
         rEnd},
     {"request_memory:", 0, 0,
@@ -1095,6 +1106,8 @@ void MiddleWareImpl::broadcastToRemote(const char *rtmsg)
 
 void MiddleWareImpl::sendToRemote(const char *rtmsg, std::string dest)
 {
+    printf("sendToRemote(%s:%s,%s)\n", rtmsg, rtosc_argument_string(rtmsg),
+            dest.c_str());
     if(dest == "GUI") {
         cb(ui, rtmsg);
     } else if(!dest.empty()) {
@@ -1121,7 +1134,7 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
     assert(strcmp(rtmsg, "/ze_state"));
 
     //Dump Incomming Events For Debugging
-    if(strcmp(rtmsg, "/vu-meter") && false) {
+    if(strcmp(rtmsg, "/vu-meter") && true) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 1 + 30, 0 + 40);
         fprintf(stdout, "frontend: '%s'<%s>\n", rtmsg,
                 rtosc_argument_string(rtmsg));
@@ -1130,10 +1143,11 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
 
     //Activity dot
     printf(".");fflush(stdout);
-    
+
     MwDataObj d(this);
     middlewareReplyPorts.dispatch(rtmsg, d, true);
 
+    in_order = true;
     //Normal message not captured by the ports
     if(d.matches == 0) {
         if(forward) {
@@ -1142,9 +1156,10 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
         } if(broadcast)
             broadcastToRemote(rtmsg);
         else
-            sendToRemote(rtmsg, curr_url);
+            sendToCurrentRemote(rtmsg);
     }
-    
+    in_order = false;
+
 }
 
 //Allocate kits on a as needed basis
@@ -1224,7 +1239,7 @@ void MiddleWareImpl::handleMsg(const char *msg)
     fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 6 + 30, 0 + 40);
     fprintf(stdout, "middleware: '%s':%s\n", msg, rtosc_argument_string(msg));
     fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
- 
+
     const char *last_path = rindex(msg, '/');
     if(!last_path) {
         printf("Bad message in handleMsg() <%s>\n", msg);
@@ -1237,10 +1252,10 @@ void MiddleWareImpl::handleMsg(const char *msg)
 
     //A message unmodified by snooping
     if(d.matches == 0 || d.forwarded) {
-        printf("Message Continuing on...\n");
+        printf("Message Continuing on<%s:%s>...\n", msg, rtosc_argument_string(msg));
         uToB->raw_write(msg);
     } else
-        printf("Message Handled...\n");
+        printf("Message Handled<%s:%s>...\n", msg, rtosc_argument_string(msg));
 }
 
 void MiddleWareImpl::write(const char *path, const char *args, ...)

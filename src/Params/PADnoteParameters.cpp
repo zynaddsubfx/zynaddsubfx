@@ -35,7 +35,7 @@ using namespace rtosc;
 
 
 #define rObject PADnoteParameters
-static const rtosc::Ports PADnotePorts =
+const rtosc::Ports PADnoteParameters::realtime_ports =
 {
     rRecurp(FreqLfo, "Frequency LFO"),
     rRecurp(AmpLfo,   "Amplitude LFO"),
@@ -44,7 +44,84 @@ static const rtosc::Ports PADnotePorts =
     rRecurp(AmpEnvelope, "Amplitude Envelope"),
     rRecurp(FilterEnvelope, "Filter Envelope"),
     rRecurp(GlobalFilter, "Post Filter"),
-    
+
+    //Volume
+    rToggle(PStereo, "Stereo/Mono Mode"),
+    rParamZyn(PPanning, "Left Right Panning"),
+    rParamZyn(PVolume, "Synth Volume"),
+    rParamZyn(PAmpVelocityScaleFunction, "Amplitude Velocity Sensing function"),
+
+    //Punch
+    rParamZyn(PPunchStrength, "Punch Strength"),
+    rParamZyn(PPunchTime, "UNKNOWN"),
+    rParamZyn(PPunchStretch, "How Punch changes with note frequency"),
+    rParamZyn(PPunchVelocitySensing, "Punch Velocity control"),
+
+    //Filter
+    rParamZyn(PFilterVelocityScale, "Filter Velocity Magnitude"),
+    rParamZyn(PFilterVelocityScaleFunction, "Filter Velocity Function Shape"),
+
+    //Freq
+    rToggle(Pfixedfreq, "Base frequency fixed frequency enable"),
+    rParamZyn(PfixedfreqET, "Equal temeperate control for fixed frequency operation"),
+
+    rParamI(PDetune,        "Fine Detune"),
+    rParamI(PCoarseDetune,  "Coarse Detune"),
+    rParamZyn(PDetuneType,  "Magnitude of Detune"),
+
+    {"sample#64:ifb", rProp(internal) rDoc("Nothing to see here"), 0,
+        [](const char *m, rtosc::RtData &d)
+        {
+            PADnoteParameters *p = (PADnoteParameters*)d.obj;
+            const char *mm = m;
+            while(!isdigit(*mm))++mm;
+            unsigned n = atoi(mm);
+            p->sample[n].size     = rtosc_argument(m,0).i;
+            p->sample[n].basefreq = rtosc_argument(m,1).f;
+            p->sample[n].smp      = *(float**)rtosc_argument(m,2).b.data;
+
+            //XXX TODO memory managment (deallocation of smp buffer)
+        }},
+    //weird stuff for PCoarseDetune
+    {"detunevalue:", rMap(unit,cents) rDoc("Get detune value"), NULL,
+        [](const char *, RtData &d)
+        {
+            PADnoteParameters *obj = (PADnoteParameters *)d.obj;
+            d.reply(d.loc, "f", getdetune(obj->PDetuneType, 0, obj->PDetune));
+        }},
+    {"octave::c:i", rProp(parameter) rDoc("Octave note offset"), NULL,
+        [](const char *msg, RtData &d)
+        {
+            PADnoteParameters *obj = (PADnoteParameters *)d.obj;
+            if(!rtosc_narguments(msg)) {
+                int k=obj->PCoarseDetune/1024;
+                if (k>=8) k-=16;
+                d.reply(d.loc, "i", k);
+            } else {
+                int k=(int) rtosc_argument(msg, 0).i;
+                if (k<0) k+=16;
+                obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
+            }
+        }},
+    {"coarsedetune::c:i", rProp(parameter) rDoc("Coarse note detune"), NULL,
+        [](const char *msg, RtData &d)
+        {
+            PADnoteParameters *obj = (PADnoteParameters *)d.obj;
+            if(!rtosc_narguments(msg)) {
+                int k=obj->PCoarseDetune%1024;
+                if (k>=512) k-=1024;
+                d.reply(d.loc, "i", k);
+            } else {
+                int k=(int) rtosc_argument(msg, 0).i;
+                if (k<0) k+=1024;
+                obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
+            }
+        }},
+
+};
+
+const rtosc::Ports PADnoteParameters::non_realtime_ports =
+{
     //Harmonic Source Distribution
     rRecurp(oscilgen, "Oscillator"),
     rRecurp(resonance, "Resonance"),
@@ -101,32 +178,8 @@ static const rtosc::Ports PADnotePorts =
     rOption(Pquality.smpoct,
             rOptions(0.5, 1, 2, 3, 4, 6, 12),
             "Samples per octave"),
-    rParamI(Pquality.oct, rLinear(0,7), 
+    rParamI(Pquality.oct, rLinear(0,7),
             "Number of octaves to sample (above the first sample"),
-
-    //Volume
-    rToggle(PStereo, "Stereo/Mono Mode"),
-    rParamZyn(PPanning, "Left Right Panning"),
-    rParamZyn(PVolume, "Synth Volume"),
-    rParamZyn(PAmpVelocityScaleFunction, "Amplitude Velocity Sensing function"),
-
-    //Punch
-    rParamZyn(PPunchStrength, "Punch Strength"),
-    rParamZyn(PPunchTime, "UNKNOWN"),
-    rParamZyn(PPunchStretch, "How Punch changes with note frequency"),
-    rParamZyn(PPunchVelocitySensing, "Punch Velocity control"),
-    
-    //Filter
-    rParamZyn(PFilterVelocityScale, "Filter Velocity Magnitude"),
-    rParamZyn(PFilterVelocityScaleFunction, "Filter Velocity Function Shape"),
-
-    //Freq
-    rToggle(Pfixedfreq, "Base frequency fixed frequency enable"),
-    rParamZyn(PfixedfreqET, "Equal temeperate control for fixed frequency operation"),
-
-    rParamI(PDetune,        "Fine Detune"),
-    rParamI(PCoarseDetune,  "Coarse Detune"),
-    rParamZyn(PDetuneType,  "Magnitude of Detune"),
 
     {"Pbandwidth::i", rProp(parameter) rLinear(0,1000) rDoc("Bandwith Of Harmonics"), NULL,
         [](const char *msg, rtosc::RtData &d) {
@@ -136,7 +189,7 @@ static const rtosc::Ports PADnotePorts =
             } else {
                 d.reply(d.loc, "i", p->Pbandwidth);
             }}},
-    
+
     {"bandwidthvalue:", rMap(unit, cents) rDoc("Get Bandwidth"), NULL,
         [](const char *, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
@@ -165,120 +218,14 @@ static const rtosc::Ports PADnotePorts =
             d.reply(d.loc, "b", n*sizeof(float), tmp);
             d.reply(d.loc, "i", realbw);
             delete[] tmp;}},
-    {"sample#64:ifb", rProp(internal) rDoc("Nothing to see here"), 0,
-        [](const char *m, rtosc::RtData &d)
-        {
-            PADnoteParameters *p = (PADnoteParameters*)d.obj;
-            const char *mm = m;
-            while(!isdigit(*mm))++mm;
-            unsigned n = atoi(mm);
-            p->sample[n].size     = rtosc_argument(m,0).i;
-            p->sample[n].basefreq = rtosc_argument(m,1).f;
-            p->sample[n].smp      = *(float**)rtosc_argument(m,2).b.data;
-
-            //XXX TODO memory managment (deallocation of smp buffer)
-        }},
-    //weird stuff for PCoarseDetune
-    {"detunevalue:", rMap(unit,cents) rDoc("Get detune value"), NULL,
-        [](const char *, RtData &d)
-        {
-            PADnoteParameters *obj = (PADnoteParameters *)d.obj;
-            d.reply(d.loc, "f", getdetune(obj->PDetuneType, 0, obj->PDetune));
-        }},
-    {"octave::c:i", rProp(parameter) rDoc("Octave note offset"), NULL,
-        [](const char *msg, RtData &d)
-        {
-            PADnoteParameters *obj = (PADnoteParameters *)d.obj;
-            if(!rtosc_narguments(msg)) {
-                int k=obj->PCoarseDetune/1024;
-                if (k>=8) k-=16;
-                d.reply(d.loc, "i", k);
-            } else {
-                int k=(int) rtosc_argument(msg, 0).i;
-                if (k<0) k+=16;
-                obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
-            }
-        }},
-    {"coarsedetune::c:i", rProp(parameter) rDoc("Coarse note detune"), NULL,
-        [](const char *msg, RtData &d)
-        {
-            PADnoteParameters *obj = (PADnoteParameters *)d.obj;
-            if(!rtosc_narguments(msg)) {
-                int k=obj->PCoarseDetune%1024;
-                if (k>=512) k-=1024;
-                d.reply(d.loc, "i", k);
-            } else {
-                int k=(int) rtosc_argument(msg, 0).i;
-                if (k<0) k+=1024;
-                obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
-            }
-        }},
 };
 
-#if 0
-rtosc::ClonePort non_realtime{
-    PADnotePorts,
-        {
-        //Recursions
-        {"oscilgen/",  rRecurCb(oscilgen)},
-        {"resonance/", rRecurCb(resonance)},
-        //Harmonic Shape
-        {"Pmode::i",   rParamICb}
-
-    {Php.base.type::i,      rOptionCb},
-    {Php.base.par1::i,      rParamZynCb},
-    {Php.freqmult::i,       rParamZynCb},
-    {Php.modulator.par1::i, rParamZynCb},
-    {Php.modulator.freq::i, rParamZynCb},
-    {Php.width::i,          rParamZynCb},
-    {Php.amp.mode::i,       rOptionCb},
-
-    //Harmonic Modulation
-    {Php.amp.type::i, rOptionCb},
-    {Php.amp.par1::i, rParamZynCb},
-    {Php.amp.par2::i, rParamZynCb},
-    {Php.autoscale, rToggleCb},
-    //...
-    rOption(Php.onehalf,
-            rOptions(Full, Upper Half, Lower Half),
-            "Harmonic cutoff model"),
-
-    //Harmonic Bandwidth
-    rOption(Pbwscale,
-            rOptions(Normal,
-              EqualHz, Quater,
-              Half, 75%, 150%,
-              Double, Inv. Half),
-            "Bandwidth scaling"),
-
-    //Harmonic Position Modulation
-    rOption(Phrpos.type,
-            rOptions(Harmonic, ShiftU, ShiftL, PowerU, PowerL, Sine,
-                Power, Shift),
-            "Harmonic Overtone shifting mode"),
-    rParamZyn(Phrpos.par1, "Harmonic position parameter"),
-    rParamZyn(Phrpos.par2, "Harmonic position parameter"),
-    rParamZyn(Phrpos.par3, "Harmonic position parameter"),
-
-    //Quality
-    rOption(Pquality.samplesize,
-            rOptions(16k (Tiny), 32k, 64k (Small), 128k,
-              256k (Normal), 512k, 1M (Big)),
-            "Size of each wavetable element"),
-    rOption(Pquality.basenote,
-            rOptions( C-2, G-2, C-3, G-3, C-4,
-                G-4, C-5, G-5, G-6,),
-            "Base note for wavetable"),
-    rOption(Pquality.smpoct,
-            rOptions(0.5, 1, 2, 3, 4, 6, 12),
-            "Samples per octave"),
-    rParamI(Pquality.oct, rLinear(0,7), 
-            "Number of octaves to sample (above the first sample"),
-
+const rtosc::MergePorts PADnoteParameters::ports =
+{
+    &PADnoteParameters::non_realtime_ports,
+    &PADnoteParameters::realtime_ports
 };
-#endif
 
-const rtosc::Ports &PADnoteParameters::ports = PADnotePorts;
 
 PADnoteParameters::PADnoteParameters(const SYNTH_T &synth_, FFTwrapper *fft_)
     :Presets(), synth(synth_)

@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include "../Misc/MiddleWare.h"
 #include "../Misc/Master.h"
+#include "../Misc/Part.h"
 #include "../Misc/PresetExtractor.h"
 #include "../Misc/PresetExtractor.cpp"
 #include "../Misc/Util.h"
@@ -59,7 +60,7 @@ class MessageTest:public CxxTest::TestSuite
             delete synth;
         }
 
-        void notestKitEnable(void)
+        void testKitEnable(void)
         {
             const char *msg = NULL;
             mw->transmitMsg("/part0/kit0/Psubenabled", "T");
@@ -71,7 +72,7 @@ class MessageTest:public CxxTest::TestSuite
             TS_ASSERT_EQUALS(string("/part0/kit0/Psubenabled"), msg);
         }
 
-        void notestBankCapture(void)
+        void testBankCapture(void)
         {
             mw->transmitMsg("/bank/slots", "");
             TS_ASSERT(!ms->uToB->hasNext());
@@ -92,6 +93,8 @@ class MessageTest:public CxxTest::TestSuite
             ms->applyOscEvent(ms->uToB->read());
             TS_ASSERT(!ms->uToB->hasNext());
 
+            ms->part[0]->kit[0].adpars->VoicePar[0].FMSmp->Pbasefuncpar = 32;
+
             int do_exit = 0;
             std::thread t([&do_exit,this](){
                     int tries = 0;
@@ -109,11 +112,13 @@ class MessageTest:public CxxTest::TestSuite
             printf("====Copy From ADsynth modulator\n");
             mw->transmitMsg("/presets/copy", "s", "/part0/kit0/adpars/VoicePar0/FMSmp/");
 
+            TS_ASSERT(ms->part[0]->kit[0].padpars->oscilgen->Pbasefuncpar != 32);
             //Paste to PADsynth
             printf("====Paste to PADsynth\n");
             mw->transmitMsg("/presets/paste", "s", "/part0/kit0/padpars/oscilgen/");
             do_exit = 1;
             t.join();
+            TS_ASSERT_EQUALS(ms->part[0]->kit[0].padpars->oscilgen->Pbasefuncpar, 32);
 
         }
 

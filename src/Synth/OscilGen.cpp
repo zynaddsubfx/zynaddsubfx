@@ -39,7 +39,7 @@
 pthread_t main_thread;
 
 #define rObject OscilGen
-const rtosc::Ports OscilGen::ports = {
+const rtosc::Ports OscilGen::non_realtime_ports = {
     rSelf(OscilGen),
     rPaste,
     //TODO ensure min/max
@@ -92,23 +92,6 @@ const rtosc::Ports OscilGen::ports = {
     rParamZyn(Pmodulationpar2, "modulation parameter"),
     rParamZyn(Pmodulationpar3, "modulation parameter"),
 
-    //XXX Start of realtime parameters
-    rParamZyn(Prand, "Oscilator Phase Randomness: smaller than 0 is \""
-            "group\", larger than 0 is for each harmonic"),
-    rParamZyn(Pamprandpower,
-            "Variance of harmonic randomness"),
-    rOption(Pamprandtype, rOptions(None, Pow, Sin),
-            "Harmonic random distribution to select from"),
-    rOption(Padaptiveharmonics,
-            rOptions(OFF, ON, Square, 2xSub, 2xAdd, 3xSub, 3xAdd, 4xSub, 4xAdd),
-            "Adaptive Harmonics Mode"),
-    rParamI(Padaptiveharmonicsbasefreq, rLinear(0,255),
-            "Base frequency of adaptive harmonic (30..3000Hz)"),
-    rParamI(Padaptiveharmonicspower,rLinear(0,200),
-            "Adaptive Harmonic Strength"),
-    rParamZyn(Padaptiveharmonicspar,
-            "Adaptive Harmonics Postprocessing Power"),
-    //XXX End of realtime parameters
 
     //TODO update to rArray and test
     {"phase#128::c", rProp(parameter) rDoc("Sets harmonic phase"),
@@ -165,6 +148,7 @@ const rtosc::Ports OscilGen::ports = {
         }},
     {"waveform:", rProp(non-realtime) rDoc("Returns waveform points"),
         NULL, [](const char *, rtosc::RtData &d) {
+            printf("WAVEFORM PORT REPORTING IN\n");
             OscilGen &o = *((OscilGen*)d.obj);
             const unsigned n = o.synth.oscilsize;
             float *smps = new float[n];
@@ -200,19 +184,25 @@ const rtosc::Ports OscilGen::ports = {
 
 #define rForwardCb [](const char *msg, rtosc::RtData &d) {\
     printf("fowarding...\n"); d.forward();}
-
-const rtosc::ClonePorts OscilGen::realtime_ports{
-    OscilGen::ports, {
-    {"self:", [](const char *, rtosc::RtData &d){
-        d.reply(d.loc, "b", sizeof(d.obj), &d.obj);}},
-    {"Prand::i",                      rParamICb(Prand)},
-    {"Pamprandpower::i",              rParamICb(Pamprandpower)},
-    {"Pamprandtype::i:c",             rOptionCb(Pamprandtype)},
-    {"Padaptiveharmonics::i:c",       rOptionCb(Padaptiveharmonics)},
-    {"Padaptiveharmonicsbasefreq::i", rParamICb(Padaptiveharmonicsbasefreq)},
-    {"Padaptiveharmonicspower::i",    rParamICb(Padaptiveharmonicspower)},
-    {"Padaptiveharmonicspar::i",      rParamICb(Padaptiveharmonicspar)},
-    {"prepare:b", [](const char *m, rtosc::RtData &d) {
+const rtosc::Ports OscilGen::realtime_ports{
+    rSelf(OscilGen),
+    rParamZyn(Prand, "Oscilator Phase Randomness: smaller than 0 is \""
+            "group\", larger than 0 is for each harmonic"),
+    rParamZyn(Pamprandpower,
+            "Variance of harmonic randomness"),
+    rOption(Pamprandtype, rOptions(None, Pow, Sin),
+            "Harmonic random distribution to select from"),
+    rOption(Padaptiveharmonics,
+            rOptions(OFF, ON, Square, 2xSub, 2xAdd, 3xSub, 3xAdd, 4xSub, 4xAdd),
+            "Adaptive Harmonics Mode"),
+    rParamI(Padaptiveharmonicsbasefreq, rLinear(0,255),
+            "Base frequency of adaptive harmonic (30..3000Hz)"),
+    rParamI(Padaptiveharmonicspower,rLinear(0,200),
+            "Adaptive Harmonic Strength"),
+    rParamZyn(Padaptiveharmonicspar,
+            "Adaptive Harmonics Postprocessing Power"),
+    {"prepare:b", rProp(internal) rProp(realtime) rProp(pointer) rDoc("Sets prepared fft data"),
+        NULL, [](const char *m, rtosc::RtData &d) {
             //fprintf(stderr, "prepare:b got a message from '%s'\n", m);
             OscilGen &o = *(OscilGen*)d.obj;
             assert(rtosc_argument(m,0).b.len == sizeof(void*));
@@ -221,8 +211,12 @@ const rtosc::ClonePorts OscilGen::realtime_ports{
             o.oscilFFTfreqs = *(fft_t**)rtosc_argument(m,0).b.data;
         }},
 
-    {"*",                             rForwardCb}
-}};
+};
+
+const rtosc::MergePorts OscilGen::ports{
+    &OscilGen::realtime_ports,
+    &OscilGen::non_realtime_ports
+};
 
 
 //operations on FFTfreqs

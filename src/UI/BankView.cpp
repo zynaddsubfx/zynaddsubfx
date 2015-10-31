@@ -21,7 +21,7 @@ void BankList::init(std::string path)
 
 void BankList::OSC_raw(const char *msg)
 {
-    if(!strcmp(msg, "/bank-list") && !strcmp(rtosc_argument_string(msg),"iss")) {
+    if(!strcmp(msg, "/bank/bank_select") && !strcmp(rtosc_argument_string(msg),"iss")) {
 
         const int   pos  = rtosc_argument(msg, 0).i;
         const char *path = rtosc_argument(msg, 1).s;
@@ -31,9 +31,8 @@ void BankList::OSC_raw(const char *msg)
             this->clear();
 
         this->add(path);
-        osc->write("/loadbank");
     }
-    if(!strcmp(msg, "/loadbank")&& !strcmp(rtosc_argument_string(msg),"i")) {
+    if(!strcmp(msg, "/bank/bank_select")&& !strcmp(rtosc_argument_string(msg),"i")) {
         value(rtosc_argument(msg, 0).i);
     }
 }
@@ -248,7 +247,7 @@ void BankView::init(Fl_Osc_Interface *osc_, BankViewControls *bvc_, int *npart_)
 
     //Request Values
     for(int i=0; i<160; ++i)
-        osc->write("/refresh_bank", "i", i);
+        osc->write("/bank/slot"+to_s(i), "");
 }
 
 /*
@@ -271,8 +270,8 @@ void BankView::react(int event, int nslot)
     //Rename slot
     if (event==2 && !isempty && mode!=4) {
         if(const char *name=fl_input("Slot (instrument) name:", slot.name())) {
-            osc->write("/bank-rename", "is", nslot, name);
-            osc->write("/refresh_bank", "i", nslot);
+            osc->write("/bank/rename_slot", "is", nslot, name);
+            osc->write("/bank/slot"+to_s(nslot), "");
         }
     }
 
@@ -289,8 +288,8 @@ void BankView::react(int event, int nslot)
     if(event==1 && mode==2){
         if(isempty ||
            fl_choice("Overwrite the slot no. %d ?","No","Yes",NULL,nslot+1)) {
-            osc->write("/save-bank-part", "ii", *npart, nslot);
-            osc->write("/refresh_bank", "i", nslot);
+            osc->write("/bank/save_to_slot", "ii", *npart, nslot);
+            osc->write("/bank/slot"+to_s(nslot), "");
         }
         bvc->mode(1);
     }
@@ -300,8 +299,8 @@ void BankView::react(int event, int nslot)
     if(event==1 && mode==3) {
         if (!isempty &&
             fl_choice("Clear the slot no. %d ?","No","Yes",NULL, nslot+1)) {
-            osc->write("/clear-bank-slot", "i", nslot);
-            osc->write("/refresh_bank", "i", nslot);
+            osc->write("/bank/clear-slot", "i", nslot);
+            osc->write("/bank/slot"+to_s(nslot), "");
         }
         bvc->mode(1);
     }
@@ -309,9 +308,9 @@ void BankView::react(int event, int nslot)
     //Swap
     if(mode==4) {
         if(event==1 && nselected>=0){
-            osc->write("/swap-bank-slots", "ii", nselected, nslot);
-            osc->write("/refresh_bank", "i", nslot);
-            osc->write("/refresh_bank", "i", nselected);
+            osc->write("/bank/swap_slots", "ii", nselected, nslot);
+            osc->write("/bank/slot"+to_s(nslot), "");
+            osc->write("/bank/slot"+to_s(nselected), "");
             nselected=-1;
         } else if(nselected<0 || event==2) {
             nselected=nslot;
@@ -345,6 +344,6 @@ void BankView::refresh(void)
         return;
 
     for(int i=0; i<160; ++i)
-        osc->write("/refresh_bank", "i", i);
+        osc->write("/bank/slot"+to_s(i), "");
 }
 
