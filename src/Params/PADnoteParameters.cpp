@@ -34,77 +34,101 @@
 using namespace rtosc;
 
 
-#define PC(x) rParamZyn(P##x, "undocumented padnote parameter")
-
-template<int i>
-void simpleset(const char *m, rtosc::RtData &d)
-{
-    unsigned char *addr = ((unsigned char*) d.obj)+i;
-    if(!rtosc_narguments(m))
-        d.reply(d.loc, "c", *addr);
-    else
-        *addr = rtosc_argument(m, 0).i;
-}
-
 #define rObject PADnoteParameters
-
-#define P_C(x) rtosc::Port{#x "::c", "::", NULL, \
-    simpleset<__builtin_offsetof(class PADnoteParameters, P##x)>}
 static const rtosc::Ports PADnotePorts =
 {
-    rRecurp(oscilgen, "Oscillator"),
     rRecurp(FreqLfo, "Frequency LFO"),
     rRecurp(AmpLfo,   "Amplitude LFO"),
     rRecurp(FilterLfo, "Filter LFO"),
-    rRecurp(resonance, "Resonance"),
     rRecurp(FreqEnvelope, "Frequency Envelope"),
     rRecurp(AmpEnvelope, "Amplitude Envelope"),
     rRecurp(FilterEnvelope, "Filter Envelope"),
     rRecurp(GlobalFilter, "Post Filter"),
-    rParamI(Pmode, rMap(min, 0), rMap(max, 2), "0 - bandwidth, 1 - discrete 2 - continious"),
-    PC(Volume),
-    PC(hp.base.type),
-    PC(hp.base.par1),
-    PC(hp.freqmult),
-    PC(hp.modulator.par1),
-    PC(hp.modulator.freq),
-    PC(hp.width),
-    PC(hp.amp.mode),
-    PC(hp.amp.type),
-    PC(hp.amp.par1),
-    PC(hp.amp.par2),
+    
+    //Harmonic Source Distribution
+    rRecurp(oscilgen, "Oscillator"),
+    rRecurp(resonance, "Resonance"),
+
+    //Harmonic Shape
+    rOption(Pmode, rMap(min, 0), rMap(max, 2), rOptions(bandwidth,discrete,continious),
+            "Harmonic Distribution Model"),
+    rOption(Php.base.type, rOptions(Gaussian, Rectanglar, Double Exponential),
+            "Harmonic profile shape"),
+    rParamZyn(Php.base.par1, "Harmonic shape distribution parameter"),
+    rParamZyn(Php.freqmult, "Frequency multiplier on distribution"),
+    rParamZyn(Php.modulator.par1, "Distribution modulator parameter"),
+    rParamZyn(Php.modulator.freq, "Frequency of modulator parameter"),
+    rParamZyn(Php.width, "Width of base harmonic"),
+    rOption(Php.amp.mode, rOptions(Sum, Mult, Div1, Div2),
+            "Amplitude harmonic multiplier type"),
+
+    //Harmonic Modulation
+    rOption(Php.amp.type, rOptions(Off, Gauss, Sine, Flat),
+            "Type of amplitude multipler"),
+    rParamZyn(Php.amp.par1, "Amplitude multiplier parameter"),
+    rParamZyn(Php.amp.par2, "Amplitude multiplier parameter"),
     rToggle(Php.autoscale, "Autoscaling Harmonics"),
-    PC(hp.onehalf),
+    rOption(Php.onehalf,
+            rOptions(Full, Upper Half, Lower Half),
+            "Harmonic cutoff model"),
 
-    PC(bwscale),
+    //Harmonic Bandwidth
+    rOption(Pbwscale,
+            rOptions(Normal,
+              EqualHz, Quater,
+              Half, 75%, 150%,
+              Double, Inv. Half),
+            "Bandwidth scaling"),
 
-    PC(hrpos.type),
-    PC(hrpos.par1),
-    PC(hrpos.par2),
-    PC(hrpos.par3),
+    //Harmonic Position Modulation
+    rOption(Phrpos.type,
+            rOptions(Harmonic, ShiftU, ShiftL, PowerU, PowerL, Sine,
+                Power, Shift),
+            "Harmonic Overtone shifting mode"),
+    rParamZyn(Phrpos.par1, "Harmonic position parameter"),
+    rParamZyn(Phrpos.par2, "Harmonic position parameter"),
+    rParamZyn(Phrpos.par3, "Harmonic position parameter"),
 
-    PC(quality.samplesize),
-    PC(quality.basenote),
-    PC(quality.oct),
-    PC(quality.smpoct),
+    //Quality
+    rOption(Pquality.samplesize,
+            rOptions(16k (Tiny), 32k, 64k (Small), 128k,
+              256k (Normal), 512k, 1M (Big)),
+            "Size of each wavetable element"),
+    rOption(Pquality.basenote,
+            rOptions( C-2, G-2, C-3, G-3, C-4,
+                G-4, C-5, G-5, G-6,),
+            "Base note for wavetable"),
+    rOption(Pquality.smpoct,
+            rOptions(0.5, 1, 2, 3, 4, 6, 12),
+            "Samples per octave"),
+    rParamI(Pquality.oct, rLinear(0,7), 
+            "Number of octaves to sample (above the first sample"),
 
-    PC(fixedfreq),
-    PC(fixedfreqET),
-    PC(Stereo),
-    PC(Panning),
-    PC(AmpVelocityScaleFunction),
-    PC(PunchStrength),
-    PC(PunchTime),
-    PC(PunchStretch),
-    PC(PunchVelocitySensing),
-    PC(FilterVelocityScale),
-    PC(FilterVelocityScaleFunction),
+    //Volume
+    rToggle(PStereo, "Stereo/Mono Mode"),
+    rParamZyn(PPanning, "Left Right Panning"),
+    rParamZyn(PVolume, "Synth Volume"),
+    rParamZyn(PAmpVelocityScaleFunction, "Amplitude Velocity Sensing function"),
+
+    //Punch
+    rParamZyn(PPunchStrength, "Punch Strength"),
+    rParamZyn(PPunchTime, "UNKNOWN"),
+    rParamZyn(PPunchStretch, "How Punch changes with note frequency"),
+    rParamZyn(PPunchVelocitySensing, "Punch Velocity control"),
+    
+    //Filter
+    rParamZyn(PFilterVelocityScale, "Filter Velocity Magnitude"),
+    rParamZyn(PFilterVelocityScaleFunction, "Filter Velocity Function Shape"),
+
+    //Freq
+    rToggle(Pfixedfreq, "Base frequency fixed frequency enable"),
+    rParamZyn(PfixedfreqET, "Equal temeperate control for fixed frequency operation"),
 
     rParamI(PDetune,        "Fine Detune"),
     rParamI(PCoarseDetune,  "Coarse Detune"),
     rParamZyn(PDetuneType,  "Magnitude of Detune"),
 
-    {"Pbandwidth::i", rProp(parameter) rDoc("Bandwith Of Harmonics"), NULL,
+    {"Pbandwidth::i", rProp(parameter) rLinear(0,1000) rDoc("Bandwith Of Harmonics"), NULL,
         [](const char *msg, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
             if(rtosc_narguments(msg)) {
@@ -190,6 +214,69 @@ static const rtosc::Ports PADnotePorts =
             }
         }},
 };
+
+#if 0
+rtosc::ClonePort non_realtime{
+    PADnotePorts,
+        {
+        //Recursions
+        {"oscilgen/",  rRecurCb(oscilgen)},
+        {"resonance/", rRecurCb(resonance)},
+        //Harmonic Shape
+        {"Pmode::i",   rParamICb}
+
+    {Php.base.type::i,      rOptionCb},
+    {Php.base.par1::i,      rParamZynCb},
+    {Php.freqmult::i,       rParamZynCb},
+    {Php.modulator.par1::i, rParamZynCb},
+    {Php.modulator.freq::i, rParamZynCb},
+    {Php.width::i,          rParamZynCb},
+    {Php.amp.mode::i,       rOptionCb},
+
+    //Harmonic Modulation
+    {Php.amp.type::i, rOptionCb},
+    {Php.amp.par1::i, rParamZynCb},
+    {Php.amp.par2::i, rParamZynCb},
+    {Php.autoscale, rToggleCb},
+    //...
+    rOption(Php.onehalf,
+            rOptions(Full, Upper Half, Lower Half),
+            "Harmonic cutoff model"),
+
+    //Harmonic Bandwidth
+    rOption(Pbwscale,
+            rOptions(Normal,
+              EqualHz, Quater,
+              Half, 75%, 150%,
+              Double, Inv. Half),
+            "Bandwidth scaling"),
+
+    //Harmonic Position Modulation
+    rOption(Phrpos.type,
+            rOptions(Harmonic, ShiftU, ShiftL, PowerU, PowerL, Sine,
+                Power, Shift),
+            "Harmonic Overtone shifting mode"),
+    rParamZyn(Phrpos.par1, "Harmonic position parameter"),
+    rParamZyn(Phrpos.par2, "Harmonic position parameter"),
+    rParamZyn(Phrpos.par3, "Harmonic position parameter"),
+
+    //Quality
+    rOption(Pquality.samplesize,
+            rOptions(16k (Tiny), 32k, 64k (Small), 128k,
+              256k (Normal), 512k, 1M (Big)),
+            "Size of each wavetable element"),
+    rOption(Pquality.basenote,
+            rOptions( C-2, G-2, C-3, G-3, C-4,
+                G-4, C-5, G-5, G-6,),
+            "Base note for wavetable"),
+    rOption(Pquality.smpoct,
+            rOptions(0.5, 1, 2, 3, 4, 6, 12),
+            "Samples per octave"),
+    rParamI(Pquality.oct, rLinear(0,7), 
+            "Number of octaves to sample (above the first sample"),
+
+};
+#endif
 
 const rtosc::Ports &PADnoteParameters::ports = PADnotePorts;
 

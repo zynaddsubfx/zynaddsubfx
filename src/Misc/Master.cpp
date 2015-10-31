@@ -228,7 +228,7 @@ static const Ports master_ports = {
     {"undo_resume:",rProp(internal) rDoc("resume undo event recording"),0,
         [](const char *, rtosc::RtData &d) {d.reply("/undo_resume", "");}},
     {"config/", rDoc("Top Level Application Configuration Parameters"), &Config::ports,
-        [](const char *, rtosc::RtData &){}},
+        [](const char *, rtosc::RtData &d){d.forward();}},
     {"presets/", rDoc("Parameter Presets"), &preset_ports, rBOIL_BEGIN
         SNIP
             preset_ports.dispatch(msg, data);
@@ -252,6 +252,7 @@ class DataObj:public rtosc::RtData
             loc_size = loc_size_;
             obj      = obj_;
             bToU     = bToU_;
+            forwarded = false;
         }
 
         virtual void reply(const char *path, const char *args, ...) override
@@ -280,9 +281,18 @@ class DataObj:public rtosc::RtData
         }
         virtual void broadcast(const char *msg) override
         {
-            reply("/broadcast");
+            reply("/broadcast", "");
             reply(msg);
-        };
+        }
+
+        virtual void forward(const char *reason) override
+        {
+            assert(message);
+            reply("/forward", "");
+            printf("forwarding '%s'\n", message);
+            forwarded = true;
+        }
+        bool forwarded;
     private:
         rtosc::ThreadLink *bToU;
 };
@@ -341,7 +351,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
         DataObj d{loc_buf, 1024, the_master, the_bToU};
         memset(loc_buf, 0, sizeof(loc_buf));
         //printf("sending an event to the owner of '%s'\n", m);
-        Master::ports.dispatch(m+1, d);
+        Master::ports.dispatch(m, d, true);
     };
 #else
     midi.event_cb = [](const char *) {};
@@ -362,8 +372,8 @@ void Master::applyOscEvent(const char *msg)
     DataObj d{loc_buf, 1024, this, bToU};
     memset(loc_buf, 0, sizeof(loc_buf));
     d.matches = 0;
-    ports.dispatch(msg+1, d);
-    if(d.matches == 0)
+    ports.dispatch(msg, d, true);
+    if(d.matches == 0 || d.forwarded)
         fprintf(stderr, "Unknown path '%s'\n", msg);
 }
 
@@ -658,9 +668,7 @@ void Master::AudioOut(float *outl, float *outr)
                     rtosc_argument_string(msg));
             fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
         }
-        d.matches = 0;
-        //fprintf(stdout, "address '%s'\n", uToB->peak());
-        ports.dispatch(msg+1, d);
+        ports.dispatch(msg, d, true);
         events++;
         if(!d.matches) {// && !ports.apropos(msg)) {
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);

@@ -38,8 +38,6 @@
 
 pthread_t main_thread;
 
-#define PC(x) rParamZyn(P##x, "undocumented oscilgen parameter")
-
 #define rObject OscilGen
 const rtosc::Ports OscilGen::ports = {
     rSelf(OscilGen),
@@ -51,21 +49,10 @@ const rtosc::Ports OscilGen::ports = {
                      dB scale (-100)),
             "Type of magnitude for harmonics"),
     rOption(Pcurrentbasefunc,
-            rOptions(sine, triangle,
-                pulse,
-                saw,
-                power,
-                gauss,
-                diode,
-                abssine,
-                pulsesine,
-                stretchsine,
-                chirp,
-                absstretchsine,
-                chebyshev,
-                sqr,
-                spike,
-                circle), rOpt(127,use-as-base waveform),
+            rOptions(sine, triangle, pulse, saw, power, gauss,
+                diode, abssine, pulsesine, stretchsine,
+                chirp, absstretchsine, chebyshev, sqr,
+                spike, circle), rOpt(127,use-as-base waveform),
             "Base Waveform for harmonics"),
     rParamZyn(Pbasefuncpar,
             "Morph between possible base function shapes "
@@ -82,42 +69,32 @@ const rtosc::Ports OscilGen::ports = {
     rParamZyn(Pwaveshaping, "Degree Of Waveshaping"),
     rOption(Pwaveshapingfunction,
             rOptions(Undistorted,
-                Arctangent,
-                Asymmetric,
-                Pow,
-                Sine,
-                Quantisize,
-                Zigzag,
-                Limiter,
-                Upper Limiter,
-                Lower Limiter,
-                Inverse Limiter,
-                Clip,
-                Asym2,
-                Pow2,
-                sigmoid), "Shape of distortion to be applied"),
+                Arctangent, Asymmetric, Pow, Sine, Quantisize,
+                Zigzag, Limiter, Upper Limiter, Lower Limiter,
+                Inverse Limiter, Clip, Asym2, Pow2, sigmoid),
+            "Shape of distortion to be applied"),
     rOption(Pfiltertype, rOptions(No Filter,
             lp, hp1, hp1b, bp1, bs1, lp2, hp2, bp2, bs2,
             cos, sin, low_shelf, s), "Harmonic Filter"),
-    PC(filterpar1),
-    PC(filterpar2),
+    rParamZyn(Pfilterpar1, "Filter parameter"),
+    rParamZyn(Pfilterpar2, "Filter parameter"),
     rToggle(Pfilterbeforews, "Filter before waveshaping spectra;"
             "When enabled oscilfilter(freqs); then waveshape(freqs);, "
             "otherwise waveshape(freqs); then oscilfilter(freqs);"),
-    PC(satype),
+    rOption(Psatype, rOptions(None, Pow, ThrsD, ThrsU),
+            "Spectral Adjustment Type"),
     rParamZyn(Psapar, "Spectral Adjustment Parameter"),
     rParamI(Pharmonicshift, "Amount of shift on harmonics"),
     rToggle(Pharmonicshiftfirst, "If harmonics are shifted before waveshaping/filtering"),
     rOption(Pmodulation, rOptions(None, Rev, Sine, Power),
             "Frequency Modulation To Combined Spectra"),
-    rParamZyn(Pmodulationpar1,
-            "modulation parameter"),
-    rParamZyn(Pmodulationpar2,
-            "modulation parameter"),
-    rParamZyn(Pmodulationpar3,
-            "modulation parameter"),
-    //FIXME realtime parameters lurking below
-    PC(rand),
+    rParamZyn(Pmodulationpar1, "modulation parameter"),
+    rParamZyn(Pmodulationpar2, "modulation parameter"),
+    rParamZyn(Pmodulationpar3, "modulation parameter"),
+
+    //XXX Start of realtime parameters
+    rParamZyn(Prand, "Oscilator Phase Randomness: smaller than 0 is \""
+            "group\", larger than 0 is for each harmonic"),
     rParamZyn(Pamprandpower,
             "Variance of harmonic randomness"),
     rOption(Pamprandtype, rOptions(None, Pow, Sin),
@@ -131,6 +108,7 @@ const rtosc::Ports OscilGen::ports = {
             "Adaptive Harmonic Strength"),
     rParamZyn(Padaptiveharmonicspar,
             "Adaptive Harmonics Postprocessing Power"),
+    //XXX End of realtime parameters
 
     //TODO update to rArray and test
     {"phase#128::c", rProp(parameter) rDoc("Sets harmonic phase"),
@@ -215,20 +193,36 @@ const rtosc::Ports OscilGen::ports = {
         NULL, [](const char *, rtosc::RtData &d) {
             ((OscilGen*)d.obj)->useasbase();
         }},
-    {"prepare:b", rProp(internal) rProp(non-realtime) rProp(pointer) rDoc("Sets prepared fft data"),
+    {"prepare:b", rProp(internal) rProp(realtime) rProp(pointer) rDoc("Sets prepared fft data"),
         NULL, [](const char *m, rtosc::RtData &d) {
+            assert(false && "wrong thread...");
+        }}};
+
+#define rForwardCb [](const char *msg, rtosc::RtData &d) {\
+    printf("fowarding...\n"); d.forward();}
+
+const rtosc::ClonePorts OscilGen::realtime_ports{
+    OscilGen::ports, {
+    {"self:", [](const char *, rtosc::RtData &d){
+        d.reply(d.loc, "b", sizeof(d.obj), &d.obj);}},
+    {"Prand::i",                      rParamICb(Prand)},
+    {"Pamprandpower::i",              rParamICb(Pamprandpower)},
+    {"Pamprandtype::i:c",             rOptionCb(Pamprandtype)},
+    {"Padaptiveharmonics::i:c",       rOptionCb(Padaptiveharmonics)},
+    {"Padaptiveharmonicsbasefreq::i", rParamICb(Padaptiveharmonicsbasefreq)},
+    {"Padaptiveharmonicspower::i",    rParamICb(Padaptiveharmonicspower)},
+    {"Padaptiveharmonicspar::i",      rParamICb(Padaptiveharmonicspar)},
+    {"prepare:b", [](const char *m, rtosc::RtData &d) {
             //fprintf(stderr, "prepare:b got a message from '%s'\n", m);
             OscilGen &o = *(OscilGen*)d.obj;
             assert(rtosc_argument(m,0).b.len == sizeof(void*));
             d.reply("/free", "sb", "fft_t", sizeof(void*), &o.oscilFFTfreqs);
-            //fprintf(stderr, "\n\n");
-            //fprintf(stderr, "The ID of this of this thread is: %ld\n", (long)pthread_self());
-            //fprintf(stderr, "o.oscilFFTfreqs = %p\n", o.oscilFFTfreqs);
-            assert(main_thread != pthread_self());
             assert(o.oscilFFTfreqs !=*(fft_t**)rtosc_argument(m,0).b.data);
             o.oscilFFTfreqs = *(fft_t**)rtosc_argument(m,0).b.data;
         }},
-};
+
+    {"*",                             rForwardCb}
+}};
 
 
 //operations on FFTfreqs
