@@ -166,8 +166,8 @@ class PADnoteParameters:public Presets
                              std::function<bool()> do_abort);
 
         static const rtosc::MergePorts ports;
-        static const rtosc::Ports      non_realtime_ports;
-        static const rtosc::Ports      realtime_ports;
+        static const rtosc::Ports     &non_realtime_ports;
+        static const rtosc::Ports     &realtime_ports;
 
     private:
         void generatespectrum_bandwidthMode(float *spectrum,

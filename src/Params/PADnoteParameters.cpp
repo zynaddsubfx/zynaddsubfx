@@ -35,7 +35,7 @@ using namespace rtosc;
 
 
 #define rObject PADnoteParameters
-const rtosc::Ports PADnoteParameters::realtime_ports =
+static const rtosc::Ports realtime_ports = 
 {
     rRecurp(FreqLfo, "Frequency LFO"),
     rRecurp(AmpLfo,   "Amplitude LFO"),
@@ -119,8 +119,7 @@ const rtosc::Ports PADnoteParameters::realtime_ports =
         }},
 
 };
-
-const rtosc::Ports PADnoteParameters::non_realtime_ports =
+static const rtosc::Ports non_realtime_ports =
 {
     //Harmonic Source Distribution
     rRecurp(oscilgen, "Oscillator"),
@@ -220,10 +219,14 @@ const rtosc::Ports PADnoteParameters::non_realtime_ports =
             delete[] tmp;}},
 };
 
+const rtosc::Ports &PADnoteParameters::non_realtime_ports = ::non_realtime_ports;
+const rtosc::Ports &PADnoteParameters::realtime_ports     = ::realtime_ports;
+
+
 const rtosc::MergePorts PADnoteParameters::ports =
 {
-    &PADnoteParameters::non_realtime_ports,
-    &PADnoteParameters::realtime_ports
+    &non_realtime_ports,
+    &realtime_ports
 };
 
 
