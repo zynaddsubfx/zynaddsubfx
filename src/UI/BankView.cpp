@@ -15,8 +15,9 @@ BankList::BankList(int x,int y, int w, int h, const char *label)
 void BankList::init(std::string path)
 {
     ext = path;
-    oscRegister("bank-list");
+    oscRegister("bank/bank_select");
     oscRegister(path.c_str());
+    oscWrite("bank/banks", "");
 }
 
 void BankList::OSC_raw(const char *msg)
@@ -245,6 +246,9 @@ void BankView::init(Fl_Osc_Interface *osc_, BankViewControls *bvc_, int *npart_)
     for(int i=0; i<160; ++i)
         slots[i]->init(i, this);
 
+    //Create Slot Listeners
+    for(int i=0; i<160; ++i)
+        osc->createLink("/bank/slot"+to_s(i), this);
     //Request Values
     for(int i=0; i<160; ++i)
         osc->write("/bank/slot"+to_s(i), "");
@@ -320,15 +324,22 @@ void BankView::react(int event, int nslot)
 
 void BankView::OSC_raw(const char *msg)
 {
-    if(strcmp(rtosc_argument_string(msg), "iss"))
-        return;
+    if(!strcmp(rtosc_argument_string(msg), "iss")) {
+        int nslot         = rtosc_argument(msg,0).i;
+        const char *name  = rtosc_argument(msg,1).s;
+        const char *fname = rtosc_argument(msg,2).s;
 
-    int nslot         = rtosc_argument(msg,0).i;
-    const char *name  = rtosc_argument(msg,1).s;
-    const char *fname = rtosc_argument(msg,2).s;
+        if(0 <= nslot && nslot < 160)
+            slots[nslot]->update(name, fname);
+    } if(!strcmp(rtosc_argument_string(msg), "ss")) {
+        while(*msg && !isdigit(*msg)) msg++;
+        int nslot         = atoi(msg);
+        const char *name  = rtosc_argument(msg,0).s;
+        const char *fname = rtosc_argument(msg,1).s;
 
-    if(0 <= nslot && nslot < 160)
-        slots[nslot]->update(name, fname);
+        if(0 <= nslot && nslot < 160)
+            slots[nslot]->update(name, fname);
+    }
 }
         
 void BankView::cbwig(Fl_Widget *w)

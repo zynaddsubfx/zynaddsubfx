@@ -756,7 +756,7 @@ rtosc::Ports bankPorts = {
         //Send updated banks
         int i = 0;
         for(auto &elm : impl.banks)
-            d.reply("/bank-list", "iss", i++, elm.name.c_str(), elm.dir.c_str());
+            d.reply("/bank/bank_select", "iss", i++, elm.name.c_str(), elm.dir.c_str());
 
         rEnd},
     {"slot#1024:", 0, 0,
@@ -769,11 +769,11 @@ rtosc::Ports bankPorts = {
                 loc, impl.ins[loc].name.c_str(),
                 impl.ins[loc].filename.c_str());
         rEnd},
-    {"slots:", 0, 0,
+    {"banks:", 0, 0,
         rBegin;
         int i = 0;
         for(auto &elm : impl.banks)
-            d.reply("/bank-list", "iss", i++, elm.name.c_str(), elm.dir.c_str());
+            d.reply("/bank/bank_select", "iss", i++, elm.name.c_str(), elm.dir.c_str());
         rEnd},
     {"bank_select::i", 0, 0,
         rBegin
@@ -791,7 +791,7 @@ rtosc::Ports bankPorts = {
                                    impl.ins[i].filename.c_str());
                }
             } else
-                d.reply("/bank_select", "i", impl.bankpos);
+                d.reply("/bank/bank_select", "i", impl.bankpos);
         rEnd},
     {"save_to_slot:ii", 0, 0,
         rBegin;
