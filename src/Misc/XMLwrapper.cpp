@@ -250,8 +250,12 @@ void XMLwrapper::addpar(const string &name, int val)
 
 void XMLwrapper::addparreal(const string &name, float val)
 {
-    addparams("par_real", 2, "name", name.c_str(), "value",
-              stringFrom<float>(val).c_str());
+    union { float in; uint32_t out; } convert;
+    char buf[11];
+    convert.in = val;
+    sprintf(buf, "0x%8X", convert.out);
+    addparams("par_real", 3, "name", name.c_str(), "value",
+              stringFrom<float>(val).c_str(), "exact_value", buf);
 }
 
 void XMLwrapper::addparbool(const string &name, int val)
@@ -571,7 +575,14 @@ float XMLwrapper::getparreal(const char *name, float defaultpar) const
     if(tmp == NULL)
         return defaultpar;
 
-    const char *strval = mxmlElementGetAttr(tmp, "value");
+    const char *strval = mxmlElementGetAttr(tmp, "exact_value");
+    if (strval != NULL) {
+        union { float out; uint32_t in; } convert;
+        sscanf(strval+2, "%x", &convert.in);
+        return convert.out;
+    }
+
+    strval = mxmlElementGetAttr(tmp, "value");
     if(strval == NULL)
         return defaultpar;
 
