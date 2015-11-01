@@ -41,9 +41,6 @@
 #endif
 
 using std::string;
-#ifndef PLUGINVERSION
-extern rtosc::ThreadLink *the_bToU;//XXX
-#endif
 
 /******************************************************************************
  *                        LIBLO And Reflection Code                           *
@@ -187,6 +184,55 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::ThreadLink *uToB)
         uToB->write((path+to_s(i)).c_str(), "ifb",
                 0, 440.0f, sizeof(float*), NULL);
     }
+}
+
+/******************************************************************************
+ *                      MIDI Serialization                                    *
+ *                                                                            *
+ ******************************************************************************/
+void saveMidiLearn(XMLwrapper &xml, const rtosc::MidiMappernRT &midi)
+{
+    xml.beginbranch("midi-learn");
+    for(auto value:midi.inv_map) {
+        XmlNode binding("midi-binding");
+        auto biject = std::get<3>(value.second);
+        binding["osc-path"]  = value.first;
+        binding["coarse-CC"] = to_s(std::get<1>(value.second));
+        binding["fine-CC"]   = to_s(std::get<2>(value.second));
+        binding["type"]      = "i";
+        binding["minimum"]   = to_s(biject.min);
+        binding["maximum"]   = to_s(biject.max);
+        xml.add(binding);
+    }
+    xml.endbranch();
+}
+
+void loadMidiLearn(XMLwrapper &xml, rtosc::MidiMappernRT &midi)
+{
+    using rtosc::Port;
+    if(xml.enterbranch("midi-learn")) {
+        auto nodes = xml.getBranch();
+
+        //TODO clear mapper
+
+        for(auto node:nodes) {
+            if(node.name != "midi-binding" ||
+                    !node.has("osc-path") ||
+                    !node.has("coarse-CC"))
+                continue;
+            const string path = node["osc-path"];
+            const int    CC   = atoi(node["coarse-CC"].c_str());
+            const Port  *p    = Master::ports.apropos(path.c_str());
+            if(p) {
+                printf("loading midi port...\n");
+                midi.addNewMapper(CC, *p, path);
+            } else {
+                printf("unknown midi bindable <%s>\n", path.c_str());
+            }
+        }
+        xml.exitbranch();
+    } else
+        printf("cannot find 'midi-learn' branch...\n");
 }
 
 /******************************************************************************
@@ -355,6 +401,7 @@ namespace Nio
                     Nio::setSink(get<0>(m));}},
     };
 }
+
 
 /* Implementation */
 class MiddleWareImpl : TmpFileMgr
@@ -587,7 +634,11 @@ public:
     std::atomic_int pending_load[NUM_MIDI_PARTS];
     std::atomic_int actual_load[NUM_MIDI_PARTS];
 
+    //Undo/Redo
     rtosc::UndoHistory undo;
+
+    //MIDI Learn
+    rtosc::MidiMappernRT midi_mapper;
 
     //Link To the Realtime
     rtosc::ThreadLink *bToU;
@@ -852,6 +903,20 @@ static rtosc::Ports middwareSnoopPorts = {
         impl.kitEnable(msg);
         d.forward();
         rEnd},
+    {"save_xlz:s", 0, 0,
+        rBegin;
+        const char *file = rtosc_argument(msg, 0).s;
+        XMLwrapper xml;
+        saveMidiLearn(xml, impl.midi_mapper);
+        xml.saveXMLfile(file, impl.master->gzip_compression);
+        rEnd},
+    {"load_xlz:s", 0, 0,
+        rBegin;
+        const char *file = rtosc_argument(msg, 0).s;
+        XMLwrapper xml;
+        xml.loadXMLfile(file);
+        loadMidiLearn(xml, impl.midi_mapper);
+        rEnd},
     {"save_xmz:s", 0, 0,
         rBegin;
         const char *file = rtosc_argument(msg, 0).s;
@@ -900,13 +965,23 @@ static rtosc::Ports middwareSnoopPorts = {
         printf("clear part port...\n");
         impl.loadClearPart(extractInt(msg));
         rEnd},
-    {"/undo:", 0, 0,
+    {"undo:", 0, 0,
         rBegin;
         impl.undo.seekHistory(-1);
         rEnd},
-    {"/redo:", 0, 0,
+    {"redo:", 0, 0,
         rBegin;
         impl.undo.seekHistory(+1);
+        rEnd},
+    {"learn:s", 0, 0,
+        rBegin;
+        string addr = rtosc_argument(msg, 0).s;
+        auto &midi  = impl.midi_mapper;
+        auto map    = midi.getMidiMappingStrings();
+        if(map.find(addr) != map.end())
+            midi.map(addr.c_str(), false);
+        else
+            midi.map(addr.c_str(), true);
         rEnd},
     //drop this message into the abyss
     {"ui/title:", 0, 0, [](const char *msg, RtData &d) {}}
@@ -947,6 +1022,10 @@ static rtosc::Ports middlewareReplyPorts = {
         if(impl.recording_undo)
             impl.undo.recordEvent(msg);
         rEnd},
+    {"midi-use-CC:i", 0, 0,
+        rBegin;
+        impl.midi_mapper.useFreeID(rtosc_argument(msg, 0).i);
+        rEnd},
     {"broadcast:", 0, 0, rBegin; impl.broadcast = true; rEnd},
     {"foward:", 0, 0, rBegin; impl.forward = true; rEnd},
 };
@@ -964,6 +1043,8 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
 {
     bToU = new rtosc::ThreadLink(4096*2,1024);
     uToB = new rtosc::ThreadLink(4096*2,1024);
+    midi_mapper.base_ports = &Master::ports;
+    midi_mapper.rt_cb      = [this](const char *msg){handleMsg(msg);};
     if(preferrred_port != -1)
         server = lo_server_new_with_proto(to_s(preferrred_port).c_str(),
                                           LO_UDP, liblo_error_cb);
@@ -990,9 +1071,6 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
     idle = 0;
     idle_ptr = 0;
 
-#ifndef PLUGINVERSION
-    the_bToU = bToU;
-#endif
     master = new Master(synth, config);
     master->bToU = bToU;
     master->uToB = uToB;
@@ -1106,8 +1184,8 @@ void MiddleWareImpl::broadcastToRemote(const char *rtmsg)
 
 void MiddleWareImpl::sendToRemote(const char *rtmsg, std::string dest)
 {
-    printf("sendToRemote(%s:%s,%s)\n", rtmsg, rtosc_argument_string(rtmsg),
-            dest.c_str());
+    //printf("sendToRemote(%s:%s,%s)\n", rtmsg, rtosc_argument_string(rtmsg),
+    //        dest.c_str());
     if(dest == "GUI") {
         cb(ui, rtmsg);
     } else if(!dest.empty()) {
@@ -1236,9 +1314,11 @@ void MiddleWareImpl::handleMsg(const char *msg)
     assert(strcmp(msg, "/sysefx0preset"));
     assert(strcmp(msg, "Psysefxvol0/part0"));
 
-    fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 6 + 30, 0 + 40);
-    fprintf(stdout, "middleware: '%s':%s\n", msg, rtosc_argument_string(msg));
-    fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+    if(strcmp("/get-vu", msg)) {
+        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 6 + 30, 0 + 40);
+        fprintf(stdout, "middleware: '%s':%s\n", msg, rtosc_argument_string(msg));
+        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+    }
 
     const char *last_path = rindex(msg, '/');
     if(!last_path) {
@@ -1252,7 +1332,9 @@ void MiddleWareImpl::handleMsg(const char *msg)
 
     //A message unmodified by snooping
     if(d.matches == 0 || d.forwarded) {
-        printf("Message Continuing on<%s:%s>...\n", msg, rtosc_argument_string(msg));
+        if(strcmp("/get-vu", msg)) {
+            printf("Message Continuing on<%s:%s>...\n", msg, rtosc_argument_string(msg));
+        }
         uToB->raw_write(msg);
     } else
         printf("Message Handled<%s:%s>...\n", msg, rtosc_argument_string(msg));

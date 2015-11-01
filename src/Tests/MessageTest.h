@@ -36,7 +36,7 @@
 #include "../Misc/Util.h"
 #include "../globals.h"
 #include "../UI/NSM.H"
-NSM_Client *nsm = 0;
+class NSM_Client *nsm = 0;
 MiddleWare *middleware = 0;
 
 using namespace std;
@@ -50,9 +50,10 @@ class MessageTest:public CxxTest::TestSuite
     public:
         Config config;
         void setUp() {
-            synth = new SYNTH_T;
-            mw    = new MiddleWare(std::move(*synth), &config);
-            ms    = mw->spawnMaster();
+            synth    = new SYNTH_T;
+            mw       = new MiddleWare(std::move(*synth), &config);
+            ms       = mw->spawnMaster();
+            realtime = NULL;
         }
 
         void tearDown() {
@@ -60,7 +61,8 @@ class MessageTest:public CxxTest::TestSuite
             delete synth;
         }
 
-        void testKitEnable(void)
+#if 0
+        void _testKitEnable(void)
         {
             const char *msg = NULL;
             mw->transmitMsg("/part0/kit0/Psubenabled", "T");
@@ -72,7 +74,7 @@ class MessageTest:public CxxTest::TestSuite
             TS_ASSERT_EQUALS(string("/part0/kit0/Psubenabled"), msg);
         }
 
-        void testBankCapture(void)
+        void _testBankCapture(void)
         {
             mw->transmitMsg("/bank/slots", "");
             TS_ASSERT(!ms->uToB->hasNext());
@@ -82,7 +84,7 @@ class MessageTest:public CxxTest::TestSuite
             TS_ASSERT_EQUALS(string("/bank/fake"), msg);
         }
 
-        void testOscCopyPaste(void)
+        void _testOscCopyPaste(void)
         {
             //Enable pad synth
             mw->transmitMsg("/part0/kit0/Ppadenabled", "T");
@@ -119,11 +121,92 @@ class MessageTest:public CxxTest::TestSuite
             do_exit = 1;
             t.join();
             TS_ASSERT_EQUALS(ms->part[0]->kit[0].padpars->oscilgen->Pbasefuncpar, 32);
+        }
+#endif
 
+        void start_realtime(void)
+        {
+            do_exit = false;
+            realtime = new std::thread([this](){
+                    int tries = 0;
+                    while(tries < 10000) {
+                        if(!ms->uToB->hasNext()) {
+                            if(do_exit)
+                                break;
+
+                            usleep(500);
+                            continue;
+                        }
+                        const char *msg = ms->uToB->read();
+                        printf("RT: handling <%s>\n", msg);
+                        ms->applyOscEvent(msg);
+                    }});
+        }
+
+        void stop_realtime(void)
+        {
+            do_exit = true;
+            realtime->join();
+            delete realtime;
+            realtime = NULL;
+        }
+
+        void run_realtime(void)
+        {
+            start_realtime();
+            stop_realtime();
+        }
+
+        void testMidiLearn(void)
+        {
+            mw->transmitMsg("/learn", "s", "/Pvolume");
+            mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 108);
+            TS_ASSERT_EQUALS(ms->Pvolume, 80);
+
+            //Perform a learning operation
+
+            run_realtime(); //1. runs learning and identifies a CC to bind
+            mw->tick();     //2. produces new binding table
+            run_realtime(); //3. applies new binding table
+
+
+            //Verify that the learning actually worked
+            mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 13);
+            run_realtime();
+            TS_ASSERT_EQUALS(ms->Pvolume, 13);
+
+            mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 2);
+            run_realtime();
+            TS_ASSERT_EQUALS(ms->Pvolume, 2);
+
+            mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 0);
+            run_realtime();
+            TS_ASSERT_EQUALS(ms->Pvolume, 0);
+
+            mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 127);
+            run_realtime();
+            TS_ASSERT_EQUALS(ms->Pvolume, 127);
+        }
+
+        void testMidiLearnSave(void)
+        {
+            mw->transmitMsg("/learn", "s", "/Pvolume");
+            mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 108);
+
+            //Perform a learning operation
+
+            run_realtime(); //1. runs learning and identifies a CC to bind
+            mw->tick();     //2. produces new binding table
+            run_realtime(); //3. applies new binding table
+
+            mw->transmitMsg("/save_xlz", "s", "test-midi-learn.xlz");
+            mw->transmitMsg("/load_xlz", "s", "test-midi-learn.xlz");
         }
 
     private:
-        SYNTH_T *synth;
-        MiddleWare *mw;
-        Master     *ms;
+        SYNTH_T     *synth;
+        MiddleWare  *mw;
+        Master      *ms;
+        std::thread *realtime;
+        bool         do_exit;
 };
