@@ -357,8 +357,10 @@ void Master::applyOscEvent(const char *msg)
     }
 
     ports.dispatch(msg, d, true);
-    if(d.matches == 0 || d.forwarded)
+    if(d.matches == 0 && !d.forwarded)
         fprintf(stderr, "Unknown path '%s:%s'\n", msg, rtosc_argument_string(msg));
+    if(d.forwarded)
+        bToU->raw_write(msg);
 }
 
 void Master::defaults()

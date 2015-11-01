@@ -94,7 +94,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
 
 
     //TODO update to rArray and test
-    {"phase#128::c", rProp(parameter) rDoc("Sets harmonic phase"),
+    {"phase#128::c:i", rProp(parameter) rLinear(0,127) rDoc("Sets harmonic phase"),
         NULL, [](const char *m, rtosc::RtData &d) {
             const char *mm = m;
             while(*mm && !isdigit(*mm)) ++mm;
@@ -105,7 +105,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
                 phase = rtosc_argument(m,0).i;
         }},
     //TODO update to rArray and test
-    {"magnitude#128::c", rProp(parameter) rDoc("Sets harmonic magnitude"),
+    {"magnitude#128::c:i", rProp(parameter) rLinear(0,127) rDoc("Sets harmonic magnitude"),
         NULL, [](const char *m, rtosc::RtData &d) {
             //printf("I'm at '%s'\n", d.loc);
             const char *mm = m;
@@ -113,8 +113,20 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             unsigned char &mag = ((OscilGen*)d.obj)->Phmag[atoi(mm)];
             if(!rtosc_narguments(m))
                 d.reply(d.loc, "c", mag);
-            else
+            else {
                 mag = rtosc_argument(m,0).i;
+                printf("setting magnitude\n\n");
+                //XXX hack hack
+                char *repath = strdup(d.loc);
+                char *edit   = rindex(repath, '/')+1;
+                strcpy(edit, "prepare");
+                OscilGen &o = *((OscilGen*)d.obj);
+                fft_t *data = new fft_t[o.synth.oscilsize / 2];
+                o.prepare(data);
+                fprintf(stderr, "sending '%p' of fft data\n", data);
+                d.chain(repath, "b", sizeof(fft_t*), &data);
+                o.pendingfreqs = data;
+            }
         }},
     {"base-spectrum:", rProp(non-realtime) rDoc("Returns spectrum of base waveshape"),
         NULL, [](const char *, rtosc::RtData &d) {
@@ -148,7 +160,6 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
         }},
     {"waveform:", rProp(non-realtime) rDoc("Returns waveform points"),
         NULL, [](const char *, rtosc::RtData &d) {
-            printf("WAVEFORM PORT REPORTING IN\n");
             OscilGen &o = *((OscilGen*)d.obj);
             const unsigned n = o.synth.oscilsize;
             float *smps = new float[n];
@@ -165,8 +176,8 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             OscilGen &o = *(OscilGen*)d.obj;
             fft_t *data = new fft_t[o.synth.oscilsize / 2];
             o.prepare(data);
-            //fprintf(stderr, "sending '%p' of fft data\n", data);
-            d.reply("/forward", "sb", d.loc, sizeof(fft_t*), &data);
+            fprintf(stderr, "sending '%p' of fft data\n", data);
+            d.chain(d.loc, "b", sizeof(fft_t*), &data);
             o.pendingfreqs = data;
         }},
     {"convert2sine:", rProp(non-realtime) rDoc("Translates waveform into FS"),
@@ -176,10 +187,6 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
     {"use-as-base:", rProp(non-realtime) rDoc("Translates current waveform into base"),
         NULL, [](const char *, rtosc::RtData &d) {
             ((OscilGen*)d.obj)->useasbase();
-        }},
-    {"prepare:b", rProp(internal) rProp(realtime) rProp(pointer) rDoc("Sets prepared fft data"),
-        NULL, [](const char *m, rtosc::RtData &d) {
-            assert(false && "wrong thread...");
         }}};
 
 #define rForwardCb [](const char *msg, rtosc::RtData &d) {\
@@ -203,7 +210,7 @@ const rtosc::Ports OscilGen::realtime_ports{
             "Adaptive Harmonics Postprocessing Power"),
     {"prepare:b", rProp(internal) rProp(realtime) rProp(pointer) rDoc("Sets prepared fft data"),
         NULL, [](const char *m, rtosc::RtData &d) {
-            //fprintf(stderr, "prepare:b got a message from '%s'\n", m);
+            fprintf(stderr, "prepare:b got a message from '%s'\n", m);
             OscilGen &o = *(OscilGen*)d.obj;
             assert(rtosc_argument(m,0).b.len == sizeof(void*));
             d.reply("/free", "sb", "fft_t", sizeof(void*), &o.oscilFFTfreqs);

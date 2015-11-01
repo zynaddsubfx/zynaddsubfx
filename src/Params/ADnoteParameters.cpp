@@ -50,6 +50,8 @@ static const Ports voicePorts = {
         data.obj = obj->OscilSmp;
         SNIP
             OscilGen::realtime_ports.dispatch(msg, data);
+        if(data.matches == 0)
+            data.forward();
         rBOIL_END},
     {"FMSmp/", rDoc("Modulating Oscillator"),
         &OscilGen::ports,
@@ -58,6 +60,8 @@ static const Ports voicePorts = {
         data.obj = obj->FMSmp;
         SNIP
             OscilGen::realtime_ports.dispatch(msg, data);
+        if(data.matches == 0)
+            data.forward();
         rBOIL_END},
     rRecurp(FreqLfo, "Frequency LFO"),
     rRecurp(AmpLfo, "Amplitude LFO"),

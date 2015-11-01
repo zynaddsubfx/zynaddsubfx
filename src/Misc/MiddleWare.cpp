@@ -324,7 +324,6 @@ struct NonRtObjStore
     }
     void handlePad(const char *msg, rtosc::RtData &d) {
         string obj_rl(d.message, msg);
-        printf("object resource locator = <%s>\n", obj_rl.c_str());
         void *pad = get(obj_rl);
         assert(pad);
         strcpy(d.loc, obj_rl.c_str());
@@ -703,6 +702,23 @@ class MwDataObj:public rtosc::RtData
         };
         //virtual void broadcast(const char *path, const char *args, ...){(void)path;(void)args;};
         //virtual void broadcast(const char *msg){(void)msg;};
+        
+        virtual void chain(const char *msg) override
+        {
+            assert(msg);
+            printf("chain call on <%s>\n", msg);
+            mwi->handleMsg(msg);
+        }
+
+        virtual void chain(const char *path, const char *args, ...) override
+        {
+            assert(path);
+            va_list va;
+            va_start(va,args);
+            rtosc_vmessage(buffer,4*4096,path,args,va);
+            chain(buffer);
+            va_end(va);
+        }
 
         virtual void forward(const char *) override
         {
@@ -861,33 +877,27 @@ rtosc::Ports bankPorts = {
 static rtosc::Ports middwareSnoopPorts = {
     {"part#16/kit#8/adpars/VoicePar#8/OscilSmp/", 0, &OscilGen::non_realtime_ports,
         rBegin;
-        printf("snoop for oscilsmp\n");
         impl.obj_store.handleOscil(chomp(chomp(chomp(chomp(chomp(msg))))), d);
         rEnd},
     {"part#16/kit#8/adpars/VoicePar#8/FMSmp/", 0, &OscilGen::non_realtime_ports,
         rBegin
-        printf("snoop for fmsmp\n");
         impl.obj_store.handleOscil(chomp(chomp(chomp(chomp(chomp(msg))))), d);
         rEnd},
     {"part#16/kit#8/padpars/", 0, &PADnoteParameters::non_realtime_ports,
         rBegin
-        printf("snoop for padpars\n");
         impl.obj_store.handlePad(chomp(chomp(chomp(msg))), d);
         rEnd},
     {"bank/", 0, &bankPorts,
         rBegin;
-        printf("bank port\n");
         d.obj = &impl.master->bank;
         bankPorts.dispatch(chomp(msg),d);
         rEnd},
     {"config/", 0, &Config::ports,
         rBegin;
-        printf("config port\n");
         d.obj = impl.config;
         Config::ports.dispatch(chomp(msg), d);
         rEnd},
     {"presets/", 0,  &real_preset_ports,          [](const char *msg, RtData &d) {
-        printf("presets port\n");
         MiddleWareImpl *obj = (MiddleWareImpl*)d.obj;
         d.obj = (void*)obj->parent;
         real_preset_ports.dispatch(chomp(msg), d);
@@ -895,11 +905,9 @@ static rtosc::Ports middwareSnoopPorts = {
             d.reply("/damage", "s", rtosc_argument(msg, 0).s);
         }},
     {"io/", 0, &Nio::ports,               [](const char *msg, RtData &d) {
-        printf("io port\n");
         Nio::ports.dispatch(chomp(msg), d);}},
     {"part*/kit*/{Padenabled,Ppadenabled,Psubenabled}:T:F", 0, 0,
         rBegin;
-        printf("enable engine port...\n");
         impl.kitEnable(msg);
         d.forward();
         rEnd},
@@ -962,7 +970,6 @@ static rtosc::Ports middwareSnoopPorts = {
         rEnd},
     {"part#16/clear:", 0, 0,
         rBegin;
-        printf("clear part port...\n");
         impl.loadClearPart(extractInt(msg));
         rEnd},
     {"undo:", 0, 0,
@@ -1027,7 +1034,7 @@ static rtosc::Ports middlewareReplyPorts = {
         impl.midi_mapper.useFreeID(rtosc_argument(msg, 0).i);
         rEnd},
     {"broadcast:", 0, 0, rBegin; impl.broadcast = true; rEnd},
-    {"foward:", 0, 0, rBegin; impl.forward = true; rEnd},
+    {"forward:", 0, 0, rBegin; impl.forward = true; rEnd},
 };
 #undef rBegin
 #undef rEnd
@@ -1212,15 +1219,15 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
     assert(strcmp(rtmsg, "/ze_state"));
 
     //Dump Incomming Events For Debugging
-    if(strcmp(rtmsg, "/vu-meter") && true) {
+    if(strcmp(rtmsg, "/vu-meter") && false) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 1 + 30, 0 + 40);
-        fprintf(stdout, "frontend: '%s'<%s>\n", rtmsg,
-                rtosc_argument_string(rtmsg));
+        fprintf(stdout, "frontend[%c]: '%s'<%s>\n", forward?'f':broadcast?'b':'N',
+                rtmsg, rtosc_argument_string(rtmsg));
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
     }
 
     //Activity dot
-    printf(".");fflush(stdout);
+    //printf(".");fflush(stdout);
 
     MwDataObj d(this);
     middlewareReplyPorts.dispatch(rtmsg, d, true);
@@ -1277,7 +1284,7 @@ void MiddleWareImpl::kitEnable(const char *msg)
 
 void MiddleWareImpl::kitEnable(int part, int kit, int type)
 {
-    printf("attempting a kit enable<%d,%d,%d>\n", part, kit, type);
+    //printf("attempting a kit enable<%d,%d,%d>\n", part, kit, type);
     string url = "/part"+to_s(part)+"/kit"+to_s(kit)+"/";
     void *ptr = NULL;
     if(type == 0 && kits.add[part][kit] == NULL) {
@@ -1314,7 +1321,7 @@ void MiddleWareImpl::handleMsg(const char *msg)
     assert(strcmp(msg, "/sysefx0preset"));
     assert(strcmp(msg, "Psysefxvol0/part0"));
 
-    if(strcmp("/get-vu", msg)) {
+    if(strcmp("/get-vu", msg) && false) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 6 + 30, 0 + 40);
         fprintf(stdout, "middleware: '%s':%s\n", msg, rtosc_argument_string(msg));
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
@@ -1332,12 +1339,13 @@ void MiddleWareImpl::handleMsg(const char *msg)
 
     //A message unmodified by snooping
     if(d.matches == 0 || d.forwarded) {
-        if(strcmp("/get-vu", msg)) {
-            printf("Message Continuing on<%s:%s>...\n", msg, rtosc_argument_string(msg));
-        }
+        //if(strcmp("/get-vu", msg)) {
+        //    printf("Message Continuing on<%s:%s>...\n", msg, rtosc_argument_string(msg));
+        //}
         uToB->raw_write(msg);
-    } else
-        printf("Message Handled<%s:%s>...\n", msg, rtosc_argument_string(msg));
+    } else {
+        //printf("Message Handled<%s:%s>...\n", msg, rtosc_argument_string(msg));
+    }
 }
 
 void MiddleWareImpl::write(const char *path, const char *args, ...)

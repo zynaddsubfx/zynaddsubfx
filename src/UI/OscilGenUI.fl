@@ -121,7 +121,7 @@ class Oscilharmonic {: {public Fl_Group}
 
 display->redraw();}
         xywh {0 15 15 115} type {Vert Knob} box NO_BOX selection_color 222 maximum 127 step 1 value 64
-        code0 {o->phase=false;//o->value(127-oscil->Phmag[n]);}
+        code0 {o->phase=false;o->ext = "magnitude"+to_s(n);//o->value(127-oscil->Phmag[n]);}
         code1 {//if (oscil->Phmag[n]==64) o->selection_color(0);}
         class OGSlider
       }
@@ -134,7 +134,7 @@ o->osc->requestValue(o->loc+"waveform");
 
 display->redraw();}
         xywh {0 135 15 75} type {Vert Knob} box NO_BOX selection_color 222 maximum 127 step 1 value 64
-        code0 {o->phase=true;//o->value(oscil->Phphase[n]);}
+        code0 {o->phase=true;o->ext = "phase"+to_s(n);//o->value(oscil->Phphase[n]);}
         class OGSlider
       }
       Fl_Box {} {
