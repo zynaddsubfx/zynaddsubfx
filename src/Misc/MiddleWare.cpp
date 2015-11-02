@@ -809,23 +809,6 @@ rtosc::Ports bankPorts = {
             } else
                 d.reply("/bank/bank_select", "i", impl.bankpos);
         rEnd},
-    {"save_to_slot:ii", 0, 0,
-        rBegin;
-        const int part_id = rtosc_argument(msg, 0).i;
-        const int slot    = rtosc_argument(msg, 1).i;
-        //impl.saveBankSlot(part_id, slot, master);
-
-        //int err = 0;
-        //doReadOnlyOp([master,nslot,npart,&err](){
-        //        err = master->bank.savetoslot(nslot, master->part[npart]);});
-        //if(err) {
-        //    char buffer[1024];
-        //    rtosc_message(buffer, 1024, "/alert", "s",
-        //            "Failed To Save To Bank Slot, please check file permissions");
-        //    GUI::raiseUi(ui, buffer);
-        //}
-        assert(false);
-        rEnd},
     {"rename_slot:is", 0, 0,
         rBegin;
         const int   slot = rtosc_argument(msg, 0).i;
@@ -891,6 +874,21 @@ static rtosc::Ports middwareSnoopPorts = {
         rBegin;
         d.obj = &impl.master->bank;
         bankPorts.dispatch(chomp(msg),d);
+        rEnd},
+    {"bank/save_to_slot:ii", 0, 0,
+        rBegin;
+        const int part_id = rtosc_argument(msg, 0).i;
+        const int slot    = rtosc_argument(msg, 1).i;
+
+        int err = 0;
+        impl.doReadOnlyOp([&impl,slot,part_id,&err](){
+                err = impl.master->bank.savetoslot(slot, impl.master->part[part_id]);});
+        if(err) {
+            char buffer[1024];
+            rtosc_message(buffer, 1024, "/alert", "s",
+                    "Failed To Save To Bank Slot, please check file permissions");
+            GUI::raiseUi(impl.ui, buffer);
+        }
         rEnd},
     {"config/", 0, &Config::ports,
         rBegin;
