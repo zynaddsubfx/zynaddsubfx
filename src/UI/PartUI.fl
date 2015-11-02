@@ -165,6 +165,7 @@ maxkcounter->do_callback();}
           label {Bass Drum}
           xywh {90 0 130 15} box THIN_DOWN_BOX labelfont 1 labelsize 10 align 20
           code0 {o->init("Pname");}
+	  callback { o->oscWrite(o->ext, "s", o->value()); }
           class Fl_Osc_Input
         }
         Fl_Check_Button adcheck {
@@ -940,6 +941,7 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
           xywh {5 60 385 50} type Multiline color 124 labelsize 10 align 5
           code0 {o->maximum_size(MAX_INFO_TEXT_SIZE);}
           code1 {o->init("info.Pauthor");}
+	  callback { o->oscWrite(o->ext, "s", o->value()); }
           class Fl_Osc_Input
         }
         Fl_Input {} {
@@ -947,6 +949,7 @@ if (x==2) part->partefx[ninseff]->setdryonly(true);
           xywh {5 125 385 90} type Multiline color 124 labelsize 11 align 5
           code0 {o->maximum_size(MAX_INFO_TEXT_SIZE);}
           code1 {o->init("info.Pcomments");}
+	  callback { o->oscWrite(o->ext, "s", o->value()); }
           class Fl_Osc_Input
         }
         Fl_Choice {} {
