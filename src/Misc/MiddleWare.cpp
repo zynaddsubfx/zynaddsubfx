@@ -705,7 +705,7 @@ class MwDataObj:public rtosc::RtData
         virtual void chain(const char *msg) override
         {
             assert(msg);
-            printf("chain call on <%s>\n", msg);
+            // printf("chain call on <%s>\n", msg);
             mwi->handleMsg(msg);
         }
 

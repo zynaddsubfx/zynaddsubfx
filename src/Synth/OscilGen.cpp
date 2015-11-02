@@ -123,7 +123,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
                 OscilGen &o = *((OscilGen*)d.obj);
                 fft_t *data = new fft_t[o.synth.oscilsize / 2];
                 o.prepare(data);
-                fprintf(stderr, "sending '%p' of fft data\n", data);
+                // fprintf(stderr, "sending '%p' of fft data\n", data);
                 d.chain(repath, "b", sizeof(fft_t*), &data);
                 o.pendingfreqs = data;
             }
@@ -176,7 +176,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             OscilGen &o = *(OscilGen*)d.obj;
             fft_t *data = new fft_t[o.synth.oscilsize / 2];
             o.prepare(data);
-            fprintf(stderr, "sending '%p' of fft data\n", data);
+            // fprintf(stderr, "sending '%p' of fft data\n", data);
             d.chain(d.loc, "b", sizeof(fft_t*), &data);
             o.pendingfreqs = data;
         }},
@@ -210,7 +210,7 @@ const rtosc::Ports OscilGen::realtime_ports{
             "Adaptive Harmonics Postprocessing Power"),
     {"prepare:b", rProp(internal) rProp(realtime) rProp(pointer) rDoc("Sets prepared fft data"),
         NULL, [](const char *m, rtosc::RtData &d) {
-            fprintf(stderr, "prepare:b got a message from '%s'\n", m);
+            // fprintf(stderr, "prepare:b got a message from '%s'\n", m);
             OscilGen &o = *(OscilGen*)d.obj;
             assert(rtosc_argument(m,0).b.len == sizeof(void*));
             d.reply("/free", "sb", "fft_t", sizeof(void*), &o.oscilFFTfreqs);
