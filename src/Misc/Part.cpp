@@ -398,7 +398,7 @@ void Part::NoteOn(unsigned char note,
     const bool doingLegato     = isRunningNote && isLegatoMode() &&
                                  lastlegatomodevalid;
 
-    if(!Pnoteon || !inRange(note, Pminkey, Pmaxkey))
+    if(!Pnoteon || !inRange(note, Pminkey, Pmaxkey) || notePool.full())
         return;
 
     verifyKeyMode();
