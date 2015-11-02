@@ -1118,7 +1118,7 @@ if (engine==2&&padnoteui) padnoteui->padnotewindow->show();} {}
 if (cleanuplastkit(kititem))
     return;
 if(adnoteui ||
-   (adnoteui=new ADnoteUI(loc+"kit"+to_s(kititem)+"/adpars/", osc)))
+   (adnoteui=new ADnoteUI(loc+"kit"+to_s(kititem)+"/adpars/", osc))) {
     if(voicelist)
         adnoteui->ADnoteVoiceList->show();
     else {
@@ -1127,7 +1127,7 @@ if(adnoteui ||
 	else
 	    adnoteui->advoice->voiceFMparametersgroup->activate();
 	adnoteui->ADnoteVoice->show();
-    }} {}}
+    }}} {}}
 
   Function {~PartUI()} {} {
     code {delete adnoteui;
