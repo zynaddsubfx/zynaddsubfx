@@ -1,3 +1,16 @@
+2.5.2 (XXX)
+        - Add MIDI-Learn serialization
+        - Add pink noise source
+        - Restore mousewheel functionality
+        - Restore bank LSB/MSB MIDI support
+        - Improve tip windows
+        - Improve oscdoc output
+        - Restore Ext Oscil/Mod functionality
+        - Remove remaining globals
+        - Fix UI connection bugs
+        - Add UI title rewrite support (FIXME)
+        - Other misc bug fixes
+
 2.5.1 (4 July 2015)
         - Add Colorized CMake Configuration
         - Add PID option for jack
