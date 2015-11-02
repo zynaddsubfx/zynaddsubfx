@@ -313,6 +313,32 @@ class MasterUI {open
               xywh {15 15 100 20} divider
             }
             MenuItem {} {
+              label {&Load Midi Learn...}
+              callback {char *filename;
+filename=fl_file_chooser("Open:","({*.xlz})",NULL,0);
+if (filename==NULL) return;
+
+osc->write("/load_xlz", "s", filename);}
+              xywh {40 40 100 20}
+            }
+            MenuItem {} {
+              label {Save Midi Learn...}
+              callback {char *filename;
+int result;
+filename=fl_file_chooser("Save:","({*.xlz})",NULL,0);
+if (filename==NULL) return;
+filename=fl_filename_setext(filename,".xlz");
+
+result=fileexists(filename);
+if (result) {
+    result=0;
+   if (!fl_choice("The file exists. \\nOverwrite it?","No","Yes",NULL)) return;
+};
+
+osc->write("/save_xlz", "s", filename);}
+              xywh {30 30 100 20} divider
+            }
+            MenuItem {} {
               label {&Load Scale Settings...}
               callback {char *filename;
 filename=fl_file_chooser("Open:","({*.xsz})",NULL,0);

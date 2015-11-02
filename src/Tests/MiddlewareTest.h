@@ -39,6 +39,8 @@ using namespace std;
 
 char *instance_name=(char*)"";
 
+#define NUM_MIDDLEWARE 3
+
 class PluginTest:public CxxTest::TestSuite
 {
     public:
@@ -58,19 +60,19 @@ class PluginTest:public CxxTest::TestSuite
 
             delete synth;
             synth = NULL;
-            for(int i = 0; i < 16; ++i) {
+            for(int i = 0; i < NUM_MIDDLEWARE; ++i) {
                 synth = new SYNTH_T;
                 synth->buffersize = 256;
                 synth->samplerate = 48000;
                 //synth->alias();
                 middleware[i] = new MiddleWare(std::move(*synth), &config);
                 master[i] = middleware[i]->spawnMaster();
-                printf("Octave size = %d\n", master[i]->microtonal.getoctavesize());
+                //printf("Octave size = %d\n", master[i]->microtonal.getoctavesize());
             }
         }
 
         void tearDown() {
-            for(int i = 0; i < 16; ++i)
+            for(int i = 0; i < NUM_MIDDLEWARE; ++i)
                 delete middleware[i];
 
             delete[] outL;
@@ -82,7 +84,7 @@ class PluginTest:public CxxTest::TestSuite
         void testInit() {
 
             for(int x=0; x<100; ++x) {
-                for(int i=0; i<16; ++i) {
+                for(int i=0; i<NUM_MIDDLEWARE; ++i) {
                     middleware[i]->tick();
                     master[i]->GetAudioOutSamples(rand()%1025,
                             synth->samplerate, outL, outR);
@@ -102,7 +104,7 @@ class PluginTest:public CxxTest::TestSuite
 
             TS_ASSERT_LESS_THAN(0.1f, sum);
         }
-        
+
         string loadfile(string fname) const
         {
             std::ifstream t(fname.c_str());
@@ -113,7 +115,7 @@ class PluginTest:public CxxTest::TestSuite
 
         void testLoad(void)
         {
-            for(int i=0; i<16; ++i) {
+            for(int i=0; i<NUM_MIDDLEWARE; ++i) {
                 middleware[i]->transmitMsg("/load-part", "is", 0, (string(SOURCE_DIR) + "/../../instruments/banks/Organ/0037-Church Organ 1.xiz").c_str());
                 middleware[i]->tick();
                 master[i]->GetAudioOutSamples(synth->buffersize, synth->samplerate, outL, outR);
@@ -133,6 +135,6 @@ class PluginTest:public CxxTest::TestSuite
     private:
         SYNTH_T *synth;
         float *outR, *outL;
-        MiddleWare *middleware[16];
-        Master *master[16];
+        MiddleWare *middleware[NUM_MIDDLEWARE];
+        Master *master[NUM_MIDDLEWARE];
 };

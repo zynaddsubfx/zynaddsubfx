@@ -632,3 +632,55 @@ mxml_node_t *XMLwrapper::addparams(const char *name, unsigned int params,
     }
     return element;
 }
+
+XmlNode::XmlNode(std::string name_)
+    :name(name_)
+{}
+
+std::string &XmlNode::operator[](std::string name)
+{
+    //fetch an existing one
+    for(auto &a:attrs)
+        if(a.name == name)
+            return a.value;
+
+    //create a new one
+    attrs.push_back({name, ""});
+    return attrs[attrs.size()-1].value;
+}
+
+bool XmlNode::has(std::string name_)
+{
+    //fetch an existing one
+    for(auto &a:attrs)
+        if(a.name == name_)
+            return true;
+    return false;
+}
+
+void XMLwrapper::add(const XmlNode &node_)
+{
+    mxml_node_t *element = mxmlNewElement(node, node_.name.c_str());
+    for(auto attr:node_.attrs)
+        mxmlElementSetAttr(element, attr.name.c_str(),
+                attr.value.c_str());
+}
+
+std::vector<XmlNode> XMLwrapper::getBranch(void) const
+{
+    std::vector<XmlNode> res;
+    mxml_node_t *current = node->child;
+    while(current) {
+        if(current->type == MXML_ELEMENT) {
+            auto elm = current->value.element;
+            XmlNode n(elm.name);
+            for(int i=0; i<elm.num_attrs; ++i) {
+                auto &attr = elm.attrs[i];
+                n[attr.name] = attr.value;
+            }
+            res.push_back(n);
+        }
+        current = mxmlWalkNext(current, node, MXML_NO_DESCEND);
+    }
+    return res;
+}

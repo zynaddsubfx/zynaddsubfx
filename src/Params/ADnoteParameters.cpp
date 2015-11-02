@@ -42,8 +42,27 @@ using rtosc::RtData;
 #define rObject ADnoteVoiceParam
 
 static const Ports voicePorts = {
-    rRecurp(OscilSmp, "Primary Oscillator"),
-    rRecurp(FMSmp,    "Modulating Oscillator"),
+    //Send Messages To Oscillator Realtime Table
+    {"OscilSmp/", rDoc("Primary Oscillator"),
+        &OscilGen::ports,
+        rBOIL_BEGIN
+            if(obj->OscilSmp == NULL) return;
+        data.obj = obj->OscilSmp;
+        SNIP
+            OscilGen::realtime_ports.dispatch(msg, data);
+        if(data.matches == 0)
+            data.forward();
+        rBOIL_END},
+    {"FMSmp/", rDoc("Modulating Oscillator"),
+        &OscilGen::ports,
+        rBOIL_BEGIN
+            if(obj->FMSmp == NULL) return;
+        data.obj = obj->FMSmp;
+        SNIP
+            OscilGen::realtime_ports.dispatch(msg, data);
+        if(data.matches == 0)
+            data.forward();
+        rBOIL_END},
     rRecurp(FreqLfo, "Frequency LFO"),
     rRecurp(AmpLfo, "Amplitude LFO"),
     rRecurp(FilterLfo, "Filter LFO"),
@@ -107,7 +126,7 @@ static const Ports voicePorts = {
     rToggle(PFMFreqEnvelopeEnabled,  "Modulator Frequency Envelope"),
     rToggle(PFMAmpEnvelopeEnabled,   "Modulator Amplitude Envelope"),
 
-    
+
     //weird stuff for PCoarseDetune
     {"detunevalue:",  rMap(unit,cents) rDoc("Get detune in cents"), NULL,
         [](const char *, RtData &d)
@@ -148,7 +167,7 @@ static const Ports voicePorts = {
                 obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
             }
         }},
-    
+
     //weird stuff for PCoarseDetune
     {"FMdetunevalue:", rMap(unit,cents) rDoc("Get modulator detune"), NULL, [](const char *, RtData &d)
         {
