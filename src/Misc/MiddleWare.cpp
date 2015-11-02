@@ -835,6 +835,14 @@ rtosc::Ports bankPorts = {
             d.reply("/alert", "s",
                     "Failed To Clear Bank Slot, please check file permissions");
         rEnd},
+    {"msb:i", 0, 0,
+        rBegin;
+        impl.setMsb(rtosc_argument(msg, 0).i);
+        rEnd},
+    {"lsb:i", 0, 0,
+        rBegin;
+        impl.setLsb(rtosc_argument(msg, 0).i);
+        rEnd},
 };
 
 /******************************************************************************
@@ -961,9 +969,12 @@ static rtosc::Ports middwareSnoopPorts = {
         rEnd},
     {"setprogram:i:c", 0, 0,
         rBegin;
-        const int slot = rtosc_argument(msg, 0).i;
-        impl.pending_load[0]++;
-        impl.loadPart(0, impl.master->bank.ins[slot].filename.c_str(), impl.master);
+        Bank &bank     = impl.master->bank;
+        const int slot = rtosc_argument(msg, 0).i + 128*bank.bank_lsb;
+        if(slot < BANK_SIZE) {
+            impl.pending_load[0]++;
+            impl.loadPart(0, impl.master->bank.ins[slot].filename.c_str(), impl.master);
+        }
         rEnd},
     {"part#16/clear:", 0, 0,
         rBegin;
