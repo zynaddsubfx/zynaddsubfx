@@ -152,7 +152,7 @@ maxkcounter->do_callback();}
           xywh {490 0 40 15} box THIN_UP_BOX labelsize 11
         }
         Fl_Check_Button mutedcheck {
-          public xywh {60 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
+          xywh {60 0 20 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 4
           code0 {o->init("Pmuted");}
           class Fl_Osc_Check
         }
