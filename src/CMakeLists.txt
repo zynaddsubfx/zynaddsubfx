@@ -363,6 +363,7 @@ add_library(zynaddsubfx_core STATIC
     globals.cpp
     ../tlsf/tlsf.c
     Containers/NotePool.cpp
+    Containers/MultiPseudoStack.cpp
 	${zynaddsubfx_dsp_SRCS}
 	${zynaddsubfx_effect_SRCS}
 	${zynaddsubfx_misc_SRCS}
