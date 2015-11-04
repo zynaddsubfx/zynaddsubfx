@@ -1127,14 +1127,15 @@ void OscilGen::getspectrum(int n, float *spc, int what)
 
     for(int i = 1; i < n; ++i) {
         if(what == 0)
-            spc[i - 1] = abs(pendingfreqs, i);
+            spc[i] = abs(pendingfreqs, i);
         else {
             if(Pcurrentbasefunc == 0)
-                spc[i - 1] = ((i == 1) ? (1.0f) : (0.0f));
+                spc[i] = ((i == 1) ? (1.0f) : (0.0f));
             else
-                spc[i - 1] = abs(basefuncFFTfreqs, i);
+                spc[i] = abs(basefuncFFTfreqs, i);
         }
     }
+    spc[0]=0;
 
     if(what == 0) {
         for(int i = 0; i < n; ++i)
