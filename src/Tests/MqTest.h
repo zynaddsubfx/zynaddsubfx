@@ -36,9 +36,9 @@ char *instance_name=(char*)"";
 class MessageTest:public CxxTest::TestSuite
 {
     public:
-        MultiPseudoStack *s;
+        MultiQueue *s;
         void setUp() {
-            s = new MultiPseudoStack;
+            s = new MultiQueue;
         }
 
         void tearDown() {
@@ -56,13 +56,29 @@ class MessageTest:public CxxTest::TestSuite
             TS_ASSERT_EQUALS(mem, mem2);
             s->free(mem2);
         }
+        void testMed(void)
+        {
+            for(int i=0; i<100; ++i) {
+                auto *mem = s->alloc();
+                TS_ASSERT(mem);
+                TS_ASSERT(mem->memory);
+                TS_ASSERT(!s->read());
+                s->write(mem);
+                auto *mem2 = s->read();
+                TS_ASSERT_EQUALS(mem, mem2);
+                s->free(mem2);
+            }
+        }
 
-#define OPS 10000
+#define OPS 1000
+#define THREADS 8
         void testThreads(void)
         {
-            std::thread *t[32];
-            for(int i=0; i<32; ++i) {
-                t[i] = new std::thread([this,i](){
+            uint8_t messages[OPS*THREADS];
+            memset(messages, 0, sizeof(messages));
+            std::thread *t[THREADS];
+            for(int i=0; i<THREADS; ++i) {
+                t[i] = new std::thread([this,i,&messages](){
                     int op=0;
                     while(op<OPS) {
                         int read = rand()%2;
@@ -71,13 +87,13 @@ class MessageTest:public CxxTest::TestSuite
                             if(mem) {
                                 //printf("r%d",i%10);
                                 //printf("got: <%s>\n", mem->memory);
-                                op++;
+                                messages[atoi(mem->memory)]++;
                             }
                             s->free(mem);
                         } else {
                             auto *mem = s->alloc();
                             if(mem) {
-                                sprintf(mem->memory,"written by %d@op%d", i,op);
+                                sprintf(mem->memory,"%d written by %d@op%d", i*OPS+op,i,op);
                                 //printf("w%d",i%10);
                                 op++;
                             }
@@ -88,10 +104,29 @@ class MessageTest:public CxxTest::TestSuite
             }
 
             printf("thread started...\n");
-            for(int i=0; i<32; ++i) {
+            for(int i=0; i<THREADS; ++i) {
                 t[i]->join();
                 delete t[i];
             }
             printf("thread stopped...\n");
+            //read the last few
+            while(1) {
+                auto *mem = s->read();
+                if(mem) {
+                    printf("got: <%s>\n", mem->memory);
+                    messages[atoi(mem->memory)]++;
+                } else
+                    break;
+                s->free(mem);
+            }
+
+            int good = 1;
+            for(int i=0; i<OPS*THREADS; ++i) {
+                if(messages[i] != 1) {
+                    assert(false);
+                    good = 0;
+                }
+            }
+            TS_ASSERT(good);
         }
 };

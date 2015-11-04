@@ -579,7 +579,7 @@ public:
             const char *rtmsg = bToU->read();
             bToUhandle(rtmsg);
         }
-        while(iql_t *m = multi_thread_source.read()) {
+        while(auto *m = multi_thread_source.read()) {
             handleMsg(m->memory);
             multi_thread_source.free(m);
         }
@@ -648,7 +648,7 @@ public:
     rtosc::ThreadLink *uToB;
 
     //Link to the unknown
-    MultiPseudoStack multi_thread_source;
+    MultiQueue multi_thread_source;
 
     //LIBLO
     lo_server server;

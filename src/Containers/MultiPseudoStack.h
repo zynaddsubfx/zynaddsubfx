@@ -1,31 +1,30 @@
 #pragma once
 #include <atomic>
+#include <cassert>
 
-struct IntrusiveQueueList
+//XXX rename this thing
+typedef struct QueueListItem qli_t;
+struct QueueListItem
 {
-    typedef IntrusiveQueueList iql_t;
-    IntrusiveQueueList(void)
-        :memory(0), next(0), size(0)
-    {}
-
-    char                 *memory;
-    std::atomic<iql_t*>   next;
-    uint32_t              size;
+    QueueListItem(void);
+    char     *memory;
+    uint32_t  size;
 };
 
 
-static_assert(sizeof(IntrusiveQueueList) <= 3*sizeof(void*),
-        "Atomic Types Must Not Add Overhead To Intrusive Queue");
-
-typedef IntrusiveQueueList iql_t;
 //Many reader many writer
-class LockFreeStack
+class LockFreeQueue
 {
-    iql_t head;
+    qli_t *const           data;
+    const int              elms;
+    std::atomic<uint32_t> *tag;
+    std::atomic<int32_t>   next_r;
+    std::atomic<int32_t>   next_w;
+    std::atomic<int32_t>   avail;
     public:
-    LockFreeStack(void);
-    iql_t *read(void);
-    void write(iql_t *Q);
+    LockFreeQueue(qli_t *data_, int n);
+    qli_t *read(void);
+    void write(qli_t *Q);
 };
 
 
@@ -34,15 +33,18 @@ class LockFreeStack
  * - lock free
  * - allocation free (post initialization)
  */
-class MultiPseudoStack
+class MultiQueue
 {
-    LockFreeStack m_free;
-    LockFreeStack m_msgs;
+    qli_t *pool;
+    LockFreeQueue m_free;
+    LockFreeQueue m_msgs;
 
     public:
-    MultiPseudoStack(void);
-    iql_t *alloc(void)   { return m_free.read();   }
-    void free(iql_t *q)  {        m_free.write(q); } 
-    void write(iql_t *q) {        m_msgs.write(q); }
-    iql_t *read(void)    { return m_msgs.read();   }
+    MultiQueue(void);
+    ~MultiQueue(void);
+    void dump(void);
+    qli_t *alloc(void)   { return m_free.read();   }
+    void free(qli_t  *q) {        m_free.write(q); }
+    void write(qli_t *q) {        m_msgs.write(q); }
+    qli_t *read(void)    { return m_msgs.read();   }
 };
