@@ -1239,7 +1239,7 @@ void OscilGen::add2XML(XMLwrapper *xml)
         for(int i = 1; i < synth.oscilsize / 2; ++i) {
             float xc = basefuncFFTfreqs[i].real();
             float xs = basefuncFFTfreqs[i].imag();
-            if((fabs(xs) > 1e-6f) && (fabs(xc) > 1e-6f)) {
+            if((fabs(xs) > 1e-6f) || (fabs(xc) > 1e-6f)) {
                 xml->beginbranch("BF_HARMONIC", i);
                 xml->addparreal("cos", xc);
                 xml->addparreal("sin", xs);
