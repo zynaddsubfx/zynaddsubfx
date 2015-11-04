@@ -115,7 +115,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
                 d.reply(d.loc, "c", mag);
             else {
                 mag = rtosc_argument(m,0).i;
-                printf("setting magnitude\n\n");
+                //printf("setting magnitude\n\n");
                 //XXX hack hack
                 char *repath = strdup(d.loc);
                 char *edit   = rindex(repath, '/')+1;
@@ -158,18 +158,6 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             d.reply(d.loc, "b", n*sizeof(float), spc);
             delete[] spc;
         }},
-    {"waveform:", rProp(non-realtime) rDoc("Returns waveform points"),
-        NULL, [](const char *, rtosc::RtData &d) {
-            OscilGen &o = *((OscilGen*)d.obj);
-            const unsigned n = o.synth.oscilsize;
-            float *smps = new float[n];
-            memset(smps, 0, 4*n);
-            //printf("%d\n", o->needPrepare());
-            o.get(smps,-1.0);
-            //printf("wave: %f %f %f %f\n", smps[0], smps[1], smps[2], smps[3]);
-            d.reply(d.loc, "b", n*sizeof(float), smps);
-            delete[] smps;
-        }},
     {"prepare:", rProp(non-realtime) rDoc("Performs setup operation to oscillator"),
         NULL, [](const char *, rtosc::RtData &d) {
             //fprintf(stderr, "prepare: got a message from '%s'\n", m);
@@ -208,6 +196,18 @@ const rtosc::Ports OscilGen::realtime_ports{
             "Adaptive Harmonic Strength"),
     rParamZyn(Padaptiveharmonicspar,
             "Adaptive Harmonics Postprocessing Power"),
+    {"waveform:", rDoc("Returns waveform points"),
+        NULL, [](const char *, rtosc::RtData &d) {
+            OscilGen &o = *((OscilGen*)d.obj);
+            const unsigned n = o.synth.oscilsize;
+            float *smps = new float[n];
+            memset(smps, 0, 4*n);
+            //printf("%d\n", o->needPrepare());
+            o.get(smps,-1.0);
+            //printf("wave: %f %f %f %f\n", smps[0], smps[1], smps[2], smps[3]);
+            d.reply(d.loc, "b", n*sizeof(float), smps);
+            delete[] smps;
+        }},
     {"prepare:b", rProp(internal) rProp(realtime) rProp(pointer) rDoc("Sets prepared fft data"),
         NULL, [](const char *m, rtosc::RtData &d) {
             // fprintf(stderr, "prepare:b got a message from '%s'\n", m);
