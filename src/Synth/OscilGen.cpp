@@ -310,6 +310,8 @@ OscilGen::OscilGen(const SYNTH_T &synth_, FFTwrapper *fft_, Resonance *res_)
     outoscilFFTfreqs = new fft_t[synth.oscilsize / 2];
     oscilFFTfreqs    = new fft_t[synth.oscilsize / 2];
     basefuncFFTfreqs = new fft_t[synth.oscilsize / 2];
+    cachedbasefunc = new float[synth.oscilsize];
+    cachedbasevalid = false;
     pendingfreqs     = oscilFFTfreqs;
 
     randseed = 1;
@@ -324,6 +326,7 @@ OscilGen::~OscilGen()
     delete[] outoscilFFTfreqs;
     delete[] basefuncFFTfreqs;
     delete[] oscilFFTfreqs;
+    delete[] cachedbasefunc;
 }
 
 
@@ -436,6 +439,17 @@ void OscilGen::convert2sine()
     prepare();
 }
 
+float OscilGen::userfunc(float x)
+{
+    if (!fft)
+        return 0;
+    if (!cachedbasevalid) {
+        fft->freqs2smps(basefuncFFTfreqs, cachedbasefunc);
+        cachedbasevalid = true;
+    }
+    return cinterpolate(cachedbasefunc, synth.oscilsize, synth.oscilsize * x);
+}
+
 /*
  * Get the base function
  */
@@ -490,8 +504,10 @@ void OscilGen::getbasefunction(float *smps)
 
         if(func)
             smps[i] = func(t, par);
-        else
+        else if (Pcurrentbasefunc == 0)
             smps[i] = -sinf(2.0f * PI * i / synth.oscilsize);
+        else
+            smps[i] = userfunc(t);
     }
 }
 
@@ -1143,6 +1159,7 @@ void OscilGen::useasbase()
 
     oldbasefunc = Pcurrentbasefunc = 127;
     prepare();
+    cachedbasevalid = false;
 }
 
 
@@ -1326,10 +1343,6 @@ void OscilGen::getfromXML(XMLwrapper *xml)
         xml->exitbranch();
     }
 
-    if(Pcurrentbasefunc != 0)
-        changebasefunction();
-
-
     if(xml->enterbranch("BASE_FUNCTION")) {
         for(int i = 1; i < synth.oscilsize / 2; ++i)
             if(xml->enterbranch("BF_HARMONIC", i)) {
@@ -1340,9 +1353,13 @@ void OscilGen::getfromXML(XMLwrapper *xml)
             }
         xml->exitbranch();
 
+        if(Pcurrentbasefunc != 0)
+            changebasefunction();
+
         clearDC(basefuncFFTfreqs);
         normalize(basefuncFFTfreqs, synth.oscilsize);
-    }
+    } else if(Pcurrentbasefunc != 0)
+        changebasefunction();
 }
 
 
