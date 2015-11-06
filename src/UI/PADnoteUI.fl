@@ -71,6 +71,7 @@ oscui=NULL;
 osc_i = osc_;
 resui=new ResonanceUI(osc_i, location+"resonance/");
 initialized = false;
+applybutton = NULL;
 make_window();
 initialized = true;} {selected
     }
@@ -281,8 +282,9 @@ oscui=new OscilEditor(false, location+"oscilgen/",osc_i);}
           Fl_Box cbwidget {
             label {Harmonic Content}
             callback {opui->update();
-applybutton->color(FL_RED);
-applybutton->redraw();}
+            if(applybutton) {
+                applybutton->color(FL_RED);
+                applybutton->redraw();}}
             xywh {125 135 205 20} align 16
           }
           Fl_Button {} {
