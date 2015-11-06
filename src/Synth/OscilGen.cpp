@@ -449,7 +449,7 @@ float OscilGen::userfunc(float x)
     }
     return cinterpolate(cachedbasefunc,
                         synth.oscilsize,
-                        synth.oscilsize * x + (synth.oscilsize - 1));
+                        synth.oscilsize * (x + 1) - 1);
 }
 
 /*
