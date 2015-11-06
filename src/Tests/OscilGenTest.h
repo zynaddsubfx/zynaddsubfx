@@ -104,14 +104,14 @@ class OscilGenTest:public CxxTest::TestSuite
         void testSpectrum(void)
         {
             oscil->getspectrum(synth->oscilsize / 2, outR, 1);
-            TS_ASSERT_DELTA(outR[0], 350.698059f, 0.0001f);
-            TS_ASSERT_DELTA(outR[1], 228.889267f, 0.0001f);
-            TS_ASSERT_DELTA(outR[2], 62.187931f, 0.0001f);
-            TS_ASSERT_DELTA(outR[3], 22.295225f, 0.0001f);
-            TS_ASSERT_DELTA(outR[4], 6.942001f, 0.0001f);
-            TS_ASSERT_DELTA(outR[26], 0.015110f, 0.0001f);
-            TS_ASSERT_DELTA(outR[47], 0.003425f, 0.0001f);
-            TS_ASSERT_DELTA(outR[65], 0.001293f, 0.0001f);
+            TS_ASSERT_DELTA(outR[1], 350.698059f, 0.0001f);
+            TS_ASSERT_DELTA(outR[2], 228.889267f, 0.0001f);
+            TS_ASSERT_DELTA(outR[3], 62.187931f, 0.0001f);
+            TS_ASSERT_DELTA(outR[4], 22.295225f, 0.0001f);
+            TS_ASSERT_DELTA(outR[5], 6.942001f, 0.0001f);
+            TS_ASSERT_DELTA(outR[27], 0.015110f, 0.0001f);
+            TS_ASSERT_DELTA(outR[48], 0.003425f, 0.0001f);
+            TS_ASSERT_DELTA(outR[66], 0.001293f, 0.0001f);
         }
 
         //performance testing

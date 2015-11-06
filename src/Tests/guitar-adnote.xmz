@@ -3319,6 +3319,7 @@ version-revision="1" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="volume" value="90" />
 <par name="panning" value="64" />
 <par name="velocity_sensing" value="64" />
+<par name="fadein_adjustment" value="20" />
 <par name="punch_strength" value="0" />
 <par name="punch_time" value="60" />
 <par name="punch_stretch" value="64" />
