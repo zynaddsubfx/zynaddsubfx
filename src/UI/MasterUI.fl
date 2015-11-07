@@ -1534,7 +1534,10 @@ osc->write("/config/cfg.UserInterfaceMode", "i", 2);}
   else snprintf(&masterwindowlabel[0],100,"%s","ZynAddSubFX");
 masterwindowlabel[99]='\\0';
 masterwindow->label(&masterwindowlabel[0]);
-simplemasterwindow->label(&masterwindowlabel[0]);} {}
+simplemasterwindow->label(&masterwindowlabel[0]);
+masterwindow->update_title();
+simplemasterwindow->update_title();
+} {}
   }
   Function {MasterUI(int *exitprogram_, class Fl_Osc_Interface *osc_):nioui(osc_)} {open
   } {

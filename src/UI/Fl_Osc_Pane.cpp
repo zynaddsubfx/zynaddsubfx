@@ -17,6 +17,7 @@ void Fl_Osc_Window::init(Fl_Osc_Interface *osc_, std::string loc_)
     title_ext  = new Osc_DataModel(osc_);
     title_ext->doUpdate("/ui/title");
     title_ext->callback = [this](string next) {
+        rewrite_rule = next;
         //printf("old: %s\n", title_orig.c_str());
         const char *orig = title_orig.c_str();
         //                               12345678901
@@ -75,6 +76,12 @@ void Fl_Osc_Window::update(void)
         if(dynamic_cast<Fl_Group*>(widget))
             nested_update(dynamic_cast<Fl_Group*>(widget));
     }
+}
+
+void Fl_Osc_Window::update_title(void)
+{
+    title_orig = label();
+    title_ext->callback(rewrite_rule);
 }
 
 static void nested_rebase(Fl_Group *g, std::string new_base)
