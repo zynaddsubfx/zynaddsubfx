@@ -1493,7 +1493,7 @@ virkeys->take_focus();}
       Fl_Button {} {
         label Advanced
         callback {
-        osc->write("/cfg.UserInterfaceMode", "i", 1);
+        osc->write("/config/cfg.UserInterfaceMode", "i", 1);
 masterwindow->show();
 selectuiwindow->hide();}
         xywh {10 165 100 35} color 229 labelfont 1 labelsize 16
@@ -1506,7 +1506,7 @@ selectuiwindow->hide();}
         label Beginner
         callback {simplemasterwindow->show();
 selectuiwindow->hide();
-osc->write("/cfg.UserInterfaceMode", "i", 2);}
+osc->write("/config/cfg.UserInterfaceMode", "i", 2);}
         xywh {10 80 100 65} color 238 labelfont 1 labelsize 16
       }
       Fl_Box {} {
