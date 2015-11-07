@@ -325,13 +325,22 @@ struct NonRtObjStore
     void handlePad(const char *msg, rtosc::RtData &d) {
         string obj_rl(d.message, msg);
         void *pad = get(obj_rl);
-        if(!strcmp(msg, "prepare"))
+        if(!strcmp(msg, "prepare")) {
             preparePadSynth(obj_rl, (PADnoteParameters*)pad, d);
-        else {
+            d.matches++;
+            d.reply((obj_rl+"needPrepare").c_str(), "F");
+        } else {
             assert(pad);
             strcpy(d.loc, obj_rl.c_str());
             d.obj = pad;
             PADnoteParameters::non_realtime_ports.dispatch(msg, d);
+            if(rtosc_narguments(msg)) {
+                if(!strcmp(msg, "oscilgen/prepare"))
+                    ; //ignore
+                else {
+                    d.reply((obj_rl+"needPrepare").c_str(), "T");
+                }
+            }
         }
     }
 };

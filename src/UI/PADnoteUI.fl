@@ -32,6 +32,9 @@ decl {\#include <string.h>} {private local
 decl {\#include <string>} {public local
 } 
 
+decl {\#include "Osc_IntModel.h"} {private local
+}
+
 decl {\#include "Fl_Osc_TSlider.H"} {public local
 } 
 
@@ -73,6 +76,33 @@ resui=new ResonanceUI(osc_i, location+"resonance/");
 initialized = false;
 applybutton = NULL;
 make_window();
+apply_watcher = new Osc_IntModel(osc_i);
+apply_watcher->callback=[this](int needsPrepare) {
+    if(needsPrepare) {
+        applybutton->color(FL_RED);
+        applybutton->redraw();
+        if(oscui) {
+            oscui->applybutton->color(FL_RED);
+            oscui->applybutton->redraw();
+        }
+        if(resui) {
+            resui->applybutton->color(FL_RED);
+            resui->applybutton->redraw();
+        }
+    } else {
+        applybutton->color(FL_GRAY);
+        applybutton->redraw();
+        if(oscui) {
+            oscui->applybutton->color(FL_GRAY);
+            oscui->applybutton->redraw();
+        }
+        if(resui) {
+            resui->applybutton->color(FL_GRAY);
+            resui->applybutton->redraw();
+        }
+    }
+};
+apply_watcher->doUpdate(location+"needPrepare");
 initialized = true;} {}
   }
   Function {make_window()} {open
@@ -877,8 +907,11 @@ applybutton->color(FL_GRAY);
 applybutton->parent()->redraw();} {}
   }
   Function {~PADnoteUI()} {} {
-    code {delete(oscui);
+    code {
+delete apply_watcher;
+delete(oscui);
 delete(resui);
+
 
 padnotewindow->hide();
 delete padnotewindow;} {}
@@ -898,5 +931,7 @@ delete padnotewindow;} {}
   decl {PADnoteHarmonicProfile *hpui;} {private local
   }
   decl {PADnoteOvertonePosition *opui;} {private local
+  }
+  decl {class Osc_IntModel *apply_watcher;} {private local
   }
 } 

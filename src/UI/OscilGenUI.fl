@@ -247,13 +247,8 @@ class OscilEditor {open : {public PresetsUI_}
       } {
         Fl_Button applybutton {
           label Apply
-          callback {//applybutton->color(FL_GRAY);
-//applybutton->redraw();
-//if (cbapplywidget!=NULL) {
-//	cbapplywidget->do_callback();
-//	cbapplywidget->color(FL_GRAY);
-//	cbapplywidget->redraw();
-//};}
+          callback {
+          dummy->osc->requestValue(loc+"../prepare");}
           xywh {305 285 60 20} box THIN_UP_BOX labelfont 1
           code0 {if(adnotep) o->hide();}
           code1 {dummy->base = loc;}
