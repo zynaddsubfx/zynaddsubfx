@@ -73,10 +73,11 @@ static const Ports sysefxPort =
             int ind2 = atoi(m);
             Master &mast = *(Master*)d.obj;
 
-            if(rtosc_narguments(m))
+            if(rtosc_narguments(m)) {
                 mast.setPsysefxvol(ind2, ind1, rtosc_argument(m,0).i);
-            else
-                d.reply(d.loc, "i", mast.Psysefxvol[ind2][ind1]);
+                d.broadcast(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
+            } else
+                d.reply(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
         }}
 };
 
