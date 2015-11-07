@@ -989,6 +989,16 @@ static rtosc::Ports middwareSnoopPorts = {
         impl.pending_load[part_id]++;
         impl.loadPart(part_id, file, impl.master);
         rEnd},
+    {"load-part:iss", 0, 0,
+        rBegin;
+        const int part_id = rtosc_argument(msg,0).i;
+        const char *file  = rtosc_argument(msg,1).s;
+        const char *name  = rtosc_argument(msg,2).s;
+        impl.pending_load[part_id]++;
+        impl.loadPart(part_id, file, impl.master);
+        impl.uToB->write(("/part"+to_s(part_id)+"/Pname").c_str(), "s",
+                name);
+        rEnd},
     {"setprogram:i:c", 0, 0,
         rBegin;
         Bank &bank     = impl.master->bank;
@@ -996,6 +1006,7 @@ static rtosc::Ports middwareSnoopPorts = {
         if(slot < BANK_SIZE) {
             impl.pending_load[0]++;
             impl.loadPart(0, impl.master->bank.ins[slot].filename.c_str(), impl.master);
+            impl.uToB->write("/part0/Pname", "s", impl.master->bank.ins[slot].name.c_str());
         }
         rEnd},
     {"part#16/clear:", 0, 0,
@@ -1051,6 +1062,7 @@ static rtosc::Ports middlewareReplyPorts = {
         const int part    = rtosc_argument(msg, 0).i;
         const int program = rtosc_argument(msg, 1).i;
         impl.loadPart(part, impl.master->bank.ins[program].filename.c_str(), impl.master);
+        impl.uToB->write(("/part"+to_s(part)+"/Pname").c_str(), "s", impl.master->bank.ins[program].name.c_str());
         rEnd},
     {"undo_pause:", 0, 0, rBegin; impl.recording_undo = false; rEnd},
     {"undo_resume:", 0, 0, rBegin; impl.recording_undo = true; rEnd},
