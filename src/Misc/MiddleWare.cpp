@@ -793,6 +793,7 @@ rtosc::Ports bankPorts = {
         int i = 0;
         for(auto &elm : impl.banks)
             d.reply("/bank/bank_select", "iss", i++, elm.name.c_str(), elm.dir.c_str());
+        d.reply("/bank/bank_select", "i", impl.bankpos);
 
         rEnd},
     {"slot#1024:", 0, 0,
