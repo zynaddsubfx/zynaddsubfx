@@ -91,7 +91,6 @@ end();} {}
     widget->ext      = next;
     osc->renameLink("/"+old, "/"+next, widget);
     osc->requestValue("/"+next);
-    printf("changing <%s> -> <%s>\\n", old.c_str(), next.c_str());
     npart = part;
     } {}
   }
