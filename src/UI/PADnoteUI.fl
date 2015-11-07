@@ -73,8 +73,7 @@ resui=new ResonanceUI(osc_i, location+"resonance/");
 initialized = false;
 applybutton = NULL;
 make_window();
-initialized = true;} {selected
-    }
+initialized = true;} {}
   }
   Function {make_window()} {open
   } {
@@ -85,6 +84,7 @@ initialized = true;} {selected
     } {
 
       Fl_Box dummy {
+        xywh {25 25 25 25}
         code0 {padnotewindow->init(osc_i, location);}
       }
       Fl_Tabs {} {
