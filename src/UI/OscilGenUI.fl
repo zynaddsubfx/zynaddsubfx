@@ -1007,7 +1007,7 @@ oscils->update();
 oscilo_base->update();
 oscils_base->update();} {}
   }
-  Function {setbfmodstatus(int menuentry)} {open public
+  Function {setbfmodstatus(int menuentry)} {open
   } {
     code {
     switch (menuentry){
