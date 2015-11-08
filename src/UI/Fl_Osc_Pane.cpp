@@ -113,6 +113,7 @@ void Fl_Osc_Window::rebase(std::string new_base)
         else if(dynamic_cast<Fl_Group*>(widget))
             nested_rebase(dynamic_cast<Fl_Group*>(widget), new_base);
     }
+    base = new_base;
 }
 
 static Fl_Osc_Pane *find_osc_pane(Fl_Widget *root)
