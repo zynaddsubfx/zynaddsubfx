@@ -1255,6 +1255,11 @@ advoice->change_voice(nvoice);}
           code0 {o->begin();for (int i=0;i<NUM_VOICES;i++){voicelistitem[i]=new ADvoicelistitem(0,0,670,25,"");voicelistitem[i]->init(i,loc+"VoicePar"+to_s(i)+"/",osc);}o->end();}
         } {}
       }
+      Fl_Button {} {
+        label {Edit ADsynth}
+        callback {ui->partui->adnoteui->ADnoteGlobalParameters->show();}
+        xywh {5 237 106 20} labelsize 12
+      }
     }
   }
   Function {ADnoteUI(std::string loc_, Fl_Osc_Interface *osc_)} {open
