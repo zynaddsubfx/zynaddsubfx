@@ -1183,7 +1183,7 @@ resui->resonancewindow->show();}
       Fl_Button {} {
         label {Close Window}
         callback {ADnoteVoice->hide();}
-        xywh {305 601 195 25} box THIN_UP_BOX labelfont 1
+        xywh {468 601 195 25} box THIN_UP_BOX labelfont 1
       }
       Fl_Counter currentvoicecounter {
         label {Current Voice}
@@ -1202,6 +1202,12 @@ advoice->change_voice(nvoice);}
         callback {presetsui->paste(ADnoteVoice->loc(),this,nvoice);}
         xywh {735 609 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
+      Fl_Button {} {
+        label {Edit ADsynth}
+        callback {ADnoteGlobalParameters->show();}
+        xywh {280 601 105 25} labelfont 1 labelsize 12
+      }
+
     }
     Fl_Window ADnoteVoiceList {
       label {ADsynth Voices list} open
