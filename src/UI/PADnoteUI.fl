@@ -109,7 +109,7 @@ initialized = true;} {}
   } {
     Fl_Window padnotewindow {
       label {PAD synth Parameters} open
-      xywh {52 324 535 435} type Double hide
+      xywh {52 324 535 430} type Double hide
       class Fl_Osc_Window
     } {
 
@@ -835,23 +835,23 @@ if (resui!=NULL) {
 	resui->applybutton->color(FL_GRAY);
 	resui->applybutton->redraw();
 };}
-        xywh {300 400 135 30} box THIN_UP_BOX
+        xywh {200 400 135 25} box THIN_UP_BOX
         code0 {o->color(FL_RED);}
       }
       Fl_Button {} {
         label Close
         callback {padnotewindow->hide();}
-        xywh {440 400 90 30} box THIN_UP_BOX
+        xywh {470 400 60 25} box THIN_UP_BOX
       }
       Fl_Button {} {
         label C
         callback {presetsui->copy(padnotewindow->loc());}
-        xywh {65 400 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
+        xywh {400 405 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Button {} {
         label P
         callback {presetsui->paste(padnotewindow->loc(),this);}
-        xywh {95 400 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
+        xywh {430 405 25 15} box THIN_UP_BOX color 179 labelfont 1 labelsize 11 labelcolor 55
       }
       Fl_Button {} {
         label export
@@ -860,7 +860,7 @@ filename=fl_file_chooser("Export samples:","(*.wav)",NULL,0);
 if (filename==NULL) return;
 fl_filename_setext(filename,"");
 o->oscWrite("export2wav", "s", filename);}
-        tooltip {export samples as wav file} xywh {5 400 55 30} box THIN_UP_BOX color 51 labelsize 11 align 128
+        tooltip {export samples as wav file} xywh {5 400 55 25} box THIN_UP_BOX color 51 labelsize 11 align 128
         class Fl_Osc_Button
       }
     }
