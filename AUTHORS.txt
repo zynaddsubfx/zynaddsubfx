@@ -30,4 +30,4 @@ Contributors:
         Filipe Coelho (Globals Cleanup)
         Andre Sklenar (UI Pixmaps)
         Harald Hvaal (General Code Modernization)
-
+        Olivier Jolly (DSSI Bank Load Fix)

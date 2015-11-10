@@ -1062,6 +1062,10 @@ static rtosc::Ports middlewareReplyPorts = {
         impl.loadPart(part, impl.master->bank.ins[program].filename.c_str(), impl.master);
         impl.uToB->write(("/part"+to_s(part)+"/Pname").c_str(), "s", impl.master->bank.ins[program].name.c_str());
         rEnd},
+    {"setbank:c", 0, 0,
+        rBegin;
+        impl.loadPendingBank(rtosc_argument(msg,0).i, impl.master->bank);
+        rEnd},
     {"undo_pause:", 0, 0, rBegin; impl.recording_undo = false; rEnd},
     {"undo_resume:", 0, 0, rBegin; impl.recording_undo = true; rEnd},
     {"undo_change", 0, 0,
