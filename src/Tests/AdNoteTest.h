@@ -45,6 +45,7 @@ class AdNoteTest:public CxxTest::TestSuite
         ADnote       *note;
         AbsTime      *time;
         FFTwrapper   *fft;
+        ADnoteParameters *defaultPreset;
         Controller   *controller;
         Alloc         memory;
         unsigned char testnote;
@@ -68,7 +69,7 @@ class AdNoteTest:public CxxTest::TestSuite
 
             fft = new FFTwrapper(synth->oscilsize);
             //prepare the default settings
-            ADnoteParameters *defaultPreset = new ADnoteParameters(*synth, fft);
+            defaultPreset = new ADnoteParameters(*synth, fft);
 
             //Assert defaults
             TS_ASSERT(!defaultPreset->VoicePar[1].Enabled);
@@ -101,13 +102,13 @@ class AdNoteTest:public CxxTest::TestSuite
 
             note = new ADnote(defaultPreset, pars);
 
-            delete defaultPreset;
             delete wrap;
         }
 
         void tearDown() {
             delete note;
             delete controller;
+            delete defaultPreset;
             delete fft;
             delete [] outL;
             delete [] outR;
