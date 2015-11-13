@@ -102,8 +102,10 @@ int Fl_Osc_Slider::handle(int ev, int X, int Y, int W, int H)
             {
                 float range = maximum() - minimum();
                 float absrng = range > 0 ? range : -range;
+                float step_ = step();
+                if (step_ == 0) step_ = 1;
 
-                if (absrng / W / step() > 32 && Fl::event_button1())
+                if (absrng / W / step_ > 32 && Fl::event_button1())
                     denominator = 0.25;
                 if (range < 0)
                     denominator *= -1;
@@ -111,23 +113,23 @@ int Fl_Osc_Slider::handle(int ev, int X, int Y, int W, int H)
             break;
         case FL_MOUSEWHEEL:
             if (this == Fl::belowmouse() && Fl::e_dy != 0) {
-                int step = 1, divisor = 16;
+                int step_ = 1, divisor = 16;
                 switch (Fl::event_state() & ( FL_CTRL | FL_SHIFT)) {
                     case FL_SHIFT:
-                        step = 8;
+                        step_ = 8;
                     case FL_SHIFT | FL_CTRL:
                         break;
                     case FL_CTRL:
                         divisor = 128;
                     default:
-                        step = (fabs(maximum() - minimum()) + 1) / divisor;
-                        if (step < 1)
-                            step = 1;
+                        step_ = (fabs(maximum() - minimum()) + 1) / divisor;
+                        if (step_ < 1)
+                            step_ = 1;
                 }
                 int dy = minimum() <=  maximum() ? -Fl::e_dy : Fl::e_dy;
                 // Flip sense for vertical sliders.
                 dy = this->horizontal() ? dy : -dy;
-                handle_drag(clamp(value() + step * dy));
+                handle_drag(clamp(value() + step_ * dy));
             }
             return 1;
         case FL_RELEASE:
