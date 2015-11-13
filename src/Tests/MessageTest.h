@@ -61,8 +61,7 @@ class MessageTest:public CxxTest::TestSuite
             delete synth;
         }
 
-#if 0
-        void _testKitEnable(void)
+        void testKitEnable(void)
         {
             const char *msg = NULL;
             mw->transmitMsg("/part0/kit0/Psubenabled", "T");
@@ -74,9 +73,9 @@ class MessageTest:public CxxTest::TestSuite
             TS_ASSERT_EQUALS(string("/part0/kit0/Psubenabled"), msg);
         }
 
-        void _testBankCapture(void)
+        void testBankCapture(void)
         {
-            mw->transmitMsg("/bank/slots", "");
+            mw->transmitMsg("/bank/slot23", "");
             TS_ASSERT(!ms->uToB->hasNext());
             mw->transmitMsg("/bank/fake", "");
             TS_ASSERT(ms->uToB->hasNext());
@@ -84,7 +83,7 @@ class MessageTest:public CxxTest::TestSuite
             TS_ASSERT_EQUALS(string("/bank/fake"), msg);
         }
 
-        void _testOscCopyPaste(void)
+        void testOscCopyPaste(void)
         {
             //Enable pad synth
             mw->transmitMsg("/part0/kit0/Ppadenabled", "T");
@@ -122,7 +121,7 @@ class MessageTest:public CxxTest::TestSuite
             t.join();
             TS_ASSERT_EQUALS(ms->part[0]->kit[0].padpars->oscilgen->Pbasefuncpar, 32);
         }
-#endif
+
 
         void start_realtime(void)
         {
@@ -202,6 +201,26 @@ class MessageTest:public CxxTest::TestSuite
             mw->transmitMsg("/save_xlz", "s", "test-midi-learn.xlz");
             mw->transmitMsg("/load_xlz", "s", "test-midi-learn.xlz");
         }
+
+        void testLfoPaste(void)
+        {
+            start_realtime();
+            ms->part[0]->kit[0].adpars->GlobalPar.FreqLfo->Pfreqrand = 32;
+            TS_ASSERT_EQUALS(ms->part[0]->kit[0].adpars->GlobalPar.FreqLfo->Pfreqrand, 32);
+
+            //Copy
+            mw->transmitMsg("/presets/copy", "s", "/part0/kit0/adpars/GlobalPar/FreqLfo/");
+
+            ms->part[0]->kit[0].adpars->GlobalPar.FreqLfo->Pfreqrand = 99;
+            TS_ASSERT_EQUALS(ms->part[0]->kit[0].adpars->GlobalPar.FreqLfo->Pfreqrand, 99);
+
+            //Paste
+            mw->transmitMsg("/presets/paste", "s", "/part0/kit0/adpars/GlobalPar/FreqLfo/");
+            stop_realtime();
+
+            TS_ASSERT_EQUALS(ms->part[0]->kit[0].adpars->GlobalPar.FreqLfo->Pfreqrand, 32);
+        }
+        
 
     private:
         SYNTH_T     *synth;
