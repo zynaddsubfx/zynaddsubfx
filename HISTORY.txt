@@ -1,7 +1,15 @@
 2.5.2 (XXX)
         - Add MIDI-Learn serialization
         - Add pink noise source
+	- Add missing velocity sense to ADvoice filters
+	- Support global Q for ADvoice formant filters
+	- Fix formant filter response to frequency
+	- Add chop pseudo sync BF modifier to oscilgen
+	- Add user adjustment for AD/PAD fadein
+	- Improve use-as-base so the result works like a built-in
+	- Save and restore some missing parameters from oscilgen
         - Restore mousewheel functionality
+	- Add window traversal shortcuts
         - Restore bank LSB/MSB MIDI support
         - Improve tip windows
         - Improve oscdoc output
