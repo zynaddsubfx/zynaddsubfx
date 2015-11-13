@@ -140,7 +140,8 @@ int NotePool::getRunningNotes(void) const
     bool running[256] = {0};
     for(auto &desc:activeDesc()) {
         //printf("note!(%d)\n", desc.note);
-        if(desc.status == Part::KEY_PLAYING)
+        if(desc.status == Part::KEY_PLAYING ||
+                desc.status == Part::KEY_RELEASED_AND_SUSTAINED)
             running[desc.note] = true;
     }
 
