@@ -376,7 +376,7 @@ Part::~Part()
     }
 }
 
-void assert_kit_sanity(const Part::Kit *kits)
+static void assert_kit_sanity(const Part::Kit *kits)
 {
     for(int i=0; i<NUM_KIT_ITEMS; ++i) {
         //an enabled kit must have a corresponding parameter object
@@ -386,10 +386,33 @@ void assert_kit_sanity(const Part::Kit *kits)
     }
 }
 
+static int kit_usage(const Part::Kit *kits, int note, int mode)
+{
+    const bool non_kit   = mode == 0;
+    const bool singl_kit = mode == 2;
+    int synth_usage = 0;
+
+    for(uint8_t i = 0; i < NUM_KIT_ITEMS; ++i) {
+        const auto &item = kits[i];
+        if(!non_kit && !item.validNote(note))
+            continue;
+
+        synth_usage += item.Padenabled;
+        synth_usage += item.Psubenabled;
+        synth_usage += item.Ppadenabled;
+
+        //Partial Kit Use
+        if(non_kit || (singl_kit && item.active()))
+            break;
+    }
+
+    return synth_usage;
+}
+
 /*
  * Note On Messages
  */
-void Part::NoteOn(unsigned char note,
+bool Part::NoteOn(unsigned char note,
                   unsigned char velocity,
                   int masterkeyshift)
 {
@@ -398,8 +421,9 @@ void Part::NoteOn(unsigned char note,
     const bool doingLegato     = isRunningNote && isLegatoMode() &&
                                  lastlegatomodevalid;
 
-    if(!Pnoteon || !inRange(note, Pminkey, Pmaxkey) || notePool.full())
-        return;
+    if(!Pnoteon || !inRange(note, Pminkey, Pmaxkey) || notePool.full() ||
+            notePool.synthFull(kit_usage(kit, note, Pkitmode)))
+        return false;
 
     verifyKeyMode();
     assert_kit_sanity(kit);
@@ -426,7 +450,7 @@ void Part::NoteOn(unsigned char note,
     const float notebasefreq = getBaseFreq(note, keyshift);
 
     if(notebasefreq < 0)
-        return;
+        return false;
 
     //Portamento
     lastnote = note;
@@ -447,7 +471,7 @@ void Part::NoteOn(unsigned char note,
     if(doingLegato) {
         LegatoParams pars = {notebasefreq, vel, portamento, note, true};
         notePool.applyLegato(pars);
-        return;
+        return true;
     }
 
     //Create New Notes
@@ -480,6 +504,7 @@ void Part::NoteOn(unsigned char note,
 
     //Enforce the key limit
     setkeylimit(Pkeylimit);
+    return true;
 }
 
 /*

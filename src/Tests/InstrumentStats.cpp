@@ -89,10 +89,12 @@ void load()
 
 void noteOn()
 {
+    int total_notes = 0;
     double t_on = tic(); // timer before calling func
     for(int i=40; i<100; ++i)
-        p->NoteOn(i,100,0);
+        total_notes += p->NoteOn(i,100,0);
     double t_off = toc(); // timer when func returns
+    printf("%d, ", total_notes);
     if(mode == MODE_PROFILE)
         printf("%f, ", t_off - t_on);
 }
@@ -136,10 +138,12 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    mode = MODE_TEST;
+    mode = MODE_PROFILE;
     setup();
     xml(argv[1]);
     load();
+    memUsage();
+    printf(", ");
     noteOn();
     speed();
     noteOff();

@@ -48,7 +48,9 @@ class Part
         void cloneTraits(Part &part) const REALTIME;
 
         // Midi commands implemented
-        void NoteOn(unsigned char note,
+
+        //returns true when note is successfully applied
+        bool NoteOn(unsigned char note,
                     unsigned char velocity,
                     int masterkeyshift) REALTIME;
         void NoteOff(unsigned char note) REALTIME;

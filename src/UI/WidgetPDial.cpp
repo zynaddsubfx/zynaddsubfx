@@ -47,7 +47,7 @@ int WidgetPDial::handle(int event)
             do_callback();
         return 1;
     }
-    
+
     switch(event) {
         case FL_PUSH:
             if (integer_step)
