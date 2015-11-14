@@ -4,6 +4,8 @@ Main author:
 Active Developers:
         Mark McCurry
         Hans Petter Selasky (BSD Compat)
+        Christopher Oliver (Unison + presets fix, mousewheel support,
+                            SUBnote overtones, unison enhancements, ...)
 
 Contributors:
         Gerald Folcher (legato, mono notes memory)
@@ -25,8 +27,6 @@ Contributors:
         Jonathan Liles (NSM & NTK support)
         Johannes Lorenz (Effect Documentation, PID Files)
         Ilario Glasgo (Italian Doc Translation)
-        Christopher Oliver (Unison + presets fix, mousewheel support,
-                            SUBnote overtones, unison enhancements, ...)
         Filipe Coelho (Globals Cleanup)
         Andre Sklenar (UI Pixmaps)
         Harald Hvaal (General Code Modernization)
