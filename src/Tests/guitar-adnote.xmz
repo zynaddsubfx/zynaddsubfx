@@ -2,7 +2,7 @@
 <?xml version="1.0f" encoding="UTF-8"?>
 <!DOCTYPE ZynAddSubFX-data>
 <ZynAddSubFX-data version-major="2" version-minor="5"
-version-revision="1" ZynAddSubFX-author="Nasca Octavian Paul">
+version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <INFORMATION>
 <par_bool name="PADsynth_used" value="yes" />
 </INFORMATION>
@@ -301,6 +301,8 @@ version-revision="1" ZynAddSubFX-author="Nasca Octavian Paul">
 </FREQUENCY_LFO>
 </FREQUENCY_PARAMETERS>
 <FILTER_PARAMETERS>
+<par name="velocity_sensing_amplitude" value="0" />
+<par name="velocity_sensing" value="64" />
 <FILTER>
 <par name="category" value="0" />
 <par name="type" value="2" />
