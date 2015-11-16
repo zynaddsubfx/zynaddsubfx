@@ -89,15 +89,21 @@ class MasterUI *ui=0;
 static Fl_Tiled_Image *module_backdrop;
 #endif
 
-int undo_redo_handler(int)
+int undo_redo_show_handler(int)
 {
     const bool undo_ = Fl::event_ctrl() && Fl::event_key() == 'z';
     const bool redo = Fl::event_ctrl() && Fl::event_key() == 'r';
+    const bool show = Fl::event_ctrl() && Fl::event_shift() &&
+        Fl::event_key() == 's';
     if(undo_)
         ui->osc->write("/undo", "");
     else if(redo)
         ui->osc->write("/redo", "");
-    return undo_ || redo;
+    else if (show) {
+        ui->simplemasterwindow->hide();
+        ui->masterwindow->show();
+    }
+    return undo_ || redo || show;
 }
 
 void
@@ -176,7 +182,7 @@ ui_handle_t GUI::createUi(Fl_Osc_Interface *osc, void *exit)
     //tree->osc           = osc;
     //midi_win->show();
 
-    Fl::add_handler(undo_redo_handler);
+    Fl::add_handler(undo_redo_show_handler);
     return (void*) (ui = new MasterUI((int*)exit, osc));
 }
 void GUI::destroyUi(ui_handle_t ui)
