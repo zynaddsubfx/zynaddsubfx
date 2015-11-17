@@ -40,6 +40,22 @@ using std::set;
 using std::string;
 using std::vector;
 
+// Mapping from dssi control index to midi CC
+DSSIaudiooutput::DSSIControl dssi_control[DSSIaudiooutput::MAX_DSSI_CONTROLS] = {
+    { C_modwheel, "Modwheel", {LADSPA_HINT_BOUNDED_ABOVE | LADSPA_HINT_BOUNDED_BELOW | LADSPA_HINT_DEFAULT_MIDDLE, 1, 127 }},
+    { C_volume, "Volume", {LADSPA_HINT_BOUNDED_ABOVE | LADSPA_HINT_BOUNDED_BELOW | LADSPA_HINT_DEFAULT_MAXIMUM, 1, 127 }},
+    { C_panning, "Panning"},
+    { C_expression, "Expression", {LADSPA_HINT_BOUNDED_ABOVE | LADSPA_HINT_BOUNDED_BELOW | LADSPA_HINT_DEFAULT_MAXIMUM, 1, 127 }},
+    { C_sustain, "Sustain", {LADSPA_HINT_TOGGLED| LADSPA_HINT_DEFAULT_0, 0, 1}},
+    { C_portamento, "Portamento", {LADSPA_HINT_TOGGLED| LADSPA_HINT_DEFAULT_0, 0, 1}},
+    { C_filterq, "Filter Q", {LADSPA_HINT_BOUNDED_ABOVE | LADSPA_HINT_BOUNDED_BELOW | LADSPA_HINT_DEFAULT_MIDDLE, 0, 128 }},
+    { C_filtercutoff, "Filter cutoff", {LADSPA_HINT_BOUNDED_ABOVE | LADSPA_HINT_BOUNDED_BELOW | LADSPA_HINT_DEFAULT_0, -1, 1 }},
+    { C_bandwidth, "Bandwidth"},
+    { C_fmamp, "FM amplification", {LADSPA_HINT_BOUNDED_ABOVE | LADSPA_HINT_BOUNDED_BELOW | LADSPA_HINT_DEFAULT_MAXIMUM, 1, 127 }},
+    { C_resonance_center, "Renonance center", {LADSPA_HINT_BOUNDED_ABOVE | LADSPA_HINT_BOUNDED_BELOW | LADSPA_HINT_DEFAULT_0, -1, 1 }},
+    { C_resonance_bandwidth, "Resonance bandwidth", {LADSPA_HINT_BOUNDED_ABOVE | LADSPA_HINT_BOUNDED_BELOW | LADSPA_HINT_DEFAULT_0, -1, 1 }},
+};
+
 //Dummy variables and functions for linking purposes
 const char *instance_name = 0;
 class WavFile;
@@ -196,6 +212,11 @@ void DSSIaudiooutput::connectPort(unsigned long port, LADSPA_Data *data)
             break;
         case 1:
             outr = data;
+            break;
+        default:
+            if ( port - 2 < MAX_DSSI_CONTROLS ) {
+                dssi_control[port - 2].data = data;
+            }
             break;
     }
 }
@@ -431,6 +452,11 @@ void DSSIaudiooutput::runSynth(unsigned long sample_count,
 
     Master *master = middleware->spawnMaster();
 
+    // forward all dssi control values to the middleware
+    for (size_t dssi_control_index = 0; dssi_control_index < MAX_DSSI_CONTROLS; ++ dssi_control_index) {
+        dssi_control[dssi_control_index].forward_control(master);
+    }
+
     do {
         /* Find the time of the next event, if any */
         if((events == NULL) || (event_index >= event_count))
@@ -535,23 +561,32 @@ DSSI_Descriptor *DSSIaudiooutput::initDssiDescriptor()
             newLadspaDescriptor->Maker =
                 "Nasca Octavian Paul <zynaddsubfx@yahoo.com>";
             newLadspaDescriptor->Copyright = "GNU General Public License v2 or later";
-            newLadspaDescriptor->PortCount = 2;
+            newLadspaDescriptor->PortCount = 2 + MAX_DSSI_CONTROLS;
 
             newPortNames    = new const char *[newLadspaDescriptor->PortCount];
             newPortNames[0] = "Output L";
             newPortNames[1] = "Output R";
+            for (size_t dssi_control_index = 0; dssi_control_index < MAX_DSSI_CONTROLS; ++ dssi_control_index) {
+                newPortNames[2 + dssi_control_index] = dssi_control[dssi_control_index].name;
+            }
             newLadspaDescriptor->PortNames = newPortNames;
 
             newPortDescriptors =
                 new LADSPA_PortDescriptor[newLadspaDescriptor->PortCount];
             newPortDescriptors[0] = LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO;
             newPortDescriptors[1] = LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO;
+            for (size_t dssi_control_index = 0; dssi_control_index < MAX_DSSI_CONTROLS; ++ dssi_control_index) {
+                newPortDescriptors[2 + dssi_control_index] = LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL;
+            }
             newLadspaDescriptor->PortDescriptors = newPortDescriptors;
 
             newPortRangeHints =
                 new LADSPA_PortRangeHint[newLadspaDescriptor->PortCount];
             newPortRangeHints[0].HintDescriptor = 0;
             newPortRangeHints[1].HintDescriptor = 0;
+            for (size_t dssi_control_index = 0; dssi_control_index < MAX_DSSI_CONTROLS; ++ dssi_control_index) {
+                newPortRangeHints[2 + dssi_control_index] = dssi_control[dssi_control_index].port_range_hint;
+            }
             newLadspaDescriptor->PortRangeHints = newPortRangeHints;
 
             newLadspaDescriptor->activate     = stub_activate;
@@ -683,4 +718,8 @@ bool DSSIaudiooutput::mapNextBank()
         bankNoToMap++;
         return true;
     }
+}
+
+void DSSIaudiooutput::DSSIControl::forward_control(Master *master) {
+    master->setController(0, controller_code, get_scaled_data());
 }
