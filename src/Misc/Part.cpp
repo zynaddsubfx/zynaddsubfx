@@ -43,6 +43,7 @@
 
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
+#include <iostream>
 
 using rtosc::Ports;
 using rtosc::RtData;
@@ -484,15 +485,19 @@ bool Part::NoteOn(unsigned char note,
             portamento, note, false};
         const int sendto = Pkitmode ? item.sendto() : 0;
 
-        if(item.Padenabled)
-            notePool.insertNote(note, sendto,
-                    {memory.alloc<ADnote>(kit[i].adpars, pars), 0, i});
-        if(item.Psubenabled)
-            notePool.insertNote(note, sendto,
-                    {memory.alloc<SUBnote>(kit[i].subpars, pars), 1, i});
-        if(item.Ppadenabled)
-            notePool.insertNote(note, sendto,
-                    {memory.alloc<PADnote>(kit[i].padpars, pars, interpolation), 2, i});
+        try {
+            if(item.Padenabled)
+                notePool.insertNote(note, sendto,
+                        {memory.alloc<ADnote>(kit[i].adpars, pars), 0, i});
+            if(item.Psubenabled)
+                notePool.insertNote(note, sendto,
+                        {memory.alloc<SUBnote>(kit[i].subpars, pars), 1, i});
+            if(item.Ppadenabled)
+                notePool.insertNote(note, sendto,
+                        {memory.alloc<PADnote>(kit[i].padpars, pars, interpolation), 2, i});
+        } catch (std::bad_alloc & ba) {
+            std::cerr << "dropped new note: " << ba.what() << std::endl;
+        }
 
         //Partial Kit Use
         if(isNonKit() || (isSingleKit() && item.active()))

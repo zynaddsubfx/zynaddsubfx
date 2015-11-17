@@ -22,6 +22,7 @@
 
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
+#include <iostream>
 
 
 #include "EffectMgr.h"
@@ -178,35 +179,40 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
     memory.dealloc(efx);
     EffectParams pars(memory, insertion, efxoutl, efxoutr, 0,
             synth.samplerate, synth.buffersize);
-    switch(nefx) {
-        case 1:
-            efx = memory.alloc<Reverb>(pars);
-            break;
-        case 2:
-            efx = memory.alloc<Echo>(pars);
-            break;
-        case 3:
-            efx = memory.alloc<Chorus>(pars);
-            break;
-        case 4:
-            efx = memory.alloc<Phaser>(pars);
-            break;
-        case 5:
-            efx = memory.alloc<Alienwah>(pars);
-            break;
-        case 6:
-            efx = memory.alloc<Distorsion>(pars);
-            break;
-        case 7:
-            efx = memory.alloc<EQ>(pars);
-            break;
-        case 8:
-            efx = memory.alloc<DynamicFilter>(pars);
-            break;
-        //put more effect here
-        default:
-            efx = NULL;
-            break; //no effect (thru)
+    try {
+        switch (nefx) {
+            case 1:
+                efx = memory.alloc<Reverb>(pars);
+                break;
+            case 2:
+                efx = memory.alloc<Echo>(pars);
+                break;
+            case 3:
+                efx = memory.alloc<Chorus>(pars);
+                break;
+            case 4:
+                efx = memory.alloc<Phaser>(pars);
+                break;
+            case 5:
+                efx = memory.alloc<Alienwah>(pars);
+                break;
+            case 6:
+                efx = memory.alloc<Distorsion>(pars);
+                break;
+            case 7:
+                efx = memory.alloc<EQ>(pars);
+                break;
+            case 8:
+                efx = memory.alloc<DynamicFilter>(pars);
+                break;
+            //put more effect here
+            default:
+                efx = NULL;
+                break; //no effect (thru)
+        }
+    } catch (std::bad_alloc &ba) {
+        std::cerr << "failed to change effect " << _nefx << ": " << ba.what() << std::endl;
+        return;
     }
 
     if(efx)
@@ -287,7 +293,11 @@ void EffectMgr::seteffectparrt(int npar, unsigned char value)
         settings[npar] = value;
     if(!efx)
         return;
-    efx->changepar(npar, value);
+    try {
+        efx->changepar(npar, value);
+    } catch (std::bad_alloc &ba) {
+        std::cerr << "failed to change effect parameter " << npar << " to " << value << ": " << ba.what() << std::endl;
+    }
 }
 
 //Change a parameter of the current effect

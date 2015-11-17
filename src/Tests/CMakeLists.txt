@@ -22,6 +22,8 @@ CXXTEST_ADD_TEST(AllocatorTest AllocatorTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/AllocatorTest.h)
 CXXTEST_ADD_TEST(KitTest KitTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/KitTest.h)
+CXXTEST_ADD_TEST(MemoryStressTest MemoryStressTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/MemoryStressTest.h)
 
 #Extra libraries added to make test and full compilation use the same library
 #links for quirky compilers
@@ -51,6 +53,7 @@ target_link_libraries(UnisonTest    ${test_lib})
 #target_link_libraries(RtAllocTest    ${test_lib})
 target_link_libraries(AllocatorTest    ${test_lib})
 target_link_libraries(KitTest    ${test_lib})
+target_link_libraries(MemoryStressTest ${test_lib})
 
 #Testbed app
 add_executable(ins-test InstrumentStats.cpp)

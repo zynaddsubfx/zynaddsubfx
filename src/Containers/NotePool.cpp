@@ -5,6 +5,7 @@
 #include "../Synth/SynthNote.h"
 #include <cstring>
 #include <cassert>
+#include <iostream>
 
 NotePool::NotePool(void)
     :needs_cleaning(0)
@@ -97,8 +98,12 @@ void NotePool::upgradeToLegato(void)
 void NotePool::insertLegatoNote(uint8_t note, uint8_t sendto, SynthDescriptor desc)
 {
     assert(desc.note);
-    desc.note = desc.note->cloneLegato();
-    insertNote(note, sendto, desc, true);
+    try {
+        desc.note = desc.note->cloneLegato();
+        insertNote(note, sendto, desc, true);
+    } catch (std::bad_alloc &ba) {
+        std::cerr << "failed to insert legato note: " << ba.what() << std::endl;
+    }
 };
 
 //There should only be one pair of notes which are still playing
@@ -107,7 +112,11 @@ void NotePool::applyLegato(LegatoParams &par)
     for(auto &desc:activeDesc()) {
         desc.note = par.midinote;
         for(auto &synth:activeNotes(desc))
-            synth.note->legatonote(par);
+            try {
+                synth.note->legatonote(par);
+            } catch (std::bad_alloc& ba) {
+                std::cerr << "failed to create legato note: " << ba.what() << std::endl;
+            }
     }
 };
 
