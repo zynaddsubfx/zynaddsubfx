@@ -1076,7 +1076,7 @@ static rtosc::Ports middlewareReplyPorts = {
         void       *ptr  = *(void**)rtosc_argument(msg, 1).b.data;
         deallocate(type, ptr);
         rEnd},
-    {"request_memory:", 0, 0,
+    {"request-memory:", 0, 0,
         rBegin;
         //Generate out more memory for the RT memory pool
         //5MBi chunk
