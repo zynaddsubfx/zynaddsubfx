@@ -71,8 +71,8 @@ class Part
         int saveXML(const char *filename);
         int loadXMLinstrument(const char *filename);
 
-        void add2XML(XMLwrapper *xml);
-        void add2XMLinstrument(XMLwrapper *xml);
+        void add2XML(XMLwrapper& xml);
+        void add2XMLinstrument(XMLwrapper& xml);
 
         void defaults();
         void defaultsinstrument();
@@ -83,8 +83,8 @@ class Part
         void initialize_rt(void) REALTIME;
         void kill_rt(void) REALTIME;
 
-        void getfromXML(XMLwrapper *xml);
-        void getfromXMLinstrument(XMLwrapper *xml);
+        void getfromXML(XMLwrapper& xml);
+        void getfromXMLinstrument(XMLwrapper& xml);
 
         void cleanup(bool final = false);
 

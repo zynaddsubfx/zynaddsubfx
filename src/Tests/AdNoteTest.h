@@ -74,17 +74,17 @@ class AdNoteTest:public CxxTest::TestSuite
             //Assert defaults
             TS_ASSERT(!defaultPreset->VoicePar[1].Enabled);
 
-            XMLwrapper *wrap = new XMLwrapper();
+            XMLwrapper wrap;
             cout << string(SOURCE_DIR) + string("/guitar-adnote.xmz")
                  << endl;
-            wrap->loadXMLfile(string(SOURCE_DIR)
+            wrap.loadXMLfile(string(SOURCE_DIR)
                               + string("/guitar-adnote.xmz"));
-            TS_ASSERT(wrap->enterbranch("MASTER"));
-            TS_ASSERT(wrap->enterbranch("PART", 0));
-            TS_ASSERT(wrap->enterbranch("INSTRUMENT"));
-            TS_ASSERT(wrap->enterbranch("INSTRUMENT_KIT"));
-            TS_ASSERT(wrap->enterbranch("INSTRUMENT_KIT_ITEM", 0));
-            TS_ASSERT(wrap->enterbranch("ADD_SYNTH_PARAMETERS"));
+            TS_ASSERT(wrap.enterbranch("MASTER"));
+            TS_ASSERT(wrap.enterbranch("PART", 0));
+            TS_ASSERT(wrap.enterbranch("INSTRUMENT"));
+            TS_ASSERT(wrap.enterbranch("INSTRUMENT_KIT"));
+            TS_ASSERT(wrap.enterbranch("INSTRUMENT_KIT_ITEM", 0));
+            TS_ASSERT(wrap.enterbranch("ADD_SYNTH_PARAMETERS"));
             defaultPreset->getfromXML(wrap);
             //defaultPreset->defaults();
 
@@ -102,7 +102,6 @@ class AdNoteTest:public CxxTest::TestSuite
 
             note = new ADnote(defaultPreset, pars);
 
-            delete wrap;
         }
 
         void tearDown() {

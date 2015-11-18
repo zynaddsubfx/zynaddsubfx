@@ -46,8 +46,8 @@ class PADnoteParameters:public Presets
         ~PADnoteParameters();
 
         void defaults();
-        void add2XML(XMLwrapper *xml);
-        void getfromXML(XMLwrapper *xml);
+        void add2XML(XMLwrapper& xml);
+        void getfromXML(XMLwrapper& xml);
 
         //returns a value between 0.0f-1.0f that represents the estimation perceived bandwidth
         float getprofile(float *smp, int size);

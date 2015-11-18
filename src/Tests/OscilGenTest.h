@@ -56,19 +56,18 @@ class OscilGenTest:public CxxTest::TestSuite
             //Assert defaults [TODO]
 
 
-            XMLwrapper *wrap = new XMLwrapper();
-            wrap->loadXMLfile(string(SOURCE_DIR)
+            XMLwrapper wrap;
+            wrap.loadXMLfile(string(SOURCE_DIR)
                               + string("/guitar-adnote.xmz"));
-            TS_ASSERT(wrap->enterbranch("MASTER"));
-            TS_ASSERT(wrap->enterbranch("PART", 0));
-            TS_ASSERT(wrap->enterbranch("INSTRUMENT"));
-            TS_ASSERT(wrap->enterbranch("INSTRUMENT_KIT"));
-            TS_ASSERT(wrap->enterbranch("INSTRUMENT_KIT_ITEM", 0));
-            TS_ASSERT(wrap->enterbranch("ADD_SYNTH_PARAMETERS"));
-            TS_ASSERT(wrap->enterbranch("VOICE", 0));
-            TS_ASSERT(wrap->enterbranch("OSCIL"));
+            TS_ASSERT(wrap.enterbranch("MASTER"));
+            TS_ASSERT(wrap.enterbranch("PART", 0));
+            TS_ASSERT(wrap.enterbranch("INSTRUMENT"));
+            TS_ASSERT(wrap.enterbranch("INSTRUMENT_KIT"));
+            TS_ASSERT(wrap.enterbranch("INSTRUMENT_KIT_ITEM", 0));
+            TS_ASSERT(wrap.enterbranch("ADD_SYNTH_PARAMETERS"));
+            TS_ASSERT(wrap.enterbranch("VOICE", 0));
+            TS_ASSERT(wrap.enterbranch("OSCIL"));
             oscil->getfromXML(wrap);
-            delete wrap;
 
             //verify xml was loaded [TODO]
 

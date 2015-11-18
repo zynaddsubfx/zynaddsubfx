@@ -67,15 +67,15 @@ class SubNoteTest:public CxxTest::TestSuite
 
             //prepare the default settings
             SUBnoteParameters *defaultPreset = new SUBnoteParameters();
-            XMLwrapper *wrap = new XMLwrapper();
-            wrap->loadXMLfile(string(SOURCE_DIR)
+            XMLwrapper wrap;
+            wrap.loadXMLfile(string(SOURCE_DIR)
                               + string("/guitar-adnote.xmz"));
-            TS_ASSERT(wrap->enterbranch("MASTER"));
-            TS_ASSERT(wrap->enterbranch("PART", 1));
-            TS_ASSERT(wrap->enterbranch("INSTRUMENT"));
-            TS_ASSERT(wrap->enterbranch("INSTRUMENT_KIT"));
-            TS_ASSERT(wrap->enterbranch("INSTRUMENT_KIT_ITEM", 0));
-            TS_ASSERT(wrap->enterbranch("SUB_SYNTH_PARAMETERS"));
+            TS_ASSERT(wrap.enterbranch("MASTER"));
+            TS_ASSERT(wrap.enterbranch("PART", 1));
+            TS_ASSERT(wrap.enterbranch("INSTRUMENT"));
+            TS_ASSERT(wrap.enterbranch("INSTRUMENT_KIT"));
+            TS_ASSERT(wrap.enterbranch("INSTRUMENT_KIT_ITEM", 0));
+            TS_ASSERT(wrap.enterbranch("SUB_SYNTH_PARAMETERS"));
             defaultPreset->getfromXML(wrap);
 
             controller = new Controller(*synth);
@@ -86,7 +86,6 @@ class SubNoteTest:public CxxTest::TestSuite
 
             SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote, false};
             note = new SUBnote(defaultPreset, pars);
-            delete wrap;
             delete defaultPreset;
         }
 

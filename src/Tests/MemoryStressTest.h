@@ -63,14 +63,14 @@ class AdNoteTest:public CxxTest::TestSuite
             std::string instrument_filename = std::string(SOURCE_DIR) + "/guitar-adnote.xmz";
             std::cout << instrument_filename << std::endl;
 
-            XMLwrapper *wrap = new XMLwrapper();
-            wrap->loadXMLfile(instrument_filename);
-            TS_ASSERT(wrap->enterbranch("MASTER"));
-            TS_ASSERT(wrap->enterbranch("PART", 0));
-            TS_ASSERT(wrap->enterbranch("INSTRUMENT"));
-            TS_ASSERT(wrap->enterbranch("INSTRUMENT_KIT"));
-            TS_ASSERT(wrap->enterbranch("INSTRUMENT_KIT_ITEM", 0));
-            TS_ASSERT(wrap->enterbranch("ADD_SYNTH_PARAMETERS"));
+            XMLwrapper wrap;
+            wrap.loadXMLfile(instrument_filename);
+            TS_ASSERT(wrap.enterbranch("MASTER"));
+            TS_ASSERT(wrap.enterbranch("PART", 0));
+            TS_ASSERT(wrap.enterbranch("INSTRUMENT"));
+            TS_ASSERT(wrap.enterbranch("INSTRUMENT_KIT"));
+            TS_ASSERT(wrap.enterbranch("INSTRUMENT_KIT_ITEM", 0));
+            TS_ASSERT(wrap.enterbranch("ADD_SYNTH_PARAMETERS"));
             defaultPreset->getfromXML(wrap);
 
             //verify xml was loaded
@@ -78,7 +78,6 @@ class AdNoteTest:public CxxTest::TestSuite
 
             controller = new Controller(*synth);
 
-            delete wrap;
         }
 
         void tearDown() {

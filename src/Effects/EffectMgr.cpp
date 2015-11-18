@@ -417,55 +417,55 @@ void EffectMgr::paste(EffectMgr &e)
         seteffectparrt(i, e.settings[i]);
 }
 
-void EffectMgr::add2XML(XMLwrapper *xml)
+void EffectMgr::add2XML(XMLwrapper& xml)
 {
-    xml->addpar("type", geteffect());
+    xml.addpar("type", geteffect());
 
     if(!geteffect())
         return;
-    xml->addpar("preset", preset);
+    xml.addpar("preset", preset);
 
-    xml->beginbranch("EFFECT_PARAMETERS");
+    xml.beginbranch("EFFECT_PARAMETERS");
     for(int n = 0; n < 128; ++n) {
         int par = geteffectpar(n);
         if(par == 0)
             continue;
-        xml->beginbranch("par_no", n);
-        xml->addpar("par", par);
-        xml->endbranch();
+        xml.beginbranch("par_no", n);
+        xml.addpar("par", par);
+        xml.endbranch();
     }
     if(filterpars) {
-        xml->beginbranch("FILTER");
+        xml.beginbranch("FILTER");
         filterpars->add2XML(xml);
-        xml->endbranch();
+        xml.endbranch();
     }
-    xml->endbranch();
+    xml.endbranch();
 }
 
-void EffectMgr::getfromXML(XMLwrapper *xml)
+void EffectMgr::getfromXML(XMLwrapper& xml)
 {
-    changeeffect(xml->getpar127("type", geteffect()));
+    changeeffect(xml.getpar127("type", geteffect()));
 
     if(!geteffect())
         return;
 
-    preset = xml->getpar127("preset", preset);
+    preset = xml.getpar127("preset", preset);
 
-    if(xml->enterbranch("EFFECT_PARAMETERS")) {
+    if(xml.enterbranch("EFFECT_PARAMETERS")) {
         for(int n = 0; n < 128; ++n) {
             seteffectpar(n, 0); //erase effect parameter
-            if(xml->enterbranch("par_no", n) == 0)
+            if(xml.enterbranch("par_no", n) == 0)
                 continue;
             int par = geteffectpar(n);
-            seteffectpar(n, xml->getpar127("par", par));
-            xml->exitbranch();
+            seteffectpar(n, xml.getpar127("par", par));
+            xml.exitbranch();
         }
         if(filterpars)
-            if(xml->enterbranch("FILTER")) {
+            if(xml.enterbranch("FILTER")) {
                 filterpars->getfromXML(xml);
-                xml->exitbranch();
+                xml.exitbranch();
             }
-        xml->exitbranch();
+        xml.exitbranch();
     }
     cleanup();
 }

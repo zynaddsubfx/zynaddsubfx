@@ -95,7 +95,7 @@ class PadNoteTest:public CxxTest::TestSuite
             TS_ASSERT(wrap.enterbranch("INSTRUMENT_KIT"));
             TS_ASSERT(wrap.enterbranch("INSTRUMENT_KIT_ITEM", 0));
             TS_ASSERT(wrap.enterbranch("PAD_SYNTH_PARAMETERS"));
-            pars->getfromXML(&wrap);
+            pars->getfromXML(wrap);
 
 
             //defaultPreset->defaults();
