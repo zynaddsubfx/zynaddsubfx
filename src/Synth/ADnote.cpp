@@ -295,12 +295,12 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars)
         oscposhi_start +=
             (int)((pars.VoicePar[nvoice].Poscilphase
                    - 64.0f) / 128.0f * synth.oscilsize + synth.oscilsize * 4);
-        oscposhi_start %= synth.oscilsize;
 
+        int kth_start = oscposhi_start;
         for(int k = 0; k < unison; ++k) {
-            oscposhi[nvoice][k] = oscposhi_start;
+            oscposhi[nvoice][k] = kth_start % synth.oscilsize;
             //put random starting point for other subvoices
-            oscposhi_start      =
+            kth_start      = oscposhi_start +
                 (int)(RND * pars.VoicePar[nvoice].Unison_phase_randomness /
                         127.0f * (synth.oscilsize - 1));
         }
