@@ -286,6 +286,18 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars)
                                              getvoicebasefreq(nvoice),
                                              pars.VoicePar[nvoice].Presonance);
 
+        //Find range of generated wave
+        float min = NoteVoicePar[nvoice].OscilSmp[0];
+        float max = min;
+        float *smpls = &(NoteVoicePar[nvoice].OscilSmp[1]);
+        for (int i = synth.oscilsize-1; i--; smpls++)
+            if (*smpls > max)
+                max = *smpls;
+            else if (*smpls < min)
+                min = *smpls;
+        NoteVoicePar[nvoice].OscilSmpMin = min;
+        NoteVoicePar[nvoice].OscilSmpMax = max;
+
         //I store the first elments to the last position for speedups
         for(int i = 0; i < OSCIL_SMP_EXTRA_SAMPLES; ++i)
             NoteVoicePar[nvoice].OscilSmp[synth.oscilsize
