@@ -6,6 +6,7 @@ message(STATUS "Checking Library Path" $ENV{CMAKE_LIBRARY_PATH} ${CMAKE_LIBRARY_
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 include(CheckCXXSourceCompiles)
+include(CheckCXXCompilerFlag) 
 find_package(PkgConfig REQUIRED)
 find_package(zlib REQUIRED)
 find_package(X11)
@@ -42,6 +43,10 @@ CHECK_CXX_SOURCE_COMPILES(
     #error unreliable atomics
     #endif
     int main(){return 0;}" HAVE_ASYNC)
+
+check_cxx_compiler_flag("-msse2" SUPPORT_SSE)
+check_cxx_compiler_flag("-mfpu=neon -Werror" SUPPORT_NEON)
+
 set(CMAKE_REQUIRED_FLAGS "")
 
 
@@ -150,18 +155,28 @@ option (BuildForDebug "Include gdb debugging support" OFF)
 
 set(CMAKE_BUILD_TYPE "Release")
 
+
 set (BuildOptions_x86_64AMD
-    "-std=c++11 -O3 -march=athlon64 -m64 -Wall -Wno-unused-parameter -ffast-math -fno-finite-math-only -fomit-frame-pointer"
+    "-march=athlon64 -m64 -Wall -Wno-unused-parameter"
   CACHE STRING "X86_64 compiler options"
 )
 
 set (BuildOptions_X86_64Core2
-    "-std=c++11 -O3 -march=core2 -m64 -Wall -Wno-unused-parameter -ffast-math -fno-finite-math-only -fomit-frame-pointer"
+    "-march=core2 -m64 -Wall -Wno-unused-parameter"
   CACHE STRING "X86_64 compiler options"
 )
 
+set (BuildOptions_NEON
+    "-march=armv7-a -mfloat-abi=hard -mfpu=neon -mcpu=cortex-a9 -mtune=cortex-a9 -pipe -mvectorize-with-neon-quad -funsafe-loop-optimizations"
+  CACHE STRING "Cortex_a9 compiler options"
+)
+set (BuildOptions_SSE
+	"-msse -msse2 -mfpmath=sse"
+  CACHE STRING "SSE compiler options"
+)
+
 set (BuildOptionsBasic
-    "-std=c++11 -Wno-unused-parameter -O3 -msse -msse2 -mfpmath=sse -ffast-math -fomit-frame-pointer"
+    "-std=c++11 -Wno-unused-parameter -O3 -ffast-math -fomit-frame-pointer"
     CACHE STRING "basic X86 complier options"
 )
 
@@ -235,15 +250,25 @@ if (BuildForDebug)
 	message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_DEBUG}")
 else (BuildForDebug)
 	set (CMAKE_BUILD_TYPE "Release")
+	
+	set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptionsBasic})
+	
 	if (BuildForAMD_X86_64)
-		set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptions_x86_64AMD})
-	else (BuildForAMD_X86_64)
-		if (BuildForCore2_X86_64)
-			set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptions_X86_64Core2})
-		else (BuildForCore2_X86_64)
-			set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptionsBasic})
-		endif (BuildForCore2_X86_64)
+		set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BuildOptions_x86_64AMD}")
 	endif (BuildForAMD_X86_64)
+	
+	if (BuildForCore2_X86_64)
+			set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BuildOptions_X86_64Core2}")
+	endif (BuildForCore2_X86_64)
+				
+	if (SUPPORT_SSE)
+		set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BuildOptions_SSE}")
+	endif (SUPPORT_SSE)
+	
+	if (SUPPORT_NEON)
+		set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BuildOptions_NEON}")
+	endif (SUPPORT_NEON)
+	
 	message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_RELEASE}")
 endif (BuildForDebug)
 
