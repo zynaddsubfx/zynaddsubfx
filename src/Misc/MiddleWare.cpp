@@ -495,23 +495,12 @@ public:
             }
         }
 
-        Part *p;
-        try {
-            p = alloc.get();
-        } catch (std::bad_alloc &ba) {
-            std::cerr << "failed to load part: " << ba.what() << std::endl;
-            return;
-        }
+        Part *p = alloc.get();
 #else
-        try {
-            Part *p = new Part(*master->memory, synth, master->time,
-                    config->cfg.GzipCompression,
-                    config->cfg.Interpolation,
-                    &master->microtonal, master->fft);
-        } catch (std::bad_alloc &ba) {
-            std::cerr << "failed to load part: " << ba.what() << std::endl;
-            return;
-        }
+        Part *p = new Part(*master->memory, synth, master->time,
+                config->cfg.GzipCompression,
+                config->cfg.Interpolation,
+                &master->microtonal, master->fft);
 
         if(p->loadXMLinstrument(filename))
             fprintf(stderr, "Warning: failed to load part<%s>!\n", filename);
@@ -538,23 +527,19 @@ public:
         if(npart == -1)
             return;
 
-        try {
-            Part *p = new Part(*master->memory, synth,
-                               master->time,
-                               config->cfg.GzipCompression,
-                               config->cfg.Interpolation,
-                               &master->microtonal, master->fft);
-            p->applyparameters();
-            obj_store.extractPart(p, npart);
-            kits.extractPart(p, npart);
+        Part *p = new Part(*master->memory, synth,
+                master->time,
+                config->cfg.GzipCompression,
+                config->cfg.Interpolation,
+                &master->microtonal, master->fft);
+        p->applyparameters();
+        obj_store.extractPart(p, npart);
+        kits.extractPart(p, npart);
 
-            //Give it to the backend and wait for the old part to return for
-            //deallocation
-            parent->transmitMsg("/load-part", "ib", npart, sizeof(Part *), &p);
-            GUI::raiseUi(ui, "/damage", "s", ("/part" + to_s(npart) + "/").c_str());
-        } catch (std::bad_alloc &ba) {
-            std::cerr << "failed to load part: " << ba.what() << std::endl;
-        }
+        //Give it to the backend and wait for the old part to return for
+        //deallocation
+        parent->transmitMsg("/load-part", "ib", npart, sizeof(Part *), &p);
+        GUI::raiseUi(ui, "/damage", "s", ("/part" + to_s(npart) + "/").c_str());
     }
 
     //Well, you don't get much crazier than changing out all of your RT
