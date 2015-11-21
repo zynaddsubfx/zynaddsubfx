@@ -220,7 +220,37 @@ class MessageTest:public CxxTest::TestSuite
 
             TS_ASSERT_EQUALS(ms->part[0]->kit[0].adpars->GlobalPar.FreqLfo->Pfreqrand, 32);
         }
-        
+
+        void testPadPaste(void)
+        {
+            mw->transmitMsg("/part0/kit0/Ppadenabled", "T");
+            run_realtime();
+
+            start_realtime();
+
+            auto &field1 = ms->part[0]->kit[0].padpars->PVolume;
+            auto &field2 = ms->part[0]->kit[0].padpars->oscilgen->Pfilterpar1;
+            field1 = 32;
+            TS_ASSERT_EQUALS(field1, 32);
+            field2 = 35;
+            TS_ASSERT_EQUALS(field2, 35);
+
+            //Copy
+            mw->transmitMsg("/presets/copy", "s", "/part0/kit0/padpars/");
+
+            field1 = 99;
+            TS_ASSERT_EQUALS(field1, 99);
+            field2 = 95;
+            TS_ASSERT_EQUALS(field2, 95);
+
+            //Paste
+            mw->transmitMsg("/presets/paste", "s", "/part0/kit0/padpars/");
+            stop_realtime();
+
+            TS_ASSERT_EQUALS(field1, 32);
+            TS_ASSERT_EQUALS(field2, 35);
+        }
+
 
     private:
         SYNTH_T     *synth;

@@ -35,7 +35,7 @@ using namespace rtosc;
 
 
 #define rObject PADnoteParameters
-static const rtosc::Ports realtime_ports = 
+static const rtosc::Ports realtime_ports =
 {
     rRecurp(FreqLfo, "Frequency LFO"),
     rRecurp(AmpLfo,   "Amplitude LFO"),
@@ -119,10 +119,24 @@ static const rtosc::Ports realtime_ports =
                 obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
             }
         }},
+    {"paste:b", rProp(internal) rDoc("paste port"), 0,
+    [](const char *m, rtosc::RtData &d){
+        rObject &paste = **(rObject **)rtosc_argument(m,0).b.data;
+        rObject &o = *(rObject*)d.obj;
+        o.pasteRT(paste);}}
 
 };
 static const rtosc::Ports non_realtime_ports =
 {
+    rSelf(PADnoteParameters),
+    rPresetType,
+    {"paste:b", rProp(internal) rDoc("paste port"), 0,
+    [](const char *m, rtosc::RtData &d){
+        rObject &paste = **(rObject **)rtosc_argument(m,0).b.data;
+        rObject &o = *(rObject*)d.obj;
+        o.paste(paste);
+        //avoid the match to forward the request along
+        d.matches--;}},
     //Harmonic Source Distribution
     rRecurp(oscilgen, "Oscillator"),
     rRecurp(resonance, "Resonance"),
@@ -227,8 +241,8 @@ const rtosc::Ports &PADnoteParameters::realtime_ports     = ::realtime_ports;
 
 const rtosc::MergePorts PADnoteParameters::ports =
 {
-    &non_realtime_ports,
-    &realtime_ports
+    &realtime_ports,
+    &non_realtime_ports
 };
 
 
@@ -1119,3 +1133,76 @@ void PADnoteParameters::getfromXML(XMLwrapper& xml)
         xml.exitbranch();
     }
 }
+
+#define COPY(y) this->y = x.y
+void PADnoteParameters::paste(PADnoteParameters &x)
+{
+    COPY(Pmode);
+
+    COPY(Php.base.type);
+    COPY(Php.base.par1);
+    COPY(Php.freqmult);
+    COPY(Php.modulator.par1);
+    COPY(Php.modulator.freq);
+    COPY(Php.width);
+    COPY(Php.amp.mode);
+    COPY(Php.amp.type);
+    COPY(Php.amp.par1);
+    COPY(Php.amp.par2);
+    COPY(Php.autoscale);
+    COPY(Php.onehalf);
+
+    COPY(Pbandwidth);
+    COPY(Pbwscale);
+
+    COPY(Phrpos.type);
+    COPY(Phrpos.par1);
+    COPY(Phrpos.par2);
+    COPY(Phrpos.par3);
+
+    COPY(Pquality.samplesize);
+    COPY(Pquality.basenote);
+    COPY(Pquality.oct);
+    COPY(Pquality.smpoct);
+
+    oscilgen->paste(*x.oscilgen);
+    resonance->paste(*x.resonance);
+}
+
+void PADnoteParameters::pasteRT(PADnoteParameters &x)
+{
+    //Realtime stuff
+
+    COPY(Pfixedfreq);
+
+    COPY(PfixedfreqET);
+    COPY(PDetune);
+    COPY(PCoarseDetune);
+    COPY(PDetuneType);
+
+    FreqEnvelope->paste(*x.FreqEnvelope);
+    FreqLfo->paste(*x.FreqLfo);
+
+    COPY(PStereo);
+    COPY(PPanning);
+    COPY(PVolume);
+    COPY(PAmpVelocityScaleFunction);
+
+    AmpEnvelope->paste(*x.AmpEnvelope);
+    AmpLfo->paste(*x.AmpLfo);
+
+    COPY(Fadein_adjustment);
+    COPY(PPunchStrength);
+    COPY(PPunchTime);
+    COPY(PPunchStretch);
+    COPY(PPunchVelocitySensing);
+
+    GlobalFilter->paste(*x.GlobalFilter);
+
+    COPY(PFilterVelocityScale);
+    COPY(PFilterVelocityScaleFunction);
+
+    FilterEnvelope->paste(*x.FilterEnvelope);
+    FilterLfo->paste(*x.FilterLfo);
+}
+#undef COPY
