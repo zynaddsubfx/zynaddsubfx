@@ -521,7 +521,7 @@ Fl_Osc_Interface *GUI::genOscInterface(MiddleWare *)
     return new UI_Interface();
 }
 
-rtosc::ThreadLink lo_buffer(4096, 1000);
+rtosc::ThreadLink lo_buffer(4096*2, 1000);
 
 static void liblo_error_cb(int i, const char *m, const char *loc)
 {
