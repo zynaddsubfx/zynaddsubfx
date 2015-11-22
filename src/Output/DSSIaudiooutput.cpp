@@ -29,11 +29,8 @@
 
 #include "DSSIaudiooutput.h"
 #include "../Misc/Master.h"
-#include "../Misc/Bank.h"
 #include "../Misc/Util.h"
-#include <rtosc/thread-link.h>
 #include <unistd.h>
-#include <string.h>
 #include <limits.h>
 
 using std::set;
@@ -551,65 +548,57 @@ DSSI_Descriptor *DSSIaudiooutput::initDssiDescriptor()
     const char **newPortNames;
     LADSPA_PortRangeHint *newPortRangeHints;
 
-    if(newDssiDescriptor) {
-        LADSPA_Descriptor *newLadspaDescriptor = new LADSPA_Descriptor;
-        if(newLadspaDescriptor) {
-            newLadspaDescriptor->UniqueID   = 100;
-            newLadspaDescriptor->Label      = "ZASF";
-            newLadspaDescriptor->Properties = 0;
-            newLadspaDescriptor->Name  = "ZynAddSubFX";
-            newLadspaDescriptor->Maker =
-                "Nasca Octavian Paul <zynaddsubfx@yahoo.com>";
-            newLadspaDescriptor->Copyright = "GNU General Public License v2 or later";
-            newLadspaDescriptor->PortCount = 2 + MAX_DSSI_CONTROLS;
-
-            newPortNames    = new const char *[newLadspaDescriptor->PortCount];
-            newPortNames[0] = "Output L";
-            newPortNames[1] = "Output R";
-            for (size_t dssi_control_index = 0; dssi_control_index < MAX_DSSI_CONTROLS; ++ dssi_control_index) {
-                newPortNames[2 + dssi_control_index] = dssi_control[dssi_control_index].name;
-            }
-            newLadspaDescriptor->PortNames = newPortNames;
-
-            newPortDescriptors =
-                new LADSPA_PortDescriptor[newLadspaDescriptor->PortCount];
-            newPortDescriptors[0] = LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO;
-            newPortDescriptors[1] = LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO;
-            for (size_t dssi_control_index = 0; dssi_control_index < MAX_DSSI_CONTROLS; ++ dssi_control_index) {
-                newPortDescriptors[2 + dssi_control_index] = LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL;
-            }
-            newLadspaDescriptor->PortDescriptors = newPortDescriptors;
-
-            newPortRangeHints =
-                new LADSPA_PortRangeHint[newLadspaDescriptor->PortCount];
-            newPortRangeHints[0].HintDescriptor = 0;
-            newPortRangeHints[1].HintDescriptor = 0;
-            for (size_t dssi_control_index = 0; dssi_control_index < MAX_DSSI_CONTROLS; ++ dssi_control_index) {
-                newPortRangeHints[2 + dssi_control_index] = dssi_control[dssi_control_index].port_range_hint;
-            }
-            newLadspaDescriptor->PortRangeHints = newPortRangeHints;
-
-            newLadspaDescriptor->activate     = stub_activate;
-            newLadspaDescriptor->cleanup      = stub_cleanup;
-            newLadspaDescriptor->connect_port = stub_connectPort;
-            newLadspaDescriptor->deactivate   = stub_deactivate;
-            newLadspaDescriptor->instantiate  = instantiate;
-            newLadspaDescriptor->run = stub_run;
-            newLadspaDescriptor->run_adding = NULL;
-            newLadspaDescriptor->set_run_adding_gain = NULL;
-        }
-        newDssiDescriptor->LADSPA_Plugin    = newLadspaDescriptor;
-        newDssiDescriptor->DSSI_API_Version = 1;
-        newDssiDescriptor->configure   = NULL;
-        newDssiDescriptor->get_program = stub_getProgram;
-        newDssiDescriptor->get_midi_controller_for_port =
-            stub_getMidiControllerForPort;
-        newDssiDescriptor->select_program      = stub_selectProgram;
-        newDssiDescriptor->run_synth           = stub_runSynth;
-        newDssiDescriptor->run_synth_adding    = NULL;
-        newDssiDescriptor->run_multiple_synths = NULL;
-        newDssiDescriptor->run_multiple_synths_adding = NULL;
+    LADSPA_Descriptor *newLadspaDescriptor = new LADSPA_Descriptor;
+    newLadspaDescriptor->UniqueID   = 100;
+    newLadspaDescriptor->Label      = "ZASF";
+    newLadspaDescriptor->Properties = 0;
+    newLadspaDescriptor->Name  = "ZynAddSubFX";
+    newLadspaDescriptor->Maker =
+        "Nasca Octavian Paul <zynaddsubfx@yahoo.com>";
+    newLadspaDescriptor->Copyright = "GNU General Public License v2 or later";
+    newLadspaDescriptor->PortCount = 2 + MAX_DSSI_CONTROLS;
+    newPortNames    = new const char *[newLadspaDescriptor->PortCount];
+    newPortNames[0] = "Output L";
+    newPortNames[1] = "Output R";
+    for (size_t dssi_control_index = 0; dssi_control_index < MAX_DSSI_CONTROLS; ++ dssi_control_index) {
+        newPortNames[2 + dssi_control_index] = dssi_control[dssi_control_index].name;
     }
+    newLadspaDescriptor->PortNames = newPortNames;
+    newPortDescriptors =
+        new LADSPA_PortDescriptor[newLadspaDescriptor->PortCount];
+    newPortDescriptors[0] = LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO;
+    newPortDescriptors[1] = LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO;
+    for (size_t dssi_control_index = 0; dssi_control_index < MAX_DSSI_CONTROLS; ++ dssi_control_index) {
+        newPortDescriptors[2 + dssi_control_index] = LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL;
+    }
+    newLadspaDescriptor->PortDescriptors = newPortDescriptors;
+    newPortRangeHints =
+        new LADSPA_PortRangeHint[newLadspaDescriptor->PortCount];
+    newPortRangeHints[0].HintDescriptor = 0;
+    newPortRangeHints[1].HintDescriptor = 0;
+    for (size_t dssi_control_index = 0; dssi_control_index < MAX_DSSI_CONTROLS; ++ dssi_control_index) {
+        newPortRangeHints[2 + dssi_control_index] = dssi_control[dssi_control_index].port_range_hint;
+    }
+    newLadspaDescriptor->PortRangeHints = newPortRangeHints;
+    newLadspaDescriptor->activate     = stub_activate;
+    newLadspaDescriptor->cleanup      = stub_cleanup;
+    newLadspaDescriptor->connect_port = stub_connectPort;
+    newLadspaDescriptor->deactivate   = stub_deactivate;
+    newLadspaDescriptor->instantiate  = instantiate;
+    newLadspaDescriptor->run = stub_run;
+    newLadspaDescriptor->run_adding = NULL;
+    newLadspaDescriptor->set_run_adding_gain = NULL;
+    newDssiDescriptor->LADSPA_Plugin    = newLadspaDescriptor;
+    newDssiDescriptor->DSSI_API_Version = 1;
+    newDssiDescriptor->configure   = NULL;
+    newDssiDescriptor->get_program = stub_getProgram;
+    newDssiDescriptor->get_midi_controller_for_port =
+        stub_getMidiControllerForPort;
+    newDssiDescriptor->select_program      = stub_selectProgram;
+    newDssiDescriptor->run_synth           = stub_runSynth;
+    newDssiDescriptor->run_synth_adding    = NULL;
+    newDssiDescriptor->run_multiple_synths = NULL;
+    newDssiDescriptor->run_multiple_synths_adding = NULL;
 
     dssiDescriptor = newDssiDescriptor;
 
