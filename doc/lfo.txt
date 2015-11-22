@@ -38,7 +38,7 @@ image:images/lfo2.png[]
 
 Other parameters are:
 
-* *Continous mode*: If this mode is used, the LFO will not start from "zero" on each new note, but it will be continuous. This is very useful if you apply on filters to make interesting sweeps.
+* *Continuous mode*: If this mode is used, the LFO will not start from "zero" on each new note, but it will be continuous. This is very useful if you apply on filters to make interesting sweeps.
 * *Stretch*: It controls how much the LFO frequency changes according to the
 note's frequency.
 It can vary from negative stretch (the LFO frequency is decreased on higher
@@ -61,5 +61,5 @@ If this knob is at the lowest value, the LFO Start Phase will be random.
 * *Delay*: LFO Delay
 * *A.R.*: LFO Amplitude Randomness
 * *F.R.*: LFO Frequency Randomness
-* *C.*: LFO Continous Mode
+* *C.*: LFO Continuous Mode
 * *Str.*: LFO Stretch - in the image above the LFO stretch is set to zero

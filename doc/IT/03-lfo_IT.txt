@@ -35,7 +35,7 @@ image:images/lfo2.png[]
 
 Altri parametri sono:
 
-* *Continous mode*: Se si utilizza questa modalità, l'LFO non partirà da "zero"
+* *Continuous mode*: Se si utilizza questa modalità, l'LFO non partirà da "zero"
 ad ogni nuova nota, ma sarà continuo. E' molto utile applicato sui filtri, per
 fare interessanti 'sweeps'.
 * *Stretch*: Controlla quanto la frequenza dell'LFO cambia in base alla frequenza
@@ -60,5 +60,5 @@ Se questo knob è al valore più basso, LFO Start Phase sarà random
 * *Delay*: LFO Delay
 * *A.R.*: LFO Amplitude Randomnes
 * *F.R.*: LFO Frequency Randomness
-* *C.*: LFO Continous Mode
+* *C.*: LFO Continuous Mode
 * *Str.*: LFO Stretch - Nell'immagine sopra LFO Stretch è impostato a zero
