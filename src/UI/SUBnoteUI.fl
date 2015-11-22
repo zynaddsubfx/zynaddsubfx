@@ -297,7 +297,7 @@ freqsettingsui->redraw();}
         }
         Fl_Dial fixedfreqetdial {
           label {Eq.T.}
-          tooltip {How the frequency varies acording to the keyboard (leftmost for fixed frequency)} xywh {610 53 15 15} box ROUND_UP_BOX labelsize 10 align 8 maximum 127 step 1
+          tooltip {How the frequency varies according to the keyboard (leftmost for fixed frequency)} xywh {610 53 15 15} box ROUND_UP_BOX labelsize 10 align 8 maximum 127 step 1
           code0 {o->init("PfixedfreqET");}
           class Fl_Osc_Dial
         }
