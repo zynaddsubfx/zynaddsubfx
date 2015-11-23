@@ -289,7 +289,7 @@ freqsettingsui->redraw();}
         }
         Fl_Dial bendadjdial {
           label {Bend Adj.}
-          tooltip {How the frequency varies according to the pitch bend} xywh {448 53 15 15} box ROUND_UP_BOX labelsize 10 align 8 maximum 127 step 1
+          tooltip {How the frequency varies according to the pitch wheel} xywh {448 53 15 15} box ROUND_UP_BOX labelsize 10 align 8 maximum 127 step 1
           code0 {o->init("PBendAdjust");}
           class Fl_Osc_Dial
         }
