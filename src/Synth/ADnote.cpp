@@ -105,6 +105,12 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars)
             continue; //the voice is disabled
         }
 
+        int BendAdj = pars.VoicePar[nvoice].PBendAdjust - 64;
+        if (BendAdj % 24 == 0)
+            NoteVoicePar[nvoice].BendAdjust = BendAdj / 24;
+        else
+            NoteVoicePar[nvoice].BendAdjust = BendAdj / 24.0f;
+
         unison_stereo_spread[nvoice] =
             pars.VoicePar[nvoice].Unison_stereo_spread / 127.0f;
         int unison = pars.VoicePar[nvoice].Unison_size;
@@ -1083,7 +1089,8 @@ void ADnote::computecurrentparameters()
                               / 100.0f;
             voicefreq = getvoicebasefreq(nvoice)
                         * powf(2, (voicepitch + globalpitch) / 12.0f);                //Hz frequency
-            voicefreq *= ctl.pitchwheel.relfreq; //change the frequency by the controller
+            voicefreq *=
+                powf(ctl.pitchwheel.relfreq, NoteVoicePar[nvoice].BendAdjust); //change the frequency by the controller
             setfreq(nvoice, voicefreq * portamentofreqrap);
 
             /***************/

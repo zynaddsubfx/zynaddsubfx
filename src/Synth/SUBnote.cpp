@@ -78,6 +78,11 @@ void SUBnote::setup(float freq,
                 basefreq *= powf(3.0f, tmp);
         }
     }
+    int BendAdj = pars.PBendAdjust - 64;
+    if (BendAdj % 24 == 0)
+        BendAdjust = BendAdj / 24;
+    else
+        BendAdjust = BendAdj / 24.0f;
     float detune = getdetune(pars.PDetuneType,
                              pars.PCoarseDetune,
                              pars.PDetune);
@@ -432,7 +437,8 @@ void SUBnote::computecurrentparameters()
             envfreq = FreqEnvelope->envout() / 1200;
             envfreq = powf(2.0f, envfreq);
         }
-        envfreq *= ctl.pitchwheel.relfreq; //pitch wheel
+        envfreq *=
+            powf(ctl.pitchwheel.relfreq, BendAdjust); //pitch wheel
         if(portamento) { //portamento is used
             envfreq *= ctl.portamento.freqrap;
             if(!ctl.portamento.used) //the portamento has finished

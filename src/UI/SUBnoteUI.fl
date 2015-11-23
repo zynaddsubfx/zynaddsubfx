@@ -287,6 +287,12 @@ freqsettingsui->redraw();}
           code0 {o->init("detunevalue");}
           class Fl_Osc_Output
         }
+        Fl_Dial bendadjdial {
+          label {Bend Adj.}
+          tooltip {How the frequency varies according to the pitch bend} xywh {448 53 15 15} box ROUND_UP_BOX labelsize 10 align 8 maximum 127 step 1
+          code0 {o->init("PBendAdjust");}
+          class Fl_Osc_Dial
+        }
         Fl_Check_Button hz440 {
           label 440Hz
           callback {if (o->value()==0) fixedfreqetdial->deactivate();

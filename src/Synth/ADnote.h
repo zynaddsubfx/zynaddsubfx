@@ -199,6 +199,9 @@ class ADnote:public SynthNote
             // cents = basefreq*VoiceDetune
             float Detune, FineDetune;
 
+            // Bend adjustment
+            float BendAdjust;
+
             Envelope *FreqEnvelope;
             LFO      *FreqLfo;
 

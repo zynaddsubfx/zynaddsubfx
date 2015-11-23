@@ -189,6 +189,9 @@ struct ADnoteVoiceParam {
     /** Detune type */
     unsigned char PDetuneType;
 
+    /** Pitch bend adjustment */
+    unsigned char PBendAdjust;
+
     /* Frequency Envelope */
     unsigned char   PFreqEnvelopeEnabled;
     EnvelopeParams *FreqEnvelope;

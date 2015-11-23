@@ -691,13 +691,13 @@ cbwidget->do_callback();}
             } {}
             Fl_Slider detune {
               callback {o->oscWrite("detunevalue");}
-              tooltip {Fine Detune (cents)} xywh {60 295 295 15} type {Horz Knob} box NO_BOX minimum -8192 maximum 8191 step 1
+              tooltip {Fine Detune (cents)} xywh {60 296 295 15} type {Horz Knob} box NO_BOX minimum -8192 maximum 8191 step 1
               code0 {o->init("PDetune", 'i');}
               class Fl_Osc_Slider
             }
             Fl_Value_Output detunevalueoutput {
               label Detune
-              xywh {12 295 45 15} labelsize 10 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 10
+              xywh {12 296 45 15} labelsize 10 align 5 minimum -5000 maximum 5000 step 0.01 textfont 1 textsize 10
               code0 {o->init("detunevalue");}
               class Fl_Osc_Output
             }
@@ -709,6 +709,12 @@ cbwidget->do_callback();}
               code1 {o->init("PDetuneType",1);}
               class Fl_Osc_Choice
             } {}
+            Fl_Dial bendadjustdial {
+              label {Bend}
+              tooltip {How the frequency varies according to the pitch wheel} xywh {60 278 15 15} box ROUND_UP_BOX labelsize 10 align 8 maximum 127 step 1
+              code0 {o->init("PBendAdjust");}
+              class Fl_Osc_Dial
+            }
             Fl_Check_Button hz440 {
               label 440Hz
               callback {if (o->value()==0) fixedfreqetdial->deactivate();

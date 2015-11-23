@@ -54,6 +54,7 @@ class SUBnoteParameters:public Presets
         EnvelopeParams    *FreqEnvelope;
         unsigned char      PBandWidthEnvelopeEnabled;
         EnvelopeParams    *BandWidthEnvelope;
+        unsigned char     PBendAdjust;
 
         //Filter Parameters (Global)
         unsigned char   PGlobalFilterEnabled;
