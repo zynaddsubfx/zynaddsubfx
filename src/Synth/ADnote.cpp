@@ -354,9 +354,6 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars)
             case 4:
                 NoteVoicePar[nvoice].FMEnabled = FREQ_MOD;
                 break;
-            case 5:
-                NoteVoicePar[nvoice].FMEnabled = PITCH_MOD;
-                break;
             default:
                 NoteVoicePar[nvoice].FMEnabled = NONE;
         }
@@ -387,8 +384,6 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars)
                     (expf(pars.VoicePar[nvoice].PFMVolume / 127.0f
                           * FM_AMP_MULTIPLIER) - 1.0f) * fmvoldamp * 4.0f;
                 break;
-            //    case PITCH_MOD:NoteVoicePar[nvoice].FMVolume=(pars.VoicePar[nvoice].PFMVolume/127.0f*8.0f)*fmvoldamp;//???????????
-            //	          break;
             default:
                 if(fmvoldamp > 1.0f)
                     fmvoldamp = 1.0f;
@@ -565,8 +560,6 @@ void ADnote::legatonote(LegatoParams lpars)
                     (expf(pars.VoicePar[nvoice].PFMVolume / 127.0f
                           * FM_AMP_MULTIPLIER) - 1.0f) * fmvoldamp * 4.0f;
                 break;
-            //    case PITCH_MOD:NoteVoicePar[nvoice].FMVolume=(pars.VoicePar[nvoice].PFMVolume/127.0f*8.0f)*fmvoldamp;//???????????
-            //	          break;
             default:
                 if(fmvoldamp > 1.0f)
                     fmvoldamp = 1.0f;
@@ -1457,12 +1450,6 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
 }
 
 
-/*Calculeaza Oscilatorul cu PITCH MODULATION*/
-inline void ADnote::ComputeVoiceOscillatorPitchModulation(int /*nvoice*/)
-{
-//TODO
-}
-
 /*
  * Computes the Noise
  */
@@ -1531,7 +1518,6 @@ int ADnote::noteout(float *outl, float *outr)
                     case FREQ_MOD:
                         ComputeVoiceOscillatorFrequencyModulation(nvoice, 1);
                         break;
-                    //case PITCH_MOD:ComputeVoiceOscillatorPitchModulation(nvoice);break;
                     default:
                         ComputeVoiceOscillator_LinearInterpolation(nvoice);
                         //if (config.cfg.Interpolation) ComputeVoiceOscillator_CubicInterpolation(nvoice);

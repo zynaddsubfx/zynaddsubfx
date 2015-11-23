@@ -27,7 +27,7 @@
 #include "PresetsArray.h"
 
 enum FMTYPE {
-    NONE, MORPH, RING_MOD, PHASE_MOD, FREQ_MOD, PITCH_MOD
+    NONE, MORPH, RING_MOD, PHASE_MOD, FREQ_MOD
 };
 
 /*****************************************************************/
