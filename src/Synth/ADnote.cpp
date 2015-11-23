@@ -364,6 +364,8 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars)
         NoteVoicePar[nvoice].FMVoice = pars.VoicePar[nvoice].PFMVoice;
         NoteVoicePar[nvoice].FMFreqEnvelope = NULL;
         NoteVoicePar[nvoice].FMAmpEnvelope  = NULL;
+        NoteVoicePar[nvoice].FMFreqFixed  = pars.VoicePar[nvoice].PFMFixedFreq;
+
 
         //Compute the Voice's modulator volume (incl. damping)
         float fmvoldamp = powf(440.0f / getvoicebasefreq(
@@ -1099,9 +1101,14 @@ void ADnote::computecurrentparameters()
                 if(NoteVoicePar[nvoice].FMFreqEnvelope)
                     FMrelativepitch +=
                         NoteVoicePar[nvoice].FMFreqEnvelope->envout() / 100;
-                FMfreq =
-                    powf(2.0f, FMrelativepitch
-                         / 12.0f) * voicefreq * portamentofreqrap;
+                if (NoteVoicePar[nvoice].FMFreqFixed)
+                    FMfreq =
+                        powf(2.0f, FMrelativepitch
+                             / 12.0f) * 440.0f;
+                else
+                    FMfreq =
+                           powf(2.0f, FMrelativepitch
+                                / 12.0f) * voicefreq * portamentofreqrap;
                 setfreqFM(nvoice, FMfreq);
 
                 FMoldamplitude[nvoice] = FMnewamplitude[nvoice];

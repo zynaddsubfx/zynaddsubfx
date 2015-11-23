@@ -283,6 +283,9 @@ struct ADnoteVoiceParam {
     /* The detune type */
     unsigned char PFMDetuneType;
 
+    /* FM base freq fixed at 440Hz */
+    unsigned char PFMFixedFreq;
+
     /* Frequency Envelope of the Modullator */
     unsigned char   PFMFreqEnvelopeEnabled;
     EnvelopeParams *FMFreqEnvelope;

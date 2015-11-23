@@ -125,6 +125,7 @@ static const Ports voicePorts = {
     rParamI(PFMDetune,               "Modulator Fine Detune"),
     rParamI(PFMCoarseDetune,         "Modulator Coarse Detune"),
     rParamZyn(PFMDetuneType,            "Modulator Detune Magnitude"),
+    rToggle(PFMFixedFreq,            "Modulator Frequency Fixed"),
     rToggle(PFMFreqEnvelopeEnabled,  "Modulator Frequency Envelope"),
     rToggle(PFMAmpEnvelopeEnabled,   "Modulator Amplitude Envelope"),
 
@@ -433,6 +434,7 @@ void ADnoteVoiceParam::defaults()
     PFilterVelocityScale = 0;
     PFilterVelocityScaleFunction = 64;
     PFMEnabled                = 0;
+    PFMFixedFreq              = false;
 
     //I use the internal oscillator (-1)
     PFMVoice = -1;
@@ -716,6 +718,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
 
         xml.addparbool("freq_envelope_enabled",
                         PFMFreqEnvelopeEnabled);
+        xml.addparbool("fixed_freq", PFMFixedFreq);
         if((PFMFreqEnvelopeEnabled != 0) || (!xml.minimal)) {
             xml.beginbranch("FREQUENCY_ENVELOPE");
             FMFreqEnvelope->add2XML(xml);
@@ -944,6 +947,7 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     copy(PFilterEnabled);
     copy(Pfilterbypass);
     copy(PFMEnabled);
+    copy(PFMFixedFreq);
 
     RCopy(OscilSmp);
 
@@ -1173,6 +1177,8 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
 
             PFMFreqEnvelopeEnabled = xml.getparbool("freq_envelope_enabled",
                                                      PFMFreqEnvelopeEnabled);
+            PFMFixedFreq = xml.getparbool("fixed_freq",
+                                                     PFMFixedFreq);
             if(xml.enterbranch("FREQUENCY_ENVELOPE")) {
                 FMFreqEnvelope->getfromXML(xml);
                 xml.exitbranch();

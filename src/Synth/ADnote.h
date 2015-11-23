@@ -234,6 +234,8 @@ class ADnote:public SynthNote
 
             FMTYPE FMEnabled;
 
+            unsigned char FMFreqFixed;
+
             int FMVoice;
 
             // Voice Output used by other voices if use this as modullator
