@@ -710,7 +710,7 @@ cbwidget->do_callback();}
               class Fl_Osc_Choice
             } {}
             Fl_Dial bendadjustdial {
-              label {Bend}
+              label {Bend Adj.}
               tooltip {How the frequency varies according to the pitch wheel} xywh {60 278 15 15} box ROUND_UP_BOX labelsize 10 align 8 maximum 127 step 1
               code0 {o->init("PBendAdjust");}
               class Fl_Osc_Dial
