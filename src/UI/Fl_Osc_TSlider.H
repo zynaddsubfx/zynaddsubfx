@@ -12,7 +12,7 @@ class Fl_Osc_TSlider:public Fl_Osc_Slider
         int handle(int event);
 	void setTransform(float scale = 1.0, float offset = 0.0);
 	float transform(float x);
-        void setRounding(unsigned int digits = 0);
+        void set_rounding(unsigned int digits = 0);
     private:
         class TipWin * tipwin;
         float value_offset;

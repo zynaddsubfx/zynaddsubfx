@@ -12,8 +12,8 @@
 
 WidgetPDial::WidgetPDial(int x, int y, int w, int h, const char *label)
     :Fl_Dial(x, y, w, h, label), reset_value(0), integer_step(true),
-     oldvalue(0.0f), pos(false), textset(false), value_offset(0.0),
-     value_scale(1.0)
+     use_rounding(false),  oldvalue(0.0f), pos(false), textset(false),
+     value_offset(0.0), value_scale(1.0)
 {
     //cout << "[" << label << "] There are now " << ++numobj << endl;
     Fl_Group *save = Fl_Group::current();
@@ -28,9 +28,9 @@ WidgetPDial::~WidgetPDial()
     delete tipwin;
 }
 
-void WidgetPDial::setRounding(unsigned int digits)
+void WidgetPDial::set_rounding(unsigned int digits)
 {
-    tipwin->setRounding(digits);
+    tipwin->set_rounding(digits);
 }
 
 #define MOD_MASK (FL_CTRL | FL_SHIFT)
@@ -55,15 +55,17 @@ int WidgetPDial::handle(int event)
     switch(event) {
         case FL_PUSH:
             mod_state = Fl::event_state() & MOD_MASK;
-            if (integer_step)
-                setRounding(0);
-            else if (mod_state == MOD_MASK)
-                setRounding(5);
-            else if (mod_state == FL_SHIFT)
-                setRounding(4);
-            else
-                setRounding((Fl::event_button3() || mod_state & FL_CTRL)
-                            ? 3 : 2);
+            if (!use_rounding) {
+                if (integer_step)
+                    set_rounding(0);
+                else if (mod_state == MOD_MASK)
+                    set_rounding(5);
+                else if (mod_state == FL_SHIFT)
+                    set_rounding(4);
+                else
+                    set_rounding((Fl::event_button3() || mod_state & FL_CTRL)
+                                 ? 3 : 2);
+            }
             oldvalue = value();
             old_y = Fl::event_y();
         case FL_DRAG:
@@ -73,15 +75,18 @@ int WidgetPDial::handle(int event)
             if (old_mod_state != mod_state) {
                 oldvalue = value();
                 old_y = Fl::event_y();
-                if (integer_step)
-                    setRounding(0);
-                else if (mod_state == MOD_MASK)
-                    setRounding(5);
-                else if (mod_state == FL_SHIFT)
-                    setRounding(4);
-                else
-                    setRounding((Fl::event_button3() || mod_state & FL_CTRL)
-                                ? 3 : 2);
+                if (!use_rounding) {
+                    if (integer_step)
+                        set_rounding(0);
+                    else if (mod_state == MOD_MASK)
+                        set_rounding(5);
+                    else if (mod_state == FL_SHIFT)
+                        set_rounding(4);
+                    else
+                        set_rounding((Fl::event_button3() ||
+                                      mod_state & FL_CTRL)
+                                     ? 3 : 2);
+                }
                 break;
             }
             dy = old_y - Fl::event_y();
@@ -109,7 +114,7 @@ int WidgetPDial::handle(int event)
             dy = - Fl::event_dy();
 
             if (integer_step) {
-                setRounding(0);
+                if (!use_rounding) set_rounding(0);
                 result = (int)(value() +
                                dy * ((Fl::event_ctrl() ||
                                       Fl::event_shift()) ? 1 : 8));
@@ -117,16 +122,16 @@ int WidgetPDial::handle(int event)
                 float dragsize;
                 if (mod_state == MOD_MASK) {
                     dragsize = 100000.0;
-                    setRounding(5);
+                    if (!use_rounding) set_rounding(5);
                 } else if (mod_state == FL_SHIFT) {
                     dragsize = 10000.0;
-                    setRounding(4);
+                    if (!use_rounding) set_rounding(4);
                 } else if (mod_state == FL_CTRL) {
                     dragsize = 1000.0;
-                    setRounding(3);
+                    if (!use_rounding) set_rounding(3);
                 } else {
                     dragsize = 100.0;
-                    setRounding(2);
+                    if (!use_rounding) set_rounding(2);
                 }
                 result = value() + dy / dragsize * (max - min);
             }
@@ -254,6 +259,7 @@ void WidgetPDial::set_transform(float scale, float offset)
 {
     value_offset = offset;
     value_scale = scale;
+    use_rounding = true;
 }
 
 float WidgetPDial::transform(float x)

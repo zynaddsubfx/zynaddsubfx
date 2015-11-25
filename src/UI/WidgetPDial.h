@@ -17,10 +17,11 @@ class WidgetPDial:public Fl_Dial
         void tooltip(const char *c);
 	void set_transform(float scale = 1.0, float offset = 0.0);
 	float transform(float x);
-        void setRounding(unsigned int digits = 0);
+        void set_rounding(unsigned int digits = 0);
         float reset_value;
     protected:
         bool integer_step;
+        bool use_rounding;
     private:
         void getPos();
         void resetPos();

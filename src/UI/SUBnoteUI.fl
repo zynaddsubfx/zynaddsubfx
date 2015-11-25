@@ -164,19 +164,19 @@ class SUBnoteUI {open : {public PresetsUI_}
         Fl_Value_Slider vol {
           label Vol
           tooltip Volume xywh {10 25 140 15} type {Horz Knob} box NO_BOX labelsize 11 align 8 maximum 127 step 1
-          code0 {o->init("PVolume");}
+          code0 {o->init("PVolume");o->reset_value=96;}
           class Fl_Osc_VSlider
         }
         Fl_Value_Slider vsns {
           label {V.Sns}
           tooltip {Velocity Sensing Function (rightmost to disable)} xywh {10 45 140 15} type {Horz Knob} box NO_BOX labelsize 11 align 8 maximum 127 step 1
-          code0 {o->init("PAmpVelocityScaleFunction");}
+          code0 {o->init("PAmpVelocityScaleFunction");o->reset_value=90;}
           class Fl_Osc_VSlider
         }
         Fl_Dial pan {
           label Pan
           tooltip {Panning (leftmost is Random)} xywh {185 20 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
-          code0 {o->init("PPanning");}
+          code0 {o->init("PPanning");o->reset_value=64;}
           class Fl_Osc_Dial
         }
         Fl_Group ampenv {
@@ -289,8 +289,8 @@ freqsettingsui->redraw();}
         }
         Fl_Dial bendadjdial {
           label {Bend Adj.}
-          tooltip {How the frequency varies according to the pitch wheel} xywh {448 53 15 15} box ROUND_UP_BOX labelsize 10 align 8 maximum 127 step 1
-          code0 {o->init("PBendAdjust");}
+          tooltip {How the frequency varies according to the pitch wheel} xywh {448 53 15 15} box ROUND_UP_BOX labelsize 10 align 8 minimum -64 maximum 63 step 1
+          code0 {o->init("PBendAdjust"); o->reset_value=24;o->set_transform(1.0/24, 0);o->set_rounding(2);}
           class Fl_Osc_Dial
         }
         Fl_Check_Button hz440 {
@@ -358,7 +358,7 @@ bandwidthsettingsui->redraw();}
         Fl_Value_Slider bandwidth {
           label {Band Width}
           xywh {225 40 115 15} type {Horz Knob} box NO_BOX labelsize 10 align 1 maximum 127 step 1
-          code0 {o->init("Pbandwidth");}
+          code0 {o->init("Pbandwidth");o->reset_value=40;}
           class Fl_Osc_VSlider
         }
         Fl_Value_Slider bwidthscale {

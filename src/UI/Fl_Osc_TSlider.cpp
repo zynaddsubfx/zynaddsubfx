@@ -11,7 +11,7 @@ Fl_Osc_TSlider::Fl_Osc_TSlider(int x, int y, int w, int h, const char *label)
     tipwin = new TipWin();
     tipwin->hide();
     Fl_Group::current(save);
-    tipwin->setRounding();
+    tipwin->set_rounding();
 }
 
 Fl_Osc_TSlider::~Fl_Osc_TSlider()
@@ -20,9 +20,9 @@ Fl_Osc_TSlider::~Fl_Osc_TSlider()
         delete tipwin;
 }
 
-void Fl_Osc_TSlider::setRounding(unsigned int digits)
+void Fl_Osc_TSlider::set_rounding(unsigned int digits)
 {
-    tipwin->setRounding(digits);
+    tipwin->set_rounding(digits);
 }
 
 
