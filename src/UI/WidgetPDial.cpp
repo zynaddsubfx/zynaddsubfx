@@ -85,6 +85,8 @@ int WidgetPDial::handle(int event)
                 break;
             }
             dy = old_y - Fl::event_y();
+            if (dy < -1 || dy > 1)
+                Fl::event_clicks(0);
 
             if (!integer_step && mod_state == MOD_MASK)
                 dragsize = 200000.0f;

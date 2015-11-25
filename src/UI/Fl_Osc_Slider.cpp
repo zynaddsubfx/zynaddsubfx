@@ -185,6 +185,8 @@ int Fl_Osc_Slider::handle(int ev, int X, int Y, int W, int H)
 
             int delta = (horizontal() ? Fl::event_x() : Fl::event_y())
                 - start_pos;
+            if (delta < -1 || delta > 1)
+                Fl::event_clicks(0);
             float new_value;
             if (slow_state == 1) {
                 new_value = old_value + delta / denominator;
