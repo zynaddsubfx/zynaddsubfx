@@ -258,7 +258,7 @@ static const Ports globalPorts = {
 
 
     //Resonance
-    rParamZyn(Hrandgrouping, "How randomness is applied to multiple voices using the same oscil"),
+    rToggle(Hrandgrouping, "How randomness is applied to multiple voices using the same oscil"),
 
     //weird stuff for PCoarseDetune
     {"detunevalue:", rMap(unit,cents) rDoc("Get detune in cents"), NULL,
