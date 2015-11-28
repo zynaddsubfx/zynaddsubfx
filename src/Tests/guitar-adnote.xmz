@@ -268,6 +268,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <FREQUENCY_PARAMETERS>
 <par_bool name="fixed_freq" value="no" />
 <par name="fixed_freq_et" value="0" />
+<par name="bend_adjust" value="88" />
 <par name="detune" value="12040" />
 <par name="coarse_detune" value="0" />
 <par name="detune_type" value="0" />
@@ -367,6 +368,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="coarse_detune" value="2048" />
 <par name="detune_type" value="2" />
 <par_bool name="freq_envelope_enabled" value="yes" />
+<par_bool name="fixed_freq" value="no" />
 <FREQUENCY_ENVELOPE>
 <par_bool name="free_mode" value="no" />
 <par name="env_points" value="3" />
@@ -485,6 +487,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <FREQUENCY_PARAMETERS>
 <par_bool name="fixed_freq" value="no" />
 <par name="fixed_freq_et" value="0" />
+<par name="bend_adjust" value="88" />
 <par name="detune" value="7902" />
 <par name="coarse_detune" value="0" />
 <par name="detune_type" value="0" />
@@ -568,6 +571,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <FREQUENCY_PARAMETERS>
 <par_bool name="fixed_freq" value="no" />
 <par name="fixed_freq_et" value="0" />
+<par name="bend_adjust" value="88" />
 <par name="detune" value="8192" />
 <par name="coarse_detune" value="0" />
 <par name="detune_type" value="0" />
@@ -674,6 +678,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <FREQUENCY_PARAMETERS>
 <par_bool name="fixed_freq" value="no" />
 <par name="fixed_freq_et" value="0" />
+<par name="bend_adjust" value="88" />
 <par name="detune" value="8192" />
 <par name="coarse_detune" value="0" />
 <par name="detune_type" value="0" />
@@ -997,6 +1002,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <FREQUENCY_PARAMETERS>
 <par_bool name="fixed_freq" value="no" />
 <par name="fixed_freq_et" value="103" />
+<par name="bend_adjust" value="88" />
 <par name="detune" value="8192" />
 <par name="coarse_detune" value="0" />
 <par name="overtone_spread_type" value="0" />
@@ -3356,6 +3362,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <FREQUENCY_PARAMETERS>
 <par name="fixed_freq" value="0" />
 <par name="fixed_freq_et" value="0" />
+<par name="bend_adjust" value="88" />
 <par name="detune" value="8192" />
 <par name="coarse_detune" value="0" />
 <par name="detune_type" value="1" />
