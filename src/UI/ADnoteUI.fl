@@ -214,6 +214,7 @@ else
         case 0:
 	    whitenoiselabel->hide();
 	    pinknoiselabel->hide();
+	    oscil->Overlay = NULL;
 	    voiceresonanceenabled->activate();
 	    detunevalueoutput->activate();
 	    voicedetune->activate();
@@ -223,10 +224,12 @@ else
 	case 1:
             whitenoiselabel->show();
             pinknoiselabel->hide();
+	    oscil->Overlay = whitenoiselabel;
 	    break;
 	default:
             pinknoiselabel->show();
             whitenoiselabel->hide();
+	    oscil->Overlay = pinknoiselabel;
     }
 
     voiceresonanceenabled->deactivate();
@@ -820,9 +823,9 @@ o->redraw();}
         } {}
         Fl_Choice {} {
           callback {switch (o->value()) {
-  case 0: voicemodegroup->activate(); whitenoiselabel->hide(); pinknoiselabel->hide(); break;
-  case 1: voicemodegroup->deactivate(); whitenoiselabel->show(); pinknoiselabel->hide(); break;
-  default: voicemodegroup->deactivate(); whitenoiselabel->hide(); pinknoiselabel->show(); break;
+  case 0: voicemodegroup->activate(); whitenoiselabel->hide(); pinknoiselabel->hide(); osc->Overlay=NULL; break;
+  case 1: voicemodegroup->deactivate(); whitenoiselabel->show(); pinknoiselabel->hide(); osc->Overlay=whitenoiselabel; break;
+  default: voicemodegroup->deactivate(); whitenoiselabel->hide(); pinknoiselabel->show(); osc->Overlay=pinknoiselabel; break;
 }} open
           tooltip {Oscillator Type (sound/noise)} xywh {5 515 65 20} down_box BORDER_BOX labelsize 10 textfont 1 textsize 10
           code0 {o->init("Type");}
