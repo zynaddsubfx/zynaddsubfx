@@ -105,7 +105,6 @@ class ADnote:public SynthNote
         /**Fadein in a way that removes clicks but keep sound "punchy"*/
         inline void fadein(float *smps) const;
 
-
         //GLOBALS
         ADnoteParameters &pars;
         unsigned char     stereo; //if the note is stereo (allows note Panning)
@@ -186,6 +185,9 @@ class ADnote:public SynthNote
 
             /* Waveform of the Voice */
             float *OscilSmp;
+
+            /* preserved for phase mod PWM emulation. */
+            int phase_offset;
 
             /* Range of waveform */
             float OscilSmpMin, OscilSmpMax;
