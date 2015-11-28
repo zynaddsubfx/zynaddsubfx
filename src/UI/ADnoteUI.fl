@@ -834,11 +834,11 @@ o->redraw();}
           }
           MenuItem {} {
             label White
-            xywh {15 15 100 20} labelfont 1 labelsize 11 labelcolor 19
+            xywh {15 15 100 20} labelfont 1 labelsize 11
           }
           MenuItem {} {
             label Pink
-            xywh {25 25 100 20} labelfont 1 labelsize 11 labelcolor 212
+            xywh {25 25 100 20} labelfont 1 labelsize 11
           }
         }
         Fl_Check_Button bypassfiltercheckbutton {
