@@ -834,7 +834,7 @@ o->redraw();}
           }
           MenuItem {} {
             label White
-            xywh {15 15 100 20} labelfont 1 labelsize 11 labelcolor 55
+            xywh {15 15 100 20} labelfont 1 labelsize 11 labelcolor 19
           }
           MenuItem {} {
             label Pink
