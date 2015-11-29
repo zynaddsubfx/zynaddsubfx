@@ -94,32 +94,32 @@ class MessageTest:public CxxTest::TestSuite
             ms->applyOscEvent(ms->uToB->read());
             TS_ASSERT(!ms->uToB->hasNext());
 
-            ms->part[0]->kit[0].adpars->VoicePar[0].FMSmp->Pbasefuncpar = 32;
+	    auto &osc_src = *ms->part[0]->kit[0].adpars->VoicePar[0].FMSmp;
+            auto &osc_dst = *ms->part[0]->kit[0].padpars->oscilgen;
+            auto &osc_oth = *ms->part[0]->kit[0].adpars->VoicePar[1].OscilSmp;
 
-            int do_exit = 0;
-            std::thread t([&do_exit,this](){
-                    int tries = 0;
-                    while(tries < 10000 && do_exit == 0) {
-                        if(!ms->uToB->hasNext()) {
-                            usleep(500);
-                            continue;
-                        }
-                        const char *msg = ms->uToB->read();
-                        printf("RT: handling <%s>\n", msg);
-                        ms->applyOscEvent(msg);
-                    }});
+	    TS_ASSERT_EQUALS(osc_src.Pbasefuncpar, 64);
+            osc_src.Pbasefuncpar = 32;
+	    TS_ASSERT_EQUALS(osc_src.Pbasefuncpar, 32);
 
             //Copy From ADsynth modulator
             printf("====Copy From ADsynth modulator\n");
+	    start_realtime();
             mw->transmitMsg("/presets/copy", "s", "/part0/kit0/adpars/VoicePar0/FMSmp/");
 
-            TS_ASSERT(ms->part[0]->kit[0].padpars->oscilgen->Pbasefuncpar != 32);
+            TS_ASSERT_EQUALS(osc_dst.Pbasefuncpar, 64);
+            TS_ASSERT_EQUALS(osc_oth.Pbasefuncpar, 64);
+
             //Paste to PADsynth
             printf("====Paste to PADsynth\n");
             mw->transmitMsg("/presets/paste", "s", "/part0/kit0/padpars/oscilgen/");
-            do_exit = 1;
-            t.join();
-            TS_ASSERT_EQUALS(ms->part[0]->kit[0].padpars->oscilgen->Pbasefuncpar, 32);
+
+	    printf("====Paste to ADsynth\n");
+            mw->transmitMsg("/presets/paste", "s", "/part0/kit0/adpars/VoicePar1/OscilSmp/");
+
+	    stop_realtime();
+            TS_ASSERT_EQUALS(osc_dst.Pbasefuncpar, 32);
+            TS_ASSERT_EQUALS(osc_oth.Pbasefuncpar, 32);
         }
 
 
