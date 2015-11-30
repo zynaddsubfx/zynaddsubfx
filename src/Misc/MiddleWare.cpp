@@ -19,6 +19,7 @@
 #include <map>
 
 #include "Util.h"
+#include "CallbackRepeater.h"
 #include "Master.h"
 #include "Part.h"
 #include "PresetExtractor.h"
@@ -589,14 +590,18 @@ public:
     {
         if(server)
             while(lo_server_recv_noblock(server, 0));
+
         while(bToU->hasNext()) {
             const char *rtmsg = bToU->read();
             bToUhandle(rtmsg);
         }
+
         while(auto *m = multi_thread_source.read()) {
             handleMsg(m->memory);
             multi_thread_source.free(m);
         }
+
+        autoSave.tick();
     }
 
 
@@ -672,6 +677,8 @@ public:
     const SYNTH_T synth;
 
     PresetsStore presetsstore;
+
+    CallbackRepeater autoSave;
 };
 
 /*****************************************************************************
@@ -1105,7 +1112,11 @@ static rtosc::Ports middlewareReplyPorts = {
 MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
     Config* config, int preferrred_port)
     :parent(mw), config(config), ui(nullptr), synth(std::move(synth_)),
-    presetsstore(*config)
+    presetsstore(*config), autoSave(60, [this]() {
+            auto master = this->master;
+            this->doReadOnlyOp([master](){
+                int res = master->saveXML("/tmp/autosave.xmz");
+                (void)res;});})
 {
     bToU = new rtosc::ThreadLink(4096*2,1024);
     uToB = new rtosc::ThreadLink(4096*2,1024);
