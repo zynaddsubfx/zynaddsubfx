@@ -428,10 +428,13 @@ target_link_libraries(zynaddsubfx
 
 if (DssiEnable)
 	add_library(zynaddsubfx_dssi SHARED
-        UI/ConnectionDummy.cpp
-		Output/DSSIaudiooutput.cpp
-		globals.cpp
-		)
+			UI/ConnectionDummy.cpp
+			Output/DSSIaudiooutput.cpp
+			globals.cpp
+			Output/DSSIControl.cpp
+			Output/DSSIControl.h
+			Output/DSSIControlDescription.cpp
+			Output/DSSIControlDescription.h)
 
 	target_link_libraries(zynaddsubfx_dssi
         zynaddsubfx_core
