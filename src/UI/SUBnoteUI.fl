@@ -107,11 +107,11 @@ harmonic->show();
 mag->reset_value=127;
 mag->ext = "Phmag" + to_s(n);
 mag->oscRegister(mag->ext.c_str());
-mag->setTransform(-1, 127);
+mag->set_transform([](float x){return 127.0f - x;});
 bw->reset_value=63;
 bw->ext = "Phrelbw" + to_s(n);
 bw->oscRegister(bw->ext.c_str());
-bw->setTransform(-1, 63);
+bw->set_transform([](float x){return 63.0f - x;});
 osc->requestValue(base+"Phrelbw"+to_s(n));
 
 end();} {}
@@ -290,7 +290,7 @@ freqsettingsui->redraw();}
         Fl_Dial bendadjdial {
           label Bend
           tooltip {How the frequency varies according to the pitch wheel} xywh {448 53 15 15} box ROUND_UP_BOX labelsize 10 align 8 minimum -64 maximum 63 step 1
-          code0 {o->init("PBendAdjust"); o->reset_value=24;o->set_transform(1.0/24, 0);o->set_rounding(2);}
+          code0 {o->init("PBendAdjust"); o->reset_value=24;o->set_transform([](float x){return x/24.0f;});o->set_rounding(2);}
           class Fl_Osc_Dial
         }
         Fl_Check_Button hz440 {

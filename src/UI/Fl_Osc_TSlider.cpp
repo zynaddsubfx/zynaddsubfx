@@ -3,9 +3,13 @@
 //Copyright (c) 2015 Christopher Oliver
 //License: GNU GPL version 2 or later
 
+static float identity(float value)
+{
+    return value;
+}
 
 Fl_Osc_TSlider::Fl_Osc_TSlider(int x, int y, int w, int h, const char *label)
-    :Fl_Osc_Slider(x, y, w, h, label), value_offset(0.0), value_scale(1.0)
+    :Fl_Osc_Slider(x, y, w, h, label), transform(identity)
 {
     Fl_Group *save = Fl_Group::current();
     tipwin = new TipWin();
@@ -53,13 +57,7 @@ int Fl_Osc_TSlider::handle(int event)
     return super;
 }
 
-void Fl_Osc_TSlider::setTransform(float scale, float offset)
+void Fl_Osc_TSlider::set_transform(float (*transformer)(float))
 {
-    value_offset = offset;
-    value_scale = scale;
-}
-
-float Fl_Osc_TSlider::transform(float x)
-{
-    return value_scale * x + value_offset;
+    transform = transformer;
 }

@@ -195,12 +195,12 @@ make_window();
 mag->osc = osc;
 mag->loc = loc;
 mag->reset_value = 63;
-mag->setTransform(-1, 63);
+mag->set_transform([](float x){return 63.0f - x;});
 phase->osc = osc;
 phase->loc = loc;
 phase->reset_value = 64;
 phase->set_rounding(1);
-phase->setTransform(-180.0/64, 180.0);
+phase->set_transform([](float x){return 180*(1 - x/64.0f);});
 
 osc->createLink(loc+"magnitude"+to_s(n), mag);
 osc->createLink(loc+"phase"+to_s(n), phase);

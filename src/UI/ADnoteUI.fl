@@ -89,7 +89,7 @@ class PhaseSlider {: {public Fl_Osc_TSlider}
   } { code {
   set_rounding(1);
   reset_value=0;
-  setTransform(180.0/64, 0);
+  set_transform([](float x){return 180.0f*x/64.0f;});
   } {}}
   Function {set_scope(Fl_Oscilloscope *newscope)} {
   } { code { oscope = newscope; } {} }
@@ -572,7 +572,7 @@ o->redraw();}
             Fl_Dial bendadjdial {
               label Bend
               tooltip {How the frequency varies according to the pitch wheel} xywh {64 270 15 15} box ROUND_UP_BOX labelsize 10 align 8 minimum -64 maximum 63 step 1
-              code0 {o->init("PBendAdjust");o->reset_value=24;o->set_transform(1.0/24, 0);o->set_rounding(2);}
+              code0 {o->init("PBendAdjust");o->reset_value=24;o->set_transform([](float x){return x/24.0f;});o->set_rounding(2);}
               class Fl_Osc_Dial
             }
             Fl_Slider {} {

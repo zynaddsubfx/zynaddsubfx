@@ -712,7 +712,7 @@ cbwidget->do_callback();}
             Fl_Dial bendadjustdial {
               label Bend
               tooltip {How the frequency varies according to the pitch wheel} xywh {60 278 15 15} box ROUND_UP_BOX labelsize 10 align 8 minimum -64 maximum 63 step 1
-              code0 {o->init("PBendAdjust");o->reset_value=24;o->set_transform(1.0/24, 0);o->set_rounding(2);}
+              code0 {o->init("PBendAdjust");o->reset_value=24;o->set_transform([](float x){return x/24.0f;});o->set_rounding(2);}
               class Fl_Osc_Dial
             }
             Fl_Check_Button hz440 {
