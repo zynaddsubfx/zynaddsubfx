@@ -571,7 +571,7 @@ o->redraw();}
             }
             Fl_Dial bendadjdial {
               label Bend
-              tooltip {How the frequency varies according to the pitch wheel} xywh {64 270 15 15} box ROUND_UP_BOX labelsize 10 align 8 minimum -64 maximum 63 step 1
+              tooltip {How the frequency varies according to the pitch wheel} xywh {60 270 15 15} box ROUND_UP_BOX labelsize 10 align 8 minimum -64 maximum 63 step 1
               code0 {o->init("PBendAdjust");o->reset_value=24;o->set_transform([](float x){return x/24.0f;});o->set_rounding(2);}
               class Fl_Osc_Dial
             }
