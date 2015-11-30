@@ -69,7 +69,7 @@ void PADnote::setup(float freq,
     else
         BendAdjust = BendAdj / 24.0f;
     float offset_val = (pars.POffsetHz - 64)/64.0f;
-    OffsetHz = 25.0f*(offset_val * sqrtf(fabsf(offset_val)));
+    OffsetHz = 15.0f*(offset_val * sqrtf(fabsf(offset_val)));
     firsttime = true;
     realfreq  = basefreq;
     if(!legato)

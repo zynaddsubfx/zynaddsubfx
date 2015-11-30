@@ -113,7 +113,7 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars)
 
         float offset_val = (pars.VoicePar[nvoice].POffsetHz - 64)/64.0f;
         NoteVoicePar[nvoice].OffsetHz =
-            25.0f*(offset_val * sqrtf(fabsf(offset_val)));
+            15.0f*(offset_val * sqrtf(fabsf(offset_val)));
 
         unison_stereo_spread[nvoice] =
             pars.VoicePar[nvoice].Unison_stereo_spread / 127.0f;

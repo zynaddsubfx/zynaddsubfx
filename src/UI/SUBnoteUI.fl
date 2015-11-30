@@ -296,7 +296,7 @@ freqsettingsui->redraw();}
         Fl_Dial offsethzdial {
           label Offset
           tooltip {Offset of frequency in Hz} xywh {500 53 15 15} box ROUND_UP_BOX labelsize 10 align 8 minimum -64 maximum 63 step 1
-          code0 {o->init("POffsetHz"); o->set_rounding(2); o->set_transform([](float x){x/=64; return 25*(x*sqrtf(fabsf(x)));});}
+          code0 {o->init("POffsetHz"); o->set_rounding(2); o->set_transform([](float x){x/=64; return 15*(x*sqrtf(fabsf(x)));});}
           class Fl_Osc_Dial
         }
         Fl_Check_Button hz440 {
