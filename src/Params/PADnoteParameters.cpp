@@ -234,6 +234,8 @@ static const rtosc::Ports non_realtime_ports =
             d.reply(d.loc, "b", n*sizeof(float), tmp);
             d.reply(d.loc, "i", realbw);
             delete[] tmp;}},
+    {"needPrepare:", rDoc("Unimplemented Stub"),
+        NULL, [](const char *, rtosc::RtData&) {}},
 };
 
 const rtosc::Ports &PADnoteParameters::non_realtime_ports = ::non_realtime_ports;
