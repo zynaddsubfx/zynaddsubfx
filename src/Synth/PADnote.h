@@ -53,6 +53,7 @@ class PADnote:public SynthNote
 
         float basefreq;
         float BendAdjust;
+        float OffsetHz;
         bool  firsttime;
 
         int nsample, portamento;

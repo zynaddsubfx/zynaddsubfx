@@ -192,6 +192,9 @@ struct ADnoteVoiceParam {
     /** Pitch bend adjustment */
     unsigned char PBendAdjust;
 
+    /** Pitch offset Hz */
+    unsigned char POffsetHz;
+
     /* Frequency Envelope */
     unsigned char   PFreqEnvelopeEnabled;
     EnvelopeParams *FreqEnvelope;

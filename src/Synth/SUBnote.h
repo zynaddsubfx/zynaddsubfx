@@ -60,6 +60,7 @@ class SUBnote:public SynthNote
         int       start; //how the harmonics start
         float     basefreq;
         float     BendAdjust;
+        float     OffsetHz;
         float     panning;
         Envelope *AmpEnvelope;
         Envelope *FreqEnvelope;

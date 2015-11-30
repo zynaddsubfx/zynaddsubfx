@@ -83,6 +83,8 @@ void SUBnote::setup(float freq,
         BendAdjust = BendAdj / 24;
     else
         BendAdjust = BendAdj / 24.0f;
+    float offset_val = (pars.POffsetHz - 64)/64.0f;
+    OffsetHz = 25.0f*(offset_val * sqrtf(fabsf(offset_val)));
     float detune = getdetune(pars.PDetuneType,
                              pars.PCoarseDetune,
                              pars.PDetune);
@@ -183,9 +185,11 @@ void SUBnote::setup(float freq,
             float amp = 1.0f;
             if(nph == 0)
                 amp = gain;
-            initfilter(lfilter[nph + n * numstages], freq, bw, amp, hgain);
+            initfilter(lfilter[nph + n * numstages], freq + OffsetHz, bw,
+                       amp, hgain);
             if(stereo)
-                initfilter(rfilter[nph + n * numstages], freq, bw, amp, hgain);
+                initfilter(rfilter[nph + n * numstages], freq + OffsetHz, bw,
+                           amp, hgain);
         }
     }
 

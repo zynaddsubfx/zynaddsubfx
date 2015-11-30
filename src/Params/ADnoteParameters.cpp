@@ -94,6 +94,7 @@ static const Ports voicePorts = {
     rToggle(Pfixedfreq,           "If frequency is fixed"),
     rParamZyn(PfixedfreqET,          "Equal Tempermant Parameter"),
     rParamZyn(PBendAdjust,          "Pitch bend adjustment"),
+    rParamZyn(POffsetHz,          "Voice constant offset"),
     rParamI(PDetune,              "Fine Detune"),
     rParamI(PCoarseDetune,        "Coarse Detune"),
     rParamZyn(PDetuneType,           "Magnitude of Detune"),
@@ -412,6 +413,7 @@ void ADnoteVoiceParam::defaults()
     Pfixedfreq    = 0;
     PfixedfreqET  = 0;
     PBendAdjust = 88; // 64 + 24
+    POffsetHz     = 64;
     Presonance    = 1;
     Pfilterbypass = 0;
     Pextoscil     = -1;
@@ -651,6 +653,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
     xml.addparbool("fixed_freq", Pfixedfreq);
     xml.addpar("fixed_freq_et", PfixedfreqET);
     xml.addpar("bend_adjust", PBendAdjust);
+    xml.addpar("offset_hz", POffsetHz);
     xml.addpar("detune", PDetune);
     xml.addpar("coarse_detune", PCoarseDetune);
     xml.addpar("detune_type", PDetuneType);
@@ -973,6 +976,7 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     copy(PCoarseDetune);
     copy(PDetuneType);
     copy(PBendAdjust);
+    copy(POffsetHz);
     copy(PFreqEnvelopeEnabled);
 
     RCopy(FreqEnvelope);
@@ -1111,6 +1115,7 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
         Pfixedfreq    = xml.getparbool("fixed_freq", Pfixedfreq);
         PfixedfreqET  = xml.getpar127("fixed_freq_et", PfixedfreqET);
         PBendAdjust  = xml.getpar127("bend_adjust", PBendAdjust);
+        POffsetHz  = xml.getpar127("offset_hz", POffsetHz);
         PDetune       = xml.getpar("detune", PDetune, 0, 16383);
         PCoarseDetune = xml.getpar("coarse_detune", PCoarseDetune, 0, 16383);
         PDetuneType   = xml.getpar127("detune_type", PDetuneType);

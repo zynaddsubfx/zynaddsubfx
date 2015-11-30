@@ -575,6 +575,12 @@ o->redraw();}
               code0 {o->init("PBendAdjust");o->reset_value=24;o->set_transform([](float x){return x/24.0f;});o->set_rounding(2);}
               class Fl_Osc_Dial
             }
+            Fl_Dial offsethzdial {
+              label Offset
+              tooltip {Offset of frequency in Hz} xywh {110 270 15 15} box ROUND_UP_BOX labelsize 10 align 8 minimum -64 maximum 63 step 1
+              code0 {o->init("POffsetHz"); o->set_rounding(2); o->set_transform([](float x){x/=64; return 25*(x*sqrtf(fabsf(x)));});}
+              class Fl_Osc_Dial
+            }
             Fl_Slider {} {
               callback {detunevalueoutput->update();}
               tooltip {Fine Detune (cents)} xywh {58 287 392 13} type {Horz Knob} box NO_BOX minimum -8192 maximum 8191 step 1

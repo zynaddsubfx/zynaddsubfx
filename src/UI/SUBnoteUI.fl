@@ -293,6 +293,12 @@ freqsettingsui->redraw();}
           code0 {o->init("PBendAdjust"); o->reset_value=24;o->set_transform([](float x){return x/24.0f;});o->set_rounding(2);}
           class Fl_Osc_Dial
         }
+        Fl_Dial offsethzdial {
+          label Offset
+          tooltip {Offset of frequency in Hz} xywh {500 53 15 15} box ROUND_UP_BOX labelsize 10 align 8 minimum -64 maximum 63 step 1
+          code0 {o->init("POffsetHz"); o->set_rounding(2); o->set_transform([](float x){x/=64; return 25*(x*sqrtf(fabsf(x)));});}
+          class Fl_Osc_Dial
+        }
         Fl_Check_Button hz440 {
           label 440Hz
           callback {if (o->value()==0) fixedfreqetdial->deactivate();

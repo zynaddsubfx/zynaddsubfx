@@ -111,6 +111,10 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars)
         else
             NoteVoicePar[nvoice].BendAdjust = BendAdj / 24.0f;
 
+        float offset_val = (pars.VoicePar[nvoice].POffsetHz - 64)/64.0f;
+        NoteVoicePar[nvoice].OffsetHz =
+            25.0f*(offset_val * sqrtf(fabsf(offset_val)));
+
         unison_stereo_spread[nvoice] =
             pars.VoicePar[nvoice].Unison_stereo_spread / 127.0f;
 
@@ -1134,7 +1138,7 @@ void ADnote::computecurrentparameters()
                         * powf(2, (voicepitch + globalpitch) / 12.0f);                //Hz frequency
             voicefreq *=
                 powf(ctl.pitchwheel.relfreq, NoteVoicePar[nvoice].BendAdjust); //change the frequency by the controller
-            setfreq(nvoice, voicefreq * portamentofreqrap);
+            setfreq(nvoice, voicefreq * portamentofreqrap + NoteVoicePar[nvoice].OffsetHz);
 
             /***************/
             /*  Modulator */

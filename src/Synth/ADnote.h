@@ -204,6 +204,8 @@ class ADnote:public SynthNote
             // Bend adjustment
             float BendAdjust;
 
+            float OffsetHz;
+
             Envelope *FreqEnvelope;
             LFO      *FreqLfo;
 

@@ -269,6 +269,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="fixed_freq" value="no" />
 <par name="fixed_freq_et" value="0" />
 <par name="bend_adjust" value="88" />
+<par name="offset_hz" value="64" />
 <par name="detune" value="12040" />
 <par name="coarse_detune" value="0" />
 <par name="detune_type" value="0" />
@@ -488,6 +489,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="fixed_freq" value="no" />
 <par name="fixed_freq_et" value="0" />
 <par name="bend_adjust" value="88" />
+<par name="offset_hz" value="64" />
 <par name="detune" value="7902" />
 <par name="coarse_detune" value="0" />
 <par name="detune_type" value="0" />
@@ -572,6 +574,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="fixed_freq" value="no" />
 <par name="fixed_freq_et" value="0" />
 <par name="bend_adjust" value="88" />
+<par name="offset_hz" value="64" />
 <par name="detune" value="8192" />
 <par name="coarse_detune" value="0" />
 <par name="detune_type" value="0" />
@@ -679,6 +682,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="fixed_freq" value="no" />
 <par name="fixed_freq_et" value="0" />
 <par name="bend_adjust" value="88" />
+<par name="offset_hz" value="64" />
 <par name="detune" value="8192" />
 <par name="coarse_detune" value="0" />
 <par name="detune_type" value="0" />
@@ -1003,6 +1007,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="fixed_freq" value="no" />
 <par name="fixed_freq_et" value="103" />
 <par name="bend_adjust" value="88" />
+<par name="offset_hz" value="64" />
 <par name="detune" value="8192" />
 <par name="coarse_detune" value="0" />
 <par name="overtone_spread_type" value="0" />
@@ -3363,6 +3368,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="fixed_freq" value="0" />
 <par name="fixed_freq_et" value="0" />
 <par name="bend_adjust" value="88" />
+<par name="offset_hz" value="64" />
 <par name="detune" value="8192" />
 <par name="coarse_detune" value="0" />
 <par name="detune_type" value="1" />
