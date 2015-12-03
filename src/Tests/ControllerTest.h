@@ -23,6 +23,8 @@
 #include <iostream>
 #include "../Params/Controller.h"
 #include "../globals.h"
+#include "../Misc/Time.h"
+
 SYNTH_T *synth;
 
 class ControllerTest:public CxxTest::TestSuite
@@ -30,7 +32,8 @@ class ControllerTest:public CxxTest::TestSuite
     public:
         void setUp() {
             synth   = new SYNTH_T;
-            testCtl = new Controller(*synth);
+            AbsTime time(*synth);
+            testCtl = new Controller(*synth, &time);
         }
 
         void tearDown() {

@@ -30,10 +30,11 @@
 class FilterParams:public PresetsArray
 {
     public:
-        FilterParams();
+        FilterParams(const AbsTime *time_ = nullptr);
         FilterParams(unsigned char Ptype_,
                      unsigned char Pfreq,
-                     unsigned char Pq_);
+                     unsigned char Pq_,
+                     const AbsTime *time_ = nullptr);
         ~FilterParams();
 
         void add2XML(XMLwrapper& xml);
@@ -69,7 +70,13 @@ class FilterParams:public PresetsArray
         struct Pvowels_t {
             struct formants_t {
                 unsigned char freq, amp, q; //frequency,amplitude,Q
+
+                const AbsTime *time;
+                int64_t last_update_timestamp;
             } formants[FF_MAX_FORMANTS];
+
+            const AbsTime *time;
+            int64_t last_update_timestamp;
         } Pvowels[FF_MAX_VOWELS];
 
 
@@ -93,6 +100,9 @@ class FilterParams:public PresetsArray
 
 
         bool changed;
+
+        const AbsTime *time;
+        int64_t last_update_timestamp;
 
         static const rtosc::Ports ports;
     private:

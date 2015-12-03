@@ -78,7 +78,7 @@ class PadNoteTest:public CxxTest::TestSuite
 
             fft = new FFTwrapper(synth->oscilsize);
             //prepare the default settings
-            pars = new PADnoteParameters(*synth, fft);
+            pars = new PADnoteParameters(*synth, fft, time);
 
 
             //Assert defaults
@@ -106,7 +106,7 @@ class PadNoteTest:public CxxTest::TestSuite
 
 
 
-            controller = new Controller(*synth);
+            controller = new Controller(*synth, time);
 
             //lets go with.... 50! as a nice note
             testnote = 50;

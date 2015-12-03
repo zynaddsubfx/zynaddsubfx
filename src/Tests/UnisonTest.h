@@ -68,12 +68,12 @@ class AdNoteTest:public CxxTest::TestSuite
 
             fft = new FFTwrapper(BUF);
             //prepare the default settings
-            params = new ADnoteParameters(*synth, fft);
+            params = new ADnoteParameters(*synth, fft, time);
 
             //sawtooth to make things a bit more interesting
             params->VoicePar[0].OscilSmp->Pcurrentbasefunc = 3;
 
-            controller = new Controller(*synth);
+            controller = new Controller(*synth, time);
 
             //lets go with.... 50! as a nice note
             testnote = 50;
