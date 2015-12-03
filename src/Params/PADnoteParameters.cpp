@@ -254,7 +254,7 @@ const rtosc::MergePorts PADnoteParameters::ports =
 
 PADnoteParameters::PADnoteParameters(const SYNTH_T &synth_, FFTwrapper *fft_,
                                      const AbsTime *time_)
-        : Presets(), time(time_), synth(synth_)
+        : Presets(), time(time_), last_update_timestamp(0), synth(synth_)
 {
     setpresettype("Ppadsynth");
 

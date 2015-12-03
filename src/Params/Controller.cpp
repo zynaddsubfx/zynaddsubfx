@@ -67,7 +67,7 @@ const rtosc::Ports Controller::ports = {
 #undef rChangeCb
 
 Controller::Controller(const SYNTH_T &synth_, const AbsTime *time_)
-    :time(time_), synth(synth_)
+    :time(time_), last_update_timestamp(0), synth(synth_)
 {
     defaults();
     resetall();

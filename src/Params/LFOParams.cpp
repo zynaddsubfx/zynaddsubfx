@@ -78,8 +78,8 @@ LFOParams::LFOParams(char Pfreq_,
                      char Pdelay_,
                      char Pcontinous_,
                      char fel_,
-                     const AbsTime *time_) : time(time_)
-{
+                     const AbsTime *time_) : time(time_),
+                                             last_update_timestamp(0) {
     switch(fel_) {
         case 0:
             setpresettype("Plfofrequency");

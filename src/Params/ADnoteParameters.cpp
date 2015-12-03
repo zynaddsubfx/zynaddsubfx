@@ -322,7 +322,7 @@ const Ports &ADnoteGlobalParam::ports = globalPorts;
 
 ADnoteParameters::ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
                                    const AbsTime *time_)
-    :PresetsArray(), GlobalPar(time_), time(time_)
+    :PresetsArray(), GlobalPar(time_), time(time_), last_update_timestamp(0)
 {
     setpresettype("Padsynth");
     fft = fft_;
@@ -337,7 +337,8 @@ ADnoteParameters::ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
     defaults();
 }
 
-ADnoteGlobalParam::ADnoteGlobalParam(const AbsTime *time_): time(time_)
+ADnoteGlobalParam::ADnoteGlobalParam(const AbsTime *time_) :
+        time(time_), last_update_timestamp(0)
 {
     FreqEnvelope = new EnvelopeParams(0, 0, time_);
     FreqEnvelope->ASRinit(64, 50, 64, 60);

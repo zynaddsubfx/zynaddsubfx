@@ -102,7 +102,8 @@ const rtosc::Ports &EnvelopeParams::ports = localPorts;
 
 EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
                                unsigned char Pforcedrelease_,
-                               const AbsTime *time_): time(time_)
+                               const AbsTime *time_):
+        time(time_), last_update_timestamp(0)
 {
     PA_dt  = 10;
     PD_dt  = 10;

@@ -135,7 +135,7 @@ static const rtosc::Ports SUBnotePorts = {
 const rtosc::Ports &SUBnoteParameters::ports = SUBnotePorts;
 
 SUBnoteParameters::SUBnoteParameters(const AbsTime *time_)
-        : Presets(), time(time_)
+        : Presets(), time(time_), last_update_timestamp(0)
 {
     setpresettype("Psubsynth");
     AmpEnvelope = new EnvelopeParams(64, 1, time_);

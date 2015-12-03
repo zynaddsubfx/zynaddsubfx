@@ -141,7 +141,8 @@ FilterParams::FilterParams(const AbsTime *time_)
 FilterParams::FilterParams(unsigned char Ptype_,
                            unsigned char Pfreq_,
                            unsigned char Pq_,
-                           const AbsTime *time_): time(time_)
+                           const AbsTime *time_):
+        time(time_), last_update_timestamp(0)
 {
     setpresettype("Pfilter");
     Dtype = Ptype_;
