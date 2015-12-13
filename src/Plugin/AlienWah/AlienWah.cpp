@@ -181,7 +181,11 @@ protected:
 /* ------------------------------------------------------------------------------------------------------------
  * Create plugin, entry point */
 
+START_NAMESPACE_DISTRHO
+
 Plugin* createPlugin()
 {
     return new AlienWahPlugin();
 }
+
+END_NAMESPACE_DISTRHO
