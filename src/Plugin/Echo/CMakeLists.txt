@@ -24,5 +24,8 @@ add_custom_command(TARGET ZynEcho_lv2 POST_BUILD
 	COMMAND lv2-ttl-generator ./ZynEcho.so
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
 
-file(GLOB ttls "${CMAKE_CURRENT_BINARY_DIR}/lv2/*.ttl")
-install(FILES ${ttls} DESTINATION lib/lv2/ZynEcho.lv2/)
+install(FILES
+	${CMAKE_CURRENT_BINARY_DIR}/lv2/manifest.ttl
+	${CMAKE_CURRENT_BINARY_DIR}/lv2/presets.ttl
+	${CMAKE_CURRENT_BINARY_DIR}/lv2/ZynEcho.ttl
+	DESTINATION lib/lv2/ZynEcho.lv2/)
