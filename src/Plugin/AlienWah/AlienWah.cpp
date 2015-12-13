@@ -43,7 +43,7 @@ protected:
       Get the plugin label.
       This label is a short restricted name consisting of only _, a-z, A-Z and 0-9 characters.
     */
-    const char* getLabel() const override
+    const char* getLabel() const noexcept override
     {
         return "AlienWah";
     }
@@ -51,7 +51,7 @@ protected:
    /**
       Get an extensive comment/description about the plugin.
     */
-    const char* getDescription() const override
+    const char* getDescription() const noexcept override
     {
         // TODO
         return "";
@@ -61,7 +61,7 @@ protected:
       Get the plugin unique Id.
       This value is used by LADSPA, DSSI and VST plugin formats.
     */
-    int64_t getUniqueId() const override
+    int64_t getUniqueId() const noexcept override
     {
         return d_cconst('Z', 'X', 'a', 'w');
     }
@@ -73,7 +73,7 @@ protected:
       Initialize the parameter @a index.
       This function will be called once, shortly after the plugin is created.
     */
-    void initParameter(uint32_t index, Parameter& parameter) override
+    void initParameter(uint32_t index, Parameter& parameter) noexcept override
     {
         parameter.hints = kParameterIsInteger;
         parameter.name  = "";
@@ -153,7 +153,7 @@ protected:
       Set the name of the program @a index.
       This function will be called once, shortly after the plugin is created.
     */
-    void initProgramName(uint32_t index, String& programName) override
+    void initProgramName(uint32_t index, String& programName) noexcept override
     {
         switch (index)
         {

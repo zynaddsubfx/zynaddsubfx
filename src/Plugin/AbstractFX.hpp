@@ -83,16 +83,16 @@ protected:
    /**
       Get the plugin author/maker.
     */
-    const char* getMaker() const override
+    const char* getMaker() const noexcept override
     {
-        return "";
+        return "ZynAddSubFX Team";
     }
 
    /**
       Get the plugin homepage.
       Optional, returns nothing by default.
     */
-    const char* getHomePage() const override
+    const char* getHomePage() const noexcept override
     {
         return "http://zynaddsubfx.sourceforge.net";
     }
@@ -100,7 +100,7 @@ protected:
    /**
       Get the plugin license (a single line of text or a URL).
     */
-    const char* getLicense() const override
+    const char* getLicense() const noexcept override
     {
         return "GPL v2";
     }
@@ -108,7 +108,7 @@ protected:
    /**
       Get the plugin version, in hexadecimal.
     */
-    uint32_t getVersion() const override
+    uint32_t getVersion() const noexcept override
     {
         // TODO: use config.h or globals.h
         return d_version(2, 5, 3);
@@ -134,13 +134,17 @@ protected:
     */
     void setParameterValue(uint32_t index, float value) override
     {
-        /*
-        TODO: check bounds and round to int without juce
+        // make sure value is in bounds for uchar conversion
+        if (value < 0.0f)
+            value = 0.0f;
+        else if (value > 127.0f)
+            value = 127.0f;
 
-        const int ivalue(roundToIntAccurate(carla_fixedValue(0.0f, 127.0f, value)));
+        // safely cast to int
+        const int ivalue = (int)(value+0.5f);
 
+        // ok!
         effect->changepar(static_cast<int>(index+2), static_cast<uchar>(ivalue));
-        */
     }
 
    /**
@@ -174,24 +178,21 @@ protected:
     */
     void run(const float** inputs, float** outputs, uint32_t frames) override
     {
-        /*
-        TODO: Replacement for juce functions
-
         if (outputs[0] != inputs[0])
-            FloatVectorOperations::copyWithMultiply(outputs[0], inputs[0], 0.5f, frames);
+            copyWithMultiply(outputs[0], inputs[0], 0.5f, frames);
         else
-            FloatVectorOperations::multiply(outputs[0], 0.5f, frames);
+            multiply(outputs[0], 0.5f, frames);
 
         if (outputs[1] != inputs[1])
-            FloatVectorOperations::copyWithMultiply(outputs[1], inputs[1], 0.5f, frames);
+            copyWithMultiply(outputs[1], inputs[1], 0.5f, frames);
         else
-            FloatVectorOperations::multiply(outputs[1], 0.5f, frames);
+            multiply(outputs[1], 0.5f, frames);
 
-        effect->out(Stereo<float*>(inputs[0], inputs[1]));
+        // FIXME: Make Zyn use const floats
+        effect->out(Stereo<float*>((float*)inputs[0], (float*)inputs[1]));
 
-        FloatVectorOperations::addWithMultiply(outputs[0], efxoutl, 0.5f, frames);
-        FloatVectorOperations::addWithMultiply(outputs[1], efxoutr, 0.5f, frames);
-        */
+        addWithMultiply(outputs[0], efxoutl, 0.5f, frames);
+        addWithMultiply(outputs[1], efxoutr, 0.5f, frames);
     }
 
    /* --------------------------------------------------------------------------------------------------------
@@ -278,6 +279,24 @@ private:
         // reset volume and pan
         effect->changepar(0, 127);
         effect->changepar(1, 64);
+    }
+
+    void addWithMultiply(float* dst, const float* src, const float multiplier, const uint32_t frames) noexcept
+    {
+        for (uint32_t i=0; i<frames; ++i)
+            dst[i] += src[i] * multiplier;
+    }
+
+    void copyWithMultiply(float* dst, const float* src, const float multiplier, const uint32_t frames) noexcept
+    {
+        for (uint32_t i=0; i<frames; ++i)
+            dst[i] = src[i] * multiplier;
+    }
+
+    void multiply(float* dst, const float multiplier, const uint32_t frames) noexcept
+    {
+        for (uint32_t i=0; i<frames; ++i)
+            dst[i] *= multiplier;
     }
 
     DISTRHO_DECLARE_NON_COPY_CLASS(AbstractPluginFX)
