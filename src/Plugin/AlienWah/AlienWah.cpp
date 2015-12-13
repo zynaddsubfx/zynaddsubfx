@@ -78,7 +78,6 @@ protected:
         parameter.hints = kParameterIsInteger;
         parameter.name  = "";
         parameter.unit  = "";
-        parameter.ranges.def = 1.0f;
         parameter.ranges.min = 0.0f;
         parameter.ranges.max = 127.0f;
 
@@ -89,58 +88,50 @@ protected:
             parameter.name = "LFO Frequency";
             parameter.ranges.def = 70.0f;
             break;
-
         case 1:
             parameter.hints |= kParameterIsAutomable;
             parameter.name = "LFO Randomness";
             parameter.ranges.def = 0.0f;
             break;
-
         case 2:
-            parameter.hints |= kParameterIsAutomable|kParameterIsBoolean;
+            parameter.hints |= kParameterIsAutomable;
             parameter.name = "LFO Type";
             parameter.ranges.def = 0.0f;
             parameter.ranges.max = 1.0f;
             /*
             TODO: support for scalePoints in DPF
-            scalePoints[0].label  = "Sine";
-            scalePoints[1].label  = "Triangle";
-            scalePoints[0].value  = 0.0f;
-            scalePoints[1].value  = 1.0f;
+            scalePoints[0].label = "Sine";
+            scalePoints[1].label = "Triangle";
+            scalePoints[0].value = 0.0f;
+            scalePoints[1].value = 1.0f;
             */
             break;
-
         case 3:
             parameter.hints |= kParameterIsAutomable;
             parameter.name = "LFO Stereo";
             parameter.ranges.def = 62.0f;
             break;
-
         case 4:
             parameter.hints |= kParameterIsAutomable;
             parameter.name = "Depth";
             parameter.ranges.def = 60.0f;
             break;
-
         case 5:
             parameter.hints |= kParameterIsAutomable;
             parameter.name = "Feedback";
             parameter.ranges.def = 105.0f;
             break;
-
         case 6:
             parameter.name = "Delay";
             parameter.ranges.def = 25.0f;
             parameter.ranges.min = 1.0f;
             parameter.ranges.max = 100.0f;
             break;
-
         case 7:
             parameter.hints |= kParameterIsAutomable;
             parameter.name = "L/R Cross";
             parameter.ranges.def = 0.0f;
             break;
-
         case 8:
             parameter.hints |= kParameterIsAutomable;
             parameter.name = "Phase";
@@ -158,19 +149,16 @@ protected:
         switch (index)
         {
         case 0:
-            programName = "AlienWah1";
+            programName = "AlienWah 1";
             break;
         case 1:
-            programName = "AlienWah2";
+            programName = "AlienWah 2";
             break;
         case 2:
-            programName = "AlienWah3";
+            programName = "AlienWah 3";
             break;
         case 3:
-            programName = "AlienWah4";
-            break;
-        default:
-            programName = nullptr;
+            programName = "AlienWah 4";
             break;
         }
     }

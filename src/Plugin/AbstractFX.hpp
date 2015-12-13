@@ -57,23 +57,9 @@ public:
 
     ~AbstractPluginFX() override
     {
-        if (efxoutl != nullptr)
-        {
-            delete[] efxoutl;
-            efxoutl = nullptr;
-        }
-
-        if (efxoutr != nullptr)
-        {
-            delete[] efxoutr;
-            efxoutr = nullptr;
-        }
-
-        if (effect != nullptr)
-        {
-            delete effect;
-            effect = nullptr;
-        }
+        delete[] efxoutl;
+        delete[] efxoutr;
+        delete effect;
     }
 
 protected:
