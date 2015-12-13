@@ -19,3 +19,7 @@ target_link_libraries(ZynChorus_vst zynaddsubfx_core ${OS_LIBRARIES})
 
 install(TARGETS ZynChorus_lv2 LIBRARY DESTINATION lib/lv2/ZynChorus.lv2/)
 install(TARGETS ZynChorus_vst LIBRARY DESTINATION lib/vst/)
+
+add_custom_command(TARGET ZynChorus_lv2 POST_BUILD
+	COMMAND lv2-ttl-generator ./ZynChorus.so
+	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)

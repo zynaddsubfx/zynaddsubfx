@@ -19,3 +19,7 @@ target_link_libraries(ZynDynamicFilter_vst zynaddsubfx_core ${OS_LIBRARIES})
 
 install(TARGETS ZynDynamicFilter_lv2 LIBRARY DESTINATION lib/lv2/ZynDynamicFilter.lv2/)
 install(TARGETS ZynDynamicFilter_vst LIBRARY DESTINATION lib/vst/)
+
+add_custom_command(TARGET ZynDynamicFilter_lv2 POST_BUILD
+	COMMAND lv2-ttl-generator ./ZynDynamicFilter.so
+	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)

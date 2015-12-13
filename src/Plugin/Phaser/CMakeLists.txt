@@ -19,3 +19,7 @@ target_link_libraries(ZynPhaser_vst zynaddsubfx_core ${OS_LIBRARIES})
 
 install(TARGETS ZynPhaser_lv2 LIBRARY DESTINATION lib/lv2/ZynPhaser.lv2/)
 install(TARGETS ZynPhaser_vst LIBRARY DESTINATION lib/vst/)
+
+add_custom_command(TARGET ZynPhaser_lv2 POST_BUILD
+	COMMAND lv2-ttl-generator ./ZynPhaser.so
+	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)

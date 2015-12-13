@@ -19,3 +19,7 @@ target_link_libraries(ZynDistortion_vst zynaddsubfx_core ${OS_LIBRARIES})
 
 install(TARGETS ZynDistortion_lv2 LIBRARY DESTINATION lib/lv2/ZynDistortion.lv2/)
 install(TARGETS ZynDistortion_vst LIBRARY DESTINATION lib/vst/)
+
+add_custom_command(TARGET ZynDistortion_lv2 POST_BUILD
+	COMMAND lv2-ttl-generator ./ZynDistortion.so
+	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
