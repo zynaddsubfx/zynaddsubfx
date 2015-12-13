@@ -38,7 +38,7 @@ class AbstractPluginFX : public Plugin
 {
 public:
     AbstractPluginFX(const uint32_t params, const uint32_t programs)
-        : Plugin(params, programs, 0),
+        : Plugin(params-2, programs, 0),
           paramCount(params-2), // volume and pan handled by host
           programCount(programs),
           bufferSize(getBufferSize()),
