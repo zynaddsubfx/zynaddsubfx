@@ -28,7 +28,7 @@
 #define DISTRHO_PLUGIN_URI   "http://zynaddsubfx.sourceforge.net/fx#AlienWah"
 
 #define DISTRHO_PLUGIN_HAS_UI        0
-#define DISTRHO_PLUGIN_IS_RT_SAFE    0
+#define DISTRHO_PLUGIN_IS_RT_SAFE    1
 #define DISTRHO_PLUGIN_IS_SYNTH      0
 #define DISTRHO_PLUGIN_NUM_INPUTS    2
 #define DISTRHO_PLUGIN_NUM_OUTPUTS   2
