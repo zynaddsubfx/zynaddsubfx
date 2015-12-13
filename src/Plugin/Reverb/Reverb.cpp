@@ -78,7 +78,6 @@ protected:
         parameter.hints = kParameterIsInteger;
         parameter.name  = "";
         parameter.unit  = "";
-        parameter.ranges.def = 1.0f;
         parameter.ranges.min = 0.0f;
         parameter.ranges.max = 127.0f;
 
@@ -101,10 +100,14 @@ protected:
         case 3:
             // FIXME: unused
             parameter.name = "bw";
+            parameter.ranges.def = 0.0f;
+            parameter.ranges.max = 1.0f;
             break;
         case 4:
             // FIXME: unused
             parameter.name = "E/R";
+            parameter.ranges.def = 0.0f;
+            parameter.ranges.max = 1.0f;
             break;
         case 5:
             parameter.name = "Low-Pass Filter";
