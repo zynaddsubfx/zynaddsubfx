@@ -5,7 +5,17 @@ add_library(ZynReverb_lv2 SHARED ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMa
 add_library(ZynReverb_vst SHARED ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp Reverb.cpp)
 
 set_target_properties(ZynReverb_lv2 PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_LV2")
+set_target_properties(ZynReverb_lv2 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "lv2")
+set_target_properties(ZynReverb_lv2 PROPERTIES OUTPUT_NAME "ZynReverb")
+set_target_properties(ZynReverb_lv2 PROPERTIES PREFIX "")
+
 set_target_properties(ZynReverb_vst PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_VST")
+set_target_properties(ZynReverb_vst PROPERTIES LIBRARY_OUTPUT_DIRECTORY "vst")
+set_target_properties(ZynReverb_vst PROPERTIES OUTPUT_NAME "ZynReverb")
+set_target_properties(ZynReverb_vst PROPERTIES PREFIX "")
 
 target_link_libraries(ZynReverb_lv2 zynaddsubfx_core ${OS_LIBRARIES})
 target_link_libraries(ZynReverb_vst zynaddsubfx_core ${OS_LIBRARIES})
+
+install(TARGETS ZynReverb_lv2 LIBRARY DESTINATION lib/lv2/ZynReverb.lv2/)
+install(TARGETS ZynReverb_vst LIBRARY DESTINATION lib/vst/)

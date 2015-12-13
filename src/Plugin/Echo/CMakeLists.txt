@@ -5,7 +5,17 @@ add_library(ZynEcho_lv2 SHARED ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain
 add_library(ZynEcho_vst SHARED ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp Echo.cpp)
 
 set_target_properties(ZynEcho_lv2 PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_LV2")
+set_target_properties(ZynEcho_lv2 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "lv2")
+set_target_properties(ZynEcho_lv2 PROPERTIES OUTPUT_NAME "ZynEcho")
+set_target_properties(ZynEcho_lv2 PROPERTIES PREFIX "")
+
 set_target_properties(ZynEcho_vst PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_VST")
+set_target_properties(ZynEcho_vst PROPERTIES LIBRARY_OUTPUT_DIRECTORY "vst")
+set_target_properties(ZynEcho_vst PROPERTIES OUTPUT_NAME "ZynEcho")
+set_target_properties(ZynEcho_vst PROPERTIES PREFIX "")
 
 target_link_libraries(ZynEcho_lv2 zynaddsubfx_core ${OS_LIBRARIES})
 target_link_libraries(ZynEcho_vst zynaddsubfx_core ${OS_LIBRARIES})
+
+install(TARGETS ZynEcho_lv2 LIBRARY DESTINATION lib/lv2/ZynEcho.lv2/)
+install(TARGETS ZynEcho_vst LIBRARY DESTINATION lib/vst/)
