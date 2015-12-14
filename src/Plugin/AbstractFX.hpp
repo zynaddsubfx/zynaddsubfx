@@ -136,7 +136,6 @@ protected:
    /**
       Load a program.
       The host may call this function from any context, including realtime processing.
-      Must be implemented by your plugin class only if DISTRHO_PLUGIN_WANT_PROGRAMS is enabled.
     */
     void loadProgram(uint32_t index) override
     {
