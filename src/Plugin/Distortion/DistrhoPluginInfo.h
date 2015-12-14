@@ -24,7 +24,7 @@
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
 #define DISTRHO_PLUGIN_BRAND "ZynAddSubFX"
-#define DISTRHO_PLUGIN_NAME  "Distortion"
+#define DISTRHO_PLUGIN_NAME  "ZynDistortion"
 #define DISTRHO_PLUGIN_URI   "http://zynaddsubfx.sourceforge.net/fx#Distortion"
 
 #define DISTRHO_PLUGIN_HAS_UI        0
