@@ -76,7 +76,6 @@ protected:
     void initParameter(uint32_t index, Parameter& parameter) noexcept override
     {
         parameter.hints = kParameterIsInteger|kParameterIsAutomable;
-        parameter.name  = "";
         parameter.unit  = "";
         parameter.ranges.min = 0.0f;
         parameter.ranges.max = 127.0f;
@@ -84,15 +83,18 @@ protected:
         switch (index)
         {
         case 0:
-            parameter.name = "LFO Frequency";
+            parameter.name   = "LFO Frequency";
+            parameter.symbol = "lfofreq";
             parameter.ranges.def = 50.0f;
             break;
         case 1:
-            parameter.name = "LFO Randomness";
+            parameter.name   = "LFO Randomness";
+            parameter.symbol = "lforand";
             parameter.ranges.def = 0.0f;
             break;
         case 2:
-            parameter.name = "LFO Type";
+            parameter.name   = "LFO Type";
+            parameter.symbol = "lfotype";
             parameter.ranges.def = 0.0f;
             parameter.ranges.max = 1.0f;
             /*
@@ -104,34 +106,41 @@ protected:
             */
             break;
         case 3:
-            parameter.name = "LFO Stereo";
+            parameter.name   = "LFO Stereo";
+            parameter.symbol = "lfostereo";
             parameter.ranges.def = 90.0f;
             break;
         case 4:
-            parameter.name = "Depth";
+            parameter.name   = "Depth";
+            parameter.symbol = "depth";
             parameter.ranges.def = 40.0f;
             break;
         case 5:
-            parameter.name = "Delay";
+            parameter.name   = "Delay";
+            parameter.symbol = "delay";
             parameter.ranges.def = 85.0f;
             break;
         case 6:
-            parameter.name = "Feedback";
+            parameter.name   = "Feedback";
+            parameter.symbol = "fb";
             parameter.ranges.def = 64.0f;
             break;
         case 7:
-            parameter.name = "L/R Cross";
+            parameter.name   = "L/R Cross";
+            parameter.symbol = "lrcross";
             parameter.ranges.def = 119.0f;
             break;
         case 8:
             parameter.hints |= kParameterIsBoolean;
-            parameter.name = "Flange Mode";
+            parameter.name   = "Flange Mode";
+            parameter.symbol = "flang";
             parameter.ranges.def = 0.0f;
             parameter.ranges.max = 1.0f;
             break;
         case 9:
             parameter.hints |= kParameterIsBoolean;
-            parameter.name = "Subtract Output";
+            parameter.name   = "Subtract Output";
+            parameter.symbol = "subsout";
             parameter.ranges.def = 0.0f;
             parameter.ranges.max = 1.0f;
             break;

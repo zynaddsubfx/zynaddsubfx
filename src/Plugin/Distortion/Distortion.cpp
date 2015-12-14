@@ -76,7 +76,6 @@ protected:
     void initParameter(uint32_t index, Parameter& parameter) noexcept override
     {
         parameter.hints = kParameterIsInteger|kParameterIsAutomable;
-        parameter.name  = "";
         parameter.unit  = "";
         parameter.ranges.min = 0.0f;
         parameter.ranges.max = 127.0f;
@@ -84,19 +83,23 @@ protected:
         switch (index)
         {
         case 0:
-            parameter.name = "L/R Cross";
+            parameter.name   = "L/R Cross";
+            parameter.symbol = "lrcross";
             parameter.ranges.def = 35.0f;
             break;
         case 1:
-            parameter.name = "Drive";
+            parameter.name   = "Drive";
+            parameter.symbol = "drive";
             parameter.ranges.def = 56.0f;
             break;
         case 2:
-            parameter.name = "Level";
+            parameter.name   = "Level";
+            parameter.symbol = "level";
             parameter.ranges.def = 70.0f;
             break;
         case 3:
-            parameter.name = "Type";
+            parameter.name   = "Type";
+            parameter.symbol = "type";
             parameter.ranges.def = 0.0f;
             parameter.ranges.max = 13.0f;
             /*
@@ -133,27 +136,32 @@ protected:
             break;
         case 4:
             parameter.hints |= kParameterIsBoolean;
-            parameter.name = "Negate";
+            parameter.name   = "Negate";
+            parameter.symbol = "negate";
             parameter.ranges.def = 0.0f;
             parameter.ranges.max = 1.0f;
             break;
         case 5:
-            parameter.name = "Low-Pass Filter";
+            parameter.name   = "Low-Pass Filter";
+            parameter.symbol = "lpf";
             parameter.ranges.def = 96.0f;
             break;
         case 6:
-            parameter.name = "High-Pass Filter";
+            parameter.name   = "High-Pass Filter";
+            parameter.symbol = "hpf";
             parameter.ranges.def = 0.0f;
             break;
         case 7:
             parameter.hints |= kParameterIsBoolean;
-            parameter.name = "Stereo";
+            parameter.name   = "Stereo";
+            parameter.symbol = "stereo";
             parameter.ranges.def = 0.0f;
             parameter.ranges.max = 1.0f;
             break;
         case 8:
             parameter.hints |= kParameterIsBoolean;
-            parameter.name = "Pre-Filtering";
+            parameter.name   = "Pre-Filtering";
+            parameter.symbol = "pf";
             parameter.ranges.def = 0.0f;
             parameter.ranges.max = 1.0f;
             break;

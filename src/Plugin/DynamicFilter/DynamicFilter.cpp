@@ -76,7 +76,6 @@ protected:
     void initParameter(uint32_t index, Parameter& parameter) noexcept override
     {
         parameter.hints = kParameterIsInteger|kParameterIsAutomable;
-        parameter.name  = "";
         parameter.unit  = "";
         parameter.ranges.min = 0.0f;
         parameter.ranges.max = 127.0f;
@@ -84,15 +83,18 @@ protected:
         switch (index)
         {
         case 0:
-            parameter.name = "LFO Frequency";
+            parameter.name   = "LFO Frequency";
+            parameter.symbol = "lfofreq";
             parameter.ranges.def = 80.0f;
             break;
         case 1:
-            parameter.name = "LFO Randomness";
+            parameter.name   = "LFO Randomness";
+            parameter.symbol = "lforand";
             parameter.ranges.def = 0.0f;
             break;
         case 2:
-            parameter.name = "LFO Type";
+            parameter.name   = "LFO Type";
+            parameter.symbol = "lfotype";
             parameter.ranges.def = 0.0f;
             parameter.ranges.max = 1.0f;
             /*
@@ -104,25 +106,30 @@ protected:
             */
             break;
         case 3:
-            parameter.name = "LFO Stereo";
+            parameter.name   = "LFO Stereo";
+            parameter.symbol = "lfostereo";
             parameter.ranges.def = 64.0f;
             break;
         case 4:
-            parameter.name = "LFO Depth";
+            parameter.name   = "LFO Depth";
+            parameter.symbol = "lfodepth";
             parameter.ranges.def = 0.0f;
             break;
         case 5:
-            parameter.name = "Amp sns";
+            parameter.name   = "Amp sns";
+            parameter.symbol = "ampsns";
             parameter.ranges.def = 90.0f;
             break;
         case 6:
             parameter.hints |= kParameterIsBoolean;
-            parameter.name = "Amp sns inv";
+            parameter.name   = "Amp sns inv";
+            parameter.symbol = "ampsnsinv";
             parameter.ranges.def = 0.0f;
             parameter.ranges.max = 1.0f;
             break;
         case 7:
-            parameter.name = "Amp Smooth";
+            parameter.name   = "Amp Smooth";
+            parameter.symbol = "ampsmooth";
             parameter.ranges.def = 60.0f;
             break;
         }

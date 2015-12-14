@@ -76,7 +76,6 @@ protected:
     void initParameter(uint32_t index, Parameter& parameter) noexcept override
     {
         parameter.hints = kParameterIsInteger;
-        parameter.name  = "";
         parameter.unit  = "";
         parameter.ranges.min = 0.0f;
         parameter.ranges.max = 127.0f;
@@ -85,46 +84,53 @@ protected:
         {
         case 0:
             parameter.hints |= kParameterIsAutomable;
-            parameter.name = "Time";
+            parameter.name   = "Time";
+            parameter.symbol = "time";
             parameter.ranges.def = 63.0f;
             break;
         case 1:
-            parameter.name = "Delay";
+            parameter.name   = "Delay";
+            parameter.symbol = "delay";
             parameter.ranges.def = 24.0f;
             break;
         case 2:
             parameter.hints |= kParameterIsAutomable;
-            parameter.name = "Feedback";
+            parameter.name   = "Feedback";
+            parameter.symbol = "fb";
             parameter.ranges.def = 0.0f;
             break;
         case 3:
             // FIXME: unused
-            parameter.name = "bw";
+            parameter.name   = "bw (unused)";
+            parameter.symbol = "unused_bw";
             parameter.ranges.def = 0.0f;
-            parameter.ranges.max = 1.0f;
             break;
         case 4:
             // FIXME: unused
-            parameter.name = "E/R";
+            parameter.name   = "E/R (unused)";
+            parameter.symbol = "unused_er";
             parameter.ranges.def = 0.0f;
-            parameter.ranges.max = 1.0f;
             break;
         case 5:
-            parameter.name = "Low-Pass Filter";
+            parameter.name   = "Low-Pass Filter";
+            parameter.symbol = "lpf";
             parameter.ranges.def = 85.0f;
             break;
         case 6:
-            parameter.name = "High-Pass Filter";
+            parameter.name   = "High-Pass Filter";
+            parameter.symbol = "hpf";
             parameter.ranges.def = 5.0f;
             break;
         case 7:
             parameter.hints |= kParameterIsAutomable;
-            parameter.name = "Damp";
+            parameter.name   = "Damp";
+            parameter.symbol = "damp";
             parameter.ranges.def = 83.0f;
             parameter.ranges.min = 64.0f;
             break;
         case 8:
-            parameter.name = "Type";
+            parameter.name   = "Type";
+            parameter.symbol = "type";
             parameter.ranges.def = 1.0f;
             parameter.ranges.max = 2.0f;
             /*
@@ -138,12 +144,14 @@ protected:
             */
             break;
         case 9:
-            parameter.name = "Room size";
+            parameter.name   = "Room size";
+            parameter.symbol = "size";
             parameter.ranges.def = 64.0f;
             parameter.ranges.min = 1.0f;
             break;
         case 10:
-            parameter.name = "Bandwidth";
+            parameter.name   = "Bandwidth";
+            parameter.symbol = "bw";
             parameter.ranges.def = 20.0f;
             break;
         }

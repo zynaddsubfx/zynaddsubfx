@@ -76,7 +76,6 @@ protected:
     void initParameter(uint32_t index, Parameter& parameter) noexcept override
     {
         parameter.hints = kParameterIsInteger|kParameterIsAutomable;
-        parameter.name  = "";
         parameter.unit  = "";
         parameter.ranges.min = 0.0f;
         parameter.ranges.max = 127.0f;
@@ -84,23 +83,28 @@ protected:
         switch (index)
         {
         case 0:
-            parameter.name = "Delay";
+            parameter.name   = "Delay";
+            parameter.symbol = "delay";
             parameter.ranges.def = 35.0f;
             break;
         case 1:
-            parameter.name = "L/R Delay";
+            parameter.name   = "L/R Delay";
+            parameter.symbol = "lrdelay";
             parameter.ranges.def = 64.0f;
             break;
         case 2:
-            parameter.name = "L/R Cross";
+            parameter.name   = "L/R Cross";
+            parameter.symbol = "lrcross";
             parameter.ranges.def = 30.0f;
             break;
         case 3:
-            parameter.name = "Feedback";
+            parameter.name   = "Feedback";
+            parameter.symbol = "fb";
             parameter.ranges.def = 59.0f;
             break;
         case 4:
-            parameter.name = "High Damp";
+            parameter.name   = "High Damp";
+            parameter.symbol = "damp";
             parameter.ranges.def = 0.0f;
             break;
         }
