@@ -220,6 +220,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="adaptive_harmonics" value="0" />
 <par name="adaptive_harmonics_base_frequency" value="128" />
 <par name="adaptive_harmonics_power" value="100" />
+<par name="adaptive_harmonics_par" value="50" />
 <HARMONICS>
 <HARMONIC id="1">
 <par name="mag" value="74" />
@@ -413,6 +414,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="adaptive_harmonics" value="0" />
 <par name="adaptive_harmonics_base_frequency" value="128" />
 <par name="adaptive_harmonics_power" value="100" />
+<par name="adaptive_harmonics_par" value="50" />
 <HARMONICS>
 <HARMONIC id="1">
 <par name="mag" value="127" />
@@ -470,6 +472,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="adaptive_harmonics" value="0" />
 <par name="adaptive_harmonics_base_frequency" value="128" />
 <par name="adaptive_harmonics_power" value="100" />
+<par name="adaptive_harmonics_par" value="50" />
 <HARMONICS>
 <HARMONIC id="1">
 <par name="mag" value="127" />
@@ -555,6 +558,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="adaptive_harmonics" value="0" />
 <par name="adaptive_harmonics_base_frequency" value="128" />
 <par name="adaptive_harmonics_power" value="100" />
+<par name="adaptive_harmonics_par" value="50" />
 <HARMONICS>
 <HARMONIC id="1">
 <par name="mag" value="127" />
@@ -640,6 +644,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="adaptive_harmonics" value="0" />
 <par name="adaptive_harmonics_base_frequency" value="128" />
 <par name="adaptive_harmonics_power" value="100" />
+<par name="adaptive_harmonics_par" value="50" />
 <HARMONICS>
 <HARMONIC id="2">
 <par name="mag" value="127" />
@@ -1260,6 +1265,7 @@ version-revision="2" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="adaptive_harmonics" value="0" />
 <par name="adaptive_harmonics_base_frequency" value="128" />
 <par name="adaptive_harmonics_power" value="100" />
+<par name="adaptive_harmonics_par" value="50" />
 <HARMONICS>
 <HARMONIC id="1">
 <par name="mag" value="127" />
