@@ -139,8 +139,9 @@ void EnvelopeFreeEdit::draw(void)
     //draw the lines
     fl_color(FL_GRAY);
 
+    const int midline = oy+ly*(1-64.0/127);
     fl_line_style(FL_SOLID);
-    fl_line(ox+2,oy+ly/2,ox+lx-2,oy+ly/2);
+    fl_line(ox+2,midline,ox+lx-2,midline);
 
     //draws the evelope points and lines
     Fl_Color alb=FL_WHITE;
