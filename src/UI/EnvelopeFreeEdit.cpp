@@ -260,7 +260,7 @@ int EnvelopeFreeEdit::handle(int event)
                   oscWrite(to_s("Penvval")+to_s(lastpoint), "c", ny);
                   oscWrite("Penvval","");
               } else if (lastpoint > 0) {
-                  int newdt = Penvdt[lastpoint] + delta;
+                  int newdt = Penvdt[lastpoint] - delta;
                   newdt = newdt < 0 ? 0 : newdt > 127 ? 127 : newdt;
                   Penvdt[lastpoint] = newdt;
                   oscWrite(to_s("Penvdt")+to_s(lastpoint),  "c", newdt);
