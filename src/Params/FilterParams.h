@@ -68,17 +68,17 @@ class FilterParams:public PresetsArray
         unsigned char Pcenterfreq, Poctavesfreq; //the center frequency of the res. func., and the number of octaves
 
         struct Pvowels_t {
-            Pvowels_t() : last_update_timestamp(0) {}
+//            Pvowels_t() : last_update_timestamp(0) {}
             struct formants_t {
-                formants_t() : last_update_timestamp(0) {}
+//                formants_t() : last_update_timestamp(0) {}
                 unsigned char freq, amp, q; //frequency,amplitude,Q
 
-                const AbsTime *time;
-                int64_t last_update_timestamp;
+//                const AbsTime *time;
+//                int64_t last_update_timestamp;
             } formants[FF_MAX_FORMANTS];
 
-            const AbsTime *time;
-            int64_t last_update_timestamp;
+//            const AbsTime *time;
+//            int64_t last_update_timestamp;
         } Pvowels[FF_MAX_VOWELS];
 
 
