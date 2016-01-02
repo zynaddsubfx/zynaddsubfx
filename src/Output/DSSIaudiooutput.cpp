@@ -612,7 +612,7 @@ DSSIaudiooutput *DSSIaudiooutput::getInstance(LADSPA_Handle instance)
  * @param sampleRate [in] the sample rate to be used by the synth.
  * @return
  */
-DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate) : dssi_control({dssi_control_description[0],
+DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate) : dssi_control{dssi_control_description[0],
                                                                            dssi_control_description[1],
                                                                            dssi_control_description[2],
                                                                            dssi_control_description[3],
@@ -623,7 +623,7 @@ DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate) : dssi_control({dssi_
                                                                            dssi_control_description[8],
                                                                            dssi_control_description[9],
                                                                            dssi_control_description[10],
-                                                                           dssi_control_description[11]})
+                                                                           dssi_control_description[11]}
 {
     SYNTH_T synth;
     synth.samplerate = sampleRate;
