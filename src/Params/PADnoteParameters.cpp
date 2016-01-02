@@ -180,9 +180,9 @@ static const rtosc::Ports non_realtime_ports =
             rOptions(Harmonic, ShiftU, ShiftL, PowerU, PowerL, Sine,
                 Power, Shift),
             "Harmonic Overtone shifting mode"),
-    rParamZyn(Phrpos.par1, "Harmonic position parameter"),
-    rParamZyn(Phrpos.par2, "Harmonic position parameter"),
-    rParamZyn(Phrpos.par3, "Harmonic position parameter"),
+    rParamI(Phrpos.par1, rLinear(0,255), "Harmonic position parameter"),
+    rParamI(Phrpos.par2, rLinear(0,255), "Harmonic position parameter"),
+    rParamI(Phrpos.par3, rLinear(0,255), "Harmonic position parameter"),
 
     //Quality
     rOption(Pquality.samplesize,
