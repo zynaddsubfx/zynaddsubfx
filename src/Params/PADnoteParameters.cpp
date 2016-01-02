@@ -321,8 +321,8 @@ void PADnoteParameters::defaults()
     oscilgen->defaults();
 
     Phrpos.type = 0;
-    Phrpos.par1 = 64;
-    Phrpos.par2 = 64;
+    Phrpos.par1 = 0;
+    Phrpos.par2 = 0;
     Phrpos.par3 = 0;
 
     Pquality.samplesize = 3;
