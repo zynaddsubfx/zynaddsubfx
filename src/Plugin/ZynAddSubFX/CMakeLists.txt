@@ -22,7 +22,7 @@ add_library(ZynAddSubFX_vst SHARED
     ZynAddSubFX.cpp
     ZynAddSubFX-UI.cpp)
 
-elseif(NtkGui)
+else()
 
 # UI Disabled
 add_library(ZynAddSubFX_lv2 SHARED
@@ -37,7 +37,7 @@ add_library(ZynAddSubFX_vst SHARED
     ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp
     ZynAddSubFX.cpp)
 
-endif(NtkGui)
+endif()
 
 set_target_properties(ZynAddSubFX_lv2 PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_LV2")
 set_target_properties(ZynAddSubFX_lv2 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "lv2")
@@ -76,4 +76,4 @@ install(TARGETS ZynAddSubFX_lv2_ui LIBRARY DESTINATION lib/lv2/ZynAddSubFX.lv2/)
 install(FILES
         ${CMAKE_CURRENT_BINARY_DIR}/lv2/ZynAddSubFX_ui.ttl
         DESTINATION lib/lv2/ZynAddSubFX.lv2/)
-endif(NtkGui)
+endif()
