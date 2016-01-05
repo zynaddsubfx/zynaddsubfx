@@ -39,3 +39,5 @@ install(DIRECTORY instruments/banks
     DESTINATION share/zynaddsubfx)
 install(DIRECTORY instruments/examples
     DESTINATION share/zynaddsubfx)
+install(DIRECTORY instruments/ZynAddSubFX.lv2presets
+    DESTINATION lib/lv2)
