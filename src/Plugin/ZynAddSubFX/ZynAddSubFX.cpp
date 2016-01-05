@@ -32,6 +32,7 @@
 // Extra includes
 #include "extra/Mutex.hpp"
 #include "extra/Thread.hpp"
+#include <lo/lo.h>
 
 /* ------------------------------------------------------------------------------------------------------------
  * ZynAddSubFX plugin class */
@@ -41,12 +42,13 @@ class ZynAddSubFX : public Plugin,
 {
 public:
     ZynAddSubFX()
-        : Plugin(0, 1, 1), // 0 parameters, 1 program, 1 state
+        : Plugin(kParamCount, 1, 1), // 1 program, 1 state
           Thread("ZynMwTick"),
           master(nullptr),
           middleware(nullptr),
           active(false),
-          defaultState(nullptr)
+          defaultState(nullptr),
+          oscPort(0)
     {
         config.init();
 
@@ -137,9 +139,51 @@ protected:
    /* --------------------------------------------------------------------------------------------------------
     * Parameters, empty for now */
 
-    void  initParameter(uint32_t, Parameter&) noexcept override {}
-    float getParameterValue(uint32_t) const noexcept override { return 0.0f; }
-    void  setParameterValue(uint32_t index, float value) noexcept override {}
+   /**
+      Initialize the parameter @a index.
+      This function will be called once, shortly after the plugin is created.
+    */
+    void initParameter(uint32_t index, Parameter& parameter) noexcept override
+    {
+        switch (index)
+        {
+        case kParamOscPort:
+            parameter.hints  = kParameterIsOutput;
+            parameter.name   = "OSC Port";
+            parameter.symbol = "osc_port";
+            parameter.unit   = "";
+            parameter.ranges.min = 0.0f;
+            parameter.ranges.max = 999999.0f;
+            parameter.ranges.def = 0.0f;
+            break;
+        }
+    }
+
+   /**
+      Get the current value of a parameter.
+      The host may call this function from any context, including realtime processing.
+    */
+    float getParameterValue(uint32_t index) const noexcept override
+    {
+        switch (index)
+        {
+        case kParamOscPort:
+            return oscPort;
+        default:
+            return 0.0f;
+        }
+    }
+
+   /**
+      Change a parameter value.
+      The host may call this function from any context, including realtime processing.
+      When a parameter is marked as automable, you must ensure no non-realtime operations are performed.
+      @note This function will only be called for parameter inputs.
+    */
+    void setParameterValue(uint32_t /*index*/, float /*value*/) noexcept override
+    {
+        // only an output port for now
+    }
 
    /* --------------------------------------------------------------------------------------------------------
     * Programs */
@@ -364,11 +408,14 @@ private:
     bool  active;
     Mutex mutex;
     char* defaultState;
+    int   oscPort;
 
     char* _getState() const
     {
         char* data = nullptr;
 
+#if 0
+        // FIXME: this can lead to issues during startup
         if (active)
         {
             middleware->doReadOnlyOp([this, &data]{
@@ -376,6 +423,7 @@ private:
             });
         }
         else
+#endif
         {
             master->getalldata(&data);
         }
@@ -389,6 +437,17 @@ private:
         middleware->setUiCallback(__uiCallback, this);
         middleware->setIdleCallback(__idleCallback, this);
         _masterChangedCallback(middleware->spawnMaster());
+
+        if (char* url = lo_url_get_port(middleware->getServerAddress()))
+        {
+            oscPort = std::atoi(url);
+            std::free(url);
+        }
+        else
+        {
+            oscPort = 0;
+        }
+
         startThread();
     }
 
@@ -401,6 +460,9 @@ private:
         middleware = nullptr;
     }
 
+   /* --------------------------------------------------------------------------------------------------------
+    * ZynAddSubFX Callbacks */
+
     void _masterChangedCallback(Master* m)
     {
         master = m;
@@ -412,14 +474,20 @@ private:
         ((ZynAddSubFX*)ptr)->_masterChangedCallback(m);
     }
 
+   /* -------------------------------------------------------------------------------------------------------- */
+
     void _uiCallback(const char* const)
     {
+        // this can be used to receive messages from UI
+        // to be handled soon for parameters
     }
 
     static void __uiCallback(void* ptr, const char* msg)
     {
         ((ZynAddSubFX*)ptr)->_uiCallback(msg);
     }
+
+   /* -------------------------------------------------------------------------------------------------------- */
 
     void _idleCallback()
     {
@@ -431,6 +499,8 @@ private:
     {
         ((ZynAddSubFX*)ptr)->_idleCallback();
     }
+
+   /* -------------------------------------------------------------------------------------------------------- */
 
     void run() noexcept override
     {

@@ -27,7 +27,12 @@
 #define DISTRHO_PLUGIN_NAME  "ZynAddSubFX"
 #define DISTRHO_PLUGIN_URI   "http://zynaddsubfx.sourceforge.net"
 
-#define DISTRHO_PLUGIN_HAS_UI          0
+#ifdef NTK_GUI
+ #define DISTRHO_PLUGIN_HAS_UI         1
+#else
+ #define DISTRHO_PLUGIN_HAS_UI         0
+#endif
+
 #define DISTRHO_PLUGIN_IS_RT_SAFE      1
 #define DISTRHO_PLUGIN_IS_SYNTH        1
 #define DISTRHO_PLUGIN_NUM_INPUTS      0
@@ -35,5 +40,16 @@
 #define DISTRHO_PLUGIN_WANT_PROGRAMS   1
 #define DISTRHO_PLUGIN_WANT_STATE      1
 #define DISTRHO_PLUGIN_WANT_FULL_STATE 1
+
+enum Parameters {
+    kParamOscPort,
+    kParamCount
+};
+
+// Needed for dpf code, external-ui is not official
+#ifdef NTK_GUI
+ #define HAVE_DGL
+ #include "DistrhoUIInternal.hpp"
+#endif
 
 #endif // DISTRHO_PLUGIN_INFO_H_INCLUDED

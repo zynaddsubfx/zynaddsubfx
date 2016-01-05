@@ -1,8 +1,43 @@
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR}/DPF/distrho .)
 
-add_library(ZynAddSubFX_lv2 SHARED ${CMAKE_SOURCE_DIR}/src/globals.cpp ${CMAKE_SOURCE_DIR}/src/UI/ConnectionDummy.cpp ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp ZynAddSubFX.cpp)
-add_library(ZynAddSubFX_vst SHARED ${CMAKE_SOURCE_DIR}/src/globals.cpp ${CMAKE_SOURCE_DIR}/src/UI/ConnectionDummy.cpp ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp ZynAddSubFX.cpp)
+if(NtkGui)
+
+# UI Enabled
+add_library(ZynAddSubFX_lv2 SHARED
+    ${CMAKE_SOURCE_DIR}/src/globals.cpp
+    ${CMAKE_SOURCE_DIR}/src/UI/ConnectionDummy.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp
+    ZynAddSubFX.cpp)
+
+add_library(ZynAddSubFX_lv2_ui SHARED
+    DistrhoUI.cpp
+    ZynAddSubFX-UI.cpp)
+
+add_library(ZynAddSubFX_vst SHARED
+    ${CMAKE_SOURCE_DIR}/src/globals.cpp
+    ${CMAKE_SOURCE_DIR}/src/UI/ConnectionDummy.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp
+    DistrhoUI.cpp
+    ZynAddSubFX.cpp
+    ZynAddSubFX-UI.cpp)
+
+elseif(NtkGui)
+
+# UI Disabled
+add_library(ZynAddSubFX_lv2 SHARED
+    ${CMAKE_SOURCE_DIR}/src/globals.cpp
+    ${CMAKE_SOURCE_DIR}/src/UI/ConnectionDummy.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp
+    ZynAddSubFX.cpp)
+
+add_library(ZynAddSubFX_vst SHARED
+    ${CMAKE_SOURCE_DIR}/src/globals.cpp
+    ${CMAKE_SOURCE_DIR}/src/UI/ConnectionDummy.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp
+    ZynAddSubFX.cpp)
+
+endif(NtkGui)
 
 set_target_properties(ZynAddSubFX_lv2 PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_LV2")
 set_target_properties(ZynAddSubFX_lv2 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "lv2")
@@ -29,3 +64,16 @@ install(FILES
 	${CMAKE_CURRENT_BINARY_DIR}/lv2/presets.ttl
 	${CMAKE_CURRENT_BINARY_DIR}/lv2/ZynAddSubFX.ttl
 	DESTINATION lib/lv2/ZynAddSubFX.lv2/)
+
+if(NtkGui)
+set_target_properties(ZynAddSubFX_lv2_ui PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_LV2")
+set_target_properties(ZynAddSubFX_lv2_ui PROPERTIES LIBRARY_OUTPUT_DIRECTORY "lv2")
+set_target_properties(ZynAddSubFX_lv2_ui PROPERTIES OUTPUT_NAME "ZynAddSubFX_ui")
+set_target_properties(ZynAddSubFX_lv2_ui PROPERTIES PREFIX "")
+
+install(TARGETS ZynAddSubFX_lv2_ui LIBRARY DESTINATION lib/lv2/ZynAddSubFX.lv2/)
+
+install(FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/lv2/ZynAddSubFX_ui.ttl
+        DESTINATION lib/lv2/ZynAddSubFX.lv2/)
+endif(NtkGui)
