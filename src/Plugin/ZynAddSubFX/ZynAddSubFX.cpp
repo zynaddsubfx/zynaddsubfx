@@ -32,23 +32,96 @@
 // Extra includes
 #include "extra/Mutex.hpp"
 #include "extra/Thread.hpp"
+#include "extra/ScopedPointer.hpp"
+
 #include <lo/lo.h>
+
+/* ------------------------------------------------------------------------------------------------------------
+ * MiddleWare thread class */
+
+class MiddleWareThread : public Thread
+{
+public:
+      class ScopedStopper
+      {
+      public:
+          ScopedStopper(MiddleWareThread& mwt) noexcept
+              : wasRunning(mwt.isThreadRunning()),
+                thread(mwt),
+                middleware(mwt.middleware)
+          {
+              if (wasRunning)
+                  thread.stop();
+          }
+
+          ~ScopedStopper() noexcept
+          {
+              if (wasRunning)
+                  thread.start(middleware);
+          }
+
+          void updateMiddleWare(MiddleWare* const mw) noexcept
+          {
+              middleware = mw;
+          }
+
+      private:
+          const bool wasRunning;
+          MiddleWareThread& thread;
+          MiddleWare* middleware;
+
+          DISTRHO_PREVENT_HEAP_ALLOCATION
+          DISTRHO_DECLARE_NON_COPY_CLASS(ScopedStopper)
+      };
+
+      MiddleWareThread()
+          : Thread("ZynMiddleWare"),
+            middleware(nullptr) {}
+
+      void start(MiddleWare* const mw) noexcept
+      {
+          middleware = mw;
+          startThread();
+      }
+
+      void stop() noexcept
+      {
+          stopThread(1000);
+          middleware = nullptr;
+      }
+
+protected:
+    void run() noexcept override
+    {
+        for (; ! shouldThreadExit();)
+        {
+            try {
+                middleware->tick();
+            } catch(...) {}
+
+            d_msleep(1);
+        }
+    }
+
+private:
+    MiddleWare* middleware;
+
+    DISTRHO_DECLARE_NON_COPY_CLASS(MiddleWareThread)
+};
 
 /* ------------------------------------------------------------------------------------------------------------
  * ZynAddSubFX plugin class */
 
-class ZynAddSubFX : public Plugin,
-                    private Thread
+class ZynAddSubFX : public Plugin
 {
 public:
     ZynAddSubFX()
         : Plugin(kParamCount, 1, 1), // 1 program, 1 state
-          Thread("ZynMwTick"),
           master(nullptr),
           middleware(nullptr),
-          active(false),
           defaultState(nullptr),
-          oscPort(0)
+          oscPort(0),
+          middlewareThread(new MiddleWareThread())
     {
         config.init();
 
@@ -63,10 +136,13 @@ public:
         _initMaster();
 
         defaultState = _getState();
+
+        middlewareThread->start(middleware);
     }
 
     ~ZynAddSubFX() override
     {
+        middlewareThread->stop();
         _deleteMaster();
         std::free(defaultState);
     }
@@ -233,6 +309,7 @@ protected:
     */
     void setState(const char* key, const char* value) override
     {
+        const MiddleWareThread::ScopedStopper mwss(*middlewareThread);
         const MutexLocker cml(mutex);
 
         master->putalldata(value);
@@ -244,22 +321,6 @@ protected:
 
    /* --------------------------------------------------------------------------------------------------------
     * Audio/MIDI Processing */
-
-   /**
-      Activate this plugin.
-    */
-    void activate() noexcept override
-    {
-        active = true;
-    }
-
-   /**
-      Deactivate this plugin.
-    */
-    void deactivate() noexcept override
-    {
-        active = false;
-    }
 
    /**
       Run/process function for plugins with MIDI input.
@@ -363,6 +424,8 @@ protected:
     */
     void bufferSizeChanged(uint32_t newBufferSize) override
     {
+        MiddleWareThread::ScopedStopper mwss(*middlewareThread);
+
         char* const state(_getState());
 
         _deleteMaster();
@@ -375,6 +438,7 @@ protected:
         synth.alias();
 
         _initMaster();
+        mwss.updateMiddleWare(middleware);
 
         setState(nullptr, state);
         std::free(state);
@@ -386,6 +450,8 @@ protected:
     */
     void sampleRateChanged(double newSampleRate) override
     {
+        MiddleWareThread::ScopedStopper mwss(*middlewareThread);
+
         char* const state(_getState());
 
         _deleteMaster();
@@ -394,6 +460,7 @@ protected:
         synth.alias();
 
         _initMaster();
+        mwss.updateMiddleWare(middleware);
 
         setState(nullptr, state);
         std::free(state);
@@ -405,29 +472,18 @@ private:
     MiddleWare* middleware;
     SYNTH_T     synth;
 
-    bool  active;
     Mutex mutex;
     char* defaultState;
     int   oscPort;
 
+    ScopedPointer<MiddleWareThread> middlewareThread;
+
     char* _getState() const
     {
+        const MiddleWareThread::ScopedStopper mwss(*middlewareThread);
+
         char* data = nullptr;
-
-#if 0
-        // FIXME: this can lead to issues during startup
-        if (active)
-        {
-            middleware->doReadOnlyOp([this, &data]{
-                master->getalldata(&data);
-            });
-        }
-        else
-#endif
-        {
-            master->getalldata(&data);
-        }
-
+        master->getalldata(&data);
         return data;
     }
 
@@ -447,14 +503,10 @@ private:
         {
             oscPort = 0;
         }
-
-        startThread();
     }
 
     void _deleteMaster()
     {
-        stopThread(1000);
-
         master = nullptr;
         delete middleware;
         middleware = nullptr;
@@ -498,20 +550,6 @@ private:
     static void __idleCallback(void* ptr)
     {
         ((ZynAddSubFX*)ptr)->_idleCallback();
-    }
-
-   /* -------------------------------------------------------------------------------------------------------- */
-
-    void run() noexcept override
-    {
-        for (; ! shouldThreadExit();)
-        {
-            try {
-                middleware->tick();
-            } catch(...) {}
-
-            d_msleep(1);
-        }
     }
 
     DISTRHO_DECLARE_NON_COPY_CLASS(ZynAddSubFX)
