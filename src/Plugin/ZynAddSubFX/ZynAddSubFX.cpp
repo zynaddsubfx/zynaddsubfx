@@ -562,6 +562,7 @@ START_NAMESPACE_DISTRHO
 
 Plugin* createPlugin()
 {
+    ::isPlugin = true;
     return new ZynAddSubFX();
 }
 
