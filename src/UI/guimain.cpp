@@ -197,6 +197,10 @@ ui_handle_t GUI::createUi(Fl_Osc_Interface *osc, void *exit)
     {
         if (long long winId = atoll(embedId))
         {
+            // running embed as plugin
+            MasterUI::menu_mastermenu[11].hide(); // file -> nio settings
+            MasterUI::menu_mastermenu[13].hide(); // file -> exit
+            MasterUI::menu_mastermenu[26].hide(); // misc -> switch interface mode
             fl_embed(ui->masterwindow, winId);
             ui->masterwindow->show();
         }
