@@ -7,5 +7,6 @@ set(zynaddsubfx_synth_SRCS
 	Synth/PADnote.cpp
 	Synth/Resonance.cpp
 	Synth/SUBnote.cpp
+    Synth/WatchPoint.cpp
 	PARENT_SCOPE
 )

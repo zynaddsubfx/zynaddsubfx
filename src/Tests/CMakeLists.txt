@@ -17,6 +17,7 @@ CXXTEST_ADD_TEST(MiddlewareTest MiddlewareTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/M
 CXXTEST_ADD_TEST(MessageTest MessageTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/MessageTest.h)
 CXXTEST_ADD_TEST(UnisonTest UnisonTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/UnisonTest.h)
 CXXTEST_ADD_TEST(MqTest MqTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/MqTest.h)
+CXXTEST_ADD_TEST(WatchTest WatchTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/WatchTest.h)
 #CXXTEST_ADD_TEST(RtAllocTest RtAllocTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/RtAllocTest.h)
 CXXTEST_ADD_TEST(AllocatorTest AllocatorTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/AllocatorTest.h)
@@ -40,6 +41,7 @@ target_link_libraries(XMLwrapperTest ${test_lib})
 target_link_libraries(RandTest       ${test_lib})
 target_link_libraries(PADnoteTest    ${test_lib})
 target_link_libraries(MqTest         ${test_lib})
+target_link_libraries(WatchTest         ${test_lib})
 target_link_libraries(PluginTest     zynaddsubfx_core zynaddsubfx_nio
     zynaddsubfx_gui_bridge
     ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})

@@ -28,13 +28,16 @@
 #include <cstdio>
 #include <cmath>
 
-LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t)
+LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManager *m,
+        const char *watch_prefix)
     :first_half(-1),
     delayTime(t, lfopars.Pdelay / 127.0f * 4.0f), //0..4 sec
     waveShape(lfopars.PLFOtype),
     deterministic(!lfopars.Pfreqrand),
     dt_(t.dt()),
-    lfopars_(lfopars), basefreq_(basefreq)
+    lfopars_(lfopars), basefreq_(basefreq),
+    watchPhase(m, watch_prefix, "phase"),
+    watchMag(m,   watch_prefix, "magnitude")
 {
     int stretch = lfopars.Pstretch;
     if(stretch == 0)
@@ -175,6 +178,10 @@ float LFO::lfoout()
 
         computeNextFreqRnd();
     }
+
+    watchPhase(phase);
+    watchMag(out);
+
     return out;
 }
 

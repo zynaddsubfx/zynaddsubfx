@@ -54,6 +54,7 @@ class  EnvelopeParams;
 class  LFOParams;
 class  FilterParams;
 
+struct WatchManager;
 class  LFO;
 class  Envelope;
 class  OscilGen;

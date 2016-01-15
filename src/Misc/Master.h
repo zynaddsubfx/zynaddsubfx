@@ -33,6 +33,7 @@
 #include "Recorder.h"
 
 #include "../Params/Controller.h"
+#include "../Synth/WatchPoint.h"
 
 class Allocator;
 
@@ -167,6 +168,10 @@ class Master
         //Statistics on output levels
         vuData vu;
 
+        //Other watchers
+        WatchManager watcher;
+
+        //Midi Learn
         rtosc::MidiMapperRT midi;
 
         bool   frozenState;//read-only parameters for threadsafe actions
