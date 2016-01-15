@@ -312,6 +312,7 @@ protected:
         const MiddleWareThread::ScopedStopper mwss(*middlewareThread);
         const MutexLocker cml(mutex);
 
+        master->defaults();
         master->putalldata(value);
         master->applyparameters();
         master->initialize_rt();
