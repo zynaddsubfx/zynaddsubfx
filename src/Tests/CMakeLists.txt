@@ -20,6 +20,7 @@ CXXTEST_ADD_TEST(MqTest MqTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/MqTest.h)
 #CXXTEST_ADD_TEST(RtAllocTest RtAllocTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/RtAllocTest.h)
 CXXTEST_ADD_TEST(AllocatorTest AllocatorTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/AllocatorTest.h)
+CXXTEST_ADD_TEST(EffectTest EffectTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/EffectTest.h)
 CXXTEST_ADD_TEST(KitTest KitTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/KitTest.h)
 CXXTEST_ADD_TEST(MemoryStressTest MemoryStressTest.cpp
@@ -54,6 +55,7 @@ target_link_libraries(UnisonTest    ${test_lib})
 target_link_libraries(AllocatorTest    ${test_lib})
 target_link_libraries(KitTest    ${test_lib})
 target_link_libraries(MemoryStressTest ${test_lib})
+target_link_libraries(EffectTest ${test_lib})
 
 #Testbed app
 add_executable(ins-test InstrumentStats.cpp)
