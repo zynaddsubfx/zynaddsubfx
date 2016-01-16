@@ -56,7 +56,7 @@ install(TARGETS ZynAddSubFX_lv2 LIBRARY DESTINATION lib/lv2/ZynAddSubFX.lv2/)
 install(TARGETS ZynAddSubFX_vst LIBRARY DESTINATION lib/vst/)
 
 add_custom_command(TARGET ZynAddSubFX_lv2 POST_BUILD
-	COMMAND lv2-ttl-generator ./ZynAddSubFX.so
+    COMMAND lv2-ttl-generator $<TARGET_FILE:ZynAddSubFX_lv2>
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
 
 install(FILES

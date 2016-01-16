@@ -21,7 +21,7 @@ install(TARGETS ZynAlienWah_lv2 LIBRARY DESTINATION lib/lv2/ZynAlienWah.lv2/)
 install(TARGETS ZynAlienWah_vst LIBRARY DESTINATION lib/vst/)
 
 add_custom_command(TARGET ZynAlienWah_lv2 POST_BUILD
-	COMMAND lv2-ttl-generator ./ZynAlienWah.so
+    COMMAND lv2-ttl-generator $<TARGET_FILE:ZynAlienWah_lv2>
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
 
 install(FILES

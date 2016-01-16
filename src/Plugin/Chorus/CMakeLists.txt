@@ -21,7 +21,7 @@ install(TARGETS ZynChorus_lv2 LIBRARY DESTINATION lib/lv2/ZynChorus.lv2/)
 install(TARGETS ZynChorus_vst LIBRARY DESTINATION lib/vst/)
 
 add_custom_command(TARGET ZynChorus_lv2 POST_BUILD
-	COMMAND lv2-ttl-generator ./ZynChorus.so
+    COMMAND lv2-ttl-generator $<TARGET_FILE:ZynChorus_lv2>
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
 
 install(FILES

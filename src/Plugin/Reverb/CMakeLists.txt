@@ -21,7 +21,7 @@ install(TARGETS ZynReverb_lv2 LIBRARY DESTINATION lib/lv2/ZynReverb.lv2/)
 install(TARGETS ZynReverb_vst LIBRARY DESTINATION lib/vst/)
 
 add_custom_command(TARGET ZynReverb_lv2 POST_BUILD
-	COMMAND lv2-ttl-generator ./ZynReverb.so
+    COMMAND lv2-ttl-generator $<TARGET_FILE:ZynReverb_lv2>
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
 
 install(FILES
