@@ -113,6 +113,7 @@ class NotePool
         void killNote(note_t note);
         void kill(NoteDescriptor &d);
         void kill(SynthDescriptor &s);
+        void entomb(NoteDescriptor &d);
 
         void cleanup(void);
 

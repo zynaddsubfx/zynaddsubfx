@@ -197,8 +197,13 @@ void NotePool::enforceKeyLimit(int limit)
         }
     }
 
-    if(to_kill)
-        kill(*to_kill);
+    if(to_kill) {
+        auto status = to_kill->status;
+        if(status == Part::KEY_RELEASED || status == Part::KEY_RELEASED_AND_SUSTAINED)
+            kill(*to_kill);
+        else
+            entomb(*to_kill);
+    }
 }
 
 void NotePool::releasePlayingNotes(void)
@@ -245,6 +250,13 @@ void NotePool::kill(SynthDescriptor &s)
     //printf("Kill synth...\n");
     s.note->memory.dealloc(s.note);
     needs_cleaning = true;
+}
+
+void NotePool::entomb(NoteDescriptor &d)
+{
+    d.status = Part::KEY_RELEASED;
+    for(auto &s:activeNotes(d))
+        s.note->entomb();
 }
 
 const char *getStatus(int status_bits)
