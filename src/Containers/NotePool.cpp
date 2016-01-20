@@ -65,6 +65,28 @@ NotePool::constActiveDescIter NotePool::activeDesc(void) const
     return constActiveDescIter{*this};
 }
 
+int NotePool::usedNoteDesc(void) const
+{
+    if(needs_cleaning)
+        const_cast<NotePool*>(this)->cleanup();
+
+    int cnt = 0;
+    for(int i=0; i<POLYPHONY; ++i)
+        cnt += (ndesc[i].size != 0);
+    return cnt;
+}
+
+int NotePool::usedSynthDesc(void) const
+{
+    if(needs_cleaning)
+        const_cast<NotePool*>(this)->cleanup();
+
+    int cnt = 0;
+    for(int i=0; i<POLYPHONY*EXPECTED_USAGE; ++i)
+        cnt += (bool)sdesc[i].note;
+    return cnt;
+}
+
 void NotePool::insertNote(uint8_t note, uint8_t sendto, SynthDescriptor desc, bool legato)
 {
     //Get first free note descriptor
@@ -160,23 +182,23 @@ int NotePool::getRunningNotes(void) const
 
     return running_count;
 }
-int NotePool::enforceKeyLimit(int limit) const
+void NotePool::enforceKeyLimit(int limit)
 {
-        //{
-        //int oldestnotepos = -1;
-        //if(notecount > keylimit)   //find out the oldest note
-        //    for(int i = 0; i < POLYPHONY; ++i) {
-        //        int maxtime = 0;
-        //        if(((partnote[i].status == KEY_PLAYING) || (partnote[i].status == KEY_RELEASED_AND_SUSTAINED)) && (partnote[i].time > maxtime)) {
-        //            maxtime = partnote[i].time;
-        //            oldestnotepos = i;
-        //        }
-        //    }
-        //if(oldestnotepos != -1)
-        //    ReleaseNotePos(oldestnotepos);
-        //}
-    //printf("Unimplemented enforceKeyLimit()\n");
-    return -1;
+    int notes_to_kill = getRunningNotes() - limit;
+    if(notes_to_kill < 0)
+        return;
+
+    NoteDescriptor *to_kill = NULL;
+    unsigned oldest = 0;
+    for(auto &nd : activeDesc()) {
+        if(nd.age > oldest || to_kill == NULL) {
+            oldest  = nd.age;
+            to_kill = &nd;
+        }
+    }
+
+    if(to_kill)
+        kill(*to_kill);
 }
 
 void NotePool::releasePlayingNotes(void)
