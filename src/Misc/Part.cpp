@@ -726,7 +726,7 @@ void Part::setkeylimit(unsigned char Pkeylimit_)
     if(keylimit == 0)
         keylimit = POLYPHONY - 5;
 
-    if(notePool.getRunningNotes() > keylimit)
+    if(notePool.getRunningNotes() >= keylimit)
         notePool.enforceKeyLimit(keylimit);
 }
 

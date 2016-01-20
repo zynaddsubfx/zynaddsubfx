@@ -560,9 +560,9 @@ class KitTest:public CxxTest::TestSuite
             part->NoteOn(68, 127, 0);
 
             //Verify that notes are spawned as expected with limit
-            TS_ASSERT_EQUALS(pool.getRunningNotes(),  3);
-            TS_ASSERT_EQUALS(pool.usedNoteDesc(),  3);
-            TS_ASSERT_EQUALS(pool.usedSynthDesc(), 3);
+            TS_ASSERT_EQUALS(pool.getRunningNotes(),  3);//2 entombed
+            TS_ASSERT_EQUALS(pool.usedNoteDesc(),     5);
+            TS_ASSERT_EQUALS(pool.usedSynthDesc(),    5);
 
             //Reset the part
             part->monomemClear();
@@ -587,24 +587,32 @@ class KitTest:public CxxTest::TestSuite
             pool.ndesc[1].age = 50;
             pool.ndesc[2].age = 500;
 
+            printf("-------------------------------------\n");
+
             //Inject two more notes which should steal the note
             //descriptors for #66 and #65
             part->NoteOn(67, 127, 0);
             pool.cleanup();
             TS_ASSERT_EQUALS(pool.ndesc[0].note, 64);
             TS_ASSERT_EQUALS(pool.ndesc[1].note, 65);
-            TS_ASSERT_EQUALS(pool.ndesc[2].note, 67);
+            TS_ASSERT_EQUALS(pool.ndesc[2].note, 66);
+            TS_ASSERT_EQUALS(pool.ndesc[2].status, Part::KEY_RELEASED);
+            TS_ASSERT_EQUALS(pool.ndesc[3].note, 67);
 
             part->NoteOn(68, 127, 0);
 
-            //Verify that note pool is still full
-            TS_ASSERT_EQUALS(pool.usedNoteDesc(),  3);
-            TS_ASSERT_EQUALS(pool.usedSynthDesc(), 3);
+            //Verify that note pool is still full and entombed
+            TS_ASSERT_EQUALS(pool.usedNoteDesc(),  5);
+            TS_ASSERT_EQUALS(pool.usedSynthDesc(), 5);
 
             //Check that the result is {64, 68, 67}
             TS_ASSERT_EQUALS(pool.ndesc[0].note, 64);
-            TS_ASSERT_EQUALS(pool.ndesc[1].note, 67);
-            TS_ASSERT_EQUALS(pool.ndesc[2].note, 68);
+            TS_ASSERT_EQUALS(pool.ndesc[1].note, 65);
+            TS_ASSERT_EQUALS(pool.ndesc[1].status, Part::KEY_RELEASED);
+            TS_ASSERT_EQUALS(pool.ndesc[2].note, 66);
+            TS_ASSERT_EQUALS(pool.ndesc[2].status, Part::KEY_RELEASED);
+            TS_ASSERT_EQUALS(pool.ndesc[3].note, 67);
+            TS_ASSERT_EQUALS(pool.ndesc[4].note, 68);
         }
 
         void tearDown() {

@@ -185,14 +185,24 @@ int NotePool::getRunningNotes(void) const
 void NotePool::enforceKeyLimit(int limit)
 {
     int notes_to_kill = getRunningNotes() - limit;
-    if(notes_to_kill < 0)
+    if(notes_to_kill <= 0)
         return;
 
     NoteDescriptor *to_kill = NULL;
     unsigned oldest = 0;
     for(auto &nd : activeDesc()) {
-        if(nd.age > oldest || to_kill == NULL) {
+        if(to_kill == NULL) {
+            //There must be something to kill
             oldest  = nd.age;
+            to_kill = &nd;
+        } else if(to_kill->status == Part::KEY_RELEASED && nd.status == Part::KEY_PLAYING) {
+            //Prefer to kill off a running note
+            oldest = nd.age;
+            to_kill = &nd;
+        } else if(nd.age > oldest && !(to_kill->status == Part::KEY_PLAYING &&
+                    nd.status == Part::KEY_RELEASED)) {
+            //Get an older note when it doesn't move from running to released
+            oldest = nd.age;
             to_kill = &nd;
         }
     }
