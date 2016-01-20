@@ -84,6 +84,10 @@ class NotePool
         activeDescIter activeDesc(void);
         constActiveDescIter activeDesc(void) const;
 
+        //Counts of descriptors used for tests
+        int usedNoteDesc(void) const;
+        int usedSynthDesc(void) const;
+
         NotePool(void);
 
         //Operations
@@ -99,7 +103,7 @@ class NotePool
         //Note that isn't KEY_PLAYING or KEY_RELASED_AND_SUSTAINING
         bool existsRunningNote(void) const;
         int getRunningNotes(void) const;
-        int enforceKeyLimit(int limit) const;
+        void enforceKeyLimit(int limit);
 
         void releasePlayingNotes(void);
         void releaseNote(note_t note);
@@ -109,6 +113,7 @@ class NotePool
         void killNote(note_t note);
         void kill(NoteDescriptor &d);
         void kill(SynthDescriptor &s);
+        void entomb(NoteDescriptor &d);
 
         void cleanup(void);
 
