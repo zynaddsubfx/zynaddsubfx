@@ -178,18 +178,13 @@ bankui->show();}
       }
       Fl_Check_Button partenabled {
         label 01
-        callback {o->oscWrite("Penabled", o->value() ? "T" : "F");
-if ((int) o->value()==0) panellistitemgroup->deactivate();
-  else {
-    panellistitemgroup->activate();
-    /*
-    if ((int)bankui->cbwig->value()!=(npart+1)){
-       bankui->cbwig->value(npart+1);
-       bankui->cbwig->do_callback();
-    };*/
-};
+        callback {
+            if ((int) o->value()==0) panellistitemgroup->deactivate();
+            else {
+                panellistitemgroup->activate();
+            };
 
-o->redraw();}
+            o->redraw();}
         private xywh {5 0 45 20} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 24
         code0 {char tmp[10];snprintf(tmp,10,"%d",npart+1);o->copy_label(tmp);}
         code1 {o->init("Penabled");}

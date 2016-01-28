@@ -6,7 +6,7 @@ CallbackRepeater::CallbackRepeater(int interval, cb_t cb_)
 void CallbackRepeater::tick(void)
 {
     auto now = time(0);
-    if(now-last > dt) {
+    if(now-last > dt && dt >= 0) {
         cb();
         last = now;
     }
