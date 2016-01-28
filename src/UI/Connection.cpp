@@ -158,12 +158,15 @@ rtosc::Ports uiPorts::ports = {
         fl_alert("%s",a0.s);
     } END
     BEGIN("alert-reload:i") {
-        if(1==fl_choice("Old autosave found, do you want to reload?",
-                NULL, "Reload", "Ignore")) {
-            printf("trying to reload...\n");
+        int res = fl_choice("Old autosave found, do you want to reload?",
+                "Delete", "Reload", "Ignore");
+        //       0        1          2
+        if(1==res) {
             d.reply("/reload_auto_save", "i", a0.i);
             ui->refresh_master_ui();
             ui->updatepanel();
+        } else if(0==res) {
+            d.reply("/delete_auto_save", "i", a0.i);
         }
     } END
     BEGIN("session-type:s") {
