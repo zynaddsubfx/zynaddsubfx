@@ -997,6 +997,14 @@ static rtosc::Ports middwareSnoopPorts = {
         //autosave, but this method should work for non-immediate crashes :-|
         remove(save_loc.c_str());
         rEnd},
+    {"delete_auto_save:i", 0, 0,
+        rBegin
+        const int save_id      = rtosc_argument(msg,0).i;
+        const string save_dir  = string(getenv("HOME")) + "/.local";
+        const string save_file = "zynaddsubfx-"+to_s(save_id)+"-autosave.xmz";
+        const string save_loc  = save_dir + "/" + save_file;
+        remove(save_loc.c_str());
+        rEnd},
     {"load_xmz:s", 0, 0,
         rBegin;
         const char *file = rtosc_argument(msg, 0).s;
