@@ -1295,7 +1295,7 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
     assert(strcmp(rtmsg, "/ze_state"));
 
     //Dump Incomming Events For Debugging
-    if(strcmp(rtmsg, "/vu-meter") && true) {
+    if(strcmp(rtmsg, "/vu-meter") && false) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 1 + 30, 0 + 40);
         fprintf(stdout, "frontend[%c]: '%s'<%s>\n", forward?'f':broadcast?'b':'N',
                 rtmsg, rtosc_argument_string(rtmsg));
