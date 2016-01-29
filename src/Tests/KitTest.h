@@ -17,6 +17,15 @@ int dummy=0;
 
 using namespace std;
 
+#define SUSTAIN_BIT 0x04
+enum PrivateNoteStatus {
+    KEY_OFF                    = 0x00,
+    KEY_PLAYING                = 0x01,
+    KEY_RELEASED_AND_SUSTAINED = 0x02,
+    KEY_RELEASED               = 0x03
+};
+
+
 class KitTest:public CxxTest::TestSuite
 {
     private:
@@ -42,6 +51,85 @@ class KitTest:public CxxTest::TestSuite
             part = new Part(alloc, *synth, *time, dummy, dummy, &microtonal, &fft);
         }
 
+        //Standard poly mode with sustain
+        void testSustainCase1() {
+            //enable sustain
+            part->ctl.setsustain(127);
+
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(64, 127, 0);
+            part->NoteOff(64);
+
+            //first note has moved to release state
+            //second note has moved to sustain state
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=KEY_RELEASED|SUSTAIN_BIT,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=KEY_RELEASED_AND_SUSTAINED,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false}));
+        }
+
+        void testSustainCase2() {
+            //enable sustain
+            part->ctl.setsustain(127);
+
+            part->NoteOn(64, 127, 0);
+            part->NoteOff(64);
+            part->NoteOn(64, 127, 0);
+
+            //first note has moved to release state
+            //second note has stayed in playing state
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=KEY_RELEASED|SUSTAIN_BIT,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=KEY_PLAYING,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false}));
+        }
+
         //Enumerate cases of:
         //Legato = {disabled,enabled}
         //Mono   = {diabled, enabled}
@@ -59,7 +147,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=64,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -68,7 +156,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -93,7 +181,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -102,7 +190,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -139,7 +227,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=64,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_RELEASED,
+                    .status=KEY_RELEASED,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -148,7 +236,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -191,7 +279,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=64,
                     .sendto=0,
                     .size=2,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -200,7 +288,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=2,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -257,7 +345,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=2,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -266,7 +354,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=2,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -323,7 +411,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=64,
                     .sendto=0,
                     .size=2,
-                    .status=Part::KEY_RELEASED,
+                    .status=KEY_RELEASED,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -332,7 +420,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=2,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -388,7 +476,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=64,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -397,7 +485,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -442,7 +530,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -451,7 +539,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -495,7 +583,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=64,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_RELEASED,
+                    .status=KEY_RELEASED,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -504,7 +592,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -525,6 +613,94 @@ class KitTest:public CxxTest::TestSuite
             TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, false);
             TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
             TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  0)
+        }
+
+        void testKeyLimit(void)
+        {
+            auto &pool = part->notePool;
+            //Verify that without a key limit, several notes can be run
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(65, 127, 0);
+            part->NoteOn(66, 127, 0);
+            part->NoteOn(67, 127, 0);
+            part->NoteOn(68, 127, 0);
+
+            //Verify that notes are spawned as expected
+            TS_ASSERT_EQUALS(pool.usedNoteDesc(),  5);
+            TS_ASSERT_EQUALS(pool.usedSynthDesc(), 5);
+
+            //Reset the part
+            part->monomemClear();
+            pool.killAllNotes();
+
+            //Verify that notes are despawned
+            TS_ASSERT_EQUALS(pool.usedNoteDesc(),  0);
+            TS_ASSERT_EQUALS(pool.usedSynthDesc(), 0);
+
+            //Enable keylimit
+            part->setkeylimit(3);
+
+            //Replay notes
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(65, 127, 0);
+            part->NoteOn(66, 127, 0);
+            part->NoteOn(67, 127, 0);
+            part->NoteOn(68, 127, 0);
+
+            //Verify that notes are spawned as expected with limit
+            TS_ASSERT_EQUALS(pool.getRunningNotes(),  3);//2 entombed
+            TS_ASSERT_EQUALS(pool.usedNoteDesc(),     5);
+            TS_ASSERT_EQUALS(pool.usedSynthDesc(),    5);
+
+            //Reset the part
+            part->monomemClear();
+            pool.killAllNotes();
+
+            //Verify that notes are despawned
+            TS_ASSERT_EQUALS(pool.usedNoteDesc(),  0);
+            TS_ASSERT_EQUALS(pool.usedSynthDesc(), 0);
+
+            //Now to test note stealing
+
+            //Replay notes
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(65, 127, 0);
+            part->NoteOn(66, 127, 0);
+
+            //Verify that note pool is full
+            TS_ASSERT_EQUALS(pool.usedNoteDesc(),  3);
+            TS_ASSERT_EQUALS(pool.usedSynthDesc(), 3);
+
+            //Age the notes
+            pool.ndesc[1].age = 50;
+            pool.ndesc[2].age = 500;
+
+            printf("-------------------------------------\n");
+
+            //Inject two more notes which should steal the note
+            //descriptors for #66 and #65
+            part->NoteOn(67, 127, 0);
+            pool.cleanup();
+            TS_ASSERT_EQUALS(pool.ndesc[0].note, 64);
+            TS_ASSERT_EQUALS(pool.ndesc[1].note, 65);
+            TS_ASSERT_EQUALS(pool.ndesc[2].note, 66);
+            TS_ASSERT_EQUALS(pool.ndesc[2].status, KEY_RELEASED);
+            TS_ASSERT_EQUALS(pool.ndesc[3].note, 67);
+
+            part->NoteOn(68, 127, 0);
+
+            //Verify that note pool is still full and entombed
+            TS_ASSERT_EQUALS(pool.usedNoteDesc(),  5);
+            TS_ASSERT_EQUALS(pool.usedSynthDesc(), 5);
+
+            //Check that the result is {64, 68, 67}
+            TS_ASSERT_EQUALS(pool.ndesc[0].note, 64);
+            TS_ASSERT_EQUALS(pool.ndesc[1].note, 65);
+            TS_ASSERT_EQUALS(pool.ndesc[1].status, KEY_RELEASED);
+            TS_ASSERT_EQUALS(pool.ndesc[2].note, 66);
+            TS_ASSERT_EQUALS(pool.ndesc[2].status, KEY_RELEASED);
+            TS_ASSERT_EQUALS(pool.ndesc[3].note, 67);
+            TS_ASSERT_EQUALS(pool.ndesc[4].note, 68);
         }
 
         void tearDown() {
