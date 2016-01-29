@@ -1,11 +1,19 @@
 #include "NotePool.h"
-//XXX eliminate dependence on Part.h
-#include "../Misc/Part.h"
 #include "../Misc/Allocator.h"
 #include "../Synth/SynthNote.h"
 #include <cstring>
 #include <cassert>
 #include <iostream>
+
+#define NOTE_MASK 0x03
+
+enum NoteStatus {
+    KEY_OFF                    = 0x00,
+    KEY_PLAYING                = 0x01,
+    KEY_RELEASED_AND_SUSTAINED = 0x02,
+    KEY_RELEASED               = 0x03
+};
+
 
 NotePool::NotePool(void)
     :needs_cleaning(0)
@@ -13,6 +21,38 @@ NotePool::NotePool(void)
     memset(ndesc, 0, sizeof(ndesc));
     memset(sdesc, 0, sizeof(sdesc));
 }
+
+bool NotePool::NoteDescriptor::playing(void) const
+{
+    return (status&NOTE_MASK) == KEY_PLAYING;
+}
+
+bool NotePool::NoteDescriptor::sustained(void) const
+{
+    return (status&NOTE_MASK) == KEY_RELEASED_AND_SUSTAINED;
+}
+
+bool NotePool::NoteDescriptor::released(void) const
+{
+    return (status&NOTE_MASK) == KEY_RELEASED;
+}
+
+bool NotePool::NoteDescriptor::off(void) const
+{
+    return (status&NOTE_MASK) == KEY_OFF;
+}
+
+void NotePool::NoteDescriptor::setStatus(uint8_t s)
+{
+    status &= ~NOTE_MASK;
+    status |= (NOTE_MASK&s);
+}
+
+void NotePool::NoteDescriptor::doSustain(void)
+{
+    setStatus(KEY_RELEASED_AND_SUSTAINED);
+}
+
 NotePool::activeNotesIter NotePool::activeNotes(NoteDescriptor &n)
 {
     const int off_d1 = &n-ndesc;
@@ -35,18 +75,18 @@ static int getMergeableDescriptor(uint8_t note, uint8_t sendto, bool legato,
 {
     int desc_id = 0;
     for(int i=0; i<POLYPHONY; ++i, ++desc_id)
-        if(ndesc[desc_id].status == Part::KEY_OFF)
+        if(ndesc[desc_id].off())
             break;
 
     if(desc_id != 0) {
         auto &nd = ndesc[desc_id-1];
         if(nd.age == 0 && nd.note == note && nd.sendto == sendto
-                && nd.status == Part::KEY_PLAYING && nd.legatoMirror == legato)
+                && nd.playing() && nd.legatoMirror == legato)
             return desc_id-1;
     }
 
     //Out of free descriptors
-    if(desc_id >= POLYPHONY || ndesc[desc_id].status != Part::KEY_OFF) {
+    if(desc_id >= POLYPHONY || !ndesc[desc_id].off()) {
         return -1;
     }
 
@@ -96,7 +136,7 @@ void NotePool::insertNote(uint8_t note, uint8_t sendto, SynthDescriptor desc, bo
     ndesc[desc_id].note         = note;
     ndesc[desc_id].sendto       = sendto;
     ndesc[desc_id].size        += 1;
-    ndesc[desc_id].status       = Part::KEY_PLAYING;
+    ndesc[desc_id].status       = KEY_PLAYING;
     ndesc[desc_id].legatoMirror = legato;
 
     //Get first free synth descriptor
@@ -112,7 +152,7 @@ void NotePool::insertNote(uint8_t note, uint8_t sendto, SynthDescriptor desc, bo
 void NotePool::upgradeToLegato(void)
 {
     for(auto &d:activeDesc())
-        if(d.status == Part::KEY_PLAYING)
+        if(d.playing())
             for(auto &s:activeNotes(d))
                 insertLegatoNote(d.note, d.sendto, s);
 }
@@ -145,7 +185,7 @@ void NotePool::applyLegato(LegatoParams &par)
 bool NotePool::full(void) const
 {
     for(int i=0; i<POLYPHONY; ++i)
-        if(ndesc[i].status == Part::KEY_OFF)
+        if(ndesc[i].off())
             return false;
     return true;
 }
@@ -171,8 +211,7 @@ int NotePool::getRunningNotes(void) const
     bool running[256] = {0};
     for(auto &desc:activeDesc()) {
         //printf("note!(%d)\n", desc.note);
-        if(desc.status == Part::KEY_PLAYING ||
-                desc.status == Part::KEY_RELEASED_AND_SUSTAINED)
+        if(desc.playing() || desc.sustained())
             running[desc.note] = true;
     }
 
@@ -195,12 +234,11 @@ void NotePool::enforceKeyLimit(int limit)
             //There must be something to kill
             oldest  = nd.age;
             to_kill = &nd;
-        } else if(to_kill->status == Part::KEY_RELEASED && nd.status == Part::KEY_PLAYING) {
+        } else if(to_kill->released() && nd.playing()) {
             //Prefer to kill off a running note
             oldest = nd.age;
             to_kill = &nd;
-        } else if(nd.age > oldest && !(to_kill->status == Part::KEY_PLAYING &&
-                    nd.status == Part::KEY_RELEASED)) {
+        } else if(nd.age > oldest && !(to_kill->playing() && nd.released())) {
             //Get an older note when it doesn't move from running to released
             oldest = nd.age;
             to_kill = &nd;
@@ -208,8 +246,8 @@ void NotePool::enforceKeyLimit(int limit)
     }
 
     if(to_kill) {
-        auto status = to_kill->status;
-        if(status == Part::KEY_RELEASED || status == Part::KEY_RELEASED_AND_SUSTAINED)
+        auto &tk = *to_kill;
+        if(tk.released() || tk.sustained())
             kill(*to_kill);
         else
             entomb(*to_kill);
@@ -219,8 +257,8 @@ void NotePool::enforceKeyLimit(int limit)
 void NotePool::releasePlayingNotes(void)
 {
     for(auto &d:activeDesc()) {
-        if(d.status == Part::KEY_PLAYING) {
-            d.status = Part::KEY_RELEASED;
+        if(d.playing()) {
+            d.setStatus(KEY_RELEASED);
             for(auto s:activeNotes(d))
                 s.note->releasekey();
         }
@@ -229,7 +267,7 @@ void NotePool::releasePlayingNotes(void)
 
 void NotePool::release(NoteDescriptor &d)
 {
-    d.status = Part::KEY_RELEASED;
+    d.setStatus(KEY_RELEASED);
     for(auto s:activeNotes(d))
         s.note->releasekey();
 }
@@ -250,7 +288,7 @@ void NotePool::killNote(uint8_t note)
 
 void NotePool::kill(NoteDescriptor &d)
 {
-    d.status = Part::KEY_OFF;
+    d.setStatus(KEY_OFF);
     for(auto &s:activeNotes(d))
         kill(s);
 }
@@ -264,7 +302,7 @@ void NotePool::kill(SynthDescriptor &s)
 
 void NotePool::entomb(NoteDescriptor &d)
 {
-    d.status = Part::KEY_RELEASED;
+    d.setStatus(KEY_RELEASED);
     for(auto &s:activeNotes(d))
         s.note->entomb();
 }
@@ -296,7 +334,7 @@ void NotePool::cleanup(void)
 
     int last_valid_desc = 0;
     for(int i=0; i<POLYPHONY; ++i)
-        if(ndesc[i].status != Part::KEY_OFF)
+        if(!ndesc[i].off())
             last_valid_desc = i;
 
     //Find the real numbers of allocated notes
@@ -319,7 +357,7 @@ void NotePool::cleanup(void)
             if(new_length[i] != 0)
                 ndesc[cum_new++] = ndesc[i];
             else
-                ndesc[i].status = Part::KEY_OFF;
+                ndesc[i].setStatus(KEY_OFF);
         }
         memset(ndesc+cum_new, 0, sizeof(*ndesc)*(POLYPHONY-cum_new));
     }

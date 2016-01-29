@@ -17,6 +17,14 @@ int dummy=0;
 
 using namespace std;
 
+enum PrivateNoteStatus {
+    KEY_OFF                    = 0x00,
+    KEY_PLAYING                = 0x01,
+    KEY_RELEASED_AND_SUSTAINED = 0x02,
+    KEY_RELEASED               = 0x03
+};
+
+
 class KitTest:public CxxTest::TestSuite
 {
     private:
@@ -59,7 +67,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=64,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -68,7 +76,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -93,7 +101,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -102,7 +110,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -139,7 +147,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=64,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_RELEASED,
+                    .status=KEY_RELEASED,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -148,7 +156,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -191,7 +199,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=64,
                     .sendto=0,
                     .size=2,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -200,7 +208,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=2,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -257,7 +265,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=2,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -266,7 +274,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=2,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -323,7 +331,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=64,
                     .sendto=0,
                     .size=2,
-                    .status=Part::KEY_RELEASED,
+                    .status=KEY_RELEASED,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -332,7 +340,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=2,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -388,7 +396,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=64,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -397,7 +405,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -442,7 +450,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -451,7 +459,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -495,7 +503,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=64,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_RELEASED,
+                    .status=KEY_RELEASED,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[1],
@@ -504,7 +512,7 @@ class KitTest:public CxxTest::TestSuite
                     .note=65,
                     .sendto=0,
                     .size=1,
-                    .status=Part::KEY_PLAYING,
+                    .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
             TS_ASSERT_EQUALS(part->notePool.ndesc[2],
@@ -596,7 +604,7 @@ class KitTest:public CxxTest::TestSuite
             TS_ASSERT_EQUALS(pool.ndesc[0].note, 64);
             TS_ASSERT_EQUALS(pool.ndesc[1].note, 65);
             TS_ASSERT_EQUALS(pool.ndesc[2].note, 66);
-            TS_ASSERT_EQUALS(pool.ndesc[2].status, Part::KEY_RELEASED);
+            TS_ASSERT_EQUALS(pool.ndesc[2].status, KEY_RELEASED);
             TS_ASSERT_EQUALS(pool.ndesc[3].note, 67);
 
             part->NoteOn(68, 127, 0);
@@ -608,9 +616,9 @@ class KitTest:public CxxTest::TestSuite
             //Check that the result is {64, 68, 67}
             TS_ASSERT_EQUALS(pool.ndesc[0].note, 64);
             TS_ASSERT_EQUALS(pool.ndesc[1].note, 65);
-            TS_ASSERT_EQUALS(pool.ndesc[1].status, Part::KEY_RELEASED);
+            TS_ASSERT_EQUALS(pool.ndesc[1].status, KEY_RELEASED);
             TS_ASSERT_EQUALS(pool.ndesc[2].note, 66);
-            TS_ASSERT_EQUALS(pool.ndesc[2].status, Part::KEY_RELEASED);
+            TS_ASSERT_EQUALS(pool.ndesc[2].status, KEY_RELEASED);
             TS_ASSERT_EQUALS(pool.ndesc[3].note, 67);
             TS_ASSERT_EQUALS(pool.ndesc[4].note, 68);
         }

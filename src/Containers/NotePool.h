@@ -24,6 +24,18 @@ class NotePool
             uint8_t status;
             bool    legatoMirror;
             bool operator==(NoteDescriptor);
+
+            //status checks
+            bool playing(void) const;
+            bool off(void) const;
+            bool sustained(void) const;
+            bool released(void) const;
+
+            //status transitions
+            void setStatus(uint8_t s);
+            void doSustain(void);
+
+            void canSustain(void) const;
         };
 
         //To be pedantic this wastes 2 or 6 bytes per descriptor
