@@ -17,6 +17,7 @@ int dummy=0;
 
 using namespace std;
 
+#define SUSTAIN_BIT 0x04
 enum PrivateNoteStatus {
     KEY_OFF                    = 0x00,
     KEY_PLAYING                = 0x01,
@@ -48,6 +49,85 @@ class KitTest:public CxxTest::TestSuite
 
 
             part = new Part(alloc, *synth, *time, dummy, dummy, &microtonal, &fft);
+        }
+
+        //Standard poly mode with sustain
+        void testSustainCase1() {
+            //enable sustain
+            part->ctl.setsustain(127);
+
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(64, 127, 0);
+            part->NoteOff(64);
+
+            //first note has moved to release state
+            //second note has moved to sustain state
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=KEY_RELEASED|SUSTAIN_BIT,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=KEY_RELEASED_AND_SUSTAINED,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false}));
+        }
+
+        void testSustainCase2() {
+            //enable sustain
+            part->ctl.setsustain(127);
+
+            part->NoteOn(64, 127, 0);
+            part->NoteOff(64);
+            part->NoteOn(64, 127, 0);
+
+            //first note has moved to release state
+            //second note has stayed in playing state
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=KEY_RELEASED|SUSTAIN_BIT,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=KEY_PLAYING,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false}));
         }
 
         //Enumerate cases of:

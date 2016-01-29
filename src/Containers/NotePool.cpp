@@ -5,7 +5,8 @@
 #include <cassert>
 #include <iostream>
 
-#define NOTE_MASK 0x03
+#define SUSTAIN_BIT 0x04
+#define NOTE_MASK   0x03
 
 enum NoteStatus {
     KEY_OFF                    = 0x00,
@@ -53,6 +54,16 @@ void NotePool::NoteDescriptor::doSustain(void)
     setStatus(KEY_RELEASED_AND_SUSTAINED);
 }
 
+bool NotePool::NoteDescriptor::canSustain(void) const
+{
+    return !(status & SUSTAIN_BIT);
+}
+
+void NotePool::NoteDescriptor::makeUnsustainable(void)
+{
+    status |= SUSTAIN_BIT;
+}
+
 NotePool::activeNotesIter NotePool::activeNotes(NoteDescriptor &n)
 {
     const int off_d1 = &n-ndesc;
@@ -81,7 +92,7 @@ static int getMergeableDescriptor(uint8_t note, uint8_t sendto, bool legato,
     if(desc_id != 0) {
         auto &nd = ndesc[desc_id-1];
         if(nd.age == 0 && nd.note == note && nd.sendto == sendto
-                && nd.playing() && nd.legatoMirror == legato)
+                && nd.playing() && nd.legatoMirror == legato && nd.canSustain())
             return desc_id-1;
     }
 
@@ -180,7 +191,18 @@ void NotePool::applyLegato(LegatoParams &par)
                 std::cerr << "failed to create legato note: " << ba.what() << std::endl;
             }
     }
-};
+}
+
+void NotePool::makeUnsustainable(uint8_t note)
+{
+    for(auto &desc:activeDesc()) {
+        if(desc.note == note) {
+            desc.makeUnsustainable();
+            if(desc.sustained())
+                release(desc);
+        }
+    }
+}
 
 bool NotePool::full(void) const
 {

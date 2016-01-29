@@ -35,7 +35,8 @@ class NotePool
             void setStatus(uint8_t s);
             void doSustain(void);
 
-            void canSustain(void) const;
+            bool canSustain(void) const;
+            void makeUnsustainable(void);
         };
 
         //To be pedantic this wastes 2 or 6 bytes per descriptor
@@ -108,6 +109,8 @@ class NotePool
 
         void upgradeToLegato(void);
         void applyLegato(LegatoParams &par);
+
+        void makeUnsustainable(uint8_t note);
 
         bool full(void) const;
         bool synthFull(int sdesc_count) const;

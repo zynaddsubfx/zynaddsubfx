@@ -475,6 +475,9 @@ bool Part::NoteOn(unsigned char note,
         return true;
     }
 
+    if(Ppolymode)
+        notePool.makeUnsustainable(note);
+
     //Create New Notes
     for(uint8_t i = 0; i < NUM_KIT_ITEMS; ++i) {
         auto &item = kit[i];
@@ -530,8 +533,12 @@ void Part::NoteOff(unsigned char note) //release the key
             else 
                 notePool.release(desc);
         }
-        else    //the sustain pedal is pushed
-            desc.doSustain();
+        else {   //the sustain pedal is pushed
+            if(desc.canSustain())
+                desc.doSustain();
+            else
+                notePool.release(desc);
+        }
     }
 }
 
