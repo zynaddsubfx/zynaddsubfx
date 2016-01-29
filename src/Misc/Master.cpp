@@ -631,7 +631,7 @@ int msg_id=0;
 /*
  * Master audio out (the final sound)
  */
-void Master::AudioOut(float *outl, float *outr)
+void Master::AudioOut(float *outr, float *outl)
 {
     //Danger Limits
     if(memory->lowMemory(2,1024*1024))
