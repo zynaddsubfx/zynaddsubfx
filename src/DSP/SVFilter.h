@@ -29,15 +29,11 @@
 class SVFilter:public Filter
 {
     public:
-        SVFilter(unsigned char Ftype,
-                 float Ffreq,
-                 float Fq,
-                 unsigned char Fstages,
-                 unsigned int srate, int bufsize);
+        SVFilter(const FilterParams *pars, unsigned int srate, int bufsize);
         ~SVFilter();
-        void filterout(float *smp);
+        void filterout(float *smp, long long frame_id);
         void setfreq(float frequency);
-        void setfreq_and_q(float frequency, float q_);
+        void setPosition(float frequency, float q_);
         void setq(float q_);
 
         void settype(int type_);

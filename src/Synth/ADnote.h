@@ -156,7 +156,7 @@ class ADnote:public SynthNote
             ******************************************/
             class Filter * GlobalFilterL, *GlobalFilterR;
 
-            float FilterCenterPitch;  //octaves
+            float FilterCenterSense;  //octaves (offset from base octaves)
             float FilterQ;
             float FilterFreqTracking;
 
@@ -230,7 +230,7 @@ class ADnote:public SynthNote
             class Filter * VoiceFilterL;
             class Filter * VoiceFilterR;
 
-            float FilterCenterPitch;  /* Filter center Pitch*/
+            float FilterCenterSense;  /* Filter center Pitch*/
             float FilterFreqTracking;
 
             Envelope *FilterEnvelope;

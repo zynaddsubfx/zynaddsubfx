@@ -28,12 +28,12 @@
 #include "AnalogFilter.h"
 #include "../Params/FilterParams.h"
 
-FormantFilter::FormantFilter(FilterParams *pars, Allocator *alloc, unsigned int srate, int bufsize)
-    : Filter(srate, bufsize), memory(*alloc)
+FormantFilter::FormantFilter(const FilterParams *pars, Allocator *alloc, unsigned int srate, int bufsize)
+    :Filter(pars, srate, bufsize), memory(*alloc)
 {
     numformants = pars->Pnumformants;
     for(int i = 0; i < numformants; ++i)
-        formant[i] = memory.alloc<AnalogFilter>(4 /*BPF*/, 1000.0f, 10.0f, pars->Pstages, srate, bufsize);
+        formant[i] = 0;//memory.alloc<AnalogFilter>(4 /*BPF*/, 1000.0f, 10.0f, pars->Pstages, srate, bufsize);
     cleanup();
 
     for(int j = 0; j < FF_MAX_VOWELS; ++j)
@@ -143,7 +143,7 @@ void FormantFilter::setpos(float frequency)
                 * (1.0f - pos) + formantpar[p2][i].amp * pos;
             currentformants[i].q =
                 formantpar[p1][i].q * (1.0f - pos) + formantpar[p2][i].q * pos;
-            formant[i]->setfreq_and_q(currentformants[i].freq,
+            formant[i]->setPosition(currentformants[i].freq,
                                       currentformants[i].q * Qfactor);
             oldformantamp[i] = currentformants[i].amp;
         }
@@ -169,7 +169,7 @@ void FormantFilter::setpos(float frequency)
                                       * pos) * formantslowness;
 
 
-            formant[i]->setfreq_and_q(currentformants[i].freq,
+            formant[i]->setPosition(currentformants[i].freq,
                                       currentformants[i].q * Qfactor);
         }
 
@@ -191,14 +191,14 @@ void FormantFilter::setq(float q_)
 void FormantFilter::setgain(float /*dBgain*/)
 {}
 
-void FormantFilter::setfreq_and_q(float frequency, float q_)
+void FormantFilter::setPosition(float frequency, float q_)
 {
     Qfactor = q_;
     setpos(frequency);
 }
 
 
-void FormantFilter::filterout(float *smp)
+void FormantFilter::filterout(float *smp, long long frame_id)
 {
     float inbuffer[buffersize];
 
@@ -209,7 +209,7 @@ void FormantFilter::filterout(float *smp)
         float tmpbuf[buffersize];
         for(int i = 0; i < buffersize; ++i)
             tmpbuf[i] = inbuffer[i] * outgain;
-        formant[j]->filterout(tmpbuf);
+        formant[j]->filterout(tmpbuf, frame_id);
 
         if(ABOVE_AMPLITUDE_THRESHOLD(oldformantamp[j], currentformants[j].amp))
             for(int i = 0; i < buffersize; ++i)

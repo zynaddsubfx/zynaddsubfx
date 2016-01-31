@@ -34,12 +34,11 @@
 class AnalogFilter:public Filter
 {
     public:
-        AnalogFilter(unsigned char Ftype, float Ffreq, float Fq,
-                     unsigned char Fstages, unsigned int srate, int bufsize);
+        AnalogFilter(const FilterParams *pars_, unsigned int srate, int bufsize);
         ~AnalogFilter();
-        void filterout(float *smp);
+        void filterout(float *smp, long long frame_id);
         void setfreq(float frequency);
-        void setfreq_and_q(float frequency, float q_);
+        void setPosition(float frequency, float q_);
         void setq(float q_);
 
         void settype(int type_);

@@ -163,9 +163,9 @@ void Reverb::out(const Stereo<float *> &smp)
         bandwidth->process(buffersize, inputbuf);
 
     if(lpf)
-        lpf->filterout(inputbuf);
+        lpf->filterout(inputbuf, 0);
     if(hpf)
-        hpf->filterout(inputbuf);
+        hpf->filterout(inputbuf, 0);
 
     processmono(0, efxoutl, inputbuf); //left
     processmono(1, efxoutr, inputbuf); //right
@@ -259,7 +259,7 @@ void Reverb::sethpf(unsigned char _Phpf)
     } else {
         float fr = expf(sqrtf(Phpf / 127.0f) * logf(10000.0f)) + 20.0f;
         if(hpf == NULL)
-            hpf = memory.alloc<AnalogFilter>(3, fr, 1, 0, samplerate, buffersize);
+            hpf = 0;//memory.alloc<AnalogFilter>(3, fr, 1, 0, samplerate, buffersize);
         else
             hpf->setfreq(fr);
     }
@@ -273,7 +273,7 @@ void Reverb::setlpf(unsigned char _Plpf)
     } else {
         float fr = expf(sqrtf(Plpf / 127.0f) * logf(25000.0f)) + 40.0f;
         if(!lpf)
-            lpf = memory.alloc<AnalogFilter>(2, fr, 1, 0, samplerate, buffersize);
+            lpf = 0;//memory.alloc<AnalogFilter>(2, fr, 1, 0, samplerate, buffersize);
         else
             lpf->setfreq(fr);
     }

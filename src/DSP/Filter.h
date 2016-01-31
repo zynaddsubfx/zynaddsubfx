@@ -29,19 +29,29 @@ class Filter
 {
     public:
         static float getrealfreq(float freqpitch);
-        static Filter *generate(class Allocator &memory, class FilterParams *pars,
+        static Filter *generate(class Allocator &memory, const class FilterParams *pars,
                 unsigned int srate, int bufsize);
 
-        Filter(unsigned int srate, int bufsize);
+        Filter(const FilterParams *par, unsigned int srate, int bufsize);
         virtual ~Filter() {}
-        virtual void filterout(float *smp)    = 0;
+
+        virtual void filterout(float *smp, long long frame_id) = 0;
         virtual void setfreq(float frequency) = 0;
-        virtual void setfreq_and_q(float frequency, float q_) = 0;
         virtual void setq(float q_) = 0;
         virtual void setgain(float dBgain) = 0;
 
+        virtual void setPosition(float freq_hz, float q) = 0;
+
+        //For Relative Modifiers
+        float getBaseFreq(void) const {return baseFreq;};
+        float getBaseQ(void) const {return baseQ;};
+
     protected:
         float outgain;
+
+        float baseQ;
+        float baseFreq;
+
 
         // current setup
         unsigned int samplerate;
@@ -60,6 +70,8 @@ class Filter
             buffersize_f     = buffersize;
             bufferbytes      = buffersize * sizeof(float);
         }
+
+        const FilterParams *pars;
 };
 
 #endif

@@ -100,8 +100,7 @@ class PADnote:public SynthNote
             ******************************************/
             class Filter * GlobalFilterL, *GlobalFilterR;
 
-            float FilterCenterPitch;  //octaves
-            float FilterQ;
+            float FilterSense;  //octaves
             float FilterFreqTracking;
 
             Envelope *FilterEnvelope;

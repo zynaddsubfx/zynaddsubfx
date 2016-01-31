@@ -82,11 +82,11 @@ void DynamicFilter::out(const Stereo<float *> &smp)
     const float frl = Filter::getrealfreq(freq + lfol + rms);
     const float frr = Filter::getrealfreq(freq + lfor + rms);
 
-    filterl->setfreq_and_q(frl, q);
-    filterr->setfreq_and_q(frr, q);
+    filterl->setPosition(frl, q);
+    filterr->setPosition(frr, q);
 
-    filterl->filterout(efxoutl);
-    filterr->filterout(efxoutr);
+    filterl->filterout(efxoutl, 0);
+    filterr->filterout(efxoutr, 0);
 
     //panning
     for(int i = 0; i < buffersize; ++i) {

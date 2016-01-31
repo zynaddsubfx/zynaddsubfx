@@ -38,10 +38,10 @@ Distorsion::Distorsion(EffectParams pars)
       Pstereo(0),
       Pprefiltering(0)
 {
-    lpfl = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
-    lpfr = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
-    hpfl = memory.alloc<AnalogFilter>(3, 20, 1, 0, pars.srate, pars.bufsize);
-    hpfr = memory.alloc<AnalogFilter>(3, 20, 1, 0, pars.srate, pars.bufsize);
+    lpfl = 0;//memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
+    lpfr = 0;//memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
+    hpfl = 0;//memory.alloc<AnalogFilter>(3, 20, 1, 0, pars.srate, pars.bufsize);
+    hpfr = 0;//memory.alloc<AnalogFilter>(3, 20, 1, 0, pars.srate, pars.bufsize);
     setpreset(Ppreset);
     cleanup();
 }
@@ -67,11 +67,11 @@ void Distorsion::cleanup(void)
 //Apply the filters
 void Distorsion::applyfilters(float *efxoutl, float *efxoutr)
 {
-    lpfl->filterout(efxoutl);
-    hpfl->filterout(efxoutl);
+    lpfl->filterout(efxoutl, 0);
+    hpfl->filterout(efxoutl, 0);
     if(Pstereo != 0) { //stereo
-        lpfr->filterout(efxoutr);
-        hpfr->filterout(efxoutr);
+        lpfr->filterout(efxoutr, 0);
+        hpfr->filterout(efxoutr, 0);
     }
 }
 

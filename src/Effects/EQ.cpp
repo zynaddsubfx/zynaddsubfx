@@ -34,8 +34,8 @@ EQ::EQ(EffectParams pars)
         filter[i].Pgain   = 64;
         filter[i].Pq      = 64;
         filter[i].Pstages = 0;
-        filter[i].l = memory.alloc<AnalogFilter>(6, 1000.0f, 1.0f, 0, pars.srate, pars.bufsize);
-        filter[i].r = memory.alloc<AnalogFilter>(6, 1000.0f, 1.0f, 0, pars.srate, pars.bufsize);
+        filter[i].l = 0;//memory.alloc<AnalogFilter>(6, 1000.0f, 1.0f, 0, pars.srate, pars.bufsize);
+        filter[i].r = 0;//memory.alloc<AnalogFilter>(6, 1000.0f, 1.0f, 0, pars.srate, pars.bufsize);
     }
     //default values
     Pvolume = 50;
@@ -72,8 +72,8 @@ void EQ::out(const Stereo<float *> &smp)
     for(int i = 0; i < MAX_EQ_BANDS; ++i) {
         if(filter[i].Ptype == 0)
             continue;
-        filter[i].l->filterout(efxoutl);
-        filter[i].r->filterout(efxoutr);
+        filter[i].l->filterout(efxoutl, 0);
+        filter[i].r->filterout(efxoutr, 0);
     }
 }
 

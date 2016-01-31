@@ -76,7 +76,7 @@ class SUBnote:public SynthNote
         int       firsttick, portamento;
         float     volume, oldamplitude, newamplitude;
 
-        float GlobalFilterCenterPitch; //octaves
+        float GlobalFilterSense; //octaves
         float GlobalFilterFreqTracking;
 
         struct bpfilter {

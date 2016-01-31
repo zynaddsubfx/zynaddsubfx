@@ -112,8 +112,7 @@ void PADnote::setup(float freq,
     else
         NoteGlobalPar.Panning = pars.PPanning / 128.0f;
 
-    NoteGlobalPar.FilterCenterPitch = pars.GlobalFilter->getfreq() //center freq
-                                      + pars.PFilterVelocityScale / 127.0f
+    NoteGlobalPar.FilterSense = pars.PFilterVelocityScale / 127.0f
                                       * 6.0f                                //velocity sensing
                                       * (VelF(velocity,
                                               pars.
@@ -165,7 +164,6 @@ void PADnote::setup(float freq,
         NoteGlobalPar.FilterEnvelope = memory.alloc<Envelope>(*pars.FilterEnvelope, basefreq, synth.dt());
         NoteGlobalPar.FilterLfo      = memory.alloc<LFO>(*pars.FilterLfo, basefreq, time);
     }
-    NoteGlobalPar.FilterQ = pars.GlobalFilter->getq();
     NoteGlobalPar.FilterFreqTracking = pars.GlobalFilter->getfreqtracking(
         basefreq);
 
@@ -230,8 +228,7 @@ inline void PADnote::fadein(float *smps)
 
 void PADnote::computecurrentparameters()
 {
-    float globalpitch, globalfilterpitch;
-    globalpitch = 0.01f * (NoteGlobalPar.FreqEnvelope->envout()
+    const float globalpitch = 0.01f * (NoteGlobalPar.FreqEnvelope->envout()
                            + NoteGlobalPar.FreqLfo->lfoout()
                            * ctl.modwheel.relmod + NoteGlobalPar.Detune);
     globaloldamplitude = globalnewamplitude;
@@ -239,18 +236,31 @@ void PADnote::computecurrentparameters()
                          * NoteGlobalPar.AmpEnvelope->envout_dB()
                          * NoteGlobalPar.AmpLfo->amplfoout();
 
-    globalfilterpitch = NoteGlobalPar.FilterEnvelope->envout()
-                        + NoteGlobalPar.FilterLfo->lfoout()
-                        + NoteGlobalPar.FilterCenterPitch;
+    //Recalculate Filter Parameters
+    {
+        auto &env   = *NoteGlobalPar.FilterEnvelope;
+        auto &lfo   = *NoteGlobalPar.FilterLfo;
+        auto &left  = *NoteGlobalPar.GlobalFilterL;
+        auto &right = *NoteGlobalPar.GlobalFilterR;
 
-    float tmpfilterfreq = globalfilterpitch + ctl.filtercutoff.relfreq
-                          + NoteGlobalPar.FilterFreqTracking;
+        const float sense    = NoteGlobalPar.FilterSense;
+        const float relfreq  = ctl.filtercutoff.relfreq;
+        const float tracking = NoteGlobalPar.FilterFreqTracking;
 
-    tmpfilterfreq = Filter::getrealfreq(tmpfilterfreq);
+        const float relq = ctl.filterq.relq;
 
-    float globalfilterq = NoteGlobalPar.FilterQ * ctl.filterq.relq;
-    NoteGlobalPar.GlobalFilterL->setfreq_and_q(tmpfilterfreq, globalfilterq);
-    NoteGlobalPar.GlobalFilterR->setfreq_and_q(tmpfilterfreq, globalfilterq);
+        //Controller Free Center Frequency
+        const float Fc = env.envout() + lfo.lfoout() + sense + left.getBaseFreq();
+        const float Fc_mod = Fc + relfreq + tracking;
+
+        //Convert into Hz
+        const float Fc_Hz = Filter::getrealfreq(Fc_mod); 
+        
+        const float q = left.getBaseQ() * relq;
+
+        left.setPosition(Fc_Hz, q);
+        right.setPosition(Fc_Hz, q);
+    }
 
     //compute the portamento, if it is used by this note
     float portamentofreqrap = 1.0f;
@@ -377,8 +387,8 @@ int PADnote::noteout(float *outl, float *outr)
         firsttime = false;
     }
 
-    NoteGlobalPar.GlobalFilterL->filterout(outl);
-    NoteGlobalPar.GlobalFilterR->filterout(outr);
+    NoteGlobalPar.GlobalFilterL->filterout(outl, time.time());
+    NoteGlobalPar.GlobalFilterR->filterout(outr, time.time());
 
     //Apply the punch
     if(NoteGlobalPar.Punch.Enabled != 0)

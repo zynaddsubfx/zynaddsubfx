@@ -25,19 +25,19 @@
 #include <cstring>
 #include <cassert>
 #include "../Misc/Util.h"
+#include "../Params/FilterParams.h"
 #include "SVFilter.h"
 
 #ifndef errx
 #include <err.h>
 #endif
 
-SVFilter::SVFilter(unsigned char Ftype, float Ffreq, float Fq,
-                   unsigned char Fstages, unsigned int srate, int bufsize)
-    :Filter(srate, bufsize),
-      type(Ftype),
-      stages(Fstages),
-      freq(Ffreq),
-      q(Fq),
+SVFilter::SVFilter(const FilterParams *par, unsigned int srate, int bufsize)
+    :Filter(par, srate, bufsize),
+      type(pars->Ptype),
+      stages(pars->Pstages),
+      freq(1000.0f),//placeholder value
+      q(pars->getq()),
       gain(1.0f),
       needsinterpolation(false),
       firsttime(true)
@@ -46,7 +46,7 @@ SVFilter::SVFilter(unsigned char Ftype, float Ffreq, float Fq,
         stages = MAX_FILTER_STAGES;
     outgain = 1.0f;
     cleanup();
-    setfreq_and_q(Ffreq, Fq);
+    setPosition(freq, q);
 }
 
 SVFilter::~SVFilter()
@@ -85,7 +85,7 @@ void SVFilter::setfreq(float frequency)
     bool nyquistthresh = (abovenq ^ oldabovenq);
 
     //if the frequency is changed fast, it needs interpolation
-    if((rap > 3.0f) || nyquistthresh) { //(now, filter and coeficients backup)
+    if((rap > 3.0f) || nyquistthresh) { //(now, filter and coefficients backup)
         if(!firsttime)
             needsinterpolation = true;
         ipar = par;
@@ -95,7 +95,7 @@ void SVFilter::setfreq(float frequency)
     firsttime = false;
 }
 
-void SVFilter::setfreq_and_q(float frequency, float q_)
+void SVFilter::setPosition(float frequency, float q_)
 {
     q = q_;
     setfreq(frequency);
@@ -157,7 +157,7 @@ void SVFilter::singlefilterout(float *smp, fstage &x, parameters &par)
     }
 }
 
-void SVFilter::filterout(float *smp)
+void SVFilter::filterout(float *smp, long long frame_id)
 {
     for(int i = 0; i < stages + 1; ++i)
         singlefilterout(smp, st[i], par);
@@ -178,4 +178,19 @@ void SVFilter::filterout(float *smp)
 
     for(int i = 0; i < buffersize; ++i)
         smp[i] *= outgain;
+
+    //check for updates (this must be done at the end of the frame due to how
+    //frequency and q are updated externally)...
+    if(pars && pars->last_update_timestamp == frame_id) {
+        printf("[SVFilter] updating internal state (q{%f->%f}, fq{%f->%f})...\n",
+                baseQ, pars->getq(), baseFreq, pars->getfreq());
+        type     = pars->Ptype;
+        stages   = pars->Pstages;
+        baseQ    = pars->getq();
+        baseFreq = pars->getfreq();
+
+
+        if(stages >= MAX_FILTER_STAGES)
+            stages = MAX_FILTER_STAGES;
+    }
 }

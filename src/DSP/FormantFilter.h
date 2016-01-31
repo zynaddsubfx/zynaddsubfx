@@ -31,11 +31,11 @@ class Allocator;
 class FormantFilter:public Filter
 {
     public:
-        FormantFilter(class FilterParams *pars, Allocator *alloc, unsigned int srate, int bufsize);
+        FormantFilter(const FilterParams *pars, Allocator *alloc, unsigned int srate, int bufsize);
         ~FormantFilter();
-        void filterout(float *smp);
+        void filterout(float *smp, long long frame_id);
         void setfreq(float frequency);
-        void setfreq_and_q(float frequency, float q_);
+        void setPosition(float frequency, float q_);
         void setq(float q_);
         void setgain(float dBgain);
 

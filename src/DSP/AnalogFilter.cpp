@@ -27,18 +27,15 @@
 #include <cassert>
 
 #include "../Misc/Util.h"
+#include "../Params/FilterParams.h"
 #include "AnalogFilter.h"
 
-AnalogFilter::AnalogFilter(unsigned char Ftype,
-                           float Ffreq,
-                           float Fq,
-                           unsigned char Fstages,
-                           unsigned int srate, int bufsize)
-    :Filter(srate, bufsize),
-      type(Ftype),
-      stages(Fstages),
-      freq(Ffreq),
-      q(Fq),
+AnalogFilter::AnalogFilter(const FilterParams *pars_, unsigned int srate, int bufsize)
+    :Filter(pars_, srate, bufsize),
+      type(pars->Ptype),
+      stages(pars->Pstages),
+      freq(1000.0f),//placeholder value
+      q(pars->getq()),
       gain(1.0),
       abovenq(false),
       oldabovenq(false)
@@ -49,7 +46,7 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
         stages = MAX_FILTER_STAGES;
     cleanup();
     firsttime = false;
-    setfreq_and_q(Ffreq, Fq);
+    setPosition(freq, q);
     firsttime  = true;
     coeff.d[0] = 0; //this is not used
     outgain    = 1.0f;
@@ -295,7 +292,7 @@ void AnalogFilter::setfreq(float frequency)
     firsttime = false;
 }
 
-void AnalogFilter::setfreq_and_q(float frequency, float q_)
+void AnalogFilter::setPosition(float frequency, float q_)
 {
     q = q_;
     setfreq(frequency);
@@ -382,7 +379,7 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist,
     }
 }
 
-void AnalogFilter::filterout(float *smp)
+void AnalogFilter::filterout(float *smp, long long frame_id)
 {
     for(int i = 0; i < stages + 1; ++i)
         singlefilterout(smp, history[i], coeff);
@@ -404,6 +401,21 @@ void AnalogFilter::filterout(float *smp)
 
     for(int i = 0; i < buffersize; ++i)
         smp[i] *= outgain;
+    
+    //check for updates (this must be done at the end of the frame due to how
+    //frequency and q are updated externally)...
+    if(pars && pars->last_update_timestamp == frame_id) {
+        printf("[AnalogFilter] updating internal state (q{%f->%f}, fq{%f->%f})...\n",
+                baseQ, pars->getq(), baseFreq, pars->getfreq());
+        type     = pars->Ptype;
+        stages   = pars->Pstages;
+        baseQ    = pars->getq();
+        baseFreq = pars->getfreq();
+
+
+        if(stages >= MAX_FILTER_STAGES)
+            stages = MAX_FILTER_STAGES;
+    }
 }
 
 float AnalogFilter::H(float freq)

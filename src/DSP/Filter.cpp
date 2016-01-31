@@ -31,15 +31,19 @@
 #include "../Params/FilterParams.h"
 #include "../Misc/Allocator.h"
 
-Filter::Filter(unsigned int srate, int bufsize)
+Filter::Filter(const FilterParams *pars_, unsigned int srate, int bufsize)
     : outgain(1.0f),
+      baseQ(pars_->getq()),
+      baseFreq(pars_->getfreq()),
       samplerate(srate),
-      buffersize(bufsize)
+      buffersize(bufsize),
+      pars(pars_)
 {
+    assert(pars);
     alias();
 }
 
-Filter *Filter::generate(Allocator &memory, FilterParams *pars,
+Filter *Filter::generate(Allocator &memory, const FilterParams *pars,
         unsigned int srate, int bufsize)
 {
     assert(srate != 0);
@@ -54,13 +58,13 @@ Filter *Filter::generate(Allocator &memory, FilterParams *pars,
             filter = memory.alloc<FormantFilter>(pars, &memory, srate, bufsize);
             break;
         case 2:
-            filter = memory.alloc<SVFilter>(Ftype, 1000.0f, pars->getq(), Fstages, srate, bufsize);
+            filter = memory.alloc<SVFilter>(pars, srate, bufsize);
             filter->outgain = dB2rap(pars->getgain());
             if(filter->outgain > 1.0f)
                 filter->outgain = sqrt(filter->outgain);
             break;
         default:
-            filter = memory.alloc<AnalogFilter>(Ftype, 1000.0f, pars->getq(), Fstages, srate, bufsize);
+            filter = memory.alloc<AnalogFilter>(pars, srate, bufsize);
             if((Ftype >= 6) && (Ftype <= 8))
                 filter->setgain(pars->getgain());
             else
