@@ -631,7 +631,7 @@ int msg_id=0;
 /*
  * Master audio out (the final sound)
  */
-void Master::AudioOut(float *outr, float *outl)
+bool Master::AudioOut(float *outr, float *outl)
 {
     //Danger Limits
     if(memory->lowMemory(2,1024*1024))
@@ -658,7 +658,7 @@ void Master::AudioOut(float *outr, float *outl)
             if (mastercb)
                 mastercb(mastercb_ptr, new_master);
             bToU->write("/free", "sb", "Master", sizeof(Master*), &this_master);
-            return;
+            return false;
         }
 
         //XXX yes, this is not realtime safe, but it is useful...
@@ -834,6 +834,8 @@ void Master::AudioOut(float *outr, float *outl)
 
     //update the global frame timer
     time++;
+
+    return true;
 }
 
 //TODO review the respective code from yoshimi for this
@@ -859,7 +861,9 @@ void Master::GetAudioOutSamples(size_t nsamples,
             nsamples -= smps;
 
             //generate samples
-            AudioOut(bufl, bufr);
+            if (! AudioOut(bufl, bufr))
+                return;
+
             off  = 0;
             out_off  += smps;
             smps = synth.buffersize;

@@ -80,6 +80,8 @@ SET (DssiEnable ${DSSI_FOUND} CACHE BOOL
     "Enable DSSI Plugin compilation")
 SET (LibloEnable ${LIBLO_FOUND} CACHE BOOL
     "Enable Liblo")
+SET (NoNeonPlease False CACHE BOOL
+    "Workaround For Broken Neon Detection")
 
 # Now, handle the incoming settings and set define flags/variables based
 # on this
@@ -265,9 +267,9 @@ else (BuildForDebug)
 		set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BuildOptions_SSE}")
 	endif (SUPPORT_SSE)
 	
-	if (SUPPORT_NEON)
+    if (SUPPORT_NEON AND NOT NoNeonPlease)
 		set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BuildOptions_NEON}")
-	endif (SUPPORT_NEON)
+	endif (SUPPORT_NEON AND NOT NoNeonPlease)
 	
 	message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_RELEASE}")
 endif (BuildForDebug)
@@ -387,6 +389,7 @@ add_subdirectory(Effects)
 add_subdirectory(Params)
 add_subdirectory(DSP)
 add_subdirectory(Nio)
+add_subdirectory(Plugin)
 
 add_library(zynaddsubfx_core STATIC
     globals.cpp
