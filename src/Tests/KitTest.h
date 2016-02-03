@@ -130,6 +130,48 @@ class KitTest:public CxxTest::TestSuite
                     .legatoMirror=false}));
         }
 
+        void testMonoSustain() {
+            //enable sustain
+            part->ctl.setsustain(127);
+            part->Ppolymode   = false;
+
+            part->NoteOn(64, 127, 0);
+            part->NoteOff(64);
+            part->NoteOn(65, 127, 0);
+
+            part->notePool.dump();
+
+            //first note has moved to release state
+            //second note has stayed in playing state
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=KEY_RELEASED,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=65,
+                    .sendto=0,
+                    .size=1,
+                    .status=KEY_PLAYING,
+                    .legatoMirror=false}));
+
+            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false}));
+        }
+
         //Enumerate cases of:
         //Legato = {disabled,enabled}
         //Mono   = {diabled, enabled}
