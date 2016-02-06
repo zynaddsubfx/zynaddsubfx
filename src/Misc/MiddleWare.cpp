@@ -909,6 +909,12 @@ rtosc::Ports bankPorts = {
         rBegin;
         impl.setLsb(rtosc_argument(msg, 0).i);
         rEnd},
+    {"newbank:s", 0, 0,
+        rBegin;
+        int err = impl.newbank(rtosc_argument(msg, 0).s);
+        if(err)
+            d.reply("/alert", "s", "Error: Could not make a new bank (directory)..");
+        rEnd},
 };
 
 /******************************************************************************
