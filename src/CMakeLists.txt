@@ -446,11 +446,7 @@ if (DssiEnable)
 		${OS_LIBRARIES}
         ${LIBLO_LIBRARIES}
 		)
-	if (${CMAKE_SIZEOF_VOID_P} EQUAL "8")
-		install(TARGETS zynaddsubfx_dssi LIBRARY DESTINATION lib64/dssi/)
-	else ()
-		install(TARGETS zynaddsubfx_dssi LIBRARY DESTINATION lib/dssi/)
-	endif ()
+    install(TARGETS zynaddsubfx_dssi LIBRARY DESTINATION ${PluginLibDir}/dssi/)
 endif()
 
 install(TARGETS zynaddsubfx
