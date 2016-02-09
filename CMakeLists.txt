@@ -40,4 +40,4 @@ install(DIRECTORY instruments/banks
 install(DIRECTORY instruments/examples
     DESTINATION share/zynaddsubfx)
 install(DIRECTORY instruments/ZynAddSubFX.lv2presets
-    DESTINATION lib/lv2)
+    DESTINATION ${PluginLibDir}/lv2)

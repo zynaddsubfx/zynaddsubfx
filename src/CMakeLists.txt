@@ -82,6 +82,8 @@ SET (LibloEnable ${LIBLO_FOUND} CACHE BOOL
     "Enable Liblo")
 SET (NoNeonPlease False CACHE BOOL
     "Workaround For Broken Neon Detection")
+SET (PluginLibDir "lib" CACHE STRING
+    "Install directory for plugin libraries PREFIX/PLUGIN_LIB_DIR/{lv2,vst}")
 
 # Now, handle the incoming settings and set define flags/variables based
 # on this

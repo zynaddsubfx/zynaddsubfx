@@ -52,8 +52,8 @@ set_target_properties(ZynAddSubFX_vst PROPERTIES PREFIX "")
 target_link_libraries(ZynAddSubFX_lv2 zynaddsubfx_core ${OS_LIBRARIES} ${LIBLO_LIBRARIES})
 target_link_libraries(ZynAddSubFX_vst zynaddsubfx_core ${OS_LIBRARIES} ${LIBLO_LIBRARIES})
 
-install(TARGETS ZynAddSubFX_lv2 LIBRARY DESTINATION lib/lv2/ZynAddSubFX.lv2/)
-install(TARGETS ZynAddSubFX_vst LIBRARY DESTINATION lib/vst/)
+install(TARGETS ZynAddSubFX_lv2 LIBRARY DESTINATION ${PluginLibDir}/lv2/ZynAddSubFX.lv2/)
+install(TARGETS ZynAddSubFX_vst LIBRARY DESTINATION ${PluginLibDir}/vst/)
 
 add_custom_command(TARGET ZynAddSubFX_lv2 POST_BUILD
     COMMAND lv2-ttl-generator $<TARGET_FILE:ZynAddSubFX_lv2>
@@ -63,7 +63,7 @@ install(FILES
 	${CMAKE_CURRENT_BINARY_DIR}/lv2/manifest.ttl
 	${CMAKE_CURRENT_BINARY_DIR}/lv2/presets.ttl
 	${CMAKE_CURRENT_BINARY_DIR}/lv2/ZynAddSubFX.ttl
-	DESTINATION lib/lv2/ZynAddSubFX.lv2/)
+    DESTINATION ${PluginLibDir}/lv2/ZynAddSubFX.lv2/)
 
 if(NtkGui)
 set_target_properties(ZynAddSubFX_lv2_ui PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_LV2")
@@ -71,9 +71,9 @@ set_target_properties(ZynAddSubFX_lv2_ui PROPERTIES LIBRARY_OUTPUT_DIRECTORY "lv
 set_target_properties(ZynAddSubFX_lv2_ui PROPERTIES OUTPUT_NAME "ZynAddSubFX_ui")
 set_target_properties(ZynAddSubFX_lv2_ui PROPERTIES PREFIX "")
 
-install(TARGETS ZynAddSubFX_lv2_ui LIBRARY DESTINATION lib/lv2/ZynAddSubFX.lv2/)
+install(TARGETS ZynAddSubFX_lv2_ui LIBRARY DESTINATION ${PluginLibDir}/lv2/ZynAddSubFX.lv2/)
 
 install(FILES
         ${CMAKE_CURRENT_BINARY_DIR}/lv2/ZynAddSubFX_ui.ttl
-        DESTINATION lib/lv2/ZynAddSubFX.lv2/)
+        DESTINATION ${PluginLibDir}/lv2/ZynAddSubFX.lv2/)
 endif()

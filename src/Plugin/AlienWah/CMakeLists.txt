@@ -17,8 +17,8 @@ set_target_properties(ZynAlienWah_vst PROPERTIES PREFIX "")
 target_link_libraries(ZynAlienWah_lv2 zynaddsubfx_core ${OS_LIBRARIES})
 target_link_libraries(ZynAlienWah_vst zynaddsubfx_core ${OS_LIBRARIES})
 
-install(TARGETS ZynAlienWah_lv2 LIBRARY DESTINATION lib/lv2/ZynAlienWah.lv2/)
-install(TARGETS ZynAlienWah_vst LIBRARY DESTINATION lib/vst/)
+install(TARGETS ZynAlienWah_lv2 LIBRARY DESTINATION ${PluginLibDir}/lv2/ZynAlienWah.lv2/)
+install(TARGETS ZynAlienWah_vst LIBRARY DESTINATION ${PluginLibDir}/vst/)
 
 add_custom_command(TARGET ZynAlienWah_lv2 POST_BUILD
     COMMAND lv2-ttl-generator $<TARGET_FILE:ZynAlienWah_lv2>
@@ -28,4 +28,4 @@ install(FILES
 	${CMAKE_CURRENT_BINARY_DIR}/lv2/manifest.ttl
 	${CMAKE_CURRENT_BINARY_DIR}/lv2/presets.ttl
 	${CMAKE_CURRENT_BINARY_DIR}/lv2/ZynAlienWah.ttl
-	DESTINATION lib/lv2/ZynAlienWah.lv2/)
+	DESTINATION ${PluginLibDir}/lv2/ZynAlienWah.lv2/)
