@@ -2,7 +2,7 @@
 Name=ZynAddSubFX - Alsa
 Comment=A powerful realtime software synthesizer
 Comment[fr]=Un synthétiseur logiciel temps-réel puissant
-Keywords=audio;sound;alsa;midi;synth;synthesizer
+Keywords=audio;sound;alsa;midi;synth;synthesizer;
 Exec=zynaddsubfx -I alsa -O alsa
 Icon=zynaddsubfx
 Terminal=false

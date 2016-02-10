@@ -2,7 +2,7 @@
 Name=ZynAddSubFX - Jack
 Comment=A powerful realtime software synthesizer
 Comment[fr]=Un synthétiseur logiciel temps-réel puissant
-Keywords=audio;sound;jack;midi;synth;synthesizer
+Keywords=audio;sound;jack;midi;synth;synthesizer;
 Exec=zynaddsubfx -I jack -O jack
 Icon=zynaddsubfx
 Terminal=false
