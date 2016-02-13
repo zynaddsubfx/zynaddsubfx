@@ -257,6 +257,17 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     assert(partefx[0]);
 }
 
+Part::Kit::Kit(void)
+    :parent(nullptr),
+     Penabled(false), Pmuted(false),
+     Pminkey(0), Pmaxkey(127),
+     Pname(nullptr),
+     Padenabled(false), Psubenabled(false),
+     Ppadenabled(false), Psendtoparteffect(0),
+     adpars(nullptr), subpars(nullptr), padpars(nullptr)
+{
+}
+
 void Part::cloneTraits(Part &p) const
 {
 #define CLONE(x) p.x = this->x
