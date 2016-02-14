@@ -323,7 +323,7 @@ void Part::defaultsinstrument()
     Pdrummode = 0;
 
     for(int n = 0; n < NUM_KIT_ITEMS; ++n) {
-        kit[n].Penabled    = false;
+        //kit[n].Penabled    = false;
         kit[n].Pmuted      = false;
         kit[n].Pminkey     = 0;
         kit[n].Pmaxkey     = 127;
@@ -858,6 +858,9 @@ void Part::setkititemstatus(unsigned kititem, bool Penabled_)
         delete kkit.adpars;
         delete kkit.subpars;
         delete kkit.padpars;
+        kkit.adpars  = nullptr;
+        kkit.subpars = nullptr;
+        kkit.padpars = nullptr;
         kkit.Pname[0] = '\0';
 
         notePool.killAllNotes();

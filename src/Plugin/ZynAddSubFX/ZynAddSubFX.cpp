@@ -333,8 +333,8 @@ protected:
         {
             //if (! isOffline())
             {
-                std::memset(outputs[0], 0, frames);
-                std::memset(outputs[1], 0, frames);
+                std::memset(outputs[0], 0, sizeof(float)*frames);
+                std::memset(outputs[1], 0, sizeof(float)*frames);
                 return;
             }
 
