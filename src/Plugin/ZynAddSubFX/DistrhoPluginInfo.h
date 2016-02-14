@@ -2,7 +2,7 @@
   ZynAddSubFX - a software synthesizer
 
   DistrhoPluginInfo.h - DPF information header
-  Copyright (C) 2015 Filipe Coelho
+  Copyright (C) 2015-2016 Filipe Coelho
   Author: Filipe Coelho
 
   This program is free software; you can redistribute it and/or modify

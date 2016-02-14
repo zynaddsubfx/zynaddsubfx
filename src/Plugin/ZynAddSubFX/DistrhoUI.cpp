@@ -35,16 +35,21 @@ uintptr_t g_nextWindowId     = 0;
 /* ------------------------------------------------------------------------------------------------------------
  * UI */
 
-UI::UI(uint width, uint height)
-    : pData(new PrivateData())
-{
 #ifdef HAVE_DGL
+UI::UI(uint width, uint height)
+    : UIWidget(*d_lastUiWindow),
+      pData(new PrivateData())
+{
     ((UIWidget*)this)->pData->needsFullViewport = false;
 
     if (width > 0 && height > 0)
         setSize(width, height);
-#endif
 }
+#else
+UI::UI(uint width, uint height)
+    : UIWidget(width, height),
+      pData(new PrivateData()) {}
+#endif
 
 UI::~UI()
 {

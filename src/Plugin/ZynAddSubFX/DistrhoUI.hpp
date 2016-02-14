@@ -39,6 +39,17 @@
 #define DISTRHO_PLUGIN_WANT_STATE       1
 #define DISTRHO_PLUGIN_WANT_FULL_STATE  1
 
+#ifndef HAVE_DGL
+# include "extra/ExternalWindow.hpp"
+typedef DISTRHO_NAMESPACE::ExternalWindow UIWidget;
+#elif DISTRHO_UI_USE_NANOVG
+# include "../dgl/NanoVG.hpp"
+typedef DGL::NanoWidget UIWidget;
+#else
+# include "../dgl/Widget.hpp"
+typedef DGL::Widget UIWidget;
+#endif
+
 START_NAMESPACE_DISTRHO
 
 /* ------------------------------------------------------------------------------------------------------------
@@ -55,7 +66,7 @@ START_NAMESPACE_DISTRHO
    @note You must call setSize during construction,
    @TODO Detailed information about this class.
  */
-class UI
+class UI : public UIWidget
 {
 public:
    /**

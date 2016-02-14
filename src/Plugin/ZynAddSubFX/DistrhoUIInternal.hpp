@@ -1,6 +1,6 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2015 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2012-2016 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -18,6 +18,14 @@
 #define DISTRHO_UI_INTERNAL_HPP_INCLUDED
 
 #include "DistrhoUI.hpp"
+
+#ifdef HAVE_DGL
+# include "../../dgl/Application.hpp"
+# include "../../dgl/Window.hpp"
+using DGL::Application;
+using DGL::IdleCallback;
+using DGL::Window;
+#endif
 
 START_NAMESPACE_DISTRHO
 
@@ -123,15 +131,87 @@ struct UI::PrivateData {
 };
 
 // -----------------------------------------------------------------------
-// UI exporter class
+// Plugin Window, needed to take care of resize properly
 
-static UI* createWindowIdUI(const intptr_t winId)
+#ifdef HAVE_DGL
+static inline
+UI* createUiWrapper(void* const dspPtr, Window* const window)
 {
-    g_nextWindowId = winId;
-    UI* const ui(createUI());
-    g_nextWindowId = 0;
-    return ui;
+    d_lastUiDspPtr = dspPtr;
+    d_lastUiWindow = window;
+    UI* const ret  = createUI();
+    d_lastUiDspPtr = nullptr;
+    d_lastUiWindow = nullptr;
+    return ret;
 }
+
+class UIExporterWindow : public Window
+{
+public:
+    UIExporterWindow(Application& app, const intptr_t winId, void* const dspPtr)
+        : Window(app, winId),
+          fUI(createUiWrapper(dspPtr, this)),
+          fIsReady(false)
+    {
+        DISTRHO_SAFE_ASSERT_RETURN(fUI != nullptr,);
+
+        // set window size
+        setResizable(false);
+        setSize(fUI->getWidth(), fUI->getHeight());
+    }
+
+    ~UIExporterWindow()
+    {
+        delete fUI;
+    }
+
+    UI* getUI() const noexcept
+    {
+        return fUI;
+    }
+
+    bool isReady() const noexcept
+    {
+        return fIsReady;
+    }
+
+protected:
+    // custom window reshape
+    void onReshape(uint width, uint height) override
+    {
+        DISTRHO_SAFE_ASSERT_RETURN(fUI != nullptr,);
+
+        fUI->uiReshape(width, height);
+        fIsReady = true;
+    }
+
+    // custom file-browser selected
+    void fileBrowserSelected(const char* filename) override
+    {
+        DISTRHO_SAFE_ASSERT_RETURN(fUI != nullptr,);
+
+        fUI->uiFileBrowserSelected(filename);
+    }
+
+private:
+    UI* const fUI;
+    bool fIsReady;
+};
+#else
+static inline
+UI* createUiWrapper(void* const dspPtr, const uintptr_t winId)
+{
+    d_lastUiDspPtr = dspPtr;
+    g_nextWindowId = winId;
+    UI* const ret  = createUI();
+    d_lastUiDspPtr = nullptr;
+    g_nextWindowId = 0;
+    return ret;
+}
+#endif
+
+// -----------------------------------------------------------------------
+// UI exporter class
 
 class UIExporter
 {
@@ -139,7 +219,14 @@ public:
     UIExporter(void* const ptr, const intptr_t winId,
                const editParamFunc editParamCall, const setParamFunc setParamCall, const setStateFunc setStateCall, const sendNoteFunc sendNoteCall, const setSizeFunc setSizeCall,
                void* const dspPtr = nullptr)
-        : fUI(createWindowIdUI(winId)),
+#ifdef HAVE_DGL
+        : glApp(),
+          glWindow(glApp, winId, dspPtr),
+          fChangingSize(false),
+          fUI(glWindow.getUI()),
+#else
+        : fUI(createUiWrapper(dspPtr, winId)),
+#endif
           fData((fUI != nullptr) ? fUI->pData : nullptr)
     {
         DISTRHO_SAFE_ASSERT_RETURN(fUI != nullptr,);
@@ -151,6 +238,48 @@ public:
         fData->setStateCallbackFunc  = setStateCall;
         fData->sendNoteCallbackFunc  = sendNoteCall;
         fData->setSizeCallbackFunc   = setSizeCall;
+    }
+
+    // -------------------------------------------------------------------
+
+    uint getWidth() const noexcept
+    {
+#ifdef HAVE_DGL
+        return glWindow.getWidth();
+#else
+        DISTRHO_SAFE_ASSERT_RETURN(fUI != nullptr, 1);
+        return fUI->getWidth();
+#endif
+    }
+
+    uint getHeight() const noexcept
+    {
+#ifdef HAVE_DGL
+        return glWindow.getHeight();
+#else
+        DISTRHO_SAFE_ASSERT_RETURN(fUI != nullptr, 1);
+        return fUI->getHeight();
+#endif
+    }
+
+    bool isVisible() const noexcept
+    {
+#ifdef HAVE_DGL
+        return glWindow.isVisible();
+#else
+        return true;
+#endif
+    }
+
+    // -------------------------------------------------------------------
+
+    intptr_t getWindowId() const noexcept
+    {
+#ifdef HAVE_DGL
+        return glWindow.getWindowId();
+#else
+        return 0;
+#endif
     }
 
     // -------------------------------------------------------------------
@@ -192,53 +321,83 @@ public:
 #endif
 
     // -------------------------------------------------------------------
-    // compatibility calls, used for regular OpenGL windows
 
-    uint getWidth() const noexcept
+#ifdef HAVE_DGL
+    void exec(IdleCallback* const cb)
     {
-        return 390;
+        DISTRHO_SAFE_ASSERT_RETURN(cb != nullptr,);
+        DISTRHO_SAFE_ASSERT_RETURN(fUI != nullptr,);
+
+        glWindow.addIdleCallback(cb);
+        glWindow.setVisible(true);
+        glApp.exec();
     }
 
-    uint getHeight() const noexcept
+    void exec_idle()
     {
-        return 525;
-    }
-
-    intptr_t getWindowId() const noexcept
-    {
-        return 0;
-    }
-
-    bool isVisible() const noexcept
-    {
-        return true;
-    }
-
-    void setWindowSize(const uint width, const uint height, const bool updateUI = false)
-    {
-    }
-
-    void setWindowTitle(const char* const uiTitle)
-    {
-    }
-
-    void setWindowTransientWinId(const uintptr_t winId)
-    {
-    }
-
-    bool setWindowVisible(const bool yesNo)
-    {
-        return true;
+        if (glWindow.isReady())
+            fUI->uiIdle();
     }
 
     bool idle()
     {
-        return true;
+        DISTRHO_SAFE_ASSERT_RETURN(fUI != nullptr, false);
+
+        glApp.idle();
+
+        if (glWindow.isReady())
+            fUI->uiIdle();
+
+        return ! glApp.isQuiting();
     }
 
     void quit()
     {
+        glWindow.close();
+        glApp.quit();
     }
+
+    // -------------------------------------------------------------------
+
+    void setWindowSize(const uint width, const uint height, const bool updateUI = false)
+    {
+        DISTRHO_SAFE_ASSERT_RETURN(fUI != nullptr,);
+        DISTRHO_SAFE_ASSERT_RETURN(! fChangingSize,);
+
+        fChangingSize = true;
+
+        if (updateUI)
+            fUI->setSize(width, height);
+
+        glWindow.setSize(width, height);
+
+        fChangingSize = false;
+    }
+
+    void setWindowTitle(const char* const uiTitle)
+    {
+        glWindow.setTitle(uiTitle);
+    }
+
+    void setWindowTransientWinId(const uintptr_t winId)
+    {
+        glWindow.setTransientWinId(winId);
+    }
+
+    bool setWindowVisible(const bool yesNo)
+    {
+        glWindow.setVisible(yesNo);
+
+        return ! glApp.isQuiting();
+    }
+#else
+    bool idle() { return true; }
+    void quit() {}
+    void setWindowSize(const uint width, const uint height, const bool updateUI = false) {}
+    void setWindowTitle(const char* const uiTitle) {}
+    void setWindowTransientWinId(const uintptr_t winId) {}
+    bool setWindowVisible(const bool yesNo) { return true; }
+#endif
 
     // -------------------------------------------------------------------
 
@@ -258,7 +417,19 @@ public:
     }
 
 private:
+#ifdef HAVE_DGL
     // -------------------------------------------------------------------
+    // DGL Application and Window for this widget
+
+    Application      glApp;
+    UIExporterWindow glWindow;
+
+    // prevent recursion
+    bool fChangingSize;
+#endif
+
+    // -------------------------------------------------------------------
+    // Widget and DistrhoUI data
 
     UI* const fUI;
     UI::PrivateData* const fData;
