@@ -30,9 +30,9 @@
 
 #include <sys/stat.h>
 GUI::ui_handle_t gui = 0;
+const char *embedId = NULL;
 #if USE_NSM
 NSM_Client *nsm = NULL;
-const char *embedId = NULL;
 #endif
 lo_server server;
 std::string sendtourl;
@@ -193,7 +193,6 @@ ui_handle_t GUI::createUi(Fl_Osc_Interface *osc, void *exit)
 
     ui = new MasterUI((int*)exit, osc);
 
-#ifdef NTK_GUI
     if (embedId != NULL)
     {
         if (long long winId = atoll(embedId))
@@ -202,17 +201,16 @@ ui_handle_t GUI::createUi(Fl_Osc_Interface *osc, void *exit)
             isPlugin = true;
             MasterUI::menu_mastermenu[11].hide(); // file -> nio settings
             MasterUI::menu_mastermenu[26].deactivate(); // misc -> switch interface mode
-
+#ifdef NTK_GUI
             if (winId != 1)
             {
                 MasterUI::menu_mastermenu[13].hide(); // file -> exit
                 fl_embed(ui->masterwindow, winId);
             }
-
+#endif
             ui->masterwindow->show();
         }
     }
-#endif
 
     return (void*) ui;
 }
@@ -599,10 +597,8 @@ int main(int argc, char *argv[])
             help = true;
         else if(!strcmp("--no-uri", argv[i]))
             no_uri = true;
-#if USE_NSM
         else if(!strcmp("--embed", argv[i]))
             embedId = argv[++i];
-#endif
         else if(!strcmp("--title", argv[i]))
             title = argv[++i];
         else
