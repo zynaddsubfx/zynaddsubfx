@@ -25,6 +25,10 @@ START_NAMESPACE_DISTRHO
 // Static data, see DistrhoUI.cpp
 
 extern double    d_lastUiSampleRate;
+extern void*     d_lastUiDspPtr;
+#ifdef HAVE_DGL
+extern Window*   d_lastUiWindow;
+#endif
 extern uintptr_t g_nextWindowId;
 
 // -----------------------------------------------------------------------
@@ -41,7 +45,11 @@ typedef void (*setSizeFunc)   (void* ptr, uint width, uint height);
 
 struct UI::PrivateData {
     // DSP
+    double   sampleRate;
     uint32_t parameterOffset;
+#if DISTRHO_PLUGIN_WANT_DIRECT_ACCESS
+    void*    dspPtr;
+#endif
 
     // Callbacks
     editParamFunc editParamCallbackFunc;
@@ -52,7 +60,11 @@ struct UI::PrivateData {
     void*         ptr;
 
     PrivateData() noexcept
-        : parameterOffset(0),
+        : sampleRate(d_lastUiSampleRate),
+          parameterOffset(0),
+#if DISTRHO_PLUGIN_WANT_DIRECT_ACCESS
+          dspPtr(d_lastUiDspPtr),
+#endif
           editParamCallbackFunc(nullptr),
           setParamCallbackFunc(nullptr),
           setStateCallbackFunc(nullptr),
@@ -60,9 +72,22 @@ struct UI::PrivateData {
           setSizeCallbackFunc(nullptr),
           ptr(nullptr)
     {
+        DISTRHO_SAFE_ASSERT(d_isNotZero(sampleRate));
+
+#if defined(DISTRHO_PLUGIN_TARGET_DSSI) || defined(DISTRHO_PLUGIN_TARGET_LV2)
+        parameterOffset += DISTRHO_PLUGIN_NUM_INPUTS + DISTRHO_PLUGIN_NUM_OUTPUTS;
+# if DISTRHO_PLUGIN_WANT_LATENCY
+        parameterOffset += 1;
+# endif
+#endif
+
 #ifdef DISTRHO_PLUGIN_TARGET_LV2
-        // events in+out
-        parameterOffset += 4 /* 2 stereo outs + events in&out */;
+# if (DISTRHO_PLUGIN_IS_SYNTH || DISTRHO_PLUGIN_WANT_TIMEPOS || DISTRHO_PLUGIN_WANT_STATE)
+        parameterOffset += 1;
+#  if DISTRHO_PLUGIN_WANT_STATE
+        parameterOffset += 1;
+#  endif
+# endif
 #endif
     }
 
@@ -146,13 +171,16 @@ public:
         fUI->parameterChanged(index, value);
     }
 
+#if DISTRHO_PLUGIN_WANT_PROGRAMS
     void programLoaded(const uint32_t index)
     {
         DISTRHO_SAFE_ASSERT_RETURN(fUI != nullptr,);
 
         fUI->programLoaded(index);
     }
+#endif
 
+#if DISTRHO_PLUGIN_WANT_STATE
     void stateChanged(const char* const key, const char* const value)
     {
         DISTRHO_SAFE_ASSERT_RETURN(fUI != nullptr,);
@@ -161,6 +189,7 @@ public:
 
         fUI->stateChanged(key, value);
     }
+#endif
 
     // -------------------------------------------------------------------
     // compatibility calls, used for regular OpenGL windows
@@ -183,10 +212,6 @@ public:
     bool isVisible() const noexcept
     {
         return true;
-    }
-
-    void setSampleRate(const double sampleRate, const bool doCallback = false)
-    {
     }
 
     void setWindowSize(const uint width, const uint height, const bool updateUI = false)
@@ -213,6 +238,23 @@ public:
 
     void quit()
     {
+    }
+
+    // -------------------------------------------------------------------
+
+    void setSampleRate(const double sampleRate, const bool doCallback = false)
+    {
+        DISTRHO_SAFE_ASSERT_RETURN(fData != nullptr,);
+        DISTRHO_SAFE_ASSERT_RETURN(fUI != nullptr,);
+        DISTRHO_SAFE_ASSERT(sampleRate > 0.0);
+
+        if (d_isEqual(fData->sampleRate, sampleRate))
+            return;
+
+        fData->sampleRate = sampleRate;
+
+        if (doCallback)
+            fUI->sampleRateChanged(sampleRate);
     }
 
 private:

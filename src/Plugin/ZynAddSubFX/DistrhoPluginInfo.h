@@ -28,27 +28,28 @@
 #define DISTRHO_PLUGIN_URI   "http://zynaddsubfx.sourceforge.net"
 
 #ifdef NTK_GUI
- #define DISTRHO_PLUGIN_HAS_UI         1
+ #define DISTRHO_PLUGIN_HAS_UI          1
+ #define DISTRHO_PLUGIN_HAS_EMBED_UI    1
+ #define DISTRHO_PLUGIN_HAS_EXTERNAL_UI 1
 #else
- #define DISTRHO_PLUGIN_HAS_UI         0
+ #define DISTRHO_PLUGIN_HAS_UI          0
 #endif
 
-#define DISTRHO_PLUGIN_IS_RT_SAFE      1
-#define DISTRHO_PLUGIN_IS_SYNTH        1
-#define DISTRHO_PLUGIN_NUM_INPUTS      0
-#define DISTRHO_PLUGIN_NUM_OUTPUTS     2
-#define DISTRHO_PLUGIN_WANT_PROGRAMS   1
-#define DISTRHO_PLUGIN_WANT_STATE      1
-#define DISTRHO_PLUGIN_WANT_FULL_STATE 1
+#define DISTRHO_PLUGIN_IS_RT_SAFE       1
+#define DISTRHO_PLUGIN_IS_SYNTH         1
+#define DISTRHO_PLUGIN_NUM_INPUTS       0
+#define DISTRHO_PLUGIN_NUM_OUTPUTS      2
+#define DISTRHO_PLUGIN_WANT_PROGRAMS    1
+#define DISTRHO_PLUGIN_WANT_STATE       1
+#define DISTRHO_PLUGIN_WANT_FULL_STATE  1
 
 enum Parameters {
     kParamOscPort,
     kParamCount
 };
 
-// Needed for dpf code, external-ui is not official
+// Needed for dpf code, external-ui is not official yet
 #ifdef NTK_GUI
- #define HAVE_DGL
  #include "DistrhoUIInternal.hpp"
 #endif
 

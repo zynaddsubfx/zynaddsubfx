@@ -22,6 +22,8 @@
 
 // DPF includes
 #include "DistrhoUI.hpp"
+
+// FIXME: remove this after DPF gets official external-ui support
 #include "src/DistrhoPluginChecks.h"
 
 // Custom includes
@@ -141,7 +143,7 @@ class ZynAddSubFXUI : public UI
 {
 public:
     ZynAddSubFXUI(const intptr_t winId)
-        : UI(),
+        : UI(390, 525),
           externalUI(winId),
           oscPort(0)
     {
@@ -211,5 +213,6 @@ UI* createUI()
 END_NAMESPACE_DISTRHO
 
 #ifdef DISTRHO_PLUGIN_TARGET_LV2
+#include "DistrhoUIInternal.hpp"
 #include "src/DistrhoUILV2.cpp"
 #endif

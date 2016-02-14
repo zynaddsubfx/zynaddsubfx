@@ -1,6 +1,6 @@
 /*
  * DISTRHO Plugin Framework (DPF)
- * Copyright (C) 2012-2015 Filipe Coelho <falktx@falktx.com>
+ * Copyright (C) 2012-2016 Filipe Coelho <falktx@falktx.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any purpose with
  * or without fee is hereby granted, provided that the above copyright notice and this
@@ -16,20 +16,34 @@
 
 #include "DistrhoUIInternal.hpp"
 
+#ifdef HAVE_DGL
+# include "src/WidgetPrivateData.hpp"
+#endif
+
 START_NAMESPACE_DISTRHO
 
 /* ------------------------------------------------------------------------------------------------------------
  * Static data, see DistrhoUIInternal.hpp */
 
 double    d_lastUiSampleRate = 0.0;
+void*     d_lastUiDspPtr     = nullptr;
+#ifdef HAVE_DGL
+Window*   d_lastUiWindow     = nullptr;
+#endif
 uintptr_t g_nextWindowId     = 0;
 
 /* ------------------------------------------------------------------------------------------------------------
  * UI */
 
-UI::UI()
+UI::UI(uint width, uint height)
     : pData(new PrivateData())
 {
+#ifdef HAVE_DGL
+    ((UIWidget*)this)->pData->needsFullViewport = false;
+
+    if (width > 0 && height > 0)
+        setSize(width, height);
+#endif
 }
 
 UI::~UI()
@@ -37,13 +51,13 @@ UI::~UI()
     delete pData;
 }
 
-uintptr_t UI::getNextWindowId() noexcept
-{
-    return g_nextWindowId;
-}
-
 /* ------------------------------------------------------------------------------------------------------------
  * Host state */
+
+double UI::getSampleRate() const noexcept
+{
+    return pData->sampleRate;
+}
 
 void UI::editParameter(uint32_t index, bool started)
 {
@@ -55,15 +69,73 @@ void UI::setParameterValue(uint32_t index, float value)
     pData->setParamCallback(index + pData->parameterOffset, value);
 }
 
+#if DISTRHO_PLUGIN_WANT_STATE
 void UI::setState(const char* key, const char* value)
 {
     pData->setStateCallback(key, value);
 }
+#endif
 
+#if DISTRHO_PLUGIN_IS_SYNTH
 void UI::sendNote(uint8_t channel, uint8_t note, uint8_t velocity)
 {
     pData->sendNoteCallback(channel, note, velocity);
 }
+#endif
+
+#if DISTRHO_PLUGIN_WANT_DIRECT_ACCESS
+/* ------------------------------------------------------------------------------------------------------------
+ * Direct DSP access */
+
+void* UI::getPluginInstancePointer() const noexcept
+{
+    return pData->dspPtr;
+}
+#endif
+
+#if DISTRHO_PLUGIN_HAS_EMBED_UI && DISTRHO_PLUGIN_HAS_EXTERNAL_UI
+/* ------------------------------------------------------------------------------------------------------------
+ * External embeddable UI helpers */
+
+uintptr_t UI::getNextWindowId() noexcept
+{
+    return g_nextWindowId;
+}
+#endif
+
+/* ------------------------------------------------------------------------------------------------------------
+ * DSP/Plugin Callbacks (optional) */
+
+void UI::sampleRateChanged(double) {}
+
+#ifdef HAVE_DGL
+/* ------------------------------------------------------------------------------------------------------------
+ * UI Callbacks (optional) */
+
+void UI::uiFileBrowserSelected(const char*)
+{
+}
+
+void UI::uiReshape(uint width, uint height)
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0.0, static_cast<GLdouble>(width), static_cast<GLdouble>(height), 0.0, 0.0, 1.0);
+    glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+}
+
+/* ------------------------------------------------------------------------------------------------------------
+ * UI Resize Handling, internal */
+
+void UI::onResize(const ResizeEvent& ev)
+{
+    pData->setSizeCallback(ev.size.getWidth(), ev.size.getHeight());
+}
+#endif
 
 // -----------------------------------------------------------------------------------------------------------
 
