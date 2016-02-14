@@ -3,7 +3,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR}/DPF/distrho 
 
 if(NtkGui)
 
-# UI Enabled
+# UI Enabled using NTK: embed + external
 add_library(ZynAddSubFX_lv2 SHARED
     ${CMAKE_SOURCE_DIR}/src/globals.cpp
     ${CMAKE_SOURCE_DIR}/src/UI/ConnectionDummy.cpp
@@ -21,6 +21,26 @@ add_library(ZynAddSubFX_vst SHARED
     ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoUIMain.cpp
     ZynAddSubFX.cpp
     ZynAddSubFX-UI.cpp)
+
+# TODO: Make this also check for Linux or MacOS
+elseif(FltkGui)
+
+# UI Enabled using FLTK: external only
+add_library(ZynAddSubFX_lv2 SHARED
+    ${CMAKE_SOURCE_DIR}/src/globals.cpp
+    ${CMAKE_SOURCE_DIR}/src/UI/ConnectionDummy.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp
+    ZynAddSubFX.cpp)
+
+add_library(ZynAddSubFX_lv2_ui SHARED
+    ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoUIMain.cpp
+    ZynAddSubFX-UI.cpp)
+
+add_library(ZynAddSubFX_vst SHARED
+    ${CMAKE_SOURCE_DIR}/src/globals.cpp
+    ${CMAKE_SOURCE_DIR}/src/UI/ConnectionDummy.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp
+    ZynAddSubFX.cpp)
 
 else()
 

@@ -27,9 +27,13 @@
 #define DISTRHO_PLUGIN_NAME  "ZynAddSubFX"
 #define DISTRHO_PLUGIN_URI   "http://zynaddsubfx.sourceforge.net"
 
-#ifdef NTK_GUI
+#if defined(NTK_GUI)
  #define DISTRHO_PLUGIN_HAS_UI          1
  #define DISTRHO_PLUGIN_HAS_EMBED_UI    1
+ #define DISTRHO_PLUGIN_HAS_EXTERNAL_UI 1
+#elif defined(FLTK_GUI)
+ #define DISTRHO_PLUGIN_HAS_UI          1
+ #define DISTRHO_PLUGIN_HAS_EMBED_UI    0
  #define DISTRHO_PLUGIN_HAS_EXTERNAL_UI 1
 #else
  #define DISTRHO_PLUGIN_HAS_UI          0
