@@ -48,9 +48,4 @@ enum Parameters {
     kParamCount
 };
 
-// Needed for dpf code, external-ui is not official yet
-#ifdef NTK_GUI
- #include "DistrhoUIInternal.hpp"
-#endif
-
 #endif // DISTRHO_PLUGIN_INFO_H_INCLUDED

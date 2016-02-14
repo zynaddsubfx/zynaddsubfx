@@ -11,14 +11,14 @@ add_library(ZynAddSubFX_lv2 SHARED
     ZynAddSubFX.cpp)
 
 add_library(ZynAddSubFX_lv2_ui SHARED
-    DistrhoUI.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoUIMain.cpp
     ZynAddSubFX-UI.cpp)
 
 add_library(ZynAddSubFX_vst SHARED
     ${CMAKE_SOURCE_DIR}/src/globals.cpp
     ${CMAKE_SOURCE_DIR}/src/UI/ConnectionDummy.cpp
     ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp
-    DistrhoUI.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoUIMain.cpp
     ZynAddSubFX.cpp
     ZynAddSubFX-UI.cpp)
 
@@ -57,12 +57,12 @@ install(TARGETS ZynAddSubFX_vst LIBRARY DESTINATION ${PluginLibDir}/vst/)
 
 add_custom_command(TARGET ZynAddSubFX_lv2 POST_BUILD
     COMMAND lv2-ttl-generator $<TARGET_FILE:ZynAddSubFX_lv2>
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
 
 install(FILES
-	${CMAKE_CURRENT_BINARY_DIR}/lv2/manifest.ttl
-	${CMAKE_CURRENT_BINARY_DIR}/lv2/presets.ttl
-	${CMAKE_CURRENT_BINARY_DIR}/lv2/ZynAddSubFX.ttl
+    ${CMAKE_CURRENT_BINARY_DIR}/lv2/manifest.ttl
+    ${CMAKE_CURRENT_BINARY_DIR}/lv2/presets.ttl
+    ${CMAKE_CURRENT_BINARY_DIR}/lv2/ZynAddSubFX.ttl
     DESTINATION ${PluginLibDir}/lv2/ZynAddSubFX.lv2/)
 
 if(NtkGui)

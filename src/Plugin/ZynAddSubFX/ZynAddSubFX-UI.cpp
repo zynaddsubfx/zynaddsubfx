@@ -23,9 +23,6 @@
 // DPF includes
 #include "DistrhoUI.hpp"
 
-// FIXME: remove this after DPF gets official external-ui support
-#include "src/DistrhoPluginChecks.h"
-
 // Custom includes
 #include <cerrno>
 #include <sys/wait.h>
@@ -211,8 +208,3 @@ UI* createUI()
 }
 
 END_NAMESPACE_DISTRHO
-
-#ifdef DISTRHO_PLUGIN_TARGET_LV2
-#include "DistrhoUIInternal.hpp"
-#include "src/DistrhoUILV2.cpp"
-#endif
