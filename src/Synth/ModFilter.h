@@ -1,3 +1,4 @@
+#pragma once
 #include "../globals.h"
 #include "../Misc/Time.h"
 
