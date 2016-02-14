@@ -90,7 +90,7 @@ private:
         sprintf(urlAsString, "osc.udp://localhost:%i/", url);
 
         char winIdAsString[32];
-        sprintf(winIdAsString, "%llu", (long long unsigned)winId);
+        sprintf(winIdAsString, "%llu", (long long unsigned)(winId ? winId : 1));
 
         printf("Now respawning at '%s', using winId '%s'\n", urlAsString, winIdAsString);
 
