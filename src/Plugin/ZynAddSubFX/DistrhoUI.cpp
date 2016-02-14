@@ -21,7 +21,8 @@ START_NAMESPACE_DISTRHO
 /* ------------------------------------------------------------------------------------------------------------
  * Static data, see DistrhoUIInternal.hpp */
 
-double d_lastUiSampleRate = 0.0;
+double    d_lastUiSampleRate = 0.0;
+uintptr_t g_nextWindowId     = 0;
 
 /* ------------------------------------------------------------------------------------------------------------
  * UI */
@@ -34,6 +35,11 @@ UI::UI()
 UI::~UI()
 {
     delete pData;
+}
+
+uintptr_t UI::getNextWindowId() noexcept
+{
+    return g_nextWindowId;
 }
 
 /* ------------------------------------------------------------------------------------------------------------

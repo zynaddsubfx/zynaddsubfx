@@ -24,7 +24,8 @@ START_NAMESPACE_DISTRHO
 // -----------------------------------------------------------------------
 // Static data, see DistrhoUI.cpp
 
-extern double d_lastUiSampleRate;
+extern double    d_lastUiSampleRate;
+extern uintptr_t g_nextWindowId;
 
 // -----------------------------------------------------------------------
 // UI callbacks
@@ -99,13 +100,21 @@ struct UI::PrivateData {
 // -----------------------------------------------------------------------
 // UI exporter class
 
+static UI* createWindowIdUI(const intptr_t winId)
+{
+    g_nextWindowId = winId;
+    UI* const ui(createUI());
+    g_nextWindowId = 0;
+    return ui;
+}
+
 class UIExporter
 {
 public:
     UIExporter(void* const ptr, const intptr_t winId,
                const editParamFunc editParamCall, const setParamFunc setParamCall, const setStateFunc setStateCall, const sendNoteFunc sendNoteCall, const setSizeFunc setSizeCall,
                void* const dspPtr = nullptr)
-        : fUI(createUI(winId)),
+        : fUI(createWindowIdUI(winId)),
           fData((fUI != nullptr) ? fUI->pData : nullptr)
     {
         DISTRHO_SAFE_ASSERT_RETURN(fUI != nullptr,);

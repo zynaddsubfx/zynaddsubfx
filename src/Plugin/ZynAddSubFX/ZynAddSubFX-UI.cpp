@@ -203,9 +203,9 @@ private:
 
 START_NAMESPACE_DISTRHO
 
-UI* createUI(const intptr_t winId)
+UI* createUI()
 {
-    return new ZynAddSubFXUI(winId);
+    return new ZynAddSubFXUI(UI::getNextWindowId());
 }
 
 END_NAMESPACE_DISTRHO

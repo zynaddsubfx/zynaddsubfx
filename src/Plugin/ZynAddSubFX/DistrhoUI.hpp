@@ -64,6 +64,13 @@ public:
     */
     void sendNote(uint8_t channel, uint8_t note, uint8_t velocity);
 
+   /**
+      Get the Window Id that will be used for the next created window.
+      @note: This function is only valid during createUI(),
+             it will return 0 when called from anywhere else.
+    */
+    static uintptr_t getNextWindowId() noexcept;
+
 protected:
    /* --------------------------------------------------------------------------------------------------------
     * DSP/Plugin Callbacks */
@@ -102,7 +109,7 @@ private:
 /**
    createUI.
  */
-extern UI* createUI(const intptr_t winId);
+extern UI* createUI();
 
 // -----------------------------------------------------------------------------------------------------------
 
