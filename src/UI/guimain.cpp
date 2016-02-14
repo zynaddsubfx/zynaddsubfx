@@ -591,6 +591,7 @@ const char *help_message =
 int main(int argc, char *argv[])
 {
     const char *uri    = NULL;
+    const char *title  = NULL;
     bool        help   = false;
     bool        no_uri = false;
     for(int i=1; i<argc; ++i) {
@@ -602,6 +603,8 @@ int main(int argc, char *argv[])
         else if(!strcmp("--embed", argv[i]))
             embedId = argv[++i];
 #endif
+        else if(!strcmp("--title", argv[i]))
+            title = argv[++i];
         else
             uri = argv[i];
     }
@@ -623,6 +626,9 @@ int main(int argc, char *argv[])
     std::thread lo_watch(watch_lo);
 
     gui = GUI::createUi(new UI_Interface(), &Pexitprogram);
+
+    if (title != NULL)
+        GUI::raiseUi(gui, "/ui/title", "s", title);
 
     GUI::raiseUi(gui, "/show",  "i", 1);
     while(Pexitprogram == 0) {

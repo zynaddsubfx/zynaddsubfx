@@ -34,6 +34,7 @@ public:
           oscPort(0),
           winId(wid)
     {
+        setTitle("ZynAddSubFX");
     }
 
     ~ZynAddSubFXUI() override
@@ -98,6 +99,8 @@ private:
             "zynaddsubfx-ext-gui",
             "--embed",
             winIdAsString,
+            "--title",
+            getTitle(),
             urlAsString,
             nullptr
         };
