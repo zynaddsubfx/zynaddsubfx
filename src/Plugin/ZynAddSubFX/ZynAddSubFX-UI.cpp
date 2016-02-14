@@ -23,126 +23,16 @@
 // DPF includes
 #include "DistrhoUI.hpp"
 
-// Custom includes
-#include <cerrno>
-#include <sys/wait.h>
-#include <unistd.h>
-
-/* ------------------------------------------------------------------------------------------------------------
- * External UI class */
-
-// NOTE: The following code is non-portable!
-//       It's only meant to be used in linux
-
-class ExternalUI
-{
-public:
-    ExternalUI(const intptr_t w)
-        : pid(0),
-          winId(w) {}
-
-    ~ExternalUI()
-    {
-        terminateAndWaitForProcess();
-    }
-
-    void respawnAtURL(const int url)
-    {
-        terminateAndWaitForProcess();
-
-        char urlAsString[32];
-        sprintf(urlAsString, "osc.udp://localhost:%i/", url);
-
-        char winIdAsString[32];
-        sprintf(winIdAsString, "%llu", (long long unsigned)winId);
-
-        printf("Now respawning at '%s', using winId '%s'\n", urlAsString, winIdAsString);
-
-        const char* args[] = {
-            "zynaddsubfx-ext-gui",
-            "--embed",
-            winIdAsString,
-            urlAsString,
-            nullptr
-        };
-
-        pid = vfork();
-
-        switch (pid)
-        {
-        case 0:
-            execvp(args[0], (char**)args);
-            _exit(1);
-            break;
-
-        case -1:
-            printf("Could not start external ui\n");
-            break;
-        }
-    }
-
-private:
-    pid_t pid;
-    const intptr_t winId;
-
-    void terminateAndWaitForProcess()
-    {
-        if (pid <= 0)
-            return;
-
-        printf("Waiting for previous process to stop,,,\n");
-
-        bool sendTerm = true;
-
-        for (pid_t p;;)
-        {
-            p = ::waitpid(pid, nullptr, WNOHANG);
-
-            switch (p)
-            {
-            case 0:
-                if (sendTerm)
-                {
-                    sendTerm = false;
-                    ::kill(pid, SIGTERM);
-                }
-                break;
-
-            case -1:
-                if (errno == ECHILD)
-                {
-                    printf("Done! (no such process)\n");
-                    pid = 0;
-                    return;
-                }
-                break;
-
-            default:
-                if (p == pid)
-                {
-                    printf("Done! (clean wait)\n");
-                    pid = 0;
-                    return;
-                }
-                break;
-            }
-
-            // 5 msec
-            usleep(5*1000);
-        }
-    }
-};
-
 /* ------------------------------------------------------------------------------------------------------------
  * ZynAddSubFX UI class */
 
 class ZynAddSubFXUI : public UI
 {
 public:
-    ZynAddSubFXUI(const intptr_t winId)
+    ZynAddSubFXUI(const intptr_t wid)
         : UI(390, 525),
-          externalUI(winId),
-          oscPort(0)
+          oscPort(0),
+          winId(wid)
     {
     }
 
@@ -168,7 +58,7 @@ protected:
             if (oscPort != port)
             {
                 oscPort = port;
-                externalUI.respawnAtURL(port);
+                respawnAtURL(port);
             }
         } break;
         }
@@ -191,20 +81,46 @@ protected:
     }
 
 private:
-    ExternalUI externalUI;
     int oscPort;
+    const intptr_t winId;
+
+    void respawnAtURL(const int url)
+    {
+        char urlAsString[32];
+        sprintf(urlAsString, "osc.udp://localhost:%i/", url);
+
+        char winIdAsString[32];
+        sprintf(winIdAsString, "%llu", (long long unsigned)winId);
+
+        printf("Now respawning at '%s', using winId '%s'\n", urlAsString, winIdAsString);
+
+        const char* args[] = {
+            "zynaddsubfx-ext-gui",
+            "--embed",
+            winIdAsString,
+            urlAsString,
+            nullptr
+        };
+
+        startExternalProcess(args);
+    }
 
     DISTRHO_DECLARE_NON_COPY_CLASS(ZynAddSubFXUI)
 };
 
 /* ------------------------------------------------------------------------------------------------------------
- * Create plugin, entry point */
+ * Create UI, entry point */
 
 START_NAMESPACE_DISTRHO
 
 UI* createUI()
 {
-    return new ZynAddSubFXUI(UI::getNextWindowId());
+#if DISTRHO_PLUGIN_HAS_EMBED_UI
+    const uintptr_t winId = UI::getNextWindowId();
+#else
+    const uintptr_t winId = 0;
+#endif
+    return new ZynAddSubFXUI(winId);
 }
 
 END_NAMESPACE_DISTRHO
