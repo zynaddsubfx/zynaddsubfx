@@ -16,6 +16,7 @@ void Fl_Osc_Window::init(Fl_Osc_Interface *osc_, std::string loc_)
 {
     title_ext  = new Osc_DataModel(osc_);
     title_ext->doUpdate("/ui/title");
+#if 0
     title_ext->callback = [this](string next) {
         rewrite_rule = next;
         //printf("old: %s\n", title_orig.c_str());
@@ -35,6 +36,9 @@ void Fl_Osc_Window::init(Fl_Osc_Interface *osc_, std::string loc_)
         //title_new = title_orig + next;
         this->label(title_new.c_str());
     };
+#else
+    title_ext->callback = [this](string next) {};
+#endif
     title_orig = label();
 
     osc   = osc_;
