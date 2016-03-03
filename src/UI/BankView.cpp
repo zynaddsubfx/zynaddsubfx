@@ -31,6 +31,9 @@ void BankList::OSC_raw(const char *msg)
         if(pos == 0)
             this->clear();
 
+        if(pos <= this->size()-2)  {
+            return;
+        }
         this->add(path);
     }
     if(!strcmp(msg, "/bank/bank_select")&& !strcmp(rtosc_argument_string(msg),"i")) {

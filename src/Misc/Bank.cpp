@@ -370,21 +370,21 @@ void Bank::rescanforbanks()
     sort(banks.begin(), banks.end());
 
     //remove duplicate bank names
-    int dupl = 0;
-    for(int j = 0; j < (int) banks.size() - 1; ++j)
+    for(int j = 0; j < (int) banks.size() - 1; ++j) {
+        int dupl = 0;
         for(int i = j + 1; i < (int) banks.size(); ++i) {
             if(banks[i].name == banks[j].name) {
                 //add a [1] to the first bankname and [n] to others
                 banks[i].name = banks[i].name + '['
                                 + stringFrom(dupl + 2) + ']';
-                if(dupl == 0)
-                    banks[j].name += "[1]";
-
                 dupl++;
             }
-            else
-                dupl = 0;
         }
+        if(dupl != 0)
+            banks[j].name += "[1]";
+        if(dupl)
+            j += dupl;
+    }
 }
 
 void Bank::setMsb(uint8_t msb)
