@@ -349,7 +349,8 @@ struct NonRtObjStore
             d.matches++;
             d.reply((obj_rl+"needPrepare").c_str(), "F");
         } else {
-            assert(pad);
+            if(!pad)
+                return;
             strcpy(d.loc, obj_rl.c_str());
             d.obj = pad;
             PADnoteParameters::non_realtime_ports.dispatch(msg, d);
