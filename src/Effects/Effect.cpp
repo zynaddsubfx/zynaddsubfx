@@ -3,7 +3,8 @@
 
   Effect.cpp - this class is inherited by the all effects(Reverb, Echo, ..)
   Copyright (C) 2002-2005 Nasca Octavian Paul
-  Copyright 2011, Alan Calvert
+  Copyright (C) 2011 Alan Calvert
+  Copyright (C) 2015 Mark McCurry
   Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or modify

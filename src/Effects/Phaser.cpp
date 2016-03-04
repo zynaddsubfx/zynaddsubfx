@@ -1,18 +1,13 @@
 /*
-
-  Phaser.cpp  - Phasing and Approximate digital model of an analog JFET phaser.
-  Analog modeling implemented by Ryan Billing aka Transmogrifox.
   ZynAddSubFX - a software synthesizer
 
-  Phaser.cpp - Phaser effect
+  Phaser.cpp - Phasing and Approximate digital model of an analog JFET phaser.
+               Analog modeling implemented by Ryan Billing aka Transmogrifox.
+               DSP analog modeling theory & practice largely influenced by
+               various CCRMA publications, particularly works by Julius O. Smith.
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Copyright (C) 2009-2010 Ryan Billing
   Copyright (C) 2010-2010 Mark McCurry
-  Author: Nasca Octavian Paul
-          Ryan Billing
-          Mark McCurry
-
-  DSP analog modeling theory & practice largely influenced by various CCRMA publications, particularly works by Julius O. Smith.
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License

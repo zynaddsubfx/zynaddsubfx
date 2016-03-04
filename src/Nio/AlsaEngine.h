@@ -1,9 +1,9 @@
 /*
   ZynAddSubFX - a software synthesizer
-  AlsaEngine.h - ALSA Driver
 
-  Copyright 2009, Alan Calvert
-            2014, Mark McCurry
+  AlsaEngine.h - ALSA Driver
+  Copyright (C) 2009 Alan Calvert
+  Copyright (C) 2014 Mark McCurry
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of version 2 of the GNU General Public License

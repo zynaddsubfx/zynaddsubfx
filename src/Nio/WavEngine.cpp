@@ -1,4 +1,7 @@
 /*
+  ZynAddSubFX - a software synthesizer
+
+  WavEngine - an Output To File Engine
   Copyright (C) 2006 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 

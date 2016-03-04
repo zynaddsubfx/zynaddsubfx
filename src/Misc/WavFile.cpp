@@ -1,4 +1,7 @@
 /*
+  ZynAddSubFX - a software synthesizer
+
+  WavFile.cpp - Wav File Serialization
   Copyright (C) 2006 Nasca Octavian Paul
   Author: Nasca Octavian Paul
           Mark McCurry
