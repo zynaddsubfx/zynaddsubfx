@@ -125,6 +125,7 @@ static int current_category(Filter *f)
         return 2;
 
     assert(false);
+    return -1;
 }
 
 void ModFilter::paramUpdate(Filter *&f)
