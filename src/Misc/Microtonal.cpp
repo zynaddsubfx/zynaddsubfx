@@ -114,7 +114,7 @@ const rtosc::Ports Microtonal::ports = {
         {
             rtosc_blob_t b = rtosc_argument(msg, 0).b;
             assert(b.len == sizeof(void*));
-            Microtonal *other = *(Microtonal**)b.len;
+            Microtonal *other = *(Microtonal**)b.data;
             Microtonal &self  = *(Microtonal*)d.obj;
             //oh how I wish there was some darn reflection for this...
 
