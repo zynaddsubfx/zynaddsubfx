@@ -49,10 +49,10 @@ std::complex<_Tp>
 FFTpolar(const _Tp& __rho, const _Tp& __theta = _Tp(0))
 {
         _Tp __x = __rho * cos(__theta);
-        if (isnan(__x))
+        if (std::isnan(__x))
                 __x = 0;
         _Tp __y = __rho * sin(__theta);
-        if (isnan(__y))
+        if (std::isnan(__y))
                 __y = 0;
         return std::complex<_Tp>(__x, __y);
 }
