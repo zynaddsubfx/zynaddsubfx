@@ -15,6 +15,7 @@ set(zynaddsubfx_misc_SRCS
     Misc/PresetExtractor.cpp
     Misc/Allocator.cpp
     Misc/CallbackRepeater.cpp
+    Misc/Schema.cpp
 )
 
 
