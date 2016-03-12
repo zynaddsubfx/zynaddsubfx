@@ -20,12 +20,22 @@
 class ZynAddSubFXUI : public UI
 {
 public:
-    ZynAddSubFXUI(const intptr_t wid)
+    ZynAddSubFXUI(const intptr_t wid, const char* const bpath)
         : UI(390, 525),
           oscPort(0),
           winId(wid)
     {
         setTitle("ZynAddSubFX");
+
+#if DISTRHO_OS_MAC
+        extUiPath  = bpath;
+        extUiPath += "/zynaddsubfx-ext-gui";
+#else
+        extUiPath = "zynaddsubfx-ext-gui";
+
+        // unused
+        return; (void)bpath;
+#endif
     }
 
     ~ZynAddSubFXUI() override
@@ -74,6 +84,7 @@ protected:
 
 private:
     int oscPort;
+    String extUiPath;
     const intptr_t winId;
 
     void respawnAtURL(const int url)
@@ -87,7 +98,7 @@ private:
         printf("Now respawning at '%s', using winId '%s'\n", urlAsString, winIdAsString);
 
         const char* args[] = {
-            "zynaddsubfx-ext-gui",
+            extUiPath.buffer(),
             "--embed",
             winIdAsString,
             "--title",
@@ -114,7 +125,9 @@ UI* createUI()
 #else
     const uintptr_t winId = 0;
 #endif
-    return new ZynAddSubFXUI(winId);
+    const char* const bundlePath = UI::getNextBundlePath();
+
+    return new ZynAddSubFXUI(winId, bundlePath);
 }
 
 END_NAMESPACE_DISTRHO
