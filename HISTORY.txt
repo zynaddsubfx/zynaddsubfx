@@ -1,3 +1,17 @@
+2.5.4 (12 March 2016)
+        - Add realtime automation for subnote parameters
+        - Add FLTK UI for LV2 plugins
+        - Add support for '~' in bank paths
+        - Fix VST crashes
+        - Fix VST loading issues
+        - Fix Microtonal copy/paste
+        - Fix GCC 5.3.0 build issues
+        - Fix autosave disable flag
+        - Fix license headers
+        - Fix plugin library directory
+        - Fix uninitialized filter bug in subnote
+        - Fix broken instrument send
+
 2.5.3 (8 Feb 2016)
         - Add LV2&VST support via DPF
         - Add autosave

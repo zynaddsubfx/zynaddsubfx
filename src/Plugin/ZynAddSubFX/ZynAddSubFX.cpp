@@ -191,7 +191,7 @@ protected:
     uint32_t getVersion() const noexcept override
     {
         // TODO: use config.h or globals.h
-        return d_version(2, 5, 3);
+        return d_version(2, 5, 4);
     }
 
    /**
