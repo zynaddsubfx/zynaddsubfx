@@ -85,7 +85,7 @@ install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/lv2/ZynAddSubFX.ttl
     DESTINATION ${PluginLibDir}/lv2/ZynAddSubFX.lv2/)
 
-if(NtkGui)
+if(NtkGui OR FltkGui)
 set_target_properties(ZynAddSubFX_lv2_ui PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_LV2")
 set_target_properties(ZynAddSubFX_lv2_ui PROPERTIES LIBRARY_OUTPUT_DIRECTORY "lv2")
 set_target_properties(ZynAddSubFX_lv2_ui PROPERTIES OUTPUT_NAME "ZynAddSubFX_ui")
