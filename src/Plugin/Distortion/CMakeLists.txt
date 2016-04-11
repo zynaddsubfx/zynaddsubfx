@@ -21,7 +21,7 @@ install(TARGETS ZynDistortion_lv2 LIBRARY DESTINATION ${PluginLibDir}/lv2/ZynDis
 install(TARGETS ZynDistortion_vst LIBRARY DESTINATION ${PluginLibDir}/vst/)
 
 add_custom_command(TARGET ZynDistortion_lv2 POST_BUILD
-    COMMAND lv2-ttl-generator $<TARGET_FILE:ZynDistortion_lv2>
+    COMMAND ../../lv2-ttl-generator $<TARGET_FILE:ZynDistortion_lv2>
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
 
 install(FILES

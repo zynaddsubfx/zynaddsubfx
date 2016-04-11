@@ -21,7 +21,7 @@ install(TARGETS ZynDynamicFilter_lv2 LIBRARY DESTINATION ${PluginLibDir}/lv2/Zyn
 install(TARGETS ZynDynamicFilter_vst LIBRARY DESTINATION ${PluginLibDir}/vst/)
 
 add_custom_command(TARGET ZynDynamicFilter_lv2 POST_BUILD
-    COMMAND lv2-ttl-generator $<TARGET_FILE:ZynDynamicFilter_lv2>
+    COMMAND ../../lv2-ttl-generator $<TARGET_FILE:ZynDynamicFilter_lv2>
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
 
 install(FILES
