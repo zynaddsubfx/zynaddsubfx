@@ -78,8 +78,6 @@ SET (LashEnable ${LASH_FOUND} CACHE BOOL
     "Enable LASH Audio Session Handler")
 SET (DssiEnable ${DSSI_FOUND} CACHE BOOL
     "Enable DSSI Plugin compilation")
-SET (LibloEnable ${LIBLO_FOUND} CACHE BOOL
-    "Enable Liblo")
 SET (NoNeonPlease False CACHE BOOL
     "Workaround For Broken Neon Detection")
 SET (PluginLibDir "lib" CACHE STRING
@@ -228,13 +226,12 @@ if(LashEnable)
 	list(APPEND AUDIO_LIBRARY_DIRS ${LASH_LIBRARY_DIRS})
 	message(STATUS "Compiling with lash")
 endif()
-if(LibloEnable)
-	include_directories(${LIBLO_INCLUDE_DIRS})
-	add_definitions(-DUSE_NSM=1)
-    list(APPEND AUDIO_LIBRARIES ${LIBLO_LIBRARIES})
-	list(APPEND AUDIO_LIBRARY_DIRS ${LIBLO_LIBRARY_DIRS})
-	message(STATUS "Compiling with liblo")
-endif()
+
+include_directories(${LIBLO_INCLUDE_DIRS})
+add_definitions(-DUSE_NSM=1)
+list(APPEND AUDIO_LIBRARIES ${LIBLO_LIBRARIES})
+list(APPEND AUDIO_LIBRARY_DIRS ${LIBLO_LIBRARY_DIRS})
+message(STATUS "Compiling with liblo")
 
 # other include directories
 include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS})
@@ -356,9 +353,7 @@ if(NtkGui)
 endif()
 
 if(NOT FltkGui AND NOT NtkGui)
-    if(LibloEnable)
-        set(NSM_WORKAROUND UI/NSM.C UI/NSM/Client.C)
-    endif()
+    set(NSM_WORKAROUND UI/NSM.C UI/NSM/Client.C)
     add_library(zynaddsubfx_gui_bridge STATIC UI/ConnectionDummy.cpp ${NSM_WORKAROUND})
     add_definitions(-DNO_UI=1)
 endif()
@@ -502,7 +497,6 @@ package_status(X11_FOUND        "x11      " "found"   ${Yellow})
 package_status(CXXTEST_FOUND    "CxxTest  " "found"   ${Yellow})
 package_status(LashEnable       "Lash     " "enabled" ${Yellow})
 package_status(DssiEnable       "DSSI     " "enabled" ${Yellow})
-package_status(LibloEnable      "liblo    " "enabled" ${Red})
 package_status(CompileTests     "tests    " "enabled" ${Yellow})
 package_status(AlsaEnable       "ALSA     " "enabled" ${Yellow})
 package_status(JackEnable       "JACK     " "enabled" ${Yellow})
