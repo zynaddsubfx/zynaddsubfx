@@ -750,6 +750,7 @@ class MwDataObj:public rtosc::RtData
 
         ~MwDataObj(void)
         {
+            delete[] loc;
             delete[] buffer;
         }
 
