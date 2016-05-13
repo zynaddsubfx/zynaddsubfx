@@ -38,7 +38,7 @@ static const rtosc::Ports SUBnotePorts = {
     rParamI(PDetune,       rShort("detune"), "Detune in detune type units"),
     rParamI(PCoarseDetune, rShort("cdetune"), "Coarse Detune"),
     //Real values needed
-    rOption(PDetuneType,               rShort("det. scl."), rOptions("100 cents", "200 cents", "500 cents"), "Detune Scale"),
+    rOption(PDetuneType,               rShort("det. scl."), rOptions(100 cents, 200 cents, 500 cents), "Detune Scale"),
     rToggle(PFreqEnvelopeEnabled,      rShort("enable"), "Enable for Frequency Envelope"),
     rToggle(PBandWidthEnvelopeEnabled, rShort("enable"), "Enable for Bandwidth Envelope"),
     rToggle(PGlobalFilterEnabled,                 rShort("enable"), "Enable for Global Filter"),
@@ -75,7 +75,7 @@ static const rtosc::Ports SUBnotePorts = {
     rRecurp(BandWidthEnvelope,    "Bandwidth Envelope"),
     rRecurp(GlobalFilterEnvelope, "Post Filter Envelope"),
     rRecurp(GlobalFilter,         "Post Filter"),
-    rOption(Pstart, rShort("initial"), rOptions("zero", "random", "ones"), "How harmonics are initialized"),
+    rOption(Pstart, rShort("initial"), rOptions(zero, random, ones), "How harmonics are initialized"),
 
     {"clear:", rDoc("Reset all harmonics to equal bandwidth/zero amplitude"), NULL, [](const char *, RtData &d)
         {

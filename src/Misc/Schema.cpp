@@ -12,6 +12,7 @@ using namespace rtosc;
  *   - 'tooltip'   : string [OPTIONAL]
  *   - 'type'      : type
  *   - 'domain'    : range [OPTIONAL]
+ *   - 'options'   : [option...] [OPTIONAL]
  * type : {'int', 'float', 'boolean'}
  * action :
  *   - 'path' : path-id
@@ -19,6 +20,9 @@ using namespace rtosc;
  * arg :
  *   - 'type'   : type
  *   - 'domain' : range [OPTIONAL]
+ * option :
+ *   - 'id'    : id-number
+ *   - 'value' : string-rep
  */
 
 void walk_ports2(const rtosc::Ports *base,
@@ -100,12 +104,14 @@ static ostream &add_options(ostream &o, Port::MetaContainer meta)
 static bool first = true;
 void dump_param_cb(const rtosc::Port *p, const char *name, void *v)
 {
+    typedef std::vector<std::pair<int,std::string>> opts;
     std::ostream &o  = *(std::ostream*)v;
     auto meta        = p->meta();
     const char *args = strchr(p->name, ':');
     auto mparameter  = meta.find("parameter");
     auto mdoc        = meta.find("documentation");
     auto msname      = meta.find("shortname");
+    opts options;
     string doc;
 
     //Escape Characters
@@ -154,6 +160,15 @@ void dump_param_cb(const rtosc::Port *p, const char *name, void *v)
     const char *min = meta["min"];
     const char *max = meta["max"];
 
+    for(auto m:meta) {
+        if(strlen(m.title) >= 5 && !bcmp(m.title, "map ", 4)) {
+            int id = atoi(m.title+4);
+            std::string val = m.value;
+            options.push_back(std::make_pair(id, val));
+            printf("PUSHING ONTO THE OPTIONS\n");
+        }
+    }
+
     if(!first)
         o << ",\n";
     else
@@ -167,10 +182,22 @@ void dump_param_cb(const rtosc::Port *p, const char *name, void *v)
     o << "        \"tooltip\"  : \"" << doc  << "\",\n";
     o << "        \"type\"     : \"" << type  << "\"";
     if(min && max)
-    o << ",\n        \"range\"    : [" << min << "," << max << "]\n";
-    else
-        o << "\n";
-    o << "    }";
+        o << ",\n        \"range\"    : [" << min << "," << max << "]";
+    if(!options.empty()) {
+        o << ",\n        \"options\"  : [\n";
+        int N = options.size();
+        for(int i=0; i<N; ++i) {
+            o << "        {\n";
+            o << "            \"id\"     : "   << options[i].first << ",\n";
+            o << "            \"value\"  : \"" << options[i].second << "\"\n";
+            o << "        }";
+            if(i != N-1)
+                o << ",";
+            o << "\n";
+        }
+        o << "        ]";
+    }
+    o << "\n    }";
 }
 
 void dump_json(std::ostream &o, const rtosc::Ports &p)
