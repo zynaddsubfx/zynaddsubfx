@@ -102,9 +102,9 @@ static ostream &add_options(ostream &o, Port::MetaContainer meta)
  *   - 'domain'    : range [OPTIONAL]
  */
 static bool first = true;
-void dump_param_cb(const rtosc::Port *p, const char *name, void *v)
+void dump_param_cb(const rtosc::Port *p, const char *full_name, void *v)
 {
-    typedef std::vector<std::pair<int,std::string>> opts;
+    typedef std::vector<std::pair<int,string>> opts;
     std::ostream &o  = *(std::ostream*)v;
     auto meta        = p->meta();
     const char *args = strchr(p->name, ':');
@@ -113,6 +113,13 @@ void dump_param_cb(const rtosc::Port *p, const char *name, void *v)
     auto msname      = meta.find("shortname");
     opts options;
     string doc;
+    string name      = p->name;;
+
+    {
+        size_t pos = 0;
+        if((pos = name.find_first_of(":")) != string::npos)
+            name = name.substr(0, pos);
+    }
 
     //Escape Characters
     if(mdoc != p->meta().end()) {
@@ -145,7 +152,7 @@ void dump_param_cb(const rtosc::Port *p, const char *name, void *v)
         }
 
         if(!type) {
-            fprintf(stderr, "rtosc port dumper: Cannot handle '%s'\n", name);
+            fprintf(stderr, "rtosc port dumper: Cannot handle '%s'\n", full_name);
             fprintf(stderr, "    args = <%s>\n", args);
             return;
         }
@@ -165,7 +172,6 @@ void dump_param_cb(const rtosc::Port *p, const char *name, void *v)
             int id = atoi(m.title+4);
             std::string val = m.value;
             options.push_back(std::make_pair(id, val));
-            printf("PUSHING ONTO THE OPTIONS\n");
         }
     }
 
@@ -175,10 +181,10 @@ void dump_param_cb(const rtosc::Port *p, const char *name, void *v)
         first = false;
 
     o << "    {\n";
-    o << "        \"path\"     : \"" << name << "\",\n";
+    o << "        \"path\"     : \"" << full_name << "\",\n";
     if(msname != meta.end())
         o << "        \"shortname\": \"" << msname.value << "\",\n";
-    o << "        \"name\"     : \"" << p->name << "\",\n";
+    o << "        \"name\"     : \"" << name << "\",\n";
     o << "        \"tooltip\"  : \"" << doc  << "\",\n";
     o << "        \"type\"     : \"" << type  << "\"";
     if(min && max)
