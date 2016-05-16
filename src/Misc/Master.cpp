@@ -241,6 +241,9 @@ static const Ports master_ports = {
     {"HDDRecorder/pause:", rDoc("Pause recording"), 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
        m->HDDRecorder.pause();}},
+    {"watch/add:s", rDoc("Add synthesis state to watch"), 0, [](const char *msg, RtData &d) {
+       Master *m = (Master*)d.obj;
+       m->watcher.add_watch(rtosc_argument(msg,0).s);}},
 
 };
 const Ports &Master::ports = master_ports;
@@ -636,6 +639,13 @@ bool Master::AudioOut(float *outr, float *outl)
         bToU->write("/request-memory", "");
         pendingMemory = true;
     }
+
+
+    //Handle watch points
+    if(bToU)
+        watcher.write_back = bToU;
+    watcher.tick();
+
     //Handle user events TODO move me to a proper location
     char loc_buf[1024];
     DataObj d{loc_buf, 1024, this, bToU};

@@ -32,7 +32,7 @@ WatchPoint::WatchPoint(WatchManager *ref, const char *prefix, const char *id)
         strncpy(identity, prefix, 128);
     if(id)
         strncat(identity, id, 128);
-    printf("new watchpoint = <%s>\n", identity);
+    printf("new watchpoint ={%s:%s} <%s>\n", prefix, id, identity);
 }
 
 bool WatchPoint::is_active(void)
@@ -113,6 +113,7 @@ int WatchManager::samples(const char *id) const
     
 void WatchManager::satisfy(const char *id, float f)
 {
+    //printf("trying to satisfy '%s'\n", id);
     if(write_back)
         write_back->write(id, "f", f);
     del_watch(id);

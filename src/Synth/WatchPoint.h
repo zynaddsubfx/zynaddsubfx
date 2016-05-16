@@ -54,7 +54,7 @@ struct WatchManager
     //Watch Point Query API
     bool active(const char *) const;
     int  samples(const char *) const;
-    
+
     //Watch Point Response API
     void satisfy(const char *, float);
 };
@@ -66,6 +66,7 @@ struct FloatWatchPoint:public WatchPoint
     {
         if(is_active() && reference) {
             reference->satisfy(identity, f);
+            active = false;
         }
     }
 };

@@ -22,13 +22,16 @@
 #include "../Misc/Util.h"
 #include "../Misc/Allocator.h"
 #include "../Params/ADnoteParameters.h"
+#include "../Containers/ScratchString.h"
 #include "ModFilter.h"
 #include "OscilGen.h"
 #include "ADnote.h"
 
-ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars)
+ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
+        WatchManager *wm, const char *prefix)
     :SynthNote(spars), pars(*pars_)
 {
+    printf("prefix = '%s'\n", prefix);
     memory.beginTransaction();
     tmpwavel = memory.valloc<float>(synth.buffersize);
     tmpwaver = memory.valloc<float>(synth.buffersize);
@@ -450,7 +453,7 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars)
         memset(tmpwave_unison[k], 0, synth.bufferbytes);
     }
 
-    initparameters();
+    initparameters(wm, prefix);
     memory.endTransaction();
 }
 
@@ -772,16 +775,18 @@ ADnote::~ADnote()
 /*
  * Init the parameters
  */
-void ADnote::initparameters()
+void ADnote::initparameters(WatchManager *wm, const char *prefix)
 {
     int tmp[NUM_VOICES];
+    ScratchString pre = prefix;
+    printf("pre = <%s>\n", pre.c_str);
     //ADnoteParameters &pars = *partparams;
 
     // Global Parameters
     NoteGlobalPar.initparameters(pars.GlobalPar, synth,
                                  time,
                                  memory, basefreq, velocity,
-                                 stereo);
+                                 stereo, wm, prefix);
 
     NoteGlobalPar.AmpEnvelope->envout_dB(); //discard the first envelope output
     globalnewamplitude = NoteGlobalPar.Volume
@@ -822,7 +827,8 @@ void ADnote::initparameters()
         }
 
         if(param.PAmpLfoEnabled) {
-            vce.AmpLfo = memory.alloc<LFO>(*param.AmpLfo, basefreq, time);
+            vce.AmpLfo = memory.alloc<LFO>(*param.AmpLfo, basefreq, time, wm,
+                    (pre+"VoicePar"+nvoice+"/AmpLfo/").c_str);
             newamplitude[nvoice] *= vce.AmpLfo->amplfoout();
         }
 
@@ -831,7 +837,8 @@ void ADnote::initparameters()
             vce.FreqEnvelope = memory.alloc<Envelope>(*param.FreqEnvelope, basefreq, synth.dt());
 
         if(param.PFreqLfoEnabled)
-            vce.FreqLfo = memory.alloc<LFO>(*param.FreqLfo, basefreq, time);
+            vce.FreqLfo = memory.alloc<LFO>(*param.FreqLfo, basefreq, time, wm,
+                    (pre+"VoicePar"+nvoice+"/FreqLfo/").c_str);
 
         /* Voice Filter Parameters Init */
         if(param.PFilterEnabled) {
@@ -848,7 +855,8 @@ void ADnote::initparameters()
             }
 
             if(param.PFilterLfoEnabled) {
-                vce.FilterLfo = memory.alloc<LFO>(*param.FilterLfo, basefreq, time);
+                vce.FilterLfo = memory.alloc<LFO>(*param.FilterLfo, basefreq, time, wm,
+                        (pre+"VoicePar"+nvoice+"/FilterLfo/").c_str);
                 vce.Filter->addMod(*vce.FilterLfo);
             }
         }
@@ -1873,13 +1881,18 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
                                     const AbsTime &time,
                                     class Allocator &memory,
                                     float basefreq, float velocity,
-                                    bool stereo)
+                                    bool stereo,
+                                    WatchManager *wm,
+                                    const char *prefix)
 {
+    ScratchString pre = prefix;
     FreqEnvelope = memory.alloc<Envelope>(*param.FreqEnvelope, basefreq, synth.dt());
-    FreqLfo      = memory.alloc<LFO>(*param.FreqLfo, basefreq, time);
+    FreqLfo      = memory.alloc<LFO>(*param.FreqLfo, basefreq, time, wm,
+                   (pre+"FreqLfo/").c_str);
 
     AmpEnvelope = memory.alloc<Envelope>(*param.AmpEnvelope, basefreq, synth.dt());
-    AmpLfo      = memory.alloc<LFO>(*param.AmpLfo, basefreq, time);
+    AmpLfo      = memory.alloc<LFO>(*param.AmpLfo, basefreq, time, wm,
+                   (pre+"AmpLfo/").c_str);
 
     Volume = 4.0f * powf(0.1f, 3.0f * (1.0f - param.PVolume / 96.0f)) //-60 dB .. 0 dB
              * VelF(velocity, param.PAmpVelocityScaleFunction);     //sensing
@@ -1888,7 +1901,8 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
             stereo, basefreq);
 
     FilterEnvelope = memory.alloc<Envelope>(*param.FilterEnvelope, basefreq, synth.dt());
-    FilterLfo      = memory.alloc<LFO>(*param.FilterLfo, basefreq, time);
+    FilterLfo      = memory.alloc<LFO>(*param.FilterLfo, basefreq, time, wm,
+                   (pre+"FilterLfo/").c_str);
 
     Filter->addMod(*FilterEnvelope);
     Filter->addMod(*FilterLfo);

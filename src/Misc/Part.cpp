@@ -501,7 +501,8 @@ bool Part::NoteOn(unsigned char note,
         try {
             if(item.Padenabled)
                 notePool.insertNote(note, sendto,
-                        {memory.alloc<ADnote>(kit[i].adpars, pars), 0, i});
+                        {memory.alloc<ADnote>(kit[i].adpars, pars,
+                            wm, (pre+"kit"+i+"/add/").c_str), 0, i});
             if(item.Psubenabled)
                 notePool.insertNote(note, sendto,
                         {memory.alloc<SUBnote>(kit[i].subpars, pars), 1, i});
