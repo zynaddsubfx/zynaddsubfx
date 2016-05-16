@@ -85,17 +85,17 @@ class MessageTest:public CxxTest::TestSuite
             ms->applyOscEvent(ms->uToB->read());
             TS_ASSERT(!ms->uToB->hasNext());
 
-	    auto &osc_src = *ms->part[0]->kit[0].adpars->VoicePar[0].FMSmp;
+            auto &osc_src = *ms->part[0]->kit[0].adpars->VoicePar[0].FMSmp;
             auto &osc_dst = *ms->part[0]->kit[0].padpars->oscilgen;
             auto &osc_oth = *ms->part[0]->kit[0].adpars->VoicePar[1].OscilSmp;
 
-	    TS_ASSERT_EQUALS(osc_src.Pbasefuncpar, 64);
+            TS_ASSERT_EQUALS(osc_src.Pbasefuncpar, 64);
             osc_src.Pbasefuncpar = 32;
-	    TS_ASSERT_EQUALS(osc_src.Pbasefuncpar, 32);
+            TS_ASSERT_EQUALS(osc_src.Pbasefuncpar, 32);
 
             //Copy From ADsynth modulator
             printf("====Copy From ADsynth modulator\n");
-	    start_realtime();
+            start_realtime();
             mw->transmitMsg("/presets/copy", "s", "/part0/kit0/adpars/VoicePar0/FMSmp/");
 
             TS_ASSERT_EQUALS(osc_dst.Pbasefuncpar, 64);
@@ -105,10 +105,10 @@ class MessageTest:public CxxTest::TestSuite
             printf("====Paste to PADsynth\n");
             mw->transmitMsg("/presets/paste", "s", "/part0/kit0/padpars/oscilgen/");
 
-	    printf("====Paste to ADsynth\n");
+            printf("====Paste to ADsynth\n");
             mw->transmitMsg("/presets/paste", "s", "/part0/kit0/adpars/VoicePar1/OscilSmp/");
 
-	    stop_realtime();
+            stop_realtime();
             TS_ASSERT_EQUALS(osc_dst.Pbasefuncpar, 32);
             TS_ASSERT_EQUALS(osc_oth.Pbasefuncpar, 32);
         }

@@ -391,6 +391,7 @@ add_subdirectory(Plugin)
 add_library(zynaddsubfx_core STATIC
     globals.cpp
     ../tlsf/tlsf.c
+    Containers/ScratchString.cpp
     Containers/NotePool.cpp
     Containers/MultiPseudoStack.cpp
 	${zynaddsubfx_dsp_SRCS}

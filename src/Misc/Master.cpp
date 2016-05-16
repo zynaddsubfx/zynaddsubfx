@@ -22,6 +22,7 @@
 #include "../Effects/EffectMgr.h"
 #include "../DSP/FFTwrapper.h"
 #include "../Misc/Allocator.h"
+#include "../Containers/ScratchString.h"
 #include "../Nio/Nio.h"
 #include "PresetExtractor.h"
 
@@ -333,9 +334,11 @@ Master::Master(const SYNTH_T &synth_, Config* config)
         fakepeakpart[npart]  = 0;
     }
 
+    ScratchString ss;
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         part[npart] = new Part(*memory, synth, time, config->cfg.GzipCompression,
-                               config->cfg.Interpolation, &microtonal, fft);
+                               config->cfg.Interpolation, &microtonal, fft, &watcher,
+                               (ss+"/part"+npart+"/").c_str);
 
     //Insertion Effects init
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)

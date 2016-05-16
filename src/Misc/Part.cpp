@@ -25,6 +25,7 @@
 #include "../Synth/ADnote.h"
 #include "../Synth/SUBnote.h"
 #include "../Synth/PADnote.h"
+#include "../Containers/ScratchString.h"
 #include "../DSP/FFTwrapper.h"
 #include "../Misc/Util.h"
 #include <cstdlib>
@@ -195,7 +196,7 @@ const Ports &Part::ports = partPorts;
 
 Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     const int &gzip_compression, const int &interpolation,
-    Microtonal *microtonal_, FFTwrapper *fft_)
+    Microtonal *microtonal_, FFTwrapper *fft_, WatchManager *wm_, const char *prefix_)
     :Pdrummode(false),
     Ppolymode(true),
     Plegatomode(false),
@@ -204,12 +205,18 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     ctl(synth_, &time_),
     microtonal(microtonal_),
     fft(fft_),
+    wm(wm_),
     memory(alloc),
     synth(synth_),
     time(time_),
     gzip_compression(gzip_compression),
     interpolation(interpolation)
 {
+    if(prefix_)
+        strncpy(prefix, prefix_, sizeof(prefix));
+    else
+        memset(prefix, 0, sizeof(prefix));
+
     monomemClear();
 
     for(int n = 0; n < NUM_KIT_ITEMS; ++n) {
@@ -482,6 +489,7 @@ bool Part::NoteOn(unsigned char note,
 
     //Create New Notes
     for(uint8_t i = 0; i < NUM_KIT_ITEMS; ++i) {
+        ScratchString pre = prefix;
         auto &item = kit[i];
         if(Pkitmode != 0 && !item.validNote(note))
             continue;
@@ -499,7 +507,8 @@ bool Part::NoteOn(unsigned char note,
                         {memory.alloc<SUBnote>(kit[i].subpars, pars), 1, i});
             if(item.Ppadenabled)
                 notePool.insertNote(note, sendto,
-                        {memory.alloc<PADnote>(kit[i].padpars, pars, interpolation), 2, i});
+                        {memory.alloc<PADnote>(kit[i].padpars, pars, interpolation, wm,
+                            (pre+"kit"+i+"/pad/").c_str), 2, i});
         } catch (std::bad_alloc & ba) {
             std::cerr << "dropped new note: " << ba.what() << std::endl;
         }

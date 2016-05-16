@@ -19,10 +19,11 @@
 #include "../Params/PADnoteParameters.h"
 #include "../Params/Controller.h"
 #include "../Params/FilterParams.h"
+#include "../Containers/ScratchString.h"
 #include "../Misc/Util.h"
 
 PADnote::PADnote(const PADnoteParameters *parameters,
-                 SynthParams pars, const int& interpolation)
+                 SynthParams pars, const int& interpolation, WatchManager *wm, const char *prefix)
     :SynthNote(pars), pars(*parameters), interpolation(interpolation)
 {
     NoteGlobalPar.GlobalFilter    = nullptr;
@@ -30,14 +31,15 @@ PADnote::PADnote(const PADnoteParameters *parameters,
     NoteGlobalPar.FilterLfo       = nullptr;
 
     firsttime = true;
-    setup(pars.frequency, pars.velocity, pars.portamento, pars.note);
+    setup(pars.frequency, pars.velocity, pars.portamento, pars.note, false, prefix);
 }
 
 void PADnote::setup(float freq,
                     float velocity_,
                     int portamento_,
                     int midinote,
-                    bool legato)
+                    bool legato, 
+                    const char *prefix)
 {
     portamento = portamento_;
     velocity   = velocity_;
@@ -129,11 +131,15 @@ void PADnote::setup(float freq,
         else
             NoteGlobalPar.Punch.Enabled = 0;
 
+        ScratchString pre = prefix;
+
         NoteGlobalPar.FreqEnvelope = memory.alloc<Envelope>(*pars.FreqEnvelope, basefreq, synth.dt());
-        NoteGlobalPar.FreqLfo      = memory.alloc<LFO>(*pars.FreqLfo, basefreq, time);
+        NoteGlobalPar.FreqLfo      = memory.alloc<LFO>(*pars.FreqLfo, basefreq, time, wm,
+                (pre+"freqlfo/").c_str);
 
         NoteGlobalPar.AmpEnvelope = memory.alloc<Envelope>(*pars.AmpEnvelope, basefreq, synth.dt());
-        NoteGlobalPar.AmpLfo      = memory.alloc<LFO>(*pars.AmpLfo, basefreq, time);
+        NoteGlobalPar.AmpLfo      = memory.alloc<LFO>(*pars.AmpLfo, basefreq, time, wm,
+                (pre+"amplfo/").c_str);
     }
 
     NoteGlobalPar.Volume = 4.0f
