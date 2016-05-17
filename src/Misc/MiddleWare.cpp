@@ -1026,6 +1026,10 @@ static rtosc::Ports middwareSnoopPorts = {
         xml.loadXMLfile(file);
         loadMidiLearn(xml, impl.midi_mapper);
         rEnd},
+    {"clear_xlz:", 0, 0,
+        rBegin;
+        impl.midi_mapper.clear();
+        rEnd},
     //scale file stuff
     {"load_xsz:s", 0, 0,
         rBegin;

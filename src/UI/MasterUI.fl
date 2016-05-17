@@ -313,6 +313,11 @@ osc->write("/load_xlz", "s", filename);}
               xywh {40 40 100 20}
             }
             MenuItem {} {
+              label {Clear Midi Learn...}
+              callback {osc->write("/clear_xlz", "");}
+              xywh {40 40 100 20}
+            }
+            MenuItem {} {
               label {Save Midi Learn...}
               callback {char *filename;
 int result;
