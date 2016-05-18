@@ -11,6 +11,7 @@
   of the License, or (at your option) any later version.
 */
 
+#include <stdlib.h>
 #include <iostream>
 #include <cmath>
 
@@ -273,7 +274,12 @@ bool AlsaEngine::openAudio()
     int rc = 0;
     /* Open PCM device for playback. */
     audio.handle = NULL;
-    rc = snd_pcm_open(&audio.handle, "hw:0",
+
+    const char *device = getenv("ALSA_DEVICE");
+    if(device == 0)
+        device = "hw:0";
+
+    rc = snd_pcm_open(&audio.handle, device,
                       SND_PCM_STREAM_PLAYBACK, 0);
     if(rc < 0) {
         fprintf(stderr,
