@@ -484,7 +484,8 @@ public:
                                    master->time,
                                    config->cfg.GzipCompression,
                                    config->cfg.Interpolation,
-                                   &master->microtonal, master->fft);
+                                   &master->microtonal, master->fft, &master->watcher,
+                                   ("/part"+to_s(npart)+"/").c_str());
                 if(p->loadXMLinstrument(filename))
                     fprintf(stderr, "Warning: failed to load part<%s>!\n", filename);
 

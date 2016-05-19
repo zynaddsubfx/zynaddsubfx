@@ -31,7 +31,6 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
         WatchManager *wm, const char *prefix)
     :SynthNote(spars), pars(*pars_)
 {
-    printf("prefix = '%s'\n", prefix);
     memory.beginTransaction();
     tmpwavel = memory.valloc<float>(synth.buffersize);
     tmpwaver = memory.valloc<float>(synth.buffersize);
@@ -779,7 +778,6 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 {
     int tmp[NUM_VOICES];
     ScratchString pre = prefix;
-    printf("pre = <%s>\n", pre.c_str);
     //ADnoteParameters &pars = *partparams;
 
     // Global Parameters

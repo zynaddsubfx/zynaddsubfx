@@ -32,7 +32,7 @@ WatchPoint::WatchPoint(WatchManager *ref, const char *prefix, const char *id)
         strncpy(identity, prefix, 128);
     if(id)
         strncat(identity, id, 128);
-    printf("new watchpoint ={%s:%s} <%s>\n", prefix, id, identity);
+    //printf("new watchpoint ={%s:%s} <%s>\n", prefix, id, identity);
 }
 
 bool WatchPoint::is_active(void)
@@ -95,6 +95,8 @@ void WatchManager::tick(void)
 
 bool WatchManager::active(const char *id) const
 {
+    assert(this);
+    assert(id);
     if(new_active)
         for(int i=0; i<MAX_WATCH; ++i)
             if(!strcmp(active_list[i], id))
