@@ -407,7 +407,7 @@ class UI_Interface:public Fl_Osc_Interface
         virtual void damage(const char *path) override
         {
 #ifndef NO_UI
-            printf("\n\nDamage(\"%s\")\n", path);
+            //printf("\n\nDamage(\"%s\")\n", path);
             std::set<Fl_Osc_Widget*> to_update;
             for(auto pair:map) {
                 if(strstr(pair.first.c_str(), path)) {

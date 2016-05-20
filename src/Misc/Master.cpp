@@ -75,7 +75,7 @@ static const Ports sysefxPort =
 
 static const Ports sysefsendto =
 {
-    {"to#" STRINGIFY(NUM_SYS_EFX) "::i", 
+    {"to#" STRINGIFY(NUM_SYS_EFX) "::i",
         rProp(parameter) rDoc("sysefx to sysefx routing gain"), 0, [](const char *m, RtData&d)
         {
             //same ugly workaround as before
@@ -96,6 +96,16 @@ static const Ports sysefsendto =
             else
                 d.reply(d.loc, "i", master.Psysefxsend[ind1][ind2]);
         }}
+};
+
+#define rBegin [](const char *msg, RtData &d) { Master *m = (Master*)d.obj
+#define rEnd }
+
+static const Ports watchPorts = {
+    {"add:s", rDoc("Add synthesis state to watch"), 0,
+        rBegin;
+        m->watcher.add_watch(rtosc_argument(msg,0).s);
+        rEnd},
 };
 
 static const Ports master_ports = {
@@ -241,11 +251,16 @@ static const Ports master_ports = {
     {"HDDRecorder/pause:", rDoc("Pause recording"), 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
        m->HDDRecorder.pause();}},
-    {"watch/add:s", rDoc("Add synthesis state to watch"), 0, [](const char *msg, RtData &d) {
-       Master *m = (Master*)d.obj;
-       m->watcher.add_watch(rtosc_argument(msg,0).s);}},
-
+    {"watch/", rDoc("Interface to grab out live synthesis state"), &watchPorts,
+        rBOIL_BEGIN;
+        SNIP;
+        watchPorts.dispatch(msg, data);
+        rBOIL_END},
 };
+
+#undef rBegin
+#undef rEnd
+
 const Ports &Master::ports = master_ports;
 
 class DataObj:public rtosc::RtData
@@ -364,7 +379,7 @@ void Master::applyOscEvent(const char *msg)
     DataObj d{loc_buf, 1024, this, bToU};
     memset(loc_buf, 0, sizeof(loc_buf));
     d.matches = 0;
-        
+
     if(strcmp(msg, "/get-vu") && false) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
         fprintf(stdout, "backend[*]: '%s'<%s>\n", msg,
@@ -690,7 +705,7 @@ bool Master::AudioOut(float *outr, float *outl)
     }
     if(events>1 && false)
         fprintf(stderr, "backend: %d events per cycle\n",events);
-        
+
 
     //Swaps the Left channel with Right Channel
     if(swaplr)

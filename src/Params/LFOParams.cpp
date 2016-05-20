@@ -27,6 +27,8 @@ using namespace rtosc;
 #define rObject LFOParams
 #undef rChangeCb
 #define rChangeCb if (obj->time) { obj->last_update_timestamp = obj->time->time(); }
+#define rBegin [](const char *msg, rtosc::RtData &d) {
+#define rEnd }
 static const rtosc::Ports _ports = {
     rSelf(LFOParams),
     rPaste,
@@ -45,7 +47,20 @@ static const rtosc::Ports _ports = {
             "0..4 second delay"),
     rToggle(Pcontinous, rShort("c"), "Enable for global operation"),
     rParamZyn(Pstretch, rShort("str"), rCentered, "Note frequency stretch"),
+
+    //Float valued aliases
+    {"delay::f", rProp(parameter) rMap(units, ms) rLog(0,4000), 0,
+        rBegin;
+
+        rEnd},
+#define rPseudoLog(a,b) rLog(a,b)
+    {"period::f", rProp(parameter) rMap(units, ms) rPseudoLog(0.10, 1500.0), 0,
+        rBegin;
+        rEnd},
 };
+#undef rPseudoLog
+#undef rBegin
+#undef rEnd
 #undef rChangeCb
 
 const rtosc::Ports &LFOParams::ports = _ports;

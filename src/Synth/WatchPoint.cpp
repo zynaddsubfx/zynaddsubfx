@@ -32,7 +32,6 @@ WatchPoint::WatchPoint(WatchManager *ref, const char *prefix, const char *id)
         strncpy(identity, prefix, 128);
     if(id)
         strncat(identity, id, 128);
-    //printf("new watchpoint ={%s:%s} <%s>\n", prefix, id, identity);
 }
 
 bool WatchPoint::is_active(void)
@@ -44,7 +43,7 @@ bool WatchPoint::is_active(void)
 
     if(reference && reference->active(identity)) {
         active       = true;
-        samples_left = reference->samples(identity);
+        samples_left = 1;
         return true;
     }
 
@@ -54,12 +53,17 @@ bool WatchPoint::is_active(void)
 FloatWatchPoint::FloatWatchPoint(WatchManager *ref, const char *prefix, const char *id)
     :WatchPoint(ref, prefix, id)
 {}
+
+VecWatchPoint::VecWatchPoint(WatchManager *ref, const char *prefix, const char *id)
+    :WatchPoint(ref, prefix, id)
+{}
     
 WatchManager::WatchManager(thrlnk *link)
     :write_back(link), new_active(false)
 {
     memset(active_list, 0, sizeof(active_list));
     memset(sample_list, 0, sizeof(sample_list));
+    memset(data_list,   0, sizeof(data_list));
     memset(deactivate,  0, sizeof(deactivate));
 }
     
@@ -70,6 +74,7 @@ void WatchManager::add_watch(const char *id)
         if(!active_list[i][0]) {
             strncpy(active_list[i], id, 128);
             new_active = true;
+            sample_list[i] = 0;
             break;
         }
     }
@@ -85,19 +90,39 @@ void WatchManager::del_watch(const char *id)
 
 void WatchManager::tick(void)
 {
+    //Try to send out any vector stuff
+    for(int i=0; i<MAX_WATCH; ++i) {
+        if(sample_list[i]) {
+            char        arg_types[MAX_SAMPLE+1] = {0};
+            rtosc_arg_t arg_val[MAX_SAMPLE];
+            for(int j=0; j<sample_list[i]; ++j) {
+                arg_types[j] = 'f';
+                arg_val[j].f = data_list[i][j];
+            }
+
+            write_back->writeArray(active_list[i], arg_types, arg_val);
+            deactivate[i] = true;
+        }
+    }
+
+    //Cleanup internal data
     new_active = false;
 
     //Clear deleted slots
-    for(int i=0; i<MAX_WATCH; ++i)
-        if(deactivate[i])
+    for(int i=0; i<MAX_WATCH; ++i) {
+        if(deactivate[i]) {
             memset(active_list[i], 0, 128);
+            sample_list[i] = 0;
+        }
+    }
+
 }
 
 bool WatchManager::active(const char *id) const
 {
     assert(this);
     assert(id);
-    if(new_active)
+    if(new_active || true)
         for(int i=0; i<MAX_WATCH; ++i)
             if(!strcmp(active_list[i], id))
                 return true;
@@ -121,3 +146,17 @@ void WatchManager::satisfy(const char *id, float f)
     del_watch(id);
 }
 
+void WatchManager::satisfy(const char *id, float *f, int n)
+{
+    int selected = -1;
+    for(int i=0; i<MAX_WATCH; ++i)
+        if(!strcmp(active_list[i], id))
+            selected = i;
+
+    if(selected == -1)
+        return;
+
+    //FIXME buffer overflow
+    for(int i=0; i<n; ++i)
+        data_list[selected][sample_list[selected]++] = f[i];
+}

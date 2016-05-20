@@ -1886,11 +1886,11 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
     ScratchString pre = prefix;
     FreqEnvelope = memory.alloc<Envelope>(*param.FreqEnvelope, basefreq, synth.dt());
     FreqLfo      = memory.alloc<LFO>(*param.FreqLfo, basefreq, time, wm,
-                   (pre+"FreqLfo/").c_str);
+                   (pre+"GlobalPar/FreqLfo/").c_str);
 
     AmpEnvelope = memory.alloc<Envelope>(*param.AmpEnvelope, basefreq, synth.dt());
     AmpLfo      = memory.alloc<LFO>(*param.AmpLfo, basefreq, time, wm,
-                   (pre+"AmpLfo/").c_str);
+                   (pre+"GlobalPar/AmpLfo/").c_str);
 
     Volume = 4.0f * powf(0.1f, 3.0f * (1.0f - param.PVolume / 96.0f)) //-60 dB .. 0 dB
              * VelF(velocity, param.PAmpVelocityScaleFunction);     //sensing
@@ -1900,7 +1900,7 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
 
     FilterEnvelope = memory.alloc<Envelope>(*param.FilterEnvelope, basefreq, synth.dt());
     FilterLfo      = memory.alloc<LFO>(*param.FilterLfo, basefreq, time, wm,
-                   (pre+"FilterLfo/").c_str);
+                   (pre+"GlobalPar/FilterLfo/").c_str);
 
     Filter->addMod(*FilterEnvelope);
     Filter->addMod(*FilterLfo);

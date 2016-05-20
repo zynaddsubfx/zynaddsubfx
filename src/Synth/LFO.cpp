@@ -27,8 +27,7 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
     deterministic(!lfopars.Pfreqrand),
     dt_(t.dt()),
     lfopars_(lfopars), basefreq_(basefreq),
-    watchPhase(m, watch_prefix, "phase"),
-    watchMag(m,   watch_prefix, "magnitude")
+    watchOut(m, watch_prefix, "out")
 {
     int stretch = lfopars.Pstretch;
     if(stretch == 0)
@@ -170,8 +169,8 @@ float LFO::lfoout()
         computeNextFreqRnd();
     }
 
-    watchPhase(phase);
-    watchMag(out);
+    float watch_data[2] = {phase, out};
+    watchOut(watch_data, 2);
 
     return out;
 }

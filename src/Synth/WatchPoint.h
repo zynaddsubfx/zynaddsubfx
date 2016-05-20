@@ -3,20 +3,12 @@
 
   WatchPoint.h - Synthesis State Watcher
   Copyright (C) 2015-2015 Mark McCurry
+  Author: Mark McCurry
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License
-  as published by the Free Software Foundation.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License (version 2 or later) for more details.
-
-  You should have received a copy of the GNU General Public License (version 2)
-  along with this program; if not, write to the Free Software Foundation,
-  Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
-
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  as published by the Free Software Foundation; either version 2
+  of the License, or (at your option) any later version.
 */
 
 #pragma once
@@ -36,12 +28,15 @@ struct WatchPoint
 };
 
 #define MAX_WATCH 16
+#define MAX_WATCH_PATH 128
+#define MAX_SAMPLE 128
 struct WatchManager
 {
     typedef rtosc::ThreadLink thrlnk;
     thrlnk *write_back;
     bool    new_active;
-    char    active_list[128][MAX_WATCH];
+    char    active_list[MAX_WATCH][MAX_WATCH_PATH];
+    float   data_list[MAX_SAMPLE][MAX_WATCH];
     int     sample_list[MAX_WATCH];
     bool    deactivate[MAX_WATCH];
 
@@ -57,6 +52,7 @@ struct WatchManager
 
     //Watch Point Response API
     void satisfy(const char *, float);
+    void satisfy(const char *, float*, int);
 };
 
 struct FloatWatchPoint:public WatchPoint
@@ -71,11 +67,15 @@ struct FloatWatchPoint:public WatchPoint
     }
 };
 
-//struct VecWatchPoint:public WatchPoint
-//{
-//    inline void operator()(float *f, int n)
-//    {
-//        if(!is_active()) {
-//        }
-//    }
-//};
+//basically the same as the float watch point, only it consumes tuples
+struct VecWatchPoint : public WatchPoint
+{
+    VecWatchPoint(WatchManager *ref, const char *prefix, const char *id);
+    inline void operator()(float *f, int n)
+    {
+        if(is_active() && reference) {
+            reference->satisfy(identity, f, n);
+            active = false;
+        }
+    }
+};

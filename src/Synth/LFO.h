@@ -65,8 +65,7 @@ class LFO
         const LFOParams &lfopars_;
         const float basefreq_;
 
-        FloatWatchPoint watchPhase;
-        FloatWatchPoint watchMag;
+        VecWatchPoint watchOut;
 
         void computeNextFreqRnd(void);
 };

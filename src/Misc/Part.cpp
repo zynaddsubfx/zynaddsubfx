@@ -502,14 +502,14 @@ bool Part::NoteOn(unsigned char note,
             if(item.Padenabled)
                 notePool.insertNote(note, sendto,
                         {memory.alloc<ADnote>(kit[i].adpars, pars,
-                            wm, (pre+"kit"+i+"/add/").c_str), 0, i});
+                            wm, (pre+"kit"+i+"/adpars/").c_str), 0, i});
             if(item.Psubenabled)
                 notePool.insertNote(note, sendto,
                         {memory.alloc<SUBnote>(kit[i].subpars, pars), 1, i});
             if(item.Ppadenabled)
                 notePool.insertNote(note, sendto,
                         {memory.alloc<PADnote>(kit[i].padpars, pars, interpolation, wm,
-                            (pre+"kit"+i+"/pad/").c_str), 2, i});
+                            (pre+"kit"+i+"/padpars/").c_str), 2, i});
         } catch (std::bad_alloc & ba) {
             std::cerr << "dropped new note: " << ba.what() << std::endl;
         }
