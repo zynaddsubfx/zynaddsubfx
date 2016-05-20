@@ -120,6 +120,8 @@ void path_search(const char *m, const char *url)
         lo_address addr = lo_address_new_from_url(url);
         if(addr)
             lo_send_message(addr, buffer, msg);
+        lo_address_free(addr);
+        lo_message_free(msg);
     }
 }
 
@@ -137,7 +139,7 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
             mw->transmitMsg("/echo", "ss", "OSC_URL", tmp);
             mw->activeUrl(tmp);
         }
-
+        free((void*)tmp);
     }
 
     char buffer[2048];
@@ -1375,6 +1377,8 @@ void MiddleWareImpl::sendToRemote(const char *rtmsg, std::string dest)
         lo_address addr = lo_address_new_from_url(dest.c_str());
         if(addr)
             lo_send_message(addr, rtmsg, msg);
+        lo_address_free(addr);
+        lo_message_free(msg);
     }
 }
 
