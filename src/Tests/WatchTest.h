@@ -65,27 +65,15 @@ class WatchTest:public CxxTest::TestSuite
             l->lfoout();
             TS_ASSERT(!tr->hasNext());
         }
-        
+
         void testPhaseWatch(void)
         {
             TS_ASSERT(!tr->hasNext());
-            w->add_watch("phase");
+            w->add_watch("out");
             l->lfoout();
+            w->tick();
             TS_ASSERT(tr->hasNext());
-            TS_ASSERT_EQUALS(string("phase"), tr->read());
-            TS_ASSERT(!tr->hasNext());
-        }
-        
-        void testPhaseMagWatch(void)
-        {
-            TS_ASSERT(!tr->hasNext());
-            w->add_watch("phase");
-            w->add_watch("magnitude");
-            l->lfoout();
-            TS_ASSERT(tr->hasNext());
-            TS_ASSERT_EQUALS(string("phase"), tr->read());
-            TS_ASSERT(tr->hasNext());
-            TS_ASSERT_EQUALS(string("magnitude"), tr->read());
+            TS_ASSERT_EQUALS(string("out"), tr->read());
             TS_ASSERT(!tr->hasNext());
         }
 };
