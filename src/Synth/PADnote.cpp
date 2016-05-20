@@ -23,7 +23,8 @@
 #include "../Misc/Util.h"
 
 PADnote::PADnote(const PADnoteParameters *parameters,
-                 SynthParams pars, const int& interpolation, WatchManager *wm, const char *prefix)
+                 SynthParams pars, const int& interpolation, WatchManager *wm,
+                 const char *prefix)
     :SynthNote(pars), pars(*parameters), interpolation(interpolation)
 {
     NoteGlobalPar.GlobalFilter    = nullptr;
@@ -31,7 +32,7 @@ PADnote::PADnote(const PADnoteParameters *parameters,
     NoteGlobalPar.FilterLfo       = nullptr;
 
     firsttime = true;
-    setup(pars.frequency, pars.velocity, pars.portamento, pars.note, false, prefix);
+    setup(pars.frequency, pars.velocity, pars.portamento, pars.note, false, wm, prefix);
 }
 
 void PADnote::setup(float freq,
@@ -39,6 +40,7 @@ void PADnote::setup(float freq,
                     int portamento_,
                     int midinote,
                     bool legato, 
+                    WatchManager *wm,
                     const char *prefix)
 {
     portamento = portamento_;
