@@ -113,6 +113,7 @@ void WatchManager::tick(void)
         if(deactivate[i]) {
             memset(active_list[i], 0, 128);
             sample_list[i] = 0;
+            deactivate[i]  = false;
         }
     }
 
