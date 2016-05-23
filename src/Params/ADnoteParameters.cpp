@@ -18,6 +18,7 @@
 #include "ADnoteParameters.h"
 #include "EnvelopeParams.h"
 #include "LFOParams.h"
+#include "../Misc/Time.h"
 #include "../Misc/XMLwrapper.h"
 #include "../DSP/FFTwrapper.h"
 #include "../Synth/OscilGen.h"
@@ -229,28 +230,29 @@ static const Ports globalPorts = {
     rRecurp(AmpEnvelope, "Frequency Envelope"),
     rRecurp(FilterEnvelope, "Frequency Envelope"),
     rRecurp(GlobalFilter, "Filter"),
-    rToggle(PStereo, "Mono/Stereo Enable"),
+
+    rToggle(PStereo, rShort("stereo"), "Mono/Stereo Enable"),
 
     //Frequency
-    rParamI(PDetune,       "Fine Detune"),
-    rParamI(PCoarseDetune, "Coarse Detune"),
-    rParamZyn(PDetuneType,   "Detune Scaling Type"),
-    rParamZyn(PBandwidth,    "Relative Fine Detune Gain"),
+    rParamI(PDetune,         rShort("fine"),   "Fine Detune"),
+    rParamI(PCoarseDetune,   rShort("coarse"), "Coarse Detune"),
+    rParamZyn(PDetuneType,   rShort("type"),   "Detune Scaling Type"),
+    rParamZyn(PBandwidth,    rShort("bw."),    "Relative Fine Detune Gain"),
 
     //Amplitude
-    rParamZyn(PPanning, "Panning of ADsynth (0 random, 1 left, 127 right)"),
-    rParamZyn(PVolume, "volume control"),
-    rParamZyn(PAmpVelocityScaleFunction, "Volume Velocity Control"),
+    rParamZyn(PPanning, rShort("pan"), "Panning of ADsynth (0 random, 1 left, 127 right)"),
+    rParamZyn(PVolume,  rShort("vol"), "volume control"),
+    rParamZyn(PAmpVelocityScaleFunction, rShort("scale"), "Volume Velocity Control"),
 
     rParamZyn(Fadein_adjustment, "Adjustment for anti-pop strategy."),
-    rParamZyn(PPunchStrength, "Punch Strength"),
-    rParamZyn(PPunchTime, "UNKNOWN"),
-    rParamZyn(PPunchStretch, "How Punch changes with note frequency"),
-    rParamZyn(PPunchVelocitySensing, "Punch Velocity control"),
+    rParamZyn(PPunchStrength, rShort("strength"),     "Punch Strength"),
+    rParamZyn(PPunchTime,     rShort("time"),         "Length of Punch"),
+    rParamZyn(PPunchStretch,  rShort("stretch"),      "How Punch changes with note frequency"),
+    rParamZyn(PPunchVelocitySensing, rShort("v.sns"), "Punch Velocity control"),
 
     //Filter
-    rParamZyn(PFilterVelocityScale, "Filter Velocity Magnitude"),
-    rParamZyn(PFilterVelocityScaleFunction, "Filter Velocity Function Shape"),
+    rParamZyn(PFilterVelocityScale,         rShort("scale"), "Filter Velocity Magnitude"),
+    rParamZyn(PFilterVelocityScaleFunction, rShort("sense"), "Filter Velocity Function Shape"),
 
 
     //Resonance
