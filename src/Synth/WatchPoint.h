@@ -13,7 +13,7 @@
 
 #pragma once
 
-class WatchManager;
+struct WatchManager;
 namespace rtosc {class ThreadLink;}
 
 struct WatchPoint

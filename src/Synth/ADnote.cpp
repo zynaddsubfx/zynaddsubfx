@@ -819,7 +819,9 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
         newamplitude[nvoice] = 1.0f;
         if(param.PAmpEnvelopeEnabled) {
-            vce.AmpEnvelope = memory.alloc<Envelope>(*param.AmpEnvelope, basefreq, synth.dt());
+            vce.AmpEnvelope = memory.alloc<Envelope>(*param.AmpEnvelope,
+                    basefreq, synth.dt(), wm,
+                    (pre+"VoicePar"+nvoice+"/AmpEnvelope/").c_str);
             vce.AmpEnvelope->envout_dB(); //discard the first envelope sample
             newamplitude[nvoice] *= vce.AmpEnvelope->envout_dB();
         }
@@ -832,7 +834,9 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
         /* Voice Frequency Parameters Init */
         if(param.PFreqEnvelopeEnabled)
-            vce.FreqEnvelope = memory.alloc<Envelope>(*param.FreqEnvelope, basefreq, synth.dt());
+            vce.FreqEnvelope = memory.alloc<Envelope>(*param.FreqEnvelope,
+                    basefreq, synth.dt(), wm,
+                    (pre+"VoicePar"+nvoice+"/FreqEnvelope/").c_str);
 
         if(param.PFreqLfoEnabled)
             vce.FreqLfo = memory.alloc<LFO>(*param.FreqLfo, basefreq, time, wm,
@@ -848,7 +852,9 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
             if(param.PFilterEnvelopeEnabled) {
                 vce.FilterEnvelope =
-                    memory.alloc<Envelope>(*param.FilterEnvelope, basefreq, synth.dt());
+                    memory.alloc<Envelope>(*param.FilterEnvelope,
+                            basefreq, synth.dt(), wm,
+                            (pre+"VoicePar"+nvoice+"/FilterEnvelope/").c_str);
                 vce.Filter->addMod(*vce.FilterEnvelope);
             }
 
@@ -898,13 +904,17 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
         }
 
         if(param.PFMFreqEnvelopeEnabled)
-            vce.FMFreqEnvelope = memory.alloc<Envelope>(*param.FMFreqEnvelope, basefreq, synth.dt());
+            vce.FMFreqEnvelope = memory.alloc<Envelope>(*param.FMFreqEnvelope,
+                    basefreq, synth.dt(), wm,
+                    (pre+"VoicePar"+nvoice+"/FMFreqEnvelope/").c_str);
 
         FMnewamplitude[nvoice] = vce.FMVolume * ctl.fmamp.relamp;
 
         if(param.PFMAmpEnvelopeEnabled ) {
             vce.FMAmpEnvelope =
-                memory.alloc<Envelope>(*param.FMAmpEnvelope, basefreq, synth.dt());
+                memory.alloc<Envelope>(*param.FMAmpEnvelope,
+                        basefreq, synth.dt(), wm,
+                        (pre+"VoicePar"+nvoice+"/FMAmpEnvelope/").c_str);
             FMnewamplitude[nvoice] *= vce.FMAmpEnvelope->envout_dB();
         }
     }
@@ -1884,11 +1894,13 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
                                     const char *prefix)
 {
     ScratchString pre = prefix;
-    FreqEnvelope = memory.alloc<Envelope>(*param.FreqEnvelope, basefreq, synth.dt());
+    FreqEnvelope = memory.alloc<Envelope>(*param.FreqEnvelope, basefreq,
+            synth.dt(), wm, (pre+"GlobalPar/FreqEnvelope/").c_str);
     FreqLfo      = memory.alloc<LFO>(*param.FreqLfo, basefreq, time, wm,
                    (pre+"GlobalPar/FreqLfo/").c_str);
 
-    AmpEnvelope = memory.alloc<Envelope>(*param.AmpEnvelope, basefreq, synth.dt());
+    AmpEnvelope = memory.alloc<Envelope>(*param.AmpEnvelope, basefreq,
+            synth.dt(), wm, (pre+"GlobalPar/AmpEnvelope/").c_str);
     AmpLfo      = memory.alloc<LFO>(*param.AmpLfo, basefreq, time, wm,
                    (pre+"GlobalPar/AmpLfo/").c_str);
 
@@ -1898,7 +1910,8 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
     Filter = memory.alloc<ModFilter>(*param.GlobalFilter, synth, time, memory, 
             stereo, basefreq);
 
-    FilterEnvelope = memory.alloc<Envelope>(*param.FilterEnvelope, basefreq, synth.dt());
+    FilterEnvelope = memory.alloc<Envelope>(*param.FilterEnvelope, basefreq,
+            synth.dt(), wm, (pre+"GlobalPar/FilterEnvelope/").c_str);
     FilterLfo      = memory.alloc<LFO>(*param.FilterLfo, basefreq, time, wm,
                    (pre+"GlobalPar/FilterLfo/").c_str);
 

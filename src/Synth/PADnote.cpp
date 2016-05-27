@@ -135,13 +135,19 @@ void PADnote::setup(float freq,
 
         ScratchString pre = prefix;
 
-        NoteGlobalPar.FreqEnvelope = memory.alloc<Envelope>(*pars.FreqEnvelope, basefreq, synth.dt());
-        NoteGlobalPar.FreqLfo      = memory.alloc<LFO>(*pars.FreqLfo, basefreq, time, wm,
-                (pre+"freqlfo/").c_str);
+        NoteGlobalPar.FreqEnvelope =
+            memory.alloc<Envelope>(*pars.FreqEnvelope, basefreq, synth.dt(),
+                    wm, (pre+"FreqEnvelope/").c_str);
+        NoteGlobalPar.FreqLfo      =
+            memory.alloc<LFO>(*pars.FreqLfo, basefreq, time,
+                    wm, (pre+"FreqLfo/").c_str);
 
-        NoteGlobalPar.AmpEnvelope = memory.alloc<Envelope>(*pars.AmpEnvelope, basefreq, synth.dt());
-        NoteGlobalPar.AmpLfo      = memory.alloc<LFO>(*pars.AmpLfo, basefreq, time, wm,
-                (pre+"amplfo/").c_str);
+        NoteGlobalPar.AmpEnvelope =
+            memory.alloc<Envelope>(*pars.AmpEnvelope, basefreq, synth.dt(),
+                    wm, (pre+"AmpEnvelope/").c_str);
+        NoteGlobalPar.AmpLfo      =
+            memory.alloc<LFO>(*pars.AmpLfo, basefreq, time,
+                    wm, (pre+"AmpLfo/").c_str);
     }
 
     NoteGlobalPar.Volume = 4.0f
@@ -155,6 +161,7 @@ void PADnote::setup(float freq,
                                               * NoteGlobalPar.AmpLfo->amplfoout();
 
     if(!legato) {
+        ScratchString pre = prefix;
         auto &flt = NoteGlobalPar.GlobalFilter;
         auto &env = NoteGlobalPar.FilterEnvelope;
         auto &lfo = NoteGlobalPar.FilterLfo;
@@ -162,8 +169,10 @@ void PADnote::setup(float freq,
         flt = memory.alloc<ModFilter>(*pars.GlobalFilter, synth, time, memory, true, basefreq);
 
         //setup mod
-        env = memory.alloc<Envelope>(*pars.FilterEnvelope, basefreq, synth.dt());
-        lfo = memory.alloc<LFO>(*pars.FilterLfo, basefreq, time);
+        env = memory.alloc<Envelope>(*pars.FilterEnvelope, basefreq,
+                synth.dt(), wm, (pre+"FilterEnvelope/").c_str);
+        lfo = memory.alloc<LFO>(*pars.FilterLfo, basefreq, time,
+                wm, (pre+"FilterLfo/").c_str);
         flt->addMod(*env);
         flt->addMod(*lfo);
     }
