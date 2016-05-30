@@ -90,7 +90,7 @@ void Envelope::releasekey()
     if(keyreleased)
         return;
     keyreleased = true;
-    if(forcedrelease != 0)
+    if(forcedrelease)
         t = 0.0f;
 }
 

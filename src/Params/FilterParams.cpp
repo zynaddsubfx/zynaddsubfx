@@ -14,6 +14,7 @@
 #include "FilterParams.h"
 #include "../Misc/Util.h"
 #include "../Misc/Time.h"
+#include "../DSP/AnalogFilter.h"
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -116,6 +117,25 @@ const rtosc::Ports FilterParams::ports = {
         NULL, [](const char *, RtData &d) {
             FilterParams *obj = (FilterParams *) d.obj;
             d.reply(d.loc, "f", obj->getoctavesfreq());
+        }},
+    {"response:",
+        rDoc("Get a frequency response"),
+        NULL, [](const char *, RtData &d) {
+            FilterParams *obj = (FilterParams *) d.obj;
+            int order = 0;
+            float gain = dB2rap(obj->getgain());
+            if(obj->Ptype != 6 && obj->Ptype != 7 && obj->Ptype != 8)
+                gain = 1.0;
+            auto cf = AnalogFilter::computeCoeff(obj->Ptype,
+                    Filter::getrealfreq(obj->getfreq()),
+                    obj->getq(), obj->Pstages,
+                    gain, 48000, order);
+            if(order == 2) {
+                d.reply(d.loc, "fffffff",
+                        (float)obj->Pstages,
+                        cf.c[0], cf.c[1], cf.c[2],
+                        0.0,     cf.d[1], cf.d[2]);
+            }
         }},
     //    "", NULL, [](){}},"/freq"
     //{"Pvowels#" FF_MAX_VOWELS "/formants#" FF_MAX_FORMANTS "/amp",
@@ -294,21 +314,18 @@ float FilterParams::getfreqpos(float freq) const
  */
 float FilterParams::getformantfreq(unsigned char freq) const
 {
-    float result = getfreqx(freq / 127.0f);
-    return result;
+    return getfreqx(freq / 127.0f);
 }
 
 float FilterParams::getformantamp(unsigned char amp) const
 {
-    float result = powf(0.1f, (1.0f - amp / 127.0f) * 4.0f);
-    return result;
+    return powf(0.1f, (1.0f - amp / 127.0f) * 4.0f);
 }
 
 float FilterParams::getformantq(unsigned char q) const
 {
     //temp
-    float result = powf(25.0f, (q - 32.0f) / 64.0f);
-    return result;
+    return  powf(25.0f, (q - 32.0f) / 64.0f);
 }
 
 
