@@ -665,6 +665,11 @@ public:
     void write(const char *path, const char *args, ...);
     void write(const char *path, const char *args, va_list va);
 
+    void currentUrl(string addr)
+    {
+        curr_url = addr;
+        known_remotes.insert(addr);
+    }
 
     // Send a message to a remote client
     void sendToRemote(const char *msg, std::string dest);
@@ -723,6 +728,7 @@ public:
     //LIBLO
     lo_server server;
     string last_url, curr_url;
+    std::set<string> known_remotes;
 
     //Synthesis Rate Parameters
     const SYNTH_T synth;
@@ -1170,7 +1176,7 @@ static rtosc::Ports middlewareReplyPorts = {
         const char *type = rtosc_argument(msg, 0).s;
         const char *url  = rtosc_argument(msg, 1).s;
         if(!strcmp(type, "OSC_URL"))
-            impl.curr_url = url;
+            impl.currentUrl(url);
         rEnd},
     {"free:sb", 0, 0,
         rBegin;
@@ -1357,8 +1363,9 @@ void MiddleWareImpl::broadcastToRemote(const char *rtmsg)
     sendToRemote(rtmsg, "GUI");
 
     //Send to remote UI if there's one listening
-    if(curr_url != "GUI")
-        sendToRemote(rtmsg, curr_url);
+    for(auto rem:known_remotes)
+        if(rem != "GUI")
+            sendToRemote(rtmsg, rem);
 
     broadcast = false;
 }
