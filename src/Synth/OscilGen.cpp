@@ -91,9 +91,20 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             while(*mm && !isdigit(*mm)) ++mm;
             unsigned char &phase = ((OscilGen*)d.obj)->Phphase[atoi(mm)];
             if(!rtosc_narguments(m))
-                d.reply(d.loc, "c", phase);
-            else
+                d.reply(d.loc, "i", phase);
+            else {
                 phase = rtosc_argument(m,0).i;
+                //XXX hack hack
+                char *repath = strdup(d.loc);
+                char *edit   = rindex(repath, '/')+1;
+                strcpy(edit, "prepare");
+                OscilGen &o = *((OscilGen*)d.obj);
+                fft_t *data = new fft_t[o.synth.oscilsize / 2];
+                o.prepare(data);
+                // fprintf(stderr, "sending '%p' of fft data\n", data);
+                d.chain(repath, "b", sizeof(fft_t*), &data);
+                o.pendingfreqs = data;
+            }
         }},
     //TODO update to rArray and test
     {"magnitude#128::c:i", rProp(parameter) rLinear(0,127) rDoc("Sets harmonic magnitude"),
@@ -103,7 +114,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             while(*mm && !isdigit(*mm)) ++mm;
             unsigned char &mag = ((OscilGen*)d.obj)->Phmag[atoi(mm)];
             if(!rtosc_narguments(m))
-                d.reply(d.loc, "c", mag);
+                d.reply(d.loc, "i", mag);
             else {
                 mag = rtosc_argument(m,0).i;
                 //printf("setting magnitude\n\n");
