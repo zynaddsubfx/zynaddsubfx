@@ -135,6 +135,11 @@ const rtosc::Ports FilterParams::ports = {
                         (float)obj->Pstages,
                         cf.c[0], cf.c[1], cf.c[2],
                         0.0,     cf.d[1], cf.d[2]);
+            } else if(order == 1) {
+                d.reply(d.loc, "fffff",
+                        (float)obj->Pstages,
+                        cf.c[0], cf.c[1],
+                        0.0,     cf.d[1]);
             }
         }},
     //    "", NULL, [](){}},"/freq"
