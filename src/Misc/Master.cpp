@@ -283,6 +283,12 @@ class DataObj:public rtosc::RtData
             forwarded = false;
         }
 
+        virtual void replyArray(const char *path, const char *args, rtosc_arg_t *vals) override
+        {
+            char *buffer = bToU->buffer();
+            rtosc_amessage(buffer,bToU->buffer_size(),path,args,vals);
+            reply(buffer);
+        }
         virtual void reply(const char *path, const char *args, ...) override
         {
             va_list va;
