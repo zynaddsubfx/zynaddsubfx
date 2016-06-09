@@ -140,6 +140,13 @@ static const Ports master_ports = {
        m->part[i] = p;
        p->initialize_rt();
        }},
+    {"active_keys:", rProp("Obtain a list of active notes"), 0,
+        rBegin;
+        char keys[129] = {0};
+        for(int i=0; i<128; ++i)
+            keys[i] = m->activeNotes[i] ? 'T' : 'F';
+        d.broadcast(d.loc, keys);
+        rEnd},
     {"Pvolume::i", rProp(parameter) rLinear(0,127) rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {
@@ -366,6 +373,9 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
         sysefx[nefx] = new EffectMgr(*memory, synth, 0, &time);
 
+    //Note Visualization
+    for(int i=0; i<128; ++i)
+        activeNotes[i] = 0;
 
     defaults();
 
@@ -432,12 +442,14 @@ void Master::defaults()
 void Master::noteOn(char chan, char note, char velocity)
 {
     if(velocity) {
-        for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+        for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
             if(chan == part[npart]->Prcvchn) {
                 fakepeakpart[npart] = velocity * 2;
                 if(part[npart]->Penabled)
                     part[npart]->NoteOn(note, velocity, keyshift);
             }
+        }
+        activeNotes[(int)note] = 1;
     }
     else
         this->noteOff(chan, note);
@@ -452,6 +464,7 @@ void Master::noteOff(char chan, char note)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         if((chan == part[npart]->Prcvchn) && part[npart]->Penabled)
             part[npart]->NoteOff(note);
+    activeNotes[(int)note] = 0;
 }
 
 /*

@@ -159,6 +159,9 @@ class Master
         //Statistics on output levels
         vuData vu;
 
+        //Display info on midi notes
+        bool activeNotes[128];
+
         //Other watchers
         WatchManager watcher;
 
