@@ -73,8 +73,8 @@ void path_search(const char *m, const char *url)
     using rtosc::Port;
 
     //assumed upper bound of 32 ports (may need to be resized)
-    char         types[129];
-    rtosc_arg_t  args[128];
+    char         types[256+1];
+    rtosc_arg_t  args[256];
     size_t       pos    = 0;
     const Ports *ports  = NULL;
     const char  *str    = rtosc_argument(m,0).s;
@@ -95,7 +95,7 @@ void path_search(const char *m, const char *url)
     if(ports) {
         //RTness not confirmed here
         for(const Port &p:*ports) {
-            if(strstr(p.name, needle)!=p.name)
+            if(strstr(p.name, needle) != p.name || !p.name)
                 continue;
             types[pos]    = 's';
             args[pos++].s = p.name;
