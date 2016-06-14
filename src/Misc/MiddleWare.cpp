@@ -783,6 +783,17 @@ class MwDataObj:public rtosc::RtData
             }
             va_end(va);
         }
+        virtual void replyArray(const char *path, const char *args, rtosc_arg_t *argd) override
+        {
+            //printf("reply building '%s'\n", path);
+            if(!strcmp(path, "/forward")) { //forward the information to the backend
+                args++;
+                rtosc_amessage(buffer,4*4096,path,args,argd);
+            } else {
+                rtosc_amessage(buffer,4*4096,path,args,argd);
+                reply(buffer);
+            }
+        }
         virtual void reply(const char *msg){
             mwi->sendToCurrentRemote(msg);
         };
@@ -936,6 +947,19 @@ rtosc::Ports bankPorts = {
         int err = impl.newbank(rtosc_argument(msg, 0).s);
         if(err)
             d.reply("/alert", "s", "Error: Could not make a new bank (directory)..");
+        rEnd},
+    {"search:s", 0, 0,
+        rBegin;
+        auto res = impl.search(rtosc_argument(msg, 0).s);
+#define MAX_SEARCH 128
+        char res_type[MAX_SEARCH+1] = {0};
+        rtosc_arg_t res_dat[MAX_SEARCH] = {0};
+        for(int i=0; i<res.size() && i<MAX_SEARCH; ++i) {
+            res_type[i]  = 's';
+            res_dat[i].s = res[i].c_str();
+        }
+        d.replyArray(d.loc, res_type, res_dat);
+#undef MAX_SEARCH
         rEnd},
 };
 
