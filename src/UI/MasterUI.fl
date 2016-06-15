@@ -1490,7 +1490,7 @@ selectuiwindow->hide();}
         xywh {10 165 100 35} color 229 labelfont 1 labelsize 16
       }
       Fl_Box {} {
-        label {.. if you have used ZynAddSubFX before, or you like to have full controll to all parameters.}
+        label {.. if you have used ZynAddSubFX before, or you like to have full control to all parameters.}
         xywh {110 165 310 35} labelfont 1 labelsize 11 align 144
       }
       Fl_Button {} {
