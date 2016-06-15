@@ -13,6 +13,12 @@ typedef BankDb::bvec bvec;
 BankEntry::BankEntry(void)
     :id(0), add(false), pad(false), sub(false)
 {}
+
+bool sfind(std::string hay, std::string needle)
+{
+    return strcasestr(hay.c_str(), needle.c_str());
+}
+
 bool BankEntry::match(string s) const
 {
     if(s == "#pad")
@@ -21,9 +27,8 @@ bool BankEntry::match(string s) const
         return sub;
     else if(s == "#add")
         return add;
-    auto end = string::npos;
-    return file.find(s) != end || name.find(s) != end ||
-        comments.find(s) != end || author.find(s) != end;
+    return sfind(file,s) || sfind(name,s) || sfind(bank, s) ||
+        sfind(type, s) || sfind(comments,s) || sfind(author,s);
 }
 
 static svec split(string s)
@@ -76,7 +81,7 @@ void BankDb::addBankDir(std::string bnk)
     bool repeat = false;
     for(auto b:banks)
         repeat |= b == bnk;
-    
+
     if(!repeat)
         banks.push_back(bnk);
 }
@@ -154,6 +159,26 @@ BankEntry BankDb::processXiz(std::string filename, std::string bank) const
     else
         entry.name = name;
 
+    const char *types[] = {
+        "None",
+        "Piano",
+        "Chromatic Percussion",
+        "Organ",
+        "Guitar",
+        "Bass",
+        "Solo Strings",
+        "Ensemble",
+        "Brass",
+        "Reed",
+        "Pipe",
+        "Synth Lead",
+        "Synth Pad",
+        "Synth Effects",
+        "Ethnic",
+        "Percussive",
+        "Sound Effects",
+    };
+
     //Try to obtain other metadata (expensive)
     XMLwrapper xml;
     string fname = bank+filename;
@@ -162,10 +187,13 @@ BankEntry BankDb::processXiz(std::string filename, std::string bank) const
         if(xml.enterbranch("INFO")) {
             char author[1024];
             char comments[1024];
+            int  type = 0;
             xml.getparstr("author", author, 1024);
             xml.getparstr("comments", comments, 1024);
+            type = xml.getpar("type", 0, 0, 16);
             entry.author   = author;
             entry.comments = comments;
+            entry.type     = types[type];
             xml.exitbranch();
         }
         if(xml.enterbranch("INSTRUMENT_KIT")) {
@@ -181,7 +209,7 @@ BankEntry BankDb::processXiz(std::string filename, std::string bank) const
         }
         xml.exitbranch();
     }
-  
+
     //printf("Bank Entry:\n");
     //printf("\tname   - %s\n", entry.name.c_str());
     //printf("\tauthor - %s\n", line(entry.author).c_str());

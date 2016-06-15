@@ -463,8 +463,10 @@ std::vector<std::string> Bank::search(std::string s) const
 {
     std::vector<std::string> out;
     auto vec = db->search(s);
-    for(auto e:vec)
+    for(auto e:vec) {
+        out.push_back(e.name);
         out.push_back(e.bank+e.file);
+    }
     return out;
 }
 

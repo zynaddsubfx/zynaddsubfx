@@ -9,6 +9,7 @@ struct BankEntry
     std::string name;
     std::string comments;
     std::string author;
+    std::string type;
     int         id;
     bool        add;
     bool        pad;
@@ -23,7 +24,7 @@ class BankDb
     public:
         typedef std::vector<std::string> svec;
         typedef std::vector<BankEntry>   bvec;
-        
+
         //search for banks
         //uses a space separated list of keywords and
         //finds something that matches ALL keywords
@@ -31,7 +32,7 @@ class BankDb
 
         //fully qualified paths only
         void addBankDir(std::string);
-        
+
         //clear all known entries and banks
         void clear(void);
 

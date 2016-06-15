@@ -108,6 +108,7 @@ static const Ports watchPorts = {
         rEnd},
 };
 
+extern const Ports bankPorts;
 static const Ports master_ports = {
     rString(last_xmz, XMZ_PATH_MAX, "File name for last name loaded if any."),
     rRecursp(part, 16, "Part"),//NUM_MIDI_PARTS
@@ -263,6 +264,8 @@ static const Ports master_ports = {
         SNIP;
         watchPorts.dispatch(msg, data);
         rBOIL_END},
+    {"bank/", rDoc("Controls for instrument banks"), &bankPorts,
+            [](const char*,RtData&) {}},
 };
 
 #undef rBegin

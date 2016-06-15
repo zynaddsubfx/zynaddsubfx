@@ -862,7 +862,8 @@ using rtosc::RtData;
  * - Load Bank                                                               *
  * - Refresh List of Banks                                                   *
  *****************************************************************************/
-rtosc::Ports bankPorts = {
+extern const rtosc::Ports bankPorts;
+const rtosc::Ports bankPorts = {
     {"rescan:", 0, 0,
         rBegin;
         impl.rescanforbanks();
@@ -872,6 +873,48 @@ rtosc::Ports bankPorts = {
             d.reply("/bank/bank_select", "iss", i++, elm.name.c_str(), elm.dir.c_str());
         d.reply("/bank/bank_select", "i", impl.bankpos);
 
+        rEnd},
+    {"bank_list:", 0, 0,
+        rBegin;
+#define MAX_BANKS 256
+        char        types[MAX_BANKS*2+1]={0};
+        rtosc_arg_t args[MAX_BANKS*2];
+        int i = 0;
+        for(auto &elm : impl.banks) {
+            types[i] = types [i + 1] = 's';
+            args[i++].s = elm.name.c_str();
+            args[i++].s = elm.dir.c_str();
+        }
+        d.replyArray("/bank/bank_list", types, args);
+#undef MAX_BANKS
+        rEnd},
+    {"types:", 0, 0,
+        rBegin;
+        const char *types[17];
+        types[ 0] = "None";
+        types[ 1] = "Piano";
+        types[ 2] = "Chromatic Percussion";
+        types[ 3] = "Organ";
+        types[ 4] = "Guitar";
+        types[ 5] = "Bass";
+        types[ 6] = "Solo Strings";
+        types[ 7] = "Ensemble";
+        types[ 8] = "Brass";
+        types[ 9] = "Reed";
+        types[10] = "Pipe";
+        types[11] = "Synth Lead";
+        types[12] = "Synth Pad";
+        types[13] = "Synth Effects";
+        types[14] = "Ethnic";
+        types[15] = "Percussive";
+        types[16] = "Sound Effects";
+        char        t[17+1]={0};
+        rtosc_arg_t args[17];
+        for(int i=0; i<17; ++i) {
+            t[i]      = 's';
+            args[i].s = types[i];
+        }
+        d.replyArray("/bank/types", t, args);
         rEnd},
     {"slot#1024:", 0, 0,
         rBegin;
@@ -958,7 +1001,7 @@ rtosc::Ports bankPorts = {
             res_type[i]  = 's';
             res_dat[i].s = res[i].c_str();
         }
-        d.replyArray(d.loc, res_type, res_dat);
+        d.replyArray("/bank/search_results", res_type, res_dat);
 #undef MAX_SEARCH
         rEnd},
 };
