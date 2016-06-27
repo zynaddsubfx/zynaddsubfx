@@ -12,10 +12,63 @@
 */
 
 #include <cmath>
+#include <rtosc/port-sugar.h>
+#include <rtosc/ports.h>
 #include "../Misc/Allocator.h"
 #include "Alienwah.h"
 
 using std::complex;
+
+#define rObject Alienwah
+#define rBegin [](const char *, rtosc::RtData &) {
+#define rEnd }
+
+rtosc::Ports Alienwah::ports = {
+    {"preset::i", rOptions(Alienwah 1, Alienwah 2, Alienwah 3, Alienwah 4)
+                  rDoc("Instrument Presets"), 0,
+                  rBegin;
+                  rEnd},
+    //Pvolume/Ppanning are common
+    {"Pfreq::i", rShort("freq")
+                   rDoc("Effect Frequency"), 0,
+                   rBegin;
+                   rEnd},
+    {"Pfreqrnd::i", rShort("rand")
+                    rDoc("Frequency Randomness"), 0,
+                    rBegin;
+                    rEnd},
+    {"PLFOtype::i", rShort("shape")
+                    rDoc("LFO Shape"), 0,
+                    rBegin;
+                    rEnd},
+    {"PStereo::T:F", rShort("stereo")
+                     rDoc("Stereo/Mono Mode"), 0,
+                     rBegin;
+                     rEnd},
+    {"Pdepth::i", rShort("depth")
+                  rDoc("LFO Depth"), 0,
+                  rBegin;
+                  rEnd},
+    {"Pfeedback::i", rShort("fb")
+                  rDoc("Feedback"), 0,
+                  rBegin;
+                  rEnd},
+    {"Pdelay::i", rShort("delay")
+                  rDoc("Delay"), 0,
+                  rBegin;
+                  rEnd},
+    {"Plrcross::i", rShort("l/r")
+                  rDoc("Left/Right Crossover"), 0,
+                  rBegin;
+                  rEnd},
+    {"Pphase::i", rShort("phase")
+                  rDoc("Phase"), 0,
+                  rBegin;
+                  rEnd},
+};
+#undef rBegin
+#undef rEnd
+#undef rObject
 
 Alienwah::Alienwah(EffectParams pars)
     :Effect(pars),

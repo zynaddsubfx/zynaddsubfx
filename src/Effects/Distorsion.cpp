@@ -16,6 +16,59 @@
 #include "../Misc/WaveShapeSmps.h"
 #include "../Misc/Allocator.h"
 #include <cmath>
+#include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
+
+#define rObject Distorsion
+#define rBegin [](const char *, rtosc::RtData &) {
+#define rEnd }
+
+rtosc::Ports Distorsion::ports = {
+    {"preset::i", rOptions(Alienwah 1, Alienwah 2, Alienwah 3, Alienwah 4)
+                  rDoc("Instrument Presets"), 0,
+                  rBegin;
+                  rEnd},
+    //Pvolume/Ppanning are common
+    {"Plrcross::i", rShort("l/r")
+                  rDoc("Left/Right Crossover"), 0,
+                  rBegin;
+                  rEnd},
+    {"Pdrive::i", rShort("drive")
+                   rDoc("Input amplification"), 0,
+                   rBegin;
+                   rEnd},
+    {"Plevel::i", rShort("output")
+                    rDoc("Output amplification"), 0,
+                    rBegin;
+                    rEnd},
+    {"Ptype::i", rShort("type")
+                    rDoc("Distortion Shape"), 0,
+                    rBegin;
+                    rEnd},
+    {"Pnegate::T:F", rShort("neg")
+                     rDoc("Negate Signal"), 0,
+                     rBegin;
+                     rEnd},
+    {"Plpf::i", rShort("lpf")
+                  rDoc("Low Pass Cutoff"), 0,
+                  rBegin;
+                  rEnd},
+    {"Phpf::i", rShort("hpf")
+                  rDoc("High Pass Cutoff"), 0,
+                  rBegin;
+                  rEnd},
+    {"Pstereo::T:F", rShort("stereo")
+                  rDoc("Stereo"), 0,
+                  rBegin;
+                  rEnd},
+    {"Pprefiltering::T:F", rShort("p.filt")
+                  rDoc("Filtering before/after non-linearity"), 0,
+                  rBegin;
+                  rEnd},
+};
+#undef rBegin
+#undef rEnd
+#undef rObject
 
 Distorsion::Distorsion(EffectParams pars)
     :Effect(pars),

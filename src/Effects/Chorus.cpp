@@ -12,11 +12,68 @@
 */
 
 #include <cmath>
+#include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
 #include "../Misc/Allocator.h"
 #include "Chorus.h"
 #include <iostream>
 
 using namespace std;
+
+#define rObject Chorus
+#define rBegin [](const char *, rtosc::RtData &) {
+#define rEnd }
+
+rtosc::Ports Chorus::ports = {
+    {"preset::i", rOptions(Alienwah 1, Alienwah 2, Alienwah 3, Alienwah 4)
+                  rDoc("Instrument Presets"), 0,
+                  rBegin;
+                  rEnd},
+    //Pvolume/Ppanning are common
+    {"Pfreq::i", rShort("freq")
+                   rDoc("Effect Frequency"), 0,
+                   rBegin;
+                   rEnd},
+    {"Pfreqrnd::i", rShort("rand")
+                    rDoc("Frequency Randomness"), 0,
+                    rBegin;
+                    rEnd},
+    {"PLFOtype::i", rShort("shape")
+                    rDoc("LFO Shape"), 0,
+                    rBegin;
+                    rEnd},
+    {"PStereo::T:F", rShort("stereo")
+                     rDoc("Stereo/Mono Mode"), 0,
+                     rBegin;
+                     rEnd},
+    {"Pdepth::i", rShort("depth")
+                  rDoc("LFO Depth"), 0,
+                  rBegin;
+                  rEnd},
+    {"Pdelay::i", rShort("delay")
+                  rDoc("Delay"), 0,
+                  rBegin;
+                  rEnd},
+    {"Pfeedback::i", rShort("fb")
+                  rDoc("Feedback"), 0,
+                  rBegin;
+                  rEnd},
+    {"Plrcross::i", rShort("l/r")
+                  rDoc("Left/Right Crossover"), 0,
+                  rBegin;
+                  rEnd},
+    {"Pflangemode::T:F", rShort("flange")
+                  rDoc("Flange Mode"), 0,
+                  rBegin;
+                  rEnd},
+    {"Poutsub::T:F", rShort("sub")
+                  rDoc("Output Subtraction"), 0,
+                  rBegin;
+                  rEnd},
+};
+#undef rBegin
+#undef rEnd
+#undef rObject
 
 Chorus::Chorus(EffectParams pars)
     :Effect(pars),
