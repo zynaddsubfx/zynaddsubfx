@@ -977,13 +977,19 @@ const rtosc::Ports bankPorts = {
             d.reply("/alert", "s",
                     "Failed To Clear Bank Slot, please check file permissions");
         rEnd},
-    {"msb:i", 0, 0,
+    {"msb::i", 0, 0,
         rBegin;
-        impl.setMsb(rtosc_argument(msg, 0).i);
+        if(rtosc_narguments(msg))
+            impl.setMsb(rtosc_argument(msg, 0).i);
+        else
+            d.reply(d.loc, "i", impl.bank_msb);
         rEnd},
-    {"lsb:i", 0, 0,
+    {"lsb::i", 0, 0,
         rBegin;
-        impl.setLsb(rtosc_argument(msg, 0).i);
+        if(rtosc_narguments(msg))
+            impl.setLsb(rtosc_argument(msg, 0).i);
+        else
+            d.reply(d.loc, "i", impl.bank_lsb);
         rEnd},
     {"newbank:s", 0, 0,
         rBegin;
