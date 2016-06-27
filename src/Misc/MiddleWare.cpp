@@ -157,6 +157,16 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
 
 typedef void(*cb_t)(void*,const char*);
 
+//utility method (should be moved to a better location)
+template <class T, class V>
+std::vector<T> keys(const std::map<T,V> &m)
+{
+    std::vector<T> vec;
+    for(auto &kv: m)
+        vec.push_back(kv.first);
+    return vec;
+}
+
 
 /*****************************************************************************
  *                    Memory Deallocation                                    *
@@ -1220,6 +1230,30 @@ static rtosc::Ports middwareSnoopPorts = {
     {"redo:", 0, 0,
         rBegin;
         impl.undo.seekHistory(+1);
+        rEnd},
+    //port to observe the midi mappings
+    {"midi-learn-values:", 0, 0,
+        rBegin;
+        auto &midi  = impl.midi_mapper;
+        auto  key   = keys(midi.inv_map);
+        //cc-id, path, min, max
+#define MAX_MIDI 32
+        rtosc_arg_t args[MAX_MIDI*4];
+        char        argt[MAX_MIDI*4+1] = {0};
+        for(int i=0; i<key.size() && i<MAX_MIDI; ++i) {
+            auto val = midi.inv_map[key[i]];
+            argt[4*i+0]   = 'i';
+            args[4*i+0].i = std::get<1>(val);
+            argt[4*i+1]   = 's';
+            args[4*i+1].s = key[i].c_str();
+            argt[4*i+2]   = 'i';
+            args[4*i+2].i = 0;
+            argt[4*i+3]   = 'i';
+            args[4*i+3].i = 127;
+
+        }
+        d.replyArray(d.loc, argt, args);
+#undef  MAX_MIDI
         rEnd},
     {"learn:s", 0, 0,
         rBegin;
