@@ -241,7 +241,9 @@ static const Ports globalPorts = {
     //Frequency
     rParamI(PDetune,         rShort("fine"),   "Fine Detune"),
     rParamI(PCoarseDetune,   rShort("coarse"), "Coarse Detune"),
-    rParamZyn(PDetuneType,   rShort("type"),   "Detune Scaling Type"),
+    rParamZyn(PDetuneType,   rShort("type"),
+            rOptions(L35cents, L10cents, E100cents, E1200cents),
+            "Detune Scaling Type"),
     rParamZyn(PBandwidth,    rShort("bw."),    "Relative Fine Detune Gain"),
 
     //Amplitude
