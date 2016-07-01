@@ -122,6 +122,12 @@ const rtosc::Ports FilterParams::ports = {
             FilterParams *obj = (FilterParams *) d.obj;
             d.reply(d.loc, "f", obj->getoctavesfreq());
         }},
+    {"q_value:",
+        rDoc("Q value for UI Response Graphs"),
+        NULL, [](const char *, RtData &d) {
+            FilterParams *obj = (FilterParams *) d.obj;
+            d.reply(d.loc, "f", obj->getq());
+        }},
     {"response:",
         rDoc("Get a frequency response"),
         NULL, [](const char *, RtData &d) {
@@ -151,6 +157,44 @@ const rtosc::Ports FilterParams::ports = {
     //    "", NULL, [](){}},
     //{"Pvowels#" FF_MAX_VOWELS "/formants#" FF_MAX_FORMANTS "/q",
     //    "", NULL, [](){}},
+    //
+        //struct Pvowels_t {
+        //    struct formants_t {
+        //        unsigned char freq, amp, q; //frequency,amplitude,Q
+        //    } formants[FF_MAX_FORMANTS];
+        //} Pvowels[FF_MAX_VOWELS];
+    {"vowels:",
+        rDoc("Get info for formant graph"),
+        NULL, [](const char *, RtData &d) {
+            FilterParams *obj = (FilterParams *) d.obj;
+
+            rtosc_arg_t args[2+3*FF_MAX_FORMANTS*FF_MAX_VOWELS];
+            char type[2+3*FF_MAX_FORMANTS*FF_MAX_VOWELS + 1] = {0};
+
+            type[0] = 'i';
+            type[1] = 'i';
+
+            args[0].i = FF_MAX_VOWELS;
+            args[1].i = FF_MAX_FORMANTS;
+
+
+            for(int i=0; i<FF_MAX_VOWELS; ++i) {
+                auto &val = obj->Pvowels[i];
+                for(int j=0; j<FF_MAX_FORMANTS; ++j) {
+                    auto &f = val.formants[j];
+                    //each formant is 3 arguments
+                    //each vowel is FF_MAX_FORMANTS * length of formants long
+                    auto *a = args + i*FF_MAX_FORMANTS*3 + j*3 + 2;
+                    auto *t = type + i*FF_MAX_FORMANTS*3 + j*3 + 2;
+                    a[0].f = obj->getformantfreq(f.freq);
+                    a[1].f = obj->getformantamp(f.amp);
+                    a[2].f = obj->getformantq(f.q);
+                    //printf("<%d,%d,%d,%d,%d,%f,%f,%f>\n", i, j, f.freq, f.amp, f.q, a[0].f, a[1].f, a[2].f);
+                    t[0] = t[1] = t[2] = 'f';
+                }
+            }
+            d.replyArray(d.loc, type, args);
+        }},
 };
 #undef rChangeCb
 #define rChangeCb
