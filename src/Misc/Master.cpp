@@ -117,7 +117,7 @@ static const Ports master_ports = {
     rRecur(microtonal, "Micrtonal Mapping Functionality"),
     rRecur(ctl, "Controller"),
     rArrayI(Pinsparts, NUM_INS_EFX, "Part to insert part onto"),
-    {"Pkeyshift::i", rProp(parameter) rLinear(0,127) rDoc("Global Key Shift"), 0, [](const char *m, RtData&d) {
+    {"Pkeyshift::i", rShort("key shift") rProp(parameter) rLinear(0,127) rDoc("Global Key Shift"), 0, [](const char *m, RtData&d) {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "i", ((Master*)d.obj)->Pkeyshift);
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
@@ -128,6 +128,22 @@ static const Ports master_ports = {
     {"get-vu:", rDoc("Grab VU Data"), 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
        d.reply("/vu-meter", "bb", sizeof(m->vu), &m->vu, sizeof(float)*NUM_MIDI_PARTS, m->vuoutpeakpart);}},
+    {"vu-meter:", rDoc("Grab VU Data"), 0, [](const char *, RtData &d) {
+       Master *m = (Master*)d.obj;
+       char        types[6+NUM_MIDI_PARTS+1] = {0};
+       rtosc_arg_t  args[6+NUM_MIDI_PARTS+1];
+       for(int i=0; i<6+NUM_MIDI_PARTS; ++i)
+           types[i] = 'f';
+       args[0].f = m->vu.outpeakl;
+       args[1].f = m->vu.outpeakr;
+       args[2].f = m->vu.maxoutpeakl;
+       args[3].f = m->vu.maxoutpeakr;
+       args[4].f = m->vu.rmspeakl;
+       args[5].f = m->vu.rmspeakr;
+       for(int i=0; i<NUM_MIDI_PARTS; ++i)
+           args[6+i].f = m->vuoutpeakpart[i];
+
+       d.replyArray("/vu-meter", types, args);}},
     {"reset-vu:", rDoc("Grab VU Data"), 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
        m->vuresetpeaks();}},
@@ -148,14 +164,14 @@ static const Ports master_ports = {
             keys[i] = m->activeNotes[i] ? 'T' : 'F';
         d.broadcast(d.loc, keys);
         rEnd},
-    {"Pvolume::i", rProp(parameter) rLinear(0,127) rDoc("Master Volume"), 0,
+    {"Pvolume::i", rShort("volume") rProp(parameter) rLinear(0,127) rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "i", ((Master*)d.obj)->Pvolume);
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
             ((Master*)d.obj)->setPvolume(limit<char>(rtosc_argument(m,0).i,0,127));
             d.broadcast(d.loc, "i", ((Master*)d.obj)->Pvolume);}}},
-    {"volume::i", rProp(parameter) rLinear(0,127) rDoc("Master Volume"), 0,
+    {"volume::i", rShort("volume") rProp(parameter) rLinear(0,127) rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "i", ((Master*)d.obj)->Pvolume);
