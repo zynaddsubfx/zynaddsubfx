@@ -165,7 +165,9 @@ static const Ports kitPorts = {
     rToggle(Padenabled, "ADsynth enable"),
     rToggle(Psubenabled, "SUBsynth enable"),
     rToggle(Ppadenabled, "PADsynth enable"),
-    rParamZyn(Psendtoparteffect, "Effect Levels"),
+    rParamZyn(Psendtoparteffect,
+            rOptions(FX1, FX2, FX3, Off),
+            "Effect Levels"),
     rString(Pname, PART_MAX_NAME_LEN, "Kit User Specified Label"),
     {"captureMin:", rDoc("Capture minimum valid note"), NULL,
         [](const char *, RtData &r)
