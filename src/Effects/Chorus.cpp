@@ -30,46 +30,16 @@ rtosc::Ports Chorus::ports = {
                   rBegin;
                   rEnd},
     //Pvolume/Ppanning are common
-    {"Pfreq::i", rShort("freq")
-                   rDoc("Effect Frequency"), 0,
-                   rBegin;
-                   rEnd},
-    {"Pfreqrnd::i", rShort("rand")
-                    rDoc("Frequency Randomness"), 0,
-                    rBegin;
-                    rEnd},
-    {"PLFOtype::i", rShort("shape")
-                    rDoc("LFO Shape"), 0,
-                    rBegin;
-                    rEnd},
-    {"PStereo::T:F", rShort("stereo")
-                     rDoc("Stereo/Mono Mode"), 0,
-                     rBegin;
-                     rEnd},
-    {"Pdepth::i", rShort("depth")
-                  rDoc("LFO Depth"), 0,
-                  rBegin;
-                  rEnd},
-    {"Pdelay::i", rShort("delay")
-                  rDoc("Delay"), 0,
-                  rBegin;
-                  rEnd},
-    {"Pfeedback::i", rShort("fb")
-                  rDoc("Feedback"), 0,
-                  rBegin;
-                  rEnd},
-    {"Plrcross::i", rShort("l/r")
-                  rDoc("Left/Right Crossover"), 0,
-                  rBegin;
-                  rEnd},
-    {"Pflangemode::T:F", rShort("flange")
-                  rDoc("Flange Mode"), 0,
-                  rBegin;
-                  rEnd},
-    {"Poutsub::T:F", rShort("sub")
-                  rDoc("Output Subtraction"), 0,
-                  rBegin;
-                  rEnd},
+    rEffPar(Pfreq,    2, rShort("freq"), "Effect Frequency"),
+    rEffPar(Pfreqrnd, 3, rShort("rand"), "Frequency Randomness"),
+    rEffPar(PLFOtype, 4, rShort("shape"), "LFO Shape"),
+    rEffParTF(PStereo,5, rShort("stereo"), "Stereo/Mono Mode"),
+    rEffPar(Pdepth,   6, rShort("depth"), "LFO Depth"),
+    rEffPar(Pdelay,   7, rShort("delay"), "Delay"),
+    rEffPar(Pfeedback,8, rShort("fb"), "Feedback"),
+    rEffPar(Plrcross, 9, rShort("l/r"), "Left/Right Crossover"),
+    rEffParTF(Pflangemode, 10, rShort("flange"), "Flange Mode"),
+    rEffParTF(Poutsub, 11, rShort("sub"), "Output Subtraction"),
 };
 #undef rBegin
 #undef rEnd

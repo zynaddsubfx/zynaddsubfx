@@ -226,8 +226,24 @@ static const rtosc::Ports non_realtime_ports =
             float *tmp = new float[n];
             float realbw = p->getprofile(tmp, n);
             d.reply(d.loc, "b", n*sizeof(float), tmp);
-            d.reply(d.loc, "i", realbw);
+            d.reply(d.loc, "i", (int)realbw);
             delete[] tmp;}},
+    {"harmonic_profile:", rProp(non-realtime) rDoc("UI display of the harmonic profile"),
+        NULL, [](const char *m, rtosc::RtData &d) {
+            PADnoteParameters *p = ((PADnoteParameters*)d.obj);
+#define RES 512
+            char        types[RES+2] = {0};
+            rtosc_arg_t args[RES+1];
+            float tmp[RES];
+            types[0]  = 'f';
+            args[0].f = p->getprofile(tmp, RES);
+            for(int i=0; i<RES; ++i) {
+                types[i+1]  = 'f';
+                args[i+1].f = tmp[i];
+            }
+            d.replyArray(d.loc, types, args);
+#undef RES
+        }},
     {"needPrepare:", rDoc("Unimplemented Stub"),
         NULL, [](const char *, rtosc::RtData&) {}},
 };

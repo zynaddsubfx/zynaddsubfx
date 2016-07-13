@@ -29,42 +29,16 @@ rtosc::Ports Distorsion::ports = {
                   rBegin;
                   rEnd},
     //Pvolume/Ppanning are common
-    {"Plrcross::i", rShort("l/r")
-                  rDoc("Left/Right Crossover"), 0,
-                  rBegin;
-                  rEnd},
-    {"Pdrive::i", rShort("drive")
-                   rDoc("Input amplification"), 0,
-                   rBegin;
-                   rEnd},
-    {"Plevel::i", rShort("output")
-                    rDoc("Output amplification"), 0,
-                    rBegin;
-                    rEnd},
-    {"Ptype::i", rShort("type")
-                    rDoc("Distortion Shape"), 0,
-                    rBegin;
-                    rEnd},
-    {"Pnegate::T:F", rShort("neg")
-                     rDoc("Negate Signal"), 0,
-                     rBegin;
-                     rEnd},
-    {"Plpf::i", rShort("lpf")
-                  rDoc("Low Pass Cutoff"), 0,
-                  rBegin;
-                  rEnd},
-    {"Phpf::i", rShort("hpf")
-                  rDoc("High Pass Cutoff"), 0,
-                  rBegin;
-                  rEnd},
-    {"Pstereo::T:F", rShort("stereo")
-                  rDoc("Stereo"), 0,
-                  rBegin;
-                  rEnd},
-    {"Pprefiltering::T:F", rShort("p.filt")
-                  rDoc("Filtering before/after non-linearity"), 0,
-                  rBegin;
-                  rEnd},
+    rEffPar(Plrcross, 2, rShort("l/r") "Left/Right Crossover"),
+    rEffPar(Pdrive,   3, rShort("drive"), "Input amplification"),
+    rEffPar(Plevel,   4, rShort("output"), "Output amplification"),
+    rEffPar(Ptype,    5, rShort("type"), "Distortion Shape"),
+    rEffParTF(Pnegate, 6, rShort("neg"), "Negate Signal"),
+    rEffPar(Plpf, 7, rShort("lpf"), "Low Pass Cutoff"),
+    rEffPar(Phpf, 8, rShort("hpf"), "High Pass Cutoff"),
+    rEffParTF(Pstereo, 9, rShort("stereo"), "Stereo"),
+    rEffParTF(Pprefiltering, 10, rShort("p.filt"),
+                  "Filtering before/after non-linearity"),
 };
 #undef rBegin
 #undef rEnd

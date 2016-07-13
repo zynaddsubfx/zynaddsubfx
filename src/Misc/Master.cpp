@@ -116,7 +116,11 @@ static const Ports master_ports = {
     rRecursp(insefx, 8, "Insertion Effect"),//NUM_INS_EFX
     rRecur(microtonal, "Micrtonal Mapping Functionality"),
     rRecur(ctl, "Controller"),
-    rArrayI(Pinsparts, NUM_INS_EFX, "Part to insert part onto"),
+    rArrayI(Pinsparts, NUM_INS_EFX, rOpt(-1, Master),
+            rOptions(Part1, Part2, Part3, Part4,  Part5, Part6,
+                 Part7, Part8, Part9, Part10, Part11, Part12,
+                 Part13, Part14, Part15, Part16),
+                "Part to insert part onto"),
     {"Pkeyshift::i", rShort("key shift") rProp(parameter) rLinear(0,127) rDoc("Global Key Shift"), 0, [](const char *m, RtData&d) {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "i", ((Master*)d.obj)->Pkeyshift);

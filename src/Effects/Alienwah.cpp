@@ -29,42 +29,15 @@ rtosc::Ports Alienwah::ports = {
                   rBegin;
                   rEnd},
     //Pvolume/Ppanning are common
-    {"Pfreq::i", rShort("freq")
-                   rDoc("Effect Frequency"), 0,
-                   rBegin;
-                   rEnd},
-    {"Pfreqrnd::i", rShort("rand")
-                    rDoc("Frequency Randomness"), 0,
-                    rBegin;
-                    rEnd},
-    {"PLFOtype::i", rShort("shape")
-                    rDoc("LFO Shape"), 0,
-                    rBegin;
-                    rEnd},
-    {"PStereo::T:F", rShort("stereo")
-                     rDoc("Stereo/Mono Mode"), 0,
-                     rBegin;
-                     rEnd},
-    {"Pdepth::i", rShort("depth")
-                  rDoc("LFO Depth"), 0,
-                  rBegin;
-                  rEnd},
-    {"Pfeedback::i", rShort("fb")
-                  rDoc("Feedback"), 0,
-                  rBegin;
-                  rEnd},
-    {"Pdelay::i", rShort("delay")
-                  rDoc("Delay"), 0,
-                  rBegin;
-                  rEnd},
-    {"Plrcross::i", rShort("l/r")
-                  rDoc("Left/Right Crossover"), 0,
-                  rBegin;
-                  rEnd},
-    {"Pphase::i", rShort("phase")
-                  rDoc("Phase"), 0,
-                  rBegin;
-                  rEnd},
+    rEffPar(Pfreq,     2, rShort("freq"), "Effect Frequency"),
+    rEffPar(Pfreqrnd,  3, rShort("rand"), "Frequency Randomness"),
+    rEffPar(PLFOtype,  4, rShort("shape"), "LFO Shape"),
+    rEffParTF(PStereo, 5, rShort("stereo"), "Stereo/Mono Mode"),
+    rEffPar(Pdepth,    6, rShort("depth"), "LFO Depth"),
+    rEffPar(Pfeedback, 7, rShort("fb"), "Feedback"),
+    rEffPar(Pdelay,    8, rShort("delay"), "Delay"),
+    rEffPar(Plrcross,  9, rShort("l/r"), "Left/Right Crossover"),
+    rEffPar(Pphase,   10, rShort("phase"), "Phase"),
 };
 #undef rBegin
 #undef rEnd
