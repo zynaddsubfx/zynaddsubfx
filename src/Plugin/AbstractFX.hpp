@@ -29,6 +29,7 @@
 // ZynAddSubFX includes
 #include "Effects/Effect.h"
 #include "Misc/Allocator.h"
+#include "version.h"
 
 /* ------------------------------------------------------------------------------------------------------------
  * Abstract plugin class */
@@ -96,8 +97,7 @@ protected:
     */
     uint32_t getVersion() const noexcept override
     {
-        // TODO: use config.h or globals.h
-        return d_version(2, 5, 4);
+    return d_version(version.major(), version.minor(), version.revision());
     }
 
    /* --------------------------------------------------------------------------------------------------------

@@ -35,6 +35,7 @@
 #include "Misc/Master.h"
 #include "Misc/Part.h"
 #include "Misc/Util.h"
+#include "version.h"
 
 //Nio System
 #include "Nio/Nio.h"
@@ -364,7 +365,7 @@ int main(int argc, char *argv[])
     synth.alias();
 
     if(exitwithversion) {
-        cout << "Version: " << VERSION << endl;
+        cout << "Version: " << version << endl;
         return 0;
     }
     if(exitwithhelp != 0) {
