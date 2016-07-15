@@ -428,7 +428,7 @@ class UI_Interface:public Fl_Osc_Interface
             //DEBUG
             //if(strcmp(msg, "/vu-meter"))//Ignore repeated message
             //    printf("trying the link for a '%s'<%s>\n", msg, rtosc_argument_string(msg));
-            const char *handle = rindex(msg,'/');
+            const char *handle = strrchr(msg,'/');
             if(handle)
                 ++handle;
 
