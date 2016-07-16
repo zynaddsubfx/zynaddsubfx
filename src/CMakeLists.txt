@@ -362,6 +362,9 @@ endif()
 # Following this should be only general compilation code, and no mention
 # of module-specific variables
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
+	${CMAKE_CURRENT_BINARY_DIR}/version.h)
+
 link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS} ${NTK_LIBRARY_DIRS})
 
 include_directories(
@@ -389,6 +392,7 @@ add_subdirectory(Nio)
 add_subdirectory(Plugin)
 
 add_library(zynaddsubfx_core STATIC
+    version.cpp
     globals.cpp
     ../tlsf/tlsf.c
     Containers/ScratchString.cpp
