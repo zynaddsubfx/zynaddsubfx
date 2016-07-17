@@ -29,7 +29,7 @@ ScratchString ScratchString::operator+(const ScratchString s)
 {
     ScratchString ss;
     strncpy(ss.c_str, c_str, SCRATCH_SIZE);
-    strncat(ss.c_str, s.c_str, SCRATCH_SIZE);
+    strncat(ss.c_str, s.c_str, SCRATCH_SIZE-strlen(c_str));
     return ss;
 }
 

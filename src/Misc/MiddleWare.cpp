@@ -1013,7 +1013,7 @@ const rtosc::Ports bankPorts = {
 #define MAX_SEARCH 128
         char res_type[MAX_SEARCH+1] = {0};
         rtosc_arg_t res_dat[MAX_SEARCH] = {0};
-        for(int i=0; i<res.size() && i<MAX_SEARCH; ++i) {
+        for(unsigned i=0; i<res.size() && i<MAX_SEARCH; ++i) {
             res_type[i]  = 's';
             res_dat[i].s = res[i].c_str();
         }
@@ -1240,7 +1240,7 @@ static rtosc::Ports middwareSnoopPorts = {
 #define MAX_MIDI 32
         rtosc_arg_t args[MAX_MIDI*4];
         char        argt[MAX_MIDI*4+1] = {0};
-        for(int i=0; i<key.size() && i<MAX_MIDI; ++i) {
+        for(unsigned i=0; i<key.size() && i<MAX_MIDI; ++i) {
             auto val = midi.inv_map[key[i]];
             argt[4*i+0]   = 'i';
             args[4*i+0].i = std::get<1>(val);
