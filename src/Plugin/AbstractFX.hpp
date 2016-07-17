@@ -29,7 +29,7 @@
 // ZynAddSubFX includes
 #include "Effects/Effect.h"
 #include "Misc/Allocator.h"
-#include "version.h"
+#include "zyn-version.h"
 
 /* ------------------------------------------------------------------------------------------------------------
  * Abstract plugin class */

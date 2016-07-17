@@ -15,7 +15,7 @@
 #include "DistrhoPlugin.hpp"
 
 // ZynAddSubFX includes
-#include "version.h"
+#include "zyn-version.h"
 #include "Misc/Master.h"
 #include "Misc/MiddleWare.h"
 #include "Misc/Part.h"
