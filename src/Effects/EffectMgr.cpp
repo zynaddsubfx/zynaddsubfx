@@ -135,6 +135,7 @@ static const rtosc::Ports local_ports = {
     rSubtype(Chorus),
     rSubtype(Distorsion),
     rSubtype(Echo),
+    rSubtype(EQ),
     rSubtype(Phaser),
     rSubtype(Reverb),
 };
