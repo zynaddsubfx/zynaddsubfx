@@ -71,7 +71,7 @@ static const rtosc::Ports SUBnotePorts = {
 #define rChangeCb if (obj->time) { obj->last_update_timestamp = obj->time->time(); }
     rParamZyn(Pnumstages, rShort("stages"), rMap(min, 1), rMap(max, 5), "Number of filter stages"),
     rParamZyn(Pbandwidth, rShort("bandwidth"), "Bandwidth of filters"),
-    rParamZyn(Phmagtype,  rShort("mag. type"),"How the magnitudes are computed (0=linear,1=-60dB,2=-60dB)"),
+    rParamZyn(Phmagtype,  rShort("mag. type"), rOptions(linear, -40dB, -60dB, -80dB, -100dB), "Magnitude scale"),
     rArray(Phmag, MAX_SUB_HARMONICS, "Harmonic magnitudes"),
     rArray(Phrelbw, MAX_SUB_HARMONICS, "Relative bandwidth"),
     rParamZyn(Pbwscale, rShort("stretch"), "Bandwidth scaling with frequency"),
