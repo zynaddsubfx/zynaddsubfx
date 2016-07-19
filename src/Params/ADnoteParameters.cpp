@@ -94,7 +94,9 @@ static const Ports voicePorts = {
     rParamZyn(PfixedfreqET,       rShort("e.t."),   "Equal Tempermant Parameter"),
     rParamZyn(PBendAdjust,        rShort("bend"),   "Pitch bend adjustment"),
     rParamZyn(POffsetHz,          rShort("offset"), "Voice constant offset"),
-    rParamI(PDetune,              rShort("fine"),   "Fine Detune"),
+    //nominally -8192..8191
+    rParamI(PDetune,              rShort("fine"),
+            rLinear(0, 16383), "Fine Detune"),
     rParamI(PCoarseDetune,        rShort("coarse"), "Coarse Detune"),
     rParamZyn(PDetuneType,        rShort("type"),   "Magnitude of Detune"),
     rToggle(PFreqEnvelopeEnabled, rShort("enable"), "Frequency Envelope Enable"),
@@ -239,7 +241,9 @@ static const Ports globalPorts = {
     rToggle(PStereo, rShort("stereo"), "Mono/Stereo Enable"),
 
     //Frequency
-    rParamI(PDetune,         rShort("fine"),   "Fine Detune"),
+    //nominally -8192..8191
+    rParamI(PDetune,              rShort("fine"),
+            rLinear(0, 16383), "Fine Detune"),
     rParamI(PCoarseDetune,   rShort("coarse"), "Coarse Detune"),
     rParamZyn(PDetuneType,   rShort("type"),
             rOptions(L35cents, L10cents, E100cents, E1200cents),
