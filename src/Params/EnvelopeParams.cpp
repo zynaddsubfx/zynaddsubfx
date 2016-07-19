@@ -17,6 +17,7 @@
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
 
+#include "version.h"
 #include "EnvelopeParams.h"
 #include "../Misc/Util.h"
 #include "../Misc/Time.h"
@@ -358,10 +359,30 @@ void EnvelopeParams::add2XML(XMLwrapper& xml)
         }
 }
 
+static float EnvelopeParams::env_dB2rap(float db) {
+    return (powf(10.0f, db / 20.0f) - 0.01)/.99f;
+}
 
+static float EnvelopeParams::env_rap2dB(float rap) {
+    return 20.0f * log10f(rap * 0.99f + 0.01);
+}
+
+int value(int input, bool mismatch)
+{
+    int res = input;
+    if(mismatch)
+    {
+        // the errors occured when calling env_dB2rap,
+        // thus, we use this formula:
+
+    }
+    return res;
+}
 
 void EnvelopeParams::getfromXML(XMLwrapper& xml)
 {
+    bool mismatch = xml.fileversion() < version_type(2,4,4);
+
     Pfreemode       = xml.getparbool("free_mode", Pfreemode);
     Penvpoints      = xml.getpar127("env_points", Penvpoints);
     Penvsustain     = xml.getpar127("env_sustain", Penvsustain);
@@ -372,17 +393,17 @@ void EnvelopeParams::getfromXML(XMLwrapper& xml)
     PA_dt  = xml.getpar127("A_dt", PA_dt);
     PD_dt  = xml.getpar127("D_dt", PD_dt);
     PR_dt  = xml.getpar127("R_dt", PR_dt);
-    PA_val = xml.getpar127("A_val", PA_val);
-    PD_val = xml.getpar127("D_val", PD_val);
-    PS_val = xml.getpar127("S_val", PS_val);
-    PR_val = xml.getpar127("R_val", PR_val);
+    PA_val = value(xml.getpar127("A_val", PA_val), mismatch);
+    PD_val = value(xml.getpar127("D_val", PD_val), mismatch);
+    PS_val = value(xml.getpar127("S_val", PS_val), mismatch);
+    PR_val = value(xml.getpar127("R_val", PR_val), mismatch);
 
     for(int i = 0; i < Penvpoints; ++i) {
         if(xml.enterbranch("POINT", i) == 0)
             continue;
         if(i != 0)
             Penvdt[i] = xml.getpar127("dt", Penvdt[i]);
-        Penvval[i] = xml.getpar127("val", Penvval[i]);
+        Penvval[i] = value(xml.getpar127("val", Penvval[i]), mismatch);
         xml.exitbranch();
     }
 

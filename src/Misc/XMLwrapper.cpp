@@ -323,13 +323,13 @@ int XMLwrapper::loadXMLfile(const string &filename)
         return -3;  //the XML doesnt embbed zynaddsubfx data
 
     //fetch version information
-    fileversion.set_major(stringTo<int>(mxmlElementGetAttr(root, "version-major")));
-    fileversion.set_minor(stringTo<int>(mxmlElementGetAttr(root, "version-minor")));
-    fileversion.set_revision(
+    _fileversion.set_major(stringTo<int>(mxmlElementGetAttr(root, "version-major")));
+    _fileversion.set_minor(stringTo<int>(mxmlElementGetAttr(root, "version-minor")));
+    _fileversion.set_revision(
         stringTo<int>(mxmlElementGetAttr(root, "version-revision")));
 
     if(verbose)
-        cout << "loadXMLfile() version: " << fileversion << endl;
+        cout << "loadXMLfile() version: " << _fileversion << endl;
 
     return 0;
 }

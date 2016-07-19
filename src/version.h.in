@@ -23,8 +23,15 @@ class version_type
     char version[3];
 
     // strcmp-like comparison against another version_type
-    constexpr int v_strcmp(const version_type& v2, int i) const;
-
+    constexpr int v_strcmp(const version_type& v2, int i) const
+    {
+        return (i == sizeof(version))
+            ? 0
+            : ((version[i] == v2.version[i])
+                ? v_strcmp(v2, i+1)
+                : (version[i] - v2.version[i]));
+    }
+    
 public:
     constexpr version_type(char maj, char min, char rev) :
         version{maj, min, rev}
@@ -47,7 +54,10 @@ public:
     int minor() const { return version[1]; }
     int revision() const { return version[2]; }
 
-    constexpr bool operator<(const version_type& other) const;
+    constexpr bool operator<(const version_type& other) const
+    {
+        return v_strcmp(other, 0) < 0;
+    }
 
     //! prints version as <major>.<minor>.<revision>
     friend std::ostream& operator<< (std::ostream& os,
