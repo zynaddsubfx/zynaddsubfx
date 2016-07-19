@@ -29,38 +29,14 @@ rtosc::Ports DynamicFilter::ports = {
                   rBegin;
                   rEnd},
     //Pvolume/Ppanning are common
-    {"Pfreq::i", rShort("freq")
-                   rDoc("Effect Frequency"), 0,
-                   rBegin;
-                   rEnd},
-    {"Pfreqrnd::i", rShort("rand")
-                    rDoc("Frequency Randomness"), 0,
-                    rBegin;
-                    rEnd},
-    {"PLFOtype::i", rShort("shape")
-                    rDoc("LFO Shape"), 0,
-                    rBegin;
-                    rEnd},
-    {"PStereo::T:F", rShort("stereo")
-                     rDoc("Stereo/Mono Mode"), 0,
-                     rBegin;
-                     rEnd},
-    {"Pdepth::i", rShort("depth")
-                  rDoc("LFO Depth"), 0,
-                  rBegin;
-                  rEnd},
-    {"Pampsns::i", rShort("sense")
-                  rDoc("how the filter varies according to the input amplitude"), 0,
-                  rBegin;
-                  rEnd},
-    {"Pampsnsinv::T:F", rShort("sns.inv")
-                   rDoc("Sense Inversion"), 0,
-                   rBegin;
-                   rEnd},
-    {"Pampsmooth::i", rShort("smooth")
-                    rDoc("how smooth the input amplitude changes the filter"), 0,
-                    rBegin;
-                    rEnd},
+    rEffPar(Pfreq,      2, rShort("freq"),      "Effect Frequency"),
+    rEffPar(Pfreqrnd,   3, rShort("rand"),      "Frequency Randomness"),
+    rEffPar(PLFOtype,   4, rShort("shape"),     "LFO Shape"),
+    rEffPar(PStereo,    5, rShort("stereo"),    "Stereo/Mono Mode"),
+    rEffPar(Pdepth,     6, rShort("depth"),     "LFO Depth"),
+    rEffPar(Pampsns,    7, rShort("sense"),     "how the filter varies according to the input amplitude"),
+    rEffPar(Pampsnsinv, 8, rShort("sns.inv"),   "Sense Inversion"),
+    rEffPar(Pampsmooth, 9, rShort("smooth"),    "how smooth the input amplitude changes the filter"),
 };
 #undef rBegin
 #undef rEnd

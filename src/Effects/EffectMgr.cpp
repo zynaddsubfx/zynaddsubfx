@@ -134,6 +134,7 @@ static const rtosc::Ports local_ports = {
     rSubtype(Alienwah),
     rSubtype(Chorus),
     rSubtype(Distorsion),
+    rSubtype(DynamicFilter),
     rSubtype(Echo),
     rSubtype(EQ),
     rSubtype(Phaser),
