@@ -27,8 +27,6 @@
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
 
-pthread_t main_thread;
-
 #define rObject OscilGen
 const rtosc::Ports OscilGen::non_realtime_ports = {
     rSelf(OscilGen),
@@ -96,7 +94,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
                 phase = rtosc_argument(m,0).i;
                 //XXX hack hack
                 char *repath = strdup(d.loc);
-                char *edit   = rindex(repath, '/')+1;
+                char *edit   = strrchr(repath, '/')+1;
                 strcpy(edit, "prepare");
                 OscilGen &o = *((OscilGen*)d.obj);
                 fft_t *data = new fft_t[o.synth.oscilsize / 2];
@@ -120,7 +118,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
                 //printf("setting magnitude\n\n");
                 //XXX hack hack
                 char *repath = strdup(d.loc);
-                char *edit   = rindex(repath, '/')+1;
+                char *edit   = strrchr(repath, '/')+1;
                 strcpy(edit, "prepare");
                 OscilGen &o = *((OscilGen*)d.obj);
                 fft_t *data = new fft_t[o.synth.oscilsize / 2];
@@ -227,6 +225,10 @@ const rtosc::MergePorts OscilGen::ports{
     &OscilGen::realtime_ports,
     &OscilGen::non_realtime_ports
 };
+
+#ifndef M_PI_2
+# define M_PI_2		1.57079632679489661923	/* pi/2 */
+#endif
 
 
 //operations on FFTfreqs

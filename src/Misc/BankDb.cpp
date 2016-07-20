@@ -16,7 +16,8 @@ BankEntry::BankEntry(void)
 
 bool sfind(std::string hay, std::string needle)
 {
-    return strcasestr(hay.c_str(), needle.c_str());
+    //return strcasestr(hay.c_str(), needle.c_str());
+    return false;
 }
 
 bool BankEntry::match(string s) const

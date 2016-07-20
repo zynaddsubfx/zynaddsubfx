@@ -17,6 +17,7 @@
 #include <map>
 #include <cmath>
 #include <cctype>
+#include <ctime>
 #include <algorithm>
 #include <signal.h>
 
@@ -25,7 +26,6 @@
 
 #include <getopt.h>
 
-#include <lo/lo.h>
 #include <rtosc/ports.h>
 #include <rtosc/thread-link.h>
 #include "Params/PADnoteParameters.h"
@@ -69,7 +69,6 @@ char *instance_name = 0;
 
 void exitprogram(const Config &config);
 
-extern pthread_t main_thread;
 
 //cleanup on signaled exit
 void sigterm_exit(int /*sig*/)
@@ -118,7 +117,6 @@ void exitprogram(const Config& config)
 
 int main(int argc, char *argv[])
 {
-    main_thread = pthread_self();
     SYNTH_T synth;
     Config config;
     config.init();
@@ -444,8 +442,10 @@ int main(int argc, char *argv[])
         middleware->updateResources(master);
 
     //Run the Nio system
+    printf("[INFO] Nio::start()\n");
     bool ioGood = Nio::start();
 
+    printf("[INFO] exec-after-init\n");
     if(!execAfterInit.empty()) {
         cout << "Executing user supplied command: " << execAfterInit << endl;
         if(system(execAfterInit.c_str()) == -1)
@@ -456,6 +456,7 @@ int main(int argc, char *argv[])
     gui = NULL;
 
     //Capture Startup Responses
+    printf("[INFO] startup OSC\n");
     typedef std::vector<const char *> wait_t;
     wait_t msg_waitlist;
     middleware->setUiCallback([](void*v,const char*msg) {
@@ -466,12 +467,14 @@ int main(int argc, char *argv[])
             wait.push_back(copy);
             }, &msg_waitlist);
 
+    printf("[INFO] UI calbacks\n");
     if(!noui)
         gui = GUI::createUi(middleware->spawnUiApi(), &Pexitprogram);
     middleware->setUiCallback(GUI::raiseUi, gui);
     middleware->setIdleCallback([](void*){GUI::tickUi(gui);}, NULL);
 
     //Replay Startup Responses
+    printf("[INFO] OSC replay\n");
     for(auto msg:msg_waitlist) {
         GUI::raiseUi(gui, msg);
         delete [] msg;
@@ -489,12 +492,18 @@ int main(int argc, char *argv[])
                     "Default IO did not initialize.\nDefaulting to NULL backend.");
     }
 
-    if(auto_save_interval > 0) {
+    printf("[INFO] auto_save setup\n");
+    if(auto_save_interval > 0 && false) {
         int old_save = middleware->checkAutoSave();
         if(old_save > 0)
             GUI::raiseUi(gui, "/alert-reload", "i", old_save);
         middleware->enableAutoSave(auto_save_interval);
     }
+    printf("[INFO] NSM Stuff\n");
+#if USE_NSM
+#undef USE_NSM
+#define USE_NSM 0
+#endif
 
 #if USE_NSM
     char *nsm_url = getenv("NSM_URL");
@@ -511,6 +520,7 @@ int main(int argc, char *argv[])
     }
 #endif
 
+    printf("[INFO] LASH Stuff\n");
 #if USE_NSM
     if(!nsm)
 #endif
@@ -521,7 +531,9 @@ int main(int argc, char *argv[])
 #endif
     }
 
+    printf("[INFO] Main Loop...\n");
     while(Pexitprogram == 0) {
+#if 0
 #if USE_NSM
         if(nsm) {
             nsm->check();
@@ -552,6 +564,7 @@ int main(int argc, char *argv[])
 done:
 #endif
         GUI::tickUi(gui);
+#endif
         middleware->tick();
     }
 

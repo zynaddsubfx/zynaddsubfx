@@ -21,6 +21,7 @@
 #include <rtosc/undo-history.h>
 #include <rtosc/thread-link.h>
 #include <rtosc/ports.h>
+#define  WIN32
 #include <lo/lo.h>
 
 #include <unistd.h>
@@ -49,6 +50,8 @@
 #include <atomic>
 #include <list>
 
+#define errx(...)
+#define warnx(...)
 #ifndef errx
 #include <err.h>
 #endif
@@ -148,7 +151,7 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
     lo_message_serialise(msg, path, buffer, &size);
     if(!strcmp(buffer, "/path-search") && !strcmp("ss", rtosc_argument_string(buffer))) {
         path_search(buffer, mw->activeUrl().c_str());
-    } else if(buffer[0]=='/' && rindex(buffer, '/')[1]) {
+    } else if(buffer[0]=='/' && strrchr(buffer, '/')[1]) {
         mw->transmitMsg(rtosc::Ports::collapsePath(buffer));
     }
 
@@ -489,7 +492,7 @@ public:
         assert(actual_load[npart] <= pending_load[npart]);
 
         //load part in async fashion when possible
-#if HAVE_ASYNC
+#if 0
         auto alloc = std::async(std::launch::async,
                 [master,filename,this,npart](){
                 Part *p = new Part(*master->memory, synth,
@@ -1604,7 +1607,7 @@ void MiddleWareImpl::kitEnable(int part, int kit, int type)
 void MiddleWareImpl::handleMsg(const char *msg)
 {
     //Check for known bugs
-    assert(msg && *msg && rindex(msg, '/')[1]);
+    assert(msg && *msg && strrchr(msg, '/')[1]);
     assert(strstr(msg,"free") == NULL || strstr(rtosc_argument_string(msg), "b") == NULL);
     assert(strcmp(msg, "/part0/Psysefxvol"));
     assert(strcmp(msg, "/Penabled"));
@@ -1619,7 +1622,7 @@ void MiddleWareImpl::handleMsg(const char *msg)
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
     }
 
-    const char *last_path = rindex(msg, '/');
+    const char *last_path = strrchr(msg, '/');
     if(!last_path) {
         printf("Bad message in handleMsg() <%s>\n", msg);
         assert(false);

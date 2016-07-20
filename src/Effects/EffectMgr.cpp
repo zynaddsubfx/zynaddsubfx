@@ -79,7 +79,7 @@ static const rtosc::Ports local_ports = {
 
                 //update parameters as well
                 strncpy(loc, d.loc, 1024);
-                char *tail = rindex(loc, '/');
+                char *tail = strrchr(loc, '/');
                 if(!tail)
                     return;
                 for(int i=0;i<128;++i) {
