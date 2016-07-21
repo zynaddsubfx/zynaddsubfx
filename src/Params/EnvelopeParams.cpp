@@ -377,7 +377,7 @@ struct version_fixer_t
 {
     const bool mismatch;
 public:
-    int operator()(int input)
+    int operator()(int input) const
     {
         return (mismatch)
             // The errors occured when calling env_dB2rap. Let f be the
@@ -385,7 +385,10 @@ public:
             // load values with (let "o" be the function composition symbol):
             //   f^{-1} o (env_dB2rap^{-1}) o dB2rap o f
             // from the xml file. This results in the following formula:
-            ? 127.0f * (0.5f * log10f( 0.01f + 0.99f * powf(100, input/127.0f - 1)) + 1)
+            ? roundf(127.0f * (0.5f *
+			       log10f( 0.01f + 0.99f *
+                                       powf(100, input/127.0f - 1))
+                               + 1))
             : input;
     }
     version_fixer_t(const version_type& fileversion, int env_mode) :
