@@ -15,20 +15,6 @@
 
 #include "zyn-version.h"
 
-constexpr int version_type::v_strcmp(const version_type& v2, int i) const
-{
-    return (i == sizeof(version))
-        ? 0
-        : ((version[i] == v2.version[i])
-            ? v_strcmp(v2, i+1)
-            : (version[i] - v2.version[i]));
-}
-
-constexpr bool version_type::operator<(const version_type& other) const
-{
-    return v_strcmp(other, 0) < 0;
-}
-
 std::ostream& operator<< (std::ostream& os,
     const version_type& v)
 {

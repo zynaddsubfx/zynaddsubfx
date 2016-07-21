@@ -233,6 +233,10 @@ class XMLwrapper
 
         std::vector<XmlNode> getBranch(void) const;
 
+        const version_type& fileversion() const {
+            return _fileversion;
+        }
+
     private:
 
         /**
@@ -272,8 +276,8 @@ class XMLwrapper
          */
         mxml_node_t *addparams(const char *name, unsigned int params,
                                ...) const;
-
-        version_type fileversion;
+public:
+        version_type _fileversion;
 };
 
 #endif

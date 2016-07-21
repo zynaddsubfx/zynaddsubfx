@@ -70,6 +70,10 @@ class EnvelopeParams:public Presets
         int64_t last_update_timestamp;
 
         static const rtosc::Ports &ports;
+
+        static float env_rap2dB(float rap);
+        static float env_dB2rap(float db);
+
     private:
         void store2defaults();
 
