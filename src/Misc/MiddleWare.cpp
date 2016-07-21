@@ -838,6 +838,24 @@ class MwDataObj:public rtosc::RtData
         MiddleWareImpl   *mwi;
 };
 
+static std::vector<std::string> getFiles(const char *folder, int mask)
+{
+    DIR *dir = opendir(folder);
+
+    if(dir == NULL) {
+        return {};
+    }
+
+    struct dirent *fn;
+    std::vector<string> files;
+
+    while((fn = readdir(dir)))
+        if(fn->d_type == mask)
+            files.push_back(fn->d_name);
+
+    closedir(dir);
+    return files;
+}
 
 
 
@@ -1156,6 +1174,48 @@ static rtosc::Ports middwareSnoopPorts = {
         const int   part_id = rtosc_argument(msg,0).i;
         const char *file    = rtosc_argument(msg,1).s;
         impl.savePart(part_id, file);
+        rEnd},
+    {"file_home_dir:", 0, 0,
+        rBegin;
+        d.reply(d.loc, "s", getenv("HOME"));
+        rEnd},
+    {"file_list_files:s", 0, 0,
+        rBegin;
+        const char *folder = rtosc_argument(msg, 0).s;
+
+        auto files = getFiles(folder, DT_REG);
+
+        const int N = files.size();
+        rtosc_arg_t *args  = new rtosc_arg_t[N];
+        char        *types = new char[N+1];
+        types[N] = 0;
+        for(int i=0; i<N; ++i) {
+            args[i].s = files[i].c_str();
+            types[i]  = 's';
+        }
+
+        d.replyArray(d.loc, types, args);
+        delete [] types;
+        delete [] args;
+        rEnd},
+    {"file_list_dirs:s", 0, 0,
+        rBegin;
+        const char *folder = rtosc_argument(msg, 0).s;
+
+        auto files = getFiles(folder, DT_DIR);
+
+        const int N = files.size();
+        rtosc_arg_t *args  = new rtosc_arg_t[N];
+        char        *types = new char[N+1];
+        types[N] = 0;
+        for(int i=0; i<N; ++i) {
+            args[i].s = files[i].c_str();
+            types[i]  = 's';
+        }
+
+        d.replyArray(d.loc, types, args);
+        delete [] types;
+        delete [] args;
         rEnd},
     {"reload_auto_save:i", 0, 0,
         rBegin
