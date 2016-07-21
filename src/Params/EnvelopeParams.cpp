@@ -17,7 +17,7 @@
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
 
-#include "version.h"
+#include "zyn-version.h"
 #include "EnvelopeParams.h"
 #include "../Misc/Util.h"
 #include "../Misc/Time.h"
