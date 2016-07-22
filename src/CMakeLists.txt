@@ -102,7 +102,9 @@ SET (PluginLibDir "lib" CACHE STRING
 
 # Add version information
 add_definitions(-DVERSION="${VERSION}")
-add_definitions(-static)
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  add_definitions(-static)
+endif()
 
 if(NOT "Darwin" STREQUAL ${CMAKE_SYSTEM_NAME})
     # Add scheduler function existance info (OSX compatiability)
