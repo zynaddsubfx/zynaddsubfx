@@ -33,7 +33,7 @@ if(CXXTEST_FOUND)
 endif()
 # lash
 if(PkgConfig_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
-message("Looking For pkg config modules")
+    message("Looking For pkg config modules")
     pkg_search_module(LASH lash-1.0)
     mark_as_advanced(LASH_LIBRARIES)
     pkg_search_module(DSSI dssi>=0.9.0)
@@ -243,6 +243,10 @@ message(STATUS "Compiling with liblo")
 
 # other include directories
 include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS})
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    add_definitions(-DWIN32)
+endif()
 
 add_definitions(
 	 -Wall

@@ -19,7 +19,6 @@
 
 #pragma once
 
-#define  WIN32
 #include <lo/lo.h>
 
 namespace NSM

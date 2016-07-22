@@ -21,7 +21,6 @@
 #include <rtosc/undo-history.h>
 #include <rtosc/thread-link.h>
 #include <rtosc/ports.h>
-#define  WIN32
 #include <lo/lo.h>
 
 #include <unistd.h>
