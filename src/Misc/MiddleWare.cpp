@@ -944,6 +944,25 @@ const rtosc::Ports bankPorts = {
         }
         d.replyArray("/bank/types", t, args);
         rEnd},
+    {"tags:", 0, 0,
+        rBegin;
+        const char *types[8];
+        types[ 0] = "fast";
+        types[ 1] = "slow";
+        types[ 2] = "saw";
+        types[ 3] = "bell";
+        types[ 4] = "lead";
+        types[ 5] = "ambient";
+        types[ 6] = "horn";
+        types[ 7] = "alarm";
+        char        t[8+1]={0};
+        rtosc_arg_t args[8];
+        for(int i=0; i<8; ++i) {
+            t[i]      = 's';
+            args[i].s = types[i];
+        }
+        d.replyArray(d.loc, t, args);
+        rEnd},
     {"slot#1024:", 0, 0,
         rBegin;
         const int loc = extractInt(msg);
