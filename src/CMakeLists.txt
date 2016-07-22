@@ -6,25 +6,16 @@ message(STATUS "Checking Library Path" $ENV{CMAKE_LIBRARY_PATH} ${CMAKE_LIBRARY_
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 include(CheckCXXSourceCompiles)
-include(CheckCXXCompilerFlag) 
+include(CheckCXXCompilerFlag)
 if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     find_package(PkgConfig)
 endif()
 find_package(zlib REQUIRED)
 find_package(X11)
 check_include_file(X11/xpm.h HAS_XPM)
-find_package(FFTW REQUIRED)
-find_package(MXML REQUIRED)
-find_package(LIBLO REQUIRED)
 find_package(Threads   REQUIRED)
 find_package(OSS)
 find_package(Alsa)
-#pkg_check_modules(JACK jack)
-find_package(PORTAUDIO)
-#pkg_check_modules(PORTAUDIO portaudio-2.0>=19)
-#set(FLTK_SKIP_OPENGL true)
-#pkg_check_modules(NTK ntk)
-#pkg_check_modules(NTK_IMAGES ntk_images)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
 find_package(CxxTest)
@@ -34,12 +25,28 @@ endif()
 # lash
 if(PkgConfig_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     message("Looking For pkg config modules")
+    pkg_check_modules(JACK jack)
+    pkg_check_modules(PORTAUDIO portaudio-2.0>=19)
+    set(FLTK_SKIP_OPENGL true)
+    pkg_check_modules(NTK ntk)
+    pkg_check_modules(NTK_IMAGES ntk_images)
+
+    pkg_check_modules(FFTW REQUIRED fftw3)
+    pkg_check_modules(MXML REQUIRED mxml)
+
+    pkg_check_modules(PORTAUDIO portaudio-2.0>=19)
+
     pkg_search_module(LASH lash-1.0)
     mark_as_advanced(LASH_LIBRARIES)
     pkg_search_module(DSSI dssi>=0.9.0)
     mark_as_advanced(DSSI_LIBRARIES)
     pkg_search_module(LIBLO liblo>=0.26 REQUIRED)
     mark_as_advanced(LIBLO_LIBRARIES)
+else()
+    find_package(FFTW REQUIRED)
+    find_package(MXML REQUIRED)
+    find_package(LIBLO REQUIRED)
+    find_package(PORTAUDIO)
 endif()
 
 CHECK_FUNCTION_EXISTS(sched_setscheduler HAVE_SCHEDULER)
@@ -343,8 +350,8 @@ endif()
 
 if(NtkGui)
 
-        find_program( FLTK_FLUID_EXECUTABLE ntk-fluid)
-        
+    find_program( FLTK_FLUID_EXECUTABLE ntk-fluid)
+
 	message(STATUS ${NTK_LDFLAGS} ${NTK_IMAGES_LDFLAGS})
 
 	set(GUI_LIBRARIES zynaddsubfx_gui ${NTK_LIBRARIES} ${NTK_IMAGES_LIBRARIES} ${OPENGL_LIBRARIES})
@@ -415,12 +422,23 @@ add_library(zynaddsubfx_core STATIC
 	${zynaddsubfx_synth_SRCS}
 	)
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set(PTHREAD_LIBRARY winpthread)
+    set(PLATFORM_LIBRARIES ws2_32
+            wsock32
+            "-static" iphlpapi
+            "-static" winpthread)
+else()
+    set(PLATFORM_LIBRARIES "")
+    set(PTHREAD_LIBRARY pthread)
+endif()
+
 target_link_libraries(zynaddsubfx_core
 	${ZLIB_LIBRARIES}
 	${FFTW_LIBRARIES}
 	${MXML_LIBRARIES}
 	${OS_LIBRARIES}
-winpthread
+    ${PTHREAD_LIBRARY}
     rtosc rtosc-cpp)
 
 if(CompileTests)
@@ -439,10 +457,8 @@ target_link_libraries(zynaddsubfx
 	${GUI_LIBRARIES}
 	${NIO_LIBRARIES}
 	${AUDIO_LIBRARIES}
-    ws2_32
-    wsock32
-    "-static" iphlpapi
-    "-static" winpthread)
+    ${PLATFORM_LIBRARIES}
+    )
 
 if (DssiEnable)
 	add_library(zynaddsubfx_dssi SHARED
