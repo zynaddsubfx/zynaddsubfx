@@ -998,6 +998,8 @@ void Master::ShutUp()
         insefx[nefx]->cleanup();
     for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
         sysefx[nefx]->cleanup();
+    for(int i = 0; i < sizeof(activeNotes)/sizeof(activeNotes[0]); ++i)
+        activeNotes[i] = 0;
     vuresetpeaks();
     shutup = 0;
 }
