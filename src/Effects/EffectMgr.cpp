@@ -103,7 +103,7 @@ static const rtosc::Ports local_ports = {
             d.reply(d.loc, "bb", sizeof(a), a, sizeof(b), b);
         }},
     {"efftype::i", rOptions(Disabled, Reverb, Echo, Chorus,
-            Phaser, Alienwah, Distorsion, EQ, DynamicFilter)
+            Phaser, Alienwah, Distorsion, EQ, DynFilter)
             rProp(parameter) rDoc("Get Effect Type"), NULL,
         [](const char *m, rtosc::RtData &d)
         {
