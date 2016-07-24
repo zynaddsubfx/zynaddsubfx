@@ -1047,7 +1047,7 @@ const rtosc::Ports bankPorts = {
     {"search:s", 0, 0,
         rBegin;
         auto res = impl.search(rtosc_argument(msg, 0).s);
-#define MAX_SEARCH 128
+#define MAX_SEARCH 300
         char res_type[MAX_SEARCH+1] = {0};
         rtosc_arg_t res_dat[MAX_SEARCH] = {0};
         for(unsigned i=0; i<res.size() && i<MAX_SEARCH; ++i) {
