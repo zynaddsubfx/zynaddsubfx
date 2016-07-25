@@ -57,7 +57,7 @@ const rtosc::Ports Microtonal::ports = {
     rParamZyn(Pglobalfinedetune, rShort("fine"), "Fine detune for all notes"),
 
     rString(Pname, MICROTONAL_MAX_NAME_LEN,    rShort("name"), "Microtonal Name"),
-    rString(Pcomment, MICROTONAL_MAX_NAME_LEN, rShort("comment") "Microtonal Name"),
+    rString(Pcomment, MICROTONAL_MAX_NAME_LEN, rShort("comment"), "Microtonal comments"),
 
     {"octavesize:", rDoc("Get octave size"), 0, [](const char*, RtData &d)
         {

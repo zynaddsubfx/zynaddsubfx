@@ -29,7 +29,7 @@ rtosc::Ports Distorsion::ports = {
                   rBegin;
                   rEnd},
     //Pvolume/Ppanning are common
-    rEffPar(Plrcross, 2, rShort("l/r") "Left/Right Crossover"),
+    rEffPar(Plrcross, 2, rShort("l/r"), "Left/Right Crossover"),
     rEffPar(Pdrive,   3, rShort("drive"), "Input amplification"),
     rEffPar(Plevel,   4, rShort("output"), "Output amplification"),
     rEffPar(Ptype,    5, rShort("type"),
