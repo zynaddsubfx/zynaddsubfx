@@ -38,6 +38,7 @@
 
 //Nio System
 #include "Nio/Nio.h"
+#include "Nio/InMgr.h"
 
 //GUI System
 #include "UI/Connection.h"
@@ -114,6 +115,82 @@ void exitprogram(const Config& config)
 
     FFT_cleanup();
 }
+
+//Windows MIDI OH WHAT A HACK...
+#include <windows.h>
+#include <mmsystem.h>
+extern InMgr  *in;
+HMIDIIN winmidiinhandle = 0;
+
+void CALLBACK WinMidiInProc(HMIDIIN hMidiIn,UINT wMsg,DWORD dwInstance,
+                            DWORD dwParam1,DWORD dwParam2)
+{
+    int midicommand=0;
+    if (wMsg==MIM_DATA) {
+        int cmd,par1,par2;
+        cmd=dwParam1&0xff;
+        if (cmd==0xfe) return;
+        par1=(dwParam1>>8)&0xff;
+        par2=dwParam1>>16;
+        int cmdchan=cmd&0x0f;
+        int cmdtype=(cmd>>4)&0x0f;
+
+        int tmp=0;
+MidiEvent ev;
+        switch (cmdtype) {
+        case(0x8)://noteon
+            ev.type = 1;
+ev.num = par1;
+ev.channel = cmdchan;
+ev.value = 0;
+in->putEvent(ev);
+            break;
+        case(0x9)://noteoff
+            ev.type = 1;
+ev.num = par1;
+ev.channel = cmdchan;
+ev.value = par2&0xff;
+in->putEvent(ev);
+            break;
+        case(0xb)://controller
+            ev.type = 2;
+ev.num = par1;
+ev.channel = cmdchan;
+ev.value = par2&0xff;
+in->putEvent(ev);
+            break;
+        case(0xe)://pitch wheel
+            //tmp=(par1+par2*(long int) 128)-8192;
+            //winmaster->SetController(cmdchan,C_pitchwheel,tmp);
+            break;
+        default:
+            break;
+        };
+
+    };
+};
+
+void InitWinMidi(int midi)
+{
+(void)midi;
+    for(int i=0; i<10; ++i) {
+        long int res=midiInOpen(&winmidiinhandle,i,(DWORD_PTR)(void*)WinMidiInProc,0,CALLBACK_FUNCTION);
+        if(res == MMSYSERR_NOERROR) {
+            res=midiInStart(winmidiinhandle);
+            printf("[INFO] Starting Windows MIDI At %d with code %d(noerror=%d)\n", i, res, MMSYSERR_NOERROR);
+            if(res == 0)
+                return;
+        } else
+            printf("[INFO] No Windows MIDI Device At id %d\n", i);
+    }
+};
+
+//void StopWinMidi()
+//{
+//    midiInStop(winmidiinhandle);
+//    midiInClose(winmidiinhandle);
+//};
+
 
 int main(int argc, char *argv[])
 {
@@ -218,6 +295,7 @@ int main(int argc, char *argv[])
     int option_index = 0, opt, exitwithhelp = 0, exitwithversion = 0;
     int prefered_port = -1;
     int auto_save_interval = 60;
+int wmidi = -1;
 
     string loadfile, loadinstrument, execAfterInit, ui_title;
 
@@ -227,7 +305,7 @@ int main(int argc, char *argv[])
         /**\todo check this process for a small memory leak*/
         opt = getopt_long(argc,
                           argv,
-                          "l:L:r:b:o:I:O:N:e:P:A:u:D:hvapSDUY",
+                          "l:L:r:b:o:I:O:N:e:P:A:u:D:hvapSDUYZ",
                           opts,
                           &option_index);
         char *optarguments = optarg;
@@ -348,6 +426,10 @@ int main(int argc, char *argv[])
                     dump_json(outfile, Master::ports);
                 }
                 break;
+            case 'Z':
+                if(optarguments)
+                    wmidi = atoi(optarguments);
+                break;
             case 'u':
                 if(optarguments)
                     ui_title = optarguments;
@@ -451,6 +533,8 @@ int main(int argc, char *argv[])
         if(system(execAfterInit.c_str()) == -1)
             cerr << "Command Failed..." << endl;
     }
+
+    InitWinMidi(wmidi);
 
 
     gui = NULL;
@@ -566,6 +650,7 @@ done:
         GUI::tickUi(gui);
 #endif
         middleware->tick();
+        Sleep(1);
     }
 
     exitprogram(config);
