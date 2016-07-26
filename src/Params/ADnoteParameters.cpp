@@ -98,7 +98,9 @@ static const Ports voicePorts = {
     rParamI(PDetune,              rShort("fine"),
             rLinear(0, 16383), "Fine Detune"),
     rParamI(PCoarseDetune,        rShort("coarse"), "Coarse Detune"),
-    rParamZyn(PDetuneType,        rShort("type"),   "Magnitude of Detune"),
+    rParamZyn(PDetuneType,        rShort("type"),
+            rOptions(L35cents, L10cents, E100cents, E1200cents),
+            "Magnitude of Detune"),
     rToggle(PFreqEnvelopeEnabled, rShort("enable"), "Frequency Envelope Enable"),
     rToggle(PFreqLfoEnabled,      rShort("enable"), "Frequency LFO Enable"),
 
@@ -127,7 +129,9 @@ static const Ports voicePorts = {
     rParamZyn(PFMVelocityScaleFunction, rShort("sense"),  "Modulator Velocity Function"),
     rParamI(PFMDetune,                  rShort("fine"),   "Modulator Fine Detune"),
     rParamI(PFMCoarseDetune,            rShort("coarse"), "Modulator Coarse Detune"),
-    rParamZyn(PFMDetuneType,            rShort("type"),   "Modulator Detune Magnitude"),
+    rParamZyn(PFMDetuneType,            rShort("type"),
+            rOptions(L35cents, L10cents, E100cents, E1200cents),
+            "Modulator Detune Magnitude"),
     rToggle(PFMFixedFreq,               rShort("fixed"),  "Modulator Frequency Fixed"),
     rToggle(PFMFreqEnvelopeEnabled,  rShort("enable"), "Modulator Frequency Envelope"),
     rToggle(PFMAmpEnvelopeEnabled,   rShort("enable"), "Modulator Amplitude Envelope"),
@@ -185,7 +189,7 @@ static const Ports voicePorts = {
             //TODO do the same for the other engines
             d.reply(d.loc, "f", getdetune(detuneType, 0, obj->PFMDetune));
         }},
-    {"FMoctave::c:i", rProp(parameter) rDoc("Octave note offset for modulator"), NULL,
+    {"FMoctave::c:i", rProp(parameter) rShort("octave") rDoc("Octave note offset for modulator"), NULL,
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;

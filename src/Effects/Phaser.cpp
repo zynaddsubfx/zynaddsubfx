@@ -36,7 +36,8 @@ rtosc::Ports Phaser::ports = {
     //Pvolume/Ppanning are common
     rEffPar(lfo.Pfreq,       2, rShort("freq"),     ""),
     rEffPar(lfo.Prandomness, 3, rShort("rnd."),     ""),
-    rEffPar(lfo.PLFOtype,    4, rShort("type"),     ""),
+    rEffPar(lfo.PLFOtype,    4, rShort("type"),
+          rOptions(sine, tri), "lfo shape"),
     rEffParTF(lfo.Pstereo,   5, rShort("stereo"),   ""),
     rEffPar(Pdepth,          6, rShort("depth"),    ""),
     rEffPar(Pfb,             7, rShort("fb"),       ""),

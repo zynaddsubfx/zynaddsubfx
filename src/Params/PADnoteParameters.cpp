@@ -64,7 +64,9 @@ static const rtosc::Ports realtime_ports =
     rParamZyn(POffsetHz,    rShort("offset"), "Voice constant offset"),
     rParamI(PDetune,        rShort("fine"),   "Fine Detune"),
     rParamI(PCoarseDetune,  rShort("coarse"), "Coarse Detune"),
-    rParamZyn(PDetuneType,  rShort("type"),   "Magnitude of Detune"),
+    rParamZyn(PDetuneType,  rShort("type"),
+            rOptions(L35cents, L10cents, E100cents, E1200cents),
+            "Magnitude of Detune"),
 
     {"sample#64:ifb", rProp(internal) rDoc("Nothing to see here"), 0,
         [](const char *m, rtosc::RtData &d)

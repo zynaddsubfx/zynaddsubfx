@@ -40,7 +40,8 @@ rtosc::Ports Reverb::ports = {
     rEffPar(Phpf,     8, rShort("lpf"),      "High pass filter"),
     rEffPar(Plohidamp,9, rShort("damp"),     "Dampening"),
     //Todo make this a selector
-    rEffPar(Ptype,    10,rShort("type"),     "Type"),
+    rEffPar(Ptype,    10,rShort("type"),
+            rOptions(Random, Freeverb, Bandwidth), "Type"),
     rEffPar(Proomsize,11,rShort("size"),     "Room Size"),
     rEffPar(Pbandwidth,12,rShort("bw"),      "Bandwidth"),
 };

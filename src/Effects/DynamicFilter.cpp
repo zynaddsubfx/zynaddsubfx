@@ -31,7 +31,8 @@ rtosc::Ports DynamicFilter::ports = {
     //Pvolume/Ppanning are common
     rEffPar(Pfreq,      2, rShort("freq"),      "Effect Frequency"),
     rEffPar(Pfreqrnd,   3, rShort("rand"),      "Frequency Randomness"),
-    rEffPar(PLFOtype,   4, rShort("shape"),     "LFO Shape"),
+    rEffPar(PLFOtype,   4, rShort("shape"),
+          rOptions(sin, tri), "LFO Shape"),
     rEffPar(PStereo,    5, rShort("stereo"),    "Stereo/Mono Mode"),
     rEffPar(Pdepth,     6, rShort("depth"),     "LFO Depth"),
     rEffPar(Pampsns,    7, rShort("sense"),     "how the filter varies according to the input amplitude"),
