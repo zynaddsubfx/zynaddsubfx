@@ -117,6 +117,7 @@ void exitprogram(const Config& config)
 }
 
 //Windows MIDI OH WHAT A HACK...
+#ifdef WIN32
 #include <windows.h>
 #include <mmsystem.h>
 extern InMgr  *in;
@@ -136,35 +137,35 @@ void CALLBACK WinMidiInProc(HMIDIIN hMidiIn,UINT wMsg,DWORD dwInstance,
         int cmdtype=(cmd>>4)&0x0f;
 
         int tmp=0;
-MidiEvent ev;
+        MidiEvent ev;
         switch (cmdtype) {
-        case(0x8)://noteon
-            ev.type = 1;
-ev.num = par1;
-ev.channel = cmdchan;
-ev.value = 0;
-in->putEvent(ev);
-            break;
-        case(0x9)://noteoff
-            ev.type = 1;
-ev.num = par1;
-ev.channel = cmdchan;
-ev.value = par2&0xff;
-in->putEvent(ev);
-            break;
-        case(0xb)://controller
-            ev.type = 2;
-ev.num = par1;
-ev.channel = cmdchan;
-ev.value = par2&0xff;
-in->putEvent(ev);
-            break;
-        case(0xe)://pitch wheel
-            //tmp=(par1+par2*(long int) 128)-8192;
-            //winmaster->SetController(cmdchan,C_pitchwheel,tmp);
-            break;
-        default:
-            break;
+            case(0x8)://noteon
+                ev.type = 1;
+                ev.num = par1;
+                ev.channel = cmdchan;
+                ev.value = 0;
+                in->putEvent(ev);
+                break;
+            case(0x9)://noteoff
+                ev.type = 1;
+                ev.num = par1;
+                ev.channel = cmdchan;
+                ev.value = par2&0xff;
+                in->putEvent(ev);
+                break;
+            case(0xb)://controller
+                ev.type = 2;
+                ev.num = par1;
+                ev.channel = cmdchan;
+                ev.value = par2&0xff;
+                in->putEvent(ev);
+                break;
+            case(0xe)://pitch wheel
+                //tmp=(par1+par2*(long int) 128)-8192;
+                //winmaster->SetController(cmdchan,C_pitchwheel,tmp);
+                break;
+            default:
+                break;
         };
 
     };
@@ -190,6 +191,9 @@ void InitWinMidi(int midi)
 //    midiInStop(winmidiinhandle);
 //    midiInClose(winmidiinhandle);
 //};
+#else
+void InitWinMidi(int) {}
+#endif
 
 
 int main(int argc, char *argv[])
@@ -584,9 +588,16 @@ int wmidi = -1;
         middleware->enableAutoSave(auto_save_interval);
     }
     printf("[INFO] NSM Stuff\n");
-#if USE_NSM
+
+    //TODO move this stuff into Cmake
+#if USE_NSM && defined(WIN32)
 #undef USE_NSM
 #define USE_NSM 0
+#endif
+
+#if LASH && defined(WIN32)
+#undef LASH
+#define LASH 0
 #endif
 
 #if USE_NSM
@@ -617,7 +628,7 @@ int wmidi = -1;
 
     printf("[INFO] Main Loop...\n");
     while(Pexitprogram == 0) {
-#if 0
+#ifndef WIN32
 #if USE_NSM
         if(nsm) {
             nsm->check();
@@ -650,7 +661,9 @@ done:
         GUI::tickUi(gui);
 #endif
         middleware->tick();
+#ifdef WIN32
         Sleep(1);
+#endif
     }
 
     exitprogram(config);
