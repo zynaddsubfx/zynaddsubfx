@@ -14,9 +14,30 @@ BankEntry::BankEntry(void)
     :id(0), add(false), pad(false), sub(false)
 {}
 
+bool platform_strcasestr(const char *hay, const char *needle)
+{
+    int n = strlen(hay);
+    int m = strlen(needle);
+    for(int i=0; i<n; i++) {
+        int good = 1;
+        for(int j=0; j<m; ++j) {
+            if(toupper(hay[i+j]) != toupper(needle[j])) {
+                good = 0;
+break;
+}
+
+        }
+        if(good)
+            return 1;
+    }
+    return 0;
+
+}
+
 bool sfind(std::string hay, std::string needle)
 {
     //return strcasestr(hay.c_str(), needle.c_str());
+    return platform_strcasestr(hay.c_str(), needle.c_str());
     return false;
 }
 
