@@ -49,6 +49,8 @@
 #include <atomic>
 #include <list>
 
+#define errx(...)
+#define warnx(...)
 #ifndef errx
 #include <err.h>
 #endif
@@ -489,7 +491,7 @@ public:
         assert(actual_load[npart] <= pending_load[npart]);
 
         //load part in async fashion when possible
-#if HAVE_ASYNC
+#if 0
         auto alloc = std::async(std::launch::async,
                 [master,filename,this,npart](){
                 Part *p = new Part(*master->memory, synth,

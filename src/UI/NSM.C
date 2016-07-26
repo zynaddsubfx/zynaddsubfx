@@ -82,7 +82,7 @@ NSM_Client::command_open(const char *name,
 
     char *new_filename;
 
-    asprintf(&new_filename, "%s.xmz", name);
+    //asprintf(&new_filename, "%s.xmz", name);
 
     struct stat st;
 

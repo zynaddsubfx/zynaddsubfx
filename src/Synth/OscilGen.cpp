@@ -27,8 +27,6 @@
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
 
-pthread_t main_thread;
-
 #define rObject OscilGen
 const rtosc::Ports OscilGen::non_realtime_ports = {
     rSelf(OscilGen),
@@ -227,6 +225,10 @@ const rtosc::MergePorts OscilGen::ports{
     &OscilGen::realtime_ports,
     &OscilGen::non_realtime_ports
 };
+
+#ifndef M_PI_2
+# define M_PI_2		1.57079632679489661923	/* pi/2 */
+#endif
 
 
 //operations on FFTfreqs
