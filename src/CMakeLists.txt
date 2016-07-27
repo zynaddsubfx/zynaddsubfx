@@ -23,7 +23,7 @@ if(CXXTEST_FOUND)
     set(CXXTEST_USE_PYTHON TRUE)
 endif()
 # lash
-if(PkgConfig_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
+if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     message("Looking For pkg config modules")
     pkg_check_modules(JACK jack)
     pkg_check_modules(PORTAUDIO portaudio-2.0>=19)
