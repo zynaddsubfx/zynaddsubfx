@@ -376,6 +376,7 @@ if(NtkGui)
 endif()
 
 if(ZestGui)
+    add_definitions(-DHAVE_DGL)
     add_definitions(-DZEST_GUI)
 endif()
 

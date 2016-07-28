@@ -1,6 +1,7 @@
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/DPF/distrho .
+    ${CMAKE_SOURCE_DIR}/DPF/dgl
     ${CMAKE_SOURCE_DIR}/DPF/dgl/src)
 
 if(NtkGui)
@@ -45,6 +46,7 @@ add_library(ZynAddSubFX_vst SHARED
     ZynAddSubFX.cpp)
 
 elseif(ZestGui)
+
 # UI Enabled using Zest: internal only
 add_library(ZynAddSubFX_lv2 SHARED
     ${CMAKE_SOURCE_DIR}/src/globals.cpp

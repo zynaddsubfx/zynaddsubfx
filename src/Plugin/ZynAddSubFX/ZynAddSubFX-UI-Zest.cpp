@@ -13,8 +13,6 @@
 
 // DPF includes
 #include "DistrhoUI.hpp"
-#include "../../../DPF/dgl/Window.hpp"
-#include "../../../DPF/dgl/Application.hpp"
 
 /* ------------------------------------------------------------------------------------------------------------
  * ZynAddSubFX UI class */
@@ -22,27 +20,16 @@
 class ZynAddSubFXUI : public UI
 {
 public:
-    ZynAddSubFXUI(const intptr_t wid, const char* const bpath)
-        : UI(390, 525),
-          win(app),
-          oscPort(0)
+    ZynAddSubFXUI()
+        : UI(390, 525)
     {
-        setTitle("ZynAddSubFX");
         printf("[INFO] Opened the zynaddsubfx UI...\n");
-
-        win.setSize(100,200);
-        win.show();
-
-        (void) wid;
-        (void) bpath;
     }
 
     ~ZynAddSubFXUI() override
     {
     }
 
-    Window win;
-    Application app;
 protected:
    /* --------------------------------------------------------------------------------------------------------
     * DSP/Plugin Callbacks */
@@ -82,6 +69,16 @@ protected:
     {
     }
 
+   /* --------------------------------------------------------------------------------------------------------
+    * UI Callbacks */
+
+   /**
+      A function called to draw the view contents with OpenGL.
+    */
+    void onDisplay() override
+    {
+    }
+
 private:
     int oscPort;
 
@@ -96,9 +93,7 @@ START_NAMESPACE_DISTRHO
 
 UI* createUI()
 {
-    const char* const bundlePath = 0;
-
-    return new ZynAddSubFXUI(0, bundlePath);
+    return new ZynAddSubFXUI();
 }
 
 END_NAMESPACE_DISTRHO
