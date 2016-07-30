@@ -252,6 +252,7 @@ message(STATUS "Compiling with liblo")
 
 # other include directories
 include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS})
+include_directories(${CMAKE_BINARY_DIR}/src) # for zyn-version.h ...
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_definitions(-DWIN32)
@@ -394,7 +395,6 @@ include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}
 	)
-
 
 
 set(NONGUI_LIBRARIES
