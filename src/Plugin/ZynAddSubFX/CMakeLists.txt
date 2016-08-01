@@ -1,5 +1,8 @@
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR}/DPF/distrho .)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/DPF/distrho .
+    ${CMAKE_SOURCE_DIR}/DPF/dgl
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src)
 
 if(NtkGui)
 
@@ -42,6 +45,31 @@ add_library(ZynAddSubFX_vst SHARED
     ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp
     ZynAddSubFX.cpp)
 
+elseif(ZestGui)
+
+# UI Enabled using Zest: internal only
+add_library(ZynAddSubFX_lv2 SHARED
+    ${CMAKE_SOURCE_DIR}/src/globals.cpp
+    ${CMAKE_SOURCE_DIR}/src/UI/ConnectionDummy.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp
+    ZynAddSubFX.cpp)
+
+add_library(ZynAddSubFX_lv2_ui SHARED
+    ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoUIMain.cpp
+    ZynAddSubFX-UI-Zest.cpp)
+
+add_library(ZynAddSubFX_vst SHARED
+    ${CMAKE_SOURCE_DIR}/src/globals.cpp
+    ${CMAKE_SOURCE_DIR}/src/UI/ConnectionDummy.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoUIMain.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Geometry.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Widget.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Window.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Application.cpp
+    ZynAddSubFX.cpp
+    ZynAddSubFX-UI-Zest.cpp)
+
 else()
 
 # UI Disabled
@@ -72,7 +100,9 @@ set_target_properties(ZynAddSubFX_vst PROPERTIES PREFIX "")
 target_link_libraries(ZynAddSubFX_lv2 zynaddsubfx_core ${OS_LIBRARIES} ${LIBLO_LIBRARIES}
     ${PLATFORM_LIBRARIES})
 target_link_libraries(ZynAddSubFX_vst zynaddsubfx_core ${OS_LIBRARIES} ${LIBLO_LIBRARIES}
-    ${PLATFORM_LIBRARIES})
+    ${PLATFORM_LIBRARIES}
+    X11
+    GL)
 
 install(TARGETS ZynAddSubFX_lv2 LIBRARY DESTINATION ${PluginLibDir}/lv2/ZynAddSubFX.lv2/)
 install(TARGETS ZynAddSubFX_vst LIBRARY DESTINATION ${PluginLibDir}/vst/)

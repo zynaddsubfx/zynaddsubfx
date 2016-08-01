@@ -73,11 +73,11 @@ execute_process(COMMAND echo fistpl 0
 # file, but either in in CMakeCache.txt before compile, or by passing
 # parameters directly into cmake using the -D flag.
 if(NTK_FOUND)
-  SET (GuiModule ntk CACHE STRING "GUI module, either fltk, ntk or off")
+  SET (GuiModule ntk  CACHE STRING "GUI module, either fltk, ntk, zest, or off")
 elseif(FLTK_FOUND)
-  SET (GuiModule fltk CACHE STRING "GUI module, either fltk, ntk or off")
+  SET (GuiModule fltk CACHE STRING "GUI module, either fltk, ntk, zest, or off")
 else()
-  SET (GuiModule off CACHE STRING "GUI module, either fltk, ntk or off")
+  SET (GuiModule off  CACHE STRING "GUI module, either fltk, ntk, zest, or off")
 endif()
 SET (CompileTests ${CXXTEST_FOUND} CACHE BOOL "whether tests should be compiled in or not")
 SET (AlsaEnable ${ALSA_FOUND} CACHE BOOL
@@ -152,16 +152,16 @@ endif()
 
 
 
-if (GuiModule STREQUAL qt AND QT_FOUND)
-	set (QtGui TRUE)
-elseif(GuiModule STREQUAL ntk AND NTK_FOUND)
+if(GuiModule STREQUAL ntk AND NTK_FOUND)
 	set (NtkGui TRUE)
 elseif(GuiModule STREQUAL fltk AND FLTK_FOUND)
 	set (FltkGui TRUE)
+elseif(GuiModule  STREQUAL zest)
+    set (ZestGui TRUE)
 elseif(GuiModule STREQUAL off)
         add_definitions(-DDISABLE_GUI)
 else  ()
-        set (GuiModule off CACHE STRING "GUI module, either fltk, qt or off")
+        set (GuiModule off CACHE STRING "GUI module, either fltk, ntk, zest, or off")
         add_definitions(-DDISABLE_GUI)
 	message(STATUS "GUI module defaulting to off")
 endif()
@@ -376,6 +376,11 @@ if(NtkGui)
 	add_subdirectory(UI)
 endif()
 
+if(ZestGui)
+    add_definitions(-DHAVE_DGL)
+    add_definitions(-DZEST_GUI)
+endif()
+
 if(NOT FltkGui AND NOT NtkGui)
     set(NSM_WORKAROUND UI/NSM.C UI/NSM/Client.C)
     add_library(zynaddsubfx_gui_bridge STATIC UI/ConnectionDummy.cpp ${NSM_WORKAROUND})
@@ -387,7 +392,7 @@ endif()
 # of module-specific variables
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zyn-version.h.in
-	${CMAKE_CURRENT_BINARY_DIR}/zyn-version.h)
+    ${CMAKE_CURRENT_SOURCE_DIR}/zyn-version.h)
 
 link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS} ${NTK_LIBRARY_DIRS})
 
