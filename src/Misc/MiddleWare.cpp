@@ -1202,7 +1202,14 @@ static rtosc::Ports middwareSnoopPorts = {
         rEnd},
     {"file_home_dir:", 0, 0,
         rBegin;
-        d.reply(d.loc, "s", getenv("HOME"));
+        const char *home = getenv("HOME");
+        if(!home)
+            home = getenv("USERPROFILE");
+        if(!home)
+            home = getenv("HOMEPATH");
+        if(!home)
+            home = "/";
+        d.reply(d.loc, "s", home);
         rEnd},
     {"file_list_files:s", 0, 0,
         rBegin;
@@ -1325,16 +1332,20 @@ static rtosc::Ports middwareSnoopPorts = {
 #define MAX_MIDI 32
         rtosc_arg_t args[MAX_MIDI*4];
         char        argt[MAX_MIDI*4+1] = {0};
+        int j=0;
         for(unsigned i=0; i<key.size() && i<MAX_MIDI; ++i) {
             auto val = midi.inv_map[key[i]];
-            argt[4*i+0]   = 'i';
-            args[4*i+0].i = std::get<1>(val);
-            argt[4*i+1]   = 's';
-            args[4*i+1].s = key[i].c_str();
-            argt[4*i+2]   = 'i';
-            args[4*i+2].i = 0;
-            argt[4*i+3]   = 'i';
-            args[4*i+3].i = 127;
+            if(std::get<1>(val) == -1)
+                continue;
+            argt[4*j+0]   = 'i';
+            args[4*j+0].i = std::get<1>(val);
+            argt[4*j+1]   = 's';
+            args[4*j+1].s = key[i].c_str();
+            argt[4*j+2]   = 'i';
+            args[4*j+2].i = 0;
+            argt[4*j+3]   = 'i';
+            args[4*j+3].i = 127;
+            j++;
 
         }
         d.replyArray(d.loc, argt, args);
