@@ -17,6 +17,7 @@
 #include <fstream>
 #include <iostream>
 #include <dirent.h>
+#include <sys/stat.h>
 
 #include <rtosc/undo-history.h>
 #include <rtosc/thread-link.h>
@@ -851,9 +852,12 @@ static std::vector<std::string> getFiles(const char *folder, int mask)
     struct dirent *fn;
     std::vector<string> files;
 
-    while((fn = readdir(dir)))
-        if(fn->d_type == mask)
+    while((fn = readdir(dir))) {
+        struct stat s;
+        stat(fn->d_name, &s);
+        if((s.st_mode & S_IFMT) == mask)
             files.push_back(fn->d_name);
+    }
 
     closedir(dir);
     return files;
@@ -1204,7 +1208,7 @@ static rtosc::Ports middwareSnoopPorts = {
         rBegin;
         const char *folder = rtosc_argument(msg, 0).s;
 
-        auto files = getFiles(folder, DT_REG);
+        auto files = getFiles(folder, S_IFREG);
 
         const int N = files.size();
         rtosc_arg_t *args  = new rtosc_arg_t[N];
@@ -1223,7 +1227,7 @@ static rtosc::Ports middwareSnoopPorts = {
         rBegin;
         const char *folder = rtosc_argument(msg, 0).s;
 
-        auto files = getFiles(folder, DT_DIR);
+        auto files = getFiles(folder, S_IFDIR);
 
         const int N = files.size();
         rtosc_arg_t *args  = new rtosc_arg_t[N];
