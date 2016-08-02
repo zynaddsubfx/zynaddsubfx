@@ -56,6 +56,11 @@ static const rtosc::Ports localPorts = {
     rParamZyn(PR_dt,  rShort("r.dt"),  "Release Time"),
     rParamZyn(PR_val, rShort("r.val"), "Release Value"),
 
+    {"Envmode:", rDoc("Envelope variant type"), NULL,
+        rBegin;
+        d.reply(d.loc, "i", env->Envmode);
+        rEnd},
+
     {"envdt", rDoc("Envelope Delay Times"), NULL,
         rBegin;
         const int N = MAX_ENVELOPE_POINTS;
