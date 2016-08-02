@@ -1272,6 +1272,7 @@ static rtosc::Ports middwareSnoopPorts = {
     {"reset_master:", 0, 0,
         rBegin;
         impl.loadMaster(NULL);
+        d.reply("/damage", "s", "/");
         rEnd},
     {"load_xiz:is", 0, 0,
         rBegin;
@@ -1309,7 +1310,9 @@ static rtosc::Ports middwareSnoopPorts = {
         rEnd},
     {"part#16/clear:", 0, 0,
         rBegin;
-        impl.loadClearPart(extractInt(msg));
+        int id = extractInt(msg);
+        impl.loadClearPart(id);
+        d.reply("/damage", "s", ("/part"+to_s(id)).c_str());
         rEnd},
     {"undo:", 0, 0,
         rBegin;
