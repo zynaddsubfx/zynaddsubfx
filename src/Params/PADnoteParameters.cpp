@@ -88,7 +88,8 @@ static const rtosc::Ports realtime_ports =
             PADnoteParameters *obj = (PADnoteParameters *)d.obj;
             d.reply(d.loc, "f", getdetune(obj->PDetuneType, 0, obj->PDetune));
         }},
-    {"octave::c:i", rProp(parameter) rShort("octave") rDoc("Octave note offset"), NULL,
+    {"octave::c:i", rProp(parameter) rShort("octave") rLinear(-8,7)
+        rDoc("Octave note offset"), NULL,
         [](const char *msg, RtData &d)
         {
             PADnoteParameters *obj = (PADnoteParameters *)d.obj;
@@ -102,7 +103,8 @@ static const rtosc::Ports realtime_ports =
                 obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
             }
         }},
-    {"coarsedetune::c:i", rProp(parameter) rDoc("Coarse note detune"), NULL,
+    {"coarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64, 63)
+        rDoc("Coarse note detune"), NULL,
         [](const char *msg, RtData &d)
         {
             PADnoteParameters *obj = (PADnoteParameters *)d.obj;

@@ -149,7 +149,8 @@ static const Ports voicePorts = {
             //TODO do the same for the other engines
             d.reply(d.loc, "f", getdetune(detuneType, 0, obj->PDetune));
         }},
-    {"octave::c:i", rProp(parameter) rDoc("Octave note offset"), NULL,
+    {"octave::c:i", rProp(parameter) rShort("octave") rLinear(-8, 7) rDoc("Octave note offset"),
+        NULL,
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
@@ -163,7 +164,8 @@ static const Ports voicePorts = {
                 obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
             }
         }},
-    {"coarsedetune::c:i", rProp(parameter) rDoc("Coarse note detune"), NULL,
+    {"coarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64,63)
+        rDoc("Coarse note detune"), NULL,
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
@@ -189,7 +191,7 @@ static const Ports voicePorts = {
             //TODO do the same for the other engines
             d.reply(d.loc, "f", getdetune(detuneType, 0, obj->PFMDetune));
         }},
-    {"FMoctave::c:i", rProp(parameter) rShort("octave") rDoc("Octave note offset for modulator"), NULL,
+    {"FMoctave::c:i", rProp(parameter) rShort("octave") rLinear(-8,7) rDoc("Octave note offset for modulator"), NULL,
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
@@ -203,7 +205,8 @@ static const Ports voicePorts = {
                 obj->PFMCoarseDetune = k*1024 + obj->PFMCoarseDetune%1024;
             }
         }},
-    {"FMcoarsedetune::c:i", rProp(parameter) rDoc("Coarse note detune for modulator"),
+    {"FMcoarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64,63)
+        rDoc("Coarse note detune for modulator"),
         NULL, [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
@@ -280,7 +283,8 @@ static const Ports globalPorts = {
             rObject *obj = (rObject *)d.obj;
             d.reply(d.loc, "f", getdetune(obj->PDetuneType, 0, obj->PDetune));
         }},
-    {"octave::c:i", rProp(parameter) rDoc("Octave note offset"), NULL,
+    {"octave::c:i", rProp(parameter) rShort("octave") rLinear(-8,7)
+        rDoc("Octave note offset"), NULL,
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
@@ -294,7 +298,8 @@ static const Ports globalPorts = {
                 obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
             }
         }},
-    {"coarsedetune::c:i", rProp(parameter) rDoc("Coarse note detune"), NULL,
+    {"coarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64, 63)
+        rDoc("Coarse note detune"), NULL,
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
