@@ -23,8 +23,8 @@ bool platform_strcasestr(const char *hay, const char *needle)
         for(int j=0; j<m; ++j) {
             if(toupper(hay[i+j]) != toupper(needle[j])) {
                 good = 0;
-break;
-}
+                break;
+            }
 
         }
         if(good)
@@ -235,6 +235,7 @@ BankEntry BankDb::processXiz(std::string filename, std::string bank) const
     //printf("Bank Entry:\n");
     //printf("\tname   - %s\n", entry.name.c_str());
     //printf("\tauthor - %s\n", line(entry.author).c_str());
+    //printf("\tbank   - %s\n", entry.bank.c_str());
     //printf("\tadd/pad/sub - %d/%d/%d\n", entry.add, entry.pad, entry.sub);
 
     return entry;
