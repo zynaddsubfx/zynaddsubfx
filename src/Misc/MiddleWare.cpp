@@ -853,10 +853,22 @@ static std::vector<std::string> getFiles(const char *folder, int mask)
     std::vector<string> files;
 
     while((fn = readdir(dir))) {
+#ifndef WIN32
         struct stat s;
         stat(fn->d_name, &s);
-        if((s.st_mode & S_IFMT) == mask)
+        printf("stat on <%s> => %x\n", fn->d_name, s.st_mode & S_IFMT);
+        printf("desired mask =  %x\n", mask);
+        if(s.st_mode & mask)
             files.push_back(fn->d_name);
+#else
+        std::string darn_windows = folder + std::string("/") + std::string(fn->d_name);
+        printf("attr on <%s> => %x\n", darn_windows.c_str(), GetFileAttributes(darn_windows.c_str()));
+        printf("desired mask =  %x\n", mask);
+        printf("error = %x\n", INVALID_FILE_ATTRIBUTES);
+       int isdir = GetFileAttributes(darn_windows.c_str()) & FILE_ATTRIBUTE_DIRECTORY;
+if((mask == 0xbeef && isdir) || (mask == 0xcafe && !isdir))
+    files.push_back(fn->d_name);
+#endif
     }
 
     closedir(dir);
@@ -1214,6 +1226,18 @@ static rtosc::Ports middwareSnoopPorts = {
     {"file_list_files:s", 0, 0,
         rBegin;
         const char *folder = rtosc_argument(msg, 0).s;
+
+#ifdef WIN32
+#ifdef S_IFREG
+#undef S_IFREG
+#endif
+#define S_IFREG 0xcafe
+
+#ifdef S_IFDIR
+#undef S_IFDIR
+#endif
+#define S_IFDIR 0xbeef
+#endif
 
         auto files = getFiles(folder, S_IFREG);
 
