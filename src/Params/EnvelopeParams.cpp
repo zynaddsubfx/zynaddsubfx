@@ -55,28 +55,46 @@ static const rtosc::Ports localPorts = {
     rParamZyn(PS_val, rShort("s.val"), "Sustain Value"),
     rParamZyn(PR_dt,  rShort("r.dt"),  "Release Time"),
     rParamZyn(PR_val, rShort("r.val"), "Release Value"),
-    
-    {"envdt:", rDoc("Envelope Delay Times"), NULL,
+
+    {"Envmode:", rDoc("Envelope variant type"), NULL,
         rBegin;
-        const int N = MAX_ENVELOPE_POINTS;
-        rtosc_arg_t args[N];
-        char arg_types[N+1] = {0};
-        for(int i=0; i<N; ++i) {
-            args[i].f    = env->getdt(i);
-            arg_types[i] = 'f';
-        }
-        d.replyArray(d.loc, arg_types, args);
+        d.reply(d.loc, "i", env->Envmode);
         rEnd},
-    {"envval:", rDoc("Envelope Delay Times"), NULL,
+
+    {"envdt", rDoc("Envelope Delay Times"), NULL,
         rBegin;
         const int N = MAX_ENVELOPE_POINTS;
-        rtosc_arg_t args[N];
-        char arg_types[N+1] = {0};
-        for(int i=0; i<N; ++i) {
-            args[i].f    = env->Penvval[i]/127.0f;
-            arg_types[i] = 'f';
+        const int M = rtosc_narguments(msg);
+        if(M == 0) {
+            rtosc_arg_t args[N];
+            char arg_types[N+1] = {0};
+            for(int i=0; i<N; ++i) {
+                args[i].f    = env->getdt(i);
+                arg_types[i] = 'f';
+            }
+            d.replyArray(d.loc, arg_types, args);
+        } else {
+            for(int i=0; i<N && i<M; ++i)
+                env->Penvdt[i] = env->inv_dt(rtosc_argument(msg, i).f);
         }
-        d.replyArray(d.loc, arg_types, args);
+        rEnd},
+    {"envval", rDoc("Envelope Delay Times"), NULL,
+        rBegin;
+        const int N = MAX_ENVELOPE_POINTS;
+        const int M = rtosc_narguments(msg);
+        if(M == 0) {
+            rtosc_arg_t args[N];
+            char arg_types[N+1] = {0};
+            for(int i=0; i<N; ++i) {
+                args[i].f    = env->Penvval[i]/127.0f;
+                arg_types[i] = 'f';
+            }
+            d.replyArray(d.loc, arg_types, args);
+        } else {
+            for(int i=0; i<N && i<M; ++i) {
+                env->Penvval[i] = limit(roundf(rtosc_argument(msg,i).f*127.0f), 0.0f, 127.0f);
+            }
+        }
         rEnd},
 
     {"addPoint:i", rProp(internal) rDoc("Add point to envelope"), NULL,
@@ -189,6 +207,12 @@ float EnvelopeParams::getdt(char i) const
 float EnvelopeParams::dt(char val)
 {
     return (powf(2.0f, val / 127.0f * 12.0f) - 1.0f) * 10.0f; //miliseconds
+}
+
+char EnvelopeParams::inv_dt(float val)
+{
+    int ival = roundf(logf(val/10.0f + 1.0f)/logf(2.0f) * 127.0f/12.0f);
+    return limit(ival, 0, 127);
 }
 
 

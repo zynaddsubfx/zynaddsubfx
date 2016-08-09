@@ -44,6 +44,7 @@ class EnvelopeParams:public Presets
 
         float getdt(char i) const;
         static float dt(char val);
+        static char inv_dt(float val);
 
         /* MIDI Parameters */
         unsigned char Pfreemode; //1 for free mode, 0 otherwise

@@ -364,9 +364,11 @@ void Bank::rescanforbanks()
     //sort the banks
     sort(banks.begin(), banks.end());
 
+    for(int i = 0; i < (int) banks.size(); ++i)
+        db->addBankDir(banks[i].dir);
+
     //remove duplicate bank names
     for(int j = 0; j < (int) banks.size() - 1; ++j) {
-        db->addBankDir(banks[j].dir);
         int dupl = 0;
         for(int i = j + 1; i < (int) banks.size(); ++i) {
             if(banks[i].name == banks[j].name) {

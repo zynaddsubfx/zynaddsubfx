@@ -26,6 +26,7 @@
 
 #include <getopt.h>
 
+#include <rtosc/rtosc.h>
 #include <rtosc/ports.h>
 #include <rtosc/thread-link.h>
 #include "Params/PADnoteParameters.h"
@@ -236,6 +237,9 @@ int main(int argc, char *argv[])
             "load-instrument", 2, NULL, 'L'
         },
         {
+            "midi-learn", 2, NULL, 'M'
+        },
+        {
             "sample-rate", 2, NULL, 'r'
         },
         {
@@ -290,9 +294,6 @@ int main(int argc, char *argv[])
             "dump-json-schema", 2, NULL, 'D'
         },
         {
-            "ui-title", 1, NULL, 'u'
-        },
-        {
             0, 0, 0, 0
         }
     };
@@ -302,7 +303,7 @@ int main(int argc, char *argv[])
     int auto_save_interval = 60;
 int wmidi = -1;
 
-    string loadfile, loadinstrument, execAfterInit, ui_title;
+    string loadfile, loadinstrument, execAfterInit, loadmidilearn;
 
     while(1) {
         int tmp = 0;
@@ -310,7 +311,7 @@ int wmidi = -1;
         /**\todo check this process for a small memory leak*/
         opt = getopt_long(argc,
                           argv,
-                          "l:L:r:b:o:I:O:N:e:P:A:u:D:hvapSDUYZ",
+                          "l:L:M:r:b:o:I:O:N:e:P:A:D:hvapSDUYZ",
                           opts,
                           &option_index);
         char *optarguments = optarg;
@@ -346,6 +347,9 @@ int wmidi = -1;
                 break;
             case 'L':
                 GETOP(loadinstrument);
+                break;
+            case 'M':
+                GETOP(loadmidilearn);
                 break;
             case 'r':
                 GETOPNUM(synth.samplerate);
@@ -435,10 +439,6 @@ int wmidi = -1;
                 if(optarguments)
                     wmidi = atoi(optarguments);
                 break;
-            case 'u':
-                if(optarguments)
-                    ui_title = optarguments;
-                break;
             case '?':
                 cerr << "ERROR:Bad option or parameter.\n" << endl;
                 exitwithhelp = 1;
@@ -458,6 +458,7 @@ int wmidi = -1;
              << "  -v , --version \t\t\t Display version and exit\n"
              << "  -l file, --load=FILE\t\t\t Loads a .xmz file\n"
              << "  -L file, --load-instrument=FILE\t Loads a .xiz file\n"
+             << "  -M file, --midi-learn=FILE\t\t Loads a .xlz file\n"
              << "  -r SR, --sample-rate=SR\t\t Set the sample rate SR\n"
              <<
         "  -b BS, --buffer-size=SR\t\t Set the buffer size (granularity)\n"
@@ -475,7 +476,6 @@ int wmidi = -1;
              << "  -I , --input\t\t\t\t Set Input Engine\n"
              << "  -e , --exec-after-init\t\t Run post-initialization script\n"
              << "  -d , --dump-oscdoc=FILE\t\t Dump oscdoc xml to file\n"
-             << "  -u , --ui-title=TITLE\t\t Extend UI Window Titles\n"
              << endl;
 
         return 0;
@@ -525,6 +525,13 @@ int wmidi = -1;
         }
     }
 
+    if(!loadmidilearn.empty()) {
+        char msg[1024];
+        rtosc_message(msg, sizeof(msg), "/load_xlz",
+                "s", loadmidilearn.c_str());
+        middleware->transmitMsg(msg);
+    }
+
     if(altered_master)
         middleware->updateResources(master);
 
@@ -568,10 +575,6 @@ int wmidi = -1;
         GUI::raiseUi(gui, msg);
         delete [] msg;
     }
-
-    //set titles
-    if(!ui_title.empty())
-        GUI::raiseUi(gui, "/ui/title", "s", ui_title.c_str());
 
     if(!noui)
     {
