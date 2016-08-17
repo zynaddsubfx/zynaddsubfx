@@ -1614,6 +1614,10 @@ void MiddleWareImpl::sendToRemote(const char *rtmsg, std::string dest)
     } else if(!dest.empty()) {
         lo_message msg  = lo_message_deserialise((void*)rtmsg,
                 rtosc_message_length(rtmsg, bToU->buffer_size()), NULL);
+        if(!msg) {
+            printf("[ERROR] OSC to <%s> Failed To Parse In Liblo\n", rtmsg);
+            return;
+        }
 
         //Send to known url
         lo_address addr = lo_address_new_from_url(dest.c_str());
@@ -1649,6 +1653,11 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
 
     MwDataObj d(this);
     middlewareReplyPorts.dispatch(rtmsg, d, true);
+
+    if(!rtmsg) {
+        fprintf(stderr, "[ERROR] Unexpected Null OSC In Zyn\n");
+        return;
+    }
 
     in_order = true;
     //Normal message not captured by the ports
