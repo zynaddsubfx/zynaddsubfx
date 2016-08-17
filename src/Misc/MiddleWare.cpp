@@ -1075,6 +1075,10 @@ const rtosc::Ports bankPorts = {
         d.replyArray("/bank/search_results", res_type, res_dat);
 #undef MAX_SEARCH
         rEnd},
+    {"search_results:", 0, 0,
+        rBegin;
+        d.reply("/bank/search_results", "");
+        rEnd},
 };
 
 /******************************************************************************
