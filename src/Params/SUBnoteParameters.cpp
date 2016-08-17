@@ -40,7 +40,7 @@ static const rtosc::Ports SUBnotePorts = {
     rParamZyn(PVolume,  rShort("volume"), "Volume"),
     rParamZyn(PPanning, rShort("panning"), "Left Right Panning"),
     rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), "Amplitude Velocity Sensing function"),
-    rParamI(PDetune,       rShort("detune"), "Detune in detune type units"),
+    rParamI(PDetune,       rShort("detune"), rLinear(0, 16383), "Detune in detune type units"),
     rParamI(PCoarseDetune, rShort("cdetune"), "Coarse Detune"),
     //Real values needed
     rOption(PDetuneType,               rShort("det. scl."), rOptions(100 cents, 200 cents, 500 cents), "Detune Scale"),

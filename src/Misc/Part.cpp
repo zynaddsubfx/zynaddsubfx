@@ -51,10 +51,10 @@ static const Ports partPorts = {
     rParamZyn(Pvolume, rShort("Vol"), "Part Volume"),
 #undef rChangeCb
 #define rChangeCb obj->setPpanning(obj->Ppanning);
-    rParamZyn(Ppanning, "Set Panning"),
+    rParamZyn(Ppanning, rShort("pan"), "Set Panning"),
 #undef rChangeCb
 #define rChangeCb obj->setkeylimit(obj->Pkeylimit);
-    rParamI(Pkeylimit, rProp(parameter), rMap(min,0), rMap(max, POLYPHONY), "Key limit per part"),
+    rParamI(Pkeylimit, rShort("limit"), rProp(parameter), rMap(min,0), rMap(max, POLYPHONY), "Key limit per part"),
 #undef rChangeCb
 #define rChangeCb
     rParamZyn(Pminkey, rShort("min"), "Min Used Key"),
@@ -62,8 +62,8 @@ static const Ports partPorts = {
     rParamZyn(Pkeyshift, rShort("shift"), "Part keyshift"),
     rParamZyn(Prcvchn, rOptions(ch1, ch2, ch3, ch4, ch5, ch6, ch7, ch8, ch9, ch10, ch11, ch12, ch13, ch14, ch15, ch16),
                 "Active MIDI channel"),
-    rParamZyn(Pvelsns,   "Velocity sensing"),
-    rParamZyn(Pveloffs,  "Velocity offset"),
+    rParamZyn(Pvelsns,   rShort("sense"), "Velocity sensing"),
+    rParamZyn(Pveloffs,  rShort("offset"), "Velocity offset"),
     rToggle(Pnoteon,  "If the channel accepts note on events"),
     rOption(Pkitmode, rOptions(Off, Multi-Kit, Single-Kit), "Kit mode/enable\n"
             "Off        - Only the first kit is ever utilized\n"

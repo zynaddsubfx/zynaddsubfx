@@ -62,7 +62,7 @@ static const rtosc::Ports realtime_ports =
     rParamZyn(PfixedfreqET, rShort("f.ET"),   "Equal temeperate control for fixed frequency operation"),
     rParamZyn(PBendAdjust,          "Pitch bend adjustment"),
     rParamZyn(POffsetHz,    rShort("offset"), "Voice constant offset"),
-    rParamI(PDetune,        rShort("fine"),   "Fine Detune"),
+    rParamI(PDetune,        rShort("fine"), rLinear(0, 16383), "Fine Detune"),
     rParamI(PCoarseDetune,  rShort("coarse"), "Coarse Detune"),
     rParamZyn(PDetuneType,  rShort("type"),
             rOptions(L35cents, L10cents, E100cents, E1200cents),
