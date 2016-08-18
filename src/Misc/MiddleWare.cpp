@@ -1075,6 +1075,19 @@ const rtosc::Ports bankPorts = {
         d.replyArray("/bank/search_results", res_type, res_dat);
 #undef MAX_SEARCH
         rEnd},
+    {"blist:s", 0, 0,
+        rBegin;
+        auto res = impl.blist(rtosc_argument(msg, 0).s);
+#define MAX_SEARCH 300
+        char res_type[MAX_SEARCH+1] = {0};
+        rtosc_arg_t res_dat[MAX_SEARCH] = {0};
+        for(unsigned i=0; i<res.size() && i<MAX_SEARCH; ++i) {
+            res_type[i]  = 's';
+            res_dat[i].s = res[i].c_str();
+        }
+        d.replyArray("/bank/search_results", res_type, res_dat);
+#undef MAX_SEARCH
+        rEnd},
     {"search_results:", 0, 0,
         rBegin;
         d.reply("/bank/search_results", "");

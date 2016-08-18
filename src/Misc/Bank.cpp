@@ -471,6 +471,20 @@ std::vector<std::string> Bank::search(std::string s) const
     }
     return out;
 }
+        
+std::vector<std::string> Bank::blist(std::string s)
+{
+    std::vector<std::string> out;
+    int result = loadbank(s);
+    for(int i=0; i<128; ++i) {
+        if(ins[i].filename.empty())
+            out.push_back("Empty Preset");
+        else
+            out.push_back(ins[i].name);
+        out.push_back(to_s(i));
+    }
+    return out;
+}
 
 int Bank::addtobank(int pos, string filename, string name)
 {
