@@ -841,7 +841,7 @@ class MwDataObj:public rtosc::RtData
         MiddleWareImpl   *mwi;
 };
 
-static std::vector<std::string> getFiles(const char *folder, int mask)
+static std::vector<std::string> getFiles(const char *folder, bool finddir)
 {
     DIR *dir = opendir(folder);
 
@@ -854,24 +854,20 @@ static std::vector<std::string> getFiles(const char *folder, int mask)
 
     while((fn = readdir(dir))) {
 #ifndef WIN32
-        struct stat s;
-        stat(fn->d_name, &s);
-        printf("stat on <%s> => %x\n", fn->d_name, s.st_mode & S_IFMT);
-        printf("desired mask =  %x\n", mask);
-        if(s.st_mode & mask)
-            files.push_back(fn->d_name);
+        bool is_dir = fn->d_type & DT_DIR;
 #else
         std::string darn_windows = folder + std::string("/") + std::string(fn->d_name);
         printf("attr on <%s> => %x\n", darn_windows.c_str(), GetFileAttributes(darn_windows.c_str()));
         printf("desired mask =  %x\n", mask);
         printf("error = %x\n", INVALID_FILE_ATTRIBUTES);
-       int isdir = GetFileAttributes(darn_windows.c_str()) & FILE_ATTRIBUTE_DIRECTORY;
-if((mask == 0xbeef && isdir) || (mask == 0xcafe && !isdir))
-    files.push_back(fn->d_name);
+        bool is_dir = GetFileAttributes(darn_windows.c_str()) & FILE_ATTRIBUTE_DIRECTORY;
 #endif
+        if(finddir == is_dir)
+            files.push_back(fn->d_name);
     }
 
     closedir(dir);
+    std::sort(begin(files), end(files));
     return files;
 }
 
@@ -1244,19 +1240,7 @@ static rtosc::Ports middwareSnoopPorts = {
         rBegin;
         const char *folder = rtosc_argument(msg, 0).s;
 
-#ifdef WIN32
-#ifdef S_IFREG
-#undef S_IFREG
-#endif
-#define S_IFREG 0xcafe
-
-#ifdef S_IFDIR
-#undef S_IFDIR
-#endif
-#define S_IFDIR 0xbeef
-#endif
-
-        auto files = getFiles(folder, S_IFREG);
+        auto files = getFiles(folder, false);
 
         const int N = files.size();
         rtosc_arg_t *args  = new rtosc_arg_t[N];
@@ -1275,7 +1259,7 @@ static rtosc::Ports middwareSnoopPorts = {
         rBegin;
         const char *folder = rtosc_argument(msg, 0).s;
 
-        auto files = getFiles(folder, S_IFDIR);
+        auto files = getFiles(folder, true);
 
         const int N = files.size();
         rtosc_arg_t *args  = new rtosc_arg_t[N];
