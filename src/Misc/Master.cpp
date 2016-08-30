@@ -116,7 +116,7 @@ static const Ports master_ports = {
     rRecursp(insefx, 8, "Insertion Effect"),//NUM_INS_EFX
     rRecur(microtonal, "Micrtonal Mapping Functionality"),
     rRecur(ctl, "Controller"),
-    rArrayI(Pinsparts, NUM_INS_EFX, rOpt(-1, Master),
+    rArrayI(Pinsparts, NUM_INS_EFX, rOpt(-2, Master), rOpt(-1, Off)
             rOptions(Part1, Part2, Part3, Part4,  Part5, Part6,
                  Part7, Part8, Part9, Part10, Part11, Part12,
                  Part13, Part14, Part15, Part16),
