@@ -77,7 +77,8 @@ static const Ports partPorts = {
     rString(info.Pauthor, MAX_INFO_TEXT_SIZE, "Instrument author"),
     rString(info.Pcomments, MAX_INFO_TEXT_SIZE, "Instrument comments"),
     rString(Pname, PART_MAX_NAME_LEN, "User specified label"),
-    rArrayI(Pefxroute, NUM_PART_EFX,  "Effect Routing"),
+    rArrayI(Pefxroute, NUM_PART_EFX,
+            rOptions(Next Effect,Part Out,Dry Out), "Effect Routing"),
     rArrayT(Pefxbypass, NUM_PART_EFX, "If an effect is bypassed"),
     {"captureMin:", rDoc("Capture minimum valid note"), NULL,
         [](const char *, RtData &r)
