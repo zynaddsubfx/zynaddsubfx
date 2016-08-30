@@ -32,7 +32,8 @@ rtosc::Ports Chorus::ports = {
     //Pvolume/Ppanning are common
     rEffPar(Pfreq,    2, rShort("freq"), "Effect Frequency"),
     rEffPar(Pfreqrnd, 3, rShort("rand"), "Frequency Randomness"),
-    rEffPar(PLFOtype, 4, rShort("shape"), "LFO Shape"),
+    rEffPar(PLFOtype, 4, rShort("shape"),
+            rOptions(sine, tri), "LFO Shape"),
     rEffParTF(PStereo,5, rShort("stereo"), "Stereo/Mono Mode"),
     rEffPar(Pdepth,   6, rShort("depth"), "LFO Depth"),
     rEffPar(Pdelay,   7, rShort("delay"), "Delay"),
