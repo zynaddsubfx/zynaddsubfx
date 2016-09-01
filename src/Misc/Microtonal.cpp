@@ -3,6 +3,7 @@
 
   Microtonal.cpp - Tuning settings and microtonal capabilities
   Copyright (C) 2002-2005 Nasca Octavian Paul
+  Copyright (C) 2016      Mark McCurry
   Author: Nasca Octavian Paul
 
   This program is free software; you can redistribute it and/or
@@ -790,6 +791,7 @@ void Microtonal::getfromXML(XMLwrapper& xml)
         }
         xml.exitbranch();
     }
+    apply();
 }
 
 
@@ -818,4 +820,35 @@ int Microtonal::loadXML(const char *filename)
     xml.exitbranch();
 
     return 0;
+}
+
+//roundabout function, but it works
+void Microtonal::apply(void)
+{
+    {
+        char buf[100*MAX_OCTAVE_SIZE] = {0};
+        char tmpbuf[100] = {0};
+        for (int i=0;i<Pmapsize;i++) {
+            if (i!=0)
+                strncat(buf, "\n", sizeof(buf)-1);
+            if (Pmapping[i]==-1)
+                snprintf(tmpbuf,100,"x");
+            else
+                snprintf(tmpbuf,100,"%d",Pmapping[i]);
+            strncat(buf, tmpbuf, sizeof(buf)-1);
+        }
+        texttomapping(buf);
+    }
+
+    {
+        char buf[100*MAX_OCTAVE_SIZE] = {0};
+        char tmpbuf[100] = {0};
+        for (int i=0;i<getoctavesize();i++){
+            if (i!=0)
+                strncat(buf, "\n", sizeof(buf)-1);
+            tuningtoline(i,tmpbuf,100);
+            strncat(buf, tmpbuf, sizeof(buf)-1);
+        }
+        int err = texttotunings(buf);
+    }
 }
