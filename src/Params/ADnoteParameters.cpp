@@ -78,7 +78,7 @@ static const Ports voicePorts = {
             "Subvoice vibratto speed"),
     rOption(Unison_invert_phase,       rShort("inv."),
             rOptions(none, random, 50%, 33%, 25%), "Subvoice Phases"),
-    rOption(Type,            rShort("type"), rOptions(Sound,White,Pink), "Type of Sound"),
+    rOption(Type,            rShort("type"), rOptions(Sound,White,Pink,DC), "Type of Sound"),
     rParamZyn(PDelay,        rShort("delay"), "Voice Startup Delay"),
     rToggle(Presonance,      rShort("enable"), "Resonance Enable"),
     rParamI(Pextoscil,       rShort("ext."),

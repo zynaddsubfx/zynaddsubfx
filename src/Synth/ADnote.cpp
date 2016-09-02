@@ -1523,6 +1523,15 @@ inline void ADnote::ComputeVoicePinkNoise(int nvoice)
     }
 }
 
+inline void ADnote::ComputeVoiceDC(int nvoice)
+{
+    for(int k = 0; k < unison_size[nvoice]; ++k) {
+        float *tw = tmpwave_unison[k];
+        for(int i = 0; i < synth.buffersize; ++i)
+            tw[i] = 1.0f;
+    }
+}
+
 
 
 /*
@@ -1568,8 +1577,11 @@ int ADnote::noteout(float *outl, float *outr)
             case 1:
                 ComputeVoiceWhiteNoise(nvoice);
                 break;
-            default:
+            case 2:
                 ComputeVoicePinkNoise(nvoice);
+                break;
+            default:
+                ComputeVoiceDC(nvoice);
                 break;
         }
         // Voice Processing
