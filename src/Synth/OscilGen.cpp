@@ -55,7 +55,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             "Base function modulation parameter"),
     rParamZyn(Pbasefuncmodulationpar3, rShort("p3"),
             "Base function modulation parameter"),
-    rParamZyn(Pwaveshaping, "Degree Of Waveshaping"),
+    rParamZyn(Pwaveshaping, rShort("amount"), "Degree Of Waveshaping"),
     rOption(Pwaveshapingfunction, rShort("distort"),
             rOptions(Undistorted,
                 Arctangent, Asymmetric, Pow, Sine, Quantisize,
@@ -73,7 +73,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
     rOption(Psatype, rShort("spec. adj."), rOptions(None, Pow, ThrsD, ThrsU),
             "Spectral Adjustment Type"),
     rParamZyn(Psapar, rShort("p1"), "Spectral Adjustment Parameter"),
-    rParamI(Pharmonicshift, rShort("shift"), "Amount of shift on harmonics"),
+    rParamI(Pharmonicshift, rLinear(-64,64), rShort("shift"), "Amount of shift on harmonics"),
     rToggle(Pharmonicshiftfirst, rShort("pre/post"), "If harmonics are shifted before waveshaping/filtering"),
     rOption(Pmodulation, rShort("FM"), rOptions(None, Rev, Sine, Power),
             "Frequency Modulation To Combined Spectra"),
@@ -186,7 +186,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
 const rtosc::Ports OscilGen::realtime_ports{
     rSelf(OscilGen),
     rPresetType,
-    rParamZyn(Prand, rShort("phase rnd"), "Oscilator Phase Randomness: smaller than 0 is \""
+    rParamZyn(Prand, rLinear(-64, 63), rShort("phase rnd"), "Oscilator Phase Randomness: smaller than 0 is \""
             "group\", larger than 0 is for each harmonic"),
     rParamZyn(Pamprandpower, rShort("variance"),
             "Variance of harmonic randomness"),
@@ -199,7 +199,7 @@ const rtosc::Ports OscilGen::realtime_ports{
             "Base frequency of adaptive harmonic (30..3000Hz)"),
     rParamI(Padaptiveharmonicspower, rShort("amount"), rLinear(0,200),
             "Adaptive Harmonic Strength"),
-    rParamZyn(Padaptiveharmonicspar, rShort("par"),
+    rParamZyn(Padaptiveharmonicspar, rShort("power"),
             "Adaptive Harmonics Postprocessing Power"),
     {"waveform:", rDoc("Returns waveform points"),
         NULL, [](const char *, rtosc::RtData &d) {
