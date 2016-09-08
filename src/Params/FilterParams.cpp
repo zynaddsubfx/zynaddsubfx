@@ -32,9 +32,9 @@ constexpr int sizeof_pvowels = sizeof(FilterParams::Pvowels);
 #define rObject FilterParams::Pvowels_t::formants_t
 
 static const rtosc::Ports subsubports = {
-    rParamZyn(freq, "Formant frequency"),
-    rParamZyn(amp,  "Strength of formant"),
-    rParamZyn(q,    "Quality Factor"),
+    rParamZyn(freq, rShort("f.freq"), "Formant frequency"),
+    rParamZyn(amp,  rShort("f.str"),  "Strength of formant"),
+    rParamZyn(q,    rShort("f.q"),    "Quality Factor"),
 };
 #undef rObject
 
@@ -69,6 +69,7 @@ const rtosc::Ports FilterParams::ports = {
     rParamZyn(Pq,               rShort("q"),
             "Quality Factor (resonance/bandwidth)"),
     rOption(Pstages,            rShort("stages"),
+            rLinear(1,5),
             rOptions(1, 2, 3, 4, 5), "Filter Stages"),
     rParamZyn(Pfreqtrack,       rShort("f.track"),
             "Frequency Tracking amount"),
@@ -85,9 +86,9 @@ const rtosc::Ports FilterParams::ports = {
             "Number of octaves for formant"),
 
     //TODO check if FF_MAX_SEQUENCE is acutally expanded or not
-    rParamZyn(Psequencesize, rMap(max, FF_MAX_SEQUENCE), "Length of vowel sequence"),
-    rParamZyn(Psequencestretch, "How modulators stretch the sequence"),
-    rToggle(Psequencereversed, "If the modulator input is inverted"),
+    rParamZyn(Psequencesize,    rShort("seq.size"), rMap(max, FF_MAX_SEQUENCE), "Length of vowel sequence"),
+    rParamZyn(Psequencestretch, rShort("seq.str"), "How modulators stretch the sequence"),
+    rToggle(Psequencereversed,  rShort("reverse"), "If the modulator input is inverted"),
 
     //{"Psequence#" FF_MAX_SEQUENCE "/nvowel", "", NULL, [](){}},
     {"type-svf::i", rProp(parameter) rShort("type")
