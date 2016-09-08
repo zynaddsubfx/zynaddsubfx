@@ -21,7 +21,7 @@
 #include <rtosc/port-sugar.h>
 
 #define rObject Reverb
-#define rBegin [](const char *, rtosc::RtData &) {
+#define rBegin [](const char *msg, rtosc::RtData &d) {
 #define rEnd }
 
 rtosc::Ports Reverb::ports = {
@@ -31,6 +31,11 @@ rtosc::Ports Reverb::ports = {
                   rProp(parameter)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
+                  rObject *o = (rObject*)d.obj;
+                  if(rtosc_narguments(msg))
+                      o->setpreset(rtosc_argument(msg, 0).i);
+                  else
+                      d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
     //Pvolume/Ppanning are common
     rEffPar(Ptime,    2, rShort("time"),     "Length of Reverb"),

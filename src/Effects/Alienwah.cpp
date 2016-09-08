@@ -20,13 +20,19 @@
 using std::complex;
 
 #define rObject Alienwah
-#define rBegin [](const char *, rtosc::RtData &) {
+#define rBegin [](const char *msg, rtosc::RtData &d) {
 #define rEnd }
 
 rtosc::Ports Alienwah::ports = {
-    {"preset::i", rOptions(Alienwah 1, Alienwah 2, Alienwah 3, Alienwah 4)
+    {"preset::i", rProp(parameter)
+                  rOptions(wah 1, wah 2, wah 3, wah 4)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
+                  rObject *o = (rObject*)d.obj;
+                  if(rtosc_narguments(msg))
+                      o->setpreset(rtosc_argument(msg, 0).i);
+                  else
+                      d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
     //Pvolume/Ppanning are common
     rEffPar(Pfreq,     2, rShort("freq"), "Effect Frequency"),

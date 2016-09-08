@@ -20,13 +20,18 @@
 #include <rtosc/port-sugar.h>
 
 #define rObject DynamicFilter
-#define rBegin [](const char *, rtosc::RtData &) {
+#define rBegin [](const char *msg, rtosc::RtData &d) {
 #define rEnd }
 
 rtosc::Ports DynamicFilter::ports = {
     {"preset::i", rOptions(WahWah, AutoWah, Sweep, VocalMorph1, VocalMorph1)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
+                  rObject *o = (rObject*)d.obj;
+                  if(rtosc_narguments(msg))
+                      o->setpreset(rtosc_argument(msg, 0).i);
+                  else
+                      d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
     //Pvolume/Ppanning are common
     rEffPar(Pfreq,      2, rShort("freq"),      "Effect Frequency"),

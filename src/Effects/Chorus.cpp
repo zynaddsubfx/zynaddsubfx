@@ -21,13 +21,21 @@
 using namespace std;
 
 #define rObject Chorus
-#define rBegin [](const char *, rtosc::RtData &) {
+#define rBegin [](const char *msg, rtosc::RtData &d) {
 #define rEnd }
 
 rtosc::Ports Chorus::ports = {
-    {"preset::i", rOptions(Alienwah 1, Alienwah 2, Alienwah 3, Alienwah 4)
+    {"preset::i", rProp(parameter)
+                  rOptions(Chorus1, Chorus2, Chorus3, Celeste1, Celeste2,
+                           Flange1, Flange2, Flange3, Flange4, Flange5)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
+                  rObject *o = (rObject*)d.obj;
+                  if(rtosc_narguments(msg))
+                      o->setpreset(rtosc_argument(msg, 0).i);
+                  else
+                      d.reply(d.loc, "i", o->Ppreset);
+
                   rEnd},
     //Pvolume/Ppanning are common
     rEffPar(Pfreq,    2, rShort("freq"), "Effect Frequency"),

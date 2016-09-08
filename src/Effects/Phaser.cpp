@@ -25,13 +25,22 @@
 using namespace std;
 
 #define rObject Phaser
-#define rBegin [](const char *, rtosc::RtData &) {
+#define rBegin [](const char *msg, rtosc::RtData &d) {
 #define rEnd }
 
 rtosc::Ports Phaser::ports = {
-    {"preset::i", rOptions(Alienwah 1, Alienwah 2, Alienwah 3, Alienwah 4)
+    {"preset::i", rProp(parameter)
+                  rOptions(Phaser 1, Phaser 2, Phaser 3, Phaser 4,
+                           Phaser 5, Phaser 6,
+                           APhaser 1, APhaser 2, APhaser 3, APhaser 4,
+                           APhaser 5, APhaser 6)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
+                  rObject *o = (rObject*)d.obj;
+                  if(rtosc_narguments(msg))
+                      o->setpreset(rtosc_argument(msg, 0).i);
+                  else
+                      d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
     //Pvolume/Ppanning are common
     rEffPar(lfo.Pfreq,       2, rShort("freq"),     ""),

@@ -20,21 +20,27 @@
 #include <rtosc/port-sugar.h>
 
 #define rObject Distorsion
-#define rBegin [](const char *, rtosc::RtData &) {
+#define rBegin [](const char *msg, rtosc::RtData &d) {
 #define rEnd }
 
 rtosc::Ports Distorsion::ports = {
-    {"preset::i", rOptions(Alienwah 1, Alienwah 2, Alienwah 3, Alienwah 4)
+    {"preset::i", rProp(parameter)
+                  rOptions(Overdrive 1, Overdrive 2, A. Exciter 1, A. Exciter 2, Guitar Amp,
+                    Quantisize)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
+                  rObject *o = (rObject*)d.obj;
+                  if(rtosc_narguments(msg))
+                      o->setpreset(rtosc_argument(msg, 0).i);
+                  else
+                      d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
     //Pvolume/Ppanning are common
     rEffPar(Plrcross, 2, rShort("l/r"), "Left/Right Crossover"),
     rEffPar(Pdrive,   3, rShort("drive"), "Input amplification"),
     rEffPar(Plevel,   4, rShort("output"), "Output amplification"),
     rEffPar(Ptype,    5, rShort("type"),
-            rOptions(Undistorted,
-                Arctangent, Asymmetric, Pow, Sine, Quantisize,
+            rOptions(Arctangent, Asymmetric, Pow, Sine, Quantisize,
                 Zigzag, Limiter, Upper Limiter, Lower Limiter,
                 Inverse Limiter, Clip, Asym2, Pow2, sigmoid),
             "Distortion Shape"),
