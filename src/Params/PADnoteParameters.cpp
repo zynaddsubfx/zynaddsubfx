@@ -45,7 +45,7 @@ static const rtosc::Ports realtime_ports =
     rParamZyn(PVolume,  rShort("vol"), "Synth Volume"),
     rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), "Amplitude Velocity Sensing function"),
 
-    rParamZyn(Fadein_adjustment, "Adjustment for anti-pop strategy."),
+    rParamZyn(Fadein_adjustment, rShort("a.pop."), "Adjustment for anti-pop strategy."),
 
     //Punch
     rParamZyn(PPunchStrength, rShort("strength"), "Punch Strength"),
