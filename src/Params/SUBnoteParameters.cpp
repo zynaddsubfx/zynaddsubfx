@@ -43,7 +43,8 @@ static const rtosc::Ports SUBnotePorts = {
     rParamI(PDetune,       rShort("detune"), rLinear(0, 16383), "Detune in detune type units"),
     rParamI(PCoarseDetune, rShort("cdetune"), "Coarse Detune"),
     //Real values needed
-    rOption(PDetuneType,               rShort("det. scl."), rOptions(100 cents, 200 cents, 500 cents), "Detune Scale"),
+    rOption(PDetuneType,               rShort("det. scl."),
+            rOptions(L35 cents, L10 cents, E100 cents, E1200 cents), "Detune Scale"),
     rToggle(PFreqEnvelopeEnabled,      rShort("enable"), "Enable for Frequency Envelope"),
     rToggle(PBandWidthEnvelopeEnabled, rShort("enable"), "Enable for Bandwidth Envelope"),
     rToggle(PGlobalFilterEnabled,                 rShort("enable"), "Enable for Global Filter"),
