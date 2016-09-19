@@ -38,6 +38,8 @@
         [](const char *msg, rtosc::RtData &data){\
             rObject &o = *(rObject*)data.obj; \
             data.obj = o.efx; \
+            if(!dynamic_cast<name*>(o.efx)) \
+                return; \
             SNIP \
             name::ports.dispatch(msg, data); \
         }}

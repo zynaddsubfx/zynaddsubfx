@@ -42,7 +42,7 @@ rtosc::Ports Chorus::ports = {
     rEffPar(Pfreqrnd, 3, rShort("rand"), "Frequency Randomness"),
     rEffPar(PLFOtype, 4, rShort("shape"),
             rOptions(sine, tri), "LFO Shape"),
-    rEffParTF(PStereo,5, rShort("stereo"), "Stereo/Mono Mode"),
+    rEffPar(PStereo,  5, rShort("stereo"), "Stereo Mode"),
     rEffPar(Pdepth,   6, rShort("depth"), "LFO Depth"),
     rEffPar(Pdelay,   7, rShort("delay"), "Delay"),
     rEffPar(Pfeedback,8, rShort("fb"), "Feedback"),

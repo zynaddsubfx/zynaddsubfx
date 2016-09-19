@@ -47,10 +47,10 @@ rtosc::Ports Phaser::ports = {
     rEffPar(lfo.Prandomness, 3, rShort("rnd."),     ""),
     rEffPar(lfo.PLFOtype,    4, rShort("type"),
           rOptions(sine, tri), "lfo shape"),
-    rEffParTF(lfo.Pstereo,   5, rShort("stereo"),   ""),
+    rEffPar(lfo.Pstereo,     5, rShort("stereo"),   ""),
     rEffPar(Pdepth,          6, rShort("depth"),    ""),
     rEffPar(Pfb,             7, rShort("fb"),       ""),
-    rEffPar(Pstages,         8, rShort("stages"),   ""),
+    rEffPar(Pstages,         8, rLinear(1,12), rShort("stages"),   ""),
     rEffPar(Plrcross,        9, rShort("cross"),    ""),
     rEffPar(Poffset,         9, rShort("off"),      "Offset"),
     rEffParTF(Poutsub,      10, rShort("sub"),      ""),
@@ -326,7 +326,7 @@ void Phaser::setoffset(unsigned char Poffset)
     offsetpct     = (float)Poffset / 127.0f;
 }
 
-void Phaser::setstages(unsigned char Pstages)
+void Phaser::setstages(unsigned char Pstages_)
 {
     memory.devalloc(old.l);
     memory.devalloc(old.r);
@@ -335,7 +335,7 @@ void Phaser::setstages(unsigned char Pstages)
     memory.devalloc(yn1.l);
     memory.devalloc(yn1.r);
 
-    this->Pstages = min(MAX_PHASER_STAGES, (int)Pstages);
+    Pstages = limit<int>(Pstages_, 1, MAX_PHASER_STAGES);
 
     old = Stereo<float *>(memory.valloc<float>(Pstages * 2),
                           memory.valloc<float>(Pstages * 2));
