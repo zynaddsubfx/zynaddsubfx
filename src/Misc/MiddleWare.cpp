@@ -855,6 +855,18 @@ static std::vector<std::string> getFiles(const char *folder, bool finddir)
     while((fn = readdir(dir))) {
 #ifndef WIN32
         bool is_dir = fn->d_type & DT_DIR;
+        //it could still be a symbolic link
+        if(!is_dir) {
+            string path = string(folder) + "/" + fn->d_name;
+            struct stat buf;
+            memset((void*)&buf, 0, sizeof(buf));
+            int err = stat(path.c_str(), &buf);
+            if(err)
+                printf("[Zyn:Error] stat cannot handle <%s>:%d\n", path.c_str(), err);
+            if(S_ISDIR(buf.st_mode)) {
+                is_dir = true;
+            }
+        }
 #else
         std::string darn_windows = folder + std::string("/") + std::string(fn->d_name);
         printf("attr on <%s> => %x\n", darn_windows.c_str(), GetFileAttributes(darn_windows.c_str()));
@@ -1234,7 +1246,13 @@ static rtosc::Ports middwareSnoopPorts = {
             home = getenv("HOMEPATH");
         if(!home)
             home = "/";
-        d.reply(d.loc, "s", home);
+
+        string home_ = home;
+#ifndef WIN32
+        if(home_[home_.length()-1] != '/')
+            home_ += '/';
+#endif
+        d.reply(d.loc, "s", home_.c_str());
         rEnd},
     {"file_list_files:s", 0, 0,
         rBegin;
