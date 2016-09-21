@@ -731,6 +731,17 @@ bool Master::AudioOut(float *outr, float *outl)
         }
         ports.dispatch(msg, d, true);
         events++;
+        if(!d.matches) {
+            //workaround for requesting voice status
+            //gtk_hscale_new_with_range
+            //
+            int a=0, b=0, c=0;
+            char e=0;
+            if(4 == sscanf(msg, "/part%d/kit%d/adpars/VoicePar%d/Enable%c", &a, &b, &c, &e)) {
+                d.reply(msg, "F");
+                d.matches++;
+            }
+        }
         if(!d.matches) {// && !ports.apropos(msg)) {
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
             fprintf(stderr, "Unknown address<BACKEND> '%s:%s'\n", uToB->peak(), rtosc_argument_string(uToB->peak()));
