@@ -65,9 +65,7 @@ rtosc::Ports EQ::ports = {
     {"filter#8/", 0, &filterports,
         rBegin;
         (void)obj;
-        printf("got a filter\n");
         SNIP;
-        printf("dispatch to <%s>\n", msg);
         filterports.dispatch(msg, d);
         rEnd},
     {"coeff:", rProp(internal) rDoc("Get equalizer Coefficients"), NULL,
