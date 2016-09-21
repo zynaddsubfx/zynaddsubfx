@@ -1239,7 +1239,9 @@ static rtosc::Ports middwareSnoopPorts = {
         rEnd},
     {"file_home_dir:", 0, 0,
         rBegin;
-        const char *home = getenv("HOME");
+        const char *home = getenv("PWD");
+        if(!home)
+            home = getenv("HOME");
         if(!home)
             home = getenv("USERPROFILE");
         if(!home)
