@@ -1317,6 +1317,7 @@ static rtosc::Ports middwareSnoopPorts = {
         rBegin;
         const char *file = rtosc_argument(msg, 0).s;
         impl.loadMaster(file);
+        d.reply("/damage", "s", "/");
         rEnd},
     {"reset_master:", 0, 0,
         rBegin;
