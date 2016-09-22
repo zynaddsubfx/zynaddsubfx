@@ -127,7 +127,9 @@ static const Ports voicePorts = {
     rParamZyn(PFMVolume,                rShort("vol."),   "Modulator Magnitude"),
     rParamZyn(PFMVolumeDamp,            rShort("damp."),  "Modulator HF dampening"),
     rParamZyn(PFMVelocityScaleFunction, rShort("sense"),  "Modulator Velocity Function"),
-    rParamI(PFMDetune,                  rShort("fine"),   "Modulator Fine Detune"),
+    //nominally -8192..8191
+    rParamI(PFMDetune,                  rShort("fine"),
+            rLinear(0, 16383), "Modulator Fine Detune"),
     rParamI(PFMCoarseDetune,            rShort("coarse"), "Modulator Coarse Detune"),
     rParamZyn(PFMDetuneType,            rShort("type"),
             rOptions(L35cents, L10cents, E100cents, E1200cents),
