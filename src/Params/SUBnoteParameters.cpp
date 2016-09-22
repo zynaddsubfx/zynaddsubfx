@@ -70,7 +70,7 @@ static const rtosc::Ports SUBnotePorts = {
             "Overtone Parameter"),
 #undef rChangeCb
 #define rChangeCb if (obj->time) { obj->last_update_timestamp = obj->time->time(); }
-    rParamZyn(Pnumstages, rShort("stages"), rMap(min, 1), rMap(max, 5), "Number of filter stages"),
+    rParamI(Pnumstages, rShort("stages"), rMap(min, 1), rMap(max, 5), "Number of filter stages"),
     rParamZyn(Pbandwidth, rShort("bandwidth"), "Bandwidth of filters"),
     rParamZyn(Phmagtype,  rShort("mag. type"), rOptions(linear, -40dB, -60dB, -80dB, -100dB), "Magnitude scale"),
     rArray(Phmag, MAX_SUB_HARMONICS, "Harmonic magnitudes"),
