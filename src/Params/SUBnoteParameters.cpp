@@ -66,8 +66,8 @@ static const rtosc::Ports SUBnotePorts = {
             "Overtone Parameter"),
     rParamI(POvertoneSpread.par2, rMap(min, 0), rMap(max, 255), rShort("p2"),
             "Overtone Parameter"),
-    rParamI(POvertoneSpread.par3, rMap(min, 0), rMap(max, 255), rShort("p3"),
-            "Overtone Parameter"),
+    rParamI(POvertoneSpread.par3, rMap(min, 0), rMap(max, 255), rShort("forceH"),
+            "Force Overtones To Harmonics"),
 #undef rChangeCb
 #define rChangeCb if (obj->time) { obj->last_update_timestamp = obj->time->time(); }
     rParamI(Pnumstages, rShort("stages"), rMap(min, 1), rMap(max, 5), "Number of filter stages"),
