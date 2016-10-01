@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <signal.h>
 
+#include <err.h>
 #include <unistd.h>
 #include <pthread.h>
 
@@ -629,6 +630,18 @@ int wmidi = -1;
         GUI::raiseUi(gui, "/session-type", "s", "LASH");
 #endif
     }
+
+#ifdef ZEST_GUI
+    if(!noui) {
+        printf("[INFO] Launching Zyn-Fusion...\n");
+        const char *addr = middleware->getServerAddress();
+        if(fork() == 0) {
+            execlp("zyn-fusion", "zyn-fusion", "--builtin", "--no-hotload", addr, 0);
+
+            err(1,"Failed to launch Zyn-Fusion");
+        }
+    }
+#endif
 
     printf("[INFO] Main Loop...\n");
     while(Pexitprogram == 0) {
