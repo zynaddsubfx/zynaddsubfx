@@ -27,7 +27,6 @@ public:
     {
         setTitle("ZynAddSubFX");
 
-#error this should not be compiled
 #if DISTRHO_OS_MAC
         extUiPath  = bpath;
         extUiPath += "/zynaddsubfx-ext-gui";
