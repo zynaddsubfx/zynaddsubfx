@@ -55,6 +55,10 @@ add_library(ZynAddSubFX_lv2 SHARED
     ZynAddSubFX.cpp)
 
 add_library(ZynAddSubFX_lv2_ui SHARED
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Geometry.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Widget.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Window.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Application.cpp
     ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoUIMain.cpp
     ZynAddSubFX-UI-Zest.cpp)
 
@@ -125,7 +129,7 @@ install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/lv2/ZynAddSubFX.ttl
     DESTINATION ${PluginLibDir}/lv2/ZynAddSubFX.lv2/)
 
-if(NtkGui OR FltkGui)
+if((NtkGui OR FltkGui OR ZestGui) AND NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 set_target_properties(ZynAddSubFX_lv2_ui PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_LV2")
 set_target_properties(ZynAddSubFX_lv2_ui PROPERTIES LIBRARY_OUTPUT_DIRECTORY "lv2")
 set_target_properties(ZynAddSubFX_lv2_ui PROPERTIES OUTPUT_NAME "ZynAddSubFX_ui")
