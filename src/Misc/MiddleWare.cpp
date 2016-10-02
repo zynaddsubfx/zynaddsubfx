@@ -57,6 +57,7 @@
 #endif
 
 using std::string;
+int Pexitprogram = 0;
 
 /******************************************************************************
  *                        LIBLO And Reflection Code                           *
@@ -1419,7 +1420,8 @@ static rtosc::Ports middwareSnoopPorts = {
         midi.unMap(addr.c_str(), true);
         rEnd},
     //drop this message into the abyss
-    {"ui/title:", 0, 0, [](const char *msg, RtData &d) {}}
+    {"ui/title:", 0, 0, [](const char *msg, RtData &d) {}},
+    {"quit:", 0, 0, [](const char *, RtData&) {Pexitprogram = 1;}},
 };
 
 static rtosc::Ports middlewareReplyPorts = {

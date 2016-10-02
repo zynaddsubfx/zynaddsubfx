@@ -56,7 +56,7 @@ using namespace std;
 Master   *master;
 int       swaplr = 0; //1 for left-right swapping
 
-int Pexitprogram = 0;     //if the UI set this to 1, the program will exit
+extern int Pexitprogram;     //if the UI set this to 1, the program will exit
 
 #if LASH
 #include "Misc/LASHClient.h"
