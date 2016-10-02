@@ -101,7 +101,7 @@ static const Ports partPorts = {
                 int res = 0;
                 if(!p->Ppolymode)
                     res = p->Plegatomode ? 2 : 1;
-                d.reply(d.loc, "c", res);
+                d.reply(d.loc, "i", res);
                 return;
             }
 
