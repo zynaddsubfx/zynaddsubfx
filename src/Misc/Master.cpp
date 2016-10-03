@@ -907,6 +907,14 @@ bool Master::AudioOut(float *outr, float *outl)
     //update the global frame timer
     time++;
 
+#ifdef DEMO_VERSION
+    double seconds = time.time()*synth.buffersize_f/synth.samplerate_f;
+    if(seconds > 10*60) {//10 minute trial
+        shutup = true;
+    }
+#endif
+
+
     return true;
 }
 
