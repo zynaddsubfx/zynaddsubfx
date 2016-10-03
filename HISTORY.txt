@@ -1,3 +1,19 @@
+3.0.0 (TBD)
+        - Add support for zest toolkit via Zyn-Fusion
+        - Add watchpoints to env/LFO
+        - Add Bank searching capabilities
+        - Add Windows Midi Support
+        - Add --midi-learn option for loading .xlz files
+        - Add bank cache file
+        - Add DC modulator type
+        - Augment Existing 2.5.x OSC API metadata
+        - Fix Envelope behavior on pre 2.4.4 patches
+        - Fix ALSA hanging after suspend to ram
+        - Fix Jack-Multi Crash
+        - Fix FreeBSD compilation
+        - Fix Windows compilation (via mingw64)
+        - Fix unapplied microtonal settings on startup
+
 2.5.4 (12 March 2016)
         - Add realtime automation for subnote parameters
         - Add FLTK UI for LV2 plugins
