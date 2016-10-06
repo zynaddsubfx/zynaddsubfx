@@ -17,6 +17,14 @@
 
 #include <iosfwd>
 
+#ifdef major
+#undef major
+#endif
+
+#ifdef minor
+#undef minor
+#endif
+
 //! class containing a zynaddsubfx version
 class version_type
 {
