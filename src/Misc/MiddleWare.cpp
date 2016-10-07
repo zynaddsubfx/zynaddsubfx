@@ -1491,8 +1491,8 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
                 int res = master->saveXML(save_file.c_str());
                 (void)res;});})
 {
-    bToU = new rtosc::ThreadLink(4096*2,1024);
-    uToB = new rtosc::ThreadLink(4096*2,1024);
+    bToU = new rtosc::ThreadLink(4096*2*16,1024/16);
+    uToB = new rtosc::ThreadLink(4096*2*16,1024/16);
     midi_mapper.base_ports = &Master::ports;
     midi_mapper.rt_cb      = [this](const char *msg){handleMsg(msg);};
     if(preferrred_port != -1)
