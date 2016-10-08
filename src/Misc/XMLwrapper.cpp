@@ -125,10 +125,21 @@ XMLwrapper::XMLwrapper()
     endbranch();
 }
 
-XMLwrapper::~XMLwrapper()
+void
+XMLwrapper::cleanup(void)
 {
     if(tree)
         mxmlDelete(tree);
+
+    /* make sure freed memory is not referenced */
+    tree = 0;
+    node = 0;
+    root = 0;
+}
+
+XMLwrapper::~XMLwrapper()
+{
+    cleanup();
 }
 
 void XMLwrapper::setPadSynth(bool enabled)
@@ -297,9 +308,7 @@ const char *trimLeadingWhite(const char *c)
 
 int XMLwrapper::loadXMLfile(const string &filename)
 {
-    if(tree != NULL)
-        mxmlDelete(tree);
-    tree = NULL;
+    cleanup();
 
     const char *xmldata = doloadfile(filename);
     if(xmldata == NULL)
@@ -367,10 +376,8 @@ char *XMLwrapper::doloadfile(const string &filename) const
 
 bool XMLwrapper::putXMLdata(const char *xmldata)
 {
-    if(tree != NULL)
-        mxmlDelete(tree);
+    cleanup();
 
-    tree = NULL;
     if(xmldata == NULL)
         return false;
 

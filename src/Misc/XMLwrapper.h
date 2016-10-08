@@ -258,6 +258,11 @@ class XMLwrapper
          */
         char *doloadfile(const std::string &filename) const;
 
+        /**
+         * Cleanup XML tree before loading new one.
+         */
+        void cleanup(void);
+
         mxml_node_t *tree; /**<all xml data*/
         mxml_node_t *root; /**<xml data used by zynaddsubfx*/
         mxml_node_t *node; /**<current subtree in parsing or writing */
