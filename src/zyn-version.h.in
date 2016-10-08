@@ -17,14 +17,6 @@
 
 #include <iosfwd>
 
-#ifdef major
-#undef major
-#endif
-
-#ifdef minor
-#undef minor
-#endif
-
 //! class containing a zynaddsubfx version
 class version_type
 {
@@ -58,9 +50,9 @@ public:
     void set_minor(int min) { version[1] = min; }
     void set_revision(int rev) { version[2] = rev; }
 
-    int major() const { return version[0]; }
-    int minor() const { return version[1]; }
-    int revision() const { return version[2]; }
+    int get_major() const { return version[0]; }
+    int get_minor() const { return version[1]; }
+    int get_revision() const { return version[2]; }
 
     constexpr bool operator<(const version_type& other) const
     {

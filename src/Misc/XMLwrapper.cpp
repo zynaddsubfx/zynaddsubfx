@@ -102,11 +102,11 @@ XMLwrapper::XMLwrapper()
 
     node = root = addparams("ZynAddSubFX-data", 4,
                             "version-major", stringFrom<int>(
-                                version.major()).c_str(),
+                                version.get_major()).c_str(),
                             "version-minor", stringFrom<int>(
-                                version.minor()).c_str(),
+                                version.get_minor()).c_str(),
                             "version-revision",
-                            stringFrom<int>(version.revision()).c_str(),
+                            stringFrom<int>(version.get_revision()).c_str(),
                             "ZynAddSubFX-author", "Nasca Octavian Paul");
 
     //make the empty branch that will contain the information parameters

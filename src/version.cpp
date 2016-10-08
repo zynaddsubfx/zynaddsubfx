@@ -18,9 +18,9 @@
 std::ostream& operator<< (std::ostream& os,
     const version_type& v)
 {
-    return os << v.major() << '.'
-        << v.minor() << '.'
-        << v.revision();
+    return os << v.get_major() << '.'
+        << v.get_minor() << '.'
+        << v.get_revision();
 }
 
 static_assert(!(version_type(3,1,1) < version_type(1,3,3)),

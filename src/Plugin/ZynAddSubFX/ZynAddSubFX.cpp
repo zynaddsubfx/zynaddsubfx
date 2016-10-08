@@ -191,7 +191,7 @@ protected:
     */
     uint32_t getVersion() const noexcept override
     {
-    return d_version(version.major(), version.minor(), version.revision());
+    return d_version(version.get_major(), version.get_minor(), version.get_revision());
     }
 
    /**
