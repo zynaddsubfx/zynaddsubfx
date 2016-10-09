@@ -260,6 +260,7 @@ endif()
 add_definitions(
 	 -Wall
 	 -Wextra
+	 -Wno-inconsistent-missing-override
 	 )
 if(NOT AVOID_ASM)
 	message(STATUS "Compiling with x86 opcode support")
