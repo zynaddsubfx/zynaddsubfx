@@ -14,6 +14,7 @@
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
 #include <iostream>
+#include <cassert>
 
 
 #include "EffectMgr.h"
@@ -174,7 +175,7 @@ EffectMgr::EffectMgr(Allocator &alloc, const SYNTH_T &synth_,
     :insertion(insertion_),
       efxoutl(new float[synth_.buffersize]),
       efxoutr(new float[synth_.buffersize]),
-      filterpars(NULL),
+      filterpars(new FilterParams(time_)),
       nefx(0),
       efx(NULL),
       time(time_),
@@ -193,6 +194,7 @@ EffectMgr::EffectMgr(Allocator &alloc, const SYNTH_T &synth_,
 EffectMgr::~EffectMgr()
 {
     memory.dealloc(efx);
+    delete filterpars;
     delete [] efxoutl;
     delete [] efxoutr;
 }
@@ -214,7 +216,7 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
     memset(efxoutr, 0, synth.bufferbytes);
     memory.dealloc(efx);
     EffectParams pars(memory, insertion, efxoutl, efxoutr, 0,
-            synth.samplerate, synth.buffersize);
+            synth.samplerate, synth.buffersize, filterpars, avoidSmash);
     try {
         switch (nefx) {
             case 1:
@@ -250,9 +252,6 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
         std::cerr << "failed to change effect " << _nefx << ": " << ba.what() << std::endl;
         return;
     }
-
-    if(efx)
-        filterpars = efx->filterpars;
 
     if(!avoidSmash)
         for(int i=0; i<128; ++i)
@@ -316,6 +315,10 @@ void EffectMgr::changepreset(unsigned char npreset)
 void EffectMgr::changepresetrt(unsigned char npreset, bool avoidSmash)
 {
     preset = npreset;
+    if(avoidSmash && dynamic_cast<DynamicFilter*>(efx)) {
+        efx->Ppreset = npreset;
+        return;
+    }
     if(efx)
         efx->setpreset(npreset);
     if(!avoidSmash)
@@ -452,6 +455,10 @@ void EffectMgr::paste(EffectMgr &e)
     changepresetrt(e.preset, true);
     for(int i=0;i<128;++i)
         seteffectparrt(i, e.settings[i]);
+    if(dynamic_cast<DynamicFilter*>(efx)) {
+        std::swap(filterpars, e.filterpars);
+        efx->filterpars = filterpars;
+    }
 }
 
 void EffectMgr::add2XML(XMLwrapper& xml)
@@ -471,7 +478,8 @@ void EffectMgr::add2XML(XMLwrapper& xml)
         xml.addpar("par", par);
         xml.endbranch();
     }
-    if(filterpars) {
+    assert(filterpars);
+    if(nefx == 8) {
         xml.beginbranch("FILTER");
         filterpars->add2XML(xml);
         xml.endbranch();
@@ -497,11 +505,11 @@ void EffectMgr::getfromXML(XMLwrapper& xml)
             seteffectpar(n, xml.getpar127("par", par));
             xml.exitbranch();
         }
-        if(filterpars)
-            if(xml.enterbranch("FILTER")) {
-                filterpars->getfromXML(xml);
-                xml.exitbranch();
-            }
+        assert(filterpars);
+        if(xml.enterbranch("FILTER")) {
+            filterpars->getfromXML(xml);
+            xml.exitbranch();
+        }
         xml.exitbranch();
     }
     cleanup();

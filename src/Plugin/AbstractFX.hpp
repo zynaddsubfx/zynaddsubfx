@@ -27,6 +27,7 @@
 #include "DistrhoPlugin.hpp"
 
 // ZynAddSubFX includes
+#include "Params/FilterParams.h"
 #include "Effects/Effect.h"
 #include "Misc/Allocator.h"
 #include "zyn-version.h"
@@ -50,6 +51,7 @@ public:
     {
         efxoutl = new float[bufferSize];
         efxoutr = new float[bufferSize];
+        filterpar = new FilterParams();
         std::memset(efxoutl, 0, sizeof(float)*bufferSize);
         std::memset(efxoutr, 0, sizeof(float)*bufferSize);
 
@@ -61,6 +63,7 @@ public:
         delete[] efxoutl;
         delete[] efxoutr;
         delete effect;
+        delete filterpar;
     }
 
 protected:
@@ -234,6 +237,7 @@ private:
     Effect* effect;
     float*  efxoutl;
     float*  efxoutr;
+    FilterParams* filterpar;
 
     AllocatorClass allocator;
 
@@ -250,7 +254,7 @@ private:
             delete effect;
         }
 
-        EffectParams pars(allocator, false, efxoutl, efxoutr, 0, static_cast<uint>(sampleRate), static_cast<int>(bufferSize));
+        EffectParams pars(allocator, false, efxoutl, efxoutr, 0, static_cast<uint>(sampleRate), static_cast<int>(bufferSize), filterpar);
         effect = new ZynFX(pars);
 
         if (firstInit)
