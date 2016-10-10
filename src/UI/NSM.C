@@ -83,7 +83,10 @@ NSM_Client::command_open(const char *name,
 
     char *new_filename;
 
-    //asprintf(&new_filename, "%s.xmz", name);
+    //if you're on windows enjoy the undefined behavior...
+#ifndef WIN32
+    asprintf(&new_filename, "%s.xmz", name);
+#endif
 
     struct stat st;
 
