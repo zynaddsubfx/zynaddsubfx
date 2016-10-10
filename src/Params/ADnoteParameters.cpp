@@ -82,16 +82,16 @@ static const Ports voicePorts = {
     rParamZyn(PDelay,        rShort("delay"), "Voice Startup Delay"),
     rToggle(Presonance,      rShort("enable"), "Resonance Enable"),
     rParamI(Pextoscil,       rShort("ext."),
-            rMap(min, -1), rMap(max, 16), "External Oscilator Selection"),
+            rMap(min, -1), rMap(max, 16), "External Oscillator Selection"),
     rParamI(PextFMoscil,     rShort("ext."),
-            rMap(min, -1), rMap(max, 16), "External FM Oscilator Selection"),
+            rMap(min, -1), rMap(max, 16), "External FM Oscillator Selection"),
     rParamZyn(Poscilphase,   rShort("phase"),    "Oscillator Phase"),
     rParamZyn(PFMoscilphase, rShort("phase"),  "FM Oscillator Phase"),
     rToggle(Pfilterbypass,   rShort("bypass"), "Filter Bypass"),
 
     //Freq Stuff
     rToggle(Pfixedfreq,           rShort("fixed"),  "If frequency is fixed"),
-    rParamZyn(PfixedfreqET,       rShort("e.t."),   "Equal Tempermant Parameter"),
+    rParamZyn(PfixedfreqET,       rShort("e.t."),   "Equal Temperament Parameter"),
     rParamZyn(PBendAdjust,        rShort("bend"),   "Pitch bend adjustment"),
     rParamZyn(POffsetHz,          rShort("offset"), "Voice constant offset"),
     //nominally -8192..8191

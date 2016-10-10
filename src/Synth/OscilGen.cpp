@@ -186,7 +186,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
 const rtosc::Ports OscilGen::realtime_ports{
     rSelf(OscilGen),
     rPresetType,
-    rParamZyn(Prand, rLinear(-64, 63), rShort("phase rnd"), "Oscilator Phase Randomness: smaller than 0 is \""
+    rParamZyn(Prand, rLinear(-64, 63), rShort("phase rnd"), "Oscillator Phase Randomness: smaller than 0 is \""
             "group\", larger than 0 is for each harmonic"),
     rParamZyn(Pamprandpower, rShort("variance"),
             "Variance of harmonic randomness"),
