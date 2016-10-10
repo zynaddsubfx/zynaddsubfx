@@ -89,7 +89,17 @@ const rtosc::Ports FilterParams::ports = {
     rParamZyn(Psequencestretch, rShort("seq.str"), "How modulators stretch the sequence"),
     rToggle(Psequencereversed,  rShort("reverse"), "If the modulator input is inverted"),
 
-    //{"Psequence#" FF_MAX_SEQUENCE "/nvowel", "", NULL, [](){}},
+    {"vowel_seq#" STRINGIFY(FF_MAX_SEQUENCE) "::i", "", NULL,
+        [](const char *msg, RtData &d){
+            FilterParams *obj = (FilterParams *) d.obj;
+            const char *mm = msg;
+            while(*mm && !isdigit(*mm)) ++mm;
+            unsigned idx = atoi(mm);
+            if(rtosc_narguments(msg)) {
+                obj->Psequence[idx].nvowel = rtosc_argument(msg, 0).i;
+            } else
+                d.broadcast(d.loc, "i", obj->Psequence[idx].nvowel);
+        }},
     {"type-svf::i", rProp(parameter) rShort("type")
         rOptions(low, high, band, notch)
             rDoc("Filter Type"), 0, rOptionCb(Ptype)},
