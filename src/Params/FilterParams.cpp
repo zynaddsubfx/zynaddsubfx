@@ -73,8 +73,8 @@ const rtosc::Ports FilterParams::ports = {
     rParamZyn(Pfreqtrack,       rShort("f.track"),
             "Frequency Tracking amount"),
     rParamZyn(Pgain,            rShort("gain"),     "Output Gain"),
-    rParamZyn(Pnumformants,     rShort("formants"),
-            "Number of formants to be used"),
+    rParamI(Pnumformants,       rShort("formants"),
+            rLinear(1,12),  "Number of formants to be used"),
     rParamZyn(Pformantslowness, rShort("slew"),
             "Rate that formants change"),
     rParamZyn(Pvowelclearness,  rShort("clarity"),
@@ -84,12 +84,11 @@ const rtosc::Ports FilterParams::ports = {
     rParamZyn(Poctavesfreq,     rShort("octaves"),
             "Number of octaves for formant"),
 
-    //TODO check if FF_MAX_SEQUENCE is acutally expanded or not
-    rParamZyn(Psequencesize,    rShort("seq.size"), rMap(max, FF_MAX_SEQUENCE), "Length of vowel sequence"),
+    rParamI(Psequencesize,    rShort("seq.size"), rLinear(0, FF_MAX_SEQUENCE), "Length of vowel sequence"),
     rParamZyn(Psequencestretch, rShort("seq.str"), "How modulators stretch the sequence"),
     rToggle(Psequencereversed,  rShort("reverse"), "If the modulator input is inverted"),
 
-    {"vowel_seq#" STRINGIFY(FF_MAX_SEQUENCE) "::i", "", NULL,
+    {"vowel_seq#" STRINGIFY(FF_MAX_SEQUENCE) "::i", rShort("vowel") rDoc("Vowel number of this sequence position"), NULL,
         [](const char *msg, RtData &d){
             FilterParams *obj = (FilterParams *) d.obj;
             const char *mm = msg;

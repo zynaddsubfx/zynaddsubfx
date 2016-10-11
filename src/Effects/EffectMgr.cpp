@@ -459,6 +459,7 @@ void EffectMgr::paste(EffectMgr &e)
         std::swap(filterpars, e.filterpars);
         efx->filterpars = filterpars;
     }
+    cleanup(); // cleanup the effect and recompute its parameters
 }
 
 void EffectMgr::add2XML(XMLwrapper& xml)
