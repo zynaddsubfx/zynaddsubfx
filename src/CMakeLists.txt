@@ -262,10 +262,16 @@ add_definitions(
 	 -Wextra
 	 )
 
-CHECK_CXX_COMPILER_FLAG(-Wno-inconsistent-missing-override
+check_cxx_compiler_flag(-Wno-inconsistent-missing-override
 	COMPILER_SUPPORTS_OVERRIDE)
 if(COMPILER_SUPPORTS_OVERRIDE)
     add_definitions(-Wno-inconsistent-missing-override)
+endif()
+
+check_cxx_compiler_flag(--system-header-prefix
+	COMPILER_SUPPORTS_SYSTEM_HDR_PREFIX)
+if(COMPILER_SUPPORTS_OVERRIDE)
+    add_definitions(--system-header-prefix="FL/")
 endif()
 
 if(NOT AVOID_ASM)
