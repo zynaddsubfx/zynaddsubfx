@@ -43,22 +43,22 @@ rtosc::Ports Phaser::ports = {
                       d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
     //Pvolume/Ppanning are common
-    rEffPar(lfo.Pfreq,       2, rShort("freq"),     ""),
-    rEffPar(lfo.Prandomness, 3, rShort("rnd."),     ""),
+    rEffPar(lfo.Pfreq,       2, rShort("freq"),     "LFO frequency"),
+    rEffPar(lfo.Prandomness, 3, rShort("rnd."),     "LFO randomness"),
     rEffPar(lfo.PLFOtype,    4, rShort("type"),
           rOptions(sine, tri), "lfo shape"),
-    rEffPar(lfo.Pstereo,     5, rShort("stereo"),   ""),
-    rEffPar(Pdepth,          6, rShort("depth"),    ""),
-    rEffPar(Pfb,             7, rShort("fb"),       ""),
+    rEffPar(lfo.Pstereo,     5, rShort("stereo"),   "Left/right channel phase shift"),
+    rEffPar(Pdepth,          6, rShort("depth"),    "LFP depth"),
+    rEffPar(Pfb,             7, rShort("fb"),       "Feedback"),
     rEffPar(Pstages,         8, rLinear(1,12), rShort("stages"),   ""),
-    rEffPar(Plrcross,        9, rShort("cross"),    ""),
+    rEffPar(Plrcross,        9, rShort("cross"),    "Channel routing"),
     rEffPar(Poffset,         9, rShort("off"),      "Offset"),
-    rEffParTF(Poutsub,      10, rShort("sub"),      ""),
+    rEffParTF(Poutsub,      10, rShort("sub"),      "Invert output"),
     rEffPar(Pphase,         11, rShort("phase"),    ""),
     rEffPar(Pwidth,         11, rShort("width"),    ""),
-    rEffParTF(Phyper,       12, rShort("hyp."),     ""),
+    rEffParTF(Phyper,       12, rShort("hyp."),     "Square the LFO"),
     rEffPar(Pdistortion,    13, rShort("distort"),  "Distortion"),
-    rEffParTF(Panalog,      14, rShort("analog"),   ""),
+    rEffParTF(Panalog,      14, rShort("analog"),   "Use analog phaser"),
 };
 #undef rBegin
 #undef rEnd

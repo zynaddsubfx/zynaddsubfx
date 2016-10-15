@@ -50,12 +50,12 @@ static rtosc::Ports filterports {
         rEQ(2);
         rEnd},
     {"Pq::i",    rProp(parameter) rMap(min, 0) rMap(max, 127)
-        rShort("q"), 0,
+        rShort("q") rDoc("Resonance/Bandwidth"), 0,
         rBegin;
         rEQ(3);
         rEnd},
     {"Pstages::i", rProp(parameter) rMap(min, 0) rMap(max, 4)
-        rShort("stages"), 0,
+        rShort("stages") rDoc("Additional filter stages"), 0,
         rBegin;
         rEQ(4);
         rEnd},
