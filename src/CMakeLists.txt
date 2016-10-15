@@ -260,8 +260,14 @@ endif()
 add_definitions(
 	 -Wall
 	 -Wextra
-	 -Wno-inconsistent-missing-override
 	 )
+
+CHECK_CXX_COMPILER_FLAG(-Wno-inconsistent-missing-override
+	COMPILER_SUPPORTS_OVERRIDE)
+if(COMPILER_SUPPORTS_OVERRIDE)
+    add_definitions(-Wno-inconsistent-missing-override)
+endif()
+
 if(NOT AVOID_ASM)
 	message(STATUS "Compiling with x86 opcode support")
     add_definitions(-DASM_F2I_YES)
