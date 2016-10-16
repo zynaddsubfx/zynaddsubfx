@@ -447,7 +447,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
             "-static" iphlpapi
             "-static" winpthread)
 else()
-    set(PLATFORM_LIBRARIES "")
+    set(PLATFORM_LIBRARIES rt)
     set(PTHREAD_LIBRARY pthread)
 endif()
 
