@@ -78,7 +78,7 @@ const rtosc::Ports FilterParams::ports = {
     rParamZyn(Pformantslowness, rShort("slew"),
             "Rate that formants change"),
     rParamZyn(Pvowelclearness,  rShort("clarity"),
-            "Cost for mixing vowels"),
+            "How much each vowel is smudged with the next in sequence. A high clarity will avoid smudging."),
     rParamZyn(Pcenterfreq,      rShort("cutoff"),
             "Center Freq (formant)"),
     rParamZyn(Poctavesfreq,     rShort("octaves"),
