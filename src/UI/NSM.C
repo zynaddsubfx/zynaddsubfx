@@ -22,7 +22,7 @@
 
 #include "../Nio/Nio.h"
 
-#ifndef NO_UI
+#if defined(FLTK_UI) || defined(NTK_UI)
 #include <FL/Fl.H>
 #endif
 #include <cstdio>
@@ -109,7 +109,7 @@ NSM_Client::command_open(const char *name,
     return r;
 }
 
-#ifndef NO_UI
+#if defined(FLTK_UI) || defined(NTK_UI)
 static void save_callback(Fl_Widget *, void *v)
 {
     MasterUI *ui = static_cast<MasterUI*>(v);
