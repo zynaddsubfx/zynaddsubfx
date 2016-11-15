@@ -105,7 +105,15 @@ void *AlsaEngine::MidiThread(void)
     snd_seq_event_t *event;
     MidiEvent ev;
     set_realtime();
-    while(snd_seq_event_input(midi.handle, &event) > 0) {
+    while(1) {
+        if(midi.exiting)
+            break;
+        if(snd_seq_event_input_pending(midi.handle, 0) <= 0) {
+            usleep(10);
+            continue;
+        }
+        if(snd_seq_event_input(midi.handle, &event) < 0)
+            break;
         //ensure ev is empty
         ev.channel = 0;
         ev.num     = 0;
@@ -225,6 +233,7 @@ bool AlsaEngine::openMidi()
     if(alsaport < 0)
         return false;
 
+    midi.exiting = false;
     pthread_attr_t attr;
 
     pthread_attr_init(&attr);
@@ -239,8 +248,10 @@ void AlsaEngine::stopMidi()
         return;
 
     snd_seq_t *handle = midi.handle;
-    if((NULL != midi.handle) && midi.pThread)
-        pthread_cancel(midi.pThread);
+    if((NULL != midi.handle) && midi.pThread) {
+        midi.exiting = true;
+        pthread_join(midi.pThread, 0);
+    }
     midi.handle = NULL;
     if(handle)
         snd_seq_close(handle);
