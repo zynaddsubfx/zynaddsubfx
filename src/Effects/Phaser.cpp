@@ -28,6 +28,16 @@ using namespace std;
 #define rBegin [](const char *msg, rtosc::RtData &d) {
 #define rEnd }
 
+#define ucharParamCb(pname) rBegin \
+        rObject &p = *(rObject*)d.obj; \
+        if(rtosc_narguments(msg)) \
+            p.set##pname(rtosc_argument(msg, 0).i); \
+        else \
+            d.reply(d.loc, "i", p.P##pname); \
+        rEnd
+#define rParamPhaser(name, ...) \
+  {STRINGIFY(P##name) "::i",  rProp(parameter) rMap(min, 0) rMap(max, 127) DOC(__VA_ARGS__), NULL, ucharParamCb(name)}
+
 rtosc::Ports Phaser::ports = {
     {"preset::i", rProp(parameter)
                   rOptions(Phaser 1, Phaser 2, Phaser 3, Phaser 4,
@@ -51,11 +61,11 @@ rtosc::Ports Phaser::ports = {
     rEffPar(Pdepth,          6, rShort("depth"),    "LFP depth"),
     rEffPar(Pfb,             7, rShort("fb"),       "Feedback"),
     rEffPar(Pstages,         8, rLinear(1,12), rShort("stages"),   ""),
-    rEffPar(Plrcross,        9, rShort("cross"),    "Channel routing"),
-    rEffPar(Poffset,         9, rShort("off"),      "Offset"),
+    rParamPhaser(lrcross,       rShort("cross"),    "Channel routing"),
+    rParamPhaser(offset,        rShort("off"),      "Offset"),
     rEffParTF(Poutsub,      10, rShort("sub"),      "Invert output"),
-    rEffPar(Pphase,         11, rShort("phase"),    ""),
-    rEffPar(Pwidth,         11, rShort("width"),    ""),
+    rParamPhaser(phase,         rShort("phase"),    ""),
+    rParamPhaser(width,         rShort("width"),    ""),
     rEffParTF(Phyper,       12, rShort("hyp."),     "Square the LFO"),
     rEffPar(Pdistortion,    13, rShort("distort"),  "Distortion"),
     rEffParTF(Panalog,      14, rShort("analog"),   "Use analog phaser"),
