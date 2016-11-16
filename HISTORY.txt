@@ -1,4 +1,4 @@
-3.0.0 (TBD)
+3.0.0 (17 November 2016)
         - Add support for zest toolkit via Zyn-Fusion
         - Add watchpoints to env/LFO
         - Add Bank searching capabilities
