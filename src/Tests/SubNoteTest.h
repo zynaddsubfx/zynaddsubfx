@@ -33,6 +33,7 @@ class SubNoteTest:public CxxTest::TestSuite
 {
     public:
 
+        SUBnoteParameters *pars;
         SUBnote      *note;
         Master       *master;
         AbsTime      *time;
@@ -77,7 +78,7 @@ class SubNoteTest:public CxxTest::TestSuite
 
             SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote, false};
             note = new SUBnote(defaultPreset, pars);
-            delete defaultPreset;
+            this->pars = defaultPreset;
         }
 
         void tearDown() {
@@ -87,6 +88,7 @@ class SubNoteTest:public CxxTest::TestSuite
             delete [] outR;
             delete time;
             delete synth;
+            delete pars;
         }
 
         void testDefaults() {
