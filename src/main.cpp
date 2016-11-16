@@ -637,6 +637,7 @@ int wmidi = -1;
         const char *addr = middleware->getServerAddress();
         if(fork() == 0) {
             execlp("zyn-fusion", "zyn-fusion", addr, "--builtin", "--no-hotload",  0);
+            execlp("./zyn-fusion", "zyn-fusion", addr, "--builtin", "--no-hotload",  0);
 
             err(1,"Failed to launch Zyn-Fusion");
         }
