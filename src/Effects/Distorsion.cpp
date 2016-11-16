@@ -50,6 +50,25 @@ rtosc::Ports Distorsion::ports = {
     rEffParTF(Pstereo, 9, rShort("stereo"), "Stereo"),
     rEffParTF(Pprefiltering, 10, rShort("p.filt"),
                   "Filtering before/after non-linearity"),
+    {"waveform:", 0, 0, [](const char *, rtosc::RtData &d)
+        {
+            Distorsion  &dd = *(Distorsion*)d.obj;
+            float        buffer[128];
+            rtosc_arg_t  args[128];
+            char         arg_str[128+1] = {0};
+
+            for(int i=0; i<128; ++i)
+                buffer[i] = 2*(i/128.0)-1;
+
+            waveShapeSmps(sizeof(buffer), buffer, dd.Ptype + 1, dd.Pdrive);
+
+            for(int i=0; i<128; ++i) {
+                arg_str[i] = 'f';
+                args[i].f  = buffer[i];
+            }
+
+            d.replyArray(d.loc, arg_str, args);
+        }},
 };
 #undef rBegin
 #undef rEnd

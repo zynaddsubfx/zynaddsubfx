@@ -609,7 +609,7 @@ int wmidi = -1;
     char *nsm_url = getenv("NSM_URL");
 
     if(nsm_url) {
-        nsm = new NSM_Client;
+        nsm = new NSM_Client(middleware);
 
         if(!nsm->init(nsm_url))
             nsm->announce("ZynAddSubFX", ":switch:", argv[0]);
@@ -637,6 +637,7 @@ int wmidi = -1;
         const char *addr = middleware->getServerAddress();
         if(fork() == 0) {
             execlp("zyn-fusion", "zyn-fusion", addr, "--builtin", "--no-hotload",  0);
+            execlp("./zyn-fusion", "zyn-fusion", addr, "--builtin", "--no-hotload",  0);
 
             err(1,"Failed to launch Zyn-Fusion");
         }

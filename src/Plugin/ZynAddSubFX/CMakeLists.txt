@@ -115,6 +115,9 @@ target_link_libraries(ZynAddSubFX_lv2 zynaddsubfx_core ${OS_LIBRARIES} ${LIBLO_L
     ${PLATFORM_LIBRARIES})
 target_link_libraries(ZynAddSubFX_vst zynaddsubfx_core ${OS_LIBRARIES} ${LIBLO_LIBRARIES}
     ${PLATFORM_LIBRARIES})
+if(ZestGui)
+    target_link_libraries(ZynAddSubFX_lv2_ui X11 GL)
+endif()
 
 install(TARGETS ZynAddSubFX_lv2 LIBRARY DESTINATION ${PluginLibDir}/lv2/ZynAddSubFX.lv2/)
 install(TARGETS ZynAddSubFX_vst LIBRARY DESTINATION ${PluginLibDir}/vst/)
