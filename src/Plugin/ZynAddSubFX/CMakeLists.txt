@@ -108,7 +108,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
             "-static" iphlpapi
             "-static" winpthread)
 else()
-    set(PLATFORM_LIBRARIES X11 GL)
+    set(PLATFORM_LIBRARIES X11 GL rt)
 endif()
 
 target_link_libraries(ZynAddSubFX_lv2 zynaddsubfx_core ${OS_LIBRARIES} ${LIBLO_LIBRARIES}

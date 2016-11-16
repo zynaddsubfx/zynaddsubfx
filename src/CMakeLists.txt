@@ -260,8 +260,35 @@ endif()
 add_definitions(
 	 -Wall
 	 -Wextra
-	 -Wno-inconsistent-missing-override
 	 )
+
+# macro similar to "check_cxx_compiler_flag_extra", however,
+# it also checks for warnings that are only output if other warnings are active
+macro (check_cxx_compiler_flag_extra _FLAG _FAILREGEX _RESULT)
+    set(SAFE_CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS}")
+    set(CMAKE_REQUIRED_DEFINITIONS "${_FLAG}")
+    
+    check_cxx_source_compiles("int main() { int x; return x; }" ${_RESULT}
+        FAIL_REGEX "unrecognized|option"
+    )
+
+    set (CMAKE_REQUIRED_DEFINITIONS "${SAFE_CMAKE_REQUIRED_DEFINITIONS}")
+endmacro ()
+
+check_cxx_compiler_flag_extra("-Wall -Wextra -Wno-inconsistent-missing-override"
+    "unrecognized|option"
+    COMPILER_SUPPORTS_NO_INCONSISTENT_MISSING_OVERRIDE
+    )
+if(COMPILER_SUPPORTS_NO_INCONSISTENT_MISSING_OVERRIDE)
+    add_definitions(-Wno-inconsistent-missing-override)
+endif()
+
+check_cxx_compiler_flag("-Wall -Wextra -Werror --system-header-prefix='FL/'"
+    COMPILER_SUPPORTS_SYSTEM_HDR_PREFIX)
+if(COMPILER_SUPPORTS_SYSTEM_HDR_PREFIX)
+    add_definitions(--system-header-prefix="FL/")
+endif()
+
 if(NOT AVOID_ASM)
 	message(STATUS "Compiling with x86 opcode support")
     add_definitions(-DASM_F2I_YES)
@@ -441,7 +468,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
             "-static" iphlpapi
             "-static" winpthread)
 else()
-    set(PLATFORM_LIBRARIES "")
+    set(PLATFORM_LIBRARIES rt)
     set(PTHREAD_LIBRARY pthread)
 endif()
 

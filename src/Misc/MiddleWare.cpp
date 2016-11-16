@@ -463,8 +463,16 @@ public:
                    int preferred_port);
     ~MiddleWareImpl(void);
 
+    //Check offline vs online mode in plugins
+    void heartBeat(Master *m);
+    int64_t start_time_sec;
+    int64_t start_time_nsec;
+    bool offline;
+
     //Apply function while parameters are write locked
     void doReadOnlyOp(std::function<void()> read_only_fn);
+    void doReadOnlyOpPlugin(std::function<void()> read_only_fn);
+    bool doReadOnlyOpNormal(std::function<void()> read_only_fn, bool canfail=false);
 
     void savePart(int npart, const char *filename)
     {
@@ -493,7 +501,7 @@ public:
         assert(actual_load[npart] <= pending_load[npart]);
 
         //load part in async fashion when possible
-#if 0
+#ifndef WIN32
         auto alloc = std::async(std::launch::async,
                 [master,filename,this,npart](){
                 Part *p = new Part(*master->memory, synth,
@@ -667,6 +675,13 @@ public:
         }
 
         autoSave.tick();
+
+        heartBeat(master);
+
+        //XXX This might have problems with a master swap operation
+        if(offline)
+            master->runOSC(0,0,true);
+
     }
 
 
@@ -1537,6 +1552,14 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
             rtosc_message(buf, 1024, "/undo_resume","");
             handleMsg(buf);
             });
+
+    //Setup starting time
+    struct timespec time;
+    clock_gettime(CLOCK_MONOTONIC, &time);
+    start_time_sec  = time.tv_sec;
+    start_time_nsec = time.tv_nsec;
+
+    offline = false;
 }
 
 MiddleWareImpl::~MiddleWareImpl(void)
@@ -1609,6 +1632,130 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
         uToB->raw_write(x);
         delete [] x;
     }
+}
+
+//Offline detection code:
+// - Assume that the audio callback should be run at least once every 50ms
+// - Atomically provide the number of ms since start to Master
+// - Every time middleware ticks provide a heart beat
+// - If when the heart beat is provided the backend is more than 200ms behind
+//   the last heartbeat then it must be offline
+// - When marked offline the backend doesn't receive another heartbeat until it
+//   registers the current beat that it's behind on
+void MiddleWareImpl::heartBeat(Master *master)
+{
+    //Current time
+    //Last provided beat
+    //Last acknowledged beat
+    //Current offline status
+    
+    struct timespec time;
+    clock_gettime(CLOCK_MONOTONIC, &time);
+    uint32_t now = (time.tv_sec-start_time_sec)*100 +
+                   (time.tv_nsec-start_time_nsec)*1e-9*100;
+    int32_t last_ack   = master->last_ack;
+    int32_t last_beat  = master->last_beat;
+
+    //everything is considered online for the first second
+    if(now < 100)
+        return;
+
+    if(offline) {
+        if(last_beat == last_ack) {
+            //XXX INSERT MESSAGE HERE ABOUT TRANSITION TO ONLINE
+            offline = false;
+
+            //Send new heart beat
+            master->last_beat = now;
+        }
+    } else {
+        //it's unquestionably alive
+        if(last_beat == last_ack) {
+
+            //Send new heart beat
+            master->last_beat = now;
+            return;
+        }
+
+        //it's pretty likely dead
+        if(last_beat-last_ack > 0 && now-last_beat > 20) {
+            //The backend has had 200 ms to acquire a new beat
+            //The backend instead has an older beat
+            //XXX INSERT MESSAGE HERE ABOUT TRANSITION TO OFFLINE
+            offline = true;
+            return;
+        }
+
+        //who knows if it's alive or not here, give it a few ms to acquire or
+        //not
+    }
+
+}
+
+void MiddleWareImpl::doReadOnlyOpPlugin(std::function<void()> read_only_fn)
+{
+    assert(uToB);
+    int offline = 0;
+    if(offline) {
+        std::atomic_thread_fence(std::memory_order_acquire);
+
+        //Now it is safe to do any read only operation
+        read_only_fn();
+    } else if(!doReadOnlyOpNormal(read_only_fn, true)) {
+        //check if we just transitioned to offline mode
+
+        std::atomic_thread_fence(std::memory_order_acquire);
+
+        //Now it is safe to do any read only operation
+        read_only_fn();
+    }
+}
+
+bool MiddleWareImpl::doReadOnlyOpNormal(std::function<void()> read_only_fn, bool canfail)
+{
+    assert(uToB);
+    uToB->write("/freeze_state","");
+
+    std::list<const char *> fico;
+    int tries = 0;
+    while(tries++ < 2000) {
+        if(!bToU->hasNext()) {
+            usleep(500);
+            continue;
+        }
+        const char *msg = bToU->read();
+        if(!strcmp("/state_frozen", msg))
+            break;
+        size_t bytes = rtosc_message_length(msg, bToU->buffer_size());
+        char *save_buf = new char[bytes];
+        memcpy(save_buf, msg, bytes);
+        fico.push_back(save_buf);
+    }
+
+    if(canfail) {
+        //Now to resume normal operations
+        uToB->write("/thaw_state","");
+        for(auto x:fico) {
+            uToB->raw_write(x);
+            delete [] x;
+        }
+        return false;
+    }
+
+    assert(tries < 10000);//if this happens, the backend must be dead
+
+    std::atomic_thread_fence(std::memory_order_acquire);
+
+    //Now it is safe to do any read only operation
+    read_only_fn();
+
+    //Now to resume normal operations
+    uToB->write("/thaw_state","");
+    for(auto x:fico) {
+        uToB->raw_write(x);
+        delete [] x;
+    }
+    return true;
 }
 
 void MiddleWareImpl::broadcastToRemote(const char *rtmsg)

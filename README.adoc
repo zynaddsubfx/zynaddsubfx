@@ -1,5 +1,8 @@
 ZynAddSubFX
 -----------
+
+image::https://travis-ci.org/zynaddsubfx/zynaddsubfx.svg?branch=master[alt="Build status", link="https://travis-ci.org/zynaddsubfx/zynaddsubfx"]
+
 It is a feature heavy realtime software synthesizer for Linux, OSX,
 and Windows. 
 

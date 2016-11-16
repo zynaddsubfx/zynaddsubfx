@@ -42,7 +42,7 @@ rtosc::Ports Reverb::ports = {
     rEffPar(Pidelay,  3, rShort("i.time"),   "Delay for first impulse"),
     rEffPar(Pidelayfb,4, rShort("i.fb"),     "Feedback for first impulse"),
     rEffPar(Plpf,     7, rShort("lpf"),      "Low pass filter"),
-    rEffPar(Phpf,     8, rShort("lpf"),      "High pass filter"),
+    rEffPar(Phpf,     8, rShort("hpf"),      "High pass filter"),
     rEffPar(Plohidamp,9, rShort("damp"),     "Dampening"),
     //Todo make this a selector
     rEffPar(Ptype,    10,rShort("type"),
