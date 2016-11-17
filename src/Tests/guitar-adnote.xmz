@@ -1,8 +1,8 @@
 
 <?xml version="1.0f" encoding="UTF-8"?>
 <!DOCTYPE ZynAddSubFX-data>
-<ZynAddSubFX-data version-major="2" version-minor="5"
-version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
+<ZynAddSubFX-data version-major="3" version-minor="0"
+version-revision="0" ZynAddSubFX-author="Nasca Octavian Paul">
 <INFORMATION>
 <par_bool name="PADsynth_used" value="yes" />
 </INFORMATION>
