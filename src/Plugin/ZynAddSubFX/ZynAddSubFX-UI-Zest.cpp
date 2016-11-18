@@ -91,6 +91,7 @@ protected:
             if (oscPort != port)
             {
                 oscPort = port;
+                repaint();
             }
         } break;
         }
