@@ -149,7 +149,7 @@ protected:
     */
     void onDisplay() override
     {
-        if(oscPort == -1)
+        if(oscPort < 1)
             return;
         if(!z.zest) {
             if(!z.zest_open)
