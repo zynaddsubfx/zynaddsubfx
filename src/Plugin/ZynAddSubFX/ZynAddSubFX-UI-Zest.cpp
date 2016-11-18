@@ -48,16 +48,19 @@ public:
         }
         memset(&z, 0, sizeof(z));
 #define get_sym(x) z.zest_##x = (decltype(z.zest_##x))dlsym(handle, "zest_"#x)
-        get_sym(open);
-        get_sym(setup);
-        get_sym(close);
-        get_sym(draw);
-        get_sym(tick);
-        get_sym(key);
-        get_sym(motion);
-        get_sym(scroll);
-        get_sym(mouse);
-        get_sym(special);
+        if(handle) {
+            get_sym(open);
+            get_sym(setup);
+            get_sym(close);
+            get_sym(draw);
+            get_sym(tick);
+            get_sym(key);
+            get_sym(motion);
+            get_sym(scroll);
+            get_sym(mouse);
+            get_sym(special);
+        }
+        oscPort = -1;
         printf("[INFO] Ready to run\n");
     }
 
@@ -66,7 +69,8 @@ public:
         printf("[INFO:Zyn] zest_close()\n");
         if(z.zest)
             z.zest_close(z.zest);
-        dlclose(handle);
+        if(handle)
+            dlclose(handle);
     }
 
 protected:
@@ -145,12 +149,15 @@ protected:
     */
     void onDisplay() override
     {
+        if(oscPort == -1)
+            return;
         if(!z.zest) {
             if(!z.zest_open)
                 return;
-            printf("[INFO:Zyn] zest_open()\n");
+            //printf("[INFO:Zyn] zest_open()\n");
             char address[1024];
             snprintf(address, sizeof(address), "osc.udp://127.0.0.1:%d",oscPort);
+            printf("[INFO:Zyn] zest_open(%s)\n", address);
 
             z.zest = z.zest_open(address);
             printf("[INFO:Zyn] zest_setup()\n");
