@@ -25,7 +25,7 @@ struct zest_handles {
     void (*zest_scroll)(zest_t*, int x, int y, int dx, int dy);
     void (*zest_mouse)(zest_t *z, int button, int action, int x, int y);
     void (*zest_key)(zest_t *z, char *key, bool press);
-    void (*zest_resize)();
+    void (*zest_resize)(zest_t *z, int w, int h);
     void (*zest_special)(zest_t *z, int key, int press);
     int (*zest_tick)(zest_t*);
     zest_t *zest;
@@ -59,6 +59,7 @@ public:
             get_sym(scroll);
             get_sym(mouse);
             get_sym(special);
+            get_sym(resize);
         }
         oscPort = -1;
         printf("[INFO] Ready to run\n");
@@ -187,6 +188,8 @@ protected:
 
     void uiReshape(uint width, uint height)
     {
+        if(z.zest)
+            z.zest_resize(z.zest, width, height);
     }
 
 private:
