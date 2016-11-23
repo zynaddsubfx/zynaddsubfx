@@ -68,8 +68,8 @@ OPTIONS
 *-e, --exec-after-init*=command::
     Run post-initialization script. This script will be run after midi and audio
     drivers have been initialized.
-*--midi-learn::
-    Option for loading .xlz files.
+*-M, --midi-learn*=FILE::
+    Load a midi learn binding (.xlz) file.
 
 BUGS
 ----
