@@ -199,7 +199,7 @@ const rtosc::Ports OscilGen::realtime_ports{
             "Base frequency of adaptive harmonic (30..3000Hz)"),
     rParamI(Padaptiveharmonicspower, rShort("amount"), rLinear(0,200),
             "Adaptive Harmonic Strength"),
-    rParamZyn(Padaptiveharmonicspar, rShort("power"),
+    rParamI(Padaptiveharmonicspar, rShort("power"), rLinear(0,100),
             "Adaptive Harmonics Postprocessing Power"),
     {"waveform:", rDoc("Returns waveform points"),
         NULL, [](const char *, rtosc::RtData &d) {
