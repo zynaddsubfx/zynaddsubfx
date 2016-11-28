@@ -20,6 +20,7 @@ struct BankEntry
     typedef std::vector<std::string> svec;
     svec tags(void) const;
     bool match(std::string) const;
+    bool operator<(const BankEntry &b) const;
 };
 
 

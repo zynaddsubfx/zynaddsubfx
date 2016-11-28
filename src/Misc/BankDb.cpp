@@ -55,6 +55,11 @@ bool BankEntry::match(string s) const
         sfind(type, s) || sfind(comments,s) || sfind(author,s);
 }
 
+bool BankEntry::operator<(const BankEntry &b) const
+{
+    return this->file < b.file;
+}
+
 static svec split(string s)
 {
     svec vec;
@@ -96,6 +101,8 @@ bvec BankDb::search(std::string ss) const
         if(match)
             vec.push_back(field);
     }
+
+    std::sort(vec.begin(), vec.end());
 
     return vec;
 }
