@@ -108,7 +108,7 @@ void *AlsaEngine::MidiThread(void)
     while(1) {
         if(midi.exiting)
             break;
-        if(snd_seq_event_input_pending(midi.handle, 0) <= 0) {
+        if(snd_seq_event_input_pending(midi.handle, 1) <= 0) {
             usleep(10);
             continue;
         }
