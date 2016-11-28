@@ -27,8 +27,9 @@ include_directories(rtosc/include)
 
 enable_testing()
 include(CTestConfig.cmake)
-#Currently the only directory that uses cmake
+#Currently the only directories that use cmake
 add_subdirectory(src)
+add_subdirectory(doc) # Doxygen only
 
 install(FILES AUTHORS.txt COPYING HISTORY.txt README.adoc
 	DESTINATION share/doc/zynaddsubfx
