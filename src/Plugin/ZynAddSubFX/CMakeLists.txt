@@ -107,8 +107,10 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
             wsock32
             "-static" iphlpapi
             "-static" winpthread)
-else()
+elseif(ZestGui)
     set(PLATFORM_LIBRARIES X11 GL rt)
+else()
+    set(PLATFORM_LIBRARIES X11 rt)
 endif()
 
 target_link_libraries(ZynAddSubFX_lv2 zynaddsubfx_core ${OS_LIBRARIES} ${LIBLO_LIBRARIES}
