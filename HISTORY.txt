@@ -1,3 +1,12 @@
+3.0.1 (28 November 2016)
+        - Fix bank screen with Zyn-Fusion
+        - Fix crash on startup with GL 2.1 to 3.1
+        - Fix UI Disconnection Bug
+        - Add resizing to LV2 Zyn-Fusion
+        - Fixes problems receiving MIDI over ALSA
+        - Fixes crash when editing instrument description in Zyn-Fusion
+        - Fixes crash when visualizing instruments in Zyn-Fusion
+
 3.0.0 (17 November 2016)
         - Add support for zest toolkit via Zyn-Fusion
         - Add watchpoints to env/LFO
