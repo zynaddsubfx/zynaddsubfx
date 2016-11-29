@@ -3,7 +3,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 project(zynaddsubfx)
 set(VERSION_MAJOR "3")
 set(VERSION_MINOR "0")
-set(VERSION_REVISION "0")
+set(VERSION_REVISION "1")
 
 
 #Include RTOSC
