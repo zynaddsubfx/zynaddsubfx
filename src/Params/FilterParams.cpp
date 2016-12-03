@@ -34,7 +34,7 @@ constexpr int sizeof_pvowels = sizeof(FilterParams::Pvowels);
 static const rtosc::Ports subsubports = {
     rParamZyn(freq, rShort("f.freq"), "Formant frequency"),
     rParamZyn(amp,  rShort("f.str"),  "Strength of formant"),
-    rParamZyn(q,    rShort("f.q"),    "The formant's quality factor, also known as resonance bandwith or Q for short"),
+    rParamZyn(q,    rShort("f.q"),    "The formant's quality factor, also known as resonance bandwidth or Q for short"),
 };
 #undef rObject
 
