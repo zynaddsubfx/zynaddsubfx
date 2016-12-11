@@ -1,8 +1,11 @@
 controller: main.o Controller.o ControllerUI.o
 	gcc -o controller *.o `fltk-config --ldflags` -lasound -lpthread -lm -lstdc++
 
-ControllerUI.cxx ControllerUI.h: ControllerUI.fl
+ControllerUI.h: ControllerUI.fl
 	fluid -c ControllerUI.fl
+
+ControllerUI.cxx: ControllerUI.h
+	echo ControllerUI.cxx
 
 ControllerUI.o: ControllerUI.cxx ControllerUI.h
 	gcc `fltk-config --cflags` -c ControllerUI.cxx -o ControllerUI.o

@@ -1,10 +1,13 @@
 spliter: main.o Spliter.o SpliterUI.o
 	gcc -o spliter *.o `fltk-config --ldflags` -lasound -lstdc++
 
-SplitterUI.cxx SpliterUI.h: SpliterUI.fl
+SpliterUI.h: SpliterUI.fl
 	fluid -c SpliterUI.fl
 
-SpliterUI.o: SplitterUI.cxx SpliterUI.h
+SpliterUI.cxx: SpliterUI.h
+	echo SpliterUI.cxx
+
+SpliterUI.o: SpliterUI.cxx SpliterUI.h
 	gcc -g `fltk-config --cflags` -c SpliterUI.cxx -o SpliterUI.o
 
 Spliter.o: Spliter.C Spliter.h
