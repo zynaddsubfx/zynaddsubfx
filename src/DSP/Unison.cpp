@@ -18,8 +18,8 @@
 #include "Unison.h"
 #include "globals.h"
 
-#define errx(...)
-#define warnx(...)
+#define errx(...) {}
+#define warnx(...) {}
 #ifndef errx
 #include <err.h>
 #endif

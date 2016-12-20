@@ -50,8 +50,8 @@
 #include <atomic>
 #include <list>
 
-#define errx(...)
-#define warnx(...)
+#define errx(...) {}
+#define warnx(...) {}
 #ifndef errx
 #include <err.h>
 #endif
