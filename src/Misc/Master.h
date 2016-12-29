@@ -181,8 +181,8 @@ class Master
 
         //Heartbeat for identifying plugin offline modes
         //in units of 10 ms (done s.t. overflow is in 497 days)
-        uint32_t last_beat;
-        uint32_t last_ack;
+        uint32_t last_beat = 0;
+        uint32_t last_ack = 0;
     private:
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
