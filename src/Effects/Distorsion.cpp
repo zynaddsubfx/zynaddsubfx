@@ -60,7 +60,8 @@ rtosc::Ports Distorsion::ports = {
             for(int i=0; i<128; ++i)
                 buffer[i] = 2*(i/128.0)-1;
 
-            waveShapeSmps(sizeof(buffer), buffer, dd.Ptype + 1, dd.Pdrive);
+            waveShapeSmps(sizeof(buffer)/sizeof(buffer[0]), buffer,
+                    dd.Ptype + 1, dd.Pdrive);
 
             for(int i=0; i<128; ++i) {
                 arg_str[i] = 'f';
