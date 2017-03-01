@@ -145,7 +145,11 @@ void Echo::setvolume(unsigned char _Pvolume)
     Pvolume = _Pvolume;
 
     if(insertion == 0) {
-        outvolume = powf(0.01f, (1.0f - Pvolume / 127.0f)) * 4.0f;
+        if (Pvolume == 0) {
+            outvolume = 0.0f;
+        } else {
+            outvolume = powf(0.01f, (1.0f - Pvolume / 127.0f)) * 4.0f;
+        }
         volume    = 1.0f;
     }
     else
