@@ -514,6 +514,18 @@ static const Ports master_ports = {
         [](const char *, rtosc::RtData &d) {d.reply("/undo_pause", "");}},
     {"undo_resume:",rProp(internal) rDoc("resume undo event recording"),0,
         [](const char *, rtosc::RtData &d) {d.reply("/undo_resume", "");}},
+    {"last_dnd::s", rProp(internal) rDoc("Last Drag and Drop OSC path"),0,
+        rBOIL_BEGIN
+            if(!strcmp("", args)) {
+                data.reply(loc, "c", obj->dnd_buffer);
+                *obj->dnd_buffer = 0;
+            } else {
+                assert(!*obj->dnd_buffer);
+                const char* var = rtosc_argument(msg, 0).s;
+                printf("receiving /last_dnd %s\n",var);
+                strncpy(obj->dnd_buffer, var, Master::dnd_buffer_size);
+            }
+        rBOIL_END },
     {"config/", rNoDefaults
         rDoc("Top Level Application Configuration Parameters"),
         &Config::ports, [](const char *, rtosc::RtData &d){d.forward();}},
@@ -769,6 +781,8 @@ bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
     if(!strcmp(msg, "/load-master")) {
         Master *this_master = this;
         Master *new_master  = *(Master**)rtosc_argument(msg, 0).b.data;
+        // if this fails, the new Master has been started too early
+        assert(new_master != this_master);
         if(!offline)
             new_master->AudioOut(outl, outr);
         if(nio)

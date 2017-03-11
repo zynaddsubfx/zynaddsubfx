@@ -43,6 +43,9 @@ struct vuData {
 class Master
 {
     public:
+        Master(const Master& other) = delete;
+        Master(Master&& other) = delete;
+
         /** Constructor TODO make private*/
         Master(const SYNTH_T &synth, class Config *config);
         /** Destructor*/
@@ -211,6 +214,12 @@ class Master
         //in units of 10 ms (done s.t. overflow is in 497 days)
         uint32_t last_beat = 0;
         uint32_t last_ack = 0;
+
+        //Buffer to contain the OSC path to the last GUI element
+        //on which a drag and drop operation ended
+        constexpr static std::size_t dnd_buffer_size = 1024;
+        char dnd_buffer[dnd_buffer_size] = {0};
+
     private:
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
