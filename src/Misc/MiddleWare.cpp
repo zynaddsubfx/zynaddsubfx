@@ -890,7 +890,7 @@ static std::vector<std::string> getFiles(const char *folder, bool finddir)
         printf("error = %x\n", INVALID_FILE_ATTRIBUTES);
         bool is_dir = GetFileAttributes(darn_windows.c_str()) & FILE_ATTRIBUTE_DIRECTORY;
 #endif
-        if(finddir == is_dir)
+        if(finddir == is_dir && strcmp(".", fn->d_name))
             files.push_back(fn->d_name);
     }
 
