@@ -1,0 +1,268 @@
+An Introduction to a Revised MIDI Learn/Automation System Within ZynAddSubFX
+============================================================================
+:author: Mark McCurry (diagrams by unfa)
+:toc:
+
+
+Motivation
+----------
+
+One of the major issues expressed by users around the time of the initial
+3.0.0 launch was that they were dissatisfied with automations when using
+ZynAddSubFX within their preferred VST host. This was a combination of:
+
+1. Hosts providing a poor workflow for sending MIDI CC events compared to VST
+   parameters
+2. Confusion with the use of MIDI learn within Zyn
+3. Issues regarding saving/loading parameters exposed through MIDI learn 
+4. Parameter resolution for MIDI CCs
+5. Some parameters only produce updates on the next note
+
+This proposal attempts to address points 1, 2, & 3. Issue 4 will be addressed
+later in the 3.0.x series culminating in the 3.1.0 release and initial work is
+documented at XYZ. Issue 5 is being fixed one set of parameters at a time and
+should be addressed in the 3.0.x series.
+
+Overview & Terminology
+----------------------
+
+The proposal boils down to replacing the existing MIDI learn implementation
+and UI views with a series of slots for parameter automation and automation
+macros. For the whole synth, currently there are a planned set of slots which
+would be exposed to VST/LV2 plugin hosts:
+
+- Master Automation Slot 1..32
+- Instrument 1..4 Automation Slot 1..4
+- Instrument 5..16 would have the same slots, but they would *NOT*
+                   be exposed to LV2/VST hosts
+
+This should keep the total number of parameters exposed to a host somewhat
+reasonable.
+
+What is an automation?
+~~~~~~~~~~~~~~~~~~~~~~
+
+- A single parameter, e.g. the addsynth base frequency in part 1, kit 1
+- A range of values that it can take on represented as a subset of the values
+  that the GUI control can perform with (e.g. -50 cents to +150 cents)
+- A mapping function (linear, log, custom, etc)
+
+Global automation slots (and some instrument slots) will always be exposed to VST/LV2 hosts
+
+image::automation.png[]
+
+At the level of a Zyn master file (.xmz) the automation slots and macro slots
+can be bound to MIDI CCs
+
+At the level of Zyn instrument files (.xiz) the automation slots can be saved
+without a MIDI binding.
+
+Zyn MIDI-learn files (.xlz) can store the MIDI CC+Channel linkage to all
+automation (and macro) slots.
+
+What is an automation slot?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- A set of automations
+- An optional MIDI CC binding
+
+All global automation slots and the first four instrument automation slots will
+be constantly exposed to VST/LV2 hosts
+
+image::automation-slot.png[]
+image::automation-slot2.png[]
+
+
+
+Workflow example
+----------------
+
+Learning a new automation
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default the easiest to work with option is creating a global automation
+slot
+
+. Use CTRL or click the [Learn] button to start learning an automation
+. Click on one or more controls (knobs/sliders/buttons) to assign them to
+  automation slots
+.. After clicking each control is allocated to the next free Master
+   automation slot
+.. Each automation slot is then placed into the "try to learn a MIDI mapping
+   to the next unbound MIDI CC that arrives" state if ZynAddSubFX is running
+   in standalone mode (MIDI CCs are identified by
+   Channel+CC# in Master automation slots)
+.. If ZynAddSubFX is running in plugin mode the automation slot is put into
+   the unbound state
+. Move to the [Automation] view
+.. The automation view is made up of two sub-views [Master Automation], &
+   [Part Automation]
+.. The [Part Automation] sub-view can be navigated via setting the active part in the
+   sidebar of zyn-fusion like other similar views
+.. The automation view shows:
+... MIDI binding if any e.g. "Chan 2, CC 14" (or "None" or "Learning...")
+... Parameter path + name (see unfa's convention) (perhaps the OSC address
+    via a hover over tooltip)
+... Minimum value*
+... Maximum value*
+... Log/Linear switch*
+... * => (optional until more floating point parameters are exposed)
+... Possible display of the current value with a horizontal slider to
+          control (I'm not sure if there's the space for this or if it's all
+                   that beneficial)
+. The user optionally sends CCs to be bound by wiggling the controls on their
+   physical (or virtual MIDI device)
+. User confirms values are correct
+.. The correct parameters are on the list
+.. The correct MIDI CCs are bound
+... If undesired the ones in the learning state can be clicked on to
+    disable learning a MIDI mapping (good option for VST/LV2 use)
+... If incorrect mappings were made, clicking returns the control to
+    a 'learning' state
+... Double clicking allows the user to manually enter in a MIDI
+        channel + CC id combination
+.. The correct range is available
+... Hovering over the min/max values shows their range in a tooltip
+... Grabbing them makes them work as other knobs/vertical-sliders do
+... Double clicking allows manual entry of a value
+.. If an automation was unintentional the user can use a handle widget on
+        the left side of the automation to delete it, or move it to another
+        slot
+
+How does this differ from the 3.0.0 workflow?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This process makes MIDI binding an optional subtask while the current design
+makes binding a MIDI CC mandatory.
+
+Learning a Macro Automation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+. Use double tap CTRL or double click the [Learn] button to start learning
+  an automation
+. Repeat the automation learning process, but all new parameters will be
+  applied to the same automation slot
+
+How does this differ from the 3.0.0 workflow?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Currently, multiple parameters cannot be mapped to the same MIDI CC (or host
+parameter).
+
+Learning CC bindings after loading an instrument/binding
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+. Go to the [Automation] view
+. Go to the [Master Automation] or [Part Automation] subview
+. Find the right automation slot and automation
+. Double click on the MIDI CC widget
+.. The automation switches to the "learning CC" state
+. Wiggle some MIDI controller
+. The CC has been remapped
+
+How does this differ from the 3.0.0 workflow?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The MIDI CC mapping cannot be remapped without learning and unlearning
+currently.
+
+
+Making Slight Changes to an Automation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It may make sense as an advanced functionality to allow changing what a
+parameter has been bound to (e.g. voice 1 volume vs voice 3 volume) with a
+dropdown.
+
+image::automation-changes.png[]
+
+How does this differ from the 3.0.0 workflow?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+MIDI learning bindings cannot currently be changed without unlearning and
+relearning
+
+
+
+Other Issues
+------------
+
+Organizing Macro Slots
+~~~~~~~~~~~~~~~~~~~~~~
+In the 3.0.0 system MIDI learned bindings cannot be organized, by the user and
+IMO that isn't a big problem.
+With the proposed system however the slot ID corresponds to an externally
+exposed parameter used by plugin hosts, so the slot ID is important.
+
+Additionally complex macro automations will add an additional level of
+organizational difficulty.
+Some functionality which has to be considered here is:
+
+- Moving automation slots
+- Naming automation slots
+- Changing global automation slots to instrument slots and visa versa
+
+One example mockup is to include a user settable slot name in the header of
+the [Automation] view:
+
+image::automation-rename.png[]
+
+Adding Onto An Existing Macro Automation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Up to this point in the document, learning a set of automations is framed in
+terms of learning new automation slots. Presumably there should be a mechanism
+to set an active slot to learn new bindings to that particular slot.
+
+Instrument Slots
+~~~~~~~~~~~~~~~~
+
+It is unclear how instrument slots should interact with other types of slots.
+It is also unclear if instrument slots are inherently valuable.
+
+Subproblems
+^^^^^^^^^^^
+
+- How are instrument slots directly learned?
+- How are slots moved from instruments to global versions?
+- How are instrument slots highlighted as different in the user interface?
+
+Active vs. Inactive slots aka the dynamic parameter issue
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+VST hosts can update the number of parameters, but this is vendor specific and
+CANNOT be expected to work reliably
+(e.g. http://www.cockos.com/reaper/sdk/vst/vst_ext.php)
+
+LV2 doesn't support dynamic parameters (at least as far as I can parse their
+reference docs). The extension to do this was LV2 dynparam, however this
+extension appears to be very dead an no host outside zynjacku appeared to use
+it.
+
+Discussion Questions
+--------------------
+
+Q1: Would selecting "Master Automation 1" from a list of plugin parameters be an
+    acceptable tradeoff when using a VST host?
+    (being able to replace the label with "Part 1 Vol" appears unlikely given
+    current plugin host constraints)
+
+Q2: Does providing unbound (to MIDI CC) automation and macro slots to
+    instruments appear useful?
+
+Q3: Does the process of learning a parameter seem easy to use?
+
+Q4: Do you use the existing NRPN mapping to Zyn effects?
+    (should this functionality continue to exist, or should it be replaced
+     with the more general automation/binding functionality)
+
+Q5: Does the idea of having a coarse physical midi control and a fine physical
+    midi control for one parameter sound appealing?
+    (effectively 7 most-significant-bits from one MIDI CC and 7
+     least-significant-bits from another MIDI CC)
+
+Q6: Should the plugin host be supplied with 0..1 representations
+    or -1..1 representations?
+
+Q?: What functionality does this system appear to lack which would improve its
+    usability?
