@@ -51,6 +51,11 @@ class ADnote:public SynthNote
         virtual SynthNote *cloneLegato(void) override;
     private:
 
+        void setupVoice(int nvoice);
+        int  setupVoiceUnison(int nvoice);
+        void setupVoiceDetune(int nvoice);
+        void setupVoiceMod(int nvoice);
+
         /**Changes the frequency of an oscillator.
          * @param nvoice voice to run computations on
          * @param in_freq new frequency*/
