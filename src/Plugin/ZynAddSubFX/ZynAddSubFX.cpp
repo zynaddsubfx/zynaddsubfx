@@ -303,6 +303,11 @@ protected:
         const MiddleWareThread::ScopedStopper mwss(*middlewareThread);
         const MutexLocker cml(mutex);
 
+        if(key && strlen(key) > 1000 && (!value || strlen(value) < 1000)) {
+            //Loading a Jackoo VST File
+            value = key;
+        }
+
         master->defaults();
         master->putalldata(value);
         master->applyparameters();
