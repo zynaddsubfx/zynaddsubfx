@@ -95,6 +95,7 @@ SET (NoNeonPlease False CACHE BOOL
     "Workaround For Broken Neon Detection")
 SET (PluginLibDir "lib" CACHE STRING
     "Install directory for plugin libraries PREFIX/PLUGIN_LIB_DIR/{lv2,vst}")
+SET (DemoMode FALSE CACHE BOOL "Enable 10 minute silence")
 
 # Now, handle the incoming settings and set define flags/variables based
 # on this
@@ -114,6 +115,10 @@ if(HAVE_ASYNC)
     add_definitions(-DHAVE_ASYNC=1)
 else()
     add_definitions(-DHAVE_ASYNC=0)
+endif()
+
+if(DemoMode)
+    add_definitions(-DDEMO_VERSION=1)
 endif()
 
 
