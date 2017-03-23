@@ -848,6 +848,9 @@ void PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
     if(samplemax == 0)
         samplemax = 1;
 
+    if(samplemax > PAD_MAX_SAMPLES)
+        samplemax = PAD_MAX_SAMPLES;
+
     //prepare a BIG FFT
     FFTwrapper *fft      = new FFTwrapper(samplesize);
     fft_t      *fftfreqs = new fft_t[samplesize / 2];
