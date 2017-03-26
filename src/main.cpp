@@ -47,6 +47,10 @@
 #include "UI/Connection.h"
 GUI::ui_handle_t gui;
 
+#ifdef ZEST_GUI
+#include <sys/wait.h>
+#endif
+
 //Glue Layer
 #include "Misc/MiddleWare.h"
 MiddleWare *middleware;
@@ -632,10 +636,12 @@ int wmidi = -1;
     }
 
 #ifdef ZEST_GUI
+    pid_t gui_pid = 0;
     if(!noui) {
         printf("[INFO] Launching Zyn-Fusion...\n");
         const char *addr = middleware->getServerAddress();
-        if(fork() == 0) {
+        gui_pid = fork();
+        if(gui_pid == 0) {
             execlp("zyn-fusion", "zyn-fusion", addr, "--builtin", "--no-hotload",  0);
             execlp("./zyn-fusion", "zyn-fusion", addr, "--builtin", "--no-hotload",  0);
 
@@ -681,6 +687,15 @@ done:
         middleware->tick();
 #ifdef WIN32
         Sleep(1);
+#endif
+
+#ifdef ZEST_GUI
+        if(!noui) {
+            int status = 0;
+            int ret = waitpid(gui_pid, &status, WNOHANG);
+            if(ret == gui_pid)
+                Pexitprogram = 1;
+        }
 #endif
     }
 
