@@ -473,7 +473,8 @@ int wmidi = -1;
         "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
              << "  -N , --named\t\t\t\t Postfix IO Name when possible\n"
              << "  -a , --auto-connect\t\t\t AutoConnect when using JACK\n"
-             << "  -A , --auto-save=INTERVAL\t\t Automatically save at interval (disabled with 0 interval)\n"
+             << "  -A , --auto-save=INTERVAL\t\t Automatically save at interval\n"
+             << "\t\t\t\t\t (disabled with 0 interval)\n"
              << "  -p , --pid-in-client-name\t\t Append PID to (JACK) "
                 "client name\n"
              << "  -P , --preferred-port\t\t\t Preferred OSC Port\n"
@@ -481,6 +482,7 @@ int wmidi = -1;
              << "  -I , --input\t\t\t\t Set Input Engine\n"
              << "  -e , --exec-after-init\t\t Run post-initialization script\n"
              << "  -d , --dump-oscdoc=FILE\t\t Dump oscdoc xml to file\n"
+             << "  -D , --dump-json-schema=FILE\t\t Dump osc schema (.json) to file\n"
              << endl;
 
         return 0;
