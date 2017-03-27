@@ -592,7 +592,7 @@ int wmidi = -1;
     }
 
     printf("[INFO] auto_save setup\n");
-    if(auto_save_interval > 0 && false) {
+    if(auto_save_interval > 0) {
         int old_save = middleware->checkAutoSave();
         if(old_save > 0)
             GUI::raiseUi(gui, "/alert-reload", "i", old_save);
