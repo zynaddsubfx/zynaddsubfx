@@ -160,6 +160,8 @@ static const Ports master_ports = {
        d.reply("/free", "sb", "Part", sizeof(void*), &m->part[i]);
        m->part[i] = p;
        p->initialize_rt();
+       for(int i=0; i<128; ++i)
+           m->activeNotes[i] = 0;
        }},
     {"active_keys:", rProp("Obtain a list of active notes"), 0,
         rBegin;
