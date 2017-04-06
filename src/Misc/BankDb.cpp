@@ -57,7 +57,7 @@ bool BankEntry::match(string s) const
 
 bool BankEntry::operator<(const BankEntry &b) const
 {
-    return this->file < b.file;
+    return (this->bank+this->file) < (b.bank+b.file);
 }
 
 static svec split(string s)
