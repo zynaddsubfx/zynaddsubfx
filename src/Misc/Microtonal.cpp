@@ -25,11 +25,13 @@
 #include "Util.h"
 #include "Microtonal.h"
 
+using namespace rtosc;
 
 #define MAX_LINE_SIZE 80
 
+namespace zyn {
+
 #define rObject Microtonal
-using namespace rtosc;
 
 /**
  * TODO
@@ -851,4 +853,6 @@ void Microtonal::apply(void)
         }
         int err = texttotunings(buf);
     }
+}
+
 }

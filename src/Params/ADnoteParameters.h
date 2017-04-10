@@ -17,6 +17,8 @@
 #include "../globals.h"
 #include "PresetsArray.h"
 
+namespace zyn {
+
 enum FMTYPE {
     NONE, MORPH, RING_MOD, PHASE_MOD, FREQ_MOD, PW_MOD
 };
@@ -337,5 +339,7 @@ class ADnoteParameters:public PresetsArray
         const AbsTime *time;
         int64_t last_update_timestamp;
 };
+
+}
 
 #endif

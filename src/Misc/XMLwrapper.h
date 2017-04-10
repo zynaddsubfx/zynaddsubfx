@@ -21,6 +21,8 @@
 #ifndef XML_WRAPPER_H
 #define XML_WRAPPER_H
 
+namespace zyn {
+
 class XmlAttr
 {
     public:
@@ -284,5 +286,7 @@ class XMLwrapper
 public:
         version_type _fileversion;
 };
+
+}
 
 #endif

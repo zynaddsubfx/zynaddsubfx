@@ -26,6 +26,8 @@
 #include "../Params/Controller.h"
 #include "../Synth/WatchPoint.h"
 
+namespace zyn {
+
 class Allocator;
 
 struct vuData {
@@ -198,5 +200,7 @@ class Master
         void(*mastercb)(void*,Master*);
         void* mastercb_ptr;
 };
+
+}
 
 #endif

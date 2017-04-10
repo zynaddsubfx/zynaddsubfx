@@ -18,12 +18,14 @@
 
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
+using namespace rtosc;
+
+namespace zyn {
 
 #define rObject Resonance
 #define rBegin [](const char *msg, RtData &d) { rObject &o = *(rObject*)d.obj
-
 #define rEnd }
-using namespace rtosc;
+
 const rtosc::Ports Resonance::ports = {
     rSelf(Resonance),
     rPaste,
@@ -318,4 +320,6 @@ void Resonance::getfromXML(XMLwrapper& xml)
         Prespoints[i] = xml.getpar127("val", Prespoints[i]);
         xml.exitbranch();
     }
+}
+
 }

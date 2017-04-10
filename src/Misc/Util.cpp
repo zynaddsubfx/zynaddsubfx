@@ -36,6 +36,8 @@
 
 #include <rtosc/rtosc.h>
 
+namespace zyn {
+
 bool isPlugin = false;
 
 prng_t prng_state = 0x1234;
@@ -224,4 +226,6 @@ char *rtosc_splat(const char *path, std::set<std::string> v)
     char *buf = new char[len];
     rtosc_amessage(buf, len, path, argT, arg);
     return buf;
+}
+
 }

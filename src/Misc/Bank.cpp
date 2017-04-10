@@ -31,12 +31,14 @@
 #include "Part.h"
 #include "BankDb.h"
 
-#define INSTRUMENT_EXTENSION ".xiz"
+using namespace std;
+
+namespace zyn {
+
+static const char* INSTRUMENT_EXTENSION = ".xiz";
 
 //if this file exists into a directory, this make the directory to be considered as a bank, even if it not contains a instrument file
-#define FORCE_BANK_DIR_FILE ".bankdir"
-
-using namespace std;
+const char* FORCE_BANK_DIR_FILE = ".bankdir";
 
 Bank::Bank(Config *config)
     :bankpos(0), defaultinsname(" "), config(config),
@@ -543,4 +545,6 @@ void Bank::normalizedirsuffix(string &dirname) const {
     if(((dirname[dirname.size() - 1]) != '/')
        && ((dirname[dirname.size() - 1]) != '\\'))
         dirname += "/";
+}
+
 }

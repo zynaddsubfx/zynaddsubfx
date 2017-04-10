@@ -25,6 +25,8 @@
 
 using namespace std;
 
+namespace zyn {
+
 //XXX to remove
 //PresetsStore presetsstore;
 
@@ -180,4 +182,6 @@ void PresetsStore::deletepreset(std::string filename)
             return;
         }
     }
+}
+
 }

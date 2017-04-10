@@ -27,6 +27,9 @@
 
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
+
+namespace zyn {
+
 using rtosc::Ports;
 using rtosc::RtData;
 
@@ -1246,4 +1249,6 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
         }
         xml.exitbranch();
     }
+}
+
 }

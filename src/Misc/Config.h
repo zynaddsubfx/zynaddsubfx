@@ -23,6 +23,8 @@ namespace rtosc
     struct Ports;
 }
 
+namespace zyn {
+
 class oss_devs_t
 {
     public:
@@ -73,4 +75,7 @@ class Config
         void saveConfig(const char *filename) const;
         void getConfigFileName(char *name, int namesize) const;
 };
+
+}
+
 #endif

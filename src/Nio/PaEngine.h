@@ -18,6 +18,8 @@
 #include "../globals.h"
 #include "AudioOut.h"
 
+namespace zyn {
+
 class PaEngine:public AudioOut
 {
     public:
@@ -42,7 +44,8 @@ class PaEngine:public AudioOut
         PaStream *stream;
 };
 
-
 void PAfinish();
+
+}
 
 #endif

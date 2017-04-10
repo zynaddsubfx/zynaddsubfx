@@ -17,6 +17,8 @@
 #include <string>
 #include <vector>
 
+namespace zyn {
+
 class XMLwrapper;
 class PresetsStore
 {
@@ -55,4 +57,7 @@ class PresetsStore
 };
 
 //extern PresetsStore presetsstore;
+
+}
+
 #endif

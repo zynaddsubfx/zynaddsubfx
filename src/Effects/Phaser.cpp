@@ -21,8 +21,9 @@
 #include <rtosc/port-sugar.h>
 #include "../Misc/Allocator.h"
 #include "Phaser.h"
-
 using namespace std;
+
+namespace zyn {
 
 #define rObject Phaser
 #define rBegin [](const char *msg, rtosc::RtData &d) {
@@ -495,4 +496,6 @@ unsigned char Phaser::getpar(int npar) const
         case 14: return Panalog;
         default: return 0;
     }
+}
+
 }

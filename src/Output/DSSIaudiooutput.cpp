@@ -34,7 +34,7 @@ class WavFile;
 namespace Nio {
     bool start(void){return 1;};
     void stop(void){};
-    void masterSwap(Master *){};
+    void masterSwap(zyn::Master *){};
     void waveNew(WavFile *){}
     void waveStart(void){}
     void waveStop(void){}
@@ -422,7 +422,7 @@ void DSSIaudiooutput::runSynth(unsigned long sample_count,
     unsigned long next_event_frame = 0;
     unsigned long to_frame = 0;
 
-    Master *master = middleware->spawnMaster();
+    zyn::Master *master = middleware->spawnMaster();
 
     // forward all dssi control values to the middleware
     for (size_t dssi_control_index = 0;
@@ -616,7 +616,7 @@ DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate) : dssi_control{dssi_c
                                                                            dssi_control_description[10],
                                                                            dssi_control_description[11]}
 {
-    SYNTH_T synth;
+    zyn::SYNTH_T synth;
     synth.samplerate = sampleRate;
 
     this->sampleRate  = sampleRate;
@@ -624,10 +624,10 @@ DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate) : dssi_control{dssi_c
 
     config.init();
 
-    sprng(time(NULL));
+    zyn::sprng(time(NULL));
 
     synth.alias();
-    middleware = new MiddleWare(std::move(synth), &config);
+    middleware = new zyn::MiddleWare(std::move(synth), &config);
     initBanks();
     loadThread = new std::thread([this]() {
             while(middleware) {
@@ -680,7 +680,7 @@ long DSSIaudiooutput::bankNoToMap = 1;
  */
 bool DSSIaudiooutput::mapNextBank()
 {
-    Bank &bank  = middleware->spawnMaster()->bank;
+    zyn::Bank &bank  = middleware->spawnMaster()->bank;
     auto &banks = bank.banks;
     if(bankNoToMap >= (int)banks.size() || banks[bankNoToMap].dir.empty())
         return false;

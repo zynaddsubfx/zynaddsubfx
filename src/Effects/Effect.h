@@ -19,9 +19,6 @@
 #include "../Params/FilterParams.h"
 #include "../Misc/Stereo.h"
 
-class FilterParams;
-class Allocator;
-
 #ifndef rEffPar
 #define rEffPar(name, idx, ...) \
   {STRINGIFY(name) "::i",  rProp(parameter) DOC(__VA_ARGS__), NULL, rEffParCb(idx)}
@@ -42,6 +39,11 @@ class Allocator;
         else \
             d.reply(d.loc, obj.getpar(idx)?"T":"F");}
 #endif
+
+namespace zyn {
+
+class FilterParams;
+class Allocator;
 
 struct EffectParams
 {
@@ -153,5 +155,7 @@ class Effect
             bufferbytes      = buffersize * sizeof(float);
         }
 };
+
+}
 
 #endif

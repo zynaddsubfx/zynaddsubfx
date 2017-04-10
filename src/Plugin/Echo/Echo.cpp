@@ -20,7 +20,7 @@
 /* ------------------------------------------------------------------------------------------------------------
  * Echo plugin class */
 
-class EchoPlugin : public AbstractPluginFX<Echo>
+class EchoPlugin : public AbstractPluginFX<zyn::Echo>
 {
 public:
     EchoPlugin()

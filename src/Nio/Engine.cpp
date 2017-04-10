@@ -12,8 +12,12 @@
 */
 #include "Engine.h"
 
+namespace zyn {
+
 Engine::Engine()
 {}
 
 Engine::~Engine()
 {}
+
+}

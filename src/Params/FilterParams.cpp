@@ -23,8 +23,9 @@
 #include <rtosc/rtosc.h>
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
-
 using namespace rtosc;
+
+namespace zyn {
 
 // g++ 4.8 needs this variable saved separately, otherwise it segfaults
 constexpr int sizeof_pvowels = sizeof(FilterParams::Pvowels);
@@ -576,4 +577,6 @@ void FilterParams::pasteArray(FilterParams &x, int nvowel)
     if ( time ) {
         last_update_timestamp = time->time();
     }
+}
+
 }

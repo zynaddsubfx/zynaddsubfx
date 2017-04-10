@@ -25,6 +25,7 @@
 #include <rtosc/port-sugar.h>
 using namespace rtosc;
 
+namespace zyn {
 
 #define rObject PADnoteParameters
 #undef rChangeCb
@@ -253,8 +254,8 @@ static const rtosc::Ports non_realtime_ports =
 };
 #undef rChangeCb
 
-const rtosc::Ports &PADnoteParameters::non_realtime_ports = ::non_realtime_ports;
-const rtosc::Ports &PADnoteParameters::realtime_ports     = ::realtime_ports;
+const rtosc::Ports &PADnoteParameters::non_realtime_ports = zyn::non_realtime_ports;
+const rtosc::Ports &PADnoteParameters::realtime_ports     = zyn::realtime_ports;
 
 
 const rtosc::MergePorts PADnoteParameters::ports =
@@ -1244,3 +1245,5 @@ void PADnoteParameters::pasteRT(PADnoteParameters &x)
     }
 }
 #undef COPY
+
+}

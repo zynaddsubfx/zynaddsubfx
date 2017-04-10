@@ -20,6 +20,8 @@
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
 
+namespace zyn {
+
 #define rObject DynamicFilter
 #define rBegin [](const char *msg, rtosc::RtData &d) {
 #define rEnd }
@@ -350,4 +352,6 @@ unsigned char DynamicFilter::getpar(int npar) const
         case 9:  return Pampsmooth;
         default: return 0;
     }
+}
+
 }

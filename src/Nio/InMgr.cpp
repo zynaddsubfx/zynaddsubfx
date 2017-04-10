@@ -17,10 +17,11 @@
 #include "../Misc/MiddleWare.h"
 #include <rtosc/thread-link.h>
 #include <iostream>
-
 using namespace std;
 
-extern MiddleWare *middleware;
+extern zyn::MiddleWare *middleware;
+
+namespace zyn {
 
 ostream &operator<<(ostream &out, const MidiEvent &ev)
 {
@@ -171,4 +172,6 @@ MidiIn *InMgr::getIn(string name)
 void InMgr::setMaster(Master *master_)
 {
     master = master_;
+}
+
 }

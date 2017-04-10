@@ -34,7 +34,7 @@ struct DSSIControl {
      * update the current control to the Master in charge of dispatching them to the parts, effects, ...
      * @param master the controller master in charge of further dispatch
      */
-    void forward_control(Master *master);
+    void forward_control(zyn::Master *master);
 
     /**
      * scale the incoming value refereced by data in the hinted range to one expected by the Master dispatcher.

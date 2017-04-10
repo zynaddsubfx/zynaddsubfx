@@ -14,6 +14,6 @@
 #include "DSSIControl.h"
 #include "../Misc/Master.h"
 
-void DSSIControl::forward_control(Master *master) {
+void DSSIControl::forward_control(zyn::Master *master) {
     master->setController(0, description.controller_code, get_scaled_data());
 }

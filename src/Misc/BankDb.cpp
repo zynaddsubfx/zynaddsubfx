@@ -6,7 +6,9 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
-#define INSTRUMENT_EXTENSION ".xiz"
+namespace zyn {
+
+static const char* INSTRUMENT_EXTENSION = ".xiz";
 
 using std::string;
 typedef BankDb::svec svec;
@@ -338,4 +340,6 @@ BankEntry BankDb::processXiz(std::string filename,
     //printf("\tadd/pad/sub - %d/%d/%d\n", entry.add, entry.pad, entry.sub);
 
     return entry;
+}
+
 }

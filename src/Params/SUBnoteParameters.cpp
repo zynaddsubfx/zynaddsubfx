@@ -22,10 +22,11 @@
 
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
-
-#define rObject SUBnoteParameters
 using namespace rtosc;
 
+namespace zyn {
+
+#define rObject SUBnoteParameters
 #define rBegin [](const char *msg, RtData &d) { \
     SUBnoteParameters *obj = (SUBnoteParameters*) d.obj
 #define rEnd }
@@ -589,4 +590,6 @@ void SUBnoteParameters::getfromXML(XMLwrapper& xml)
 
         xml.exitbranch();
     }
+}
+
 }

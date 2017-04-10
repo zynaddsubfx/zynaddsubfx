@@ -20,7 +20,7 @@
 /* ------------------------------------------------------------------------------------------------------------
  * Distortion plugin class */
 
-class DistortionPlugin : public AbstractPluginFX<Distorsion>
+class DistortionPlugin : public AbstractPluginFX<zyn::Distorsion>
 {
 public:
     DistortionPlugin()

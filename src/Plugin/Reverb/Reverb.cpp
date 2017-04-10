@@ -20,7 +20,7 @@
 /* ------------------------------------------------------------------------------------------------------------
  * Reverb plugin class */
 
-class ReverbPlugin : public AbstractPluginFX<Reverb>
+class ReverbPlugin : public AbstractPluginFX<zyn::Reverb>
 {
 public:
     ReverbPlugin()

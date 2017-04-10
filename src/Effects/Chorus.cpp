@@ -17,8 +17,9 @@
 #include "../Misc/Allocator.h"
 #include "Chorus.h"
 #include <iostream>
-
 using namespace std;
+
+namespace zyn {
 
 #define rObject Chorus
 #define rBegin [](const char *msg, rtosc::RtData &d) {
@@ -293,4 +294,6 @@ unsigned char Chorus::getpar(int npar) const
         case 11: return Poutsub;
         default: return 0;
     }
+}
+
 }

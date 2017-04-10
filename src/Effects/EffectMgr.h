@@ -16,13 +16,15 @@
 
 #include <pthread.h>
 
+#include "../Params/FilterParams.h"
+#include "../Params/Presets.h"
+
+namespace zyn {
+
 class Effect;
 class FilterParams;
 class XMLwrapper;
 class Allocator;
-
-#include "../Params/FilterParams.h"
-#include "../Params/Presets.h"
 
 /** Effect manager, an interface between the program and effects */
 class EffectMgr:public Presets
@@ -81,5 +83,7 @@ class EffectMgr:public Presets
         Allocator &memory;
         const SYNTH_T &synth;
 };
+
+}
 
 #endif

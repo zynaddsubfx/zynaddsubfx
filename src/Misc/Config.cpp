@@ -22,6 +22,8 @@
 #include "../globals.h"
 #include "XMLwrapper.h"
 
+namespace zyn {
+
 #define rStdString(name, len, ...) \
     {STRINGIFY(name) "::s", rMap(length, len) rProp(parameter) DOC(__VA_ARGS__), NULL, rStringCb(name,len)}
 #define rStdStringCb(name, length) rBOIL_BEGIN \
@@ -168,7 +170,7 @@ static const rtosc::Ports ports = {
             delete [] args;
         }},
 };
-const rtosc::Ports &Config::ports = ::ports;
+const rtosc::Ports &Config::ports = zyn::ports;
 #endif
 
 Config::Config()
@@ -448,4 +450,6 @@ void Config::getConfigFileName(char *name, int namesize) const
 {
     name[0] = 0;
     snprintf(name, namesize, "%s%s", getenv("HOME"), "/.zynaddsubfxXML.cfg");
+}
+
 }

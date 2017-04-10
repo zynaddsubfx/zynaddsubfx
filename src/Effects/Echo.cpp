@@ -21,6 +21,8 @@
 
 #define MAX_DELAY 2
 
+namespace zyn {
+
 #define rObject Echo
 #define rBegin [](const char *msg, rtosc::RtData &d) {
 #define rEnd }
@@ -254,4 +256,6 @@ unsigned char Echo::getpar(int npar) const
         case 6:  return Phidamp;
         default: return 0; // in case of bogus parameter number
     }
+}
+
 }

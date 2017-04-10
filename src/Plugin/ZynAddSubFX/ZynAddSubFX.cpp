@@ -52,7 +52,7 @@ public:
                   thread.start(middleware);
           }
 
-          void updateMiddleWare(MiddleWare* const mw) noexcept
+	  void updateMiddleWare(zyn::MiddleWare* const mw) noexcept
           {
               middleware = mw;
           }
@@ -60,7 +60,7 @@ public:
       private:
           const bool wasRunning;
           MiddleWareThread& thread;
-          MiddleWare* middleware;
+	  zyn::MiddleWare* middleware;
 
           DISTRHO_PREVENT_HEAP_ALLOCATION
           DISTRHO_DECLARE_NON_COPY_CLASS(ScopedStopper)
@@ -70,7 +70,7 @@ public:
           : Thread("ZynMiddleWare"),
             middleware(nullptr) {}
 
-      void start(MiddleWare* const mw) noexcept
+      void start(zyn::MiddleWare* const mw) noexcept
       {
           middleware = mw;
           startThread();
@@ -96,7 +96,7 @@ protected:
     }
 
 private:
-    MiddleWare* middleware;
+    zyn::MiddleWare* middleware;
 
     DISTRHO_DECLARE_NON_COPY_CLASS(MiddleWareThread)
 };
@@ -191,7 +191,9 @@ protected:
     */
     uint32_t getVersion() const noexcept override
     {
-    return d_version(version.get_major(), version.get_minor(), version.get_revision());
+        return d_version(zyn::version.get_major(),
+                         zyn::version.get_minor(),
+                         zyn::version.get_revision());
     }
 
    /**
@@ -398,7 +400,7 @@ protected:
                 const uint8_t msb = midiEvent.data[2];
                 const int   value = ((msb << 7) | lsb) - 8192;
 
-                master->setController(channel, C_pitchwheel, value);
+                master->setController(channel, zyn::C_pitchwheel, value);
             } break;
             }
         }
@@ -464,10 +466,10 @@ protected:
     }
 
 private:
-    Config      config;
-    Master*     master;
-    MiddleWare* middleware;
-    SYNTH_T     synth;
+    zyn::Config      config;
+    zyn::Master*     master;
+    zyn::MiddleWare* middleware;
+    zyn::SYNTH_T     synth;
 
     Mutex mutex;
     char* defaultState;
@@ -486,7 +488,7 @@ private:
 
     void _initMaster()
     {
-        middleware = new MiddleWare(std::move(synth), &config);
+	middleware = new zyn::MiddleWare(std::move(synth), &config);
         middleware->setUiCallback(__uiCallback, this);
         middleware->setIdleCallback(__idleCallback, this);
         _masterChangedCallback(middleware->spawnMaster());
@@ -512,13 +514,13 @@ private:
    /* --------------------------------------------------------------------------------------------------------
     * ZynAddSubFX Callbacks */
 
-    void _masterChangedCallback(Master* m)
+    void _masterChangedCallback(zyn::Master* m)
     {
         master = m;
         master->setMasterChangedCallback(__masterChangedCallback, this);
     }
 
-    static void __masterChangedCallback(void* ptr, Master* m)
+    static void __masterChangedCallback(void* ptr, zyn::Master* m)
     {
         ((ZynAddSubFX*)ptr)->_masterChangedCallback(m);
     }
@@ -559,7 +561,7 @@ START_NAMESPACE_DISTRHO
 
 Plugin* createPlugin()
 {
-    ::isPlugin = true;
+    zyn::isPlugin = true;
     return new ZynAddSubFX();
 }
 
@@ -570,7 +572,7 @@ END_NAMESPACE_DISTRHO
 
 class WavFile;
 namespace Nio {
-   void masterSwap(Master*){}
+   void masterSwap(zyn::Master*){}
    bool setSource(std::string){return true;}
    bool setSink(std::string){return true;}
    std::set<std::string> getSources(void){return std::set<std::string>();}

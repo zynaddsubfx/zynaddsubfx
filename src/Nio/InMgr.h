@@ -16,6 +16,8 @@
 #include "ZynSema.h"
 #include "SafeQueue.h"
 
+namespace zyn {
+
 enum midi_type {
     M_NOTE = 1,
     M_CONTROLLER = 2,
@@ -64,5 +66,7 @@ class InMgr
         /**the link to the rest of zyn*/
         class Master *master;
 };
+
+}
 
 #endif

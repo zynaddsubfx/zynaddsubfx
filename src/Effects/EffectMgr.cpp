@@ -16,7 +16,6 @@
 #include <iostream>
 #include <cassert>
 
-
 #include "EffectMgr.h"
 #include "Effect.h"
 #include "Alienwah.h"
@@ -32,6 +31,7 @@
 #include "../Params/FilterParams.h"
 #include "../Misc/Allocator.h"
 
+namespace zyn {
 
 #define rObject EffectMgr
 #define rSubtype(name) \
@@ -514,4 +514,6 @@ void EffectMgr::getfromXML(XMLwrapper& xml)
         xml.exitbranch();
     }
     cleanup();
+}
+
 }

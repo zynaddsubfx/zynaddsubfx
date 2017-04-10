@@ -22,6 +22,8 @@
 
 #include <functional>
 
+namespace zyn {
+
 /** Part implementation*/
 class Part
 {
@@ -199,5 +201,7 @@ class Part
         const AbsTime &time;
         const int &gzip_compression, &interpolation;
 };
+
+}
 
 #endif

@@ -23,6 +23,8 @@
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
 
+namespace zyn {
+
 using std::min;
 using std::max;
 
@@ -180,5 +182,7 @@ rPresetType, \
         int field = rtosc_argument(m,1).i; \
         rObject &o = *(rObject*)d.obj;\
         o.pasteArray(paste,field);}}
+
+}
 
 #endif

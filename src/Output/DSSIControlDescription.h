@@ -26,7 +26,7 @@ struct DSSIControlDescription {
 
     const static int MAX_DSSI_CONTROLS = 12;
 
-    const MidiControllers controller_code; /// controler code, as accepted by the Controller class
+    const zyn::MidiControllers controller_code; /// controler code, as accepted by the Controller class
     const char *name; /// human readable name of this control
 
     /** hint about usable range of value for this control, defaulting to 0-128, initially at 64 */
@@ -38,8 +38,9 @@ struct DSSIControlDescription {
      * @param controller_code the controller code
      * @param name the human readable code name
      */
-    DSSIControlDescription(MidiControllers controller_code, const char *name) : controller_code(controller_code),
-                                                                                name(name) { }
+    DSSIControlDescription(zyn::MidiControllers controller_code, const char *name) :
+	controller_code(controller_code),
+	name(name) { }
 
     /**
      * Ctr for a DSSIControlDescription
@@ -47,7 +48,7 @@ struct DSSIControlDescription {
      * @param name the human readable code name
      * @param port_range_hint the accepted range of values
      */
-    DSSIControlDescription(MidiControllers controller_code, const char *name, LADSPA_PortRangeHint port_range_hint) :
+    DSSIControlDescription(zyn::MidiControllers controller_code, const char *name, LADSPA_PortRangeHint port_range_hint) :
             controller_code(controller_code), name(name), port_range_hint(port_range_hint) { }
 
 };

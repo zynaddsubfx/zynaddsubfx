@@ -24,6 +24,8 @@
 #include "OutMgr.h"
 #include "../Misc/Stereo.h"
 
+namespace zyn {
+
 class AlsaEngine:public AudioOut, MidiIn
 {
     public:
@@ -73,5 +75,7 @@ class AlsaEngine:public AudioOut, MidiIn
 
         void *processAudio();
 };
+
+}
 
 #endif

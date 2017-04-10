@@ -18,6 +18,8 @@
 #include "../Misc/XMLwrapper.h"
 #include "Presets.h"
 
+namespace zyn {
+
 class EnvelopeParams:public Presets
 {
     public:
@@ -85,5 +87,7 @@ class EnvelopeParams:public Presets
         unsigned char DA_dt, DD_dt, DR_dt,
                       DA_val, DD_val, DS_val, DR_val;
 };
+
+}
 
 #endif

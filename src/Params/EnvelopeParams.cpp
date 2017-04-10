@@ -22,8 +22,11 @@
 #include "../Misc/Util.h"
 #include "../Misc/Time.h"
 
-#define rObject EnvelopeParams
 using namespace rtosc;
+
+namespace zyn {
+
+#define rObject EnvelopeParams
 #define rBegin [](const char *msg, RtData &d) { \
     EnvelopeParams *env = (rObject*) d.obj
 #define rEnd }
@@ -481,4 +484,6 @@ void EnvelopeParams::store2defaults()
     DD_val = PD_val;
     DS_val = PS_val;
     DR_val = PR_val;
+}
+
 }

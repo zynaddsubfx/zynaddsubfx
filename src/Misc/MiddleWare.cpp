@@ -56,6 +56,8 @@
 #include <err.h>
 #endif
 
+namespace zyn {
+
 using std::string;
 int Pexitprogram = 0;
 
@@ -2164,4 +2166,6 @@ const PresetsStore& MiddleWare::getPresetsStore() const
 PresetsStore& MiddleWare::getPresetsStore()
 {
     return impl->presetsstore;
+}
+
 }

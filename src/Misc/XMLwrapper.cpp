@@ -27,6 +27,8 @@
 
 using namespace std;
 
+namespace zyn {
+
 int  xml_k   = 0;
 bool verbose = false;
 
@@ -676,4 +678,6 @@ std::vector<XmlNode> XMLwrapper::getBranch(void) const
         current = mxmlWalkNext(current, node, MXML_NO_DESCEND);
     }
     return res;
+}
+
 }

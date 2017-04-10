@@ -20,7 +20,7 @@
 /* ------------------------------------------------------------------------------------------------------------
  * Phaser plugin class */
 
-class PhaserPlugin : public AbstractPluginFX<Phaser>
+class PhaserPlugin : public AbstractPluginFX<zyn::Phaser>
 {
 public:
     PhaserPlugin()

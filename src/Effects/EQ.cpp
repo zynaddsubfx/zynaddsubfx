@@ -18,6 +18,8 @@
 #include "../DSP/AnalogFilter.h"
 #include "../Misc/Allocator.h"
 
+namespace zyn {
+
 using rtosc::RtData;
 #define rObject EQ
 #define rBegin [](const char *msg, RtData &d) {\
@@ -296,4 +298,6 @@ void EQ::getFilter(float *a, float *b) const
             }
         }
     }
+}
+
 }

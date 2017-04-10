@@ -27,6 +27,8 @@
 
 #define OSCIL_SMP_EXTRA_SAMPLES 5
 
+namespace zyn {
+
 /**The "additive" synthesizer*/
 class ADnote:public SynthNote
 {
@@ -321,5 +323,7 @@ class ADnote:public SynthNote
         //how the fine detunes are made bigger or smaller
         float bandwidthDetuneMultiplier;
 };
+
+}
 
 #endif

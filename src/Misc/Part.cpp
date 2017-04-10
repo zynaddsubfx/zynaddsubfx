@@ -37,6 +37,8 @@
 #include <rtosc/port-sugar.h>
 #include <iostream>
 
+namespace zyn {
+
 using rtosc::Ports;
 using rtosc::RtData;
 
@@ -1207,4 +1209,6 @@ uint8_t Part::Kit::sendto(void) const
 bool Part::Kit::validNote(char note) const
 {
     return !Pmuted && inRange((uint8_t)note, Pminkey, Pmaxkey);
+}
+
 }

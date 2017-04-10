@@ -14,6 +14,10 @@
 #include <cstdarg>
 #include <string>
 
+class Fl_Osc_Interface;
+
+namespace zyn {
+
 struct SYNTH_T;
 class  Master;
 class PresetsStore;
@@ -41,7 +45,7 @@ class MiddleWare
         void removeAutoSave(void);
 
         //return  UI interface
-        class Fl_Osc_Interface *spawnUiApi(void);
+        Fl_Osc_Interface *spawnUiApi(void);
         //Set callback to push UI events to
         void setUiCallback(void(*cb)(void*,const char *),void *ui);
         //Set callback to run while busy
@@ -81,3 +85,6 @@ class MiddleWare
     private:
         class MiddleWareImpl *impl;
 };
+
+}
+

@@ -1,6 +1,16 @@
 #include <ostream>
 #include <rtosc/ports.h>
 using namespace rtosc;
+
+// forwards declaration from rtosc lib
+void walk_ports2(const rtosc::Ports *base,
+                 char         *name_buffer,
+                 size_t        buffer_size,
+                 void         *data,
+                 rtosc::port_walker_t walker);
+
+namespace zyn {
+
 /*
  * root :
  *   - 'parameters' : [parameter...]
@@ -24,13 +34,6 @@ using namespace rtosc;
  *   - 'id'    : id-number
  *   - 'value' : string-rep
  */
-
-void walk_ports2(const rtosc::Ports *base,
-                 char         *name_buffer,
-                 size_t        buffer_size,
-                 void         *data,
-                 rtosc::port_walker_t walker);
-
 
 using std::ostream;
 using std::string;
@@ -221,4 +224,4 @@ void dump_json(std::ostream &o, const rtosc::Ports &p)
     o << "}";
 }
 
-
+}

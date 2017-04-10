@@ -36,11 +36,13 @@
 #include <algorithm>
 #include <cmath>
 #include <atomic>
-
 #include <unistd.h>
 
 using namespace std;
 using namespace rtosc;
+
+namespace zyn {
+
 #define rObject Master
 
 static const Ports sysefxPort =
@@ -1249,4 +1251,6 @@ void Master::getfromXML(XMLwrapper& xml)
 
         xml.exitbranch();
     }
+}
+
 }

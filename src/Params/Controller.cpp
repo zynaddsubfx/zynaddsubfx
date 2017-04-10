@@ -22,6 +22,8 @@
 #include <rtosc/port-sugar.h>
 using namespace rtosc;
 
+namespace zyn {
+
 #define rObject Controller
 
 #undef rChangeCb
@@ -466,4 +468,6 @@ void Controller::getfromXML(XMLwrapper& xml)
                                            resonancecenter.depth);
     resonancebandwidth.depth = xml.getpar127("resonance_bandwidth_depth",
                                               resonancebandwidth.depth);
+}
+
 }

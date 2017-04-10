@@ -23,6 +23,7 @@
 #include <rtosc/ports.h>
 using namespace rtosc;
 
+namespace zyn {
 
 #define rObject LFOParams
 #undef rChangeCb
@@ -173,3 +174,5 @@ void LFOParams::paste(LFOParams &x)
     }
 }
 #undef COPY
+
+}

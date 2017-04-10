@@ -53,14 +53,22 @@ GUI::ui_handle_t gui;
 
 //Glue Layer
 #include "Misc/MiddleWare.h"
-MiddleWare *middleware;
 
 using namespace std;
+using namespace zyn;
+
+MiddleWare *middleware;
 
 Master   *master;
 int       swaplr = 0; //1 for left-right swapping
 
-extern int Pexitprogram;     //if the UI set this to 1, the program will exit
+// forward declarations of namespace zyn
+namespace zyn
+{
+    extern int Pexitprogram;     //if the UI set this to 1, the program will exit
+    void dump_json(std::ostream &o,
+                   const rtosc::Ports &p);
+}
 
 #if LASH
 #include "Misc/LASHClient.h"
@@ -435,8 +443,6 @@ int wmidi = -1;
                 if(optarguments)
                 {
                     ofstream outfile(optarguments);
-                    void dump_json(std::ostream &o,
-                            const rtosc::Ports &p);
                     dump_json(outfile, Master::ports);
                 }
                 break;

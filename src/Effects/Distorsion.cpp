@@ -19,6 +19,8 @@
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
 
+namespace zyn {
+
 #define rObject Distorsion
 #define rBegin [](const char *msg, rtosc::RtData &d) {
 #define rEnd }
@@ -292,4 +294,6 @@ unsigned char Distorsion::getpar(int npar) const
         case 10: return Pprefiltering;
         default: return 0; //in case of bogus parameter number
     }
+}
+
 }

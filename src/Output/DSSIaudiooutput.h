@@ -96,7 +96,7 @@ class DSSIaudiooutput
         LADSPA_Data *outl;
         LADSPA_Data *outr;
         long    sampleRate;
-        MiddleWare *middleware;
+	zyn::MiddleWare *middleware;
         std::thread *loadThread;
         static DSSI_Descriptor *dssiDescriptor;
         static std::string      bankDirNames[];
@@ -110,7 +110,7 @@ class DSSIaudiooutput
         bool banksInited;
 
         static long bankNoToMap;
-        Config config;
+	zyn::Config config;
 };
 
 #endif

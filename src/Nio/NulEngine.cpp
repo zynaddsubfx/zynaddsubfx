@@ -16,8 +16,9 @@
 
 #include <unistd.h>
 #include <iostream>
-
 using namespace std;
+
+namespace zyn {
 
 NulEngine::NulEngine(const SYNTH_T &synth_)
     :AudioOut(synth_), pThread(NULL)
@@ -101,4 +102,6 @@ void NulEngine::setAudioEn(bool nval)
 bool NulEngine::getAudioEn() const
 {
     return pThread;
+}
+
 }

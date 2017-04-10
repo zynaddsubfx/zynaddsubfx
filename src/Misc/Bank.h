@@ -22,6 +22,8 @@
 //entries in a bank
 #define BANK_SIZE 160
 
+namespace zyn {
+
 /**The instrument Bank*/
 class Bank
 {
@@ -109,5 +111,7 @@ class Bank
         uint8_t bank_msb;
         uint8_t bank_lsb;
 };
+
+}
 
 #endif

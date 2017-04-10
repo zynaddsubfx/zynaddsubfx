@@ -18,6 +18,8 @@
 #include "../Misc/XMLwrapper.h"
 #include "PresetsArray.h"
 
+namespace zyn {
+
 class FilterParams:public PresetsArray
 {
     public:
@@ -97,5 +99,7 @@ class FilterParams:public PresetsArray
         unsigned char Dfreq;
         unsigned char Dq;
 };
+
+}
 
 #endif

@@ -51,7 +51,7 @@ public:
     {
         efxoutl = new float[bufferSize];
         efxoutr = new float[bufferSize];
-        filterpar = new FilterParams();
+        filterpar = new zyn::FilterParams();
         std::memset(efxoutl, 0, sizeof(float)*bufferSize);
         std::memset(efxoutr, 0, sizeof(float)*bufferSize);
 
@@ -100,9 +100,9 @@ protected:
     */
     uint32_t getVersion() const noexcept override
     {
-        return d_version(version.get_major(),
-                         version.get_minor(),
-                         version.get_revision());
+        return d_version(zyn::version.get_major(),
+                         zyn::version.get_minor(),
+                         zyn::version.get_revision());
     }
 
    /* --------------------------------------------------------------------------------------------------------
@@ -179,7 +179,7 @@ protected:
             multiply(outputs[1], 0.5f, frames);
 
         // FIXME: Make Zyn use const floats
-        effect->out(Stereo<float*>((float*)inputs[0], (float*)inputs[1]));
+        effect->out(zyn::Stereo<float*>((float*)inputs[0], (float*)inputs[1]));
 
         addWithMultiply(outputs[0], efxoutl, 0.5f, frames);
         addWithMultiply(outputs[1], efxoutr, 0.5f, frames);
@@ -234,12 +234,12 @@ private:
     uint32_t bufferSize;
     double   sampleRate;
 
-    Effect* effect;
+    zyn::Effect* effect;
     float*  efxoutl;
     float*  efxoutr;
-    FilterParams* filterpar;
+    zyn::FilterParams* filterpar;
 
-    AllocatorClass allocator;
+    zyn::AllocatorClass allocator;
 
     void doReinit(const bool firstInit)
     {
@@ -254,7 +254,7 @@ private:
             delete effect;
         }
 
-        EffectParams pars(allocator, false, efxoutl, efxoutr, 0, static_cast<uint>(sampleRate), static_cast<int>(bufferSize), filterpar);
+        zyn::EffectParams pars(allocator, false, efxoutl, efxoutr, 0, static_cast<uint>(sampleRate), static_cast<int>(bufferSize), filterpar);
         effect = new ZynFX(pars);
 
         if (firstInit)

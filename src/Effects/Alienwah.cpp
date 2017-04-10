@@ -17,6 +17,8 @@
 #include "../Misc/Allocator.h"
 #include "Alienwah.h"
 
+namespace zyn {
+
 using std::complex;
 
 #define rObject Alienwah
@@ -256,4 +258,6 @@ unsigned char Alienwah::getpar(int npar) const
         case 10: return Pphase;
         default: return 0;
     }
+}
+
 }

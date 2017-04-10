@@ -20,7 +20,7 @@
 /* ------------------------------------------------------------------------------------------------------------
  * DynamicFilter plugin class */
 
-class DynamicFilterPlugin : public AbstractPluginFX<DynamicFilter>
+class DynamicFilterPlugin : public AbstractPluginFX<zyn::DynamicFilter>
 {
 public:
     DynamicFilterPlugin()

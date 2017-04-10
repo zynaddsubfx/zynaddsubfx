@@ -20,7 +20,7 @@
 /* ------------------------------------------------------------------------------------------------------------
  * AlienWah plugin class */
 
-class AlienWahPlugin : public AbstractPluginFX<Alienwah>
+class AlienWahPlugin : public AbstractPluginFX<zyn::Alienwah>
 {
 public:
     AlienWahPlugin()

@@ -20,6 +20,8 @@
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
 
+namespace zyn {
+
 #define rObject Reverb
 #define rBegin [](const char *msg, rtosc::RtData &d) {
 #define rEnd }
@@ -515,4 +517,6 @@ unsigned char Reverb::getpar(int npar) const
         case 12: return Pbandwidth;
         default: return 0;
     }
+}
+
 }

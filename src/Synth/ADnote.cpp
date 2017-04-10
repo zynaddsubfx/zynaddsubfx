@@ -27,6 +27,8 @@
 #include "OscilGen.h"
 #include "ADnote.h"
 
+namespace zyn {
+
 ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
         WatchManager *wm, const char *prefix)
     :SynthNote(spars), pars(*pars_)
@@ -1961,4 +1963,6 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
         Filter->updateSense(velocity, param.PFilterVelocityScale,
                 param.PFilterVelocityScaleFunction);
     }
+}
+
 }

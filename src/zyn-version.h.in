@@ -17,6 +17,8 @@
 
 #include <iosfwd>
 
+namespace zyn {
+
 //! class containing a zynaddsubfx version
 class version_type
 {
@@ -66,6 +68,8 @@ public:
 
 //! the current zynaddsubfx version
 constexpr version_type version;
+
+}
 
 #endif
 

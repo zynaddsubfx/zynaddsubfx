@@ -20,7 +20,7 @@
 /* ------------------------------------------------------------------------------------------------------------
  * Chorus plugin class */
 
-class ChorusPlugin : public AbstractPluginFX<Chorus>
+class ChorusPlugin : public AbstractPluginFX<zyn::Chorus>
 {
 public:
     ChorusPlugin()
