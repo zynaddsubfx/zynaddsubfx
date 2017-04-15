@@ -18,9 +18,11 @@
 #include "../Effects/Echo.h"
 #include "../Misc/Allocator.h"
 #include "../globals.h"
-SYNTH_T *synth;
 
 using namespace std;
+using namespace zyn;
+
+SYNTH_T *synth;
 
 class EchoTest:public CxxTest::TestSuite
 {

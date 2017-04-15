@@ -29,9 +29,11 @@
 #include "../Params/Presets.h"
 #include "../DSP/FFTwrapper.h"
 #include "../globals.h"
+using namespace std;
+using namespace zyn;
+
 SYNTH_T *synth;
 
-using namespace std;
 #ifndef SOURCE_DIR
 #define SOURCE_DIR "BE QUIET COMPILER"
 #endif

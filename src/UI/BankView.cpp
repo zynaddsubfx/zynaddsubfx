@@ -19,6 +19,8 @@
 #include <cstring>
 #include <cassert>
 
+using namespace zyn;
+
 BankList::BankList(int x,int y, int w, int h, const char *label)
     :Fl_Osc_Choice(x,y,w,h,label)
 {}

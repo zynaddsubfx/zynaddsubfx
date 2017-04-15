@@ -21,6 +21,8 @@
 #include "../Misc/Allocator.h"
 //using namespace std;
 using std::vector;
+using namespace zyn;
+
 class AllocatorTest:public CxxTest::TestSuite
 {
     public:

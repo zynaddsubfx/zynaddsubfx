@@ -23,10 +23,12 @@
 #include "../Synth/SynthNote.h"
 #include "../Misc/Part.h"
 #include "../globals.h"
-SYNTH_T *synth;
-int dummy=0;
 
 using namespace std;
+using namespace zyn;
+
+SYNTH_T *synth;
+int dummy=0;
 
 #define SUSTAIN_BIT 0x04
 enum PrivateNoteStatus {

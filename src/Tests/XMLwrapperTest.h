@@ -14,8 +14,10 @@
 #include "../Misc/XMLwrapper.h"
 #include <string>
 #include "../globals.h"
-SYNTH_T *synth;
 using namespace std;
+using namespace zyn;
+
+SYNTH_T *synth;
 
 class XMLwrapperTest:public CxxTest::TestSuite
 {

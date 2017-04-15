@@ -18,9 +18,10 @@
 #include <string>
 #include <cstdio>
 #include "../globals.h"
-SYNTH_T *synth;
-
 using namespace std;
+using namespace zyn;
+
+SYNTH_T *synth;
 
 class MicrotonalTest:public CxxTest::TestSuite
 {

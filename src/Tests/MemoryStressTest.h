@@ -25,6 +25,8 @@
 #include "../Params/Presets.h"
 #include "../DSP/FFTwrapper.h"
 #include "../globals.h"
+using namespace zyn;
+
 SYNTH_T *synth;
 
 class AdNoteTest:public CxxTest::TestSuite

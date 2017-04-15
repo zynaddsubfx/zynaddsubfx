@@ -53,6 +53,9 @@ decl {\#include "../globals.h"} {public local
 decl {\#include "../Misc/Util.h"} {public local
 } 
 
+decl {using namespace zyn;} {public local
+}
+
 class ConfigUI {} {
   Function {make_window()} {} {
     Fl_Window configwindow {

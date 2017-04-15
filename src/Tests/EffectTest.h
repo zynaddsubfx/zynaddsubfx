@@ -18,6 +18,8 @@
 #include "../Effects/Reverb.h"
 #include "../Effects/Echo.h"
 #include "../globals.h"
+using namespace zyn;
+
 SYNTH_T *synth;
 
 class EchoTest:public CxxTest::TestSuite

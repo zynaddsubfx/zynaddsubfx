@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include "../Containers/MultiPseudoStack.h"
 using namespace std;
+using namespace zyn;
 
 char *instance_name=(char*)"";
 

@@ -12,6 +12,7 @@
 #include "VuMeter.h"
 #include "Fl_Osc_Interface.h"
 #define MIN_DB (-48)
+using namespace zyn;
 
 class VuMasterMeter: public VuMeter
 {

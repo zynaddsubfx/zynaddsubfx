@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cxxtest/TestSuite.h>
+using namespace zyn;
 
 class RandTest:public CxxTest::TestSuite
 {

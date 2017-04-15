@@ -17,9 +17,10 @@
 #include "../DSP/FFTwrapper.h"
 #include "../Misc/Util.h"
 #include "../globals.h"
-SYNTH_T *synth;
-
 using namespace std;
+using namespace zyn;
+
+SYNTH_T *synth;
 
 class OscilGenTest:public CxxTest::TestSuite
 {

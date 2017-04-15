@@ -25,15 +25,14 @@
 
 namespace zyn {
 
+extern bool isPlugin;
+bool fileexists(const char *filename);
+
 using std::min;
 using std::max;
 
 //Velocity Sensing function
 extern float VelF(float velocity, unsigned char scaling);
-
-extern bool isPlugin;
-
-bool fileexists(const char *filename);
 
 #define N_DETUNE_TYPES 4 //the number of detune types
 extern float getdetune(unsigned char type,

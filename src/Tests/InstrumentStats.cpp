@@ -22,10 +22,11 @@
 #include "../Misc/Microtonal.h"
 #include "../DSP/FFTwrapper.h"
 #include "../globals.h"
+using namespace std;
+using namespace zyn;
+
 SYNTH_T *synth;
 AbsTime *time_;
-
-using namespace std;
 
 char *instance_name=(char*)"";
 MiddleWare *middleware;

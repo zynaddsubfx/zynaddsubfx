@@ -23,10 +23,11 @@
 #include "../Misc/Util.h"
 #include "../globals.h"
 #include "../UI/NSM.H"
+using namespace std;
+using namespace zyn;
+
 NSM_Client *nsm = 0;
 MiddleWare *middleware = 0;
-
-using namespace std;
 
 char *instance_name=(char*)"";
 

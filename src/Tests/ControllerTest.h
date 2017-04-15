@@ -15,6 +15,7 @@
 #include "../Params/Controller.h"
 #include "../globals.h"
 #include "../Misc/Time.h"
+using namespace zyn;
 
 SYNTH_T *synth;
 

@@ -32,6 +32,7 @@
 #include "../Synth/LFO.h"
 #include <unistd.h>
 using namespace std;
+using namespace zyn;
 
 char *instance_name=(char*)"";
 
