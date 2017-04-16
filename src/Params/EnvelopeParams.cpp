@@ -37,7 +37,7 @@ static const rtosc::Ports localPorts = {
 #undef  rChangeCb
 #define rChangeCb if(!obj->Pfreemode) obj->converttofree(); if (obj->time) { \
         obj->last_update_timestamp = obj->time->time(); }
-    rToggle(Pfreemode, "Complex Envelope Definitions"),
+    rToggle(Pfreemode, rDefault(false), "Complex Envelope Definitions"),
 #undef  rChangeCb
 #define rChangeCb if(!obj->Pfreemode) obj->converttofree(); \
                   if(obj->time) { obj->last_update_timestamp = obj->time->time(); }
@@ -51,13 +51,14 @@ static const rtosc::Ports localPorts = {
             "Force Envelope to fully evaluate"),
     rToggle(Plinearenvelope, rShort("lin/log"),
             "Linear or Logarithmic Envelopes"),
-    rParamZyn(PA_dt,  rShort("a.dt"),  "Attack Time"),
-    rParamZyn(PA_val, rShort("a.val"), "Attack Value"),
-    rParamZyn(PD_dt,  rShort("d.dt"),  "Decay Time"),
-    rParamZyn(PD_val, rShort("d.val"), "Decay Value"),
-    rParamZyn(PS_val, rShort("s.val"), "Sustain Value"),
-    rParamZyn(PR_dt,  rShort("r.dt"),  "Release Time"),
-    rParamZyn(PR_val, rShort("r.val"), "Release Value"),
+    rParamZyn(PA_dt,  rShort("a.dt"),
+              rDefaultDepends(Envmode), rMap(default 1, 0 /*TODO*/) "Attack Time"),
+    rParamZyn(PA_val, rShort("a.val"), rDefaultDepends(Envmode), "Attack Value"),
+    rParamZyn(PD_dt,  rShort("d.dt"),  rDefaultDepends(Envmode), "Decay Time"),
+    rParamZyn(PD_val, rShort("d.val"), rDefaultDepends(Envmode), "Decay Value"),
+    rParamZyn(PS_val, rShort("s.val"), rDefaultDepends(Envmode), "Sustain Value"),
+    rParamZyn(PR_dt,  rShort("r.dt"),  rDefaultDepends(Envmode), "Release Time"),
+    rParamZyn(PR_val, rShort("r.val"),  "Release Value"),
 
     {"Envmode:", rDoc("Envelope variant type"), NULL,
         rBegin;
