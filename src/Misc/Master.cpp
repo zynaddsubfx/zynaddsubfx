@@ -116,14 +116,14 @@ static const Ports master_ports = {
     rRecursp(part, 16, "Part"),//NUM_MIDI_PARTS
     rRecursp(sysefx, 4, "System Effect"),//NUM_SYS_EFX
     rRecursp(insefx, 8, "Insertion Effect"),//NUM_INS_EFX
-    rRecur(microtonal, "Micrtonal Mapping Functionality"),
+    rRecur(microtonal, "Microtonal Mapping Functionality"),
     rRecur(ctl, "Controller"),
-    rArrayI(Pinsparts, NUM_INS_EFX, rOpt(-2, Master), rOpt(-1, Off)
-            rOptions(Part1, Part2, Part3, Part4,  Part5, Part6,
+    rArrayI(Pinsparts, NUM_INS_EFX, rOpt(-2, Master), rOpt(-1, Off),
+            rOptions(Part1, Part2, Part3, Part4, Part5, Part6,
                  Part7, Part8, Part9, Part10, Part11, Part12,
-                 Part13, Part14, Part15, Part16),
+                 Part13, Part14, Part15, Part16) rDefault(Off),
                 "Part to insert part onto"),
-    {"Pkeyshift::i", rShort("key shift") rProp(parameter) rLinear(0,127) rDoc("Global Key Shift"), 0, [](const char *m, RtData&d) {
+    {"Pkeyshift::i", rShort("key shift") rProp(parameter) rLinear(0,127) rDefault(64) rDoc("Global Key Shift"), 0, [](const char *m, RtData&d) {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "i", ((Master*)d.obj)->Pkeyshift);
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
@@ -172,14 +172,14 @@ static const Ports master_ports = {
             keys[i] = m->activeNotes[i] ? 'T' : 'F';
         d.broadcast(d.loc, keys);
         rEnd},
-    {"Pvolume::i", rShort("volume") rProp(parameter) rLinear(0,127) rDoc("Master Volume"), 0,
+    {"Pvolume::i", rShort("volume") rProp(parameter) rLinear(0,127) rDefault(80) rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "i", ((Master*)d.obj)->Pvolume);
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
             ((Master*)d.obj)->setPvolume(limit<char>(rtosc_argument(m,0).i,0,127));
             d.broadcast(d.loc, "i", ((Master*)d.obj)->Pvolume);}}},
-    {"volume::i", rShort("volume") rProp(parameter) rLinear(0,127) rDoc("Master Volume"), 0,
+    {"volume::i", rShort("volume") rProp(parameter) rLinear(0,127) rDefault(80) rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "i", ((Master*)d.obj)->Pvolume);

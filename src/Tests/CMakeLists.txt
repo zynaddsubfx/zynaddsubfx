@@ -63,5 +63,9 @@ target_link_libraries(EffectTest ${test_lib})
 add_executable(ins-test InstrumentStats.cpp)
 target_link_libraries(ins-test ${test_lib} rt)
 
+# add_executable(load_omz load_omz.cpp)
+# target_link_libraries(load-omz ${test_lib})
+
+
 #message(STATUS "Plugin Test ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}")
 

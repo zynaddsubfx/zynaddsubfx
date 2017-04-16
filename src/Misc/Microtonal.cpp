@@ -42,25 +42,25 @@ namespace zyn {
  * A good lookup table should be a good finalization of this
  */
 const rtosc::Ports Microtonal::ports = {
-    rToggle(Pinvertupdown, rShort("inv."), "key mapping inverse"),
-    rParamZyn(Pinvertupdowncenter, rShort("center"), "center of the inversion"),
-    rToggle(Penabled, rShort("enable"), "Enable for microtonal mode"),
-    rParamZyn(PAnote, rShort("1/1 midi note"), "The note for 'A'"),
-    rParamF(PAfreq,   rShort("ref freq"), "Frequency of the 'A' note"),
-    rParamZyn(Pscaleshift, rShort("shift"), "UNDOCUMENTED"),
-    rParamZyn(Pfirstkey, rShort("first key"), "First key to retune"),
-    rParamZyn(Plastkey,  rShort("last key"), "Last key to retune"),
-    rParamZyn(Pmiddlenote, rShort("middle"), "Scale degree 0 note"),
+    rToggle(Pinvertupdown, rShort("inv."), rDefault(false), "key mapping inverse"),
+    rParamZyn(Pinvertupdowncenter, rShort("center"), rDefault(60), "center of the inversion"),
+    rToggle(Penabled, rShort("enable"), rDefault(false), "Enable for microtonal mode"),
+    rParamZyn(PAnote, rShort("1/1 midi note"), rDefault(69), "The note for 'A'"),
+    rParamF(PAfreq,   rShort("ref freq"), rDefault(440.0f), "Frequency of the 'A' note"),
+    rParamZyn(Pscaleshift, rShort("shift"), rDefault(64), "UNDOCUMENTED"),
+    rParamZyn(Pfirstkey, rShort("first key"), rDefault(0), "First key to retune"),
+    rParamZyn(Plastkey,  rShort("last key"), rDefault(127), "Last key to retune"),
+    rParamZyn(Pmiddlenote, rShort("middle"), rDefault(60), "Scale degree 0 note"),
 
     //TODO check to see if this should be exposed
-    rParamZyn(Pmapsize, "Size of key map"),
-    rToggle(Pmappingenabled, "Mapping Enable"),
+    rParamZyn(Pmapsize, rDefault(12), "Size of key map"),
+    rToggle(Pmappingenabled, rDefault(false), "Mapping Enable"),
 
-    rParams(Pmapping, 128, "Mapping of keys"),
-    rParamZyn(Pglobalfinedetune, rShort("fine"), "Fine detune for all notes"),
+    rParams(Pmapping, 128, rDefault("form:i"), "Mapping of keys"),
+    rParamZyn(Pglobalfinedetune, rShort("fine"), rDefault(64), "Fine detune for all notes"),
 
-    rString(Pname, MICROTONAL_MAX_NAME_LEN,    rShort("name"), "Microtonal Name"),
-    rString(Pcomment, MICROTONAL_MAX_NAME_LEN, rShort("comment"), "Microtonal comments"),
+    rString(Pname, MICROTONAL_MAX_NAME_LEN,    rShort("name"), rDefault(""), "Microtonal Name"),
+    rString(Pcomment, MICROTONAL_MAX_NAME_LEN, rShort("comment"), rDefault(""), "Microtonal comments"),
 
     {"octavesize:", rDoc("Get octave size"), 0, [](const char*, RtData &d)
         {

@@ -71,18 +71,18 @@ static const Ports voicePorts = {
     rRecurp(VoiceFilter,    "Optional Voice Filter"),
 
     rToggle(Enabled,       rShort("enable"), "Voice Enable"),
-    rParamI(Unison_size, rShort("size"), rMap(min, 0), rMap(max, 50), "Number of subvoices"),
-    rParamZyn(Unison_phase_randomness, rShort("ph.rnd."), "Phase Randomness"),
-    rParamZyn(Unison_frequency_spread, rShort("detune"),  "Subvoice detune"),
-    rParamZyn(Unison_stereo_spread,    rShort("spread"),
+    rParamI(Unison_size, rShort("size"), rMap(min, 0), rMap(max, 50), rDefault(1), "Number of subvoices"),
+    rParamZyn(Unison_phase_randomness, rShort("ph.rnd."), rDefault(127), "Phase Randomness"),
+    rParamZyn(Unison_frequency_spread, rShort("detune"), rDefault(60),  "Subvoice detune"),
+    rParamZyn(Unison_stereo_spread,    rShort("spread"), rDefault(64),
             "Subvoice L/R Separation"),
-    rParamZyn(Unison_vibratto,         rShort("vib."),    "Subvoice vibratto"),
-    rParamZyn(Unison_vibratto_speed,   rShort("speed"),
+    rParamZyn(Unison_vibratto,         rShort("vib."), rDefault(64),   "Subvoice vibratto"),
+    rParamZyn(Unison_vibratto_speed,   rShort("speed"), rDefault(64),
             "Subvoice vibratto speed"),
-    rOption(Unison_invert_phase,       rShort("inv."),
+    rOption(Unison_invert_phase,       rShort("inv."), rDefault(0),
             rOptions(none, random, 50%, 33%, 25%), "Subvoice Phases"),
-    rOption(Type,            rShort("type"), rOptions(Sound,White,Pink,DC), "Type of Sound"),
-    rParamZyn(PDelay,        rShort("delay"), "Voice Startup Delay"),
+    rOption(Type,            rShort("type"), rOptions(Sound,White,Pink,DC), rDefault(Sound), "Type of Sound"),
+    rParamZyn(PDelay,        rShort("delay"), rDefault(0), "Voice Startup Delay"),
     rToggle(Presonance,      rShort("enable"), "Resonance Enable"),
     rParamI(Pextoscil,       rShort("ext."),
             rMap(min, -1), rMap(max, 16), "External Oscillator Selection"),
@@ -109,37 +109,38 @@ static const Ports voicePorts = {
 
     //Amplitude Stuff
     rParamZyn(PPanning,                  rShort("pan."), "Panning"),
-    rParamZyn(PVolume,                   rShort("vol."), "Volume"),
-    rToggle(PVolumeminus,                rShort("inv."), "Signal Inverter"), //do we really need this??
-    rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), "Velocity Sensing"),
-    rToggle(PAmpEnvelopeEnabled, rShort("enable"), "Amplitude Envelope Enable"),
-    rToggle(PAmpLfoEnabled,      rShort("enable"), "Amplitude LFO Enable"),
+    rParamZyn(PVolume,                   rShort("vol."), rDefault(100), "Volume"),
+    rToggle(PVolumeminus,                rShort("inv."), rDefault(false), "Signal Inverter"), //do we really need this??
+    rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), rDefault(127), "Velocity Sensing"),
+    rToggle(PAmpEnvelopeEnabled, rShort("enable"), rDefault(false), "Amplitude Envelope Enable"),
+    rToggle(PAmpLfoEnabled,      rShort("enable"), rDefault(false), "Amplitude LFO Enable"),
 
     //Filter Stuff
-    rToggle(PFilterEnabled,         rShort("enable"), "Filter Enable"),
-    rToggle(PFilterEnvelopeEnabled, rShort("enable"), "Filter Envelope Enable"),
-    rToggle(PFilterLfoEnabled,      rShort("enable"), "Filter LFO Enable"),
-    rParamZyn(PFilterVelocityScale,         rShort("v.scale"), "Filter Velocity Magnitude"),
-    rParamZyn(PFilterVelocityScaleFunction, rShort("v.sense"), "Filter Velocity Function Shape"),
+    rToggle(PFilterEnabled,         rShort("enable"), rDefault(false), "Filter Enable"),
+    rToggle(PFilterEnvelopeEnabled, rShort("enable"), rDefault(false), "Filter Envelope Enable"),
+    rToggle(PFilterLfoEnabled,      rShort("enable"), rDefault(false), "Filter LFO Enable"),
+    rParamZyn(PFilterVelocityScale,         rShort("v.scale"), rDefault(0),  "Filter Velocity Magnitude"),
+    rParamZyn(PFilterVelocityScaleFunction, rShort("v.sense"), rDefault(64), "Filter Velocity Function Shape"),
 
 
     //Modulator Stuff
     rOption(PFMEnabled, rShort("mode"), rOptions(none, morph, ring, phase,
-                frequency, pulse), "Modulator mode"),
-    rParamI(PFMVoice,                   rShort("voice"),  "Modulator Oscillator Selection"),
-    rParamZyn(PFMVolume,                rShort("vol."),   "Modulator Magnitude"),
-    rParamZyn(PFMVolumeDamp,            rShort("damp."),  "Modulator HF dampening"),
-    rParamZyn(PFMVelocityScaleFunction, rShort("sense"),  "Modulator Velocity Function"),
+                frequency, pulse), rDefault(false), "Modulator mode"),
+    rParamI(PFMVoice,                   rShort("voice"), rDefault(-1), "Modulator Oscillator Selection"),
+    rParamZyn(PFMVolume,                rShort("vol."),  rDefault(90), "Modulator Magnitude"),
+    rParamZyn(PFMVolumeDamp,            rShort("damp."), rDefault(64), "Modulator HF dampening"),
+    rParamZyn(PFMVelocityScaleFunction, rShort("sense"), rDefault(64), "Modulator Velocity Function"),
     //nominally -8192..8191
     rParamI(PFMDetune,                  rShort("fine"),
-            rLinear(0, 16383), "Modulator Fine Detune"),
-    rParamI(PFMCoarseDetune,            rShort("coarse"), "Modulator Coarse Detune"),
+            rLinear(0, 16383), rDefault(8192), "Modulator Fine Detune"),
+    rParamI(PFMCoarseDetune,            rShort("coarse"), rDefault(0), "Modulator Coarse Detune"),
     rParamZyn(PFMDetuneType,            rShort("type"),
             rOptions(L35cents, L10cents, E100cents, E1200cents),
+	    rDefault(L35cents),
             "Modulator Detune Magnitude"),
-    rToggle(PFMFixedFreq,               rShort("fixed"),  "Modulator Frequency Fixed"),
-    rToggle(PFMFreqEnvelopeEnabled,  rShort("enable"), "Modulator Frequency Envelope"),
-    rToggle(PFMAmpEnvelopeEnabled,   rShort("enable"), "Modulator Amplitude Envelope"),
+    rToggle(PFMFixedFreq,               rShort("fixed"),  rDefault(false), "Modulator Frequency Fixed"),
+    rToggle(PFMFreqEnvelopeEnabled,  rShort("enable"), rDefault(false), "Modulator Frequency Envelope"),
+    rToggle(PFMAmpEnvelopeEnabled,   rShort("enable"), rDefault(false), "Modulator Amplitude Envelope"),
 
 
     //weird stuff for PCoarseDetune
@@ -250,36 +251,37 @@ static const Ports globalPorts = {
     rRecurp(FilterEnvelope, "Frequency Envelope"),
     rRecurp(GlobalFilter, "Filter"),
 
-    rToggle(PStereo, rShort("stereo"), "Mono/Stereo Enable"),
+    rToggle(PStereo, rShort("stereo"), rDefault(true), "Mono/Stereo Enable"),
 
     //Frequency
     //nominally -8192..8191
     rParamI(PDetune,              rShort("fine"),
-            rLinear(0, 16383), "Fine Detune"),
-    rParamI(PCoarseDetune,   rShort("coarse"), "Coarse Detune"),
+            rLinear(0, 16383), rDefault(8192), "Fine Detune"),
+    rParamI(PCoarseDetune,   rShort("coarse"), rDefault(0), "Coarse Detune"),
     rParamZyn(PDetuneType,   rShort("type"),
             rOptions(L35cents, L10cents, E100cents, E1200cents),
+	    rDefault(L10cents),
             "Detune Scaling Type"),
-    rParamZyn(PBandwidth,    rShort("bw."),    "Relative Fine Detune Gain"),
+    rParamZyn(PBandwidth,    rShort("bw."), rDefault(64), "Relative Fine Detune Gain"),
 
     //Amplitude
-    rParamZyn(PPanning, rShort("pan"), "Panning of ADsynth (0 random, 1 left, 127 right)"),
-    rParamZyn(PVolume,  rShort("vol"), "volume control"),
-    rParamZyn(PAmpVelocityScaleFunction, rShort("scale"), "Volume Velocity Control"),
+    rParamZyn(PPanning, rShort("pan"), rDefault(64), "Panning of ADsynth (0 random, 1 left, 127 right)"),
+    rParamZyn(PVolume,  rShort("vol"), rDefault(90), "volume control"),
+    rParamZyn(PAmpVelocityScaleFunction, rShort("scale"), rDefault(64), "Volume Velocity Control"),
 
-    rParamZyn(Fadein_adjustment, "Adjustment for anti-pop strategy."),
-    rParamZyn(PPunchStrength, rShort("strength"),     "Punch Strength"),
-    rParamZyn(PPunchTime,     rShort("time"),         "Length of Punch"),
-    rParamZyn(PPunchStretch,  rShort("stretch"),      "How Punch changes with note frequency"),
-    rParamZyn(PPunchVelocitySensing, rShort("v.sns"), "Punch Velocity control"),
+    rParamZyn(Fadein_adjustment, rDefault(FADEIN_ADJUSTMENT_SCALE), "Adjustment for anti-pop strategy."),
+    rParamZyn(PPunchStrength, rShort("strength"),     rDefault(0),  "Punch Strength"),
+    rParamZyn(PPunchTime,     rShort("time"),         rDefault(60), "Length of Punch"),
+    rParamZyn(PPunchStretch,  rShort("stretch"),      rDefault(64), "How Punch changes with note frequency"),
+    rParamZyn(PPunchVelocitySensing, rShort("v.sns"), rDefault(72), "Punch Velocity control"),
 
     //Filter
-    rParamZyn(PFilterVelocityScale,         rShort("scale"), "Filter Velocity Magnitude"),
-    rParamZyn(PFilterVelocityScaleFunction, rShort("sense"), "Filter Velocity Function Shape"),
+    rParamZyn(PFilterVelocityScale,         rShort("scale"), rDefault(64), "Filter Velocity Magnitude"),
+    rParamZyn(PFilterVelocityScaleFunction, rShort("sense"), rDefault(64), "Filter Velocity Function Shape"),
 
 
     //Resonance
-    rToggle(Hrandgrouping, "How randomness is applied to multiple voices using the same oscil"),
+    rToggle(Hrandgrouping, rDefault(false), "How randomness is applied to multiple voices using the same oscil"),
 
     //weird stuff for PCoarseDetune
     {"detunevalue:", rMap(unit,cents) rDoc("Get detune in cents"), NULL,
