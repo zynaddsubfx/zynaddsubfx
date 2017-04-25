@@ -30,6 +30,8 @@ using std::vector;
 
 //Dummy variables and functions for linking purposes
 const char *instance_name = 0;
+
+namespace zyn {
 class WavFile;
 namespace Nio {
     bool start(void){return 1;};
@@ -46,6 +48,7 @@ namespace Nio {
     string getSource(void){return "";}
     string getSink(void){return "";}
 }
+} // namespace zyn
 
 //
 // Static stubs for LADSPA member functions
