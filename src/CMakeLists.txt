@@ -518,6 +518,7 @@ if (DssiEnable)
 		zynaddsubfx_core
 		${OS_LIBRARIES}
 		${LIBLO_LIBRARIES}
+		${PLATFORM_LIBRARIES}
 		-Wl,--no-undefined
 		)
     install(TARGETS zynaddsubfx_dssi LIBRARY DESTINATION ${PluginLibDir}/dssi/)
