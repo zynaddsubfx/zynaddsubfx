@@ -570,6 +570,7 @@ END_NAMESPACE_DISTRHO
 /* ------------------------------------------------------------------------------------------------------------
  * Dummy variables and functions for linking purposes */
 
+namespace zyn {
 class WavFile;
 namespace Nio {
    void masterSwap(zyn::Master*){}
@@ -582,4 +583,5 @@ namespace Nio {
    void waveNew(WavFile*){}
    void waveStart(){}
    void waveStop(){}
+}
 }
