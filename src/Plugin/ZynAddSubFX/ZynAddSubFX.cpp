@@ -395,6 +395,17 @@ protected:
                 master->setController(channel, control, value);
             } break;
 
+            case 0xC0: {
+                const int program = midiEvent.data[1];
+
+                for(int i=0; i < NUM_MIDI_PARTS; ++i) {
+                    //set the program of the parts assigned to the midi channel
+                    if(master->part[i]->Prcvchn == channel) {
+                        middleware->pendingSetProgram(i, program);
+                    }
+                }
+            } break;
+
             case 0xE0: {
                 const uint8_t lsb = midiEvent.data[1];
                 const uint8_t msb = midiEvent.data[2];
