@@ -572,6 +572,9 @@ int Microtonal::loadscl(SclInfo &scl, const char *filename)
     char  tmp[500];
     OctaveTuning tmpoctave[MAX_OCTAVE_SIZE];
 
+    if(!file)
+        return 2;
+
     fseek(file, 0, SEEK_SET);
 
     //loads the short description
@@ -622,6 +625,9 @@ int Microtonal::loadkbm(KbmInfo &kbm, const char *filename)
     int   x;
     float tmpPAfreq = 440.0f;
     char  tmp[500];
+
+    if(!file)
+        return 2;
 
     fseek(file, 0, SEEK_SET);
     //loads the mapsize
