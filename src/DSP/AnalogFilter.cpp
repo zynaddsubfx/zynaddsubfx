@@ -68,6 +68,7 @@ AnalogFilter::Coeff AnalogFilter::computeCoeff(int type, float cutoff, float q,
 {
     AnalogFilter::Coeff coeff;
     bool  zerocoefs = false; //this is used if the freq is too high
+    printf("computeCoeff(%d, %f, %f, %d, %f, %f, %d)\n", type, cutoff, q, stages, gain, fs, order);
 
     const float samplerate_f = fs;
     const float halfsamplerate_f = fs/2;
