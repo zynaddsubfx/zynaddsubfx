@@ -268,8 +268,13 @@ void FilterParams::defaults()
     Pq    = Dq;
 
     Pstages       = 0;
-    freqtracking  = 0.0;
-    gain          = 0.0;
+    basefreq  = (Pfreq / 64.0f - 1.0f) * 5.0f;
+    basefreq  = powf(2.0f, basefreq + 9.96578428f);
+    baseq     = expf(powf((float) Pq / 127.0f, 2) * logf(1000.0f)) - 0.9f;
+
+    gain = 0.0f;
+    freqtracking = 0.0f;
+
     Pcategory     = 0;
 
     Pnumformants     = 3;
@@ -437,11 +442,11 @@ void FilterParams::add2XML(XMLwrapper& xml)
     //filter parameters
     xml.addpar("category", Pcategory);
     xml.addpar("type", Ptype);
-    xml.addpar("basefreq", basefreq);
-    xml.addpar("q", Pq);
+    xml.addparreal("basefreq", basefreq);
+    xml.addparreal("baseq", baseq);
     xml.addpar("stages", Pstages);
-    xml.addpar("freq_track", freqtracking);
-    xml.addpar("gain",       gain);
+    xml.addparreal("freq_tracking", freqtracking);
+    xml.addparreal("gain",       gain);
 
     //formant filter parameters
     if((Pcategory == 1) || (!xml.minimal)) {
@@ -491,7 +496,7 @@ void FilterParams::getfromXMLsection(XMLwrapper& xml, int n)
 
 void FilterParams::getfromXML(XMLwrapper& xml)
 {
-    const bool upgrade_3_0_2 = xml.fileversion() < version_type(3,0,2);
+    const bool upgrade_3_0_2 = (xml.fileversion() < version_type(3,0,2)) && (xml.getparreal("basefreq", -1) < 0);
 
     //filter parameters
     Pcategory    = xml.getpar127("category", Pcategory);
