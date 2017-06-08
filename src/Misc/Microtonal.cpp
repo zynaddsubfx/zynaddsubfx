@@ -851,7 +851,7 @@ void Microtonal::apply(void)
     {
         char buf[100*MAX_OCTAVE_SIZE] = {0};
         char tmpbuf[100] = {0};
-        for (int i=0;i<getoctavesize();i++){
+        for (int i=0;i<octavesize;i++){
             if (i!=0)
                 strncat(buf, "\n", sizeof(buf)-1);
             tuningtoline(i,tmpbuf,100);
