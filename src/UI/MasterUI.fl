@@ -2,7 +2,7 @@
 version 1.0302 
 header_name {.h} 
 code_name {.cc}
-decl {//Copyright (c) 2002-2009 Nasca Octavian Paul - (c) 2009-2016 Mark McCurry} {private local
+decl {//Copyright (c) 2002-2009 Nasca Octavian Paul - (c) 2009-2017 Mark McCurry} {private local
 } 
 
 decl {//License: GNU GPL version 2 or later} {private local
