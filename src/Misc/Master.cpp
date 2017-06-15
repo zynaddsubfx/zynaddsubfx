@@ -110,6 +110,50 @@ static const Ports watchPorts = {
         rEnd},
 };
 
+static const Ports automate_ports = {
+    {"slot#16/learn-binding:s", rDoc("Create binding for automation path with midi-learn"), 0,
+        rBegin;
+        m->automate.createBinding(rtosc_argument(msg, 0).i,
+                                  rtosc_argument(msg, 1).s,
+                                  rtosc_argument(msg, 2).T);
+        rEnd},
+    {"slot#16/create-binding:s", rDoc("Create binding for automation path"), 0,
+        rBegin;
+        m->automate.createBinding(rtosc_argument(msg, 0).i,
+                                  rtosc_argument(msg, 1).s,
+                                  rtosc_argument(msg, 2).T);
+        rEnd},
+    {"slot#16/value::f", rProp(parameter) rMap(default, 0.5) rDoc("Access current value in slot 'i' (0..1)"), 0,
+        rBegin;
+        rEnd},
+
+    {"slot#16/name::s", rProp(parameter) rDoc("Access name of automation slot"), 0,
+        rBegin;
+        rEnd},
+    {"slot#16/midi-cc::i", rProp(parameter) rMap(default, -1) rDoc("Access assigned midi CC slot") , 0,
+        rBegin;
+        rEnd},
+    {"slot#16/active::T:F",  rProp(parameter) rMap(default, F) rDoc("If Slot is enabled"), 0,
+        rBegin;
+        rEnd},
+    {"slot#16/learning::T:F", rProp(parameter) rMap(default, F) rDoc("If slot is trying to find a midi learn binding"), 0,
+        rBegin;
+        rEnd},
+
+    {"slot#16/param#4/used:", 0, 0,
+        rBegin;
+        rEnd},
+    {"slot#16/param#4/active:", 0, 0,
+        rBegin;
+        rEnd},
+    {"slot#16/param#4/path:", 0, 0,
+        rBegin;
+        rEnd},
+    {"slot#16/param#4/mapping:", 0, 0,
+        rBegin;
+        rEnd},
+};
+
 extern const Ports bankPorts;
 static const Ports master_ports = {
     rString(last_xmz, XMZ_PATH_MAX, "File name for last name loaded if any."),
@@ -233,13 +277,11 @@ static const Ports master_ports = {
         [](const char *,RtData &d) {
             Master *M =  (Master*)d.obj;
             M->frozenState = false;}},
-    {"midi-learn/", 0, &rtosc::MidiMapperRT::ports,
+    {"automate/", 0, &automate_ports,
         [](const char *msg, RtData &d) {
-            Master *M =  (Master*)d.obj;
             SNIP;
-            printf("residue message = <%s>\n", msg);
-            d.obj = &M->midi;
-            rtosc::MidiMapperRT::ports.dispatch(msg,d);}},
+            automate_ports.dispatch(msg, d);
+            }},
     {"close-ui:", rDoc("Request to close any connection named \"GUI\""), 0,
         [](const char *, RtData &d) {
        d.reply("/close-ui", "");}},
@@ -367,14 +409,15 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     :HDDRecorder(synth_), time(synth_), ctl(synth_, &time),
     microtonal(config->cfg.GzipCompression), bank(config),
     frozenState(false), pendingMemory(false),
+    automate(16,4,8),
     synth(synth_), gzip_compression(config->cfg.GzipCompression)
 {
     bToU = NULL;
     uToB = NULL;
 
     //Setup MIDI
-    midi.frontend = [this](const char *msg) {bToU->raw_write(msg);};
-    midi.backend  = [this](const char *msg) {applyOscEvent(msg);};
+    //midi.frontend = [this](const char *msg) {bToU->raw_write(msg);};
+    //midi.backend  = [this](const char *msg) {applyOscEvent(msg);};
 
     memory = new AllocatorClass();
     swaplr = 0;
@@ -524,7 +567,7 @@ void Master::setController(char chan, int type, int par)
     if(frozenState)
         return;
     //TODO add chan back
-    midi.handleCC(type,par);
+    //midi.handleCC(type,par);
     if((type == C_dataentryhi) || (type == C_dataentrylo)
        || (type == C_nrpnhi) || (type == C_nrpnlo)) { //Process RPN and NRPN by the Master (ignore the chan)
         ctl.setparameternumber(type, par);

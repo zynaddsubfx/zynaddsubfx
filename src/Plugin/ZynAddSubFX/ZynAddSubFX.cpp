@@ -226,6 +226,15 @@ protected:
             parameter.ranges.def = 0.0f;
             break;
         }
+        if(kParamSlot1 <= index && index <= kParamSlot16) {
+            parameter.hints  = kParameterIsAutomable;
+            parameter.name   = ("Automation Slot " + zyn::to_s(index)).c_str();
+            parameter.symbol = ("slot" + zyn::to_s(index)).c_str();
+            parameter.unit   = "";
+            parameter.ranges.min = 0.0f;
+            parameter.ranges.max = 1.0f;
+            parameter.ranges.def = 0.5f;
+        }
     }
 
    /**
