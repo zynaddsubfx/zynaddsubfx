@@ -184,4 +184,6 @@ rPresetType, \
 
 }
 
+#define rUnit(x) rMap(unit, x)
+
 #endif

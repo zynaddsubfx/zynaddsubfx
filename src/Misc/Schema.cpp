@@ -21,6 +21,8 @@ namespace zyn {
  *   - 'shortname' : string [OPTIONAL]
  *   - 'tooltip'   : string [OPTIONAL]
  *   - 'type'      : type
+ *   - 'units'     : unit-type
+ *   - 'scale'     : scale-type
  *   - 'domain'    : range [OPTIONAL]
  *   - 'options'   : [option...] [OPTIONAL]
  * type : {'int', 'float', 'boolean'}
@@ -114,6 +116,9 @@ void dump_param_cb(const rtosc::Port *p, const char *full_name, void *v)
     auto mparameter  = meta.find("parameter");
     auto mdoc        = meta.find("documentation");
     auto msname      = meta.find("shortname");
+    auto units       = meta.find("unit");
+    auto scale       = meta.find("scale");
+
     opts options;
     string doc;
     string name      = p->name;;
@@ -189,6 +194,10 @@ void dump_param_cb(const rtosc::Port *p, const char *full_name, void *v)
         o << "        \"shortname\": \"" << msname.value << "\",\n";
     o << "        \"name\"     : \"" << name << "\",\n";
     o << "        \"tooltip\"  : \"" << doc  << "\",\n";
+    if(units != meta.end())
+        o << "        \"units\"    : \"" << units.value << "\",\n";
+    if(scale != meta.end())
+        o << "        \"scale\"    : \"" << scale.value << "\",\n";
     o << "        \"type\"     : \"" << type  << "\"";
     if(min && max)
         o << ",\n        \"range\"    : [" << min << "," << max << "]";

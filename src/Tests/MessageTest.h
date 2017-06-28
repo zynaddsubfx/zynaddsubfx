@@ -243,6 +243,53 @@ class MessageTest:public CxxTest::TestSuite
             TS_ASSERT_EQUALS(field2, 35);
         }
 
+        void testFilterDepricated(void)
+        {
+            vector<string> v = {"Pfreq", "Pfreqtrack", "Pgain", "Pq"};
+            for(int i=0; i<v.size(); ++i) {
+                string path = "/part0/kit0/adpars/GlobalPar/GlobalFilter/"+v[i];
+                for(int j=0; j<128; ++j) {
+                    mw->transmitMsg(path.c_str(), "i", j); //Set
+                    mw->transmitMsg(path.c_str(), ""); //Get
+                }
+
+            }
+            while(ms->uToB->hasNext()) {
+                const char *msg = ms->uToB->read();
+                //printf("RT: handling <%s>\n", msg);
+                ms->applyOscEvent(msg);
+            }
+
+            int id = 0;
+            int state = 0;
+            int value = 0;
+            // 0 - broadcast
+            // 1 - true value     (set)
+            // 2 - expected value (get)
+            while(ms->bToU->hasNext()) {
+                const char *msg = ms->bToU->read();
+                if(state == 0) {
+                    TS_ASSERT_EQUALS(rtosc_narguments(msg), 0);
+                    state = 1;
+                } else if(state == 1) {
+                    TS_ASSERT_EQUALS(rtosc_narguments(msg), 1);
+                    value = rtosc_argument(msg, 0).i;
+                    state = 2;
+                } else if(state == 2) {
+                    int val = rtosc_argument(msg, 0).i;
+                    if(value != val) {
+                        printf("%s - %d should equal %d\n", msg, value, val);
+                        TS_ASSERT(0);
+                    }
+                    state = 0;
+                }
+
+                //printf("Message #%d %s:%s\n", id++, msg, rtosc_argument_string(msg));
+                //if(rtosc_narguments(msg))
+                //    printf("        %d\n", rtosc_argument(msg, 0).i);
+            }
+        }
+
 
     private:
         SYNTH_T     *synth;
