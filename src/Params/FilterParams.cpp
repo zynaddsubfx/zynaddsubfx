@@ -3,7 +3,9 @@
 
   FilterParams.cpp - Parameters for filter
   Copyright (C) 2002-2005 Nasca Octavian Paul
+  Copyright (C) 2017      Mark McCurry
   Author: Nasca Octavian Paul
+          Mark McCurry
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -226,12 +228,63 @@ const rtosc::Ports FilterParams::ports = {
         }},
 
     //Old 0..127 parameter mappings
-    rParamZyn(Pfreq,            rShort("cutoff"),  rProp(deprecated),  "Center Freq"),
-    rParamZyn(Pfreqtrack,       rShort("f.track"), rProp(deprecated),
-            "Frequency Tracking amount"),
-    rParamZyn(Pgain,            rShort("gain"),    rProp(deprecated), "Output Gain"),
-    rParamZyn(Pq,                rShort("q"),       rProp(deprecated),
-            "Quality Factor (resonance/bandwidth)"),
+    {"Pfreq::i",  rLinear(0, 127) rShort("cutoff")  rProp(deprecated)  rDoc("Center Freq"), 0,
+        [](const char *msg, RtData &d) {
+            FilterParams *obj = (FilterParams*)d.obj;
+            if(rtosc_narguments(msg)) {
+                int Pfreq = rtosc_argument(msg, 0).i;
+                obj->basefreq  = (Pfreq / 64.0f - 1.0f) * 5.0f;
+                obj->basefreq  = powf(2.0f, obj->basefreq + 9.96578428f);
+                rChangeCb;
+                d.broadcast(d.loc, "i", Pfreq);
+            } else {
+                float tmp = obj->basefreq;
+                tmp = log2f(tmp) - 9.96578428f;
+                tmp = (tmp / 5.0 + 1.0) * 64.0f;
+                int Pfreq = roundf(tmp);
+                d.reply(d.loc, "i", Pfreq);
+            }
+        }},
+    {"Pfreqtrack::i", rLinear(0, 127) rShort("f.track") rProp(deprecated) rDoc("Frequency Tracking amount"), 0,
+        [](const char *msg, RtData &d) {
+            FilterParams *obj = (FilterParams*)d.obj;
+            if(rtosc_narguments(msg)) {
+                int Pfreqtracking = rtosc_argument(msg, 0).i;
+                obj->freqtracking = 100 * (Pfreqtracking - 64.0f) / (64.0f);
+                rChangeCb;
+                d.broadcast(d.loc, "i", Pfreqtracking);
+            } else {
+                int Pfreqtracking = obj->freqtracking/100.0*64.0 + 64.0;
+                d.reply(d.loc, "i", Pfreqtracking);
+            }
+        }},
+    {"Pgain::i", rLinear(0, 127) rShort("gain") rProp(deprecated) rDoc("Output Gain"), 0,
+        [](const char *msg, RtData &d) {
+            FilterParams *obj = (FilterParams*)d.obj;
+            if(rtosc_narguments(msg)) {
+                int Pgain = rtosc_argument(msg, 0).i;
+                obj->gain   = (Pgain / 64.0f - 1.0f) * 30.0f; //-30..30dB
+                rChangeCb;
+                d.broadcast(d.loc, "i", Pgain);
+            } else {
+                int Pgain = roundf((obj->gain/30.0f + 1.0f) * 64.0f);
+                d.reply(d.loc, "i", Pgain);
+            }
+        }},
+    {"Pq::i", rLinear(0,127) rShort("q") rProp(deprecated)
+        rDoc("Quality Factor (resonance/bandwidth)"), 0,
+        [](const char *msg, RtData &d) {
+            FilterParams *obj = (FilterParams*)d.obj;
+            if(rtosc_narguments(msg)) {
+                int Pq = rtosc_argument(msg, 0).i;
+                obj->baseq  = expf(powf((float) Pq / 127.0f, 2) * logf(1000.0f)) - 0.9f;
+                rChangeCb;
+                d.broadcast(d.loc, "i", Pq);
+            } else {
+                int Pq = roundf(127.0f * sqrtf(logf(0.9f + obj->baseq)/logf(1000.0f)));
+                d.reply(d.loc, "i", Pq);
+            }
+        }},
 };
 #undef rChangeCb
 #define rChangeCb
