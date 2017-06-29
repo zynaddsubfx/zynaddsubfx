@@ -16,7 +16,7 @@
 #define MASTER_H
 #include "../globals.h"
 #include "Microtonal.h"
-#include <rtosc/miditable.h>
+#include <rtosc/automations.h>
 #include <rtosc/ports.h>
 
 #include "Time.h"
@@ -171,7 +171,7 @@ class Master
         WatchManager watcher;
 
         //Midi Learn
-        rtosc::MidiMapperRT midi;
+        rtosc::AutomationMgr automate;
 
         bool   frozenState;//read-only parameters for threadsafe actions
         Allocator *memory;
