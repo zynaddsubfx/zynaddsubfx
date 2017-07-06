@@ -41,6 +41,22 @@
 #define DISTRHO_PLUGIN_WANT_FULL_STATE  1
 
 enum Parameters {
+    kParamSlot1,
+    kParamSlot2,
+    kParamSlot3,
+    kParamSlot4,
+    kParamSlot5,
+    kParamSlot6,
+    kParamSlot7,
+    kParamSlot8,
+    kParamSlot9,
+    kParamSlot10,
+    kParamSlot11,
+    kParamSlot12,
+    kParamSlot13,
+    kParamSlot14,
+    kParamSlot15,
+    kParamSlot16,
     kParamOscPort,
     kParamCount
 };

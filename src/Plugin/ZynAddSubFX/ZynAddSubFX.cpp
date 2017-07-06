@@ -224,6 +224,15 @@ protected:
             parameter.ranges.def = 0.0f;
             break;
         }
+        if(kParamSlot1 <= index && index <= kParamSlot16) {
+            parameter.hints  = kParameterIsAutomable;
+            parameter.name   = ("Slot " + zyn::to_s(index-kParamSlot1 + 1)).c_str();
+            parameter.symbol = ("slot"  + zyn::to_s(index-kParamSlot1 + 1)).c_str();
+            parameter.unit   = "";
+            parameter.ranges.min = 0.0f;
+            parameter.ranges.max = 1.0f;
+            parameter.ranges.def = 0.5f;
+        }
     }
 
    /**
@@ -236,9 +245,11 @@ protected:
         {
         case kParamOscPort:
             return oscPort;
-        default:
-            return 0.0f;
         }
+        if(kParamSlot1 <= index && index <= kParamSlot16) {
+            return master->automate.getSlot(index - kParamSlot1);
+        }
+        return 0.0f;
     }
 
    /**
@@ -247,9 +258,12 @@ protected:
       When a parameter is marked as automable, you must ensure no non-realtime operations are performed.
       @note This function will only be called for parameter inputs.
     */
-    void setParameterValue(uint32_t /*index*/, float /*value*/) noexcept override
+    void setParameterValue(uint32_t index, float value) noexcept override
     {
         // only an output port for now
+        if(kParamSlot1 <= index && index <= kParamSlot16) {
+            master->automate.setSlot(index - kParamSlot1, value);
+        }
     }
 
    /* --------------------------------------------------------------------------------------------------------

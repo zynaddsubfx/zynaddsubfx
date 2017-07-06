@@ -114,6 +114,201 @@ static const Ports sysefsendto =
         }}
 };
 
+#define rBegin [](const char *msg, RtData &d) { rtosc::AutomationMgr &a = *(AutomationMgr*)d.obj
+#define rEnd }
+
+static int extract_num(const char *&msg)
+{
+    while(*msg && !isdigit(*msg)) msg++;
+    int num = atoi(msg);
+    while(isdigit(*msg)) msg++;
+    return num;
+}
+
+static int get_next_int(const char *msg)
+{
+    return extract_num(msg);
+}
+
+static const Ports mapping_ports = {
+    {"offset::f", rProp(parameter) rShort("off") rLinear(-50, 50) rMap(unit, percent), 0,
+        rBegin;
+        int slot = d.idx[1];
+        int param = d.idx[0];
+        if(!strcmp("f",rtosc_argument_string(msg))) {
+            a.setSlotSubOffset(slot, param, rtosc_argument(msg, 0).f);
+            a.updateMapping(slot, param);
+            d.broadcast(d.loc, "f", a.getSlotSubOffset(slot, param));
+        } else
+            d.reply(d.loc, "f", a.getSlotSubOffset(slot, param));
+        rEnd},
+    {"gain::f", rProp(parameter) rShort("gain") rLinear(-200, 200) rMap(unit, percent), 0,
+        rBegin;
+        int slot = d.idx[1];
+        int param = d.idx[0];
+        if(!strcmp("f",rtosc_argument_string(msg))) {
+            a.setSlotSubGain(slot, param, rtosc_argument(msg, 0).f);
+            a.updateMapping(slot, param);
+            d.broadcast(d.loc, "f", a.getSlotSubGain(slot, param));
+        } else
+            d.reply(d.loc, "f", a.getSlotSubGain(slot, param));
+        rEnd},
+};
+
+static const Ports auto_param_ports = {
+    {"used:", rProp(parameter) rProp(read-only) rDoc("If automation is assigned to anything"), 0,
+        rBegin;
+        int slot  = d.idx[1];
+        int param = d.idx[0];
+
+        d.reply(d.loc, a.slots[slot].automations[param].used ? "T" : "F");
+        rEnd},
+    {"active::T:F", rProp(parameter) rDoc("If automation is being actively used"), 0,
+        rBegin;
+        int slot  = d.idx[1];
+        int param = d.idx[0];
+        if(rtosc_narguments(msg))
+            a.slots[slot].automations[param].active = rtosc_argument(msg, 0).T;
+        else
+            d.reply(d.loc, a.slots[slot].automations[param].active ? "T" : "F");
+        rEnd},
+    {"path:", rProp(parameter) rProp(read-only) rDoc("Path of parameter"), 0,
+        rBegin;
+        int slot  = d.idx[1];
+        int param = d.idx[0];
+        d.reply(d.loc, "s", a.slots[slot].automations[param].param_path);
+        rEnd},
+    {"clear:", 0, 0,
+        rBegin;
+        int slot = d.idx[1];
+        int param = d.idx[0];
+        a.clearSlotSub(slot, param);
+        rEnd},
+    {"mapping/", 0, &mapping_ports,
+        rBegin;
+        SNIP;
+        mapping_ports.dispatch(msg, d);
+        rEnd},
+
+    //{"mapping", rDoc("Parameter mapping control"), 0,
+    //    rBegin;
+    //    int slot  = d.idx[1];
+    //    int param = d.idx[0];
+    //    if(!strcmp("b", rtosc_argument_string(msg))) {
+    //        int    len  = rtosc_argument(msg, 0).b.len / sizeof(float);
+    //        float *data = (float*)rtosc_argument(msg, 0).b.data;
+    //    } else {
+    //        d.reply(d.loc, "b",
+    //                a.slots[slot].automations[param].map.npoints*sizeof(float),
+    //                a.slots[slot].automations[param].map.control_points);
+    //    }
+    //    rEnd},
+};
+
+static const Ports slot_ports = {
+    //{"learn-binding:s", rDoc("Create binding for automation path with midi-learn"), 0,
+    //    rBegin;
+    //    (void) m;
+    //    //m->automate.createBinding(rtosc_argument(msg, 0).i,
+    //    //                          rtosc_argument(msg, 1).s,
+    //    //                          rtosc_argument(msg, 2).T);
+    //    rEnd},
+    //{"create-binding:s", rDoc("Create binding for automation path"), 0,
+    //    rBegin;
+    //    m->automate.createBinding(rtosc_argument(msg, 0).i,
+    //                              rtosc_argument(msg, 1).s,
+    //                              rtosc_argument(msg, 2).T);
+    //    rEnd},
+    {"value::f", rProp(parameter) rMap(default, 0.5) rLinear(0, 1) rDoc("Access current value in slot 'i' (0..1)"), 0,
+        rBegin;
+        int num = d.idx[0];
+        if(!strcmp("f",rtosc_argument_string(msg))) {
+            a.setSlot(num, rtosc_argument(msg, 0).f);
+            d.broadcast(d.loc, "f", a.getSlot(num));
+        } else
+            d.reply(d.loc, "f", a.getSlot(num));
+        rEnd},
+
+    {"name::s", rProp(parameter) rDoc("Access name of automation slot"), 0,
+        rBegin;
+        int num = d.idx[0];
+        if(!strcmp("s",rtosc_argument_string(msg))) {
+            a.setName(num, rtosc_argument(msg, 0).s);
+            d.broadcast(d.loc, "s", a.getName(num));
+        } else
+            d.reply(d.loc, "s", a.getName(num));
+        rEnd},
+    {"midi-cc::i", rProp(parameter) rMap(default, -1) rDoc("Access assigned midi CC slot") , 0,
+        rBegin;
+        int slot = d.idx[0];
+        if(rtosc_narguments(msg))
+            a.slots[slot].midi_cc = rtosc_argument(msg, 0).i;
+        else
+            d.reply(d.loc, "i", a.slots[slot].midi_cc);
+
+        rEnd},
+    {"active::T:F",  rProp(parameter) rMap(default, F) rDoc("If Slot is enabled"), 0,
+        rBegin;
+        int slot = d.idx[0];
+        if(rtosc_narguments(msg))
+            a.slots[slot].active = rtosc_argument(msg, 0).T;
+        else
+            d.reply(d.loc, a.slots[slot].active ? "T" : "F");
+        rEnd},
+    {"learning:", rProp(parameter) rMap(default, -1) rDoc("If slot is trying to find a midi learn binding"), 0,
+        rBegin;
+        int slot = d.idx[0];
+        d.reply(d.loc, "i", a.slots[slot].learning);
+        rEnd},
+    {"clear:", 0, 0,
+        rBegin;
+        int slot = d.idx[0];
+        a.clearSlot(slot);
+        rEnd},
+    {"param#4/", rDoc("Info on individual param mappings"), &auto_param_ports,
+        rBegin;
+        (void)a;
+        d.push_index(get_next_int(msg));
+        SNIP;
+        auto_param_ports.dispatch(msg, d);
+        d.pop_index();
+        rEnd},
+};
+
+static const Ports automate_ports = {
+    {"active-slot::i", rProp(parameter) rMap(min, -1) rMap(max, 16) rDoc("Active Slot for macro learning"), 0,
+        rBegin;
+        if(!strcmp("i",rtosc_argument_string(msg))) {
+            a.active_slot = rtosc_argument(msg, 0).i;
+            d.broadcast(d.loc, "i", a.active_slot);
+        } else
+            d.reply(d.loc, "i", a.active_slot);
+        rEnd},
+    {"learn-binding-new-slot:s", rDoc("Learn a parameter assigned to a new slot"), 0,
+        rBegin;
+        int free_slot = a.free_slot();
+        if(free_slot >= 0) {
+            a.createBinding(free_slot, rtosc_argument(msg, 0).s, true);
+            a.active_slot = free_slot;
+        }
+        rEnd},
+    {"learn-binding-same-slot:s", rDoc("Learn a parameter appending to the active-slot"), 0,
+        rBegin;
+        if(a.active_slot >= 0)
+            a.createBinding(a.active_slot, rtosc_argument(msg, 0).s, true);
+        rEnd},
+    {"slot#16/", rDoc("Parameters of individual automation slots"), &slot_ports,
+        rBegin;
+        (void)a;
+        d.push_index(get_next_int(msg));
+        SNIP;
+        slot_ports.dispatch(msg, d);
+        d.pop_index();
+        rEnd},
+};
+
+#undef  rBegin
+#undef  rEnd
 #define rBegin [](const char *msg, RtData &d) { Master *m = (Master*)d.obj
 #define rEnd }
 
@@ -123,6 +318,7 @@ static const Ports watchPorts = {
         m->watcher.add_watch(rtosc_argument(msg,0).s);
         rEnd},
 };
+
 
 extern const Ports bankPorts;
 static const Ports master_ports = {
@@ -250,13 +446,12 @@ static const Ports master_ports = {
         [](const char *,RtData &d) {
             Master *M =  (Master*)d.obj;
             M->frozenState = false;}},
-    {"midi-learn/", 0, &rtosc::MidiMapperRT::ports,
+    {"automate/", rDoc("MIDI Learn/Plugin Automation support"), &automate_ports,
         [](const char *msg, RtData &d) {
-            Master *M =  (Master*)d.obj;
             SNIP;
-            printf("residue message = <%s>\n", msg);
-            d.obj = &M->midi;
-            rtosc::MidiMapperRT::ports.dispatch(msg,d);}},
+            d.obj = (void*)&((Master*)d.obj)->automate;
+            automate_ports.dispatch(msg, d);
+            }},
     {"close-ui:", rDoc("Request to close any connection named \"GUI\""), 0,
         [](const char *, RtData &d) {
        d.reply("/close-ui", "");}},
@@ -307,6 +502,14 @@ static const Ports master_ports = {
         rBOIL_END},
     {"bank/", rDoc("Controls for instrument banks"), &bankPorts,
             [](const char*,RtData&) {}},
+    {"learn:s", rProp(depricated) rDoc("MIDI Learn"), 0,
+        rBegin;
+        int free_slot = m->automate.free_slot();
+        if(free_slot >= 0) {
+            m->automate.createBinding(free_slot, rtosc_argument(msg, 0).s, true);
+            m->automate.active_slot = free_slot;
+        }
+        rEnd},
 };
 
 #undef rBegin
@@ -383,15 +586,18 @@ vuData::vuData(void)
 Master::Master(const SYNTH_T &synth_, Config* config)
     :HDDRecorder(synth_), time(synth_), ctl(synth_, &time),
     microtonal(config->cfg.GzipCompression), bank(config),
+    automate(16,4,8),
     frozenState(false), pendingMemory(false),
     synth(synth_), gzip_compression(config->cfg.GzipCompression)
 {
     bToU = NULL;
     uToB = NULL;
 
-    //Setup MIDI
-    midi.frontend = [this](const char *msg) {bToU->raw_write(msg);};
-    midi.backend  = [this](const char *msg) {applyOscEvent(msg);};
+    //Setup MIDI Learn
+    automate.set_ports(master_ports);
+    automate.set_instance(this);
+    //midi.frontend = [this](const char *msg) {bToU->raw_write(msg);};
+    automate.backend  = [this](const char *msg) {applyOscEvent(msg);};
 
     memory = new AllocatorClass();
     swaplr = 0;
@@ -541,8 +747,7 @@ void Master::setController(char chan, int type, int par)
 {
     if(frozenState)
         return;
-    //TODO add chan back
-    midi.handleCC(type,par);
+    automate.handleMidi(chan, type, par);
     if((type == C_dataentryhi) || (type == C_dataentrylo)
        || (type == C_nrpnhi) || (type == C_nrpnlo)) { //Process RPN and NRPN by the Master (ignore the chan)
         ctl.setparameternumber(type, par);
@@ -746,13 +951,19 @@ bool Master::runOSC(float *outl, float *outr, bool offline)
         }
         if(!d.matches) {// && !ports.apropos(msg)) {
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
-            fprintf(stderr, "Unknown address<BACKEND:%s> '%s:%s'\n", 
+            fprintf(stderr, "Unknown address<BACKEND:%s> '%s:%s'\n",
                     offline ? "offline" : "online",
                     uToB->peak(),
                     rtosc_argument_string(uToB->peak()));
             fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
         }
     }
+
+    if(automate.damaged) {
+        d.broadcast("/damage", "s", "/automate/");
+        automate.damaged = 0;
+    }
+
     if(events>1 && false)
         fprintf(stderr, "backend: %d events per cycle\n",events);
 
