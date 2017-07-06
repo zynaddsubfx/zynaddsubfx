@@ -16,6 +16,7 @@
 
 #include "Part.h"
 
+#include "zyn-version.h"
 #include "../Misc/Stereo.h"
 #include "../Misc/Util.h"
 #include "../Params/LFOParams.h"
@@ -32,6 +33,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <fstream>
 #include <iostream>
 #include <algorithm>
 #include <cmath>
@@ -51,12 +53,18 @@ static const Ports sysefxPort =
         rDoc("gain on part to sysefx routing"), 0,
         [](const char *m, RtData&d)
         {
-            //ok, this is going to be an ugly workaround
-            //we know that if we are here the message previously MUST have
-            //matched Psysefxvol#/
-            //and the number is one or two digits at most
-            const char *index_1 = m;
-            index_1 -=2;
+            //we know that if we are here the location must
+            //be ...Psysefxvol#N/part#M
+            //and the number "N" is one or two digits at most
+
+            // go backto the '/'
+            const char* m_findslash = m + strlen(m),
+                      * loc_findslash = d.loc + strlen(d.loc);
+            for(;*loc_findslash != '/'; --m_findslash, --loc_findslash)
+                assert(*loc_findslash == *m_findslash);
+            assert(m_findslash + 1 == m);
+
+            const char *index_1 = loc_findslash-1;
             assert(isdigit(*index_1));
             if(isdigit(index_1[-1]))
                 index_1--;
@@ -80,9 +88,15 @@ static const Ports sysefsendto =
     {"to#" STRINGIFY(NUM_SYS_EFX) "::i",
         rProp(parameter) rDoc("sysefx to sysefx routing gain"), 0, [](const char *m, RtData&d)
         {
-            //same ugly workaround as before
-            const char *index_1 = m;
-            index_1 -=2;
+            //same workaround as before
+            //go backto the '/'
+            const char* m_findslash = m + strlen(m),
+                      * loc_findslash = d.loc + strlen(d.loc);
+            for(;*loc_findslash != '/'; --m_findslash, --loc_findslash)
+                assert(*loc_findslash == *m_findslash);
+            assert(m_findslash + 1 == m);
+
+            const char *index_1 = loc_findslash-1;
             assert(isdigit(*index_1));
             if(isdigit(index_1[-1]))
                 index_1--;
@@ -118,12 +132,13 @@ static const Ports master_ports = {
     rRecursp(insefx, 8, "Insertion Effect"),//NUM_INS_EFX
     rRecur(microtonal, "Microtonal Mapping Functionality"),
     rRecur(ctl, "Controller"),
-    rArrayI(Pinsparts, NUM_INS_EFX, rOpt(-2, Master), rOpt(-1, Off),
-            rOptions(Part1, Part2, Part3, Part4, Part5, Part6,
-                 Part7, Part8, Part9, Part10, Part11, Part12,
-                 Part13, Part14, Part15, Part16) rDefault(Off),
-                "Part to insert part onto"),
-    {"Pkeyshift::i", rShort("key shift") rProp(parameter) rLinear(0,127) rDefault(64) rDoc("Global Key Shift"), 0, [](const char *m, RtData&d) {
+    rArrayOption(Pinsparts, NUM_INS_EFX, rOpt(-2, Master), rOpt(-1, Off),
+                 rOptions(Part1, Part2, Part3, Part4, Part5, Part6,
+                          Part7, Part8, Part9, Part10, Part11, Part12,
+                          Part13, Part14, Part15, Part16) rDefault(Off),
+                 "Part to insert part onto"),
+    {"Pkeyshift::i", rShort("key shift") rProp(parameter) rLinear(0,127)
+        rDefault(64) rDoc("Global Key Shift"), 0, [](const char *m, RtData&d) {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "i", ((Master*)d.obj)->Pkeyshift);
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
@@ -172,14 +187,16 @@ static const Ports master_ports = {
             keys[i] = m->activeNotes[i] ? 'T' : 'F';
         d.broadcast(d.loc, keys);
         rEnd},
-    {"Pvolume::i", rShort("volume") rProp(parameter) rLinear(0,127) rDefault(80) rDoc("Master Volume"), 0,
+    {"Pvolume::i", rShort("volume") rProp(parameter) rLinear(0,127)
+        rDefault(80) rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "i", ((Master*)d.obj)->Pvolume);
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
             ((Master*)d.obj)->setPvolume(limit<char>(rtosc_argument(m,0).i,0,127));
             d.broadcast(d.loc, "i", ((Master*)d.obj)->Pvolume);}}},
-    {"volume::i", rShort("volume") rProp(parameter) rLinear(0,127) rDefault(80) rDoc("Master Volume"), 0,
+    {"volume::i", rShort("volume") rProp(parameter) rLinear(0,127)
+        rDefault(80) rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "i", ((Master*)d.obj)->Pvolume);
@@ -265,8 +282,8 @@ static const Ports master_ports = {
         [](const char *, rtosc::RtData &d) {d.reply("/undo_pause", "");}},
     {"undo_resume:",rProp(internal) rDoc("resume undo event recording"),0,
         [](const char *, rtosc::RtData &d) {d.reply("/undo_resume", "");}},
-    {"config/", rDoc("Top Level Application Configuration Parameters"), &Config::ports,
-        [](const char *, rtosc::RtData &d){d.forward();}},
+    {"config/", rNoWalk rDoc("Top Level Application Configuration Parameters"),
+        &Config::ports, [](const char *, rtosc::RtData &d){d.forward();}},
     {"presets/", rDoc("Parameter Presets"), &preset_ports, rBOIL_BEGIN
         SNIP
             preset_ports.dispatch(msg, data);
@@ -445,6 +462,7 @@ void Master::defaults()
 
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
         part[npart]->defaults();
+        part[npart]->partno  = npart % NUM_MIDI_CHANNELS;
         part[npart]->Prcvchn = npart % NUM_MIDI_CHANNELS;
     }
 
@@ -1252,5 +1270,112 @@ void Master::getfromXML(XMLwrapper& xml)
         xml.exitbranch();
     }
 }
+
+static rtosc_version version_in_rtosc_fmt()
+{
+    return rtosc_version
+    {
+        (unsigned char) version.get_major(),
+        (unsigned char) version.get_minor(),
+        (unsigned char) version.get_revision()
+    };
+}
+
+char* Master::getXMLData()
+{
+    XMLwrapper xml;
+
+    xml.beginbranch("MASTER");
+    add2XML(xml);
+    xml.endbranch();
+
+    return xml.getXMLdata();
+}
+
+int Master::saveOSC(const char *filename)
+{
+    std::string savefile = rtosc::save_to_file(ports, this,
+                                               "ZynAddSubFX",
+                                               version_in_rtosc_fmt());
+
+    zyn::Config config;
+    zyn::SYNTH_T* synth = new zyn::SYNTH_T;
+    synth->buffersize = 256;
+    synth->samplerate = 48000;
+    synth->alias();
+
+    zyn::Master master2(*synth, &config);
+    int rval = master2.loadOSCFromStr(savefile.c_str());
+
+
+    if(rval < 0)
+    {
+        std::cerr << "invalid savefile!" << std::endl;
+        std::cerr << "first entry that could not be parsed:" << std::endl;
+
+        for(int i = -rval + 1; savefile[i]; ++i)
+        if(savefile[i] == '\n')
+        {
+            savefile.resize(i);
+            break;
+        }
+        std::cerr << (savefile.c_str() - rval) << std::endl;
+
+        rval = -1;
+    }
+    else
+    {
+        char* xml = getXMLData(),
+            * xml2 = master2.getXMLData();
+
+        rval = strcmp(xml, xml2) ? -1 : 0;
+
+        if(rval == 0)
+        {
+            if(filename)
+            {
+                std::ofstream ofs(filename);
+                ofs << savefile;
+            }
+            else if(!filename)
+                std::cout << savefile << std::endl;
+        }
+        else
+        {
+            std::cout << savefile << std::endl;
+            std::cerr << "Can not write OSC savefile!! (see tmp1.txt and tmp2.txt)"
+                      << std::endl;
+            std::ofstream tmp1("tmp1.txt"), tmp2("tmp2.txt");
+            tmp1 << xml;
+            tmp2 << xml2;
+        }
+
+        free(xml);
+        free(xml2);
+    }
+    return rval;
+}
+
+int Master::loadOSCFromStr(const char *filename)
+{
+    return rtosc::load_from_file(filename,
+                                 ports, this,
+                                 "ZynAddSubFX", version_in_rtosc_fmt());
+}
+
+string loadfile(string fname)
+{
+    std::ifstream t(fname.c_str());
+    std::string str((std::istreambuf_iterator<char>(t)),
+                     std::istreambuf_iterator<char>());
+    return str;
+}
+
+int Master::loadOSC(const char *filename)
+{
+    int rval = loadOSCFromStr(loadfile(filename).c_str());
+    return rval < 0 ? rval : 0;
+}
+
 
 }

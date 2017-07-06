@@ -40,32 +40,44 @@ static const rtosc::Ports SUBnotePorts = {
     rToggle(Pstereo,    rShort("stereo"), rDefault(true), "Stereo Enable"),
     rParamZyn(PVolume,  rShort("volume"), rDefault(96), "Volume"),
     rParamZyn(PPanning, rShort("panning"), rDefault(64), "Left Right Panning"),
-    rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), rDefault(90), "Amplitude Velocity Sensing function"),
-    rParamI(PDetune,       rShort("detune"), rLinear(0, 16383), rDefault(8192), "Detune in detune type units"),
+    rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), rDefault(90),
+        "Amplitude Velocity Sensing function"),
+    rParamI(PDetune,       rShort("detune"), rLinear(0, 16383), rDefault(8192),
+        "Detune in detune type units"),
     rParamI(PCoarseDetune, rShort("cdetune"), rDefault(0), "Coarse Detune"),
     //Real values needed
     rOption(PDetuneType,               rShort("det. scl."),
-            rOptions(L35 cents, L10 cents, E100 cents, E1200 cents), rDefault(L10 cents), "Detune Scale"),
-    rToggle(PFreqEnvelopeEnabled,      rShort("enable"), rDefault(false), "Enable for Frequency Envelope"),
-    rToggle(PBandWidthEnvelopeEnabled, rShort("enable"), rDefault(false), "Enable for Bandwidth Envelope"),
-    rToggle(PGlobalFilterEnabled,                 rShort("enable"), rDefault(false), "Enable for Global Filter"),
-    rParamZyn(PGlobalFilterVelocityScale,         rShort("scale"), rDefault(64), "Filter Velocity Magnitude"),
-    rParamZyn(PGlobalFilterVelocityScaleFunction, rShort("sense"), rDefault(64), "Filter Velocity Function Shape"),
+            rOptions(L35 cents, L10 cents, E100 cents, E1200 cents),
+            rDefault("L10 cents"S), "Detune Scale"),
+    rToggle(PFreqEnvelopeEnabled,      rShort("enable"), rDefault(false),
+        "Enable for Frequency Envelope"),
+    rToggle(PBandWidthEnvelopeEnabled, rShort("enable"), rDefault(false),
+        "Enable for Bandwidth Envelope"),
+    rToggle(PGlobalFilterEnabled,                 rShort("enable"),
+        rDefault(false), "Enable for Global Filter"),
+    rParamZyn(PGlobalFilterVelocityScale,         rShort("scale"), rDefault(64),
+        "Filter Velocity Magnitude"),
+    rParamZyn(PGlobalFilterVelocityScaleFunction, rShort("sense"), rDefault(64),
+        "Filter Velocity Function Shape"),
     //rRecur(FreqEnvelope, EnvelopeParams),
     //rToggle(),//continue
-    rToggle(Pfixedfreq,     rShort("fixed freq"), rDefault(false), "Base frequency fixed frequency enable"),
-    rParamZyn(PfixedfreqET, rShort("fixed ET"),   rDefault(0),     "Equal temeperate control for fixed frequency operation"),
-    rParamZyn(PBendAdjust,  rShort("bend"),       rDefault(88),    "Pitch bend adjustment"),
-    rParamZyn(POffsetHz,    rShort("+ Hz"),       rDefault(64),    "Voice constant offset"),
+    rToggle(Pfixedfreq,     rShort("fixed freq"), rDefault(false),
+        "Base frequency fixed frequency enable"),
+    rParamZyn(PfixedfreqET, rShort("fixed ET"),   rDefault(0),
+        "Equal temeperate control for fixed frequency operation"),
+    rParamZyn(PBendAdjust,  rShort("bend"),       rDefault(88),
+        "Pitch bend adjustment"),
+    rParamZyn(POffsetHz,    rShort("+ Hz"),       rDefault(64),
+        "Voice constant offset"),
 #undef rChangeCb
 #define rChangeCb obj->updateFrequencyMultipliers(); if (obj->time) { \
     obj->last_update_timestamp = obj->time->time(); }
     rParamI(POvertoneSpread.type, rMap(min, 0), rMap(max, 7), rShort("spread type")
             rOptions(Harmonic, ShiftU, ShiftL, PowerU, PowerL, Sine, Power, Shift),
-	    rDefault(Harmonic)
+            rDefault(Harmonic)
             "Spread of harmonic frequencies"),
     rParamI(POvertoneSpread.par1, rMap(min, 0), rMap(max, 255), rShort("p1"),
-	    rDefault(0), "Overtone Parameter"),
+            rDefault(0), "Overtone Parameter"),
     rParamI(POvertoneSpread.par2, rMap(min, 0), rMap(max, 255), rShort("p2"),
             rDefault(0), "Overtone Parameter"),
     rParamI(POvertoneSpread.par3, rMap(min, 0), rMap(max, 255), rShort("forceH"),
@@ -74,20 +86,24 @@ static const rtosc::Ports SUBnotePorts = {
 #define rChangeCb if (obj->time) { obj->last_update_timestamp = obj->time->time(); }
     rParamI(Pnumstages, rShort("stages"), rMap(min, 1), rMap(max, 5),
             rDefault(2), "Number of filter stages"),
-    rParamZyn(Pbandwidth, rShort("bandwidth"), rDefault(40), "Bandwidth of filters"),
-    rParamZyn(Phmagtype,  rShort("mag. type"), rOptions(linear, -40dB, -60dB, -80dB, -100dB),
+    rParamZyn(Pbandwidth, rShort("bandwidth"), rDefault(40),
+              "Bandwidth of filters"),
+    rParamZyn(Phmagtype,  rShort("mag. type"),
+              rOptions(linear, -40dB, -60dB, -80dB, -100dB),
               rDefault(linear), "Magnitude scale"),
-    rArray(Phmag, MAX_SUB_HARMONICS, rDefault(0),
+    rArray(Phmag, MAX_SUB_HARMONICS, rDefaultMissing,
            "Harmonic magnitudes"),
-    rArray(Phrelbw, MAX_SUB_HARMONICS, rDefault(64),
+    rArray(Phrelbw, MAX_SUB_HARMONICS, rDefaultMissing,
            "Relative bandwidth"),
-    rParamZyn(Pbwscale, rShort("stretch"), rDefault(64), "Bandwidth scaling with frequency"),
+    rParamZyn(Pbwscale, rShort("stretch"), rDefault(64),
+              "Bandwidth scaling with frequency"),
     rRecurp(AmpEnvelope,          "Amplitude envelope"),
     rRecurp(FreqEnvelope,         "Frequency Envelope"),
     rRecurp(BandWidthEnvelope,    "Bandwidth Envelope"),
     rRecurp(GlobalFilterEnvelope, "Post Filter Envelope"),
     rRecurp(GlobalFilter,         "Post Filter"),
-    rOption(Pstart, rShort("initial"), rOptions(zero, random, ones), rDefault(random),
+    rOption(Pstart, rShort("initial"), rOptions(zero, random, ones),
+            rDefault(random),
             "How harmonics are initialized"),
 
     {"clear:", rDoc("Reset all harmonics to equal bandwidth/zero amplitude"), NULL,
@@ -185,15 +201,15 @@ SUBnoteParameters::SUBnoteParameters(const AbsTime *time_)
 {
     setpresettype("Psubsynth");
     AmpEnvelope = new EnvelopeParams(64, 1, time_);
-    AmpEnvelope->ADSRinit_dB(0, 40, 127, 25);
+    AmpEnvelope->init(EnvelopeParams::ad_global_amp_env);
     FreqEnvelope = new EnvelopeParams(64, 0, time_);
-    FreqEnvelope->ASRinit(30, 50, 64, 60);
+    FreqEnvelope->init(EnvelopeParams::sub_freq_env);
     BandWidthEnvelope = new EnvelopeParams(64, 0, time_);
-    BandWidthEnvelope->ASRinit_bw(100, 70, 64, 60);
+    BandWidthEnvelope->init(EnvelopeParams::sub_bandwidth_env);
 
     GlobalFilter = new FilterParams(2, 80, 40, time_);
     GlobalFilterEnvelope = new EnvelopeParams(0, 1, time_);
-    GlobalFilterEnvelope->ADSRinit_filter(64, 40, 64, 70, 60, 64);
+    GlobalFilterEnvelope->init(EnvelopeParams::ad_global_filter_env);
 
     defaults();
 }

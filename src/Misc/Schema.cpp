@@ -105,7 +105,8 @@ static ostream &add_options(ostream &o, Port::MetaContainer meta)
  *   - 'domain'    : range [OPTIONAL]
  */
 static bool first = true;
-void dump_param_cb(const rtosc::Port *p, const char *full_name, void *v)
+void dump_param_cb(const rtosc::Port *p, const char *full_name, const char*,
+                   const Ports&,void *v, void*)
 {
     typedef std::vector<std::pair<int,string>> opts;
     std::ostream &o  = *(std::ostream*)v;

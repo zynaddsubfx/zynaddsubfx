@@ -215,7 +215,6 @@ int main(int argc, char *argv[])
 {
     SYNTH_T synth;
     Config config;
-    config.init();
     int noui = 0;
     cerr
     << "\nZynAddSubFX - Copyright (c) 2002-2013 Nasca Octavian Paul and others"

@@ -115,8 +115,6 @@ public:
           oscPort(0),
           middlewareThread(new MiddleWareThread())
     {
-        config.init();
-
         synth.buffersize = static_cast<int>(getBufferSize());
         synth.samplerate = static_cast<uint>(getSampleRate());
 

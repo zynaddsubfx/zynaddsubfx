@@ -97,8 +97,9 @@ const rtosc::Ports FilterParams::ports = {
             unsigned idx = atoi(mm);
             if(rtosc_narguments(msg)) {
                 obj->Psequence[idx].nvowel = rtosc_argument(msg, 0).i;
-            } else
                 d.broadcast(d.loc, "i", obj->Psequence[idx].nvowel);
+            } else
+                d.reply(d.loc, "i", obj->Psequence[idx].nvowel);
         }},
     {"type-svf::i", rProp(parameter) rShort("type")
         rOptions(low, high, band, notch)
