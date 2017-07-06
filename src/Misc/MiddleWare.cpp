@@ -887,9 +887,9 @@ static std::vector<std::string> getFiles(const char *folder, bool finddir)
         }
 #else
         std::string darn_windows = folder + std::string("/") + std::string(fn->d_name);
-        printf("attr on <%s> => %x\n", darn_windows.c_str(), GetFileAttributes(darn_windows.c_str()));
-        printf("desired mask =  %x\n", mask);
-        printf("error = %x\n", INVALID_FILE_ATTRIBUTES);
+        //printf("attr on <%s> => %x\n", darn_windows.c_str(), GetFileAttributes(darn_windows.c_str()));
+        //printf("desired mask =  %x\n", mask);
+        //printf("error = %x\n", INVALID_FILE_ATTRIBUTES);
         bool is_dir = GetFileAttributes(darn_windows.c_str()) & FILE_ATTRIBUTE_DIRECTORY;
 #endif
         if(finddir == is_dir && strcmp(".", fn->d_name))

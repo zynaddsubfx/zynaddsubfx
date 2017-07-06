@@ -231,10 +231,18 @@ BankEntry BankDb::processXiz(std::string filename,
 
     //Grab a timestamp
     struct stat st;
-    int ret  = lstat(fname.c_str(), &st);
     int time = 0;
+
+    //gah windows, just implement the darn standard APIs
+#ifndef WIN32
+    int ret  = lstat(fname.c_str(), &st);
     if(ret != -1)
         time = st.st_mtim.tv_sec;
+#else
+    int ret = 0;
+    time = rand();
+#endif
+    
 
     //quickly check if the file exists in the cache and if it is up-to-date
     if(cache.find(fname) != cache.end() &&
