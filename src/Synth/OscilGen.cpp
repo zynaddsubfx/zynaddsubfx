@@ -69,7 +69,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             "Shape of distortion to be applied"),
     rOption(Pfiltertype, rShort("filter"), rOptions(No Filter,
             lp, hp1, hp1b, bp1, bs1, lp2, hp2, bp2, bs2,
-            cos, sin, low_shelf, s), rDefault("No Filter"S), "Harmonic Filter"),
+            cos, sin, low_shelf, s), rDefaultId(No Filter), "Harmonic Filter"),
     rParamZyn(Pfilterpar1, rShort("p1"), rDefault(64), "Filter parameter"),
     rParamZyn(Pfilterpar2, rShort("p2"), rDefault(64), "Filter parameter"),
     rToggle(Pfilterbeforews, rShort("pre/post"), rDefault(false),

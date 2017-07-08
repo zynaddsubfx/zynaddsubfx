@@ -297,7 +297,8 @@ static const Ports automate_ports = {
         if(a.active_slot >= 0)
             a.createBinding(a.active_slot, rtosc_argument(msg, 0).s, true);
         rEnd},
-    {"slot#16/", rDoc("Parameters of individual automation slots"), &slot_ports,
+    // TODO: remove rNoWalk
+    {"slot#16/", rNoWalk rDoc("Parameters of individual automation slots"), &slot_ports,
         rBegin;
         (void)a;
         d.push_index(get_next_int(msg));
@@ -1522,6 +1523,8 @@ int Master::saveOSC(const char *filename)
     if(rval < 0)
     {
         std::cerr << "invalid savefile!" << std::endl;
+        std::cerr << "complete savefile:" << std::endl;
+        std::cerr << savefile << std::endl;
         std::cerr << "first entry that could not be parsed:" << std::endl;
 
         for(int i = -rval + 1; savefile[i]; ++i)

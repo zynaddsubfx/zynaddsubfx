@@ -48,7 +48,7 @@ static const rtosc::Ports SUBnotePorts = {
     //Real values needed
     rOption(PDetuneType,               rShort("det. scl."),
             rOptions(L35 cents, L10 cents, E100 cents, E1200 cents),
-            rDefault("L10 cents"S), "Detune Scale"),
+            rDefaultId(L10 cents), "Detune Scale"),
     rToggle(PFreqEnvelopeEnabled,      rShort("enable"), rDefault(false),
         "Enable for Frequency Envelope"),
     rToggle(PBandWidthEnvelopeEnabled, rShort("enable"), rDefault(false),
