@@ -13,7 +13,12 @@
 
 // DPF includes
 #include "DistrhoUI.hpp"
+#ifdef WIN32
+#include <windows.h>
+#else
+#define __USE_GNU
 #include <dlfcn.h>
+#endif
 
 typedef void *zest_t;
 struct zest_handles {
@@ -41,13 +46,37 @@ public:
         : UI(1181, 659)
     {
         printf("[INFO] Opened the zynaddsubfx UI...\n");
-        handle = dlopen("/opt/zyn-fusion/libzest.so", RTLD_LAZY);
+#ifdef WIN32
+        char path[1024];
+        GetModuleFileName(GetModuleHandle("ZynAddSubFX.dll"), path, sizeof(path));
+        if(strstr(path, "ZynAddSubFX.dll"))
+            strstr(path, "ZynAddSubFX.dll")[0] = 0;
+        strcat(path, "libzest.dll");
+        printf("[DEBUG] Loading zest library from <%s>\n", path);
+        handle = LoadLibrary(path);
+        if(!handle)
+            handle = LoadLibrary("./libzest.dll");
+        if(!handle)
+            handle = LoadLibrary("libzest.dll");
+#else
+        handle = dlopen("./libzest.so", RTLD_LAZY);
+        if(!handle)
+            handle = dlopen("/opt/zyn-fusion/libzest.so", RTLD_LAZY);
+        if(!handle)
+            handle = dlopen("libzest.so", RTLD_LAZY);
+#endif
         if(!handle) {
             printf("[ERROR] Cannot Open libzest.so\n");
+#ifndef WIN32
             printf("[ERROR] '%s'\n", dlerror());
+#endif
         }
         memset(&z, 0, sizeof(z));
+#ifdef WIN32
+#define get_sym(x) z.zest_##x = (decltype(z.zest_##x))GetProcAddress(handle, "zest_"#x)
+#else
 #define get_sym(x) z.zest_##x = (decltype(z.zest_##x))dlsym(handle, "zest_"#x)
+#endif
         if(handle) {
             get_sym(open);
             get_sym(setup);
@@ -70,8 +99,11 @@ public:
         printf("[INFO:Zyn] zest_close()\n");
         if(z.zest)
             z.zest_close(z.zest);
+#ifdef WIN32
+#else
         if(handle)
-            dlclose(handle);
+        dlclose(handle);
+#endif
     }
 
 protected:
@@ -156,13 +188,15 @@ protected:
         if(!z.zest) {
             if(!z.zest_open)
                 return;
-            //printf("[INFO:Zyn] zest_open()\n");
+if(!oscPort)
+    return;
+            printf("[INFO:Zyn] zest_open()\n");
             char address[1024];
             snprintf(address, sizeof(address), "osc.udp://127.0.0.1:%d",oscPort);
             printf("[INFO:Zyn] zest_open(%s)\n", address);
 
             z.zest = z.zest_open(address);
-            printf("[INFO:Zyn] zest_setup()\n");
+            printf("[INFO:Zyn] zest_setup(%s)\n", address);
             z.zest_setup(z.zest);
         }
 
@@ -195,7 +229,11 @@ protected:
 private:
     int oscPort;
     zest_handles z;
+#ifdef WIN32
+    HMODULE handle;
+#else
     void *handle;
+#endif
 
 
     DISTRHO_DECLARE_NON_COPY_CLASS(ZynAddSubFXUI)
