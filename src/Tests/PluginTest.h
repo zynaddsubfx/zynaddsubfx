@@ -56,7 +56,7 @@ void print_string_differences(string orig, string next)
     //Insertion is 2 cost and moves +2 State (+2 if symbols are different)
     //Deletion  is 1 cost and moves +0 State (+2 if symbols are different)
     char *transition = new char[N*M];
-    int  *cost       = new int[N*M];
+    float  *cost       = new float[N*M];
 
     const int match  = 1;
     const int insert = 2;
@@ -69,8 +69,8 @@ void print_string_differences(string orig, string next)
     }
 
     //Just assume the -1 line is the same
-    cost[0*M + 0] = (a[0] == b[0])*3;
-    cost[0*M + 1] = (a[1] == b[0])*2 + 2;
+    cost[0*M + 0] = (a[0] != b[0])*3;
+    cost[0*M + 1] = (a[1] != b[0])*2 + 2;
     for(int i=1; i<N; ++i) {
         for(int j=0; j<M; ++j) {
             int cost_match = 0xffffff;
@@ -80,7 +80,7 @@ void print_string_differences(string orig, string next)
             if(j > 1)
                 cost_ins = cost[(i-1)*M + (j-2)] + 1 + 2*(a[i] != b[j]);
             if(j > 0)
-                cost_match = cost[(i-1)*M + (j-1)] + 2*(a[i] != b[j]);
+                cost_match = cost[(i-1)*M + (j-1)] + 3*(a[i] != b[j]);
 
             if(cost_match >= 0xffff && cost_ins >= 0xffff && cost_del >= 0xffff) {
                 ;
@@ -97,26 +97,64 @@ void print_string_differences(string orig, string next)
         }
     }
 
+    //int off = 0;
+    //int len = N;
+    //for(int i=off; i<off+len; ++i) {
+    //    for(int j=off; j<off+len; ++j) {
+    //        printf("%4d ", (int)(cost[i*M+j] > 4000 ? -1 : cost[i*M+j]));
+    //    }
+    //    printf("\n");
+    //}
+    //for(int i=off; i<off+len; ++i) {
+    //    for(int j=off; j<off+len; ++j) {
+    //        printf("%d ", transition[i*M+j]);
+    //    }
+    //    printf("\n");
+    //}
+
+    //for(int i=off; i<off+len; ++i)
+    //    printf("%d: %s\n", i, a[i].c_str());
+    //for(int i=off; i<off+len; ++i)
+    //    printf("%d: %s\n", i, b[i].c_str());
+    //exit(1);
+
     int total_cost = cost[(N-1)*M + (M-1)];
     if(total_cost < 500) {
-        printf("total cost = %d\n", cost[(N-1)*M + (M-1)]);
+        printf("total cost = %f\n", cost[(N-1)*M + (M-1)]);
 
-        //int b_pos = b.size()-1;
+        int b_pos = b.size()-1;
         int a_pos = a.size()-1;
-        for(int i=(M-1); i >= 0; --i) {
-            if(a[a_pos] != b[i]) {
-                printf("- %s\n", a[a_pos].c_str());
-                printf("+ %s\n", b[i].c_str());
-            }
-            if(transition[i*M+a_pos] == match) {
+        while(a_pos > 0 && b_pos > 0) {
+            //printf("state = (%d, %d) => %f\n", a_pos, b_pos, cost[a_pos*M+b_pos]);
+            if(transition[a_pos*M+b_pos] == match) {
+                if(a[a_pos] != b[b_pos]) {
+                    printf("REF - %s\n", a[a_pos].c_str());
+                    printf("NEW + %s\n", b[b_pos].c_str());
+                }
                 //printf("R");
                 a_pos -= 1;
-            } else if(transition[i*M+a_pos] == del) {
+                b_pos -= 1;
+            } else if(transition[a_pos*M+b_pos] == del) {
                 //printf("D");
-            } else if(transition[i*M+a_pos] == insert) {
+                //if(a[a_pos] != b[b_pos]) {
+                    //printf("- %s\n", a[a_pos].c_str());
+                    printf("NEW - %s\n", b[b_pos].c_str());
+                //}
+                b_pos -= 1;
+            } else if(transition[a_pos*M+b_pos] == insert) {
+                //if(a[a_pos] != b[b_pos]) {
+                printf("REF - %s\n", a[a_pos].c_str());
+                printf("NEW + %s\n", b[b_pos].c_str());
+                printf("NEW + %s\n", b[b_pos-1].c_str());
+                //}
                 //printf("I");
-                a_pos -= 2;
+                a_pos -= 1;
+                b_pos -= 2;
+            } else {
+                printf("ERROR STATE @(%d, %d)\n", a_pos, b_pos);
+                exit(1);
             }
+
         }
         //printf("%d vs %d\n", N, M);
     }
