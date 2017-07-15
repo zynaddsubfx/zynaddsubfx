@@ -184,14 +184,48 @@ class MessageTest:public CxxTest::TestSuite
             mw->transmitMsg("/learn", "s", "/Pvolume");
             mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 108);
 
+            //param is at default until rt-thread is run
+            TS_ASSERT_EQUALS(ms->Pvolume, 80);
+
+
             //Perform a learning operation
+            run_realtime();
 
-            run_realtime(); //1. runs learning and identifies a CC to bind
-            mw->tick();     //2. produces new binding table
-            run_realtime(); //3. applies new binding table
+            //Verify binding affects control
+            TS_ASSERT_EQUALS(ms->Pvolume, 108);
 
+
+            printf("# Trying to save automations\n");
+            start_realtime();
             mw->transmitMsg("/save_xlz", "s", "test-midi-learn.xlz");
+            stop_realtime();
+
+            //Verify that some file exists
+            printf("# Verifying file exists\n");
+            FILE *f = fopen("test-midi-learn.xlz", "r");
+            TS_ASSERT(f);
+
+            if(f)
+                fclose(f);
+
+            printf("# Clearing automation\n");
+            //Clear out state
+            mw->transmitMsg("/clear_xlz", "");
+            //Send dummy message
+            mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 27);
+            run_realtime();
+
+            //Verify automation table is clear
+            TS_ASSERT_EQUALS(ms->Pvolume, 108);
+
+            printf("# Loading automation\n");
             mw->transmitMsg("/load_xlz", "s", "test-midi-learn.xlz");
+            //Send message
+            mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 28);
+            run_realtime();
+
+            //Verify automation table is restored
+            TS_ASSERT_EQUALS(ms->Pvolume, 28);
         }
 
         void testLfoPaste(void)

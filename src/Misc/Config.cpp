@@ -150,7 +150,7 @@ static const rtosc::Ports ports = {
             }
 
         }},
-    {"favorites:", rProp(parameter), 0,
+    {"favorites:", /*rProp(parameter)*/ 0, 0,
         [](const char *msg, rtosc::RtData &d)
         {
             Config &c = *(Config*)d.obj;

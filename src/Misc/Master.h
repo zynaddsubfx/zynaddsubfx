@@ -59,6 +59,9 @@ class Master
         /**This adds the parameters to the XML data*/
         void add2XML(XMLwrapper& xml);
 
+        static void saveAutomation(XMLwrapper &xml, const rtosc::AutomationMgr &midi);
+        static void loadAutomation(XMLwrapper &xml,       rtosc::AutomationMgr &midi);
+
         void defaults();
 
         /**loads all settings from a XML file
