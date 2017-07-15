@@ -11,6 +11,30 @@ void walk_ports2(const rtosc::Ports *base,
 
 namespace zyn {
 
+static const char *escape_string(const char *msg)
+{
+    if(!msg)
+        return NULL;
+    char *out = (char*)malloc(strlen(msg)*2+1);
+    memset(out, 0, strlen(msg)*2+1);
+    char *itr = out;
+    while(*msg) {
+        if(*msg == '"') {
+            *itr++ = '\\';
+            *itr++ = '\"';
+        } else if(*msg == '\\') {
+            *itr++ = '\\';
+            *itr++ = '\\';
+        } else {
+            *itr++ = *msg;
+        }
+
+        msg++;
+
+    }
+    return out;
+}
+
 /*
  * root :
  *   - 'parameters' : [parameter...]
@@ -181,6 +205,7 @@ void dump_param_cb(const rtosc::Port *p, const char *full_name, const char*,
     const char *min = meta["min"];
     const char *max = meta["max"];
     const char *def = meta["default"];
+    def = escape_string(def);
 
     for(auto m:meta) {
         if(strlen(m.title) >= 5 && !memcmp(m.title, "map ", 4)) {
