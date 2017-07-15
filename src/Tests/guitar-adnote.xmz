@@ -28,6 +28,9 @@ version-revision="1" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="a_note" value="69" />
 <par_real name="a_freq" value="440" exact_value="0x43DC0000" />
 </MICROTONAL>
+<automation>
+<mgr-info nslots="16" nautomations="4" ncontrol="8" />
+</automation>
 <PART id="0">
 <par_bool name="enabled" value="yes" />
 <par name="volume" value="96" />

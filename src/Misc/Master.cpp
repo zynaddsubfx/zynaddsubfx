@@ -631,7 +631,7 @@ void Master::saveAutomation(XMLwrapper &xml, const rtosc::AutomationMgr &midi)
         for(int i=0; i<midi.nslots; ++i) {
             const auto &slot = midi.slots[i];
             if(!slot.used)
-                return;
+                continue;
             xml.beginbranch("slot", i);
             XmlNode params("params");
             params["midi-cc"] = to_s(slot.midi_cc);
@@ -639,7 +639,7 @@ void Master::saveAutomation(XMLwrapper &xml, const rtosc::AutomationMgr &midi)
             for(int j=0; j<midi.per_slot; ++j) {
                 const auto &au = slot.automations[j];
                 if(!au.used)
-                    return;
+                    continue;
                 xml.beginbranch("automation", j);
                 XmlNode automation("params");
                 automation["path"] = au.param_path;
@@ -1418,6 +1418,8 @@ void Master::add2XML(XMLwrapper& xml)
     microtonal.add2XML(xml);
     xml.endbranch();
 
+    saveAutomation(xml, automate);
+
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
         xml.beginbranch("PART", npart);
         part[npart]->add2XML(xml);
@@ -1541,6 +1543,8 @@ void Master::getfromXML(XMLwrapper& xml)
         microtonal.getfromXML(xml);
         xml.exitbranch();
     }
+
+    loadAutomation(xml, automate);
 
     sysefx[0]->changeeffect(0);
     if(xml.enterbranch("SYSTEM_EFFECTS")) {
