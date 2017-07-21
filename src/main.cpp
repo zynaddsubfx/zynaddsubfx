@@ -318,7 +318,7 @@ int main(int argc, char *argv[])
     opterr = 0;
     int option_index = 0, opt, exitwithhelp = 0, exitwithversion = 0;
     int prefered_port = -1;
-    int auto_save_interval = 60;
+    int auto_save_interval = 0;
 int wmidi = -1;
 
     string loadfile, loadinstrument, execAfterInit, loadmidilearn;
