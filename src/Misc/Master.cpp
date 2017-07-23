@@ -131,7 +131,7 @@ static int get_next_int(const char *msg)
 }
 
 static const Ports mapping_ports = {
-    {"offset::f", rProp(parameter) rShort("off") rLinear(-50, 50) rMap(unit, percent), 0,
+    {"offset::f", rProp(parameter) rDefault(0) rShort("off") rLinear(-50, 50) rMap(unit, percent), 0,
         rBegin;
         int slot = d.idx[1];
         int param = d.idx[0];
@@ -142,7 +142,7 @@ static const Ports mapping_ports = {
         } else
             d.reply(d.loc, "f", a.getSlotSubOffset(slot, param));
         rEnd},
-    {"gain::f", rProp(parameter) rShort("gain") rLinear(-200, 200) rMap(unit, percent), 0,
+    {"gain::f", rProp(parameter) rDefault(100) rShort("gain") rLinear(-200, 200) rMap(unit, percent), 0,
         rBegin;
         int slot = d.idx[1];
         int param = d.idx[0];
