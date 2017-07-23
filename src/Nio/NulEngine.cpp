@@ -14,7 +14,8 @@
 #include "NulEngine.h"
 #include "../globals.h"
 
-#include <unistd.h>
+#include <thread>
+#include <chrono>
 #include <iostream>
 using namespace std;
 
@@ -35,6 +36,7 @@ void *NulEngine::_AudioThread(void *arg)
 
 void *NulEngine::AudioThread()
 {
+    using namespace std::chrono;
     while(pThread) {
         getNext();
 
@@ -50,7 +52,7 @@ void *NulEngine::AudioThread()
                         + (playing_until.tv_sec - now.tv_sec) * 1000000;
             if(remaining > 10000) //Don't sleep() less than 10ms.
                 //This will add latency...
-                usleep(remaining - 10000);
+                std::this_thread::sleep_for(std::chrono::microseconds(remaining  - 10000));
             if(remaining < 0)
                 cerr << "WARNING - too late" << endl;
         }
