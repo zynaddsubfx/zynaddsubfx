@@ -46,7 +46,7 @@ extern float getdetune(unsigned char type,
 void set_realtime();
 
 /**Os independent sleep in microsecond*/
-void os_sleep(long length);
+void os_usleep(long length);
 
 //! returns pid padded to maximum pid lenght, posix conform
 std::string os_pid_as_padded_string();

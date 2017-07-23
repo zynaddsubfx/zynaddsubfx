@@ -129,10 +129,31 @@ void set_realtime()
 #endif
 }
 
-void os_sleep(long length)
+
+
+#ifdef WIN32
+#include <windows.h>
+
+//https://stackoverflow.com/questions/5801813/c-usleep-is-obsolete-workarounds-for-windows-mingw
+void os_usleep(long usec)
+{
+    HANDLE timer;
+    LARGE_INTEGER ft;
+
+    ft.QuadPart = -(10*usec); // Convert to 100 nanosecond interval, negative value indicates relative time
+
+    timer = CreateWaitableTimer(NULL, TRUE, NULL);
+    SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0);
+    WaitForSingleObject(timer, INFINITE);
+    CloseHandle(timer);
+}
+#else
+
+void os_usleep(long length)
 {
     usleep(length);
 }
+#endif
 
 //!< maximum lenght a pid has on any POSIX system
 //!< this is an estimation, but more than 12 looks insane

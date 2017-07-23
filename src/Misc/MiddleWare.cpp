@@ -48,8 +48,6 @@
 #include <string>
 #include <future>
 #include <atomic>
-#include <chrono>
-#include <thread>
 #include <list>
 
 #define errx(...) {}
@@ -1556,7 +1554,6 @@ MiddleWareImpl::~MiddleWareImpl(void)
 
 void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
 {
-    using namespace std::chrono;
     assert(uToB);
     uToB->write("/freeze_state","");
 
@@ -1564,7 +1561,7 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
     int tries = 0;
     while(tries++ < 10000) {
         if(!bToU->hasNext()) {
-            std::this_thread::sleep_for(microseconds(500));
+            os_usleep(500);
             continue;
         }
         const char *msg = bToU->read();
@@ -1670,7 +1667,6 @@ void MiddleWareImpl::doReadOnlyOpPlugin(std::function<void()> read_only_fn)
 
 bool MiddleWareImpl::doReadOnlyOpNormal(std::function<void()> read_only_fn, bool canfail)
 {
-    using namespace std::chrono;
     assert(uToB);
     uToB->write("/freeze_state","");
 
@@ -1678,7 +1674,7 @@ bool MiddleWareImpl::doReadOnlyOpNormal(std::function<void()> read_only_fn, bool
     int tries = 0;
     while(tries++ < 2000) {
         if(!bToU->hasNext()) {
-            std::this_thread::sleep_for(microseconds(500));
+            os_usleep(500);
             continue;
         }
         const char *msg = bToU->read();
