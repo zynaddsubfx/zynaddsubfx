@@ -138,13 +138,20 @@ static const rtosc::Ports ports = {
             c.cfg.OscilSize = val;
             d.broadcast(d.loc, "i", (int)(log(c.cfg.OscilSize*1.0)/log(2.0)));
         }},
+    {"clear-favorites:", rDoc("Clear favorite directories"), 0,
+        [](const char *msg, rtosc::RtData &d) {
+            Config &c = *(Config*)d.obj;
+            for(int i=0; i<MAX_BANK_ROOT_DIRS; ++i)
+                c.cfg.favoriteList[i] = "";
+        }},
     {"add-favorite:s", rDoc("Add favorite directory"), 0,
         [](const char *msg, rtosc::RtData &d)
         {
             Config &c = *(Config*)d.obj;
+            const char *path = rtosc_argument(msg, 0).s;
             for(int i=0; i<MAX_BANK_ROOT_DIRS; ++i) {
-                if(c.cfg.favoriteList[i].empty()) {
-                    c.cfg.favoriteList[i] = rtosc_argument(msg, 0).s;
+                if(c.cfg.favoriteList[i].empty() || c.cfg.favoriteList[i] == path) {
+                    c.cfg.favoriteList[i] = path;
                     return;
                 }
             }
