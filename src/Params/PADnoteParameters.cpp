@@ -192,7 +192,7 @@ static const rtosc::Ports non_realtime_ports =
     //Harmonic Bandwidth
     rOption(Pbwscale, rShort("bw scale"),
             rOptions(Normal,
-              EqualHz, Quater,
+              EqualHz, Quarter,
               Half, 75%, 150%,
               Double, Inv. Half),
             rDefault(Normal),
