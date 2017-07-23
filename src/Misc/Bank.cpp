@@ -30,6 +30,9 @@
 #include "Util.h"
 #include "Part.h"
 #include "BankDb.h"
+#ifndef WIN32
+#include <windows.h>
+#endif
 
 using namespace std;
 
@@ -362,6 +365,18 @@ void Bank::rescanforbanks()
     for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
         if(!config->cfg.bankRootDirList[i].empty())
             scanrootdir(config->cfg.bankRootDirList[i]);
+#ifdef WIN32
+    {
+        //Search the VST Directory for banks/preset/etc
+        char path[1024];
+        GetModuleFileName(GetModuleHandle("ZynAddSubFX.dll"), path, sizeof(path));
+        if(strstr(path, "ZynAddSubFX.dll")) {
+            strstr(path, "ZynAddSubFX.dll")[0] = 0;
+            strcat(path, "banks");
+            scanrootdir(path);
+        }
+    }
+#endif
 
     //sort the banks
     sort(banks.begin(), banks.end());
