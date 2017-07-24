@@ -24,6 +24,8 @@ add_custom_command(TARGET ZynPhaser_lv2 POST_BUILD
     COMMAND ../../lv2-ttl-generator $<TARGET_FILE:ZynPhaser_lv2>
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
 
+add_dependencies(ZynPhaser_lv2 lv2-ttl-generator)
+
 install(FILES
 	${CMAKE_CURRENT_BINARY_DIR}/lv2/manifest.ttl
 	${CMAKE_CURRENT_BINARY_DIR}/lv2/presets.ttl

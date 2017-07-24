@@ -139,6 +139,8 @@ if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_custom_command(TARGET ZynAddSubFX_lv2 POST_BUILD
         COMMAND ../../lv2-ttl-generator $<TARGET_FILE:ZynAddSubFX_lv2>
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
+
+    add_dependencies(ZynAddSubFX_lv2 lv2-ttl-generator)
 endif()
 
 install(FILES
