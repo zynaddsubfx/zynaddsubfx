@@ -16,7 +16,9 @@
 #ifdef WIN32
 #include <windows.h>
 #else
+#ifndef __USE_GNU
 #define __USE_GNU
+#endif
 #include <dlfcn.h>
 #endif
 
