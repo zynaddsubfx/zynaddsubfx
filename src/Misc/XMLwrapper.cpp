@@ -397,6 +397,12 @@ bool XMLwrapper::putXMLdata(const char *xmldata)
     if(root == NULL)
         return false;
 
+    //fetch version information
+    _fileversion.set_major(stringTo<int>(mxmlElementGetAttr(root, "version-major")));
+    _fileversion.set_minor(stringTo<int>(mxmlElementGetAttr(root, "version-minor")));
+    _fileversion.set_revision(
+        stringTo<int>(mxmlElementGetAttr(root, "version-revision")));
+
     return true;
 }
 
