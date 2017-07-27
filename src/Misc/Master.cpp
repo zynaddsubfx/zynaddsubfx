@@ -178,7 +178,7 @@ static const Ports auto_param_ports = {
         int param = d.idx[0];
         d.reply(d.loc, "s", a.slots[slot].automations[param].param_path);
         rEnd},
-    {"clear:", 0, 0,
+    {"clear:", rDoc("Clear automation param"), 0,
         rBegin;
         int slot = d.idx[1];
         int param = d.idx[0];
@@ -260,7 +260,7 @@ static const Ports slot_ports = {
         int slot = d.idx[0];
         d.reply(d.loc, "i", a.slots[slot].learning);
         rEnd},
-    {"clear:", 0, 0,
+    {"clear:", rDoc("Clear automation slot"), 0,
         rBegin;
         int slot = d.idx[0];
         a.clearSlot(slot);
@@ -306,7 +306,7 @@ static const Ports automate_ports = {
         slot_ports.dispatch(msg, d);
         d.pop_index();
         rEnd},
-    {"clear", 0, 0,
+    {"clear", rDoc("Clear all automation slots"), 0,
         rBegin;
         for(int i=0; i<a.nslots; ++i)
             a.clearSlot(i);

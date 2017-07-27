@@ -329,7 +329,7 @@ int wmidi = -1;
         /**\todo check this process for a small memory leak*/
         opt = getopt_long(argc,
                           argv,
-                          "l:L:M:r:b:o:I:O:N:e:P:A:D:hvapSDUYZ",
+                          "l:L:M:r:b:o:I:O:N:e:P:A:d:D:hvapSDUYZ",
                           opts,
                           &option_index);
         char *optarguments = optarg;
