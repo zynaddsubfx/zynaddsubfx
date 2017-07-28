@@ -468,7 +468,7 @@ void EffectMgr::add2XML(XMLwrapper& xml)
     for(int n = 0; n < 128; ++n) {
         int par = 0;
         if(efx)
-            par = efx->getpar(par);
+            par = efx->getpar(n);
         else if(n<128)
             par = settings[n];
 
