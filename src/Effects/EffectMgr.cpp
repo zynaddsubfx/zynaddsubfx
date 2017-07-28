@@ -466,7 +466,12 @@ void EffectMgr::add2XML(XMLwrapper& xml)
 
     xml.beginbranch("EFFECT_PARAMETERS");
     for(int n = 0; n < 128; ++n) {
-        int par = geteffectpar(n);
+        int par = 0;
+        if(efx)
+            par = efx->getpar(par);
+        else if(n<128)
+            par = settings[n];
+
         if(par == 0)
             continue;
         xml.beginbranch("par_no", n);

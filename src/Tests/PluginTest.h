@@ -157,6 +157,8 @@ void print_string_differences(string orig, string next)
 
         }
         //printf("%d vs %d\n", N, M);
+    } else {
+        printf("[WARNING] XML File appears to be radically different\n");
     }
 }
 
