@@ -219,7 +219,7 @@ static const Ports slot_ports = {
     //                              rtosc_argument(msg, 1).s,
     //                              rtosc_argument(msg, 2).T);
     //    rEnd},
-    {"value::f", rProp(parameter) rMap(default, 0.5) rLinear(0, 1) rDoc("Access current value in slot 'i' (0..1)"), 0,
+    {"value::f", rProp(no learn) rProp(parameter) rMap(default, 0.5) rLinear(0, 1) rDoc("Access current value in slot 'i' (0..1)"), 0,
         rBegin;
         int num = d.idx[0];
         if(!strcmp("f",rtosc_argument_string(msg))) {
