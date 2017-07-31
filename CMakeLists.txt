@@ -34,7 +34,7 @@ add_subdirectory(doc) # Doxygen only
 install(FILES AUTHORS.txt COPYING HISTORY.txt README.adoc
 	DESTINATION share/doc/zynaddsubfx
 	)
-install(FILES zynaddsubfx-jack.desktop zynaddsubfx-alsa.desktop
+install(FILES zynaddsubfx-jack.desktop zynaddsubfx-alsa.desktop zynaddsubfx-oss.desktop
     DESTINATION share/applications)
 install(FILES zynaddsubfx.svg
     DESTINATION share/pixmaps)
