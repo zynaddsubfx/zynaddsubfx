@@ -889,13 +889,23 @@ extern const rtosc::Ports bankPorts;
 const rtosc::Ports bankPorts = {
     {"rescan:", 0, 0,
         rBegin;
+        impl.bankpos = 0;
         impl.rescanforbanks();
         //Send updated banks
         int i = 0;
         for(auto &elm : impl.banks)
             d.reply("/bank/bank_select", "iss", i++, elm.name.c_str(), elm.dir.c_str());
         d.reply("/bank/bank_select", "i", impl.bankpos);
+        if (i > 0) {
+            impl.loadbank(impl.banks[0].dir);
 
+            //Reload bank slots
+            for(int i=0; i<BANK_SIZE; ++i) {
+                d.reply("/bankview", "iss",
+                    i, impl.ins[i].name.c_str(),
+                    impl.ins[i].filename.c_str());
+            }
+        }
         rEnd},
     {"bank_list:", 0, 0,
         rBegin;
