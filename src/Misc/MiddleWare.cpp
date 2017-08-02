@@ -905,6 +905,11 @@ const rtosc::Ports bankPorts = {
                     i, impl.ins[i].name.c_str(),
                     impl.ins[i].filename.c_str());
             }
+        } else {
+            //Clear all bank slots
+            for(int i=0; i<BANK_SIZE; ++i) {
+                d.reply("/bankview", "iss", i, "", "");
+            }
         }
         rEnd},
     {"bank_list:", 0, 0,
