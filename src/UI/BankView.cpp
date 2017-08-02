@@ -225,8 +225,8 @@ void BankViewControls::mode(int m)
 
 
 BankView::BankView(int x,int y, int w, int h, const char *label)
-    :Fl_Group(x,y,w,h,label), bvc(NULL), slots{0}, osc(0),
-    loc(""), nselected(-1), npart(0), cbwig_(0)
+    :Fl_Group(x,y,w,h,label), Fl_Osc_Widget(),
+    bvc(NULL), slots{0}, nselected(-1), npart(0), cbwig_(0)
 {}
 
 
