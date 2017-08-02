@@ -1043,8 +1043,8 @@ const rtosc::Ports bankPorts = {
         rBegin;
         auto res = impl.search(rtosc_argument(msg, 0).s);
 #define MAX_SEARCH 300
-        char res_type[MAX_SEARCH+1] = {0};
-        rtosc_arg_t res_dat[MAX_SEARCH] = {0};
+        char res_type[MAX_SEARCH+1] = {};
+        rtosc_arg_t res_dat[MAX_SEARCH] = {};
         for(unsigned i=0; i<res.size() && i<MAX_SEARCH; ++i) {
             res_type[i]  = 's';
             res_dat[i].s = res[i].c_str();
@@ -1056,8 +1056,8 @@ const rtosc::Ports bankPorts = {
         rBegin;
         auto res = impl.blist(rtosc_argument(msg, 0).s);
 #define MAX_SEARCH 300
-        char res_type[MAX_SEARCH+1] = {0};
-        rtosc_arg_t res_dat[MAX_SEARCH] = {0};
+        char res_type[MAX_SEARCH+1] = {};
+        rtosc_arg_t res_dat[MAX_SEARCH] = {};
         for(unsigned i=0; i<res.size() && i<MAX_SEARCH; ++i) {
             res_type[i]  = 's';
             res_dat[i].s = res[i].c_str();
@@ -1354,7 +1354,7 @@ static rtosc::Ports middwareSnoopPorts = {
     //    //cc-id, path, min, max
 //#define MAX_MIDI 32
     //    rtosc_arg_t args[MAX_MIDI*4];
-    //    char        argt[MAX_MIDI*4+1] = {0};
+    //    char        argt[MAX_MIDI*4+1] = {};
     //    int j=0;
     //    for(unsigned i=0; i<key.size() && i<MAX_MIDI; ++i) {
     //        auto val = midi.inv_map[key[i]];
