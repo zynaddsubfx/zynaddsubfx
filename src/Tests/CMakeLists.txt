@@ -29,7 +29,8 @@ CXXTEST_ADD_TEST(MemoryStressTest MemoryStressTest.cpp
 
 #Extra libraries added to make test and full compilation use the same library
 #links for quirky compilers
-set(test_lib zynaddsubfx_core ${GUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW_LIBRARIES} ${MXML_LIBRARIES} pthread)
+set(test_lib zynaddsubfx_core ${GUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW_LIBRARIES}
+    ${MXML_LIBRARIES} pthread "-Wl,--no-as-needed -lpthread")
 
 message(STATUS "Linking tests with: ${test_lib}")
 target_link_libraries(ADnoteTest     ${test_lib})
