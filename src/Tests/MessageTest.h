@@ -280,7 +280,7 @@ class MessageTest:public CxxTest::TestSuite
         void testFilterDepricated(void)
         {
             vector<string> v = {"Pfreq", "Pfreqtrack", "Pgain", "Pq"};
-            for(int i=0; i<v.size(); ++i) {
+            for(int i=0; i<(int)v.size(); ++i) {
                 string path = "/part0/kit0/adpars/GlobalPar/GlobalFilter/"+v[i];
                 for(int j=0; j<128; ++j) {
                     mw->transmitMsg(path.c_str(), "i", j); //Set
@@ -318,6 +318,7 @@ class MessageTest:public CxxTest::TestSuite
                     state = 0;
                 }
 
+                (void) id;
                 //printf("Message #%d %s:%s\n", id++, msg, rtosc_argument_string(msg));
                 //if(rtosc_narguments(msg))
                 //    printf("        %d\n", rtosc_argument(msg, 0).i);

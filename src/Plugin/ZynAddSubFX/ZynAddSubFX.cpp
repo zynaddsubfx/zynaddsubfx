@@ -224,7 +224,7 @@ protected:
             parameter.ranges.def = 0.0f;
             break;
         }
-        if(kParamSlot1 <= index && index <= kParamSlot16) {
+        if(index <= kParamSlot16) {
             parameter.hints  = kParameterIsAutomable;
             parameter.name   = ("Slot " + zyn::to_s(index-kParamSlot1 + 1)).c_str();
             parameter.symbol = ("slot"  + zyn::to_s(index-kParamSlot1 + 1)).c_str();
@@ -246,7 +246,7 @@ protected:
         case kParamOscPort:
             return oscPort;
         }
-        if(kParamSlot1 <= index && index <= kParamSlot16) {
+        if(index <= kParamSlot16) {
             return master->automate.getSlot(index - kParamSlot1);
         }
         return 0.0f;
@@ -260,10 +260,8 @@ protected:
     */
     void setParameterValue(uint32_t index, float value) noexcept override
     {
-        // only an output port for now
-        if(kParamSlot1 <= index && index <= kParamSlot16) {
+        if(index <= kParamSlot16)
             master->automate.setSlot(index - kParamSlot1, value);
-        }
     }
 
    /* --------------------------------------------------------------------------------------------------------
