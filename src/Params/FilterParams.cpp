@@ -101,8 +101,9 @@ const rtosc::Ports FilterParams::ports = {
             unsigned idx = atoi(mm);
             if(rtosc_narguments(msg)) {
                 obj->Psequence[idx].nvowel = rtosc_argument(msg, 0).i;
-            } else
                 d.broadcast(d.loc, "i", obj->Psequence[idx].nvowel);
+            } else
+                d.reply(d.loc, "i", obj->Psequence[idx].nvowel);
         }},
     {"type-svf::i", rProp(parameter) rShort("type")
         rOptions(low, high, band, notch)
@@ -171,7 +172,6 @@ const rtosc::Ports FilterParams::ports = {
                             0.0,     cf.d[1]);
                 }
             } else if(obj->Pcategory == 2) {
-                int order = 0;
                 float gain = dB2rap(obj->getgain());
                 auto cf = SVFilter::computeResponse(obj->Ptype,
                         Filter::getrealfreq(obj->getfreq()),
@@ -569,7 +569,7 @@ void FilterParams::getfromXML(XMLwrapper& xml)
         basefreq     = xml.getparreal("basefreq",   1000);
         baseq        = xml.getparreal("baseq",      10);
         gain         = xml.getparreal("gain",       0);
-        freqtracking = xml.getparreal("freq_track", 0);
+        freqtracking = xml.getparreal("freq_tracking", 0);
     }
 
     //formant filter parameters

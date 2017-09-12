@@ -625,8 +625,6 @@ DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate) : dssi_control{dssi_c
     this->sampleRate  = sampleRate;
     this->banksInited = false;
 
-    config.init();
-
     zyn::sprng(time(NULL));
 
     synth.alias();

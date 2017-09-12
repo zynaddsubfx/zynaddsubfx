@@ -11,6 +11,30 @@ void walk_ports2(const rtosc::Ports *base,
 
 namespace zyn {
 
+static const char *escape_string(const char *msg)
+{
+    if(!msg)
+        return NULL;
+    char *out = (char*)malloc(strlen(msg)*2+1);
+    memset(out, 0, strlen(msg)*2+1);
+    char *itr = out;
+    while(*msg) {
+        if(*msg == '"') {
+            *itr++ = '\\';
+            *itr++ = '\"';
+        } else if(*msg == '\\') {
+            *itr++ = '\\';
+            *itr++ = '\\';
+        } else {
+            *itr++ = *msg;
+        }
+
+        msg++;
+
+    }
+    return out;
+}
+
 /*
  * root :
  *   - 'parameters' : [parameter...]
@@ -25,6 +49,8 @@ namespace zyn {
  *   - 'scale'     : scale-type
  *   - 'domain'    : range [OPTIONAL]
  *   - 'options'   : [option...] [OPTIONAL]
+ *   - 'default'   : string
+ *   - 'defaults'  : defaults
  * type : {'int', 'float', 'boolean'}
  * action :
  *   - 'path' : path-id
@@ -35,10 +61,14 @@ namespace zyn {
  * option :
  *   - 'id'    : id-number
  *   - 'value' : string-rep
+ * defaults :
+ *   - 'id'    : id-number
+ *   - 'value' : string-rep
  */
 
 using std::ostream;
 using std::string;
+#if 0
 static int enum_min(Port::MetaContainer meta)
 {
     int min = 0;
@@ -96,6 +126,7 @@ static ostream &add_options(ostream &o, Port::MetaContainer meta)
 
     return o;
 }
+#endif
 
 /*
  * parameter :
@@ -107,7 +138,8 @@ static ostream &add_options(ostream &o, Port::MetaContainer meta)
  *   - 'domain'    : range [OPTIONAL]
  */
 static bool first = true;
-void dump_param_cb(const rtosc::Port *p, const char *full_name, void *v)
+void dump_param_cb(const rtosc::Port *p, const char *full_name, const char*,
+                   const Ports&,void *v, void*)
 {
     typedef std::vector<std::pair<int,string>> opts;
     std::ostream &o  = *(std::ostream*)v;
@@ -174,6 +206,8 @@ void dump_param_cb(const rtosc::Port *p, const char *full_name, void *v)
 
     const char *min = meta["min"];
     const char *max = meta["max"];
+    const char *def = meta["default"];
+    def = escape_string(def);
 
     for(auto m:meta) {
         if(strlen(m.title) >= 5 && !memcmp(m.title, "map ", 4)) {
@@ -201,6 +235,8 @@ void dump_param_cb(const rtosc::Port *p, const char *full_name, void *v)
     o << "        \"type\"     : \"" << type  << "\"";
     if(min && max)
         o << ",\n        \"range\"    : [" << min << "," << max << "]";
+    if(def)
+        o << ",\n        \"default\"  : \"" << def << "\"\n";
     if(!options.empty()) {
         o << ",\n        \"options\"  : [\n";
         int N = options.size();

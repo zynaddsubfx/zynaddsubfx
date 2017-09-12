@@ -48,6 +48,7 @@ add_library(ZynAddSubFX_vst SHARED
 elseif(ZestGui)
 
 # UI Enabled using Zest: internal only
+if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 add_library(ZynAddSubFX_lv2 SHARED
     ${CMAKE_SOURCE_DIR}/src/globals.cpp
     ${CMAKE_SOURCE_DIR}/src/UI/ConnectionDummy.cpp
@@ -61,6 +62,7 @@ add_library(ZynAddSubFX_lv2_ui SHARED
     ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Application.cpp
     ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoUIMain.cpp
     ZynAddSubFX-UI-Zest.cpp)
+endif()
 
 add_library(ZynAddSubFX_vst SHARED
     ${CMAKE_SOURCE_DIR}/src/globals.cpp
@@ -91,10 +93,12 @@ add_library(ZynAddSubFX_vst SHARED
 
 endif()
 
-set_target_properties(ZynAddSubFX_lv2 PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_LV2")
-set_target_properties(ZynAddSubFX_lv2 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "lv2")
-set_target_properties(ZynAddSubFX_lv2 PROPERTIES OUTPUT_NAME "ZynAddSubFX")
-set_target_properties(ZynAddSubFX_lv2 PROPERTIES PREFIX "")
+if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set_target_properties(ZynAddSubFX_lv2 PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_LV2")
+    set_target_properties(ZynAddSubFX_lv2 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "lv2")
+    set_target_properties(ZynAddSubFX_lv2 PROPERTIES OUTPUT_NAME "ZynAddSubFX")
+    set_target_properties(ZynAddSubFX_lv2 PROPERTIES PREFIX "")
+endif()
 
 set_target_properties(ZynAddSubFX_vst PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_VST")
 set_target_properties(ZynAddSubFX_vst PROPERTIES LIBRARY_OUTPUT_DIRECTORY "vst")
@@ -104,29 +108,40 @@ set_target_properties(ZynAddSubFX_vst PROPERTIES PREFIX "")
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set(PLATFORM_LIBRARIES ws2_32
             winmm
+            glu32 
+            gdi32
+            opengl32
             wsock32
             "-static" iphlpapi
             "-static" winpthread)
 elseif(ZestGui)
     set(PLATFORM_LIBRARIES X11 GL rt)
-else()
+elseif(NtkGui OR FltkGui)
     set(PLATFORM_LIBRARIES X11 rt)
+else()
+    set(PLATFORM_LIBRARIES rt)
 endif()
 
-target_link_libraries(ZynAddSubFX_lv2 zynaddsubfx_core ${OS_LIBRARIES} ${LIBLO_LIBRARIES}
-    ${PLATFORM_LIBRARIES})
+if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    target_link_libraries(ZynAddSubFX_lv2 zynaddsubfx_core ${OS_LIBRARIES} ${LIBLO_LIBRARIES}
+        ${PLATFORM_LIBRARIES})
+endif()
 target_link_libraries(ZynAddSubFX_vst zynaddsubfx_core ${OS_LIBRARIES} ${LIBLO_LIBRARIES}
     ${PLATFORM_LIBRARIES})
-if(ZestGui)
+if(ZestGui AND NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     target_link_libraries(ZynAddSubFX_lv2_ui X11 GL)
 endif()
 
-install(TARGETS ZynAddSubFX_lv2 LIBRARY DESTINATION ${PluginLibDir}/lv2/ZynAddSubFX.lv2/)
-install(TARGETS ZynAddSubFX_vst LIBRARY DESTINATION ${PluginLibDir}/vst/)
+if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    install(TARGETS ZynAddSubFX_lv2 LIBRARY DESTINATION ${PluginLibDir}/lv2/ZynAddSubFX.lv2/)
+    install(TARGETS ZynAddSubFX_vst LIBRARY DESTINATION ${PluginLibDir}/vst/)
 
-add_custom_command(TARGET ZynAddSubFX_lv2 POST_BUILD
-    COMMAND ../../lv2-ttl-generator $<TARGET_FILE:ZynAddSubFX_lv2>
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
+    add_custom_command(TARGET ZynAddSubFX_lv2 POST_BUILD
+        COMMAND ../../lv2-ttl-generator $<TARGET_FILE:ZynAddSubFX_lv2>
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lv2)
+
+    add_dependencies(ZynAddSubFX_lv2 lv2-ttl-generator)
+endif()
 
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/lv2/manifest.ttl

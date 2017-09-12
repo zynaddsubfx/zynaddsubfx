@@ -1,0 +1,208 @@
+An Introduction to the ZynAddSubFX Macro System
+===============================================
+:author: Mark McCurry, Spencer Jackson
+:toc:
+
+
+Motivation
+----------
+
+One of the major issues expressed by users around the time of the initial
+3.0.0 launch was that they were dissatisfied with automations when using
+ZynAddSubFX within their preferred VST host. This was a combination of:
+
+1. Hosts providing a poor workflow for sending MIDI CC events compared to VST
+   parameters
+2. Confusion with the use of MIDI learn within Zyn
+3. Issues regarding saving/loading parameters exposed through MIDI learn
+4. Parameter resolution for MIDI CCs
+5. Some parameters only produce updates on the next note
+
+This feature attempts to address points 1, 2, & 3. Issue 4 is a large undertaking
+but is expected to become complete for the 3.1.x release.  Issue 5 is being fixed
+one set of parameters at a time and should be addressed in the 3.0.x series.
+
+Overview & Terminology
+----------------------
+
+The Macro System boils down to replacing the existing MIDI learn implementation
+with a series of 'slots' for parameter automation and automation
+macros. In its current state it does that and a little more but as it matures it
+should become a powerful system for automation and live tweaking of sounds.
+
+What is an automation?
+~~~~~~~~~~~~~~~~~~~~~~
+image::automation1.png[]
+
+- A single parameter, e.g. the addsynth base frequency in part 1, kit 1
+- A gain and offset to adjust the range of values the automation will reach
+(e.g. -50 cents to +150 cents)
+- A mapping function (currently only linear, log, custom, etc coming soon)
+
+What is a macro?
+~~~~~~~~~~~~~~~~
+
+- A group of automations that get assigned to an automation slot
+
+All automations in the macro are operated together. Thus turning one knob on
+your MIDI controller or a single automation lane in a DAW can change up to
+4 parameters (see <<FAQ>>)
+at a time. Using the automation mappings allows for all the parameters to be adjusted
+in different amounts and/or directions, but they are all moved by actuating the macro.
+
+Macros are assembled by adding automations to a macro slot.
+
+What is a macro slot?
+~~~~~~~~~~~~~~~~~~~~~~
+
+- A set of one or more automations (a single macro)
+- An optional MIDI CC binding or plugin host automation
+
+In Zynaddsubfx 3.0.2 all macro slots are global. This means that loading new
+instruments does not switch the automations in any way. Only loading and saving
+Zyn master files will allow you to quickly switch between macro slot configurations.
+In future versions there
+will be global macro slots and instrument macro slots that can be saved
+and loaded independently.
+
+The global macro slots are exposed to VST/LV2 hosts.
+This keeps the total number of parameters exposed to a host somewhat
+reasonable: 16 slots for automation of up to 64 parameters.
+
+
+At the level of a Zyn master file (.xmz) the automation slots
+can be bound to MIDI CCs; loading the file will reload the midi bindings.
+Zyn MIDI-learn files (.xlz) can store the MIDI CC+Channel linkage to all
+automation slots.
+
+The Macros View
+---------------
+
+image::macro_view.png[]
+
+The Macro view shows:
+
+. List of Slots
+.. Slot state (active, inactive) - currently this button is disabled, all slots are always active
+.. A "clear slot" button (the x) -  removes all automations in the slot
+.. Slot name -  click name to edit
+. Macro selector buttons
+.. highlighted button is the slot currently selected
+.. use these when macro learning to select which slot to add to
+. Macro sliders - (green bars under names)
+.. indicates current macro value
+.. slide to adjust through the UI
+. Learning Mode selectors
+.. Normal Learn - each learned automation is added to the next available slot
+.. Macro Learn - learned automations are added to the currently selected slot (if not full)
+
+image::current_slot.png[]
+Currently selected slot is selected/indicated with these buttons.
+
+The selected macro shows:
+
+. MIDI binding if any e.g. "Chan 2, CC 14" (or "None" or "Learning Queue N")
+. 4 Automations
+
+image::automation1.png[]
+
+Each automation shows
+
+. Parameter path/name - clicking a section of the path shows a dropdown menu allowing easy switching between parts, voices, engines, etc.
+. Minimum, maximum, center value of parameter
+. Graph of map function
+.. X is the macro value
+.. Y is value of parameter being automated
+. Gain knob - adjust to change slope of map function
+. Offset knob adjust to move map function up or down
+. Remove button (X) - click to remove the automation
+
+
+Workflow examples
+-----------------
+
+Automating a parameter in plugin mode
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+. Learn mode should be set to Normal Learn (this is the default)
+. Use CTRL or click the [Learn] button to start learning an automation
+. Click on one or more controls (knobs/sliders/buttons) to assign them to
+  automation slots
+.. After clicking, each control is allocated to the next free Master
+   automation slot
+.. the automation slot is put into the unbound state (it can be put into
+   "MIDI learn" mode later.
+. The automation can be adjusted in the automation view
+
+Binding parameters to MIDI in standalone mode
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+. Learn mode should be set to Normal Learn (this is the default)
+. Use CTRL or click the [Learn] button to start learning an automation
+. Click on one or more controls (knobs/sliders/buttons) to assign them to
+  automation slots
+.. After clicking, each control is allocated to the next free Master
+   automation slot
+.. Each automation slot is then placed into the "MIDI learn" mode, watching for
+   the next unbound MIDI CC that arrives in standalone mode
+   (MIDI CCs are identified by Channel+CC# in Master automation slots)
+. The user optionally sends CCs to be bound by wiggling the controls on their
+  physical (or virtual) MIDI device
+. The automation can be adjusted in the automation view
+
+Setting up a macro
+~~~~~~~~~~~~~~~~~~
+
+image::macro.png[]
+A macro with 3 automations
+
+. Enter the Macro view
+. Select the Macro Learn button (the Normal Learn button will turn off)
+. Select the macro slot you would like to add new automations to
+. Hold CTRL or double click the [Learn] button to enter learn mode
+. Click the parameter(s) that you wish to add the the macro slot
+. To add parameters to another macro slot switch the currently selected
+  macro slot in the Macro view
+
+Adjusting automation ranges
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+. Go to the macro view
+. Find the right macro slot and automation
+. Adjust gain
+.. High gain will make the automation's parameter traverse the whole range of travel with just a little movement of the macro.
+.. Low gain will make the automation's parameter travel less range through the knob than the knob in the UI
+.. Negative gain makes the macro adjust the parameter down when the macro is turned up
+. Adjust offset
+.. This moves the automation's parameter range of travel up or down
+. If an automation was unintentional the user can use the X button to remove that automation
+
+Learning/changing MIDI CC bindings after loading an instrument/binding
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+. Go to the [Macro] view
+. Find the right macro slot and automation
+. Single click on the MIDI CC widget
+.. The automation switches to the "learning CC" state
+. Wiggle some MIDI controller
+. OR Double click on the MIDI CC widget
+.. this shows a dialog to manually choose the channel and CC id
+. The CC has been remapped
+
+FAQ
+---
+Q: Why only 4 automations to a slot?
+
+A: Limiting it to only 4 allowed for an easier design in the UI. There is no
+limitation in the software and if many users request more capability, we will
+extend it to more.
+
+
+Q: What happens if a single parameter is in multiple automation slots?
+
+A: Currently the engine will set the parameter to the value from the macro that
+was most recently changed. Future versions may allow for macro fusion to combine
+multiple values in different ways.
+
+
+Q: Why didn't you add _feature X_
+
+A: We love well documented feature requests. Please leave your idea in our bugtracker at https://sourceforge.net/p/zynaddsubfx/feature-requests/

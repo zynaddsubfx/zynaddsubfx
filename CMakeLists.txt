@@ -3,8 +3,12 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 project(zynaddsubfx)
 set(VERSION_MAJOR "3")
 set(VERSION_MINOR "0")
-set(VERSION_REVISION "1")
+set(VERSION_REVISION "2")
 
+#Set data directory, if any
+if(DEFINED ZYN_DATADIR)
+add_definitions(-DZYN_DATADIR="${ZYN_DATADIR}")
+endif()
 
 #Include RTOSC
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/rtosc/CMakeLists.txt")
@@ -34,14 +38,19 @@ add_subdirectory(doc) # Doxygen only
 install(FILES AUTHORS.txt COPYING HISTORY.txt README.adoc
 	DESTINATION share/doc/zynaddsubfx
 	)
-install(FILES zynaddsubfx-jack.desktop zynaddsubfx-alsa.desktop
+install(FILES zynaddsubfx-jack.desktop zynaddsubfx-alsa.desktop zynaddsubfx-oss.desktop
     DESTINATION share/applications)
 install(FILES zynaddsubfx.svg
     DESTINATION share/pixmaps)
 install(DIRECTORY instruments/banks
     DESTINATION share/zynaddsubfx)
+if(DEFINED ZYN_EXAMPLESDIR)
+install(DIRECTORY instruments/examples
+    DESTINATION ${ZYN_EXAMPLESDIR})
+else()
 install(DIRECTORY instruments/examples
     DESTINATION share/zynaddsubfx)
+endif()
 install(DIRECTORY instruments/ZynAddSubFX.lv2presets
     DESTINATION ${PluginLibDir}/lv2)
 

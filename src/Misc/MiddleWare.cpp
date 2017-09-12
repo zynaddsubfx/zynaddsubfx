@@ -228,55 +228,6 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
 }
 
 /******************************************************************************
- *                      MIDI Serialization                                    *
- *                                                                            *
- ******************************************************************************/
-//void saveMidiLearn(XMLwrapper &xml, const rtosc::MidiMappernRT &midi)
-//{
-//    xml.beginbranch("midi-learn");
-//    for(auto value:midi.inv_map) {
-//        XmlNode binding("midi-binding");
-//        auto biject = std::get<3>(value.second);
-//        binding["osc-path"]  = value.first;
-//        binding["coarse-CC"] = to_s(std::get<1>(value.second));
-//        binding["fine-CC"]   = to_s(std::get<2>(value.second));
-//        binding["type"]      = "i";
-//        binding["minimum"]   = to_s(biject.min);
-//        binding["maximum"]   = to_s(biject.max);
-//        xml.add(binding);
-//    }
-//    xml.endbranch();
-//}
-//
-//void loadMidiLearn(XMLwrapper &xml, rtosc::MidiMappernRT &midi)
-//{
-//    using rtosc::Port;
-//    if(xml.enterbranch("midi-learn")) {
-//        auto nodes = xml.getBranch();
-//
-//        //TODO clear mapper
-//
-//        for(auto node:nodes) {
-//            if(node.name != "midi-binding" ||
-//                    !node.has("osc-path") ||
-//                    !node.has("coarse-CC"))
-//                continue;
-//            const string path = node["osc-path"];
-//            const int    CC   = atoi(node["coarse-CC"].c_str());
-//            const Port  *p    = Master::ports.apropos(path.c_str());
-//            if(p) {
-//                printf("loading midi port...\n");
-//                midi.addNewMapper(CC, *p, path);
-//            } else {
-//                printf("unknown midi bindable <%s>\n", path.c_str());
-//            }
-//        }
-//        xml.exitbranch();
-//    } else
-//        printf("cannot find 'midi-learn' branch...\n");
-//}
-
-/******************************************************************************
  *                      Non-RealTime Object Store                             *
  *                                                                            *
  *                                                                            *
@@ -803,7 +754,7 @@ class MwDataObj:public rtosc::RtData
         //Chain calls repeat the call into handle()
 
         //Forward calls send the message directly to the realtime
-        virtual void reply(const char *path, const char *args, ...)
+        virtual void reply(const char *path, const char *args, ...) override
         {
             //printf("reply building '%s'\n", path);
             va_list va;
@@ -829,7 +780,7 @@ class MwDataObj:public rtosc::RtData
                 reply(buffer);
             }
         }
-        virtual void reply(const char *msg){
+        virtual void reply(const char *msg) override{
             mwi->sendToCurrentRemote(msg);
         };
         //virtual void broadcast(const char *path, const char *args, ...){(void)path;(void)args;};
@@ -891,9 +842,9 @@ static std::vector<std::string> getFiles(const char *folder, bool finddir)
         }
 #else
         std::string darn_windows = folder + std::string("/") + std::string(fn->d_name);
-        printf("attr on <%s> => %x\n", darn_windows.c_str(), GetFileAttributes(darn_windows.c_str()));
-        printf("desired mask =  %x\n", mask);
-        printf("error = %x\n", INVALID_FILE_ATTRIBUTES);
+        //printf("attr on <%s> => %x\n", darn_windows.c_str(), GetFileAttributes(darn_windows.c_str()));
+        //printf("desired mask =  %x\n", mask);
+        //printf("error = %x\n", INVALID_FILE_ATTRIBUTES);
         bool is_dir = GetFileAttributes(darn_windows.c_str()) & FILE_ATTRIBUTE_DIRECTORY;
 #endif
         if(finddir == is_dir && strcmp(".", fn->d_name))
@@ -942,13 +893,28 @@ extern const rtosc::Ports bankPorts;
 const rtosc::Ports bankPorts = {
     {"rescan:", 0, 0,
         rBegin;
+        impl.bankpos = 0;
         impl.rescanforbanks();
         //Send updated banks
         int i = 0;
         for(auto &elm : impl.banks)
             d.reply("/bank/bank_select", "iss", i++, elm.name.c_str(), elm.dir.c_str());
         d.reply("/bank/bank_select", "i", impl.bankpos);
+        if (i > 0) {
+            impl.loadbank(impl.banks[0].dir);
 
+            //Reload bank slots
+            for(int i=0; i<BANK_SIZE; ++i) {
+                d.reply("/bankview", "iss",
+                    i, impl.ins[i].name.c_str(),
+                    impl.ins[i].filename.c_str());
+            }
+        } else {
+            //Clear all bank slots
+            for(int i=0; i<BANK_SIZE; ++i) {
+                d.reply("/bankview", "iss", i, "", "");
+            }
+        }
         rEnd},
     {"bank_list:", 0, 0,
         rBegin;
@@ -1096,8 +1062,8 @@ const rtosc::Ports bankPorts = {
         rBegin;
         auto res = impl.search(rtosc_argument(msg, 0).s);
 #define MAX_SEARCH 300
-        char res_type[MAX_SEARCH+1] = {0};
-        rtosc_arg_t res_dat[MAX_SEARCH] = {0};
+        char res_type[MAX_SEARCH+1] = {};
+        rtosc_arg_t res_dat[MAX_SEARCH] = {};
         for(unsigned i=0; i<res.size() && i<MAX_SEARCH; ++i) {
             res_type[i]  = 's';
             res_dat[i].s = res[i].c_str();
@@ -1109,8 +1075,8 @@ const rtosc::Ports bankPorts = {
         rBegin;
         auto res = impl.blist(rtosc_argument(msg, 0).s);
 #define MAX_SEARCH 300
-        char res_type[MAX_SEARCH+1] = {0};
-        rtosc_arg_t res_dat[MAX_SEARCH] = {0};
+        char res_type[MAX_SEARCH+1] = {};
+        rtosc_arg_t res_dat[MAX_SEARCH] = {};
         for(unsigned i=0; i<res.size() && i<MAX_SEARCH; ++i) {
             res_type[i]  = 's';
             res_dat[i].s = res[i].c_str();
@@ -1206,24 +1172,29 @@ static rtosc::Ports middwareSnoopPorts = {
         impl.kitEnable(msg);
         d.forward();
         rEnd},
-    //{"save_xlz:s", 0, 0,
-    //    rBegin;
-    //    const char *file = rtosc_argument(msg, 0).s;
-    //    XMLwrapper xml;
-    //    saveMidiLearn(xml, impl.midi_mapper);
-    //    xml.saveXMLfile(file, impl.master->gzip_compression);
-    //    rEnd},
-    //{"load_xlz:s", 0, 0,
-    //    rBegin;
-    //    const char *file = rtosc_argument(msg, 0).s;
-    //    XMLwrapper xml;
-    //    xml.loadXMLfile(file);
-    //    loadMidiLearn(xml, impl.midi_mapper);
-    //    rEnd},
-    //{"clear_xlz:", 0, 0,
-    //    rBegin;
-    //    impl.midi_mapper.clear();
-    //    rEnd},
+    {"save_xlz:s", 0, 0,
+        rBegin;
+        impl.doReadOnlyOp([&]() {
+                const char *file = rtosc_argument(msg, 0).s;
+                XMLwrapper xml;
+                Master::saveAutomation(xml, impl.master->automate);
+                xml.saveXMLfile(file, impl.master->gzip_compression);
+                });
+        rEnd},
+    {"load_xlz:s", 0, 0,
+        rBegin;
+        const char *file = rtosc_argument(msg, 0).s;
+        XMLwrapper xml;
+        xml.loadXMLfile(file);
+        rtosc::AutomationMgr *mgr = new rtosc::AutomationMgr(16,4,8);
+        mgr->set_ports(Master::ports);
+        Master::loadAutomation(xml, *mgr);
+        d.chain("/automate/load-blob", "b", sizeof(void*), &mgr);
+        rEnd},
+    {"clear_xlz:", 0, 0,
+        rBegin;
+        d.chain("/automate/clear", "");
+        rEnd},
     //scale file stuff
     {"load_xsz:s", 0, 0,
         rBegin;
@@ -1402,7 +1373,7 @@ static rtosc::Ports middwareSnoopPorts = {
     //    //cc-id, path, min, max
 //#define MAX_MIDI 32
     //    rtosc_arg_t args[MAX_MIDI*4];
-    //    char        argt[MAX_MIDI*4+1] = {0};
+    //    char        argt[MAX_MIDI*4+1] = {};
     //    int j=0;
     //    for(unsigned i=0; i<key.size() && i<MAX_MIDI; ++i) {
     //        auto val = midi.inv_map[key[i]];
@@ -1486,10 +1457,6 @@ static rtosc::Ports middlewareReplyPorts = {
         if(impl.recording_undo)
             impl.undo.recordEvent(msg);
         rEnd},
-    //{"midi-use-CC:i", 0, 0,
-    //    rBegin;
-    //    impl.midi_mapper.useFreeID(rtosc_argument(msg, 0).i);
-    //    rEnd},
     {"broadcast:", 0, 0, rBegin; impl.broadcast = true; rEnd},
     {"forward:", 0, 0, rBegin; impl.forward = true; rEnd},
 };
@@ -1613,7 +1580,7 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
     int tries = 0;
     while(tries++ < 10000) {
         if(!bToU->hasNext()) {
-            usleep(500);
+            os_usleep(500);
             continue;
         }
         const char *msg = bToU->read();
@@ -1726,7 +1693,7 @@ bool MiddleWareImpl::doReadOnlyOpNormal(std::function<void()> read_only_fn, bool
     int tries = 0;
     while(tries++ < 2000) {
         if(!bToU->hasNext()) {
-            usleep(500);
+            os_usleep(500);
             continue;
         }
         const char *msg = bToU->read();

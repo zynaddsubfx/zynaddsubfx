@@ -29,7 +29,8 @@ CXXTEST_ADD_TEST(MemoryStressTest MemoryStressTest.cpp
 
 #Extra libraries added to make test and full compilation use the same library
 #links for quirky compilers
-set(test_lib zynaddsubfx_core ${GUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW_LIBRARIES} ${MXML_LIBRARIES} pthread)
+set(test_lib zynaddsubfx_core ${GUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW_LIBRARIES}
+    ${MXML_LIBRARIES} pthread "-Wl,--no-as-needed -lpthread")
 
 message(STATUS "Linking tests with: ${test_lib}")
 target_link_libraries(ADnoteTest     ${test_lib})
@@ -42,7 +43,7 @@ target_link_libraries(XMLwrapperTest ${test_lib})
 target_link_libraries(RandTest       ${test_lib})
 target_link_libraries(PADnoteTest    ${test_lib})
 target_link_libraries(MqTest         ${test_lib})
-target_link_libraries(WatchTest         ${test_lib})
+target_link_libraries(WatchTest      ${test_lib})
 target_link_libraries(PluginTest     zynaddsubfx_core zynaddsubfx_nio
     zynaddsubfx_gui_bridge
     ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
@@ -62,6 +63,13 @@ target_link_libraries(EffectTest ${test_lib})
 #Testbed app
 add_executable(ins-test InstrumentStats.cpp)
 target_link_libraries(ins-test ${test_lib} rt)
+
+add_executable(save-osc SaveOSC.cpp)
+target_link_libraries(save-osc
+                      zynaddsubfx_core zynaddsubfx_nio
+                      zynaddsubfx_gui_bridge
+                      ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
+
 
 #message(STATUS "Plugin Test ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}")
 

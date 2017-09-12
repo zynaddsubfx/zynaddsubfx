@@ -39,12 +39,23 @@ rtosc::Ports Echo::ports = {
                   else
                       d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
-    //Pvolume/Ppanning are common
-    rEffPar(Pdelay,   2, rShort("delay"),    "Length of Echo"),
-    rEffPar(Plrdelay, 3, rShort("lr delay"), "Difference In Left/Right Delay"),
-    rEffPar(Plrcross, 4, rShort("cross"),    "Left/Right Crossover"),
-    rEffPar(Pfb,      5, rShort("feedback"), "Echo Feedback"),
-    rEffPar(Phidamp,  6, rShort("damp"),     "Dampen High Frequencies"),
+    rEffParVol(rDefault(67), rPresetsAt(6, 81, 81, 62)),
+    rEffParPan(rPresetsAt(2, 75, 60, 60, 64, 60, 60, 64)),
+    rEffPar(Pdelay,   2, rShort("delay"),
+            rPresets(35, 21, 60, 44, 102, 44, 46, 26, 28),
+            "Length of Echo"),
+    rEffPar(Plrdelay, 3, rShort("lr delay"),
+            rPresetsAt(4, 50, 17, 118, 100, 64), rDefault(64),
+            "Difference In Left/Right Delay"),
+    rEffPar(Plrcross, 4, rShort("cross"),
+            rPresetsAt(5, 0, 100, 127, 100), rDefault(30),
+            "Left/Right Crossover"),
+    rEffPar(Pfb,      5, rShort("feedback"),
+            rPresets(59, 59, 59, 0, 82, 82, 68, 67, 90),
+            "Echo Feedback"),
+    rEffPar(Phidamp,  6, rShort("damp"),
+            rPresets(0, 0, 10, 0, 48, 24, 18, 36, 55),
+            "Dampen High Frequencies"),
 };
 #undef rBegin
 #undef rEnd

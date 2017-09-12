@@ -122,8 +122,8 @@ static const rtosc::Ports ports = {
     //rArrayS(cfg.presetsDirList,MAX_BANK_ROOT_DIRS),
     rToggle(cfg.CheckPADsynth, "Old Check For PADsynth functionality within a patch"),
     rToggle(cfg.IgnoreProgramChange, "Ignore MIDI Program Change Events"),
-    rParamI(cfg.UserInterfaceMode,   "Beginner/Advanced Mode Select"),
-    rParamI(cfg.VirKeybLayout,       "Keyboard Layout For Virtual Piano Keyboard"),
+    rParamI(cfg.UserInterfaceMode, "Beginner/Advanced Mode Select"),
+    rParamI(cfg.VirKeybLayout, "Keyboard Layout For Virtual Piano Keyboard"),
     //rParamS(cfg.LinuxALSAaudioDev),
     //rParamS(cfg.nameTag)
     {"cfg.OscilPower::i", rProp(parameter) rDoc("Size Of Oscillator Wavetable"), 0,
@@ -138,19 +138,26 @@ static const rtosc::Ports ports = {
             c.cfg.OscilSize = val;
             d.broadcast(d.loc, "i", (int)(log(c.cfg.OscilSize*1.0)/log(2.0)));
         }},
+    {"clear-favorites:", rDoc("Clear favorite directories"), 0,
+        [](const char *msg, rtosc::RtData &d) {
+            Config &c = *(Config*)d.obj;
+            for(int i=0; i<MAX_BANK_ROOT_DIRS; ++i)
+                c.cfg.favoriteList[i] = "";
+        }},
     {"add-favorite:s", rDoc("Add favorite directory"), 0,
         [](const char *msg, rtosc::RtData &d)
         {
             Config &c = *(Config*)d.obj;
+            const char *path = rtosc_argument(msg, 0).s;
             for(int i=0; i<MAX_BANK_ROOT_DIRS; ++i) {
-                if(c.cfg.favoriteList[i].empty()) {
-                    c.cfg.favoriteList[i] = rtosc_argument(msg, 0).s;
+                if(c.cfg.favoriteList[i].empty() || c.cfg.favoriteList[i] == path) {
+                    c.cfg.favoriteList[i] = path;
                     return;
                 }
             }
 
         }},
-    {"favorites:", rProp(parameter), 0,
+    {"favorites:", /*rProp(parameter)*/ 0, 0,
         [](const char *msg, rtosc::RtData &d)
         {
             Config &c = *(Config*)d.obj;
@@ -174,7 +181,9 @@ const rtosc::Ports &Config::ports = zyn::ports;
 #endif
 
 Config::Config()
-{}
+{
+    init();
+}
 
 void Config::init()
 {
@@ -225,14 +234,18 @@ void Config::init()
         //banks
         cfg.bankRootDirList[0] = "~/banks";
         cfg.bankRootDirList[1] = "./";
-        cfg.bankRootDirList[2] = "/usr/share/zynaddsubfx/banks";
-        cfg.bankRootDirList[3] = "/usr/local/share/zynaddsubfx/banks";
 #ifdef __APPLE__
-        cfg.bankRootDirList[4] = "../Resources/banks";
+        cfg.bankRootDirList[2] = "../Resources/banks";
 #else
-        cfg.bankRootDirList[4] = "../banks";
+        cfg.bankRootDirList[2] = "../banks";
 #endif
-        cfg.bankRootDirList[5] = "banks";
+        cfg.bankRootDirList[3] = "banks";
+#ifdef ZYN_DATADIR
+        cfg.bankRootDirList[4] = ZYN_DATADIR "/banks";
+#else
+        cfg.bankRootDirList[4] = "/usr/share/zynaddsubfx/banks";
+        cfg.bankRootDirList[5] = "/usr/local/share/zynaddsubfx/banks";
+#endif
     }
 
     if(cfg.presetsDirList[0].empty()) {
@@ -244,8 +257,12 @@ void Config::init()
         cfg.presetsDirList[1] = "../presets";
 #endif
         cfg.presetsDirList[2] = "presets";
+#ifdef ZYN_DATADIR
+        cfg.presetsDirList[3] = ZYN_DATADIR "/presets";
+#else
         cfg.presetsDirList[3] = "/usr/share/zynaddsubfx/presets";
         cfg.presetsDirList[4] = "/usr/local/share/zynaddsubfx/presets";
+#endif
     }
     cfg.LinuxALSAaudioDev = "default";
     cfg.nameTag = "";
