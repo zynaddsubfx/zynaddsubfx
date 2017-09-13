@@ -23,7 +23,7 @@
 namespace zyn {
 
 /**
- * @brief Parameters for PAD synthesis
+ * Parameters for PAD synthesis
  *
  * @note unlike most other parameter objects significant portions of this
  * object are `owned' by the non-realtime context. The realtime context only
@@ -151,8 +151,7 @@ class PADnoteParameters:public Presets
         float getNhr(int n) const;
 
         void applyparameters(void);
-        //! @brief Compute the #sample array from the other parameters.
-        //!
+        //! Compute the #sample array from the other parameters.
         //! For the function's parameters, see sampleGenerator()
         void applyparameters(std::function<bool()> do_abort,
                              unsigned max_threads = 0);
@@ -172,8 +171,7 @@ class PADnoteParameters:public Presets
 
         typedef std::function<void(int,PADnoteParameters::Sample&)> callback;
 
-        //! @brief PAD synth main function
-        //!
+        //! PAD synth main function
         //! Generate spectrum and run IFFTs on it
         //! @param cb A callback that will be executed for each sample buffer
         //!           Note that this function can be executed by multiple
