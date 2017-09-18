@@ -515,9 +515,11 @@ if (DssiEnable)
 			Output/DSSIControlDescription.h)
 
 	target_link_libraries(zynaddsubfx_dssi
-        zynaddsubfx_core
+		zynaddsubfx_core
 		${OS_LIBRARIES}
-        ${LIBLO_LIBRARIES}
+		${LIBLO_LIBRARIES}
+		${PLATFORM_LIBRARIES}
+		-Wl,--no-undefined
 		)
     install(TARGETS zynaddsubfx_dssi LIBRARY DESTINATION ${PluginLibDir}/dssi/)
 endif()

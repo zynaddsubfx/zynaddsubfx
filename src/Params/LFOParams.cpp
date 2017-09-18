@@ -47,8 +47,10 @@ static const rtosc::Ports _ports = {
     rParamZyn(Pdelay, rShort("delay"), rSpecial(disable), "Delay before LFO start\n"
             "0..4 second delay"),
     rToggle(Pcontinous, rShort("c"), "Enable for global operation"),
-    rParamZyn(Pstretch, rShort("str"), rCentered, rDefault(64), "Note frequency stretch"),
-
+    rParamZyn(Pstretch, rShort("str"), rCentered, rDefault(64),
+        "Note frequency stretch"),
+// these are currently not yet implemented at must be hidden therefore
+#ifdef DEAD_PORTS
     //Float valued aliases
     {"delay::f", rProp(parameter) rMap(units, ms) rLog(0,4000), 0,
         rBegin;
@@ -58,6 +60,7 @@ static const rtosc::Ports _ports = {
     {"period::f", rProp(parameter) rMap(units, ms) rPseudoLog(0.10, 1500.0), 0,
         rBegin;
         rEnd},
+#endif
 };
 #undef rPseudoLog
 #undef rBegin

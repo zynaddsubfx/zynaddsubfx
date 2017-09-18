@@ -332,7 +332,7 @@ static const Ports master_ports = {
     rArrayOption(Pinsparts, NUM_INS_EFX, rOpt(-2, Master), rOpt(-1, Off),
                  rOptions(Part1, Part2, Part3, Part4, Part5, Part6,
                           Part7, Part8, Part9, Part10, Part11, Part12,
-                          Part13, Part14, Part15, Part16) rDefault([Off...]),
+                          Part13, Part14, Part15, Part16) rDefault(Off),
                  "Part to insert part onto"),
     {"Pkeyshift::i", rShort("key shift") rProp(parameter) rLinear(0,127)
         rDefault(64) rDoc("Global Key Shift"), 0, [](const char *m, RtData&d) {

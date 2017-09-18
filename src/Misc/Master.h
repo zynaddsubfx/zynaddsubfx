@@ -16,7 +16,7 @@
 #define MASTER_H
 #include "../globals.h"
 #include "Microtonal.h"
-#include <rtosc/miditable.h>
+#include <rtosc/automations.h>
 #include <rtosc/ports.h>
 
 #include "Time.h"
@@ -64,6 +64,14 @@ class Master
         /**loads all settings from a XML file
          * @return 0 for ok or -1 if there is an error*/
         int loadXML(const char *filename);
+
+        /**Save all settings to an OSC file (as specified by RT OSC)
+         * @param filename File to save to or NULL (useful for testing)
+         * @return 0 for ok or <0 if there is an error*/
+        int saveOSC(const char *filename);
+        /**loads all settings from an OSC file (as specified by RT OSC)
+         * @return 0 for ok or <0 if there is an error*/
+        int loadOSC(const char *filename);
 
         /**Regenerate PADsynth and other non-RT parameters
          * It is NOT SAFE to call this from a RT context*/
@@ -171,7 +179,7 @@ class Master
         WatchManager watcher;
 
         //Midi Learn
-        rtosc::MidiMapperRT midi;
+        rtosc::AutomationMgr automate;
 
         bool   frozenState;//read-only parameters for threadsafe actions
         Allocator *memory;
@@ -199,6 +207,11 @@ class Master
         //Callback When Master changes
         void(*mastercb)(void*,Master*);
         void* mastercb_ptr;
+
+        //Return XML data as string. Must be freed.
+        char* getXMLData();
+        //Used by loadOSC and saveOSC
+        int loadOSCFromStr(const char *filename);
 };
 
 }

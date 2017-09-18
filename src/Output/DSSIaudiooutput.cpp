@@ -30,6 +30,8 @@ using std::vector;
 
 //Dummy variables and functions for linking purposes
 const char *instance_name = 0;
+
+namespace zyn {
 class WavFile;
 namespace Nio {
     bool start(void){return 1;};
@@ -46,6 +48,7 @@ namespace Nio {
     string getSource(void){return "";}
     string getSink(void){return "";}
 }
+} // namespace zyn
 
 //
 // Static stubs for LADSPA member functions
@@ -621,8 +624,6 @@ DSSIaudiooutput::DSSIaudiooutput(unsigned long sampleRate) : dssi_control{dssi_c
 
     this->sampleRate  = sampleRate;
     this->banksInited = false;
-
-    config.init();
 
     zyn::sprng(time(NULL));
 

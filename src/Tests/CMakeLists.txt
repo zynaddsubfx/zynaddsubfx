@@ -42,7 +42,7 @@ target_link_libraries(XMLwrapperTest ${test_lib})
 target_link_libraries(RandTest       ${test_lib})
 target_link_libraries(PADnoteTest    ${test_lib})
 target_link_libraries(MqTest         ${test_lib})
-target_link_libraries(WatchTest         ${test_lib})
+target_link_libraries(WatchTest      ${test_lib})
 target_link_libraries(PluginTest     zynaddsubfx_core zynaddsubfx_nio
     zynaddsubfx_gui_bridge
     ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
@@ -63,8 +63,11 @@ target_link_libraries(EffectTest ${test_lib})
 add_executable(ins-test InstrumentStats.cpp)
 target_link_libraries(ins-test ${test_lib} rt)
 
-# add_executable(load_omz load_omz.cpp)
-# target_link_libraries(load-omz ${test_lib})
+add_executable(save-osc SaveOSC.cpp)
+target_link_libraries(save-osc
+                      zynaddsubfx_core zynaddsubfx_nio
+                      zynaddsubfx_gui_bridge
+                      ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
 
 
 #message(STATUS "Plugin Test ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}")

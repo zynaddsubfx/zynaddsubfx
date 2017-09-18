@@ -137,11 +137,11 @@ version-revision="1" ZynAddSubFX-author="Nasca Octavian Paul">
 <FILTER>
 <par name="category" value="0" />
 <par name="type" value="2" />
-<par name="freq" value="70" />
-<par name="q" value="40" />
+<par_real name="basefreq" value="1383.91" exact_value="0x44ACFD1C" />
+<par_real name="baseq" value="1.08427" exact_value="0x3F8AC956" />
 <par name="stages" value="0" />
-<par name="freq_track" value="64" />
-<par name="gain" value="64" />
+<par_real name="freq_tracking" value="0" exact_value="0x00000000" />
+<par_real name="gain" value="0" exact_value="0x00000000" />
 </FILTER>
 <FILTER_ENVELOPE>
 <par_bool name="free_mode" value="no" />
@@ -309,11 +309,11 @@ version-revision="1" ZynAddSubFX-author="Nasca Octavian Paul">
 <FILTER>
 <par name="category" value="0" />
 <par name="type" value="2" />
-<par name="freq" value="65" />
-<par name="q" value="68" />
+<par_real name="basefreq" value="1055.65" exact_value="0x4483F4A4" />
+<par_real name="baseq" value="6.34546" exact_value="0x40CB0DF9" />
 <par name="stages" value="0" />
-<par name="freq_track" value="64" />
-<par name="gain" value="64" />
+<par_real name="freq_tracking" value="0" exact_value="0x00000000" />
+<par_real name="gain" value="0" exact_value="0x00000000" />
 </FILTER>
 <par_bool name="filter_envelope_enabled" value="yes" />
 <FILTER_ENVELOPE>
@@ -1060,11 +1060,11 @@ version-revision="1" ZynAddSubFX-author="Nasca Octavian Paul">
 <FILTER>
 <par name="category" value="0" />
 <par name="type" value="4" />
-<par name="freq" value="80" />
-<par name="q" value="40" />
+<par_real name="basefreq" value="2378.41" exact_value="0x4514A69F" />
+<par_real name="baseq" value="1.08427" exact_value="0x3F8AC956" />
 <par name="stages" value="0" />
-<par name="freq_track" value="64" />
-<par name="gain" value="64" />
+<par_real name="freq_tracking" value="0" exact_value="0x00000000" />
+<par_real name="gain" value="0" exact_value="0x00000000" />
 </FILTER>
 <par name="filter_velocity_sensing" value="64" />
 <par name="filter_velocity_sensing_amplitude" value="64" />
@@ -3411,11 +3411,11 @@ version-revision="1" ZynAddSubFX-author="Nasca Octavian Paul">
 <FILTER>
 <par name="category" value="0" />
 <par name="type" value="2" />
-<par name="freq" value="111" />
-<par name="q" value="95" />
+<par_real name="basefreq" value="12745.1" exact_value="0x4647248B" />
+<par_real name="baseq" value="46.8148" exact_value="0x423B4262" />
 <par name="stages" value="0" />
-<par name="freq_track" value="64" />
-<par name="gain" value="64" />
+<par_real name="freq_tracking" value="0" exact_value="0x00000000" />
+<par_real name="gain" value="0" exact_value="0x00000000" />
 </FILTER>
 <FILTER_ENVELOPE>
 <par_bool name="free_mode" value="no" />

@@ -370,8 +370,7 @@ static const Ports adPorts = {//XXX 16 should not be hard coded
     rArrayPaste,
     rRecurs(VoicePar, NUM_VOICES),
     {"VoicePar#" STRINGIFY(NUM_VOICES) "/Enabled::T:F",
-     rProp(parameter) rShort("enable") rDoc("Voice Enable")
-     rDefault([true false false ...]),
+     rProp(parameter) rShort("enable") rDoc("Voice Enable"),
      NULL, rArrayTCbMember(VoicePar, Enabled)},
     rRecur(GlobalPar, "Adnote Parameters"),
 };

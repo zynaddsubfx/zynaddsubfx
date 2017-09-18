@@ -88,10 +88,9 @@ static const Ports partPorts = {
         "Instrument comments"),
     rString(Pname, PART_MAX_NAME_LEN, rDefault(""), "User specified label"),
     rArrayI(Pefxroute, NUM_PART_EFX,
-            rOptions(Next Effect,Part Out,Dry Out),
-            ":default\0=[\"Next Effect\"S ...]\0",
+            rOptions(Next Effect,Part Out,Dry Out), rDefaultId(Next Effect),
             "Effect Routing"),
-    rArrayT(Pefxbypass, NUM_PART_EFX, rDefault([false...]),
+    rArrayT(Pefxbypass, NUM_PART_EFX, rDefault(false),
         "If an effect is bypassed"),
     {"captureMin:", rDoc("Capture minimum valid note"), NULL,
         [](const char *, RtData &r)

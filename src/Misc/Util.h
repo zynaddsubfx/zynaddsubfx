@@ -153,11 +153,6 @@ char *rtosc_splat(const char *path, std::set<std::string>);
 #define rParamZyn(name, ...) \
   {STRINGIFY(name) "::i",  rProp(parameter) rMap(min, 0) rMap(max, 127) DOC(__VA_ARGS__), NULL, rParamICb(name)}
 
-#define rSelf(type) \
-{"self:", rProp(internal) rMap(class, type) rDoc("port metadata"), 0, \
-    [](const char *, rtosc::RtData &d){ \
-        d.reply(d.loc, "b", sizeof(d.obj), &d.obj);}}\
-
 #define rPresetType \
 {"preset-type:", rProp(internal) rDoc("clipboard type of object"), 0, \
     [](const char *, rtosc::RtData &d){ \
@@ -183,5 +178,7 @@ rPresetType, \
         o.pasteArray(paste,field);}}
 
 }
+
+#define rUnit(x) rMap(unit, x)
 
 #endif
