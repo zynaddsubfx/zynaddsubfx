@@ -85,7 +85,9 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
 
 
     //TODO update to rArray and test
-    {"phase#128::c:i", rProp(parameter) rLinear(0,127) rDoc("Sets harmonic phase"),
+    {"phase#128::c:i", rProp(parameter) rLinear(0,127)
+        rDefault([64 ...])
+        rDoc("Sets harmonic phase"),
         NULL, [](const char *m, rtosc::RtData &d) {
             const char *mm = m;
             while(*mm && !isdigit(*mm)) ++mm;
@@ -108,7 +110,8 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             }
         }},
     //TODO update to rArray and test
-    {"magnitude#128::c:i", rProp(parameter) rLinear(0,127) rDoc("Sets harmonic magnitude"),
+    {"magnitude#128::c:i", rProp(parameter) rLinear(0,127)
+        rDefault([127 64 64 ...]) rDoc("Sets harmonic magnitude"),
         NULL, [](const char *m, rtosc::RtData &d) {
             //printf("I'm at '%s'\n", d.loc);
             const char *mm = m;
@@ -1384,7 +1387,7 @@ void OscilGen::getfromXML(XMLwrapper& xml)
 
 
     if(xml.enterbranch("HARMONICS")) {
-        Phmag[0]   = 64;
+        Phmag[0]   = 127; // TODO: correct?
         Phphase[0] = 64;
         for(int n = 0; n < MAX_AD_HARMONICS; ++n) {
             if(xml.enterbranch("HARMONIC", n + 1) == 0)
