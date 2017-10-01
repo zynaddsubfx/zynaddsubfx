@@ -443,6 +443,41 @@ void ADnote::setupVoiceMod(int nvoice)
 
     voice.FMFreqFixed  = param.PFMFixedFreq;
 
+    //Triggers when a user enables modulation on a running voice
+    if(voice.FMEnabled != NONE && voice.FMSmp == NULL) {
+        voice.FMSmp = memory.valloc<float>(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
+        memset(voice.FMSmp, 0, sizeof(float)*(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES));
+        int vc = nvoice;
+        if(param.PextFMoscil != -1)
+            vc = param.PextFMoscil;
+
+        float tmp = 1.0f;
+        if((pars.VoicePar[vc].FMSmp->Padaptiveharmonics != 0)
+                || (voice.FMEnabled == MORPH)
+                || (voice.FMEnabled == RING_MOD))
+            tmp = getFMvoicebasefreq(nvoice);
+
+        if(!pars.GlobalPar.Hrandgrouping)
+            pars.VoicePar[vc].FMSmp->newrandseed(prng());
+
+        for(int k = 0; k < unison_size[nvoice]; ++k)
+            oscposhiFM[nvoice][k] = (oscposhi[nvoice][k]
+                    + pars.VoicePar[vc].FMSmp->get(
+                        voice.FMSmp, tmp))
+                % synth.oscilsize;
+
+        for(int i = 0; i < OSCIL_SMP_EXTRA_SAMPLES; ++i)
+            voice.FMSmp[synth.oscilsize + i] = voice.FMSmp[i];
+        int oscposhiFM_add =
+            (int)((param.PFMoscilphase
+                        - 64.0f) / 128.0f * synth.oscilsize
+                    + synth.oscilsize * 4);
+        for(int k = 0; k < unison_size[nvoice]; ++k) {
+            oscposhiFM[nvoice][k] += oscposhiFM_add;
+            oscposhiFM[nvoice][k] %= synth.oscilsize;
+        }
+    }
+
 
     //Compute the Voice's modulator volume (incl. damping)
     float fmvoldamp = powf(440.0f / getvoicebasefreq(nvoice),
