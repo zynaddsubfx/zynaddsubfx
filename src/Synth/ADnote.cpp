@@ -77,9 +77,8 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
     else
         NoteGlobalPar.Punch.Enabled = 0;
 
-    for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
+    for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
         setupVoice(nvoice);
-    }
 
     max_unison = 1;
     for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice)
@@ -414,7 +413,7 @@ void ADnote::setupVoiceDetune(int nvoice)
                 pars.VoicePar[nvoice].PFMDetune);
 }
 
-void ADnote::setupVoiceMod(int nvoice)
+void ADnote::setupVoiceMod(int nvoice, bool first_run)
 {
     auto &param = pars.VoicePar[nvoice];
     auto &voice = NoteVoicePar[nvoice];
@@ -444,7 +443,8 @@ void ADnote::setupVoiceMod(int nvoice)
     voice.FMFreqFixed  = param.PFMFixedFreq;
 
     //Triggers when a user enables modulation on a running voice
-    if(voice.FMEnabled != NONE && voice.FMSmp == NULL) {
+    if(!first_run && voice.FMEnabled != NONE && voice.FMSmp == NULL && voice.FMVoice < 0) {
+        param.FMSmp->newrandseed(prng());
         voice.FMSmp = memory.valloc<float>(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
         memset(voice.FMSmp, 0, sizeof(float)*(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES));
         int vc = nvoice;
@@ -1609,7 +1609,7 @@ int ADnote::noteout(float *outl, float *outr)
            || (NoteVoicePar[nvoice].DelayTicks > 0))
             continue;
         setupVoiceDetune(nvoice);
-        setupVoiceMod(nvoice);
+        setupVoiceMod(nvoice, false);
     }
 
     computecurrentparameters();
