@@ -453,6 +453,22 @@ namespace Nio
 
 
 /* Implementation */
+
+class mw_dispatcher_t : public master_dispatcher_t
+{
+    MiddleWare* mw;
+    bool do_dispatch(const char *msg) override
+    {
+        mw->transmitMsg(msg);
+        return true; // we cannot yet say if the port matched
+                     // we will query the Master after everything wil be done
+    }
+    void vUpdateMaster(Master* m) { mw->switchMaster(m); }
+
+public:
+    mw_dispatcher_t(MiddleWare* mw) : mw(mw) {}
+};
+
 class MiddleWareImpl
 {
     public:
@@ -578,15 +594,26 @@ public:
 
     //Well, you don't get much crazier than changing out all of your RT
     //structures at once... TODO error handling
-    void loadMaster(const char *filename)
+    void loadMaster(const char *filename, bool osc_format = false)
     {
         Master *m = new Master(synth, config);
         m->uToB = uToB;
         m->bToU = bToU;
         if(filename) {
-            if ( m->loadXML(filename) ) {
-                delete m;
-                return;
+            if(osc_format)
+            {
+                mw_dispatcher_t dispatcher(parent);
+                if( m->loadOSC(filename, &dispatcher) < 0 ) {
+                    delete m;
+                    return;
+                }
+            }
+            else
+            {
+                if ( m->loadXML(filename) ) {
+                    delete m;
+                    return;
+                }
             }
             m->applyparameters();
         }
@@ -1245,8 +1272,31 @@ static rtosc::Ports middwareSnoopPorts = {
         rBegin;
         const char *file = rtosc_argument(msg, 0).s;
         //Copy is needed as filename WILL get trashed during the rest of the run
+        //^TODO: what does this comment mean? (copy & paste error?)
         impl.doReadOnlyOp([&impl,file](){
                 int res = impl.master->saveXML(file);
+                (void)res;});
+        rEnd},
+    {"save_osc:s", 0, 0,
+        rBegin;
+        const char *file = rtosc_argument(msg, 0).s;
+        //Copy is needed as filename WILL get trashed during the rest of the run
+        //^TODO: what does this comment mean? (copy & paste error?)
+        mw_dispatcher_t dispatcher(impl.parent);
+
+        // allocate an "empty" master
+        // after the savefile will have been saved, it will be loaded into this
+        // dummy master, and then the two masters will be compared
+        zyn::Config config;
+        zyn::SYNTH_T* synth = new zyn::SYNTH_T;
+        synth->buffersize = impl.master->synth.buffersize;
+        synth->samplerate = impl.master->synth.samplerate;
+        synth->alias();
+        zyn::Master master2(*synth, &config);
+        master2.frozenState = true;
+
+        impl.doReadOnlyOp([&impl,file,&dispatcher,&master2](){
+                int res = impl.master->saveOSC(file, &dispatcher, &master2);
                 (void)res;});
         rEnd},
     {"save_xiz:is", 0, 0,
@@ -1335,6 +1385,12 @@ static rtosc::Ports middwareSnoopPorts = {
         rBegin;
         const char *file = rtosc_argument(msg, 0).s;
         impl.loadMaster(file);
+        d.reply("/damage", "s", "/");
+        rEnd},
+    {"load_osc:s", 0, 0,
+        rBegin;
+        const char *file = rtosc_argument(msg, 0).s;
+        impl.loadMaster(file, true);
         d.reply("/damage", "s", "/");
         rEnd},
     {"reset_master:", 0, 0,
@@ -2166,6 +2222,15 @@ const PresetsStore& MiddleWare::getPresetsStore() const
 PresetsStore& MiddleWare::getPresetsStore()
 {
     return impl->presetsstore;
+}
+
+void MiddleWare::switchMaster(Master* new_master)
+{
+    assert(impl->master->frozenState);
+    new_master->uToB = impl->uToB;
+    new_master->bToU = impl->bToU;
+    impl->master = new_master;
+    impl->updateResources(new_master);
 }
 
 }

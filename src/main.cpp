@@ -23,13 +23,11 @@
 
 #include <err.h>
 #include <unistd.h>
-#include <pthread.h>
 
 #include <getopt.h>
 
 #include <rtosc/rtosc.h>
 #include <rtosc/ports.h>
-#include <rtosc/thread-link.h>
 #include "Params/PADnoteParameters.h"
 
 #include "DSP/FFTwrapper.h"

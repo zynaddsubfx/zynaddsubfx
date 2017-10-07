@@ -50,7 +50,10 @@ class Master
 
         char last_xmz[XMZ_PATH_MAX];
 
-        void applyOscEvent(const char *event);
+        //applyOscEvent overlays
+        bool applyOscEvent(const char *event, float *outl, float *outr,
+                           bool offline, bool nio = true, int msg_id = -1);
+        bool applyOscEvent(const char *event, bool nio = true, int msg_id = -1);
 
         /**Saves all settings to a XML file
          * @return 0 for ok or <0 if there is an error*/
@@ -67,11 +70,18 @@ class Master
 
         /**Save all settings to an OSC file (as specified by RT OSC)
          * @param filename File to save to or NULL (useful for testing)
+         * @param dispatcher Message dispatcher and modifier
+         * @param master2 An empty master dummy where the savefile will be
+         *                loaded to and compared with the current master
          * @return 0 for ok or <0 if there is an error*/
-        int saveOSC(const char *filename);
+        int saveOSC(const char *filename,
+                    class master_dispatcher_t* dispatcher,
+                    Master* master2);
         /**loads all settings from an OSC file (as specified by RT OSC)
+         * @param dispatcher Message dispatcher and modifier
          * @return 0 for ok or <0 if there is an error*/
-        int loadOSC(const char *filename);
+        int loadOSC(const char *filename,
+                    rtosc::savefile_dispatcher_t* dispatcher);
 
         /**Regenerate PADsynth and other non-RT parameters
          * It is NOT SAFE to call this from a RT context*/
@@ -211,7 +221,19 @@ class Master
         //Return XML data as string. Must be freed.
         char* getXMLData();
         //Used by loadOSC and saveOSC
-        int loadOSCFromStr(const char *filename);
+        int loadOSCFromStr(const char *file_content,
+                           rtosc::savefile_dispatcher_t* dispatcher);
+        //applyOscEvent with a DataObj parameter
+        bool applyOscEventWith(const char *event, float *outl, float *outr,
+                               bool offline, bool nio,
+                               class DataObj& d, int msg_id = -1);
+};
+
+class master_dispatcher_t : public rtosc::savefile_dispatcher_t
+{
+    virtual void vUpdateMaster(Master* m) = 0;
+public:
+    void updateMaster(Master* m) { vUpdateMaster(m); }
 };
 
 }

@@ -82,6 +82,10 @@ class MiddleWare
         
         const PresetsStore& getPresetsStore() const;
         PresetsStore& getPresetsStore();
+
+        //!Make @p new_master the current master
+        //!@warning use with care, and only in frozen state
+        void switchMaster(Master* new_master);
     private:
         class MiddleWareImpl *impl;
 };

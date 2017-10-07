@@ -76,8 +76,8 @@ static const Ports sysefxPort =
             Master &mast = *(Master*)d.obj;
 
             if(rtosc_narguments(m)) {
-                mast.setPsysefxvol(ind2, ind1, rtosc_argument(m,0).i);
-                d.broadcast(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
+             mast.setPsysefxvol(ind2, ind1, rtosc_argument(m,0).i);
+             d.broadcast(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
             } else
                 d.reply(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
         }}
@@ -332,7 +332,7 @@ static const Ports master_ports = {
     rArrayOption(Pinsparts, NUM_INS_EFX, rOpt(-2, Master), rOpt(-1, Off),
                  rOptions(Part1, Part2, Part3, Part4, Part5, Part6,
                           Part7, Part8, Part9, Part10, Part11, Part12,
-                          Part13, Part14, Part15, Part16) rDefault(Off),
+                          Part13, Part14, Part15, Part16) rDefault([Off ...]),
                  "Part to insert part onto"),
     {"Pkeyshift::i", rShort("key shift") rProp(parameter) rLinear(0,127)
         rDefault(64) rDoc("Global Key Shift"), 0, [](const char *m, RtData&d) {
@@ -453,7 +453,7 @@ static const Ports master_ports = {
             d.obj = (void*)&((Master*)d.obj)->automate;
             automate_ports.dispatch(msg, d);
             }},
-    {"close-ui:", rDoc("Request to close any connection named \"GUI\""), 0,
+    {"close-ui:", rDoc("Request to close the unique connection named \"GUI\""), 0,
         [](const char *, RtData &d) {
        d.reply("/close-ui", "");}},
     {"add-rt-memory:bi", rProp(internal) rDoc("Add Additional Memory To RT MemPool"), 0,
@@ -640,25 +640,81 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     mastercb_ptr = 0;
 }
 
-void Master::applyOscEvent(const char *msg)
+bool Master::applyOscEventWith(const char *msg, float *outl, float *outr,
+                               bool offline, bool nio, DataObj& d, int msg_id)
+{
+    if(!strcmp(msg, "/load-master")) {
+        Master *this_master = this;
+        Master *new_master  = *(Master**)rtosc_argument(msg, 0).b.data;
+        if(!offline)
+            new_master->AudioOut(outl, outr);
+        if(nio)
+            Nio::masterSwap(new_master);
+        if (mastercb)
+            mastercb(mastercb_ptr, new_master);
+        bToU->write("/free", "sb", "Master", sizeof(Master*), &this_master);
+        return false;
+    }
+
+    //XXX yes, this is not realtime safe, but it is useful...
+    if(strcmp(msg, "/get-vu") && false) {
+        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
+        if(msg_id > 0)
+            fprintf(stdout, "backend[%d]: '%s'<%s>\n", msg_id, msg,
+                    rtosc_argument_string(msg));
+        else
+            fprintf(stdout, "backend[*]: '%s'<%s>\n", msg,
+                    rtosc_argument_string(msg));
+        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+    }
+
+    ports.dispatch(msg, d, true);
+
+    if(!d.matches) {
+        //workaround for requesting voice status
+        int a=0, b=0, c=0;
+        char e=0;
+        if(4 == sscanf(msg, "/part%d/kit%d/adpars/VoicePar%d/Enable%c", &a, &b, &c, &e)) {
+            d.reply(msg, "F");
+            d.matches++;
+        }
+    }
+    if(!d.matches && !d.forwarded) {// && !ports.apropos(msg)) {
+        fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
+        fprintf(stderr, "Unknown address<BACKEND:%s> '%s:%s'\n",
+                offline ? "offline" : "online",
+                uToB->peak(),
+                rtosc_argument_string(uToB->peak()));
+        fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
+    }
+    else if(d.forwarded)
+        bToU->raw_write(msg);
+
+    if(d.matches == 0 && !d.forwarded)
+        fprintf(stderr, "Unknown path '%s:%s'\n", msg, rtosc_argument_string(msg));
+    if(d.forwarded)
+        bToU->raw_write(msg);
+
+    return true;
+}
+
+bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
+                           bool offline, bool nio, int msg_id)
 {
     char loc_buf[1024];
     DataObj d{loc_buf, 1024, this, bToU};
     memset(loc_buf, 0, sizeof(loc_buf));
     d.matches = 0;
 
-    if(strcmp(msg, "/get-vu") && false) {
-        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
-        fprintf(stdout, "backend[*]: '%s'<%s>\n", msg,
-                rtosc_argument_string(msg));
-        fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
-    }
+    return applyOscEventWith(msg, outl, outr, offline, nio, d, msg_id);
+}
 
-    ports.dispatch(msg, d, true);
-    if(d.matches == 0 && !d.forwarded)
-        fprintf(stderr, "Unknown path '%s:%s'\n", msg, rtosc_argument_string(msg));
-    if(d.forwarded)
-        bToU->raw_write(msg);
+bool Master::applyOscEvent(const char *msg, bool nio, int msg_id)
+{
+    // TODO: the following comment is probably wrong
+    // "/load-master" can not be handled, since no out buffers are specified
+//    assert(strcmp(msg, "/load-master"));
+    return applyOscEvent(msg, NULL, NULL, true, nio, msg_id);
 }
 
 void Master::defaults()
@@ -916,48 +972,13 @@ bool Master::runOSC(float *outl, float *outr, bool offline)
     char loc_buf[1024];
     DataObj d{loc_buf, 1024, this, bToU};
     memset(loc_buf, 0, sizeof(loc_buf));
+
     int events = 0;
-    while(uToB && uToB->hasNext() && events < 100) {
+    for(; uToB && uToB->hasNext() && events < 100; ++msg_id, ++events)
+    {
         const char *msg = uToB->read();
-
-        if(!strcmp(msg, "/load-master")) {
-            Master *this_master = this;
-            Master *new_master  = *(Master**)rtosc_argument(msg, 0).b.data;
-            if(!offline)
-                new_master->AudioOut(outl, outr);
-            Nio::masterSwap(new_master);
-            if (mastercb)
-                mastercb(mastercb_ptr, new_master);
-            bToU->write("/free", "sb", "Master", sizeof(Master*), &this_master);
+        if(! applyOscEventWith(msg, outl, outr, offline, true, d, msg_id) )
             return false;
-        }
-
-        //XXX yes, this is not realtime safe, but it is useful...
-        if(strcmp(msg, "/get-vu") && false) {
-            fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 5 + 30, 0 + 40);
-            fprintf(stdout, "backend[%d]: '%s'<%s>\n", msg_id++, msg,
-                    rtosc_argument_string(msg));
-            fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
-        }
-        ports.dispatch(msg, d, true);
-        events++;
-        if(!d.matches) {
-            //workaround for requesting voice status
-            int a=0, b=0, c=0;
-            char e=0;
-            if(4 == sscanf(msg, "/part%d/kit%d/adpars/VoicePar%d/Enable%c", &a, &b, &c, &e)) {
-                d.reply(msg, "F");
-                d.matches++;
-            }
-        }
-        if(!d.matches) {// && !ports.apropos(msg)) {
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 1, 7 + 30, 0 + 40);
-            fprintf(stderr, "Unknown address<BACKEND:%s> '%s:%s'\n",
-                    offline ? "offline" : "online",
-                    uToB->peak(),
-                    rtosc_argument_string(uToB->peak()));
-            fprintf(stderr, "%c[%d;%d;%dm", 0x1B, 0, 7 + 30, 0 + 40);
-        }
     }
 
     if(automate.damaged) {
@@ -1504,21 +1525,29 @@ char* Master::getXMLData()
     return xml.getXMLdata();
 }
 
-int Master::saveOSC(const char *filename)
+// this is being called as a "read only op" directly by MiddleWare
+// note that the Master itself is frozen
+int Master::saveOSC(const char *filename, master_dispatcher_t* dispatcher,
+                    Master* master2)
 {
     std::string savefile = rtosc::save_to_file(ports, this,
                                                "ZynAddSubFX",
                                                version_in_rtosc_fmt());
 
-    zyn::Config config;
-    zyn::SYNTH_T* synth = new zyn::SYNTH_T;
-    synth->buffersize = 256;
-    synth->samplerate = 48000;
-    synth->alias();
+    // load the savefile string into another master to compare the results
+    // between the original and the savefile-loaded master
+    // this requires a temporary master switch
+    dispatcher->updateMaster(master2);
+    if(mastercb)
+        mastercb(mastercb_ptr, master2);
 
-    zyn::Master master2(*synth, &config);
-    int rval = master2.loadOSCFromStr(savefile.c_str());
+    int rval = master2->loadOSCFromStr(savefile.c_str(), dispatcher);
+    sleep(3); // wait until savefile has been loaded into master2
+              // TODO: how to find out when waited enough?
 
+    dispatcher->updateMaster(this);
+    if(mastercb)
+        mastercb(mastercb_ptr, this);
 
     if(rval < 0)
     {
@@ -1540,18 +1569,18 @@ int Master::saveOSC(const char *filename)
     else
     {
         char* xml = getXMLData(),
-            * xml2 = master2.getXMLData();
+            * xml2 = master2->getXMLData();
 
         rval = strcmp(xml, xml2) ? -1 : 0;
 
         if(rval == 0)
         {
-            if(filename)
+            if(filename && *filename)
             {
                 std::ofstream ofs(filename);
                 ofs << savefile;
             }
-            else if(!filename)
+            else
                 std::cout << savefile << std::endl;
         }
         else
@@ -1570,11 +1599,13 @@ int Master::saveOSC(const char *filename)
     return rval;
 }
 
-int Master::loadOSCFromStr(const char *filename)
+int Master::loadOSCFromStr(const char *file_content,
+                           savefile_dispatcher_t* dispatcher)
 {
-    return rtosc::load_from_file(filename,
+    return rtosc::load_from_file(file_content,
                                  ports, this,
-                                 "ZynAddSubFX", version_in_rtosc_fmt());
+                                 "ZynAddSubFX", version_in_rtosc_fmt(),
+                                 dispatcher);
 }
 
 string loadfile(string fname)
@@ -1585,9 +1616,9 @@ string loadfile(string fname)
     return str;
 }
 
-int Master::loadOSC(const char *filename)
+int Master::loadOSC(const char *filename, savefile_dispatcher_t* dispatcher)
 {
-    int rval = loadOSCFromStr(loadfile(filename).c_str());
+    int rval = loadOSCFromStr(loadfile(filename).c_str(), dispatcher);
     return rval < 0 ? rval : 0;
 }
 
