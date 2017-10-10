@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=ZynAddSubFX - OSS
+Comment=A powerful realtime software synthesizer
+Comment[fr]=Un synthétiseur logiciel temps-réel puissant
+Keywords=audio;sound;alsa;midi;synth;synthesizer;
+Exec=zynaddsubfx -I OSS -O OSS
+Icon=zynaddsubfx
+Terminal=false
+Type=Application
+Categories=AudioVideo;Audio;

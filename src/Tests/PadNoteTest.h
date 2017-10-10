@@ -92,7 +92,7 @@ class PadNoteTest:public CxxTest::TestSuite
 
 
             //defaultPreset->defaults();
-            pars->applyparameters();
+            pars->applyparameters([]{return false;}, 1);
 
             //verify xml was loaded
             ///TS_ASSERT(defaultPreset->VoicePar[1].Enabled);
@@ -197,9 +197,9 @@ class PadNoteTest:public CxxTest::TestSuite
             TS_ASSERT_DELTA(note->NoteGlobalPar.Panning, 0.500000f, 0.01f);
 
 
-            for(int i=0; i<7; ++i)
+            for(int i=0; i<8; ++i)
                 TS_ASSERT(pars->sample[i].smp);
-            for(int i=7; i<PAD_MAX_SAMPLES; ++i)
+            for(int i=8; i<PAD_MAX_SAMPLES; ++i)
                 TS_ASSERT(!pars->sample[i].smp);
 
             TS_ASSERT_DELTA(pars->sample[0].smp[0],  -0.057407f, 0.0005f);

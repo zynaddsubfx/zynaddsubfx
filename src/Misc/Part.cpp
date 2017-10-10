@@ -49,8 +49,12 @@ static const Ports partPorts = {
     rRecur(ctl,       "Controller"),
     rParamZyn(partno, rProp(internal),
               "How many parts are before this in the Master"),
+#undef  rChangeCb
+#define rChangeCb if(obj->Penabled == false) obj->AllNotesOff();
     rToggle(Penabled, rShort("enable"), rDefaultDepends(partno),
             rPresets(true), rDefault(false), "Part enable"),
+#undef rChangeCb
+#define rChangeCb
 #undef rChangeCb
 #define rChangeCb obj->setPvolume(obj->Pvolume);
     rParamZyn(Pvolume, rShort("Vol"), rDefault(96),"Part Volume"),

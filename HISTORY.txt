@@ -1,3 +1,14 @@
+3.0.2 (21 July 2017)
+        - Upgrade MIDI learn system to include host automations and macro
+          learned controls
+        - Upgrade analog filter parameters to floating point resolution
+        - Add default values to OSC metadata
+        - Fix exit when closing zyn-fusion subprocess
+        - Fix crash with large number of pad synth samples
+        - Silence 0 volume effects
+        - Silence 0 volume add synth voices
+        - Fix minor bugs
+
 3.0.1 (28 November 2016)
         - Fix bank screen with Zyn-Fusion
         - Fix crash on startup with GL 2.1 to 3.1

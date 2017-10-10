@@ -3,7 +3,7 @@
 
   main.cpp  -  Main file of the synthesizer
   Copyright (C) 2002-2005 Nasca Octavian Paul
-  Copyright (C) 2012-2016 Mark McCurry
+  Copyright (C) 2012-2017 Mark McCurry
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -21,7 +21,9 @@
 #include <algorithm>
 #include <signal.h>
 
+#ifndef WIN32
 #include <err.h>
+#endif
 #include <unistd.h>
 
 #include <getopt.h>
@@ -46,7 +48,9 @@
 GUI::ui_handle_t gui;
 
 #ifdef ZEST_GUI
+#ifndef WIN32
 #include <sys/wait.h>
+#endif
 #endif
 
 //Glue Layer
@@ -133,7 +137,9 @@ void exitprogram(const Config& config)
 #ifdef WIN32
 #include <windows.h>
 #include <mmsystem.h>
+namespace zyn{
 extern InMgr  *in;
+}
 HMIDIIN winmidiinhandle = 0;
 
 void CALLBACK WinMidiInProc(HMIDIIN hMidiIn,UINT wMsg,DWORD dwInstance,
@@ -310,7 +316,7 @@ int main(int argc, char *argv[])
     opterr = 0;
     int option_index = 0, opt, exitwithhelp = 0, exitwithversion = 0;
     int prefered_port = -1;
-    int auto_save_interval = 60;
+    int auto_save_interval = 0;
 int wmidi = -1;
 
     string loadfile, loadinstrument, execAfterInit, loadmidilearn;
@@ -321,7 +327,7 @@ int wmidi = -1;
         /**\todo check this process for a small memory leak*/
         opt = getopt_long(argc,
                           argv,
-                          "l:L:M:r:b:o:I:O:N:e:P:A:D:hvapSDUYZ",
+                          "l:L:M:r:b:o:I:O:N:e:P:A:d:D:hvapSDUYZ",
                           opts,
                           &option_index);
         char *optarguments = optarg;
@@ -641,10 +647,13 @@ int wmidi = -1;
     }
 
 #ifdef ZEST_GUI
+#ifndef WIN32
     pid_t gui_pid = 0;
+#endif
     if(!noui) {
         printf("[INFO] Launching Zyn-Fusion...\n");
         const char *addr = middleware->getServerAddress();
+#ifndef WIN32
         gui_pid = fork();
         if(gui_pid == 0) {
             execlp("zyn-fusion", "zyn-fusion", addr, "--builtin", "--no-hotload",  0);
@@ -652,6 +661,28 @@ int wmidi = -1;
 
             err(1,"Failed to launch Zyn-Fusion");
         }
+#else
+        STARTUPINFO si;
+PROCESS_INFORMATION pi;
+memset(&si, 0, sizeof(si));
+memset(&pi, 0, sizeof(pi));
+char *why_windows = strrchr(addr, ':');
+char *seriously_why = why_windows + 1;
+char start_line[256] = {0};
+if(why_windows)
+    snprintf(start_line, sizeof(start_line), "zyn-fusion.exe osc.udp://127.0.0.1:%s", seriously_why);
+else {
+    printf("COULD NOT PARSE <%s>\n", addr);
+    exit(1);
+}
+printf("[INFO] starting subprocess via <%s>\n", start_line);
+if(!CreateProcess(NULL, start_line,
+NULL, NULL, 0, 0, NULL, NULL, &si, &pi)) {
+    printf("Failed to launch Zyn-Fusion...\n");
+    exit(1);
+}
+
+#endif
     }
 #endif
 
@@ -695,12 +726,14 @@ done:
 #endif
 
 #ifdef ZEST_GUI
+#ifndef WIN32
         if(!noui) {
             int status = 0;
             int ret = waitpid(gui_pid, &status, WNOHANG);
             if(ret == gui_pid)
                 Pexitprogram = 1;
         }
+#endif
 #endif
     }
 

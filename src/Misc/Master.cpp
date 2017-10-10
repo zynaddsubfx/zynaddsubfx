@@ -131,7 +131,7 @@ static int get_next_int(const char *msg)
 }
 
 static const Ports mapping_ports = {
-    {"offset::f", rProp(parameter) rShort("off") rLinear(-50, 50) rMap(unit, percent), 0,
+    {"offset::f", rProp(parameter) rDefault(0) rShort("off") rLinear(-50, 50) rMap(unit, percent), 0,
         rBegin;
         int slot = d.idx[1];
         int param = d.idx[0];
@@ -142,7 +142,7 @@ static const Ports mapping_ports = {
         } else
             d.reply(d.loc, "f", a.getSlotSubOffset(slot, param));
         rEnd},
-    {"gain::f", rProp(parameter) rShort("gain") rLinear(-200, 200) rMap(unit, percent), 0,
+    {"gain::f", rProp(parameter) rDefault(100) rShort("gain") rLinear(-200, 200) rMap(unit, percent), 0,
         rBegin;
         int slot = d.idx[1];
         int param = d.idx[0];
@@ -156,7 +156,7 @@ static const Ports mapping_ports = {
 };
 
 static const Ports auto_param_ports = {
-    {"used:", rProp(parameter) rProp(read-only) rDoc("If automation is assigned to anything"), 0,
+    {"used::T:F", rProp(parameter) rProp(read-only) rDoc("If automation is assigned to anything"), 0,
         rBegin;
         int slot  = d.idx[1];
         int param = d.idx[0];
@@ -172,13 +172,13 @@ static const Ports auto_param_ports = {
         else
             d.reply(d.loc, a.slots[slot].automations[param].active ? "T" : "F");
         rEnd},
-    {"path:", rProp(parameter) rProp(read-only) rDoc("Path of parameter"), 0,
+    {"path::s", rProp(parameter) rProp(read-only) rDoc("Path of parameter"), 0,
         rBegin;
         int slot  = d.idx[1];
         int param = d.idx[0];
         d.reply(d.loc, "s", a.slots[slot].automations[param].param_path);
         rEnd},
-    {"clear:", 0, 0,
+    {"clear:", rDoc("Clear automation param"), 0,
         rBegin;
         int slot = d.idx[1];
         int param = d.idx[0];
@@ -186,6 +186,7 @@ static const Ports auto_param_ports = {
         rEnd},
     {"mapping/", 0, &mapping_ports,
         rBegin;
+        (void) a;
         SNIP;
         mapping_ports.dispatch(msg, d);
         rEnd},
@@ -219,7 +220,7 @@ static const Ports slot_ports = {
     //                              rtosc_argument(msg, 1).s,
     //                              rtosc_argument(msg, 2).T);
     //    rEnd},
-    {"value::f", rProp(parameter) rMap(default, 0.5) rLinear(0, 1) rDoc("Access current value in slot 'i' (0..1)"), 0,
+    {"value::f", rProp(no learn) rProp(parameter) rMap(default, 0.5) rLinear(0, 1) rDoc("Access current value in slot 'i' (0..1)"), 0,
         rBegin;
         int num = d.idx[0];
         if(!strcmp("f",rtosc_argument_string(msg))) {
@@ -255,12 +256,12 @@ static const Ports slot_ports = {
         else
             d.reply(d.loc, a.slots[slot].active ? "T" : "F");
         rEnd},
-    {"learning:", rProp(parameter) rMap(default, -1) rDoc("If slot is trying to find a midi learn binding"), 0,
+    {"learning::i", rProp(parameter) rMap(default, -1) rDoc("If slot is trying to find a midi learn binding"), 0,
         rBegin;
         int slot = d.idx[0];
         d.reply(d.loc, "i", a.slots[slot].learning);
         rEnd},
-    {"clear:", 0, 0,
+    {"clear:", rDoc("Clear automation slot"), 0,
         rBegin;
         int slot = d.idx[0];
         a.clearSlot(slot);
@@ -305,6 +306,40 @@ static const Ports automate_ports = {
         SNIP;
         slot_ports.dispatch(msg, d);
         d.pop_index();
+        rEnd},
+    {"clear", rDoc("Clear all automation slots"), 0,
+        rBegin;
+        for(int i=0; i<a.nslots; ++i)
+            a.clearSlot(i);
+        rEnd},
+    {"load-blob:b", rProp(internal) rDoc("Load blob from middleware"), 0,
+        rBegin;
+        auto &b = **(rtosc::AutomationMgr **)rtosc_argument(msg, 0).b.data;
+        //XXX this code should likely be in rtosc
+        for(int i=0; i<a.nslots; ++i) {
+            auto &slota = a.slots[i];
+            auto &slotb = b.slots[i];
+            std::swap(slota.learning, slotb.learning);
+            std::swap(slota.midi_cc,  slotb.midi_cc);
+            std::swap(slota.used,     slotb.used);
+            std::swap(slota.active,   slotb.active);
+            for(int j=0; j<a.per_slot; ++j) {
+                auto &aa = slota.automations[j];
+                auto &ab = slotb.automations[j];
+                std::swap(aa.used, ab.used);
+                std::swap(aa.active, ab.active);
+                std::swap(aa.param_path, ab.param_path);
+                std::swap(aa.param_min, ab.param_min);
+                std::swap(aa.param_max, ab.param_max);
+                std::swap(aa.param_step, ab.param_step);
+                std::swap(aa.param_type, ab.param_type);
+                std::swap(aa.map.offset, ab.map.offset);
+                std::swap(aa.map.gain, ab.map.gain);
+                std::swap(aa.map.upoints, ab.map.upoints);
+                for(int k=0; k<aa.map.npoints; ++k)
+                    std::swap(aa.map.control_points[k], ab.map.control_points[k]);
+            }
+        }
         rEnd},
 };
 
@@ -583,6 +618,81 @@ vuData::vuData(void)
     :outpeakl(0.0f), outpeakr(0.0f), maxoutpeakl(0.0f), maxoutpeakr(0.0f),
       rmspeakl(0.0f), rmspeakr(0.0f), clipped(0)
 {}
+
+void Master::saveAutomation(XMLwrapper &xml, const rtosc::AutomationMgr &midi)
+{
+    xml.beginbranch("automation");
+    {
+        XmlNode metadata("mgr-info");
+        metadata["nslots"]       = to_s(midi.nslots);
+        metadata["nautomations"] = to_s(midi.per_slot);
+        metadata["ncontrol"]     = to_s(midi.slots[0].automations[0].map.npoints);
+        xml.add(metadata);
+
+        for(int i=0; i<midi.nslots; ++i) {
+            const auto &slot = midi.slots[i];
+            if(!slot.used)
+                continue;
+            xml.beginbranch("slot", i);
+            XmlNode params("params");
+            params["midi-cc"] = to_s(slot.midi_cc);
+            xml.add(params);
+            for(int j=0; j<midi.per_slot; ++j) {
+                const auto &au = slot.automations[j];
+                if(!au.used)
+                    continue;
+                xml.beginbranch("automation", j);
+                XmlNode automation("params");
+                automation["path"] = au.param_path;
+                XmlNode mapping("mapping");
+                mapping["gain"]   = to_s(au.map.gain);
+                mapping["offset"] = to_s(au.map.offset);
+                xml.add(automation);
+                xml.add(mapping);
+                xml.endbranch();
+            }
+
+            xml.endbranch();
+        }
+    }
+    xml.endbranch();
+}
+
+void Master::loadAutomation(XMLwrapper &xml, rtosc::AutomationMgr &midi)
+{
+    if(xml.enterbranch("automation")) {
+        for(int i=0; i<midi.nslots; ++i) {
+            auto &slot = midi.slots[i];
+            if(xml.enterbranch("slot", i)) {
+                for(int j=0; j<midi.per_slot; ++j) {
+                    if(xml.enterbranch("automation", j)) {
+                        float gain       = 1.0;
+                        float offset     = 0.0;
+                        std::string path = "";
+                        for(auto node:xml.getBranch()) {
+                            if(node.name == "params")
+                                path = node["path"];
+                            else if(node.name == "mapping") {
+                                gain   = atof(node["gain"].c_str());
+                                offset = atof(node["offset"].c_str());
+                            }
+                        }
+                        printf("createBinding(%d, %s, false)\n", i, path.c_str());
+                        midi.createBinding(i, path.c_str(), false);
+                        midi.setSlotSubGain(i, j, gain);
+                        midi.setSlotSubOffset(i, j, offset);
+                        xml.exitbranch();
+                    }
+                }
+                for(auto node:xml.getBranch())
+                    if(node.name == "params")
+                        slot.midi_cc = atoi(node["midi-cc"].c_str());
+                xml.exitbranch();
+            }
+        }
+        xml.exitbranch();
+    }
+}
 
 Master::Master(const SYNTH_T &synth_, Config* config)
     :HDDRecorder(synth_), time(synth_), ctl(synth_, &time),
@@ -1349,6 +1459,8 @@ void Master::add2XML(XMLwrapper& xml)
     microtonal.add2XML(xml);
     xml.endbranch();
 
+    saveAutomation(xml, automate);
+
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
         xml.beginbranch("PART", npart);
         part[npart]->add2XML(xml);
@@ -1472,6 +1584,8 @@ void Master::getfromXML(XMLwrapper& xml)
         microtonal.getfromXML(xml);
         xml.exitbranch();
     }
+
+    loadAutomation(xml, automate);
 
     sysefx[0]->changeeffect(0);
     if(xml.enterbranch("SYSTEM_EFFECTS")) {

@@ -46,6 +46,7 @@ const rtosc::Ports Controller::ports = {
     rToggle(pitchwheel.is_split,   rDefault(false),
         "If PitchWheel Has unified bendrange or not"),
     rParamI(pitchwheel.bendrange,  rShort("pch.d"), rDefault(200),
+            rLinear(-6400, 6400),
         "Range of MIDI Pitch Wheel"),
     rParamI(pitchwheel.bendrange_down, rDefault(0),
         "Lower Range of MIDI Pitch Wheel"),

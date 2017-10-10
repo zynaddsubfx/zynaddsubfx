@@ -13,8 +13,8 @@
 
 #include "NulEngine.h"
 #include "../globals.h"
+#include "../Misc/Util.h"
 
-#include <unistd.h>
 #include <iostream>
 using namespace std;
 
@@ -50,7 +50,7 @@ void *NulEngine::AudioThread()
                         + (playing_until.tv_sec - now.tv_sec) * 1000000;
             if(remaining > 10000) //Don't sleep() less than 10ms.
                 //This will add latency...
-                usleep(remaining - 10000);
+                os_usleep(remaining  - 10000);
             if(remaining < 0)
                 cerr << "WARNING - too late" << endl;
         }

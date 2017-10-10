@@ -172,7 +172,6 @@ const rtosc::Ports FilterParams::ports = {
                             0.0,     cf.d[1]);
                 }
             } else if(obj->Pcategory == 2) {
-                int order = 0;
                 float gain = dB2rap(obj->getgain());
                 auto cf = SVFilter::computeResponse(obj->Ptype,
                         Filter::getrealfreq(obj->getfreq()),
@@ -570,7 +569,7 @@ void FilterParams::getfromXML(XMLwrapper& xml)
         basefreq     = xml.getparreal("basefreq",   1000);
         baseq        = xml.getparreal("baseq",      10);
         gain         = xml.getparreal("gain",       0);
-        freqtracking = xml.getparreal("freq_track", 0);
+        freqtracking = xml.getparreal("freq_tracking", 0);
     }
 
     //formant filter parameters
