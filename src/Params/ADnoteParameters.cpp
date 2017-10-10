@@ -106,7 +106,7 @@ static const Ports voicePorts = {
     rParamZyn(POffsetHz,          rShort("offset"), "Voice constant offset"),
     //nominally -8192..8191
     rParamI(PDetune,              rShort("fine"),
-            rLinear(0, 16383), "Fine Detune"),
+            rLinear(0, 16383), rDefault(8192), "Fine Detune"),
     rParamI(PCoarseDetune,        rShort("coarse"), "Coarse Detune"),
     rParamZyn(PDetuneType,        rShort("type"),
             rOptions(L35cents, L10cents, E100cents, E1200cents),
@@ -115,7 +115,8 @@ static const Ports voicePorts = {
     rToggle(PFreqLfoEnabled,      rShort("enable"), "Frequency LFO Enable"),
 
     //Amplitude Stuff
-    rParamZyn(PPanning,                  rShort("pan."), "Panning"),
+    rParamZyn(PPanning,                  rShort("pan."), rDefault(64),
+        "Panning"),
     rParamZyn(PVolume,                   rShort("vol."), rDefault(100),
         "Volume"),
     rToggle(PVolumeminus,                rShort("inv."), rDefault(false),

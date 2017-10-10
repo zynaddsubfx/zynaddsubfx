@@ -33,7 +33,8 @@ namespace zyn {
 static const rtosc::Ports _ports = {
     rSelf(LFOParams),
     rPaste,
-    rParamF(Pfreq, rShort("freq"), rLinear(0.0,1.0), "frequency of LFO\n"
+    rParamF(Pfreq, rShort("freq"), rLinear(0.0,1.0), rDefaultMissing,
+            "frequency of LFO\n"
             "lfo frequency = (2^(10*Pfreq)-1)/12 * stretch\n"
             "true frequency is [0,85.33] Hz"),
     rParamZyn(Pintensity, rShort("depth"), "Intensity of LFO"),

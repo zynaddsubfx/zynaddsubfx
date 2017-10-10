@@ -23,6 +23,12 @@ class SaveOSCTest
 
         void _masterChangedCallback(zyn::Master* m)
         {
+            /*
+                Note: This message will appear 4 times:
+                 * Once at startup (changing from nil)
+                 * Once after the loading
+                 * Twice for the temporary exchange during saving
+             */
             printf("Changing master from %p (%p) to %p...\n", master, &master, m);
             master = m;
             master->setMasterChangedCallback(__masterChangedCallback, this);
@@ -45,6 +51,7 @@ class SaveOSCTest
         }
 
         void tearDown() {
+            printf("Master at the end: %p\n", master);
             delete mw;
             delete synth;
         }

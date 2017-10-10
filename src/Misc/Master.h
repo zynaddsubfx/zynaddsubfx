@@ -128,6 +128,9 @@ class Master
 
         //Set callback to run when master changes
         void setMasterChangedCallback(void(*cb)(void*,Master*),void *ptr);
+        //Copy callback to other master
+        void copyMasterCbTo(Master* dest);
+        bool hasMasterCb() const;
 
         /**parts \todo see if this can be made to be dynamic*/
         class Part * part[NUM_MIDI_PARTS];

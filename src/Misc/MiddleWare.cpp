@@ -1293,6 +1293,7 @@ static rtosc::Ports middwareSnoopPorts = {
         synth->samplerate = impl.master->synth.samplerate;
         synth->alias();
         zyn::Master master2(*synth, &config);
+        impl.master->copyMasterCbTo(&master2);
         master2.frozenState = true;
 
         impl.doReadOnlyOp([&impl,file,&dispatcher,&master2](){
@@ -2226,11 +2227,20 @@ PresetsStore& MiddleWare::getPresetsStore()
 
 void MiddleWare::switchMaster(Master* new_master)
 {
+    // this function is kept similar to loadMaster
     assert(impl->master->frozenState);
+
     new_master->uToB = impl->uToB;
     new_master->bToU = impl->bToU;
-    impl->master = new_master;
     impl->updateResources(new_master);
+    impl->master = new_master;
+
+    if(impl->master->hasMasterCb())
+    {
+        // inform the realtime thread about the switch
+        // this will be done by calling the mastercb
+        transmitMsg("/switch-master", "b", sizeof(Master*), &new_master);
+    }
 }
 
 }

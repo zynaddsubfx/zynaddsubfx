@@ -650,9 +650,17 @@ bool Master::applyOscEventWith(const char *msg, float *outl, float *outr,
             new_master->AudioOut(outl, outr);
         if(nio)
             Nio::masterSwap(new_master);
-        if (mastercb)
+        if (hasMasterCb())
             mastercb(mastercb_ptr, new_master);
         bToU->write("/free", "sb", "Master", sizeof(Master*), &this_master);
+        return false;
+    } else if(!strcmp(msg, "/switch-master")) {
+        // if the other stuff from load-master is needed optionally
+        // (currently, it is not needed anywhere)
+        // add booleans to the parameters of "/switch-master"
+        Master *new_master  = *(Master**)rtosc_argument(msg, 0).b.data;
+        if (hasMasterCb())
+            mastercb(mastercb_ptr, new_master);
         return false;
     }
 
@@ -910,6 +918,18 @@ void Master::setMasterChangedCallback(void(*cb)(void*,Master*), void *ptr)
     mastercb     = cb;
     mastercb_ptr = ptr;
 }
+
+void Master::copyMasterCbTo(Master *dest)
+{
+    dest->mastercb     = mastercb;
+    dest->mastercb_ptr = mastercb_ptr;
+}
+
+bool Master::hasMasterCb() const
+{
+    return !!mastercb;
+}
+
 
 #if 0
 template <class T>
@@ -1538,16 +1558,12 @@ int Master::saveOSC(const char *filename, master_dispatcher_t* dispatcher,
     // between the original and the savefile-loaded master
     // this requires a temporary master switch
     dispatcher->updateMaster(master2);
-    if(mastercb)
-        mastercb(mastercb_ptr, master2);
 
     int rval = master2->loadOSCFromStr(savefile.c_str(), dispatcher);
     sleep(3); // wait until savefile has been loaded into master2
               // TODO: how to find out when waited enough?
 
     dispatcher->updateMaster(this);
-    if(mastercb)
-        mastercb(mastercb_ptr, this);
 
     if(rval < 0)
     {

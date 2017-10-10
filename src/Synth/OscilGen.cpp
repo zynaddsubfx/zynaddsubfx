@@ -92,6 +92,8 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
               "modulation parameter"),
     rParamZyn(Pmodulationpar3, rShort("p3"), rDefault(32),
               "modulation parameter"),
+    rToggle(ADvsPAD, rShort("If it is used by PADSynth"),
+            "If it is used by PADSynth (and not ADSynth)"),
 
 
     //TODO update to rArray and test
@@ -201,7 +203,9 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
 const rtosc::Ports OscilGen::realtime_ports{
     rSelf(OscilGen),
     rPresetType,
-    rParamZyn(Prand, rLinear(-64, 63), rShort("phase rnd"), "Oscillator Phase Randomness: smaller than 0 is \""
+    rParamZyn(Prand, rLinear(-64, 63), rShort("phase rnd"),
+            rDefaultDepends(ADvsPAD), rPreset(true, 127), rPreset(false, 64),
+            "Oscillator Phase Randomness: smaller than 0 is \""
             "group\", larger than 0 is for each harmonic"),
     rParamZyn(Pamprandpower, rShort("variance"), rDefault(64),
             "Variance of harmonic randomness"),
