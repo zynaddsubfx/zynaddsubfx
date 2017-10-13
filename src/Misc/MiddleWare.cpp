@@ -209,8 +209,18 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
     assert(!path.empty());
     path += "sample";
 
-    mutex rtdata_mutex;
-    unsigned num = p->sampleGenerator([&rtdata_mutex,&path,&d]
+#ifdef WIN32
+    unsigned num = p->sampleGenerator([&path,&d]
+                       (unsigned N, PADnoteParameters::Sample &s)
+                       {
+                           //printf("sending info to '%s'\n",
+                           //       (path+to_s(N)).c_str());
+                           d.chain((path+to_s(N)).c_str(), "ifb",
+                                   s.size, s.basefreq, sizeof(float*), &s.smp);
+                       }, []{return false;}, 1);
+#else
+    std::mutex rtdata_mutex;
+    unsigned num = p->sampleGenerator([&rtdata_mutex, &path,&d]
                        (unsigned N, PADnoteParameters::Sample &s)
                        {
                            //printf("sending info to '%s'\n",
@@ -220,6 +230,8 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
                                    s.size, s.basefreq, sizeof(float*), &s.smp);
                            rtdata_mutex.unlock();
                        }, []{return false;});
+#endif
+
     //clear out unused samples
     for(unsigned i = num; i < PAD_MAX_SAMPLES; ++i) {
         d.chain((path+to_s(i)).c_str(), "ifb",
