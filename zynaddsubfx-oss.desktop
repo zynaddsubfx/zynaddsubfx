@@ -2,6 +2,7 @@
 Name=ZynAddSubFX - OSS
 Comment=A powerful realtime software synthesizer
 Comment[fr]=Un synthétiseur logiciel temps-réel puissant
+Comment[pl]=Funkcjonalny syntezator wirtualny czasu rzeczywistego
 Keywords=audio;sound;alsa;midi;synth;synthesizer;
 Exec=zynaddsubfx -I OSS -O OSS
 Icon=zynaddsubfx
