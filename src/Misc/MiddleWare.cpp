@@ -60,7 +60,6 @@
 namespace zyn {
 
 using std::string;
-using std::mutex;
 int Pexitprogram = 0;
 
 /******************************************************************************
