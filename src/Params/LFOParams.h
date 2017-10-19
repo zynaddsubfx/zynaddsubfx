@@ -35,6 +35,8 @@ class LFOParams:public Presets
 {
     public:
         LFOParams(const AbsTime* time_ = nullptr);
+        LFOParams(consumer_location_t loc,
+                  const AbsTime* time_ = nullptr);
         LFOParams(char Pfreq_,
                   char Pintensity_,
                   char Pstartphase_,
@@ -42,7 +44,7 @@ class LFOParams:public Presets
                   char Prandomness_,
                   char Pdelay_,
                   char Pcontinous,
-                  char fel_,
+                  consumer_location_t loc,
                   const AbsTime* time_ = nullptr);
         ~LFOParams();
 
@@ -63,13 +65,18 @@ class LFOParams:public Presets
         unsigned char Pcontinous; /**<1 if LFO is continous*/
         unsigned char Pstretch; /**<how the LFO is "stretched" according the note frequency (64=no stretch)*/
 
-        int fel; //what kind is the LFO (0 - frequency, 1 - amplitude, 2 - filter)
+        //! what kind is the LFO (0 - frequency, 1 - amplitude, 2 - filter)
+        consumer_location_type_t fel;
+        int loc; //!< consumer location
 
         const AbsTime *time;
         int64_t last_update_timestamp;
 
         static const rtosc::Ports &ports;
     private:
+        //! common functionality of ctors
+        void setup();
+
         /* Default parameters */
         unsigned char Dfreq;
         unsigned char Dintensity;

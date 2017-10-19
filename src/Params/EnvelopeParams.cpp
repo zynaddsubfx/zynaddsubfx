@@ -41,48 +41,48 @@ static const rtosc::Ports localPorts = {
 #undef  rChangeCb
 #define rChangeCb if(!obj->Pfreemode) obj->converttofree(); \
                   if(obj->time) { obj->last_update_timestamp = obj->time->time(); }
-    rOption(envelope_type, rProp(internal),
+    rOption(loc, rProp(internal),
             rOptions(ad_global_amp, ad_global_freq, ad_global_filter,
                      ad_voice_amp, ad_voice_freq, ad_voice_filter,
                      ad_voice_fm_freq, ad_voice_fm_amp,
                      sub_freq_env, sub_bandwidth_env), "function of the envelope"),
-    rParamZyn(Penvpoints, rProp(internal), rDefaultDepends(envelope_type),
+    rParamZyn(Penvpoints, rProp(internal), rDefaultDepends(loc),
             rPresets(4, 3, 4, 4, 3, 4, 3, 4, 3, 3),
             "Number of points in complex definition"),
-    rParamZyn(Penvsustain, rDefaultDepends(envelope_type),
+    rParamZyn(Penvsustain, rDefaultDepends(loc),
             rPresets(2, 1, 2, 2, 1, 2, 1, 2, 1, 1),
             "Location of the sustain point"),
     rParams(Penvdt,  MAX_ENVELOPE_POINTS, "Envelope Delay Times"),
     rParams(Penvval, MAX_ENVELOPE_POINTS, "Envelope Values"),
-    rParamZyn(Penvstretch,  rShort("stretch"), rDefaultDepends(envelope_type),
+    rParamZyn(Penvstretch,  rShort("stretch"), rDefaultDepends(loc),
             rPresets(64, 0, 0, 64, 0, 0, 0, 64, 64, 64),
             "Stretch with respect to frequency"),
-    rToggle(Pforcedrelease, rShort("frcr"), rDefaultDepends(envelope_type),
+    rToggle(Pforcedrelease, rShort("frcr"), rDefaultDepends(loc),
             rPresets(true, false, true, true, false,
                      false, false, true, false, false),
             "Force Envelope to fully evaluate"),
     rToggle(Plinearenvelope, rShort("lin/log"), rDefault(false),
             "Linear or Logarithmic Envelopes"),
-    rParamZyn(PA_dt,  rShort("a.dt"), rDefaultDepends(envelope_type),
+    rParamZyn(PA_dt,  rShort("a.dt"), rDefaultDepends(loc),
               rPresets(0, 50, 40, 0, 40, 70, 90, 80, 50, 70),
               "Attack Time"),
-    rParamZyn(PA_val, rShort("a.val"), rDefaultDepends(envelope_type),
+    rParamZyn(PA_val, rShort("a.val"), rDefaultDepends(loc),
               rDefault(64), rPresetsAt(4, 30, 90, 20, 64, 30, 100),
               "Attack Value"),
-    rParamZyn(PD_dt,  rShort("d.dt"),  rDefaultDepends(envelope_type),
+    rParamZyn(PD_dt,  rShort("d.dt"),  rDefaultDepends(loc),
               rDefault(10), rPresets(40, 10, 70, 100, 10, 70, 10, 90),
               "Decay Time"),
-    rParamZyn(PD_val, rShort("d.val"), rDefaultDepends(envelope_type),
+    rParamZyn(PD_val, rShort("d.val"), rDefaultDepends(loc),
               rDefault(64), rPresetsAt(5, 40),
               "Decay Value"),
-    rParamZyn(PS_val, rShort("s.val"), rDefaultDepends(envelope_type),
+    rParamZyn(PS_val, rShort("s.val"), rDefaultDepends(loc),
               rDefault(64),
               rPresets(127), rPresetsAt(3, 127), rPresetsAt(7, 127),
               "Sustain Value"),
-    rParamZyn(PR_dt,  rShort("r.dt"),  rDefaultDepends(envelope_type),
+    rParamZyn(PR_dt,  rShort("r.dt"),  rDefaultDepends(loc),
               rPresets(25, 60, 60, 100, 60, 10, 80, 100, 60, 60),
               "Release Time"),
-    rParamZyn(PR_val, rShort("r.val"), rDefaultDepends(envelope_type),
+    rParamZyn(PR_val, rShort("r.val"), rDefaultDepends(loc),
               rDefault(64), rPresetsAt(5, 40, 40),
               "Release Value"),
 
@@ -229,24 +229,26 @@ void EnvelopeParams::paste(const EnvelopeParams &ep)
 }
 #undef COPY
 
-void EnvelopeParams::init(EnvelopeParams::envelope_type_t etype)
+void EnvelopeParams::init(zyn::consumer_location_t _loc)
 {
-    switch(etype)
+    switch(loc = _loc)
     {
-        case ad_global_amp_env:    ADSRinit_dB(0, 40, 127, 25); break;
-        case ad_global_freq_env:   ASRinit(64, 50, 64, 60); break;
-        case ad_global_filter_env: ADSRinit_filter(64, 40, 64, 70, 60, 64);
+        case ad_global_amp:    ADSRinit_dB(0, 40, 127, 25); break;
+        case ad_global_freq:   ASRinit(64, 50, 64, 60); break;
+        case ad_global_filter:
+        case sub_filter:
+            ADSRinit_filter(64, 40, 64, 70, 60, 64);
             break;
-        case ad_voice_amp_env:     ADSRinit_dB(0, 100, 127, 100); break;
-        case ad_voice_freq_env:    ASRinit(30, 40, 64, 60); break;
-        case ad_voice_filter_env:  ADSRinit_filter(90, 70, 40, 70, 10, 40);
+        case ad_voice_amp:     ADSRinit_dB(0, 100, 127, 100); break;
+        case ad_voice_freq:    ASRinit(30, 40, 64, 60); break;
+        case ad_voice_filter:  ADSRinit_filter(90, 70, 40, 70, 10, 40);
             break;
-        case ad_voice_fm_freq_env: ASRinit(20, 90, 40, 80); break;
-        case ad_voice_fm_amp_env:  ADSRinit(80, 90, 127, 100); break;
-        case sub_freq_env:         ASRinit(30, 50, 64, 60); break;
-        case sub_bandwidth_env:    ASRinit_bw(100, 70, 64, 60); break;
+        case ad_voice_fm_freq: ASRinit(20, 90, 40, 80); break;
+        case ad_voice_fm_amp:  ADSRinit(80, 90, 127, 100); break;
+        case sub_freq:         ASRinit(30, 50, 64, 60); break;
+        case sub_bandwidth:    ASRinit_bw(100, 70, 64, 60); break;
+        default: throw std::logic_error("Invalid envelope consumer location");
     };
-    envelope_type = etype;
 }
 
 float EnvelopeParams::getdt(char i) const

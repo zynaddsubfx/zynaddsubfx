@@ -70,18 +70,35 @@ static const rtosc::Ports _ports = {
 
 const rtosc::Ports &LFOParams::ports = _ports;
 
-LFOParams::LFOParams(const AbsTime *time_) : time(time_)
+void LFOParams::setup()
 {
-    Dfreq       = 64;
-    Dintensity  = 0;
-    Dstartphase = 0;
-    DLFOtype    = 0;
-    Drandomness = 0;
-    Ddelay      = 0;
-    Dcontinous  = 0;
-    fel  = 0;
+    switch(loc) {
+        case unspecified:
+            fel =consumer_location_type_t::unspecified;
+            break;
+        case ad_global_freq:
+        case ad_voice_freq:
+            fel = consumer_location_type_t::freq;
+            setpresettype("Plfofrequency");
+            break;
+        case ad_global_amp:
+        case ad_voice_amp:
+            fel = consumer_location_type_t::amp;
+            setpresettype("Plfoamplitude");
+            break;
+        default:
+            fel = consumer_location_type_t::filter;
+            setpresettype("Plfofilter");
+            break;
+    }
 
     defaults();
+}
+
+// TODO: reuse
+LFOParams::LFOParams(const AbsTime *time_) :
+    LFOParams(64, 0, 0, 0, 0, 0, 0, consumer_location_t::unspecified, time_)
+{
 }
 
 LFOParams::LFOParams(char Pfreq_,
@@ -91,20 +108,10 @@ LFOParams::LFOParams(char Pfreq_,
                      char Prandomness_,
                      char Pdelay_,
                      char Pcontinous_,
-                     char fel_,
-                     const AbsTime *time_) : time(time_),
+                     consumer_location_t loc,
+                     const AbsTime *time_) : loc(loc),
+                                             time(time_),
                                              last_update_timestamp(0) {
-    switch(fel_) {
-        case 0:
-            setpresettype("Plfofrequency");
-            break;
-        case 1:
-            setpresettype("Plfoamplitude");
-            break;
-        case 2:
-            setpresettype("Plfofilter");
-            break;
-    }
     Dfreq       = Pfreq_;
     Dintensity  = Pintensity_;
     Dstartphase = Pstartphase_;
@@ -112,9 +119,41 @@ LFOParams::LFOParams(char Pfreq_,
     Drandomness = Prandomness_;
     Ddelay      = Pdelay_;
     Dcontinous  = Pcontinous_;
-    fel  = fel_;
 
-    defaults();
+    setup();
+}
+
+LFOParams::LFOParams(consumer_location_t loc,
+                     const AbsTime *time_) : loc(loc),
+                                             time(time_),
+                                             last_update_timestamp(0) {
+
+    auto init =
+        [&](char Pfreq_, char Pintensity_, char Pstartphase_, char PLFOtype_,
+            char Prandomness_, char Pdelay_, char Pcontinous_)
+    {
+        Dfreq       = Pfreq_;
+        Dintensity  = Pintensity_;
+        Dstartphase = Pstartphase_;
+        DLFOtype    = PLFOtype_;
+        Drandomness = Prandomness_;
+        Ddelay      = Pdelay_;
+        Dcontinous  = Pcontinous_;
+    };
+
+    switch(loc)
+    {
+        case ad_global_amp:    init(80, 0, 64, 0, 0, 0, 0); break;
+        case ad_global_freq:   init(70, 0, 64, 0, 0, 0, 0); break;
+        case ad_global_filter: init(80, 0, 64, 0, 0, 0, 0);
+            break;
+        case ad_voice_amp:     init(90, 32, 64, 0, 0, 30, 0); break;
+        case ad_voice_freq:    init(50, 40,  0, 0, 0,  0, 0); break;
+        case ad_voice_filter:  init(50, 20, 64, 0, 0,  0, 0); break;
+        default: throw std::logic_error("Invalid LFO consumer location");
+    }
+
+    setup();
 }
 
 LFOParams::~LFOParams()

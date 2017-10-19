@@ -1403,7 +1403,7 @@ void OscilGen::getfromXML(XMLwrapper& xml)
 
 
     if(xml.enterbranch("HARMONICS")) {
-        Phmag[0]   = 127; // TODO: correct?
+        Phmag[0]   = 64;
         Phphase[0] = 64;
         for(int n = 0; n < MAX_AD_HARMONICS; ++n) {
             if(xml.enterbranch("HARMONIC", n + 1) == 0)

@@ -46,7 +46,7 @@
 
 #define rEffParCommon(pname, rshort, rdoc, idx, ...) \
 {STRINGIFY(pname) "::i", rProp(parameter) rLinear(0,127) \
-    rShort(rshort) rDoc(rdoc), \
+    rShort(rshort) DOC(__VA_ARGS__, rdoc), \
     0, \
     [](const char *msg, rtosc::RtData &d) \
     { \

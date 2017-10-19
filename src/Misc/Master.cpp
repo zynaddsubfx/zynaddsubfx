@@ -49,7 +49,7 @@ namespace zyn {
 
 static const Ports sysefxPort =
 {
-    {"part#" STRINGIFY(NUM_MIDI_PARTS) "::i", rProp(parameter)
+    {"part#" STRINGIFY(NUM_MIDI_PARTS) "::i", rProp(parameter) rDefault([0...])
         rDoc("gain on part to sysefx routing"), 0,
         [](const char *m, RtData&d)
         {
@@ -85,8 +85,8 @@ static const Ports sysefxPort =
 
 static const Ports sysefsendto =
 {
-    {"to#" STRINGIFY(NUM_SYS_EFX) "::i",
-        rProp(parameter) rDoc("sysefx to sysefx routing gain"), 0, [](const char *m, RtData&d)
+    {"to#" STRINGIFY(NUM_SYS_EFX) "::i", rProp(parameter)  rDefault([0...])
+        rDoc("sysefx to sysefx routing gain"), 0, [](const char *m, RtData&d)
         {
             //same workaround as before
             //go backto the '/'

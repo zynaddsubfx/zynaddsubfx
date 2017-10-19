@@ -206,6 +206,7 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
     if(nefx == _nefx && efx != NULL)
         return;
     nefx = _nefx;
+    preset = 0;
     memset(efxoutl, 0, synth.bufferbytes);
     memset(efxoutr, 0, synth.bufferbytes);
     memory.dealloc(efx);

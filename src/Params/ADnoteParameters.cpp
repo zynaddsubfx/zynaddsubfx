@@ -371,7 +371,8 @@ static const Ports adPorts = {//XXX 16 should not be hard coded
     rArrayPaste,
     rRecurs(VoicePar, NUM_VOICES),
     {"VoicePar#" STRINGIFY(NUM_VOICES) "/Enabled::T:F",
-     rProp(parameter) rShort("enable") rDoc("Voice Enable"),
+     rProp(parameter) rShort("enable") rDoc("Voice Enable")
+     rDefault([true false false ...]),
      NULL, rArrayTCbMember(VoicePar, Enabled)},
     rRecur(GlobalPar, "Adnote Parameters"),
 };
@@ -401,17 +402,17 @@ ADnoteGlobalParam::ADnoteGlobalParam(const AbsTime *time_) :
         time(time_), last_update_timestamp(0)
 {
     FreqEnvelope = new EnvelopeParams(0, 0, time_);
-    FreqEnvelope->init(EnvelopeParams::ad_global_freq_env);
-    FreqLfo = new LFOParams(70, 0, 64, 0, 0, 0, 0, 0, time_);
+    FreqEnvelope->init(ad_global_freq);
+    FreqLfo = new LFOParams(ad_global_freq, time_);
 
     AmpEnvelope = new EnvelopeParams(64, 1, time_);
-    AmpEnvelope->init(EnvelopeParams::ad_global_amp_env);
-    AmpLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 1, time_);
+    AmpEnvelope->init(ad_global_amp);
+    AmpLfo = new LFOParams(ad_global_amp, time_);
 
-    GlobalFilter   = new FilterParams(2, 94, 40, time_);
+    GlobalFilter   = new FilterParams(ad_global_filter, time_);
     FilterEnvelope = new EnvelopeParams(0, 1, time_);
-    FilterEnvelope->init(EnvelopeParams::ad_global_filter_env);
-    FilterLfo = new LFOParams(80, 0, 64, 0, 0, 0, 0, 2, time_);
+    FilterEnvelope->init(ad_global_filter);
+    FilterLfo = new LFOParams(ad_global_filter, time_);
     Reson     = new Resonance();
 }
 
@@ -557,22 +558,22 @@ void ADnoteVoiceParam::enable(const SYNTH_T &synth, FFTwrapper *fft,
     FMSmp    = new OscilGen(synth, fft, NULL);
 
     AmpEnvelope = new EnvelopeParams(64, 1, time);
-    AmpEnvelope->init(EnvelopeParams::ad_voice_amp_env);
-    AmpLfo = new LFOParams(90, 32, 64, 0, 0, 30, 0, 1, time);
+    AmpEnvelope->init(ad_voice_amp);
+    AmpLfo = new LFOParams(ad_voice_amp, time);
 
     FreqEnvelope = new EnvelopeParams(0, 0, time);
-    FreqEnvelope->init(EnvelopeParams::ad_voice_freq_env);
-    FreqLfo = new LFOParams(50, 40, 0, 0, 0, 0, 0, 0, time);
+    FreqEnvelope->init(ad_voice_freq);
+    FreqLfo = new LFOParams(ad_voice_freq, time);
 
-    VoiceFilter    = new FilterParams(2, 50, 60, time);
+    VoiceFilter    = new FilterParams(ad_voice_filter, time);
     FilterEnvelope = new EnvelopeParams(0, 0, time);
-    FilterEnvelope->init(EnvelopeParams::ad_voice_filter_env);
-    FilterLfo = new LFOParams(50, 20, 64, 0, 0, 0, 0, 2, time);
+    FilterEnvelope->init(ad_voice_filter);
+    FilterLfo = new LFOParams(ad_voice_filter, time);
 
     FMFreqEnvelope = new EnvelopeParams(0, 0, time);
-    FMFreqEnvelope->init(EnvelopeParams::ad_voice_fm_freq_env);
+    FMFreqEnvelope->init(ad_voice_fm_freq);
     FMAmpEnvelope = new EnvelopeParams(64, 1, time);
-    FMAmpEnvelope->init(EnvelopeParams::ad_voice_fm_amp_env);
+    FMAmpEnvelope->init(ad_voice_fm_amp);
 }
 
 /*

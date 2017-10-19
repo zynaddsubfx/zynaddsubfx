@@ -64,15 +64,17 @@ const rtosc::Ports FilterParams::ports = {
     rPaste,
     rArrayPaste,
     rOption(Pcategory,          rShort("class"),
-            rOptions(analog, formant, st.var.), "Class of filter"),
+            rOptions(analog, formant, st.var.), rDefault(analog),
+            "Class of filter"),
     rOption(Ptype,              rShort("type"),
             rOptions(LP1, HP1, LP2, HP2, BP, notch, peak,
-                l.shelf, h.shelf), "Filter Type"),
+                l.shelf, h.shelf), rDefault(2), "Filter Type"),
     rParamI(Pstages,            rShort("stages"),
             rLinear(0,5),  "Filter Stages"),
     rParamF(baseq,               rShort("q"),      rUnit(none),  rLog(0.1, 1000),
             "Quality Factor (resonance/bandwidth)"),
-    rParamF(basefreq,           rShort("cutoff"),  rUnit(Hz),    rLog(31.25, 32000),
+    rParamF(basefreq,           rShort("cutoff"),
+            rUnit(Hz),    rLog(31.25, 32000),
             "Base cutoff frequency"),
     rParamF(freqtracking,       rShort("f.track"), rUnit(%),     rLinear(-100, 100),
             "Frequency Tracking amount"),
@@ -291,23 +293,51 @@ const rtosc::Ports FilterParams::ports = {
 
 
 
-FilterParams::FilterParams(const AbsTime *time_)
-    :FilterParams(0,64,64, time_)
-{
-}
-FilterParams::FilterParams(unsigned char Ptype_,
-                           unsigned char Pfreq_,
-                           unsigned char Pq_,
-                           const AbsTime *time_):
-        time(time_), last_update_timestamp(0)
+void FilterParams::setup()
 {
     setpresettype("Pfilter");
-    Dtype = Ptype_;
-    Dfreq = Pfreq_;
-    Dq    = Pq_;
 
     changed = false;
     defaults();
+}
+
+FilterParams::FilterParams(const AbsTime *time_)
+    :FilterParams(0,64,64, unspecified, time_)
+{
+}
+
+FilterParams::FilterParams(unsigned char Ptype_,
+                           unsigned char Pfreq_,
+                           unsigned char Pq_,
+                           consumer_location_t loc,
+                           const AbsTime *time_):
+        loc(loc), time(time_), last_update_timestamp(0),
+        Dtype(Ptype_), Dfreq(Pfreq_), Dq(Pq_)
+{
+    setup();
+}
+
+FilterParams::FilterParams(consumer_location_t loc,
+                           const AbsTime *time_):
+        loc(loc), time(time_), last_update_timestamp(0)
+{
+    auto init =
+        [&](unsigned char Ptype_, unsigned char Pfreq_, unsigned char Pq_)
+    {
+        Dtype = Ptype_;
+        Dfreq = Pfreq_;
+        Dq    = Pq_;
+    };
+
+    switch(loc)
+    {
+        case ad_global_filter:  init(2, 94, 40); break;
+        case ad_voice_filter:   init(2, 50, 60); break;
+        case sub_filter:        init(2, 80, 40); break;
+        default: throw std::logic_error("Invalid filter consumer location");
+    }
+
+    setup();
 }
 
 FilterParams::~FilterParams()

@@ -62,13 +62,14 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
     lfofreqrnd = powf(lfopars.Pfreqrand / 127.0f, 2.0f) * 4.0f;
 
     switch(lfopars.fel) {
-        case 1:
+        case consumer_location_type_t::amp:
             lfointensity = lfopars.Pintensity / 127.0f;
             break;
-        case 2:
+        case consumer_location_type_t::filter:
             lfointensity = lfopars.Pintensity / 127.0f * 4.0f;
             break; //in octave
-        default:
+        case consumer_location_type_t::freq:
+        case consumer_location_type_t::unspecified:
             lfointensity = powf(2, lfopars.Pintensity / 127.0f * 11.0f) - 1.0f; //in centi
             phase -= 0.25f; //chance the starting phase
             break;
@@ -133,13 +134,14 @@ float LFO::lfoout()
         phaseInc = fabs(lfofreq) * dt_;
 
         switch(lfopars_.fel) {
-            case 1:
+            case consumer_location_type_t::amp:
                 lfointensity = lfopars_.Pintensity / 127.0f;
                 break;
-            case 2:
+            case consumer_location_type_t::filter:
                 lfointensity = lfopars_.Pintensity / 127.0f * 4.0f;
                 break; //in octave
-            default:
+            case consumer_location_type_t::freq:
+            case consumer_location_type_t::unspecified:
                 lfointensity = powf(2, lfopars_.Pintensity / 127.0f * 11.0f) - 1.0f; //in centi
                 //x -= 0.25f; //chance the starting phase
                 break;

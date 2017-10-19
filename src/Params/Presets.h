@@ -43,6 +43,35 @@ class Presets
         //virtual void defaults() = 0;
 };
 
+/**
+    Location where a "consumer" in zyn is located, where
+    consumers are envelopes, LFOs and filters.
+    Note that the AD synth global consumers correspond to those of PAD synth
+ */
+enum consumer_location_t
+{
+    ad_global_amp,
+    ad_global_freq,
+    ad_global_filter,
+
+    ad_voice_amp,
+    ad_voice_freq,
+    ad_voice_filter,
+    ad_voice_fm_freq,
+    ad_voice_fm_amp,
+
+    sub_freq,
+    sub_filter,
+    sub_bandwidth,
+
+    unspecified
+};
+
+enum class consumer_location_type_t
+{
+    freq, amp, filter, unspecified
+};
+
 }
 
 #endif

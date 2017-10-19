@@ -23,28 +23,13 @@ namespace zyn {
 class EnvelopeParams:public Presets
 {
     public:
-        enum envelope_type_t
-        {
-            ad_global_amp_env,     // ADSRinit_dB(0, 40, 127, 25);
-            ad_global_freq_env,    // ASRinit(64, 50, 64, 60);
-            ad_global_filter_env,  // ADSRinit_filter(64, 40, 64, 70, 60, 64)
-
-            ad_voice_amp_env,      // ADSRinit_dB(0, 100, 127, 100);
-            ad_voice_freq_env,     // ASRinit(30, 40, 64, 60);
-            ad_voice_filter_env,   // ADSRinit_filter(90, 70, 40, 70, 10, 40);
-            ad_voice_fm_freq_env,  // ASRinit(20, 90, 40, 80);
-            ad_voice_fm_amp_env,   // ADSRinit(80, 90, 127, 100)
-            sub_freq_env,          // ASRinit(30, 50, 64, 60);
-            sub_bandwidth_env,     // ASRinit_bw(100, 70, 64, 60)
-        };
-
         EnvelopeParams(unsigned char Penvstretch_=64,
                        unsigned char Pforcedrelease_=0,
                        const AbsTime *time_ = nullptr);
         ~EnvelopeParams();
         void paste(const EnvelopeParams &ep);
 
-        void init(envelope_type_t etype);
+        void init(consumer_location_t loc);
         void converttofree();
 
         void add2XML(XMLwrapper& xml);
@@ -55,9 +40,7 @@ class EnvelopeParams:public Presets
         static float dt(char val);
         static char inv_dt(float val);
 
-        //! Defines where it is used and its default settings.
-	//! Corresponds to envelope_type_t
-        int envelope_type;
+        int loc; //!< consumer location
 
         /* MIDI Parameters */
         unsigned char Pfreemode; //1 for free mode, 0 otherwise

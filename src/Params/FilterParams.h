@@ -27,6 +27,9 @@ class FilterParams:public PresetsArray
         FilterParams(unsigned char Ptype_,
                      unsigned char Pfreq,
                      unsigned char Pq_,
+                     consumer_location_t loc,
+                     const AbsTime *time_ = nullptr);
+        FilterParams(consumer_location_t loc,
                      const AbsTime *time_ = nullptr);
         ~FilterParams();
 
@@ -89,7 +92,7 @@ class FilterParams:public PresetsArray
 
         void defaults(int n);
 
-
+        int loc; //!< consumer location
         bool changed;
 
         const AbsTime *time;
@@ -98,6 +101,8 @@ class FilterParams:public PresetsArray
 
         static const rtosc::Ports ports;
     private:
+        // common
+        void setup();
 
         //stored default parameters
         unsigned char Dtype;
