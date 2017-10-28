@@ -131,11 +131,19 @@ Saving
 This is where the nice pristine hands off approach sadly comes to an end.
 There simply isn't an effective means of capturing all parameters without
 taking a large amount of time.
+
 In order to permit the serialization of parameter objects, the backend is 
-partially 'frozen'.
-This essentially prevents the backend from processing most messages from the
-user interface and when this occurs the parameters which are too be serialized
+partially 'frozen'. The master has two kinds of variables:
+ - The realtime variables which are only ever mutable through the RT thread
+ - The non realtime variables which are only ever mutable through
+   * osc dispatch within Master
+   * MiddleWare (using struct NonRtObjStore)
+Partially means that only the second kind of variable is ever being saved.
+Since the freezing message is the last one the middleware sends, this
+essentially prevents the backend from processing most messages from the
+user interface and when this occurs the parameters which are to be serialized
 can be guaranteed to be constant and thus safe to access across threads.
+
 This class of read-only-operation can be seen as used in parameter copy/paste
 operations and in saving full instances as well as instruments.
 

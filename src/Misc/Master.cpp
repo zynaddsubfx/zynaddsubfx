@@ -750,8 +750,8 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     mastercb_ptr = 0;
 }
 
-bool Master::applyOscEventWith(const char *msg, float *outl, float *outr,
-                               bool offline, bool nio, DataObj& d, int msg_id)
+bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
+                           bool offline, bool nio, DataObj& d, int msg_id)
 {
     if(!strcmp(msg, "/load-master")) {
         Master *this_master = this;
@@ -824,14 +824,11 @@ bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
     memset(loc_buf, 0, sizeof(loc_buf));
     d.matches = 0;
 
-    return applyOscEventWith(msg, outl, outr, offline, nio, d, msg_id);
+    return applyOscEvent(msg, outl, outr, offline, nio, d, msg_id);
 }
 
 bool Master::applyOscEvent(const char *msg, bool nio, int msg_id)
 {
-    // TODO: the following comment is probably wrong
-    // "/load-master" can not be handled, since no out buffers are specified
-//    assert(strcmp(msg, "/load-master"));
     return applyOscEvent(msg, NULL, NULL, true, nio, msg_id);
 }
 
@@ -1098,7 +1095,7 @@ int msg_id=0;
 
 bool Master::runOSC(float *outl, float *outr, bool offline)
 {
-    //Handle user events TODO move me to a proper location
+    //Handle user events
     char loc_buf[1024];
     DataObj d{loc_buf, 1024, this, bToU};
     memset(loc_buf, 0, sizeof(loc_buf));
@@ -1107,7 +1104,7 @@ bool Master::runOSC(float *outl, float *outr, bool offline)
     for(; uToB && uToB->hasNext() && events < 100; ++msg_id, ++events)
     {
         const char *msg = uToB->read();
-        if(! applyOscEventWith(msg, outl, outr, offline, true, d, msg_id) )
+        if(! applyOscEvent(msg, outl, outr, offline, true, d, msg_id) )
             return false;
     }
 
@@ -1659,7 +1656,7 @@ char* Master::getXMLData()
     return xml.getXMLdata();
 }
 
-// this is being called as a "read only op" directly by MiddleWare
+// this is being called as a "read only op" directly by MiddleWare or the UI;
 // note that the Master itself is frozen
 int Master::saveOSC(const char *filename, master_dispatcher_t* dispatcher,
                     Master* master2)
@@ -1674,14 +1671,25 @@ int Master::saveOSC(const char *filename, master_dispatcher_t* dispatcher,
     dispatcher->updateMaster(master2);
 
     int rval = master2->loadOSCFromStr(savefile.c_str(), dispatcher);
-    sleep(3); // wait until savefile has been loaded into master2
-              // TODO: how to find out when waited enough?
+
+    // The above call is in this thread (i.e. called by MiddleWare or UI), but
+    // it sends messages to master2 in order to load the values
+    // We need to wait until savefile has been loaded into master2
+    int i;
+    for(i = 0; i < 20 && master2->uToB->hasNext(); ++i)
+        usleep(50000);
+    if(i >= 20) // >= 1 second?
+    {
+        // Master failed to fetch its messages
+        rval = -1;
+    }
+    printf("Saved in less than %d ms.\n", 50*i);
 
     dispatcher->updateMaster(this);
 
     if(rval < 0)
     {
-        std::cerr << "invalid savefile!" << std::endl;
+        std::cerr << "invalid savefile (or a backend error)!" << std::endl;
         std::cerr << "complete savefile:" << std::endl;
         std::cerr << savefile << std::endl;
         std::cerr << "first entry that could not be parsed:" << std::endl;
@@ -1721,6 +1729,7 @@ int Master::saveOSC(const char *filename, master_dispatcher_t* dispatcher,
             std::ofstream tmp1("tmp1.txt"), tmp2("tmp2.txt");
             tmp1 << xml;
             tmp2 << xml2;
+            rval = -1;
         }
 
         free(xml);

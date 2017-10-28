@@ -416,7 +416,7 @@ class mw_dispatcher_t : public master_dispatcher_t
     {
         mw->transmitMsg(msg);
         return true; // we cannot yet say if the port matched
-                     // we will query the Master after everything wil be done
+                     // we will query the Master after everything will be done
     }
     void vUpdateMaster(Master* m) { mw->switchMaster(m); }
 
@@ -449,7 +449,8 @@ public:
 
     void savePart(int npart, const char *filename)
     {
-        //Copy is needed as filename WILL get trashed during the rest of the run
+        // Due to a possible bug in ThreadLink, filename may get trashed when
+        // the read-only operation writes to the buffer again. Copy to string:
         std::string fname = filename;
         //printf("saving part(%d,'%s')\n", npart, filename);
         doReadOnlyOp([this,fname,npart](){
@@ -807,11 +808,19 @@ class MwDataObj:public rtosc::RtData
                 reply(buffer);
             }
         }
+        //! In the case of MiddleWare, reply always means sending back to
+        //! the front-end. If a message from the back-end gets "replied", this
+        //! only means that it has been sent from the front-end via MiddleWare
+        //! to the backend, so the reply has to go to the front-end.
+        //! The back-end itself usually doesn't ask things, so it does not
+        //! get replies.
         virtual void reply(const char *msg) override{
             mwi->sendToCurrentRemote(msg);
-        };
+        }
         //virtual void broadcast(const char *path, const char *args, ...){(void)path;(void)args;};
-        //virtual void broadcast(const char *msg){(void)msg;};
+        virtual void broadcast(const char *msg) override {
+            mwi->broadcastToRemote(msg);
+        }
 
         virtual void chain(const char *msg) override
         {
@@ -1135,6 +1144,68 @@ const rtosc::Ports bankPorts = {
 #define STRINGIFY(a) STRINGIFY2(a)
 #endif
 
+template<bool osc_format>
+void load_cb(const char *msg, RtData &d)
+{
+    MiddleWareImpl &impl = *((MiddleWareImpl*)d.obj);
+    const char *file = rtosc_argument(msg, 0).s;
+    uint64_t request_time = 0;
+    if(rtosc_narguments(msg) > 1)
+        request_time = rtosc_argument(msg, 1).t;
+
+    impl.loadMaster(file, osc_format);
+    d.broadcast("/damage", "s", "/");
+    d.broadcast(d.loc, "stT", file, request_time);
+}
+
+void save_cb(const char *msg, RtData &d,
+             std::function<int(MiddleWareImpl&, const std::string&)>& cb)
+{
+    MiddleWareImpl &impl = *((MiddleWareImpl*)d.obj);
+    // Due to a possible bug in ThreadLink, filename may get trashed when
+    // the read-only operation writes to the buffer again. Copy to string:
+    const string file = rtosc_argument(msg, 0).s;
+    uint64_t request_time = 0;
+    if(rtosc_narguments(msg) > 1)
+        request_time = rtosc_argument(msg, 1).t;
+
+    int res = cb(impl, file); // the actual saving
+
+    d.broadcast(d.loc, (res == 0) ? "stT" : "stF",
+                file.c_str(), request_time);
+}
+
+int save_osc(MiddleWareImpl& impl, const std::string& file)
+{
+    mw_dispatcher_t dispatcher(impl.parent);
+
+    // allocate an "empty" master
+    // after the savefile will have been saved, it will be loaded into this
+    // dummy master, and then the two masters will be compared
+    zyn::Config config;
+    zyn::SYNTH_T* synth = new zyn::SYNTH_T;
+    synth->buffersize = impl.master->synth.buffersize;
+    synth->samplerate = impl.master->synth.samplerate;
+    synth->alias();
+    zyn::Master master2(*synth, &config);
+    impl.master->copyMasterCbTo(&master2);
+    master2.frozenState = true;
+
+    int res;
+    impl.doReadOnlyOp([&impl,file,&dispatcher,&master2,&res](){
+            res = impl.master->saveOSC(file.c_str(), &dispatcher,
+                                       &master2);});
+    return res;
+}
+
+int save_xml(MiddleWareImpl& impl, const std::string& file)
+{
+    int res;
+    impl.doReadOnlyOp([&impl,file, &res](){
+            res = impl.master->saveXML(file.c_str());});
+    return res;
+}
+
 /*
  * BASE/part#/kititem#
  * BASE/part#/kit#/adpars/voice#/oscil/\*
@@ -1243,38 +1314,8 @@ static rtosc::Ports middwareSnoopPorts = {
         const char *file = rtosc_argument(msg, 0).s;
         impl.loadKbm(file, d);
         rEnd},
-    {"save_xmz:s", 0, 0,
-        rBegin;
-        const char *file = rtosc_argument(msg, 0).s;
-        //Copy is needed as filename WILL get trashed during the rest of the run
-        //^TODO: what does this comment mean? (copy & paste error?)
-        impl.doReadOnlyOp([&impl,file](){
-                int res = impl.master->saveXML(file);
-                (void)res;});
-        rEnd},
-    {"save_osc:s", 0, 0,
-        rBegin;
-        const char *file = rtosc_argument(msg, 0).s;
-        //Copy is needed as filename WILL get trashed during the rest of the run
-        //^TODO: what does this comment mean? (copy & paste error?)
-        mw_dispatcher_t dispatcher(impl.parent);
-
-        // allocate an "empty" master
-        // after the savefile will have been saved, it will be loaded into this
-        // dummy master, and then the two masters will be compared
-        zyn::Config config;
-        zyn::SYNTH_T* synth = new zyn::SYNTH_T;
-        synth->buffersize = impl.master->synth.buffersize;
-        synth->samplerate = impl.master->synth.samplerate;
-        synth->alias();
-        zyn::Master master2(*synth, &config);
-        impl.master->copyMasterCbTo(&master2);
-        master2.frozenState = true;
-
-        impl.doReadOnlyOp([&impl,file,&dispatcher,&master2](){
-                int res = impl.master->saveOSC(file, &dispatcher, &master2);
-                (void)res;});
-        rEnd},
+    {"save_xmz:s:st", 0, 0, save_cb<save_xml>},
+    {"save_osc:s:st", 0, 0, save_cb<save_osc>},
     {"save_xiz:is", 0, 0,
         rBegin;
         const int   part_id = rtosc_argument(msg,0).i;
@@ -1357,18 +1398,8 @@ static rtosc::Ports middwareSnoopPorts = {
         const string save_loc  = save_dir + "/" + save_file;
         remove(save_loc.c_str());
         rEnd},
-    {"load_xmz:s", 0, 0,
-        rBegin;
-        const char *file = rtosc_argument(msg, 0).s;
-        impl.loadMaster(file);
-        d.reply("/damage", "s", "/");
-        rEnd},
-    {"load_osc:s", 0, 0,
-        rBegin;
-        const char *file = rtosc_argument(msg, 0).s;
-        impl.loadMaster(file, true);
-        d.reply("/damage", "s", "/");
-        rEnd},
+    {"load_xmz:s:st", 0, 0, load_cb<false>},
+    {"load_osc:s:st", 0, 0, load_cb<true>},
     {"reset_master:", 0, 0,
         rBegin;
         impl.loadMaster(NULL);

@@ -1,0 +1,7 @@
+* get position of bundle in a path
+* fix sleep => wait correctly
+* use b (or #?) for bundles, not a
+test:
+* zyn fx (all presets)
+* rtosc arg val maths
+fix all new todos
