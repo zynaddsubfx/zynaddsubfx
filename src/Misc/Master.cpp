@@ -1656,7 +1656,7 @@ char* Master::getXMLData()
     return xml.getXMLdata();
 }
 
-// this is being called as a "read only op" directly by MiddleWare or the UI;
+// this is being called as a "read only op" directly by the MiddleWare thread;
 // note that the Master itself is frozen
 int Master::saveOSC(const char *filename, master_dispatcher_t* dispatcher,
                     Master* master2)
@@ -1672,7 +1672,7 @@ int Master::saveOSC(const char *filename, master_dispatcher_t* dispatcher,
 
     int rval = master2->loadOSCFromStr(savefile.c_str(), dispatcher);
 
-    // The above call is in this thread (i.e. called by MiddleWare or UI), but
+    // The above call is done by this thread (i.e. the MiddleWare thread), but
     // it sends messages to master2 in order to load the values
     // We need to wait until savefile has been loaded into master2
     int i;

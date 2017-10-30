@@ -2,6 +2,7 @@
 #include <thread>
 #include <mutex>
 #include <iostream>
+#include <ctime>
 #include <unistd.h>
 #include <rtosc/thread-link.h>
 #include <rtosc/rtosc-time.h>
@@ -68,8 +69,10 @@ class SaveOSCTest
         std::mutex cb_mutex;
         using mutex_guard = std::lock_guard<std::mutex>;
 
-        bool timedOperation(const char* osc_path, const char* arg1, int tries)
+        bool timeOutOperation(const char* osc_path, const char* arg1, int tries)
         {
+            clock_t begin = clock(); // just for statistics
+
             bool ok = false;
             rtosc_arg_val_t start_time;
             rtosc_arg_val_current_time(&start_time);
@@ -90,10 +93,17 @@ class SaveOSCTest
                 usleep(1000);
             }
 
-            fprintf(stderr, "Action %s terminated after %d tries (%s)\n",
-                    osc_path, attempt,
+            // statistics:
+            clock_t end = clock();
+            double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+
+            fprintf(stderr, "Action %s finished after %lf ms,\n"
+                            "    with a timeout of <%d ms (%s)\n",
+                    osc_path, elapsed_secs,
+                    attempt+1,
                     attempt == tries ? "timeout"
                                      : ok ? "ok" : "failure");
+
             return ok && (attempt != tries);
         }
 
@@ -129,13 +139,13 @@ class SaveOSCTest
             int rval;
 
             fputs("Loading XML file...\n", stderr);
-            if(timedOperation("/load_xmz", filename, 1000))
+            if(timeOutOperation("/load_xmz", filename, 1000))
             {
                 fputs("Saving OSC file now...\n", stderr);
                 // There is actually no need to wait for /save_osc, since
                 // we're in the "UI" thread which does the saving itself,
                 // but this gives an example how it works with remote fron-ends
-                rval = timedOperation("/save_osc", filename, 1000)
+                rval = timeOutOperation("/save_osc", filename, 1000)
                      ? EXIT_SUCCESS
                      : EXIT_FAILURE;
             }

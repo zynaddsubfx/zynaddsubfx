@@ -584,6 +584,37 @@ public:
         parent->transmitMsg("/load-master", "b", sizeof(Master*), &m);
     }
 
+    int saveMaster(const char *filename, bool osc_format = false)
+    {
+        int res;
+        if(osc_format)
+        {
+            mw_dispatcher_t dispatcher(parent);
+
+            // allocate an "empty" master
+            // after the savefile will have been saved, it will be loaded into this
+            // dummy master, and then the two masters will be compared
+            zyn::Config config;
+            zyn::SYNTH_T* synth = new zyn::SYNTH_T;
+            synth->buffersize = master->synth.buffersize;
+            synth->samplerate = master->synth.samplerate;
+            synth->alias();
+            zyn::Master master2(*synth, &config);
+            master->copyMasterCbTo(&master2);
+            master2.frozenState = true;
+
+            doReadOnlyOp([this,filename,&dispatcher,&master2,&res](){
+                             res = master->saveOSC(filename, &dispatcher,
+                                                   &master2);});
+        }
+        else // xml format
+        {
+            doReadOnlyOp([this,filename,&res](){
+                             res = master->saveXML(filename);});
+        }
+        return res;
+    }
+
     void loadXsz(const char *filename, rtosc::RtData &d)
     {
         Microtonal *micro = new Microtonal(master->gzip_compression);
@@ -808,16 +839,16 @@ class MwDataObj:public rtosc::RtData
                 reply(buffer);
             }
         }
-        //! In the case of MiddleWare, reply always means sending back to
+        //! In the case of MiddleWare, "reply" always means sending back to
         //! the front-end. If a message from the back-end gets "replied", this
-        //! only means that it has been sent from the front-end via MiddleWare
-        //! to the backend, so the reply has to go to the front-end.
-        //! The back-end itself usually doesn't ask things, so it does not
-        //! get replies.
+        //! only means that its counterpart has been sent from the front-end via
+        //! MiddleWare to the backend, so the reply has to go back to the
+        //! front-end. The back-end itself usually doesn't ask things, so it
+        //! will not get replies.
         virtual void reply(const char *msg) override{
             mwi->sendToCurrentRemote(msg);
         }
-        //virtual void broadcast(const char *path, const char *args, ...){(void)path;(void)args;};
+
         virtual void broadcast(const char *msg) override {
             mwi->broadcastToRemote(msg);
         }
@@ -1144,6 +1175,9 @@ const rtosc::Ports bankPorts = {
 #define STRINGIFY(a) STRINGIFY2(a)
 #endif
 
+/*
+ * common snoop port callbacks
+ */
 template<bool osc_format>
 void load_cb(const char *msg, RtData &d)
 {
@@ -1158,8 +1192,8 @@ void load_cb(const char *msg, RtData &d)
     d.broadcast(d.loc, "stT", file, request_time);
 }
 
-void save_cb(const char *msg, RtData &d,
-             std::function<int(MiddleWareImpl&, const std::string&)>& cb)
+template<bool osc_format>
+void save_cb(const char *msg, RtData &d)
 {
     MiddleWareImpl &impl = *((MiddleWareImpl*)d.obj);
     // Due to a possible bug in ThreadLink, filename may get trashed when
@@ -1169,41 +1203,9 @@ void save_cb(const char *msg, RtData &d,
     if(rtosc_narguments(msg) > 1)
         request_time = rtosc_argument(msg, 1).t;
 
-    int res = cb(impl, file); // the actual saving
-
+    int res = impl.saveMaster(file.c_str(), osc_format);
     d.broadcast(d.loc, (res == 0) ? "stT" : "stF",
                 file.c_str(), request_time);
-}
-
-int save_osc(MiddleWareImpl& impl, const std::string& file)
-{
-    mw_dispatcher_t dispatcher(impl.parent);
-
-    // allocate an "empty" master
-    // after the savefile will have been saved, it will be loaded into this
-    // dummy master, and then the two masters will be compared
-    zyn::Config config;
-    zyn::SYNTH_T* synth = new zyn::SYNTH_T;
-    synth->buffersize = impl.master->synth.buffersize;
-    synth->samplerate = impl.master->synth.samplerate;
-    synth->alias();
-    zyn::Master master2(*synth, &config);
-    impl.master->copyMasterCbTo(&master2);
-    master2.frozenState = true;
-
-    int res;
-    impl.doReadOnlyOp([&impl,file,&dispatcher,&master2,&res](){
-            res = impl.master->saveOSC(file.c_str(), &dispatcher,
-                                       &master2);});
-    return res;
-}
-
-int save_xml(MiddleWareImpl& impl, const std::string& file)
-{
-    int res;
-    impl.doReadOnlyOp([&impl,file, &res](){
-            res = impl.master->saveXML(file.c_str());});
-    return res;
 }
 
 /*
@@ -1314,8 +1316,8 @@ static rtosc::Ports middwareSnoopPorts = {
         const char *file = rtosc_argument(msg, 0).s;
         impl.loadKbm(file, d);
         rEnd},
-    {"save_xmz:s:st", 0, 0, save_cb<save_xml>},
-    {"save_osc:s:st", 0, 0, save_cb<save_osc>},
+    {"save_xmz:s:st", 0, 0, save_cb<false>},
+    {"save_osc:s:st", 0, 0, save_cb<true>},
     {"save_xiz:is", 0, 0,
         rBegin;
         const int   part_id = rtosc_argument(msg,0).i;

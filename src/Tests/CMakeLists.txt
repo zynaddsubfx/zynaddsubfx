@@ -65,7 +65,7 @@ add_executable(ins-test InstrumentStats.cpp)
 target_link_libraries(ins-test ${test_lib} rt)
 
 add_executable(save-osc SaveOSC.cpp)
-target_link_libraries(save-osc rtosc
+target_link_libraries(save-osc
                       zynaddsubfx_core zynaddsubfx_nio
                       zynaddsubfx_gui_bridge
                       ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
