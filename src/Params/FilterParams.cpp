@@ -36,8 +36,10 @@ constexpr int sizeof_pvowels = sizeof(FilterParams::Pvowels);
 
 static const rtosc::Ports subsubports = {
     rParamZyn(freq, rShort("f.freq"), "Formant frequency"),
-    rParamZyn(amp,  rShort("f.str"),  "Strength of formant"),
-    rParamZyn(q,    rShort("f.q"),    "The formant's quality factor, also known as resonance bandwidth or Q for short"),
+    rParamZyn(amp,  rShort("f.str"),  rDefault(127), "Strength of formant"),
+    rParamZyn(q,    rShort("f.q"),    rDefault(64),
+              "The formant's quality factor, also known as "
+              "resonance bandwidth or Q for short"),
 };
 #undef rObject
 
@@ -68,32 +70,46 @@ const rtosc::Ports FilterParams::ports = {
             "Class of filter"),
     rOption(Ptype,              rShort("type"),
             rOptions(LP1, HP1, LP2, HP2, BP, notch, peak,
-                l.shelf, h.shelf), rDefault(2), "Filter Type"),
+                l.shelf, h.shelf), rDefault(LP2), "Filter Type"),
     rParamI(Pstages,            rShort("stages"),
-            rLinear(0,5),  "Filter Stages"),
+            rLinear(0,5), rDefault(0), "Filter Stages"),
     rParamF(baseq,               rShort("q"),      rUnit(none),  rLog(0.1, 1000),
+            rDefaultDepends(loc),
+            rPreset(ad_global_filter, 0x1.1592acp+0),
+            rPreset(ad_voice_filter, 0x1.e2f3ap+1),
+            rPreset(sub_filter, 0x1.1592acp+0),
             "Quality Factor (resonance/bandwidth)"),
     rParamF(basefreq,           rShort("cutoff"),
             rUnit(Hz),    rLog(31.25, 32000),
+            rDefaultDepends(loc),
+            rPreset(ad_global_filter, 0x1.3d434p+12),
+            rPreset(ad_voice_filter, 0x1.d48ab6p+8),
+            rPreset(sub_filter, 0x1.294d3ep+11),
             "Base cutoff frequency"),
-    rParamF(freqtracking,       rShort("f.track"), rUnit(%),     rLinear(-100, 100),
+    rParamF(freqtracking,       rShort("f.track"), rUnit(%),
+            rLinear(-100, 100), rDefault(0.0f),
             "Frequency Tracking amount"),
-    rParamF(gain,               rShort("gain"),    rUnit(dB),    rLinear(-30, 30),
+    rParamF(gain,               rShort("gain"),    rUnit(dB),
+            rLinear(-30, 30),   rDefault(0.0f),
             "Output Gain"),
     rParamI(Pnumformants,       rShort("formants"),
-            rLinear(1,12),  "Number of formants to be used"),
+            rLinear(1,12),      rDefault(3),
+            "Number of formants to be used"),
     rParamZyn(Pformantslowness, rShort("slew"),
-            "Rate that formants change"),
-    rParamZyn(Pvowelclearness,  rShort("clarity"),
+            rDefault(64), "Rate that formants change"),
+    rParamZyn(Pvowelclearness,  rShort("clarity"), rDefault(64),
             "How much each vowel is smudged with the next in sequence. A high clarity will avoid smudging."),
-    rParamZyn(Pcenterfreq,      rShort("cutoff"),
+    rParamZyn(Pcenterfreq,      rShort("cutoff"),  rDefault(64),
             "Center Freq (formant)"),
-    rParamZyn(Poctavesfreq,     rShort("octaves"),
+    rParamZyn(Poctavesfreq,     rShort("octaves"), rDefault(64),
             "Number of octaves for formant"),
 
-    rParamI(Psequencesize,    rShort("seq.size"), rLinear(0, FF_MAX_SEQUENCE), "Length of vowel sequence"),
-    rParamZyn(Psequencestretch, rShort("seq.str"), "How modulators stretch the sequence"),
-    rToggle(Psequencereversed,  rShort("reverse"), "If the modulator input is inverted"),
+    rParamI(Psequencesize,    rShort("seq.size"),
+            rLinear(0, FF_MAX_SEQUENCE), rDefault(3), "Length of vowel sequence"),
+    rParamZyn(Psequencestretch, rShort("seq.str"),
+            rDefault(40), "How modulators stretch the sequence"),
+    rToggle(Psequencereversed,  rShort("reverse"),
+            rDefault(false), "If the modulator input is inverted"),
 
     {"vowel_seq#" STRINGIFY(FF_MAX_SEQUENCE) "::i", rShort("vowel") rDoc("Vowel number of this sequence position"), NULL,
         [](const char *msg, RtData &d){
@@ -302,7 +318,7 @@ void FilterParams::setup()
 }
 
 FilterParams::FilterParams(const AbsTime *time_)
-    :FilterParams(0,64,64, unspecified, time_)
+    :FilterParams(0,64,64, loc_unspecified, time_)
 {
 }
 
@@ -331,9 +347,9 @@ FilterParams::FilterParams(consumer_location_t loc,
 
     switch(loc)
     {
-        case ad_global_filter:  init(2, 94, 40); break;
-        case ad_voice_filter:   init(2, 50, 60); break;
-        case sub_filter:        init(2, 80, 40); break;
+        case loc_ad_global_filter:  init(2, 94, 40); break;
+        case loc_ad_voice_filter:   init(2, 50, 60); break;
+        case loc_sub_filter:        init(2, 80, 40); break;
         default: throw std::logic_error("Invalid filter consumer location");
     }
 

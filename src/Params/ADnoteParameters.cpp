@@ -402,17 +402,17 @@ ADnoteGlobalParam::ADnoteGlobalParam(const AbsTime *time_) :
         time(time_), last_update_timestamp(0)
 {
     FreqEnvelope = new EnvelopeParams(0, 0, time_);
-    FreqEnvelope->init(ad_global_freq);
-    FreqLfo = new LFOParams(ad_global_freq, time_);
+    FreqEnvelope->init(loc_ad_global_freq);
+    FreqLfo = new LFOParams(loc_ad_global_freq, time_);
 
     AmpEnvelope = new EnvelopeParams(64, 1, time_);
-    AmpEnvelope->init(ad_global_amp);
-    AmpLfo = new LFOParams(ad_global_amp, time_);
+    AmpEnvelope->init(loc_ad_global_amp);
+    AmpLfo = new LFOParams(loc_ad_global_amp, time_);
 
-    GlobalFilter   = new FilterParams(ad_global_filter, time_);
+    GlobalFilter   = new FilterParams(loc_ad_global_filter, time_);
     FilterEnvelope = new EnvelopeParams(0, 1, time_);
-    FilterEnvelope->init(ad_global_filter);
-    FilterLfo = new LFOParams(ad_global_filter, time_);
+    FilterEnvelope->init(loc_ad_global_filter);
+    FilterLfo = new LFOParams(loc_ad_global_filter, time_);
     Reson     = new Resonance();
 }
 
@@ -558,22 +558,22 @@ void ADnoteVoiceParam::enable(const SYNTH_T &synth, FFTwrapper *fft,
     FMSmp    = new OscilGen(synth, fft, NULL);
 
     AmpEnvelope = new EnvelopeParams(64, 1, time);
-    AmpEnvelope->init(ad_voice_amp);
-    AmpLfo = new LFOParams(ad_voice_amp, time);
+    AmpEnvelope->init(loc_ad_voice_amp);
+    AmpLfo = new LFOParams(loc_ad_voice_amp, time);
 
     FreqEnvelope = new EnvelopeParams(0, 0, time);
-    FreqEnvelope->init(ad_voice_freq);
-    FreqLfo = new LFOParams(ad_voice_freq, time);
+    FreqEnvelope->init(loc_ad_voice_freq);
+    FreqLfo = new LFOParams(loc_ad_voice_freq, time);
 
-    VoiceFilter    = new FilterParams(ad_voice_filter, time);
+    VoiceFilter    = new FilterParams(loc_ad_voice_filter, time);
     FilterEnvelope = new EnvelopeParams(0, 0, time);
-    FilterEnvelope->init(ad_voice_filter);
-    FilterLfo = new LFOParams(ad_voice_filter, time);
+    FilterEnvelope->init(loc_ad_voice_filter);
+    FilterLfo = new LFOParams(loc_ad_voice_filter, time);
 
     FMFreqEnvelope = new EnvelopeParams(0, 0, time);
-    FMFreqEnvelope->init(ad_voice_fm_freq);
+    FMFreqEnvelope->init(loc_ad_voice_fm_freq);
     FMAmpEnvelope = new EnvelopeParams(64, 1, time);
-    FMAmpEnvelope->init(ad_voice_fm_amp);
+    FMAmpEnvelope->init(loc_ad_voice_fm_amp);
 }
 
 /*

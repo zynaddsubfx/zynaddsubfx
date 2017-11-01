@@ -41,11 +41,6 @@ static const rtosc::Ports localPorts = {
 #undef  rChangeCb
 #define rChangeCb if(!obj->Pfreemode) obj->converttofree(); \
                   if(obj->time) { obj->last_update_timestamp = obj->time->time(); }
-    rOption(loc, rProp(internal),
-            rOptions(ad_global_amp, ad_global_freq, ad_global_filter,
-                     ad_voice_amp, ad_voice_freq, ad_voice_filter,
-                     ad_voice_fm_freq, ad_voice_fm_amp,
-                     sub_freq_env, sub_bandwidth_env), "function of the envelope"),
     rParamZyn(Penvpoints, rProp(internal), rDefaultDepends(loc),
             rPresets(4, 3, 4, 4, 3, 4, 3, 4, 3, 3),
             "Number of points in complex definition"),
@@ -233,20 +228,18 @@ void EnvelopeParams::init(zyn::consumer_location_t _loc)
 {
     switch(loc = _loc)
     {
-        case ad_global_amp:    ADSRinit_dB(0, 40, 127, 25); break;
-        case ad_global_freq:   ASRinit(64, 50, 64, 60); break;
-        case ad_global_filter:
-        case sub_filter:
-            ADSRinit_filter(64, 40, 64, 70, 60, 64);
-            break;
-        case ad_voice_amp:     ADSRinit_dB(0, 100, 127, 100); break;
-        case ad_voice_freq:    ASRinit(30, 40, 64, 60); break;
-        case ad_voice_filter:  ADSRinit_filter(90, 70, 40, 70, 10, 40);
-            break;
-        case ad_voice_fm_freq: ASRinit(20, 90, 40, 80); break;
-        case ad_voice_fm_amp:  ADSRinit(80, 90, 127, 100); break;
-        case sub_freq:         ASRinit(30, 50, 64, 60); break;
-        case sub_bandwidth:    ASRinit_bw(100, 70, 64, 60); break;
+        case loc_ad_global_amp:    ADSRinit_dB(0, 40, 127, 25); break;
+        case loc_ad_global_freq:   ASRinit(64, 50, 64, 60); break;
+        case loc_ad_global_filter:
+        case loc_sub_filter:
+        case loc_ad_voice_amp:     ADSRinit_dB(0, 100, 127, 100); break;
+        case loc_ad_voice_freq:    ASRinit(30, 40, 64, 60); break;
+        case loc_ad_voice_filter:  ADSRinit_filter(90, 70, 40, 70, 10, 40);
+                                   break;
+        case loc_ad_voice_fm_freq: ASRinit(20, 90, 40, 80); break;
+        case loc_ad_voice_fm_amp:  ADSRinit(80, 90, 127, 100); break;
+        case loc_sub_freq:         ASRinit(30, 50, 64, 60); break;
+        case loc_sub_bandwidth:    ASRinit_bw(100, 70, 64, 60); break;
         default: throw std::logic_error("Invalid envelope consumer location");
     };
 }
