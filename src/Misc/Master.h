@@ -72,6 +72,8 @@ class Master
         int loadXML(const char *filename);
 
         /**Save all settings to an OSC file (as specified by RT OSC)
+         * When the function returned, the OSC file has been either saved or
+         * an error occured.
          * @param filename File to save to or NULL (useful for testing)
          * @param dispatcher Message dispatcher and modifier
          * @param master2 An empty master dummy where the savefile will be
@@ -230,9 +232,9 @@ class Master
         int loadOSCFromStr(const char *file_content,
                            rtosc::savefile_dispatcher_t* dispatcher);
         //applyOscEvent with a DataObj parameter
-        bool applyOscEventWith(const char *event, float *outl, float *outr,
-                               bool offline, bool nio,
-                               class DataObj& d, int msg_id = -1);
+        bool applyOscEvent(const char *event, float *outl, float *outr,
+                           bool offline, bool nio,
+                           class DataObj& d, int msg_id = -1);
 };
 
 class master_dispatcher_t : public rtosc::savefile_dispatcher_t

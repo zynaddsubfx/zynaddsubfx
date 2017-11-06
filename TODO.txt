@@ -1,0 +1,10 @@
+TODOs for default values:
+* iterate correctly over arrays
+* use b (or #?) for bundles, not a
+move code:
+ports.cpp => default_values.cpp
+rtosc.cpp => ...cmp.cpp?
+test:
+* zyn fx (all presets)
+* rtosc arg val maths
+fix all new todos
