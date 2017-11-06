@@ -51,6 +51,7 @@ class Presets
 //currently no enum, since this won't work with rPreset
 //enum consumer_location_t
 //{
+
 #define loc_ad_global_amp 0
 #define loc_ad_global_freq 1
 #define loc_ad_global_filter 2
@@ -58,19 +59,19 @@ class Presets
 #define loc_ad_voice_amp 3
 #define loc_ad_voice_freq 4
 #define loc_ad_voice_filter 5
-#define loc_ad_voice_fm_freq 6
-#define loc_ad_voice_fm_amp 7
+
+#define loc_ad_voice_fm_amp 6
+#define loc_ad_voice_fm_freq 7
 
 #define loc_sub_freq 8
 #define loc_sub_filter 9
 #define loc_sub_bandwidth 10
 
-#define loc_unspecified 11
+#define loc_effect 11
+#define loc_unspecified 12
 
-#define rLocPreset(x) rPreset(loc_x, x)
-
-using consumer_location_t = int;
 //};
+using consumer_location_t = int;
 
 enum class consumer_location_type_t
 {
