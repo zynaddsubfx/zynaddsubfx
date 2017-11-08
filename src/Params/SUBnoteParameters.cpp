@@ -201,15 +201,15 @@ SUBnoteParameters::SUBnoteParameters(const AbsTime *time_)
 {
     setpresettype("Psubsynth");
     AmpEnvelope = new EnvelopeParams(64, 1, time_);
-    AmpEnvelope->init(loc_ad_global_amp);
+    AmpEnvelope->init(ad_global_amp);
     FreqEnvelope = new EnvelopeParams(64, 0, time_);
-    FreqEnvelope->init(loc_sub_freq);
+    FreqEnvelope->init(sub_freq);
     BandWidthEnvelope = new EnvelopeParams(64, 0, time_);
-    BandWidthEnvelope->init(loc_sub_bandwidth);
+    BandWidthEnvelope->init(sub_bandwidth);
 
-    GlobalFilter = new FilterParams(loc_sub_filter, time_);
+    GlobalFilter = new FilterParams(sub_filter, time_);
     GlobalFilterEnvelope = new EnvelopeParams(0, 1, time_);
-    GlobalFilterEnvelope->init(loc_sub_filter);
+    GlobalFilterEnvelope->init(sub_filter);
 
     defaults();
 }

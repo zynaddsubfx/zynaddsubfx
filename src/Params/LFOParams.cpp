@@ -39,22 +39,22 @@ static const rtosc::Ports _ports = {
             "location of the filter"),
     rParamF(Pfreq, rShort("freq"), rLinear(0.0,1.0),
             rDefaultDepends(loc),
-            rPreset(loc_ad_global_amp, 80.0f),
-            rPreset(loc_ad_global_freq, 70.0f),
-            rPreset(loc_ad_global_filter, 80.0f),
-            rPreset(loc_ad_voice_amp, 90.0f),
-            rPreset(loc_ad_voice_freq, 50.0f),
-            rPreset(loc_ad_voice_filter, 50.0f),
+            rPreset(ad_global_amp, 0x1.42850ap-1), // 80
+            rPreset(ad_global_freq, 0x1.1a3468p-1), // 70
+            rPreset(ad_global_filter, 0x1.42850ap-1),
+            rPreset(ad_voice_amp, 0x1.6ad5acp-1), // 90
+            rPreset(ad_voice_freq, 0x1.93264cp-2), // 50
+            rPreset(ad_voice_filter, 0x1.93264cp-2),
             "frequency of LFO\n"
             "lfo frequency = (2^(10*Pfreq)-1)/12 * stretch\n"
             "true frequency is [0,85.33] Hz"),
     rParamZyn(Pintensity, rShort("depth"),
               rDefaultDepends(loc),
-              rDefault(0), rPreset(loc_ad_voice_amp, 32),
-              rPreset(loc_ad_voice_freq, 40), rPreset(loc_ad_voice_filter, 20),
+              rDefault(0), rPreset(ad_voice_amp, 32),
+              rPreset(ad_voice_freq, 40), rPreset(ad_voice_filter, 20),
               "Intensity of LFO"),
     rParamZyn(Pstartphase, rShort("start"), rSpecial(random),
-              rDefaultDepends(loc), rDefault(64), rPreset(loc_ad_voice_freq, 0),
+              rDefaultDepends(loc), rDefault(64), rPreset(ad_voice_freq, 0),
               "Starting Phase"),
     rOption(PLFOtype, rShort("type"), rOptions(sine, triangle, square, up, down,
                 exp1, exp2), rDefault(sine), "Shape of LFO"),
@@ -63,9 +63,10 @@ static const rtosc::Ports _ports = {
     rParamZyn(Pfreqrand, rShort("f.r."), rSpecial(disable), rDefault(0),
             "Frequency Randomness (calculated uniformly at each cycle)"),
     rParamZyn(Pdelay, rShort("delay"), rSpecial(disable),
-              rDefaultDepends(loc), rDefault(0), rPreset(loc_ad_voice_amp, 30),
+              rDefaultDepends(loc), rDefault(0), rPreset(ad_voice_amp, 30),
               "Delay before LFO start\n0..4 second delay"),
-    rToggle(Pcontinous, rShort("c"), rDefault(0), "Enable for global operation"),
+    rToggle(Pcontinous, rShort("c"), rDefault(false),
+            "Enable for global operation"),
     rParamZyn(Pstretch, rShort("str"), rCentered, rDefault(64),
         "Note frequency stretch"),
 // these are currently not yet implemented at must be hidden therefore
@@ -94,18 +95,18 @@ void LFOParams::setup()
         case loc_unspecified:
             fel = consumer_location_type_t::unspecified;
             break;
-        case loc_ad_global_freq:
-        case loc_ad_voice_freq:
+        case ad_global_freq:
+        case ad_voice_freq:
             fel = consumer_location_type_t::freq;
             setpresettype("Plfofrequency");
             break;
-        case loc_ad_global_amp:
-        case loc_ad_voice_amp:
+        case ad_global_amp:
+        case ad_voice_amp:
             fel = consumer_location_type_t::amp;
             setpresettype("Plfoamplitude");
             break;
-        case loc_ad_global_filter:
-        case loc_ad_voice_filter:
+        case ad_global_filter:
+        case ad_voice_filter:
             fel = consumer_location_type_t::filter;
             setpresettype("Plfofilter");
             break;
@@ -164,12 +165,12 @@ LFOParams::LFOParams(consumer_location_t loc,
 
     switch(loc)
     {
-        case loc_ad_global_amp:    init(80, 0, 64, 0, 0, 0, 0); break;
-        case loc_ad_global_freq:   init(70, 0, 64, 0, 0, 0, 0); break;
-        case loc_ad_global_filter: init(80, 0, 64, 0, 0, 0, 0); break;
-        case loc_ad_voice_amp:     init(90, 32, 64, 0, 0, 30, 0); break;
-        case loc_ad_voice_freq:    init(50, 40,  0, 0, 0,  0, 0); break;
-        case loc_ad_voice_filter:  init(50, 20, 64, 0, 0,  0, 0); break;
+        case ad_global_amp:    init(80, 0, 64, 0, 0, 0, 0); break;
+        case ad_global_freq:   init(70, 0, 64, 0, 0, 0, 0); break;
+        case ad_global_filter: init(80, 0, 64, 0, 0, 0, 0); break;
+        case ad_voice_amp:     init(90, 32, 64, 0, 0, 30, 0); break;
+        case ad_voice_freq:    init(50, 40,  0, 0, 0,  0, 0); break;
+        case ad_voice_filter:  init(50, 20, 64, 0, 0,  0, 0); break;
         default: throw std::logic_error("Invalid LFO consumer location");
     }
 

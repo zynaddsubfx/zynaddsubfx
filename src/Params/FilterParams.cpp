@@ -66,7 +66,7 @@ const rtosc::Ports FilterParams::ports = {
     rPaste,
     rArrayPaste,
     rOption(loc, rProp(internal),
-            rOptions(ad_global_filter, ad_voice_filter, sub_filter, effect),
+            rOptions(ad_global_filter, ad_voice_filter, sub_filter, in_effect),
             "location of the filter"),
     rOption(Pcategory,          rShort("class"),
             rOptions(analog, formant, st.var.), rDefault(analog),
@@ -78,18 +78,18 @@ const rtosc::Ports FilterParams::ports = {
             rLinear(0,5), rDefault(0), "Filter Stages"),
     rParamF(baseq,               rShort("q"),      rUnit(none),  rLog(0.1, 1000),
             rDefaultDepends(loc),
-            rPreset(loc_ad_global_filter, 0x1.1592acp+0),
-            rPreset(loc_ad_voice_filter, 0x1.e2f3ap+1),
-            rPreset(loc_sub_filter, 0x1.1592acp+0),
-            rPreset(loc_effect, 0x1.384298p+2),
+            rPreset(ad_global_filter, 0x1.1592acp+0),
+            rPreset(ad_voice_filter, 0x1.e2f3ap+1),
+            rPreset(sub_filter, 0x1.1592acp+0),
+            rPreset(in_effect, 0x1.384298p+2),
             "Quality Factor (resonance/bandwidth)"),
     rParamF(basefreq,           rShort("cutoff"),
             rUnit(Hz),    rLog(31.25, 32000),
             rDefaultDepends(loc),
-            rPreset(loc_ad_global_filter, 0x1.3d434p+12),
-            rPreset(loc_ad_voice_filter, 0x1.d48ab6p+8),
-            rPreset(loc_sub_filter, 0x1.294d3ep+11),
-            rPreset(loc_effect, 0x1.f3fffcp+9),
+            rPreset(ad_global_filter, 0x1.3d434p+12),
+            rPreset(ad_voice_filter, 0x1.d48ab6p+8),
+            rPreset(sub_filter, 0x1.294d3ep+11),
+            rPreset(in_effect, 0x1.f3fffcp+9),
             "Base cutoff frequency"),
     rParamF(freqtracking,       rShort("f.track"), rUnit(%),
             rLinear(-100, 100), rDefault(0.0f),
@@ -323,7 +323,7 @@ void FilterParams::setup()
 }
 
 FilterParams::FilterParams(const AbsTime *time_)
-    :FilterParams(loc_effect, time_)
+    :FilterParams(in_effect, time_)
 {
 }
 
@@ -352,10 +352,10 @@ FilterParams::FilterParams(consumer_location_t loc,
 
     switch(loc)
     {
-        case loc_ad_global_filter:  init(2, 94, 40); break;
-        case loc_ad_voice_filter:   init(2, 50, 60); break;
-        case loc_sub_filter:        init(2, 80, 40); break;
-        case loc_effect:            init(0, 64, 64); break;
+        case ad_global_filter:  init(2, 94, 40); break;
+        case ad_voice_filter:   init(2, 50, 60); break;
+        case sub_filter:        init(2, 80, 40); break;
+        case in_effect:         init(0, 64, 64); break;
         default: throw std::logic_error("Invalid filter consumer location");
     }
 

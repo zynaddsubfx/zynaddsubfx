@@ -41,7 +41,7 @@ static const rtosc::Ports localPorts = {
             rOptions(ad_global_amp, ad_global_freq, ad_global_filter,
                      ad_voice_amp, ad_voice_freq, ad_voice_filter,
                      ad_voice_fm_amp, ad_voice_fm_freq,
-                     sub_freq_env, sub_bandwidth_env),
+                     sub_freq, sub_bandwidth),
             "location of the envelope"),
     rToggle(Pfreemode, rDefault(false), "Complex Envelope Definitions"),
 #undef  rChangeCb
@@ -50,13 +50,13 @@ static const rtosc::Ports localPorts = {
     rParamZyn(Penvpoints, rProp(internal), rDefaultDepends(loc),
             rPresetAtMulti(3, ad_global_freq, ad_voice_freq,
                               ad_voice_fm_freq,
-                              sub_freq_env, sub_bandwidth_env),
+                              sub_freq, sub_bandwidth),
             rDefault(4),
             "Number of points in complex definition"),
     rParamZyn(Penvsustain, rDefaultDepends(loc),
             rPresetAtMulti(1, ad_global_freq, ad_voice_freq,
                               ad_voice_fm_freq,
-                              sub_freq_env, sub_bandwidth_env),
+                              sub_freq, sub_bandwidth),
             rDefault(2),
             "Location of the sustain point"),
     rParams(Penvdt,  MAX_ENVELOPE_POINTS, "Envelope Delay Times"),
@@ -77,13 +77,13 @@ static const rtosc::Ports localPorts = {
               rPreset(ad_global_freq, 50),   rPreset(ad_global_filter, 40),
               rPreset(ad_voice_freq, 40),    rPreset(ad_voice_filter, 70),
               rPreset(ad_voice_fm_freq, 90), rPreset(ad_voice_fm_amp, 80),
-              rPreset(sub_freq_env, 50),     rPreset(sub_bandwidth_env, 70),
+              rPreset(sub_freq, 50),         rPreset(sub_bandwidth, 70),
               rDefault(0),
               "Attack Time"),
     rParamZyn(PA_val, rShort("a.val"), rDefaultDepends(loc),
-              rPreset(ad_global_freq, 30),   rPreset(ad_global_filter, 90),
-              rPreset(ad_voice_fm_freq, 20), rPreset(ad_voice_fm_amp, 64),
-              rPreset(sub_freq_env, 30),     rPreset(sub_bandwidth_env, 100),
+              rPreset(ad_voice_freq, 30),    rPreset(ad_voice_filter, 90),
+              rPreset(ad_voice_fm_freq, 20),
+              rPreset(sub_freq, 30),         rPreset(sub_bandwidth, 100),
               rDefault(64),
               "Attack Value"),
     rParamZyn(PD_dt,  rShort("d.dt"),  rDefaultDepends(loc),
@@ -256,18 +256,17 @@ void EnvelopeParams::init(zyn::consumer_location_t _loc)
 {
     switch(loc = _loc)
     {
-        case loc_ad_global_amp:    ADSRinit_dB(0, 40, 127, 25); break;
-        case loc_ad_global_freq:   ASRinit(64, 50, 64, 60); break;
-        case loc_ad_global_filter:
-        case loc_sub_filter:
-        case loc_ad_voice_amp:     ADSRinit_dB(0, 100, 127, 100); break;
-        case loc_ad_voice_freq:    ASRinit(30, 40, 64, 60); break;
-        case loc_ad_voice_filter:  ADSRinit_filter(90, 70, 40, 70, 10, 40);
-                                   break;
-        case loc_ad_voice_fm_freq: ASRinit(20, 90, 40, 80); break;
-        case loc_ad_voice_fm_amp:  ADSRinit(80, 90, 127, 100); break;
-        case loc_sub_freq:         ASRinit(30, 50, 64, 60); break;
-        case loc_sub_bandwidth:    ASRinit_bw(100, 70, 64, 60); break;
+        case ad_global_amp:    ADSRinit_dB(0, 40, 127, 25); break;
+        case ad_global_freq:   ASRinit(64, 50, 64, 60); break;
+        case ad_global_filter:
+        case sub_filter:       ADSRinit_filter(64, 40, 64, 70, 60, 64); break;
+        case ad_voice_amp:     ADSRinit_dB(0, 100, 127, 100); break;
+        case ad_voice_freq:    ASRinit(30, 40, 64, 60); break;
+        case ad_voice_filter:  ADSRinit_filter(90, 70, 40, 70, 10, 40); break;
+        case ad_voice_fm_freq: ASRinit(20, 90, 40, 80); break;
+        case ad_voice_fm_amp:  ADSRinit(80, 90, 127, 100); break;
+        case sub_freq:         ASRinit(30, 50, 64, 60); break;
+        case sub_bandwidth:    ASRinit_bw(100, 70, 64, 60); break;
         default: throw std::logic_error("Invalid envelope consumer location");
     };
 }
