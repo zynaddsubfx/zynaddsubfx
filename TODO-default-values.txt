@@ -1,8 +1,8 @@
 TODOs for default values:
-* iterate correctly over arrays
 * use b (or #?) for bundles, not a
 * code for random port ("init() to random")
 * remove rDefaultMissing if possible
+* auto range-print
 move code:
 ports.cpp => default_values.cpp
 rtosc.cpp => ...cmp.cpp?

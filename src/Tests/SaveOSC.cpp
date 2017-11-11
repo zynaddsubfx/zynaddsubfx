@@ -145,7 +145,8 @@ class SaveOSCTest
                 // There is actually no need to wait for /save_osc, since
                 // we're in the "UI" thread which does the saving itself,
                 // but this gives an example how it works with remote fron-ends
-                rval = timeOutOperation("/save_osc", filename, 1000)
+                // The filename '""' will write the savefile to stdout
+                rval = timeOutOperation("/save_osc", "", 1000)
                      ? EXIT_SUCCESS
                      : EXIT_FAILURE;
             }
