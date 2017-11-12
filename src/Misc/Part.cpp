@@ -185,7 +185,7 @@ static const Ports kitPorts = {
     rParamZyn(Pminkey, rDefault(0),  "Kit item min key"),
     rParamZyn(Pmaxkey, rDefault(127)  "Kit item max key"),
     rToggle(Padenabled, rDefaultDepends(firstkit),
-            rPreset(true, true), rPreset(false, false)
+            rPreset(true, true), rPreset(false, false),
             "ADsynth enable"),
     rToggle(Psubenabled, rDefault(false), "SUBsynth enable"),
     rToggle(Ppadenabled, rDefault(false), "PADsynth enable"),

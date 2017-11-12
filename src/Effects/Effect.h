@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Effect.h - this class is inherited by the all effects(Reverb, Echo, ..)
+  Effect.h - this class is inherited by all effects (Reverb, Echo, ...)
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
@@ -19,8 +19,7 @@
 #include "../Params/FilterParams.h"
 #include "../Misc/Stereo.h"
 
-// bug: the effect parameters can currently be set, but such values
-//      will not be saved into XML files
+// effect parameters differing between single effects
 #ifndef rEffPar
 #define rEffPar(name, idx, ...) \
   {STRINGIFY(name) "::i",  rProp(parameter) rDefaultDepends(preset) \
@@ -31,19 +30,24 @@
 #define rEffParCb(idx) \
     [](const char *msg, rtosc::RtData &d) {\
         rObject &obj = *(rObject*)d.obj; \
-        if(rtosc_narguments(msg)) \
+        if(rtosc_narguments(msg)) { \
             obj.changepar(idx, rtosc_argument(msg, 0).i); \
+            d.broadcast(d.loc, "i", obj.getpar(idx)); \
+        } \
         else \
             d.reply(d.loc, "i", obj.getpar(idx));}
 #define rEffParTFCb(idx) \
     [](const char *msg, rtosc::RtData &d) {\
         rObject &obj = *(rObject*)d.obj; \
-        if(rtosc_narguments(msg)) \
+        if(rtosc_narguments(msg)) { \
             obj.changepar(idx, rtosc_argument(msg, 0).T*127); \
+            d.broadcast(d.loc, obj.getpar(idx)?"T":"F"); \
+        } \
         else \
             d.reply(d.loc, obj.getpar(idx)?"T":"F");}
 #endif
 
+// effect parameters common to all effects
 #define rEffParCommon(pname, rshort, rdoc, idx, ...) \
 {STRINGIFY(pname) "::i", rProp(parameter) rLinear(0,127) \
     rShort(rshort) DOC(__VA_ARGS__, rdoc), \
@@ -58,7 +62,6 @@
             d.broadcast(d.loc, "i", eff.getpar(idx)); \
         } \
     }}
-
 #define rEffParVol(...) rEffParCommon(Pvolume, "amt", "amount of effect", 0, \
     __VA_ARGS__)
 #define rEffParPan(...) rEffParCommon(Ppanning, "pan", "panning", 1, \

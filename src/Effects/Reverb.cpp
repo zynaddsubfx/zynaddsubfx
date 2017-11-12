@@ -42,7 +42,7 @@ rtosc::Ports Reverb::ports = {
     rEffParVol(rDefault(90), rPresets(80, 80, 80),
                rPresetsAt(5, 100, 100, 110, 85, 95)),
     rEffParPan(rPreset(8, 80)),
-    rEffPar(Ptime,    2, rShort("time"),
+    rEffPar(Ptime,    2, rShort("time"), rLinear(0, 127),
             rPresets(63, 69, 69, 51, 53, 33, 21, 14, 84, 26, 40, 93, 111),
             "Length of Reverb"),
     rEffPar(Pidelay,  3, rShort("i.time"),

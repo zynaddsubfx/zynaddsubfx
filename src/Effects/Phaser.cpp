@@ -69,7 +69,7 @@ rtosc::Ports Phaser::ports = {
     rEffPar(lfo.Pstereo,     5, rShort("stereo"),
             rPresetsAt(1, 88, 66, 66, 110, 58), rDefault(64),
             "Left/right channel phase shift"),
-    rEffPar(Pdepth,          6, rShort("depth"),
+    rEffPar(Pdepth,          6, rShort("depth"), rLinear(0, 127),
             rPresets(110, 40, 68, 67, 67, 37, 64, 70, 60, 45, 25, 70),
             "LFP depth"),
     rEffPar(Pfb,             7, rShort("fb"),
