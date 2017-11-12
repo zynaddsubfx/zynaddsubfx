@@ -965,6 +965,11 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
         delete[] spectrum;
     };
 
+#ifdef WIN32
+    //Temporarily disable multi-threading here as C++11 threads are broken on
+    //mingw cross compilation
+    thread_cb(1,0);
+#else
     unsigned nthreads = std::min(max_threads,
                                  std::thread::hardware_concurrency());
     std::vector<std::thread> threads(nthreads);
@@ -972,6 +977,7 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
         threads[i] = std::thread(thread_cb, nthreads, i);
     for(unsigned i = 0; i < nthreads; ++i)
         threads[i].join();
+#endif
 
     return samplemax;
 }

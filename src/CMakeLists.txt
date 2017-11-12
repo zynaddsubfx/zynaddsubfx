@@ -147,6 +147,11 @@ elseif (OssEnable)
         "Default Output module: [null, alsa, oss, jack, portaudio]")
     SET (DefaultInput oss CACHE STRING
         "Default Input module: [null, alsa, oss, jack]")
+elseif (PaEnable)
+    SET (DefaultOutput pa CACHE STRING
+        "Default Output module: [null, alsa, oss, jack, portaudio]")
+    SET (DefaultInput null CACHE STRING
+        "Default Input module: [null, alsa, oss, jack]")
 else()
     SET (DefaultOutput null CACHE STRING
         "Default Output module: [null, alsa, oss, jack, portaudio]")
