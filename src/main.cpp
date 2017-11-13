@@ -226,7 +226,6 @@ int main(int argc, char *argv[])
     cerr
     << "                Copyright (c) 2009-2017 Mark McCurry [active maintainer]"
     << endl;
-    cerr << "Compiled: " << __DATE__ << " " << __TIME__ << endl;
     cerr << "This program is free software (GNU GPL v2 or later) and \n";
     cerr << "it comes with ABSOLUTELY NO WARRANTY.\n" << endl;
     if(argc == 1)

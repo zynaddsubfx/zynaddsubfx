@@ -7,6 +7,7 @@
         - Fix loading filter parameters with older xml
         - Fix effect saving when updating with zyn-fusion interface
         - Fix minor bugs
+        - The build process is now reproducible
 
 3.0.2 (21 July 2017)
         - Upgrade MIDI learn system to include host automations and macro
