@@ -102,7 +102,7 @@ class SaveOSCTest
                     osc_path, elapsed_secs,
                     attempt+1,
                     attempt == tries ? "timeout"
-                                     : ok ? "ok" : "failure");
+                                     : ok ? "success" : "failure");
 
             return ok && (attempt != tries);
         }
@@ -205,5 +205,7 @@ int main(int argc, char** argv)
     test.start_realtime();
     int res = test.run(argc, argv);
     test.stop_realtime();
+    std::cerr << "Summary: " << ((res == EXIT_SUCCESS) ? "SUCCESS" : "FAILURE")
+              << std::endl;
     return res;
 }

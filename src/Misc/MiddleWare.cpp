@@ -560,26 +560,27 @@ public:
     }
 
     //Well, you don't get much crazier than changing out all of your RT
-    //structures at once... TODO error handling
-    void loadMaster(const char *filename, bool osc_format = false)
+    //structures at once...
+    int loadMaster(const char *filename, bool osc_format = false)
     {
         Master *m = new Master(synth, config);
         m->uToB = uToB;
         m->bToU = bToU;
+
         if(filename) {
             if(osc_format)
             {
                 mw_dispatcher_t dispatcher(parent);
                 if( m->loadOSC(filename, &dispatcher) < 0 ) {
                     delete m;
-                    return;
+                    return -1;
                 }
             }
             else
             {
                 if ( m->loadXML(filename) ) {
                     delete m;
-                    return;
+                    return -1;
                 }
             }
             m->applyparameters();
@@ -593,6 +594,7 @@ public:
         //Give it to the backend and wait for the old part to return for
         //deallocation
         parent->transmitMsg("/load-master", "b", sizeof(Master*), &m);
+        return 0;
     }
 
     int saveMaster(const char *filename, bool osc_format = false)
@@ -1198,9 +1200,12 @@ void load_cb(const char *msg, RtData &d)
     if(rtosc_narguments(msg) > 1)
         request_time = rtosc_argument(msg, 1).t;
 
-    impl.loadMaster(file, osc_format);
-    d.broadcast("/damage", "s", "/");
-    d.broadcast(d.loc, "stT", file, request_time);
+    if(!impl.loadMaster(file, osc_format)) { // return-value 0 <=> OK
+        d.broadcast("/damage", "s", "/");
+        d.broadcast(d.loc, "stT", file, request_time);
+    }
+    else
+        d.broadcast(d.loc, "stF", file, request_time);
 }
 
 template<bool osc_format>

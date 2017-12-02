@@ -3,6 +3,9 @@ TODOs for default values:
 * code for random port ("init() to random")
 * remove rDefaultMissing if possible
 * auto range-print
+* rEnabled vs rExist:
+  * clarify/rename
+  * make a clean function?
 move code:
 ports.cpp => default_values.cpp
 rtosc.cpp => ...cmp.cpp?
