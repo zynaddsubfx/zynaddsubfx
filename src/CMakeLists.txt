@@ -59,9 +59,10 @@ find_library(HAVE_LIBRT rt)
 set(CMAKE_REQUIRED_FLAGS "")
 
 
-execute_process(COMMAND echo fistpl 0
-                COMMAND as -
-                ERROR_VARIABLE AVOID_ASM)
+CHECK_CXX_SOURCE_COMPILES(
+    "int main(){
+    __asm__ __volatile__ (\"fistpl 0\");
+    return 0;}" HAVE_X86_FISTPL)
 
 ######### Settings ###########
 # NOTE: These cache variables should normally not be changed in this
@@ -384,8 +385,8 @@ if(COMPILER_SUPPORTS_SYSTEM_HDR_PREFIX)
     add_definitions(--system-header-prefix="FL/")
 endif()
 
-if(NOT AVOID_ASM)
-	message(STATUS "Compiling with x86 opcode support")
+if(HAVE_X86_FISTPL)
+    message(STATUS "Compiling with x86 opcode support")
     add_definitions(-DASM_F2I_YES)
 endif()
 
