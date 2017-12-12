@@ -306,8 +306,8 @@ static const Ports globalPorts = {
     rParamZyn(PPanning, rShort("pan"), rDefault(64),
         "Panning of ADsynth (0 random, 1 left, 127 right)"),
     rParamZyn(PVolume,  rShort("vol"), rDefault(90), "volume control"),
-    rParamZyn(PAmpVelocityScaleFunction, rShort("scale"), rDefault(64),
-        "Volume Velocity Control"),
+    rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), rDefault(64),
+        "Volume velocity sense"),
 
     rParamZyn(Fadein_adjustment, rDefault(FADEIN_ADJUSTMENT_SCALE),
         "Adjustment for anti-pop strategy."),
