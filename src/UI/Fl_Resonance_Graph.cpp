@@ -253,6 +253,6 @@ float Fl_Resonance_Graph::getoctavesfreq() const
 void Fl_Resonance_Graph::setPoint(int idx, int val)
 {
     Prespoints[idx] = val;
-    oscWrite(std::string("Prespoints")+to_s(idx), "c", val);
+    oscWrite(std::string("Prespoints")+to_s(idx), "i", val);
     redraw();
 }

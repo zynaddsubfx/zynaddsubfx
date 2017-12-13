@@ -33,7 +33,7 @@ const rtosc::Ports Resonance::ports = {
             "resonance enable"),
     rToggle(Pprotectthefundamental, rShort("p.fund."), rDefault(false),
             "Disable resonance filter on first harmonic"),
-    rParams(Prespoints, N_RES_POINTS, rDefaultMissing,
+    rParams(Prespoints, N_RES_POINTS, rDefault([64 ...]),
             "Resonance data points"),
     rParamZyn(PmaxdB,      rShort("max"), rDefault(20),
               "how many dB the signal may be amplified"),

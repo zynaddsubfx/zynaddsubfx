@@ -55,12 +55,12 @@ void EnvelopeFreeEdit::OSC_raw(const char *msg)
         rtosc_blob_t b = rtosc_argument(msg, 0).b;
         assert(b.len == MAX_ENVELOPE_POINTS);
         memcpy(Penvval, b.data, MAX_ENVELOPE_POINTS);
-    } else if(strstr(msg, "Penvval") && !strcmp(args, "c")) {
+    } else if(strstr(msg, "Penvval") && !strcmp(args, "i")) {
         const char *str = strstr(msg, "Penvval");
         int id = atoi(str+7);
         assert(0 <= id && id < MAX_ENVELOPE_POINTS);
         Penvval[id] = rtosc_argument(msg, 0).i;
-    } else if(strstr(msg, "Penvdt") && !strcmp(args, "c")) {
+    } else if(strstr(msg, "Penvdt") && !strcmp(args, "i")) {
         const char *str = strstr(msg, "Penvdt");
         int id = atoi(str+6);
         assert(0 <= id && id < MAX_ENVELOPE_POINTS);
@@ -270,13 +270,13 @@ int EnvelopeFreeEdit::handle(int event)
                   int ny = Penvval[lastpoint] - delta;
                   ny = ny < 0 ? 0 : ny > 127 ? 127 : ny;
                   Penvval[lastpoint] = ny;
-                  oscWrite(to_s("Penvval")+to_s(lastpoint), "c", ny);
+                  oscWrite(to_s("Penvval")+to_s(lastpoint), "i", ny);
                   oscWrite("Penvval","");
               } else if (lastpoint > 0) {
                   int newdt = Penvdt[lastpoint] - delta;
                   newdt = newdt < 0 ? 0 : newdt > 127 ? 127 : newdt;
                   Penvdt[lastpoint] = newdt;
-                  oscWrite(to_s("Penvdt")+to_s(lastpoint),  "c", newdt);
+                  oscWrite(to_s("Penvdt")+to_s(lastpoint),  "i", newdt);
                   oscWrite("Penvdt","");
               }
               redraw();
@@ -300,7 +300,7 @@ int EnvelopeFreeEdit::handle(int event)
                   const int newval=limit(cpval+dy, 0, 127);
 
                   Penvval[currentpoint]=newval;
-                  oscWrite(to_s("Penvval")+to_s(currentpoint), "c", newval);
+                  oscWrite(to_s("Penvval")+to_s(currentpoint), "i", newval);
                   oscWrite("Penvval","");
               }
 
@@ -312,7 +312,7 @@ int EnvelopeFreeEdit::handle(int event)
                       Penvdt[currentpoint]=newdt;
                   else
                       Penvdt[currentpoint]=0;
-                  oscWrite(to_s("Penvdt")+to_s(currentpoint),  "c", newdt);
+                  oscWrite(to_s("Penvdt")+to_s(currentpoint),  "i", newdt);
                   oscWrite("Penvdt","");
               }
 

@@ -1,12 +1,16 @@
 TODOs for default values:
-* use b (or #?) for bundles, not a
-* code for random port ("init() to random")
-* remove rDefaultMissing if possible
-* auto range-print
+* use # for bundles, not a
+* 1 ... 7 => 1 2 ... 7
+* also after scanning?
+
 move code:
-ports.cpp => default_values.cpp
-rtosc.cpp => ...cmp.cpp?
+* ports.cpp => default_values.cpp
+* rtosc.cpp => ...cmp.cpp?
+
 test:
 * zyn fx (all presets)
 * rtosc arg val maths
-fix all new todos
+
+finally:
+* remove rDefaultMissing if possible
+* fix all TODOs from default_values

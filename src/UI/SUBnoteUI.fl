@@ -49,7 +49,7 @@ class SUBSlider {: {public Fl_Osc_TSlider}
   Function {SUBSlider(int x,int y, int w, int h, const char *label=0)
   :Fl_Osc_TSlider(x,y,w,h,label)} {open
   } { code {} {}}
-   Function {OSC_value(char c)} {open return_type void
+   Function {OSC_value(int c)} {open return_type void
    } { code {
        value(127-c);
        selection_color(value() == reset_value ? 0 : 222);	
@@ -58,7 +58,7 @@ class SUBSlider {: {public Fl_Osc_TSlider}
   } {
     code {
 	selection_color(value() == reset_value ? 0 : 222);	
-	oscWrite(ext, "c", (int)(127-Fl_Slider::value()));
+	oscWrite(ext, "i", (int)(127-Fl_Slider::value()));
 	if(cb_data.first)
 	    cb_data.first(this, cb_data.second);
 } {}
@@ -332,11 +332,11 @@ freqsettingsui->redraw();}
         label Clear
         callback {o->oscWrite("clear");
         for (int i=1;i<MAX_SUB_HARMONICS;i++){
-    h[i]->mag->oscWrite(h[i]->mag->ext, "c", 0);
-    h[i]->bw->oscWrite(h[i]->bw->ext, "c", 64);
+    h[i]->mag->oscWrite(h[i]->mag->ext, "i", 0);
+    h[i]->bw->oscWrite(h[i]->bw->ext, "i", 64);
 };
-h[0]->mag->oscWrite(h[0]->mag->ext, "c", 127);
-h[0]->bw->oscWrite(h[0]->bw->ext, "c", 64);
+h[0]->mag->oscWrite(h[0]->mag->ext, "i", 127);
+h[0]->bw->oscWrite(h[0]->bw->ext, "i", 64);
 SUBparameters->redraw();}
         tooltip {Clear the harmonics} xywh {445 446 70 25} box THIN_UP_BOX
         class Fl_Osc_Button

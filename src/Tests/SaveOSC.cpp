@@ -32,7 +32,9 @@ class SaveOSCTest
                  * Once after the loading
                  * Twice for the temporary exchange during saving
              */
+#ifdef SAVE_OSC_DEBUG
             printf("Changing master from %p (%p) to %p...\n", master, &master, m);
+#endif
             master = m;
             master->setMasterChangedCallback(__masterChangedCallback, this);
         }
@@ -55,7 +57,9 @@ class SaveOSCTest
         }
 
         void tearDown() {
+#ifdef SAVE_OSC_DEBUG
             printf("Master at the end: %p\n", master);
+#endif
             delete mw;
             delete synth;
         }
@@ -112,11 +116,17 @@ class SaveOSCTest
             if(!strcmp(msg, "/save_osc") || !strcmp(msg, "/load_xmz"))
             {
                 mutex_guard guard(cb_mutex);
+#ifdef SAVE_OSC_DEBUG
                 fprintf(stderr, "Received message \"%s\".\n", msg);
+#endif
                 recent.operation = msg;
                 recent.file = rtosc_argument(msg, 0).s;
                 recent.stamp = rtosc_argument(msg, 1).t;
                 recent.status = rtosc_argument(msg, 2).T;
+            }
+            else if(!strcmp(msg, "/damage"))
+            {
+                // (ignore)
             }
             else
                 fprintf(stderr, "Unknown message \"%s\", ignoring...\n", msg);
@@ -176,7 +186,9 @@ class SaveOSCTest
                         continue;
                     }
                     const char *msg = master->uToB->read();
+#ifdef SAVE_OSC_DEBUG
                     printf("Master %p: handling <%s>\n", master, msg);
+#endif
                     master->applyOscEvent(msg, false);
                 }});
         }

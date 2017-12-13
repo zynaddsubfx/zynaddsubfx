@@ -428,7 +428,7 @@ static const Ports master_ports = {
             ((Master*)d.obj)->setPvolume(limit<char>(rtosc_argument(m,0).i,0,127));
             d.broadcast(d.loc, "i", ((Master*)d.obj)->Pvolume);}}},
     {"volume::i", rShort("volume") rProp(parameter) rLinear(0,127)
-        rDefault(80) rDoc("Master Volume"), 0,
+        rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "i", ((Master*)d.obj)->Pvolume);
