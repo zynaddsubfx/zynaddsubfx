@@ -41,8 +41,11 @@ class FilterParams:public PresetsArray
         void paste(FilterParams &);
         void pasteArray(FilterParams &, int section);
 
-
-        void getfromFilterParams(FilterParams *pars);
+        //! assignment operator-like function
+        //! @warning function has been unused since 2004
+        //!     (84ddf9c0132b6be8d685f01c6444edd8bc49bb0f). If you use it, make
+        //!     sure it's still up-to-date and make tests
+        void getfromFilterParams(const FilterParams *pars);
 
         float getfreq() const ;
         float getq() const ;
@@ -90,7 +93,7 @@ class FilterParams:public PresetsArray
         float getformantamp(unsigned char amp) const ;
         float getformantq(unsigned char q) const ;
 
-        void defaults(int n);
+        void defaults(int n); //!< set default for formant @p n
 
         int loc; //!< consumer location
         bool changed;

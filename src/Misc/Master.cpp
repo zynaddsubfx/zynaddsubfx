@@ -1718,8 +1718,12 @@ int Master::saveOSC(const char *filename, master_dispatcher_t* dispatcher,
                 std::ofstream ofs(filename);
                 ofs << savefile;
             }
-            else
+            else {
+                std::cout << "The savefile content follows" << std::endl;
+                std::cout << "---->8----" << std::endl;
                 std::cout << savefile << std::endl;
+                std::cout << "---->8----" << std::endl;
+            }
         }
         else
         {

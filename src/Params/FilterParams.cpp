@@ -139,7 +139,10 @@ const rtosc::Ports FilterParams::ports = {
             d.reply(d.loc, "b", sizeof_pvowels, obj->Pvowels);
         }},
 
-    {"Pvowels#" STRINGIFY(FF_MAX_VOWELS) "/", NULL, &subports,
+    rEnabledCondition(is_formant_filter, obj->Pcategory == 1),
+    {"Pvowels#" STRINGIFY(FF_MAX_VOWELS) "/",
+        rEnabledByCondition(is_formant_filter),
+        &subports,
         [](const char *msg, RtData &d) {
             const char *mm = msg; \
             while(*mm && !isdigit(*mm)) ++mm; \
@@ -414,8 +417,8 @@ void FilterParams::defaults(int n)
 /*
  * Get the parameters from other FilterParams
  */
-
-void FilterParams::getfromFilterParams(FilterParams *pars)
+// WARNING! Function unused since 2004, see declaration in header
+void FilterParams::getfromFilterParams(const FilterParams *pars)
 {
     defaults();
 
