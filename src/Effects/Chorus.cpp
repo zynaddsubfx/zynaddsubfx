@@ -47,7 +47,7 @@ rtosc::Ports Chorus::ports = {
     rEffPar(Pfreqrnd, 3, rShort("rand"),
             rPreset(4, 117) rPreset(6, 34) rPreset(7, 34) rPreset(9, 105)
             rDefault(0), "Frequency Randomness"),
-    rEffPar(PLFOtype, 4, rShort("shape"),
+    rEffParOpt(PLFOtype, 4, rShort("shape"),
             rOptions(sine, tri),
             rPresets(sine, sine, tri, sine, sine, sine, tri, tri, tri, sine),
             "LFO Shape"),

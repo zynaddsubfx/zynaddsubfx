@@ -45,7 +45,7 @@ rtosc::Ports Distorsion::ports = {
             "Input amplification"),
     rEffPar(Plevel,   4, rShort("output"), rPresets(70, 75, 80, 62, 75, 75),
             "Output amplification"),
-    rEffPar(Ptype,    5, rShort("type"),
+    rEffParOpt(Ptype,    5, rShort("type"),
             rOptions(Arctangent, Asymmetric, Pow, Sine, Quantisize,
                      Zigzag, Limiter, Upper Limiter, Lower Limiter,
                      Inverse Limiter, Clip, Asym2, Pow2, sigmoid),

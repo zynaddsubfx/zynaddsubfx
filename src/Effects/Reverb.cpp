@@ -60,7 +60,7 @@ rtosc::Ports Reverb::ports = {
             rPresets(83, 71, 78, 78, 71, 106, 77, 71, 78, 64, 88, 77, 74)
             "Dampening"),
     //Todo make this a selector
-    rEffPar(Ptype,    10, rShort("type"),
+    rEffParOpt(Ptype,    10, rShort("type"),
             rOptions(Random, Freeverb, Bandwidth),
             rPresets(Freeverb, Random, Freeverb, Freeverb, Freeverb, Random,
                      Freeverb, Random, Freeverb, Freeverb, Freeverb, Random,

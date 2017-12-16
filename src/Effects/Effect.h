@@ -24,6 +24,12 @@
 #define rEffPar(name, idx, ...) \
   {STRINGIFY(name) "::i",  rProp(parameter) rDefaultDepends(preset) \
    DOC(__VA_ARGS__), NULL, rEffParCb(idx)}
+#define rEffParOpt(name, idx, ...) \
+  {STRINGIFY(name) "::i:c:S",  rProp(parameter) rDefaultDepends(preset) \
+   rProp(enumerated) DOC(__VA_ARGS__), NULL, \
+       rBOIL_BEGIN \
+       rCOptionCb_(obj->getpar(idx), obj->changepar(idx, var)) \
+       rBOIL_END }
 #define rEffParTF(name, idx, ...) \
   {STRINGIFY(name) "::T:F",  rProp(parameter) rDefaultDepends(preset) \
    DOC(__VA_ARGS__), NULL, rEffParTFCb(idx)}

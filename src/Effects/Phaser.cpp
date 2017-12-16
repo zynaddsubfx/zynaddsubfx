@@ -62,7 +62,7 @@ rtosc::Ports Phaser::ports = {
     rEffPar(lfo.Prandomness, 3, rShort("rnd."),
             rPreset(5, 100), rPreset(7, 5), rPresetsAt(9, 10, 10, 10),
             rDefault(0), "LFO randomness"),
-    rEffPar(lfo.PLFOtype,    4, rShort("type"),
+    rEffParOpt(lfo.PLFOtype,    4, rShort("type"),
             rPreset(4, tri), rPresetsAt(6, tri, tri), rPreset(11, tri),
             rDefault(sine),
             rOptions(sine, tri), "lfo shape"),
