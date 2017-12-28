@@ -180,6 +180,7 @@ endif()
 option (BuildForAMD_X86_64 "Build for AMD x86_64 system" OFF)
 option (BuildForCore2_X86_64 "Build for Intel Core2 x86_64 system" OFF)
 option (BuildForDebug "Include gdb debugging support" OFF)
+option (IncludeWhatYouUse "Check for useless includes" OFF)
 
 set(CMAKE_BUILD_TYPE "Release")
 
@@ -210,6 +211,19 @@ set (BuildOptionsBasic
 
 set (BuildOptionsDebug
     "-std=c++11 -O0 -g3 -ggdb -Wall -Wno-unused-parameter -Wpointer-arith" CACHE STRING "Debug build flags")
+
+if(${CMAKE_VERSION} VERSION_LESS "3.3.0")
+    set(IwyuErr "disabled (cmake < 3.3.0)")
+else()
+    if(IncludeWhatYouUse)
+        find_program(IwyuPath NAMES include-what-you-use iwyu)
+        if(NOT IwyuPath)
+            set(IwyuErr "package NOT found")
+        endif()
+    else()
+        set(IwyuErr "disabled (IncludeWhatYouUse=OFF)")
+    endif()
+endif()
 
 ########### Settings dependant code ###########
 # From here on, the setting variables have  been prepared so concentrate
@@ -489,6 +503,17 @@ target_link_libraries(zynaddsubfx_core
 	${OS_LIBRARIES}
     ${PTHREAD_LIBRARY}
     rtosc rtosc-cpp)
+
+if(IwyuErr)
+    message (STATUS "Include what you use: ${IwyuErr}")
+else()
+    set(IwyuPathAndOptions
+        ${IwyuPath}
+        -Xiwyu
+        --no_comments)
+    set_property(TARGET zynaddsubfx_core PROPERTY CXX_INCLUDE_WHAT_YOU_USE
+                 ${IwyuPathAndOptions})
+endif()
 
 if(CompileTests)
 	add_subdirectory(Tests)

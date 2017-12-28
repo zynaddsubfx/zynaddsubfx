@@ -1,3 +1,4 @@
+#include <cstring>
 #include <ostream>
 #include <rtosc/ports.h>
 using namespace rtosc;

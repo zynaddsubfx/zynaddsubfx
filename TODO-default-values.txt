@@ -6,9 +6,6 @@ TODOs for default values:
 * rEnabled vs rExists:
   * clarify/rename
   * make a clean function?
-move code:
-* ports.cpp => default_values.cpp
-* rtosc.cpp => ...cmp.cpp?
 
 test:
 * zyn fx (all presets)
