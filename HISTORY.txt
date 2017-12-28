@@ -1,4 +1,4 @@
-3.0.3 (Mid October 2017)
+3.0.3 (4 December 2017)
         - Add bank search to FLTK/NTK GUI
         - Add parallel padsynth sample generation
         - Remove X11 dependency for non-GUI builds

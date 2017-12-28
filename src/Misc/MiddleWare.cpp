@@ -904,6 +904,7 @@ static std::vector<std::string> getFiles(const char *folder, bool finddir)
 
     struct dirent *fn;
     std::vector<string> files;
+    bool has_updir = false;
 
     while((fn = readdir(dir))) {
 #ifndef WIN32
@@ -929,7 +930,13 @@ static std::vector<std::string> getFiles(const char *folder, bool finddir)
 #endif
         if(finddir == is_dir && strcmp(".", fn->d_name))
             files.push_back(fn->d_name);
+
+        if(!strcmp("..", fn->d_name))
+            has_updir = true;
     }
+
+    if(finddir == true && has_updir == false)
+        files.push_back("..");
 
     closedir(dir);
     std::sort(begin(files), end(files));
