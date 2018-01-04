@@ -491,6 +491,8 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
             wsock32
             "-static" iphlpapi
             "-static" winpthread)
+elseif(APPLE)
+    set(PTHREAD_LIBRARY pthread)
 else()
     set(PLATFORM_LIBRARIES rt)
     set(PTHREAD_LIBRARY pthread)
