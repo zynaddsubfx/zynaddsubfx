@@ -60,6 +60,9 @@ public:
             handle = LoadLibrary("./libzest.dll");
         if(!handle)
             handle = LoadLibrary("libzest.dll");
+#elif defined __APPLE__
+        if(!handle)
+            handle = dlopen("@loader_path/libzest.dylib", RTLD_LAZY);
 #else
         handle = dlopen("./libzest.so", RTLD_LAZY);
         if(!handle)
