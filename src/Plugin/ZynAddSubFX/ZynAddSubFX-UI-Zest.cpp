@@ -195,8 +195,8 @@ protected:
         if(!z.zest) {
             if(!z.zest_open)
                 return;
-if(!oscPort)
-    return;
+            if(!oscPort)
+                return;
             printf("[INFO:Zyn] zest_open()\n");
             char address[1024];
             snprintf(address, sizeof(address), "osc.udp://127.0.0.1:%d",oscPort);
