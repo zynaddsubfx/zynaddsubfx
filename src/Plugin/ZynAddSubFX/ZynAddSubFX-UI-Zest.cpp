@@ -61,8 +61,7 @@ public:
         if(!handle)
             handle = LoadLibrary("libzest.dll");
 #elif defined __APPLE__
-        if(!handle) // LV2
-            handle = dlopen("@loader_path/libzest.dylib", RTLD_LAZY);
+        handle = dlopen("@loader_path/libzest.dylib", RTLD_NOW | RTLD_LOCAL);
         if(!handle) // VST
             handle = dlopen("@loader_path/../Resources/libzest.dylib", RTLD_LAZY);
 #else
