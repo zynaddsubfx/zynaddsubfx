@@ -208,7 +208,6 @@ if(!oscPort)
         }
 
         z.zest_draw(z.zest);
-        repaint();
     }
 
     bool onKeyboard(const KeyboardEvent &ev)
@@ -223,8 +222,11 @@ if(!oscPort)
 
     void uiIdle(void) override
     {
-        if(z.zest)
-            z.zest_tick(z.zest);
+        if(z.zest) {
+            if (z.zest_tick(z.zest)) {
+                repaint();
+            }
+        }
     }
 
     void uiReshape(uint width, uint height)
