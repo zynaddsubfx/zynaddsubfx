@@ -14,8 +14,13 @@ set_target_properties(ZynDistortion_vst PROPERTIES LIBRARY_OUTPUT_DIRECTORY "vst
 set_target_properties(ZynDistortion_vst PROPERTIES OUTPUT_NAME "ZynDistortion")
 set_target_properties(ZynDistortion_vst PROPERTIES PREFIX "")
 
-target_link_libraries(ZynDistortion_lv2 zynaddsubfx_core ${OS_LIBRARIES})
-target_link_libraries(ZynDistortion_vst zynaddsubfx_core ${OS_LIBRARIES})
+if(APPLE)
+    target_link_libraries(ZynDistortion_lv2 zynaddsubfx_core ${OS_LIBRARIES} "-Wl,-exported_symbol,_lv2_descriptor" "-Wl,-exported_symbol,_lv2_generate_ttl")
+    target_link_libraries(ZynDistortion_vst zynaddsubfx_core ${OS_LIBRARIES} "-Wl,-exported_symbol,_VSTPluginMain")
+else()
+    target_link_libraries(ZynDistortion_lv2 zynaddsubfx_core ${OS_LIBRARIES})
+    target_link_libraries(ZynDistortion_vst zynaddsubfx_core ${OS_LIBRARIES})
+endif()
 
 install(TARGETS ZynDistortion_lv2 LIBRARY DESTINATION ${PluginLibDir}/lv2/ZynDistortion.lv2/)
 install(TARGETS ZynDistortion_vst LIBRARY DESTINATION ${PluginLibDir}/vst/)
