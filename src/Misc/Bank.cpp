@@ -37,7 +37,7 @@
 #ifdef __APPLE__
 #include <dlfcn.h>
 
-static char* my_dylib_path () {
+static const char* my_dylib_path () {
     static Dl_info info;
     if (dladdr((const void*) &my_dylib_path, &info)) {
         return info.dli_fname;
@@ -391,7 +391,7 @@ void Bank::rescanforbanks()
 #endif
 #ifdef __APPLE__
    {
-        char* path = my_dylib_path ();
+        const char* path = my_dylib_path ();
         if (path && strstr(path, "ZynAddSubFX.dylib") && strlen (path) < 1000) {
             char tmp[1024];
             strcpy (tmp, path);
