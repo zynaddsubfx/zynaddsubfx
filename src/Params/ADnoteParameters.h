@@ -270,7 +270,7 @@ struct ADnoteVoiceParam {
     OscilGen *FMSmp;
 
     /* Modullator Volume */
-    unsigned char PFMVolume;
+    float FMvolume;
 
     /* Modullator damping at higher frequencies */
     unsigned char PFMVolumeDamp;

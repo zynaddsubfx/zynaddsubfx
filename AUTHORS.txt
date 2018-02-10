@@ -6,6 +6,7 @@ Active Developers:
         Hans Petter Selasky (BSD Compat)
         Christopher Oliver (Unison + presets fix, mousewheel support,
                             SUBnote overtones, unison enhancements, ...)
+        Daniel Sheeler
 
 Contributors:
         Gerald Folcher (legato, mono notes memory)
