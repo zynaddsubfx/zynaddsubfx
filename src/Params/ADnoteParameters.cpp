@@ -799,7 +799,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
         xml.beginbranch("FM_PARAMETERS");
         xml.addpar("input_voice", PFMVoice);
 
-        xml.addpar("volume", FMvolume);
+        xml.addparreal("volume", FMvolume);
         xml.addpar("volume_damp", PFMVolumeDamp);
         xml.addpar("velocity_sensing",
                     PFMVelocityScaleFunction);
