@@ -482,7 +482,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
     //Compute the Voice's modulator volume (incl. damping)
     float fmvoldamp = powf(440.0f / getvoicebasefreq(nvoice),
             param.PFMVolumeDamp / 64.0f - 1.0f);
-    const float fmvolume_ = param.PFMVolume / 127.0f;
+    const float fmvolume_ = param.FMvolume / 100.0f;
     switch(voice.FMEnabled) {
         case PHASE_MOD:
         case PW_MOD:
@@ -631,20 +631,20 @@ void ADnote::legatonote(LegatoParams lpars)
                              nvoice), pars.VoicePar[nvoice].PFMVolumeDamp
                          / 64.0f);
                 NoteVoicePar[nvoice].FMVolume =
-                    (expf(pars.VoicePar[nvoice].PFMVolume / 127.0f
+                    (expf(pars.VoicePar[nvoice].FMvolume / 100.0f
                           * FM_AMP_MULTIPLIER) - 1.0f) * fmvoldamp * 4.0f;
                 break;
             case FREQ_MOD:
                 NoteVoicePar[nvoice].FMVolume =
-                    (expf(pars.VoicePar[nvoice].PFMVolume / 127.0f
+                    (expf(pars.VoicePar[nvoice].FMvolume / 100.0f
                           * FM_AMP_MULTIPLIER) - 1.0f) * fmvoldamp * 4.0f;
                 break;
             default:
                 if(fmvoldamp > 1.0f)
                     fmvoldamp = 1.0f;
                 NoteVoicePar[nvoice].FMVolume =
-                    pars.VoicePar[nvoice].PFMVolume
-                    / 127.0f * fmvoldamp;
+                    pars.VoicePar[nvoice].FMvolume
+                    / 100.0f * fmvoldamp;
         }
 
         //Voice's modulator velocity sensing
