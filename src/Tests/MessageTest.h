@@ -303,10 +303,10 @@ class MessageTest:public CxxTest::TestSuite
             while(ms->bToU->hasNext()) {
                 const char *msg = ms->bToU->read();
                 if(state == 0) {
-                    TS_ASSERT_EQUALS(rtosc_narguments(msg), 0);
+                    TS_ASSERT_EQUALS(rtosc_narguments(msg), 0U);
                     state = 1;
                 } else if(state == 1) {
-                    TS_ASSERT_EQUALS(rtosc_narguments(msg), 1);
+                    TS_ASSERT_EQUALS(rtosc_narguments(msg), 1U);
                     value = rtosc_argument(msg, 0).i;
                     state = 2;
                 } else if(state == 2) {
