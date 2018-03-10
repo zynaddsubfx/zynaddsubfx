@@ -190,6 +190,8 @@ void SUBnote::setup(float freq,
         if(GlobalFilter)
             GlobalFilter->updateNoteFreq(basefreq);
     }
+
+    oldamplitude = newamplitude;
 }
 
 SynthNote *SUBnote::cloneLegato(void)
@@ -477,7 +479,6 @@ void SUBnote::computecurrentparameters()
         oldbandwidth  = ctl.bandwidth.data;
         oldpitchwheel = ctl.pitchwheel.data;
     }
-    oldamplitude = newamplitude;
     newamplitude = volume * AmpEnvelope->envout_dB() * 2.0f;
 
     //Filter

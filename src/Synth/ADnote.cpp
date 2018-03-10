@@ -669,7 +669,6 @@ void ADnote::legatonote(LegatoParams lpars)
                            * VelF(
         velocity,
         pars.GlobalPar.PAmpVelocityScaleFunction); //velocity sensing
-    globaloldamplitude = globalnewamplitude;
     globalnewamplitude = NoteGlobalPar.Volume
                          * NoteGlobalPar.AmpEnvelope->envout_dB()
                          * NoteGlobalPar.AmpLfo->amplfoout();
