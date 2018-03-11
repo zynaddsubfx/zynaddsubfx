@@ -50,7 +50,7 @@ bool WatchPoint::is_active(void)
 
     return false;
 }
-    
+
 FloatWatchPoint::FloatWatchPoint(WatchManager *ref, const char *prefix, const char *id)
     :WatchPoint(ref, prefix, id)
 {}
@@ -58,7 +58,7 @@ FloatWatchPoint::FloatWatchPoint(WatchManager *ref, const char *prefix, const ch
 VecWatchPoint::VecWatchPoint(WatchManager *ref, const char *prefix, const char *id)
     :WatchPoint(ref, prefix, id)
 {}
-    
+
 WatchManager::WatchManager(thrlnk *link)
     :write_back(link), new_active(false)
 {
@@ -67,7 +67,7 @@ WatchManager::WatchManager(thrlnk *link)
     memset(data_list,   0, sizeof(data_list));
     memset(deactivate,  0, sizeof(deactivate));
 }
-    
+
 void WatchManager::add_watch(const char *id)
 {
     //Don't add duplicate watchs
@@ -136,7 +136,7 @@ bool WatchManager::active(const char *id) const
 
     return false;
 }
-    
+
 int WatchManager::samples(const char *id) const
 {
     for(int i=0; i<MAX_WATCH; ++i)
@@ -144,7 +144,7 @@ int WatchManager::samples(const char *id) const
             return sample_list[i];
     return 0;
 }
-    
+
 void WatchManager::satisfy(const char *id, float f)
 {
     //printf("trying to satisfy '%s'\n", id);

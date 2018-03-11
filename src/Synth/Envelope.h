@@ -23,7 +23,6 @@ namespace zyn {
 class Envelope
 {
     public:
-
         /**Constructor*/
         Envelope(class EnvelopeParams &pars, float basefreq, float dt, WatchManager *m=0,
                 const char *watch_prefix=0);
@@ -37,6 +36,8 @@ class Envelope
         /**Determines the status of the Envelope
          * @return returns 1 if the envelope is finished*/
         bool finished(void) const;
+        void watch(float time, float value);
+
     private:
         int   envpoints;
         int   envsustain;    //"-1" means disabled
@@ -44,6 +45,7 @@ class Envelope
         float envval[MAX_ENVELOPE_POINTS]; // [0.0f .. 1.0f]
         float envstretch;
         int   linearenvelope;
+        int   mode;
 
         int   currentpoint;    //current envelope point (starts from 1)
         bool  forcedrelease;

@@ -32,7 +32,7 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
     if(!pars.Pfreemode)
         pars.converttofree();
 
-    int mode = pars.Envmode;
+    mode = pars.Envmode;
 
     //for amplitude envelopes
     if((mode == 1) && !linearenvelope)
@@ -101,26 +101,54 @@ void Envelope::forceFinish(void)
     envfinish = true;
 }
 
+void Envelope::watch(float time, float value)
+{
+    float pos[2];
+    float factor1;
+    float factor2;
+    pos[0] = time;
+    switch(mode) {
+        case 2:
+            pos[1] = 1 - value / -40.f;
+            watchOut(pos, 2);
+            break;
+        case 3:
+            factor1 = log(value/100. + 1.) / (6. * log(2));
+            factor2 = log(1. - value/100.) / (6. * log(2));
+            pos[1] = ((0.5 * factor1) >= 0) ? (0.5 * factor1 + 0.5) : (0.5  - factor2 * 0.5);
+            watchOut(pos, 2);
+            break;
+        case 4:
+            pos[1] = (value + 6.) / 12.f;
+            watchOut(pos, 2);
+            break;
+        case 5:
+            pos[1] = (value + 10.) / 20.f;
+            watchOut(pos, 2);
+            break;
+        default:
+            pos[1] = value;
+            watchOut(pos, 2);
+    }
+}
+
 /*
  * Envelope Output
  */
 float Envelope::envout(bool doWatch)
 {
     float out;
-
     if(envfinish) { //if the envelope is finished
         envoutval = envval[envpoints - 1];
         if(doWatch) {
-            float pos[2] = {(float)envpoints - 1, envoutval};
-            watchOut(pos, 2);
+            watch(envpoints - 1, envoutval);
         }
         return envoutval;
     }
     if((currentpoint == envsustain + 1) && !keyreleased) { //if it is sustaining now
         envoutval = envval[envsustain];
         if(doWatch) {
-            float pos[2] = {(float)envsustain, envoutval};
-            watchOut(pos, 2);
+            watch(envsustain, envoutval);
         }
         return envoutval;
     }
@@ -144,8 +172,7 @@ float Envelope::envout(bool doWatch)
         }
 
         if(doWatch) {
-            float pos[2] = {(float)tmp + t, envoutval};
-            watchOut(pos, 2);
+            watch(tmp + t, envoutval);
         }
 
         return out;
@@ -169,8 +196,7 @@ float Envelope::envout(bool doWatch)
     envoutval = out;
 
     if(doWatch) {
-        float pos[2] = {(float)currentpoint + t, envoutval};
-        watchOut(pos, 2);
+        watch(currentpoint + t, envoutval);
     }
     return out;
 }
@@ -201,13 +227,13 @@ float Envelope::envout_dB()
             envoutval = EnvelopeParams::env_rap2dB(out);
         else
             envoutval = MIN_ENVELOPE_DB;
+        out = envoutval;
     } else
-        out = EnvelopeParams::env_dB2rap(envout(false));
+        out = envout(false);
 
-    float pos[2] = {(float)currentpoint + t, out};
-    watchOut(pos, 2);
+    watch(currentpoint + t, out);
+    return EnvelopeParams::env_dB2rap(out);
 
-    return out;
 }
 
 bool Envelope::finished() const

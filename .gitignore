@@ -1,6 +1,12 @@
 *.o
 *~
 *.bc
+*.swp
+*.config
+*.creator
+*.creator.user
+*.files
+*.includes
 src/zynaddsubfx
 src/Tests/runner
 src/Tests/runner.cpp
