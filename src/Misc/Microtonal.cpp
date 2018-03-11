@@ -51,6 +51,7 @@ const rtosc::Ports Microtonal::ports = {
     rParamZyn(PAnote, rShort("1/1 midi note"), rDefault(69),
         "The note for 'A'"),
     rParamF(PAfreq,   rShort("ref freq"), rDefault(440.0f),
+         rLog(1.0,20000.0),
         "Frequency of the 'A' note"),
     rParamZyn(Pscaleshift, rShort("shift"), rDefault(64),
         "UNDOCUMENTED"),
