@@ -8,12 +8,12 @@ gen-files:
 
 
 xhtml: zynaddsubfx.txt envelope.txt intro.txt lfo.txt
-	asciidoc -a numbered -a toc -b html5 \
+	asciidoctor -a numbered -a toc -b html5 \
 		-a latexmath \
 		zynaddsubfx.txt
 
 chunked:
-	asciidoc --doctype=article   -b docbook \
+	asciidoctor --doctype=article   -b docbook5 \
 	          zynaddsubfx.txt
 	rm -rf ./zynaddsubfx.chunked
 	mkdir ./zynaddsubfx.chunked
@@ -30,10 +30,10 @@ chunked:
 		 "./zynaddsubfx.xml" \
 
 pdf:
-	a2x -f pdf zynaddsubfx.txt
+	asciidoctor-pdf zynaddsubfx.txt
 
 man: zynaddsubfx.1.txt
-	a2x -f manpage zynaddsubfx.1.txt
+	asciidoctor -b manpage zynaddsubfx.1.txt
 
 clean:
 	rm -f *~ *html *pdf *xml *tex *log zynaddsubfx.chunked/images
