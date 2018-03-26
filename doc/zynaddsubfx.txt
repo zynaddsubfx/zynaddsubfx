@@ -6,6 +6,8 @@ This documentation is a work in progress
 
 include::intro.txt[]
 
+include::output.txt[]
+
 include::filter.txt[]
 
 include::lfo.txt[]

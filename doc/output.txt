@@ -1,0 +1,49 @@
+Output engines
+--------------
+
+There are different output engines for zynaddsubfx.
+
+ALSA
+~~~~
+Simply start zyn using `zynaddsubfx -O alsa`.
+
+NOTE: If your system is using PulseAudio, this may not work. Even if it does,
+and ALSA redirects to PulseAudio, realtime guarantees can not be made. It is
+recommended to follow the steps in the <<PulseAudio>> section.
+
+Jack
+~~~~
+NOTE: If your system is using PulseAudio, this is the suggested way, but may
+not work out of the box, or it may not do what you want. Please seee the
+<<PulseAudio>> section.
+
+There are different ways to forward zyn to jack:
+
+* Automatic connecting with `zynaddsfubx -O jack -a` will usually do what you
+  want
+* Manual selective connecting can be done by using `zynaddsfubx -O jack` and
+  then using one of
+  - the `qjackctl` gui
+  - the `jack_connect` commandline utility
+* Automatic selective connecting can be done using
+  http://www.rncbc.org/drupal/node/76[jack's patchbays]
+
+PulseAudio
+~~~~~~~~~~
+PulseAudio is *not* **directly** implemented in zyn. While PulseAudio can be
+really practical in many cases, it has no realtime guarantees. Running zyn
+right through pulse is thus not intended. In case you want to keep
+PulseAudio and still use zyn, the suggested way is to route PulseAudio through
+jack. You need to
+
+* Install jack2
+* Route pulse through jack2 using cadence
+  
+These steps should be described for your distribution. Check out one of the
+following links.
+
+* https://wiki.archlinux.org/index.php/PulseAudio/Examples#The_KXStudio_method[Arch Linux]
+* please add more here ...
+ 
+After that, follow the usual steps described under <<Jack>>.
+

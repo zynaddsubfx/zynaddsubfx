@@ -14,7 +14,9 @@ zynaddsubfx -I alsa -O jack -a
 ------------------------------
 
 This sets the input driver to be alsa and the output driver to be jack, which
-should attempt to autoconnect to your soundcard as per the '-a' flag.
+should attempt to autoconnect to your soundcard as per the '-a' flag. For more
+details, see the <<Output engines>> chapter.
+
 If this is your first time running ZynAddSubFX, you will see a screen that lets
 you choose between the advanced and beginner interface.
 Currently the beginner interface is deprecated, so the advanced one is
