@@ -74,64 +74,6 @@ static void liblo_error_cb(int i, const char *m, const char *loc)
     fprintf(stderr, "liblo :-( %d-%s@%s\n",i,m,loc);
 }
 
-void path_search(const char *m, const char *url)
-{
-    using rtosc::Ports;
-    using rtosc::Port;
-
-    //assumed upper bound of 32 ports (may need to be resized)
-    char         types[256+1];
-    rtosc_arg_t  args[256];
-    size_t       pos    = 0;
-    const Ports *ports  = NULL;
-    const char  *str    = rtosc_argument(m,0).s;
-    const char  *needle = rtosc_argument(m,1).s;
-
-    //zero out data
-    memset(types, 0, sizeof(types));
-    memset(args,  0, sizeof(args));
-
-    if(!*str) {
-        ports = &Master::ports;
-    } else {
-        const Port *port = Master::ports.apropos(rtosc_argument(m,0).s);
-        if(port)
-            ports = port->ports;
-    }
-
-    if(ports) {
-        //RTness not confirmed here
-        for(const Port &p:*ports) {
-            if(strstr(p.name, needle) != p.name || !p.name)
-                continue;
-            types[pos]    = 's';
-            args[pos++].s = p.name;
-            types[pos]    = 'b';
-            if(p.metadata && *p.metadata) {
-                args[pos].b.data = (unsigned char*) p.metadata;
-                auto tmp = rtosc::Port::MetaContainer(p.metadata);
-                args[pos++].b.len  = tmp.length();
-            } else {
-                args[pos].b.data = (unsigned char*) NULL;
-                args[pos++].b.len  = 0;
-            }
-        }
-    }
-
-
-    //Reply to requester [wow, these messages are getting huge...]
-    char buffer[1024*20];
-    size_t length = rtosc_amessage(buffer, sizeof(buffer), "/paths", types, args);
-    if(length) {
-        lo_message msg  = lo_message_deserialise((void*)buffer, length, NULL);
-        lo_address addr = lo_address_new_from_url(url);
-        if(addr)
-            lo_send_message(addr, buffer, msg);
-        lo_address_free(addr);
-        lo_message_free(msg);
-    }
-}
-
 static int handler_function(const char *path, const char *types, lo_arg **argv,
         int argc, lo_message msg, void *user_data)
 {
@@ -153,8 +95,26 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
     memset(buffer, 0, sizeof(buffer));
     size_t size = 2048;
     lo_message_serialise(msg, path, buffer, &size);
-    if(!strcmp(buffer, "/path-search") && !strcmp("ss", rtosc_argument_string(buffer))) {
-        path_search(buffer, mw->activeUrl().c_str());
+
+    if(!strcmp(buffer, "/path-search") &&
+       !strcmp("ss", rtosc_argument_string(buffer))) {
+        auto reply_cb = [](const char* url, const char* types, const rtosc_arg_t* args)
+        {
+            char buffer[1024*20];
+            size_t length = rtosc_amessage(buffer, sizeof(buffer),
+                                           "/paths", types, args);
+            if(length) {
+                lo_message msg  = lo_message_deserialise((void*)buffer,
+                                                         length, NULL);
+                lo_address addr = lo_address_new_from_url(url);
+                if(addr)
+                    lo_send_message(addr, buffer, msg);
+                lo_address_free(addr);
+                lo_message_free(msg);
+            }
+        };
+        rtosc::path_search(Master::ports, buffer, mw->activeUrl().c_str(),
+                           reply_cb);
     } else if(buffer[0]=='/' && strrchr(buffer, '/')[1]) {
         mw->transmitMsg(rtosc::Ports::collapsePath(buffer));
     }
