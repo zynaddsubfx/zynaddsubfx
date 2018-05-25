@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=ZynAddSubFX - Jack (multi channel)
+Comment=A powerful realtime software synthesizer
+Comment[fr]=Un synthétiseur logiciel temps-réel puissant
+Comment[pl]=Funkcjonalny syntezator wirtualny czasu rzeczywistego
+Keywords=audio;sound;jack;midi;synth;synthesizer;
+Exec=zynaddsubfx -I jack -O jack-multi
+Icon=zynaddsubfx
+Terminal=false
+Type=Application
+Categories=AudioVideo;Audio;
