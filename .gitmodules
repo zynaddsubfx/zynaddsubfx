@@ -7,4 +7,4 @@
 	branch = default_values
 [submodule "DPF"]
 	path = DPF
-	url = git://github.com/DISTRHO/DPF
+	url = https://github.com/DISTRHO/DPF
