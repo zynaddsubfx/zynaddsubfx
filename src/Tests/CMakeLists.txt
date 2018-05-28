@@ -70,7 +70,7 @@ target_link_libraries(save-osc
                       zynaddsubfx_gui_bridge
                       ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
 #this will be replace with a for loop when the code will get more stable:
-add_test(SaveOsc save-osc ../../../instruments/examples/Arpeggio\ 1.xmz)
+add_test(SaveOsc save-osc ${CMAKE_CURRENT_SOURCE_DIR}/../../instruments/examples/Arpeggio\ 1.xmz)
 
 #message(STATUS "Plugin Test ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}")
 
