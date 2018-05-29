@@ -422,7 +422,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
     else
         switch(param.PFMEnabled) {
             case 1:
-                voice.FMEnabled = MORPH;
+                voice.FMEnabled = MIX;
                 break;
             case 2:
                 voice.FMEnabled = RING_MOD;
@@ -453,7 +453,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
 
         float tmp = 1.0f;
         if((pars.VoicePar[vc].FMSmp->Padaptiveharmonics != 0)
-                || (voice.FMEnabled == MORPH)
+                || (voice.FMEnabled == MIX)
                 || (voice.FMEnabled == RING_MOD))
             tmp = getFMvoicebasefreq(nvoice);
 
@@ -730,7 +730,7 @@ void ADnote::legatonote(LegatoParams lpars)
            && (NoteVoicePar[nvoice].FMVoice < 0)) {
             pars.VoicePar[nvoice].FMSmp->newrandseed(prng());
 
-            //Perform Anti-aliasing only on MORPH or RING MODULATION
+            //Perform Anti-aliasing only on MIX or RING MODULATION
 
             int vc = nvoice;
             if(pars.VoicePar[nvoice].PextFMoscil != -1)
@@ -920,7 +920,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
             param.FMSmp->newrandseed(prng());
             vce.FMSmp = memory.valloc<float>(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
 
-            //Perform Anti-aliasing only on MORPH or RING MODULATION
+            //Perform Anti-aliasing only on MIX or RING MODULATION
 
             int vc = nvoice;
             if(param.PextFMoscil != -1)
@@ -928,7 +928,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
             float tmp = 1.0f;
             if((pars.VoicePar[vc].FMSmp->Padaptiveharmonics != 0)
-               || (vce.FMEnabled == MORPH)
+               || (vce.FMEnabled == MIX)
                || (vce.FMEnabled == RING_MOD))
                 tmp = getFMvoicebasefreq(nvoice);
 
@@ -1301,9 +1301,9 @@ inline void ADnote::ComputeVoiceOscillator_CubicInterpolation(int nvoice){
 };
 */
 /*
- * Computes the Oscillator (Morphing)
+ * Computes the Oscillator (Mixing)
  */
-inline void ADnote::ComputeVoiceOscillatorMorph(int nvoice)
+inline void ADnote::ComputeVoiceOscillatorMix(int nvoice)
 {
     ComputeVoiceOscillator_LinearInterpolation(nvoice);
     if(FMnewamplitude[nvoice] > 1.0f)
@@ -1617,8 +1617,8 @@ int ADnote::noteout(float *outl, float *outr)
         switch (NoteVoicePar[nvoice].noisetype) {
             case 0: //voice mode=sound
                 switch(NoteVoicePar[nvoice].FMEnabled) {
-                    case MORPH:
-                        ComputeVoiceOscillatorMorph(nvoice);
+                    case MIX:
+                        ComputeVoiceOscillatorMix(nvoice);
                         break;
                     case RING_MOD:
                         ComputeVoiceOscillatorRingModulation(nvoice);
