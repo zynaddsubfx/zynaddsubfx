@@ -34,6 +34,18 @@
 #include <windows.h>
 #endif
 
+#ifdef __APPLE__
+#include <dlfcn.h>
+
+static const char* my_dylib_path () {
+    static Dl_info info;
+    if (dladdr((const void*) &my_dylib_path, &info)) {
+        return info.dli_fname;
+    }
+    return NULL;
+}
+#endif
+
 using namespace std;
 
 namespace zyn {
@@ -376,6 +388,22 @@ void Bank::rescanforbanks()
             scanrootdir(path);
         }
     }
+#endif
+#ifdef __APPLE__
+   {
+        const char* path = my_dylib_path ();
+        if (path && strstr(path, "ZynAddSubFX.dylib") && strlen (path) < 1000) {
+            char tmp[1024];
+            strcpy (tmp, path);
+            strstr (tmp, "ZynAddSubFX.dylib")[0] = 0; // LV2
+            strcat (tmp, "banks");
+            scanrootdir(tmp);
+            strcpy (tmp, path);
+            strstr (tmp, "ZynAddSubFX.dylib")[0] = 0;
+            strcat (tmp, "../Resources/banks"); // VST
+            scanrootdir(tmp);
+        }
+   }
 #endif
 
     //sort the banks

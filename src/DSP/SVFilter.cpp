@@ -26,6 +26,12 @@
 
 namespace zyn {
 
+enum FilterInterpolationType {
+    INTERPOLATE_EXTREME = 0x01,
+    INTERPOLATE_NON_ZERO,
+    INTERPOLATE_NONE
+};
+
 SVFilter::SVFilter(unsigned char Ftype, float Ffreq, float Fq,
                    unsigned char Fstages, unsigned int srate, int bufsize)
     :Filter(srate, bufsize),
@@ -34,7 +40,7 @@ SVFilter::SVFilter(unsigned char Ftype, float Ffreq, float Fq,
       freq(Ffreq),
       q(Fq),
       gain(1.0f),
-      needsinterpolation(false),
+      needsinterpolation(INTERPOLATE_NONE),
       firsttime(true)
 {
     if(stages >= MAX_FILTER_STAGES)
@@ -100,6 +106,8 @@ SVFilter::response SVFilter::computeResponse(int type,
     }
 }
 
+
+
 void SVFilter::computefiltercoefs(void)
 {
     par.f = freq / samplerate_f * 4.0f;
@@ -127,8 +135,14 @@ void SVFilter::setfreq(float frequency)
     //if the frequency is changed fast, it needs interpolation
     if((rap > 3.0f) || nyquistthresh) { //(now, filter and coefficients backup)
         if(!firsttime)
-            needsinterpolation = true;
+            needsinterpolation = INTERPOLATE_EXTREME;
         ipar = par;
+    } else if(rap != 1.0) {
+        if (!firsttime)
+            needsinterpolation = INTERPOLATE_NON_ZERO;
+        ipar = par;
+    } else {
+        needsinterpolation = INTERPOLATE_NONE;
     }
     freq = frequency;
     computefiltercoefs();
@@ -168,8 +182,7 @@ void SVFilter::setstages(int stages_)
     computefiltercoefs();
 }
 
-void SVFilter::singlefilterout(float *smp, fstage &x, parameters &par)
-{
+float *SVFilter::getfilteroutfortype(SVFilter::fstage &x) {
     float *out = NULL;
     switch(type) {
         case 0:
@@ -188,11 +201,20 @@ void SVFilter::singlefilterout(float *smp, fstage &x, parameters &par)
             out = &x.low;
             warnx("Impossible SVFilter type encountered [%d]", type);
     }
+    return out;
+}
 
+void SVFilter::singlefilterout_with_par_interpolation(float *smp, fstage &x, parameters &par1, parameters &par2)
+{
+    float *out = getfilteroutfortype(x);
     for(int i = 0; i < buffersize; ++i) {
-        x.low   = x.low + par.f * x.band;
-        x.high  = par.q_sqrt * smp[i] - x.low - par.q * x.band;
-        x.band  = par.f * x.high + x.band;
+        float p = i / buffersize_f;
+        float f = par1.f + (par2.f - par1.f) * p;
+        float q = par1.q + (par2.q - par1.q) * p;
+        float q_sqrt = sqrtf(q);
+        x.low   = x.low + f * x.band;
+        x.high  = q_sqrt * smp[i] - x.low - q * x.band;
+        x.band  = f * x.high + x.band;
         x.notch = x.high + x.low;
         smp[i]  = *out;
     }
@@ -209,23 +231,38 @@ void SVFilter::singlefilterout(float *smp, fstage &x, parameters &par)
 // xl = pf*pfxh*z(-1)/(1-z(-1))^2
 
 
+
+void SVFilter::singlefilterout(float *smp, SVFilter::fstage &x, SVFilter::parameters &par)
+{
+    float *out = getfilteroutfortype(x);
+    for(int i = 0; i < buffersize; ++i) {
+        x.low   = x.low + par.f * x.band;
+        x.high  = par.q_sqrt * smp[i] - x.low - par.q * x.band;
+        x.band  = par.f * x.high + x.band;
+        x.notch = x.high + x.low;
+        smp[i]  = *out;
+    }
+}
+
 void SVFilter::filterout(float *smp)
 {
-    for(int i = 0; i < stages + 1; ++i)
-        singlefilterout(smp, st[i], par);
-
-    if(needsinterpolation) {
+    if (needsinterpolation == INTERPOLATE_EXTREME) {
         float ismp[buffersize];
+        for(int i = 0; i < stages + 1; ++i)
+            singlefilterout(smp, st[i], par);
         memcpy(ismp, smp, bufferbytes);
-
         for(int i = 0; i < stages + 1; ++i)
             singlefilterout(ismp, st[i], ipar);
-
         for(int i = 0; i < buffersize; ++i) {
             float x = i / buffersize_f;
             smp[i] = ismp[i] * (1.0f - x) + smp[i] * x;
         }
-        needsinterpolation = false;
+    } else if (needsinterpolation == INTERPOLATE_NON_ZERO) {
+        for(int i = 0; i < stages + 1; ++i)
+            singlefilterout_with_par_interpolation(smp, st[i], ipar, par);
+    } else {
+        for(int i = 0; i < stages + 1; ++i)
+            singlefilterout(smp, st[i], par);
     }
 
     for(int i = 0; i < buffersize; ++i)

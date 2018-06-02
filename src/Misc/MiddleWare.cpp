@@ -62,6 +62,26 @@ namespace zyn {
 using std::string;
 int Pexitprogram = 0;
 
+#ifdef __APPLE__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
+/* work around missing clock_gettime on OSX */
+static void monotonic_clock_gettime(struct timespec *ts) {
+#ifdef __APPLE__
+    clock_serv_t cclock;
+    mach_timespec_t mts;
+    host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock);
+    clock_get_time(cclock, &mts);
+    mach_port_deallocate(mach_task_self(), cclock);
+    ts->tv_sec = mts.tv_sec;
+    ts->tv_nsec = mts.tv_nsec;
+#else
+    clock_gettime(CLOCK_MONOTONIC, ts);
+#endif
+}
+
 /******************************************************************************
  *                        LIBLO And Reflection Code                           *
  *                                                                            *
@@ -1601,7 +1621,7 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
 
     //Setup starting time
     struct timespec time;
-    clock_gettime(CLOCK_MONOTONIC, &time);
+    monotonic_clock_gettime(&time);
     start_time_sec  = time.tv_sec;
     start_time_nsec = time.tv_nsec;
 
@@ -1696,7 +1716,7 @@ void MiddleWareImpl::heartBeat(Master *master)
     //Current offline status
     
     struct timespec time;
-    clock_gettime(CLOCK_MONOTONIC, &time);
+    monotonic_clock_gettime(&time);
     uint32_t now = (time.tv_sec-start_time_sec)*100 +
                    (time.tv_nsec-start_time_nsec)*1e-9*100;
     int32_t last_ack   = master->last_ack;

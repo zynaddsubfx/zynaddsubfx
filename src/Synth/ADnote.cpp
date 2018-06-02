@@ -216,7 +216,7 @@ void ADnote::setupVoice(int nvoice)
     voice.filterbypass = param.Pfilterbypass;
 
     setupVoiceMod(nvoice);
-    
+
     voice.FMVoice = param.PFMVoice;
     voice.FMFreqEnvelope = NULL;
     voice.FMAmpEnvelope  = NULL;
@@ -422,7 +422,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
     else
         switch(param.PFMEnabled) {
             case 1:
-                voice.FMEnabled = MORPH;
+                voice.FMEnabled = MIX;
                 break;
             case 2:
                 voice.FMEnabled = RING_MOD;
@@ -453,7 +453,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
 
         float tmp = 1.0f;
         if((pars.VoicePar[vc].FMSmp->Padaptiveharmonics != 0)
-                || (voice.FMEnabled == MORPH)
+                || (voice.FMEnabled == MIX)
                 || (voice.FMEnabled == RING_MOD))
             tmp = getFMvoicebasefreq(nvoice);
 
@@ -482,7 +482,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
     //Compute the Voice's modulator volume (incl. damping)
     float fmvoldamp = powf(440.0f / getvoicebasefreq(nvoice),
             param.PFMVolumeDamp / 64.0f - 1.0f);
-    const float fmvolume_ = param.PFMVolume / 127.0f;
+    const float fmvolume_ = param.FMvolume / 100.0f;
     switch(voice.FMEnabled) {
         case PHASE_MOD:
         case PW_MOD:
@@ -508,7 +508,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
 
 SynthNote *ADnote::cloneLegato(void)
 {
-    SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity, 
+    SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity,
                    (bool)portamento, legato.param.midinote, true};
     return memory.alloc<ADnote>(&pars, sp);
 }
@@ -520,7 +520,6 @@ SynthNote *ADnote::cloneLegato(void)
 void ADnote::legatonote(LegatoParams lpars)
 {
     //ADnoteParameters &pars = *partparams;
-
     // Manage legato stuff
     if(legato.update(lpars))
         return;
@@ -543,7 +542,7 @@ void ADnote::legatonote(LegatoParams lpars)
     else
         NoteGlobalPar.Panning = pars.GlobalPar.PPanning / 128.0f;
 
-    NoteGlobalPar.Filter->updateSense(velocity, 
+    NoteGlobalPar.Filter->updateSense(velocity,
                 pars.GlobalPar.PFilterVelocityScale,
                 pars.GlobalPar.PFilterVelocityScaleFunction);
 
@@ -586,7 +585,6 @@ void ADnote::legatonote(LegatoParams lpars)
                 pars.GlobalPar.PDetuneType,
                 pars.VoicePar[nvoice].PFMCoarseDetune,
                 pars.VoicePar[nvoice].PFMDetune);
-
 
         //Get the voice's oscil or external's voice oscil
         int vc = nvoice;
@@ -631,20 +629,20 @@ void ADnote::legatonote(LegatoParams lpars)
                              nvoice), pars.VoicePar[nvoice].PFMVolumeDamp
                          / 64.0f);
                 NoteVoicePar[nvoice].FMVolume =
-                    (expf(pars.VoicePar[nvoice].PFMVolume / 127.0f
+                    (expf(pars.VoicePar[nvoice].FMvolume / 100.0f
                           * FM_AMP_MULTIPLIER) - 1.0f) * fmvoldamp * 4.0f;
                 break;
             case FREQ_MOD:
                 NoteVoicePar[nvoice].FMVolume =
-                    (expf(pars.VoicePar[nvoice].PFMVolume / 127.0f
+                    (expf(pars.VoicePar[nvoice].FMvolume / 100.0f
                           * FM_AMP_MULTIPLIER) - 1.0f) * fmvoldamp * 4.0f;
                 break;
             default:
                 if(fmvoldamp > 1.0f)
                     fmvoldamp = 1.0f;
                 NoteVoicePar[nvoice].FMVolume =
-                    pars.VoicePar[nvoice].PFMVolume
-                    / 127.0f * fmvoldamp;
+                    pars.VoicePar[nvoice].FMvolume
+                    / 100.0f * fmvoldamp;
         }
 
         //Voice's modulator velocity sensing
@@ -657,7 +655,6 @@ void ADnote::legatonote(LegatoParams lpars)
                         * logf(50.0f))
                    - 1.0f) / synth.buffersize_f / 10.0f * synth.samplerate_f);
     }
-
     ///    initparameters();
 
     ///////////////
@@ -672,7 +669,6 @@ void ADnote::legatonote(LegatoParams lpars)
                            * VelF(
         velocity,
         pars.GlobalPar.PAmpVelocityScaleFunction); //velocity sensing
-
     globalnewamplitude = NoteGlobalPar.Volume
                          * NoteGlobalPar.AmpEnvelope->envout_dB()
                          * NoteGlobalPar.AmpLfo->amplfoout();
@@ -734,7 +730,7 @@ void ADnote::legatonote(LegatoParams lpars)
            && (NoteVoicePar[nvoice].FMVoice < 0)) {
             pars.VoicePar[nvoice].FMSmp->newrandseed(prng());
 
-            //Perform Anti-aliasing only on MORPH or RING MODULATION
+            //Perform Anti-aliasing only on MIX or RING MODULATION
 
             int vc = nvoice;
             if(pars.VoicePar[nvoice].PextFMoscil != -1)
@@ -924,7 +920,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
             param.FMSmp->newrandseed(prng());
             vce.FMSmp = memory.valloc<float>(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
 
-            //Perform Anti-aliasing only on MORPH or RING MODULATION
+            //Perform Anti-aliasing only on MIX or RING MODULATION
 
             int vc = nvoice;
             if(param.PextFMoscil != -1)
@@ -932,7 +928,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
             float tmp = 1.0f;
             if((pars.VoicePar[vc].FMSmp->Padaptiveharmonics != 0)
-               || (vce.FMEnabled == MORPH)
+               || (vce.FMEnabled == MIX)
                || (vce.FMEnabled == RING_MOD))
                 tmp = getFMvoicebasefreq(nvoice);
 
@@ -1305,9 +1301,9 @@ inline void ADnote::ComputeVoiceOscillator_CubicInterpolation(int nvoice){
 };
 */
 /*
- * Computes the Oscillator (Morphing)
+ * Computes the Oscillator (Mixing)
  */
-inline void ADnote::ComputeVoiceOscillatorMorph(int nvoice)
+inline void ADnote::ComputeVoiceOscillatorMix(int nvoice)
 {
     ComputeVoiceOscillator_LinearInterpolation(nvoice);
     if(FMnewamplitude[nvoice] > 1.0f)
@@ -1564,15 +1560,15 @@ inline void ADnote::ComputeVoicePinkNoise(int nvoice)
         float *tw = tmpwave_unison[k];
         float *f = &pinking[nvoice][k > 0 ? 7 : 0];
         for(int i = 0; i < synth.buffersize; ++i) {
-	    float white = (RND-0.5)/4.0;
-	    f[0] = 0.99886*f[0]+white*0.0555179;
-	    f[1] = 0.99332*f[1]+white*0.0750759;
-	    f[2] = 0.96900*f[2]+white*0.1538520;
-	    f[3] = 0.86650*f[3]+white*0.3104856;
-	    f[4] = 0.55000*f[4]+white*0.5329522;
-	    f[5] = -0.7616*f[5]-white*0.0168980;
-	    tw[i] = f[0]+f[1]+f[2]+f[3]+f[4]+f[5]+f[6]+white*0.5362;
-	    f[6] = white*0.115926;
+            float white = (RND-0.5)/4.0;
+            f[0] = 0.99886*f[0]+white*0.0555179;
+            f[1] = 0.99332*f[1]+white*0.0750759;
+            f[2] = 0.96900*f[2]+white*0.1538520;
+            f[3] = 0.86650*f[3]+white*0.3104856;
+            f[4] = 0.55000*f[4]+white*0.5329522;
+            f[5] = -0.7616*f[5]-white*0.0168980;
+            tw[i] = f[0]+f[1]+f[2]+f[3]+f[4]+f[5]+f[6]+white*0.5362;
+            f[6] = white*0.115926;
         }
     }
 }
@@ -1621,8 +1617,8 @@ int ADnote::noteout(float *outl, float *outr)
         switch (NoteVoicePar[nvoice].noisetype) {
             case 0: //voice mode=sound
                 switch(NoteVoicePar[nvoice].FMEnabled) {
-                    case MORPH:
-                        ComputeVoiceOscillatorMorph(nvoice);
+                    case MIX:
+                        ComputeVoiceOscillatorMix(nvoice);
                         break;
                     case RING_MOD:
                         ComputeVoiceOscillatorRingModulation(nvoice);
@@ -1983,7 +1979,7 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
     Volume = 4.0f * powf(0.1f, 3.0f * (1.0f - param.PVolume / 96.0f)) //-60 dB .. 0 dB
              * VelF(velocity, param.PAmpVelocityScaleFunction);     //sensing
 
-    Filter = memory.alloc<ModFilter>(*param.GlobalFilter, synth, time, memory, 
+    Filter = memory.alloc<ModFilter>(*param.GlobalFilter, synth, time, memory,
             stereo, basefreq);
 
     FilterEnvelope = memory.alloc<Envelope>(*param.FilterEnvelope, basefreq,
@@ -1993,7 +1989,7 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
 
     Filter->addMod(*FilterEnvelope);
     Filter->addMod(*FilterLfo);
-    
+
     {
         Filter->updateSense(velocity, param.PFilterVelocityScale,
                 param.PFilterVelocityScaleFunction);

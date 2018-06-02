@@ -56,7 +56,9 @@ class SVFilter:public Filter
             float f, q, q_sqrt;
         } par, ipar;
 
+        float *getfilteroutfortype(SVFilter::fstage &x);
         void singlefilterout(float *smp, fstage &x, parameters &par);
+        void singlefilterout_with_par_interpolation(float *smp, fstage &x, parameters &par1, parameters &par2);
         void computefiltercoefs(void);
         int   type;    // The type of the filter (LPF1,HPF1,LPF2,HPF2...)
         int   stages;  // how many times the filter is applied (0->1,1->2,etc.)
@@ -66,7 +68,8 @@ class SVFilter:public Filter
 
         bool abovenq,   //if the frequency is above the nyquist
              oldabovenq;
-        bool needsinterpolation, firsttime;
+        int needsinterpolation;
+        bool firsttime;
 };
 
 }

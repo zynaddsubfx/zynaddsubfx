@@ -3,73 +3,79 @@ ZynAddSubFX
 
 image::https://travis-ci.org/zynaddsubfx/zynaddsubfx.svg?branch=master[alt="Build status", link="https://travis-ci.org/zynaddsubfx/zynaddsubfx"]
 
-It is a feature heavy realtime software synthesizer for Linux, OSX,
-and Windows. 
+ZynAddSubFX is a fully featured musical software synthesizer for Linux, MacOS,
+BSD, and Windows.
+ZynAddSubFX exposes a wide array of synthesis parameters to make it flexible
+tool for sound design and a fun experience for playing instruments.
 
-Originally written by Nasca Octavian Paul <zynaddsubfx AT yahoo D0T com>
+image::doc/zyn-fusion-add.png[Zyn-Fusion Add Synth Editor]
 
-Maintained by Mark McCurry 2009+.
+Features
+~~~~~~~~
 
-ZynAddSubFX is free program and is distributed WITH NO WARRANTY.
-It is licensed under GNU General Public License version 2+.
+*   Polyphonic with support for legato and mono playing modes
+*   Three synthesizer engines:
+**      Additive Synthesis for classic synth sounds composed of a variety of voices with powerful modulation. This exposes modulators ranging from LFOs and envelopes to oscillator modulators for FM, PM, and AM.
+**      Subtractive Synthesis for creating variable bandwidth harmonics from filtered white noise
+**      PAD synthesis for creating beautiful pads and other instruments
+*   Powerful waveform generator with up to 128 sine/non-sine harmonics
+*   A variety of filters including analogue modeled filters, formant filters, and state variable filters.
+*   Envelopes can have ADSR (or ASR, etc..) modes or can be free modes (with any shape)
+*   Effects for Reverb, Echo, Chorus/Flange, Phasing, Wave-shaping, Equalizing, Dynamic Filtering with flexible signal routing
+*   Instruments can be organized in kits, which allows you to make drum kits or layered instruments; this makes possible to use more than one instrument for a single part. It is possible to choose what items from the kit should be processed by the Part's effects.
+*   Randomness settings to create subtle differences in each sound to help create that familiar analogue warmth.
+*   Microtonal capabilities with any scale, up to 128 notes per octave, and key mapping
+*   Extensive MIDI/Audio driver support including JACK, ALSA, OSS, and PortAudio
+*   Session Management Support via LASH/NSM
+*   Plugin Support via DSSI/LV2/VST
+*   Over 1100 high quality instruments included
 
-The project page is
-http://sourceforge.net/projects/zynaddsubfx
-or
-http://zynaddsubfx.sourceforge.net
-     
-Mailing List:
-http://lists.sourceforge.net/mailman/listinfo/zynaddsubfx-user
 
-Public Forum:
-http://www.kvraudio.com/forum/viewforum.php?f=47
+For more information see:
 
-Requirements:
-~~~~~~~~~~~~~
+- The project page: http://zynaddsubfx.sf.net
+- The mailing list: http://lists.sourceforge.net/mailman/listinfo/zynaddsubfx-user
+- The public forum: http://www.kvraudio.com/forum/viewforum.php?f=47
+- The IRC channel: ##zynaddsubfx on freenode
+
+Dependencies
+~~~~~~~~~~~~
+
+ZynAddSubFX depends on a number of dependencies for building.
+For more information on building the core along with the FLTK based interface
+see doc/building.txt and for building the new interface see
+https://github.com/zynaddsubfx/zyn-fusion-build
+
+Required:
+
 - FFTW 3.x.x  - necessary for Fast Fourier computations
-- MXML-2.5+ from www.minixml.org
+- MXML-2.5+   - from www.minixml.org
 - zlib library from http://www.zlib.org
-- Jack Audio (may be optional in the future)
+- Liblo - networked open sound control
 
 Optional:
-~~~~~~~~~
-- FLTK 1.x.x (tested with fltk 1.3+)
-- a VST host for the VST version [For more information see:
-  http://www.kvraudio.com/forum/viewtopic.php?t=268277&sid=95be0b6c9909300d566006428bcbb97d]
 
-Compilation:
-~~~~~~~~~~~~
-  For the main program see doc/build.txt.
-  To compile the Spliter, run "make" from the "Spliter" directory.
-  To compile the Controller, run "make" from the "Controller" directory.
+- FLTK (for the old user interface)
+- NTK  (for the old user interface)
+- JACK
+- OSS
+- ALSA
+- CxxTest (for unit tests)
+- LASH
+- DSSI
 
-Running on Linux
-~~~~~~~~~~~~~~~~
-Under linux there are several options for both audio output and MIDI input.
-Defaults are set at compile time and the desired backend can be set when
-starting ZynAddSubFX with the '-I' and '-O' options.
-The currently supported backends are:
+Sibling projects:
 
-- Audio Output
-    * ALSA (Advanced Linux Sound Architecture)
-    * OSS (Open Sound System)
-    * JACK (JACK Audio Connection Kit)
-    * Port Audio
+- rtosc - realtime open sound control https://github.com/fundamental/rtosc
+- mruby-zest - the framework for the zyn-fusion GUI
+               https://github.com/mruby-zest/mruby-zest
 
-- MIDI Input
-    * ALSA
-    * OSS
-    * JACK
 
-Running on OSX
-~~~~~~~~~~~~~~
-Under OSX simply download the binary available on http://sourceforge.net/projects/zynaddsubfx
-and run with JACK
+License
+~~~~~~~
 
-Running on Windows
-~~~~~~~~~~~~~~~~~~
-NOTE: At this time only older versions of ZynAddSubFX were compiled on windows
-      See older versions on sf.net (ie version 2.2.1)
+ZynAddSubFX is available under the GPLv2+ license.
 
 Have fun! :-)
+
 --The ZynAddSubFX team

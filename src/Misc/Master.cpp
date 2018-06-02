@@ -681,6 +681,7 @@ void Master::loadAutomation(XMLwrapper &xml, rtosc::AutomationMgr &midi)
                         midi.createBinding(i, path.c_str(), false);
                         midi.setSlotSubGain(i, j, gain);
                         midi.setSlotSubOffset(i, j, offset);
+                        midi.updateMapping(i, j);
                         xml.exitbranch();
                     }
                 }

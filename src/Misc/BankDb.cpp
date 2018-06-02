@@ -237,7 +237,11 @@ BankEntry BankDb::processXiz(std::string filename,
 #ifndef WIN32
     int ret  = lstat(fname.c_str(), &st);
     if(ret != -1)
+# ifdef __APPLE__
+        time = st.st_mtimespec.tv_sec;
+# else
         time = st.st_mtim.tv_sec;
+# endif
 #else
     int ret = 0;
     time = rand();

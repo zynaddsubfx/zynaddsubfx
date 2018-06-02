@@ -86,9 +86,9 @@ class ADnote:public SynthNote
          * Affects tmpwave_unison and updates oscposhi/oscposlo
          * @todo remove this declaration if it is commented out*/
         inline void ComputeVoiceOscillator_CubicInterpolation(int nvoice);
-        /**Computes the Oscillator samples with morphing.
+        /**Computes the Oscillator samples with mixing.
          * updates tmpwave_unison*/
-        inline void ComputeVoiceOscillatorMorph(int nvoice);
+        inline void ComputeVoiceOscillatorMix(int nvoice);
         /**Computes the Ring Modulated Oscillator.*/
         inline void ComputeVoiceOscillatorRingModulation(int nvoice);
         /**Computes the Frequency Modulated Oscillator.
@@ -255,8 +255,8 @@ class ADnote:public SynthNote
         /*    INTERNAL VALUES OF THE NOTE AND OF THE VOICES     */
         /********************************************************/
 
-	//pinking filter (Paul Kellet)
-	float pinking[NUM_VOICES][14]; 
+        //pinking filter (Paul Kellet)
+        float pinking[NUM_VOICES][14];
 
         //the size of unison for a single voice
         int unison_size[NUM_VOICES];

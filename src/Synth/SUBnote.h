@@ -22,7 +22,8 @@ namespace zyn {
 class SUBnote:public SynthNote
 {
     public:
-        SUBnote(const SUBnoteParameters *parameters, SynthParams &pars);
+        SUBnote(const SUBnoteParameters *parameters, SynthParams &pars,
+                WatchManager *wm = 0, const char *prefix = 0);
         ~SUBnote();
 
         SynthNote *cloneLegato(void);
@@ -38,14 +39,14 @@ class SUBnote:public SynthNote
                    float velocity,
                    int portamento_,
                    int midinote,
-                   bool legato = false);
+                   bool legato = false, WatchManager *wm = 0, const char *prefix = 0);
         float setupFilters(int *pos, bool automation);
         void computecurrentparameters();
         /*
          * Initialize envelopes and global filter
          * calls computercurrentparameters()
          */
-        void initparameters(float freq, WatchManager *wm);
+        void initparameters(float freq, WatchManager *wm, const char *prefix);
         void KillNote();
 
         const SUBnoteParameters &pars;

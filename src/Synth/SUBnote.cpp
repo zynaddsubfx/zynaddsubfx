@@ -34,7 +34,8 @@
 
 namespace zyn {
 
-SUBnote::SUBnote(const SUBnoteParameters *parameters, SynthParams &spars)
+SUBnote::SUBnote(const SUBnoteParameters *parameters, SynthParams &spars, WatchManager *wm, const char *prefix
+                 )
     :SynthNote(spars), pars(*parameters),
     AmpEnvelope(nullptr),
     FreqEnvelope(nullptr),
@@ -42,10 +43,9 @@ SUBnote::SUBnote(const SUBnoteParameters *parameters, SynthParams &spars)
     GlobalFilter(nullptr),
     GlobalFilterEnvelope(nullptr),
     NoteEnabled(true),
-    lfilter(nullptr), rfilter(nullptr),
-    wm(nullptr)
+    lfilter(nullptr), rfilter(nullptr)
 {
-    setup(spars.frequency, spars.velocity, spars.portamento, spars.note);
+    setup(spars.frequency, spars.velocity, spars.portamento, spars.note, false, wm, prefix);
 }
 
 float SUBnote::setupFilters(int *pos, bool automation)
@@ -91,7 +91,9 @@ void SUBnote::setup(float freq,
                     float velocity,
                     int portamento_,
                     int midinote,
-                    bool legato)
+                    bool legato,
+                    WatchManager *wm,
+                    const char *prefix)
 {
     this->velocity = velocity;
     portamento  = portamento_;
@@ -175,9 +177,9 @@ void SUBnote::setup(float freq,
     oldbandwidth  = 64;
     if(!legato) { //normal note
         if(pars.Pfixedfreq == 0)
-            initparameters(basefreq, wm);
+            initparameters(basefreq, wm, prefix);
         else
-            initparameters(basefreq / 440.0f * freq, wm);
+            initparameters(basefreq / 440.0f * freq, wm, prefix);
     }
     else {
         if(pars.Pfixedfreq == 0)
@@ -207,7 +209,7 @@ void SUBnote::legatonote(LegatoParams pars)
 
     try {
         setup(pars.frequency, pars.velocity, pars.portamento, pars.midinote,
-              true);
+              true, wm);
     } catch (std::bad_alloc &ba) {
         std::cerr << "failed to set legato note parameter in SUBnote: " << ba.what() << std::endl;
     }
@@ -353,10 +355,9 @@ void SUBnote::filter(bpfilter &filter, float *smps)
 /*
  * Init Parameters
  */
-void SUBnote::initparameters(float freq, WatchManager *wm)
+void SUBnote::initparameters(float freq, WatchManager *wm, const char *prefix)
 {
-    //TODO populate this base string
-    ScratchString pre;
+    ScratchString pre = prefix;
     AmpEnvelope = memory.alloc<Envelope>(*pars.AmpEnvelope, freq,
             synth.dt(), wm, (pre+"AmpEnvelope/").c_str);
 

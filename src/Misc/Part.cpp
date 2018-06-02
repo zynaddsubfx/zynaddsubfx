@@ -133,7 +133,7 @@ static const Ports partPorts = {
                 p->Ppolymode = 0;
                 p->Plegatomode = 1;
             }}},
-    {"clear:", rProp(internal) rDoc("Reset Part To Defaults"), 0, 
+    {"clear:", rProp(internal) rDoc("Reset Part To Defaults"), 0,
         [](const char *, RtData &d)
         {
             //XXX todo forward this event for middleware to handle
@@ -534,7 +534,7 @@ bool Part::NoteOn(unsigned char note,
                             wm, (pre+"kit"+i+"/adpars/").c_str), 0, i});
             if(item.Psubenabled)
                 notePool.insertNote(note, sendto,
-                        {memory.alloc<SUBnote>(kit[i].subpars, pars), 1, i});
+                        {memory.alloc<SUBnote>(kit[i].subpars, pars, wm, (pre+"kit"+i+"/subpars/").c_str), 1, i});
             if(item.Ppadenabled)
                 notePool.insertNote(note, sendto,
                         {memory.alloc<PADnote>(kit[i].padpars, pars, interpolation, wm,
@@ -571,7 +571,7 @@ void Part::NoteOff(unsigned char note) //release the key
         if(!ctl.sustain.sustain) { //the sustain pedal is not pushed
             if((isMonoMode() || isLegatoMode()) && !monomemEmpty())
                 MonoMemRenote();//Play most recent still active note
-            else 
+            else
                 notePool.release(desc);
         }
         else {   //the sustain pedal is pushed

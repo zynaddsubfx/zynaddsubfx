@@ -1,10 +1,10 @@
 [submodule "instruments"]
 	path = instruments
-	url = git://git.code.sf.net/p/zynaddsubfx/instruments
+	url = https://github.com/zynaddsubfx/instruments
 [submodule "rtosc"]
 	path = rtosc
 	url = https://github.com/fundamental/rtosc
 	branch = default_values
 [submodule "DPF"]
 	path = DPF
-	url = git://github.com/DISTRHO/DPF
+	url = https://github.com/DISTRHO/DPF

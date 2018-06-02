@@ -61,7 +61,7 @@ class Allocator
         T *valloc(size_t len, Ts&&... ts)
         {
             T *data = (T*)alloc_mem(len*sizeof(T));
-            if(!data) {
+            if(!data && len != 0) {
                 rollbackTransaction();
                 throw std::bad_alloc();
             }

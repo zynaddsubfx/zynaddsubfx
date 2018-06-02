@@ -349,7 +349,7 @@ version-revision="3" ZynAddSubFX-author="Nasca Octavian Paul">
 </FILTER_PARAMETERS>
 <FM_PARAMETERS>
 <par name="input_voice" value="-1" />
-<par name="volume" value="46" />
+<par_real name="volume" value="36.2205" exact_value="0x4210E1C3" />
 <par name="volume_damp" value="36" />
 <par name="velocity_sensing" value="92" />
 <par_bool name="amp_envelope_enabled" value="yes" />

@@ -60,6 +60,10 @@ public:
             handle = LoadLibrary("./libzest.dll");
         if(!handle)
             handle = LoadLibrary("libzest.dll");
+#elif defined __APPLE__
+        handle = dlopen("@loader_path/libzest.dylib", RTLD_NOW | RTLD_LOCAL);
+        if(!handle) // VST
+            handle = dlopen("@loader_path/../Resources/libzest.dylib", RTLD_LAZY);
 #else
         handle = dlopen("./libzest.so", RTLD_LAZY);
         if(!handle)
@@ -190,8 +194,8 @@ protected:
         if(!z.zest) {
             if(!z.zest_open)
                 return;
-if(!oscPort)
-    return;
+            if(!oscPort)
+                return;
             printf("[INFO:Zyn] zest_open()\n");
             char address[1024];
             snprintf(address, sizeof(address), "osc.udp://127.0.0.1:%d",oscPort);
@@ -203,7 +207,6 @@ if(!oscPort)
         }
 
         z.zest_draw(z.zest);
-        repaint();
     }
 
     bool onKeyboard(const KeyboardEvent &ev)
@@ -218,8 +221,11 @@ if(!oscPort)
 
     void uiIdle(void) override
     {
-        if(z.zest)
-            z.zest_tick(z.zest);
+        if(z.zest) {
+            if (z.zest_tick(z.zest)) {
+                repaint();
+            }
+        }
     }
 
     void uiReshape(uint width, uint height)
