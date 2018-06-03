@@ -69,8 +69,10 @@ target_link_libraries(EffectTest ${test_lib})
 add_executable(ins-test InstrumentStats.cpp)
 target_link_libraries(ins-test ${test_lib} rt)
 
-cp_script(check-ports.rb)
-add_test(PortChecker check-ports.rb)
+if(LIBLO_FOUND)
+    cp_script(check-ports.rb)
+    add_test(PortChecker check-ports.rb)
+endif()
 
 add_executable(save-osc SaveOSC.cpp)
 target_link_libraries(save-osc
