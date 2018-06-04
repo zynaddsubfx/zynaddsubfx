@@ -28,6 +28,9 @@
 
 #include <getopt.h>
 
+#include <sys/types.h>
+#include <signal.h>
+
 #include <rtosc/rtosc.h>
 #include <rtosc/ports.h>
 #include "Params/PADnoteParameters.h"
@@ -735,7 +738,14 @@ done:
 #endif
 #endif
     }
-
+#ifdef ZEST_GUI
+#ifndef WIN32
+    int ret = kill(gui_pid, SIGHUP);
+    if (ret == -1) {
+        err(1, "Failed to terminate Zyn-Fusion...\n");
+    }
+#endif
+#endif
     exitprogram(config);
     return 0;
 }

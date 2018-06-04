@@ -1,3 +1,8 @@
+function(cp_script script_name)
+	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${script_name}
+		${CMAKE_CURRENT_BINARY_DIR}/${script_name} COPYONLY)
+endfunction()
+
 #for tests looking for files stored in the source dir
 add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -64,13 +69,18 @@ target_link_libraries(EffectTest ${test_lib})
 add_executable(ins-test InstrumentStats.cpp)
 target_link_libraries(ins-test ${test_lib} rt)
 
+if(LIBLO_FOUND)
+    cp_script(check-ports.rb)
+    add_test(PortChecker check-ports.rb)
+endif()
+
 add_executable(save-osc SaveOSC.cpp)
 target_link_libraries(save-osc
                       zynaddsubfx_core zynaddsubfx_nio
                       zynaddsubfx_gui_bridge
                       ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
-#this will be replace with a for loop when the code will get more stable:
-add_test(SaveOsc save-osc ../../../instruments/examples/Arpeggio\ 1.xmz)
+#this will be replaced with a for loop when the code will get more stable:
+add_test(SaveOsc save-osc ${CMAKE_CURRENT_SOURCE_DIR}/../../instruments/examples/Arpeggio\ 1.xmz)
 
 #message(STATUS "Plugin Test ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}")
 
