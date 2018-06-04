@@ -20,6 +20,7 @@
 */
 
 #include "WatchPoint.h"
+#include "../Misc/Util.h"
 #include <cstring>
 #include <rtosc/thread-link.h>
 
@@ -30,9 +31,9 @@ WatchPoint::WatchPoint(WatchManager *ref, const char *prefix, const char *id)
 {
     identity[0] = 0;
     if(prefix)
-        strncpy(identity, prefix, 128);
+        fast_strcpy(identity, prefix, sizeof(identity));
     if(id)
-        strncat(identity, id, 128);
+        strncat(identity, id, sizeof(identity));
 }
 
 bool WatchPoint::is_active(void)
@@ -78,7 +79,7 @@ void WatchManager::add_watch(const char *id)
     //Apply to a free slot
     for(int i=0; i<MAX_WATCH; ++i) {
         if(!active_list[i][0]) {
-            strncpy(active_list[i], id, 128);
+            fast_strcpy(active_list[i], id, MAX_WATCH_PATH);
             new_active = true;
             sample_list[i] = 0;
             break;

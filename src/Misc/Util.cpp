@@ -55,6 +55,12 @@ float VelF(float velocity, unsigned char scaling)
         return powf(velocity, x);
 }
 
+char *fast_strcpy(char *dest, const char *src, size_t buffersize)
+{
+    *dest = 0;
+    return strncat(dest, src, buffersize-1);
+}
+
 /*
  * Get the detune in cents
  */

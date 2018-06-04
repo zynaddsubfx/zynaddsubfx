@@ -30,7 +30,7 @@ namespace zyn {
         if(!strcmp("", args)) {\
             data.reply(loc, "s", obj->name); \
         } else { \
-            strncpy(obj->name, rtosc_argument(msg, 0).s, length); \
+            fast_strcpy(obj->name, rtosc_argument(msg, 0).s, length); \
             data.broadcast(loc, "s", obj->name);\
             rChangeCb \
         } rBOIL_END

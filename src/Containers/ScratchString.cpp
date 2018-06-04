@@ -1,4 +1,5 @@
 #include "ScratchString.h"
+#include "../Misc/Util.h"
 #include <cstring>
 #include <cstdio>
 
@@ -22,7 +23,7 @@ ScratchString::ScratchString(unsigned char num)
 ScratchString::ScratchString(const char *str)
 {
     if(str)
-        strncpy(c_str, str, SCRATCH_SIZE);
+        fast_strcpy(c_str, str, SCRATCH_SIZE);
     else
         memset(c_str, 0, sizeof(c_str));
 }
@@ -30,7 +31,7 @@ ScratchString::ScratchString(const char *str)
 ScratchString ScratchString::operator+(const ScratchString s)
 {
     ScratchString ss;
-    strncpy(ss.c_str, c_str, SCRATCH_SIZE);
+    fast_strcpy(ss.c_str, c_str, SCRATCH_SIZE);
     strncat(ss.c_str, s.c_str, SCRATCH_SIZE-strlen(c_str));
     return ss;
 }

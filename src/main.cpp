@@ -516,7 +516,7 @@ int wmidi = -1;
             exit(1);
         }
         else {
-            strncpy(master->last_xmz, filename, XMZ_PATH_MAX);
+            fast_strcpy(master->last_xmz, filename, XMZ_PATH_MAX);
             master->last_xmz[XMZ_PATH_MAX-1] = 0;
             master->applyparameters();
             cout << "Master file loaded." << endl;

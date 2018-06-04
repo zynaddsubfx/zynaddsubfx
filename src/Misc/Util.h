@@ -31,6 +31,19 @@ bool fileexists(const char *filename);
 using std::min;
 using std::max;
 
+/**
+ * Copy string to another memory location, including the terminating zero byte
+ * @param dest Destination memory location
+ * @param src Source string
+ * @param buffersize Maximal number of bytes that you can write to @p dest
+ * @return A pointer to @p dest
+ * @warning @p dest and @p src shall not overlap
+ * @warning if buffersize is larger than strlen(src)+1, unused bytes in @p dest
+ *   are not overwritten. Secure information may be released. Don't use this if
+ *   you want to send the string somewhere else, e.g. via IPC.
+ */
+char *fast_strcpy(char *dest, const char *src, size_t buffersize);
+
 //Velocity Sensing function
 extern float VelF(float velocity, unsigned char scaling);
 

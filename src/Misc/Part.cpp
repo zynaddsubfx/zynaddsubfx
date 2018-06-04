@@ -27,7 +27,6 @@
 #include "../Synth/PADnote.h"
 #include "../Containers/ScratchString.h"
 #include "../DSP/FFTwrapper.h"
-#include "../Misc/Util.h"
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -240,7 +239,7 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     interpolation(interpolation)
 {
     if(prefix_)
-        strncpy(prefix, prefix_, sizeof(prefix));
+        fast_strcpy(prefix, prefix_, sizeof(prefix));
     else
         memset(prefix, 0, sizeof(prefix));
 

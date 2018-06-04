@@ -10,6 +10,7 @@
   of the License, or (at your option) any later version.
 */
 #pragma once
+#include <cassert>
 #include <rtosc/ports.h>
 #include "Fl_Osc_Interface.h"
 #include <FL/Fl_Tree.H>
@@ -77,7 +78,8 @@ class Fl_Osc_Tree: public Fl_Tree
                     } else {
                         char tmpa[1024];
                         char tmpb[1024];
-                        strncpy(tmpa, path.c_str(), 1024);
+                        assert(path.length() < 1024);
+                        strncpy(tmpa, path.c_str(), sizeof(tmpa));
                         char *pound = index(tmpa, '#');
                         int N = atoi(pound+1);
                         *pound = 0;

@@ -107,7 +107,7 @@ static const rtosc::Ports local_ports = {
                 d.broadcast(d.loc, "i", eff->getpreset());
 
                 //update parameters as well
-                strncpy(loc, d.loc, 1024);
+                fast_strcpy(loc, d.loc, sizeof(loc));
                 char *tail = strrchr(loc, '/');
                 if(!tail)
                     return;
