@@ -96,6 +96,8 @@ SET (NoNeonPlease False CACHE BOOL
 SET (PluginLibDir "lib" CACHE STRING
     "Install directory for plugin libraries PREFIX/PLUGIN_LIB_DIR/{lv2,vst}")
 SET (DemoMode FALSE CACHE BOOL "Enable 10 minute silence")
+SET (ZynFusionDir "" CACHE STRING "Developers only: zest binary's dir; useful if fusion is not system-instealled.")
+mark_as_advanced(FORCE ZynFusionDir)
 
 # Now, handle the incoming settings and set define flags/variables based
 # on this
@@ -181,6 +183,7 @@ option (BuildForAMD_X86_64 "Build for AMD x86_64 system" OFF)
 option (BuildForCore2_X86_64 "Build for Intel Core2 x86_64 system" OFF)
 option (BuildForDebug "Include gdb debugging support" OFF)
 option (IncludeWhatYouUse "Check for useless includes" OFF)
+mark_as_advanced(IncludeWhatYouUse)
 
 set(CMAKE_BUILD_TYPE "Release")
 
@@ -444,6 +447,8 @@ endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zyn-version.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/zyn-version.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zyn-config.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/zyn-config.h)
 
 link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS} ${NTK_LIBRARY_DIRS})
 

@@ -12,8 +12,8 @@
   of the License, or (at your option) any later version.
 */
 
-#ifndef VERSION_H
-#define VERSION_H
+#ifndef ZYN_VERSION_H
+#define ZYN_VERSION_H
 
 #include <iosfwd>
 

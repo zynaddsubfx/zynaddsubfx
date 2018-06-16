@@ -40,6 +40,7 @@
 #include "Misc/Master.h"
 #include "Misc/Part.h"
 #include "Misc/Util.h"
+#include "zyn-config.h"
 #include "zyn-version.h"
 
 //Nio System
@@ -658,37 +659,57 @@ int wmidi = -1;
 #ifndef WIN32
         gui_pid = fork();
         if(gui_pid == 0) {
-            execlp("zyn-fusion", "zyn-fusion", addr, "--builtin", "--no-hotload",  0);
-            execlp("./zyn-fusion", "zyn-fusion", addr, "--builtin", "--no-hotload",  0);
-
+            auto exec_fusion = [&addr](const char* path) {
+                execlp(path, "zyn-fusion", addr, "--builtin", "--no-hotload",  0); };
+            if(fusion_dir && *fusion_dir)
+            {
+                std::string fusion = fusion_dir;
+                fusion += "/zest";
+                if(access(fusion.c_str(), X_OK))
+                    fputs("Warning: CMake's ZynFusionDir does not contain a"
+                          "\"zest\" binary - ignoring.", stderr);
+                else {
+                    const char* cur = getenv("LD_LIBRARY_PATH");
+                    std::string ld_library_path;
+                    if(cur) {
+                        ld_library_path += cur;
+                        ld_library_path += ":";
+                    }
+                    ld_library_path += fusion_dir;
+                    setenv("LD_LIBRARY_PATH", ld_library_path.c_str(), 1);
+                    exec_fusion(fusion.c_str());
+                }
+            }
+            exec_fusion("./zyn-fusion");
+            exec_fusion("zyn-fusion");
             err(1,"Failed to launch Zyn-Fusion");
         }
 #else
         STARTUPINFO si;
-PROCESS_INFORMATION pi;
-memset(&si, 0, sizeof(si));
-memset(&pi, 0, sizeof(pi));
-char *why_windows = strrchr(addr, ':');
-char *seriously_why = why_windows + 1;
-char start_line[256] = {0};
-if(why_windows)
-    snprintf(start_line, sizeof(start_line), "zyn-fusion.exe osc.udp://127.0.0.1:%s", seriously_why);
-else {
-    printf("COULD NOT PARSE <%s>\n", addr);
-    exit(1);
-}
-printf("[INFO] starting subprocess via <%s>\n", start_line);
-if(!CreateProcess(NULL, start_line,
-NULL, NULL, 0, 0, NULL, NULL, &si, &pi)) {
-    printf("Failed to launch Zyn-Fusion...\n");
-    exit(1);
-}
-
+        PROCESS_INFORMATION pi;
+        memset(&si, 0, sizeof(si));
+        memset(&pi, 0, sizeof(pi));
+        char *why_windows = strrchr(addr, ':');
+        char *seriously_why = why_windows + 1;
+        char start_line[256] = {0};
+        if(why_windows)
+            snprintf(start_line, sizeof(start_line), "zyn-fusion.exe osc.udp://127.0.0.1:%s", seriously_why);
+        else {
+            printf("COULD NOT PARSE <%s>\n", addr);
+            exit(1);
+        }
+        printf("[INFO] starting subprocess via <%s>\n", start_line);
+        if(!CreateProcess(NULL, start_line,
+        NULL, NULL, 0, 0, NULL, NULL, &si, &pi)) {
+            printf("Failed to launch Zyn-Fusion...\n");
+            exit(1);
+        }
 #endif
     }
 #endif
 
     printf("[INFO] Main Loop...\n");
+    bool already_exited = false;
     while(Pexitprogram == 0) {
 #ifndef WIN32
 #if USE_NSM
@@ -732,19 +753,27 @@ done:
         if(!noui) {
             int status = 0;
             int ret = waitpid(gui_pid, &status, WNOHANG);
-            if(ret == gui_pid)
+            if(ret == gui_pid) {
                 Pexitprogram = 1;
+                already_exited = true;
+            }
         }
 #endif
 #endif
     }
 #ifdef ZEST_GUI
 #ifndef WIN32
-    int ret = kill(gui_pid, SIGHUP);
-    if (ret == -1) {
-        err(1, "Failed to terminate Zyn-Fusion...\n");
+    if(!already_exited) {
+        int ret = kill(gui_pid, SIGHUP);
+        if (ret == -1) {
+            err(1, "Failed to terminate Zyn-Fusion...\n");
+        }
     }
+#else
+    (void)already_exited;
 #endif
+#else
+    (void)already_exited;
 #endif
     exitprogram(config);
     return 0;

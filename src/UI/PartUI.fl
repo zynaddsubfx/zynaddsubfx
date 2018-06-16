@@ -487,8 +487,8 @@ else {bendrng->oscMove("pitchwheel.bendrange");}}
         xywh {205 37 69 15} down_box DOWN_BOX labelsize 10
       }
       Fl_Counter bendrng {
-        label {PWheelB.Rng (cents)}
-        tooltip {Pitch Wheel Bend Range (cents)} xywh {165 15 110 20} labelsize 10 align 1 minimum -6400 maximum 6400 step 1
+        label {PWheelB.Rng (% semitone)}
+        tooltip {Pitch Wheel Bend Range (cents of semitone)} xywh {165 15 110 20} labelsize 10 align 1 minimum -6400 maximum 6400 step 1
         code0 {o->init("pitchwheel.bendrange", 'i');}
         code1 {o->lstep(100);}
         class Fl_Osc_Counter
