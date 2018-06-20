@@ -204,19 +204,16 @@ void *capture(Master *m, std::string url)
 template<class T>
 std::string doCopy(MiddleWare &mw, string url, string name)
 {
-    XMLwrapper xml;
-    mw.doReadOnlyOp([&xml, url, name, &mw](){
+    mw.doReadOnlyOp([url, name, &mw](){
         Master *m = mw.spawnMaster();
         //Get the pointer
-        //printf("capture at <%s>\n", (url+"self").c_str());
         T *t = (T*)capture<void*>(m, url+"self");
         assert(t);
         //Extract Via mxml
-        //t->add2XML(&xml);
         t->copy(mw.getPresetsStore(), name.empty()? NULL:name.c_str());
     });
 
-    return "";//xml.getXMLdata();
+    return "";
 }
 
 template<class T, typename... Ts>
@@ -249,9 +246,8 @@ void doPaste(MiddleWare &mw, string url, string type, XMLwrapper &xml, Ts&&... a
 template<class T>
 std::string doArrayCopy(MiddleWare &mw, int field, string url, string name)
 {
-    XMLwrapper xml;
     //printf("Getting info from '%s'<%d>\n", url.c_str(), field);
-    mw.doReadOnlyOp([&xml, url, field, name, &mw](){
+    mw.doReadOnlyOp([url, field, name, &mw](){
         Master *m = mw.spawnMaster();
         //Get the pointer
         T *t = (T*)capture<void*>(m, url+"self");
@@ -259,7 +255,7 @@ std::string doArrayCopy(MiddleWare &mw, int field, string url, string name)
         t->copy(mw.getPresetsStore(), field, name.empty()?NULL:name.c_str());
     });
 
-    return "";//xml.getXMLdata();
+    return "";
 }
 
 template<class T, typename... Ts>

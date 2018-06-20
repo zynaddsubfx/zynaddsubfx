@@ -270,7 +270,7 @@ static const rtosc::Ports non_realtime_ports =
             d.reply(d.loc, "i", (int)realbw);
             delete[] tmp;}},
     {"harmonic_profile:", rProp(non-realtime) rDoc("UI display of the harmonic profile"),
-        NULL, [](const char *m, rtosc::RtData &d) {
+        NULL, [](const char *, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
 #define RES 512
             char        types[RES+2] = {0};

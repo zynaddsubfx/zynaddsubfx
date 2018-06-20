@@ -108,6 +108,7 @@ static const rtosc::Ports SUBnotePorts = {
 
     {"clear:", rDoc("Reset all harmonics to equal bandwidth/zero amplitude"), NULL,
         rBegin;
+        (void) msg;
         for(int i=0; i<MAX_SUB_HARMONICS; ++i) {
             obj->Phmag[i]   = 0;
             obj->Phrelbw[i] = 64;
@@ -116,6 +117,7 @@ static const rtosc::Ports SUBnotePorts = {
         rEnd},
     {"detunevalue:", rDoc("Get note detune value"), NULL,
         rBegin;
+        (void) msg;
         d.reply(d.loc, "f", getdetune(obj->PDetuneType, 0, obj->PDetune));
         rEnd},
     //weird stuff for PCoarseDetune
@@ -150,6 +152,7 @@ static const rtosc::Ports SUBnotePorts = {
             "        filter = [frequency, bandwidth, amplitude]"),
     NULL,
     rBegin;
+    (void) msg;
 
     //Identify the active harmonics
     int pos[MAX_SUB_HARMONICS];

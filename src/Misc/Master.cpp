@@ -114,7 +114,9 @@ static const Ports sysefsendto =
         }}
 };
 
-#define rBegin [](const char *msg, RtData &d) { rtosc::AutomationMgr &a = *(AutomationMgr*)d.obj
+#define rBegin [](const char *msg, RtData &d) { \
+    (void) msg; \
+    rtosc::AutomationMgr &a = *(AutomationMgr*)d.obj
 #define rEnd }
 
 static int extract_num(const char *&msg)
@@ -605,6 +607,7 @@ class DataObj:public rtosc::RtData
         virtual void forward(const char *reason) override
         {
             assert(message);
+            (void) reason;
             reply("/forward", "");
             printf("forwarding '%s'\n", message);
             forwarded = true;
