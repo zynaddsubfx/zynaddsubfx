@@ -173,9 +173,9 @@ static const Ports partPorts = {
 #define rObject Part::Kit
 static const Ports kitPorts = {
     rSelf(Part::Kit, rEnabledBy(Penabled)),
-    rRecurp(padpars, "Padnote parameters"),
-    rRecurp(adpars, "Adnote parameters"),
-    rRecurp(subpars, "Adnote parameters"),
+    rRecurp(padpars, rEnabledBy(Ppadenabled), "Padnote parameters"),
+    rRecurp(adpars, rEnabledBy(Padenabled), "Adnote parameters"),
+    rRecurp(subpars, rEnabledBy(Psubenabled), "Subnote parameters"),
     rToggle(firstkit, rProp(internal), "If this is the part's first kit"),
     rToggle(Penabled, rDefaultDepends(firstkit),
             rPreset(true, true), rPreset(false, false),

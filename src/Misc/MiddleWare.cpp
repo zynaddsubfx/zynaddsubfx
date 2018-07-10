@@ -300,10 +300,15 @@ struct NonRtObjStore
     void handleOscil(const char *msg, rtosc::RtData &d) {
         string obj_rl(d.message, msg);
         void *osc = get(obj_rl);
-        assert(osc);
-        strcpy(d.loc, obj_rl.c_str());
-        d.obj = osc;
-        OscilGen::non_realtime_ports.dispatch(msg, d);
+        if(osc)
+        {
+            strcpy(d.loc, obj_rl.c_str());
+            d.obj = osc;
+            OscilGen::non_realtime_ports.dispatch(msg, d);
+        }
+        else
+            fprintf(stderr, "Warning: trying to access oscil object \"%s\","
+                            "which does not exist\n", obj_rl.c_str());
     }
     void handlePad(const char *msg, rtosc::RtData &d) {
         string obj_rl(d.message, msg);
@@ -313,18 +318,23 @@ struct NonRtObjStore
             d.matches++;
             d.reply((obj_rl+"needPrepare").c_str(), "F");
         } else {
-            if(!pad)
-                return;
-            strcpy(d.loc, obj_rl.c_str());
-            d.obj = pad;
-            PADnoteParameters::non_realtime_ports.dispatch(msg, d);
-            if(rtosc_narguments(msg)) {
-                if(!strcmp(msg, "oscilgen/prepare"))
-                    ; //ignore
-                else {
-                    d.reply((obj_rl+"needPrepare").c_str(), "T");
+            if(pad)
+            {
+                strcpy(d.loc, obj_rl.c_str());
+                d.obj = pad;
+                PADnoteParameters::non_realtime_ports.dispatch(msg, d);
+                if(rtosc_narguments(msg)) {
+                    if(!strcmp(msg, "oscilgen/prepare"))
+                        ; //ignore
+                    else {
+                        d.reply((obj_rl+"needPrepare").c_str(), "T");
+                    }
                 }
             }
+            else
+                fprintf(stderr, "Warning: trying to access pad synth object "
+                                "\"%s\", which does not exist\n",
+                        obj_rl.c_str());
         }
     }
 };

@@ -300,8 +300,7 @@ static const Ports automate_ports = {
         if(a.active_slot >= 0)
             a.createBinding(a.active_slot, rtosc_argument(msg, 0).s, true);
         rEnd},
-    // TODO: remove rNoWalk
-    {"slot#16/", rNoWalk rDoc("Parameters of individual automation slots"), &slot_ports,
+    {"slot#16/", rDoc("Parameters of individual automation slots"), &slot_ports,
         rBegin;
         (void)a;
         d.push_index(get_next_int(msg));
@@ -515,7 +514,8 @@ static const Ports master_ports = {
         [](const char *, rtosc::RtData &d) {d.reply("/undo_pause", "");}},
     {"undo_resume:",rProp(internal) rDoc("resume undo event recording"),0,
         [](const char *, rtosc::RtData &d) {d.reply("/undo_resume", "");}},
-    {"config/", rNoWalk rDoc("Top Level Application Configuration Parameters"),
+    {"config/", rNoDefaults
+        rDoc("Top Level Application Configuration Parameters"),
         &Config::ports, [](const char *, rtosc::RtData &d){d.forward();}},
     {"presets/", rDoc("Parameter Presets"), &preset_ports, rBOIL_BEGIN
         SNIP
