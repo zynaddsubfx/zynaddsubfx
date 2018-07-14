@@ -639,6 +639,7 @@ void Master::saveAutomation(XMLwrapper &xml, const rtosc::AutomationMgr &midi)
             xml.beginbranch("slot", i);
             XmlNode params("params");
             params["midi-cc"] = to_s(slot.midi_cc);
+            params["name"] = to_s(slot.name);
             xml.add(params);
             for(int j=0; j<midi.per_slot; ++j) {
                 const auto &au = slot.automations[j];
@@ -689,8 +690,16 @@ void Master::loadAutomation(XMLwrapper &xml, rtosc::AutomationMgr &midi)
                     }
                 }
                 for(auto node:xml.getBranch())
+                {
                     if(node.name == "params")
+                    {
                         slot.midi_cc = atoi(node["midi-cc"].c_str());
+                        if(node["name"] != "")
+                        {
+                            strncpy(slot.name, node["name"].c_str(), sizeof(slot.name) - 1);
+                        }
+                    }
+                }
                 xml.exitbranch();
             }
         }
