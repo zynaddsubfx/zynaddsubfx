@@ -28,9 +28,9 @@ struct zest_handles {
     void (*zest_close)(zest_t*);
     void (*zest_setup)(zest_t*);
     void (*zest_draw)(zest_t*);
-    void (*zest_motion)(zest_t*, int x, int y);
+    void (*zest_motion)(zest_t*, int x, int y, int mod);
     void (*zest_scroll)(zest_t*, int x, int y, int dx, int dy);
-    void (*zest_mouse)(zest_t *z, int button, int action, int x, int y);
+    void (*zest_mouse)(zest_t *z, int button, int action, int x, int y, int mod);
     void (*zest_key)(zest_t *z, char *key, bool press);
     void (*zest_resize)(zest_t *z, int w, int h);
     void (*zest_special)(zest_t *z, int key, int press);
@@ -173,14 +173,14 @@ protected:
     bool onMouse(const MouseEvent &m) override
     {
         if(z.zest)
-            z.zest_mouse(z.zest, m.button, m.press, m.pos.getX(), m.pos.getY());
+            z.zest_mouse(z.zest, m.button, m.press, m.pos.getX(), m.pos.getY(), m.mod);
         return false;
     }
 
     bool onMotion(const MotionEvent &m) override
     {
         if(z.zest)
-            z.zest_motion(z.zest, m.pos.getX(), m.pos.getY());
+            z.zest_motion(z.zest, m.pos.getX(), m.pos.getY(), m.mod);
         return false;
     }
 
