@@ -29,7 +29,7 @@ struct zest_handles {
     void (*zest_setup)(zest_t*);
     void (*zest_draw)(zest_t*);
     void (*zest_motion)(zest_t*, int x, int y, int mod);
-    void (*zest_scroll)(zest_t*, int x, int y, int dx, int dy);
+    void (*zest_scroll)(zest_t*, int x, int y, int dx, int dy, int mod);
     void (*zest_mouse)(zest_t *z, int button, int action, int x, int y, int mod);
     void (*zest_key)(zest_t *z, char *key, bool press);
     void (*zest_resize)(zest_t *z, int w, int h);
@@ -158,7 +158,7 @@ protected:
     bool onScroll(const ScrollEvent &ev) override
     {
         if(z.zest)
-            z.zest_scroll(z.zest, ev.pos.getX(), ev.pos.getY(), ev.delta.getX(), ev.delta.getY());
+            z.zest_scroll(z.zest, ev.pos.getX(), ev.pos.getY(), ev.delta.getX(), ev.delta.getY(), ev.mod);
         return false;
     }
 
