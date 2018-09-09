@@ -156,11 +156,13 @@ void PADnote::setup(float freq,
                            * powf(0.1f, 3.0f * (1.0f - pars.PVolume / 96.0f))      //-60 dB .. 0 dB
                            * VelF(velocity, pars.PAmpVelocityScaleFunction); //velocity sensing
 
-    NoteGlobalPar.AmpEnvelope->envout_dB(); //discard the first envelope output
-    globaloldamplitude = globalnewamplitude = NoteGlobalPar.Volume
-                                              * NoteGlobalPar.AmpEnvelope->
-                                              envout_dB()
-                                              * NoteGlobalPar.AmpLfo->amplfoout();
+    if (!legato) {
+        NoteGlobalPar.AmpEnvelope->envout_dB(); //discard the first envelope output
+        globaloldamplitude = globalnewamplitude = NoteGlobalPar.Volume
+                                                  * NoteGlobalPar.AmpEnvelope->
+                                                  envout_dB()
+                                                  * NoteGlobalPar.AmpLfo->amplfoout();
+    }
 
     if(!legato) {
         ScratchString pre = prefix;
