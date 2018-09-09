@@ -793,7 +793,7 @@ void OscilGen::shiftharmonics(fft_t *freqs)
         }
     else
         for(int i = 0; i < synth.oscilsize / 2 - 1; ++i) {
-	    int oldh = i + ::abs(harmonicshift);
+        int oldh = i + ::abs(harmonicshift);
             if(oldh >= (synth.oscilsize / 2 - 1))
                 h = 0.0f;
             else {

@@ -41,7 +41,7 @@ void PADnote::setup(float freq,
                     float velocity_,
                     int portamento_,
                     int midinote,
-                    bool legato, 
+                    bool legato,
                     WatchManager *wm,
                     const char *prefix)
 {
@@ -196,8 +196,8 @@ void PADnote::setup(float freq,
 
 SynthNote *PADnote::cloneLegato(void)
 {
-    SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity, 
-                   (bool)portamento, legato.param.midinote, true};
+    SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity,
+                   (bool)portamento, legato.param.midinote, true, legato.param.seed};
     return memory.alloc<PADnote>(&pars, sp, interpolation);
 }
 
