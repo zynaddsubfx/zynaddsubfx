@@ -168,9 +168,8 @@ void SUBnote::setup(float freq,
     }
 
     //how much the amplitude is normalised (because the harmonics)
-    float reduceamp = setupFilters(pos, false);
+    float reduceamp = setupFilters(pos, legato);
     oldreduceamp    = reduceamp;
-
     volume /= reduceamp;
 
     oldpitchwheel = 0;
