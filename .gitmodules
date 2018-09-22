@@ -4,7 +4,6 @@
 [submodule "rtosc"]
 	path = rtosc
 	url = https://github.com/fundamental/rtosc
-	branch = default_values
 [submodule "DPF"]
 	path = DPF
 	url = https://github.com/DISTRHO/DPF
