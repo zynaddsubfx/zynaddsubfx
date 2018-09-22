@@ -86,7 +86,7 @@ class AdNoteTest:public CxxTest::TestSuite
 
             unsigned char testnote = 42;
             float freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
-            SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote, false};
+            SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote, false, prng()};
 
             std::vector<ADnote*> notes;
 

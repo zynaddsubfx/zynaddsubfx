@@ -168,9 +168,8 @@ void SUBnote::setup(float freq,
     }
 
     //how much the amplitude is normalised (because the harmonics)
-    float reduceamp = setupFilters(pos, false);
+    float reduceamp = setupFilters(pos, legato);
     oldreduceamp    = reduceamp;
-
     volume /= reduceamp;
 
     oldpitchwheel = 0;
@@ -197,7 +196,7 @@ void SUBnote::setup(float freq,
 SynthNote *SUBnote::cloneLegato(void)
 {
     SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity,
-                   portamento, legato.param.midinote, true};
+                   portamento, legato.param.midinote, true, legato.param.seed};
     return memory.alloc<SUBnote>(&pars, sp);
 }
 

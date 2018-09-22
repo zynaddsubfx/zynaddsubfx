@@ -41,7 +41,7 @@ void PADnote::setup(float freq,
                     float velocity_,
                     int portamento_,
                     int midinote,
-                    bool legato, 
+                    bool legato,
                     WatchManager *wm,
                     const char *prefix)
 {
@@ -73,7 +73,7 @@ void PADnote::setup(float freq,
         BendAdjust = BendAdj / 24.0f;
     float offset_val = (pars.POffsetHz - 64)/64.0f;
     OffsetHz = 15.0f*(offset_val * sqrtf(fabsf(offset_val)));
-    firsttime = true;
+    if(!legato) firsttime = true;
     realfreq  = basefreq;
     if(!legato)
         NoteGlobalPar.Detune = getdetune(pars.PDetuneType, pars.PCoarseDetune,
@@ -156,11 +156,13 @@ void PADnote::setup(float freq,
                            * powf(0.1f, 3.0f * (1.0f - pars.PVolume / 96.0f))      //-60 dB .. 0 dB
                            * VelF(velocity, pars.PAmpVelocityScaleFunction); //velocity sensing
 
-    NoteGlobalPar.AmpEnvelope->envout_dB(); //discard the first envelope output
-    globaloldamplitude = globalnewamplitude = NoteGlobalPar.Volume
-                                              * NoteGlobalPar.AmpEnvelope->
-                                              envout_dB()
-                                              * NoteGlobalPar.AmpLfo->amplfoout();
+    if (!legato) {
+        NoteGlobalPar.AmpEnvelope->envout_dB(); //discard the first envelope output
+        globaloldamplitude = globalnewamplitude = NoteGlobalPar.Volume
+                                                  * NoteGlobalPar.AmpEnvelope->
+                                                  envout_dB()
+                                                  * NoteGlobalPar.AmpLfo->amplfoout();
+    }
 
     if(!legato) {
         ScratchString pre = prefix;
@@ -194,8 +196,8 @@ void PADnote::setup(float freq,
 
 SynthNote *PADnote::cloneLegato(void)
 {
-    SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity, 
-                   (bool)portamento, legato.param.midinote, true};
+    SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity,
+                   (bool)portamento, legato.param.midinote, true, legato.param.seed};
     return memory.alloc<PADnote>(&pars, sp, interpolation);
 }
 

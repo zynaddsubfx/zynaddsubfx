@@ -13,7 +13,7 @@
 #ifndef SYNTH_NOTE_H
 #define SYNTH_NOTE_H
 #include "../globals.h"
-
+#include "../Misc/Util.h"
 namespace zyn {
 
 class Allocator;
@@ -29,6 +29,7 @@ struct SynthParams
     bool      portamento;//True if portamento is used for this note
     int       note;      //Integer value of the note
     bool      quiet;     //Initial output condition for legato notes
+    prng_t    seed;      //Random seed
 };
 
 struct LegatoParams
@@ -38,6 +39,7 @@ struct LegatoParams
     bool portamento;
     int midinote;
     bool externcall;
+    prng_t seed;
 };
 
 class SynthNote
@@ -68,6 +70,9 @@ class SynthNote
         /* For polyphonic aftertouch needed */
         void setVelocity(float velocity_);
 
+        /* Random numbers with own seed */
+        float getRandom();
+
         //Realtime Safe Memory Allocator For notes
         class Allocator  &memory;
     protected:
@@ -76,7 +81,7 @@ class SynthNote
         {
             public:
                 Legato(const SYNTH_T &synth_, float freq, float vel, int port,
-                       int note, bool quiet);
+                       int note, bool quiet, prng_t seed);
 
                 void apply(SynthNote &note, float *outl, float *outr);
                 int update(LegatoParams pars);
@@ -92,9 +97,10 @@ class SynthNote
                 } fade;
             public:
                 struct { // Note parameters
-                    float freq, vel;
-                    bool  portamento;
-                    int   midinote;
+                    float  freq, vel;
+                    bool   portamento;
+                    int    midinote;
+                    prng_t seed;
                 } param;
                 const SYNTH_T &synth;
 
@@ -103,10 +109,13 @@ class SynthNote
                 float getVelocity() {return param.vel; }
                 bool  getPortamento() {return param.portamento; }
                 int getMidinote() {return param.midinote; }
+                prng_t getSeed() {return param.seed;}
                 void setSilent(bool silent_) {silent = silent_; }
                 void setDecounter(int decounter_) {decounter = decounter_; }
         } legato;
 
+        prng_t initial_seed;
+        prng_t current_prng_state;
         const Controller &ctl;
         const SYNTH_T    &synth;
         const AbsTime    &time;

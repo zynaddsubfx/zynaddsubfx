@@ -45,6 +45,8 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
     NoteEnabled = ON;
     basefreq    = spars.frequency;
     velocity    = spars.velocity;
+    initial_seed = spars.seed;
+    current_prng_state = spars.seed;
     stereo = pars.GlobalPar.PStereo;
 
     NoteGlobalPar.Detune = getdetune(pars.GlobalPar.PDetuneType,
@@ -53,8 +55,8 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
     bandwidthDetuneMultiplier = pars.getBandwidthDetuneMultiplier();
 
     if(pars.GlobalPar.PPanning == 0)
-        NoteGlobalPar.Panning = RND;
-    else
+        NoteGlobalPar.Panning = getRandom();
+     else
         NoteGlobalPar.Panning = pars.GlobalPar.PPanning / 128.0f;
 
 
@@ -509,7 +511,8 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
 SynthNote *ADnote::cloneLegato(void)
 {
     SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity,
-                   (bool)portamento, legato.param.midinote, true};
+                (bool)portamento, legato.param.midinote, true,
+                initial_seed };
     return memory.alloc<ADnote>(&pars, sp);
 }
 
@@ -527,6 +530,8 @@ void ADnote::legatonote(LegatoParams lpars)
     portamento = lpars.portamento;
     midinote   = lpars.midinote;
     basefreq   = lpars.frequency;
+    initial_seed = lpars.seed;
+    current_prng_state = lpars.seed;
 
     if(velocity > 1.0f)
         velocity = 1.0f;
@@ -537,9 +542,9 @@ void ADnote::legatonote(LegatoParams lpars)
                                      pars.GlobalPar.PDetune);
     bandwidthDetuneMultiplier = pars.getBandwidthDetuneMultiplier();
 
-    if(pars.GlobalPar.PPanning == 0)
-        NoteGlobalPar.Panning = RND;
-    else
+    if(pars.GlobalPar.PPanning == 0) {
+        NoteGlobalPar.Panning = getRandom();
+    } else
         NoteGlobalPar.Panning = pars.GlobalPar.PPanning / 128.0f;
 
     NoteGlobalPar.Filter->updateSense(velocity,
@@ -669,9 +674,6 @@ void ADnote::legatonote(LegatoParams lpars)
                            * VelF(
         velocity,
         pars.GlobalPar.PAmpVelocityScaleFunction); //velocity sensing
-    globalnewamplitude = NoteGlobalPar.Volume
-                         * NoteGlobalPar.AmpEnvelope->envout_dB()
-                         * NoteGlobalPar.AmpLfo->amplfoout();
 
     {
         auto        *filter  = NoteGlobalPar.Filter;
@@ -703,9 +705,9 @@ void ADnote::legatonote(LegatoParams lpars)
         if(pars.VoicePar[nvoice].PVolumeminus != 0)
             NoteVoicePar[nvoice].Volume = -NoteVoicePar[nvoice].Volume;
 
-        if(pars.VoicePar[nvoice].PPanning == 0)
-            NoteVoicePar[nvoice].Panning = RND;  // random panning
-        else
+        if(pars.VoicePar[nvoice].PPanning == 0) {
+            NoteVoicePar[nvoice].Panning = getRandom();
+        } else
             NoteVoicePar[nvoice].Panning =
                 pars.VoicePar[nvoice].PPanning / 128.0f;
 
@@ -862,9 +864,9 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
         if(param.PVolumeminus)
             vce.Volume = -vce.Volume;
 
-        if(param.PPanning == 0)
-            vce.Panning = RND;  // random panning
-        else
+        if(param.PPanning == 0) {
+            vce.Panning = getRandom();
+        } else
             vce.Panning = param.PPanning / 128.0f;
 
         newamplitude[nvoice] = 1.0f;

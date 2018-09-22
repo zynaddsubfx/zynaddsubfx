@@ -507,7 +507,7 @@ bool Part::NoteOn(unsigned char note,
 
     //Adjust Existing Notes
     if(doingLegato) {
-        LegatoParams pars = {notebasefreq, vel, portamento, note, true};
+        LegatoParams pars = {notebasefreq, vel, portamento, note, true, prng()};
         notePool.applyLegato(pars);
         return true;
     }
@@ -523,7 +523,7 @@ bool Part::NoteOn(unsigned char note,
             continue;
 
         SynthParams pars{memory, ctl, synth, time, notebasefreq, vel,
-            portamento, note, false};
+            portamento, note, false, prng()};
         const int sendto = Pkitmode ? item.sendto() : 0;
 
         try {

@@ -84,7 +84,7 @@ class AdNoteTest:public CxxTest::TestSuite
         void run_test(int a, int b, int c, int d, int e, int f, float values[4])
         {
             sprng(0);
-            
+
             const int ADnote_unison_sizes[] =
             {1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 0};
             params->VoicePar[0].Unison_size = ADnote_unison_sizes[a];
@@ -94,7 +94,7 @@ class AdNoteTest:public CxxTest::TestSuite
             params->VoicePar[0].Unison_vibratto_speed   = e;
             params->VoicePar[0].Unison_invert_phase     = f;
 
-            SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote, false};
+            SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote, false, prng()};
             note = new ADnote(params, pars);
             note->noteout(outL, outR);
             TS_ASSERT_DELTA(outL[80], values[0], 1e-5);

@@ -117,25 +117,24 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
     lo_message_serialise(msg, path, buffer, &size);
 
     if(!strcmp(buffer, "/path-search") &&
-       !strcmp("ss", rtosc_argument_string(buffer))) {
-        auto reply_cb = [](const char* url, const char* types, const rtosc_arg_t* args)
-        {
-            char buffer[1024*20];
-            size_t length = rtosc_amessage(buffer, sizeof(buffer),
-                                           "/paths", types, args);
-            if(length) {
-                lo_message msg  = lo_message_deserialise((void*)buffer,
-                                                         length, NULL);
-                lo_address addr = lo_address_new_from_url(url);
-                if(addr)
-                    lo_send_message(addr, buffer, msg);
-                lo_address_free(addr);
-                lo_message_free(msg);
-            }
-        };
-        rtosc::path_search(Master::ports, buffer, mw->activeUrl().c_str(),
-                           reply_cb);
-    } else if(buffer[0]=='/' && strrchr(buffer, '/')[1]) {
+       !strcmp("ss", rtosc_argument_string(buffer)))
+    {
+        char reply_buffer[1024*20];
+        std::size_t length =
+            rtosc::path_search(Master::ports, buffer, 128,
+                               reply_buffer, sizeof(reply_buffer));
+        if(length) {
+            lo_message msg  = lo_message_deserialise((void*)reply_buffer,
+                                                     length, NULL);
+            lo_address addr = lo_address_new_from_url(mw->activeUrl().c_str());
+            if(addr)
+                lo_send_message(addr, reply_buffer, msg);
+            lo_address_free(addr);
+            lo_message_free(msg);
+        }
+    }
+    else if(buffer[0]=='/' && strrchr(buffer, '/')[1])
+    {
         mw->transmitMsg(rtosc::Ports::collapsePath(buffer));
     }
 
@@ -1724,7 +1723,7 @@ void MiddleWareImpl::heartBeat(Master *master)
     //Last provided beat
     //Last acknowledged beat
     //Current offline status
-    
+
     struct timespec time;
     monotonic_clock_gettime(&time);
     uint32_t now = (time.tv_sec-start_time_sec)*100 +
