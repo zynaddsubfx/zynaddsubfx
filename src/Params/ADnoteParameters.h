@@ -20,7 +20,7 @@
 namespace zyn {
 
 enum FMTYPE {
-    NONE, MIX, RING_MOD, PHASE_MOD, FREQ_MOD, PW_MOD
+    NONE, MIX, RING_MOD, PHASE_MOD, FREQ_MOD, PW_MOD, WAVE_MOD
 };
 
 /*****************************************************************/
