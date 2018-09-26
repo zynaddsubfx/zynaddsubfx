@@ -681,6 +681,7 @@ int wmidi = -1;
                 }
             }
             exec_fusion("./zyn-fusion");
+            exec_fusion("/opt/zyn-fusion/zyn-fusion");
             exec_fusion("zyn-fusion");
             err(1,"Failed to launch Zyn-Fusion");
         }
