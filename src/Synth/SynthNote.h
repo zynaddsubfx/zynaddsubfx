@@ -71,7 +71,8 @@ class SynthNote
         void setVelocity(float velocity_);
 
         /* Random numbers with own seed */
-        float getRandom();
+        float getRandomFloat();
+        prng_t getRandomUint();
 
         //Realtime Safe Memory Allocator For notes
         class Allocator  &memory;

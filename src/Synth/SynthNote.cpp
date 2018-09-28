@@ -163,9 +163,13 @@ void SynthNote::setVelocity(float velocity_) {
     legato.setDecounter(0); //avoid chopping sound due fade-in
 }
 
-float SynthNote::getRandom() {
+float SynthNote::getRandomFloat() {
+    return (getRandomUint() / (INT32_MAX * 1.0f));
+}
+
+prng_t SynthNote::getRandomUint() {
     current_prng_state = prng_r(current_prng_state);
-    return (current_prng_state / (INT32_MAX * 1.0f));
+    return current_prng_state;
 }
 
 }

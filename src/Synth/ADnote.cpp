@@ -55,7 +55,7 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
     bandwidthDetuneMultiplier = pars.getBandwidthDetuneMultiplier();
 
     if(pars.GlobalPar.PPanning == 0)
-        NoteGlobalPar.Panning = getRandom();
+        NoteGlobalPar.Panning = getRandomFloat();
      else
         NoteGlobalPar.Panning = pars.GlobalPar.PPanning / 128.0f;
 
@@ -543,7 +543,7 @@ void ADnote::legatonote(LegatoParams lpars)
     bandwidthDetuneMultiplier = pars.getBandwidthDetuneMultiplier();
 
     if(pars.GlobalPar.PPanning == 0) {
-        NoteGlobalPar.Panning = getRandom();
+        NoteGlobalPar.Panning = getRandomFloat();
     } else
         NoteGlobalPar.Panning = pars.GlobalPar.PPanning / 128.0f;
 
@@ -596,7 +596,7 @@ void ADnote::legatonote(LegatoParams lpars)
         if(pars.VoicePar[nvoice].Pextoscil != -1)
             vc = pars.VoicePar[nvoice].Pextoscil;
         if(!pars.GlobalPar.Hrandgrouping)
-            pars.VoicePar[vc].OscilSmp->newrandseed(prng());
+            pars.VoicePar[vc].OscilSmp->newrandseed(getRandomUint());
 
         pars.VoicePar[vc].OscilSmp->get(NoteVoicePar[nvoice].OscilSmp,
                                          getvoicebasefreq(nvoice),
@@ -706,7 +706,7 @@ void ADnote::legatonote(LegatoParams lpars)
             NoteVoicePar[nvoice].Volume = -NoteVoicePar[nvoice].Volume;
 
         if(pars.VoicePar[nvoice].PPanning == 0) {
-            NoteVoicePar[nvoice].Panning = getRandom();
+            NoteVoicePar[nvoice].Panning = getRandomFloat();
         } else
             NoteVoicePar[nvoice].Panning =
                 pars.VoicePar[nvoice].PPanning / 128.0f;
@@ -865,7 +865,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
             vce.Volume = -vce.Volume;
 
         if(param.PPanning == 0) {
-            vce.Panning = getRandom();
+            vce.Panning = getRandomFloat();
         } else
             vce.Panning = param.PPanning / 128.0f;
 
