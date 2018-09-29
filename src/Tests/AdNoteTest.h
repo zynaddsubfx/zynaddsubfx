@@ -124,26 +124,26 @@ class AdNoteTest:public CxxTest::TestSuite
 #endif
             sampleCount += synth->buffersize;
 
-            TS_ASSERT_DELTA(outL[255], 0.254609f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], 0.2555f, 0.0001f);
 
             note->releasekey();
 
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.102197f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], -0.4688f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.111261f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], 0.0613f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.021375f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], 0.0971f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], 0.149149f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], -0.0901f, 0.0001f);
 
             while(!note->finished()) {
                 note->noteout(outL, outR);

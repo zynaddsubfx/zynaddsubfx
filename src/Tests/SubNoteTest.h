@@ -119,19 +119,19 @@ class SubNoteTest:public CxxTest::TestSuite
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], 0.0016f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], 0.0029f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.0000f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], -0.0011f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.0013f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], -0.0017f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.0002f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], -0.0005f, 0.0001f);
 
             while(!note->finished()) {
                 note->noteout(outL, outR);

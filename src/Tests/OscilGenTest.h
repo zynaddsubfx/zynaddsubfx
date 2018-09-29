@@ -86,10 +86,10 @@ class OscilGenTest:public CxxTest::TestSuite
         void testOutput(void)
         {
             oscil->get(outL, freq);
-            TS_ASSERT_DELTA(outL[23], -0.044547f, 0.0001f);
-            TS_ASSERT_DELTA(outL[129], -0.018169f, 0.0001f);
-            TS_ASSERT_DELTA(outL[586], 0.045647f, 0.0001f);
-            TS_ASSERT_DELTA(outL[1023], -0.038334f, 0.0001f);
+            TS_ASSERT_DELTA(outL[23], -0.5371f, 0.0001f);
+            TS_ASSERT_DELTA(outL[129], 0.3613f, 0.0001f);
+            TS_ASSERT_DELTA(outL[586], 0.1118f, 0.0001f);
+            TS_ASSERT_DELTA(outL[1023], -0.6889f, 0.0001f);
         }
 
         void testSpectrum(void)
