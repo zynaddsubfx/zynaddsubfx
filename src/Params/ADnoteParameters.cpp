@@ -222,7 +222,7 @@ static const Ports voicePorts = {
                 obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
             }
         }},
-    {"PFMVolume::i", rShort("vol.") rLinear(0,127)
+    {"FMVolume::i", rShort("vol.") rLinear(0,127)
         rDoc("Modulator Magnitude"), NULL,
         [](const char *msg, RtData &d)
         {
