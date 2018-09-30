@@ -157,7 +157,7 @@ static const Ports voicePorts = {
                 frequency, pulse), rDefault(none), "Modulator mode"),
     rParamI(PFMVoice,                   rShort("voice"), rDefault(-1),
         "Modulator Oscillator Selection"),
-    rParamF(PFMvolume,                   rShort("vol."),  rLinear(0.0, 100.0),
+    rParamF(FMvolume,                   rShort("vol."),  rLinear(0.0, 100.0),
         rDefault(70.0),                 "Modulator Magnitude"),
     rParamZyn(PFMVolumeDamp,            rShort("damp."), rDefault(64),
         "Modulator HF dampening"),
@@ -228,10 +228,10 @@ static const Ports voicePorts = {
         {
             rObject *obj = (rObject *)d.obj;
             if (!rtosc_narguments(msg))
-                d.reply(d.loc, "i", (int)roundf(127.0f * obj->PFMvolume
+                d.reply(d.loc, "i", (int)roundf(127.0f * obj->FMvolume
                     / 100.0f));
             else
-                obj->PFMvolume = 100.0f * rtosc_argument(msg, 0).i / 127.0f;
+                obj->FMvolume = 100.0f * rtosc_argument(msg, 0).i / 127.0f;
         }},
     //weird stuff for PCoarseDetune
     {"FMdetunevalue:", rMap(unit,cents) rDoc("Get modulator detune"), NULL, [](const char *, RtData &d)
@@ -535,7 +535,7 @@ void ADnoteVoiceParam::defaults()
     //I use the internal oscillator (-1)
     PFMVoice = -1;
 
-    PFMvolume       = 70.0;
+    FMvolume       = 70.0;
     PFMVolumeDamp   = 64;
     PFMDetune       = 8192;
     PFMCoarseDetune = 0;
@@ -799,7 +799,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
         xml.beginbranch("FM_PARAMETERS");
         xml.addpar("input_voice", PFMVoice);
 
-        xml.addparreal("volume", PFMvolume);
+        xml.addparreal("volume", FMvolume);
         xml.addpar("volume_damp", PFMVolumeDamp);
         xml.addpar("velocity_sensing",
                     PFMVelocityScaleFunction);
@@ -1100,7 +1100,7 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     RCopy(FilterLfo);
 
     copy(PFMVoice);
-    copy(PFMvolume);
+    copy(FMvolume);
     copy(PFMVolumeDamp);
     copy(PFMVelocityScaleFunction);
 
@@ -1280,9 +1280,9 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
         PFMVoice      = xml.getpar("input_voice", PFMVoice, -1, nvoice - 1);
         if (upgrade_3_0_3) {
             int Pvolume = xml.getpar127("volume", 0);
-            PFMvolume    = 100.0f * Pvolume / 127.0f;
+            FMvolume    = 100.0f * Pvolume / 127.0f;
         } else {
-            PFMvolume    = xml.getparreal("volume", PFMvolume);
+            FMvolume    = xml.getparreal("volume", FMvolume);
         }
         PFMVolumeDamp = xml.getpar127("volume_damp", PFMVolumeDamp);
         PFMVelocityScaleFunction = xml.getpar127("velocity_sensing",
