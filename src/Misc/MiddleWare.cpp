@@ -426,15 +426,13 @@ public:
 
 class MiddleWareImpl
 {
-    public:
-    MiddleWare *parent;
-    private:
-
 public:
+    MiddleWare *parent;
     Config* const config;
     MiddleWareImpl(MiddleWare *mw, SYNTH_T synth, Config* config,
                    int preferred_port);
     ~MiddleWareImpl(void);
+    void recreateMinimalMaster();
 
     //Check offline vs online mode in plugins
     void heartBeat(Master *m);
@@ -778,7 +776,7 @@ public:
     std::set<string> known_remotes;
 
     //Synthesis Rate Parameters
-    const SYNTH_T synth;
+    SYNTH_T synth;
 
     PresetsStore presetsstore;
 
@@ -1514,8 +1512,33 @@ static rtosc::Ports middwareSnoopPorts = {
     //    midi.unMap(addr.c_str(), true);
     //    rEnd},
     //drop this message into the abyss
-    {"ui/title:", 0, 0, [](const char *msg, RtData &d) {}},
+    {"ui/title:", 0, 0, [](const char *, RtData &) {}},
     {"quit:", 0, 0, [](const char *, RtData&) {Pexitprogram = 1;}},
+    // may only be called when Master is not being run
+    {"change-synth:iiit", 0, 0,
+        rBegin
+        // save all data, overwrite all params defining SYNTH,
+        // restart the master and load all data back into it
+
+        char* data = nullptr;
+        impl.master->getalldata(&data);
+        delete impl.master;
+
+        impl.synth.samplerate = (unsigned)rtosc_argument(msg, 0).i;
+        impl.synth.buffersize = rtosc_argument(msg, 1).i;
+        impl.synth.oscilsize = rtosc_argument(msg, 2).i;
+        impl.synth.alias();
+
+        impl.recreateMinimalMaster();
+        impl.master->defaults();
+        impl.master->putalldata(data);
+        impl.master->applyparameters();
+        impl.master->initialize_rt();
+        impl.updateResources(impl.master);
+
+        d.broadcast("/change-synth", "t", rtosc_argument(msg, 3).t);
+        rEnd
+    }
 };
 
 static rtosc::Ports middlewareReplyPorts = {
@@ -1603,9 +1626,7 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
     idle = 0;
     idle_ptr = 0;
 
-    master = new Master(synth, config);
-    master->bToU = bToU;
-    master->uToB = uToB;
+    recreateMinimalMaster();
     osc    = GUI::genOscInterface(mw);
 
     //Grab objects of interest from master
@@ -1648,6 +1669,13 @@ MiddleWareImpl::~MiddleWareImpl(void)
     delete bToU;
     delete uToB;
 
+}
+
+void zyn::MiddleWareImpl::recreateMinimalMaster()
+{
+    master = new Master(synth, config);
+    master->bToU = bToU;
+    master->uToB = uToB;
 }
 
 /** Threading When Saving
