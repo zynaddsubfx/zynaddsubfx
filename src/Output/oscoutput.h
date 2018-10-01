@@ -31,7 +31,6 @@ public:
     //SPA_PLUGIN
 
     static const spa::descriptor* getOscDescriptor(unsigned long index);
-    static const ZynOscPlugin* instantiate(const spa::descriptor*, unsigned long sampleRate);
 
     void run() override;
 
@@ -53,20 +52,20 @@ public:
     struct recent_op_t {
         std::string file;
         //! this must be 64 bit in order to be compliant with OSC timestamps
-        uint64_t stamp;
-        bool status;
-    } recent_load, recent_save;
+        uint64_t stamp = 0; // TODO: use atomics here?
+        bool status = false;
+    } recent_load, recent_save, recent_restore;
 
 public:	// FEATURE: make these private?
     //! The sole constructor.
     ZynOscPlugin();
-    ~ZynOscPlugin();
+    ~ZynOscPlugin() override;
 
     void init() override;
 
     static void _uiCallback(void* ptr, const char* msg)
     {
-        ((ZynOscPlugin*)ptr)->uiCallback(msg);
+        (static_cast<ZynOscPlugin*>(ptr))->uiCallback(msg);
     }
 
     void uiCallback(const char* msg);
@@ -82,36 +81,21 @@ private:
     void hide_ui();
 
     pid_t ui_pid = 0;
-    long sampleRate;
     zyn::MiddleWare *middleware;
-    std::thread *middlewareThread;
+    std::thread *middlewareThread = nullptr;
 
     zyn::Config config;
     zyn::Master* master = nullptr;
 
     unsigned net_port() const override;
 
-    //! Let the plugin dump a savefile. The success of the operation will
-    //! need to be checked later by check_save()
-    //! @param savefile The destination to dump the savefile to
-    //! @param ticket A value that, combined with @p savefile, identifies
-    //!   that operation, e.g. an increasing counter or an OSC timestamp
-    //! @return true iff the saving request could be sent
     bool save(const char* savefile, uint64_t ticket) override;
-
-    //! Let the plugin load a savefile. The success of the operation will
-    //! need to be checked later by check_load()
-    //! @param savefile The path to load the savefile from
-    //! @param ticket A value that, combined with @p savefile, identifies
-    //!   that operation, e.g. an increasing counter or an OSC timestamp
-    //! @return true iff the loading request could be sent
     bool load(const char* savefile, uint64_t ticket) override;
+    void restore(uint64_t ticket) override;
 
-    //! Check if a requested save operation succeeded
     bool save_check(const char* savefile, uint64_t ticket) override;
-
-    //! Check if a requested load operation succeeded
     bool load_check(const char* savefile, uint64_t ticket) override;
+    bool restore_check(uint64_t ticket) override;
 };
 
 class ZynOscDescriptor : public spa::descriptor
@@ -140,7 +124,8 @@ class ZynOscDescriptor : public spa::descriptor
 
 //	int id() const;
 
-    ZynOscPlugin* instantiate() const;
+    ZynOscPlugin* instantiate() const override;
+    bool restore_has() const override { return true; }
     bool save_has() const override { return true; }
     bool load_has() const override { return true; }
     // if you add more: comma separated, no spaces

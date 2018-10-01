@@ -16,8 +16,12 @@
 #include <unistd.h>
 #include <csignal>
 #include <cstring>
+#include <set>
+#include <string>
+#include <vector>
 #include <rtosc/thread-link.h>
 #include <rtosc/rtosc.h>
+#include <mutex>
 
 #include <zyn-config.h>
 #include "icon.h"
@@ -31,7 +35,7 @@ using std::vector;
 
 //Dummy variables and functions for linking purposes
 namespace zyn {
-    const char *instance_name = 0;
+    const char *instance_name = nullptr;
     class WavFile;
     namespace Nio {
         bool start(void){return 1;};
@@ -55,7 +59,7 @@ void ZynOscPlugin::run(/*float* outl, float* outr, unsigned long sample_count*/)
 {
     check_osc();
     master->GetAudioOutSamples(p_samplecount,
-                               (int)sampleRate,
+                               static_cast<unsigned>(p_samplerate),
                                p_out.left, p_out.right);
 }
 
@@ -167,7 +171,7 @@ struct set_min : public spa::audio::visitor
     template<class T> using ci = spa::audio::control_in<T>;
     void visit(ci<int> &p) override { p.min = atoi(min); }
     void visit(ci<long long int> &p) override { p.min = atoll(min); }
-    void visit(ci<float> &p) override { p.min = atof(min); }
+    void visit(ci<float> &p) override { p.min = static_cast<float>(atof(min)); }
     void visit(ci<double> &p) override { p.min = atof(min); }
 };
 
@@ -177,11 +181,11 @@ struct set_max : public spa::audio::visitor
     template<class T> using ci = spa::audio::control_in<T>;
     void visit(ci<int> &p) override { p.max = atoi(max); }
     void visit(ci<long long int> &p) override { p.max = atoll(max); }
-    void visit(ci<float> &p) override { p.max = atof(max); }
+    void visit(ci<float> &p) override { p.max = static_cast<float>(atof(max)); }
     void visit(ci<double> &p) override { p.max = atof(max); }
 };
 
-struct is_bool_t : public spa::audio::visitor
+struct is_bool_t final : public spa::audio::visitor
 {
     bool res = false;
     template<class T> using ci = spa::audio::control_in<T>;
@@ -189,7 +193,7 @@ struct is_bool_t : public spa::audio::visitor
 };
 
 // TODO: bad design of control_in<T>
-struct set_scale_type : public spa::audio::visitor
+struct set_scale_type final : public spa::audio::visitor
 {
     template<class T> using ci = spa::audio::control_in<T>;
     spa::audio::scale_type_t scale_type = spa::audio::scale_type_t::linear;
@@ -200,7 +204,7 @@ struct set_scale_type : public spa::audio::visitor
 };
 
 //! class for capturing numerics (not pointers to string/blob memory involved)
-class capture : public rtosc::RtData
+class capture final : public rtosc::RtData
 {
     rtosc_arg_val_t res;
     void replyArray(const char*, const char *args,
@@ -227,7 +231,7 @@ public:
     const rtosc_arg_val_t& val() { return res; }
 };
 
-class set_init : public spa::audio::visitor
+class set_init final : public spa::audio::visitor
 {
     template<class T> using ci = spa::audio::control_in<T>;
     const rtosc_arg_val_t& av;
@@ -251,7 +255,7 @@ spa::port_ref_base* new_port(const char* metadata, const char* args)
     set_max max_setter;
     set_scale_type scale_type_setter;
 
-    for(const auto x : meta)
+    for(const auto& x : meta)
     {
         if(!strcmp(x.title, "parameter"))
             is_parameter = true;
@@ -350,7 +354,7 @@ void ZynOscPlugin::check_osc()
         }
 #endif
         master->uToB->raw_write(path);
-    }
+        }
 }
 
 void ZynOscPlugin::hide_ui()
@@ -370,7 +374,7 @@ unsigned ZynOscPlugin::net_port() const {
     const char* addr = middleware->getServerAddress();
     const char* port_str = strrchr(addr, ':');
     assert(port_str);
-    return atoi(port_str + 1);
+    return static_cast<unsigned>(atoi(port_str + 1));
 }
 
 bool ZynOscPlugin::save(const char *savefile, uint64_t ticket) {
@@ -383,15 +387,35 @@ bool ZynOscPlugin::load(const char *savefile, uint64_t ticket) {
     return true;
 }
 
+void ZynOscPlugin::restore(uint64_t ticket)
+{
+    middleware->messageAnywhere("/change-synth", "iiit",
+                                (int)p_samplerate, (int)p_buffersize,
+                                middleware->getSynth().oscilsize, ticket);
+}
+
+
+
 bool ZynOscPlugin::save_check(const char *savefile, uint64_t ticket) {
+    mutex_guard guard(cb_mutex);
     return recent_save.file == savefile &&
         recent_save.stamp == ticket &&
         recent_save.status; }
 
 bool ZynOscPlugin::load_check(const char *savefile, uint64_t ticket) {
+    mutex_guard guard(cb_mutex);
     return recent_load.file == savefile &&
         recent_load.stamp == ticket &&
         recent_load.status; }
+bool ZynOscPlugin::restore_check(uint64_t ticket) {
+    mutex_guard guard(cb_mutex);
+    if(recent_restore.stamp == ticket) {
+        masterChangedCallback(middleware->spawnMaster());
+        return true;
+    }
+    else
+        return false;
+}
 
 void ZynOscPlugin::masterChangedCallback(zyn::Master *m)
 {
@@ -401,7 +425,7 @@ void ZynOscPlugin::masterChangedCallback(zyn::Master *m)
 
 void ZynOscPlugin::_masterChangedCallback(void *ptr, zyn::Master *m)
 {
-    ((ZynOscPlugin*)ptr)->masterChangedCallback(m);
+    (static_cast<ZynOscPlugin*>(ptr))->masterChangedCallback(m);
 }
 
 extern "C" {
@@ -423,7 +447,7 @@ ZynOscPlugin::~ZynOscPlugin()
     hide_ui();
 
     auto *tmp = middleware;
-    middleware = 0;
+    middleware = nullptr;
     middlewareThread->join();
     delete tmp;
     delete middlewareThread;
@@ -431,18 +455,14 @@ ZynOscPlugin::~ZynOscPlugin()
 
 void ZynOscPlugin::init()
 {
-    unsigned sampleRate = p_samplerate;
-
     zyn::SYNTH_T synth;
-    synth.samplerate = sampleRate;
-
-    this->sampleRate = sampleRate;
+    synth.samplerate = p_samplerate;
 
     config.init();
     // disable compression for being conform with LMMS' format
     config.cfg.GzipCompression = 0;
 
-    zyn::sprng(time(NULL));
+    zyn::sprng(time(nullptr));
 
     synth.alias();
     middleware = new zyn::MiddleWare(std::move(synth), &config);
@@ -450,26 +470,37 @@ void ZynOscPlugin::init()
     masterChangedCallback(middleware->spawnMaster());
 
     middlewareThread = new std::thread([this]() {
-            while(middleware) {
+        while(middleware) {
             middleware->tick();
             usleep(1000);
-            }});
+        }
+    });
 }
 
 void ZynOscPlugin::uiCallback(const char *msg)
 {
-    if(!strcmp(msg, "/save_xmz") || !strcmp(msg, "/load_xmz"))
+    //fprintf(stderr, "UI callback: \"%s\".\n", msg);
+    if(!strcmp(msg, "/save_xmz") || !strcmp(msg, "/load_xmz") ||
+        !strcmp(msg, "/change-synth"))
     {
         mutex_guard guard(cb_mutex);
 #ifdef SAVE_OSC_DEBUG
         fprintf(stderr, "Received message \"%s\".\n", msg);
 #endif
-        recent_op_t& recent = (msg[1] == 'l')
+        if(msg[1] == 'c')
+        {
+            recent_restore.stamp = rtosc_argument(msg, 0).t;
+            recent_restore.status = true;
+        }
+        else
+        {
+            recent_op_t& recent = (msg[1] == 'l')
                 ? recent_load
                 : recent_save;
-        recent.file = rtosc_argument(msg, 0).s;
-        recent.stamp = rtosc_argument(msg, 1).t;
-        recent.status = rtosc_argument(msg, 2).T;
+            recent.file = rtosc_argument(msg, 0).s;
+            recent.stamp = rtosc_argument(msg, 1).t;
+            recent.status = rtosc_argument(msg, 2).T;
+        }
     }
     else if(!strcmp(msg, "/damage"))
     {
