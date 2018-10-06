@@ -45,8 +45,8 @@ namespace Nio
     std::string getSource(void);
     std::string getSink(void);
 
-    //Get the prefered sample rate from jack (if running)
-    void preferedSampleRate(unsigned &rate);
+    //Get the preferred sample rate from jack (if running)
+    void preferredSampleRate(unsigned &rate);
 
     //Complete Master Swaps to ONLY BE CALLED FROM RT CONTEXT
     void masterSwap(Master *master);

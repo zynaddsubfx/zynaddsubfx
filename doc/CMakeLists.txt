@@ -13,3 +13,6 @@ if(DOXYGEN_FOUND)
         COMMENT "Generating API documentation with Doxygen" VERBATIM)
     add_custom_target(doc DEPENDS html)
 endif()
+
+add_subdirectory(bash-completion)
+
