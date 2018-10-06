@@ -1,0 +1,296 @@
+# zynaddsubfx(1) completion                                -*- shell-script -*-
+
+_zynaddsubfx_array_contains ()
+{
+    local e match="$1"
+    shift
+    for e; do [[ "$e" == "$match" ]] && return 0; done
+    return 1
+}
+
+_zynaddsubfx_long_param_of()
+{
+    case "$1" in
+        -l)
+            echo "load"
+            ;;
+        -L)
+            echo "load-instrument"
+            ;;
+        -M)
+            echo "midi-learn"
+            ;;
+        -r)
+            echo "sample-rate"
+            ;;
+        -b)
+            echo "buffer-size"
+            ;;
+        -o)
+            echo "oscil-size"
+            ;;
+        -S)
+            echo "swap"
+            ;;
+        -U)
+            echo "no-gui"
+            ;;
+        -N)
+            echo "named"
+            ;;
+        -a)
+            echo "auto-connect"
+            ;;
+        -A)
+            echo "auto-save"
+            ;;
+        -p)
+            echo "pid-in-client"
+            ;;
+        -P)
+            echo "preferred-port"
+            ;;
+        -O)
+            echo "output"
+            ;;
+        -I)
+            echo "input"
+            ;;
+        -e)
+            echo "exec-after-init"
+            ;;
+        -d)
+            echo "dump-oscdoc"
+            ;;
+        -D)
+            echo "dump-json-schema"
+            ;;
+        *)
+            echo ""
+            ;;
+    esac
+}
+
+_zynaddsubfx()
+{
+    local cword=$COMP_CWORD
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local params filetypes pars shortargs
+
+    # call routine provided by bash-completion
+    _init_completion || return
+
+    # pars without args
+    pars=(--help --version --auto-connect --no-gui --swap)
+    pars+=(--pid-in-client-name)
+    # pars with args
+    pars+=(--load --load-instrument --midi-learn)
+    pars+=(--sample-rate --buffer-size --oscil-size)
+    pars+=(--named --auto-save)
+    pars+=(--preferred-port --output --input)
+    pars+=(--exec-after-init --dump-oscdoc --dump-json-schema)
+
+    shortargs=(-h -v -l -L -M -r -b -o -S -U -N -a -A -p -P -O -I -e -d -D)
+    
+    local prev=
+    if [ "$cword" -gt 1 ]
+    then
+        prev=${COMP_WORDS[cword-1]}
+    fi
+
+    # don't show shortargs, but complete them when entered
+    if [[ $cur =~ ^-[^-]$ ]]
+    then
+        if _zynaddsubfx_array_contains "$cur" "${shortargs[@]}"
+        then
+            COMPREPLY=( "$cur" )
+        fi
+        return
+    fi
+
+    
+    local filemode
+
+    #
+    # please keep those in order like def_pars_args above
+    #
+    case $prev in
+        --load|-l)
+            filetypes=xmz
+            filemode=existing_files
+            ;;
+        --load-instrument|-L)
+            filetypes=xiz
+            filemode=existing_files
+            ;;
+        --midi-learn|-M)
+            filetypes=xlz
+            filemode=existing_files
+            ;;
+        --sample-rate|-r)
+            params="8000 16000 44100 48000 96000 192000"
+            ;;
+        --buffer-size|-b)
+            # less than 32 sounds insane, more than 4096 observed buggy
+            params="32 64 128 256 512 1024 2048 4096"
+            ;;
+        --oscil-size|-o)
+            params="128 256 512 1024 2048 4096"
+            ;;
+        --named|-N)
+            ;;
+        --auto-save|-A)
+            params="30 60 120 180 300 450 600 900 1200 1800 2400 3600 "
+            params+="5400 7200 10800 14400 21600 43200 86400"
+            ;;
+        --preferred-port|-P)
+            params=
+            ;;
+        --input|--output|-I|-O)
+            local jack_enable_cmake=@JackEnable@
+            local pa_enable_cmake=@PaEnable@
+            local alsa_enable_cmake=@AlsaEnable@
+            local oss_enable_cmake=@OssEnable@
+
+            local jack_enable pa_enable alsa_enable oss_enable
+            [[ $jack_enable_cmake =~ FALSE|0|OFF|^$ ]] || jack_enable=1
+            [[ $pa_enable_cmake =~ FALSE|0|OFF|^$ ]] || pa_enable=1
+            [[ $alsa_enable_cmake =~ FALSE|0|OFF|^$ ]] || alsa_enable=1
+            [[ $oss_enable_cmake =~ FALSE|0|OFF|^$ ]] || oss_enable=1
+
+            params="null"
+            [ "$jack_enable" ] && params+=" jack"
+            [ "$pa_enable" ] && params+=" pa"
+            [ "$alsa_enable" ] && params+=" alsa"
+            [ "$oss_enable" ] && params+=" oss"
+            if [[ $prev =~ --output|-O ]]
+            then
+                [ "$jack_enable" ] && params+=" jack-multi"
+                [ "$oss_enable" ] && params+=" oss-multi"
+            fi
+            
+            if [[ $prev =~ --output|-O ]]
+            then
+                for i in "${COMPREPLY[@]}"
+                do
+                    if [ "$i" == '-a' ] || [ "$i" == '--autoconnect' ]
+                    then
+                        params="jack jack-multi"
+                        break;
+                    fi
+                done
+            fi
+            ;;
+        --exec-after-init|-e)
+            filemode=executables
+            ;;
+        --dump-oscdoc|-d)
+            filemode=files
+            filetypes=xml
+            ;;
+        --dump-json-schema|-D)
+            filemode=files
+            filetypes=json
+            ;;
+        *)
+            if [[ $prev =~ --help|-h|-version|-v ]]
+            then
+                # the -e flag (from --import) and help/version
+                # always mark the end of arguments
+                return
+            fi
+        
+            # add pars to params, but also check the history of comp words
+            local param
+            for param in "${pars[@]}"
+            do
+                local do_append=1
+                for i in "${!COMP_WORDS[@]}"
+                do
+                    if [ "$i" -ne 0 ] && [ "$i" -ne "$cword" ]
+                    then
+                        # disallow double long parameters
+                        if [ "${COMP_WORDS[$i]}" == "$param" ]
+                        then
+                            do_append=
+                        # disallow double short parameters
+                        elif [ "${COMP_WORDS[$i]:0:1}" == '-' ] && ! [ "${COMP_WORDS[$i]:1:2}" == '-' ] &&
+                            [ "--$(_zynaddsubfx_long_param_of "${COMP_WORDS[$i]}")" == "$param" ]
+                        then
+                            do_append=
+                        # --help or --version must be the first parameters
+                        elif [ "$cword" -gt 1 ] && [[ $param =~ --help|--version ]]
+                        then
+                            do_append=
+                        fi
+                    fi
+                done
+                if [ "$do_append" ]
+                then
+                    params+="$param "
+                fi
+            done
+
+            ;;
+    esac
+
+    
+    case $filemode in
+        
+        # use completion routine provided by bash-completion
+        # to fill $COMPREPLY
+        
+        existing_files)
+            _filedir "@($filetypes)"
+        ;;
+
+        existing_directories)
+            _filedir -d
+        ;;
+        
+        executables)
+            
+            _filedir
+            local tmp=("${COMPREPLY[@]}")
+            COMPREPLY=( )
+            for i in "${!tmp[@]}"
+            do
+                if [ -f "${tmp[i]}" ] && ! [ -x "${tmp[i]}" ]
+                then
+                    # if it's a file that can't be executed, omit from completion
+                    true
+                else
+                    COMPREPLY+=( "${tmp[i]}" )
+                fi
+            done
+        ;;
+        
+        files)
+
+            # non existing files complete like directories...
+            _filedir -d
+            
+            # ...except for non-completing files with the right file type
+            if [ ${#COMPREPLY[@]} -eq 0 ]
+            then
+                if ! [[ "$cur" =~ /$ ]] && [ "$filetypes" ] && [[ "$cur" =~ \.($filetypes)$ ]]
+                then
+                    # file ending fits, we seem to be done
+                    COMPREPLY=( "$cur" )
+                fi
+            fi
+        ;;
+        
+    esac
+
+    if [ "$params" ]
+    then
+        # none of our parameters contain spaces, so deactivate shellcheck's warning
+        # shellcheck disable=SC2207
+        COMPREPLY+=( $(compgen -W "${params}" -- "${cur}") )
+    fi
+
+}
+
+
+complete -F _zynaddsubfx zynaddsubfx

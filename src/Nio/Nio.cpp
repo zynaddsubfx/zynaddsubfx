@@ -134,7 +134,7 @@ string Nio::getSink()
 
 #if JACK
 #include <jack/jack.h>
-void Nio::preferedSampleRate(unsigned &rate)
+void Nio::preferredSampleRate(unsigned &rate)
 {
 #if __linux__
     //avoid checking in with jack if it's off
@@ -157,7 +157,7 @@ void Nio::preferedSampleRate(unsigned &rate)
     }
 }
 #else
-void Nio::preferedSampleRate(unsigned &)
+void Nio::preferredSampleRate(unsigned &)
 {}
 #endif
 

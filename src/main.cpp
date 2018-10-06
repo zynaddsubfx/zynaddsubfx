@@ -103,9 +103,9 @@ void sigterm_exit(int /*sig*/)
 /*
  * Program initialisation
  */
-void initprogram(SYNTH_T synth, Config* config, int prefered_port)
+void initprogram(SYNTH_T synth, Config* config, int preferred_port)
 {
-    middleware = new MiddleWare(std::move(synth), config, prefered_port);
+    middleware = new MiddleWare(std::move(synth), config, preferred_port);
     master = middleware->spawnMaster();
     master->swaplr = swaplr;
 
@@ -241,14 +241,19 @@ int main(int argc, char *argv[])
     synth.oscilsize  = config.cfg.OscilSize;
     swaplr = config.cfg.SwapStereo;
 
-    Nio::preferedSampleRate(synth.samplerate);
+    Nio::preferredSampleRate(synth.samplerate);
 
     synth.alias(); //build aliases
 
     sprng(time(NULL));
 
+    // for option entrys with the 3rd member (flag) pointing here,
+    // getopt_long*() will return 0 and set this flag to the 4th member (val)
+    int getopt_flag;
+
     /* Parse command-line options */
     struct option opts[] = {
+        // options with single char equivalents
         {
             "load", 2, NULL, 'l'
         },
@@ -295,7 +300,7 @@ int main(int argc, char *argv[])
             "pid-in-client-name", 0, NULL, 'p'
         },
         {
-            "prefered-port", 1, NULL, 'P',
+            "preferred-port", 1, NULL, 'P',
         },
         {
             "output", 1, NULL, 'O'
@@ -312,15 +317,31 @@ int main(int argc, char *argv[])
         {
             "dump-json-schema", 2, NULL, 'D'
         },
+        // options without single char equivalents ("getopt_flag" compulsory)
+        {
+            "list-inputs", no_argument, &getopt_flag, 'i'
+        },
+        {
+            "list-outputs", no_argument, &getopt_flag, 'o'
+        },
         {
             0, 0, 0, 0
         }
     };
     opterr = 0;
-    int option_index = 0, opt, exitwithhelp = 0, exitwithversion = 0;
-    int prefered_port = -1;
+    int option_index = 0, opt;
+    enum class exit_with_t
+    {
+        dont_exit,
+        help,
+        version,
+        list_inputs,
+        list_outputs
+    };
+    exit_with_t exit_with = exit_with_t::dont_exit;
+    int preferred_port = -1;
     int auto_save_interval = 0;
-int wmidi = -1;
+    int wmidi = -1;
 
     string loadfile, loadinstrument, execAfterInit, loadmidilearn;
 
@@ -346,10 +367,10 @@ int wmidi = -1;
 
         switch(opt) {
             case 'h':
-                exitwithhelp = 1;
+                exit_with = exit_with_t::help;
                 break;
             case 'v':
-                exitwithversion = 1;
+                exit_with = exit_with_t::version;
                 break;
             case 'Y': /* this command a dummy command (has NO effect)
                         and is used because I need for NSIS installer
@@ -422,7 +443,7 @@ int wmidi = -1;
                 break;
             case 'P':
                 if(optarguments)
-                    prefered_port = atoi(optarguments);
+                    preferred_port = atoi(optarguments);
                 break;
             case 'A':
                 if(optarguments)
@@ -456,49 +477,80 @@ int wmidi = -1;
                 if(optarguments)
                     wmidi = atoi(optarguments);
                 break;
+            case 0: // catch options without single char equivalent
+                switch(getopt_flag)
+                {
+                    case 'i':
+                        exit_with = exit_with_t::list_inputs;
+                        break;
+                    case 'o':
+                        exit_with = exit_with_t::list_outputs;
+                        break;
+                }
+                break;
             case '?':
                 cerr << "ERROR:Bad option or parameter.\n" << endl;
-                exitwithhelp = 1;
+                exit_with = exit_with_t::help;
                 break;
         }
     }
 
     synth.alias();
 
-    if(exitwithversion) {
-        cout << "Version: " << version << endl;
-        return 0;
+    switch (exit_with)
+    {
+        case exit_with_t::version:
+            cout << "Version: " << version << endl;
+            break;
+        case exit_with_t::help:
+            cout << "Usage: zynaddsubfx [OPTION]\n\n"
+                 << "  -h , --help \t\t\t\t Display command-line help and exit\n"
+                 << "  -v , --version \t\t\t Display version and exit\n"
+                 << "  -l file, --load=FILE\t\t\t Loads a .xmz file\n"
+                 << "  -L file, --load-instrument=FILE\t Loads a .xiz file\n"
+                 << "  -M file, --midi-learn=FILE\t\t Loads a .xlz file\n"
+                 << "  -r SR, --sample-rate=SR\t\t Set the sample rate SR\n"
+                 <<
+            "  -b BS, --buffer-size=SR\t\t Set the buffer size (granularity)\n"
+                 << "  -o OS, --oscil-size=OS\t\t Set the ADsynth oscil. size\n"
+                 << "  -S , --swap\t\t\t\t Swap Left <--> Right\n"
+                 <<
+            "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
+                 << "  -N , --named\t\t\t\t Postfix IO Name when possible\n"
+                 << "  -a , --auto-connect\t\t\t AutoConnect when using JACK\n"
+                 << "  -A , --auto-save=INTERVAL\t\t Automatically save at interval\n"
+                 << "\t\t\t\t\t (disabled with 0 interval)\n"
+                 << "  -p , --pid-in-client-name\t\t Append PID to (JACK) "
+                    "client name\n"
+                 << "  -P , --preferred-port\t\t\t Preferred OSC Port\n"
+                 << "  -O , --output\t\t\t\t Set Output Engine\n"
+                 << "  -I , --input\t\t\t\t Set Input Engine\n"
+                 << "  -e , --exec-after-init\t\t Run post-initialization script\n"
+                 << "  -d , --dump-oscdoc=FILE\t\t Dump oscdoc xml to file\n"
+                 << "  -D , --dump-json-schema=FILE\t\t Dump osc schema (.json) to file\n"
+                 << endl;
+            break;
+        case exit_with_t::list_inputs:
+        case exit_with_t::list_outputs:
+        {
+            Nio::init(synth, config.cfg.oss_devs, nullptr);
+            auto get_func = (getopt_flag == 'i')
+                    ? &Nio::getSources
+                    : &Nio::getSinks;
+            std::set<std::string> engines = (*get_func)();
+            for(std::string engine : engines)
+            {
+                std::transform(engine.begin(), engine.end(), engine.begin(),
+                               ::tolower);
+                cout << engine << endl;
+            }
+            break;
+        }
+        default:
+            break;
     }
-    if(exitwithhelp != 0) {
-        cout << "Usage: zynaddsubfx [OPTION]\n\n"
-             << "  -h , --help \t\t\t\t Display command-line help and exit\n"
-             << "  -v , --version \t\t\t Display version and exit\n"
-             << "  -l file, --load=FILE\t\t\t Loads a .xmz file\n"
-             << "  -L file, --load-instrument=FILE\t Loads a .xiz file\n"
-             << "  -M file, --midi-learn=FILE\t\t Loads a .xlz file\n"
-             << "  -r SR, --sample-rate=SR\t\t Set the sample rate SR\n"
-             <<
-        "  -b BS, --buffer-size=SR\t\t Set the buffer size (granularity)\n"
-             << "  -o OS, --oscil-size=OS\t\t Set the ADsynth oscil. size\n"
-             << "  -S , --swap\t\t\t\t Swap Left <--> Right\n"
-             <<
-        "  -U , --no-gui\t\t\t\t Run ZynAddSubFX without user interface\n"
-             << "  -N , --named\t\t\t\t Postfix IO Name when possible\n"
-             << "  -a , --auto-connect\t\t\t AutoConnect when using JACK\n"
-             << "  -A , --auto-save=INTERVAL\t\t Automatically save at interval\n"
-             << "\t\t\t\t\t (disabled with 0 interval)\n"
-             << "  -p , --pid-in-client-name\t\t Append PID to (JACK) "
-                "client name\n"
-             << "  -P , --preferred-port\t\t\t Preferred OSC Port\n"
-             << "  -O , --output\t\t\t\t Set Output Engine\n"
-             << "  -I , --input\t\t\t\t Set Input Engine\n"
-             << "  -e , --exec-after-init\t\t Run post-initialization script\n"
-             << "  -d , --dump-oscdoc=FILE\t\t Dump oscdoc xml to file\n"
-             << "  -D , --dump-json-schema=FILE\t\t Dump osc schema (.json) to file\n"
-             << endl;
-
+    if(exit_with != exit_with_t::dont_exit)
         return 0;
-    }
 
     cerr.precision(1);
     cerr << std::fixed;
@@ -507,7 +559,7 @@ int wmidi = -1;
     cerr << "Internal latency = \t" << synth.dt() * 1000.0f << " ms" << endl;
     cerr << "ADsynth Oscil.Size = \t" << synth.oscilsize << " samples" << endl;
 
-    initprogram(std::move(synth), &config, prefered_port);
+    initprogram(std::move(synth), &config, preferred_port);
 
     bool altered_master = false;
     if(!loadfile.empty()) {
