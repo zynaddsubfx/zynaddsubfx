@@ -165,43 +165,77 @@ spa::port_ref_base* port_from_osc_args(const char* args)
     }
 }
 
-struct set_min : public spa::audio::visitor
+struct set_min final : public spa::audio::visitor
 {
     const char* min = nullptr;
     template<class T> using ci = spa::audio::control_in<T>;
-    void visit(ci<int> &p) override { p.min = atoi(min); }
-    void visit(ci<long long int> &p) override { p.min = atoll(min); }
-    void visit(ci<float> &p) override { p.min = static_cast<float>(atof(min)); }
-    void visit(ci<double> &p) override { p.min = atof(min); }
+    void visit(ci<int> &p) override;
+    void visit(ci<long long int> &p) override;
+    void visit(ci<float> &p) override;
+    void visit(ci<double> &p) override;
 };
 
-struct set_max : public spa::audio::visitor
+void set_min::visit(ci<int> &p) { p.min = atoi(min); }
+void set_min::visit(ci<long long int> &p) { p.min = atoll(min); }
+void set_min::visit(ci<float> &p) {
+    p.min = static_cast<float>(atof(min)); }
+void set_min::visit(ci<double> &p) { p.min = atof(min); }
+
+struct set_max final : public spa::audio::visitor
 {
     const char* max = nullptr;
     template<class T> using ci = spa::audio::control_in<T>;
-    void visit(ci<int> &p) override { p.max = atoi(max); }
-    void visit(ci<long long int> &p) override { p.max = atoll(max); }
-    void visit(ci<float> &p) override { p.max = static_cast<float>(atof(max)); }
-    void visit(ci<double> &p) override { p.max = atof(max); }
+    void visit(ci<int> &p) override;
+    void visit(ci<long long int> &p) override;
+    void visit(ci<float> &p) override;
+    void visit(ci<double> &p) override;
 };
+
+void set_max::visit(ci<int> &p) { p.max = atoi(max); }
+void set_max::visit(ci<long long int> &p) { p.max = atoll(max); }
+void set_max::visit(ci<float> &p) {
+    p.min = static_cast<float>(atof(max)); }
+void set_max::visit(ci<double> &p) { p.max = atof(max); }
+
+struct set_step final : public spa::audio::visitor
+{
+    const char* step = nullptr;
+    template<class T> using ci = spa::audio::control_in<T>;
+    void visit(ci<int> &p) override;
+    void visit(ci<long long int> &p) override;
+    void visit(ci<float> &p) override;
+    void visit(ci<double> &p) override;
+};
+
+void set_step::visit(ci<int> &p) { p.step = atoi(step); }
+void set_step::visit(ci<long long> &p) { p.step = atoll(step); }
+void set_step::visit(ci<float> &p) { p.step = static_cast<float>(atof(step)); }
+void set_step::visit(ci<double> &p) { p.step = atof(step); }
 
 struct is_bool_t final : public spa::audio::visitor
 {
     bool res = false;
     template<class T> using ci = spa::audio::control_in<T>;
-    void visit(ci<bool> &) override { res = true; }
+    void visit(ci<bool> &);
 };
+
+void is_bool_t::visit(ci<bool> &) { res = true; }
 
 // TODO: bad design of control_in<T>
 struct set_scale_type final : public spa::audio::visitor
 {
     template<class T> using ci = spa::audio::control_in<T>;
     spa::audio::scale_type_t scale_type = spa::audio::scale_type_t::linear;
-    void visit(ci<int> &p) override { p.scale_type = scale_type; }
-    void visit(ci<long long int> &p) override { p.scale_type = scale_type; }
-    void visit(ci<float> &p) override { p.scale_type = scale_type; }
-    void visit(ci<double> &p) override { p.scale_type = scale_type; }
+    void visit(ci<int> &p) override;
+    void visit(ci<long long int> &p) override;
+    void visit(ci<float> &p) override;
+    void visit(ci<double> &p) override;
 };
+
+void set_scale_type::visit(ci<int> &p) { p.scale_type = scale_type; }
+void set_scale_type::visit(ci<long long> &p) { p.scale_type = scale_type; }
+void set_scale_type::visit(ci<float> &p) { p.scale_type = scale_type; }
+void set_scale_type::visit(ci<double> &p) { p.scale_type = scale_type; }
 
 //! class for capturing numerics (not pointers to string/blob memory involved)
 class capture final : public rtosc::RtData
@@ -253,6 +287,7 @@ spa::port_ref_base* new_port(const char* metadata, const char* args)
     bool is_parameter = false;
     set_min min_setter;
     set_max max_setter;
+    set_step step_setter;
     set_scale_type scale_type_setter;
 
     for(const auto& x : meta)
@@ -553,3 +588,4 @@ spa::simple_vec<spa::simple_str> ZynOscDescriptor::port_names() const
 {
     return { "out", "buffersize", "osc", "samplecount", "samplerate" };
 }
+
