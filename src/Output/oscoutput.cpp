@@ -194,7 +194,7 @@ struct set_max final : public spa::audio::visitor
 void set_max::visit(ci<int> &p) { p.max = atoi(max); }
 void set_max::visit(ci<long long int> &p) { p.max = atoll(max); }
 void set_max::visit(ci<float> &p) {
-    p.min = static_cast<float>(atof(max)); }
+    p.max = static_cast<float>(atof(max)); }
 void set_max::visit(ci<double> &p) { p.max = atof(max); }
 
 struct set_step final : public spa::audio::visitor
