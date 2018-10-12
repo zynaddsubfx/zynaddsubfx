@@ -89,12 +89,11 @@ void ZynOscPlugin::ui_ext_show(bool show)
                               "\"zest\" binary - ignoring.", stderr);
                     else {
                         const char* cur = getenv("LD_LIBRARY_PATH");
-                        std::string ld_library_path;
+                        std::string ld_library_path = zyn::fusion_dir;
                         if(cur) {
-                            ld_library_path += cur;
                             ld_library_path += ":";
+                            ld_library_path += cur;
                         }
-                        ld_library_path += zyn::fusion_dir;
                         setenv("LD_LIBRARY_PATH", ld_library_path.c_str(), 1);
                         exec_fusion(fusion.c_str());
                     }
