@@ -475,6 +475,15 @@ add_subdirectory(DSP)
 add_subdirectory(Nio)
 add_subdirectory(Plugin)
 
+add_executable(wavenormalgen
+	${CMAKE_CURRENT_SOURCE_DIR}/Synth/wavenormalgen.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Synth/basefunctions.cpp
+	)
+add_custom_command(
+	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/wavenormals.cpp
+	COMMAND ${CMAKE_CURRENT_BINARY_DIR}/wavenormalgen > ${CMAKE_CURRENT_BINARY_DIR}/wavenormals.cpp
+	DEPENDS wavenormalgen
+)
 add_library(zynaddsubfx_core STATIC
     version.cpp
     globals.cpp
