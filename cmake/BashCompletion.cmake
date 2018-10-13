@@ -79,7 +79,7 @@ if [ -w \"${BASHCOMP_PKG_PATH}\" ]; then\n\
 fi\n\
 echo -e \"\\nInstalling bash completion...\\n\"\n\
 mkdir -p \"\$BASHCOMP_PKG_PATH\"\n\
-cp \"${CMAKE_CURRENT_SOURCE_DIR}/${SCRIPT_NAME}\" \"\$BASHCOMP_PKG_PATH\"\n\
+cp \"${CMAKE_CURRENT_BINARY_DIR}/${SCRIPT_NAME}\" \"\$BASHCOMP_PKG_PATH\"\n\
 chmod a+r \"\$BASHCOMP_PKG_PATH/${SCRIPT_NAME}\"\n\
 echo -e \"Bash completion for ${SCRIPT_NAME} has been installed to \$BASHCOMP_PKG_PATH/${SCRIPT_NAME}\"\n\
 ")
