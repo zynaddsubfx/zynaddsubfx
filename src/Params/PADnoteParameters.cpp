@@ -285,6 +285,11 @@ static const rtosc::Ports non_realtime_ports =
             d.replyArray(d.loc, types, args);
 #undef RES
         }},
+    {"export2wav:s", rDoc("Export padsynth waveforms to .wav files"),
+        NULL, [](const char *m, rtosc::RtData&d) {
+            PADnoteParameters *p = ((PADnoteParameters*)d.obj);
+            p->export2wav(rtosc_argument(m, 0).s);
+        }},
     {"needPrepare:", rDoc("Unimplemented Stub"),
         NULL, [](const char *, rtosc::RtData&) {}},
 };
