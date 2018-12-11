@@ -57,7 +57,7 @@ static const rtosc::Ports _ports = {
               rDefaultDepends(loc), rDefault(64), rPreset(ad_voice_freq, 0),
               "Starting Phase"),
     rOption(PLFOtype, rShort("type"), rOptions(sine, triangle, square, up, down,
-                exp1, exp2, ran), rDefault(sine), "Shape of LFO"),
+                exp1, exp2, random), rDefault(sine), "Shape of LFO"),
     rParamZyn(Prandomness, rShort("a.r."), rSpecial(disable), rDefault(0),
             "Amplitude Randomness (calculated uniformly at each cycle)"),
     rParamZyn(Pfreqrand, rShort("f.r."), rSpecial(disable), rDefault(0),
