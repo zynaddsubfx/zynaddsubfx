@@ -207,7 +207,7 @@ static const Ports voicePorts = {
                 obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
             }
         }},
-    {"coarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64,63)
+    {"coarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64,63) rDefault(0)
         rDoc("Coarse note detune"), NULL,
         [](const char *msg, RtData &d)
         {
