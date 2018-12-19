@@ -23,6 +23,7 @@
 #include "../Synth/ADnote.h"
 #include "../Synth/OscilGen.h"
 #include "../Params/Presets.h"
+#include "../Params/FilterParams.h"
 #include "../DSP/FFTwrapper.h"
 #include "../globals.h"
 using namespace std;
@@ -63,6 +64,9 @@ class AdNoteTest:public CxxTest::TestSuite
 
             //sawtooth to make things a bit more interesting
             params->VoicePar[0].OscilSmp->Pcurrentbasefunc = 3;
+
+            params->GlobalPar.PFilterVelocityScale = 64;
+            params->GlobalPar.GlobalFilter->basefreq = 5076.203125;
 
             controller = new Controller(*synth, time);
 
