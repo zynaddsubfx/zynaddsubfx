@@ -63,7 +63,7 @@ static const rtosc::Ports realtime_ports =
         "Punch Velocity control"),
 
     //Filter
-    rParamZyn(PFilterVelocityScale,         rShort("scale"), rDefault(64),
+    rParamZyn(PFilterVelocityScale,         rShort("scale"), rDefault(0),
         "Filter Velocity Magnitude"),
     rParamZyn(PFilterVelocityScaleFunction, rShort("sense"), rDefault(64),
         "Filter Velocity Function Shape"),
@@ -407,7 +407,7 @@ void PADnoteParameters::defaults()
     PPunchVelocitySensing = 72;
 
     /* Filter Global Parameters*/
-    PFilterVelocityScale = 64;
+    PFilterVelocityScale = 0;
     PFilterVelocityScaleFunction = 64;
     GlobalFilter->defaults();
     FilterEnvelope->defaults();
