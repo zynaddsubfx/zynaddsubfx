@@ -55,7 +55,7 @@ static const rtosc::Ports SUBnotePorts = {
         "Enable for Bandwidth Envelope"),
     rToggle(PGlobalFilterEnabled,                 rShort("enable"),
         rDefault(false), "Enable for Global Filter"),
-    rParamZyn(PGlobalFilterVelocityScale,         rShort("scale"), rDefault(64),
+    rParamZyn(PGlobalFilterVelocityScale,         rShort("scale"), rDefault(0),
         "Filter Velocity Magnitude"),
     rParamZyn(PGlobalFilterVelocityScaleFunction, rShort("sense"), rDefault(64),
         "Filter Velocity Function Shape"),
@@ -304,7 +304,7 @@ void SUBnoteParameters::defaults()
     Phmag[0] = 127;
 
     PGlobalFilterEnabled = 0;
-    PGlobalFilterVelocityScale = 64;
+    PGlobalFilterVelocityScale = 0;
     PGlobalFilterVelocityScaleFunction = 64;
 
     AmpEnvelope->defaults();
