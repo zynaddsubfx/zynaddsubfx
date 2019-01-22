@@ -24,13 +24,19 @@ namespace zyn {
 class MidiIn:public virtual Engine
 {
     public:
+        MidiIn();
+
         /**Enables or disables driver based upon value*/
         virtual void setMidiEn(bool nval) = 0;
         /**Returns if driver is initialized*/
         virtual bool getMidiEn() const = 0;
-        static void midiProcess(unsigned char head,
-                                unsigned char num,
-                                unsigned char value);
+        void midiProcess(unsigned char head,
+                         unsigned char num,
+                         unsigned char value);
+    private:
+        uint8_t midiSysEx(unsigned char data);
+        uint8_t sysex_offset;
+        uint8_t sysex_data[64];
 };
 
 }
