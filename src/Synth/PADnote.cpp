@@ -20,6 +20,7 @@
 #include "../Params/Controller.h"
 #include "../Params/FilterParams.h"
 #include "../Containers/ScratchString.h"
+#include "../Containers/NotePool.h"
 #include "../Misc/Util.h"
 
 namespace zyn {
@@ -40,7 +41,7 @@ PADnote::PADnote(const PADnoteParameters *parameters,
 void PADnote::setup(float freq,
                     float velocity_,
                     int portamento_,
-                    int midinote,
+                    note_t midinote,
                     bool legato,
                     WatchManager *wm,
                     const char *prefix)

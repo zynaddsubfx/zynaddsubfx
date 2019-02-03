@@ -879,7 +879,7 @@ void Master::defaults()
 /*
  * Note On Messages (velocity=0 for NoteOff)
  */
-void Master::noteOn(char chan, char note, char velocity)
+void Master::noteOn(char chan, note_t note, char velocity)
 {
     if(velocity) {
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
@@ -889,7 +889,7 @@ void Master::noteOn(char chan, char note, char velocity)
                     part[npart]->NoteOn(note, velocity, keyshift);
             }
         }
-        activeNotes[(int)note] = 1;
+        activeNotes[note] = 1;
         HDDRecorder.triggernow();
     }
     else
@@ -899,18 +899,18 @@ void Master::noteOn(char chan, char note, char velocity)
 /*
  * Note Off Messages
  */
-void Master::noteOff(char chan, char note)
+void Master::noteOff(char chan, note_t note)
 {
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         if((chan == part[npart]->Prcvchn) && part[npart]->Penabled)
             part[npart]->NoteOff(note);
-    activeNotes[(int)note] = 0;
+    activeNotes[note] = 0;
 }
 
 /*
  * Pressure Messages (velocity=0 for NoteOff)
  */
-void Master::polyphonicAftertouch(char chan, char note, char velocity)
+void Master::polyphonicAftertouch(char chan, note_t note, char velocity)
 {
     if(velocity) {
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)

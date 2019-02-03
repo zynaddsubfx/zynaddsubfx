@@ -21,6 +21,7 @@
 #include "Envelope.h"
 #include "ModFilter.h"
 #include "../Containers/ScratchString.h"
+#include "../Containers/NotePool.h"
 #include "../Params/Controller.h"
 #include "../Params/SUBnoteParameters.h"
 #include "../Params/FilterParams.h"
@@ -90,7 +91,7 @@ float SUBnote::setupFilters(int *pos, bool automation)
 void SUBnote::setup(float freq,
                     float velocity,
                     int portamento_,
-                    int midinote,
+                    note_t midinote,
                     bool legato,
                     WatchManager *wm,
                     const char *prefix)

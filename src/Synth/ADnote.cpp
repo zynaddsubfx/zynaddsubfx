@@ -23,6 +23,7 @@
 #include "../Misc/Allocator.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Containers/ScratchString.h"
+#include "../Containers/NotePool.h"
 #include "ModFilter.h"
 #include "OscilGen.h"
 #include "ADnote.h"

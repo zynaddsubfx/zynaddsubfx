@@ -450,7 +450,7 @@ static int kit_usage(const Part::Kit *kits, int note, int mode)
 /*
  * Note On Messages
  */
-bool Part::NoteOn(unsigned char note,
+bool Part::NoteOn(note_t note,
                   unsigned char velocity,
                   int masterkeyshift)
 {
@@ -558,7 +558,7 @@ bool Part::NoteOn(unsigned char note,
 /*
  * Note Off Messages
  */
-void Part::NoteOff(unsigned char note) //release the key
+void Part::NoteOff(note_t note) //release the key
 {
     // This note is released, so we remove it from the list.
     if(!monomemEmpty())
@@ -582,9 +582,9 @@ void Part::NoteOff(unsigned char note) //release the key
     }
 }
 
-void Part::PolyphonicAftertouch(unsigned char note,
-                                unsigned char velocity,
-                                int masterkeyshift)
+void Part::PolyphonicAftertouch(note_t note,
+				unsigned char velocity,
+				int masterkeyshift)
 {
     (void) masterkeyshift;
 
@@ -727,13 +727,13 @@ void Part::ReleaseAllKeys()
 // (Made for Mono/Legato).
 void Part::MonoMemRenote()
 {
-    unsigned char mmrtempnote = monomemBack(); // Last list element.
+    note_t mmrtempnote = monomemBack(); // Last list element.
     monomemPop(mmrtempnote); // We remove it, will be added again in NoteOn(...).
     NoteOn(mmrtempnote, monomem[mmrtempnote].velocity,
             monomem[mmrtempnote].mkeyshift);
 }
 
-float Part::getBaseFreq(int note, int keyshift) const
+float Part::getBaseFreq(note_t note, int keyshift) const
 {
     if(Pdrummode)
         return 440.0f * powf(2.0f, (note - 69.0f) / 12.0f);
@@ -1053,7 +1053,7 @@ void Part::kill_rt(void)
     notePool.killAllNotes();
 }
 
-void Part::monomemPush(char note)
+void Part::monomemPush(note_t note)
 {
     for(int i=0; i<256; ++i)
         if(monomemnotes[i]==note)
@@ -1064,7 +1064,7 @@ void Part::monomemPush(char note)
     monomemnotes[0] = note;
 }
 
-void Part::monomemPop(char note)
+void Part::monomemPop(note_t note)
 {
     int note_pos=-1;
     for(int i=0; i<256; ++i)
@@ -1077,7 +1077,7 @@ void Part::monomemPop(char note)
     }
 }
 
-char Part::monomemBack(void) const
+note_t Part::monomemBack(void) const
 {
     return monomemnotes[0];
 }

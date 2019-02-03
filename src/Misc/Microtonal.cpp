@@ -257,7 +257,7 @@ unsigned char Microtonal::getoctavesize() const
 /*
  * Get the frequency according the note number
  */
-float Microtonal::getnotefreq(int note, int keyshift) const
+float Microtonal::getnotefreq(note_t note, int keyshift) const
 {
     // in this function will appears many times things like this:
     // var=(a+b*100)%b

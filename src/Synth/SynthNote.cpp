@@ -25,7 +25,7 @@ SynthNote::SynthNote(SynthParams &pars)
 {}
 
 SynthNote::Legato::Legato(const SYNTH_T &synth_, float freq, float vel, int port,
-                          int note, bool quiet, prng_t seed)
+                          note_t note, bool quiet, prng_t seed)
     :synth(synth_)
 {
     // Initialise some legato-specific vars
@@ -154,7 +154,7 @@ void SynthNote::Legato::apply(SynthNote &note, float *outl, float *outr)
 void SynthNote::setVelocity(float velocity_) {
     legato.setSilent(true); //Let legato.update(...) returns 0.
     LegatoParams pars{legato.getFreq(), velocity_,
-               legato.getPortamento(), legato.getMidinote(), true, legato.getSeed()};
+               legato.getPortamento(), legato.getMidiNote(), true, legato.getSeed()};
     try {
         legatonote(pars);
     } catch (std::bad_alloc &ba) {

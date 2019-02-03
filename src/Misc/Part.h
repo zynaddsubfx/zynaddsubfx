@@ -43,11 +43,11 @@ class Part
         // Midi commands implemented
 
         //returns true when note is successfully applied
-        bool NoteOn(unsigned char note,
+        bool NoteOn(note_t note,
                     unsigned char velocity,
                     int masterkeyshift) REALTIME;
-        void NoteOff(unsigned char note) REALTIME;
-        void PolyphonicAftertouch(unsigned char note,
+        void NoteOff(note_t note) REALTIME;
+        void PolyphonicAftertouch(note_t note,
                                   unsigned char velocity,
                                   int masterkeyshift) REALTIME;
         void AllNotesOff() REALTIME; //panic
@@ -159,7 +159,7 @@ class Part
 
     private:
         void MonoMemRenote(); // MonoMem stuff.
-        float getBaseFreq(int note, int keyshift) const;
+        float getBaseFreq(note_t note, int keyshift) const;
         float getVelocity(uint8_t velocity, uint8_t velocity_sense,
                 uint8_t velocity_offset) const;
         void verifyKeyMode(void);
@@ -177,9 +177,9 @@ class Part
         bool lastlegatomodevalid; // To keep track of previous legatomodevalid.
 
         // MonoMem stuff
-        void monomemPush(char note);
-        void monomemPop(char note);
-        char monomemBack(void) const;
+        void monomemPush(note_t note);
+        void monomemPop(note_t note);
+        note_t monomemBack(void) const;
         bool monomemEmpty(void) const;
         void monomemClear(void);
 

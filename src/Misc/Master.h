@@ -104,9 +104,9 @@ class Master
         void putalldata(const char *data);
 
         //Midi IN
-        void noteOn(char chan, char note, char velocity);
-        void noteOff(char chan, char note);
-        void polyphonicAftertouch(char chan, char note, char velocity);
+        void noteOn(char chan, note_t note, char velocity);
+        void noteOff(char chan, note_t note);
+        void polyphonicAftertouch(char chan, note_t note, char velocity);
         void setController(char chan, int type, int par);
         //void NRPN...
 
