@@ -243,17 +243,17 @@ bool NotePool::existsRunningNote(void) const
 
 int NotePool::getRunningNotes(void) const
 {
-    bool running[256] = {0};
-    for(auto &desc:activeDesc()) {
-        //printf("note!(%d)\n", desc.note);
-        if(desc.playing() || desc.sustained())
-            running[desc.note] = true;
-    }
-
+    bool running[256] = {};
     int running_count = 0;
-    for(int i=0; i<256; ++i)
-        running_count += running[i];
 
+    for(auto &desc:activeDesc()) {
+        if(desc.playing() == false && desc.sustained() == false)
+            continue;
+        if (running[desc.note] != false)
+            continue;
+        running[desc.note] = true;
+        running_count++;
+    }
     return running_count;
 }
 void NotePool::enforceKeyLimit(int limit)
