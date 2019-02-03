@@ -410,8 +410,7 @@ static const Ports master_ports = {
        d.reply("/free", "sb", "Part", sizeof(void*), &m->part[i]);
        m->part[i] = p;
        p->initialize_rt();
-       for(int i=0; i<128; ++i)
-           m->activeNotes[i] = 0;
+       memset(m->activeNotes, 0, sizeof(m->activeNotes));
        }},
     {"active_keys:", rProp("Obtain a list of active notes"), 0,
         rBegin;
@@ -754,8 +753,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
         sysefx[nefx] = new EffectMgr(*memory, synth, 0, &time);
 
     //Note Visualization
-    for(int i=0; i<128; ++i)
-        activeNotes[i] = 0;
+    memset(activeNotes, 0, sizeof(activeNotes));
 
     defaults();
 
@@ -1423,8 +1421,7 @@ void Master::ShutUp()
         insefx[nefx]->cleanup();
     for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
         sysefx[nefx]->cleanup();
-    for(int i = 0; i < int(sizeof(activeNotes)/sizeof(activeNotes[0])); ++i)
-        activeNotes[i] = 0;
+    memset(activeNotes, 0, sizeof(activeNotes));
     vuresetpeaks();
     shutup = 0;
 }
