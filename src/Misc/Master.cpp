@@ -890,10 +890,10 @@ void Master::noteOn(char chan, char note, char velocity)
             }
         }
         activeNotes[(int)note] = 1;
+        HDDRecorder.triggernow();
     }
     else
         this->noteOff(chan, note);
-    HDDRecorder.triggernow();
 }
 
 /*
