@@ -249,7 +249,7 @@ int NotePool::getRunningNotes(void) const
     for(auto &desc:activeDesc()) {
         if(desc.playing() == false && desc.sustained() == false)
             continue;
-        if (running[desc.note] != false)
+        if(running[desc.note] != false)
             continue;
         running[desc.note] = true;
         running_count++;
