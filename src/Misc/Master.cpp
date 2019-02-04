@@ -879,14 +879,14 @@ void Master::defaults()
 /*
  * Note On Messages (velocity=0 for NoteOff)
  */
-void Master::noteOn(char chan, note_t note, char velocity)
+void Master::noteOn(char chan, note_t note, char velocity, float note_log2_freq)
 {
     if(velocity) {
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
             if(chan == part[npart]->Prcvchn) {
                 fakepeakpart[npart] = velocity * 2;
                 if(part[npart]->Penabled)
-                    part[npart]->NoteOn(note, velocity, keyshift);
+                    part[npart]->NoteOn(note, velocity, keyshift, note_log2_freq);
             }
         }
         activeNotes[note] = 1;

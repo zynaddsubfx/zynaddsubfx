@@ -43,9 +43,13 @@ class Part
         // Midi commands implemented
 
         //returns true when note is successfully applied
+        bool NoteOn(note_t note, uint8_t vel, int shift) REALTIME {
+             return (NoteOn(note, vel, shift, note / 12.0f));
+        };
         bool NoteOn(note_t note,
                     unsigned char velocity,
-                    int masterkeyshift) REALTIME;
+                    int masterkeyshift,
+                    float note_log2_freq) REALTIME;
         void NoteOff(note_t note) REALTIME;
         void PolyphonicAftertouch(note_t note,
                                   unsigned char velocity,
@@ -159,7 +163,7 @@ class Part
 
     private:
         void MonoMemRenote(); // MonoMem stuff.
-        float getBaseFreq(note_t note, int keyshift) const;
+        float getBaseFreq(float note_log2_freq, int keyshift) const;
         float getVelocity(uint8_t velocity, uint8_t velocity_sense,
                 uint8_t velocity_offset) const;
         void verifyKeyMode(void);
@@ -187,6 +191,7 @@ class Part
         struct {
             unsigned char velocity;
             int mkeyshift; // I'm not sure masterkeyshift should be remembered.
+            float note_log2_freq;
         } monomem[256];
         /* 256 is to cover all possible note values.
            monomem[] is used in conjunction with the list to

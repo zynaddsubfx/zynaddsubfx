@@ -29,7 +29,7 @@ struct SynthParams
     float     frequency; //Note base frequency
     float     velocity;  //Velocity of the Note
     bool      portamento;//True if portamento is used for this note
-    note_t    note;      //Integer value of the note
+    float     note_log2_freq; //Floating point value of the note
     bool      quiet;     //Initial output condition for legato notes
     prng_t    seed;      //Random seed
 };
@@ -39,7 +39,7 @@ struct LegatoParams
     float frequency;
     float velocity;
     bool portamento;
-    note_t midinote;
+    float note_log2_freq; //Floating point value of the note
     bool externcall;
     prng_t seed;
 };
@@ -84,7 +84,7 @@ class SynthNote
         {
             public:
                 Legato(const SYNTH_T &synth_, float freq, float vel, int port,
-                       note_t note, bool quiet, prng_t seed);
+                       float note_log2_freq, bool quiet, prng_t seed);
 
                 void apply(SynthNote &note, float *outl, float *outr);
                 int update(LegatoParams pars);
@@ -102,7 +102,7 @@ class SynthNote
                 struct { // Note parameters
                     float  freq, vel;
                     bool   portamento;
-                    note_t midinote;
+                    float  note_log2_freq;
                     prng_t seed;
                 } param;
                 const SYNTH_T &synth;
@@ -111,7 +111,7 @@ class SynthNote
                 float getFreq() {return param.freq; }
                 float getVelocity() {return param.vel; }
                 bool  getPortamento() {return param.portamento; }
-                note_t getMidiNote() {return param.midinote; }
+                float getNoteLog2Freq() {return param.note_log2_freq; }
                 prng_t getSeed() {return param.seed;}
                 void setSilent(bool silent_) {silent = silent_; }
                 void setDecounter(int decounter_) {decounter = decounter_; }

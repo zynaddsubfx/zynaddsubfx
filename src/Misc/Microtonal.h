@@ -68,7 +68,7 @@ class Microtonal
         void defaults();
         /**Calculates the frequency for a given note
          */
-        float getnotefreq(note_t note, int keyshift) const;
+        float getnotefreq(float note_log2_freq, int keyshift) const;
 
 
         //Parameters

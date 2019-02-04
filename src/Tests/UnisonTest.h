@@ -98,7 +98,7 @@ class AdNoteTest:public CxxTest::TestSuite
             params->VoicePar[0].Unison_vibratto_speed   = e;
             params->VoicePar[0].Unison_invert_phase     = f;
 
-            SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote, false, prng()};
+            SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote / 12.0f, false, prng()};
             note = new ADnote(params, pars);
             note->noteout(outL, outR);
             TS_ASSERT_DELTA(outL[80], values[0], 1e-5);

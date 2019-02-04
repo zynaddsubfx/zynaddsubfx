@@ -110,7 +110,7 @@ class ADnote:public SynthNote
         //GLOBALS
         ADnoteParameters &pars;
         unsigned char     stereo; //if the note is stereo (allows note Panning)
-        note_t midinote;
+        float note_log2_freq;
         float velocity, basefreq;
 
         ONOFFTYPE   NoteEnabled;

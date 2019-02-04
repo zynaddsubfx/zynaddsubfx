@@ -275,7 +275,7 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     Pname = new char[PART_MAX_NAME_LEN];
 
     oldvolumel = oldvolumer = 0.5f;
-    lastnote   = -1;
+    lastnote = -1;
 
     defaults();
     assert(partefx[0]);
@@ -452,7 +452,8 @@ static int kit_usage(const Part::Kit *kits, int note, int mode)
  */
 bool Part::NoteOn(note_t note,
                   unsigned char velocity,
-                  int masterkeyshift)
+                  int masterkeyshift,
+                  float note_log2_freq)
 {
     //Verify Basic Mode and sanity
     const bool isRunningNote   = notePool.existsRunningNote();
@@ -471,6 +472,7 @@ bool Part::NoteOn(note_t note,
         monomemPush(note);
         monomem[note].velocity  = velocity;
         monomem[note].mkeyshift = masterkeyshift;
+        monomem[note].note_log2_freq = note_log2_freq;
 
     } else if(!monomemEmpty())
         monomemClear();
@@ -485,9 +487,9 @@ bool Part::NoteOn(note_t note,
     const float vel          = getVelocity(velocity, Pvelsns, Pveloffs);
     const int   partkeyshift = (int)Pkeyshift - 64;
     const int   keyshift     = masterkeyshift + partkeyshift;
-    const float notebasefreq = getBaseFreq(note, keyshift);
+    const float notebasefreq = getBaseFreq(note_log2_freq, keyshift);
 
-    if(notebasefreq < 0)
+    if(notebasefreq < 0.0f)
         return false;
 
     //Portamento
@@ -507,8 +509,8 @@ bool Part::NoteOn(note_t note,
 
     //Adjust Existing Notes
     if(doingLegato) {
-        LegatoParams pars = {notebasefreq, vel, portamento, note, true, prng()};
-        notePool.applyLegato(pars);
+        LegatoParams pars = {notebasefreq, vel, portamento, note_log2_freq, true, prng()};
+        notePool.applyLegato(note, pars);
         return true;
     }
 
@@ -523,7 +525,7 @@ bool Part::NoteOn(note_t note,
             continue;
 
         SynthParams pars{memory, ctl, synth, time, notebasefreq, vel,
-            portamento, note, false, prng()};
+            portamento, note_log2_freq, false, prng()};
         const int sendto = Pkitmode ? item.sendto() : 0;
 
         try {
@@ -729,16 +731,18 @@ void Part::MonoMemRenote()
 {
     note_t mmrtempnote = monomemBack(); // Last list element.
     monomemPop(mmrtempnote); // We remove it, will be added again in NoteOn(...).
-    NoteOn(mmrtempnote, monomem[mmrtempnote].velocity,
-            monomem[mmrtempnote].mkeyshift);
+    NoteOn(mmrtempnote,
+           monomem[mmrtempnote].velocity,
+           monomem[mmrtempnote].mkeyshift,
+           monomem[mmrtempnote].note_log2_freq);
 }
 
-float Part::getBaseFreq(note_t note, int keyshift) const
+float Part::getBaseFreq(float note_log2_freq, int keyshift) const
 {
     if(Pdrummode)
-        return 440.0f * powf(2.0f, (note - 69.0f) / 12.0f);
+        return 440.0f * powf(2.0f, note_log2_freq - (69.0f / 12.0f));
     else
-        return microtonal->getnotefreq(note, keyshift);
+        return microtonal->getnotefreq(note_log2_freq, keyshift);
 }
 
 float Part::getVelocity(uint8_t velocity, uint8_t velocity_sense,

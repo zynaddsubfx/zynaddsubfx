@@ -46,7 +46,7 @@ SUBnote::SUBnote(const SUBnoteParameters *parameters, SynthParams &spars, WatchM
     NoteEnabled(true),
     lfilter(nullptr), rfilter(nullptr)
 {
-    setup(spars.frequency, spars.velocity, spars.portamento, spars.note, false, wm, prefix);
+    setup(spars.frequency, spars.velocity, spars.portamento, spars.note_log2_freq, false, wm, prefix);
 }
 
 float SUBnote::setupFilters(int *pos, bool automation)
@@ -91,7 +91,7 @@ float SUBnote::setupFilters(int *pos, bool automation)
 void SUBnote::setup(float freq,
                     float velocity,
                     int portamento_,
-                    note_t midinote,
+                    float note_log2_freq,
                     bool legato,
                     WatchManager *wm,
                     const char *prefix)
@@ -120,7 +120,7 @@ void SUBnote::setup(float freq,
         basefreq = 440.0f;
         int fixedfreqET = pars.PfixedfreqET;
         if(fixedfreqET) { //if the frequency varies according the keyboard note
-            float tmp = (midinote - 69.0f) / 12.0f
+            float tmp = (note_log2_freq - (69.0f / 12.0f))
                 * (powf(2.0f, (fixedfreqET - 1) / 63.0f) - 1.0f);
             if(fixedfreqET <= 64)
                 basefreq *= powf(2.0f, tmp);
@@ -197,7 +197,7 @@ void SUBnote::setup(float freq,
 SynthNote *SUBnote::cloneLegato(void)
 {
     SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity,
-                   portamento, legato.param.midinote, true, legato.param.seed};
+                   portamento, legato.param.note_log2_freq, true, legato.param.seed};
     return memory.alloc<SUBnote>(&pars, sp);
 }
 
@@ -208,7 +208,7 @@ void SUBnote::legatonote(LegatoParams pars)
         return;
 
     try {
-        setup(pars.frequency, pars.velocity, pars.portamento, pars.midinote,
+        setup(pars.frequency, pars.velocity, pars.portamento, pars.note_log2_freq,
               true, wm);
     } catch (std::bad_alloc &ba) {
         std::cerr << "failed to set legato note parameter in SUBnote: " << ba.what() << std::endl;

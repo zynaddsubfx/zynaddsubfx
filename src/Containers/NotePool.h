@@ -122,7 +122,7 @@ class NotePool
         void insertLegatoNote(note_t note, uint8_t sendto, SynthDescriptor desc);
 
         void upgradeToLegato(void);
-        void applyLegato(LegatoParams &par);
+        void applyLegato(note_t note, LegatoParams &par);
 
         void makeUnsustainable(note_t note);
 

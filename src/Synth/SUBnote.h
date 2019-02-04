@@ -38,7 +38,7 @@ class SUBnote:public SynthNote
         void setup(float freq,
                    float velocity,
                    int portamento_,
-                   note_t midinote,
+                   float note_log2_freq,
                    bool legato = false, WatchManager *wm = 0, const char *prefix = 0);
         float setupFilters(int *pos, bool automation);
         void computecurrentparameters();

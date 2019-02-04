@@ -42,7 +42,7 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
 
     ADnoteParameters &pars = *pars_;
     portamento  = spars.portamento;
-    midinote    = spars.note;
+    note_log2_freq = spars.note_log2_freq;
     NoteEnabled = ON;
     basefreq    = spars.frequency;
     velocity    = spars.velocity;
@@ -512,7 +512,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
 SynthNote *ADnote::cloneLegato(void)
 {
     SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity,
-                (bool)portamento, legato.param.midinote, true,
+                (bool)portamento, legato.param.note_log2_freq, true,
                 initial_seed };
     return memory.alloc<ADnote>(&pars, sp);
 }
@@ -529,7 +529,7 @@ void ADnote::legatonote(LegatoParams lpars)
         return;
 
     portamento = lpars.portamento;
-    midinote   = lpars.midinote;
+    note_log2_freq = lpars.note_log2_freq;
     basefreq   = lpars.frequency;
     initial_seed = lpars.seed;
     current_prng_state = lpars.seed;
@@ -1071,9 +1071,7 @@ float ADnote::getvoicebasefreq(int nvoice) const
         float fixedfreq   = 440.0f;
         int   fixedfreqET = NoteVoicePar[nvoice].fixedfreqET;
         if(fixedfreqET != 0) { //if the frequency varies according the keyboard note
-            float tmp =
-                (midinote
-                 - 69.0f) / 12.0f
+            float tmp = (note_log2_freq - (69.0f / 12.0f))
                 * (powf(2.0f, (fixedfreqET - 1) / 63.0f) - 1.0f);
             if(fixedfreqET <= 64)
                 fixedfreq *= powf(2.0f, tmp);
