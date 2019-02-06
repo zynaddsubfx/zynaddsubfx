@@ -202,7 +202,7 @@ if (true) {
  else o->textcolor(FL_BLACK);*/
 
 o->redraw();}
-          tooltip {The "A" note (the reference note for which freq. ("A" freq) is given)} xywh {173 17 65 20} labelfont 1 labelsize 10 align 129 minimum 0 maximum 127 step 1 value 69 textfont 1 textsize 10
+          tooltip {The "A" note (the reference note for which freq. ("A" freq) is given, default=69)} xywh {173 17 65 20} labelfont 1 labelsize 10 align 129 minimum 0 maximum 127 step 1 value 69 textfont 1 textsize 10
           code0 {o->lstep(12);}
           code1 {o->init("PAnote");}
           class Fl_Osc_Counter
