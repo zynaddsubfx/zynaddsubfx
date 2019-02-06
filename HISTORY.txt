@@ -9,6 +9,7 @@
         - Fix pad synth export
         - Fix envelope watchpoint visualization
         - Fix minor bugs
+        - Added support for floating point notes via MIDI SYSEX.
 
 3.0.3 (4 December 2017)
         - Add bank search to FLTK/NTK GUI
