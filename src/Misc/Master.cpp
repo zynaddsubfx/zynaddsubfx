@@ -174,11 +174,17 @@ static const Ports auto_param_ports = {
         else
             d.reply(d.loc, a.slots[slot].automations[param].active ? "T" : "F");
         rEnd},
-    {"path::s", rProp(parameter) rProp(read-only) rDoc("Path of parameter"), 0,
+    {"path::s", rProp(parameter) rDoc("Path of parameter"), 0,
         rBegin;
         int slot  = d.idx[1];
         int param = d.idx[0];
-        d.reply(d.loc, "s", a.slots[slot].automations[param].param_path);
+        if(!strcmp("s",rtosc_argument_string(msg))) {
+            a.setSlotSubPath(slot, param, rtosc_argument(msg, 0).s);
+            a.updateMapping(slot, param);
+            d.broadcast(d.loc, "s", a.slots[slot].automations[param].param_path);
+        }
+        else
+			d.reply(d.loc, "s", a.slots[slot].automations[param].param_path);
         rEnd},
     {"clear:", rDoc("Clear automation param"), 0,
         rBegin;
@@ -244,9 +250,10 @@ static const Ports slot_ports = {
     {"midi-cc::i", rProp(parameter) rMap(default, -1) rDoc("Access assigned midi CC slot") , 0,
         rBegin;
         int slot = d.idx[0];
-        if(rtosc_narguments(msg))
+        if(rtosc_narguments(msg)) {
             a.slots[slot].midi_cc = rtosc_argument(msg, 0).i;
-        else
+            d.broadcast(d.loc, "i", a.slots[slot].midi_cc);
+        } else
             d.reply(d.loc, "i", a.slots[slot].midi_cc);
 
         rEnd},
