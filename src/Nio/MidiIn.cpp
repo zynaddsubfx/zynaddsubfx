@@ -14,6 +14,7 @@
 #include "MidiIn.h"
 #include "../globals.h"
 #include "InMgr.h"
+#include <string.h>
 
 namespace zyn {
 
