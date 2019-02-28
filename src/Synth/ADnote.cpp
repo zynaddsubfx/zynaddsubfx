@@ -670,8 +670,8 @@ void ADnote::legatonote(LegatoParams lpars)
 
     NoteGlobalPar.Volume = 4.0f
                            * powf(0.1f, 3.0f
-                                  * (1.0f - pars.GlobalPar.PVolume
-                                     / 96.0f))                                      //-60 dB .. 0 dB
+                                  * (1.0f - pars.GlobalPar.Volume
+                                     / 75.0f))                                      //-60 dB .. 0 dB
                            * VelF(
         velocity,
         pars.GlobalPar.PAmpVelocityScaleFunction); //velocity sensing
@@ -1977,7 +1977,7 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
     AmpLfo      = memory.alloc<LFO>(*param.AmpLfo, basefreq, time, wm,
                    (pre+"GlobalPar/AmpLfo/").c_str);
 
-    Volume = 4.0f * powf(0.1f, 3.0f * (1.0f - param.PVolume / 96.0f)) //-60 dB .. 0 dB
+    Volume = 4.0f * powf(0.1f, 3.0f * (1.0f - param.Volume / 75.0f)) //-60 dB .. 0 dB
              * VelF(velocity, param.PAmpVelocityScaleFunction);     //sensing
 
     Filter = memory.alloc<ModFilter>(*param.GlobalFilter, synth, time, memory,

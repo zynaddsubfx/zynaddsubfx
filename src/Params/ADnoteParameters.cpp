@@ -151,7 +151,7 @@ static const Ports voicePorts = {
     rParamZyn(PFilterVelocityScaleFunction, rShort("v.sense"), rDefault(64),
         "Filter Velocity Function Shape"),
 
-
+ 
     //Modulator Stuff
     rOption(PFMEnabled, rShort("mode"), rOptions(none, mix, ring, phase,
                 frequency, pulse), rDefault(none), "Modulator mode"),
@@ -178,6 +178,7 @@ static const Ports voicePorts = {
             "Modulator Frequency Envelope"),
     rToggle(PFMAmpEnvelopeEnabled,   rShort("enable"), rDefault(false),
             "Modulator Amplitude Envelope"),
+
 
 
     //weird stuff for PCoarseDetune
@@ -315,10 +316,21 @@ static const Ports globalPorts = {
     //Amplitude
     rParamZyn(PPanning, rShort("pan"), rDefault(64),
         "Panning of ADsynth (0 random, 1 left, 127 right)"),
-    rParamZyn(PVolume,  rShort("vol"), rDefault(90), "volume control"),
+    rParamF(Volume,                   rShort("vol"), rLinear(0.0, 100.0),
+        rDefault(70.87), "volume control"),
     rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), rDefault(64),
         "Volume velocity sense"),
-
+    {"PVolume::i", rShort("vol.") rLinear(0,127)
+        rDoc("Volume"), NULL,
+        [](const char *msg, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            if (!rtosc_narguments(msg))
+                d.reply(d.loc, "i", (int)roundf(127.0f * obj->Volume
+                    / 100.0f));
+            else
+                obj->Volume = 100.0f * rtosc_argument(msg, 0).i / 127.0f;
+        }},
     rParamZyn(Fadein_adjustment, rDefault(FADEIN_ADJUSTMENT_SCALE),
         "Adjustment for anti-pop strategy."),
     rParamZyn(PPunchStrength, rShort("strength"),     rDefault(0),
@@ -460,7 +472,7 @@ void ADnoteGlobalParam::defaults()
     PBandwidth = 64;
 
     /* Amplitude Global Parameters */
-    PVolume  = 90;
+    Volume  = 70.87;
     PPanning = 64; //center
     PAmpVelocityScaleFunction = 64;
     AmpEnvelope->defaults();
@@ -839,7 +851,7 @@ void ADnoteGlobalParam::add2XML(XMLwrapper& xml)
     xml.addparbool("stereo", PStereo);
 
     xml.beginbranch("AMPLITUDE_PARAMETERS");
-    xml.addpar("volume", PVolume);
+    xml.addparreal("volume", Volume);
     xml.addpar("panning", PPanning);
     xml.addpar("velocity_sensing", PAmpVelocityScaleFunction);
     xml.addpar("fadein_adjustment", Fadein_adjustment);
@@ -914,7 +926,15 @@ void ADnoteGlobalParam::getfromXML(XMLwrapper& xml)
     PStereo = xml.getparbool("stereo", PStereo);
 
     if(xml.enterbranch("AMPLITUDE_PARAMETERS")) {
-        PVolume  = xml.getpar127("volume", PVolume);
+        const bool upgrade_3_0_3 = (xml.fileversion() < version_type(3,0,3)) ||
+            (xml.getparreal("volume", -1) < 0);
+
+        if (upgrade_3_0_3) {
+            int vol = xml.getpar127("volume", 0);
+            Volume    = 100.0f * vol / 127.0f;
+        } else {
+            Volume    = xml.getparreal("volume", Volume);
+        }
         PPanning = xml.getpar127("panning", PPanning);
         PAmpVelocityScaleFunction = xml.getpar127("velocity_sensing",
                                                    PAmpVelocityScaleFunction);
@@ -1127,7 +1147,7 @@ void ADnoteGlobalParam::paste(ADnoteGlobalParam &a)
 {
     copy(PStereo);
 
-    copy(PVolume);
+    copy(Volume);
     copy(PPanning);
     copy(PAmpVelocityScaleFunction);
 
