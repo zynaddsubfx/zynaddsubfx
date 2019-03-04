@@ -505,6 +505,7 @@ int XMLwrapper::getparbool(const string &name, int defaultpar) const
 
 void XMLwrapper::getparstr(const string &name, char *par, int maxstrlen) const
 {
+    int* set_Space = 1;
     ZERO(par, maxstrlen);
     mxml_node_t *tmp = mxmlFindElement(node,
                                        node,
@@ -522,9 +523,9 @@ void XMLwrapper::getparstr(const string &name, char *par, int maxstrlen) const
         snprintf(par, maxstrlen, "%s", mxmlGetElement(mxmlGetFirstChild(tmp)));
         return;
     }
-    if ((mxmlGetType(mxmlGetFirstChild(tmp)) == MXML_TEXT) && (mxmlGetText(mxmlGetFirstChild(tmp), 1) != NULL))
+    if ((mxmlGetType(mxmlGetFirstChild(tmp)) == MXML_TEXT) && (mxmlGetText(mxmlGetFirstChild(tmp), set_Space) != NULL))
     {
-        snprintf(par, maxstrlen, "%s", mxmlGetText(mxmlGetFirstChild(tmp), 1));
+        snprintf(par, maxstrlen, "%s", mxmlGetText(mxmlGetFirstChild(tmp), set_Space));
         return;
     }
 }
@@ -532,6 +533,7 @@ void XMLwrapper::getparstr(const string &name, char *par, int maxstrlen) const
 string XMLwrapper::getparstr(const string &name,
                              const std::string &defaultpar) const
 {
+    int *set_Space = 1;
     mxml_node_t *tmp = mxmlFindElement(node,
                                        node,
                                        "string",
@@ -545,8 +547,8 @@ string XMLwrapper::getparstr(const string &name,
     if ((mxmlGetType(mxmlGetFirstChild(tmp))) == MXML_OPAQUE && (mxmlGetElement(mxmlGetFirstChild(tmp))) != NULL)
         return mxmlGetElement(mxmlGetFirstChild(tmp));
 
-    if ((mxmlGetType(mxmlGetFirstChild(tmp))) == MXML_TEXT && (mxmlGetText(mxmlGetFirstChild(tmp), 1)) != NULL)
-        return mxmlGetText(mxmlGetFirstChild(tmp), 1);
+    if ((mxmlGetType(mxmlGetFirstChild(tmp))) == MXML_TEXT && (mxmlGetText(mxmlGetFirstChild(tmp), set_Space)) != NULL)
+        return mxmlGetText(mxmlGetFirstChild(tmp), set_Space);
 
     return defaultpar;
 }
