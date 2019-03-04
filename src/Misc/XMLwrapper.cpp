@@ -522,9 +522,9 @@ void XMLwrapper::getparstr(const string &name, char *par, int maxstrlen) const
         snprintf(par, maxstrlen, "%s", mxmlGetElement(mxmlGetFirstChild(tmp)));
         return;
     }
-    if ((mxmlGetType(mxmlGetFirstChild(tmp)) == MXML_TEXT) && (mxmlGetText(mxmlGetFirstChild(tmp), NULL) != NULL))
+    if ((mxmlGetType(mxmlGetFirstChild(tmp)) == MXML_TEXT) && (mxmlGetText(mxmlGetFirstChild(tmp), 0) != NULL))
     {
-        snprintf(par, maxstrlen, "%s", mxmlGetText(mxmlGetFirstChild(tmp), NULL));
+        snprintf(par, maxstrlen, "%s", mxmlGetText(mxmlGetFirstChild(tmp), 0));
         return;
     }
 }
@@ -545,8 +545,8 @@ string XMLwrapper::getparstr(const string &name,
     if ((mxmlGetType(mxmlGetFirstChild(tmp))) == MXML_OPAQUE && (mxmlGetElement(mxmlGetFirstChild(tmp))) != NULL)
         return mxmlGetElement(mxmlGetFirstChild(tmp));
 
-    if ((mxmlGetType(mxmlGetFirstChild(tmp))) == MXML_TEXT && (mxmlGetText(mxmlGetFirstChild(tmp), NULL)) != NULL)
-        return mxmlGetText(mxmlGetFirstChild(tmp), NULL);
+    if ((mxmlGetType(mxmlGetFirstChild(tmp))) == MXML_TEXT && (mxmlGetText(mxmlGetFirstChild(tmp), 0)) != NULL)
+        return mxmlGetText(mxmlGetFirstChild(tmp), 0);
 
     return defaultpar;
 }
@@ -674,7 +674,7 @@ std::vector<XmlNode> XMLwrapper::getBranch(void) const
             #if (MXML_MAJOR_VERSION == 3 )
             {
 
-                for (int i = 0; i < mxmlElementGetAttrCount(current) - 1; ++i)
+                for (int i = 0; i < mxmlElementGetAttrCount(current)-1; ++i)
                 {
                     mxmlElementGetAttrByIndex(current, i, &the_return_value);
                     n[the_return_value] = mxmlElementGetAttr(current, the_return_value);
