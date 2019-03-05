@@ -665,21 +665,20 @@ std::vector<XmlNode> XMLwrapper::getBranch(void) const
     std::vector<XmlNode> res;
     mxml_node_t *current = mxmlGetFirstChild(node);
 
-    const char *the_return_value = 0;
     while (current)
     {
         if (mxmlGetType(current) == MXML_ELEMENT)
         {
 
-            XmlNode n(mxmlGetElement(current));
-
 #if (MXML_MAJOR_VERSION == 3)
             {
+                XmlNode n(mxmlGetElement(current));
+                const char *the_return_value = 0;
 
                 for (int i = 0; i < mxmlElementGetAttrCount(current) - 1; ++i)
                 {
-                    mxmlElementGetAttrByIndex(current, i, &the_return_value);
-                    n[the_return_value] = mxmlElementGetAttr(current, the_return_value);
+
+                    n[the_return_value] = mxmlElementGetAttrByIndex(current, i, &the_return_value);
                 }
             }
 #else
