@@ -565,6 +565,17 @@ string XMLwrapper::getparstr(const string &name,
     return defaultpar;
 }
 
+bool XMLwrapper::hasparreal(const char *name) const
+{
+    const mxml_node_t *tmp = mxmlFindElement(node,
+                                             node,
+                                             "par_real",
+                                             "name",
+                                             name,
+                                             MXML_DESCEND_FIRST);
+    return tmp != nullptr;
+}
+
 float XMLwrapper::getparreal(const char *name, float defaultpar) const
 {
     const mxml_node_t *tmp = mxmlFindElement(node,
