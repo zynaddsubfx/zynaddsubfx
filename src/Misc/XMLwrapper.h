@@ -21,6 +21,10 @@
 #ifndef XML_WRAPPER_H
 #define XML_WRAPPER_H
 
+#ifndef MXML_MAJOR_VERSION
+#define MXML_MAJOR_VERSION 1
+#endif
+
 namespace zyn {
 
 class XmlAttr
