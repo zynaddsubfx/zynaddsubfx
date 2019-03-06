@@ -202,6 +202,12 @@ class XMLwrapper
                               const std::string &defaultpar) const;
 
         /**
+         * Test existence of real parameter.
+         * @param name The parameter name.
+         */
+        bool hasparreal(const char *name) const;
+
+        /**
          * Returns the real value stored in the node.
          * @param name The parameter name.
          * @param defaultpar The default value if the real value is not found.
