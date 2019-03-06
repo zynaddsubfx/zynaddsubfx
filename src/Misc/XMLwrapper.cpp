@@ -520,11 +520,11 @@ void XMLwrapper::getparstr(const string &name, char *par, int maxstrlen) const
 {
     ZERO(par, maxstrlen);
     mxml_node_t *tmp = mxmlFindElement(node,
-                                             node,
-                                             "string",
-                                             "name",
-                                             name.c_str(),
-                                             MXML_DESCEND_FIRST);
+                                       node,
+                                       "string",
+                                       "name",
+                                        name.c_str(),
+                                        MXML_DESCEND_FIRST);
 
     if(tmp == NULL)
         return;
@@ -545,11 +545,11 @@ string XMLwrapper::getparstr(const string &name,
                              const std::string &defaultpar) const
 {
     mxml_node_t *tmp = mxmlFindElement(node,
-                                             node,
-                                             "string",
-                                             "name",
-                                             name.c_str(),
-                                             MXML_DESCEND_FIRST);
+                                       node,
+                                       "string",
+                                       "name",
+                                       name.c_str(),
+                                       MXML_DESCEND_FIRST);
 
     if((tmp == NULL) || (mxmlGetFirstChild(tmp) == NULL))
         return defaultpar;
@@ -683,24 +683,22 @@ std::vector<XmlNode> XMLwrapper::getBranch(void) const
     std::vector<XmlNode> res;
     mxml_node_t *current = mxmlGetFirstChild(node);
     while(current) {
-        if (mxmlGetType(current) == MXML_ELEMENT) {
-        #if MXML_MAJOR_VERSION == 3
+        if(mxmlGetType(current) == MXML_ELEMENT) {
+#if MXML_MAJOR_VERSION == 3
             XmlNode n(mxmlGetElement(current));
             int count = mxmlElementGetAttrCount(current);
-            char *name;
-            for (int i = 0; i < count; ++i)
-            {
+            const char *name;
+            for(int i = 0; i < count; ++i) {
                 n[name] = mxmlElementGetAttrByIndex(current, i, &name);
             }
-        #else
+#else
             auto elm = current->value.element;
             XmlNode n(elm.name);
-            for (int i = 0; i < elm.num_attrs; ++i)
-            {
+            for(int i = 0; i < elm.num_attrs; ++i) {
                 auto &attr = elm.attrs[i];
                 n[attr.name] = attr.value;
             }
-        #endif
+#endif
             res.push_back(n);
         }
         current = mxmlWalkNext(current, node, MXML_NO_DESCEND);
