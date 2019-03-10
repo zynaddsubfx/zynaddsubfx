@@ -2,6 +2,7 @@
         - Add scripting to zyn-fusion UI for automated screen capture
         - Add double click to reset sliders
         - Add random LFO to UI
+        - Add compatibility with MXML 3.0
         - Enhance modulation volume parameter resolution
         - Enhance global volume parameter resolution
         - Enhance state variable filter interpolation
