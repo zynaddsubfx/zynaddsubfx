@@ -29,7 +29,6 @@
 #include "ADnote.h"
 
 namespace zyn {
-
 ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
         WatchManager *wm, const char *prefix)
     :SynthNote(spars), watch_be4_add(wm, prefix, "noteout/be4_mix"), watch_after_add(wm,prefix,"noteout/after_mix"),
@@ -139,6 +138,7 @@ void ADnote::setupVoice(int nvoice)
 
     oscfreqhi[nvoice]   = memory.valloc<int>(unison);
     oscfreqlo[nvoice]   = memory.valloc<float>(unison);
+    
     oscfreqhiFM[nvoice] = memory.valloc<unsigned int>(unison);
     oscfreqloFM[nvoice] = memory.valloc<float>(unison);
     oscposhi[nvoice]    = memory.valloc<int>(unison);
@@ -1033,6 +1033,7 @@ void ADnote::setfreq(int nvoice, float in_freq)
 
         F2I(speed, oscfreqhi[nvoice][k]);
         oscfreqlo[nvoice][k] = speed - floor(speed);
+
     }
 }
 
@@ -1241,20 +1242,80 @@ inline void ADnote::fadein(float *smps) const
  */
 inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
 {
+       
+    // windowed sinc kernel factor Fs/4, rejection 80dB      
+    const float_t kernel[21] = {
+        0.00017017607982446043,
+        0.0009262403856891687,
+        0,
+        -0.008116326243706371,
+        -0.02476577025825532,
+        -0.03386903752666308,
+        0,
+        0.10709721649843373,
+        0.27452737291792295,
+        0.4339834705604548,
+        0.5000933151725993,
+        0.4339834705604548,
+        0.27452737291792295,
+        0.10709721649843373,
+        0,
+        -0.03386903752666308,
+        -0.02476577025825532,
+        -0.008116326243706371,
+        0,
+        0.0009262403856891687,
+        0.00017017607982446043
+        };
+    
+    
     for(int k = 0; k < unison_size[nvoice]; ++k) {
         int    poshi  = oscposhi[nvoice][k];
         int    poslo  = oscposlo[nvoice][k] * (1<<24);
         int    freqhi = oscfreqhi[nvoice][k];
         int    freqlo = oscfreqlo[nvoice][k] * (1<<24);
+        int    ovsmpfreqhi = oscfreqhi[nvoice][k] / 2;
+        int    ovsmpfreqlo = (oscfreqlo[nvoice][k] / 2) * (1<<24);
+        
+        int    ovsmpposlo; 
+        int    ovsmpposhi;
+        int    uflow;
         float *smps   = NoteVoicePar[nvoice].OscilSmp;
         float *tw     = tmpwave_unison[k];
         assert(oscfreqlo[nvoice][k] < 1.0f);
+        float out = 0;
+        
         for(int i = 0; i < synth.buffersize; ++i) {
-            tw[i]  = (smps[poshi] * ((1<<24) - poslo) + smps[poshi + 1] * poslo)/(1.0f*(1<<24));
+
+            // linear interpolated sampling of waveform for low frequencies
+            //tw[i] = (smps[poshi] * ((1<<24) - poslo) + smps[poshi + 1] * poslo)/(1.0f*(1<<24));
+
+            ovsmpposlo  = poslo - 10 * ovsmpfreqlo;
+            uflow = ovsmpposlo>>24;
+            ovsmpposhi  = poshi - 10 * ovsmpfreqhi - ((0x00 - uflow) & 0xff);
+            ovsmpposlo &= 0xffffff;
+            ovsmpposhi &= synth.oscilsize - 1;
+            out = 0;
+            for (int l = 0; l<21; l++) {
+                out += kernel[l] * (
+                    smps[ovsmpposhi]     * ((1<<24) - ovsmpposlo) + 
+                    smps[ovsmpposhi + 1] * ovsmpposlo)/(1.0f*(1<<24));
+                // advance to next sample
+                ovsmpposlo += ovsmpfreqlo;
+                ovsmpposhi += ovsmpfreqhi + (ovsmpposlo>>24); // add the 24-bit overflow
+                ovsmpposlo &= 0xffffff;
+                ovsmpposhi &= synth.oscilsize - 1;
+
+            }
+
+            // advance to next sample
             poslo += freqlo;
             poshi += freqhi + (poslo>>24);
             poslo &= 0xffffff;
             poshi &= synth.oscilsize - 1;
+
+            tw[i] = out;
+            
         }
         oscposhi[nvoice][k] = poshi;
         oscposlo[nvoice][k] = poslo/(1.0f*(1<<24));
