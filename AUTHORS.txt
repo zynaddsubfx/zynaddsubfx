@@ -1,12 +1,13 @@
-Main author:
-        Nasca Octavian Paul
-
 Active Developers:
-        Mark McCurry
+        Mark McCurry (Realtime compat, UI rewrite)
         Hans Petter Selasky (BSD Compat)
         Christopher Oliver (Unison + presets fix, mousewheel support,
                             SUBnote overtones, unison enhancements, ...)
+        Johannes Lorenz (Effect Documentation, PID Files, parameter metadata)
         Daniel Sheeler
+
+Original author (inactive):
+        Nasca Octavian Paul
 
 Contributors:
         Gerald Folcher (legato, mono notes memory)
@@ -26,9 +27,9 @@ Contributors:
         Lieven Moors (Spike/Circle waveform)
         Olaf Schulz (MIDI Aftertouch support)
         Jonathan Liles (NSM & NTK support)
-        Johannes Lorenz (Effect Documentation, PID Files)
         Ilario Glasgo (Italian Doc Translation)
         Filipe Coelho (Globals Cleanup)
         Andre Sklenar (UI Pixmaps)
         Harald Hvaal (General Code Modernization)
         Olivier Jolly (DSSI Bank Load Fix)
+        Micky Yun Chan (MXML 3.0 compatibility fix)
