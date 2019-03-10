@@ -1,13 +1,15 @@
-3.0.4 (Sometime in January 2019)
+3.0.4 (10 March 2019)
         - Add scripting to zyn-fusion UI for automated screen capture
         - Add double click to reset sliders
         - Add random LFO to UI
         - Enhance modulation volume parameter resolution
+        - Enhance global volume parameter resolution
         - Enhance state variable filter interpolation
         - Change filter defaults for easier patch setup
         - Fix pops with note aftertouch
         - Fix pad synth export
         - Fix envelope watchpoint visualization
+        - Fix .xlz load/save in fusion UI
         - Fix minor bugs
         - Added support for floating point notes via MIDI SYSEX.
 
