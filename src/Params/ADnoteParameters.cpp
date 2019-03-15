@@ -317,7 +317,7 @@ static const Ports globalPorts = {
     rParamZyn(PPanning, rShort("pan"), rDefault(64),
         "Panning of ADsynth (0 random, 1 left, 127 right)"),
     rParamF(Volume,                   rShort("vol"), rLinear(-60.0f,20.0f),
-        rDefault(-3.75f), "volume control"),
+        rUnit(dB), rDefault(-3.75f), "volume control"),
     rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), rDefault(64),
         "Volume velocity sense"),
     {"PVolume::i", rShort("vol.") rLinear(0,127)
@@ -327,7 +327,7 @@ static const Ports globalPorts = {
             rObject *obj = (rObject *)d.obj;
             if (!rtosc_narguments(msg))
                 d.reply(d.loc, "i", (int)roundf(96.0f * (1.0f + obj->Volume/60.0f)));
-            else
+            else 
                 obj->Volume = -60.0f * (1.0f - rtosc_argument(msg, 0).i / 96.0f);
         }},
     rParamZyn(Fadein_adjustment, rDefault(FADEIN_ADJUSTMENT_SCALE),

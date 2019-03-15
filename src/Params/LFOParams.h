@@ -37,7 +37,7 @@ class LFOParams:public Presets
         LFOParams(const AbsTime* time_ = nullptr);
         LFOParams(consumer_location_t loc,
                   const AbsTime* time_ = nullptr);
-        LFOParams(char Pfreq_,
+        LFOParams(float freq_,
                   char Pintensity_,
                   char Pstartphase_,
                   char PLFOtype_,
@@ -55,7 +55,7 @@ class LFOParams:public Presets
         void paste(LFOParams &);
 
         /*  MIDI Parameters*/
-        float Pfreq;      /**<frequency*/
+        float freq;      /**<frequency*/
         unsigned char Pintensity; /**<intensity*/
         unsigned char Pstartphase; /**<start phase (0=random)*/
         unsigned char PLFOtype; /**<LFO type (sin,triangle,square,ramp,...)*/
@@ -78,7 +78,7 @@ class LFOParams:public Presets
         void setup();
 
         /* Default parameters */
-        unsigned char Dfreq;
+        float Dfreq;
         unsigned char Dintensity;
         unsigned char Dstartphase;
         unsigned char DLFOtype;

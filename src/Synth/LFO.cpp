@@ -38,8 +38,7 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
     //max 2x/octave
     const float lfostretch = powf(basefreq / 440.0f, (stretch - 64.0f) / 63.0f);
 
-    const float lfofreq =
-        (powf(2, lfopars.Pfreq * 10.0f) - 1.0f) / 12.0f * lfostretch;
+    const float lfofreq = lfopars.freq * lfostretch;
     phaseInc = fabs(lfofreq) * t.dt();
 
     if(!lfopars.Pcontinous) {
@@ -128,8 +127,7 @@ float LFO::lfoout()
             stretch = 1;
         const float lfostretch = powf(basefreq_ / 440.0f, (stretch - 64.0f) / 63.0f);
 
-        float lfofreq =
-            (powf(2, lfopars_.Pfreq * 10.0f) - 1.0f) / 12.0f * lfostretch;
+        float lfofreq = lfopars_.freq * lfostretch;
 
         phaseInc = fabs(lfofreq) * dt_;
 
