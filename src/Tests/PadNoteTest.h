@@ -155,19 +155,19 @@ class PadNoteTest:public CxxTest::TestSuite
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.0742f, 0.0005f);
+            TS_ASSERT_DELTA(outL[255], -0.0729f, 0.0005f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.0347f, 0.0005f);
+            TS_ASSERT_DELTA(outL[255], -0.0331f, 0.0005f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], 0.0237f, 0.0005f);
+            TS_ASSERT_DELTA(outL[255], 0.0219f, 0.0005f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], 0.0156f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], 0.0137f, 0.0001f);
 
             while(!note->finished()) {
                 note->noteout(outL, outR);
