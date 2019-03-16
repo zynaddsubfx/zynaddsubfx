@@ -91,7 +91,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="R_val" value="64" />
 </AMPLITUDE_ENVELOPE>
 <AMPLITUDE_LFO>
-<par_real name="freq" value="0.629921" exact_value="0x3F214281" />
+<par_real name="freq" value="6.47918" exact_value="0x40CF556A" />
 <par name="intensity" value="0" />
 <par name="start_phase" value="64" />
 <par name="lfo_type" value="0" />
@@ -123,7 +123,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="R_val" value="58" />
 </FREQUENCY_ENVELOPE>
 <FREQUENCY_LFO>
-<par_real name="freq" value="0.543307" exact_value="0x3F0B162B" />
+<par_real name="freq" value="3.51694" exact_value="0x40611598" />
 <par name="intensity" value="29" />
 <par name="start_phase" value="64" />
 <par name="lfo_type" value="0" />
@@ -162,7 +162,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="R_val" value="64" />
 </FILTER_ENVELOPE>
 <FILTER_LFO>
-<par_real name="freq" value="0.629921" exact_value="0x3F214281" />
+<par_real name="freq" value="6.47918" exact_value="0x40CF556A" />
 <par name="intensity" value="0" />
 <par name="start_phase" value="64" />
 <par name="lfo_type" value="0" />
@@ -258,7 +258,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 </AMPLITUDE_ENVELOPE>
 <par_bool name="amp_lfo_enabled" value="yes" />
 <AMPLITUDE_LFO>
-<par_real name="freq" value="0.743661" exact_value="0x3F3E6091" />
+<par_real name="freq" value="14.3531" exact_value="0x4165A67F" />
 <par name="intensity" value="32" />
 <par name="start_phase" value="64" />
 <par name="lfo_type" value="0" />
@@ -295,7 +295,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 </FREQUENCY_ENVELOPE>
 <par_bool name="freq_lfo_enabled" value="yes" />
 <FREQUENCY_LFO>
-<par_real name="freq" value="0.590551" exact_value="0x3F172E5A" />
+<par_real name="freq" value="4.91188" exact_value="0x409D2E28" />
 <par name="intensity" value="18" />
 <par name="start_phase" value="64" />
 <par name="lfo_type" value="0" />
@@ -336,7 +336,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 </FILTER_ENVELOPE>
 <par_bool name="filter_lfo_enabled" value="yes" />
 <FILTER_LFO>
-<par_real name="freq" value="0.363701" exact_value="0x3EBA3704" />
+<par_real name="freq" value="0.953402" exact_value="0x3F741224" />
 <par name="intensity" value="46" />
 <par name="start_phase" value="64" />
 <par name="lfo_type" value="0" />
@@ -502,7 +502,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="freq_envelope_enabled" value="no" />
 <par_bool name="freq_lfo_enabled" value="yes" />
 <FREQUENCY_LFO>
-<par_real name="freq" value="0.393701" exact_value="0x3EC9932D" />
+<par_real name="freq" value="1.19304" exact_value="0x3F98B572" />
 <par name="intensity" value="20" />
 <par name="start_phase" value="66" />
 <par name="lfo_type" value="0" />
@@ -588,7 +588,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="freq_envelope_enabled" value="no" />
 <par_bool name="freq_lfo_enabled" value="yes" />
 <FREQUENCY_LFO>
-<par_real name="freq" value="0.393701" exact_value="0x3EC9932D" />
+<par_real name="freq" value="1.19304" exact_value="0x3F98B572" />
 <par name="intensity" value="18" />
 <par name="start_phase" value="67" />
 <par name="lfo_type" value="0" />
@@ -3362,7 +3362,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="R_val" value="64" />
 </AMPLITUDE_ENVELOPE>
 <AMPLITUDE_LFO>
-<par_real name="freq" value="0.629921" exact_value="0x3F214281" />
+<par_real name="freq" value="6.47918" exact_value="0x40CF556A" />
 <par name="intensity" value="24" />
 <par name="start_phase" value="64" />
 <par name="lfo_type" value="0" />
@@ -3397,7 +3397,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="R_val" value="64" />
 </FREQUENCY_ENVELOPE>
 <FREQUENCY_LFO>
-<par_real name="freq" value="0.551181" exact_value="0x3F0D1A33" />
+<par_real name="freq" value="3.7189" exact_value="0x406E027E" />
 <par name="intensity" value="0" />
 <par name="start_phase" value="64" />
 <par name="lfo_type" value="0" />
@@ -3436,7 +3436,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="R_val" value="64" />
 </FILTER_ENVELOPE>
 <FILTER_LFO>
-<par_real name="freq" value="0.629921" exact_value="0x3F214281" />
+<par_real name="freq" value="6.47918" exact_value="0x40CF556A" />
 <par name="intensity" value="0" />
 <par name="start_phase" value="64" />
 <par name="lfo_type" value="0" />
