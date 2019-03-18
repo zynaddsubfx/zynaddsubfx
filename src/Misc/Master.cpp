@@ -1586,12 +1586,9 @@ void Master::getfromXML(XMLwrapper& xml)
 {
     if (xml.hasparreal("volume")) {
         xml.getparreal("volume", volume);
-        printf("getparreal\n");
     } else {
         setPvolume(xml.getpar127("volume", Pvolume));
-        printf("getpar127\n");
     }
-    printf("volume %f\n", volume);
     setPkeyshift(xml.getpar127("key_shift", Pkeyshift));
     ctl.NRPN.receive = xml.getparbool("nrpn_receive", ctl.NRPN.receive);
 
