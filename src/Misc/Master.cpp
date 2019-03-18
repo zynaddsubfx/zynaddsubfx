@@ -430,18 +430,20 @@ static const Ports master_ports = {
         rDefault(80) rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {
-            d.reply(d.loc, "i", ((Master*)d.obj)->Pvolume);
+            d.reply(d.loc, "i", (int) roundf(96.0f * ((Master*)d.obj)->volume / 40.0f + 96.0f));
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
-            ((Master*)d.obj)->setPvolume(limit<char>(rtosc_argument(m,0).i,0,127));
-            d.broadcast(d.loc, "i", ((Master*)d.obj)->Pvolume);}}},
-    {"volume::i", rShort("volume") rProp(parameter) rLinear(0,127)
-        rDoc("Master Volume"), 0,
-        [](const char *m, rtosc::RtData &d) {
-        if(rtosc_narguments(m)==0) {
-            d.reply(d.loc, "i", ((Master*)d.obj)->Pvolume);
-        } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
-            ((Master*)d.obj)->setPvolume(limit<char>(rtosc_argument(m,0).i,0,127));
-            d.broadcast(d.loc, "i", ((Master*)d.obj)->Pvolume);}}},
+            ((Master*)d.obj)->volume = 40.0f * (limit<char>(rtosc_argument(m,0).i,0,127) - 96.0f) / 96.0f;
+            d.broadcast(d.loc, "i", limit<char>(rtosc_argument(m, 0).i, 0, 127));
+        }}},
+    {"volume::f", rShort("volume") rProp(parameter) rDefault(-6.667f) rLinear(-40.0f,12.917f)
+             rDoc("Master Volume"), 0,
+             [](const char *m, rtosc::RtData &d) {
+             if(rtosc_narguments(m)==0) {
+                 d.reply(d.loc, "f", ((Master*)d.obj)->volume);
+             } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='f') {
+                 ((Master*)d.obj)->setPvolume((int) roundf(96.0f * rtosc_argument(m,0).f) / 40.0f + 96.0f);
+                 d.broadcast(d.loc, "f", ((Master*)d.obj)->volume);
+         }}},
     {"Psysefxvol#" STRINGIFY(NUM_SYS_EFX) "/::i", 0, &sysefxPort,
         [](const char *msg, rtosc::RtData &d) {
             SNIP;
@@ -852,7 +854,7 @@ bool Master::applyOscEvent(const char *msg, bool nio, int msg_id)
 
 void Master::defaults()
 {
-    volume = 1.0f;
+    volume = -6.667;
     setPvolume(80);
     setPkeyshift(64);
 
@@ -1008,7 +1010,7 @@ void Master::vuUpdate(const float *outl, const float *outr)
                 if(tmp > vuoutpeakpart[npart])
                     vuoutpeakpart[npart] = tmp;
             }
-            vuoutpeakpart[npart] *= volume;
+            vuoutpeakpart[npart] *= dB2rap(volume);
         }
         else
         if(fakepeakpart[npart] > 1)
@@ -1290,9 +1292,10 @@ bool Master::AudioOut(float *outr, float *outl)
 
 
     //Master Volume
+    float v = dB2rap(volume);
     for(int i = 0; i < synth.buffersize; ++i) {
-        outl[i] *= volume;
-        outr[i] *= volume;
+        outl[i] *= v;
+        outr[i] *= v;
     }
 
     vuUpdate(outl, outr);
@@ -1392,7 +1395,7 @@ Master::~Master()
 void Master::setPvolume(char Pvolume_)
 {
     Pvolume = Pvolume_;
-    volume  = dB2rap((Pvolume - 96.0f) / 96.0f * 40.0f);
+    volume  = (Pvolume - 96.0f) / 96.0f * 40.0f;
 }
 
 void Master::setPkeyshift(char Pkeyshift_)
@@ -1465,7 +1468,7 @@ void Master::initialize_rt(void)
 
 void Master::add2XML(XMLwrapper& xml)
 {
-    xml.addpar("volume", Pvolume);
+    xml.addparreal("volume", volume);
     xml.addpar("key_shift", Pkeyshift);
     xml.addparbool("nrpn_receive", ctl.NRPN.receive);
 
@@ -1581,7 +1584,14 @@ int Master::loadXML(const char *filename)
 
 void Master::getfromXML(XMLwrapper& xml)
 {
-    setPvolume(xml.getpar127("volume", Pvolume));
+    if (xml.hasparreal("volume")) {
+        xml.getparreal("volume", volume);
+        printf("getparreal\n");
+    } else {
+        setPvolume(xml.getpar127("volume", Pvolume));
+        printf("getpar127\n");
+    }
+    printf("volume %f\n", volume);
     setPkeyshift(xml.getpar127("key_shift", Pkeyshift));
     ctl.NRPN.receive = xml.getparbool("nrpn_receive", ctl.NRPN.receive);
 

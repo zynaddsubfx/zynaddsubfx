@@ -15,7 +15,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="max_addsynth_voices" value="8" />
 </BASE_PARAMETERS>
 <MASTER>
-<par name="volume" value="80" />
+<par_real name="volume" value="-6.66667" exact_value="0xC0D55556" />
 <par name="key_shift" value="64" />
 <par_bool name="nrpn_receive" value="yes" />
 <MICROTONAL>
