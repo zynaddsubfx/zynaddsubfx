@@ -215,6 +215,7 @@ struct ADnoteVoiceParam {
 
     /* Voice Volume */
     unsigned char PVolume;
+    float volume;
 
     /* If the Volume negative */
     unsigned char PVolumeminus;

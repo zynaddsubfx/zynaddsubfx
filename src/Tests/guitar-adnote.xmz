@@ -237,7 +237,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 </OSCIL>
 <AMPLITUDE_PARAMETERS>
 <par name="panning" value="6" />
-<par name="volume" value="100" />
+<par_real name="volume" value="-12.7559" exact_value="0xC14C1832" />
 <par_bool name="volume_minus" value="no" />
 <par name="velocity_sensing" value="127" />
 <par_bool name="amp_envelope_enabled" value="yes" />
@@ -485,7 +485,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 </OSCIL>
 <AMPLITUDE_PARAMETERS>
 <par name="panning" value="0" />
-<par name="volume" value="100" />
+<par_real name="volume" value="-12.7559" exact_value="0xC14C1832" />
 <par_bool name="volume_minus" value="no" />
 <par name="velocity_sensing" value="127" />
 <par_bool name="amp_envelope_enabled" value="no" />
@@ -571,7 +571,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 </OSCIL>
 <AMPLITUDE_PARAMETERS>
 <par name="panning" value="127" />
-<par name="volume" value="100" />
+<par_real name="volume" value="-12.7559" exact_value="0xC14C1832" />
 <par_bool name="volume_minus" value="no" />
 <par name="velocity_sensing" value="127" />
 <par_bool name="amp_envelope_enabled" value="no" />
@@ -665,7 +665,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 </OSCIL>
 <AMPLITUDE_PARAMETERS>
 <par name="panning" value="64" />
-<par name="volume" value="127" />
+<par_real name="volume" value="-0" exact_value="0x80000000" />
 <par_bool name="volume_minus" value="no" />
 <par name="velocity_sensing" value="70" />
 <par_bool name="amp_envelope_enabled" value="yes" />

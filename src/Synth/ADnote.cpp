@@ -694,11 +694,10 @@ void ADnote::legatonote(LegatoParams lpars)
         NoteVoicePar[nvoice].noisetype = pars.VoicePar[nvoice].Type;
         /* Voice Amplitude Parameters Init */
         NoteVoicePar[nvoice].Volume =
-            powf(0.1f, 3.0f
-                 * (1.0f - pars.VoicePar[nvoice].PVolume / 127.0f))             // -60 dB .. 0 dB
+            dB2rap(pars.VoicePar[nvoice].volume)             // -60 dB .. 0 dB
             * VelF(velocity,
                    pars.VoicePar[nvoice].PAmpVelocityScaleFunction); //velocity
-        if(pars.VoicePar[nvoice].PVolume == 0)
+        if(pars.VoicePar[nvoice].volume == -60.0)
             NoteVoicePar[nvoice].Volume = 0;
 
         if(pars.VoicePar[nvoice].PVolumeminus != 0)
@@ -855,9 +854,9 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
         vce.noisetype = param.Type;
         /* Voice Amplitude Parameters Init */
-        vce.Volume = powf(0.1f, 3.0f * (1.0f - param.PVolume / 127.0f)) // -60dB..0dB
+        vce.Volume = dB2rap(param.volume) // -60dB..0dB
                      * VelF(velocity, param.PAmpVelocityScaleFunction);
-        if(param.PVolume == 0)
+        if(param.volume == -60.0f)
             vce.Volume = 0;
 
         if(param.PVolumeminus)

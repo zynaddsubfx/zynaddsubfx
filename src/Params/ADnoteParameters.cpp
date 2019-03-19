@@ -130,6 +130,19 @@ static const Ports voicePorts = {
         "Panning"),
     rParamZyn(PVolume,                   rShort("vol."), rDefault(100),
         "Volume"),
+    {"volume::f", rShort("volume") rProp(parameter) rUnit(dB) rDefault(-12.75) rLinear(-60.0f, 0.0f)
+        rDoc("Part Volume"), NULL,
+        [](const char *msg, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            if(!rtosc_narguments(msg)) {
+               d.reply(d.loc, "f", obj->volume);
+            } else if (rtosc_narguments(msg) == 1 && rtosc_type(msg, 0) == 'f') {
+               obj->PVolume = ((int) roundf(127.0f * (rtosc_argument(msg, 0).f / 60.0f + 1.0f)));
+               obj->volume = rtosc_argument(msg, 0).f;
+               d.broadcast(d.loc, "f", ((obj->volume)));
+            }
+        }},
     rToggle(PVolumeminus,                rShort("inv."), rDefault(false),
         "Signal Inverter"), //do we really need this??
     rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), rDefault(127),
@@ -525,6 +538,7 @@ void ADnoteVoiceParam::defaults()
     PFMoscilphase = 64;
     PDelay                    = 0;
     PVolume                   = 100;
+    volume                    = -60.0f* (1.0f - 100.0f / 127.0f);
     PVolumeminus              = 0;
     PPanning                  = 64; //center
     PDetune                   = 8192; //8192=0
@@ -735,7 +749,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
 
     xml.beginbranch("AMPLITUDE_PARAMETERS");
     xml.addpar("panning", PPanning);
-    xml.addpar("volume", PVolume);
+    xml.addparreal("volume", volume);
     xml.addparbool("volume_minus", PVolumeminus);
     xml.addpar("velocity_sensing", PAmpVelocityScaleFunction);
 
@@ -1081,6 +1095,7 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
 
     copy(PPanning);
     copy(PVolume);
+    copy(volume);
     copy(PVolumeminus);
     copy(PAmpVelocityScaleFunction);
     copy(PAmpEnvelopeEnabled);
@@ -1221,6 +1236,15 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
     if(xml.enterbranch("AMPLITUDE_PARAMETERS")) {
         PPanning     = xml.getpar127("panning", PPanning);
         PVolume      = xml.getpar127("volume", PVolume);
+        const bool upgrade_3_0_3 = (xml.fileversion() < version_type(3,0,3)) ||
+            (!xml.hasparreal("volume"));
+
+        if (upgrade_3_0_3) {
+            int vol = xml.getpar127("volume", 0);
+            volume    = -60.0f * ( 1.0f - vol / 127.0f);
+        } else {
+            volume    = xml.getparreal("volume", volume);
+        }
         PVolumeminus = xml.getparbool("volume_minus", PVolumeminus);
         PAmpVelocityScaleFunction = xml.getpar127("velocity_sensing",
                                                    PAmpVelocityScaleFunction);
