@@ -144,14 +144,12 @@ class Master
         class Part * part[NUM_MIDI_PARTS];
 
         //parameters
-
-        unsigned char Pvolume;
         unsigned char Pkeyshift;
         unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         unsigned char Psysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
 
         //parameters control
-        void setPvolume(char Pvolume_);
+        float volume127ToFloat(unsigned char volume_);
         void setPkeyshift(char Pkeyshift_);
         void setPsysefxvol(int Ppart, int Pefx, char Pvol);
         void setPsysefxsend(int Pefxfrom, int Pefxto, char Pvol);
@@ -188,7 +186,7 @@ class Master
         class FFTwrapper * fft;
 
         static const rtosc::Ports &ports;
-        float  volume;
+        float  Volume;
 
         //Statistics on output levels
         vuData vu;
