@@ -388,12 +388,12 @@ static const Ports master_ports = {
        d.reply(m-1);}},
     {"get-vu:", rDoc("Grab VU Data"), 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
-       d.reply("/vu-meter", "bb", sizeof(m->vu), &m->vu, sizeof(float)*NUM_MIDI_PARTS, m->vuoutpeakpart);}},
+       d.reply("/vu-meter", "bb", sizeof(m->vu), &m->vu, sizeof(float)*NUM_MIDI_PARTS, m->vuoutpeakpartl);}},
     {"vu-meter:", rDoc("Grab VU Data"), 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
-       char        types[6+NUM_MIDI_PARTS+1] = {0};
-       rtosc_arg_t  args[6+NUM_MIDI_PARTS+1];
-       for(int i=0; i<6+NUM_MIDI_PARTS; ++i)
+       char        types[6+2*NUM_MIDI_PARTS+1] = {0};
+       rtosc_arg_t  args[6+2*NUM_MIDI_PARTS+1];
+       for(int i=0; i<6+2*NUM_MIDI_PARTS; ++i)
            types[i] = 'f';
        args[0].f = m->vu.outpeakl;
        args[1].f = m->vu.outpeakr;
@@ -401,9 +401,10 @@ static const Ports master_ports = {
        args[3].f = m->vu.maxoutpeakr;
        args[4].f = m->vu.rmspeakl;
        args[5].f = m->vu.rmspeakr;
-       for(int i=0; i<NUM_MIDI_PARTS; ++i)
-           args[6+i].f = m->vuoutpeakpart[i];
-
+       for(int i=0; i<NUM_MIDI_PARTS; ++i) {
+           args[6 + 2 * i].f = m->vuoutpeakpartl[i];
+           args[6 + 2 * i + 1].f = m->vuoutpeakpartr[i];
+       }
        d.replyArray("/vu-meter", types, args);}},
     {"reset-vu:", rDoc("Grab VU Data"), 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
@@ -745,7 +746,8 @@ Master::Master(const SYNTH_T &synth_, Config* config)
 
     shutup = 0;
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
-        vuoutpeakpart[npart] = 1e-9;
+        vuoutpeakpartl[npart] = 1e-9;
+        vuoutpeakpartr[npart] = 1e-9;
         fakepeakpart[npart]  = 0;
     }
 
@@ -1004,16 +1006,20 @@ void Master::vuUpdate(const float *outl, const float *outr)
 
     //Part Peak computation (for Part vumeters or fake part vumeters)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
-        vuoutpeakpart[npart] = 1.0e-12f;
+        vuoutpeakpartl[npart] = 1.0e-12f;
+        vuoutpeakpartr[npart] = 1.0e-12f;
         if(part[npart]->Penabled != 0) {
             float *outl = part[npart]->partoutl,
             *outr = part[npart]->partoutr;
             for(int i = 0; i < synth.buffersize; ++i) {
-                float tmp = fabs(outl[i] + outr[i]);
-                if(tmp > vuoutpeakpart[npart])
-                    vuoutpeakpart[npart] = tmp;
+                if (fabs(outl[i]) > vuoutpeakpartl[npart])
+                    vuoutpeakpartl[npart] = fabs(outl[i]);
+                if (fabs(outr[i]) > vuoutpeakpartr[npart])
+                    vuoutpeakpartr[npart] = fabs(outr[i]);
             }
-            vuoutpeakpart[npart] *= dB2rap(volume);
+            float v = dB2rap(Volume);
+            vuoutpeakpartl[npart] *= v;
+            vuoutpeakpartr[npart] *= v;
         }
         else
         if(fakepeakpart[npart] > 1)
