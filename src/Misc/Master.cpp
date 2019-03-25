@@ -862,6 +862,7 @@ void Master::defaults()
     union {float f; uint32_t i;} convert;
     convert.i = 0xC0D55556;
     Volume = convert.f;
+    oldVolume = Volume;
     setPkeyshift(64);
 
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
@@ -1302,12 +1303,25 @@ bool Master::AudioOut(float *outr, float *outl)
 
 
     //Master Volume
-    float v = dB2rap(Volume);
-    for(int i = 0; i < synth.buffersize; ++i) {
-        outl[i] *= v;
-        outr[i] *= v;
+    float oldvol = dB2rap(oldVolume);
+    float newvol = dB2rap(Volume);
+    if(ABOVE_AMPLITUDE_THRESHOLD(oldvol, newvol)) {
+        for(int i = 0; i < synth.buffersize; ++i) {
+            float vol = INTERPOLATE_AMPLITUDE(oldvol, newvol,
+                                              i, synth.buffersize);
+            outl[i] *= vol;
+            outr[i] *= vol;
+        }
+        oldVolume = Volume;
     }
-
+    else {
+        // No interpolation
+        float vol = dB2rap(Volume);
+        for(int i = 0; i < synth.buffersize; ++i) {
+            outl[i] *= vol;
+            outr[i] *= vol;
+        }
+    }
     vuUpdate(outl, outr);
 
     //Shutup if it is asked (with fade-out)
@@ -1598,6 +1612,7 @@ void Master::getfromXML(XMLwrapper& xml)
         xml.getparreal("volume", Volume);
     } else {
         Volume  = volume127ToFloat(xml.getpar127("volume", 0));
+        oldVolume = Volume;
     }
     setPkeyshift(xml.getpar127("key_shift", Pkeyshift));
     ctl.NRPN.receive = xml.getparbool("nrpn_receive", ctl.NRPN.receive);
