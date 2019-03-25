@@ -994,7 +994,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="stereo" value="yes" />
 <par name="volume" value="96" />
 <par name="panning" value="64" />
-<par name="velocity_sensing" value="90" />
+<par_real name="velocity_sensing" value="70.86" exact_value="0x428DB852" />
 <AMPLITUDE_ENVELOPE>
 <par_bool name="free_mode" value="no" />
 <par name="env_points" value="4" />
