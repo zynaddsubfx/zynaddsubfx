@@ -976,7 +976,7 @@ void Master::setController(char chan, int type, int par)
     }
 }
 
-void Master::vuUpdate(const float *outl, const float *outr)
+void Master::vuUpdate(const float *outr, const float *outl)
 {
     //Peak computation (for vumeters)
     vu.outpeakl = 1e-12;
@@ -1009,8 +1009,8 @@ void Master::vuUpdate(const float *outl, const float *outr)
         vuoutpeakpartl[npart] = 1.0e-12f;
         vuoutpeakpartr[npart] = 1.0e-12f;
         if(part[npart]->Penabled != 0) {
-            float *outl = part[npart]->partoutl,
-            *outr = part[npart]->partoutr;
+            float *outr = part[npart]->partoutl,
+            *outl = part[npart]->partoutr;
             for(int i = 0; i < synth.buffersize; ++i) {
                 if (fabs(outl[i]) > vuoutpeakpartl[npart])
                     vuoutpeakpartl[npart] = fabs(outl[i]);
