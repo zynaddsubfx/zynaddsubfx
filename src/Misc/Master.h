@@ -149,7 +149,7 @@ class Master
         unsigned char Psysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
 
         //parameters control
-        float volume127ToFloat(unsigned char volume_);
+        static float volume127ToFloat(unsigned char volume_);
         void setPkeyshift(char Pkeyshift_);
         void setPsysefxvol(int Ppart, int Pefx, char Pvol);
         void setPsysefxsend(int Pefxfrom, int Pefxto, char Pvol);

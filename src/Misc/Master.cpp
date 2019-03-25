@@ -439,11 +439,12 @@ static const Ports master_ports = {
     {"volume::i", rShort("volume") rProp(parameter) rLinear(0,127)
            rDoc("Master Volume"), 0,
            [](const char *m, rtosc::RtData &d) {
+           Master *master = (Master *)d.obj;
            if(rtosc_narguments(m)==0) {
-                d.reply(d.loc, "i", (int) roundf(96.0f * ((Master*)d.obj)->Volume / 40.0f + 96.0f));
+                d.reply(d.loc, "i", (int) roundf(96.0f * master->Volume / 40.0f + 96.0f));
             } else if (rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
-               ((Master *)d.obj)->Volume  = ((Master *)d.obj)->volume127ToFloat(limit<unsigned char>(rtosc_argument(m, 0).i, 0, 127));
-                 d.broadcast(d.loc, "i", limit<char>(rtosc_argument(m, 0).i, 0, 127));
+               master->Volume  = master->volume127ToFloat(limit<unsigned char>(rtosc_argument(m, 0).i, 0, 127));
+               d.broadcast(d.loc, "i", limit<char>(rtosc_argument(m, 0).i, 0, 127));
            }}},
     rParamF(Volume, rShort("volume"), rDefault(-6.66667f), rLinear(-40.0f,12.917f),
              rUnit(dB), "Master Volume"),
