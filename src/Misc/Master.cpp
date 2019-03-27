@@ -1312,7 +1312,6 @@ bool Master::AudioOut(float *outr, float *outl)
             outl[i] *= vol;
             outr[i] *= vol;
         }
-        oldVolume = Volume;
     }
     else {
         // No interpolation
@@ -1322,6 +1321,8 @@ bool Master::AudioOut(float *outr, float *outl)
             outr[i] *= vol;
         }
     }
+    oldVolume = Volume;
+
     vuUpdate(outl, outr);
 
     //Shutup if it is asked (with fade-out)
