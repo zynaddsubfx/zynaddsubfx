@@ -1019,9 +1019,6 @@ void Master::vuUpdate(const float *outr, const float *outl)
                 if (fabs(outr[i]) > vuoutpeakpartr[npart])
                     vuoutpeakpartr[npart] = fabs(outr[i]);
             }
-            float v = dB2rap(Volume);
-            vuoutpeakpartl[npart] *= v;
-            vuoutpeakpartr[npart] *= v;
         }
         else
         if(fakepeakpart[npart] > 1)
