@@ -113,10 +113,11 @@ class Part
 
         unsigned char partno; /**<if it's the Master's first part*/
         bool          Penabled; /**<if the part is enabled*/
-        unsigned char Pvolume; /**<part volume*/
+        float         Volume; /**<part volume*/
         unsigned char Pminkey; /**<the minimum key that the part receives noteon messages*/
         unsigned char Pmaxkey; //the maximum key that the part receives noteon messages
-        void setPvolume(char Pvolume);
+        static float volume127ToFloat(unsigned char volume_);
+        void setVolume(float Volume);
         unsigned char Pkeyshift; //Part keyshift
         unsigned char Prcvchn; //from what midi channel it receives commands
         unsigned char Ppanning; //part panning
