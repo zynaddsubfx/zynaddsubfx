@@ -1208,7 +1208,6 @@ void Part::getfromXML(XMLwrapper& xml)
     if (xml.hasparreal("volume")) {
         setVolume(xml.getparreal("volume", Volume));
     } else {
-        unsigned char c = xml.getpar127("volume", 0);
         setVolume(volume127ToFloat(xml.getpar127("volume", -40.0f)));
     }
     setPpanning(xml.getpar127("panning", Ppanning));
