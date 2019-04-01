@@ -24,7 +24,7 @@ namespace zyn {
 LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManager *m,
         const char *watch_prefix)
     :first_half(-1),
-    delayTime(t, lfopars.Pdelay / 127.0f * 4.0f), //0..4 sec
+    delayTime(t, lfopars.delay), //0..4 sec
     waveShape(lfopars.PLFOtype),
     deterministic(!lfopars.Pfreqrand),
     dt_(t.dt()),

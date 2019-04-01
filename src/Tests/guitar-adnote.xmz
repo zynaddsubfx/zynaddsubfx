@@ -33,7 +33,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 </automation>
 <PART id="0">
 <par_bool name="enabled" value="yes" />
-<par name="volume" value="96" />
+<par_real name="volume" value="0" exact_value="0x00000000" />
 <par name="panning" value="64" />
 <par name="min_key" value="0" />
 <par name="max_key" value="127" />
@@ -97,7 +97,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="lfo_type" value="0" />
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
-<par name="delay" value="0" />
+<par_real name="delay" value="0" exact_value="0x00000000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="no" />
 </AMPLITUDE_LFO>
@@ -129,7 +129,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="lfo_type" value="0" />
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
-<par name="delay" value="19" />
+<par_real name="delay" value="0.598425" exact_value="0x3F193265" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="no" />
 </FREQUENCY_LFO>
@@ -168,7 +168,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="lfo_type" value="0" />
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
-<par name="delay" value="0" />
+<par_real name="delay" value="0" exact_value="0x00000000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="no" />
 </FILTER_LFO>
@@ -264,7 +264,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="lfo_type" value="0" />
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
-<par name="delay" value="30" />
+<par_real name="delay" value="0.944882" exact_value="0x3F71E3C8" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="no" />
 </AMPLITUDE_LFO>
@@ -301,7 +301,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="lfo_type" value="0" />
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
-<par name="delay" value="0" />
+<par_real name="delay" value="0" exact_value="0x00000000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="yes" />
 </FREQUENCY_LFO>
@@ -342,7 +342,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="lfo_type" value="0" />
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
-<par name="delay" value="0" />
+<par_real name="delay" value="0" exact_value="0x00000000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="no" />
 </FILTER_LFO>
@@ -508,7 +508,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="lfo_type" value="0" />
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
-<par name="delay" value="0" />
+<par_real name="delay" value="0" exact_value="0x00000000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="yes" />
 </FREQUENCY_LFO>
@@ -594,7 +594,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="lfo_type" value="0" />
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
-<par name="delay" value="0" />
+<par_real name="delay" value="0" exact_value="0x00000000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="yes" />
 </FREQUENCY_LFO>
@@ -921,7 +921,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 </PART>
 <PART id="1">
 <par_bool name="enabled" value="yes" />
-<par name="volume" value="96" />
+<par_real name="volume" value="0" exact_value="0x00000000" />
 <par name="panning" value="64" />
 <par name="min_key" value="0" />
 <par name="max_key" value="127" />
@@ -994,7 +994,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="stereo" value="yes" />
 <par_real name="volume" value="75.59" exact_value="0x42972E14" />
 <par name="panning" value="64" />
-<par name="velocity_sensing" value="90" />
+<par_real name="velocity_sensing" value="70.86" exact_value="0x428DB852" />
 <AMPLITUDE_ENVELOPE>
 <par_bool name="free_mode" value="no" />
 <par name="env_points" value="4" />
@@ -1189,7 +1189,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 </PART>
 <PART id="2">
 <par_bool name="enabled" value="yes" />
-<par name="volume" value="96" />
+<par_real name="volume" value="0" exact_value="0x00000000" />
 <par name="panning" value="64" />
 <par name="min_key" value="0" />
 <par name="max_key" value="127" />
@@ -3368,7 +3368,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="lfo_type" value="0" />
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
-<par name="delay" value="0" />
+<par_real name="delay" value="0" exact_value="0x00000000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="no" />
 </AMPLITUDE_LFO>
@@ -3403,7 +3403,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="lfo_type" value="0" />
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
-<par name="delay" value="0" />
+<par_real name="delay" value="0" exact_value="0x00000000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="no" />
 </FREQUENCY_LFO>
@@ -3442,7 +3442,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="lfo_type" value="0" />
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
-<par name="delay" value="0" />
+<par_real name="delay" value="0" exact_value="0x00000000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="no" />
 </FILTER_LFO>

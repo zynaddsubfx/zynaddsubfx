@@ -439,13 +439,14 @@ static const Ports master_ports = {
     {"volume::i", rShort("volume") rProp(parameter) rLinear(0,127)
            rDoc("Master Volume"), 0,
            [](const char *m, rtosc::RtData &d) {
+           Master *master = (Master *)d.obj;
            if(rtosc_narguments(m)==0) {
-                d.reply(d.loc, "i", (int) roundf(96.0f * ((Master*)d.obj)->Volume / 40.0f + 96.0f));
+                d.reply(d.loc, "i", (int) roundf(96.0f * master->Volume / 40.0f + 96.0f));
             } else if (rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
-               ((Master *)d.obj)->Volume  = ((Master *)d.obj)->volume127ToFloat(limit<unsigned char>(rtosc_argument(m, 0).i, 0, 127));
-                 d.broadcast(d.loc, "i", limit<char>(rtosc_argument(m, 0).i, 0, 127));
+               master->Volume  = master->volume127ToFloat(limit<unsigned char>(rtosc_argument(m, 0).i, 0, 127));
+               d.broadcast(d.loc, "i", limit<char>(rtosc_argument(m, 0).i, 0, 127));
            }}},
-    rParamF(Volume, rShort("volume"), rDefault(-6.66667f), rLinear(-40.0f,12.917f),
+    rParamF(Volume, rShort("volume"), rDefault(-6.66667f), rLinear(-40.0f,13.3333f),
              rUnit(dB), "Master Volume"),
     {"Psysefxvol#" STRINGIFY(NUM_SYS_EFX) "/::i", 0, &sysefxPort,
         [](const char *msg, rtosc::RtData &d) {
@@ -861,6 +862,7 @@ void Master::defaults()
     union {float f; uint32_t i;} convert;
     convert.i = 0xC0D55556;
     Volume = convert.f;
+    oldVolume = Volume;
     setPkeyshift(64);
 
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
@@ -976,7 +978,7 @@ void Master::setController(char chan, int type, int par)
     }
 }
 
-void Master::vuUpdate(const float *outl, const float *outr)
+void Master::vuUpdate(const float *outr, const float *outl)
 {
     //Peak computation (for vumeters)
     vu.outpeakl = 1e-12;
@@ -1009,17 +1011,14 @@ void Master::vuUpdate(const float *outl, const float *outr)
         vuoutpeakpartl[npart] = 1.0e-12f;
         vuoutpeakpartr[npart] = 1.0e-12f;
         if(part[npart]->Penabled != 0) {
-            float *outl = part[npart]->partoutl,
-            *outr = part[npart]->partoutr;
+            float *outr = part[npart]->partoutl,
+            *outl = part[npart]->partoutr;
             for(int i = 0; i < synth.buffersize; ++i) {
                 if (fabs(outl[i]) > vuoutpeakpartl[npart])
                     vuoutpeakpartl[npart] = fabs(outl[i]);
                 if (fabs(outr[i]) > vuoutpeakpartr[npart])
                     vuoutpeakpartr[npart] = fabs(outr[i]);
             }
-            float v = dB2rap(Volume);
-            vuoutpeakpartl[npart] *= v;
-            vuoutpeakpartr[npart] *= v;
         }
         else
         if(fakepeakpart[npart] > 1)
@@ -1301,11 +1300,25 @@ bool Master::AudioOut(float *outr, float *outl)
 
 
     //Master Volume
-    float v = dB2rap(Volume);
-    for(int i = 0; i < synth.buffersize; ++i) {
-        outl[i] *= v;
-        outr[i] *= v;
+    float oldvol = dB2rap(oldVolume);
+    float newvol = dB2rap(Volume);
+    if(ABOVE_AMPLITUDE_THRESHOLD(oldvol, newvol)) {
+        for(int i = 0; i < synth.buffersize; ++i) {
+            float vol = INTERPOLATE_AMPLITUDE(oldvol, newvol,
+                                              i, synth.buffersize);
+            outl[i] *= vol;
+            outr[i] *= vol;
+        }
     }
+    else {
+        // No interpolation
+        float vol = dB2rap(Volume);
+        for(int i = 0; i < synth.buffersize; ++i) {
+            outl[i] *= vol;
+            outr[i] *= vol;
+        }
+    }
+    oldVolume = Volume;
 
     vuUpdate(outl, outr);
 
@@ -1597,6 +1610,7 @@ void Master::getfromXML(XMLwrapper& xml)
         xml.getparreal("volume", Volume);
     } else {
         Volume  = volume127ToFloat(xml.getpar127("volume", 0));
+        oldVolume = Volume;
     }
     setPkeyshift(xml.getpar127("key_shift", Pkeyshift));
     ctl.NRPN.receive = xml.getparbool("nrpn_receive", ctl.NRPN.receive);

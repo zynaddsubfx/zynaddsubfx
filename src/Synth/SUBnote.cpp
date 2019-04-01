@@ -100,7 +100,8 @@ void SUBnote::setup(float freq,
     portamento  = portamento_;
     NoteEnabled = ON;
     volume      = powf(0.1f, 3.0f * (1.0f - pars.Volume / 75.59f)); //-60 dB .. 0 dB
-    volume     *= VelF(velocity, pars.PAmpVelocityScaleFunction);
+    volume     *= VelF(velocity, pars.AmpVelocityScaleFunction);
+
     if(pars.PPanning != 0)
         panning = pars.PPanning / 127.0f;
     else

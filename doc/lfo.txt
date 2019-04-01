@@ -6,17 +6,17 @@ Introduction
 ~~~~~~~~~~~~
 
 "LFO" means Low Frequency Oscillator.
-These oscillators are not used to make sounds by themselves, but they changes
+These oscillators are not used to make sounds by themselves, but they change
 some parameters (like the frequencies, the amplitudes or the filters).
 
 The LFOs have some basic parameters:
 
-* *Delay*: This parameter sets how much time takes since the start of the
-           note to the start of the LFO
-* *Start Phase*: The position that a LFO will start at
-* *Frequency*: How fast the LFO is (i.e. how fast the parameter's controlled by
+* *Delay*: This parameter sets how much time it takes since the start of the
+           note to the start of the LFO.
+* *Start Phase*: The position that a LFO will start at . 
+* *Frequency*: How fast the LFO is (i.e. how fast the parameter is controlled by
                the LFO changes)
-* *Depth*: The amplitude of the LFO (i.e. how much the parameter's controlled
+* *Depth*: The amplitude of the LFO (i.e. how much the parameter is controlled
            by the LFO changes)
 
 image:images/lfo0.png[]
@@ -31,14 +31,14 @@ Another parameter is the LFO Randomness.
 It modifies the LFO amplitude or the LFO frequency at random.
 In ZynAddSubFX you can choose how much the LFO frequency or LFO amplitude
 changes by this parameter.
-In the following images are shown some examples of randomness and how changes
+In the following images, there are shown some examples of randomness and how it changes
 the shape of a triangle LFO.
 
 image:images/lfo2.png[]
 
 Other parameters are:
 
-* *Continuous mode*: If this mode is used, the LFO will not start from "zero" on each new note, but it will be continuous. This is very useful if you apply on filters to make interesting sweeps.
+* *Continuous mode*: If this mode is used, then the  LFO will not start from "zero" on each new note, but it will be continuous. This is very useful if you apply on filters to make interesting sweeps.
 * *Stretch*: It controls how much the LFO frequency changes according to the
 note's frequency.
 It can vary from negative stretch (the LFO frequency is decreased on higher

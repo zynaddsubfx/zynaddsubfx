@@ -40,8 +40,8 @@ static const rtosc::Ports SUBnotePorts = {
     rToggle(Pstereo,    rShort("stereo"), rDefault(true), "Stereo Enable"),
     rParamF(Volume,  rShort("volume"), rLinear(0.0, 100.0), rDefault(75.59), "Volume"),
     rParamZyn(PPanning, rShort("panning"), rDefault(64), "Left Right Panning"),
-    rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), rDefault(90),
-        "Amplitude Velocity Sensing function"),
+    rParamF(AmpVelocityScaleFunction, rShort("sense"), rDefault(70.86),
+        rLinear(0.0, 100.0), "Amplitude Velocity Sensing function"),
     rParamI(PDetune,       rShort("detune"), rLinear(0, 16383), rDefault(8192),
         "Detune in detune type units"),
     rParamI(PCoarseDetune, rShort("cdetune"), rDefault(0), "Coarse Detune"),
@@ -283,7 +283,7 @@ void SUBnoteParameters::defaults()
 {
     Volume  = 75.59;
     PPanning = 64;
-    PAmpVelocityScaleFunction = 90;
+    AmpVelocityScaleFunction = 70.86;
 
     Pfixedfreq   = 0;
     PfixedfreqET = 0;
@@ -360,7 +360,7 @@ void SUBnoteParameters::add2XML(XMLwrapper& xml)
     xml.addparbool("stereo", Pstereo);
     xml.addparreal("volume", Volume);
     xml.addpar("panning", PPanning);
-    xml.addpar("velocity_sensing", PAmpVelocityScaleFunction);
+    xml.addparreal("velocity_sensing", AmpVelocityScaleFunction);
     xml.beginbranch("AMPLITUDE_ENVELOPE");
     AmpEnvelope->add2XML(xml);
     xml.endbranch();
@@ -484,7 +484,7 @@ void SUBnoteParameters::paste(SUBnoteParameters &sub)
     doPaste(Pstereo);
     doPaste(Volume);
     doPaste(PPanning);
-    doPaste(PAmpVelocityScaleFunction);
+    doPaste(AmpVelocityScaleFunction);
     doPPaste(AmpEnvelope);
 
     //Frequency Parameters
@@ -563,8 +563,17 @@ void SUBnoteParameters::getfromXML(XMLwrapper& xml)
             Volume    = xml.getparreal("volume", Volume);
         }
         PPanning = xml.getpar127("panning", PPanning);
-        PAmpVelocityScaleFunction = xml.getpar127("velocity_sensing",
-                PAmpVelocityScaleFunction);
+        const bool upgrade_3_0_3 = (xml.fileversion() < version_type(3,0,3)) ||
+            (xml.getparreal("velocity_sensing", -1) < 0);
+
+        if (upgrade_3_0_3) {
+            int tmp_val = xml.getpar127("velocity_sensing", 0);
+            AmpVelocityScaleFunction    = 100.0f * tmp_val / 127.0f;
+        } else {
+            AmpVelocityScaleFunction    = xml.getparreal("velocity_sensing", AmpVelocityScaleFunction);
+        }
+
+
         if(xml.enterbranch("AMPLITUDE_ENVELOPE")) {
             AmpEnvelope->getfromXML(xml);
             xml.exitbranch();

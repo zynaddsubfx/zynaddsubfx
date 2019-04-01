@@ -55,9 +55,19 @@ static const Ports partPorts = {
 #undef rChangeCb
 #define rChangeCb
 #undef rChangeCb
-#define rChangeCb obj->setPvolume(obj->Pvolume);
-    rParamZyn(Pvolume, rShort("Vol"), rDefault(96),"Part Volume"),
+#define rChangeCb obj->setVolume(obj->Volume);
+    rParamF(Volume, rShort("Vol"), rDefault(0.0), rUnit(dB), 
+            rLinear(-40.0, 13.3333), "Part Volume"),
 #undef rChangeCb
+    {"Pvolume::i", rShort("Vol") rProp(parameter) rLinear(0,127)
+        rDefault(96) rDoc("Part Volume"), 0,
+        [](const char *m, rtosc::RtData &d) {
+        if(rtosc_narguments(m)==0) {
+            d.reply(d.loc, "i", (int) roundf(96.0f * ((Part*)d.obj)->Volume / 40.0f + 96.0f));
+        } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
+            ((Part *)d.obj)->Volume  = ((Part *)d.obj)->volume127ToFloat(limit<unsigned char>(rtosc_argument(m, 0).i, 0, 127));
+             d.broadcast(d.loc, "i", limit<char>(rtosc_argument(m, 0).i, 0, 127));
+        }}},
 #define rChangeCb obj->setPpanning(obj->Ppanning);
     rParamZyn(Ppanning, rShort("pan"), rDefault(64), "Set Panning"),
 #undef rChangeCb
@@ -297,7 +307,7 @@ void Part::cloneTraits(Part &p) const
 #define CLONE(x) p.x = this->x
     CLONE(Penabled);
 
-    p.setPvolume(this->Pvolume);
+    p.setVolume(this->Volume);
     p.setPpanning(this->Ppanning);
 
     CLONE(Pminkey);
@@ -324,7 +334,7 @@ void Part::defaults()
     Pnoteon     = 1;
     Ppolymode   = 1;
     Plegatomode = 0;
-    setPvolume(96);
+    setVolume(0.0);
     Pkeyshift = 64;
     Prcvchn   = 0;
     setPpanning(64);
@@ -616,7 +626,7 @@ void Part::SetController(unsigned int type, int par)
             break;
         case C_expression:
             ctl.setexpression(par);
-            setPvolume(Pvolume); //update the volume
+            setVolume(Volume); //update the volume
             break;
         case C_portamento:
             ctl.setportamento(par);
@@ -645,7 +655,7 @@ void Part::SetController(unsigned int type, int par)
             if(ctl.volume.receive != 0)
                 volume = ctl.volume.volume;
             else
-                setPvolume(Pvolume);
+                setVolume(Volume);
             break;
         case C_sustain:
             ctl.setsustain(par);
@@ -661,8 +671,8 @@ void Part::SetController(unsigned int type, int par)
             if(ctl.volume.receive != 0)
                 volume = ctl.volume.volume;
             else
-                setPvolume(Pvolume);
-            setPvolume(Pvolume); //update the volume
+                setVolume(Volume);
+            setVolume(Volume); //update the volume
             setPpanning(Ppanning); //update the panning
 
             for(int item = 0; item < NUM_KIT_ITEMS; ++item) {
@@ -858,11 +868,16 @@ void Part::ComputePartSmps()
 /*
  * Parameter control
  */
-void Part::setPvolume(char Pvolume_)
+float Part::volume127ToFloat(unsigned char volume_)
 {
-    Pvolume = Pvolume_;
+    return (volume_ - 96.0f) / 96.0f * 40.0;
+}
+
+void Part::setVolume(float Volume_)
+{
+    Volume = Volume_;
     volume  =
-        dB2rap((Pvolume - 96.0f) / 96.0f * 40.0f) * ctl.expression.relvolume;
+        dB2rap(Volume) * ctl.expression.relvolume;
 }
 
 void Part::setPpanning(char Ppanning_)
@@ -980,7 +995,7 @@ void Part::add2XML(XMLwrapper& xml)
     if((Penabled == 0) && (xml.minimal))
         return;
 
-    xml.addpar("volume", Pvolume);
+    xml.addparreal("volume", Volume);
     xml.addpar("panning", Ppanning);
 
     xml.addpar("min_key", Pminkey);
@@ -1190,8 +1205,11 @@ void Part::getfromXMLinstrument(XMLwrapper& xml)
 void Part::getfromXML(XMLwrapper& xml)
 {
     Penabled = xml.getparbool("enabled", Penabled);
-
-    setPvolume(xml.getpar127("volume", Pvolume));
+    if (xml.hasparreal("volume")) {
+        setVolume(xml.getparreal("volume", Volume));
+    } else {
+        setVolume(volume127ToFloat(xml.getpar127("volume", -40.0f)));
+    }
     setPpanning(xml.getpar127("panning", Ppanning));
 
     Pminkey   = xml.getpar127("min_key", Pminkey);
