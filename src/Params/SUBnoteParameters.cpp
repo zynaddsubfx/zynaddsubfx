@@ -38,7 +38,7 @@ static const rtosc::Ports SUBnotePorts = {
     rSelf(SUBnoteParameters),
     rPaste,
     rToggle(Pstereo,    rShort("stereo"), rDefault(true), "Stereo Enable"),
-    rParamZyn(PVolume,  rShort("volume"), rDefault(96), "Volume"),
+    rParamF(Volume,  rShort("volume"), rLinear(0.0, 100.0), rDefault(75.59), "Volume"),
     rParamZyn(PPanning, rShort("panning"), rDefault(64), "Left Right Panning"),
     rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), rDefault(90),
         "Amplitude Velocity Sensing function"),
@@ -105,7 +105,18 @@ static const rtosc::Ports SUBnotePorts = {
     rOption(Pstart, rShort("initial"), rOptions(zero, random, ones),
             rDefault(random),
             "How harmonics are initialized"),
-
+    
+    {"PVolume::i", rShort("volume") rLinear(0,127)
+        rDoc("Volume"), NULL,
+        [](const char *msg, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            if (!rtosc_narguments(msg))
+                d.reply(d.loc, "i", (int)roundf(127.0f * obj->Volume
+                    / 100.0f));
+            else
+                obj->Volume = 100.0f * rtosc_argument(msg, 0).i / 127.0f;
+        }},
     {"clear:", rDoc("Reset all harmonics to equal bandwidth/zero amplitude"), NULL,
         rBegin;
         (void) msg;
@@ -270,7 +281,7 @@ float SUBnoteParameters::convertHarmonicMag(int mag, int type)
 
 void SUBnoteParameters::defaults()
 {
-    PVolume  = 96;
+    Volume  = 75.59;
     PPanning = 64;
     PAmpVelocityScaleFunction = 90;
 
@@ -347,7 +358,7 @@ void SUBnoteParameters::add2XML(XMLwrapper& xml)
 
     xml.beginbranch("AMPLITUDE_PARAMETERS");
     xml.addparbool("stereo", Pstereo);
-    xml.addpar("volume", PVolume);
+    xml.addparreal("volume", Volume);
     xml.addpar("panning", PPanning);
     xml.addpar("velocity_sensing", PAmpVelocityScaleFunction);
     xml.beginbranch("AMPLITUDE_ENVELOPE");
@@ -471,7 +482,7 @@ void SUBnoteParameters::updateFrequencyMultipliers(void) {
 void SUBnoteParameters::paste(SUBnoteParameters &sub)
 {
     doPaste(Pstereo);
-    doPaste(PVolume);
+    doPaste(Volume);
     doPaste(PPanning);
     doPaste(PAmpVelocityScaleFunction);
     doPPaste(AmpEnvelope);
@@ -543,7 +554,14 @@ void SUBnoteParameters::getfromXML(XMLwrapper& xml)
 
     if(xml.enterbranch("AMPLITUDE_PARAMETERS")) {
         Pstereo  = xml.getparbool("stereo", Pstereo);
-        PVolume  = xml.getpar127("volume", PVolume);
+        const bool upgrade_3_0_3 = (xml.fileversion() < version_type(3,0,3)) ||
+            (xml.getparreal("volume", -1) < 0);
+        if (upgrade_3_0_3) {
+            int vol = xml.getpar127("volume", 0);
+            Volume    = 100.0f * vol / 127.0f;
+        } else {
+            Volume    = xml.getparreal("volume", Volume);
+        }
         PPanning = xml.getpar127("panning", PPanning);
         PAmpVelocityScaleFunction = xml.getpar127("velocity_sensing",
                 PAmpVelocityScaleFunction);
