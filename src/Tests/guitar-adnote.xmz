@@ -992,7 +992,7 @@ version-revision="4" ZynAddSubFX-author="Nasca Octavian Paul">
 </HARMONICS>
 <AMPLITUDE_PARAMETERS>
 <par_bool name="stereo" value="yes" />
-<par name="volume" value="96" />
+<par_real name="volume" value="0" exact_value="0x00000000" />
 <par name="panning" value="64" />
 <par_real name="velocity_sensing" value="70.86" exact_value="0x428DB852" />
 <AMPLITUDE_ENVELOPE>
