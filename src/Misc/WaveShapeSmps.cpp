@@ -16,20 +16,75 @@
 
 namespace zyn {
 
+float polyblampres(float smp, float ws, float dMax)
+{
+    // Formula from: Esqueda, Välimäki, Bilbao (2015): ALIASING REDUCTION IN SOFT-CLIPPING ALGORITHMS
+    // http://dafx16.vutbr.cz/dafxpapers/18-DAFx-16_paper_33-PN.pdf pg 123, table 1 
+    // Four-point polyBLAMP residual:
+    // [−2T, T] d^5/120
+    // [−T, 0] −d^5/40 + d^4/24 + d^3/12 + d^2/12 + d/24 + 1/120
+    // [0, T] d^5/40 − d^4/12 + d^2/3 − d/2 + 7/30
+    // [T, 2T] −d^5/120 + d^4/24 − d^3/12 + d^2/12 − d/24 + 1/120
+
+    float dist = fabs(smp) - ws;
+    float res, d1, d2, d3, d4, d5;
+    if (fabs(dist) < dMax) {
+        if (dist < -dMax/2.0f) {
+            d1 = (dist + dMax)/dMax*2;   // [-dMax ... -dMax/2] -> [0 ... 1]
+            res = powf(d1, 5.0f) / 120.0f;
+        }
+        else if ( dist < 0.0) {
+            d1 = (dist + dMax/2)/dMax*2; // [-dMax/2 ... 0] -> [0 ... 1]
+            d2 = d1*d1;
+            d3 = d2*d1;
+            d4 = d3*d1;
+            d5 = d4*d1;
+            res = (-d5/40.0f) + (d4/24.0f) + (d3/12.0f) + (d2/12.0f) + (d1/24.0f) + (1.0f/120.0f);
+        }
+        else if ( dist < dMax/2.0) {
+            d1 = (dist)/dMax*2;          //[0 ... dMax/2] -> [0 ... 1]
+            d2 = d1*d1;
+            d4 = d2*d2;
+            d5 = d4*d1;
+            res = (d5/40.0f) - (d4/12.0f) + (d2/3.0f) - (d1/2.0f) + (7.0f/30.0f);
+        }
+        else {
+            d1 = (dist - dMax/2.0)/dMax*2; //[dMax/2 ... dMax] -> [0 ... 1]
+            d2 = d1*d1;
+            d3 = d2*d1;
+            d4 = d3*d1;
+            d5 = d4*d1;
+            res = (-d5/120.0f) + (d4/24.0f) - (d3/12.0f) + (d2/12.0f) - (d1/24.0f) + (1.0f/120.0f);
+        }
+    }
+    else
+        res = 0;
+
+    return res*dMax/2;
+
+}
+
 void waveShapeSmps(int n,
                    float *smps,
                    unsigned char type,
-                   unsigned char drive)
+                   unsigned char drive,
+                   unsigned char offset,
+                   unsigned char funcpar)
 {
     int   i;
     float ws = drive / 127.0f;
+    float par = funcpar / 127.0f;
+    float offs = (offset - 64.0f) / 64.0f;
     float tmpv;
 
     switch(type) {
         case 1:
             ws = powf(10, ws * ws * 3.0f) - 1.0f + 0.001f; //Arctangent
-            for(i = 0; i < n; ++i)
+            for(i = 0; i < n; ++i) {
+                smps[i] += offs;
                 smps[i] = atanf(smps[i] * ws) / atanf(ws);
+                smps[i] -= offs;
+            }
             break;
         case 2:
             ws = ws * ws * 32.0f + 0.0001f; //Asymmetric
@@ -79,16 +134,25 @@ void waveShapeSmps(int n,
             break;
         case 7:
             ws = powf(2.0f, -ws * ws * 8.0f); //Limiter
+            par = par/4;
+            if (par > ws - 0.01) par = ws - 0.01;
             for(i = 0; i < n; ++i) {
-                float tmp = smps[i];
-                if(fabs(tmp) > ws) {
-                    if(tmp >= 0.0f)
-                        smps[i] = 1.0f;
-                    else
-                        smps[i] = -1.0f;
-                }
+                // add the offset: x = smps[i] + offs
+                smps[i] += offs; 
+                float res = polyblampres(smps[i], ws, par);
+                // now apply the polyblamped limiter: y = f(x)
+                if (smps[i]>=0)
+                    smps[i] = ( smps[i] > ws ? ws-res : smps[i]-res );
                 else
-                    smps[i] /= ws;
+                    smps[i] = ( smps[i] < -ws ? -ws+res : smps[i]+res );
+                // and substract the polyblamp-limited offset again: smps[i] = y - f(offs)
+                if (offs>=0)
+                    smps[i] -= ( offs >= ws ? ws-res : offs-res );
+                else
+                    smps[i] -= ( offs <= -ws ? -ws+res : offs+res );
+                // divide through the drive factor: prevents limited signals to get low
+                smps[i] /= ws;
+
             }
             break;
         case 8:
@@ -111,16 +175,15 @@ void waveShapeSmps(int n,
             break;
         case 10:
             ws = (powf(2.0f, ws * 6.0f) - 1.0f) / powf(2.0f, 6.0f); //Inverse Limiter
+            if (par > ws - 0.01) par = ws - 0.01;
             for(i = 0; i < n; ++i) {
-                float tmp = smps[i];
-                if(fabs(tmp) > ws) {
-                    if(tmp >= 0.0f)
-                        smps[i] = tmp - ws;
-                    else
-                        smps[i] = tmp + ws;
-                }
+                smps[i] += offs;
+                float res = polyblampres(smps[i], ws, par);
+                if (smps[i]>=0)
+                    smps[i] = ( smps[i] > ws ? smps[i]-ws+res : res );
                 else
-                    smps[i] = 0;
+                    smps[i] = ( smps[i] < -ws ? smps[i]+ws-res : -res );
+                smps[i] -= offs;
             }
             break;
         case 11:
@@ -168,6 +231,8 @@ void waveShapeSmps(int n,
             else
                 tmpv = 0.5f - 1.0f / (expf(ws) + 1.0f);
             for(i = 0; i < n; ++i) {
+                smps[i] += offs; //add offset
+                // calculate sigmoid function
                 float tmp = smps[i] * ws;
                 if(tmp < -10.0f)
                     tmp = -10.0f;
@@ -175,7 +240,60 @@ void waveShapeSmps(int n,
                 if(tmp > 10.0f)
                     tmp = 10.0f;
                 tmp     = 0.5f - 1.0f / (expf(tmp) + 1.0f);
+                // calculate the same for offset value
+                float tmpo = offs * ws;
+                if(tmpo < -10.0f)
+                    tmpo = -10.0f;
+                else
+                if(tmpo > 10.0f)
+                    tmpo = 10.0f;
+                tmpo     = 0.5f - 1.0f / (expf(tmpo) + 1.0f);
+                
                 smps[i] = tmp / tmpv;
+                smps[i] -= tmpo / tmpv; // substract offset
+            }
+            break;
+        case 15:
+            // f(x) = x / ((1+|x|^n)^(1/n)) // tanh approximation for n=2.5
+            // Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
+            par = (20.0f) * par * par + (0.1f) * par + 1.0f;  //Pfunpar=32 -> n=2.5
+            ws = ws * ws * 35.0f + 1.0f;
+            for(i = 0; i < n; ++i) {
+                smps[i] *= ws;// multiply signal to drive it in the saturation of the function
+                smps[i] += offs; // add dc offset
+                smps[i] = smps[i] / powf(1+powf(fabs(smps[i]), par), 1/par);
+                smps[i] -= offs / powf(1+powf(fabs(offs), par), 1/par);
+            }
+            break;
+        case 16:
+            // f(x) = 1.5 * (x-(x^3/3))
+            // Formula from: https://ccrma.stanford.edu/~jos/pasp/Soft_Clipping.html
+            // modified with factor 1.5 to go through [1,1] and [-1,-1]
+            ws = powf(ws, 3.5f) * 20.0f + 1.0f; //cubic soft limiter
+            for(i = 0; i < n; ++i) {
+                smps[i] *= ws; // multiply signal to drive it in the saturation of the function
+                smps[i] += offs; // add dc offset
+                if(fabs(smps[i]) < 1.0f)
+                    smps[i] = 1.5 * (smps[i] - (powf(smps[i], 3.0) / 3.0) );
+                else
+                    smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
+                //substract offset with distorsion function applied
+                smps[i] -= 1.5 * (offs - (powf(offs, 3.0) / 3.0)); 
+            }
+            break;
+        case 17:
+        // f(x) = x*(2-abs(x))
+        // Formula of 16 changed to square but still going through [1,1] and [-1,-1]
+            ws = ws * ws * ws * 20.0f + 1.0f; //square soft limiter
+            for(i = 0; i < n; ++i) {
+                smps[i] *= ws; // multiply signal to drive it in the saturation of the function
+                smps[i] += offs; // add dc offset
+                if(fabs(smps[i]) < 1.0f)
+                    smps[i] = smps[i]*(2-fabs(smps[i]));
+                else
+                    smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
+                //substract offset with distorsion function applied
+                smps[i] -= offs*(2-fabs(offs));
             }
             break;
     }

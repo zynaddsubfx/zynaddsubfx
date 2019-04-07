@@ -635,6 +635,18 @@ redrawoscil();}
               label Sgm
               xywh {95 95 100 20} labelfont 1 labelsize 10
             }
+            MenuItem {} {
+              label Tanh
+              xywh {105 105 100 20} labelfont 1 labelsize 10
+            }
+            MenuItem {} {
+              label Cubic
+              xywh {115 115 100 20} labelfont 1 labelsize 10
+            }
+            MenuItem {} {
+              label Square
+              xywh {205 125 100 20} labelfont 1 labelsize 10
+            }
           }
           Fl_Dial wshpar {
             callback {redrawoscil();if(wsparval){wsparval->value(o->value());}}

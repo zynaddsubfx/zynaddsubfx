@@ -48,7 +48,8 @@ rtosc::Ports Distorsion::ports = {
     rEffParOpt(Ptype,    5, rShort("type"),
             rOptions(Arctangent, Asymmetric, Pow, Sine, Quantisize,
                      Zigzag, Limiter, Upper Limiter, Lower Limiter,
-                     Inverse Limiter, Clip, Asym2, Pow2, sigmoid),
+                     Inverse Limiter, Clip, Asym2, Pow2, Sigmoid, Tanh,
+                     Cubic, Square),
             rPresets(Arctangent, Asymmetric, Zigzag,
                      Asymmetric, Pow, Quantisize),
             "Distortion Shape"),
@@ -61,6 +62,10 @@ rtosc::Ports Distorsion::ports = {
               rPresets(false, false, true, true, false, true), "Stereo"),
     rEffParTF(Pprefiltering, 10, rShort("p.filt"), rDefault(false),
               "Filtering before/after non-linearity"),
+    rEffPar(Pfuncpar,   11, rShort("shape"), rDefault(32),
+            rLinear(0, 127), "Shape of the wave shaping function"),
+    rEffPar(Poffset,   12, rShort("offset"), rDefault(64),
+            rLinear(0, 127), "Input DC Offset"),
     {"waveform:", 0, 0, [](const char *, rtosc::RtData &d)
         {
             Distorsion  &dd = *(Distorsion*)d.obj;
@@ -72,7 +77,7 @@ rtosc::Ports Distorsion::ports = {
                 buffer[i] = 2*(i/128.0)-1;
 
             waveShapeSmps(sizeof(buffer)/sizeof(buffer[0]), buffer,
-                    dd.Ptype + 1, dd.Pdrive);
+                    dd.Ptype + 1, dd.Pdrive, dd.Poffset, dd.Pfuncpar);
 
             for(int i=0; i<128; ++i) {
                 arg_str[i] = 'f';
@@ -96,7 +101,9 @@ Distorsion::Distorsion(EffectParams pars)
       Plpf(127),
       Phpf(0),
       Pstereo(0),
-      Pprefiltering(0)
+      Pprefiltering(0),
+      Pfuncpar(32),
+      Poffset(64)
 {
     lpfl = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
     lpfr = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
@@ -155,9 +162,9 @@ void Distorsion::out(const Stereo<float *> &smp)
     if(Pprefiltering)
         applyfilters(efxoutl, efxoutr);
 
-    waveShapeSmps(buffersize, efxoutl, Ptype + 1, Pdrive);
+    waveShapeSmps(buffersize, efxoutl, Ptype + 1, Pdrive, Poffset, Pfuncpar);
     if(Pstereo)
-        waveShapeSmps(buffersize, efxoutr, Ptype + 1, Pdrive);
+        waveShapeSmps(buffersize, efxoutr, Ptype + 1, Pdrive, Poffset, Pfuncpar);
 
     if(!Pprefiltering)
         applyfilters(efxoutl, efxoutr);
@@ -261,8 +268,8 @@ void Distorsion::changepar(int npar, unsigned char value)
             Plevel = value;
             break;
         case 5:
-            if(value > 13)
-                Ptype = 13;  //this must be increased if more distorsion types are added
+            if(value > 16)
+                Ptype = 16;  //this must be increased if more distorsion types are added
             else
                 Ptype = value;
             break;
@@ -284,6 +291,12 @@ void Distorsion::changepar(int npar, unsigned char value)
         case 10:
             Pprefiltering = value;
             break;
+        case 11:
+            Pfuncpar = value;
+            break;
+        case 12:
+            Poffset = value;
+            break;
     }
 }
 
@@ -301,6 +314,8 @@ unsigned char Distorsion::getpar(int npar) const
         case 8:  return Phpf;
         case 9:  return Pstereo;
         case 10: return Pprefiltering;
+        case 11: return Pfuncpar;
+        case 12: return Poffset;
         default: return 0; //in case of bogus parameter number
     }
 }
