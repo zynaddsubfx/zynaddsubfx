@@ -43,6 +43,8 @@ class Distorsion:public Effect
         unsigned char Phpf;          //highpass filter
         unsigned char Pstereo;       //0=mono, 1=stereo
         unsigned char Pprefiltering; //if you want to do the filtering before the distorsion
+        unsigned char Pfuncpar;      //for parametric functions
+        unsigned char Poffset;       //the input offset
 
         void setvolume(unsigned char _Pvolume);
         void setlpf(unsigned char _Plpf);
