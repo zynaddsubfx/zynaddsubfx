@@ -257,6 +257,16 @@ static const Ports slot_ports = {
             d.reply(d.loc, "i", a.slots[slot].midi_cc);
 
         rEnd},
+    {"midi-nrpn::i", rProp(parameter) rMap(default, -1) rDoc("Access assigned midi NRPN slot") , 0,
+        rBegin;
+        int slot = d.idx[0];
+        if(rtosc_narguments(msg)) {
+            a.slots[slot].midi_nrpn = rtosc_argument(msg, 0).i;
+            d.broadcast(d.loc, "i", a.slots[slot].midi_nrpn);
+        } else
+            d.reply(d.loc, "i", a.slots[slot].midi_nrpn);
+
+        rEnd},
     {"active::T:F",  rProp(parameter) rMap(default, F) rDoc("If Slot is enabled"), 0,
         rBegin;
         int slot = d.idx[0];
