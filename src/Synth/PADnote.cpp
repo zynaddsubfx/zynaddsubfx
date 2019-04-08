@@ -153,7 +153,7 @@ void PADnote::setup(float freq,
     }
 
     NoteGlobalPar.Volume = 4.0f
-                           * powf(0.1f, 3.0f * (1.0f - pars.PVolume / 96.0f))      //-60 dB .. 0 dB
+                           * powf(10.0, pars.Volume / 20.0f)      //-60 dB .. 0 dB
                            * VelF(velocity, pars.PAmpVelocityScaleFunction); //velocity sensing
 
     if (!legato) {

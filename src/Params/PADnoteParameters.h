@@ -117,7 +117,7 @@ class PADnoteParameters:public Presets
                 127 - right */
         unsigned char PPanning;
 
-        unsigned char PVolume;
+        float Volume;
 
         unsigned char PAmpVelocityScaleFunction;
 

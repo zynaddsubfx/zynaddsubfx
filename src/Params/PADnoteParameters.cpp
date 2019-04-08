@@ -45,7 +45,7 @@ static const rtosc::Ports realtime_ports =
     //Volume
     rToggle(PStereo,    rShort("stereo"), rDefault(true), "Stereo/Mono Mode"),
     rParamZyn(PPanning, rShort("panning"), rDefault(64), "Left Right Panning"),
-    rParamZyn(PVolume,  rShort("vol"), rDefault(90), "Synth Volume"),
+    rParamZyn(Volume,  rShort("vol"), rLinear(-60.0f,0), rUnit(dB), rDefault(-3.75f), "Synth Volume"),
     rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), rDefault(64),
         "Amplitude Velocity Sensing function"),
 
@@ -83,7 +83,15 @@ static const rtosc::Ports realtime_ports =
     rParamZyn(PDetuneType,  rShort("type"),
             rOptions(L35cents, L10cents, E100cents, E1200cents),
             rDefault(L10cents), "Magnitude of Detune"),
-
+    {"PVolume::i", rShort("volume") rLinear(0,127) rdoc("Volume"), NULL,
+	[](const char *msg, RtData &d)
+	{
+	    robject *obj = (rObject *)d.obj;
+	    if(!rtosc_narguments(msg))
+		d.reply(d.loc, "i", (int)roundf(127.0f * (1.0f + obj->volume/60.0f)));
+	    else
+		obj->volume = -60.0f * (1.0f - rtosc_argument(msg,0).i / 127.0f);
+	}},
     {"sample#64:ifb", rProp(internal) rDoc("Nothing to see here"), 0,
         [](const char *m, rtosc::RtData &d)
         {
@@ -395,7 +403,7 @@ void PADnoteParameters::defaults()
     FreqLfo->defaults();
 
     /* Amplitude Global Parameters */
-    PVolume  = 90;
+    Volume  = -3.75f;
     PPanning = 64; //center
     PAmpVelocityScaleFunction = 64;
     AmpEnvelope->defaults();
@@ -1056,7 +1064,7 @@ void PADnoteParameters::add2XML(XMLwrapper& xml)
     xml.endbranch();
 
     xml.beginbranch("AMPLITUDE_PARAMETERS");
-    xml.addpar("volume", PVolume);
+    xml.addparreal("volume", Volume);
     xml.addpar("panning", PPanning);
     xml.addpar("velocity_sensing", PAmpVelocityScaleFunction);
     xml.addpar("fadein_adjustment", Fadein_adjustment);
@@ -1169,7 +1177,13 @@ void PADnoteParameters::getfromXML(XMLwrapper& xml)
     }
 
     if(xml.enterbranch("AMPLITUDE_PARAMETERS")) {
-        PVolume  = xml.getpar127("volume", PVolume);
+	 const bool upgrade_3_0_3 = (xml.fileversion() < version_type(3,0,3)) || 			(!xml.hasparreal("volume"));
+  	if (upgrade_3_0_3) {
+		int vol = xml.getpar127("volume",0);
+		Volume = -60.0f * (1.0f - vol / 127.0f);
+  	} else {
+		Volume = xml.getparreal("volume",Volume);
+    	}
         PPanning = xml.getpar127("panning", PPanning);
         PAmpVelocityScaleFunction = xml.getpar127("velocity_sensing",
                                                    PAmpVelocityScaleFunction);
@@ -1289,7 +1303,7 @@ void PADnoteParameters::pasteRT(PADnoteParameters &x)
 
     COPY(PStereo);
     COPY(PPanning);
-    COPY(PVolume);
+    COPY(Volume);
     COPY(PAmpVelocityScaleFunction);
 
     AmpEnvelope->paste(*x.AmpEnvelope);
