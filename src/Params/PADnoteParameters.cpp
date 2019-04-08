@@ -83,7 +83,8 @@ static const rtosc::Ports realtime_ports =
     rParamZyn(PDetuneType,  rShort("type"),
             rOptions(L35cents, L10cents, E100cents, E1200cents),
             rDefault(L10cents), "Magnitude of Detune"),
-    {"PVolume::i", rShort("volume") rLinear(0,127) rdoc("Volume"), NULL,
+    {"PVolume::i", rShort("volume") rLinear(0,127)
+	rdoc("Volume"), NULL,
 	[](const char *msg, RtData &d)
 	{
 	    robject *obj = (rObject *)d.obj;
