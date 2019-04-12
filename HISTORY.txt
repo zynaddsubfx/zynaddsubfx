@@ -1,3 +1,16 @@
+3.0.5 (soon)
+        - Add Stereo peaks for individual part metering
+        - Change LFO frequency units to Hz (from unitless)
+        - Enhance LFO delay parameter resolution and units (seconds)
+        - Enhance global volume parameter resolution and units (dB)
+        - Enhance part volume parameter resolution and units (dB)
+        - Enhance sub synth volume parameter resolution and units (dB)
+        - Enhance sub synth volume velocity sensing resolution
+        - Fix zippering when changing master volume
+        - Fix misaligned points in live envelope values
+        - Fix possible crash when envelopes are provided invalid live data
+        - Fix minor bugs
+
 3.0.4 (10 March 2019)
         - Add scripting to zyn-fusion UI for automated screen capture
         - Add double click to reset sliders
