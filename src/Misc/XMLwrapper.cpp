@@ -688,8 +688,11 @@ std::vector<XmlNode> XMLwrapper::getBranch(void) const
             XmlNode n(mxmlGetElement(current));
             int count = mxmlElementGetAttrCount(current);
             const char *name;
+            const char *attrib;
             for(int i = 0; i < count; ++i) {
-                n[name] = mxmlElementGetAttrByIndex(current, i, &name);
+                attrib = mxmlElementGetAttrByIndex(current, i, &name);
+                if(name)
+                    n[name] = attrib;
             }
 #else
             auto elm = current->value.element;
