@@ -41,7 +41,7 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
         mode = 1;                              //change to linear
 
     for(int i = 0; i < MAX_ENVELOPE_POINTS; ++i) {
-        const float tmp = pars.getdt(i) / 1000.0f * envstretch;
+        const float tmp = pars.getdt(i) * envstretch;
         if(tmp > bufferdt)
             envdt[i] = bufferdt / tmp;
         else
@@ -160,9 +160,10 @@ float Envelope::envout(bool doWatch)
             out = envval[tmp];
         else
             out = envoutval + (envval[tmp] - envoutval) * t;
+
         t += envdt[tmp] * envstretch;
 
-        if(t >= 1.0f) {
+        if(t >= 1.0f) { // move to the next segment
             currentpoint = envsustain + 2;
             forcedrelease = 0;
             t    = 0.0f;
@@ -184,6 +185,7 @@ float Envelope::envout(bool doWatch)
               + (envval[currentpoint] - envval[currentpoint - 1]) * t;
 
     t += inct;
+
     if(t >= 1.0f) {
         if(currentpoint >= envpoints - 1)
             envfinish = true;
@@ -210,12 +212,13 @@ float Envelope::envout_dB()
     if(linearenvelope)
         return envout(true);
 
-    if((currentpoint == 1) && (!keyreleased || !forcedrelease)) { //first point is always lineary interpolated
+    if((currentpoint == 1) && (!keyreleased || !forcedrelease)) { //first point is always lineary interpolated <- seems to have odd effects
         float v1 = EnvelopeParams::env_dB2rap(envval[0]);
         float v2 = EnvelopeParams::env_dB2rap(envval[1]);
         out = v1 + (v2 - v1) * t;
 
         t += inct;
+
         if(t >= 1.0f) {
             t    = 0.0f;
             inct = envdt[2];
