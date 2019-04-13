@@ -37,8 +37,7 @@ class EnvelopeParams:public Presets
         void getfromXML(XMLwrapper& xml);
 
         float getdt(char i) const;
-        static float dt(char val);
-        static char inv_dt(float val);
+
 
         int loc; //!< consumer location
 
@@ -46,14 +45,14 @@ class EnvelopeParams:public Presets
         unsigned char Pfreemode; //1 for free mode, 0 otherwise
         unsigned char Penvpoints;
         unsigned char Penvsustain; //127 for disabled
-        unsigned char Penvdt[MAX_ENVELOPE_POINTS];
+        float         envdt[MAX_ENVELOPE_POINTS];
         unsigned char Penvval[MAX_ENVELOPE_POINTS];
         unsigned char Penvstretch; //64=normal stretch (piano-like), 0=no stretch
         unsigned char Pforcedrelease; //0 - OFF, 1 - ON
         unsigned char Plinearenvelope; //if the amplitude envelope is linear
 
-        unsigned char PA_dt, PD_dt, PR_dt,
-                      PA_val, PD_val, PS_val, PR_val;
+        float A_dt, D_dt, R_dt;
+        unsigned char PA_val, PD_val, PS_val, PR_val;
 
 
 
@@ -72,16 +71,17 @@ class EnvelopeParams:public Presets
         static float env_dB2rap(float db);
 
     private:
-        void ADSRinit(char A_dt, char D_dt, char S_val, char R_dt);
-        void ADSRinit_dB(char A_dt, char D_dt, char S_val, char R_dt);
-        void ASRinit(char A_val, char A_dt, char R_val, char R_dt);
+
+        void ADSRinit(float A_dt, float D_dt, char S_val, float R_dt);
+        void ADSRinit_dB(float A_dt, float D_dt, char S_val, float R_dt);
+        void ASRinit(char A_val, float A_dt, char R_val, float R_dt);
         void ADSRinit_filter(char A_val,
-                             char A_dt,
+                             float A_dt,
                              char D_val,
-                             char D_dt,
-                             char R_dt,
+                             float D_dt,
+                             float R_dt,
                              char R_val);
-        void ASRinit_bw(char A_val, char A_dt, char R_val, char R_dt);
+        void ASRinit_bw(char A_val, float A_dt, char R_val, float R_dt);
 
         void store2defaults();
 
@@ -89,8 +89,8 @@ class EnvelopeParams:public Presets
         unsigned char Denvstretch;
         unsigned char Dforcedrelease;
         unsigned char Dlinearenvelope;
-        unsigned char DA_dt, DD_dt, DR_dt,
-                      DA_val, DD_val, DS_val, DR_val;
+        float DA_dt, DD_dt, DR_dt;
+        unsigned char DA_val, DD_val, DS_val, DR_val;
 };
 
 }
