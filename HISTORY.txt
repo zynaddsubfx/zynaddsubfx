@@ -1,4 +1,4 @@
-3.0.5 (soon)
+3.0.5 (15 April 2019)
         - Add Stereo peaks for individual part metering
         - Change LFO frequency units to Hz (from unitless)
         - Enhance LFO delay parameter resolution and units (seconds)
