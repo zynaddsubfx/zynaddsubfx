@@ -91,7 +91,7 @@ class AdNoteTest:public CxxTest::TestSuite
             //lets go with.... 50! as a nice note
             testnote = 50;
             float freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
-            SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote, false, prng()};
+            SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote / 12.0f, false, prng()};
 
             note = new ADnote(defaultPreset, pars);
 

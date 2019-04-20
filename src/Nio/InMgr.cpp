@@ -32,6 +32,13 @@ ostream &operator<<(ostream &out, const MidiEvent &ev)
             << "          velocity(" << ev.value << ")";
             break;
 
+        case M_FLOAT_NOTE:
+            out << "MidiNote: note(" << ev.num << ")\n"
+            << "          channel(" << ev.channel << ")\n"
+            << "          velocity(" << ev.value << ")\n"
+            << "          log2_freq(" << ev.log2_freq << ")";
+            break;
+
         case M_CONTROLLER:
             out << "MidiCtl: controller(" << ev.num << ")\n"
             << "         channel(" << ev.channel << ")\n"
@@ -93,10 +100,11 @@ void InMgr::flush(unsigned frameStart, unsigned frameStop)
 
         switch(ev.type) {
             case M_NOTE:
-                if(ev.value)
-                    master->noteOn(ev.channel, ev.num, ev.value);
-                else
-                    master->noteOff(ev.channel, ev.num);
+                master->noteOn(ev.channel, ev.num, ev.value);
+                break;
+
+            case M_FLOAT_NOTE:
+                master->noteOn(ev.channel, ev.num, ev.value, ev.log2_freq);
                 break;
 
             case M_CONTROLLER:

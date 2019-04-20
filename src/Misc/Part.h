@@ -43,11 +43,15 @@ class Part
         // Midi commands implemented
 
         //returns true when note is successfully applied
-        bool NoteOn(unsigned char note,
+        bool NoteOn(note_t note, uint8_t vel, int shift) REALTIME {
+             return (NoteOn(note, vel, shift, note / 12.0f));
+        };
+        bool NoteOn(note_t note,
                     unsigned char velocity,
-                    int masterkeyshift) REALTIME;
-        void NoteOff(unsigned char note) REALTIME;
-        void PolyphonicAftertouch(unsigned char note,
+                    int masterkeyshift,
+                    float note_log2_freq) REALTIME;
+        void NoteOff(note_t note) REALTIME;
+        void PolyphonicAftertouch(note_t note,
                                   unsigned char velocity,
                                   int masterkeyshift) REALTIME;
         void AllNotesOff() REALTIME; //panic
@@ -109,10 +113,11 @@ class Part
 
         unsigned char partno; /**<if it's the Master's first part*/
         bool          Penabled; /**<if the part is enabled*/
-        unsigned char Pvolume; /**<part volume*/
+        float         Volume; /**<part volume*/
         unsigned char Pminkey; /**<the minimum key that the part receives noteon messages*/
         unsigned char Pmaxkey; //the maximum key that the part receives noteon messages
-        void setPvolume(char Pvolume);
+        static float volume127ToFloat(unsigned char volume_);
+        void setVolume(float Volume);
         unsigned char Pkeyshift; //Part keyshift
         unsigned char Prcvchn; //from what midi channel it receives commands
         unsigned char Ppanning; //part panning
@@ -159,7 +164,7 @@ class Part
 
     private:
         void MonoMemRenote(); // MonoMem stuff.
-        float getBaseFreq(int note, int keyshift) const;
+        float getBaseFreq(float note_log2_freq, int keyshift) const;
         float getVelocity(uint8_t velocity, uint8_t velocity_sense,
                 uint8_t velocity_offset) const;
         void verifyKeyMode(void);
@@ -177,9 +182,9 @@ class Part
         bool lastlegatomodevalid; // To keep track of previous legatomodevalid.
 
         // MonoMem stuff
-        void monomemPush(char note);
-        void monomemPop(char note);
-        char monomemBack(void) const;
+        void monomemPush(note_t note);
+        void monomemPop(note_t note);
+        note_t monomemBack(void) const;
         bool monomemEmpty(void) const;
         void monomemClear(void);
 
@@ -187,6 +192,7 @@ class Part
         struct {
             unsigned char velocity;
             int mkeyshift; // I'm not sure masterkeyshift should be remembered.
+            float note_log2_freq;
         } monomem[256];
         /* 256 is to cover all possible note values.
            monomem[] is used in conjunction with the list to

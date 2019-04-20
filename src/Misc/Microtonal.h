@@ -17,6 +17,7 @@
 #include <cstdio>
 #include <stdint.h>
 #include "../globals.h"
+#include "../Containers/NotePool.h"
 
 #define MAX_OCTAVE_SIZE 128
 #define MICROTONAL_MAX_NAME_LEN 120
@@ -67,7 +68,7 @@ class Microtonal
         void defaults();
         /**Calculates the frequency for a given note
          */
-        float getnotefreq(int note, int keyshift) const;
+        float getnotefreq(float note_log2_freq, int keyshift) const;
 
 
         //Parameters

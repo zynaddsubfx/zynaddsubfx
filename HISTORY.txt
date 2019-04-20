@@ -1,3 +1,32 @@
+3.0.5 (15 April 2019)
+        - Add Stereo peaks for individual part metering
+        - Change LFO frequency units to Hz (from unitless)
+        - Enhance LFO delay parameter resolution and units (seconds)
+        - Enhance global volume parameter resolution and units (dB)
+        - Enhance part volume parameter resolution and units (dB)
+        - Enhance sub synth volume parameter resolution and units (dB)
+        - Enhance sub synth volume velocity sensing resolution
+        - Fix zippering when changing master volume
+        - Fix misaligned points in live envelope values
+        - Fix possible crash when envelopes are provided invalid live data
+        - Fix minor bugs
+
+3.0.4 (10 March 2019)
+        - Add scripting to zyn-fusion UI for automated screen capture
+        - Add double click to reset sliders
+        - Add random LFO to UI
+        - Add compatibility with MXML 3.0
+        - Enhance modulation volume parameter resolution
+        - Enhance global volume parameter resolution
+        - Enhance state variable filter interpolation
+        - Change filter defaults for easier patch setup
+        - Fix pops with note aftertouch
+        - Fix pad synth export
+        - Fix envelope watchpoint visualization
+        - Fix .xlz load/save in fusion UI
+        - Fix minor bugs
+        - Added support for floating point notes via MIDI SYSEX.
+
 3.0.3 (4 December 2017)
         - Add bank search to FLTK/NTK GUI
         - Add parallel padsynth sample generation

@@ -464,7 +464,7 @@ public:
             bank.loadbank(bank.banks[par].dir);
     }
 
-    void loadPart(int npart, const char *filename, Master *master)
+    void loadPart(int npart, const char *filename, Master *master, rtosc::RtData &d)
     {
         actual_load[npart]++;
 
@@ -522,7 +522,7 @@ public:
         //Give it to the backend and wait for the old part to return for
         //deallocation
         parent->transmitMsg("/load-part", "ib", npart, sizeof(Part*), &p);
-        GUI::raiseUi(ui, "/damage", "s", ("/part"+to_s(npart)+"/").c_str());
+        d.broadcast("/damage", "s", ("/part"+to_s(npart)+"/").c_str());
     }
 
     //Load a new cleared Part instance
@@ -1422,14 +1422,14 @@ static rtosc::Ports middwareSnoopPorts = {
         const int part_id = rtosc_argument(msg,0).i;
         const char *file  = rtosc_argument(msg,1).s;
         impl.pending_load[part_id]++;
-        impl.loadPart(part_id, file, impl.master);
+        impl.loadPart(part_id, file, impl.master, d);
         rEnd},
     {"load-part:is", 0, 0,
         rBegin;
         const int part_id = rtosc_argument(msg,0).i;
         const char *file  = rtosc_argument(msg,1).s;
         impl.pending_load[part_id]++;
-        impl.loadPart(part_id, file, impl.master);
+        impl.loadPart(part_id, file, impl.master, d);
         rEnd},
     {"load-part:iss", 0, 0,
         rBegin;
@@ -1437,7 +1437,7 @@ static rtosc::Ports middwareSnoopPorts = {
         const char *file  = rtosc_argument(msg,1).s;
         const char *name  = rtosc_argument(msg,2).s;
         impl.pending_load[part_id]++;
-        impl.loadPart(part_id, file, impl.master);
+        impl.loadPart(part_id, file, impl.master, d);
         impl.uToB->write(("/part"+to_s(part_id)+"/Pname").c_str(), "s",
                 name);
         rEnd},
@@ -1447,7 +1447,7 @@ static rtosc::Ports middwareSnoopPorts = {
         const int slot = rtosc_argument(msg, 0).i + 128*bank.bank_lsb;
         if(slot < BANK_SIZE) {
             impl.pending_load[0]++;
-            impl.loadPart(0, impl.master->bank.ins[slot].filename.c_str(), impl.master);
+            impl.loadPart(0, impl.master->bank.ins[slot].filename.c_str(), impl.master, d);
             impl.uToB->write("/part0/Pname", "s", impl.master->bank.ins[slot].name.c_str());
         }
         rEnd},
@@ -1568,7 +1568,7 @@ static rtosc::Ports middlewareReplyPorts = {
         Bank &bank        = impl.master->bank;
         const int part    = rtosc_argument(msg, 0).i;
         const int program = rtosc_argument(msg, 1).i + 128*bank.bank_lsb;
-        impl.loadPart(part, impl.master->bank.ins[program].filename.c_str(), impl.master);
+        impl.loadPart(part, impl.master->bank.ins[program].filename.c_str(), impl.master, d);
         impl.uToB->write(("/part"+to_s(part)+"/Pname").c_str(), "s", impl.master->bank.ins[program].name.c_str());
         rEnd},
     {"setbank:c", 0, 0,
