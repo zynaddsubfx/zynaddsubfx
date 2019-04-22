@@ -336,8 +336,8 @@ static const Ports globalPorts = {
     //Amplitude
     rParamZyn(PPanning, rShort("pan"), rDefault(64),
         "Panning of ADsynth (0 random, 1 left, 127 right)"),
-    rParamF(Volume,                   rShort("vol"), rLinear(-60.0f,20.0f),
-        rUnit(dB), rDefault(-3.75f), "volume control"),
+    rParamF(Volume,                   rShort("vol"), rLinear(-47.9588f,32.0412f),
+        rUnit(dB), rDefault(8.29f), "volume control"),
     rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), rDefault(64),
         "Volume velocity sense"),
     {"PVolume::i", rShort("vol.") rLinear(0,127)
@@ -346,9 +346,9 @@ static const Ports globalPorts = {
         {
             rObject *obj = (rObject *)d.obj;
             if (!rtosc_narguments(msg))
-                d.reply(d.loc, "i", (int)roundf(96.0f * (1.0f + obj->Volume/60.0f)));
+                d.reply(d.loc, "i", (int)roundf(96.0f * (1.0f + (obj->Volume - 12.0412)/60.0f)));
             else 
-                obj->Volume = -60.0f * (1.0f - rtosc_argument(msg, 0).i / 96.0f);
+                obj->Volume = 12.0412 - 60.0f * (1.0f - rtosc_argument(msg, 0).i / 96.0f);
         }},
     rParamZyn(Fadein_adjustment, rDefault(FADEIN_ADJUSTMENT_SCALE),
         "Adjustment for anti-pop strategy."),
@@ -491,7 +491,7 @@ void ADnoteGlobalParam::defaults()
     PBandwidth = 64;
 
     /* Amplitude Global Parameters */
-    Volume  = -3.75f;
+    Volume  = 8.29f;
     PPanning = 64; //center
     PAmpVelocityScaleFunction = 64;
     AmpEnvelope->defaults();
@@ -945,14 +945,18 @@ void ADnoteGlobalParam::getfromXML(XMLwrapper& xml)
     PStereo = xml.getparbool("stereo", PStereo);
 
     if(xml.enterbranch("AMPLITUDE_PARAMETERS")) {
+        const bool upgrade_3_0_5 = (xml.fileversion() < version_type(3,0,5));
         const bool upgrade_3_0_3 = (xml.fileversion() < version_type(3,0,3)) ||
             (!xml.hasparreal("volume"));
 
         if (upgrade_3_0_3) {
             int vol = xml.getpar127("volume", 0);
-            Volume    = -60.0f * ( 1.0f - vol / 96.0f);
+            Volume = 12.0412 - 60.0f * ( 1.0f - vol / 96.0f);
+        } else if (upgrade_3_0_5) {
+            printf("file version less than 3.0.5\n");
+            Volume = 12.0412 + xml.getparreal("volume", Volume);
         } else {
-            Volume    = xml.getparreal("volume", Volume);
+            Volume = xml.getparreal("volume", Volume);
         }
         PPanning = xml.getpar127("panning", PPanning);
         PAmpVelocityScaleFunction = xml.getpar127("velocity_sensing",
