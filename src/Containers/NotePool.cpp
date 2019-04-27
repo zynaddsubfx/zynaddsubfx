@@ -94,7 +94,7 @@ bool NotePool::NoteDescriptor::operator==(NoteDescriptor nd)
 
 //return either the first unused descriptor or the last valid descriptor which
 //matches note/sendto
-static int getMergeableDescriptor(uint8_t note, uint8_t sendto, bool legato,
+static int getMergeableDescriptor(note_t note, uint8_t sendto, bool legato,
         NotePool::NoteDescriptor *ndesc)
 {
     int desc_id = 0;
@@ -151,7 +151,7 @@ int NotePool::usedSynthDesc(void) const
     return cnt;
 }
 
-void NotePool::insertNote(uint8_t note, uint8_t sendto, SynthDescriptor desc, bool legato)
+void NotePool::insertNote(note_t note, uint8_t sendto, SynthDescriptor desc, bool legato)
 {
     //Get first free note descriptor
     int desc_id = getMergeableDescriptor(note, sendto, legato, ndesc);
@@ -181,7 +181,7 @@ void NotePool::upgradeToLegato(void)
                 insertLegatoNote(d.note, d.sendto, s);
 }
 
-void NotePool::insertLegatoNote(uint8_t note, uint8_t sendto, SynthDescriptor desc)
+void NotePool::insertLegatoNote(note_t note, uint8_t sendto, SynthDescriptor desc)
 {
     assert(desc.note);
     try {
@@ -193,10 +193,10 @@ void NotePool::insertLegatoNote(uint8_t note, uint8_t sendto, SynthDescriptor de
 };
 
 //There should only be one pair of notes which are still playing
-void NotePool::applyLegato(LegatoParams &par)
+void NotePool::applyLegato(note_t note, LegatoParams &par)
 {
     for(auto &desc:activeDesc()) {
-        desc.note = par.midinote;
+        desc.note = note;
         for(auto &synth:activeNotes(desc))
             try {
                 synth.note->legatonote(par);
@@ -206,7 +206,7 @@ void NotePool::applyLegato(LegatoParams &par)
     }
 }
 
-void NotePool::makeUnsustainable(uint8_t note)
+void NotePool::makeUnsustainable(note_t note)
 {
     for(auto &desc:activeDesc()) {
         if(desc.note == note) {
@@ -243,17 +243,17 @@ bool NotePool::existsRunningNote(void) const
 
 int NotePool::getRunningNotes(void) const
 {
-    bool running[256] = {0};
-    for(auto &desc:activeDesc()) {
-        //printf("note!(%d)\n", desc.note);
-        if(desc.playing() || desc.sustained())
-            running[desc.note] = true;
-    }
-
+    bool running[256] = {};
     int running_count = 0;
-    for(int i=0; i<256; ++i)
-        running_count += running[i];
 
+    for(auto &desc:activeDesc()) {
+        if(desc.playing() == false && desc.sustained() == false)
+            continue;
+        if(running[desc.note] != false)
+            continue;
+        running[desc.note] = true;
+        running_count++;
+    }
     return running_count;
 }
 void NotePool::enforceKeyLimit(int limit)
@@ -313,7 +313,7 @@ void NotePool::killAllNotes(void)
         kill(d);
 }
 
-void NotePool::killNote(uint8_t note)
+void NotePool::killNote(note_t note)
 {
     for(auto &d:activeDesc()) {
         if(d.note == note)

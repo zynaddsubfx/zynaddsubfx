@@ -20,6 +20,7 @@
 #include "../Params/Controller.h"
 #include "../Params/FilterParams.h"
 #include "../Containers/ScratchString.h"
+#include "../Containers/NotePool.h"
 #include "../Misc/Util.h"
 
 namespace zyn {
@@ -34,13 +35,13 @@ PADnote::PADnote(const PADnoteParameters *parameters,
     NoteGlobalPar.FilterLfo       = nullptr;
 
     firsttime = true;
-    setup(pars.frequency, pars.velocity, pars.portamento, pars.note, false, wm, prefix);
+    setup(pars.frequency, pars.velocity, pars.portamento, pars.note_log2_freq, false, wm, prefix);
 }
 
 void PADnote::setup(float freq,
                     float velocity_,
                     int portamento_,
-                    int midinote,
+                    float note_log2_freq,
                     bool legato,
                     WatchManager *wm,
                     const char *prefix)
@@ -57,8 +58,7 @@ void PADnote::setup(float freq,
         int fixedfreqET = pars.PfixedfreqET;
         if(fixedfreqET != 0) { //if the frequency varies according the keyboard note
             float tmp =
-                (midinote
-                 - 69.0f) / 12.0f
+                (note_log2_freq - (69.0f / 12.0f))
                 * (powf(2.0f, (fixedfreqET - 1) / 63.0f) - 1.0f);
             if(fixedfreqET <= 64)
                 basefreq *= powf(2.0f, tmp);
@@ -197,7 +197,7 @@ void PADnote::setup(float freq,
 SynthNote *PADnote::cloneLegato(void)
 {
     SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity,
-                   (bool)portamento, legato.param.midinote, true, legato.param.seed};
+                   (bool)portamento, legato.param.note_log2_freq, true, legato.param.seed};
     return memory.alloc<PADnote>(&pars, sp, interpolation);
 }
 
@@ -207,7 +207,7 @@ void PADnote::legatonote(LegatoParams pars)
     if(legato.update(pars))
         return;
 
-    setup(pars.frequency, pars.velocity, pars.portamento, pars.midinote, true);
+    setup(pars.frequency, pars.velocity, pars.portamento, pars.note_log2_freq, true);
 }
 
 

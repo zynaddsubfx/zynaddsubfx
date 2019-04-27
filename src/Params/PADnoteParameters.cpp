@@ -63,7 +63,7 @@ static const rtosc::Ports realtime_ports =
         "Punch Velocity control"),
 
     //Filter
-    rParamZyn(PFilterVelocityScale,         rShort("scale"), rDefault(64),
+    rParamZyn(PFilterVelocityScale,         rShort("scale"), rDefault(0),
         "Filter Velocity Magnitude"),
     rParamZyn(PFilterVelocityScaleFunction, rShort("sense"), rDefault(64),
         "Filter Velocity Function Shape"),
@@ -285,6 +285,11 @@ static const rtosc::Ports non_realtime_ports =
             d.replyArray(d.loc, types, args);
 #undef RES
         }},
+    {"export2wav:s", rDoc("Export padsynth waveforms to .wav files"),
+        NULL, [](const char *m, rtosc::RtData&d) {
+            PADnoteParameters *p = ((PADnoteParameters*)d.obj);
+            p->export2wav(rtosc_argument(m, 0).s);
+        }},
     {"needPrepare:", rDoc("Unimplemented Stub"),
         NULL, [](const char *, rtosc::RtData&) {}},
 };
@@ -402,7 +407,7 @@ void PADnoteParameters::defaults()
     PPunchVelocitySensing = 72;
 
     /* Filter Global Parameters*/
-    PFilterVelocityScale = 64;
+    PFilterVelocityScale = 0;
     PFilterVelocityScaleFunction = 64;
     GlobalFilter->defaults();
     FilterEnvelope->defaults();

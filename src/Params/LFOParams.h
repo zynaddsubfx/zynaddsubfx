@@ -37,12 +37,12 @@ class LFOParams:public Presets
         LFOParams(const AbsTime* time_ = nullptr);
         LFOParams(consumer_location_t loc,
                   const AbsTime* time_ = nullptr);
-        LFOParams(char Pfreq_,
+        LFOParams(float freq_,
                   char Pintensity_,
                   char Pstartphase_,
                   char PLFOtype_,
                   char Prandomness_,
-                  char Pdelay_,
+                  float delay_,
                   char Pcontinous,
                   consumer_location_t loc,
                   const AbsTime* time_ = nullptr);
@@ -55,13 +55,13 @@ class LFOParams:public Presets
         void paste(LFOParams &);
 
         /*  MIDI Parameters*/
-        float Pfreq;      /**<frequency*/
+        float         freq;      /**<frequency*/
         unsigned char Pintensity; /**<intensity*/
         unsigned char Pstartphase; /**<start phase (0=random)*/
         unsigned char PLFOtype; /**<LFO type (sin,triangle,square,ramp,...)*/
         unsigned char Prandomness; /**<randomness (0=off)*/
         unsigned char Pfreqrand; /**<frequency randomness (0=off)*/
-        unsigned char Pdelay; /**<delay (0=off)*/
+        float         delay; /**<delay (0=off)*/
         unsigned char Pcontinous; /**<1 if LFO is continous*/
         unsigned char Pstretch; /**<how the LFO is "stretched" according the note frequency (64=no stretch)*/
 
@@ -78,12 +78,12 @@ class LFOParams:public Presets
         void setup();
 
         /* Default parameters */
-        unsigned char Dfreq;
+        float         Dfreq;
         unsigned char Dintensity;
         unsigned char Dstartphase;
         unsigned char DLFOtype;
         unsigned char Drandomness;
-        unsigned char Ddelay;
+        float         Ddelay;
         unsigned char Dcontinous;
 };
 

@@ -23,6 +23,7 @@
 #include "../Misc/Allocator.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Containers/ScratchString.h"
+#include "../Containers/NotePool.h"
 #include "ModFilter.h"
 #include "OscilGen.h"
 #include "ADnote.h"
@@ -41,7 +42,7 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
 
     ADnoteParameters &pars = *pars_;
     portamento  = spars.portamento;
-    midinote    = spars.note;
+    note_log2_freq = spars.note_log2_freq;
     NoteEnabled = ON;
     basefreq    = spars.frequency;
     velocity    = spars.velocity;
@@ -511,7 +512,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
 SynthNote *ADnote::cloneLegato(void)
 {
     SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity,
-                (bool)portamento, legato.param.midinote, true,
+                (bool)portamento, legato.param.note_log2_freq, true,
                 initial_seed };
     return memory.alloc<ADnote>(&pars, sp);
 }
@@ -528,7 +529,7 @@ void ADnote::legatonote(LegatoParams lpars)
         return;
 
     portamento = lpars.portamento;
-    midinote   = lpars.midinote;
+    note_log2_freq = lpars.note_log2_freq;
     basefreq   = lpars.frequency;
     initial_seed = lpars.seed;
     current_prng_state = lpars.seed;
@@ -667,13 +668,10 @@ void ADnote::legatonote(LegatoParams lpars)
 
     int tmp[NUM_VOICES];
 
-    NoteGlobalPar.Volume = 4.0f
-                           * powf(0.1f, 3.0f
-                                  * (1.0f - pars.GlobalPar.PVolume
-                                     / 96.0f))                                      //-60 dB .. 0 dB
+    NoteGlobalPar.Volume = dB2rap(pars.GlobalPar.Volume) //-60 dB .. 20 dB
                            * VelF(
-        velocity,
-        pars.GlobalPar.PAmpVelocityScaleFunction); //velocity sensing
+                               velocity,
+                               pars.GlobalPar.PAmpVelocityScaleFunction); //velocity sensing
 
     {
         auto        *filter  = NoteGlobalPar.Filter;
@@ -695,11 +693,10 @@ void ADnote::legatonote(LegatoParams lpars)
         NoteVoicePar[nvoice].noisetype = pars.VoicePar[nvoice].Type;
         /* Voice Amplitude Parameters Init */
         NoteVoicePar[nvoice].Volume =
-            powf(0.1f, 3.0f
-                 * (1.0f - pars.VoicePar[nvoice].PVolume / 127.0f))             // -60 dB .. 0 dB
+            dB2rap(pars.VoicePar[nvoice].volume)             // -60 dB .. 0 dB
             * VelF(velocity,
                    pars.VoicePar[nvoice].PAmpVelocityScaleFunction); //velocity
-        if(pars.VoicePar[nvoice].PVolume == 0)
+        if(pars.VoicePar[nvoice].volume == -60.0)
             NoteVoicePar[nvoice].Volume = 0;
 
         if(pars.VoicePar[nvoice].PVolumeminus != 0)
@@ -856,9 +853,9 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
         vce.noisetype = param.Type;
         /* Voice Amplitude Parameters Init */
-        vce.Volume = powf(0.1f, 3.0f * (1.0f - param.PVolume / 127.0f)) // -60dB..0dB
+        vce.Volume = dB2rap(param.volume) // -60dB..0dB
                      * VelF(velocity, param.PAmpVelocityScaleFunction);
-        if(param.PVolume == 0)
+        if(param.volume == -60.0f)
             vce.Volume = 0;
 
         if(param.PVolumeminus)
@@ -1070,9 +1067,7 @@ float ADnote::getvoicebasefreq(int nvoice) const
         float fixedfreq   = 440.0f;
         int   fixedfreqET = NoteVoicePar[nvoice].fixedfreqET;
         if(fixedfreqET != 0) { //if the frequency varies according the keyboard note
-            float tmp =
-                (midinote
-                 - 69.0f) / 12.0f
+            float tmp = (note_log2_freq - (69.0f / 12.0f))
                 * (powf(2.0f, (fixedfreqET - 1) / 63.0f) - 1.0f);
             if(fixedfreqET <= 64)
                 fixedfreq *= powf(2.0f, tmp);
@@ -1978,7 +1973,7 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
     AmpLfo      = memory.alloc<LFO>(*param.AmpLfo, basefreq, time, wm,
                    (pre+"GlobalPar/AmpLfo/").c_str);
 
-    Volume = 4.0f * powf(0.1f, 3.0f * (1.0f - param.PVolume / 96.0f)) //-60 dB .. 0 dB
+    Volume = dB2rap(param.Volume) 
              * VelF(velocity, param.PAmpVelocityScaleFunction);     //sensing
 
     Filter = memory.alloc<ModFilter>(*param.GlobalFilter, synth, time, memory,

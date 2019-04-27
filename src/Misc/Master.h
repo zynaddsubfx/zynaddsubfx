@@ -107,9 +107,12 @@ class Master
         void putalldata(const char *data);
 
         //Midi IN
-        void noteOn(char chan, char note, char velocity);
-        void noteOff(char chan, char note);
-        void polyphonicAftertouch(char chan, char note, char velocity);
+        void noteOn(char chan, note_t note, char velocity) {
+            noteOn(chan, note, velocity, note / 12.0f);
+        };
+        void noteOn(char chan, note_t note, char velocity, float note_log2_freq);
+        void noteOff(char chan, note_t note);
+        void polyphonicAftertouch(char chan, note_t note, char velocity);
         void setController(char chan, int type, int par);
         //void NRPN...
 
@@ -144,14 +147,12 @@ class Master
         class Part * part[NUM_MIDI_PARTS];
 
         //parameters
-
-        unsigned char Pvolume;
         unsigned char Pkeyshift;
         unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         unsigned char Psysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
 
         //parameters control
-        void setPvolume(char Pvolume_);
+        static float volume127ToFloat(unsigned char volume_);
         void setPkeyshift(char Pkeyshift_);
         void setPsysefxvol(int Ppart, int Pefx, char Pvol);
         void setPsysefxsend(int Pefxfrom, int Pefxto, char Pvol);
@@ -172,7 +173,8 @@ class Master
         void vuresetpeaks();
 
         //peaks for part VU-meters
-        float vuoutpeakpart[NUM_MIDI_PARTS];
+        float vuoutpeakpartl[NUM_MIDI_PARTS];
+        float vuoutpeakpartr[NUM_MIDI_PARTS];
         unsigned char fakepeakpart[NUM_MIDI_PARTS]; //this is used to compute the "peak" when the part is disabled
 
         AbsTime  time;
@@ -188,7 +190,8 @@ class Master
         class FFTwrapper * fft;
 
         static const rtosc::Ports &ports;
-        float  volume;
+        float oldVolume;
+        float  Volume;
 
         //Statistics on output levels
         vuData vu;

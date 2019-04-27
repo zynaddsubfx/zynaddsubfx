@@ -21,6 +21,10 @@
 #ifndef XML_WRAPPER_H
 #define XML_WRAPPER_H
 
+#ifndef MXML_MAJOR_VERSION
+#define MXML_MAJOR_VERSION 1
+#endif
+
 namespace zyn {
 
 class XmlAttr
@@ -200,6 +204,12 @@ class XMLwrapper
          */
         std::string getparstr(const std::string &name,
                               const std::string &defaultpar) const;
+
+        /**
+         * Test existence of real parameter.
+         * @param name The parameter name.
+         */
+        bool hasparreal(const char *name) const;
 
         /**
          * Returns the real value stored in the node.

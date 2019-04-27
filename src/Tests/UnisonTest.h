@@ -23,6 +23,7 @@
 #include "../Synth/ADnote.h"
 #include "../Synth/OscilGen.h"
 #include "../Params/Presets.h"
+#include "../Params/FilterParams.h"
 #include "../DSP/FFTwrapper.h"
 #include "../globals.h"
 using namespace std;
@@ -64,6 +65,9 @@ class AdNoteTest:public CxxTest::TestSuite
             //sawtooth to make things a bit more interesting
             params->VoicePar[0].OscilSmp->Pcurrentbasefunc = 3;
 
+            params->GlobalPar.PFilterVelocityScale = 64;
+            params->GlobalPar.GlobalFilter->basefreq = 5076.203125;
+
             controller = new Controller(*synth, time);
 
             //lets go with.... 50! as a nice note
@@ -94,19 +98,19 @@ class AdNoteTest:public CxxTest::TestSuite
             params->VoicePar[0].Unison_vibratto_speed   = e;
             params->VoicePar[0].Unison_invert_phase     = f;
 
-            SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote, false, prng()};
+            SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote / 12.0f, false, prng()};
             note = new ADnote(params, pars);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(outL[80], values[0], 1e-5);
+            TS_ASSERT_DELTA(outL[80], values[0], 1.9e-5);
             printf("\n{%f,", outL[80]);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(outR[90], values[1], 1e-5);
+            TS_ASSERT_DELTA(outR[90], values[1], 1.9e-5);
             printf("\n%f,", outR[90]);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(outL[20], values[2], 1e-5);
+            TS_ASSERT_DELTA(outL[20], values[2], 1.9e-5);
             printf("\n%f,", outL[20]);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(outR[200], values[3], 1e-5);
+            TS_ASSERT_DELTA(outR[200], values[3], 1.9e-5);
             printf("\n%f},\n", outR[200]);
         }
 
