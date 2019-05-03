@@ -74,7 +74,7 @@ ELSE()
 #!${BASH}\n\
 set -e\n\
 BASHCOMP_PKG_PATH=\"${BASHCOMP_USER_PATH}\"\n\
-if [ -w \"${BASHCOMP_PKG_PATH}\" ]; then\n\
+if [ -n \"${BASHCOMP_PKG_PATH}\" ]; then\n\
   BASHCOMP_PKG_PATH=\"${BASHCOMP_PKG_PATH}\"\n\
 fi\n\
 echo -e \"\\nInstalling bash completion...\\n\"\n\
