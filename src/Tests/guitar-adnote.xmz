@@ -66,7 +66,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <ADD_SYNTH_PARAMETERS>
 <par_bool name="stereo" value="yes" />
 <AMPLITUDE_PARAMETERS>
-<par_real name="volume" value="-14.375" exact_value="0xC165FFFF" />
+<par_real name="volume" value="-2.3338" exact_value="0xC0155CF7" />
 <par name="panning" value="74" />
 <par name="velocity_sensing" value="85" />
 <par name="fadein_adjustment" value="20" />
