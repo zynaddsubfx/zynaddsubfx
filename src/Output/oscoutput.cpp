@@ -482,7 +482,7 @@ ZynOscPlugin::~ZynOscPlugin()
 
     auto *tmp = middleware;
     middleware = nullptr;
-    middlewareThread->join();
+    if(middlewareThread) { middlewareThread->join(); }
     delete tmp;
     delete middlewareThread;
 }
