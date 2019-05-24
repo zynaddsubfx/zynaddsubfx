@@ -101,16 +101,16 @@ class AdNoteTest:public CxxTest::TestSuite
             SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote / 12.0f, false, prng()};
             note = new ADnote(params, pars);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(outL[80], values[0], 1e-5);
+            TS_ASSERT_DELTA(outL[80], values[0], 1.9e-5);
             printf("\n{%f,", outL[80]);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(outR[90], values[1], 1e-5);
+            TS_ASSERT_DELTA(outR[90], values[1], 1.9e-5);
             printf("\n%f,", outR[90]);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(outL[20], values[2], 1e-5);
+            TS_ASSERT_DELTA(outL[20], values[2], 1.9e-5);
             printf("\n%f,", outL[20]);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(outR[200], values[3], 1e-5);
+            TS_ASSERT_DELTA(outR[200], values[3], 1.9e-5);
             printf("\n%f},\n", outR[200]);
         }
 

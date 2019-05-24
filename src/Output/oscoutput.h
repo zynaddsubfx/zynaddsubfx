@@ -81,7 +81,7 @@ private:
     void hide_ui();
 
     pid_t ui_pid = 0;
-    zyn::MiddleWare *middleware;
+    zyn::MiddleWare *middleware = nullptr;
     std::thread *middlewareThread = nullptr;
 
     zyn::Config config;
