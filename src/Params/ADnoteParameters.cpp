@@ -218,14 +218,18 @@ static const Ports voicePorts = {
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_octave = [&obj](){
                 int k=obj->PCoarseDetune/1024;
                 if (k>=8) k-=16;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_octave());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=16;
                 obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
+                d.broadcast(d.loc, "i", get_octave());
             }
         }},
     {"coarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64,63) rDefault(0)
@@ -233,14 +237,18 @@ static const Ports voicePorts = {
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_coarse = [&obj](){
                 int k=obj->PCoarseDetune%1024;
                 if (k>=512) k-=1024;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_coarse());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=1024;
                 obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
+                d.broadcast(d.loc, "i", get_coarse());
             }
         }},
     {"PFMVolume::i", rShort("vol.") rLinear(0,127)
@@ -269,14 +277,18 @@ static const Ports voicePorts = {
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_octave = [&obj](){
                 int k=obj->PFMCoarseDetune/1024;
                 if (k>=8) k-=16;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_octave());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=16;
                 obj->PFMCoarseDetune = k*1024 + obj->PFMCoarseDetune%1024;
+                d.broadcast(d.loc, "i", get_octave());
             }
         }},
     {"FMcoarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64,63)
@@ -284,14 +296,18 @@ static const Ports voicePorts = {
         NULL, [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_coarse = [&obj](){
                 int k=obj->PFMCoarseDetune%1024;
                 if (k>=512) k-=1024;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_coarse());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=1024;
                 obj->PFMCoarseDetune = k + (obj->PFMCoarseDetune/1024)*1024;
+                d.broadcast(d.loc, "i", get_coarse());
             }
         }},
 
@@ -384,14 +400,18 @@ static const Ports globalPorts = {
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_octave = [&obj](){
                 int k=obj->PCoarseDetune/1024;
                 if (k>=8) k-=16;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_octave());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=16;
                 obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
+                d.broadcast(d.loc, "i", get_octave());
             }
         }},
     {"coarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64, 63)
@@ -399,14 +419,18 @@ static const Ports globalPorts = {
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_coarse = [&obj](){
                 int k=obj->PCoarseDetune%1024;
                 if (k>=512) k-=1024;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_coarse());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=1024;
                 obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
+                d.broadcast(d.loc, "i", get_coarse());
             }
         }},
 

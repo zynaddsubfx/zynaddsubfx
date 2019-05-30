@@ -125,11 +125,15 @@ static const Ports partPorts = {
         [](const char *msg, RtData &d)
         {
             Part *p = (Part*)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_polytype = [&p](){
                 int res = 0;
                 if(!p->Ppolymode)
                     res = p->Plegatomode ? 2 : 1;
-                d.reply(d.loc, "i", res);
+                return res;
+            };
+
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_polytype());
                 return;
             }
 
@@ -143,7 +147,10 @@ static const Ports partPorts = {
             } else {
                 p->Ppolymode = 0;
                 p->Plegatomode = 1;
-            }}},
+            }
+            d.broadcast(d.loc, "i", get_polytype());
+        }
+    },
     {"clear:", rProp(internal) rDoc("Reset Part To Defaults"), 0,
         [](const char *, RtData &d)
         {

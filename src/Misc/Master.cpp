@@ -76,8 +76,8 @@ static const Ports sysefxPort =
             Master &mast = *(Master*)d.obj;
 
             if(rtosc_narguments(m)) {
-             mast.setPsysefxvol(ind2, ind1, rtosc_argument(m,0).i);
-             d.broadcast(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
+                mast.setPsysefxvol(ind2, ind1, rtosc_argument(m,0).i);
+                d.broadcast(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
             } else
                 d.reply(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
         }}
@@ -108,7 +108,10 @@ static const Ports sysefsendto =
             Master &master = *(Master*)d.obj;
 
             if(rtosc_narguments(m))
+            {
                 master.setPsysefxsend(ind1, ind2, rtosc_argument(m,0).i);
+                d.broadcast(d.loc, "i", master.Psysefxsend[ind1][ind2]);
+            }
             else
                 d.reply(d.loc, "i", master.Psysefxsend[ind1][ind2]);
         }}
@@ -169,8 +172,10 @@ static const Ports auto_param_ports = {
         rBegin;
         int slot  = d.idx[1];
         int param = d.idx[0];
-        if(rtosc_narguments(msg))
+        if(rtosc_narguments(msg)) {
             a.slots[slot].automations[param].active = rtosc_argument(msg, 0).T;
+            d.broadcast(d.loc, a.slots[slot].automations[param].active ? "T" : "F");
+        }
         else
             d.reply(d.loc, a.slots[slot].automations[param].active ? "T" : "F");
         rEnd},
@@ -270,8 +275,10 @@ static const Ports slot_ports = {
     {"active::T:F",  rProp(parameter) rMap(default, F) rDoc("If Slot is enabled"), 0,
         rBegin;
         int slot = d.idx[0];
-        if(rtosc_narguments(msg))
+        if(rtosc_narguments(msg)) {
             a.slots[slot].active = rtosc_argument(msg, 0).T;
+            d.broadcast(d.loc, a.slots[slot].active ? "T" : "F");
+        }
         else
             d.reply(d.loc, a.slots[slot].active ? "T" : "F");
         rEnd},

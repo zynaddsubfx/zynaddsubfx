@@ -74,8 +74,7 @@ target_link_libraries(ins-test ${test_lib} rt)
 
 if(LIBLO_FOUND)
     cp_script(check-ports.rb)
-#   Currently fails due to zynaddsubfx issues?
-#   add_test(PortChecker check-ports.rb)
+    add_test(PortChecker check-ports.rb)
 endif()
 
 add_executable(save-osc SaveOSC.cpp)

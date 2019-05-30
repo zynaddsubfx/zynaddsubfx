@@ -281,7 +281,7 @@ int PADnote::Compute_Linear(float *outl,
                             int freqhi,
                             float freqlo)
 {
-    float *smps = pars.sample[nsample].smp;
+    const float *smps = pars.sample[nsample].smp;
     if(smps == NULL) {
         finished_ = true;
         return 1;
