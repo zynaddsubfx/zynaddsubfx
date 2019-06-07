@@ -30,9 +30,10 @@
 
 namespace zyn {
 
+
 ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
         WatchManager *wm, const char *prefix)
-    :SynthNote(spars), pars(*pars_)
+    :SynthNote(spars), pars(*pars_), watchOut(wm, prefix, "out"), watchOut1(wm,prefix,"out1")
 {
     memory.beginTransaction();
     tmpwavel = memory.valloc<float>(synth.buffersize);
@@ -1701,9 +1702,11 @@ int ADnote::noteout(float *outl, float *outr)
             else
                 for(int i = 0; i < synth.buffersize; ++i)
                     tmpwavel[i] += tw[i];
+            if(nvoice == 0)
+                watchOut(tmpwavel,synth.buffersize);
+            if(nvoice == 1)
+                watchOut1(tmpwavel,synth.buffersize);
         }
-
-
         float unison_amplitude = 1.0f / sqrt(unison_size[nvoice]); //reduce the amplitude for large unison sizes
         // Amplitude
         float oldam = oldamplitude[nvoice] * unison_amplitude;
