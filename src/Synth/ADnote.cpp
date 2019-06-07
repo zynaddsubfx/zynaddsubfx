@@ -30,7 +30,6 @@
 
 namespace zyn {
 
-
 ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
         WatchManager *wm, const char *prefix)
     :SynthNote(spars), pars(*pars_), watchOut(wm, prefix, "out"), watchOut1(wm,prefix,"out1")

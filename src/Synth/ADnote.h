@@ -30,13 +30,6 @@
 
 namespace zyn {
 
-class voicewatch{
-    public:
-        voicewatch(WatchManager *m, const char *watch_prefix);
-        VecWatchPoint watchOut;
-
-};
-
 /**The "additive" synthesizer*/
 class ADnote:public SynthNote
 {
