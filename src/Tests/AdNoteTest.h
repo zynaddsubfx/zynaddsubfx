@@ -25,6 +25,7 @@
 #include "../Params/Presets.h"
 #include "../DSP/FFTwrapper.h"
 #include "../globals.h"
+#include <rtosc/thread-link.h>
 
 using namespace std;
 using namespace zyn;
@@ -35,6 +36,7 @@ SYNTH_T *synth;
 class AdNoteTest:public CxxTest::TestSuite
 {
     public:
+        rtosc::ThreadLink *tr;
         ADnote       *note;
         AbsTime      *time;
         FFTwrapper   *fft;
@@ -42,7 +44,7 @@ class AdNoteTest:public CxxTest::TestSuite
         Controller   *controller;
         Alloc         memory;
         unsigned char testnote;
-
+        WatchManager *w;
         float *outR, *outL;
 
         void setUp() {
@@ -59,6 +61,8 @@ class AdNoteTest:public CxxTest::TestSuite
             for(int i = 0; i < synth->buffersize; ++i)
                 *(outR + i) = 0;
 
+            tr  = new rtosc::ThreadLink(1024,3);
+            w   = new WatchManager(tr);
 
             fft = new FFTwrapper(synth->oscilsize);
             //prepare the default settings
@@ -93,7 +97,7 @@ class AdNoteTest:public CxxTest::TestSuite
             float freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
             SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote / 12.0f, false, prng()};
 
-            note = new ADnote(defaultPreset, pars);
+            note = new ADnote(defaultPreset, pars,w);
 
         }
 
@@ -144,6 +148,17 @@ class AdNoteTest:public CxxTest::TestSuite
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], -0.0901f, 0.0001f);
+
+        
+            TS_ASSERT(!tr->hasNext());
+            w->add_watch("out1");
+            note->noteout(outL, outR);
+            sampleCount += synth->buffersize;
+            w->tick();
+            TS_ASSERT(tr->hasNext());
+            TS_ASSERT_EQUALS(string("out1"), tr->read());
+            TS_ASSERT(!tr->hasNext());
+        
 
             while(!note->finished()) {
                 note->noteout(outL, outR);
