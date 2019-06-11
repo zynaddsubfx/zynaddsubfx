@@ -132,9 +132,14 @@ class AdNoteTest:public CxxTest::TestSuite
 
             note->releasekey();
 
-
+            TS_ASSERT(!tr->hasNext());
+            w->add_watch("out");
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
+            w->tick();
+            TS_ASSERT(tr->hasNext());
+            TS_ASSERT_EQUALS(string("out"), tr->read());
+            TS_ASSERT(!tr->hasNext());
             TS_ASSERT_DELTA(outL[255], -0.4688f, 0.0001f);
 
             note->noteout(outL, outR);
