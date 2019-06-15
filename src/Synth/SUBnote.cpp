@@ -44,7 +44,8 @@ SUBnote::SUBnote(const SUBnoteParameters *parameters, SynthParams &spars, WatchM
     GlobalFilter(nullptr),
     GlobalFilterEnvelope(nullptr),
     NoteEnabled(true),
-    lfilter(nullptr), rfilter(nullptr)
+    lfilter(nullptr), rfilter(nullptr),
+    watchOut(wm, prefix, "out"), watchOut1(wm,prefix,"out1")
 {
     setup(spars.frequency, spars.velocity, spars.portamento, spars.note_log2_freq, false, wm, prefix);
 }
@@ -518,6 +519,9 @@ void SUBnote::chanOutput(float *out, bpfilter *bp, int buffer_size)
 
         for(int i = 0; i < synth.buffersize; ++i)
             out[i] += tmpsmp[i] * rolloff;
+        
+        if(n == 0)
+            watchOut(tmpsmp,buffer_size);
     }
 }
 
@@ -547,7 +551,7 @@ int SUBnote::noteout(float *outl, float *outr)
 
         memcpy(outr, outl, synth.bufferbytes);
     }
-
+    watchOut1(outl,synth.buffersize);
     if(firsttick) {
         int n = 10;
         if(n > synth.buffersize)

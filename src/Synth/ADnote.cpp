@@ -1703,8 +1703,8 @@ int ADnote::noteout(float *outl, float *outr)
                     tmpwavel[i] += tw[i];
             if(nvoice == 0)
                 watchOut(tmpwavel,synth.buffersize);
-            if(nvoice == 1)
-                watchOut1(tmpwavel,synth.buffersize);
+            
+            watchOut1(tmpwavel,synth.buffersize);
         }
         float unison_amplitude = 1.0f / sqrt(unison_size[nvoice]); //reduce the amplitude for large unison sizes
         // Amplitude
