@@ -100,7 +100,7 @@ void WatchManager::tick(void)
     //Try to send out any vector stuff
     for(int i=0; i<MAX_WATCH; ++i) {
         if(sample_list[i]) {
-            if(data_list[i][sample_list[i]-1] != 0){
+            if(data_list[i][MAX_SAMPLE-1] != 0){
                 char        arg_types[MAX_SAMPLE+1] = {0};
                 rtosc_arg_t arg_val[MAX_SAMPLE];
                 for(int j=0; j<sample_list[i]; ++j) {
