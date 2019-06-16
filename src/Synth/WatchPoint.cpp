@@ -100,15 +100,17 @@ void WatchManager::tick(void)
     //Try to send out any vector stuff
     for(int i=0; i<MAX_WATCH; ++i) {
         if(sample_list[i]) {
-            char        arg_types[MAX_SAMPLE+1] = {0};
-            rtosc_arg_t arg_val[MAX_SAMPLE];
-            for(int j=0; j<sample_list[i]; ++j) {
-                arg_types[j] = 'f';
-                arg_val[j].f = data_list[i][j];
+            if(data_list[i][sample_list[i]-1] != 0){
+                char        arg_types[MAX_SAMPLE+1] = {0};
+                rtosc_arg_t arg_val[MAX_SAMPLE];
+                for(int j=0; j<sample_list[i]; ++j) {
+                    arg_types[j] = 'f';
+                    arg_val[j].f = data_list[i][j];
+                }
+            
+                write_back->writeArray(active_list[i], arg_types, arg_val);
+                deactivate[i] = true;
             }
-
-            write_back->writeArray(active_list[i], arg_types, arg_val);
-            deactivate[i] = true;
         }
     }
 
