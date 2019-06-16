@@ -100,7 +100,7 @@ void WatchManager::tick(void)
     //Try to send out any vector stuff
     for(int i=0; i<MAX_WATCH; ++i) {
         if(sample_list[i]) {
-            if(data_list[i][MAX_SAMPLE-1] != 0){
+            if(accumulate_index[i] >= 109){
                 char        arg_types[MAX_SAMPLE+1] = {0};
                 rtosc_arg_t arg_val[MAX_SAMPLE];
                 for(int j=0; j<sample_list[i]; ++j) {
@@ -110,6 +110,7 @@ void WatchManager::tick(void)
             
                 write_back->writeArray(active_list[i], arg_types, arg_val);
                 deactivate[i] = true;
+                accumulate_index[i] = 0;
             }
         }
     }
@@ -166,9 +167,18 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     if(selected == -1)
         return;
 
+    int space = MAX_SAMPLE - accumulate_index[selected];
+
+    if(space >= n)
+        space = n;
+
     //FIXME buffer overflow
-    for(int i=0; i<n; ++i)
-        data_list[selected][sample_list[selected]++] = f[i];
+    if(space){
+        for(int i=0; i<space; ++i)
+            data_list[selected][sample_list[selected]++] = f[i];
+    
+        accumulate_index[selected] += space;
+    }
 }
 
 }

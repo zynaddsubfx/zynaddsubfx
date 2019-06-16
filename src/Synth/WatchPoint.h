@@ -42,6 +42,7 @@ struct WatchManager
     float   data_list[MAX_SAMPLE][MAX_WATCH];
     int     sample_list[MAX_WATCH];
     bool    deactivate[MAX_WATCH];
+    int   accumulate_index[MAX_WATCH];
 
     //External API
     WatchManager(thrlnk *link=0);
