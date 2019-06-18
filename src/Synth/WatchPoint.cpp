@@ -106,8 +106,10 @@ void WatchManager::tick(void)
                 for(int j=0; j<sample_list[i]; ++j) {
                     arg_types[j] = 'f';
                     arg_val[j].f = data_list[i][j];
+                    printf("%f ",data_list[i][j]);
                 }
-            
+                printf("\n");
+
                 write_back->writeArray(active_list[i], arg_types, arg_val);
                 deactivate[i] = true;
                 accumulate_index[i] = 0;
@@ -159,7 +161,9 @@ void WatchManager::satisfy(const char *id, float f)
 
 void WatchManager::satisfy(const char *id, float *f, int n)
 {
-    int selected = -1;
+   
+
+    int selected = -1;    
     for(int i=0; i<MAX_WATCH; ++i)
         if(!strcmp(active_list[i], id))
             selected = i;
@@ -167,18 +171,25 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     if(selected == -1)
         return;
 
+     if(accumulate_index[selected]%32 == 0)
+        {
+            triggerPerframe[selected] = 0;
+        }
+
     int space = MAX_SAMPLE - accumulate_index[selected];
 
     if(space >= n)
         space = n;
 
     //FIXME buffer overflow
-    if(space){
+    if(space && triggerPerframe[selected] == 0){
         for(int i=0; i<space; ++i)
             data_list[selected][sample_list[selected]++] = f[i];
-    
+
         accumulate_index[selected] += space;
+
     }
+    triggerPerframe[selected] += 1;
 }
 
 }
