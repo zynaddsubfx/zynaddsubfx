@@ -100,15 +100,13 @@ void WatchManager::tick(void)
     //Try to send out any vector stuff
     for(int i=0; i<MAX_WATCH; ++i) {
         if(sample_list[i]) {
-            if(accumulate_index[i] >= 109){
+            if(accumulate_index[i] >= 127){
                 char        arg_types[MAX_SAMPLE+1] = {0};
                 rtosc_arg_t arg_val[MAX_SAMPLE];
                 for(int j=0; j<sample_list[i]; ++j) {
                     arg_types[j] = 'f';
                     arg_val[j].f = data_list[i][j];
-                    printf("%f ",data_list[i][j]);
                 }
-                printf("\n");
 
                 write_back->writeArray(active_list[i], arg_types, arg_val);
                 deactivate[i] = true;
@@ -161,8 +159,6 @@ void WatchManager::satisfy(const char *id, float f)
 
 void WatchManager::satisfy(const char *id, float *f, int n)
 {
-   
-
     int selected = -1;    
     for(int i=0; i<MAX_WATCH; ++i)
         if(!strcmp(active_list[i], id))
@@ -171,25 +167,18 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     if(selected == -1)
         return;
 
-     if(accumulate_index[selected]%32 == 0)
-        {
-            triggerPerframe[selected] = 0;
-        }
-
     int space = MAX_SAMPLE - accumulate_index[selected];
 
     if(space >= n)
         space = n;
 
     //FIXME buffer overflow
-    if(space && triggerPerframe[selected] == 0){
+    if(space){
         for(int i=0; i<space; ++i)
             data_list[selected][sample_list[selected]++] = f[i];
 
         accumulate_index[selected] += space;
-
     }
-    triggerPerframe[selected] += 1;
 }
 
 }

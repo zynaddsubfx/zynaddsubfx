@@ -43,7 +43,7 @@ struct WatchManager
     int     sample_list[MAX_WATCH];
     bool    deactivate[MAX_WATCH];
     int   accumulate_index[MAX_WATCH];
-    int triggerPerframe[MAX_WATCH];
+
     //External API
     WatchManager(thrlnk *link=0);
     void add_watch(const char *);
