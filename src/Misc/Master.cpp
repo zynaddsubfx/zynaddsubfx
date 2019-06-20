@@ -359,7 +359,7 @@ static const Ports automate_ports = {
 static const Ports watchPorts = {
     {"add:s", rDoc("Add synthesis state to watch"), 0,
         rBegin;
-        if(!m->watcher.is_active(rtosc_argument(msg,0).s))
+        if(!m->watcher.active(rtosc_argument(msg,0).s))
             m->watcher.add_watch(rtosc_argument(msg,0).s);
         rEnd},
 };
