@@ -100,7 +100,11 @@ void WatchManager::tick(void)
     //Try to send out any vector stuff
     for(int i=0; i<MAX_WATCH; ++i) {
         if(sample_list[i]) {
-            if(accumulate_index[i] >= 127){
+            int framesize = 2;
+            if(strstr(active_list[i], "Envelope") == NULL || strstr(active_list[i], "Lfo") == NULL)
+                framesize = 127;
+            
+            if(accumulate_index[i] >= framesize){
                 char        arg_types[MAX_SAMPLE+1] = {0};
                 rtosc_arg_t arg_val[MAX_SAMPLE];
                 for(int j=0; j<sample_list[i]; ++j) {
@@ -158,7 +162,8 @@ void WatchManager::satisfy(const char *id, float f)
 }
 
 void WatchManager::satisfy(const char *id, float *f, int n)
-{
+{   
+    printf("\nid: %s\n",id);
     int selected = -1;    
     for(int i=0; i<MAX_WATCH; ++i)
         if(!strcmp(active_list[i], id))
