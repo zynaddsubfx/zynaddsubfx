@@ -28,7 +28,8 @@ namespace zyn {
 PADnote::PADnote(const PADnoteParameters *parameters,
                  SynthParams pars, const int& interpolation, WatchManager *wm,
                  const char *prefix)
-    :SynthNote(pars), pars(*parameters), interpolation(interpolation)
+    :SynthNote(pars), pars(*parameters), interpolation(interpolation),
+    watchOut(wm, prefix, "out"), watchOut1(wm,prefix,"out1")
 {
     NoteGlobalPar.GlobalFilter    = nullptr;
     NoteGlobalPar.FilterEnvelope  = nullptr;
@@ -377,6 +378,7 @@ int PADnote::noteout(float *outl, float *outr)
     else
         Compute_Linear(outl, outr, freqhi, freqlo);
 
+    watchOut(outr,synth.buffersize);
 
     if(firsttime) {
         fadein(outl);
@@ -399,6 +401,8 @@ int PADnote::noteout(float *outl, float *outr)
                 break;
             }
         }
+
+    watchOut1(outr,synth.buffersize);
 
     if(ABOVE_AMPLITUDE_THRESHOLD(globaloldamplitude, globalnewamplitude))
         // Amplitude Interpolation
