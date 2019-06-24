@@ -39,10 +39,9 @@ struct WatchManager
     thrlnk *write_back;
     bool    new_active;
     char    active_list[MAX_WATCH][MAX_WATCH_PATH];
-    float   data_list[MAX_SAMPLE][MAX_WATCH];
+    float   data_list[MAX_WATCH][MAX_SAMPLE];
     int     sample_list[MAX_WATCH];
     bool    deactivate[MAX_WATCH];
-    int   accumulate_index[MAX_WATCH];
 
     //External API
     WatchManager(thrlnk *link=0);
