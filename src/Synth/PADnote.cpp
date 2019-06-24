@@ -355,7 +355,9 @@ int PADnote::Compute_Cubic(float *outl,
 
 
 int PADnote::noteout(float *outl, float *outr)
-{
+{   
+    watchOut(outr,synth.buffersize);
+    
     computecurrentparameters();
     float *smps = pars.sample[nsample].smp;
     if(smps == NULL) {
@@ -378,7 +380,7 @@ int PADnote::noteout(float *outl, float *outr)
     else
         Compute_Linear(outl, outr, freqhi, freqlo);
 
-    watchOut(outr,synth.buffersize);
+    watchOut1(outr,synth.buffersize);
 
     if(firsttime) {
         fadein(outl);
@@ -401,8 +403,7 @@ int PADnote::noteout(float *outl, float *outr)
                 break;
             }
         }
-
-    watchOut1(outr,synth.buffersize);
+    
 
     if(ABOVE_AMPLITUDE_THRESHOLD(globaloldamplitude, globalnewamplitude))
         // Amplitude Interpolation
