@@ -73,9 +73,7 @@ class WatchTest:public CxxTest::TestSuite
         {
             TS_ASSERT(!tr->hasNext());
             w->add_watch("out");
-            for(int i = 0; i < 64; ++i)
-                l->lfoout();
-       
+            l->lfoout();
             w->tick();
             TS_ASSERT(tr->hasNext());
             TS_ASSERT_EQUALS(string("out"), tr->read());

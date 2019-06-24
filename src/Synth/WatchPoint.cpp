@@ -99,23 +99,21 @@ void WatchManager::tick(void)
 {
     //Try to send out any vector stuff
     for(int i=0; i<MAX_WATCH; ++i) {
-        if(sample_list[i]) {
-            int framesize = 2;
-            if(strstr(active_list[i], "Envelope") == NULL || strstr(active_list[i], "Lfo") == NULL)
-                framesize = 127;
-            
-            if(accumulate_index[i] >= framesize){
-                char        arg_types[MAX_SAMPLE+1] = {0};
-                rtosc_arg_t arg_val[MAX_SAMPLE];
-                for(int j=0; j<sample_list[i]; ++j) {
-                    arg_types[j] = 'f';
-                    arg_val[j].f = data_list[i][j];
-                }
-
-                write_back->writeArray(active_list[i], arg_types, arg_val);
-                deactivate[i] = true;
-                accumulate_index[i] = 0;
+        int framesize = 2;
+        if(strstr(active_list[i], "noteout") != NULL)
+            framesize = 128;
+        if(sample_list[i] >= framesize-1) {
+            char        arg_types[MAX_SAMPLE+1] = {0};
+            rtosc_arg_t arg_val[MAX_SAMPLE];
+            printf("\n current accum index:%d  \n",sample_list[i]);
+            for(int j=0; j<sample_list[i]; ++j) {
+                arg_types[j] = 'f';
+                arg_val[j].f = data_list[i][j];
+                printf("%f ",arg_val[i].f);
             }
+            
+            write_back->writeArray(active_list[i], arg_types, arg_val);
+            deactivate[i] = true;
         }
     }
 
@@ -163,7 +161,6 @@ void WatchManager::satisfy(const char *id, float f)
 
 void WatchManager::satisfy(const char *id, float *f, int n)
 {   
-    printf("\nid: %s\n",id);
     int selected = -1;    
     for(int i=0; i<MAX_WATCH; ++i)
         if(!strcmp(active_list[i], id))
@@ -172,17 +169,20 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     if(selected == -1)
         return;
 
-    int space = MAX_SAMPLE - accumulate_index[selected];
-
+    int space = 128 - sample_list[selected];
+    int start = sample_list[selected];
+    
     if(space >= n)
         space = n;
 
     //FIXME buffer overflow
     if(space){
-        for(int i=0; i<space; ++i)
-            data_list[selected][sample_list[selected]++] = f[i];
+        for(int i=0; i<space; ++i){
+            data_list[selected][start] = f[i];
+            start++;
+        }
 
-        accumulate_index[selected] += space;
+        sample_list[selected] += space;
     }
 }
 

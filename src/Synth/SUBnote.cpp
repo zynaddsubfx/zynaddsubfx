@@ -45,7 +45,7 @@ SUBnote::SUBnote(const SUBnoteParameters *parameters, SynthParams &spars, WatchM
     GlobalFilterEnvelope(nullptr),
     NoteEnabled(true),
     lfilter(nullptr), rfilter(nullptr),
-    watchOut(wm, prefix, "out"), watchOut1(wm,prefix,"out1")
+    watchOut(wm, prefix, "noteout"), watchOut1(wm,prefix,"noteout1")
 {
     setup(spars.frequency, spars.velocity, spars.portamento, spars.note_log2_freq, false, wm, prefix);
 }

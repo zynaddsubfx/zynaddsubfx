@@ -32,7 +32,7 @@ namespace zyn {
 
 ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
         WatchManager *wm, const char *prefix)
-    :SynthNote(spars), pars(*pars_), watchOut(wm, prefix, "out"), watchOut1(wm,prefix,"out1")
+    :SynthNote(spars), pars(*pars_), watchOut(wm, prefix, "noteout"), watchOut1(wm,prefix,"noteout1")
 {
     memory.beginTransaction();
     tmpwavel = memory.valloc<float>(synth.buffersize);

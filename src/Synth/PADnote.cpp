@@ -29,7 +29,7 @@ PADnote::PADnote(const PADnoteParameters *parameters,
                  SynthParams pars, const int& interpolation, WatchManager *wm,
                  const char *prefix)
     :SynthNote(pars), pars(*parameters), interpolation(interpolation),
-    watchOut(wm, prefix, "out"), watchOut1(wm,prefix,"out1")
+    watchOut(wm, prefix, "noteout"), watchOut1(wm,prefix,"noteout1")
 {
     NoteGlobalPar.GlobalFilter    = nullptr;
     NoteGlobalPar.FilterEnvelope  = nullptr;
