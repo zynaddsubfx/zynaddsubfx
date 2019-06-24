@@ -105,7 +105,6 @@ void WatchManager::tick(void)
         if(sample_list[i] >= framesize-1) {
             char        arg_types[MAX_SAMPLE+1] = {0};
             rtosc_arg_t arg_val[MAX_SAMPLE];
-    
             for(int j=0; j<sample_list[i]; ++j) {
                 arg_types[j] = 'f';
                 arg_val[j].f = data_list[i][j];
@@ -181,7 +180,6 @@ void WatchManager::satisfy(const char *id, float *f, int n)
             data_list[selected][start] = f[i];
             start++;
         }
-
         sample_list[selected] += space;
     }
 }
