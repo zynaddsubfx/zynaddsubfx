@@ -125,6 +125,7 @@ void WatchManager::tick(void)
             memset(data_list[i], 0, sizeof(float)*128);
             sample_list[i] = 0;
             deactivate[i]  = false;
+            trigger[i] = false;
         }
     }
 
@@ -183,9 +184,10 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                     sample_list[selected]++;
                 }
             else{
-                 if(f[i] > -4){
+                 if(trigger[selected] || f[i] > 0){
                     data_list[selected][sample_list[selected]] = f[i];
                     sample_list[selected]++;
+                    trigger[selected] = true;
                 }
             }
         }

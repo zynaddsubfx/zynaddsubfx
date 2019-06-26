@@ -42,6 +42,7 @@ struct WatchManager
     float   data_list[MAX_WATCH][MAX_SAMPLE];
     int     sample_list[MAX_WATCH];
     bool    deactivate[MAX_WATCH];
+    bool trigger[MAX_WATCH];
 
     //External API
     WatchManager(thrlnk *link=0);
