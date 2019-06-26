@@ -169,7 +169,6 @@ void WatchManager::satisfy(const char *id, float *f, int n)
         return;
 
     int space = 128 - sample_list[selected];
-    int start = sample_list[selected];
     
     if(space >= n)
         space = n;
@@ -177,10 +176,19 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     //FIXME buffer overflow
     if(space){
         for(int i=0; i<space; ++i){
-            data_list[selected][start] = f[i];
-            start++;
+
+            if(strstr(active_list[i], "noteout") == NULL)
+                {   
+                    data_list[selected][sample_list[selected]] = f[i];
+                    sample_list[selected]++;
+                }
+            else{
+                 if(f[i] > -4){
+                    data_list[selected][sample_list[selected]] = f[i];
+                    sample_list[selected]++;
+                }
+            }
         }
-        sample_list[selected] += space;
     }
 }
 
