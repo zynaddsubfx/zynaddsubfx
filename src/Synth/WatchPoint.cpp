@@ -122,7 +122,7 @@ void WatchManager::tick(void)
     for(int i=0; i<MAX_WATCH; ++i) {
         if(deactivate[i]) {
             memset(active_list[i], 0, 128);
-            memset(data_list[i], 0, sizeof(float)*128);
+            memset(data_list[i], 0, sizeof(float)*MAX_SAMPLE);
             sample_list[i] = 0;
             deactivate[i]  = false;
             trigger[i] = false;
@@ -177,14 +177,13 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     //FIXME buffer overflow
     if(space){
         for(int i=0; i<space; ++i){
-
             if(strstr(active_list[i], "noteout") == NULL)
                 {   
                     data_list[selected][sample_list[selected]] = f[i];
                     sample_list[selected]++;
                 }
             else{
-                 if(trigger[selected] || f[i] > 0){
+                 if(trigger[selected] || f[i] >= 0.03){
                     data_list[selected][sample_list[selected]] = f[i];
                     sample_list[selected]++;
                     trigger[selected] = true;

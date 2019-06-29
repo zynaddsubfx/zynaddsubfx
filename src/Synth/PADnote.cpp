@@ -356,8 +356,6 @@ int PADnote::Compute_Cubic(float *outl,
 
 int PADnote::noteout(float *outl, float *outr)
 {   
-    watchOut(outr,synth.buffersize);
-    
     computecurrentparameters();
     float *smps = pars.sample[nsample].smp;
     if(smps == NULL) {
@@ -424,6 +422,8 @@ int PADnote::noteout(float *outl, float *outr)
 
     // Apply legato-specific sound signal modifications
     legato.apply(*this, outl, outr);
+
+    watchOut(outr,synth.buffersize);
 
     // Check if the global amplitude is finished.
     // If it does, disable the note
