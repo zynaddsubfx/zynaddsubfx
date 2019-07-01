@@ -183,7 +183,10 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                     sample_list[selected]++;
                 }
             else{
-                 if(trigger[selected] || f[i-1] <= 0 && f[i] > 0){
+                if(i == 0)
+                    i += 1;
+
+                if(trigger[selected] || f[i-1] <= 0 && f[i] > 0){
                     data_list[selected][sample_list[selected]] = f[i];
                     sample_list[selected]++;
                     trigger[selected] = true;
