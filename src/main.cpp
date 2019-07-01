@@ -36,6 +36,7 @@
 #include "Params/PADnoteParameters.h"
 
 #include "DSP/FFTwrapper.h"
+#include "Misc/MemLocker.h"
 #include "Misc/PresetExtractor.h"
 #include "Misc/Master.h"
 #include "Misc/Part.h"
@@ -761,6 +762,9 @@ int main(int argc, char *argv[])
     }
 #endif
 
+    MemLocker mem_locker;
+    mem_locker.lock();
+
     printf("[INFO] Main Loop...\n");
     bool already_exited = false;
     while(Pexitprogram == 0) {
@@ -814,6 +818,9 @@ done:
 #endif
 #endif
     }
+
+    mem_locker.unlock();
+
 #ifdef ZEST_GUI
 #ifndef WIN32
     if(!already_exited) {
