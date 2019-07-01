@@ -122,34 +122,36 @@ class SubNoteTest:public CxxTest::TestSuite
 
             note->releasekey();
 
-
+            TS_ASSERT(!tr->hasNext());
+            w->add_watch("noteout");
+            
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], 0.0029f, 0.0001f);
+            w->tick();
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], -0.0011f, 0.0001f);
-            
-            TS_ASSERT(!tr->hasNext());
-            w->add_watch("noteout");
-            note->noteout(outL, outR);
-            sampleCount += synth->buffersize;
             w->tick();
+
             TS_ASSERT(tr->hasNext());
             TS_ASSERT_EQUALS(string("noteout"), tr->read());
             TS_ASSERT(!tr->hasNext());
-            TS_ASSERT_DELTA(outL[255], -0.0017f, 0.0001f);
 
-            TS_ASSERT(!tr->hasNext());
             w->add_watch("noteout1");
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
+            TS_ASSERT_DELTA(outL[255], -0.0017f, 0.0001f);
+            w->tick();
+            
+            note->noteout(outL, outR);
+            sampleCount += synth->buffersize;
+            TS_ASSERT_DELTA(outL[255], -0.0005f, 0.0001f);
             w->tick();
             TS_ASSERT(tr->hasNext());
             TS_ASSERT_EQUALS(string("noteout1"), tr->read());
             TS_ASSERT(!tr->hasNext());
-            TS_ASSERT_DELTA(outL[255], -0.0005f, 0.0001f);
 
             while(!note->finished()) {
                 note->noteout(outL, outR);

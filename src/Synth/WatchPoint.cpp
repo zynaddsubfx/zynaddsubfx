@@ -101,7 +101,7 @@ void WatchManager::tick(void)
     for(int i=0; i<MAX_WATCH; ++i) {
         int framesize = 2;
         if(strstr(active_list[i], "noteout") != NULL)
-            framesize = 128;
+            framesize = MAX_SAMPLE-1;
         if(sample_list[i] >= framesize-1) {
             char        arg_types[MAX_SAMPLE+1] = {0};
             rtosc_arg_t arg_val[MAX_SAMPLE];
@@ -121,9 +121,9 @@ void WatchManager::tick(void)
     //Clear deleted slots
     for(int i=0; i<MAX_WATCH; ++i) {
         if(deactivate[i]) {
-            memset(active_list[i], 0, 128);
-            memset(data_list[i], 0, sizeof(float)*MAX_SAMPLE);
+            memset(active_list[i], 0, MAX_SAMPLE);
             sample_list[i] = 0;
+            memset(data_list[i], 0, sizeof(float)*MAX_SAMPLE);
             deactivate[i]  = false;
             trigger[i] = false;
         }
@@ -169,28 +169,26 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     if(selected == -1)
         return;
 
-    int space = 128 - sample_list[selected];
+    int space = MAX_SAMPLE - sample_list[selected];
     
     if(space >= n)
         space = n;
 
+    if(n == 2)
+        trigger[selected] = true;
+
     //FIXME buffer overflow
     if(space){
         for(int i=0; i<space; ++i){
-            if(strstr(active_list[i], "noteout") == NULL)
-                {   
+                if(!trigger[selected])
+                {   if(i == 0)
+                    i ++;
+                    if (f[i-1] <= 0 && f[i] > 0)
+                        trigger[selected] = true;
+                }
+                if(trigger[selected]){
                     data_list[selected][sample_list[selected]] = f[i];
                     sample_list[selected]++;
-                }
-            else{
-                if(i == 0)
-                    i += 1;
-
-                if(trigger[selected] || f[i-1] <= 0 && f[i] > 0){
-                    data_list[selected][sample_list[selected]] = f[i];
-                    sample_list[selected]++;
-                    trigger[selected] = true;
-                }
             }
         }
     }
