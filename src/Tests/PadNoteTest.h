@@ -29,6 +29,7 @@
 #include "../Params/Presets.h"
 #include "../DSP/FFTwrapper.h"
 #include "../globals.h"
+#include <rtosc/thread-link.h>
 using namespace std;
 using namespace zyn;
 
@@ -50,6 +51,8 @@ class PadNoteTest:public CxxTest::TestSuite
         unsigned char testnote;
         Alloc         memory;
         int           interpolation;
+        rtosc::ThreadLink *tr;
+        WatchManager *w;
 
 
         float *outR, *outL;
@@ -68,6 +71,8 @@ class PadNoteTest:public CxxTest::TestSuite
             for(int i = 0; i < synth->buffersize; ++i)
                 *(outR + i) = 0;
 
+            tr  = new rtosc::ThreadLink(1024,3);
+            w   = new WatchManager(tr);
 
             fft = new FFTwrapper(synth->oscilsize);
             //prepare the default settings
@@ -152,10 +157,13 @@ class PadNoteTest:public CxxTest::TestSuite
 
             note->releasekey();
 
-
+            TS_ASSERT(!tr->hasNext());
+            w->add_watch("noteout");
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], -0.0729f, 0.0005f);
+            w->tick();
+            TS_ASSERT(!tr->hasNext());
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
