@@ -185,6 +185,21 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                     i ++;
                     if (f[i-1] <= 0 && f[i] > 0)
                         trigger[selected] = true;
+                     for(int k=0; k<MAX_WATCH; ++k) {
+                            if(selected != k){
+                            char tmp[128];
+                            char tmp1[128];
+                            strcpy(tmp, active_list[selected]);
+                            strcpy(tmp1, active_list[k]);
+                            if(strlen(active_list[k]) < strlen(active_list[selected]))
+                                tmp[strlen(tmp)-1] =0;
+                            else if (strlen(active_list[k]) > strlen(active_list[selected]))
+                                tmp1[strlen(tmp1)-1] =0;
+                            if(!strcmp(tmp1,tmp)){
+                                trigger[k] = true;
+                            }
+                        }
+                     }
                 }
                 if(trigger[selected]){
                     data_list[selected][sample_list[selected]] = f[i];
