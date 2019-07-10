@@ -124,6 +124,7 @@ void WatchManager::tick(void)
             memset(active_list[i], 0, MAX_SAMPLE);
             sample_list[i] = 0;
             memset(data_list[i], 0, sizeof(float)*MAX_SAMPLE);
+            memset(prebuffer[i], 0, sizeof(float)*MAX_SAMPLE);
             deactivate[i]  = false;
             trigger[i] = false;
         }
@@ -171,6 +172,11 @@ void WatchManager::satisfy(const char *id, float *f, int n)
 
     int space = MAX_SAMPLE - sample_list[selected];
     
+    
+    for(int i = 0; i < n; ++i){
+        prebuffer[selected][i] = f[i];
+    }
+
     if(space >= n)
         space = n;
 
@@ -187,16 +193,26 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                         trigger[selected] = true;
                      for(int k=0; k<MAX_WATCH; ++k) {
                             if(selected != k){
-                            char tmp[128];
-                            char tmp1[128];
-                            strcpy(tmp, active_list[selected]);
-                            strcpy(tmp1, active_list[k]);
-                            if(strlen(active_list[k]) < strlen(active_list[selected]))
-                                tmp[strlen(tmp)-1] =0;
-                            else if (strlen(active_list[k]) > strlen(active_list[selected]))
-                                tmp1[strlen(tmp1)-1] =0;
-                            if(!strcmp(tmp1,tmp)){
-                                trigger[k] = true;
+                                char tmp[128];
+                                char tmp1[128];
+                                strcpy(tmp, active_list[selected]);
+                                strcpy(tmp1, active_list[k]);
+                                if(strlen(active_list[k]) < strlen(active_list[selected]))
+                                    tmp[strlen(tmp)-1] =0;
+                                else if (strlen(active_list[k]) > strlen(active_list[selected]))
+                                    tmp1[strlen(tmp1)-1] =0;
+                                if(!strcmp(tmp1,tmp)){
+                                    trigger[k] = true;
+                                    int space_k = MAX_SAMPLE - sample_list[k];
+                                    if(space_k >= n)
+                                        space_k = n;
+
+                                    for(int j = i; j < space_k ; ++j){
+                                        data_list[k][sample_list[k]] = prebuffer[k][j];
+                                        sample_list[k]++;
+                                    }
+
+
                             }
                         }
                      }

@@ -40,6 +40,7 @@ struct WatchManager
     bool    new_active;
     char    active_list[MAX_WATCH][MAX_WATCH_PATH];
     float   data_list[MAX_WATCH][MAX_SAMPLE];
+    float   prebuffer[MAX_WATCH][MAX_SAMPLE];
     int     sample_list[MAX_WATCH];
     bool    deactivate[MAX_WATCH];
     bool trigger[MAX_WATCH];
