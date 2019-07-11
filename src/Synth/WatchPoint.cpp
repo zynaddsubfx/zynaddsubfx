@@ -144,6 +144,14 @@ bool WatchManager::active(const char *id) const
     return false;
 }
 
+bool WatchManager::trigger_active(const char *id) const
+{
+    for(int i=0; i<MAX_WATCH; ++i)
+        if(!strcmp(active_list[i], id))
+            if(trigger[i])
+                return true
+}
+
 int WatchManager::samples(const char *id) const
 {
     for(int i=0; i<MAX_WATCH; ++i)
@@ -211,8 +219,6 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                                         data_list[k][sample_list[k]] = prebuffer[k][j];
                                         sample_list[k]++;
                                     }
-
-
                             }
                         }
                      }
