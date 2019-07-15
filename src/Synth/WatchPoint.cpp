@@ -149,7 +149,8 @@ bool WatchManager::trigger_active(const char *id) const
     for(int i=0; i<MAX_WATCH; ++i)
         if(!strcmp(active_list[i], id))
             if(trigger[i])
-                return true
+                return true;
+    return false;
 }
 
 int WatchManager::samples(const char *id) const

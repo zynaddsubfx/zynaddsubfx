@@ -137,7 +137,7 @@ class AdNoteTest:public CxxTest::TestSuite
             TS_ASSERT_DELTA(outL[255], -0.4688f, 0.0001f);
             w->tick();
             TS_ASSERT(!tr->hasNext());
-
+            
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             w->tick();
@@ -147,18 +147,19 @@ class AdNoteTest:public CxxTest::TestSuite
             sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], 0.0971f, 0.0001f);
             w->tick();
-
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], -0.0901f, 0.0001f);
+            TS_ASSERT(!w->trigger_active("/part0/kit0/adpars/noteout"));
             w->tick();
-            
+
             TS_ASSERT(tr->hasNext());
             TS_ASSERT_EQUALS(string("noteout"), tr->read());
             TS_ASSERT(!tr->hasNext());
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
+
 
             while(!note->finished()) {
                 note->noteout(outL, outR);
