@@ -52,7 +52,8 @@ class TriggerTest:public CxxTest::TestSuite
         void setUp() {
             synth = new SYNTH_T;
             // //First the sensible settings and variables that have to be set:
-            synth->buffersize = 256;
+            synth->buffersize = 32;
+            synth->alias(false);
             outL = new float[synth->buffersize];
             for(int i = 0; i < synth->buffersize; ++i)
                 *(outL + i) = 0;
@@ -60,7 +61,7 @@ class TriggerTest:public CxxTest::TestSuite
             for(int i = 0; i < synth->buffersize; ++i)
                 *(outR + i) = 0;
 
-            synth->buffersize = 64;
+
             time  = new AbsTime(*synth);
 
             tr  = new rtosc::ThreadLink(1024,3);
@@ -79,17 +80,12 @@ class TriggerTest:public CxxTest::TestSuite
             TS_ASSERT(wrap.enterbranch("SUB_SYNTH_PARAMETERS"));
             defaultPreset->getfromXML(wrap);
             
-            synth = new SYNTH_T;
-            synth->buffersize = 64;
             controller = new Controller(*synth, time);
 
             //lets go with.... 50! as a nice note
             testnote = 50;
             float freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
 
-
-            synth = new SYNTH_T;
-            synth->buffersize = 64;
             SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote / 12.0f, false, prng()};
             note = new SUBnote(defaultPreset, pars, w);
             this->pars = defaultPreset;
@@ -127,32 +123,25 @@ class TriggerTest:public CxxTest::TestSuite
 
             TS_ASSERT(!tr->hasNext());
             w->add_watch("noteout");
+            w->add_watch("noteout1");
+            note->noteout(outL, outR);
+            sampleCount += synth->buffersize;
+            w->tick();
+            TS_ASSERT(w->trigger_active("noteout1"));
+            TS_ASSERT(w->trigger_active("noteout"));
+            note->noteout(outL, outR);
+            sampleCount += synth->buffersize;
+            w->tick();
+
+            note->noteout(outL, outR);
+            sampleCount += synth->buffersize;
+            w->tick();
+            TS_ASSERT_EQUALS(string("noteout1"), tr->read());
             
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             w->tick();
-            note->noteout(outL, outR);
-            sampleCount += synth->buffersize;
-            w->tick();
-            // TS_ASSERT(!tr->hasNext());
-
-            // w->add_watch("noteout1");
-            note->noteout(outL, outR);
-            sampleCount += synth->buffersize;
-            // w->tick();
             
-            note->noteout(outL, outR);
-            sampleCount += synth->buffersize;
-            w->tick();
-            TS_ASSERT(tr->hasNext());
-            TS_ASSERT(w->trigger_active("/part0/kit0/subpars/noteout"));
-
-            TS_ASSERT_EQUALS(string("noteout"), tr->read());
-            
-            // TS_ASSERT(tr->hasNext());
-            // TS_ASSERT_EQUALS(string("noteout1"), tr->read());
-            // TS_ASSERT(!tr->hasNext());
-
             while(!note->finished()) {
                 note->noteout(outL, outR);
 #ifdef WRITE_OUTPUT

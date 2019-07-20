@@ -82,13 +82,14 @@ void WatchManager::add_watch(const char *id)
             fast_strcpy(active_list[i], id, MAX_WATCH_PATH);
             new_active = true;
             sample_list[i] = 0;
+            //printf("\n added watchpoint ID %s\n",id);
             break;
         }
     }
 }
 
 void WatchManager::del_watch(const char *id)
-{
+{   
     //Queue up the delete
     for(int i=0; i<MAX_WATCH; ++i)
         if(!strcmp(active_list[i], id))
@@ -121,12 +122,14 @@ void WatchManager::tick(void)
     //Clear deleted slots
     for(int i=0; i<MAX_WATCH; ++i) {
         if(deactivate[i]) {
+            //printf("\ndelete id : %s\n",active_list[i]);
             memset(active_list[i], 0, MAX_SAMPLE);
             sample_list[i] = 0;
             memset(data_list[i], 0, sizeof(float)*MAX_SAMPLE);
             memset(prebuffer[i], 0, sizeof(float)*MAX_SAMPLE);
             deactivate[i]  = false;
             trigger[i] = false;
+            
         }
     }
 
@@ -146,10 +149,14 @@ bool WatchManager::active(const char *id) const
 
 bool WatchManager::trigger_active(const char *id) const
 {
-    for(int i=0; i<MAX_WATCH; ++i)
-        if(!strcmp(active_list[i], id))
+    for(int i=0; i<MAX_WATCH; ++i){
+        //printf("\n current watch id :%s   and id : %s\n",active_list[i], id);
+        if(!strcmp(active_list[i], id)){
+            //printf("\n testing trigger %s\n",active_list[i]);
             if(trigger[i])
                 return true;
+        }
+    }
     return false;
 }
 
@@ -179,6 +186,11 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     if(selected == -1)
         return;
 
+    // printf("\npath : %s  \n", id);
+
+    // if (!strcmp(id,"/part0/kit0/subpars/noteout"))
+    //     printf("\n matched: %s\n", id);
+
     int space = MAX_SAMPLE - sample_list[selected];
     
     
@@ -201,16 +213,18 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                     if (f[i-1] <= 0 && f[i] > 0)
                         trigger[selected] = true;
                      for(int k=0; k<MAX_WATCH; ++k) {
-                            if(selected != k){
+                            if(selected != k && !trigger[k]){
                                 char tmp[128];
                                 char tmp1[128];
                                 strcpy(tmp, active_list[selected]);
                                 strcpy(tmp1, active_list[k]);
+                                
                                 if(strlen(active_list[k]) < strlen(active_list[selected]))
                                     tmp[strlen(tmp)-1] =0;
                                 else if (strlen(active_list[k]) > strlen(active_list[selected]))
                                     tmp1[strlen(tmp1)-1] =0;
                                 if(!strcmp(tmp1,tmp)){
+                                    //printf("\n path compare %s vs %s   id: %s\n",tmp,tmp1, active_list[k]);
                                     trigger[k] = true;
                                     int space_k = MAX_SAMPLE - sample_list[k];
                                     if(space_k >= n)
