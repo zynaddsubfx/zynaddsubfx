@@ -1617,7 +1617,7 @@ int Master::loadXML(const char *filename)
 void Master::getfromXML(XMLwrapper& xml)
 {
     if (xml.hasparreal("volume")) {
-        xml.getparreal("volume", Volume);
+        Volume = xml.getparreal("volume", Volume);
     } else {
         Volume  = volume127ToFloat(xml.getpar127("volume", 0));
         oldVolume = Volume;
