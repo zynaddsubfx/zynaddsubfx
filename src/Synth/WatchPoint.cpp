@@ -67,6 +67,9 @@ WatchManager::WatchManager(thrlnk *link)
     memset(sample_list, 0, sizeof(sample_list));
     memset(data_list,   0, sizeof(data_list));
     memset(deactivate,  0, sizeof(deactivate));
+    memset(prebuffer,  0, sizeof(prebuffer));
+    memset(trigger,  0, sizeof(trigger));
+
 }
 
 void WatchManager::add_watch(const char *id)
@@ -207,9 +210,9 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     //FIXME buffer overflow
     if(space){
         for(int i=0; i<space; ++i){
-                if(!trigger[selected])
-                {   if(i == 0)
-                    i ++;
+                if(!trigger[selected]){
+                    if(i == 0)
+                        i++;
                     if (f[i-1] <= 0 && f[i] > 0)
                         trigger[selected] = true;
                      for(int k=0; k<MAX_WATCH; ++k) {
@@ -224,9 +227,9 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                                 else if (strlen(active_list[k]) > strlen(active_list[selected]))
                                     tmp1[strlen(tmp1)-1] =0;
                                 if(!strcmp(tmp1,tmp)){
-                                    //printf("\n path compare %s vs %s   id: %s\n",tmp,tmp1, active_list[k]);
                                     trigger[k] = true;
                                     int space_k = MAX_SAMPLE - sample_list[k];
+
                                     if(space_k >= n)
                                         space_k = n;
 
@@ -234,16 +237,17 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                                         data_list[k][sample_list[k]] = prebuffer[k][j];
                                         sample_list[k]++;
                                     }
+                                }
                             }
                         }
-                     }
                 }
-                if(trigger[selected]){
-                    data_list[selected][sample_list[selected]] = f[i];
-                    sample_list[selected]++;
+
+            if(trigger[selected]){
+            data_list[selected][sample_list[selected]] = f[i];
+            sample_list[selected]++;
             }
         }
+        
     }
 }
-
 }

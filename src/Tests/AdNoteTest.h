@@ -1,11 +1,9 @@
 /*
   ZynAddSubFX - a software synthesizer
-
   AdNoteTest.h - CxxTest for Synth/ADnote
   Copyright (C) 2009-2011 Mark McCurry
   Copyright (C) 2009 Harald Hvaal
   Authors: Mark McCurry, Harald Hvaal
-
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
   as published by the Free Software Foundation; either version 2
@@ -150,7 +148,6 @@ class AdNoteTest:public CxxTest::TestSuite
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], -0.0901f, 0.0001f);
-            TS_ASSERT(!w->trigger_active("/part0/kit0/adpars/noteout"));
             w->tick();
 
             TS_ASSERT(tr->hasNext());

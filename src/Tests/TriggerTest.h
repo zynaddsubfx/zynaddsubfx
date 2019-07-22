@@ -125,12 +125,12 @@ class TriggerTest:public CxxTest::TestSuite
             w->add_watch("noteout1");
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            w->tick();
+            //w->tick();
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            w->tick();
-            TS_ASSERT(w->trigger_active("noteout"));
+            //w->tick();
             TS_ASSERT(w->trigger_active("noteout1"));
+            TS_ASSERT(w->trigger_active("noteout"));
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             w->tick();
@@ -156,17 +156,15 @@ class TriggerTest:public CxxTest::TestSuite
 #define OUTPUT_PROFILE
 #ifdef OUTPUT_PROFILE
         void testSpeed() {
+            const int samps = 15000;
 
-          
-            // const int samps = 15000;
+            int t_on = clock(); // timer before calling func
+            for(int i = 0; i < samps; ++i)
+                note->noteout(outL, outR);
+            int t_off = clock(); // timer when func returns
 
-            // int t_on = clock(); // timer before calling func
-            // for(int i = 0; i < samps; ++i)
-            //     note->noteout(outL, outR);
-            // int t_off = clock(); // timer when func returns
-
-            // printf("SubNoteTest: %f seconds for %d Samples to be generated.\n",
-            //        (static_cast<float>(t_off - t_on)) / CLOCKS_PER_SEC, samps);
+            printf("SubNoteTest: %f seconds for %d Samples to be generated.\n",
+                   (static_cast<float>(t_off - t_on)) / CLOCKS_PER_SEC, samps);
         }
 #endif
 };
