@@ -120,10 +120,12 @@ class TriggerTest:public CxxTest::TestSuite
 #endif
             sampleCount += synth->buffersize;
             note->releasekey();
-
             TS_ASSERT(!tr->hasNext());
             w->add_watch("noteout");
             w->add_watch("noteout1");
+            note->noteout(outL, outR);
+            sampleCount += synth->buffersize;
+            w->tick();
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             w->tick();
@@ -132,12 +134,7 @@ class TriggerTest:public CxxTest::TestSuite
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             w->tick();
-
-            note->noteout(outL, outR);
-            sampleCount += synth->buffersize;
-            w->tick();
             TS_ASSERT_EQUALS(string("noteout1"), tr->read());
-            
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             w->tick();
