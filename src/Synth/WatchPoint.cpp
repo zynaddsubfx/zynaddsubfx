@@ -208,33 +208,34 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                 if(!trigger[selected]){
                     if(i == 0)
                         i++;
-                    if (f[i-1] <= 0 && f[i] > 0)
+                    if (f[i-1] <= 0 && f[i] > 0){
                         trigger[selected] = true;
-                     for(int k=0; k<MAX_WATCH; ++k) {
-                            if(selected != k && !trigger[k]){
-                                char tmp[128];
-                                char tmp1[128];
-                                strcpy(tmp, active_list[selected]);
-                                strcpy(tmp1, active_list[k]);
-                                
-                                if(strlen(active_list[k]) < strlen(active_list[selected]))
-                                    tmp[strlen(tmp)-1] =0;
-                                else if (strlen(active_list[k]) > strlen(active_list[selected]))
-                                    tmp1[strlen(tmp1)-1] =0;
-                                if(!strcmp(tmp1,tmp)){
-                                    trigger[k] = true;
-                                    int space_k = MAX_SAMPLE - sample_list[k];
+                        for(int k=0; k<MAX_WATCH; ++k){
+                                if(selected != k && !trigger[k]){
+                                    char tmp[128];
+                                    char tmp1[128];
+                                    strcpy(tmp, active_list[selected]);
+                                    strcpy(tmp1, active_list[k]);
+                                    
+                                    if(strlen(active_list[k]) < strlen(active_list[selected]))
+                                        tmp[strlen(tmp)-1] =0;
+                                    else if (strlen(active_list[k]) > strlen(active_list[selected]))
+                                        tmp1[strlen(tmp1)-1] =0;
+                                    if(!strcmp(tmp1,tmp)){
+                                        trigger[k] = true;
+                                        int space_k = MAX_SAMPLE - sample_list[k];
 
-                                    if(space_k >= n)
-                                        space_k = n;
+                                        if(space_k >= n)
+                                            space_k = n;
 
-                                    for(int j = i; j < space_k ; ++j){
-                                        data_list[k][sample_list[k]] = prebuffer[k][j];
-                                        sample_list[k]++;
+                                        for(int j = i; j < space_k ; ++j){
+                                            data_list[k][sample_list[k]] = prebuffer[k][j];
+                                            sample_list[k]++;
+                                        }
                                     }
                                 }
-                            }
                         }
+                    }
                 }
 
             if(trigger[selected]){
