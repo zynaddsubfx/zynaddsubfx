@@ -152,15 +152,9 @@ bool WatchManager::active(const char *id) const
 
 bool WatchManager::trigger_active(const char *id) const
 {
-    for(int i=0; i<MAX_WATCH; ++i){
-        //printf("\n current watch id :%s   and id : %s\n",active_list[i], id);
-        if(!strcmp(active_list[i], id)){
-            //printf("\n testing trigger %s\n",active_list[i]);
-            if(trigger[i])
-                return true;
-        }
-    }
-    return false;
+    for(int i=0; i<MAX_WATCH; ++i)
+        if(!strcmp(active_list[i], id))
+            return trigger[i];
 }
 
 int WatchManager::samples(const char *id) const
@@ -243,8 +237,8 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                 }
 
             if(trigger[selected]){
-            data_list[selected][sample_list[selected]] = f[i];
-            sample_list[selected]++;
+                data_list[selected][sample_list[selected]] = f[i];
+                sample_list[selected]++;
             }
         }
         
