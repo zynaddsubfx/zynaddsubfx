@@ -123,21 +123,20 @@ class TriggerTest:public CxxTest::TestSuite
             TS_ASSERT(!tr->hasNext());
             w->add_watch("noteout");
             w->add_watch("noteout1");
+            TS_ASSERT(!w->trigger_active("noteout"));
+            TS_ASSERT(!w->trigger_active("noteout1"));
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            w->tick();
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            w->tick();
             TS_ASSERT(w->trigger_active("noteout1"));
             TS_ASSERT(w->trigger_active("noteout"));
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            w->tick();
-            TS_ASSERT_EQUALS(string("noteout1"), tr->read());
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             w->tick();
+            TS_ASSERT_EQUALS(string("noteout1"), tr->read());
             
             while(!note->finished()) {
                 note->noteout(outL, outR);
