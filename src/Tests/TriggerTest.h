@@ -136,7 +136,7 @@ class TriggerTest:public CxxTest::TestSuite
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             w->tick();
-            TS_ASSERT_EQUALS(string("noteout1"), tr->read());
+            TS_ASSERT_EQUALS(string("noteout"), tr->read());
             
             while(!note->finished()) {
                 note->noteout(outL, outR);
