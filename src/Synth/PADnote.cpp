@@ -28,7 +28,8 @@ namespace zyn {
 PADnote::PADnote(const PADnoteParameters *parameters,
                  SynthParams pars, const int& interpolation, WatchManager *wm,
                  const char *prefix)
-    :SynthNote(pars), pars(*parameters), interpolation(interpolation)
+    :SynthNote(pars), pars(*parameters), interpolation(interpolation),
+    watchOut(wm, prefix, "noteout"), watchOut1(wm,prefix,"noteout1")
 {
     NoteGlobalPar.GlobalFilter    = nullptr;
     NoteGlobalPar.FilterEnvelope  = nullptr;
@@ -354,7 +355,7 @@ int PADnote::Compute_Cubic(float *outl,
 
 
 int PADnote::noteout(float *outl, float *outr)
-{
+{   
     computecurrentparameters();
     float *smps = pars.sample[nsample].smp;
     if(smps == NULL) {
@@ -377,6 +378,7 @@ int PADnote::noteout(float *outl, float *outr)
     else
         Compute_Linear(outl, outr, freqhi, freqlo);
 
+    watchOut1(outr,synth.buffersize);
 
     if(firsttime) {
         fadein(outl);
@@ -399,6 +401,7 @@ int PADnote::noteout(float *outl, float *outr)
                 break;
             }
         }
+    
 
     if(ABOVE_AMPLITUDE_THRESHOLD(globaloldamplitude, globalnewamplitude))
         // Amplitude Interpolation
@@ -419,6 +422,8 @@ int PADnote::noteout(float *outl, float *outr)
 
     // Apply legato-specific sound signal modifications
     legato.apply(*this, outl, outr);
+
+    watchOut(outr,synth.buffersize);
 
     // Check if the global amplitude is finished.
     // If it does, disable the note

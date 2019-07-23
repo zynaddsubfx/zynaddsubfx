@@ -39,15 +39,18 @@ struct WatchManager
     thrlnk *write_back;
     bool    new_active;
     char    active_list[MAX_WATCH][MAX_WATCH_PATH];
-    float   data_list[MAX_SAMPLE][MAX_WATCH];
+    float   data_list[MAX_WATCH][MAX_SAMPLE];
+    float   prebuffer[MAX_WATCH][MAX_SAMPLE];
     int     sample_list[MAX_WATCH];
     bool    deactivate[MAX_WATCH];
+    bool trigger[MAX_WATCH];
 
     //External API
     WatchManager(thrlnk *link=0);
     void add_watch(const char *);
     void del_watch(const char *);
     void tick(void);
+    bool trigger_active(const char *) const;
 
     //Watch Point Query API
     bool active(const char *) const;

@@ -32,7 +32,7 @@ using namespace zyn;
 
 SYNTH_T *synth;
 
-class SubNoteTest:public CxxTest::TestSuite
+class TriggerTest:public CxxTest::TestSuite
 {
     public:
 
@@ -51,16 +51,18 @@ class SubNoteTest:public CxxTest::TestSuite
 
         void setUp() {
             synth = new SYNTH_T;
-            //First the sensible settings and variables that have to be set:
-            synth->buffersize = 256;
-            time  = new AbsTime(*synth);
-
+            // //First the sensible settings and variables that have to be set:
+            synth->buffersize = 32;
+            synth->alias(false);
             outL = new float[synth->buffersize];
             for(int i = 0; i < synth->buffersize; ++i)
                 *(outL + i) = 0;
             outR = new float[synth->buffersize];
             for(int i = 0; i < synth->buffersize; ++i)
                 *(outR + i) = 0;
+
+
+            time  = new AbsTime(*synth);
 
             tr  = new rtosc::ThreadLink(1024,3);
             w   = new WatchManager(tr);
@@ -77,7 +79,7 @@ class SubNoteTest:public CxxTest::TestSuite
             TS_ASSERT(wrap.enterbranch("INSTRUMENT_KIT_ITEM", 0));
             TS_ASSERT(wrap.enterbranch("SUB_SYNTH_PARAMETERS"));
             defaultPreset->getfromXML(wrap);
-
+            
             controller = new Controller(*synth, time);
 
             //lets go with.... 50! as a nice note
@@ -117,42 +119,25 @@ class SubNoteTest:public CxxTest::TestSuite
 
 #endif
             sampleCount += synth->buffersize;
-
-            TS_ASSERT_DELTA(outL[255], 0.0000f, 0.0001f);
-
             note->releasekey();
-
             TS_ASSERT(!tr->hasNext());
             w->add_watch("noteout");
-            
-            note->noteout(outL, outR);
-            sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], 0.0029f, 0.0001f);
-            w->tick();
-
-            note->noteout(outL, outR);
-            sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.0011f, 0.0001f);
-            w->tick();
-
-            TS_ASSERT(tr->hasNext());
-            TS_ASSERT_EQUALS(string("noteout"), tr->read());
-            TS_ASSERT(!tr->hasNext());
-
             w->add_watch("noteout1");
+            TS_ASSERT(!w->trigger_active("noteout"));
+            TS_ASSERT(!w->trigger_active("noteout1"));
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.0017f, 0.0001f);
+            note->noteout(outL, outR);
+            sampleCount += synth->buffersize;
+            TS_ASSERT(w->trigger_active("noteout1"));
+            TS_ASSERT(w->trigger_active("noteout"));
+            note->noteout(outL, outR);
+            sampleCount += synth->buffersize;
+            note->noteout(outL, outR);
+            sampleCount += synth->buffersize;
             w->tick();
+            TS_ASSERT_EQUALS(string("noteout"), tr->read());
             
-            note->noteout(outL, outR);
-            sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.0005f, 0.0001f);
-            w->tick();
-            TS_ASSERT(tr->hasNext());
-            TS_ASSERT_EQUALS(string("noteout1"), tr->read());
-            TS_ASSERT(!tr->hasNext());
-
             while(!note->finished()) {
                 note->noteout(outL, outR);
 #ifdef WRITE_OUTPUT
@@ -165,8 +150,6 @@ class SubNoteTest:public CxxTest::TestSuite
 #ifdef WRITE_OUTPUT
             file.close();
 #endif
-
-            TS_ASSERT_EQUALS(sampleCount, 2304);
         }
 
 #define OUTPUT_PROFILE

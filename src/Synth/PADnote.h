@@ -35,6 +35,8 @@ class PADnote:public SynthNote
         bool finished() const;
         void entomb(void);
 
+        VecWatchPoint watchOut,watchOut1;
+
         void releasekey();
     private:
         void setup(float freq, float velocity, int portamento_,

@@ -19,6 +19,7 @@
 #include "LFO.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Params/Controller.h"
+#include "WatchPoint.h"
 
 //Globals
 
@@ -57,7 +58,7 @@ class ADnote:public SynthNote
         int  setupVoiceUnison(int nvoice);
         void setupVoiceDetune(int nvoice);
         void setupVoiceMod(int nvoice, bool first_run = true);
-
+        VecWatchPoint watchOut,watchOut1;
         /**Changes the frequency of an oscillator.
          * @param nvoice voice to run computations on
          * @param in_freq new frequency*/

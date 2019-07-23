@@ -31,6 +31,8 @@ CXXTEST_ADD_TEST(KitTest KitTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/KitTest.h)
 CXXTEST_ADD_TEST(MemoryStressTest MemoryStressTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/MemoryStressTest.h)
+CXXTEST_ADD_TEST(TriggerTest TriggerTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/TriggerTest.h)
 
 #Extra libraries added to make test and full compilation use the same library
 #links for quirky compilers
@@ -49,6 +51,7 @@ target_link_libraries(RandTest       ${test_lib})
 target_link_libraries(PADnoteTest    ${test_lib})
 target_link_libraries(MqTest         ${test_lib})
 target_link_libraries(WatchTest      ${test_lib})
+target_link_libraries(TriggerTest      ${test_lib})
 target_link_libraries(PluginTest     zynaddsubfx_core zynaddsubfx_nio
     zynaddsubfx_gui_bridge
     ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
