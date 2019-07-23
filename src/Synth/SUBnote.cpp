@@ -519,9 +519,6 @@ void SUBnote::chanOutput(float *out, bpfilter *bp, int buffer_size)
 
         for(int i = 0; i < synth.buffersize; ++i)
             out[i] += tmpsmp[i] * rolloff;
-        
-        if(n == 0)
-            watchOut(tmpsmp,buffer_size);
     }
 }
 
@@ -535,7 +532,7 @@ int SUBnote::noteout(float *outl, float *outr)
 
     if(!NoteEnabled)
         return 0;
-
+    watchOut(outr,synth.buffersize);
     if(stereo) {
         chanOutput(outl, lfilter, synth.buffersize);
         chanOutput(outr, rfilter, synth.buffersize);
@@ -580,13 +577,11 @@ int SUBnote::noteout(float *outl, float *outr)
             outl[i] *= newamplitude * panning;
             outr[i] *= newamplitude * (1.0f - panning);
         }
-
     oldamplitude = newamplitude;
     computecurrentparameters();
 
     // Apply legato-specific sound signal modifications
     legato.apply(*this, outl, outr);
-
     // Check if the note needs to be computed more
     if(AmpEnvelope->finished() != 0) {
         for(int i = 0; i < synth.buffersize; ++i) { //fade-out
