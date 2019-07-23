@@ -113,7 +113,7 @@ void WatchManager::tick(void)
                 arg_types[j] = 'f';
                 arg_val[j].f = data_list[i][j];
             }
-            
+
             write_back->writeArray(active_list[i], arg_types, arg_val);
             deactivate[i] = true;
         }
@@ -132,7 +132,7 @@ void WatchManager::tick(void)
             memset(prebuffer[i], 0, sizeof(float)*MAX_SAMPLE);
             deactivate[i]  = false;
             trigger[i] = false;
-            
+
         }
     }
 
@@ -190,8 +190,8 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     //     printf("\n matched: %s\n", id);
 
     int space = MAX_SAMPLE - sample_list[selected];
-    
-    
+
+
     for(int i = 0; i < n; ++i){
         prebuffer[selected][i] = f[i];
     }
@@ -205,45 +205,45 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     //FIXME buffer overflow
     if(space){
         for(int i=0; i<space; ++i){
-                if(!trigger[selected]){
-                    if(i == 0)
-                        i++;
-                    if (f[i-1] <= 0 && f[i] > 0){
-                        trigger[selected] = true;
-                        for(int k=0; k<MAX_WATCH; ++k){
-                                if(selected != k && !trigger[k]){
-                                    char tmp[128];
-                                    char tmp1[128];
-                                    strcpy(tmp, active_list[selected]);
-                                    strcpy(tmp1, active_list[k]);
-                                    
-                                    if(strlen(active_list[k]) < strlen(active_list[selected]))
-                                        tmp[strlen(tmp)-1] =0;
-                                    else if (strlen(active_list[k]) > strlen(active_list[selected]))
-                                        tmp1[strlen(tmp1)-1] =0;
-                                    if(!strcmp(tmp1,tmp)){
-                                        trigger[k] = true;
-                                        int space_k = MAX_SAMPLE - sample_list[k];
+            if(!trigger[selected]){
+                if(i == 0)
+                    i++;
+                if (f[i-1] <= 0 && f[i] > 0){
+                    trigger[selected] = true;
+                    for(int k=0; k<MAX_WATCH; ++k){
+                        if(selected != k && !trigger[k]){
+                            char tmp[128];
+                            char tmp1[128];
+                            strcpy(tmp, active_list[selected]);
+                            strcpy(tmp1, active_list[k]);
 
-                                        if(space_k >= n)
-                                            space_k = n;
+                            if(strlen(active_list[k]) < strlen(active_list[selected]))
+                                tmp[strlen(tmp)-1] =0;
+                            else if (strlen(active_list[k]) > strlen(active_list[selected]))
+                                tmp1[strlen(tmp1)-1] =0;
+                            if(!strcmp(tmp1,tmp)){
+                                trigger[k] = true;
+                                int space_k = MAX_SAMPLE - sample_list[k];
 
-                                        for(int j = i; j < space_k ; ++j){
-                                            data_list[k][sample_list[k]] = prebuffer[k][j];
-                                            sample_list[k]++;
-                                        }
-                                    }
+                                if(space_k >= n)
+                                    space_k = n;
+
+                                for(int j = i; j < space_k ; ++j){
+                                    data_list[k][sample_list[k]] = prebuffer[k][j];
+                                    sample_list[k]++;
                                 }
+                            }
                         }
                     }
                 }
+            }
 
             if(trigger[selected]){
                 data_list[selected][sample_list[selected]] = f[i];
                 sample_list[selected]++;
             }
         }
-        
+
     }
 }
 }

@@ -17,6 +17,7 @@ set(zynaddsubfx_misc_SRCS
     Misc/Allocator.cpp
     Misc/CallbackRepeater.cpp
     Misc/Schema.cpp
+    Misc/MemLocker.cpp
 )
 
 
