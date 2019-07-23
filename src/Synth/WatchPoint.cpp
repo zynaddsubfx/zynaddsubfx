@@ -232,15 +232,14 @@ void WatchManager::satisfy(const char *id, float *f, int n)
 
                                 if(space_k >= n)
                                     space_k = n;
-                                printf("/n putting prebuffer size of %d into %s watchpoint /n",space_k - i,active_list[k]);
+                                //printf("/n putting prebuffer size of %d into %s watchpoint /n",space_k - i,active_list[k]);
                                 
                                 for(int j = i; j < space_k ; ++j){
                                     data_list[k][sample_list[k]] = prebuffer[k][j];
                                     sample_list[k]++;
                                 }
                                 prebuffer_done[k] = true;
-                                printf("\n t Trigger for %s happen at sample %d \n",active_list[k],sample_list[k] );
-                                
+                                //printf("\n t Trigger for %s happen at sample %d \n",active_list[k],sample_list[k] ); 
                             }
                         }
                     }
@@ -248,15 +247,11 @@ void WatchManager::satisfy(const char *id, float *f, int n)
             }
             if(trigger[selected] && !prebuffer_done[selected]){
                 if(selected == 0){
-                printf("\n id : %s, sample_list[select] : %d  , index : %d \n",active_list[selected],sample_list[selected],selected);
-                printf("\n value f[i] : %f length of input: %d , current iteration: %d\n",f[i],n,i);}
+                // printf("\n id : %s, sample_list[select] : %d  , index : %d \n",active_list[selected],sample_list[selected],selected);
+                // printf("\n value f[i] : %f length of input: %d , current iteration: %d\n",f[i],n,i);}
                 data_list[selected][sample_list[selected]] = f[i];
                 sample_list[selected]++;
             }
-
-            if(kfd == 0)
-            printf("\n Trigger for %s happen at sample %d \n",active_list[selected],sample_list[selected] );
-            kfd =1;
         }
         if(prebuffer_done[selected])
             prebuffer_done[selected] = false;
