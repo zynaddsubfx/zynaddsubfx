@@ -26,6 +26,7 @@
 #include "../Params/Presets.h"
 #include "../globals.h"
 #include <rtosc/thread-link.h>
+#include <rtosc/rtosc.h>
 
 using namespace std;
 using namespace zyn;
@@ -55,12 +56,11 @@ class TriggerTest:public CxxTest::TestSuite
             synth->buffersize = 32;
             synth->alias(false);
             outL = new float[synth->buffersize];
-            for(int i = 0; i < synth->buffersize; ++i)
-                *(outL + i) = 0;
             outR = new float[synth->buffersize];
-            for(int i = 0; i < synth->buffersize; ++i)
-                *(outR + i) = 0;
-
+            for(int i = 0; i < synth->buffersize; ++i) {
+                outL[i] = 0;
+                outR[i] = 0;
+            }
 
             time  = new AbsTime(*synth);
 
@@ -69,17 +69,8 @@ class TriggerTest:public CxxTest::TestSuite
 
             //prepare the default settings
             SUBnoteParameters *defaultPreset = new SUBnoteParameters(time);
-            XMLwrapper wrap;
-            wrap.loadXMLfile(string(SOURCE_DIR)
-                              + string("/guitar-adnote.xmz"));
-            TS_ASSERT(wrap.enterbranch("MASTER"));
-            TS_ASSERT(wrap.enterbranch("PART", 1));
-            TS_ASSERT(wrap.enterbranch("INSTRUMENT"));
-            TS_ASSERT(wrap.enterbranch("INSTRUMENT_KIT"));
-            TS_ASSERT(wrap.enterbranch("INSTRUMENT_KIT_ITEM", 0));
-            TS_ASSERT(wrap.enterbranch("SUB_SYNTH_PARAMETERS"));
-            defaultPreset->getfromXML(wrap);
-            
+            sprng(0x7eefdead);
+
             controller = new Controller(*synth, time);
 
             //lets go with.... 50! as a nice note
@@ -101,69 +92,112 @@ class TriggerTest:public CxxTest::TestSuite
             delete pars;
         }
 
-        void testDefaults() {
-            //Note: if these tests fail it is due to the relationship between
-            //global.h::RND and SUBnote.cpp
+        void dump_samples(const char *s) {
+            puts(s);
+            for(int i=0; i<synth->buffersize; ++i)
+                printf(w->prebuffer[0][i]>0?"+":"-");
+            printf("\n");
+            for(int i=0; i<synth->buffersize; ++i)
+                printf(w->prebuffer[1][i]>0?"+":"-");
+            printf("\n");
+            //for(int i=0; i<synth->buffersize; ++i)
+            //    printf("%d->%f\n", i, w->prebuffer[0][i]);
+            //for(int i=0; i<synth->buffersize; ++i)
+            //    printf("%d->%f\n", i, w->prebuffer[1][i]);
+        }
 
-            int sampleCount = 0;
-
-//#define WRITE_OUTPUT
-
-#ifdef WRITE_OUTPUT
-            ofstream file("subnoteout", ios::out);
-#endif
+        void testCombinedTrigger() {
+            //Generate a note
             note->noteout(outL, outR);
-#ifdef WRITE_OUTPUT
-            for(int i = 0; i < synth->buffersize; ++i)
-                file << outL[i] << std::endl;
-
-#endif
-            sampleCount += synth->buffersize;
             note->releasekey();
+
+            //Preconditions
+            //
+            //- No pending messages
+            //- No active watch points
+            //
             TS_ASSERT(!tr->hasNext());
+            TS_ASSERT_EQUALS(string(""), w->active_list[0]);
+            TS_ASSERT_EQUALS(string(""), w->active_list[1]);
+            TS_ASSERT_EQUALS(0, w->sample_list[0]);
+            TS_ASSERT_EQUALS(0, w->sample_list[1]);
+            TS_ASSERT(!w->trigger_active("noteout"));
+            TS_ASSERT(!w->trigger_active("noteout1"));
+
+            //Setup a watchpoint
+            //
+            // - Watchpoints will be added to the active list in the watch
+            // manager
+            // - Watchpoints will not be triggered
             w->add_watch("noteout");
             w->add_watch("noteout1");
             TS_ASSERT(!w->trigger_active("noteout"));
             TS_ASSERT(!w->trigger_active("noteout1"));
+            TS_ASSERT_EQUALS(string("noteout"),  w->active_list[0]);
+            TS_ASSERT_EQUALS(string("noteout1"), w->active_list[1]);
+            TS_ASSERT_EQUALS(0, w->sample_list[0]);
+            TS_ASSERT_EQUALS(0, w->sample_list[1]);
+            dump_samples("Initial pre-buffer");
+
+            //Run the system
+            //noteout1 should trigger on this buffer
             note->noteout(outL, outR);
-            sampleCount += synth->buffersize;
+            w->tick();
+            dump_samples("Step 1 pre-buffer");
+            TS_ASSERT(w->trigger_active("noteout"));
+            TS_ASSERT(w->trigger_active("noteout1"));
+            TS_ASSERT(!tr->hasNext());
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 32);//only 32 have been
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 32);//processed so far
+
+
+            //Both should continue to accumulate samples
             note->noteout(outL, outR);
-            sampleCount += synth->buffersize;
+            w->tick();
+            dump_samples("Step 2 pre-buffer\n");
             TS_ASSERT(w->trigger_active("noteout1"));
             TS_ASSERT(w->trigger_active("noteout"));
+            TS_ASSERT(!tr->hasNext());
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 64);//only 64 have been
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 64);//processed so far
+
+            //Continue accum samples
             note->noteout(outL, outR);
-            sampleCount += synth->buffersize;
-            note->noteout(outL, outR);
-            sampleCount += synth->buffersize;
             w->tick();
-            TS_ASSERT_EQUALS(string("noteout"), tr->read());
+            dump_samples("Step 3 pre-buffer\n");
+            TS_ASSERT(w->trigger_active("noteout1"));
+            TS_ASSERT(w->trigger_active("noteout"));
+            TS_ASSERT(!tr->hasNext());
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 96);//only 96 have been
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 96);//processed so far
+
+            //Finish accumulating samples
+            note->noteout(outL, outR);
+            w->tick();
+            dump_samples("Step 4 pre-buffer\n");
+            TS_ASSERT(w->trigger_active("noteout1"));
+            TS_ASSERT(w->trigger_active("noteout"));
+            TS_ASSERT(!tr->hasNext());
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 128);   // not yet reach 128 (only 119)
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 128);
             
-            while(!note->finished()) {
-                note->noteout(outL, outR);
-#ifdef WRITE_OUTPUT
-                for(int i = 0; i < synth->buffersize; ++i)
-                    file << outL[i] << std::endl;
+            note->noteout(outL, outR);
+            w->tick();
 
-#endif
-                sampleCount += synth->buffersize;
-            }
-#ifdef WRITE_OUTPUT
-            file.close();
-#endif
+#define f32  "ffffffffffffffffffffffffffffffff"
+#define f128 f32 f32 f32 f32
+            //Verify the output to the user interface
+            //if 128 samples are requested, then 128 should be delivered
+            const char *msg1 = tr->read();
+            TS_ASSERT_EQUALS(string("noteout"), msg1);
+            TS_ASSERT_EQUALS(string(f128), rtosc_argument_string(msg1));
+            TS_ASSERT_EQUALS(128, strlen(rtosc_argument_string(msg1)));
+            TS_ASSERT(tr->hasNext());
+            const char *msg2 = tr->read();
+            TS_ASSERT_EQUALS(string("noteout1"), msg2);
+            TS_ASSERT_EQUALS(128, strlen(rtosc_argument_string(msg2)));
+            TS_ASSERT_EQUALS(string(f128), rtosc_argument_string(msg2));
+            TS_ASSERT(!tr->hasNext());
         }
 
-#define OUTPUT_PROFILE
-#ifdef OUTPUT_PROFILE
-        void testSpeed() {
-            const int samps = 15000;
-
-            int t_on = clock(); // timer before calling func
-            for(int i = 0; i < samps; ++i)
-                note->noteout(outL, outR);
-            int t_off = clock(); // timer when func returns
-
-            printf("SubNoteTest: %f seconds for %d Samples to be generated.\n",
-                   (static_cast<float>(t_off - t_on)) / CLOCKS_PER_SEC, samps);
-        }
-#endif
 };
