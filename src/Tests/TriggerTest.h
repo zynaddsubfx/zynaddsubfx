@@ -142,6 +142,7 @@ class TriggerTest:public CxxTest::TestSuite
             //Run the system
             //noteout1 should trigger on this buffer
             note->noteout(outL, outR);
+
             w->tick();
             dump_samples("Step 1 pre-buffer");
             TS_ASSERT(w->trigger_active("noteout"));
@@ -175,9 +176,14 @@ class TriggerTest:public CxxTest::TestSuite
             note->noteout(outL, outR);
             w->tick();
             dump_samples("Step 4 pre-buffer\n");
-            TS_ASSERT(!w->trigger_active("noteout1"));
-            TS_ASSERT(!w->trigger_active("noteout"));
-            TS_ASSERT(tr->hasNext());
+            TS_ASSERT(w->trigger_active("noteout1"));
+            TS_ASSERT(w->trigger_active("noteout"));
+            TS_ASSERT(!tr->hasNext());
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 128);   // not yet reach 128 (only 119)
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 128);
+            
+            note->noteout(outL, outR);
+            w->tick();
 
 
 

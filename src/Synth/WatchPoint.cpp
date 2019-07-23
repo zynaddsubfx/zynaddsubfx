@@ -69,6 +69,7 @@ WatchManager::WatchManager(thrlnk *link)
     memset(deactivate,  0, sizeof(deactivate));
     memset(prebuffer,  0, sizeof(prebuffer));
     memset(trigger,  0, sizeof(trigger));
+    memset(prebuffer_done,  0, sizeof(prebuffer_done));
 
 }
 
@@ -106,6 +107,7 @@ void WatchManager::tick(void)
         int framesize = 2;
         if(strstr(active_list[i], "noteout") != NULL)
             framesize = MAX_SAMPLE-1;
+        //printf("\n framesize: %d  \n",framesize);
         if(sample_list[i] >= framesize-1) {
             char        arg_types[MAX_SAMPLE+1] = {0};
             rtosc_arg_t arg_val[MAX_SAMPLE];
@@ -132,6 +134,7 @@ void WatchManager::tick(void)
             memset(prebuffer[i], 0, sizeof(float)*MAX_SAMPLE);
             deactivate[i]  = false;
             trigger[i] = false;
+            prebuffer_done[i] = false;
 
         }
     }
@@ -190,7 +193,8 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     //     printf("\n matched: %s\n", id);
 
     int space = MAX_SAMPLE - sample_list[selected];
-
+    if(selected == 1)
+    printf("\nspace:%d\n",space);
 
     for(int i = 0; i < n; ++i){
         prebuffer[selected][i] = f[i];
@@ -201,7 +205,9 @@ void WatchManager::satisfy(const char *id, float *f, int n)
 
     if(n == 2)
         trigger[selected] = true;
-
+    if(selected == 1)
+    printf("\nspace:%d\n",space);
+    int kfd = 0;
     //FIXME buffer overflow
     if(space){
         for(int i=0; i<space; ++i){
@@ -216,7 +222,6 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                             char tmp1[128];
                             strcpy(tmp, active_list[selected]);
                             strcpy(tmp1, active_list[k]);
-
                             if(strlen(active_list[k]) < strlen(active_list[selected]))
                                 tmp[strlen(tmp)-1] =0;
                             else if (strlen(active_list[k]) > strlen(active_list[selected]))
@@ -227,23 +232,34 @@ void WatchManager::satisfy(const char *id, float *f, int n)
 
                                 if(space_k >= n)
                                     space_k = n;
-
+                                printf("/n putting prebuffer size of %d into %s watchpoint /n",space_k - i,active_list[k]);
+                                
                                 for(int j = i; j < space_k ; ++j){
                                     data_list[k][sample_list[k]] = prebuffer[k][j];
                                     sample_list[k]++;
                                 }
+                                prebuffer_done[k] = true;
+                                printf("\n t Trigger for %s happen at sample %d \n",active_list[k],sample_list[k] );
+                                
                             }
                         }
                     }
                 }
             }
-
-            if(trigger[selected]){
+            if(trigger[selected] && !prebuffer_done[selected]){
+                if(selected == 0){
+                printf("\n id : %s, sample_list[select] : %d  , index : %d \n",active_list[selected],sample_list[selected],selected);
+                printf("\n value f[i] : %f length of input: %d , current iteration: %d\n",f[i],n,i);}
                 data_list[selected][sample_list[selected]] = f[i];
                 sample_list[selected]++;
             }
-        }
 
+            if(kfd == 0)
+            printf("\n Trigger for %s happen at sample %d \n",active_list[selected],sample_list[selected] );
+            kfd =1;
+        }
+        if(prebuffer_done[selected])
+            prebuffer_done[selected] = false;
     }
 }
 }

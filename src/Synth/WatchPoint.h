@@ -44,6 +44,7 @@ struct WatchManager
     int     sample_list[MAX_WATCH];
     bool    deactivate[MAX_WATCH];
     bool trigger[MAX_WATCH];
+    bool prebuffer_done[MAX_WATCH];
 
     //External API
     WatchManager(thrlnk *link=0);

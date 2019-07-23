@@ -532,7 +532,7 @@ int SUBnote::noteout(float *outl, float *outr)
 
     if(!NoteEnabled)
         return 0;
-    watchOut(outr,synth.buffersize);
+
     if(stereo) {
         chanOutput(outl, lfilter, synth.buffersize);
         chanOutput(outr, rfilter, synth.buffersize);
@@ -548,7 +548,7 @@ int SUBnote::noteout(float *outl, float *outr)
 
         memcpy(outr, outl, synth.bufferbytes);
     }
-    watchOut1(outl,synth.buffersize);
+    watchOut(outl,synth.buffersize);
     if(firsttick) {
         int n = 10;
         if(n > synth.buffersize)
@@ -582,6 +582,7 @@ int SUBnote::noteout(float *outl, float *outr)
 
     // Apply legato-specific sound signal modifications
     legato.apply(*this, outl, outr);
+    watchOut1(outl,synth.buffersize);
     // Check if the note needs to be computed more
     if(AmpEnvelope->finished() != 0) {
         for(int i = 0; i < synth.buffersize; ++i) { //fade-out
