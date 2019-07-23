@@ -138,7 +138,6 @@ void WatchManager::tick(void)
 
         }
     }
-
 }
 
 bool WatchManager::active(const char *id) const
@@ -246,7 +245,7 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                 }
             }
             if(trigger[selected] && !prebuffer_done[selected]){
-                if(selected == 0){
+                //if(selected == 0){
                 // printf("\n id : %s, sample_list[select] : %d  , index : %d \n",active_list[selected],sample_list[selected],selected);
                 // printf("\n value f[i] : %f length of input: %d , current iteration: %d\n",f[i],n,i);}
                 data_list[selected][sample_list[selected]] = f[i];
