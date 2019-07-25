@@ -69,7 +69,7 @@ class TriggerTest:public CxxTest::TestSuite
 
             //prepare the default settings
             SUBnoteParameters *defaultPreset = new SUBnoteParameters(time);
-            sprng(0x7eefdead);
+            sprng(32);
 
             controller = new Controller(*synth, time);
 
@@ -145,8 +145,8 @@ class TriggerTest:public CxxTest::TestSuite
 
             w->tick();
             dump_samples("Step 1 pre-buffer");
-            TS_ASSERT(w->trigger_active("noteout"));
-            TS_ASSERT(w->trigger_active("noteout1"));
+            TS_ASSERT(!w->trigger_active("noteout"));   //not active as prebuffer is not filled
+            TS_ASSERT(!w->trigger_active("noteout1"));
             TS_ASSERT(!tr->hasNext());
             TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 32);//only 32 have been
             TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 32);//processed so far
@@ -176,11 +176,11 @@ class TriggerTest:public CxxTest::TestSuite
             note->noteout(outL, outR);
             w->tick();
             dump_samples("Step 4 pre-buffer\n");
-            TS_ASSERT(w->trigger_active("noteout1"));
-            TS_ASSERT(w->trigger_active("noteout"));
-            TS_ASSERT(!tr->hasNext());
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 128);   // not yet reach 128 (only 119)
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 128);
+            TS_ASSERT(!w->trigger_active("noteout1")); // trigger deactivated as data sent
+            TS_ASSERT(!w->trigger_active("noteout"));
+            TS_ASSERT(tr->hasNext());  // data sent
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 0);   // overpass 128 and reset to 0
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 0);
             
             note->noteout(outL, outR);
             w->tick();

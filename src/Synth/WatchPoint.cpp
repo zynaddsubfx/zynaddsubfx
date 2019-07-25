@@ -65,13 +65,14 @@ WatchManager::WatchManager(thrlnk *link)
 {
     memset(active_list, 0, sizeof(active_list));
     memset(sample_list, 0, sizeof(sample_list));
+    memset(prebuffer_sample, 0, sizeof(prebuffer_sample));
     memset(data_list,   0, sizeof(data_list));
     memset(deactivate,  0, sizeof(deactivate));
     memset(prebuffer,  0, sizeof(prebuffer));
     memset(trigger,  0, sizeof(trigger));
     memset(prebuffer_done,  0, sizeof(prebuffer_done));
 
-}
+} 
 
 void WatchManager::add_watch(const char *id)
 {
@@ -196,7 +197,8 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     printf("\nspace:%d\n",space);
 
     for(int i = 0; i < n; ++i){
-        prebuffer[selected][i] = f[i];
+        prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)] = f[i];
+        prebuffer_sample[selected]++;
     }
 
     if(space >= n)
@@ -210,11 +212,17 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     //FIXME buffer overflow
     if(space){
         for(int i=0; i<space; ++i){
-            if(!trigger[selected]){
+            if(!trigger[selected] && prebuffer_sample[selected] >= (MAX_SAMPLE/2)){
                 if(i == 0)
                     i++;
                 if (f[i-1] <= 0 && f[i] > 0){
                     trigger[selected] = true;
+                    for(int j = 0; j < (MAX_SAMPLE/2); ++j){
+                        data_list[selected][sample_list[selected]] = prebuffer[selected][j];
+                        sample_list[selected]++;
+                    }
+                    prebuffer_done[selected] = true;
+                    space = MAX_SAMPLE - sample_list[selected];
                     for(int k=0; k<MAX_WATCH; ++k){
                         if(selected != k && !trigger[k]){
                             char tmp[128];
@@ -227,13 +235,9 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                                 tmp1[strlen(tmp1)-1] =0;
                             if(!strcmp(tmp1,tmp)){
                                 trigger[k] = true;
-                                int space_k = MAX_SAMPLE - sample_list[k];
-
-                                if(space_k >= n)
-                                    space_k = n;
                                 //printf("/n putting prebuffer size of %d into %s watchpoint /n",space_k - i,active_list[k]);
                                 
-                                for(int j = i; j < space_k ; ++j){
+                                for(int j = 0; j < (MAX_SAMPLE/2); ++j){
                                     data_list[k][sample_list[k]] = prebuffer[k][j];
                                     sample_list[k]++;
                                 }
