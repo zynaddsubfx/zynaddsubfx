@@ -69,7 +69,7 @@ class TriggerTest:public CxxTest::TestSuite
 
             //prepare the default settings
             SUBnoteParameters *defaultPreset = new SUBnoteParameters(time);
-            sprng(32);
+            sprng(3543);
 
             controller = new Controller(*synth, time);
 
@@ -148,42 +148,48 @@ class TriggerTest:public CxxTest::TestSuite
             TS_ASSERT(!w->trigger_active("noteout"));   //not active as prebuffer is not filled
             TS_ASSERT(!w->trigger_active("noteout1"));
             TS_ASSERT(!tr->hasNext());
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 32);//only 32 have been
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 32);//processed so far
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 0); // Is 0 as prebuffer not filled
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 0);
 
 
             //Both should continue to accumulate samples
             note->noteout(outL, outR);
             w->tick();
             dump_samples("Step 2 pre-buffer\n");
-            TS_ASSERT(w->trigger_active("noteout1"));
-            TS_ASSERT(w->trigger_active("noteout"));
+            TS_ASSERT(!w->trigger_active("noteout1")); // not active as prebuffer is not filled
+            TS_ASSERT(!w->trigger_active("noteout"));
             TS_ASSERT(!tr->hasNext());
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 64);//only 64 have been
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 64);//processed so far
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 0); // Is 0 as prebuffer not filled
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 0);
 
             //Continue accum samples
             note->noteout(outL, outR);
             w->tick();
             dump_samples("Step 3 pre-buffer\n");
-            TS_ASSERT(w->trigger_active("noteout1"));
-            TS_ASSERT(w->trigger_active("noteout"));
+            TS_ASSERT(!w->trigger_active("noteout1"));
+            TS_ASSERT(!w->trigger_active("noteout"));
             TS_ASSERT(!tr->hasNext());
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 96);//only 96 have been
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 96);//processed so far
-
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 0); // Is 0 as prebuffer not filled
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 0);
+            
             //Finish accumulating samples
             note->noteout(outL, outR);
             w->tick();
             dump_samples("Step 4 pre-buffer\n");
-            TS_ASSERT(!w->trigger_active("noteout1")); // trigger deactivated as data sent
-            TS_ASSERT(!w->trigger_active("noteout"));
-            TS_ASSERT(tr->hasNext());  // data sent
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 0);   // overpass 128 and reset to 0
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 0);
+            TS_ASSERT(w->trigger_active("noteout1")); // trigger activate and filling post buffer
+            TS_ASSERT(w->trigger_active("noteout"));
+            TS_ASSERT(!tr->hasNext());  // post buffer not reach 128
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 128);   // prebuffer + postbuffer filled in
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 128);
             
             note->noteout(outL, outR);
             w->tick();
+            dump_samples("Step 5 post-buffer filled\n");
+            TS_ASSERT(!w->trigger_active("noteout1")); // trigger deactivate as post-buffer filled
+            TS_ASSERT(!w->trigger_active("noteout"));
+            TS_ASSERT(tr->hasNext());  // data is sent
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 0);   // overpass 128 and reset to 0
+            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 0);
 
 
 
