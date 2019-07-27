@@ -208,9 +208,9 @@ void WatchManager::satisfy(const char *id, float *f, int n)
             prebuffer_sample[selected]++;
             if(!trigger[selected] && prebuffer_sample[selected] >= (MAX_SAMPLE/2)){                
                 if (prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)-2] <= 0 && f[i] > 0){
-                    // printf("\n %f should be less than or equal 0 and %f should be greater than 0 \n",f[i-1],f[i]);
+                    // printf("\n %f should be less than or equal 0 and %f should be greater than 0 \n",prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)-2],f[i]);
                     // printf("\n %s space:%d index when trigger %d \n",active_list[selected],space,prebuffer_sample[selected]);
-                    //printf("\n %d trigger active \n",MAX_SAMPLE);
+                    // printf("\n %d trigger active \n",MAX_SAMPLE);
                     trigger[selected] = true;
                     // printf("\n id: %s  fill buffer from %d \n",active_list[selected],prebuffer_sample[selected]);
                     // printf("\n value of first buffer %f \n",prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)]);
