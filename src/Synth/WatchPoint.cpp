@@ -105,7 +105,7 @@ void WatchManager::tick(void)
 {
     //Try to send out any vector stuff
     for(int i=0; i<MAX_WATCH; ++i) {
-        int framesize = 2;
+        int framesize = MAX_SAMPLE;
         if(strstr(active_list[i], "noteout") != NULL)
             framesize = MAX_SAMPLE;
         //printf("\n framesize: %d  \n",framesize);
@@ -197,7 +197,7 @@ void WatchManager::satisfy(const char *id, float *f, int n)
 
     if(space >= n)
         space = n;
-
+        
     if(n == 2)
         trigger[selected] = true;
 
@@ -206,14 +206,18 @@ void WatchManager::satisfy(const char *id, float *f, int n)
         for(int i=0; i<space; ++i){
             prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)] = f[i];
             prebuffer_sample[selected]++;
-            if(!trigger[selected] && prebuffer_sample[selected] >= (MAX_SAMPLE/2)){
-                //printf("\n prebuffer filled \n");
-                if(i == 0)
-                    i++;
-                //printf("\n %f should be less than or equal 0 and %f should be greater than 0 \n",f[i-1],f[i]);
-                if (f[i-1] <= 0 && f[i] > 0){
+            if(!trigger[selected] && prebuffer_sample[selected] >= (MAX_SAMPLE/2)){                
+                if (prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)-2] <= 0 && f[i] > 0){
+                    // printf("\n %f should be less than or equal 0 and %f should be greater than 0 \n",f[i-1],f[i]);
+                    // printf("\n %s space:%d index when trigger %d \n",active_list[selected],space,prebuffer_sample[selected]);
+                 for (int k = 0; k < 32; k++){
+                //printf("\n %s index: %d   value %f\n",active_list[selected],k,prebuffer[selected][k]);
+            
+                }
                     //printf("\n %d trigger active \n",MAX_SAMPLE);
                     trigger[selected] = true;
+                    // printf("\n id: %s  fill buffer from %d \n",active_list[selected],prebuffer_sample[selected]);
+                    // printf("\n value of first buffer %f \n",prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)]);
                     for(int j = prebuffer_sample[selected]%(MAX_SAMPLE/2); j < (MAX_SAMPLE/2); ++j){
                         data_list[selected][sample_list[selected]] = prebuffer[selected][j];
                         sample_list[selected]++;
@@ -225,7 +229,7 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                     //prebuffer_done[selected] = true;
                     space = MAX_SAMPLE - sample_list[selected];
                     for(int k=0; k<MAX_WATCH; ++k){
-                        if(selected != k && !trigger[k] && prebuffer_sample[k] >= (MAX_SAMPLE/2)){
+                        if(selected != k && !trigger[k]){
                             char tmp[128];
                             char tmp1[128];
                             strcpy(tmp, active_list[selected]);
@@ -234,10 +238,11 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                                 tmp[strlen(tmp)-1] =0;
                             else if (strlen(active_list[k]) > strlen(active_list[selected]))
                                 tmp1[strlen(tmp1)-1] =0;
+                            //printf("\n compare tmp1 %s with tmp %s \n",tmp1,tmp);
                             if(!strcmp(tmp1,tmp)){
                                 trigger[k] = true;
-                                //printf("/n putting prebuffer size of %d into %s watchpoint /n",space_k - i,active_list[k]);
-                                
+                                //printf("\n putting prebuffer size of %d into %s watchpoint \n",prebuffer_sample[k]%(MAX_SAMPLE/2),active_list[k]);
+                                //printf("\n value of first buffer %f \n",prebuffer[k][prebuffer_sample[k]%(MAX_SAMPLE/2)]);                            
                                 for(int j = prebuffer_sample[k]%(MAX_SAMPLE/2); j < (MAX_SAMPLE/2); ++j){
                                     data_list[k][sample_list[k]] = prebuffer[k][j];
                                     sample_list[k]++;
@@ -253,7 +258,7 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                     }
                 }
             }
-            if(trigger[selected] && !prebuffer_done[selected]){
+            if(trigger[selected]){
                 //if(selected == 0){
                 // printf("\n id : %s, sample_list[select] : %d  , index : %d \n",active_list[selected],sample_list[selected],selected);
                 // printf("\n value f[i] : %f length of input: %d , current iteration: %d\n",f[i],n,i);}
@@ -261,8 +266,6 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                 sample_list[selected]++;
             }
         }
-        if(prebuffer_done[selected])
-            prebuffer_done[selected] = false;
     }
 }
 }
