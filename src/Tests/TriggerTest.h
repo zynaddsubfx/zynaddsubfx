@@ -131,7 +131,7 @@ class TriggerTest:public CxxTest::TestSuite
             const char *msg1 = tr->read();
             float buf1[128] = {0};
             TS_ASSERT(msg1);
-            TS_ASSERT_EQUALS(127, rtosc_narguments(msg1));
+            TS_ASSERT_EQUALS(128, rtosc_narguments(msg1));
 
             printf("msg1 = %s\n",   msg1);
             printf("msg1 = <%s>\n", rtosc_argument_string(msg1));
@@ -140,19 +140,24 @@ class TriggerTest:public CxxTest::TestSuite
                 buf1[i] = rtosc_argument(msg1, i).f;
 
             w->add_watch("noteout2");
-            for(int i=0; i<1024/32; ++i) {
-                w->satisfy("noteout2", &data[i*32], 32);
+            for(int i=0; i<1024/512; ++i) {
+                w->satisfy("noteout2", &data[i*512], 512);
                 w->tick();
             }
             const char *msg2 = tr->read();
             TS_ASSERT(msg2);
-            TS_ASSERT_EQUALS(127, rtosc_narguments(msg2));
+            TS_ASSERT_EQUALS(128, rtosc_narguments(msg2));
             float buf2[128] = {0};
             printf("nargs = %d\n", rtosc_narguments(msg2));
             for(int i=0; i<126; ++i)
                 buf2[i] = rtosc_argument(msg2, i).f;
-            for(int i=0; i<127; ++i)
-                printf("%f %f\n", buf1[i], buf2[i]);
+            for(int i=0; i<127; ++i){
+                if(buf1[i] != buf2[i]){
+                printf("index: %d   %f %f\n", i, buf1[i], buf2[i]);
+                printf("error = %f for %f %f\n", fabsf(buf1[i]-buf2[i]), buf1[i], buf2[i]); 
+                }
+
+            }
             
             //printf("\n ms1 %s  , ms2 %s \n",msg1,msg2);
         }
