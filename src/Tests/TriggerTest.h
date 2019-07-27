@@ -106,6 +106,57 @@ class TriggerTest:public CxxTest::TestSuite
             //    printf("%d->%f\n", i, w->prebuffer[1][i]);
         }
 
+        void testSine(void) {
+            //Generate a sine table
+            float data[1024] = {0};
+            for(int i=0; i<1024; ++i)
+                data[i] = -sin(2*M_PI*(i/1024.0));
+
+            //Preconditions
+            //
+            //- No pending messages
+            //- No active watch points
+            //
+            TS_ASSERT(!tr->hasNext());
+            TS_ASSERT_EQUALS(string(""), w->active_list[0]);
+            TS_ASSERT_EQUALS(0, w->sample_list[0]);
+            TS_ASSERT(!w->trigger_active("data"));
+
+
+            w->add_watch("noteout");
+            for(int i=0; i<1024; ++i) {
+                w->satisfy("noteout", &data[i], 1);
+                w->tick();
+            }
+            const char *msg1 = tr->read();
+            float buf1[128] = {0};
+            TS_ASSERT(msg1);
+            TS_ASSERT_EQUALS(127, rtosc_narguments(msg1));
+
+            printf("msg1 = %s\n",   msg1);
+            printf("msg1 = <%s>\n", rtosc_argument_string(msg1));
+            printf("nargs = %d\n",  rtosc_narguments(msg1));
+            for(int i=0; i<126; ++i)
+                buf1[i] = rtosc_argument(msg1, i).f;
+
+            w->add_watch("noteout2");
+            for(int i=0; i<1024/32; ++i) {
+                w->satisfy("noteout2", &data[i*32], 32);
+                w->tick();
+            }
+            const char *msg2 = tr->read();
+            TS_ASSERT(msg2);
+            TS_ASSERT_EQUALS(127, rtosc_narguments(msg2));
+            float buf2[128] = {0};
+            printf("nargs = %d\n", rtosc_narguments(msg2));
+            for(int i=0; i<126; ++i)
+                buf2[i] = rtosc_argument(msg2, i).f;
+            for(int i=0; i<127; ++i)
+                printf("%f %f\n", buf1[i], buf2[i]);
+            
+            //printf("\n ms1 %s  , ms2 %s \n",msg1,msg2);
+        }
+
         void testCombinedTrigger() {
             //Generate a note
             note->noteout(outL, outR);
