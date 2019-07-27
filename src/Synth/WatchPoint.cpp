@@ -211,7 +211,11 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                     i++;
                 if (f[i-1] <= 0 && f[i] > 0){
                     trigger[selected] = true;
-                    for(int j = 0; j < (MAX_SAMPLE/2); ++j){
+                    for(int j = prebuffer_sample[selected]%(MAX_SAMPLE/2); j < (MAX_SAMPLE/2); ++j){
+                        data_list[selected][sample_list[selected]] = prebuffer[selected][j];
+                        sample_list[selected]++;
+                    }
+                    for(int j = 0; j < prebuffer_sample[selected]%(MAX_SAMPLE/2)-1; ++j){
                         data_list[selected][sample_list[selected]] = prebuffer[selected][j];
                         sample_list[selected]++;
                     }
