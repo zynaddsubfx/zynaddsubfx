@@ -105,7 +105,7 @@ void WatchManager::tick(void)
 {
     //Try to send out any vector stuff
     for(int i=0; i<MAX_WATCH; ++i) {
-        int framesize = MAX_SAMPLE;
+        int framesize = 2;
         if(strstr(active_list[i], "noteout") != NULL)
             framesize = MAX_SAMPLE;
         //printf("\n framesize: %d  \n",framesize);
@@ -197,7 +197,7 @@ void WatchManager::satisfy(const char *id, float *f, int n)
 
     if(space >= n)
         space = n;
-        
+    
     if(n == 2)
         trigger[selected] = true;
 
@@ -210,10 +210,6 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                 if (prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)-2] <= 0 && f[i] > 0){
                     // printf("\n %f should be less than or equal 0 and %f should be greater than 0 \n",f[i-1],f[i]);
                     // printf("\n %s space:%d index when trigger %d \n",active_list[selected],space,prebuffer_sample[selected]);
-                 for (int k = 0; k < 32; k++){
-                //printf("\n %s index: %d   value %f\n",active_list[selected],k,prebuffer[selected][k]);
-            
-                }
                     //printf("\n %d trigger active \n",MAX_SAMPLE);
                     trigger[selected] = true;
                     // printf("\n id: %s  fill buffer from %d \n",active_list[selected],prebuffer_sample[selected]);

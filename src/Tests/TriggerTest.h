@@ -152,19 +152,16 @@ class TriggerTest:public CxxTest::TestSuite
             for(int i=0; i<126; ++i)
                 buf2[i] = rtosc_argument(msg2, i).f;
             for(int i=0; i<127; ++i){
-                //if(buf1[i] != buf2[i]){
-                printf("index: %d   %f %f\n", i, buf1[i], buf2[i]);
-               // printf("error = %f for %f %f\n", fabsf(buf1[i]-buf2[i]), buf1[i], buf2[i]); 
-               // }
+               TS_ASSERT_EQUALS(buf1[i], buf2[i]);
             }
 
-        // for (int k = 0; k < 1024; k++){
-        //     if(data[k] == buf1[0])
-        //         printf("\n index of data for buf1 0 is %d \n",k);
-        //     if(data[k] == buf2[0])
-        //     printf("\n index of data for buf2 0 is %d \n",k);
-        //     }
-            //printf("\n ms1 %s  , ms2 %s \n",msg1,msg2);
+            // for (int k = 0; k < 1024; k++){
+            //     if(data[k] == buf1[0])
+            //         printf("\n index of data for buf1 0 is %d \n",k);
+            //     if(data[k] == buf2[0])
+            //     printf("\n index of data for buf2 0 is %d \n",k);
+            //     }
+                //printf("\n ms1 %s  , ms2 %s \n",msg1,msg2);
         }
 
         void testCombinedTrigger() {
