@@ -136,12 +136,12 @@ class TriggerTest:public CxxTest::TestSuite
             printf("msg1 = %s\n",   msg1);
             printf("msg1 = <%s>\n", rtosc_argument_string(msg1));
             printf("nargs = %d\n",  rtosc_narguments(msg1));
-            for(int i=0; i<126; ++i)
+            for(int i=0; i<127; ++i)
                 buf1[i] = rtosc_argument(msg1, i).f;
 
             w->add_watch("noteout2");
-            for(int i=0; i<1024/32; ++i) {
-                w->satisfy("noteout2", &data[i*32], 32);
+            for(int i=0; i<1024/97; ++i) {
+                w->satisfy("noteout2", &data[i*97], 97);
                 w->tick();
             }
             const char *msg2 = tr->read();
@@ -149,22 +149,13 @@ class TriggerTest:public CxxTest::TestSuite
             TS_ASSERT_EQUALS(128, rtosc_narguments(msg2));
             float buf2[128] = {0};
             printf("nargs = %d\n", rtosc_narguments(msg2));
-            for(int i=0; i<126; ++i)
+            for(int i=0; i<127; ++i)
                 buf2[i] = rtosc_argument(msg2, i).f;
             for(int i=0; i<127; ++i){
                TS_ASSERT_EQUALS(buf1[i], buf2[i]);
-
+                TS_ASSERT_EQUALS(buf1[i],data[450+i]);
+                TS_ASSERT_EQUALS(buf2[i],data[450+i]);
             }
-            TS_ASSERT_EQUALS(buf1[0], data[450]);
-            TS_ASSERT_EQUALS(buf2[0], data[450]);
-
-            // for (int k = 0; k < 1024; k++){
-            //     if(data[k] == buf1[0])
-            //         printf("\n index of data for buf1 0 is %d \n",k);
-            //     if(data[k] == buf2[0])
-            //     printf("\n index of data for buf2 0 is %d \n",k);
-            //     }
-            //     printf("\n ms1 %s  , ms2 %s \n",msg1,msg2);
         }
 
         void testCombinedTrigger() {
@@ -242,29 +233,23 @@ class TriggerTest:public CxxTest::TestSuite
             TS_ASSERT(!tr->hasNext());  // post buffer not reach 128
             TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 128);   // prebuffer + postbuffer filled in
             TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 128);
-            
             note->noteout(outL, outR);
             w->tick();
-            dump_samples("Step 5 post-buffer filled\n");
-            TS_ASSERT(!w->trigger_active("noteout1")); // trigger deactivate as post-buffer filled
-            TS_ASSERT(!w->trigger_active("noteout"));
-            TS_ASSERT(tr->hasNext());  // data is sent
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 0);   // overpass 128 and reset to 0
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 0);
-
-
+            note->noteout(outL, outR);
+            w->tick();
+            TS_ASSERT(tr->hasNext());  // post buffer reach 128
 
 #define f32  "ffffffffffffffffffffffffffffffff"
 #define f128 f32 f32 f32 f32
             //Verify the output to the user interface
             //if 128 samples are requested, then 128 should be delivered
             const char *msg1 = tr->read();
-            TS_ASSERT_EQUALS(string("noteout"), msg1);
+            TS_ASSERT_EQUALS(string("noteout1"), msg1);
             TS_ASSERT_EQUALS(string(f128), rtosc_argument_string(msg1));
             TS_ASSERT_EQUALS(128, strlen(rtosc_argument_string(msg1)));
             TS_ASSERT(tr->hasNext());
             const char *msg2 = tr->read();
-            TS_ASSERT_EQUALS(string("noteout1"), msg2);
+            TS_ASSERT_EQUALS(string("noteout"), msg2);
             TS_ASSERT_EQUALS(128, strlen(rtosc_argument_string(msg2)));
             TS_ASSERT_EQUALS(string(f128), rtosc_argument_string(msg2));
             TS_ASSERT(!tr->hasNext());

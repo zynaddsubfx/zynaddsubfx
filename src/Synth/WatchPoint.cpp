@@ -108,15 +108,13 @@ void WatchManager::tick(void)
         int framesize = 2;
         if(strstr(active_list[i], "noteout") != NULL)
             framesize = MAX_SAMPLE;
-        //printf("\n framesize: %d  \n",framesize);
-        if(sample_list[i] >= framesize) {
+        if(sample_list[i] == framesize) {
             char        arg_types[MAX_SAMPLE+1] = {0};
             rtosc_arg_t arg_val[MAX_SAMPLE];
             for(int j=0; j<sample_list[i]; ++j) {
                 arg_types[j] = 'f';
                 arg_val[j].f = data_list[i][j];
             }
-            //printf("\n data sent %d \n",framesize);
             write_back->writeArray(active_list[i], arg_types, arg_val);
             deactivate[i] = true;
         }
@@ -128,7 +126,6 @@ void WatchManager::tick(void)
     //Clear deleted slots
     for(int i=0; i<MAX_WATCH; ++i) {
         if(deactivate[i]) {
-            //printf("\ndelete id : %s\n",active_list[i]);
             memset(active_list[i], 0, MAX_SAMPLE);
             sample_list[i] = 0;
             memset(data_list[i], 0, sizeof(float)*MAX_SAMPLE);
@@ -187,81 +184,85 @@ void WatchManager::satisfy(const char *id, float *f, int n)
 
     if(selected == -1)
         return;
-
-    // printf("\npath : %s  \n", id);
-
-    // if (!strcmp(id,"/part0/kit0/subpars/noteout"))
-    //     printf("\n matched: %s\n", id);
-
     int space = MAX_SAMPLE - sample_list[selected];
-
     if(space >= n)
         space = n;
-    
+
     if(n == 2)
         trigger[selected] = true;
 
-    //FIXME buffer overflow
+    if(!trigger[selected])
+        space = n;
+
     if(space){
-        for(int i=0; i<space; ++i){
-            prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)] = f[i];
-            prebuffer_sample[selected]++;
+        for(int i=0; i<space; i++){
+
+            if(!trigger[selected]){
+                prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)] = f[i];
+                prebuffer_sample[selected]++;     
+                //printf("\n before trigger %s  prebuffer at index %d   %f \n",active_list[selected],prebuffer_sample[selected],prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)]);
+            }
+
             if(!trigger[selected] && prebuffer_sample[selected] >= (MAX_SAMPLE/2)){                
                 if (prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)-2] <= 0 && f[i] > 0){
-                    // printf("\n %f should be less than or equal 0 and %f should be greater than 0 \n",prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)-2],f[i]);
-                    // printf("\n %s space:%d index when trigger %d \n",active_list[selected],space,prebuffer_sample[selected]);
-                    // printf("\n %d trigger active \n",MAX_SAMPLE);
+                    //printf("\n trigger at %s  prebuffer at index %f  %d   f[i] %f \n",active_list[selected],prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)-2],prebuffer_sample[selected],f[i]);
                     trigger[selected] = true;
-                    // printf("\n id: %s  fill buffer from %d \n",active_list[selected],prebuffer_sample[selected]);
-                    // printf("\n value of first buffer %f \n",prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)]);
-                    for(int j = prebuffer_sample[selected]%(MAX_SAMPLE/2); j < (MAX_SAMPLE/2); ++j){
-                        data_list[selected][sample_list[selected]] = prebuffer[selected][j];
+                    for(int j = 0; j < (MAX_SAMPLE/2); ++j){
+                        data_list[selected][sample_list[selected]] = prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)];
                         sample_list[selected]++;
+                        prebuffer_sample[selected]++;
                     }
-                    for(int j = 0; j < prebuffer_sample[selected]%(MAX_SAMPLE/2); ++j){
-                        data_list[selected][sample_list[selected]] = prebuffer[selected][j];
-                        sample_list[selected]++;
-                    }
-                    //prebuffer_done[selected] = true;
+                    prebuffer_done[selected] = true;          
                     space = MAX_SAMPLE - sample_list[selected];
-                    for(int k=0; k<MAX_WATCH; ++k){
-                        if(selected != k && !trigger[k]){
-                            char tmp[128];
-                            char tmp1[128];
-                            strcpy(tmp, active_list[selected]);
-                            strcpy(tmp1, active_list[k]);
-                            if(strlen(active_list[k]) < strlen(active_list[selected]))
-                                tmp[strlen(tmp)-1] =0;
-                            else if (strlen(active_list[k]) > strlen(active_list[selected]))
-                                tmp1[strlen(tmp1)-1] =0;
-                            //printf("\n compare tmp1 %s with tmp %s \n",tmp1,tmp);
-                            if(!strcmp(tmp1,tmp)){
-                                trigger[k] = true;
-                                //printf("\n putting prebuffer size of %d into %s watchpoint \n",prebuffer_sample[k]%(MAX_SAMPLE/2),active_list[k]);
-                                //printf("\n value of first buffer %f \n",prebuffer[k][prebuffer_sample[k]%(MAX_SAMPLE/2)]);                            
-                                for(int j = prebuffer_sample[k]%(MAX_SAMPLE/2); j < (MAX_SAMPLE/2); ++j){
-                                    data_list[k][sample_list[k]] = prebuffer[k][j];
-                                    sample_list[k]++;
-                                }
-                                for(int j = 0; j < prebuffer_sample[selected]%(MAX_SAMPLE/2); ++j){
-                                   data_list[k][sample_list[k]] = prebuffer[k][j];
-                                   sample_list[k]++;
-                                }
-                                //prebuffer_done[k] = true;
-                                //printf("\n t Trigger for %s happen at sample %d \n",active_list[k],sample_list[k] ); 
-                            }
-                        }
-                    }
+                    if(n >= i+space)
+                        space = i+space;
+                    else
+                        space = n;
+                    trigger_other(selected);
                 }
             }
-            if(trigger[selected]){
-                //if(selected == 0){
-                // printf("\n id : %s, sample_list[select] : %d  , index : %d \n",active_list[selected],sample_list[selected],selected);
-                // printf("\n value f[i] : %f length of input: %d , current iteration: %d\n",f[i],n,i);}
+
+            if(trigger[selected] && !prebuffer_done[selected]){
                 data_list[selected][sample_list[selected]] = f[i];
                 sample_list[selected]++;
+            }
+
+            if(prebuffer_done[selected])
+                prebuffer_done[selected] = false;
+        }
+    }
+}
+
+void WatchManager::trigger_other(int selected){
+     for(int k=0; k<MAX_WATCH; ++k){
+        if(selected != k && !trigger[k]){
+            char tmp[128];
+            char tmp1[128];
+            strcpy(tmp, active_list[selected]);
+            strcpy(tmp1, active_list[k]);
+            if(strlen(active_list[k]) < strlen(active_list[selected]))
+                tmp[strlen(tmp)-1] =0;
+            else if (strlen(active_list[k]) > strlen(active_list[selected]))
+                tmp1[strlen(tmp1)-1] =0;
+            //printf("\n compare tmp1 %s with tmp %s \n",tmp1,tmp);
+            if(!strcmp(tmp1,tmp)){
+                trigger[k] = true;
+                //printf("\n putting prebuffer size of %d into %s watchpoint \n",prebuffer_sample[k]%(MAX_SAMPLE/2),active_list[k]);
+                //printf("\n value of first buffer %f \n",prebuffer[k][prebuffer_sample[k]%(MAX_SAMPLE/2)]);                            
+                for(int j = prebuffer_sample[k]%(MAX_SAMPLE/2); j < (MAX_SAMPLE/2); ++j){
+                    data_list[k][sample_list[k]] = prebuffer[k][j];
+                    sample_list[k]++;
+                }
+                for(int j = 0; j < prebuffer_sample[selected]%(MAX_SAMPLE/2); ++j){
+                    data_list[k][sample_list[k]] = prebuffer[k][j];
+                    sample_list[k]++;
+                }
+                //prebuffer_done[k] = true;
+                //printf("\n t Trigger for %s happen at sample %d \n",active_list[k],sample_list[k] ); 
             }
         }
     }
 }
+
+
 }

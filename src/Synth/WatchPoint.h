@@ -53,6 +53,7 @@ struct WatchManager
     void del_watch(const char *);
     void tick(void);
     bool trigger_active(const char *) const;
+    void trigger_other(int);
 
     //Watch Point Query API
     bool active(const char *) const;
