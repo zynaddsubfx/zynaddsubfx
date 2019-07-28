@@ -1123,28 +1123,43 @@ int msg_id=0;
 
 bool Master::runOSC(float *outl, float *outr, bool offline)
 {
-    //Handle user events
-    char loc_buf[1024];
-    DataObj d{loc_buf, 1024, this, bToU};
-    memset(loc_buf, 0, sizeof(loc_buf));
-
-    int events = 0;
-    for(; uToB && uToB->hasNext() && events < 100; ++msg_id, ++events)
+    // the following block is only ever entered by 1 thread at a time
+    // other threads have to ignore it
+    if(!run_osc_in_use.exchange(true)) // exchange returns value before call
     {
-        const char *msg = uToB->read();
-        if(! applyOscEvent(msg, outl, outr, offline, true, d, msg_id) )
-            return false;
+        /*
+         * WARNING: Do not return without "run_osc_in_use.store(false)"
+         */
+
+        //Handle user events
+        char loc_buf[1024];
+        DataObj d{loc_buf, 1024, this, bToU};
+        memset(loc_buf, 0, sizeof(loc_buf));
+
+        int events = 0;
+        for(; uToB && uToB->hasNext() && events < 100; ++msg_id, ++events)
+        {
+            const char *msg = uToB->read();
+            if(! applyOscEvent(msg, outl, outr, offline, true, d, msg_id,
+                               ) )
+            {
+                run_osc_in_use.store(false);
+                return false;
+            }
+        }
+
+        if(automate.damaged) {
+            d.broadcast("/damage", "s", "/automate/");
+            automate.damaged = 0;
+        }
+
+        if(events>1 && false)
+            fprintf(stderr, "backend: %d events per cycle\n",events);
+
+        run_osc_in_use.store(false);
+        return true;
     }
-
-    if(automate.damaged) {
-        d.broadcast("/damage", "s", "/automate/");
-        automate.damaged = 0;
-    }
-
-    if(events>1 && false)
-        fprintf(stderr, "backend: %d events per cycle\n",events);
-
-    return true;
+    else { return true; /* = no new master */ }
 }
 
 /*

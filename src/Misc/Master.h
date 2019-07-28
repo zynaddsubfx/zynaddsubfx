@@ -16,6 +16,7 @@
 #define MASTER_H
 #include "../globals.h"
 #include "Microtonal.h"
+#include <atomic>
 #include <rtosc/automations.h>
 #include <rtosc/savefile.h>
 
@@ -215,6 +216,8 @@ class Master
         uint32_t last_beat = 0;
         uint32_t last_ack = 0;
     private:
+        std::atomic<bool> run_osc_in_use = { false };
+
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
         int    keyshift;
