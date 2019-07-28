@@ -108,7 +108,7 @@ void WatchManager::tick(void)
         int framesize = 2;
         if(strstr(active_list[i], "noteout") != NULL)
             framesize = MAX_SAMPLE;
-        if(sample_list[i] == framesize) {
+        if(sample_list[i] >= framesize) {
             char        arg_types[MAX_SAMPLE+1] = {0};
             rtosc_arg_t arg_val[MAX_SAMPLE];
             for(int j=0; j<sample_list[i]; ++j) {
@@ -185,18 +185,14 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     if(selected == -1)
         return;
     int space = MAX_SAMPLE - sample_list[selected];
-    if(space >= n)
+    if(space >= n || !trigger[selected])
         space = n;
 
     if(n == 2)
         trigger[selected] = true;
-
-    if(!trigger[selected])
-        space = n;
-
+        
     if(space){
         for(int i=0; i<space; i++){
-
             if(!trigger[selected]){
                 prebuffer[selected][prebuffer_sample[selected]%(MAX_SAMPLE/2)] = f[i];
                 prebuffer_sample[selected]++;     
