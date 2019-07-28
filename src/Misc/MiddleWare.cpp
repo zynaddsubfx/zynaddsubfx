@@ -578,6 +578,7 @@ public:
         //Update resource locator table
         updateResources(m);
 
+        previous_master = master;
         master = m;
 
         //Give it to the backend and wait for the old part to return for
@@ -696,10 +697,13 @@ public:
 
         heartBeat(master);
 
-        //XXX This might have problems with a master swap operation
         if(offline)
-            master->runOSC(0,0,true);
-
+        {
+            //pass previous master in case it will have to be freed
+            //similar to previous_master->runOSC(0,0,true)
+            //but note that previous_master could have been freed already
+            master->runOSC(0,0,true, previous_master);
+        }
     }
 
 
@@ -740,6 +744,10 @@ public:
     //This code will own the pointer to master, be prepared for odd things if
     //this assumption is broken
     Master *master;
+
+    //The master before the last load operation, if any
+    //Only valid until freed
+    Master *previous_master = nullptr;
 
     //The ONLY means that any chunk of UI code should have for interacting with the
     //backend
