@@ -28,6 +28,7 @@ struct WatchPoint
 
     WatchPoint(WatchManager *ref, const char *prefix, const char *id);
     bool is_active(void);
+    bool is_empty(void);
 };
 
 #define MAX_WATCH 16
@@ -46,6 +47,8 @@ struct WatchManager
     bool    deactivate[MAX_WATCH];
     bool trigger[MAX_WATCH];
     bool prebuffer_done[MAX_WATCH];
+    int call_count[MAX_WATCH];
+    char countID_list[MAX_WATCH][MAX_WATCH_PATH];
 
     //External API
     WatchManager(thrlnk *link=0);

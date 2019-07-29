@@ -52,6 +52,11 @@ bool WatchPoint::is_active(void)
     return false;
 }
 
+bool WatchPoint::is_empty(void)
+{
+    return reference->is_empty(identity);
+}
+
 FloatWatchPoint::FloatWatchPoint(WatchManager *ref, const char *prefix, const char *id)
     :WatchPoint(ref, prefix, id)
 {}
@@ -71,22 +76,23 @@ WatchManager::WatchManager(thrlnk *link)
     memset(prebuffer,  0, sizeof(prebuffer));
     memset(trigger,  0, sizeof(trigger));
     memset(prebuffer_done,  0, sizeof(prebuffer_done));
+    memset(call_count,0,sizeof(call_count));
 
 } 
 
 void WatchManager::add_watch(const char *id)
-{
+{   
     //Don't add duplicate watchs
     for(int i=0; i<MAX_WATCH; ++i)
         if(!strcmp(active_list[i], id))
             return;
-
     //Apply to a free slot
     for(int i=0; i<MAX_WATCH; ++i) {
         if(!active_list[i][0]) {
             fast_strcpy(active_list[i], id, MAX_WATCH_PATH);
             new_active = true;
             sample_list[i] = 0;
+            call_count[i] = 0;
             //printf("\n added watchpoint ID %s\n",id);
             break;
         }
@@ -102,13 +108,14 @@ void WatchManager::del_watch(const char *id)
 }
 
 void WatchManager::tick(void)
-{
+{   
     //Try to send out any vector stuff
     for(int i=0; i<MAX_WATCH; ++i) {
         int framesize = 2;
+        call_count[i] = 0;
         if(strstr(active_list[i], "noteout") != NULL)
             framesize = MAX_SAMPLE;
-        if(sample_list[i] >= framesize) {
+        if(sample_list[i] >= framesize && call_count[i]==0) {
             char        arg_types[MAX_SAMPLE+1] = {0};
             rtosc_arg_t arg_val[MAX_SAMPLE];
             for(int j=0; j<sample_list[i]; ++j) {
@@ -134,7 +141,6 @@ void WatchManager::tick(void)
             trigger[i] = false;
             prebuffer_done[i] = false;
             prebuffer_sample[i] = 0;
-
         }
     }
 }
@@ -181,7 +187,7 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     for(int i=0; i<MAX_WATCH; ++i)
         if(!strcmp(active_list[i], id))
             selected = i;
-
+    
     if(selected == -1)
         return;
 
@@ -201,7 +207,7 @@ void WatchManager::satisfy(const char *id, float *f, int n)
     if(n == 2)
         trigger[selected] = true;
 
-    if(space){
+    if(space && call_count[selected]==0){
         for(int i=0; i<space; i++){
             const float prev = prebuffer[selected][(prebuffer_sample[selected]+MAX_SAMPLE/2-1)%(MAX_SAMPLE/2)];
             if(!trigger[selected]){
@@ -237,6 +243,7 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                 prebuffer_done[selected] = false;
         }
     }
+        call_count[selected]++;
 }
 
 void WatchManager::trigger_other(int selected){
