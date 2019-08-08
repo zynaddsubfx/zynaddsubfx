@@ -1,4 +1,4 @@
-This is a list of things to do when releasing a new version.
+# This is a list of things to do when releasing a new version.
 
 - Update version number in CMakeLists.txt
 - Update version number in src/Tests/guitar-adnote.xmz

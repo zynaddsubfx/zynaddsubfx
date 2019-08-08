@@ -6,4 +6,3 @@ Requirements for this directory:
  * auto-pst-pdf (latex module)
  * pst-tools (latex module)
  * gnuplot
-

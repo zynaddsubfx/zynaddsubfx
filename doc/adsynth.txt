@@ -104,12 +104,12 @@ modulated square wave.
 Quants
 ++++++
 
-http://en.wikipedia.org/wiki/Quantization_%28sound_processing%29[Quantization]
+https://en.wikipedia.org/wiki/Quantization_%28sound_processing%29[Quantization]
 adds high overtones early. It can be seen as an unnatural effect, which is often
 used for electronic music.
 
 The transformation is a bit similar to building
-the http://en.wikipedia.org/wiki/Riemann_sum[lower sum] of a wave,
+the https://en.wikipedia.org/wiki/Riemann_sum[lower sum] of a wave,
 mathematically said. This means that the transformation effect turns your
 "endless high" sampled wave into only a few samples. The more distortion you
 will apply, the less samples will be used. Indeed, this is equivalent to say
@@ -130,7 +130,7 @@ can be forgotten. This behaviour might make some quantisations a bit unexpected.
 Limiting & Clipping
 +++++++++++++++++++
 
-http://en.wikipedia.org/wiki/Limiting[Limiting] usually means that for a signal,
+https://en.wikipedia.org/wiki/Limiting[Limiting] usually means that for a signal,
 the amplitude is modified because it exceeds its maximum value. Overdrive, as
 often used for guitars, is often achieved by limiting: It happens because an
 amplifier "overdrives" the maximum amplitude it can deliver.
