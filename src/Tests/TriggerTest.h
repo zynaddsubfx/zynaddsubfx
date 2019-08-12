@@ -131,7 +131,7 @@ class TriggerTest:public CxxTest::TestSuite
             const char *msg1 = tr->read();
             float buf1[128] = {0};
             TS_ASSERT(msg1);
-            TS_ASSERT_EQUALS(128, rtosc_narguments(msg1));
+            TS_ASSERT_EQUALS(127, rtosc_narguments(msg1));
 
             printf("msg1 = %s\n",   msg1);
             printf("msg1 = <%s>\n", rtosc_argument_string(msg1));
@@ -146,7 +146,7 @@ class TriggerTest:public CxxTest::TestSuite
             }
             const char *msg2 = tr->read();
             TS_ASSERT(msg2);
-            TS_ASSERT_EQUALS(128, rtosc_narguments(msg2));
+            TS_ASSERT_EQUALS(127, rtosc_narguments(msg2));
             float buf2[128] = {0};
             printf("nargs = %d\n", rtosc_narguments(msg2));
             for(int i=0; i<127; ++i)

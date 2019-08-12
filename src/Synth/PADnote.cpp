@@ -29,7 +29,8 @@ PADnote::PADnote(const PADnoteParameters *parameters,
                  SynthParams pars, const int& interpolation, WatchManager *wm,
                  const char *prefix)
     :SynthNote(pars), pars(*parameters), interpolation(interpolation),
-    watchOut(wm, prefix, "noteout"), watchOut1(wm,prefix,"noteout1")
+    watchOut(wm, prefix, "noteout/after_interpolation"), watchOut1(wm, prefix, "noteout/after_punch"),
+    watchOut2(wm, prefix, "noteout/after_amp_interpolation"), watchOut3(wm, prefix, "noteout/after_legato")
 {
     NoteGlobalPar.GlobalFilter    = nullptr;
     NoteGlobalPar.FilterEnvelope  = nullptr;
@@ -378,7 +379,7 @@ int PADnote::noteout(float *outl, float *outr)
     else
         Compute_Linear(outl, outr, freqhi, freqlo);
 
-    watchOut1(outr,synth.buffersize);
+    watchOut(outl,synth.buffersize);
 
     if(firsttime) {
         fadein(outl);
@@ -402,6 +403,7 @@ int PADnote::noteout(float *outl, float *outr)
             }
         }
     
+    watchOut1(outl,synth.buffersize);
 
     if(ABOVE_AMPLITUDE_THRESHOLD(globaloldamplitude, globalnewamplitude))
         // Amplitude Interpolation
@@ -419,11 +421,12 @@ int PADnote::noteout(float *outl, float *outr)
             outr[i] *= globalnewamplitude * (1.0f - NoteGlobalPar.Panning);
         }
 
+    watchOut2(outl,synth.buffersize);
 
     // Apply legato-specific sound signal modifications
     legato.apply(*this, outl, outr);
 
-    watchOut(outr,synth.buffersize);
+    watchOut3(outl,synth.buffersize);
 
     // Check if the global amplitude is finished.
     // If it does, disable the note
