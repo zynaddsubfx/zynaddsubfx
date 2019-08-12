@@ -35,7 +35,7 @@ class PADnote:public SynthNote
         bool finished() const;
         void entomb(void);
 
-        VecWatchPoint watchOut,watchOut1;
+        VecWatchPoint watchOut,watchOut1, watchOut2, watchOut3;
 
         void releasekey();
     private:

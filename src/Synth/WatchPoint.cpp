@@ -52,11 +52,6 @@ bool WatchPoint::is_active(void)
     return false;
 }
 
-bool WatchPoint::is_empty(void)
-{
-    return reference->is_empty(identity);
-}
-
 FloatWatchPoint::FloatWatchPoint(WatchManager *ref, const char *prefix, const char *id)
     :WatchPoint(ref, prefix, id)
 {}
@@ -114,7 +109,7 @@ void WatchManager::tick(void)
         int framesize = 2;
         call_count[i] = 0;
         if(strstr(active_list[i], "noteout") != NULL)
-            framesize = MAX_SAMPLE;
+            framesize = MAX_SAMPLE-1;
         if(sample_list[i] >= framesize && call_count[i]==0) {
             char        arg_types[MAX_SAMPLE+1] = {0};
             rtosc_arg_t arg_val[MAX_SAMPLE];
