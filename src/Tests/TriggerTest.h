@@ -243,14 +243,14 @@ class TriggerTest:public CxxTest::TestSuite
             //Verify the output to the user interface
             //if 128 samples are requested, then 128 should be delivered
             const char *msg1 = tr->read();
-            TS_ASSERT_EQUALS(string("noteout"), msg1);
+            TS_ASSERT_EQUALS(string("noteout1"), msg1);
             TS_ASSERT_EQUALS(string(f128), rtosc_argument_string(msg1));
             TS_ASSERT_EQUALS(128, strlen(rtosc_argument_string(msg1)));
-            TS_ASSERT(!tr->hasNext());
             note->noteout(outL, outR);
             w->tick();
+            TS_ASSERT(tr->hasNext());
             const char *msg2 = tr->read();
-            TS_ASSERT_EQUALS(string("noteout1"), msg2);
+            TS_ASSERT_EQUALS(string("noteout"), msg2);
             TS_ASSERT_EQUALS(128, strlen(rtosc_argument_string(msg2)));
             TS_ASSERT_EQUALS(string(f128), rtosc_argument_string(msg2));
             TS_ASSERT(!tr->hasNext());
