@@ -32,7 +32,8 @@ namespace zyn {
 
 ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
         WatchManager *wm, const char *prefix)
-    :SynthNote(spars), pars(*pars_), watchOut(wm, prefix, "noteout"), watchOut1(wm,prefix,"noteout1")
+    :SynthNote(spars), pars(*pars_), watch_be4_add(wm, prefix, "noteout/be4_mix"), watch_after_add(wm,prefix,"noteout/after_mix"),
+    watch_punch(wm, prefix, "noteout/punch"), watch_legato(wm, prefix, "noteout/legato")
 {
     memory.beginTransaction();
     tmpwavel = memory.valloc<float>(synth.buffersize);
@@ -1702,9 +1703,9 @@ int ADnote::noteout(float *outl, float *outr)
                 for(int i = 0; i < synth.buffersize; ++i)
                     tmpwavel[i] += tw[i];
             if(nvoice == 0)
-                watchOut(tmpwavel,synth.buffersize);
+                watch_be4_add(tmpwavel,synth.buffersize);
             
-            watchOut1(tmpwavel,synth.buffersize);
+            watch_after_add(tmpwavel,synth.buffersize);
         }
         float unison_amplitude = 1.0f / sqrt(unison_size[nvoice]); //reduce the amplitude for large unison sizes
         // Amplitude
@@ -1857,10 +1858,12 @@ int ADnote::noteout(float *outl, float *outr)
             }
         }
 
+    watch_punch(outl, synth.buffersize);
 
     // Apply legato-specific sound signal modifications
     legato.apply(*this, outl, outr);
 
+    watch_legato(outl, synth.buffersize);
 
     // Check if the global amplitude is finished.
     // If it does, disable the note

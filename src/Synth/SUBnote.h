@@ -29,7 +29,7 @@ class SUBnote:public SynthNote
 
         SynthNote *cloneLegato(void);
         void legatonote(LegatoParams pars);
-        VecWatchPoint watchOut,watchOut1;
+        VecWatchPoint watch_filter,watch_amp_int, watch_legato;
         int noteout(float *outl, float *outr); //note output,return 0 if the note is finished
         void releasekey();
         bool finished() const;

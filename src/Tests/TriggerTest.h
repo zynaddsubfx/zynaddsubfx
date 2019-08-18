@@ -123,9 +123,9 @@ class TriggerTest:public CxxTest::TestSuite
             TS_ASSERT(!w->trigger_active("data"));
 
 
-            w->add_watch("noteout");
+            w->add_watch("noteout/filter");
             for(int i=0; i<1024; ++i) {
-                w->satisfy("noteout", &data[i], 1);
+                w->satisfy("noteout/filter", &data[i], 1);
                 w->tick();
             }
             const char *msg1 = tr->read();
@@ -139,9 +139,9 @@ class TriggerTest:public CxxTest::TestSuite
             for(int i=0; i<127; ++i)
                 buf1[i] = rtosc_argument(msg1, i).f;
 
-            w->add_watch("noteout2");
+            w->add_watch("noteout/amp_int");
             for(int i=0; i<1024/97; ++i) {
-                w->satisfy("noteout2", &data[i*97], 97);
+                w->satisfy("noteout/amp_int", &data[i*97], 97);
                 w->tick();
             }
             const char *msg2 = tr->read();
@@ -173,20 +173,20 @@ class TriggerTest:public CxxTest::TestSuite
             TS_ASSERT_EQUALS(string(""), w->active_list[1]);
             TS_ASSERT_EQUALS(0, w->sample_list[0]);
             TS_ASSERT_EQUALS(0, w->sample_list[1]);
-            TS_ASSERT(!w->trigger_active("noteout"));
-            TS_ASSERT(!w->trigger_active("noteout1"));
+            TS_ASSERT(!w->trigger_active("noteout/filter"));
+            TS_ASSERT(!w->trigger_active("noteout/amp_int"));
 
             //Setup a watchpoint
             //
             // - Watchpoints will be added to the active list in the watch
             // manager
             // - Watchpoints will not be triggered
-            w->add_watch("noteout");
-            w->add_watch("noteout1");
-            TS_ASSERT(!w->trigger_active("noteout"));
-            TS_ASSERT(!w->trigger_active("noteout1"));
-            TS_ASSERT_EQUALS(string("noteout"),  w->active_list[0]);
-            TS_ASSERT_EQUALS(string("noteout1"), w->active_list[1]);
+            w->add_watch("noteout/filter");
+            w->add_watch("noteout/amp_int");
+            TS_ASSERT(!w->trigger_active("noteout/filter"));
+            TS_ASSERT(!w->trigger_active("noteout/amp_int"));
+            TS_ASSERT_EQUALS(string("noteout/filter"),  w->active_list[0]);
+            TS_ASSERT_EQUALS(string("noteout/amp_int"), w->active_list[1]);
             TS_ASSERT_EQUALS(0, w->sample_list[0]);
             TS_ASSERT_EQUALS(0, w->sample_list[1]);
             dump_samples("Initial pre-buffer");
@@ -197,8 +197,8 @@ class TriggerTest:public CxxTest::TestSuite
 
             w->tick();
             dump_samples("Step 1 pre-buffer");
-            TS_ASSERT(!w->trigger_active("noteout"));   //not active as prebuffer is not filled
-            TS_ASSERT(!w->trigger_active("noteout1"));
+            TS_ASSERT(!w->trigger_active("noteout/filter"));   //not active as prebuffer is not filled
+            TS_ASSERT(!w->trigger_active("noteout/amp_int"));
             TS_ASSERT(!tr->hasNext());
             TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 0); // Is 0 as prebuffer not filled
             TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 0);
@@ -208,8 +208,8 @@ class TriggerTest:public CxxTest::TestSuite
             note->noteout(outL, outR);
             w->tick();
             dump_samples("Step 2 pre-buffer\n");
-            TS_ASSERT(!w->trigger_active("noteout1")); // not active as prebuffer is not filled
-            TS_ASSERT(!w->trigger_active("noteout"));
+            TS_ASSERT(!w->trigger_active("noteout/filter"));   //not active as prebuffer is not filled
+            TS_ASSERT(!w->trigger_active("noteout/amp_int"));
             TS_ASSERT(!tr->hasNext());
             TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 0); // Is 0 as prebuffer not filled
             TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 0);
@@ -218,8 +218,8 @@ class TriggerTest:public CxxTest::TestSuite
             note->noteout(outL, outR);
             w->tick();
             dump_samples("Step 3 pre-buffer\n");
-            TS_ASSERT(!w->trigger_active("noteout1"));
-            TS_ASSERT(!w->trigger_active("noteout"));
+            TS_ASSERT(!w->trigger_active("noteout/filter"));   
+            TS_ASSERT(!w->trigger_active("noteout/amp_int"));
             TS_ASSERT(!tr->hasNext());
             TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 0); // Is 0 as prebuffer not filled
             TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 0);
@@ -228,8 +228,8 @@ class TriggerTest:public CxxTest::TestSuite
             note->noteout(outL, outR);
             w->tick();
             dump_samples("Step 4 pre-buffer\n");
-            TS_ASSERT(w->trigger_active("noteout1")); // trigger activate and filling post buffer
-            TS_ASSERT(w->trigger_active("noteout"));
+            TS_ASSERT(w->trigger_active("noteout/filter"));   // trigger activate and filling post buffer
+            TS_ASSERT(w->trigger_active("noteout/amp_int"));
             TS_ASSERT(!tr->hasNext());  // post buffer not reach 128
             TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 128);   // prebuffer + postbuffer filled in
             TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 128);
@@ -243,14 +243,14 @@ class TriggerTest:public CxxTest::TestSuite
             //Verify the output to the user interface
             //if 128 samples are requested, then 128 should be delivered
             const char *msg1 = tr->read();
-            TS_ASSERT_EQUALS(string("noteout1"), msg1);
+            TS_ASSERT_EQUALS(string("noteout/filter"), msg1);
             TS_ASSERT_EQUALS(string(f128), rtosc_argument_string(msg1));
             TS_ASSERT_EQUALS(128, strlen(rtosc_argument_string(msg1)));
             note->noteout(outL, outR);
             w->tick();
             TS_ASSERT(tr->hasNext());
             const char *msg2 = tr->read();
-            TS_ASSERT_EQUALS(string("noteout"), msg2);
+            TS_ASSERT_EQUALS(string("noteout/amp_int"), msg2);
             TS_ASSERT_EQUALS(128, strlen(rtosc_argument_string(msg2)));
             TS_ASSERT_EQUALS(string(f128), rtosc_argument_string(msg2));
             TS_ASSERT(!tr->hasNext());
