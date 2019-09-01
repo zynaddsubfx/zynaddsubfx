@@ -787,17 +787,26 @@ Master::Master(const SYNTH_T &synth_, Config* config)
 }
 
 bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
-                           bool offline, bool nio, DataObj& d, int msg_id)
+                           bool offline, bool nio, DataObj& d, int msg_id,
+                           Master* master_from_mw)
 {
     if(!strcmp(msg, "/load-master")) {
-        Master *this_master = this;
+        Master *this_master = master_from_mw ? master_from_mw : this;
         Master *new_master  = *(Master**)rtosc_argument(msg, 0).b.data;
+        // This can not fail anymore, but just to be sure...
+        assert(new_master != this_master);
+
+        /*
+         * WARNING: Do not use anything from "this" below, use "this_master"
+         */
+
         if(!offline)
             new_master->AudioOut(outl, outr);
         if(nio)
             Nio::masterSwap(new_master);
-        if (hasMasterCb())
-            mastercb(mastercb_ptr, new_master);
+        if (this_master->hasMasterCb()) {
+            this_master->mastercb(this_master->mastercb_ptr, new_master);
+        }
         bToU->write("/free", "sb", "Master", sizeof(Master*), &this_master);
         return false;
     } else if(!strcmp(msg, "/switch-master")) {
@@ -1132,30 +1141,46 @@ void dump_msg(const char* ptr, std::ostream& os = std::cerr)
 #endif
 int msg_id=0;
 
-bool Master::runOSC(float *outl, float *outr, bool offline)
+bool Master::runOSC(float *outl, float *outr, bool offline,
+                    Master* master_from_mw)
 {
-    //Handle user events
-    char loc_buf[1024];
-    DataObj d{loc_buf, 1024, this, bToU};
-    memset(loc_buf, 0, sizeof(loc_buf));
-
-    int events = 0;
-    for(; uToB && uToB->hasNext() && events < 100; ++msg_id, ++events)
+    // the following block is only ever entered by 1 thread at a time
+    // other threads have to ignore it
+    if(!run_osc_in_use.exchange(true)) // exchange returns value before call
     {
-        const char *msg = uToB->read();
-        if(! applyOscEvent(msg, outl, outr, offline, true, d, msg_id) )
-            return false;
+        /*
+         * WARNING: Do not return without "run_osc_in_use.store(false)"
+         */
+
+        //Handle user events
+        char loc_buf[1024];
+        DataObj d{loc_buf, 1024, this, bToU};
+        memset(loc_buf, 0, sizeof(loc_buf));
+
+        int events = 0;
+        for(; uToB && uToB->hasNext() && events < 100; ++msg_id, ++events)
+        {
+            const char *msg = uToB->read();
+            if(! applyOscEvent(msg, outl, outr, offline, true, d, msg_id,
+                               master_from_mw) )
+            {
+                run_osc_in_use.store(false);
+                return false;
+            }
+        }
+
+        if(automate.damaged) {
+            d.broadcast("/damage", "s", "/automate/");
+            automate.damaged = 0;
+        }
+
+        if(events>1 && false)
+            fprintf(stderr, "backend: %d events per cycle\n",events);
+
+        run_osc_in_use.store(false);
+        return true;
     }
-
-    if(automate.damaged) {
-        d.broadcast("/damage", "s", "/automate/");
-        automate.damaged = 0;
-    }
-
-    if(events>1 && false)
-        fprintf(stderr, "backend: %d events per cycle\n",events);
-
-    return true;
+    else { return true; /* = no new master */ }
 }
 
 /*
