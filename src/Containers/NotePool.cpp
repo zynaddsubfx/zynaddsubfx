@@ -97,10 +97,12 @@ bool NotePool::NoteDescriptor::operator==(NoteDescriptor nd)
 static int getMergeableDescriptor(note_t note, uint8_t sendto, bool legato,
         NotePool::NoteDescriptor *ndesc)
 {
-    int desc_id = 0;
-    for(int i=0; i<POLYPHONY; ++i, ++desc_id)
+    int desc_id;
+
+    for(desc_id = 0; desc_id != POLYPHONY; ++desc_id) {
         if(ndesc[desc_id].off())
             break;
+    }
 
     if(desc_id != 0) {
         auto &nd = ndesc[desc_id-1];
@@ -110,7 +112,7 @@ static int getMergeableDescriptor(note_t note, uint8_t sendto, bool legato,
     }
 
     //Out of free descriptors
-    if(desc_id >= POLYPHONY || !ndesc[desc_id].off()) {
+    if(desc_id == POLYPHONY || !ndesc[desc_id].off()) {
         return -1;
     }
 
