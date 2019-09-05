@@ -117,7 +117,7 @@ void WatchManager::tick(void)
         if(strstr(active_list[i], "noteout") != NULL)
             framesize = MAX_SAMPLE-1;
         if(sample_list[i] >= framesize && call_count[i]==0) {
-            char        arg_types[MAX_SAMPLE+1] = {0};
+            char        arg_types[MAX_SAMPLE+1] = {};
             rtosc_arg_t arg_val[MAX_SAMPLE];
             for(int j=0; j<sample_list[i]; ++j) {
                 arg_types[j] = 'f';

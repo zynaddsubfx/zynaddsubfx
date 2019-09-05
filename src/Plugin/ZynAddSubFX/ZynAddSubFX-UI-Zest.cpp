@@ -211,7 +211,7 @@ protected:
 
     bool onKeyboard(const KeyboardEvent &ev)
     {
-        char c[2] = {0};
+        char c[2] = {};
         if(ev.key < 128)
             c[0] = ev.key;
         if(z.zest && c[0])

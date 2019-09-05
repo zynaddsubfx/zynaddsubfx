@@ -226,7 +226,7 @@ const rtosc::Ports FilterParams::ports = {
             FilterParams *obj = (FilterParams *) d.obj;
 
             rtosc_arg_t args[2+3*FF_MAX_FORMANTS*FF_MAX_VOWELS];
-            char type[2+3*FF_MAX_FORMANTS*FF_MAX_VOWELS + 1] = {0};
+            char type[2+3*FF_MAX_FORMANTS*FF_MAX_VOWELS + 1] = {};
 
             type[0] = 'i';
             type[1] = 'i';

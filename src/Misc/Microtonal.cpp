@@ -82,8 +82,8 @@ const rtosc::Ports Microtonal::ports = {
         }},
     {"mapping::s", rDoc("Get user editable tunings"), 0, [](const char *msg, RtData &d)
         {
-            char buf[100*MAX_OCTAVE_SIZE] = {0};
-            char tmpbuf[100] = {0};
+            char buf[100*MAX_OCTAVE_SIZE] = {};
+            char tmpbuf[100] = {};
             Microtonal &m = *(Microtonal*)d.obj;
             if(rtosc_narguments(msg) == 1) {
                 m.texttomapping(rtosc_argument(msg,0).s);
@@ -102,8 +102,8 @@ const rtosc::Ports Microtonal::ports = {
             }},
     {"tunings::s", rDoc("Get user editable tunings"), 0, [](const char *msg, RtData &d)
         {
-            char buf[100*MAX_OCTAVE_SIZE] = {0};
-            char tmpbuf[100] = {0};
+            char buf[100*MAX_OCTAVE_SIZE] = {};
+            char tmpbuf[100] = {};
             Microtonal &m = *(Microtonal*)d.obj;
             if(rtosc_narguments(msg) == 1) {
                 int err = m.texttotunings(rtosc_argument(msg,0).s);
@@ -848,8 +848,8 @@ int Microtonal::loadXML(const char *filename)
 void Microtonal::apply(void)
 {
     {
-        char buf[100*MAX_OCTAVE_SIZE] = {0};
-        char tmpbuf[100] = {0};
+        char buf[100*MAX_OCTAVE_SIZE] = {};
+        char tmpbuf[100] = {};
         for (int i=0;i<Pmapsize;i++) {
             if (i!=0)
                 strncat(buf, "\n", sizeof(buf)-1);
@@ -863,8 +863,8 @@ void Microtonal::apply(void)
     }
 
     {
-        char buf[100*MAX_OCTAVE_SIZE] = {0};
-        char tmpbuf[100] = {0};
+        char buf[100*MAX_OCTAVE_SIZE] = {};
+        char tmpbuf[100] = {};
         for (int i=0;i<octavesize;i++){
             if (i!=0)
                 strncat(buf, "\n", sizeof(buf)-1);

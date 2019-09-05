@@ -63,7 +63,7 @@ const rtosc::Ports Resonance::ports = {
             }
         } else {
             rtosc_arg_t args[N_RES_POINTS];
-            char        types[N_RES_POINTS+1] = {0};
+            char        types[N_RES_POINTS+1] = {};
             for(int i=0; i<N_RES_POINTS; ++i) {
                 args[i].f = o.Prespoints[i]/127.0;
                 types[i]  = 'f';
