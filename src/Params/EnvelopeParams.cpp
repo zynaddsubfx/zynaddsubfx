@@ -120,7 +120,7 @@ static const rtosc::Ports localPorts = {
         const int M = rtosc_narguments(msg);
         if(M == 0) {
             rtosc_arg_t args[N];
-            char arg_types[N+1] = {0};
+            char arg_types[N+1] = {};
             for(int i=0; i<N; ++i) {
                 args[i].f    = env->getdt(i);
                 arg_types[i] = 'f';
@@ -137,7 +137,7 @@ static const rtosc::Ports localPorts = {
         const int M = rtosc_narguments(msg);
         if(M == 0) {
             rtosc_arg_t args[N];
-            char arg_types[N+1] = {0};
+            char arg_types[N+1] = {};
             for(int i=0; i<N; ++i) {
                 args[i].f    = env->Penvval[i]/127.0f;
                 arg_types[i] = 'f';

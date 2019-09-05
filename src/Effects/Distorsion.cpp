@@ -66,7 +66,7 @@ rtosc::Ports Distorsion::ports = {
             Distorsion  &dd = *(Distorsion*)d.obj;
             float        buffer[128];
             rtosc_arg_t  args[128];
-            char         arg_str[128+1] = {0};
+            char         arg_str[128+1] = {};
 
             for(int i=0; i<128; ++i)
                 buffer[i] = 2*(i/128.0)-1;

@@ -745,7 +745,7 @@ int main(int argc, char *argv[])
         memset(&pi, 0, sizeof(pi));
         char *why_windows = strrchr(addr, ':');
         char *seriously_why = why_windows + 1;
-        char start_line[256] = {0};
+        char start_line[256] = {};
         if(why_windows)
             snprintf(start_line, sizeof(start_line), "zyn-fusion.exe osc.udp://127.0.0.1:%s", seriously_why);
         else {

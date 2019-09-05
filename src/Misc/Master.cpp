@@ -402,7 +402,7 @@ static const Ports master_ports = {
        d.reply("/vu-meter", "bb", sizeof(m->vu), &m->vu, sizeof(float)*NUM_MIDI_PARTS, m->vuoutpeakpartl);}},
     {"vu-meter:", rDoc("Grab VU Data"), 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
-       char        types[6+2*NUM_MIDI_PARTS+1] = {0};
+       char        types[6+2*NUM_MIDI_PARTS+1] = {};
        rtosc_arg_t  args[6+2*NUM_MIDI_PARTS+1];
        for(int i=0; i<6+2*NUM_MIDI_PARTS; ++i)
            types[i] = 'f';
@@ -433,7 +433,7 @@ static const Ports master_ports = {
        }},
     {"active_keys:", rProp("Obtain a list of active notes"), 0,
         rBegin;
-        char keys[129] = {0};
+        char keys[129] = {};
         for(int i=0; i<128; ++i)
             keys[i] = m->activeNotes[i] ? 'T' : 'F';
         d.broadcast(d.loc, keys);

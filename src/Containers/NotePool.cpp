@@ -359,8 +359,8 @@ void NotePool::cleanup(void)
     if(!needs_cleaning)
         return;
     needs_cleaning = false;
-    int new_length[POLYPHONY] = {0};
-    int cur_length[POLYPHONY] = {0};
+    int new_length[POLYPHONY] = {};
+    int cur_length[POLYPHONY] = {};
     //printf("Cleanup Start\n");
     //dump();
 
