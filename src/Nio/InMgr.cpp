@@ -65,7 +65,7 @@ InMgr &InMgr::getInstance()
 }
 
 InMgr::InMgr()
-    :queue(100), master(NULL)
+    :queue(256), master(NULL)
 {
     current = NULL;
     work.init(PTHREAD_PROCESS_PRIVATE, 0);
@@ -79,7 +79,7 @@ InMgr::~InMgr()
 void InMgr::putEvent(MidiEvent ev)
 {
     if(queue.push(ev)) //check for error
-        cerr << "ERROR: Midi Ringbuffer is FULL" << endl;
+        cerr << "ERROR: MIDI ringbuffer is FULL" << endl;
     else
         work.post();
 }
