@@ -79,6 +79,8 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
     incrnd   = nextincrnd = 1.0f;
     computeNextFreqRnd();
     computeNextFreqRnd(); //twice because I want incrnd & nextincrnd to be random
+    z1 = 0.0;
+    z2 = 0.0;
 }
 
 LFO::~LFO()
@@ -86,6 +88,7 @@ LFO::~LFO()
 
 float LFO::baseOut(const char waveShape, const float phase)
 {
+    float lfo_out;
     switch(waveShape) {
         case LFO_TRIANGLE:
             if(phase >= 0.0f && phase < 0.25f)
@@ -97,9 +100,11 @@ float LFO::baseOut(const char waveShape, const float phase)
             break;
         case LFO_SQUARE:
             if(phase < 0.5f)
-                return -1;
+                lfo_out = -1;
             else
-                return  1;
+                lfo_out = 1;
+                
+            return biquad(lfo_out);
             break;
         case LFO_RAMPUP:    return (phase - 0.5f) * 2.0f;
         case LFO_RAMPDOWN:  return (0.5f - phase) * 2.0f;
@@ -110,9 +115,33 @@ float LFO::baseOut(const char waveShape, const float phase)
                 first_half = phase < 0.5;
                 last_random = 2*RND-1;
             }
-            return last_random;
-        default:            return cosf(phase * 2.0f * PI); //LFO_SINE
+            
+            
+            return biquad(last_random);
+            break;
+        default:
+            return cosf(phase * 2.0f * PI); //LFO_SINE
     }
+}
+
+
+float LFO::biquad(float input)
+{
+    float output;
+    // calculate biquad coefficients
+    Fc = powf(lfopars_.Pcutoff + 7.0f, 2.0f)/127.0f;
+    K = tan(PI * Fc * dt_);
+    norm = 1 / (1 + K / 0.7071f + K * K);
+    a0 = K * K * norm;
+    a1 = 2 * a0;
+    a2 = a0;
+    b1 = 2 * (K * K - 1) * norm;
+    b2 = (1 - K / 0.7071f + K * K) * norm;            
+    // lp filter the (s&h) random LFO
+    output = input * a0 + z1;
+    z1 = input * a1 + z2 - b1 * output;
+    z2 = input * a2 - b2 * output;
+    return (lfopars_.Pcutoff==127) ? input : output;
 }
 
 
