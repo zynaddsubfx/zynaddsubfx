@@ -152,6 +152,8 @@ static const Ports voicePorts = {
         }},
     rToggle(PVolumeminus,                rShort("inv."), rDefault(false),
         "Signal Inverter"), //do we really need this??
+    rToggle(PAAEnabled,        rShort("enable"), rDefault(false),
+        "AntiAliasing Enable"),
     rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), rDefault(127),
         "Velocity Sensing"),
     rToggle(PAmpEnvelopeEnabled, rShort("enable"), rDefault(false),
@@ -570,6 +572,7 @@ void ADnoteVoiceParam::defaults()
     PDelay                    = 0;
     volume                    = -60.0f* (1.0f - 100.0f / 127.0f);
     PVolumeminus              = 0;
+    PAAEnabled                = 0;
     PPanning                  = 64; //center
     PDetune                   = 8192; //8192=0
     PCoarseDetune             = 0;

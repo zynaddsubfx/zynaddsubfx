@@ -120,6 +120,8 @@ void ADnote::setupVoice(int nvoice)
         voice.Enabled = OFF;
         return;   //the voice is disabled
     }
+    NoteVoicePar[nvoice].AAEnabled =
+                pars.VoicePar[nvoice].PAAEnabled;
 
     const int BendAdj = pars.VoicePar[nvoice].PBendAdjust - 64;
     if (BendAdj % 24 == 0)
@@ -702,7 +704,10 @@ void ADnote::legatonote(LegatoParams lpars)
 
         if(pars.VoicePar[nvoice].PVolumeminus != 0)
             NoteVoicePar[nvoice].Volume = -NoteVoicePar[nvoice].Volume;
-
+            
+        NoteVoicePar[nvoice].AAEnabled =
+                pars.VoicePar[nvoice].PAAEnabled;
+                
         if(pars.VoicePar[nvoice].PPanning == 0) {
             NoteVoicePar[nvoice].Panning = getRandomFloat();
         } else
@@ -1242,6 +1247,46 @@ inline void ADnote::fadein(float *smps) const
  */
 inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
 {
+    for(int k = 0; k < unison_size[nvoice]; ++k) {
+        int    poshi  = oscposhi[nvoice][k];
+        int    poslo  = oscposlo[nvoice][k] * (1<<24);
+        int    freqhi = oscfreqhi[nvoice][k];
+        int    freqlo = oscfreqlo[nvoice][k] * (1<<24);
+        float *smps   = NoteVoicePar[nvoice].OscilSmp;
+        float *tw     = tmpwave_unison[k];
+        assert(oscfreqlo[nvoice][k] < 1.0f);
+        for(int i = 0; i < synth.buffersize; ++i) {
+            tw[i]  = (smps[poshi] * ((1<<24) - poslo) + smps[poshi + 1] * poslo)/(1.0f*(1<<24));
+            poslo += freqlo;
+            poshi += freqhi + (poslo>>24);
+            poslo &= 0xffffff;
+            poshi &= synth.oscilsize - 1;
+        }
+        oscposhi[nvoice][k] = poshi;
+        oscposlo[nvoice][k] = poslo/(1.0f*(1<<24));
+    }
+}
+
+
+/*
+ * Computes the Oscillator (Without Modulation) - windowed sinc Interpolation
+ */
+
+/* As the code here is a bit odd due to optimization, here is what happens
+ * First the current possition and frequency are retrieved from the running
+ * state. These are broken up into high and low portions to indicate how many
+ * samples are skipped in one step and how many fractional samples are skipped.
+ * Outside of this method the fractional samples are just handled with floating
+ * point code, but that's a bit slower than it needs to be. In this code the low
+ * portions are known to exist between 0.0 and 1.0 and it is known that they are
+ * stored in single precision floating point IEEE numbers. This implies that
+ * a maximum of 24 bits are significant. The below code does your standard
+ * linear interpolation that you'll see throughout this codebase, but by
+ * sticking to integers for tracking the overflow of the low portion, around 15%
+ * of the execution time was shaved off in the ADnote test.
+ */
+inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
+{
        
     // windowed sinc kernel factor Fs/4, rejection 80dB      
     const float_t kernel[21] = {
@@ -1286,10 +1331,6 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
         float out = 0;
         
         for(int i = 0; i < synth.buffersize; ++i) {
-
-            // linear interpolated sampling of waveform for low frequencies
-            //tw[i] = (smps[poshi] * ((1<<24) - poslo) + smps[poshi + 1] * poslo)/(1.0f*(1<<24));
-
             ovsmpposlo  = poslo - 10 * ovsmpfreqlo;
             uflow = ovsmpposlo>>24;
             ovsmpposhi  = poshi - 10 * ovsmpfreqhi - ((0x00 - uflow) & 0xff);
@@ -1323,42 +1364,6 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
 }
 
 
-
-/*
- * Computes the Oscillator (Without Modulation) - CubicInterpolation
- *
- The differences from the Linear are to little to deserve to be used. This is because I am using a large synth.oscilsize (>512)
-inline void ADnote::ComputeVoiceOscillator_CubicInterpolation(int nvoice){
-    int i,poshi;
-    float poslo;
-
-    poshi=oscposhi[nvoice];
-    poslo=oscposlo[nvoice];
-    float *smps=NoteVoicePar[nvoice].OscilSmp;
-    float xm1,x0,x1,x2,a,b,c;
-    for (i=0;i<synth.buffersize;i++){
-    xm1=smps[poshi];
-    x0=smps[poshi+1];
-    x1=smps[poshi+2];
-    x2=smps[poshi+3];
-    a=(3.0f * (x0-x1) - xm1 + x2) / 2.0f;
-    b = 2.0f*x1 + xm1 - (5.0f*x0 + x2) / 2.0f;
-    c = (x1 - xm1) / 2.0f;
-    tmpwave[i]=(((a * poslo) + b) * poslo + c) * poslo + x0;
-    printf("a\n");
-    //tmpwave[i]=smps[poshi]*(1.0f-poslo)+smps[poshi+1]*poslo;
-    poslo+=oscfreqlo[nvoice];
-    if (poslo>=1.0f) {
-            poslo-=1.0f;
-        poshi++;
-    };
-        poshi+=oscfreqhi[nvoice];
-        poshi&=synth.oscilsize-1;
-    };
-    oscposhi[nvoice]=poshi;
-    oscposlo[nvoice]=poslo;
-};
-*/
 /*
  * Computes the Oscillator (Mixing)
  */
@@ -1689,7 +1694,8 @@ int ADnote::noteout(float *outl, float *outr)
                                                                   NoteVoicePar[nvoice].FMEnabled);
                         break;
                     default:
-                        ComputeVoiceOscillator_LinearInterpolation(nvoice);
+                        if(NoteVoicePar[nvoice].AAEnabled) ComputeVoiceOscillator_SincInterpolation(nvoice);
+                        else ComputeVoiceOscillator_LinearInterpolation(nvoice);
                         //if (config.cfg.Interpolation) ComputeVoiceOscillator_CubicInterpolation(nvoice);
                 }
                 break;
