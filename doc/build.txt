@@ -5,7 +5,7 @@ Introduction to CMake
 ~~~~~~~~~~~~~~~~~~~~~
 
 ********************************************************************
-Note: This section is mostly copied from the OpenSceneGraph wiki, at:
+Note: This section was mostly copied from the OpenSceneGraph wiki, at:
 http://www.openscenegraph.org/projects/osg/wiki/Build/CMake
 ********************************************************************
 

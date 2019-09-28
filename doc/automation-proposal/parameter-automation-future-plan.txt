@@ -232,7 +232,7 @@ Active vs. Inactive slots aka the dynamic parameter issue
 
 VST hosts can update the number of parameters, but this is vendor specific and
 CANNOT be expected to work reliably
-(e.g. http://www.cockos.com/reaper/sdk/vst/vst_ext.php)
+(e.g. https://www.cockos.com/reaper/sdk/vst/vst_ext.php)
 
 LV2 doesn't support dynamic parameters (at least as far as I can parse their
 reference docs). The extension to do this was LV2 dynparam, however this

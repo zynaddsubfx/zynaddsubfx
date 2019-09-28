@@ -53,7 +53,7 @@ have poles that correspond to that frequency. Usually, two poles mean that the
 function has more "steepness", and that you can set the exact value of the
 function at the poles by defining the "resonance value". Filters with two poles
 are also often referenced
-as http://de.wikipedia.org/wiki/Butterworth-Filter[Butterworth Filters].
+as https://de.wikipedia.org/wiki/Butterworth-Filter[Butterworth Filters].
 
 ********************************************************************
 For the interested, functions having poles means that we are given a quotient of
