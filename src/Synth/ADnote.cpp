@@ -28,6 +28,8 @@
 #include "OscilGen.h"
 #include "ADnote.h"
 
+#define LENGTHOF(x) (sizeof(x)/sizeof(x[0]))
+
 namespace zyn {
 ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
         WatchManager *wm, const char *prefix)
@@ -1288,30 +1290,29 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
 inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
 {
        
-    // windowed sinc kernel factor Fs/4, rejection 80dB      
-    const float_t kernel[21] = {
-        0.00017017607982446043,
-        0.0009262403856891687,
-        0,
-        -0.008116326243706371,
-        -0.02476577025825532,
-        -0.03386903752666308,
-        0,
-        0.10709721649843373,
-        0.27452737291792295,
-        0.4339834705604548,
-        0.5000933151725993,
-        0.4339834705604548,
-        0.27452737291792295,
-        0.10709721649843373,
-        0,
-        -0.03386903752666308,
-        -0.02476577025825532,
-        -0.008116326243706371,
-        0,
-        0.0009262403856891687,
-        0.00017017607982446043
+    // windowed sinc kernel factor Fs*0.3, rejection 80dB      
+    const float_t kernel[] = {
+        0.0010596256917418426,
+        0.004273442181254887,
+        0.0035466063043375785,
+        -0.014555483937137638,
+        -0.04789321342588484,
+        -0.050800020978553066,
+        0.04679847159974432,
+        0.2610646708018185,
+        0.4964802251145513,
+        0.6000513532962539,
+        0.4964802251145513,
+        0.2610646708018185,
+        0.04679847159974432,
+        -0.050800020978553066,
+        -0.04789321342588484,
+        -0.014555483937137638,
+        0.0035466063043375785,
+        0.004273442181254887,
+        0.0010596256917418426
         };
+        
     
     
     for(int k = 0; k < unison_size[nvoice]; ++k) {
@@ -1331,13 +1332,13 @@ inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
         float out = 0;
         
         for(int i = 0; i < synth.buffersize; ++i) {
-            ovsmpposlo  = poslo - 10 * ovsmpfreqlo;
+            ovsmpposlo  = poslo - (LENGTHOF(kernel)-1)/2 * ovsmpfreqlo;
             uflow = ovsmpposlo>>24;
-            ovsmpposhi  = poshi - 10 * ovsmpfreqhi - ((0x00 - uflow) & 0xff);
+            ovsmpposhi  = poshi - (LENGTHOF(kernel)-1)/2 * ovsmpfreqhi - ((0x00 - uflow) & 0xff);
             ovsmpposlo &= 0xffffff;
             ovsmpposhi &= synth.oscilsize - 1;
             out = 0;
-            for (int l = 0; l<21; l++) {
+            for (int l = 0; l<LENGTHOF(kernel); l++) {
                 out += kernel[l] * (
                     smps[ovsmpposhi]     * ((1<<24) - ovsmpposlo) + 
                     smps[ovsmpposhi + 1] * ovsmpposlo)/(1.0f*(1<<24));
