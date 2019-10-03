@@ -35,7 +35,12 @@ include(CTestConfig.cmake)
 add_subdirectory(src)
 add_subdirectory(doc) # Doxygen only
 
-install(FILES AUTHORS.txt COPYING HISTORY.txt README.adoc
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/HISTORY.txt")
+install(FILES HISTORY.txt
+	DESTINATION share/doc/zynaddsubfx
+	)
+endif()
+install(FILES AUTHORS.txt COPYING README.adoc
 	DESTINATION share/doc/zynaddsubfx
 	)
 install(FILES zynaddsubfx-jack-multi.desktop zynaddsubfx-jack.desktop zynaddsubfx-alsa.desktop zynaddsubfx-oss.desktop
