@@ -266,7 +266,7 @@ bool AlsaEngine::openMidi()
     pthread_attr_t attr;
 
     pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
     pthread_create(&midi.pThread, &attr, _MidiThread, this);
     return true;
 }
