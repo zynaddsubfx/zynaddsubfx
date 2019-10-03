@@ -206,7 +206,7 @@ void *AlsaEngine::MidiThread(void)
                 break;
 
             case SND_SEQ_EVENT_SYSEX:   // system exclusive
-                for (int x = 0; x < event->data.ext.len; x += 3) {
+                for (unsigned int x = 0; x < event->data.ext.len; x += 3) {
                     uint8_t buf[3];
                     int y = event->data.ext.len - x;
                     if (y >= 3) {
