@@ -971,6 +971,9 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
         delete[] spectrum;
     };
 
+    if(oscilgen->needPrepare())
+        oscilgen->prepare();
+
 #ifdef WIN32
     //Temporarily disable multi-threading here as C++11 threads are broken on
     //mingw cross compilation
