@@ -35,11 +35,6 @@ include(CTestConfig.cmake)
 add_subdirectory(src)
 add_subdirectory(doc) # Doxygen only
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/HISTORY.txt")
-install(FILES HISTORY.txt
-	DESTINATION share/doc/zynaddsubfx
-	)
-endif()
 install(FILES AUTHORS.txt COPYING README.adoc
 	DESTINATION share/doc/zynaddsubfx
 	)
