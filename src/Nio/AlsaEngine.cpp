@@ -114,20 +114,18 @@ void *AlsaEngine::MidiThread(void)
     while(1) {
         if(midi.exiting)
             break;
-        error = snd_seq_poll_descriptors(midi.handle, pfd, 4, POLLIN);
-        if(error <= 0)
-            break;
-        error = poll(pfd, error, 1000 /* ms */);
-        if(error < 0) {
-          if(errno == EAGAIN || errno == EINTR)
-              continue;
-          break;
-        }
         error = snd_seq_event_input(midi.handle, &event);
         if (error < 0) {
-          if(error == -EAGAIN || error == -EINTR)
-              continue;
-          break;
+            if(error != -EAGAIN && error != -EINTR)
+                break;
+            error = snd_seq_poll_descriptors(midi.handle, pfd, 4, POLLIN);
+            if(error <= 0)
+                break;
+            error = poll(pfd, error, 1000 /* ms */);
+            if(error < 0 &&
+               errno != EAGAIN && errno != EINTR)
+	        break;
+            continue;
         }
         //ensure ev is empty
         ev.channel = 0;
