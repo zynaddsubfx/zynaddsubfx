@@ -477,10 +477,16 @@ static const Ports master_ports = {
             sysefsendto.dispatch(msg, d);
         }},
 
-    {"noteOn:iii", rDoc("Noteon Event"), 0,
+    {"noteOn:iii:iiif", rDoc("Noteon Event"), 0,
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
-            M->noteOn(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
+            if (rtosc_narguments(m) > 3)
+                /* Manually specify the frequency as 4th argument */
+                M->noteOn(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i,rtosc_argument(m,3).f);
+            else
+                /* Standard MIDI noteOn */
+                M->noteOn(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);
+        }},
 
     {"noteOff:ii", rDoc("Noteoff Event"), 0,
         [](const char *m,RtData &d){
