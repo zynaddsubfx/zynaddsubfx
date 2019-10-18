@@ -44,6 +44,9 @@ struct vuData {
 class Master
 {
     public:
+        Master(const Master& other) = delete;
+        Master(Master&& other) = delete;
+
         /** Constructor TODO make private*/
         Master(const SYNTH_T &synth, class Config *config);
         /** Destructor*/
