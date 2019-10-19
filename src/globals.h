@@ -301,6 +301,8 @@ struct SYNTH_T {
 
     SYNTH_T(const SYNTH_T& ) = delete;
     SYNTH_T(SYNTH_T&& ) = default;
+    SYNTH_T& operator=(const SYNTH_T& ) = delete;
+    SYNTH_T& operator=(SYNTH_T&& ) = default;
 
     /** the buffer to add noise in order to avoid denormalisation */
     m_unique_ptr<float> denormalkillbuf;
