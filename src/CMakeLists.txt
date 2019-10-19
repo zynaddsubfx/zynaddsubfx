@@ -96,7 +96,7 @@ SET (NoNeonPlease False CACHE BOOL
 SET (PluginLibDir "lib" CACHE STRING
     "Install directory for plugin libraries PREFIX/PLUGIN_LIB_DIR/{lv2,vst}")
 SET (DemoMode FALSE CACHE BOOL "Enable 10 minute silence")
-SET (ZynFusionDir "" CACHE STRING "Developers only: zest binary's dir; useful if fusion is not system-instealled.")
+SET (ZynFusionDir "" CACHE STRING "Developers only: zest binary's dir; useful if fusion is not system-installed.")
 mark_as_advanced(FORCE ZynFusionDir)
 
 # Now, handle the incoming settings and set define flags/variables based
