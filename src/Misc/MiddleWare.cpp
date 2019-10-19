@@ -426,11 +426,8 @@ public:
 
 class MiddleWareImpl
 {
-    public:
-    MiddleWare *parent;
-    private:
-
 public:
+    MiddleWare *parent;
     Config* const config;
     MiddleWareImpl(MiddleWare *mw, SYNTH_T synth, Config* config,
                    int preferred_port);
