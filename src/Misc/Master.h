@@ -219,6 +219,12 @@ class Master
         //in units of 10 ms (done s.t. overflow is in 497 days)
         uint32_t last_beat = 0;
         uint32_t last_ack = 0;
+
+        //Buffer to contain the OSC path to the last GUI element
+        //on which a drag and drop operation ended
+        constexpr static std::size_t dnd_buffer_size = 1024;
+        char dnd_buffer[dnd_buffer_size] = {0};
+
     private:
         std::atomic<bool> run_osc_in_use = { false };
 
