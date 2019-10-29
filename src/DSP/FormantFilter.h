@@ -49,7 +49,8 @@ class FormantFilter:public Filter
 
         float oldformantamp[FF_MAX_FORMANTS];
 
-        int   sequencesize, numformants, firsttime;
+        int   sequencesize, numformants;
+        bool  firsttime;
         float oldinput, slowinput;
         float Qfactor, formantslowness, oldQfactor;
         float vowelclearness, sequencestretch;
