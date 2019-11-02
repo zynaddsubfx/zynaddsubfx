@@ -69,7 +69,7 @@ const rtosc::Ports FilterParams::ports = {
             rOptions(ad_global_filter, ad_voice_filter, sub_filter, in_effect),
             "location of the filter"),
     rOption(Pcategory,          rShort("class"),
-            rOptions(analog, formant, st.var.), rDefault(analog),
+            rOptions(analog, formant, st.var., moog), rDefault(analog),
             "Class of filter"),
     rOption(Ptype,              rShort("type"),
             rOptions(LP1, HP1, LP2, HP2, BP, notch, peak, l.shelf, h.shelf),
@@ -131,7 +131,9 @@ const rtosc::Ports FilterParams::ports = {
     {"type-svf::i", rProp(parameter) rShort("type")
         rOptions(low, high, band, notch)
             rDoc("Filter Type"), 0, rOptionCb(Ptype)},
-
+    {"type-moog::i", rProp(parameter) rShort("type")
+        rOptions(HP, BP, LP)
+            rDoc("Filter Type"), 0, rOptionCb(Ptype)},
     //UI reader
     {"Pvowels:", rDoc("Get Formant Vowels"), NULL,
         [](const char *, RtData &d) {
