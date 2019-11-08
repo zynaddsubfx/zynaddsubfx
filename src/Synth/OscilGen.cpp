@@ -524,7 +524,7 @@ void OscilGen::getbasefunction(float *smps)
             break;
     }
 
-    base_func func = getBaseFunction(Pcurrentbasefunc);
+    base_func_t *func = getBaseFunction(Pcurrentbasefunc);
 
     for(int i = 0; i < synth.oscilsize; ++i) {
         float t = i * 1.0f / synth.oscilsize;
@@ -566,7 +566,7 @@ void OscilGen::oscilfilter(fft_t *freqs)
 
     const float par    = 1.0f - Pfilterpar1 / 128.0f;
     const float par2   = Pfilterpar2 / 127.0f;
-    filter_func filter = getFilter(Pfiltertype);
+    filter_func_t *filter = getFilter(Pfiltertype);
 
     for(int i = 1; i < synth.oscilsize / 2; ++i)
         freqs[i] *= filter(i, par, par2);
@@ -1630,19 +1630,9 @@ FUNC(circle)
     return y;
 }
 
-typedef float (*base_func)(float, float);
-
-base_func getBaseFunction(unsigned char func)
+base_func_t *getBaseFunction(unsigned char func)
 {
-    if(!func)
-        return NULL;
-
-    if(func == 127) //should be the custom wave
-        return NULL;
-
-    func--;
-    assert(func < 15);
-    base_func functions[] = {
+    static const base_func_t *functions[] = {
         basefunc_triangle,
         basefunc_pulse,
         basefunc_saw,
@@ -1659,6 +1649,15 @@ base_func getBaseFunction(unsigned char func)
         basefunc_spike,
         basefunc_circle,
     };
+
+    if(!func)
+        return NULL;
+
+    if(func == 127) //should be the custom wave
+        return NULL;
+
+    func--;
+    assert(func < (sizeof(functions)/sizeof(functions[0])));
     return functions[func];
 }
 
@@ -1791,15 +1790,9 @@ FILTER(s)
 }
 #undef FILTER
 
-typedef float (*filter_func)(unsigned int, float, float);
-filter_func getFilter(unsigned char func)
+filter_func_t *getFilter(unsigned char func)
 {
-    if(!func)
-        return NULL;
-
-    func--;
-    assert(func < 13);
-    filter_func functions[] = {
+    static const filter_func_t *functions[] = {
         osc_lp,
         osc_hp1,
         osc_hp1b,
@@ -1814,6 +1807,12 @@ filter_func getFilter(unsigned char func)
         osc_low_shelf,
         osc_s
     };
+
+    if(!func)
+        return NULL;
+
+    func--;
+    assert(func < (sizeof(functions)/sizeof(functions[0])));
     return functions[func];
 }
 

@@ -180,10 +180,10 @@ class OscilGen:public Presets
         const SYNTH_T &synth;
 };
 
-typedef float (*filter_func)(unsigned int, float, float);
-filter_func getFilter(unsigned char func);
-typedef float (*base_func)(float, float);
-base_func getBaseFunction(unsigned char func);
+typedef float filter_func_t(unsigned int, float, float);
+filter_func_t *getFilter(unsigned char func);
+typedef float base_func_t(float, float);
+base_func_t *getBaseFunction(unsigned char func);
 
 }
 
