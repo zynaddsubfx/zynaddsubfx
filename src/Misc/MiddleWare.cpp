@@ -471,12 +471,7 @@ public:
         if(actual_load[npart] != pending_load[npart])
             return;
         assert(actual_load[npart] <= pending_load[npart]);
-
-        if(!filename || !*filename){
-            fprintf(stderr, "Warning: failed to load undefined part<%s>\n",
-                    filename);
-            return;
-        }
+        assert(filename);
 
         //load part in async fashion when possible
 #ifndef WIN32
@@ -1582,6 +1577,11 @@ static rtosc::Ports middlewareReplyPorts = {
         Bank &bank        = impl.master->bank;
         const int part    = rtosc_argument(msg, 0).i;
         const int program = rtosc_argument(msg, 1).i + 128*bank.bank_lsb;
+        if (program >= BANK_SIZE) {
+            fprintf(stderr, "bank:program number %d:%d is out of range.",
+                    program >> 7, program & 0x7f);
+            return;
+        }
         const char *fn  = impl.master->bank.ins[program].filename.c_str();
         impl.loadPart(part, fn, impl.master, d);
         impl.uToB->write(("/part"+to_s(part)+"/Pname").c_str(), "s",
