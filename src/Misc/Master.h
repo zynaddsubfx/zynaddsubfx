@@ -16,6 +16,7 @@
 #define MASTER_H
 #include "../globals.h"
 #include "Microtonal.h"
+#include <atomic>
 #include <rtosc/automations.h>
 #include <rtosc/savefile.h>
 
@@ -123,7 +124,8 @@ class Master
         void vuUpdate(const float *outl, const float *outr);
 
         //Process a set of OSC events in the bToU buffer
-        bool runOSC(float *outl, float *outr, bool offline=false);
+        bool runOSC(float *outl, float *outr, bool offline=false,
+                    Master* master_from_mw = nullptr);
 
         /**Audio Output*/
         bool AudioOut(float *outl, float *outr) REALTIME;
@@ -224,6 +226,8 @@ class Master
         char dnd_buffer[dnd_buffer_size] = {0};
 
     private:
+        std::atomic<bool> run_osc_in_use = { false };
+
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
         int    keyshift;
@@ -243,10 +247,12 @@ class Master
         //Used by loadOSC and saveOSC
         int loadOSCFromStr(const char *file_content,
                            rtosc::savefile_dispatcher_t* dispatcher);
-        //applyOscEvent with a DataObj parameter
+        //!applyOscEvent with a DataObj parameter
+        //!@return false iff master has been changed
         bool applyOscEvent(const char *event, float *outl, float *outr,
                            bool offline, bool nio,
-                           class DataObj& d, int msg_id = -1);
+                           class DataObj& d, int msg_id = -1,
+                           Master* master_from_mw = nullptr);
 };
 
 class master_dispatcher_t : public rtosc::savefile_dispatcher_t
