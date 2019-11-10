@@ -25,6 +25,7 @@
 #include "../Params/SUBnoteParameters.h"
 #include "../Params/Presets.h"
 #include "../globals.h"
+#include <rtosc/thread-link.h>
 
 using namespace std;
 using namespace zyn;
@@ -42,6 +43,8 @@ class SubNoteTest:public CxxTest::TestSuite
         Controller   *controller;
         unsigned char testnote;
         Alloc         memory;
+        rtosc::ThreadLink *tr;
+        WatchManager *w;
 
 
         float *outR, *outL;
@@ -58,6 +61,9 @@ class SubNoteTest:public CxxTest::TestSuite
             outR = new float[synth->buffersize];
             for(int i = 0; i < synth->buffersize; ++i)
                 *(outR + i) = 0;
+
+            tr  = new rtosc::ThreadLink(1024,3);
+            w   = new WatchManager(tr);
 
             //prepare the default settings
             SUBnoteParameters *defaultPreset = new SUBnoteParameters(time);
@@ -78,8 +84,8 @@ class SubNoteTest:public CxxTest::TestSuite
             testnote = 50;
             float freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
 
-            SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote, false, prng()};
-            note = new SUBnote(defaultPreset, pars);
+            SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote / 12.0f, false, prng()};
+            note = new SUBnote(defaultPreset, pars, w);
             this->pars = defaultPreset;
         }
 
@@ -116,22 +122,36 @@ class SubNoteTest:public CxxTest::TestSuite
 
             note->releasekey();
 
-
+            TS_ASSERT(!tr->hasNext());
+            w->add_watch("noteout/filter");
+            
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], 0.0029f, 0.0001f);
+            w->tick();
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], -0.0011f, 0.0001f);
+            w->tick();
 
+            TS_ASSERT(tr->hasNext());
+            TS_ASSERT_EQUALS(string("noteout/filter"), tr->read());
+            TS_ASSERT(!tr->hasNext());
+
+            w->add_watch("noteout/amp_int");
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], -0.0017f, 0.0001f);
-
+            w->tick();
+            
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], -0.0005f, 0.0001f);
+            w->tick();
+            TS_ASSERT(tr->hasNext());
+            TS_ASSERT_EQUALS(string("noteout/amp_int"), tr->read());
+            TS_ASSERT(!tr->hasNext());
 
             while(!note->finished()) {
                 note->noteout(outL, outR);

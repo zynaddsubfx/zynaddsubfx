@@ -34,7 +34,7 @@ bool verbose = false;
 
 const char *XMLwrapper_whitespace_callback(mxml_node_t *node, int where)
 {
-    const char *name = node->value.element.name;
+    const char *name = mxmlGetElement(node);
 
     if((where == MXML_WS_BEFORE_OPEN) && (!strcmp(name, "?xml")))
         return NULL;
@@ -291,10 +291,10 @@ void XMLwrapper::beginbranch(const string &name, int id)
 void XMLwrapper::endbranch()
 {
     if(verbose)
-        cout << "endbranch()" << node << "-" << node->value.element.name
+        cout << "endbranch()" << node << "-" << mxmlGetElement(node)
              << " To "
-             << node->parent << "-" << node->parent->value.element.name << endl;
-    node = node->parent;
+             << mxmlGetParent(node) << "-" << mxmlGetElement(mxmlGetParent(node)) << endl;
+    node = mxmlGetParent(node);
 }
 
 
@@ -440,10 +440,10 @@ int XMLwrapper::enterbranch(const string &name, int id)
 void XMLwrapper::exitbranch()
 {
     if(verbose)
-        cout << "exitbranch()" << node << "-" << node->value.element.name
+        cout << "exitbranch()" << node << "-" << mxmlGetElement(node)
              << " To "
-             << node->parent << "-" << node->parent->value.element.name << endl;
-    node = node->parent;
+             << mxmlGetParent(node) << "-" << mxmlGetElement(mxmlGetParent(node)) << endl;
+    node = mxmlGetParent(node);
 }
 
 
@@ -519,24 +519,24 @@ int XMLwrapper::getparbool(const string &name, int defaultpar) const
 void XMLwrapper::getparstr(const string &name, char *par, int maxstrlen) const
 {
     ZERO(par, maxstrlen);
-    const mxml_node_t *tmp = mxmlFindElement(node,
-                                             node,
-                                             "string",
-                                             "name",
-                                             name.c_str(),
-                                             MXML_DESCEND_FIRST);
+    mxml_node_t *tmp = mxmlFindElement(node,
+                                       node,
+                                       "string",
+                                       "name",
+                                        name.c_str(),
+                                        MXML_DESCEND_FIRST);
 
     if(tmp == NULL)
         return;
-    if(tmp->child == NULL)
+    if(mxmlGetFirstChild(tmp) == NULL)
         return;
-    if(tmp->child->type == MXML_OPAQUE) {
-        snprintf(par, maxstrlen, "%s", tmp->child->value.element.name);
+    if(mxmlGetType(mxmlGetFirstChild(tmp)) == MXML_OPAQUE) {
+        snprintf(par, maxstrlen, "%s", mxmlGetOpaque(mxmlGetFirstChild(tmp)));
         return;
     }
-    if((tmp->child->type == MXML_TEXT)
-       && (tmp->child->value.text.string != NULL)) {
-        snprintf(par, maxstrlen, "%s", tmp->child->value.text.string);
+    if((mxmlGetType(mxmlGetFirstChild(tmp)) == MXML_TEXT)
+       && (mxmlGetFirstChild(tmp) != NULL)) {
+        snprintf(par, maxstrlen, "%s", mxmlGetText(mxmlGetFirstChild(tmp),NULL));
         return;
     }
 }
@@ -544,25 +544,36 @@ void XMLwrapper::getparstr(const string &name, char *par, int maxstrlen) const
 string XMLwrapper::getparstr(const string &name,
                              const std::string &defaultpar) const
 {
-    const mxml_node_t *tmp = mxmlFindElement(node,
-                                             node,
-                                             "string",
-                                             "name",
-                                             name.c_str(),
-                                             MXML_DESCEND_FIRST);
+    mxml_node_t *tmp = mxmlFindElement(node,
+                                       node,
+                                       "string",
+                                       "name",
+                                       name.c_str(),
+                                       MXML_DESCEND_FIRST);
 
-    if((tmp == NULL) || (tmp->child == NULL))
+    if((tmp == NULL) || (mxmlGetFirstChild(tmp) == NULL))
         return defaultpar;
 
-    if((tmp->child->type == MXML_OPAQUE)
-       && (tmp->child->value.element.name != NULL))
-        return tmp->child->value.element.name;
+    if(mxmlGetType(mxmlGetFirstChild(tmp)) == MXML_OPAQUE
+       && (mxmlGetOpaque(mxmlGetFirstChild(tmp)) != NULL))
+        return mxmlGetOpaque(mxmlGetFirstChild(tmp));
 
-    if((tmp->child->type == MXML_TEXT)
-       && (tmp->child->value.text.string != NULL))
-        return tmp->child->value.text.string;
+    if(mxmlGetType(mxmlGetFirstChild(tmp)) == MXML_TEXT
+       && (mxmlGetText(mxmlGetFirstChild(tmp),NULL) != NULL))
+        return mxmlGetText(mxmlGetFirstChild(tmp),NULL);
 
     return defaultpar;
+}
+
+bool XMLwrapper::hasparreal(const char *name) const
+{
+    const mxml_node_t *tmp = mxmlFindElement(node,
+                                             node,
+                                             "par_real",
+                                             "name",
+                                             name,
+                                             MXML_DESCEND_FIRST);
+    return tmp != nullptr;
 }
 
 float XMLwrapper::getparreal(const char *name, float defaultpar) const
@@ -670,15 +681,27 @@ void XMLwrapper::add(const XmlNode &node_)
 std::vector<XmlNode> XMLwrapper::getBranch(void) const
 {
     std::vector<XmlNode> res;
-    mxml_node_t *current = node->child;
+    mxml_node_t *current = mxmlGetFirstChild(node);
     while(current) {
-        if(current->type == MXML_ELEMENT) {
+        if(mxmlGetType(current) == MXML_ELEMENT) {
+#if MXML_MAJOR_VERSION == 3
+            XmlNode n(mxmlGetElement(current));
+            int count = mxmlElementGetAttrCount(current);
+            const char *name;
+            const char *attrib;
+            for(int i = 0; i < count; ++i) {
+                attrib = mxmlElementGetAttrByIndex(current, i, &name);
+                if(name)
+                    n[name] = attrib;
+            }
+#else
             auto elm = current->value.element;
             XmlNode n(elm.name);
-            for(int i=0; i<elm.num_attrs; ++i) {
+            for(int i = 0; i < elm.num_attrs; ++i) {
                 auto &attr = elm.attrs[i];
                 n[attr.name] = attr.value;
             }
+#endif
             res.push_back(n);
         }
         current = mxmlWalkNext(current, node, MXML_NO_DESCEND);

@@ -3,7 +3,7 @@
 
   main.cpp  -  Main file of the synthesizer
   Copyright (C) 2002-2005 Nasca Octavian Paul
-  Copyright (C) 2012-2017 Mark McCurry
+  Copyright (C) 2012-2019 Mark McCurry
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -36,6 +36,7 @@
 #include "Params/PADnoteParameters.h"
 
 #include "DSP/FFTwrapper.h"
+#include "Misc/MemLocker.h"
 #include "Misc/PresetExtractor.h"
 #include "Misc/Master.h"
 #include "Misc/Part.h"
@@ -228,7 +229,7 @@ int main(int argc, char *argv[])
     << "\nZynAddSubFX - Copyright (c) 2002-2013 Nasca Octavian Paul and others"
     << endl;
     cerr
-    << "                Copyright (c) 2009-2017 Mark McCurry [active maintainer]"
+    << "                Copyright (c) 2009-2019 Mark McCurry [active maintainer]"
     << endl;
     cerr << "This program is free software (GNU GPL v2 or later) and \n";
     cerr << "it comes with ABSOLUTELY NO WARRANTY.\n" << endl;
@@ -744,7 +745,7 @@ int main(int argc, char *argv[])
         memset(&pi, 0, sizeof(pi));
         char *why_windows = strrchr(addr, ':');
         char *seriously_why = why_windows + 1;
-        char start_line[256] = {0};
+        char start_line[256] = {};
         if(why_windows)
             snprintf(start_line, sizeof(start_line), "zyn-fusion.exe osc.udp://127.0.0.1:%s", seriously_why);
         else {
@@ -760,6 +761,9 @@ int main(int argc, char *argv[])
 #endif
     }
 #endif
+
+    MemLocker mem_locker;
+    mem_locker.lock();
 
     printf("[INFO] Main Loop...\n");
     bool already_exited = false;
@@ -814,6 +818,9 @@ done:
 #endif
 #endif
     }
+
+    mem_locker.unlock();
+
 #ifdef ZEST_GUI
 #ifndef WIN32
     if(!already_exited) {

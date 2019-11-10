@@ -10,6 +10,7 @@
 src/zynaddsubfx
 src/Tests/runner
 src/Tests/runner.cpp
+src/Tests/Testing
 CMakeCache.txt
 CMakeFiles
 build

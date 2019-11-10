@@ -74,19 +74,19 @@ ELSE()
 #!${BASH}\n\
 set -e\n\
 BASHCOMP_PKG_PATH=\"${BASHCOMP_USER_PATH}\"\n\
-if [ -w \"${BASHCOMP_PKG_PATH}\" ]; then\n\
+if [ -n \"${BASHCOMP_PKG_PATH}\" ]; then\n\
   BASHCOMP_PKG_PATH=\"${BASHCOMP_PKG_PATH}\"\n\
 fi\n\
 echo -e \"\\nInstalling bash completion...\\n\"\n\
-mkdir -p \"\$BASHCOMP_PKG_PATH\"\n\
-cp \"${CMAKE_CURRENT_SOURCE_DIR}/${SCRIPT_NAME}\" \"\$BASHCOMP_PKG_PATH\"\n\
-chmod a+r \"\$BASHCOMP_PKG_PATH/${SCRIPT_NAME}\"\n\
-echo -e \"Bash completion for ${SCRIPT_NAME} has been installed to \$BASHCOMP_PKG_PATH/${SCRIPT_NAME}\"\n\
+mkdir -p \"\${DESTDIR}/$BASHCOMP_PKG_PATH\"\n\
+cp \"${CMAKE_CURRENT_BINARY_DIR}/${SCRIPT_NAME}\" \"\${DESTDIR}/$BASHCOMP_PKG_PATH\"\n\
+chmod a+r \"\${DESTDIR}/$BASHCOMP_PKG_PATH/${SCRIPT_NAME}\"\n\
+echo -e \"Bash completion for ${SCRIPT_NAME} has been installed to \${DESTDIR}/$BASHCOMP_PKG_PATH/${SCRIPT_NAME}\"\n\
 ")
 		INSTALL(CODE "EXECUTE_PROCESS(COMMAND chmod u+x \"install_${SCRIPT_NAME}_completion.sh\" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )")
 		INSTALL(CODE "EXECUTE_PROCESS(COMMAND \"./install_${SCRIPT_NAME}_completion.sh\" WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )")
 
-		MESSAGE(STATUS "Bash completion script for ${SCRIPT_NAME} will be installed to ${BASHCOMP_PKG_PATH} or fallback to ${BASHCOMP_USER_PATH} if unwritable.")
+    MESSAGE(STATUS "Bash completion script for ${SCRIPT_NAME} will be installed to ${DESTDIR}/${BASHCOMP_PKG_PATH} or fallback to ${BASHCOMP_USER_PATH} if unwritable.")
 	ENDMACRO()
 ENDIF()
 

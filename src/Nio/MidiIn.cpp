@@ -14,8 +14,32 @@
 #include "MidiIn.h"
 #include "../globals.h"
 #include "InMgr.h"
+#include <string.h>
 
 namespace zyn {
+
+MidiIn::MidiIn()
+{
+    sysex_offset = 0;
+    memset(sysex_data, 0, sizeof(sysex_data));
+}
+
+uint8_t MidiIn::midiSysEx(unsigned char data)
+{
+    if (data & 0x80) {
+        if (data == 0xF0) {
+		sysex_offset = 0; /* begin */
+        } else if (data == 0xF7) {
+                return (2); /* end */
+        } else {
+                return (1); /* error */
+        }
+    } else if (sysex_offset >= sizeof(sysex_data)) {
+        return (1); /* error */
+    }
+    sysex_data[sysex_offset++] = data;
+    return (0);
+}
 
 void MidiIn::midiProcess(unsigned char head,
                          unsigned char num,
@@ -23,6 +47,40 @@ void MidiIn::midiProcess(unsigned char head,
 {
     MidiEvent     ev;
     unsigned char chan = head & 0x0f;
+
+    /* SYSEX handling */
+    if (head == 0xF0 || sysex_offset != 0) {
+        uint8_t status = 0;
+
+        status |= midiSysEx(head);
+        status |= midiSysEx(num);
+        status |= midiSysEx(value);
+
+        if (status & 1) {
+            /* error parsing SYSEX */
+            sysex_offset = 0;
+        } else if (status & 2) {
+            /* message complete */
+
+            if (sysex_offset >= 10 &&
+                sysex_data[1] == 0x0A &&
+                sysex_data[2] == 0x55) {
+                ev.type = M_FLOAT_NOTE;
+                ev.channel = sysex_data[3] & 0x0F;
+                ev.num = sysex_data[4];
+                ev.value = sysex_data[5];
+                ev.log2_freq = (sysex_data[6] +
+                  (sysex_data[7] / (128.0f)) +
+                  (sysex_data[8] / (128.0f * 128.0f)) +
+                  (sysex_data[9] / (128.0f * 128.0f * 128.0f))
+                  ) / 12.0f;
+                InMgr::getInstance().putEvent(ev);
+            }
+            return; /* message complete */
+        } else {
+	    return; /* wait for more data */
+        }
+    }
     switch(head & 0xf0) {
         case 0x80: //Note Off
             ev.type    = M_NOTE;

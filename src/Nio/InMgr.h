@@ -19,12 +19,12 @@
 namespace zyn {
 
 enum midi_type {
-    M_NOTE = 1,
-    M_CONTROLLER = 2,
-    M_PGMCHANGE  = 3,
-    M_PRESSURE   = 4
-};    //type=1 for note, type=2 for controller, type=3 for program change
-//type=4 for polyphonic aftertouch
+    M_NOTE = 1, // for note
+    M_CONTROLLER = 2, // for controller
+    M_PGMCHANGE  = 3, // for program change
+    M_PRESSURE   = 4, // for polyphonic aftertouch
+    M_FLOAT_NOTE = 5  // for floating point note
+};
 
 struct MidiEvent {
     MidiEvent();
@@ -33,6 +33,7 @@ struct MidiEvent {
     int num;     //note, controller or program number
     int value;   //velocity or controller value
     int time;    //time offset of event (used only in jack->jack case at the moment)
+    float log2_freq;	//type=5 for logarithmic representation of note
 };
 
 //super simple class to manage the inputs

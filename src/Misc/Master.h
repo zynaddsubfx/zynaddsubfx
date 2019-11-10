@@ -16,6 +16,7 @@
 #define MASTER_H
 #include "../globals.h"
 #include "Microtonal.h"
+#include <atomic>
 #include <rtosc/automations.h>
 #include <rtosc/savefile.h>
 
@@ -43,6 +44,9 @@ struct vuData {
 class Master
 {
     public:
+        Master(const Master& other) = delete;
+        Master(Master&& other) = delete;
+
         /** Constructor TODO make private*/
         Master(const SYNTH_T &synth, class Config *config);
         /** Destructor*/
@@ -104,9 +108,12 @@ class Master
         void putalldata(const char *data);
 
         //Midi IN
-        void noteOn(char chan, char note, char velocity);
-        void noteOff(char chan, char note);
-        void polyphonicAftertouch(char chan, char note, char velocity);
+        void noteOn(char chan, note_t note, char velocity) {
+            noteOn(chan, note, velocity, note / 12.0f);
+        };
+        void noteOn(char chan, note_t note, char velocity, float note_log2_freq);
+        void noteOff(char chan, note_t note);
+        void polyphonicAftertouch(char chan, note_t note, char velocity);
         void setController(char chan, int type, int par);
         //void NRPN...
 
@@ -117,7 +124,8 @@ class Master
         void vuUpdate(const float *outl, const float *outr);
 
         //Process a set of OSC events in the bToU buffer
-        bool runOSC(float *outl, float *outr, bool offline=false);
+        bool runOSC(float *outl, float *outr, bool offline=false,
+                    Master* master_from_mw = nullptr);
 
         /**Audio Output*/
         bool AudioOut(float *outl, float *outr) REALTIME;
@@ -141,14 +149,12 @@ class Master
         class Part * part[NUM_MIDI_PARTS];
 
         //parameters
-
-        unsigned char Pvolume;
         unsigned char Pkeyshift;
         unsigned char Psysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         unsigned char Psysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
 
         //parameters control
-        void setPvolume(char Pvolume_);
+        static float volume127ToFloat(unsigned char volume_);
         void setPkeyshift(char Pkeyshift_);
         void setPsysefxvol(int Ppart, int Pefx, char Pvol);
         void setPsysefxsend(int Pefxfrom, int Pefxto, char Pvol);
@@ -169,7 +175,8 @@ class Master
         void vuresetpeaks();
 
         //peaks for part VU-meters
-        float vuoutpeakpart[NUM_MIDI_PARTS];
+        float vuoutpeakpartl[NUM_MIDI_PARTS];
+        float vuoutpeakpartr[NUM_MIDI_PARTS];
         unsigned char fakepeakpart[NUM_MIDI_PARTS]; //this is used to compute the "peak" when the part is disabled
 
         AbsTime  time;
@@ -185,7 +192,8 @@ class Master
         class FFTwrapper * fft;
 
         static const rtosc::Ports &ports;
-        float  volume;
+        float oldVolume;
+        float  Volume;
 
         //Statistics on output levels
         vuData vu;
@@ -211,7 +219,15 @@ class Master
         //in units of 10 ms (done s.t. overflow is in 497 days)
         uint32_t last_beat = 0;
         uint32_t last_ack = 0;
+
+        //Buffer to contain the OSC path to the last GUI element
+        //on which a drag and drop operation ended
+        constexpr static std::size_t dnd_buffer_size = 1024;
+        char dnd_buffer[dnd_buffer_size] = {0};
+
     private:
+        std::atomic<bool> run_osc_in_use = { false };
+
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
         int    keyshift;
@@ -231,10 +247,12 @@ class Master
         //Used by loadOSC and saveOSC
         int loadOSCFromStr(const char *file_content,
                            rtosc::savefile_dispatcher_t* dispatcher);
-        //applyOscEvent with a DataObj parameter
+        //!applyOscEvent with a DataObj parameter
+        //!@return false iff master has been changed
         bool applyOscEvent(const char *event, float *outl, float *outr,
                            bool offline, bool nio,
-                           class DataObj& d, int msg_id = -1);
+                           class DataObj& d, int msg_id = -1,
+                           Master* master_from_mw = nullptr);
 };
 
 class master_dispatcher_t : public rtosc::savefile_dispatcher_t

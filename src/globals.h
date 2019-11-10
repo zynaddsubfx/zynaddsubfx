@@ -274,9 +274,13 @@ class m_unique_ptr
     T* ptr = nullptr;
 public:
     m_unique_ptr() = default;
-    m_unique_ptr(m_unique_ptr&& other) {
+    m_unique_ptr(m_unique_ptr&& other) : ptr(other.ptr) {
+        other.ptr = nullptr;
+    }
+    m_unique_ptr& operator=(m_unique_ptr&& other) {
         ptr = other.ptr;
         other.ptr = nullptr;
+        return *this;
     }
     m_unique_ptr(const m_unique_ptr& other) = delete;
     ~m_unique_ptr() { ptr = nullptr; }
@@ -301,6 +305,8 @@ struct SYNTH_T {
 
     SYNTH_T(const SYNTH_T& ) = delete;
     SYNTH_T(SYNTH_T&& ) = default;
+    SYNTH_T& operator=(const SYNTH_T& ) = delete;
+    SYNTH_T& operator=(SYNTH_T&& ) = default;
 
     /** the buffer to add noise in order to avoid denormalisation */
     m_unique_ptr<float> denormalkillbuf;

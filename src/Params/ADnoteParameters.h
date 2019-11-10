@@ -64,7 +64,7 @@ struct ADnoteGlobalParam {
             127 - right */
     unsigned char PPanning;
 
-    unsigned char PVolume;
+    float Volume;
 
     unsigned char PAmpVelocityScaleFunction;
 
@@ -214,7 +214,7 @@ struct ADnoteVoiceParam {
     unsigned char PPanning;
 
     /* Voice Volume */
-    unsigned char PVolume;
+    float volume;
 
     /* If the Volume negative */
     unsigned char PVolumeminus;

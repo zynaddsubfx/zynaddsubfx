@@ -35,10 +35,12 @@ class PADnote:public SynthNote
         bool finished() const;
         void entomb(void);
 
+        VecWatchPoint watch_int,watch_punch, watch_amp_int, watch_legato;
+
         void releasekey();
     private:
         void setup(float freq, float velocity, int portamento_,
-                   int midinote, bool legato = false, WatchManager *wm=0, const char *prefix=0);
+                   float note_log2_freq, bool legato = false, WatchManager *wm=0, const char *prefix=0);
         void fadein(float *smps);
         void computecurrentparameters();
         bool finished_;

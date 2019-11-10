@@ -150,9 +150,9 @@ class MessageTest:public CxxTest::TestSuite
 
         void testMidiLearn(void)
         {
-            mw->transmitMsg("/learn", "s", "/Pvolume");
+            mw->transmitMsg("/learn", "s", "/Pkeyshift");
             mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 108);
-            TS_ASSERT_EQUALS(ms->Pvolume, 80);
+            TS_ASSERT_EQUALS(ms->Pkeyshift, 64);
 
             //Perform a learning operation
 
@@ -164,35 +164,35 @@ class MessageTest:public CxxTest::TestSuite
             //Verify that the learning actually worked
             mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 13);
             run_realtime();
-            TS_ASSERT_EQUALS(ms->Pvolume, 13);
+            TS_ASSERT_EQUALS(ms->Pkeyshift, 13);
 
             mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 2);
             run_realtime();
-            TS_ASSERT_EQUALS(ms->Pvolume, 2);
+            TS_ASSERT_EQUALS(ms->Pkeyshift, 2);
 
             mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 0);
             run_realtime();
-            TS_ASSERT_EQUALS(ms->Pvolume, 0);
+            TS_ASSERT_EQUALS(ms->Pkeyshift, 0);
 
             mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 127);
             run_realtime();
-            TS_ASSERT_EQUALS(ms->Pvolume, 127);
+            TS_ASSERT_EQUALS(ms->Pkeyshift, 127);
         }
 
         void testMidiLearnSave(void)
         {
-            mw->transmitMsg("/learn", "s", "/Pvolume");
+            mw->transmitMsg("/learn", "s", "/Pkeyshift");
             mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 108);
 
             //param is at default until rt-thread is run
-            TS_ASSERT_EQUALS(ms->Pvolume, 80);
+            TS_ASSERT_EQUALS(ms->Pkeyshift, 64);
 
 
             //Perform a learning operation
             run_realtime();
 
             //Verify binding affects control
-            TS_ASSERT_EQUALS(ms->Pvolume, 108);
+            TS_ASSERT_EQUALS(ms->Pkeyshift, 108);
 
 
             printf("# Trying to save automations\n");
@@ -216,7 +216,7 @@ class MessageTest:public CxxTest::TestSuite
             run_realtime();
 
             //Verify automation table is clear
-            TS_ASSERT_EQUALS(ms->Pvolume, 108);
+            TS_ASSERT_EQUALS(ms->Pkeyshift, 108);
 
             printf("# Loading automation\n");
             mw->transmitMsg("/load_xlz", "s", "test-midi-learn.xlz");
@@ -225,7 +225,7 @@ class MessageTest:public CxxTest::TestSuite
             run_realtime();
 
             //Verify automation table is restored
-            TS_ASSERT_EQUALS(ms->Pvolume, 28);
+            TS_ASSERT_EQUALS(ms->Pkeyshift, 28);
         }
 
         void testLfoPaste(void)

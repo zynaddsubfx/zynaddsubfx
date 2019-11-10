@@ -426,15 +426,13 @@ public:
 
 class MiddleWareImpl
 {
-    public:
-    MiddleWare *parent;
-    private:
-
 public:
+    MiddleWare *parent;
     Config* const config;
     MiddleWareImpl(MiddleWare *mw, SYNTH_T synth, Config* config,
                    int preferred_port);
     ~MiddleWareImpl(void);
+    void recreateMinimalMaster();
 
     //Check offline vs online mode in plugins
     void heartBeat(Master *m);
@@ -466,7 +464,7 @@ public:
             bank.loadbank(bank.banks[par].dir);
     }
 
-    void loadPart(int npart, const char *filename, Master *master)
+    void loadPart(int npart, const char *filename, Master *master, rtosc::RtData &d)
     {
         actual_load[npart]++;
 
@@ -524,7 +522,7 @@ public:
         //Give it to the backend and wait for the old part to return for
         //deallocation
         parent->transmitMsg("/load-part", "ib", npart, sizeof(Part*), &p);
-        GUI::raiseUi(ui, "/damage", "s", ("/part"+to_s(npart)+"/").c_str());
+        d.broadcast("/damage", "s", ("/part"+to_s(npart)+"/").c_str());
     }
 
     //Load a new cleared Part instance
@@ -578,6 +576,7 @@ public:
         //Update resource locator table
         updateResources(m);
 
+        previous_master = master;
         master = m;
 
         //Give it to the backend and wait for the old part to return for
@@ -696,10 +695,13 @@ public:
 
         heartBeat(master);
 
-        //XXX This might have problems with a master swap operation
         if(offline)
-            master->runOSC(0,0,true);
-
+        {
+            //pass previous master in case it will have to be freed
+            //similar to previous_master->runOSC(0,0,true)
+            //but note that previous_master could have been freed already
+            master->runOSC(0,0,true, previous_master);
+        }
     }
 
 
@@ -741,6 +743,10 @@ public:
     //this assumption is broken
     Master *master;
 
+    //The master before the last load operation, if any
+    //Only valid until freed
+    Master *previous_master = nullptr;
+
     //The ONLY means that any chunk of UI code should have for interacting with the
     //backend
     Fl_Osc_Interface *osc;
@@ -778,7 +784,7 @@ public:
     std::set<string> known_remotes;
 
     //Synthesis Rate Parameters
-    const SYNTH_T synth;
+    SYNTH_T synth;
 
     PresetsStore presetsstore;
 
@@ -1424,14 +1430,14 @@ static rtosc::Ports middwareSnoopPorts = {
         const int part_id = rtosc_argument(msg,0).i;
         const char *file  = rtosc_argument(msg,1).s;
         impl.pending_load[part_id]++;
-        impl.loadPart(part_id, file, impl.master);
+        impl.loadPart(part_id, file, impl.master, d);
         rEnd},
     {"load-part:is", 0, 0,
         rBegin;
         const int part_id = rtosc_argument(msg,0).i;
         const char *file  = rtosc_argument(msg,1).s;
         impl.pending_load[part_id]++;
-        impl.loadPart(part_id, file, impl.master);
+        impl.loadPart(part_id, file, impl.master, d);
         rEnd},
     {"load-part:iss", 0, 0,
         rBegin;
@@ -1439,7 +1445,7 @@ static rtosc::Ports middwareSnoopPorts = {
         const char *file  = rtosc_argument(msg,1).s;
         const char *name  = rtosc_argument(msg,2).s;
         impl.pending_load[part_id]++;
-        impl.loadPart(part_id, file, impl.master);
+        impl.loadPart(part_id, file, impl.master, d);
         impl.uToB->write(("/part"+to_s(part_id)+"/Pname").c_str(), "s",
                 name);
         rEnd},
@@ -1449,7 +1455,7 @@ static rtosc::Ports middwareSnoopPorts = {
         const int slot = rtosc_argument(msg, 0).i + 128*bank.bank_lsb;
         if(slot < BANK_SIZE) {
             impl.pending_load[0]++;
-            impl.loadPart(0, impl.master->bank.ins[slot].filename.c_str(), impl.master);
+            impl.loadPart(0, impl.master->bank.ins[slot].filename.c_str(), impl.master, d);
             impl.uToB->write("/part0/Pname", "s", impl.master->bank.ins[slot].name.c_str());
         }
         rEnd},
@@ -1514,8 +1520,33 @@ static rtosc::Ports middwareSnoopPorts = {
     //    midi.unMap(addr.c_str(), true);
     //    rEnd},
     //drop this message into the abyss
-    {"ui/title:", 0, 0, [](const char *msg, RtData &d) {}},
+    {"ui/title:", 0, 0, [](const char *, RtData &) {}},
     {"quit:", 0, 0, [](const char *, RtData&) {Pexitprogram = 1;}},
+    // may only be called when Master is not being run
+    {"change-synth:iiit", 0, 0,
+        rBegin
+        // save all data, overwrite all params defining SYNTH,
+        // restart the master and load all data back into it
+
+        char* data = nullptr;
+        impl.master->getalldata(&data);
+        delete impl.master;
+
+        impl.synth.samplerate = (unsigned)rtosc_argument(msg, 0).i;
+        impl.synth.buffersize = rtosc_argument(msg, 1).i;
+        impl.synth.oscilsize = rtosc_argument(msg, 2).i;
+        impl.synth.alias();
+
+        impl.recreateMinimalMaster();
+        impl.master->defaults();
+        impl.master->putalldata(data);
+        impl.master->applyparameters();
+        impl.master->initialize_rt();
+        impl.updateResources(impl.master);
+
+        d.broadcast("/change-synth", "t", rtosc_argument(msg, 3).t);
+        rEnd
+    }
 };
 
 static rtosc::Ports middlewareReplyPorts = {
@@ -1545,7 +1576,7 @@ static rtosc::Ports middlewareReplyPorts = {
         Bank &bank        = impl.master->bank;
         const int part    = rtosc_argument(msg, 0).i;
         const int program = rtosc_argument(msg, 1).i + 128*bank.bank_lsb;
-        impl.loadPart(part, impl.master->bank.ins[program].filename.c_str(), impl.master);
+        impl.loadPart(part, impl.master->bank.ins[program].filename.c_str(), impl.master, d);
         impl.uToB->write(("/part"+to_s(part)+"/Pname").c_str(), "s", impl.master->bank.ins[program].name.c_str());
         rEnd},
     {"setbank:c", 0, 0,
@@ -1603,9 +1634,7 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
     idle = 0;
     idle_ptr = 0;
 
-    master = new Master(synth, config);
-    master->bToU = bToU;
-    master->uToB = uToB;
+    recreateMinimalMaster();
     osc    = GUI::genOscInterface(mw);
 
     //Grab objects of interest from master
@@ -1648,6 +1677,13 @@ MiddleWareImpl::~MiddleWareImpl(void)
     delete bToU;
     delete uToB;
 
+}
+
+void zyn::MiddleWareImpl::recreateMinimalMaster()
+{
+    master = new Master(synth, config);
+    master->bToU = bToU;
+    master->uToB = uToB;
 }
 
 /** Threading When Saving

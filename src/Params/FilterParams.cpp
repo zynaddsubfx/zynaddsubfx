@@ -86,9 +86,9 @@ const rtosc::Ports FilterParams::ports = {
     rParamF(basefreq,           rShort("cutoff"),
             rUnit(Hz),    rLog(31.25, 32000),
             rDefaultDepends(loc),
-            rPreset(ad_global_filter, 0x1.3d434p+12),
-            rPreset(ad_voice_filter, 0x1.d48ab6p+8),
-            rPreset(sub_filter, 0x1.294d3ep+11),
+            rPreset(ad_global_filter, 32000),
+            rPreset(ad_voice_filter, 32000),
+            rPreset(sub_filter, 32000),
             rPreset(in_effect, 0x1.f3fffcp+9),
             "Base cutoff frequency"),
     rParamF(freqtracking,       rShort("f.track"), rUnit(%),
@@ -226,7 +226,7 @@ const rtosc::Ports FilterParams::ports = {
             FilterParams *obj = (FilterParams *) d.obj;
 
             rtosc_arg_t args[2+3*FF_MAX_FORMANTS*FF_MAX_VOWELS];
-            char type[2+3*FF_MAX_FORMANTS*FF_MAX_VOWELS + 1] = {0};
+            char type[2+3*FF_MAX_FORMANTS*FF_MAX_VOWELS + 1] = {};
 
             type[0] = 'i';
             type[1] = 'i';
@@ -355,9 +355,9 @@ FilterParams::FilterParams(consumer_location_t loc,
 
     switch(loc)
     {
-        case ad_global_filter:  init(2, 94, 40); break;
-        case ad_voice_filter:   init(2, 50, 60); break;
-        case sub_filter:        init(2, 80, 40); break;
+        case ad_global_filter:  init(2, 127, 40); break;
+        case ad_voice_filter:   init(2, 127, 60); break;
+        case sub_filter:        init(2, 127, 40); break;
         case in_effect:         init(0, 64, 64); break;
         default: throw std::logic_error("Invalid filter consumer location");
     }

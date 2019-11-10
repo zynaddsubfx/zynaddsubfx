@@ -128,8 +128,28 @@ static const Ports voicePorts = {
     //Amplitude Stuff
     rParamZyn(PPanning,                  rShort("pan."), rDefault(64),
         "Panning"),
-    rParamZyn(PVolume,                   rShort("vol."), rDefault(100),
-        "Volume"),
+    {"PVolume::i", rShort("vol.") rLinear(0,127)
+        rDoc("Volume"), NULL,
+        [](const char *msg, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            if (!rtosc_narguments(msg))
+                d.reply(d.loc, "i", (int)roundf(127.0f * (1.0f + obj->volume/60.0f)));
+            else 
+                obj->volume = -60.0f * (1.0f - rtosc_argument(msg, 0).i / 127.0f);
+        }},
+    {"volume::f", rShort("volume") rProp(parameter) rUnit(dB) rDefault(-12.75) rLinear(-60.0f, 0.0f)
+        rDoc("Part Volume"), NULL,
+        [](const char *msg, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            if(!rtosc_narguments(msg)) {
+               d.reply(d.loc, "f", obj->volume);
+            } else if (rtosc_narguments(msg) == 1 && rtosc_type(msg, 0) == 'f') {
+               obj->volume = rtosc_argument(msg, 0).f;
+               d.broadcast(d.loc, "f", ((obj->volume)));
+            }
+        }},
     rToggle(PVolumeminus,                rShort("inv."), rDefault(false),
         "Signal Inverter"), //do we really need this??
     rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), rDefault(127),
@@ -151,7 +171,7 @@ static const Ports voicePorts = {
     rParamZyn(PFilterVelocityScaleFunction, rShort("v.sense"), rDefault(64),
         "Filter Velocity Function Shape"),
 
-
+ 
     //Modulator Stuff
     rOption(PFMEnabled, rShort("mode"), rOptions(none, mix, ring, phase,
                 frequency, pulse, wave), rDefault(none), "Modulator mode"),
@@ -180,6 +200,7 @@ static const Ports voicePorts = {
             "Modulator Amplitude Envelope"),
 
 
+
     //weird stuff for PCoarseDetune
     {"detunevalue:",  rMap(unit,cents) rDoc("Get detune in cents"), NULL,
         [](const char *, RtData &d)
@@ -197,29 +218,37 @@ static const Ports voicePorts = {
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_octave = [&obj](){
                 int k=obj->PCoarseDetune/1024;
                 if (k>=8) k-=16;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_octave());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=16;
                 obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
+                d.broadcast(d.loc, "i", get_octave());
             }
         }},
-    {"coarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64,63)
+    {"coarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64,63) rDefault(0)
         rDoc("Coarse note detune"), NULL,
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_coarse = [&obj](){
                 int k=obj->PCoarseDetune%1024;
                 if (k>=512) k-=1024;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_coarse());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=1024;
                 obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
+                d.broadcast(d.loc, "i", get_coarse());
             }
         }},
     {"PFMVolume::i", rShort("vol.") rLinear(0,127)
@@ -248,14 +277,18 @@ static const Ports voicePorts = {
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_octave = [&obj](){
                 int k=obj->PFMCoarseDetune/1024;
                 if (k>=8) k-=16;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_octave());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=16;
                 obj->PFMCoarseDetune = k*1024 + obj->PFMCoarseDetune%1024;
+                d.broadcast(d.loc, "i", get_octave());
             }
         }},
     {"FMcoarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64,63)
@@ -263,14 +296,18 @@ static const Ports voicePorts = {
         NULL, [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_coarse = [&obj](){
                 int k=obj->PFMCoarseDetune%1024;
                 if (k>=512) k-=1024;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_coarse());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=1024;
                 obj->PFMCoarseDetune = k + (obj->PFMCoarseDetune/1024)*1024;
+                d.broadcast(d.loc, "i", get_coarse());
             }
         }},
 
@@ -315,10 +352,20 @@ static const Ports globalPorts = {
     //Amplitude
     rParamZyn(PPanning, rShort("pan"), rDefault(64),
         "Panning of ADsynth (0 random, 1 left, 127 right)"),
-    rParamZyn(PVolume,  rShort("vol"), rDefault(90), "volume control"),
+    rParamF(Volume,                   rShort("vol"), rLinear(-47.9588f,32.0412f),
+        rUnit(dB), rDefault(8.29f), "volume control"),
     rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), rDefault(64),
         "Volume velocity sense"),
-
+    {"PVolume::i", rShort("vol.") rLinear(0,127)
+        rDoc("Volume"), NULL,
+        [](const char *msg, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            if (!rtosc_narguments(msg))
+                d.reply(d.loc, "i", (int)roundf(96.0f * (1.0f + (obj->Volume - 12.0412)/60.0f)));
+            else 
+                obj->Volume = 12.0412 - 60.0f * (1.0f - rtosc_argument(msg, 0).i / 96.0f);
+        }},
     rParamZyn(Fadein_adjustment, rDefault(FADEIN_ADJUSTMENT_SCALE),
         "Adjustment for anti-pop strategy."),
     rParamZyn(PPunchStrength, rShort("strength"),     rDefault(0),
@@ -331,7 +378,7 @@ static const Ports globalPorts = {
         "Punch Velocity control"),
 
     //Filter
-    rParamZyn(PFilterVelocityScale,         rShort("scale"), rDefault(64),
+    rParamZyn(PFilterVelocityScale,         rShort("scale"), rDefault(0),
         "Filter Velocity Magnitude"),
     rParamZyn(PFilterVelocityScaleFunction, rShort("sense"), rDefault(64),
         "Filter Velocity Function Shape"),
@@ -353,14 +400,18 @@ static const Ports globalPorts = {
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_octave = [&obj](){
                 int k=obj->PCoarseDetune/1024;
                 if (k>=8) k-=16;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_octave());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=16;
                 obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
+                d.broadcast(d.loc, "i", get_octave());
             }
         }},
     {"coarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64, 63)
@@ -368,14 +419,18 @@ static const Ports globalPorts = {
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_coarse = [&obj](){
                 int k=obj->PCoarseDetune%1024;
                 if (k>=512) k-=1024;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_coarse());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=1024;
                 obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
+                d.broadcast(d.loc, "i", get_coarse());
             }
         }},
 
@@ -460,7 +515,7 @@ void ADnoteGlobalParam::defaults()
     PBandwidth = 64;
 
     /* Amplitude Global Parameters */
-    PVolume  = 90;
+    Volume  = 8.29f;
     PPanning = 64; //center
     PAmpVelocityScaleFunction = 64;
     AmpEnvelope->defaults();
@@ -473,7 +528,7 @@ void ADnoteGlobalParam::defaults()
     Hrandgrouping = 0;
 
     /* Filter Global Parameters*/
-    PFilterVelocityScale = 64;
+    PFilterVelocityScale = 0;
     PFilterVelocityScaleFunction = 64;
     GlobalFilter->defaults();
     FilterEnvelope->defaults();
@@ -513,7 +568,7 @@ void ADnoteVoiceParam::defaults()
     Poscilphase   = 64;
     PFMoscilphase = 64;
     PDelay                    = 0;
-    PVolume                   = 100;
+    volume                    = -60.0f* (1.0f - 100.0f / 127.0f);
     PVolumeminus              = 0;
     PPanning                  = 64; //center
     PDetune                   = 8192; //8192=0
@@ -724,7 +779,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
 
     xml.beginbranch("AMPLITUDE_PARAMETERS");
     xml.addpar("panning", PPanning);
-    xml.addpar("volume", PVolume);
+    xml.addparreal("volume", volume);
     xml.addparbool("volume_minus", PVolumeminus);
     xml.addpar("velocity_sensing", PAmpVelocityScaleFunction);
 
@@ -839,7 +894,7 @@ void ADnoteGlobalParam::add2XML(XMLwrapper& xml)
     xml.addparbool("stereo", PStereo);
 
     xml.beginbranch("AMPLITUDE_PARAMETERS");
-    xml.addpar("volume", PVolume);
+    xml.addparreal("volume", Volume);
     xml.addpar("panning", PPanning);
     xml.addpar("velocity_sensing", PAmpVelocityScaleFunction);
     xml.addpar("fadein_adjustment", Fadein_adjustment);
@@ -914,7 +969,19 @@ void ADnoteGlobalParam::getfromXML(XMLwrapper& xml)
     PStereo = xml.getparbool("stereo", PStereo);
 
     if(xml.enterbranch("AMPLITUDE_PARAMETERS")) {
-        PVolume  = xml.getpar127("volume", PVolume);
+        const bool upgrade_3_0_5 = (xml.fileversion() < version_type(3,0,5));
+        const bool upgrade_3_0_3 = (xml.fileversion() < version_type(3,0,3)) ||
+            (!xml.hasparreal("volume"));
+
+        if (upgrade_3_0_3) {
+            int vol = xml.getpar127("volume", 0);
+            Volume = 12.0412 - 60.0f * ( 1.0f - vol / 96.0f);
+        } else if (upgrade_3_0_5) {
+            printf("file version less than 3.0.5\n");
+            Volume = 12.0412 + xml.getparreal("volume", Volume);
+        } else {
+            Volume = xml.getparreal("volume", Volume);
+        }
         PPanning = xml.getpar127("panning", PPanning);
         PAmpVelocityScaleFunction = xml.getpar127("velocity_sensing",
                                                    PAmpVelocityScaleFunction);
@@ -1061,7 +1128,7 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
 
 
     copy(PPanning);
-    copy(PVolume);
+    copy(volume);
     copy(PVolumeminus);
     copy(PAmpVelocityScaleFunction);
     copy(PAmpEnvelopeEnabled);
@@ -1127,7 +1194,7 @@ void ADnoteGlobalParam::paste(ADnoteGlobalParam &a)
 {
     copy(PStereo);
 
-    copy(PVolume);
+    copy(Volume);
     copy(PPanning);
     copy(PAmpVelocityScaleFunction);
 
@@ -1201,7 +1268,15 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
 
     if(xml.enterbranch("AMPLITUDE_PARAMETERS")) {
         PPanning     = xml.getpar127("panning", PPanning);
-        PVolume      = xml.getpar127("volume", PVolume);
+        const bool upgrade_3_0_3 = (xml.fileversion() < version_type(3,0,3)) ||
+            (!xml.hasparreal("volume"));
+
+        if (upgrade_3_0_3) {
+            int vol = xml.getpar127("volume", 0);
+            volume    = -60.0f * ( 1.0f - vol / 127.0f);
+        } else {
+            volume    = xml.getparreal("volume", volume);
+        }
         PVolumeminus = xml.getparbool("volume_minus", PVolumeminus);
         PAmpVelocityScaleFunction = xml.getpar127("velocity_sensing",
                                                    PAmpVelocityScaleFunction);

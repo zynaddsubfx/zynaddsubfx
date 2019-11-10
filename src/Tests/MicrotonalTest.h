@@ -62,7 +62,7 @@ class MicrotonalTest:public CxxTest::TestSuite
             for(int i = 0; i < 128; ++i)
                 TS_ASSERT_EQUALS(testMicro->Pmapping[i], i);
 
-            TS_ASSERT_DELTA(testMicro->getnotefreq(19, 0), 24.4997f, 0.0001f);
+            TS_ASSERT_DELTA(testMicro->getnotefreq(19 / 12.0f, 0), 24.4997f, 0.0001f);
         }
 
         //Tests saving/loading to XML

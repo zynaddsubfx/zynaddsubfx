@@ -76,8 +76,8 @@ static const Ports sysefxPort =
             Master &mast = *(Master*)d.obj;
 
             if(rtosc_narguments(m)) {
-             mast.setPsysefxvol(ind2, ind1, rtosc_argument(m,0).i);
-             d.broadcast(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
+                mast.setPsysefxvol(ind2, ind1, rtosc_argument(m,0).i);
+                d.broadcast(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
             } else
                 d.reply(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
         }}
@@ -108,7 +108,10 @@ static const Ports sysefsendto =
             Master &master = *(Master*)d.obj;
 
             if(rtosc_narguments(m))
+            {
                 master.setPsysefxsend(ind1, ind2, rtosc_argument(m,0).i);
+                d.broadcast(d.loc, "i", master.Psysefxsend[ind1][ind2]);
+            }
             else
                 d.reply(d.loc, "i", master.Psysefxsend[ind1][ind2]);
         }}
@@ -169,16 +172,24 @@ static const Ports auto_param_ports = {
         rBegin;
         int slot  = d.idx[1];
         int param = d.idx[0];
-        if(rtosc_narguments(msg))
+        if(rtosc_narguments(msg)) {
             a.slots[slot].automations[param].active = rtosc_argument(msg, 0).T;
+            d.broadcast(d.loc, a.slots[slot].automations[param].active ? "T" : "F");
+        }
         else
             d.reply(d.loc, a.slots[slot].automations[param].active ? "T" : "F");
         rEnd},
-    {"path::s", rProp(parameter) rProp(read-only) rDoc("Path of parameter"), 0,
+    {"path::s", rProp(parameter) rDoc("Path of parameter"), 0,
         rBegin;
         int slot  = d.idx[1];
         int param = d.idx[0];
-        d.reply(d.loc, "s", a.slots[slot].automations[param].param_path);
+        if(!strcmp("s",rtosc_argument_string(msg))) {
+            a.setSlotSubPath(slot, param, rtosc_argument(msg, 0).s);
+            a.updateMapping(slot, param);
+            d.broadcast(d.loc, "s", a.slots[slot].automations[param].param_path);
+        }
+        else
+			d.reply(d.loc, "s", a.slots[slot].automations[param].param_path);
         rEnd},
     {"clear:", rDoc("Clear automation param"), 0,
         rBegin;
@@ -244,17 +255,30 @@ static const Ports slot_ports = {
     {"midi-cc::i", rProp(parameter) rMap(default, -1) rDoc("Access assigned midi CC slot") , 0,
         rBegin;
         int slot = d.idx[0];
-        if(rtosc_narguments(msg))
+        if(rtosc_narguments(msg)) {
             a.slots[slot].midi_cc = rtosc_argument(msg, 0).i;
-        else
+            d.broadcast(d.loc, "i", a.slots[slot].midi_cc);
+        } else
             d.reply(d.loc, "i", a.slots[slot].midi_cc);
+
+        rEnd},
+    {"midi-nrpn::i", rProp(parameter) rMap(default, -1) rDoc("Access assigned midi NRPN slot") , 0,
+        rBegin;
+        int slot = d.idx[0];
+        if(rtosc_narguments(msg)) {
+            a.slots[slot].midi_nrpn = rtosc_argument(msg, 0).i;
+            d.broadcast(d.loc, "i", a.slots[slot].midi_nrpn);
+        } else
+            d.reply(d.loc, "i", a.slots[slot].midi_nrpn);
 
         rEnd},
     {"active::T:F",  rProp(parameter) rMap(default, F) rDoc("If Slot is enabled"), 0,
         rBegin;
         int slot = d.idx[0];
-        if(rtosc_narguments(msg))
+        if(rtosc_narguments(msg)) {
             a.slots[slot].active = rtosc_argument(msg, 0).T;
+            d.broadcast(d.loc, a.slots[slot].active ? "T" : "F");
+        }
         else
             d.reply(d.loc, a.slots[slot].active ? "T" : "F");
         rEnd},
@@ -352,7 +376,8 @@ static const Ports automate_ports = {
 static const Ports watchPorts = {
     {"add:s", rDoc("Add synthesis state to watch"), 0,
         rBegin;
-        m->watcher.add_watch(rtosc_argument(msg,0).s);
+        if(!m->watcher.active(rtosc_argument(msg,0).s))
+            m->watcher.add_watch(rtosc_argument(msg,0).s);
         rEnd},
 };
 
@@ -381,12 +406,12 @@ static const Ports master_ports = {
        d.reply(m-1);}},
     {"get-vu:", rDoc("Grab VU Data"), 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
-       d.reply("/vu-meter", "bb", sizeof(m->vu), &m->vu, sizeof(float)*NUM_MIDI_PARTS, m->vuoutpeakpart);}},
+       d.reply("/vu-meter", "bb", sizeof(m->vu), &m->vu, sizeof(float)*NUM_MIDI_PARTS, m->vuoutpeakpartl);}},
     {"vu-meter:", rDoc("Grab VU Data"), 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
-       char        types[6+NUM_MIDI_PARTS+1] = {0};
-       rtosc_arg_t  args[6+NUM_MIDI_PARTS+1];
-       for(int i=0; i<6+NUM_MIDI_PARTS; ++i)
+       char        types[6+2*NUM_MIDI_PARTS+1] = {};
+       rtosc_arg_t  args[6+2*NUM_MIDI_PARTS+1];
+       for(int i=0; i<6+2*NUM_MIDI_PARTS; ++i)
            types[i] = 'f';
        args[0].f = m->vu.outpeakl;
        args[1].f = m->vu.outpeakr;
@@ -394,9 +419,10 @@ static const Ports master_ports = {
        args[3].f = m->vu.maxoutpeakr;
        args[4].f = m->vu.rmspeakl;
        args[5].f = m->vu.rmspeakr;
-       for(int i=0; i<NUM_MIDI_PARTS; ++i)
-           args[6+i].f = m->vuoutpeakpart[i];
-
+       for(int i=0; i<NUM_MIDI_PARTS; ++i) {
+           args[6 + 2 * i].f = m->vuoutpeakpartl[i];
+           args[6 + 2 * i + 1].f = m->vuoutpeakpartr[i];
+       }
        d.replyArray("/vu-meter", types, args);}},
     {"reset-vu:", rDoc("Grab VU Data"), 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
@@ -410,12 +436,11 @@ static const Ports master_ports = {
        d.reply("/free", "sb", "Part", sizeof(void*), &m->part[i]);
        m->part[i] = p;
        p->initialize_rt();
-       for(int i=0; i<128; ++i)
-           m->activeNotes[i] = 0;
+       memset(m->activeNotes, 0, sizeof(m->activeNotes));
        }},
     {"active_keys:", rProp("Obtain a list of active notes"), 0,
         rBegin;
-        char keys[129] = {0};
+        char keys[129] = {};
         for(int i=0; i<128; ++i)
             keys[i] = m->activeNotes[i] ? 'T' : 'F';
         d.broadcast(d.loc, keys);
@@ -424,18 +449,23 @@ static const Ports master_ports = {
         rDefault(80) rDoc("Master Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
         if(rtosc_narguments(m)==0) {
-            d.reply(d.loc, "i", ((Master*)d.obj)->Pvolume);
+            d.reply(d.loc, "i", (int) roundf(96.0f * ((Master*)d.obj)->Volume / 40.0f + 96.0f));
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
-            ((Master*)d.obj)->setPvolume(limit<char>(rtosc_argument(m,0).i,0,127));
-            d.broadcast(d.loc, "i", ((Master*)d.obj)->Pvolume);}}},
+            ((Master *)d.obj)->Volume  = ((Master *)d.obj)->volume127ToFloat(limit<unsigned char>(rtosc_argument(m, 0).i, 0, 127));
+             d.broadcast(d.loc, "i", limit<char>(rtosc_argument(m, 0).i, 0, 127));
+        }}},
     {"volume::i", rShort("volume") rProp(parameter) rLinear(0,127)
-        rDoc("Master Volume"), 0,
-        [](const char *m, rtosc::RtData &d) {
-        if(rtosc_narguments(m)==0) {
-            d.reply(d.loc, "i", ((Master*)d.obj)->Pvolume);
-        } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
-            ((Master*)d.obj)->setPvolume(limit<char>(rtosc_argument(m,0).i,0,127));
-            d.broadcast(d.loc, "i", ((Master*)d.obj)->Pvolume);}}},
+           rDoc("Master Volume"), 0,
+           [](const char *m, rtosc::RtData &d) {
+           Master *master = (Master *)d.obj;
+           if(rtosc_narguments(m)==0) {
+                d.reply(d.loc, "i", (int) roundf(96.0f * master->Volume / 40.0f + 96.0f));
+            } else if (rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
+               master->Volume  = master->volume127ToFloat(limit<unsigned char>(rtosc_argument(m, 0).i, 0, 127));
+               d.broadcast(d.loc, "i", limit<char>(rtosc_argument(m, 0).i, 0, 127));
+           }}},
+    rParamF(Volume, rShort("volume"), rDefault(-6.66667f), rLinear(-40.0f,13.3333f),
+             rUnit(dB), "Master Volume"),
     {"Psysefxvol#" STRINGIFY(NUM_SYS_EFX) "/::i", 0, &sysefxPort,
         [](const char *msg, rtosc::RtData &d) {
             SNIP;
@@ -514,6 +544,18 @@ static const Ports master_ports = {
         [](const char *, rtosc::RtData &d) {d.reply("/undo_pause", "");}},
     {"undo_resume:",rProp(internal) rDoc("resume undo event recording"),0,
         [](const char *, rtosc::RtData &d) {d.reply("/undo_resume", "");}},
+    {"last_dnd::s", rProp(internal) rDoc("Last Drag and Drop OSC path"),0,
+        rBOIL_BEGIN
+            if(!strcmp("", args)) {
+                data.reply(loc, "c", obj->dnd_buffer);
+                *obj->dnd_buffer = 0;
+            } else {
+                assert(!*obj->dnd_buffer);
+                const char* var = rtosc_argument(msg, 0).s;
+                printf("receiving /last_dnd %s\n",var);
+                strncpy(obj->dnd_buffer, var, Master::dnd_buffer_size);
+            }
+        rBOIL_END },
     {"config/", rNoDefaults
         rDoc("Top Level Application Configuration Parameters"),
         &Config::ports, [](const char *, rtosc::RtData &d){d.forward();}},
@@ -735,7 +777,8 @@ Master::Master(const SYNTH_T &synth_, Config* config)
 
     shutup = 0;
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
-        vuoutpeakpart[npart] = 1e-9;
+        vuoutpeakpartl[npart] = 1e-9;
+        vuoutpeakpartr[npart] = 1e-9;
         fakepeakpart[npart]  = 0;
     }
 
@@ -754,8 +797,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
         sysefx[nefx] = new EffectMgr(*memory, synth, 0, &time);
 
     //Note Visualization
-    for(int i=0; i<128; ++i)
-        activeNotes[i] = 0;
+    memset(activeNotes, 0, sizeof(activeNotes));
 
     defaults();
 
@@ -764,17 +806,26 @@ Master::Master(const SYNTH_T &synth_, Config* config)
 }
 
 bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
-                           bool offline, bool nio, DataObj& d, int msg_id)
+                           bool offline, bool nio, DataObj& d, int msg_id,
+                           Master* master_from_mw)
 {
     if(!strcmp(msg, "/load-master")) {
-        Master *this_master = this;
+        Master *this_master = master_from_mw ? master_from_mw : this;
         Master *new_master  = *(Master**)rtosc_argument(msg, 0).b.data;
+        // This can not fail anymore, but just to be sure...
+        assert(new_master != this_master);
+
+        /*
+         * WARNING: Do not use anything from "this" below, use "this_master"
+         */
+
         if(!offline)
             new_master->AudioOut(outl, outr);
         if(nio)
             Nio::masterSwap(new_master);
-        if (hasMasterCb())
-            mastercb(mastercb_ptr, new_master);
+        if (this_master->hasMasterCb()) {
+            this_master->mastercb(this_master->mastercb_ptr, new_master);
+        }
         bToU->write("/free", "sb", "Master", sizeof(Master*), &this_master);
         return false;
     } else if(!strcmp(msg, "/switch-master")) {
@@ -847,8 +898,10 @@ bool Master::applyOscEvent(const char *msg, bool nio, int msg_id)
 
 void Master::defaults()
 {
-    volume = 1.0f;
-    setPvolume(80);
+    union {float f; uint32_t i;} convert;
+    convert.i = 0xC0D55556;
+    Volume = convert.f;
+    oldVolume = Volume;
     setPkeyshift(64);
 
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
@@ -881,38 +934,38 @@ void Master::defaults()
 /*
  * Note On Messages (velocity=0 for NoteOff)
  */
-void Master::noteOn(char chan, char note, char velocity)
+void Master::noteOn(char chan, note_t note, char velocity, float note_log2_freq)
 {
     if(velocity) {
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
             if(chan == part[npart]->Prcvchn) {
                 fakepeakpart[npart] = velocity * 2;
                 if(part[npart]->Penabled)
-                    part[npart]->NoteOn(note, velocity, keyshift);
+                    part[npart]->NoteOn(note, velocity, keyshift, note_log2_freq);
             }
         }
-        activeNotes[(int)note] = 1;
+        activeNotes[note] = 1;
+        HDDRecorder.triggernow();
     }
     else
         this->noteOff(chan, note);
-    HDDRecorder.triggernow();
 }
 
 /*
  * Note Off Messages
  */
-void Master::noteOff(char chan, char note)
+void Master::noteOff(char chan, note_t note)
 {
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         if((chan == part[npart]->Prcvchn) && part[npart]->Penabled)
             part[npart]->NoteOff(note);
-    activeNotes[(int)note] = 0;
+    activeNotes[note] = 0;
 }
 
 /*
  * Pressure Messages (velocity=0 for NoteOff)
  */
-void Master::polyphonicAftertouch(char chan, char note, char velocity)
+void Master::polyphonicAftertouch(char chan, note_t note, char velocity)
 {
     if(velocity) {
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
@@ -964,7 +1017,7 @@ void Master::setController(char chan, int type, int par)
     }
 }
 
-void Master::vuUpdate(const float *outl, const float *outr)
+void Master::vuUpdate(const float *outr, const float *outl)
 {
     //Peak computation (for vumeters)
     vu.outpeakl = 1e-12;
@@ -994,16 +1047,17 @@ void Master::vuUpdate(const float *outl, const float *outr)
 
     //Part Peak computation (for Part vumeters or fake part vumeters)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
-        vuoutpeakpart[npart] = 1.0e-12f;
+        vuoutpeakpartl[npart] = 1.0e-12f;
+        vuoutpeakpartr[npart] = 1.0e-12f;
         if(part[npart]->Penabled != 0) {
-            float *outl = part[npart]->partoutl,
-            *outr = part[npart]->partoutr;
+            float *outr = part[npart]->partoutl,
+            *outl = part[npart]->partoutr;
             for(int i = 0; i < synth.buffersize; ++i) {
-                float tmp = fabs(outl[i] + outr[i]);
-                if(tmp > vuoutpeakpart[npart])
-                    vuoutpeakpart[npart] = tmp;
+                if (fabs(outl[i]) > vuoutpeakpartl[npart])
+                    vuoutpeakpartl[npart] = fabs(outl[i]);
+                if (fabs(outr[i]) > vuoutpeakpartr[npart])
+                    vuoutpeakpartr[npart] = fabs(outr[i]);
             }
-            vuoutpeakpart[npart] *= volume;
         }
         else
         if(fakepeakpart[npart] > 1)
@@ -1106,30 +1160,46 @@ void dump_msg(const char* ptr, std::ostream& os = std::cerr)
 #endif
 int msg_id=0;
 
-bool Master::runOSC(float *outl, float *outr, bool offline)
+bool Master::runOSC(float *outl, float *outr, bool offline,
+                    Master* master_from_mw)
 {
-    //Handle user events
-    char loc_buf[1024];
-    DataObj d{loc_buf, 1024, this, bToU};
-    memset(loc_buf, 0, sizeof(loc_buf));
-
-    int events = 0;
-    for(; uToB && uToB->hasNext() && events < 100; ++msg_id, ++events)
+    // the following block is only ever entered by 1 thread at a time
+    // other threads have to ignore it
+    if(!run_osc_in_use.exchange(true)) // exchange returns value before call
     {
-        const char *msg = uToB->read();
-        if(! applyOscEvent(msg, outl, outr, offline, true, d, msg_id) )
-            return false;
+        /*
+         * WARNING: Do not return without "run_osc_in_use.store(false)"
+         */
+
+        //Handle user events
+        char loc_buf[1024];
+        DataObj d{loc_buf, 1024, this, bToU};
+        memset(loc_buf, 0, sizeof(loc_buf));
+
+        int events = 0;
+        for(; uToB && uToB->hasNext() && events < 100; ++msg_id, ++events)
+        {
+            const char *msg = uToB->read();
+            if(! applyOscEvent(msg, outl, outr, offline, true, d, msg_id,
+                               master_from_mw) )
+            {
+                run_osc_in_use.store(false);
+                return false;
+            }
+        }
+
+        if(automate.damaged) {
+            d.broadcast("/damage", "s", "/automate/");
+            automate.damaged = 0;
+        }
+
+        if(events>1 && false)
+            fprintf(stderr, "backend: %d events per cycle\n",events);
+
+        run_osc_in_use.store(false);
+        return true;
     }
-
-    if(automate.damaged) {
-        d.broadcast("/damage", "s", "/automate/");
-        automate.damaged = 0;
-    }
-
-    if(events>1 && false)
-        fprintf(stderr, "backend: %d events per cycle\n",events);
-
-    return true;
+    else { return true; /* = no new master */ }
 }
 
 /*
@@ -1285,10 +1355,25 @@ bool Master::AudioOut(float *outr, float *outl)
 
 
     //Master Volume
-    for(int i = 0; i < synth.buffersize; ++i) {
-        outl[i] *= volume;
-        outr[i] *= volume;
+    float oldvol = dB2rap(oldVolume);
+    float newvol = dB2rap(Volume);
+    if(ABOVE_AMPLITUDE_THRESHOLD(oldvol, newvol)) {
+        for(int i = 0; i < synth.buffersize; ++i) {
+            float vol = INTERPOLATE_AMPLITUDE(oldvol, newvol,
+                                              i, synth.buffersize);
+            outl[i] *= vol;
+            outr[i] *= vol;
+        }
     }
+    else {
+        // No interpolation
+        float vol = dB2rap(Volume);
+        for(int i = 0; i < synth.buffersize; ++i) {
+            outl[i] *= vol;
+            outr[i] *= vol;
+        }
+    }
+    oldVolume = Volume;
 
     vuUpdate(outl, outr);
 
@@ -1384,10 +1469,10 @@ Master::~Master()
 /*
  * Parameter control
  */
-void Master::setPvolume(char Pvolume_)
+
+float Master::volume127ToFloat(unsigned char volume_)
 {
-    Pvolume = Pvolume_;
-    volume  = dB2rap((Pvolume - 96.0f) / 96.0f * 40.0f);
+    return (volume_ - 96.0f) / 96.0f * 40.0;
 }
 
 void Master::setPkeyshift(char Pkeyshift_)
@@ -1423,8 +1508,7 @@ void Master::ShutUp()
         insefx[nefx]->cleanup();
     for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx)
         sysefx[nefx]->cleanup();
-    for(int i = 0; i < int(sizeof(activeNotes)/sizeof(activeNotes[0])); ++i)
-        activeNotes[i] = 0;
+    memset(activeNotes, 0, sizeof(activeNotes));
     vuresetpeaks();
     shutup = 0;
 }
@@ -1461,7 +1545,7 @@ void Master::initialize_rt(void)
 
 void Master::add2XML(XMLwrapper& xml)
 {
-    xml.addpar("volume", Pvolume);
+    xml.addparreal("volume", Volume);
     xml.addpar("key_shift", Pkeyshift);
     xml.addparbool("nrpn_receive", ctl.NRPN.receive);
 
@@ -1577,7 +1661,12 @@ int Master::loadXML(const char *filename)
 
 void Master::getfromXML(XMLwrapper& xml)
 {
-    setPvolume(xml.getpar127("volume", Pvolume));
+    if (xml.hasparreal("volume")) {
+        Volume = xml.getparreal("volume", Volume);
+    } else {
+        Volume  = volume127ToFloat(xml.getpar127("volume", 0));
+        oldVolume = Volume;
+    }
     setPkeyshift(xml.getpar127("key_shift", Pkeyshift));
     ctl.NRPN.receive = xml.getparbool("nrpn_receive", ctl.NRPN.receive);
 

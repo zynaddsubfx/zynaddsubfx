@@ -55,9 +55,21 @@ static const Ports partPorts = {
 #undef rChangeCb
 #define rChangeCb
 #undef rChangeCb
-#define rChangeCb obj->setPvolume(obj->Pvolume);
-    rParamZyn(Pvolume, rShort("Vol"), rDefault(96),"Part Volume"),
+#define rChangeCb obj->setVolume(obj->Volume);
+    rParamF(Volume, rShort("Vol"), rDefault(0.0), rUnit(dB), 
+            rLinear(-40.0, 13.3333), "Part Volume"),
 #undef rChangeCb
+    {"Pvolume::i", rShort("Vol") rProp(parameter) rLinear(0,127)
+        rDefault(96) rDoc("Part Volume"), 0,
+        [](const char *m, rtosc::RtData &d) {
+            Part *obj = (Part*)d.obj;
+        if(rtosc_narguments(m)==0) {
+            d.reply(d.loc, "i", (int) roundf(96.0f * obj->Volume / 40.0f + 96.0f));
+        } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
+            obj->Volume  = obj->volume127ToFloat(limit<unsigned char>(rtosc_argument(m, 0).i, 0, 127));
+            obj->setVolume(obj->Volume);
+            d.broadcast(d.loc, "i", limit<char>(rtosc_argument(m, 0).i, 0, 127));
+        }}},
 #define rChangeCb obj->setPpanning(obj->Ppanning);
     rParamZyn(Ppanning, rShort("pan"), rDefault(64), "Set Panning"),
 #undef rChangeCb
@@ -113,11 +125,15 @@ static const Ports partPorts = {
         [](const char *msg, RtData &d)
         {
             Part *p = (Part*)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_polytype = [&p](){
                 int res = 0;
                 if(!p->Ppolymode)
                     res = p->Plegatomode ? 2 : 1;
-                d.reply(d.loc, "i", res);
+                return res;
+            };
+
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_polytype());
                 return;
             }
 
@@ -131,7 +147,10 @@ static const Ports partPorts = {
             } else {
                 p->Ppolymode = 0;
                 p->Plegatomode = 1;
-            }}},
+            }
+            d.broadcast(d.loc, "i", get_polytype());
+        }
+    },
     {"clear:", rProp(internal) rDoc("Reset Part To Defaults"), 0,
         [](const char *, RtData &d)
         {
@@ -275,7 +294,7 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     Pname = new char[PART_MAX_NAME_LEN];
 
     oldvolumel = oldvolumer = 0.5f;
-    lastnote   = -1;
+    lastnote = -1;
 
     defaults();
     assert(partefx[0]);
@@ -297,7 +316,7 @@ void Part::cloneTraits(Part &p) const
 #define CLONE(x) p.x = this->x
     CLONE(Penabled);
 
-    p.setPvolume(this->Pvolume);
+    p.setVolume(this->Volume);
     p.setPpanning(this->Ppanning);
 
     CLONE(Pminkey);
@@ -324,7 +343,7 @@ void Part::defaults()
     Pnoteon     = 1;
     Ppolymode   = 1;
     Plegatomode = 0;
-    setPvolume(96);
+    setVolume(0.0);
     Pkeyshift = 64;
     Prcvchn   = 0;
     setPpanning(64);
@@ -450,9 +469,10 @@ static int kit_usage(const Part::Kit *kits, int note, int mode)
 /*
  * Note On Messages
  */
-bool Part::NoteOn(unsigned char note,
+bool Part::NoteOn(note_t note,
                   unsigned char velocity,
-                  int masterkeyshift)
+                  int masterkeyshift,
+                  float note_log2_freq)
 {
     //Verify Basic Mode and sanity
     const bool isRunningNote   = notePool.existsRunningNote();
@@ -471,6 +491,7 @@ bool Part::NoteOn(unsigned char note,
         monomemPush(note);
         monomem[note].velocity  = velocity;
         monomem[note].mkeyshift = masterkeyshift;
+        monomem[note].note_log2_freq = note_log2_freq;
 
     } else if(!monomemEmpty())
         monomemClear();
@@ -485,9 +506,9 @@ bool Part::NoteOn(unsigned char note,
     const float vel          = getVelocity(velocity, Pvelsns, Pveloffs);
     const int   partkeyshift = (int)Pkeyshift - 64;
     const int   keyshift     = masterkeyshift + partkeyshift;
-    const float notebasefreq = getBaseFreq(note, keyshift);
+    const float notebasefreq = getBaseFreq(note_log2_freq, keyshift);
 
-    if(notebasefreq < 0)
+    if(notebasefreq < 0.0f)
         return false;
 
     //Portamento
@@ -507,8 +528,8 @@ bool Part::NoteOn(unsigned char note,
 
     //Adjust Existing Notes
     if(doingLegato) {
-        LegatoParams pars = {notebasefreq, vel, portamento, note, true, prng()};
-        notePool.applyLegato(pars);
+        LegatoParams pars = {notebasefreq, vel, portamento, note_log2_freq, true, prng()};
+        notePool.applyLegato(note, pars);
         return true;
     }
 
@@ -523,7 +544,7 @@ bool Part::NoteOn(unsigned char note,
             continue;
 
         SynthParams pars{memory, ctl, synth, time, notebasefreq, vel,
-            portamento, note, false, prng()};
+            portamento, note_log2_freq, false, prng()};
         const int sendto = Pkitmode ? item.sendto() : 0;
 
         try {
@@ -558,7 +579,7 @@ bool Part::NoteOn(unsigned char note,
 /*
  * Note Off Messages
  */
-void Part::NoteOff(unsigned char note) //release the key
+void Part::NoteOff(note_t note) //release the key
 {
     // This note is released, so we remove it from the list.
     if(!monomemEmpty())
@@ -582,9 +603,9 @@ void Part::NoteOff(unsigned char note) //release the key
     }
 }
 
-void Part::PolyphonicAftertouch(unsigned char note,
-                                unsigned char velocity,
-                                int masterkeyshift)
+void Part::PolyphonicAftertouch(note_t note,
+				unsigned char velocity,
+				int masterkeyshift)
 {
     (void) masterkeyshift;
 
@@ -614,7 +635,7 @@ void Part::SetController(unsigned int type, int par)
             break;
         case C_expression:
             ctl.setexpression(par);
-            setPvolume(Pvolume); //update the volume
+            setVolume(Volume); //update the volume
             break;
         case C_portamento:
             ctl.setportamento(par);
@@ -643,7 +664,7 @@ void Part::SetController(unsigned int type, int par)
             if(ctl.volume.receive != 0)
                 volume = ctl.volume.volume;
             else
-                setPvolume(Pvolume);
+                setVolume(Volume);
             break;
         case C_sustain:
             ctl.setsustain(par);
@@ -659,8 +680,8 @@ void Part::SetController(unsigned int type, int par)
             if(ctl.volume.receive != 0)
                 volume = ctl.volume.volume;
             else
-                setPvolume(Pvolume);
-            setPvolume(Pvolume); //update the volume
+                setVolume(Volume);
+            setVolume(Volume); //update the volume
             setPpanning(Ppanning); //update the panning
 
             for(int item = 0; item < NUM_KIT_ITEMS; ++item) {
@@ -727,18 +748,20 @@ void Part::ReleaseAllKeys()
 // (Made for Mono/Legato).
 void Part::MonoMemRenote()
 {
-    unsigned char mmrtempnote = monomemBack(); // Last list element.
+    note_t mmrtempnote = monomemBack(); // Last list element.
     monomemPop(mmrtempnote); // We remove it, will be added again in NoteOn(...).
-    NoteOn(mmrtempnote, monomem[mmrtempnote].velocity,
-            monomem[mmrtempnote].mkeyshift);
+    NoteOn(mmrtempnote,
+           monomem[mmrtempnote].velocity,
+           monomem[mmrtempnote].mkeyshift,
+           monomem[mmrtempnote].note_log2_freq);
 }
 
-float Part::getBaseFreq(int note, int keyshift) const
+float Part::getBaseFreq(float note_log2_freq, int keyshift) const
 {
     if(Pdrummode)
-        return 440.0f * powf(2.0f, (note - 69.0f) / 12.0f);
+        return 440.0f * powf(2.0f, note_log2_freq - (69.0f / 12.0f));
     else
-        return microtonal->getnotefreq(note, keyshift);
+        return microtonal->getnotefreq(note_log2_freq, keyshift);
 }
 
 float Part::getVelocity(uint8_t velocity, uint8_t velocity_sense,
@@ -854,11 +877,16 @@ void Part::ComputePartSmps()
 /*
  * Parameter control
  */
-void Part::setPvolume(char Pvolume_)
+float Part::volume127ToFloat(unsigned char volume_)
 {
-    Pvolume = Pvolume_;
-    volume  =
-        dB2rap((Pvolume - 96.0f) / 96.0f * 40.0f) * ctl.expression.relvolume;
+    return (volume_ - 96.0f) / 96.0f * 40.0;
+}
+
+void Part::setVolume(float Volume_)
+{
+    Volume = Volume_;
+    volume =
+        dB2rap(Volume) * ctl.expression.relvolume;
 }
 
 void Part::setPpanning(char Ppanning_)
@@ -976,7 +1004,7 @@ void Part::add2XML(XMLwrapper& xml)
     if((Penabled == 0) && (xml.minimal))
         return;
 
-    xml.addpar("volume", Pvolume);
+    xml.addparreal("volume", Volume);
     xml.addpar("panning", Ppanning);
 
     xml.addpar("min_key", Pminkey);
@@ -1053,7 +1081,7 @@ void Part::kill_rt(void)
     notePool.killAllNotes();
 }
 
-void Part::monomemPush(char note)
+void Part::monomemPush(note_t note)
 {
     for(int i=0; i<256; ++i)
         if(monomemnotes[i]==note)
@@ -1064,7 +1092,7 @@ void Part::monomemPush(char note)
     monomemnotes[0] = note;
 }
 
-void Part::monomemPop(char note)
+void Part::monomemPop(note_t note)
 {
     int note_pos=-1;
     for(int i=0; i<256; ++i)
@@ -1077,7 +1105,7 @@ void Part::monomemPop(char note)
     }
 }
 
-char Part::monomemBack(void) const
+note_t Part::monomemBack(void) const
 {
     return monomemnotes[0];
 }
@@ -1186,8 +1214,11 @@ void Part::getfromXMLinstrument(XMLwrapper& xml)
 void Part::getfromXML(XMLwrapper& xml)
 {
     Penabled = xml.getparbool("enabled", Penabled);
-
-    setPvolume(xml.getpar127("volume", Pvolume));
+    if (xml.hasparreal("volume")) {
+        setVolume(xml.getparreal("volume", Volume));
+    } else {
+        setVolume(volume127ToFloat(xml.getpar127("volume", -40.0f)));
+    }
     setPpanning(xml.getpar127("panning", Ppanning));
 
     Pminkey   = xml.getpar127("min_key", Pminkey);

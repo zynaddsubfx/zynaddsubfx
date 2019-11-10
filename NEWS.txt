@@ -1,3 +1,32 @@
+3.0.5 (15 April 2019)
+        - Add Stereo peaks for individual part metering
+        - Change LFO frequency units to Hz (from unitless)
+        - Enhance LFO delay parameter resolution and units (seconds)
+        - Enhance global volume parameter resolution and units (dB)
+        - Enhance part volume parameter resolution and units (dB)
+        - Enhance sub synth volume parameter resolution and units (dB)
+        - Enhance sub synth volume velocity sensing resolution
+        - Fix zippering when changing master volume
+        - Fix misaligned points in live envelope values
+        - Fix possible crash when envelopes are provided invalid live data
+        - Fix minor bugs
+
+3.0.4 (10 March 2019)
+        - Add scripting to zyn-fusion UI for automated screen capture
+        - Add double click to reset sliders
+        - Add random LFO to UI
+        - Add compatibility with MXML 3.0
+        - Enhance modulation volume parameter resolution
+        - Enhance global volume parameter resolution
+        - Enhance state variable filter interpolation
+        - Change filter defaults for easier patch setup
+        - Fix pops with note aftertouch
+        - Fix pad synth export
+        - Fix envelope watchpoint visualization
+        - Fix .xlz load/save in fusion UI
+        - Fix minor bugs
+        - Added support for floating point notes via MIDI SYSEX.
+
 3.0.3 (4 December 2017)
         - Add bank search to FLTK/NTK GUI
         - Add parallel padsynth sample generation
@@ -193,26 +222,26 @@
 	- made to work with mxml-2.2 (will NOT work on older versions)
 	- it is possible to remove completely the graphical user interface (e.g. it can run without X). For this you need to modify the DISABLE_GUI option from the Makefile.inc
 	- added a commandline -L which load a instrument (.xiz) - now it only loads to part 0 (you can use this option with -l to load a master file and after this the option -L to replace the part)
-	
+
 2.2.0 (8 Apr 2005)
 	- the VST version of ZynAddSubFX is removed from the instalation until it will be more stable (hope soon :) )
 	- now, the instrument banks contains over 300 high quality instruments
-	- added "Apply" a button from OscilGen window for PADsynth 
+	- added "Apply" a button from OscilGen window for PADsynth
 	- added another parameter to ADsynth that controls the amount of all detunes of voices
 	- adaptive harmonics postprocess
 	- improved the VU-meter and added a RMS plot
 	- Dvorak support for Virtual Keyboard
 	- many bugs fixed and code cleanups
-	
-2.1.1 (2 Oct 2004) 
+
+2.1.1 (2 Oct 2004)
 	- Removed a big bug that prevented changing the part
-2.1.0 (1 Oct 2004) 
+2.1.0 (1 Oct 2004)
 	- Added a installer for windows (thanks to NSIS installer ( http://nsis.sourceforge.net/ ) ). Both VST and standalone vesions are contained in the same installer.
 	- Added a new user interface for beginners. You can switch the current user interface with that anytime do you want.
 	- All parts, effects, etc. are counted from '1' and not from '0'
 	- Added the posibility to compile the OSS and JACK support in the same binary (look in the Makefile.inc)
 	- VST host should be able to save all zynaddsubfx parameters into their setups (this is untested)
-	- Bugfixes and other 
+	- Bugfixes and other
 
 2.0.0 (27 Aug 2004)
 	- VST version works (there are some issues/bugs but it works)
@@ -221,13 +250,13 @@
 	- Corrected a error to pitch bend on VST plugin (thanks to Krzysztof Korpiela)
 	- Impoved the PADsynth module
 	- Because the PADsynth module takes a time to load, the instrument that contains such modules are shown in different colors
-	- Bugfixes 
+	- Bugfixes
 	- Other
-	
+
 2.0.0_pre2 (31 Iul 2004)
 	- Updated the XMLwrapper to mxml-2.0
 	- Many bugfixes
-	- Other 
+	- Other
 
 2.0.0_pre1 (17 Iul 2004)
 	- Added a new powerful synth engine which is called PADsynth, you can make very beautifull pads and even some strange sounds
@@ -247,28 +276,28 @@
 	- More "randomness" options
 	- Other impovements
 	- Many, many bugfixes
-	- Added the full changelog (since I started to write zynaddsubfx), most is in Romanian 
+	- Added the full changelog (since I started to write zynaddsubfx), most is in Romanian
 	- Other things
-      
+
 1.4.3 (31 Aug 2003)
       - added state variable filters and other types to analog filters
-      - small user interface improvememnts 
+      - small user interface improvememnts
       - small bugfixes
 
 1.4.2 (17 Iul 2003)
-      - added full-featured, advanced formantic filters 
-      - added mixer panel which lets you to see/change most important part settings, and shows a vu-meters for each part 
+      - added full-featured, advanced formantic filters
+      - added mixer panel which lets you to see/change most important part settings, and shows a vu-meters for each part
       - you can choose to process the instrument's kit items only with one Part effect (eg. you can make a instrument kit that contains a reverberated piano and flanged strings)
       - enabled to launch more instances in Jack
       - when is launched first time, it searches for default.bnk_zyn file into /usr/share/zynaddsubfx and /usr/local/share/zynaddsubfx directories (useful for binary packages for Linux distributions)
       - bugfixes
-      
+
 1.4.1 (8 May 2003)
       - added single mode to the instrument kit who alows only one item to be played same time
       - added "Spectrum Adjust" to the ADsynth oscillator
       - added "drum mode" to the instrument, where all midi keys are mapped to 12tET
       - added a parameter to the "440Hz" which make the freq to varies a bit according to the key pressed (very usefull to toms and other drums)
-      - (for OSS audio out) if it is launched with root privileges, the synth will gain realtime scheduling priority 
+      - (for OSS audio out) if it is launched with root privileges, the synth will gain realtime scheduling priority
       - bugfixes
 
 1.4.0 (15 Apr 2003)
@@ -289,7 +318,7 @@
       - it is possible to swap effects or copy them
       - started to port ZynAddSubFX to VST (not functional, yet)
       - the resonace can protect the fundamental freq. against damping
-      
+
 1.2.0 (21 Mar 2003)
       - ZynAddSubFX is ported to Windows ;-)
       - added internal Virtual Keyboard
@@ -311,7 +340,7 @@
       - added mono mode and portamento
       - added the EQ effect
       - the output of a system effect can be sent to others system effects
-      - minor bugfixes and improvements      
+      - minor bugfixes and improvements
 
 1.0.7 (7 Feb 2003)
       - some settings (like samplerate) are set at runtime (by comand line)
@@ -347,7 +376,7 @@
 	if you "acconect" zynaddsubfx with aseqview no note was processed a long time.
       - added Notch Filter
       - added the option to randomize the ressonance function
-      - added VU-Meter      
+      - added VU-Meter
       - Change the Insertion effect modes behaves (it sounds a bit louder)
       - Added to the project an external program called Spliter that splits the
 	keyboard and alows you to play two instruments same time. You can use this
@@ -362,13 +391,13 @@
       - the BandPass Filter's output amplitude was increased
       - few fixes of FFTwrapper. See the documentation from "FFTwrapper.h" if you got error messages.
 
-1.0.1 (6 Dec 2002) 
+1.0.1 (6 Dec 2002)
       - corrected a bug that made ZynAddSubFX to crash(sometimes) if you disable a part
       - wrote Resonance
       - added the BandPass filter
-      - added the recording feature      
+      - added the recording feature
       - added "New instrument" menuitem
 
-1.0.0 (25 Sep 2002) 
+1.0.0 (25 Sep 2002)
       - first release, done a lot before it :-)
 

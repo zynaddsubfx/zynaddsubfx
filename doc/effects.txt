@@ -63,12 +63,12 @@ Equalizer
 Introduction
 ^^^^^^^^^^^^
 
-An http://en.wikipedia.org/wiki/Filter_%28signal_processing%29[equalizer] is a
+An https://en.wikipedia.org/wiki/Filter_%28signal_processing%29[equalizer] is a
 filter effect that applies different volume to different frequencies of the
 input signal. This can, for example, be used to "filter out" unwanted 
 frequencies.
 ZynAddSubFX's implementations follow the
-http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt["Cookbook formulae for
+https://www.musicdsp.org/en/latest/Filters/197-rbj-audio-eq-cookbook.html["Cookbook formulae for
 audio EQ"] by Robert Bristow-Johnson.
 
 Filter Types
@@ -164,9 +164,9 @@ Distortion means, in general, altering a signal. Natural instruments
 usually produce sine like waves. A wave is transformed in an unnatural way when
 distortion is used. The most distorted waves are usually pulse waves. It is 
 typical for distortion to add overtones to a sound. Distortion often increases 
-the power and the http://en.wikipedia.org/wiki/Loudness[loudness] of a signal, 
+the power and the https://en.wikipedia.org/wiki/Loudness[loudness] of a signal, 
 while the db level is not increased. This is an important topic in the
-http://en.wikipedia.org/wiki/Loudness_war[Loudness War].
+https://en.wikipedia.org/wiki/Loudness_war[Loudness War].
 
 NOTE: As distortion increases loudness, distorted music can cause ear damage
 at lower volume levels. Thus, you might want to use it a bit careful.
@@ -306,7 +306,7 @@ Introduction
 ^^^^^^^^^^^^
 
 The echo effect, also known as
-http://en.wikipedia.org/wiki/Delay_%28audio_effect%29[delay effect], simulates
+https://en.wikipedia.org/wiki/Delay_%28audio_effect%29[delay effect], simulates
 the natural reflection of a sound. The listener can hear the sound multiple
 times, usually decreasing in volume. Echos can be useful to fill empty parts of
 your songs with.
@@ -366,7 +366,7 @@ Reverb
 Introduction
 ^^^^^^^^^^^^
 
-A http://en.wikipedia.org/wiki/Reverberation[Reverberation] actually expresses
+A https://en.wikipedia.org/wiki/Reverberation[Reverberation] actually expresses
 the effect of many echoes being played at the same time. This can happen in an
 enclosed room, where the sound can be reflected in different angles. Also, in
 nature, thunders approximate reverbs, because the sound is reflected in many
@@ -418,7 +418,7 @@ Phaser
 Introduction
 ^^^^^^^^^^^^
 
-The http://en.wikipedia.org/wiki/Phaser_%28effect%29[Phaser] is a special
+The https://en.wikipedia.org/wiki/Phaser_%28effect%29[Phaser] is a special
 dynamic filter. The result is a sweeping
 sound, which is
 often used on instruments with a large frequency band, like guitars or strings.
@@ -457,7 +457,7 @@ punchier, while normal phasers sound more fluently. However, analog filters
 usually need more filter stages to reach a characteristic sound.
 * Sine and triangle filters. Note that an analog triangle filter with many poles
 is a barber pole filter and can be used to generate
-http://en.wikipedia.org/wiki/Shepard_tone[Shepard Tones],
+https://en.wikipedia.org/wiki/Shepard_tone[Shepard Tones],
 i.e. tones that seem to increase or decrease with time, but do not really.
 * The LFO function can be squared. This converts the triangle wave into a hyper 
 sine wave. The sine squared is simply a faster sine wave.
@@ -495,7 +495,7 @@ Introduction
 ^^^^^^^^^^^^
 
 The AlienWah effect is a special, dynamic
-http://en.wikipedia.org/wiki/Formant[formant] filter (TODO: is this true?).
+https://en.wikipedia.org/wiki/Formant[formant] filter (TODO: is this true?).
 Paul Nasca named it AlienWah because it sounded "a bit like wahwah, but more
 strange". The result of the filter is a sound varying between the 
 vocals "Ahhhhh" (or "Uhhhhh") and "Eeeeee".

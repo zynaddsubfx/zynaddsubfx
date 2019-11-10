@@ -19,18 +19,19 @@
 
 namespace zyn {
 
+typedef uint8_t note_t; //Global MIDI note definition
+
 struct LegatoParams;
 class NotePool
 {
     public:
-        typedef uint8_t note_t;
         //Currently this wastes a ton of bits due ot the legatoMirror flag
         struct NoteDescriptor {
             //acceptable overlap after 2 minutes
             //run time at 48kHz 8 samples per buffer
             //19 bit minimum
             uint32_t age;
-            uint8_t note;
+            note_t note;
             uint8_t sendto;
             //max of 16 kit elms and 3 kit items per
             uint8_t size;
@@ -117,13 +118,13 @@ class NotePool
         NotePool(void);
 
         //Operations
-        void insertNote(uint8_t note, uint8_t sendto, SynthDescriptor desc, bool legato=false);
-        void insertLegatoNote(uint8_t note, uint8_t sendto, SynthDescriptor desc);
+        void insertNote(note_t note, uint8_t sendto, SynthDescriptor desc, bool legato=false);
+        void insertLegatoNote(note_t note, uint8_t sendto, SynthDescriptor desc);
 
         void upgradeToLegato(void);
-        void applyLegato(LegatoParams &par);
+        void applyLegato(note_t note, LegatoParams &par);
 
-        void makeUnsustainable(uint8_t note);
+        void makeUnsustainable(note_t note);
 
         bool full(void) const;
         bool synthFull(int sdesc_count) const;

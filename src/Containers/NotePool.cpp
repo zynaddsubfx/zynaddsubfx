@@ -94,13 +94,15 @@ bool NotePool::NoteDescriptor::operator==(NoteDescriptor nd)
 
 //return either the first unused descriptor or the last valid descriptor which
 //matches note/sendto
-static int getMergeableDescriptor(uint8_t note, uint8_t sendto, bool legato,
+static int getMergeableDescriptor(note_t note, uint8_t sendto, bool legato,
         NotePool::NoteDescriptor *ndesc)
 {
-    int desc_id = 0;
-    for(int i=0; i<POLYPHONY; ++i, ++desc_id)
+    int desc_id;
+
+    for(desc_id = 0; desc_id != POLYPHONY; ++desc_id) {
         if(ndesc[desc_id].off())
             break;
+    }
 
     if(desc_id != 0) {
         auto &nd = ndesc[desc_id-1];
@@ -110,7 +112,7 @@ static int getMergeableDescriptor(uint8_t note, uint8_t sendto, bool legato,
     }
 
     //Out of free descriptors
-    if(desc_id >= POLYPHONY || !ndesc[desc_id].off()) {
+    if(desc_id == POLYPHONY || !ndesc[desc_id].off()) {
         return -1;
     }
 
@@ -151,11 +153,22 @@ int NotePool::usedSynthDesc(void) const
     return cnt;
 }
 
-void NotePool::insertNote(uint8_t note, uint8_t sendto, SynthDescriptor desc, bool legato)
+void NotePool::insertNote(note_t note, uint8_t sendto, SynthDescriptor desc, bool legato)
 {
     //Get first free note descriptor
     int desc_id = getMergeableDescriptor(note, sendto, legato, ndesc);
-    assert(desc_id != -1);
+    int sdesc_id = 0;
+    if(desc_id < 0)
+        goto error;
+
+    //Get first free synth descriptor
+    while(1) {
+        if (sdesc_id == POLYPHONY*EXPECTED_USAGE)
+                goto error;
+        if (sdesc[sdesc_id].note == 0)
+                break;
+        sdesc_id++;
+    }
 
     ndesc[desc_id].note         = note;
     ndesc[desc_id].sendto       = sendto;
@@ -163,14 +176,13 @@ void NotePool::insertNote(uint8_t note, uint8_t sendto, SynthDescriptor desc, bo
     ndesc[desc_id].status       = KEY_PLAYING;
     ndesc[desc_id].legatoMirror = legato;
 
-    //Get first free synth descriptor
-    int sdesc_id = 0;
-    while(sdesc[sdesc_id].note && sdesc_id < POLYPHONY*EXPECTED_USAGE)
-        sdesc_id++;
-
-    assert(sdesc_id < POLYPHONY*EXPECTED_USAGE);
-
     sdesc[sdesc_id] = desc;
+    return;
+error:
+    //Avoid leaking note
+    desc.note->memory.dealloc(desc.note);
+    //Let caller handle failure
+    throw std::bad_alloc();
 };
 
 void NotePool::upgradeToLegato(void)
@@ -181,7 +193,7 @@ void NotePool::upgradeToLegato(void)
                 insertLegatoNote(d.note, d.sendto, s);
 }
 
-void NotePool::insertLegatoNote(uint8_t note, uint8_t sendto, SynthDescriptor desc)
+void NotePool::insertLegatoNote(note_t note, uint8_t sendto, SynthDescriptor desc)
 {
     assert(desc.note);
     try {
@@ -193,10 +205,10 @@ void NotePool::insertLegatoNote(uint8_t note, uint8_t sendto, SynthDescriptor de
 };
 
 //There should only be one pair of notes which are still playing
-void NotePool::applyLegato(LegatoParams &par)
+void NotePool::applyLegato(note_t note, LegatoParams &par)
 {
     for(auto &desc:activeDesc()) {
-        desc.note = par.midinote;
+        desc.note = note;
         for(auto &synth:activeNotes(desc))
             try {
                 synth.note->legatonote(par);
@@ -206,7 +218,7 @@ void NotePool::applyLegato(LegatoParams &par)
     }
 }
 
-void NotePool::makeUnsustainable(uint8_t note)
+void NotePool::makeUnsustainable(note_t note)
 {
     for(auto &desc:activeDesc()) {
         if(desc.note == note) {
@@ -243,17 +255,17 @@ bool NotePool::existsRunningNote(void) const
 
 int NotePool::getRunningNotes(void) const
 {
-    bool running[256] = {0};
-    for(auto &desc:activeDesc()) {
-        //printf("note!(%d)\n", desc.note);
-        if(desc.playing() || desc.sustained())
-            running[desc.note] = true;
-    }
-
+    bool running[256] = {};
     int running_count = 0;
-    for(int i=0; i<256; ++i)
-        running_count += running[i];
 
+    for(auto &desc:activeDesc()) {
+        if(desc.playing() == false && desc.sustained() == false)
+            continue;
+        if(running[desc.note] != false)
+            continue;
+        running[desc.note] = true;
+        running_count++;
+    }
     return running_count;
 }
 void NotePool::enforceKeyLimit(int limit)
@@ -313,7 +325,7 @@ void NotePool::killAllNotes(void)
         kill(d);
 }
 
-void NotePool::killNote(uint8_t note)
+void NotePool::killNote(note_t note)
 {
     for(auto &d:activeDesc()) {
         if(d.note == note)
@@ -359,8 +371,8 @@ void NotePool::cleanup(void)
     if(!needs_cleaning)
         return;
     needs_cleaning = false;
-    int new_length[POLYPHONY] = {0};
-    int cur_length[POLYPHONY] = {0};
+    int new_length[POLYPHONY] = {};
+    int cur_length[POLYPHONY] = {};
     //printf("Cleanup Start\n");
     //dump();
 

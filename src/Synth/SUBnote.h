@@ -16,6 +16,7 @@
 
 #include "SynthNote.h"
 #include "../globals.h"
+#include "WatchPoint.h"
 
 namespace zyn {
 
@@ -28,7 +29,7 @@ class SUBnote:public SynthNote
 
         SynthNote *cloneLegato(void);
         void legatonote(LegatoParams pars);
-
+        VecWatchPoint watch_filter,watch_amp_int, watch_legato;
         int noteout(float *outl, float *outr); //note output,return 0 if the note is finished
         void releasekey();
         bool finished() const;
@@ -38,7 +39,7 @@ class SUBnote:public SynthNote
         void setup(float freq,
                    float velocity,
                    int portamento_,
-                   int midinote,
+                   float note_log2_freq,
                    bool legato = false, WatchManager *wm = 0, const char *prefix = 0);
         float setupFilters(int *pos, bool automation);
         void computecurrentparameters();
@@ -50,7 +51,7 @@ class SUBnote:public SynthNote
         void KillNote();
 
         const SUBnoteParameters &pars;
-
+        
         //parameters
         bool       stereo;
         int       numstages; //number of stages of filters
