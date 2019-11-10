@@ -154,7 +154,7 @@ static const Ports voicePorts = {
 
     //Modulator Stuff
     rOption(PFMEnabled, rShort("mode"), rOptions(none, mix, ring, phase,
-                frequency, pulse), rDefault(none), "Modulator mode"),
+                frequency, pulse, wave), rDefault(none), "Modulator mode"),
     rParamI(PFMVoice,                   rShort("voice"), rDefault(-1),
         "Modulator Oscillator Selection"),
     rParamF(FMvolume,                   rShort("vol."),  rLinear(0.0, 100.0),
