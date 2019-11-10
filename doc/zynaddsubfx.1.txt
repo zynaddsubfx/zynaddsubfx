@@ -76,7 +76,7 @@ BUGS
 Please report any bugs to either the mailing list
     zynaddsubfx-user@lists.sourceforge.net
 or the bugtracker
-    http://sourceforge.net/tracker/?group_id=62934
+    https://sourceforge.net/p/zynaddsubfx/bugs/
 
 AUTHOR
 ------

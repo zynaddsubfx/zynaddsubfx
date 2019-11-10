@@ -28,7 +28,10 @@ namespace zyn {
 PADnote::PADnote(const PADnoteParameters *parameters,
                  SynthParams pars, const int& interpolation, WatchManager *wm,
                  const char *prefix)
-    :SynthNote(pars), pars(*parameters), interpolation(interpolation)
+    :SynthNote(pars),
+    watch_int(wm, prefix, "noteout/after_interpolation"), watch_punch(wm, prefix, "noteout/after_punch"),
+    watch_amp_int(wm, prefix, "noteout/after_amp_interpolation"), watch_legato(wm, prefix, "noteout/after_legato"),
+     pars(*parameters),interpolation(interpolation)
 {
     NoteGlobalPar.GlobalFilter    = nullptr;
     NoteGlobalPar.FilterEnvelope  = nullptr;
@@ -278,7 +281,7 @@ int PADnote::Compute_Linear(float *outl,
                             int freqhi,
                             float freqlo)
 {
-    float *smps = pars.sample[nsample].smp;
+    const float *smps = pars.sample[nsample].smp;
     if(smps == NULL) {
         finished_ = true;
         return 1;
@@ -354,7 +357,7 @@ int PADnote::Compute_Cubic(float *outl,
 
 
 int PADnote::noteout(float *outl, float *outr)
-{
+{   
     computecurrentparameters();
     float *smps = pars.sample[nsample].smp;
     if(smps == NULL) {
@@ -377,6 +380,7 @@ int PADnote::noteout(float *outl, float *outr)
     else
         Compute_Linear(outl, outr, freqhi, freqlo);
 
+    watch_int(outl,synth.buffersize);
 
     if(firsttime) {
         fadein(outl);
@@ -399,6 +403,8 @@ int PADnote::noteout(float *outl, float *outr)
                 break;
             }
         }
+    
+    watch_punch(outl,synth.buffersize);
 
     if(ABOVE_AMPLITUDE_THRESHOLD(globaloldamplitude, globalnewamplitude))
         // Amplitude Interpolation
@@ -416,9 +422,12 @@ int PADnote::noteout(float *outl, float *outr)
             outr[i] *= globalnewamplitude * (1.0f - NoteGlobalPar.Panning);
         }
 
+    watch_amp_int(outl,synth.buffersize);
 
     // Apply legato-specific sound signal modifications
     legato.apply(*this, outl, outr);
+
+    watch_legato(outl,synth.buffersize);
 
     // Check if the global amplitude is finished.
     // If it does, disable the note

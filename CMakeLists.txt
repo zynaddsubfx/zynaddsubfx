@@ -35,7 +35,7 @@ include(CTestConfig.cmake)
 add_subdirectory(src)
 add_subdirectory(doc) # Doxygen only
 
-install(FILES AUTHORS.txt COPYING HISTORY.txt README.adoc
+install(FILES AUTHORS.txt COPYING README.adoc
 	DESTINATION share/doc/zynaddsubfx
 	)
 install(FILES zynaddsubfx-jack-multi.desktop zynaddsubfx-jack.desktop zynaddsubfx-alsa.desktop zynaddsubfx-oss.desktop

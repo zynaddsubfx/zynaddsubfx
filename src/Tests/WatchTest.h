@@ -30,6 +30,7 @@
 #include "../Misc/Time.h"
 #include "../Params/LFOParams.h"
 #include "../Synth/LFO.h"
+#include "../Synth/SynthNote.h"
 #include <unistd.h>
 using namespace std;
 using namespace zyn;
@@ -52,6 +53,7 @@ class WatchTest:public CxxTest::TestSuite
             w   = new WatchManager(tr);
             par = new LFOParams;
             l   = new LFO(*par, 440.0, *at, w);
+            
         }
 
         void tearDown() {
@@ -77,4 +79,5 @@ class WatchTest:public CxxTest::TestSuite
             TS_ASSERT_EQUALS(string("out"), tr->read());
             TS_ASSERT(!tr->hasNext());
         }
+
 };

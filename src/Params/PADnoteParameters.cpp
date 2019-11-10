@@ -273,7 +273,7 @@ static const rtosc::Ports non_realtime_ports =
         NULL, [](const char *, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
 #define RES 512
-            char        types[RES+2] = {0};
+            char        types[RES+2] = {};
             rtosc_arg_t args[RES+1];
             float tmp[RES];
             types[0]  = 'f';
@@ -970,6 +970,9 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
         delete[] fftfreqs;
         delete[] spectrum;
     };
+
+    if(oscilgen->needPrepare())
+        oscilgen->prepare();
 
 #ifdef WIN32
     //Temporarily disable multi-threading here as C++11 threads are broken on

@@ -120,6 +120,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
                 // fprintf(stderr, "sending '%p' of fft data\n", data);
                 d.chain(repath, "b", sizeof(fft_t*), &data);
                 o.pendingfreqs = data;
+                d.broadcast(d.loc, "i", phase);
             }
         }},
     //TODO update to rArray and test
@@ -146,6 +147,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
                 // fprintf(stderr, "sending '%p' of fft data\n", data);
                 d.chain(repath, "b", sizeof(fft_t*), &data);
                 o.pendingfreqs = data;
+                d.broadcast(d.loc, "i", mag);
             }
         }},
     {"base-spectrum:", rProp(non-realtime) rDoc("Returns spectrum of base waveshape"),

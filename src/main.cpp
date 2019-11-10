@@ -36,6 +36,7 @@
 #include "Params/PADnoteParameters.h"
 
 #include "DSP/FFTwrapper.h"
+#include "Misc/MemLocker.h"
 #include "Misc/PresetExtractor.h"
 #include "Misc/Master.h"
 #include "Misc/Part.h"
@@ -744,7 +745,7 @@ int main(int argc, char *argv[])
         memset(&pi, 0, sizeof(pi));
         char *why_windows = strrchr(addr, ':');
         char *seriously_why = why_windows + 1;
-        char start_line[256] = {0};
+        char start_line[256] = {};
         if(why_windows)
             snprintf(start_line, sizeof(start_line), "zyn-fusion.exe osc.udp://127.0.0.1:%s", seriously_why);
         else {
@@ -760,6 +761,9 @@ int main(int argc, char *argv[])
 #endif
     }
 #endif
+
+    MemLocker mem_locker;
+    mem_locker.lock();
 
     printf("[INFO] Main Loop...\n");
     bool already_exited = false;
@@ -814,6 +818,9 @@ done:
 #endif
 #endif
     }
+
+    mem_locker.unlock();
+
 #ifdef ZEST_GUI
 #ifndef WIN32
     if(!already_exited) {

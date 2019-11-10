@@ -44,7 +44,9 @@ SUBnote::SUBnote(const SUBnoteParameters *parameters, SynthParams &spars, WatchM
     GlobalFilter(nullptr),
     GlobalFilterEnvelope(nullptr),
     NoteEnabled(true),
-    lfilter(nullptr), rfilter(nullptr)
+    lfilter(nullptr), rfilter(nullptr),
+    watch_filter(wm, prefix, "noteout/filter"), watch_amp_int(wm,prefix,"noteout/amp_int"),
+    watch_legato(wm, prefix, "noteout/legato")
 {
     setup(spars.frequency, spars.velocity, spars.portamento, spars.note_log2_freq, false, wm, prefix);
 }
@@ -547,7 +549,7 @@ int SUBnote::noteout(float *outl, float *outr)
 
         memcpy(outr, outl, synth.bufferbytes);
     }
-
+    watch_filter(outl,synth.buffersize);
     if(firsttick) {
         int n = 10;
         if(n > synth.buffersize)
@@ -576,13 +578,13 @@ int SUBnote::noteout(float *outl, float *outr)
             outl[i] *= newamplitude * panning;
             outr[i] *= newamplitude * (1.0f - panning);
         }
-
+    watch_amp_int(outl,synth.buffersize);
     oldamplitude = newamplitude;
     computecurrentparameters();
 
     // Apply legato-specific sound signal modifications
     legato.apply(*this, outl, outr);
-
+    watch_legato(outl,synth.buffersize);
     // Check if the note needs to be computed more
     if(AmpEnvelope->finished() != 0) {
         for(int i = 0; i < synth.buffersize; ++i) { //fade-out

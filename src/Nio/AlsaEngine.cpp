@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <cmath>
+#include <poll.h>
 
 #include "../Misc/Util.h"
 #include "../Misc/Config.h"
@@ -105,17 +106,27 @@ void *AlsaEngine::_MidiThread(void *arg)
 void *AlsaEngine::MidiThread(void)
 {
     snd_seq_event_t *event;
-    MidiEvent ev;
+    MidiEvent ev = {};
+    struct pollfd pfd[4 /* XXX 1 should be enough */];
+    int error;
+
     set_realtime();
     while(1) {
         if(midi.exiting)
             break;
-        if(snd_seq_event_input_pending(midi.handle, 1) <= 0) {
-            usleep(10);
+        error = snd_seq_event_input(midi.handle, &event);
+        if (error < 0) {
+            if(error != -EAGAIN && error != -EINTR)
+                break;
+            error = snd_seq_poll_descriptors(midi.handle, pfd, 4, POLLIN);
+            if(error <= 0)
+                break;
+            error = poll(pfd, error, 1000 /* ms */);
+            if(error < 0 &&
+               errno != EAGAIN && errno != EINTR)
+	        break;
             continue;
         }
-        if(snd_seq_event_input(midi.handle, &event) < 0)
-            break;
         //ensure ev is empty
         ev.channel = 0;
         ev.num     = 0;
@@ -193,6 +204,19 @@ void *AlsaEngine::MidiThread(void)
                 break;
 
             case SND_SEQ_EVENT_SYSEX:   // system exclusive
+                for (unsigned int x = 0; x < event->data.ext.len; x += 3) {
+                    uint8_t buf[3];
+                    int y = event->data.ext.len - x;
+                    if (y >= 3) {
+                        memcpy(buf, (uint8_t *)event->data.ext.ptr + x, 3);
+                    } else {
+                        memset(buf, 0, sizeof(buf));
+                        memcpy(buf, (uint8_t *)event->data.ext.ptr + x, y);
+                    }
+                    midiProcess(buf[0], buf[1], buf[2]);
+                }
+                break;
+
             case SND_SEQ_EVENT_SENSING: // midi device still there
                 break;
 
@@ -215,7 +239,8 @@ bool AlsaEngine::openMidi()
     int alsaport;
     midi.handle = NULL;
 
-    if(snd_seq_open(&midi.handle, "default", SND_SEQ_OPEN_INPUT, 0) != 0)
+    if(snd_seq_open(&midi.handle, "default",
+       SND_SEQ_OPEN_INPUT, SND_SEQ_NONBLOCK) != 0)
         return false;
 
     string clientname = "ZynAddSubFX";
@@ -239,7 +264,7 @@ bool AlsaEngine::openMidi()
     pthread_attr_t attr;
 
     pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
     pthread_create(&midi.pThread, &attr, _MidiThread, this);
     return true;
 }

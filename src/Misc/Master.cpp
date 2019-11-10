@@ -76,8 +76,8 @@ static const Ports sysefxPort =
             Master &mast = *(Master*)d.obj;
 
             if(rtosc_narguments(m)) {
-             mast.setPsysefxvol(ind2, ind1, rtosc_argument(m,0).i);
-             d.broadcast(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
+                mast.setPsysefxvol(ind2, ind1, rtosc_argument(m,0).i);
+                d.broadcast(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
             } else
                 d.reply(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
         }}
@@ -108,7 +108,10 @@ static const Ports sysefsendto =
             Master &master = *(Master*)d.obj;
 
             if(rtosc_narguments(m))
+            {
                 master.setPsysefxsend(ind1, ind2, rtosc_argument(m,0).i);
+                d.broadcast(d.loc, "i", master.Psysefxsend[ind1][ind2]);
+            }
             else
                 d.reply(d.loc, "i", master.Psysefxsend[ind1][ind2]);
         }}
@@ -169,8 +172,10 @@ static const Ports auto_param_ports = {
         rBegin;
         int slot  = d.idx[1];
         int param = d.idx[0];
-        if(rtosc_narguments(msg))
+        if(rtosc_narguments(msg)) {
             a.slots[slot].automations[param].active = rtosc_argument(msg, 0).T;
+            d.broadcast(d.loc, a.slots[slot].automations[param].active ? "T" : "F");
+        }
         else
             d.reply(d.loc, a.slots[slot].automations[param].active ? "T" : "F");
         rEnd},
@@ -257,11 +262,23 @@ static const Ports slot_ports = {
             d.reply(d.loc, "i", a.slots[slot].midi_cc);
 
         rEnd},
+    {"midi-nrpn::i", rProp(parameter) rMap(default, -1) rDoc("Access assigned midi NRPN slot") , 0,
+        rBegin;
+        int slot = d.idx[0];
+        if(rtosc_narguments(msg)) {
+            a.slots[slot].midi_nrpn = rtosc_argument(msg, 0).i;
+            d.broadcast(d.loc, "i", a.slots[slot].midi_nrpn);
+        } else
+            d.reply(d.loc, "i", a.slots[slot].midi_nrpn);
+
+        rEnd},
     {"active::T:F",  rProp(parameter) rMap(default, F) rDoc("If Slot is enabled"), 0,
         rBegin;
         int slot = d.idx[0];
-        if(rtosc_narguments(msg))
+        if(rtosc_narguments(msg)) {
             a.slots[slot].active = rtosc_argument(msg, 0).T;
+            d.broadcast(d.loc, a.slots[slot].active ? "T" : "F");
+        }
         else
             d.reply(d.loc, a.slots[slot].active ? "T" : "F");
         rEnd},
@@ -359,7 +376,8 @@ static const Ports automate_ports = {
 static const Ports watchPorts = {
     {"add:s", rDoc("Add synthesis state to watch"), 0,
         rBegin;
-        m->watcher.add_watch(rtosc_argument(msg,0).s);
+        if(!m->watcher.active(rtosc_argument(msg,0).s))
+            m->watcher.add_watch(rtosc_argument(msg,0).s);
         rEnd},
 };
 
@@ -391,7 +409,7 @@ static const Ports master_ports = {
        d.reply("/vu-meter", "bb", sizeof(m->vu), &m->vu, sizeof(float)*NUM_MIDI_PARTS, m->vuoutpeakpartl);}},
     {"vu-meter:", rDoc("Grab VU Data"), 0, [](const char *, RtData &d) {
        Master *m = (Master*)d.obj;
-       char        types[6+2*NUM_MIDI_PARTS+1] = {0};
+       char        types[6+2*NUM_MIDI_PARTS+1] = {};
        rtosc_arg_t  args[6+2*NUM_MIDI_PARTS+1];
        for(int i=0; i<6+2*NUM_MIDI_PARTS; ++i)
            types[i] = 'f';
@@ -422,7 +440,7 @@ static const Ports master_ports = {
        }},
     {"active_keys:", rProp("Obtain a list of active notes"), 0,
         rBegin;
-        char keys[129] = {0};
+        char keys[129] = {};
         for(int i=0; i<128; ++i)
             keys[i] = m->activeNotes[i] ? 'T' : 'F';
         d.broadcast(d.loc, keys);
@@ -1644,7 +1662,7 @@ int Master::loadXML(const char *filename)
 void Master::getfromXML(XMLwrapper& xml)
 {
     if (xml.hasparreal("volume")) {
-        xml.getparreal("volume", Volume);
+        Volume = xml.getparreal("volume", Volume);
     } else {
         Volume  = volume127ToFloat(xml.getpar127("volume", 0));
         oldVolume = Volume;

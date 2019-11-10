@@ -26,7 +26,7 @@ There are different ways to forward zyn to jack:
   - the `qjackctl` gui
   - the `jack_connect` commandline utility
 * Automatic selective connecting can be done using
-  http://www.rncbc.org/drupal/node/76[jack's patchbays]
+  https://www.rncbc.org/drupal/node/76[jack's patchbays]
 
 PulseAudio
 ~~~~~~~~~~

@@ -66,7 +66,7 @@ FormantFilter::FormantFilter(const FilterParams *pars, Allocator *alloc, unsigne
     oldinput   = -1.0f;
     Qfactor = pars->getq();
     oldQfactor = Qfactor;
-    firsttime  = 1;
+    firsttime  = true;
 }
 
 FormantFilter::~FormantFilter()
@@ -93,7 +93,7 @@ void FormantFilter::setpos(float frequency)
     //Convert form real freq[Hz]
     const float input = log_2(frequency) - 9.96578428f; //log2(1000)=9.95748f.
 
-    if(firsttime != 0)
+    if(firsttime)
         slowinput = input;
     else
         slowinput = slowinput
@@ -101,8 +101,8 @@ void FormantFilter::setpos(float frequency)
 
     if((fabsf(oldinput - input) < 0.001f) && (fabsf(slowinput - input) < 0.001f)
        && (fabsf(Qfactor - oldQfactor) < 0.001f)) {
-        //	oldinput=input; daca setez asta, o sa faca probleme la schimbari foarte lente
-        firsttime = 0;
+        //	oldinput=input; setting this will cause problems at very slow changes
+        firsttime = false;
         return;
     }
     else
@@ -126,7 +126,7 @@ void FormantFilter::setpos(float frequency)
     p1 = sequence[p1].nvowel;
     p2 = sequence[p2].nvowel;
 
-    if(firsttime != 0) {
+    if(firsttime) {
         for(int i = 0; i < numformants; ++i) {
             currentformants[i].freq =
                 formantpar[p1][i].freq
@@ -140,7 +140,7 @@ void FormantFilter::setpos(float frequency)
                                       currentformants[i].q * Qfactor);
             oldformantamp[i] = currentformants[i].amp;
         }
-        firsttime = 0;
+        firsttime = false;
     }
     else
         for(int i = 0; i < numformants; ++i) {

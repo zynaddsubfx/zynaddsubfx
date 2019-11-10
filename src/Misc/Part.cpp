@@ -62,11 +62,13 @@ static const Ports partPorts = {
     {"Pvolume::i", rShort("Vol") rProp(parameter) rLinear(0,127)
         rDefault(96) rDoc("Part Volume"), 0,
         [](const char *m, rtosc::RtData &d) {
+            Part *obj = (Part*)d.obj;
         if(rtosc_narguments(m)==0) {
-            d.reply(d.loc, "i", (int) roundf(96.0f * ((Part*)d.obj)->Volume / 40.0f + 96.0f));
+            d.reply(d.loc, "i", (int) roundf(96.0f * obj->Volume / 40.0f + 96.0f));
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
-            ((Part *)d.obj)->Volume  = ((Part *)d.obj)->volume127ToFloat(limit<unsigned char>(rtosc_argument(m, 0).i, 0, 127));
-             d.broadcast(d.loc, "i", limit<char>(rtosc_argument(m, 0).i, 0, 127));
+            obj->Volume  = obj->volume127ToFloat(limit<unsigned char>(rtosc_argument(m, 0).i, 0, 127));
+            obj->setVolume(obj->Volume);
+            d.broadcast(d.loc, "i", limit<char>(rtosc_argument(m, 0).i, 0, 127));
         }}},
 #define rChangeCb obj->setPpanning(obj->Ppanning);
     rParamZyn(Ppanning, rShort("pan"), rDefault(64), "Set Panning"),
@@ -123,11 +125,15 @@ static const Ports partPorts = {
         [](const char *msg, RtData &d)
         {
             Part *p = (Part*)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_polytype = [&p](){
                 int res = 0;
                 if(!p->Ppolymode)
                     res = p->Plegatomode ? 2 : 1;
-                d.reply(d.loc, "i", res);
+                return res;
+            };
+
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_polytype());
                 return;
             }
 
@@ -141,7 +147,10 @@ static const Ports partPorts = {
             } else {
                 p->Ppolymode = 0;
                 p->Plegatomode = 1;
-            }}},
+            }
+            d.broadcast(d.loc, "i", get_polytype());
+        }
+    },
     {"clear:", rProp(internal) rDoc("Reset Part To Defaults"), 0,
         [](const char *, RtData &d)
         {
@@ -876,7 +885,7 @@ float Part::volume127ToFloat(unsigned char volume_)
 void Part::setVolume(float Volume_)
 {
     Volume = Volume_;
-    volume  =
+    volume =
         dB2rap(Volume) * ctl.expression.relvolume;
 }
 
