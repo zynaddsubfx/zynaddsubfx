@@ -86,7 +86,7 @@ OssMultiEngine :: openAudio()
         device = linux_oss_wave_out_dev;
 
     /* NOTE: PIPEs and FIFOs can block when opening them */
-    handle = open(device, O_WRONLY, O_NONBLOCK);
+    handle = open(device, O_WRONLY | O_NONBLOCK);
     if (handle == -1) {
         cerr << "ERROR - I can't open the "
             << device << '.' << endl;
