@@ -37,7 +37,7 @@ extern zyn::MiddleWare *middleware;
 
 namespace zyn {
 
-static const int OssBlocking = 0;
+static const int OssNonBlocking = 0;
 
 OssMultiEngine :: OssMultiEngine(const SYNTH_T &synth,
     const oss_devs_t &oss_devs)
@@ -94,7 +94,7 @@ OssMultiEngine :: openAudio()
             << device << '.' << endl;
         return (false);
     }
-    ioctl(handle, FIONBIO, &OssBlocking);
+    ioctl(handle, FIONBIO, &OssNonBlocking);
     ioctl(handle, SNDCTL_DSP_RESET, 0);
 
     /* Figure out the correct format first */

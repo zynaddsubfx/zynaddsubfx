@@ -36,7 +36,7 @@ using namespace std;
 
 namespace zyn {
 
-static const int OssBlocking = 0;
+static const int OssNonBlocking = 0;
 
 /*
  * The following statemachine converts MIDI commands to USB MIDI
@@ -224,7 +224,7 @@ bool OssEngine::openAudio()
              << device << '.' << endl;
         return false;
     }
-    ioctl(audio.handle, FIONBIO, &OssBlocking);
+    ioctl(audio.handle, FIONBIO, &OssNonBlocking);
     ioctl(audio.handle, SNDCTL_DSP_RESET, NULL);
 
     /* Figure out the correct format first */
@@ -363,7 +363,7 @@ bool OssEngine::openMidi()
         return false;
     midi.handle = handle;
 
-    ioctl(midi.handle, FIONBIO, &OssBlocking);
+    ioctl(midi.handle, FIONBIO, &OssNonBlocking);
 
     pthread_attr_t attr;
     pthread_attr_init(&attr);
