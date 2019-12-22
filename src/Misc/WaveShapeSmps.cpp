@@ -146,6 +146,7 @@ void waveShapeSmps(int n,
                 else
                     smps[i] = ( smps[i] < -ws ? -ws+res : smps[i]+res );
                 // and substract the polyblamp-limited offset again: smps[i] = y - f(offs)
+                res = polyblampres(offs, ws, par);
                 if (offs>=0)
                     smps[i] -= ( offs >= ws ? ws-res : offs-res );
                 else
