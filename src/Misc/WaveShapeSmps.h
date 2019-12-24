@@ -19,8 +19,14 @@ namespace zyn {
 void waveShapeSmps(int n,
                    float *smps,
                    unsigned char type,
-                   unsigned char drive);
+                   unsigned char drive,
+                   unsigned char offset = 64,
+                   unsigned char funcpar = 0);
 
+//calculate the polyblamp residual value (called by waveshape function)
+float polyblampres(float smp, 
+                   float ws, 
+                   float dMax);
 }
 
 #endif

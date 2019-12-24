@@ -65,7 +65,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             rOptions(Undistorted,
                 Arctangent, Asymmetric, Pow, Sine, Quantisize,
                 Zigzag, Limiter, Upper Limiter, Lower Limiter,
-                Inverse Limiter, Clip, Asym2, Pow2, sigmoid),
+                Inverse Limiter, Clip, Asym2, Pow2, sigmoid, Tanh, Cubic, Square),
             "Shape of distortion to be applied"),
     rOption(Pfiltertype, rShort("filter"), rOptions(No Filter,
             lp, hp1, hp1b, bp1, bs1, lp2, hp2, bp2, bs2,

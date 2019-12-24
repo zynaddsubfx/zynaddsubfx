@@ -807,6 +807,18 @@ if (filterwindow!=NULL){
         code0 {o->init("parameter4");}
         class Fl_Osc_Dial
       }
+      Fl_Dial distp12 {
+        label Offs
+        tooltip {DC Offset} xywh {190 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter12");}
+        class Fl_Osc_Dial
+      }
+      Fl_Dial distp11 {
+        label Shape
+        tooltip {Shape Parameter} xywh {225 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter11");}
+        class Fl_Osc_Dial
+      }
       Fl_Dial distp7 {
         label LPF
         tooltip {Low Pass Filter} xywh {285 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
@@ -821,7 +833,7 @@ if (filterwindow!=NULL){
       }
       Fl_Choice distp5 {
         label Type
-        xywh {190 50 60 20} box UP_BOX down_box BORDER_BOX labelfont 1 labelsize 11 align 2 textsize 10
+        xywh {190 15 60 20} box UP_BOX down_box BORDER_BOX labelfont 1 labelsize 11 align 5 textsize 10
         code0 {o->init("parameter5");}
         class Fl_Osc_Choice
       } {
@@ -881,10 +893,22 @@ if (filterwindow!=NULL){
           label Sgm
           xywh {95 95 100 20} labelfont 1 labelsize 10
         }
+        MenuItem {} {
+          label Tanh
+          xywh {105 105 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label Cubic
+          xywh {115 115 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label Square
+          xywh {205 125 100 20} labelfont 1 labelsize 10
+        }
       }
       Fl_Check_Button distp6 {
         label {Neg.}
-        xywh {260 55 15 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 2
+        xywh {260 15 15 15} down_box DOWN_BOX labelfont 1 labelsize 11 align 1
         code0 {o->init("parameter6");}
         class Fl_Osc_Check
       }
@@ -1722,6 +1746,18 @@ effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);} {}
         code0 {o->init("parameter4");}
         class Fl_Osc_Dial
       }
+      Fl_Dial distp12 {
+        label Offs
+        tooltip {DC Offset} xywh {190 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter12");}
+        class Fl_Osc_Dial
+      }
+      Fl_Dial distp11 {
+        label Shape
+        tooltip {Shape Parameter} xywh {225 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter11");}
+        class Fl_Osc_Dial
+      }
       Fl_Dial distp7 {
         label LPF
         tooltip {Low Pass Filter} xywh {190 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
@@ -1730,7 +1766,7 @@ effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);} {}
       }
       Fl_Choice distp5 {
         label Type
-        xywh {120 50 60 20} box UP_BOX down_box BORDER_BOX labelfont 1 labelsize 11 align 2 textsize 10
+        xywh {120 15 60 20} box UP_BOX down_box BORDER_BOX labelfont 1 labelsize 11 align 5 textsize 10
         code0 {o->init("parameter5");}
         class Fl_Osc_Choice
       } {
@@ -1789,6 +1825,18 @@ effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);} {}
         MenuItem {} {
           label Sgm
           xywh {95 95 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label Tanh
+          xywh {105 105 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label Cubic
+          xywh {115 115 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label Square
+          xywh {205 125 100 20} labelfont 1 labelsize 10
         }
       }
     }
