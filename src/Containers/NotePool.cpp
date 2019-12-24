@@ -246,7 +246,7 @@ bool NotePool::synthFull(int sdesc_count) const
     return actually_free < sdesc_count;
 }
 
-//Note that isn't KEY_PLAYING or KEY_RELASED_AND_SUSTAINING
+//Note that isn't KEY_PLAYING or KEY_RELEASED_AND_SUSTAINING
 bool NotePool::existsRunningNote(void) const
 {
     //printf("runing note # =%d\n", getRunningNotes());

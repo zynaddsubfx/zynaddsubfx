@@ -129,7 +129,7 @@ class NotePool
         bool full(void) const;
         bool synthFull(int sdesc_count) const;
 
-        //Note that isn't KEY_PLAYING or KEY_RELASED_AND_SUSTAINING
+        //Note that isn't KEY_PLAYING or KEY_RELEASED_AND_SUSTAINING
         bool existsRunningNote(void) const;
         int getRunningNotes(void) const;
         void enforceKeyLimit(int limit);
