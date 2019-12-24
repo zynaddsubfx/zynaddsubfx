@@ -256,7 +256,7 @@ envfree->redraw();}
         }
         Fl_Check_Button e1linearenvelope {
           label L
-          tooltip {The evelope is linear} xywh {180 20 15 15} down_box DOWN_BOX labelsize 10 align 4
+          tooltip {The envelope is linear} xywh {180 20 15 15} down_box DOWN_BOX labelsize 10 align 4
           code0 {o->init("Plinearenvelope");}
           class Fl_Osc_Check
         }
