@@ -28,7 +28,7 @@
 #include "OscilGen.h"
 #include "ADnote.h"
 
-#define LENGTHOF(x) (sizeof(x)/sizeof(x[0]))
+#define LENGTHOF(x) ((int)(sizeof(x)/sizeof(x[0])))
 
 namespace zyn {
 ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
