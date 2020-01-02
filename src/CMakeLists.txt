@@ -421,7 +421,7 @@ if(NtkGui)
 
 	message(STATUS "Will build NTK gui")
 
-	include_directories(
+	include_directories(BEFORE
 			${NTK_INCLUDE_DIRS}
 			"${CMAKE_CURRENT_SOURCE_DIR}/UI"
 			"${CMAKE_CURRENT_BINARY_DIR}/UI"
