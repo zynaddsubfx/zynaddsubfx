@@ -1632,7 +1632,7 @@ FUNC(circle)
 
 base_func_t *getBaseFunction(unsigned char func)
 {
-    static const base_func_t *functions[] = {
+    static base_func_t * const functions[] = {
         basefunc_triangle,
         basefunc_pulse,
         basefunc_saw,
@@ -1792,7 +1792,7 @@ FILTER(s)
 
 filter_func_t *getFilter(unsigned char func)
 {
-    static const filter_func_t *functions[] = {
+    static filter_func_t * const functions[] = {
         osc_lp,
         osc_hp1,
         osc_hp1b,
