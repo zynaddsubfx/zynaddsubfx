@@ -158,7 +158,7 @@ static const rtosc::Ports localPorts = {
         d.reply(d.loc, "i", env->Envmode);
         rEnd},
 
-    {"envdt", rDoc("Envelope Delay Times (log)"), NULL,
+    {"envdt", rDoc("Envelope Delay Times (ms)"), NULL,
         rBegin;
         const int N = MAX_ENVELOPE_POINTS;
         const int M = rtosc_narguments(msg);
@@ -176,7 +176,7 @@ static const rtosc::Ports localPorts = {
             }
         }
         rEnd},
-    {"dt", rDoc("Envelope Delay Times (lin)"), NULL,
+    {"dt", rDoc("Envelope Delay Times (sec)"), NULL,
         rBegin;
         
         const int N = MAX_ENVELOPE_POINTS;
@@ -556,7 +556,7 @@ void EnvelopeParams::getfromXML(XMLwrapper& xml)
         if(xml.enterbranch("POINT", i) == 0)
             continue;
         if(i != 0) {
-            if(!xml.hasparreal("A_dt")) {
+            if(!xml.hasparreal("dt")) {
                 int dt = xml.getpar127("dt", dT127(envdt[i]));
                 envdt[i] = dTREAL(dt);
             }
