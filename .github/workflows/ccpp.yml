@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v1
+    - name: apt_update
+      run:  sudo apt-get update
     - name: install_deps1
       run:   sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev
     - name: install_deps2
@@ -30,6 +32,8 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v1
+    - name: apt_update
+      run:  sudo apt-get update
     - name: install_deps1
       run:   sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev
     - name: install_deps2
@@ -54,7 +58,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: install_deps1
-      run: brew install libmxml libfftw3
+      run: brew install libmxml fftw3
     - name: install_deps2
       run: brew install liblo
     - name: install_test_deps1
