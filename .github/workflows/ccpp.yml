@@ -58,7 +58,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: install_deps1
-      run: brew install libmxml fftw3
+      run: brew install libmxml fftw
     - name: install_deps2
       run: brew install liblo
     - name: install_test_deps1

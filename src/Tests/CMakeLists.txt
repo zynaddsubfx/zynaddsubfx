@@ -72,7 +72,7 @@ target_link_libraries(EffectTest ${test_lib})
 add_executable(ins-test InstrumentStats.cpp)
 target_link_libraries(ins-test ${test_lib} rt)
 
-if(LIBLO_FOUND)
+if(LIBLO_FOUND AND FALSE)
     cp_script(check-ports.rb)
     add_test(PortChecker check-ports.rb)
 endif()
