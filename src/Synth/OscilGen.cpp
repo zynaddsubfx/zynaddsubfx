@@ -320,8 +320,9 @@ void normalize(fft_t *freqs, int oscilsize)
     union { float in; uint32_t out; } convert;
     convert.in = max;
     printf("max -> 0x%.8X", convert.out);
-    for(int i = 0; i < oscilsize / 2; ++i)
-        freqs[i] /= max;
+    if(fabs(max-1.0f) > 1e-4)
+        for(int i = 0; i < oscilsize / 2; ++i)
+            freqs[i] /= max;
 }
 
 //Full RMS normalize
