@@ -24,7 +24,7 @@ jobs:
     - name: make
       run: cd build && make
     - name: make test
-      run: cd build && make test
+      run: cd build && ctest --output-on-failure
     env:
         CC:  gcc
         CXX: g++
@@ -49,7 +49,7 @@ jobs:
     - name: make
       run: cd build && make
     - name: make test
-      run: cd build && make test
+      run: cd build && ctest --output-on-failure
     env:
         CC:  clang
         CXX: clang++
@@ -72,7 +72,7 @@ jobs:
     - name: make
       run: cd build && make
     - name: make test
-      run: cd build && make test
+      run: cd build && ctest --output-on-failure
     env:
         CC:  clang
         CXX: clang++
