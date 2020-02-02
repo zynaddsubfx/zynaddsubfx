@@ -254,7 +254,7 @@ void XMLwrapper::addparreal(const string &name, float val)
     char buf[11];
     convert.in = val;
     sprintf(buf, "0x%.8X", convert.out);
-    printf("write <%s> %x\n", name, convert.out);
+    printf("write <%s> %x\n", name.c_str(), convert.out);
     addparams("par_real", 3, "name", name.c_str(), "value",
               stringFrom<float>(val).c_str(), "exact_value", buf);
 }
