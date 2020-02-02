@@ -593,6 +593,7 @@ float XMLwrapper::getparreal(const char *name, float defaultpar) const
         sscanf(strval+2, "%x", &convert.in);
         return convert.out;
     }
+    assert(false);
 
     strval = mxmlElementGetAttr(tmp, "value");
     if(strval == NULL)
