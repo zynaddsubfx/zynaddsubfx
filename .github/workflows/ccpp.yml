@@ -60,7 +60,7 @@ jobs:
     - name: install_deps1
       run: brew install libmxml fftw
     - name: install_deps2
-      run: brew install liblo
+      run: brew install liblo pkg-config
     - name: install_test_deps1
       run: brew install cxxtest
     - name: install_test_deps2
