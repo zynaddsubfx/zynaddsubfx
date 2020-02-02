@@ -254,6 +254,7 @@ void XMLwrapper::addparreal(const string &name, float val)
     char buf[11];
     convert.in = val;
     sprintf(buf, "0x%.8X", convert.out);
+    printf("write <%s> %x\n", name, out);
     addparams("par_real", 3, "name", name.c_str(), "value",
               stringFrom<float>(val).c_str(), "exact_value", buf);
 }
@@ -591,10 +592,9 @@ float XMLwrapper::getparreal(const char *name, float defaultpar) const
     if (strval != NULL) {
         union { float out; uint32_t in; } convert;
         sscanf(strval+2, "%x", &convert.in);
+        printf("read <%s> %x\n", name, in);
         return convert.out;
     }
-    assert(false);
-
     strval = mxmlElementGetAttr(tmp, "value");
     if(strval == NULL)
         return defaultpar;
