@@ -119,7 +119,7 @@ void print_string_differences(string orig, string next)
     //exit(1);
 
     int total_cost = cost[(N-1)*M + (M-1)];
-    if(total_cost < 500) {
+    if(total_cost < 500 || true) {
         printf("total cost = %f\n", cost[(N-1)*M + (M-1)]);
 
         int b_pos = b.size()-1;
