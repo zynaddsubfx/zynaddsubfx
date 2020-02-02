@@ -271,6 +271,7 @@ if(LashEnable)
 endif()
 
 include_directories(${LIBLO_INCLUDE_DIRS})
+include_directories(${LIBLO_INCLUDEDIR})
 add_definitions(-DUSE_NSM=1)
 list(APPEND AUDIO_LIBRARIES ${LIBLO_LIBRARIES})
 list(APPEND AUDIO_LIBRARY_DIRS ${LIBLO_LIBRARY_DIRS})
