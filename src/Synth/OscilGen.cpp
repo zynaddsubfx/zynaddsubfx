@@ -316,6 +316,10 @@ void normalize(fft_t *freqs, int oscilsize)
     if(max < 1e-8) //data is all ~zero, do not amplify noise
         return;
 
+    printf("max = %f\n", max);
+    union { float in; uint32_t out; } convert;
+    convert.in = max;
+    printf("max -> 0x%.8X", convert.out);
     for(int i = 0; i < oscilsize / 2; ++i)
         freqs[i] /= max;
 }
