@@ -87,6 +87,22 @@ decl {\#if !defined(PLUGINVERSION) && HAS_X11
 \#endif} {public local
 } 
 
+decl {\#if !defined(PLUGINVERSION) && HAS_X11
+\#include <FL/Fl_RGB_Image.H>
+\#endif} {private local
+} 
+
+decl {\#if !defined(PLUGINVERSION) && HAS_X11
+\#include <FL/FL.H>
+\#include "Enumerations.H"
+\#endif} {private local
+} 
+
+decl {\#if !defined(PLUGINVERSION) && HAS_X11
+\#include <FL/Fl_Pixmap.H>
+\#endif} {private local
+} 
+
 decl {\#include "../globals.h"} {public local
 } 
 
@@ -1576,10 +1592,9 @@ make_window();
 fl_open_display();
 
 \#if !defined(PLUGINVERSION) && HAS_X11
-Pixmap p, mask;
-XCreatePixmapFromData(fl_display, DefaultRootWindow(fl_display),
-                                 (char**)zynaddsubfx_xpm, &p, &mask, NULL);
-masterwindow->icon((char *)p);
+Fl_Pixmap *pixmap = new Fl_Pixmap(zynaddsubfx_xpm);
+Fl_RGB_Image *p = new Fl_RGB_Image(pixmap, FL_GRAY);
+masterwindow->icon(p);
 \#endif
 assert(osc);
 presetsui=new PresetsUI(osc);
