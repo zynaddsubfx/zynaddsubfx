@@ -94,7 +94,11 @@ decl {\#if !defined(PLUGINVERSION) && HAS_X11
 
 decl {\#if !defined(PLUGINVERSION) && HAS_X11
 \#include <FL/FL.H>
-\#include "Enumerations.H"
+\#endif} {private local
+} 
+
+decl {\#if !defined(PLUGINVERSION) && HAS_X11
+\#include <FL/Enumerations.H>
 \#endif} {private local
 } 
 
