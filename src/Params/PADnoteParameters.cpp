@@ -916,7 +916,7 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
 
         for(int nsample = 0; nsample < samplemax; ++nsample)
         if(nsample % nthreads == threadno)
-         {
+        {
             if(do_abort())
                 break;
             const float basefreqadjust =
@@ -933,7 +933,7 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
                 this_c->generatespectrum_otherModes(spectrum, spectrumsize,
                                                     basefreq * basefreqadjust);
 
-            //the last samples contains the first samples
+            //the last samples contain the first samples
             //(used for linear/cubic interpolation)
             const int extra_samples = 5;
             PADnoteParameters::Sample newsample;

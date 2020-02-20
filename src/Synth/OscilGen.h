@@ -112,13 +112,13 @@ class OscilGen:public Presets
         static const rtosc::Ports      realtime_ports;
 
         /* Oscillator Frequencies -
-         *  this is different than the hamonics set-up by the user,
+         *  this is different than the harmonics set-up by the user,
          *  it may contains time-domain data if the antialiasing is turned off*/
         fft_t *oscilFFTfreqs;
 
         fft_t *pendingfreqs;
     private:
-        //This array stores some termporary data and it has OSCIL_SIZE elements
+        //This array stores some temporary data and it has OSCIL_SIZE elements
         float *tmpsmps;
         fft_t *outoscilFFTfreqs;
         float *cachedbasefunc;

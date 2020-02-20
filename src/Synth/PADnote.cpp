@@ -239,7 +239,7 @@ inline void PADnote::fadein(float *smps)
     tmp *= NoteGlobalPar.Fadein_adjustment;
 
     int n;
-    F2I(tmp, n); //how many samples is the fade-in
+    F2I(tmp, n) //how many samples is the fade-in
     if(n > synth.buffersize)
         n = synth.buffersize;
     for(int i = 0; i < n; ++i) { //fade-in
@@ -357,7 +357,7 @@ int PADnote::Compute_Cubic(float *outl,
 
 
 int PADnote::noteout(float *outl, float *outr)
-{   
+{
     computecurrentparameters();
     float *smps = pars.sample[nsample].smp;
     if(smps == NULL) {
@@ -372,7 +372,7 @@ int PADnote::noteout(float *outl, float *outr)
 
     float freqrap = realfreq / smpfreq;
     int   freqhi  = (int) (floor(freqrap));
-    float freqlo  = freqrap - floor(freqrap);
+    float freqlo  = freqrap - floorf(freqrap);
 
 
     if(interpolation)
