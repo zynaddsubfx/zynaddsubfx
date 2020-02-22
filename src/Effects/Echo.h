@@ -27,6 +27,7 @@ class Echo:public Effect
         ~Echo();
 
         void out(const Stereo<float *> &input);
+        unsigned char getpresetpar(unsigned char npreset, unsigned int npar);
         void setpreset(unsigned char npreset);
         /**
          * Sets the value of the chosen variable

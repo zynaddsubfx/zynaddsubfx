@@ -85,12 +85,12 @@ void PADnote::setup(float freq,
 
     //find out the closest note
     float logfreq = logf(basefreq * powf(2.0f, NoteGlobalPar.Detune / 1200.0f));
-    float mindist = fabs(logfreq - logf(pars.sample[0].basefreq + 0.0001f));
+    float mindist = fabsf(logfreq - logf(pars.sample[0].basefreq + 0.0001f));
     nsample = 0;
     for(int i = 1; i < PAD_MAX_SAMPLES; ++i) {
         if(pars.sample[i].smp == NULL)
             break;
-        float dist = fabs(logfreq - logf(pars.sample[i].basefreq + 0.0001f));
+        float dist = fabsf(logfreq - logf(pars.sample[i].basefreq + 0.0001f));
 
         if(dist < mindist) {
             nsample = i;

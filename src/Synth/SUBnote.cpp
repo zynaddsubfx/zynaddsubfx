@@ -35,18 +35,19 @@
 
 namespace zyn {
 
-SUBnote::SUBnote(const SUBnoteParameters *parameters, SynthParams &spars, WatchManager *wm, const char *prefix
-                 )
-    :SynthNote(spars), pars(*parameters),
+SUBnote::SUBnote(const SUBnoteParameters *parameters, SynthParams &spars,
+    WatchManager *wm, const char *prefix) :
+    SynthNote(spars),
+    watch_filter(wm, prefix, "noteout/filter"), watch_amp_int(wm,prefix,"noteout/amp_int"),
+    watch_legato(wm, prefix, "noteout/legato"),
+    pars(*parameters),
     AmpEnvelope(nullptr),
     FreqEnvelope(nullptr),
     BandWidthEnvelope(nullptr),
     GlobalFilter(nullptr),
     GlobalFilterEnvelope(nullptr),
     NoteEnabled(true),
-    lfilter(nullptr), rfilter(nullptr),
-    watch_filter(wm, prefix, "noteout/filter"), watch_amp_int(wm,prefix,"noteout/amp_int"),
-    watch_legato(wm, prefix, "noteout/legato")
+    lfilter(nullptr), rfilter(nullptr)
 {
     setup(spars.frequency, spars.velocity, spars.portamento, spars.note_log2_freq, false, wm, prefix);
 }

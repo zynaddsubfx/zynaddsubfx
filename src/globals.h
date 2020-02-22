@@ -201,8 +201,8 @@ typedef std::complex<fftw_real> fft_t;
 /*
  * How the amplitude threshold is computed
  */
-#define ABOVE_AMPLITUDE_THRESHOLD(a, b) ((2.0f * fabs((b) - (a)) \
-                                          / (fabs((b) + (a) \
+#define ABOVE_AMPLITUDE_THRESHOLD(a, b) ((2.0f * fabsf((b) - (a)) \
+                                          / (fabsf((b) + (a) \
                                                   + 0.0000000001f))) > \
                                          AMPLITUDE_INTERPOLATION_THRESHOLD)
 

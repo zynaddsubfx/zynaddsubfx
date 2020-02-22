@@ -25,6 +25,7 @@ class Distorsion:public Effect
         Distorsion(EffectParams pars);
         ~Distorsion();
         void out(const Stereo<float *> &smp);
+        unsigned char getpresetpar(unsigned char npreset, unsigned int npar);
         void setpreset(unsigned char npreset);
         void changepar(int npar, unsigned char value);
         unsigned char getpar(int npar) const;

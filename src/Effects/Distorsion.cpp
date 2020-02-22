@@ -218,36 +218,43 @@ void Distorsion::sethpf(unsigned char _Phpf)
     hpfr->setfreq(fr);
 }
 
+unsigned char Distorsion::getpresetpar(unsigned char npreset, unsigned int npar)
+{
+#define	PRESET_SIZE 13
+#define	NUM_PRESETS 6
+    static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
+        //Overdrive 1
+        {127, 64, 35, 56, 70, 0, 0, 96,  0,   0, 0, 32, 64},
+        //Overdrive 2
+        {127, 64, 35, 29, 75, 1, 0, 127, 0,   0, 0, 32, 64},
+        //A. Exciter 1
+        {64,  64, 35, 75, 80, 5, 0, 127, 105, 1, 0, 32, 64},
+        //A. Exciter 2
+        {64,  64, 35, 85, 62, 1, 0, 127, 118, 1, 0, 32, 64},
+        //Guitar Amp
+        {127, 64, 35, 63, 75, 2, 0, 55,  0,   0, 0, 32, 64},
+        //Quantisize
+        {127, 64, 35, 88, 75, 4, 0, 127, 0,   1, 0, 32, 64}
+    };
+    if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
+        if(npar == 0 && insertion == 0) {
+            /* lower the volume if this is system effect */
+            return (3 * presets[npreset][npar]) / 2;
+        }
+        return presets[npreset][npar];
+    }
+    return 0;
+}
 
 void Distorsion::setpreset(unsigned char npreset)
 {
-    const int     PRESET_SIZE = 11;
-    const int     NUM_PRESETS = 6;
-    unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
-        //Overdrive 1
-        {127, 64, 35, 56, 70, 0, 0, 96,  0,   0, 0},
-        //Overdrive 2
-        {127, 64, 35, 29, 75, 1, 0, 127, 0,   0, 0},
-        //A. Exciter 1
-        {64,  64, 35, 75, 80, 5, 0, 127, 105, 1, 0},
-        //A. Exciter 2
-        {64,  64, 35, 85, 62, 1, 0, 127, 118, 1, 0},
-        //Guitar Amp
-        {127, 64, 35, 63, 75, 2, 0, 55,  0,   0, 0},
-        //Quantisize
-        {127, 64, 35, 88, 75, 4, 0, 127, 0,   1, 0}
-    };
-
     if(npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
-    if(!insertion) //lower the volume if this is system effect
-        changepar(0, (int) (presets[npreset][0] / 1.5f));
+    for(int n = 0; n != 128; n++)
+        changepar(n, getpresetpar(npreset, n));
     Ppreset = npreset;
     cleanup();
 }
-
 
 void Distorsion::changepar(int npar, unsigned char value)
 {

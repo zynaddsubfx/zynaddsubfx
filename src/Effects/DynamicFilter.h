@@ -27,6 +27,7 @@ class DynamicFilter:public Effect
         ~DynamicFilter();
         void out(const Stereo<float *> &smp);
 
+        unsigned char getpresetpar(unsigned char npreset, unsigned int npar);
         void setpreset(unsigned char npreset) { setpreset(npreset, false); };
         void setpreset(unsigned char npreset, bool protect);
         void changepar(int npar, unsigned char value);

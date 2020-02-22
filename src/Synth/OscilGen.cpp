@@ -602,8 +602,8 @@ inline void normalize(float *smps, size_t N)
     //Find max
     float max = 0.0f;
     for(size_t i = 0; i < N; ++i)
-        if(max < fabs(smps[i]))
-            max = fabs(smps[i]);
+        if(max < fabsf(smps[i]))
+            max = fabsf(smps[i]);
     if(max < 0.00001f)
         max = 1.0f;
 
@@ -829,7 +829,7 @@ void OscilGen::prepare(fft_t *freqs)
         hphase[i] = (Phphase[i] - 64.0f) / 64.0f * PI / (i + 1);
 
     for(int i = 0; i < MAX_AD_HARMONICS; ++i) {
-        const float hmagnew = 1.0f - fabs(Phmag[i] / 64.0f - 1.0f);
+        const float hmagnew = 1.0f - fabsf(Phmag[i] / 64.0f - 1.0f);
         switch(Phmagtype) {
             case 1:
                 hmag[i] = expf(hmagnew * logf(0.01f));
@@ -1058,7 +1058,7 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
 
     clearAll(outoscilFFTfreqs, synth.oscilsize);
 
-    int nyquist = (int)(0.5f * synth.samplerate_f / fabs(freqHz)) + 2;
+    int nyquist = (int)(0.5f * synth.samplerate_f / fabsf(freqHz)) + 2;
     if(ADvsPAD)
         nyquist = (int)(synth.oscilsize / 2);
     if(nyquist > synth.oscilsize / 2)
@@ -1110,7 +1110,7 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
                 power = powf(15.0f, power) * 2.0f;
                 float rndfreq = 2 * PI * RND;
                 for(int i = 1; i < nyquist - 1; ++i)
-                    outoscilFFTfreqs[i] *= powf(fabs(sinf(i * rndfreq)), power)
+                    outoscilFFTfreqs[i] *= powf(fabsf(sinf(i * rndfreq)), power)
                                            * normalize;
                 break;
         }
@@ -1329,7 +1329,7 @@ void OscilGen::add2XML(XMLwrapper& xml)
         for(int i = 1; i < synth.oscilsize / 2; ++i) {
             float xc = basefuncFFTfreqs[i].real();
             float xs = basefuncFFTfreqs[i].imag();
-            if((fabs(xs) > 1e-6f) || (fabs(xc) > 1e-6f)) {
+            if((fabsf(xs) > 1e-6f) || (fabsf(xc) > 1e-6f)) {
                 xml.beginbranch("BF_HARMONIC", i);
                 xml.addparreal("cos", xc);
                 xml.addparreal("sin", xs);
@@ -1544,7 +1544,7 @@ FUNC(stretchsine)
     if(a > 0.0f)
         a *= 2;
     a = powf(3.0f, a);
-    float b = powf(fabs(x), a);
+    float b = powf(fabsf(x), a);
     if(x < 0)
         b = -b;
     return -sinf(b * PI);
@@ -1565,7 +1565,7 @@ FUNC(absstretchsine)
     x = fmod(x + 0.5f, 1) * 2.0f - 1.0f;
     a = (a - 0.5f) * 9;
     a = powf(3.0f, a);
-    float b = powf(fabs(x), a);
+    float b = powf(fabsf(x), a);
     if(x < 0)
         b = -b;
     return -powf(sinf(b * PI), 2);
@@ -1723,7 +1723,7 @@ FILTER(hp2)
 
 FILTER(bp2)
 {
-    return (fabs(powf(2,
+    return (fabsf(powf(2,
                       (1.0f
                        - par)
                       * 7)
@@ -1732,7 +1732,7 @@ FILTER(bp2)
 
 FILTER(bs2)
 {
-    return (fabs(powf(2,
+    return (fabsf(powf(2,
                       (1.0f
                        - par)
                       * 7)

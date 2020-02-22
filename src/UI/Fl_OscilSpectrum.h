@@ -63,7 +63,7 @@ class Fl_OscilSpectrum : public Fl_Box, public Fl_Osc_Widget
             //normalize
             float max=0;
             for (unsigned i=0; i<nsamples; i++){
-                float x=fabs(spc[i]);
+                float x=fabsf(spc[i]);
                 if (max<x) max=x;
             }
             if (max<0.000001) max=1.0;

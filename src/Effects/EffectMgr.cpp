@@ -180,7 +180,7 @@ EffectMgr::EffectMgr(Allocator &alloc, const SYNTH_T &synth_,
     setpresettype("Peffect");
     memset(efxoutl, 0, synth.bufferbytes);
     memset(efxoutr, 0, synth.bufferbytes);
-    memset(settings, 0, sizeof(settings));
+    memset(settings, 255, sizeof(settings));
     defaults();
 }
 
@@ -249,7 +249,7 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
     }
 
     if(!avoidSmash)
-        for(int i=0; i<128; ++i)
+        for(int i = 0; i != 128; i++)
             settings[i] = geteffectparrt(i);
 }
 
@@ -257,7 +257,6 @@ void EffectMgr::changeeffect(int _nefx)
 {
     nefx = _nefx;
     //preset    = 0;
-    //memset(settings, 0, sizeof(settings));
 }
 
 //Obtain the effect number
@@ -266,14 +265,29 @@ int EffectMgr::geteffect(void)
     return nefx;
 }
 
+void EffectMgr::changesettingsrt(const short int *p_value)
+{
+    for(int i = 0; i != 128; i++) {
+        short int value = p_value[i];
+        /* check if setting is missing */
+        if(value == -1) {
+            if(efx)
+                value = efx->getpresetpar(preset, i);
+            else
+                value = 0;
+        }
+        /* update settings */
+        seteffectparrt(i, value);
+    }
+}
+
 // Initialize An Effect in RT context
 void EffectMgr::init(void)
 {
     kill();
     changeeffectrt(nefx, true);
     changepresetrt(preset, true);
-    for(int i=0; i<128; ++i)
-        seteffectparrt(i, settings[i]);
+    changesettingsrt(settings);
 }
 
 //Strip effect manager of it's realtime memory
@@ -317,15 +331,17 @@ void EffectMgr::changepresetrt(unsigned char npreset, bool avoidSmash)
     if(efx)
         efx->setpreset(npreset);
     if(!avoidSmash)
-        for(int i=0; i<128; ++i)
+        for(int i = 0; i != 128; i++)
             settings[i] = geteffectparrt(i);
 }
 
 //Change a parameter of the current effect
 void EffectMgr::seteffectparrt(int npar, unsigned char value)
 {
-    if(npar<128)
-        settings[npar] = value;
+    if(npar < 0 || npar >= 128)
+        return;
+    settings[npar] = value;
+
     if(!efx)
         return;
     try {
@@ -333,23 +349,6 @@ void EffectMgr::seteffectparrt(int npar, unsigned char value)
     } catch (std::bad_alloc &ba) {
         std::cerr << "failed to change effect parameter " << npar << " to " << value << ": " << ba.what() << std::endl;
     }
-}
-
-//Change a parameter of the current effect
-void EffectMgr::seteffectpar(int npar, unsigned char value)
-{
-    settings[npar] = value;
-}
-
-//Get a parameter of the current effect
-unsigned char EffectMgr::geteffectpar(int npar)
-{
-    if(npar<128)
-        return settings[npar];
-
-    if(!efx)
-        return 0;
-    return efx->getpar(npar);
 }
 
 unsigned char EffectMgr::geteffectparrt(int npar)
@@ -448,8 +447,7 @@ void EffectMgr::paste(EffectMgr &e)
 {
     changeeffectrt(e.nefx, true);
     changepresetrt(e.preset, true);
-    for(int i=0;i<128;++i)
-        seteffectparrt(i, e.settings[i]);
+    changesettingsrt(e.settings);
     if(dynamic_cast<DynamicFilter*>(efx)) {
         std::swap(filterpars, e.filterpars);
         efx->filterpars = filterpars;
@@ -466,14 +464,18 @@ void EffectMgr::add2XML(XMLwrapper& xml)
     xml.addpar("preset", preset);
 
     xml.beginbranch("EFFECT_PARAMETERS");
-    for(int n = 0; n < 128; ++n) {
-        int par = 0;
-        if(efx)
+    for(int n = 0; n != 128; n++) {
+        int par;
+        int def;
+        if(efx) {
             par = efx->getpar(n);
-        else if(n<128)
+            def = efx->getpresetpar(preset, n);
+        } else {
             par = settings[n];
-
-        if(par == 0)
+            def = -1;
+        }
+        /* don't store default values */
+        if(par == def)
             continue;
         xml.beginbranch("par_no", n);
         xml.addpar("par", par);
@@ -498,13 +500,13 @@ void EffectMgr::getfromXML(XMLwrapper& xml)
     preset = xml.getpar127("preset", preset);
 
     if(xml.enterbranch("EFFECT_PARAMETERS")) {
-        for(int n = 0; n < 128; ++n) {
-            seteffectpar(n, 0); //erase effect parameter
-            if(xml.enterbranch("par_no", n) == 0)
-                continue;
-            int par = geteffectpar(n);
-            seteffectpar(n, xml.getpar127("par", par));
-            xml.exitbranch();
+        for(int n = 0; n != 128; n++) {
+            if(xml.enterbranch("par_no", n) == 0) {
+                settings[n] = -1; /* use default */
+            } else {
+                settings[n] = xml.getpar127("par", 0);
+                xml.exitbranch();
+            }
         }
         assert(filterpars);
         if(xml.enterbranch("FILTER")) {

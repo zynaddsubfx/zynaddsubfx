@@ -1029,10 +1029,10 @@ void Master::vuUpdate(const float *outr, const float *outl)
     vu.outpeakl = 1e-12;
     vu.outpeakr = 1e-12;
     for(int i = 0; i < synth.buffersize; ++i) {
-        if(fabs(outl[i]) > vu.outpeakl)
-            vu.outpeakl = fabs(outl[i]);
-        if(fabs(outr[i]) > vu.outpeakr)
-            vu.outpeakr = fabs(outr[i]);
+        if(fabsf(outl[i]) > vu.outpeakl)
+            vu.outpeakl = fabsf(outl[i]);
+        if(fabsf(outr[i]) > vu.outpeakr)
+            vu.outpeakr = fabsf(outr[i]);
     }
     if((vu.outpeakl > 1.0f) || (vu.outpeakr > 1.0f))
         vu.clipped = 1;
@@ -1059,10 +1059,10 @@ void Master::vuUpdate(const float *outr, const float *outl)
             float *outr = part[npart]->partoutl,
             *outl = part[npart]->partoutr;
             for(int i = 0; i < synth.buffersize; ++i) {
-                if (fabs(outl[i]) > vuoutpeakpartl[npart])
-                    vuoutpeakpartl[npart] = fabs(outl[i]);
-                if (fabs(outr[i]) > vuoutpeakpartr[npart])
-                    vuoutpeakpartr[npart] = fabs(outr[i]);
+                if (fabsf(outl[i]) > vuoutpeakpartl[npart])
+                    vuoutpeakpartl[npart] = fabsf(outl[i]);
+                if (fabsf(outr[i]) > vuoutpeakpartr[npart])
+                    vuoutpeakpartr[npart] = fabsf(outr[i]);
             }
         }
         else

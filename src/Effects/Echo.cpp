@@ -202,11 +202,11 @@ void Echo::sethidamp(unsigned char _Phidamp)
     hidamp  = 1.0f - Phidamp / 127.0f;
 }
 
-void Echo::setpreset(unsigned char npreset)
+unsigned char Echo::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-    const int     PRESET_SIZE = 7;
-    const int     NUM_PRESETS = 9;
-    unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
+#define	PRESET_SIZE 7
+#define	NUM_PRESETS 9
+    static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         {67, 64, 35,  64,  30,  59, 0 }, //Echo 1
         {67, 64, 21,  64,  30,  59, 0 }, //Echo 2
         {67, 75, 60,  64,  30,  59, 10}, //Echo 3
@@ -217,16 +217,24 @@ void Echo::setpreset(unsigned char npreset)
         {81, 60, 26,  100, 127, 67, 36}, //Panning Echo 3
         {62, 64, 28,  64,  100, 90, 55}  //Feedback Echo
     };
-
-    if(npreset >= NUM_PRESETS)
-        npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
-    if(insertion)
-        setvolume(presets[npreset][0] / 2);  //lower the volume if this is insertion effect
-    Ppreset = npreset;
+    if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
+        if(npar == 0 && insertion != 0) {
+            /* lower the volume if this is insertion effect */
+            return presets[npreset][npar] / 2;
+        }
+        return presets[npreset][npar];
+    }
+    return 0;
 }
 
+void Echo::setpreset(unsigned char npreset)
+{
+    if(npreset >= NUM_PRESETS)
+        npreset = NUM_PRESETS - 1;
+    for(int n = 0; n != 128; n++)
+        changepar(n, getpresetpar(npreset, n));
+    Ppreset = npreset;
+}
 
 void Echo::changepar(int npar, unsigned char value)
 {
