@@ -28,28 +28,28 @@ float polyblampres(float smp, float ws, float dMax)
 
     float dist = fabsf(smp) - ws;
     float res, d1, d2, d3, d4, d5;
-    if (fabsf(dist) < dMax) {
-        if (dist < -dMax/2.0f) {
-            d1 = (dist + dMax)/dMax*2;   // [-dMax ... -dMax/2] -> [0 ... 1]
+    if(fabsf(dist) < dMax) {
+        if(dist < -dMax/2.0f) {
+            d1 = (dist + dMax)/dMax*2.0f;   // [-dMax ... -dMax/2] -> [0 ... 1]
             res = powf(d1, 5.0f) / 120.0f;
         }
-        else if ( dist < 0.0) {
-            d1 = (dist + dMax/2)/dMax*2; // [-dMax/2 ... 0] -> [0 ... 1]
+        else if(dist < 0.0f) {
+            d1 = (dist + dMax/2.0f)/dMax*2.0f; // [-dMax/2 ... 0] -> [0 ... 1]
             d2 = d1*d1;
             d3 = d2*d1;
             d4 = d3*d1;
             d5 = d4*d1;
             res = (-d5/40.0f) + (d4/24.0f) + (d3/12.0f) + (d2/12.0f) + (d1/24.0f) + (1.0f/120.0f);
         }
-        else if ( dist < dMax/2.0) {
-            d1 = (dist)/dMax*2;          //[0 ... dMax/2] -> [0 ... 1]
+        else if(dist < dMax/2.0f) {
+            d1 = dist/dMax*2.0f;          //[0 ... dMax/2] -> [0 ... 1]
             d2 = d1*d1;
             d4 = d2*d2;
             d5 = d4*d1;
             res = (d5/40.0f) - (d4/12.0f) + (d2/3.0f) - (d1/2.0f) + (7.0f/30.0f);
         }
         else {
-            d1 = (dist - dMax/2.0)/dMax*2; //[dMax/2 ... dMax] -> [0 ... 1]
+            d1 = (dist - dMax/2.0f)/dMax*2.0f; //[dMax/2 ... dMax] -> [0 ... 1]
             d2 = d1*d1;
             d3 = d2*d1;
             d4 = d3*d1;
@@ -58,10 +58,9 @@ float polyblampres(float smp, float ws, float dMax)
         }
     }
     else
-        res = 0;
+        res = 0.0f;
 
-    return res*dMax/2;
-
+    return res*dMax/2.0f;
 }
 
 void waveShapeSmps(int n,
