@@ -505,7 +505,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
                     f = 1.0f;
                 break;
             case 2:
-                f = expf(-(fabs(x)) * sqrt(basepar));
+                f = expf(-(fabsf(x)) * sqrt(basepar));
                 break;
             default:
                 f = expf(-(x * x) * basepar);

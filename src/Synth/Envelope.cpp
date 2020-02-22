@@ -54,7 +54,7 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
             case 3:
                 envval[i] =
                     (powf(2, 6.0f
-                          * fabs(pars.Penvval[i]
+                          * fabsf(pars.Penvval[i]
                                  - 64.0f) / 64.0f) - 1.0f) * 100.0f;
                 if(pars.Penvval[i] < 64)
                     envval[i] = -envval[i];

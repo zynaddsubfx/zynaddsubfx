@@ -661,7 +661,7 @@ void ADnoteVoiceParam::enable(const SYNTH_T &synth, FFTwrapper *fft,
 float ADnoteParameters::getBandwidthDetuneMultiplier() const
 {
     float bw = (GlobalPar.PBandwidth - 64.0f) / 64.0f;
-    bw = powf(2.0f, bw * powf(fabs(bw), 0.2f) * 5.0f);
+    bw = powf(2.0f, bw * powf(fabsf(bw), 0.2f) * 5.0f);
 
     return bw;
 }

@@ -39,7 +39,7 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
     const float lfostretch = powf(basefreq / 440.0f, (stretch - 64.0f) / 63.0f);
 
     const float lfofreq = lfopars.freq * lfostretch;
-    phaseInc = fabs(lfofreq) * t.dt();
+    phaseInc = fabsf(lfofreq) * t.dt();
 
     if(!lfopars.Pcontinous) {
         if(lfopars.Pstartphase == 0)
@@ -129,7 +129,7 @@ float LFO::lfoout()
 
         float lfofreq = lfopars_.freq * lfostretch;
 
-        phaseInc = fabs(lfofreq) * dt_;
+        phaseInc = fabsf(lfofreq) * dt_;
 
         switch(lfopars_.fel) {
             case consumer_location_type_t::amp:

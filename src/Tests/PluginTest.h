@@ -209,7 +209,7 @@ class PluginTest:public CxxTest::TestSuite
 
             float sum = 0.0f;
             for(int i = 0; i < synth->buffersize; ++i)
-                sum += fabs(outL[i]);
+                sum += fabsf(outL[i]);
 
             TS_ASSERT_LESS_THAN(0.1f, sum);
         }

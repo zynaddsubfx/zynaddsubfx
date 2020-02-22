@@ -85,22 +85,22 @@ float getdetune(unsigned char type,
     switch(type) {
 //	case 1: is used for the default (see below)
         case 2:
-            cdet   = fabs(cdetune * 10.0f);
-            findet = fabs(fdetune / 8192.0f) * 10.0f;
+            cdet   = fabsf(cdetune * 10.0f);
+            findet = fabsf(fdetune / 8192.0f) * 10.0f;
             break;
         case 3:
-            cdet   = fabs(cdetune * 100.0f);
-            findet = powf(10, fabs(fdetune / 8192.0f) * 3.0f) / 10.0f - 0.1f;
+            cdet   = fabsf(cdetune * 100.0f);
+            findet = powf(10, fabsf(fdetune / 8192.0f) * 3.0f) / 10.0f - 0.1f;
             break;
         case 4:
-            cdet   = fabs(cdetune * 701.95500087f); //perfect fifth
+            cdet   = fabsf(cdetune * 701.95500087f); //perfect fifth
             findet =
-                (powf(2, fabs(fdetune / 8192.0f) * 12.0f) - 1.0f) / 4095 * 1200;
+                (powf(2, fabsf(fdetune / 8192.0f) * 12.0f) - 1.0f) / 4095 * 1200;
             break;
         //case ...: need to update N_DETUNE_TYPES, if you'll add more
         default:
-            cdet   = fabs(cdetune * 50.0f);
-            findet = fabs(fdetune / 8192.0f) * 35.0f; //almost like "Paul's Sound Designer 2"
+            cdet   = fabsf(cdetune * 50.0f);
+            findet = fabsf(fdetune / 8192.0f) * 35.0f; //almost like "Paul's Sound Designer 2"
             break;
     }
     if(finedetune < 8192)

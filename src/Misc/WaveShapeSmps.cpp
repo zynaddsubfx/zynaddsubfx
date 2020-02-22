@@ -26,9 +26,9 @@ float polyblampres(float smp, float ws, float dMax)
     // [0, T] d^5/40 − d^4/12 + d^2/3 − d/2 + 7/30
     // [T, 2T] −d^5/120 + d^4/24 − d^3/12 + d^2/12 − d/24 + 1/120
 
-    float dist = fabs(smp) - ws;
+    float dist = fabsf(smp) - ws;
     float res, d1, d2, d3, d4, d5;
-    if (fabs(dist) < dMax) {
+    if (fabsf(dist) < dMax) {
         if (dist < -dMax/2.0f) {
             d1 = (dist + dMax)/dMax*2;   // [-dMax ... -dMax/2] -> [0 ... 1]
             res = powf(d1, 5.0f) / 120.0f;
@@ -100,7 +100,7 @@ void waveShapeSmps(int n,
             ws = ws * ws * ws * 20.0f + 0.0001f; //Pow
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws;
-                if(fabs(smps[i]) < 1.0f) {
+                if(fabsf(smps[i]) < 1.0f) {
                     smps[i] = (smps[i] - powf(smps[i], 3.0f)) * 3.0f;
                     if(ws < 1.0f)
                         smps[i] /= ws;
@@ -262,8 +262,8 @@ void waveShapeSmps(int n,
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws;// multiply signal to drive it in the saturation of the function
                 smps[i] += offs; // add dc offset
-                smps[i] = smps[i] / powf(1+powf(fabs(smps[i]), par), 1/par);
-                smps[i] -= offs / powf(1+powf(fabs(offs), par), 1/par);
+                smps[i] = smps[i] / powf(1+powf(fabsf(smps[i]), par), 1/par);
+                smps[i] -= offs / powf(1+powf(fabsf(offs), par), 1/par);
             }
             break;
         case 16:
@@ -274,7 +274,7 @@ void waveShapeSmps(int n,
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws; // multiply signal to drive it in the saturation of the function
                 smps[i] += offs; // add dc offset
-                if(fabs(smps[i]) < 1.0f)
+                if(fabsf(smps[i]) < 1.0f)
                     smps[i] = 1.5 * (smps[i] - (powf(smps[i], 3.0) / 3.0) );
                 else
                     smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
@@ -289,12 +289,12 @@ void waveShapeSmps(int n,
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws; // multiply signal to drive it in the saturation of the function
                 smps[i] += offs; // add dc offset
-                if(fabs(smps[i]) < 1.0f)
-                    smps[i] = smps[i]*(2-fabs(smps[i]));
+                if(fabsf(smps[i]) < 1.0f)
+                    smps[i] = smps[i]*(2-fabsf(smps[i]));
                 else
                     smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
                 //substract offset with distorsion function applied
-                smps[i] -= offs*(2-fabs(offs));
+                smps[i] -= offs*(2-fabsf(offs));
             }
             break;
     }

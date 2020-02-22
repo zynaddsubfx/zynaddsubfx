@@ -1033,7 +1033,7 @@ void ADnote::compute_unison_freq_rap(int nvoice) {
 void ADnote::setfreq(int nvoice, float in_freq)
 {
     for(int k = 0; k < unison_size[nvoice]; ++k) {
-        float freq  = fabs(in_freq) * unison_freq_rap[nvoice][k];
+        float freq  = fabsf(in_freq) * unison_freq_rap[nvoice][k];
         float speed = freq * synth.oscilsize_f / synth.samplerate_f;
         if(speed > synth.oscilsize_f)
             speed = synth.oscilsize_f;
@@ -1050,7 +1050,7 @@ void ADnote::setfreq(int nvoice, float in_freq)
 void ADnote::setfreqFM(int nvoice, float in_freq)
 {
     for(int k = 0; k < unison_size[nvoice]; ++k) {
-        float freq  = fabs(in_freq) * unison_freq_rap[nvoice][k];
+        float freq  = fabsf(in_freq) * unison_freq_rap[nvoice][k];
         float speed = freq * synth.oscilsize_f / synth.samplerate_f;
         if(speed > synth.samplerate_f)
             speed = synth.samplerate_f;
