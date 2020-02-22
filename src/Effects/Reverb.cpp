@@ -470,7 +470,7 @@ unsigned char Reverb::getpresetpar(unsigned char npreset, unsigned int npar)
             /* lower the volume if reverb is insertion effect */
             return presets[npreset][npar] / 2;
         }
-	return presets[npreset][npar];
+        return presets[npreset][npar];
     }
     return 0;
 }
