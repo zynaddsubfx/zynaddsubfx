@@ -103,9 +103,7 @@ class SUBnote:public SynthNote
         float overtone_freq[MAX_SUB_HARMONICS];
 
         int   oldpitchwheel, oldbandwidth;
-        float globalfiltercenterq;
         float velocity;
-        WatchManager *wm;
 };
 
 }
