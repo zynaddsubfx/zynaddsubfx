@@ -433,11 +433,11 @@ void Reverb::setbandwidth(unsigned char _Pbandwidth)
         bandwidth->setBandwidth(powf(v, 2.0f) * 200.0f);
 }
 
-void Reverb::setpreset(unsigned char npreset)
+unsigned char Reverb::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-    const int     PRESET_SIZE = 13;
-    const int     NUM_PRESETS = 13;
-    unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
+#define	PRESET_SIZE 13
+#define	NUM_PRESETS 13
+    static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Cathedral1
         {80,  64, 63,  24, 0,  0, 0, 85,  5,  83,  1, 64,  20},
         //Cathedral2
@@ -465,16 +465,24 @@ void Reverb::setpreset(unsigned char npreset)
         //VeryLong2
         {90,  64, 111, 30, 0,  0, 0, 114, 90, 74,  1, 80,  20}
     };
-
-    if(npreset >= NUM_PRESETS)
-        npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
-    if(insertion)
-        changepar(0, presets[npreset][0] / 2);  //lower the volume if reverb is insertion effect
-    Ppreset = npreset;
+    if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
+        if (npar == 0 && insertion != 0) {
+            /* lower the volume if reverb is insertion effect */
+            return presets[npreset][npar] / 2;
+        }
+	return presets[npreset][npar];
+    }
+    return 0;
 }
 
+void Reverb::setpreset(unsigned char npreset)
+{
+    if(npreset >= NUM_PRESETS)
+        npreset = NUM_PRESETS - 1;
+    for(int n = 0; n != 128; n++)
+        changepar(n, getpresetpar(npreset, n));
+    Ppreset = npreset;
+}
 
 void Reverb::changepar(int npar, unsigned char value)
 {

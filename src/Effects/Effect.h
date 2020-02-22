@@ -113,6 +113,13 @@ class Effect
         Effect(EffectParams pars);
         virtual ~Effect() {}
         /**
+         * Get default preset parameter value
+         * @param npreset chosen preset
+         * @param npar chosen parameter
+         * @return the default parameter value
+         **/
+        virtual unsigned char getpresetpar(unsigned char npreset, unsigned int npar) = 0;
+        /**
          * Choose a preset
          * @param npreset number of chosen preset*/
         virtual void setpreset(unsigned char npreset) = 0;

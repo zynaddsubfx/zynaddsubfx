@@ -402,12 +402,11 @@ void Phaser::setdepth(unsigned char Pdepth)
     depth = (float)(Pdepth) / 127.0f;
 }
 
-
-void Phaser::setpreset(unsigned char npreset)
+unsigned char Phaser::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-    const int     PRESET_SIZE = 15;
-    const int     NUM_PRESETS = 12;
-    unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
+#define	PRESET_SIZE 15
+#define	NUM_PRESETS 12
+    static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Phaser
         //0   1    2    3  4   5     6   7   8    9 10   11 12  13 14
         {64, 64, 36,  0,   0, 64,  110, 64,  1,  0,   0, 20,
@@ -438,13 +437,19 @@ void Phaser::setpreset(unsigned char npreset)
         {64, 64, 1,   10,  1, 64,  70,  40,  12, 10,  0, 110,1,  20,
          1 }
     };
-    if(npreset >= NUM_PRESETS)
-        npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
-    Ppreset = npreset;
+    if(npreset < NUM_PRESETS && npar < PRESET_SIZE)
+        return presets[npreset][npar];
+    return 0;
 }
 
+void Phaser::setpreset(unsigned char npreset)
+{
+    if(npreset >= NUM_PRESETS)
+        npreset = NUM_PRESETS - 1;
+    for(int n = 0; n != 128; n++)
+        changepar(n, getpresetpar(npreset, n));
+    Ppreset = npreset;
+}
 
 void Phaser::changepar(int npar, unsigned char value)
 {
