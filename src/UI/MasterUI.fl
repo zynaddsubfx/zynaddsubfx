@@ -88,7 +88,7 @@ decl {\#if !defined(PLUGINVERSION) && HAS_X11
 } 
 
 decl {\#if !defined(PLUGINVERSION) && HAS_X11
-\#include <FL/FL.H>
+\#include <FL/Fl.H>
 \#endif} {private local
 } 
 
