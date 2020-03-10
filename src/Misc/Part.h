@@ -159,6 +159,7 @@ class Part
         bool Pefxbypass[NUM_PART_EFX]; //if the effects are bypassed
 
         int lastnote;
+        char loaded_file[256];
 
         const static rtosc::Ports &ports;
 
