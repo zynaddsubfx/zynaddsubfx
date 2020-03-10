@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  EffectMgr.cpp - Effect manager, an interface betwen the program and effects
+  EffectMgr.cpp - Effect manager, an interface between the program and effects
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
@@ -149,7 +149,7 @@ static const rtosc::Ports local_ports = {
             std::swap(eff->efxoutl, eff_->efxoutl);
             std::swap(eff->efxoutr, eff_->efxoutr);
 
-            //Return the old data for distruction
+            //Return the old data for destruction
             d.reply("/free", "sb", "EffectMgr", sizeof(EffectMgr*), &eff_);
         }},
     rSubtype(Alienwah),

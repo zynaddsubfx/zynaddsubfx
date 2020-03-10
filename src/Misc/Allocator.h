@@ -194,7 +194,7 @@ extern DummyAllocator DummyAlloc;
  *     * When a new Part instance is provided it may or may not come with some
  *       instrument effects
  *     * Merging blocks is an option, but one that is not going to likely be
- *       implmented too soon, thus all effects need to be reallocated when the
+ *       implemented too soon, thus all effects need to be reallocated when the
  *       pointer swap occurs
  *     * The old effect is extracted from the manager
  *     * A new one is constructed with a deep copy

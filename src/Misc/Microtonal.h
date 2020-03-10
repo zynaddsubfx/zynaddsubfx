@@ -148,7 +148,7 @@ class Microtonal
         unsigned char octavesize;
         OctaveTuning octave[MAX_OCTAVE_SIZE];
     private:
-        //loads a line from the text file, while ignoring the lines beggining with "!"
+        //loads a line from the text file, while ignoring the lines beginning with "!"
         static int loadline(FILE *file, char *line);
         //Grab a 0..127 integer from the provided descriptor
 

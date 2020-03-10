@@ -231,7 +231,7 @@ inline void PADnote::fadein(float *smps)
     int zerocrossings = 0;
     for(int i = 1; i < synth.buffersize; ++i)
         if((smps[i - 1] < 0.0f) && (smps[i] > 0.0f))
-            zerocrossings++;                                  //this is only the possitive crossings
+            zerocrossings++;                                  //this is only the positive crossings
 
     float tmp = (synth.buffersize_f - 1.0f) / (zerocrossings + 1) / 3.0f;
     if(tmp < 8.0f)

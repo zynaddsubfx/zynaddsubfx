@@ -1701,8 +1701,8 @@ void zyn::MiddleWareImpl::recreateMinimalMaster()
  *   1) Middleware sends /freeze_state to backend
  *   2) Middleware waits on /state_frozen from backend
  *      All intervening commands are held for out of order execution
- *   3) Aquire memory
- *      At this time by the memory barrier we are guarenteed that all old
+ *   3) Acquire memory
+ *      At this time by the memory barrier we are guaranteed that all old
  *      writes are done and assuming the freezing logic is sound, then it is
  *      impossible for any other parameter to change at this time
  *   3) Middleware performs saving operation
@@ -1930,7 +1930,7 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
     assert(strcmp(rtmsg, "/part0/kit0/Ppadenableda"));
     assert(strcmp(rtmsg, "/ze_state"));
 
-    //Dump Incomming Events For Debugging
+    //Dump Incoming Events For Debugging
     if(strcmp(rtmsg, "/vu-meter") && false) {
         fprintf(stdout, "%c[%d;%d;%dm", 0x1B, 0, 1 + 30, 0 + 40);
         fprintf(stdout, "frontend[%c]: '%s'<%s>\n", forward?'f':broadcast?'b':'N',

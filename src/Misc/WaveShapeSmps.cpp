@@ -144,7 +144,7 @@ void waveShapeSmps(int n,
                     smps[i] = ( smps[i] > ws ? ws-res : smps[i]-res );
                 else
                     smps[i] = ( smps[i] < -ws ? -ws+res : smps[i]+res );
-                // and substract the polyblamp-limited offset again: smps[i] = y - f(offs)
+                // and subtract the polyblamp-limited offset again: smps[i] = y - f(offs)
                 res = polyblampres(offs, ws, par);
                 if (offs>=0)
                     smps[i] -= ( offs >= ws ? ws-res : offs-res );
@@ -250,7 +250,7 @@ void waveShapeSmps(int n,
                 tmpo     = 0.5f - 1.0f / (expf(tmpo) + 1.0f);
                 
                 smps[i] = tmp / tmpv;
-                smps[i] -= tmpo / tmpv; // substract offset
+                smps[i] -= tmpo / tmpv; // subtract offset
             }
             break;
         case 15:
@@ -277,7 +277,7 @@ void waveShapeSmps(int n,
                     smps[i] = 1.5 * (smps[i] - (powf(smps[i], 3.0) / 3.0) );
                 else
                     smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
-                //substract offset with distorsion function applied
+                //subtract offset with distorsion function applied
                 smps[i] -= 1.5 * (offs - (powf(offs, 3.0) / 3.0)); 
             }
             break;
@@ -292,7 +292,7 @@ void waveShapeSmps(int n,
                     smps[i] = smps[i]*(2-fabsf(smps[i]));
                 else
                     smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
-                //substract offset with distorsion function applied
+                //subtract offset with distorsion function applied
                 smps[i] -= offs*(2-fabsf(offs));
             }
             break;

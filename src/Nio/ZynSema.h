@@ -81,7 +81,7 @@ private:
 
 }
 
-#else // POSIX sempahore
+#else // POSIX semaphore
 
 #include <semaphore.h>
 

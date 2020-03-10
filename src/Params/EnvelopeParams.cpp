@@ -166,7 +166,7 @@ static const rtosc::Ports localPorts = {
             rtosc_arg_t args[N];
             char arg_types[N+1] = {0};
             for(int i=0; i<N; ++i) {
-                args[i].f    = env->getdt(i)*1000; //answer miliseconds to old gui
+                args[i].f    = env->getdt(i)*1000; //answer milliseconds to old gui
                 arg_types[i] = 'f';
             }
             d.replyArray(d.loc, arg_types, args);
@@ -510,7 +510,7 @@ public:
     int operator()(int input) const
     {
         return (mismatch)
-            // The errors occured when calling env_dB2rap. Let f be the
+            // The errors occurred when calling env_dB2rap. Let f be the
             // conversion function for mode 2 (see Envelope.cpp), then we
             // load values with (let "o" be the function composition symbol):
             //   f^{-1} o (env_dB2rap^{-1}) o dB2rap o f

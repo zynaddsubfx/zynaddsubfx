@@ -57,7 +57,7 @@ class AnalogFilter:public Filter
             float y1, y2; //Output History
         } history[MAX_FILTER_STAGES + 1], oldHistory[MAX_FILTER_STAGES + 1];
 
-        //old coeffs are used for interpolation when paremeters change quickly
+        //old coeffs are used for interpolation when parameters change quickly
 
         //Apply IIR filter to Samples, with coefficients, and past history
         void singlefilterout(float *smp, fstage &hist, const Coeff &coeff);

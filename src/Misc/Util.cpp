@@ -129,7 +129,7 @@ void set_realtime()
     sched_param sc;
     sc.sched_priority = 60;
     //if you want get "sched_setscheduler undeclared" from compilation,
-    //you can safely remove the folowing line:
+    //you can safely remove the following line:
     sched_setscheduler(0, SCHED_FIFO, &sc);
     //if (err==0) printf("Real-time");
 #endif
@@ -161,11 +161,11 @@ void os_usleep(long length)
 }
 #endif
 
-//!< maximum lenght a pid has on any POSIX system
+//!< maximum length a pid has on any POSIX system
 //!< this is an estimation, but more than 12 looks insane
 constexpr std::size_t max_pid_len = 12;
 
-//!< safe pid lenght guess, posix conform
+//!< safe pid length guess, posix conform
 std::size_t os_guess_pid_length()
 {
     const char* pid_max_file = "/proc/sys/kernel/pid_max";

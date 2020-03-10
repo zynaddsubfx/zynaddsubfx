@@ -136,7 +136,7 @@ class Effect
          *
          * This method should result in the effect generating its results
          * and placing them into the efxoutl and efxoutr buffers.
-         * Every Effect should overide this method.
+         * Every Effect should override this method.
          *
          * @param smpsl Input buffer for the Left channel
          * @param smpsr Input buffer for the Right channel

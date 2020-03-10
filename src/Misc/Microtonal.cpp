@@ -659,7 +659,7 @@ int Microtonal::loadkbm(KbmInfo &kbm, const char *filename)
         return 2;
     kbm.Plastkey = limit(x, 0, 127);
 
-    //loads last the middle note where scale fro scale degree=0
+    //loads last the middle note where scale from scale degree=0
     if(loadline(file, tmp) != 0 || sscanf(tmp, "%d", &x) == 0)
         return 2;
     kbm.Pmiddlenote = limit(x, 0, 127);

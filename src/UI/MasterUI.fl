@@ -889,7 +889,7 @@ panelwindow->show();}
       }
       Fl_Box {} {
         label {This is free software; you may redistribute it and/or modify it under the terms of the 
-version 2 (or any later version) of the GNU General Public License as published by the Free Software Fundation.
+version 2 (or any later version) of the GNU General Public License as published by the Free Software Foundation.
   This program comes with
  ABSOLUTELY NO WARRANTY. 
  See the version 2 (or any later version) of the 
