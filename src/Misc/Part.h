@@ -132,7 +132,7 @@ class Part
 
         bool Ppolymode; //Part mode - 0=monophonic , 1=polyphonic
         bool Plegatomode; // 0=normal, 1=legato
-        unsigned char Pkeylimit; //how many keys are alowed to be played same time (0=off), the older will be released
+        unsigned char Pkeylimit; //how many keys are allowed to be played same time (0=off), the older will be released
 
         char *Pname; //name of the instrument
         struct { //instrument additional information

@@ -109,7 +109,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif()
 
 if(NOT "Darwin" STREQUAL ${CMAKE_SYSTEM_NAME})
-    # Add scheduler function existance info (OSX compatiability)
+    # Add scheduler function existence info (OSX compatibility)
     add_definitions(-DHAVE_SCHEDULER=${HAVE_SCHEDULER})
 endif()
 
@@ -209,7 +209,7 @@ set (BuildOptions_SSE
 
 set (BuildOptionsBasic
     "-std=c++11 -Wno-unused-parameter -O3 -ffast-math -fomit-frame-pointer"
-    CACHE STRING "basic X86 complier options"
+    CACHE STRING "basic X86 compiler options"
 )
 
 set (BuildOptionsDebug
@@ -228,7 +228,7 @@ else()
     endif()
 endif()
 
-########### Settings dependant code ###########
+########### Settings dependent code ###########
 # From here on, the setting variables have  been prepared so concentrate
 # on the actual compiling.
 

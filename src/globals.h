@@ -99,7 +99,7 @@ typedef std::complex<fftw_real> fft_t;
 #define NUM_MIDI_PARTS 16
 
 /*
- * Number of Midi channes
+ * Number of Midi channels
  */
 #define NUM_MIDI_CHANNELS 16
 

@@ -12,7 +12,7 @@
 */
 
 /*
- * Inital working DSSI output code contributed by Stephen G. Parry
+ * Initial working DSSI output code contributed by Stephen G. Parry
  */
 
 //this file contains code used from trivial_synth.c from

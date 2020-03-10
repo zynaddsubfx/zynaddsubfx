@@ -171,7 +171,7 @@ bool XMLwrapper::hasPadSynth() const
                                              "name",
                                              "PADsynth_used",
                                              MXML_DESCEND_FIRST);
-    if(parameter == NULL) //no information availiable
+    if(parameter == NULL) //no information available
         return false;
 
     const char *strval = mxmlElementGetAttr(parameter, "value");
@@ -331,7 +331,7 @@ int XMLwrapper::loadXMLfile(const string &filename)
                                   NULL,
                                   MXML_DESCEND);
     if(root == NULL)
-        return -3;  //the XML doesnt embbed zynaddsubfx data
+        return -3;  //the XML doesn't embbed zynaddsubfx data
 
     //fetch version information
     _fileversion.set_major(stringTo<int>(mxmlElementGetAttr(root, "version-major")));

@@ -201,7 +201,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
         }}};
 
 #define rForwardCb [](const char *msg, rtosc::RtData &d) {\
-    printf("fowarding...\n"); d.forward();}
+    printf("forwarding...\n"); d.forward();}
 const rtosc::Ports OscilGen::realtime_ports{
     rSelf(OscilGen),
     rPresetType,
@@ -398,7 +398,7 @@ void OscilGen::defaults()
     Phmag[0]  = 127;
     Phmagtype = 0;
     if(ADvsPAD)
-        Prand = 127;       //max phase randomness (usefull if the oscil will be imported to a ADsynth from a PADsynth
+        Prand = 127;       //max phase randomness (useful if the oscil will be imported to a ADsynth from a PADsynth
     else
         Prand = 64;  //no randomness
 
@@ -949,7 +949,7 @@ void OscilGen::adaptiveharmonic(fft_t *f, float freq)
             f[i] = (1.0f - low) * inf[high] + low * inf[high + 1];
         }
     }
-    if(!down)//corect the aplitude of the first harmonic
+    if(!down)//correct the amplitude of the first harmonic
         f[0] *= rap;
 
     f[1] += f[0];

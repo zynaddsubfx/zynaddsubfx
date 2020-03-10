@@ -31,7 +31,7 @@ class AudioOut:public virtual Engine
         void setSamplerate(int _samplerate);
 
         /**Sets the Samples required per Out of this driver
-         * not a realtime opperation */
+         * not a realtime operation */
         int getSampleRate();
         void setBufferSize(int _bufferSize);
 

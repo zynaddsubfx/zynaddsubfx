@@ -187,7 +187,7 @@ class KitTest:public CxxTest::TestSuite
 
         //Enumerate cases of:
         //Legato = {disabled,enabled}
-        //Mono   = {diabled, enabled}
+        //Mono   = {disabled, enabled}
         //Kit    = {off, normal, single}
         //ignore legato=enabled, mono=enabled
 

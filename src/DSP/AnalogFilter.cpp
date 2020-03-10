@@ -105,7 +105,7 @@ AnalogFilter::Coeff AnalogFilter::computeCoeff(int type, float cutoff, float q,
     const float sn    = sinf(omega), cs = cosf(omega);
     float       alpha, beta;
 
-    //most of theese are implementations of
+    //most of these are implementations of
     //the "Cookbook formulae for audio EQ" by Robert Bristow-Johnson
     //The original location of the Cookbook is:
     //http://www.harmony-central.com/Computer/Programming/Audio-EQ-Cookbook.txt
@@ -282,7 +282,7 @@ void AnalogFilter::setfreq(float frequency)
 
 
     //if the frequency is changed fast, it needs interpolation
-    if((rap > 3.0f) || nyquistthresh) { //(now, filter and coeficients backup)
+    if((rap > 3.0f) || nyquistthresh) { //(now, filter and coefficients backup)
         oldCoeff = coeff;
         for(int i = 0; i < MAX_FILTER_STAGES + 1; ++i)
             oldHistory[i] = history[i];

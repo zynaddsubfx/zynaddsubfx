@@ -69,7 +69,7 @@ void Fl_Osc_Widget::oscWrite(std::string path, const char *args, ...)
     if(rtosc_vmessage(buffer, 1024, (loc+path).c_str(), args, va))
         osc->writeRaw(buffer);
     else
-        puts("Dangerous Event ommision");
+        puts("Dangerous Event omission");
 
     va_end(va);
     ////Try to pretty print basic events

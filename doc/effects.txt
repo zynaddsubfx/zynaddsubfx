@@ -150,7 +150,7 @@ the delay also depends on the current pitch.
 * After the correct element of the sound buffer is found using the LFO, the
 *Fb* knob lets you set how loud it shall be played. This is mostly redundant to
 the *D/W* knob, but we have not applied panning and subtraction yet. 
-* Next, the signal can be negated. If the *Substract* checkbox is activated,
+* Next, the signal can be negated. If the *Subtract* checkbox is activated,
 the amplitude is multiplied by -1.
 * Finally, *Pan* lets you apply panning.
 
@@ -486,7 +486,7 @@ filter, the value is added before, for analog after the first phasing stage.
 * Now, *Stages* phasing stages are being applied. *dist* sets the distortion 
 for when applying the phasing stages. This has only effect for analog phasers.
 * The feedback is taken now.
-* In the end, *Substract* inverts the signal, multiplying it by -1.
+* In the end, *Subtract* inverts the signal, multiplying it by -1.
 
 Alienwah
 ~~~~~~~~

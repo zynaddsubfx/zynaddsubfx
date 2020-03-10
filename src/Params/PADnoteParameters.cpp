@@ -95,7 +95,7 @@ static const rtosc::Ports realtime_ports =
             p->sample[n].basefreq = rtosc_argument(m,1).f;
             p->sample[n].smp      = *(float**)rtosc_argument(m,2).b.data;
 
-            //XXX TODO memory managment (deallocation of smp buffer)
+            //XXX TODO memory management (deallocation of smp buffer)
         }},
     //weird stuff for PCoarseDetune
     {"detunevalue:", rMap(unit,cents) rDoc("Get detune value"), NULL,
@@ -232,7 +232,7 @@ static const rtosc::Ports non_realtime_ports =
             "Number of octaves to sample (above the first sample"),
 
     {"Pbandwidth::i", rShort("bandwidth") rProp(parameter) rLinear(0,1000)
-        rDefault(500) rDoc("Bandwith Of Harmonics"), NULL,
+        rDefault(500) rDoc("Bandwidth Of Harmonics"), NULL,
         [](const char *msg, rtosc::RtData &d) {
             PADnoteParameters *p = ((PADnoteParameters*)d.obj);
             if(rtosc_narguments(msg)) {
@@ -697,7 +697,7 @@ static float Pbwscale_translate(char Pbwscale)
 //Requires
 // - bandwidth scaling power
 // - bandwidth
-// - oscilator harmonics at various frequences (oodles of data)
+// - oscilator harmonics at various frequencies (oodles of data)
 // - sampled resonance
 void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
                                                        int size,

@@ -194,7 +194,7 @@ void ADnote::setupVoice(int nvoice)
     // NoteVoicePar[nvoice].OscilSmpMin = min;
     // NoteVoicePar[nvoice].OscilSmpMax = max;
 
-    //I store the first elments to the last position for speedups
+    //I store the first elements to the last position for speedups
     for(int i = 0; i < OSCIL_SMP_EXTRA_SAMPLES; ++i)
         voice.OscilSmp[synth.oscilsize + i] = voice.OscilSmp[i];
 
@@ -608,7 +608,7 @@ void ADnote::legatonote(LegatoParams lpars)
                                          getvoicebasefreq(nvoice),
                                          pars.VoicePar[nvoice].Presonance); //(gf)Modif of the above line.
 
-        //I store the first elments to the last position for speedups
+        //I store the first elements to the last position for speedups
         for(int i = 0; i < OSCIL_SMP_EXTRA_SAMPLES; ++i)
             NoteVoicePar[nvoice].OscilSmp[synth.oscilsize
                                           + i] =
@@ -1213,7 +1213,7 @@ inline void ADnote::fadein(float *smps) const
     int zerocrossings = 0;
     for(int i = 1; i < synth.buffersize; ++i)
         if((smps[i - 1] < 0.0f) && (smps[i] > 0.0f))
-            zerocrossings++;  //this is only the possitive crossings
+            zerocrossings++;  //this is only the positive crossings
 
     float tmp = (synth.buffersize_f - 1.0f) / (zerocrossings + 1) / 3.0f;
     if(tmp < 8.0f)
@@ -1235,7 +1235,7 @@ inline void ADnote::fadein(float *smps) const
  */
 
 /* As the code here is a bit odd due to optimization, here is what happens
- * First the current possition and frequency are retrieved from the running
+ * First the current position and frequency are retrieved from the running
  * state. These are broken up into high and low portions to indicate how many
  * samples are skipped in one step and how many fractional samples are skipped.
  * Outside of this method the fractional samples are just handled with floating
@@ -1275,7 +1275,7 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
  */
 
 /* As the code here is a bit odd due to optimization, here is what happens
- * First the current possition and frequency are retrieved from the running
+ * First the current position and frequency are retrieved from the running
  * state. These are broken up into high and low portions to indicate how many
  * samples are skipped in one step and how many fractional samples are skipped.
  * Outside of this method the fractional samples are just handled with floating
@@ -1836,7 +1836,7 @@ int ADnote::noteout(float *outl, float *outr)
         //the voice is killed later
 
 
-        // Put the ADnote samples in VoiceOut (without appling Global volume, because I wish to use this voice as a modullator)
+        // Put the ADnote samples in VoiceOut (without applying Global volume, because I wish to use this voice as a modullator)
         if(NoteVoicePar[nvoice].VoiceOut) {
             if(stereo)
                 for(int i = 0; i < synth.buffersize; ++i)
@@ -1874,7 +1874,7 @@ int ADnote::noteout(float *outl, float *outr)
                 for(int i = 0; i < synth.buffersize; ++i) //mono
                     bypassl[i] += tmpwavel[i] * NoteVoicePar[nvoice].Volume;
         }
-        // chech if there is necesary to proces the voice longer (if the Amplitude envelope isn't finished)
+        // check if there is necessary to process the voice longer (if the Amplitude envelope isn't finished)
         if(NoteVoicePar[nvoice].AmpEnvelope)
             if(NoteVoicePar[nvoice].AmpEnvelope->finished())
                 KillVoice(nvoice);

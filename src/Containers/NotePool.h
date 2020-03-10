@@ -25,7 +25,7 @@ struct LegatoParams;
 class NotePool
 {
     public:
-        //Currently this wastes a ton of bits due ot the legatoMirror flag
+        //Currently this wastes a ton of bits due to the legatoMirror flag
         struct NoteDescriptor {
             //acceptable overlap after 2 minutes
             //run time at 48kHz 8 samples per buffer

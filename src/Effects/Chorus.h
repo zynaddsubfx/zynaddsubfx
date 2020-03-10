@@ -79,7 +79,7 @@ class Chorus:public Effect
         unsigned char Pdelay;      //the delay (ms)
         unsigned char Pfb;         //feedback
         unsigned char Pflangemode; //how the LFO is scaled, to result chorus or flange
-        unsigned char Poutsub;     //if I wish to substract the output instead of the adding it
+        unsigned char Poutsub;     //if I wish to subtract the output instead of the adding it
         EffectLFO     lfo;         //lfo-ul chorus
 
 

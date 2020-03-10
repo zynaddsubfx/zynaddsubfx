@@ -249,7 +249,7 @@ bool NotePool::synthFull(int sdesc_count) const
 //Note that isn't KEY_PLAYING or KEY_RELEASED_AND_SUSTAINING
 bool NotePool::existsRunningNote(void) const
 {
-    //printf("runing note # =%d\n", getRunningNotes());
+    //printf("running note # =%d\n", getRunningNotes());
     return getRunningNotes();
 }
 

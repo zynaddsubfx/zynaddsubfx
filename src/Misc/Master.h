@@ -77,7 +77,7 @@ class Master
 
         /**Save all settings to an OSC file (as specified by RT OSC)
          * When the function returned, the OSC file has been either saved or
-         * an error occured.
+         * an error occurred.
          * @param filename File to save to or NULL (useful for testing)
          * @param dispatcher Message dispatcher and modifier
          * @param master2 An empty master dummy where the savefile will be
@@ -130,7 +130,7 @@ class Master
         /**Audio Output*/
         bool AudioOut(float *outl, float *outr) REALTIME;
         /**Audio Output (for callback mode).
-         * This allows the program to be controled by an external program*/
+         * This allows the program to be controlled by an external program*/
         void GetAudioOutSamples(size_t nsamples,
                                 unsigned samplerate,
                                 float *outl,
@@ -232,7 +232,7 @@ class Master
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
         int    keyshift;
 
-        //information relevent to generating plugin audio samples
+        //information relevant to generating plugin audio samples
         float *bufl;
         float *bufr;
         off_t  off;

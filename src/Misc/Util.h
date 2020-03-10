@@ -61,7 +61,7 @@ void set_realtime();
 /**Os independent sleep in microsecond*/
 void os_usleep(long length);
 
-//! returns pid padded to maximum pid lenght, posix conform
+//! returns pid padded to maximum pid length, posix conform
 std::string os_pid_as_padded_string();
 
 std::string legalizeFilename(std::string filename);
