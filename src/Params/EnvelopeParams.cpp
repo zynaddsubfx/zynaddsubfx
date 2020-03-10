@@ -483,7 +483,7 @@ void EnvelopeParams::add2XML(XMLwrapper& xml)
         for(int i = 0; i < Penvpoints; ++i) {
             xml.beginbranch("POINT", i);
             if(i != 0)
-                xml.addpar("dt", envdt[i]);
+                xml.addparreal("dt", envdt[i]);
             xml.addpar("val", Penvval[i]);
             xml.endbranch();
         }
