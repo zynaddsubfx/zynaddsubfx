@@ -165,8 +165,12 @@ static const Ports partPorts = {
 
             //d.broadcast("/damage", "s", part_loc);
         }},
-
-
+        {"savexml:", rProp(internal) rDoc("Save Part to the file it has been loaded from"), 0,
+        [](const char *, RtData &d)
+        {
+            Part *p = (Part*)d.obj;
+            p->saveXML(p->loaded_file);
+        }},
     //{"kit#16::T:F", "::Enables or disables kit item", 0,
     //    [](const char *m, RtData &d) {
     //        auto loc = d.loc;
@@ -1077,6 +1081,7 @@ int Part::saveXML(const char *filename)
     xml.endbranch();
 
     int result = xml.saveXMLfile(filename, gzip_compression);
+    strcpy(loaded_file,filename);
     return result;
 }
 
@@ -1089,6 +1094,10 @@ int Part::loadXMLinstrument(const char *filename)
 
     if(xml.enterbranch("INSTRUMENT") == 0)
         return -10;
+
+    // store filename in member variable
+    strcpy(loaded_file,filename);
+
     getfromXMLinstrument(xml);
     xml.exitbranch();
 
