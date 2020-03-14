@@ -200,8 +200,9 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             d.reply("/damage", "s", repath);
         }}};
 
-#define rForwardCb [](const char *msg, rtosc::RtData &d) {\
-    printf("forwarding...\n"); d.forward();}
+//unused:
+//#define rForwardCb [](const char *msg, rtosc::RtData &d) {\
+//    printf("forwarding...\n"); d.forward();}
 const rtosc::Ports OscilGen::realtime_ports{
     rSelf(OscilGen),
     rPresetType,
@@ -282,20 +283,20 @@ inline void clearDC(fft_t *freqs)
 //return magnitude squared
 inline float normal(const fft_t *freqs, off_t x)
 {
-    return norm(freqs[x]);
+    return (float)norm(freqs[x]);
 }
 
 //return magnitude
 inline float abs(const fft_t *freqs, off_t x)
 {
-    return abs(freqs[x]);
+    return (float)abs(freqs[x]);
 }
 
 //return angle aka phase from a sine (not cosine wave)
 inline float arg(const fft_t *freqs, off_t x)
 {
     const fft_t tmp(freqs[x].imag(), freqs[x].real());
-    return arg(tmp);
+    return (float)arg(tmp);
 }
 
 /**
@@ -312,7 +313,7 @@ void normalize(fft_t *freqs, int oscilsize)
             normMax = norm;
     }
 
-    const float max = sqrt(normMax);
+    const float max = sqrtf(normMax);
     if(max < 1e-8) //data is all ~zero, do not amplify noise
         return;
 
@@ -330,7 +331,7 @@ void rmsNormalize(fft_t *freqs, int oscilsize)
     if(sum < 0.000001f)
         return;  //data is all ~zero, do not amplify noise
 
-    const float gain = 1.0f / sqrt(sum);
+    const float gain = 1.0f / sqrtf(sum);
 
     for(int i = 1; i < oscilsize / 2; ++i)
         freqs[i] *= gain;
@@ -510,13 +511,13 @@ void OscilGen::getbasefunction(float *smps)
     switch(Pbasefuncmodulation) {
         case 1:
             p1 = (powf(2, p1 * 5.0f) - 1.0f) / 10.0f;
-            p3 = floor(powf(2, p3 * 5.0f) - 1.0f);
+            p3 = floorf(powf(2, p3 * 5.0f) - 1.0f);
             if(p3 < 0.9999f)
                 p3 = -1.0f;
             break;
         case 2:
             p1 = (powf(2, p1 * 5.0f) - 1.0f) / 10.0f;
-            p3 = 1.0f + floor(powf(2, p3 * 5.0f) - 1.0f);
+            p3 = 1.0f + floorf(powf(2, p3 * 5.0f) - 1.0f);
             break;
         case 3:
             p1 = (powf(2, p1 * 7.0f) - 1.0f) / 10.0f;
@@ -540,11 +541,11 @@ void OscilGen::getbasefunction(float *smps)
                 t += powf((1.0f - cosf((t + p2) * 2.0f * PI)) * 0.5f, p3) * p1;
                 break;
             case 4: //chop
-                t = t * (powf(2.0, Pbasefuncmodulationpar1/32.0 +
-                              Pbasefuncmodulationpar2/2048.0)) + p3;
+                t = t * (powf(2.0, Pbasefuncmodulationpar1/32.f +
+                              Pbasefuncmodulationpar2/2048.f)) + p3;
         }
 
-        t = t - floor(t);
+        t = t - floorf(t);
 
         if(func)
             smps[i] = func(t, par);
@@ -660,14 +661,14 @@ void OscilGen::modulation(fft_t *freqs)
     switch(Pmodulation) {
         case 1:
             modulationpar1 = (powf(2, modulationpar1 * 7.0f) - 1.0f) / 100.0f;
-            modulationpar3 = floor((powf(2, modulationpar3 * 5.0f) - 1.0f));
+            modulationpar3 = floorf((powf(2, modulationpar3 * 5.0f) - 1.0f));
             if(modulationpar3 < 0.9999f)
                 modulationpar3 = -1.0f;
             break;
         case 2:
             modulationpar1 = (powf(2, modulationpar1 * 7.0f) - 1.0f) / 100.0f;
             modulationpar3 = 1.0f
-                             + floor((powf(2, modulationpar3 * 5.0f) - 1.0f));
+                             + floorf((powf(2, modulationpar3 * 5.0f) - 1.0f));
             break;
         case 3:
             modulationpar1 = (powf(2, modulationpar1 * 9.0f) - 1.0f) / 100.0f;
@@ -715,10 +716,10 @@ void OscilGen::modulation(fft_t *freqs)
                 break;
         }
 
-        t = (t - floor(t)) * synth.oscilsize;
+        t = (t - floorf(t)) * synth.oscilsize;
 
         const int   poshi = (int) t;
-        const float poslo = t - floor(t);
+        const float poslo = t - floorf(t);
 
         tmpsmps[i] = in[poshi] * (1.0f - poslo) + in[poshi + 1] * poslo;
     }
@@ -756,7 +757,7 @@ void OscilGen::spectrumadjust(fft_t *freqs)
 
     for(int i = 0; i < synth.oscilsize / 2; ++i) {
         float mag   = abs(freqs, i);
-        float phase = M_PI_2 - arg(freqs, i);
+        float phase = ((float)M_PI_2) - arg(freqs, i);
 
         switch(Psatype) {
             case 1:
@@ -905,7 +906,7 @@ void OscilGen::prepare(fft_t *freqs)
 
 fft_t operator*(float a, fft_t b)
 {
-    return std::complex<float>(a*b.real(), a*b.imag());
+    return std::complex<float>((float)(a*b.real()), (float)(a*b.imag()));
 }
 
 void OscilGen::adaptiveharmonic(fft_t *f, float freq)
@@ -936,7 +937,7 @@ void OscilGen::adaptiveharmonic(fft_t *f, float freq)
 
     for(int i = 0; i < synth.oscilsize / 2 - 2; ++i) {
         const int   high = (int)(i * rap);
-        const float low  = fmod(i * rap, 1.0f);
+        const float low  = fmodf(i * rap, 1.0f);
 
         if(high >= (synth.oscilsize / 2 - 2))
             break;
@@ -1192,7 +1193,7 @@ void OscilGen::getspectrum(int n, float *spc, int what)
         adaptiveharmonic(outoscilFFTfreqs, 0.0f);
         adaptiveharmonicpostprocess(outoscilFFTfreqs, n - 1);
         for(int i = 0; i < n; ++i)
-            spc[i] = outoscilFFTfreqs[i].imag();
+            spc[i] = (float)outoscilFFTfreqs[i].imag();
     }
 }
 
@@ -1327,8 +1328,8 @@ void OscilGen::add2XML(XMLwrapper& xml)
 
         xml.beginbranch("BASE_FUNCTION");
         for(int i = 1; i < synth.oscilsize / 2; ++i) {
-            float xc = basefuncFFTfreqs[i].real();
-            float xs = basefuncFFTfreqs[i].imag();
+            float xc = (float)basefuncFFTfreqs[i].real();
+            float xs = (float)basefuncFFTfreqs[i].imag();
             if((fabsf(xs) > 1e-6f) || (fabsf(xc) > 1e-6f)) {
                 xml.beginbranch("BF_HARMONIC", i);
                 xml.addparreal("cos", xc);
@@ -1444,7 +1445,7 @@ void OscilGen::getfromXML(XMLwrapper& xml)
 
 FUNC(pulse)
 {
-    return (fmod(x, 1.0f) < a) ? -1.0f : 1.0f;
+    return (fmodf(x, 1.0f) < a) ? -1.0f : 1.0f;
 }
 
 FUNC(saw)
@@ -1454,7 +1455,7 @@ FUNC(saw)
     else
     if(a > 0.99999f)
         a = 0.99999f;
-    x = fmod(x, 1);
+    x = fmodf(x, 1);
     if(x < a)
         return x / a * 2.0f - 1.0f;
     else
@@ -1463,7 +1464,7 @@ FUNC(saw)
 
 FUNC(triangle)
 {
-    x = fmod(x + 0.25f, 1);
+    x = fmodf(x + 0.25f, 1);
     a = 1 - a;
     if(a < 0.00001f)
         a = 0.00001f;
@@ -1481,7 +1482,7 @@ FUNC(triangle)
 
 FUNC(power)
 {
-    x = fmod(x, 1);
+    x = fmodf(x, 1);
     if(a < 0.00001f)
         a = 0.00001f;
     else
@@ -1492,7 +1493,7 @@ FUNC(power)
 
 FUNC(gauss)
 {
-    x = fmod(x, 1) * 2.0f - 1.0f;
+    x = fmodf(x, 1) * 2.0f - 1.0f;
     if(a < 0.00001f)
         a = 0.00001f;
     return expf(-x * x * (expf(a * 8) + 5.0f)) * 2.0f - 1.0f;
@@ -1514,7 +1515,7 @@ FUNC(diode)
 
 FUNC(abssine)
 {
-    x = fmod(x, 1);
+    x = fmodf(x, 1);
     if(a < 0.00001f)
         a = 0.00001f;
     else
@@ -1527,7 +1528,7 @@ FUNC(pulsesine)
 {
     if(a < 0.00001f)
         a = 0.00001f;
-    x = (fmod(x, 1) - 0.5f) * expf((a - 0.5f) * logf(128));
+    x = (fmodf(x, 1) - 0.5f) * expf((a - 0.5f) * logf(128));
     if(x < -0.5f)
         x = -0.5f;
     else
@@ -1539,7 +1540,7 @@ FUNC(pulsesine)
 
 FUNC(stretchsine)
 {
-    x = fmod(x + 0.5f, 1) * 2.0f - 1.0f;
+    x = fmodf(x + 0.5f, 1) * 2.0f - 1.0f;
     a = (a - 0.5f) * 4;
     if(a > 0.0f)
         a *= 2;
@@ -1552,7 +1553,7 @@ FUNC(stretchsine)
 
 FUNC(chirp)
 {
-    x = fmod(x, 1.0f) * 2.0f * PI;
+    x = fmodf(x, 1.0f) * 2.0f * PI;
     a = (a - 0.5f) * 4;
     if(a < 0.0f)
         a *= 2.0f;
@@ -1562,7 +1563,7 @@ FUNC(chirp)
 
 FUNC(absstretchsine)
 {
-    x = fmod(x + 0.5f, 1) * 2.0f - 1.0f;
+    x = fmodf(x + 0.5f, 1) * 2.0f - 1.0f;
     a = (a - 0.5f) * 9;
     a = powf(3.0f, a);
     float b = powf(fabsf(x), a);
@@ -1585,22 +1586,22 @@ FUNC(sqr)
 
 FUNC(spike)
 {
-    float b = a * 0.66666; // the width of the range: if a == 0.5, b == 0.33333
+    float b = a * 0.66666f; // the width of the range: if a == 0.5, b == 0.33333
 
     if(x < 0.5) {
         if(x < (0.5 - (b / 2.0)))
             return 0.0;
         else {
-            x = (x + (b / 2) - 0.5) * (2.0 / b); // shift to zero, and expand to range from 0 to 1
-            return x * (2.0 / b); // this is the slope: 1 / (b / 2)
+            x = (x + (b / 2) - 0.5f) * (2.f / b); // shift to zero, and expand to range from 0 to 1
+            return x * (2.f / b); // this is the slope: 1 / (b / 2)
         }
     }
     else {
         if(x > (0.5 + (b / 2.0)))
             return 0.0;
         else {
-            x = (x - 0.5) * (2.0 / b);
-            return (1 - x) * (2.0 / b);
+            x = (x - .5f) * (2.f / b);
+            return (1 - x) * (2.f / b);
         }
     }
 }
@@ -1618,14 +1619,14 @@ FUNC(circle)
         if((x < -b) || (x > b))
             y = 0;
         else
-            y = sqrt(1 - (pow(x, 2) / pow(b, 2)));  // normally * a^2, but a stays 1
+            y = sqrtf(1 - (powf(x, 2) / powf(b, 2)));  // normally * a^2, but a stays 1
     }
     else {
         x = x - 3; // x goes from -1 to 1 as well
         if((x < -b) || (x > b))
             y = 0;
         else
-            y = -sqrt(1 - (pow(x, 2) / pow(b, 2)));
+            y = -sqrtf(1 - (powf(x, 2) / powf(b, 2)));
     }
     return y;
 }
@@ -1696,7 +1697,7 @@ FILTER(bp1)
     float tmp = powf(5.0f, par2 * 2.0f);
     gain = powf(gain, tmp);
     if(gain < 1e-5)
-        gain = 1e-5;
+        gain = (float)1e-5;
     return gain;
 }
 
@@ -1741,7 +1742,7 @@ FILTER(bs2)
 
 bool floatEq(float a, float b)
 {
-    const float fudge = .01;
+    const float fudge = .01f;
     return a + fudge > b && a - fudge < b;
 }
 

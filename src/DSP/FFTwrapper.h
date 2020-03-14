@@ -24,7 +24,7 @@ class FFTwrapper
 {
     public:
         /**Constructor
-         * @param fftsize The size of samples to be fed to fftw*/
+         * @param fftsize_ The size of samples to be fed to fftw*/
         FFTwrapper(int fftsize_);
         /**Destructor*/
         ~FFTwrapper();
@@ -50,10 +50,10 @@ template<class _Tp>
 std::complex<_Tp>
 FFTpolar(const _Tp& __rho, const _Tp& __theta = _Tp(0))
 {
-        _Tp __x = __rho * cos(__theta);
+        _Tp __x = __rho * std::cos(__theta);
         if (std::isnan(__x))
                 __x = 0;
-        _Tp __y = __rho * sin(__theta);
+        _Tp __y = __rho * std::sin(__theta);
         if (std::isnan(__y))
                 __y = 0;
         return std::complex<_Tp>(__x, __y);
