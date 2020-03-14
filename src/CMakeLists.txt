@@ -182,11 +182,49 @@ endif()
 option (BuildForAMD_X86_64 "Build for AMD x86_64 system" OFF)
 option (BuildForCore2_X86_64 "Build for Intel Core2 x86_64 system" OFF)
 option (BuildForDebug "Include gdb debugging support" OFF)
+option (ExtendedWarnings "Enable all useful warnings" OFF)
 option (IncludeWhatYouUse "Check for useless includes" OFF)
 mark_as_advanced(IncludeWhatYouUse)
 
 set(CMAKE_BUILD_TYPE "Release")
 
+set (BuildOptions_ExtendedWarnings "")
+if (ExtendedWarnings)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        # The following generates a list of warning exceptions
+        # (after it enables all warnings).
+        # This is for developers who want to make sure they really
+        # see all possible warnings, with a few exceptions that don't
+        # make sense in this code base.
+        # You can remove those exceptions if they don't complain too
+        # often about the code base. If you want to add exceptions,
+        # be VERY CAREFUL, ask the project maintainers for
+        # their consent.
+        set (BuildOptions_ExtendedWarnings_List
+        "-Wall" "-Wextra" "-Weverything" # start with really everything
+        "-Wno-c++98-compat" "-Wno-c++98-compat-extra-semi" "-Wno-c++98-compat-pedantic" # C++11 is a zyn build requirement
+        "-Wno-cast-align" # not relevant for our case
+        "-Wno-double-promotion" # Used too often to fix
+        "-Wno-old-style-cast" # forces you to use static_cast<> etc everywhere! too many errors
+        "-Wno-padded" # this tells you to realign your structs to have better memory management
+        "-Wno-zero-as-null-pointer-constant" # wants you to use nullptr in the whole code base
+        "-Wno-implicit-int-conversion" # too often to fix
+        "-Wno-extra-semi" # one semicolon more than useful - no danger to disable this
+        "-Wno-vla-extension" "-Wno-vla" # rtosc currently heavily uses them, and they are supported by our CI
+        "-Wno-exit-time-destructors" "-Wno-global-constructors" # used too often in rtosc
+        "-Wno-gnu-zero-variadic-macro-arguments" # used too often in zyn
+        "-Wno-shadow" # used too often in zyn
+        "-Wno-cast-align" # used too often in zyn
+        "-Wno-missing-prototypes" # used too often in zyn
+        "-Wno-sign-conversion" # used too often in zyn
+	"-Wno-float-equal" # can be disturbing in some cases
+        )
+        STRING(REPLACE ";" " " BuildOptions_ExtendedWarnings "${BuildOptions_ExtendedWarnings_List}")
+        MESSAGE(STATUS "Using extended Warning options: ${BuildOptions_ExtendedWarnings}")
+    else()
+        MESSAGE(WARNING "\"ExtendedWarnings\" selected, but this is only supported for clang - ignoring")
+    endif()
+endif()
 
 set (BuildOptions_x86_64AMD
     "-march=athlon64 -m64 -Wall -Wno-unused-parameter"
@@ -211,9 +249,12 @@ set (BuildOptionsBasic
     "-std=c++11 -Wno-unused-parameter -O3 -ffast-math -fomit-frame-pointer"
     CACHE STRING "basic X86 compiler options"
 )
+STRING(APPEND BuildOptionsBasic " ${BuildOptions_ExtendedWarnings}")
 
 set (BuildOptionsDebug
-    "-std=c++11 -O0 -g3 -ggdb -Wall -Wno-unused-parameter -Wpointer-arith" CACHE STRING "Debug build flags")
+    "-std=c++11 -O0 -g3 -ggdb -Wall -Wno-unused-parameter -Wpointer-arith"
+    CACHE STRING "Debug build flags")
+STRING(APPEND BuildOptionsDebug " ${BuildOptions_ExtendedWarnings}")
 
 if(${CMAKE_VERSION} VERSION_LESS "3.3.0")
     set(IwyuErr "disabled (cmake < 3.3.0)")

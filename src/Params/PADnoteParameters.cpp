@@ -90,7 +90,7 @@ static const rtosc::Ports realtime_ports =
             PADnoteParameters *p = (PADnoteParameters*)d.obj;
             const char *mm = m;
             while(!isdigit(*mm))++mm;
-            unsigned n = atoi(mm);
+            int n = atoi(mm);
             p->sample[n].size     = rtosc_argument(m,0).i;
             p->sample[n].basefreq = rtosc_argument(m,1).f;
             p->sample[n].smp      = *(float**)rtosc_argument(m,2).b.data;
@@ -442,14 +442,14 @@ float PADnoteParameters::getprofile(float *smp, int size)
         smp[i] = 0.0f;
     const int supersample = 16;
     float     basepar     = powf(2.0f, (1.0f - Php.base.par1 / 127.0f) * 12.0f);
-    float     freqmult    = floor(powf(2.0f,
+    float     freqmult    = floorf(powf(2.0f,
                                        Php.freqmult / 127.0f
                                        * 5.0f) + 0.000001f);
 
-    float modfreq = floor(powf(2.0f,
+    float modfreq = floorf(powf(2.0f,
                                Php.modulator.freq / 127.0f
                                * 5.0f) + 0.000001f);
-    float modpar1 = powf(Php.modulator.par1 / 127.0f, 4.0f) * 5.0f / sqrt(
+    float modpar1 = powf(Php.modulator.par1 / 127.0f, 4.0f) * 5.0f / sqrtf(
         modfreq);
     float amppar1 =
         powf(2.0f, powf(Php.amp.par1 / 127.0f, 2.0f) * 10.0f) - 0.999f;
@@ -491,7 +491,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
 
         //do the modulation of the profile
         x += sinf(x_before_freq_mult * 3.1415926f * modfreq) * modpar1;
-        x  = fmod(x + 1000.0f, 1.0f) * 2.0f - 1.0f;
+        x  = fmodf(x + 1000.0f, 1.0f) * 2.0f - 1.0f;
 
 
         //this is the base function of the profile
@@ -505,7 +505,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
                     f = 1.0f;
                 break;
             case 2:
-                f = expf(-(fabsf(x)) * sqrt(basepar));
+                f = expf(-(fabsf(x)) * sqrtf(basepar));
                 break;
             default:
                 f = expf(-(x * x) * basepar);
@@ -525,7 +525,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
             case 2:
                 amp = 0.5f
                       * (1.0f
-                         + cosf(3.1415926f * origx * sqrt(amppar1 * 4.0f + 1.0f)));
+                         + cosf(3.1415926f * origx * sqrtf(amppar1 * 4.0f + 1.0f)));
                 break;
             case 3:
                 amp = 1.0f
@@ -535,7 +535,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
 
         //apply the amplitude multiplier
         float finalsmp = f;
-        if(Php.amp.type != 0)
+        if(Php.amp.type != 0) {
             switch(Php.amp.mode) {
                 case 0:
                     finalsmp = amp * (1.0f - amppar2) + finalsmp * amppar2;
@@ -553,7 +553,7 @@ float PADnoteParameters::getprofile(float *smp, int size)
                                   + powf(amppar2, 4.0f) * 20.0f + 0.0001f);
                     break;
             }
-        ;
+        }
 
         smp[i / supersample] += finalsmp / supersample;
     }
@@ -640,7 +640,7 @@ float PADnoteParameters::getNhr(int n) const
         case 5:
             result = n0
                      + sinf(n0 * par2 * par2 * PI
-                            * 0.999f) * sqrt(par1) * 2.0f + 1.0f;
+                            * 0.999f) * sqrtf(par1) * 2.0f + 1.0f;
             break;
         case 6:
             tmp    = powf(par2 * 2.0f, 2.0f) + 0.1f;
@@ -656,7 +656,7 @@ float PADnoteParameters::getNhr(int n) const
 
     const float par3 = Phrpos.par3 / 255.0f;
 
-    const float iresult = floor(result + 0.5f);
+    const float iresult = floorf(result + 0.5f);
     const float dresult = result - iresult;
 
     return iresult + (1.0f - par3) * dresult;
@@ -740,12 +740,12 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
             amp *= resonance->getfreqresponse(realfreq);
 
         if(ibw > profilesize) { //if the bandwidth is larger than the profilesize
-            const float rap   = sqrt((float)profilesize / (float)ibw);
+            const float rap   = sqrtf((float)profilesize / (float)ibw);
             const int   cfreq =
                 (int) (realfreq
                        / (synth.samplerate_f * 0.5f) * size) - ibw / 2;
             for(int i = 0; i < ibw; ++i) {
-                const int src    = i * rap * rap;
+                const int src    = (int)(i * rap * rap);
                 const int spfreq = i + cfreq;
                 if(spfreq < 0)
                     continue;
@@ -755,7 +755,7 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
             }
         }
         else {  //if the bandwidth is smaller than the profilesize
-            const float rap = sqrt((float)ibw / (float)profilesize);
+            const float rap = sqrtf((float)ibw / (float)profilesize);
             const float ibasefreq = realfreq / (synth.samplerate_f * 0.5f) * size;
             for(int i = 0; i < profilesize; ++i) {
                 const float idfreq = (i / (float)profilesize - 0.5f) * ibw;
@@ -804,9 +804,9 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
         float amp = harmonics[nh - 1];
         if(resonance->Penabled)
             amp *= resonance->getfreqresponse(realfreq);
-        const int cfreq = realfreq / (synth.samplerate_f * 0.5f) * size;
+        const int cfreq = (int)(realfreq / (synth.samplerate_f * 0.5f) * size);
 
-        spectrum[cfreq] = amp + 1e-9;
+        spectrum[cfreq] = amp + (float)1e-9;
     }
 
     //In continous mode the spectrum gets additional interpolation between the
@@ -951,10 +951,10 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
             float rms = 0.0f;
             for(int i = 0; i < samplesize; ++i)
                 rms += newsample.smp[i] * newsample.smp[i];
-            rms = sqrt(rms);
+            rms = sqrtf(rms);
             if(rms < 0.000001f)
                 rms = 1.0f;
-            rms *= sqrt(262144.0f / samplesize);//262144=2^18
+            rms *= sqrtf(262144.0f / samplesize);//262144=2^18
             for(int i = 0; i < samplesize; ++i)
                 newsample.smp[i] *= 1.0f / rms * 50.0f;
 
