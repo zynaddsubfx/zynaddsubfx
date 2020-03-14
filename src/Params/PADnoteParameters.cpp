@@ -898,12 +898,15 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
     float adj[samplemax];
     for(int nsample = 0; nsample < samplemax; ++nsample)
         adj[nsample] = (Pquality.oct + 1.0f) * (float)nsample / samplemax;
+    // QtCreator can't capture VLAs (QTCREATORBUG-23722), so this is
+    // a workaround to allow using the IDE
+    float * const adj_ptr = adj;
 
     const PADnoteParameters* this_c = this;
 
     auto thread_cb = [basefreq, bwadjust, &cb, do_abort,
                       samplesize, samplemax, spectrumsize,
-                      &adj, &profile, this_c](
+                      adj_ptr, &profile, this_c](
                       unsigned nthreads, unsigned threadno)
     {
         //prepare a BIG IFFT
@@ -917,7 +920,7 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
             if(do_abort())
                 break;
             const float basefreqadjust =
-                powf(2.0f, adj[nsample] - adj[samplemax - 1] * 0.5f);
+                powf(2.0f, adj_ptr[nsample] - adj_ptr[samplemax - 1] * 0.5f);
 
             if(this_c->Pmode == 0)
                 this_c->generatespectrum_bandwidthMode(spectrum,
