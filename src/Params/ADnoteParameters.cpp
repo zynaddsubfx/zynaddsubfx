@@ -71,7 +71,7 @@ static const Ports voicePorts = {
     rRecurp(VoiceFilter,    "Optional Voice Filter"),
 
 //    rToggle(Enabled,       rShort("enable"), "Voice Enable"),
-    rParamI(Unison_size, rShort("size"), rMap(min, 0), rMap(max, 50),
+    rParamI(Unison_size, rShort("size"), rMap(min, 1), rMap(max, 50),
         rDefault(1), "Number of subvoices"),
     rParamZyn(Unison_phase_randomness, rShort("ph.rnd."), rDefault(127),
         "Phase Randomness"),
