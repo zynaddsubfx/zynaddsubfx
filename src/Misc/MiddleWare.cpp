@@ -322,7 +322,7 @@ struct NonRtObjStore
                 strcpy(d.loc, obj_rl.c_str());
                 d.obj = pad;
                 PADnoteParameters::non_realtime_ports.dispatch(msg, d);
-                if(rtosc_narguments(msg)) {
+                if(d.matches && rtosc_narguments(msg)) {
                     if(!strcmp(msg, "oscilgen/prepare"))
                         ; //ignore
                     else {
