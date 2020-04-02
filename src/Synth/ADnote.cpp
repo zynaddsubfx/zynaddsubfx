@@ -539,9 +539,9 @@ void ADnote::legatonote(LegatoParams lpars)
     initial_seed = lpars.seed;
     current_prng_state = lpars.seed;
 
+    velocity = lpars.velocity;
     if(velocity > 1.0f)
         velocity = 1.0f;
-    velocity = lpars.velocity;
 
     NoteGlobalPar.Detune = getdetune(pars.GlobalPar.PDetuneType,
                                      pars.GlobalPar.PCoarseDetune,
