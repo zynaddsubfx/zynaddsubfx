@@ -163,6 +163,18 @@ void SynthNote::setVelocity(float velocity_) {
     legato.setDecounter(0); //avoid chopping sound due fade-in
 }
 
+void SynthNote::setPitch(float freq_, float log2_freq_) {
+    legato.setSilent(true); //Let legato.update(...) return 0.
+    LegatoParams pars{freq_, legato.getVelocity(),
+               legato.getPortamento(), log2_freq_, true, legato.getSeed()};
+    try {
+        legatonote(pars);
+    } catch (std::bad_alloc &ba) {
+        std::cerr << "failed to set velocity to legato note: " << ba.what() << std::endl;
+    }
+    legato.setDecounter(0); //avoid chopping sound due fade-in
+}
+
 float SynthNote::getRandomFloat() {
     return (getRandomUint() / (INT32_MAX * 1.0f));
 }

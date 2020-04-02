@@ -72,6 +72,9 @@ class SynthNote
         /* For polyphonic aftertouch needed */
         void setVelocity(float velocity_);
 
+        /* For per-note pitch */
+        void setPitch(float freq_, float log2_freq_);
+
         /* Random numbers with own seed */
         float getRandomFloat();
         prng_t getRandomUint();
