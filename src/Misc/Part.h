@@ -55,6 +55,8 @@ class Part
                                   unsigned char velocity) REALTIME;
         void AllNotesOff() REALTIME; //panic
         void SetController(unsigned int type, int par) REALTIME;
+        void SetController(unsigned int type, note_t, float value,
+                           int masterkeyshift) REALTIME;
         void ReleaseSustainedKeys() REALTIME; //this is called when the sustain pedal is released
         void ReleaseAllKeys() REALTIME; //this is called on AllNotesOff controller
 

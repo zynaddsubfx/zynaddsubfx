@@ -1018,6 +1018,20 @@ void Master::setController(char chan, int type, int par)
     }
 }
 
+/*
+ * Per note controllers
+ */
+void Master::setController(char chan, int type, note_t note, float value)
+{
+    if(frozenState)
+        return;
+
+    /* Send the controller to all part assigned to the channel */
+    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+        if((chan == part[npart]->Prcvchn) && (part[npart]->Penabled != 0))
+            part[npart]->SetController(type, note, value, keyshift);
+}
+
 void Master::vuUpdate(const float *outr, const float *outl)
 {
     //Peak computation (for vumeters)

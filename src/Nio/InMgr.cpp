@@ -45,6 +45,13 @@ ostream &operator<<(ostream &out, const MidiEvent &ev)
             << "         value(" << ev.value << ")";
             break;
 
+        case M_FLOAT_CTRL:
+            out << "MidiNote: controller(" << ev.num << ")\n"
+            << "          channel(" << ev.channel << ")\n"
+            << "          note(" << ev.value << ")\n"
+            << "          log2_value(" << ev.log2_freq << ")";
+            break;
+
         case M_PGMCHANGE:
             out << "PgmChange: program(" << ev.num << ")\n"
             << "           channel(" << ev.channel << ")";
@@ -118,6 +125,10 @@ void InMgr::flush(unsigned frameStart, unsigned frameStop)
                     middleware->spawnMaster()->bToU->write("/bank/lsb", "i", ev.value);
                 } else
                     master->setController(ev.channel, ev.num, ev.value);
+                break;
+
+            case M_FLOAT_CTRL:
+                master->setController(ev.channel, ev.num, ev.value, ev.log2_freq);
                 break;
 
             case M_PGMCHANGE:

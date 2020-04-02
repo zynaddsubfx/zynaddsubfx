@@ -65,10 +65,31 @@ void MidiIn::midiProcess(unsigned char head,
             if (sysex_offset >= 10 &&
                 sysex_data[1] == 0x0A &&
                 sysex_data[2] == 0x55) {
-                ev.type = M_FLOAT_NOTE;
+                switch (sysex_data[3] >> 4) {
+                case 0: /* Note ON */
+                    ev.type = M_FLOAT_NOTE;
+                    ev.num = sysex_data[4];
+                    ev.value = sysex_data[5];
+                    break;
+                case 1: /* Pressure, Aftertouch */
+                    ev.type = M_FLOAT_CTRL;
+                    ev.num = C_aftertouch;
+                    ev.value = sysex_data[4];
+                    break;
+                case 2: /* Controller */
+                    ev.type = M_FLOAT_CTRL;
+                    ev.num = sysex_data[5];
+                    ev.value = sysex_data[4];
+                    break;
+                case 3: /* Absolute pitch */
+                    ev.type = M_FLOAT_CTRL;
+                    ev.num = C_pitch;
+                    ev.value = sysex_data[4];
+                    break;
+                default:
+                    return;
+                }
                 ev.channel = sysex_data[3] & 0x0F;
-                ev.num = sysex_data[4];
-                ev.value = sysex_data[5];
                 ev.log2_freq = (sysex_data[6] +
                   (sysex_data[7] / (128.0f)) +
                   (sysex_data[8] / (128.0f * 128.0f)) +

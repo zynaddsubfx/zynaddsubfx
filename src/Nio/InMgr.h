@@ -23,7 +23,8 @@ enum midi_type {
     M_CONTROLLER = 2, // for controller
     M_PGMCHANGE  = 3, // for program change
     M_PRESSURE   = 4, // for polyphonic aftertouch
-    M_FLOAT_NOTE = 5  // for floating point note
+    M_FLOAT_NOTE = 5, // for floating point note
+    M_FLOAT_CTRL = 6  // for floating point controller
 };
 
 struct MidiEvent {
@@ -33,7 +34,7 @@ struct MidiEvent {
     int num;     //note, controller or program number
     int value;   //velocity or controller value
     int time;    //time offset of event (used only in jack->jack case at the moment)
-    float log2_freq;	//type=5 for logarithmic representation of note
+    float log2_freq;   //type=5,6 for logarithmic representation of note/parameter
 };
 
 //super simple class to manage the inputs

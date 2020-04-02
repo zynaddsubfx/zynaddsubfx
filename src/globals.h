@@ -237,6 +237,7 @@ enum ONOFFTYPE {
 
 enum MidiControllers {
     C_bankselectmsb = 0, C_pitchwheel = 1000, C_NULL = 1001,
+    C_aftertouch = 1002, C_pitch = 1003,
     C_expression    = 11, C_panning = 10, C_bankselectlsb = 32,
     C_filtercutoff  = 74, C_filterq = 71, C_bandwidth = 75, C_modwheel = 1,
     C_fmamp  = 76,

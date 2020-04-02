@@ -712,6 +712,37 @@ void Part::SetController(unsigned int type, int par)
             break;
     }
 }
+
+/*
+ * Per note controllers.
+ */
+void Part::SetController(unsigned int type, note_t note, float value,
+                         int masterkeyshift)
+{
+    if(!Pnoteon || !inRange(note, Pminkey, Pmaxkey) || Pdrummode)
+        return;
+
+    switch (type) {
+    case C_aftertouch:
+        PolyphonicAftertouch(note, floorf(value));
+        break;
+    case C_pitch: {
+        const int   partkeyshift = (int)Pkeyshift - 64;
+        const int   keyshift     = masterkeyshift + partkeyshift;
+        const float notebasefreq = getBaseFreq(value, keyshift);
+
+        for(auto &d:notePool.activeDesc()) {
+            if(d.note == note && d.playing())
+                for(auto &s:notePool.activeNotes(d))
+                    s.note->setPitch(notebasefreq, value);
+        }
+        break;
+    }
+    default:
+        break;
+    }
+}
+
 /*
  * Release the sustained keys
  */
