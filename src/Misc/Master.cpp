@@ -973,15 +973,10 @@ void Master::noteOff(char chan, note_t note)
  */
 void Master::polyphonicAftertouch(char chan, note_t note, char velocity)
 {
-    if(velocity) {
-        for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-            if(chan == part[npart]->Prcvchn)
-                if(part[npart]->Penabled)
-                    part[npart]->PolyphonicAftertouch(note, velocity);
-
-    }
-    else
-        this->noteOff(chan, note);
+    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+        if(chan == part[npart]->Prcvchn)
+            if(part[npart]->Penabled)
+                part[npart]->PolyphonicAftertouch(note, velocity);
 }
 
 /*
