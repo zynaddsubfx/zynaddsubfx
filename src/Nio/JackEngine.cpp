@@ -382,61 +382,78 @@ void JackEngine::handleMidi(unsigned long frames)
     void *midi_buf = jack_port_get_buffer(midi.inport, frames);
     jack_midi_event_t jack_midi_event;
     jack_nframes_t    event_index = 0;
-    unsigned char    *midi_data;
+    unsigned char     buf[3];
     unsigned char     type;
 
     while(jack_midi_event_get(&jack_midi_event, midi_buf,
                               event_index++) == 0) {
-        MidiEvent ev;
-        midi_data  = jack_midi_event.buffer;
-        type       = midi_data[0] & 0xF0;
-        ev.channel = midi_data[0] & 0x0F;
+        MidiEvent ev = {};
+
+        memset(buf, 0, sizeof(buf));
+        memcpy(buf, jack_midi_event.buffer,
+            std::min(sizeof(buf), jack_midi_event.size));
+
+        /* make sure the values are within range */
+        buf[1] &= 0x7F;
+        buf[2] &= 0x7F;
+        type       = buf[0] & 0xF0;
+        ev.channel = buf[0] & 0x0F;
         ev.time    = midi.jack_sync ? jack_midi_event.time : 0;
 
         switch(type) {
             case 0x80: /* note-off */
                 ev.type  = M_NOTE;
-                ev.num   = midi_data[1];
+                ev.num   = buf[1];
                 ev.value = 0;
                 InMgr::getInstance().putEvent(ev);
                 break;
 
             case 0x90: /* note-on */
                 ev.type  = M_NOTE;
-                ev.num   = midi_data[1];
-                ev.value = midi_data[2];
+                ev.num   = buf[1];
+                ev.value = buf[2];
                 InMgr::getInstance().putEvent(ev);
                 break;
 
             case 0xA0: /* pressure, aftertouch */
                 ev.type  = M_PRESSURE;
-                ev.num   = midi_data[1];
-                ev.value = midi_data[2];
+                ev.num   = buf[1];
+                ev.value = buf[2];
                 InMgr::getInstance().putEvent(ev);
                 break;
 
             case 0xB0: /* controller */
                 ev.type  = M_CONTROLLER;
-                ev.num   = midi_data[1];
-                ev.value = midi_data[2];
+                ev.num   = buf[1];
+                ev.value = buf[2];
                 InMgr::getInstance().putEvent(ev);
                 break;
 
             case 0xC0: /* program change */
                 ev.type  = M_PGMCHANGE;
-                ev.num   = midi_data[1];
-                ev.value = 0;
+                ev.num   = buf[1];
                 InMgr::getInstance().putEvent(ev);
                 break;
 
             case 0xE0: /* pitch bend */
                 ev.type  = M_CONTROLLER;
                 ev.num   = C_pitchwheel;
-                ev.value = ((midi_data[2] << 7) | midi_data[1]) - 8192;
+                ev.value = ((buf[2] << 7) | buf[1]) - 8192;
                 InMgr::getInstance().putEvent(ev);
                 break;
 
-                /* XXX TODO: handle MSB/LSB controllers and RPNs and NRPNs */
+            default:
+                for (size_t x = 0; x < jack_midi_event.size; x += 3) {
+                    size_t y = jack_midi_event.size - x;
+                    if (y >= 3) {
+                        memcpy(buf, (uint8_t *)jack_midi_event.buffer + x, 3);
+                    } else {
+                        memset(buf, 0, sizeof(buf));
+                        memcpy(buf, (uint8_t *)jack_midi_event.buffer + x, y);
+                    }
+                    midiProcess(buf[0], buf[1], buf[2]);
+                }
+                break;
         }
     }
 }
