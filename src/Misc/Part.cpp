@@ -604,11 +604,8 @@ void Part::NoteOff(note_t note) //release the key
 }
 
 void Part::PolyphonicAftertouch(note_t note,
-				unsigned char velocity,
-				int masterkeyshift)
+				unsigned char velocity)
 {
-    (void) masterkeyshift;
-
     if(!Pnoteon || !inRange(note, Pminkey, Pmaxkey) || Pdrummode)
         return;
 
