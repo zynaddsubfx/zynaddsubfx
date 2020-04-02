@@ -329,7 +329,7 @@ void EnvelopeParams::init(zyn::consumer_location_t _loc)
         case ad_voice_filter:  ADSRinit_filter(90, 0.025, 40, 0.025, 0.009, 40); break;
         case ad_voice_fm_freq: ASRinit(20, 3.62, 40, 1.876); break;
         case ad_voice_fm_amp:  ADSRinit(80, 90, 127, 100); break;
-        case sub_freq:         ASRinit(0.01, 0.025, 64, 0.5); break;
+        case sub_freq:         ASRinit(30, 0.025, 64, 0.5); break;
         case sub_bandwidth:    ASRinit_bw(100, 0.97, 64, 0.5); break;
         default: throw std::logic_error("Invalid envelope consumer location");
     };
