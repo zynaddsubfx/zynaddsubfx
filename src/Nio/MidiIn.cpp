@@ -65,11 +65,18 @@ void MidiIn::midiProcess(unsigned char head,
             if (sysex_offset >= 10 &&
                 sysex_data[1] == 0x0A &&
                 sysex_data[2] == 0x55) {
+                ev.channel = sysex_data[3] & 0x0F;
+                ev.log2_freq = sysex_data[6] +
+                  (sysex_data[7] / (128.0f)) +
+                  (sysex_data[8] / (128.0f * 128.0f)) +
+                  (sysex_data[9] / (128.0f * 128.0f * 128.0f));
+
                 switch (sysex_data[3] >> 4) {
                 case 0: /* Note ON */
                     ev.type = M_FLOAT_NOTE;
                     ev.num = sysex_data[4];
                     ev.value = sysex_data[5];
+                    ev.log2_freq /= 12.0f;
                     break;
                 case 1: /* Pressure, Aftertouch */
                     ev.type = M_FLOAT_CTRL;
@@ -85,21 +92,16 @@ void MidiIn::midiProcess(unsigned char head,
                     ev.type = M_FLOAT_CTRL;
                     ev.num = C_pitch;
                     ev.value = sysex_data[4];
+                    ev.log2_freq /= 12.0f;
                     break;
                 default:
                     return;
                 }
-                ev.channel = sysex_data[3] & 0x0F;
-                ev.log2_freq = (sysex_data[6] +
-                  (sysex_data[7] / (128.0f)) +
-                  (sysex_data[8] / (128.0f * 128.0f)) +
-                  (sysex_data[9] / (128.0f * 128.0f * 128.0f))
-                  ) / 12.0f;
                 InMgr::getInstance().putEvent(ev);
             }
             return; /* message complete */
         } else {
-	    return; /* wait for more data */
+            return; /* wait for more data */
         }
     }
     switch(head & 0xf0) {
