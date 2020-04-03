@@ -75,6 +75,10 @@ class SynthNote
         /* For per-note pitch */
         void setPitch(float freq_, float log2_freq_);
 
+        /* For per-note filter cutoff */
+        void setFilterCutoff(float);
+        float getFilterCutoffRelFreq(void);
+
         /* Random numbers with own seed */
         float getRandomFloat();
         prng_t getRandomUint();
@@ -126,6 +130,7 @@ class SynthNote
         const SYNTH_T    &synth;
         const AbsTime    &time;
         WatchManager     *wm;
+        smooth_float     filtercutoff_relfreq;
 };
 
 }

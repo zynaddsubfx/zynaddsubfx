@@ -738,6 +738,13 @@ void Part::SetController(unsigned int type, note_t note, float value,
         }
         break;
     }
+    case C_filtercutoff:
+        for(auto &d:notePool.activeDesc()) {
+            if(d.note == note && d.playing())
+                for(auto &s:notePool.activeNotes(d))
+                    s.note->setFilterCutoff(value);
+        }
+        break;
     default:
         break;
     }

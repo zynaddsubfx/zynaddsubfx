@@ -10,6 +10,7 @@
   of the License, or (at your option) any later version.
 */
 #include "SynthNote.h"
+#include "../Params/Controller.h"
 #include "../Misc/Util.h"
 #include "../globals.h"
 #include <cstring>
@@ -173,6 +174,22 @@ void SynthNote::setPitch(float freq_, float log2_freq_) {
         std::cerr << "failed to set velocity to legato note: " << ba.what() << std::endl;
     }
     legato.setDecounter(0); //avoid chopping sound due fade-in
+}
+
+void SynthNote::setFilterCutoff(float value)
+{
+    filtercutoff_relfreq =
+        (value - 64.0f) * ctl.filtercutoff.depth / 4096.0f * 3.321928f;
+}
+
+float SynthNote::getFilterCutoffRelFreq(void)
+{
+    const float value = filtercutoff_relfreq;
+
+    if (value == 0.0f)
+        return (ctl.filtercutoff.relfreq);
+    else
+        return (value);
 }
 
 float SynthNote::getRandomFloat() {

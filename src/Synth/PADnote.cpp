@@ -251,6 +251,7 @@ inline void PADnote::fadein(float *smps)
 
 void PADnote::computecurrentparameters()
 {
+    const float relfreq = getFilterCutoffRelFreq();
     const float globalpitch = 0.01f * (NoteGlobalPar.FreqEnvelope->envout()
                            + NoteGlobalPar.FreqLfo->lfoout()
                            * ctl.modwheel.relmod + NoteGlobalPar.Detune);
@@ -259,8 +260,7 @@ void PADnote::computecurrentparameters()
                          * NoteGlobalPar.AmpEnvelope->envout_dB()
                          * NoteGlobalPar.AmpLfo->amplfoout();
 
-    NoteGlobalPar.GlobalFilter->update(ctl.filtercutoff.relfreq,
-                                       ctl.filterq.relq);
+    NoteGlobalPar.GlobalFilter->update(relfreq, ctl.filterq.relq);
 
     //compute the portamento, if it is used by this note
     float portamentofreqrap = 1.0f;

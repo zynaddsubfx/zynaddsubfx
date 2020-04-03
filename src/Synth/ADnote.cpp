@@ -1085,9 +1085,11 @@ float ADnote::getFMvoicebasefreq(int nvoice) const
  */
 void ADnote::computecurrentparameters()
 {
+    const float relfreq = getFilterCutoffRelFreq();
     int   nvoice;
     float voicefreq, voicepitch, FMfreq,
           FMrelativepitch, globalpitch;
+
     globalpitch = 0.01f * (NoteGlobalPar.FreqEnvelope->envout()
                            + NoteGlobalPar.FreqLfo->lfoout()
                            * ctl.modwheel.relmod);
@@ -1096,8 +1098,7 @@ void ADnote::computecurrentparameters()
                          * NoteGlobalPar.AmpEnvelope->envout_dB()
                          * NoteGlobalPar.AmpLfo->amplfoout();
 
-    NoteGlobalPar.Filter->update(ctl.filtercutoff.relfreq,
-                                 ctl.filterq.relq);
+    NoteGlobalPar.Filter->update(relfreq, ctl.filterq.relq);
 
 
     //compute the portamento, if it is used by this note
@@ -1135,8 +1136,7 @@ void ADnote::computecurrentparameters()
         /****************/
         auto *voiceFilter = NoteVoicePar[nvoice].Filter;
         if(voiceFilter) {
-            voiceFilter->update(ctl.filtercutoff.relfreq,
-                                ctl.filterq.relq);
+            voiceFilter->update(relfreq, ctl.filterq.relq);
         }
 
         if(NoteVoicePar[nvoice].noisetype == 0) { //compute only if the voice isn't noise

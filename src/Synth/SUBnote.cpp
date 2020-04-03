@@ -490,9 +490,10 @@ void SUBnote::computecurrentparameters()
     newamplitude = volume * AmpEnvelope->envout_dB() * 2.0f;
 
     //Filter
-    if(GlobalFilter)
-        GlobalFilter->update(ctl.filtercutoff.relfreq,
-                             ctl.filterq.relq);
+    if(GlobalFilter) {
+        const float relfreq = getFilterCutoffRelFreq();
+        GlobalFilter->update(relfreq, ctl.filterq.relq);
+    }
 }
 
 void SUBnote::computeallfiltercoefs(bpfilter *filters, float envfreq,
