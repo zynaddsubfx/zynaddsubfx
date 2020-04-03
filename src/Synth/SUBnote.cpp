@@ -106,7 +106,7 @@ void SUBnote::setup(float freq,
     volume     *= VelF(velocity, pars.AmpVelocityScaleFunction);
     if(pars.PPanning != 0)
         panning = pars.PPanning / 127.0f;
-    else
+    else if (!legato)
         panning = RND;
 
     if(!legato) { //normal note
@@ -310,7 +310,9 @@ void SUBnote::initfilter(bpfilter &filter,
     filter.amp  = amp;
     filter.freq = freq;
     filter.bw   = bw;
-    computefiltercoefs(filter, freq, bw, 1.0f);
+
+    if (!automation)
+        computefiltercoefs(filter, freq, bw, 1.0f);
 }
 
 /*
