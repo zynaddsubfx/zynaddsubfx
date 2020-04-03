@@ -92,18 +92,18 @@ float SUBnote::setupFilters(int *pos, bool automation)
 }
 
 void SUBnote::setup(float freq,
-                    float velocity,
+                    float velocity_,
                     int portamento_,
                     float note_log2_freq,
                     bool legato,
                     WatchManager *wm,
                     const char *prefix)
 {
-    this->velocity = velocity;
+    velocity    = velocity_;
     portamento  = portamento_;
     NoteEnabled = ON;
     volume      = powf(10.0,  pars.Volume / 20.0f);
-    volume     *= VelF(velocity, pars.AmpVelocityScaleFunction);
+    volume     *= VelF(velocity_, pars.AmpVelocityScaleFunction);
     if(pars.PPanning != 0)
         panning = pars.PPanning / 127.0f;
     else if (!legato)
