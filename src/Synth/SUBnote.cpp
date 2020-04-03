@@ -185,11 +185,6 @@ void SUBnote::setup(float freq,
             initparameters(basefreq / 440.0f * freq, wm, prefix);
     }
     else {
-        if(pars.Pfixedfreq == 0)
-            freq = basefreq;
-        else
-            freq *= basefreq / 440.0f;
-
         if(GlobalFilter)
             GlobalFilter->updateNoteFreq(basefreq);
     }
