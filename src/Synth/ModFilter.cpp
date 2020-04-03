@@ -30,7 +30,6 @@ ModFilter::ModFilter(const FilterParams &pars_,
                            bool         stereo,
                            float        notefreq)
     :pars(pars_), synth(synth_), time(time_), alloc(alloc_),
-    baseQ(pars.getq()), baseFreq(pars.getfreq()),
     noteFreq(notefreq),
     left(nullptr), 
     right(nullptr),
