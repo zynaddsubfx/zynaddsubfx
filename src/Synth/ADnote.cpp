@@ -548,9 +548,7 @@ void ADnote::legatonote(LegatoParams lpars)
                                      pars.GlobalPar.PDetune);
     bandwidthDetuneMultiplier = pars.getBandwidthDetuneMultiplier();
 
-    if(pars.GlobalPar.PPanning == 0) {
-        NoteGlobalPar.Panning = getRandomFloat();
-    } else
+    if(pars.GlobalPar.PPanning)
         NoteGlobalPar.Panning = pars.GlobalPar.PPanning / 128.0f;
 
     NoteGlobalPar.Filter->updateSense(velocity,
@@ -596,23 +594,6 @@ void ADnote::legatonote(LegatoParams lpars)
                 pars.GlobalPar.PDetuneType,
                 pars.VoicePar[nvoice].PFMCoarseDetune,
                 pars.VoicePar[nvoice].PFMDetune);
-
-        //Get the voice's oscil or external's voice oscil
-        int vc = nvoice;
-        if(pars.VoicePar[nvoice].Pextoscil != -1)
-            vc = pars.VoicePar[nvoice].Pextoscil;
-        if(!pars.GlobalPar.Hrandgrouping)
-            pars.VoicePar[vc].OscilSmp->newrandseed(getRandomUint());
-
-        pars.VoicePar[vc].OscilSmp->get(NoteVoicePar[nvoice].OscilSmp,
-                                         getvoicebasefreq(nvoice),
-                                         pars.VoicePar[nvoice].Presonance); //(gf)Modif of the above line.
-
-        //I store the first elements to the last position for speedups
-        for(int i = 0; i < OSCIL_SMP_EXTRA_SAMPLES; ++i)
-            NoteVoicePar[nvoice].OscilSmp[synth.oscilsize
-                                          + i] =
-                NoteVoicePar[nvoice].OscilSmp[i];
 
         auto &voiceFilter = NoteVoicePar[nvoice].Filter;
         if(voiceFilter) {
@@ -1182,7 +1163,7 @@ void ADnote::computecurrentparameters()
                 FMrelativepitch = NoteVoicePar[nvoice].FMDetune / 100.0f;
                 if(NoteVoicePar[nvoice].FMFreqEnvelope)
                     FMrelativepitch +=
-                        NoteVoicePar[nvoice].FMFreqEnvelope->envout() / 100;
+                        NoteVoicePar[nvoice].FMFreqEnvelope->envout() / 100.0f;
                 if (NoteVoicePar[nvoice].FMFreqFixed)
                     FMfreq =
                         powf(2.0f, FMrelativepitch
