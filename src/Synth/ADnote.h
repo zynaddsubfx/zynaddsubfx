@@ -251,7 +251,7 @@ class ADnote:public SynthNote
             /* Wave of the Voice */
             float *FMSmp;
 
-            float FMVolume;
+            smooth_float FMVolume;
             float FMDetune;  //in cents
 
             Envelope *FMFreqEnvelope;

@@ -425,6 +425,8 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
 {
     auto &param = pars.VoicePar[nvoice];
     auto &voice = NoteVoicePar[nvoice];
+    float FMVolume;
+
     if (param.Type != 0)
         voice.FMEnabled = NONE;
     else
@@ -496,21 +498,22 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
         case PW_MOD:
             fmvoldamp = powf(440.0f / getvoicebasefreq(nvoice),
                     param.PFMVolumeDamp / 64.0f);
-            voice.FMVolume = (expf(fmvolume_ * FM_AMP_MULTIPLIER) - 1.0f)
+            FMVolume = (expf(fmvolume_ * FM_AMP_MULTIPLIER) - 1.0f)
                 * fmvoldamp * 4.0f;
             break;
         case FREQ_MOD:
-            voice.FMVolume = (expf(fmvolume_ * FM_AMP_MULTIPLIER) - 1.0f)
+            FMVolume = (expf(fmvolume_ * FM_AMP_MULTIPLIER) - 1.0f)
                 * fmvoldamp * 4.0f;
             break;
         default:
             if(fmvoldamp > 1.0f)
                 fmvoldamp = 1.0f;
-            voice.FMVolume = fmvolume_ * fmvoldamp;
+            FMVolume = fmvolume_ * fmvoldamp;
+            break;
     }
 
     //Voice's modulator velocity sensing
-    NoteVoicePar[nvoice].FMVolume *=
+    voice.FMVolume = FMVolume *
         VelF(velocity, pars.VoicePar[nvoice].PFMVelocityScaleFunction);
 }
 
@@ -535,13 +538,14 @@ void ADnote::legatonote(LegatoParams lpars)
 
     portamento = lpars.portamento;
     note_log2_freq = lpars.note_log2_freq;
-    basefreq   = lpars.frequency;
+    basefreq = lpars.frequency;
     initial_seed = lpars.seed;
     current_prng_state = lpars.seed;
 
+    if(lpars.velocity > 1.0f)
+        lpars.velocity = 1.0f;
+
     velocity = lpars.velocity;
-    if(velocity > 1.0f)
-        velocity = 1.0f;
 
     NoteGlobalPar.Detune = getdetune(pars.GlobalPar.PDetuneType,
                                      pars.GlobalPar.PCoarseDetune,
@@ -557,95 +561,94 @@ void ADnote::legatonote(LegatoParams lpars)
 
 
     for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
-        if(NoteVoicePar[nvoice].Enabled == OFF)
+        auto &voice = NoteVoicePar[nvoice];
+        float FMVolume;
+
+        if(voice.Enabled == OFF)
             continue;  //(gf) Stay the same as first note in legato.
 
-        NoteVoicePar[nvoice].fixedfreq   = pars.VoicePar[nvoice].Pfixedfreq;
-        NoteVoicePar[nvoice].fixedfreqET = pars.VoicePar[nvoice].PfixedfreqET;
+        voice.fixedfreq   = pars.VoicePar[nvoice].Pfixedfreq;
+        voice.fixedfreqET = pars.VoicePar[nvoice].PfixedfreqET;
 
         //use the Globalpars.detunetype if the detunetype is 0
         if(pars.VoicePar[nvoice].PDetuneType != 0) {
-            NoteVoicePar[nvoice].Detune = getdetune(
+            voice.Detune = getdetune(
                 pars.VoicePar[nvoice].PDetuneType,
                 pars.VoicePar[nvoice].PCoarseDetune,
                 8192); //coarse detune
-            NoteVoicePar[nvoice].FineDetune = getdetune(
+            voice.FineDetune = getdetune(
                 pars.VoicePar[nvoice].PDetuneType,
                 0,
                 pars.VoicePar[nvoice].PDetune); //fine detune
         }
         else {
-            NoteVoicePar[nvoice].Detune = getdetune(
+            voice.Detune = getdetune(
                 pars.GlobalPar.PDetuneType,
                 pars.VoicePar[nvoice].PCoarseDetune,
                 8192); //coarse detune
-            NoteVoicePar[nvoice].FineDetune = getdetune(
+            voice.FineDetune = getdetune(
                 pars.GlobalPar.PDetuneType,
                 0,
                 pars.VoicePar[nvoice].PDetune); //fine detune
         }
         if(pars.VoicePar[nvoice].PFMDetuneType != 0)
-            NoteVoicePar[nvoice].FMDetune = getdetune(
+            voice.FMDetune = getdetune(
                 pars.VoicePar[nvoice].PFMDetuneType,
                 pars.VoicePar[nvoice].PFMCoarseDetune,
                 pars.VoicePar[nvoice].PFMDetune);
         else
-            NoteVoicePar[nvoice].FMDetune = getdetune(
+            voice.FMDetune = getdetune(
                 pars.GlobalPar.PDetuneType,
                 pars.VoicePar[nvoice].PFMCoarseDetune,
                 pars.VoicePar[nvoice].PFMDetune);
 
-        auto &voiceFilter = NoteVoicePar[nvoice].Filter;
+        auto &voiceFilter = voice.Filter;
         if(voiceFilter) {
             const auto  &vce     = pars.VoicePar[nvoice];
             voiceFilter->updateSense(velocity, vce.PFilterVelocityScale,
                         vce.PFilterVelocityScaleFunction);
         }
 
-        NoteVoicePar[nvoice].filterbypass =
+        voice.filterbypass =
             pars.VoicePar[nvoice].Pfilterbypass;
 
 
-        NoteVoicePar[nvoice].FMVoice = pars.VoicePar[nvoice].PFMVoice;
+        voice.FMVoice = pars.VoicePar[nvoice].PFMVoice;
 
         //Compute the Voice's modulator volume (incl. damping)
         float fmvoldamp = powf(440.0f / getvoicebasefreq(nvoice),
                                pars.VoicePar[nvoice].PFMVolumeDamp / 64.0f
                                - 1.0f);
 
-        switch(NoteVoicePar[nvoice].FMEnabled) {
+        switch(voice.FMEnabled) {
             case PHASE_MOD:
             case PW_MOD:
                 fmvoldamp =
                     powf(440.0f / getvoicebasefreq(
                              nvoice), pars.VoicePar[nvoice].PFMVolumeDamp
                          / 64.0f);
-                NoteVoicePar[nvoice].FMVolume =
+                FMVolume =
                     (expf(pars.VoicePar[nvoice].FMvolume / 100.0f
                           * FM_AMP_MULTIPLIER) - 1.0f) * fmvoldamp * 4.0f;
                 break;
             case FREQ_MOD:
-                NoteVoicePar[nvoice].FMVolume =
+                FMVolume =
                     (expf(pars.VoicePar[nvoice].FMvolume / 100.0f
                           * FM_AMP_MULTIPLIER) - 1.0f) * fmvoldamp * 4.0f;
                 break;
             default:
                 if(fmvoldamp > 1.0f)
                     fmvoldamp = 1.0f;
-                NoteVoicePar[nvoice].FMVolume =
+                FMVolume =
                     pars.VoicePar[nvoice].FMvolume
                     / 100.0f * fmvoldamp;
+                break;
         }
 
         //Voice's modulator velocity sensing
-        NoteVoicePar[nvoice].FMVolume *=
+        voice.FMVolume = FMVolume *
             VelF(velocity,
                  pars.VoicePar[nvoice].PFMVelocityScaleFunction);
-
-        NoteVoicePar[nvoice].DelayTicks =
-            (int)((expf(pars.VoicePar[nvoice].PDelay / 127.0f
-                        * logf(50.0f))
-                   - 1.0f) / synth.buffersize_f / 10.0f * synth.samplerate_f);
     }
     ///    initparameters();
 
