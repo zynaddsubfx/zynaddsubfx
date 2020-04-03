@@ -113,10 +113,10 @@ void PADnote::setup(float freq,
     }
 
 
-    if(pars.PPanning == 0)
-        NoteGlobalPar.Panning = RND;
-    else
+    if(pars.PPanning)
         NoteGlobalPar.Panning = pars.PPanning / 128.0f;
+    else if(!legato)
+        NoteGlobalPar.Panning = RND;
 
     if(!legato) {
         NoteGlobalPar.Fadein_adjustment =
