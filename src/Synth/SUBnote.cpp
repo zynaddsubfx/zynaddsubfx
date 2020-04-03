@@ -185,8 +185,12 @@ void SUBnote::setup(float freq,
             initparameters(basefreq / 440.0f * freq, wm, prefix);
     }
     else {
-        if(GlobalFilter)
-            GlobalFilter->updateNoteFreq(basefreq);
+        if(GlobalFilter) {
+            if(pars.Pfixedfreq == 0)
+                GlobalFilter->updateNoteFreq(basefreq);
+            else
+                GlobalFilter->updateNoteFreq(basefreq / 440.0f * freq);
+        }
     }
 
     oldamplitude = newamplitude;
