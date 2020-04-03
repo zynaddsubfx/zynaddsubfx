@@ -47,7 +47,8 @@ SUBnote::SUBnote(const SUBnoteParameters *parameters, SynthParams &spars,
     GlobalFilter(nullptr),
     GlobalFilterEnvelope(nullptr),
     NoteEnabled(true),
-    lfilter(nullptr), rfilter(nullptr)
+    lfilter(nullptr), rfilter(nullptr),
+    filterupdate(false)
 {
     setup(spars.frequency, spars.velocity, spars.portamento, spars.note_log2_freq, false, wm, prefix);
 }
@@ -115,7 +116,6 @@ void SUBnote::setup(float freq,
         start     = pars.Pstart;
         firsttick = 1;
     }
-
 
     if(pars.Pfixedfreq == 0)
         basefreq = freq;
@@ -312,6 +312,8 @@ void SUBnote::initfilter(bpfilter &filter,
 
     if (!automation)
         computefiltercoefs(filter, freq, bw, 1.0f);
+    else
+        filterupdate = true;
 }
 
 /*
@@ -441,7 +443,8 @@ void SUBnote::computecurrentparameters()
     if(FreqEnvelope || BandWidthEnvelope
        || (oldpitchwheel != ctl.pitchwheel.data)
        || (oldbandwidth != ctl.bandwidth.data)
-       || portamento) {
+       || portamento
+       || filterupdate) {
         float envfreq = 1.0f;
         float envbw   = 1.0f;
 
@@ -482,6 +485,7 @@ void SUBnote::computecurrentparameters()
 
         oldbandwidth  = ctl.bandwidth.data;
         oldpitchwheel = ctl.pitchwheel.data;
+        filterupdate = false;
     }
     newamplitude = volume * AmpEnvelope->envout_dB() * 2.0f;
 

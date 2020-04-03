@@ -104,6 +104,7 @@ class SUBnote:public SynthNote
 
         int   oldpitchwheel, oldbandwidth;
         float velocity;
+        bool filterupdate;
 };
 
 }
