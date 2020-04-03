@@ -347,5 +347,34 @@ struct SYNTH_T {
     static float numRandom(void); //defined in Util.cpp for now
 };
 
+class smooth_float {
+private:
+    bool init;
+    float curr_value;
+    float next_value;
+public:
+    smooth_float() {
+        init = false;
+	next_value = curr_value = 0.0f;
+    };
+    smooth_float(const float value) {
+        init = true;
+        next_value = curr_value = value;
+    };
+    operator float() {
+        const float delta = (next_value - curr_value) / 128.0f;
+        curr_value += delta;
+        return (curr_value);
+    };
+    void operator =(const float value) {
+      if (init) {
+          next_value = value;
+      } else {
+          next_value = curr_value = value;
+          init = true;
+      }
+    };
+};
+
 }
 #endif
