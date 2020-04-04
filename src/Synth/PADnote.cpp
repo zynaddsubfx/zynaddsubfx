@@ -266,16 +266,16 @@ void PADnote::computecurrentparameters()
     NoteGlobalPar.GlobalFilter->update(relfreq, ctl.filterq.relq);
 
     //compute the portamento, if it is used by this note
-    float portamentofreqrap = 1.0f;
+    float portamentofreqdelta_log2 = 0.0f;
     if(portamento) { //this voice use portamento
-        portamentofreqrap = ctl.portamento.freqrap;
+        portamentofreqdelta_log2 = ctl.portamento.freqdelta_log2;
         if(ctl.portamento.used == 0) //the portamento has finished
             portamento = false;  //this note is no longer "portamented"
     }
 
-    realfreq = portamentofreqrap
-        * powf(2.0f, note_log2_freq + globalpitch / 12.0f)
-        * powf(ctl.pitchwheel.relfreq, BendAdjust) + OffsetHz;
+    realfreq =
+        powf(2.0f, note_log2_freq + globalpitch / 12.0f + portamentofreqdelta_log2) *
+        powf(ctl.pitchwheel.relfreq, BendAdjust) + OffsetHz;
 }
 
 

@@ -287,7 +287,7 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     }
 
     killallnotes = false;
-    oldfreq      = -1.0f;
+    oldfreq_log2 = -1.0f;
 
     cleanup();
 
@@ -502,22 +502,22 @@ bool Part::NoteOnInternal(note_t note,
 
     //Compute Note Parameters
     const float vel          = getVelocity(velocity, Pvelsns, Pveloffs);
-    const float notebasefreq = powf(2.0f, note_log2_freq);
 
     //Portamento
     lastnote = note;
-    if(oldfreq < 1.0f)
-        oldfreq = notebasefreq;//this is only the first note is played
+
+    /* check if first note is played */
+    if(oldfreq_log2 < 0.0f)
+        oldfreq_log2 = note_log2_freq;
 
     // For Mono/Legato: Force Portamento Off on first
     // notes. That means it is required that the previous note is
     // still held down or sustained for the Portamento to activate
     // (that's like Legato).
-    bool portamento = false;
-    if(Ppolymode || isRunningNote)
-        portamento = ctl.initportamento(oldfreq, notebasefreq, doingLegato);
+    const bool portamento = (Ppolymode || isRunningNote) &&
+        ctl.initportamento(oldfreq_log2, note_log2_freq, doingLegato);
 
-    oldfreq = notebasefreq;
+    oldfreq_log2 = note_log2_freq;
 
     //Adjust Existing Notes
     if(doingLegato) {

@@ -456,7 +456,7 @@ void SUBnote::computecurrentparameters()
         float envbw   = 1.0f;
 
         if(FreqEnvelope) {
-            envfreq = FreqEnvelope->envout() / 1200;
+            envfreq = FreqEnvelope->envout() / 1200.0f;
             envfreq = powf(2.0f, envfreq);
         }
 
@@ -465,7 +465,7 @@ void SUBnote::computecurrentparameters()
 
         //Update frequency while portamento is converging
         if(portamento) {
-            envfreq *= ctl.portamento.freqrap;
+            envfreq *= powf(2.0f, ctl.portamento.freqdelta_log2);
             if(!ctl.portamento.used) //the portamento has finished
                 portamento = false;
         }

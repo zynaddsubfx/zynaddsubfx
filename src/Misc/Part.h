@@ -211,7 +211,7 @@ class Part
            store the velocity and logarithmic frequency values of a given note.
            For example 'monomem[note].velocity' would be the velocity value of the note 'note'.*/
 
-        float oldfreq;    //this is used for portamento
+        float oldfreq_log2;    //this is used for portamento
         Microtonal *microtonal;
         FFTwrapper *fft;
         WatchManager *wm;

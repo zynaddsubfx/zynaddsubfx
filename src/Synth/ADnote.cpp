@@ -1101,11 +1101,10 @@ void ADnote::computecurrentparameters()
 
     NoteGlobalPar.Filter->update(relfreq, ctl.filterq.relq);
 
-
     //compute the portamento, if it is used by this note
-    float portamentofreqrap = 1.0f;
+    float portamentofreqdelta_log2 = 0.0f;
     if(portamento != 0) { //this voice use portamento
-        portamentofreqrap = ctl.portamento.freqrap;
+        portamentofreqdelta_log2 = ctl.portamento.freqdelta_log2;
         if(ctl.portamento.used == 0) //the portamento has finished
             portamento = 0;  //this note is no longer "portamented"
     }
@@ -1152,11 +1151,11 @@ void ADnote::computecurrentparameters()
             if(NoteVoicePar[nvoice].FreqEnvelope)
                 voicepitch += NoteVoicePar[nvoice].FreqEnvelope->envout()
                               / 100.0f;
-            voicefreq = getvoicebasefreq(nvoice,
+            voicefreq = getvoicebasefreq(nvoice, portamentofreqdelta_log2 +
                 (voicepitch + globalpitch) / 12.0f); //Hz frequency
             voicefreq *=
                 powf(ctl.pitchwheel.relfreq, NoteVoicePar[nvoice].BendAdjust); //change the frequency by the controller
-            setfreq(nvoice, voicefreq * portamentofreqrap + NoteVoicePar[nvoice].OffsetHz);
+            setfreq(nvoice, voicefreq + NoteVoicePar[nvoice].OffsetHz);
 
             /***************/
             /*  Modulator */
@@ -1169,13 +1168,9 @@ void ADnote::computecurrentparameters()
                     FMrelativepitch +=
                         NoteVoicePar[nvoice].FMFreqEnvelope->envout() / 100.0f;
                 if (NoteVoicePar[nvoice].FMFreqFixed)
-                    FMfreq =
-                        powf(2.0f, FMrelativepitch
-                             / 12.0f) * 440.0f;
+                    FMfreq = powf(2.0f, FMrelativepitch / 12.0f) * 440.0f;
                 else
-                    FMfreq =
-                           powf(2.0f, FMrelativepitch
-                                / 12.0f) * voicefreq * portamentofreqrap;
+                    FMfreq = powf(2.0f, FMrelativepitch / 12.0f) * voicefreq;
                 setfreqFM(nvoice, FMfreq);
 
                 FMoldamplitude[nvoice] = FMnewamplitude[nvoice];
