@@ -184,12 +184,10 @@ void SynthNote::setFilterCutoff(float value)
 
 float SynthNote::getFilterCutoffRelFreq(void)
 {
-    const float value = filtercutoff_relfreq;
-
-    if (value == 0.0f)
+    if (filtercutoff_relfreq.isSet() == false)
         return (ctl.filtercutoff.relfreq);
     else
-        return (value);
+        return (filtercutoff_relfreq);
 }
 
 float SynthNote::getRandomFloat() {

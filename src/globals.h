@@ -374,6 +374,9 @@ public:
           init = true;
       }
     };
+    bool isSet() const {
+        return (init);
+    };
 };
 
 }
