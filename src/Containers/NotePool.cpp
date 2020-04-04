@@ -205,7 +205,7 @@ void NotePool::insertLegatoNote(note_t note, uint8_t sendto, SynthDescriptor des
 };
 
 //There should only be one pair of notes which are still playing
-void NotePool::applyLegato(note_t note, LegatoParams &par)
+void NotePool::applyLegato(note_t note, const LegatoParams &par)
 {
     for(auto &desc:activeDesc()) {
         desc.note = note;
