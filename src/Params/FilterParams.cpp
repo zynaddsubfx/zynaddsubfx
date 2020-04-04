@@ -469,7 +469,7 @@ float FilterParams::getq() const
 }
 float FilterParams::getfreqtracking(float notefreq) const
 {
-    return log2f(notefreq / 440.0f) * (freqtracking / 100.0);
+    return log2f(notefreq / 440.0f) * (freqtracking / 100.0f);
 }
 
 float FilterParams::getgain() const

@@ -973,15 +973,10 @@ void Master::noteOff(char chan, note_t note)
  */
 void Master::polyphonicAftertouch(char chan, note_t note, char velocity)
 {
-    if(velocity) {
-        for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-            if(chan == part[npart]->Prcvchn)
-                if(part[npart]->Penabled)
-                    part[npart]->PolyphonicAftertouch(note, velocity, keyshift);
-
-    }
-    else
-        this->noteOff(chan, note);
+    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+        if(chan == part[npart]->Prcvchn)
+            if(part[npart]->Penabled)
+                part[npart]->PolyphonicAftertouch(note, velocity);
 }
 
 /*
@@ -1021,6 +1016,20 @@ void Master::setController(char chan, int type, int par)
                 insefx[nefx]->cleanup();
         }
     }
+}
+
+/*
+ * Per note controllers
+ */
+void Master::setController(char chan, int type, note_t note, float value)
+{
+    if(frozenState)
+        return;
+
+    /* Send the controller to all part assigned to the channel */
+    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+        if((chan == part[npart]->Prcvchn) && (part[npart]->Penabled != 0))
+            part[npart]->SetController(type, note, value, keyshift);
 }
 
 void Master::vuUpdate(const float *outr, const float *outl)

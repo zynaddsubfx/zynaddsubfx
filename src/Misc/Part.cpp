@@ -287,7 +287,7 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     }
 
     killallnotes = false;
-    oldfreq      = -1.0f;
+    oldfreq_log2 = -1.0f;
 
     cleanup();
 
@@ -469,9 +469,8 @@ static int kit_usage(const Part::Kit *kits, int note, int mode)
 /*
  * Note On Messages
  */
-bool Part::NoteOn(note_t note,
+bool Part::NoteOnInternal(note_t note,
                   unsigned char velocity,
-                  int masterkeyshift,
                   float note_log2_freq)
 {
     //Verify Basic Mode and sanity
@@ -490,7 +489,6 @@ bool Part::NoteOn(note_t note,
     if(isMonoMode() || isLegatoMode()) {
         monomemPush(note);
         monomem[note].velocity  = velocity;
-        monomem[note].mkeyshift = masterkeyshift;
         monomem[note].note_log2_freq = note_log2_freq;
 
     } else if(!monomemEmpty())
@@ -504,31 +502,26 @@ bool Part::NoteOn(note_t note,
 
     //Compute Note Parameters
     const float vel          = getVelocity(velocity, Pvelsns, Pveloffs);
-    const int   partkeyshift = (int)Pkeyshift - 64;
-    const int   keyshift     = masterkeyshift + partkeyshift;
-    const float notebasefreq = getBaseFreq(note_log2_freq, keyshift);
-
-    if(notebasefreq < 0.0f)
-        return false;
 
     //Portamento
     lastnote = note;
-    if(oldfreq < 1.0f)
-        oldfreq = notebasefreq;//this is only the first note is played
+
+    /* check if first note is played */
+    if(oldfreq_log2 < 0.0f)
+        oldfreq_log2 = note_log2_freq;
 
     // For Mono/Legato: Force Portamento Off on first
     // notes. That means it is required that the previous note is
     // still held down or sustained for the Portamento to activate
     // (that's like Legato).
-    bool portamento = false;
-    if(Ppolymode || isRunningNote)
-        portamento = ctl.initportamento(oldfreq, notebasefreq, doingLegato);
+    const bool portamento = (Ppolymode || isRunningNote) &&
+        ctl.initportamento(oldfreq_log2, note_log2_freq, doingLegato);
 
-    oldfreq = notebasefreq;
+    oldfreq_log2 = note_log2_freq;
 
     //Adjust Existing Notes
     if(doingLegato) {
-        LegatoParams pars = {notebasefreq, vel, portamento, note_log2_freq, true, prng()};
+        LegatoParams pars = {vel, portamento, note_log2_freq, true, prng()};
         notePool.applyLegato(note, pars);
         return true;
     }
@@ -543,7 +536,7 @@ bool Part::NoteOn(note_t note,
         if(Pkitmode != 0 && !item.validNote(note))
             continue;
 
-        SynthParams pars{memory, ctl, synth, time, notebasefreq, vel,
+        SynthParams pars{memory, ctl, synth, time, vel,
             portamento, note_log2_freq, false, prng()};
         const int sendto = Pkitmode ? item.sendto() : 0;
 
@@ -604,13 +597,17 @@ void Part::NoteOff(note_t note) //release the key
 }
 
 void Part::PolyphonicAftertouch(note_t note,
-				unsigned char velocity,
-				int masterkeyshift)
+				unsigned char velocity)
 {
-    (void) masterkeyshift;
-
     if(!Pnoteon || !inRange(note, Pminkey, Pmaxkey) || Pdrummode)
         return;
+
+    /*
+     * Don't allow the velocity to reach zero.
+     * Keep it alive until note off.
+     */
+    if(velocity == 0)
+        velocity = 1;
 
     // MonoMem stuff:
     if(!Ppolymode)   // if Poly is off
@@ -715,6 +712,47 @@ void Part::SetController(unsigned int type, int par)
             break;
     }
 }
+
+/*
+ * Per note controllers.
+ */
+void Part::SetController(unsigned int type, note_t note, float value,
+                         int masterkeyshift)
+{
+    if(!Pnoteon || !inRange(note, Pminkey, Pmaxkey) || Pdrummode)
+        return;
+
+    switch (type) {
+    case C_aftertouch:
+        PolyphonicAftertouch(note, floorf(value));
+        break;
+    case C_pitch: {
+        if (getNoteLog2Freq(masterkeyshift, value) == false)
+	    break;
+
+        /* Make sure MonoMem's frequency information is kept up to date */
+        if(!Ppolymode)
+            monomem[note].note_log2_freq = value;
+
+        for(auto &d:notePool.activeDesc()) {
+            if(d.note == note && d.playing())
+                for(auto &s:notePool.activeNotes(d))
+                    s.note->setPitch(value);
+        }
+        break;
+    }
+    case C_filtercutoff:
+        for(auto &d:notePool.activeDesc()) {
+            if(d.note == note && d.playing())
+                for(auto &s:notePool.activeNotes(d))
+                    s.note->setFilterCutoff(value);
+        }
+        break;
+    default:
+        break;
+    }
+}
+
 /*
  * Release the sustained keys
  */
@@ -750,18 +788,19 @@ void Part::MonoMemRenote()
 {
     note_t mmrtempnote = monomemBack(); // Last list element.
     monomemPop(mmrtempnote); // We remove it, will be added again in NoteOn(...).
-    NoteOn(mmrtempnote,
+    NoteOnInternal(mmrtempnote,
            monomem[mmrtempnote].velocity,
-           monomem[mmrtempnote].mkeyshift,
            monomem[mmrtempnote].note_log2_freq);
 }
 
-float Part::getBaseFreq(float note_log2_freq, int keyshift) const
+bool Part::getNoteLog2Freq(int masterkeyshift, float &note_log2_freq)
 {
-    if(Pdrummode)
-        return 440.0f * powf(2.0f, note_log2_freq - (69.0f / 12.0f));
-    else
-        return microtonal->getnotefreq(note_log2_freq, keyshift);
+    if(Pdrummode) {
+        note_log2_freq += log2f(440.0f) - 69.0f / 12.0f;
+        return true;
+    }
+    return microtonal->updatenotefreq_log2(note_log2_freq,
+        (int)Pkeyshift - 64 + masterkeyshift);
 }
 
 float Part::getVelocity(uint8_t velocity, uint8_t velocity_sense,

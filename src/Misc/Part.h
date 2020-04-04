@@ -42,20 +42,34 @@ class Part
 
         // Midi commands implemented
 
+        //returns true when successful
+        bool getNoteLog2Freq(int masterkeyshift, float &note_log2_freq);
+
         //returns true when note is successfully applied
         bool NoteOn(note_t note, uint8_t vel, int shift) REALTIME {
-             return (NoteOn(note, vel, shift, note / 12.0f));
+            float log2_freq = note / 12.0f;
+            return (getNoteLog2Freq(shift, log2_freq) &&
+                NoteOnInternal(note, vel, log2_freq));
         };
-        bool NoteOn(note_t note,
+
+        //returns true when note is successfully applied
+        bool NoteOn(note_t note, uint8_t vel, int shift,
+                    float log2_freq) REALTIME {
+            return (getNoteLog2Freq(shift, log2_freq) &&
+                NoteOnInternal(note, vel, log2_freq));
+        };
+
+        //returns true when note is successfully applied
+        bool NoteOnInternal(note_t note,
                     unsigned char velocity,
-                    int masterkeyshift,
                     float note_log2_freq) REALTIME;
         void NoteOff(note_t note) REALTIME;
         void PolyphonicAftertouch(note_t note,
-                                  unsigned char velocity,
-                                  int masterkeyshift) REALTIME;
+                                  unsigned char velocity) REALTIME;
         void AllNotesOff() REALTIME; //panic
         void SetController(unsigned int type, int par) REALTIME;
+        void SetController(unsigned int type, note_t, float value,
+                           int masterkeyshift) REALTIME;
         void ReleaseSustainedKeys() REALTIME; //this is called when the sustain pedal is released
         void ReleaseAllKeys() REALTIME; //this is called on AllNotesOff controller
 
@@ -164,7 +178,6 @@ class Part
 
     private:
         void MonoMemRenote(); // MonoMem stuff.
-        float getBaseFreq(float note_log2_freq, int keyshift) const;
         float getVelocity(uint8_t velocity, uint8_t velocity_sense,
                 uint8_t velocity_offset) const;
         void verifyKeyMode(void);
@@ -191,15 +204,14 @@ class Part
         short monomemnotes[256]; // A list to remember held notes.
         struct {
             unsigned char velocity;
-            int mkeyshift; // I'm not sure masterkeyshift should be remembered.
             float note_log2_freq;
         } monomem[256];
         /* 256 is to cover all possible note values.
            monomem[] is used in conjunction with the list to
-           store the velocity and masterkeyshift values of a given note (the list only store note values).
+           store the velocity and logarithmic frequency values of a given note.
            For example 'monomem[note].velocity' would be the velocity value of the note 'note'.*/
 
-        float oldfreq;    //this is used for portamento
+        float oldfreq_log2;    //this is used for portamento
         Microtonal *microtonal;
         FFTwrapper *fft;
         WatchManager *wm;

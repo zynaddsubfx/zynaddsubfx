@@ -85,8 +85,7 @@ class AdNoteTest:public CxxTest::TestSuite
         void testManySimultaneousNotes() {
 
             unsigned char testnote = 42;
-            float freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
-            SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote / 12.0f, false, prng()};
+            SynthParams pars{memory, *controller, *synth, *time, 120, 0, testnote / 12.0f, false, prng()};
 
             std::vector<ADnote*> notes;
 

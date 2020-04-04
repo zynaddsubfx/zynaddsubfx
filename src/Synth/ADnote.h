@@ -37,13 +37,13 @@ class ADnote:public SynthNote
         /**Constructor.
          * @param pars Note Parameters
          * @param spars Synth Engine Agnostic Parameters*/
-        ADnote(ADnoteParameters *pars, SynthParams &spars,
+        ADnote(ADnoteParameters *pars, const SynthParams &spars,
                 WatchManager *wm=0, const char *prefix=0);
         /**Destructor*/
         ~ADnote();
 
         /**Alters the playing note for legato effect*/
-        void legatonote(LegatoParams pars);
+        void legatonote(const LegatoParams &pars);
 
         int noteout(float *outl, float *outr);
         void releasekey();
@@ -77,7 +77,7 @@ class ADnote:public SynthNote
         /**Deallocate Note resources and voice resources*/
         void KillNote();
         /**Get the Voice's base frequency*/
-        inline float getvoicebasefreq(int nvoice) const;
+        inline float getvoicebasefreq(int nvoice, float adjust_log2 = 0.0f) const;
         /**Get modulator's base frequency*/
         inline float getFMvoicebasefreq(int nvoice) const;
         /**Compute the Oscillator's samples.
@@ -116,7 +116,7 @@ class ADnote:public SynthNote
         ADnoteParameters &pars;
         unsigned char     stereo; //if the note is stereo (allows note Panning)
         float note_log2_freq;
-        float velocity, basefreq;
+        float velocity;
 
         ONOFFTYPE   NoteEnabled;
 
@@ -251,7 +251,7 @@ class ADnote:public SynthNote
             /* Wave of the Voice */
             float *FMSmp;
 
-            float FMVolume;
+            smooth_float FMVolume;
             float FMDetune;  //in cents
 
             Envelope *FMFreqEnvelope;

@@ -48,7 +48,7 @@ class PadNoteTest:public CxxTest::TestSuite
         FFTwrapper   *fft;
         Controller   *controller;
         AbsTime      *time;
-        unsigned char testnote;
+        float test_freq_log2;
         Alloc         memory;
         int           interpolation;
         rtosc::ThreadLink *tr;
@@ -107,9 +107,8 @@ class PadNoteTest:public CxxTest::TestSuite
             controller = new Controller(*synth, time);
 
             //lets go with.... 50! as a nice note
-            testnote = 50;
-            float freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
-            SynthParams pars_{memory, *controller, *synth, *time, freq, 120, 0, testnote / 12.0f, false, prng()};
+            test_freq_log2 = log2f(440.0f) + (50.0 - 69.0f) / 12.0f;
+            SynthParams pars_{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng()};
 
             note = new PADnote(pars, pars_, interpolation);
         }

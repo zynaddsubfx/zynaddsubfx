@@ -237,6 +237,7 @@ enum ONOFFTYPE {
 
 enum MidiControllers {
     C_bankselectmsb = 0, C_pitchwheel = 1000, C_NULL = 1001,
+    C_aftertouch = 1002, C_pitch = 1003,
     C_expression    = 11, C_panning = 10, C_bankselectlsb = 32,
     C_filtercutoff  = 74, C_filterq = 71, C_bandwidth = 75, C_modwheel = 1,
     C_fmamp  = 76,
@@ -344,6 +345,38 @@ struct SYNTH_T {
     }
     void alias(bool randomize=true);
     static float numRandom(void); //defined in Util.cpp for now
+};
+
+class smooth_float {
+private:
+    bool init;
+    float curr_value;
+    float next_value;
+public:
+    smooth_float() {
+        init = false;
+	next_value = curr_value = 0.0f;
+    };
+    smooth_float(const float value) {
+        init = true;
+        next_value = curr_value = value;
+    };
+    operator float() {
+        const float delta = (next_value - curr_value) / 128.0f;
+        curr_value += delta;
+        return (curr_value);
+    };
+    void operator =(const float value) {
+      if (init) {
+          next_value = value;
+      } else {
+          next_value = curr_value = value;
+          init = true;
+      }
+    };
+    bool isSet() const {
+        return (init);
+    };
 };
 
 }

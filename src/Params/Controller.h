@@ -169,12 +169,11 @@ class Controller
             unsigned char updowntimestretch;
             /**this value is used to compute the actual portamento
              *
-             * This is a multiplyer to change the frequency of the newer
-             * frequency to fit the profile of the portamento.
+             * This is the logarithmic power of two frequency
+             * adjustment of the newer frequency to fit the profile of
+             * the portamento.
              * This will be linear with respect to x.*/
-            float freqrap;
-            /**this is used by the Part for knowing which note uses the portamento*/
-            int noteusing;
+            float freqdelta_log2;
             /**if a the portamento is used by a note
              * \todo see if this can be a bool*/
             int used;
@@ -185,8 +184,8 @@ class Controller
             float x;
             /**dx is the increment to x when updateportamento is called*/
             float dx;
-            /** this is used for computing oldfreq value from x*/
-            float origfreqrap;
+            /** this is used for computing freqdelta_log2 value from x*/
+            float origfreqdelta_log2;
         } portamento;
 
         struct { //Resonance Center Frequency
