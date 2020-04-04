@@ -31,7 +31,7 @@
 #define LENGTHOF(x) ((int)(sizeof(x)/sizeof(x[0])))
 
 namespace zyn {
-ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
+ADnote::ADnote(ADnoteParameters *pars_, const SynthParams &spars,
         WatchManager *wm, const char *prefix)
     :SynthNote(spars), watch_be4_add(wm, prefix, "noteout/be4_mix"), watch_after_add(wm,prefix,"noteout/after_mix"),
     watch_punch(wm, prefix, "noteout/punch"), watch_legato(wm, prefix, "noteout/legato"), pars(*pars_)
@@ -46,7 +46,6 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
     portamento  = spars.portamento;
     note_log2_freq = spars.note_log2_freq;
     NoteEnabled = ON;
-    basefreq    = spars.frequency;
     velocity    = spars.velocity;
     initial_seed = spars.seed;
     current_prng_state = spars.seed;
@@ -75,7 +74,7 @@ ADnote::ADnote(ADnoteParameters *pars_, SynthParams &spars,
                     pars.GlobalPar.PPunchVelocitySensing));
         float time =
             powf(10, 3.0f * pars.GlobalPar.PPunchTime / 127.0f) / 10000.0f;   //0.1f .. 100 ms
-        float stretch = powf(440.0f / spars.frequency,
+        float stretch = powf(440.0f / powf(2.0f, spars.note_log2_freq),
                              pars.GlobalPar.PPunchStretch / 64.0f);
         NoteGlobalPar.Punch.dt = 1.0f / (time * synth.samplerate_f * stretch);
     }
@@ -519,7 +518,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
 
 SynthNote *ADnote::cloneLegato(void)
 {
-    SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity,
+    SynthParams sp{memory, ctl, synth, time, velocity,
                 (bool)portamento, legato.param.note_log2_freq, true,
                 initial_seed };
     return memory.alloc<ADnote>(&pars, sp);
@@ -529,7 +528,7 @@ SynthNote *ADnote::cloneLegato(void)
 // initparameters() stuck together with some lines removed so that it
 // only alter the already playing note (to perform legato). It is
 // possible I left stuff that is not required for this.
-void ADnote::legatonote(LegatoParams lpars)
+void ADnote::legatonote(const LegatoParams &lpars)
 {
     //ADnoteParameters &pars = *partparams;
     // Manage legato stuff
@@ -538,14 +537,15 @@ void ADnote::legatonote(LegatoParams lpars)
 
     portamento = lpars.portamento;
     note_log2_freq = lpars.note_log2_freq;
-    basefreq = lpars.frequency;
     initial_seed = lpars.seed;
     current_prng_state = lpars.seed;
 
     if(lpars.velocity > 1.0f)
-        lpars.velocity = 1.0f;
+        velocity = 1.0f;
+    else
+        velocity = lpars.velocity;
 
-    velocity = lpars.velocity;
+    const float basefreq = powf(2.0f, note_log2_freq);
 
     NoteGlobalPar.Detune = getdetune(pars.GlobalPar.PDetuneType,
                                      pars.GlobalPar.PCoarseDetune,
@@ -817,7 +817,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 {
     int tmp[NUM_VOICES];
     ScratchString pre = prefix;
-    //ADnoteParameters &pars = *partparams;
+    const float basefreq = powf(2.0f, note_log2_freq);
 
     // Global Parameters
     NoteGlobalPar.initparameters(pars.GlobalPar, synth,
@@ -1047,27 +1047,29 @@ void ADnote::setfreqFM(int nvoice, float in_freq)
 /*
  * Get Voice base frequency
  */
-float ADnote::getvoicebasefreq(int nvoice) const
+float ADnote::getvoicebasefreq(int nvoice, float adjust_log2) const
 {
-    float detune = NoteVoicePar[nvoice].Detune / 100.0f
+    const float detune = NoteVoicePar[nvoice].Detune / 100.0f
                    + NoteVoicePar[nvoice].FineDetune / 100.0f
                    * ctl.bandwidth.relbw * bandwidthDetuneMultiplier
                    + NoteGlobalPar.Detune / 100.0f;
 
-    if(NoteVoicePar[nvoice].fixedfreq == 0)
-        return this->basefreq * powf(2, detune / 12.0f);
+    if(NoteVoicePar[nvoice].fixedfreq == 0) {
+        return powf(2.0f, note_log2_freq + detune / 12.0f + adjust_log2);
+    }
     else { //the fixed freq is enabled
-        float fixedfreq   = 440.0f;
-        int   fixedfreqET = NoteVoicePar[nvoice].fixedfreqET;
+        const int fixedfreqET = NoteVoicePar[nvoice].fixedfreqET;
+        float fixedfreq_log2 = log2f(440.0f);
+
         if(fixedfreqET != 0) { //if the frequency varies according the keyboard note
-            float tmp = (note_log2_freq - (69.0f / 12.0f))
-                * (powf(2.0f, (fixedfreqET - 1) / 63.0f) - 1.0f);
+            float tmp_log2 = (note_log2_freq - fixedfreq_log2) *
+                (powf(2.0f, (fixedfreqET - 1) / 63.0f) - 1.0f);
             if(fixedfreqET <= 64)
-                fixedfreq *= powf(2.0f, tmp);
+                fixedfreq_log2 += tmp_log2;
             else
-                fixedfreq *= powf(3.0f, tmp);
+                fixedfreq_log2 += tmp_log2 * log2f(3.0f);
         }
-        return fixedfreq * powf(2.0f, detune / 12.0f);
+        return powf(2.0f, fixedfreq_log2 + detune / 12.0f + adjust_log2);
     }
 }
 
@@ -1076,8 +1078,7 @@ float ADnote::getvoicebasefreq(int nvoice) const
  */
 float ADnote::getFMvoicebasefreq(int nvoice) const
 {
-    float detune = NoteVoicePar[nvoice].FMDetune / 100.0f;
-    return getvoicebasefreq(nvoice) * powf(2, detune / 12.0f);
+    return getvoicebasefreq(nvoice, NoteVoicePar[nvoice].FMDetune / 1200.0f);
 }
 
 /*
@@ -1151,8 +1152,8 @@ void ADnote::computecurrentparameters()
             if(NoteVoicePar[nvoice].FreqEnvelope)
                 voicepitch += NoteVoicePar[nvoice].FreqEnvelope->envout()
                               / 100.0f;
-            voicefreq = getvoicebasefreq(nvoice)
-                        * powf(2, (voicepitch + globalpitch) / 12.0f);                //Hz frequency
+            voicefreq = getvoicebasefreq(nvoice,
+                (voicepitch + globalpitch) / 12.0f); //Hz frequency
             voicefreq *=
                 powf(ctl.pitchwheel.relfreq, NoteVoicePar[nvoice].BendAdjust); //change the frequency by the controller
             setfreq(nvoice, voicefreq * portamentofreqrap + NoteVoicePar[nvoice].OffsetHz);

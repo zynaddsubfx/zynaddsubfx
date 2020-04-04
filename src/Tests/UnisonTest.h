@@ -39,11 +39,10 @@ class AdNoteTest:public CxxTest::TestSuite
         ADnote       *note;
         FFTwrapper   *fft;
         Controller   *controller;
-        unsigned char testnote;
+        float test_freq_log2;
         ADnoteParameters *params;
         AbsTime  *time;
         Alloc     memory;
-        float freq;
 
 
         float outR[BUF], outL[BUF];
@@ -71,8 +70,7 @@ class AdNoteTest:public CxxTest::TestSuite
             controller = new Controller(*synth, time);
 
             //lets go with.... 50! as a nice note
-            testnote = 50;
-            freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
+            test_freq_log2 = log2f(440.0f) + (50.0 - 69.0f) / 12.0f;
         }
 
         void tearDown() {
@@ -98,7 +96,7 @@ class AdNoteTest:public CxxTest::TestSuite
             params->VoicePar[0].Unison_vibratto_speed   = e;
             params->VoicePar[0].Unison_invert_phase     = f;
 
-            SynthParams pars{memory, *controller, *synth, *time, freq, 120, 0, testnote / 12.0f, false, prng()};
+            SynthParams pars{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng()};
             note = new ADnote(params, pars);
             note->noteout(outL, outR);
             TS_ASSERT_DELTA(outL[80], values[0], 1.9e-5);

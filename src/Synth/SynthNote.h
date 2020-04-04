@@ -26,7 +26,6 @@ struct SynthParams
     const Controller &ctl;
     const SYNTH_T    &synth;
     const AbsTime    &time;
-    float     frequency; //Note base frequency
     float     velocity;  //Velocity of the Note
     bool      portamento;//True if portamento is used for this note
     float     note_log2_freq; //Floating point value of the note
@@ -36,7 +35,6 @@ struct SynthParams
 
 struct LegatoParams
 {
-    float frequency;
     float velocity;
     bool portamento;
     float note_log2_freq; //Floating point value of the note
@@ -47,7 +45,7 @@ struct LegatoParams
 class SynthNote
 {
     public:
-        SynthNote(SynthParams &pars);
+        SynthNote(const SynthParams &pars);
         virtual ~SynthNote() {}
 
         /**Compute Output Samples
@@ -65,7 +63,7 @@ class SynthNote
         /**Make a note die off next buffer compute*/
         virtual void entomb(void) = 0;
 
-        virtual void legatonote(LegatoParams pars) = 0;
+        virtual void legatonote(const LegatoParams &pars) = 0;
 
         virtual SynthNote *cloneLegato(void) = 0;
 
@@ -73,7 +71,7 @@ class SynthNote
         void setVelocity(float velocity_);
 
         /* For per-note pitch */
-        void setPitch(float freq_, float log2_freq_);
+        void setPitch(float log2_freq_);
 
         /* For per-note filter cutoff */
         void setFilterCutoff(float);
@@ -90,15 +88,15 @@ class SynthNote
         class Legato
         {
             public:
-                Legato(const SYNTH_T &synth_, float freq, float vel, int port,
+                Legato(const SYNTH_T &synth_, float vel, int port,
                        float note_log2_freq, bool quiet, prng_t seed);
 
                 void apply(SynthNote &note, float *outl, float *outr);
-                int update(LegatoParams pars);
+                int update(const LegatoParams &pars);
 
             private:
                 bool      silent;
-                float     lastfreq;
+                float     lastfreq_log2;
                 LegatoMsg msg;
                 int       decounter;
                 struct { // Fade In/Out vars

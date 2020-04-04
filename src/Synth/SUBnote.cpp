@@ -35,7 +35,7 @@
 
 namespace zyn {
 
-SUBnote::SUBnote(const SUBnoteParameters *parameters, SynthParams &spars,
+SUBnote::SUBnote(const SUBnoteParameters *parameters, const SynthParams &spars,
     WatchManager *wm, const char *prefix) :
     SynthNote(spars),
     watch_filter(wm, prefix, "noteout/filter"), watch_amp_int(wm,prefix,"noteout/amp_int"),
@@ -50,10 +50,10 @@ SUBnote::SUBnote(const SUBnoteParameters *parameters, SynthParams &spars,
     lfilter(nullptr), rfilter(nullptr),
     filterupdate(false)
 {
-    setup(spars.frequency, spars.velocity, spars.portamento, spars.note_log2_freq, false, wm, prefix);
+    setup(spars.velocity, spars.portamento, spars.note_log2_freq, false, wm, prefix);
 }
 
-float SUBnote::setupFilters(int *pos, bool automation)
+float SUBnote::setupFilters(float basefreq, int *pos, bool automation)
 {
     //how much the amplitude is normalised (because the harmonics)
     float reduceamp = 0.0f;
@@ -92,10 +92,9 @@ float SUBnote::setupFilters(int *pos, bool automation)
     return reduceamp;
 }
 
-void SUBnote::setup(float freq,
-                    float velocity_,
+void SUBnote::setup(float velocity_,
                     int portamento_,
-                    float note_log2_freq,
+                    float note_log2_freq_,
                     bool legato,
                     WatchManager *wm,
                     const char *prefix)
@@ -117,32 +116,38 @@ void SUBnote::setup(float freq,
         firsttick = 1;
     }
 
-    if(pars.Pfixedfreq == 0)
-        basefreq = freq;
-    else {
-        basefreq = 440.0f;
-        int fixedfreqET = pars.PfixedfreqET;
-        if(fixedfreqET) { //if the frequency varies according the keyboard note
-            float tmp = (note_log2_freq - (69.0f / 12.0f))
-                * (powf(2.0f, (fixedfreqET - 1) / 63.0f) - 1.0f);
-            if(fixedfreqET <= 64)
-                basefreq *= powf(2.0f, tmp);
-            else
-                basefreq *= powf(3.0f, tmp);
-        }
+    if(pars.Pfixedfreq == 0) {
+        note_log2_freq = note_log2_freq_;
     }
+    else { //the fixed freq is enabled
+        const int fixedfreqET = pars.PfixedfreqET;
+        float fixedfreq_log2 = log2f(440.0f);
+
+        if(fixedfreqET != 0) { //if the frequency varies according the keyboard note
+            float tmp_log2 = (note_log2_freq_ - fixedfreq_log2) *
+                (powf(2.0f, (fixedfreqET - 1) / 63.0f) - 1.0f);
+            if(fixedfreqET <= 64)
+                fixedfreq_log2 += tmp_log2;
+            else
+                fixedfreq_log2 += tmp_log2 * log2f(3.0f);
+        }
+        note_log2_freq = fixedfreq_log2;
+    }
+
     int BendAdj = pars.PBendAdjust - 64;
     if (BendAdj % 24 == 0)
         BendAdjust = BendAdj / 24;
     else
         BendAdjust = BendAdj / 24.0f;
-    float offset_val = (pars.POffsetHz - 64)/64.0f;
+    const float offset_val = (pars.POffsetHz - 64)/64.0f;
     OffsetHz = 15.0f*(offset_val * sqrtf(fabsf(offset_val)));
-    float detune = getdetune(pars.PDetuneType,
+    const float detune = getdetune(pars.PDetuneType,
                              pars.PCoarseDetune,
                              pars.PDetune);
-    basefreq *= powf(2.0f, detune / 1200.0f); //detune
-//    basefreq*=ctl.pitchwheel.relfreq;//pitch wheel
+
+    note_log2_freq += detune / 1200.0f; //detune
+
+    const float basefreq = powf(2.0f, note_log2_freq);
 
     int pos[MAX_SUB_HARMONICS];
     int harmonics;
@@ -172,12 +177,14 @@ void SUBnote::setup(float freq,
     }
 
     //how much the amplitude is normalised (because the harmonics)
-    float reduceamp = setupFilters(pos, legato);
+    const float reduceamp = setupFilters(basefreq, pos, legato);
     oldreduceamp    = reduceamp;
     volume /= reduceamp;
 
     oldpitchwheel = 0;
     oldbandwidth  = 64;
+
+    const float freq = powf(2.0f, note_log2_freq_);
     if(!legato) { //normal note
         if(pars.Pfixedfreq == 0)
             initparameters(basefreq, wm, prefix);
@@ -198,20 +205,19 @@ void SUBnote::setup(float freq,
 
 SynthNote *SUBnote::cloneLegato(void)
 {
-    SynthParams sp{memory, ctl, synth, time, legato.param.freq, velocity,
+    SynthParams sp{memory, ctl, synth, time, velocity,
                    portamento, legato.param.note_log2_freq, true, legato.param.seed};
     return memory.alloc<SUBnote>(&pars, sp);
 }
 
-void SUBnote::legatonote(LegatoParams pars)
+void SUBnote::legatonote(const LegatoParams &pars)
 {
     // Manage legato stuff
     if(legato.update(pars))
         return;
 
     try {
-        setup(pars.frequency, pars.velocity, pars.portamento, pars.note_log2_freq,
-              true, wm);
+        setup(pars.velocity, pars.portamento, pars.note_log2_freq, true, wm);
     } catch (std::bad_alloc &ba) {
         std::cerr << "failed to set legato note parameter in SUBnote: " << ba.what() << std::endl;
     }
@@ -435,7 +441,8 @@ void SUBnote::computecurrentparameters()
                 rfilter = memory.valloc<bpfilter>(numstages * numharmonics);
         }
 
-        float reduceamp = setupFilters(pos, !delta_harmonics);
+        const float basefreq = powf(2.0f, note_log2_freq);
+        const float reduceamp = setupFilters(basefreq, pos, !delta_harmonics);
         volume = volume*oldreduceamp/reduceamp;
         oldreduceamp = reduceamp;
     }
