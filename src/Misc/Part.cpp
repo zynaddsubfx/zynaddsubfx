@@ -731,6 +731,10 @@ void Part::SetController(unsigned int type, note_t note, float value,
         const int   keyshift     = masterkeyshift + partkeyshift;
         const float notebasefreq = getBaseFreq(value, keyshift);
 
+        /* Make sure MonoMem's frequency information is kept up to date */
+        if(!Ppolymode)
+            monomem[note].note_log2_freq = value;
+
         for(auto &d:notePool.activeDesc()) {
             if(d.note == note && d.playing())
                 for(auto &s:notePool.activeNotes(d))
