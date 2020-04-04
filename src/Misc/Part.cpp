@@ -609,6 +609,13 @@ void Part::PolyphonicAftertouch(note_t note,
     if(!Pnoteon || !inRange(note, Pminkey, Pmaxkey) || Pdrummode)
         return;
 
+    /*
+     * Don't allow the velocity to reach zero.
+     * Keep it alive until note off.
+     */
+    if(velocity == 0)
+        velocity = 1;
+
     // MonoMem stuff:
     if(!Ppolymode)   // if Poly is off
         monomem[note].velocity = velocity;       // Store this note's velocity.
