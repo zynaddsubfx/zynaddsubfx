@@ -283,7 +283,6 @@ int Controller::initportamento(float oldfreq,
     else     // No legato, do the original if...return
     if((portamento.used != 0) || (portamento.portamento == 0))
         return 0;
-    ;
 
     float portamentotime = powf(100.0f, portamento.time / 127.0f) / 50.0f; //portamento time in seconds
 
