@@ -55,7 +55,7 @@ class ModFilter
 
         smooth_float baseQ;    //filter sharpness
         smooth_float baseFreq; //base filter frequency
-        smooth_float noteFreq; //frequency note was initialized to
+        float noteFreq; //frequency note was initialized to
         smooth_float tracking; //shift due to note frequency
         smooth_float sense;    //shift due to note velocity
 
