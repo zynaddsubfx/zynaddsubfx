@@ -383,6 +383,17 @@ failure:
     return false;
 }
 
+/*
+ * Get the note frequency in Hz, -1.0f if invalid.
+ */
+float Microtonal::getnotefreq(float note_log2_freq, int keyshift) const
+{
+    if (updatenotefreq_log2(note_log2_freq, keyshift))
+        return powf(2.0f, note_log2_freq);
+    else
+        return -1.0f;
+}
+
 bool Microtonal::operator==(const Microtonal &micro) const
 {
     return !(*this != micro);

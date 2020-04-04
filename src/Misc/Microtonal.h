@@ -74,12 +74,7 @@ class Microtonal
         bool updatenotefreq_log2(float &note_log2_freq, int keyshift) const;
         /**Calculates the frequency for a given note
          */
-        float getnotefreq(float note_log2_freq, int keyshift) const {
-            if (updatenotefreq_log2(note_log2_freq, keyshift))
-                return powf(2.0f, note_log2_freq);
-            else
-                return -1.0f;
-        };
+        float getnotefreq(float note_log2_freq, int keyshift) const;
 
         //Parameters
         /**if the keys are inversed (the pitch is lower to keys from the right direction)*/
