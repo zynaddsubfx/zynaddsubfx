@@ -202,8 +202,6 @@ void SUBnote::setup(float velocity_,
                                       pars.PGlobalFilterVelocityScaleFunction);
         }
     }
-
-    oldamplitude = newamplitude;
 }
 
 SynthNote *SUBnote::cloneLegato(void)
@@ -397,6 +395,7 @@ void SUBnote::initparameters(float freq, WatchManager *wm, const char *prefix)
         GlobalFilter->addMod(*GlobalFilterEnvelope);
     }
     computecurrentparameters();
+    oldamplitude = newamplitude;
 }
 
 /*
