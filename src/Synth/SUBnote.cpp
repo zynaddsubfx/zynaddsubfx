@@ -197,6 +197,9 @@ void SUBnote::setup(float velocity_,
                 GlobalFilter->updateNoteFreq(basefreq);
             else
                 GlobalFilter->updateNoteFreq(basefreq / 440.0f * freq);
+
+            GlobalFilter->updateSense(velocity, pars.PGlobalFilterVelocityScale,
+                                      pars.PGlobalFilterVelocityScaleFunction);
         }
     }
 
