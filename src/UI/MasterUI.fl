@@ -506,7 +506,7 @@ if (fl_choice("The file *might* exist. \\nOverwrite it?","No","Yes",NULL)) {
 	masterwindow->hide();
 	refresh_master_ui();
 	simplemasterwindow->show();
-    osc->write("/cfg.UserInterfaceMode", "i", 2);
+    osc->write("/config/cfg.UserInterfaceMode", "i", 2);
 };}
               xywh {15 15 100 20}
             }
@@ -1072,7 +1072,7 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an
 	simplemasterwindow->hide();
 	refresh_master_ui();
 	masterwindow->show();
-    osc->write("/cfg.UserInterfaceMode", "i", 1);
+    osc->write("/config/cfg.UserInterfaceMode", "i", 1);
 };}
             xywh {0 0 100 20}
           }
