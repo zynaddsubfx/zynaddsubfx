@@ -430,9 +430,6 @@ if(FltkGui)
 
 
 	set(GUI_LIBRARIES zynaddsubfx_gui ${FLTK_LIBRARIES} ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
-    if(X11_FOUND AND X11_Xpm_FOUND)
-        set(GUI_LIBRARIES ${GUI_LIBRARIES} ${X11_LIBRARIES} -lXpm)
-    endif()
 
 	add_definitions(-DFLTK_GUI)
 	message(STATUS "Will build FLTK gui")
@@ -448,15 +445,15 @@ endif()
 
 if(NtkGui)
 
-    find_program( FLTK_FLUID_EXECUTABLE ntk-fluid)
+    find_program(FLTK_FLUID_EXECUTABLE ntk-fluid)
 
 	message(STATUS ${NTK_LDFLAGS} ${NTK_IMAGES_LDFLAGS})
 
 	set(GUI_LIBRARIES zynaddsubfx_gui ${NTK_LIBRARIES} ${NTK_IMAGES_LIBRARIES} ${OPENGL_LIBRARIES})
 
-    if(X11_FOUND AND X11_Xpm_FOUND)
-        set(GUI_LIBRARIES ${GUI_LIBRARIES} ${X11_LIBRARIES} -lXpm)
-    endif()
+	if(X11_FOUND AND X11_Xpm_FOUND)
+	     set(GUI_LIBRARIES ${GUI_LIBRARIES} ${X11_LIBRARIES} -lXpm)
+	endif()
 
 	add_definitions(-DNTK_GUI)
 
