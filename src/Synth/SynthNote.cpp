@@ -176,6 +176,10 @@ void SynthNote::setPitch(float log2_freq_) {
 
 void SynthNote::setFilterCutoff(float value)
 {
+    /* set current value, if first time */
+    if (filtercutoff_relfreq.isSet() == false)
+        filtercutoff_relfreq = ctl.filtercutoff.relfreq;
+    /* update value */
     filtercutoff_relfreq =
         (value - 64.0f) * ctl.filtercutoff.depth / 4096.0f * 3.321928f;
 }
