@@ -87,13 +87,14 @@ static const rtosc::Ports realtime_ports =
     {"sample#64:ifb", rProp(internal) rDoc("Nothing to see here"), 0,
         [](const char *m, rtosc::RtData &d)
         {
+            // takes Sample struct for Sample number "n" (see below for "n")
             // MiddleWare calls this to send the generated sample buffers to us
             PADnoteParameters *p = (PADnoteParameters*)d.obj;
             const char *mm = m;
             while(!isdigit(*mm))++mm;
             int n = atoi(mm);
-            p->sample[n].size     = rtosc_argument(m,0).i;
-            p->sample[n].basefreq = rtosc_argument(m,1).f;
+            p->setCurSampleSize(n, rtosc_argument(m,0).i);
+            p->setCurBaseFreq(n, rtosc_argument(m,1).f);
             p->sample[n].smp      = *(float**)rtosc_argument(m,2).b.data;
 
             //XXX TODO memory management (deallocation of smp buffer)
@@ -415,6 +416,26 @@ void PADnoteParameters::defaults()
     FilterLfo->defaults();
 
     deletesamples();
+}
+
+float* PADnoteParameters::curSample(std::size_t idx)
+{
+    return sample[idx].smp;
+}
+
+const float* PADnoteParameters::curSample(std::size_t idx) const
+{
+    return sample[idx].smp;
+}
+
+const float* PADnoteParameters::curSampleToPlay(std::size_t idx) const
+{
+    return sample[idx].smp;
+}
+
+void PADnoteParameters::setCurSample(std::size_t idx, float* vals)
+{
+    sample[idx].smp = vals;
 }
 
 void PADnoteParameters::deletesample(int n)
@@ -1000,7 +1021,7 @@ void PADnoteParameters::export2wav(std::string basefilename)
     applyparameters();
     basefilename += "_PADsynth_";
     for(int k = 0; k < PAD_MAX_SAMPLES; ++k) {
-        if(sample[k].smp == NULL)
+        if(curSampleToPlay(k) == NULL)
             continue;
         char tmpstr[20];
         snprintf(tmpstr, 20, "_%02d", k + 1);
@@ -1010,7 +1031,7 @@ void PADnoteParameters::export2wav(std::string basefilename)
             int nsmps = sample[k].size;
             short int *smps = new short int[nsmps];
             for(int i = 0; i < nsmps; ++i)
-                smps[i] = (short int)(sample[k].smp[i] * 32767.0f);
+                smps[i] = (short int)(curSampleToPlay(k)[i] * 32767.0f);
             wav.writeMonoSamples(nsmps, smps);
         }
     }
