@@ -176,6 +176,27 @@ class PADnoteParameters:public Presets
         //! RT sample data
         Sample sample[PAD_MAX_SAMPLES];
 
+        // getters/setters for "sample"
+        float* curSample(std::size_t idx);
+        const float* curSample(std::size_t idx) const;
+        const float* curSampleToPlay(std::size_t idx) const;
+        void setCurSample(std::size_t idx, float* vals);
+
+        int curSampleSize(std::size_t idx) const {
+            return sample[idx].size;
+        }
+        void setCurSampleSize(std::size_t idx, int val) {
+            sample[idx].size = val;
+        }
+        float curBaseFreq(std::size_t idx) const
+        {
+            return sample[idx].basefreq;
+        }
+        void setCurBaseFreq(std::size_t idx, float val)
+        {
+            sample[idx].basefreq = val;
+        }
+
         //! callback type for sampleGenerator
         typedef std::function<void(int,PADnoteParameters::Sample&&)> callback;
 

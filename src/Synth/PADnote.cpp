@@ -90,7 +90,7 @@ void PADnote::setup(float velocity_,
     float mindist = fabsf(log2freq - log2f(pars.sample[0].basefreq + 0.0001f));
     nsample = 0;
     for(int i = 1; i < PAD_MAX_SAMPLES; ++i) {
-        if(pars.sample[i].smp == NULL)
+        if(!pars.curSampleToPlay(i))
             break;
         const float dist = fabsf(log2freq - log2f(pars.sample[i].basefreq + 0.0001f));
 
@@ -194,7 +194,7 @@ void PADnote::setup(float velocity_,
         flt.updateNoteFreq(basefreq);
     }
 
-    if(!pars.sample[nsample].smp) {
+    if(!pars.curSampleToPlay(nsample)) {
         finished_ = true;
         return;
     }
@@ -284,8 +284,8 @@ int PADnote::Compute_Linear(float *outl,
                             int freqhi,
                             float freqlo)
 {
-    const float *smps = pars.sample[nsample].smp;
-    if(smps == NULL) {
+    const float *smps = pars.curSampleToPlay(nsample);
+    if(!smps) {
         finished_ = true;
         return 1;
     }
@@ -314,8 +314,8 @@ int PADnote::Compute_Cubic(float *outl,
                            int freqhi,
                            float freqlo)
 {
-    float *smps = pars.sample[nsample].smp;
-    if(smps == NULL) {
+    const float *smps = pars.curSampleToPlay(nsample);
+    if(!smps) {
         finished_ = true;
         return 1;
     }
@@ -362,8 +362,7 @@ int PADnote::Compute_Cubic(float *outl,
 int PADnote::noteout(float *outl, float *outr)
 {
     computecurrentparameters();
-    float *smps = pars.sample[nsample].smp;
-    if(smps == NULL) {
+    if(!pars.curSampleToPlay(nsample)) {
         for(int i = 0; i < synth.buffersize; ++i) {
             outl[i] = 0.0f;
             outr[i] = 0.0f;
