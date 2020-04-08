@@ -181,6 +181,7 @@ void deallocate(const char *str, void *v)
  *                    PadSynth Setup                                         *
  *****************************************************************************/
 
+// This lets MiddleWare compute non-realtime PAD synth data and send it to the backend
 void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
 {
     //printf("preparing padsynth parameters\n");
@@ -204,6 +205,7 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
                            //printf("sending info to '%s'\n",
                            //       (path+to_s(N)).c_str());
                            rtdata_mutex.lock();
+                           // send non-realtime computed data to PADnoteParameters
                            d.chain((path+to_s(N)).c_str(), "ifb",
                                    s.size, s.basefreq, sizeof(float*), &s.smp);
                            rtdata_mutex.unlock();

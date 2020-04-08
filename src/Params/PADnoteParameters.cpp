@@ -87,6 +87,7 @@ static const rtosc::Ports realtime_ports =
     {"sample#64:ifb", rProp(internal) rDoc("Nothing to see here"), 0,
         [](const char *m, rtosc::RtData &d)
         {
+            // MiddleWare calls this to send the generated sample buffers to us
             PADnoteParameters *p = (PADnoteParameters*)d.obj;
             const char *mm = m;
             while(!isdigit(*mm))++mm;

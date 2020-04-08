@@ -176,6 +176,7 @@ class PADnoteParameters:public Presets
         //! RT sample data
         Sample sample[PAD_MAX_SAMPLES];
 
+        //! callback type for sampleGenerator
         typedef std::function<void(int,PADnoteParameters::Sample&&)> callback;
 
         //! PAD synth main function
