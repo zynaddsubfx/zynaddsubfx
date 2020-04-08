@@ -42,6 +42,14 @@ static const rtosc::Ports realtime_ports =
     rRecurp(FilterEnvelope, "Filter Envelope"),
     rRecurp(GlobalFilter, "Post Filter"),
 
+    //Wave
+    // Pwavepos is just a "wheel", where you can change the oscilgen parameter "live"
+    // this may later be replaced by envelopes or even modulators
+    // then, it could still make the envelope un-centric or something, let's see
+    // TODO: save this in the XML, if it even will be ever used...
+    // default value is 63 * Sample::bufs_per_oscilgen_par
+    rParamF(Pwavepos, rShort("Wave table position"), rDefault(252), "Basefunc parameter of the oscillator"),
+
     //Volume
     rToggle(PStereo,    rShort("stereo"), rDefault(true), "Stereo/Mono Mode"),
     rParamZyn(PPanning, rShort("panning"), rDefault(64), "Left Right Panning"),
@@ -95,9 +103,16 @@ static const rtosc::Ports realtime_ports =
             int n = atoi(mm);
             p->setCurSampleSize(n, rtosc_argument(m,0).i);
             p->setCurBaseFreq(n, rtosc_argument(m,1).f);
-            p->sample[n].smp      = *(float**)rtosc_argument(m,2).b.data;
 
-            //XXX TODO memory management (deallocation of smp buffer)
+            rtosc_blob_t blob = rtosc_argument(m,2).b;
+            assert(static_cast<std::size_t>(blob.len) / sizeof(float*) == p->sample[n].smp.size());
+            // for each oscilgen basefunc parameter...
+            for(std::size_t idx = 0; idx < p->sample[n].smp.size(); ++idx)
+            {
+                // ...take sample buffer
+                p->sample[n].smp[idx] = ((float**)blob.data)[idx];
+            }
+            //XXX TODO memory management (deallocation of current smp buffer)
         }},
     //weird stuff for PCoarseDetune
     {"detunevalue:", rMap(unit,cents) rDoc("Get detune value"), NULL,
@@ -159,8 +174,8 @@ static const rtosc::Ports non_realtime_ports =
     rRecurp(resonance, "Resonance"),
 
     //Harmonic Shape
-    rOption(Pmode, rMap(min, 0), rMap(max, 2), rShort("distribution"),
-            rOptions(bandwidth,discrete,continious),
+    rOption(Pmode, rMap(min, 0), rMap(max, 3), rShort("distribution"),
+            rOptions(bandwidth,discrete,continious,wavetable),
             rDefault(bandwidth),
             "Harmonic Distribution Model"),
     rOption(Php.base.type, rOptions(Gaussian, Rectanglar, Double Exponential),
@@ -332,7 +347,10 @@ PADnoteParameters::PADnoteParameters(const SYNTH_T &synth_, FFTwrapper *fft_,
     FilterLfo = new LFOParams(ad_global_filter, time_);
 
     for(int i = 0; i < PAD_MAX_SAMPLES; ++i)
-        sample[i].smp = NULL;
+    {
+        for(float*& ptr : sample[i].smp)
+            ptr = nullptr;
+    }
 
     defaults();
 }
@@ -396,6 +414,9 @@ void PADnoteParameters::defaults()
     FreqEnvelope->defaults();
     FreqLfo->defaults();
 
+    /* Wavetable parameters */
+    Pwavepos = 63 * Sample::bufs_per_oscilgen_par;
+
     /* Amplitude Global Parameters */
     PVolume  = 90;
     PPanning = 64; //center
@@ -420,22 +441,28 @@ void PADnoteParameters::defaults()
 
 float* PADnoteParameters::curSample(std::size_t idx)
 {
-    return sample[idx].smp;
+    return sample[idx].smp[Sample::bufs_per_oscilgen_par * oscilgen->Pbasefuncpar];
 }
 
 const float* PADnoteParameters::curSample(std::size_t idx) const
 {
-    return sample[idx].smp;
+    return sample[idx].smp[Sample::bufs_per_oscilgen_par * oscilgen->Pbasefuncpar];
 }
 
 const float* PADnoteParameters::curSampleToPlay(std::size_t idx) const
 {
-    return sample[idx].smp;
+    /* for wavetable mode (currently abusing discrete mode), use wavepos */
+    /* otherwise, just use the oscilgen parameter */
+    // TODO: remove cast when OscilGen has floats
+    std::size_t pos = (Pmode == pad_mode::wavetable)
+        ? static_cast<std::size_t>(Pwavepos) // desired wavetable position
+        : (oscilgen->Pbasefuncpar * Sample::bufs_per_oscilgen_par); // fix oscilgen parameter
+    return sample[idx].smp[pos];
 }
 
 void PADnoteParameters::setCurSample(std::size_t idx, float* vals)
 {
-    sample[idx].smp = vals;
+    sample[idx].smp[Sample::bufs_per_oscilgen_par * oscilgen->Pbasefuncpar] = vals;
 }
 
 void PADnoteParameters::deletesample(int n)
@@ -443,8 +470,11 @@ void PADnoteParameters::deletesample(int n)
     if((n < 0) || (n >= PAD_MAX_SAMPLES))
         return;
 
-    delete[] sample[n].smp;
-    sample[n].smp = NULL;
+    for(std::size_t j = 0; j < sample[n].smp.size(); ++j)
+    {
+        delete[] sample[n].smp[j];
+        sample[n].smp[j] = nullptr;
+    }
     sample[n].size     = 0;
     sample[n].basefreq = 440.0f;
 }
@@ -801,14 +831,15 @@ void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
  */
 void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
                                                     int size,
-                                                    float basefreq) const
+                                                    float basefreq,
+                                                    OscilGen* oscilgen_ptr) const
 {
     float harmonics[synth.oscilsize];
     memset(spectrum,  0, sizeof(float) * size);
     memset(harmonics, 0, sizeof(float) * synth.oscilsize);
 
     //get the harmonic structure from the oscillator (I am using the frequency amplitudes, only)
-    oscilgen->get(harmonics, basefreq, false);
+    oscilgen_ptr->get(harmonics, basefreq, false);
 
     //normalize
     normalize_max(harmonics, synth.oscilsize / 2);
@@ -865,8 +896,9 @@ void PADnoteParameters::applyparameters(std::function<bool()> do_abort,
         return;
     unsigned num = sampleGenerator([this]
                        (unsigned N, PADnoteParameters::Sample&& smp) {
-                           delete[] sample[N].smp;
+                           for(float* smps : sample[N].smp) { delete[] smps; }
                            sample[N] = std::move(smp);
+                           assert(smp.smp.size() == 0); // don't destroy the vector here, it should have been moved
                        },
                        do_abort, max_threads);
 
@@ -935,54 +967,129 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
         FFTwrapper *fft      = new FFTwrapper(samplesize);
         fft_t      *fftfreqs = new fft_t[samplesize / 2];
         float      *spectrum = new float[spectrumsize];
+        const OscilGen* oscilgen_ptr = this_c->oscilgen;
 
         for(int nsample = 0; nsample < samplemax; ++nsample)
         if(nsample % nthreads == threadno)
         {
-            if(do_abort())
-                break;
+            assert(oscilgen_ptr);
+#if 0
+            // UNUSED
+            // compute min and max for the wavetable
+            // no float comparisons here to avoid comparison errors
+            int max_extent; // in range [0,63]
+            
+            if(this_c->Pmode == pad_mode::wavetable)
+            {
+                max_extent = std::min((int)oscilgen_ptr->Pbasefuncpar, 127-oscilgen_ptr->Pbasefuncpar);
+                if(max_extent < 0) { max_extent = 0; }
+            }
+            else
+            {
+                max_extent = 0;
+            }
+
+            std::size_t minIdx = (oscilgen_ptr->Pbasefuncpar - max_extent) * Sample::num_smps_per_key;
+            std::size_t maxIdx = (oscilgen_ptr->Pbasefuncpar + max_extent) * Sample::num_smps_per_key + 1;
+            assert(minIdx < maxIdx);
+            assert(minIdx > 0);
+            assert(maxIdx <= 512);
+            assert(minIdx <= oscilgen_ptr->Pbasefuncpar*Sample::num_smps_per_key + 1.0f);
+            assert(maxIdx >= oscilgen_ptr->Pbasefuncpar*Sample::num_smps_per_key - 1.0f);
+#else
+            std::size_t minIdx, maxIdx;
+            if(this_c->Pmode == pad_mode::wavetable) {
+                // generate sample buffers for all OscilGen basefunc values
+                minIdx = 0;
+                maxIdx = Sample::num_buffers();
+            } else {
+                // generate only one sample buffer at the current basefunc par
+                minIdx = oscilgen_ptr->Pbasefuncpar * Sample::bufs_per_oscilgen_par;
+                maxIdx = minIdx + 1;
+            }
+
+#endif
+            PADnoteParameters::Sample newsample;
             const float basefreqadjust =
                 powf(2.0f, adj_ptr[nsample] - adj_ptr[samplemax - 1] * 0.5f);
 
-            if(this_c->Pmode == pad_mode::bandwidth)
-                this_c->generatespectrum_bandwidthMode(spectrum,
-                                                       spectrumsize,
-                                                       basefreq*basefreqadjust,
-                                                       profile,
-                                                       profilesize,
-                                                       bwadjust);
-            else
-                this_c->generatespectrum_otherModes(spectrum, spectrumsize,
-                                                    basefreq * basefreqadjust);
+            // this loop runs only once, except for wavetable modulation
+            for(std::size_t basefuncparIdx = minIdx; basefuncparIdx < maxIdx; ++basefuncparIdx)
+            {
+                float mbasefuncpar = basefuncparIdx / Sample::bufs_per_oscilgen_par;
+                if(do_abort())
+                    break;
 
-            //the last samples contain the first samples
-            //(used for linear/cubic interpolation)
-            const int extra_samples = 5;
-            PADnoteParameters::Sample newsample;
-            newsample.smp = new float[samplesize + extra_samples];
+                switch(this_c->Pmode)
+                {
+                    case pad_mode::bandwidth:
+                        this_c->generatespectrum_bandwidthMode(spectrum,
+                                                           spectrumsize,
+                                                           basefreq*basefreqadjust,
+                                                           profile,
+                                                           profilesize,
+                                                           bwadjust);
+                        break;
+                    case pad_mode::discrete:
+                    case pad_mode::continous:
+                    {
+                        this_c->generatespectrum_otherModes(spectrum, spectrumsize,
+                                                        basefreq * basefreqadjust,
+                                                        this_c->oscilgen);
+                        break;
+                    }
+                    case pad_mode::wavetable:
+                    {
+                        // overwrite base function parameter in a deep copy
+                        OscilGen osc2 = *oscilgen_ptr;
+                        // TODO: OscilGen can currently only take chars, it should take
+                        //       floats for the best sound experience
+                        osc2.Pbasefuncpar = static_cast<int>(mbasefuncpar);
+                        osc2.prepare();
+                        this_c->generatespectrum_otherModes(spectrum, spectrumsize,
+                                                        basefreq * basefreqadjust,
+                                                        &osc2);
+                        break;
+                    }
+                }
 
-            newsample.smp[0] = 0.0f;
-            for(int i = 1; i < spectrumsize; ++i) //randomize the phases
-                fftfreqs[i] = FFTpolar(spectrum[i], (float)RND * 2 * PI);
-            //that's all; here is the only ifft for the whole sample;
-            //no windows are used ;-)
-            fft->freqs2smps(fftfreqs, newsample.smp);
+                //the last samples contain the first samples
+                //(used for linear/cubic interpolation)
+                const int extra_samples = 5;
+                newsample.smp[basefuncparIdx] = new float[samplesize + extra_samples];
+                newsample.smp[basefuncparIdx][0] = 0.0f;
 
+                if(this_c->Pmode == pad_mode::wavetable)
+                {
+                    for(int i = 1; i < spectrumsize; ++i) //randomize the phases
+                        fftfreqs[i] = FFTpolar(spectrum[i], 2 * PI);
+                }
+                else
+                {
+                    for(int i = 1; i < spectrumsize; ++i) //randomize the phases
+                        fftfreqs[i] = FFTpolar(spectrum[i], (float)RND * 2 * PI);
+                }
 
-            //normalize(rms)
-            float rms = 0.0f;
-            for(int i = 0; i < samplesize; ++i)
-                rms += newsample.smp[i] * newsample.smp[i];
-            rms = sqrtf(rms);
-            if(rms < 0.000001f)
-                rms = 1.0f;
-            rms *= sqrtf(262144.0f / samplesize);//262144=2^18
-            for(int i = 0; i < samplesize; ++i)
-                newsample.smp[i] *= 1.0f / rms * 50.0f;
+                //that's all; here is the only ifft for the whole sample;
+                //no windows are used ;-)
+                fft->freqs2smps(fftfreqs, newsample.smp[basefuncparIdx]);
 
-            //prepare extra samples used by the linear or cubic interpolation
-            for(int i = 0; i < extra_samples; ++i)
-                newsample.smp[i + samplesize] = newsample.smp[i];
+    
+                //normalize(rms)
+                float rms = 0.0f;
+                for(int i = 0; i < samplesize; ++i)
+                    rms += newsample.smp[basefuncparIdx][i] * newsample.smp[basefuncparIdx][i];
+                rms = sqrtf(rms);
+                if(rms < 0.000001f)
+                    rms = 1.0f;
+                rms *= sqrtf(262144.0f / samplesize);//262144=2^18
+                for(int i = 0; i < samplesize; ++i)
+                    newsample.smp[basefuncparIdx][i] *= 1.0f / rms * 50.0f;
+    
+                //prepare extra samples used by the linear or cubic interpolation
+                for(int i = 0; i < extra_samples; ++i)
+                    newsample.smp[basefuncparIdx][i + samplesize] = newsample.smp[basefuncparIdx][i];
+            }
 
             //yield new sample
             newsample.size     = samplesize;
@@ -1314,6 +1421,8 @@ void PADnoteParameters::pasteRT(PADnoteParameters &x)
 
     FreqEnvelope->paste(*x.FreqEnvelope);
     FreqLfo->paste(*x.FreqLfo);
+
+    COPY(Pwavepos);
 
     COPY(PStereo);
     COPY(PPanning);
