@@ -842,9 +842,9 @@ void PADnoteParameters::applyparameters(std::function<bool()> do_abort,
     if(do_abort())
         return;
     unsigned num = sampleGenerator([this]
-                       (unsigned N, PADnoteParameters::Sample &smp) {
+                       (unsigned N, PADnoteParameters::Sample&& smp) {
                            delete[] sample[N].smp;
-                           sample[N] = smp;
+                           sample[N] = std::move(smp);
                        },
                        do_abort, max_threads);
 
@@ -965,7 +965,7 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
             //yield new sample
             newsample.size     = samplesize;
             newsample.basefreq = basefreq * basefreqadjust;
-            cb(nsample, newsample);
+            cb(nsample, std::move(newsample));
         }
 
         //Cleanup

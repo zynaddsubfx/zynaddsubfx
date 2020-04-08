@@ -199,7 +199,7 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
 #else
     std::mutex rtdata_mutex;
     unsigned num = p->sampleGenerator([&rtdata_mutex, &path,&d]
-                       (unsigned N, PADnoteParameters::Sample &s)
+                       (unsigned N, PADnoteParameters::Sample&& s)
                        {
                            //printf("sending info to '%s'\n",
                            //       (path+to_s(N)).c_str());

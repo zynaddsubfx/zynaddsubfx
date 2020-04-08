@@ -176,7 +176,7 @@ class PADnoteParameters:public Presets
         //! RT sample data
         Sample sample[PAD_MAX_SAMPLES];
 
-        typedef std::function<void(int,PADnoteParameters::Sample&)> callback;
+        typedef std::function<void(int,PADnoteParameters::Sample&&)> callback;
 
         //! PAD synth main function
         //! Generate spectrum and run IFFTs on it
