@@ -352,7 +352,7 @@ PADnoteParameters::~PADnoteParameters()
 
 void PADnoteParameters::defaults()
 {
-    Pmode = 0;
+    Pmode = pad_mode::bandwidth;
     Php.base.type      = 0;
     Php.base.par1      = 80;
     Php.freqmult       = 0;
@@ -811,7 +811,7 @@ void PADnoteParameters::generatespectrum_otherModes(float *spectrum,
 
     //In continous mode the spectrum gets additional interpolation between the
     //spectral peaks
-    if(Pmode != 1) { //continous mode
+    if(Pmode == pad_mode::continous) { //continous mode
         int old = 0;
         for(int k = 1; k < size; ++k)
             if((spectrum[k] > 1e-10) || (k == (size - 1))) {
@@ -922,7 +922,7 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
             const float basefreqadjust =
                 powf(2.0f, adj_ptr[nsample] - adj_ptr[samplemax - 1] * 0.5f);
 
-            if(this_c->Pmode == 0)
+            if(this_c->Pmode == pad_mode::bandwidth)
                 this_c->generatespectrum_bandwidthMode(spectrum,
                                                        spectrumsize,
                                                        basefreq*basefreqadjust,
@@ -1020,7 +1020,7 @@ void PADnoteParameters::add2XML(XMLwrapper& xml)
     xml.setPadSynth(true);
 
     xml.addparbool("stereo", PStereo);
-    xml.addpar("mode", Pmode);
+    xml.addpar("mode", (int)Pmode);
     xml.addpar("bandwidth", Pbandwidth);
     xml.addpar("bandwidth_scale", Pbwscale);
 
@@ -1120,7 +1120,7 @@ void PADnoteParameters::add2XML(XMLwrapper& xml)
 void PADnoteParameters::getfromXML(XMLwrapper& xml)
 {
     PStereo    = xml.getparbool("stereo", PStereo);
-    Pmode      = xml.getpar127("mode", 0);
+    Pmode      = (pad_mode)xml.getpar127("mode", 0);
     Pbandwidth = xml.getpar("bandwidth", Pbandwidth, 0, 1000);
     Pbwscale   = xml.getpar127("bandwidth_scale", Pbwscale);
 

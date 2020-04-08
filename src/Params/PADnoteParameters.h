@@ -50,10 +50,17 @@ class PADnoteParameters:public Presets
         float getprofile(float *smp, int size);
 
         //parameters
-
-        //the mode: 0 - bandwidth, 1 - discrete (bandwidth=0), 2 - continous
-        //the harmonic profile is used only on mode 0
-        unsigned char Pmode;
+        //! the mode how bandwidth is created
+        //! the harmonic profile is used only on mode 0
+        enum class pad_mode
+        {
+            //! "normal" mode, generate the wave with bandwidth
+            bandwidth,
+            //! bandwidth = 0, almost like adnote
+            discrete,
+            //! filtered noise
+            continous
+        } Pmode;
 
         //Harmonic profile (the frequency distribution of a single harmonic)
         struct {

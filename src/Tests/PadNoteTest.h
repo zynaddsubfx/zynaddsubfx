@@ -194,7 +194,7 @@ class PadNoteTest:public CxxTest::TestSuite
         }
 
         void testInitialization() {
-            TS_ASSERT_EQUALS(pars->Pmode, 0);
+            TS_ASSERT_EQUALS(pars->Pmode, PADnoteParameters::pad_mode::bandwidth);
 
             TS_ASSERT_EQUALS(pars->PVolume, 90);
             TS_ASSERT(pars->oscilgen);
