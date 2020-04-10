@@ -145,8 +145,12 @@ float Envelope::envout(bool doWatch)
         }
         return envoutval;
     }
+
     if((currentpoint == envsustain + 1) && !keyreleased) { //if it is sustaining now
         envoutval = envval[envsustain];
+        if (envval[envsustain] == -40.0f && envval[envsustain+1] == -40.0f) { //if sustaining at zero with zero release
+            envfinish = true;   // finish voice to free ressources
+        }
         if(doWatch) {
             watch(envsustain, envoutval);
         }
@@ -159,7 +163,7 @@ float Envelope::envout(bool doWatch)
         if(envdt[tmp] < 0.00000001f)
             out = envval[tmp];
         else
-            out = envoutval + (envval[tmp] - envoutval) * t;
+            out = envoutval + (envval[tmp] - envoutval) * t; // linear interpolation envoutval and envval[tmp]
 
         t += envdt[tmp] * envstretch;
 
