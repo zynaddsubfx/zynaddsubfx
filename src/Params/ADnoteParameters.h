@@ -206,8 +206,8 @@ struct ADnoteVoiceParam {
     *   AMPLITUDE PARAMETERS   *
     ***************************/
 
-    /* Panning       0 - random
-             1 - left
+    /* Panning   0 - random
+                 1 - left
                 64 - center
                127 - right
        The Panning is ignored if the instrument is mono */
@@ -264,27 +264,27 @@ struct ADnoteVoiceParam {
     /* Modulator Parameters (0=off,1=Mix,2=RM,3=PM,4=FM.. */
     FMTYPE PFMEnabled;
 
-    /* Voice that I use as modullator instead of FMSmp.
+    /* Voice that I use as modulator instead of FMSmp.
        It is -1 if I use FMSmp(default).
        It maynot be equal or bigger than current voice */
     short int PFMVoice;
 
-    /* Modullator oscillator */
+    /* Modulator oscillator */
     OscilGen *FMSmp;
 
-    /* Modullator Volume */
+    /* Modulator Volume */
     float FMvolume;
 
-    /* Modullator damping at higher frequencies */
+    /* Modulator damping at higher frequencies */
     unsigned char PFMVolumeDamp;
 
-    /* Modullator Velocity Sensing */
+    /* Modulator Velocity Sensing */
     unsigned char PFMVelocityScaleFunction;
 
-    /* Fine Detune of the Modullator*/
+    /* Fine Detune of the Modulator */
     unsigned short int PFMDetune;
 
-    /* Coarse Detune of the Modullator */
+    /* Coarse Detune of the Modulator */
     unsigned short int PFMCoarseDetune;
 
     /* The detune type */
@@ -293,11 +293,11 @@ struct ADnoteVoiceParam {
     /* FM base freq fixed at 440Hz */
     unsigned char PFMFixedFreq;
 
-    /* Frequency Envelope of the Modullator */
+    /* Frequency Envelope of the Modulator */
     unsigned char   PFMFreqEnvelopeEnabled;
     EnvelopeParams *FMFreqEnvelope;
 
-    /* Frequency Envelope of the Modullator */
+    /* Frequency Envelope of the Modulator */
     unsigned char   PFMAmpEnvelopeEnabled;
     EnvelopeParams *FMAmpEnvelope;
 
