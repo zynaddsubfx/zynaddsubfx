@@ -19,7 +19,7 @@
 
 namespace zyn {
 
-enum FMTYPE {
+enum class FMTYPE {
     NONE, MIX, RING_MOD, PHASE_MOD, FREQ_MOD, PW_MOD
 };
 
@@ -261,8 +261,8 @@ struct ADnoteVoiceParam {
     *   MODULLATOR PARAMETERS   *
     ****************************/
 
-    /* Modullator Parameters (0=off,1=Mix,2=RM,3=PM,4=FM.. */
-    unsigned char PFMEnabled;
+    /* Modulator Parameters (0=off,1=Mix,2=RM,3=PM,4=FM.. */
+    FMTYPE PFMEnabled;
 
     /* Voice that I use as modullator instead of FMSmp.
        It is -1 if I use FMSmp(default).

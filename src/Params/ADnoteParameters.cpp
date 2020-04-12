@@ -587,7 +587,7 @@ void ADnoteVoiceParam::defaults()
     PFilterLfoEnabled         = 0;
     PFilterVelocityScale = 0;
     PFilterVelocityScaleFunction = 64;
-    PFMEnabled                = 0;
+    PFMEnabled                = FMTYPE::NONE;
     PFMFixedFreq              = false;
 
     //I use the internal oscillator (-1)
@@ -773,7 +773,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
     xml.addparbool("filter_enabled", PFilterEnabled);
     xml.addparbool("filter_bypass", Pfilterbypass);
 
-    xml.addpar("fm_enabled", PFMEnabled);
+    xml.addpar("fm_enabled", (int)PFMEnabled);
 
     xml.beginbranch("OSCIL");
     OscilSmp->add2XML(xml);
@@ -852,7 +852,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
         xml.endbranch();
     }
 
-    if((PFMEnabled != 0) || (fmoscilused != 0)
+    if((PFMEnabled != FMTYPE::NONE) || (fmoscilused != 0)
        || (!xml.minimal)) {
         xml.beginbranch("FM_PARAMETERS");
         xml.addpar("input_voice", PFMVoice);
@@ -1261,7 +1261,7 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
     PFMoscilphase  = xml.getpar127("oscil_fm_phase", PFMoscilphase);
     PFilterEnabled = xml.getparbool("filter_enabled", PFilterEnabled);
     Pfilterbypass  = xml.getparbool("filter_bypass", Pfilterbypass);
-    PFMEnabled     = xml.getpar127("fm_enabled", PFMEnabled);
+    PFMEnabled     = (FMTYPE)xml.getpar127("fm_enabled", (int)PFMEnabled);
 
     if(xml.enterbranch("OSCIL")) {
         OscilSmp->getfromXML(xml);
