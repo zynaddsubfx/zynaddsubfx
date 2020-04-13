@@ -275,33 +275,33 @@ int ADnote::setupVoiceUnison(int nvoice)
         case 1:
             unison_base_freq_rap[nvoice][0] = 1.0f; //if the unison is not used, always make the only subvoice to have the default note
             break;
-        case 2: { //unison for 2 subvoices
-                    unison_base_freq_rap[nvoice][0] = 1.0f / unison_real_spread;
-                    unison_base_freq_rap[nvoice][1] = unison_real_spread;
-                };
-                break;
-        default: { //unison for more than 2 subvoices
-                     float unison_values[true_unison];
-                     float min = -1e-6, max = 1e-6;
-                     for(int k = 0; k < true_unison; ++k) {
-                         float step = (k / (float) (true_unison - 1)) * 2.0f - 1.0f; //this makes the unison spread more uniform
-                         float val  = step + (RND * 2.0f - 1.0f) / (true_unison - 1);
-                         unison_values[k] = val;
-                         if (min > val) {
-                             min = val;
-                         }
-                         if (max < val) {
-                             max = val;
-                         }
-                     }
-                     const float diff = max - min;
-                     for(int k = 0; k < true_unison; ++k) {
-                         unison_values[k] =
-                             (unison_values[k] - (max + min) * 0.5f) / diff;             //the lowest value will be -1 and the highest will be 1
-                         unison_base_freq_rap[nvoice][k] =
-                             powf(2.0f, (unison_spread * unison_values[k]) / 1200);
-                     }
-                 };
+        case 2: //unison for 2 subvoices
+            unison_base_freq_rap[nvoice][0] = 1.0f / unison_real_spread;
+            unison_base_freq_rap[nvoice][1] = unison_real_spread;
+            break;
+        default: //unison for more than 2 subvoices
+        {
+            float unison_values[true_unison];
+            float min = -1e-6f, max = 1e-6f;
+            for(int k = 0; k < true_unison; ++k) {
+                float step = (k / (float) (true_unison - 1)) * 2.0f - 1.0f; //this makes the unison spread more uniform
+                float val  = step + (RND * 2.0f - 1.0f) / (true_unison - 1);
+                unison_values[k] = val;
+                if (min > val) {
+                    min = val;
+                }
+                if (max < val) {
+                    max = val;
+                }
+            }
+            const float diff = max - min;
+            for(int k = 0; k < true_unison; ++k) {
+                unison_values[k] =
+                    (unison_values[k] - (max + min) * 0.5f) / diff;         //the lowest value will be -1 and the highest will be 1
+                unison_base_freq_rap[nvoice][k] =
+                    powf(2.0f, (unison_spread * unison_values[k]) / 1200);
+            }
+        }
     }
     if (is_pwm)
         for (int i = true_unison - 1; i >= 0; i--) {
@@ -1005,7 +1005,7 @@ void ADnote::setfreq(int nvoice, float in_freq)
             speed = synth.oscilsize_f;
 
         F2I(speed, oscfreqhi[nvoice][k]);
-        oscfreqlo[nvoice][k] = speed - floor(speed);
+        oscfreqlo[nvoice][k] = speed - floorf(speed);
 
     }
 }
@@ -1022,7 +1022,7 @@ void ADnote::setfreqFM(int nvoice, float in_freq)
             speed = synth.samplerate_f;
 
         F2I(speed, oscfreqhiFM[nvoice][k]);
-        oscfreqloFM[nvoice][k] = speed - floor(speed);
+        oscfreqloFM[nvoice][k] = speed - floorf(speed);
     }
 }
 
@@ -1213,9 +1213,9 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
 {
     for(int k = 0; k < unison_size[nvoice]; ++k) {
         int    poshi  = oscposhi[nvoice][k];
-        int    poslo  = oscposlo[nvoice][k] * (1<<24);
+        int    poslo  = (int)(oscposlo[nvoice][k] * (1<<24));
         int    freqhi = oscfreqhi[nvoice][k];
-        int    freqlo = oscfreqlo[nvoice][k] * (1<<24);
+        int    freqlo = (int)(oscfreqlo[nvoice][k] * (1<<24));
         float *smps   = NoteVoicePar[nvoice].OscilSmp;
         float *tw     = tmpwave_unison[k];
         assert(oscfreqlo[nvoice][k] < 1.0f);
@@ -1254,36 +1254,36 @@ inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
        
     // windowed sinc kernel factor Fs*0.3, rejection 80dB      
     const float_t kernel[] = {
-        0.0010596256917418426,
-        0.004273442181254887,
-        0.0035466063043375785,
-        -0.014555483937137638,
-        -0.04789321342588484,
-        -0.050800020978553066,
-        0.04679847159974432,
-        0.2610646708018185,
-        0.4964802251145513,
-        0.6000513532962539,
-        0.4964802251145513,
-        0.2610646708018185,
-        0.04679847159974432,
-        -0.050800020978553066,
-        -0.04789321342588484,
-        -0.014555483937137638,
-        0.0035466063043375785,
-        0.004273442181254887,
-        0.0010596256917418426
+        0.0010596256917418426f,
+        0.004273442181254887f,
+        0.0035466063043375785f,
+        -0.014555483937137638f,
+        -0.04789321342588484f,
+        -0.050800020978553066f,
+        0.04679847159974432f,
+        0.2610646708018185f,
+        0.4964802251145513f,
+        0.6000513532962539f,
+        0.4964802251145513f,
+        0.2610646708018185f,
+        0.04679847159974432f,
+        -0.050800020978553066f,
+        -0.04789321342588484f,
+        -0.014555483937137638f,
+        0.0035466063043375785f,
+        0.004273442181254887f,
+        0.0010596256917418426f
         };
         
     
     
     for(int k = 0; k < unison_size[nvoice]; ++k) {
         int    poshi  = oscposhi[nvoice][k];
-        int    poslo  = oscposlo[nvoice][k] * (1<<24);
+        int    poslo  = (int)(oscposlo[nvoice][k] * (1<<24));
         int    freqhi = oscfreqhi[nvoice][k];
-        int    freqlo = oscfreqlo[nvoice][k] * (1<<24);
+        int    freqlo = (int)(oscfreqlo[nvoice][k] * (1<<24));
         int    ovsmpfreqhi = oscfreqhi[nvoice][k] / 2;
-        int    ovsmpfreqlo = (oscfreqlo[nvoice][k] / 2) * (1<<24);
+        int    ovsmpfreqlo = (int)((oscfreqlo[nvoice][k] / 2) * (1<<24));
         
         int    ovsmpposlo; 
         int    ovsmpposhi;
@@ -1456,9 +1456,9 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
         //Compute the modulator and store it in tmpwave_unison[][]
         for(int k = 0; k < unison_size[nvoice]; ++k) {
             int    poshiFM  = oscposhiFM[nvoice][k];
-            int    posloFM  = oscposloFM[nvoice][k]  * (1<<24);
+            int    posloFM  = (int)(oscposloFM[nvoice][k]  * (1<<24));
             int    freqhiFM = oscfreqhiFM[nvoice][k];
-            int    freqloFM = oscfreqloFM[nvoice][k] * (1<<24);
+            int    freqloFM = (int)(oscfreqloFM[nvoice][k] * (1<<24));
             float *tw = tmpwave_unison[k];
             const float *smps = NoteVoicePar[nvoice].FMSmp;
 
@@ -1508,7 +1508,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
             float *tw    = tmpwave_unison[k];
             float  fmold = FMoldsmp[nvoice][k];
             for(int i = 0; i < synth.buffersize; ++i) {
-                fmold = fmod(fmold + tw[i] * normalize, synth.oscilsize);
+                fmold = fmodf(fmold + tw[i] * normalize, synth.oscilsize);
                 tw[i] = fmold;
             }
             FMoldsmp[nvoice][k] = fmold;
@@ -1528,9 +1528,9 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
         float *smps   = NoteVoicePar[nvoice].OscilSmp;
         float *tw     = tmpwave_unison[k];
         int    poshi  = oscposhi[nvoice][k];
-        int    poslo  = oscposlo[nvoice][k] * (1<<24);
+        int    poslo  = (int)(oscposlo[nvoice][k] * (1<<24));
         int    freqhi = oscfreqhi[nvoice][k];
-        int    freqlo = oscfreqlo[nvoice][k] * (1<<24);
+        int    freqlo = (int)(oscfreqlo[nvoice][k] * (1<<24));
 
         for(int i = 0; i < synth.buffersize; ++i) {
             int FMmodfreqhi = 0;
@@ -1541,7 +1541,7 @@ inline void ADnote::ComputeVoiceOscillatorFrequencyModulation(int nvoice,
 
             //carrier
             int carposhi = poshi + FMmodfreqhi;
-            int carposlo = poslo + FMmodfreqlo;
+            int carposlo = (int)(poslo + FMmodfreqlo);
             if (FMmode == FMTYPE::PW_MOD && (k & 1))
                 carposhi += NoteVoicePar[nvoice].phase_offset;
 
@@ -1587,15 +1587,15 @@ inline void ADnote::ComputeVoicePinkNoise(int nvoice)
         float *tw = tmpwave_unison[k];
         float *f = &pinking[nvoice][k > 0 ? 7 : 0];
         for(int i = 0; i < synth.buffersize; ++i) {
-            float white = (RND-0.5)/4.0;
-            f[0] = 0.99886*f[0]+white*0.0555179;
-            f[1] = 0.99332*f[1]+white*0.0750759;
-            f[2] = 0.96900*f[2]+white*0.1538520;
-            f[3] = 0.86650*f[3]+white*0.3104856;
-            f[4] = 0.55000*f[4]+white*0.5329522;
-            f[5] = -0.7616*f[5]-white*0.0168980;
-            tw[i] = f[0]+f[1]+f[2]+f[3]+f[4]+f[5]+f[6]+white*0.5362;
-            f[6] = white*0.115926;
+            float white = (RND-0.5f)/4.0f;
+            f[0] = 0.99886f*f[0]+white*0.0555179f;
+            f[1] = 0.99332f*f[1]+white*0.0750759f;
+            f[2] = 0.96900f*f[2]+white*0.1538520f;
+            f[3] = 0.86650f*f[3]+white*0.3104856f;
+            f[4] = 0.55000f*f[4]+white*0.5329522f;
+            f[5] = -0.7616f*f[5]-white*0.0168980f;
+            tw[i] = f[0]+f[1]+f[2]+f[3]+f[4]+f[5]+f[6]+white*0.5362f;
+            f[6] = white*0.115926f;
         }
     }
 }
@@ -1736,7 +1736,7 @@ int ADnote::noteout(float *outl, float *outr)
                 watch_be4_add(tmpwavel,synth.buffersize);
         }
 
-        float unison_amplitude = 1.0f / sqrt(unison_size[nvoice]); //reduce the amplitude for large unison sizes
+        float unison_amplitude = 1.0f / sqrtf(unison_size[nvoice]); //reduce the amplitude for large unison sizes
         // Amplitude
         float oldam = oldamplitude[nvoice] * unison_amplitude;
         float newam = newamplitude[nvoice] * unison_amplitude;

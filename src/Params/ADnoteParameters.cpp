@@ -33,7 +33,6 @@ namespace zyn {
 using rtosc::Ports;
 using rtosc::RtData;
 
-#define EXPAND(x) x
 #define rObject ADnoteVoiceParam
 
 #undef rChangeCb
@@ -364,9 +363,9 @@ static const Ports globalPorts = {
         {
             rObject *obj = (rObject *)d.obj;
             if (!rtosc_narguments(msg))
-                d.reply(d.loc, "i", (int)roundf(96.0f * (1.0f + (obj->Volume - 12.0412)/60.0f)));
+                d.reply(d.loc, "i", (int)roundf(96.0f * (1.0f + (obj->Volume - 12.0412f)/60.0f)));
             else 
-                obj->Volume = 12.0412 - 60.0f * (1.0f - rtosc_argument(msg, 0).i / 96.0f);
+                obj->Volume = 12.0412f - 60.0f * (1.0f - rtosc_argument(msg, 0).i / 96.0f);
         }},
     rParamZyn(Fadein_adjustment, rDefault(FADEIN_ADJUSTMENT_SCALE),
         "Adjustment for anti-pop strategy."),
@@ -676,7 +675,7 @@ float ADnoteParameters::getUnisonFrequencySpreadCents(int nvoice) const
 }
 
 float ADnoteVoiceParam::getUnisonFrequencySpreadCents(void) const {
-    return powf(Unison_frequency_spread / 127.0 * 2.0f, 2.0f) * 50.0f; //cents
+    return powf(Unison_frequency_spread / 127.0f * 2.0f, 2.0f) * 50.0f; //cents
 }
 
 /*
@@ -978,10 +977,10 @@ void ADnoteGlobalParam::getfromXML(XMLwrapper& xml)
 
         if (upgrade_3_0_3) {
             int vol = xml.getpar127("volume", 0);
-            Volume = 12.0412 - 60.0f * ( 1.0f - vol / 96.0f);
+            Volume = 12.0412f - 60.0f * ( 1.0f - vol / 96.0f);
         } else if (upgrade_3_0_5) {
             printf("file version less than 3.0.5\n");
-            Volume = 12.0412 + xml.getparreal("volume", Volume);
+            Volume = 12.0412f + xml.getparreal("volume", Volume);
         } else {
             Volume = xml.getparreal("volume", Volume);
         }

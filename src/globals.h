@@ -254,13 +254,16 @@ enum LegatoMsg {
 
 //is like i=(int)(floor(f))
 #ifdef ASM_F2I_YES
-#define F2I(f, \
-            i) __asm__ __volatile__ ("fistpl %0" : "=m" (i) : "t" (f \
-                                                                   - \
-                                                                   0.49999999f) \
-                                     : "st");
+#define F2I(f, i)\
+    do {\
+        __asm__ __volatile__\
+            ("fistpl %0" : "=m" (i) : "t" (f - 0.49999999f) : "st");\
+    } while (false)
 #else
-#define F2I(f, i) (i) = ((f > 0) ? ((int)(f)) : ((int)(f - 1.0f)));
+#define F2I(f, i)\
+    do {\
+        (i) = ((f > 0) ? ((int)(f)) : ((int)(f - 1.0f)));\
+    } while (false)
 #endif
 
 

@@ -163,14 +163,14 @@ typedef AllocatorClass Alloc;
 //! the dummy allocator, which does not allow any allocation
 class DummyAllocator : public Allocator
 {
-    void not_allowed() const {
+    [[ noreturn ]] void not_allowed() const {
         throw "(de)allocation forbidden"; // TODO: std exception
     }
 public:
-    void *alloc_mem(size_t ) { return not_allowed(), nullptr; }
+    void *alloc_mem(size_t ) { not_allowed(); }
     void dealloc_mem(void* ) { not_allowed(); } // TODO: more functions?
     void addMemory(void *, size_t ) { not_allowed(); }
-    bool lowMemory(unsigned , size_t ) const { return not_allowed(), true; }
+    bool lowMemory(unsigned , size_t ) const { not_allowed(); }
     using Allocator::Allocator;
 };
 

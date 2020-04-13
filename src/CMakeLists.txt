@@ -213,11 +213,12 @@ if (ExtendedWarnings)
         "-Wno-vla-extension" "-Wno-vla" # rtosc currently heavily uses them, and they are supported by our CI
         "-Wno-exit-time-destructors" "-Wno-global-constructors" # used too often in rtosc
         "-Wno-gnu-zero-variadic-macro-arguments" # used too often in zyn
-        "-Wno-shadow" # used too often in zyn
+        "-Wno-shadow" "-Wno-shadow-field" # used too often in zyn
         "-Wno-cast-align" # used too often in zyn
         "-Wno-missing-prototypes" # used too often in zyn
         "-Wno-sign-conversion" # used too often in zyn
-	"-Wno-float-equal" # can be disturbing in some cases
+        "-Wno-float-equal" # can be disturbing in some cases
+        "-Wno-switch-enum" # used too often in zyn
         )
         STRING(REPLACE ";" " " BuildOptions_ExtendedWarnings "${BuildOptions_ExtendedWarnings_List}")
         MESSAGE(STATUS "Using extended Warning options: ${BuildOptions_ExtendedWarnings}")
