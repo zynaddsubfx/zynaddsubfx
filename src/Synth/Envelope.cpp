@@ -150,7 +150,7 @@ float Envelope::envout(bool doWatch)
         envoutval = envval[envsustain];
         bool zerorelease = true;
         for (auto i = envsustain; i<envpoints; i++)
-            if (envval[envsustain] != -40.0f) zerorelease = false;
+            if (envval[i] != -40.0f) zerorelease = false;
         if (zerorelease &&                             //if sustaining at zero with zero until env ends
             (mode == ADSR_lin || mode == ADSR_dB)) {   // and its an amp envelope
             envfinish = true;   // finish voice to free ressources

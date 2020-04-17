@@ -21,11 +21,11 @@
 namespace zyn {
     
    enum envmode_enum {
-        ADSR_lin,
-        ADSR_dB,
-        ASR_freqlfo,
-        ADSR_filter,
-        ASR_bw
+        ADSR_lin = 1,
+        ADSR_dB = 2,
+        ASR_freqlfo = 3,
+        ADSR_filter = 4,
+        ASR_bw = 5
     };
 
 class EnvelopeParams:public Presets
