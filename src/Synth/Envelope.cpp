@@ -145,8 +145,16 @@ float Envelope::envout(bool doWatch)
         }
         return envoutval;
     }
+
     if((currentpoint == envsustain + 1) && !keyreleased) { //if it is sustaining now
         envoutval = envval[envsustain];
+        bool zerorelease = true;
+        for (auto i = envsustain; i<envpoints; i++)
+            if (envval[i] != -40.0f) zerorelease = false;
+        if (zerorelease &&                             //if sustaining at zero with zero until env ends
+            (mode == ADSR_lin || mode == ADSR_dB)) {   // and its an amp envelope
+            envfinish = true;   // finish voice to free ressources
+        }
         if(doWatch) {
             watch(envsustain, envoutval);
         }
@@ -159,7 +167,7 @@ float Envelope::envout(bool doWatch)
         if(envdt[tmp] < 0.00000001f)
             out = envval[tmp];
         else
-            out = envoutval + (envval[tmp] - envoutval) * t;
+            out = envoutval + (envval[tmp] - envoutval) * t; // linear interpolation envoutval and envval[tmp]
 
         t += envdt[tmp] * envstretch;
 

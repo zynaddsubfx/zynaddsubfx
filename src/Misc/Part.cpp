@@ -597,7 +597,7 @@ void Part::NoteOff(note_t note) //release the key
 }
 
 void Part::PolyphonicAftertouch(note_t note,
-				unsigned char velocity)
+                unsigned char velocity)
 {
     if(!Pnoteon || !inRange(note, Pminkey, Pmaxkey) || Pdrummode)
         return;
@@ -728,7 +728,7 @@ void Part::SetController(unsigned int type, note_t note, float value,
         break;
     case C_pitch: {
         if (getNoteLog2Freq(masterkeyshift, value) == false)
-	    break;
+            break;
 
         /* Make sure MonoMem's frequency information is kept up to date */
         if(!Ppolymode)
