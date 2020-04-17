@@ -275,7 +275,7 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
     envdt[0]        = 0.0f; //no used
     Penvsustain     = 1;
     Penvpoints      = 1;
-    Envmode         = 1;
+    Envmode         = ADSR_lin;
     Penvstretch     = Penvstretch_;
     Pforcedrelease  = Pforcedrelease_;
     Pfreemode       = 1;
@@ -346,7 +346,7 @@ float EnvelopeParams::getdt(char i) const
 void EnvelopeParams::ADSRinit(float a_dt, float d_dt, char s_val, float r_dt)
 {
     setpresettype("Penvamplitude");
-    Envmode   = 1;
+    Envmode   = ADSR_lin;
     A_dt      = a_dt;
     D_dt      = d_dt;
     PS_val    = s_val;
@@ -360,7 +360,7 @@ void EnvelopeParams::ADSRinit(float a_dt, float d_dt, char s_val, float r_dt)
 void EnvelopeParams::ADSRinit_dB(float a_dt, float d_dt, char s_val, float r_dt)
 {
     setpresettype("Penvamplitude");
-    Envmode   = 2;
+    Envmode   = ADSR_dB;
     A_dt      = a_dt;
     D_dt      = d_dt;
     PS_val    = s_val;
@@ -374,7 +374,7 @@ void EnvelopeParams::ADSRinit_dB(float a_dt, float d_dt, char s_val, float r_dt)
 void EnvelopeParams::ASRinit(char a_val, float a_dt, char r_val, float r_dt)
 {
     setpresettype("Penvfrequency");
-    Envmode   = 3;
+    Envmode   = ASR_freqlfo;
     PA_val    = a_val;
     A_dt      = a_dt;
     PR_val    = r_val;
@@ -393,7 +393,7 @@ void EnvelopeParams::ADSRinit_filter(char a_val,
                                      char r_val)
 {
     setpresettype("Penvfilter");
-    Envmode   = 4;
+    Envmode   = ADSR_filter;
     PA_val    = a_val;
     A_dt      = a_dt;
     PD_val    = d_val;
@@ -408,7 +408,7 @@ void EnvelopeParams::ADSRinit_filter(char a_val,
 void EnvelopeParams::ASRinit_bw(char a_val, float a_dt, char r_val, float r_dt)
 {
     setpresettype("Penvbandwidth");
-    Envmode   = 5;
+    Envmode   = ASR_bw;
     PA_val    = a_val;
     A_dt      = a_dt;
     PR_val    = r_val;
@@ -424,8 +424,8 @@ void EnvelopeParams::ASRinit_bw(char a_val, float a_dt, char r_val, float r_dt)
 void EnvelopeParams::converttofree()
 {
     switch(Envmode) {
-        case 1:
-        case 2:
+        case ADSR_lin:
+        case ADSR_dB:
             Penvpoints  = 4;
             Penvsustain = 2;
             Penvval[0]  = 0;
@@ -436,8 +436,8 @@ void EnvelopeParams::converttofree()
             envdt[3]   = R_dt;
             Penvval[3]  = 0;
             break;
-        case 3:
-        case 5:
+        case ASR_freqlfo:
+        case ASR_bw:
             Penvpoints  = 3;
             Penvsustain = 1;
             Penvval[0]  = PA_val;
@@ -446,7 +446,7 @@ void EnvelopeParams::converttofree()
             envdt[2]   = R_dt;
             Penvval[2]  = PR_val;
             break;
-        case 4:
+        case ADSR_filter:
             Penvpoints  = 4;
             Penvsustain = 2;
             Penvval[0]  = PA_val;

@@ -181,7 +181,7 @@ envfree->redraw();}
       }
       Fl_Button {} {
         label {Cancel}
-	tooltip {Cancel freemode editing}
+    tooltip {Cancel freemode editing}
         callback {disable_freemode();}
         xywh {5 155 80 20} box THIN_UP_BOX labelsize 11 labelcolor 1
         class Fl_Osc_Button
