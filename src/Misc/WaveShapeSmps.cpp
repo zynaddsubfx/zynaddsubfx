@@ -25,13 +25,13 @@ float polyblampres(float smp, float ws, float dMax)
     // [−T, 0] −d^5/40 + d^4/24 + d^3/12 + d^2/12 + d/24 + 1/120
     // [0, T] d^5/40 − d^4/12 + d^2/3 − d/2 + 7/30
     // [T, 2T] −d^5/120 + d^4/24 − d^3/12 + d^2/12 − d/24 + 1/120
-
+    if (dMax == 0) return 0.0;
     float dist = fabsf(smp) - ws;
     float res, d1, d2, d3, d4, d5;
     if(fabsf(dist) < dMax) {
         if(dist < -dMax/2.0f) {
             d1 = (dist + dMax)/dMax*2.0f;   // [-dMax ... -dMax/2] -> [0 ... 1]
-            res = powf(d1, 5.0f) / 120.0f;
+            res = d1 * d1 * d1 * d1 * d1 / 120.0f;
         }
         else if(dist < 0.0f) {
             d1 = (dist + dMax/2.0f)/dMax*2.0f; // [-dMax/2 ... 0] -> [0 ... 1]
@@ -100,7 +100,7 @@ void waveShapeSmps(int n,
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws;
                 if(fabsf(smps[i]) < 1.0f) {
-                    smps[i] = (smps[i] - powf(smps[i], 3.0f)) * 3.0f;
+                    smps[i] = (smps[i] - smps[i] * smps[i] * smps[i]) * 3.0f;
                     if(ws < 1.0f)
                         smps[i] /= ws;
                 }
@@ -274,11 +274,11 @@ void waveShapeSmps(int n,
                 smps[i] *= ws; // multiply signal to drive it in the saturation of the function
                 smps[i] += offs; // add dc offset
                 if(fabsf(smps[i]) < 1.0f)
-                    smps[i] = 1.5 * (smps[i] - (powf(smps[i], 3.0) / 3.0) );
+                    smps[i] = 1.5 * (smps[i] - (smps[i]*smps[i]*smps[i] / 3.0) );
                 else
                     smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
                 //subtract offset with distorsion function applied
-                smps[i] -= 1.5 * (offs - (powf(offs, 3.0) / 3.0)); 
+                smps[i] -= 1.5 * (offs - (offs*offs*offs / 3.0)); 
             }
             break;
         case 17:
