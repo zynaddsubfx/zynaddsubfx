@@ -135,11 +135,11 @@ void Distorsion::cleanup(void)
 //Apply the filters
 void Distorsion::applyfilters(float *efxoutl, float *efxoutr)
 {
-    lpfl->filterout(efxoutl);
-    hpfl->filterout(efxoutl);
+    if(Plpf!=127) lpfl->filterout(efxoutl);
+    if(Phpf!=0) hpfl->filterout(efxoutl);
     if(Pstereo != 0) { //stereo
-        lpfr->filterout(efxoutr);
-        hpfr->filterout(efxoutr);
+        if(Plpf!=127) lpfr->filterout(efxoutr);
+        if(Phpf!=0) hpfr->filterout(efxoutr);
     }
 }
 

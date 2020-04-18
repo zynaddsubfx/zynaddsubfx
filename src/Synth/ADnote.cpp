@@ -1222,21 +1222,21 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
     Voice& vce = NoteVoicePar[nvoice];
     for(int k = 0; k < vce.unison_size; ++k) {
         int    poshi  = vce.oscposhi[k];
-        int    poslo  = (int)(vce.oscposlo[k] * (1<<24));
+        int    poslo  = (int)(vce.oscposlo[k] * (0x01000000));
         int    freqhi = vce.oscfreqhi[k];
-        int    freqlo = (int)(vce.oscfreqlo[k] * (1<<24));
+        int    freqlo = (int)(vce.oscfreqlo[k] * (0x01000000));
         float *smps   = NoteVoicePar[nvoice].OscilSmp;
         float *tw     = tmpwave_unison[k];
         assert(vce.oscfreqlo[k] < 1.0f);
         for(int i = 0; i < synth.buffersize; ++i) {
-            tw[i]  = (smps[poshi] * ((1<<24) - poslo) + smps[poshi + 1] * poslo)/(1.0f*(1<<24));
+            tw[i]  = (smps[poshi] * (0x01000000 - poslo) + smps[poshi + 1] * poslo)/(16777216.0f);
             poslo += freqlo;
             poshi += freqhi + (poslo>>24);
             poslo &= 0xffffff;
             poshi &= synth.oscilsize - 1;
         }
         vce.oscposhi[k] = poshi;
-        vce.oscposlo[k] = poslo/(1.0f*(1<<24));
+        vce.oscposlo[k] = poslo/(16777216.0f);
     }
 }
 
