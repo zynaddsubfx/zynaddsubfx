@@ -69,19 +69,20 @@ rtosc::Ports Distorsion::ports = {
     {"waveform:", 0, 0, [](const char *, rtosc::RtData &d)
         {
             Distorsion  &dd = *(Distorsion*)d.obj;
-            float        buffer[128];
+            float        buffer[128], orig[128];
             rtosc_arg_t  args[128];
             char         arg_str[128+1] = {};
 
             for(int i=0; i<128; ++i)
                 buffer[i] = 2*(i/128.0)-1;
+            memcpy(orig, buffer, sizeof(float_t)*128);
 
             waveShapeSmps(sizeof(buffer)/sizeof(buffer[0]), buffer,
                     dd.Ptype + 1, dd.Pdrive, dd.Poffset, dd.Pfuncpar);
 
             for(int i=0; i<128; ++i) {
                 arg_str[i] = 'f';
-                args[i].f  = buffer[i];
+                args[i].f  = (dd.Pvolume * buffer[i] + (127 - dd.Pvolume) * orig[i]) / 127.0f;
             }
 
             d.replyArray(d.loc, arg_str, args);
