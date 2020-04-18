@@ -169,6 +169,13 @@ static const Ports partPorts = {
         [](const char *, RtData &d)
         {
             Part *p = (Part*)d.obj;
+            if (!p->hasFilename) {  // if part was never loaded or saved
+                time_t rawtime;     // make a new name from date and time
+                struct tm * timeinfo;
+                time (&rawtime);
+                timeinfo = localtime (&rawtime);
+                strftime (p->loaded_file,23,"%F_%R.xiz",timeinfo); 
+            }
             p->saveXML(p->loaded_file);
         }},
     //{"kit#16::T:F", "::Enables or disables kit item", 0,
@@ -296,6 +303,7 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     cleanup();
 
     Pname = new char[PART_MAX_NAME_LEN];
+    hasFilename = false;
 
     oldvolumel = oldvolumer = 0.5f;
     lastnote = -1;
@@ -1081,7 +1089,8 @@ int Part::saveXML(const char *filename)
     xml.endbranch();
 
     int result = xml.saveXMLfile(filename, gzip_compression);
-    strcpy(loaded_file,filename);
+    strncpy(loaded_file,filename, sizeof(loaded_file));
+    hasFilename = true;
     return result;
 }
 
@@ -1096,7 +1105,8 @@ int Part::loadXMLinstrument(const char *filename)
         return -10;
 
     // store filename in member variable
-    strcpy(loaded_file,filename);
+    strncpy(loaded_file,filename, sizeof(loaded_file));
+    hasFilename = true;
 
     getfromXMLinstrument(xml);
     xml.exitbranch();
