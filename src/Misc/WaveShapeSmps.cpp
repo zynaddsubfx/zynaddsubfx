@@ -255,49 +255,53 @@ void waveShapeSmps(int n,
             }
             break;
         case 15:
+            // flexible tanh soft limiter
             // f(x) = x / ((1+|x|^n)^(1/n)) // tanh approximation for n=2.5
             // Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
+            // the use of powf makes it quite cpu intensive
             par = (20.0f) * par * par + (0.1f) * par + 1.0f;  //Pfunpar=32 -> n=2.5
             ws = ws * ws * 35.0f + 1.0f;
             for(i = 0; i < n; ++i) {
-                smps[i] *= ws;// multiply signal to drive it in the saturation of the function
-                smps[i] += offs; // add dc offset
-                smps[i] = smps[i] / powf(1+powf(fabsf(smps[i]), par), 1/par); // unfortunately powf is quite slow
-                smps[i] -= offs / powf(1+powf(fabsf(offs), par), 1/par);
+                X *= ws;// multiply signal to drive it in the saturation of the function
+                X += offs; // add dc offset
+                X = X / powf(1+powf(fabsf(X), par), 1/par); // unfortunately powf is quite slow
+                X -= offs / powf(1+powf(fabsf(offs), par), 1/par);
             }
             break;
         case 16:
+            // cubic soft limiter
             // f(x) = 1.5 * (x-(x^3/3))
             // Formula from: https://ccrma.stanford.edu/~jos/pasp/Soft_Clipping.html
             // modified with factor 1.5 to go through [1,1] and [-1,-1]
-            ws = powf(ws, 3.5f) * 20.0f + 1.0f; //cubic soft limiter
+            ws = powf(ws, 3.5f) * 20.0f + 1.0f; 
             for(i = 0; i < n; ++i) {
-                smps[i] *= ws;   // multiply signal to drive it in the saturation of the function
-                smps[i] += offs; // add dc offset
+                X *= ws;   // multiply signal to drive it in the saturation of the function
+                X += offs; // add dc offset
                 float_t absX = fabsf(X);
                 if(fabsf(smps[i]) < 1.0f)
                     if (par==0.0)// standard square formula, saves some multiplications
                         X = 1.5 * (X - (X*X*X/3.0));
                     else         //  abs(x) <-> 1-abs(x) makes the function linear in center more square further away
                                  //  par <-> (1-par) blends the center linearization in with higher par
-                        X = par * (1-absX)          *     X      +  //linear part 
-                           (par *  absX  + (1-par)) * 1.5 * (X - (X*X*X/3.0)); //square part
+                        X = par * (1-absX)          *          X            +   //linear part 
+                           (par *  absX  + (1-par)) * 1.5 * (X - (X*X*X/3.0));  //cubic part
                 else
                     
-                    smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
+                    X = (X > 0 ? 1.0f : -1.0f);
                 //subtract offset with distorsion function applied
-                smps[i] -= 1.5 * (offs - (offs*offs*offs / 3.0)); 
-                smps[i] -= offs*(2-fabsf(offs)); // for offset calculation the square one is good enough and less cpu intensive
+                //X -= 1.5 * (offs - (offs*offs*offs / 3.0));
+                X -= offs*(2-fabsf(offs)); // for offset calculation the square one is good enough and less cpu intensive
             }
             break;
         case 17:
+        // square soft limiter
         // f(x) = x*(2-abs(x))
         // Formula of 16 changed to square but still going through [1,1] and [-1,-1]
-            ws = ws * ws * ws * 20.0f + 1.0f; //square soft limiter
+            ws = ws * ws * ws * 20.0f + 1.0f; 
             par = par/1.3;
             for(i = 0; i < n; ++i) {
-                smps[i] *= ws; // multiply signal to drive it in the saturation of the function
-                smps[i] += offs; // add dc offset
+                X *= ws; // multiply signal to drive it in the saturation of the function
+                X += offs; // add dc offset
                 float_t absX = fabsf(X);
                 if(absX < 1.0f)
                     if (par==0.0)// standard square formula, saves some multiplications
@@ -309,7 +313,7 @@ void waveShapeSmps(int n,
                 else
                     X = (X > 0 ? 1.0f : -1.0f);
                 //subtract offset with distorsion function applied
-                smps[i] -= offs*(2-fabsf(offs));
+                X -= offs*(2-fabsf(offs));
             }
             break;
     }
