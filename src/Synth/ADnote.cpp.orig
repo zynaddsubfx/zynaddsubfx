@@ -1218,16 +1218,24 @@ inline void ADnote::fadein(float *smps) const
  */
 inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
 {
+<<<<<<< HEAD
     Voice& vce = NoteVoicePar[nvoice];
     for(int k = 0; k < vce.unison_size; ++k) {
         int    poshi  = vce.oscposhi[k];
+        int    poslo  = (int)(vce.oscposlo[k] * (0x01000000));
+        int    freqhi = vce.oscfreqhi[k];
+        int    freqlo = (int)(vce.oscfreqlo[k] * (0x01000000));
+=======
+    for(int k = 0; k < unison_size[nvoice]; ++k) {
+        int    poshi  = oscposhi[nvoice][k];
         // convert floating point fractional part (sample interval phase) 
         // with range [0.0 ... 1.0] to fixed point with 1 digit is 2^-24
         // by multiplying with precalculated 2^24 and casting to integer:
-        int    poslo  = (int)(vce.oscposlo[k] * 16777216.0f);
-        int    freqhi = vce.oscfreqhi[k];
+        int    poslo  = (int)(oscposlo[nvoice][k] * 16777216.0f); 
+        int    freqhi = oscfreqhi[nvoice][k];
         // same for phase increment:
-        int    freqlo = (int)(vce.oscfreqlo[k] * 16777216.0f);
+        int    freqlo = (int)(oscfreqlo[nvoice][k] * 16777216.0f);
+>>>>>>> adsynth more comments and small fixes
         float *smps   = NoteVoicePar[nvoice].OscilSmp;
         float *tw     = tmpwave_unison[k];
         assert(vce.oscfreqlo[k] < 1.0f);
@@ -1285,7 +1293,7 @@ inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
         0.004273442181254887f,
         0.0010596256917418426f
         };
-
+<<<<<<< HEAD
         
     
     Voice& vce = NoteVoicePar[nvoice];
@@ -1296,7 +1304,18 @@ inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
         int    freqlo = (int)(vce.oscfreqlo[k] * (1<<24));
         int    ovsmpfreqhi = vce.oscfreqhi[k] / 2;
         int    ovsmpfreqlo = (int)((vce.oscfreqlo[k] / 2) * (1<<24));
+        
+=======
 
+    for(int k = 0; k < unison_size[nvoice]; ++k) {
+        int    poshi  = oscposhi[nvoice][k];
+        int    poslo  = (int)(oscposlo[nvoice][k] * (1<<24));
+        int    freqhi = oscfreqhi[nvoice][k];
+        int    freqlo = (int)(oscfreqlo[nvoice][k] * (1<<24));
+        int    ovsmpfreqhi = oscfreqhi[nvoice][k] / 2;
+        int    ovsmpfreqlo = (int)((oscfreqlo[nvoice][k] / 2) * (1<<24));
+
+>>>>>>> adsynth more comments and small fixes
         int    ovsmpposlo; 
         int    ovsmpposhi;
         int    uflow;
@@ -1321,7 +1340,6 @@ inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
                 ovsmpposhi += ovsmpfreqhi + (ovsmpposlo>>24); // add the 24-bit overflow
                 ovsmpposlo &= 0xffffff;
                 ovsmpposhi &= synth.oscilsize - 1;
-
             }
 
             // advance to next sample
@@ -1337,7 +1355,6 @@ inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
         vce.oscposlo[k] = poslo/(1.0f*(1<<24));
     }
 }
-
 
 /*
  * Computes the Oscillator (Mixing)
