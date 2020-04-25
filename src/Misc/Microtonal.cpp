@@ -820,8 +820,8 @@ void Microtonal::getfromXML(XMLwrapper& xml)
                 octave[i].x2     = 0;
                 octave[i].tuning_log2 = log2f(xml.getparreal("cents",
                     powf(2.0f, octave[i].tuning_log2))) / log2(2.0f);
-                octave[i].x1     = xml.getpar127("numerator", octave[i].x1);
-                octave[i].x2     = xml.getpar127("denominator", octave[i].x2);
+                octave[i].x1     = xml.getpar("numerator", octave[i].x1, 0, 65535);
+                octave[i].x2     = xml.getpar("denominator", octave[i].x2, 0, 65535);
 
                 if(octave[i].x2 != 0)
                     octave[i].type = 2;
