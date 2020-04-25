@@ -25,6 +25,26 @@ namespace zyn {
 #define rBegin [](const char *msg, rtosc::RtData &d) {
 #define rEnd }
 
+unsigned char distdefaultpars[17] = {
+0,
+0,
+0,
+0,
+0,
+0,
+0, // limiter
+0,
+0,
+0, // inverse limiter
+0,
+0,
+0,
+0,
+32, // tanh
+0,  // cubic
+0   // square   
+};
+
 rtosc::Ports Distorsion::ports = {
     {"preset::i", rProp(parameter)
                   rOptions(Overdrive 1, Overdrive 2, A. Exciter 1, A. Exciter 2, Guitar Amp,
@@ -278,8 +298,10 @@ void Distorsion::changepar(int npar, unsigned char value)
         case 5:
             if(value > 16)
                 Ptype = 16;  //this must be increased if more distorsion types are added
-            else
+            else {
                 Ptype = value;
+                Pfuncpar = distdefaultpars[Ptype];
+            }
             break;
         case 6:
             if(value > 1)
