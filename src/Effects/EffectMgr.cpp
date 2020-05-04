@@ -502,7 +502,25 @@ void EffectMgr::getfromXML(XMLwrapper& xml)
     if(xml.enterbranch("EFFECT_PARAMETERS")) {
         for(int n = 0; n != 128; n++) {
             if(xml.enterbranch("par_no", n) == 0) {
-                settings[n] = -1; /* use default */
+                /*
+                 * XXX workaround for old presets:
+                 *
+                 * All effect parameters have a default value.
+                 * Default values are skipped when storing parameters,
+                 * and must appear as the default value when loading.
+                 *
+                 * Up until recently it was assumed that the default
+                 * value of all parameters is zero. This is no longer
+                 * true, but when loading old presets we need to
+                 * preserve this behaviour! Else sounds may change.
+                 */
+                if (xml.fileversion() < version_type(3,0,6) &&
+                    /* XXX old presets don't have DC offset */
+                    (geteffect() != 6 || n < 11)) {
+                        settings[n] = 0;
+                } else {
+                        settings[n] = -1; /* use parameter default */
+                }
             } else {
                 settings[n] = xml.getpar127("par", 0);
                 xml.exitbranch();
