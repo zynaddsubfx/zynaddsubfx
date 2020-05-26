@@ -28,7 +28,7 @@ uint8_t MidiIn::midiSysEx(unsigned char data)
 {
     if (data & 0x80) {
         if (data == 0xF0) {
-		sysex_offset = 0; /* begin */
+            sysex_offset = 0; /* begin */
         } else if (data == 0xF7) {
                 return (2); /* end */
         } else {
