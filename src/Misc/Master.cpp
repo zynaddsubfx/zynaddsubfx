@@ -999,8 +999,10 @@ void Master::setController(char chan, int type, int par)
                         sysefx[parlo]->seteffectparrt(valhi, vallo);
                     break;
                 case 0x08: //Insertion Effects
-                    if(parlo < NUM_INS_EFX)
+                    if(chan == 0 && parlo < NUM_INS_EFX)
                         insefx[parlo]->seteffectparrt(valhi, vallo);
+                    else if (chan < NUM_MIDI_PARTS && parlo < NUM_PART_EFX)
+                        part[chan-1]->partefx[parlo]->seteffectparrt(valhi, vallo);
                     break;
             }
         }
