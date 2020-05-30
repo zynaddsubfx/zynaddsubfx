@@ -190,7 +190,7 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
 
 #ifdef WIN32
     unsigned num = p->sampleGenerator([&path,&d]
-                       (unsigned N, PADnoteParameters::Sample &s)
+                       (unsigned N, PADnoteParameters::Sample &&s)
                        {
                            //printf("sending info to '%s'\n",
                            //       (path+to_s(N)).c_str());
