@@ -16,6 +16,7 @@
 
 #include "../globals.h"
 #include "PresetsArray.h"
+#include "WaveTable.h"
 
 namespace zyn {
 
@@ -307,6 +308,8 @@ struct ADnoteVoiceParam {
     int64_t last_update_timestamp;
 
     static const rtosc::Ports &ports;
+
+    WaveTable Table;
 };
 
 class ADnoteParameters:public PresetsArray

@@ -322,8 +322,9 @@ struct NonRtObjStore
         return objmap[loc];
     }
 
-    void handleOscil(const char *msg, rtosc::RtData &d) {
-        string obj_rl(d.message, msg);
+    //! try to dispatch a message at the OscilGen non-RT-ports
+    void handleOscilADnote(const char *msg, rtosc::RtData &d, bool voiceOscil) {
+        const string obj_rl(d.message, msg);
         assert(d.message);
         assert(msg);
         assert(msg >= d.message);
@@ -334,6 +335,40 @@ struct NonRtObjStore
             strcpy(d.loc, obj_rl.c_str());
             d.obj = osc;
             OscilGen::non_realtime_ports.dispatch(msg, d);
+            if(d.matches == 0 /* || d.forwarded -> check should be useless, can't be forwarded */)
+            {
+                // nothing to re-compute
+                // this will probably never be the case when OscilGen::get will be non-RT
+            }
+            else
+            {
+                if(voiceOscil)
+                {
+                    OscilGen* oscilGen = static_cast<OscilGen*>(d.obj);
+                    WaveTable wt = oscilGen->calculateWaveTable();
+                    // TODO: how to send wt back to ADnoteVoice?
+                    //       maybe via OSC, like this?
+#if 0
+                    string::size_type pos = obj_rl.rfind("/OscilSmp");
+                    if(pos == string::npos)
+                    {
+                        printf("???\n");
+                    }
+                    else
+                    {
+                        const std::string obj_vc(obj_rl, 0, pos);
+                        printf("obj_ad: %d: %s -> %s\n", (int)pos, obj_rl.c_str(), obj_ad.c_str());
+
+                        // e.g.: dispatch("/part0/kit0/adpars/VoicePar0", d)
+                        MwDataObj result(/*???*/);
+                        // some how store wt into "result"
+                        ADnoteVoiceParam::ports.dispatch(obj_vc.c_str(), d);
+                    }
+#else
+                    (void)wt;
+#endif
+                }
+            }
         }
         else {
             // print warning, except in rtosc::walk_ports
@@ -1405,13 +1440,13 @@ static rtosc::Ports nonRtParamPorts = {
         "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/adpars/VoicePar#"
             STRINGIFY(NUM_VOICES) "/OscilSmp/", 0, &OscilGen::non_realtime_ports,
         rBegin;
-        impl.obj_store.handleOscil(chomp(chomp(chomp(chomp(chomp(msg))))), d);
+        impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), d, true);
         rEnd},
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
         "/kit#" STRINGIFY(NUM_KIT_ITEMS)
             "/adpars/VoicePar#" STRINGIFY(NUM_VOICES) "/FMSmp/", 0, &OscilGen::non_realtime_ports,
         rBegin
-        impl.obj_store.handleOscil(chomp(chomp(chomp(chomp(chomp(msg))))), d);
+        impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), d, false);
         rEnd},
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
         "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/padpars/", 0, &PADnoteParameters::non_realtime_ports,

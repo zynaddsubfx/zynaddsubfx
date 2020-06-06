@@ -17,6 +17,7 @@
 #include "../globals.h"
 #include <rtosc/ports.h>
 #include "../Params/Presets.h"
+#include "../Params/WaveTable.h"
 
 namespace zyn {
 
@@ -50,6 +51,8 @@ class OscilGen:public Presets
         void getfromXML(XMLwrapper& xml);
 
         void convert2sine();
+
+        WaveTable calculateWaveTable() { return WaveTable(); /* TODO */ }
 
         //Parameters
 
