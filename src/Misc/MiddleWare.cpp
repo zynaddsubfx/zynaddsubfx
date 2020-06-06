@@ -32,6 +32,7 @@
 #include "../UI/Fl_Osc_Interface.h"
 
 #include <map>
+#include <memory>
 #include <queue>
 
 #include "Util.h"
@@ -42,7 +43,7 @@
 #include "PresetExtractor.h"
 #include "../Containers/MultiPseudoStack.h"
 #include "../Params/PresetsStore.h"
-#include "../Params/EnvelopeParams.h"
+#include "../Synth/Resonance.h"
 #include "../Params/LFOParams.h"
 #include "../Params/FilterParams.h"
 #include "../Effects/EffectMgr.h"
@@ -50,6 +51,7 @@
 #include "../Params/ADnoteParameters.h"
 #include "../Params/SUBnoteParameters.h"
 #include "../Params/PADnoteParameters.h"
+#include "../Params/WaveTable.h"
 #include "../DSP/FFTwrapper.h"
 #include "../Synth/OscilGen.h"
 #include "../Nio/Nio.h"
@@ -224,6 +226,21 @@ void deallocate(const char *str, void *v)
         delete (rtosc::AutomationMgr*)v;
     else if(!strcmp(str, "PADsample"))
         delete[] (float*)v;
+    else if(!strcmp(str, "Tensor2<WaveTable::float32>")) {
+//      printf("WT: MW free Tensor2<WaveTable::float32> %p\n", v);
+        delete (Tensor2<WaveTable::float32>*)v;
+    }
+    else if(!strcmp(str, "Tensor1<WaveTable::float32>")) {
+//      printf("WT: MW free Tensor1<WaveTable::float32> %p\n", v);
+        delete (Tensor1<WaveTable::float32>*)v;
+    }
+    else if(!strcmp(str, "Tensor1<WaveTable::IntOrFloat>")) {
+//      printf("WT: MW free Tensor1<WaveTable::IntOrFloat> %p\n", v);
+        delete (Tensor1<WaveTable::IntOrFloat>*)v;
+    }
+    else if(!strcmp(str, "WaveTable")) {
+        delete (WaveTable*)v;
+    }
     else
         fprintf(stderr, "Unknown type '%s', leaking pointer %p!!\n", str, v);
 }
@@ -270,6 +287,75 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
                 0, 440.0f, sizeof(float*), NULL);
     }
 }
+
+/**
+ * Class responsible for sending chained requests of "/wavetable-params-changed"
+ * TODO WT1: This could be removed, because changes are detected in a loop in
+ *           ADnoteParameters::requestWaveTables (every 0.2s).
+ */
+class WaveTableRequestHandler
+{
+public:
+    using param_change_time_t = int;
+private:
+    struct info_t
+    {
+        //! do not request ad-pars if we're already waiting for them
+        bool waitForAdPars = false;
+        //! do not generate waves for out-dated parameters
+        //! this marks which scale tensors are currently valid
+        //! first time will be "1"
+        param_change_time_t param_change_time = 0;
+    };
+
+    info_t info[NUM_MIDI_PARTS][NUM_KIT_ITEMS][NUM_VOICES][2];
+
+public:
+    //! if not already done, inform RT that params relevant for wavetable
+    //! calculation failed. if freqs or semantics could have changed, send those
+    //! aswell.
+    void chainWtParamRequest(int part, int kit, int voice, bool isModOsc, rtosc::RtData& d)
+    {
+        info_t& cur_info = info[part][kit][voice][isModOsc];
+        if(!cur_info.waitForAdPars)
+        {
+#ifdef DBG_WAVETABLES
+            printf("WT: MW sending /wavetable-params-changed...\n");
+#endif
+            std::string s = buildVoiceParMsg(&part, &kit, &voice);
+            cur_info.waitForAdPars = true;
+            ++cur_info.param_change_time;
+            d.chain((s + "/wavetable-params-changed").c_str(), isModOsc ? "Ti" : "Fi",
+                    cur_info.param_change_time);
+        }
+    }
+
+    void receivedAdPars(int part, int kit, int voice, bool isModOsc)
+    {
+        info[part][kit][voice][isModOsc].waitForAdPars = false;
+    }
+
+    bool isParamChangeUpToDate(int part, int kit, int voice, bool isModOsc, int current) const
+    {
+        info_t cur_info = info[part][kit][voice][isModOsc];
+        bool up_to_date;
+        if(current)
+        {
+            param_change_time_t expected = cur_info.param_change_time;
+            if(current < expected)
+                up_to_date = false;
+            else if(current == expected)
+                up_to_date = true;
+            else
+                assert(false);
+        }
+        else
+            // hey, it's just a few waves... if they will be outdated soon,
+            // we have not really lost much
+            up_to_date = true;
+        return up_to_date;
+    }
+};
 
 /******************************************************************************
  *                      MIDI Serialization                                    *
@@ -379,11 +465,13 @@ struct NonRtObjStore
             std::string nbase = base+"adpars/VoicePar"+to_s(k)+"/";
             if(adpars) {
                 auto &nobj = adpars->VoicePar[k];
-                objmap[nbase+"OscilSmp/"] = nobj.OscilGn;
-                objmap[nbase+"FMSmp/"]    = nobj.FmGn;
+                objmap[nbase+"OscilSmp/"]              = nobj.OscilGn;
+                objmap[nbase+"FMSmp/"]                 = nobj.FmGn;
+                objmap[base+"adpars/GlobalPar/Reson/"] = adpars->GlobalPar.Reson;
             } else {
-                objmap[nbase+"OscilSmp/"] = nullptr;
-                objmap[nbase+"FMSmp/"]    = nullptr;
+                objmap[nbase+"OscilSmp/"]              = nullptr;
+                objmap[nbase+"FMSmp/"]                 = nullptr;
+                objmap[base+"adpars/GlobalPar/Reson/"] = nullptr;
             }
         }
     }
@@ -395,9 +483,11 @@ struct NonRtObjStore
             if(padpars) {
                 objmap[base+"padpars/"]       = padpars;
                 objmap[base+"padpars/oscilgen/"] = padpars->oscilgen;
+                objmap[base+"padpars/resonance/"] = padpars->resonance;
             } else {
                 objmap[base+"padpars/"]       = nullptr;
                 objmap[base+"padpars/oscilgen/"] = nullptr;
+                objmap[base+"padpars/resonance/"] = nullptr;
             }
         }
     }
@@ -407,18 +497,72 @@ struct NonRtObjStore
         objmap.clear();
     }
 
-    bool has(std::string loc)
+    bool has(std::string loc) const
     {
         return objmap.find(loc) != objmap.end();
     }
 
     void *get(std::string loc)
     {
-        return objmap[loc];
+        auto itr = objmap.find(loc);
+        return (itr == objmap.end()) ? nullptr : itr->second;
     }
 
-    void handleOscil(const char *msg, rtosc::RtData &d) {
+    void handleReson(const char *msg, rtosc::RtData &d,
+                     WaveTableRequestHandler& handler)
+    {
+        int part, kit;
+        bool res = idsFromMsg(d.message, &part, &kit);
+        assert(res);
+
         string obj_rl(d.message, msg);
+        void *reso = get(obj_rl);
+        if(reso)
+        {
+            strcpy(d.loc, obj_rl.c_str());
+            d.obj = reso;
+            Resonance::ports.dispatch(msg, d);
+            if(// no match (will probably not occur)
+               d.matches == 0 ||
+               // message does not modify Resonance?
+               // (currently, messages without arguments don't modify it)
+               (   !rtosc_narguments(msg)
+                && !strstr(msg, "smooth")
+                && !strstr(msg, "zero")
+               ))
+            {
+                // nothing to re-compute
+            }
+            else {
+                // inform RT about new params
+                for(int voice = 0; voice < NUM_VOICES; ++voice)
+                {
+                    // TODO WT1: can be detected in ADnoteParameters::requestWavetables(),
+                    //           similar to OscilGen change stamps?
+                    handler.chainWtParamRequest(part, kit, voice, false, d);
+                }
+            }
+        }
+        else {
+            // print warning, except in rtosc::walk_ports
+            if(!strstr(d.message, "/pointer"))
+            {
+                fprintf(stderr, "Warning: trying to access Resonance object "
+                                "\"%s\", which does not exist\n",
+                        obj_rl.c_str());
+            }
+            d.obj = nullptr; // tell walk_ports that there's nothing to recurse here...
+        }
+    }
+    //! try to dispatch a message at the OscilGen ports, which are all non-RT
+    void handleOscilADnote(const char *msg, bool isModOsc, rtosc::RtData &d,
+                           WaveTableRequestHandler& handler) {
+        int part, kit, voice;
+        bool res = idsFromMsg(d.message, &part, &kit, &voice);
+        assert(res);
+
+        // relative location of this message (i.e. the OscilGen path)
+        const string obj_rl(d.message, msg);
         assert(d.message);
         assert(msg);
         assert(msg >= d.message);
@@ -426,9 +570,27 @@ struct NonRtObjStore
         void *osc = get(obj_rl);
         if(osc)
         {
+            // try to forward the message to our non-realtime ports
+            // therefore, change
+            // * loc from "" to the OscilGen path
+            // * d.obj from MiddleWareImplementation to the OscilGen object
             strcpy(d.loc, obj_rl.c_str());
             d.obj = osc;
-            OscilGen::non_realtime_ports.dispatch(msg, d);
+            OscilGen::ports.dispatch(msg, d);
+            if(// no match (will probably not occur)
+               d.matches == 0 ||
+               // message does not modify OscilGen?
+               // (currently, messages without arguments don't modify it)
+               !rtosc_narguments(msg))
+            {
+                // nothing to re-compute
+            }
+            else {
+                // inform RT about new params
+                // TODO WT1: can be detected in ADnoteParameters::requestWavetables(),
+                //           similar to OscilGen change stamps?
+                handler.chainWtParamRequest(part, kit, voice, isModOsc, d);
+            }
         }
         else {
             // print warning, except in rtosc::walk_ports
@@ -568,9 +730,43 @@ public:
 
 class MiddleWareImpl
 {
+public:
+    struct waveTablesToGenerateStruct
+    {
+        std::string voicePath;
+        int part, kit, voice; // redundant to voice path
+        bool isModOsc, isWtMod;
+        int extMod;
+        bool isExtMod() const { return extMod != -1; }
+        int param_change_time;
+        int presonance;
+        struct wave_request
+        {
+            tensor_size_t sem_idx;
+            tensor_size_t freq_idx;
+            WaveTable::IntOrFloat sem;
+            float freq;
+        };
+        //! specific sem/freq, if not the whole wavetable shall be generated
+        std::vector<wave_request> wave_requests;
+    };
+
+    void addWaveTableToGenerate(waveTablesToGenerateStruct&& params)
+    {
+        waveTablesToGenerate.push(std::move(params));
+    }
+
+private:
     // messages chained with MwDataObj::chain
     // must yet be handled after a previous handleMsg
     std::queue<std::vector<char>> msgsToHandle;
+    // pending jobs, will be completed when MW is not very busy
+    std::queue<waveTablesToGenerateStruct> waveTablesToGenerate;
+    // age of oldest message in the wavetable queue
+    // only required for debugging what happens when MW replies too slow
+    // (or possibly profiling in the future)
+    unsigned wt_queue_age = 0;
+    static constexpr unsigned wt_queue_max_age = 0; // > 0 only for debugging
 public:
     MiddleWare *parent;
     Config* const config;
@@ -578,6 +774,8 @@ public:
                    int preferred_port);
     ~MiddleWareImpl(void);
     void recreateMinimalMaster();
+
+    WaveTableRequestHandler waveTableRequestHandler;
 
     //Check offline vs online mode in plugins
     void heartBeat(Master *m);
@@ -918,6 +1116,253 @@ public:
     bool recording_undo = true;
     void bToUhandle(const char *rtmsg);
 
+    /*
+     * begin of wavetable code
+     */
+    std::vector<std::unique_ptr<std::thread>> wtGenThreads;
+    struct wtResult
+    {
+        void* tensor;
+        std::size_t freq_idx;
+        std::size_t sem_idx;
+    };
+    std::vector<wtResult> calculatedTables;
+
+    //! Return the generating oscilGen (can be internal or external)
+    OscilGen* getOscilGen(const waveTablesToGenerateStruct& params)
+    {
+        std::string oscilGenStr = params.voicePath;
+        if(oscilGenStr.back() == '/')
+            oscilGenStr.resize(oscilGenStr.size()-1);
+        if(params.isExtMod())
+        {
+            while(isdigit(oscilGenStr.back()))
+                oscilGenStr.resize(oscilGenStr.size()-1);
+            oscilGenStr += std::to_string(params.extMod);
+        }
+        oscilGenStr += (params.isModOsc ? "/FMSmp/" : "/OscilSmp/");
+        // the generating oscilGen (can be internal or external)
+        OscilGen* oscilGen = static_cast<OscilGen*>(
+             obj_store.get(oscilGenStr));
+        assert(oscilGen);
+        return oscilGen;
+    }
+
+    void calculateWavetables(const waveTablesToGenerateStruct& params, std::size_t job,
+                             OscilGen* oscilGen,
+                             wavetable_types::WtMode wtMode,
+                             std::size_t size_semantics,
+                             const WaveTable::float32* freqs_array,
+                             const WaveTable::IntOrFloat* sem_array)
+    {
+        {
+            const char* mode_str = "unknown";
+            switch(wtMode)
+            {
+                case wavetable_types::WtMode::freqwave_smps:
+                    mode_str = "wavetable";
+                    break;
+                case wavetable_types::WtMode::freqseed_smps:
+                    mode_str = "freqseed";
+                    break;
+                case wavetable_types::WtMode::freq_smps:
+                    mode_str = "freq";
+                    break;
+            }
+
+            // calculate all freqs for all pending semantics
+            if(params.wave_requests.size())
+            {
+#ifdef DBG_WAVETABLES_BASIC
+                printf("WT: MW generating new tensor of 1 wave each (mode %s)...\n",
+                       mode_str);
+#endif
+                const waveTablesToGenerateStruct::wave_request& wave_req = params.wave_requests[job];
+                Tensor1<WaveTable::float32>* newTensor = new Tensor1<WaveTable::float32>(synth.oscilsize);
+                WaveTable::float32* data = oscilGen->calculateWaveTableData(
+                    wave_req.freq, wave_req.sem, wtMode, params.presonance);
+                newTensor->take_data_and_own_it(data);
+
+                calculatedTables[job].tensor = newTensor;
+                calculatedTables[job].freq_idx = wave_req.freq_idx;
+                calculatedTables[job].sem_idx = wave_req.sem_idx;
+            }
+            else // calculate one big table
+            {
+#ifdef DBG_WAVETABLES_BASIC
+                printf("WT: MW generating new tensor of %d waves each (mode %s)...\n",
+                       (int)size_semantics, mode_str);
+#endif
+                assert(freqs_array);
+                assert(sem_array);
+
+                const Shape2 tensorShape{size_semantics,
+                                         (tensor_size_t)synth.oscilsize};
+                Tensor2<WaveTable::float32>* newTensor =
+                    new Tensor2<WaveTable::float32>(tensorShape);
+
+                for(tensor_size_t s = 0; s < size_semantics; ++s)
+                {
+                    WaveTable::float32* data = oscilGen->calculateWaveTableData(
+                        freqs_array[job], sem_array[s], wtMode, params.presonance);
+                    (*newTensor)[s].take_data_and_own_it(data);
+                }
+
+#ifdef DBG_WAVETABLES
+                printf("WT: MW sending tensor at freq %d\n", (int)job);
+#endif
+                calculatedTables[job].tensor = newTensor;
+                calculatedTables[job].freq_idx = job;
+            }
+        }
+    }
+
+    void calculateWaveTablesIfPossible()
+    {
+        if(!wtGenThreads.size())
+            wtGenThreads.resize(/*std::thread::hardware_concurrency()*/1);
+/*      if(wtGenThreads)
+        {
+            if(!calcsLeft) // atomic variable
+            {
+                // TODO: send vector
+                // TODO: make vector empty
+                waveTablesToGenerate.pop();
+                wtGenThread.reset(nullptr);
+            }
+        }
+        else*/
+        {
+            if(wt_queue_age < wt_queue_max_age)
+            {
+                ++wt_queue_age;
+                return;
+            }
+            else
+            {
+                wt_queue_age = 0;
+            }
+
+            while(!waveTablesToGenerate.empty())
+            {
+                waveTablesToGenerateStruct& params = waveTablesToGenerate.front();
+
+                if(waveTableRequestHandler.isParamChangeUpToDate(
+                    params.part, params.kit, params.voice, params.isModOsc,
+                    params.param_change_time))
+                {
+                    OscilGen* oscilGen = getOscilGen(params);
+
+                    wavetable_types::WtMode wtMode;
+                    // hack:
+                    const WaveTable::float32* freqs_array = nullptr;
+                    const WaveTable::IntOrFloat* sem_array = nullptr;
+                    std::size_t size_freqs, size_semantics;
+                    if(params.wave_requests.size())
+                    {
+                        wtMode = wavetable_types::WtMode::freqseed_smps;
+                    }
+                    else
+                    // if no wave requests, this means generate a completely new
+                    // wavetable
+                    {
+                        Tensor1<WaveTable::float32>* unused_freqs; // non-constant
+                        Tensor1<WaveTable::IntOrFloat>* unused_semantics;
+                        wtMode = oscilGen->calculateWaveTableMode(params.isWtMod);
+                        std::tie(unused_freqs, unused_semantics) = oscilGen->calculateWaveTableScales(wtMode, params.presonance != 0);
+                        // hack: pointing to these arrays is OK, because the swap
+                        // in ADnoteParameters will not touch the array
+                        // (and it will not get deleted until MW has delivered a
+                        // further Tensor)
+                        freqs_array = unused_freqs->data();
+                        sem_array = unused_semantics->data();
+                        size_freqs = unused_freqs->size();
+                        size_semantics = unused_semantics->size();
+
+                        // possible optimization: no allocations when sizes don't change
+                        // but this might complicate the code
+                        WaveTable* newWt = new WaveTable(unused_semantics->size(), unused_freqs->size());
+                        newWt->setMode(wtMode);
+                        newWt->swapFreqsInitially(*unused_freqs);
+                        newWt->swapSemanticsInitially(*unused_semantics);
+                        newWt->setChangeStamp(oscilGen->change_stamp());
+
+                        delete unused_freqs;
+                        delete unused_semantics;
+                        const WaveTable* wt = newWt; // from now, kept const in this function
+
+                        // send Tensor3, it does not contain any buffers yet
+                        // no snoop ports, send this directly to RT
+                        uToB->write((params.voicePath + "set-wavetable").c_str(),
+                                    params.isModOsc ? "Tb" : "Fb", sizeof(WaveTable*), (uint8_t*)&wt);
+
+#ifdef DBG_WAVETABLES
+                        printf("WT: MW generated new scales, sizes: %d %d\n", (int)wt->size_freqs(), (int)wt->size_semantics());
+#endif
+                    }
+
+#ifdef DBG_WAVETABLES
+                    printf("WT: MW must generate: %s (mod-osc: %s), resonance %d\n",
+                        params.voicePath.c_str(), params.isModOsc ? "true":"false", params.presonance);
+#endif
+                    assert(!params.isModOsc || params.presonance == 0);
+
+                    std::size_t calcsToBeDone = params.wave_requests.size()
+                                              ? params.wave_requests.size()
+                                              : size_freqs;
+                    calculatedTables.resize(calcsToBeDone);
+
+                    MiddleWareImpl* this_ptr = this;
+                    auto thread_cb = [calcsToBeDone, this_ptr, params,
+                                      oscilGen, wtMode,
+                                      size_semantics, freqs_array, sem_array](
+                                      std::size_t nthreads, std::size_t threadno)
+                    {
+                        for(std::size_t job = threadno; job < calcsToBeDone; job+=nthreads)
+                        {
+                            this_ptr->calculateWavetables(params, job, oscilGen, wtMode, size_semantics, freqs_array, sem_array);
+                        }
+                    };
+
+                    for(std::size_t t = 0; t < wtGenThreads.size(); ++t)
+                        //wtGenThreads[t] = std::make_unique<std::thread>(thread_cb, wtGenThreads.size(), t); // TODO: C++14
+                        wtGenThreads[t].reset(new std::thread(thread_cb, wtGenThreads.size(), t));
+                    for(std::unique_ptr<std::thread>& thrd : wtGenThreads)
+                    {
+                        thrd->join();
+                        thrd.reset(nullptr);
+                    }
+
+                    for(wtResult& m_result : calculatedTables)
+                    {
+                        if(params.wave_requests.size())
+                        {
+                            uToB->write((params.voicePath + "set-waves").c_str(), params.isModOsc ? "Tiiib" : "Fiiib",
+                                         params.param_change_time, m_result.freq_idx, m_result.sem_idx, sizeof(Tensor1<WaveTable::float32>*), (uint8_t*)&m_result.tensor);
+                        }
+                        else
+                        {
+                            uToB->write((params.voicePath + "set-waves").c_str(), params.isModOsc ? "Tiib" : "Fiib",
+                                        params.param_change_time, m_result.freq_idx, sizeof(Tensor2<WaveTable::float32>*), (uint8_t*)&m_result.tensor);
+                        }
+                    }
+
+                }
+                else {
+#ifdef DBG_WAVETABLES
+                    printf("WT: MW dropping outdated WT request %d\n",params.param_change_time);
+#endif
+                }
+                waveTablesToGenerate.pop();
+            }
+
+        }
+    }
+
+    /*
+     * end of wavetable code
+     */
+
     void tick(void)
     {
         if(server)
@@ -943,6 +1388,20 @@ public:
             //similar to previous_master->runOSC(0,0,true)
             //but note that previous_master could have been freed already
             master->runOSC(0,0,true, previous_master);
+        }
+
+        // anything urgent to do?
+        // (autoSave and offline detection are not considered urgent,
+        // runOsc has just handled all master OSC events)
+        if(lo_server_wait(server, 0) ||
+           bToU->hasNext() ||
+           multi_thread_source.canRead())
+        {
+            // don't do anything, let the caller decide to call tick() again
+        }
+        else
+        {
+            calculateWaveTablesIfPossible();
         }
     }
 
@@ -1504,17 +1963,22 @@ void gcc_10_1_0_is_dumb(const std::vector<std::string> &files,
  * BASE/part#/kit#/padpars/oscil/\*
  */
 static rtosc::Ports nonRtParamPorts = {
+    /*
+        obj_store access
+    */
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
         "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/adpars/VoicePar#"
-            STRINGIFY(NUM_VOICES) "/OscilSmp/", 0, &OscilGen::non_realtime_ports,
+            STRINGIFY(NUM_VOICES) "/OscilSmp/", 0, &OscilGen::ports,
         rBegin;
-        impl.obj_store.handleOscil(chomp(chomp(chomp(chomp(chomp(msg))))), d);
+        impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), false, d,
+                                         impl.waveTableRequestHandler);
         rEnd},
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
         "/kit#" STRINGIFY(NUM_KIT_ITEMS)
-            "/adpars/VoicePar#" STRINGIFY(NUM_VOICES) "/FMSmp/", 0, &OscilGen::non_realtime_ports,
+            "/adpars/VoicePar#" STRINGIFY(NUM_VOICES) "/FMSmp/", 0, &OscilGen::ports,
         rBegin
-        impl.obj_store.handleOscil(chomp(chomp(chomp(chomp(chomp(msg))))), d);
+        impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), true, d,
+                                         impl.waveTableRequestHandler);
         rEnd},
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
         "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/padpars/", 0, &PADnoteParameters::non_realtime_ports,
@@ -1524,6 +1988,44 @@ static rtosc::Ports nonRtParamPorts = {
 };
 
 static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
+    /*
+        catch AD resonance changes
+    */
+    {"part#" STRINGIFY(NUM_MIDI_PARTS)
+        "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/adpars/VoicePar#"
+            STRINGIFY(NUM_VOICES) "/Presonance:T:F", 0, nullptr,
+        rBegin;
+        int part, kit, voice;
+        bool res = idsFromMsg(msg, &part, &kit, &voice);
+        assert(res);
+        impl.waveTableRequestHandler.chainWtParamRequest(part, kit, voice, false, d);
+        d.forward();
+        rEnd}, // TODO WT2: might handle re-request WTs in ADnotePar...
+    {"part#" STRINGIFY(NUM_MIDI_PARTS)
+        "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/adpars/GlobalPar/Reson/", 0, nullptr,
+        rBegin;
+        impl.obj_store.handleReson(chomp(chomp(chomp(chomp(chomp(msg))))), d,
+                                   impl.waveTableRequestHandler);
+        const char* portname = strstr(msg, "/Reson/");
+        assert(portname);
+        portname += 7;
+        // all resonance ports except
+        if(rtosc_narguments(msg) ||
+           !strcmp(portname, "smooth") || !strcmp(portname, "zero"))
+        {
+            // => this is a modifying message
+            int part, kit;
+            bool res = idsFromMsg(msg, &part, &kit);
+            assert(res);
+            for(int voice = 0; voice < NUM_VOICES; ++voice)
+            {
+                impl.waveTableRequestHandler.chainWtParamRequest(part, kit, voice, false, d);
+            }
+        }
+        rEnd},
+    /*
+        other
+    */
     {"bank/", 0, &bankPorts,
         rBegin;
         d.obj = &impl.master->bank;
@@ -1550,12 +2052,65 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         d.obj = impl.config;
         Config::ports.dispatch(chomp(msg), d);
         rEnd},
+    {"presets/copy:s:ss:si:ssi", 0, 0,
+        [](const char *msg, rtosc::RtData &d) {
+            MiddleWareImpl *impl = (MiddleWareImpl*)d.obj;
+            d.obj = (void*)impl->parent;
+            MiddleWare &mw = *impl->parent;
+            assert(d.obj);
+
+            std::string args = rtosc_argument_string(msg);
+            d.reply(d.loc, "s", "clipboard copy...");
+
+            std::string url = rtosc_argument(msg, 0).s;
+            void* obj = impl->obj_store.get(url);
+
+            printf("\nClipboard Copy...\n");
+            if(args == "s")
+                presetCopy(mw, url, "", obj);
+            else if(args == "ss")
+                presetCopy(mw, url,
+                            rtosc_argument(msg, 1).s, obj);
+            else if(args == "si")
+                presetCopyArray(mw, url,
+                            rtosc_argument(msg, 1).i, "", obj);
+            else if(args == "ssi")
+                presetCopyArray(mw, url,
+                            rtosc_argument(msg, 2).i, rtosc_argument(msg, 1).s, obj);
+            else
+                assert(false && "bad arguments");
+        }},
+    {"presets/paste:s:ss:si:ssi", 0, 0,
+     [](const char *msg, rtosc::RtData &d) {
+         MiddleWareImpl *impl = (MiddleWareImpl*)d.obj;
+         d.obj = (void*)impl->parent;
+         MiddleWare &mw = *impl->parent;
+         assert(d.obj);
+
+         std::string args = rtosc_argument_string(msg);
+         d.reply(d.loc, "s", "clipboard paste...");
+
+         std::string url = rtosc_argument(msg, 0).s;
+         void* obj = impl->obj_store.get(url);
+
+         if(args == "s")
+             presetPaste(mw, url, "", obj);
+         else if(args == "ss")
+             presetPaste(mw, url,
+                         rtosc_argument(msg, 1).s, obj);
+         else if(args == "si")
+             presetPasteArray(mw, url,
+                         rtosc_argument(msg, 1).i, "", obj);
+         else if(args == "ssi")
+             presetPasteArray(mw, url,
+                         rtosc_argument(msg, 2).i, rtosc_argument(msg, 1).s, obj);
+         else
+             assert(false && "bad arguments");
+        }},
     {"presets/", 0,  &real_preset_ports,          [](const char *msg, RtData &d) {
         MiddleWareImpl *obj = (MiddleWareImpl*)d.obj;
         d.obj = (void*)obj->parent;
         real_preset_ports.dispatch(chomp(msg), d);
-        if(strstr(msg, "paste") && rtosc_argument_string(msg)[0] == 's')
-            d.broadcast("/damage", "s", rtosc_argument(msg, 0).s);
         }},
     {"io/", 0, &Nio::ports,               [](const char *msg, RtData &d) {
         Nio::ports.dispatch(chomp(msg), d);}},
@@ -1925,6 +2480,72 @@ static rtosc::Ports middlewareReplyPorts = {
         rEnd},
     {"broadcast:", 0, 0, rBegin; impl.broadcast = true; rEnd},
     {"forward:", 0, 0, rBegin; impl.forward = true; rEnd},
+    {"request-wavetable:sTFiii:iiiTFiii:sFTiii:sFFiii:iiiFTiii:iiiFFiii", 0, 0,
+        // add request to queue, allow new requests for this OscilGen again
+        rBegin;
+
+        MiddleWareImpl::waveTablesToGenerateStruct wt2g;
+
+        unsigned argpos = 0;
+        // the first 1 or 3 params are either s or i
+        // in either case, fill wt2g.voicePath and part/kit/voice
+        if(rtosc_type(msg, 0) == 's')
+        {
+            // fill wt2g.voicePath
+            wt2g.voicePath = rtosc_argument(msg, argpos++).s; // it's *not yet* the voice path
+            string::size_type pos = wt2g.voicePath.rfind('/') + 1;
+            wt2g.voicePath.resize(pos); // *now* it's the voice location
+            // fill p/k/v
+            bool res = idsFromMsg(wt2g.voicePath.c_str(), &wt2g.part, &wt2g.kit, &wt2g.voice);
+            assert(res);
+        }
+        else
+        {
+            // fill p/k/v
+            wt2g.part  = rtosc_argument(msg, argpos++).i;
+            wt2g.kit   = rtosc_argument(msg, argpos++).i;
+            wt2g.voice = rtosc_argument(msg, argpos++).i;
+            // fill wt2g.voicePath
+            wt2g.voicePath = buildVoiceParMsg(&wt2g.part, &wt2g.kit, &wt2g.voice) + "/";
+        }
+        wt2g.isModOsc          = rtosc_argument(msg, argpos++).T;
+        wt2g.isWtMod           = rtosc_argument(msg, argpos++).T;
+        assert(!(wt2g.isModOsc && wt2g.isWtMod));
+        wt2g.param_change_time = rtosc_argument(msg, argpos++).i;
+        wt2g.extMod            = rtosc_argument(msg, argpos++).i;
+        wt2g.presonance        = rtosc_argument(msg, argpos++).i;
+        unsigned nargs = rtosc_narguments(msg);
+        for(; argpos < nargs; argpos+=4)
+        {
+            assert(argpos + 3 < nargs);
+            assert(rtosc_type(msg, argpos) == 'i');
+            assert(rtosc_type(msg, argpos+1) == 'i');
+            // re-requesting single float buffers is only planned for seed mode,
+            // so only allow seeds (integers), not wave function parameters (float)
+            assert(rtosc_type(msg, argpos+2) == 'i');
+            assert(rtosc_type(msg, argpos+3) == 'f');
+            WaveTable::IntOrFloat sem;
+            if(rtosc_type(msg, argpos+2) == 'i')
+                sem.intVal = rtosc_argument(msg, argpos+2).i;
+            else if(rtosc_type(msg, argpos+2) == 'f')
+                sem.floatVal = rtosc_argument(msg, argpos+2).f;
+            else assert(false);
+            wt2g.wave_requests.push_back(MiddleWareImpl::waveTablesToGenerateStruct::wave_request{
+                .sem_idx = (tensor_size_t)rtosc_argument(msg, argpos).i,
+                .freq_idx = (tensor_size_t)rtosc_argument(msg, argpos+1).i,
+                .sem = sem,
+                .freq = rtosc_argument(msg, argpos+3).f
+            });
+        }
+
+        // re-allow new wavetable-requests from AD synth
+        // this was just disabled in order to prevent message spamming,
+        // and should be enabled as soon as possible (i.e. now)
+        impl.waveTableRequestHandler.receivedAdPars(wt2g.part, wt2g.kit, wt2g.voice, wt2g.isModOsc);
+
+        //printf("WT: MW received wt-request (timestamp %d), queuing...\n", wt2g.param_change_time);
+        impl.addWaveTableToGenerate(std::move(wt2g));
+        rEnd}
 };
 #undef rBegin
 #undef rEnd
@@ -2001,7 +2622,6 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
 
 MiddleWareImpl::~MiddleWareImpl(void)
 {
-
     if(server)
         lo_server_free(server);
 

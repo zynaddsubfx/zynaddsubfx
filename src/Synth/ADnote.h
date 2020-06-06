@@ -21,6 +21,7 @@
 #include "../Params/ADnoteParameters.h"
 #include "../Params/Controller.h"
 #include "WatchPoint.h"
+#include "../Params/WaveTableFwd.h"
 
 //Globals
 
@@ -55,6 +56,7 @@ class ADnote:public SynthNote
         virtual SynthNote *cloneLegato(void) override;
     private:
 
+        int fillOscilSmpFromWt(int nvoice);
         void setupVoice(int nvoice);
         int  setupVoiceUnison(int nvoice);
         void setupVoiceDetune(int nvoice);
@@ -102,6 +104,8 @@ class ADnote:public SynthNote
         inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                                                               FMTYPE FMmode);
         //  inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice);
+        /**Computes the WaveTable Modulated Oscillator.*/
+        inline void ComputeVoiceOscillatorWaveTableModulation(int nvoice);
         /**TODO*/
         inline void ComputeVoiceOscillatorPitchModulation(int nvoice);
 
@@ -191,7 +195,19 @@ class ADnote:public SynthNote
             int DelayTicks;
 
             /* Waveform of the Voice */
-            float *OscilSmp;
+            struct OscilSmpT
+            {
+                // only one of smps/table is valid
+                float* smps;
+                const WaveTable* table;
+                bool isWaveTable;
+            };
+            OscilSmpT OscilSmp;
+            float basefuncpar; //!< WT oscillation center
+            //! WT only: Divisor, so [-1,1] is scaled down. E.g. if the wave
+            //!          oscillation center is 0.8, then +1 has to be mapped to
+            //!          +0.2, and -1 to -0.2, i.e. FMSmpMax is 5
+            float FMSmpMax;
 
             /* preserved for phase mod PWM emulation. */
             int phase_offset;
@@ -240,7 +256,8 @@ class ADnote:public SynthNote
             *   MODULLATOR PARAMETERS   *
             ****************************/
 
-            FMTYPE FMEnabled;
+            FMTYPE FMEnabled, FMEnabledBeforeWtSwitch;
+            bool FMEnabledCorrectedLastTime = true;
 
             unsigned char FMFreqFixed;
 
@@ -328,6 +345,9 @@ class ADnote:public SynthNote
 
         //how the fine detunes are made bigger or smaller
         float bandwidthDetuneMultiplier;
+
+        //should only be false for debugging
+        const bool waveTables;
 };
 
 }

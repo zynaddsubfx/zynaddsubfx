@@ -34,9 +34,11 @@ quick_test(PadNoteTest      ${test_lib})
 quick_test(PortamentoTest   ${test_lib})
 quick_test(RandTest         ${test_lib})
 quick_test(SubNoteTest      ${test_lib})
+quick_test(TensorTest       ${test_lib})
 quick_test(TriggerTest      ${test_lib})
 quick_test(UnisonTest       ${test_lib})
 quick_test(WatchTest        ${test_lib})
+quick_test(WaveTableTest    ${test_lib})
 quick_test(XMLwrapperTest   ${test_lib})
 
 quick_test(PluginTest     zynaddsubfx_core zynaddsubfx_nio

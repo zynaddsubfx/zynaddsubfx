@@ -14,9 +14,12 @@
 #ifndef OSCIL_GEN_H
 #define OSCIL_GEN_H
 
+#include <atomic>
+
 #include "../globals.h"
 #include <rtosc/ports.h>
 #include "../Params/Presets.h"
+#include "../Params/WaveTableFwd.h"
 #include "../DSP/FFTwrapper.h"
 
 namespace zyn {
@@ -47,6 +50,8 @@ public:
     OscilGenBuffers(OscilGenBuffersCreator creator);
     ~OscilGenBuffers();
     void defaults();
+    unsigned change_stamp() const { return m_change_stamp; }
+    void inc_change_stamp() { ++m_change_stamp; }
 
 private:
     // OscilGen needs to work with this data
@@ -79,6 +84,8 @@ private:
     int    oscilprepared;   //1 if the oscil is prepared, 0 if it is not prepared and is need to call ::prepare() before ::get()
 
     float hmag[MAX_AD_HARMONICS], hphase[MAX_AD_HARMONICS]; //the magnituides and the phases of the sine/nonsine harmonics
+
+    std::atomic<unsigned> m_change_stamp;
 };
 
 class OscilGen:public Presets, NoCopyNoMove
@@ -90,20 +97,20 @@ class OscilGen:public Presets, NoCopyNoMove
         OscilGenBuffersCreator createOscilGenBuffers() const;
 
         /**computes the full spectrum of oscil from harmonics,phases and basefunc*/
-        void prepare(OscilGenBuffers& bfrs) const;
-        void prepare() { return prepare(myBuffers()); }
+        void prepare(OscilGenBuffers& bfrs, float differingBaseFuncPar = -1.f) const;
+        void prepare(float differingBaseFuncPar = -1.f) { return prepare(myBuffers(), differingBaseFuncPar); }
 
-        void prepare(OscilGenBuffers& bfrs, FFTfreqBuffer data) const;
+        void prepare(OscilGenBuffers& bfrs, FFTfreqBuffer data, float differingBaseFuncPar = -1.f) const;
 
         /**do the antialiasing(cut off higher freqs.),apply randomness and do a IFFT*/
         //returns where should I start getting samples, used in block type randomness
-        short get(OscilGenBuffers& bfrs, float *smps, float freqHz, int resonance = 0) const;
-        short get(float *smps, float freqHz, int resonance = 0) {
-            return get(myBuffers(), smps, freqHz, resonance);
+        short get(OscilGenBuffers& bfrs, float *smps, float freqHz, int resonance = 0, float differingBaseFuncPar = -1.f) const;
+        short get(float *smps, float freqHz, int resonance = 0, float differingBaseFuncPar = -1.f) {
+            return get(myBuffers(), smps, freqHz, resonance, differingBaseFuncPar);
         }
         //if freqHz is smaller than 0, return the "un-randomized" sample for UI
 
-        void getbasefunction(OscilGenBuffers& bfrs, FFTsampleBuffer smps) const;
+        void getbasefunction(OscilGenBuffers& bfrs, FFTsampleBuffer smps, float differingBaseFuncPar = -1.f) const;
 
         //called by UI
         void getspectrum(int n, float *spc, int what); //what=0 pt. oscil,1 pt. basefunc
@@ -117,6 +124,26 @@ class OscilGen:public Presets, NoCopyNoMove
         void getfromXML(XMLwrapper& xml);
 
         void convert2sine();
+
+        //! initial calculation for pre-allocated wavetable, no allocations
+        void recalculateDefaultWaveTable(WaveTable*) const;
+        //! allocating a wavetable with full capacity and without any waves
+        WaveTable *allocWaveTable() const;
+        //! calculate the wave table audio buffers
+        wavetable_types::float32* calculateWaveTableData(wavetable_types::float32 freq,
+            wavetable_types::IntOrFloat semantic,
+            wavetable_types::WtMode wtMode,
+            int Presonance);
+        //! calculate wave table mode, i.e. meaning + handling of semantics
+        wavetable_types::WtMode calculateWaveTableMode(bool forceWtMode) const;
+        std::size_t calculateNumFreqs(bool voice_uses_reso) const;
+        std::size_t calculateNumSemantics(wavetable_types::WtMode wtMode) const;
+        //! calculate freqs + semantics
+        std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloat>*>
+            calculateWaveTableScales(wavetable_types::WtMode wtMode, bool voice_uses_reso) const;
+        // wavetable related time stamp
+        unsigned change_stamp() const { return myBuffers().change_stamp(); }
+        void inc_change_stamp() { ++myBuffers().m_change_stamp; }
 
         //Parameters
 
@@ -160,6 +187,8 @@ class OscilGen:public Presets, NoCopyNoMove
           63..0 - block type randomness - 0 is maximum
           65..127 - each harmonic randomness - 127 is maximum*/
         unsigned char Prand;
+        int calculateOutpos() const;
+        unsigned char getFinalOutpos() const;
         unsigned char Pamprandpower, Pamprandtype; //amplitude randomness
         unsigned char Padaptiveharmonics; //the adaptive harmonics status (off=0,on=1,etc..)
         unsigned char Padaptiveharmonicsbasefreq; //the base frequency of the adaptive harmonic (30..3000Hz)
@@ -174,9 +203,7 @@ class OscilGen:public Presets, NoCopyNoMove
 
         bool ADvsPAD; //!< true if it is used by PADsynth instead of ADsynth
 
-        static const rtosc::MergePorts ports;
-        static const rtosc::Ports      non_realtime_ports;
-        static const rtosc::Ports      realtime_ports;
+        static const rtosc::Ports ports;
 
         /* Oscillator Frequencies -
          *  this is different than the harmonics set-up by the user,
@@ -184,6 +211,7 @@ class OscilGen:public Presets, NoCopyNoMove
 
         //Access m_myBuffers. Should be avoided.
         OscilGenBuffers& myBuffers() { return m_myBuffers; }
+        const OscilGenBuffers& myBuffers() const { return m_myBuffers; }
 
     private:
 
@@ -195,7 +223,7 @@ class OscilGen:public Presets, NoCopyNoMove
 
         FFTwrapper *fft;
         //computes the basefunction and make the FFT; newbasefunc<0  = same basefunc
-        void changebasefunction(OscilGenBuffers& bfrs) const;
+        void changebasefunction(OscilGenBuffers& bfrs, float differingBaseFuncPar = -1.f) const;
         //Waveshaping
         void waveshape(OscilGenBuffers& bfrs, FFTfreqBuffer freqs) const;
 
@@ -213,10 +241,11 @@ class OscilGen:public Presets, NoCopyNoMove
 
         float userfunc(OscilGenBuffers& bfrs, float x) const;
 
+        unsigned char getFinalOutpos(int outpos) const;
     public:
         //Check system for needed updates
-        bool needPrepare(OscilGenBuffers& bfrs) const;
-        bool needPrepare() { return needPrepare(myBuffers()); }
+        bool needPrepare(OscilGenBuffers& bfrs, float differingBaseFuncPar = -1.f) const;
+        bool needPrepare(float differingBaseFuncPar = -1.f) { return needPrepare(myBuffers(), differingBaseFuncPar); }
     private:
 
         //Do the adaptive harmonic stuff
@@ -227,6 +256,10 @@ class OscilGen:public Presets, NoCopyNoMove
         //this can be called for the sine and components, and for the spectrum
         //(that's why the sine and cosine components should be processed with a separate call)
         void adaptiveharmonicpostprocess(fft_t *f, int size) const;
+        //! whether the generation of the wave (OscilGen::get) can consume any random
+        //! for at least one frequency
+        bool mayUseRandom() const;
+
 
         Resonance *res;
 

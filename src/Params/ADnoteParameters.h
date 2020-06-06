@@ -17,10 +17,14 @@
 #include "../globals.h"
 #include "PresetsArray.h"
 
+namespace rtosc {
+    struct RtData;
+}
+
 namespace zyn {
 
 enum class FMTYPE {
-    NONE, MIX, RING_MOD, PHASE_MOD, FREQ_MOD, PW_MOD
+    NONE, MIX, RING_MOD, PHASE_MOD, FREQ_MOD, PW_MOD, WAVE_MOD
 };
 
 /*****************************************************************/
@@ -111,6 +115,7 @@ struct ADnoteGlobalParam {
 /*                    VOICE PARAMETERS                     */
 /***********************************************************/
 struct ADnoteVoiceParam {
+    ADnoteVoiceParam(const ADnoteVoiceParam& other) = delete;
     ADnoteVoiceParam() : time(nullptr), last_update_timestamp(0) { };
     void getfromXML(XMLwrapper& xml, unsigned nvoice);
     void add2XML(XMLwrapper& xml, bool fmoscilused);
@@ -120,6 +125,15 @@ struct ADnoteVoiceParam {
                 const AbsTime *time);
     void kill(void);
     float getUnisonFrequencySpreadCents(void) const;
+    //! write WT requests into *bToU for those OscilGens in this voice
+    //! that require it
+    void requestWavetables(rtosc::ThreadLink* bToU, int part, int kit, int voice);
+    //! send one single wavetable request via *bToU
+    void requestWavetable(rtosc::ThreadLink* bToU, int part, int kit, int voice, bool isModOsc) const;
+    //! send one single wavetable as a reply (data.loc must contain the location)
+    void requestWavetable(rtosc::RtData& data, bool isModOsc) const;
+
+
     /** If the voice is enabled */
     unsigned char Enabled;
 
@@ -307,13 +321,23 @@ struct ADnoteVoiceParam {
     int64_t last_update_timestamp;
 
     static const rtosc::Ports &ports;
+
+    //! carrier tensor for random-seed (not wavetable modulation)
+    class WaveTable* table = nullptr;
+    //! modulator tensor
+    class WaveTable* tableMod = nullptr;
+
+    // new tensors are gathered here
+    class WaveTable* nextTable = nullptr, * nextTableMod = nullptr;
+    //! whether to use wave tables - only false for debugging
+    bool waveTables; // const after it has been set
 };
 
 class ADnoteParameters:public PresetsArray
 {
     public:
         ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
-                         const AbsTime *time_ = nullptr);
+                         const AbsTime *time_ = nullptr, bool waveTables = true);
         ~ADnoteParameters() override;
 
         ADnoteGlobalParam GlobalPar;
@@ -336,11 +360,17 @@ class ADnoteParameters:public PresetsArray
 
         const AbsTime *time;
         int64_t last_update_timestamp;
+        //! whether to use wave tables - only false for debugging
+        bool usesWaveTables() const { return waveTables; }
+        //! write WT requests into *bToU for those OscilGens in the voices
+        //! that require it
+        void requestWavetables(rtosc::ThreadLink* bToU, int part, int kit);
 
     private:
         void EnableVoice(const SYNTH_T &synth, int nvoice, const AbsTime* time);
         void KillVoice(int nvoice);
         FFTwrapper *fft;
+        const bool waveTables;
 };
 
 }
