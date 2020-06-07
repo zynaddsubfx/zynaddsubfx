@@ -253,7 +253,7 @@ void waveShapeSmps(int n,
                 smps[i] -= tmpo / tmpv; // subtract offset
             }
             break;
-        case 15:
+        case 15: // tanh soft limiter
             // f(x) = x / ((1+|x|^n)^(1/n)) // tanh approximation for n=2.5
             // Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
             par = (20.0f) * par * par + (0.1f) * par + 1.0f;  //Pfunpar=32 -> n=2.5
@@ -265,11 +265,11 @@ void waveShapeSmps(int n,
                 smps[i] -= offs / powf(1+powf(fabsf(offs), par), 1/par);
             }
             break;
-        case 16:
+        case 16: //cubic distortion
             // f(x) = 1.5 * (x-(x^3/3))
             // Formula from: https://ccrma.stanford.edu/~jos/pasp/Soft_Clipping.html
             // modified with factor 1.5 to go through [1,1] and [-1,-1]
-            ws = powf(ws, 3.5f) * 20.0f + 1.0f; //cubic soft limiter
+            ws = ws * ws * ws * 20.0f + 0.168f; // plain cubic at drive=44
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws; // multiply signal to drive it in the saturation of the function
                 smps[i] += offs; // add dc offset
@@ -281,10 +281,10 @@ void waveShapeSmps(int n,
                 smps[i] -= 1.5 * (offs - (offs*offs*offs / 3.0)); 
             }
             break;
-        case 17:
+        case 17: //square distortion
         // f(x) = x*(2-abs(x))
-        // Formula of 16 changed to square but still going through [1,1] and [-1,-1]
-            ws = ws * ws * ws * 20.0f + 1.0f; //square soft limiter
+        // Formula of cubic changed to square but still going through [1,1] and [-1,-1]
+            ws = ws * ws * ws * 20.0f + 0.168f; // plain square at drive=44
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws; // multiply signal to drive it in the saturation of the function
                 smps[i] += offs; // add dc offset
