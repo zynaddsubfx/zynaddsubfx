@@ -196,6 +196,10 @@ void deallocate(const char *str, void *v)
         delete (SclInfo*)v;
     else if(!strcmp(str, "Microtonal"))
         delete (Microtonal*)v;
+    else if(!strcmp(str, "WaveTable")) {
+        printf("deleting WaveTable ptr %p\n", v);
+        delete (WaveTable*)v;
+    }
     else
         fprintf(stderr, "Unknown type '%s', leaking pointer %p!!\n", str, v);
 }
@@ -323,7 +327,7 @@ struct NonRtObjStore
     }
 
     //! try to dispatch a message at the OscilGen non-RT-ports
-    void handleOscilADnote(const char *msg, rtosc::RtData &d, bool voiceOscil) {
+    void handleOscilADnote(const char *msg, rtosc::RtData &d) {
         const string obj_rl(d.message, msg);
         assert(d.message);
         assert(msg);
@@ -335,38 +339,35 @@ struct NonRtObjStore
             strcpy(d.loc, obj_rl.c_str());
             d.obj = osc;
             OscilGen::non_realtime_ports.dispatch(msg, d);
-            if(d.matches == 0 /* || d.forwarded -> check should be useless, can't be forwarded */)
+            if(// no match (will probably not occur)
+               d.matches == 0 ||
+               // message does not modify OscilGen?
+               // (currently, messages without arguments don't modify it)
+               !rtosc_narguments(msg))
             {
                 // nothing to re-compute
-                // this will probably never be the case when OscilGen::get will be non-RT
             }
             else
             {
-                if(voiceOscil)
-                {
-                    OscilGen* oscilGen = static_cast<OscilGen*>(d.obj);
-                    WaveTable wt = oscilGen->calculateWaveTable();
-                    // TODO: how to send wt back to ADnoteVoice?
-                    //       maybe via OSC, like this?
-#if 0
-                    string::size_type pos = obj_rl.rfind("/OscilSmp");
-                    if(pos == string::npos)
-                    {
-                        printf("???\n");
-                    }
-                    else
-                    {
-                        const std::string obj_vc(obj_rl, 0, pos);
-                        printf("obj_ad: %d: %s -> %s\n", (int)pos, obj_rl.c_str(), obj_ad.c_str());
+                //printf("msg: %s,%s\n",d.message,msg);
+                const OscilGen* oscilGen = static_cast<const OscilGen*>(d.obj);
+                const WaveTable* wt = oscilGen->calculateWaveTable();
 
-                        // e.g.: dispatch("/part0/kit0/adpars/VoicePar0", d)
-                        MwDataObj result(/*???*/);
-                        // some how store wt into "result"
-                        ADnoteVoiceParam::ports.dispatch(obj_vc.c_str(), d);
-                    }
-#else
-                    (void)wt;
-#endif
+                string::size_type pos = obj_rl.rfind("/OscilSmp");
+                if(pos == string::npos)
+                {
+                    assert(!"OscilGen message does not end on \"/OscilSmp\"");
+                }
+                else
+                {
+                    std::string obj_vc(obj_rl, 0, pos);
+                    obj_vc += "/set-wavetable";
+
+                    // send wavetable to corresponding ADnote voice
+                    // e.g. dispatch "wt" at "/part0/kit0/adpars/VoicePar0"
+                    // in the future, we may send only slices
+                    printf("sending %p to ADnote voice %s\n", wt, obj_vc.c_str());
+                    d.chain(obj_vc.c_str(), "b", sizeof(WaveTable*), &wt);
                 }
             }
         }
@@ -1440,13 +1441,13 @@ static rtosc::Ports nonRtParamPorts = {
         "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/adpars/VoicePar#"
             STRINGIFY(NUM_VOICES) "/OscilSmp/", 0, &OscilGen::non_realtime_ports,
         rBegin;
-        impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), d, true);
+        impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), d);
         rEnd},
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
         "/kit#" STRINGIFY(NUM_KIT_ITEMS)
             "/adpars/VoicePar#" STRINGIFY(NUM_VOICES) "/FMSmp/", 0, &OscilGen::non_realtime_ports,
         rBegin
-        impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), d, false);
+        impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), d);
         rEnd},
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
         "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/padpars/", 0, &PADnoteParameters::non_realtime_ports,

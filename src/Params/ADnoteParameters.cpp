@@ -38,6 +38,17 @@ using rtosc::RtData;
 #undef rChangeCb
 #define rChangeCb if (obj->time) { obj->last_update_timestamp = obj->time->time(); }
 static const Ports voicePorts = {
+    {"set-wavetable:b",
+        rDoc("inform voice to update oscillator table"), NULL,
+        [](const char *msg, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            WaveTable* unusedWt = *(WaveTable**)rtosc_argument(msg, 0).b.data;
+            std::swap(unusedWt, obj->table);
+            // ^ no need for atomic swap - Master is single-threaded
+            d.reply("/free", "sb", "WaveTable", sizeof(WaveTable*), &unusedWt);
+            printf("set ad note parameters, table pointer: %p\n", obj->table);
+        }},
     //Send Messages To Oscillator Realtime Table
     {"OscilSmp/", rDoc("Primary Oscillator"),
         &OscilGen::ports,

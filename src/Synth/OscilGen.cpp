@@ -15,6 +15,8 @@
 #include "../DSP/FFTwrapper.h"
 #include "../Synth/Resonance.h"
 #include "../Misc/WaveShapeSmps.h"
+#include "../Params/WaveTable.h"
+
 
 #include <cassert>
 #include <cstdlib>
@@ -478,6 +480,13 @@ void OscilGen::convert2sine()
     }
     delete[] freqs;
     prepare();
+}
+
+zyn::WaveTable *zyn::OscilGen::calculateWaveTable() const
+{
+    WaveTable* wt = new WaveTable();
+    /* TODO: generate wave table here... */
+    return wt;
 }
 
 float OscilGen::userfunc(float x)

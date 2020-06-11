@@ -309,7 +309,7 @@ struct ADnoteVoiceParam {
 
     static const rtosc::Ports &ports;
 
-    WaveTable Table;
+    WaveTable* table = nullptr;
 };
 
 class ADnoteParameters:public PresetsArray
