@@ -354,6 +354,7 @@ struct NonRtObjStore
                 const WaveTable* wt = oscilGen->calculateWaveTable();
 
                 string::size_type pos = obj_rl.rfind("/OscilSmp");
+                if(pos == string::npos) pos = obj_rl.rfind("/FMSmp");
                 if(pos == string::npos)
                 {
                     assert(!"OscilGen message does not end on \"/OscilSmp\"");
