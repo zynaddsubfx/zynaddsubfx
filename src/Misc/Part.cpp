@@ -174,10 +174,8 @@ static const Ports partPorts = {
                 time (&rawtime);
                 const struct tm* timeinfo = localtime (&rawtime);
                 strftime (p->loaded_file,23,"%F_%R.xiz",timeinfo); 
-                printf("ceated new filename %s\n", p->loaded_file);
             }
             p->saveXML(p->loaded_file);
-            printf("saving to file %s\n", p->loaded_file);
         }},
     //{"kit#16::T:F", "::Enables or disables kit item", 0,
     //    [](const char *m, RtData &d) {
@@ -1092,6 +1090,7 @@ int Part::saveXML(const char *filename)
 
     int result = xml.saveXMLfile(filename, gzip_compression);
     strncpy(loaded_file,filename, sizeof(loaded_file));
+    loaded_file[sizeof(loaded_file)-1] = '\0';
     return result;
 }
 
@@ -1106,7 +1105,10 @@ int Part::loadXMLinstrument(const char *filename)
         return -10;
 
     // store filename in member variable
-    strncpy(loaded_file,filename, sizeof(loaded_file));
+    int length = sizeof(loaded_file)-1;
+    strncpy(loaded_file, filename, length);
+    // set last element to \0 in case filname is too long or not terminated
+    loaded_file[length]='\0';
 
     getfromXMLinstrument(xml);
     xml.exitbranch();
