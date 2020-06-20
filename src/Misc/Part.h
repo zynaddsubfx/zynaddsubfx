@@ -174,7 +174,6 @@ class Part
 
         int lastnote;
         char loaded_file[256];
-        bool hasFilename;
 
         const static rtosc::Ports &ports;
 

@@ -169,14 +169,15 @@ static const Ports partPorts = {
         [](const char *, RtData &d)
         {
             Part *p = (Part*)d.obj;
-            if (!p->hasFilename) {  // if part was never loaded or saved
+            if (p->loaded_file[0] == '\0') {  // if part was never loaded or saved
                 time_t rawtime;     // make a new name from date and time
-                struct tm * timeinfo;
                 time (&rawtime);
-                timeinfo = localtime (&rawtime);
+                const struct tm* timeinfo = localtime (&rawtime);
                 strftime (p->loaded_file,23,"%F_%R.xiz",timeinfo); 
+                printf("ceated new filename %s\n", p->loaded_file);
             }
             p->saveXML(p->loaded_file);
+            printf("saving to file %s\n", p->loaded_file);
         }},
     //{"kit#16::T:F", "::Enables or disables kit item", 0,
     //    [](const char *m, RtData &d) {
@@ -268,6 +269,8 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     gzip_compression(gzip_compression),
     interpolation(interpolation)
 {
+    loaded_file[0] = '\0';
+
     if(prefix_)
         fast_strcpy(prefix, prefix_, sizeof(prefix));
     else
@@ -303,7 +306,6 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     cleanup();
 
     Pname = new char[PART_MAX_NAME_LEN];
-    hasFilename = false;
 
     oldvolumel = oldvolumer = 0.5f;
     lastnote = -1;
@@ -1090,7 +1092,6 @@ int Part::saveXML(const char *filename)
 
     int result = xml.saveXMLfile(filename, gzip_compression);
     strncpy(loaded_file,filename, sizeof(loaded_file));
-    hasFilename = true;
     return result;
 }
 
@@ -1106,7 +1107,6 @@ int Part::loadXMLinstrument(const char *filename)
 
     // store filename in member variable
     strncpy(loaded_file,filename, sizeof(loaded_file));
-    hasFilename = true;
 
     getfromXMLinstrument(xml);
     xml.exitbranch();
