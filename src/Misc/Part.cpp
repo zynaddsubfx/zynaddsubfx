@@ -176,6 +176,7 @@ static const Ports partPorts = {
                 strftime (p->loaded_file,23,"%F_%R.xiz",timeinfo); 
             }
             p->saveXML(p->loaded_file);
+            fprintf(stderr, "Part %d saved to %s\n", (p->partno + 1), p->loaded_file);
         }},
     //{"kit#16::T:F", "::Enables or disables kit item", 0,
     //    [](const char *m, RtData &d) {
