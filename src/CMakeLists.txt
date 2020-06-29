@@ -15,6 +15,7 @@ find_package(X11)
 find_package(Threads   REQUIRED)
 find_package(OSS)
 find_package(Alsa)
+find_package(Sndio)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
 find_package(CxxTest)
@@ -87,6 +88,8 @@ SET (OssEnable ${OSS_FOUND} CACHE BOOL
     "Enable support for Open Sound System")
 SET (PaEnable ${PORTAUDIO_FOUND} CACHE BOOL
     "Enable support for Port Audio System")
+SET (SndioEnable ${SNDIO_FOUND} CACHE BOOL
+    "Enable support for Sndio System")
 SET (LashEnable ${LASH_FOUND} CACHE BOOL
     "Enable LASH Audio Session Handler")
 SET (DssiEnable ${DSSI_FOUND} CACHE BOOL
@@ -154,6 +157,11 @@ elseif (PaEnable)
         "Default Output module: [null, alsa, oss, jack, portaudio]")
     SET (DefaultInput null CACHE STRING
         "Default Input module: [null, alsa, oss, jack]")
+elseif (SndioEnable)
+    SET (DefaultOutput sndio CACHE STRING
+        "Default Output module: [null, alsa, oss, jack, portaudio, sndio]")
+    SET (DefaultInput sndio CACHE STRING
+        "Default Input module: [null, alsa, oss, jack, sndio]")
 else()
     SET (DefaultOutput null CACHE STRING
         "Default Output module: [null, alsa, oss, jack, portaudio]")
@@ -299,6 +307,12 @@ endif(JackEnable)
 if(OssEnable)
 	add_definitions(-DOSS=1)
 endif(OssEnable)
+
+if(SndioEnable)
+	list(APPEND AUDIO_LIBRARIES ${SNDIO_LIBRARY})
+	list(APPEND AUDIO_LIBRARY_DIRS ${SNDIO_LIBRARY_DIRS})
+	add_definitions(-DSNDIO=1)
+endif(SndioEnable)
 
 if (CompileTests)
 	ENABLE_TESTING()
@@ -655,6 +669,7 @@ package_status(AlsaEnable       "ALSA     " "enabled" ${Yellow})
 package_status(JackEnable       "JACK     " "enabled" ${Yellow})
 package_status(OssEnable        "OSS      " "enabled" ${Yellow})
 package_status(PaEnable         "PA       " "enabled" ${Yellow})
+package_status(SndioEnable      "SNDIO    " "enabled" ${Yellow})
 #TODO GUI MODULE
 package_status(HAVE_ASYNC       "c++ async" "usable"  ${Yellow})
 

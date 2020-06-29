@@ -46,6 +46,10 @@ if(OssEnable)
     list(APPEND zynaddsubfx_nio_SRCS OssEngine.cpp OssMultiEngine.cpp)
 endif(OssEnable)
 
+if(SndioEnable)
+    list(APPEND zynaddsubfx_nio_SRCS SndioEngine.cpp)
+    list(APPEND zynaddsubfx_nio_lib ${SNDIO_LIBRARY})
+endif(SndioEnable)
 
 add_library(zynaddsubfx_nio STATIC
     ${zynaddsubfx_nio_SRCS} 
