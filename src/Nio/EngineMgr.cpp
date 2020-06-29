@@ -35,6 +35,9 @@ using namespace std;
 #if PORTAUDIO
 #include "PaEngine.h"
 #endif
+#if SNDIO
+#include "SndioEngine.h"
+#endif
 
 namespace zyn {
 
@@ -65,6 +68,9 @@ EngineMgr::EngineMgr(const SYNTH_T *synth, const oss_devs_t& oss_devs)
 #endif
 #if PORTAUDIO
     engines.push_back(new PaEngine(*synth));
+#endif
+#if SNDIO
+    engines.push_back(new SndioEngine(*synth));
 #endif
 
     defaultOut = dynamic_cast<AudioOut *>(defaultEng);

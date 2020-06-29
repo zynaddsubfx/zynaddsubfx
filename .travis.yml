@@ -8,6 +8,7 @@ dist: xenial
 before_install:
     - sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev
     - sudo apt-get install liblo-dev
+    - sudo apt-get install libsndio-dev
     - sudo apt-get install --force-yes cxxtest
 
 
