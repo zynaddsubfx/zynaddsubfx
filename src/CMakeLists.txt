@@ -58,6 +58,7 @@ CHECK_CXX_SOURCE_COMPILES(
 
 check_cxx_compiler_flag("-msse2" SUPPORT_SSE)
 check_cxx_compiler_flag("-mfpu=neon -Werror" SUPPORT_NEON)
+check_include_file_cxx(complex HAVE_CPP_STD_COMPLEX)
 
 set(CMAKE_REQUIRED_FLAGS "")
 
@@ -118,6 +119,10 @@ if(HAVE_ASYNC)
     add_definitions(-DHAVE_ASYNC=1)
 else()
     add_definitions(-DHAVE_ASYNC=0)
+endif()
+
+if(HAVE_CPP_STD_COMPLEX)
+    add_definitions(-DHAVE_CPP_STD_COMPLEX=1)
 endif()
 
 if(DemoMode)

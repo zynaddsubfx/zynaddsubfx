@@ -26,7 +26,7 @@
 
 //Forward Declarations
 
-#if defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(HAVE_CPP_STD_COMPLEX)
 #include <complex>
 #else
 namespace std {
