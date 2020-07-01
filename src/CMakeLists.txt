@@ -60,6 +60,8 @@ check_cxx_compiler_flag("-msse2" SUPPORT_SSE)
 check_cxx_compiler_flag("-mfpu=neon -Werror" SUPPORT_NEON)
 check_include_file_cxx(complex HAVE_CPP_STD_COMPLEX)
 
+find_library(HAVE_LIBRT rt)
+
 set(CMAKE_REQUIRED_FLAGS "")
 
 
@@ -559,7 +561,9 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 elseif(APPLE)
     set(PTHREAD_LIBRARY pthread)
 else()
-    set(PLATFORM_LIBRARIES rt)
+    if(HAVE_LIBRT)
+        set(PLATFORM_LIBRARIES rt)
+    endif()
     set(PTHREAD_LIBRARY pthread)
 endif()
 
