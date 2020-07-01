@@ -334,6 +334,8 @@ message(STATUS "Compiling with liblo")
 include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS})
 include_directories(${CMAKE_BINARY_DIR}/src) # for zyn-version.h ...
 
+get_filename_component(X11_LIBRARY_DIRS ${X11_X11_LIB} DIRECTORY)
+
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_definitions(-DWIN32)
 endif()
@@ -505,7 +507,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zyn-version.h.in
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zyn-config.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/zyn-config.h)
 
-link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS} ${NTK_LIBRARY_DIRS})
+link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS} ${NTK_LIBRARY_DIRS} ${X11_LIBRARY_DIRS})
 
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
