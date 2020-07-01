@@ -112,7 +112,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
   add_definitions(-static)
 endif()
 
-if(NOT "Darwin" STREQUAL ${CMAKE_SYSTEM_NAME})
+if(HAVE_SCHEDULER AND (NOT "Darwin" STREQUAL ${CMAKE_SYSTEM_NAME}))
     # Add scheduler function existence info (OSX compatibility)
     add_definitions(-DHAVE_SCHEDULER=${HAVE_SCHEDULER})
 endif()
