@@ -1796,7 +1796,7 @@ int Master::saveOSC(const char *filename, master_dispatcher_t* dispatcher,
     // We need to wait until savefile has been loaded into master2
     int i;
     for(i = 0; i < 20 && master2->uToB->hasNext(); ++i)
-        usleep(50000);
+        os_usleep(50000);
     if(i >= 20) // >= 1 second?
     {
         // Master failed to fetch its messages
