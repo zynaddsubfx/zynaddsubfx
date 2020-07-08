@@ -34,8 +34,6 @@ if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     pkg_check_modules(FFTW REQUIRED fftw3)
     pkg_check_modules(MXML REQUIRED mxml)
 
-    pkg_check_modules(PORTAUDIO portaudio-2.0>=19)
-
     pkg_search_module(LASH lash-1.0)
     mark_as_advanced(LASH_LIBRARIES)
     pkg_search_module(DSSI dssi>=0.9.0)
