@@ -338,6 +338,10 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_definitions(-DWIN32)
 endif()
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "CYGWIN")
+    add_definitions(-D_GNU_SOURCE=1 -D_POSIX_THREAD_PRIO_INHERIT=1)
+endif()
+
 add_definitions(
 	 -Wall
 	 -Wextra
