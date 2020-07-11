@@ -1,4 +1,11 @@
 # Find OSS (Open Sound System)
+
+# OSS is not for APPLE or WINDOWS
+
+IF(APPLE OR WIN32)
+  RETURN()
+ENDIF()
+
 find_path(OSS_INCLUDE_DIR sys/soundcard.h)
 set(OSS_LIBRARIES True)
 mark_as_advanced(OSS_INCLUDE_DIR)
