@@ -31,6 +31,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cassert>
+#include <ctime>
 
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
