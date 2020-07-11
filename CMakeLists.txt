@@ -42,6 +42,8 @@ install(FILES zynaddsubfx-jack-multi.desktop zynaddsubfx-jack.desktop zynaddsubf
     DESTINATION share/applications)
 install(FILES zynaddsubfx.svg
     DESTINATION share/pixmaps)
+install(FILES zynaddsubfx.png
+    DESTINATION share/pixmaps)
 install(DIRECTORY instruments/banks
     DESTINATION share/zynaddsubfx)
 if(DEFINED ZYN_EXAMPLESDIR)
