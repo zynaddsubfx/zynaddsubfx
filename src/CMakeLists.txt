@@ -341,7 +341,9 @@ message(STATUS "Compiling with liblo")
 include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS})
 include_directories(${CMAKE_BINARY_DIR}/src) # for zyn-version.h ...
 
-get_filename_component(X11_LIBRARY_DIRS ${X11_X11_LIB} DIRECTORY)
+if(NOT ${X11_X11_LIB} STREQUAL "")
+    get_filename_component(X11_LIBRARY_DIRS ${X11_X11_LIB} DIRECTORY)
+endif()
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_definitions(-DWIN32)
