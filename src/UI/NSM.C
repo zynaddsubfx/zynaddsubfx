@@ -80,12 +80,14 @@ NSM_Client::command_open(const char *name,
 
     zyn::Nio::start();
 
-    char *new_filename;
+    char *new_filename = (char *)malloc(strlen(name) + 5);
 
-    //if you're on windows enjoy the undefined behavior...
-#ifndef WIN32
-    asprintf(&new_filename, "%s.xmz", name);
-#endif
+    if (new_filename) {
+        strcpy(new_filename, name);
+        strcat(new_filename, ".xmz");
+    } else {
+        // TODO, handle error condition...
+    }
 
     struct stat st;
 
