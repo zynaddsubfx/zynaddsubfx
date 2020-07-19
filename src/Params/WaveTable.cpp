@@ -42,5 +42,13 @@ void WaveTable::insert(Tensor3<float> data,
     (void)invalidate;
 }
 
+WaveTable::WaveTable(std::size_t buffersize) :
+    semantics(Shape1{num_semantics}),
+    freqs(Shape1{num_freqs}),
+    data(Shape3{num_semantics, num_freqs, buffersize})
+{
+
+}
+
 }
 

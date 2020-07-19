@@ -484,7 +484,7 @@ void OscilGen::convert2sine()
 
 zyn::WaveTable *zyn::OscilGen::calculateWaveTable() const
 {
-    WaveTable* wt = new WaveTable();
+    WaveTable* wt = new WaveTable(synth.oscilsize);
     /* TODO: generate wave table here... */
     return wt;
 }

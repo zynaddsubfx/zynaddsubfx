@@ -14,44 +14,140 @@
 #ifndef WAVETABLE_H
 #define WAVETABLE_H
 
-#include "../Misc/Allocator.h"
+#include <cassert>
+#include <algorithm>
 
 namespace zyn {
 
-struct Shape1  { int dim[1]; };
-struct Shape2  { int dim[2]; };
-struct Shape3  { int dim[3]; };
+namespace detail
+{
+    //! check that arrays @p arr1 and @p arr2 are equal in range 0...Idx
+    template<std::size_t Idx>
+    constexpr bool check_equal_until(const std::size_t* arr1, const std::size_t* arr2) { return arr1[Idx] == arr2[Idx] && check_equal_until<Idx-1>(arr1, arr2); }
+    template<>
+    constexpr bool check_equal_until<0>(const std::size_t* arr1, const std::size_t* arr2) { return arr1[0] == arr2[0]; }
 
-template <class T>
-struct Tensor3 {
-    Tensor3(Shape3, Allocator&) {}
-    T    ***data;
-    Shape3  shape;
+    //! multiply the first (Idx+1) members (0...Idx) of array @p arr
+    template<std::size_t Idx>
+    constexpr std::size_t mult(const std::size_t* arr) { return arr[Idx] * mult<Idx-1>(arr); }
+    template<>
+    constexpr std::size_t mult<0>(const std::size_t* arr) { return arr[0]; }
+}
 
-    Tensor3() = default;
-    Tensor3(Tensor3&& other) = default;
-    Tensor3& operator=(Tensor3&& other) = default;
+template<std::size_t N>
+class Shape
+{
+public:
+    std::size_t dim[N];
+    constexpr bool operator==(const Shape<N>& other) const {
+        return detail::check_equal_until<N-1>(dim, other.dim); }
+    constexpr std::size_t volume() const { return detail::mult<N-1>(dim); }
+    //! projection of shape onto first dimension
+    //! the first dimension will be removed
+    Shape<N-1> proj() const
+    {
+        // TODO: don't need for loop (use consexpr)?
+        Shape<N-1> res;
+        for(std::size_t i = 1; i < N; ++i)
+            res.dim[i-1] = dim[i];
+        return res;
+    }
 };
-template <class T>
-struct Tensor2 {
-    Tensor2(Shape2, Allocator&) {}
-    T     **data;
-    Shape2  shape;
 
-    Tensor2() = default;
-    Tensor2(Tensor2&& other) = default;
-    Tensor2& operator=(Tensor2&& other) = default;
-};
-template <class T>
-struct Tensor1 {
-    Tensor1(Shape1, Allocator&) {}
-    T      *data;
-    Shape1  shape;
+//! Tensor base class
+//! contains a possibly multi dimensional array
+template <std::size_t N, class T>
+class TensorBase
+{
+protected:
+    T       *m_data;
+    Shape<N> m_shape;
+    bool     m_owner = true; //! says if memory is owned by us
+    void cleanup() { if(m_owner) { delete[] m_data; m_owner = false; } }
+public:
+    TensorBase(Shape<N> shape, T* data) :
+        m_data(data),
+        m_shape(shape),
+        m_owner(false)
+    {}
+    TensorBase(Shape<N> shape) :
+        m_data(new T[shape.volume()]),
+        m_shape(shape)
+    {}
+    ~TensorBase() { cleanup(); }
 
-    Tensor1() = default;
-    Tensor1(Tensor1&& other) = default;
-    Tensor1& operator=(Tensor1&& other) = default;
+    TensorBase(TensorBase&& other) {
+        m_data = other.m_data; m_shape = other.m_shape;
+        m_owner = other.m_owner;
+        other.m_owner = false;
+    }
+    TensorBase& operator=(TensorBase&& other) {
+        cleanup();
+        m_data = other.m_data; m_shape = other.m_shape;
+        m_owner = other.m_owner;
+        other.m_owner = false;
+    }
+
+    Shape<N> shape() const { return m_shape; }
+
+    bool operator==(const TensorBase<N, T>& other) const {
+        return shape() == other.shape() &&
+                std::equal(m_data, m_data + (shape().volume()), other.m_data); }
+
+    bool operator!=(const TensorBase<N, T>& other) const {
+        return !operator==(other); }
 };
+
+// all dimensions other than 1
+template <std::size_t N, class T>
+class Tensor : public TensorBase<N, T>
+{
+    using base_type = TensorBase<N, T>;
+public:
+    using TensorBase<N, T>::TensorBase;
+    //! access slice with index @p i
+    Tensor<N-1, T> operator[](std::size_t i) {
+        return std::move(Tensor<N-1, T>(base_type::shape().proj(), base_type::m_data + i * base_type::shape().proj().volume())); }
+    const Tensor<N-1, const T> operator[](std::size_t i) const {
+        return std::move(Tensor<N-1, const T>(base_type::shape().proj(), base_type::m_data + i * base_type::shape().proj().volume())); }
+
+
+    template<std::size_t N2, class X2>
+    friend void pointer_swap(Tensor<N2, X2>&, Tensor<N2, X2>&);
+};
+
+// dimension 1
+template <class T>
+class Tensor<1, T> : public TensorBase<1, T>
+{
+    using base_type = TensorBase<1, T>;
+public:
+    using TensorBase<1, T>::TensorBase;
+    //! raw access into 1D array
+    T* data() { return base_type::m_data; }
+    const T* data() const { return base_type::m_data; }
+    //! raw indexing into 1D array
+    T& operator[](std::size_t i) { return base_type::m_data[i]; }
+    const T& operator[](std::size_t i) const { return base_type::m_data[i]; }
+
+    template<std::size_t N2, class X2>
+    friend void pointer_swap(Tensor<N2, X2>&, Tensor<N2, X2>&);
+};
+
+template<class T> using Tensor1 = Tensor<1, T>;
+template<class T> using Tensor2 = Tensor<2, T>;
+template<class T> using Tensor3 = Tensor<3, T>;
+
+using Shape1 = Shape<1>;
+using Shape2 = Shape<2>;
+using Shape3 = Shape<3>;
+
+//! swap data of two equally sized tensors
+template<std::size_t N, class T>
+void pointer_swap(Tensor<N, T>& t1, Tensor<N, T>& t2) {
+    assert(t1.m_shape == t2.m_shape);
+    std::swap(t1.m_data, t2.m_data);
+}
 
 class WaveTable
 {
@@ -59,6 +155,9 @@ class WaveTable
     Tensor3<float32> data;  //!< time=col,freq=row,semantics(oscil param or random seed)=depth
     Tensor1<float32> freqs; //!< The frequency of each 'row'
     Tensor1<float32> semantics; //!< E.g. oscil params or random seed (e.g. 0...127)
+    // pure guesses for what sounds good:
+    constexpr const static std::size_t num_freqs = 10;
+    constexpr const static std::size_t num_semantics = 128;
 
     enum class WtMode
     {
@@ -83,7 +182,7 @@ public:
     // Used to determine if new random seeds are needed
     // int number_of_remaining_seeds(void);
 
-    WaveTable() = default;
+    WaveTable(std::size_t buffersize);
     WaveTable(WaveTable&& other) = default;
     WaveTable& operator=(WaveTable&& other) = default;
 };
