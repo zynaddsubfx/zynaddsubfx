@@ -151,10 +151,8 @@ void pointer_swap(Tensor<N, T>& t1, Tensor<N, T>& t2) {
 
 class WaveTable
 {
+public:
     using float32 = float;
-    Tensor3<float32> data;  //!< time=col,freq=row,semantics(oscil param or random seed)=depth
-    Tensor1<float32> freqs; //!< The frequency of each 'row'
-    Tensor1<float32> semantics; //!< E.g. oscil params or random seed (e.g. 0...127)
     // pure guesses for what sounds good:
     constexpr const static std::size_t num_freqs = 10;
     constexpr const static std::size_t num_semantics = 128;
@@ -165,9 +163,19 @@ class WaveTable
         freqseed_smps, // (freq, seed)->samples
         freqwave_smps // (freq, wave param)->samples
     };
+
+private:
+    Tensor1<float32> semantics; //!< E.g. oscil params or random seed (e.g. 0...127)
+    Tensor1<float32> freqs; //!< The frequency of each 'row'
+    Tensor3<float32> data;  //!< time=col,freq=row,semantics(oscil param or random seed)=depth
+    WtMode m_mode;
+
 public:
+
+    void setMode(WtMode mode) { m_mode = mode; }
+
     //! Return sample slice for given frequency
-    const Tensor1<float32>& get(float32 freq) const; // works for both seed and seedless setups
+    Tensor1<const float32> get(float32 freq) const; // works for both seed and seedless setups
     // future extensions
     // Tensor2<float32> get_antialiased(void); // works for seed and seedless setups
     // Tensor2<float32> get_wavetablemod(float32 freq);
@@ -176,11 +184,11 @@ public:
     //! If this is only adding new random seeds, then the rest of the data does
     //! not need to be purged
     //! @param semantics seed or param
-    void insert(Tensor3<float> data, Tensor1<float32> freqs, Tensor1<float32> semantics, bool invalidate=true);
+    void insert(Tensor3<float>& data, Tensor1<float32>& freqs, Tensor1<float32>& semantics, bool invalidate=true);
 
     // future extension
     // Used to determine if new random seeds are needed
-    // int number_of_remaining_seeds(void);
+    // std::size_t number_of_remaining_seeds(void);
 
     WaveTable(std::size_t buffersize);
     WaveTable(WaveTable&& other) = default;

@@ -51,6 +51,7 @@ class OscilGen:public Presets
 
         void convert2sine();
 
+        void calculateWaveTableBuffer(float semantic, float freq, float* dest, std::size_t bufsize) const;
         class WaveTable* calculateWaveTable() const;
 
         //Parameters

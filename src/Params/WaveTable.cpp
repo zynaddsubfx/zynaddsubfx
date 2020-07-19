@@ -23,23 +23,27 @@
 
 namespace zyn {
 
-const Tensor1<WaveTable::float32> &WaveTable::get(WaveTable::float32 freq) const
+Tensor1<const WaveTable::float32> WaveTable::get(WaveTable::float32 freq) const
 {
-    (void) freq;
-    /* TODO: this is obviously wrong yet, we need to return slices from data, */
-    /*       not from freqs. This is for removing compiler warnings yet */
-    return freqs;
+    std::size_t num_freqs = freqs.shape().dim[0], i;
+    for(i = 0; i < num_freqs; ++i) // TODO: use binary search
+    {
+        if(freqs[i] == freq)
+            break;
+    }
+    assert(i < num_freqs);
+    return Tensor1<const WaveTable::float32>(data[0][i].shape(), data[0][i].data());
 }
 
-void WaveTable::insert(Tensor3<float> data,
-                       Tensor1<WaveTable::float32> freqs,
-                       Tensor1<WaveTable::float32> semantics,
+void WaveTable::insert(Tensor3<float> &data,
+                       Tensor1<float32> &freqs,
+                       Tensor1<float32> &semantics,
                        bool invalidate)
 {
-    (void)data;
-    (void)freqs;
-    (void)semantics;
-    (void)invalidate;
+    pointer_swap(this->data, data);
+    pointer_swap(this->freqs, freqs);
+    pointer_swap(this->semantics, semantics);
+    (void)invalidate; // future enhancement
 }
 
 WaveTable::WaveTable(std::size_t buffersize) :
