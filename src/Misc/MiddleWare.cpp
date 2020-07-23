@@ -1229,6 +1229,19 @@ void save_cb(const char *msg, RtData &d)
                 file.c_str(), request_time);
 }
 
+void
+gcc_10_1_0_is_dumb(const std::vector<std::string> &files,
+        const int N,
+        char *types,
+        rtosc_arg_t *args)
+{
+        types[N] = 0;
+        for(int i=0; i<N; ++i) {
+            args[i].s = files[i].c_str();
+            types[i]  = 's';
+        }
+}
+
 /*
  * BASE/part#/kititem#
  * BASE/part#/kit#/adpars/voice#/oscil/\*
@@ -1373,11 +1386,8 @@ static rtosc::Ports middwareSnoopPorts = {
         const int N = files.size();
         rtosc_arg_t *args  = new rtosc_arg_t[N];
         char        *types = new char[N+1];
-        types[N] = 0;
-        for(int i=0; i<N; ++i) {
-            args[i].s = files[i].c_str();
-            types[i]  = 's';
-        }
+        string      *data  = files.data();
+        gcc_10_1_0_is_dumb(files, N, types, args);
 
         d.replyArray(d.loc, types, args);
         delete [] types;
@@ -1392,11 +1402,7 @@ static rtosc::Ports middwareSnoopPorts = {
         const int N = files.size();
         rtosc_arg_t *args  = new rtosc_arg_t[N];
         char        *types = new char[N+1];
-        types[N] = 0;
-        for(int i=0; i<N; ++i) {
-            args[i].s = files[i].c_str();
-            types[i]  = 's';
-        }
+        gcc_10_1_0_is_dumb(files, N, types, args);
 
         d.replyArray(d.loc, types, args);
         delete [] types;
