@@ -19,6 +19,7 @@
 
 */
 
+#include <cmath>
 #include "WaveTable.h"
 
 namespace zyn {
@@ -26,13 +27,28 @@ namespace zyn {
 Tensor1<const WaveTable::float32> WaveTable::get(WaveTable::float32 freq) const
 {
     std::size_t num_freqs = freqs.shape().dim[0], i;
-    for(i = 0; i < num_freqs; ++i) // TODO: use binary search
+    float bestFreqDist = 9999999;
+    std::size_t bestI = 0;
+    for(i = 0; i < num_freqs; ++i) // TODO: std::lower_bound?
     {
-        if(freqs[i] == freq)
+        float curFreqDist = fabsf(freqs[i] - freq);
+        if(bestFreqDist > curFreqDist)
+        {
+            bestFreqDist = curFreqDist;
+            bestI = i;
+        }
+        else
+        {
+            assert(i > 0);
+            bestI = i - 1; // it got worse, so take the previous freq
             break;
+        }
     }
-    assert(i < num_freqs);
-    return Tensor1<const WaveTable::float32>(data[0][i].shape(), data[0][i].data());
+    assert(bestI < num_freqs);
+    std::size_t random_seed = 0; // TODO: fix
+    return Tensor1<const WaveTable::float32>(
+        data[random_seed][bestI].shape(),
+        data[random_seed][bestI].data());
 }
 
 void WaveTable::insert(Tensor3<float> &data,
