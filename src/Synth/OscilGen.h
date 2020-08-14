@@ -105,7 +105,7 @@ class OscilGen:public Presets
         //this should be called every note on event
         void newrandseed(unsigned int randseed);
 
-        bool ADvsPAD; //if it is used by ADsynth or by PADsynth
+        bool ADvsPAD; //!< true if it is used by PADsynth instead of ADsynth
 
         static const rtosc::MergePorts ports;
         static const rtosc::Ports      non_realtime_ports;
