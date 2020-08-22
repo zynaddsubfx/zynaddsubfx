@@ -42,8 +42,8 @@ static const Ports voicePorts = {
     {"OscilSmp/", rDoc("Primary Oscillator"),
         &OscilGen::ports,
         rBOIL_BEGIN
-            if(obj->OscilSmp == NULL) return;
-        data.obj = obj->OscilSmp;
+            if(obj->OscilGn == NULL) return;
+        data.obj = obj->OscilGn;
         SNIP
             OscilGen::realtime_ports.dispatch(msg, data);
         if(data.matches == 0)
@@ -52,8 +52,8 @@ static const Ports voicePorts = {
     {"FMSmp/", rDoc("Modulating Oscillator"),
         &OscilGen::ports,
         rBOIL_BEGIN
-            if(obj->FMSmp == NULL) return;
-        data.obj = obj->FMSmp;
+            if(obj->FmGn == NULL) return;
+        data.obj = obj->FmGn;
         SNIP
             OscilGen::realtime_ports.dispatch(msg, data);
         if(data.matches == 0)
@@ -601,8 +601,8 @@ void ADnoteVoiceParam::defaults()
     PFMAmpEnvelopeEnabled    = 0;
     PFMVelocityScaleFunction = 64;
 
-    OscilSmp->defaults();
-    FMSmp->defaults();
+    OscilGn->defaults();
+    FmGn->defaults();
 
     AmpEnvelope->defaults();
     AmpLfo->defaults();
@@ -632,8 +632,8 @@ void ADnoteParameters::EnableVoice(const SYNTH_T &synth, int nvoice,
 void ADnoteVoiceParam::enable(const SYNTH_T &synth, FFTwrapper *fft,
                               Resonance *Reson, const AbsTime *time)
 {
-    OscilSmp = new OscilGen(synth, fft, Reson);
-    FMSmp    = new OscilGen(synth, fft, NULL);
+    OscilGn  = new OscilGen(synth, fft, Reson);
+    FmGn    = new OscilGen(synth, fft, NULL);
 
     AmpEnvelope = new EnvelopeParams(64, 1, time);
     AmpEnvelope->init(ad_voice_amp);
@@ -688,8 +688,8 @@ void ADnoteParameters::KillVoice(int nvoice)
 
 void ADnoteVoiceParam::kill()
 {
-    delete OscilSmp;
-    delete FMSmp;
+    delete OscilGn;
+    delete FmGn;
 
     delete AmpEnvelope;
     delete AmpLfo;
@@ -775,7 +775,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
     xml.addpar("fm_enabled", (int)PFMEnabled);
 
     xml.beginbranch("OSCIL");
-    OscilSmp->add2XML(xml);
+    OscilGn->add2XML(xml);
     xml.endbranch();
 
 
@@ -883,7 +883,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
         }
 
         xml.beginbranch("OSCIL");
-        FMSmp->add2XML(xml);
+        FmGn->add2XML(xml);
         xml.endbranch();
 
         xml.endbranch();
@@ -1126,7 +1126,7 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     copy(PFMEnabled);
     copy(PFMFixedFreq);
 
-    RCopy(OscilSmp);
+    RCopy(OscilGn);
 
 
     copy(PPanning);
@@ -1185,7 +1185,7 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
 
     RCopy(FMFreqEnvelope);
 
-    RCopy(FMSmp);
+    RCopy(FmGn);
 
     if ( time ) {
         last_update_timestamp = time->time();
@@ -1263,7 +1263,7 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
     PFMEnabled     = (FMTYPE)xml.getpar127("fm_enabled", (int)PFMEnabled);
 
     if(xml.enterbranch("OSCIL")) {
-        OscilSmp->getfromXML(xml);
+        OscilGn->getfromXML(xml);
         xml.exitbranch();
     }
 
@@ -1390,7 +1390,7 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
             }
 
             if(xml.enterbranch("OSCIL")) {
-                FMSmp->getfromXML(xml);
+                FmGn->getfromXML(xml);
                 xml.exitbranch();
             }
 

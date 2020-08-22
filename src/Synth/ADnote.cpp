@@ -108,7 +108,7 @@ void ADnote::setupVoice(int nvoice)
     for (int i = 0; i < 14; i++)
         voice.pinking[i] = 0.0;
 
-    param.OscilSmp->newrandseed(prng());
+    param.OscilGn->newrandseed(prng());
     voice.OscilSmp = NULL;
     voice.FMSmp    = NULL;
     voice.VoiceOut = NULL;
@@ -170,9 +170,9 @@ void ADnote::setupVoice(int nvoice)
     if(pars.VoicePar[nvoice].Pextoscil != -1)
         vc = pars.VoicePar[nvoice].Pextoscil;
     if(!pars.GlobalPar.Hrandgrouping)
-        pars.VoicePar[vc].OscilSmp->newrandseed(prng());
+        pars.VoicePar[vc].OscilGn->newrandseed(prng());
     int oscposhi_start =
-        pars.VoicePar[vc].OscilSmp->get(NoteVoicePar[nvoice].OscilSmp,
+        pars.VoicePar[vc].OscilGn->get(NoteVoicePar[nvoice].OscilSmp,
                 getvoicebasefreq(nvoice),
                 pars.VoicePar[nvoice].Presonance);
 
@@ -435,7 +435,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
 
     //Triggers when a user enables modulation on a running voice
     if(!first_run && voice.FMEnabled != FMTYPE::NONE && voice.FMSmp == NULL && voice.FMVoice < 0) {
-        param.FMSmp->newrandseed(prng());
+        param.FmGn->newrandseed(prng());
         voice.FMSmp = memory.valloc<float>(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
         memset(voice.FMSmp, 0, sizeof(float)*(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES));
         int vc = nvoice;
@@ -443,17 +443,17 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
             vc = param.PextFMoscil;
 
         float tmp = 1.0f;
-        if((pars.VoicePar[vc].FMSmp->Padaptiveharmonics != 0)
+        if((pars.VoicePar[vc].FmGn->Padaptiveharmonics != 0)
                 || (voice.FMEnabled == FMTYPE::MIX)
                 || (voice.FMEnabled == FMTYPE::RING_MOD))
             tmp = getFMvoicebasefreq(nvoice);
 
         if(!pars.GlobalPar.Hrandgrouping)
-            pars.VoicePar[vc].FMSmp->newrandseed(prng());
+            pars.VoicePar[vc].FmGn->newrandseed(prng());
 
         for(int k = 0; k < voice.unison_size; ++k)
             voice.oscposhiFM[k] = (voice.oscposhi[k]
-                    + pars.VoicePar[vc].FMSmp->get(
+                    + pars.VoicePar[vc].FmGn->get(
                         voice.FMSmp, tmp))
                 % synth.oscilsize;
 
@@ -702,7 +702,7 @@ void ADnote::legatonote(const LegatoParams &lpars)
         /* Voice Modulation Parameters Init */
         if((NoteVoicePar[nvoice].FMEnabled != FMTYPE::NONE)
            && (NoteVoicePar[nvoice].FMVoice < 0)) {
-            pars.VoicePar[nvoice].FMSmp->newrandseed(prng());
+            pars.VoicePar[nvoice].FmGn->newrandseed(prng());
 
             //Perform Anti-aliasing only on MIX or RING MODULATION
 
@@ -711,7 +711,7 @@ void ADnote::legatonote(const LegatoParams &lpars)
                 vc = pars.VoicePar[nvoice].PextFMoscil;
 
             if(!pars.GlobalPar.Hrandgrouping)
-                pars.VoicePar[vc].FMSmp->newrandseed(prng());
+                pars.VoicePar[vc].FmGn->newrandseed(prng());
 
             for(int i = 0; i < OSCIL_SMP_EXTRA_SAMPLES; ++i)
                 NoteVoicePar[nvoice].FMSmp[synth.oscilsize + i] =
@@ -893,7 +893,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
         /* Voice Modulation Parameters Init */
         if((vce.FMEnabled != FMTYPE::NONE) && (vce.FMVoice < 0)) {
-            param.FMSmp->newrandseed(prng());
+            param.FmGn->newrandseed(prng());
             vce.FMSmp = memory.valloc<float>(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
 
             //Perform Anti-aliasing only on MIX or RING MODULATION
@@ -903,17 +903,17 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
                 vc = param.PextFMoscil;
 
             float tmp = 1.0f;
-            if((pars.VoicePar[vc].FMSmp->Padaptiveharmonics != 0)
+            if((pars.VoicePar[vc].FmGn->Padaptiveharmonics != 0)
                || (vce.FMEnabled == FMTYPE::MIX)
                || (vce.FMEnabled == FMTYPE::RING_MOD))
                 tmp = getFMvoicebasefreq(nvoice);
 
             if(!pars.GlobalPar.Hrandgrouping)
-                pars.VoicePar[vc].FMSmp->newrandseed(prng());
+                pars.VoicePar[vc].FmGn->newrandseed(prng());
 
             for(int k = 0; k < vce.unison_size; ++k)
                 vce.oscposhiFM[k] = (vce.oscposhi[k]
-                                         + pars.VoicePar[vc].FMSmp->get(
+                                         + pars.VoicePar[vc].FmGn->get(
                                              vce.FMSmp, tmp))
                                         % synth.oscilsize;
 

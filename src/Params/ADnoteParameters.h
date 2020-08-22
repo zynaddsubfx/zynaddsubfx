@@ -164,7 +164,7 @@ struct ADnoteVoiceParam {
     unsigned char Pfilterbypass;
 
     /** Voice oscillator */
-    OscilGen *OscilSmp;
+    OscilGen *OscilGn;
 
     /**********************************
     *     FREQUENCY PARAMETERS        *
@@ -270,7 +270,7 @@ struct ADnoteVoiceParam {
     short int PFMVoice;
 
     /* Modulator oscillator */
-    OscilGen *FMSmp;
+    OscilGen *FmGn;
 
     /* Modulator Volume */
     float FMvolume;
