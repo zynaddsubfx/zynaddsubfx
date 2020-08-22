@@ -62,7 +62,7 @@ class AdNoteTest:public CxxTest::TestSuite
             params = new ADnoteParameters(*synth, fft, time);
 
             //sawtooth to make things a bit more interesting
-            params->VoicePar[0].OscilSmp->Pcurrentbasefunc = 3;
+            params->VoicePar[0].OscilGn->Pcurrentbasefunc = 3;
 
             params->GlobalPar.PFilterVelocityScale = 64;
             params->GlobalPar.GlobalFilter->basefreq = 5076.203125;

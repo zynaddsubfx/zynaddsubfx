@@ -260,8 +260,8 @@ struct NonRtObjStore
             std::string nbase = base+"adpars/VoicePar"+to_s(k)+"/";
             if(adpars) {
                 auto &nobj = adpars->VoicePar[k];
-                objmap[nbase+"OscilSmp/"]     = nobj.OscilSmp;
-                objmap[nbase+"FMSmp/"] = nobj.FMSmp;
+                objmap[nbase+"OscilSmp/"] = nobj.OscilGn;
+                objmap[nbase+"FMSmp/"]    = nobj.FmGn;
             } else {
                 objmap[nbase+"OscilSmp/"] = nullptr;
                 objmap[nbase+"FMSmp/"]    = nullptr;

@@ -86,9 +86,9 @@ class MessageTest:public CxxTest::TestSuite
             ms->applyOscEvent(ms->uToB->read());
             TS_ASSERT(!ms->uToB->hasNext());
 
-            auto &osc_src = *ms->part[0]->kit[0].adpars->VoicePar[0].FMSmp;
+            auto &osc_src = *ms->part[0]->kit[0].adpars->VoicePar[0].FmGn;
             auto &osc_dst = *ms->part[0]->kit[0].padpars->oscilgen;
-            auto &osc_oth = *ms->part[0]->kit[0].adpars->VoicePar[1].OscilSmp;
+            auto &osc_oth = *ms->part[0]->kit[0].adpars->VoicePar[1].OscilGn;
 
             TS_ASSERT_EQUALS(osc_src.Pbasefuncpar, 64);
             osc_src.Pbasefuncpar = 32;
