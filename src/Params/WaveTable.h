@@ -15,7 +15,9 @@
 #define WAVETABLE_H
 
 #include <cassert>
+#include <cstddef>
 #include <algorithm>
+#include <iostream>
 
 namespace zyn {
 
@@ -46,89 +48,185 @@ public:
     //! the first dimension will be removed
     Shape<N-1> proj() const
     {
-        // TODO: don't need for loop (use consexpr)?
+        // TODO: don't need for loop (use constexpr)?
         Shape<N-1> res;
         for(std::size_t i = 1; i < N; ++i)
             res.dim[i-1] = dim[i];
         return res;
     }
+
+    Shape<N+1> prepend_dim(std::size_t to_prepend) const
+    {
+        Shape<N+1> res;
+        res.dim[0] = to_prepend;
+        for(std::size_t i = 0; i < N; ++i)
+            res.dim[i+1] = dim[i];
+        return res;
+    }
 };
 
-//! Tensor base class
-//! contains a possibly multi dimensional array
+//! Common Tensor base class for all dimensions
 template <std::size_t N, class T>
 class TensorBase
 {
 protected:
-    T       *m_data;
-    Shape<N> m_shape;
+    std::size_t m_size;
     bool     m_owner = true; //! says if memory is owned by us
-    void cleanup() { if(m_owner) { delete[] m_data; m_owner = false; } }
-public:
-    TensorBase(Shape<N> shape, T* data) :
-        m_data(data),
-        m_shape(shape),
-        m_owner(false)
-    {}
-    TensorBase(Shape<N> shape) :
-        m_data(new T[shape.volume()]),
-        m_shape(shape)
-    {}
-    ~TensorBase() { cleanup(); }
+
+    TensorBase() : m_size(0), m_owner(false) {}
+    TensorBase(std::size_t size) : m_size(size), m_owner(true) {};
 
     TensorBase(TensorBase&& other) {
-        m_data = other.m_data; m_shape = other.m_shape;
+        m_size = other.size;
         m_owner = other.m_owner;
         other.m_owner = false;
     }
     TensorBase& operator=(TensorBase&& other) {
-        cleanup();
-        m_data = other.m_data; m_shape = other.m_shape;
+        m_size = other.m_size;
         m_owner = other.m_owner;
         other.m_owner = false;
     }
-
-    Shape<N> shape() const { return m_shape; }
-
+public:
+    std::size_t size() const { return m_size; }
+protected:
+    void reserve_size(std::size_t new_size) { m_size = new_size; m_owner = true; }
     bool operator==(const TensorBase<N, T>& other) const {
-        return shape() == other.shape() &&
-                std::equal(m_data, m_data + (shape().volume()), other.m_data); }
+#if 0
+        return shape() == other.shape();/* &&
+                std::equal(m_data, m_data + (shape().volume()), other.m_data);*/ }
+#else
+        return m_size == other.m_size;
+#endif
+    }
 
-    bool operator!=(const TensorBase<N, T>& other) const {
-        return !operator==(other); }
 };
 
-// all dimensions other than 1
+//! Tensor class for all dimensions != 1
 template <std::size_t N, class T>
 class Tensor : public TensorBase<N, T>
 {
     using base_type = TensorBase<N, T>;
-public:
-    using TensorBase<N, T>::TensorBase;
-    //! access slice with index @p i
-    Tensor<N-1, T> operator[](std::size_t i) {
-        return std::move(Tensor<N-1, T>(base_type::shape().proj(), base_type::m_data + i * base_type::shape().proj().volume())); }
-    const Tensor<N-1, const T> operator[](std::size_t i) const {
-        return std::move(Tensor<N-1, const T>(base_type::shape().proj(), base_type::m_data + i * base_type::shape().proj().volume())); }
+    Tensor<N-1, T>* m_data;
+    void init_shape_alloced(const Shape<N>& shape)
+    {
+        Shape<N-1> proj = shape.proj();
+        for(std::size_t i = 0; i < base_type::size(); ++i)
+        {
+            m_data[i].init_shape(proj);
+        }
+    }
 
+public:
+    Tensor() : m_data(nullptr) {}
+    Tensor(const Shape<N>& shape) :
+        TensorBase<N, T> (shape.dim[0]),
+        m_data(new Tensor<N-1, T>[base_type::size()])
+    {
+        init_shape_alloced(shape);
+    }
+    void init_shape(const Shape<N>& shape)
+    {
+        base_type::reserve_size(shape.dim[0]);
+        m_data = new Tensor<N-1, T>[base_type::size()];
+        init_shape_alloced(shape);
+    }
+    ~Tensor()
+    {
+        if(base_type::m_owner) { delete[] m_data; }
+    }
+    Tensor& operator=(Tensor&& other) {
+        base_type::operator=(other);
+        m_data = other.m_data;
+    }
+
+    //! access slice with index @p i
+    Tensor<N-1, T>& operator[](std::size_t i) { return m_data[i]; }
+    const Tensor<N-1, T>& operator[](std::size_t i) const { return m_data[i]; }
+
+    bool operator==(const Tensor<N, T>& other) const
+    {
+        bool equal = base_type::operator==(other);
+        for(std::size_t i = 0; equal && i < base_type::size(); ++i)
+        {
+            equal = m_data[i].operator==(other.m_data[i]);
+        }
+        return equal;
+    }
+
+    bool operator!=(const Tensor<N, T>& other) const {
+        return !operator==(other); }
+
+    // testing only:
+    std::size_t set_data(const T* new_data)
+    {
+        std::size_t consumed = 0;
+        for(std::size_t i = 0; i < base_type::size(); ++i)
+        {
+            consumed += m_data[i].set_data(new_data + consumed);
+        }
+        return consumed;
+    }
+
+    Shape<N> shape() const {
+        if(base_type::size()) {
+            return m_data[0].shape().prepend_dim(base_type::size());
+        }
+        else {
+            Shape<N> res;
+            for(std::size_t i = 0; i < N; ++i) res.dim[i] = 0;
+            return res;
+        }
+    }
 
     template<std::size_t N2, class X2>
     friend void pointer_swap(Tensor<N2, X2>&, Tensor<N2, X2>&);
 };
 
-// dimension 1
+//! Tensor class for dimension 1
 template <class T>
 class Tensor<1, T> : public TensorBase<1, T>
 {
     using base_type = TensorBase<1, T>;
+    T* m_data;
+
 public:
-    using TensorBase<1, T>::TensorBase;
+    Tensor() : m_data(nullptr) {}
+    Tensor(std::size_t size) : TensorBase<1, T>(size), m_data(new T[size]) {}
+    Tensor(const Shape<1>& shape) : Tensor(shape.dim[0]){}
+    ~Tensor() { if(base_type::m_owner) { delete[] m_data; } }
+    Tensor& operator=(Tensor&& other) {
+        base_type::operator=(other);
+        m_data = other.m_data;
+    }
+
+    void init_shape(const Shape<1>& shape)
+    {
+        base_type::reserve_size(shape.dim[0]);
+        m_data = new T[base_type::size()];
+    }
+
     //! raw access into 1D array
-    T* data() { return base_type::m_data; }
-    const T* data() const { return base_type::m_data; }
+    T* data() { return m_data; }
+    const T* data() const { return m_data; }
     //! raw indexing into 1D array
-    T& operator[](std::size_t i) { return base_type::m_data[i]; }
-    const T& operator[](std::size_t i) const { return base_type::m_data[i]; }
+    T& operator[](std::size_t i) { return m_data[i]; }
+    const T& operator[](std::size_t i) const { return m_data[i]; }
+
+    bool operator==(const Tensor<1, T>& other) const {
+        return base_type::operator==(other) &&
+            std::equal(m_data, m_data + base_type::size(), other.m_data);
+    }
+
+    bool operator!=(const Tensor<1, T>& other) const {
+        return !operator==(other); }
+
+    std::size_t set_data(const T* new_data)
+    {
+        std::copy(new_data, new_data+base_type::size(), m_data);
+        return base_type::size();
+    }
+
+    Shape<1> shape() const { return Shape<1>{base_type::size()}; }
 
     template<std::size_t N2, class X2>
     friend void pointer_swap(Tensor<N2, X2>&, Tensor<N2, X2>&);
@@ -145,8 +243,9 @@ using Shape3 = Shape<3>;
 //! swap data of two equally sized tensors
 template<std::size_t N, class T>
 void pointer_swap(Tensor<N, T>& t1, Tensor<N, T>& t2) {
-    assert(t1.m_shape == t2.m_shape);
+    assert(t1.m_size == t2.m_size);
     std::swap(t1.m_data, t2.m_data);
+    std::swap(t1.m_owner, t2.m_owner);
 }
 
 class WaveTable
@@ -175,7 +274,7 @@ public:
     void setMode(WtMode mode) { m_mode = mode; }
 
     //! Return sample slice for given frequency
-    Tensor1<const float32> get(float32 freq) const; // works for both seed and seedless setups
+    const Tensor1<float32> &get(float32 freq) const; // works for both seed and seedless setups
     // future extensions
     // Tensor2<float32> get_antialiased(void); // works for seed and seedless setups
     // Tensor2<float32> get_wavetablemod(float32 freq);

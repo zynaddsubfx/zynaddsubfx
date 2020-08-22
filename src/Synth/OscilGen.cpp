@@ -492,7 +492,6 @@ WaveTable *OscilGen::calculateWaveTable() const
     WaveTable* wt = new WaveTable(synth.oscilsize);
     wt->setMode(WaveTable::WtMode::freqseed_smps);
     std::size_t oscilsize = static_cast<std::size_t>(synth.oscilsize);
-    /* TODO: generate wave table here... */
     Tensor1<WaveTable::float32>
             freqs(Shape1{WaveTable::num_freqs}),
             semantics(Shape1{WaveTable::num_semantics});
