@@ -484,7 +484,9 @@ void OscilGen::convert2sine()
 
 void OscilGen::calculateWaveTableBuffer(float semantic, float freq, float *dest, int Presonance)/* const*/
 {
-    // TODO: calculate the buffer "dest" similar to OscilGen::get, but with the random seed from "semantic"
+    // calculate the buffer "dest" similar to OscilGen::get, but with the random seed from "semantic"
+    // TODO: semantic cast float -> unsigned: bad?
+    OscilGen::get(dest, freq, Presonance, true, (unsigned)semantic);
 }
 
 WaveTable *OscilGen::calculateWaveTable(int Presonance) /*const*/
