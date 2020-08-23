@@ -357,7 +357,7 @@ struct NonRtObjStore
                 if(pos == string::npos) pos = obj_rl.rfind("/FMSmp");
                 if(pos == string::npos)
                 {
-                    assert(!"OscilGen message does not end on \"/OscilSmp\"");
+                    assert(!"OscilGen message does not end on \"/OscilSmp\" or \"/FMsmp\"");
                 }
                 else
                 {
