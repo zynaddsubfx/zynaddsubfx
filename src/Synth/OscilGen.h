@@ -51,8 +51,7 @@ class OscilGen:public Presets
 
         void convert2sine();
 
-        void calculateWaveTableBuffer(float semantic, float freq, float* dest, std::size_t bufsize) const;
-        class WaveTable* calculateWaveTable() const;
+        class WaveTable* calculateWaveTable(int Presonance) /*const*/;
 
         //Parameters
 
@@ -162,6 +161,8 @@ class OscilGen:public Presets
         //this can be called for the sine and components, and for the spectrum
         //(that's why the sine and cosine components should be processed with a separate call)
         void adaptiveharmonicpostprocess(fft_t *f, int size);
+
+        void calculateWaveTableBuffer(float semantic, float freq, float* dest, int Presonance) /*const*/;
 
         //Internal Data
         unsigned char oldbasefunc, oldbasepar, oldhmagtype,

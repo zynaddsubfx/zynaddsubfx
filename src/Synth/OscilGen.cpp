@@ -482,12 +482,12 @@ void OscilGen::convert2sine()
     prepare();
 }
 
-void OscilGen::calculateWaveTableBuffer(float semantic, float freq, float *dest, std::size_t bufsize) const
+void OscilGen::calculateWaveTableBuffer(float semantic, float freq, float *dest, int Presonance)/* const*/
 {
     // TODO: calculate the buffer "dest" similar to OscilGen::get, but with the random seed from "semantic"
 }
 
-WaveTable *OscilGen::calculateWaveTable() const
+WaveTable *OscilGen::calculateWaveTable(int Presonance) /*const*/
 {
     WaveTable* wt = new WaveTable(synth.oscilsize);
     wt->setMode(WaveTable::WtMode::freqseed_smps);
@@ -510,7 +510,7 @@ WaveTable *OscilGen::calculateWaveTable() const
     {
         for(std::size_t j = 0; j < WaveTable::num_freqs; ++j)
         {
-            calculateWaveTableBuffer(semantics[i], freqs[j], data[i][j].data(), oscilsize);
+            calculateWaveTableBuffer(semantics[i], freqs[j], data[i][j].data(), Presonance);
         }
     }
 

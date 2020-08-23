@@ -350,8 +350,8 @@ struct NonRtObjStore
             else
             {
                 //printf("msg: %s,%s\n",d.message,msg);
-                const OscilGen* oscilGen = static_cast<const OscilGen*>(d.obj);
-                const WaveTable* wt = oscilGen->calculateWaveTable();
+                OscilGen* oscilGen = static_cast<OscilGen*>(d.obj);
+                const WaveTable* wt = oscilGen->calculateWaveTable(0 /*TODO: get Presonance from ADnote? How do we access it here?*/);
 
                 string::size_type pos = obj_rl.rfind("/OscilSmp");
                 if(pos == string::npos) pos = obj_rl.rfind("/FMSmp");
