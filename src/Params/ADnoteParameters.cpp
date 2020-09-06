@@ -524,6 +524,12 @@ void ADnoteParameters::defaults()
         defaults(nvoice);
 
     VoicePar[0].Enabled = 1;
+
+    for(int k=0; k<NUM_VOICES; ++k) { // calculating too much can never harm...
+        ADnoteVoiceParam& voice = VoicePar[k];
+        // TODO: refactor this code line into ADnoteVoicePar
+        voice.table = voice.OscilGn->calculateWaveTable(voice.Presonance);
+    }
 }
 
 void ADnoteGlobalParam::defaults()
