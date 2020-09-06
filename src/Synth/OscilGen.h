@@ -95,6 +95,8 @@ class OscilGen:public Presets
           63..0 - block type randomness - 0 is maximum
           65..127 - each harmonic randomness - 127 is maximum*/
         unsigned char Prand;
+        int calculateOutpos() const;
+        unsigned char getFinalOutpos() const;
         unsigned char Pamprandpower, Pamprandtype; //amplitude randomness
         unsigned char Padaptiveharmonics; //the adaptive harmonics status (off=0,on=1,etc..)
         unsigned char Padaptiveharmonicsbasefreq; //the base frequency of the adaptive harmonic (30..3000Hz)
@@ -148,6 +150,7 @@ class OscilGen:public Presets
 
         float userfunc(float x);
 
+        unsigned char getFinalOutpos(int outpos) const;
     public:
         //Check system for needed updates
         bool needPrepare(void);

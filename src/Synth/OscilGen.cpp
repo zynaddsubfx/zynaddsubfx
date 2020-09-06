@@ -1089,11 +1089,7 @@ short int OscilGen::get(float *smps, float freqHz, int resonance, bool useSpecia
     unsigned int realrnd = prng();
     sprng(useSpecialRandSeed ? specialRandSeed : randseed);
 
-    int outpos =
-        (int)((RND * 2.0f
-               - 1.0f) * synth.oscilsize_f * (Prand - 64.0f) / 64.0f);
-    outpos = (outpos + 2 * synth.oscilsize) % synth.oscilsize;
-
+    int outpos = calculateOutpos();
 
     clearAll(outoscilFFTfreqs, synth.oscilsize);
 
@@ -1171,10 +1167,26 @@ short int OscilGen::get(float *smps, float freqHz, int resonance, bool useSpecia
 
     sprng(realrnd + 1);
 
-    if(Prand < 64)
-        return outpos;
-    else
-        return 0;
+    return getFinalOutpos(outpos);
+}
+
+int OscilGen::calculateOutpos() const
+{
+    int outpos =
+            (int)((RND * 2.0f
+                   - 1.0f) * synth.oscilsize_f * (Prand - 64.0f) / 64.0f);
+    outpos = (outpos + 2 * synth.oscilsize) % synth.oscilsize;
+    return outpos;
+}
+
+unsigned char OscilGen::getFinalOutpos(int outpos) const
+{
+    return (Prand < 64) ? outpos : 0;
+}
+
+unsigned char OscilGen::getFinalOutpos() const
+{
+    return getFinalOutpos(calculateOutpos());
 }
 
 ///*
