@@ -38,6 +38,17 @@ using rtosc::RtData;
 #undef rChangeCb
 #define rChangeCb if (obj->time) { obj->last_update_timestamp = obj->time->time(); }
 static const Ports voicePorts = {
+    {"wavetable-rt-params:",
+        rDoc("retrieve realtime params for wavetable computation"),
+        nullptr,
+        [](const char *msg, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            // reply all RT params required for computation
+            // in this case, it's only Presonance...
+            d.reply("/request-wavetable", "si", d.loc, (int)obj->Presonance);
+        }
+    },
     {"set-wavetable:b",
         rDoc("inform voice to update oscillator table"), NULL,
         [](const char *msg, RtData &d)

@@ -355,8 +355,6 @@ struct NonRtObjStore
             else
             {
                 //printf("msg: %s,%s\n",d.message,msg);
-                OscilGen* oscilGen = static_cast<OscilGen*>(d.obj);
-                const WaveTable* wt = oscilGen->calculateWaveTable(0 /*TODO: get Presonance from ADnote? How do we access it here?*/);
 
                 string::size_type pos = obj_rl.rfind("/OscilSmp");
                 if(pos == string::npos) pos = obj_rl.rfind("/FMSmp");
@@ -367,13 +365,10 @@ struct NonRtObjStore
                 else
                 {
                     std::string obj_vc(obj_rl, 0, pos);
-                    obj_vc += "/set-wavetable";
-
-                    // send wavetable to corresponding ADnote voice
-                    // e.g. dispatch "wt" at "/part0/kit0/adpars/VoicePar0"
-                    // in the future, we may send only slices
-                    printf("sending %p to ADnote voice %s\n", wt, obj_vc.c_str());
-                    d.chain(obj_vc.c_str(), "b", sizeof(WaveTable*), &wt);
+                    // we want to calculate the new wavetable now, but we first
+                    // need to wait for RT to deliver us the RT params
+                    obj_vc += "/wavetable-rt-params";
+                    d.chain(obj_vc.c_str(), "");
                 }
             }
         }
@@ -1820,6 +1815,22 @@ static rtosc::Ports middlewareReplyPorts = {
         rEnd},
     {"broadcast:", 0, 0, rBegin; impl.broadcast = true; rEnd},
     {"forward:", 0, 0, rBegin; impl.forward = true; rEnd},
+    {"request-wavetable:si", 0, 0, // TODO: rename? like "request-wavetable"?
+        rBegin;
+        string voice         = rtosc_argument(msg, 0).s; // it's *not yet* the voice path
+        const int presonance = rtosc_argument(msg, 1).i;
+        string::size_type pos = voice.find("wavetable-rt-params");
+        assert(pos == voice.length() - strlen("wavetable-rt-params"));
+        voice.resize(pos); // *now* it's the voice location
+
+        void* ptr = impl.obj_store.get(voice + "OscilSmp/");
+        assert(ptr);
+        OscilGen* oscilGen = static_cast<OscilGen*>(ptr);
+        const WaveTable* wt = oscilGen->calculateWaveTable(presonance);
+        //printf("got: %s -> %s, %s/ %s, %d\n", d.loc, d.message, msg, path.c_str(), presonance);
+        d.chain((voice + "set-wavetable").c_str(), "b", sizeof(WaveTable*), &wt);
+    }
+}
 };
 #undef rBegin
 #undef rEnd
