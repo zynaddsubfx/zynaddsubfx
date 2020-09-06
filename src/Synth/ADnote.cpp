@@ -108,7 +108,9 @@ void ADnote::setupVoice(int nvoice)
     for (int i = 0; i < 14; i++)
         voice.pinking[i] = 0.0;
 
+#if 0
     param.OscilGn->newrandseed(prng());
+#endif
     voice.OscilSmp = NULL;
     voice.FMSmp    = NULL;
     voice.VoiceOut = NULL;
@@ -169,12 +171,19 @@ void ADnote::setupVoice(int nvoice)
     int vc = nvoice;
     if(pars.VoicePar[nvoice].Pextoscil != -1)
         vc = pars.VoicePar[nvoice].Pextoscil;
+#if 0
     if(!pars.GlobalPar.Hrandgrouping)
         pars.VoicePar[vc].OscilGn->newrandseed(prng());
     int oscposhi_start =
         pars.VoicePar[vc].OscilGn->get(NoteVoicePar[nvoice].OscilSmp,
                 getvoicebasefreq(nvoice),
                 pars.VoicePar[nvoice].Presonance);
+#else
+    assert(pars.VoicePar[vc].table); // did you allocate ADnoteParameters and not assign its "table" member?
+    const float* bufferInTable = pars.VoicePar[vc].table->get(getvoicebasefreq(nvoice)).data();
+    std::copy(bufferInTable, bufferInTable + synth.oscilsize, NoteVoicePar[nvoice].OscilSmp);
+    int oscposhi_start = pars.VoicePar[vc].OscilGn->getFinalOutpos();
+#endif
 
     // This code was planned for biasing the carrier in MOD_RING
     // but that's on hold for the moment.  Disabled 'cos small
