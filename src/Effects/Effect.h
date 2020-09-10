@@ -23,7 +23,7 @@
 #ifndef rEffPar
 #define rEffPar(name, idx, ...) \
   {STRINGIFY(name) "::i",  rProp(parameter) rDefaultDepends(preset) \
-   DOC(__VA_ARGS__), NULL, rEffParCb(idx)}
+      rLinear(0,127) DOC(__VA_ARGS__), NULL, rEffParCb(idx)}
 #define rEffParOpt(name, idx, ...) \
   {STRINGIFY(name) "::i:c:S",  rProp(parameter) rDefaultDepends(preset) \
    rProp(enumerated) DOC(__VA_ARGS__), NULL, \
