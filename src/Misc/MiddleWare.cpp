@@ -31,6 +31,7 @@
 #include "../UI/Fl_Osc_Interface.h"
 
 #include <map>
+#include <queue>
 
 #include "Util.h"
 #include "CallbackRepeater.h"
@@ -428,6 +429,9 @@ public:
 
 class MiddleWareImpl
 {
+    // messages chained with MwDataObj::chain
+    // must yet be handled after a previous handleMsg
+    std::queue<std::vector<char>> msgsToHandle;
 public:
     MiddleWare *parent;
     Config* const config;
@@ -714,6 +718,12 @@ public:
     // Handle an event with special cases
     void handleMsg(const char *msg);
 
+    // Add a message for handleMsg to a queue
+    void queueMsg(const char* msg)
+    {
+        msgsToHandle.emplace(msg, msg+rtosc_message_length(msg, -1));
+    }
+
     void write(const char *path, const char *args, ...);
     void write(const char *path, const char *args, va_list va);
 
@@ -868,7 +878,7 @@ class MwDataObj:public rtosc::RtData
         {
             assert(msg);
             // printf("chain call on <%s>\n", msg);
-            mwi->handleMsg(msg);
+            mwi->queueMsg(msg);
         }
 
         virtual void chain(const char *path, const char *args, ...) override
@@ -2040,6 +2050,8 @@ void MiddleWareImpl::kitEnable(int part, int kit, int type)
  */
 void MiddleWareImpl::handleMsg(const char *msg)
 {
+    assert(msgsToHandle.empty());
+
     //Check for known bugs
     assert(msg && *msg && strrchr(msg, '/')[1]);
     assert(strstr(msg,"free") == NULL || strstr(rtosc_argument_string(msg), "b") == NULL);
@@ -2074,6 +2086,14 @@ void MiddleWareImpl::handleMsg(const char *msg)
         uToB->raw_write(msg);
     } else {
         //printf("Message Handled<%s:%s>...\n", msg, rtosc_argument_string(msg));
+    }
+
+    // now handle all chained messages
+    while(!msgsToHandle.empty())
+    {
+        std::vector<char> front = msgsToHandle.front();
+        msgsToHandle.pop();
+        handleMsg(front.data());
     }
 }
 
