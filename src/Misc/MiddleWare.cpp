@@ -1000,6 +1000,7 @@ const rtosc::Ports bankPorts = {
                 d.reply("/bankview", "iss", i, "", "");
             }
         }
+        d.broadcast("/damage", "s", "/bank/");
         rEnd},
     {"bank_list:", 0, 0,
         rBegin;
@@ -1286,6 +1287,7 @@ static rtosc::Ports middwareSnoopPorts = {
                     "Failed To Save To Bank Slot, please check file permissions");
             GUI::raiseUi(impl.ui, buffer);
         }
+        else d.broadcast("/damage", "s", "/bank/search_results/");
         rEnd},
     {"config/", 0, &Config::ports,
         rBegin;
