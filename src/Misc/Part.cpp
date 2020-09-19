@@ -172,9 +172,10 @@ static const Ports partPorts = {
             Part *p = (Part*)d.obj;
             if (p->loaded_file[0] == '\0') {  // if part was never loaded or saved
                 time_t rawtime;     // make a new name from date and time
+                char filename[32];
                 time (&rawtime);
                 const struct tm* timeinfo = localtime (&rawtime);
-                strftime (p->loaded_file,23,"%F_%R.xiz",timeinfo); 
+                strftime (filename,23,"%F_%R.xiz",timeinfo); 
             }
             p->saveXML(p->loaded_file);
             fprintf(stderr, "Part %d saved to %s\n", (p->partno + 1), p->loaded_file);
