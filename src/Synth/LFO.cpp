@@ -126,31 +126,31 @@ float LFO::baseOut(const char waveShape, const float phase)
 float LFO::biquad(float input)
 {
     float output;
-    static char cutoff = 127;
-    if (lfopars_.Pcutoff!=cutoff )
+    char cutoff = 127;
+    if (lfopars_.Pcutoff!=cutoff ) // calculate coeffs only if cutoff changed
     {
-		cutoff = lfopars_.Pcutoff;
-		if (cutoff != 127)
-		{
-		    // calculate biquad coefficients
-		    Fc = powf(cutoff + 7.0f, 2.0f)/142.0f;
-		    K = tan(PI * Fc * dt_);
-		    norm = 1 / (1 + K / 0.7071f + K * K);
-		    a0 = K * K * norm;
-		    a1 = 2 * a0;
-		    a2 = a0;
-		    b1 = 2 * (K * K - 1) * norm;
-		    b2 = (1 - K / 0.7071f + K * K) * norm;
-		}
-	}
-	if (cutoff != 127)
-	{
-		// lp filter the (s&h) random LFO
-	    output = limit(input * a0 + z1, -1.0f, 1.0f);
-	    z1 = input * a1 + z2 - b1 * output;
-	    z2 = input * a2 - b2 * output;
-	}
-    return (cutoff==127) ? input : output;
+        cutoff = lfopars_.Pcutoff;
+        if (cutoff != 127) // at cutoff 127 we bypass filter, no coeffs needed
+        {
+            // calculate biquad coefficients
+            Fc = powf(cutoff + 7.0f, 2.0f)/ 45056.0f;
+            K = tan(PI * Fc);
+            norm = 1 / (1 + K / 0.7071f + K * K);
+            a0 = K * K * norm;
+            a1 = 2 * a0;
+            a2 = a0;
+            b1 = 2 * (K * K - 1) * norm;
+            b2 = (1 - K / 0.7071f + K * K) * norm;
+        }
+    }
+    if (cutoff != 127) // at cutoff 127 we bypass filter, nothing to do
+    {
+        // lp filter the (s&h) random LFO
+        output = limit(input * a0 + z1, -1.0f, 1.0f);
+        z1 = input * a1 + z2 - b1 * output;
+        z2 = input * a2 - b2 * output;
+    }
+    return (cutoff==127) ? input : output; // at cutoff 127 bypass filter
 }
 
 
