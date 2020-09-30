@@ -21,6 +21,7 @@ add_definitions(-DOUT_DEFAULT="${DefaultOutput}")
 add_definitions(-DIN_DEFAULT="${DefaultInput}")
 
 if(JackEnable)
+    INCLUDE(CheckIncludeFiles)
     include_directories(${JACK_INCLUDE_DIR})
     list(APPEND zynaddsubfx_nio_SRCS JackEngine.cpp JackMultiEngine.cpp)
     list(APPEND zynaddsubfx_nio_lib ${JACK_LIBRARIES})
