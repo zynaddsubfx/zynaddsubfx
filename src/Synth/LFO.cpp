@@ -21,6 +21,8 @@
 
 namespace zyn {
 
+#define LIMIT(x,lu, ll) (x>lu ? lu : (x<ll ? ll : x) )
+
 LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManager *m,
         const char *watch_prefix)
     :first_half(-1),
@@ -133,8 +135,10 @@ float LFO::biquad(float input)
         if (cutoff != 127) // at cutoff 127 we bypass filter, no coeffs needed
         {
             // calculate biquad coefficients
-            Fc = powf(cutoff + 7.0f, 2.0f)/ 45056.0f;
-            K = tan(PI * Fc);
+            FcAbs = (cutoff + 7.0f)*(cutoff + 7.0f)/ 450.56f; // max value < 40
+            K = tan(PI * LIMIT(FcAbs * dt_,0.4,0.001)); // FcRel * dt_ max 40 * 0.01 = 0.4,
+            // LIMIT in case of LFO sampling frequency lower than 100 Hz
+
             norm = 1 / (1 + K / 0.7071f + K * K);
             a0 = K * K * norm;
             a1 = 2 * a0;
