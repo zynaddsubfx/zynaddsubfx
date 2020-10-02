@@ -176,9 +176,14 @@ static const Ports partPorts = {
                 time (&rawtime);
                 const struct tm* timeinfo = localtime (&rawtime);
                 strftime (filename,23,"%F_%R.xiz",timeinfo); 
+                p->saveXML(filename);
+                fprintf(stderr, "Part %d saved to %s\n", (p->partno + 1), filename);
             }
-            p->saveXML(p->loaded_file);
-            fprintf(stderr, "Part %d saved to %s\n", (p->partno + 1), p->loaded_file);
+            else
+            {
+                p->saveXML(p->loaded_file);
+                fprintf(stderr, "Part %d saved to %s\n", (p->partno + 1), p->loaded_file);
+            }
         }},
     //{"kit#16::T:F", "::Enables or disables kit item", 0,
     //    [](const char *m, RtData &d) {
@@ -1092,8 +1097,6 @@ int Part::saveXML(const char *filename)
     xml.endbranch();
 
     int result = xml.saveXMLfile(filename, gzip_compression);
-    strncpy(loaded_file,filename, sizeof(loaded_file));
-    loaded_file[sizeof(loaded_file)-1] = '\0';
     return result;
 }
 
