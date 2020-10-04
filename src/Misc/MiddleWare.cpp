@@ -247,6 +247,38 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
     }
 }
 
+/**
+ * Class responsible for sending chained requests of "/wavetable-rt-params"
+ */
+class WaveTableRequestHandler
+{
+    bool waitForAdPars[NUM_MIDI_PARTS][NUM_KIT_ITEMS][NUM_VOICES];
+
+public:
+    WaveTableRequestHandler()
+    {
+        for(std::size_t p = 0; p < NUM_MIDI_PARTS; ++p)
+        for(std::size_t k = 0; k < NUM_KIT_ITEMS; ++k)
+        for(std::size_t v = 0; v < NUM_VOICES; ++v)
+            waitForAdPars[p][k][v] = false;
+    }
+
+    void chainWtParamRequest(int part, int kit, int voice, rtosc::RtData& d)
+    {
+        if(!waitForAdPars[part][kit][voice])
+        {
+            std::string s = buildVoiceParMsg(&part, &kit, &voice);
+            d.chain((s + "/wavetable-rt-params").c_str(), "");
+            waitForAdPars[part][kit][voice] = true;
+        }
+    }
+
+    void receivedAdPars(int part, int kit, int voice)
+    {
+        waitForAdPars[part][kit][voice] = false;
+    }
+};
+
 /******************************************************************************
  *                      Non-RealTime Object Store                             *
  *                                                                            *
@@ -327,7 +359,7 @@ struct NonRtObjStore
     }
 
     //! try to dispatch a message at the OscilGen non-RT-ports
-    void handleOscilADnote(const char *msg, rtosc::RtData &d) {
+    void handleOscilADnote(const char *msg, rtosc::RtData &d, WaveTableRequestHandler& handler) {
         // relative location of this message (i.e. the OscilGen path)
         const string obj_rl(d.message, msg);
         assert(d.message);
@@ -337,7 +369,7 @@ struct NonRtObjStore
         void *osc = get(obj_rl);
         if(osc)
         {
-            // try forward the message to our non-realtime ports
+            // try to forward the message to our non-realtime ports
             // therefore, change
             // * loc from "" to the OscilGen path
             // * d.obj from MiddleWareImplementation to the OscilGen object
@@ -354,22 +386,10 @@ struct NonRtObjStore
             }
             else
             {
-                //printf("msg: %s,%s\n",d.message,msg);
-
-                string::size_type pos = obj_rl.rfind("/OscilSmp");
-                if(pos == string::npos) pos = obj_rl.rfind("/FMSmp");
-                if(pos == string::npos)
-                {
-                    assert(!"OscilGen message does not end on \"/OscilSmp\" or \"/FMsmp\"");
-                }
-                else
-                {
-                    std::string obj_vc(obj_rl, 0, pos);
-                    // we want to calculate the new wavetable now, but we first
-                    // need to wait for RT to deliver us the RT params
-                    obj_vc += "/wavetable-rt-params";
-                    d.chain(obj_vc.c_str(), "");
-                }
+                int part, kit, voice;
+                bool res = idsFromMsg(d.message, &part, &kit, &voice);
+                assert(res);
+                handler.chainWtParamRequest(part, kit, voice, d);
             }
         }
         else {
@@ -503,7 +523,7 @@ public:
     mw_dispatcher_t(MiddleWare* mw) : mw(mw) {}
 };
 
-class MiddleWareImpl
+class MiddleWareImpl : public WaveTableRequestHandler
 {
     // messages chained with MwDataObj::chain
     // must yet be handled after a previous handleMsg
@@ -1815,20 +1835,27 @@ static rtosc::Ports middlewareReplyPorts = {
         rEnd},
     {"broadcast:", 0, 0, rBegin; impl.broadcast = true; rEnd},
     {"forward:", 0, 0, rBegin; impl.forward = true; rEnd},
-    {"request-wavetable:si", 0, 0, // TODO: rename? like "request-wavetable"?
+    {"request-wavetable:si", 0, 0,
         rBegin;
-        string voice         = rtosc_argument(msg, 0).s; // it's *not yet* the voice path
-        const int presonance = rtosc_argument(msg, 1).i;
-        string::size_type pos = voice.find("wavetable-rt-params");
-        assert(pos == voice.length() - strlen("wavetable-rt-params"));
-        voice.resize(pos); // *now* it's the voice location
+        int part, kit, voice;
 
-        void* ptr = impl.obj_store.get(voice + "OscilSmp/");
+        string voicePath     = rtosc_argument(msg, 0).s; // it's *not yet* the voice path
+        const int presonance = rtosc_argument(msg, 1).i;
+        bool res = idsFromMsg(voicePath.c_str(), &part, &kit, &voice);
+        assert(res);
+
+        string::size_type pos = voicePath.find("wavetable-rt-params");
+        assert(pos == voicePath.length() - strlen("wavetable-rt-params"));
+        voicePath.resize(pos); // *now* it's the voice location
+
+        void* ptr = impl.obj_store.get(voicePath + "OscilSmp/");
         assert(ptr);
         OscilGen* oscilGen = static_cast<OscilGen*>(ptr);
         const WaveTable* wt = oscilGen->calculateWaveTable(presonance);
         //printf("got: %s -> %s, %s/ %s, %d\n", d.loc, d.message, msg, path.c_str(), presonance);
-        d.chain((voice + "set-wavetable").c_str(), "b", sizeof(WaveTable*), &wt);
+        d.chain((voicePath + "set-wavetable").c_str(), "b", sizeof(WaveTable*), &wt);
+
+        impl.receivedAdPars(part, kit, voice);
     }
 }
 };
