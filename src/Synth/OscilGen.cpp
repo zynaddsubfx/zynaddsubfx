@@ -494,23 +494,39 @@ WaveTable *OscilGen::calculateWaveTable(int Presonance) /*const*/
     WaveTable* wt = new WaveTable(synth.oscilsize);
     wt->setMode(WaveTable::WtMode::freqseed_smps);
     std::size_t oscilsize = static_cast<std::size_t>(synth.oscilsize);
+
+    std::size_t num_semantics, num_freqs;
+
+    if(Pcurrentbasefunc == 0)
+    {
+        // sine wave - should behave the same for all freqs and semantics
+        num_semantics = num_freqs = 1;
+    }
+    else
+    {
+        num_semantics = WaveTable::num_semantics;
+        num_freqs = WaveTable::num_freqs;
+    }
+
     Tensor1<WaveTable::float32>
-            freqs(Shape1{WaveTable::num_freqs}),
-            semantics(Shape1{WaveTable::num_semantics});
+            freqs(Shape1{num_freqs}),
+            semantics(Shape1{num_semantics});
     Tensor3<WaveTable::float32> data(
-            Shape3{WaveTable::num_semantics, WaveTable::num_freqs, oscilsize});
-    for(std::size_t i = 0; i < WaveTable::num_semantics; ++i)
+            Shape3{num_semantics, num_freqs, oscilsize});
+
+
+    for(std::size_t i = 0; i < num_semantics; ++i)
     {
         semantics[i] = prng();
     }
     freqs[0] = 55.f;
-    for(std::size_t i = 1; i < WaveTable::num_freqs; ++i)
+    for(std::size_t i = 1; i < num_freqs; ++i)
     {
         freqs[i] = 2.f * freqs[i-1];
     }
-    for(std::size_t i = 0; i < WaveTable::num_semantics; ++i)
+    for(std::size_t i = 0; i < num_semantics; ++i)
     {
-        for(std::size_t j = 0; j < WaveTable::num_freqs; ++j)
+        for(std::size_t j = 0; j < num_freqs; ++j)
         {
             calculateWaveTableBuffer(semantics[i], freqs[j], data[i][j].data(), Presonance);
         }

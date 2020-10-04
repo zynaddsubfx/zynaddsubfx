@@ -240,10 +240,10 @@ using Shape1 = Shape<1>;
 using Shape2 = Shape<2>;
 using Shape3 = Shape<3>;
 
-//! swap data of two equally sized tensors
+//! swap data of two tensors
 template<std::size_t N, class T>
 void pointer_swap(Tensor<N, T>& t1, Tensor<N, T>& t2) {
-    assert(t1.m_size == t2.m_size);
+    std::swap(t1.m_size, t2.m_size);
     std::swap(t1.m_data, t2.m_data);
     std::swap(t1.m_owner, t2.m_owner);
 }
