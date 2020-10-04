@@ -220,6 +220,48 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
     }
 }
 
+/*
+ * Build/parse messages from/to part/kit/voice IDs
+ */
+static std::string buildVoiceParMsg(int part, int kit, int voice)
+{
+    return std::string("/part") + std::to_string(part)
+           + std::string("/kit") + std::to_string(kit)
+           + std::string("/adpars/VoicePar") + std::to_string(voice);
+}
+
+static void idsFromMsg(const char* msg, int* part, int* kit, int* voice)
+{
+    auto must_match = [](const char* msg, const char* match) {
+        assert(!strncmp(msg, match, strlen(match)));
+    };
+
+    const char *end = msg;
+    char *newend;
+
+    if(*end == '/')
+        ++end;
+
+    must_match(end, "part");
+    end += 4;
+    *part = static_cast<int>(strtol(end, &newend, 10));
+    assert(newend != end);
+    end = newend;
+
+    must_match(end, "/kit");
+    end += 4;
+    *kit = static_cast<int>(strtol(end, &newend, 10));
+    assert(newend != end);
+    end = newend;
+
+    if(!strncmp(end, "/adpars/V", 9) && voice)
+    {
+        must_match(end, "/adpars/VoicePar");
+        end += 16;
+        *voice = static_cast<int>(strtol(end, &newend, 10));
+    }
+}
+
 /******************************************************************************
  *                      Non-RealTime Object Store                             *
  *                                                                            *
@@ -2002,20 +2044,8 @@ void MiddleWareImpl::kitEnable(const char *msg)
     else
         return;
 
-    const char *tmp = strstr(msg, "part");
-
-    if(tmp == NULL)
-        return;
-
-    const int part = atoi(tmp+4);
-
-    tmp = strstr(msg, "kit");
-
-    if(tmp == NULL)
-        return;
-
-    const int kit = atoi(tmp+3);
-
+    int part, kit;
+    idsFromMsg(msg, &part, &kit, nullptr);
     kitEnable(part, kit, type);
 }
 
