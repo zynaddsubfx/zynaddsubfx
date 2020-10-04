@@ -2050,8 +2050,6 @@ void MiddleWareImpl::kitEnable(int part, int kit, int type)
  */
 void MiddleWareImpl::handleMsg(const char *msg)
 {
-    assert(msgsToHandle.empty());
-
     //Check for known bugs
     assert(msg && *msg && strrchr(msg, '/')[1]);
     assert(strstr(msg,"free") == NULL || strstr(rtosc_argument_string(msg), "b") == NULL);
