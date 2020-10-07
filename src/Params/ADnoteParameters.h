@@ -112,6 +112,7 @@ struct ADnoteGlobalParam {
 /*                    VOICE PARAMETERS                     */
 /***********************************************************/
 struct ADnoteVoiceParam {
+    ADnoteVoiceParam(const ADnoteVoiceParam& other) = delete;
     ADnoteVoiceParam() : time(nullptr), last_update_timestamp(0) { };
     void getfromXML(XMLwrapper& xml, unsigned nvoice);
     void add2XML(XMLwrapper& xml, bool fmoscilused);
