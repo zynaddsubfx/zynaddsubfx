@@ -524,12 +524,6 @@ void ADnoteParameters::defaults()
         defaults(nvoice);
 
     VoicePar[0].Enabled = 1;
-
-    for(int k=0; k<NUM_VOICES; ++k) { // calculating too much can never harm...
-        ADnoteVoiceParam& voice = VoicePar[k];
-        // TODO: refactor this code line into ADnoteVoicePar
-        voice.table = voice.OscilGn->calculateWaveTable(voice.Presonance);
-    }
 }
 
 void ADnoteGlobalParam::defaults()
@@ -644,6 +638,8 @@ void ADnoteVoiceParam::defaults()
 
     FMFreqEnvelope->defaults();
     FMAmpEnvelope->defaults();
+
+    OscilGn->recalculateDefaultWaveTable(table, Presonance);
 }
 
 
@@ -680,6 +676,8 @@ void ADnoteVoiceParam::enable(const SYNTH_T &synth, FFTwrapper *fft,
     FMFreqEnvelope->init(ad_voice_fm_freq);
     FMAmpEnvelope = new EnvelopeParams(64, 1, time);
     FMAmpEnvelope->init(ad_voice_fm_amp);
+
+    table = OscilGn->allocWaveTable();
 }
 
 /*

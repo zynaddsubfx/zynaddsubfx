@@ -536,6 +536,52 @@ WaveTable *OscilGen::calculateWaveTable(int Presonance) /*const*/
     return wt;
 }
 
+WaveTable *OscilGen::allocWaveTable() const
+{
+    WaveTable* wt = new WaveTable(synth.oscilsize);
+    wt->setMode(WaveTable::WtMode::freqseed_smps);
+    std::size_t oscilsize = static_cast<std::size_t>(synth.oscilsize);
+
+    Tensor1<WaveTable::float32>
+            freqs(Shape1{1}),
+            semantics(Shape1{1});
+    Tensor3<WaveTable::float32> data(
+            Shape3{1, 1, oscilsize});
+    wt->insert(data, freqs, semantics, true);
+    return wt;
+}
+
+void OscilGen::recalculateDefaultWaveTable(WaveTable * wt, int Presonance) /*const*/
+{
+    wt->setMode(WaveTable::WtMode::freqseed_smps);
+
+    // no allocations:
+    Tensor1<WaveTable::float32> freqs, semantics;
+    Tensor3<WaveTable::float32> data;
+
+    // abuse pointer swap to steal memory from current wavetable
+    wt->insert(data, freqs, semantics, true);
+
+    for(std::size_t i = 0; i < semantics.size(); ++i)
+    {
+        semantics[i] = prng();
+    }
+    freqs[0] = 55.f;
+    for(std::size_t i = 1; i < freqs.size(); ++i)
+    {
+        freqs[i] = 2.f * freqs[i-1];
+    }
+    for(std::size_t i = 0; i < semantics.size(); ++i)
+    {
+        for(std::size_t j = 0; j < freqs.size(); ++j)
+        {
+            calculateWaveTableBuffer(semantics[i], freqs[j], data[i][j].data(), Presonance);
+        }
+    }
+
+    wt->insert(data, freqs, semantics, true);
+}
+
 float OscilGen::userfunc(float x)
 {
     if (!fft)

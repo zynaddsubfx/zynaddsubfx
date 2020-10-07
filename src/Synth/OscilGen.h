@@ -51,7 +51,12 @@ class OscilGen:public Presets
 
         void convert2sine();
 
+        //! the usual way to calculate a new wave table
         class WaveTable* calculateWaveTable(int Presonance) /*const*/;
+        //! initial calculation for pre-allocated wavetable, no allocations
+        void recalculateDefaultWaveTable(WaveTable*, int Presonance);
+        //! allocating a small wavetable without any waves
+        WaveTable *allocWaveTable() const;
 
         //Parameters
 
