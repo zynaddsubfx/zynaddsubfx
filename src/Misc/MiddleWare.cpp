@@ -1282,8 +1282,12 @@ void save_cb(const char *msg, RtData &d)
                 file.c_str(), request_time);
 }
 
-void
-gcc_10_1_0_is_dumb(const std::vector<std::string> &files,
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
+#pragma GCC push_options
+#pragma GCC optimize("O0")
+#endif
+
+void gcc_10_1_0_is_dumb(const std::vector<std::string> &files,
         const int N,
         char *types,
         rtosc_arg_t *args)
@@ -1294,6 +1298,10 @@ gcc_10_1_0_is_dumb(const std::vector<std::string> &files,
             types[i]  = 's';
         }
 }
+
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER)
+#pragma GCC pop_options
+#endif
 
 /*
  * BASE/part#/kititem#
@@ -1440,7 +1448,6 @@ static rtosc::Ports middwareSnoopPorts = {
         const int N = files.size();
         rtosc_arg_t *args  = new rtosc_arg_t[N];
         char        *types = new char[N+1];
-        string      *data  = files.data();
         gcc_10_1_0_is_dumb(files, N, types, args);
 
         d.replyArray(d.loc, types, args);
