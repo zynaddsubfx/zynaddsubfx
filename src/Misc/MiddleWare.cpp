@@ -208,7 +208,8 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
                            rtdata_mutex.lock();
                            // send non-realtime computed data to PADnoteParameters
                            d.chain((path+to_s(N)).c_str(), "ifb",
-                                   s.size, s.basefreq, sizeof(float*), &s.smp);
+                                   s.size, s.basefreq, sizeof(float*) * s.smp.size(),
+                                   s.smp.data());
                            rtdata_mutex.unlock();
                        }, []{return false;});
 #endif
@@ -216,7 +217,7 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
     //clear out unused samples
     for(unsigned i = num; i < PAD_MAX_SAMPLES; ++i) {
         d.chain((path+to_s(i)).c_str(), "ifb",
-                0, 440.0f, sizeof(float*), NULL);
+            0, 440.0f, sizeof(float*) * (PADnoteParameters::Sample::num_buffers()), nullptr);
     }
 }
 

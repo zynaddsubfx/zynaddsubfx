@@ -205,30 +205,30 @@ class PadNoteTest:public CxxTest::TestSuite
 
 
             for(int i=0; i<8; ++i)
-                TS_ASSERT(pars->sample[i].smp);
+                TS_ASSERT(pars->curSample(i));
             for(int i=8; i<PAD_MAX_SAMPLES; ++i)
-                TS_ASSERT(!pars->sample[i].smp);
+                TS_ASSERT(!pars->curSample(i));
 
-            TS_ASSERT_DELTA(pars->sample[0].smp[0],   0.0516f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[1],   0.0845f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[2],   0.1021f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[3],   0.0919f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[4],   0.0708f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[5],   0.0414f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[6],   0.0318f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[7],   0.0217f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[8],   0.0309f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[9],   0.0584f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[10],  0.0266f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[11],  0.0436f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[12],  0.0199f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[13],  0.0505f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[14],  0.0438f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[15],  0.0024f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[16],  0.0052f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[17], -0.0180f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[18],  0.0342f, 0.0005f);
-            TS_ASSERT_DELTA(pars->sample[0].smp[19],  0.0051f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[0],   0.0516f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[1],   0.0845f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[2],   0.1021f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[3],   0.0919f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[4],   0.0708f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[5],   0.0414f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[6],   0.0318f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[7],   0.0217f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[8],   0.0309f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[9],   0.0584f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[10],  0.0266f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[11],  0.0436f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[12],  0.0199f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[13],  0.0505f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[14],  0.0438f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[15],  0.0024f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[16],  0.0052f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[17], -0.0180f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[18],  0.0342f, 0.0005f);
+            TS_ASSERT_DELTA(pars->curSample(0)[19],  0.0051f, 0.0005f);
 
 
             //Verify Harmonic Input

@@ -324,6 +324,12 @@ resui->resonancewindow->show();
 resui->setcbwidget(cbwidget,applybutton);}
             xywh {375 225 80 20} box THIN_UP_BOX
           }
+          Fl_Dial wavedial {
+            label Wave Pos
+            xywh {480 225 35 35} box ROUND_UP_BOX labelsize 10 maximum 511 step 1
+            code0 {o->make_float();o->bounds(0.0, 511.0f);o->init("Pwavepos");o->reset_value=63*4;/*TODO: deactivate if it's not wt modulation*/}
+            class Fl_Osc_Dial
+          }
           Fl_Dial bwdial {
             label BandWidth
             callback {o->oscWrite("bandwidthvalue");cbwidget->do_callback();}
@@ -653,6 +659,10 @@ cbwidget->do_callback();}
             MenuItem {} {
               label Continuous
               xywh {115 115 100 20} labelfont 1 labelsize 11
+            }
+            MenuItem {} {
+              label WaveTable
+              xywh {135 135 100 20} labelfont 1 labelsize 11
             }
           }
         }

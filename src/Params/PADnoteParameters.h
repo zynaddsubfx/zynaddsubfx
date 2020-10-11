@@ -18,6 +18,7 @@
 
 #include "Presets.h"
 #include <string>
+#include <vector>
 #include <functional>
 
 namespace zyn {
@@ -59,8 +60,16 @@ class PADnoteParameters:public Presets
             //! bandwidth = 0, almost like adnote
             discrete,
             //! filtered noise
-            continous
+            continous,
+            //! generate a table of discrete waves, similar code to "discrete"
+            wavetable
         } Pmode;
+
+        //! Wavetable modulation position
+        //! This is ~ 4 * the OscilGen basefunc parameter which is currently
+        //! chosen by wavetable modulation
+        //! Relevant only for pad_mode::wavetable
+        float Pwavepos;
 
         //Harmonic profile (the frequency distribution of a single harmonic)
         struct {
@@ -167,14 +176,53 @@ class PADnoteParameters:public Presets
         OscilGen  *oscilgen;
         Resonance *resonance;
 
-        struct Sample {
-            int    size;
+        //! struct containing the sample buffer for one note
+        struct Sample
+        {
+            //! Oscilgen allows params 0..127
+            static constexpr const std::size_t oscilgen_par_levels = 128;
+            //! interpolate between the params with 4 buffers each
+            static constexpr const std::size_t bufs_per_oscilgen_par = 4;
+            //! number of buffers (4 for each oscilgen par)
+            //! will equal smp.size() after allocation
+            static constexpr std::size_t num_buffers() {
+                return oscilgen_par_levels * bufs_per_oscilgen_par;
+            }
+            int    size; //!< size of each sample buffer
             float  basefreq;
-            float *smp;
-        };
 
+            //! pointers to the sample buffers, index is the basewave parameter
+            //! they are all initialized, nullptrs indicate that no wave was calculated for a parameter
+            std::vector<float*> smp;
+            Sample() { smp.resize(num_buffers()); }
+            // copying is deleted at all
+            Sample(const Sample& source) = delete;
+            Sample& operator=(const Sample& source) = delete;
+            Sample& operator=(Sample&& source) = default;
+        };
         //! RT sample data
         Sample sample[PAD_MAX_SAMPLES];
+
+        // getters/setters for "sample"
+        float* curSample(std::size_t idx);
+        const float* curSample(std::size_t idx) const;
+        const float* curSampleToPlay(std::size_t idx) const;
+        void setCurSample(std::size_t idx, float* vals);
+
+        int curSampleSize(std::size_t idx) const {
+            return sample[idx].size;
+        }
+        void setCurSampleSize(std::size_t idx, int val) {
+            sample[idx].size = val;
+        }
+        float curBaseFreq(std::size_t idx) const
+        {
+            return sample[idx].basefreq;
+        }
+        void setCurBaseFreq(std::size_t idx, float val)
+        {
+            sample[idx].basefreq = val;
+        }
 
         //! callback type for sampleGenerator
         typedef std::function<void(int,PADnoteParameters::Sample&&)> callback;
@@ -210,7 +258,8 @@ class PADnoteParameters:public Presets
                                             float bwadjust) const;
         void generatespectrum_otherModes(float *spectrum,
                                          int size,
-                                         float basefreq) const;
+                                         float basefreq,
+                                         OscilGen* oscilgen_ptr) const;
         void deletesamples();
         void deletesample(int n);
 

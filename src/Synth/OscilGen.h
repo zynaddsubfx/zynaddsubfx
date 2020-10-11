@@ -23,8 +23,8 @@ namespace zyn {
 class OscilGen:public Presets
 {
     public:
-        OscilGen(const SYNTH_T &synth, FFTwrapper *fft_, Resonance *res_);
-        ~OscilGen();
+        OscilGen(const SYNTH_T &synth, FFTwrapper *fft_, const Resonance *res_);
+        ~OscilGen() = default;
 
         /**computes the full spectrum of oscil from harmonics,phases and basefunc*/
         void prepare();
@@ -114,21 +114,50 @@ class OscilGen:public Presets
         /* Oscillator Frequencies -
          *  this is different than the harmonics set-up by the user,
          *  it may contains time-domain data if the antialiasing is turned off*/
-        fft_t *oscilFFTfreqs;
+        class deep_copying_fft_ptr
+        {
+            fft_t* ptr;
+            std::size_t size = 0;
+        public:
+            deep_copying_fft_ptr() = default;
+            void init_size(std::size_t newsize);
+            void reset(fft_t* new_ptr) { ptr = new_ptr; }
+            deep_copying_fft_ptr(const deep_copying_fft_ptr& other);
+            fft_t& operator[](std::size_t i);
+            const fft_t& operator[](std::size_t i) const;
+            operator fft_t*() { return ptr; }
+            operator const fft_t*() const { return ptr; }
+        } oscilFFTfreqs;
 
-        fft_t *pendingfreqs;
+        fft_t* pendingfreqs;
     private:
         //This array stores some temporary data and it has OSCIL_SIZE elements
-        float *tmpsmps;
-        fft_t *outoscilFFTfreqs;
-        float *cachedbasefunc;
+        std::vector<float> tmpsmps;
+        std::vector<fft_t> outoscilFFTfreqs;
+        std::vector<float> cachedbasefunc;
         bool cachedbasevalid;
 
         float hmag[MAX_AD_HARMONICS], hphase[MAX_AD_HARMONICS]; //the magnituides and the phases of the sine/nonsine harmonics
 
-        FFTwrapper *fft;
+        class fftWrapperContainer
+        {
+            FFTwrapper *fft;
+            bool allocatedByUs;
+        public:
+            //! Refering CTOR - OscilGen default ctor will use this
+            fftWrapperContainer(FFTwrapper* fft) : fft(fft), allocatedByUs(false) {}
+            //! Deep copying CTOR - OscilGen copy ctor will use this
+            fftWrapperContainer(const fftWrapperContainer& source);
+            ~fftWrapperContainer();
+            operator FFTwrapper*() { return fft; }
+            operator const FFTwrapper*() const { return fft; }
+            FFTwrapper* operator->() { return fft; }
+            const FFTwrapper* operator->() const { return fft; }
+        } fft;
+
         //computes the basefunction and make the FFT; newbasefunc<0  = same basefunc
         void changebasefunction(void);
+    private:
         //Waveshaping
         void waveshape(fft_t *freqs);
 
@@ -170,10 +199,10 @@ class OscilGen:public Presets
             oldmodulationpar3;
 
 
-        fft_t *basefuncFFTfreqs; //Base Function Frequencies
+        std::vector<fft_t> basefuncFFTfreqs; //Base Function Frequencies
         int    oscilprepared;   //1 if the oscil is prepared, 0 if it is not prepared and is need to call ::prepare() before ::get()
 
-        Resonance *res;
+        const Resonance *res;
 
         unsigned int randseed;
     public:
