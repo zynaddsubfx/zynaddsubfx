@@ -68,6 +68,8 @@ static const rtosc::Ports _ports = {
     rParamZyn(Pstartphase, rShort("start"), rSpecial(random),
               rDefaultDepends(loc), rDefault(64), rPreset(ad_voice_freq, 0),
               "Starting Phase"),
+    rParamZyn(Pcutoff, rShort("lp"), rDefault(127), 
+            "RND/SQR lp-filter freq"),
     rOption(PLFOtype, rShort("type"), rOptions(sine, triangle, square, up, down,
                 exp1, exp2, random), rDefault(sine), "Shape of LFO"),
     rParamZyn(Prandomness, rShort("a.r."), rSpecial(disable), rDefault(0),
@@ -143,13 +145,14 @@ void LFOParams::setup()
 
 // TODO: reuse
 LFOParams::LFOParams(const AbsTime *time_) :
-    LFOParams(2.65, 0, 0, 0, 0, 0, 0, loc_unspecified, time_)
+    LFOParams(2.65, 0, 0, 127, 0, 0, 0, 0, loc_unspecified, time_)
 {
 }
 
 LFOParams::LFOParams(float freq_,
                      char Pintensity_,
                      char Pstartphase_,
+                     char Pcutoff_,
                      char PLFOtype_,
                      char Prandomness_,
                      float Pdelay_,
@@ -161,6 +164,7 @@ LFOParams::LFOParams(float freq_,
     Dfreq       = freq_;
     Dintensity  = Pintensity_;
     Dstartphase = Pstartphase_;
+    Dcutoff     = Pcutoff_;
     DLFOtype    = PLFOtype_;
     Drandomness = Prandomness_;
     Ddelay      = Pdelay_;
@@ -175,12 +179,13 @@ LFOParams::LFOParams(consumer_location_t loc,
                                              last_update_timestamp(0) {
 
     auto init =
-        [&](float freq_, char Pintensity_, char Pstartphase_, char PLFOtype_,
+        [&](float freq_, char Pintensity_, char Pstartphase_, char Pcutoff_, char PLFOtype_,
             char Prandomness_, float delay_, char Pcontinous_)
     {
         Dfreq       = freq_;
         Dintensity  = Pintensity_;
         Dstartphase = Pstartphase_;
+        Dcutoff     = Pcutoff_;
         DLFOtype    = PLFOtype_;
         Drandomness = Prandomness_;
         Ddelay      = delay_;
@@ -189,12 +194,12 @@ LFOParams::LFOParams(consumer_location_t loc,
 
     switch(loc)
     {
-        case ad_global_amp:    init(6.49, 0, 64, 0, 0, 0, 0); break;
-        case ad_global_freq:   init(3.71, 0, 64, 0, 0, 0, 0); break;
-        case ad_global_filter: init(6.49, 0, 64, 0, 0, 0, 0); break;
-        case ad_voice_amp:     init(11.25, 32, 64, 0, 0, 0.94, 0); break;
-        case ad_voice_freq:    init(1.19, 40,  0, 0, 0,  0, 0); break;
-        case ad_voice_filter:  init(1.19, 20, 64, 0, 0,  0, 0); break;
+        case ad_global_amp:    init(6.49, 0, 64, 127, 0, 0, 0, 0); break;
+        case ad_global_freq:   init(3.71, 0, 64, 127, 0, 0, 0, 0); break;
+        case ad_global_filter: init(6.49, 0, 64, 127, 0, 0, 0, 0); break;
+        case ad_voice_amp:     init(11.25, 32, 64, 127, 0, 0, 0.94, 0); break;
+        case ad_voice_freq:    init(1.19, 40,  0, 127, 0, 0,  0, 0); break;
+        case ad_voice_filter:  init(1.19, 20, 64, 127, 0, 0,  0, 0); break;
         default: throw std::logic_error("Invalid LFO consumer location");
     }
 
@@ -209,6 +214,7 @@ void LFOParams::defaults()
     freq        = Dfreq;
     Pintensity  = Dintensity;
     Pstartphase = Dstartphase;
+    Pcutoff     = Dcutoff;
     PLFOtype    = DLFOtype;
     Prandomness = Drandomness;
     delay       = Ddelay;
@@ -223,6 +229,7 @@ void LFOParams::add2XML(XMLwrapper& xml)
     xml.addparreal("freq", freq);
     xml.addpar("intensity", Pintensity);
     xml.addpar("start_phase", Pstartphase);
+    xml.addpar("cutoff", Pcutoff);
     xml.addpar("lfo_type", PLFOtype);
     xml.addpar("randomness_amplitude", Prandomness);
     xml.addpar("randomness_frequency", Pfreqrand);
@@ -240,6 +247,7 @@ void LFOParams::getfromXML(XMLwrapper& xml)
     }
     Pintensity  = xml.getpar127("intensity", Pintensity);
     Pstartphase = xml.getpar127("start_phase", Pstartphase);
+    Pcutoff = xml.getpar127("cutoff", Pcutoff);
     PLFOtype    = xml.getpar127("lfo_type", PLFOtype);
     Prandomness = xml.getpar127("randomness_amplitude", Prandomness);
     Pfreqrand   = xml.getpar127("randomness_frequency", Pfreqrand);
@@ -259,6 +267,7 @@ void LFOParams::paste(LFOParams &x)
     COPY(freq);
     COPY(Pintensity);
     COPY(Pstartphase);
+    COPY(Pcutoff);
     COPY(PLFOtype);
     COPY(Prandomness);
     COPY(Pfreqrand);

@@ -79,15 +79,21 @@ hide();} {}
           code0 {o->init("Pintensity");}
           class Fl_Osc_Dial
         }
+        Fl_Dial cutoff {
+          label LP
+          tooltip {LP cutoff} xywh {70 30 20 20} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
+          code0 {o->init("Pcutoff");}
+          class Fl_Osc_Dial
+        }
         Fl_Dial delay {
           label Delay
-          tooltip {LFO delay} xywh {110 20 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
+          tooltip {LFO delay} xywh {120 30 20 20} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           code0 {o->init("Pdelay");}
           class Fl_Osc_Dial
         }
         Fl_Dial startphase {
           label Start
-          tooltip {LFO Startphase (leftmost is Random)} xywh {75 20 30 30} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
+          tooltip {LFO Startphase (leftmost is Random)} xywh {95 20 20 20} box ROUND_UP_BOX labelsize 10 maximum 127 step 1
           code0 {o->init("Pstartphase");}
           class Fl_Osc_Dial
         }
@@ -172,6 +178,7 @@ hide();} {}
     code {freq->update();
 intensity->update();
 startphase->update();
+cutoff->update();
 delay->update();
 continous->update();
 stretch->update();

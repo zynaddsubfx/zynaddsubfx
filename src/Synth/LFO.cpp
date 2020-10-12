@@ -79,6 +79,8 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
     incrnd   = nextincrnd = 1.0f;
     computeNextFreqRnd();
     computeNextFreqRnd(); //twice because I want incrnd & nextincrnd to be random
+    z1 = 0.0;
+    z2 = 0.0;
 }
 
 LFO::~LFO()
@@ -86,6 +88,7 @@ LFO::~LFO()
 
 float LFO::baseOut(const char waveShape, const float phase)
 {
+    float lfo_out;
     switch(waveShape) {
         case LFO_TRIANGLE:
             if(phase >= 0.0f && phase < 0.25f)
@@ -97,9 +100,11 @@ float LFO::baseOut(const char waveShape, const float phase)
             break;
         case LFO_SQUARE:
             if(phase < 0.5f)
-                return -1;
+                lfo_out = -1;
             else
-                return  1;
+                lfo_out = 1;
+                
+            return biquad(lfo_out);
             break;
         case LFO_RAMPUP:    return (phase - 0.5f) * 2.0f;
         case LFO_RAMPDOWN:  return (0.5f - phase) * 2.0f;
@@ -109,10 +114,45 @@ float LFO::baseOut(const char waveShape, const float phase)
             if ((phase < 0.5) != first_half) {
                 first_half = phase < 0.5;
                 last_random = 2*RND-1;
-            }
-            return last_random;
-        default:            return cosf(phase * 2.0f * PI); //LFO_SINE
+            }    
+            return biquad(last_random);
+            break;
+        default:
+            return cosf(phase * 2.0f * PI); //LFO_SINE
     }
+}
+
+
+float LFO::biquad(float input)
+{
+    float output;
+    char cutoff = 127;
+    if (lfopars_.Pcutoff!=cutoff ) // calculate coeffs only if cutoff changed
+    {
+        cutoff = lfopars_.Pcutoff;
+        if (cutoff != 127) // at cutoff 127 we bypass filter, no coeffs needed
+        {
+            // calculate biquad coefficients
+            FcAbs = (cutoff + 7.0f)*(cutoff + 7.0f)/ 450.56f; // max value < 40
+            K = tan(PI * limit(FcAbs * dt_,0.001f,0.4f)); // FcRel * dt_ max 40 * 0.01 = 0.4,
+            // LIMIT in case of LFO sampling frequency lower than 100 Hz
+
+            norm = 1 / (1 + K / 0.7071f + K * K);
+            a0 = K * K * norm;
+            a1 = 2 * a0;
+            a2 = a0;
+            b1 = 2 * (K * K - 1) * norm;
+            b2 = (1 - K / 0.7071f + K * K) * norm;
+        }
+    }
+    if (cutoff != 127) // at cutoff 127 we bypass filter, nothing to do
+    {
+        // lp filter the (s&h) random LFO
+        output = limit(input * a0 + z1, -1.0f, 1.0f);
+        z1 = input * a1 + z2 - b1 * output;
+        z2 = input * a2 - b2 * output;
+    }
+    return (cutoff==127) ? input : output; // at cutoff 127 bypass filter
 }
 
 

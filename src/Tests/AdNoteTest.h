@@ -22,6 +22,8 @@
 #include "../Synth/ADnote.h"
 #include "../Params/Presets.h"
 #include "../DSP/FFTwrapper.h"
+#include "../Synth/LFO.h"
+#include "../Params/LFOParams.h"
 #include "../globals.h"
 #include <rtosc/thread-link.h>
 
@@ -44,6 +46,37 @@ class AdNoteTest:public CxxTest::TestSuite
         float test_freq_log2;
         WatchManager *w;
         float *outR, *outL;
+        
+        LFO          *lfo;
+        LFOParams    *lfop;
+        int randval(int min, int max)
+        {
+            int ret = rand()%(1+max-min)+min;
+            //printf("ret = %d (%d..%d)\n",ret, min,max);
+            return ret;
+        }
+        
+        void randomize_params(void) {
+            lfop->Pintensity  = randval(0,255);
+            lfop->Pstartphase = randval(0,255);
+            lfop->Pcutoff     = randval(0,255);
+            lfop->PLFOtype    = randval(0,6);
+            lfop->Prandomness = randval(0,255);
+            lfop->Pfreqrand   = randval(0,255);
+            lfop->Pcontinous  = randval(0,1);
+            lfop->Pstretch    = randval(0,255);
+        }
+        
+        void run_lfo_randomtest(void)
+        {
+            lfo  = new LFO(*lfop, 440.0f, *time);
+            for(int i=0; i<100; ++i) {
+                float out = lfo->lfoout();
+                TS_ASSERT((-2.0f < out && out < 2.0f));
+            }
+		}
+
+
 
         void setUp() {
             //First the sensible settings and variables that have to be set:
@@ -171,6 +204,17 @@ class AdNoteTest:public CxxTest::TestSuite
 #endif
 
             TS_ASSERT_EQUALS(sampleCount, 9472);
+            
+              lfop = new LFOParams();
+            lfop->fel  = zyn::consumer_location_type_t::amp;
+            lfop->freq = 2.0f;
+            lfop->delay = 0.0f;
+            for(int i=0; i<10000; ++i) {
+                randomize_params();
+                run_lfo_randomtest();
+            }
+            
+            
         }
 
 #define OUTPUT_PROFILE

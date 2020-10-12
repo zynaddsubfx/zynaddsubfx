@@ -37,6 +37,7 @@ class LFO
         float amplfoout();
     private:
         float baseOut(const char waveShape, const float phase);
+        float biquad(float input);
         //Phase of Oscillator
         float phase;
         //Phase Increment Per Frame
@@ -49,6 +50,7 @@ class LFO
         // RND mode
         int first_half;
         float last_random;
+        float z1, z2, noisy_out;
 
         //Intensity of the wave
         float lfointensity;
@@ -66,6 +68,15 @@ class LFO
         const float     dt_;
         const LFOParams &lfopars_;
         const float basefreq_;
+        
+        float FcAbs, K, norm;
+        
+        //biquad coefficients for lp filtering in noise-LFO
+        float a0 = 0.0007508914611009499;
+        float a1 = 0.0015017829222018998;
+        float a2 = 0.0007508914611009499;
+        float b1 = -1.519121359805288;
+        float b2 =  0.5221249256496917;
 
         VecWatchPoint watchOut;
 
