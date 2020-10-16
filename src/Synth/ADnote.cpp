@@ -444,7 +444,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
 
     //Triggers when a user enables modulation on a running voice
     if(!first_run && voice.FMEnabled != FMTYPE::NONE && voice.FMSmp == NULL && voice.FMVoice < 0) {
-        param.FmGn->newrandseed(prng());
+//        param.FmGn->newrandseed(prng());
         voice.FMSmp = memory.valloc<float>(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
         memset(voice.FMSmp, 0, sizeof(float)*(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES));
         int vc = nvoice;
@@ -457,14 +457,23 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
                 || (voice.FMEnabled == FMTYPE::RING_MOD))
             tmp = getFMvoicebasefreq(nvoice);
 
-        if(!pars.GlobalPar.Hrandgrouping)
-            pars.VoicePar[vc].FmGn->newrandseed(prng());
+//        if(!pars.GlobalPar.Hrandgrouping)
+//            pars.VoicePar[vc].FmGn->newrandseed(prng());
 
         for(int k = 0; k < voice.unison_size; ++k)
+        {
+#if 0
             voice.oscposhiFM[k] = (voice.oscposhi[k]
                     + pars.VoicePar[vc].FmGn->get(
                         voice.FMSmp, tmp))
                 % synth.oscilsize;
+#else
+            assert(pars.VoicePar[vc].tableFm); // did you allocate ADnoteParameters and not assign its "table" member?
+            const float* bufferInTable = pars.VoicePar[vc].tableFm->get(tmp).data();
+            std::copy(bufferInTable, bufferInTable + synth.oscilsize, voice.FMSmp);
+            voice.oscposhiFM[k] = pars.VoicePar[vc].OscilGn->getFinalOutpos() % synth.oscilsize;
+#endif
+        }
 
         for(int i = 0; i < OSCIL_SMP_EXTRA_SAMPLES; ++i)
             voice.FMSmp[synth.oscilsize + i] = voice.FMSmp[i];
@@ -711,7 +720,7 @@ void ADnote::legatonote(const LegatoParams &lpars)
         /* Voice Modulation Parameters Init */
         if((NoteVoicePar[nvoice].FMEnabled != FMTYPE::NONE)
            && (NoteVoicePar[nvoice].FMVoice < 0)) {
-            pars.VoicePar[nvoice].FmGn->newrandseed(prng());
+//            pars.VoicePar[nvoice].FmGn->newrandseed(prng());
 
             //Perform Anti-aliasing only on MIX or RING MODULATION
 
@@ -719,8 +728,8 @@ void ADnote::legatonote(const LegatoParams &lpars)
             if(pars.VoicePar[nvoice].PextFMoscil != -1)
                 vc = pars.VoicePar[nvoice].PextFMoscil;
 
-            if(!pars.GlobalPar.Hrandgrouping)
-                pars.VoicePar[vc].FmGn->newrandseed(prng());
+//            if(!pars.GlobalPar.Hrandgrouping)
+//                pars.VoicePar[vc].FmGn->newrandseed(prng());
 
             for(int i = 0; i < OSCIL_SMP_EXTRA_SAMPLES; ++i)
                 NoteVoicePar[nvoice].FMSmp[synth.oscilsize + i] =
@@ -902,7 +911,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
         /* Voice Modulation Parameters Init */
         if((vce.FMEnabled != FMTYPE::NONE) && (vce.FMVoice < 0)) {
-            param.FmGn->newrandseed(prng());
+//            param.FmGn->newrandseed(prng());
             vce.FMSmp = memory.valloc<float>(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
 
             //Perform Anti-aliasing only on MIX or RING MODULATION
@@ -921,10 +930,19 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
                 pars.VoicePar[vc].FmGn->newrandseed(prng());
 
             for(int k = 0; k < vce.unison_size; ++k)
+            {
+#if 0
                 vce.oscposhiFM[k] = (vce.oscposhi[k]
                                          + pars.VoicePar[vc].FmGn->get(
                                              vce.FMSmp, tmp))
                                         % synth.oscilsize;
+#else
+                assert(pars.VoicePar[vc].tableFm); // did you allocate ADnoteParameters and not assign its "table" member?
+                const float* bufferInTable = pars.VoicePar[vc].tableFm->get(tmp).data();
+                std::copy(bufferInTable, bufferInTable + synth.oscilsize, vce.FMSmp);
+                vce.oscposhiFM[k] = pars.VoicePar[vc].OscilGn->getFinalOutpos() % synth.oscilsize;
+#endif
+            }
 
             for(int i = 0; i < OSCIL_SMP_EXTRA_SAMPLES; ++i)
                 vce.FMSmp[synth.oscilsize + i] = vce.FMSmp[i];

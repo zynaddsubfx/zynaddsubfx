@@ -38,27 +38,31 @@ using rtosc::RtData;
 #undef rChangeCb
 #define rChangeCb if (obj->time) { obj->last_update_timestamp = obj->time->time(); }
 static const Ports voicePorts = {
-    {"wavetable-rt-params:",
+    {"wavetable-rt-params:T:F",
         rDoc("retrieve realtime params for wavetable computation"),
         nullptr,
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
+            bool isFmSmp = rtosc_argument(msg, 0).T;
             // reply all RT params required for computation
             // in this case, it's only Presonance...
-            d.reply("/request-wavetable", "si", d.loc, (int)obj->Presonance);
+            d.reply("/request-wavetable", isFmSmp ? "sTi" : "sFi",
+                    d.loc, isFmSmp ? 0 : (int)obj->Presonance);
         }
     },
-    {"set-wavetable:b",
+    {"set-wavetable:bT:bF",
         rDoc("inform voice to update oscillator table"), NULL,
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
             WaveTable* unusedWt = *(WaveTable**)rtosc_argument(msg, 0).b.data;
-            std::swap(unusedWt, obj->table);
+            bool isFmSmp = rtosc_argument(msg, 1).T;
+            WaveTable*& usedWt = isFmSmp ? obj->tableFm : obj->table;
+            std::swap(unusedWt, usedWt);
             // ^ no need for atomic swap - Master is single-threaded
             d.reply("/free", "sb", "WaveTable", sizeof(WaveTable*), &unusedWt);
-            printf("set ad note parameters, table pointer: %p\n", obj->table);
+            printf("set ad note parameters, table pointer: %p\n", usedWt);
         }},
     //Send Messages To Oscillator Realtime Table
     {"OscilSmp/", rDoc("Primary Oscillator"),
@@ -640,6 +644,7 @@ void ADnoteVoiceParam::defaults()
     FMAmpEnvelope->defaults();
 
     OscilGn->recalculateDefaultWaveTable(table, Presonance);
+    FmGn->recalculateDefaultWaveTable(tableFm);
 }
 
 
@@ -678,6 +683,7 @@ void ADnoteVoiceParam::enable(const SYNTH_T &synth, FFTwrapper *fft,
     FMAmpEnvelope->init(ad_voice_fm_amp);
 
     table = OscilGn->allocWaveTable();
+    tableFm = FmGn->allocWaveTable();
 }
 
 /*

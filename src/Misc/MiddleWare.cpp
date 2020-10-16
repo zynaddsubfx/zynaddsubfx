@@ -252,7 +252,7 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
  */
 class WaveTableRequestHandler
 {
-    bool waitForAdPars[NUM_MIDI_PARTS][NUM_KIT_ITEMS][NUM_VOICES];
+    bool waitForAdPars[NUM_MIDI_PARTS][NUM_KIT_ITEMS][NUM_VOICES][2];
 
 public:
     WaveTableRequestHandler()
@@ -260,22 +260,23 @@ public:
         for(std::size_t p = 0; p < NUM_MIDI_PARTS; ++p)
         for(std::size_t k = 0; k < NUM_KIT_ITEMS; ++k)
         for(std::size_t v = 0; v < NUM_VOICES; ++v)
-            waitForAdPars[p][k][v] = false;
+        for(std::size_t i = 0; i < 2; ++i)
+            waitForAdPars[p][k][v][i] = false;
     }
 
-    void chainWtParamRequest(int part, int kit, int voice, rtosc::RtData& d)
+    void chainWtParamRequest(int part, int kit, int voice, bool isFm, rtosc::RtData& d)
     {
-        if(!waitForAdPars[part][kit][voice])
+        if(!waitForAdPars[part][kit][voice][isFm])
         {
             std::string s = buildVoiceParMsg(&part, &kit, &voice);
-            d.chain((s + "/wavetable-rt-params").c_str(), "");
-            waitForAdPars[part][kit][voice] = true;
+            d.chain((s + "/wavetable-rt-params").c_str(), isFm ? "T" : "F");
+            waitForAdPars[part][kit][voice][isFm] = true;
         }
     }
 
-    void receivedAdPars(int part, int kit, int voice)
+    void receivedAdPars(int part, int kit, int voice, bool isFm)
     {
-        waitForAdPars[part][kit][voice] = false;
+        waitForAdPars[part][kit][voice][isFm] = false;
     }
 };
 
@@ -359,7 +360,7 @@ struct NonRtObjStore
     }
 
     //! try to dispatch a message at the OscilGen non-RT-ports
-    void handleOscilADnote(const char *msg, rtosc::RtData &d, WaveTableRequestHandler& handler) {
+    void handleOscilADnote(const char *msg, bool isFm, rtosc::RtData &d, WaveTableRequestHandler& handler) {
         // relative location of this message (i.e. the OscilGen path)
         const string obj_rl(d.message, msg);
         assert(d.message);
@@ -389,7 +390,7 @@ struct NonRtObjStore
                 int part, kit, voice;
                 bool res = idsFromMsg(d.message, &part, &kit, &voice);
                 assert(res);
-                handler.chainWtParamRequest(part, kit, voice, d);
+                handler.chainWtParamRequest(part, kit, voice, isFm, d);
             }
         }
         else {
@@ -1465,14 +1466,14 @@ static rtosc::Ports nonRtParamPorts = {
         "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/adpars/VoicePar#"
             STRINGIFY(NUM_VOICES) "/OscilSmp/", 0, &OscilGen::non_realtime_ports,
         rBegin;
-        impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), d,
+        impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), false, d,
                                          static_cast<WaveTableRequestHandler&>(impl));
         rEnd},
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
         "/kit#" STRINGIFY(NUM_KIT_ITEMS)
             "/adpars/VoicePar#" STRINGIFY(NUM_VOICES) "/FMSmp/", 0, &OscilGen::non_realtime_ports,
         rBegin
-        impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), d,
+        impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), true, d,
                                          static_cast<WaveTableRequestHandler&>(impl));
         rEnd},
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
@@ -1493,7 +1494,7 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         int part, kit, voice;
         bool res = idsFromMsg(msg, &part, &kit, &voice);
         assert(res);
-        impl.chainWtParamRequest(part, kit, voice, d);
+        impl.chainWtParamRequest(part, kit, voice, false, d);
         d.forward();
         rEnd},
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
@@ -1513,7 +1514,7 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
             assert(res);
             for(voice = 0; voice < NUM_VOICES; ++voice)
             {
-                impl.chainWtParamRequest(part, kit, voice, d);
+                impl.chainWtParamRequest(part, kit, voice, false, d);
             }
         }
         d.forward();
@@ -1878,12 +1879,13 @@ static rtosc::Ports middlewareReplyPorts = {
         rEnd},
     {"broadcast:", 0, 0, rBegin; impl.broadcast = true; rEnd},
     {"forward:", 0, 0, rBegin; impl.forward = true; rEnd},
-    {"request-wavetable:si", 0, 0,
+    {"request-wavetable:sTi:sFi", 0, 0,
         rBegin;
         int part, kit, voice;
 
         string voicePath     = rtosc_argument(msg, 0).s; // it's *not yet* the voice path
-        const int presonance = rtosc_argument(msg, 1).i;
+        const bool isFm      = rtosc_argument(msg, 1).T;
+        const int presonance = rtosc_argument(msg, 2).i;
         bool res = idsFromMsg(voicePath.c_str(), &part, &kit, &voice);
         assert(res);
 
@@ -1891,14 +1893,17 @@ static rtosc::Ports middlewareReplyPorts = {
         assert(pos == voicePath.length() - strlen("wavetable-rt-params"));
         voicePath.resize(pos); // *now* it's the voice location
 
-        void* ptr = impl.obj_store.get(voicePath + "OscilSmp/");
-        assert(ptr);
-        OscilGen* oscilGen = static_cast<OscilGen*>(ptr);
-        const WaveTable* wt = oscilGen->calculateWaveTable(presonance);
-        //printf("got: %s -> %s, %s/ %s, %d\n", d.loc, d.message, msg, path.c_str(), presonance);
-        d.chain((voicePath + "set-wavetable").c_str(), "b", sizeof(WaveTable*), &wt);
+        OscilGen* oscilGen = static_cast<OscilGen*>(
+                             impl.obj_store.get(voicePath +
+                                                (isFm ? "FMSmp/" : "OscilSmp/")));
 
-        impl.receivedAdPars(part, kit, voice);
+        //printf("got: %s -> %s, %s. %s %s %d\n", d.loc, d.message, msg, voicePath.c_str(), isFm ? "true":"false", presonance);
+        assert(oscilGen);
+        assert(!isFm || presonance == 0);
+        const WaveTable* wt = oscilGen->calculateWaveTable(presonance);
+        d.chain((voicePath + "set-wavetable").c_str(), isFm ? "bT" : "bF", sizeof(WaveTable*), &wt);
+
+        impl.receivedAdPars(part, kit, voice, isFm);
     }
 }
 };
