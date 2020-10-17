@@ -46,6 +46,7 @@ class Envelope
         float envstretch;
         int   linearenvelope;
         int   mode;
+        bool  repeating;
 
         int   currentpoint;    //current envelope point (starts from 1)
         bool  forcedrelease;
