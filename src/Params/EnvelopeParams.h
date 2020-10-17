@@ -57,7 +57,8 @@ class EnvelopeParams:public Presets
         unsigned char Penvval[MAX_ENVELOPE_POINTS];
         unsigned char Penvstretch; //64=normal stretch (piano-like), 0=no stretch
         unsigned char Pforcedrelease; //0 - OFF, 1 - ON
-        unsigned char Plinearenvelope; //if the amplitude envelope is linear
+        unsigned char Plinearenvelope; //1 for linear AMP ENV, 0 otherwise
+        unsigned char Prepeating; //0 - OFF, 1 - ON
 
         float A_dt, D_dt, R_dt;
         unsigned char PA_val, PD_val, PS_val, PR_val;
