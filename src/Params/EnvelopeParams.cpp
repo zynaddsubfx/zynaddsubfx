@@ -111,8 +111,11 @@ static const rtosc::Ports localPorts = {
             rPresetAtMulti(true, ad_global_amp, ad_global_filter, ad_voice_amp,
                                  ad_voice_fm_amp),
             rDefault(false),
-            "Force Envelope to fully evaluate"),    rToggle(Plinearenvelope, rShort("lin/log"), rDefault(false),
+            "Force Envelope to fully evaluate"),    
+    rToggle(Plinearenvelope, rShort("lin/log"), rDefault(false),
             "Linear or Logarithmic Envelopes"),
+    rToggle(Prepeating, rShort("repeat"), rDefault(false),
+            "Repeat the Envelope"),
     rParamDT(A_dt ,  rShort("a.dt"), rLinear(0,127), "Attack Time"),
     rParamF(A_dt,  rShort("a.dt"), rLog(0.0f,41.0f), rDefaultDepends(loc),
               rPreset(ad_global_freq, 0.254),   rPreset(ad_global_filter, 0.127),
@@ -280,6 +283,7 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
     Pforcedrelease  = Pforcedrelease_;
     Pfreemode       = 1;
     Plinearenvelope = 0;
+    Prepeating      = 0;
 
     store2defaults();
 }
