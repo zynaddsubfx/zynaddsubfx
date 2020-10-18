@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  WaveTable.h - WaveTable definition
+  WaveTable.h - WaveTable declarations
   Copyright (C) 2020-2020 Johannes Lorenz
   Author: Johannes Lorenz
 
@@ -242,7 +242,8 @@ using Shape3 = Shape<3>;
 
 //! swap data of two tensors
 template<std::size_t N, class T>
-void pointer_swap(Tensor<N, T>& t1, Tensor<N, T>& t2) {
+void pointer_swap(Tensor<N, T>& t1, Tensor<N, T>& t2)
+{
     std::swap(t1.m_size, t2.m_size);
     std::swap(t1.m_data, t2.m_data);
     std::swap(t1.m_owner, t2.m_owner);
