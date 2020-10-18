@@ -936,8 +936,10 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
                || (vce.FMEnabled == FMTYPE::RING_MOD))
                 tmp = getFMvoicebasefreq(nvoice);
 
+#ifdef NO_WAVETABLES
             if(!pars.GlobalPar.Hrandgrouping)
                 pars.VoicePar[vc].FmGn->newrandseed(prng());
+#endif
 
             for(int k = 0; k < vce.unison_size; ++k)
             {
