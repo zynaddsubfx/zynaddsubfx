@@ -486,7 +486,8 @@ void OscilGen::calculateWaveTableBuffer(float semantic, float freq, float *dest,
 {
     // calculate the buffer "dest" similar to OscilGen::get, but with the random seed from "semantic"
     // TODO: semantic cast float -> unsigned: bad?
-    OscilGen::get(dest, freq, Presonance, true, (unsigned)semantic);
+    newrandseed((unsigned)semantic);
+    get(dest, freq, Presonance);
 }
 
 WaveTable *OscilGen::calculateWaveTable(int Presonance) /*const*/
@@ -1141,7 +1142,7 @@ bool OscilGen::needPrepare(void)
 /*
  * Get the oscillator function
  */
-short int OscilGen::get(float *smps, float freqHz, int resonance, bool useSpecialRandSeed, unsigned specialRandSeed)
+short int OscilGen::get(float *smps, float freqHz, int resonance)
 {
     if(needPrepare())
         prepare();
@@ -1149,7 +1150,7 @@ short int OscilGen::get(float *smps, float freqHz, int resonance, bool useSpecia
     fft_t *input = freqHz > 0.0f ? oscilFFTfreqs : pendingfreqs;
 
     unsigned int realrnd = prng();
-    sprng(useSpecialRandSeed ? specialRandSeed : randseed);
+    sprng(randseed);
 
     int outpos = calculateOutpos();
 

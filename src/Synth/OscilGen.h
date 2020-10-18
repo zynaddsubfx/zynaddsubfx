@@ -33,7 +33,7 @@ class OscilGen:public Presets
 
         /**do the antialiasing(cut off higher freqs.),apply randomness and do a IFFT*/
         //returns where should I start getting samples, used in block type randomness
-        short get(float *smps, float freqHz, int resonance = 0, bool useSpecialRandSeed = false, unsigned specialRandSeed = 0);
+        short get(float *smps, float freqHz, int resonance = 0);
         //if freqHz is smaller than 0, return the "un-randomized" sample for UI
 
         void getbasefunction(float *smps);
