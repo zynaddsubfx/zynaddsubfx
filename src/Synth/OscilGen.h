@@ -17,6 +17,7 @@
 #include "../globals.h"
 #include <rtosc/ports.h>
 #include "../Params/Presets.h"
+#include "../Params/WaveTableFwd.h"
 
 namespace zyn {
 
@@ -52,7 +53,7 @@ class OscilGen:public Presets
         void convert2sine();
 
         //! the usual way to calculate a new wave table
-        class WaveTable* calculateWaveTable(int Presonance = 0) /*const*/;
+        WaveTable* calculateWaveTable(int Presonance = 0) /*const*/;
         //! initial calculation for pre-allocated wavetable, no allocations
         void recalculateDefaultWaveTable(WaveTable*, int Presonance = 0);
         //! allocating a small wavetable without any waves

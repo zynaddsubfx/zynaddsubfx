@@ -18,6 +18,7 @@
 #include <cstddef>
 #include <algorithm>
 #include <iostream>
+#include "WaveTableFwd.h"
 
 namespace zyn {
 
@@ -232,10 +233,6 @@ public:
     friend void pointer_swap(Tensor<N2, X2>&, Tensor<N2, X2>&);
 };
 
-template<class T> using Tensor1 = Tensor<1, T>;
-template<class T> using Tensor2 = Tensor<2, T>;
-template<class T> using Tensor3 = Tensor<3, T>;
-
 using Shape1 = Shape<1>;
 using Shape2 = Shape<2>;
 using Shape3 = Shape<3>;
@@ -252,7 +249,8 @@ void pointer_swap(Tensor<N, T>& t1, Tensor<N, T>& t2)
 class WaveTable
 {
 public:
-    using float32 = float;
+    using float32 = wavetable_types::float32;
+
     // pure guesses for what sounds good:
     constexpr const static std::size_t num_freqs = 10;
     constexpr const static std::size_t num_semantics = 128;
@@ -284,7 +282,7 @@ public:
     //! If this is only adding new random seeds, then the rest of the data does
     //! not need to be purged
     //! @param semantics seed or param
-    void insert(Tensor3<float>& data, Tensor1<float32>& freqs, Tensor1<float32>& semantics, bool invalidate=true);
+    void insert(Tensor3<float32> &data, Tensor1<float32>& freqs, Tensor1<float32> &semantics, bool invalidate=true);
 
     // future extension
     // Used to determine if new random seeds are needed

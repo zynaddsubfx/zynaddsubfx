@@ -24,7 +24,7 @@
 
 namespace zyn {
 
-const Tensor1<WaveTable::float32>& WaveTable::get(WaveTable::float32 freq) const
+const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq) const
 {
     std::size_t num_freqs = freqs.size(), i;
     float bestFreqDist = 9999999;
