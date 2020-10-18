@@ -108,7 +108,7 @@ void ADnote::setupVoice(int nvoice)
     for (int i = 0; i < 14; i++)
         voice.pinking[i] = 0.0;
 
-#if 0
+#ifdef NO_WAVETABLES
     param.OscilGn->newrandseed(prng());
 #endif
     voice.OscilSmp = NULL;
@@ -171,7 +171,7 @@ void ADnote::setupVoice(int nvoice)
     int vc = nvoice;
     if(pars.VoicePar[nvoice].Pextoscil != -1)
         vc = pars.VoicePar[nvoice].Pextoscil;
-#if 0
+#ifdef NO_WAVETABLES
     if(!pars.GlobalPar.Hrandgrouping)
         pars.VoicePar[vc].OscilGn->newrandseed(prng());
     int oscposhi_start =
@@ -444,7 +444,9 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
 
     //Triggers when a user enables modulation on a running voice
     if(!first_run && voice.FMEnabled != FMTYPE::NONE && voice.FMSmp == NULL && voice.FMVoice < 0) {
-//        param.FmGn->newrandseed(prng());
+#ifdef NO_WAVETABLES
+        param.FmGn->newrandseed(prng());
+#endif
         voice.FMSmp = memory.valloc<float>(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
         memset(voice.FMSmp, 0, sizeof(float)*(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES));
         int vc = nvoice;
@@ -457,12 +459,14 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
                 || (voice.FMEnabled == FMTYPE::RING_MOD))
             tmp = getFMvoicebasefreq(nvoice);
 
-//        if(!pars.GlobalPar.Hrandgrouping)
-//            pars.VoicePar[vc].FmGn->newrandseed(prng());
+#ifdef NO_WAVETABLES
+        if(!pars.GlobalPar.Hrandgrouping)
+            pars.VoicePar[vc].FmGn->newrandseed(prng());
+#endif
 
         for(int k = 0; k < voice.unison_size; ++k)
         {
-#if 0
+#ifdef NO_WAVETABLES
             voice.oscposhiFM[k] = (voice.oscposhi[k]
                     + pars.VoicePar[vc].FmGn->get(
                         voice.FMSmp, tmp))
@@ -720,7 +724,9 @@ void ADnote::legatonote(const LegatoParams &lpars)
         /* Voice Modulation Parameters Init */
         if((NoteVoicePar[nvoice].FMEnabled != FMTYPE::NONE)
            && (NoteVoicePar[nvoice].FMVoice < 0)) {
-//            pars.VoicePar[nvoice].FmGn->newrandseed(prng());
+#ifdef NO_WAVETABLES
+            pars.VoicePar[nvoice].FmGn->newrandseed(prng());
+#endif
 
             //Perform Anti-aliasing only on MIX or RING MODULATION
 
@@ -728,8 +734,10 @@ void ADnote::legatonote(const LegatoParams &lpars)
             if(pars.VoicePar[nvoice].PextFMoscil != -1)
                 vc = pars.VoicePar[nvoice].PextFMoscil;
 
-//            if(!pars.GlobalPar.Hrandgrouping)
-//                pars.VoicePar[vc].FmGn->newrandseed(prng());
+#ifdef NO_WAVETABLES
+            if(!pars.GlobalPar.Hrandgrouping)
+                pars.VoicePar[vc].FmGn->newrandseed(prng());
+#endif
 
             for(int i = 0; i < OSCIL_SMP_EXTRA_SAMPLES; ++i)
                 NoteVoicePar[nvoice].FMSmp[synth.oscilsize + i] =
@@ -911,7 +919,9 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
         /* Voice Modulation Parameters Init */
         if((vce.FMEnabled != FMTYPE::NONE) && (vce.FMVoice < 0)) {
-//            param.FmGn->newrandseed(prng());
+#ifdef NO_WAVETABLES
+            param.FmGn->newrandseed(prng());
+#endif
             vce.FMSmp = memory.valloc<float>(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
 
             //Perform Anti-aliasing only on MIX or RING MODULATION
@@ -931,7 +941,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
 
             for(int k = 0; k < vce.unison_size; ++k)
             {
-#if 0
+#ifdef NO_WAVETABLES
                 vce.oscposhiFM[k] = (vce.oscposhi[k]
                                          + pars.VoicePar[vc].FmGn->get(
                                              vce.FMSmp, tmp))
