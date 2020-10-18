@@ -172,7 +172,7 @@ class OscilGen:public Presets
         void adaptiveharmonicpostprocess(fft_t *f, int size);
 
         void calculateWaveTableTensors(Tensor1<wavetable_types::float32>& freqs_input,
-            Tensor1<wavetable_types::float32>& semantics_input,
+            Tensor1<wavetable_types::IntOrFloat>& semantics_input,
             Tensor3<wavetable_types::float32>& data_input,
             int Presonance) /*const*/;
 

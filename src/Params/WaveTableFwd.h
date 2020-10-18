@@ -26,6 +26,12 @@ namespace wavetable_types
 {
     using float32 = float;
     static_assert (sizeof (float32) == 4, "float does not have size 4");
+
+    union IntOrFloat
+    {
+        prng_t intVal;
+        float32 floatVal;
+    };
 }
 
 //! Tensor class for all dimensions != 1

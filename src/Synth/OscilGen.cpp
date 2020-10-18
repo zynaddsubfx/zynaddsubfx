@@ -483,13 +483,13 @@ void OscilGen::convert2sine()
 }
 
 void OscilGen::calculateWaveTableTensors(Tensor1<wavetable_types::float32>& freqs,
-    Tensor1<wavetable_types::float32>& semantics,
+    Tensor1<wavetable_types::IntOrFloat>& semantics,
     Tensor3<wavetable_types::float32>& data,
     int Presonance)
 {
     for(std::size_t i = 0; i < semantics.size(); ++i)
     {
-        semantics[i] = prng();
+        semantics[i].intVal = prng();
     }
     freqs[0] = 55.f;
     for(std::size_t i = 1; i < freqs.size(); ++i)
@@ -500,7 +500,7 @@ void OscilGen::calculateWaveTableTensors(Tensor1<wavetable_types::float32>& freq
     {
         for(std::size_t j = 0; j < freqs.size(); ++j)
         {
-            newrandseed(semantics[i]);
+            newrandseed(semantics[i].intVal);
             get(data[i][j].data(), freqs[j], Presonance);
         }
     }
@@ -525,9 +525,8 @@ WaveTable *OscilGen::calculateWaveTable(int Presonance) /*const*/
         num_freqs = WaveTable::num_freqs;
     }
 
-    Tensor1<WaveTable::float32>
-            freqs(Shape1{num_freqs}),
-            semantics(Shape1{num_semantics});
+    Tensor1<WaveTable::float32> freqs(Shape1{num_freqs});
+    Tensor1<WaveTable::IntOrFloat> semantics(Shape1{num_semantics});
     Tensor3<WaveTable::float32> data(
             Shape3{num_semantics, num_freqs, oscilsize});
 
@@ -543,11 +542,9 @@ WaveTable *OscilGen::allocWaveTable() const
     wt->setMode(WaveTable::WtMode::freqseed_smps);
     std::size_t oscilsize = static_cast<std::size_t>(synth.oscilsize);
 
-    Tensor1<WaveTable::float32>
-            freqs(Shape1{1}),
-            semantics(Shape1{1});
-    Tensor3<WaveTable::float32> data(
-            Shape3{1, 1, oscilsize});
+    Tensor1<WaveTable::float32> freqs(Shape1{1});
+    Tensor1<WaveTable::IntOrFloat> semantics(Shape1{1});
+    Tensor3<WaveTable::float32> data(Shape3{1, 1, oscilsize});
     wt->insert(data, freqs, semantics, true);
     return wt;
 }
@@ -558,7 +555,7 @@ void OscilGen::recalculateDefaultWaveTable(WaveTable * wt, int Presonance) /*con
 
     // no allocations:
     Tensor1<WaveTable::float32> freqs;
-    Tensor1<WaveTable::float32> semantics;
+    Tensor1<WaveTable::IntOrFloat> semantics;
     Tensor3<WaveTable::float32> data;
 
     // abuse pointer swap to steal memory from current wavetable

@@ -250,6 +250,7 @@ class WaveTable
 {
 public:
     using float32 = wavetable_types::float32;
+    using IntOrFloat = wavetable_types::IntOrFloat;
 
     // pure guesses for what sounds good:
     constexpr const static std::size_t num_freqs = 10;
@@ -263,7 +264,7 @@ public:
     };
 
 private:
-    Tensor1<float32> semantics; //!< E.g. oscil params or random seed (e.g. 0...127)
+    Tensor1<IntOrFloat> semantics; //!< E.g. oscil params or random seed (e.g. 0...127)
     Tensor1<float32> freqs; //!< The frequency of each 'row'
     Tensor3<float32> data;  //!< time=col,freq=row,semantics(oscil param or random seed)=depth
     WtMode m_mode;
@@ -282,7 +283,7 @@ public:
     //! If this is only adding new random seeds, then the rest of the data does
     //! not need to be purged
     //! @param semantics seed or param
-    void insert(Tensor3<float32> &data, Tensor1<float32>& freqs, Tensor1<float32> &semantics, bool invalidate=true);
+    void insert(Tensor3<float32> &data, Tensor1<float32>& freqs, Tensor1<IntOrFloat> &semantics, bool invalidate=true);
 
     // future extension
     // Used to determine if new random seeds are needed

@@ -49,9 +49,9 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq) const
     return data[random_seed][bestI];
 }
 
-void WaveTable::insert(Tensor3<float> &data,
+void WaveTable::insert(Tensor3<float32> &data,
                        Tensor1<float32> &freqs,
-                       Tensor1<float32> &semantics,
+                       Tensor1<IntOrFloat> &semantics,
                        bool invalidate)
 {
     pointer_swap(this->data, data);
