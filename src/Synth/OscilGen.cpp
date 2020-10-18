@@ -482,12 +482,28 @@ void OscilGen::convert2sine()
     prepare();
 }
 
-void OscilGen::calculateWaveTableBuffer(float semantic, float freq, float *dest, int Presonance)/* const*/
+void OscilGen::calculateWaveTableTensors(Tensor1<wavetable_types::float32>& freqs,
+    Tensor1<wavetable_types::float32>& semantics,
+    Tensor3<wavetable_types::float32>& data,
+    int Presonance)
 {
-    // calculate the buffer "dest" similar to OscilGen::get, but with the random seed from "semantic"
-    // TODO: semantic cast float -> unsigned: bad?
-    newrandseed((unsigned)semantic);
-    get(dest, freq, Presonance);
+    for(std::size_t i = 0; i < semantics.size(); ++i)
+    {
+        semantics[i] = prng();
+    }
+    freqs[0] = 55.f;
+    for(std::size_t i = 1; i < freqs.size(); ++i)
+    {
+        freqs[i] = 2.f * freqs[i-1];
+    }
+    for(std::size_t i = 0; i < semantics.size(); ++i)
+    {
+        for(std::size_t j = 0; j < freqs.size(); ++j)
+        {
+            newrandseed(semantics[i]);
+            get(data[i][j].data(), freqs[j], Presonance);
+        }
+    }
 }
 
 WaveTable *OscilGen::calculateWaveTable(int Presonance) /*const*/
@@ -515,23 +531,7 @@ WaveTable *OscilGen::calculateWaveTable(int Presonance) /*const*/
     Tensor3<WaveTable::float32> data(
             Shape3{num_semantics, num_freqs, oscilsize});
 
-
-    for(std::size_t i = 0; i < num_semantics; ++i)
-    {
-        semantics[i] = prng();
-    }
-    freqs[0] = 55.f;
-    for(std::size_t i = 1; i < num_freqs; ++i)
-    {
-        freqs[i] = 2.f * freqs[i-1];
-    }
-    for(std::size_t i = 0; i < num_semantics; ++i)
-    {
-        for(std::size_t j = 0; j < num_freqs; ++j)
-        {
-            calculateWaveTableBuffer(semantics[i], freqs[j], data[i][j].data(), Presonance);
-        }
-    }
+    calculateWaveTableTensors(freqs, semantics, data, Presonance);
 
     wt->insert(data, freqs, semantics, true);
     return wt;
@@ -557,28 +557,14 @@ void OscilGen::recalculateDefaultWaveTable(WaveTable * wt, int Presonance) /*con
     wt->setMode(WaveTable::WtMode::freqseed_smps);
 
     // no allocations:
-    Tensor1<WaveTable::float32> freqs, semantics;
+    Tensor1<WaveTable::float32> freqs;
+    Tensor1<WaveTable::float32> semantics;
     Tensor3<WaveTable::float32> data;
 
     // abuse pointer swap to steal memory from current wavetable
     wt->insert(data, freqs, semantics, true);
 
-    for(std::size_t i = 0; i < semantics.size(); ++i)
-    {
-        semantics[i] = prng();
-    }
-    freqs[0] = 55.f;
-    for(std::size_t i = 1; i < freqs.size(); ++i)
-    {
-        freqs[i] = 2.f * freqs[i-1];
-    }
-    for(std::size_t i = 0; i < semantics.size(); ++i)
-    {
-        for(std::size_t j = 0; j < freqs.size(); ++j)
-        {
-            calculateWaveTableBuffer(semantics[i], freqs[j], data[i][j].data(), Presonance);
-        }
-    }
+    calculateWaveTableTensors(freqs, semantics, data, Presonance);
 
     wt->insert(data, freqs, semantics, true);
 }

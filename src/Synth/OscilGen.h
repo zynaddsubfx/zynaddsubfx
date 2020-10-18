@@ -171,7 +171,10 @@ class OscilGen:public Presets
         //(that's why the sine and cosine components should be processed with a separate call)
         void adaptiveharmonicpostprocess(fft_t *f, int size);
 
-        void calculateWaveTableBuffer(float semantic, float freq, float* dest, int Presonance) /*const*/;
+        void calculateWaveTableTensors(Tensor1<wavetable_types::float32>& freqs_input,
+            Tensor1<wavetable_types::float32>& semantics_input,
+            Tensor3<wavetable_types::float32>& data_input,
+            int Presonance) /*const*/;
 
         //Internal Data
         unsigned char oldbasefunc, oldbasepar, oldhmagtype,
