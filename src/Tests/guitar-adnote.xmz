@@ -82,6 +82,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="env_stretch" value="69" />
 <par_bool name="forced_release" value="yes" />
 <par_bool name="linear_envelope" value="no" />
+<par_bool name="repeating_envelope" value="no" />
 <par_real name="A_dt" value="0" exact_value="0x00000000" />
 <par_real name="D_dt" value="4.40846" exact_value="0x408D1224" />
 <par_real name="R_dt" value="0.207199" exact_value="0x3E542BF1" />
@@ -115,6 +116,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="env_stretch" value="0" />
 <par_bool name="forced_release" value="no" />
 <par_bool name="linear_envelope" value="no" />
+<par_bool name="repeating_envelope" value="no" />
 <par_real name="A_dt" value="0.00581636" exact_value="0x3BBE9724" />
 <par_real name="D_dt" value="0.00925031" exact_value="0x3C178EA0" />
 <par_real name="R_dt" value="0.2219" exact_value="0x3E6339D6" />
@@ -155,6 +157,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="env_stretch" value="0" />
 <par_bool name="forced_release" value="yes" />
 <par_bool name="linear_envelope" value="no" />
+<par_bool name="repeating_envelope" value="no" />
 <par_real name="A_dt" value="0.127326" exact_value="0x3E02619E" />
 <par_real name="D_dt" value="0.969635" exact_value="0x3F783A06" />
 <par_real name="R_dt" value="0.498893" exact_value="0x3EFF6EF3" />
@@ -251,6 +254,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="env_stretch" value="64" />
 <par_bool name="forced_release" value="yes" />
 <par_bool name="linear_envelope" value="no" />
+<par_bool name="repeating_envelope" value="no" />
 <par_real name="A_dt" value="0.0322438" exact_value="0x3D041217" />
 <par_real name="D_dt" value="2.28527" exact_value="0x401241DB" />
 <par_real name="R_dt" value="6.9784" exact_value="0x40DF4F0C" />
@@ -289,6 +293,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="env_stretch" value="8" />
 <par_bool name="forced_release" value="no" />
 <par_bool name="linear_envelope" value="no" />
+<par_bool name="repeating_envelope" value="no" />
 <par_real name="A_dt" value="0.408115" exact_value="0x3ED0F466" />
 <par_real name="D_dt" value="0.00925031" exact_value="0x3C178EA0" />
 <par_real name="R_dt" value="2.00347" exact_value="0x400038ED" />
@@ -331,6 +336,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="env_stretch" value="0" />
 <par_bool name="forced_release" value="no" />
 <par_bool name="linear_envelope" value="no" />
+<par_bool name="repeating_envelope" value="no" />
 <par_real name="A_dt" value="1.87583" exact_value="0x3FF01B2D" />
 <par_real name="D_dt" value="3.17458" exact_value="0x404B2C5C" />
 <par_real name="R_dt" value="0.00925031" exact_value="0x3C178EA0" />
@@ -366,6 +372,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="env_stretch" value="46" />
 <par_bool name="forced_release" value="yes" />
 <par_bool name="linear_envelope" value="no" />
+<par_bool name="repeating_envelope" value="no" />
 <par_real name="A_dt" value="0.743858" exact_value="0x3F3E6D76" />
 <par_real name="D_dt" value="1.4412" exact_value="0x3FB87940" />
 <par_real name="R_dt" value="2.78361" exact_value="0x40322696" />
@@ -387,6 +394,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="env_stretch" value="0" />
 <par_bool name="forced_release" value="no" />
 <par_bool name="linear_envelope" value="no" />
+<par_bool name="repeating_envelope" value="no" />
 <par_real name="A_dt" value="7.95646" exact_value="0x40FE9B4D" />
 <par_real name="D_dt" value="0.00925031" exact_value="0x3C178EA0" />
 <par_real name="R_dt" value="0.849364" exact_value="0x3F596FE4" />
@@ -684,6 +692,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="env_stretch" value="64" />
 <par_bool name="forced_release" value="yes" />
 <par_bool name="linear_envelope" value="no" />
+<par_bool name="repeating_envelope" value="no" />
 <par_real name="A_dt" value="0.00299497" exact_value="0x3B44472E" />
 <par_real name="D_dt" value="0.0270575" exact_value="0x3CDDA798" />
 <par_real name="R_dt" value="6.9784" exact_value="0x40DF4F0C" />
@@ -1010,6 +1019,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="env_stretch" value="64" />
 <par_bool name="forced_release" value="yes" />
 <par_bool name="linear_envelope" value="no" />
+<par_bool name="repeating_envelope" value="no" />
 <par_real name="A_dt" value="0" exact_value="0x00000000" />
 <par_real name="D_dt" value="0.127326" exact_value="0x3E02619E" />
 <par_real name="R_dt" value="0.0414155" exact_value="0x3D29A358" />
@@ -1041,6 +1051,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="env_stretch" value="64" />
 <par_bool name="forced_release" value="no" />
 <par_bool name="linear_envelope" value="no" />
+<par_bool name="repeating_envelope" value="no" />
 <par_real name="A_dt" value="0.0225078" exact_value="0x3CB8625B" />
 <par_real name="D_dt" value="0.00925031" exact_value="0x3C178EA0" />
 <par_real name="R_dt" value="0.498893" exact_value="0x3EFF6EF3" />
@@ -1057,6 +1068,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="env_stretch" value="64" />
 <par_bool name="forced_release" value="no" />
 <par_bool name="linear_envelope" value="no" />
+<par_bool name="repeating_envelope" value="no" />
 <par_real name="A_dt" value="0.969635" exact_value="0x3F783A06" />
 <par_real name="D_dt" value="0.00925031" exact_value="0x3C178EA0" />
 <par_real name="R_dt" value="0.498893" exact_value="0x3EFF6EF3" />
@@ -1086,6 +1098,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="env_stretch" value="0" />
 <par_bool name="forced_release" value="yes" />
 <par_bool name="linear_envelope" value="no" />
+<par_bool name="repeating_envelope" value="no" />
 <par_real name="A_dt" value="0.127326" exact_value="0x3E02619E" />
 <par_real name="D_dt" value="0.969635" exact_value="0x3F783A06" />
 <par_real name="R_dt" value="0.498893" exact_value="0x3EFF6EF3" />
@@ -3361,6 +3374,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="env_stretch" value="64" />
 <par_bool name="forced_release" value="yes" />
 <par_bool name="linear_envelope" value="no" />
+<par_bool name="repeating_envelope" value="no" />
 <par_real name="A_dt" value="0" exact_value="0x00000000" />
 <par_real name="D_dt" value="0.127326" exact_value="0x3E02619E" />
 <par_real name="R_dt" value="0.0414155" exact_value="0x3D29A358" />
@@ -3397,6 +3411,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="env_stretch" value="0" />
 <par_bool name="forced_release" value="no" />
 <par_bool name="linear_envelope" value="no" />
+<par_bool name="repeating_envelope" value="no" />
 <par_real name="A_dt" value="0.254356" exact_value="0x3E823AED" />
 <par_real name="D_dt" value="0.00925031" exact_value="0x3C178EA0" />
 <par_real name="R_dt" value="0.498893" exact_value="0x3EFF6EF3" />
@@ -3437,6 +3452,7 @@ version-revision="5" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="env_stretch" value="0" />
 <par_bool name="forced_release" value="yes" />
 <par_bool name="linear_envelope" value="no" />
+<par_bool name="repeating_envelope" value="no" />
 <par_real name="A_dt" value="0.127326" exact_value="0x3E02619E" />
 <par_real name="D_dt" value="0.969635" exact_value="0x3F783A06" />
 <par_real name="R_dt" value="0.498893" exact_value="0x3EFF6EF3" />
