@@ -475,6 +475,7 @@ void EnvelopeParams::add2XML(XMLwrapper& xml)
     xml.addpar("env_stretch", Penvstretch);
     xml.addparbool("forced_release", Pforcedrelease);
     xml.addparbool("linear_envelope", Plinearenvelope);
+    xml.addparbool("repeating_envelope", Prepeating);
     xml.addparreal("A_dt", A_dt);
     xml.addparreal("D_dt", D_dt);
     xml.addparreal("R_dt", R_dt);
@@ -538,6 +539,7 @@ void EnvelopeParams::getfromXML(XMLwrapper& xml)
     Penvstretch     = xml.getpar127("env_stretch", Penvstretch);
     Pforcedrelease  = xml.getparbool("forced_release", Pforcedrelease);
     Plinearenvelope = xml.getparbool("linear_envelope", Plinearenvelope);
+    Prepeating      = xml.getparbool("repeating_envelope", Prepeating);
 
     version_fixer_t version_fix(xml.fileversion(), Envmode);
 
@@ -582,6 +584,7 @@ void EnvelopeParams::defaults()
     Penvstretch     = Denvstretch;
     Pforcedrelease  = Dforcedrelease;
     Plinearenvelope = Dlinearenvelope;
+    Prepeating      = Drepeating;
     A_dt     = DA_dt;
     D_dt     = DD_dt;
     R_dt     = DR_dt;
@@ -598,6 +601,7 @@ void EnvelopeParams::store2defaults()
     Denvstretch     = Penvstretch;
     Dforcedrelease  = Pforcedrelease;
     Dlinearenvelope = Plinearenvelope;
+    Drepeating      = Prepeating;
     DA_dt  = A_dt;
     DD_dt  = D_dt;
     DR_dt  = R_dt;
