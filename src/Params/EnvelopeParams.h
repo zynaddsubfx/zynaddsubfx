@@ -101,6 +101,7 @@ class EnvelopeParams:public Presets
         unsigned char Denvstretch;
         unsigned char Dforcedrelease;
         unsigned char Dlinearenvelope;
+        unsigned char Drepeating;
         float DA_dt, DD_dt, DR_dt;
         unsigned char DA_val, DD_val, DS_val, DR_val;
 };
