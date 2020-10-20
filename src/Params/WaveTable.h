@@ -17,6 +17,7 @@
 #include <cassert>
 #include <cstddef>
 #include <algorithm>
+#include <atomic>
 #include <iostream>
 #include "WaveTableFwd.h"
 
@@ -269,12 +270,14 @@ private:
     Tensor3<float32> data;  //!< time=col,freq=row,semantics(oscil param or random seed)=depth
     WtMode m_mode;
 
+    std::atomic<std::size_t> reader;
+
 public:
 
     void setMode(WtMode mode) { m_mode = mode; }
 
     //! Return sample slice for given frequency
-    const Tensor1<float32> &get(float32 freq) const; // works for both seed and seedless setups
+    const Tensor1<float32> &get(float32 freq); // works for both seed and seedless setups
     // future extensions
     // Tensor2<float32> get_antialiased(void); // works for seed and seedless setups
     // Tensor2<float32> get_wavetablemod(float32 freq);
