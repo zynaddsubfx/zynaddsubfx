@@ -77,6 +77,8 @@ class LFO
         float a2 = 0.0007508914611009499;
         float b1 = -1.519121359805288;
         float b2 =  0.5221249256496917;
+        
+        char cutoff = 127;
 
         VecWatchPoint watchOut;
 
