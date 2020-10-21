@@ -126,7 +126,6 @@ float LFO::baseOut(const char waveShape, const float phase)
 float LFO::biquad(float input)
 {
     float output;
-    char cutoff = 127;
     if (lfopars_.Pcutoff!=cutoff ) // calculate coeffs only if cutoff changed
     {
         cutoff = lfopars_.Pcutoff;
