@@ -32,9 +32,10 @@
 namespace zyn {
 
 #define rObject OscilGen
-const rtosc::Ports OscilGen::non_realtime_ports = {
+const rtosc::Ports OscilGen::ports = {
     rSelf(OscilGen),
     rPaste,
+    rPresetType,
     //TODO ensure min/max
     rOption(Phmagtype, rShort("scale"),
             rOptions(linear,dB scale (-40),
@@ -200,11 +201,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             char *edit   = strrchr(repath, '/')+1;
             *edit = 0;
             d.broadcast("/damage", "s", repath);
-        }}};
-
-const rtosc::Ports OscilGen::realtime_ports{
-    rSelf(OscilGen),
-    rPresetType,
+        }},
     rParamZyn(Prand, rLinear(-64, 63), rShort("phase rnd"),
             rDefaultDepends(ADvsPAD), rPreset(true, 127), rPreset(false, 64),
             "Oscillator Phase Randomness: smaller than 0 is \""
@@ -256,11 +253,6 @@ const rtosc::Ports OscilGen::realtime_ports{
             o.oscilFFTfreqs = *(fft_t**)rtosc_argument(m,0).b.data;
         }},
 
-};
-
-const rtosc::MergePorts OscilGen::ports{
-    &OscilGen::realtime_ports,
-    &OscilGen::non_realtime_ports
 };
 
 #ifndef M_PI_2

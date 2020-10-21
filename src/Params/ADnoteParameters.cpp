@@ -71,7 +71,7 @@ static const Ports voicePorts = {
             if(obj->OscilGn == NULL) return;
         data.obj = obj->OscilGn;
         SNIP
-            OscilGen::realtime_ports.dispatch(msg, data);
+            OscilGen::ports.dispatch(msg, data);
         if(data.matches == 0)
             data.forward();
         rBOIL_END},
@@ -81,7 +81,7 @@ static const Ports voicePorts = {
             if(obj->FmGn == NULL) return;
         data.obj = obj->FmGn;
         SNIP
-            OscilGen::realtime_ports.dispatch(msg, data);
+            OscilGen::ports.dispatch(msg, data);
         if(data.matches == 0)
             data.forward();
         rBOIL_END},

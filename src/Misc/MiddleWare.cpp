@@ -359,7 +359,7 @@ struct NonRtObjStore
         return objmap[loc];
     }
 
-    //! try to dispatch a message at the OscilGen non-RT-ports
+    //! try to dispatch a message at the OscilGen ports, which are all non-RT
     void handleOscilADnote(const char *msg, bool isFm, rtosc::RtData &d, WaveTableRequestHandler& handler) {
         // relative location of this message (i.e. the OscilGen path)
         const string obj_rl(d.message, msg);
@@ -376,7 +376,7 @@ struct NonRtObjStore
             // * d.obj from MiddleWareImplementation to the OscilGen object
             strcpy(d.loc, obj_rl.c_str());
             d.obj = osc;
-            OscilGen::non_realtime_ports.dispatch(msg, d);
+            OscilGen::ports.dispatch(msg, d);
             if(// no match (will probably not occur)
                d.matches == 0 ||
                // message does not modify OscilGen?
@@ -1464,14 +1464,14 @@ static rtosc::Ports nonRtParamPorts = {
     */
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
         "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/adpars/VoicePar#"
-            STRINGIFY(NUM_VOICES) "/OscilSmp/", 0, &OscilGen::non_realtime_ports,
+            STRINGIFY(NUM_VOICES) "/OscilSmp/", 0, &OscilGen::ports,
         rBegin;
         impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), false, d,
                                          static_cast<WaveTableRequestHandler&>(impl));
         rEnd},
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
         "/kit#" STRINGIFY(NUM_KIT_ITEMS)
-            "/adpars/VoicePar#" STRINGIFY(NUM_VOICES) "/FMSmp/", 0, &OscilGen::non_realtime_ports,
+            "/adpars/VoicePar#" STRINGIFY(NUM_VOICES) "/FMSmp/", 0, &OscilGen::ports,
         rBegin
         impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), true, d,
                                          static_cast<WaveTableRequestHandler&>(impl));
