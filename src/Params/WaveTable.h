@@ -158,6 +158,14 @@ public:
     bool operator!=(const Tensor<N, T>& other) const {
         return !operator==(other); }
 
+    void fillWithZeroes()
+    {
+        for(std::size_t i = 0; i < base_type::size(); ++i)
+        {
+            m_data[i].fillWithZeroes();
+        }
+    }
+
     // testing only:
     std::size_t set_data(const T* new_data)
     {
@@ -221,6 +229,11 @@ public:
 
     bool operator!=(const Tensor<1, T>& other) const {
         return !operator==(other); }
+
+    void fillWithZeroes()
+    {
+        std::fill_n(m_data, base_type::size(), 0);
+    }
 
     std::size_t set_data(const T* new_data)
     {
