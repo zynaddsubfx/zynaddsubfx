@@ -44,11 +44,21 @@ static const Ports voicePorts = {
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            bool isFmSmp = rtosc_argument(msg, 0).T;
-            // reply all RT params required for computation
-            // in this case, it's only Presonance...
-            d.reply("/request-wavetable", isFmSmp ? "sTi" : "sFi",
-                    d.loc, isFmSmp ? 0 : (int)obj->Presonance);
+            if(obj->waveTables)
+            {
+                bool isFmSmp = rtosc_argument(msg, 0).T;
+                // reply all RT params required for computation
+                // in this case, it's only Presonance...
+                d.reply("/request-wavetable", isFmSmp ? "sTi" : "sFi",
+                        d.loc, isFmSmp ? 0 : (int)obj->Presonance);
+            }
+            else
+            {
+                // MiddleWare will just wait patiently for the wavetable params,
+                // but we won't send them, because we don't need the tables.
+                // MiddleWare will just consider the tables as outdated, which
+                // is OK because they are not used.
+            }
         }
     },
     {"set-wavetable:bT:bF",
@@ -485,14 +495,16 @@ const Ports &ADnoteVoiceParam::ports  = voicePorts;
 const Ports &ADnoteGlobalParam::ports = globalPorts;
 
 ADnoteParameters::ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
-                                   const AbsTime *time_)
-    :PresetsArray(), GlobalPar(time_), time(time_), last_update_timestamp(0)
+                                   const AbsTime *time_, bool waveTables)
+    :PresetsArray(), GlobalPar(time_), time(time_), last_update_timestamp(0),
+    waveTables(waveTables)
 {
     setpresettype("Padsynth");
     fft = fft_;
 
 
     for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
+        VoicePar[nvoice].waveTables = waveTables;
         VoicePar[nvoice].GlobalPDetuneType = &GlobalPar.PDetuneType;
         VoicePar[nvoice].time = time_;
         EnableVoice(synth, nvoice, time_);
@@ -643,8 +655,11 @@ void ADnoteVoiceParam::defaults()
     FMFreqEnvelope->defaults();
     FMAmpEnvelope->defaults();
 
-    OscilGn->recalculateDefaultWaveTable(table, Presonance);
-    FmGn->recalculateDefaultWaveTable(tableFm);
+    // compute wavetables without allocating them again
+    // in case of non wavetable mode, all buffers will be filled with zeroes to
+    // avoid uninitialized reads
+    OscilGn->recalculateDefaultWaveTable(table, Presonance, !waveTables);
+    FmGn->recalculateDefaultWaveTable(tableFm, 0, !waveTables);
 }
 
 

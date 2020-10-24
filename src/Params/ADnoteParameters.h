@@ -312,13 +312,15 @@ struct ADnoteVoiceParam {
     static const rtosc::Ports &ports;
 
     WaveTable* table = nullptr, * tableFm = nullptr;
+    //! whether to use wave tables - only false for debugging
+    bool waveTables; // const after it has been set
 };
 
 class ADnoteParameters:public PresetsArray
 {
     public:
         ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
-                         const AbsTime *time_ = nullptr);
+                         const AbsTime *time_ = nullptr, bool waveTables = true);
         ~ADnoteParameters() override;
 
         ADnoteGlobalParam GlobalPar;
@@ -341,11 +343,14 @@ class ADnoteParameters:public PresetsArray
 
         const AbsTime *time;
         int64_t last_update_timestamp;
+        //! whether to use wave tables - only false for debugging
+        bool usesWaveTables() const { return waveTables; }
 
     private:
         void EnableVoice(const SYNTH_T &synth, int nvoice, const AbsTime* time);
         void KillVoice(int nvoice);
         FFTwrapper *fft;
+        const bool waveTables;
 };
 
 }

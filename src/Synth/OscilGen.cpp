@@ -477,23 +477,46 @@ void OscilGen::convert2sine()
 void OscilGen::calculateWaveTableTensors(Tensor1<wavetable_types::float32>& freqs,
     Tensor1<wavetable_types::IntOrFloat>& semantics,
     Tensor3<wavetable_types::float32>& data,
-    int Presonance)
+    int Presonance,
+    bool fillWithZeroes)
 {
-    for(std::size_t i = 0; i < semantics.size(); ++i)
+    // semantics
+    if(fillWithZeroes)
     {
-        semantics[i].intVal = prng();
+        for(std::size_t i = 0; i < semantics.size(); ++i)
+        {
+            semantics[i].intVal = i; // do not consume any random
+        }
     }
+    else
+    {
+        for(std::size_t i = 0; i < semantics.size(); ++i)
+        {
+            semantics[i].intVal = prng();
+        }
+    }
+
+    // frequency
     freqs[0] = 55.f;
     for(std::size_t i = 1; i < freqs.size(); ++i)
     {
         freqs[i] = 2.f * freqs[i-1];
     }
-    for(std::size_t i = 0; i < semantics.size(); ++i)
+
+    // data
+    if(fillWithZeroes)
     {
-        for(std::size_t j = 0; j < freqs.size(); ++j)
+        data.fillWithZeroes(); // avoid uninitialized reads
+    }
+    else
+    {
+        for(std::size_t i = 0; i < semantics.size(); ++i)
         {
-            newrandseed(semantics[i].intVal);
-            get(data[i][j].data(), freqs[j], Presonance);
+            for(std::size_t j = 0; j < freqs.size(); ++j)
+            {
+                newrandseed(semantics[i].intVal);
+                get(data[i][j].data(), freqs[j], Presonance);
+            }
         }
     }
 }
@@ -541,7 +564,7 @@ WaveTable *OscilGen::allocWaveTable() const
     return wt;
 }
 
-void OscilGen::recalculateDefaultWaveTable(WaveTable * wt, int Presonance) /*const*/
+void OscilGen::recalculateDefaultWaveTable(WaveTable * wt, int Presonance, bool fillWithZeroes) /*const*/
 {
     wt->setMode(WaveTable::WtMode::freqseed_smps);
 
@@ -553,7 +576,7 @@ void OscilGen::recalculateDefaultWaveTable(WaveTable * wt, int Presonance) /*con
     // abuse pointer swap to steal memory from current wavetable
     wt->insert(data, freqs, semantics, true);
 
-    calculateWaveTableTensors(freqs, semantics, data, Presonance);
+    calculateWaveTableTensors(freqs, semantics, data, Presonance, fillWithZeroes);
 
     wt->insert(data, freqs, semantics, true);
 }

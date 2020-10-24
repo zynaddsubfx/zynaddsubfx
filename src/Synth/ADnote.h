@@ -327,6 +327,9 @@ class ADnote:public SynthNote
 
         //how the fine detunes are made bigger or smaller
         float bandwidthDetuneMultiplier;
+
+        //should only be false for debugging
+        const bool waveTables;
 };
 
 }

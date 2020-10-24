@@ -34,7 +34,8 @@ namespace zyn {
 ADnote::ADnote(ADnoteParameters *pars_, const SynthParams &spars,
         WatchManager *wm, const char *prefix)
     :SynthNote(spars), watch_be4_add(wm, prefix, "noteout/be4_mix"), watch_after_add(wm,prefix,"noteout/after_mix"),
-    watch_punch(wm, prefix, "noteout/punch"), watch_legato(wm, prefix, "noteout/legato"), pars(*pars_)
+    watch_punch(wm, prefix, "noteout/punch"), watch_legato(wm, prefix, "noteout/legato"),
+    pars(*pars_), waveTables(pars_->usesWaveTables())
 {
     memory.beginTransaction();
     tmpwavel = memory.valloc<float>(synth.buffersize);
@@ -108,9 +109,9 @@ void ADnote::setupVoice(int nvoice)
     for (int i = 0; i < 14; i++)
         voice.pinking[i] = 0.0;
 
-#ifdef NO_WAVETABLES
-    param.OscilGn->newrandseed(prng());
-#endif
+    if(!waveTables)
+        param.OscilGn->newrandseed(prng());
+
     voice.OscilSmp = NULL;
     voice.FMSmp    = NULL;
     voice.VoiceOut = NULL;
@@ -171,19 +172,23 @@ void ADnote::setupVoice(int nvoice)
     int vc = nvoice;
     if(pars.VoicePar[nvoice].Pextoscil != -1)
         vc = pars.VoicePar[nvoice].Pextoscil;
-#ifdef NO_WAVETABLES
-    if(!pars.GlobalPar.Hrandgrouping)
-        pars.VoicePar[vc].OscilGn->newrandseed(prng());
-    int oscposhi_start =
-        pars.VoicePar[vc].OscilGn->get(NoteVoicePar[nvoice].OscilSmp,
-                getvoicebasefreq(nvoice),
-                pars.VoicePar[nvoice].Presonance);
-#else
-    assert(pars.VoicePar[vc].table); // did you allocate ADnoteParameters and not assign its "table" member?
-    const float* bufferInTable = pars.VoicePar[vc].table->get(getvoicebasefreq(nvoice)).data();
-    std::copy(bufferInTable, bufferInTable + synth.oscilsize, NoteVoicePar[nvoice].OscilSmp);
-    int oscposhi_start = pars.VoicePar[vc].OscilGn->getFinalOutpos();
-#endif
+    int oscposhi_start;
+    if(waveTables)
+    {
+        assert(pars.VoicePar[vc].table);
+        const float* bufferInTable = pars.VoicePar[vc].table->get(getvoicebasefreq(nvoice)).data();
+        std::copy(bufferInTable, bufferInTable + synth.oscilsize, NoteVoicePar[nvoice].OscilSmp);
+        oscposhi_start = pars.VoicePar[vc].OscilGn->getFinalOutpos();
+    }
+    else
+    {
+        if(!pars.GlobalPar.Hrandgrouping)
+            pars.VoicePar[vc].OscilGn->newrandseed(prng());
+        oscposhi_start =
+            pars.VoicePar[vc].OscilGn->get(NoteVoicePar[nvoice].OscilSmp,
+                    getvoicebasefreq(nvoice),
+                    pars.VoicePar[nvoice].Presonance);
+    }
 
     // This code was planned for biasing the carrier in MOD_RING
     // but that's on hold for the moment.  Disabled 'cos small
@@ -444,9 +449,9 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
 
     //Triggers when a user enables modulation on a running voice
     if(!first_run && voice.FMEnabled != FMTYPE::NONE && voice.FMSmp == NULL && voice.FMVoice < 0) {
-#ifdef NO_WAVETABLES
-        param.FmGn->newrandseed(prng());
-#endif
+        if(!waveTables)
+            param.FmGn->newrandseed(prng());
+
         voice.FMSmp = memory.valloc<float>(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
         memset(voice.FMSmp, 0, sizeof(float)*(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES));
         int vc = nvoice;
@@ -459,24 +464,26 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
                 || (voice.FMEnabled == FMTYPE::RING_MOD))
             tmp = getFMvoicebasefreq(nvoice);
 
-#ifdef NO_WAVETABLES
-        if(!pars.GlobalPar.Hrandgrouping)
-            pars.VoicePar[vc].FmGn->newrandseed(prng());
-#endif
+        if(!waveTables)
+            if(!pars.GlobalPar.Hrandgrouping)
+                pars.VoicePar[vc].FmGn->newrandseed(prng());
 
         for(int k = 0; k < voice.unison_size; ++k)
         {
-#ifdef NO_WAVETABLES
-            voice.oscposhiFM[k] = (voice.oscposhi[k]
-                    + pars.VoicePar[vc].FmGn->get(
-                        voice.FMSmp, tmp))
-                % synth.oscilsize;
-#else
-            assert(pars.VoicePar[vc].tableFm); // did you allocate ADnoteParameters and not assign its "table" member?
-            const float* bufferInTable = pars.VoicePar[vc].tableFm->get(tmp).data();
-            std::copy(bufferInTable, bufferInTable + synth.oscilsize, voice.FMSmp);
-            voice.oscposhiFM[k] = pars.VoicePar[vc].OscilGn->getFinalOutpos() % synth.oscilsize;
-#endif
+            if(waveTables)
+            {
+                assert(pars.VoicePar[vc].tableFm); // did you allocate ADnoteParameters and not assign its "table" member?
+                const float* bufferInTable = pars.VoicePar[vc].tableFm->get(tmp).data();
+                std::copy(bufferInTable, bufferInTable + synth.oscilsize, voice.FMSmp);
+                voice.oscposhiFM[k] = pars.VoicePar[vc].OscilGn->getFinalOutpos() % synth.oscilsize;
+            }
+            else
+            {
+                voice.oscposhiFM[k] = (voice.oscposhi[k]
+                        + pars.VoicePar[vc].FmGn->get(
+                            voice.FMSmp, tmp))
+                    % synth.oscilsize;
+            }
         }
 
         for(int i = 0; i < OSCIL_SMP_EXTRA_SAMPLES; ++i)
@@ -723,10 +730,10 @@ void ADnote::legatonote(const LegatoParams &lpars)
 
         /* Voice Modulation Parameters Init */
         if((NoteVoicePar[nvoice].FMEnabled != FMTYPE::NONE)
-           && (NoteVoicePar[nvoice].FMVoice < 0)) {
-#ifdef NO_WAVETABLES
-            pars.VoicePar[nvoice].FmGn->newrandseed(prng());
-#endif
+           && (NoteVoicePar[nvoice].FMVoice < 0))
+        {
+            if(!waveTables)
+                pars.VoicePar[nvoice].FmGn->newrandseed(prng());
 
             //Perform Anti-aliasing only on MIX or RING MODULATION
 
@@ -734,10 +741,9 @@ void ADnote::legatonote(const LegatoParams &lpars)
             if(pars.VoicePar[nvoice].PextFMoscil != -1)
                 vc = pars.VoicePar[nvoice].PextFMoscil;
 
-#ifdef NO_WAVETABLES
-            if(!pars.GlobalPar.Hrandgrouping)
-                pars.VoicePar[vc].FmGn->newrandseed(prng());
-#endif
+            if(!waveTables)
+                if(!pars.GlobalPar.Hrandgrouping)
+                    pars.VoicePar[vc].FmGn->newrandseed(prng());
 
             for(int i = 0; i < OSCIL_SMP_EXTRA_SAMPLES; ++i)
                 NoteVoicePar[nvoice].FMSmp[synth.oscilsize + i] =
@@ -918,10 +924,11 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
         }
 
         /* Voice Modulation Parameters Init */
-        if((vce.FMEnabled != FMTYPE::NONE) && (vce.FMVoice < 0)) {
-#ifdef NO_WAVETABLES
-            param.FmGn->newrandseed(prng());
-#endif
+        if((vce.FMEnabled != FMTYPE::NONE) && (vce.FMVoice < 0))
+        {
+            if(!waveTables)
+                param.FmGn->newrandseed(prng());
+
             vce.FMSmp = memory.valloc<float>(synth.oscilsize + OSCIL_SMP_EXTRA_SAMPLES);
 
             //Perform Anti-aliasing only on MIX or RING MODULATION
@@ -936,24 +943,26 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
                || (vce.FMEnabled == FMTYPE::RING_MOD))
                 tmp = getFMvoicebasefreq(nvoice);
 
-#ifdef NO_WAVETABLES
-            if(!pars.GlobalPar.Hrandgrouping)
-                pars.VoicePar[vc].FmGn->newrandseed(prng());
-#endif
+            if(!waveTables)
+                if(!pars.GlobalPar.Hrandgrouping)
+                    pars.VoicePar[vc].FmGn->newrandseed(prng());
 
             for(int k = 0; k < vce.unison_size; ++k)
             {
-#ifdef NO_WAVETABLES
-                vce.oscposhiFM[k] = (vce.oscposhi[k]
-                                         + pars.VoicePar[vc].FmGn->get(
-                                             vce.FMSmp, tmp))
-                                        % synth.oscilsize;
-#else
-                assert(pars.VoicePar[vc].tableFm); // did you allocate ADnoteParameters and not assign its "table" member?
-                const float* bufferInTable = pars.VoicePar[vc].tableFm->get(tmp).data();
-                std::copy(bufferInTable, bufferInTable + synth.oscilsize, vce.FMSmp);
-                vce.oscposhiFM[k] = pars.VoicePar[vc].OscilGn->getFinalOutpos() % synth.oscilsize;
-#endif
+                if(waveTables)
+                {
+                    assert(pars.VoicePar[vc].tableFm); // did you allocate ADnoteParameters and not assign its "table" member?
+                    const float* bufferInTable = pars.VoicePar[vc].tableFm->get(tmp).data();
+                    std::copy(bufferInTable, bufferInTable + synth.oscilsize, vce.FMSmp);
+                    vce.oscposhiFM[k] = pars.VoicePar[vc].OscilGn->getFinalOutpos() % synth.oscilsize;
+                }
+                else
+                {
+                    vce.oscposhiFM[k] = (vce.oscposhi[k]
+                                             + pars.VoicePar[vc].FmGn->get(
+                                                 vce.FMSmp, tmp))
+                                            % synth.oscilsize;
+                }
             }
 
             for(int i = 0; i < OSCIL_SMP_EXTRA_SAMPLES; ++i)
