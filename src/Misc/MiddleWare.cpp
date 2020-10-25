@@ -2185,7 +2185,7 @@ void MiddleWare::enableAutoSave(int interval_sec)
     impl->autoSave.dt = interval_sec;
 }
 
-int MiddleWare::checkAutoSave(void)
+int MiddleWare::checkAutoSave(void) const
 {
     //save spec zynaddsubfx-PID-autosave.xmz
     const std::string home     = getenv("HOME");
@@ -2317,7 +2317,7 @@ void MiddleWare::pendingSetProgram(int part, int program)
     impl->bToU->write("/setprogram", "cc", part, program);
 }
 
-std::string MiddleWare::activeUrl(void)
+std::string MiddleWare::activeUrl(void) const
 {
     return impl->last_url;
 }
