@@ -125,6 +125,8 @@ class Master
         void vuUpdate(const float *outl, const float *outr);
 
         //Process a set of OSC events in the bToU buffer
+        //This may be called by MiddleWare if we are offline
+        //(in this case, the param offline is true)
         bool runOSC(float *outl, float *outr, bool offline=false,
                     Master* master_from_mw = nullptr);
 
@@ -248,8 +250,10 @@ class Master
         //Used by loadOSC and saveOSC
         int loadOSCFromStr(const char *file_content,
                            rtosc::savefile_dispatcher_t* dispatcher);
-        //!applyOscEvent with a DataObj parameter
-        //!@return false iff master has been changed
+        //! apply an OSC event with a DataObj parameter
+        //! @note This may be called by MiddleWare if we are offline
+        //!   (in this case, the param offline is true)
+        //! @return false iff master has been changed
         bool applyOscEvent(const char *event, float *outl, float *outr,
                            bool offline, bool nio,
                            class DataObj& d, int msg_id = -1,
