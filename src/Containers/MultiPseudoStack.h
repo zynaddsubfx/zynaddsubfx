@@ -11,7 +11,6 @@
 */
 #pragma once
 #include <atomic>
-#include <cassert>
 
 namespace zyn {
 
@@ -58,7 +57,6 @@ class MultiQueue
 public:
     MultiQueue(void);
     ~MultiQueue(void);
-    void dump(void);
     //! return a fresh item, e.g. to write to
     qli_t *alloc(void)   { return m_free.read();   }
     //! free an item
