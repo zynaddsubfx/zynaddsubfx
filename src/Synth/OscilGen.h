@@ -175,6 +175,10 @@ class OscilGen:public Presets
         //(that's why the sine and cosine components should be processed with a separate call)
         void adaptiveharmonicpostprocess(fft_t *f, int size);
 
+        //! whether the generation of the wave (OscilGen::get) can consume any random
+        //! for at least one frequency
+        bool mayUseRandom() const;
+
         //Internal Data
         unsigned char oldbasefunc, oldbasepar, oldhmagtype,
                       oldwaveshapingfunction, oldwaveshaping;

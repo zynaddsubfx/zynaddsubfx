@@ -497,23 +497,41 @@ public:
 std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloat>*> OscilGen::calculateWaveTableScales(
     bool fillWithZeroes) const
 {
-    Tensor1<wavetable_types::float32>* freqs = new Tensor1<wavetable_types::float32>(WaveTable::num_freqs, WaveTable::num_freqs);
-    Tensor1<wavetable_types::IntOrFloat>* semantics = new Tensor1<wavetable_types::IntOrFloat>(WaveTable::num_semantics, WaveTable::num_semantics);
+    Tensor1<wavetable_types::float32>* freqs;
+    Tensor1<wavetable_types::IntOrFloat>* semantics;
+    const bool mayUseRandom = OscilGen::mayUseRandom();
+
+    {
+        std::size_t freq_sz = WaveTable::num_freqs;
+        // TODO: random not relevant for wavetable modulation
+        std::size_t sem_sz = mayUseRandom ? WaveTable::num_semantics : 1;
+
+        freqs = new Tensor1<wavetable_types::float32>(freq_sz, freq_sz);
+        semantics = new Tensor1<wavetable_types::IntOrFloat>(sem_sz, sem_sz);
+    }
 
     // semantics
-    if(fillWithZeroes)
+    if(mayUseRandom)
     {
-        for(int i = 0; i < semantics->size(); ++i)
+        if(fillWithZeroes)
         {
-            (*semantics)[i].intVal = i; // do not consume any random
+            for(int i = 0; i < semantics->size(); ++i)
+            {
+                (*semantics)[i].intVal = i; // do not consume any random
+            }
+        }
+        else
+        {
+            for(int i = 0; i < semantics->size(); ++i)
+            {
+                (*semantics)[i].intVal = prng();
+            }
         }
     }
     else
     {
-        for(int i = 0; i < semantics->size(); ++i)
-        {
-            (*semantics)[i].intVal = prng();
-        }
+        assert(semantics->size() == 1);
+        (*semantics)[0].intVal = 0;
     }
 
     // frequency
@@ -1113,8 +1131,17 @@ bool OscilGen::needPrepare(void)
     return outdated == true || oscilprepared == false;
 }
 
+bool OscilGen::mayUseRandom() const
+{
+    return !ADvsPAD && (
+                        Prand > 64 || // phase randomness
+                        Pamprandtype  // amplitude randomness
+                        );
+}
+
 /*
  * Get the oscillator function
+ * When you change this, also change OscilGen::usesRandom
  */
 short int OscilGen::get(float *smps, float freqHz, int resonance)
 {
