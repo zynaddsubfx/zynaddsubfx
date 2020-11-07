@@ -44,6 +44,7 @@ using rtosc::RtData;
 
 #define rObject Part
 static const Ports partPorts = {
+    rSelf(Part, rEnabledBy(Penabled)),
     rRecurs(kit, 16, "Kit"),//NUM_KIT_ITEMS
     rRecursp(partefx, 3, "Part Effect"),
     rRecur(ctl,       "Controller"),
