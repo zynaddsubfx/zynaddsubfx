@@ -27,7 +27,7 @@ namespace zyn {
 #define rEnd }
 
 rtosc::Ports DynamicFilter::ports = {
-    {"preset::i", rOptions(WahWah, AutoWah, Sweep, VocalMorph1, VocalMorph1)
+    {"preset::i", rOptions(WahWah, AutoWah, Sweep, VocalMorph1, VocalMorph2)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
                   rObject *o = (rObject*)d.obj;
@@ -286,7 +286,7 @@ unsigned char DynamicFilter::getpresetpar(unsigned char npreset, unsigned int np
         {100, 64, 30, 0, 0, 50, 80, 0,  0, 60},
         //VocalMorph1
         {110, 64, 80, 0, 0, 64, 0,  64, 0, 60},
-        //VocalMorph1
+        //VocalMorph2
         {127, 64, 50, 0, 0, 96, 64, 0,  0, 60}
     };
     if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
