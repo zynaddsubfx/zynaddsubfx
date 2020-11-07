@@ -68,15 +68,15 @@ static const Ports sysefxPort =
             assert(isdigit(*index_1));
             if(isdigit(index_1[-1]))
                 index_1--;
-            int ind1 = atoi(index_1);
+            int ind1 = atoi(index_1); //efx
 
             //Now get the second index like normal
             while(!isdigit(*m)) m++;
-            int ind2 = atoi(m);
+            int ind2 = atoi(m); //part
             Master &mast = *(Master*)d.obj;
 
             if(rtosc_narguments(m)) {
-                mast.setPsysefxvol(ind2, ind1, rtosc_argument(m,0).i);
+                mast.setPsysefxvol(ind2, ind1, rtosc_argument(m,0).i /*vol*/);
                 d.broadcast(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
             } else
                 d.reply(d.loc, "i", mast.Psysefxvol[ind1][ind2]);
