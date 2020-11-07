@@ -350,9 +350,15 @@ struct NonRtObjStore
             d.obj = osc;
             OscilGen::non_realtime_ports.dispatch(msg, d);
         }
-        else
-            fprintf(stderr, "Warning: trying to access oscil object \"%s\","
-                            "which does not exist\n", obj_rl.c_str());
+        else {
+            // print warning, except in rtosc::walk_ports
+            if(obj_rl.find("/pointer") == obj_rl.npos)
+            {
+                fprintf(stderr, "Warning: trying to access oscil object \"%s\","
+                                "which does not exist\n", obj_rl.c_str());
+            }
+            d.obj = nullptr; // tell walk_ports that there's nothing to recurse here...
+        }
     }
     void handlePad(const char *msg, rtosc::RtData &d) {
         string obj_rl(d.message, msg);
@@ -375,10 +381,16 @@ struct NonRtObjStore
                     }
                 }
             }
-            else
-                fprintf(stderr, "Warning: trying to access pad synth object "
-                                "\"%s\", which does not exist\n",
-                        obj_rl.c_str());
+            else {
+                // print warning, except in rtosc::walk_ports
+                if(obj_rl.find("/pointer") == obj_rl.npos)
+                {
+                    fprintf(stderr, "Warning: trying to access pad synth object "
+                                    "\"%s\", which does not exist\n",
+                            obj_rl.c_str());
+                }
+                d.obj = nullptr; // tell walk_ports that there's nothing to recurse here...
+            }
         }
     }
 };
