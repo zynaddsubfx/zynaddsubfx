@@ -1331,4 +1331,6 @@ void PADnoteParameters::pasteRT(PADnoteParameters &x)
 }
 #undef COPY
 
+const Ports *PADnoteParameters::getPorts() const { return &ports; }
+
 }

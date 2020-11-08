@@ -16,6 +16,7 @@
 
 #include "../globals.h"
 
+#include "../Misc/ClassWithPorts.h"
 #include "Presets.h"
 #include <string>
 #include <functional>
@@ -32,7 +33,7 @@ namespace zyn {
  * The ownership will be unclear for the time being, but it should be made more
  * explicit with time.
  */
-class PADnoteParameters:public Presets
+class PADnoteParameters:public Presets, public ClassWithPorts
 {
     public:
         PADnoteParameters(const SYNTH_T &synth_, FFTwrapper *fft_,
@@ -214,6 +215,8 @@ class PADnoteParameters:public Presets
         void deletesamples();
         void deletesample(int n);
 
+        const rtosc::Ports* getPorts() const override;
+        void* getClass() override { return this; }
     public:
         const SYNTH_T &synth;
 };

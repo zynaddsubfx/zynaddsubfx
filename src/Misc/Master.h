@@ -20,6 +20,7 @@
 #include <rtosc/automations.h>
 #include <rtosc/savefile.h>
 
+#include "ClassWithPorts.h"
 #include "Time.h"
 #include "Bank.h"
 #include "Recorder.h"
@@ -42,7 +43,7 @@ struct vuData {
 
 /** It sends Midi Messages to Parts, receives samples from parts,
  *  process them with system/insertion effects and mix them */
-class Master
+class Master : public ClassWithPorts
 {
     public:
         Master(const Master& other) = delete;
@@ -51,7 +52,7 @@ class Master
         /** Constructor TODO make private*/
         Master(const SYNTH_T &synth, class Config *config);
         /** Destructor*/
-        ~Master();
+        ~Master() override;
 
         char last_xmz[XMZ_PATH_MAX];
 
@@ -251,6 +252,9 @@ class Master
                            bool offline, bool nio,
                            class DataObj& d, int msg_id = -1,
                            Master* master_from_mw = nullptr);
+
+        const rtosc::Ports* getPorts() const override { return &ports; }
+        void* getClass() override { return this; }
 
         Value_Smoothing_Filter smoothing;
 
