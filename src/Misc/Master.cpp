@@ -1777,88 +1777,11 @@ char* Master::getXMLData()
 
 // this is being called as a "read only op" directly by the MiddleWare thread;
 // note that the Master itself is frozen
-int Master::saveOSC(const char *filename, master_dispatcher_t* dispatcher,
-                    Master* master2)
+std::string Master::saveOSC(std::string savefile)
 {
-    std::string savefile = rtosc::save_to_file(ports, this,
-                                               "ZynAddSubFX",
-                                               version_in_rtosc_fmt());
-
-    // load the savefile string into another master to compare the results
-    // between the original and the savefile-loaded master
-    // this requires a temporary master switch
-    dispatcher->updateMaster(master2);
-
-    int rval = master2->loadOSCFromStr(savefile.c_str(), dispatcher);
-
-    // The above call is done by this thread (i.e. the MiddleWare thread), but
-    // it sends messages to master2 in order to load the values
-    // We need to wait until savefile has been loaded into master2
-    int i;
-    for(i = 0; i < 20 && master2->uToB->hasNext(); ++i)
-        os_usleep(50000);
-    if(i >= 20) // >= 1 second?
-    {
-        // Master failed to fetch its messages
-        rval = -1;
-    }
-    printf("Saved in less than %d ms.\n", 50*i);
-
-    dispatcher->updateMaster(this);
-
-    if(rval < 0)
-    {
-        std::cerr << "invalid savefile (or a backend error)!" << std::endl;
-        std::cerr << "complete savefile:" << std::endl;
-        std::cerr << savefile << std::endl;
-        std::cerr << "first entry that could not be parsed:" << std::endl;
-
-        for(int i = -rval + 1; savefile[i]; ++i)
-        if(savefile[i] == '\n')
-        {
-            savefile.resize(i);
-            break;
-        }
-        std::cerr << (savefile.c_str() - rval) << std::endl;
-
-        rval = -1;
-    }
-    else
-    {
-        char* xml = getXMLData(),
-            * xml2 = master2->getXMLData();
-
-        rval = strcmp(xml, xml2) ? -1 : 0;
-
-        if(rval == 0)
-        {
-            if(filename && *filename)
-            {
-                std::ofstream ofs(filename);
-                ofs << savefile;
-            }
-            else {
-                std::cout << "The savefile content follows" << std::endl;
-                std::cout << "---->8----" << std::endl;
-                std::cout << savefile << std::endl;
-                std::cout << "---->8----" << std::endl;
-            }
-        }
-        else
-        {
-            std::cout << savefile << std::endl;
-            std::cerr << "Can not write OSC savefile!! (see tmp1.txt and tmp2.txt)"
-                      << std::endl;
-            std::ofstream tmp1("tmp1.txt"), tmp2("tmp2.txt");
-            tmp1 << xml;
-            tmp2 << xml2;
-            rval = -1;
-        }
-
-        free(xml);
-        free(xml2);
-    }
-    return rval;
+    return rtosc::save_to_file(ports, this,
+                               nullptr, version_in_rtosc_fmt(), // both unused
+                               savefile);
 }
 
 int Master::loadOSCFromStr(const char *file_content,
