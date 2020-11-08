@@ -78,22 +78,16 @@ static const Ports voicePorts = {
     {"OscilSmp/", rDoc("Primary Oscillator"),
         &OscilGen::ports,
         rBOIL_BEGIN
-            if(obj->OscilGn == NULL) return;
+        if(obj->OscilGn == NULL) return;
         data.obj = obj->OscilGn;
-        SNIP
-            OscilGen::ports.dispatch(msg, data);
-        if(data.matches == 0)
-            data.forward();
+        data.forward();
         rBOIL_END},
     {"FMSmp/", rDoc("Modulating Oscillator"),
         &OscilGen::ports,
         rBOIL_BEGIN
-            if(obj->FmGn == NULL) return;
+        if(obj->FmGn == NULL) return;
         data.obj = obj->FmGn;
-        SNIP
-            OscilGen::ports.dispatch(msg, data);
-        if(data.matches == 0)
-            data.forward();
+        data.forward();
         rBOIL_END},
     rRecurp(FreqLfo, "Frequency LFO"),
     rRecurp(AmpLfo, "Amplitude LFO"),
