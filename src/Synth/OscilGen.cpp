@@ -19,6 +19,7 @@
 
 
 #include <cassert>
+#include <chrono>
 #include <cstdlib>
 #include <cmath>
 #include <cstdio>
@@ -473,6 +474,25 @@ void OscilGen::convert2sine()
     delete[] freqs;
     prepare();
 }
+
+class timer_t
+{
+    using time_point = std::chrono::steady_clock::time_point;
+    std::size_t num;
+    time_point begin;
+public:
+    timer_t(std::size_t num) :
+        num(num),
+        begin(std::chrono::steady_clock::now()) {}
+    ~timer_t() {
+         time_point end = std::chrono::steady_clock::now();
+         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+         if(ms == 0)
+            std::cout << "Calculated " << num << " wavetables in <1 ms" << std::endl;
+         else
+            std::cout << "Calculated " << num << " wavetables in " << ms << " ms" << std::endl;
+    }
+};
 
 void OscilGen::calculateWaveTableTensors(Tensor1<wavetable_types::float32>& freqs,
     Tensor1<wavetable_types::IntOrFloat>& semantics,
