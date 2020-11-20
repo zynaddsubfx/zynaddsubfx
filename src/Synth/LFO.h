@@ -50,7 +50,7 @@ class LFO
         // RND mode
         int first_half;
         float last_random;
-        float z1, z2, noisy_out;
+        float z1, z2;
 
         //Intensity of the wave
         float lfointensity;
