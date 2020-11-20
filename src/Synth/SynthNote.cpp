@@ -193,7 +193,7 @@ float SynthNote::getFilterCutoffRelFreq(void)
 }
 
 float SynthNote::getRandomFloat() {
-    return (getRandomUint() / (INT32_MAX * 1.0f));
+    return (getRandomUint() / (INT32_MAX_FLOAT * 1.0f));
 }
 
 prng_t SynthNote::getRandomUint() {
