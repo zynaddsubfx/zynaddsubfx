@@ -122,22 +122,27 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
     lo_message_serialise(msg, path, buffer, &size);
 
     if(!strcmp(buffer, "/path-search") &&
-       !strcmp("ss", rtosc_argument_string(buffer)))
+       (!strcmp("ss",  rtosc_argument_string(buffer)) ||
+        !strcmp("ssT", rtosc_argument_string(buffer)) ) )
     {
-        constexpr bool debug_path_search = true;
+        constexpr bool debug_path_search = false;
         if(debug_path_search) {
-            printf("MW: path-search: %s, %s\n",
+            fprintf(stderr, "MW: path-search: %s, %s\n",
                    rtosc_argument(buffer, 0).s, rtosc_argument(buffer, 1).s);
         }
+        bool reply_with_query = rtosc_narguments(buffer) == 3;
+
         char reply_buffer[1024*20];
         std::size_t length =
             rtosc::path_search(MiddleWare::getAllPorts(), buffer, 128,
-                               reply_buffer, sizeof(reply_buffer));
+                               reply_buffer, sizeof(reply_buffer),
+                               rtosc::path_search_opts::sorted_and_unique_prefix,
+                               reply_with_query);
         if(length) {
             lo_message msg  = lo_message_deserialise((void*)reply_buffer,
                                                      length, NULL);
             if(debug_path_search) {
-                printf("  reply:\n");
+                fprintf(stderr, "  reply:\n");
                 lo_message_pp(msg);
             }
             lo_address addr = lo_address_new_from_url(mw->activeUrl().c_str());
@@ -148,7 +153,7 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
         }
         else {
             if(debug_path_search)
-                printf("  -> no reply!\n");
+                fprintf(stderr, "  -> no reply!\n");
         }
     }
     else if(buffer[0]=='/' && strrchr(buffer, '/')[1])
