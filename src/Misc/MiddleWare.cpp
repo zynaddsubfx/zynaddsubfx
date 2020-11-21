@@ -95,9 +95,8 @@ static void liblo_error_cb(int i, const char *m, const char *loc)
     fprintf(stderr, "liblo :-( %d-%s@%s\n",i,m,loc);
 }
 
-// we need to access those earlier
+// we need to access this before the definitions
 // bad style?
-static const rtosc::MergePorts& getParameterPorts();
 static const rtosc::Ports& getNonRtParamPorts();
 
 static int handler_function(const char *path, const char *types, lo_arg **argv,
@@ -125,18 +124,31 @@ static int handler_function(const char *path, const char *types, lo_arg **argv,
     if(!strcmp(buffer, "/path-search") &&
        !strcmp("ss", rtosc_argument_string(buffer)))
     {
+        constexpr bool debug_path_search = true;
+        if(debug_path_search) {
+            printf("MW: path-search: %s, %s\n",
+                   rtosc_argument(buffer, 0).s, rtosc_argument(buffer, 1).s);
+        }
         char reply_buffer[1024*20];
         std::size_t length =
-            rtosc::path_search(getParameterPorts(), buffer, 128,
+            rtosc::path_search(MiddleWare::getAllPorts(), buffer, 128,
                                reply_buffer, sizeof(reply_buffer));
         if(length) {
             lo_message msg  = lo_message_deserialise((void*)reply_buffer,
                                                      length, NULL);
+            if(debug_path_search) {
+                printf("  reply:\n");
+                lo_message_pp(msg);
+            }
             lo_address addr = lo_address_new_from_url(mw->activeUrl().c_str());
             if(addr)
                 lo_send_message(addr, reply_buffer, msg);
             lo_address_free(addr);
             lo_message_free(msg);
+        }
+        else {
+            if(debug_path_search)
+                printf("  -> no reply!\n");
         }
     }
     else if(buffer[0]=='/' && strrchr(buffer, '/')[1])
@@ -1742,15 +1754,15 @@ static rtosc::MergePorts middwareSnoopPorts =
     &middwareSnoopPortsWithoutNonRtParams
 };
 
-static rtosc::MergePorts parameterPorts =
+const rtosc::MergePorts allPorts =
 {
     // order is important: params should be queried on Master first
     // (because MiddleWare often just redirects, hiding the metadata)
     &Master::ports,
-    &nonRtParamPorts
+    &middwareSnoopPorts
 };
-const rtosc::MergePorts& getParameterPorts() { return parameterPorts; }
 const rtosc::Ports& getNonRtParamPorts() { return nonRtParamPorts; }
+const rtosc::MergePorts& MiddleWare::getAllPorts() { return allPorts; }
 
 static rtosc::Ports middlewareReplyPorts = {
     {"echo:ss", 0, 0,

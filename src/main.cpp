@@ -459,7 +459,7 @@ int main(int argc, char *argv[])
                     rtosc::OscDocFormatter s;
                     ofstream outfile(optarguments);
                     s.prog_name    = "ZynAddSubFX";
-                    s.p            = &Master::ports;
+                    s.p            = &MiddleWare::getAllPorts();
                     s.uri          = "http://example.com/fake/";
                     s.doc_origin   = "http://example.com/fake/url.xml";
                     s.author_first = "Mark";
@@ -471,7 +471,7 @@ int main(int argc, char *argv[])
                 if(optarguments)
                 {
                     ofstream outfile(optarguments);
-                    dump_json(outfile, Master::ports);
+                    dump_json(outfile, MiddleWare::getAllPorts());
                 }
                 break;
             case 'Z':

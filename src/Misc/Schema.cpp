@@ -1,14 +1,9 @@
 #include <cstring>
 #include <ostream>
 #include <rtosc/ports.h>
+#include <set>
+#include <string>
 using namespace rtosc;
-
-// forwards declaration from rtosc lib
-void walk_ports2(const rtosc::Ports *base,
-                 char         *name_buffer,
-                 size_t        buffer_size,
-                 void         *data,
-                 rtosc::port_walker_t walker);
 
 namespace zyn {
 
@@ -139,8 +134,7 @@ static ostream &add_options(ostream &o, Port::MetaContainer meta)
  *   - 'domain'    : range [OPTIONAL]
  */
 static bool first = true;
-void dump_param_cb(const rtosc::Port *p, const char *full_name, const char*,
-                   const Ports&,void *v, void*)
+static bool do_dump(const rtosc::Port *p, const char *full_name, void *v)
 {
     typedef std::vector<std::pair<int,string>> opts;
     std::ostream &o  = *(std::ostream*)v;
@@ -175,7 +169,7 @@ void dump_param_cb(const rtosc::Port *p, const char *full_name, const char*,
         }
     }
     if(meta.find("internal") != meta.end())
-        return;
+        return false;
 
     char type = 0;
     if(mparameter != p->meta().end()) {
@@ -195,14 +189,14 @@ void dump_param_cb(const rtosc::Port *p, const char *full_name, const char*,
         if(!type) {
             fprintf(stderr, "rtosc port dumper: Cannot handle '%s'\n", full_name);
             fprintf(stderr, "    args = <%s>\n", args);
-            return;
+            return false;
         }
     } else {
         //fprintf(stderr, "Skipping \"%s\"\n", name);
         //if(args) {
         //    fprintf(stderr, "    type = %s\n", args);
         //}
-        return;
+        return false;
     }
 
     const char *min = meta["min"];
@@ -253,6 +247,19 @@ void dump_param_cb(const rtosc::Port *p, const char *full_name, const char*,
         o << "        ]";
     }
     o << "\n    }";
+    return true;
+}
+
+static void dump_param_cb(const rtosc::Port *p, const char *full_name, const char*,
+                          const Ports&,void *v, void*)
+{
+    static std::set<std::pair<std::string, std::string>> already_dumped;
+    if(already_dumped.find(std::make_pair(full_name, p->name)) == already_dumped.end())
+    {
+        bool dumped = do_dump(p, full_name, v);
+        if(dumped)
+            already_dumped.emplace(full_name, p->name);
+    }
 }
 
 void dump_json(std::ostream &o, const rtosc::Ports &p)
@@ -262,7 +269,7 @@ void dump_json(std::ostream &o, const rtosc::Ports &p)
     o << "    \"parameter\" : [\n";
     char buffer[1024];
     memset(buffer, 0, sizeof(buffer));
-    walk_ports2(&p, buffer, 1024, &o, dump_param_cb);
+    walk_ports(&p, buffer, 1024, &o, dump_param_cb, true, nullptr, true);
     o << "\n    ],\n";
     o << "    \"actions\" : [\n";
     //walk_ports2(formatter.p, buffer, 1024, &o, dump_action_cb);
