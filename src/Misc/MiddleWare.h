@@ -16,6 +16,10 @@
 
 class Fl_Osc_Interface;
 
+namespace rtosc {
+    struct MergePorts;
+}
+
 namespace zyn {
 
 struct SYNTH_T;
@@ -86,6 +90,9 @@ class MiddleWare
         //!Make @p new_master the current master
         //!@warning use with care, and only in frozen state
         void switchMaster(Master* new_master);
+
+        static const rtosc::MergePorts& getAllPorts();
+
     private:
         class MiddleWareImpl *impl;
 };
