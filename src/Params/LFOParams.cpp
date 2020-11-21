@@ -95,7 +95,7 @@ static const rtosc::Ports _ports = {
             "Enable for global operation"),
     rParamZyn(Pstretch, rShort("str"), rCentered, rDefault(64),
         "Note frequency stretch"),
-// these are currently not yet implemented at must be hidden therefore
+// these are currently not yet implemented and must be hidden therefore
 #ifdef DEAD_PORTS
     //Float valued aliases
     {"delay::f", rProp(parameter) rMap(units, ms) rLog(0,4000), 0,
