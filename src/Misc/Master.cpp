@@ -388,6 +388,7 @@ static const Ports master_ports = {
     rRecursp(part, 16, "Part"),//NUM_MIDI_PARTS
     rRecursp(sysefx, 4, "System Effect"),//NUM_SYS_EFX
     rRecursp(insefx, 8, "Insertion Effect"),//NUM_INS_EFX
+    rRecur(HDDRecorder, "HDD recorder"),
     rRecur(microtonal, "Microtonal Mapping Functionality"),
     rRecur(ctl, "Controller"),
     rArrayOption(Pinsparts, NUM_INS_EFX, rOpt(-2, Master), rOpt(-1, Off),
@@ -569,18 +570,6 @@ static const Ports master_ports = {
         SNIP
             preset_ports.dispatch(msg, data);
         rBOIL_END},
-    {"HDDRecorder/preparefile:s", rDoc("Init WAV file"), 0, [](const char *msg, RtData &d) {
-       Master *m = (Master*)d.obj;
-       m->HDDRecorder.preparefile(rtosc_argument(msg, 0).s, 1);}},
-    {"HDDRecorder/start:", rDoc("Start recording"), 0, [](const char *, RtData &d) {
-       Master *m = (Master*)d.obj;
-       m->HDDRecorder.start();}},
-    {"HDDRecorder/stop:", rDoc("Stop recording"), 0, [](const char *, RtData &d) {
-       Master *m = (Master*)d.obj;
-       m->HDDRecorder.stop();}},
-    {"HDDRecorder/pause:", rDoc("Pause recording"), 0, [](const char *, RtData &d) {
-       Master *m = (Master*)d.obj;
-       m->HDDRecorder.pause();}},
     {"watch/", rDoc("Interface to grab out live synthesis state"), &watchPorts,
         rBOIL_BEGIN;
         SNIP;
