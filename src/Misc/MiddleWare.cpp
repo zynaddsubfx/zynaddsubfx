@@ -708,7 +708,7 @@ public:
             doReadOnlyOp([this,filename,&dispatcher,&master2,&savefile,&res]()
             {
                 savefile = master->saveOSC(savefile);
-
+#if 1
                 // load the savefile string into another master to compare the results
                 // between the original and the savefile-loaded master
                 // this requires a temporary master switch
@@ -732,7 +732,7 @@ public:
                 printf("Saved in less than %d ms.\n", 50*i);
 
                 dispatcher.updateMaster(old_master);
-
+#endif
                 if(res < 0)
                 {
                     std::cerr << "invalid savefile (or a backend error)!" << std::endl;
