@@ -531,7 +531,7 @@ public:
     mw_dispatcher_t(MiddleWare* mw) : mw(mw) {}
 };
 
-class MiddleWareImpl : public WaveTableRequestHandler
+class MiddleWareImpl
 {
     // messages chained with MwDataObj::chain
     // must yet be handled after a previous handleMsg
@@ -543,6 +543,8 @@ public:
                    int preferred_port);
     ~MiddleWareImpl(void);
     void recreateMinimalMaster();
+
+    WaveTableRequestHandler waveTableRequestHandler;
 
     //Check offline vs online mode in plugins
     void heartBeat(Master *m);
@@ -1474,14 +1476,14 @@ static rtosc::Ports nonRtParamPorts = {
             STRINGIFY(NUM_VOICES) "/OscilSmp/", 0, &OscilGen::ports,
         rBegin;
         impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), false, d,
-                                         static_cast<WaveTableRequestHandler&>(impl));
+                                         impl.waveTableRequestHandler);
         rEnd},
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
         "/kit#" STRINGIFY(NUM_KIT_ITEMS)
             "/adpars/VoicePar#" STRINGIFY(NUM_VOICES) "/FMSmp/", 0, &OscilGen::ports,
         rBegin
         impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), true, d,
-                                         static_cast<WaveTableRequestHandler&>(impl));
+                                         impl.waveTableRequestHandler);
         rEnd},
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
         "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/padpars/", 0, &PADnoteParameters::non_realtime_ports,
@@ -1501,7 +1503,7 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         int part, kit, voice;
         bool res = idsFromMsg(msg, &part, &kit, &voice);
         assert(res);
-        impl.chainWtParamRequest(part, kit, voice, false, d);
+        impl.waveTableRequestHandler.chainWtParamRequest(part, kit, voice, false, d);
         d.forward();
         rEnd},
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
@@ -1521,7 +1523,7 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
             assert(res);
             for(voice = 0; voice < NUM_VOICES; ++voice)
             {
-                impl.chainWtParamRequest(part, kit, voice, false, d);
+                impl.waveTableRequestHandler.chainWtParamRequest(part, kit, voice, false, d);
             }
         }
         d.forward();
@@ -1976,7 +1978,7 @@ static rtosc::Ports middlewareReplyPorts = {
         const WaveTable* wt = oscilGen->calculateWaveTable(presonance);
         d.chain((voicePath + "set-wavetable").c_str(), isFm ? "bT" : "bF", sizeof(WaveTable*), &wt);
 
-        impl.receivedAdPars(part, kit, voice, isFm);
+        impl.waveTableRequestHandler.receivedAdPars(part, kit, voice, isFm);
     }
 }
 };
