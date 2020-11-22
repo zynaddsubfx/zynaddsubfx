@@ -889,7 +889,7 @@ public:
     void kitEnable(int part, int kit, int type);
 
     // Handle an event with special cases
-    void handleMsg(const char *msg);
+    void handleMsg(const char *msg, bool msg_comes_from_realtime = false);
 
     // Add a message for handleMsg to a queue
     void queueMsg(const char* msg)
@@ -2173,7 +2173,7 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
     if(d.matches == 0) {
         if(forward) {
             forward = false;
-            handleMsg(rtmsg);
+            handleMsg(rtmsg, true);
         } if(broadcast)
             broadcastToRemote(rtmsg);
         else
@@ -2235,7 +2235,7 @@ void MiddleWareImpl::kitEnable(int part, int kit, int type)
 /*
  * Handle all messages traveling to the realtime side.
  */
-void MiddleWareImpl::handleMsg(const char *msg)
+void MiddleWareImpl::handleMsg(const char *msg, bool msg_comes_from_realtime)
 {
     //Check for known bugs
     assert(msg && *msg && strrchr(msg, '/')[1]);
@@ -2265,10 +2265,16 @@ void MiddleWareImpl::handleMsg(const char *msg)
 
     //A message unmodified by snooping
     if(d.matches == 0 || d.forwarded) {
-        //if(strcmp("/get-vu", msg)) {
-        //    printf("Message Continuing on<%s:%s>...\n", msg, rtosc_argument_string(msg));
-        //}
-        uToB->raw_write(msg);
+        if(msg_comes_from_realtime) {
+            // don't reply the same msg to realtime - avoid cycles
+            //printf("Message from RT will not be replied to RT: <%s:%s>...\n",
+            //       msg, rtosc_argument_string(msg));
+        } else {
+            //if(strcmp("/get-vu", msg)) {
+            //    printf("Message Continuing on<%s:%s>...\n", msg, rtosc_argument_string(msg));
+            //}
+            uToB->raw_write(msg);
+        }
     } else {
         //printf("Message Handled<%s:%s>...\n", msg, rtosc_argument_string(msg));
     }
