@@ -378,7 +378,7 @@ struct NonRtObjStore
         }
         else {
             // print warning, except in rtosc::walk_ports
-            if(obj_rl.find("/pointer") == obj_rl.npos)
+            if(!strstr(d.message, "/pointer"))
             {
                 fprintf(stderr, "Warning: trying to access oscil object \"%s\","
                                 "which does not exist\n", obj_rl.c_str());
@@ -409,7 +409,7 @@ struct NonRtObjStore
             }
             else {
                 // print warning, except in rtosc::walk_ports
-                if(obj_rl.find("/pointer") == obj_rl.npos)
+                if(!strstr(d.message, "/pointer"))
                 {
                     fprintf(stderr, "Warning: trying to access pad synth object "
                                     "\"%s\", which does not exist\n",
