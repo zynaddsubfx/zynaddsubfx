@@ -867,11 +867,6 @@ bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
     else if(d.forwarded)
         bToU->raw_write(msg);
 
-    if(d.matches == 0 && !d.forwarded)
-        fprintf(stderr, "Unknown path '%s:%s'\n", msg, rtosc_argument_string(msg));
-    if(d.forwarded)
-        bToU->raw_write(msg);
-
     return true;
 }
 
