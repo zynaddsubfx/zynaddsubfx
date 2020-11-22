@@ -35,7 +35,7 @@ namespace zyn {
 #define dTREAL(var) (powf(2.0f, var / 127.0f * 12.0f) - 1.0f) / 100.0f
 
 #define rParamDT(name, ...) \
-  {"P" STRINGIFY(name) "::i",  rProp(parameter) DOC(__VA_ARGS__), NULL, rParamDTCb(name)}
+  {"P" STRINGIFY(name) "::i", rProp(alias) rProp(parameter) DOC(__VA_ARGS__), NULL, rParamDTCb(name)}
 
 #define rParamDTCb(name) rBOIL_BEGIN \
         if(!strcmp("", args)) {\
