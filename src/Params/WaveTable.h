@@ -72,32 +72,32 @@ template <std::size_t N, class T>
 class TensorBase
 {
 protected:
-    std::size_t m_size;
+    std::size_t m_capacity;
     bool     m_owner = true; //! says if memory is owned by us
 
-    TensorBase() : m_size(0), m_owner(false) {}
-    TensorBase(std::size_t size) : m_size(size), m_owner(true) {};
+    TensorBase() : m_capacity(0), m_owner(false) {}
+    TensorBase(std::size_t capacity) : m_capacity(capacity), m_owner(true) {};
 
     TensorBase(TensorBase&& other) {
-        m_size = other.size;
+        m_capacity = other.capacity;
         m_owner = other.m_owner;
         other.m_owner = false;
     }
     TensorBase& operator=(TensorBase&& other) {
-        m_size = other.m_size;
+        m_capacity = other.m_capacity;
         m_owner = other.m_owner;
         other.m_owner = false;
     }
 public:
-    std::size_t size() const { return m_size; }
+    std::size_t capacity() const { return m_capacity; }
 protected:
-    void reserve_size(std::size_t new_size) { m_size = new_size; m_owner = true; }
+    void reserve_capacity(std::size_t new_capacity) { m_capacity = new_capacity; m_owner = true; }
     bool operator==(const TensorBase<N, T>& other) const {
 #if 0
         return shape() == other.shape();/* &&
                 std::equal(m_data, m_data + (shape().volume()), other.m_data);*/ }
 #else
-        return m_size == other.m_size;
+        return m_capacity == other.m_capacity;
 #endif
     }
 
@@ -112,7 +112,7 @@ class Tensor : public TensorBase<N, T>
     void init_shape_alloced(const Shape<N>& shape)
     {
         Shape<N-1> proj = shape.proj();
-        for(std::size_t i = 0; i < base_type::size(); ++i)
+        for(std::size_t i = 0; i < base_type::capacity(); ++i)
         {
             m_data[i].init_shape(proj);
         }
@@ -122,14 +122,14 @@ public:
     Tensor() : m_data(nullptr) {}
     Tensor(const Shape<N>& shape) :
         TensorBase<N, T> (shape.dim[0]),
-        m_data(new Tensor<N-1, T>[base_type::size()])
+        m_data(new Tensor<N-1, T>[base_type::capacity()])
     {
         init_shape_alloced(shape);
     }
     void init_shape(const Shape<N>& shape)
     {
-        base_type::reserve_size(shape.dim[0]);
-        m_data = new Tensor<N-1, T>[base_type::size()];
+        base_type::reserve_capacity(shape.dim[0]);
+        m_data = new Tensor<N-1, T>[base_type::capacity()];
         init_shape_alloced(shape);
     }
     ~Tensor()
@@ -148,7 +148,7 @@ public:
     bool operator==(const Tensor<N, T>& other) const
     {
         bool equal = base_type::operator==(other);
-        for(std::size_t i = 0; equal && i < base_type::size(); ++i)
+        for(std::size_t i = 0; equal && i < base_type::capacity(); ++i)
         {
             equal = m_data[i].operator==(other.m_data[i]);
         }
@@ -160,7 +160,7 @@ public:
 
     void fillWithZeroes()
     {
-        for(std::size_t i = 0; i < base_type::size(); ++i)
+        for(std::size_t i = 0; i < base_type::capacity(); ++i)
         {
             m_data[i].fillWithZeroes();
         }
@@ -170,7 +170,7 @@ public:
     std::size_t set_data(const T* new_data)
     {
         std::size_t consumed = 0;
-        for(std::size_t i = 0; i < base_type::size(); ++i)
+        for(std::size_t i = 0; i < base_type::capacity(); ++i)
         {
             consumed += m_data[i].set_data(new_data + consumed);
         }
@@ -178,8 +178,8 @@ public:
     }
 
     Shape<N> shape() const {
-        if(base_type::size()) {
-            return m_data[0].shape().prepend_dim(base_type::size());
+        if(base_type::capacity()) {
+            return m_data[0].shape().prepend_dim(base_type::capacity());
         }
         else {
             Shape<N> res;
@@ -201,7 +201,7 @@ class Tensor<1, T> : public TensorBase<1, T>
 
 public:
     Tensor() : m_data(nullptr) {}
-    Tensor(std::size_t size) : TensorBase<1, T>(size), m_data(new T[size]) {}
+    Tensor(std::size_t capacity) : TensorBase<1, T>(capacity), m_data(new T[capacity]) {}
     Tensor(const Shape<1>& shape) : Tensor(shape.dim[0]){}
     ~Tensor() { if(base_type::m_owner) { delete[] m_data; } }
     Tensor& operator=(Tensor&& other) {
@@ -211,8 +211,8 @@ public:
 
     void init_shape(const Shape<1>& shape)
     {
-        base_type::reserve_size(shape.dim[0]);
-        m_data = new T[base_type::size()];
+        base_type::reserve_capacity(shape.dim[0]);
+        m_data = new T[base_type::capacity()];
     }
 
     //! raw access into 1D array
@@ -224,7 +224,7 @@ public:
 
     bool operator==(const Tensor<1, T>& other) const {
         return base_type::operator==(other) &&
-            std::equal(m_data, m_data + base_type::size(), other.m_data);
+            std::equal(m_data, m_data + base_type::capacity(), other.m_data);
     }
 
     bool operator!=(const Tensor<1, T>& other) const {
@@ -232,16 +232,16 @@ public:
 
     void fillWithZeroes()
     {
-        std::fill_n(m_data, base_type::size(), 0);
+        std::fill_n(m_data, base_type::capacity(), 0);
     }
 
     std::size_t set_data(const T* new_data)
     {
-        std::copy(new_data, new_data+base_type::size(), m_data);
-        return base_type::size();
+        std::copy(new_data, new_data+base_type::capacity(), m_data);
+        return base_type::capacity();
     }
 
-    Shape<1> shape() const { return Shape<1>{base_type::size()}; }
+    Shape<1> shape() const { return Shape<1>{base_type::capacity()}; }
 
     template<std::size_t N2, class X2>
     friend void pointer_swap(Tensor<N2, X2>&, Tensor<N2, X2>&);
@@ -255,7 +255,7 @@ using Shape3 = Shape<3>;
 template<std::size_t N, class T>
 void pointer_swap(Tensor<N, T>& t1, Tensor<N, T>& t2)
 {
-    std::swap(t1.m_size, t2.m_size);
+    std::swap(t1.m_capacity, t2.m_capacity);
     std::swap(t1.m_data, t2.m_data);
     std::swap(t1.m_owner, t2.m_owner);
 }

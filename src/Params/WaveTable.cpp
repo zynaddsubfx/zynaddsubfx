@@ -26,7 +26,7 @@ namespace zyn {
 
 const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
 {
-    std::size_t num_freqs = freqs.size(), i;
+    std::size_t num_freqs = freqs.capacity(), i;
     float bestFreqDist = 9999999;
     std::size_t bestI = 0;
     for(i = 0; i < num_freqs; ++i) // TODO: std::lower_bound?
@@ -47,7 +47,7 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
     assert(bestI < num_freqs);
     const Tensor1<WaveTable::float32>& res = data[reader][bestI];
     ++reader;
-    reader = reader % semantics.size();
+    reader = reader % semantics.capacity();
     return res;
 }
 
