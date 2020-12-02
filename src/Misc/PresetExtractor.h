@@ -27,10 +27,10 @@ struct Clipboard {
 
 Clipboard clipboardCopy(class MiddleWare &mw, std::string url);
 
-void presetCopy(MiddleWare &mw, std::string url, std::string name, ClassWithPorts *dispatchRoot);
-void presetPaste(MiddleWare &mw, std::string url, std::string name, ClassWithPorts *dispatchRoot);
-void presetCopyArray(MiddleWare &mw, std::string url,  int field, std::string name, ClassWithPorts *dispatchRoot);
-void presetPasteArray(MiddleWare &mw, std::string url, int field, std::string name, ClassWithPorts *dispatchRoot);
+void presetCopy(MiddleWare &mw, std::string url, std::string name, void *presetsObj);
+void presetPaste(MiddleWare &mw, std::string url, std::string name, void *presetsObj);
+void presetCopyArray(MiddleWare &mw, std::string url,  int field, std::string name, void *presetsObj);
+void presetPasteArray(MiddleWare &mw, std::string url, int field, std::string name, void *presetsObj);
 void presetPaste(std::string url, int);
 void presetDelete(int);
 void presetRescan();

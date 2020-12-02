@@ -1568,10 +1568,10 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
             d.reply(d.loc, "s", "clipboard copy...");
 
             std::string url = rtosc_argument(msg, 0).s;
-            ClassWithPorts* obj = nullptr;
+            void* obj = nullptr;
             if(impl->obj_store.has(url))
             {
-                obj = impl->obj_store.getClassWithPorts(url);
+                obj = impl->obj_store.getClassWithPorts(url)->getClass();
             }
 
             printf("\nClipboard Copy...\n");
@@ -1600,10 +1600,10 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
          d.reply(d.loc, "s", "clipboard paste...");
 
          std::string url = rtosc_argument(msg, 0).s;
-         ClassWithPorts* obj = nullptr;
+         void* obj = nullptr;
          if(impl->obj_store.has(url))
          {
-             obj = impl->obj_store.getClassWithPorts(url);
+             obj = impl->obj_store.getClassWithPorts(url)->getClass();
          }
 
          if(args == "s")

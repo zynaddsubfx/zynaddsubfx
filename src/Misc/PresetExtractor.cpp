@@ -127,70 +127,66 @@ class Capture:public rtosc::RtData
 };
 
 template <class T>
-T capture(Master *m, std::string url, ClassWithPorts* dispatchRoot);
+T capture(Master *m, std::string url, void* presetsObj);
 
+//! Capture a preset type
 template <>
-std::string capture(Master *m, std::string url, ClassWithPorts* dispatchRoot)
+std::string capture(Master *m, std::string url, void* presetsObj)
 {
-    if(dispatchRoot)
+    if(presetsObj)
     {
-        // it's not master - remove the whole path
-        std::size_t found = url.find_last_of('/');
-        assert(found != string::npos);
-        url = url.substr(found);
+        // this means the dispatch does not happen
+        // at master - we already have the dispatch object
+        return static_cast<Presets*>(presetsObj)->type;
     }
     else
     {
-        dispatchRoot = m;
-    }
-
-    Capture c(dispatchRoot->getClass());
-    char query[1024];
-    rtosc_message(query, 1024, url.c_str(), "");
-    dispatchRoot->getPorts()->dispatch(query+1,c);
-    if(rtosc_message_length(c.msgbuf, sizeof(c.msgbuf))) {
-        if(rtosc_type(c.msgbuf, 0) == 's')
-            return rtosc_argument(c.msgbuf,0).s;
+        // dispatch the whole path at Master
+        Capture c(m);
+        char query[1024];
+        rtosc_message(query, 1024, url.c_str(), "");
+        Master::ports.dispatch(query+1,c);
+        if(rtosc_message_length(c.msgbuf, sizeof(c.msgbuf)))
+            if(rtosc_type(c.msgbuf, 0) == 's')
+                return rtosc_argument(c.msgbuf,0).s;
     }
 
     return "";
 }
 
+//! Capture a preset type
 template <>
-void *capture(Master *m, std::string url, ClassWithPorts* dispatchRoot)
+void *capture(Master *m, std::string url, void* presetsObj)
 {
-    if(dispatchRoot)
+    if(presetsObj)
     {
-        // it's not master - remove the whole path
-        std::size_t found = url.find_last_of('/');
-        assert(found != string::npos);
-        url = url.substr(found);
+        // this means the dispatch does not happen
+        // at master - we already have the dispatch object
+        return presetsObj;
     }
     else
     {
-        dispatchRoot = m;
+        // dispatch the whole path at Master
+        Capture c(m);
+        char query[1024];
+        rtosc_message(query, 1024, url.c_str(), "");
+        Master::ports.dispatch(query+1,c);
+        if(rtosc_message_length(c.msgbuf, sizeof(c.msgbuf))) {
+            if(rtosc_type(c.msgbuf, 0) == 'b' &&
+                    rtosc_argument(c.msgbuf, 0).b.len == sizeof(void*))
+                return *(void**)rtosc_argument(c.msgbuf,0).b.data;
+        }
+        return NULL;
     }
-
-    Capture c(dispatchRoot->getClass());
-    char query[1024];
-    rtosc_message(query, 1024, url.c_str(), "");
-    dispatchRoot->getPorts()->dispatch(query+1,c);
-    if(rtosc_message_length(c.msgbuf, sizeof(c.msgbuf))) {
-        if(rtosc_type(c.msgbuf, 0) == 'b' &&
-                rtosc_argument(c.msgbuf, 0).b.len == sizeof(void*))
-            return *(void**)rtosc_argument(c.msgbuf,0).b.data;
-    }
-
-    return NULL;
 }
 
 template<class T>
-std::string doCopy(MiddleWare &mw, string url, string name, ClassWithPorts* dispatchRoot)
+std::string doCopy(MiddleWare &mw, string url, string name, void* presetsObj)
 {
-    mw.doReadOnlyOp([url, name, &mw, dispatchRoot](){
+    mw.doReadOnlyOp([url, name, &mw, presetsObj](){
         Master *m = mw.spawnMaster();
         //Get the pointer
-        T *t = (T*)capture<void*>(m, url+"self", dispatchRoot);
+        T *t = (T*)capture<void*>(m, url+"self", presetsObj);
         assert(t);
         //Extract Via mxml
         t->copy(mw.getPresetsStore(), name.empty()? NULL:name.c_str());
@@ -227,13 +223,13 @@ void doPaste(MiddleWare &mw, string url, string type, XMLwrapper &xml, Ts&&... a
 }
 
 template<class T>
-std::string doArrayCopy(MiddleWare &mw, int field, string url, string name, ClassWithPorts* dispatchRoot)
+std::string doArrayCopy(MiddleWare &mw, int field, string url, string name, void* presetsObj)
 {
     //printf("Getting info from '%s'<%d>\n", url.c_str(), field);
-    mw.doReadOnlyOp([url, field, name, &mw, dispatchRoot](){
+    mw.doReadOnlyOp([url, field, name, &mw, presetsObj](){
         Master *m = mw.spawnMaster();
         //Get the pointer
-        T *t = (T*)capture<void*>(m, url+"self", dispatchRoot);
+        T *t = (T*)capture<void*>(m, url+"self", presetsObj);
         //Extract Via mxml
         t->copy(mw.getPresetsStore(), field, name.empty()?NULL:name.c_str());
     });
@@ -301,27 +297,27 @@ void doClassPaste(std::string type, std::string type_, MiddleWare &mw, string ur
     }
 }
 
-std::string doClassCopy(std::string type, MiddleWare &mw, string url, string name, ClassWithPorts* dispatchRoot)
+std::string doClassCopy(std::string type, MiddleWare &mw, string url, string name, void* presetsObj)
 {
     //printf("doClassCopy(%p)\n", mw.spawnMaster()->uToB);
     if(type == "EnvelopeParams")
-        return doCopy<EnvelopeParams>(mw, url, name, dispatchRoot);
+        return doCopy<EnvelopeParams>(mw, url, name, presetsObj);
     else if(type == "LFOParams")
-        return doCopy<LFOParams>(mw, url, name, dispatchRoot);
+        return doCopy<LFOParams>(mw, url, name, presetsObj);
     else if(type == "FilterParams")
-        return doCopy<FilterParams>(mw, url, name, dispatchRoot);
+        return doCopy<FilterParams>(mw, url, name, presetsObj);
     else if(type == "ADnoteParameters")
-        return doCopy<ADnoteParameters>(mw, url, name, dispatchRoot);
+        return doCopy<ADnoteParameters>(mw, url, name, presetsObj);
     else if(type == "PADnoteParameters")
-        return doCopy<PADnoteParameters>(mw, url, name, dispatchRoot);
+        return doCopy<PADnoteParameters>(mw, url, name, presetsObj);
     else if(type == "SUBnoteParameters")
-        return doCopy<SUBnoteParameters>(mw, url, name, dispatchRoot);
+        return doCopy<SUBnoteParameters>(mw, url, name, presetsObj);
     else if(type == "OscilGen")
-        return doCopy<OscilGen>(mw, url, name, dispatchRoot);
+        return doCopy<OscilGen>(mw, url, name, presetsObj);
     else if(type == "Resonance")
-        return doCopy<Resonance>(mw, url, name, dispatchRoot);
+        return doCopy<Resonance>(mw, url, name, presetsObj);
     else if(type == "EffectMgr")
-        doCopy<EffectMgr>(mw, url, name, dispatchRoot);
+        return doCopy<EffectMgr>(mw, url, name, presetsObj);
     return "UNDEF";
 }
 
@@ -334,24 +330,24 @@ void doClassArrayPaste(std::string type, std::string type_, int field, MiddleWar
         doArrayPaste<ADnoteParameters>(mw, field, url, type_, data, mw.getSynth(), (FFTwrapper*)NULL);
 }
 
-std::string doClassArrayCopy(std::string type, int field, MiddleWare &mw, string url, string name, ClassWithPorts* dispatchRoot)
+std::string doClassArrayCopy(std::string type, int field, MiddleWare &mw, string url, string name, void* presetsObj)
 {
     if(type == "FilterParams")
-        return doArrayCopy<FilterParams>(mw, field, url, name, dispatchRoot);
+        return doArrayCopy<FilterParams>(mw, field, url, name, presetsObj);
     else if(type == "ADnoteParameters")
-        return doArrayCopy<ADnoteParameters>(mw, field, url, name, dispatchRoot);
+        return doArrayCopy<ADnoteParameters>(mw, field, url, name, presetsObj);
     return "UNDEF";
 }
 
 //This is an abuse of the readonly op, but one that might look reasonable from a
 //user perspective...
-std::string getUrlPresetType(std::string url, MiddleWare &mw, ClassWithPorts* dispatchRoot)
+std::string getUrlPresetType(std::string url, MiddleWare &mw, void* presetsObj)
 {
     std::string result;
-    mw.doReadOnlyOp([url, &result, &mw, dispatchRoot](){
+    mw.doReadOnlyOp([url, &result, &mw, presetsObj](){
         Master *m = mw.spawnMaster();
         //Get the pointer
-        result = capture<std::string>(m, url+"preset-type", dispatchRoot);
+        result = capture<std::string>(m, url+"preset-type", presetsObj);
     });
     //printf("preset type = %s\n", result.c_str());
     return result;
@@ -397,13 +393,13 @@ void clipBoardPaste(const char *url, Clipboard clip)
 }
 #endif
 
-void presetCopy(MiddleWare &mw, std::string url, std::string name, ClassWithPorts *dispatchRoot)
+void presetCopy(MiddleWare &mw, std::string url, std::string name, void *presetsObj)
 {
     (void) name;
-    doClassCopy(getUrlType(url), mw, url, name, dispatchRoot);
+    doClassCopy(getUrlType(url), mw, url, name, presetsObj);
     //printf("PresetCopy()\n");
 }
-void presetPaste(MiddleWare &mw, std::string url, std::string name, ClassWithPorts *dispatchRoot)
+void presetPaste(MiddleWare &mw, std::string url, std::string name, void *presetsObj)
 {
     (void) name;
     //printf("PresetPaste()\n");
@@ -420,15 +416,15 @@ void presetPaste(MiddleWare &mw, std::string url, std::string name, ClassWithPor
             return;
     }
 
-    doClassPaste(getUrlType(url), getUrlPresetType(url, mw, dispatchRoot), mw, url, xml);
+    doClassPaste(getUrlType(url), getUrlPresetType(url, mw, presetsObj), mw, url, xml);
 }
-void presetCopyArray(MiddleWare &mw, std::string url, int field, std::string name, ClassWithPorts *dispatchRoot)
+void presetCopyArray(MiddleWare &mw, std::string url, int field, std::string name, void *presetsObj)
 {
     (void) name;
     //printf("PresetArrayCopy()\n");
-    doClassArrayCopy(getUrlType(url), field, mw, url, name, dispatchRoot);
+    doClassArrayCopy(getUrlType(url), field, mw, url, name, presetsObj);
 }
-void presetPasteArray(MiddleWare &mw, std::string url, int field, std::string name, ClassWithPorts *dispatchRoot)
+void presetPasteArray(MiddleWare &mw, std::string url, int field, std::string name, void *presetsObj)
 {
     (void) name;
     //printf("PresetArrayPaste()\n");
@@ -445,7 +441,7 @@ void presetPasteArray(MiddleWare &mw, std::string url, int field, std::string na
             return;
     }
     //printf("Performing Paste...\n");
-    doClassArrayPaste(getUrlType(url), getUrlPresetType(url, mw, dispatchRoot), field, mw, url, xml);
+    doClassArrayPaste(getUrlType(url), getUrlPresetType(url, mw, presetsObj), field, mw, url, xml);
 }
 #if 0
 void presetPaste(std::string url, int)
