@@ -15,8 +15,6 @@
 
 namespace zyn {
 
-class ClassWithPorts;
-
 extern const rtosc::Ports real_preset_ports;
 extern const rtosc::Ports preset_ports;
 

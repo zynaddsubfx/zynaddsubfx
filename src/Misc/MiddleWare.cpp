@@ -296,7 +296,7 @@ public:
  ******************************************************************************/
 struct NonRtObjStore
 {
-    std::map<std::string, ClassWithPorts*> objmap;
+    std::map<std::string, void*> objmap;
 
     void extractMaster(Master *master)
     {
@@ -355,12 +355,6 @@ struct NonRtObjStore
     }
 
     void *get(std::string loc)
-    {
-        ClassWithPorts* ptr = getClassWithPorts(loc);
-        return ptr ? ptr->getClass() : nullptr;
-    }
-
-    ClassWithPorts *getClassWithPorts(std::string loc)
     {
         auto itr = objmap.find(loc);
         return (itr == objmap.end()) ? nullptr : itr->second;
@@ -1568,11 +1562,7 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
             d.reply(d.loc, "s", "clipboard copy...");
 
             std::string url = rtosc_argument(msg, 0).s;
-            void* obj = nullptr;
-            if(impl->obj_store.has(url))
-            {
-                obj = impl->obj_store.getClassWithPorts(url)->getClass();
-            }
+            void* obj = impl->obj_store.get(url);
 
             printf("\nClipboard Copy...\n");
             if(args == "s")
@@ -1600,11 +1590,7 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
          d.reply(d.loc, "s", "clipboard paste...");
 
          std::string url = rtosc_argument(msg, 0).s;
-         void* obj = nullptr;
-         if(impl->obj_store.has(url))
-         {
-             obj = impl->obj_store.getClassWithPorts(url)->getClass();
-         }
+         void* obj = impl->obj_store.get(url);
 
          if(args == "s")
              presetPaste(mw, url, "", obj);

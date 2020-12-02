@@ -14,7 +14,6 @@
 #ifndef OSCIL_GEN_H
 #define OSCIL_GEN_H
 
-#include "../Misc/ClassWithPorts.h"
 #include "../globals.h"
 #include <rtosc/ports.h>
 #include "../Params/Presets.h"
@@ -22,11 +21,11 @@
 
 namespace zyn {
 
-class OscilGen:public Presets, public ClassWithPorts
+class OscilGen:public Presets
 {
     public:
         OscilGen(const SYNTH_T &synth, FFTwrapper *fft_, Resonance *res_);
-        ~OscilGen() override;
+        ~OscilGen();
 
         /**computes the full spectrum of oscil from harmonics,phases and basefunc*/
         void prepare();
@@ -194,9 +193,6 @@ class OscilGen:public Presets, public ClassWithPorts
         Resonance *res;
 
         unsigned int randseed;
-
-        const rtosc::Ports* getPorts() const override { return &ports; }
-        void* getClass() override { return this; }
     public:
         const SYNTH_T &synth;
 };
