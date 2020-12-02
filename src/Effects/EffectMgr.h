@@ -32,10 +32,10 @@ class EffectMgr:public Presets
     public:
         EffectMgr(Allocator &alloc, const SYNTH_T &synth, const bool insertion_,
               const AbsTime *time_ = nullptr);
-        ~EffectMgr();
+        ~EffectMgr() override;
 
         void paste(EffectMgr &e);
-        void add2XML(XMLwrapper& xml);
+        void add2XML(XMLwrapper& xml) override;
         void defaults(void) REALTIME;
         void getfromXML(XMLwrapper& xml);
 

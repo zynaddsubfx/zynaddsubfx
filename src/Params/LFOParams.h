@@ -47,9 +47,9 @@ class LFOParams:public Presets
                   char Pcontinous,
                   consumer_location_t loc,
                   const AbsTime* time_ = nullptr);
-        ~LFOParams();
+        ~LFOParams() override;
 
-        void add2XML(XMLwrapper& xml);
+        void add2XML(XMLwrapper& xml) override;
         void defaults();
         /**Loads the LFO from the xml*/
         void getfromXML(XMLwrapper& xml);

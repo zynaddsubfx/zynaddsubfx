@@ -27,7 +27,7 @@ class Resonance:public Presets
 {
     public:
         Resonance(void);
-        ~Resonance(void);
+        ~Resonance(void) override;
         void setpoint(int n, unsigned char p);
         void applyres(int n, fft_t *fftdata, float freq) const;
         void smooth(void);
@@ -36,7 +36,7 @@ class Resonance:public Presets
         void zero(void);
 
         void paste(Resonance &r);
-        void add2XML(XMLwrapper& xml);
+        void add2XML(XMLwrapper& xml) override;
         void defaults(void);
         void getfromXML(XMLwrapper& xml);
 

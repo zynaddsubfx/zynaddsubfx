@@ -34,13 +34,13 @@ class EnvelopeParams:public Presets
         EnvelopeParams(unsigned char Penvstretch_=64,
                        unsigned char Pforcedrelease_=0,
                        const AbsTime *time_ = nullptr);
-        ~EnvelopeParams();
+        ~EnvelopeParams() override;
         void paste(const EnvelopeParams &ep);
 
         void init(consumer_location_t loc);
         void converttofree();
 
-        void add2XML(XMLwrapper& xml);
+        void add2XML(XMLwrapper& xml) override;
         void defaults();
         void getfromXML(XMLwrapper& xml);
 

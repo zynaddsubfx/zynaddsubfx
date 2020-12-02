@@ -25,9 +25,9 @@ class PresetsArray:public Presets
 {
     public:
         PresetsArray();
-        virtual ~PresetsArray();
+        ~PresetsArray() override;
 
-        void copy(PresetsStore &ps, const char *name); /**<if name==NULL, the clipboard is used*/
+        void copy(PresetsStore &ps, const char *name) override; /**<if name==NULL, the clipboard is used*/
         void copy(PresetsStore &ps, int elm, const char *name); /**<if name==NULL, the clipboard is used*/
         //void paste(PresetsStore &ps, int npreset); //npreset==0 for clipboard
         //bool checkclipboardtype(PresetsStore &ps);

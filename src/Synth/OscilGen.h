@@ -24,7 +24,7 @@ class OscilGen:public Presets
 {
     public:
         OscilGen(const SYNTH_T &synth, FFTwrapper *fft_, Resonance *res_);
-        ~OscilGen();
+        ~OscilGen() override;
 
         /**computes the full spectrum of oscil from harmonics,phases and basefunc*/
         void prepare();
@@ -45,7 +45,7 @@ class OscilGen:public Presets
         void useasbase();
 
         void paste(OscilGen &o);
-        void add2XML(XMLwrapper& xml);
+        void add2XML(XMLwrapper& xml) override;
         void defaults();
         void getfromXML(XMLwrapper& xml);
 

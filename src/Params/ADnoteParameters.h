@@ -314,13 +314,13 @@ class ADnoteParameters:public PresetsArray
     public:
         ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
                          const AbsTime *time_ = nullptr);
-        ~ADnoteParameters();
+        ~ADnoteParameters() override;
 
         ADnoteGlobalParam GlobalPar;
         ADnoteVoiceParam  VoicePar[NUM_VOICES];
 
         void defaults();
-        void add2XML(XMLwrapper& xml);
+        void add2XML(XMLwrapper& xml) override;
         void getfromXML(XMLwrapper& xml);
 
         void paste(ADnoteParameters &a);
@@ -331,7 +331,7 @@ class ADnoteParameters:public PresetsArray
         float getUnisonFrequencySpreadCents(int nvoice) const;
         static const rtosc::Ports &ports;
         void defaults(int n); //n is the nvoice
-        void add2XMLsection(XMLwrapper& xml, int n);
+        void add2XMLsection(XMLwrapper& xml, int n) override;
         void getfromXMLsection(XMLwrapper& xml, int n);
 
         const AbsTime *time;

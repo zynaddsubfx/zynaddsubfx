@@ -24,7 +24,7 @@ class SUBnoteParameters:public Presets
 {
     public:
         SUBnoteParameters(const AbsTime *time_ = nullptr);
-        ~SUBnoteParameters();
+        ~SUBnoteParameters() override;
 
         //Identify active harmonic positions
         // - pos       : int[MAX_SUB_HARMONICS] offsets of active harmonics
@@ -35,7 +35,7 @@ class SUBnoteParameters:public Presets
                 int scale, int relbw);
         static float convertHarmonicMag(int mag, int type);
 
-        void add2XML(XMLwrapper& xml);
+        void add2XML(XMLwrapper& xml) override;
         void defaults();
         void getfromXML(XMLwrapper& xml);
         void updateFrequencyMultipliers(void);

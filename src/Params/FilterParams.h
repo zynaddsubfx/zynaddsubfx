@@ -31,10 +31,10 @@ class FilterParams:public PresetsArray
                      const AbsTime *time_ = nullptr);
         FilterParams(consumer_location_t loc,
                      const AbsTime *time_ = nullptr);
-        ~FilterParams();
+        ~FilterParams() override;
 
-        void add2XML(XMLwrapper& xml);
-        void add2XMLsection(XMLwrapper& xml, int n);
+        void add2XML(XMLwrapper& xml) override;
+        void add2XMLsection(XMLwrapper& xml, int n) override;
         void defaults();
         void getfromXML(XMLwrapper& xml);
         void getfromXMLsection(XMLwrapper& xml, int n);
