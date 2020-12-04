@@ -118,11 +118,11 @@ static const rtosc::Ports localPorts = {
             "Repeat the Envelope"),
     rParamDT(A_dt ,  rShort("a.dt"), rLinear(0,127), "Attack Time"),
     rParamF(A_dt,  rShort("a.dt"), rLog(0.0f,41.0f), rDefaultDepends(loc),
-              rPreset(ad_global_freq, 0.254),   rPreset(ad_global_filter, 0.127),
-              rPreset(ad_voice_freq, 0.127),    rPreset(ad_voice_filter, 0.97),
-              rPreset(ad_voice_fm_freq, 3.62), rPreset(ad_voice_fm_amp, 1.876),
-              rPreset(sub_freq, 0.254),         rPreset(sub_bandwidth, 0.97),
-              rDefault(0.00),
+              rPreset(ad_global_freq, 0.254f),   rPreset(ad_global_filter, 0.127f),
+              rPreset(ad_voice_freq, 0.127f),    rPreset(ad_voice_filter, 0.970f),
+              rPreset(ad_voice_fm_freq, 3.620f), rPreset(ad_voice_fm_amp, 1.876f),
+              rPreset(sub_freq, 0.254f),         rPreset(sub_bandwidth, 0.970f),
+              rDefault(0.0f),
               "Attack Time"),
 
     rParamZyn(PA_val, rShort("a.val"), rDefaultDepends(loc),
@@ -133,10 +133,10 @@ static const rtosc::Ports localPorts = {
               "Attack Value"),
     rParamDT(D_dt, rShort("d.dt"), rLinear(0,127), "Decay Time"),
     rParamF(D_dt,  rShort("d.dt"), rLog(0.0f,41.0f),  rDefaultDepends(loc),
-              rPreset(ad_global_amp, 0.127),    rPreset(ad_global_filter, 0.97),
-              rPreset(ad_voice_amp, 7),    rPreset(ad_voice_filter, 0.97),
-              rPreset(ad_voice_fm_amp, 3.62),
-              rDefault(0.00925031),
+              rPreset(ad_global_amp, 0.127f),    rPreset(ad_global_filter, 0.970f),
+              rPreset(ad_voice_amp, 6.978f),    rPreset(ad_voice_filter, 0.970f),
+              rPreset(ad_voice_fm_amp, 3.620f),
+              rDefault(0.009f),
               "Decay Time"),
     rParamZyn(PD_val, rShort("d.val"), rDefaultDepends(loc),
               rDefault(64), rPreset(ad_voice_filter, 40),
@@ -146,11 +146,11 @@ static const rtosc::Ports localPorts = {
               rPresetAtMulti(127, ad_global_amp, ad_voice_amp, ad_voice_fm_amp),
               "Sustain Value"),
     rParamDT(R_dt, rShort("r.dt"), rLinear(0,127), "Release Time"),
-    rParamF(R_dt,  rShort("r.dt"), rLog(0.01f,41.0f),  rDefaultDepends(loc),
-              rPreset(ad_global_amp, 0.025),
-              rPreset(ad_voice_amp, 7),    rPreset(ad_voice_filter, 0.01),
-              rPreset(ad_voice_fm_freq, 1.876), rPreset(ad_voice_fm_amp, 7),
-              rDefault(0.498893),
+    rParamF(R_dt,  rShort("r.dt"), rLog(0.009f,41.0f),  rDefaultDepends(loc),
+              rPreset(ad_global_amp, 0.041f),
+              rPreset(ad_voice_amp, 6.978f),    rPreset(ad_voice_filter, 0.009f),
+              rPreset(ad_voice_fm_freq, 1.876f), rPreset(ad_voice_fm_amp, 6.978f),
+              rDefault(0.499f),
               "Release Time"),
     rParamZyn(PR_val, rShort("r.val"), rDefaultDepends(loc),
               rPresetAtMulti(40, ad_voice_filter, ad_voice_fm_freq),
@@ -263,9 +263,9 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
                                const AbsTime *time_):
         time(time_), last_update_timestamp(0)
 {
-    A_dt  = 0.01;
-    D_dt  = 0.01;
-    R_dt  = 0.01;
+    A_dt  = 0.009;
+    D_dt  = 0.009;
+    R_dt  = 0.009;
     PA_val = 64;
     PD_val = 64;
     PS_val = 64;
@@ -275,7 +275,7 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
         envdt[i]  = dTREAL(32);
         Penvval[i] = 64;
     }
-    envdt[0]        = 0.0f; //no used
+    envdt[0]        = 0.0f; //not used
     Penvsustain     = 1;
     Penvpoints      = 1;
     Envmode         = ADSR_lin;
@@ -324,17 +324,17 @@ void EnvelopeParams::init(zyn::consumer_location_t _loc)
 {
     switch(loc = _loc)
     {
-        case ad_global_amp:    ADSRinit_dB(0, 0.01, 127, 0.025); break;
-        case ad_global_freq:   ASRinit(64, 0.025, 64, 0.5); break;
+        case ad_global_amp:    ADSRinit_dB(0.0f, 0.127f, 127, 0.041f); break;
+        case ad_global_freq:   ASRinit(64, 0.254f, 64, 0.499f); break;
         case ad_global_filter:
-        case sub_filter:       ADSRinit_filter(64, 0.01, 64, 0.025, 0.05, 64); break;
-        case ad_voice_amp:     ADSRinit_dB(0, 7.0, 127, 7.0); break;
-        case ad_voice_freq:    ASRinit(30, 0.01, 64, 0.5); break;
-        case ad_voice_filter:  ADSRinit_filter(90, 0.025, 40, 0.025, 0.009, 40); break;
-        case ad_voice_fm_freq: ASRinit(20, 3.62, 40, 1.876); break;
-        case ad_voice_fm_amp:  ADSRinit(80, 90, 127, 100); break;
-        case sub_freq:         ASRinit(30, 0.025, 64, 0.5); break;
-        case sub_bandwidth:    ASRinit_bw(100, 0.97, 64, 0.5); break;
+        case sub_filter:       ADSRinit_filter(64, 0.127f, 64, 0.970f, 0.499f, 64); break;
+        case ad_voice_amp:     ADSRinit_dB(0.0f, 6.978f, 127, 6.978f); break;
+        case ad_voice_freq:    ASRinit(30, 0.127f, 64, 0.499f); break;
+        case ad_voice_filter:  ADSRinit_filter(90, 0.970f, 40, 0.970f, 0.009f, 40); break;
+        case ad_voice_fm_freq: ASRinit(20, 3.620f, 40, 1.876f); break;
+        case ad_voice_fm_amp:  ADSRinit(1.876f, 3.620f, 127, 6.978f); break;
+        case sub_freq:         ASRinit(30, 0.254f, 64, 0.499f); break;
+        case sub_bandwidth:    ASRinit_bw(100, 0.970f, 64, 0.499f); break;
         default: throw std::logic_error("Invalid envelope consumer location");
     };
 }
