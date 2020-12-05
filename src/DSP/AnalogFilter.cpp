@@ -46,6 +46,7 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
     firsttime  = true;
     coeff.d[0] = 0; //this is not used
     outgain    = 1.0f;
+    freq_smoothing.sample_rate(samplerate_f);
 }
 
 AnalogFilter::~AnalogFilter()
@@ -280,15 +281,6 @@ void AnalogFilter::setfreq(float frequency)
 
     bool nyquistthresh = (abovenq ^ oldabovenq);
 
-
-    //if the frequency is changed fast, it needs interpolation
-    if((rap > 3.0f) || nyquistthresh) { //(now, filter and coefficients backup)
-        oldCoeff = coeff;
-        for(int i = 0; i < MAX_FILTER_STAGES + 1; ++i)
-            oldHistory[i] = history[i];
-        if(!firsttime)
-            needsinterpolation = true;
-    }
     freq = frequency;
     computefiltercoefs();
     firsttime = false;
@@ -383,26 +375,70 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist,
     }
 }
 
-void AnalogFilter::filterout(float *smp)
+
+void AnalogFilter::singlefilterout_freqbuf(float *smp, fstage &hist,
+                                   float *freqbuf)
 {
-    for(int i = 0; i < stages + 1; ++i)
-        singlefilterout(smp, history[i], coeff);
+    assert((buffersize % 8) == 0);
 
-    if(needsinterpolation) {
-        //Merge Filter at old coeff with new coeff
-        float ismp[buffersize];
-        memcpy(ismp, smp, bufferbytes);
+    for ( int i = 0; i < buffersize; i += 8 )
+    {
+	/* recompute coeffs for each 8 samples */
+	freq = freqbuf[i];
+	computefiltercoefs();
+	
+	if(order == 1) {  //First order filter
+	    for ( int j = 0; j < 8; j++ )
+	    {
+		float y0 = smp[i+j] * coeff.c[0] + hist.x1 * coeff.c[1]
+		    + hist.y1 * coeff.d[1];
+		hist.y1 = y0;
+		hist.x1 = smp[i+j];
+		smp[i+j]  = y0;
+	    }
+	} else if(order == 2) {//Second order filter
 
-        for(int i = 0; i < stages + 1; ++i)
-            singlefilterout(ismp, oldHistory[i], oldCoeff);
-
-        for(int i = 0; i < buffersize; ++i) {
-            float x = (float)i / buffersize_f;
-            smp[i] = ismp[i] * (1.0f - x) + smp[i] * x;
-        }
-        needsinterpolation = false;
+	    const float coeff_[5] = {coeff.c[0], coeff.c[1], coeff.c[2],  coeff.d[1], coeff.d[2]};
+	    float work[4]  = {hist.x1, hist.x2, hist.y1, hist.y2};
+	    
+	    AnalogBiquadFilterA(coeff_, smp[i + 0], work);
+	    AnalogBiquadFilterB(coeff_, smp[i + 1], work);
+	    AnalogBiquadFilterA(coeff_, smp[i + 2], work);
+	    AnalogBiquadFilterB(coeff_, smp[i + 3], work);
+	    AnalogBiquadFilterA(coeff_, smp[i + 4], work);
+	    AnalogBiquadFilterB(coeff_, smp[i + 5], work);
+	    AnalogBiquadFilterA(coeff_, smp[i + 6], work);
+	    AnalogBiquadFilterB(coeff_, smp[i + 7], work);
+	    
+	    hist.x1 = work[0];
+	    hist.x2 = work[1];
+	    hist.y1 = work[2];
+	    hist.y2 = work[3];
+	}
     }
 
+    freq = freqbuf[buffersize-1];
+    computefiltercoefs();
+}
+
+void AnalogFilter::filterout(float *smp)
+{
+
+    float freqbuf[buffersize];
+    
+    if ( freq_smoothing.apply( freqbuf, buffersize, freq ) )
+    {
+	/* in transition, need to do fine grained interpolation */
+	for(int i = 0; i < stages + 1; ++i)
+	    singlefilterout_freqbuf(smp, history[i], freqbuf);
+    }
+    else
+    {
+	/* stable state, just use one coeff */
+	for(int i = 0; i < stages + 1; ++i)
+	    singlefilterout(smp, history[i], coeff);
+    }
+    
     for(int i = 0; i < buffersize; ++i)
         smp[i] *= outgain;
 }

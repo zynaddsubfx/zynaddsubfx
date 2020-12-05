@@ -18,6 +18,7 @@
 
 #include "../globals.h"
 #include "Filter.h"
+#include "Value_Smoothing_Filter.h"
 
 namespace zyn {
 
@@ -61,6 +62,7 @@ class AnalogFilter:public Filter
 
         //Apply IIR filter to Samples, with coefficients, and past history
         void singlefilterout(float *smp, fstage &hist, const Coeff &coeff);
+        void singlefilterout_freqbuf(float *smp, fstage &hist, float *freqbuf);
         //Update coeff and order
         void computefiltercoefs(void);
 
@@ -77,6 +79,9 @@ class AnalogFilter:public Filter
         bool abovenq,                 //if the frequency is above the nyquist
              oldabovenq;              //if the last time was above nyquist
                                       //(used to see if it needs interpolation)
+
+
+    Value_Smoothing_Filter freq_smoothing; /* for smoothing freq modulations to avoid zipper effect */
 };
 
 }
