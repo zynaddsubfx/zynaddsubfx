@@ -59,6 +59,8 @@ NSM_Client::command_save(char **out_msg)
 {
     (void) out_msg;
     int r = ERR_OK;
+    if(!project_filename)
+        return ERR_NO_SESSION_OPEN;
 
     middleware->transmitMsg("/save_xmz", "s", project_filename);
 
