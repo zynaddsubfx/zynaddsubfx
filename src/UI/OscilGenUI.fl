@@ -990,6 +990,8 @@ basefuncdisplaygroup = NULL;
 bfpar = NULL;
 bftype = NULL;
 make_window();
+if(!adnotep)
+    osceditUI->label("PADsynth Harmonic Content Editor");
 bftype->init("Pcurrentbasefunc");
 initialized = true;
 
