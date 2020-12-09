@@ -47,6 +47,7 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
     coeff.d[0] = 0; //this is not used
     outgain    = 1.0f;
     freq_smoothing.sample_rate(samplerate_f);
+    freq_smoothing.reset( freq );
 }
 
 AnalogFilter::~AnalogFilter()
