@@ -81,7 +81,15 @@ class OGSlider {: {public Fl_Osc_TSlider}
   } { code {phase=false; } {} }
 
   Function {OSC_value(char c)} {open return_type void
-  } { code {value(phase ? c : 127-c);
+  } { code {
+  value(phase ? c : 127-c);
+  selection_color(value() == reset_value ? 0 : 222);
+  redraw();
+  } {} }
+  
+  Function {OSC_value(int c)} {open return_type void
+  } { code {
+  value(phase ? c : 127-c);
   selection_color(value() == reset_value ? 0 : 222);
   redraw();
   } {} }
