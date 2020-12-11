@@ -32,18 +32,14 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
       stages(Fstages),
       freq(Ffreq),
       q(Fq),
-      gain(1.0),
-      abovenq(false),
-      oldabovenq(false)
+      gain(1.0)
 {
     for(int i = 0; i < 3; ++i)
         coeff.c[i] = coeff.d[i] = oldCoeff.c[i] = oldCoeff.d[i] = 0.0f;
     if(stages >= MAX_FILTER_STAGES)
         stages = MAX_FILTER_STAGES;
     cleanup();
-    firsttime = false;
     setfreq_and_q(Ffreq, Fq);
-    firsttime  = true;
     coeff.d[0] = 0; //this is not used
     outgain    = 1.0f;
     freq_smoothing.sample_rate(samplerate_f);
@@ -62,7 +58,6 @@ void AnalogFilter::cleanup()
         history[i].y2 = 0.0f;
         oldHistory[i] = history[i];
     }
-    needsinterpolation = false;
 }
 
 AnalogFilter::Coeff AnalogFilter::computeCoeff(int type, float cutoff, float q,
@@ -277,14 +272,8 @@ void AnalogFilter::setfreq(float frequency)
     if(rap < 1.0f)
         rap = 1.0f / rap;
 
-    oldabovenq = abovenq;
-    abovenq    = frequency > (halfsamplerate_f - 500.0f);
-
-    bool nyquistthresh = (abovenq ^ oldabovenq);
-
     freq = frequency;
     computefiltercoefs();
-    firsttime = false;
 }
 
 void AnalogFilter::setfreq_and_q(float frequency, float q_)

@@ -74,13 +74,6 @@ class AnalogFilter:public Filter
 
         int order; //the order of the filter (number of poles)
 
-        bool needsinterpolation,      //Interpolation between coeff changes
-             firsttime;               //First Iteration of filter
-        bool abovenq,                 //if the frequency is above the nyquist
-             oldabovenq;              //if the last time was above nyquist
-                                      //(used to see if it needs interpolation)
-
-
     Value_Smoothing_Filter freq_smoothing; /* for smoothing freq modulations to avoid zipper effect */
 };
 

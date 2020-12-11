@@ -32,6 +32,13 @@ Value_Smoothing_Filter::sample_rate ( nframes_t n )
 bool
 Value_Smoothing_Filter::apply( sample_t * __restrict__ dst, nframes_t nframes, float gt )
 {
+    if ( _reset_on_next_apply )
+    {
+	reset( gt );
+	_reset_on_next_apply = false;
+	return false;
+    }
+
     if ( target_reached(gt) )
 	return false;
 	    
