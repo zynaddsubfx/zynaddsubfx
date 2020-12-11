@@ -944,6 +944,13 @@ float Part::volume127ToFloat(unsigned char volume_)
 
 void Part::setVolume(float Volume_)
 {
+    //Fixes bug with invalid loading
+    if(fabs(Volume_ - 50.0f) < 0.001)
+        Volume_ = 0.0f;
+
+    Volume_ = limit(Volume_, -40.0f, 13.333f);
+
+    assert(Volume_ < 40.0);
     Volume = Volume_;
     volume =
         dB2rap(Volume) * ctl.expression.relvolume;
@@ -1284,7 +1291,7 @@ void Part::getfromXML(XMLwrapper& xml)
     if (xml.hasparreal("volume")) {
         setVolume(xml.getparreal("volume", Volume));
     } else {
-        setVolume(volume127ToFloat(xml.getpar127("volume", -40.0f)));
+        setVolume(volume127ToFloat(xml.getpar127("volume", 96)));
     }
     setPpanning(xml.getpar127("panning", Ppanning));
 
