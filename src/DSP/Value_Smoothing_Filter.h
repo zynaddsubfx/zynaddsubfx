@@ -17,6 +17,9 @@
 /* Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /*******************************************************************************/
 
+#ifndef VALUE_SMOOTHING_FILTER_H
+#define VALUE_SMOOTHING_FILTER_H
+
 typedef unsigned long nframes_t;
 typedef float sample_t;
 
@@ -26,14 +29,20 @@ class Value_Smoothing_Filter
     
     float _cutoff;
 
+    bool _reset_on_next_apply;
+    
 public:
 
     Value_Smoothing_Filter ( )
 	{
 	    g1 = g2 = 0;
 	    _cutoff = 10.0f;
+	    _reset_on_next_apply = false;
 	}
 
+
+    void reset_on_next_apply ( bool v ) { _reset_on_next_apply = v; }
+    
     void cutoff ( float v ) { _cutoff = v; }
 
     void reset ( float v ) { g2 = g1 = v; }
@@ -45,3 +54,4 @@ public:
     bool apply( sample_t * __restrict__ dst, nframes_t nframes, float gt );
 };
 
+#endif

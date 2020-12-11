@@ -785,13 +785,13 @@ Master::Master(const SYNTH_T &synth_, Config* config)
                                config->cfg.Interpolation, &microtonal, fft, &watcher,
                                (ss+"/part"+npart+"/").c_str);
 	smoothing_part_l[npart].sample_rate( synth.samplerate );
-	smoothing_part_l[npart].reset( 1.0f );
+	smoothing_part_l[npart].reset_on_next_apply( true ); /* necessary to make CI tests happy, otherwise of no practical use */
 	smoothing_part_r[npart].sample_rate( synth.samplerate );
-	smoothing_part_r[npart].reset( 0.992126f ); /* curious default, must be a bug in panning formula. */
+	smoothing_part_r[npart].reset_on_next_apply( true ); /* necessary to make CI tests happy, otherwise of no practical use */
     }
 
     smoothing.sample_rate( synth.samplerate );
-    smoothing.reset( 0.464159f ); /* master volume has this odd default for some reason, just go with it. */
+    smoothing.reset_on_next_apply( true ); /* necessary to make CI tests happy, otherwise of no practical use */
     
     //Insertion Effects init
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
