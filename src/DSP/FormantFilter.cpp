@@ -40,7 +40,11 @@ FormantFilter::FormantFilter(const FilterParams *pars, Allocator *alloc, unsigne
         }
 
     for(int i = 0; i < FF_MAX_FORMANTS; ++i)
-        oldformantamp[i] = 1.0f;
+    {
+	formant_amp_smoothing[i].sample_rate(srate);
+	formant_amp_smoothing[i].reset(1.0f);
+    }
+        
     for(int i = 0; i < numformants; ++i) {
         currentformants[i].freq = 1000.0f;
         currentformants[i].amp  = 1.0f;
@@ -138,7 +142,6 @@ void FormantFilter::setpos(float frequency)
                 formantpar[p1][i].q * (1.0f - pos) + formantpar[p2][i].q * pos;
             formant[i]->setfreq_and_q(currentformants[i].freq,
                                       currentformants[i].q * Qfactor);
-            oldformantamp[i] = currentformants[i].amp;
         }
         firsttime = false;
     }
@@ -198,23 +201,27 @@ void FormantFilter::filterout(float *smp)
     memcpy(inbuffer, smp, bufferbytes);
     memset(smp, 0, bufferbytes);
 
+    float formantbuf[buffersize];
+    
     for(int j = 0; j < numformants; ++j) {
+	
         float tmpbuf[buffersize];
-        for(int i = 0; i < buffersize; ++i)
-            tmpbuf[i] = inbuffer[i] * outgain;
-        formant[j]->filterout(tmpbuf);
 
-        if(ABOVE_AMPLITUDE_THRESHOLD(oldformantamp[j], currentformants[j].amp))
-            for(int i = 0; i < buffersize; ++i)
-                smp[i] += tmpbuf[i]
-                          * INTERPOLATE_AMPLITUDE(oldformantamp[j],
-                                                  currentformants[j].amp,
-                                                  i,
-                                                  buffersize);
-        else
-            for(int i = 0; i < buffersize; ++i)
+	for(int i = 0; i < buffersize; ++i)
+            tmpbuf[i] = inbuffer[i] * outgain;
+
+	formant[j]->filterout(tmpbuf);
+	
+	if ( formant_amp_smoothing[j].apply( formantbuf, buffersize, currentformants[j].amp ) )
+	{
+	    for(int i = 0; i < buffersize; ++i)
+		smp[i] += tmpbuf[i] * formantbuf[i];
+	}
+	else
+	{
+	    for(int i = 0; i < buffersize; ++i)
                 smp[i] += tmpbuf[i] * currentformants[j].amp;
-        oldformantamp[j] = currentformants[j].amp;
+	}
     }
 }
 
