@@ -59,8 +59,8 @@ static const rtosc::Ports subports = {
 
 #define rObject FilterParams
 #undef  rChangeCb
-#define rChangeCb obj->changed = true; if ( obj->time) {      \
-    obj->last_update_timestamp = obj->time->time(); }
+#define rChangeCb do { obj->changed = true; if ( obj->time) {      \
+    obj->last_update_timestamp = obj->time->time(); } } while(false)
 const rtosc::Ports FilterParams::ports = {
     rSelf(FilterParams),
     rPaste,
@@ -144,8 +144,8 @@ const rtosc::Ports FilterParams::ports = {
         rEnabledByCondition(is_formant_filter),
         &subports,
         [](const char *msg, RtData &d) {
-            const char *mm = msg; \
-            while(*mm && !isdigit(*mm)) ++mm; \
+            const char *mm = msg;
+            while(*mm && !isdigit(*mm)) ++mm;
             unsigned idx = atoi(mm);
 
             SNIP;
