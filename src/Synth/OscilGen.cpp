@@ -494,10 +494,8 @@ public:
     }
 };
 
-void OscilGen::calculateWaveTableTensors(Tensor1<wavetable_types::float32>& freqs,
+void OscilGen::calculateWaveTableScales(Tensor1<wavetable_types::float32>& freqs,
     Tensor1<wavetable_types::IntOrFloat>& semantics,
-    Tensor3<wavetable_types::float32>& data,
-    int Presonance,
     bool fillWithZeroes)
 {
     // semantics
@@ -522,7 +520,14 @@ void OscilGen::calculateWaveTableTensors(Tensor1<wavetable_types::float32>& freq
     {
         freqs[i] = 2.f * freqs[i-1];
     }
+}
 
+void OscilGen::calculateWaveTableData(const Tensor1<wavetable_types::float32>& freqs,
+    const Tensor1<wavetable_types::IntOrFloat>& semantics,
+    Tensor3<wavetable_types::float32>& data,
+    int Presonance,
+    bool fillWithZeroes)
+{
     // data
     if(fillWithZeroes)
     {
@@ -565,7 +570,8 @@ WaveTable *OscilGen::calculateWaveTable(int Presonance) /*const*/
     Tensor3<WaveTable::float32> data(
             Shape3{num_semantics, num_freqs, oscilsize});
 
-    calculateWaveTableTensors(freqs, semantics, data, Presonance);
+    calculateWaveTableScales(freqs, semantics);
+    calculateWaveTableData(freqs, semantics, data, Presonance);
 
     wt->insert(data, freqs, semantics, true);
     return wt;
@@ -584,7 +590,7 @@ WaveTable *OscilGen::allocWaveTable() const
     return wt;
 }
 
-void OscilGen::recalculateDefaultWaveTable(WaveTable * wt, int Presonance, bool fillWithZeroes) /*const*/
+void OscilGen::recalculateDefaultWaveTable(WaveTable * wt, bool fillWithZeroes) /*const*/
 {
     wt->setMode(WaveTable::WtMode::freqseed_smps);
 
@@ -596,7 +602,16 @@ void OscilGen::recalculateDefaultWaveTable(WaveTable * wt, int Presonance, bool 
     // abuse pointer swap to steal memory from current wavetable
     wt->insert(data, freqs, semantics, true);
 
-    calculateWaveTableTensors(freqs, semantics, data, Presonance, fillWithZeroes);
+    calculateWaveTableScales(freqs, semantics, fillWithZeroes);
+    for(std::size_t i = 0; i < semantics.capacity(); ++i)
+    {
+        for(std::size_t j = 0; j < freqs.capacity(); ++j)
+        {
+            // no FFT/IFFT required, it's a simple sine
+            // (the currently selected base function is still sine)
+            getbasefunction(data[i][j].data());
+        }
+    }
 
     wt->insert(data, freqs, semantics, true);
 }
@@ -1250,6 +1265,12 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
 
     return getFinalOutpos(outpos);
 }
+/*
+// get function if you know that you only want a simple sine
+short int OscilGen::getSine(float *smps)
+{
+    getbasefunction(smps);
+}*/
 
 int OscilGen::calculateOutpos() const
 {

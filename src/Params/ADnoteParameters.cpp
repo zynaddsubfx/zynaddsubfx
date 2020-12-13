@@ -664,8 +664,8 @@ void ADnoteVoiceParam::defaults()
     // compute wavetables without allocating them again
     // in case of non wavetable mode, all buffers will be filled with zeroes to
     // avoid uninitialized reads
-    OscilGn->recalculateDefaultWaveTable(table, Presonance, !waveTables);
-    FmGn->recalculateDefaultWaveTable(tableFm, 0, !waveTables);
+    OscilGn->recalculateDefaultWaveTable(table, !waveTables);
+    FmGn->recalculateDefaultWaveTable(tableFm, !waveTables);
 }
 
 

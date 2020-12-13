@@ -56,8 +56,7 @@ class OscilGen:public Presets
         WaveTable* calculateWaveTable(int Presonance = 0) /*const*/;
         //! initial calculation for pre-allocated wavetable, no allocations
         //! @param fillWithZeroes if true, all buffers will be zero, and no random will be consumed
-        void recalculateDefaultWaveTable(WaveTable*, int Presonance = 0,
-                                         bool fillWithZeroes = false);
+        void recalculateDefaultWaveTable(WaveTable*, bool fillWithZeroes = false);
         //! allocating a small wavetable without any waves
         WaveTable *allocWaveTable() const;
 
@@ -171,11 +170,16 @@ class OscilGen:public Presets
         //(that's why the sine and cosine components should be processed with a separate call)
         void adaptiveharmonicpostprocess(fft_t *f, int size);
 
-        void calculateWaveTableTensors(Tensor1<wavetable_types::float32>& freqs_input,
+        //! calculate the frequencies and semantics
+        void calculateWaveTableScales(Tensor1<wavetable_types::float32>& freqs_input,
             Tensor1<wavetable_types::IntOrFloat>& semantics_input,
-            Tensor3<wavetable_types::float32>& data_input,
-            int Presonance,
             bool fillWithZeroes = false) /*const*/;
+        //! calculate the wave table audio buffers
+        void calculateWaveTableData(const Tensor1<wavetable_types::float32>& freqs,
+            const Tensor1<wavetable_types::IntOrFloat>& semantics,
+            Tensor3<wavetable_types::float32>& data,
+            int Presonance,
+            bool fillWithZeroes = false); // TODO: check params
 
         //Internal Data
         unsigned char oldbasefunc, oldbasepar, oldhmagtype,
