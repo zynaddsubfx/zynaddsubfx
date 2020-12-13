@@ -1452,7 +1452,7 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         d.obj = (void*)obj->parent;
         real_preset_ports.dispatch(chomp(msg), d);
         if(strstr(msg, "paste") && rtosc_argument_string(msg)[0] == 's')
-            d.reply("/damage", "s", rtosc_argument(msg, 0).s);
+            d.broadcast("/damage", "s", rtosc_argument(msg, 0).s);
         }},
     {"io/", 0, &Nio::ports,               [](const char *msg, RtData &d) {
         Nio::ports.dispatch(chomp(msg), d);}},
@@ -1586,7 +1586,7 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
     {"reset_master:", 0, 0,
         rBegin;
         impl.loadMaster(NULL);
-        d.reply("/damage", "s", "/");
+        d.broadcast("/damage", "s", "/");
         rEnd},
     {"load_xiz:is", 0, 0,
         rBegin;
@@ -1626,7 +1626,7 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         rBegin;
         int id = extractInt(msg);
         impl.loadClearPart(id);
-        d.reply("/damage", "s", ("/part"+to_s(id)).c_str());
+        d.broadcast("/damage", "s", ("/part"+to_s(id)).c_str());
         rEnd},
     {"undo:", 0, 0,
         rBegin;

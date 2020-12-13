@@ -187,7 +187,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             strcpy(repath, d.loc);
             char *edit   = strrchr(repath, '/')+1;
             *edit = 0;
-            d.reply("/damage", "s", repath);
+            d.broadcast("/damage", "s", repath);
         }},
     {"use-as-base:", rProp(non-realtime) rDoc("Translates current waveform into base"),
         NULL, [](const char *, rtosc::RtData &d) {
@@ -197,7 +197,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             strcpy(repath, d.loc);
             char *edit   = strrchr(repath, '/')+1;
             *edit = 0;
-            d.reply("/damage", "s", repath);
+            d.broadcast("/damage", "s", repath);
         }}};
 
 //unused:
