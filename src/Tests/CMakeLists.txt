@@ -18,6 +18,7 @@ CXXTEST_ADD_TEST(OscilGenTest OscilGenTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/Oscil
 CXXTEST_ADD_TEST(RandTest RandTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/RandTest.h)
 CXXTEST_ADD_TEST(PADnoteTest PadNoteTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/PadNoteTest.h)
 CXXTEST_ADD_TEST(PluginTest PluginTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/PluginTest.h)
+CXXTEST_ADD_TEST(MsgParseTest MsgParseTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/MsgParseTest.h)
 CXXTEST_ADD_TEST(MiddlewareTest MiddlewareTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/MiddlewareTest.h)
 CXXTEST_ADD_TEST(MessageTest MessageTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/MessageTest.h)
 CXXTEST_ADD_TEST(UnisonTest UnisonTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/UnisonTest.h)
@@ -55,6 +56,7 @@ target_link_libraries(TriggerTest      ${test_lib})
 target_link_libraries(PluginTest     zynaddsubfx_core zynaddsubfx_nio
     zynaddsubfx_gui_bridge
     ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
+target_link_libraries(MsgParseTest ${test_lib})
 target_link_libraries(MiddlewareTest zynaddsubfx_core zynaddsubfx_nio
     zynaddsubfx_gui_bridge
     ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})

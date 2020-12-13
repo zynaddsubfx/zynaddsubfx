@@ -36,6 +36,7 @@
 #include "Util.h"
 #include "CallbackRepeater.h"
 #include "Master.h"
+#include "MsgParsing.h"
 #include "Part.h"
 #include "PresetExtractor.h"
 #include "../Containers/MultiPseudoStack.h"
@@ -239,48 +240,6 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
     for(unsigned i = num; i < PAD_MAX_SAMPLES; ++i) {
         d.chain((path+to_s(i)).c_str(), "ifb",
                 0, 440.0f, sizeof(float*), NULL);
-    }
-}
-
-/*
- * Build/parse messages from/to part/kit/voice IDs
- */
-static std::string buildVoiceParMsg(int part, int kit, int voice)
-{
-    return std::string("/part") + std::to_string(part)
-           + std::string("/kit") + std::to_string(kit)
-           + std::string("/adpars/VoicePar") + std::to_string(voice);
-}
-
-static void idsFromMsg(const char* msg, int* part, int* kit, int* voice)
-{
-    auto must_match = [](const char* msg, const char* match) {
-        assert(!strncmp(msg, match, strlen(match)));
-    };
-
-    const char *end = msg;
-    char *newend;
-
-    if(*end == '/')
-        ++end;
-
-    must_match(end, "part");
-    end += 4;
-    *part = static_cast<int>(strtol(end, &newend, 10));
-    assert(newend != end);
-    end = newend;
-
-    must_match(end, "/kit");
-    end += 4;
-    *kit = static_cast<int>(strtol(end, &newend, 10));
-    assert(newend != end);
-    end = newend;
-
-    if(!strncmp(end, "/adpars/V", 9) && voice)
-    {
-        must_match(end, "/adpars/VoicePar");
-        end += 16;
-        *voice = static_cast<int>(strtol(end, &newend, 10));
     }
 }
 
@@ -2202,7 +2161,8 @@ void MiddleWareImpl::kitEnable(const char *msg)
         return;
 
     int part, kit;
-    idsFromMsg(msg, &part, &kit, nullptr);
+    bool res = idsFromMsg(msg, &part, &kit, nullptr);
+    assert(res);
     kitEnable(part, kit, type);
 }
 
