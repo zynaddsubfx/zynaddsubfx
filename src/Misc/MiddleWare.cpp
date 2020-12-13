@@ -280,6 +280,53 @@ public:
     }
 };
 
+/**
+ * Class responsible for remembering if a special object currently has a
+ * paste operation in progress.
+ */
+class PasteStateHandler
+{
+//#define DBG_PASTE_STATE_HANDLER
+
+    enum class pasteStateType { notInUse, inProgress };
+    pasteStateType pasteState[NUM_MIDI_PARTS][NUM_KIT_ITEMS][NUM_VOICES][2];
+
+public:
+    PasteStateHandler()
+    {
+        for(std::size_t p = 0; p < NUM_MIDI_PARTS; ++p)
+        for(std::size_t k = 0; k < NUM_KIT_ITEMS; ++k)
+        for(std::size_t v = 0; v < NUM_VOICES; ++v)
+        for(std::size_t i = 0; i < 2; ++i)
+            pasteState[p][k][v][i] = pasteStateType::notInUse;
+    }
+
+    void notifyPasteDone(int part, int kit, int voice, bool isFm)
+    {
+#ifdef DBG_PASTE_STATE_HANDLER
+        printf("paste done: %d %d %d %s\n", part, kit, voice, isFm?"Fm":"Oscil");
+#endif
+        pasteState[part][kit][voice][isFm] = pasteStateType::notInUse;
+    }
+
+    void notifyPasteBegin(int part, int kit, int voice, bool isFm)
+    {
+#ifdef DBG_PASTE_STATE_HANDLER
+        printf("paste begin: %d %d %d %s\n", part, kit, voice, isFm?"Fm":"Oscil");
+#endif
+        pasteState[part][kit][voice][isFm] = pasteStateType::inProgress;
+    }
+
+    bool isPasteInProgress(int part, int kit, int voice, bool isFm) const
+    {
+#ifdef DBG_PASTE_STATE_HANDLER
+        printf("paste in progress? %d %d %d %s -> %s\n", part, kit, voice, isFm?"Fm":"Oscil",
+               pasteState[part][kit][voice][isFm] == pasteStateType::inProgress ? "yes":"no");
+#endif
+        return pasteState[part][kit][voice][isFm] == pasteStateType::inProgress;
+    }
+};
+
 /******************************************************************************
  *                      Non-RealTime Object Store                             *
  *                                                                            *
@@ -361,7 +408,24 @@ struct NonRtObjStore
     }
 
     //! try to dispatch a message at the OscilGen ports, which are all non-RT
-    void handleOscilADnote(const char *msg, bool isFm, rtosc::RtData &d, WaveTableRequestHandler& handler) {
+    void handleOscilADnote(const char *msg, bool isFm, rtosc::RtData &d,
+                           WaveTableRequestHandler& handler,
+                           const PasteStateHandler& pasteStateHandler) {
+        if(strstr(msg, "paste")) {
+            // even non-RT objects are always pasted inside the RT thread
+            d.forward();
+            return;
+        }
+        int part, kit, voice;
+        bool res = idsFromMsg(d.message, &part, &kit, &voice);
+        assert(res);
+        if(pasteStateHandler.isPasteInProgress(part, kit, voice, isFm))
+        {
+            printf("Dropped OscilGen Message because paste is in progress:\n");
+            printf("  %s\n",msg);
+            return; // drop message for now - could be queued
+        }
+
         // relative location of this message (i.e. the OscilGen path)
         const string obj_rl(d.message, msg);
         assert(d.message);
@@ -387,12 +451,7 @@ struct NonRtObjStore
                 // nothing to re-compute
             }
             else
-            {
-                int part, kit, voice;
-                bool res = idsFromMsg(d.message, &part, &kit, &voice);
-                assert(res);
                 handler.chainWtParamRequest(part, kit, voice, isFm, d);
-            }
         }
         else {
             // print warning, except in rtosc::walk_ports
@@ -539,6 +598,7 @@ public:
     void recreateMinimalMaster();
 
     WaveTableRequestHandler waveTableRequestHandler;
+    PasteStateHandler pasteStateHandler;
 
     //Check offline vs online mode in plugins
     void heartBeat(Master *m);
@@ -1470,14 +1530,16 @@ static rtosc::Ports nonRtParamPorts = {
             STRINGIFY(NUM_VOICES) "/OscilSmp/", 0, &OscilGen::ports,
         rBegin;
         impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), false, d,
-                                         impl.waveTableRequestHandler);
+                                         impl.waveTableRequestHandler,
+                                         impl.pasteStateHandler);
         rEnd},
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
         "/kit#" STRINGIFY(NUM_KIT_ITEMS)
             "/adpars/VoicePar#" STRINGIFY(NUM_VOICES) "/FMSmp/", 0, &OscilGen::ports,
         rBegin
         impl.obj_store.handleOscilADnote(chomp(chomp(chomp(chomp(chomp(msg))))), true, d,
-                                         impl.waveTableRequestHandler);
+                                         impl.waveTableRequestHandler,
+                                         impl.pasteStateHandler);
         rEnd},
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
         "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/padpars/", 0, &PADnoteParameters::non_realtime_ports,
@@ -1592,6 +1654,14 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
          std::string url = rtosc_argument(msg, 0).s;
          void* obj = impl->obj_store.get(url);
 
+         {
+             int part, kit, vc;
+             bool isFm;
+             if(idsFromMsg(url.c_str(), &part, &kit, &vc, &isFm)) {
+                 impl->pasteStateHandler.notifyPasteBegin(part, kit, vc, isFm);
+             }
+         }
+
          if(args == "s")
              presetPaste(mw, url, "", obj);
          else if(args == "ss")
@@ -1605,16 +1675,11 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
                          rtosc_argument(msg, 2).i, rtosc_argument(msg, 1).s, obj);
          else
              assert(false && "bad arguments");
-
-         if(rtosc_argument_string(msg)[0] == 's')
-             d.reply("/damage", "s", rtosc_argument(msg, 0).s);
         }},
     {"presets/", 0,  &real_preset_ports,          [](const char *msg, RtData &d) {
         MiddleWareImpl *obj = (MiddleWareImpl*)d.obj;
         d.obj = (void*)obj->parent;
         real_preset_ports.dispatch(chomp(msg), d);
-        if(strstr(msg, "paste") && rtosc_argument_string(msg)[0] == 's')
-            d.broadcast("/damage", "s", rtosc_argument(msg, 0).s);
         }},
     {"io/", 0, &Nio::ports,               [](const char *msg, RtData &d) {
         Nio::ports.dispatch(chomp(msg), d);}},
@@ -1965,8 +2030,24 @@ static rtosc::Ports middlewareReplyPorts = {
         d.chain((voicePath + "set-wavetable").c_str(), isFm ? "bT" : "bF", sizeof(WaveTable*), &wt);
 
         impl.waveTableRequestHandler.receivedAdPars(part, kit, voice, isFm);
+        rEnd},
+    {"rt_paste_done:s", 0, 0,
+        rBegin;
+        std::string url = rtosc_argument(msg, 0).s;
+        int part, kit, vc;
+        bool isFm;
+        std::size_t res = idsFromMsg(url.c_str(), &part, &kit, &vc, &isFm);
+        if(res)
+            impl.pasteStateHandler.notifyPasteDone(part, kit, vc, isFm);
+        printf("rPaste done.\n");
+        // if URL ends on "/paste[^/]*", cut before the "/paste"
+        string::size_type last_slash = url.rfind("/paste");
+        assert(last_slash != string::npos);
+        if(!url.compare(last_slash, 6, "/paste"))
+            url.resize(last_slash+1);
+        d.broadcast("/damage", "s", url.c_str());
+        rEnd
     }
-}
 };
 #undef rBegin
 #undef rEnd

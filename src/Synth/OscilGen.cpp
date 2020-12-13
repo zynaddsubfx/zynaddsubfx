@@ -35,7 +35,7 @@ namespace zyn {
 #define rObject OscilGen
 const rtosc::Ports OscilGen::ports = {
     rSelf(OscilGen),
-    rPaste,
+    rPasteAndReply,
     rPresetType,
     //TODO ensure min/max
     rOption(Phmagtype, rShort("scale"),
