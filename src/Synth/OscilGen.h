@@ -56,7 +56,7 @@ class OscilGen:public Presets
         WaveTable* calculateWaveTable(int Presonance = 0) /*const*/;
         //! initial calculation for pre-allocated wavetable, no allocations
         //! @param fillWithZeroes if true, all buffers will be zero, and no random will be consumed
-        void recalculateDefaultWaveTable(WaveTable*, bool fillWithZeroes = false);
+        void recalculateDefaultWaveTable(WaveTable*, bool fillWithZeroes = false) const;
         //! allocating a small wavetable without any waves
         WaveTable *allocWaveTable() const;
 
@@ -173,7 +173,7 @@ class OscilGen:public Presets
         //! calculate the frequencies and semantics
         void calculateWaveTableScales(Tensor1<wavetable_types::float32>& freqs_input,
             Tensor1<wavetable_types::IntOrFloat>& semantics_input,
-            bool fillWithZeroes = false) /*const*/;
+            bool fillWithZeroes = false) const;
         //! calculate the wave table audio buffers
         void calculateWaveTableData(const Tensor1<wavetable_types::float32>& freqs,
             const Tensor1<wavetable_types::IntOrFloat>& semantics,
