@@ -1574,10 +1574,10 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
            !strcmp(portname, "smooth") || !strcmp(portname, "zero"))
         {
             // => this is a modifying message
-            int part, kit, voice;
-            bool res = idsFromMsg(msg, &part, &kit, &voice);
+            int part, kit;
+            bool res = idsFromMsg(msg, &part, &kit);
             assert(res);
-            for(voice = 0; voice < NUM_VOICES; ++voice)
+            for(int voice = 0; voice < NUM_VOICES; ++voice)
             {
                 impl.waveTableRequestHandler.chainWtParamRequest(part, kit, voice, false, d);
             }
