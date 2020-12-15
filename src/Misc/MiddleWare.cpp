@@ -1096,7 +1096,7 @@ static int extractInt(const char *msg)
 
 static const char *chomp(const char *msg)
 {
-    while(*msg && *msg!='/') ++msg; \
+    while(*msg && *msg!='/') ++msg;
     msg = *msg ? msg+1 : msg;
     return msg;
 };
