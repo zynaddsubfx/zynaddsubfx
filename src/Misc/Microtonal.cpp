@@ -637,8 +637,10 @@ int Microtonal::loadscl(SclInfo &scl, const char *filename)
         if(tmp[i] < 32)
             tmp[i] = 0;
 
-    snprintf(scl.Pname,    MICROTONAL_MAX_NAME_LEN, "%s", tmp);
-    snprintf(scl.Pcomment, MICROTONAL_MAX_NAME_LEN, "%s", tmp);
+    strncpy(scl.Pname,    tmp, MICROTONAL_MAX_NAME_LEN);
+    strncpy(scl.Pcomment, tmp, MICROTONAL_MAX_NAME_LEN);
+    scl.Pname[MICROTONAL_MAX_NAME_LEN-1] = 0;
+    scl.Pcomment[MICROTONAL_MAX_NAME_LEN-1] = 0;
 
     //loads the number of the notes
     if(loadline(file, &tmp[0]) != 0)
