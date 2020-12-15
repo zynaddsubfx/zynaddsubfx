@@ -93,16 +93,6 @@ Controller::Controller(const SYNTH_T &synth_, const AbsTime *time_)
     resetall();
 }
 
-Controller &Controller::operator=(const Controller &c)
-{
-    //just pretend that undefined behavior doesn't exist...
-    memcpy(this, &c, sizeof(Controller));
-    return *this;
-}
-
-Controller::~Controller()
-{}
-
 void Controller::defaults()
 {
     pitchwheel.bendrange = 200; //2 halftones
