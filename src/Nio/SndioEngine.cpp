@@ -212,11 +212,10 @@ void *SndioEngine::processAudio()
 
     while(audio.handle) {
         audio.buffer = interleave(getNext());
-	handle = audio.handle;	
-	len = sio_write(handle, audio.buffer, audio.buffer_size);
-	if(len < 0) {
+        handle = audio.handle;
+        len = sio_write(handle, audio.buffer, audio.buffer_size);
+        if(len == 0) // write error according to sndio examples
             cerr << "sio_write error" << endl;
-	}
     }
     return NULL;
 }
@@ -247,28 +246,32 @@ void *SndioEngine::processMidi()
         if(midi.exiting)
             break;
 
-	nfds = mio_pollfd(midi.handle, pfd, POLLIN);
+        nfds = mio_pollfd(midi.handle, pfd, POLLIN);
 
-	rc = poll(pfd, nfds, 1000);
-	if(rc < 0 && rc != EAGAIN && rc != EINTR) {
+        rc = poll(pfd, nfds, 1000);
+        if(rc < 0 && rc != EAGAIN && rc != EINTR) {
             cerr << "poll error" << endl;
-	    break;
-	}
+            break;
+        }
 
-	revents = mio_revents(midi.handle, pfd);
-	if(revents & POLLHUP) {
+        revents = mio_revents(midi.handle, pfd);
+        if(revents & POLLHUP) {
             cerr << "mio_revents catches POLLHUP" << endl;
-	    continue;
-	}
-	if(!(revents & POLLIN))
-	    continue;
+            continue;
+        }
+        if(!(revents & POLLIN))
+            continue;
 
-	memset(buf, 0, sizeof(buf));
-	len = mio_read(midi.handle, buf, sizeof(buf));
-	if(len < 0 || len > sizeof(buf)) {
+        memset(buf, 0, sizeof(buf));
+        len = mio_read(midi.handle, buf, sizeof(buf));
+        if(len == 0) {
+            // since mio_read is non-blocking, this must indicate an error
+            // so stop processing all MIDI
+            break;
+        } else if(len > sizeof(buf)) {
             fprintf(stderr, "mio_read invalid len = %zu\n", len);
-	    continue;
-	}
+            continue;
+        }
 
         midiProcess(buf[0], buf[1], buf[2]);
     }
@@ -315,9 +318,9 @@ void SndioEngine::showAudioInfo(struct sio_hdl *handle)
     fprintf(stderr, "sndio audio parameters:\n");
     fprintf(stderr,
         "  bits = %u bps = %u sig = %u le = %u msb = %u rchan = %u pchan = %u\n"
-	"  rate = %u appbufsz = %u bufsz = %u round = %u xrun = %u\n",
+        "  rate = %u appbufsz = %u bufsz = %u round = %u xrun = %u\n",
         par.bits, par.bps, par.sig, par.le, par.msb, par.rchan, par.pchan,
-	par.rate, par.appbufsz, par.bufsz, par.round, par.xrun);
+        par.rate, par.appbufsz, par.bufsz, par.round, par.xrun);
 
     rc = sio_getcap(handle, &cap);
     if(rc != 1) {
@@ -331,7 +334,7 @@ void SndioEngine::showAudioInfo(struct sio_hdl *handle)
         fprintf(stderr,
             "    [%d] bits = %u bps = %u sig = %u le = %u msb = %u\n",
             i, cap.enc[i].bits, cap.enc[i].bps, cap.enc[i].sig,
-	    cap.enc[i].le, cap.enc[i].msb);
+            cap.enc[i].le, cap.enc[i].msb);
 
     fprintf(stderr, "  supported channel numbers of recording:\n");
     for(i = 0; i < SIO_NCHAN; ++i)
@@ -349,8 +352,8 @@ void SndioEngine::showAudioInfo(struct sio_hdl *handle)
     for(i = 0; i < cap.nconf; ++i)
         fprintf(stderr,
             "    [%d] enc = %x rchan = %x pchan = %x rate = %x\n",
-	    i, cap.confs[i].enc, cap.confs[i].rchan, cap.confs[i].pchan, 
-	    cap.confs[i].rate);
+            i, cap.confs[i].enc, cap.confs[i].rchan, cap.confs[i].pchan,
+            cap.confs[i].rate);
 }
 
 }
