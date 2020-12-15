@@ -353,7 +353,9 @@ void Part::cloneTraits(Part &p) const
     CLONE(Plegatomode);
     CLONE(Pkeylimit);
 
-    CLONE(ctl);
+    // Controller has a refence, so it can not be re-assigned
+    // So, destroy and reconstruct it.
+    p.ctl.~Controller(); new (&p.ctl) Controller(this->ctl);
 }
 
 void Part::defaults()

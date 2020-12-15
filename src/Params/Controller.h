@@ -25,8 +25,7 @@ class Controller
 {
     public:
         Controller(const SYNTH_T &synth, const AbsTime *time = nullptr);
-        Controller&operator=(const Controller &c);
-        ~Controller();
+
         void resetall();
 
         void add2XML(XMLwrapper& xml);
