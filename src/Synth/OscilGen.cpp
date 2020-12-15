@@ -200,9 +200,6 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             d.broadcast("/damage", "s", repath);
         }}};
 
-//unused:
-//#define rForwardCb [](const char *msg, rtosc::RtData &d) {\
-//    printf("forwarding...\n"); d.forward();}
 const rtosc::Ports OscilGen::realtime_ports{
     rSelf(OscilGen),
     rPresetType,
