@@ -1,3 +1,4 @@
+add_compile_options(-Wno-parentheses) # disable warnings from Lv2 headers
 
 add_executable(lv2-ttl-generator ${CMAKE_SOURCE_DIR}/DPF/utils/lv2-ttl-generator/lv2_ttl_generator.c)
 
