@@ -74,7 +74,7 @@ class AnalogFilter:public Filter
 
         int order; //the order of the filter (number of poles)
 
-    Value_Smoothing_Filter freq_smoothing; /* for smoothing freq modulations to avoid zipper effect */
+        Value_Smoothing_Filter freq_smoothing; /* for smoothing freq modulations to avoid zipper effect */
 };
 
 }

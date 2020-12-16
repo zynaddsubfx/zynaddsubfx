@@ -20,15 +20,18 @@
 #include "Value_Smoothing_Filter.h"
 #include <math.h>
 
+/* compensate for missing nonlib macro */
+#define assume_aligned(x) (x)
+
 void
 Value_Smoothing_Filter::sample_rate ( nframes_t n )
 {
     const float FS = n;
     const float T = 0.05f;
-	    
+
     w = _cutoff / (FS * T);
 }
-    
+
 bool
 Value_Smoothing_Filter::apply( sample_t * __restrict__ dst, nframes_t nframes, float gt )
 {
@@ -41,32 +44,31 @@ Value_Smoothing_Filter::apply( sample_t * __restrict__ dst, nframes_t nframes, f
 
     if ( target_reached(gt) )
 	return false;
-	    
-    /* sample_t * dst_ = (sample_t*) assume_aligned(dst); */
-    sample_t * dst_ = (sample_t*)(dst);
-	    
+
+    sample_t * dst_ = (sample_t*) assume_aligned(dst);
+
     const float a = 0.07f;
     const float b = 1 + a;
-	    
+
     const float gm = b * gt;
-	    
+
     float g1 = this->g1;
     float g2 = this->g2;
-	    
+
     for (nframes_t i = 0; i < nframes; i++)
     {
 	g1 += w * (gm - g1 - a * g2);
 	g2 += w * (g1 - g2);
 	dst_[i] = g2;
     }
-	    
+
     g2 += 1e-10f;		/* denormal protection */
-	    
+
     if ( fabsf( gt - g2 ) < 0.0001f )
 	g2 = gt;
-	    
+
     this->g1 = g1;
     this->g2 = g2;
-	    
+
     return true;
 }

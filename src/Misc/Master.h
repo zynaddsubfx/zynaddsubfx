@@ -252,12 +252,10 @@ class Master
                            class DataObj& d, int msg_id = -1,
                            Master* master_from_mw = nullptr);
 
-    Value_Smoothing_Filter smoothing;
+        Value_Smoothing_Filter smoothing;
 
-    Value_Smoothing_Filter smoothing_part_l[NUM_MIDI_PARTS];
-    Value_Smoothing_Filter smoothing_part_r[NUM_MIDI_PARTS];
-    
-    
+        Value_Smoothing_Filter smoothing_part_l[NUM_MIDI_PARTS];
+        Value_Smoothing_Filter smoothing_part_r[NUM_MIDI_PARTS];
 };
 
 class master_dispatcher_t : public rtosc::savefile_dispatcher_t

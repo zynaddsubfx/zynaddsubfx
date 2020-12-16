@@ -26,11 +26,11 @@ typedef float sample_t;
 class Value_Smoothing_Filter
 {
     float w, g1, g2;
-    
+
     float _cutoff;
 
     bool _reset_on_next_apply;
-    
+
 public:
 
     Value_Smoothing_Filter ( )
@@ -40,9 +40,8 @@ public:
 	    _reset_on_next_apply = false;
 	}
 
-
     void reset_on_next_apply ( bool v ) { _reset_on_next_apply = v; }
-    
+
     void cutoff ( float v ) { _cutoff = v; }
 
     void reset ( float v ) { g2 = g1 = v; }
@@ -50,7 +49,7 @@ public:
     inline bool target_reached ( float gt ) const { return gt == g2; }
 
     void sample_rate ( nframes_t n );
-	
+
     bool apply( sample_t * __restrict__ dst, nframes_t nframes, float gt );
 };
 

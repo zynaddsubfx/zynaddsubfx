@@ -777,7 +777,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
         fakepeakpart[npart]  = 0;
     }
 
-    
+
     ScratchString ss;
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
     {
@@ -792,7 +792,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
 
     smoothing.sample_rate( synth.samplerate );
     smoothing.reset_on_next_apply( true ); /* necessary to make CI tests happy, otherwise of no practical use */
-    
+
     //Insertion Effects init
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
         insefx[nefx] = new EffectMgr(*memory, synth, 1, &time);
@@ -1269,7 +1269,7 @@ bool Master::AudioOut(float *outr, float *outl)
             continue;
 
         Stereo<float> newvol(part[npart]->volume);
-	
+
         float pan = part[npart]->panning;
         if(pan < 0.5f)
             newvol.l *= pan * 2.0f;
@@ -1291,7 +1291,7 @@ bool Master::AudioOut(float *outr, float *outl)
 	    for ( int i = 0; i < synth.buffersize; ++i )
 		part[npart]->partoutl[i] *= newvol.l;
 	}
-	
+
 	if ( smoothing_part_r[npart].apply( gainbuf, synth.buffersize, newvol.r ) )
 	{
 	    for ( int i = 0; i < synth.buffersize; ++i )
@@ -1302,8 +1302,8 @@ bool Master::AudioOut(float *outr, float *outl)
 	    for ( int i = 0; i < synth.buffersize; ++i )
 		part[npart]->partoutr[i] *= newvol.r;
 	}
-    }	
-	
+    }
+
     //System effects
     for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx) {
         if(sysefx[nefx]->geteffect() == 0)
