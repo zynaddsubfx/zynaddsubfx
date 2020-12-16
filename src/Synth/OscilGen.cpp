@@ -269,7 +269,8 @@ const rtosc::MergePorts OscilGen::ports{
 //operations on FFTfreqs
 inline void clearAll(fft_t *freqs, int oscilsize)
 {
-    memset(freqs, 0, oscilsize / 2 * sizeof(fft_t));
+    fft_t zero = 0;
+    std::fill_n(freqs, oscilsize / 2, zero);
 }
 
 inline void clearDC(fft_t *freqs)
@@ -1185,8 +1186,8 @@ void OscilGen::getspectrum(int n, float *spc, int what)
     if(what == 0) {
         for(int i = 0; i < n; ++i)
             outoscilFFTfreqs[i] = fft_t(spc[i], spc[i]);
-        memset(outoscilFFTfreqs + n, 0,
-               (synth.oscilsize / 2 - n) * sizeof(fft_t));
+        fft_t zero = 0;
+        std::fill_n(outoscilFFTfreqs + n, synth.oscilsize / 2 - n, zero);
         adaptiveharmonic(outoscilFFTfreqs, 0.0f);
         adaptiveharmonicpostprocess(outoscilFFTfreqs, n - 1);
         for(int i = 0; i < n; ++i)
