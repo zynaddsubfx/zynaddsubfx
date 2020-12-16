@@ -44,7 +44,7 @@ FormantFilter::FormantFilter(const FilterParams *pars, Allocator *alloc, unsigne
 	formant_amp_smoothing[i].sample_rate(srate);
 	formant_amp_smoothing[i].reset(1.0f);
     }
-        
+
     for(int i = 0; i < numformants; ++i) {
         currentformants[i].freq = 1000.0f;
         currentformants[i].amp  = 1.0f;
@@ -202,16 +202,16 @@ void FormantFilter::filterout(float *smp)
     memset(smp, 0, bufferbytes);
 
     float formantbuf[buffersize];
-    
+
     for(int j = 0; j < numformants; ++j) {
-	
+
         float tmpbuf[buffersize];
 
 	for(int i = 0; i < buffersize; ++i)
             tmpbuf[i] = inbuffer[i] * outgain;
 
 	formant[j]->filterout(tmpbuf);
-	
+
 	if ( formant_amp_smoothing[j].apply( formantbuf, buffersize, currentformants[j].amp ) )
 	{
 	    for(int i = 0; i < buffersize; ++i)

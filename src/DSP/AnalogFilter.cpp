@@ -376,7 +376,7 @@ void AnalogFilter::singlefilterout_freqbuf(float *smp, fstage &hist,
 	/* recompute coeffs for each 8 samples */
 	freq = freqbuf[i];
 	computefiltercoefs();
-	
+
 	if(order == 1) {  //First order filter
 	    for ( int j = 0; j < 8; j++ )
 	    {
@@ -390,7 +390,7 @@ void AnalogFilter::singlefilterout_freqbuf(float *smp, fstage &hist,
 
 	    const float coeff_[5] = {coeff.c[0], coeff.c[1], coeff.c[2],  coeff.d[1], coeff.d[2]};
 	    float work[4]  = {hist.x1, hist.x2, hist.y1, hist.y2};
-	    
+
 	    AnalogBiquadFilterA(coeff_, smp[i + 0], work);
 	    AnalogBiquadFilterB(coeff_, smp[i + 1], work);
 	    AnalogBiquadFilterA(coeff_, smp[i + 2], work);
@@ -399,7 +399,7 @@ void AnalogFilter::singlefilterout_freqbuf(float *smp, fstage &hist,
 	    AnalogBiquadFilterB(coeff_, smp[i + 5], work);
 	    AnalogBiquadFilterA(coeff_, smp[i + 6], work);
 	    AnalogBiquadFilterB(coeff_, smp[i + 7], work);
-	    
+
 	    hist.x1 = work[0];
 	    hist.x2 = work[1];
 	    hist.y1 = work[2];
@@ -413,9 +413,8 @@ void AnalogFilter::singlefilterout_freqbuf(float *smp, fstage &hist,
 
 void AnalogFilter::filterout(float *smp)
 {
-
     float freqbuf[buffersize];
-    
+
     if ( freq_smoothing.apply( freqbuf, buffersize, freq ) )
     {
 	/* in transition, need to do fine grained interpolation */
@@ -428,7 +427,7 @@ void AnalogFilter::filterout(float *smp)
 	for(int i = 0; i < stages + 1; ++i)
 	    singlefilterout(smp, history[i], coeff);
     }
-    
+
     for(int i = 0; i < buffersize; ++i)
         smp[i] *= outgain;
 }

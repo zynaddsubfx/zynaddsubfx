@@ -54,8 +54,8 @@ class FormantFilter:public Filter
         float Qfactor, formantslowness, oldQfactor;
         float vowelclearness, sequencestretch;
         Allocator &memory;
-    
-    Value_Smoothing_Filter formant_amp_smoothing[FF_MAX_FORMANTS];
+
+        Value_Smoothing_Filter formant_amp_smoothing[FF_MAX_FORMANTS];
 };
 
 }
