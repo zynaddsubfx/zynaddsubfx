@@ -16,6 +16,7 @@
 
 #include "../globals.h"
 #include "Filter.h"
+#include "Value_Smoothing_Filter.h"
 
 namespace zyn {
 
@@ -47,14 +48,14 @@ class FormantFilter:public Filter
             unsigned char nvowel;
         } sequence [FF_MAX_SEQUENCE];
 
-        float oldformantamp[FF_MAX_FORMANTS];
-
         int   sequencesize, numformants;
         bool  firsttime;
         float oldinput, slowinput;
         float Qfactor, formantslowness, oldQfactor;
         float vowelclearness, sequencestretch;
         Allocator &memory;
+
+        Value_Smoothing_Filter formant_amp_smoothing[FF_MAX_FORMANTS];
 };
 
 }

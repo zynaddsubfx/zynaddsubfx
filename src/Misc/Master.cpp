@@ -777,11 +777,21 @@ Master::Master(const SYNTH_T &synth_, Config* config)
         fakepeakpart[npart]  = 0;
     }
 
+
     ScratchString ss;
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    {
         part[npart] = new Part(*memory, synth, time, config->cfg.GzipCompression,
                                config->cfg.Interpolation, &microtonal, fft, &watcher,
                                (ss+"/part"+npart+"/").c_str);
+	smoothing_part_l[npart].sample_rate( synth.samplerate );
+	smoothing_part_l[npart].reset_on_next_apply( true ); /* necessary to make CI tests happy, otherwise of no practical use */
+	smoothing_part_r[npart].sample_rate( synth.samplerate );
+	smoothing_part_r[npart].reset_on_next_apply( true ); /* necessary to make CI tests happy, otherwise of no practical use */
+    }
+
+    smoothing.sample_rate( synth.samplerate );
+    smoothing.reset_on_next_apply( true ); /* necessary to make CI tests happy, otherwise of no practical use */
 
     //Insertion Effects init
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
@@ -891,7 +901,6 @@ void Master::defaults()
     union {float f; uint32_t i;} convert;
     convert.i = 0xC0D55556;
     Volume = convert.f;
-    oldVolume = Volume;
     setPkeyshift(64);
 
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
@@ -1252,14 +1261,14 @@ bool Master::AudioOut(float *outr, float *outl)
         }
 
 
+    float gainbuf[synth.buffersize];
+
     //Apply the part volumes and pannings (after insertion effects)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
         if(!part[npart]->Penabled)
             continue;
 
-        Stereo<float> newvol(part[npart]->volume),
-        oldvol(part[npart]->oldvolumel,
-               part[npart]->oldvolumer);
+        Stereo<float> newvol(part[npart]->volume);
 
         float pan = part[npart]->panning;
         if(pan < 0.5f)
@@ -1269,28 +1278,31 @@ bool Master::AudioOut(float *outr, float *outl)
         //if(npart==0)
         //printf("[%d]vol = %f->%f\n", npart, oldvol.l, newvol.l);
 
-        //the volume or the panning has changed and needs interpolation
-        if(ABOVE_AMPLITUDE_THRESHOLD(oldvol.l, newvol.l)
-           || ABOVE_AMPLITUDE_THRESHOLD(oldvol.r, newvol.r)) {
-            for(int i = 0; i < synth.buffersize; ++i) {
-                Stereo<float> vol(INTERPOLATE_AMPLITUDE(oldvol.l, newvol.l,
-                                                        i, synth.buffersize),
-                                  INTERPOLATE_AMPLITUDE(oldvol.r, newvol.r,
-                                                        i, synth.buffersize));
-                part[npart]->partoutl[i] *= vol.l;
-                part[npart]->partoutr[i] *= vol.r;
-            }
-            part[npart]->oldvolumel = newvol.l;
-            part[npart]->oldvolumer = newvol.r;
-        }
-        else {
-            for(int i = 0; i < synth.buffersize; ++i) { //the volume did not changed
-                part[npart]->partoutl[i] *= newvol.l;
-                part[npart]->partoutr[i] *= newvol.r;
-            }
-        }
-    }
 
+
+	/* This is where the part volume (and pan) smoothing and application happens */
+	if ( smoothing_part_l[npart].apply( gainbuf, synth.buffersize, newvol.l ) )
+	{
+	    for ( int i = 0; i < synth.buffersize; ++i )
+		part[npart]->partoutl[i] *= gainbuf[i];
+	}
+	else
+	{
+	    for ( int i = 0; i < synth.buffersize; ++i )
+		part[npart]->partoutl[i] *= newvol.l;
+	}
+
+	if ( smoothing_part_r[npart].apply( gainbuf, synth.buffersize, newvol.r ) )
+	{
+	    for ( int i = 0; i < synth.buffersize; ++i )
+		part[npart]->partoutr[i] *= gainbuf[i];
+	}
+	else
+	{
+	    for ( int i = 0; i < synth.buffersize; ++i )
+		part[npart]->partoutr[i] *= newvol.r;
+	}
+    }
 
     //System effects
     for(int nefx = 0; nefx < NUM_SYS_EFX; ++nefx) {
@@ -1354,27 +1366,26 @@ bool Master::AudioOut(float *outr, float *outl)
         if(Pinsparts[nefx] == -2)
             insefx[nefx]->out(outl, outr);
 
+    float vol = dB2rap(Volume);
 
     //Master Volume
-    float oldvol = dB2rap(oldVolume);
-    float newvol = dB2rap(Volume);
-    if(ABOVE_AMPLITUDE_THRESHOLD(oldvol, newvol)) {
-        for(int i = 0; i < synth.buffersize; ++i) {
-            float vol = INTERPOLATE_AMPLITUDE(oldvol, newvol,
-                                              i, synth.buffersize);
-            outl[i] *= vol;
-            outr[i] *= vol;
-        }
+    /* this is where the master volume smoothing and application happens */
+    if ( smoothing.apply( gainbuf, synth.buffersize, vol ) )
+    {
+	for ( int i = 0; i < synth.buffersize; ++i )
+	{
+	    outl[i] *= gainbuf[i];
+	    outr[i] *= gainbuf[i];
+	}
     }
-    else {
-        // No interpolation
-        float vol = dB2rap(Volume);
-        for(int i = 0; i < synth.buffersize; ++i) {
-            outl[i] *= vol;
-            outr[i] *= vol;
-        }
+    else
+    {
+	for ( int i = 0; i < synth.buffersize; ++i )
+	{
+	    outl[i] *= vol;
+	    outr[i] *= vol;
+	}
     }
-    oldVolume = Volume;
 
     vuUpdate(outl, outr);
 
@@ -1666,7 +1677,6 @@ void Master::getfromXML(XMLwrapper& xml)
         Volume = xml.getparreal("volume", Volume);
     } else {
         Volume  = volume127ToFloat(xml.getpar127("volume", 0));
-        oldVolume = Volume;
     }
     setPkeyshift(xml.getpar127("key_shift", Pkeyshift));
     ctl.NRPN.receive = xml.getparbool("nrpn_receive", ctl.NRPN.receive);

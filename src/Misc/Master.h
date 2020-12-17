@@ -26,6 +26,7 @@
 
 #include "../Params/Controller.h"
 #include "../Synth/WatchPoint.h"
+#include "../DSP/Value_Smoothing_Filter.h"
 
 namespace zyn {
 
@@ -186,7 +187,6 @@ class Master
         class FFTwrapper * fft;
 
         static const rtosc::Ports &ports;
-        float oldVolume;
         float  Volume;
 
         //Statistics on output levels
@@ -251,6 +251,11 @@ class Master
                            bool offline, bool nio,
                            class DataObj& d, int msg_id = -1,
                            Master* master_from_mw = nullptr);
+
+        Value_Smoothing_Filter smoothing;
+
+        Value_Smoothing_Filter smoothing_part_l[NUM_MIDI_PARTS];
+        Value_Smoothing_Filter smoothing_part_r[NUM_MIDI_PARTS];
 };
 
 class master_dispatcher_t : public rtosc::savefile_dispatcher_t
