@@ -283,6 +283,7 @@ int EnvelopeFreeEdit::handle(int event)
               if (pair!=NULL) pair->redraw();
               return 1;
           }
+          // fall through
       case FL_DRAG:
           if (currentpoint>=0){
               old_mod_state = mod_state;
