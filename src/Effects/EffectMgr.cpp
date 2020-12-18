@@ -236,7 +236,7 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
                 efx = memory.alloc<EQ>(pars);
                 break;
             case 8:
-                efx = memory.alloc<DynamicFilter>(pars, time);
+                efx = memory.alloc<DynamicFilter>(pars);
                 break;
             //put more effect here
             default:

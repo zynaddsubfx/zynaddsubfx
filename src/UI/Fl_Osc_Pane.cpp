@@ -48,7 +48,7 @@ void Fl_Osc_Window::init(Fl_Osc_Interface *osc_, std::string loc_)
         this->label(title_new.c_str());
     };
 #else
-    title_ext->callback = [this](string next) {};
+    title_ext->callback = [](string ) {};
 #endif
     title_orig = label();
 

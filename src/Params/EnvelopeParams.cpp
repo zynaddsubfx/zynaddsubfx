@@ -28,7 +28,7 @@ namespace zyn {
 
 #define rObject EnvelopeParams
 #define rBegin [](const char *msg, RtData &d) { \
-    EnvelopeParams *env = (rObject*) d.obj
+    (void)* msg; EnvelopeParams *env = (rObject*) d.obj
 #define rEnd }
 
 #define dT127(var) limit( (int)roundf(log2f(var*100.0f + 1.0f) * 127.0f/12.0f), 0, 127 )
