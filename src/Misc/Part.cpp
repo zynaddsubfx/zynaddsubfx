@@ -154,7 +154,7 @@ static const Ports partPorts = {
         }
     },
     {"clear:", rProp(internal) rDoc("Reset Part To Defaults"), 0,
-        [](const char *, RtData &d)
+        [](const char *, RtData &)
         {
             //XXX todo forward this event for middleware to handle
             //Part *p = (Part*)d.obj;

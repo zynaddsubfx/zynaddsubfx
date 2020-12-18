@@ -370,7 +370,7 @@ static const Ports automate_ports = {
 
 #undef  rBegin
 #undef  rEnd
-#define rBegin [](const char *msg, RtData &d) { Master *m = (Master*)d.obj
+#define rBegin [](const char *msg, RtData &d) { (void)msg; Master *m = (Master*)d.obj
 #define rEnd }
 
 static const Ports watchPorts = {

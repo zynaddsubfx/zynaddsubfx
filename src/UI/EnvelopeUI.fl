@@ -60,7 +60,7 @@ class PointButton {open : {public Fl_Button, public Fl_Osc_Widget}}
 {
   Function {PointButton(int x,int y, int w, int h, const char *label=0):Fl_Button(x,y,w,h,label),Fl_Osc_Widget(this)} {open
   } {
-    code {} {}
+    code {(void)label;} {}
   }
   Function {rebase(std::string new_base)} {open
   } {
@@ -74,7 +74,8 @@ class PointButton {open : {public Fl_Button, public Fl_Osc_Widget}}
 class EnvelopeUI {open : {public Fl_Osc_Group,PresetsUI_}
 } {
   Function {EnvelopeUI(int x,int y, int w, int h, const char *label=0):Fl_Osc_Group(x,y,w,h)} {} {
-    code {freemodeeditwindow=NULL;
+    code {(void)label;
+freemodeeditwindow=NULL;
 envADSR=NULL;
 envASR=NULL;
 envADSRfilter=NULL;

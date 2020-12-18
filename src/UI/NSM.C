@@ -73,6 +73,7 @@ NSM_Client::command_open(const char *name,
                          const char *client_id,
                          char **out_msg)
 {
+    (void) out_msg;
     zyn::Nio::stop();
 
     if(instance_name)
@@ -171,5 +172,7 @@ NSM_Client::command_active(bool active)
         ui->sm_indicator1->tooltip(NULL);
         ui->sm_indicator2->tooltip(NULL);
     }
+#else
+    (void)active;
 #endif
 }

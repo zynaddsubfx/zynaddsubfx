@@ -80,6 +80,7 @@ protected:
     */
     void stateChanged(const char* key, const char* value) override
     {
+        (void)key; (void)value;
     }
 
 private:
