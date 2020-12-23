@@ -26,7 +26,7 @@ namespace zyn {
 
 const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
 {
-    std::size_t num_freqs = freqs.capacity(), i;
+    std::size_t num_freqs = freqs.size(), i;
     float bestFreqDist = 9999999;
     std::size_t bestI = 0;
     for(i = 0; i < num_freqs; ++i) // TODO: std::lower_bound?
@@ -45,29 +45,17 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
         }
     }
     assert(bestI < num_freqs);
-    const Tensor1<WaveTable::float32>& res = data[reader][bestI];
-    ++reader;
-    reader = reader % semantics.capacity();
+    const Tensor1<WaveTable::float32>& res = data[data.read_pos()][bestI];
+    data.inc_read_pos();
     return res;
-}
-
-void WaveTable::insert(Tensor3<float32> &data,
-                       Tensor1<float32> &freqs,
-                       Tensor1<IntOrFloat> &semantics,
-                       bool invalidate)
-{
-    pointer_swap(this->data, data);
-    pointer_swap(this->freqs, freqs);
-    pointer_swap(this->semantics, semantics);
-    (void)invalidate; // future enhancement
 }
 
 WaveTable::WaveTable(std::size_t buffersize) :
     semantics(Shape1{num_semantics}),
     freqs(Shape1{num_freqs}),
-    data(Shape3{num_semantics, num_freqs, buffersize}),
-    reader(0)
+    data(Shape3{num_semantics, num_freqs, buffersize})
 {
+    setMode(WtMode::freqseed_smps);
 }
 
 }

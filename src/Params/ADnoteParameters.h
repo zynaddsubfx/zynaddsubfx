@@ -123,6 +123,10 @@ struct ADnoteVoiceParam {
                 const AbsTime *time);
     void kill(void);
     float getUnisonFrequencySpreadCents(void) const;
+    //! write WT requests into *bToU for those OscilGens in this voice
+    //! that require it
+    void requestWavetables(rtosc::ThreadLink* bToU, int part, int kit, int voice);
+
     /** If the voice is enabled */
     unsigned char Enabled;
 
@@ -345,6 +349,9 @@ class ADnoteParameters:public PresetsArray
         int64_t last_update_timestamp;
         //! whether to use wave tables - only false for debugging
         bool usesWaveTables() const { return waveTables; }
+        //! write WT requests into *bToU for those OscilGens in the voices
+        //! that require it
+        void requestWavetables(rtosc::ThreadLink* bToU, int part, int kit);
 
     private:
         void EnableVoice(const SYNTH_T &synth, int nvoice, const AbsTime* time);

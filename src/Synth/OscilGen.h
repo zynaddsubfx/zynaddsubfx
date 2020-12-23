@@ -52,13 +52,18 @@ class OscilGen:public Presets
 
         void convert2sine();
 
-        //! the usual way to calculate a new wave table
-        WaveTable* calculateWaveTable(int Presonance = 0) /*const*/;
         //! initial calculation for pre-allocated wavetable, no allocations
         //! @param fillWithZeroes if true, all buffers will be zero, and no random will be consumed
         void recalculateDefaultWaveTable(WaveTable*, bool fillWithZeroes = false) const;
-        //! allocating a small wavetable without any waves
+        //! allocating a wavetable with full capacity and without any waves
         WaveTable *allocWaveTable() const;
+        //! calculate the wave table audio buffers
+        wavetable_types::float32* calculateWaveTableData(wavetable_types::float32 freq,
+            wavetable_types::IntOrFloat semantic,
+            int Presonance);
+        //! calculate freqs + semantics
+        std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloat>*>
+            calculateWaveTableScales(bool fillWithZeroes = false) const;
 
         //Parameters
 
@@ -169,17 +174,6 @@ class OscilGen:public Presets
         //this can be called for the sine and components, and for the spectrum
         //(that's why the sine and cosine components should be processed with a separate call)
         void adaptiveharmonicpostprocess(fft_t *f, int size);
-
-        //! calculate the frequencies and semantics
-        void calculateWaveTableScales(Tensor1<wavetable_types::float32>& freqs_input,
-            Tensor1<wavetable_types::IntOrFloat>& semantics_input,
-            bool fillWithZeroes = false) const;
-        //! calculate the wave table audio buffers
-        void calculateWaveTableData(const Tensor1<wavetable_types::float32>& freqs,
-            const Tensor1<wavetable_types::IntOrFloat>& semantics,
-            Tensor3<wavetable_types::float32>& data,
-            int Presonance,
-            bool fillWithZeroes = false); // TODO: check params
 
         //Internal Data
         unsigned char oldbasefunc, oldbasepar, oldhmagtype,

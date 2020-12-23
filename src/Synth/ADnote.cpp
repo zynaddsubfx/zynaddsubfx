@@ -855,7 +855,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
     // Voice Parameter init
     for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
         Voice &vce = NoteVoicePar[nvoice];
-        ADnoteVoiceParam &param = pars.VoicePar[nvoice];
+        const ADnoteVoiceParam &param = pars.VoicePar[nvoice];
 
         if(vce.Enabled == 0)
             continue;

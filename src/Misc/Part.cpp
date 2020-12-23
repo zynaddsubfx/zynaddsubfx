@@ -1347,4 +1347,12 @@ bool Part::Kit::validNote(char note) const
     return !Pmuted && inRange((uint8_t)note, Pminkey, Pmaxkey);
 }
 
+void Part::Kit::requestWavetables(rtosc::ThreadLink* bToU, int part, int kit)
+{
+    if(Penabled && Padenabled && adpars)
+    {
+        adpars->requestWavetables(bToU, part, kit);
+    }
+}
+
 }
