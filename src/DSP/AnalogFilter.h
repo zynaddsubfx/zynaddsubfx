@@ -61,17 +61,17 @@ class AnalogFilter:public Filter
         //old coeffs are used for interpolation when parameters change quickly
 
         //Apply IIR filter to Samples, with coefficients, and past history
-        void singlefilterout(float *smp, fstage &hist, const Coeff &coeff);
+    void singlefilterout(float *smp, fstage &hist);// const Coeff &coeff);
         void singlefilterout_freqbuf(float *smp, fstage &hist, float *freqbuf);
         //Update coeff and order
-        void computefiltercoefs(void);
+    void computefiltercoefs(float freq, float q);
 
         int   type;   //The type of the filter (LPF1,HPF1,LPF2,HPF2...)
         int   stages; //how many times the filter is applied (0->1,1->2,etc.)
         float freq;   //Frequency given in Hz
         float q;      //Q factor (resonance or Q factor)
         float gain;   //the gain of the filter (if are shelf/peak) filters
-
+        bool recompute; // need to recompute coeff.
         int order; //the order of the filter (number of poles)
 
         Value_Smoothing_Filter freq_smoothing; /* for smoothing freq modulations to avoid zipper effect */
