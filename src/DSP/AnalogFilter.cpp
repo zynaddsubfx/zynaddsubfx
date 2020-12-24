@@ -20,6 +20,10 @@
 #include "../Misc/Util.h"
 #include "AnalogFilter.h"
 
+
+const float MAX_FREQ = 20000.0f;
+const float MAX_FREQ_CO = 1.0f / MAX_FREQ;
+
 namespace zyn {
 
 AnalogFilter::AnalogFilter(unsigned char Ftype,
@@ -32,7 +36,8 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
       stages(Fstages),
       freq(Ffreq),
       q(Fq),
-      gain(1.0)
+     gain(1.0),
+     recompute(true)
 {
     for(int i = 0; i < 3; ++i)
         coeff.c[i] = coeff.d[i] = oldCoeff.c[i] = oldCoeff.d[i] = 0.0f;
@@ -43,7 +48,7 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
     coeff.d[0] = 0; //this is not used
     outgain    = 1.0f;
     freq_smoothing.sample_rate(samplerate_f);
-    freq_smoothing.reset( freq );
+    freq_smoothing.reset( freq * MAX_FREQ_CO );
 }
 
 AnalogFilter::~AnalogFilter()
@@ -257,7 +262,7 @@ AnalogFilter::Coeff AnalogFilter::computeCoeff(int type, float cutoff, float q,
     return coeff;
 }
 
-void AnalogFilter::computefiltercoefs(void)
+void AnalogFilter::computefiltercoefs(float freq, float q)
 {
     coeff = AnalogFilter::computeCoeff(type, freq, q, stages, gain,
             samplerate_f, order);
@@ -268,12 +273,24 @@ void AnalogFilter::setfreq(float frequency)
 {
     if(frequency < 0.1f)
         frequency = 0.1f;
+    else if ( frequency > MAX_FREQ )
+	frequency = MAX_FREQ;
+
     float rap = freq / frequency;
     if(rap < 1.0f)
         rap = 1.0f / rap;
 
-    freq = frequency;
-    computefiltercoefs();
+    frequency = ceilf(frequency);/* fractional Hz changes are not
+				 * likely to be audible and waste CPU,
+				 * esp since we're already smoothing
+				 * changes, so round it */
+
+    if ( fabsf( frequency - freq ) >= 1.0f )
+    {
+	/* only perform computation if absolutely necessary */
+	freq = frequency;
+	recompute = true;
+    }
 }
 
 void AnalogFilter::setfreq_and_q(float frequency, float q_)
@@ -285,19 +302,19 @@ void AnalogFilter::setfreq_and_q(float frequency, float q_)
 void AnalogFilter::setq(float q_)
 {
     q = q_;
-    computefiltercoefs();
+    computefiltercoefs(freq,q);
 }
 
 void AnalogFilter::settype(int type_)
 {
     type = type_;
-    computefiltercoefs();
+    computefiltercoefs(freq,q);
 }
 
 void AnalogFilter::setgain(float dBgain)
 {
     gain = dB2rap(dBgain);
-    computefiltercoefs();
+    computefiltercoefs(freq,q);
 }
 
 void AnalogFilter::setstages(int stages_)
@@ -307,7 +324,7 @@ void AnalogFilter::setstages(int stages_)
     if(stages_  != stages) {
         stages = stages_;
         cleanup();
-        computefiltercoefs();
+        computefiltercoefs(freq,q);
     }
 }
 
@@ -333,10 +350,16 @@ inline void AnalogBiquadFilterB(const float coeff[5], float &src, float work[4])
     src     = work[2];
 }
 
-void AnalogFilter::singlefilterout(float *smp, fstage &hist,
-                                   const Coeff &coeff)
+void AnalogFilter::singlefilterout(float *smp, fstage &hist)
 {
     assert((buffersize % 8) == 0);
+
+    if ( recompute )
+    {
+	computefiltercoefs(freq,q);
+	recompute = false;
+    }
+
     if(order == 1) {  //First order filter
         for(int i = 0; i < buffersize; ++i) {
             float y0 = smp[i] * coeff.c[0] + hist.x1 * coeff.c[1]
@@ -365,17 +388,25 @@ void AnalogFilter::singlefilterout(float *smp, fstage &hist,
     }
 }
 
-
 void AnalogFilter::singlefilterout_freqbuf(float *smp, fstage &hist,
                                    float *freqbuf)
 {
     assert((buffersize % 8) == 0);
 
+    float frequency = -1.0f;
+    
     for ( int i = 0; i < buffersize; i += 8 )
     {
 	/* recompute coeffs for each 8 samples */
-	freq = freqbuf[i];
-	computefiltercoefs();
+
+	const float f = ceilf(freqbuf[i] * MAX_FREQ);
+
+	if ( fabsf( f - frequency ) >= 1.0f )
+	{
+	    /* don't perform computation more often than necessary */
+	    computefiltercoefs(f,q);
+	    frequency = f;
+	}
 
 	if(order == 1) {  //First order filter
 	    for ( int j = 0; j < 8; j++ )
@@ -407,15 +438,14 @@ void AnalogFilter::singlefilterout_freqbuf(float *smp, fstage &hist,
 	}
     }
 
-    freq = freqbuf[buffersize-1];
-    computefiltercoefs();
+    recompute = true;
 }
 
 void AnalogFilter::filterout(float *smp)
 {
     float freqbuf[buffersize];
 
-    if ( freq_smoothing.apply( freqbuf, buffersize, freq ) )
+    if ( freq_smoothing.apply( freqbuf, buffersize, freq * MAX_FREQ_CO ) )
     {
 	/* in transition, need to do fine grained interpolation */
 	for(int i = 0; i < stages + 1; ++i)
@@ -425,7 +455,7 @@ void AnalogFilter::filterout(float *smp)
     {
 	/* stable state, just use one coeff */
 	for(int i = 0; i < stages + 1; ++i)
-	    singlefilterout(smp, history[i], coeff);
+	    singlefilterout(smp, history[i]);
     }
 
     for(int i = 0; i < buffersize; ++i)
