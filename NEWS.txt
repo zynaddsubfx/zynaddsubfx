@@ -1,3 +1,19 @@
+3.0.6 (TBD)
+        - Enhances watchpoint system for waveform views (GSOC michiboo)
+        - Add anti-alias mode to add synth oscillator interpolation
+        - Add 14 bit NRPN support for automations
+        - Add Tanh, Cubic, and square distortions with additional shaping
+          params
+        - Add filter parameter smoothing
+        - Add filter optional LPF to LFO
+        - Add repeatable envelopes
+        - Increase envelope time parameter resolution
+        - Fix excessively loud volume bug in Part XML loader
+        - Fix crash with gcc 10.x.x within file manager
+        - Fix crash in erroneous patch load
+        - Fix OSS/etc detection under cygwin
+        - Fix other bugs
+
 3.0.5 (15 April 2019)
         - Add Stereo peaks for individual part metering
         - Change LFO frequency units to Hz (from unitless)
