@@ -57,7 +57,7 @@ static const Ports partPorts = {
 #undef rChangeCb
 #define rChangeCb
 #undef rChangeCb
-#define rChangeCb obj->setVolume(obj->Volume);
+#define rChangeCb obj->setVolumedB(obj->Volume);
     rParamF(Volume, rShort("Vol"), rDefault(0.0), rUnit(dB), 
             rLinear(-40.0, 13.3333), "Part Volume"),
 #undef rChangeCb
@@ -68,8 +68,8 @@ static const Ports partPorts = {
         if(rtosc_narguments(m)==0) {
             d.reply(d.loc, "i", (int) roundf(96.0f * obj->Volume / 40.0f + 96.0f));
         } else if(rtosc_narguments(m)==1 && rtosc_type(m,0)=='i') {
-            obj->Volume  = obj->volume127ToFloat(limit<unsigned char>(rtosc_argument(m, 0).i, 0, 127));
-            obj->setVolume(obj->Volume);
+            obj->Volume  = obj->volume127TodB(limit<unsigned char>(rtosc_argument(m, 0).i, 0, 127));
+            obj->setVolumedB(obj->Volume);
             d.broadcast(d.loc, "i", limit<char>(rtosc_argument(m, 0).i, 0, 127));
         }}},
 #define rChangeCb obj->setPpanning(obj->Ppanning);
@@ -314,7 +314,6 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
 
     Pname = new char[PART_MAX_NAME_LEN];
 
-    oldvolumel = oldvolumer = 0.5f;
     lastnote = -1;
 
     defaults();
@@ -337,7 +336,7 @@ void Part::cloneTraits(Part &p) const
 #define CLONE(x) p.x = this->x
     CLONE(Penabled);
 
-    p.setVolume(this->Volume);
+    p.setVolumedB(this->Volume);
     p.setPpanning(this->Ppanning);
 
     CLONE(Pminkey);
@@ -366,7 +365,7 @@ void Part::defaults()
     Pnoteon     = 1;
     Ppolymode   = 1;
     Plegatomode = 0;
-    setVolume(0.0);
+    setVolumedB(0.0);
     Pkeyshift = 64;
     Prcvchn   = 0;
     setPpanning(64);
@@ -655,7 +654,7 @@ void Part::SetController(unsigned int type, int par)
             break;
         case C_expression:
             ctl.setexpression(par);
-            setVolume(Volume); //update the volume
+            setVolumedB(Volume); //update the volume
             break;
         case C_portamento:
             ctl.setportamento(par);
@@ -682,9 +681,10 @@ void Part::SetController(unsigned int type, int par)
         case C_volume:
             ctl.setvolume(par);
             if(ctl.volume.receive != 0)
-                volume = ctl.volume.volume;
+		setVolumedB(volume127TodB( ctl.volume.volume * 127.0f ) );
             else
-                setVolume(Volume);
+		/* FIXME: why do this? */
+                setVolumedB(Volume);
             break;
         case C_sustain:
             ctl.setsustain(par);
@@ -698,10 +698,9 @@ void Part::SetController(unsigned int type, int par)
             ctl.resetall();
             ReleaseSustainedKeys();
             if(ctl.volume.receive != 0)
-                volume = ctl.volume.volume;
+		setVolumedB(volume127TodB( ctl.volume.volume * 127.0f ) );
             else
-                setVolume(Volume);
-            setVolume(Volume); //update the volume
+                setVolumedB(Volume);
             setPpanning(Ppanning); //update the panning
 
             for(int item = 0; item < NUM_KIT_ITEMS; ++item) {
@@ -939,12 +938,15 @@ void Part::ComputePartSmps()
 /*
  * Parameter control
  */
-float Part::volume127ToFloat(unsigned char volume_)
+
+float Part::volume127TodB(unsigned char volume_)
 {
-    return (volume_ - 96.0f) / 96.0f * 40.0;
+    assert( volume_  <= 127 );
+
+    return 20.0f * log10f(volume_ / 127.0f);
 }
 
-void Part::setVolume(float Volume_)
+void Part::setVolumedB(float Volume_)
 {
     //Fixes bug with invalid loading
     if(fabs(Volume_ - 50.0f) < 0.001)
@@ -954,8 +956,14 @@ void Part::setVolume(float Volume_)
 
     assert(Volume_ < 40.0);
     Volume = Volume_;
-    volume =
-        dB2rap(Volume) * ctl.expression.relvolume;
+
+    float volume = dB2rap( Volume_ );
+
+    /* printf( "Volume: %f, Expression %f\n", volume, ctl.expression.relvolume ); */
+
+    assert( volume <= 1.0f );
+
+    gain = volume * ctl.expression.relvolume;
 }
 
 void Part::setPpanning(char Ppanning_)
@@ -1291,9 +1299,9 @@ void Part::getfromXML(XMLwrapper& xml)
 {
     Penabled = xml.getparbool("enabled", Penabled);
     if (xml.hasparreal("volume")) {
-        setVolume(xml.getparreal("volume", Volume));
+        setVolumedB(xml.getparreal("volume", Volume));
     } else {
-        setVolume(volume127ToFloat(xml.getpar127("volume", 96)));
+        setVolumedB(volume127TodB( xml.getpar127("volume", gain * 127.0f )));
     }
     setPpanning(xml.getpar127("panning", Ppanning));
 

@@ -130,8 +130,9 @@ class Part
         float         Volume; /**<part volume*/
         unsigned char Pminkey; /**<the minimum key that the part receives noteon messages*/
         unsigned char Pmaxkey; //the maximum key that the part receives noteon messages
-        static float volume127ToFloat(unsigned char volume_);
-        void setVolume(float Volume);
+        static float volume127TodB(unsigned char volume_);
+        void setVolumeGain(float Volume);
+        void setVolumedB(float Volume);
         unsigned char Pkeyshift; //Part keyshift
         unsigned char Prcvchn; //from what midi channel it receives commands
         unsigned char Ppanning; //part panning
@@ -163,7 +164,7 @@ class Part
         *partfxinputr[NUM_PART_EFX + 1];          //partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
 
 
-        float volume, oldvolumel, oldvolumer; //this is applied by Master
+        float gain;
         float panning; //this is applied by Master, too
 
         Controller ctl; //Part controllers
