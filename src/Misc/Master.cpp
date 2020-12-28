@@ -1268,7 +1268,7 @@ bool Master::AudioOut(float *outr, float *outl)
         if(!part[npart]->Penabled)
             continue;
 
-        Stereo<float> newvol(part[npart]->volume);
+        Stereo<float> newvol(part[npart]->gain);
 
         float pan = part[npart]->panning;
         if(pan < 0.5f)
