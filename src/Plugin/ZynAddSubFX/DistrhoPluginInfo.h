@@ -27,7 +27,10 @@
  #define DISTRHO_PLUGIN_HAS_EMBED_UI    0
  #define DISTRHO_PLUGIN_HAS_EXTERNAL_UI 1
 #elif defined(ZEST_GUI)
+ #define DGL_OPENGL                     1
+ #define HAVE_OPENGL                    1
  #define DISTRHO_PLUGIN_HAS_UI          1
+ #define DISTRHO_PLUGIN_HAS_EMBED_UI    1
 #else
  #define DISTRHO_PLUGIN_HAS_UI          0
 #endif
