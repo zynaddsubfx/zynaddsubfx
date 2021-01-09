@@ -681,9 +681,9 @@ void Part::SetController(unsigned int type, int par)
         case C_volume:
             ctl.setvolume(par);
             if(ctl.volume.receive != 0)
-		setVolumedB(volume127TodB( ctl.volume.volume * 127.0f ) );
+                setVolumedB(volume127TodB( ctl.volume.volume * 127.0f ) );
             else
-		/* FIXME: why do this? */
+                /* FIXME: why do this? */
                 setVolumedB(Volume);
             break;
         case C_sustain:
@@ -698,7 +698,7 @@ void Part::SetController(unsigned int type, int par)
             ctl.resetall();
             ReleaseSustainedKeys();
             if(ctl.volume.receive != 0)
-		setVolumedB(volume127TodB( ctl.volume.volume * 127.0f ) );
+                setVolumedB(volume127TodB( ctl.volume.volume * 127.0f ) );
             else
                 setVolumedB(Volume);
             setPpanning(Ppanning); //update the panning

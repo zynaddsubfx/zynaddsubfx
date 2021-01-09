@@ -37,13 +37,13 @@ Value_Smoothing_Filter::apply( sample_t * __restrict__ dst, nframes_t nframes, f
 {
     if ( _reset_on_next_apply )
     {
-	reset( gt );
-	_reset_on_next_apply = false;
-	return false;
+        reset( gt );
+        _reset_on_next_apply = false;
+        return false;
     }
 
     if ( target_reached(gt) )
-	return false;
+        return false;
 
     sample_t * dst_ = (sample_t*) assume_aligned(dst);
 
@@ -57,15 +57,15 @@ Value_Smoothing_Filter::apply( sample_t * __restrict__ dst, nframes_t nframes, f
 
     for (nframes_t i = 0; i < nframes; i++)
     {
-	g1 += w * (gm - g1 - a * g2);
-	g2 += w * (g1 - g2);
-	dst_[i] = g2;
+        g1 += w * (gm - g1 - a * g2);
+        g2 += w * (g1 - g2);
+        dst_[i] = g2;
     }
 
-    g2 += 1e-10f;		/* denormal protection */
+    g2 += 1e-10f;               /* denormal protection */
 
     if ( fabsf( gt - g2 ) < 0.0001f )
-	g2 = gt;
+        g2 = gt;
 
     this->g1 = g1;
     this->g2 = g2;
