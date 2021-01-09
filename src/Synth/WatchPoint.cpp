@@ -183,23 +183,26 @@ void WatchManager::satisfy(const char *id, float f)
 }
 
 void WatchManager::satisfy(const char *id, float *f, int n)
-{   
+{
     int selected = -1;    
     for(int i=0; i<MAX_WATCH; ++i)
         if(!strcmp(active_list[i], id))
             selected = i;
-    
+
     if(selected == -1)
         return;
 
     int space = MAX_SAMPLE - sample_list[selected];
-    
+
     if(space >= n || !trigger[selected])
         space = n;
+
+    //special case to capture the time+level pairs that come from
+    //envelopes/LFOs
     if(n == 2)
         trigger[selected] = true;
 
-    if(space && call_count[selected]==0){
+    if(space && (call_count[selected]==0 || n == 2)){
         for(int i=0; i<space; i++){
             const float prev = prebuffer[selected][(prebuffer_sample[selected]+MAX_SAMPLE/2-1)%(MAX_SAMPLE/2)];
             if(!trigger[selected]){
@@ -222,7 +225,7 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                         space = i+space;
                     else
                         space = n;
-                   trigger_other(selected);
+                    trigger_other(selected);
                 }
             }
 
@@ -235,11 +238,11 @@ void WatchManager::satisfy(const char *id, float *f, int n)
                 prebuffer_done[selected] = false;
         }
     }
-        call_count[selected]++;
+    call_count[selected]++;
 }
 
 void WatchManager::trigger_other(int selected){
-     for(int k=0; k<MAX_WATCH; ++k){
+    for(int k=0; k<MAX_WATCH; ++k){
         if(selected != k && !trigger[k] && prebuffer_sample[k]>(MAX_SAMPLE/2) ){
             char tmp[128];
             char tmp1[128];
