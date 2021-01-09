@@ -41,8 +41,8 @@ FormantFilter::FormantFilter(const FilterParams *pars, Allocator *alloc, unsigne
 
     for(int i = 0; i < FF_MAX_FORMANTS; ++i)
     {
-	formant_amp_smoothing[i].sample_rate(srate);
-	formant_amp_smoothing[i].reset(1.0f);
+        formant_amp_smoothing[i].sample_rate(srate);
+        formant_amp_smoothing[i].reset(1.0f);
     }
 
     for(int i = 0; i < numformants; ++i) {
@@ -105,7 +105,7 @@ void FormantFilter::setpos(float frequency)
 
     if((fabsf(oldinput - input) < 0.001f) && (fabsf(slowinput - input) < 0.001f)
        && (fabsf(Qfactor - oldQfactor) < 0.001f)) {
-        //	oldinput=input; setting this will cause problems at very slow changes
+        //      oldinput=input; setting this will cause problems at very slow changes
         firsttime = false;
         return;
     }
@@ -207,21 +207,21 @@ void FormantFilter::filterout(float *smp)
 
         float tmpbuf[buffersize];
 
-	for(int i = 0; i < buffersize; ++i)
+        for(int i = 0; i < buffersize; ++i)
             tmpbuf[i] = inbuffer[i] * outgain;
 
-	formant[j]->filterout(tmpbuf);
+        formant[j]->filterout(tmpbuf);
 
-	if ( formant_amp_smoothing[j].apply( formantbuf, buffersize, currentformants[j].amp ) )
-	{
-	    for(int i = 0; i < buffersize; ++i)
-		smp[i] += tmpbuf[i] * formantbuf[i];
-	}
-	else
-	{
-	    for(int i = 0; i < buffersize; ++i)
+        if ( formant_amp_smoothing[j].apply( formantbuf, buffersize, currentformants[j].amp ) )
+        {
+            for(int i = 0; i < buffersize; ++i)
+                smp[i] += tmpbuf[i] * formantbuf[i];
+        }
+        else
+        {
+            for(int i = 0; i < buffersize; ++i)
                 smp[i] += tmpbuf[i] * currentformants[j].amp;
-	}
+        }
     }
 }
 

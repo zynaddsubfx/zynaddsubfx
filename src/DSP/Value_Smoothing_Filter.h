@@ -34,11 +34,11 @@ class Value_Smoothing_Filter
 public:
 
     Value_Smoothing_Filter ( )
-	{
-	    g1 = g2 = 0;
-	    _cutoff = 10.0f;
-	    _reset_on_next_apply = false;
-	}
+        {
+            g1 = g2 = 0;
+            _cutoff = 10.0f;
+            _reset_on_next_apply = false;
+        }
 
     void reset_on_next_apply ( bool v ) { _reset_on_next_apply = v; }
 

@@ -189,7 +189,7 @@ static const Ports auto_param_ports = {
             d.broadcast(d.loc, "s", a.slots[slot].automations[param].param_path);
         }
         else
-			d.reply(d.loc, "s", a.slots[slot].automations[param].param_path);
+                        d.reply(d.loc, "s", a.slots[slot].automations[param].param_path);
         rEnd},
     {"clear:", rDoc("Clear automation param"), 0,
         rBegin;
@@ -784,10 +784,10 @@ Master::Master(const SYNTH_T &synth_, Config* config)
         part[npart] = new Part(*memory, synth, time, config->cfg.GzipCompression,
                                config->cfg.Interpolation, &microtonal, fft, &watcher,
                                (ss+"/part"+npart+"/").c_str);
-	smoothing_part_l[npart].sample_rate( synth.samplerate );
-	smoothing_part_l[npart].reset_on_next_apply( true ); /* necessary to make CI tests happy, otherwise of no practical use */
-	smoothing_part_r[npart].sample_rate( synth.samplerate );
-	smoothing_part_r[npart].reset_on_next_apply( true ); /* necessary to make CI tests happy, otherwise of no practical use */
+        smoothing_part_l[npart].sample_rate( synth.samplerate );
+        smoothing_part_l[npart].reset_on_next_apply( true ); /* necessary to make CI tests happy, otherwise of no practical use */
+        smoothing_part_r[npart].sample_rate( synth.samplerate );
+        smoothing_part_r[npart].reset_on_next_apply( true ); /* necessary to make CI tests happy, otherwise of no practical use */
     }
 
     smoothing.sample_rate( synth.samplerate );
@@ -1119,52 +1119,52 @@ bool Master::hasMasterCb() const
 template <class T>
 struct def_skip
 {
-	static void skip(const char*& argptr) { argptr += sizeof(T); }
+        static void skip(const char*& argptr) { argptr += sizeof(T); }
 };
 
 template <class T>
 struct str_skip
 {
-	static void skip(const char*& argptr) { while(argptr++); /*TODO: 4 padding */ }
+        static void skip(const char*& argptr) { while(argptr++); /*TODO: 4 padding */ }
 };
 
 template<class T, class Display = T, template<class TMP> class SkipsizeFunc = def_skip>
 void _dump_prim_arg(const char*& argptr, std::ostream& os)
 {
-	os << ' ' << (Display)*(const T*)argptr;
-	SkipsizeFunc<T>::skip(argptr);
+        os << ' ' << (Display)*(const T*)argptr;
+        SkipsizeFunc<T>::skip(argptr);
 }
 
 void dump_msg(const char* ptr, std::ostream& os = std::cerr)
 {
-	assert(*ptr == '/');
-	os << ptr;
+        assert(*ptr == '/');
+        os << ptr;
 
-	while(*++ptr) ; // skip address
-	while(!*++ptr) ; // skip 0s
+        while(*++ptr) ; // skip address
+        while(!*++ptr) ; // skip 0s
 
-	assert(*ptr == ',');
-	os << ' ' << (ptr + 1);
+        assert(*ptr == ',');
+        os << ' ' << (ptr + 1);
 
-	const char* argptr = ptr;
-	while(*++argptr) ; // skip type string
-	while(!*++argptr) ; // skip 0s
+        const char* argptr = ptr;
+        while(*++argptr) ; // skip type string
+        while(!*++argptr) ; // skip 0s
 
-	char c;
-	while((c = *++ptr))
-	{
-		switch(c)
-		{
-			case 'i':
-				_dump_prim_arg<int32_t>(argptr, os); break;
-			case 'c':
-				_dump_prim_arg<int32_t, char>(argptr, os); break;
-		//	case 's':
-		//		_dump_prim_arg<char, const char*>(argptr, os); break;
-			default:
-				exit(1);
-		}
-	}
+        char c;
+        while((c = *++ptr))
+        {
+                switch(c)
+                {
+                        case 'i':
+                                _dump_prim_arg<int32_t>(argptr, os); break;
+                        case 'c':
+                                _dump_prim_arg<int32_t, char>(argptr, os); break;
+                //      case 's':
+                //              _dump_prim_arg<char, const char*>(argptr, os); break;
+                        default:
+                                exit(1);
+                }
+        }
 
 }
 #endif
@@ -1280,28 +1280,28 @@ bool Master::AudioOut(float *outr, float *outl)
 
 
 
-	/* This is where the part volume (and pan) smoothing and application happens */
-	if ( smoothing_part_l[npart].apply( gainbuf, synth.buffersize, newvol.l ) )
-	{
-	    for ( int i = 0; i < synth.buffersize; ++i )
-		part[npart]->partoutl[i] *= gainbuf[i];
-	}
-	else
-	{
-	    for ( int i = 0; i < synth.buffersize; ++i )
-		part[npart]->partoutl[i] *= newvol.l;
-	}
+        /* This is where the part volume (and pan) smoothing and application happens */
+        if ( smoothing_part_l[npart].apply( gainbuf, synth.buffersize, newvol.l ) )
+        {
+            for ( int i = 0; i < synth.buffersize; ++i )
+                part[npart]->partoutl[i] *= gainbuf[i];
+        }
+        else
+        {
+            for ( int i = 0; i < synth.buffersize; ++i )
+                part[npart]->partoutl[i] *= newvol.l;
+        }
 
-	if ( smoothing_part_r[npart].apply( gainbuf, synth.buffersize, newvol.r ) )
-	{
-	    for ( int i = 0; i < synth.buffersize; ++i )
-		part[npart]->partoutr[i] *= gainbuf[i];
-	}
-	else
-	{
-	    for ( int i = 0; i < synth.buffersize; ++i )
-		part[npart]->partoutr[i] *= newvol.r;
-	}
+        if ( smoothing_part_r[npart].apply( gainbuf, synth.buffersize, newvol.r ) )
+        {
+            for ( int i = 0; i < synth.buffersize; ++i )
+                part[npart]->partoutr[i] *= gainbuf[i];
+        }
+        else
+        {
+            for ( int i = 0; i < synth.buffersize; ++i )
+                part[npart]->partoutr[i] *= newvol.r;
+        }
     }
 
     //System effects
@@ -1372,19 +1372,19 @@ bool Master::AudioOut(float *outr, float *outl)
     /* this is where the master volume smoothing and application happens */
     if ( smoothing.apply( gainbuf, synth.buffersize, vol ) )
     {
-	for ( int i = 0; i < synth.buffersize; ++i )
-	{
-	    outl[i] *= gainbuf[i];
-	    outr[i] *= gainbuf[i];
-	}
+        for ( int i = 0; i < synth.buffersize; ++i )
+        {
+            outl[i] *= gainbuf[i];
+            outr[i] *= gainbuf[i];
+        }
     }
     else
     {
-	for ( int i = 0; i < synth.buffersize; ++i )
-	{
-	    outl[i] *= vol;
-	    outr[i] *= vol;
-	}
+        for ( int i = 0; i < synth.buffersize; ++i )
+        {
+            outl[i] *= vol;
+            outr[i] *= vol;
+        }
     }
 
     vuUpdate(outl, outr);

@@ -211,21 +211,21 @@ void SVFilter::filterout(float *smp)
 
     if ( freq_smoothing.apply( freqbuf, buffersize, freq ) )
     {
-	/* 8 sample chunks seems to work OK for AnalogFilter, so do that here too. */
-	for ( int i = 0; i < buffersize; i += 8 )
-	{
-	    freq = freqbuf[i];
-	    computefiltercoefs();
+        /* 8 sample chunks seems to work OK for AnalogFilter, so do that here too. */
+        for ( int i = 0; i < buffersize; i += 8 )
+        {
+            freq = freqbuf[i];
+            computefiltercoefs();
 
-	    for(int j = 0; j < stages + 1; ++j)
-		singlefilterout(smp + i, st[j], par, 8 );
-	}
+            for(int j = 0; j < stages + 1; ++j)
+                singlefilterout(smp + i, st[j], par, 8 );
+        }
 
-	freq = freqbuf[buffersize - 1];
-	computefiltercoefs();
+        freq = freqbuf[buffersize - 1];
+        computefiltercoefs();
     }
     else
-	for(int i = 0; i < stages + 1; ++i)
+        for(int i = 0; i < stages + 1; ++i)
             singlefilterout(smp, st[i], par, buffersize );
 
     for(int i = 0; i < buffersize; ++i)
