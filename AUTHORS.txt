@@ -1,9 +1,11 @@
 Active Developers:
         Mark McCurry (Realtime compat, UI rewrite)
-        Hans Petter Selasky (BSD Compat)
+        Hans Petter Selasky (BSD Compat, microtonal updates, OSS enh, ...)
         Christopher Oliver (Unison + presets fix, mousewheel support,
                             SUBnote overtones, unison enhancements, ...)
         Johannes Lorenz (Effect Documentation, PID Files, parameter metadata)
+        Friedolino (14 bit unison, anti-aliased oscillators, floating point
+        params, repeatable envs, ...)
         Daniel Sheeler
 
 Original author (inactive):
@@ -32,5 +34,16 @@ Contributors:
         Andre Sklenar (UI Pixmaps)
         Harald Hvaal (General Code Modernization)
         Olivier Jolly (DSSI Bank Load Fix)
-        Micky Yun Chan (MXML 3.0 compatibility fix)
+        Micky Yun Chan (MXML 3.0 compatibility fix, oscilloscope style watch
+        points)
         Jacob Alzén (smaller documentation, link and README updates)
+        nick87720z (Fixed bash completion script)
+        piegames (OSC handle for custom frequency notes)
+        Michael Muller (Fixed bank change crash)
+        Nori Li (Fixed FLTK build on linux)
+        Luz.paz (Fixed lots of spelling errors throughout codebase)
+        Strongheart (Fixed unison range)
+        James McKernon (Expanded range of microtonal ranges)
+        Kinichiro Inoguchi (Added Sndio input&output engine, build/cmake fixes)
+        Carlo Bramini (Fixed several cygwin build issues)
+        Simon van der Veldt (fixed missing cmake dependency)
