@@ -451,7 +451,7 @@ if(FltkGui)
 	find_program (FLTK_CONFIG fltk-config)
 	if (FLTK_CONFIG)
 		execute_process (COMMAND ${FLTK_CONFIG} --use-images --ldflags OUTPUT_VARIABLE FLTK_LDFLAGS)
-		string(STRIP ${FLTK_LDFLAGS} FLTK_LIBRARIES)
+		string(STRIP "${FLTK_LDFLAGS}" FLTK_LIBRARIES)
 	endif()
 
 	message(STATUS ${FLTK_LDFLAGS})
