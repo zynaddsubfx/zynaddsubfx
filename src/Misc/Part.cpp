@@ -942,8 +942,7 @@ void Part::ComputePartSmps()
 float Part::volume127TodB(unsigned char volume_)
 {
     assert( volume_  <= 127 );
-
-    return 20.0f * log10f(volume_ / 127.0f);
+    return (volume_ - 96.0f) / 96.0f * 40.0;
 }
 
 void Part::setVolumedB(float Volume_)
@@ -954,14 +953,14 @@ void Part::setVolumedB(float Volume_)
 
     Volume_ = limit(Volume_, -40.0f, 13.333f);
 
-    assert(Volume_ < 40.0);
+    assert(Volume_ < 14.0);
     Volume = Volume_;
 
     float volume = dB2rap( Volume_ );
 
     /* printf( "Volume: %f, Expression %f\n", volume, ctl.expression.relvolume ); */
 
-    assert( volume <= 1.0f );
+    assert( volume <= dB2rap(14.0f) );
 
     gain = volume * ctl.expression.relvolume;
 }
@@ -1301,7 +1300,7 @@ void Part::getfromXML(XMLwrapper& xml)
     if (xml.hasparreal("volume")) {
         setVolumedB(xml.getparreal("volume", Volume));
     } else {
-        setVolumedB(volume127TodB( xml.getpar127("volume", gain * 127.0f )));
+        setVolumedB(volume127TodB( xml.getpar127("volume", 96)));
     }
     setPpanning(xml.getpar127("panning", Ppanning));
 

@@ -151,7 +151,7 @@ class PadNoteTest:public CxxTest::TestSuite
 #endif
             sampleCount += synth->buffersize;
 
-            TS_ASSERT_DELTA(outL[255], -0.0554, 0.0005f);
+            TS_ASSERT_DELTA(outL[255], 0.3950, 0.0005f);
 
 
             note->releasekey();
@@ -160,21 +160,21 @@ class PadNoteTest:public CxxTest::TestSuite
             w->add_watch("noteout");
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.0729f, 0.0005f);
+            TS_ASSERT_DELTA(outL[255], -0.2305f, 0.0005f);
             w->tick();
             TS_ASSERT(!tr->hasNext());
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.0331f, 0.0005f);
+            TS_ASSERT_DELTA(outL[255], -0.0754f, 0.0005f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], 0.0219f, 0.0005f);
+            TS_ASSERT_DELTA(outL[255], 0.0448f, 0.0005f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], 0.0137f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], 0.0220f, 0.0001f);
 
             while(!note->finished()) {
                 note->noteout(outL, outR);
