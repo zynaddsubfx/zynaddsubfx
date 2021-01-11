@@ -154,8 +154,8 @@ void EQ::setvolume(unsigned char _Pvolume)
 
 unsigned char EQ::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-#define	PRESET_SIZE 1
-#define	NUM_PRESETS 2
+#define PRESET_SIZE 1
+#define NUM_PRESETS 2
     static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         {67}, //EQ 1
         {67}  //EQ 2
@@ -163,8 +163,8 @@ unsigned char EQ::getpresetpar(unsigned char npreset, unsigned int npar)
     if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
         return presets[npreset][npar];
     } else if (npar >= 10 && npar < (10 + MAX_EQ_BANDS * 5)) {
-	static const unsigned char bp_preset[5] = { 0, 64, 64, 64, 0 };
-	return bp_preset[npar % 5];
+        static const unsigned char bp_preset[5] = { 0, 64, 64, 64, 0 };
+        return bp_preset[npar % 5];
     }
     return 0;
 }

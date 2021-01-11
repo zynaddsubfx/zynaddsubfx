@@ -133,7 +133,7 @@ void SynthNote::Legato::apply(SynthNote &note, float *outl, float *outr)
                         //previous freq during the fadeout.
                         const float catchupfreq_log2 = 2.0f * param.note_log2_freq - lastfreq_log2;
                         LegatoParams pars{param.vel, param.portamento,
-					  catchupfreq_log2, false, param.seed};
+                            catchupfreq_log2, false, param.seed};
                         note.legatonote(pars);
                         break;
                     }

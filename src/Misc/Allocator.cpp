@@ -124,15 +124,15 @@ void AllocatorClass::addMemory(void *v, size_t mem_size)
 //From tlsf internals
 typedef struct block_header_t
 {
-	/* Points to the previous physical block. */
-	struct block_header_t* prev_phys_block;
+    /* Points to the previous physical block. */
+    struct block_header_t* prev_phys_block;
 
-	/* The size of this block, excluding the block header. */
-	size_t size;
+    /* The size of this block, excluding the block header. */
+    size_t size;
 
-	/* Next and previous free blocks. */
-	struct block_header_t* next_free;
-	struct block_header_t* prev_free;
+    /* Next and previous free blocks. */
+    struct block_header_t* next_free;
+    struct block_header_t* prev_free;
 } block_header_t;
 static const size_t block_header_free_bit = 1 << 0;
 #endif

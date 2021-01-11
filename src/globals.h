@@ -358,7 +358,7 @@ private:
 public:
     smooth_float() {
         init = false;
-	next_value = curr_value = 0.0f;
+        next_value = curr_value = 0.0f;
     };
     smooth_float(const float value) {
         init = true;

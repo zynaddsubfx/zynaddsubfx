@@ -74,7 +74,7 @@ class AdNoteTest:public CxxTest::TestSuite
                 float out = lfo->lfoout();
                 TS_ASSERT((-2.0f < out && out < 2.0f));
             }
-		}
+        }
 
 
 

@@ -16,15 +16,15 @@ namespace zyn {
 //! Class to lock all pages in memory 
 class MemLocker
 {
-	bool isLocked = false;
+    bool isLocked = false;
 public:
-	MemLocker() = default;
-	~MemLocker() { unlock(); }
-	
-	//! try to lock all current and future pages, if not already locked
-	void lock();
-	//! try to unlock all pages, if locked
-	void unlock();
+    MemLocker() = default;
+    ~MemLocker() { unlock(); }
+
+    //! try to lock all current and future pages, if not already locked
+    void lock();
+    //! try to unlock all pages, if locked
+    void unlock();
 };
 
 }

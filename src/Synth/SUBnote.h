@@ -38,9 +38,9 @@ class SUBnote:public SynthNote
 
         void setup(float velocity,
                    int portamento_,
-		   float note_log2_freq,
+                   float note_log2_freq,
                    bool legato = false, WatchManager *wm = 0, const char *prefix = 0);
-	float setupFilters(float basefreq, int *pos, bool automation);
+        float setupFilters(float basefreq, int *pos, bool automation);
         void computecurrentparameters();
         /*
          * Initialize envelopes and global filter
@@ -57,7 +57,7 @@ class SUBnote:public SynthNote
         int       numharmonics; //number of harmonics (after the too higher hamonics are removed)
         int       firstnumharmonics; //To keep track of the first note's numharmonics value, useful in legato mode.
         int       start; //how the harmonics start
-	float     note_log2_freq;
+        float     note_log2_freq;
         float     BendAdjust;
         float     OffsetHz;
         float     panning;

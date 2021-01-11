@@ -52,7 +52,7 @@ public:
                   thread.start(middleware);
           }
 
-	  void updateMiddleWare(zyn::MiddleWare* const mw) noexcept
+          void updateMiddleWare(zyn::MiddleWare* const mw) noexcept
           {
               middleware = mw;
           }
@@ -60,7 +60,7 @@ public:
       private:
           const bool wasRunning;
           MiddleWareThread& thread;
-	  zyn::MiddleWare* middleware;
+          zyn::MiddleWare* middleware;
 
           DISTRHO_PREVENT_HEAP_ALLOCATION
           DISTRHO_DECLARE_NON_COPY_CLASS(ScopedStopper)
@@ -509,7 +509,7 @@ private:
 
     void _initMaster()
     {
-	middleware = new zyn::MiddleWare(std::move(synth), &config);
+        middleware = new zyn::MiddleWare(std::move(synth), &config);
         middleware->setUiCallback(__uiCallback, this);
         middleware->setIdleCallback(__idleCallback, this);
         _masterChangedCallback(middleware->spawnMaster());

@@ -167,7 +167,7 @@ void Controller::setexpression(int value)
     expression.data = value;
     if(expression.receive != 0)
     {
-	assert( value <= 127 );	/* to protect what's left of JML's hearing */
+        assert( value <= 127 ); /* to protect what's left of JML's hearing */
 
         expression.relvolume = value / 127.0f;
     }
@@ -244,12 +244,12 @@ void Controller::setvolume(int value)
     if(volume.receive != 0)
     {
         /* volume.volume = powf(0.1f, (127 - value) / 127.0f * 2.0f); */
-	/* rather than doing something fancy that results in a value
-	 * of 0 not completely muting the output, do the reasonable
-	 * thing and just give the value the user ordered. */
-	assert( value <= 127 );
+        /* rather than doing something fancy that results in a value
+         * of 0 not completely muting the output, do the reasonable
+         * thing and just give the value the user ordered. */
+        assert( value <= 127 );
 
-	volume.volume = value / 127.0f;
+        volume.volume = value / 127.0f;
     }
     else
         volume.volume = 1.0f;
