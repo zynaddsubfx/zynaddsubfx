@@ -273,21 +273,21 @@ enum LegatoMsg {
 #endif
 
 template<class T>
-class m_unique_ptr
+class m_unique_array
 {
-    T* ptr = nullptr;
+    T* ptr = nullptr; //!< @invariant nullptr or pointer to new[]'ed memory
 public:
-    m_unique_ptr() = default;
-    m_unique_ptr(m_unique_ptr&& other) : ptr(other.ptr) {
+    m_unique_array() = default;
+    m_unique_array(m_unique_array&& other) : ptr(other.ptr) {
         other.ptr = nullptr;
     }
-    m_unique_ptr& operator=(m_unique_ptr&& other) {
+    m_unique_array& operator=(m_unique_array&& other) {
         ptr = other.ptr;
         other.ptr = nullptr;
         return *this;
     }
-    m_unique_ptr(const m_unique_ptr& other) = delete;
-    ~m_unique_ptr() { ptr = nullptr; }
+    m_unique_array(const m_unique_array& other) = delete;
+    ~m_unique_array() { delete[] ptr; ptr = nullptr; }
     void resize(unsigned sz) {
         delete[] ptr;
         ptr = new T[sz]; }
@@ -313,7 +313,7 @@ struct SYNTH_T {
     SYNTH_T& operator=(SYNTH_T&& ) = default;
 
     /** the buffer to add noise in order to avoid denormalisation */
-    m_unique_ptr<float> denormalkillbuf;
+    m_unique_array<float> denormalkillbuf;
 
     /**Sampling rate*/
     unsigned int samplerate;
