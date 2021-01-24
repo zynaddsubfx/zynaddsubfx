@@ -252,7 +252,7 @@ public:
 
     ~Tensor()
     {
-        if(base_type::m_owner) { delete[] m_data; }
+        delete[] m_data;
     }
 
     Tensor& operator=(Tensor&& other) {
@@ -337,7 +337,7 @@ protected:
 public:
     Tensor(std::size_t capacity, std::size_t newsize) : TensorBase<1, T>(capacity, newsize), m_data(new T[capacity]) {}
     Tensor(const Shape<1>& shape, const Shape<1>& newsize) : Tensor(shape.dim[0], newsize.dim[0]){}
-    ~Tensor() { if(base_type::m_owner) { delete[] m_data; } }
+    ~Tensor() { delete[] m_data; }
     Tensor& operator=(Tensor&& other) {
         base_type::operator=(other);
         m_data = other.m_data;
