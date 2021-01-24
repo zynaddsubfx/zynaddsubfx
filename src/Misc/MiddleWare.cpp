@@ -276,14 +276,20 @@ public:
     //! calculation failed. if freqs or semantics could have changed, send those
     //! aswell.
     void chainWtParamRequest(int part, int kit, int voice, bool isFm, rtosc::RtData& d,
-        Tensor1<WaveTable::float32>* freqs = nullptr, Tensor1<WaveTable::IntOrFloat>* semantics = nullptr)
+        OscilGen* oscilGen = nullptr)
     {
         if(!waitForAdPars[part][kit][voice][isFm])
         {
             printf("WT: MW sending /wavetable-params-changed...\n");
             std::string s = buildVoiceParMsg(&part, &kit, &voice);
-            if(semantics)
+            if(oscilGen)
             {
+                std::pair<Tensor1<WaveTable::float32>*,
+                    Tensor1<WaveTable::IntOrFloat>*> scales =
+                oscilGen->calculateWaveTableScales();
+                Tensor1<WaveTable::float32>* freqs = scales.first;
+                Tensor1<WaveTable::IntOrFloat>* semantics = scales.second;
+
                 printf("WT: MW calculated scales %p (sz %d) %p (sz %d)\n",
                     freqs, freqs->size(), semantics, semantics->size());
                 d.chain((s + "/wavetable-params-changed").c_str(), isFm ? "Tbb" : "Fbb", sizeof(freqs), &freqs, sizeof(semantics), &semantics);
@@ -473,11 +479,9 @@ struct NonRtObjStore
             else {
                 // param change may have influence on wavetable freqs/semantics
                 OscilGen* oscilGen = static_cast<OscilGen*>(osc);
-                std::pair<Tensor1<WaveTable::float32>*,
-                    Tensor1<WaveTable::IntOrFloat>*> scales =
-                oscilGen->calculateWaveTableScales();
+
                 // inform RT about new params/scales
-                handler.chainWtParamRequest(part, kit, voice, isFm, d, scales.first, scales.second);
+                handler.chainWtParamRequest(part, kit, voice, isFm, d, oscilGen);
             }
         }
         else {
