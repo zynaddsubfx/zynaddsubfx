@@ -2448,12 +2448,26 @@ const SYNTH_T &MiddleWare::getSynth(void) const
     return impl->synth;
 }
 
-const char* MiddleWare::getServerAddress(void) const
+char* MiddleWare::getServerAddress(void) const
 {
     if(impl->server)
         return lo_server_get_url(impl->server);
     else
-        return "NULL";
+        return nullptr;
+}
+
+char* MiddleWare::getServerPort(void) const
+{
+    char* addr = getServerAddress();
+    char* result;
+    if(addr)
+    {
+        result = lo_url_get_port(addr);
+        free(addr);
+    }
+    else
+        result = nullptr;
+    return result;
 }
 
 const PresetsStore& MiddleWare::getPresetsStore() const

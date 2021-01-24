@@ -82,7 +82,8 @@ class MiddleWare
         //View Synthesis Parameters
         const SYNTH_T &getSynth(void) const;
         //liblo stuff
-        const char* getServerAddress(void) const;
+        char* getServerAddress(void) const;
+        char* getServerPort(void) const;
 
         const PresetsStore& getPresetsStore() const;
         PresetsStore& getPresetsStore();

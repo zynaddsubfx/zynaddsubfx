@@ -708,7 +708,7 @@ int main(int argc, char *argv[])
 #endif
     if(!noui) {
         printf("[INFO] Launching Zyn-Fusion...\n");
-        const char *addr = middleware->getServerAddress();
+        char *addr = middleware->getServerAddress();
 #ifndef WIN32
         gui_pid = fork();
         if(gui_pid == 0) {
@@ -759,6 +759,7 @@ int main(int argc, char *argv[])
             exit(1);
         }
 #endif
+        free(addr);
     }
 #endif
 
