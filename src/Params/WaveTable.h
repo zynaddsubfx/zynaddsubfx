@@ -229,6 +229,7 @@ protected:
     Tensor() : m_data(nullptr) {}
     void init_shape(const Shape<N>& shape)
     {
+        assert(!m_data);
         base_type::set_capacity(shape.dim[0]);
         m_data = new SubTensor[base_type::capacity()];
         init_shape_alloced(shape);
@@ -329,6 +330,7 @@ protected:
     Tensor() : m_data(nullptr) {}
     void init_shape(const Shape<1>& shape)
     {
+        assert(!m_data);
         base_type::set_capacity(shape.dim[0]);
         m_data = new T[base_type::capacity()];
     }
