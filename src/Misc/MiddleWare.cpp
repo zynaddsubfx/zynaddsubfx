@@ -1042,19 +1042,19 @@ public:
                 assert(!params.isFm || params.presonance == 0);
 
                 // calculate all freqs for all pending semantics
-                printf("WT: MW generating %d new tensors of %d waves each...\n", params.write_space, (int)params.freqs->capacity());
+                printf("WT: MW generating %d new tensors of %d waves each...\n", params.write_space, (int)params.freqs->size());
                 for(int i = 0; i < params.write_space; ++i)
                 {
                     const Shape2 tensorShape{(size_t)params.freqs->size(),
                                              (size_t)synth.oscilsize};
                     Tensor2<WaveTable::float32>* newTensor =
-                        new Tensor2<WaveTable::float32>(tensorShape);
+                        new Tensor2<WaveTable::float32>(tensorShape, tensorShape);
                     // TODO: the 2nd dim (float buffer) is not resized... (but it's not used right now)
                     newTensor->resize(Shape1{(size_t)params.freqs->size()});
 
                     // TODO: remove those casts everywhere, elliminate std::size_t...
-                    int s = (params.write_pos + i) % (int)params.semantics->capacity();
-                    for(int f = 0; f < (int)params.freqs->capacity(); ++f)
+                    int s = (params.write_pos + i) % (int)params.semantics->size();
+                    for(int f = 0; f < (int)params.freqs->size(); ++f)
                     {
                         WaveTable::float32* data = oscilGen->calculateWaveTableData(
                             (*params.freqs)[f], (*params.semantics)[s], params.presonance);

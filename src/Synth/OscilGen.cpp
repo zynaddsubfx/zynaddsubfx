@@ -497,22 +497,20 @@ public:
 std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloat>*> OscilGen::calculateWaveTableScales(
     bool fillWithZeroes) const
 {
-    Tensor1<wavetable_types::float32>* freqs = new Tensor1<wavetable_types::float32>(WaveTable::num_freqs);
-    Tensor1<wavetable_types::IntOrFloat>* semantics = new Tensor1<wavetable_types::IntOrFloat>(WaveTable::num_semantics);
-    freqs->resize(freqs->capacity());
-    semantics->resize(semantics->capacity());
+    Tensor1<wavetable_types::float32>* freqs = new Tensor1<wavetable_types::float32>(WaveTable::num_freqs, WaveTable::num_freqs);
+    Tensor1<wavetable_types::IntOrFloat>* semantics = new Tensor1<wavetable_types::IntOrFloat>(WaveTable::num_semantics, WaveTable::num_semantics);
 
     // semantics
     if(fillWithZeroes)
     {
-        for(std::size_t i = 0; i < semantics->capacity(); ++i)
+        for(int i = 0; i < semantics->size(); ++i)
         {
             (*semantics)[i].intVal = i; // do not consume any random
         }
     }
     else
     {
-        for(std::size_t i = 0; i < semantics->capacity(); ++i)
+        for(int i = 0; i < semantics->size(); ++i)
         {
             (*semantics)[i].intVal = prng();
         }
@@ -520,7 +518,7 @@ std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloa
 
     // frequency
     (*freqs)[0] = 55.f;
-    for(std::size_t i = 1; i < freqs->capacity(); ++i)
+    for(int i = 1; i < freqs->size(); ++i)
     {
         (*freqs)[i] = 2.f * (*freqs)[i-1];
     }
