@@ -804,6 +804,9 @@ void ADnoteParameters::KillVoice(int nvoice)
 
 void ADnoteVoiceParam::kill()
 {
+    delete table;
+    delete tableFm;
+
     delete OscilGn;
     delete FmGn;
 

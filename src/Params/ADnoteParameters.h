@@ -114,7 +114,6 @@ struct ADnoteGlobalParam {
 struct ADnoteVoiceParam {
     ADnoteVoiceParam(const ADnoteVoiceParam& other) = delete;
     ADnoteVoiceParam() : time(nullptr), last_update_timestamp(0) { };
-    ~ADnoteVoiceParam() { delete table; delete tableFm; }
     void getfromXML(XMLwrapper& xml, unsigned nvoice);
     void add2XML(XMLwrapper& xml, bool fmoscilused);
     void paste(ADnoteVoiceParam &p);
