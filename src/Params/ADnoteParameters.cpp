@@ -39,128 +39,6 @@ using rtosc::RtData;
 #undef rChangeCb
 #define rChangeCb if (obj->time) { obj->last_update_timestamp = obj->time->time(); }
 static const Ports voicePorts = {
-    {"wavetable-params-changed:T:F:Tbb:Fbb",
-        rDoc("retrieve realtime params for wavetable computation"),
-        nullptr,
-        [](const char *msg, RtData &d)
-        {
-            rObject *obj = (rObject *)d.obj;
-            if(obj->waveTables)
-            {
-                int nargs = rtosc_narguments(msg);
-                bool isFmSmp = rtosc_argument(msg, 0).T;
-                WaveTable*& wt = isFmSmp ? obj->tableFm : obj->table;
-                printf("WT: AD received /wavetable-params-changed...\n");
-                // refresh freqs and semantics if passed
-                if(nargs == 3)
-                {
-                    Tensor1<WaveTable::float32>* freqs = *(Tensor1<WaveTable::float32>**)rtosc_argument(msg, 1).b.data;
-                    Tensor1<WaveTable::IntOrFloat>* semantics = *(Tensor1<WaveTable::IntOrFloat>**)rtosc_argument(msg, 2).b.data;
-                    printf("WT: AD received new scale tensors %p (sz %d) %p (sz %d)\n", freqs, freqs->size(), semantics, semantics->size());
-                    wt->swapFreqs(*freqs);
-                    wt->swapSemantics(*semantics);
-                    d.reply("/free", "sb", "Tensor1<WaveTable::float32>", sizeof(Tensor1<WaveTable::float32>*), &freqs);
-                    d.reply("/free", "sb", "Tensor1<WaveTable::IntOrFloat>", sizeof(Tensor1<WaveTable::IntOrFloat>*), &semantics);
-                    wt->resize(Shape2{wt->semantics_size(), wt->freqs_size()}); // TODO: remove casts
-                }
-                // give MW all it needs to generate the new table
-                int write_pos = wt->write_pos_semantics();
-                int write_space = wt->write_space_semantics();
-                printf("WT: AD WT %p requesting %d new 2D Tensors at position %d (reason: params changed)...\n",
-                       wt, write_space, write_pos);
-                d.reply("/request-wavetable", isFmSmp ? "sTiibbi" : "sFiibbi",
-                        // path to this voice (T+F give the OscilGen of this voice)
-                        d.loc,
-                        // write position + length + tensors
-                        write_pos,
-                        write_space,
-                        sizeof(Tensor1<WaveTable::IntOrFloat>*),
-                        wt->get_semantics_addr(),
-                        sizeof(Tensor1<WaveTable::float32>*),
-                        wt->get_freqs_addr(),
-                        // wavetable parameters (curently, only Presonance)
-                        isFmSmp ? 0 : (int)obj->Presonance);
-                // tell the ringbuffer that we can not write more
-                wt->inc_write_pos_semantics(write_space);
-            }
-            else
-            {
-                // MiddleWare will just wait patiently for the wavetable params,
-                // but we won't send them, because we don't need the tables.
-                // MiddleWare will just consider the tables as outdated, which
-                // is OK because they are not used.
-            }
-        }
-    },
-    {"set-waves:Tib:Fib",
-        rDoc("inform voice to update oscillator table"), NULL,
-        [](const char *msg, RtData &d)
-        {
-            // take the passed waves
-            // TODO: somehow let ADnote know that the waves can be used now!! (read pointer)
-            rObject *obj = (rObject *)d.obj;
-
-            bool isFmSmp = rtosc_argument(msg, 0).T;
-            int sem_idx = rtosc_argument(msg, 1).i;
-            Tensor2<WaveTable::float32>* waves = *(Tensor2<WaveTable::float32>**)rtosc_argument(msg, 2).b.data;
-
-            WaveTable*& wt = isFmSmp ? obj->tableFm : obj->table;
-
-            if(wt->write_pos_delayed_semantics() != sem_idx)
-            {
-                // since we request the wavetables in order, and the
-                // communication with MiddleWare is lossless, this should
-                // imply a programming error
-                printf("WARNING: MW sent (out-dated?) semantic \"%d\", "
-                       "but the next required semantic is \"%d\" - ignoring!\n",
-                       sem_idx, wt->write_pos_semantics());
-                assert(false); // in debug mode, just abort now
-            }
-            else
-            {
-                assert(wt->write_space_delayed_semantics() > 0);
-
-                // the received Tensor2 may have different size than ours,
-                // so take what we need, bit by bit
-                for(int freq_idx = 0; freq_idx < waves->size(); ++freq_idx)
-                {
-                    Tensor1<WaveTable::float32>& unusedWave = (*waves)[freq_idx];
-                    wt->swapDataAt(sem_idx, freq_idx, unusedWave);
-                }
-
-                wt->inc_write_pos_delayed_semantics();
-                // recycle the packaging
-                // this will also free the contained Tensor1 (which are useless after the swap)
-                d.reply("/free", "sb", "Tensor2<WaveTable::float32>", sizeof(Tensor2<WaveTable::float32>*), &waves);
-            }
-        }},
-    //Send Messages To Oscillator Realtime Table
-    {"OscilSmp/", rDoc("Primary Oscillator"),
-        &OscilGen::ports,
-        rBOIL_BEGIN
-        if(obj->OscilGn == NULL) return;
-        data.obj = obj->OscilGn;
-        if(strstr(msg, "paste"))
-        {
-            SNIP
-            OscilGen::ports.dispatch(msg, data);
-        }
-        else
-            data.forward();
-        rBOIL_END},
-    {"FMSmp/", rDoc("Modulating Oscillator"),
-        &OscilGen::ports,
-        rBOIL_BEGIN
-        if(obj->FmGn == NULL) return;
-        data.obj = obj->FmGn;
-        if(strstr(msg, "paste"))
-        {
-            SNIP
-            OscilGen::ports.dispatch(msg, data);
-        }
-        else
-            data.forward();
-        rBOIL_END},
     rRecurp(FreqLfo, "Frequency LFO"),
     rRecurp(AmpLfo, "Amplitude LFO"),
     rRecurp(FilterLfo, "Filter LFO"),
@@ -421,6 +299,131 @@ static const Ports voicePorts = {
             rObject *obj = (rObject *)d.obj;
             d.reply(d.loc, "f", obj->getUnisonFrequencySpreadCents());
         }},
+
+    // Wavetable stuff
+    {"wavetable-params-changed:T:F:Tbb:Fbb",
+        rDoc("retrieve realtime params for wavetable computation"),
+        nullptr,
+        [](const char *msg, RtData &d)
+        {
+            rObject *obj = (rObject *)d.obj;
+            if(obj->waveTables)
+            {
+                int nargs = rtosc_narguments(msg);
+                bool isFmSmp = rtosc_argument(msg, 0).T;
+                WaveTable*& wt = isFmSmp ? obj->tableFm : obj->table;
+                printf("WT: AD received /wavetable-params-changed...\n");
+                // refresh freqs and semantics if passed
+                if(nargs == 3)
+                {
+                    Tensor1<WaveTable::float32>* freqs = *(Tensor1<WaveTable::float32>**)rtosc_argument(msg, 1).b.data;
+                    Tensor1<WaveTable::IntOrFloat>* semantics = *(Tensor1<WaveTable::IntOrFloat>**)rtosc_argument(msg, 2).b.data;
+                    printf("WT: AD received new scale tensors %p (sz %d) %p (sz %d)\n", freqs, freqs->size(), semantics, semantics->size());
+                    wt->swapFreqs(*freqs);
+                    wt->swapSemantics(*semantics);
+                    d.reply("/free", "sb", "Tensor1<WaveTable::float32>", sizeof(Tensor1<WaveTable::float32>*), &freqs);
+                    d.reply("/free", "sb", "Tensor1<WaveTable::IntOrFloat>", sizeof(Tensor1<WaveTable::IntOrFloat>*), &semantics);
+                    wt->resize(Shape2{wt->semantics_size(), wt->freqs_size()}); // TODO: remove casts
+                }
+                // give MW all it needs to generate the new table
+                int write_pos = wt->write_pos_semantics();
+                int write_space = wt->write_space_semantics();
+                printf("WT: AD WT %p requesting %d new 2D Tensors at position %d (reason: params changed)...\n",
+                       wt, write_space, write_pos);
+                d.reply("/request-wavetable", isFmSmp ? "sTiibbi" : "sFiibbi",
+                        // path to this voice (T+F give the OscilGen of this voice)
+                        d.loc,
+                        // write position + length + tensors
+                        write_pos,
+                        write_space,
+                        sizeof(Tensor1<WaveTable::IntOrFloat>*),
+                        wt->get_semantics_addr(),
+                        sizeof(Tensor1<WaveTable::float32>*),
+                        wt->get_freqs_addr(),
+                        // wavetable parameters (curently, only Presonance)
+                        isFmSmp ? 0 : (int)obj->Presonance);
+                // tell the ringbuffer that we can not write more
+                wt->inc_write_pos_semantics(write_space);
+            }
+            else
+            {
+                // MiddleWare will just wait patiently for the wavetable params,
+                // but we won't send them, because we don't need the tables.
+                // MiddleWare will just consider the tables as outdated, which
+                // is OK because they are not used.
+            }
+        }
+    },
+    {"set-waves:Tib:Fib",
+        rDoc("inform voice to update oscillator table"), NULL,
+        [](const char *msg, RtData &d)
+        {
+            // take the passed waves
+            rObject *obj = (rObject *)d.obj;
+
+            bool isFmSmp = rtosc_argument(msg, 0).T;
+            int sem_idx = rtosc_argument(msg, 1).i;
+            Tensor2<WaveTable::float32>* waves = *(Tensor2<WaveTable::float32>**)rtosc_argument(msg, 2).b.data;
+
+            WaveTable*& wt = isFmSmp ? obj->tableFm : obj->table;
+
+            if(wt->write_pos_delayed_semantics() != sem_idx)
+            {
+                // since we request the wavetables in order, and the
+                // communication with MiddleWare is lossless, this should
+                // imply a programming error
+                printf("WARNING: MW sent (out-dated?) semantic \"%d\", "
+                       "but the next required semantic is \"%d\" - ignoring!\n",
+                       sem_idx, wt->write_pos_semantics());
+                assert(false); // in debug mode, just abort now
+            }
+            else
+            {
+                assert(wt->write_space_delayed_semantics() > 0);
+
+                // the received Tensor2 may have different size than ours,
+                // so take what we need, bit by bit
+                for(int freq_idx = 0; freq_idx < waves->size(); ++freq_idx)
+                {
+                    Tensor1<WaveTable::float32>& unusedWave = (*waves)[freq_idx];
+                    wt->swapDataAt(sem_idx, freq_idx, unusedWave);
+                }
+
+                wt->inc_write_pos_delayed_semantics();
+                // recycle the packaging
+                // this will also free the contained Tensor1 (which are useless after the swap)
+                d.reply("/free", "sb", "Tensor2<WaveTable::float32>", sizeof(Tensor2<WaveTable::float32>*), &waves);
+            }
+        }},
+
+    //Send Messages To Oscillator Realtime Table
+    {"OscilSmp/", rDoc("Primary Oscillator"),
+        &OscilGen::ports,
+        rBOIL_BEGIN
+        if(obj->OscilGn == NULL) return;
+        data.obj = obj->OscilGn;
+        if(strstr(msg, "paste"))
+        {
+            SNIP
+            OscilGen::ports.dispatch(msg, data);
+        }
+        else
+            data.forward();
+        rBOIL_END},
+    {"FMSmp/", rDoc("Modulating Oscillator"),
+        &OscilGen::ports,
+        rBOIL_BEGIN
+        if(obj->FmGn == NULL) return;
+        data.obj = obj->FmGn;
+        if(strstr(msg, "paste"))
+        {
+            SNIP
+            OscilGen::ports.dispatch(msg, data);
+        }
+        else
+            data.forward();
+        rBOIL_END},
+
 };
 #undef rChangeCb
 
