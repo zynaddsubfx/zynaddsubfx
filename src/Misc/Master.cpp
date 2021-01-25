@@ -504,13 +504,13 @@ static const Ports master_ports = {
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
             M->setController(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
-    {"tempo::i", rProp(parameter) rDefault(120) rShort("Tempo") rUnit(BPM) rDoc("Tempo / Beats per minute") rLinear(40, 200), 0,
+    {"bpm::i", rProp(parameter) rDefault(120) rShort("BPM") rDoc("Tempo / Beats per minute") rLinear(40, 200) rMap(unit, bpm), 0,
         rBegin;
         if(!strcmp("i",rtosc_argument_string(msg))) {
-            m->time.tempo = rtosc_argument(msg, 0).i;
-            d.broadcast(d.loc, "i", m->time.tempo);
+            m->time.bpm = rtosc_argument(msg, 0).i;
+            d.broadcast(d.loc, "i", m->time.bpm);
         } else
-            d.reply(d.loc, "i", m->time.tempo);
+            d.reply(d.loc, "i", m->time.bpm);
         rEnd},
     {"Panic:", rDoc("Stop all sound"), 0,
         [](const char *, RtData &d) {
@@ -776,6 +776,9 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     bToU = NULL;
     uToB = NULL;
 
+    // set default tempo
+    time.bpm = 120;
+    
     // set default tempo
     time.tempo = 120;
 
