@@ -520,6 +520,13 @@ static const Ports master_ports = {
         [](const char *,RtData &d) {
             Master *M =  (Master*)d.obj;
             M->frozenState = false;}},
+    {"midi-learn/", rDoc("MIDI Learn Classic"), &rtosc::MidiMapperRT::ports,
+        [](const char *msg, RtData &d) {
+            Master *M =  (Master*)d.obj;
+            SNIP;
+            printf("residue message = <%s>\n", msg);
+            d.obj = &M->midi;
+            rtosc::MidiMapperRT::ports.dispatch(msg,d);}},
     {"automate/", rDoc("MIDI Learn/Plugin Automation support"), &automate_ports,
         [](const char *msg, RtData &d) {
             SNIP;
@@ -757,7 +764,8 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     //Setup MIDI Learn
     automate.set_ports(master_ports);
     automate.set_instance(this);
-    //midi.frontend = [this](const char *msg) {bToU->raw_write(msg);};
+    midi.frontend = [this](const char *msg) {bToU->raw_write(msg);};
+    midi.backend  = [this](const char *msg) {applyOscEvent(msg);};
     automate.backend  = [this](const char *msg) {applyOscEvent(msg);};
 
     memory = new AllocatorClass();
@@ -980,6 +988,7 @@ void Master::setController(char chan, int type, int par)
     if(frozenState)
         return;
     automate.handleMidi(chan, type, par);
+    midi.handleCC(type, par, chan, false);
     if((type == C_dataentryhi) || (type == C_dataentrylo)
        || (type == C_nrpnhi) || (type == C_nrpnlo)) { //Process RPN and NRPN by the Master (ignore the chan)
         ctl.setparameternumber(type, par);
@@ -996,6 +1005,9 @@ void Master::setController(char chan, int type, int par)
                         insefx[parlo]->seteffectparrt(valhi, vallo);
                     else if (chan < NUM_MIDI_PARTS && parlo < NUM_PART_EFX)
                         part[chan-1]->partefx[parlo]->seteffectparrt(valhi, vallo);
+                    break;
+                default:
+                    midi.handleCC(parhi<<7&parlo,valhi<<7&vallo, chan, true);
                     break;
             }
         }

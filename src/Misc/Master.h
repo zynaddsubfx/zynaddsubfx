@@ -18,6 +18,7 @@
 #include "Microtonal.h"
 #include <atomic>
 #include <rtosc/automations.h>
+#include <rtosc/miditable.h>
 #include <rtosc/savefile.h>
 
 #include "Time.h"
@@ -200,6 +201,7 @@ class Master
 
         //Midi Learn
         rtosc::AutomationMgr automate;
+        rtosc::MidiMapperRT midi;
 
         bool   frozenState;//read-only parameters for threadsafe actions
         Allocator *memory;
