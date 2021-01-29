@@ -244,6 +244,73 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
 }
 
 /******************************************************************************
+ *                      MIDI Serialization                                    *
+ *                                                                            *
+ ******************************************************************************/
+void saveMidiLearn(XMLwrapper &xml, const rtosc::MidiMappernRT &midi)
+{
+    xml.beginbranch("midi-learn");
+    for(auto value:midi.inv_map) {
+        XmlNode binding("midi-binding");
+        auto biject = std::get<3>(value.second);
+        binding["osc-path"]  = value.first;
+        binding["coarse-CC"] = to_s(std::get<1>(value.second));
+        binding["fine-CC"]   = to_s(std::get<2>(value.second));
+        binding["type"]      = "i";
+        binding["minimum"]   = to_s(biject.min);
+        binding["maximum"]   = to_s(biject.max);
+        xml.add(binding);
+    }
+    xml.endbranch();
+}
+
+void loadMidiLearn(XMLwrapper &xml, rtosc::MidiMappernRT &midi)
+{
+    using rtosc::Port;
+    if(xml.enterbranch("midi-learn")) {
+        auto nodes = xml.getBranch();
+
+        //TODO clear mapper
+
+        for(auto node:nodes) {
+            if(node.name != "midi-binding" ||
+                    !node.has("osc-path") ||
+                    !node.has("coarse-CC"))
+                continue;
+            const string path = node["osc-path"];
+            const int    CC   = atoi(node["coarse-CC"].c_str());
+            const Port  *p    = Master::ports.apropos(path.c_str());
+            if(p) {
+                printf("loading midi port...\n");
+                midi.addNewMapper(CC, *p, path);
+            } else {
+                printf("unknown midi bindable <%s>\n", path.c_str());
+            }
+        }
+        xml.exitbranch();
+    } else
+        printf("cannot find 'midi-learn' branch...\n");
+}
+
+void connectMidiLearn(int par, int chan, bool isNrpn, string path, rtosc::MidiMappernRT &midi)
+{
+    const rtosc::Port *p = Master::ports.apropos(path.c_str());
+    if(p) {
+        if(isNrpn)
+            printf("mapping midi NRPN: %d, CH: %d to Port: %s\n", par, chan, path.c_str());
+        else
+            printf("mapping midi CC: %d, CH: %d to Port: %s\n", par, chan, path.c_str());
+            
+        if(chan<1) chan=1;
+        int ID = (isNrpn<<18) + (((chan-1)&0x0f)<<14) + par;
+        //~ printf("ID = %d\n", ID);
+
+        midi.addNewMapper(ID, *p, path);
+    } else {
+        printf("unknown port to midi bind <%s>\n", path.c_str());
+    }
+}
+/******************************************************************************
  *                      Non-RealTime Object Store                             *
  *                                                                            *
  *                                                                            *
@@ -914,7 +981,7 @@ public:
     rtosc::UndoHistory undo;
 
     //MIDI Learn
-    //rtosc::MidiMappernRT midi_mapper;
+    rtosc::MidiMappernRT midi_mapper;
 
     //Link To the Realtime
     rtosc::ThreadLink *bToU;
@@ -1461,6 +1528,44 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         impl.kitEnable(msg);
         d.forward();
         rEnd},
+    {"save_xcz:s", 0, 0,
+        rBegin;
+        const char *file = rtosc_argument(msg, 0).s;
+        XMLwrapper xml;
+        saveMidiLearn(xml, impl.midi_mapper);
+        xml.saveXMLfile(file, impl.master->gzip_compression);
+        rEnd},
+    {"load_xcz:s", 0, 0,
+        rBegin;
+        const char *file = rtosc_argument(msg, 0).s;
+        XMLwrapper xml;
+        xml.loadXMLfile(file);
+        loadMidiLearn(xml, impl.midi_mapper);
+        rEnd},
+    {"clear_xcz:", 0, 0,
+        rBegin;
+        impl.midi_mapper.clear();
+        rEnd},
+    {"midi-map-cc:is", "bind a midi CC on CH to an OSC path", 0,
+        rBegin;
+        const int par = rtosc_argument(msg, 0).i;
+        const string path = rtosc_argument(msg, 1).s;
+        connectMidiLearn(par, 1, false, path, impl.midi_mapper);
+        rEnd},
+    {"midi-map-cc:iis", "bind a midi CC on CH to an OSC path", 0,
+        rBegin;
+        const int par = rtosc_argument(msg, 0).i;
+        const int ch = rtosc_argument(msg, 1).i;
+        const string path = rtosc_argument(msg, 2).s;
+        connectMidiLearn(par, ch, false, path, impl.midi_mapper);
+        rEnd},
+    {"midi-map-nrpn:iis", "bind nrpn on channel to an OSC path", 0,
+        rBegin;
+        const int par = rtosc_argument(msg, 0).i;
+        const int ch = rtosc_argument(msg, 1).i;
+        const string path = rtosc_argument(msg, 2).s;
+        connectMidiLearn(par, ch, true, path, impl.midi_mapper);
+        rEnd},
     {"save_xlz:s", 0, 0,
         rBegin;
         impl.doReadOnlyOp([&]() {
@@ -1637,51 +1742,52 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         impl.undo.seekHistory(+1);
         rEnd},
     //port to observe the midi mappings
-    //{"midi-learn-values:", 0, 0,
-    //    rBegin;
-    //    auto &midi  = impl.midi_mapper;
-    //    auto  key   = keys(midi.inv_map);
-    //    //cc-id, path, min, max
-//#define MAX_MIDI 32
-    //    rtosc_arg_t args[MAX_MIDI*4];
-    //    char        argt[MAX_MIDI*4+1] = {};
-    //    int j=0;
-    //    for(unsigned i=0; i<key.size() && i<MAX_MIDI; ++i) {
-    //        auto val = midi.inv_map[key[i]];
-    //        if(std::get<1>(val) == -1)
-    //            continue;
-    //        argt[4*j+0]   = 'i';
-    //        args[4*j+0].i = std::get<1>(val);
-    //        argt[4*j+1]   = 's';
-    //        args[4*j+1].s = key[i].c_str();
-    //        argt[4*j+2]   = 'i';
-    //        args[4*j+2].i = 0;
-    //        argt[4*j+3]   = 'i';
-    //        args[4*j+3].i = 127;
-    //        j++;
+    {"mlearn-values:", 0, 0,
+        rBegin;
+        auto &midi  = impl.midi_mapper;
+        auto  key   = keys(midi.inv_map);
+        //cc-id, path, min, max
+#define MAX_MIDI 32
+        rtosc_arg_t args[MAX_MIDI*4];
+        char        argt[MAX_MIDI*4+1] = {};
+        int j=0;
+        for(unsigned i=0; i<key.size() && i<MAX_MIDI; ++i) {
+            auto par = midi.inv_map[key[i]];
+            if(std::get<1>(par) == -1)
+                continue;
+            auto bounds = midi.getBounds(key[i].c_str());
+            argt[4*j+0]   = 'i';
+            args[4*j+0].i = std::get<1>(par);
+            argt[4*j+1]   = 's';
+            args[4*j+1].s = key[i].c_str();
+            argt[4*j+2]   = 'f';
+            args[4*j+2].f = std::get<0>(bounds);
+            argt[4*j+3]   = 'f';
+            args[4*j+3].f = std::get<1>(bounds);
+            j++;
 
-    //    }
-    //    d.replyArray(d.loc, argt, args);
-//#undef  MAX_MIDI
-    //    rEnd},
-    //{"learn:s", 0, 0,
-    //    rBegin;
-    //    string addr = rtosc_argument(msg, 0).s;
-    //    auto &midi  = impl.midi_mapper;
-    //    auto map    = midi.getMidiMappingStrings();
-    //    if(map.find(addr) != map.end())
-    //        midi.map(addr.c_str(), false);
-    //    else
-    //        midi.map(addr.c_str(), true);
-    //    rEnd},
-    //{"unlearn:s", 0, 0,
-    //    rBegin;
-    //    string addr = rtosc_argument(msg, 0).s;
-    //    auto &midi  = impl.midi_mapper;
-    //    auto map    = midi.getMidiMappingStrings();
-    //    midi.unMap(addr.c_str(), false);
-    //    midi.unMap(addr.c_str(), true);
-    //    rEnd},
+        }
+        d.replyArray(d.loc, argt, args);
+#undef  MAX_MIDI
+        rEnd},
+    {"mlearn:s", 0, 0,
+        rBegin;
+        string addr = rtosc_argument(msg, 0).s;
+        auto &midi  = impl.midi_mapper;
+        auto map    = midi.getMidiMappingStrings();
+        if(map.find(addr) != map.end())
+            midi.map(addr.c_str(), false);
+        else
+            midi.map(addr.c_str(), true);
+        rEnd},
+    {"munlearn:s", 0, 0,
+        rBegin;
+        string addr = rtosc_argument(msg, 0).s;
+        auto &midi  = impl.midi_mapper;
+        auto map    = midi.getMidiMappingStrings();
+        midi.unMap(addr.c_str(), false);
+        midi.unMap(addr.c_str(), true);
+        rEnd},
     //drop this message into the abyss
     {"ui/title:", 0, 0, [](const char *, RtData &) {}},
     {"quit:", 0, 0, [](const char *, RtData&) {Pexitprogram = 1;}},
@@ -1776,6 +1882,10 @@ static rtosc::Ports middlewareReplyPorts = {
         if(impl.recording_undo)
             impl.undo.recordEvent(msg);
         rEnd},
+    {"midi-use-CC:i", 0, 0,
+        rBegin;
+        impl.midi_mapper.useFreeID(rtosc_argument(msg, 0).i);
+        rEnd},
     {"broadcast:", 0, 0, rBegin; impl.broadcast = true; rEnd},
     {"forward:", 0, 0, rBegin; impl.forward = true; rEnd},
 };
@@ -1800,8 +1910,8 @@ MiddleWareImpl::MiddleWareImpl(MiddleWare *mw, SYNTH_T synth_,
 {
     bToU = new rtosc::ThreadLink(4096*2*16,1024/16);
     uToB = new rtosc::ThreadLink(4096*2*16,1024/16);
-    //midi_mapper.base_ports = &Master::ports;
-    //midi_mapper.rt_cb      = [this](const char *msg){handleMsg(msg);};
+    midi_mapper.base_ports = &Master::ports;
+    midi_mapper.rt_cb      = [this](const char *msg){handleMsg(msg);};
     if(preferrred_port != -1)
         server = lo_server_new_with_proto(to_s(preferrred_port).c_str(),
                                           LO_UDP, liblo_error_cb);
