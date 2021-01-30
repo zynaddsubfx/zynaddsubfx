@@ -157,7 +157,7 @@ class TensorTest : public CxxTest::TestSuite
             Shape3 s; s.dim[0] = s.dim[1] = s.dim[2] = 2;
             int raw[] = {0,1,2,3,4,5,6,7};
             Tensor3<int> t(s, s);
-            std::size_t consumed = t.set_data(raw);
+            std::size_t consumed = t.set_data_using_deep_copy(raw);
             TS_ASSERT_EQUALS(consumed, sizeof (raw) / sizeof (raw[0]));
             TS_ASSERT_EQUALS(t[0][0][0], 0);
             TS_ASSERT_EQUALS(t[0][0][1], 1);
@@ -174,8 +174,8 @@ class TensorTest : public CxxTest::TestSuite
             int raw[] = {0,1,2,3,4,5,6,7};
             Tensor3<int> t1(s,s);
             Tensor3<int> t2(s,s);
-            t1.set_data(raw);
-            t2.set_data(raw);
+            t1.set_data_using_deep_copy(raw);
+            t2.set_data_using_deep_copy(raw);
             MY_TS_ASSERT_EQUALS(t1, t2);
         }
 
@@ -186,8 +186,8 @@ class TensorTest : public CxxTest::TestSuite
             int raw2[] = {0,1,2,3,4,4,6,7};
             Tensor3<int> t1(s,s);
             Tensor3<int> t2(s,s);
-            t1.set_data(raw1);
-            t2.set_data(raw2);
+            t1.set_data_using_deep_copy(raw1);
+            t2.set_data_using_deep_copy(raw2);
             MY_TS_ASSERT_DIFFERS(t1, t2);
         }
 
@@ -195,7 +195,7 @@ class TensorTest : public CxxTest::TestSuite
             Shape3 s{2,2,2};
             int raw[] = {0,1,2,3,4,5,6,7};
             Tensor3<int> t3(s,s);
-            t3.set_data(raw);
+            t3.set_data_using_deep_copy(raw);
             const Tensor2<int>& t20 = t3[0];
             const Tensor2<int>& t21 = t3[1];
             const Tensor1<int>& t10 = t20[0];
@@ -204,10 +204,10 @@ class TensorTest : public CxxTest::TestSuite
             int exp21[] = {4,5,6,7};
             int exp10[] = {0,1};
             int exp11[] = {2,3};
-            Tensor2<int> texp20(t20.capacity_shape(), t20.capacity_shape()); texp20.set_data(exp20);
-            Tensor2<int> texp21(t20.capacity_shape(), t20.capacity_shape()); texp21.set_data(exp21);
-            Tensor1<int> texp10(t10.capacity_shape(), t10.capacity_shape()); texp10.set_data(exp10);
-            Tensor1<int> texp11(t10.capacity_shape(), t10.capacity_shape()); texp11.set_data(exp11);
+            Tensor2<int> texp20(t20.capacity_shape(), t20.capacity_shape()); texp20.set_data_using_deep_copy(exp20);
+            Tensor2<int> texp21(t20.capacity_shape(), t20.capacity_shape()); texp21.set_data_using_deep_copy(exp21);
+            Tensor1<int> texp10(t10.capacity_shape(), t10.capacity_shape()); texp10.set_data_using_deep_copy(exp10);
+            Tensor1<int> texp11(t10.capacity_shape(), t10.capacity_shape()); texp11.set_data_using_deep_copy(exp11);
             MY_TS_ASSERT_EQUALS(t20, texp20);
             MY_TS_ASSERT_EQUALS(t21, texp21);
             MY_TS_ASSERT_EQUALS(t10, texp10);

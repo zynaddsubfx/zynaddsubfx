@@ -292,13 +292,12 @@ public:
     }
 
     // testing only:
-    // TODO: rename: set_data_test (or completely remove)
-    std::size_t set_data(const T* new_data)
+    std::size_t set_data_using_deep_copy(const T* new_data)
     {
         std::size_t consumed = 0;
         for(std::size_t i = 0; i < base_type::size(); ++i)
         {
-            consumed += m_data[i].set_data(new_data + consumed);
+            consumed += m_data[i].set_data_using_deep_copy(new_data + consumed);
         }
         return consumed;
     }
@@ -377,7 +376,7 @@ public:
         std::fill_n(m_data, base_type::size(), 0);
     }
 
-    std::size_t set_data(const T* new_data)
+    std::size_t set_data_using_deep_copy(const T* new_data)
     {
         std::copy(new_data, new_data+base_type::size(), m_data);
         return base_type::capacity();

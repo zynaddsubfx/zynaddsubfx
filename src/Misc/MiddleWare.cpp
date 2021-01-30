@@ -1089,7 +1089,10 @@ public:
                         {
                             WaveTable::float32* data = oscilGen->calculateWaveTableData(
                                 (*params.freqs)[f], (*params.semantics)[s], params.presonance);
-                            (*newTensor)[f].set_data(data);
+                            (*newTensor)[f].set_data_using_deep_copy(data);
+                            delete[] data;
+                            // TODO: maybe let calculateWaveTableData already acces the Tensor
+                            //       then we save this alloc-copy-dealloc
                         }
 
                         // send Tensor2 for the current semantic
