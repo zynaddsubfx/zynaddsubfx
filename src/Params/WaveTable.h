@@ -85,6 +85,11 @@ protected:
 
     TensorBase() : m_capacity(0), m_size(0), m_owner(false) {}
     TensorBase(std::size_t capacity, std::size_t newsize) : m_capacity(capacity), m_size(newsize), m_owner(true) {};
+    TensorBase(const TensorBase& other) = delete;
+    TensorBase& operator=(const TensorBase& other) = delete;
+    TensorBase(TensorBase&& other) = delete;
+    TensorBase& operator=(TensorBase&& other) = delete;
+
 
 #if 0
     TensorBase(TensorBase&& other) {
@@ -157,7 +162,7 @@ public:
 
     void inc_write_pos(int amnt) { assert(amnt <= write_space()); w = (amnt+w) % m_size; }
     void inc_write_pos_delayed(int amnt = 1) { assert(amnt <= write_space_delayed()); w_delayed = (amnt+w_delayed) % m_size; }
-    void inc_read_pos() { assert(m_size == 1 || 1 <= read_space()); r = (1+r) % m_size; }
+    void inc_read_pos() { assert(m_size == 1 || 1 <= read_space()); /* <- too many consumed? */ r = (1+r) % m_size; }
 
     int read_pos() const { return r; }
     int write_pos() const { return w; }
@@ -418,13 +423,7 @@ public:
     }
     int size() const { return base_type::size(); }
 
-    Tensor3ForWaveTable& operator=(Tensor3ForWaveTable&& other) {
-        base_type::operator=(std::move(other));
-        AbstractRingbuffer::operator=(std::move(other));
-        return *this;
-    }
-
-/*    template<std::size_t N2, class X2>
+/*  template<std::size_t N2, class X2>
     friend void pointer_swap(Tensor<N2, X2>&, Tensor<N2, X2>&);*/
 };
 
