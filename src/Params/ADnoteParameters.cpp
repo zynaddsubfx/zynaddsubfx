@@ -301,7 +301,7 @@ static const Ports voicePorts = {
         }},
 
     // Wavetable stuff
-    {"wavetable-params-changed:T:F:Tbb:Fbb",
+    {"wavetable-params-changed:T:F:Tibb:Fibb",
         rDoc("retrieve realtime params for wavetable computation"),
         nullptr,
         [](const char *msg, RtData &d)
@@ -313,11 +313,13 @@ static const Ports voicePorts = {
                 bool isFmSmp = rtosc_argument(msg, 0).T;
                 WaveTable*& wt = isFmSmp ? obj->tableFm : obj->table;
                 printf("WT: AD received /wavetable-params-changed...\n");
+                int param_change_time = 0;
                 // refresh freqs and semantics if passed
-                if(nargs == 3)
+                if(nargs == 4)
                 {
-                    Tensor1<WaveTable::float32>* freqs = *(Tensor1<WaveTable::float32>**)rtosc_argument(msg, 1).b.data;
-                    Tensor1<WaveTable::IntOrFloat>* semantics = *(Tensor1<WaveTable::IntOrFloat>**)rtosc_argument(msg, 2).b.data;
+                    param_change_time = rtosc_argument(msg, 1).i;
+                    Tensor1<WaveTable::float32>* freqs = *(Tensor1<WaveTable::float32>**)rtosc_argument(msg, 2).b.data;
+                    Tensor1<WaveTable::IntOrFloat>* semantics = *(Tensor1<WaveTable::IntOrFloat>**)rtosc_argument(msg, 3).b.data;
                     printf("WT: AD received new scale tensors %p (sz %d) %p (sz %d)\n", freqs, freqs->size(), semantics, semantics->size());
                     wt->swapFreqs(*freqs);
                     wt->swapSemantics(*semantics);
@@ -330,9 +332,11 @@ static const Ports voicePorts = {
                 int write_space = wt->write_space_semantics();
                 printf("WT: AD WT %p requesting %d new 2D Tensors at position %d (reason: params changed)...\n",
                        wt, write_space, write_pos);
-                d.reply("/request-wavetable", isFmSmp ? "sTiibbi" : "sFiibbi",
+                d.reply("/request-wavetable", isFmSmp ? "sTiiibbi" : "sFiiibbi",
                         // path to this voice (T+F give the OscilGen of this voice)
                         d.loc,
+                        // tensor relevant parameter change time
+                        param_change_time,
                         // write position + length + tensors
                         write_pos,
                         write_space,
@@ -1542,9 +1546,11 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
                 int write_pos = wt->write_pos_semantics();
                 printf("WT: AD WT %p requesting %d new 2D Tensors at position %d (reason: too many consumed)...\n",
                        wt, write_space, write_pos);
-                bToU->write("/request-wavetable", isFmSmp ? "iiiTiibbi" : "iiiFiibbi",
+                bToU->write("/request-wavetable", isFmSmp ? "iiiTiiibbi" : "iiiFiiibbi",
                         // path to this voice
                         part, kit, voice,
+                        // parameter change time (none)
+                        0, // <- still the same as last time
                         // write position + length + tensors
                         write_pos,
                         write_space,

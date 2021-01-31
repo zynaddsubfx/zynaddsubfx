@@ -260,28 +260,37 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
  */
 class WaveTableRequestHandler
 {
-    bool waitForAdPars[NUM_MIDI_PARTS][NUM_KIT_ITEMS][NUM_VOICES][2];
+public:
+    using param_change_time_t = int;
+private:
+    struct info_t
+    {
+        //! do not request ad-pars if we're already waiting for them
+        bool waitForAdPars = false;
+        //! do not generate waves for out-dated parameters
+        //! this marks which scale tensors are currently valid
+        //! first time will be "1"
+        param_change_time_t param_change_time = 0;
+        bool last_param_change_was_up_to_date = true;
+    };
+
+    info_t info[NUM_MIDI_PARTS][NUM_KIT_ITEMS][NUM_VOICES][2];
 
 public:
-    WaveTableRequestHandler()
-    {
-        for(std::size_t p = 0; p < NUM_MIDI_PARTS; ++p)
-        for(std::size_t k = 0; k < NUM_KIT_ITEMS; ++k)
-        for(std::size_t v = 0; v < NUM_VOICES; ++v)
-        for(std::size_t i = 0; i < 2; ++i)
-            waitForAdPars[p][k][v][i] = false;
-    }
-
     //! if not already done, inform RT that params relevant for wavetable
     //! calculation failed. if freqs or semantics could have changed, send those
     //! aswell.
     void chainWtParamRequest(int part, int kit, int voice, bool isFm, rtosc::RtData& d,
         OscilGen* oscilGen = nullptr)
     {
-        if(!waitForAdPars[part][kit][voice][isFm])
+        info_t& cur_info = info[part][kit][voice][isFm];
+        if(!cur_info.waitForAdPars)
         {
             printf("WT: MW sending /wavetable-params-changed...\n");
             std::string s = buildVoiceParMsg(&part, &kit, &voice);
+            cur_info.waitForAdPars = true;
+            ++cur_info.param_change_time;
+
             if(oscilGen)
             {
                 std::pair<Tensor1<WaveTable::float32>*,
@@ -292,17 +301,34 @@ public:
 
                 printf("WT: MW calculated scales %p (sz %d) %p (sz %d)\n",
                     freqs, freqs->size(), semantics, semantics->size());
-                d.chain((s + "/wavetable-params-changed").c_str(), isFm ? "Tbb" : "Fbb", sizeof(freqs), &freqs, sizeof(semantics), &semantics);
+                d.chain((s + "/wavetable-params-changed").c_str(), isFm ? "Tibb" : "Fibb",
+                    cur_info.param_change_time,
+                    sizeof(freqs), &freqs, sizeof(semantics), &semantics);
             }
             else
                 d.chain((s + "/wavetable-params-changed").c_str(), isFm ? "T" : "F");
-            waitForAdPars[part][kit][voice][isFm] = true;
         }
     }
 
     void receivedAdPars(int part, int kit, int voice, bool isFm)
     {
-        waitForAdPars[part][kit][voice][isFm] = false;
+        info[part][kit][voice][isFm].waitForAdPars = false;
+    }
+
+    bool isParamChangeUpToDate(int part, int kit, int voice, bool isFm, int current) const
+    {
+        info_t cur_info = info[part][kit][voice][isFm];
+        if(current)
+        {
+            param_change_time_t expected = cur_info.param_change_time;
+            if(current < expected)
+                cur_info.last_param_change_was_up_to_date = false;
+            else if(current == expected)
+                cur_info.last_param_change_was_up_to_date = true;
+            else
+                assert(false);
+        }
+        return cur_info.last_param_change_was_up_to_date;
     }
 };
 
@@ -621,7 +647,9 @@ public:
     struct waveTablesToGenerateStruct
     {
         std::string voicePath;
+        int part, kit, voice; // redundant to voice path
         bool isFm;
+        int param_change_time;
         int write_pos;
         int write_space;
         const Tensor1<WaveTable::IntOrFloat>* semantics;
@@ -1029,41 +1057,45 @@ public:
             while(!waveTablesToGenerate.empty())
             {
                 const waveTablesToGenerateStruct& params = waveTablesToGenerate.front();
-
-                OscilGen* oscilGen = static_cast<OscilGen*>(
-                     obj_store.get(params.voicePath +
-                                        (params.isFm ? "FMSmp/" : "OscilSmp/")));
-
-                printf("WT: MW must generate: %s (FM: %s), resonance %d, %d %d %p (sz %d) %p (sz %d)\n",
-                    params.voicePath.c_str(), params.isFm ? "true":"false", params.presonance,
-                    params.write_pos, params.write_space,
-                    params.freqs, params.freqs->size(), params.semantics, params.semantics->size());
-                assert(oscilGen);
-                assert(!params.isFm || params.presonance == 0);
-
-                // calculate all freqs for all pending semantics
-                printf("WT: MW generating %d new tensors of %d waves each...\n", params.write_space, (int)params.freqs->size());
-                for(int i = 0; i < params.write_space; ++i)
+                if(waveTableRequestHandler.isParamChangeUpToDate(
+                    params.part, params.kit, params.voice, params.isFm,
+                    params.param_change_time))
                 {
-                    const Shape2 tensorShape{(size_t)params.freqs->size(),
-                                             (size_t)synth.oscilsize};
-                    Tensor2<WaveTable::float32>* newTensor =
-                        new Tensor2<WaveTable::float32>(tensorShape, tensorShape);
-                    // TODO: the 2nd dim (float buffer) is not resized... (but it's not used right now)
-                    newTensor->resize(Shape1{(size_t)params.freqs->size()});
+                    OscilGen* oscilGen = static_cast<OscilGen*>(
+                         obj_store.get(params.voicePath +
+                                            (params.isFm ? "FMSmp/" : "OscilSmp/")));
 
-                    // TODO: remove those casts everywhere, elliminate std::size_t...
-                    int s = (params.write_pos + i) % (int)params.semantics->size();
-                    for(int f = 0; f < (int)params.freqs->size(); ++f)
+                    printf("WT: MW must generate: %s (FM: %s), resonance %d, %d %d %p (sz %d) %p (sz %d)\n",
+                        params.voicePath.c_str(), params.isFm ? "true":"false", params.presonance,
+                        params.write_pos, params.write_space,
+                        params.freqs, params.freqs->size(), params.semantics, params.semantics->size());
+                    assert(oscilGen);
+                    assert(!params.isFm || params.presonance == 0);
+
+                    // calculate all freqs for all pending semantics
+                    printf("WT: MW generating %d new tensors of %d waves each...\n", params.write_space, (int)params.freqs->size());
+                    for(int i = 0; i < params.write_space; ++i)
                     {
-                        WaveTable::float32* data = oscilGen->calculateWaveTableData(
-                            (*params.freqs)[f], (*params.semantics)[s], params.presonance);
-                        (*newTensor)[f].set_data(data);
-                    }
+                        const Shape2 tensorShape{(size_t)params.freqs->size(),
+                                                 (size_t)synth.oscilsize};
+                        Tensor2<WaveTable::float32>* newTensor =
+                            new Tensor2<WaveTable::float32>(tensorShape, tensorShape);
+                        // TODO: the 2nd dim (float buffer) is not resized... (but it's not used right now)
+                        newTensor->resize(Shape1{(size_t)params.freqs->size()});
 
-                    // send Tensor2 for the current semantic
-                    // no snoop ports, send this directly to RT
-                    uToB->write((params.voicePath + "set-waves").c_str(), params.isFm ? "Tib" : "Fib", s, sizeof(Tensor2<WaveTable::float32>*), (uint8_t*)&newTensor);
+                        // TODO: remove those casts everywhere, elliminate std::size_t...
+                        int s = (params.write_pos + i) % (int)params.semantics->size();
+                        for(int f = 0; f < (int)params.freqs->size(); ++f)
+                        {
+                            WaveTable::float32* data = oscilGen->calculateWaveTableData(
+                                (*params.freqs)[f], (*params.semantics)[s], params.presonance);
+                            (*newTensor)[f].set_data(data);
+                        }
+
+                        // send Tensor2 for the current semantic
+                        // no snoop ports, send this directly to RT
+                        uToB->write((params.voicePath + "set-waves").c_str(), params.isFm ? "Tib" : "Fib", s, sizeof(Tensor2<WaveTable::float32>*), (uint8_t*)&newTensor);
+                    }
                 }
 
                 waveTablesToGenerate.pop();
@@ -2112,14 +2144,13 @@ static rtosc::Ports middlewareReplyPorts = {
         rEnd},
     {"broadcast:", 0, 0, rBegin; impl.broadcast = true; rEnd},
     {"forward:", 0, 0, rBegin; impl.forward = true; rEnd},
-    {"request-wavetable:sTiibbi:sFiibbi:iiiTiibbi:iiiFiibbi", 0, 0,
+    {"request-wavetable:sTiiibbi:sFiiibbi:iiiTiiibbi:iiiFiiibbi", 0, 0,
         // add request to queue, allow new requests for this OscilGen again
         rBegin;
 
         printf("WT: MW received wt-request, queuing...\n");
 
         MiddleWareImpl::waveTablesToGenerateStruct wt2g;
-        int part, kit, voice;
 
         unsigned offs;
         // the first 1 or 3 params are either s or i
@@ -2132,29 +2163,30 @@ static rtosc::Ports middlewareReplyPorts = {
             assert(pos == wt2g.voicePath.length() - strlen("wavetable-params-changed"));
             wt2g.voicePath.resize(pos); // *now* it's the voice location
             // fill p/k/v
-            bool res = idsFromMsg(wt2g.voicePath.c_str(), &part, &kit, &voice);
+            bool res = idsFromMsg(wt2g.voicePath.c_str(), &wt2g.part, &wt2g.kit, &wt2g.voice);
             assert(res);
             offs = 1;
         }
         else
         {
             // fill p/k/v
-            part = rtosc_argument(msg, 0).i;
-            kit = rtosc_argument(msg, 1).i;
-            voice = rtosc_argument(msg, 2).i;
+            wt2g.part = rtosc_argument(msg, 0).i;
+            wt2g.kit = rtosc_argument(msg, 1).i;
+            wt2g.voice = rtosc_argument(msg, 2).i;
             // fill wt2g.voicePath
-            wt2g.voicePath = buildVoiceParMsg(&part, &kit, &voice) + "/";
+            wt2g.voicePath = buildVoiceParMsg(&wt2g.part, &wt2g.kit, &wt2g.voice) + "/";
             offs = 3;
         }
         wt2g.isFm      = rtosc_argument(msg, offs+0).T;
-        wt2g.write_pos  = rtosc_argument(msg, offs+1).i;
-        wt2g.write_space= rtosc_argument(msg, offs+2).i;
-        wt2g.semantics = *(Tensor1<WaveTable::IntOrFloat>**)rtosc_argument(msg, offs+3).b.data;
-        wt2g.freqs = *(Tensor1<WaveTable::float32>**)rtosc_argument(msg, offs+4).b.data;
-        wt2g.presonance = rtosc_argument(msg, offs+5).i;
+        wt2g.param_change_time = rtosc_argument(msg, offs+1).i;
+        wt2g.write_pos  = rtosc_argument(msg, offs+2).i;
+        wt2g.write_space= rtosc_argument(msg, offs+3).i;
+        wt2g.semantics = *(Tensor1<WaveTable::IntOrFloat>**)rtosc_argument(msg, offs+4).b.data;
+        wt2g.freqs = *(Tensor1<WaveTable::float32>**)rtosc_argument(msg, offs+5).b.data;
+        wt2g.presonance = rtosc_argument(msg, offs+6).i;
 
         // (TODO: might be done later when handling the queue)
-        impl.waveTableRequestHandler.receivedAdPars(part, kit, voice, wt2g.isFm);
+        impl.waveTableRequestHandler.receivedAdPars(wt2g.part, wt2g.kit, wt2g.voice, wt2g.isFm);
 
         impl.addWaveTableToGenerate(std::move(wt2g));
         rEnd},
