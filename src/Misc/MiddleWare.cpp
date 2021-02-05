@@ -2545,6 +2545,11 @@ void MiddleWare::pendingSetProgram(int part, int program)
     impl->bToU->write("/setprogram", "cc", part, program);
 }
 
+std::string zyn::MiddleWare::getProgramName(int program) const
+{
+    return impl->master->bank.ins[program].name;
+}
+
 std::string MiddleWare::activeUrl(void) const
 {
     return impl->last_url;

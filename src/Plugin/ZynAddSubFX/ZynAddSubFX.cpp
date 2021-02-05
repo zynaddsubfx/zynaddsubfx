@@ -274,7 +274,7 @@ protected:
     */
     void initProgramName(uint32_t index, String& programName) override
     {
-        programName = "Default";
+        programName = middleware->getProgramName(index).c_str();
     }
 
    /**
@@ -283,7 +283,8 @@ protected:
     */
     void loadProgram(uint32_t index) override
     {
-        setState(nullptr, defaultState);
+        //in plugin mode, only the first part is useful
+        middleware->pendingSetProgram(0, index);
     }
 
    /* --------------------------------------------------------------------------------------------------------
