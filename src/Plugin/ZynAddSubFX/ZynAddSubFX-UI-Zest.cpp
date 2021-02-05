@@ -35,6 +35,7 @@ struct zest_handles {
     void (*zest_resize)(zest_t *z, int w, int h);
     void (*zest_special)(zest_t *z, int key, int press);
     int (*zest_tick)(zest_t*);
+    void (*zest_forget_all_state) (zest_t*);
     zest_t *zest;
 };
 
@@ -95,6 +96,7 @@ public:
             get_sym(mouse);
             get_sym(special);
             get_sym(resize);
+            get_sym(forget_all_state);
         }
         oscPort = -1;
         printf("[INFO] Ready to run\n");
@@ -142,6 +144,11 @@ protected:
     */
     void programLoaded(uint32_t index) override
     {
+        // Tell Zest that we need to reload the UI.
+        // Currently Zyn-Fusion doesn't use built-in program,
+        //   and this event may not be raised.
+        if(z.zest)
+            z.zest_forget_all_state(z.zest);
     }
 
    /**
@@ -150,6 +157,11 @@ protected:
     */
     void stateChanged(const char* key, const char* value) override
     {
+        // Tell Zest that we need to reload the UI.
+        // This event will be raised when you load a preset from your host,
+        //   or during UI loads.
+        if(z.zest)
+            z.zest_forget_all_state(z.zest);
     }
 
    /* --------------------------------------------------------------------------------------------------------
