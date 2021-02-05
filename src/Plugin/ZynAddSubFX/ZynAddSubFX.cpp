@@ -155,8 +155,9 @@ protected:
     */
     const char* getDescription() const noexcept override
     {
-        // TODO
-        return "";
+        return "Synthesizer featuring additive, subtractive, and Fourier "
+               "synthesis methods, a variety of modulators, powerful "
+               "oscillator editors, and a variety of built-in effects.";
     }
 
    /**
