@@ -72,6 +72,7 @@ protected:
     */
     void programLoaded(uint32_t index) override
     {
+        (void)index; // ZynAddSubFX::loadProgram already informs the UI
     }
 
    /**

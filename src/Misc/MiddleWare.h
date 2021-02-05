@@ -76,6 +76,8 @@ class MiddleWare
         //NOTE: Can only be called by realtime thread
         void pendingSetProgram(int part, int program);
 
+        std::string getProgramName(int program) const;
+
         //Get/Set the active bToU url
         std::string activeUrl(void) const;
         void activeUrl(std::string u);
