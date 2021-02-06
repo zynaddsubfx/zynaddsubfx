@@ -577,7 +577,7 @@ static const Ports master_ports = {
         rBOIL_END},
     {"bank/", rDoc("Controls for instrument banks"), &bankPorts,
             [](const char*,RtData&) {}},
-    {"learn:s", rProp(depricated) rDoc("MIDI Learn"), 0,
+    {"learn:s", rProp(deprecated) rDoc("MIDI Learn"), 0,
         rBegin;
         int free_slot = m->automate.free_slot();
         if(free_slot >= 0) {
