@@ -394,7 +394,7 @@ void AnalogFilter::singlefilterout_freqbuf(float *smp, fstage &hist,
     assert((buffersize % 8) == 0);
 
     float frequency = -1.0f;
-    
+
     for ( int i = 0; i < buffersize; i += 8 )
     {
         /* recompute coeffs for each 8 samples */

@@ -406,7 +406,7 @@ int PADnote::noteout(float *outl, float *outr)
                 break;
             }
         }
-    
+
     watch_punch(outl,synth.buffersize);
 
     if(ABOVE_AMPLITUDE_THRESHOLD(globaloldamplitude, globalnewamplitude))

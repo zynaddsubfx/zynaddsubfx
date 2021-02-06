@@ -218,7 +218,7 @@ struct ADnoteVoiceParam {
 
     /* If the Volume negative */
     unsigned char PVolumeminus;
-    
+
     /* if AntiAliasing is enabled */
     bool PAAEnabled;
 

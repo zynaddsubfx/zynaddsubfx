@@ -246,7 +246,7 @@ BankEntry BankDb::processXiz(std::string filename,
     int ret = 0;
     time = rand();
 #endif
-    
+
 
     //quickly check if the file exists in the cache and if it is up-to-date
     if(cache.find(fname) != cache.end() &&

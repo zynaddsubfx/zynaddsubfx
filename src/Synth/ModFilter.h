@@ -46,7 +46,7 @@ class ModFilter
         void svParamUpdate(SVFilter &sv);
         void anParamUpdate(AnalogFilter &an);
 
-        
+
         const FilterParams &pars;  //Parameters to Pull Updates From
         const SYNTH_T      &synth; //Synthesizer Buffer Parameters
         const AbsTime      &time;  //Time for RT Updates

@@ -85,8 +85,8 @@ bool JackMultiEngine::Start(void)
 
     if(!impl->client)
         errx(1, "failed to connect to jack...");
-    
-    
+
+
     //Create the set of jack ports
     char portName[20];
     memset(portName,0,sizeof(portName));
@@ -117,7 +117,7 @@ bool JackMultiEngine::Start(void)
     jack_set_process_callback(impl->client, _processCallback, this);
 
     //run
-    if(jack_activate(impl->client)) 
+    if(jack_activate(impl->client))
         errx(1, "failed at starting the jack client");
     impl->running = true;
     return true;

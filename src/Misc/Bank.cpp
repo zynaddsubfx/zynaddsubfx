@@ -516,7 +516,7 @@ std::vector<std::string> Bank::search(std::string s) const
     }
     return out;
 }
-        
+
 std::vector<std::string> Bank::blist(std::string s)
 {
     std::vector<std::string> out;

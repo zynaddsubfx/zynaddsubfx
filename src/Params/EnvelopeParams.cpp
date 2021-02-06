@@ -111,7 +111,7 @@ static const rtosc::Ports localPorts = {
             rPresetAtMulti(true, ad_global_amp, ad_global_filter, ad_voice_amp,
                                  ad_voice_fm_amp),
             rDefault(false),
-            "Force Envelope to fully evaluate"),    
+            "Force Envelope to fully evaluate"),
     rToggle(Plinearenvelope, rShort("lin/log"), rDefault(false),
             "Linear or Logarithmic Envelopes"),
     rToggle(Prepeating, rShort("repeat"), rDefault(false),
@@ -181,7 +181,7 @@ static const rtosc::Ports localPorts = {
         rEnd},
     {"dt", rDoc("Envelope Delay Times (sec)"), NULL,
         rBegin;
-        
+
         const int N = MAX_ENVELOPE_POINTS;
         const int M = rtosc_narguments(msg);
         if(M == 0) {

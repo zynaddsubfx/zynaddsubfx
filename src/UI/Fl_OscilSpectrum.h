@@ -84,13 +84,13 @@ class Fl_OscilSpectrum : public Fl_Box, public Fl_Osc_Widget
             int n=lx/GX-1;
             if (n>(int)nsamples)
                 n=nsamples;
-                
+
             fl_rectf(ox,oy,lx,ly,0,0,0);
 
             //draw
-            if(this->active_r()) 
+            if(this->active_r())
                 fl_color(0,0,255);
-            else 
+            else
                 fl_color(this->parent()->color());
             fl_line_style(FL_DOT);
 
@@ -132,4 +132,4 @@ class Fl_OscilSpectrum : public Fl_Box, public Fl_Osc_Widget
 
         size_t nsamples;
         float *spc;
-}; 
+};

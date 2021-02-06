@@ -50,7 +50,7 @@ class SUBnote:public SynthNote
         void KillNote();
 
         const SUBnoteParameters &pars;
-        
+
         //parameters
         bool       stereo;
         int       numstages; //number of stages of filters

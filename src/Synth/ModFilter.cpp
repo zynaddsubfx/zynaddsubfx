@@ -31,10 +31,10 @@ ModFilter::ModFilter(const FilterParams &pars_,
                            float        notefreq)
     :pars(pars_), synth(synth_), time(time_), alloc(alloc_),
     noteFreq(notefreq),
-    left(nullptr), 
+    left(nullptr),
     right(nullptr),
     env(nullptr),
-    lfo(nullptr)  
+    lfo(nullptr)
 {
     tracking = pars.getfreqtracking(notefreq);
     baseQ    = pars.getq();
@@ -53,7 +53,7 @@ ModFilter::~ModFilter(void)
     alloc.dealloc(left);
     alloc.dealloc(right);
 }
-        
+
 void ModFilter::addMod(LFO &lfo_)
 {
     lfo = &lfo_;
@@ -107,7 +107,7 @@ void ModFilter::updateSense(float velocity, uint8_t scale,
     const float velScale = scale / 127.0f;
     sense = velScale * 6.0f * (VelF(velocity, func) - 1);
 }
-        
+
 void ModFilter::filter(float *l, float *r)
 {
     if(left && l)
@@ -134,7 +134,7 @@ void ModFilter::paramUpdate(Filter *&f)
     //Common parameters
     baseQ    = pars.getq();
     baseFreq = pars.getfreq();
-    
+
     if(current_category(f) != pars.Pcategory) {
         alloc.dealloc(f);
         f = Filter::generate(alloc, &pars,

@@ -19,7 +19,7 @@
 #include "Presets.h"
 
 namespace zyn {
-    
+
    enum envmode_enum {
         ADSR_lin = 1,
         ADSR_dB = 2,
@@ -64,14 +64,14 @@ class EnvelopeParams:public Presets
         unsigned char PA_val, PD_val, PS_val, PR_val;
 
 
-        
+
 
         envmode_enum Envmode; // 1 for ADSR parameters (linear amplitude)
                      // 2 for ADSR_dB parameters (dB amplitude)
                      // 3 for ASR parameters (frequency LFO)
                      // 4 for ADSR_filter parameters (filter parameters)
                      // 5 for ASR_bw parameters (bandwidth parameters)
-                    
+
 
 
         const AbsTime *time;

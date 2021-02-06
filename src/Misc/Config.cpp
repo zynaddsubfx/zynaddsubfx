@@ -369,7 +369,7 @@ void Config::readConfig(const char *filename)
                 cfg.presetsDirList[i] = xmlcfg.getparstr("presets_root", "");
                 xmlcfg.exitbranch();
             }
-        
+
         //Get favs
         for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
             if(xmlcfg.enterbranch("FAVSROOT", i)) {
@@ -437,7 +437,7 @@ void Config::saveConfig(const char *filename) const
             xmlcfg->addparstr("presets_root", cfg.presetsDirList[i]);
             xmlcfg->endbranch();
         }
-        
+
     for(int i = 0; i < MAX_BANK_ROOT_DIRS; ++i)
         if(!cfg.favoriteList[i].empty()) {
             xmlcfg->beginbranch("FAVSROOT", i);

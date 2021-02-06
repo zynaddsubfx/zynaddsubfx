@@ -53,7 +53,7 @@ class WatchTest:public CxxTest::TestSuite
             w   = new WatchManager(tr);
             par = new LFOParams;
             l   = new LFO(*par, 440.0, *at, w);
-            
+
         }
 
         void tearDown() {

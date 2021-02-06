@@ -140,7 +140,7 @@ void ADnote::setupVoice(int nvoice)
 
     voice.oscfreqhi   = memory.valloc<int>(unison);
     voice.oscfreqlo   = memory.valloc<float>(unison);
-    
+
     voice.oscfreqhiFM = memory.valloc<unsigned int>(unison);
     voice.oscfreqloFM = memory.valloc<float>(unison);
     voice.oscposhi    = memory.valloc<int>(unison);
@@ -673,10 +673,10 @@ void ADnote::legatonote(const LegatoParams &lpars)
 
         if(pars.VoicePar[nvoice].PVolumeminus != 0)
             NoteVoicePar[nvoice].Volume = -NoteVoicePar[nvoice].Volume;
-            
+
         NoteVoicePar[nvoice].AAEnabled =
                 pars.VoicePar[nvoice].PAAEnabled;
-                
+
         if(pars.VoicePar[nvoice].PPanning == 0) {
             NoteVoicePar[nvoice].Panning = getRandomFloat();
         } else
@@ -1221,7 +1221,7 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
     Voice& vce = NoteVoicePar[nvoice];
     for(int k = 0; k < vce.unison_size; ++k) {
         int    poshi  = vce.oscposhi[k];
-        // convert floating point fractional part (sample interval phase) 
+        // convert floating point fractional part (sample interval phase)
         // with range [0.0 ... 1.0] to fixed point with 1 digit is 2^-24
         // by multiplying with precalculated 2^24 and casting to integer:
         int    poslo  = (int)(vce.oscposlo[k] * 16777216.0f);
@@ -1263,7 +1263,7 @@ inline void ADnote::ComputeVoiceOscillator_LinearInterpolation(int nvoice)
  */
 inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
 {
-    // windowed sinc kernel factor Fs*0.3, rejection 80dB      
+    // windowed sinc kernel factor Fs*0.3, rejection 80dB
     const float_t kernel[] = {
         0.0010596256917418426f,
         0.004273442181254887f,
@@ -1286,8 +1286,8 @@ inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
         0.0010596256917418426f
         };
 
-        
-    
+
+
     Voice& vce = NoteVoicePar[nvoice];
     for(int k = 0; k < vce.unison_size; ++k) {
         int    poshi  = vce.oscposhi[k];
@@ -1297,7 +1297,7 @@ inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
         int    ovsmpfreqhi = vce.oscfreqhi[k] / 2;
         int    ovsmpfreqlo = (int)((vce.oscfreqlo[k] / 2) * (1<<24));
 
-        int    ovsmpposlo; 
+        int    ovsmpposlo;
         int    ovsmpposhi;
         int    uflow;
         float *smps   = NoteVoicePar[nvoice].OscilSmp;
@@ -1314,7 +1314,7 @@ inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
             out = 0;
             for (int l = 0; l<LENGTHOF(kernel); l++) {
                 out += kernel[l] * (
-                    smps[ovsmpposhi]     * ((1<<24) - ovsmpposlo) + 
+                    smps[ovsmpposhi]     * ((1<<24) - ovsmpposlo) +
                     smps[ovsmpposhi + 1] * ovsmpposlo)/(1.0f*(1<<24));
                 // advance to next kernel sample
                 ovsmpposlo += ovsmpfreqlo;
@@ -1331,7 +1331,7 @@ inline void ADnote::ComputeVoiceOscillator_SincInterpolation(int nvoice)
             poshi &= synth.oscilsize - 1;
 
             tw[i] = out;
-            
+
         }
         vce.oscposhi[k] = poshi;
         vce.oscposlo[k] = poslo/(1.0f*(1<<24));
@@ -2025,7 +2025,7 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
     AmpLfo      = memory.alloc<LFO>(*param.AmpLfo, basefreq, time, wm,
                    (pre+"GlobalPar/AmpLfo/").c_str);
 
-    Volume = dB2rap(param.Volume) 
+    Volume = dB2rap(param.Volume)
              * VelF(velocity, param.PAmpVelocityScaleFunction);     //sensing
 
     Filter = memory.alloc<ModFilter>(*param.GlobalFilter, synth, time, memory,

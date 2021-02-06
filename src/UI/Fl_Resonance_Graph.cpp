@@ -85,7 +85,7 @@ void Fl_Resonance_Graph::draw()
         if(i==1) {
             draw_freq_line(i*100.0,0);
             draw_freq_line(i*1000.0,0);
-        } else 
+        } else
             if (i==5) {
                 draw_freq_line(i*100.0,2);
                 draw_freq_line(i*1000.0,2);
@@ -202,7 +202,7 @@ void Fl_Resonance_Graph::update(void)
     oscWrite("Poctavesfreq");
     oscWrite("PmaxdB");
 }
-        
+
 void Fl_Resonance_Graph::OSC_raw(const char *msg)
 {
     //TODO check the types (OSC regex)

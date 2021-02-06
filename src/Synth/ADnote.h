@@ -176,7 +176,7 @@ class ADnote:public SynthNote
             void kill(Allocator &memory, const SYNTH_T &synth);
             /* If the voice is enabled */
             ONOFFTYPE Enabled;
-            
+
             /* if AntiAliasing is enabled */
             bool AAEnabled;
 

@@ -123,7 +123,7 @@ class SubNoteTest:public CxxTest::TestSuite
 
             TS_ASSERT(!tr->hasNext());
             w->add_watch("noteout/filter");
-            
+
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], 0.0114f, 0.0001f);
@@ -143,7 +143,7 @@ class SubNoteTest:public CxxTest::TestSuite
             sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], -0.0020f, 0.0001f);
             w->tick();
-            
+
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             TS_ASSERT_DELTA(outL[255], -0.0005f, 0.0001f);

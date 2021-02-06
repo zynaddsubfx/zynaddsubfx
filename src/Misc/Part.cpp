@@ -58,7 +58,7 @@ static const Ports partPorts = {
 #define rChangeCb
 #undef rChangeCb
 #define rChangeCb obj->setVolumedB(obj->Volume);
-    rParamF(Volume, rShort("Vol"), rDefault(0.0), rUnit(dB), 
+    rParamF(Volume, rShort("Vol"), rDefault(0.0), rUnit(dB),
             rLinear(-40.0, 13.3333), "Part Volume"),
 #undef rChangeCb
     {"Pvolume::i", rShort("Vol") rProp(parameter) rLinear(0,127)
@@ -176,7 +176,7 @@ static const Ports partPorts = {
                 char filename[32];
                 time (&rawtime);
                 const struct tm* timeinfo = localtime (&rawtime);
-                strftime (filename,23,"%F_%R.xiz",timeinfo); 
+                strftime (filename,23,"%F_%R.xiz",timeinfo);
                 p->saveXML(filename);
                 fprintf(stderr, "Part %d saved to %s\n", (p->partno + 1), filename);
             }

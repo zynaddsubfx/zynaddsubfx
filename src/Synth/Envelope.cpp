@@ -201,7 +201,7 @@ float Envelope::envout(bool doWatch)
         // but if reached sustain point, repeating activated and key still pressed or sustained
         else if (repeating && currentpoint == envsustain && !keyreleased) {
             // set first value to sustain value to prevent jump
-            envval[0] = envval[currentpoint]; 
+            envval[0] = envval[currentpoint];
             // reset current point
             currentpoint = 1;
         }

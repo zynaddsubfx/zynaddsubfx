@@ -221,7 +221,7 @@ void doPaste(MiddleWare &mw, string url, string type, XMLwrapper &xml, Ts&&... a
 {
     //Generate a new object
     T *t = new T(std::forward<Ts>(args)...);
-    
+
     //Old workaround for LFO parameters
     if(strstr(type.c_str(), "Plfo"))
         type = "Plfo";

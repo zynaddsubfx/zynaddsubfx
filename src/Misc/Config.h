@@ -38,7 +38,7 @@ class Config
         Config();
         Config(const Config& ) = delete;
         ~Config();
-        
+
         struct {
             oss_devs_t oss_devs;
             int   SampleRate, SoundBufferSize, OscilSize, SwapStereo;

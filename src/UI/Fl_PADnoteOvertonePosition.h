@@ -53,7 +53,7 @@ class PADnoteOvertonePosition: public Fl_Box, public Fl_Osc_Widget
             base_path = og->base;
             osc = og->osc;
             assert(osc);
-            
+
             osc->createLink("/oscilsize", (Fl_Osc_Widget*) this);
             osc->requestValue("/oscilsize");
 
@@ -181,7 +181,7 @@ class PADnoteOvertonePosition: public Fl_Box, public Fl_Osc_Widget
 
             if (!visible())
                 return;
-            
+
             if (damage()!=1){
                 fl_color(fl_color_average(FL_BLACK,
                             FL_BACKGROUND_COLOR, 0.5 ));
@@ -197,7 +197,7 @@ class PADnoteOvertonePosition: public Fl_Box, public Fl_Osc_Widget
                 int kx=(int)(lx/(float)maxharmonic*i);
                 fl_line(ox+kx,oy,ox+kx,oy+ly);
             };
-            
+
             fl_color(180,0,0);
             fl_line_style(0);
 
@@ -220,4 +220,4 @@ class PADnoteOvertonePosition: public Fl_Box, public Fl_Osc_Widget
 
         std::string base_path;
         Fl_Osc_Interface *osc;
-}; 
+};

@@ -19,7 +19,7 @@ namespace zyn {
 float polyblampres(float smp, float ws, float dMax)
 {
     // Formula from: Esqueda, Välimäki, Bilbao (2015): ALIASING REDUCTION IN SOFT-CLIPPING ALGORITHMS
-    // http://dafx16.vutbr.cz/dafxpapers/18-DAFx-16_paper_33-PN.pdf pg 123, table 1 
+    // http://dafx16.vutbr.cz/dafxpapers/18-DAFx-16_paper_33-PN.pdf pg 123, table 1
     // Four-point polyBLAMP residual:
     // [−2T, T] d^5/120
     // [−T, 0] −d^5/40 + d^4/24 + d^3/12 + d^2/12 + d/24 + 1/120
@@ -137,7 +137,7 @@ void waveShapeSmps(int n,
             if (par > ws - 0.01) par = ws - 0.01;
             for(i = 0; i < n; ++i) {
                 // add the offset: x = smps[i] + offs
-                smps[i] += offs; 
+                smps[i] += offs;
                 float res = polyblampres(smps[i], ws, par);
                 // now apply the polyblamped limiter: y = f(x)
                 if (smps[i]>=0)
@@ -248,7 +248,7 @@ void waveShapeSmps(int n,
                 if(tmpo > 10.0f)
                     tmpo = 10.0f;
                 tmpo     = 0.5f - 1.0f / (expf(tmpo) + 1.0f);
-                
+
                 smps[i] = tmp / tmpv;
                 smps[i] -= tmpo / tmpv; // subtract offset
             }
@@ -278,7 +278,7 @@ void waveShapeSmps(int n,
                 else
                     smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
                 //subtract offset with distorsion function applied
-                smps[i] -= 1.5 * (offs - (offs*offs*offs / 3.0)); 
+                smps[i] -= 1.5 * (offs - (offs*offs*offs / 3.0));
             }
             break;
         case 17: //square distortion

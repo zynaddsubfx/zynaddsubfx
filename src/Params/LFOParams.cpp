@@ -68,7 +68,7 @@ static const rtosc::Ports _ports = {
     rParamZyn(Pstartphase, rShort("start"), rSpecial(random),
               rDefaultDepends(loc), rDefault(64), rPreset(ad_voice_freq, 0),
               "Starting Phase"),
-    rParamZyn(Pcutoff, rShort("lp"), rDefault(127), 
+    rParamZyn(Pcutoff, rShort("lp"), rDefault(127),
             "RND/SQR lp-filter freq"),
     rOption(PLFOtype, rShort("type"), rOptions(sine, triangle, square, up, down,
                 exp1, exp2, random), rDefault(sine), "Shape of LFO"),

@@ -209,7 +209,7 @@ void Resonance::randomize(int type)
 
 void Resonance::zero(void)
 {
-    for(int i=0; i<N_RES_POINTS; ++i) 
+    for(int i=0; i<N_RES_POINTS; ++i)
         setpoint(i,64);
 }
 

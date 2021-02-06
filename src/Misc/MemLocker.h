@@ -13,7 +13,7 @@
 
 namespace zyn {
 
-//! Class to lock all pages in memory 
+//! Class to lock all pages in memory
 class MemLocker
 {
     bool isLocked = false;

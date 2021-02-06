@@ -46,7 +46,7 @@ class AdNoteTest:public CxxTest::TestSuite
         float test_freq_log2;
         WatchManager *w;
         float *outR, *outL;
-        
+
         LFO          *lfo;
         LFOParams    *lfop;
         int randval(int min, int max)
@@ -55,7 +55,7 @@ class AdNoteTest:public CxxTest::TestSuite
             //printf("ret = %d (%d..%d)\n",ret, min,max);
             return ret;
         }
-        
+
         void randomize_params(void) {
             lfop->Pintensity  = randval(0,255);
             lfop->Pstartphase = randval(0,255);
@@ -66,7 +66,7 @@ class AdNoteTest:public CxxTest::TestSuite
             lfop->Pcontinous  = randval(0,1);
             lfop->Pstretch    = randval(0,255);
         }
-        
+
         void run_lfo_randomtest(void)
         {
             lfo  = new LFO(*lfop, 440.0f, *time);
@@ -167,7 +167,7 @@ class AdNoteTest:public CxxTest::TestSuite
             TS_ASSERT_DELTA(outL[255], -0.4717f, 0.0001f);
             w->tick();
             TS_ASSERT(tr->hasNext());
-            
+
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             w->tick();
@@ -204,7 +204,7 @@ class AdNoteTest:public CxxTest::TestSuite
 #endif
 
             TS_ASSERT_EQUALS(sampleCount, 9472);
-            
+
               lfop = new LFOParams();
             lfop->fel  = zyn::consumer_location_type_t::amp;
             lfop->freq = 2.0f;
@@ -213,8 +213,8 @@ class AdNoteTest:public CxxTest::TestSuite
                 randomize_params();
                 run_lfo_randomtest();
             }
-            
-            
+
+
         }
 
 #define OUTPUT_PROFILE

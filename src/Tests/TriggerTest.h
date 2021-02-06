@@ -217,12 +217,12 @@ class TriggerTest:public CxxTest::TestSuite
             note->noteout(outL, outR);
             w->tick();
             dump_samples("Step 3 pre-buffer\n");
-            TS_ASSERT(!w->trigger_active("noteout/filter"));   
+            TS_ASSERT(!w->trigger_active("noteout/filter"));
             TS_ASSERT(!w->trigger_active("noteout/amp_int"));
             TS_ASSERT(!tr->hasNext());
             TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 0); // Is 0 as prebuffer not filled
             TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 0);
-            
+
             //Finish accumulating samples
             note->noteout(outL, outR);
             w->tick();

@@ -134,7 +134,7 @@ static const Ports voicePorts = {
             rObject *obj = (rObject *)d.obj;
             if (!rtosc_narguments(msg))
                 d.reply(d.loc, "i", (int)roundf(127.0f * (1.0f + obj->volume/60.0f)));
-            else 
+            else
                 obj->volume = -60.0f * (1.0f - rtosc_argument(msg, 0).i / 127.0f);
         }},
     {"volume::f", rShort("volume") rProp(parameter) rUnit(dB) rDefault(-12.75) rLinear(-60.0f, 0.0f)
@@ -172,7 +172,7 @@ static const Ports voicePorts = {
     rParamZyn(PFilterVelocityScaleFunction, rShort("v.sense"), rDefault(64),
         "Filter Velocity Function Shape"),
 
- 
+
     //Modulator Stuff
     rOption(PFMEnabled, rShort("mode"), rOptions(none, mix, ring, phase,
                 frequency, pulse), rDefault(none), "Modulator mode"),
@@ -364,7 +364,7 @@ static const Ports globalPorts = {
             rObject *obj = (rObject *)d.obj;
             if (!rtosc_narguments(msg))
                 d.reply(d.loc, "i", (int)roundf(96.0f * (1.0f + (obj->Volume - 12.0412f)/60.0f)));
-            else 
+            else
                 obj->Volume = 12.0412f - 60.0f * (1.0f - rtosc_argument(msg, 0).i / 96.0f);
         }},
     rParamZyn(Fadein_adjustment, rDefault(FADEIN_ADJUSTMENT_SCALE),

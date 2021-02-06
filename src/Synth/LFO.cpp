@@ -103,7 +103,7 @@ float LFO::baseOut(const char waveShape, const float phase)
                 lfo_out = -1;
             else
                 lfo_out = 1;
-                
+
             return biquad(lfo_out);
             break;
         case LFO_RAMPUP:    return (phase - 0.5f) * 2.0f;
@@ -114,7 +114,7 @@ float LFO::baseOut(const char waveShape, const float phase)
             if ((phase < 0.5) != first_half) {
                 first_half = phase < 0.5;
                 last_random = 2*RND-1;
-            }    
+            }
             return biquad(last_random);
             break;
         default:
