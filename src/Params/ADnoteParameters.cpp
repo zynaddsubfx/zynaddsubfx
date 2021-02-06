@@ -337,7 +337,7 @@ static const Ports voicePorts = {
                         d.loc,
                         // tensor relevant parameter change time
                         param_change_time,
-                        // write position + length + tensors
+                        // write position, length, tensors
                         write_pos,
                         write_space,
                         sizeof(Tensor1<WaveTable::IntOrFloat>*),
@@ -378,7 +378,7 @@ static const Ports voicePorts = {
                 // imply a programming error
                 printf("WARNING: MW sent (out-dated?) semantic \"%d\", "
                        "but the next required semantic is \"%d\" - ignoring!\n",
-                       sem_idx, wt->write_pos_semantics());
+                       sem_idx, wt->write_pos_delayed_semantics());
                 assert(false); // in debug mode, just abort now
             }
             else
@@ -393,6 +393,7 @@ static const Ports voicePorts = {
                     wt->swapDataAt(sem_idx, freq_idx, unusedWave);
                 }
 
+                // tell the ringbuffer that we can not write more
                 wt->inc_write_pos_delayed_semantics();
                 // recycle the packaging
                 // this will also free the contained Tensor1 (which are useless after the swap)
@@ -1551,7 +1552,7 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
                         part, kit, voice,
                         // parameter change time (none)
                         0, // <- still the same as last time
-                        // write position + length + tensors
+                        // write position, length, tensors
                         write_pos,
                         write_space,
                         sizeof(Tensor1<WaveTable::IntOrFloat>*),
