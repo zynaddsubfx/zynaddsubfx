@@ -35,8 +35,8 @@ class TensorTest : public CxxTest::TestSuite
 
         void testRb(void)
         {
-            AbstractRingbuffer rb;
-            rb.resize(4);
+            AbstractRingbuffer rb(4);
+
             // r=w=0
             TS_ASSERT_EQUALS(4, rb.size());
             TS_ASSERT_EQUALS(0, rb.read_space());

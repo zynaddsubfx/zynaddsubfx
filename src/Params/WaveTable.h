@@ -80,11 +80,10 @@ class TensorBase
 {
 protected:
     std::size_t m_capacity;
-    int m_size;
     bool m_owner = true; //!< says if memory is owned by us
 
-    TensorBase() : m_capacity(0), m_size(0), m_owner(false) {}
-    TensorBase(std::size_t capacity, std::size_t newsize) : m_capacity(capacity), m_size(newsize), m_owner(true) {};
+    TensorBase() : m_capacity(0), m_owner(false) {}
+    TensorBase(std::size_t capacity, std::size_t newsize) : m_capacity(capacity), m_owner(true) {};
     TensorBase(const TensorBase& other) = delete;
     TensorBase& operator=(const TensorBase& other) = delete;
     TensorBase(TensorBase&& other) = delete;
@@ -110,8 +109,9 @@ protected:
 #endif
 public:
     std::size_t capacity() const { return m_capacity; }
-    void resize(int newsize) { m_size = newsize; }
-    int size() const { return m_size; }
+
+    int size() const { return capacity(); }
+
 protected:
     void set_capacity(std::size_t new_capacity) { m_capacity = new_capacity; m_owner = true; }
     bool operator==(const TensorBase<N, T>& other) const {
@@ -119,15 +119,13 @@ protected:
         return shape() == other.shape();/* &&
                 std::equal(m_data, m_data + (shape().volume()), other.m_data);*/ }
 #else
-        return m_capacity == other.m_capacity && m_size == other.m_size;
+        return m_capacity == other.m_capacity;
 #endif
     }
-
 
     void swapWith(Tensor<N,T>& other)
     {
         std::swap(m_capacity, other.m_capacity);
-        std::swap(m_size, other.m_size);
         std::swap(m_owner, other.m_owner);
     }
 };
@@ -137,7 +135,7 @@ protected:
 class AbstractRingbuffer
 {
 public:
-    AbstractRingbuffer() { resize(0); }
+    AbstractRingbuffer(int newsize) { resize(newsize); }
 
     int read_space() const
     {
@@ -168,21 +166,31 @@ public:
     int write_pos() const { return w; }
     int write_pos_delayed() const { return w_delayed; }
 
+    int size() const { return m_size; }
+
+    void swapWith(AbstractRingbuffer& other)
+    {
+        std::swap(m_size, other.m_size);
+        std::swap(r, other.r);
+        std::swap(w_delayed, other.w_delayed);
+        std::swap(w, other.w);
+    }
+
     void dump() const
     {
         printf("RINGBUFFER: size: %d, r/w_delayed/w: %d %d %d\n",
                m_size, r, w_delayed, w);
     }
 
+private:
+
+    // TODO: only used by CTOR -> move to CTOR initializer list
     void resize(int newsize)
     {
         r = w = w_delayed = 0;
         m_size = newsize;
     }
 
-    int size() const { return m_size; }
-
-private:
     // Invariant: r<=w_delayed<=w<r (in a cyclic sense)
     //! read position, marks next element to read. can read until w_delayed.
     int r;
@@ -220,22 +228,6 @@ class Tensor : public TensorBase<N, T>
         }
     }
 
-    template<std::size_t M>
-    void resize_internal(const Shape<M>& shape)
-    {
-        TensorBase<N, T>::resize(shape.dim[0]);
-        Shape<M-1> proj = shape.proj();
-        for(int i = 0; i < base_type::size(); ++i)
-        {
-            m_data[i].resize(proj);
-        }
-    }
-
-    void resize_internal(const Shape<1>& shape)
-    {
-        TensorBase<N, T>::resize(shape.dim[0]);
-    }
-
 protected:
     Tensor() : m_data(nullptr) {}
     void init_shape(const Shape<N>& shape)
@@ -247,18 +239,11 @@ protected:
     }
 
 public:
-    Tensor(const Shape<N>& shape, const Shape<N>& newsize) :
-        TensorBase<N, T> (shape.dim[0], newsize.dim[0]),
+    Tensor(const Shape<N>& shape, const Shape<N>& ) :
+        TensorBase<N, T> (shape.dim[0], shape.dim[0]),
         m_data(new SubTensor[base_type::capacity()])
     {
         init_shape_alloced(shape);
-        resize(newsize);
-    }
-
-    template<std::size_t M>
-    void resize(const Shape<M>& shape)
-    {
-        resize_internal(shape);
     }
 
     ~Tensor()
@@ -342,24 +327,17 @@ protected:
     {
         assert(!m_data);
         base_type::set_capacity(shape.dim[0]);
-        m_data = new T[base_type::capacity()];
+        if(base_type::capacity())
+            m_data = new T[base_type::capacity()];
     }
 public:
-    Tensor(std::size_t capacity, std::size_t newsize) : TensorBase<1, T>(capacity, newsize), m_data(new T[capacity]) {}
-    Tensor(const Shape<1>& shape, const Shape<1>& newsize) : Tensor(shape.dim[0], newsize.dim[0]){}
+    Tensor(std::size_t capacity, std::size_t ) : TensorBase<1, T>(capacity, capacity),
+        m_data(capacity ? new T[capacity] : nullptr) {}
+    Tensor(const Shape<1>& shape, const Shape<1>& ) : Tensor(shape.dim[0], shape.dim[0]){}
     ~Tensor() { delete[] m_data; }
     Tensor& operator=(Tensor&& other) {
         base_type::operator=(other);
         m_data = other.m_data;
-    }
-
-    void resize(int newsize)
-    {
-        base_type::resize(newsize);
-    }
-    void resize(const Shape<1>& shape)
-    {
-        resize(shape.dim[0]);
     }
 
     //! raw access into 1D array
@@ -420,16 +398,19 @@ class Tensor3ForWaveTable : public Tensor<3, wavetable_types::float32>, public A
 public:
     using base_type::base_type;
 
-    template<std::size_t M>
-    void resize(const Shape<M>& shape)
-    {
-        base_type::resize(shape);
-        AbstractRingbuffer::resize(shape.dim[0]);
-    }
+    Tensor3ForWaveTable(const Shape<3>& shape, const Shape<3>& )
+        : base_type(shape, shape), AbstractRingbuffer(shape.dim[0]) {}
+
     int size() const { return base_type::size(); }
 
 /*  template<std::size_t N2, class X2>
     friend void pointer_swap(Tensor<N2, X2>&, Tensor<N2, X2>&);*/
+
+    void swapWith(Tensor3ForWaveTable& other)
+    {
+        base_type::swapWith(other);
+        AbstractRingbuffer::swapWith(other);
+    }
 };
 
 /**
@@ -481,19 +462,11 @@ public:
     const Tensor1<IntOrFloat>* const* get_semantics_addr() const { return &semantics_addr; }
     const Tensor1<float32>* const* get_freqs_addr() const { return &freqs_addr; }
 
-    std::size_t semantics_size() const { return semantics.size(); }
-    std::size_t freqs_size() const { return freqs.size(); }
     void swapSemantics(Tensor1<IntOrFloat>& unused) { semantics.swapWith(unused); }
     void swapFreqs(Tensor1<float32>& unused) { freqs.swapWith(unused); }
-
-    void resize(const Shape2& sizes) {
-        semantics.resize(sizes.dim[0]);
-        freqs.resize(sizes.dim[1]);
-        data.resize(sizes);
-    }
+    void swapTensor3(Tensor3ForWaveTable& unused) { data.swapWith(unused); }
 
     void setMode(WtMode mode) { m_mode = mode; }
-    //void setData(Tensor3<float32>&& data_arg) { data = std::move(data_arg); }
     WtMode mode() const { return m_mode; }
 
     //! Return sample slice for given frequency

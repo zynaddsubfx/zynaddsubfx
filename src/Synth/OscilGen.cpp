@@ -547,8 +547,6 @@ void OscilGen::recalculateDefaultWaveTable(WaveTable * wt, bool fillWithZeroes) 
 
     // TODO: ringbuffer at size 1 will not work because the write ptr always
     //       needs to be at least 1 behind the read pointer
-    wt->resize(Shape2{1,1});
-
     wt->setFreq(0, 55.f);
     wt->setSemantic(0, wavetable_types::IntOrFloat{.intVal=0});
 

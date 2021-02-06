@@ -208,6 +208,9 @@ void deallocate(const char *str, void *v)
 //      printf("WT: MW free Tensor1<WaveTable::IntOrFloat> %p\n", v);
         delete (Tensor1<WaveTable::IntOrFloat>*)v;
     }
+    else if(!strcmp(str, "Tensor3ForWaveTable")) {
+        delete (Tensor3ForWaveTable*)v;
+    }
     else
         fprintf(stderr, "Unknown type '%s', leaking pointer %p!!\n", str, v);
 }
@@ -1072,6 +1075,20 @@ public:
                     assert(oscilGen);
                     assert(!params.isFm || params.presonance == 0);
 
+                    // send new tensor3, but only if the parameters changed at all
+                    // TODO: condition is correct, but the new tensor3 is only required if
+                    // semantic size changed
+                    if(params.param_change_time)
+                    {
+                        const Shape3 tensor3Shape{(size_t)params.semantics->size(),
+                                                  (size_t)params.freqs->size(),
+                                                  0 /* buffers remain nullpointers for now */};
+                        Tensor3ForWaveTable* tensor3 = new Tensor3ForWaveTable(tensor3Shape, tensor3Shape);
+                        // send Tensor3, it does not contain any buffers yet
+                        // no snoop ports, send this directly to RT
+                        uToB->write((params.voicePath + "set-tensor3").c_str(), params.isFm ? "Tb" : "Fb", sizeof(Tensor3ForWaveTable*), (uint8_t*)&tensor3);
+                    }
+
                     // calculate all freqs for all pending semantics
                     printf("WT: MW generating %d new tensors of %d waves each...\n", params.write_space, (int)params.freqs->size());
                     for(int i = 0; i < params.write_space; ++i)
@@ -1081,7 +1098,7 @@ public:
                         Tensor2<WaveTable::float32>* newTensor =
                             new Tensor2<WaveTable::float32>(tensorShape, tensorShape);
                         // TODO: the 2nd dim (float buffer) is not resized... (but it's not used right now)
-                        newTensor->resize(Shape1{(size_t)params.freqs->size()});
+                        //newTensor->resize(Shape1{(size_t)params.freqs->size()});
 
                         // TODO: remove those casts everywhere, elliminate std::size_t...
                         int s = (params.write_pos + i) % (int)params.semantics->size();
