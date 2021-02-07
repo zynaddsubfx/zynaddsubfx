@@ -2,6 +2,7 @@
   ZynAddSubFX - a software synthesizer
 
   OscilGen.cpp - Waveform generator for ADnote
+  Copyright (C) 2021 Hans Petter Selasky
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
@@ -44,7 +45,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             rOptions(sine, triangle, pulse, saw, power, gauss,
                 diode, abssine, pulsesine, stretchsine,
                 chirp, absstretchsine, chebyshev, sqr,
-                spike, circle), rOpt(127,use-as-base waveform),
+                spike, circle, powersinus), rOpt(127,use-as-base waveform),
             rDefault(sine),
             "Base Waveform for harmonics"),
     rParamZyn(Pbasefuncpar, rShort("shape"), rDefault(64),
@@ -1629,6 +1630,78 @@ FUNC(circle)
     return y;
 }
 
+static float
+power_cosinus_32(float _x, double _power)
+{
+    uint32_t x = (_x - floorf(_x)) * (1ULL << 32);
+    double retval;
+    uint8_t num;
+
+    /* Handle special cases, if any */
+    switch (x) {
+    case 0xFFFFFFFFU:
+    case 0x00000000U:
+        return (1.0f);
+    case 0x3FFFFFFFU:
+    case 0x40000000U:
+    case 0xBFFFFFFFU:
+    case 0xC0000000U:
+        return (0.0f);
+    case 0x7FFFFFFFU:
+    case 0x80000000U:
+        return (-1.0f);
+    }
+
+    /* Apply "grey" encoding */
+    for (uint32_t mask = 1U << 31; mask != 1; mask /= 2) {
+        if (x & mask)
+            x ^= (mask - 1);
+    }
+
+    /* Find first set bit */
+    for (num = 0; num != 30; num++) {
+        if (x & (1U << num)) {
+            num++;
+            break;
+        }
+    }
+
+    /* Initialize return value */
+    retval = 0.0;
+
+    /* Compute the rest of the power series */
+    for (; num != 30; num++) {
+        if (x & (1U << num))
+            retval = pow((1.0 - retval) / 2.0, _power);
+        else
+            retval = pow((1.0 + retval) / 2.0, _power);
+    }
+
+    /* Check if halfway */
+    if (x & (1ULL << 30))
+        retval = -retval;
+
+    return (retval);
+}
+
+//
+// power argument magic values:
+//     0.0: Converges to a square wave
+//     0.5: Sinus wave
+//     1.0: Triangle wave
+// x: phase value [0..1>
+//
+static float
+power_sinus_32(float _x, double _power)
+{
+    return (power_cosinus_32(_x + 0.75f, _power));
+}
+
+FUNC(powersinus)
+{
+    return (power_sinus_32(x, 2.0 * a));
+}
+
 base_func_t *getBaseFunction(unsigned char func)
 {
     static base_func_t * const functions[] = {
@@ -1647,6 +1720,7 @@ base_func_t *getBaseFunction(unsigned char func)
         basefunc_sqr,
         basefunc_spike,
         basefunc_circle,
+        basefunc_powersinus,
     };
 
     if(!func)

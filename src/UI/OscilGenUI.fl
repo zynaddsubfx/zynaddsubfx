@@ -440,6 +440,10 @@ setbfmodstatus(o->value());
               label Circle
               xywh {127 127 100 20} labelfont 1 labelsize 11
             }
+            MenuItem {} {
+              label PowerSinus
+              xywh {127 127 100 20} labelfont 1 labelsize 11
+            }
 	    MenuItem {} {
 	      label User
 	      xywh {127 127 100 20} labelfont 1 labelsize 11 hide
