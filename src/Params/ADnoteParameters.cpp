@@ -301,7 +301,7 @@ static const Ports voicePorts = {
         }},
 
     // Wavetable stuff
-    {"wavetable-params-changed:T:F:Tibb:Fibb",
+    {"wavetable-params-changed:Ti:Fi:Tibb:Fibb",
         rDoc("retrieve realtime params for wavetable computation"),
         nullptr,
         [](const char *msg, RtData &d)
@@ -312,21 +312,13 @@ static const Ports voicePorts = {
                 int nargs = rtosc_narguments(msg);
                 bool isFmSmp = rtosc_argument(msg, 0).T;
                 WaveTable*& wt = isFmSmp ? obj->tableFm : obj->table;
-                printf("WT: AD received /wavetable-params-changed...\n");
-                int param_change_time = 0;
+                int param_change_time = rtosc_argument(msg, 1).i;
+                printf("WT: AD received /wavetable-params-changed (timestamp %d)...\n", param_change_time);
 
-                // we will request the maximum write space, which is the
-                // the size of the CURRENT semantics tensor minus one
-                // if the tensor will be swapped with this message, this
-                // variable will be changed to the size of the NEW semantics
-                // tensor minus one
-                int cur_ringbuffer_write_space = wt->write_space_semantics();
-                int write_space = cur_ringbuffer_write_space;
-
+                int write_space;
                 // refresh freqs and semantics if passed
                 if(nargs == 4)
                 {
-                    param_change_time = rtosc_argument(msg, 1).i;
                     Tensor1<WaveTable::float32>* freqs = *(Tensor1<WaveTable::float32>**)rtosc_argument(msg, 2).b.data;
                     Tensor1<WaveTable::IntOrFloat>* semantics = *(Tensor1<WaveTable::IntOrFloat>**)rtosc_argument(msg, 3).b.data;
                     // size of the NEW semantics tensor minus one
@@ -339,6 +331,9 @@ static const Ports voicePorts = {
                     wt->swapSemantics(*semantics);
                     d.reply("/free", "sb", "Tensor1<WaveTable::float32>", sizeof(Tensor1<WaveTable::float32>*), &freqs);
                     d.reply("/free", "sb", "Tensor1<WaveTable::IntOrFloat>", sizeof(Tensor1<WaveTable::IntOrFloat>*), &semantics);
+                }
+                else {
+                    write_space = wt->write_space_semantics(false);
                 }
 
                 // give MW all it needs to generate the new table
@@ -358,10 +353,12 @@ static const Ports voicePorts = {
                         wt->get_freqs_addr(),
                         // wavetable parameters (currently, only Presonance)
                         isFmSmp ? 0 : (int)obj->Presonance);
-                // tell the ringbuffer that we can not write more
-                // (this can be different to the number of semantics requested
-                // in case we have requested a ringbuffer resize)
-                wt->inc_write_pos_semantics(cur_ringbuffer_write_space);
+                // don't mark the whole ringbuffer (-1) as "write requested"
+                // because the current Tensor3 will be swapped before it will
+                // be refilled
+                wt->dump_rb(true);
+                // WT is outdated until MW has returned all data for "param_change_time"
+                wt->set_outdated(param_change_time);
             }
             else
             {
@@ -383,14 +380,17 @@ static const Ports voicePorts = {
 
             Shape3 s = unused->capacity_shape();
             printf("WT: AD swapping tensor. New tensor dim: %lu %lu %lu\n", s.dim[0], s.dim[1], s.dim[2]);
-            wt->swapTensor3(*unused);
-            wt->inc_write_pos_semantics(wt->write_space_semantics());
+            // swap the new unused tensor with the "to-be-filled" tensor of the wavetable
+            wt->swapTensor3With(*unused);
+            // mark the whole ringbuffer (-1) as "write requested"
+            wt->inc_write_pos_semantics(true, wt->write_space_semantics(true));
+            wt->dump_rb(true);
 
             // recycle the whole old Tensor3
             // this will also free the contained sub-tensors
             d.reply("/free", "sb", "Tensor3ForWaveTable", sizeof(Tensor3ForWaveTable*), &unused);
         }},
-    {"set-waves:Tib:Fib",
+    {"set-waves:Tiib:Fiib",
         rDoc("inform voice to update oscillator table"), NULL,
         [](const char *msg, RtData &d)
         {
@@ -398,40 +398,60 @@ static const Ports voicePorts = {
             rObject *obj = (rObject *)d.obj;
 
             bool isFmSmp = rtosc_argument(msg, 0).T;
-            int sem_idx = rtosc_argument(msg, 1).i;
-            Tensor2<WaveTable::float32>* waves = *(Tensor2<WaveTable::float32>**)rtosc_argument(msg, 2).b.data;
-
+            int paramChangeTime = rtosc_argument(msg, 1).i;
+            bool fromParamChange = !!paramChangeTime;
+            int sem_idx = rtosc_argument(msg, 2).i;
+            Tensor2<WaveTable::float32>* waves = *(Tensor2<WaveTable::float32>**)rtosc_argument(msg, 3).b.data;
             WaveTable*& wt = isFmSmp ? obj->tableFm : obj->table;
-
-            if(wt->write_pos_delayed_semantics() != sem_idx)
+            printf("WT: AD incoming timestamp %d...\n", paramChangeTime);
+            // ignore outdated param changes, allow the rest:
+            if(!fromParamChange || wt->is_correct_timestamp(paramChangeTime))
             {
-                // since we request the wavetables in order, and the
-                // communication with MiddleWare is lossless, this should
-                // imply a programming error
-                printf("WARNING: MW sent (out-dated?) semantic \"%d\", "
-                       "but the next required semantic is \"%d\" - ignoring!\n",
-                       sem_idx, wt->write_pos_delayed_semantics());
-                assert(false); // in debug mode, just abort now
-            }
-            else
-            {
-                assert(wt->write_space_delayed_semantics() > 0);
-
-                // the received Tensor2 may have different size than ours,
-                // so take what we need, bit by bit
-                for(int freq_idx = 0; freq_idx < waves->size(); ++freq_idx)
+                if(wt->write_pos_delayed_semantics(fromParamChange) != sem_idx)
                 {
-                    Tensor1<WaveTable::float32>& unusedWave = (*waves)[freq_idx];
-                    wt->swapDataAt(sem_idx, freq_idx, unusedWave);
+                    // since we request the wavetables in order, and the
+                    // communication with MiddleWare is lossless, this should
+                    // imply a programming error
+                    printf("WARNING: MW sent (out-dated?) semantic \"%d\", "
+                           "but the next required semantic is \"%d\" - ignoring!\n",
+                           sem_idx, wt->write_pos_delayed_semantics(fromParamChange));
+                    assert(false); // in debug mode, just abort now
                 }
+                else
+                {
+                    wt->dump_rb(fromParamChange);
+                    printf("WS delayed: %d (sem %d), %d\n", wt->write_space_delayed_semantics(fromParamChange), sem_idx, fromParamChange);
+                    assert(wt->write_space_delayed_semantics(fromParamChange) > 0);
 
-                // tell the ringbuffer that we can not write more
-                wt->inc_write_pos_delayed_semantics();
-                // recycle the packaging
-                // this will also free the contained Tensor1 (which are useless after the swap)
-                d.reply("/free", "sb", "Tensor2<WaveTable::float32>", sizeof(Tensor2<WaveTable::float32>*), &waves);
-            }
-        }},
+                    // the received Tensor2 may have different size than ours,
+                    // so take what we need, bit by bit
+                    int nwaves = waves->size();
+                    for(int freq_idx = 0; freq_idx < nwaves; ++freq_idx)
+                    {
+                        Tensor1<WaveTable::float32>& unusedWave = (*waves)[freq_idx];
+                        wt->swapDataAt(sem_idx, freq_idx, unusedWave, fromParamChange);
+                    }
+
+                    // tell the ringbuffer that we can not write more
+                    wt->inc_write_pos_delayed_semantics(fromParamChange, 1);
+
+                    // recycle the packaging
+                    // this will also free the contained Tensor1 (which are useless after the swap)
+                    d.reply("/free", "sb", "Tensor2<WaveTable::float32>", sizeof(Tensor2<WaveTable::float32>*), &waves);
+
+                    // if this was the last index, the new tensor is complete, so
+                    // we can use it
+                    // -1 for C-style array indexing
+                    // -1 because ringbuffer does only allow to write until "read_pos - 1"
+                    if(fromParamChange && sem_idx == wt->size_next_semantics() - 2)
+                    {
+                        printf("WT: AD: swap tensor3s\n");
+                        wt->swapTensor3s(paramChangeTime);
+                    }
+                 }
+             }
+         }
+     },
 
     //Send Messages To Oscillator Realtime Table
     {"OscilSmp/", rDoc("Primary Oscillator"),
@@ -1573,9 +1593,10 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
         {
             // give MW all it needs to generate the new table
             WaveTable* wt = isFmSmp ? tableFm : table;
-            int write_space = wt->write_space_semantics();
-            if(write_space)
+            int write_space = wt->write_space_semantics(false);
+            if(write_space && !wt->outdated())
             {
+                wt->dump_rb(false);
                 int write_pos = wt->write_pos_semantics();
                 printf("WT: AD WT %p requesting %d new 2D Tensors at position %d (reason: too many consumed)...\n",
                        wt, write_space, write_pos);
@@ -1594,7 +1615,7 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
                         // wavetable parameters (currently, only Presonance)
                         isFmSmp ? 0 : (int)Presonance);
                 // tell the ringbuffer that we can not write more
-                wt->inc_write_pos_semantics(write_space);
+                wt->inc_write_pos_semantics(false, write_space);
             }
         }
     }

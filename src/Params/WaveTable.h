@@ -440,31 +440,44 @@ private:
     Tensor1<IntOrFloat> semantics; //!< E.g. oscil params or random seed (e.g. 0...127)
     Tensor1<float32> freqs; //!< The frequency of each 'row'
     Tensor3ForWaveTable data;  //!< time=col,freq=row,semantics(oscil param or random seed)=depth
+    Tensor3ForWaveTable next_tensor3; //!< can be safely refilled while data is in use, is swapped with data
 
     // permanent pointers, required to be able to transfer pointers through uToB
     const Tensor1<IntOrFloat>* semantics_addr = &semantics;
     const Tensor1<float32>* freqs_addr = &freqs;
 
     WtMode m_mode;
+
+    int timestamp_requested = 0, timestamp_current = 0;
+
+    Tensor3ForWaveTable& get_tensor3(bool next) { return (next?next_tensor3:data); }
+    const Tensor3ForWaveTable& get_tensor3(bool next) const { return (next?next_tensor3:data); }
 public:
 
-    int size_semantics() const { return data.size(); }
-    int read_space_semantics() const { return data.read_space(); }
-    int write_space_semantics() const { return data.write_space(); }
-    int write_space_delayed_semantics() const { return data.write_space_delayed(); }
-    int read_pos_semantics() const { return data.read_pos(); }
+    // ringbuffer stuff
+    int size_next_semantics() const { return next_tensor3.size(); }
+    int write_space_semantics(bool next_tensor) const { return get_tensor3(next_tensor).write_space(); }
+    int write_space_delayed_semantics(bool next_tensor) const { return get_tensor3(next_tensor).write_space_delayed(); }
     int write_pos_semantics() const { return data.write_pos(); }
-    int write_pos_delayed_semantics() const { return data.write_pos_delayed(); }
+    int write_pos_delayed_semantics(bool next_tensor) const { return get_tensor3(next_tensor).write_pos_delayed(); }
     void inc_read_pos_semantics() { data.inc_read_pos(); }
-    void inc_write_pos_semantics(int amnt) { data.inc_write_pos(amnt); }
-    void inc_write_pos_delayed_semantics() { data.inc_write_pos_delayed(); }
+    void inc_write_pos_semantics(bool next_tensor, int amnt) { get_tensor3(next_tensor).inc_write_pos(amnt); }
+    void inc_write_pos_delayed_semantics(bool next_tensor, int amnt) { get_tensor3(next_tensor).inc_write_pos_delayed(amnt); }
 
+    void dump_rb(bool next_tensor) const { get_tensor3(next_tensor).AbstractRingbuffer::dump(); }
+
+    // timestamp/outdated stuff
+    void set_outdated(int timestamp) { assert(timestamp != timestamp_current); timestamp_requested = timestamp; }
+    void set_not_outdated_anymore(int timestamp) { assert(timestamp == timestamp_requested); timestamp_current = timestamp; }
+    bool outdated() const { return timestamp_requested != timestamp_current; }
+    bool is_correct_timestamp(int timestamp) const { return timestamp_requested == timestamp; }
+
+    // data access
     const Tensor1<IntOrFloat>* const* get_semantics_addr() const { return &semantics_addr; }
     const Tensor1<float32>* const* get_freqs_addr() const { return &freqs_addr; }
-
     void swapSemantics(Tensor1<IntOrFloat>& unused) { semantics.swapWith(unused); }
     void swapFreqs(Tensor1<float32>& unused) { freqs.swapWith(unused); }
-    void swapTensor3(Tensor3ForWaveTable& unused) { data.swapWith(unused); }
+    void swapTensor3With(Tensor3ForWaveTable& unused) { next_tensor3.swapWith(unused); }
 
     void setMode(WtMode mode) { m_mode = mode; }
     WtMode mode() const { return m_mode; }
@@ -478,7 +491,9 @@ public:
     void setSemantic(std::size_t i, IntOrFloat val) { semantics[i] = val; }
     void setFreq(std::size_t i, float32 val) { freqs[i] = val; }
     void setDataAt(int semanticIdx, int freqIdx, float bufIdx, float to) { data[semanticIdx][freqIdx][bufIdx] = to; }
-    void swapDataAt(int semanticIdx, int freqIdx, Tensor1<float32>& new_data) { data[semanticIdx][freqIdx].swapWith(new_data); }
+    void swapDataAt(int semanticIdx, int freqIdx, Tensor1<float32>& new_data, bool next_tensor) {
+        (next_tensor ? (next_tensor3) : (data))[semanticIdx][freqIdx].swapWith(new_data); }
+    void swapTensor3s(int timestamp) { assert(timestamp == timestamp_requested); data.swapWith(next_tensor3); timestamp_current = timestamp_requested; }
 
     //! Insert generated data into this object
     //! If this is only adding new random seeds, then the rest of the data does

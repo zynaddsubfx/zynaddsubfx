@@ -309,7 +309,8 @@ public:
                     sizeof(freqs), &freqs, sizeof(semantics), &semantics);
             }
             else
-                d.chain((s + "/wavetable-params-changed").c_str(), isFm ? "T" : "F");
+                d.chain((s + "/wavetable-params-changed").c_str(), isFm ? "Ti" : "Fi",
+                        cur_info.param_change_time);
         }
     }
 
@@ -1078,7 +1079,9 @@ public:
                     // send new tensor3, but only if the parameters changed at all
                     // TODO: condition is correct, but the new tensor3 is only required if
                     // semantic size changed
-                    if(params.param_change_time)
+
+                    if(params.param_change_time) // TODO: currently, param_change_time is !=0 for
+                    // parameter changes where the Tensor3 size is unchanged, too!
                     {
                         const Shape3 tensor3Shape{(size_t)params.semantics->size(),
                                                   (size_t)params.freqs->size(),
@@ -1112,9 +1115,8 @@ public:
                             //       then we save this alloc-copy-dealloc
                         }
 
-                        // send Tensor2 for the current semantic
                         // no snoop ports, send this directly to RT
-                        uToB->write((params.voicePath + "set-waves").c_str(), params.isFm ? "Tib" : "Fib", s, sizeof(Tensor2<WaveTable::float32>*), (uint8_t*)&newTensor);
+                        uToB->write((params.voicePath + "set-waves").c_str(), params.isFm ? "Tiib" : "Fiib", params.param_change_time, s, sizeof(Tensor2<WaveTable::float32>*), (uint8_t*)&newTensor);
                     }
                 }
                 else {
