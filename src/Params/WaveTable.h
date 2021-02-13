@@ -439,12 +439,17 @@ public:
 private:
     Tensor1<IntOrFloat> semantics; //!< E.g. oscil params or random seed (e.g. 0...127)
     Tensor1<float32> freqs; //!< The frequency of each 'row'
+    Tensor1<IntOrFloat> next_semantics;
+    Tensor1<float32> next_freqs;
+
     Tensor3ForWaveTable data;  //!< time=col,freq=row,semantics(oscil param or random seed)=depth
     Tensor3ForWaveTable next_tensor3; //!< can be safely refilled while data is in use, is swapped with data
 
     // permanent pointers, required to be able to transfer pointers through uToB
-    const Tensor1<IntOrFloat>* semantics_addr = &semantics;
-    const Tensor1<float32>* freqs_addr = &freqs;
+    const Tensor1<IntOrFloat>* const semantics_addr = &semantics;
+    const Tensor1<float32>* const freqs_addr = &freqs;
+    const Tensor1<IntOrFloat>* const next_semantics_addr = &next_semantics;
+    const Tensor1<float32>* const next_freqs_addr = &next_freqs;
 
     WtMode m_mode;
 
@@ -473,10 +478,10 @@ public:
     bool is_correct_timestamp(int timestamp) const { return timestamp_requested == timestamp; }
 
     // data access
-    const Tensor1<IntOrFloat>* const* get_semantics_addr() const { return &semantics_addr; }
-    const Tensor1<float32>* const* get_freqs_addr() const { return &freqs_addr; }
-    void swapSemantics(Tensor1<IntOrFloat>& unused) { semantics.swapWith(unused); }
-    void swapFreqs(Tensor1<float32>& unused) { freqs.swapWith(unused); }
+    const Tensor1<IntOrFloat>* const* get_semantics_addr(bool next = false) const { return &(next?next_semantics_addr:semantics_addr); }
+    const Tensor1<float32>* const* get_freqs_addr(bool next = false) const { return &(next?next_freqs_addr:freqs_addr); }
+    void swapSemantics(Tensor1<IntOrFloat>& unused) { next_semantics.swapWith(unused); }
+    void swapFreqs(Tensor1<float32>& unused) { next_freqs.swapWith(unused); }
     void swapNextTensor3With(Tensor3ForWaveTable& unused) { next_tensor3.swapWith(unused); }
 
     void setMode(WtMode mode) { m_mode = mode; }
@@ -493,7 +498,11 @@ public:
     void setDataAt(int semanticIdx, int freqIdx, float bufIdx, float to) { data[semanticIdx][freqIdx][bufIdx] = to; }
     void swapDataAt(int semanticIdx, int freqIdx, Tensor1<float32>& new_data, bool next_tensor) {
         (next_tensor ? (next_tensor3) : (data))[semanticIdx][freqIdx].swapWith(new_data); }
-    void swapTensor3s(int timestamp) { assert(timestamp == timestamp_requested); data.swapWith(next_tensor3); timestamp_current = timestamp_requested; }
+    void swapTensors(int timestamp) { assert(timestamp == timestamp_requested);
+        data.swapWith(next_tensor3);
+        semantics.swapWith(next_semantics);
+        freqs.swapWith(next_freqs);
+        timestamp_current = timestamp_requested; }
 
     //! Insert generated data into this object
     //! If this is only adding new random seeds, then the rest of the data does

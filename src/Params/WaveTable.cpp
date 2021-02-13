@@ -26,6 +26,7 @@ namespace zyn {
 
 const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
 {
+    assert(data[data.read_pos()].size() == freqs.size());
     std::size_t num_freqs = freqs.size(), i;
     float bestFreqDist = 9999999;
     std::size_t bestI = 0;
@@ -66,6 +67,8 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
 WaveTable::WaveTable(std::size_t buffersize) :
     semantics(Shape1{1}, Shape1{0}),
     freqs(Shape1{1}, Shape1{0}),
+    next_semantics(Shape1{1}, Shape1{0}),
+    next_freqs(Shape1{1}, Shape1{0}),
     data(Shape3{1, 1, buffersize}, Shape3{0, 0, 0}),
     next_tensor3(Shape3{1, 1,buffersize}, Shape3{0, 0, 0}) /* TODO: test with 0 */
 {

@@ -316,8 +316,9 @@ static const Ports voicePorts = {
                 printf("WT: AD received /wavetable-params-changed (timestamp %d)...\n", param_change_time);
 
                 int write_space;
+                bool new_scale_tensors = 4 == nargs;
                 // refresh freqs and semantics if passed
-                if(nargs == 4)
+                if(new_scale_tensors)
                 {
                     Tensor1<WaveTable::float32>* freqs = *(Tensor1<WaveTable::float32>**)rtosc_argument(msg, 2).b.data;
                     Tensor1<WaveTable::IntOrFloat>* semantics = *(Tensor1<WaveTable::IntOrFloat>**)rtosc_argument(msg, 3).b.data;
@@ -348,9 +349,9 @@ static const Ports voicePorts = {
                         0,
                         write_space,
                         sizeof(Tensor1<WaveTable::IntOrFloat>*),
-                        wt->get_semantics_addr(),
+                        wt->get_semantics_addr(new_scale_tensors),
                         sizeof(Tensor1<WaveTable::float32>*),
-                        wt->get_freqs_addr(),
+                        wt->get_freqs_addr(new_scale_tensors),
                         // wavetable parameters (currently, only Presonance)
                         isFmSmp ? 0 : (int)obj->Presonance);
                 // don't mark the whole ringbuffer (-1) as "write requested"
@@ -445,8 +446,8 @@ static const Ports voicePorts = {
                     // -1 because ringbuffer does only allow to write until "read_pos - 1"
                     if(fromParamChange && sem_idx == wt->size_next_semantics() - 2)
                     {
-                        printf("WT: AD: swap tensor3s\n");
-                        wt->swapTensor3s(paramChangeTime);
+                        printf("WT: AD: swap tensors\n");
+                        wt->swapTensors(paramChangeTime);
                     }
                  }
              }
