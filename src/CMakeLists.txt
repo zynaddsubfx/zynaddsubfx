@@ -540,7 +540,7 @@ add_subdirectory(Effects)
 add_subdirectory(Params)
 add_subdirectory(DSP)
 add_subdirectory(Nio)
-#add_subdirectory(Plugin) # unstable right now
+add_subdirectory(Plugin)
 
 add_library(zynaddsubfx_core STATIC
     version.cpp
