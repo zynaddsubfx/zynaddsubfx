@@ -168,6 +168,12 @@ public:
     int write_pos() const { return w; }
     int write_pos_delayed() const { return w_delayed; }
 
+    void dump() const
+    {
+        printf("RINGBUFFER: size: %d, r/w_delayed/w: %d %d %d\n",
+               m_size, r, w_delayed, w);
+    }
+
     void resize(int newsize)
     {
         r = w = w_delayed = 0;
