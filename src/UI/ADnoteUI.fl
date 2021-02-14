@@ -178,7 +178,7 @@ class ADvoicelistitem {open : {public Fl_Osc_Group}
 else voicelistitemgroup->activate();
 o->redraw();}
         private xywh {30 5 20 20} down_box DOWN_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 13 align 4
-        code0 {char tmp[10];snprintf(tmp,10,"%d",nvoice+1);o->label(strdup(tmp));}
+        code0 {char tmp[12];snprintf(tmp,12,"%d",nvoice+1);o->label(strdup(tmp));}
         code1 {o->init("Enabled");}
         class Fl_Osc_Check
       }
@@ -825,7 +825,7 @@ o->redraw();}
         Fl_Group activeVoiceID {
           label 01
           xywh {5 5 55 35} box THIN_UP_BOX labeltype EMBOSSED_LABEL labelfont 1 labelsize 22 align 16
-          code0 {char tmp[10];snprintf(tmp,10,"%d",nvoice+1);o->label(strdup(tmp));}
+          code0 {char tmp[12];snprintf(tmp,12,"%d",nvoice+1);o->label(strdup(tmp));}
         } {}
         Fl_Choice {} {
           callback {switch (o->value()) {
@@ -930,7 +930,7 @@ delete(oscedit);
   } {
     code {nvoice = nvoice_;
     loc = base+"VoicePar"+to_s(nvoice)+"/";
-    char tmp[50];snprintf(tmp,10,"%d",nvoice+1);
+    char tmp[50];snprintf(tmp,12,"%d",nvoice+1);
     activeVoiceID->label(strdup(tmp));
     extoscil->clear();
     extoscil->add("Internal");

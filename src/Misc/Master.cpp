@@ -560,7 +560,7 @@ static const Ports master_ports = {
                 assert(!*obj->dnd_buffer);
                 const char* var = rtosc_argument(msg, 0).s;
                 printf("receiving /last_dnd %s\n",var);
-                strncpy(obj->dnd_buffer, var, Master::dnd_buffer_size);
+                strncpy(obj->dnd_buffer, var, Master::dnd_buffer_size-1);
             }
         rBOIL_END },
     {"config/", rNoDefaults

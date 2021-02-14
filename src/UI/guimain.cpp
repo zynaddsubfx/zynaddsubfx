@@ -202,6 +202,8 @@ ui_handle_t GUI::createUi(Fl_Osc_Interface *osc, void *exit)
                 MasterUI::menu_mastermenu[13].hide(); // file -> exit
                 fl_embed(ui->masterwindow, winId);
             }
+#else
+            (void) winId; // Silences compiler warning.
 #endif
             ui->masterwindow->show();
         }
