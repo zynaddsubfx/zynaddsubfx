@@ -1080,8 +1080,11 @@ public:
                     // TODO: condition is correct, but the new tensor3 is only required if
                     // semantic size changed
 
-                    if(params.param_change_time) // TODO: currently, param_change_time is !=0 for
-                    // parameter changes where the Tensor3 size is unchanged, too!
+                    if(params.param_change_time)
+                    // TODO: currently, param_change_time is !=0 for
+                    // parameter changes where the Tensor3 size is unchanged, too
+                    // => this means Tensor3 are generated even if the Tensor3
+                    //    size does not need to be changed
                     {
                         const Shape3 tensor3Shape{(size_t)params.semantics->size(),
                                                   (size_t)params.freqs->size(),

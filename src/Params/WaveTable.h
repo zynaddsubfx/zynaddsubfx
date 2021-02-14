@@ -477,7 +477,7 @@ public:
     const Tensor1<float32>* const* get_freqs_addr() const { return &freqs_addr; }
     void swapSemantics(Tensor1<IntOrFloat>& unused) { semantics.swapWith(unused); }
     void swapFreqs(Tensor1<float32>& unused) { freqs.swapWith(unused); }
-    void swapTensor3With(Tensor3ForWaveTable& unused) { next_tensor3.swapWith(unused); }
+    void swapNextTensor3With(Tensor3ForWaveTable& unused) { next_tensor3.swapWith(unused); }
 
     void setMode(WtMode mode) { m_mode = mode; }
     WtMode mode() const { return m_mode; }

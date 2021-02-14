@@ -380,8 +380,8 @@ static const Ports voicePorts = {
 
             Shape3 s = unused->capacity_shape();
             printf("WT: AD swapping tensor. New tensor dim: %lu %lu %lu\n", s.dim[0], s.dim[1], s.dim[2]);
-            // swap the new unused tensor with the "to-be-filled" tensor of the wavetable
-            wt->swapTensor3With(*unused);
+            // swap the new unused tensor with wt's "to-be-filled" tensor
+            wt->swapNextTensor3With(*unused);
             // mark the whole ringbuffer (-1) as "write requested"
             wt->inc_write_pos_semantics(true, wt->write_space_semantics(true));
             wt->dump_rb(true);
