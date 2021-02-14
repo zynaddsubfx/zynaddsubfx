@@ -1100,6 +1100,9 @@ public:
                         uToB->write((params.voicePath + "set-waves").c_str(), params.isFm ? "Tib" : "Fib", s, sizeof(Tensor2<WaveTable::float32>*), (uint8_t*)&newTensor);
                     }
                 }
+                else {
+                    printf("WT: MW dropping outdated WT request %d\n",params.param_change_time);
+                }
 
                 waveTablesToGenerate.pop();
             }
@@ -2151,8 +2154,6 @@ static rtosc::Ports middlewareReplyPorts = {
         // add request to queue, allow new requests for this OscilGen again
         rBegin;
 
-        printf("WT: MW received wt-request, queuing...\n");
-
         MiddleWareImpl::waveTablesToGenerateStruct wt2g;
 
         unsigned offs;
@@ -2191,6 +2192,7 @@ static rtosc::Ports middlewareReplyPorts = {
         // (TODO: might be done later when handling the queue)
         impl.waveTableRequestHandler.receivedAdPars(wt2g.part, wt2g.kit, wt2g.voice, wt2g.isFm);
 
+        printf("WT: MW received wt-request (timestamp %d), queuing...\n", wt2g.param_change_time);
         impl.addWaveTableToGenerate(std::move(wt2g));
         rEnd},
     {"rt_paste_done:s", 0, 0,

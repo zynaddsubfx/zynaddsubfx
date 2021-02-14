@@ -344,7 +344,7 @@ static const Ports voicePorts = {
                         wt->get_semantics_addr(),
                         sizeof(Tensor1<WaveTable::float32>*),
                         wt->get_freqs_addr(),
-                        // wavetable parameters (curently, only Presonance)
+                        // wavetable parameters (currently, only Presonance)
                         isFmSmp ? 0 : (int)obj->Presonance);
                 // tell the ringbuffer that we can not write more
                 wt->inc_write_pos_semantics(write_space);
@@ -1559,7 +1559,7 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
                         wt->get_semantics_addr(),
                         sizeof(Tensor1<WaveTable::float32>*),
                         wt->get_freqs_addr(),
-                        // wavetable parameters (curently, only Presonance)
+                        // wavetable parameters (currently, only Presonance)
                         isFmSmp ? 0 : (int)Presonance);
                 // tell the ringbuffer that we can not write more
                 wt->inc_write_pos_semantics(write_space);
