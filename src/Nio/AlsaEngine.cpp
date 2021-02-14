@@ -137,13 +137,11 @@ void *AlsaEngine::MidiThread(void)
             continue;
         switch(event->type) {
             case SND_SEQ_EVENT_NOTEON:
-                if(event->data.note.note) {
-                    ev.type    = M_NOTE;
-                    ev.channel = event->data.note.channel;
-                    ev.num     = event->data.note.note;
-                    ev.value   = event->data.note.velocity;
-                    InMgr::getInstance().putEvent(ev);
-                }
+                ev.type    = M_NOTE;
+                ev.channel = event->data.note.channel;
+                ev.num     = event->data.note.note;
+                ev.value   = event->data.note.velocity;
+                InMgr::getInstance().putEvent(ev);
                 break;
 
             case SND_SEQ_EVENT_NOTEOFF:
