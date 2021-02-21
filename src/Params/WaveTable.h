@@ -130,47 +130,63 @@ protected:
     }
 };
 
-//! Ringbuffer without buffer - only size, reader and writer
-//! @invariant r<=w_delayed<=w<r (in a cyclic sense)
+/**
+    Ringbuffer without buffer - only size, reader and writer
+    (and delayed writer)
+    @invariant r <= w_delayed <= w (non-cyclic)
+    @invariant r <= w + m_size (non-cyclic)
+
+    While "normal" ringbuffers only allow w < r + m_size, this ringbuffer
+    allows w <= r + m_size. This means, w === r mod m_size can have 2
+    meanings, which is while we calculate mod (m_size*2) internally
+*/
 class AbstractRingbuffer
 {
 public:
-    AbstractRingbuffer(int newsize) { resize(newsize); }
+    AbstractRingbuffer(int newsize) :
+        m_size(newsize),
+        m_size_mask(newsize-1),
+        m_size_x2(m_size << 1),
+        m_size_x2_mask((m_size << 1) - 1)
+    {
+        assert(is_power_of_2(m_size));
+    }
 
     int read_space() const
     {
-        // "r->w" > 0 => OK, can read
-        // "r->w" == 0 => can not read
-        return (w_delayed - r + m_size) % m_size;
-    }
-
-    int write_space() const
-    {
-        // "w->r" (ringwise) > 1 => OK, can write
-        // "w->r" (ringwise) == 1 => write would cause "r==w" (increase read space) => can not read
-        // "w->r" (ringwise) == 0 => forbidden (see case ==1)
-        return ((r-1) - w + m_size) % m_size;
+        // we know w_delayed <= r + m_size (in non-cyclic sense), so we calculate
+        //     (w_delayed - r +(m_size*2)) % (m_size*2)
+        return (w_delayed - r + m_size_x2) & m_size_x2_mask;
     }
 
     int write_space_delayed() const
     {
-        // same reasoning as for read_space
-        return (w - w_delayed + m_size) % m_size;
+        // analog reason as in read_space
+        return (w - w_delayed + m_size_x2) & m_size_x2_mask;
     }
 
-    void inc_write_pos(int amnt) { assert(amnt <= write_space()); w = (amnt+w) % m_size; }
-    void inc_write_pos_delayed(int amnt = 1) { assert(amnt <= write_space_delayed()); w_delayed = (amnt+w_delayed) % m_size; }
-    void inc_read_pos() { assert(m_size == 1 || 1 <= read_space()); /* <- too many consumed? */ r = (1+r) % m_size; }
+    int write_space() const
+    {
+        //              (0 <= this part <= 128 by invariant  )
+        return m_size - ((w - r + m_size_x2) & m_size_x2_mask);
+    }
 
-    int read_pos() const { return r; }
-    int write_pos() const { return w; }
-    int write_pos_delayed() const { return w_delayed; }
+    void inc_write_pos(int amnt) { assert(amnt <= write_space()); w = (amnt+w) & m_size_x2_mask; }
+    void inc_write_pos_delayed(int amnt = 1) { assert(amnt <= write_space_delayed()); w_delayed = (amnt+w_delayed) & m_size_x2_mask; }
+    void inc_read_pos() { assert(1 <= read_space()); r = (1+r) & m_size_x2_mask; }
+
+    int read_pos() const { return r & m_size_mask; }
+    int write_pos() const { return w & m_size_mask; }
+    int write_pos_delayed() const { return w_delayed & m_size_mask; }
 
     int size() const { return m_size; }
 
     void swapWith(AbstractRingbuffer& other)
     {
         std::swap(m_size, other.m_size);
+        std::swap(m_size_mask, other.m_size_mask);
+        std::swap(m_size_x2, other.m_size_x2);
+        std::swap(m_size_x2_mask, other.m_size_x2_mask);
         std::swap(r, other.r);
         std::swap(w_delayed, other.w_delayed);
         std::swap(w, other.w);
@@ -182,26 +198,37 @@ public:
                m_size, r, w_delayed, w);
     }
 
+    //! testing only
+    static bool debugfunc_is_power_of_2(int x) { return is_power_of_2(x); }
+
 private:
 
-    // TODO: only used by CTOR -> move to CTOR initializer list
-    void resize(int newsize)
+    //! return if x = 2^n for n in [0,...]
+    static bool is_power_of_2(int x)
     {
-        r = w = w_delayed = 0;
-        m_size = newsize;
+        return x && !(x & (x-1));
     }
 
-    // Invariant: r<=w_delayed<=w<r (in a cyclic sense)
+    // Invariant: r<=w_delayed<=w (in a non-cyclic sense)
+
+    // while "normal" ringbuffers only allow w < r + m_size, this ringbuffer
+    // allows w <= r + m_size. this means, w === r mod m_size can have 2 meanings,
+    // which is while we calculate mod (m_size*2)
+
     //! read position, marks next element to read. can read until w_delayed.
-    int r;
+    int r = 0;
     //! write position, marks the element that will be written to next (may be
     //! reserved for write already if w_delayed < w). can write until w.
-    int w_delayed;
+    int w_delayed = 0;
     //! write position, marks the element that will be reserved for a write
     //! next (but maybe not yet written). can write until r-1.
-    int w;
+    int w = 0;
 
-    int m_size;
+    // const (except of swapping)
+    int m_size;         //!< size
+    int m_size_mask;    //!< size - 1
+    int m_size_x2;      //!< size * 2
+    int m_size_x2_mask; //!< size * 2 - 1
 };
 
 //! Tensor class for all dimensions != 1

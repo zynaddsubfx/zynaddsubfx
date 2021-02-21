@@ -325,7 +325,7 @@ static const Ports voicePorts = {
                     // size of the NEW semantics tensor minus one
                     // we can't fill it with "write_space" (ringbuffer limit)
                     // but it's perfectly acceptable to not completely fill it
-                    write_space = semantics->size() - 1;
+                    write_space = semantics->size();
 
                     printf("WT: AD received new scale tensors %p (sz %d) %p (sz %d)\n", freqs, freqs->size(), semantics, semantics->size());
                     wt->swapFreqs(*freqs);
@@ -443,8 +443,7 @@ static const Ports voicePorts = {
                     // if this was the last index, the new tensor is complete, so
                     // we can use it
                     // -1 for C-style array indexing
-                    // -1 because ringbuffer does only allow to write until "read_pos - 1"
-                    if(fromParamChange && sem_idx == wt->size_next_semantics() - 2)
+                    if(fromParamChange && sem_idx == wt->size_next_semantics() - 1)
                     {
                         printf("WT: AD: swap tensors\n");
                         wt->swapTensors(paramChangeTime);
