@@ -1233,14 +1233,17 @@ bool Master::AudioOut(float *outr, float *outl)
 
     //request wavetables (ad synth) from MW if too many were consumed
     //large for loop, but should boil down to only few iterations in practice
-    for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    if(bToU)
     {
-        Part* mpart = part[npart];
-        if(mpart->Penabled)
+        for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         {
-            for(int nkit = 0; nkit < NUM_KIT_ITEMS; ++nkit)
+            Part* mpart = part[npart];
+            if(mpart->Penabled)
             {
-                mpart->kit[nkit].requestWavetables(bToU, npart, nkit);
+                for(int nkit = 0; nkit < NUM_KIT_ITEMS; ++nkit)
+                {
+                    mpart->kit[nkit].requestWavetables(bToU, npart, nkit);
+                }
             }
         }
     }
