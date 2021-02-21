@@ -131,6 +131,55 @@ class TensorTest : public CxxTest::TestSuite
             TS_ASSERT_EQUALS(2, rb.write_space());
         }
 
+        void testRb2(void)
+        {
+            AbstractRingbuffer rb(1);
+
+            // r=w=0
+            TS_ASSERT_EQUALS(1, rb.size());
+
+            TS_ASSERT_EQUALS(rb.read_pos(), 0);
+            TS_ASSERT_EQUALS(rb.write_pos_delayed(), 0);
+            TS_ASSERT_EQUALS(rb.write_pos(), 0);
+            TS_ASSERT_EQUALS(0, rb.read_space());
+            TS_ASSERT_EQUALS(0, rb.write_space_delayed());
+            TS_ASSERT_EQUALS(1, rb.write_space());
+
+            rb.inc_write_pos(1); TS_ASSERT_EQUALS(1, rb.write_space_delayed());
+            rb.inc_write_pos_delayed(1);
+
+            // r=0, w=1
+            TS_ASSERT_EQUALS(rb.read_pos(), 0);
+            // still 0, but now "before r" in cyclic sense
+            TS_ASSERT_EQUALS(rb.write_pos_delayed(), 0);
+            TS_ASSERT_EQUALS(rb.write_pos(), 0);
+            TS_ASSERT_EQUALS(1, rb.read_space());
+            TS_ASSERT_EQUALS(0, rb.write_space());
+
+            rb.inc_read_pos();
+            // r=w=1
+            TS_ASSERT_EQUALS(0, rb.read_space());
+            TS_ASSERT_EQUALS(1, rb.write_space());
+
+            rb.inc_write_pos(1); TS_ASSERT_EQUALS(1, rb.write_space_delayed());
+            rb.inc_write_pos_delayed(1);
+
+            // r=1, w=0
+            TS_ASSERT_EQUALS(rb.read_pos(), 0);
+            TS_ASSERT_EQUALS(rb.write_pos_delayed(), 0);
+            TS_ASSERT_EQUALS(rb.write_pos(), 0);
+            TS_ASSERT_EQUALS(1, rb.read_space());
+            TS_ASSERT_EQUALS(0, rb.write_space());
+
+            rb.inc_read_pos();
+            // r=w=0
+            TS_ASSERT_EQUALS(rb.read_pos(), 0);
+            TS_ASSERT_EQUALS(rb.write_pos_delayed(), 0);
+            TS_ASSERT_EQUALS(rb.write_pos(), 0);
+            TS_ASSERT_EQUALS(0, rb.read_space());
+            TS_ASSERT_EQUALS(1, rb.write_space());
+        }
+
         void testShapeEquals(void) {
             Shape3 s1{3,4,5}, s2{3,4,5};;
             TS_ASSERT_EQUALS(s1, s2);
