@@ -449,10 +449,10 @@ static const Ports voicePorts = {
                         printf("WT: AD: swap tensors\n");
                         wt->swapTensors(paramChangeTime);
                     }
-                 }
-             }
-         }
-     },
+                }
+            }
+        }
+    },
 
     //Send Messages To Oscillator Realtime Table
     {"OscilSmp/", rDoc("Primary Oscillator"),
