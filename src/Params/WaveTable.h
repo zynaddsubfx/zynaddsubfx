@@ -313,7 +313,7 @@ public:
     std::size_t set_data_using_deep_copy(const T* new_data)
     {
         std::size_t consumed = 0;
-        for(std::size_t i = 0; i < base_type::size(); ++i)
+        for(int i = 0; i < base_type::size(); ++i)
         {
             consumed += m_data[i].set_data_using_deep_copy(new_data + consumed);
         }
