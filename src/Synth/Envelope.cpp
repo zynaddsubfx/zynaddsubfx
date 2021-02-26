@@ -170,7 +170,7 @@ float Envelope::envout(bool doWatch)
         else
             out = envoutval + (envval[releaseindex] - envoutval) * t; // linear interpolation envoutval and envval[releaseindex]
 
-        t += envdt[releaseindex] * envstretch;
+        t += envdt[releaseindex];
 
         if(t >= 1.0f) { // move to the next segment
             currentpoint = envsustain + 2;
