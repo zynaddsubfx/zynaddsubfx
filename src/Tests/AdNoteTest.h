@@ -59,12 +59,14 @@ class AdNoteTest:public CxxTest::TestSuite
         void randomize_params(void) {
             lfop->Pintensity  = randval(0,255);
             lfop->Pstartphase = randval(0,255);
-            lfop->Pcutoff     = randval(0,255);
+            lfop->Pcutoff     = randval(0,127);
             lfop->PLFOtype    = randval(0,6);
             lfop->Prandomness = randval(0,255);
             lfop->Pfreqrand   = randval(0,255);
             lfop->Pcontinous  = randval(0,1);
             lfop->Pstretch    = randval(0,255);
+            lfop->fel         = (consumer_location_type_t) randval(1,2);
+            
         }
 
         void run_lfo_randomtest(void)
@@ -72,7 +74,15 @@ class AdNoteTest:public CxxTest::TestSuite
             lfo  = new LFO(*lfop, 440.0f, *time);
             for(int i=0; i<100; ++i) {
                 float out = lfo->lfoout();
-                TS_ASSERT((-2.0f < out && out < 2.0f));
+                switch(lfop->fel)
+                {
+                    case consumer_location_type_t::amp:
+                        TS_ASSERT((-2.0f < out && out < 2.0f));
+                        break;
+                    case consumer_location_type_t::filter:
+                        TS_ASSERT((-8.0f < out && out < 8.0f));
+                        break;
+                }
             }
         }
 
@@ -171,15 +181,15 @@ class AdNoteTest:public CxxTest::TestSuite
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             w->tick();
-            TS_ASSERT_DELTA(outL[255], 0.0592f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], 0.0646f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], 0.0989f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], 0.1183f, 0.0001f);
             w->tick();
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.0901f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], -0.1169f, 0.0001f);
             w->tick();
 
             TS_ASSERT(tr->hasNext());
@@ -203,7 +213,7 @@ class AdNoteTest:public CxxTest::TestSuite
             file.close();
 #endif
 
-            TS_ASSERT_EQUALS(sampleCount, 9472);
+            TS_ASSERT_EQUALS(sampleCount, 30208);
 
               lfop = new LFOParams();
             lfop->fel  = zyn::consumer_location_type_t::amp;
