@@ -314,7 +314,8 @@ struct ADnoteVoiceParam {
 
     static const rtosc::Ports &ports;
 
-    WaveTable* table = nullptr, * tableFm = nullptr;
+    WaveTable* table = nullptr, * tableFm = nullptr; // tensors in use
+    WaveTable* nextTable = nullptr, * nextTableFm = nullptr; // new tensors are gathered here
     //! whether to use wave tables - only false for debugging
     bool waveTables; // const after it has been set
 };

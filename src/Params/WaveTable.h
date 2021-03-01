@@ -400,6 +400,13 @@ public:
         TensorBase<1, T>::swapWith(other);
         std::swap(m_data, other.m_data);
     }
+
+    // TODO: remove
+    void deepCopyTo(Tensor<1,T>& target)
+    {
+        target.init_shape(capacity_shape());
+        target.set_data_using_deep_copy(m_data);
+    }
 };
 
 using Shape1 = Shape<1>;
@@ -466,50 +473,53 @@ public:
 private:
     Tensor1<IntOrFloat> semantics; //!< E.g. oscil params or random seed (e.g. 0...127)
     Tensor1<float32> freqs; //!< The frequency of each 'row'
-    Tensor1<IntOrFloat> next_semantics;
-    Tensor1<float32> next_freqs;
-
     Tensor3ForWaveTable data;  //!< time=col,freq=row,semantics(oscil param or random seed)=depth
-    Tensor3ForWaveTable next_tensor3; //!< can be safely refilled while data is in use, is swapped with data
 
-    // permanent pointers, required to be able to transfer pointers through uToB
     const Tensor1<IntOrFloat>* const semantics_addr = &semantics;
     const Tensor1<float32>* const freqs_addr = &freqs;
-    const Tensor1<IntOrFloat>* const next_semantics_addr = &next_semantics;
-    const Tensor1<float32>* const next_freqs_addr = &next_freqs;
 
     WtMode m_mode;
 
     int timestamp_requested = 0, timestamp_current = 0;
 
-    Tensor3ForWaveTable& get_tensor3(bool next) { return (next?next_tensor3:data); }
-    const Tensor3ForWaveTable& get_tensor3(bool next) const { return (next?next_tensor3:data); }
 public:
+    // how many more const can you get into one line?
+    const Tensor1<IntOrFloat>* const* get_semantics_addr() const { return &semantics_addr; }
+    const Tensor1<float32>* const* get_freqs_addr() const { return &freqs_addr; }
 
     // ringbuffer stuff
-    int size_next_semantics() const { return next_tensor3.size(); }
-    int write_space_semantics(bool next_tensor) const { return get_tensor3(next_tensor).write_space(); }
-    int write_space_delayed_semantics(bool next_tensor) const { return get_tensor3(next_tensor).write_space_delayed(); }
+    int size_freqs() const { return freqs.size(); }
+    int size_semantics() const { return data.size(); }
+    int write_space_semantics() const { return data.write_space(); }
+    int write_space_delayed_semantics() const { return data.write_space_delayed(); }
     int write_pos_semantics() const { return data.write_pos(); }
-    int write_pos_delayed_semantics(bool next_tensor) const { return get_tensor3(next_tensor).write_pos_delayed(); }
+    int write_pos_delayed_semantics() const { return data.write_pos_delayed(); }
     void inc_read_pos_semantics() { data.inc_read_pos(); }
-    void inc_write_pos_semantics(bool next_tensor, int amnt) { get_tensor3(next_tensor).inc_write_pos(amnt); }
-    void inc_write_pos_delayed_semantics(bool next_tensor, int amnt) { get_tensor3(next_tensor).inc_write_pos_delayed(amnt); }
+    void inc_write_pos_semantics(int amnt) { data.inc_write_pos(amnt); }
+    void inc_write_pos_delayed_semantics(int amnt) { data.inc_write_pos_delayed(amnt); }
 
-    void dump_rb(bool next_tensor) const { get_tensor3(next_tensor).AbstractRingbuffer::dump(); }
+    void dump_rb() const { data.AbstractRingbuffer::dump(); }
 
     // timestamp/outdated stuff
+    // only valid for the *current* table, not for the next one
+    // TODO: timestamp_current is nowhere updated
     void set_outdated(int timestamp) { assert(timestamp != timestamp_current); timestamp_requested = timestamp; }
-    void set_not_outdated_anymore(int timestamp) { assert(timestamp == timestamp_requested); timestamp_current = timestamp; }
     bool outdated() const { return timestamp_requested != timestamp_current; }
     bool is_correct_timestamp(int timestamp) const { return timestamp_requested == timestamp; }
+    int debug_get_timestamp_requested() const { return timestamp_requested; }
+    int debug_get_timestamp_current() const { return timestamp_current; }
 
     // data access
-    const Tensor1<IntOrFloat>* const* get_semantics_addr(bool next = false) const { return &(next?next_semantics_addr:semantics_addr); }
-    const Tensor1<float32>* const* get_freqs_addr(bool next = false) const { return &(next?next_freqs_addr:freqs_addr); }
-    void swapSemantics(Tensor1<IntOrFloat>& unused) { next_semantics.swapWith(unused); }
-    void swapFreqs(Tensor1<float32>& unused) { next_freqs.swapWith(unused); }
-    void swapNextTensor3With(Tensor3ForWaveTable& unused) { next_tensor3.swapWith(unused); }
+    void swapSemanticsInitially(Tensor1<IntOrFloat>& unused) { semantics.swapWith(unused); }
+    void swapFreqsInitially(Tensor1<float32>& unused) { freqs.swapWith(unused); }
+    void swapWith(WaveTable& unused) {
+        semantics.swapWith(unused.semantics);
+        freqs.swapWith(unused.freqs);
+        data.swapWith(unused.data);
+        std::swap(m_mode, unused.m_mode);
+        std::swap(timestamp_current, unused.timestamp_current);
+        std::swap(timestamp_requested, unused.timestamp_requested);
+    }
 
     void setMode(WtMode mode) { m_mode = mode; }
     WtMode mode() const { return m_mode; }
@@ -523,13 +533,8 @@ public:
     void setSemantic(std::size_t i, IntOrFloat val) { semantics[i] = val; }
     void setFreq(std::size_t i, float32 val) { freqs[i] = val; }
     void setDataAt(int semanticIdx, int freqIdx, float bufIdx, float to) { data[semanticIdx][freqIdx][bufIdx] = to; }
-    void swapDataAt(int semanticIdx, int freqIdx, Tensor1<float32>& new_data, bool next_tensor) {
-        (next_tensor ? (next_tensor3) : (data))[semanticIdx][freqIdx].swapWith(new_data); }
-    void swapTensors(int timestamp) { assert(timestamp == timestamp_requested);
-        data.swapWith(next_tensor3);
-        semantics.swapWith(next_semantics);
-        freqs.swapWith(next_freqs);
-        timestamp_current = timestamp_requested; }
+    void swapDataAt(int semanticIdx, int freqIdx, Tensor1<float32>& new_data) {
+        data[semanticIdx][freqIdx].swapWith(new_data); }
 
     //! Insert generated data into this object
     //! If this is only adding new random seeds, then the rest of the data does
@@ -544,7 +549,8 @@ public:
     // std::size_t number_of_remaining_seeds(void);
 
     WaveTable(std::size_t buffersize);
-
+    //! Only alloc the tensor3, NOT the scales
+    WaveTable(int nsemantics, int nfreqs);
     WaveTable(const WaveTable& other) = delete;
     WaveTable& operator=(const WaveTable& other) = delete;
     WaveTable(WaveTable&& other) = delete;
