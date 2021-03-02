@@ -44,6 +44,7 @@ class LFOParams:public Presets
                   char PLFOtype_,
                   char Prandomness_,
                   float delay_,
+                  float fadein_,
                   char Pcontinous,
                   consumer_location_t loc,
                   const AbsTime* time_ = nullptr);
@@ -64,6 +65,7 @@ class LFOParams:public Presets
         unsigned char Prandomness; /**<randomness (0=off)*/
         unsigned char Pfreqrand; /**<frequency randomness (0=off)*/
         float         delay; /**<delay (0=off)*/
+        float         fadein; /**<fadein (0=off)*/
         unsigned char Pcontinous; /**<1 if LFO is continous*/
         unsigned char Pstretch; /**<how the LFO is "stretched" according the note frequency (64=no stretch)*/
 
@@ -87,6 +89,7 @@ class LFOParams:public Presets
         unsigned char DLFOtype;
         unsigned char Drandomness;
         float         Ddelay;
+        float         Dfadein;
         unsigned char Dcontinous;
 };
 

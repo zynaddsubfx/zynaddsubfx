@@ -80,6 +80,9 @@ static const rtosc::Ports _ports = {
               rLinear(0.0, 4.0), rDefaultDepends(loc), rDefault(0),
               rPreset(ad_voice_amp, 0.94),
               "Delay before LFO start\n0..4 second delay"),
+    rParamF(fadein, rShort("fadein"), rSpecial(disable), rUnit(S),
+              rLinear(0.0, 10.0), rDefault(0),
+              "Time to ramp up LFO amplitude\n0..10 second"),
     {"Pdelay::i", rShort("delay") rLinear(0,127)
      rDoc("Delay before LFO start\n0..4 second delay"), NULL,
     [](const char *msg, RtData &d)
@@ -91,6 +94,7 @@ static const rtosc::Ports _ports = {
              obj->delay = 4.0f * rtosc_argument(msg, 0).i / 127.0f;
          }
      }},
+     
     rToggle(Pcontinous, rShort("c"), rDefault(false),
             "Enable for global operation"),
     rParamZyn(Pstretch, rShort("str"), rCentered, rDefault(64),
@@ -145,7 +149,7 @@ void LFOParams::setup()
 
 // TODO: reuse
 LFOParams::LFOParams(const AbsTime *time_) :
-    LFOParams(2.65, 0, 0, 127, 0, 0, 0, 0, loc_unspecified, time_)
+    LFOParams(2.65, 0, 0, 127, 0, 0, 0, 0, 0, loc_unspecified, time_)
 {
 }
 
@@ -156,6 +160,7 @@ LFOParams::LFOParams(float freq_,
                      char PLFOtype_,
                      char Prandomness_,
                      float Pdelay_,
+                     float Pfadein_,
                      char Pcontinous_,
                      consumer_location_t loc,
                      const AbsTime *time_) : loc(loc),
@@ -168,6 +173,7 @@ LFOParams::LFOParams(float freq_,
     DLFOtype    = PLFOtype_;
     Drandomness = Prandomness_;
     Ddelay      = Pdelay_;
+    Dfadein     = Pfadein_;
     Dcontinous  = Pcontinous_;
 
     setup();
@@ -180,7 +186,7 @@ LFOParams::LFOParams(consumer_location_t loc,
 
     auto init =
         [&](float freq_, char Pintensity_, char Pstartphase_, char Pcutoff_, char PLFOtype_,
-            char Prandomness_, float delay_, char Pcontinous_)
+            char Prandomness_, float delay_, float fadein_, char Pcontinous_)
     {
         Dfreq       = freq_;
         Dintensity  = Pintensity_;
@@ -189,17 +195,18 @@ LFOParams::LFOParams(consumer_location_t loc,
         DLFOtype    = PLFOtype_;
         Drandomness = Prandomness_;
         Ddelay      = delay_;
+        Dfadein     = fadein_;
         Dcontinous  = Pcontinous_;
     };
 
     switch(loc)
     {
-        case ad_global_amp:    init(6.49, 0, 64, 127, 0, 0, 0, 0); break;
-        case ad_global_freq:   init(3.71, 0, 64, 127, 0, 0, 0, 0); break;
-        case ad_global_filter: init(6.49, 0, 64, 127, 0, 0, 0, 0); break;
-        case ad_voice_amp:     init(11.25, 32, 64, 127, 0, 0, 0.94, 0); break;
-        case ad_voice_freq:    init(1.19, 40,  0, 127, 0, 0,  0, 0); break;
-        case ad_voice_filter:  init(1.19, 20, 64, 127, 0, 0,  0, 0); break;
+        case ad_global_amp:    init(6.49, 0, 64, 127, 0, 0, 0, 0, 0); break;
+        case ad_global_freq:   init(3.71, 0, 64, 127, 0, 0, 0, 0, 0); break;
+        case ad_global_filter: init(6.49, 0, 64, 127, 0, 0, 0, 0, 0); break;
+        case ad_voice_amp:     init(11.25, 32, 64, 127, 0, 0, 0.94, 0, 0); break;
+        case ad_voice_freq:    init(1.19, 40,  0, 127, 0, 0,  0, 0, 0); break;
+        case ad_voice_filter:  init(1.19, 20, 64, 127, 0, 0,  0, 0, 0); break;
         default: throw std::logic_error("Invalid LFO consumer location");
     }
 
@@ -218,6 +225,7 @@ void LFOParams::defaults()
     PLFOtype    = DLFOtype;
     Prandomness = Drandomness;
     delay       = Ddelay;
+    fadein      = Dfadein;
     Pcontinous  = Dcontinous;
     Pfreqrand   = 0;
     Pstretch    = 64;
@@ -234,6 +242,7 @@ void LFOParams::add2XML(XMLwrapper& xml)
     xml.addpar("randomness_amplitude", Prandomness);
     xml.addpar("randomness_frequency", Pfreqrand);
     xml.addparreal("delay", delay);
+    xml.addparreal("fadein", fadein);
     xml.addpar("stretch", Pstretch);
     xml.addparbool("continous", Pcontinous);
 }
@@ -257,6 +266,9 @@ void LFOParams::getfromXML(XMLwrapper& xml)
         delay      = 4.0f * xml.getpar127("delay", (int)delay *127.0f/4.0f)
                      / 127.0f;
     }
+    if (xml.hasparreal("fadein")) {
+        fadein      = xml.getparreal("fadein", fadein);
+    }
     Pstretch    = xml.getpar127("stretch", Pstretch);
     Pcontinous  = xml.getparbool("continous", Pcontinous);
 }
@@ -272,6 +284,7 @@ void LFOParams::paste(LFOParams &x)
     COPY(Prandomness);
     COPY(Pfreqrand);
     COPY(delay);
+    COPY(fadein);
     COPY(Pcontinous);
     COPY(Pstretch);
 

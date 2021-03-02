@@ -48,6 +48,12 @@ class RelTime
         bool inThisFrame() {return t.time() == frame;};
         bool inPast() {return t.time() > frame;}
         bool inFuture() {return t.time() < frame;}
+        int64_t over() {return t.time() - frame;}
+        
+        friend int64_t operator-(const RelTime& lhs, const RelTime& rhs)
+        {
+            return (lhs.frame-rhs.frame);
+        }
     private:
         int64_t frame;
         int32_t sample;

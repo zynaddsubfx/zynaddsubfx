@@ -59,6 +59,10 @@ class LFO
 
         //Delay before starting
         RelTime delayTime;
+        //Time to ramp in
+        RelTime fadeInTime;
+        // store the constant out value before oscillating starts
+        float outConst = 0;
 
         char  waveShape;
 

@@ -25,6 +25,7 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
         const char *watch_prefix)
     :first_half(-1),
     delayTime(t, lfopars.delay), //0..4 sec
+    fadeInTime(t, lfopars.delay+lfopars.fadein), //0..8 sec
     waveShape(lfopars.PLFOtype),
     deterministic(!lfopars.Pfreqrand),
     dt_(t.dt()),
@@ -193,7 +194,18 @@ float LFO::lfoout()
         out *= lfointensity * amp2;
 
     if(delayTime.inFuture())
+    {
+        outConst = out;
         return out;
+    }
+
+    if(fadeInTime.inFuture())
+    {
+        float ramp = ((float)delayTime.over()) / (float)(fadeInTime-delayTime);
+        out *= ramp;
+        out += outConst * (1.0f-ramp);
+    }
+
 
     //Start oscillating
     if(deterministic)
