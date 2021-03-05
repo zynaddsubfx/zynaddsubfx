@@ -71,7 +71,7 @@ static const rtosc::Ports _ports = {
     rParamZyn(Pcutoff, rShort("lp"), rDefault(127),
             "RND/SQR lp-filter freq"),
     rOption(PLFOtype, rShort("type"), rOptions(sine, triangle, square, up, down,
-                exp1, exp2, random), rDefault(sine), "Shape of LFO"),
+                exp1, exp2, random), rLinear(0,127), rDefault(sine), "Shape of LFO"),
     rParamZyn(Prandomness, rShort("a.r."), rSpecial(disable), rDefault(0),
             "Amplitude Randomness (calculated uniformly at each cycle)"),
     rParamZyn(Pfreqrand, rShort("f.r."), rSpecial(disable), rDefault(0),

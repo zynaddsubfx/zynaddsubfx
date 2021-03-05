@@ -86,7 +86,7 @@ static const Ports voicePorts = {
             rOptions(none, random, 50%, 33%, 25%), rDefault(none),
             "Subvoice Phases"),
     rOption(Type,            rShort("type"), rOptions(Sound,White,Pink,DC),
-        rDefault(Sound), "Type of Sound"),
+        rLinear(0,127), rDefault(Sound), "Type of Sound"),
     rParamZyn(PDelay,        rShort("delay"), rDefault(0),
         "Voice Startup Delay"),
     rToggle(Presonance,      rShort("enable"), rDefault(true),
@@ -175,7 +175,7 @@ static const Ports voicePorts = {
 
     //Modulator Stuff
     rOption(PFMEnabled, rShort("mode"), rOptions(none, mix, ring, phase,
-                frequency, pulse), rDefault(none), "Modulator mode"),
+                frequency, pulse), rLinear(0,127), rDefault(none), "Modulator mode"),
     rParamI(PFMVoice,                   rShort("voice"), rDefault(-1),
         "Modulator Oscillator Selection"),
     rParamF(FMvolume,                   rShort("vol."),  rLinear(0.0, 100.0),
