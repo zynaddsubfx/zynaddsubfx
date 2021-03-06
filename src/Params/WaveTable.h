@@ -458,17 +458,11 @@ class WaveTable
 public:
     using float32 = wavetable_types::float32;
     using IntOrFloat = wavetable_types::IntOrFloat;
+    using WtMode = wavetable_types::WtMode;
 
     // pure guesses for what sounds good:
     constexpr const static std::size_t num_freqs = 10;
     constexpr const static std::size_t num_semantics = 128;
-
-    enum class WtMode
-    {
-        freq_smps, // (freq)->samples
-        freqseed_smps, // (seed, freq)->samples
-        freqwave_smps // (wave param, freq)->samples
-    };
 
 private:
     Tensor1<IntOrFloat> semantics; //!< E.g. oscil params or random seed (e.g. 0...127)

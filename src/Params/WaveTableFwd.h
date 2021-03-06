@@ -32,6 +32,13 @@ namespace wavetable_types
         prng_t intVal;
         float32 floatVal;
     };
+
+    enum class WtMode
+    {
+        freq_smps, // (freq)->samples
+        freqseed_smps, // (seed, freq)->samples
+        freqwave_smps // (wave param, freq)->samples
+    };
 }
 
 //! Tensor class for all dimensions != 1

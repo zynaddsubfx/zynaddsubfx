@@ -82,7 +82,7 @@ WaveTable::WaveTable(int nsemantics, int nfreqs) :
     data(Shape3{(std::size_t)nsemantics, (std::size_t)nfreqs, 0}, Shape3{0, 0, 0})
 {
     freqs_consumed[0] = 0;
-    setMode(WtMode::freqseed_smps);
+    setMode(WtMode::freq_smps);
 }
 
 }

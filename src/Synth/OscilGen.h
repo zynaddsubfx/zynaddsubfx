@@ -61,9 +61,11 @@ class OscilGen:public Presets
         wavetable_types::float32* calculateWaveTableData(wavetable_types::float32 freq,
             wavetable_types::IntOrFloat semantic,
             int Presonance);
+        //! calculate wave table mode, i.e. meaning + handling of semantics
+        wavetable_types::WtMode calculateWaveTableMode() const;
         //! calculate freqs + semantics
         std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloat>*>
-            calculateWaveTableScales(bool fillWithZeroes = false) const;
+            calculateWaveTableScales(wavetable_types::WtMode wtMode, bool fillWithZeroes = false) const;
 
         //Parameters
 

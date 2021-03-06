@@ -494,24 +494,38 @@ public:
     }
 };
 
+wavetable_types::WtMode OscilGen::calculateWaveTableMode() const
+{
+    using WtMode = wavetable_types::WtMode;
+    if(false) // TODO: if wave modulation is wanted
+    {
+        return WtMode::freqwave_smps;
+    }
+    else
+    {
+        return mayUseRandom() ? WtMode::freqseed_smps : WtMode::freq_smps;
+    }
+}
+
 std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloat>*> OscilGen::calculateWaveTableScales(
-    bool fillWithZeroes) const
+    wavetable_types::WtMode wtMode, bool fillWithZeroes) const
 {
     Tensor1<wavetable_types::float32>* freqs;
     Tensor1<wavetable_types::IntOrFloat>* semantics;
-    const bool mayUseRandom = OscilGen::mayUseRandom();
+    using WtMode = wavetable_types::WtMode;
 
     {
         std::size_t freq_sz = WaveTable::num_freqs;
         // TODO: random not relevant for wavetable modulation
-        std::size_t sem_sz = mayUseRandom ? WaveTable::num_semantics : 1;
+        std::size_t sem_sz = (wtMode == WtMode::freqseed_smps)
+                             ? WaveTable::num_semantics : 1;
 
         freqs = new Tensor1<wavetable_types::float32>(freq_sz, freq_sz);
         semantics = new Tensor1<wavetable_types::IntOrFloat>(sem_sz, sem_sz);
     }
 
     // semantics
-    if(mayUseRandom)
+    if(wtMode == WtMode::freqseed_smps)
     {
         if(fillWithZeroes)
         {
@@ -528,10 +542,14 @@ std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloa
             }
         }
     }
-    else
+    else if(wtMode == WtMode::freq_smps)
     {
         assert(semantics->size() == 1);
         (*semantics)[0].intVal = 0;
+    }
+    else
+    {
+        assert(false);
     }
 
     // frequency
@@ -561,7 +579,7 @@ WaveTable *OscilGen::allocWaveTable() const
 
 void OscilGen::recalculateDefaultWaveTable(WaveTable * wt, bool fillWithZeroes) const
 {
-    wt->setMode(WaveTable::WtMode::freqseed_smps);
+    wt->setMode(WaveTable::WtMode::freq_smps);
 
     // TODO: ringbuffer at size 1 will not work because the write ptr always
     //       needs to be at least 1 behind the read pointer

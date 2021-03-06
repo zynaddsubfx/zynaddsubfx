@@ -1057,7 +1057,8 @@ public:
                     {
                         Tensor1<WaveTable::float32>* nc_freqs; // non-constant
                         Tensor1<WaveTable::IntOrFloat>* nc_semantics;
-                        std::tie(nc_freqs, nc_semantics) = oscilGen->calculateWaveTableScales();
+                        wavetable_types::WtMode wtMode = oscilGen->calculateWaveTableMode();
+                        std::tie(nc_freqs, nc_semantics) = oscilGen->calculateWaveTableScales(wtMode);
                         nc_freqs->deepCopyTo(freqs);
                         nc_semantics->deepCopyTo(semantics);
 
@@ -1072,6 +1073,7 @@ public:
                         // => this means Tensor3 are generated even if the Tensor3
                         //    size does not need to be changed
                         WaveTable* wt = new WaveTable(nc_semantics->size(), nc_freqs->size());
+                        wt->setMode(wtMode); // TODO: set it in ctor?
 
                         Tensor1<int> freqs_consumed(semantics.capacity(), semantics.capacity());
                         wt->swapFreqsConsumedInitially(freqs_consumed);
