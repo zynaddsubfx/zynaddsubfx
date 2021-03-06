@@ -2,7 +2,7 @@
   ZynAddSubFX - a software synthesizer
 
   oscoutput.h - Audio output for OSC plugins
-  Copyright (C) 2017-2018 Johannes Lorenz
+  Copyright (C) 2017-2020 Johannes Lorenz
   Author: Johannes Lorenz
 
   This program is free software; you can redistribute it and/or
