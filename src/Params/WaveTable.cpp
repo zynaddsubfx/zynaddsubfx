@@ -53,14 +53,15 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
             ? data[(data.read_pos() + data.size() - 1) % data.size()][bestI]
             // normal case
             : data[data.read_pos()][bestI];
-    if(data.read_space()) {
+    if(mode() == WtMode::freqseed_smps && data.read_space()) {
         data.dump();
         freqs_consumed[data.read_pos()] = bestI;
         data.inc_read_pos();
     }
     else {
         // there was no read space (we just read the previous
-        // element)
+        // element),
+        // or we just do not consume any seeds in general (peak at read pos)
     }
     return res;
 }
