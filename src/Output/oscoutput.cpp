@@ -364,8 +364,10 @@ spa::port_ref_base &ZynOscPlugin::port(const char *pname) {
             if(!length)
                 throw std::runtime_error("Could not build rtosc message");
             zyn::Master::ports.dispatch(msgbuf, cap, true);
-            if(cap.matches != 1)
+            if(cap.matches < 1)
                 throw std::runtime_error("Could not find port"); // TODO...
+	    else if(cap.matches > 1)
+		throw std::runtime_error("Port name ambigous");
             set_init init_setter(cap.val());
             new_ref->accept(init_setter);
             ports.emplace(pname, new_ref);
@@ -389,6 +391,7 @@ void ZynOscPlugin::check_osc()
 #endif
         master->uToB->raw_write(path);
         }
+    p_osc_in.reset();
 }
 
 void ZynOscPlugin::hide_ui()
