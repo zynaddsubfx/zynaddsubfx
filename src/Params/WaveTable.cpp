@@ -48,7 +48,7 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
     assert(bestI < num_freqs);
     // TODO: hide this logic in WaveTable struct
     const Tensor1<WaveTable::float32>& res =
-        (data.size()>1 && data.read_space() == 0)
+        (data.read_space() == 0)
             // previous element
             ? data[(data.read_pos() + data.size() - 1) % data.size()][bestI]
             // normal case
@@ -59,8 +59,8 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
         data.inc_read_pos();
     }
     else {
-        // then either, there was no read space (we just read the previous
-        // element), or the size was 1 (nothing to increase)
+        // there was no read space (we just read the previous
+        // element)
     }
     return res;
 }

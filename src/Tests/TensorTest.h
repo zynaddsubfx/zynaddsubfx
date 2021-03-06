@@ -133,6 +133,10 @@ class TensorTest : public CxxTest::TestSuite
 
         void testRb2(void)
         {
+            // this is really a strange case
+            // normal ringbuffers would not allow writing anything, because
+            // when you write, the write pointer would hit the read pointer
+            // this ringbuffer simply allows writing one element
             AbstractRingbuffer rb(1);
 
             // r=w=0
