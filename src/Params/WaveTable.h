@@ -473,6 +473,7 @@ public:
 private:
     Tensor1<IntOrFloat> semantics; //!< E.g. oscil params or random seed (e.g. 0...127)
     Tensor1<float32> freqs; //!< The frequency of each 'row'
+    Tensor1<int> freqs_consumed; //!< frequency index consumed for each semantic
     Tensor3ForWaveTable data;  //!< time=col,freq=row,semantics(oscil param or random seed)=depth
 
     const Tensor1<IntOrFloat>* const semantics_addr = &semantics;
@@ -482,7 +483,12 @@ private:
 
     int timestamp_requested = 0, timestamp_current = 0;
 
+    static constexpr const int no_freq_consumed = -1;
+
 public:
+    float get_freq(int freq_idx) const { return freqs[freq_idx]; }
+    IntOrFloat get_sem(int sem_idx) const { return semantics[sem_idx]; }
+
     // how many more const can you get into one line?
     const Tensor1<IntOrFloat>* const* get_semantics_addr() const { return &semantics_addr; }
     const Tensor1<float32>* const* get_freqs_addr() const { return &freqs_addr; }
@@ -509,13 +515,25 @@ public:
     int debug_get_timestamp_requested() const { return timestamp_requested; }
     int debug_get_timestamp_current() const { return timestamp_current; }
 
+    void setFreqsNotConsumed(int sem_idx) { assert(sem_idx < freqs_consumed.size()); freqs_consumed[sem_idx] = no_freq_consumed; }
+    int getConsumedFreq(int sem_idx) const { assert(sem_idx < freqs_consumed.size()); return freqs_consumed[sem_idx]; }
+
     // data access
+    void swapFreqsConsumedInitially(Tensor1<int>& freqs_consumed_arg)
+    {
+        freqs_consumed.swapWith(freqs_consumed_arg);
+        for(int i = 0; i < (int)freqs_consumed.capacity(); ++i)
+        {
+            freqs_consumed[i] = no_freq_consumed;
+        }
+    }
     void swapSemanticsInitially(Tensor1<IntOrFloat>& unused) { semantics.swapWith(unused); }
     void swapFreqsInitially(Tensor1<float32>& unused) { freqs.swapWith(unused); }
     void swapWith(WaveTable& unused) {
         semantics.swapWith(unused.semantics);
         freqs.swapWith(unused.freqs);
         data.swapWith(unused.data);
+        freqs_consumed.swapWith(unused.freqs_consumed);
         std::swap(m_mode, unused.m_mode);
         std::swap(timestamp_current, unused.timestamp_current);
         std::swap(timestamp_requested, unused.timestamp_requested);

@@ -55,6 +55,7 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
             : data[data.read_pos()][bestI];
     if(data.read_space()) {
         data.dump();
+        freqs_consumed[data.read_pos()] = bestI;
         data.inc_read_pos();
     }
     else {
@@ -67,16 +68,20 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
 WaveTable::WaveTable(std::size_t buffersize) :
     semantics(Shape1{1}, Shape1{0}),
     freqs(Shape1{1}, Shape1{0}),
+    freqs_consumed(Shape1{1}, Shape1{0}),
     data(Shape3{1, 1, buffersize}, Shape3{0, 0, 0})
 {
+    freqs_consumed[0] = 0;
     setMode(WtMode::freq_smps);
 }
 
 WaveTable::WaveTable(int nsemantics, int nfreqs) :
     semantics(Shape1{0}, Shape1{0}),
     freqs(Shape1{0}, Shape1{0}),
+    freqs_consumed(Shape1{1}, Shape1{0}),
     data(Shape3{(std::size_t)nsemantics, (std::size_t)nfreqs, 0}, Shape3{0, 0, 0})
 {
+    freqs_consumed[0] = 0;
     setMode(WtMode::freqseed_smps);
 }
 
