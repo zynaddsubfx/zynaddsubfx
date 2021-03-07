@@ -81,7 +81,15 @@ class OGSlider {: {public Fl_Osc_TSlider}
   } { code {phase=false; } {} }
 
   Function {OSC_value(char c)} {open return_type void
-  } { code {value(phase ? c : 127-c);
+  } { code {
+  value(phase ? c : 127-c);
+  selection_color(value() == reset_value ? 0 : 222);
+  redraw();
+  } {} }
+  
+  Function {OSC_value(int c)} {open return_type void
+  } { code {
+  value(phase ? c : 127-c);
   selection_color(value() == reset_value ? 0 : 222);
   redraw();
   } {} }
@@ -635,6 +643,18 @@ redrawoscil();}
               label Sgm
               xywh {95 95 100 20} labelfont 1 labelsize 10
             }
+            MenuItem {} {
+              label Tanh
+              xywh {105 105 100 20} labelfont 1 labelsize 10
+            }
+            MenuItem {} {
+              label Cubic
+              xywh {115 115 100 20} labelfont 1 labelsize 10
+            }
+            MenuItem {} {
+              label Square
+              xywh {205 125 100 20} labelfont 1 labelsize 10
+            }
           }
           Fl_Dial wshpar {
             callback {redrawoscil();if(wsparval){wsparval->value(o->value());}}
@@ -970,6 +990,8 @@ basefuncdisplaygroup = NULL;
 bfpar = NULL;
 bftype = NULL;
 make_window();
+if(!adnotep)
+    osceditUI->label("PADsynth Harmonic Content Editor");
 bftype->init("Pcurrentbasefunc");
 initialized = true;
 

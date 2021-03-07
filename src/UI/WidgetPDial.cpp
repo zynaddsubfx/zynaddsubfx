@@ -84,6 +84,7 @@ int WidgetPDial::handle(int event)
             }
             oldvalue = value();
             old_y = Fl::event_y();
+            // fall through
         case FL_DRAG:
             getPos();
             old_mod_state = mod_state;

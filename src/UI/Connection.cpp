@@ -147,7 +147,7 @@ void GUI::destroyUi(ui_handle_t ui)
 
 #define BEGIN(x) {x,":non-realtime\0",NULL,[](const char *m, rtosc::RtData &d){ \
     MasterUI *ui   = static_cast<MasterUI*>(d.obj); \
-    rtosc_arg_t a0 = {0}, a1 = {0}; \
+    rtosc_arg_t a0 = {}, a1 = {}; \
     if(rtosc_narguments(m) > 0) \
         a0 = rtosc_argument(m,0); \
     if(rtosc_narguments(m) > 1) \

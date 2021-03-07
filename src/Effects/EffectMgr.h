@@ -1,7 +1,7 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  EffectMgr.h - Effect manager, an interface betwen the program and effects
+  EffectMgr.h - Effect manager, an interface between the program and effects
   Copyright (C) 2002-2005 Nasca Octavian Paul
   Author: Nasca Octavian Paul
 
@@ -32,10 +32,10 @@ class EffectMgr:public Presets
     public:
         EffectMgr(Allocator &alloc, const SYNTH_T &synth, const bool insertion_,
               const AbsTime *time_ = nullptr);
-        ~EffectMgr();
+        ~EffectMgr() override;
 
         void paste(EffectMgr &e);
-        void add2XML(XMLwrapper& xml);
+        void add2XML(XMLwrapper& xml) override;
         void defaults(void) REALTIME;
         void getfromXML(XMLwrapper& xml);
 
@@ -50,13 +50,13 @@ class EffectMgr:public Presets
         void kill(void) REALTIME;
         void cleanup(void) REALTIME;
 
+        void changesettingsrt(const short int *) REALTIME;
         void changeeffectrt(int nefx_, bool avoidSmash=false) REALTIME;
         void changeeffect(int nefx_) NONREALTIME;
         int geteffect(void);
         void changepreset(unsigned char npreset) NONREALTIME;
         void changepresetrt(unsigned char npreset, bool avoidSmash=false) REALTIME;
         unsigned char getpreset(void);
-        void seteffectpar(int npar, unsigned char value) NONREALTIME;
         void seteffectparrt(int npar, unsigned char value) REALTIME;
         unsigned char geteffectpar(int npar);
         unsigned char geteffectparrt(int npar) REALTIME;
@@ -101,7 +101,7 @@ class EffectMgr:public Presets
          *
          * See also: PresetExtractor.cpp
          */
-        char settings[128];
+        short int settings[128];
 
         bool dryonly;
         Allocator &memory;

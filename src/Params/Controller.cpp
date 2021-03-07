@@ -93,16 +93,6 @@ Controller::Controller(const SYNTH_T &synth_, const AbsTime *time_)
     resetall();
 }
 
-Controller &Controller::operator=(const Controller &c)
-{
-    //just pretend that undefined behavior doesn't exist...
-    memcpy(this, &c, sizeof(Controller));
-    return *this;
-}
-
-Controller::~Controller()
-{}
-
 void Controller::defaults()
 {
     pitchwheel.bendrange = 200; //2 halftones
@@ -131,11 +121,10 @@ void Controller::defaults()
     portamento.updowntimestretch = 64;
     portamento.pitchthresh     = 3;
     portamento.pitchthreshtype = 1;
-    portamento.noteusing     = -1;
     resonancecenter.depth    = 64;
     resonancebandwidth.depth = 64;
 
-    initportamento(440.0f, 440.0f, false); // Now has a third argument
+    initportamento(log2f(440.0f), log2f(440.0f), false);
     setportamento(0);
 }
 
@@ -177,7 +166,11 @@ void Controller::setexpression(int value)
 {
     expression.data = value;
     if(expression.receive != 0)
+    {
+        assert( value <= 127 ); /* to protect what's left of JML's hearing */
+
         expression.relvolume = value / 127.0f;
+    }
     else
         expression.relvolume = 1.0f;
 }
@@ -249,7 +242,15 @@ void Controller::setvolume(int value)
 {
     volume.data = value;
     if(volume.receive != 0)
-        volume.volume = powf(0.1f, (127 - value) / 127.0f * 2.0f);
+    {
+        /* volume.volume = powf(0.1f, (127 - value) / 127.0f * 2.0f); */
+        /* rather than doing something fancy that results in a value
+         * of 0 not completely muting the output, do the reasonable
+         * thing and just give the value the user ordered. */
+        assert( value <= 127 );
+
+        volume.volume = value / 127.0f;
+    }
     else
         volume.volume = 1.0f;
 }
@@ -270,8 +271,8 @@ void Controller::setportamento(int value)
         portamento.portamento = ((value < 64) ? 0 : 1);
 }
 
-int Controller::initportamento(float oldfreq,
-                               float newfreq,
+int Controller::initportamento(float oldfreq_log2,
+                               float newfreq_log2,
                                bool legatoflag)
 {
     portamento.x = 0.0f;
@@ -280,59 +281,47 @@ int Controller::initportamento(float oldfreq,
         if(portamento.portamento == 0)
             return 0;
     }
-    else     // No legato, do the original if...return
-    if((portamento.used != 0) || (portamento.portamento == 0))
-        return 0;
-    ;
-
-    float portamentotime = powf(100.0f, portamento.time / 127.0f) / 50.0f; //portamento time in seconds
-
-    if(portamento.proportional) {
-        //If there is a min(float,float) and a max(float,float) then they
-        //could be used here
-        //Linear functors could also make this nicer
-        if(oldfreq > newfreq) //2 is the center of propRate
-            portamentotime *=
-                powf(oldfreq / newfreq
-                     / (portamento.propRate / 127.0f * 3 + .05),
-                     (portamento.propDepth / 127.0f * 1.6f + .2));
-        else                  //1 is the center of propDepth
-            portamentotime *=
-                powf(newfreq / oldfreq
-                     / (portamento.propRate / 127.0f * 3 + .05),
-                     (portamento.propDepth / 127.0f * 1.6f + .2));
+    else {  // No legato, do the original if...return
+        if((portamento.used != 0) || (portamento.portamento == 0))
+            return 0;
     }
 
-    if((portamento.updowntimestretch >= 64) && (newfreq < oldfreq)) {
+    float portamentotime = powf(100.0f, portamento.time / 127.0f) / 50.0f; //portamento time in seconds
+    const float deltafreq_log2 = oldfreq_log2 - newfreq_log2;
+    const float absdeltaf_log2 = fabsf(deltafreq_log2);
+
+    if(portamento.proportional) {
+        const float absdeltaf = powf(2.0f, absdeltaf_log2);
+
+        portamentotime *= powf(absdeltaf
+            / (portamento.propRate / 127.0f * 3 + .05),
+              (portamento.propDepth / 127.0f * 1.6f + .2));
+    }
+
+    if((portamento.updowntimestretch >= 64) && (newfreq_log2 < oldfreq_log2)) {
         if(portamento.updowntimestretch == 127)
             return 0;
         portamentotime *= powf(0.1f,
                                (portamento.updowntimestretch - 64) / 63.0f);
     }
-    if((portamento.updowntimestretch < 64) && (newfreq > oldfreq)) {
+    if((portamento.updowntimestretch < 64) && (newfreq_log2 > oldfreq_log2)) {
         if(portamento.updowntimestretch == 0)
             return 0;
         portamentotime *= powf(0.1f,
                                (64.0f - portamento.updowntimestretch) / 64.0f);
     }
 
-    //printf("%f->%f : Time %f\n",oldfreq,newfreq,portamentotime);
-
     portamento.dx = synth.buffersize_f / (portamentotime * synth.samplerate_f);
-    portamento.origfreqrap = oldfreq / newfreq;
+    portamento.origfreqdelta_log2 = deltafreq_log2;
 
-    float tmprap = ((portamento.origfreqrap > 1.0f) ?
-                    (portamento.origfreqrap) :
-                    (1.0f / portamento.origfreqrap));
-
-    float thresholdrap = powf(2.0f, portamento.pitchthresh / 12.0f);
-    if((portamento.pitchthreshtype == 0) && (tmprap - 0.00001f > thresholdrap))
+    const float threshold_log2 = portamento.pitchthresh / 12.0f;
+    if((portamento.pitchthreshtype == 0) && (absdeltaf_log2 - 0.00001f > threshold_log2))
         return 0;
-    if((portamento.pitchthreshtype == 1) && (tmprap + 0.00001f < thresholdrap))
+    if((portamento.pitchthreshtype == 1) && (absdeltaf_log2 + 0.00001f < threshold_log2))
         return 0;
 
-    portamento.used    = 1;
-    portamento.freqrap = portamento.origfreqrap;
+    portamento.used = 1;
+    portamento.freqdelta_log2 = deltafreq_log2;
     return 1;
 }
 
@@ -346,8 +335,8 @@ void Controller::updateportamento()
         portamento.x    = 1.0f;
         portamento.used = 0;
     }
-    portamento.freqrap =
-        (1.0f - portamento.x) * portamento.origfreqrap + portamento.x;
+    portamento.freqdelta_log2 =
+        (1.0f - portamento.x) * portamento.origfreqdelta_log2;
 }
 
 

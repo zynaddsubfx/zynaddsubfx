@@ -152,9 +152,11 @@ for (i=0;i<N_OCT*12;i++){
      else
        key = black_down;
 
-       key->draw( ox + (kv + 7 * noct ) * white_up->w() - black_up->w() / 2 + 2, oy );
+     key->draw( ox + (kv + 7 * noct ) * white_up->w() - black_up->w() / 2 + 2, oy );
    }
 }
+(void)lx;
+(void)ly;
 \#else
 if (damage()!=1){
  fl_color(250,240,230);

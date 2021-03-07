@@ -29,6 +29,7 @@
 #include "../Params/Presets.h"
 #include "../DSP/FFTwrapper.h"
 #include "../globals.h"
+#include <rtosc/thread-link.h>
 using namespace std;
 using namespace zyn;
 
@@ -47,9 +48,11 @@ class PadNoteTest:public CxxTest::TestSuite
         FFTwrapper   *fft;
         Controller   *controller;
         AbsTime      *time;
-        unsigned char testnote;
+        float test_freq_log2;
         Alloc         memory;
         int           interpolation;
+        rtosc::ThreadLink *tr;
+        WatchManager *w;
 
 
         float *outR, *outL;
@@ -68,6 +71,8 @@ class PadNoteTest:public CxxTest::TestSuite
             for(int i = 0; i < synth->buffersize; ++i)
                 *(outR + i) = 0;
 
+            tr  = new rtosc::ThreadLink(1024,3);
+            w   = new WatchManager(tr);
 
             fft = new FFTwrapper(synth->oscilsize);
             //prepare the default settings
@@ -102,9 +107,8 @@ class PadNoteTest:public CxxTest::TestSuite
             controller = new Controller(*synth, time);
 
             //lets go with.... 50! as a nice note
-            testnote = 50;
-            float freq = 440.0f * powf(2.0f, (testnote - 69.0f) / 12.0f);
-            SynthParams pars_{memory, *controller, *synth, *time, freq, 120, 0, testnote / 12.0f, false, prng()};
+            test_freq_log2 = log2f(440.0f) + (50.0 - 69.0f) / 12.0f;
+            SynthParams pars_{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng()};
 
             note = new PADnote(pars, pars_, interpolation);
         }
@@ -147,27 +151,30 @@ class PadNoteTest:public CxxTest::TestSuite
 #endif
             sampleCount += synth->buffersize;
 
-            TS_ASSERT_DELTA(outL[255], -0.0554, 0.0005f);
+            TS_ASSERT_DELTA(outL[255], 0.3950, 0.0005f);
 
 
             note->releasekey();
 
+            TS_ASSERT(!tr->hasNext());
+            w->add_watch("noteout");
+            note->noteout(outL, outR);
+            sampleCount += synth->buffersize;
+            TS_ASSERT_DELTA(outL[255], -0.2305f, 0.0005f);
+            w->tick();
+            TS_ASSERT(!tr->hasNext());
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.0729f, 0.0005f);
+            TS_ASSERT_DELTA(outL[255], -0.0754f, 0.0005f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.0331f, 0.0005f);
+            TS_ASSERT_DELTA(outL[255], 0.0448f, 0.0005f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], 0.0219f, 0.0005f);
-
-            note->noteout(outL, outR);
-            sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], 0.0137f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], 0.0220f, 0.0001f);
 
             while(!note->finished()) {
                 note->noteout(outL, outR);
@@ -187,7 +194,7 @@ class PadNoteTest:public CxxTest::TestSuite
         }
 
         void testInitialization() {
-            TS_ASSERT_EQUALS(pars->Pmode, 0);
+            TS_ASSERT_EQUALS(pars->Pmode, PADnoteParameters::pad_mode::bandwidth);
 
             TS_ASSERT_EQUALS(pars->PVolume, 90);
             TS_ASSERT(pars->oscilgen);

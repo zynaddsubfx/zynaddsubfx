@@ -30,7 +30,6 @@ ModFilter::ModFilter(const FilterParams &pars_,
                            bool         stereo,
                            float        notefreq)
     :pars(pars_), synth(synth_), time(time_), alloc(alloc_),
-    baseQ(pars.getq()), baseFreq(pars.getfreq()),
     noteFreq(notefreq),
     left(nullptr), 
     right(nullptr),
@@ -99,7 +98,7 @@ void ModFilter::update(float relfreq, float relq)
 void ModFilter::updateNoteFreq(float noteFreq_)
 {
     noteFreq = noteFreq_;
-    tracking = pars.getfreqtracking(noteFreq);
+    tracking = pars.getfreqtracking(noteFreq_);
 }
 
 void ModFilter::updateSense(float velocity, uint8_t scale,

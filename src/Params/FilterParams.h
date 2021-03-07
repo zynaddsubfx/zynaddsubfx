@@ -31,10 +31,10 @@ class FilterParams:public PresetsArray
                      const AbsTime *time_ = nullptr);
         FilterParams(consumer_location_t loc,
                      const AbsTime *time_ = nullptr);
-        ~FilterParams();
+        ~FilterParams() override;
 
-        void add2XML(XMLwrapper& xml);
-        void add2XMLsection(XMLwrapper& xml, int n);
+        void add2XML(XMLwrapper& xml) override;
+        void add2XMLsection(XMLwrapper& xml, int n) override;
         void defaults();
         void getfromXML(XMLwrapper& xml);
         void getfromXMLsection(XMLwrapper& xml, int n);
@@ -52,13 +52,13 @@ class FilterParams:public PresetsArray
         float getfreqtracking(float notefreq) const ;
         float getgain() const ;
 
-        unsigned Pcategory:2;  //< Filter category (Analog/Formant/StVar)
-        unsigned Ptype:8;      //< Filter type  (for analog lpf,hpf,bpf..)
-        unsigned Pstages:8;    //< filter stages+1
-        float    basefreq;     //< Base cutoff frequency (Hz)
-        float    baseq;        //< Q parameters (resonance or bandwidth)
-        float    freqtracking; //< Tracking of center frequency with note frequency (percentage)
-        float    gain;         //< filter's output gain (dB)
+        unsigned Pcategory:2;  //!< Filter category (Analog/Formant/StVar)
+        unsigned Ptype:8;      //!< Filter type  (for analog lpf,hpf,bpf..)
+        unsigned Pstages:8;    //!< filter stages+1
+        float    basefreq;     //!< Base cutoff frequency (Hz)
+        float    baseq;        //!< Q parameters (resonance or bandwidth)
+        float    freqtracking; //!< Tracking of center frequency with note frequency (percentage)
+        float    gain;         //!< filter's output gain (dB)
 
         int Pq;         //dummy
         int Pfreq;      //dummy

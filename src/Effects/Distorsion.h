@@ -25,6 +25,7 @@ class Distorsion:public Effect
         Distorsion(EffectParams pars);
         ~Distorsion();
         void out(const Stereo<float *> &smp);
+        unsigned char getpresetpar(unsigned char npreset, unsigned int npar);
         void setpreset(unsigned char npreset);
         void changepar(int npar, unsigned char value);
         unsigned char getpar(int npar) const;
@@ -43,6 +44,8 @@ class Distorsion:public Effect
         unsigned char Phpf;          //highpass filter
         unsigned char Pstereo;       //0=mono, 1=stereo
         unsigned char Pprefiltering; //if you want to do the filtering before the distorsion
+        unsigned char Pfuncpar;      //for parametric functions
+        unsigned char Poffset;       //the input offset
 
         void setvolume(unsigned char _Pvolume);
         void setlpf(unsigned char _Plpf);

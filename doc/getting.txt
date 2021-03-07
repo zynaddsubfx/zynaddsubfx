@@ -4,7 +4,7 @@ Appendix C: Getting ZynAddSubFX
 Usually there are several methods to obtain a copy of ZynAddSubFX.
 
 SourceForge::
-    http://sourceforge.net/projects/zynaddsubfx/files/
+    https://sourceforge.net/projects/zynaddsubfx/files/
 Distribution::
     apt/yum/others
 Git::

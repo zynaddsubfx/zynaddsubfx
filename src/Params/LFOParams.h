@@ -40,15 +40,16 @@ class LFOParams:public Presets
         LFOParams(float freq_,
                   char Pintensity_,
                   char Pstartphase_,
+                  char Pcutoff_,
                   char PLFOtype_,
                   char Prandomness_,
                   float delay_,
                   char Pcontinous,
                   consumer_location_t loc,
                   const AbsTime* time_ = nullptr);
-        ~LFOParams();
+        ~LFOParams() override;
 
-        void add2XML(XMLwrapper& xml);
+        void add2XML(XMLwrapper& xml) override;
         void defaults();
         /**Loads the LFO from the xml*/
         void getfromXML(XMLwrapper& xml);
@@ -58,6 +59,7 @@ class LFOParams:public Presets
         float         freq;      /**<frequency*/
         unsigned char Pintensity; /**<intensity*/
         unsigned char Pstartphase; /**<start phase (0=random)*/
+        unsigned char Pcutoff; /**<cutoff */
         unsigned char PLFOtype; /**<LFO type (sin,triangle,square,ramp,...)*/
         unsigned char Prandomness; /**<randomness (0=off)*/
         unsigned char Pfreqrand; /**<frequency randomness (0=off)*/
@@ -81,6 +83,7 @@ class LFOParams:public Presets
         float         Dfreq;
         unsigned char Dintensity;
         unsigned char Dstartphase;
+        unsigned char Dcutoff;
         unsigned char DLFOtype;
         unsigned char Drandomness;
         float         Ddelay;

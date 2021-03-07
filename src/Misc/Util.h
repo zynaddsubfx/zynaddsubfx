@@ -61,7 +61,7 @@ void set_realtime();
 /**Os independent sleep in microsecond*/
 void os_usleep(long length);
 
-//! returns pid padded to maximum pid lenght, posix conform
+//! returns pid padded to maximum pid length, posix conform
 std::string os_pid_as_padded_string();
 
 std::string legalizeFilename(std::string filename);
@@ -141,10 +141,10 @@ inline void sprng(prng_t p)
 /*
  * The random generator (0.0f..1.0f)
  */
-#ifndef INT32_MAX
-#define INT32_MAX      (2147483647)
+#ifndef INT32_MAX_FLOAT
+#define INT32_MAX_FLOAT   0x7fffff80	/* the float mantissa is only 24-bit */
 #endif
-#define RND (prng() / (INT32_MAX * 1.0f))
+#define RND (prng() / (INT32_MAX_FLOAT * 1.0f))
 
 //Linear Interpolation
 float interpolate(const float *data, size_t len, float pos);

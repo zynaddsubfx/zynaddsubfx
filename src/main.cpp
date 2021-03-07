@@ -36,6 +36,7 @@
 #include "Params/PADnoteParameters.h"
 
 #include "DSP/FFTwrapper.h"
+#include "Misc/MemLocker.h"
 #include "Misc/PresetExtractor.h"
 #include "Misc/Master.h"
 #include "Misc/Part.h"
@@ -247,7 +248,7 @@ int main(int argc, char *argv[])
 
     sprng(time(NULL));
 
-    // for option entrys with the 3rd member (flag) pointing here,
+    // for option entries with the 3rd member (flag) pointing here,
     // getopt_long*() will return 0 and set this flag to the 4th member (val)
     int getopt_flag;
 
@@ -458,7 +459,7 @@ int main(int argc, char *argv[])
                     rtosc::OscDocFormatter s;
                     ofstream outfile(optarguments);
                     s.prog_name    = "ZynAddSubFX";
-                    s.p            = &Master::ports;
+                    s.p            = &MiddleWare::getAllPorts();
                     s.uri          = "http://example.com/fake/";
                     s.doc_origin   = "http://example.com/fake/url.xml";
                     s.author_first = "Mark";
@@ -470,7 +471,7 @@ int main(int argc, char *argv[])
                 if(optarguments)
                 {
                     ofstream outfile(optarguments);
-                    dump_json(outfile, Master::ports);
+                    dump_json(outfile, MiddleWare::getAllPorts());
                 }
                 break;
             case 'Z':
@@ -662,7 +663,6 @@ int main(int argc, char *argv[])
             GUI::raiseUi(gui, "/alert-reload", "i", old_save);
         middleware->enableAutoSave(auto_save_interval);
     }
-    printf("[INFO] NSM Stuff\n");
 
     //TODO move this stuff into Cmake
 #if USE_NSM && defined(WIN32)
@@ -676,6 +676,7 @@ int main(int argc, char *argv[])
 #endif
 
 #if USE_NSM
+    printf("[INFO] NSM Stuff\n");
     char *nsm_url = getenv("NSM_URL");
 
     if(nsm_url) {
@@ -690,8 +691,8 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    printf("[INFO] LASH Stuff\n");
 #if USE_NSM
+    printf("[INFO] LASH Stuff\n");
     if(!nsm)
 #endif
     {
@@ -744,7 +745,7 @@ int main(int argc, char *argv[])
         memset(&pi, 0, sizeof(pi));
         char *why_windows = strrchr(addr, ':');
         char *seriously_why = why_windows + 1;
-        char start_line[256] = {0};
+        char start_line[256] = {};
         if(why_windows)
             snprintf(start_line, sizeof(start_line), "zyn-fusion.exe osc.udp://127.0.0.1:%s", seriously_why);
         else {
@@ -760,6 +761,9 @@ int main(int argc, char *argv[])
 #endif
     }
 #endif
+
+    MemLocker mem_locker;
+    mem_locker.lock();
 
     printf("[INFO] Main Loop...\n");
     bool already_exited = false;
@@ -795,7 +799,7 @@ int main(int argc, char *argv[])
 done:
 #endif
         GUI::tickUi(gui);
-#endif
+#endif // !WIN32
         middleware->tick();
 #ifdef WIN32
         Sleep(1);
@@ -813,7 +817,10 @@ done:
         }
 #endif
 #endif
-    }
+    } // while !Pexitprogram
+
+    mem_locker.unlock();
+
 #ifdef ZEST_GUI
 #ifndef WIN32
     if(!already_exited) {

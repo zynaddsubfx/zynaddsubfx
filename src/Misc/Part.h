@@ -42,20 +42,34 @@ class Part
 
         // Midi commands implemented
 
+        //returns true when successful
+        bool getNoteLog2Freq(int masterkeyshift, float &note_log2_freq);
+
         //returns true when note is successfully applied
         bool NoteOn(note_t note, uint8_t vel, int shift) REALTIME {
-             return (NoteOn(note, vel, shift, note / 12.0f));
+            float log2_freq = note / 12.0f;
+            return (getNoteLog2Freq(shift, log2_freq) &&
+                NoteOnInternal(note, vel, log2_freq));
         };
-        bool NoteOn(note_t note,
+
+        //returns true when note is successfully applied
+        bool NoteOn(note_t note, uint8_t vel, int shift,
+                    float log2_freq) REALTIME {
+            return (getNoteLog2Freq(shift, log2_freq) &&
+                NoteOnInternal(note, vel, log2_freq));
+        };
+
+        //returns true when note is successfully applied
+        bool NoteOnInternal(note_t note,
                     unsigned char velocity,
-                    int masterkeyshift,
                     float note_log2_freq) REALTIME;
         void NoteOff(note_t note) REALTIME;
         void PolyphonicAftertouch(note_t note,
-                                  unsigned char velocity,
-                                  int masterkeyshift) REALTIME;
+                                  unsigned char velocity) REALTIME;
         void AllNotesOff() REALTIME; //panic
         void SetController(unsigned int type, int par) REALTIME;
+        void SetController(unsigned int type, note_t, float value,
+                           int masterkeyshift) REALTIME;
         void ReleaseSustainedKeys() REALTIME; //this is called when the sustain pedal is released
         void ReleaseAllKeys() REALTIME; //this is called on AllNotesOff controller
 
@@ -116,8 +130,9 @@ class Part
         float         Volume; /**<part volume*/
         unsigned char Pminkey; /**<the minimum key that the part receives noteon messages*/
         unsigned char Pmaxkey; //the maximum key that the part receives noteon messages
-        static float volume127ToFloat(unsigned char volume_);
-        void setVolume(float Volume);
+        static float volume127TodB(unsigned char volume_);
+        void setVolumeGain(float Volume);
+        void setVolumedB(float Volume);
         unsigned char Pkeyshift; //Part keyshift
         unsigned char Prcvchn; //from what midi channel it receives commands
         unsigned char Ppanning; //part panning
@@ -132,7 +147,7 @@ class Part
 
         bool Ppolymode; //Part mode - 0=monophonic , 1=polyphonic
         bool Plegatomode; // 0=normal, 1=legato
-        unsigned char Pkeylimit; //how many keys are alowed to be played same time (0=off), the older will be released
+        unsigned char Pkeylimit; //how many keys are allowed to be played same time (0=off), the older will be released
 
         char *Pname; //name of the instrument
         struct { //instrument additional information
@@ -149,7 +164,7 @@ class Part
         *partfxinputr[NUM_PART_EFX + 1];          //partfxinput l/r [NUM_PART_EFX] is for "no effect" buffer
 
 
-        float volume, oldvolumel, oldvolumer; //this is applied by Master
+        float gain;
         float panning; //this is applied by Master, too
 
         Controller ctl; //Part controllers
@@ -159,12 +174,12 @@ class Part
         bool Pefxbypass[NUM_PART_EFX]; //if the effects are bypassed
 
         int lastnote;
+        char loaded_file[256];
 
         const static rtosc::Ports &ports;
 
     private:
         void MonoMemRenote(); // MonoMem stuff.
-        float getBaseFreq(float note_log2_freq, int keyshift) const;
         float getVelocity(uint8_t velocity, uint8_t velocity_sense,
                 uint8_t velocity_offset) const;
         void verifyKeyMode(void);
@@ -191,15 +206,14 @@ class Part
         short monomemnotes[256]; // A list to remember held notes.
         struct {
             unsigned char velocity;
-            int mkeyshift; // I'm not sure masterkeyshift should be remembered.
             float note_log2_freq;
         } monomem[256];
         /* 256 is to cover all possible note values.
            monomem[] is used in conjunction with the list to
-           store the velocity and masterkeyshift values of a given note (the list only store note values).
+           store the velocity and logarithmic frequency values of a given note.
            For example 'monomem[note].velocity' would be the velocity value of the note 'note'.*/
 
-        float oldfreq;    //this is used for portamento
+        float oldfreq_log2;    //this is used for portamento
         Microtonal *microtonal;
         FFTwrapper *fft;
         WatchManager *wm;

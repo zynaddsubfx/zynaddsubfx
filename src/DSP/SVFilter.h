@@ -16,6 +16,7 @@
 
 #include "../globals.h"
 #include "Filter.h"
+#include "Value_Smoothing_Filter.h"
 
 namespace zyn {
 
@@ -57,19 +58,16 @@ class SVFilter:public Filter
         } par, ipar;
 
         float *getfilteroutfortype(SVFilter::fstage &x);
-        void singlefilterout(float *smp, fstage &x, parameters &par);
-        void singlefilterout_with_par_interpolation(float *smp, fstage &x, parameters &par1, parameters &par2);
-        void computefiltercoefs(void);
+    void singlefilterout(float *smp, fstage &x, parameters &par, int buffersize );
+
+    void computefiltercoefs(void);
         int   type;    // The type of the filter (LPF1,HPF1,LPF2,HPF2...)
         int   stages;  // how many times the filter is applied (0->1,1->2,etc.)
         float freq; // Frequency given in Hz
         float q;    // Q factor (resonance or Q factor)
         float gain; // the gain of the filter (if are shelf/peak) filters
 
-        bool abovenq,   //if the frequency is above the nyquist
-             oldabovenq;
-        int needsinterpolation;
-        bool firsttime;
+    Value_Smoothing_Filter freq_smoothing;
 };
 
 }

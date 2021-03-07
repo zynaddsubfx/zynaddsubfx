@@ -28,6 +28,7 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
     forcedrelease   = pars.Pforcedrelease;
     envstretch     = powf(440.0f / basefreq, pars.Penvstretch / 64.0f);
     linearenvelope = pars.Plinearenvelope;
+    repeating = pars.Prepeating;
 
     if(!pars.Pfreemode)
         pars.converttofree();
@@ -41,9 +42,9 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
         mode = 1;                              //change to linear
 
     for(int i = 0; i < MAX_ENVELOPE_POINTS; ++i) {
-        const float tmp = pars.getdt(i) / 1000.0f * envstretch;
-        if(tmp > bufferdt)
-            envdt[i] = bufferdt / tmp;
+        const float dtstretched = pars.getdt(i) * envstretch;
+        if(dtstretched > bufferdt)
+            envdt[i] = bufferdt / dtstretched;
         else
             envdt[i] = 2.0f;  //any value larger than 1
 
@@ -54,7 +55,7 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
             case 3:
                 envval[i] =
                     (powf(2, 6.0f
-                          * fabs(pars.Penvval[i]
+                          * fabsf(pars.Penvval[i]
                                  - 64.0f) / 64.0f) - 1.0f) * 100.0f;
                 if(pars.Penvval[i] < 64)
                     envval[i] = -envval[i];
@@ -145,8 +146,16 @@ float Envelope::envout(bool doWatch)
         }
         return envoutval;
     }
+
     if((currentpoint == envsustain + 1) && !keyreleased) { //if it is sustaining now
         envoutval = envval[envsustain];
+        bool zerorelease = true;
+        for (auto i = envsustain; i<envpoints; i++)
+            if (envval[i] != -40.0f) zerorelease = false;
+        if (zerorelease &&                             //if sustaining at zero with zero until env ends
+            (mode == ADSR_lin || mode == ADSR_dB)) {   // and its an amp envelope
+            envfinish = true;   // finish voice to free ressources
+        }
         if(doWatch) {
             watch(envsustain, envoutval);
         }
@@ -154,15 +163,16 @@ float Envelope::envout(bool doWatch)
     }
 
     if(keyreleased && forcedrelease) { //do the forced release
-        int tmp = (envsustain < 0) ? (envpoints - 1) : (envsustain + 1); //if there is no sustain point, use the last point for release
+        int releaseindex = (envsustain < 0) ? (envpoints - 1) : (envsustain + 1); //if there is no sustain point, use the last point for release
 
-        if(envdt[tmp] < 0.00000001f)
-            out = envval[tmp];
+        if(envdt[releaseindex] < 0.00000001f)
+            out = envval[releaseindex];
         else
-            out = envoutval + (envval[tmp] - envoutval) * t;
-        t += envdt[tmp] * envstretch;
+            out = envoutval + (envval[releaseindex] - envoutval) * t; // linear interpolation envoutval and envval[releaseindex]
 
-        if(t >= 1.0f) {
+        t += envdt[releaseindex] * envstretch;
+
+        if(t >= 1.0f) { // move to the next segment
             currentpoint = envsustain + 2;
             forcedrelease = 0;
             t    = 0.0f;
@@ -172,7 +182,7 @@ float Envelope::envout(bool doWatch)
         }
 
         if(doWatch) {
-            watch(tmp + t, envoutval);
+            watch(releaseindex + t, envoutval);
         }
 
         return out;
@@ -184,11 +194,20 @@ float Envelope::envout(bool doWatch)
               + (envval[currentpoint] - envval[currentpoint - 1]) * t;
 
     t += inct;
+
     if(t >= 1.0f) {
-        if(currentpoint >= envpoints - 1)
+        if(currentpoint >= envpoints - 1) // if last point reached
             envfinish = true;
-        else
-            currentpoint++;
+        // but if reached sustain point, repeating activated and key still pressed or sustained
+        else if (repeating && currentpoint == envsustain && !keyreleased) {
+            // set first value to sustain value to prevent jump
+            envval[0] = envval[currentpoint]; 
+            // reset current point
+            currentpoint = 1;
+        }
+        // otherwise proceed to the next segment
+        else currentpoint++;
+
         t    = 0.0f;
         inct = envdt[currentpoint];
     }
@@ -210,12 +229,13 @@ float Envelope::envout_dB()
     if(linearenvelope)
         return envout(true);
 
-    if((currentpoint == 1) && (!keyreleased || !forcedrelease)) { //first point is always lineary interpolated
+    if((currentpoint == 1) && (!keyreleased || !forcedrelease)) { //first point is always lineary interpolated <- seems to have odd effects
         float v1 = EnvelopeParams::env_dB2rap(envval[0]);
         float v2 = EnvelopeParams::env_dB2rap(envval[1]);
         out = v1 + (v2 - v1) * t;
 
         t += inct;
+
         if(t >= 1.0f) {
             t    = 0.0f;
             inct = envdt[2];

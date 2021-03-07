@@ -10,11 +10,12 @@ include(CheckCXXCompilerFlag)
 if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     find_package(PkgConfig)
 endif()
-find_package(zlib REQUIRED)
+find_package(ZLIB REQUIRED)
 find_package(X11)
 find_package(Threads   REQUIRED)
 find_package(OSS)
 find_package(Alsa)
+find_package(Sndio)
 find_package(FLTK)
 find_package(OpenGL) #for FLTK
 find_package(CxxTest)
@@ -32,8 +33,6 @@ if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
 
     pkg_check_modules(FFTW REQUIRED fftw3)
     pkg_check_modules(MXML REQUIRED mxml)
-
-    pkg_check_modules(PORTAUDIO portaudio-2.0>=19)
 
     pkg_search_module(LASH lash-1.0)
     mark_as_advanced(LASH_LIBRARIES)
@@ -59,6 +58,9 @@ CHECK_CXX_SOURCE_COMPILES(
 
 check_cxx_compiler_flag("-msse2" SUPPORT_SSE)
 check_cxx_compiler_flag("-mfpu=neon -Werror" SUPPORT_NEON)
+check_include_file_cxx(complex HAVE_CPP_STD_COMPLEX)
+
+find_library(HAVE_LIBRT rt)
 
 set(CMAKE_REQUIRED_FLAGS "")
 
@@ -87,6 +89,8 @@ SET (OssEnable ${OSS_FOUND} CACHE BOOL
     "Enable support for Open Sound System")
 SET (PaEnable ${PORTAUDIO_FOUND} CACHE BOOL
     "Enable support for Port Audio System")
+SET (SndioEnable ${SNDIO_FOUND} CACHE BOOL
+    "Enable support for Sndio System")
 SET (LashEnable ${LASH_FOUND} CACHE BOOL
     "Enable LASH Audio Session Handler")
 SET (DssiEnable ${DSSI_FOUND} CACHE BOOL
@@ -108,8 +112,8 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
   add_definitions(-static)
 endif()
 
-if(NOT "Darwin" STREQUAL ${CMAKE_SYSTEM_NAME})
-    # Add scheduler function existance info (OSX compatiability)
+if(HAVE_SCHEDULER AND (NOT "Darwin" STREQUAL ${CMAKE_SYSTEM_NAME}))
+    # Add scheduler function existence info (OSX compatibility)
     add_definitions(-DHAVE_SCHEDULER=${HAVE_SCHEDULER})
 endif()
 
@@ -117,6 +121,10 @@ if(HAVE_ASYNC)
     add_definitions(-DHAVE_ASYNC=1)
 else()
     add_definitions(-DHAVE_ASYNC=0)
+endif()
+
+if(HAVE_CPP_STD_COMPLEX)
+    add_definitions(-DHAVE_CPP_STD_COMPLEX=1)
 endif()
 
 if(DemoMode)
@@ -154,6 +162,11 @@ elseif (PaEnable)
         "Default Output module: [null, alsa, oss, jack, portaudio]")
     SET (DefaultInput null CACHE STRING
         "Default Input module: [null, alsa, oss, jack]")
+elseif (SndioEnable)
+    SET (DefaultOutput sndio CACHE STRING
+        "Default Output module: [null, alsa, oss, jack, portaudio, sndio]")
+    SET (DefaultInput sndio CACHE STRING
+        "Default Input module: [null, alsa, oss, jack, sndio]")
 else()
     SET (DefaultOutput null CACHE STRING
         "Default Output module: [null, alsa, oss, jack, portaudio]")
@@ -182,11 +195,50 @@ endif()
 option (BuildForAMD_X86_64 "Build for AMD x86_64 system" OFF)
 option (BuildForCore2_X86_64 "Build for Intel Core2 x86_64 system" OFF)
 option (BuildForDebug "Include gdb debugging support" OFF)
+option (ExtendedWarnings "Enable all useful warnings" OFF)
 option (IncludeWhatYouUse "Check for useless includes" OFF)
 mark_as_advanced(IncludeWhatYouUse)
 
 set(CMAKE_BUILD_TYPE "Release")
 
+set (BuildOptions_ExtendedWarnings "")
+if (ExtendedWarnings)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        # The following generates a list of warning exceptions
+        # (after it enables all warnings).
+        # This is for developers who want to make sure they really
+        # see all possible warnings, with a few exceptions that don't
+        # make sense in this code base.
+        # You can remove those exceptions if they don't complain too
+        # often about the code base. If you want to add exceptions,
+        # be VERY CAREFUL, ask the project maintainers for
+        # their consent.
+        set (BuildOptions_ExtendedWarnings_List
+        "-Wall" "-Wextra" "-Weverything" # start with really everything
+        "-Wno-c++98-compat" "-Wno-c++98-compat-extra-semi" "-Wno-c++98-compat-pedantic" # C++11 is a zyn build requirement
+        "-Wno-cast-align" # not relevant for our case
+        "-Wno-double-promotion" # Used too often to fix
+        "-Wno-old-style-cast" # forces you to use static_cast<> etc everywhere! too many errors
+        "-Wno-padded" # this tells you to realign your structs to have better memory management
+        "-Wno-zero-as-null-pointer-constant" # wants you to use nullptr in the whole code base
+        "-Wno-implicit-int-conversion" # too often to fix
+        "-Wno-extra-semi" # one semicolon more than useful - no danger to disable this
+        "-Wno-vla-extension" "-Wno-vla" # rtosc currently heavily uses them, and they are supported by our CI
+        "-Wno-exit-time-destructors" "-Wno-global-constructors" # used too often in rtosc
+        "-Wno-gnu-zero-variadic-macro-arguments" # used too often in zyn
+        "-Wno-shadow" "-Wno-shadow-field" # used too often in zyn
+        "-Wno-cast-align" # used too often in zyn
+        "-Wno-missing-prototypes" # used too often in zyn
+        "-Wno-sign-conversion" # used too often in zyn
+        "-Wno-float-equal" # can be disturbing in some cases
+        "-Wno-switch-enum" # used too often in zyn
+        )
+        STRING(REPLACE ";" " " BuildOptions_ExtendedWarnings "${BuildOptions_ExtendedWarnings_List}")
+        MESSAGE(STATUS "Using extended Warning options: ${BuildOptions_ExtendedWarnings}")
+    else()
+        MESSAGE(WARNING "\"ExtendedWarnings\" selected, but this is only supported for clang - ignoring")
+    endif()
+endif()
 
 set (BuildOptions_x86_64AMD
     "-march=athlon64 -m64 -Wall -Wno-unused-parameter"
@@ -209,11 +261,14 @@ set (BuildOptions_SSE
 
 set (BuildOptionsBasic
     "-std=c++11 -Wno-unused-parameter -O3 -ffast-math -fomit-frame-pointer"
-    CACHE STRING "basic X86 complier options"
+    CACHE STRING "basic X86 compiler options"
 )
+STRING(APPEND BuildOptionsBasic " ${BuildOptions_ExtendedWarnings}")
 
 set (BuildOptionsDebug
-    "-std=c++11 -O0 -g3 -ggdb -Wall -Wno-unused-parameter -Wpointer-arith" CACHE STRING "Debug build flags")
+    "-std=c++11 -O0 -g3 -ggdb -Wall -Wno-unused-parameter -Wpointer-arith"
+    CACHE STRING "Debug build flags")
+STRING(APPEND BuildOptionsDebug " ${BuildOptions_ExtendedWarnings}")
 
 if(${CMAKE_VERSION} VERSION_LESS "3.3.0")
     set(IwyuErr "disabled (cmake < 3.3.0)")
@@ -228,7 +283,7 @@ else()
     endif()
 endif()
 
-########### Settings dependant code ###########
+########### Settings dependent code ###########
 # From here on, the setting variables have  been prepared so concentrate
 # on the actual compiling.
 
@@ -258,6 +313,12 @@ if(OssEnable)
 	add_definitions(-DOSS=1)
 endif(OssEnable)
 
+if(SndioEnable)
+	list(APPEND AUDIO_LIBRARIES ${SNDIO_LIBRARY})
+	list(APPEND AUDIO_LIBRARY_DIRS ${SNDIO_LIBRARY_DIRS})
+	add_definitions(-DSNDIO=1)
+endif(SndioEnable)
+
 if (CompileTests)
 	ENABLE_TESTING()
 endif()
@@ -280,8 +341,16 @@ message(STATUS "Compiling with liblo")
 include_directories(${ZLIB_INCLUDE_DIRS} ${MXML_INCLUDE_DIRS})
 include_directories(${CMAKE_BINARY_DIR}/src) # for zyn-version.h ...
 
+if(NOT ${X11_X11_LIB} STREQUAL "")
+    get_filename_component(X11_LIBRARY_DIRS ${X11_X11_LIB} DIRECTORY)
+endif()
+
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_definitions(-DWIN32)
+endif()
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "CYGWIN")
+    add_definitions(-D_GNU_SOURCE=1 -D_POSIX_THREAD_PRIO_INHERIT=1)
 endif()
 
 add_definitions(
@@ -382,16 +451,13 @@ if(FltkGui)
 	find_program (FLTK_CONFIG fltk-config)
 	if (FLTK_CONFIG)
 		execute_process (COMMAND ${FLTK_CONFIG} --use-images --ldflags OUTPUT_VARIABLE FLTK_LDFLAGS)
-		string(STRIP ${FLTK_LDFLAGS} FLTK_LIBRARIES)
+		string(STRIP "${FLTK_LDFLAGS}" FLTK_LIBRARIES)
 	endif()
 
 	message(STATUS ${FLTK_LDFLAGS})
 
 
 	set(GUI_LIBRARIES zynaddsubfx_gui ${FLTK_LIBRARIES} ${FLTK_LIBRARIES} ${OPENGL_LIBRARIES})
-    if(X11_FOUND AND X11_Xpm_FOUND)
-        set(GUI_LIBRARIES ${GUI_LIBRARIES} ${X11_LIBRARIES} -lXpm)
-    endif()
 
 	add_definitions(-DFLTK_GUI)
 	message(STATUS "Will build FLTK gui")
@@ -407,21 +473,21 @@ endif()
 
 if(NtkGui)
 
-    find_program( FLTK_FLUID_EXECUTABLE ntk-fluid)
+    find_program(FLTK_FLUID_EXECUTABLE ntk-fluid)
 
 	message(STATUS ${NTK_LDFLAGS} ${NTK_IMAGES_LDFLAGS})
 
 	set(GUI_LIBRARIES zynaddsubfx_gui ${NTK_LIBRARIES} ${NTK_IMAGES_LIBRARIES} ${OPENGL_LIBRARIES})
 
-    if(X11_FOUND AND X11_Xpm_FOUND)
-        set(GUI_LIBRARIES ${GUI_LIBRARIES} ${X11_LIBRARIES} -lXpm)
-    endif()
+	if(X11_FOUND AND X11_Xpm_FOUND)
+	     set(GUI_LIBRARIES ${GUI_LIBRARIES} ${X11_LIBRARIES} -lXpm)
+	endif()
 
 	add_definitions(-DNTK_GUI)
 
 	message(STATUS "Will build NTK gui")
 
-	include_directories(
+	include_directories(BEFORE
 			${NTK_INCLUDE_DIRS}
 			"${CMAKE_CURRENT_SOURCE_DIR}/UI"
 			"${CMAKE_CURRENT_BINARY_DIR}/UI"
@@ -431,6 +497,7 @@ if(NtkGui)
 endif()
 
 if(ZestGui)
+    add_definitions(-DDGL_OPENGL=1)
     add_definitions(-DHAVE_DGL)
     add_definitions(-DZEST_GUI)
 endif()
@@ -450,7 +517,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zyn-version.h.in
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zyn-config.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/zyn-config.h)
 
-link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS} ${NTK_LIBRARY_DIRS})
+link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS} ${NTK_LIBRARY_DIRS} ${X11_LIBRARY_DIRS})
 
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
@@ -499,7 +566,9 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 elseif(APPLE)
     set(PTHREAD_LIBRARY pthread)
 else()
-    set(PLATFORM_LIBRARIES rt)
+    if(HAVE_LIBRT)
+        set(PLATFORM_LIBRARIES rt)
+    endif()
     set(PTHREAD_LIBRARY pthread)
 endif()
 
@@ -602,11 +671,11 @@ package_status(X11_FOUND        "x11      " "found"   ${Yellow})
 package_status(X11_Xpm_FOUND    "xpm      " "found"   ${Yellow})
 package_status(FLTK_FOUND       "fltk     " "found"   ${Yellow})
 package_status(NTK_FOUND        "ntk      " "found"   ${Yellow})
-package_status(X11_FOUND        "x11      " "found"   ${Yellow})
 package_status(OSS_FOUND        "OSS      " "found"   ${Yellow})
 package_status(ALSA_FOUND       "ALSA     " "found"   ${Yellow})
 package_status(JACK_FOUND       "JACK     " "found"   ${Yellow})
 package_status(PORTAUDIO_FOUND  "PA       " "found"   ${Yellow})
+package_status(SNDIO_FOUND      "SNDIO    " "found"   ${Yellow})
 package_status(LASH_FOUND       "Lash     " "found"   ${Yellow})
 package_status(DSSI_FOUND       "DSSI     " "found"   ${Yellow})
 package_status(CXXTEST_FOUND    "CxxTest  " "found"   ${Yellow})
@@ -617,6 +686,7 @@ package_status(AlsaEnable       "ALSA     " "enabled" ${Yellow})
 package_status(JackEnable       "JACK     " "enabled" ${Yellow})
 package_status(OssEnable        "OSS      " "enabled" ${Yellow})
 package_status(PaEnable         "PA       " "enabled" ${Yellow})
+package_status(SndioEnable      "SNDIO    " "enabled" ${Yellow})
 #TODO GUI MODULE
 package_status(HAVE_ASYNC       "c++ async" "usable"  ${Yellow})
 

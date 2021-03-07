@@ -136,7 +136,7 @@ void OutMgr::applyOscEventRt(const char *msg)
 }
 
 //perform a cheap linear interpolation for resampling
-//This will result in some distortion at frame boundries
+//This will result in some distortion at frame boundaries
 //returns number of samples produced
 static size_t resample(float *dest,
                        const float *src,

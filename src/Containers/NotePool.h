@@ -25,7 +25,7 @@ struct LegatoParams;
 class NotePool
 {
     public:
-        //Currently this wastes a ton of bits due ot the legatoMirror flag
+        //Currently this wastes a ton of bits due to the legatoMirror flag
         struct NoteDescriptor {
             //acceptable overlap after 2 minutes
             //run time at 48kHz 8 samples per buffer
@@ -122,14 +122,14 @@ class NotePool
         void insertLegatoNote(note_t note, uint8_t sendto, SynthDescriptor desc);
 
         void upgradeToLegato(void);
-        void applyLegato(note_t note, LegatoParams &par);
+        void applyLegato(note_t note, const LegatoParams &par);
 
         void makeUnsustainable(note_t note);
 
         bool full(void) const;
         bool synthFull(int sdesc_count) const;
 
-        //Note that isn't KEY_PLAYING or KEY_RELASED_AND_SUSTAINING
+        //Note that isn't KEY_PLAYING or KEY_RELEASED_AND_SUSTAINING
         bool existsRunningNote(void) const;
         int getRunningNotes(void) const;
         void enforceKeyLimit(int limit);

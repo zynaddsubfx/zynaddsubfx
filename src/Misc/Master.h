@@ -16,6 +16,7 @@
 #define MASTER_H
 #include "../globals.h"
 #include "Microtonal.h"
+#include <atomic>
 #include <rtosc/automations.h>
 #include <rtosc/savefile.h>
 
@@ -25,6 +26,7 @@
 
 #include "../Params/Controller.h"
 #include "../Synth/WatchPoint.h"
+#include "../DSP/Value_Smoothing_Filter.h"
 
 namespace zyn {
 
@@ -74,17 +76,8 @@ class Master
          * @return 0 for ok or -1 if there is an error*/
         int loadXML(const char *filename);
 
-        /**Save all settings to an OSC file (as specified by RT OSC)
-         * When the function returned, the OSC file has been either saved or
-         * an error occured.
-         * @param filename File to save to or NULL (useful for testing)
-         * @param dispatcher Message dispatcher and modifier
-         * @param master2 An empty master dummy where the savefile will be
-         *                loaded to and compared with the current master
-         * @return 0 for ok or <0 if there is an error*/
-        int saveOSC(const char *filename,
-                    class master_dispatcher_t* dispatcher,
-                    Master* master2);
+        /**Append all settings to an OSC savefile (as specified by RT OSC)*/
+        std::string saveOSC(std::string savefile);
         /**loads all settings from an OSC file (as specified by RT OSC)
          * @param dispatcher Message dispatcher and modifier
          * @return 0 for ok or <0 if there is an error*/
@@ -114,6 +107,7 @@ class Master
         void noteOff(char chan, note_t note);
         void polyphonicAftertouch(char chan, note_t note, char velocity);
         void setController(char chan, int type, int par);
+        void setController(char chan, int type, note_t note, float value);
         //void NRPN...
 
 
@@ -123,12 +117,15 @@ class Master
         void vuUpdate(const float *outl, const float *outr);
 
         //Process a set of OSC events in the bToU buffer
-        bool runOSC(float *outl, float *outr, bool offline=false);
+        //This may be called by MiddleWare if we are offline
+        //(in this case, the param offline is true)
+        bool runOSC(float *outl, float *outr, bool offline=false,
+                    Master* master_from_mw = nullptr);
 
         /**Audio Output*/
         bool AudioOut(float *outl, float *outr) REALTIME;
         /**Audio Output (for callback mode).
-         * This allows the program to be controled by an external program*/
+         * This allows the program to be controlled by an external program*/
         void GetAudioOutSamples(size_t nsamples,
                                 unsigned samplerate,
                                 float *outl,
@@ -190,7 +187,6 @@ class Master
         class FFTwrapper * fft;
 
         static const rtosc::Ports &ports;
-        float oldVolume;
         float  Volume;
 
         //Statistics on output levels
@@ -223,12 +219,21 @@ class Master
         constexpr static std::size_t dnd_buffer_size = 1024;
         char dnd_buffer[dnd_buffer_size] = {0};
 
+        //Return XML data as string. Must be freed.
+        char* getXMLData();
+        //Load OSC from OSC savefile
+        //Returns 0 if OK, <0 in case of failure
+        int loadOSCFromStr(const char *file_content,
+                           rtosc::savefile_dispatcher_t* dispatcher);
+
     private:
+        std::atomic<bool> run_osc_in_use = { false };
+
         float  sysefxvol[NUM_SYS_EFX][NUM_MIDI_PARTS];
         float  sysefxsend[NUM_SYS_EFX][NUM_SYS_EFX];
         int    keyshift;
 
-        //information relevent to generating plugin audio samples
+        //information relevant to generating plugin audio samples
         float *bufl;
         float *bufr;
         off_t  off;
@@ -238,15 +243,19 @@ class Master
         void(*mastercb)(void*,Master*);
         void* mastercb_ptr;
 
-        //Return XML data as string. Must be freed.
-        char* getXMLData();
-        //Used by loadOSC and saveOSC
-        int loadOSCFromStr(const char *file_content,
-                           rtosc::savefile_dispatcher_t* dispatcher);
-        //applyOscEvent with a DataObj parameter
+        //! apply an OSC event with a DataObj parameter
+        //! @note This may be called by MiddleWare if we are offline
+        //!   (in this case, the param offline is true)
+        //! @return false iff master has been changed
         bool applyOscEvent(const char *event, float *outl, float *outr,
                            bool offline, bool nio,
-                           class DataObj& d, int msg_id = -1);
+                           class DataObj& d, int msg_id = -1,
+                           Master* master_from_mw = nullptr);
+
+        Value_Smoothing_Filter smoothing;
+
+        Value_Smoothing_Filter smoothing_part_l[NUM_MIDI_PARTS];
+        Value_Smoothing_Filter smoothing_part_r[NUM_MIDI_PARTS];
 };
 
 class master_dispatcher_t : public rtosc::savefile_dispatcher_t

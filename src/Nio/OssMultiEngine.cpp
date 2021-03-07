@@ -37,6 +37,8 @@ extern zyn::MiddleWare *middleware;
 
 namespace zyn {
 
+static const int OssNonBlocking = 0;
+
 OssMultiEngine :: OssMultiEngine(const SYNTH_T &synth,
     const oss_devs_t &oss_devs)
     :AudioOut(synth),
@@ -86,12 +88,13 @@ OssMultiEngine :: openAudio()
         device = linux_oss_wave_out_dev;
 
     /* NOTE: PIPEs and FIFOs can block when opening them */
-    handle = open(device, O_WRONLY, O_NONBLOCK);
+    handle = open(device, O_WRONLY | O_NONBLOCK);
     if (handle == -1) {
         cerr << "ERROR - I can't open the "
             << device << '.' << endl;
         return (false);
     }
+    ioctl(handle, FIONBIO, &OssNonBlocking);
     ioctl(handle, SNDCTL_DSP_RESET, 0);
 
     /* Figure out the correct format first */

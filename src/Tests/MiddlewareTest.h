@@ -92,7 +92,7 @@ class PluginTest:public CxxTest::TestSuite
 
             float sum = 0.0f;
             for(int i = 0; i < synth->buffersize; ++i)
-                sum += fabs(outL[i]);
+                sum += fabsf(outL[i]);
 
             TS_ASSERT_LESS_THAN(0.1f, sum);
         }
@@ -123,6 +123,20 @@ class PluginTest:public CxxTest::TestSuite
             //const string fdata = loadfile(fname);
         }
 
+        void testChangeToOutOfRangeProgram()
+        {
+            middleware[0]->transmitMsg("/bank/msb", "i", 0);
+            middleware[0]->tick();
+            middleware[0]->transmitMsg("/bank/lsb", "i", 1);
+            middleware[0]->tick();
+            middleware[0]->pendingSetProgram(0, 32);
+            middleware[0]->tick();
+            master[0]->GetAudioOutSamples(synth->buffersize, synth->samplerate, outL, outR);
+            // We should ideally be checking to verify that the part change
+            // didn't happen, but it's not clear how to do that.  We're
+            // currently relying on the assert(filename) in loadPart() failing
+            // if this logic gets broken.
+        }
 
     private:
         SYNTH_T *synth;

@@ -24,7 +24,7 @@ class OscilGen:public Presets
 {
     public:
         OscilGen(const SYNTH_T &synth, FFTwrapper *fft_, Resonance *res_);
-        ~OscilGen();
+        ~OscilGen() override;
 
         /**computes the full spectrum of oscil from harmonics,phases and basefunc*/
         void prepare();
@@ -45,7 +45,7 @@ class OscilGen:public Presets
         void useasbase();
 
         void paste(OscilGen &o);
-        void add2XML(XMLwrapper& xml);
+        void add2XML(XMLwrapper& xml) override;
         void defaults();
         void getfromXML(XMLwrapper& xml);
 
@@ -105,20 +105,20 @@ class OscilGen:public Presets
         //this should be called every note on event
         void newrandseed(unsigned int randseed);
 
-        bool ADvsPAD; //if it is used by ADsynth or by PADsynth
+        bool ADvsPAD; //!< true if it is used by PADsynth instead of ADsynth
 
         static const rtosc::MergePorts ports;
         static const rtosc::Ports      non_realtime_ports;
         static const rtosc::Ports      realtime_ports;
 
         /* Oscillator Frequencies -
-         *  this is different than the hamonics set-up by the user,
+         *  this is different than the harmonics set-up by the user,
          *  it may contains time-domain data if the antialiasing is turned off*/
         fft_t *oscilFFTfreqs;
 
         fft_t *pendingfreqs;
     private:
-        //This array stores some termporary data and it has OSCIL_SIZE elements
+        //This array stores some temporary data and it has OSCIL_SIZE elements
         float *tmpsmps;
         fft_t *outoscilFFTfreqs;
         float *cachedbasefunc;
@@ -180,10 +180,10 @@ class OscilGen:public Presets
         const SYNTH_T &synth;
 };
 
-typedef float (*filter_func)(unsigned int, float, float);
-filter_func getFilter(unsigned char func);
-typedef float (*base_func)(float, float);
-base_func getBaseFunction(unsigned char func);
+typedef float filter_func_t(unsigned int, float, float);
+filter_func_t *getFilter(unsigned char func);
+typedef float base_func_t(float, float);
+base_func_t *getBaseFunction(unsigned char func);
 
 }
 

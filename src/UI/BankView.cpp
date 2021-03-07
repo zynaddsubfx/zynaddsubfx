@@ -285,7 +285,7 @@ void BankView::init(Fl_Osc_Interface *osc_, BankViewControls *bvc_, int *npart_)
  * - Read From Slot
  * - Write To Slot
  * - Swap Slot First Selection
- * - Swap Slot Second Selction
+ * - Swap Slot Second Selection
  *
  *   TODO restore autoclose functionality
  */

@@ -26,12 +26,6 @@
 
 namespace zyn {
 
-enum FilterInterpolationType {
-    INTERPOLATE_EXTREME = 0x01,
-    INTERPOLATE_NON_ZERO,
-    INTERPOLATE_NONE
-};
-
 SVFilter::SVFilter(unsigned char Ftype, float Ffreq, float Fq,
                    unsigned char Fstages, unsigned int srate, int bufsize)
     :Filter(srate, bufsize),
@@ -39,15 +33,15 @@ SVFilter::SVFilter(unsigned char Ftype, float Ffreq, float Fq,
       stages(Fstages),
       freq(Ffreq),
       q(Fq),
-      gain(1.0f),
-      needsinterpolation(INTERPOLATE_NONE),
-      firsttime(true)
+      gain(1.0f)
 {
     if(stages >= MAX_FILTER_STAGES)
         stages = MAX_FILTER_STAGES;
     outgain = 1.0f;
     cleanup();
     setfreq_and_q(Ffreq, Fq);
+    freq_smoothing.reset(Ffreq);
+    freq_smoothing.sample_rate(srate);
 }
 
 SVFilter::~SVFilter()
@@ -57,8 +51,6 @@ void SVFilter::cleanup()
 {
     for(int i = 0; i < MAX_FILTER_STAGES + 1; ++i)
         st[i].low = st[i].high = st[i].band = st[i].notch = 0.0f;
-    oldabovenq = false;
-    abovenq    = false;
 }
 
 SVFilter::response::response(float b0, float b1, float b2,
@@ -127,26 +119,8 @@ void SVFilter::setfreq(float frequency)
     if(rap < 1.0f)
         rap = 1.0f / rap;
 
-    oldabovenq = abovenq;
-    abovenq    = frequency > (samplerate_f / 2 - 500.0f);
-
-    bool nyquistthresh = (abovenq ^ oldabovenq);
-
-    //if the frequency is changed fast, it needs interpolation
-    if((rap > 3.0f) || nyquistthresh) { //(now, filter and coefficients backup)
-        if(!firsttime)
-            needsinterpolation = INTERPOLATE_EXTREME;
-        ipar = par;
-    } else if(rap != 1.0) {
-        if (!firsttime)
-            needsinterpolation = INTERPOLATE_NON_ZERO;
-        ipar = par;
-    } else {
-        needsinterpolation = INTERPOLATE_NONE;
-    }
     freq = frequency;
     computefiltercoefs();
-    firsttime = false;
 }
 
 void SVFilter::setfreq_and_q(float frequency, float q_)
@@ -204,21 +178,6 @@ float *SVFilter::getfilteroutfortype(SVFilter::fstage &x) {
     return out;
 }
 
-void SVFilter::singlefilterout_with_par_interpolation(float *smp, fstage &x, parameters &par1, parameters &par2)
-{
-    float *out = getfilteroutfortype(x);
-    for(int i = 0; i < buffersize; ++i) {
-        float p = i / buffersize_f;
-        float f = par1.f + (par2.f - par1.f) * p;
-        float q = par1.q + (par2.q - par1.q) * p;
-        float q_sqrt = sqrtf(q);
-        x.low   = x.low + f * x.band;
-        x.high  = q_sqrt * smp[i] - x.low - q * x.band;
-        x.band  = f * x.high + x.band;
-        x.notch = x.high + x.low;
-        smp[i]  = *out;
-    }
-}
 
 // simplifying the responses
 // xl = xl*z(-1) +      pf*xb*z(-1)
@@ -232,7 +191,7 @@ void SVFilter::singlefilterout_with_par_interpolation(float *smp, fstage &x, par
 
 
 
-void SVFilter::singlefilterout(float *smp, SVFilter::fstage &x, SVFilter::parameters &par)
+void SVFilter::singlefilterout(float *smp, SVFilter::fstage &x, SVFilter::parameters &par, int buffersize )
 {
     float *out = getfilteroutfortype(x);
     for(int i = 0; i < buffersize; ++i) {
@@ -246,24 +205,28 @@ void SVFilter::singlefilterout(float *smp, SVFilter::fstage &x, SVFilter::parame
 
 void SVFilter::filterout(float *smp)
 {
-    if (needsinterpolation == INTERPOLATE_EXTREME) {
-        float ismp[buffersize];
-        for(int i = 0; i < stages + 1; ++i)
-            singlefilterout(smp, st[i], par);
-        memcpy(ismp, smp, bufferbytes);
-        for(int i = 0; i < stages + 1; ++i)
-            singlefilterout(ismp, st[i], ipar);
-        for(int i = 0; i < buffersize; ++i) {
-            float x = i / buffersize_f;
-            smp[i] = ismp[i] * (1.0f - x) + smp[i] * x;
+    assert((buffersize % 8) == 0);
+
+    float freqbuf[buffersize];
+
+    if ( freq_smoothing.apply( freqbuf, buffersize, freq ) )
+    {
+        /* 8 sample chunks seems to work OK for AnalogFilter, so do that here too. */
+        for ( int i = 0; i < buffersize; i += 8 )
+        {
+            freq = freqbuf[i];
+            computefiltercoefs();
+
+            for(int j = 0; j < stages + 1; ++j)
+                singlefilterout(smp + i, st[j], par, 8 );
         }
-    } else if (needsinterpolation == INTERPOLATE_NON_ZERO) {
-        for(int i = 0; i < stages + 1; ++i)
-            singlefilterout_with_par_interpolation(smp, st[i], ipar, par);
-    } else {
-        for(int i = 0; i < stages + 1; ++i)
-            singlefilterout(smp, st[i], par);
+
+        freq = freqbuf[buffersize - 1];
+        computefiltercoefs();
     }
+    else
+        for(int i = 0; i < stages + 1; ++i)
+            singlefilterout(smp, st[i], par, buffersize );
 
     for(int i = 0; i < buffersize; ++i)
         smp[i] *= outgain;

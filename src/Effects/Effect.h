@@ -23,7 +23,7 @@
 #ifndef rEffPar
 #define rEffPar(name, idx, ...) \
   {STRINGIFY(name) "::i",  rProp(parameter) rDefaultDepends(preset) \
-   DOC(__VA_ARGS__), NULL, rEffParCb(idx)}
+      rLinear(0,127) DOC(__VA_ARGS__), NULL, rEffParCb(idx)}
 #define rEffParOpt(name, idx, ...) \
   {STRINGIFY(name) "::i:c:S",  rProp(parameter) rDefaultDepends(preset) \
    rProp(enumerated) DOC(__VA_ARGS__), NULL, \
@@ -113,6 +113,13 @@ class Effect
         Effect(EffectParams pars);
         virtual ~Effect() {}
         /**
+         * Get default preset parameter value
+         * @param npreset chosen preset
+         * @param npar chosen parameter
+         * @return the default parameter value
+         **/
+        virtual unsigned char getpresetpar(unsigned char npreset, unsigned int npar) = 0;
+        /**
          * Choose a preset
          * @param npreset number of chosen preset*/
         virtual void setpreset(unsigned char npreset) = 0;
@@ -129,7 +136,7 @@ class Effect
          *
          * This method should result in the effect generating its results
          * and placing them into the efxoutl and efxoutr buffers.
-         * Every Effect should overide this method.
+         * Every Effect should override this method.
          *
          * @param smpsl Input buffer for the Left channel
          * @param smpsr Input buffer for the Right channel

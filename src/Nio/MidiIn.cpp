@@ -28,7 +28,7 @@ uint8_t MidiIn::midiSysEx(unsigned char data)
 {
     if (data & 0x80) {
         if (data == 0xF0) {
-		sysex_offset = 0; /* begin */
+            sysex_offset = 0; /* begin */
         } else if (data == 0xF7) {
                 return (2); /* end */
         } else {
@@ -65,20 +65,43 @@ void MidiIn::midiProcess(unsigned char head,
             if (sysex_offset >= 10 &&
                 sysex_data[1] == 0x0A &&
                 sysex_data[2] == 0x55) {
-                ev.type = M_FLOAT_NOTE;
                 ev.channel = sysex_data[3] & 0x0F;
-                ev.num = sysex_data[4];
-                ev.value = sysex_data[5];
-                ev.log2_freq = (sysex_data[6] +
+                ev.log2_freq = sysex_data[6] +
                   (sysex_data[7] / (128.0f)) +
                   (sysex_data[8] / (128.0f * 128.0f)) +
-                  (sysex_data[9] / (128.0f * 128.0f * 128.0f))
-                  ) / 12.0f;
+                  (sysex_data[9] / (128.0f * 128.0f * 128.0f));
+
+                switch (sysex_data[3] >> 4) {
+                case 0: /* Note ON */
+                    ev.type = M_FLOAT_NOTE;
+                    ev.num = sysex_data[4];
+                    ev.value = sysex_data[5];
+                    ev.log2_freq /= 12.0f;
+                    break;
+                case 1: /* Pressure, Aftertouch */
+                    ev.type = M_FLOAT_CTRL;
+                    ev.num = C_aftertouch;
+                    ev.value = sysex_data[4];
+                    break;
+                case 2: /* Controller */
+                    ev.type = M_FLOAT_CTRL;
+                    ev.num = sysex_data[5];
+                    ev.value = sysex_data[4];
+                    break;
+                case 3: /* Absolute pitch */
+                    ev.type = M_FLOAT_CTRL;
+                    ev.num = C_pitch;
+                    ev.value = sysex_data[4];
+                    ev.log2_freq /= 12.0f;
+                    break;
+                default:
+                    return;
+                }
                 InMgr::getInstance().putEvent(ev);
             }
             return; /* message complete */
         } else {
-	    return; /* wait for more data */
+            return; /* wait for more data */
         }
     }
     switch(head & 0xf0) {

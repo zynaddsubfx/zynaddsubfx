@@ -43,7 +43,7 @@ class RelTime
             double deltaFrames = sec*t.framesPerSec();
             int64_t tmp = (int64_t)deltaFrames;
             frame = t.time() + tmp;
-            sample = t.samplesPerFrame()*(deltaFrames-tmp);
+            sample = (int32_t)(t.samplesPerFrame()*(deltaFrames-tmp));
         }
         bool inThisFrame() {return t.time() == frame;};
         bool inPast() {return t.time() > frame;}

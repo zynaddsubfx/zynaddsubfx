@@ -1,0 +1,29 @@
+name: Ubuntu Build CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: update_apt
+      run:   sudo apt-get update
+    - name: install_deps1
+      run:   sudo apt-get install zlib1g-dev libmxml-dev libfftw3-dev dssi-dev libfltk1.3-dev fluid libxpm-dev
+    - name: install_deps2
+      run: sudo apt-get install liblo-dev
+    - name: install_test_deps1
+      run: sudo apt-get install --force-yes cxxtest
+    - name: install_test_deps2
+      run: sudo apt-get install ruby
+    - name: submodule
+      run: git submodule update --init
+    - name: configure
+      run: mkdir build && cd build && cmake ..
+    - name: make
+      run: cd build && make
+    - name: make test
+      run: cd build && make test

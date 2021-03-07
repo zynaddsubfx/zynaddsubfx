@@ -16,6 +16,10 @@
 
 class Fl_Osc_Interface;
 
+namespace rtosc {
+    struct MergePorts;
+}
+
 namespace zyn {
 
 struct SYNTH_T;
@@ -40,7 +44,7 @@ class MiddleWare
         //instances are in use OR when there was a crash
         //
         //When an old save is found return the id of the save file
-        int checkAutoSave(void);
+        int checkAutoSave(void) const;
 
         void removeAutoSave(void);
 
@@ -73,19 +77,22 @@ class MiddleWare
         void pendingSetProgram(int part, int program);
 
         //Get/Set the active bToU url
-        std::string activeUrl(void);
+        std::string activeUrl(void) const;
         void activeUrl(std::string u);
         //View Synthesis Parameters
         const SYNTH_T &getSynth(void) const;
         //liblo stuff
         const char* getServerAddress(void) const;
-        
+
         const PresetsStore& getPresetsStore() const;
         PresetsStore& getPresetsStore();
 
         //!Make @p new_master the current master
         //!@warning use with care, and only in frozen state
         void switchMaster(Master* new_master);
+
+        static const rtosc::MergePorts& getAllPorts();
+
     private:
         class MiddleWareImpl *impl;
 };

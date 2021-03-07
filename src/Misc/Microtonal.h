@@ -41,9 +41,12 @@ struct KbmInfo
 struct OctaveTuning {
     unsigned char type; //1 for cents or 2 for division
 
-    // the real tuning (eg. +1.05946f for one halftone)
-    // or 2.0f for one octave
-    float tuning;
+    /*
+     * The real tuning in logarithmic power of two.
+     * For example 1/12 for one halftone and
+     * 1 for one octave.
+     */
+    float tuning_log2;
 
     //the real tunning is x1/x2
     unsigned int x1, x2;
@@ -66,10 +69,12 @@ class Microtonal
         /**Destructor*/
         ~Microtonal();
         void defaults();
+        /**Updates the logarithmic power of two frequency for a given note
+         */
+        bool updatenotefreq_log2(float &note_log2_freq, int keyshift) const;
         /**Calculates the frequency for a given note
          */
         float getnotefreq(float note_log2_freq, int keyshift) const;
-
 
         //Parameters
         /**if the keys are inversed (the pitch is lower to keys from the right direction)*/
@@ -148,7 +153,7 @@ class Microtonal
         unsigned char octavesize;
         OctaveTuning octave[MAX_OCTAVE_SIZE];
     private:
-        //loads a line from the text file, while ignoring the lines beggining with "!"
+        //loads a line from the text file, while ignoring the lines beginning with "!"
         static int loadline(FILE *file, char *line);
         //Grab a 0..127 integer from the provided descriptor
 

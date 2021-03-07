@@ -27,7 +27,7 @@ namespace zyn {
 #define rEnd }
 
 rtosc::Ports DynamicFilter::ports = {
-    {"preset::i", rOptions(WahWah, AutoWah, Sweep, VocalMorph1, VocalMorph1)
+    {"preset::i", rOptions(WahWah, AutoWah, Sweep, VocalMorph1, VocalMorph2)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
                   rObject *o = (rObject*)d.obj;
@@ -59,7 +59,7 @@ rtosc::Ports DynamicFilter::ports = {
 #undef rEnd
 #undef rObject
 
-DynamicFilter::DynamicFilter(EffectParams pars, const AbsTime *time)
+DynamicFilter::DynamicFilter(EffectParams pars)
     :Effect(pars),
       lfo(pars.srate, pars.bufsize),
       Pvolume(110),
@@ -273,11 +273,11 @@ void DynamicFilter::setfilterpreset(unsigned char npreset)
     reinitfilter();
 }
 
-void DynamicFilter::setpreset(unsigned char npreset, bool protect)
+unsigned char DynamicFilter::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-    const int     PRESET_SIZE = 10;
-    const int     NUM_PRESETS = 5;
-    unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
+#define	PRESET_SIZE 10
+#define	NUM_PRESETS 5
+    static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //WahWah
         {110, 64, 80, 0, 0, 64, 0,  90, 0, 60},
         //AutoWah
@@ -286,22 +286,29 @@ void DynamicFilter::setpreset(unsigned char npreset, bool protect)
         {100, 64, 30, 0, 0, 50, 80, 0,  0, 60},
         //VocalMorph1
         {110, 64, 80, 0, 0, 64, 0,  64, 0, 60},
-        //VocalMorph1
+        //VocalMorph2
         {127, 64, 50, 0, 0, 96, 64, 0,  0, 60}
     };
+    if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
+        if(npar == 0 && insertion == 0) {
+            /* lower the volume if this is system effect */
+            return presets[npreset][npar] / 2;
+        }
+        return presets[npreset][npar];
+    }
+    return 0;
+}
 
+void DynamicFilter::setpreset(unsigned char npreset, bool protect)
+{
     if(npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
-
-    if(insertion == 0) //lower the volume if this is system effect
-        changepar(0, presets[npreset][0] * 0.5f);
+    for(int n = 0; n != 128; n++)
+        changepar(n, getpresetpar(npreset, n));
     Ppreset = npreset;
     if(!protect)
         setfilterpreset(npreset);
 }
-
 
 void DynamicFilter::changepar(int npar, unsigned char value)
 {

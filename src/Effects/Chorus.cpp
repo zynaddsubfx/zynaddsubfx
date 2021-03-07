@@ -210,12 +210,11 @@ void Chorus::setvolume(unsigned char _Pvolume)
     volume    = (!insertion) ? 1.0f : outvolume;
 }
 
-
-void Chorus::setpreset(unsigned char npreset)
+unsigned char Chorus::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-    const int     PRESET_SIZE = 12;
-    const int     NUM_PRESETS = 10;
-    unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
+#define	PRESET_SIZE 12
+#define	NUM_PRESETS 10
+    static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Chorus1
         {64, 64, 50, 0,   0, 90, 40,  85, 64,  119, 0, 0},
         //Chorus2
@@ -237,14 +236,20 @@ void Chorus::setpreset(unsigned char npreset)
         //Flange5
         {64, 64, 55, 105, 0, 24, 39,  19, 17,  0,   0, 1}
     };
-
-    if(npreset >= NUM_PRESETS)
-        npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
-    Ppreset = npreset;
+    if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
+        return presets[npreset][npar];
+    }
+    return 0;
 }
 
+void Chorus::setpreset(unsigned char npreset)
+{
+    if(npreset >= NUM_PRESETS)
+        npreset = NUM_PRESETS - 1;
+    for(int n = 0; n != 128; n++)
+        changepar(n, getpresetpar(npreset, n));
+    Ppreset = npreset;
+}
 
 void Chorus::changepar(int npar, unsigned char value)
 {

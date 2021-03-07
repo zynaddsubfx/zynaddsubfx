@@ -100,11 +100,6 @@ EQ::EQ(EffectParams pars)
     :Effect(pars)
 {
     for(int i = 0; i < MAX_EQ_BANDS; ++i) {
-        filter[i].Ptype   = 0;
-        filter[i].Pfreq   = 64;
-        filter[i].Pgain   = 64;
-        filter[i].Pq      = 64;
-        filter[i].Pstages = 0;
         filter[i].l = memory.alloc<AnalogFilter>(6, 1000.0f, 1.0f, 0, pars.srate, pars.bufsize);
         filter[i].r = memory.alloc<AnalogFilter>(6, 1000.0f, 1.0f, 0, pars.srate, pars.bufsize);
     }
@@ -157,20 +152,30 @@ void EQ::setvolume(unsigned char _Pvolume)
     volume    = (!insertion) ? 1.0f : outvolume;
 }
 
-
-void EQ::setpreset(unsigned char npreset)
+unsigned char EQ::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-    const int     PRESET_SIZE = 1;
-    const int     NUM_PRESETS = 2;
-    unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
+#define PRESET_SIZE 1
+#define NUM_PRESETS 2
+    static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         {67}, //EQ 1
         {67}  //EQ 2
     };
+    if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
+        return presets[npreset][npar];
+    } else if (npar >= 10 && npar < (10 + MAX_EQ_BANDS * 5)) {
+        static const unsigned char bp_preset[5] = { 0, 64, 64, 64, 0 };
+        return bp_preset[npar % 5];
+    }
+    return 0;
+}
+
+void EQ::setpreset(unsigned char npreset)
+{
 
     if(npreset >= NUM_PRESETS)
         npreset = NUM_PRESETS - 1;
-    for(int n = 0; n < PRESET_SIZE; ++n)
-        changepar(n, presets[npreset][n]);
+    for(int n = 0; n != 128; n++)
+        changepar(n, getpresetpar(npreset, n));
     Ppreset = npreset;
 }
 

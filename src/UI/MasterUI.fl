@@ -82,9 +82,29 @@ extern NSM_Client *nsm;
 \#endif} {public local
 } 
 
-decl {\#if !defined(PLUGINVERSION) && HAS_X11
+decl {\#if !defined(PLUGINVERSION) && defined(NTK_GUI)
 \#include <X11/xpm.h>
 \#endif} {public local
+}
+
+decl {\#if !defined(PLUGINVERSION) && HAS_X11
+\#include <FL/Fl_RGB_Image.H>
+\#endif} {private local
+} 
+
+decl {\#if !defined(PLUGINVERSION) && HAS_X11
+\#include <FL/Fl.H>
+\#endif} {private local
+} 
+
+decl {\#if !defined(PLUGINVERSION) && HAS_X11
+\#include <FL/Enumerations.H>
+\#endif} {private local
+} 
+
+decl {\#if !defined(PLUGINVERSION) && HAS_X11
+\#include <FL/Fl_Pixmap.H>
+\#endif} {private local
 } 
 
 decl {\#include "../globals.h"} {public local
@@ -486,7 +506,7 @@ if (fl_choice("The file *might* exist. \\nOverwrite it?","No","Yes",NULL)) {
 	masterwindow->hide();
 	refresh_master_ui();
 	simplemasterwindow->show();
-    osc->write("/cfg.UserInterfaceMode", "i", 2);
+    osc->write("/config/cfg.UserInterfaceMode", "i", 2);
 };}
               xywh {15 15 100 20}
             }
@@ -874,7 +894,7 @@ panelwindow->show();}
       }
       Fl_Box {} {
         label {This is free software; you may redistribute it and/or modify it under the terms of the 
-version 2 (or any later version) of the GNU General Public License as published by the Free Software Fundation.
+version 2 (or any later version) of the GNU General Public License as published by the Free Software Foundation.
   This program comes with
  ABSOLUTELY NO WARRANTY. 
  See the version 2 (or any later version) of the 
@@ -1052,7 +1072,7 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an
 	simplemasterwindow->hide();
 	refresh_master_ui();
 	masterwindow->show();
-    osc->write("/cfg.UserInterfaceMode", "i", 1);
+    osc->write("/config/cfg.UserInterfaceMode", "i", 1);
 };}
             xywh {0 0 100 20}
           }
@@ -1575,10 +1595,15 @@ configui=new ConfigUI(osc);
 make_window();
 fl_open_display();
 
-\#if !defined(PLUGINVERSION) && HAS_X11
+\#if !defined(PLUGINVERSION) && defined(FLTK_GUI)
+Fl_Pixmap *pixmap = new Fl_Pixmap(zynaddsubfx_xpm);
+Fl_RGB_Image *p = new Fl_RGB_Image(pixmap, FL_GRAY);
+masterwindow->icon(p);
+\#endif
+\#if !defined(PLUGINVERSION) && defined(NTK_GUI)
 Pixmap p, mask;
 XCreatePixmapFromData(fl_display, DefaultRootWindow(fl_display),
-                                 (char**)zynaddsubfx_xpm, &p, &mask, NULL);
+                      (char**)zynaddsubfx_xpm, &p, &mask, NULL);
 masterwindow->icon((char *)p);
 \#endif
 assert(osc);

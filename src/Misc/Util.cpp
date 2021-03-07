@@ -85,22 +85,22 @@ float getdetune(unsigned char type,
     switch(type) {
 //	case 1: is used for the default (see below)
         case 2:
-            cdet   = fabs(cdetune * 10.0f);
-            findet = fabs(fdetune / 8192.0f) * 10.0f;
+            cdet   = fabsf(cdetune * 10.0f);
+            findet = fabsf(fdetune / 8192.0f) * 10.0f;
             break;
         case 3:
-            cdet   = fabs(cdetune * 100.0f);
-            findet = powf(10, fabs(fdetune / 8192.0f) * 3.0f) / 10.0f - 0.1f;
+            cdet   = fabsf(cdetune * 100.0f);
+            findet = powf(10, fabsf(fdetune / 8192.0f) * 3.0f) / 10.0f - 0.1f;
             break;
         case 4:
-            cdet   = fabs(cdetune * 701.95500087f); //perfect fifth
+            cdet   = fabsf(cdetune * 701.95500087f); //perfect fifth
             findet =
-                (powf(2, fabs(fdetune / 8192.0f) * 12.0f) - 1.0f) / 4095 * 1200;
+                (powf(2, fabsf(fdetune / 8192.0f) * 12.0f) - 1.0f) / 4095 * 1200;
             break;
         //case ...: need to update N_DETUNE_TYPES, if you'll add more
         default:
-            cdet   = fabs(cdetune * 50.0f);
-            findet = fabs(fdetune / 8192.0f) * 35.0f; //almost like "Paul's Sound Designer 2"
+            cdet   = fabsf(cdetune * 50.0f);
+            findet = fabsf(fdetune / 8192.0f) * 35.0f; //almost like "Paul's Sound Designer 2"
             break;
     }
     if(finedetune < 8192)
@@ -129,7 +129,7 @@ void set_realtime()
     sched_param sc;
     sc.sched_priority = 60;
     //if you want get "sched_setscheduler undeclared" from compilation,
-    //you can safely remove the folowing line:
+    //you can safely remove the following line:
     sched_setscheduler(0, SCHED_FIFO, &sc);
     //if (err==0) printf("Real-time");
 #endif
@@ -161,11 +161,11 @@ void os_usleep(long length)
 }
 #endif
 
-//!< maximum lenght a pid has on any POSIX system
+//!< maximum length a pid has on any POSIX system
 //!< this is an estimation, but more than 12 looks insane
 constexpr std::size_t max_pid_len = 12;
 
-//!< safe pid lenght guess, posix conform
+//!< safe pid length guess, posix conform
 std::size_t os_guess_pid_length()
 {
     const char* pid_max_file = "/proc/sys/kernel/pid_max";

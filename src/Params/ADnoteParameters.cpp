@@ -33,7 +33,6 @@ namespace zyn {
 using rtosc::Ports;
 using rtosc::RtData;
 
-#define EXPAND(x) x
 #define rObject ADnoteVoiceParam
 
 #undef rChangeCb
@@ -43,8 +42,8 @@ static const Ports voicePorts = {
     {"OscilSmp/", rDoc("Primary Oscillator"),
         &OscilGen::ports,
         rBOIL_BEGIN
-            if(obj->OscilSmp == NULL) return;
-        data.obj = obj->OscilSmp;
+            if(obj->OscilGn == NULL) return;
+        data.obj = obj->OscilGn;
         SNIP
             OscilGen::realtime_ports.dispatch(msg, data);
         if(data.matches == 0)
@@ -53,8 +52,8 @@ static const Ports voicePorts = {
     {"FMSmp/", rDoc("Modulating Oscillator"),
         &OscilGen::ports,
         rBOIL_BEGIN
-            if(obj->FMSmp == NULL) return;
-        data.obj = obj->FMSmp;
+            if(obj->FmGn == NULL) return;
+        data.obj = obj->FmGn;
         SNIP
             OscilGen::realtime_ports.dispatch(msg, data);
         if(data.matches == 0)
@@ -71,7 +70,7 @@ static const Ports voicePorts = {
     rRecurp(VoiceFilter,    "Optional Voice Filter"),
 
 //    rToggle(Enabled,       rShort("enable"), "Voice Enable"),
-    rParamI(Unison_size, rShort("size"), rMap(min, 0), rMap(max, 50),
+    rParamI(Unison_size, rShort("size"), rMap(min, 1), rMap(max, 50),
         rDefault(1), "Number of subvoices"),
     rParamZyn(Unison_phase_randomness, rShort("ph.rnd."), rDefault(127),
         "Phase Randomness"),
@@ -152,6 +151,8 @@ static const Ports voicePorts = {
         }},
     rToggle(PVolumeminus,                rShort("inv."), rDefault(false),
         "Signal Inverter"), //do we really need this??
+    rToggle(PAAEnabled,        rShort("enable"), rDefault(false),
+        "AntiAliasing Enable"),
     rParamZyn(PAmpVelocityScaleFunction, rShort("sense"), rDefault(127),
         "Velocity Sensing"),
     rToggle(PAmpEnvelopeEnabled, rShort("enable"), rDefault(false),
@@ -218,14 +219,18 @@ static const Ports voicePorts = {
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_octave = [&obj](){
                 int k=obj->PCoarseDetune/1024;
                 if (k>=8) k-=16;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_octave());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=16;
                 obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
+                d.broadcast(d.loc, "i", get_octave());
             }
         }},
     {"coarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64,63) rDefault(0)
@@ -233,14 +238,18 @@ static const Ports voicePorts = {
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_coarse = [&obj](){
                 int k=obj->PCoarseDetune%1024;
                 if (k>=512) k-=1024;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_coarse());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=1024;
                 obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
+                d.broadcast(d.loc, "i", get_coarse());
             }
         }},
     {"PFMVolume::i", rShort("vol.") rLinear(0,127)
@@ -269,14 +278,18 @@ static const Ports voicePorts = {
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_octave = [&obj](){
                 int k=obj->PFMCoarseDetune/1024;
                 if (k>=8) k-=16;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_octave());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=16;
                 obj->PFMCoarseDetune = k*1024 + obj->PFMCoarseDetune%1024;
+                d.broadcast(d.loc, "i", get_octave());
             }
         }},
     {"FMcoarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64,63)
@@ -284,14 +297,18 @@ static const Ports voicePorts = {
         NULL, [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_coarse = [&obj](){
                 int k=obj->PFMCoarseDetune%1024;
                 if (k>=512) k-=1024;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_coarse());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=1024;
                 obj->PFMCoarseDetune = k + (obj->PFMCoarseDetune/1024)*1024;
+                d.broadcast(d.loc, "i", get_coarse());
             }
         }},
 
@@ -346,9 +363,9 @@ static const Ports globalPorts = {
         {
             rObject *obj = (rObject *)d.obj;
             if (!rtosc_narguments(msg))
-                d.reply(d.loc, "i", (int)roundf(96.0f * (1.0f + (obj->Volume - 12.0412)/60.0f)));
+                d.reply(d.loc, "i", (int)roundf(96.0f * (1.0f + (obj->Volume - 12.0412f)/60.0f)));
             else 
-                obj->Volume = 12.0412 - 60.0f * (1.0f - rtosc_argument(msg, 0).i / 96.0f);
+                obj->Volume = 12.0412f - 60.0f * (1.0f - rtosc_argument(msg, 0).i / 96.0f);
         }},
     rParamZyn(Fadein_adjustment, rDefault(FADEIN_ADJUSTMENT_SCALE),
         "Adjustment for anti-pop strategy."),
@@ -384,14 +401,18 @@ static const Ports globalPorts = {
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_octave = [&obj](){
                 int k=obj->PCoarseDetune/1024;
                 if (k>=8) k-=16;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_octave());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=16;
                 obj->PCoarseDetune = k*1024 + obj->PCoarseDetune%1024;
+                d.broadcast(d.loc, "i", get_octave());
             }
         }},
     {"coarsedetune::c:i", rProp(parameter) rShort("coarse") rLinear(-64, 63)
@@ -399,14 +420,18 @@ static const Ports globalPorts = {
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            if(!rtosc_narguments(msg)) {
+            auto get_coarse = [&obj](){
                 int k=obj->PCoarseDetune%1024;
                 if (k>=512) k-=1024;
-                d.reply(d.loc, "i", k);
+                return k;
+            };
+            if(!rtosc_narguments(msg)) {
+                d.reply(d.loc, "i", get_coarse());
             } else {
                 int k=(int) rtosc_argument(msg, 0).i;
                 if (k<0) k+=1024;
                 obj->PCoarseDetune = k + (obj->PCoarseDetune/1024)*1024;
+                d.broadcast(d.loc, "i", get_coarse());
             }
         }},
 
@@ -546,6 +571,7 @@ void ADnoteVoiceParam::defaults()
     PDelay                    = 0;
     volume                    = -60.0f* (1.0f - 100.0f / 127.0f);
     PVolumeminus              = 0;
+    PAAEnabled                = 0;
     PPanning                  = 64; //center
     PDetune                   = 8192; //8192=0
     PCoarseDetune             = 0;
@@ -560,7 +586,7 @@ void ADnoteVoiceParam::defaults()
     PFilterLfoEnabled         = 0;
     PFilterVelocityScale = 0;
     PFilterVelocityScaleFunction = 64;
-    PFMEnabled                = 0;
+    PFMEnabled                = FMTYPE::NONE;
     PFMFixedFreq              = false;
 
     //I use the internal oscillator (-1)
@@ -575,8 +601,8 @@ void ADnoteVoiceParam::defaults()
     PFMAmpEnvelopeEnabled    = 0;
     PFMVelocityScaleFunction = 64;
 
-    OscilSmp->defaults();
-    FMSmp->defaults();
+    OscilGn->defaults();
+    FmGn->defaults();
 
     AmpEnvelope->defaults();
     AmpLfo->defaults();
@@ -606,8 +632,8 @@ void ADnoteParameters::EnableVoice(const SYNTH_T &synth, int nvoice,
 void ADnoteVoiceParam::enable(const SYNTH_T &synth, FFTwrapper *fft,
                               Resonance *Reson, const AbsTime *time)
 {
-    OscilSmp = new OscilGen(synth, fft, Reson);
-    FMSmp    = new OscilGen(synth, fft, NULL);
+    OscilGn  = new OscilGen(synth, fft, Reson);
+    FmGn    = new OscilGen(synth, fft, NULL);
 
     AmpEnvelope = new EnvelopeParams(64, 1, time);
     AmpEnvelope->init(ad_voice_amp);
@@ -634,7 +660,7 @@ void ADnoteVoiceParam::enable(const SYNTH_T &synth, FFTwrapper *fft,
 float ADnoteParameters::getBandwidthDetuneMultiplier() const
 {
     float bw = (GlobalPar.PBandwidth - 64.0f) / 64.0f;
-    bw = powf(2.0f, bw * powf(fabs(bw), 0.2f) * 5.0f);
+    bw = powf(2.0f, bw * powf(fabsf(bw), 0.2f) * 5.0f);
 
     return bw;
 }
@@ -649,7 +675,7 @@ float ADnoteParameters::getUnisonFrequencySpreadCents(int nvoice) const
 }
 
 float ADnoteVoiceParam::getUnisonFrequencySpreadCents(void) const {
-    return powf(Unison_frequency_spread / 127.0 * 2.0f, 2.0f) * 50.0f; //cents
+    return powf(Unison_frequency_spread / 127.0f * 2.0f, 2.0f) * 50.0f; //cents
 }
 
 /*
@@ -662,8 +688,8 @@ void ADnoteParameters::KillVoice(int nvoice)
 
 void ADnoteVoiceParam::kill()
 {
-    delete OscilSmp;
-    delete FMSmp;
+    delete OscilGn;
+    delete FmGn;
 
     delete AmpEnvelope;
     delete AmpLfo;
@@ -746,10 +772,10 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
     xml.addparbool("filter_enabled", PFilterEnabled);
     xml.addparbool("filter_bypass", Pfilterbypass);
 
-    xml.addpar("fm_enabled", PFMEnabled);
+    xml.addpar("fm_enabled", (int)PFMEnabled);
 
     xml.beginbranch("OSCIL");
-    OscilSmp->add2XML(xml);
+    OscilGn->add2XML(xml);
     xml.endbranch();
 
 
@@ -825,7 +851,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
         xml.endbranch();
     }
 
-    if((PFMEnabled != 0) || (fmoscilused != 0)
+    if((PFMEnabled != FMTYPE::NONE) || (fmoscilused != 0)
        || (!xml.minimal)) {
         xml.beginbranch("FM_PARAMETERS");
         xml.addpar("input_voice", PFMVoice);
@@ -857,7 +883,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
         }
 
         xml.beginbranch("OSCIL");
-        FMSmp->add2XML(xml);
+        FmGn->add2XML(xml);
         xml.endbranch();
 
         xml.endbranch();
@@ -951,10 +977,10 @@ void ADnoteGlobalParam::getfromXML(XMLwrapper& xml)
 
         if (upgrade_3_0_3) {
             int vol = xml.getpar127("volume", 0);
-            Volume = 12.0412 - 60.0f * ( 1.0f - vol / 96.0f);
+            Volume = 12.0412f - 60.0f * ( 1.0f - vol / 96.0f);
         } else if (upgrade_3_0_5) {
             printf("file version less than 3.0.5\n");
-            Volume = 12.0412 + xml.getparreal("volume", Volume);
+            Volume = 12.0412f + xml.getparreal("volume", Volume);
         } else {
             Volume = xml.getparreal("volume", Volume);
         }
@@ -1100,7 +1126,7 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     copy(PFMEnabled);
     copy(PFMFixedFreq);
 
-    RCopy(OscilSmp);
+    RCopy(OscilGn);
 
 
     copy(PPanning);
@@ -1159,7 +1185,7 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
 
     RCopy(FMFreqEnvelope);
 
-    RCopy(FMSmp);
+    RCopy(FmGn);
 
     if ( time ) {
         last_update_timestamp = time->time();
@@ -1234,10 +1260,10 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
     PFMoscilphase  = xml.getpar127("oscil_fm_phase", PFMoscilphase);
     PFilterEnabled = xml.getparbool("filter_enabled", PFilterEnabled);
     Pfilterbypass  = xml.getparbool("filter_bypass", Pfilterbypass);
-    PFMEnabled     = xml.getpar127("fm_enabled", PFMEnabled);
+    PFMEnabled     = (FMTYPE)xml.getpar127("fm_enabled", (int)PFMEnabled);
 
     if(xml.enterbranch("OSCIL")) {
-        OscilSmp->getfromXML(xml);
+        OscilGn->getfromXML(xml);
         xml.exitbranch();
     }
 
@@ -1364,7 +1390,7 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
             }
 
             if(xml.enterbranch("OSCIL")) {
-                FMSmp->getfromXML(xml);
+                FmGn->getfromXML(xml);
                 xml.exitbranch();
             }
 

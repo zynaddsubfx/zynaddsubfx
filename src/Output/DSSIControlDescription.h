@@ -26,7 +26,7 @@ struct DSSIControlDescription {
 
     const static int MAX_DSSI_CONTROLS = 12;
 
-    const zyn::MidiControllers controller_code; /// controler code, as accepted by the Controller class
+    const zyn::MidiControllers controller_code; /// controller code, as accepted by the Controller class
     const char *name; /// human readable name of this control
 
     /** hint about usable range of value for this control, defaulting to 0-128, initially at 64 */

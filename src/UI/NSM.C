@@ -59,6 +59,8 @@ NSM_Client::command_save(char **out_msg)
 {
     (void) out_msg;
     int r = ERR_OK;
+    if(!project_filename)
+        return ERR_NO_SESSION_OPEN;
 
     middleware->transmitMsg("/save_xmz", "s", project_filename);
 
@@ -71,6 +73,7 @@ NSM_Client::command_open(const char *name,
                          const char *client_id,
                          char **out_msg)
 {
+    (void) out_msg;
     zyn::Nio::stop();
 
     if(instance_name)
@@ -80,12 +83,14 @@ NSM_Client::command_open(const char *name,
 
     zyn::Nio::start();
 
-    char *new_filename;
+    char *new_filename = (char *)malloc(strlen(name) + 5);
 
-    //if you're on windows enjoy the undefined behavior...
-#ifndef WIN32
-    asprintf(&new_filename, "%s.xmz", name);
-#endif
+    if (new_filename) {
+        strcpy(new_filename, name);
+        strcat(new_filename, ".xmz");
+    } else {
+        // TODO, handle error condition...
+    }
 
     struct stat st;
 
@@ -167,5 +172,7 @@ NSM_Client::command_active(bool active)
         ui->sm_indicator1->tooltip(NULL);
         ui->sm_indicator2->tooltip(NULL);
     }
+#else
+    (void)active;
 #endif
 }

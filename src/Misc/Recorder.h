@@ -13,6 +13,7 @@
 
 #ifndef RECORDER_H
 #define RECORDER_H
+#include <rtosc/ports.h>
 #include <string>
 
 namespace zyn {
@@ -39,6 +40,8 @@ class Recorder
          *  1 - ready
          *  2 - recording */
         int status;
+
+        static const rtosc::Ports ports;
 
     private:
         int notetrigger;

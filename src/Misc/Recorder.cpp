@@ -11,6 +11,8 @@
   of the License, or (at your option) any later version.
 */
 
+#include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
 #include <sys/stat.h>
 #include "Recorder.h"
 #include "WavFile.h"
@@ -18,6 +20,27 @@
 #include "../Nio/Nio.h"
 
 namespace zyn {
+
+#define rObject Recorder
+const rtosc::Ports Recorder::ports = {
+    {"preparefile:s", rDoc("Init WAV file"), 0,
+        rBOIL_BEGIN
+        obj->preparefile(rtosc_argument(msg, 0).s, 1);
+        rBOIL_END },
+    {"start:", rDoc("Start recording"), 0,
+        rBOIL_BEGIN
+        obj->start();
+        rBOIL_END },
+    {"stop:", rDoc("Stop recording"), 0,
+        rBOIL_BEGIN
+        obj->stop();
+        rBOIL_END },
+    {"pause:", rDoc("Pause recording"), 0,
+        rBOIL_BEGIN;
+        obj->pause();
+        rBOIL_END}
+};
+#undef rObject
 
 Recorder::Recorder(const SYNTH_T &synth_)
     :status(0), notetrigger(0),synth(synth_)

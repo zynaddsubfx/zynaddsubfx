@@ -60,7 +60,7 @@ class PointButton {open : {public Fl_Button, public Fl_Osc_Widget}}
 {
   Function {PointButton(int x,int y, int w, int h, const char *label=0):Fl_Button(x,y,w,h,label),Fl_Osc_Widget(this)} {open
   } {
-    code {} {}
+    code {(void)label;} {}
   }
   Function {rebase(std::string new_base)} {open
   } {
@@ -74,7 +74,8 @@ class PointButton {open : {public Fl_Button, public Fl_Osc_Widget}}
 class EnvelopeUI {open : {public Fl_Osc_Group,PresetsUI_}
 } {
   Function {EnvelopeUI(int x,int y, int w, int h, const char *label=0):Fl_Osc_Group(x,y,w,h)} {} {
-    code {freemodeeditwindow=NULL;
+    code {(void)label;
+freemodeeditwindow=NULL;
 envADSR=NULL;
 envASR=NULL;
 envADSRfilter=NULL;
@@ -181,7 +182,7 @@ envfree->redraw();}
       }
       Fl_Button {} {
         label {Cancel}
-	tooltip {Cancel freemode editing}
+        tooltip {Cancel freemode editing}
         callback {disable_freemode();}
         xywh {5 155 80 20} box THIN_UP_BOX labelsize 11 labelcolor 1
         class Fl_Osc_Button
@@ -256,7 +257,7 @@ envfree->redraw();}
         }
         Fl_Check_Button e1linearenvelope {
           label L
-          tooltip {The evelope is linear} xywh {180 20 15 15} down_box DOWN_BOX labelsize 10 align 4
+          tooltip {The envelope is linear} xywh {180 20 15 15} down_box DOWN_BOX labelsize 10 align 4
           code0 {o->init("Plinearenvelope");}
           class Fl_Osc_Check
         }

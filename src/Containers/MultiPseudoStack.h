@@ -11,12 +11,12 @@
 */
 #pragma once
 #include <atomic>
-#include <cassert>
 
 namespace zyn {
 
 //XXX rename this thing
 typedef struct QueueListItem qli_t;
+//! Queue item for LockFreeQueue
 struct QueueListItem
 {
     QueueListItem(void);
@@ -25,7 +25,7 @@ struct QueueListItem
 };
 
 
-//Many reader many writer
+//! Many reader many writer queue of fixed size memory chunks
 class LockFreeQueue
 {
     qli_t *const           data;
@@ -34,7 +34,7 @@ class LockFreeQueue
     std::atomic<int32_t>   next_r;
     std::atomic<int32_t>   next_w;
     std::atomic<int32_t>   avail;
-    public:
+public:
     LockFreeQueue(qli_t *data_, int n);
     ~LockFreeQueue(void);
     qli_t *read(void);
@@ -42,24 +42,28 @@ class LockFreeQueue
 };
 
 
-/*
- * Many reader Many writer capiable queue
+/**
+ * Many reader many writer capiable queue of fixed size memory chunks
+ *
  * - lock free
  * - allocation free (post initialization)
  */
 class MultiQueue
 {
-    qli_t *pool;
-    LockFreeQueue m_free;
-    LockFreeQueue m_msgs;
+    qli_t *pool;          //!< actual storage
+    LockFreeQueue m_free; //!< queue of unused items
+    LockFreeQueue m_msgs; //!< actual queue
 
-    public:
+public:
     MultiQueue(void);
     ~MultiQueue(void);
-    void dump(void);
+    //! return a fresh item, e.g. to write to
     qli_t *alloc(void)   { return m_free.read();   }
+    //! free an item
     void free(qli_t  *q) {        m_free.write(q); }
+    //! write item into the queue
     void write(qli_t *q) {        m_msgs.write(q); }
+    //! take an item from the queue, must be freed
     qli_t *read(void)    { return m_msgs.read();   }
 };
 
