@@ -45,7 +45,6 @@ namespace zyn {
             rLIMIT(var, atoi) \
             rCAPPLY(obj->name, "f", obj->name = dTREAL(var)) \
             data.broadcast(loc, "i", dT127(obj->name));\
-            rChangeCb \
         } rBOIL_END
 
 #define rParamsDT(name, length, ...) \
@@ -55,7 +54,9 @@ rArrayDT(name, length, __VA_ARGS__), \
 #define rParamsDTCb(name, length) rBOIL_BEGIN \
     char varS[length]; \
     for (int i = 0; i < length; i++) {varS[i] = dT127(obj->name[i]);} \
-    data.reply(loc, "b", length, varS); rBOIL_END
+    data.reply(loc, "b", length, varS); \
+    rChangeCb \
+    rBOIL_END
 
 #define rArrayDT(name, length, ...) \
 {"P" STRINGIFY(name) "#" STRINGIFY(length) "::i", rProp(parameter) DOC(__VA_ARGS__), NULL, rArrayDTICb(name)}
@@ -77,7 +78,7 @@ static const rtosc::Ports localPorts = {
     rPaste,
 #undef  rChangeCb
 #define rChangeCb if(!obj->Pfreemode) obj->converttofree(); if (obj->time) { \
-        obj->last_update_timestamp = obj->time->time(); }
+            obj->last_update_timestamp = obj->time->time(); }
     rOption(loc, rProp(internal),
             rOptions(ad_global_amp, ad_global_freq, ad_global_filter,
                      ad_voice_amp, ad_voice_freq, ad_voice_filter,
@@ -87,6 +88,7 @@ static const rtosc::Ports localPorts = {
     rToggle(Pfreemode, rDefault(false), "Complex Envelope Definitions"),
 #undef  rChangeCb
 #define rChangeCb if(!obj->Pfreemode) obj->converttofree(); \
+                  else obj->updatenonfree(); \
                   if(obj->time) { obj->last_update_timestamp = obj->time->time(); }
     rParamZyn(Penvpoints, rProp(internal), rDefaultDepends(loc),
             rPresetAtMulti(3, ad_global_freq, ad_voice_freq,
@@ -116,6 +118,17 @@ static const rtosc::Ports localPorts = {
             "Linear or Logarithmic Envelopes"),
     rToggle(Prepeating, rShort("repeat"), rDefault(false),
             "Repeat the Envelope"),
+#undef  rChangeCb
+#define rChangeCb if(!obj->Pfreemode) obj->converttofree(); \
+                  else obj->updatefree(); \
+                  if(obj->time) { obj->last_update_timestamp = obj->time->time(); }\
+                  char part_loc[128]; \
+                  strncpy(part_loc, loc, sizeof(part_loc)); \
+                  part_loc[sizeof(part_loc) - 1] = '\0'; \
+                  char *end = strrchr(part_loc, '/'); \
+                  if(end) { \
+                      end[1] = '\0'; \
+                      data.broadcast("/damage", "s", part_loc);}
     rParamDT(A_dt ,  rShort("a.dt"), rLinear(0,127), "Attack Time"),
     rParamF(A_dt,  rShort("a.dt"), rLog(0.0f,41.0f), rDefaultDepends(loc),
               rPreset(ad_global_freq, 0.254f),   rPreset(ad_global_filter, 0.127f),
@@ -124,7 +137,6 @@ static const rtosc::Ports localPorts = {
               rPreset(sub_freq, 0.254f),         rPreset(sub_bandwidth, 0.970f),
               rDefault(0.0f),
               "Attack Time"),
-
     rParamZyn(PA_val, rShort("a.val"), rDefaultDepends(loc),
               rPreset(ad_voice_freq, 30),    rPreset(ad_voice_filter, 90),
               rPreset(ad_voice_fm_freq, 20),
@@ -177,6 +189,15 @@ static const rtosc::Ports localPorts = {
             for(int i=0; i<N && i<M; ++i) {
                 env->envdt[i] = (rtosc_argument(msg, i).f)/1000; //store as seconds in member variable
             }
+            env->updatenonfree();
+              char part_loc[128];
+              strncpy(part_loc, d.loc, sizeof(part_loc));
+              part_loc[sizeof(part_loc) - 1] = '\0';
+              char *end = strrchr(part_loc, '/');
+              if(end) {
+                  end[1] = '\0';
+                  d.broadcast("/damage", "s", part_loc);
+                }
         }
         rEnd},
     {"dt", rDoc("Envelope Delay Times (sec)"), NULL,
@@ -193,8 +214,18 @@ static const rtosc::Ports localPorts = {
             }
             d.replyArray(d.loc, arg_types, args);
         } else {
-            for(int i=0; i<N && i<M; ++i)
+            for(int i=0; i<N && i<M; ++i) {
                 env->envdt[i] = (rtosc_argument(msg, i).f);
+            }
+            env->updatenonfree();
+              char part_loc[128];
+              strncpy(part_loc, d.loc, sizeof(part_loc));
+              part_loc[sizeof(part_loc) - 1] = '\0';
+              char *end = strrchr(part_loc, '/');
+              if(end) {
+                  end[1] = '\0';
+                  d.broadcast("/damage", "s", part_loc);
+              }
         }
         rEnd},
     {"envval", rDoc("Envelope Values"), NULL,
@@ -213,6 +244,15 @@ static const rtosc::Ports localPorts = {
             for(int i=0; i<N && i<M; ++i) {
                 env->Penvval[i] = limit(roundf(rtosc_argument(msg,i).f*127.0f), 0.0f, 127.0f);
             }
+            env->updatenonfree();
+              char part_loc[128];
+              strncpy(part_loc, d.loc, sizeof(part_loc));
+              part_loc[sizeof(part_loc) - 1] = '\0';
+              char *end = strrchr(part_loc, '/');
+              if(end) {
+                  end[1] = '\0';
+                  d.broadcast("/damage", "s", part_loc);
+                }
         }
         rEnd},
 
@@ -464,7 +504,27 @@ void EnvelopeParams::converttofree()
     }
 }
 
+void EnvelopeParams::updatefree()
+{
+    Penvval[0]  = PA_val;
+    envdt[1]    = A_dt;
+    envdt[Penvsustain]   = D_dt;
+    Penvval[Penvsustain-1]  = PD_val;
+    Penvval[Penvsustain]  = PS_val;
+    envdt[Penvpoints-1]   = R_dt;
+    Penvval[Penvpoints-1]  = PR_val;
+}
 
+void EnvelopeParams::updatenonfree()
+{
+    PA_val = Penvval[0];
+    A_dt = envdt[1];
+    D_dt = envdt[Penvsustain];
+    PD_val = Penvval[Penvsustain-1];
+    PS_val = Penvval[Penvsustain];
+    R_dt = envdt[Penvpoints-1];
+    PR_val = Penvval[Penvpoints-1];
+}
 
 
 void EnvelopeParams::add2XML(XMLwrapper& xml)
