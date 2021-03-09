@@ -39,6 +39,8 @@ class EnvelopeParams:public Presets
 
         void init(consumer_location_t loc);
         void converttofree();
+        void updatefree();
+        void updatenonfree();
 
         void add2XML(XMLwrapper& xml) override;
         void defaults();
