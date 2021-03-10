@@ -42,7 +42,7 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
     if (!lfopars.speedratio) {
         lfofreq = lfopars.freq * lfostretch;   
     } else {
-        lfofreq = (float(time.bpm)) / 60.0f * lfopars.speedratio;
+        lfofreq = (float(time.tempo)) / 60.0f * lfopars.speedratio;
     }
     
     phaseInc = fabsf(lfofreq) * t.dt();
@@ -175,7 +175,7 @@ float LFO::lfoout()
         if (!lfopars_.speedratio) {
             lfofreq = lfopars_.freq * lfostretch;   
         } else {
-            lfofreq = (float(time.bpm)) / 60.0f * lfopars_.speedratio;
+            lfofreq = (float(time.tempo)) / 60.0f * lfopars_.speedratio;
         }
         phaseInc = fabsf(lfofreq) * dt_;
 

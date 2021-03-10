@@ -500,13 +500,13 @@ static const Ports master_ports = {
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
             M->setController(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
-    {"bpm::i", rProp(parameter) rDefault(120) rShort("BPM") rDoc("Tempo / Beats per minute") rLinear(40, 200) rMap(unit, bpm), 0,
+    {"tempo::i", rProp(parameter) rDefault(120) rShort("BPM") rDoc("Tempo / Beats per minute") rLinear(40, 200) rMap(unit, bpm), 0,
         rBegin;
         if(!strcmp("i",rtosc_argument_string(msg))) {
-            m->time.bpm = rtosc_argument(msg, 0).i;
-            d.broadcast(d.loc, "i", m->time.bpm);
+            m->time.tempo = rtosc_argument(msg, 0).i;
+            d.broadcast(d.loc, "i", m->time.tempo);
         } else
-            d.reply(d.loc, "i", m->time.bpm);
+            d.reply(d.loc, "i", m->time.tempo);
         rEnd},
     {"Panic:", rDoc("Stop all sound"), 0,
         [](const char *, RtData &d) {
@@ -761,7 +761,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     uToB = NULL;
     
     // set default tempo
-    time.bpm = 120;
+    time.tempo = 120;
 
     //Setup MIDI Learn
     automate.set_ports(master_ports);
