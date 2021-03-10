@@ -82,6 +82,10 @@ class AdNoteTest:public CxxTest::TestSuite
                     case consumer_location_type_t::filter:
                         TS_ASSERT((-8.0f < out && out < 8.0f));
                         break;
+                    case consumer_location_type_t::freq:
+                    case consumer_location_type_t::unspecified:
+                    default:
+                        break;
                 }
             }
         }
