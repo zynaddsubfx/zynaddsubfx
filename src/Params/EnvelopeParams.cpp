@@ -45,6 +45,7 @@ namespace zyn {
             rLIMIT(var, atoi) \
             rCAPPLY(obj->name, "f", obj->name = dTREAL(var)) \
             data.broadcast(loc, "i", dT127(obj->name));\
+            rChangeCb \
         } rBOIL_END
 
 #define rParamsDT(name, length, ...) \
