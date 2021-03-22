@@ -54,10 +54,12 @@ class  Resonance;
 class  FFTwrapper;
 class  EnvelopeParams;
 class  LFOParams;
+class  SEQParams;
 class  FilterParams;
 
 struct WatchManager;
 class  LFO;
+class  SEQ;
 class  Envelope;
 class  OscilGen;
 
@@ -133,6 +135,11 @@ typedef std::complex<fftw_real> fft_t;
  * Maximum number of the instrument on a part
  */
 #define NUM_KIT_ITEMS 16
+
+/*
+ * Maximum number of steps in a sequence
+ */
+#define NUM_SEQ_STEPS 128
 
 
 /*
