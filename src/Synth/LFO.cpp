@@ -51,12 +51,10 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
         if(!lfopars.Pstartphase)
             phase = RND;
         else
-            phase = fmod((lfopars.Pstartphase + 63.0f) / 127.0f, 1.0f);
+            phase = 0.0f;
     }
     else {
-        const float tmp = fmod((float)t.time() * phaseInc, 1.0f);
-        phase = fmod((lfopars.Pstartphase + 63.0f) / 127.0f + tmp, 1.0f);
-        
+        phase = fmod((float)t.time() * phaseInc, 1.0f);
     }
 
     //Limit the Frequency(or else...)
@@ -196,7 +194,7 @@ float LFO::lfoout()
         }
     }
 
-    float out = baseOut(waveShape, phase);
+    float out = baseOut(waveShape, fmod(phase + (lfopars_.Pstartphase + 63.0f) / 127.0f, 1.0f));
 
     if(waveShape == LFO_SINE || waveShape == LFO_TRIANGLE)
         out *= lfointensity * (amp1 + phase * (amp2 - amp1));
