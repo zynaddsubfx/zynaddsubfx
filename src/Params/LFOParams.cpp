@@ -212,13 +212,13 @@ LFOParams::LFOParams(consumer_location_t loc,
                                              last_update_timestamp(0) {
 
     auto init =
-        [&](float freq_, char Pintensity_, char Pstartphase_, char Pcutoff_, char PLFOtype_,
+        [&](float freq_, char Pintensity_, char Pstartphase_, char PLFOtype_,
             char Prandomness_, float delay_, char Pcontinous_, char speedratio_)
     {
         Dfreq       = freq_;
         Dintensity  = Pintensity_;
         Dstartphase = Pstartphase_;
-        Dcutoff     = Pcutoff_;
+        Dcutoff     = 127;
         DLFOtype    = PLFOtype_;
         Drandomness = Prandomness_;
         Ddelay      = delay_;
@@ -228,12 +228,12 @@ LFOParams::LFOParams(consumer_location_t loc,
 
     switch(loc)
     {
-        case ad_global_amp:    init(6.49, 0, 64, 0, 0, 0, 0, 0, 0); break;
-        case ad_global_freq:   init(3.71, 0, 64, 0, 0, 0, 0, 0, 0); break;
-        case ad_global_filter: init(6.49, 0, 64, 0, 0, 0, 0, 0, 0); break;
-        case ad_voice_amp:     init(11.25, 32, 64, 0, 0, 0.94, 0, 0, 0); break;
-        case ad_voice_freq:    init(1.19, 40,  0, 0, 0,  0, 0, 0, 0); break;
-        case ad_voice_filter:  init(1.19, 20, 64, 0, 0,  0, 0, 0, 0); break;
+        case ad_global_amp:    init(6.49, 0, 64, 0, 0, 0, 0, 0); break;
+        case ad_global_freq:   init(3.71, 0, 64, 0, 0, 0, 0, 0); break;
+        case ad_global_filter: init(6.49, 0, 64, 0, 0, 0, 0, 0); break;
+        case ad_voice_amp:     init(11.25, 32, 64, 0, 0.94, 0, 0, 0); break;
+        case ad_voice_freq:    init(1.19, 40,  0, 0,  0, 0, 0, 0); break;
+        case ad_voice_filter:  init(1.19, 20, 64, 0,  0, 0, 0, 0); break;
         default: throw std::logic_error("Invalid LFO consumer location");
     }
 
