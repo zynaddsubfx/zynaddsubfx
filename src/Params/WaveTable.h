@@ -143,13 +143,19 @@ protected:
 class AbstractRingbuffer
 {
 public:
-    AbstractRingbuffer(int newsize) :
-        m_size(newsize),
-        m_size_mask(newsize-1),
-        m_size_x2(m_size << 1),
-        m_size_x2_mask((m_size << 1) - 1)
+    AbstractRingbuffer(int newsize) { resize(newsize); }
+    AbstractRingbuffer() { r = w_delayed = w = 0; }
+
+    void resize(int newsize)
     {
-        assert(is_power_of_2(m_size));
+        assert(is_power_of_2(newsize));
+
+        m_size = newsize;
+        m_size_mask = newsize-1;
+        m_size_x2 = m_size << 1;
+        m_size_x2_mask = (m_size << 1) - 1;
+
+        r = w_delayed = w = 0;
     }
 
     int read_space() const
