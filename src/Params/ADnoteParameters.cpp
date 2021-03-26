@@ -401,18 +401,10 @@ static const Ports voicePorts = {
             // ignore outdated param changes, allow the rest:
             if(!fromParamChange || current->is_correct_timestamp(paramChangeTime))
             {
-                if(! ((sem_idx == -1 && wt->write_pos_delayed_semantics(freq_idx) == 0) ||
-                    wt->write_pos_delayed_semantics(freq_idx) == sem_idx)) // TODO: switch NOT
-                {
-                    // since we request the wavetables in order, and the
-                    // communication with MiddleWare is lossless, this should
-                    // imply a programming error
-                    printf("WARNING: MW sent (out-dated?) semantic \"%d\", "
-                           "but the next required semantic is \"%d\" - ignoring!\n",
-                           sem_idx, wt->write_pos_delayed_semantics(freq_idx));
-                    assert(false); // in debug mode, just abort now
-                }
-                else
+                if(// no write position => fill all semantics at this frequency
+                   (sem_idx == -1 && wt->write_pos_delayed_semantics(freq_idx) == 0) ||
+                   // write position just matches input
+                   wt->write_pos_delayed_semantics(freq_idx) == sem_idx)
                 {
                     wt->dump_rb(freq_idx);
                     printf("WS delayed: %d (freq %d), %d\n", wt->write_space_delayed_semantics(freq_idx), freq_idx, fromParamChange);
@@ -451,6 +443,16 @@ static const Ports voicePorts = {
                         printf("WT: AD: swap tensors\n");
                         current->swapWith(*wt);
                     }
+                }
+                else
+                {
+                    // since we request the wavetables in order, and the
+                    // communication with MiddleWare is lossless, this should
+                    // imply a programming error
+                    printf("WARNING: MW sent (out-dated?) semantic \"%d\", "
+                           "but the next required semantic is \"%d\" - ignoring!\n",
+                           sem_idx, wt->write_pos_delayed_semantics(freq_idx));
+                    assert(false); // in debug mode, just abort now
                 }
             }
         }
