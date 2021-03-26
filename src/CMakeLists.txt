@@ -56,8 +56,6 @@ CHECK_CXX_SOURCE_COMPILES(
     #endif
     int main(){return 0;}" HAVE_ASYNC)
 
-check_cxx_compiler_flag("-msse2" SUPPORT_SSE)
-check_cxx_compiler_flag("-mfpu=neon -Werror" SUPPORT_NEON)
 check_include_file_cxx(complex HAVE_CPP_STD_COMPLEX)
 
 find_library(HAVE_LIBRT rt)
@@ -254,10 +252,15 @@ set (BuildOptions_NEON
     "-march=armv7-a -mfloat-abi=hard -mfpu=neon -mcpu=cortex-a9 -mtune=cortex-a9 -pipe -mvectorize-with-neon-quad -funsafe-loop-optimizations"
   CACHE STRING "Cortex_a9 compiler options"
 )
+
+check_cxx_compiler_flag("${BuildOptions_NEON} -Werror" SUPPORT_NEON)
+
 set (BuildOptions_SSE
 	"-msse -msse2 -mfpmath=sse"
   CACHE STRING "SSE compiler options"
 )
+
+check_cxx_compiler_flag("${BuildOptions_SSE} -Werror" SUPPORT_SSE)
 
 set (BuildOptionsBasic
     "-std=c++11 -Wno-unused-parameter -O3 -ffast-math -fomit-frame-pointer"
@@ -398,7 +401,7 @@ else (BuildForDebug)
 	set (CMAKE_BUILD_TYPE "Release")
 	
 	set (CMAKE_CXX_FLAGS_RELEASE ${BuildOptionsBasic})
-	
+
 	if (BuildForAMD_X86_64)
 		set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BuildOptions_x86_64AMD}")
 	endif (BuildForAMD_X86_64)
@@ -406,15 +409,15 @@ else (BuildForDebug)
 	if (BuildForCore2_X86_64)
 			set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BuildOptions_X86_64Core2}")
 	endif (BuildForCore2_X86_64)
-				
+
 	if (SUPPORT_SSE)
 		set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BuildOptions_SSE}")
 	endif (SUPPORT_SSE)
 	
-    if (SUPPORT_NEON AND NOT NoNeonPlease)
+	if (SUPPORT_NEON AND NOT NoNeonPlease)
 		set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${BuildOptions_NEON}")
 	endif (SUPPORT_NEON AND NOT NoNeonPlease)
-	
+
 	message (STATUS "Building for ${CMAKE_BUILD_TYPE}, flags: ${CMAKE_CXX_FLAGS_RELEASE}")
 endif (BuildForDebug)
 
