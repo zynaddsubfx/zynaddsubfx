@@ -26,7 +26,6 @@ namespace zyn {
 
 const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
 {
-    assert(data[data.read_pos()].size() == freqs.size());
     std::size_t num_freqs = freqs.size(), i;
     float bestFreqDist = 9999999;
     std::size_t bestI = 0;
@@ -46,17 +45,21 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
         }
     }
     assert(bestI < num_freqs);
+
+    AbstractRingbuffer& rb = data.ringbuffers[bestI];
+    assert(data[rb.read_pos()].size() == freqs.size());
+
+
     // TODO: hide this logic in WaveTable struct
     const Tensor1<WaveTable::float32>& res =
-        (data.read_space() == 0)
+        (rb.read_space() == 0)
             // previous element
-            ? data[(data.read_pos() + data.size() - 1) % data.size()][bestI]
+            ? data[(rb.read_pos() + data.size() - 1) % data.size()][bestI]
             // normal case
-            : data[data.read_pos()][bestI];
-    if(mode() == WtMode::freqseed_smps && data.read_space()) {
-        data.dump();
-        freqs_consumed[data.read_pos()] = bestI;
-        data.inc_read_pos();
+            : data[rb.read_pos()][bestI];
+    if(mode() == WtMode::freqseed_smps && rb.read_space()) {
+        rb.dump();
+        rb.inc_read_pos();
     }
     else {
         // there was no read space (we just read the previous
@@ -69,20 +72,16 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
 WaveTable::WaveTable(std::size_t buffersize) :
     semantics(Shape1{1}, Shape1{0}),
     freqs(Shape1{1}, Shape1{0}),
-    freqs_consumed(Shape1{1}, Shape1{0}),
     data(Shape3{1, 1, buffersize}, Shape3{0, 0, 0})
 {
-    freqs_consumed[0] = 0;
     setMode(WtMode::freq_smps);
 }
 
 WaveTable::WaveTable(int nsemantics, int nfreqs) :
     semantics(Shape1{0}, Shape1{0}),
     freqs(Shape1{0}, Shape1{0}),
-    freqs_consumed(Shape1{1}, Shape1{0}),
     data(Shape3{(std::size_t)nsemantics, (std::size_t)nfreqs, 0}, Shape3{0, 0, 0})
 {
-    freqs_consumed[0] = 0;
     setMode(WtMode::freq_smps);
 }
 

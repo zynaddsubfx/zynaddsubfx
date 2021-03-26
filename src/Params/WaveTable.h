@@ -432,16 +432,18 @@ void pointer_swap(Tensor<N, T>& t1, Tensor<N, T>& t2)
 }
 #endif
 
-class Tensor3ForWaveTable : public Tensor<3, wavetable_types::float32>, public AbstractRingbuffer
+class Tensor3ForWaveTable : public Tensor<3, wavetable_types::float32>
 {
     using base_type = Tensor<3, wavetable_types::float32>;
+
 public:
-    using base_type::base_type;
-
     Tensor3ForWaveTable(const Shape<3>& shape, const Shape<3>& )
-        : base_type(shape, shape), AbstractRingbuffer(shape.dim[0]) {}
-
-    int size() const { return base_type::size(); }
+        : base_type(shape, shape), ringbuffers(shape.dim[1], shape.dim[1])
+    {
+        // TODO: tensor iterator?
+        for(unsigned i = 0; i < shape.dim[1]; ++i)
+            ringbuffers[i].resize(shape.dim[0]);
+    }
 
 /*  template<std::size_t N2, class X2>
     friend void pointer_swap(Tensor<N2, X2>&, Tensor<N2, X2>&);*/
@@ -449,8 +451,10 @@ public:
     void swapWith(Tensor3ForWaveTable& other)
     {
         base_type::swapWith(other);
-        AbstractRingbuffer::swapWith(other);
+        ringbuffers.swapWith(other.ringbuffers);
     }
+
+    Tensor<1, AbstractRingbuffer> ringbuffers;
 };
 
 /**
@@ -473,7 +477,6 @@ public:
 private:
     Tensor1<IntOrFloat> semantics; //!< E.g. oscil params or random seed (e.g. 0...127)
     Tensor1<float32> freqs; //!< The frequency of each 'row'
-    Tensor1<int> freqs_consumed; //!< frequency index consumed for each semantic
     Tensor3ForWaveTable data;  //!< time=col,freq=row,semantics(oscil param or random seed)=depth
 
     const Tensor1<IntOrFloat>* const semantics_addr = &semantics;
@@ -482,8 +485,6 @@ private:
     WtMode m_mode;
 
     int timestamp_requested = 0, timestamp_current = 0;
-
-    static constexpr const int no_freq_consumed = -1;
 
 public:
     float get_freq(int freq_idx) const { return freqs[freq_idx]; }
@@ -496,15 +497,15 @@ public:
     // ringbuffer stuff
     int size_freqs() const { return freqs.size(); }
     int size_semantics() const { return data.size(); }
-    int write_space_semantics() const { return data.write_space(); }
-    int write_space_delayed_semantics() const { return data.write_space_delayed(); }
-    int write_pos_semantics() const { return data.write_pos(); }
-    int write_pos_delayed_semantics() const { return data.write_pos_delayed(); }
-    void inc_read_pos_semantics() { data.inc_read_pos(); }
-    void inc_write_pos_semantics(int amnt) { data.inc_write_pos(amnt); }
-    void inc_write_pos_delayed_semantics(int amnt) { data.inc_write_pos_delayed(amnt); }
+    int write_space_semantics(unsigned freq_idx) const { return data.ringbuffers[freq_idx].write_space(); }
+    int write_space_delayed_semantics(unsigned freq_idx) const { return data.ringbuffers[freq_idx].write_space_delayed(); }
+    int write_pos_semantics(unsigned freq_idx) const { return data.ringbuffers[freq_idx].write_pos(); }
+    int write_pos_delayed_semantics(unsigned freq_idx) const { return data.ringbuffers[freq_idx].write_pos_delayed(); }
+    void inc_read_pos_semantics(unsigned freq_idx) { data.ringbuffers[freq_idx].inc_read_pos(); }
+    void inc_write_pos_semantics(unsigned freq_idx, int amnt) { data.ringbuffers[freq_idx].inc_write_pos(amnt); }
+    void inc_write_pos_delayed_semantics(unsigned freq_idx, int amnt) { data.ringbuffers[freq_idx].inc_write_pos_delayed(amnt); }
 
-    void dump_rb() const { data.AbstractRingbuffer::dump(); }
+    void dump_rb(unsigned freq_idx) const { data.ringbuffers[freq_idx].AbstractRingbuffer::dump(); }
 
     // timestamp/outdated stuff
     // only valid for the *current* table, not for the next one
@@ -515,25 +516,14 @@ public:
     int debug_get_timestamp_requested() const { return timestamp_requested; }
     int debug_get_timestamp_current() const { return timestamp_current; }
 
-    void setFreqsNotConsumed(int sem_idx) { assert(sem_idx < freqs_consumed.size()); freqs_consumed[sem_idx] = no_freq_consumed; }
-    int getConsumedFreq(int sem_idx) const { assert(sem_idx < freqs_consumed.size()); return freqs_consumed[sem_idx]; }
+    Shape3 debug_get_shape() const { return data.capacity_shape(); }
 
-    // data access
-    void swapFreqsConsumedInitially(Tensor1<int>& freqs_consumed_arg)
-    {
-        freqs_consumed.swapWith(freqs_consumed_arg);
-        for(int i = 0; i < (int)freqs_consumed.capacity(); ++i)
-        {
-            freqs_consumed[i] = no_freq_consumed;
-        }
-    }
     void swapSemanticsInitially(Tensor1<IntOrFloat>& unused) { semantics.swapWith(unused); }
     void swapFreqsInitially(Tensor1<float32>& unused) { freqs.swapWith(unused); }
     void swapWith(WaveTable& unused) {
         semantics.swapWith(unused.semantics);
         freqs.swapWith(unused.freqs);
         data.swapWith(unused.data);
-        freqs_consumed.swapWith(unused.freqs_consumed);
         std::swap(m_mode, unused.m_mode);
         std::swap(timestamp_current, unused.timestamp_current);
         std::swap(timestamp_requested, unused.timestamp_requested);
