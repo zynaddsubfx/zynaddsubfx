@@ -310,7 +310,7 @@ static const Ports voicePorts = {
             if(obj->waveTables)
             {
                 bool isFmSmp = rtosc_argument(msg, 0).T;
-                WaveTable*& wt = isFmSmp ? obj->tableFm : obj->table;
+                WaveTable* const wt = isFmSmp ? obj->tableFm : obj->table;
                 int param_change_time = rtosc_argument(msg, 1).i;
                 printf("WT: AD received /wavetable-params-changed (timestamp %d)...\n", param_change_time);
 
@@ -347,7 +347,7 @@ static const Ports voicePorts = {
             rObject *obj = (rObject *)d.obj;
             bool isFmSmp = rtosc_argument(msg, 0).T;
             WaveTable* unused = *(WaveTable**)rtosc_argument(msg, 1).b.data;
-            WaveTable*& next = isFmSmp ? obj->nextTableFm : obj->nextTable;
+            WaveTable* next = isFmSmp ? obj->nextTableFm : obj->nextTable;
 
             {
                 Shape3 s = unused->debug_get_shape();
@@ -386,13 +386,11 @@ static const Ports voicePorts = {
             } else {
                 waves2 = *(Tensor2<WaveTable::float32>**)rtosc_argument(msg, 3).b.data;
             }
-            WaveTable*& wt =
+            WaveTable* const wt =
                 fromParamChange
                 ? (isFmSmp ? obj->nextTableFm : obj->nextTable)
                 : (isFmSmp ? obj->tableFm : obj->table);
-            WaveTable*& current = (isFmSmp ? obj->tableFm : obj->table);
-
-            // TODO: everywhere in this file: just use *, not *&
+            WaveTable* const current = (isFmSmp ? obj->tableFm : obj->table);
 
             printf("WT: AD incoming timestamp %d (req,cur: %d/%d) (param change? %s, correct timestamp? %s): %p (%s), s %d, f %d...\n", paramChangeTime,
                    current->debug_get_timestamp_requested(), current->debug_get_timestamp_current(),
@@ -1601,7 +1599,7 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
         for(bool isFmSmp : notFmAndFm)
         {
             // give MW all it needs to generate the new table
-            WaveTable* wt = isFmSmp ? tableFm : table;
+            WaveTable* const wt = isFmSmp ? tableFm : table;
 
             if(!wt->outdated())
             {
