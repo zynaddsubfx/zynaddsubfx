@@ -274,7 +274,6 @@ private:
         //! this marks which scale tensors are currently valid
         //! first time will be "1"
         param_change_time_t param_change_time = 0;
-        bool last_param_change_was_up_to_date = true;
     };
 
     info_t info[NUM_MIDI_PARTS][NUM_KIT_ITEMS][NUM_VOICES][2];
@@ -305,17 +304,22 @@ public:
     bool isParamChangeUpToDate(int part, int kit, int voice, bool isFm, int current) const
     {
         info_t cur_info = info[part][kit][voice][isFm];
+        bool up_to_date;
         if(current)
         {
             param_change_time_t expected = cur_info.param_change_time;
             if(current < expected)
-                cur_info.last_param_change_was_up_to_date = false;
+                up_to_date = false;
             else if(current == expected)
-                cur_info.last_param_change_was_up_to_date = true;
+                up_to_date = true;
             else
                 assert(false);
         }
-        return cur_info.last_param_change_was_up_to_date;
+        else
+            // hey, it's just a few waves... if they will be outdated soon,
+            // we have not really lost much
+            up_to_date = true;
+        return up_to_date;
     }
 };
 
