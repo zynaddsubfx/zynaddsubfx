@@ -62,12 +62,16 @@ static const rtosc::Ports _ports = {
             rOptions(ad_global_amp, ad_global_freq, ad_global_filter,
                      ad_voice_amp, ad_voice_freq, ad_voice_filter, unspecified),
             "location of the filter"),
-    rParamF(freq, rShort("freq"), rDefault(2.0f), rUnit(Hz), rLinear(0.1f,10.0f),
+    rParamF(freq, rShort("F"), rDefault(2.0f), rUnit(Hz), rLinear(0.1f,10.0f),
             "step frequency"),
+    rParamF(intensity, rShort("depth"), rDefaultDepends(loc),
+              rLinear(0.0f, 100.0f), rDefault(0.0f), rUnit(%), rPreset(ad_voice_amp, 50.0f),
+              rPreset(ad_voice_freq, 100.0f), rPreset(ad_voice_filter, 25.0f),
+              "Intensity of SEQ"),
     rParamF(cutoff, rShort("lp"), rDefault(0.0f), rUnit(Hz), rLinear(0.0f,MAX_CUTOFF),
             "cutoff of lp-filter for output\n 0.0=off"),
     rParamF(delay, rShort("delay"), rUnit(S),
-              rLinear(0.0, 4.0), rDefault(0.0),
+              rLinear(0.0f, 4.0f), rDefault(0.0f),
               "Delay before SEQ start\n0..4 second delay"),
     rToggle(continous, rShort("c"), rDefault(false),
             "Enable for global operation"),
@@ -77,7 +81,7 @@ static const rtosc::Ports _ports = {
         rLinear(0,20), rDefault(off), "select fixed ratio for BPM sync"),
     rParamF(speedratio, rShort("r"), rLinear(0.0f,8.0f), rDefault(0.0f),
             "ratio for BPM sync"),
-    rParamZyn(steps, rShort("steps"), rLinear(0,128), rDefault(0),
+    rParamI(steps, rShort("steps"), rLinear(0,64), rDefault(0),
             "number of steps"),
     rArrayF(sequence, NUM_SEQ_STEPS, rLinear(-1.0f,1.0f), rDefaultDepends(loc),
               rPreset(ad_global_freq, [0.0 0.0 0.0 ...]),   
@@ -124,13 +128,14 @@ void SEQParams::setup()
 
 // TODO: reuse
 SEQParams::SEQParams(const AbsTime *time_) :
-    SEQParams(2.0f, 20.0f, 0, 0.0f, false, 0.0f, loc_unspecified, time_)
+    SEQParams(2.0f, 20.0f, 0.0f, 0, 0.0f, false, 0.0f, loc_unspecified, time_)
 {
 }
 
 SEQParams::SEQParams(float freq_,
                      float cutoff_,
-                     unsigned char steps_,
+                     float intensity_,
+                     int steps_,
                      float delay_,
                      bool continous_,
                      float speedratio_,
@@ -140,6 +145,7 @@ SEQParams::SEQParams(float freq_,
                                              last_update_timestamp(0) {
     Dfreq       = freq_;
     Dcutoff     = cutoff_;
+    Dintensity  = intensity_;
     Dsteps      = steps_;
     Ddelay      = delay_;
     Dcontinous  = continous_;
@@ -164,14 +170,15 @@ SEQParams::SEQParams(consumer_location_t loc,
                                              last_update_timestamp(0) {
 
     auto init =
-        [&](float freq_, char cutoff_, unsigned char steps_, float val_)
+        [&](float freq_, float cutoff_, float intensity_, int steps_, float val_)
     {
         Dfreq       = freq_;
         Dcutoff     = cutoff_;
+        Dintensity  = intensity_;
         Dsteps      = steps_;
         Ddelay      = 0.0f;
         Dcontinous  = false;
-        Dspeedratio = 1.0f;
+        Dspeedratio = 0.0f;
         for(int i = 0; i<NUM_SEQ_STEPS; ++i)
             Dsequence[i] = val_;
 
@@ -181,13 +188,13 @@ SEQParams::SEQParams(consumer_location_t loc,
     sequence = new float[NUM_SEQ_STEPS];
 
     switch(loc)
-    {                    // (float freq_, char cutoff_, unsigned char steps_, float val_)
-        case ad_global_amp:    init(2.0f, MAX_CUTOFF, 8, 1.0f); break;
-        case ad_global_freq:   init(2.0f, MAX_CUTOFF, 8, 0.0f); break;
-        case ad_global_filter: init(2.0f, MAX_CUTOFF, 8, 0.0f); break;
-        case ad_voice_amp:     init(2.0f, MAX_CUTOFF, 8, 1.0f); break;
-        case ad_voice_freq:    init(2.0f, MAX_CUTOFF, 8, 0.0f); break;
-        case ad_voice_filter:  init(2.0f, MAX_CUTOFF, 8, 0.0f); break;
+    {                    // (float freq_, float cutoff_, float intensity_, int steps_, float val_)
+        case ad_global_amp:    init(2.0f, MAX_CUTOFF, 0.0f, 0, 1.0f); break;
+        case ad_global_freq:   init(2.0f, MAX_CUTOFF, 0.0f, 0, 0.0f); break;
+        case ad_global_filter: init(2.0f, MAX_CUTOFF, 0.0f, 0, 0.0f); break;
+        case ad_voice_amp:     init(2.0f, MAX_CUTOFF, 0.5f, 8, 1.0f); break;
+        case ad_voice_freq:    init(2.0f, MAX_CUTOFF, 1.0f, 8, 0.0f); break;
+        case ad_voice_filter:  init(2.0f, MAX_CUTOFF, 0.25f, 8, 0.0f); break;
         default: throw std::logic_error("Invalid SEQ consumer location");
     }
     
@@ -204,6 +211,7 @@ void SEQParams::defaults()
 {
     freq       = Dfreq;
     cutoff     = Dcutoff;
+    intensity  = Dintensity;
     steps      = Dsteps;
     delay      = Ddelay;
     continous  = Dcontinous;
@@ -216,6 +224,7 @@ void SEQParams::add2XML(XMLwrapper& xml)
 {
     xml.addparreal("freq", freq);
     xml.addparreal("cutoff", cutoff);
+    xml.addparreal("intensity", intensity);
     xml.addpar("steps", steps);
     xml.addparreal("delay", delay);
     xml.addparbool("continous", continous);
@@ -236,6 +245,7 @@ void SEQParams::getfromXML(XMLwrapper& xml)
 
     freq       = xml.getparreal("freq", freq);
     cutoff     = xml.getparreal("cutoff", cutoff);
+    intensity  = xml.getparreal("intensity", intensity);
     steps      = xml.getpar("steps", steps,0,127);
     delay      = xml.getparreal("delay", delay);
     continous  = xml.getparbool("continous", continous);
@@ -259,6 +269,7 @@ void SEQParams::paste(SEQParams &x)
 {
     COPY(freq);
     COPY(cutoff);
+    COPY(intensity);
     COPY(steps);
     COPY(delay);
     COPY(continous);

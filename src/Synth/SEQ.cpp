@@ -138,18 +138,17 @@ float SEQ::seqout()
     
     switch(seqpars_.fel) {
         case consumer_location_type_t::amp:
-            seqintensity = 1.0f;//seqpars_.intensity;
+            seqintensity = seqpars_.intensity / 100.0f;
             break;
         case consumer_location_type_t::filter:
-            seqintensity = 4.0f;//seqpars_.intensity * 4.0f;
-            break; //in octave
+            seqintensity = seqpars_.intensity / 25.0f;
+            break; 
         case consumer_location_type_t::freq:
-            seqintensity = 2047.0f; //in centi
-            break;
         case consumer_location_type_t::unspecified:
-            seqintensity = 2047.0f; //powf(2, seqpars_.intensity * 11.0f) - 1.0f; //in centi
+            seqintensity = seqpars_.intensity * 40.96f;
             break;
         }
+    
 
     out *= seqintensity;
 

@@ -32,7 +32,8 @@ class SEQParams:public Presets
                   const AbsTime* time_ = nullptr);
         SEQParams(float freq_,
                   float cutoff_,
-                  unsigned char steps_,
+                  float intensity_,
+                  int steps_,
                   float delay_,
                   bool continous,
                   float speedratio,
@@ -48,11 +49,12 @@ class SEQParams:public Presets
 
 
         float freq;
-        float cutoff; /**<cutoff frequency of LP filter (0.0f=off) */
-        float delay; /**<delay (0=off)*/
+        float cutoff;
+        float intensity;
+        float delay;
         unsigned char continous; 
         unsigned char ratiofixed; 
-        unsigned char steps; 
+        int steps; 
         float         speedratio;
         float*        sequence;
 
@@ -70,11 +72,12 @@ class SEQParams:public Presets
 
         /* Default parameters */
         float         Dfreq;
-        unsigned char Dcutoff;
+        float         Dcutoff;
+        float         Dintensity;
         float         Ddelay;
         unsigned char Dcontinous;
         float         Dspeedratio;
-        unsigned char Dsteps;
+        int           Dsteps;
         float*        Dsequence;
 };
 
