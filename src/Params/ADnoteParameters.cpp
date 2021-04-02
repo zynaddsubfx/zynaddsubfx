@@ -351,14 +351,16 @@ static const Ports voicePorts = {
 
             {
                 Shape3 s = unused->debug_get_shape();
-                printf("WT: AD swapping tensor. New tensor dim: %lu %lu %lu\n", s.dim[0], s.dim[1], s.dim[2]);
+                printf("WT: AD %s swapping tensor. New tensor dim: %lu %lu %lu\n",
+                    (isFmSmp ? "FM" : "not-FM"),
+                    s.dim[0], s.dim[1], s.dim[2]);
             }
             // swap the new unused tensor with wt's "to-be-filled" tensor
             next->swapWith(*unused);
             // mark the whole ringbuffer (-1) as "write requested"
             for(unsigned f = 0; f < (unsigned)next->size_freqs(); ++f)
                 next->inc_write_pos_semantics(f, next->write_space_semantics(f));
-            //next->dump_rb();
+            //next->dump_rb(0);
 
             // recycle the whole old Tensor3
             // this will also free the contained sub-tensors
@@ -392,7 +394,9 @@ static const Ports voicePorts = {
                 : (isFmSmp ? obj->tableFm : obj->table);
             WaveTable* const current = (isFmSmp ? obj->tableFm : obj->table);
 
-            printf("WT: AD incoming timestamp %d (req,cur: %d/%d) (param change? %s, correct timestamp? %s): %p (%s), s %d, f %d...\n", paramChangeTime,
+            printf("WT: AD %s incoming timestamp %d (req,cur: %d/%d) (param change? %s, correct timestamp? %s): %p (%s), s %d, f %d...\n",
+                   (isFmSmp ? "FM" : "not-FM"),
+                   paramChangeTime,
                    current->debug_get_timestamp_requested(), current->debug_get_timestamp_current(),
                    fromParamChange ? "yes" : "no", current->is_correct_timestamp(paramChangeTime) ? "yes" : "no",
                    (sem_idx == -1) ? (void*)waves2 : (void*)waves1, (sem_idx == -1) ? "Tensor2" : "Tensor1", sem_idx, freq_idx);
