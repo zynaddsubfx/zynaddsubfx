@@ -380,16 +380,23 @@ static const Ports voicePorts = {
             int sem_idx = -1; // optional
             Tensor1<WaveTable::float32>* waves1;
             Tensor2<WaveTable::float32>* waves2;
+            bool fillNext;
             if(rtosc_type(msg, 3) == 'i')
             {
                 sem_idx = rtosc_argument(msg, 3).i;
                 assert(sem_idx >= 0);
                 waves1 = *(Tensor1<WaveTable::float32>**)rtosc_argument(msg, 4).b.data;
+                // if single semantic is specified ('i'), this just updates one
+                // element in the current table
+                fillNext = false;
             } else {
                 waves2 = *(Tensor2<WaveTable::float32>**)rtosc_argument(msg, 3).b.data;
+                // if all semantics are selected
+                // (no 'i'), this updates the "next" table
+                fillNext = true;
             }
             WaveTable* const wt =
-                fromParamChange
+                fillNext
                 ? (isFmSmp ? obj->nextTableFm : obj->nextTable)
                 : (isFmSmp ? obj->tableFm : obj->table);
             WaveTable* const current = (isFmSmp ? obj->tableFm : obj->table);
@@ -440,7 +447,7 @@ static const Ports voicePorts = {
                     // if this was the last index, the new tensor is complete, so
                     // we can use it
                     // -1 for C-style array indexing
-                    if(fromParamChange && freq_idx == wt->size_freqs() - 1)
+                    if(fillNext && freq_idx == wt->size_freqs() - 1)
                     {
                         printf("WT: AD: swap tensors\n");
                         current->swapWith(*wt);
