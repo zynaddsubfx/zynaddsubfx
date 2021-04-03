@@ -486,6 +486,10 @@ private:
 
     int timestamp_requested = 0, timestamp_current = 0;
 
+    // whether we must request a complete re-generation from MW
+    // in the next cycle
+    bool m_require_update_request = false;
+
 public:
     float get_freq(int freq_idx) const { return freqs[freq_idx]; }
     IntOrFloat get_sem(int sem_idx) const { return semantics[sem_idx]; }
@@ -515,6 +519,10 @@ public:
     bool is_correct_timestamp(int timestamp) const { return timestamp_requested == timestamp; }
     int debug_get_timestamp_requested() const { return timestamp_requested; }
     int debug_get_timestamp_current() const { return timestamp_current; }
+
+    void require_update_request() { m_require_update_request = true; }
+    bool update_request_required() const { return m_require_update_request; }
+    void update_request_sent() { m_require_update_request = false; }
 
     Shape3 debug_get_shape() const { return data.capacity_shape(); }
 

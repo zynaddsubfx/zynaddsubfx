@@ -1235,15 +1235,18 @@ bool Master::AudioOut(float *outr, float *outl)
     //large for loop, but should boil down to only few iterations in practice
     if(bToU)
     {
+        // all parts/kits are allocated, so request wavetables for all of them
+        // however, most kits will have adpars == nullptr, and even if they
+        // do have adpars, those will mostly have sine waves
+        // for loading a new preset with 16 parts and 8 voices each,
+        // and normal+FM oscillator each, we have
+        // 256 sine waves to compute - not too much
         for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
         {
             Part* mpart = part[npart];
-            if(mpart->Penabled)
+            for(int nkit = 0; nkit < NUM_KIT_ITEMS; ++nkit)
             {
-                for(int nkit = 0; nkit < NUM_KIT_ITEMS; ++nkit)
-                {
-                    mpart->kit[nkit].requestWavetables(bToU, npart, nkit);
-                }
+                mpart->kit[nkit].requestWavetables(bToU, npart, nkit);
             }
         }
     }

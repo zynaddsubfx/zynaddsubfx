@@ -1384,6 +1384,9 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     if ( time ) {
         last_update_timestamp = time->time();
     }
+
+    table->require_update_request();
+    tableFm->require_update_request();
 }
 
 void ADnoteGlobalParam::paste(ADnoteGlobalParam &a)
@@ -1592,10 +1595,16 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
         }
         xml.exitbranch();
     }
+
+    table->require_update_request();
+    tableFm->require_update_request();
 }
 
 void ADnoteParameters::requestWavetables(rtosc::ThreadLink* bToU, int part, int kit)
 {
+    // for AD note, all waves exist in memory, so we compute wavetables for
+    // all of them, even for user-disabled voices (common case)
+    // usually, user-disabled voices are plain sine waves, so this is fast
     for (std::size_t v = 0; v < NUM_VOICES; ++v)
     {
         VoicePar[v].requestWavetables(bToU, part, kit, v);
@@ -1605,75 +1614,93 @@ void ADnoteParameters::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
 void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int kit, int voice)
 {
     const bool notFmAndFm[] = { false, true };
-    if(Enabled)
+    for(bool isFmSmp : notFmAndFm)
     {
-        for(bool isFmSmp : notFmAndFm)
+        // give MW all it needs to generate the new table
+        WaveTable* const wt = isFmSmp ? tableFm : table;
+
+        if(!wt->outdated())
         {
-            // give MW all it needs to generate the new table
-            WaveTable* const wt = isFmSmp ? tableFm : table;
-
-            if(!wt->outdated())
+            for(int freq_idx = 0; freq_idx < wt->size_freqs(); ++freq_idx)
             {
-                for(int freq_idx = 0; freq_idx < wt->size_freqs(); ++freq_idx)
+                int write_pos = wt->write_pos_semantics(freq_idx);
+                int write_space = wt->write_space_semantics(freq_idx);
+
+                if(write_space)
                 {
-                    int write_pos = wt->write_pos_semantics(freq_idx);
-                    int write_space = wt->write_space_semantics(freq_idx);
+                    wt->dump_rb(freq_idx);
+                    printf("WT: AD WT %p requesting %d new 2D Tensors at position %d (reason: too many consumed) %p %p...\n",
+                           wt, write_space, write_pos, wt->get_freqs_addr(), wt->get_semantics_addr());
 
-                    if(write_space)
+                    // max. number of semantics is 512 (TODO: not hard coded),
+                    // *4 because 4 params per semantic (for loop below),
+                    // *2 because of ~8 preceding args:
+                    char argstr[4096] = { 'i', 'i', 'i', // path
+                                          isFmSmp ? 'T' : 'F',
+                                          'i', // parameter change time (0)
+                                          'i', 'i', // write pos + space
+                                          'i', // wavetable params (Presonance)
+                                          0
+                                        };
+                    rtosc_arg_t args[4096];
+                    assert(sizeof(args)/sizeof(args[0]) == (sizeof(argstr)/sizeof(argstr[0])));
+
+                    rtosc_arg_t* aptr = args; char* sptr = argstr;
+                    // path to this voice
+                    *sptr++ = 'i'; aptr++->i = part;
+                    *sptr++ = 'i'; aptr++->i = kit;
+                    *sptr++ = 'i'; aptr++->i = voice;
+                    *sptr++ = isFmSmp ? 'T' : 'F';
+                    // parameter change time (none)
+                    *sptr++ = 'i'; aptr++->i = 0;
+                    // wavetable parameters (Presonance)
+                    *sptr++ = 'i'; aptr++->i = isFmSmp ? 0 : (int)Presonance;
+                    // semantics and freqs of waves that need to be regenerated
+                    int imax = write_pos + write_space;
+                    assert(imax < (int)(sizeof(argstr)/sizeof(argstr[0])));
+                    const char semType = wt->mode() == WaveTable::WtMode::freqwave_smps ? 'f' : 'i';
+                    for(int sem_idx_2 = write_pos; sem_idx_2 < imax; ++sem_idx_2)
                     {
-                        wt->dump_rb(freq_idx);
-                        printf("WT: AD WT %p requesting %d new 2D Tensors at position %d (reason: too many consumed) %p %p...\n",
-                               wt, write_space, write_pos, wt->get_freqs_addr(), wt->get_semantics_addr());
+                        int sem_idx = sem_idx_2 % wt->size_semantics();
+                        *sptr++ = 'i'; aptr++->i = sem_idx;
+                        *sptr++ = 'i'; aptr++->i = freq_idx;
+                        *sptr++ = semType;
+                        // TODO: optimize this: function ptr on [](WaveTable*, int, rtosc_arg_t*)
+                        if(semType == 'f') aptr++->f = wt->get_sem(sem_idx).floatVal;
+                        else aptr++->i = wt->get_sem(sem_idx).intVal;
+                        *sptr++ = 'f'; aptr++->f = wt->get_freq(freq_idx);
+                    }
+                    // string termination
+                    *sptr = 0;
 
-                        // max. number of semantics is 512 (TODO: not hard coded),
-                        // *4 because 4 params per semantic (for loop below),
-                        // *2 because of ~8 preceding args:
-                        char argstr[4096] = { 'i', 'i', 'i', // path
-                                              isFmSmp ? 'T' : 'F',
-                                              'i', // parameter change time (0)
-                                              'i', 'i', // write pos + space
-                                              'i', // wavetable params (Presonance)
-                                              0
-                                            };
-                        rtosc_arg_t args[4096];
-                        assert(sizeof(args)/sizeof(args[0]) == (sizeof(argstr)/sizeof(argstr[0])));
+                    bToU->writeArray("/request-wavetable", argstr, args);
+                    // tell the ringbuffer that we can not write more
+                    wt->inc_write_pos_semantics(freq_idx, write_space);
+                } // if write_space
+            } // for loop over freqs
+        } // !wt->outdated()
 
-                        rtosc_arg_t* aptr = args; char* sptr = argstr;
-                        // path to this voice
-                        *sptr++ = 'i'; aptr++->i = part;
-                        *sptr++ = 'i'; aptr++->i = kit;
-                        *sptr++ = 'i'; aptr++->i = voice;
-                        *sptr++ = isFmSmp ? 'T' : 'F';
-                        // parameter change time (none)
-                        *sptr++ = 'i'; aptr++->i = 0;
-                        // wavetable parameters (Presonance)
-                        *sptr++ = 'i'; aptr++->i = isFmSmp ? 0 : (int)Presonance;
-                        // semantics and freqs of waves that need to be regenerated
-                        int imax = write_pos + write_space;
-                        assert(imax < (int)(sizeof(argstr)/sizeof(argstr[0])));
-                        const char semType = wt->mode() == WaveTable::WtMode::freqwave_smps ? 'f' : 'i';
-                        for(int sem_idx_2 = write_pos; sem_idx_2 < imax; ++sem_idx_2)
-                        {
-                            int sem_idx = sem_idx_2 % wt->size_semantics();
-                            *sptr++ = 'i'; aptr++->i = sem_idx;
-                            *sptr++ = 'i'; aptr++->i = freq_idx;
-                            *sptr++ = semType;
-                            // TODO: optimize this: function ptr on [](WaveTable*, int, rtosc_arg_t*)
-                            if(semType == 'f') aptr++->f = wt->get_sem(sem_idx).floatVal;
-                            else aptr++->i = wt->get_sem(sem_idx).intVal;
-                            *sptr++ = 'f'; aptr++->f = wt->get_freq(freq_idx);
-                        }
-                        // string termination
-                        *sptr = 0;
+        if(wt->update_request_required())
+        {
+            printf("WT: AD WT %p requesting new wavetable (reason: outdated)\n",
+                   wt);
 
-                        bToU->writeArray("/request-wavetable", argstr, args);
-                        // tell the ringbuffer that we can not write more
-                        wt->inc_write_pos_semantics(freq_idx, write_space);
-                    } // if write_space
-                } // for loop over freqs
-            } // write_space && !wt->outdated()
-        } // notFmAndFm
-    }
+            bToU->write("/request-wavetable", isFmSmp ? "iiiTii" : "iiiFii",
+                    // path to this voice (T+F give the OscilGen of this voice)
+                    part, kit, voice,
+                    // tensor relevant parameter change time (none)
+                    0,
+                    // wavetable parameters (currently, only Presonance)
+                    isFmSmp ? 0 : (int)Presonance);
+            // don't mark the whole ringbuffer (-1) as "write requested"
+            // because the current Tensor3 will be swapped before it will
+            // be refilled
+            //wt->dump_rb();
+
+            wt->update_request_sent();
+        }
+
+    } // notFmAndFm
 }
 
 }

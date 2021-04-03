@@ -1349,7 +1349,10 @@ bool Part::Kit::validNote(char note) const
 
 void Part::Kit::requestWavetables(rtosc::ThreadLink* bToU, int part, int kit)
 {
-    if(Penabled && Padenabled && adpars)
+    // if it exists in memory, precompute wavetables, even if the ad note is
+    // disabled (disabled ad notes are usually plane sine waves, so this should
+    // be fast)
+    if(adpars)
     {
         adpars->requestWavetables(bToU, part, kit);
     }
