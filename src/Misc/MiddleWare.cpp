@@ -1058,6 +1058,8 @@ public:
 
                     Tensor1<WaveTable::float32> freqs(0, 0); // "buffer"
                     Tensor1<WaveTable::IntOrFloat> semantics(0, 0); // "buffer"
+                    // if no wave requests, this means generate a completely new
+                    // wavetable
                     if(!params.wave_requests.size())
                     {
                         Tensor1<WaveTable::float32>* nc_freqs; // non-constant
@@ -1067,13 +1069,8 @@ public:
                         nc_freqs->deepCopyTo(freqs);
                         nc_semantics->deepCopyTo(semantics);
 
-                        // send new tensor3, but only if the parameters changed at all
-                        // TODO: condition is correct, but the new tensor3 is only required if
-                        // semantic size changed
-                        // TODO: currently, param_change_time is !=0 for
-                        // parameter changes where the Tensor3 size is unchanged, too
-                        // => this means Tensor3 are generated even if the Tensor3
-                        //    size does not need to be changed
+                        // possible optimization: no allocations when sizes don't change
+                        // but this might complicate the code
                         WaveTable* wt = new WaveTable(nc_semantics->size(), nc_freqs->size());
                         wt->setMode(wtMode); // TODO: set it in ctor?
 
@@ -1109,7 +1106,8 @@ public:
                             Tensor1<WaveTable::float32>* newTensor = new Tensor1<WaveTable::float32>(synth.oscilsize, synth.oscilsize);
                             WaveTable::float32* data = oscilGen->calculateWaveTableData(
                                 wave_req.freq, wave_req.sem, params.presonance);
-                            newTensor->set_data_using_deep_copy(data); // TODO: take ownership and not delete[]? (also in the else part)
+                            // (TODO) take ownership and not delete[]? (also in the else part)
+                            newTensor->set_data_using_deep_copy(data);
                             delete[] data;
                             // this actually just sets "one" wave
                             uToB->write((params.voicePath + "set-waves").c_str(), params.isFm ? "Tiiib" : "Fiiib",
@@ -1138,7 +1136,7 @@ public:
                                     freqs[f], semantics[s], params.presonance);
                                 (*newTensor)[s].set_data_using_deep_copy(data);
                                 delete[] data;
-                                // TODO: maybe let calculateWaveTableData already acces the Tensor
+                                // TODO: maybe let calculateWaveTableData already access the Tensor
                                 //       then we save this alloc-copy-dealloc
                             }
 
