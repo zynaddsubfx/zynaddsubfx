@@ -20,6 +20,9 @@
 #include <iostream>
 #include "WaveTableFwd.h"
 
+// define this to enable debug output
+//#define DBG_WAVETABLES
+
 namespace zyn {
 
 namespace detail
@@ -509,7 +512,13 @@ public:
     void inc_write_pos_semantics(unsigned freq_idx, int amnt) { data.ringbuffers[freq_idx].inc_write_pos(amnt); }
     void inc_write_pos_delayed_semantics(unsigned freq_idx, int amnt) { data.ringbuffers[freq_idx].inc_write_pos_delayed(amnt); }
 
-    void dump_rb(unsigned freq_idx) const { data.ringbuffers[freq_idx].AbstractRingbuffer::dump(); }
+    void dump_rb(unsigned freq_idx) const {
+#ifdef DBG_WAVETABLES
+        data.ringbuffers[freq_idx].AbstractRingbuffer::dump();
+#else
+        (void)freq_idx;
+#endif
+    }
 
     // timestamp/outdated stuff
     // only valid for the *current* table, not for the next one

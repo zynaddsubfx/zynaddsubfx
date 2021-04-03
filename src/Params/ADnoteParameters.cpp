@@ -312,11 +312,12 @@ static const Ports voicePorts = {
                 bool isFmSmp = rtosc_argument(msg, 0).T;
                 WaveTable* const wt = isFmSmp ? obj->tableFm : obj->table;
                 int param_change_time = rtosc_argument(msg, 1).i;
+#ifdef DBG_WAVETABLES
                 printf("WT: AD received /wavetable-params-changed (timestamp %d)...\n", param_change_time);
-
-                // give MW all it needs to generate the new table
                 printf("WT: AD WT %p requesting (max) new 2D Tensors (reason: params changed)...\n",
                        wt);
+#endif
+                // give MW all it needs to generate the new table
                 d.reply("/request-wavetable", isFmSmp ? "sTii" : "sFii",
                         // path to this voice (T+F give the OscilGen of this voice)
                         d.loc,
@@ -349,12 +350,15 @@ static const Ports voicePorts = {
             WaveTable* unused = *(WaveTable**)rtosc_argument(msg, 1).b.data;
             WaveTable* next = isFmSmp ? obj->nextTableFm : obj->nextTable;
 
+#ifdef DBG_WAVETABLES
             {
                 Shape3 s = unused->debug_get_shape();
                 printf("WT: AD %s swapping tensor. New tensor dim: %lu %lu %lu\n",
                     (isFmSmp ? "FM" : "not-FM"),
                     s.dim[0], s.dim[1], s.dim[2]);
             }
+#endif
+
             // swap the new unused tensor with wt's "to-be-filled" tensor
             next->swapWith(*unused);
             // mark the whole ringbuffer (-1) as "write requested"
@@ -401,13 +405,15 @@ static const Ports voicePorts = {
                 : (isFmSmp ? obj->tableFm : obj->table);
             WaveTable* const current = (isFmSmp ? obj->tableFm : obj->table);
 
+#ifdef DBG_WAVETABLES
             printf("WT: AD %s incoming timestamp %d (req,cur: %d/%d) (param change? %s, correct timestamp? %s): %p (%s), s %d, f %d...\n",
                    (isFmSmp ? "FM" : "not-FM"),
                    paramChangeTime,
                    current->debug_get_timestamp_requested(), current->debug_get_timestamp_current(),
                    fromParamChange ? "yes" : "no", current->is_correct_timestamp(paramChangeTime) ? "yes" : "no",
                    (sem_idx == -1) ? (void*)waves2 : (void*)waves1, (sem_idx == -1) ? "Tensor2" : "Tensor1", sem_idx, freq_idx);
-            // ignore outdated param changes, allow the rest:
+#endif
+         // ignore outdated param changes, allow the rest:
             if(!fromParamChange || current->is_correct_timestamp(paramChangeTime))
             {
                 if(// no write position => fill all semantics at this frequency
@@ -415,8 +421,10 @@ static const Ports voicePorts = {
                    // write position just matches input
                    wt->write_pos_delayed_semantics(freq_idx) == sem_idx)
                 {
+#ifdef DBG_WAVETABLES
                     wt->dump_rb(freq_idx);
                     printf("WS delayed: %d (freq %d), %d\n", wt->write_space_delayed_semantics(freq_idx), freq_idx, fromParamChange);
+#endif
                     assert(wt->write_space_delayed_semantics(freq_idx) > 0);
 
                     // the received Tensor2 may have different size than ours,
@@ -449,7 +457,9 @@ static const Ports voicePorts = {
                     // -1 for C-style array indexing
                     if(fillNext && freq_idx == wt->size_freqs() - 1)
                     {
+#ifdef DBG_WAVETABLES
                         printf("WT: AD: swap tensors\n");
+#endif
                         current->swapWith(*wt);
                     }
                 }
@@ -1628,10 +1638,11 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
 
                 if(write_space)
                 {
+#ifdef DBG_WAVETABLES
                     wt->dump_rb(freq_idx);
                     printf("WT: AD WT %p requesting %d new 2D Tensors at position %d (reason: too many consumed) %p %p...\n",
                            wt, write_space, write_pos, wt->get_freqs_addr(), wt->get_semantics_addr());
-
+#endif
                     // max. number of semantics is 512 (TODO: not hard coded),
                     // *4 because 4 params per semantic (for loop below),
                     // *2 because of ~8 preceding args:
@@ -1682,8 +1693,10 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
 
         if(wt->update_request_required())
         {
+#ifdef DBG_WAVETABLES
             printf("WT: AD WT %p requesting new wavetable (reason: outdated)\n",
                    wt);
+#endif
 
             bToU->write("/request-wavetable", isFmSmp ? "iiiTii" : "iiiFii",
                     // path to this voice (T+F give the OscilGen of this voice)

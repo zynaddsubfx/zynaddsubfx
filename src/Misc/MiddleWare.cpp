@@ -287,7 +287,9 @@ public:
         info_t& cur_info = info[part][kit][voice][isFm];
         if(!cur_info.waitForAdPars)
         {
+#ifdef DBG_WAVETABLES
             printf("WT: MW sending /wavetable-params-changed...\n");
+#endif
             std::string s = buildVoiceParMsg(&part, &kit, &voice);
             cur_info.waitForAdPars = true;
             ++cur_info.param_change_time;
@@ -1082,19 +1084,25 @@ public:
                         uToB->write((params.voicePath + "set-wavetable").c_str(),
                                     params.isFm ? "Tb" : "Fb", sizeof(WaveTable*), (uint8_t*)&wt);
 
+#ifdef DBG_WAVETABLES
                         printf("WT: MW generated new scales, sizes: %d %d\n", freqs.size(), semantics.size());
+#endif
                     }
 
+#ifdef DBG_WAVETABLES
                     printf("WT: MW must generate: %s (FM: %s), resonance %d, %p (%d) %p (%d)\n",
                         params.voicePath.c_str(), params.isFm ? "true":"false", params.presonance,
                         &freqs, freqs.size(), &semantics, semantics.size());
+#endif
                     assert(oscilGen);
                     assert(!params.isFm || params.presonance == 0);
 
                     // calculate all freqs for all pending semantics
                     if(params.wave_requests.size())
                     {
+#ifdef DBG_WAVETABLES
                         printf("WT: MW generating %d new tensors of 1 wave each...\n", (int)params.wave_requests.size());
+#endif
                         for(const waveTablesToGenerateStruct::wave_request& wave_req : params.wave_requests)
                         {
                             Tensor1<WaveTable::float32>* newTensor = new Tensor1<WaveTable::float32>(synth.oscilsize, synth.oscilsize);
@@ -1109,7 +1117,9 @@ public:
                     }
                     else
                     {
+#ifdef DBG_WAVETABLES
                         printf("WT: MW generating %d new tensors of %d waves each...\n", semantics.size(), freqs.size());
+#endif
                         for(int i = 0; i < freqs.size(); ++i)
                         {
                             const Shape2 tensorShape{(size_t)semantics.size(),
@@ -1131,14 +1141,18 @@ public:
                                 //       then we save this alloc-copy-dealloc
                             }
 
+#ifdef DBG_WAVETABLES
                             printf("WT: MW sending tensor at freq %d\n", f);
+#endif
                             // no snoop ports, send this directly to RT
                             uToB->write((params.voicePath + "set-waves").c_str(), params.isFm ? "Tiib" : "Fiib", params.param_change_time, f, sizeof(Tensor2<WaveTable::float32>*), (uint8_t*)&newTensor);
                         }
                     }
                 }
                 else {
+#ifdef DBG_WAVETABLES
                     printf("WT: MW dropping outdated WT request %d\n",params.param_change_time);
+#endif
                 }
 
                 waveTablesToGenerate.pop();
@@ -2244,7 +2258,7 @@ static rtosc::Ports middlewareReplyPorts = {
         // (TODO: might be done later when handling the queue)
         impl.waveTableRequestHandler.receivedAdPars(wt2g.part, wt2g.kit, wt2g.voice, wt2g.isFm);
 
-        printf("WT: MW received wt-request (timestamp %d), queuing...\n", wt2g.param_change_time);
+        //printf("WT: MW received wt-request (timestamp %d), queuing...\n", wt2g.param_change_time);
         impl.addWaveTableToGenerate(std::move(wt2g));
         rEnd},
     {"rt_paste_done:s", 0, 0,
