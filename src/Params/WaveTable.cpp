@@ -58,7 +58,9 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
             // normal case
             : data[rb.read_pos()][bestI];
     if(mode() == WtMode::freqseed_smps && rb.read_space()) {
+#ifdef DBG_WAVETABLES
         rb.dump();
+#endif
         rb.inc_read_pos();
     }
     else {
