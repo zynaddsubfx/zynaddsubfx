@@ -44,6 +44,7 @@
 #include "../Params/ADnoteParameters.h"
 #include "../Params/SUBnoteParameters.h"
 #include "../Params/PADnoteParameters.h"
+#include "../Params/WaveTable.h"
 #include "../DSP/FFTwrapper.h"
 #include "../Synth/OscilGen.h"
 #include "../Nio/Nio.h"

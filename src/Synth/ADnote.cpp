@@ -26,6 +26,7 @@
 #include "../Containers/NotePool.h"
 #include "ModFilter.h"
 #include "OscilGen.h"
+#include "../Params/WaveTable.h"
 #include "ADnote.h"
 
 #define LENGTHOF(x) ((int)(sizeof(x)/sizeof(x[0])))

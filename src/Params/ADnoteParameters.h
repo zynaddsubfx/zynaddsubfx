@@ -16,7 +16,6 @@
 
 #include "../globals.h"
 #include "PresetsArray.h"
-#include "WaveTable.h"
 
 namespace zyn {
 
@@ -314,8 +313,10 @@ struct ADnoteVoiceParam {
 
     static const rtosc::Ports &ports;
 
-    WaveTable* table = nullptr, * tableFm = nullptr; // tensors in use
-    WaveTable* nextTable = nullptr, * nextTableFm = nullptr; // new tensors are gathered here
+    // tensors in use
+    class WaveTable* table = nullptr, * tableFm = nullptr;
+    // new tensors are gathered here
+    class WaveTable* nextTable = nullptr, * nextTableFm = nullptr;
     //! whether to use wave tables - only false for debugging
     bool waveTables; // const after it has been set
 };

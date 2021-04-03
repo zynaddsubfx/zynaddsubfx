@@ -24,6 +24,7 @@
 #include "../Synth/OscilGen.h"
 #include "../Synth/Resonance.h"
 #include "FilterParams.h"
+#include "WaveTable.h"
 
 #include <rtosc/ports.h>
 #include <rtosc/port-sugar.h>
