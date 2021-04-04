@@ -120,7 +120,7 @@ static const rtosc::Ports local_ports = {
                 }
             }
         }},
-    {"ratiofixed::i", rOptions(off, 8, 7, 6, 5, 4, 3, 2, 7/4, 3/2, 5/4, 1/1, 7/8, 3/4, 1/2, 1/3, 1/4, 1/5, 1/6, 1/7, 1/8)
+    {"ratiofixed::i", rOptions(SPEEDRATIO_OPTIONS)
         rProp(parameter) rLinear(0,20)
         rDoc("select fixed ratio for BPM based delay") 
         rDefault(off), NULL,

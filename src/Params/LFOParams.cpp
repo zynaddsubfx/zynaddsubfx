@@ -120,7 +120,7 @@ static const rtosc::Ports _ports = {
             "Enable for global operation"),
     rCrossOption(ratiofixed, speedratio, obj->speedratio = speedratios[var], 
         rShort("rat"), 
-        rOptions(off, 8, 7, 6, 5, 4, 3, 2, 7/4, 3/2, 5/4, 1/1, 7/8, 3/4, 1/2, 1/3, 1/4, 1/5, 1/6, 1/7, 1/8), 
+        rOptions(SPEEDRATIO_OPTIONS), 
         rLinear(0,20), rDefault(off), "select fixed ratio for BPM sync"),
     rParamF(speedratio, rShort("r"), rLinear(0.0f,8.0f), rDefault(0.0f),
             "ratio for BPM sync"),
