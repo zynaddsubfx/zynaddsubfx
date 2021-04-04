@@ -55,16 +55,6 @@ SEQ::SEQ(const SEQParams &seqpars, float basefreq, const AbsTime &t, WatchManage
         neutralOut = 1.0f;
     else
         neutralOut = 0.0f;
-    
-    //~ if(seqpars_.fel == consumer_location_type_t::freq)
-    //~ {
-        //~ printf("tStart: %d\n", tStart);
-        //~ printf("tRef: %d\n", tRef);
-        //~ printf("SEQ::SEQ  seqpars_.steps: %d\n", seqpars_.steps);
-        //~ printf("seqpars_.freq: %f\n", seqpars_.freq);
-        //~ printf("seqpars_.speedratio: %f\n", seqpars_.speedratio);
-        //~ printf("seq: %f %f %f %f\n", seqpars_.sequence[0], seqpars_.sequence[1], seqpars_.sequence[2], seqpars_.sequence[3]);
-    //~ }
 
 }
 
@@ -76,7 +66,7 @@ float SEQ::baseOut()
     float fraction = (float)(time.time() - tRef) * time.dt() / duration;
     int index = (int)fraction;
     //~ printf("time.time(): %d, tRef: %d\n", time.time(), tRef);
-    int currentSegment = index % limit((int)seqpars_.steps, 1, 128);
+    currentSegment = index % limit((int)seqpars_.steps, 1, 128);
     //~ printf("index: %d, currentSegment: %d\n", index, currentSegment);
     float seq_out = seqpars_.sequence[currentSegment];
     //~ printf("seq_out: %f\n", seq_out);
@@ -151,6 +141,9 @@ float SEQ::seqout()
     
 
     out *= seqintensity;
+    
+    float watch_data[2] = {(float)currentSegment/(float)NUM_SEQ_STEPS, out};
+    watchOut(watch_data, 2);
 
     return out;
 }

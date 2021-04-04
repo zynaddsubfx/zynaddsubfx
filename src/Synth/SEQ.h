@@ -54,6 +54,8 @@ class SEQ
         int64_t tRef;
         // store the constant out value before oscillating starts
         float outConst;
+        // step index
+        int currentSegment;
 
         //If After initialization there are no calls to random number gen.
         bool  deterministic;
