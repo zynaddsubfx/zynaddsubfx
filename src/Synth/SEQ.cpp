@@ -65,6 +65,7 @@ float SEQ::baseOut()
 {
     float fraction = (float)(time.time() - tRef) * time.dt() / duration;
     int index = (int)fraction;
+    phase = fraction - (float)index;
     //~ printf("time.time(): %d, tRef: %d\n", time.time(), tRef);
     currentSegment = index % limit((int)seqpars_.steps, 1, 128);
     //~ printf("index: %d, currentSegment: %d\n", index, currentSegment);
@@ -142,7 +143,7 @@ float SEQ::seqout()
 
     out *= seqintensity;
     
-    float watch_data[2] = {(float)currentSegment/(float)NUM_SEQ_STEPS, out};
+    float watch_data[2] = {((float)currentSegment+phase)/(float)NUM_SEQ_STEPS, out};
     watchOut(watch_data, 2);
 
     return out;

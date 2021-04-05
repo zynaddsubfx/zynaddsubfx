@@ -56,6 +56,7 @@ class SEQ
         float outConst;
         // step index
         int currentSegment;
+        float phase;
 
         //If After initialization there are no calls to random number gen.
         bool  deterministic;
