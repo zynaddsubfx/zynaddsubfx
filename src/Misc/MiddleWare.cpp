@@ -1062,19 +1062,19 @@ public:
                     const WaveTable* wt;
                     if(!params.wave_requests.size())
                     {
-                        Tensor1<WaveTable::float32>* nc_freqs; // non-constant
-                        Tensor1<WaveTable::IntOrFloat>* nc_semantics;
+                        Tensor1<WaveTable::float32>* unused_freqs; // non-constant
+                        Tensor1<WaveTable::IntOrFloat>* unused_semantics;
                         wavetable_types::WtMode wtMode = oscilGen->calculateWaveTableMode();
-                        std::tie(nc_freqs, nc_semantics) = oscilGen->calculateWaveTableScales(wtMode);
+                        std::tie(unused_freqs, unused_semantics) = oscilGen->calculateWaveTableScales(wtMode);
 
                         // possible optimization: no allocations when sizes don't change
                         // but this might complicate the code
-                        WaveTable* newWt = new WaveTable(nc_semantics->size(), nc_freqs->size());
+                        WaveTable* newWt = new WaveTable(unused_semantics->size(), unused_freqs->size());
                         newWt->setMode(wtMode); // TODO: set it in ctor?
-                        newWt->swapFreqsInitially(*nc_freqs);
-                        newWt->swapSemanticsInitially(*nc_semantics);
-                        delete nc_freqs;
-                        delete nc_semantics;
+                        newWt->swapFreqsInitially(*unused_freqs);
+                        newWt->swapSemanticsInitially(*unused_semantics);
+                        delete unused_freqs;
+                        delete unused_semantics;
                         wt = newWt; // from now, kept const in this function
 
                         // send Tensor3, it does not contain any buffers yet
