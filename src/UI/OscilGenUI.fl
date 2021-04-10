@@ -149,7 +149,6 @@ class Oscilharmonic {: {public Fl_Group}
     phase->value(64);
     phase->selection_color(0);
  }
- o->osc->requestValue(o->loc+"prepare");
  o->osc->requestValue(o->loc+"spectrum");
  o->osc->requestValue(o->loc+"waveform");
 
@@ -162,7 +161,6 @@ display->redraw();}
       Fl_Slider phase {
         callback {
 o->osc->writeValue(o->loc+"phase"+to_s(n), (char) o->value());
-o->osc->requestValue(o->loc+"prepare");
 o->osc->requestValue(o->loc+"spectrum");
 o->osc->requestValue(o->loc+"waveform");
 
@@ -259,6 +257,8 @@ class OscilEditor {open : {public PresetsUI_}
         Fl_Button applybutton {
           label Apply
           callback {
+          //call PADnoteParameters' "prepare" port, which computes the whole
+          //PAD synth wave table
           dummy->osc->requestValue(loc+"../prepare");}
           xywh {305 285 60 20} box THIN_UP_BOX labelfont 1
           code0 {if(adnotep) o->hide();}
