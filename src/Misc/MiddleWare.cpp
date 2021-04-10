@@ -1073,6 +1073,8 @@ public:
                         newWt->setMode(wtMode); // TODO: set it in ctor?
                         newWt->swapFreqsInitially(*nc_freqs);
                         newWt->swapSemanticsInitially(*nc_semantics);
+                        delete nc_freqs;
+                        delete nc_semantics;
                         wt = newWt; // from now, kept const in this function
 
                         // send Tensor3, it does not contain any buffers yet
