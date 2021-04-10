@@ -1056,26 +1056,24 @@ public:
                          obj_store.get(params.voicePath +
                                             (params.isFm ? "FMSmp/" : "OscilSmp/")));
 
-                    Tensor1<WaveTable::float32> freqs(0, 0); // "buffer"
-                    Tensor1<WaveTable::IntOrFloat> semantics(0, 0); // "buffer"
                     // if no wave requests, this means generate a completely new
                     // wavetable
+
+                    const WaveTable* wt;
                     if(!params.wave_requests.size())
                     {
                         Tensor1<WaveTable::float32>* nc_freqs; // non-constant
                         Tensor1<WaveTable::IntOrFloat>* nc_semantics;
                         wavetable_types::WtMode wtMode = oscilGen->calculateWaveTableMode();
                         std::tie(nc_freqs, nc_semantics) = oscilGen->calculateWaveTableScales(wtMode);
-                        nc_freqs->deepCopyTo(freqs);
-                        nc_semantics->deepCopyTo(semantics);
 
                         // possible optimization: no allocations when sizes don't change
                         // but this might complicate the code
-                        WaveTable* wt = new WaveTable(nc_semantics->size(), nc_freqs->size());
-                        wt->setMode(wtMode); // TODO: set it in ctor?
-
-                        wt->swapFreqsInitially(*nc_freqs);
-                        wt->swapSemanticsInitially(*nc_semantics);
+                        WaveTable* newWt = new WaveTable(nc_semantics->size(), nc_freqs->size());
+                        newWt->setMode(wtMode); // TODO: set it in ctor?
+                        newWt->swapFreqsInitially(*nc_freqs);
+                        newWt->swapSemanticsInitially(*nc_semantics);
+                        wt = newWt; // from now, kept const in this function
 
                         // send Tensor3, it does not contain any buffers yet
                         // no snoop ports, send this directly to RT
@@ -1119,9 +1117,9 @@ public:
 #ifdef DBG_WAVETABLES
                         printf("WT: MW generating %d new tensors of %d waves each...\n", semantics.size(), freqs.size());
 #endif
-                        for(int i = 0; i < freqs.size(); ++i)
+                        for(int i = 0; i < wt->size_freqs(); ++i)
                         {
-                            const Shape2 tensorShape{(size_t)semantics.size(),
+                            const Shape2 tensorShape{(size_t)wt->size_semantics(),
                                                      (size_t)synth.oscilsize};
                             Tensor2<WaveTable::float32>* newTensor =
                                 new Tensor2<WaveTable::float32>(tensorShape, tensorShape);
@@ -1129,11 +1127,11 @@ public:
                             //newTensor->resize(Shape1{(size_t)params.freqs->size()});
 
                             // TODO: remove those casts everywhere, elliminate std::size_t...
-                            int f = i % (int)freqs.size();
-                            for(int s = 0; s < (int)semantics.size(); ++s)
+                            int f = i % (int)wt->size_freqs();
+                            for(int s = 0; s < (int)wt->size_semantics(); ++s)
                             {
                                 WaveTable::float32* data = oscilGen->calculateWaveTableData(
-                                    freqs[f], semantics[s], params.presonance);
+                                    wt->get_freq(f), wt->get_sem(s), params.presonance);
                                 (*newTensor)[s].set_data_using_deep_copy(data);
                                 delete[] data;
                                 // TODO: maybe let calculateWaveTableData already access the Tensor
