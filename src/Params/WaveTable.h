@@ -411,13 +411,6 @@ public:
         TensorBase<1, T>::swapWith(other);
         std::swap(m_data, other.m_data);
     }
-
-    // TODO: remove
-    void deepCopyTo(Tensor<1,T>& target)
-    {
-        target.init_shape(capacity_shape());
-        target.set_data_using_deep_copy(m_data);
-    }
 };
 
 using Shape1 = Shape<1>;
@@ -524,9 +517,9 @@ public:
 
     // timestamp/outdated stuff
     // only valid for the *current* table, not for the next one
-    // TODO: timestamp_current is nowhere updated
     void set_outdated(int timestamp) { assert(timestamp != timestamp_current); timestamp_requested = timestamp; }
     bool outdated() const { return timestamp_requested != timestamp_current; }
+    void set_current_timestamp(int timestamp) { timestamp_current = timestamp; }
     bool is_correct_timestamp(int timestamp) const { return timestamp_requested == timestamp; }
     int debug_get_timestamp_requested() const { return timestamp_requested; }
     int debug_get_timestamp_current() const { return timestamp_current; }

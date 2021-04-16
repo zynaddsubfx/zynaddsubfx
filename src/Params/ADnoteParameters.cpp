@@ -469,6 +469,7 @@ static const Ports voicePorts = {
                         printf("WT: AD: swap tensors\n");
 #endif
                         current->swapWith(*wt);
+                        current->set_current_timestamp(paramChangeTime);
                     }
                 }
                 else
