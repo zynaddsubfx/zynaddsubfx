@@ -70,7 +70,8 @@ public:
 };
 
 /**
-    Common Tensor base class for all dimensions
+    Common Tensor base class for all dimensions.
+    Not copyable, not movable, but swappable.
 
     m_usable <= m_size_planned <= m_capacity
     m_usable: data that has been generated and can be used
@@ -92,24 +93,6 @@ protected:
     TensorBase(TensorBase&& other) = delete;
     TensorBase& operator=(TensorBase&& other) = delete;
 
-
-#if 0
-    TensorBase(TensorBase&& other) {
-        m_capacity = other.capacity;
-        m_size_planned = other.m_size_planned;
-        m_usable = other.m_usable;
-        m_owner = other.m_owner;
-        other.m_owner = false;
-    }
-    TensorBase& operator=(TensorBase&& other) {
-        m_capacity = other.m_capacity;
-        m_size_planned = other.m_size_planned;
-        m_usable = other.m_usable;
-        m_owner = other.m_owner;
-        other.m_owner = false;
-    }
-    // TODO: check rule of 5
-#endif
 public:
     tensor_size_t capacity() const { return m_capacity; }
 
@@ -118,12 +101,7 @@ public:
 protected:
     void set_capacity(tensor_size_t new_capacity) { m_capacity = new_capacity; m_owner = true; }
     bool operator==(const TensorBase<N, T>& other) const {
-#if 0
-        return shape() == other.shape();/* &&
-                std::equal(m_data, m_data + (shape().volume()), other.m_data);*/ }
-#else
         return m_capacity == other.m_capacity;
-#endif
     }
 
     void swapWith(Tensor<N,T>& other)
@@ -342,9 +320,6 @@ public:
         }
     }
 
-/*    template<tensor_size_t N2, class X2>
-    friend void pointer_swap(Tensor<N2, X2>&, Tensor<N2, X2>&);*/
-
     void swapWith(Tensor<N,T>& other)
     {
         TensorBase<N, T>::swapWith(other);
@@ -417,19 +392,6 @@ using Shape1 = Shape<1>;
 using Shape2 = Shape<2>;
 using Shape3 = Shape<3>;
 
-#if 0
-//! swap data of two tensors
-template<tensor_size_t N, class T>
-void pointer_swap(Tensor<N, T>& t1, Tensor<N, T>& t2)
-{
-    std::swap(t1.m_capacity, t2.m_capacity);
-    std::swap(t1.m_size_planned, t2.m_size_planned);
-    std::swap(t1.m_usable, t2.m_usable);
-    std::swap(t1.m_data, t2.m_data);
-    std::swap(t1.m_owner, t2.m_owner);
-}
-#endif
-
 class Tensor3ForWaveTable : public Tensor<3, wavetable_types::float32>
 {
     using base_type = Tensor<3, wavetable_types::float32>;
@@ -442,9 +404,6 @@ public:
         for(unsigned i = 0; i < shape.dim[1]; ++i)
             ringbuffers[i].resize(shape.dim[0]);
     }
-
-/*  template<tensor_size_t N2, class X2>
-    friend void pointer_swap(Tensor<N2, X2>&, Tensor<N2, X2>&);*/
 
     void swapWith(Tensor3ForWaveTable& other)
     {
