@@ -1128,8 +1128,6 @@ public:
                                                      (tensor_size_t)synth.oscilsize};
                             Tensor2<WaveTable::float32>* newTensor =
                                 new Tensor2<WaveTable::float32>(tensorShape);
-                            // TODO: the 2nd dim (float buffer) is not resized... (but it's not used right now)
-                            //newTensor->resize(Shape1{(size_t)params.freqs->size()});
 
                             tensor_size_t f = i % wt->size_freqs();
                             for(tensor_size_t s = 0; s < wt->size_semantics(); ++s)
@@ -1137,8 +1135,6 @@ public:
                                 WaveTable::float32* data = oscilGen->calculateWaveTableData(
                                     wt->get_freq(f), wt->get_sem(s), params.presonance);
                                 (*newTensor)[s].take_data_and_own_it(data);
-                                // TODO: maybe let calculateWaveTableData already access the Tensor
-                                //       then we save this alloc-copy-dealloc
                             }
 
 #ifdef DBG_WAVETABLES
@@ -2239,7 +2235,9 @@ static rtosc::Ports middlewareReplyPorts = {
             assert(argpos + 3 < nargs);
             assert(rtosc_type(msg, argpos) == 'i');
             assert(rtosc_type(msg, argpos+1) == 'i');
-            assert(rtosc_type(msg, argpos+2) == 'i' || rtosc_type(msg, argpos+2) == 'f'); // TODO: more exactly, depend on wavetable mode
+            // re-requesting single float buffers is only planned for seed mode,
+            // so only allow seeds (integers), not wave function parameters (float)
+            assert(rtosc_type(msg, argpos+2) == 'i');
             assert(rtosc_type(msg, argpos+3) == 'f');
             WaveTable::IntOrFloat sem;
             if(rtosc_type(msg, argpos+2) == 'i')
@@ -2255,7 +2253,9 @@ static rtosc::Ports middlewareReplyPorts = {
             });
         }
 
-        // (TODO: might be done later when handling the queue)
+        // re-allow new wavetable-requests from AD synth
+        // this was just disabled in order to prevent message spamming,
+        // and should be enabled as soon as possible (i.e. now)
         impl.waveTableRequestHandler.receivedAdPars(wt2g.part, wt2g.kit, wt2g.voice, wt2g.isModOsc);
 
         //printf("WT: MW received wt-request (timestamp %d), queuing...\n", wt2g.param_change_time);

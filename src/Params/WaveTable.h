@@ -52,13 +52,12 @@ public:
     //! the first dimension will be removed
     Shape<N-1> proj() const
     {
-        // TODO: don't need for loop (use constexpr)?
         Shape<N-1> res;
         for(tensor_size_t i = 1; i < N; ++i)
             res.dim[i-1] = dim[i];
         return res;
     }
-
+    //! prepend `to_prepend` to dim
     Shape<N+1> prepend_dim(tensor_size_t to_prepend) const
     {
         Shape<N+1> res;
@@ -292,15 +291,29 @@ public:
         std::swap(m_data, other.m_data);
     }
 
+    class TensorIterator
+    {
+        using sub_type = Tensor<N-1, T>;
+        sub_type* sub;
+    public:
+        TensorIterator() = default;
+        TensorIterator(sub_type* sub) : sub(sub) {}
+        TensorIterator operator++() { ++sub; return *this; }
+        bool operator!=(TensorIterator& other) const { return sub != other.sub; }
+        sub_type& operator*() { return *sub; }
+    };
+    TensorIterator begin() const { return TensorIterator(m_data); }
+    TensorIterator end() const { return TensorIterator(m_data + base_type::size()); }
+
     /*
         testing only
      */
     tensor_size_t debug_set_data_using_deep_copy(const T* new_data)
     {
         tensor_size_t consumed = 0;
-        for(tensor_size_t i = 0; i < base_type::size(); ++i)
+        for(Tensor<N-1, T>& sub : *this)
         {
-            consumed += m_data[i].debug_set_data_using_deep_copy(new_data + consumed);
+            consumed += sub.debug_set_data_using_deep_copy(new_data + consumed);
         }
         return consumed;
     }
@@ -322,7 +335,6 @@ public:
 };
 
 //! Tensor class for dimension 1
-//! TODO: rule of 5 everywhere?
 template <class T>
 class Tensor<1, T> : public TensorBase<1, T>
 {
@@ -374,6 +386,19 @@ public:
         m_data = new_data;
     }
 
+    class TensorIterator
+    {
+        T* sub;
+    public:
+        TensorIterator() = default;
+        TensorIterator(T* sub) : sub(sub) {}
+        TensorIterator operator++() { ++sub; return *this; }
+        bool operator!=(TensorIterator& other) const { return sub != other.sub; }
+        T& operator*() { return *sub; }
+    };
+    TensorIterator begin() const { return TensorIterator(m_data); }
+    TensorIterator end() const { return TensorIterator(m_data + base_type::size()); }
+
     /*
         testing only
      */
@@ -390,6 +415,8 @@ using Shape1 = Shape<1>;
 using Shape2 = Shape<2>;
 using Shape3 = Shape<3>;
 
+//! Tensor3 that keeps track of its subtensors, using a Tensor of
+//! AbstractRingbuffer
 class Tensor3ForWaveTable : public Tensor<3, wavetable_types::float32>
 {
     using base_type = Tensor<3, wavetable_types::float32>;
@@ -398,9 +425,8 @@ public:
     Tensor3ForWaveTable(const Shape<3>& shape)
         : base_type(shape), ringbuffers(shape.dim[1])
     {
-        // TODO: tensor iterator?
-        for(unsigned i = 0; i < shape.dim[1]; ++i)
-            ringbuffers[i].resize(shape.dim[0]);
+        for(AbstractRingbuffer& rb : ringbuffers)
+            rb.resize(shape.dim[0]);
     }
 
     void swapWith(Tensor3ForWaveTable& other)
