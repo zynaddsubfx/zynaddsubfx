@@ -519,14 +519,14 @@ std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloa
     {
         if(fillWithZeroes)
         {
-            for(int i = 0; i < semantics->size(); ++i)
+            for(tensor_size_t i = 0; i < semantics->size(); ++i)
             {
-                (*semantics)[i].intVal = i; // do not consume any random
+                (*semantics)[i].intVal = (int)i; // do not consume any random
             }
         }
         else
         {
-            for(int i = 0; i < semantics->size(); ++i)
+            for(tensor_size_t i = 0; i < semantics->size(); ++i)
             {
                 (*semantics)[i].intVal = prng();
             }
@@ -544,7 +544,7 @@ std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloa
 
     // frequency
     (*freqs)[0] = 55.f;
-    for(int i = 1; i < freqs->size(); ++i)
+    for(tensor_size_t i = 1; i < freqs->size(); ++i)
     {
         (*freqs)[i] = 2.f * (*freqs)[i-1];
     }
@@ -579,7 +579,8 @@ void OscilGen::recalculateDefaultWaveTable(WaveTable * wt, bool fillWithZeroes) 
     // no FFT/IFFT required, it's a simple sine
     // (the currently selected base function is still sine)
     for(int k = 0; k < synth.oscilsize; ++k) {
-        wt->setDataAt(0,0,k,-sinf(2.0f * PI * k / synth.oscilsize));
+        wt->setDataAt(0,0,(tensor_size_t)k,
+            -sinf(2.0f * PI * (float)k / (float)synth.oscilsize));
     }
 }
 

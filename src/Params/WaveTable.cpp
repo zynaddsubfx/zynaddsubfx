@@ -26,9 +26,9 @@ namespace zyn {
 
 const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
 {
-    std::size_t num_freqs = freqs.size(), i;
+    tensor_size_t num_freqs = freqs.size(), i;
     float bestFreqDist = 9999999;
-    std::size_t bestI = 0;
+    tensor_size_t bestI = 0;
     for(i = 0; i < num_freqs; ++i) // TODO: std::lower_bound?
     {
         float curFreqDist = fabsf(freqs[i] - freq);
@@ -71,7 +71,7 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
     return res;
 }
 
-WaveTable::WaveTable(std::size_t buffersize) :
+WaveTable::WaveTable(tensor_size_t buffersize) :
     semantics(Shape1{1}, Shape1{0}),
     freqs(Shape1{1}, Shape1{0}),
     data(Shape3{1, 1, buffersize}, Shape3{0, 0, 0})
@@ -79,10 +79,10 @@ WaveTable::WaveTable(std::size_t buffersize) :
     setMode(WtMode::freq_smps);
 }
 
-WaveTable::WaveTable(int nsemantics, int nfreqs) :
+WaveTable::WaveTable(tensor_size_t nsemantics, tensor_size_t nfreqs) :
     semantics(Shape1{0}, Shape1{0}),
     freqs(Shape1{0}, Shape1{0}),
-    data(Shape3{(std::size_t)nsemantics, (std::size_t)nfreqs, 0}, Shape3{0, 0, 0})
+    data(Shape3{nsemantics, nfreqs, 0}, Shape3{0, 0, 0})
 {
     setMode(WtMode::freq_smps);
 }

@@ -28,42 +28,42 @@ namespace zyn {
 namespace detail
 {
     //! check that arrays @p arr1 and @p arr2 are equal in range 0...Idx
-    template<std::size_t Idx>
-    constexpr bool check_equal_until(const std::size_t* arr1, const std::size_t* arr2) { return arr1[Idx] == arr2[Idx] && check_equal_until<Idx-1>(arr1, arr2); }
+    template<tensor_size_t Idx>
+    constexpr bool check_equal_until(const tensor_size_t* arr1, const tensor_size_t* arr2) { return arr1[Idx] == arr2[Idx] && check_equal_until<Idx-1>(arr1, arr2); }
     template<>
-    constexpr bool check_equal_until<0>(const std::size_t* arr1, const std::size_t* arr2) { return arr1[0] == arr2[0]; }
+    constexpr bool check_equal_until<0>(const tensor_size_t* arr1, const tensor_size_t* arr2) { return arr1[0] == arr2[0]; }
 
     //! multiply the first (Idx+1) members (0...Idx) of array @p arr
-    template<std::size_t Idx>
-    constexpr std::size_t mult(const std::size_t* arr) { return arr[Idx] * mult<Idx-1>(arr); }
+    template<tensor_size_t Idx>
+    constexpr tensor_size_t mult(const tensor_size_t* arr) { return arr[Idx] * mult<Idx-1>(arr); }
     template<>
-    constexpr std::size_t mult<0>(const std::size_t* arr) { return arr[0]; }
+    constexpr tensor_size_t mult<0>(const tensor_size_t* arr) { return arr[0]; }
 }
 
-template<std::size_t N>
+template<tensor_size_t N>
 class Shape
 {
 public:
-    std::size_t dim[N];
+    tensor_size_t dim[N];
     constexpr bool operator==(const Shape<N>& other) const {
         return detail::check_equal_until<N-1>(dim, other.dim); }
-    constexpr std::size_t volume() const { return detail::mult<N-1>(dim); }
+    constexpr tensor_size_t volume() const { return detail::mult<N-1>(dim); }
     //! projection of shape onto first dimension
     //! the first dimension will be removed
     Shape<N-1> proj() const
     {
         // TODO: don't need for loop (use constexpr)?
         Shape<N-1> res;
-        for(std::size_t i = 1; i < N; ++i)
+        for(tensor_size_t i = 1; i < N; ++i)
             res.dim[i-1] = dim[i];
         return res;
     }
 
-    Shape<N+1> prepend_dim(std::size_t to_prepend) const
+    Shape<N+1> prepend_dim(tensor_size_t to_prepend) const
     {
         Shape<N+1> res;
         res.dim[0] = to_prepend;
-        for(std::size_t i = 0; i < N; ++i)
+        for(tensor_size_t i = 0; i < N; ++i)
             res.dim[i+1] = dim[i];
         return res;
     }
@@ -78,15 +78,15 @@ public:
                     m_usable == m_size_planned)
     m_capacity: allocated size
 */
-template <std::size_t N, class T>
+template <tensor_size_t N, class T>
 class TensorBase
 {
 protected:
-    std::size_t m_capacity;
+    tensor_size_t m_capacity;
     bool m_owner = true; //!< says if memory is owned by us
 
     TensorBase() : m_capacity(0), m_owner(false) {}
-    TensorBase(std::size_t capacity, std::size_t newsize) : m_capacity(capacity), m_owner(true) {};
+    TensorBase(tensor_size_t capacity, tensor_size_t newsize) : m_capacity(capacity), m_owner(true) {};
     TensorBase(const TensorBase& other) = delete;
     TensorBase& operator=(const TensorBase& other) = delete;
     TensorBase(TensorBase&& other) = delete;
@@ -111,12 +111,12 @@ protected:
     // TODO: check rule of 5
 #endif
 public:
-    std::size_t capacity() const { return m_capacity; }
+    tensor_size_t capacity() const { return m_capacity; }
 
-    int size() const { return capacity(); }
+    tensor_size_t size() const { return capacity(); }
 
 protected:
-    void set_capacity(std::size_t new_capacity) { m_capacity = new_capacity; m_owner = true; }
+    void set_capacity(tensor_size_t new_capacity) { m_capacity = new_capacity; m_owner = true; }
     bool operator==(const TensorBase<N, T>& other) const {
 #if 0
         return shape() == other.shape();/* &&
@@ -146,10 +146,12 @@ protected:
 class AbstractRingbuffer
 {
 public:
-    AbstractRingbuffer(int newsize) { resize(newsize); }
+    using size_t = tensor_size_t;
+
+    AbstractRingbuffer(size_t newsize) { resize(newsize); }
     AbstractRingbuffer() { r = w_delayed = w = 0; }
 
-    void resize(int newsize)
+    void resize(size_t newsize)
     {
         assert(is_power_of_2(newsize));
 
@@ -161,34 +163,34 @@ public:
         r = w_delayed = w = 0;
     }
 
-    int read_space() const
+    size_t read_space() const
     {
         // we know w_delayed <= r + m_size (in non-cyclic sense), so we calculate
         //     (w_delayed - r +(m_size*2)) % (m_size*2)
         return (w_delayed - r + m_size_x2) & m_size_x2_mask;
     }
 
-    int write_space_delayed() const
+    size_t write_space_delayed() const
     {
         // analog reason as in read_space
         return (w - w_delayed + m_size_x2) & m_size_x2_mask;
     }
 
-    int write_space() const
+    size_t write_space() const
     {
         //              (0 <= this part <= 128 by invariant  )
         return m_size - ((w - r + m_size_x2) & m_size_x2_mask);
     }
 
-    void inc_write_pos(int amnt) { assert(amnt <= write_space()); w = (amnt+w) & m_size_x2_mask; }
-    void inc_write_pos_delayed(int amnt = 1) { assert(amnt <= write_space_delayed()); w_delayed = (amnt+w_delayed) & m_size_x2_mask; }
+    void inc_write_pos(size_t amnt) { assert(amnt <= write_space()); w = (amnt+w) & m_size_x2_mask; }
+    void inc_write_pos_delayed(size_t amnt = 1) { assert(amnt <= write_space_delayed()); w_delayed = (amnt+w_delayed) & m_size_x2_mask; }
     void inc_read_pos() { assert(1 <= read_space()); r = (1+r) & m_size_x2_mask; }
 
-    int read_pos() const { return r & m_size_mask; }
-    int write_pos() const { return w & m_size_mask; }
-    int write_pos_delayed() const { return w_delayed & m_size_mask; }
+    size_t read_pos() const { return r & m_size_mask; }
+    size_t write_pos() const { return w & m_size_mask; }
+    size_t write_pos_delayed() const { return w_delayed & m_size_mask; }
 
-    int size() const { return m_size; }
+    size_t size() const { return m_size; }
 
     void swapWith(AbstractRingbuffer& other)
     {
@@ -204,16 +206,16 @@ public:
     void dump() const
     {
         printf("RINGBUFFER: size: %d, r/w_delayed/w: %d %d %d\n",
-               m_size, r, w_delayed, w);
+               (int)m_size, (int)r, (int)w_delayed, (int)w);
     }
 
     //! testing only
-    static bool debugfunc_is_power_of_2(int x) { return is_power_of_2(x); }
+    static bool debugfunc_is_power_of_2(size_t x) { return is_power_of_2(x); }
 
 private:
 
     //! return if x = 2^n for n in [0,...]
-    static bool is_power_of_2(int x)
+    static bool is_power_of_2(size_t x)
     {
         return x && !(x & (x-1));
     }
@@ -225,23 +227,23 @@ private:
     // which is while we calculate mod (m_size*2)
 
     //! read position, marks next element to read. can read until w_delayed.
-    int r = 0;
+    size_t r = 0;
     //! write position, marks the element that will be written to next (may be
     //! reserved for write already if w_delayed < w). can write until w.
-    int w_delayed = 0;
+    size_t w_delayed = 0;
     //! write position, marks the element that will be reserved for a write
     //! next (but maybe not yet written). can write until r-1.
-    int w = 0;
+    size_t w = 0;
 
     // const (except of swapping)
-    int m_size;         //!< size
-    int m_size_mask;    //!< size - 1
-    int m_size_x2;      //!< size * 2
-    int m_size_x2_mask; //!< size * 2 - 1
+    size_t m_size;         //!< size
+    size_t m_size_mask;    //!< size - 1
+    size_t m_size_x2;      //!< size * 2
+    size_t m_size_x2_mask; //!< size * 2 - 1
 };
 
 //! Tensor class for all dimensions != 1
-template <std::size_t N, class T>
+template <tensor_size_t N, class T>
 class Tensor : public TensorBase<N, T>
 {
     using base_type = TensorBase<N, T>;
@@ -258,7 +260,7 @@ class Tensor : public TensorBase<N, T>
     void init_shape_alloced(const Shape<N>& shape)
     {
         Shape<N-1> proj = shape.proj();
-        for(std::size_t i = 0; i < base_type::capacity(); ++i)
+        for(tensor_size_t i = 0; i < base_type::capacity(); ++i)
         {
             m_data[i].init_shape(proj);
         }
@@ -294,13 +296,13 @@ public:
     }
 
     //! access slice with index @p i
-    Tensor<N-1, T>& operator[](std::size_t i) { return m_data[i]; }
-    const Tensor<N-1, T>& operator[](std::size_t i) const { return m_data[i]; }
+    Tensor<N-1, T>& operator[](tensor_size_t i) { return m_data[i]; }
+    const Tensor<N-1, T>& operator[](tensor_size_t i) const { return m_data[i]; }
 
     bool operator==(const Tensor<N, T>& other) const
     {
         bool equal = base_type::operator==(other);
-        for(std::size_t i = 0; equal && i < base_type::capacity(); ++i)
+        for(tensor_size_t i = 0; equal && i < base_type::capacity(); ++i)
         {
             equal = m_data[i].operator==(other.m_data[i]);
         }
@@ -312,17 +314,17 @@ public:
 
     void fillWithZeroes()
     {
-        for(std::size_t i = 0; i < base_type::size(); ++i)
+        for(tensor_size_t i = 0; i < base_type::size(); ++i)
         {
             m_data[i].fillWithZeroes();
         }
     }
 
     // testing only:
-    std::size_t set_data_using_deep_copy(const T* new_data)
+    tensor_size_t set_data_using_deep_copy(const T* new_data)
     {
-        std::size_t consumed = 0;
-        for(int i = 0; i < base_type::size(); ++i)
+        tensor_size_t consumed = 0;
+        for(tensor_size_t i = 0; i < base_type::size(); ++i)
         {
             consumed += m_data[i].set_data_using_deep_copy(new_data + consumed);
         }
@@ -335,12 +337,12 @@ public:
         }
         else {
             Shape<N> res;
-            for(std::size_t i = 0; i < N; ++i) res.dim[i] = 0;
+            for(tensor_size_t i = 0; i < N; ++i) res.dim[i] = 0;
             return res;
         }
     }
 
-/*    template<std::size_t N2, class X2>
+/*    template<tensor_size_t N2, class X2>
     friend void pointer_swap(Tensor<N2, X2>&, Tensor<N2, X2>&);*/
 
     void swapWith(Tensor<N,T>& other)
@@ -367,7 +369,7 @@ protected:
             m_data = new T[base_type::capacity()];
     }
 public:
-    Tensor(std::size_t capacity, std::size_t ) : TensorBase<1, T>(capacity, capacity),
+    Tensor(tensor_size_t capacity, tensor_size_t ) : TensorBase<1, T>(capacity, capacity),
         m_data(capacity ? new T[capacity] : nullptr) {}
     Tensor(const Shape<1>& shape, const Shape<1>& ) : Tensor(shape.dim[0], shape.dim[0]){}
     ~Tensor() { delete[] m_data; }
@@ -380,8 +382,8 @@ public:
     T* data() { return m_data; }
     const T* data() const { return m_data; }
     //! raw indexing into 1D array
-    T& operator[](std::size_t i) { return m_data[i]; }
-    const T& operator[](std::size_t i) const { return m_data[i]; }
+    T& operator[](tensor_size_t i) { return m_data[i]; }
+    const T& operator[](tensor_size_t i) const { return m_data[i]; }
 
     bool operator==(const Tensor<1, T>& other) const {
         return base_type::operator==(other) &&
@@ -396,7 +398,7 @@ public:
         std::fill_n(m_data, base_type::size(), 0);
     }
 
-    std::size_t set_data_using_deep_copy(const T* new_data)
+    tensor_size_t set_data_using_deep_copy(const T* new_data)
     {
         std::copy(new_data, new_data+base_type::size(), m_data);
         return base_type::capacity();
@@ -424,7 +426,7 @@ using Shape3 = Shape<3>;
 
 #if 0
 //! swap data of two tensors
-template<std::size_t N, class T>
+template<tensor_size_t N, class T>
 void pointer_swap(Tensor<N, T>& t1, Tensor<N, T>& t2)
 {
     std::swap(t1.m_capacity, t2.m_capacity);
@@ -448,7 +450,7 @@ public:
             ringbuffers[i].resize(shape.dim[0]);
     }
 
-/*  template<std::size_t N2, class X2>
+/*  template<tensor_size_t N2, class X2>
     friend void pointer_swap(Tensor<N2, X2>&, Tensor<N2, X2>&);*/
 
     void swapWith(Tensor3ForWaveTable& other)
@@ -474,8 +476,8 @@ public:
     using WtMode = wavetable_types::WtMode;
 
     // pure guesses for what sounds good:
-    constexpr const static std::size_t num_freqs = 10;
-    constexpr const static std::size_t num_semantics = 128;
+    constexpr const static tensor_size_t num_freqs = 10;
+    constexpr const static tensor_size_t num_semantics = 128;
 
 private:
     Tensor1<IntOrFloat> semantics; //!< E.g. oscil params or random seed (e.g. 0...127)
@@ -494,25 +496,25 @@ private:
     bool m_require_update_request = false;
 
 public:
-    float get_freq(int freq_idx) const { return freqs[freq_idx]; }
-    IntOrFloat get_sem(int sem_idx) const { return semantics[sem_idx]; }
+    float get_freq(tensor_size_t freq_idx) const { return freqs[freq_idx]; }
+    IntOrFloat get_sem(tensor_size_t sem_idx) const { return semantics[sem_idx]; }
 
     // how many more const can you get into one line?
     const Tensor1<IntOrFloat>* const* get_semantics_addr() const { return &semantics_addr; }
     const Tensor1<float32>* const* get_freqs_addr() const { return &freqs_addr; }
 
     // ringbuffer stuff
-    int size_freqs() const { return freqs.size(); }
-    int size_semantics() const { return data.size(); }
-    int write_space_semantics(unsigned freq_idx) const { return data.ringbuffers[freq_idx].write_space(); }
-    int write_space_delayed_semantics(unsigned freq_idx) const { return data.ringbuffers[freq_idx].write_space_delayed(); }
-    int write_pos_semantics(unsigned freq_idx) const { return data.ringbuffers[freq_idx].write_pos(); }
-    int write_pos_delayed_semantics(unsigned freq_idx) const { return data.ringbuffers[freq_idx].write_pos_delayed(); }
-    void inc_read_pos_semantics(unsigned freq_idx) { data.ringbuffers[freq_idx].inc_read_pos(); }
-    void inc_write_pos_semantics(unsigned freq_idx, int amnt) { data.ringbuffers[freq_idx].inc_write_pos(amnt); }
-    void inc_write_pos_delayed_semantics(unsigned freq_idx, int amnt) { data.ringbuffers[freq_idx].inc_write_pos_delayed(amnt); }
+    AbstractRingbuffer::size_t size_freqs() const { return freqs.size(); }
+    AbstractRingbuffer::size_t size_semantics() const { return data.size(); }
+    AbstractRingbuffer::size_t write_space_semantics(tensor_size_t freq_idx) const { return data.ringbuffers[freq_idx].write_space(); }
+    AbstractRingbuffer::size_t write_space_delayed_semantics(tensor_size_t freq_idx) const { return data.ringbuffers[freq_idx].write_space_delayed(); }
+    AbstractRingbuffer::size_t write_pos_semantics(tensor_size_t freq_idx) const { return data.ringbuffers[freq_idx].write_pos(); }
+    AbstractRingbuffer::size_t write_pos_delayed_semantics(tensor_size_t freq_idx) const { return data.ringbuffers[freq_idx].write_pos_delayed(); }
+    void inc_read_pos_semantics(tensor_size_t freq_idx) { data.ringbuffers[freq_idx].inc_read_pos(); }
+    void inc_write_pos_semantics(tensor_size_t freq_idx, AbstractRingbuffer::size_t amnt) { data.ringbuffers[freq_idx].inc_write_pos(amnt); }
+    void inc_write_pos_delayed_semantics(tensor_size_t freq_idx, AbstractRingbuffer::size_t amnt) { data.ringbuffers[freq_idx].inc_write_pos_delayed(amnt); }
 
-    void dump_rb(unsigned freq_idx) const {
+    void dump_rb(tensor_size_t freq_idx) const {
 #ifdef DBG_WAVETABLES
         data.ringbuffers[freq_idx].AbstractRingbuffer::dump();
 #else
@@ -555,10 +557,10 @@ public:
     // Tensor2<float32> get_antialiased(void); // works for seed and seedless setups
     // Tensor2<float32> get_wavetablemod(float32 freq);
 
-    void setSemantic(std::size_t i, IntOrFloat val) { semantics[i] = val; }
-    void setFreq(std::size_t i, float32 val) { freqs[i] = val; }
-    void setDataAt(int semanticIdx, int freqIdx, float bufIdx, float to) { data[semanticIdx][freqIdx][bufIdx] = to; }
-    void swapDataAt(int semanticIdx, int freqIdx, Tensor1<float32>& new_data) {
+    void setSemantic(tensor_size_t i, IntOrFloat val) { semantics[i] = val; }
+    void setFreq(tensor_size_t i, float32 val) { freqs[i] = val; }
+    void setDataAt(tensor_size_t semanticIdx, tensor_size_t freqIdx, tensor_size_t bufIdx, float to) { data[semanticIdx][freqIdx][bufIdx] = to; }
+    void swapDataAt(tensor_size_t semanticIdx, tensor_size_t freqIdx, Tensor1<float32>& new_data) {
         data[semanticIdx][freqIdx].swapWith(new_data); }
 
     //! Insert generated data into this object
@@ -571,11 +573,11 @@ public:
 
     // future extension
     // Used to determine if new random seeds are needed
-    // std::size_t number_of_remaining_seeds(void);
+    // tensor_size_t number_of_remaining_seeds(void);
 
-    WaveTable(std::size_t buffersize);
+    WaveTable(tensor_size_t buffersize);
     //! Only alloc the tensor3, NOT the scales
-    WaveTable(int nsemantics, int nfreqs);
+    WaveTable(tensor_size_t nsemantics, tensor_size_t nfreqs);
     WaveTable(const WaveTable& other) = delete;
     WaveTable& operator=(const WaveTable& other) = delete;
     WaveTable(WaveTable&& other) = delete;

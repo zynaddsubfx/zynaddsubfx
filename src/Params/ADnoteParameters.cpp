@@ -354,9 +354,9 @@ static const Ports voicePorts = {
 #ifdef DBG_WAVETABLES
             {
                 Shape3 s = unused->debug_get_shape();
-                printf("WT: AD %s swapping tensor. New tensor dim: %lu %lu %lu\n",
+                printf("WT: AD %s swapping tensor. New tensor dim: %d %d %d\n",
                     (isFmSmp ? "FM" : "not-FM"),
-                    s.dim[0], s.dim[1], s.dim[2]);
+                    (int)s.dim[0], (int)s.dim[1], (int)s.dim[2]);
             }
 #endif
 
@@ -381,20 +381,26 @@ static const Ports voicePorts = {
             bool isFmSmp = rtosc_argument(msg, 0).T;
             int paramChangeTime = rtosc_argument(msg, 1).i;
             bool fromParamChange = !!paramChangeTime;
-            int freq_idx = rtosc_argument(msg, 2).i;
-            int sem_idx = -1; // optional
+            std::size_t freq_idx = (std::size_t)rtosc_argument(msg, 2).i;
+            auto all_semantics = []{ return std::numeric_limits<std::size_t>::max(); };
+            std::size_t sem_idx; // optional
             Tensor1<WaveTable::float32>* waves1;
             Tensor2<WaveTable::float32>* waves2;
             bool fillNext;
             if(rtosc_type(msg, 3) == 'i')
             {
-                sem_idx = rtosc_argument(msg, 3).i;
-                assert(sem_idx >= 0);
+                int sem_idx_int = rtosc_argument(msg, 3).i;
+                assert(sem_idx_int >= 0);
+                sem_idx = (tensor_size_t)sem_idx_int;
+                assert(sem_idx != all_semantics());
                 waves1 = *(Tensor1<WaveTable::float32>**)rtosc_argument(msg, 4).b.data;
+                waves2 = nullptr;
                 // if single semantic is specified ('i'), this just updates one
                 // element in the current table
                 fillNext = false;
             } else {
+                sem_idx = all_semantics();
+                waves1 = nullptr;
                 waves2 = *(Tensor2<WaveTable::float32>**)rtosc_argument(msg, 3).b.data;
                 // if all semantics are selected
                 // (no 'i'), this updates the "next" table
@@ -412,43 +418,44 @@ static const Ports voicePorts = {
                    paramChangeTime,
                    current->debug_get_timestamp_requested(), current->debug_get_timestamp_current(),
                    fromParamChange ? "yes" : "no", current->is_correct_timestamp(paramChangeTime) ? "yes" : "no",
-                   (sem_idx == -1) ? (void*)waves2 : (void*)waves1, (sem_idx == -1) ? "Tensor2" : "Tensor1", sem_idx, freq_idx);
+                   (sem_idx == all_semantics()) ? (void*)waves2 : (void*)waves1, (sem_idx == all_semantics()) ? "Tensor2" : "Tensor1",
+                   (int)sem_idx, (int)freq_idx);
 #endif
          // ignore outdated param changes, allow the rest:
             if(!fromParamChange || current->is_correct_timestamp(paramChangeTime))
             {
                 if(// no write position => fill all semantics at this frequency
-                   (sem_idx == -1 && wt->write_pos_delayed_semantics(freq_idx) == 0) ||
+                   (sem_idx == all_semantics() && wt->write_pos_delayed_semantics(freq_idx) == 0) ||
                    // write position just matches input
                    wt->write_pos_delayed_semantics(freq_idx) == sem_idx)
                 {
 #ifdef DBG_WAVETABLES
                     wt->dump_rb(freq_idx);
-                    printf("WS delayed: %d (freq %d), %d\n", wt->write_space_delayed_semantics(freq_idx), freq_idx, fromParamChange);
+                    printf("WS delayed: %d (freq %d), %d\n", (int)wt->write_space_delayed_semantics(freq_idx), (int)freq_idx, fromParamChange);
 #endif
                     assert(wt->write_space_delayed_semantics(freq_idx) > 0);
 
                     // the received Tensor2 may have different size than ours,
                     // so take what we need, bit by bit
-                    if(sem_idx == -1)
+                    if(sem_idx == all_semantics())
                     {
-                        int nwaves = waves2->size();
+                        std::size_t nwaves = waves2->size();
                         assert(nwaves <= wt->write_space_delayed_semantics(freq_idx));
-                        for(int sem_idx = 0; sem_idx < nwaves; ++sem_idx)
+                        for(std::size_t sem_idx = 0; sem_idx < nwaves; ++sem_idx)
                         {
                             Tensor1<WaveTable::float32>& unusedWave = (*waves2)[sem_idx];
                             wt->swapDataAt(sem_idx, freq_idx, unusedWave);
                         }
                         wt->inc_write_pos_delayed_semantics(freq_idx, nwaves);
                     } else {
-                            Tensor1<WaveTable::float32>& unusedWave = (*waves1);
-                            wt->swapDataAt(sem_idx, freq_idx, unusedWave);
-                            wt->inc_write_pos_delayed_semantics(freq_idx, 1);
+                        Tensor1<WaveTable::float32>& unusedWave = (*waves1);
+                        wt->swapDataAt(sem_idx, freq_idx, unusedWave);
+                        wt->inc_write_pos_delayed_semantics(freq_idx, 1);
                     }
 
                     // recycle the packaging
                     // this will also free the contained Tensor1 (which are useless after the swap)
-                    if(sem_idx == -1)
+                    if(sem_idx == all_semantics())
                         d.reply("/free", "sb", "Tensor2<WaveTable::float32>", sizeof(Tensor2<WaveTable::float32>*), &waves2);
                     else
                         d.reply("/free", "sb", "Tensor1<WaveTable::float32>", sizeof(Tensor1<WaveTable::float32>*), &waves1);
@@ -471,7 +478,7 @@ static const Ports voicePorts = {
                     // imply a programming error
                     printf("WARNING: MW sent (out-dated?) semantic \"%d\", "
                            "but the next required semantic is \"%d\" - ignoring!\n",
-                           sem_idx, wt->write_pos_delayed_semantics(freq_idx));
+                           (int)sem_idx, (int)wt->write_pos_delayed_semantics(freq_idx));
                     assert(false); // in debug mode, just abort now
                 }
             }
@@ -1632,17 +1639,17 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
 
         if(!wt->outdated())
         {
-            for(int freq_idx = 0; freq_idx < wt->size_freqs(); ++freq_idx)
+            for(tensor_size_t freq_idx = 0; freq_idx < wt->size_freqs(); ++freq_idx)
             {
-                int write_pos = wt->write_pos_semantics(freq_idx);
-                int write_space = wt->write_space_semantics(freq_idx);
+                tensor_size_t write_pos = wt->write_pos_semantics(freq_idx);
+                tensor_size_t write_space = wt->write_space_semantics(freq_idx);
 
                 if(write_space)
                 {
 #ifdef DBG_WAVETABLES
                     wt->dump_rb(freq_idx);
                     printf("WT: AD WT %p requesting %d new 2D Tensors at position %d (reason: too many consumed) %p %p...\n",
-                           wt, write_space, write_pos, wt->get_freqs_addr(), wt->get_semantics_addr());
+                           wt, (int)write_space, (int)write_pos, wt->get_freqs_addr(), wt->get_semantics_addr());
 #endif
                     // max. number of semantics is 512 (TODO: not hard coded),
                     // *4 because 4 params per semantic (for loop below),
@@ -1668,12 +1675,12 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
                     // wavetable parameters (Presonance)
                     *sptr++ = 'i'; aptr++->i = isFmSmp ? 0 : (int)Presonance;
                     // semantics and freqs of waves that need to be regenerated
-                    int imax = write_pos + write_space;
+                    tensor_size_t imax = write_pos + write_space;
                     assert(imax < (int)(sizeof(argstr)/sizeof(argstr[0])));
                     const char semType = wt->mode() == WaveTable::WtMode::freqwave_smps ? 'f' : 'i';
-                    for(int sem_idx_2 = write_pos; sem_idx_2 < imax; ++sem_idx_2)
+                    for(tensor_size_t sem_idx_2 = write_pos; sem_idx_2 < imax; ++sem_idx_2)
                     {
-                        int sem_idx = sem_idx_2 % wt->size_semantics();
+                        tensor_size_t sem_idx = sem_idx_2 % wt->size_semantics();
                         *sptr++ = 'i'; aptr++->i = sem_idx;
                         *sptr++ = 'i'; aptr++->i = freq_idx;
                         *sptr++ = semType;

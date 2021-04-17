@@ -642,7 +642,13 @@ public:
         bool isFm;
         int param_change_time;
         int presonance;
-        struct wave_request { int sem_idx; int freq_idx; WaveTable::IntOrFloat sem; float freq; };
+        struct wave_request
+        {
+            tensor_size_t sem_idx;
+            tensor_size_t freq_idx;
+            WaveTable::IntOrFloat sem;
+            float freq;
+        };
         //! specific sem/freq, if not the whole wavetable shall be generated
         std::vector<wave_request> wave_requests;
     };
@@ -1059,7 +1065,7 @@ public:
                     // if no wave requests, this means generate a completely new
                     // wavetable
 
-                    const WaveTable* wt;
+                    const WaveTable* wt = nullptr;
                     if(!params.wave_requests.size())
                     {
                         Tensor1<WaveTable::float32>* unused_freqs; // non-constant
@@ -1083,14 +1089,13 @@ public:
                                     params.isFm ? "Tb" : "Fb", sizeof(WaveTable*), (uint8_t*)&wt);
 
 #ifdef DBG_WAVETABLES
-                        printf("WT: MW generated new scales, sizes: %d %d\n", freqs.size(), semantics.size());
+                        printf("WT: MW generated new scales, sizes: %d %d\n", (int)wt->size_freqs(), (int)wt->size_semantics());
 #endif
                     }
 
 #ifdef DBG_WAVETABLES
-                    printf("WT: MW must generate: %s (FM: %s), resonance %d, %p (%d) %p (%d)\n",
-                        params.voicePath.c_str(), params.isFm ? "true":"false", params.presonance,
-                        &freqs, freqs.size(), &semantics, semantics.size());
+                    printf("WT: MW must generate: %s (FM: %s), resonance %d\n",
+                        params.voicePath.c_str(), params.isFm ? "true":"false", params.presonance);
 #endif
                     assert(oscilGen);
                     assert(!params.isFm || params.presonance == 0);
@@ -1117,20 +1122,19 @@ public:
                     else
                     {
 #ifdef DBG_WAVETABLES
-                        printf("WT: MW generating %d new tensors of %d waves each...\n", semantics.size(), freqs.size());
+                        printf("WT: MW generating %d new tensors of %d waves each...\n", (int)wt->size_semantics(), (int)wt->size_freqs());
 #endif
-                        for(int i = 0; i < wt->size_freqs(); ++i)
+                        for(tensor_size_t i = 0; i < wt->size_freqs(); ++i)
                         {
-                            const Shape2 tensorShape{(size_t)wt->size_semantics(),
-                                                     (size_t)synth.oscilsize};
+                            const Shape2 tensorShape{wt->size_semantics(),
+                                                     (tensor_size_t)synth.oscilsize};
                             Tensor2<WaveTable::float32>* newTensor =
                                 new Tensor2<WaveTable::float32>(tensorShape, tensorShape);
                             // TODO: the 2nd dim (float buffer) is not resized... (but it's not used right now)
                             //newTensor->resize(Shape1{(size_t)params.freqs->size()});
 
-                            // TODO: remove those casts everywhere, elliminate std::size_t...
-                            int f = i % (int)wt->size_freqs();
-                            for(int s = 0; s < (int)wt->size_semantics(); ++s)
+                            tensor_size_t f = i % wt->size_freqs();
+                            for(tensor_size_t s = 0; s < wt->size_semantics(); ++s)
                             {
                                 WaveTable::float32* data = oscilGen->calculateWaveTableData(
                                     wt->get_freq(f), wt->get_sem(s), params.presonance);
@@ -1141,7 +1145,7 @@ public:
                             }
 
 #ifdef DBG_WAVETABLES
-                            printf("WT: MW sending tensor at freq %d\n", f);
+                            printf("WT: MW sending tensor at freq %d\n", (int)f);
 #endif
                             // no snoop ports, send this directly to RT
                             uToB->write((params.voicePath + "set-waves").c_str(), params.isFm ? "Tiib" : "Fiib", params.param_change_time, f, sizeof(Tensor2<WaveTable::float32>*), (uint8_t*)&newTensor);
@@ -2247,8 +2251,8 @@ static rtosc::Ports middlewareReplyPorts = {
                 sem.floatVal = rtosc_argument(msg, argpos+2).f;
             else assert(false);
             wt2g.wave_requests.push_back(MiddleWareImpl::waveTablesToGenerateStruct::wave_request{
-                .sem_idx = rtosc_argument(msg, argpos).i,
-                .freq_idx = rtosc_argument(msg, argpos+1).i,
+                .sem_idx = (tensor_size_t)rtosc_argument(msg, argpos).i,
+                .freq_idx = (tensor_size_t)rtosc_argument(msg, argpos+1).i,
                 .sem = sem,
                 .freq = rtosc_argument(msg, argpos+3).f
             });

@@ -41,6 +41,8 @@ namespace wavetable_types
     };
 }
 
+using tensor_size_t = std::size_t;
+
 //! Tensor class for all dimensions != 1
 template <std::size_t N, class T>
 class Tensor;
