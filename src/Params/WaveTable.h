@@ -322,6 +322,7 @@ public:
 };
 
 //! Tensor class for dimension 1
+//! TODO: rule of 5 everywhere?
 template <class T>
 class Tensor<1, T> : public TensorBase<1, T>
 {
@@ -366,6 +367,11 @@ public:
     {
         TensorBase<1, T>::swapWith(other);
         std::swap(m_data, other.m_data);
+    }
+
+    void take_data_and_own_it(T* new_data)
+    {
+        m_data = new_data;
     }
 
     /*

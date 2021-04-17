@@ -1111,9 +1111,7 @@ public:
                             Tensor1<WaveTable::float32>* newTensor = new Tensor1<WaveTable::float32>(synth.oscilsize);
                             WaveTable::float32* data = oscilGen->calculateWaveTableData(
                                 wave_req.freq, wave_req.sem, params.presonance);
-                            // TODO: take ownership and not delete[]? (also in the else part)
-                            newTensor->debug_set_data_using_deep_copy(data);
-                            delete[] data;
+                            newTensor->take_data_and_own_it(data);
                             // this actually just sets "one" wave
                             uToB->write((params.voicePath + "set-waves").c_str(), params.isModOsc ? "Tiiib" : "Fiiib",
                                         params.param_change_time, wave_req.freq_idx, wave_req.sem_idx, sizeof(Tensor1<WaveTable::float32>*), (uint8_t*)&newTensor);
@@ -1138,9 +1136,7 @@ public:
                             {
                                 WaveTable::float32* data = oscilGen->calculateWaveTableData(
                                     wt->get_freq(f), wt->get_sem(s), params.presonance);
-                                // TODO: take ownership and not delete[]? (also in the if part)
-                                (*newTensor)[s].debug_set_data_using_deep_copy(data);
-                                delete[] data;
+                                (*newTensor)[s].take_data_and_own_it(data);
                                 // TODO: maybe let calculateWaveTableData already access the Tensor
                                 //       then we save this alloc-copy-dealloc
                             }
