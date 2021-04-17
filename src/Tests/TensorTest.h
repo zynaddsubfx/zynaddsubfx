@@ -277,4 +277,15 @@ class TensorTest : public CxxTest::TestSuite
             TS_ASSERT_EQUALS(t11[0], 2);
             TS_ASSERT_EQUALS(t11[1], 3);
         }
+
+        void testFindBestIndex(){
+            wavetable_types::float32 raw[] = { 55.f, 110.f, 220.f };
+            Tensor<1, wavetable_types::float32> freqs(sizeof(raw)/sizeof(raw[0]));
+            freqs.debug_set_data_using_deep_copy(raw);
+            TS_ASSERT_EQUALS(findBestIndex(freqs, -1.f), 0);
+            TS_ASSERT_EQUALS(findBestIndex(freqs, 0.f), 0);
+            TS_ASSERT_EQUALS(findBestIndex(freqs, 110.f), 1);
+            TS_ASSERT_EQUALS(findBestIndex(freqs, 220.f), 2);
+            TS_ASSERT_EQUALS(findBestIndex(freqs, 440.f), 2);
+        }
 };

@@ -411,6 +411,8 @@ public:
     Shape<1> debug_get_shape() const { return Shape<1>{base_type::size()}; }
 };
 
+tensor_size_t findBestIndex(const Tensor<1, wavetable_types::float32>& freqs, float freq);
+
 using Shape1 = Shape<1>;
 using Shape2 = Shape<2>;
 using Shape3 = Shape<3>;

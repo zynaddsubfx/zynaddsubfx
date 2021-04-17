@@ -24,7 +24,7 @@
 
 namespace zyn {
 
-const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
+tensor_size_t findBestIndex(const Tensor<1, wavetable_types::float32>& freqs, float freq)
 {
     tensor_size_t num_freqs = freqs.size(), i;
     float bestFreqDist = 9999999;
@@ -45,6 +45,12 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
         }
     }
     assert(bestI < num_freqs);
+    return bestI;
+}
+
+const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
+{
+    tensor_size_t bestI = findBestIndex(freqs, freq);
 
     AbstractRingbuffer& rb = data.ringbuffers[bestI];
     assert(data[rb.read_pos()].size() == freqs.size());
