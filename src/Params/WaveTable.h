@@ -86,7 +86,7 @@ protected:
     bool m_owner = true; //!< says if memory is owned by us
 
     TensorBase() : m_capacity(0), m_owner(false) {}
-    TensorBase(tensor_size_t capacity, tensor_size_t newsize) : m_capacity(capacity), m_owner(true) {};
+    TensorBase(tensor_size_t capacity) : m_capacity(capacity), m_owner(true) {};
     TensorBase(const TensorBase& other) = delete;
     TensorBase& operator=(const TensorBase& other) = delete;
     TensorBase(TensorBase&& other) = delete;
@@ -277,8 +277,8 @@ protected:
     }
 
 public:
-    Tensor(const Shape<N>& shape, const Shape<N>& ) :
-        TensorBase<N, T> (shape.dim[0], shape.dim[0]),
+    Tensor(const Shape<N>& shape) :
+        TensorBase<N, T> (shape.dim[0]),
         m_data(new SubTensor[base_type::capacity()])
     {
         init_shape_alloced(shape);
@@ -369,9 +369,9 @@ protected:
             m_data = new T[base_type::capacity()];
     }
 public:
-    Tensor(tensor_size_t capacity, tensor_size_t ) : TensorBase<1, T>(capacity, capacity),
+    Tensor(tensor_size_t capacity) : TensorBase<1, T>(capacity),
         m_data(capacity ? new T[capacity] : nullptr) {}
-    Tensor(const Shape<1>& shape, const Shape<1>& ) : Tensor(shape.dim[0], shape.dim[0]){}
+    Tensor(const Shape<1>& shape) : Tensor(shape.dim[0]){}
     ~Tensor() { delete[] m_data; }
     Tensor& operator=(Tensor&& other) {
         base_type::operator=(other);
@@ -435,8 +435,8 @@ class Tensor3ForWaveTable : public Tensor<3, wavetable_types::float32>
     using base_type = Tensor<3, wavetable_types::float32>;
 
 public:
-    Tensor3ForWaveTable(const Shape<3>& shape, const Shape<3>& )
-        : base_type(shape, shape), ringbuffers(shape.dim[1], shape.dim[1])
+    Tensor3ForWaveTable(const Shape<3>& shape)
+        : base_type(shape), ringbuffers(shape.dim[1])
     {
         // TODO: tensor iterator?
         for(unsigned i = 0; i < shape.dim[1]; ++i)

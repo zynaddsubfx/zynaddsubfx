@@ -72,17 +72,17 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
 }
 
 WaveTable::WaveTable(tensor_size_t buffersize) :
-    semantics(Shape1{1}, Shape1{0}),
-    freqs(Shape1{1}, Shape1{0}),
-    data(Shape3{1, 1, buffersize}, Shape3{0, 0, 0})
+    semantics(Shape1{1}),
+    freqs(Shape1{1}),
+    data(Shape3{1, 1, buffersize})
 {
     setMode(WtMode::freq_smps);
 }
 
 WaveTable::WaveTable(tensor_size_t nsemantics, tensor_size_t nfreqs) :
-    semantics(Shape1{0}, Shape1{0}),
-    freqs(Shape1{0}, Shape1{0}),
-    data(Shape3{nsemantics, nfreqs, 0}, Shape3{0, 0, 0})
+    semantics(Shape1{0}),
+    freqs(Shape1{0}),
+    data(Shape3{nsemantics, nfreqs, 0})
 {
     setMode(WtMode::freq_smps);
 }

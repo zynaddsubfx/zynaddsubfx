@@ -1108,7 +1108,7 @@ public:
 #endif
                         for(const waveTablesToGenerateStruct::wave_request& wave_req : params.wave_requests)
                         {
-                            Tensor1<WaveTable::float32>* newTensor = new Tensor1<WaveTable::float32>(synth.oscilsize, synth.oscilsize);
+                            Tensor1<WaveTable::float32>* newTensor = new Tensor1<WaveTable::float32>(synth.oscilsize);
                             WaveTable::float32* data = oscilGen->calculateWaveTableData(
                                 wave_req.freq, wave_req.sem, params.presonance);
                             // (TODO) take ownership and not delete[]? (also in the else part)
@@ -1129,7 +1129,7 @@ public:
                             const Shape2 tensorShape{wt->size_semantics(),
                                                      (tensor_size_t)synth.oscilsize};
                             Tensor2<WaveTable::float32>* newTensor =
-                                new Tensor2<WaveTable::float32>(tensorShape, tensorShape);
+                                new Tensor2<WaveTable::float32>(tensorShape);
                             // TODO: the 2nd dim (float buffer) is not resized... (but it's not used right now)
                             //newTensor->resize(Shape1{(size_t)params.freqs->size()});
 

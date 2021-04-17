@@ -53,8 +53,7 @@ class OscilGen:public Presets
         void convert2sine();
 
         //! initial calculation for pre-allocated wavetable, no allocations
-        //! @param fillWithZeroes if true, all buffers will be zero, and no random will be consumed
-        void recalculateDefaultWaveTable(WaveTable*, bool fillWithZeroes = false) const;
+        void recalculateDefaultWaveTable(WaveTable*) const;
         //! allocating a wavetable with full capacity and without any waves
         WaveTable *allocWaveTable() const;
         //! calculate the wave table audio buffers
@@ -65,7 +64,7 @@ class OscilGen:public Presets
         wavetable_types::WtMode calculateWaveTableMode() const;
         //! calculate freqs + semantics
         std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloat>*>
-            calculateWaveTableScales(wavetable_types::WtMode wtMode, bool fillWithZeroes = false) const;
+            calculateWaveTableScales(wavetable_types::WtMode wtMode) const;
 
         //Parameters
 

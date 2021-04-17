@@ -498,7 +498,7 @@ wavetable_types::WtMode OscilGen::calculateWaveTableMode() const
 }
 
 std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloat>*> OscilGen::calculateWaveTableScales(
-    wavetable_types::WtMode wtMode, bool fillWithZeroes) const
+    wavetable_types::WtMode wtMode) const
 {
     Tensor1<wavetable_types::float32>* freqs;
     Tensor1<wavetable_types::IntOrFloat>* semantics;
@@ -510,26 +510,16 @@ std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloa
         std::size_t sem_sz = (wtMode == WtMode::freqseed_smps)
                              ? WaveTable::num_semantics : 1;
 
-        freqs = new Tensor1<wavetable_types::float32>(freq_sz, freq_sz);
-        semantics = new Tensor1<wavetable_types::IntOrFloat>(sem_sz, sem_sz);
+        freqs = new Tensor1<wavetable_types::float32>(freq_sz);
+        semantics = new Tensor1<wavetable_types::IntOrFloat>(sem_sz);
     }
 
     // semantics
     if(wtMode == WtMode::freqseed_smps)
     {
-        if(fillWithZeroes)
+        for(tensor_size_t i = 0; i < semantics->size(); ++i)
         {
-            for(tensor_size_t i = 0; i < semantics->size(); ++i)
-            {
-                (*semantics)[i].intVal = (int)i; // do not consume any random
-            }
-        }
-        else
-        {
-            for(tensor_size_t i = 0; i < semantics->size(); ++i)
-            {
-                (*semantics)[i].intVal = prng();
-            }
+            (*semantics)[i].intVal = prng();
         }
     }
     else if(wtMode == WtMode::freq_smps)
@@ -567,7 +557,7 @@ WaveTable *OscilGen::allocWaveTable() const
     return new WaveTable(static_cast<std::size_t>(synth.oscilsize));
 }
 
-void OscilGen::recalculateDefaultWaveTable(WaveTable * wt, bool fillWithZeroes) const
+void OscilGen::recalculateDefaultWaveTable(WaveTable * wt) const
 {
     wt->setMode(WaveTable::WtMode::freq_smps);
 
