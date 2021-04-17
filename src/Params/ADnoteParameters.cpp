@@ -310,8 +310,8 @@ static const Ports voicePorts = {
             rObject *obj = (rObject *)d.obj;
             if(obj->waveTables)
             {
-                bool isFmSmp = rtosc_argument(msg, 0).T;
-                WaveTable* const wt = isFmSmp ? obj->tableFm : obj->table;
+                bool isModOsc = rtosc_argument(msg, 0).T;
+                WaveTable* const wt = isModOsc ? obj->tableMod : obj->table;
                 int param_change_time = rtosc_argument(msg, 1).i;
 #ifdef DBG_WAVETABLES
                 printf("WT: AD received /wavetable-params-changed (timestamp %d)...\n", param_change_time);
@@ -319,13 +319,13 @@ static const Ports voicePorts = {
                        wt);
 #endif
                 // give MW all it needs to generate the new table
-                d.reply("/request-wavetable", isFmSmp ? "sTii" : "sFii",
+                d.reply("/request-wavetable", isModOsc ? "sTii" : "sFii",
                         // path to this voice (T+F give the OscilGen of this voice)
                         d.loc,
                         // tensor relevant parameter change time
                         param_change_time,
                         // wavetable parameters (currently, only Presonance)
-                        isFmSmp ? 0 : (int)obj->Presonance);
+                        isModOsc ? 0 : (int)obj->Presonance);
                 // don't mark the whole ringbuffer (-1) as "write requested"
                 // because the current Tensor3 will be swapped before it will
                 // be refilled
@@ -347,15 +347,15 @@ static const Ports voicePorts = {
         [](const char *msg, RtData &d)
         {
             rObject *obj = (rObject *)d.obj;
-            bool isFmSmp = rtosc_argument(msg, 0).T;
+            bool isModOsc = rtosc_argument(msg, 0).T;
             WaveTable* unused = *(WaveTable**)rtosc_argument(msg, 1).b.data;
-            WaveTable* next = isFmSmp ? obj->nextTableFm : obj->nextTable;
+            WaveTable* next = isModOsc ? obj->nextTableMod : obj->nextTable;
 
 #ifdef DBG_WAVETABLES
             {
                 Shape3 s = unused->debug_get_shape();
                 printf("WT: AD %s swapping tensor. New tensor dim: %d %d %d\n",
-                    (isFmSmp ? "FM" : "not-FM"),
+                    (isModOsc ? "mod" : "not-mod"),
                     (int)s.dim[0], (int)s.dim[1], (int)s.dim[2]);
             }
 #endif
@@ -378,7 +378,7 @@ static const Ports voicePorts = {
             // take the passed waves
             rObject *obj = (rObject *)d.obj;
 
-            bool isFmSmp = rtosc_argument(msg, 0).T;
+            bool isModOsc = rtosc_argument(msg, 0).T;
             int paramChangeTime = rtosc_argument(msg, 1).i;
             bool fromParamChange = !!paramChangeTime;
             std::size_t freq_idx = (std::size_t)rtosc_argument(msg, 2).i;
@@ -408,13 +408,13 @@ static const Ports voicePorts = {
             }
             WaveTable* const wt =
                 fillNext
-                ? (isFmSmp ? obj->nextTableFm : obj->nextTable)
-                : (isFmSmp ? obj->tableFm : obj->table);
-            WaveTable* const current = (isFmSmp ? obj->tableFm : obj->table);
+                ? (isModOsc ? obj->nextTableMod : obj->nextTable)
+                : (isModOsc ? obj->tableMod : obj->table);
+            WaveTable* const current = (isModOsc ? obj->tableMod : obj->table);
 
 #ifdef DBG_WAVETABLES
             printf("WT: AD %s incoming timestamp %d (req,cur: %d/%d) (param change? %s, correct timestamp? %s): %p (%s), s %d, f %d...\n",
-                   (isFmSmp ? "FM" : "not-FM"),
+                   (isModOsc ? "mod" : "not-mod"),
                    paramChangeTime,
                    current->debug_get_timestamp_requested(), current->debug_get_timestamp_current(),
                    fromParamChange ? "yes" : "no", current->is_correct_timestamp(paramChangeTime) ? "yes" : "no",
@@ -818,7 +818,7 @@ void ADnoteVoiceParam::defaults()
     // in case of non wavetable mode, all buffers will be filled with zeroes to
     // avoid uninitialized reads
     OscilGn->recalculateDefaultWaveTable(table, !waveTables);
-    FmGn->recalculateDefaultWaveTable(tableFm, !waveTables);
+    FmGn->recalculateDefaultWaveTable(tableMod, !waveTables);
 }
 
 
@@ -857,9 +857,9 @@ void ADnoteVoiceParam::enable(const SYNTH_T &synth, FFTwrapper *fft,
     FMAmpEnvelope->init(ad_voice_fm_amp);
 
     table = OscilGn->allocWaveTable();
-    tableFm = FmGn->allocWaveTable();
+    tableMod = FmGn->allocWaveTable();
     nextTable = OscilGn->allocWaveTable();
-    nextTableFm = FmGn->allocWaveTable();
+    nextTableMod = FmGn->allocWaveTable();
 }
 
 /*
@@ -897,9 +897,9 @@ void ADnoteParameters::KillVoice(int nvoice)
 void ADnoteVoiceParam::kill()
 {
     delete table;
-    delete tableFm;
+    delete tableMod;
     delete nextTable;
-    delete nextTableFm;
+    delete nextTableMod;
 
     delete OscilGn;
     delete FmGn;
@@ -1405,7 +1405,7 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     }
 
     table->require_update_request();
-    tableFm->require_update_request();
+    tableMod->require_update_request();
 }
 
 void ADnoteGlobalParam::paste(ADnoteGlobalParam &a)
@@ -1616,7 +1616,7 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
     }
 
     table->require_update_request();
-    tableFm->require_update_request();
+    tableMod->require_update_request();
 }
 
 void ADnoteParameters::requestWavetables(rtosc::ThreadLink* bToU, int part, int kit)
@@ -1632,11 +1632,11 @@ void ADnoteParameters::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
 
 void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int kit, int voice)
 {
-    const bool notFmAndFm[] = { false, true };
-    for(bool isFmSmp : notFmAndFm)
+    const bool notModAndMod[] = { false, true };
+    for(bool isModOsc : notModAndMod)
     {
         // give MW all it needs to generate the new table
-        WaveTable* const wt = isFmSmp ? tableFm : table;
+        WaveTable* const wt = isModOsc ? tableMod : table;
 
         if(!wt->outdated())
         {
@@ -1656,7 +1656,7 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
                     // *4 because 4 params per semantic (for loop below),
                     // *2 because of ~8 preceding args:
                     char argstr[4096] = { 'i', 'i', 'i', // path
-                                          isFmSmp ? 'T' : 'F',
+                                          isModOsc ? 'T' : 'F',
                                           'i', // parameter change time (0)
                                           'i', 'i', // write pos + space
                                           'i', // wavetable params (Presonance)
@@ -1670,11 +1670,11 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
                     *sptr++ = 'i'; aptr++->i = part;
                     *sptr++ = 'i'; aptr++->i = kit;
                     *sptr++ = 'i'; aptr++->i = voice;
-                    *sptr++ = isFmSmp ? 'T' : 'F';
+                    *sptr++ = isModOsc ? 'T' : 'F';
                     // parameter change time (none)
                     *sptr++ = 'i'; aptr++->i = 0;
                     // wavetable parameters (Presonance)
-                    *sptr++ = 'i'; aptr++->i = isFmSmp ? 0 : (int)Presonance;
+                    *sptr++ = 'i'; aptr++->i = isModOsc ? 0 : (int)Presonance;
                     // semantics and freqs of waves that need to be regenerated
                     tensor_size_t imax = write_pos + write_space;
                     assert(imax < (int)(sizeof(argstr)/sizeof(argstr[0])));
@@ -1707,13 +1707,13 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
                    wt);
 #endif
 
-            bToU->write("/request-wavetable", isFmSmp ? "iiiTii" : "iiiFii",
+            bToU->write("/request-wavetable", isModOsc ? "iiiTii" : "iiiFii",
                     // path to this voice (T+F give the OscilGen of this voice)
                     part, kit, voice,
                     // tensor relevant parameter change time (none)
                     0,
                     // wavetable parameters (currently, only Presonance)
-                    isFmSmp ? 0 : (int)Presonance);
+                    isModOsc ? 0 : (int)Presonance);
             // don't mark the whole ringbuffer (-1) as "write requested"
             // because the current Tensor3 will be swapped before it will
             // be refilled
@@ -1722,7 +1722,7 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
             wt->update_request_sent();
         }
 
-    } // notFmAndFm
+    } // notModAndMod
 }
 
 }

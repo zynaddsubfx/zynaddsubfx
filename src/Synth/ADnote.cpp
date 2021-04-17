@@ -473,8 +473,8 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
         {
             if(waveTables)
             {
-                assert(pars.VoicePar[vc].tableFm); // did you allocate ADnoteParameters and not assign its "table" member?
-                const float* bufferInTable = pars.VoicePar[vc].tableFm->get(tmp).data();
+                assert(pars.VoicePar[vc].tableMod); // did you allocate ADnoteParameters and not assign its "table" member?
+                const float* bufferInTable = pars.VoicePar[vc].tableMod->get(tmp).data();
                 std::copy(bufferInTable, bufferInTable + synth.oscilsize, voice.FMSmp);
                 voice.oscposhiFM[k] = pars.VoicePar[vc].OscilGn->getFinalOutpos() % synth.oscilsize;
             }
@@ -952,8 +952,8 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
             {
                 if(waveTables)
                 {
-                    assert(pars.VoicePar[vc].tableFm); // did you allocate ADnoteParameters and not assign its "table" member?
-                    const float* bufferInTable = pars.VoicePar[vc].tableFm->get(tmp).data();
+                    assert(pars.VoicePar[vc].tableMod); // did you allocate ADnoteParameters and not assign its "table" member?
+                    const float* bufferInTable = pars.VoicePar[vc].tableMod->get(tmp).data();
                     std::copy(bufferInTable, bufferInTable + synth.oscilsize, vce.FMSmp);
                     vce.oscposhiFM[k] = pars.VoicePar[vc].OscilGn->getFinalOutpos() % synth.oscilsize;
                 }

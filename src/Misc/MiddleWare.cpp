@@ -283,9 +283,9 @@ public:
     //! if not already done, inform RT that params relevant for wavetable
     //! calculation failed. if freqs or semantics could have changed, send those
     //! aswell.
-    void chainWtParamRequest(int part, int kit, int voice, bool isFm, rtosc::RtData& d)
+    void chainWtParamRequest(int part, int kit, int voice, bool isModOsc, rtosc::RtData& d)
     {
-        info_t& cur_info = info[part][kit][voice][isFm];
+        info_t& cur_info = info[part][kit][voice][isModOsc];
         if(!cur_info.waitForAdPars)
         {
 #ifdef DBG_WAVETABLES
@@ -294,19 +294,19 @@ public:
             std::string s = buildVoiceParMsg(&part, &kit, &voice);
             cur_info.waitForAdPars = true;
             ++cur_info.param_change_time;
-            d.chain((s + "/wavetable-params-changed").c_str(), isFm ? "Ti" : "Fi",
+            d.chain((s + "/wavetable-params-changed").c_str(), isModOsc ? "Ti" : "Fi",
                     cur_info.param_change_time);
         }
     }
 
-    void receivedAdPars(int part, int kit, int voice, bool isFm)
+    void receivedAdPars(int part, int kit, int voice, bool isModOsc)
     {
-        info[part][kit][voice][isFm].waitForAdPars = false;
+        info[part][kit][voice][isModOsc].waitForAdPars = false;
     }
 
-    bool isParamChangeUpToDate(int part, int kit, int voice, bool isFm, int current) const
+    bool isParamChangeUpToDate(int part, int kit, int voice, bool isModOsc, int current) const
     {
-        info_t cur_info = info[part][kit][voice][isFm];
+        info_t cur_info = info[part][kit][voice][isModOsc];
         bool up_to_date;
         if(current)
         {
@@ -347,29 +347,29 @@ public:
             pasteState[p][k][v][i] = pasteStateType::notInUse;
     }
 
-    void notifyPasteDone(int part, int kit, int voice, bool isFm)
+    void notifyPasteDone(int part, int kit, int voice, bool isModOsc)
     {
 #ifdef DBG_PASTE_STATE_HANDLER
-        printf("paste done: %d %d %d %s\n", part, kit, voice, isFm?"Fm":"Oscil");
+        printf("paste done: %d %d %d %s\n", part, kit, voice, isModOsc?"Mod-Oscil":"Oscil");
 #endif
-        pasteState[part][kit][voice][isFm] = pasteStateType::notInUse;
+        pasteState[part][kit][voice][isModOsc] = pasteStateType::notInUse;
     }
 
-    void notifyPasteBegin(int part, int kit, int voice, bool isFm)
+    void notifyPasteBegin(int part, int kit, int voice, bool isModOsc)
     {
 #ifdef DBG_PASTE_STATE_HANDLER
-        printf("paste begin: %d %d %d %s\n", part, kit, voice, isFm?"Fm":"Oscil");
+        printf("paste begin: %d %d %d %s\n", part, kit, voice, isModOsc?"Mod-Oscil":"Oscil");
 #endif
-        pasteState[part][kit][voice][isFm] = pasteStateType::inProgress;
+        pasteState[part][kit][voice][isModOsc] = pasteStateType::inProgress;
     }
 
-    bool isPasteInProgress(int part, int kit, int voice, bool isFm) const
+    bool isPasteInProgress(int part, int kit, int voice, bool isModOsc) const
     {
 #ifdef DBG_PASTE_STATE_HANDLER
-        printf("paste in progress? %d %d %d %s -> %s\n", part, kit, voice, isFm?"Fm":"Oscil",
-               pasteState[part][kit][voice][isFm] == pasteStateType::inProgress ? "yes":"no");
+        printf("paste in progress? %d %d %d %s -> %s\n", part, kit, voice, isModOsc?"Mod-Oscil":"Oscil",
+               pasteState[part][kit][voice][isModOsc] == pasteStateType::inProgress ? "yes":"no");
 #endif
-        return pasteState[part][kit][voice][isFm] == pasteStateType::inProgress;
+        return pasteState[part][kit][voice][isModOsc] == pasteStateType::inProgress;
     }
 };
 
@@ -454,7 +454,7 @@ struct NonRtObjStore
     }
 
     //! try to dispatch a message at the OscilGen ports, which are all non-RT
-    void handleOscilADnote(const char *msg, bool isFm, rtosc::RtData &d,
+    void handleOscilADnote(const char *msg, bool isModOsc, rtosc::RtData &d,
                            WaveTableRequestHandler& handler,
                            const PasteStateHandler& pasteStateHandler) {
         if(strstr(msg, "paste")) {
@@ -465,7 +465,7 @@ struct NonRtObjStore
         int part, kit, voice;
         bool res = idsFromMsg(d.message, &part, &kit, &voice);
         assert(res);
-        if(pasteStateHandler.isPasteInProgress(part, kit, voice, isFm))
+        if(pasteStateHandler.isPasteInProgress(part, kit, voice, isModOsc))
         {
             printf("Dropped OscilGen Message because paste is in progress:\n");
             printf("  %s\n",msg);
@@ -498,7 +498,7 @@ struct NonRtObjStore
             }
             else {
                 // inform RT about new params
-                handler.chainWtParamRequest(part, kit, voice, isFm, d);
+                handler.chainWtParamRequest(part, kit, voice, isModOsc, d);
             }
         }
         else {
@@ -639,7 +639,7 @@ public:
     {
         std::string voicePath;
         int part, kit, voice; // redundant to voice path
-        bool isFm;
+        bool isModOsc;
         int param_change_time;
         int presonance;
         struct wave_request
@@ -1055,12 +1055,12 @@ public:
             {
                 waveTablesToGenerateStruct& params = waveTablesToGenerate.front();
                 if(waveTableRequestHandler.isParamChangeUpToDate(
-                    params.part, params.kit, params.voice, params.isFm,
+                    params.part, params.kit, params.voice, params.isModOsc,
                     params.param_change_time))
                 {
                     OscilGen* oscilGen = static_cast<OscilGen*>(
                          obj_store.get(params.voicePath +
-                                            (params.isFm ? "FMSmp/" : "OscilSmp/")));
+                                            (params.isModOsc ? "FMSmp/" : "OscilSmp/")));
 
                     // if no wave requests, this means generate a completely new
                     // wavetable
@@ -1086,7 +1086,7 @@ public:
                         // send Tensor3, it does not contain any buffers yet
                         // no snoop ports, send this directly to RT
                         uToB->write((params.voicePath + "set-wavetable").c_str(),
-                                    params.isFm ? "Tb" : "Fb", sizeof(WaveTable*), (uint8_t*)&wt);
+                                    params.isModOsc ? "Tb" : "Fb", sizeof(WaveTable*), (uint8_t*)&wt);
 
 #ifdef DBG_WAVETABLES
                         printf("WT: MW generated new scales, sizes: %d %d\n", (int)wt->size_freqs(), (int)wt->size_semantics());
@@ -1094,11 +1094,11 @@ public:
                     }
 
 #ifdef DBG_WAVETABLES
-                    printf("WT: MW must generate: %s (FM: %s), resonance %d\n",
-                        params.voicePath.c_str(), params.isFm ? "true":"false", params.presonance);
+                    printf("WT: MW must generate: %s (mod-osc: %s), resonance %d\n",
+                        params.voicePath.c_str(), params.isModOsc ? "true":"false", params.presonance);
 #endif
                     assert(oscilGen);
-                    assert(!params.isFm || params.presonance == 0);
+                    assert(!params.isModOsc || params.presonance == 0);
 
                     // calculate all freqs for all pending semantics
                     if(params.wave_requests.size())
@@ -1115,7 +1115,7 @@ public:
                             newTensor->set_data_using_deep_copy(data);
                             delete[] data;
                             // this actually just sets "one" wave
-                            uToB->write((params.voicePath + "set-waves").c_str(), params.isFm ? "Tiiib" : "Fiiib",
+                            uToB->write((params.voicePath + "set-waves").c_str(), params.isModOsc ? "Tiiib" : "Fiiib",
                                         params.param_change_time, wave_req.freq_idx, wave_req.sem_idx, sizeof(Tensor1<WaveTable::float32>*), (uint8_t*)&newTensor);
                         }
                     }
@@ -1148,7 +1148,7 @@ public:
                             printf("WT: MW sending tensor at freq %d\n", (int)f);
 #endif
                             // no snoop ports, send this directly to RT
-                            uToB->write((params.voicePath + "set-waves").c_str(), params.isFm ? "Tiib" : "Fiib", params.param_change_time, f, sizeof(Tensor2<WaveTable::float32>*), (uint8_t*)&newTensor);
+                            uToB->write((params.voicePath + "set-waves").c_str(), params.isModOsc ? "Tiib" : "Fiib", params.param_change_time, f, sizeof(Tensor2<WaveTable::float32>*), (uint8_t*)&newTensor);
                         }
                     }
                 }
@@ -1855,9 +1855,9 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
 
          {
              int part, kit, vc;
-             bool isFm;
-             if(idsFromMsg(url.c_str(), &part, &kit, &vc, &isFm)) {
-                 impl->pasteStateHandler.notifyPasteBegin(part, kit, vc, isFm);
+             bool isMod;
+             if(idsFromMsg(url.c_str(), &part, &kit, &vc, &isMod)) {
+                 impl->pasteStateHandler.notifyPasteBegin(part, kit, vc, isMod);
              }
          }
 
@@ -2227,15 +2227,15 @@ static rtosc::Ports middlewareReplyPorts = {
         else
         {
             // fill p/k/v
-            wt2g.part = rtosc_argument(msg, argpos++).i;
-            wt2g.kit = rtosc_argument(msg, argpos++).i;
+            wt2g.part  = rtosc_argument(msg, argpos++).i;
+            wt2g.kit   = rtosc_argument(msg, argpos++).i;
             wt2g.voice = rtosc_argument(msg, argpos++).i;
             // fill wt2g.voicePath
             wt2g.voicePath = buildVoiceParMsg(&wt2g.part, &wt2g.kit, &wt2g.voice) + "/";
         }
-        wt2g.isFm      = rtosc_argument(msg, argpos++).T;
+        wt2g.isModOsc          = rtosc_argument(msg, argpos++).T;
         wt2g.param_change_time = rtosc_argument(msg, argpos++).i;
-        wt2g.presonance = rtosc_argument(msg, argpos++).i;
+        wt2g.presonance        = rtosc_argument(msg, argpos++).i;
         unsigned nargs = rtosc_narguments(msg);
         for(; argpos < nargs; argpos+=4)
         {
@@ -2259,7 +2259,7 @@ static rtosc::Ports middlewareReplyPorts = {
         }
 
         // (TODO: might be done later when handling the queue)
-        impl.waveTableRequestHandler.receivedAdPars(wt2g.part, wt2g.kit, wt2g.voice, wt2g.isFm);
+        impl.waveTableRequestHandler.receivedAdPars(wt2g.part, wt2g.kit, wt2g.voice, wt2g.isModOsc);
 
         //printf("WT: MW received wt-request (timestamp %d), queuing...\n", wt2g.param_change_time);
         impl.addWaveTableToGenerate(std::move(wt2g));
@@ -2268,10 +2268,10 @@ static rtosc::Ports middlewareReplyPorts = {
         rBegin;
         std::string url = rtosc_argument(msg, 0).s;
         int part, kit, vc;
-        bool isFm;
-        std::size_t res = idsFromMsg(url.c_str(), &part, &kit, &vc, &isFm);
+        bool isModOsc;
+        std::size_t res = idsFromMsg(url.c_str(), &part, &kit, &vc, &isModOsc);
         if(res)
-            impl.pasteStateHandler.notifyPasteDone(part, kit, vc, isFm);
+            impl.pasteStateHandler.notifyPasteDone(part, kit, vc, isModOsc);
         printf("rPaste done.\n");
         // if URL ends on "/paste[^/]*", cut before the "/paste"
         string::size_type last_slash = url.rfind("/paste");
