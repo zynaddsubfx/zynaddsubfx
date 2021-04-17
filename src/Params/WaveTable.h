@@ -73,41 +73,37 @@ public:
     Common Tensor base class for all dimensions.
     Not copyable, not movable, but swappable.
 
-    m_usable <= m_size_planned <= m_capacity
+    m_usable <= m_size_planned <= m_size
     m_usable: data that has been generated and can be used
     m_size_planned: data that shall be generated (after generation,
                     m_usable == m_size_planned)
-    m_capacity: allocated size
+    m_size: allocated size
 */
 template <tensor_size_t N, class T>
 class TensorBase
 {
 protected:
-    tensor_size_t m_capacity;
-    bool m_owner = true; //!< says if memory is owned by us
+    tensor_size_t m_size;
 
-    TensorBase() : m_capacity(0), m_owner(false) {}
-    TensorBase(tensor_size_t capacity) : m_capacity(capacity), m_owner(true) {};
+    TensorBase() : m_size(0) {}
+    TensorBase(tensor_size_t size) : m_size(size) {}
     TensorBase(const TensorBase& other) = delete;
     TensorBase& operator=(const TensorBase& other) = delete;
     TensorBase(TensorBase&& other) = delete;
     TensorBase& operator=(TensorBase&& other) = delete;
 
 public:
-    tensor_size_t capacity() const { return m_capacity; }
-
-    tensor_size_t size() const { return capacity(); }
+    tensor_size_t size() const { return m_size; }
 
 protected:
-    void set_capacity(tensor_size_t new_capacity) { m_capacity = new_capacity; m_owner = true; }
+    void set_size(tensor_size_t new_size) { m_size = new_size; }
     bool operator==(const TensorBase<N, T>& other) const {
-        return m_capacity == other.m_capacity;
+        return m_size == other.m_size;
     }
 
     void swapWith(Tensor<N,T>& other)
     {
-        std::swap(m_capacity, other.m_capacity);
-        std::swap(m_owner, other.m_owner);
+        std::swap(m_size, other.m_size);
     }
 };
 
@@ -238,7 +234,7 @@ class Tensor : public TensorBase<N, T>
     void init_shape_alloced(const Shape<N>& shape)
     {
         Shape<N-1> proj = shape.proj();
-        for(tensor_size_t i = 0; i < base_type::capacity(); ++i)
+        for(tensor_size_t i = 0; i < base_type::size(); ++i)
         {
             m_data[i].init_shape(proj);
         }
@@ -249,15 +245,15 @@ protected:
     void init_shape(const Shape<N>& shape)
     {
         assert(!m_data);
-        base_type::set_capacity(shape.dim[0]);
-        m_data = new SubTensor[base_type::capacity()];
+        base_type::set_size(shape.dim[0]);
+        m_data = new SubTensor[base_type::size()];
         init_shape_alloced(shape);
     }
 
 public:
     Tensor(const Shape<N>& shape) :
         TensorBase<N, T> (shape.dim[0]),
-        m_data(new SubTensor[base_type::capacity()])
+        m_data(new SubTensor[base_type::size()])
     {
         init_shape_alloced(shape);
     }
@@ -280,7 +276,7 @@ public:
     bool operator==(const Tensor<N, T>& other) const
     {
         bool equal = base_type::operator==(other);
-        for(tensor_size_t i = 0; equal && i < base_type::capacity(); ++i)
+        for(tensor_size_t i = 0; equal && i < base_type::size(); ++i)
         {
             equal = m_data[i].operator==(other.m_data[i]);
         }
@@ -309,9 +305,9 @@ public:
         return consumed;
     }
 
-    Shape<N> capacity_shape() const {
-        if(base_type::capacity()) {
-            return m_data[0].capacity_shape().prepend_dim(base_type::capacity());
+    Shape<N> size_shape() const {
+        if(base_type::size()) {
+            return m_data[0].size_shape().prepend_dim(base_type::size());
         }
         else {
             Shape<N> res;
@@ -339,13 +335,13 @@ protected:
     void init_shape(const Shape<1>& shape)
     {
         assert(!m_data);
-        base_type::set_capacity(shape.dim[0]);
-        if(base_type::capacity())
-            m_data = new T[base_type::capacity()];
+        base_type::set_size(shape.dim[0]);
+        if(base_type::size())
+            m_data = new T[base_type::size()];
     }
 public:
-    Tensor(tensor_size_t capacity) : TensorBase<1, T>(capacity),
-        m_data(capacity ? new T[capacity] : nullptr) {}
+    Tensor(tensor_size_t size) : TensorBase<1, T>(size),
+        m_data(size ? new T[size] : nullptr) {}
     Tensor(const Shape<1>& shape) : Tensor(shape.dim[0]){}
     ~Tensor() { delete[] m_data; }
     Tensor& operator=(Tensor&& other) {
@@ -376,10 +372,10 @@ public:
     tensor_size_t set_data_using_deep_copy(const T* new_data)
     {
         std::copy(new_data, new_data+base_type::size(), m_data);
-        return base_type::capacity();
+        return base_type::size();
     }
 
-    Shape<1> capacity_shape() const { return Shape<1>{base_type::capacity()}; }
+    Shape<1> size_shape() const { return Shape<1>{base_type::size()}; }
 
     void swapWith(Tensor<1,T>& other)
     {
@@ -487,7 +483,7 @@ public:
     bool update_request_required() const { return m_require_update_request; }
     void update_request_sent() { m_require_update_request = false; }
 
-    Shape3 debug_get_shape() const { return data.capacity_shape(); }
+    Shape3 debug_get_shape() const { return data.size_shape(); }
 
     void swapSemanticsInitially(Tensor1<IntOrFloat>& unused) { semantics.swapWith(unused); }
     void swapFreqsInitially(Tensor1<float32>& unused) { freqs.swapWith(unused); }

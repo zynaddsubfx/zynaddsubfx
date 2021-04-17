@@ -266,10 +266,10 @@ class TensorTest : public CxxTest::TestSuite
             int exp21[] = {4,5,6,7};
             int exp10[] = {0,1};
             int exp11[] = {2,3};
-            Tensor2<int> texp20(t20.capacity_shape()); texp20.set_data_using_deep_copy(exp20);
-            Tensor2<int> texp21(t20.capacity_shape()); texp21.set_data_using_deep_copy(exp21);
-            Tensor1<int> texp10(t10.capacity_shape()); texp10.set_data_using_deep_copy(exp10);
-            Tensor1<int> texp11(t10.capacity_shape()); texp11.set_data_using_deep_copy(exp11);
+            Tensor2<int> texp20(t20.size_shape()); texp20.set_data_using_deep_copy(exp20);
+            Tensor2<int> texp21(t20.size_shape()); texp21.set_data_using_deep_copy(exp21);
+            Tensor1<int> texp10(t10.size_shape()); texp10.set_data_using_deep_copy(exp10);
+            Tensor1<int> texp11(t10.size_shape()); texp11.set_data_using_deep_copy(exp11);
             MY_TS_ASSERT_EQUALS(t20, texp20);
             MY_TS_ASSERT_EQUALS(t21, texp21);
             MY_TS_ASSERT_EQUALS(t10, texp10);
