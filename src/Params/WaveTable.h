@@ -82,29 +82,29 @@ public:
 template <tensor_size_t N, class T>
 class TensorBase
 {
-protected:
     tensor_size_t m_size;
 
-    TensorBase() : m_size(0) {}
-    TensorBase(tensor_size_t size) : m_size(size) {}
     TensorBase(const TensorBase& other) = delete;
     TensorBase& operator=(const TensorBase& other) = delete;
     TensorBase(TensorBase&& other) = delete;
     TensorBase& operator=(TensorBase&& other) = delete;
 
-public:
-    tensor_size_t size() const { return m_size; }
-
 protected:
-    void set_size(tensor_size_t new_size) { m_size = new_size; }
+    TensorBase() : m_size(0) {}
+    TensorBase(tensor_size_t size) : m_size(size) {}
+
     bool operator==(const TensorBase<N, T>& other) const {
         return m_size == other.m_size;
     }
-
     void swapWith(Tensor<N,T>& other)
     {
         std::swap(m_size, other.m_size);
     }
+
+    void set_size(tensor_size_t new_size) { m_size = new_size; }
+
+public:
+    tensor_size_t size() const { return m_size; }
 };
 
 /**
@@ -286,40 +286,38 @@ public:
     bool operator!=(const Tensor<N, T>& other) const {
         return !operator==(other); }
 
-    void fillWithZeroes()
-    {
-        for(tensor_size_t i = 0; i < base_type::size(); ++i)
-        {
-            m_data[i].fillWithZeroes();
-        }
-    }
-
-    // testing only:
-    tensor_size_t set_data_using_deep_copy(const T* new_data)
-    {
-        tensor_size_t consumed = 0;
-        for(tensor_size_t i = 0; i < base_type::size(); ++i)
-        {
-            consumed += m_data[i].set_data_using_deep_copy(new_data + consumed);
-        }
-        return consumed;
-    }
-
-    Shape<N> size_shape() const {
-        if(base_type::size()) {
-            return m_data[0].size_shape().prepend_dim(base_type::size());
-        }
-        else {
-            Shape<N> res;
-            for(tensor_size_t i = 0; i < N; ++i) res.dim[i] = 0;
-            return res;
-        }
-    }
-
     void swapWith(Tensor<N,T>& other)
     {
         TensorBase<N, T>::swapWith(other);
         std::swap(m_data, other.m_data);
+    }
+
+    /*
+        testing only
+     */
+    tensor_size_t debug_set_data_using_deep_copy(const T* new_data)
+    {
+        tensor_size_t consumed = 0;
+        for(tensor_size_t i = 0; i < base_type::size(); ++i)
+        {
+            consumed += m_data[i].debug_set_data_using_deep_copy(new_data + consumed);
+        }
+        return consumed;
+    }
+
+    Shape<N> debug_get_shape() const {
+        if(base_type::size()) {
+            // we do not store the whole shape, but only our own size,
+            // so calculate it iterting
+            return m_data[0].debug_get_shape().prepend_dim(base_type::size());
+        }
+        else {
+            // we can not compute the shape from m_data[0], because
+            // m_data has size 0 - so set it all to 0
+            Shape<N> res;
+            for(tensor_size_t i = 0; i < N; ++i) res.dim[i] = 0;
+            return res;
+        }
     }
 };
 
@@ -364,24 +362,22 @@ public:
     bool operator!=(const Tensor<1, T>& other) const {
         return !operator==(other); }
 
-    void fillWithZeroes()
-    {
-        std::fill_n(m_data, base_type::size(), 0);
-    }
-
-    tensor_size_t set_data_using_deep_copy(const T* new_data)
-    {
-        std::copy(new_data, new_data+base_type::size(), m_data);
-        return base_type::size();
-    }
-
-    Shape<1> size_shape() const { return Shape<1>{base_type::size()}; }
-
     void swapWith(Tensor<1,T>& other)
     {
         TensorBase<1, T>::swapWith(other);
         std::swap(m_data, other.m_data);
     }
+
+    /*
+        testing only
+     */
+    tensor_size_t debug_set_data_using_deep_copy(const T* new_data)
+    {
+        std::copy(new_data, new_data+base_type::size(), m_data);
+        return base_type::size();
+    }
+
+    Shape<1> debug_get_shape() const { return Shape<1>{base_type::size()}; }
 };
 
 using Shape1 = Shape<1>;
@@ -483,7 +479,7 @@ public:
     bool update_request_required() const { return m_require_update_request; }
     void update_request_sent() { m_require_update_request = false; }
 
-    Shape3 debug_get_shape() const { return data.size_shape(); }
+    Shape3 debug_get_shape() const { return data.debug_get_shape(); }
 
     void swapSemanticsInitially(Tensor1<IntOrFloat>& unused) { semantics.swapWith(unused); }
     void swapFreqsInitially(Tensor1<float32>& unused) { freqs.swapWith(unused); }
