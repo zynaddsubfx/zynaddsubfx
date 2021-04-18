@@ -26,26 +26,17 @@ namespace zyn {
 
 tensor_size_t findBestIndex(const Tensor<1, wavetable_types::float32>& freqs, float freq)
 {
-    tensor_size_t num_freqs = freqs.size(), i;
-    float bestFreqDist = 9999999;
-    tensor_size_t bestI = 0;
-    for(i = 0; i < num_freqs; ++i) // TODO: std::lower_bound?
+    auto not_less_than_freq = std::lower_bound(freqs.begin(), freqs.end(), freq);
+    if(not_less_than_freq == freqs.end())
     {
-        float curFreqDist = fabsf(freqs[i] - freq);
-        if(bestFreqDist > curFreqDist)
-        {
-            bestFreqDist = curFreqDist;
-            bestI = i;
-        }
-        else
-        {
-            assert(i > 0);
-            bestI = i - 1; // it got worse, so take the previous freq
-            break;
-        }
+        // if nothing is greater/equal, the greatest frequency will cover our needs
+        --not_less_than_freq;
     }
-    assert(bestI < num_freqs);
-    return bestI;
+#ifdef DBG_WAVETABLES
+    printf("WT: ADnote playing %f Hz, using wave at %f Hz\n",
+           freq, *not_less_than_freq);
+#endif
+    return std::distance(freqs.begin(), not_less_than_freq);
 }
 
 const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)

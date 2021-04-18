@@ -390,10 +390,21 @@ public:
     {
         T* sub;
     public:
+        // define all the stuff that std::lower_bound & co require...
+        using difference_type = std::size_t;
+        using value_type = T;
+        using pointer = T*;
+        using reference = T&;
+        using iterator_category = std::random_access_iterator_tag;
+
         TensorIterator() = default;
         TensorIterator(T* sub) : sub(sub) {}
-        TensorIterator operator++() { ++sub; return *this; }
-        bool operator!=(TensorIterator& other) const { return sub != other.sub; }
+        TensorIterator& operator+=(tensor_size_t inc) { sub += inc; return *this; }
+        TensorIterator& operator++() { ++sub; return *this; }
+        TensorIterator& operator--() { --sub; return *this; }
+        bool operator==(const TensorIterator& other) const { return sub == other.sub; }
+        bool operator!=(const TensorIterator& other) const { return sub != other.sub; }
+        tensor_size_t operator-(const TensorIterator& other) const { return sub - other.sub; }
         T& operator*() { return *sub; }
     };
     TensorIterator begin() const { return TensorIterator(m_data); }
