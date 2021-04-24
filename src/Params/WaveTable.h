@@ -400,6 +400,7 @@ public:
         TensorIterator() = default;
         TensorIterator(T* sub) : sub(sub) {}
         TensorIterator& operator+=(tensor_size_t inc) { sub += inc; return *this; }
+        TensorIterator operator-(tensor_size_t inc) { return TensorIterator(sub - inc); }
         TensorIterator& operator++() { ++sub; return *this; }
         TensorIterator& operator--() { --sub; return *this; }
         bool operator==(const TensorIterator& other) const { return sub == other.sub; }
