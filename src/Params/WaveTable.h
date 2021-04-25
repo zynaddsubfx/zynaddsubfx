@@ -18,6 +18,9 @@
 #include <cstddef>
 #include <algorithm>
 #include <iostream>
+#ifdef CAN_USE_CPP14
+#include <utility>
+#endif
 #include "WaveTableFwd.h"
 
 // define this to enable debug output
@@ -38,11 +41,40 @@ namespace detail
     constexpr tensor_size_t mult(const tensor_size_t* arr) { return arr[Idx] * mult<Idx-1>(arr); }
     template<>
     constexpr tensor_size_t mult<0>(const tensor_size_t* arr) { return arr[0]; }
+
+#ifndef CAN_USE_CPP14
+    template<std::size_t... Indices>
+    struct seq {};
+
+    template<std::size_t I0, std::size_t... Other>
+    struct mk_seq : public mk_seq<I0-1, I0, Other...> {};
+
+    template<std::size_t... Other>
+    struct mk_seq<0, Other...> : public seq<0, Other...> {};
+#endif
 }
 
 template<tensor_size_t N>
 class Shape
 {
+    // indices must be given as 0...(N-2)
+    template<std::size_t ... Indices>
+#ifdef CAN_USE_CPP14
+    constexpr Shape<N-1> proj_internal(std::index_sequence<Indices...>) const {
+#else
+    constexpr Shape<N-1> proj_internal(detail::seq<Indices...>) const {
+#endif
+        return Shape<N-1>{{dim[Indices+1]...}};
+    }
+    template<std::size_t ... Indices>
+#ifdef CAN_USE_CPP14
+    constexpr Shape<N+1> prepend_dim_internal(tensor_size_t prepend, std::index_sequence<Indices...>) const {
+#else
+    constexpr Shape<N+1> prepend_dim_internal(tensor_size_t prepend, detail::seq<Indices...>) const {
+#endif
+            return Shape<N+1>{{prepend, dim[Indices]...}};
+    }
+
 public:
     tensor_size_t dim[N];
     constexpr bool operator==(const Shape<N>& other) const {
@@ -50,21 +82,22 @@ public:
     constexpr tensor_size_t volume() const { return detail::mult<N-1>(dim); }
     //! projection of shape onto first dimension
     //! the first dimension will be removed
-    Shape<N-1> proj() const
+    constexpr Shape<N-1> proj() const
     {
-        Shape<N-1> res;
-        for(tensor_size_t i = 1; i < N; ++i)
-            res.dim[i-1] = dim[i];
-        return res;
+#ifdef CAN_USE_CPP14
+        return proj_internal(std::make_index_sequence<N-1>{});
+#else
+        return proj_internal(detail::mk_seq<N-2>{});
+#endif
     }
     //! prepend `to_prepend` to dim
-    Shape<N+1> prepend_dim(tensor_size_t to_prepend) const
+    constexpr Shape<N+1> prepend_dim(tensor_size_t to_prepend) const
     {
-        Shape<N+1> res;
-        res.dim[0] = to_prepend;
-        for(tensor_size_t i = 0; i < N; ++i)
-            res.dim[i+1] = dim[i];
-        return res;
+#ifdef CAN_USE_CPP14
+        return prepend_dim_internal(to_prepend, std::make_index_sequence<N>{});
+#else
+        return prepend_dim_internal(to_prepend, detail::mk_seq<N-1>{});
+#endif
     }
 };
 
