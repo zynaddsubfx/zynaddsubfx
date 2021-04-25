@@ -12,7 +12,7 @@
 */
 
 //Based Upon AdNoteTest.h
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include <iostream>
 #include <fstream>
 #include <ctime>
@@ -32,7 +32,7 @@ using namespace zyn;
 
 SYNTH_T *synth;
 
-class SubNoteTest:public CxxTest::TestSuite
+class SubNoteTest
 {
     public:
 
@@ -135,7 +135,7 @@ class SubNoteTest:public CxxTest::TestSuite
             w->tick();
 
             TS_ASSERT(tr->hasNext());
-            TS_ASSERT_EQUALS(string("noteout/filter"), tr->read());
+            TS_ASSERT_EQUAL_STR("noteout/filter", tr->read());
             TS_ASSERT(!tr->hasNext());
 
             w->add_watch("noteout/amp_int");
@@ -149,7 +149,7 @@ class SubNoteTest:public CxxTest::TestSuite
             TS_ASSERT_DELTA(outL[255], -0.0013f, 0.0001f);
             w->tick();
             TS_ASSERT(tr->hasNext());
-            TS_ASSERT_EQUALS(string("noteout/amp_int"), tr->read());
+            TS_ASSERT_EQUAL_STR("noteout/amp_int", tr->read());
             TS_ASSERT(!tr->hasNext());
 
             while(!note->finished()) {
@@ -165,7 +165,7 @@ class SubNoteTest:public CxxTest::TestSuite
             file.close();
 #endif
 
-            TS_ASSERT_EQUALS(sampleCount, 5888);
+            TS_ASSERT_EQUAL_INT(sampleCount, 5888);
         }
 
 #define OUTPUT_PROFILE
@@ -183,3 +183,10 @@ class SubNoteTest:public CxxTest::TestSuite
         }
 #endif
 };
+
+int main(void)
+{
+    SubNoteTest test;
+    RUN_TEST(testDefaults);
+    return test_summary();
+}

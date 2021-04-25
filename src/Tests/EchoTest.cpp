@@ -11,7 +11,7 @@
   as published by the Free Software Foundation; either version 2
   of the License, or (at your option) any later version.
 */
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -24,7 +24,7 @@ using namespace zyn;
 
 SYNTH_T *synth;
 
-class EchoTest:public CxxTest::TestSuite
+class EchoTest
 {
     public:
         void setUp() {
@@ -75,8 +75,8 @@ class EchoTest:public CxxTest::TestSuite
             for(int i = 0; i < 500; ++i)
                 testFX->out(*input);
             for(int i = 0; i < synth->buffersize; ++i) {
-                TS_ASSERT_DIFFERS(outL[i], 0.0f);
-                TS_ASSERT_DIFFERS(outR[i], 0.0f)
+                TS_ASSERT(outL[i] != 0.0f);
+                TS_ASSERT(outR[i] != 0.0f);
             }
             //After making sure the internal buffer has a nonzero value
             //cleanup
@@ -99,8 +99,8 @@ class EchoTest:public CxxTest::TestSuite
             for(int i = 0; i < 100; ++i)
                 testFX->out(*input);
             for(int i = 0; i < synth->buffersize; ++i) {
-                TS_ASSERT_DIFFERS(outL[i], 0.0f);
-                TS_ASSERT_DIFFERS(outR[i], 0.0f)
+                TS_ASSERT(outL[i] != 0.0f);
+                TS_ASSERT(outR[i] != 0.0f);
             }
             float amp = abs(outL[0] + outR[0]) / 2;
             //reset input to zero
@@ -110,7 +110,7 @@ class EchoTest:public CxxTest::TestSuite
             //give the echo time to fade based upon zero input and high feedback
             for(int i = 0; i < 50; ++i)
                 testFX->out(*input);
-            TS_ASSERT_LESS_THAN_EQUALS(abs(outL[0] + outR[0]) / 2, amp);
+            TS_ASSERT(abs(outL[0] + outR[0]) / 2 <= amp);
         }
 
 
@@ -120,3 +120,13 @@ class EchoTest:public CxxTest::TestSuite
         Echo  *testFX;
         Alloc alloc;
 };
+
+int main()
+{
+    tap_quiet = 1;
+    EchoTest test;
+    RUN_TEST(testInit);
+    RUN_TEST(testClear);
+    RUN_TEST(testDecaywFb);
+    return test_summary();
+}

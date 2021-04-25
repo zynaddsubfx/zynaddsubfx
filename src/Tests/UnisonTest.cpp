@@ -13,7 +13,7 @@
 */
 
 
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include <iostream>
 #include <fstream>
 #include <ctime>
@@ -32,7 +32,7 @@ using namespace zyn;
 SYNTH_T *synth;
 
 #define BUF 256
-class AdNoteTest:public CxxTest::TestSuite
+class UnisonTest
 {
     public:
 
@@ -178,3 +178,10 @@ class AdNoteTest:public CxxTest::TestSuite
 #endif
         }
 };
+
+int main()
+{
+    UnisonTest test;
+    RUN_TEST(testUnison);
+    return test_summary();
+}

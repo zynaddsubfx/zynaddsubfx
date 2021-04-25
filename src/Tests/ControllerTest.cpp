@@ -10,7 +10,8 @@
   as published by the Free Software Foundation; either version 2
   of the License, or (at your option) any later version.
 */
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
+#include <cmath>
 #include <iostream>
 #include "../Params/Controller.h"
 #include "../globals.h"
@@ -19,7 +20,7 @@ using namespace zyn;
 
 SYNTH_T *synth;
 
-class ControllerTest:public CxxTest::TestSuite
+class ControllerTest
 {
     public:
         void setUp() {
@@ -61,10 +62,18 @@ class ControllerTest:public CxxTest::TestSuite
             for(i = 0; i < 10; ++i)
                 testCtl->updateportamento();
             //Assert that the numbers are the same as they were at release
-            TS_ASSERT_DELTA(testCtl->portamento.x, 0.0290249f, 0.000001f)
-            TS_ASSERT_DELTA(testCtl->portamento.freqdelta_log2, -3.2255092, 0.000001f)
+            TS_ASSERT_DELTA(testCtl->portamento.x, 0.0290249f, 0.000001f);
+            TS_ASSERT_DELTA(testCtl->portamento.freqdelta_log2, -3.2255092, 0.000001f);
         }
 
     private:
         Controller *testCtl;
 };
+
+int main()
+{
+    ControllerTest test;
+    RUN_TEST(testPortamentoRange);
+    RUN_TEST(testPortamentoValue);
+    return test_summary();
+}

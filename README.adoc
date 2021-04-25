@@ -58,7 +58,6 @@ Optional:
 - ALSA
 - LASH
 - DSSI
-- CxxTest (for unit tests)
 
 Sibling projects
 ~~~~~~~~~~~~~~~~

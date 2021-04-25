@@ -11,7 +11,7 @@
 */
 
 
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include <iostream>
 #include <fstream>
 #include <ctime>
@@ -23,7 +23,7 @@
 using std::vector;
 using namespace zyn;
 
-class AllocatorTest:public CxxTest::TestSuite
+class AllocatorTest
 {
     public:
         Allocator     *memory_;
@@ -40,7 +40,7 @@ class AllocatorTest:public CxxTest::TestSuite
         void testBasic() {
             Allocator &memory = *memory_;
             char *d = (char*)memory.alloc_mem(128);
-            TS_ASSERT(d);
+            TS_NON_NULL(d);
             d[0]   = 0;
             d[127] = 0;
             memory.dealloc_mem(d);
@@ -83,13 +83,13 @@ class AllocatorTest:public CxxTest::TestSuite
             //We should be able to see that a chunk enters and exits the free
             //state
             char *mem2 = (char*)memory.alloc_mem(10*1024*1024);
-            TS_ASSERT(mem2);
+            TS_NON_NULL(mem2);
             TS_ASSERT(!memory.memFree(bufA));
             memory.dealloc_mem(mem2);
             TS_ASSERT(memory.memFree(bufA));
             mem2 = (char*)memory.alloc_mem(10*1024*1024);
             char *mem3 = (char*)memory.alloc_mem(10*1024*1024);
-            TS_ASSERT(mem3);
+            TS_NON_NULL(mem3);
             memory.dealloc_mem(mem2);
             TS_ASSERT(!memory.memFree(bufA));
             TS_ASSERT(memory.freePools() == 0);
@@ -106,3 +106,11 @@ class AllocatorTest:public CxxTest::TestSuite
         }
 
 };
+
+int main()
+{
+    AllocatorTest test;
+    RUN_TEST(testBasic);
+    RUN_TEST(testTooBig);
+    RUN_TEST(testEnlarge);
+}

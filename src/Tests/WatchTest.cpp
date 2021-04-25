@@ -19,7 +19,7 @@
   Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 */
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -37,7 +37,7 @@ using namespace zyn;
 
 char *instance_name=(char*)"";
 
-class WatchTest:public CxxTest::TestSuite
+class WatchTest
 {
     public:
         rtosc::ThreadLink *tr;
@@ -76,8 +76,16 @@ class WatchTest:public CxxTest::TestSuite
             l->lfoout();
             w->tick();
             TS_ASSERT(tr->hasNext());
-            TS_ASSERT_EQUALS(string("out"), tr->read());
+            TS_ASSERT_EQUAL_STR("out", tr->read());
             TS_ASSERT(!tr->hasNext());
         }
 
 };
+
+int main()
+{
+    WatchTest test;
+    RUN_TEST(testNoWatch);
+    RUN_TEST(testPhaseWatch);
+    return test_summary();
+}

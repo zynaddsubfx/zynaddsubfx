@@ -10,7 +10,7 @@
   as published by the Free Software Foundation; either version 2
   of the License, or (at your option) any later version.
 */
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -37,7 +37,7 @@ char *instance_name=(char*)"";
 
 #define NUM_MIDDLEWARE 3
 
-class MessageTest:public CxxTest::TestSuite
+class MessageTest
 {
     public:
         Config config;
@@ -59,10 +59,10 @@ class MessageTest:public CxxTest::TestSuite
             mw->transmitMsg("/part0/kit0/Psubenabled", "T");
             TS_ASSERT(ms->uToB->hasNext());
             msg = ms->uToB->read();
-            TS_ASSERT_EQUALS(string("/part0/kit0/subpars-data"), msg);
+            TS_ASSERT_EQUAL_STR("/part0/kit0/subpars-data", msg);
             TS_ASSERT(ms->uToB->hasNext());
             msg = ms->uToB->read();
-            TS_ASSERT_EQUALS(string("/part0/kit0/Psubenabled"), msg);
+            TS_ASSERT_EQUAL_STR("/part0/kit0/Psubenabled", msg);
         }
 
         void testBankCapture(void)
@@ -72,7 +72,7 @@ class MessageTest:public CxxTest::TestSuite
             mw->transmitMsg("/bank/fake", "");
             TS_ASSERT(ms->uToB->hasNext());
             const char *msg = ms->uToB->read();
-            TS_ASSERT_EQUALS(string("/bank/fake"), msg);
+            TS_ASSERT_EQUAL_STR("/bank/fake", msg);
         }
 
         void testOscCopyPaste(void)
@@ -90,19 +90,20 @@ class MessageTest:public CxxTest::TestSuite
             auto &osc_dst = *ms->part[0]->kit[0].padpars->oscilgen;
             auto &osc_oth = *ms->part[0]->kit[0].adpars->VoicePar[1].OscilGn;
 
-            TS_ASSERT_EQUALS(osc_src.Pbasefuncpar, 64);
+            TS_ASSERT_EQUAL_INT(osc_src.Pbasefuncpar, 64);
             osc_src.Pbasefuncpar = 32;
-            TS_ASSERT_EQUALS(osc_src.Pbasefuncpar, 32);
+            TS_ASSERT_EQUAL_INT(osc_src.Pbasefuncpar, 32);
 
             //Copy From ADsynth modulator
             printf("====Copy From ADsynth modulator\n");
             start_realtime();
             mw->transmitMsg("/presets/copy", "s", "/part0/kit0/adpars/VoicePar0/FMSmp/");
 
-            TS_ASSERT_EQUALS(mw->getPresetsStore().clipboard.type.c_str(), string("Poscilgen"));
+            TS_ASSERT_EQUAL_STR("Poscilgen", mw->getPresetsStore().clipboard.type.c_str());
             // a regex would be better here...
             // hopefully, mxml will not change its whitespace behavior
-            TS_ASSERT(strstr(mw->getPresetsStore().clipboard.data.c_str(), "<par name=\"base_function_par\" value=\"32\" />"));
+            assert_non_null(strstr(mw->getPresetsStore().clipboard.data.c_str(), "<par name=\"base_function_par\" value=\"32\" />"),
+                    "base_function_par at right value", __LINE__);
 
             /* // better test this without string comparison:
             {
@@ -116,8 +117,8 @@ class MessageTest:public CxxTest::TestSuite
             //printf("clipboard type: %s\n",mw->getPresetsStore().clipboard.type.c_str());
             //printf("clipboard data:\n%s\n",mw->getPresetsStore().clipboard.data.c_str());
 
-            TS_ASSERT_EQUALS(osc_dst.Pbasefuncpar, 64);
-            TS_ASSERT_EQUALS(osc_oth.Pbasefuncpar, 64);
+            TS_ASSERT_EQUAL_INT(osc_dst.Pbasefuncpar, 64);
+            TS_ASSERT_EQUAL_INT(osc_oth.Pbasefuncpar, 64);
 
             //Paste to PADsynth
             printf("====Paste to PADsynth\n");
@@ -127,8 +128,8 @@ class MessageTest:public CxxTest::TestSuite
             mw->transmitMsg("/presets/paste", "s", "/part0/kit0/adpars/VoicePar1/OscilSmp/");
 
             stop_realtime();
-            TS_ASSERT_EQUALS(osc_dst.Pbasefuncpar, 32);
-            TS_ASSERT_EQUALS(osc_oth.Pbasefuncpar, 32);
+            TS_ASSERT_EQUAL_INT(osc_dst.Pbasefuncpar, 32);
+            TS_ASSERT_EQUAL_INT(osc_oth.Pbasefuncpar, 32);
         }
 
 
@@ -169,7 +170,7 @@ class MessageTest:public CxxTest::TestSuite
         {
             mw->transmitMsg("/learn", "s", "/Pkeyshift");
             mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 108);
-            TS_ASSERT_EQUALS(ms->Pkeyshift, 64);
+            TS_ASSERT_EQUAL_INT(ms->Pkeyshift, 64);
 
             //Perform a learning operation
 
@@ -181,19 +182,19 @@ class MessageTest:public CxxTest::TestSuite
             //Verify that the learning actually worked
             mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 13);
             run_realtime();
-            TS_ASSERT_EQUALS(ms->Pkeyshift, 13);
+            TS_ASSERT_EQUAL_INT(ms->Pkeyshift, 13);
 
             mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 2);
             run_realtime();
-            TS_ASSERT_EQUALS(ms->Pkeyshift, 2);
+            TS_ASSERT_EQUAL_INT(ms->Pkeyshift, 2);
 
             mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 0);
             run_realtime();
-            TS_ASSERT_EQUALS(ms->Pkeyshift, 0);
+            TS_ASSERT_EQUAL_INT(ms->Pkeyshift, 0);
 
             mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 127);
             run_realtime();
-            TS_ASSERT_EQUALS(ms->Pkeyshift, 127);
+            TS_ASSERT_EQUAL_INT(ms->Pkeyshift, 127);
         }
 
         void testMidiLearnSave(void)
@@ -202,14 +203,14 @@ class MessageTest:public CxxTest::TestSuite
             mw->transmitMsg("/virtual_midi_cc", "iii", 0, 23, 108);
 
             //param is at default until rt-thread is run
-            TS_ASSERT_EQUALS(ms->Pkeyshift, 64);
+            TS_ASSERT_EQUAL_INT(ms->Pkeyshift, 64);
 
 
             //Perform a learning operation
             run_realtime();
 
             //Verify binding affects control
-            TS_ASSERT_EQUALS(ms->Pkeyshift, 108);
+            TS_ASSERT_EQUAL_INT(ms->Pkeyshift, 108);
 
 
             printf("# Trying to save automations\n");
@@ -220,7 +221,7 @@ class MessageTest:public CxxTest::TestSuite
             //Verify that some file exists
             printf("# Verifying file exists\n");
             FILE *f = fopen("test-midi-learn.xlz", "r");
-            TS_ASSERT(f);
+            assert_non_null(f, "test file exists", __LINE__);
 
             if(f)
                 fclose(f);
@@ -233,7 +234,7 @@ class MessageTest:public CxxTest::TestSuite
             run_realtime();
 
             //Verify automation table is clear
-            TS_ASSERT_EQUALS(ms->Pkeyshift, 108);
+            TS_ASSERT_EQUAL_INT(ms->Pkeyshift, 108);
 
             printf("# Loading automation\n");
             mw->transmitMsg("/load_xlz", "s", "test-midi-learn.xlz");
@@ -242,26 +243,26 @@ class MessageTest:public CxxTest::TestSuite
             run_realtime();
 
             //Verify automation table is restored
-            TS_ASSERT_EQUALS(ms->Pkeyshift, 28);
+            TS_ASSERT_EQUAL_INT(ms->Pkeyshift, 28);
         }
 
         void testLfoPaste(void)
         {
             start_realtime();
             ms->part[0]->kit[0].adpars->GlobalPar.FreqLfo->Pfreqrand = 32;
-            TS_ASSERT_EQUALS(ms->part[0]->kit[0].adpars->GlobalPar.FreqLfo->Pfreqrand, 32);
+            TS_ASSERT_EQUAL_INT(ms->part[0]->kit[0].adpars->GlobalPar.FreqLfo->Pfreqrand, 32);
 
             //Copy
             mw->transmitMsg("/presets/copy", "s", "/part0/kit0/adpars/GlobalPar/FreqLfo/");
 
             ms->part[0]->kit[0].adpars->GlobalPar.FreqLfo->Pfreqrand = 99;
-            TS_ASSERT_EQUALS(ms->part[0]->kit[0].adpars->GlobalPar.FreqLfo->Pfreqrand, 99);
+            TS_ASSERT_EQUAL_INT(ms->part[0]->kit[0].adpars->GlobalPar.FreqLfo->Pfreqrand, 99);
 
             //Paste
             mw->transmitMsg("/presets/paste", "s", "/part0/kit0/adpars/GlobalPar/FreqLfo/");
             stop_realtime();
 
-            TS_ASSERT_EQUALS(ms->part[0]->kit[0].adpars->GlobalPar.FreqLfo->Pfreqrand, 32);
+            TS_ASSERT_EQUAL_INT(ms->part[0]->kit[0].adpars->GlobalPar.FreqLfo->Pfreqrand, 32);
         }
 
         void testPadPaste(void)
@@ -274,24 +275,24 @@ class MessageTest:public CxxTest::TestSuite
             auto &field1 = ms->part[0]->kit[0].padpars->PVolume;
             auto &field2 = ms->part[0]->kit[0].padpars->oscilgen->Pfilterpar1;
             field1 = 32;
-            TS_ASSERT_EQUALS(field1, 32);
+            TS_ASSERT_EQUAL_INT(field1, 32);
             field2 = 35;
-            TS_ASSERT_EQUALS(field2, 35);
+            TS_ASSERT_EQUAL_INT(field2, 35);
 
             //Copy
             mw->transmitMsg("/presets/copy", "s", "/part0/kit0/padpars/");
 
             field1 = 99;
-            TS_ASSERT_EQUALS(field1, 99);
+            TS_ASSERT_EQUAL_INT(field1, 99);
             field2 = 95;
-            TS_ASSERT_EQUALS(field2, 95);
+            TS_ASSERT_EQUAL_INT(field2, 95);
 
             //Paste
             mw->transmitMsg("/presets/paste", "s", "/part0/kit0/padpars/");
             stop_realtime();
 
-            TS_ASSERT_EQUALS(field1, 32);
-            TS_ASSERT_EQUALS(field2, 35);
+            TS_ASSERT_EQUAL_INT(field1, 32);
+            TS_ASSERT_EQUAL_INT(field2, 35);
         }
 
         void testFilterDepricated(void)
@@ -320,10 +321,10 @@ class MessageTest:public CxxTest::TestSuite
             while(ms->bToU->hasNext()) {
                 const char *msg = ms->bToU->read();
                 if(state == 0) {
-                    TS_ASSERT_EQUALS(rtosc_narguments(msg), 0U);
+                    TS_ASSERT_EQUAL_INT(rtosc_narguments(msg), 0U);
                     state = 1;
                 } else if(state == 1) {
-                    TS_ASSERT_EQUALS(rtosc_narguments(msg), 1U);
+                    TS_ASSERT_EQUAL_INT(rtosc_narguments(msg), 1U);
                     value = rtosc_argument(msg, 0).i;
                     state = 2;
                 } else if(state == 2) {
@@ -350,3 +351,17 @@ class MessageTest:public CxxTest::TestSuite
         std::thread *realtime;
         bool         do_exit;
 };
+
+int main()
+{
+    MessageTest test;
+    RUN_TEST(testKitEnable);
+    RUN_TEST(testBankCapture);
+    RUN_TEST(testOscCopyPaste);
+    RUN_TEST(testMidiLearn);
+    RUN_TEST(testMidiLearnSave);
+    RUN_TEST(testLfoPaste);
+    RUN_TEST(testPadPaste);
+    RUN_TEST(testFilterDepricated);
+    return test_summary();
+}

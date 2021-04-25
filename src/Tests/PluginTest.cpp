@@ -10,7 +10,7 @@
   as published by the Free Software Foundation; either version 2
   of the License, or (at your option) any later version.
 */
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -162,7 +162,7 @@ void print_string_differences(string orig, string next)
     }
 }
 
-class PluginTest:public CxxTest::TestSuite
+class PluginTest
 {
     public:
         Config config;
@@ -211,7 +211,7 @@ class PluginTest:public CxxTest::TestSuite
             for(int i = 0; i < synth->buffersize; ++i)
                 sum += fabsf(outL[i]);
 
-            TS_ASSERT_LESS_THAN(0.1f, sum);
+            TS_ASSERT(0.1f < sum);
         }
 
         string loadfile(string fname) const
@@ -231,7 +231,7 @@ class PluginTest:public CxxTest::TestSuite
             master[0]->putalldata((char*)fdata.c_str());
             int res = master[0]->getalldata(&result);
 
-            TS_ASSERT_EQUALS((int)(fdata.length()+1), res);
+            TS_ASSERT_EQUAL_INT((int)(fdata.length()+1), res);
             TS_ASSERT(fdata == result);
             if(fdata != result)
                 print_string_differences(fdata, result);
@@ -242,3 +242,11 @@ class PluginTest:public CxxTest::TestSuite
         float *outR, *outL;
         Master *master[16];
 };
+
+int main()
+{
+    PluginTest test;
+    RUN_TEST(testInit);
+    RUN_TEST(testPanic);
+    RUN_TEST(testLoadSave);
+}

@@ -16,8 +16,6 @@ jobs:
     - name: install_deps2
       run: sudo apt-get install liblo-dev
     - name: install_test_deps1
-      run: sudo apt-get install --force-yes cxxtest python3
-    - name: install_test_deps2
       run: sudo apt-get install ruby
     - name: submodule
       run: git submodule update --init

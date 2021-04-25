@@ -9,7 +9,7 @@
   as published by the Free Software Foundation; either version 2
   of the License, or (at your option) any later version.
 */
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include <cmath>
 #include <cstring>
 #include <cstdlib>
@@ -39,7 +39,7 @@ enum PrivateNoteStatus {
 };
 
 
-class KitTest:public CxxTest::TestSuite
+class KitTest
 {
     private:
         Alloc      alloc;
@@ -76,7 +76,7 @@ class KitTest:public CxxTest::TestSuite
             //first note has moved to release state
             //second note has moved to sustain state
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[0],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=64,
@@ -85,7 +85,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_RELEASED|SUSTAIN_BIT,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=64,
@@ -94,7 +94,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_RELEASED_AND_SUSTAINED,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=0,
@@ -115,7 +115,7 @@ class KitTest:public CxxTest::TestSuite
             //first note has moved to release state
             //second note has stayed in playing state
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[0],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=64,
@@ -124,7 +124,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_RELEASED|SUSTAIN_BIT,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=64,
@@ -133,7 +133,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=0,
@@ -157,7 +157,7 @@ class KitTest:public CxxTest::TestSuite
             //first note has moved to release state
             //second note has stayed in playing state
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[0],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=64,
@@ -166,7 +166,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_RELEASED,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=65,
@@ -175,7 +175,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=0,
@@ -196,7 +196,7 @@ class KitTest:public CxxTest::TestSuite
             part->NoteOn(64, 127, 0);
             part->NoteOn(65, 127, 0);
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[0],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=64,
@@ -205,7 +205,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=65,
@@ -214,7 +214,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=0,
@@ -230,7 +230,7 @@ class KitTest:public CxxTest::TestSuite
             part->NoteOn(64, 127, 0);
             part->NoteOn(65, 127, 0);
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[0],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=65,
@@ -239,7 +239,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=65,
@@ -248,7 +248,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=0,
@@ -257,16 +257,16 @@ class KitTest:public CxxTest::TestSuite
                     .status=0,
                     .legatoMirror=false}));
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[0].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].kit,  0)
+            TS_NON_NULL(part->notePool.sdesc[0].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].kit,  0);
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[1].note, nullptr);
+            TS_NON_NULL(part->notePool.sdesc[1].note);
             if(part->notePool.sdesc[1].note)
-                TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, true);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  0)
+                TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].note->legato.silent, true);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].kit,  0);
         }
 
         void testNoKitNoLegatoYesMono() {
@@ -276,7 +276,7 @@ class KitTest:public CxxTest::TestSuite
             part->NoteOn(65, 127, 0);
 
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[0],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=64,
@@ -285,7 +285,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_RELEASED,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=65,
@@ -294,7 +294,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=0,
@@ -303,15 +303,15 @@ class KitTest:public CxxTest::TestSuite
                     .status=0,
                     .legatoMirror=false}));
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[0].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].kit,  0)
+            TS_NON_NULL(part->notePool.sdesc[0].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].kit,  0);
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[1].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  0)
+            TS_NON_NULL(part->notePool.sdesc[1].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].kit,  0);
         }
 
         //Normal Kit
@@ -328,7 +328,7 @@ class KitTest:public CxxTest::TestSuite
 
             part->notePool.dump();
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[0],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=64,
@@ -337,7 +337,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=65,
@@ -346,7 +346,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=0,
@@ -355,29 +355,31 @@ class KitTest:public CxxTest::TestSuite
                     .status=0,
                     .legatoMirror=false}));
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[0].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].kit,  0)
+            TS_NON_NULL(part->notePool.sdesc[0].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].kit,  0);
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[1].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  1)
+            TS_NON_NULL(part->notePool.sdesc[1].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].kit,  1);
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[2].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[2].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[2].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[2].kit,  0)
+            TS_NON_NULL(part->notePool.sdesc[2].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[2].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[2].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[2].kit,  0);
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[3].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[3].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[3].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[3].kit,  1)
+            TS_NON_NULL(part->notePool.sdesc[3].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[3].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[3].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[3].kit,  1);
 
-            TS_ASSERT_EQUALS(part->notePool.sdesc[4].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[4].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[4].kit,  0)
+            assert_ptr_eq(part->notePool.sdesc[4].note,
+                          nullptr,
+                          "note free", __LINE__);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[4].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[4].kit,  0);
         }
 
         void testYesKitYesLegatoNoMono() {
@@ -394,7 +396,7 @@ class KitTest:public CxxTest::TestSuite
 
             part->notePool.dump();
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[0],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=65,
@@ -403,7 +405,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=65,
@@ -412,7 +414,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=0,
@@ -421,29 +423,31 @@ class KitTest:public CxxTest::TestSuite
                     .status=0,
                     .legatoMirror=false}));
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[0].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].kit,  0)
+            TS_NON_NULL(part->notePool.sdesc[0].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].kit,  0);
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[1].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  1)
+            TS_NON_NULL(part->notePool.sdesc[1].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].kit,  1);
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[2].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[2].note->legato.silent, true);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[2].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[2].kit,  0)
+            TS_NON_NULL(part->notePool.sdesc[2].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[2].note->legato.silent, true);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[2].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[2].kit,  0);
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[3].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[3].note->legato.silent, true);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[3].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[3].kit,  1)
+            TS_NON_NULL(part->notePool.sdesc[3].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[3].note->legato.silent, true);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[3].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[3].kit,  1);
 
-            TS_ASSERT_EQUALS(part->notePool.sdesc[4].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[4].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[4].kit,  0)
+            assert_ptr_eq(part->notePool.sdesc[4].note,
+                          nullptr,
+                          "note free", __LINE__);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[4].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[4].kit,  0);
         }
 
         void testYesKitNoLegatoYesMono() {
@@ -460,7 +464,7 @@ class KitTest:public CxxTest::TestSuite
 
             part->notePool.dump();
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[0],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=64,
@@ -469,7 +473,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_RELEASED,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=65,
@@ -478,7 +482,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=0,
@@ -487,29 +491,31 @@ class KitTest:public CxxTest::TestSuite
                     .status=0,
                     .legatoMirror=false}));
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[0].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].kit,  0)
+            TS_NON_NULL(part->notePool.sdesc[0].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].kit,  0);
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[1].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  1)
+            TS_NON_NULL(part->notePool.sdesc[1].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].kit,  1);
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[2].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[2].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[2].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[2].kit,  0)
+            TS_NON_NULL(part->notePool.sdesc[2].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[2].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[2].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[2].kit,  0);
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[3].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[3].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[3].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[3].kit,  1)
+            TS_NON_NULL(part->notePool.sdesc[3].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[3].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[3].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[3].kit,  1);
 
-            TS_ASSERT_EQUALS(part->notePool.sdesc[4].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[4].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[4].kit,  0)
+            assert_ptr_eq(part->notePool.sdesc[4].note,
+                          nullptr,
+                          "note free", __LINE__);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[4].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[4].kit,  0);
         }
 
         //Single Kit
@@ -525,7 +531,7 @@ class KitTest:public CxxTest::TestSuite
 
             part->notePool.dump();
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[0],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=64,
@@ -534,7 +540,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=65,
@@ -543,7 +549,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=0,
@@ -552,19 +558,21 @@ class KitTest:public CxxTest::TestSuite
                     .status=0,
                     .legatoMirror=false}));
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[0].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].kit,  0)
+            TS_NON_NULL(part->notePool.sdesc[0].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].kit,  0);
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[1].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  0)
+            TS_NON_NULL(part->notePool.sdesc[1].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].kit,  0);
 
-            TS_ASSERT_EQUALS(part->notePool.sdesc[2].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[2].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[2].kit,  0)
+            assert_ptr_eq(part->notePool.sdesc[2].note,
+                          nullptr,
+                          "note free", __LINE__);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[2].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[2].kit,  0);
         }
 
         void testSingleKitYesLegatoNoMono() {
@@ -579,7 +587,7 @@ class KitTest:public CxxTest::TestSuite
             part->NoteOn(64, 127, 0);
             part->NoteOn(65, 127, 0);
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[0],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=65,
@@ -588,7 +596,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=65,
@@ -597,7 +605,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=0,
@@ -606,16 +614,16 @@ class KitTest:public CxxTest::TestSuite
                     .status=0,
                     .legatoMirror=false}));
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[0].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].kit,  0)
+            TS_NON_NULL(part->notePool.sdesc[0].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].kit,  0);
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[1].note, nullptr);
+            TS_NON_NULL(part->notePool.sdesc[1].note);
             if(part->notePool.sdesc[1].note)
-                TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, true);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  0)
+                TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].note->legato.silent, true);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].kit,  0);
         }
 
         void testSingleKitNoLegatoYesMono() {
@@ -632,7 +640,7 @@ class KitTest:public CxxTest::TestSuite
 
 
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[0],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[0],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=64,
@@ -641,7 +649,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_RELEASED,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[1],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=65,
@@ -650,7 +658,7 @@ class KitTest:public CxxTest::TestSuite
                     .status=KEY_PLAYING,
                     .legatoMirror=false}));
 
-            TS_ASSERT_EQUALS(part->notePool.ndesc[2],
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
                     .age=0,
                     .note=0,
@@ -659,15 +667,15 @@ class KitTest:public CxxTest::TestSuite
                     .status=0,
                     .legatoMirror=false}));
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[0].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[0].kit,  0)
+            TS_NON_NULL(part->notePool.sdesc[0].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].kit,  0);
 
-            TS_ASSERT_DIFFERS(part->notePool.sdesc[1].note, nullptr);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].note->legato.silent, false);
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].type, 0)
-            TS_ASSERT_EQUALS(part->notePool.sdesc[1].kit,  0)
+            TS_NON_NULL(part->notePool.sdesc[1].note);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].note->legato.silent, false);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].type, 0);
+            TS_ASSERT_EQUAL_INT(part->notePool.sdesc[1].kit,  0);
         }
 
         void testKeyLimit(void)
@@ -681,16 +689,16 @@ class KitTest:public CxxTest::TestSuite
             part->NoteOn(68, 127, 0);
 
             //Verify that notes are spawned as expected
-            TS_ASSERT_EQUALS(pool.usedNoteDesc(),  5);
-            TS_ASSERT_EQUALS(pool.usedSynthDesc(), 5);
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  5);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 5);
 
             //Reset the part
             part->monomemClear();
             pool.killAllNotes();
 
             //Verify that notes are despawned
-            TS_ASSERT_EQUALS(pool.usedNoteDesc(),  0);
-            TS_ASSERT_EQUALS(pool.usedSynthDesc(), 0);
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  0);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 0);
 
             //Enable keylimit
             part->setkeylimit(3);
@@ -703,17 +711,17 @@ class KitTest:public CxxTest::TestSuite
             part->NoteOn(68, 127, 0);
 
             //Verify that notes are spawned as expected with limit
-            TS_ASSERT_EQUALS(pool.getRunningNotes(),  3);//2 entombed
-            TS_ASSERT_EQUALS(pool.usedNoteDesc(),     5);
-            TS_ASSERT_EQUALS(pool.usedSynthDesc(),    5);
+            TS_ASSERT_EQUAL_INT(pool.getRunningNotes(),  3);//2 entombed
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),     5);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(),    5);
 
             //Reset the part
             part->monomemClear();
             pool.killAllNotes();
 
             //Verify that notes are despawned
-            TS_ASSERT_EQUALS(pool.usedNoteDesc(),  0);
-            TS_ASSERT_EQUALS(pool.usedSynthDesc(), 0);
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  0);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 0);
 
             //Now to test note stealing
 
@@ -723,8 +731,8 @@ class KitTest:public CxxTest::TestSuite
             part->NoteOn(66, 127, 0);
 
             //Verify that note pool is full
-            TS_ASSERT_EQUALS(pool.usedNoteDesc(),  3);
-            TS_ASSERT_EQUALS(pool.usedSynthDesc(), 3);
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  3);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 3);
 
             //Age the notes
             pool.ndesc[1].age = 50;
@@ -736,26 +744,26 @@ class KitTest:public CxxTest::TestSuite
             //descriptors for #66 and #65
             part->NoteOn(67, 127, 0);
             pool.cleanup();
-            TS_ASSERT_EQUALS(pool.ndesc[0].note, 64);
-            TS_ASSERT_EQUALS(pool.ndesc[1].note, 65);
-            TS_ASSERT_EQUALS(pool.ndesc[2].note, 66);
-            TS_ASSERT_EQUALS(pool.ndesc[2].status, KEY_RELEASED);
-            TS_ASSERT_EQUALS(pool.ndesc[3].note, 67);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 65);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 66);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].status, KEY_RELEASED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 67);
 
             part->NoteOn(68, 127, 0);
 
             //Verify that note pool is still full and entombed
-            TS_ASSERT_EQUALS(pool.usedNoteDesc(),  5);
-            TS_ASSERT_EQUALS(pool.usedSynthDesc(), 5);
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  5);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 5);
 
             //Check that the result is {64, 68, 67}
-            TS_ASSERT_EQUALS(pool.ndesc[0].note, 64);
-            TS_ASSERT_EQUALS(pool.ndesc[1].note, 65);
-            TS_ASSERT_EQUALS(pool.ndesc[1].status, KEY_RELEASED);
-            TS_ASSERT_EQUALS(pool.ndesc[2].note, 66);
-            TS_ASSERT_EQUALS(pool.ndesc[2].status, KEY_RELEASED);
-            TS_ASSERT_EQUALS(pool.ndesc[3].note, 67);
-            TS_ASSERT_EQUALS(pool.ndesc[4].note, 68);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 65);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].status, KEY_RELEASED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 66);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].status, KEY_RELEASED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 67);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
         }
 
         void tearDown() {
@@ -766,3 +774,22 @@ class KitTest:public CxxTest::TestSuite
             delete synth;
         }
 };
+
+int main()
+{
+    KitTest test;
+    RUN_TEST(testSustainCase1);
+    RUN_TEST(testSustainCase2);
+    RUN_TEST(testMonoSustain);
+    RUN_TEST(testNoKitNoLegatoNoMono);
+    RUN_TEST(testNoKitYesLegatoNoMono);
+    RUN_TEST(testNoKitNoLegatoYesMono);
+    RUN_TEST(testYesKitNoLegatoNoMono);
+    RUN_TEST(testYesKitYesLegatoNoMono);
+    RUN_TEST(testYesKitNoLegatoYesMono);
+    RUN_TEST(testSingleKitNoLegatoNoMono);
+    RUN_TEST(testSingleKitYesLegatoNoMono);
+    RUN_TEST(testSingleKitNoLegatoYesMono);
+    RUN_TEST(testKeyLimit);
+    return test_summary();
+}

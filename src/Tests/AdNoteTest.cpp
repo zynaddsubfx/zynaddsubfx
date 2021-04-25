@@ -11,7 +11,7 @@
 */
 
 
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include <iostream>
 #include <fstream>
 #include <ctime>
@@ -33,7 +33,7 @@ using namespace zyn;
 SYNTH_T *synth;
 
 
-class AdNoteTest:public CxxTest::TestSuite
+class AdNoteTest
 {
     public:
         rtosc::ThreadLink *tr;
@@ -197,7 +197,7 @@ class AdNoteTest:public CxxTest::TestSuite
             w->tick();
 
             TS_ASSERT(tr->hasNext());
-            TS_ASSERT_EQUALS(string("noteout/be4_mix"), tr->read());
+            TS_ASSERT_EQUAL_STR("noteout/be4_mix", tr->read());
             TS_ASSERT(!tr->hasNext());
 
             note->noteout(outL, outR);
@@ -217,7 +217,7 @@ class AdNoteTest:public CxxTest::TestSuite
             file.close();
 #endif
 
-            TS_ASSERT_EQUALS(sampleCount, 30208);
+            TS_ASSERT_EQUAL_INT(sampleCount, 30208);
 
               lfop = new LFOParams();
             lfop->fel  = zyn::consumer_location_type_t::amp;
@@ -246,3 +246,13 @@ class AdNoteTest:public CxxTest::TestSuite
         }
 #endif
 };
+
+int main()
+{
+    tap_quiet = 1;
+    AdNoteTest test;
+    test.setUp();
+    test.testDefaults();
+    test.tearDown();
+    return test_summary();
+}

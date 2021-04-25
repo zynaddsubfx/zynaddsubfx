@@ -13,7 +13,7 @@
 */
 
 
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include <iostream>
 #include <fstream>
 #include <ctime>
@@ -29,10 +29,9 @@ using namespace zyn;
 
 SYNTH_T *synth;
 
-class AdNoteTest:public CxxTest::TestSuite
+class MemoryStressTest
 {
     public:
-        ADnote       *note;
         AbsTime      *time;
         FFTwrapper   *fft;
         ADnoteParameters *defaultPreset;
@@ -74,7 +73,6 @@ class AdNoteTest:public CxxTest::TestSuite
         }
 
         void tearDown() {
-            delete note;
             delete controller;
             delete defaultPreset;
             delete fft;
@@ -109,3 +107,10 @@ class AdNoteTest:public CxxTest::TestSuite
         }
 
 };
+
+int main()
+{
+    MemoryStressTest test;
+    RUN_TEST(testManySimultaneousNotes);
+    return test_summary();
+}

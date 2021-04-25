@@ -10,7 +10,7 @@
   as published by the Free Software Foundation; either version 2
   of the License, or (at your option) any later version.
 */
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include "../Misc/XMLwrapper.h"
 #include <string>
 #include "../globals.h"
@@ -19,7 +19,7 @@ using namespace zyn;
 
 SYNTH_T *synth;
 
-class XMLwrapperTest:public CxxTest::TestSuite
+class XMLwrapperTest
 {
     public:
         void setUp() {
@@ -30,7 +30,7 @@ class XMLwrapperTest:public CxxTest::TestSuite
 
         void testAddPar() {
             xmla->addpar("my Pa*_ramet@er", 75);
-            TS_ASSERT_EQUALS(xmla->getpar("my Pa*_ramet@er", 0, -200, 200), 75);
+            TS_ASSERT_EQUAL_INT(xmla->getpar("my Pa*_ramet@er", 0, -200, 200), 75);
         }
 
         //here to verify that no leaks occur
@@ -61,3 +61,13 @@ version-revision=\"1\" ZynAddSubFX-author=\"Nasca Octavian Paul\">\n\
         XMLwrapper *xmla;
         XMLwrapper *xmlb;
 };
+
+int main()
+{
+    XMLwrapperTest test;
+    RUN_TEST(testAddPar);
+    RUN_TEST(testLoad);
+    RUN_TEST(testAnotherLoad);
+    return test_summary();
+}
+

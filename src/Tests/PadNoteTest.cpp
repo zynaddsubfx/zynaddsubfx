@@ -13,12 +13,13 @@
 
 
 //Based Upon AdNoteTest.h and SubNoteTest.h
-#include <cxxtest/TestSuite.h>
-#include <iostream>
-#include <fstream>
+#include "test-suite.h"
+#include <complex>
 #include <ctime>
 #include <string>
 #define private public
+#include "../Synth/PADnote.h"
+#undef private
 #include "../Misc/Master.h"
 #include "../Misc/Util.h"
 #include "../Misc/Allocator.h"
@@ -39,7 +40,7 @@ SYNTH_T *synth;
 #define SOURCE_DIR "BE QUIET COMPILER"
 #endif
 
-class PadNoteTest:public CxxTest::TestSuite
+class PadNoteTest
 {
     public:
         PADnote      *note;
@@ -83,8 +84,8 @@ class PadNoteTest:public CxxTest::TestSuite
             ///TS_ASSERT(!defaultPreset->VoicePar[1].Enabled);
 
             XMLwrapper wrap;
-            cout << string(SOURCE_DIR) + string("/guitar-adnote.xmz")
-                 << endl;
+            //cout << string(SOURCE_DIR) + string("/guitar-adnote.xmz")
+            //     << endl;
             wrap.loadXMLfile(string(SOURCE_DIR)
                               + string("/guitar-adnote.xmz"));
             TS_ASSERT(wrap.enterbranch("MASTER"));
@@ -190,22 +191,22 @@ class PadNoteTest:public CxxTest::TestSuite
             file.close();
 #endif
 
-            TS_ASSERT_EQUALS(sampleCount, 5888);
+            TS_ASSERT_EQUAL_INT(sampleCount, 5888);
         }
 
         void testInitialization() {
-            TS_ASSERT_EQUALS(pars->Pmode, PADnoteParameters::pad_mode::bandwidth);
+            TS_ASSERT(pars->Pmode == PADnoteParameters::pad_mode::bandwidth);
 
-            TS_ASSERT_EQUALS(pars->PVolume, 90);
-            TS_ASSERT(pars->oscilgen);
-            TS_ASSERT(pars->resonance);
+            TS_ASSERT_EQUAL_INT(pars->PVolume, 90);
+            TS_NON_NULL(pars->oscilgen);
+            TS_NON_NULL(pars->resonance);
 
             TS_ASSERT_DELTA(note->NoteGlobalPar.Volume, 2.597527f, 0.001f);
             TS_ASSERT_DELTA(note->NoteGlobalPar.Panning, 0.500000f, 0.01f);
 
 
             for(int i=0; i<8; ++i)
-                TS_ASSERT(pars->sample[i].smp);
+                TS_NON_NULL(pars->sample[i].smp);
             for(int i=8; i<PAD_MAX_SAMPLES; ++i)
                 TS_ASSERT(!pars->sample[i].smp);
 
@@ -287,3 +288,12 @@ class PadNoteTest:public CxxTest::TestSuite
         }
 #endif
 };
+
+int main()
+{
+    PadNoteTest test;
+    RUN_TEST(testDefaults);
+    RUN_TEST(testInitialization);
+    RUN_TEST(testSpeed);
+    return test_summary();
+}
