@@ -1040,7 +1040,7 @@ bool OscilGen::needPrepare(void)
 /*
  * Get the oscillator function
  */
-short int OscilGen::get(float *smps, float freqHz, int resonance)
+short int OscilGen::get(float *smps, float freqHz, int resonance, float nyquistFactor)
 {
     if(needPrepare())
         prepare();
@@ -1058,7 +1058,7 @@ short int OscilGen::get(float *smps, float freqHz, int resonance)
 
     clearAll(outoscilFFTfreqs, synth.oscilsize);
 
-    int nyquist = (int)(0.5f * synth.samplerate_f / fabsf(freqHz)) + 2;
+    int nyquist = (int)(0.5f * synth.samplerate_f / fabsf(freqHz) * nyquistFactor) + 2;
     if(ADvsPAD)
         nyquist = (int)(synth.oscilsize / 2);
     if(nyquist > synth.oscilsize / 2)
