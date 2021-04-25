@@ -1652,16 +1652,17 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
                     printf("WT: AD WT %p requesting %d new 2D Tensors at position %d (reason: too many consumed) %p %p...\n",
                            wt, (int)write_space, (int)write_pos, wt->get_freqs_addr(), wt->get_semantics_addr());
 #endif
-                    // max. number of semantics is 512 (TODO: not hard coded),
                     // *4 because 4 params per semantic (for loop below),
                     // *2 because of ~8 preceding args:
-                    char argstr[4096] = { 'i', 'i', 'i', // path
-                                          isModOsc ? 'T' : 'F',
-                                          'i', // parameter change time (0)
-                                          'i', 'i', // write pos + space
-                                          'i', // wavetable params (Presonance)
-                                          0
-                                        };
+                    char argstr[WaveTable::max_semantics_ever*4*2] =
+                    {
+                        'i', 'i', 'i', // path
+                        isModOsc ? 'T' : 'F',
+                        'i', // parameter change time (0)
+                        'i', 'i', // write pos + space
+                        'i', // wavetable params (Presonance)
+                        0
+                    };
                     rtosc_arg_t args[4096];
                     assert(sizeof(args)/sizeof(args[0]) == (sizeof(argstr)/sizeof(argstr[0])));
 

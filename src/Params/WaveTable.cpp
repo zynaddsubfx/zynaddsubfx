@@ -81,6 +81,7 @@ WaveTable::WaveTable(tensor_size_t nsemantics, tensor_size_t nfreqs) :
     freqs(Shape1{0}),
     data(Shape3{nsemantics, nfreqs, 0})
 {
+    assert(nsemantics <= max_semantics_ever);
     setMode(WtMode::freq_smps);
 }
 

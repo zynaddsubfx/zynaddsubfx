@@ -468,6 +468,7 @@ public:
     // pure guesses for what sounds good:
     constexpr const static tensor_size_t num_freqs = 10;
     constexpr const static tensor_size_t num_semantics = 128;
+    constexpr const static tensor_size_t max_semantics_ever = 512;
 
 private:
     Tensor1<IntOrFloat> semantics; //!< E.g. oscil params or random seed (e.g. 0...127)
@@ -527,7 +528,10 @@ public:
 
     Shape3 debug_get_shape() const { return data.debug_get_shape(); }
 
-    void swapSemanticsInitially(Tensor1<IntOrFloat>& unused) { semantics.swapWith(unused); }
+    void swapSemanticsInitially(Tensor1<IntOrFloat>& unused) {
+        semantics.swapWith(unused);
+        assert(semantics.size() <= max_semantics_ever);
+    }
     void swapFreqsInitially(Tensor1<float32>& unused) { freqs.swapWith(unused); }
     void swapWith(WaveTable& unused) {
         semantics.swapWith(unused.semantics);
@@ -536,6 +540,7 @@ public:
         std::swap(m_mode, unused.m_mode);
         std::swap(timestamp_current, unused.timestamp_current);
         std::swap(timestamp_requested, unused.timestamp_requested);
+        assert(semantics.size() <= max_semantics_ever);
     }
 
     void setMode(WtMode mode) { m_mode = mode; }
