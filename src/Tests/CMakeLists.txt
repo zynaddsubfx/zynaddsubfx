@@ -6,6 +6,7 @@ endfunction()
 #for tests looking for files stored in the source dir
 add_definitions(-DSOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
+CXXTEST_ADD_TEST(CppTest CppTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/CppTest.h)
 CXXTEST_ADD_TEST(ControllerTest ControllerTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/ControllerTest.h)
 CXXTEST_ADD_TEST(EchoTest EchoTest.cpp ${CMAKE_CURRENT_SOURCE_DIR}/EchoTest.h)
 #CXXTEST_ADD_TEST(SampleTest SampleTest.h)
@@ -41,6 +42,7 @@ set(test_lib zynaddsubfx_core ${GUI_LIBRARIES} ${ZLIB_LIBRARY} ${FFTW_LIBRARIES}
     ${MXML_LIBRARIES} pthread "-Wl,--no-as-needed -lpthread")
 
 message(STATUS "Linking tests with: ${test_lib}")
+target_link_libraries(CppTest        ${test_lib})
 target_link_libraries(ADnoteTest     ${test_lib})
 target_link_libraries(SUBnoteTest    ${test_lib})
 target_link_libraries(ControllerTest ${test_lib})
