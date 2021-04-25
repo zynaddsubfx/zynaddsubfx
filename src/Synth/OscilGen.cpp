@@ -560,9 +560,6 @@ WaveTable *OscilGen::allocWaveTable() const
 void OscilGen::recalculateDefaultWaveTable(WaveTable * wt) const
 {
     wt->setMode(WaveTable::WtMode::freq_smps);
-
-    // TODO: ringbuffer at size 1 will not work because the write ptr always
-    //       needs to be at least 1 behind the read pointer
     wt->setFreq(0, 55.f);
     wt->setSemantic(0, wavetable_types::IntOrFloat{.intVal=0});
 

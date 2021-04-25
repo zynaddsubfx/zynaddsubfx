@@ -1038,7 +1038,7 @@ public:
                     // possible optimization: no allocations when sizes don't change
                     // but this might complicate the code
                     WaveTable* newWt = new WaveTable(unused_semantics->size(), unused_freqs->size());
-                    newWt->setMode(wtMode); // TODO: set it in ctor?
+                    newWt->setMode(wtMode);
                     newWt->swapFreqsInitially(*unused_freqs);
                     newWt->swapSemanticsInitially(*unused_semantics);
                     delete unused_freqs;
