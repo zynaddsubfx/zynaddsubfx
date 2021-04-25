@@ -1058,11 +1058,14 @@ short int OscilGen::get(float *smps, float freqHz, int resonance, float nyquistF
 
     clearAll(outoscilFFTfreqs, synth.oscilsize);
 
-    int nyquist = (int)(0.5f * synth.samplerate_f / fabsf(freqHz) * nyquistFactor) + 2;
+    int nyquist = (int)(0.5f * synth.samplerate_f / fabsf(freqHz)) + 2;
+    int nyquistLimited = (int)(0.5f * synth.samplerate_f / fabsf(freqHz) * nyquistFactor) + 2;
     if(ADvsPAD)
         nyquist = (int)(synth.oscilsize / 2);
     if(nyquist > synth.oscilsize / 2)
         nyquist = synth.oscilsize / 2;
+    if(nyquistLimited > synth.oscilsize / 2)
+        nyquistLimited = synth.oscilsize / 2;
 
     //Process harmonics
     {
@@ -1070,7 +1073,7 @@ short int OscilGen::get(float *smps, float freqHz, int resonance, float nyquistF
 
         if(Padaptiveharmonics != 0)
             nyquist = synth.oscilsize / 2;
-        for(int i = 1; i < nyquist - 1; ++i)
+        for(int i = 1; i < nyquistLimited - 1; ++i)
             outoscilFFTfreqs[i] = input[i];
 
         adaptiveharmonic(outoscilFFTfreqs, freqHz);
@@ -1081,7 +1084,7 @@ short int OscilGen::get(float *smps, float freqHz, int resonance, float nyquistF
     }
 
     if(Padaptiveharmonics)   //do the antialiasing in the case of adaptive harmonics
-        for(int i = nyquist; i < synth.oscilsize / 2; ++i)
+        for(int i = nyquistLimited; i < synth.oscilsize / 2; ++i)
             outoscilFFTfreqs[i] = fft_t(0.0f, 0.0f);
 
     // Randomness (each harmonic), the block type is computed
