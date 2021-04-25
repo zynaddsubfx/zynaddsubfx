@@ -74,7 +74,7 @@ elseif(FLTK_FOUND)
 else()
   SET (GuiModule off  CACHE STRING "GUI module, either fltk, ntk, zest, or off")
 endif()
-SET (CompileTests ${CXXTEST_FOUND} CACHE BOOL "whether tests should be compiled in or not")
+SET (CompileTests ON CACHE BOOL "whether tests should be compiled in or not")
 SET (AlsaEnable ${ALSA_FOUND} CACHE BOOL
     "Enable support for Advanced Linux Sound Architecture")
 SET (JackEnable ${JACK_FOUND} CACHE BOOL
