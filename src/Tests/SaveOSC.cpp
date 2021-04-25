@@ -7,8 +7,6 @@
 #include <rtosc/thread-link.h>
 #include <rtosc/rtosc-time.h>
 
-#include <cxxtest/TestSuite.h>
-
 #include "../Misc/Master.h"
 #include "../Misc/MiddleWare.h"
 #include "../UI/NSM.H"
