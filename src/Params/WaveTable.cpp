@@ -46,8 +46,6 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
     AbstractRingbuffer& rb = data.ringbuffers[bestI];
     assert(data[rb.read_pos()].size() == freqs.size());
 
-
-    // TODO: hide this logic in WaveTable struct
     const Tensor1<WaveTable::float32>& res =
         (rb.read_space() == 0)
             // previous element

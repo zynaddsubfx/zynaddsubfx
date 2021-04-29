@@ -1680,15 +1680,22 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
                     tensor_size_t imax = write_pos + write_space;
                     assert(imax < (int)(sizeof(argstr)/sizeof(argstr[0])));
                     const char semType = wt->mode() == WaveTable::WtMode::freqwave_smps ? 'f' : 'i';
+                    auto handleArgptrInt = [](const WaveTable* wt, int sem_idx, rtosc_arg_t* aptr)
+                    {
+                        aptr->i = wt->get_sem(sem_idx).intVal;
+                    };
+                    auto handleArgptrFloat = [](const WaveTable* wt, int sem_idx, rtosc_arg_t* aptr)
+                    {
+                        aptr->f = wt->get_sem(sem_idx).floatVal;
+                    };
+                    auto argPtr = (semType == 'f') ? handleArgptrFloat : handleArgptrInt;
                     for(tensor_size_t sem_idx_2 = write_pos; sem_idx_2 < imax; ++sem_idx_2)
                     {
                         tensor_size_t sem_idx = sem_idx_2 % wt->size_semantics();
                         *sptr++ = 'i'; aptr++->i = sem_idx;
                         *sptr++ = 'i'; aptr++->i = freq_idx;
                         *sptr++ = semType;
-                        // TODO: optimize this: function ptr on [](WaveTable*, int, rtosc_arg_t*)
-                        if(semType == 'f') aptr++->f = wt->get_sem(sem_idx).floatVal;
-                        else aptr++->i = wt->get_sem(sem_idx).intVal;
+                        (*argPtr)(wt, sem_idx, aptr++);
                         *sptr++ = 'f'; aptr++->f = wt->get_freq(freq_idx);
                     }
                     // string termination
