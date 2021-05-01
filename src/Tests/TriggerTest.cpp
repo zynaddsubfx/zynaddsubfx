@@ -104,6 +104,9 @@ class TriggerTest
             //for(int i=0; i<synth->buffersize; ++i)
             //    printf("%d->%f\n", i, w->prebuffer[1][i]);
         }
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
 
         void testSine(void) {
             //Generate a sine table

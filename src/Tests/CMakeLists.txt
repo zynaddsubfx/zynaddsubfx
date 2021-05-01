@@ -41,27 +41,34 @@ quick_test(XMLwrapperTest   ${test_lib})
 
 quick_test(PluginTest     zynaddsubfx_core zynaddsubfx_nio
                           zynaddsubfx_gui_bridge
-                          ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
+                          ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+                          ${PLATFORM_LIBRARIES})
 quick_test(MiddlewareTest zynaddsubfx_core zynaddsubfx_nio
                           zynaddsubfx_gui_bridge
-                          ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
+                          ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+                          ${PLATFORM_LIBRARIES})
 quick_test(MessageTest zynaddsubfx_core zynaddsubfx_nio
                        zynaddsubfx_gui_bridge
-                       ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
+                       ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+                       ${PLATFORM_LIBRARIES})
 
 #Testbed app
-add_executable(ins-test InstrumentStats.cpp)
-target_link_libraries(ins-test ${test_lib} rt)
 
-if(LIBLO_FOUND)
-    cp_script(check-ports.rb)
-    add_test(PortChecker check-ports.rb)
+if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
+    add_executable(ins-test InstrumentStats.cpp)
+    target_link_libraries(ins-test ${test_lib} rt)
+
+    if(LIBLO_FOUND)
+        cp_script(check-ports.rb)
+        add_test(PortChecker check-ports.rb)
+    endif()
 endif()
 
 add_executable(save-osc SaveOSC.cpp)
 target_link_libraries(save-osc
                       zynaddsubfx_core zynaddsubfx_nio
                       zynaddsubfx_gui_bridge
-                      ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES})
+                      ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+                      ${PLATFORM_LIBRARIES})
 #this will be replaced with a for loop when the code will get more stable:
 add_test(SaveOsc save-osc ${CMAKE_CURRENT_SOURCE_DIR}/../../instruments/examples/Arpeggio\ 1.xmz)

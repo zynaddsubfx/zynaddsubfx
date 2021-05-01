@@ -106,6 +106,7 @@ class OscilGenTest
         }
 
         //performance testing
+#ifdef __linux__
         void testSpeed() {
             const int samps = 15000;
 
@@ -125,6 +126,7 @@ class OscilGenTest
             printf("OscilGenTest: %f seconds for %d gets.\n",
                    (static_cast<float>(t_off - t_on)) / CLOCKS_PER_SEC, samps);
         }
+#endif
 };
 
 int main()
@@ -133,6 +135,8 @@ int main()
     RUN_TEST(testInit);
     RUN_TEST(testOutput);
     RUN_TEST(testSpectrum);
+#ifdef __linux__
     RUN_TEST(testSpeed);
+#endif
     return test_summary();
 }
