@@ -62,13 +62,14 @@ if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
         cp_script(check-ports.rb)
         add_test(PortChecker check-ports.rb)
     endif()
+    add_executable(save-osc SaveOSC.cpp)
+    target_link_libraries(save-osc
+        zynaddsubfx_core zynaddsubfx_nio
+        zynaddsubfx_gui_bridge
+        ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+        ${PLATFORM_LIBRARIES})
+    #this will be replaced with a for loop when the code will get more stable:
+    add_test(SaveOsc save-osc ${CMAKE_CURRENT_SOURCE_DIR}/../../instruments/examples/Arpeggio\ 1.xmz)
+
 endif()
 
-add_executable(save-osc SaveOSC.cpp)
-target_link_libraries(save-osc
-                      zynaddsubfx_core zynaddsubfx_nio
-                      zynaddsubfx_gui_bridge
-                      ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
-                      ${PLATFORM_LIBRARIES})
-#this will be replaced with a for loop when the code will get more stable:
-add_test(SaveOsc save-osc ${CMAKE_CURRENT_SOURCE_DIR}/../../instruments/examples/Arpeggio\ 1.xmz)
