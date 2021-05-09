@@ -42,6 +42,7 @@ tensor_size_t findBestIndex(const Tensor<1, wavetable_types::float32>& freqs, fl
 
 const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
 {
+    assert(mode() != WtMode::freqwave_smps);
     tensor_size_t bestI = findBestIndex(freqs, freq);
 
     AbstractRingbuffer& rb = data.ringbuffers[bestI];
@@ -67,6 +68,13 @@ const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
     return res;
 }
 
+const Tensor1<WaveTable::float32>& WaveTable::getWaveAt(float32 freq, std::size_t semantic) const
+{
+    assert(mode() == WtMode::freqwave_smps);
+    tensor_size_t bestI = findBestIndex(freqs, freq);
+    return data[semantic][bestI];
+}
+
 WaveTable::WaveTable(tensor_size_t buffersize) :
     semantics(Shape1{1}),
     freqs(Shape1{1}),
@@ -82,6 +90,13 @@ WaveTable::WaveTable(tensor_size_t nsemantics, tensor_size_t nfreqs) :
 {
     assert(nsemantics <= max_semantics_ever);
     setMode(WtMode::freq_smps);
+}
+
+WaveTableRef::~WaveTableRef() {
+    // ref may be nullptr if the object has donated its content in a move CTOR
+    if(ref && --ref->refCount == 0) {
+        delete ref->wt; delete ref;
+    }
 }
 
 }

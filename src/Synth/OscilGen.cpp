@@ -1,4 +1,4 @@
-/*
+﻿/*
   ZynAddSubFX - a software synthesizer
 
   OscilGen.cpp - Waveform generator for ADnote
@@ -507,8 +507,10 @@ std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloa
     {
         std::size_t freq_sz = WaveTable::num_freqs;
         // TODO: random not relevant for wavetable modulation
-        std::size_t sem_sz = (wtMode == WtMode::freqseed_smps)
-                             ? WaveTable::num_semantics : 1;
+        std::size_t sem_sz = wtMode == WtMode::freqwave_smps
+                             ? WaveTable::num_semantics_wtmod
+                             : (wtMode == WtMode::freqseed_smps)
+                               ? WaveTable::num_semantics : 1;
 
         freqs = new Tensor1<wavetable_types::float32>(freq_sz);
         semantics = new Tensor1<wavetable_types::IntOrFloat>(sem_sz);
@@ -527,9 +529,14 @@ std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloa
         assert(semantics->size() == 1);
         (*semantics)[0].intVal = 0;
     }
-    else
+    else // TODO: else-if
     {
-        assert(false);
+        // TODO: compare with old WT algorithm
+        float step = 128.f / semantics->size();
+        for(tensor_size_t i = 0; i < semantics->size(); ++i)
+        {
+            (*semantics)[i].floatVal = step * i;
+        }
     }
 
     // frequency
@@ -548,8 +555,10 @@ wavetable_types::float32* OscilGen::calculateWaveTableData(wavetable_types::floa
     int Presonance)
 {
     wavetable_types::float32* data = new wavetable_types::float32[synth.oscilsize];
+    float one = 1.f;
+    std::fill_n(data, synth.oscilsize, one);
     if(wtMode == wavetable_types::WtMode::freqwave_smps) {
-        assert(false); // stub
+        get(data, freq, Presonance, semantic.floatVal);
     }
     else {
         newrandseed(semantic.intVal);
@@ -593,10 +602,12 @@ float OscilGen::userfunc(float x)
 /*
  * Get the base function
  */
-void OscilGen::getbasefunction(float *smps)
+void OscilGen::getbasefunction(float *smps, float differingBaseFuncPar)
 {
-    float par = (Pbasefuncpar + 0.5f) / 128.0f;
-    if(Pbasefuncpar == 64)
+    if(differingBaseFuncPar < 0.f)
+        differingBaseFuncPar = Pbasefuncpar;
+    float par = (differingBaseFuncPar + 0.5f) / 128.0f;
+    if(differingBaseFuncPar == 64)
         par = 0.5f;
 
     float p1 = Pbasefuncmodulationpar1 / 127.0f,
@@ -674,10 +685,10 @@ void OscilGen::oscilfilter(fft_t *freqs)
 /*
  * Change the base function
  */
-void OscilGen::changebasefunction(void)
+void OscilGen::changebasefunction(float differingBaseFuncPar)
 {
     if(Pcurrentbasefunc != 0) {
-        getbasefunction(tmpsmps);
+        getbasefunction(tmpsmps, differingBaseFuncPar);
         if(fft)
             fft->smps2freqs(tmpsmps, basefuncFFTfreqs);
         clearDC(basefuncFFTfreqs);
@@ -686,7 +697,7 @@ void OscilGen::changebasefunction(void)
         clearAll(basefuncFFTfreqs, synth.oscilsize);
     oscilprepared = 0;
     oldbasefunc   = Pcurrentbasefunc;
-    oldbasepar    = Pbasefuncpar;
+    oldbasepar    = (differingBaseFuncPar >= 0) ? differingBaseFuncPar : Pbasefuncpar;
     oldbasefuncmodulation     = Pbasefuncmodulation;
     oldbasefuncmodulationpar1 = Pbasefuncmodulationpar1;
     oldbasefuncmodulationpar2 = Pbasefuncmodulationpar2;
@@ -909,17 +920,19 @@ void OscilGen::shiftharmonics(fft_t *freqs)
 /*
  * Prepare the Oscillator
  */
-void OscilGen::prepare(void)
+void OscilGen::prepare(float differingBaseFuncPar)
 {
-    prepare(oscilFFTfreqs);
+    prepare(oscilFFTfreqs, differingBaseFuncPar);
 }
 
-void OscilGen::prepare(fft_t *freqs)
+// TODO: float vs char everywhere!
+void OscilGen::prepare(fft_t *freqs, float differingBaseFuncPar)
 {
-    if((oldbasepar != Pbasefuncpar) || (oldbasefunc != Pcurrentbasefunc)
+    if(differingBaseFuncPar >= 0.f
+       || (oldbasepar != Pbasefuncpar) || (oldbasefunc != Pcurrentbasefunc)
        || DIFF(basefuncmodulation) || DIFF(basefuncmodulationpar1)
        || DIFF(basefuncmodulationpar2) || DIFF(basefuncmodulationpar3))
-        changebasefunction();
+        changebasefunction(differingBaseFuncPar);
 
     for(int i = 0; i < MAX_AD_HARMONICS; ++i)
         hphase[i] = (Phphase[i] - 64.0f) / 64.0f * PI / (i + 1);
@@ -1093,12 +1106,12 @@ void OscilGen::newrandseed(unsigned int randseed)
     this->randseed = randseed;
 }
 
-bool OscilGen::needPrepare(void)
+bool OscilGen::needPrepare(float differingBaseFuncPar)
 {
     bool outdated = false;
 
     //Check function parameters
-    if((oldbasepar != Pbasefuncpar) || (oldbasefunc != Pcurrentbasefunc)
+    if((differingBaseFuncPar >= 0.f) || (oldbasepar != Pbasefuncpar) || (oldbasefunc != Pcurrentbasefunc)
        || DIFF(hmagtype) || DIFF(waveshaping) || DIFF(waveshapingfunction))
         outdated = true;
 
@@ -1145,10 +1158,10 @@ bool OscilGen::mayUseRandom() const
  * Get the oscillator function
  * When you change this, also change OscilGen::usesRandom
  */
-short int OscilGen::get(float *smps, float freqHz, int resonance)
+short int OscilGen::get(float *smps, float freqHz, int resonance, float differingBaseFuncPar)
 {
-    if(needPrepare())
-        prepare();
+    if(needPrepare(differingBaseFuncPar))
+        prepare(differingBaseFuncPar);
 
     fft_t *input = freqHz > 0.0f ? oscilFFTfreqs : pendingfreqs;
 

@@ -20,6 +20,7 @@
 #include "../Params/ADnoteParameters.h"
 #include "../Params/Controller.h"
 #include "WatchPoint.h"
+#include "../Params/WaveTableFwd.h"
 
 //Globals
 
@@ -54,6 +55,7 @@ class ADnote:public SynthNote
         virtual SynthNote *cloneLegato(void) override;
     private:
 
+        int fillOscilSmpFromWt(int nvoice);
         void setupVoice(int nvoice);
         int  setupVoiceUnison(int nvoice);
         void setupVoiceDetune(int nvoice);
@@ -101,6 +103,8 @@ class ADnote:public SynthNote
         inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice,
                                                               FMTYPE FMmode);
         //  inline void ComputeVoiceOscillatorFrequencyModulation(int nvoice);
+        /**Computes the WaveTable Modulated Oscillator.*/
+        inline void ComputeVoiceOscillatorWaveTableModulation(int nvoice);
         /**TODO*/
         inline void ComputeVoiceOscillatorPitchModulation(int nvoice);
 
@@ -190,7 +194,15 @@ class ADnote:public SynthNote
             int DelayTicks;
 
             /* Waveform of the Voice */
-            float *OscilSmp;
+            struct OscilSmpT
+            {
+                // only one of smps/table is valid
+                float* smps;
+                const WaveTable* table;
+                bool isWaveTable;
+            };
+            OscilSmpT OscilSmp;
+            float basefuncpar; //! basefunc par of what is stored in out OscilSmp [0,1.0]
 
             /* preserved for phase mod PWM emulation. */
             int phase_offset;
@@ -250,6 +262,7 @@ class ADnote:public SynthNote
 
             /* Wave of the Voice */
             float *FMSmp;
+            float FMSmpMax; // TODO! document this
 
             smooth_float FMVolume;
             float FMDetune;  //in cents

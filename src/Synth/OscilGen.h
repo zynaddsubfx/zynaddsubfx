@@ -28,16 +28,16 @@ class OscilGen:public Presets
         ~OscilGen();
 
         /**computes the full spectrum of oscil from harmonics,phases and basefunc*/
-        void prepare();
+        void prepare(float differingBaseFuncPar = -1.f);
 
-        void prepare(fft_t *data);
+        void prepare(fft_t *data, float differingBaseFuncPar = -1.f);
 
         /**do the antialiasing(cut off higher freqs.),apply randomness and do a IFFT*/
         //returns where should I start getting samples, used in block type randomness
-        short get(float *smps, float freqHz, int resonance = 0);
+        short get(float *smps, float freqHz, int resonance = 0, float differingBaseFuncPar = -1.f);
         //if freqHz is smaller than 0, return the "un-randomized" sample for UI
 
-        void getbasefunction(float *smps);
+        void getbasefunction(float *smps, float differingBaseFuncPar = -1.f);
 
         //called by UI
         void getspectrum(int n, float *spc, int what); //what=0 pt. oscil,1 pt. basefunc
@@ -144,7 +144,7 @@ class OscilGen:public Presets
 
         FFTwrapper *fft;
         //computes the basefunction and make the FFT; newbasefunc<0  = same basefunc
-        void changebasefunction(void);
+        void changebasefunction(float differingBaseFuncPar = -1.f);
         //Waveshaping
         void waveshape(fft_t *freqs);
 
@@ -165,7 +165,7 @@ class OscilGen:public Presets
         unsigned char getFinalOutpos(int outpos) const;
     public:
         //Check system for needed updates
-        bool needPrepare(void);
+        bool needPrepare(float differingBaseFuncPar = -1.f);
     private:
 
         //Do the adaptive harmonic stuff

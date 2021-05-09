@@ -501,8 +501,10 @@ public:
     // pure guesses for what sounds good:
     constexpr const static tensor_size_t num_freqs = 10;
     constexpr const static tensor_size_t num_semantics = 128;
+    constexpr const static tensor_size_t num_semantics_wtmod = 512;
     constexpr const static tensor_size_t max_semantics_ever = 512;
     static_assert (num_semantics <= max_semantics_ever, "max_semantics_ever too low");
+    static_assert (num_semantics_wtmod <= max_semantics_ever, "max_semantics_ever too low");
 
 private:
     Tensor1<IntOrFloat> semantics; //!< E.g. oscil params or random seed (e.g. 0...127)
@@ -582,6 +584,8 @@ public:
 
     //! Return sample slice for given frequency
     const Tensor1<float32> &get(float32 freq); // works for both seed and seedless setups
+    //! Return whole table for all values of wave parameters
+    const Tensor1<float32> &getWaveAt(float32 freq, std::size_t semantic) const;
     // future extensions
     // Tensor2<float32> get_antialiased(void); // works for seed and seedless setups
     // Tensor2<float32> get_wavetablemod(float32 freq);

@@ -20,7 +20,7 @@
 namespace zyn {
 
 enum class FMTYPE {
-    NONE, MIX, RING_MOD, PHASE_MOD, FREQ_MOD, PW_MOD
+    NONE, MIX, RING_MOD, PHASE_MOD, FREQ_MOD, PW_MOD, WAVE_MOD
 };
 
 /*****************************************************************/
@@ -313,8 +313,10 @@ struct ADnoteVoiceParam {
 
     static const rtosc::Ports &ports;
 
-    //! carrier tensor
+    //! carrier tensor for random-seed (not wavetable modulation)
     class WaveTable* table = nullptr;
+    //! carrier tensor for wavetable modulation
+    class WaveTable* tableWaveMod = nullptr;
     //! modulator tensor
     class WaveTable* tableMod = nullptr;
 

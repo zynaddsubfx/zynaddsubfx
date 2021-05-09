@@ -14,6 +14,7 @@
 #ifndef WAVETABLEFWD_H
 #define WAVETABLEFWD_H
 
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 
@@ -56,6 +57,36 @@ template<class T> using Tensor2 = Tensor<2, T>;
 template<class T> using Tensor3 = Tensor<3, T>;
 
 class WaveTable;
+
+class WaveTableRef
+{
+    struct sharedRefT {
+        WaveTable* wt;
+        std::size_t refCount;
+    };
+    sharedRefT* ref;
+public:
+    WaveTableRef(WaveTable* wt) : ref(new sharedRefT{wt, 1}) {}
+    ~WaveTableRef();
+    WaveTableRef(const WaveTableRef& other) : ref(other.ref) {
+        assert(other.ref);
+        ++ref->refCount;
+    }
+    WaveTableRef& operator=(const WaveTableRef& other) {
+        assert(other.ref);
+        ref = other.ref;
+        ++ref->refCount;
+        return *this;
+    }
+    WaveTableRef(WaveTableRef&& other) { ref = other.ref; other.ref = nullptr; } // TODO: make nullptr? does this call dtor?
+    WaveTableRef& operator=(WaveTableRef&& other) {
+        ref = other.ref;
+        other.ref = nullptr;
+        return *this;
+    }
+
+    std::size_t debug_refcount() const { return ref->refCount; }
+};
 
 }
 
