@@ -318,8 +318,11 @@ static const Ports voicePorts = {
                 printf("WT: AD WT %p requesting (max) new 2D Tensors (reason: params changed)...\n",
                        wt);
 #endif
+                char argStr[] = "s?ii";
+                argStr[1] = isModOsc ? 'T' : 'F';
+
                 // give MW all it needs to generate the new table
-                d.reply("/request-wavetable", isModOsc ? "sTii" : "sFii",
+                d.reply("/request-wavetable", argStr,
                         // path to this voice (T+F give the OscilGen of this voice)
                         d.loc,
                         // tensor relevant parameter change time
@@ -431,7 +434,7 @@ static const Ports voicePorts = {
                 {
 #ifdef DBG_WAVETABLES
                     wt->dump_rb(freq_idx);
-                    printf("WS delayed: %d (freq %d), %d\n", (int)wt->write_space_delayed_semantics(freq_idx), (int)freq_idx, fromParamChange);
+                    printf("WT: AD: WS delayed: %d (freq %d), %d\n", (int)wt->write_space_delayed_semantics(freq_idx), (int)freq_idx, fromParamChange);
 #endif
                     assert(wt->write_space_delayed_semantics(freq_idx) > 0);
 
@@ -1654,15 +1657,7 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
 #endif
                     // *4 because 4 params per semantic (for loop below),
                     // *2 because of ~8 preceding args:
-                    char argstr[WaveTable::max_semantics_ever*4*2] =
-                    {
-                        'i', 'i', 'i', // path
-                        isModOsc ? 'T' : 'F',
-                        'i', // parameter change time (0)
-                        'i', 'i', // write pos + space
-                        'i', // wavetable params (Presonance)
-                        0
-                    };
+                    char argstr[WaveTable::max_semantics_ever*4*2];
                     rtosc_arg_t args[4096];
                     assert(sizeof(args)/sizeof(args[0]) == (sizeof(argstr)/sizeof(argstr[0])));
 
