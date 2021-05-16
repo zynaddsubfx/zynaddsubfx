@@ -502,6 +502,7 @@ public:
     constexpr const static tensor_size_t num_freqs = 10;
     constexpr const static tensor_size_t num_semantics = 128;
     constexpr const static tensor_size_t max_semantics_ever = 512;
+    static_assert (num_semantics <= max_semantics_ever, "max_semantics_ever too low");
 
 private:
     Tensor1<IntOrFloat> semantics; //!< E.g. oscil params or random seed (e.g. 0...127)

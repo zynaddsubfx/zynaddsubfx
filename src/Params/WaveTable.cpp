@@ -33,8 +33,9 @@ tensor_size_t findBestIndex(const Tensor<1, wavetable_types::float32>& freqs, fl
         --not_less_than_freq;
     }
 #ifdef DBG_WAVETABLES
-    printf("WT: ADnote playing %f Hz, using wave at %f Hz\n",
-           freq, *not_less_than_freq);
+    //Printing this will give a lot of lag:
+    //printf("WT: ADnote playing %f Hz, using wave at %f Hz\n",
+    //       freq, *not_less_than_freq);
 #endif
     return std::distance(freqs.begin(), not_less_than_freq);
 }

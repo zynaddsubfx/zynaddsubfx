@@ -313,8 +313,11 @@ struct ADnoteVoiceParam {
 
     static const rtosc::Ports &ports;
 
-    // tensors in use
-    class WaveTable* table = nullptr, * tableMod = nullptr;
+    //! carrier tensor
+    class WaveTable* table = nullptr;
+    //! modulator tensor
+    class WaveTable* tableMod = nullptr;
+
     // new tensors are gathered here
     class WaveTable* nextTable = nullptr, * nextTableMod = nullptr;
     //! whether to use wave tables - only false for debugging
