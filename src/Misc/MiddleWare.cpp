@@ -1025,15 +1025,26 @@ public:
                      obj_store.get(params.voicePath +
                                         (params.isModOsc ? "FMSmp/" : "OscilSmp/")));
 
+                // hack:
+                const WaveTable::float32* freqs_array = nullptr;
+                const WaveTable::IntOrFloat* sem_array = nullptr;
+                std::size_t size_freqs, size_semantics;
                 // if no wave requests, this means generate a completely new
                 // wavetable
-                const WaveTable* wt = nullptr;
                 if(!params.wave_requests.size())
                 {
                     Tensor1<WaveTable::float32>* unused_freqs; // non-constant
                     Tensor1<WaveTable::IntOrFloat>* unused_semantics;
                     wavetable_types::WtMode wtMode = oscilGen->calculateWaveTableMode();
                     std::tie(unused_freqs, unused_semantics) = oscilGen->calculateWaveTableScales(wtMode);
+                    // hack: pointing to these arrays is OK, because the swap
+                    // in ADnoteParamters will not touch the array
+                    // (and it will not get deleted until MW has delivered a
+                    // further Tensor)
+                    freqs_array = unused_freqs->data();
+                    sem_array = unused_semantics->data();
+                    size_freqs = unused_freqs->size();
+                    size_semantics = unused_semantics->size();
 
                     // possible optimization: no allocations when sizes don't change
                     // but this might complicate the code
@@ -1043,7 +1054,7 @@ public:
                     newWt->swapSemanticsInitially(*unused_semantics);
                     delete unused_freqs;
                     delete unused_semantics;
-                    wt = newWt; // from now, kept const in this function
+                    const WaveTable* wt = newWt; // from now, kept const in this function
 
                     // send Tensor3, it does not contain any buffers yet
                     // no snoop ports, send this directly to RT
@@ -1082,20 +1093,22 @@ public:
                 else
                 {
 #ifdef DBG_WAVETABLES
-                    printf("WT: MW generating %d new tensors of %d waves each...\n", (int)wt->size_semantics(), (int)wt->size_freqs());
+                    printf("WT: MW generating %d new tensors of %d waves each...\n", (int)size_semantics, (int)size_freqs);
 #endif
-                    for(tensor_size_t i = 0; i < wt->size_freqs(); ++i)
+                    assert(freqs_array);
+                    assert(sem_array);
+                    for(tensor_size_t i = 0; i < size_freqs; ++i)
                     {
-                        const Shape2 tensorShape{wt->size_semantics(),
+                        const Shape2 tensorShape{size_semantics,
                                                  (tensor_size_t)synth.oscilsize};
                         Tensor2<WaveTable::float32>* newTensor =
                             new Tensor2<WaveTable::float32>(tensorShape);
 
-                        tensor_size_t f = i % wt->size_freqs();
-                        for(tensor_size_t s = 0; s < wt->size_semantics(); ++s)
+                        tensor_size_t f = i % size_freqs;
+                        for(tensor_size_t s = 0; s < size_semantics; ++s)
                         {
                             WaveTable::float32* data = oscilGen->calculateWaveTableData(
-                                wt->get_freq(f), wt->get_sem(s), params.presonance);
+                                freqs_array[f], sem_array[s], params.presonance);
                             (*newTensor)[s].take_data_and_own_it(data);
                         }
 
