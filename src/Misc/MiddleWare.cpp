@@ -639,7 +639,7 @@ public:
     {
         std::string voicePath;
         int part, kit, voice; // redundant to voice path
-        bool isModOsc;
+        bool isModOsc, isWtMod;
         int param_change_time;
         int presonance;
         struct wave_request
@@ -1025,17 +1025,22 @@ public:
                      obj_store.get(params.voicePath +
                                         (params.isModOsc ? "FMSmp/" : "OscilSmp/")));
 
+                wavetable_types::WtMode wtMode;
                 // hack:
                 const WaveTable::float32* freqs_array = nullptr;
                 const WaveTable::IntOrFloat* sem_array = nullptr;
                 std::size_t size_freqs, size_semantics;
+                if(params.wave_requests.size())
+                {
+                    wtMode = wavetable_types::WtMode::freqseed_smps;
+                }
+                else
                 // if no wave requests, this means generate a completely new
                 // wavetable
-                if(!params.wave_requests.size())
                 {
                     Tensor1<WaveTable::float32>* unused_freqs; // non-constant
                     Tensor1<WaveTable::IntOrFloat>* unused_semantics;
-                    wavetable_types::WtMode wtMode = oscilGen->calculateWaveTableMode();
+                    wtMode = oscilGen->calculateWaveTableMode(params.isWtMod);
                     std::tie(unused_freqs, unused_semantics) = oscilGen->calculateWaveTableScales(wtMode);
                     // hack: pointing to these arrays is OK, because the swap
                     // in ADnoteParamters will not touch the array
@@ -1083,7 +1088,7 @@ public:
                     {
                         Tensor1<WaveTable::float32>* newTensor = new Tensor1<WaveTable::float32>(synth.oscilsize);
                         WaveTable::float32* data = oscilGen->calculateWaveTableData(
-                            wave_req.freq, wave_req.sem, params.presonance);
+                            wave_req.freq, wave_req.sem, wtMode, params.presonance);
                         newTensor->take_data_and_own_it(data);
                         // this actually just sets "one" wave
                         uToB->write((params.voicePath + "set-waves").c_str(), params.isModOsc ? "Tiiib" : "Fiiib",
@@ -1108,7 +1113,7 @@ public:
                         for(tensor_size_t s = 0; s < size_semantics; ++s)
                         {
                             WaveTable::float32* data = oscilGen->calculateWaveTableData(
-                                freqs_array[f], sem_array[s], params.presonance);
+                                freqs_array[f], sem_array[s], wtMode, params.presonance);
                             (*newTensor)[s].take_data_and_own_it(data);
                         }
 
@@ -2213,7 +2218,7 @@ static rtosc::Ports middlewareReplyPorts = {
         rEnd},
     {"broadcast:", 0, 0, rBegin; impl.broadcast = true; rEnd},
     {"forward:", 0, 0, rBegin; impl.forward = true; rEnd},
-    {"request-wavetable:sTii:sFii:iiiTii:iiiFii", 0, 0,
+    {"request-wavetable:sTFii:iiiTFii:sFTii:sFFii:iiiFTii:iiiFFii", 0, 0,
         // add request to queue, allow new requests for this OscilGen again
         rBegin;
 
@@ -2243,6 +2248,8 @@ static rtosc::Ports middlewareReplyPorts = {
             wt2g.voicePath = buildVoiceParMsg(&wt2g.part, &wt2g.kit, &wt2g.voice) + "/";
         }
         wt2g.isModOsc          = rtosc_argument(msg, argpos++).T;
+        wt2g.isWtMod           = rtosc_argument(msg, argpos++).T;
+        assert(!(wt2g.isModOsc && wt2g.isWtMod));
         wt2g.param_change_time = rtosc_argument(msg, argpos++).i;
         wt2g.presonance        = rtosc_argument(msg, argpos++).i;
         unsigned nargs = rtosc_narguments(msg);

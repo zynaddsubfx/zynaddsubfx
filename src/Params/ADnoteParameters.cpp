@@ -318,8 +318,9 @@ static const Ports voicePorts = {
                 printf("WT: AD WT %p requesting (max) new 2D Tensors (reason: params changed)...\n",
                        wt);
 #endif
-                char argStr[] = "s?ii";
+                char argStr[] = "s??ii";
                 argStr[1] = isModOsc ? 'T' : 'F';
+                argStr[2] = 'F'; // stub - WT modulation is not implemented yet
 
                 // give MW all it needs to generate the new table
                 d.reply("/request-wavetable", argStr,
@@ -1656,7 +1657,7 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
                            wt, (int)write_space, (int)write_pos, wt->get_freqs_addr(), wt->get_semantics_addr());
 #endif
                     // *4 because 4 params per semantic (for loop below),
-                    // *2 because of ~8 preceding args:
+                    // *2 because of ~9 preceding args:
                     char argstr[WaveTable::max_semantics_ever*4*2];
                     rtosc_arg_t args[4096];
                     assert(sizeof(args)/sizeof(args[0]) == (sizeof(argstr)/sizeof(argstr[0])));
@@ -1667,6 +1668,7 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
                     *sptr++ = 'i'; aptr++->i = kit;
                     *sptr++ = 'i'; aptr++->i = voice;
                     *sptr++ = isModOsc ? 'T' : 'F';
+                    *sptr++ = 'F'; // "table"/"tableMod" are never WT-modulation
                     // parameter change time (none)
                     *sptr++ = 'i'; aptr++->i = 0;
                     // wavetable parameters (Presonance)

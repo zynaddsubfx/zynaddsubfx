@@ -484,10 +484,10 @@ public:
     }
 };
 
-wavetable_types::WtMode OscilGen::calculateWaveTableMode() const
+wavetable_types::WtMode OscilGen::calculateWaveTableMode(bool forceWtMode) const
 {
     using WtMode = wavetable_types::WtMode;
-    if(false) // TODO: if wave modulation is wanted
+    if(forceWtMode)
     {
         return WtMode::freqwave_smps;
     }
@@ -544,11 +544,17 @@ std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloa
 
 wavetable_types::float32* OscilGen::calculateWaveTableData(wavetable_types::float32 freq,
     wavetable_types::IntOrFloat semantic,
+    wavetable_types::WtMode wtMode,
     int Presonance)
 {
     wavetable_types::float32* data = new wavetable_types::float32[synth.oscilsize];
-    newrandseed(semantic.intVal);
-    get(data, freq, Presonance);
+    if(wtMode == wavetable_types::WtMode::freqwave_smps) {
+        assert(false); // stub
+    }
+    else {
+        newrandseed(semantic.intVal);
+        get(data, freq, Presonance);
+    }
     return data;
 }
 
