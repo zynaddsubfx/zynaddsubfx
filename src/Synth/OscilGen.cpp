@@ -1866,11 +1866,11 @@ FILTER(s)
 
 FILTER(lpsk2)
 {
-    float tmp2PIf = 2.0f * PI * (1.0f-par)*64.0f;
+    float tmp2PIf = 2.0f * PI * (1.05f-par)*64.0f;
     std::complex<float> s  (0.0f,2.0f*PI*i);
     float vOut = tmp2PIf * tmp2PIf;
-    std::complex<float> vIn = s*s + tmp2PIf*s/(4*par2+0.001f) + tmp2PIf*tmp2PIf;
-    return std::abs((vOut*vOut) / (vIn*vIn));
+    std::complex<float> vIn = s*s + tmp2PIf*s/(4*par2+0.5f) + tmp2PIf*tmp2PIf;
+    return std::abs((vOut*vOut*vOut) / (vIn*vIn*vIn));
     
 }
 #undef FILTER
