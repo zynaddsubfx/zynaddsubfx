@@ -1776,7 +1776,10 @@ inline void ADnote::ComputeVoiceOscillatorWaveTableModulation(int nvoice)
 
     // WaveTable-specific code
     for(int k = 0; k < vce.unison_size; ++k) {
-        assert(vce.OscilSmp.isWaveTable);
+        if(!vce.OscilSmp.isWaveTable) {
+           printf("\n\n assertion isWaveTable would have failed \n");
+           continue; 
+        }
         const WaveTable* wt = NoteVoicePar[nvoice].OscilSmp.table;
         int    poshi  = vce.oscposhi[k];
         int    poslo  = vce.oscposlo[k] * (1<<24);
@@ -1785,13 +1788,13 @@ inline void ADnote::ComputeVoiceOscillatorWaveTableModulation(int nvoice)
 
         float *tw     = tmpwave_unison[k];
         assert(vce.oscfreqlo[k] < 1.0f);
-        float oscilsize_inv = 1.0f / synth.oscilsize_f;
+        // float oscilsize_inv = 1.0f / synth.oscilsize_f;  // unused variable
         // debugging variables:
         // float minpar = 1.0f, maxpar = 0.0f;
 
         for(int i = 0; i < synth.buffersize; ++i) {
 
-            float oscil_pos = (float)poshi;
+            // float oscil_pos = (float)poshi;  // unused variable
 
             // tw[i] is the original modulator
             // FMSmpMax makes sure tw[i] is in range [-1,1]
@@ -1805,19 +1808,29 @@ inline void ADnote::ComputeVoiceOscillatorWaveTableModulation(int nvoice)
                  NoteVoicePar[nvoice].basefuncpar));
 
             float semantic = par * 512.f;
-            if(semantic >= wt->size_semantics())
-                semantic = wt->size_semantics() - 1;
+            if(semantic >= wt->size_semantics() - 1)
+                semantic = wt->size_semantics() - 2;
 
             // TODO: frequency computation is always constant! re-use same freq index
-            const Tensor1<WaveTable::float32>& wave = wt->getWaveAt(freq, semantic);
-            tw[i]  = (wave[poshi] * ((1<<24) - poslo) +
-                      wave[(poshi + 1)%wave.size()] * poslo)
+            // get the two waves where semantic is between its indices
+            const Tensor1<WaveTable::float32>& waveA = wt->getWaveAt(freq, semantic);
+            const Tensor1<WaveTable::float32>& waveB = wt->getWaveAt(freq, semantic+1);
+            // fractional part of semantic is the lerp parameter
+            const float semantic_fractional = semantic - floor(semantic);
+            // calculate current sample of both waves 
+            const float twA  = (waveA[poshi] * ((1<<24) - poslo) +
+                      waveA[(poshi + 1)%waveA.size()] * poslo)
                        / (1.0f*(1<<24));
-            float rms = rmsValue(wave, wave.size()); // TODO: required?
+            const float twB  = (waveB[poshi] * ((1<<24) - poslo) +
+                      waveB[(poshi + 1)%waveB.size()] * poslo)
+                       / (1.0f*(1<<24));
+            // lerp between these samples
+            tw[i] = (1.0f - semantic_fractional) * twA + semantic_fractional * twB;
+            //float rms = rmsValue(waveA, waveA.size()); // TODO: required?
 
             //printf("%f %f [%d->%f]: %f %f -> rms %f\n",freq,semantic,(int)oscil_pos,(float)(oscil_pos + oscilsize_inv),wave[oscil_pos],wave[oscil_pos + oscilsize_inv], rms);
 
-            tw[i] *= 0.5f / rms;
+            tw[i] *= 0.5f;// / rms;
             poslo += freqlo;
             poshi += freqhi + (poslo>>24);
             poslo &= 0xffffff;
