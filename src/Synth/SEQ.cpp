@@ -136,7 +136,7 @@ float SEQ::seqout()
             break; 
         case consumer_location_type_t::freq:
         case consumer_location_type_t::unspecified:
-            seqintensity = seqpars_.intensity * 40.96f;
+            seqintensity = seqpars_.intensity * 19.0f;
             break;
         }
     
