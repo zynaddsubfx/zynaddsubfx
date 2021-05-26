@@ -28,8 +28,9 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
     fadeInTime(t, lfopars.delay+lfopars.fadein), //0..8 sec
     waveShape(lfopars.PLFOtype),
     deterministic(!lfopars.Pfreqrand),
-    dt_(t.dt()),
-    lfopars_(lfopars), basefreq_(basefreq),
+        dt_(t.dt()),
+    lfopars_(lfopars), 
+    basefreq_(basefreq),
     watchOut(m, watch_prefix, "out")
 {
     int stretch = lfopars.Pstretch;
@@ -74,6 +75,9 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
             phase -= 0.25f; //chance the starting phase
             break;
     }
+
+    fadeout = false;
+    ramp = 0.0f;
 
     amp1     = (1 - lfornd) + lfornd * RND;
     amp2     = (1 - lfornd) + lfornd * RND;
@@ -155,6 +159,19 @@ float LFO::biquad(float input)
     return (cutoff==127) ? input : output; // at cutoff 127 bypass filter
 }
 
+void LFO::releasekey()
+{
+    if (lfopars_.fadeout==10.0f) // deactivated
+        return;
+    // store current ramp value in case of release while fading in
+    rampConst = ramp; 
+    // set fadeout state
+    fadeout = true;
+    // store current time
+    releaseTime = lfopars_.time->time();
+    // calculate fade out duration in frames
+    fadeOutDuration = lfopars_.fadeout * lfopars_.time->framesPerSec();
+}
 
 float LFO::lfoout()
 {
@@ -195,17 +212,24 @@ float LFO::lfoout()
 
     if(delayTime.inFuture())
     {
-        outConst = out;
+        outConst = out; // keep start phase
         return out;
-    }
+    } else if (fadeout) {
+        // fade out has priority over fadein
+        ramp = rampConst * (1.0f - (float)(lfopars_.time->time() - releaseTime) / (float)fadeOutDuration);
+        // if ramp is finished, stay there
+        // (ramp could overflow, but not during maximal note release time)
+        if (ramp < 0) ramp = 0; 
 
-    if(fadeInTime.inFuture())
+        out *= ramp;
+        out += outConst * (1.0f-ramp);
+    }    
+    else if(fadeInTime.inFuture())
     {
-        float ramp = ((float)delayTime.over()) / (float)(fadeInTime-delayTime);
+        ramp = ((float)delayTime.over()) / (float)(fadeInTime-delayTime);
         out *= ramp;
         out += outConst * (1.0f-ramp);
     }
-
 
     //Start oscillating
     if(deterministic)

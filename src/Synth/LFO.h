@@ -35,6 +35,7 @@ class LFO
 
         float lfoout();
         float amplfoout();
+        void releasekey();
     private:
         float baseOut(const char waveShape, const float phase);
         float biquad(float input);
@@ -61,6 +62,11 @@ class LFO
         RelTime delayTime;
         //Time to ramp in
         RelTime fadeInTime;
+        //Timestamp of noteoff
+        int64_t releaseTime;
+        //Time to ramp out
+        int64_t fadeOutDuration;
+        float ramp, rampConst;
         // store the constant out value before oscillating starts
         float outConst = 0;
 
@@ -68,6 +74,8 @@ class LFO
 
         //If After initialization there are no calls to random number gen.
         bool  deterministic;
+        
+        bool fadeout;
 
         const float     dt_;
         const LFOParams &lfopars_;

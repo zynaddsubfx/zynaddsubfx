@@ -81,8 +81,11 @@ static const rtosc::Ports _ports = {
               rPreset(ad_voice_amp, 0.94),
               "Delay before LFO start\n0..4 second delay"),
     rParamF(fadein, rShort("fadein"), rSpecial(disable), rUnit(S),
-              rLinear(0.0, 10.0), rDefault(0),
+              rLinear(0.0, 10.0f), rDefault(0.0f),
               "Time to ramp up LFO amplitude\n0..10 second"),
+    rParamF(fadeout, rShort("fadeout"), rSpecial(disable), rUnit(S),
+              rLinear(0.001, 10.0f), rDefault(10.0f),
+              "Time to ramp down LFO amplitude\n0..10 second"),
     {"Pdelay::i", rShort("delay") rLinear(0,127)
      rDoc("Delay before LFO start\n0..4 second delay"), NULL,
     [](const char *msg, RtData &d)
@@ -149,7 +152,7 @@ void LFOParams::setup()
 
 // TODO: reuse
 LFOParams::LFOParams(const AbsTime *time_) :
-    LFOParams(2.65, 0, 0, 127, 0, 0, 0, 0, 0, loc_unspecified, time_)
+    LFOParams(2.65, 0, 0, 127, 0, 0, 0.0, 0.0, 0.0, 0, loc_unspecified, time_)
 {
 }
 
@@ -161,6 +164,7 @@ LFOParams::LFOParams(float freq_,
                      char Prandomness_,
                      float Pdelay_,
                      float Pfadein_,
+                     float Pfadeout_,
                      char Pcontinous_,
                      consumer_location_t loc,
                      const AbsTime *time_) : loc(loc),
@@ -174,6 +178,7 @@ LFOParams::LFOParams(float freq_,
     Drandomness = Prandomness_;
     Ddelay      = Pdelay_;
     Dfadein     = Pfadein_;
+    Dfadeout    = Pfadeout_;
     Dcontinous  = Pcontinous_;
 
     setup();
@@ -186,7 +191,7 @@ LFOParams::LFOParams(consumer_location_t loc,
 
     auto init =
         [&](float freq_, char Pintensity_, char Pstartphase_, char Pcutoff_, char PLFOtype_,
-            char Prandomness_, float delay_, float fadein_, char Pcontinous_)
+            char Prandomness_, float delay_, char Pcontinous_)
     {
         Dfreq       = freq_;
         Dintensity  = Pintensity_;
@@ -195,18 +200,19 @@ LFOParams::LFOParams(consumer_location_t loc,
         DLFOtype    = PLFOtype_;
         Drandomness = Prandomness_;
         Ddelay      = delay_;
-        Dfadein     = fadein_;
+        Dfadein     = 0.0f;
+        Dfadeout    = 10.0f;
         Dcontinous  = Pcontinous_;
     };
 
     switch(loc)
     {
-        case ad_global_amp:    init(6.49, 0, 64, 127, 0, 0, 0, 0, 0); break;
-        case ad_global_freq:   init(3.71, 0, 64, 127, 0, 0, 0, 0, 0); break;
-        case ad_global_filter: init(6.49, 0, 64, 127, 0, 0, 0, 0, 0); break;
-        case ad_voice_amp:     init(11.25, 32, 64, 127, 0, 0, 0.94, 0, 0); break;
-        case ad_voice_freq:    init(1.19, 40,  0, 127, 0, 0,  0, 0, 0); break;
-        case ad_voice_filter:  init(1.19, 20, 64, 127, 0, 0,  0, 0, 0); break;
+        case ad_global_amp:    init(6.49, 0, 64, 127, 0, 0, 0, 0); break;
+        case ad_global_freq:   init(3.71, 0, 64, 127, 0, 0, 0, 0); break;
+        case ad_global_filter: init(6.49, 0, 64, 127, 0, 0, 0, 0); break;
+        case ad_voice_amp:     init(11.25, 32, 64, 127, 0, 0, 0, 0); break;
+        case ad_voice_freq:    init(1.19, 40,  0, 127, 0, 0, 0, 0); break;
+        case ad_voice_filter:  init(1.19, 20, 64, 127, 0, 0, 0, 0); break;
         default: throw std::logic_error("Invalid LFO consumer location");
     }
 
@@ -226,6 +232,7 @@ void LFOParams::defaults()
     Prandomness = Drandomness;
     delay       = Ddelay;
     fadein      = Dfadein;
+    fadeout     = Dfadeout;
     Pcontinous  = Dcontinous;
     Pfreqrand   = 0;
     Pstretch    = 64;
@@ -269,6 +276,9 @@ void LFOParams::getfromXML(XMLwrapper& xml)
     if (xml.hasparreal("fadein")) {
         fadein      = xml.getparreal("fadein", fadein);
     }
+    if (xml.hasparreal("fadeout")) {
+        fadeout      = xml.getparreal("fadeout", fadeout);
+    }
     Pstretch    = xml.getpar127("stretch", Pstretch);
     Pcontinous  = xml.getparbool("continous", Pcontinous);
 }
@@ -285,6 +295,7 @@ void LFOParams::paste(LFOParams &x)
     COPY(Pfreqrand);
     COPY(delay);
     COPY(fadein);
+    COPY(fadeout);
     COPY(Pcontinous);
     COPY(Pstretch);
 
