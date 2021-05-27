@@ -34,7 +34,7 @@ For more information see:
 - The project page: http://zynaddsubfx.sf.net
 - The mailing list: https://sourceforge.net/projects/zynaddsubfx/lists/zynaddsubfx-user
 - The public forum: https://www.kvraudio.com/forum/viewforum.php?f=47
-- The IRC channel: ##zynaddsubfx on freenode
+- The IRC channel: #zynaddsubfx on irc.Libera.chat
 
 Dependencies
 ~~~~~~~~~~~~
