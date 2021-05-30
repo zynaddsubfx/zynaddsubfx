@@ -26,6 +26,7 @@
 #include <fstream> // std::istream
 
 #include "Nio.h"
+#include "Compressor.h"
 #include "OutMgr.h"
 #include "InMgr.h"
 #include "Misc/Util.h"
@@ -44,6 +45,7 @@ JackEngine::JackEngine(const SYNTH_T &synth)
     name = "JACK";
     audio.jackSamplerate = 0;
     audio.jackNframes    = 0;
+    audio.peaks[0] = 0;
     for(int i = 0; i < 2; ++i) {
         audio.ports[i]     = NULL;
         audio.portBuffs[i] = NULL;
@@ -344,6 +346,13 @@ bool JackEngine::processAudio(jack_nframes_t nframes)
     //Assumes size of smp.l == nframes
     memcpy(audio.portBuffs[0], smp.l, bufferSize * sizeof(float));
     memcpy(audio.portBuffs[1], smp.r, bufferSize * sizeof(float));
+
+    //Make sure the audio output doesn't overflow
+    for(int frame = 0; frame != bufferSize; ++frame) {
+        float &l = audio.portBuffs[0][frame];
+        float &r = audio.portBuffs[1][frame];
+        stereoCompressor(synth.samplerate, audio.peaks[0], l, r);
+    }
     return true;
 }
 

@@ -19,6 +19,7 @@
 #include <cassert>
 
 #include "Nio.h"
+#include "Compressor.h"
 #include "../Misc/Util.h"
 #include "../Misc/Master.h"
 #include "../Misc/Part.h"
@@ -35,6 +36,7 @@ using std::string;
 struct jack_multi
 {
     jack_port_t *ports[NUM_MIDI_PARTS * 2 + 2];
+    float peaks[NUM_MIDI_PARTS + 1];
     jack_client_t *client;
     bool running;
 };
@@ -44,6 +46,7 @@ JackMultiEngine::JackMultiEngine(const SYNTH_T &synth)
 {
     impl->running = false;
     impl->client  = NULL;
+    memset(impl->peaks, 0, sizeof(impl->peaks));
 
     name = "JACK-MULTI";
 }
@@ -148,11 +151,30 @@ int JackMultiEngine::processAudio(jack_nframes_t nframes)
     memcpy(buffers[0], smp.l, synth.bufferbytes);
     memcpy(buffers[1], smp.r, synth.bufferbytes);
 
+    const int maxFrames = (synth.bufferbytes / sizeof(float));
+
+    //Make sure the audio output doesn't overflow
+    for(int frame = 0; frame != maxFrames; ++frame) {
+	float &p = impl->peaks[0];
+	float &l = buffers[0][frame];
+	float &r = buffers[1][frame];
+	stereoCompressor(synth.samplerate, p, l, r);
+    }
+
     //Gather other samples from individual parts
     Master &master = *middleware->spawnMaster();
     for(int i = 0; i < NUM_MIDI_PARTS; ++i) {
+        float &p = impl->peaks[i + 1];
+
         memcpy(buffers[2*i + 2], master.part[i]->partoutl, synth.bufferbytes);
         memcpy(buffers[2*i + 3], master.part[i]->partoutr, synth.bufferbytes);
+
+        //Make sure the audio output doesn't overflow
+        for(int frame = 0; frame != maxFrames; ++frame) {
+            float &l = buffers[2*i + 2][frame];
+            float &r = buffers[2*i + 3][frame];
+            stereoCompressor(synth.samplerate, p, l, r);
+        }
     }
 
     return false;
