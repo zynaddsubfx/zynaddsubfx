@@ -14,8 +14,8 @@
 #define	_COMPRESSOR_H_
 
 #define	floatIsValid(x) ({			\
-      float __r = (x) * 0.0;			\
-      __r == 0.0 || __r == -0.0;		\
+      const float __r = (x) * 0.0;		\
+      __r == 0.0;				\
 })
 
 #define	stereoCompressor(div,pv,l,r) do {	\
