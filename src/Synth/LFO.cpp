@@ -25,7 +25,6 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
         const char *watch_prefix)
     :first_half(-1),
     delayTime(t, lfopars.delay), //0..4 sec
-    fadeInTime(t, lfopars.delay+lfopars.fadein), //0..8 sec
     waveShape(lfopars.PLFOtype),
     deterministic(!lfopars.Pfreqrand),
     dt_(t.dt()),
@@ -77,6 +76,7 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
     }
 
     fadeout = false;
+    fadein = false;
     ramp = 0.0f;
 
     amp1     = (1 - lfornd) + lfornd * RND;
@@ -165,12 +165,14 @@ void LFO::releasekey()
         return;
     // store current ramp value in case of release while fading in
     rampConst = ramp; 
-    // set fadeout state
-    fadeout = true;
+
     // store current time
     releaseTime = lfopars_.time->time();
     // calculate fade out duration in frames
     fadeOutDuration = lfopars_.fadeout * lfopars_.time->framesPerSec();
+    
+    // set fadeout state
+    fadeout = true;
 }
 
 float LFO::lfoout()
@@ -212,22 +214,32 @@ float LFO::lfoout()
 
     if(delayTime.inFuture())
     {
-        outConst = out; // keep start phase
         return out;
-    } else if (fadeout) {
+    } else if (!fadein){
+        fadeInTime = lfopars_.time->time();
+        fadeInDuration = lfopars_.fadein * lfopars_.time->framesPerSec();
+        outConst = out; // keep start value to prevent jump
+        fadein = true;
+    }
+    
+    if (fadeout) {
         // fade out has priority over fadein
-        ramp = rampConst * (1.0f - (float)(lfopars_.time->time() - releaseTime) / (float)fadeOutDuration);
+        if(fadeOutDuration) // no dividion by zero
+            ramp = rampConst * (1.0f - (float)(lfopars_.time->time() - releaseTime) / (float)fadeOutDuration);
+        else
+            ramp = 0.0f;
         // if ramp is finished, stay there
-        // (ramp could overflow, but not during maximal note release time)
-        if (ramp < 0) ramp = 0; 
+        // (ramp could overflow, but actually not during maximal note release time)
+        if (ramp < 0.0f) ramp = 0.0f; 
+        out *= ramp;
 
+    } else if(fadein && ramp < 1.0f){
+        if (fadeInDuration)
+            ramp = ((float)(lfopars_.time->time() - fadeInTime) / (float)fadeInDuration);        
+        else
+            ramp = 1.0f;
         out *= ramp;
-        out += outConst * (1.0f-ramp);
-    }    
-    else if(fadeInTime.inFuture())
-    {
-        ramp = ((float)delayTime.over()) / (float)(fadeInTime-delayTime);
-        out *= ramp;
+        // add the fading out outconst (value due to startphase)
         out += outConst * (1.0f-ramp);
     }
 

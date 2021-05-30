@@ -60,22 +60,26 @@ class LFO
 
         //Delay before starting
         RelTime delayTime;
-        //Time to ramp in
-        RelTime fadeInTime;
+
+        int64_t fadeInDuration;
+        //Timestamp of begin fadein
+        int64_t fadeInTime;
         //Timestamp of noteoff
         int64_t releaseTime;
         //Time to ramp out
+        
         int64_t fadeOutDuration;
         float ramp, rampConst;
         // store the constant out value before oscillating starts
-        float outConst = 0;
+        float outConst = 0.0;
 
         char  waveShape;
 
         //If After initialization there are no calls to random number gen.
         bool  deterministic;
         
-        bool fadeout;
+        // state variables
+        bool fadeout, fadein;
 
         const float     dt_;
         const LFOParams &lfopars_;

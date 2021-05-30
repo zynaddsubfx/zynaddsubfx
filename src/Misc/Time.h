@@ -54,6 +54,11 @@ class RelTime
         {
             return (lhs.frame-rhs.frame);
         }
+        
+        friend bool operator>(const RelTime& lhs, const RelTime& rhs)
+        {
+            return (lhs.frame>rhs.frame);
+        }
     private:
         int64_t frame;
         int32_t sample;

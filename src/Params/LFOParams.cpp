@@ -154,7 +154,7 @@ void LFOParams::setup()
 
 // TODO: reuse
 LFOParams::LFOParams(const AbsTime *time_) :
-    LFOParams(2.65, 0, 0, 127, 0, 0, 0.0, 0.0, 0.0, 0, loc_unspecified, time_)
+    LFOParams(2.65, 0, 0, 127, 0, 0, 0.0, 0.0, 10.0, 0, loc_unspecified, time_)
 {
 }
 
@@ -164,9 +164,9 @@ LFOParams::LFOParams(float freq_,
                      char Pcutoff_,
                      char PLFOtype_,
                      char Prandomness_,
-                     float Pdelay_,
-                     float Pfadein_,
-                     float Pfadeout_,
+                     float delay_,
+                     float fadein_,
+                     float fadeout_,
                      char Pcontinous_,
                      consumer_location_t loc,
                      const AbsTime *time_) : loc(loc),
@@ -178,9 +178,9 @@ LFOParams::LFOParams(float freq_,
     Dcutoff     = Pcutoff_;
     DLFOtype    = PLFOtype_;
     Drandomness = Prandomness_;
-    Ddelay      = Pdelay_;
-    Dfadein     = Pfadein_;
-    Dfadeout    = Pfadeout_;
+    Ddelay      = delay_;
+    Dfadein     = fadein_;
+    Dfadeout    = fadeout_;
     Dcontinous  = Pcontinous_;
 
     setup();
