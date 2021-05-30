@@ -165,6 +165,7 @@ void LFO::releasekey()
         return;
     // store current ramp value in case of release while fading in
     rampConst = ramp; 
+    outConst *= ((1.0f/ramp)-1.0f);
 
     // store current time
     releaseTime = lfopars_.time->time();
@@ -230,12 +231,17 @@ float LFO::lfoout()
             ramp = 0.0f;
         // if ramp is finished, stay there
         // (ramp could overflow, but actually not during maximal note release time)
-        if (ramp < 0.0f) ramp = 0.0f; 
+        if (ramp < 0.0f) 
+            ramp = 0.0f; 
+        
+        out += outConst;
         out *= ramp;
 
     } else if(fadein && ramp < 1.0f){
-        if (fadeInDuration)
-            ramp = ((float)(lfopars_.time->time() - fadeInTime) / (float)fadeInDuration);        
+        if (fadeInDuration) {
+            ramp = ((float)(lfopars_.time->time() - fadeInTime) / (float)fadeInDuration);
+            ramp = sqrtf(ramp);    
+        } 
         else
             ramp = 1.0f;
         out *= ramp;
