@@ -28,7 +28,7 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
     fadeInTime(t, lfopars.delay+lfopars.fadein), //0..8 sec
     waveShape(lfopars.PLFOtype),
     deterministic(!lfopars.Pfreqrand),
-        dt_(t.dt()),
+    dt_(t.dt()),
     lfopars_(lfopars), 
     basefreq_(basefreq),
     watchOut(m, watch_prefix, "out")

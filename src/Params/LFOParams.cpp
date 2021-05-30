@@ -82,10 +82,12 @@ static const rtosc::Ports _ports = {
               "Delay before LFO start\n0..4 second delay"),
     rParamF(fadein, rShort("fadein"), rSpecial(disable), rUnit(S),
               rLinear(0.0, 10.0f), rDefault(0.0f),
-              "Time to ramp up LFO amplitude\n0..10 second"),
+              "Time to ramp up LFO amplitude\n \
+              0..10 seconds"),
     rParamF(fadeout, rShort("fadeout"), rSpecial(disable), rUnit(S),
               rLinear(0.001, 10.0f), rDefault(10.0f),
-              "Time to ramp down LFO amplitude\n0..10 second"),
+              "Time to ramp down LFO amplitude on key release\n  \
+              0..10 seconds, 10=off (default)"),
     {"Pdelay::i", rShort("delay") rLinear(0,127)
      rDoc("Delay before LFO start\n0..4 second delay"), NULL,
     [](const char *msg, RtData &d)
@@ -210,7 +212,7 @@ LFOParams::LFOParams(consumer_location_t loc,
         case ad_global_amp:    init(6.49, 0, 64, 127, 0, 0, 0, 0); break;
         case ad_global_freq:   init(3.71, 0, 64, 127, 0, 0, 0, 0); break;
         case ad_global_filter: init(6.49, 0, 64, 127, 0, 0, 0, 0); break;
-        case ad_voice_amp:     init(11.25, 32, 64, 127, 0, 0, 0, 0); break;
+        case ad_voice_amp:     init(11.25, 32, 64, 127, 0, 0, 0.94, 0); break;
         case ad_voice_freq:    init(1.19, 40,  0, 127, 0, 0, 0, 0); break;
         case ad_voice_filter:  init(1.19, 20, 64, 127, 0, 0, 0, 0); break;
         default: throw std::logic_error("Invalid LFO consumer location");
@@ -250,6 +252,7 @@ void LFOParams::add2XML(XMLwrapper& xml)
     xml.addpar("randomness_frequency", Pfreqrand);
     xml.addparreal("delay", delay);
     xml.addparreal("fadein", fadein);
+    xml.addparreal("fadeout", fadeout);
     xml.addpar("stretch", Pstretch);
     xml.addparbool("continous", Pcontinous);
 }
@@ -263,7 +266,7 @@ void LFOParams::getfromXML(XMLwrapper& xml)
     }
     Pintensity  = xml.getpar127("intensity", Pintensity);
     Pstartphase = xml.getpar127("start_phase", Pstartphase);
-    Pcutoff = xml.getpar127("cutoff", Pcutoff);
+    Pcutoff     = xml.getpar127("cutoff", Pcutoff);
     PLFOtype    = xml.getpar127("lfo_type", PLFOtype);
     Prandomness = xml.getpar127("randomness_amplitude", Prandomness);
     Pfreqrand   = xml.getpar127("randomness_frequency", Pfreqrand);

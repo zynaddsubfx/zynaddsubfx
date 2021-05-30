@@ -66,8 +66,8 @@ class LFOParams:public Presets
         unsigned char Prandomness; /**<randomness (0=off)*/
         unsigned char Pfreqrand; /**<frequency randomness (0=off)*/
         float         delay; /**<delay (0=off)*/
-        float         fadein; /**<fadein, relative to delay (0=off)*/
-        float         fadeout; /**<fadein (0=off)*/
+        float         fadein; /**<fadein, relative to delay*/
+        float         fadeout; /**<fadeout on key release (10.0=off)*/
         unsigned char Pcontinous; /**<1 if LFO is continous*/
         unsigned char Pstretch; /**<how the LFO is "stretched" according the note frequency (64=no stretch)*/
 
