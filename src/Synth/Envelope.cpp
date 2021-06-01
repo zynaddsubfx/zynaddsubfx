@@ -51,6 +51,7 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
         switch(mode) {
             case 2:
                 envval[i] = (1.0f - pars.Penvval[i] / 127.0f) * -40;
+                envcpy[i] = 10.0f * pars.envcpy[i];
                 break;
             case 3:
                 envval[i] =
@@ -59,15 +60,20 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
                                  - 64.0f) / 64.0f) - 1.0f) * 100.0f;
                 if(pars.Penvval[i] < 64)
                     envval[i] = -envval[i];
+                envcpy[i] = 1000.0f * pars.envcpy[i];
                 break;
             case 4:
                 envval[i] = (pars.Penvval[i] - 64.0f) / 64.0f * 6.0f; //6 octaves (filtru)
+                envcpy[i] = 3.0f * pars.envcpy[i];
                 break;
             case 5:
                 envval[i] = (pars.Penvval[i] - 64.0f) / 64.0f * 10;
+                envcpy[i] = 100.0f * pars.envcpy[i];
                 break;
             default:
                 envval[i] = pars.Penvval[i] / 127.0f;
+                envcpy[i] = 5.0f * pars.envcpy[i];
+                break;
         }
     }
 
@@ -76,6 +82,7 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
     currentpoint = 1; //the envelope starts from 1
     keyreleased  = false;
     t = 0.0f;
+    tRelease = 0.0f;
     envfinish = false;
     inct      = envdt[1];
     envoutval = 0.0f;
@@ -93,8 +100,11 @@ void Envelope::releasekey()
     if(keyreleased)
         return;
     keyreleased = true;
-    if(forcedrelease)
+    if(forcedrelease) {
+        tRelease = t;
         t = 0.0f;
+
+    }
 }
 
 void Envelope::forceFinish(void)
@@ -133,12 +143,28 @@ void Envelope::watch(float time, float value)
     }
 }
 
+inline float bezier3(float a, float bRel, float cRel, float d, float t)
+{
+    const float t2 = t*t;
+    const float t3 = t2*t;
+
+    const float mt = 1.0f-t;
+    const float mt2 = mt*mt;
+    const float mt3 = mt2*mt;
+
+    const float b = (3.0f*a+d)*0.25f + 4.0f*bRel;
+    const float c = (a+3.0f*d)*0.25f + 4.0f*cRel;
+
+    return mt3*a + 3.0f*mt2*t*b + 3.0f*mt*t2*c + t3*d;
+}
+
 /*
  * Envelope Output
  */
 float Envelope::envout(bool doWatch)
 {
     float out;
+
     if(envfinish) { //if the envelope is finished
         envoutval = envval[envpoints - 1];
         if(doWatch) {
@@ -168,7 +194,7 @@ float Envelope::envout(bool doWatch)
         if(envdt[releaseindex] < 0.00000001f)
             out = envval[releaseindex];
         else
-            out = envoutval + (envval[releaseindex] - envoutval) * t; // linear interpolation envoutval and envval[releaseindex]
+            out = bezier3(envoutval, envcpy[releaseindex*2-1], envcpy[releaseindex*2], envval[releaseindex], t);
 
         t += envdt[releaseindex];
 
@@ -187,11 +213,12 @@ float Envelope::envout(bool doWatch)
 
         return out;
     }
-    if(inct >= 1.0f)
+
+    if(t >= 1.0f) // if we reached the next point
         out = envval[currentpoint];
-    else
-        out = envval[currentpoint - 1]
-              + (envval[currentpoint] - envval[currentpoint - 1]) * t;
+    else { // if we have to interpolate between points
+        out = bezier3(envval[currentpoint - 1], envcpy[currentpoint*2-1], envcpy[currentpoint*2], envval[currentpoint], t);
+    }
 
     t += inct;
 
@@ -215,7 +242,7 @@ float Envelope::envout(bool doWatch)
     envoutval = out;
 
     if(doWatch) {
-        watch(currentpoint + t, envoutval);
+        watch(currentpoint + t + tRelease, envoutval);
     }
     return out;
 }
@@ -230,8 +257,8 @@ float Envelope::envout_dB()
         return envout(true);
 
     if((currentpoint == 1) && (!keyreleased || !forcedrelease)) { //first point is always lineary interpolated <- seems to have odd effects
-        float v1 = EnvelopeParams::env_dB2rap(envval[0]);
-        float v2 = EnvelopeParams::env_dB2rap(envval[1]);
+        const float v1 = EnvelopeParams::env_dB2rap(envval[0]);
+        const float v2 = EnvelopeParams::env_dB2rap(envval[1]);
         out = v1 + (v2 - v1) * t;
 
         t += inct;
@@ -247,6 +274,7 @@ float Envelope::envout_dB()
             envoutval = EnvelopeParams::env_rap2dB(out);
         else
             envoutval = MIN_ENVELOPE_DB;
+
         out = envoutval;
     } else
         out = envout(false);

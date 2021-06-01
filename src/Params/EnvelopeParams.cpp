@@ -238,8 +238,37 @@ static const rtosc::Ports localPorts = {
             }
             d.replyArray(d.loc, arg_types, args);
         } else {
-            for(int i=0; i<N && i<M; ++i)
+            for(int i=0; i<N && i<M; ++i) {
                 env->envdt[i] = (rtosc_argument(msg, i).f);
+
+            }
+            char part_loc[128];
+            strncpy(part_loc, d.loc, sizeof(part_loc));
+            part_loc[sizeof(part_loc) - 1] = '\0';
+            char *end = strrchr(part_loc, '/');
+            if(end) {
+                end[1] = '\0';
+                d.broadcast("/damage", "s", part_loc);
+            }
+        }
+        rEnd},
+    {"envcpy", rShort("bezier y") rProp(parameter) rDefault([0.f 0.f ...]) rDoc("Envelope Control Points"), NULL,
+        rBegin;
+        const int N = MAX_ENVELOPE_CPOINTS;
+        const int M = rtosc_narguments(msg);
+        if(M == 0) {
+            rtosc_arg_t args[N];
+            char arg_types[N+1] = {};
+            for(int i=0; i<N; ++i) {
+                    args[i].f    = env->envcpy[i];
+                    arg_types[i] = 'f';
+            }
+            d.replyArray(d.loc, arg_types, args);
+        } else {
+            for(int i=0; i<N && i<M; ++i) {
+                env->envcpy[i] = rtosc_argument(msg,i).f;
+            }
+
         }
         rEnd},
     {"envval", rDoc("Envelope Values"), NULL,
@@ -260,17 +289,17 @@ static const rtosc::Ports localPorts = {
             }
         }
         rEnd},
-
     {"addPoint:i", rProp(internal) rDoc("Add point to envelope"), NULL,
         rBegin;
         const int curpoint = rtosc_argument(msg, 0).i;
-        //int curpoint=freeedit->lastpoint;
         if (curpoint<0 || curpoint>env->Penvpoints || env->Penvpoints>=MAX_ENVELOPE_POINTS)
             return;
 
         for (int i=env->Penvpoints; i>=curpoint+1; i--) {
             env->envdt[i]=env->envdt[i-1];
             env->Penvval[i]=env->Penvval[i-1];
+            env->envcpy[i*2] = env->envcpy[(i-1)*2];
+            env->envcpy[i*2-1] = env->envcpy[(i-1)*2-1];
         }
 
         if (curpoint==0)
@@ -289,6 +318,8 @@ static const rtosc::Ports localPorts = {
         for (int i=curpoint+1;i<env->Penvpoints;i++){
             env->envdt[i-1]=env->envdt[i];
             env->Penvval[i-1]=env->Penvval[i];
+            env->envcpy[(i-1)*2] = env->envcpy[i*2];
+            env->envcpy[(i-1)*2-1] = env->envcpy[i*2-1];
         };
 
         env->Penvpoints--;
@@ -318,6 +349,8 @@ EnvelopeParams::EnvelopeParams(unsigned char Penvstretch_,
     for(int i = 0; i < MAX_ENVELOPE_POINTS; ++i) {
         envdt[i]  = dTREAL(32);
         Penvval[i] = 64;
+        envcpy[i*2] = 0.0f;
+        envcpy[i*2+1] = 0.0f;
     }
     envdt[0]        = 0.0f; //not used
     Penvsustain     = 1;
@@ -368,11 +401,11 @@ void EnvelopeParams::init(zyn::consumer_location_t _loc)
 {
     switch(loc = _loc)
     {
-        case ad_global_amp:    ADSRinit_dB(0.0f, 0.127f, 127, 0.041f); break;
+        case ad_global_amp:    ADSRinit_dB(0.0001f, 0.127f, 127, 0.041f); break;
         case ad_global_freq:   ASRinit(64, 0.254f, 64, 0.499f); break;
         case ad_global_filter:
         case sub_filter:       ADSRinit_filter(64, 0.127f, 64, 0.970f, 0.499f, 64); break;
-        case ad_voice_amp:     ADSRinit_dB(0.0f, 6.978f, 127, 6.978f); break;
+        case ad_voice_amp:     ADSRinit_dB(0.0001f, 6.978f, 127, 6.978f); break;
         case ad_voice_freq:    ASRinit(30, 0.127f, 64, 0.499f); break;
         case ad_voice_filter:  ADSRinit_filter(90, 0.970f, 40, 0.970f, 0.009f, 40); break;
         case ad_voice_fm_freq: ASRinit(20, 3.620f, 40, 1.876f); break;
@@ -385,7 +418,7 @@ void EnvelopeParams::init(zyn::consumer_location_t _loc)
 
 float EnvelopeParams::getdt(char i) const
 {
-    return envdt[(int)i]; //seconds
+    return envdt[(int)i]; // 1/(seconds*sr)
 }
 
 /*
@@ -531,9 +564,12 @@ void EnvelopeParams::add2XML(XMLwrapper& xml)
     if((Pfreemode != 0) || (!xml.minimal))
         for(int i = 0; i < Penvpoints; ++i) {
             xml.beginbranch("POINT", i);
-            if(i != 0)
+            if(i != 0) {
                 xml.addparreal("dt", envdt[i]);
+                xml.addparreal("envcpy", envcpy[i]);
+            }
             xml.addpar("val", Penvval[i]);
+
             xml.endbranch();
         }
 }
@@ -589,8 +625,11 @@ void EnvelopeParams::getfromXML(XMLwrapper& xml)
 
     if(!xml.hasparreal("A_dt")) {
         A_dt = dTREAL(xml.getpar127("A_dt", 0));
+        if (A_dt == 0.0f) A_dt= 0.0001f;
         D_dt = dTREAL(xml.getpar127("D_dt", 0));
+        if (D_dt == 0.0f) D_dt= 0.0001f;
         R_dt = dTREAL(xml.getpar127("R_dt", 0));
+        if (R_dt == 0.0f) R_dt= 0.0001f;
     } else {
         A_dt  = xml.getparreal("A_dt", A_dt);
         D_dt  = xml.getparreal("D_dt", D_dt);
@@ -613,6 +652,7 @@ void EnvelopeParams::getfromXML(XMLwrapper& xml)
             else {
                 envdt[i] = xml.getparreal("dt", envdt[i]);
             }
+            if(xml.hasparreal("envcpy")) envcpy[i] = xml.getparreal("envcpy", 0.0f);
         }
         Penvval[i] = version_fix(xml.getpar127("val", Penvval[i]));
         xml.exitbranch();
