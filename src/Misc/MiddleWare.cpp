@@ -23,6 +23,7 @@
 #include <rtosc/undo-history.h>
 #include <rtosc/thread-link.h>
 #include <rtosc/ports.h>
+#include <rtosc/port-sugar.h>
 #include <lo/lo.h>
 
 #include <unistd.h>
@@ -1546,20 +1547,20 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         rBegin;
         impl.midi_mapper.clear();
         rEnd},
-    {"midi-map-cc:is", "bind a midi CC on CH to an OSC path", 0,
+    {"midi-map-cc:is", rDoc("bind a midi CC on CH to an OSC path"), 0,
         rBegin;
         const int par = rtosc_argument(msg, 0).i;
         const string path = rtosc_argument(msg, 1).s;
         connectMidiLearn(par, 1, false, path, impl.midi_mapper);
         rEnd},
-    {"midi-map-cc:iis", "bind a midi CC on CH to an OSC path", 0,
+    {"midi-map-cc:iis", rDoc("bind a midi CC on CH to an OSC path"), 0,
         rBegin;
         const int par = rtosc_argument(msg, 0).i;
         const int ch = rtosc_argument(msg, 1).i;
         const string path = rtosc_argument(msg, 2).s;
         connectMidiLearn(par, ch, false, path, impl.midi_mapper);
         rEnd},
-    {"midi-map-nrpn:iis", "bind nrpn on channel to an OSC path", 0,
+    {"midi-map-nrpn:iis", rDoc("bind nrpn on channel to an OSC path"), 0,
         rBegin;
         const int par = rtosc_argument(msg, 0).i;
         const int ch = rtosc_argument(msg, 1).i;
@@ -1600,7 +1601,7 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         const char *file = rtosc_argument(msg, 0).s;
         impl.saveXsz(file, d);
         rEnd},
-    {"load_scl:s", 0, 0,
+    {"load_scl:s", rDoc("Load a scale from a file"), 0,
         rBegin;
         const char *file = rtosc_argument(msg, 0).s;
         impl.loadScl(file, d);
@@ -1790,7 +1791,8 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         rEnd},
     //drop this message into the abyss
     {"ui/title:", 0, 0, [](const char *, RtData &) {}},
-    {"quit:", 0, 0, [](const char *, RtData&) {Pexitprogram = 1;}},
+    {"quit:", rDoc("Stops the Zynaddsubfx process"),
+     0, [](const char *, RtData&) {Pexitprogram = 1;}},
     // may only be called when Master is not being run
     {"change-synth:iiit", 0, 0,
         rBegin
