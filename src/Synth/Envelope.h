@@ -43,6 +43,7 @@ class Envelope
         int   envsustain;    //"-1" means disabled
         float envdt[MAX_ENVELOPE_POINTS]; //seconds
         float envval[MAX_ENVELOPE_POINTS]; // [0.0f .. 1.0f]
+        float envcpy[MAX_ENVELOPE_CPOINTS]; // [-1.0f .. 1.0f]
         float envstretch;
         int   linearenvelope;
         int   mode;
@@ -53,6 +54,7 @@ class Envelope
         bool  keyreleased;    //if the key was released
         bool  envfinish;
         float t; // the time from the last point
+        float tRelease;
         float inct; // the time increment
         float envoutval; //used to do the forced release
 
