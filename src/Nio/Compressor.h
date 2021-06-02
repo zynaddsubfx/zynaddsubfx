@@ -14,8 +14,8 @@
 #define	_COMPRESSOR_H_
 
 #define	floatIsValid(x) ({			\
-      const float __r = (x) * 0.0;		\
-      __r == 0.0;				\
+      const float __r = (x) * 0.0f;		\
+      __r == 0.0f;				\
 })
 
 #define	stereoCompressor(div,pv,l,r) do {	\
@@ -25,17 +25,17 @@
    * equalizer filters in the DSP's output	\
    * path. Keep one 10th, 1dB, reserved.	\
    */						\
-  const float __limit = 1.0 - (1.0 / 10.0);	\
+  const float __limit = 1.0f - (1.0f / 10.0f);	\
   float __peak;					\
 						\
   /* sanity checks */				\
   __peak = (pv);				\
   if (!floatIsValid(__peak))			\
-	__peak = 0.0;				\
+	__peak = 0.0f;				\
   if (!floatIsValid(l))				\
-	(l) = 0.0;				\
+	(l) = 0.0f;				\
   if (!floatIsValid(r))				\
-	(r) = 0.0;				\
+	(r) = 0.0f;				\
   /* compute maximum */				\
   if ((l) < -__peak)				\
     __peak = -(l);				\
