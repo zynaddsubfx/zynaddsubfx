@@ -171,8 +171,16 @@ delete (formantparswindow);} {}
           class Fl_Osc_Choice
         } {
           MenuItem {} {
-            label LPF
+            label LP
             xywh {134 134 100 20} labelfont 1 labelsize 10
+          }
+          MenuItem {} {
+            label HP
+            xywh {144 144 100 20} labelfont 1 labelsize 10
+          }
+          MenuItem {} {
+            label BP
+            xywh {154 154 100 20} labelfont 1 labelsize 10
           }
         }
         Fl_Choice filtertype {

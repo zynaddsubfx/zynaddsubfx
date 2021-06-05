@@ -1,9 +1,9 @@
 /*
   ZynAddSubFX - a software synthesizer
 
-  Moog Filter.h - Several analog filters (lowpass, highpass...)
-  Copyright (C) 2018-2018 Mark McCurry
-  Author: Mark McCurry
+  Moog Filter.h - moog style multimode filter (lowpass, highpass...)
+  Copyright (C) 2020-2020 Michael Kirchner
+  Author: Michael Kirchner
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -28,18 +28,17 @@ class MoogFilter:public Filter
         void setfreq_and_q(float frequency, float q_) override;
         void setq(float /*q_*/) override;
         void setgain(float dBgain) override;
-        void settype(unsigned char type); //
+        void settype(unsigned char ftype);
 
     private:
         unsigned sr;
         float gain;
-        unsigned char type;
 
         float step(float x);
 
-        float tanhXdivX(const float x);
-        float tanhX(const float x);
-        float tan_2(const float x);
+        float tanhXdivX(const float x) const;
+        float tanhX(const float x) const;
+        float tan_2(const float x) const;
 
         float feedbackGain;
         // aN: multimode coefficients for LP,BP,HP configurations

@@ -13,10 +13,10 @@ namespace zyn{
 
 MoogFilter::MoogFilter(unsigned char Ftype, float Ffreq, float Fq,
     unsigned int srate, int bufsize)
-    :Filter(srate, bufsize), sr(srate), gain(1.0f), type(Ftype)
+    :Filter(srate, bufsize), sr(srate), gain(1.0f)
 {
     setfreq_and_q(Ffreq/srate, Fq);
-    settype(type); // q must be set before
+    settype(Ftype); // q must be set before
     for (unsigned int i = 0; i<(sizeof(state)/sizeof(*state)); i++)
     {
         state[i] = 0.0f;
@@ -28,14 +28,14 @@ MoogFilter::~MoogFilter(void)
 
 }
 
-inline float MoogFilter::tan_2(const float x)
+inline float MoogFilter::tan_2(const float x) const
 {
     //Pade approximation tan(x) hand tuned to map fCutoff
     float x2 = x*x;
     return ((9.5f*(11.15f*x - x2*x))/(105.0f - 45.0f*x2 + x2*x2));
 }
 
-inline float MoogFilter::tanhX(const float x)
+inline float MoogFilter::tanhX(const float x) const
 {
     // Pade approximation of tanh(x) bound to [-1 .. +1]
     // https://mathr.co.uk/blog/2017-09-06_approximating_hyperbolic_tangent.html
@@ -44,7 +44,7 @@ inline float MoogFilter::tanhX(const float x)
 }
 
 
-inline float MoogFilter::tanhXdivX(float x)
+inline float MoogFilter::tanhXdivX(float x) const
 {
     // Pade approximation for tanh(x)/x used in filter stages
     float x2 = x*x;
@@ -153,16 +153,15 @@ void MoogFilter::setgain(float dBgain)
     gain = dB2rap(dBgain);
 }
 
-void MoogFilter::settype(unsigned char type_)
+void MoogFilter::settype(unsigned char ftype)
 {
-    type = type_;
-    switch (type)
+    switch (ftype)
     {
-        case 1:
-            a0 = 0.0f; a1 = 0.0f; a2 = 4.0f; a3 =-8.0f; a4 = 4.0f;
-            break;
         case 0:
             a0 = 1.0f; a1 =-4.0f; a2 = 6.0f; a3 =-4.0f; a4 = 1.0f;
+            break;
+        case 1:
+            a0 = 0.0f; a1 = 0.0f; a2 = 4.0f; a3 =-8.0f; a4 = 4.0f;
             break;
         case 2:
         default:
