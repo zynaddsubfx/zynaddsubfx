@@ -165,13 +165,12 @@ void LFO::releasekey()
         return;
     // store current ramp value in case of release while fading in
     rampConst = ramp; 
-    outConst *= ((1.0f/ramp)-1.0f);
-
+    // burn in the current amount of outConst    
+    outConst *= (1.0f - ramp);
     // store current time
     releaseTime = lfopars_.time->time();
     // calculate fade out duration in frames
     fadeOutDuration = lfopars_.fadeout * lfopars_.time->framesPerSec();
-    
     // set fadeout state
     fadeout = true;
 }
@@ -234,8 +233,8 @@ float LFO::lfoout()
         if (ramp < 0.0f) 
             ramp = 0.0f; 
         
-        out += outConst;
         out *= ramp;
+        out += outConst;
 
     } else if(fadein && ramp < 1.0f){
         if (fadeInDuration) {
@@ -245,7 +244,7 @@ float LFO::lfoout()
         else
             ramp = 1.0f;
         out *= ramp;
-        // add the fading out outconst (value due to startphase)
+        // add the down-ramped outconst (value due to startphase)
         out += outConst * (1.0f-ramp);
     }
 
