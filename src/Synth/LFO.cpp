@@ -225,7 +225,7 @@ float LFO::lfoout()
     
     if (fadeout) {
         // fade out has priority over fadein
-        if(fadeOutDuration) // no dividion by zero
+        if(fadeOutDuration) // no division by zero
             ramp = rampConst * (1.0f - (float)(lfopars_.time->time() - releaseTime) / (float)fadeOutDuration);
         else
             ramp = 0.0f;
