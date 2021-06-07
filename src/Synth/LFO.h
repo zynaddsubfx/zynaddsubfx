@@ -18,7 +18,17 @@
 #include "../Misc/Time.h"
 #include "WatchPoint.h"
 
+
+
 namespace zyn {
+
+typedef enum lfo_state_type{
+    firstTick,
+    delaying, 
+    fadingIn,
+    running,
+    fadingOut
+} lfo_state_type;
 
 /**Class for creating Low Frequency Oscillators*/
 class LFO
@@ -39,6 +49,10 @@ class LFO
     private:
         float baseOut(const char waveShape, const float phase);
         float biquad(float input);
+        void prepareFadeIn();
+        lfo_state_type lfo_state;
+        
+        float out;
         //Phase of Oscillator
         float phase;
         //Phase Increment Per Frame
@@ -63,15 +77,15 @@ class LFO
 
         int64_t fadeInDuration;
         //Timestamp of begin fadein
-        int64_t fadeInTime;
+        int64_t fadeInTimestamp;
         //Timestamp of noteoff
-        int64_t releaseTime;
+        int64_t releaseTimestamp;
         //Time to ramp out
         
         int64_t fadeOutDuration;
-        float ramp, rampConst;
+        float ramp, rampOnRelease;
         // store the constant out value before oscillating starts
-        float outConst = 0.0;
+        float outStartValue = 0.0;
 
         char  waveShape;
 
