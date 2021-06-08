@@ -209,6 +209,19 @@ const rtosc::Ports FilterParams::ports = {
                         (float)obj->Pstages,
                         cf.b[0], cf.b[1], cf.b[2],
                         0.0,     -cf.a[1], -cf.a[2]);
+            } else if(obj->Pcategory == 3) {
+                int order = 0;
+                float gain = dB2rap(obj->getgain());
+                if(obj->Ptype != 6 && obj->Ptype != 7 && obj->Ptype != 8)
+                    gain = 1.0;
+                auto cf = AnalogFilter::computeCoeff(obj->Ptype,
+                        Filter::getrealfreq(obj->getfreq()),
+                        obj->getq(), obj->Pstages,
+                        gain, 48000, order);
+                d.reply(d.loc, "fffffff",
+                        (float)obj->Pstages,
+                        cf.c[0], cf.c[1], cf.c[2],
+                        0.0,     cf.d[1], cf.d[2]);
             }
         }},
     //    "", NULL, [](){}},"/freq"
