@@ -32,7 +32,7 @@ inline float MoogFilter::tan_2(const float x) const
 {
     //Pade approximation tan(x) hand tuned to map fCutoff
     float x2 = x*x;
-    return ((9.5f*(11.15f*x - x2*x))/(105.0f - 45.0f*x2 + x2*x2));
+    return ((9.54f*x*((11.08f - x2)))/(105.0f - x2*(45.0f + x2)));
 }
 
 inline float MoogFilter::tanhX(const float x) const
@@ -40,7 +40,7 @@ inline float MoogFilter::tanhX(const float x) const
     // Pade approximation of tanh(x) bound to [-1 .. +1]
     // https://mathr.co.uk/blog/2017-09-06_approximating_hyperbolic_tangent.html
     float x2 = x*x;
-    return (x*(105.0f+10.0f*x2)/(105.0f+(45.0f+x2)*x2)); //
+    return (x*(105.0f+10.0f*x2)/(105.0f+(45.0f+x2)*x2));
 }
 
 
@@ -48,7 +48,7 @@ inline float MoogFilter::tanhXdivX(float x) const
 {
     // Pade approximation for tanh(x)/x used in filter stages
     float x2 = x*x;
-    return ((x2 + 105.0f)*x2 + 945.0f) / ((15.0f*x2 + 420.0f)*x2 + 945.0f);
+    return ((15.0+x2)/(15.0+6.0*x2));
 }
 
 inline float MoogFilter::step(float input)
@@ -59,6 +59,7 @@ inline float MoogFilter::step(float input)
     float gm1 = tanhXdivX(state[1]);
     float gm2 = tanhXdivX(state[2]);
     float gm3 = tanhXdivX(state[3]);
+
 
     // pre calc often used terms
     float ctgm0 = c*gm0;
@@ -83,15 +84,10 @@ inline float MoogFilter::step(float input)
         c   * gm2 * d3                      * d2 * state[2] +
                                               d3 * state[3];
 
-    // instantaneous gain coefficient
-    float z0 = ctgm0 * d0;
-    float z1 = ctgm1 * d1;
-    float z2 = ctgm2 * d2;
-    float z3 = ctgm3 * d3;
-    float instantaneousgain = 1.0f / (1.0f + feedbackGain * z0*z1*z2*z3);
-
-    // input for the fist stage
-    float u = input - tanhX(feedbackGain * y3Estimate) * instantaneousgain;
+    // mix input and gained feedback estimate for
+    // cheaper feedback gain compensation. Idea from 
+    // Antti Huovilainen and Vesa Välimäki, "NEW APPROACHES TO DIGITAL SUBTRACTIVE SYNTHESIS"
+    float u = input - tanhX(feedbackGain * (y3Estimate - 0.5f*input));
     // output of all stages
     float y0 = gm0 * d0 * (state[0] + c * u);
     float y1 = gm1 * d1 * (state[1] + c * y0);
