@@ -72,7 +72,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             "Shape of distortion to be applied"),
     rOption(Pfiltertype, rShort("filter"), rOptions(No Filter,
             lp, hp1, hp1b, bp1, bs1, lp2, hp2, bp2, bs2,
-            cos, sin, low_shelf, s, lpsk2), rDefaultId(No Filter), "Harmonic Filter"),
+            cos, sin, low_shelf, s, lpsk), rDefaultId(No Filter), "Harmonic Filter"),
     rParamZyn(Pfilterpar1, rShort("p1"), rDefault(64), "Filter parameter"),
     rParamZyn(Pfilterpar2, rShort("p2"), rDefault(64), "Filter parameter"),
     rToggle(Pfilterbeforews, rShort("pre/post"), rDefault(false),
@@ -1864,12 +1864,12 @@ FILTER(s)
     return gain;
 }
 
-FILTER(lpsk2)
+FILTER(lpsk)
 {
     float tmp2PIf = 2.0f * PI * (1.05f-par)*64.0f;
     std::complex<float> s  (0.0f,2.0f*PI*i);
     float vOut = tmp2PIf * tmp2PIf;
-    std::complex<float> vIn = s*s + tmp2PIf*s/(4*par2+0.5f) + tmp2PIf*tmp2PIf;
+    std::complex<float> vIn = s*s + tmp2PIf*s/((par2)+(2.0f*par*par2)+0.5f) + tmp2PIf*tmp2PIf;
     return std::abs((vOut*vOut*vOut) / (vIn*vIn*vIn));
     
 }
