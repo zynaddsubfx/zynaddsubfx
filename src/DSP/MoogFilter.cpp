@@ -28,13 +28,6 @@ MoogFilter::~MoogFilter(void)
 
 }
 
-inline float MoogFilter::tan_2(const float x) const
-{
-    //Pade approximation tan(x) hand tuned to map fCutoff
-    float x2 = x*x;
-    return ((9.54f*x*((11.08f - x2)))/(105.0f - x2*(45.0f + x2)));
-}
-
 inline float MoogFilter::tanhX(const float x) const
 {
     // Pade approximation of tanh(x) bound to [-1 .. +1]
@@ -48,7 +41,8 @@ inline float MoogFilter::tanhXdivX(float x) const
 {
     // Pade approximation for tanh(x)/x used in filter stages
     float x2 = x*x;
-    return ((15.0+x2)/(15.0+6.0*x2));
+    //~ return ((15.0+x2)/(15.0+6.0*x2)); // more accurate but instable at high frequencies
+    return (1.0f-(0.35f*x2)+(0.1f*x2*x2));
 }
 
 inline float MoogFilter::step(float input)
@@ -123,12 +117,20 @@ void MoogFilter::setfreq_and_q(float frequency, float q_)
     setq(q_);
 }
 
+inline float MoogFilter::tan_2(const float x) const
+{
+    //Pade approximation tan(x) hand tuned to map fCutoff
+    float x2 = x*x;
+    //~ return ((9.54f*x*((11.08f - x2)))/(105.0f - x2*(45.0f + x2)));
+    return (x+0.15f*x2+0.3f*x2*x2);
+}
+
 void MoogFilter::setfreq(float ff)
 {
-    // limit cutoff to prevent overflow
-    ff = limit(ff,0.0002f,0.48f);
     // pre warp cutoff to map to reality
-    c = tan_2(PI * ff);
+    c = tan_2(PI * ff);    
+    // limit cutoff to prevent overflow
+    c = limit(c,0.0006f,1.5f);
     // pre calculate some stuff outside the hot zone
     ct2 = c * 2.0f;
     cp2 = c * c;

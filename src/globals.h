@@ -179,6 +179,7 @@ typedef std::complex<fftw_real> fft_t;
 
 #define LOG_2 0.693147181f
 #define PI 3.1415926536f
+#define PIDIV2 1.5707963268f
 #define LOG_10 2.302585093f
 
 /*
