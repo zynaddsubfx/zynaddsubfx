@@ -231,6 +231,7 @@ float LFO::lfoout()
         
             if (delayTime.inFuture()) {
                 lfo_state = lfo_state_type::delaying;
+                outStartValue = out;
                 return out;
             }
             else {
