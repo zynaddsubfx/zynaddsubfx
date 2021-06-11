@@ -22,6 +22,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstddef>
+#include <complex>
 
 #include <unistd.h>
 
@@ -29,6 +30,7 @@
 #include <rtosc/port-sugar.h>
 
 namespace zyn {
+
 
 #define rObject OscilGen
 const rtosc::Ports OscilGen::non_realtime_ports = {
@@ -70,7 +72,7 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             "Shape of distortion to be applied"),
     rOption(Pfiltertype, rShort("filter"), rOptions(No Filter,
             lp, hp1, hp1b, bp1, bs1, lp2, hp2, bp2, bs2,
-            cos, sin, low_shelf, s), rDefaultId(No Filter), "Harmonic Filter"),
+            cos, sin, low_shelf, s, lpsk), rDefaultId(No Filter), "Harmonic Filter"),
     rParamZyn(Pfilterpar1, rShort("p1"), rDefault(64), "Filter parameter"),
     rParamZyn(Pfilterpar2, rShort("p2"), rDefault(64), "Filter parameter"),
     rToggle(Pfilterbeforews, rShort("pre/post"), rDefault(false),
@@ -1861,6 +1863,16 @@ FILTER(s)
         gain = powf(2.0f, par2 * par2 * 8.0f);
     return gain;
 }
+
+FILTER(lpsk)
+{
+    float tmp2PIf = 2.0f * PI * (1.05f-par)*64.0f;
+    std::complex<float> s  (0.0f,2.0f*PI*i);
+    float vOut = tmp2PIf * tmp2PIf;
+    std::complex<float> vIn = s*s + tmp2PIf*s/((par2)+(2.0f*par*par2)+0.5f) + tmp2PIf*tmp2PIf;
+    return std::abs((vOut*vOut*vOut) / (vIn*vIn*vIn));
+    
+}
 #undef FILTER
 
 filter_func_t *getFilter(unsigned char func)
@@ -1878,7 +1890,8 @@ filter_func_t *getFilter(unsigned char func)
         osc_cos,
         osc_sin,
         osc_low_shelf,
-        osc_s
+        osc_s,
+        osc_lpsk
     };
 
     if(!func)
