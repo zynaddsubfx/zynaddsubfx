@@ -1891,7 +1891,7 @@ filter_func_t *getFilter(unsigned char func)
         osc_sin,
         osc_low_shelf,
         osc_s,
-        osc_lpsk2
+        osc_lpsk
     };
 
     if(!func)
