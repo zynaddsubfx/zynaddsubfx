@@ -29,7 +29,6 @@ quick_test(KitTest          ${test_lib})
 quick_test(MemoryStressTest ${test_lib})
 quick_test(MicrotonalTest   ${test_lib})
 quick_test(MsgParseTest     ${test_lib})
-quick_test(MqTest           ${test_lib})
 quick_test(OscilGenTest     ${test_lib})
 quick_test(PadNoteTest      ${test_lib})
 quick_test(RandTest         ${test_lib})
@@ -55,6 +54,10 @@ quick_test(MessageTest zynaddsubfx_core zynaddsubfx_nio
 #Testbed app
 
 if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
+
+    #std::thread issues with mingw vvvvv
+    quick_test(MqTest           ${test_lib})
+
     add_executable(ins-test InstrumentStats.cpp)
     target_link_libraries(ins-test ${test_lib} rt)
 
