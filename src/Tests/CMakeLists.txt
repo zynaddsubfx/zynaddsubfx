@@ -46,10 +46,6 @@ quick_test(MiddlewareTest zynaddsubfx_core zynaddsubfx_nio
                           zynaddsubfx_gui_bridge
                           ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
                           ${PLATFORM_LIBRARIES})
-quick_test(MessageTest zynaddsubfx_core zynaddsubfx_nio
-                       zynaddsubfx_gui_bridge
-                       ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
-                       ${PLATFORM_LIBRARIES})
 
 #Testbed app
 
@@ -57,6 +53,11 @@ if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
 
     #std::thread issues with mingw vvvvv
     quick_test(MqTest           ${test_lib})
+    #same std::thread mingw issue
+    quick_test(MessageTest zynaddsubfx_core zynaddsubfx_nio
+                           zynaddsubfx_gui_bridge
+                           ${GUI_LIBRARIES} ${NIO_LIBRARIES} ${AUDIO_LIBRARIES}
+                           ${PLATFORM_LIBRARIES})
 
     add_executable(ins-test InstrumentStats.cpp)
     target_link_libraries(ins-test ${test_lib} rt)
