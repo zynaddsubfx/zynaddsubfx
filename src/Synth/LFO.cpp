@@ -77,7 +77,8 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
 
     lfo_state=lfo_state_type::firstTick;
     
-    ramp = 0.0f;
+    rampUp = 0.0f;
+    rampDown = 1.0f;
 
     amp1     = (1 - lfornd) + lfornd * RND;
     amp2     = (1 - lfornd) + lfornd * RND;
@@ -166,11 +167,11 @@ void LFO::releasekey()
         return;
     }
     // store current ramp value in case of release while fading in
-    rampOnRelease = ramp; 
+    rampOnRelease = rampUp;
     // burn in the current amount of outStartValue    
     // therefor multiply its current reverse ramping factor 
     // and divide by current ramp factor. It will be multiplied during fading out.
-    outStartValue *= ((ramp>0.001) ? (1.0f - ramp)/ramp : 1000);
+    outStartValue *= (1.0f - rampOnRelease);
     // store current time
     releaseTimestamp = lfopars_.time->time();
     // calculate fade out duration in frames
@@ -183,9 +184,6 @@ inline void LFO::prepareFadeIn()
 {
     fadeInTimestamp = lfopars_.time->time();
     fadeInDuration = lfopars_.fadein * lfopars_.time->framesPerSec();
-    if (fadeInDuration)
-        ramp = 0.0f;
-    outStartValue = out; // keep start value to prevent jump
 }
 
 float LFO::lfoout()
@@ -228,10 +226,9 @@ float LFO::lfoout()
     // handle lfo state (delay, fade in, fade out)
     switch(lfo_state) {
         case firstTick:
-        
+            outStartValue = out; // keep start value to prevent jump
             if (delayTime.inFuture()) {
                 lfo_state = lfo_state_type::delaying;
-                outStartValue = out;
                 return out;
             }
             else {
@@ -252,31 +249,32 @@ float LFO::lfoout()
 
         case fadingIn:
             
-            if (fadeInDuration && ramp < 1.0) {
-                ramp = ((float)(lfopars_.time->time() - fadeInTimestamp) / (float)fadeInDuration);
-                ramp *= ramp; // square
+            if (fadeInDuration && rampUp < 1.0) {
+                rampUp = ((float)(lfopars_.time->time() - fadeInTimestamp) / (float)fadeInDuration);
+                rampUp *= rampUp; // square for soft start
                     
             } 
             else {
-                ramp = 1.0f;
+                rampUp = 1.0f;
                 lfo_state = lfo_state_type::running;
             } 
             
-            out *= ramp;
-            out += outStartValue * (1.0f-ramp);
+            out *= rampUp;
+            out += outStartValue * (1.0f-rampUp);
             
             break;
         
         case fadingOut:
-            if(fadeOutDuration && ramp) {// no division by zero, please
-                ramp = rampOnRelease * (1.0f - (float)(lfopars_.time->time() - releaseTimestamp) / (float)fadeOutDuration);
-                ramp *= ramp; // square
+            if(fadeOutDuration && rampDown) {// no division by zero, please
+                rampDown = 1.0f - ( (float)(lfopars_.time->time() - releaseTimestamp) / (float)fadeOutDuration );
+                rampDown *= rampDown; // square for soft end
             }
             else // no ramp down
-                ramp = 0.0f; 
+                rampDown = 0.0f; 
             
-            out += outStartValue;
-            out *= ramp;
+            
+            out *= rampOnRelease * rampDown;
+            out += outStartValue*rampDown;
             
             break;
         

@@ -83,7 +83,7 @@ class LFO
         //Time to ramp out
         
         int64_t fadeOutDuration;
-        float ramp, rampOnRelease;
+        float rampUp, rampDown, rampOnRelease;
         // store the constant out value before oscillating starts
         float outStartValue = 0.0;
 
