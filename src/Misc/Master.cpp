@@ -708,6 +708,10 @@ void Master::saveAutomation(XMLwrapper &xml, const rtosc::AutomationMgr &midi)
 
 void Master::loadAutomation(XMLwrapper &xml, rtosc::AutomationMgr &midi)
 {
+    //Clear out old data
+    for(int i=0; i<midi.nslots; ++i)
+        midi.clearSlot(i);
+
     if(xml.enterbranch("automation")) {
         for(int i=0; i<midi.nslots; ++i) {
             auto &slot = midi.slots[i];
