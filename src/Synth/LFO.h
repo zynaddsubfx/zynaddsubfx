@@ -22,14 +22,6 @@
 
 namespace zyn {
 
-typedef enum lfo_state_type{
-    firstTick,
-    delaying, 
-    fadingIn,
-    running,
-    fadingOut
-} lfo_state_type;
-
 /**Class for creating Low Frequency Oscillators*/
 class LFO
 {
@@ -47,9 +39,15 @@ class LFO
         float amplfoout();
         void releasekey();
     private:
+        typedef enum lfo_state_type{
+            delaying, 
+            fadingIn,
+            running,
+            fadingOut
+        } lfo_state_type;
+    
         float baseOut(const char waveShape, const float phase);
         float biquad(float input);
-        void prepareFadeIn();
         lfo_state_type lfo_state;
         
         float out;

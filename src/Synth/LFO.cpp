@@ -75,7 +75,7 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
             break;
     }
 
-    lfo_state=lfo_state_type::firstTick;
+    lfo_state=lfo_state_type::delaying;
     
     rampUp = 0.0f;
     rampDown = 1.0f;
@@ -180,12 +180,6 @@ void LFO::releasekey()
     lfo_state = lfo_state_type::fadingOut;
 }
 
-inline void LFO::prepareFadeIn()
-{
-    fadeInTimestamp = lfopars_.time->time();
-    fadeInDuration = lfopars_.fadein * lfopars_.time->framesPerSec();
-}
-
 float LFO::lfoout()
 {
     //update internals
@@ -225,23 +219,14 @@ float LFO::lfoout()
     
     // handle lfo state (delay, fade in, fade out)
     switch(lfo_state) {
-        case firstTick:
-            outStartValue = out; // keep start value to prevent jump
-            if (delayTime.inFuture()) {
-                lfo_state = lfo_state_type::delaying;
-                return out;
-            }
-            else {
-                prepareFadeIn();
-                lfo_state = lfo_state_type::fadingIn;
-            }
-            break;
-
         case delaying:
+        
+            outStartValue = out; // keep start value to prevent jump
             if (delayTime.inFuture()) {
                 return out;
             }else{
-                prepareFadeIn();
+                fadeInTimestamp = lfopars_.time->time();
+                fadeInDuration = lfopars_.fadein * lfopars_.time->framesPerSec();
                 lfo_state = lfo_state_type::fadingIn;
             }
             
