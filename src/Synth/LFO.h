@@ -50,7 +50,7 @@ class LFO
         float biquad(float input);
         lfo_state_type lfo_state;
         
-        float out;
+        //~ float out;
         //Phase of Oscillator
         float phase;
         //Phase Increment Per Frame
@@ -89,9 +89,6 @@ class LFO
 
         //If After initialization there are no calls to random number gen.
         bool  deterministic;
-        
-        // state variables
-        bool fadeout, fadein;
 
         const float     dt_;
         const LFOParams &lfopars_;

@@ -209,7 +209,7 @@ float LFO::lfoout()
         }
     }
     
-    out = baseOut(waveShape, phase);
+    float out = baseOut(waveShape, phase);
     // Apply intensity
     if(waveShape == LFO_SINE || waveShape == LFO_TRIANGLE)
         out *= lfointensity * (amp1 + phase * (amp2 - amp1));
