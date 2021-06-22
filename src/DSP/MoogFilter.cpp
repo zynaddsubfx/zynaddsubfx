@@ -17,6 +17,8 @@ MoogFilter::MoogFilter(unsigned char Ftype, float Ffreq, float Fq,
 {
     setfreq_and_q(Ffreq/srate, Fq);
     settype(Ftype); // q must be set before
+    
+    // initialize state but not to 0, in case of being used as denominator
     for (unsigned int i = 0; i<(sizeof(state)/sizeof(*state)); i++)
     {
         state[i] = 0.0001f;
@@ -40,8 +42,9 @@ inline float MoogFilter::tanhX(const float x) const
 inline float MoogFilter::tanhXdivX(float x) const
 {
     
-    //add DC offset to raise even harmonics
-    x+= 0.01f;
+    //add DC offset to raise even harmonics (like transistor bias current)
+    x+= 0.026f;
+    // pre calc often used term
     float x2 = x*x;
     // Pade approximation for tanh(x)/x used in filter stages (5x per sample)
     //~ return ((15.0+x2)/(15.0+6.0*x2)); 
