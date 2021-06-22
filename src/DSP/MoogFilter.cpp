@@ -19,7 +19,7 @@ MoogFilter::MoogFilter(unsigned char Ftype, float Ffreq, float Fq,
     settype(Ftype); // q must be set before
     for (unsigned int i = 0; i<(sizeof(state)/sizeof(*state)); i++)
     {
-        state[i] = 0.0f;
+        state[i] = 0.0001f;
     }
 }
 
@@ -39,10 +39,14 @@ inline float MoogFilter::tanhX(const float x) const
 
 inline float MoogFilter::tanhXdivX(float x) const
 {
-    // Pade approximation for tanh(x)/x used in filter stages
+    
+    //add DC offset to raise even harmonics
+    x+= 0.01f;
     float x2 = x*x;
-    //~ return ((15.0+x2)/(15.0+6.0*x2)); // more accurate but instable at high frequencies
-    return (1.0f-(0.35f*x2)+(0.1f*x2*x2));
+    // Pade approximation for tanh(x)/x used in filter stages (5x per sample)
+    //~ return ((15.0+x2)/(15.0+6.0*x2)); 
+    // faster approximation without division
+    return (1.0f-(0.35f*x2)+(0.1f*x2*x2)); 
 }
 
 inline float MoogFilter::step(float input)
@@ -121,8 +125,8 @@ inline float MoogFilter::tan_2(const float x) const
 {
     //Pade approximation tan(x) hand tuned to map fCutoff
     float x2 = x*x;
-    //~ return ((9.54f*x*((11.08f - x2)))/(105.0f - x2*(45.0f + x2)));
-    return (x+0.15f*x2+0.3f*x2*x2);
+    //~ return ((9.54f*x*((11.08f - x2)))/(105.0f - x2*(45.0f + x2))); // more accurate but instable at high frequencies
+    return (x+0.15f*x2+0.3f*x2*x2); // faster, no division (by zero)
 }
 
 void MoogFilter::setfreq(float ff)
