@@ -214,7 +214,7 @@ const rtosc::Ports FilterParams::ports = {
                 float gain = dB2rap(obj->getgain());
                 if(obj->Ptype != 6 && obj->Ptype != 7 && obj->Ptype != 8)
                     gain = 1.0;
-                auto cf = AnalogFilter::computeCoeff(obj->Ptype,
+                auto cf = AnalogFilter::computeCoeff(4-obj->Ptype,
                         Filter::getrealfreq(obj->getfreq()),
                         obj->getq(), obj->Pstages,
                         gain, 48000, order);
