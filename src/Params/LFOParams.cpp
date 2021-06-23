@@ -80,11 +80,11 @@ static const rtosc::Ports _ports = {
               rLinear(0.0, 4.0), rDefaultDepends(loc), rDefault(0),
               rPreset(ad_voice_amp, 0.94),
               "Delay before LFO start\n0..4 second delay"),
-    rParamF(fadein, rShort("fadein"), rSpecial(disable), rUnit(S),
+    rParamF(fadein, rShort("f.in"), rSpecial(disable), rUnit(S),
               rLinear(0.0, 10.0f), rDefault(0.0f),
               "Time to ramp up LFO amplitude\n \
               0..10 seconds"),
-    rParamF(fadeout, rShort("fadeout"), rSpecial(disable), rUnit(S),
+    rParamF(fadeout, rShort("f.out"), rSpecial(disable), rUnit(S),
               rLinear(0.001, 10.0f), rDefault(10.0f),
               "Time to ramp down LFO amplitude on key release\n  \
               0..10 seconds, 10=off (default)"),
