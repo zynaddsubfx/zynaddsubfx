@@ -28,7 +28,8 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
     waveShape(lfopars.PLFOtype),
     deterministic(!lfopars.Pfreqrand),
     dt_(t.dt()),
-    lfopars_(lfopars), basefreq_(basefreq),
+    lfopars_(lfopars), 
+    basefreq_(basefreq),
     watchOut(m, watch_prefix, "out")
 {
     int stretch = lfopars.Pstretch;
@@ -73,6 +74,11 @@ LFO::LFO(const LFOParams &lfopars, float basefreq, const AbsTime &t, WatchManage
             phase -= 0.25f; //chance the starting phase
             break;
     }
+
+    lfo_state=lfo_state_type::delaying;
+    
+    rampUp = 0.0f;
+    rampDown = 1.0f;
 
     amp1     = (1 - lfornd) + lfornd * RND;
     amp2     = (1 - lfornd) + lfornd * RND;
@@ -154,46 +160,113 @@ float LFO::biquad(float input)
     return (cutoff==127) ? input : output; // at cutoff 127 bypass filter
 }
 
+void LFO::releasekey()
+{
+    if (lfopars_.fadeout==10.0f) { // deactivated
+        fadeOutDuration = 0.0f;
+        return;
+    }
+    // store current ramp value in case of release while fading in
+    rampOnRelease = rampUp;
+    // burn in the current amount of outStartValue    
+    // therefor multiply its current reverse ramping factor 
+    // and divide by current ramp factor. It will be multiplied during fading out.
+    outStartValue *= (1.0f - rampOnRelease);
+    // store current time
+    releaseTimestamp = lfopars_.time->time();
+    // calculate fade out duration in frames
+    fadeOutDuration = lfopars_.fadeout * lfopars_.time->framesPerSec();
+    // set fadeout state
+    lfo_state = lfo_state_type::fadingOut;
+}
 
 float LFO::lfoout()
 {
-    //update internals XXX TODO cleanup
+    //update internals
     if ( ! lfopars_.time || lfopars_.last_update_timestamp == lfopars_.time->time())
     {
         waveShape = lfopars_.PLFOtype;
         int stretch = lfopars_.Pstretch;
         if(stretch == 0)
             stretch = 1;
+        
         const float lfostretch = powf(basefreq_ / 440.0f, (stretch - 64.0f) / 63.0f);
 
         float lfofreq = lfopars_.freq * lfostretch;
-
         phaseInc = fabsf(lfofreq) * dt_;
 
         switch(lfopars_.fel) {
             case consumer_location_type_t::amp:
-                lfointensity = lfopars_.Pintensity / 127.0f;
+                lfointensity = lfopars_.Pintensity / 127.0f; // [0...1]
                 break;
             case consumer_location_type_t::filter:
-                lfointensity = lfopars_.Pintensity / 127.0f * 4.0f;
-                break; //in octave
+                lfointensity = lfopars_.Pintensity / 127.0f * 4.0f; // [0...4] octaves
+                break; 
             case consumer_location_type_t::freq:
             case consumer_location_type_t::unspecified:
-                lfointensity = powf(2, lfopars_.Pintensity / 127.0f * 11.0f) - 1.0f; //in centi
-                //x -= 0.25f; //chance the starting phase
+                lfointensity = powf(2, lfopars_.Pintensity / 127.0f * 11.0f) - 1.0f; // [0...2047] cent
                 break;
         }
     }
-
+    
     float out = baseOut(waveShape, phase);
-
+    // Apply intensity
     if(waveShape == LFO_SINE || waveShape == LFO_TRIANGLE)
         out *= lfointensity * (amp1 + phase * (amp2 - amp1));
     else
         out *= lfointensity * amp2;
+    
+    
+    // handle lfo state (delay, fade in, fade out)
+    switch(lfo_state) {
+        case delaying:
+        
+            outStartValue = out; // keep start value to prevent jump
+            if (delayTime.inFuture()) {
+                return out;
+            }else{
+                fadeInTimestamp = lfopars_.time->time();
+                fadeInDuration = lfopars_.fadein * lfopars_.time->framesPerSec();
+                lfo_state = lfo_state_type::fadingIn;
+            }
+            
+            break;
 
-    if(delayTime.inFuture())
-        return out;
+        case fadingIn:
+            
+            if (fadeInDuration && rampUp < 1.0) {
+                rampUp = ((float)(lfopars_.time->time() - fadeInTimestamp) / (float)fadeInDuration);
+                rampUp *= rampUp; // square for soft start
+                    
+            } 
+            else {
+                rampUp = 1.0f;
+                lfo_state = lfo_state_type::running;
+            } 
+            
+            out *= rampUp;
+            out += outStartValue * (1.0f-rampUp);
+            
+            break;
+        
+        case fadingOut:
+            if(fadeOutDuration && rampDown) {// no division by zero, please
+                rampDown = 1.0f - ( (float)(lfopars_.time->time() - releaseTimestamp) / (float)fadeOutDuration );
+                rampDown *= rampDown; // square for soft end
+            }
+            else // no ramp down
+                rampDown = 0.0f; 
+            
+            
+            out *= rampOnRelease * rampDown;
+            out += outStartValue*rampDown;
+            
+            break;
+        
+        case running:
+        default:
+            break;
+    }
 
     //Start oscillating
     if(deterministic)
@@ -209,7 +282,7 @@ float LFO::lfoout()
 
         computeNextFreqRnd();
     }
-
+            
     float watch_data[2] = {phase, out};
     watchOut(watch_data, 2);
 

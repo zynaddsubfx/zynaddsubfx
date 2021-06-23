@@ -1936,6 +1936,9 @@ void ADnote::releasekey()
     NoteGlobalPar.FreqEnvelope->releasekey();
     NoteGlobalPar.FilterEnvelope->releasekey();
     NoteGlobalPar.AmpEnvelope->releasekey();
+    NoteGlobalPar.FreqLfo->releasekey();
+    NoteGlobalPar.FilterLfo->releasekey();
+    NoteGlobalPar.AmpLfo->releasekey();
 }
 
 /*
