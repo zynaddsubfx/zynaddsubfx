@@ -43,13 +43,14 @@ inline float MoogFilter::tanhXdivX(float x) const
 {
     
     //add DC offset to raise even harmonics (like transistor bias current)
-    x+= 0.026f;
+    x+= 0.1f;
     // pre calc often used term
     float x2 = x*x;
     // Pade approximation for tanh(x)/x used in filter stages (5x per sample)
     //~ return ((15.0+x2)/(15.0+6.0*x2)); 
-    // faster approximation without division
-    return (1.0f-(0.35f*x2)+(0.1f*x2*x2)); 
+    // faster approximation without division 
+    // tuned for more distortion in self oscillation
+    return (1.0f-(0.35f*x2)+(0.06f*x2*x2)); 
 }
 
 inline float MoogFilter::step(float input)
@@ -57,33 +58,20 @@ inline float MoogFilter::step(float input)
     // transconductance
     // gM(vIn) = tanh( vIn ) / vIn
     float gm0 = tanhXdivX(state[0]);
-    float gm1 = tanhXdivX(state[1]);
-    float gm2 = tanhXdivX(state[2]);
-    float gm3 = tanhXdivX(state[3]);
-
-
-    // pre calc often used terms
-    float ctgm0 = c*gm0;
-    float ctgm1 = c*gm1;
-    float ctgm2 = c*gm2;
-    float ctgm3 = c*gm3;
-
+    // to ease calculations the others are 1.0 (so daturation)
     // denominators
-    float d0 = 1.0f / (1.0f + ctgm0);
-    float d1 = 1.0f / (1.0f + ctgm1);
-    float d2 = 1.0f / (1.0f + ctgm2);
-    float d3 = 1.0f / (1.0f + ctgm3);
-
-    // pre calc often used term
-    float gm1td2tgm2td3 = gm1 * d2 * gm2 * d3;
+    float d0 = 1.0f / (1.0f + c*gm0);
+    float dp1 = 1.0f / (1.0f + c);
+    float dp2 = dp1*dp1;
+    float dp3 = dp2*dp1;
 
     // instantaneous response estimate
     float y3Estimate =
-        cp4 * d0 * gm0 * d1 * gm1td2tgm2td3 * input +
-        cp3 * gm0 * d1 * gm1td2tgm2td3      * d0 * state[0] +
-        cp2 * gm1td2tgm2td3                 * d1 * state[1] +
-        c   * gm2 * d3                      * d2 * state[2] +
-                                              d3 * state[3];
+        cp4 * d0 * gm0 * dp3 * input +
+        cp3 * gm0 * dp3     * d0 * state[0] +
+        cp2 * dp3 * state[1] +
+        c   * dp2 * state[2] +
+              dp1 * state[3];
 
     // mix input and gained feedback estimate for
     // cheaper feedback gain compensation. Idea from 
@@ -91,9 +79,9 @@ inline float MoogFilter::step(float input)
     float u = input - tanhX(feedbackGain * (y3Estimate - 0.5f*input));
     // output of all stages
     float y0 = gm0 * d0 * (state[0] + c * u);
-    float y1 = gm1 * d1 * (state[1] + c * y0);
-    float y2 = gm2 * d2 * (state[2] + c * y1);
-    float y3 = gm3 * d3 * (state[3] + c * y2);
+    float y1 = dp1 * (state[1] + c * y0);
+    float y2 = dp1 * (state[2] + c * y1);
+    float y3 = dp1 * (state[3] + c * y2);
 
     // update state
     state[0] += ct2 * (u - y0);
@@ -148,7 +136,7 @@ void MoogFilter::setfreq(float ff)
 void MoogFilter::setq(float q)
 {
     // flattening the Q input
-    feedbackGain = cbrtf(q/1000.0f)*4.0f + 0.1f;
+    feedbackGain = cbrtf(q/1000.0f)*4.15f + 0.1f;
     // compensation factor for passband reduction by the negative feedback
     passbandCompensation = 1.0f + limit(feedbackGain, 0.0f, 1.0f);
 }
