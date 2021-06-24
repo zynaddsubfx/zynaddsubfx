@@ -136,7 +136,9 @@ void MoogFilter::setfreq(float ff)
 void MoogFilter::setq(float q)
 {
     // flattening the Q input
-    feedbackGain = cbrtf(q/1000.0f)*4.15f + 0.1f;
+    // self oscillation begins around 4.0
+    // mapped to match the ANALOG filter class
+    feedbackGain = cbrtf(q/1000.0f)*4.0f + 0.3f;
     // compensation factor for passband reduction by the negative feedback
     passbandCompensation = 1.0f + limit(feedbackGain, 0.0f, 1.0f);
 }
