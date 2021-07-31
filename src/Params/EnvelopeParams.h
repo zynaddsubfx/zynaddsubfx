@@ -17,6 +17,8 @@
 #include "../globals.h"
 #include "../Misc/XMLwrapper.h"
 #include "Presets.h"
+#include "../Synth/ModMatrix.h"
+
 #include <cstdint>
 
 namespace zyn {
@@ -34,7 +36,8 @@ class EnvelopeParams:public Presets
     public:
         EnvelopeParams(unsigned char Penvstretch_=64,
                        unsigned char Pforcedrelease_=0,
-                       const AbsTime *time_ = nullptr);
+                       const AbsTime *time_ = nullptr,
+                       const ModMatrix* mod_ = nullptr);
         ~EnvelopeParams() override;
         void paste(const EnvelopeParams &ep);
 
@@ -76,6 +79,7 @@ class EnvelopeParams:public Presets
 
 
         const AbsTime *time;
+        const ModMatrix *mod;
         int64_t last_update_timestamp;
 
         static const rtosc::Ports &ports;

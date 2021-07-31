@@ -11,6 +11,9 @@
 */
 #include "SynthNote.h"
 #include "../Params/Controller.h"
+#include "../Params/LFOParams.h"
+#include "../Params/EnvelopeParams.h"
+#include "../Misc/Allocator.h"
 #include "../Misc/Util.h"
 #include "../globals.h"
 #include <cstring>
@@ -19,12 +22,18 @@
 
 namespace zyn {
 
-SynthNote::SynthNote(const SynthParams &pars)
+SynthNote::SynthNote(const SynthParams &pars, const char *prefix)
     :memory(pars.memory),
     legato(pars.synth, pars.velocity, pars.portamento,
             pars.note_log2_freq, pars.quiet, pars.seed), ctl(pars.ctl), synth(pars.synth), time(pars.time)
-{}
+{
+    ScratchString pre = prefix;
 
+}
+SynthNote::~SynthNote()
+{
+
+}
 SynthNote::Legato::Legato(const SYNTH_T &synth_, float vel,
                           Portamento *portamento,
                           float note_log2_freq, bool quiet, prng_t seed)
@@ -201,5 +210,21 @@ prng_t SynthNote::getRandomUint() {
     current_prng_state = prng_r(current_prng_state);
     return current_prng_state;
 }
+
+//~ SynthParams::SynthParams(Allocator &memory_, const Controller &ctl_,
+            //~ const SYNTH_T &synth_, const AbsTime &time_, float velocity_,
+            //~ Portamento *portamento_, float note_log2_freq_, bool quiet_, prng_t seed_) :
+        //~ memory(memory_), ctl(ctl_), synth(synth_), time(time_),
+        //~ velocity(velocity_), portamento(portamento_),
+        //~ note_log2_freq(note_log2_freq_), quiet(quiet_), seed(seed_),
+        //~ last_update_timestamp(0)
+//~ {
+
+//~ }
+
+//~ SynthParams::~SynthParams()
+//~ {
+
+//~ }
 
 }

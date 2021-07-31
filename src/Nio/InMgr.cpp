@@ -119,12 +119,12 @@ bool InMgr::flush(unsigned frameStart, unsigned frameStop)
                 break;
 
             case M_CONTROLLER:
-                if(ev.num == C_bankselectmsb) {        // Change current bank
+                if(ev.num == C_Bank_Select_MSB) {        // Change current bank
                     middleware->spawnMaster()->bToU->write("/forward", "");
                     middleware->spawnMaster()->bToU->write("/bank/msb", "i", ev.value);
                     middleware->spawnMaster()->bToU->write("/bank/bank_select", "i", ev.value);
 
-                } else if(ev.num == C_bankselectlsb)  {// Change current bank (LSB)
+                } else if(ev.num == C_Bank_Select_LSB )  {// Change current bank (LSB)
                     middleware->spawnMaster()->bToU->write("/forward", "");
                     middleware->spawnMaster()->bToU->write("/bank/lsb", "i", ev.value);
                 } else

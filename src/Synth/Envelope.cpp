@@ -18,7 +18,7 @@
 namespace zyn {
 
 Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
-        WatchManager *m, const char *watch_prefix)
+        WatchManager *m, const char *watch_prefix, float* modValue)
     :watchOut(m, watch_prefix, "out")
 {
     envpoints = pars.Penvpoints;
@@ -42,6 +42,7 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
         mode = 1;                              //change to linear
 
     for(int i = 0; i < MAX_ENVELOPE_POINTS; ++i) {
+        APPLY_MODMATRIX_FACTOR(pars, envstretch, ENV_SPEED);
         const float dtstretched = pars.getdt(i) * envstretch;
         if(dtstretched > bufferdt)
             envdt[i] = bufferdt / dtstretched;
@@ -49,10 +50,10 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
             envdt[i] = 2.0f;  //any value larger than 1
 
         switch(mode) {
-            case 2:
+            case ADSR_dB:
                 envval[i] = (1.0f - pars.Penvval[i] / 127.0f) * -40;
                 break;
-            case 3:
+            case ASR_freqlfo:
                 envval[i] =
                     (powf(2, 6.0f
                           * fabsf(pars.Penvval[i]
@@ -60,15 +61,19 @@ Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
                 if(pars.Penvval[i] < 64)
                     envval[i] = -envval[i];
                 break;
-            case 4:
+            case ADSR_filter:
                 envval[i] = (pars.Penvval[i] - 64.0f) / 64.0f * 6.0f; //6 octaves (filtru)
                 break;
-            case 5:
+            case ASR_bw:
                 envval[i] = (pars.Penvval[i] - 64.0f) / 64.0f * 10;
                 break;
+            case ADSR_lin:
             default:
                 envval[i] = pars.Penvval[i] / 127.0f;
         }
+        float val = envval[i];
+        APPLY_MODMATRIX_FACTOR(pars, val, ENV_DEPTH);
+        envval[i] = val;
     }
 
     envdt[0] = 1.0f;

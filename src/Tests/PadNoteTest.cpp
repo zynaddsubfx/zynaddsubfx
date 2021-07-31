@@ -109,7 +109,7 @@ class PadNoteTest
 
             //lets go with.... 50! as a nice note
             test_freq_log2 = log2f(440.0f) + (50.0 - 69.0f) / 12.0f;
-            SynthParams pars_{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng()};
+            SynthParams pars_{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng(), 0};
 
             note = new PADnote(pars, pars_, interpolation);
         }
