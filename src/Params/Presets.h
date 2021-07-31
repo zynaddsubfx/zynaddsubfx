@@ -52,6 +52,7 @@ class Presets
 //enum consumer_location_t
 //{
 
+//ATTENTION: the numbering must be the same as the order in ../Synth/ModMatrix.h
 #define ad_global_amp 0
 #define ad_global_freq 1
 #define ad_global_filter 2
@@ -68,20 +69,20 @@ class Presets
 #define sub_bandwidth 10
 
 #define in_effect 11
-#define loc_unspecified 12
+#define loc_generic1 12
+#define loc_generic2 13
 
-#define dynfilter_0 13
-#define dynfilter_1 14
-#define dynfilter_2 15
-#define dynfilter_3 16
-#define dynfilter_4 17
-
+#define dynfilter_0 14
+#define dynfilter_1 15
+#define dynfilter_2 16
+#define dynfilter_3 17
+#define dynfilter_4 18
 //};
 using consumer_location_t = int;
 
 enum class consumer_location_type_t
 {
-    freq, amp, filter, unspecified
+    freq, amp, filter, generic, unspecified
 };
 
 }

@@ -42,6 +42,22 @@ bool isPlugin = false;
 
 prng_t prng_state = 0x1234;
 
+void chua_attractor(float &x, float &y, float &z, float alpha, float beta, float mu0, float mu1, float speed) {
+    //~ const int ovsmpl = speed * 8
+    const float dt = speed / 32;
+    //~ for(int i = 0; i<ovsmpl; i++) {
+        const float ht = mu1 * x + 0.5f * (mu0 - mu1) * (fabs(x + 1.0f) - fabs(x - 1.0f));
+        const float x_out = x + dt * (alpha * (y - x - ht));
+        const float y_out = y  + dt * (x - y + z);
+        const float z_out = z + dt * (-beta * y);
+        x = x_out;
+        y = y_out;
+        z = z_out;
+    //~ }
+    
+}
+
+
 /*
  * Transform the velocity according the scaling parameter (velocity sensing)
  */
