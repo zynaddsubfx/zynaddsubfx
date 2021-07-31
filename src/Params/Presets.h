@@ -69,6 +69,7 @@ class Presets
 
 #define in_effect 11
 #define loc_unspecified 12
+#define loc_generic 13
 
 #define dynfilter_0 13
 #define dynfilter_1 14

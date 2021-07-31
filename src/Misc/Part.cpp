@@ -637,7 +637,7 @@ bool Part::NoteOnInternal(note_t note,
 
     if(Ppolymode)
         notePool.makeUnsustainable(note);
-    
+
     // in latch mode release latched notes before creating the new one
     if(Platchmode)
         notePool.releaseLatched();
@@ -1018,6 +1018,18 @@ void Part::AllNotesOff()
     killallnotes = true;
 }
 
+/*
+ * Compute Part Generic Controllers and store them in the envout and lfoout
+ */
+void Part::ComputePartCtrl(float& envout, float& lfoout)
+{
+    for(auto &d:notePool.activeDesc()) {
+        for(auto &s:notePool.activeNotes(d)) {
+            auto &note = *s.note;
+            note.calcMod(envout, lfoout);
+        }
+    }
+}
 /*
  * Compute Part samples and store them in the partoutl[] and partoutr[]
  */

@@ -180,6 +180,13 @@ typedef std::complex<fftwf_real> fft_t;
 #define FF_MAX_FORMANTS 12
 #define FF_MAX_SEQUENCE 8
 
+/*
+ * Generic Controler Types
+ */
+#define CONTROLER_TYPE_LFO 1
+#define CONTROLER_TYPE_ENV 2
+
+
 #define MAX_PRESETTYPE_SIZE 30
 
 #define LOG_2 0.693147181f

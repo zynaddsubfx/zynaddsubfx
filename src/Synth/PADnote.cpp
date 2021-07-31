@@ -29,7 +29,7 @@ namespace zyn {
 PADnote::PADnote(const PADnoteParameters *parameters,
                  const SynthParams &pars, const int& interpolation, WatchManager *wm,
                  const char *prefix)
-    :SynthNote(pars),
+    :SynthNote(pars, prefix),
     watch_int(wm, prefix, "noteout/after_interpolation"), watch_punch(wm, prefix, "noteout/after_punch"),
     watch_amp_int(wm, prefix, "noteout/after_amp_interpolation"), watch_legato(wm, prefix, "noteout/after_legato"),
      pars(*parameters),interpolation(interpolation)

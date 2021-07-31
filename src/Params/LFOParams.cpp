@@ -133,6 +133,7 @@ void LFOParams::setup()
 {
     switch(loc) {
         case loc_unspecified:
+        case loc_generic:
             fel = consumer_location_type_t::unspecified;
             break;
         case ad_global_freq:
@@ -220,6 +221,7 @@ LFOParams::LFOParams(consumer_location_t loc,
         case ad_voice_amp:     init(11.25, 32, 64, 0.94f); break;
         case ad_voice_freq:    init(1.19, 40,  0, 0.0f); break;
         case ad_voice_filter:  init(1.19, 20, 64, 0.0f); break;
+        case loc_generic:      init(6.49, 0, 64, 0.0f); break;
         default: throw std::logic_error("Invalid LFO consumer location");
     }
 

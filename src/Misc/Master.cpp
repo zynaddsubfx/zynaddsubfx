@@ -272,7 +272,17 @@ static const Ports slot_ports = {
             d.reply(d.loc, "i", a.slots[slot].midi_nrpn);
 
         rEnd},
-    {"active::T:F",  rProp(parameter) rDefault(false) rDoc("If Slot is enabled"), 0,
+    {"internal::i", rOptions(NONE, ENV, LFO) rDefault(NONE)
+     rProp(parameter) rMap(default, 0) rDoc("Access assigned internal mod type \n 0=NONE 1=ENV 2=LFO") , 0,
+        rBegin;
+        int slot = d.idx[0];
+        if(rtosc_narguments(msg)) {
+            a.slots[slot].internal = rtosc_argument(msg, 0).i;
+            d.broadcast(d.loc, "i", a.slots[slot].internal);
+        } else
+            d.reply(d.loc, "i", a.slots[slot].internal);
+
+        rEnd},
         rBegin;
         int slot = d.idx[0];
         if(rtosc_narguments(msg)) {
@@ -775,7 +785,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     SaveFullXml=(config->cfg.SaveFullXml==1);
     bToU = NULL;
     uToB = NULL;
-    
+
     // set default tempo
     time.tempo = 120;
 
@@ -1288,7 +1298,13 @@ bool Master::AudioOut(float *outl, float *outr)
     //Note: We do this regardless if the part is enabled or not, to allow
     //the part to graciously shut down when disabled.
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
+    {
+        float envout=0.0f, lfoout=0.0f;
+        part[npart]->ComputePartCtrl(envout, lfoout);
+        automate.handleGenericControlers(CONTROLER_TYPE_ENV, envout);
+        automate.handleGenericControlers(CONTROLER_TYPE_LFO, lfoout);
         part[npart]->ComputePartSmps();
+    }
 
     //Insertion effects
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)

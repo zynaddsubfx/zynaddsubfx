@@ -75,6 +75,7 @@ class Part
         void ReleaseAllKeys() REALTIME; //this is called on AllNotesOff controller
 
         /* The synthesizer part output */
+        void ComputePartCtrl(float& envout, float& lfoout) REALTIME; //Part Generic Controllers
         void ComputePartSmps() REALTIME; //Part output
 
 
