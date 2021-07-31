@@ -265,4 +265,5 @@ int main()
     TriggerTest test;
     RUN_TEST(testSine);
     RUN_TEST(testCombinedTrigger);
+    return test_summary();
 }

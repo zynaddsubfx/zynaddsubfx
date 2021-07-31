@@ -249,4 +249,5 @@ int main()
     RUN_TEST(testInit);
     RUN_TEST(testPanic);
     RUN_TEST(testLoadSave);
+    return test_summary();
 }

@@ -113,4 +113,5 @@ int main()
     RUN_TEST(testBasic);
     RUN_TEST(testTooBig);
     RUN_TEST(testEnlarge);
+    return test_summary();
 }
