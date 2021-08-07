@@ -116,13 +116,15 @@ static const Ports partPorts = {
     {"captureMax:", rDoc("Capture maximum valid note"), NULL,
         [](const char *, RtData &r)
         {Part *p = (Part*)r.obj; p->Pmaxkey = p->lastnote;}},
-    {"polyType::c:i", rProp(parameter) rOptions(Polyphonic, Monophonic, Legato)
+    {"polyType::c:i", rProp(parameter) rOptions(Polyphonic, Monophonic, Legato, Latch)
         rDoc("Synthesis polyphony type\n"
                 "Polyphonic - Each note is played independently\n"
                 "Monophonic - A single note is played at a time with"
                 " envelopes resetting between notes\n"
                 "Legato     - A single note is played at a time without"
                 " envelopes resetting between notes\n"
+                "Latch     - Notes are released when a new one is hit "
+                " after key release\n"
             ), NULL,
         [](const char *msg, RtData &d)
         {
@@ -143,12 +145,19 @@ static const Ports partPorts = {
             if(i == 0) {
                 p->Ppolymode = 1;
                 p->Plegatomode = 0;
+                p->Platchmode = 0;
             } else if(i==1) {
                 p->Ppolymode = 0;
                 p->Plegatomode = 0;
-            } else {
+                p->Platchmode = 0;
+            } else if(i==2) {
                 p->Ppolymode = 0;
                 p->Plegatomode = 1;
+                p->Platchmode = 0;
+            } else {
+                p->Ppolymode = 1;
+                p->Plegatomode = 0;
+                p->Platchmode = 1;
             }
             d.broadcast(d.loc, "i", get_polytype());
         }
@@ -550,6 +559,10 @@ bool Part::NoteOnInternal(note_t note,
 
     if(Ppolymode)
         notePool.makeUnsustainable(note);
+    
+    // in latch mode release latched notes before creating the new one
+    if(Platchmode)
+        notePool.releaseLatched();
 
     //Create New Notes
     for(uint8_t i = 0; i < NUM_KIT_ITEMS; ++i) {
@@ -603,7 +616,10 @@ void Part::NoteOff(note_t note) //release the key
     for(auto &desc:notePool.activeDesc()) {
         if(desc.note != note || !desc.playing())
             continue;
-        if(!ctl.sustain.sustain) { //the sustain pedal is not pushed
+        // if latch is on we ignore noteoff, but set the state to lateched
+        if(Platchmode) {
+            notePool.latch(desc);
+        } else if(!ctl.sustain.sustain) { //the sustain pedal is not pushed
             if((isMonoMode() || isLegatoMode()) && !monomemEmpty())
                 MonoMemRenote();//Play most recent still active note
             else
@@ -612,8 +628,9 @@ void Part::NoteOff(note_t note) //release the key
         else {   //the sustain pedal is pushed
             if(desc.canSustain())
                 desc.doSustain();
-            else
+            else {
                 notePool.release(desc);
+            }
         }
     }
 }

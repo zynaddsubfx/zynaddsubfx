@@ -147,6 +147,7 @@ class Part
 
         bool Ppolymode; //Part mode - 0=monophonic , 1=polyphonic
         bool Plegatomode; // 0=normal, 1=legato
+        bool Platchmode; // 0=normal, 1=latch
         unsigned char Pkeylimit; //how many keys are allowed to be played same time (0=off), the older will be released
 
         char *Pname; //name of the instrument
