@@ -30,7 +30,7 @@ using namespace zyn;
 SYNTH_T *synth;
 int dummy=0;
 
-#define SUSTAIN_BIT 0x04
+#define SUSTAIN_BIT 0x08
 enum PrivateNoteStatus {
     KEY_OFF                    = 0x00,
     KEY_PLAYING                = 0x01,
