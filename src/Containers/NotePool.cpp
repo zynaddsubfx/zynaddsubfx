@@ -16,8 +16,8 @@
 #include <cassert>
 #include <iostream>
 
-#define SUSTAIN_BIT 0x04
-#define NOTE_MASK   0x03
+#define SUSTAIN_BIT 0x08
+#define NOTE_MASK   0x07
 
 namespace zyn {
 
@@ -25,7 +25,8 @@ enum NoteStatus {
     KEY_OFF                    = 0x00,
     KEY_PLAYING                = 0x01,
     KEY_RELEASED_AND_SUSTAINED = 0x02,
-    KEY_RELEASED               = 0x03
+    KEY_RELEASED               = 0x03,
+    KEY_LATCHED                = 0x04
 };
 
 
@@ -39,6 +40,11 @@ NotePool::NotePool(void)
 bool NotePool::NoteDescriptor::playing(void) const
 {
     return (status&NOTE_MASK) == KEY_PLAYING;
+}
+
+bool NotePool::NoteDescriptor::latched(void) const
+{
+    return (status&NOTE_MASK) == KEY_LATCHED;
 }
 
 bool NotePool::NoteDescriptor::sustained(void) const
@@ -259,7 +265,7 @@ int NotePool::getRunningNotes(void) const
     int running_count = 0;
 
     for(auto &desc:activeDesc()) {
-        if(desc.playing() == false && desc.sustained() == false)
+        if(desc.playing() == false && desc.sustained() == false && desc.latched() == false)
             continue;
         if(running[desc.note] != false)
             continue;
@@ -304,7 +310,7 @@ void NotePool::enforceKeyLimit(int limit)
 void NotePool::releasePlayingNotes(void)
 {
     for(auto &d:activeDesc()) {
-        if(d.playing() || d.sustained()) {
+        if(d.playing() || d.sustained() || d.latched()) {
             d.setStatus(KEY_RELEASED);
             for(auto s:activeNotes(d))
                 s.note->releasekey();
@@ -317,6 +323,19 @@ void NotePool::release(NoteDescriptor &d)
     d.setStatus(KEY_RELEASED);
     for(auto s:activeNotes(d))
         s.note->releasekey();
+}
+
+void NotePool::latch(NoteDescriptor &d)
+{
+    d.setStatus(KEY_LATCHED);
+}
+
+void NotePool::releaseLatched()
+{
+    for(auto &desc:activeDesc())
+        if(desc.latched())
+            for(auto s:activeNotes(desc))
+                s.note->releasekey();
 }
 
 void NotePool::killAllNotes(void)

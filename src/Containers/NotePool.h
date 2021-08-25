@@ -44,6 +44,7 @@ class NotePool
             bool off(void) const;
             bool sustained(void) const;
             bool released(void) const;
+            bool latched(void) const;
 
             //status transitions
             void setStatus(uint8_t s);
@@ -125,6 +126,8 @@ class NotePool
         void applyLegato(note_t note, const LegatoParams &par);
 
         void makeUnsustainable(note_t note);
+        
+        void releaseLatched();
 
         bool full(void) const;
         bool synthFull(int sdesc_count) const;
@@ -137,6 +140,8 @@ class NotePool
         void releasePlayingNotes(void);
         void releaseNote(note_t note);
         void release(NoteDescriptor &d);
+        void latch(NoteDescriptor &d);
+        
 
         void killAllNotes(void);
         void killNote(note_t note);
