@@ -1102,9 +1102,10 @@ void ADnoteGlobalParam::getfromXML(XMLwrapper& xml)
         FreqLfo->getfromXML(xml);
         xml.exitbranch();
 
-        xml.enterbranch("FREQUENCY_SEQ");
-        FreqSeq->getfromXML(xml);
-        xml.exitbranch();
+        if(xml.enterbranch("FREQUENCY_SEQ")) {
+            FreqSeq->getfromXML(xml);
+            xml.exitbranch();
+        }
 
         xml.exitbranch(); // FREQUENCY_PARAMETERS
     }
@@ -1129,10 +1130,10 @@ void ADnoteGlobalParam::getfromXML(XMLwrapper& xml)
         FilterLfo->getfromXML(xml);
         xml.exitbranch();
 
-        xml.enterbranch("FILTER_SEQ");
-        FilterSeq->getfromXML(xml);
-        xml.exitbranch();
-        
+        if(xml.enterbranch("FILTER_SEQ")) {
+            FilterSeq->getfromXML(xml);
+            xml.exitbranch();
+        }
         xml.exitbranch(); // FILTER_PARAMETERS
     }
 
