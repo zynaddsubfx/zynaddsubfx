@@ -108,6 +108,401 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </AMPLITUDE_LFO>
+<AMPLITUDE_SEQ>
+<par_real name="freq" value="2" exact_value="0x40000000" />
+<par_real name="cutoff" value="20" exact_value="0x41A00000" />
+<par name="steps" value="1" />
+<par_real name="delay" value="0" exact_value="0x00000000" />
+<par_bool name="continous" value="no" />
+<par name="numerator" value="0" />
+<par name="denominator" value="4" />
+<SEQUENCE>
+<STEP id="1">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="2">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="3">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="4">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="5">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="6">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="7">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="8">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="9">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="10">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="11">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="12">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="13">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="14">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="15">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="16">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="17">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="18">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="19">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="20">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="21">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="22">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="23">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="24">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="25">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="26">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="27">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="28">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="29">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="30">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="31">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="32">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="33">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="34">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="35">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="36">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="37">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="38">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="39">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="40">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="41">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="42">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="43">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="44">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="45">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="46">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="47">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="48">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="49">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="50">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="51">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="52">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="53">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="54">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="55">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="56">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="57">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="58">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="59">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="60">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="61">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="62">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="63">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="64">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="65">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="66">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="67">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="68">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="69">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="70">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="71">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="72">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="73">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="74">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="75">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="76">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="77">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="78">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="79">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="80">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="81">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="82">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="83">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="84">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="85">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="86">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="87">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="88">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="89">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="90">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="91">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="92">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="93">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="94">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="95">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="96">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="97">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="98">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="99">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="100">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="101">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="102">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="103">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="104">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="105">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="106">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="107">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="108">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="109">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="110">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="111">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="112">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="113">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="114">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="115">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="116">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="117">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="118">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="119">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="120">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="121">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="122">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="123">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="124">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="125">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="126">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="127">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="128">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+</SEQUENCE>
+</AMPLITUDE_SEQ>
 </AMPLITUDE_PARAMETERS>
 <FREQUENCY_PARAMETERS>
 <par name="detune" value="8192" />
@@ -146,6 +541,16 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </FREQUENCY_LFO>
+<FREQUENCY_SEQ>
+<par_real name="freq" value="2" exact_value="0x40000000" />
+<par_real name="cutoff" value="20" exact_value="0x41A00000" />
+<par name="steps" value="1" />
+<par_real name="delay" value="0" exact_value="0x00000000" />
+<par_bool name="continous" value="no" />
+<par name="numerator" value="0" />
+<par name="denominator" value="4" />
+<SEQUENCE />
+</FREQUENCY_SEQ>
 </FREQUENCY_PARAMETERS>
 <FILTER_PARAMETERS>
 <par name="velocity_sensing_amplitude" value="34" />
@@ -191,6 +596,16 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </FILTER_LFO>
+<FILTER_SEQ>
+<par_real name="freq" value="2" exact_value="0x40000000" />
+<par_real name="cutoff" value="20" exact_value="0x41A00000" />
+<par name="steps" value="86" />
+<par_real name="delay" value="0" exact_value="0x00000000" />
+<par_bool name="continous" value="no" />
+<par name="numerator" value="0" />
+<par name="denominator" value="4" />
+<SEQUENCE />
+</FILTER_SEQ>
 </FILTER_PARAMETERS>
 <RESONANCE>
 <par_bool name="enabled" value="no" />
@@ -294,6 +709,402 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </AMPLITUDE_LFO>
+<par_bool name="amp_seq_enabled" value="yes" />
+<AMPLITUDE_SEQ>
+<par_real name="freq" value="2" exact_value="0x40000000" />
+<par_real name="cutoff" value="20" exact_value="0x41A00000" />
+<par name="steps" value="86" />
+<par_real name="delay" value="0" exact_value="0x00000000" />
+<par_bool name="continous" value="no" />
+<par name="numerator" value="0" />
+<par name="denominator" value="4" />
+<SEQUENCE>
+<STEP id="1">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="2">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="3">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="4">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="5">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="6">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="7">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="8">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="9">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="10">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="11">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="12">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="13">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="14">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="15">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="16">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="17">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="18">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="19">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="20">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="21">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="22">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="23">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="24">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="25">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="26">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="27">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="28">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="29">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="30">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="31">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="32">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="33">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="34">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="35">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="36">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="37">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="38">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="39">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="40">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="41">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="42">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="43">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="44">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="45">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="46">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="47">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="48">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="49">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="50">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="51">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="52">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="53">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="54">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="55">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="56">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="57">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="58">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="59">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="60">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="61">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="62">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="63">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="64">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="65">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="66">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="67">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="68">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="69">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="70">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="71">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="72">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="73">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="74">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="75">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="76">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="77">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="78">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="79">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="80">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="81">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="82">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="83">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="84">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="85">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="86">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="87">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="88">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="89">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="90">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="91">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="92">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="93">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="94">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="95">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="96">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="97">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="98">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="99">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="100">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="101">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="102">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="103">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="104">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="105">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="106">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="107">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="108">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="109">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="110">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="111">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="112">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="113">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="114">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="115">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="116">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="117">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="118">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="119">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="120">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="121">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="122">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="123">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="124">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="125">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="126">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="127">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+<STEP id="128">
+<par_real name="value" value="1" exact_value="0x3F800000" />
+</STEP>
+</SEQUENCE>
+</AMPLITUDE_SEQ>
 </AMPLITUDE_PARAMETERS>
 <FREQUENCY_PARAMETERS>
 <par_bool name="fixed_freq" value="no" />
@@ -337,6 +1148,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </FREQUENCY_LFO>
+<par_bool name="freq_seq_enabled" value="no" />
 </FREQUENCY_PARAMETERS>
 <FILTER_PARAMETERS>
 <par name="velocity_sensing_amplitude" value="0" />
@@ -384,6 +1196,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </FILTER_LFO>
+<par_bool name="filter_seq_enabled" value="no" />
 </FILTER_PARAMETERS>
 <FM_PARAMETERS>
 <par name="input_voice" value="-1" />
@@ -531,6 +1344,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="velocity_sensing" value="127" />
 <par_bool name="amp_envelope_enabled" value="no" />
 <par_bool name="amp_lfo_enabled" value="no" />
+<par_bool name="amp_seq_enabled" value="no" />
 </AMPLITUDE_PARAMETERS>
 <FREQUENCY_PARAMETERS>
 <par_bool name="fixed_freq" value="no" />
@@ -558,6 +1372,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </FREQUENCY_LFO>
+<par_bool name="freq_seq_enabled" value="no" />
 </FREQUENCY_PARAMETERS>
 </VOICE>
 <VOICE id="2">
@@ -623,6 +1438,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="velocity_sensing" value="127" />
 <par_bool name="amp_envelope_enabled" value="no" />
 <par_bool name="amp_lfo_enabled" value="no" />
+<par_bool name="amp_seq_enabled" value="no" />
 </AMPLITUDE_PARAMETERS>
 <FREQUENCY_PARAMETERS>
 <par_bool name="fixed_freq" value="no" />
@@ -650,6 +1466,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </FREQUENCY_LFO>
+<par_bool name="freq_seq_enabled" value="no" />
 </FREQUENCY_PARAMETERS>
 </VOICE>
 <VOICE id="3">
@@ -739,6 +1556,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="R_val" value="64" />
 </AMPLITUDE_ENVELOPE>
 <par_bool name="amp_lfo_enabled" value="no" />
+<par_bool name="amp_seq_enabled" value="no" />
 </AMPLITUDE_PARAMETERS>
 <FREQUENCY_PARAMETERS>
 <par_bool name="fixed_freq" value="no" />
@@ -750,6 +1568,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="detune_type" value="0" />
 <par_bool name="freq_envelope_enabled" value="no" />
 <par_bool name="freq_lfo_enabled" value="no" />
+<par_bool name="freq_seq_enabled" value="no" />
 </FREQUENCY_PARAMETERS>
 </VOICE>
 <VOICE id="4">
@@ -826,32 +1645,14 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_no id="1">
 <par name="par" value="65" />
 </par_no>
-<par_no id="2">
-<par name="par" value="35" />
-</par_no>
 <par_no id="3">
 <par name="par" value="97" />
 </par_no>
 <par_no id="4">
 <par name="par" value="29" />
 </par_no>
-<par_no id="5">
-<par name="par" value="0" />
-</par_no>
-<par_no id="6">
-<par name="par" value="0" />
-</par_no>
 <par_no id="7">
 <par name="par" value="83" />
-</par_no>
-<par_no id="8">
-<par name="par" value="0" />
-</par_no>
-<par_no id="9">
-<par name="par" value="0" />
-</par_no>
-<par_no id="10">
-<par name="par" value="0" />
 </par_no>
 </EFFECT_PARAMETERS>
 <par name="numerator" value="0" />
@@ -868,33 +1669,6 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_no id="0">
 <par name="par" value="56" />
 </par_no>
-<par_no id="1">
-<par name="par" value="0" />
-</par_no>
-<par_no id="2">
-<par name="par" value="0" />
-</par_no>
-<par_no id="3">
-<par name="par" value="0" />
-</par_no>
-<par_no id="4">
-<par name="par" value="0" />
-</par_no>
-<par_no id="5">
-<par name="par" value="0" />
-</par_no>
-<par_no id="6">
-<par name="par" value="0" />
-</par_no>
-<par_no id="7">
-<par name="par" value="0" />
-</par_no>
-<par_no id="8">
-<par name="par" value="0" />
-</par_no>
-<par_no id="9">
-<par name="par" value="0" />
-</par_no>
 <par_no id="10">
 <par name="par" value="7" />
 </par_no>
@@ -907,23 +1681,14 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_no id="13">
 <par name="par" value="36" />
 </par_no>
-<par_no id="14">
-<par name="par" value="0" />
-</par_no>
 <par_no id="15">
 <par name="par" value="6" />
 </par_no>
 <par_no id="16">
 <par name="par" value="76" />
 </par_no>
-<par_no id="17">
-<par name="par" value="64" />
-</par_no>
 <par_no id="18">
 <par name="par" value="32" />
-</par_no>
-<par_no id="19">
-<par name="par" value="0" />
 </par_no>
 <par_no id="20">
 <par name="par" value="9" />
@@ -934,15 +1699,6 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_no id="22">
 <par name="par" value="75" />
 </par_no>
-<par_no id="23">
-<par name="par" value="64" />
-</par_no>
-<par_no id="24">
-<par name="par" value="0" />
-</par_no>
-<par_no id="25">
-<par name="par" value="0" />
-</par_no>
 <par_no id="26">
 <par name="par" value="36" />
 </par_no>
@@ -951,303 +1707,6 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 </par_no>
 <par_no id="28">
 <par name="par" value="57" />
-</par_no>
-<par_no id="29">
-<par name="par" value="0" />
-</par_no>
-<par_no id="30">
-<par name="par" value="0" />
-</par_no>
-<par_no id="31">
-<par name="par" value="64" />
-</par_no>
-<par_no id="32">
-<par name="par" value="64" />
-</par_no>
-<par_no id="33">
-<par name="par" value="64" />
-</par_no>
-<par_no id="34">
-<par name="par" value="0" />
-</par_no>
-<par_no id="35">
-<par name="par" value="0" />
-</par_no>
-<par_no id="36">
-<par name="par" value="64" />
-</par_no>
-<par_no id="37">
-<par name="par" value="64" />
-</par_no>
-<par_no id="38">
-<par name="par" value="64" />
-</par_no>
-<par_no id="39">
-<par name="par" value="0" />
-</par_no>
-<par_no id="40">
-<par name="par" value="0" />
-</par_no>
-<par_no id="41">
-<par name="par" value="64" />
-</par_no>
-<par_no id="42">
-<par name="par" value="64" />
-</par_no>
-<par_no id="43">
-<par name="par" value="64" />
-</par_no>
-<par_no id="44">
-<par name="par" value="0" />
-</par_no>
-<par_no id="45">
-<par name="par" value="0" />
-</par_no>
-<par_no id="46">
-<par name="par" value="64" />
-</par_no>
-<par_no id="47">
-<par name="par" value="64" />
-</par_no>
-<par_no id="48">
-<par name="par" value="64" />
-</par_no>
-<par_no id="49">
-<par name="par" value="0" />
-</par_no>
-<par_no id="50">
-<par name="par" value="0" />
-</par_no>
-<par_no id="51">
-<par name="par" value="0" />
-</par_no>
-<par_no id="52">
-<par name="par" value="0" />
-</par_no>
-<par_no id="53">
-<par name="par" value="0" />
-</par_no>
-<par_no id="54">
-<par name="par" value="0" />
-</par_no>
-<par_no id="55">
-<par name="par" value="0" />
-</par_no>
-<par_no id="56">
-<par name="par" value="0" />
-</par_no>
-<par_no id="57">
-<par name="par" value="0" />
-</par_no>
-<par_no id="58">
-<par name="par" value="0" />
-</par_no>
-<par_no id="59">
-<par name="par" value="0" />
-</par_no>
-<par_no id="60">
-<par name="par" value="0" />
-</par_no>
-<par_no id="61">
-<par name="par" value="0" />
-</par_no>
-<par_no id="62">
-<par name="par" value="0" />
-</par_no>
-<par_no id="63">
-<par name="par" value="0" />
-</par_no>
-<par_no id="64">
-<par name="par" value="0" />
-</par_no>
-<par_no id="65">
-<par name="par" value="0" />
-</par_no>
-<par_no id="66">
-<par name="par" value="0" />
-</par_no>
-<par_no id="67">
-<par name="par" value="0" />
-</par_no>
-<par_no id="68">
-<par name="par" value="0" />
-</par_no>
-<par_no id="69">
-<par name="par" value="0" />
-</par_no>
-<par_no id="70">
-<par name="par" value="0" />
-</par_no>
-<par_no id="71">
-<par name="par" value="0" />
-</par_no>
-<par_no id="72">
-<par name="par" value="0" />
-</par_no>
-<par_no id="73">
-<par name="par" value="0" />
-</par_no>
-<par_no id="74">
-<par name="par" value="0" />
-</par_no>
-<par_no id="75">
-<par name="par" value="0" />
-</par_no>
-<par_no id="76">
-<par name="par" value="0" />
-</par_no>
-<par_no id="77">
-<par name="par" value="0" />
-</par_no>
-<par_no id="78">
-<par name="par" value="0" />
-</par_no>
-<par_no id="79">
-<par name="par" value="0" />
-</par_no>
-<par_no id="80">
-<par name="par" value="0" />
-</par_no>
-<par_no id="81">
-<par name="par" value="0" />
-</par_no>
-<par_no id="82">
-<par name="par" value="0" />
-</par_no>
-<par_no id="83">
-<par name="par" value="0" />
-</par_no>
-<par_no id="84">
-<par name="par" value="0" />
-</par_no>
-<par_no id="85">
-<par name="par" value="0" />
-</par_no>
-<par_no id="86">
-<par name="par" value="0" />
-</par_no>
-<par_no id="87">
-<par name="par" value="0" />
-</par_no>
-<par_no id="88">
-<par name="par" value="0" />
-</par_no>
-<par_no id="89">
-<par name="par" value="0" />
-</par_no>
-<par_no id="90">
-<par name="par" value="0" />
-</par_no>
-<par_no id="91">
-<par name="par" value="0" />
-</par_no>
-<par_no id="92">
-<par name="par" value="0" />
-</par_no>
-<par_no id="93">
-<par name="par" value="0" />
-</par_no>
-<par_no id="94">
-<par name="par" value="0" />
-</par_no>
-<par_no id="95">
-<par name="par" value="0" />
-</par_no>
-<par_no id="96">
-<par name="par" value="0" />
-</par_no>
-<par_no id="97">
-<par name="par" value="0" />
-</par_no>
-<par_no id="98">
-<par name="par" value="0" />
-</par_no>
-<par_no id="99">
-<par name="par" value="0" />
-</par_no>
-<par_no id="100">
-<par name="par" value="0" />
-</par_no>
-<par_no id="101">
-<par name="par" value="0" />
-</par_no>
-<par_no id="102">
-<par name="par" value="0" />
-</par_no>
-<par_no id="103">
-<par name="par" value="0" />
-</par_no>
-<par_no id="104">
-<par name="par" value="0" />
-</par_no>
-<par_no id="105">
-<par name="par" value="0" />
-</par_no>
-<par_no id="106">
-<par name="par" value="0" />
-</par_no>
-<par_no id="107">
-<par name="par" value="0" />
-</par_no>
-<par_no id="108">
-<par name="par" value="0" />
-</par_no>
-<par_no id="109">
-<par name="par" value="0" />
-</par_no>
-<par_no id="110">
-<par name="par" value="0" />
-</par_no>
-<par_no id="111">
-<par name="par" value="0" />
-</par_no>
-<par_no id="112">
-<par name="par" value="0" />
-</par_no>
-<par_no id="113">
-<par name="par" value="0" />
-</par_no>
-<par_no id="114">
-<par name="par" value="0" />
-</par_no>
-<par_no id="115">
-<par name="par" value="0" />
-</par_no>
-<par_no id="116">
-<par name="par" value="0" />
-</par_no>
-<par_no id="117">
-<par name="par" value="0" />
-</par_no>
-<par_no id="118">
-<par name="par" value="0" />
-</par_no>
-<par_no id="119">
-<par name="par" value="0" />
-</par_no>
-<par_no id="120">
-<par name="par" value="0" />
-</par_no>
-<par_no id="121">
-<par name="par" value="0" />
-</par_no>
-<par_no id="122">
-<par name="par" value="0" />
-</par_no>
-<par_no id="123">
-<par name="par" value="0" />
-</par_no>
-<par_no id="124">
-<par name="par" value="0" />
-</par_no>
-<par_no id="125">
-<par name="par" value="0" />
-</par_no>
-<par_no id="126">
-<par name="par" value="0" />
-</par_no>
-<par_no id="127">
-<par name="par" value="0" />
 </par_no>
 </EFFECT_PARAMETERS>
 <par name="numerator" value="0" />
@@ -2172,1534 +2631,6 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <BF_HARMONIC id="127">
 <par_real name="cos" value="-0.00466252" exact_value="0xBB98C80B" />
 <par_real name="sin" value="0.000647821" exact_value="0x3A29D285" />
-</BF_HARMONIC>
-<BF_HARMONIC id="128">
-<par_real name="cos" value="-0.00355099" exact_value="0xBB68B7B6" />
-<par_real name="sin" value="0.00857284" exact_value="0x3C0C7517" />
-</BF_HARMONIC>
-<BF_HARMONIC id="129">
-<par_real name="cos" value="0.00279707" exact_value="0x3B374F09" />
-<par_real name="sin" value="0.00369976" exact_value="0x3B7277A8" />
-</BF_HARMONIC>
-<BF_HARMONIC id="130">
-<par_real name="cos" value="-0.00447642" exact_value="0xBB92AEED" />
-<par_real name="sin" value="0.000524249" exact_value="0x3A096DBF" />
-</BF_HARMONIC>
-<BF_HARMONIC id="131">
-<par_real name="cos" value="-0.00365297" exact_value="0xBB6F66A7" />
-<par_real name="sin" value="0.00830969" exact_value="0x3C08255C" />
-</BF_HARMONIC>
-<BF_HARMONIC id="132">
-<par_real name="cos" value="-0.0114829" exact_value="0xBC3C22C3" />
-<par_real name="sin" value="0.0212727" exact_value="0x3CAE4413" />
-</BF_HARMONIC>
-<BF_HARMONIC id="133">
-<par_real name="cos" value="-0.00429548" exact_value="0xBB8CC117" />
-<par_real name="sin" value="0.000409766" exact_value="0x39D6D5DA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="134">
-<par_real name="cos" value="-0.00374869" exact_value="0xBB75AC91" />
-<par_real name="sin" value="0.00805342" exact_value="0x3C03F27C" />
-</BF_HARMONIC>
-<BF_HARMONIC id="135">
-<par_real name="cos" value="0.00263038" exact_value="0x3B2C6271" />
-<par_real name="sin" value="0.00380885" exact_value="0x3B799DE2" />
-</BF_HARMONIC>
-<BF_HARMONIC id="136">
-<par_real name="cos" value="-0.00411949" exact_value="0xBB86FCC7" />
-<par_real name="sin" value="0.000303872" exact_value="0x399F5100" />
-</BF_HARMONIC>
-<BF_HARMONIC id="137">
-<par_real name="cos" value="-0.00383842" exact_value="0xBB7B8DFC" />
-<par_real name="sin" value="0.00780363" exact_value="0x3BFFB594" />
-</BF_HARMONIC>
-<BF_HARMONIC id="138">
-<par_real name="cos" value="0.0109713" exact_value="0x3C33C0F5" />
-<par_real name="sin" value="0.0263173" exact_value="0x3CD7975E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="139">
-<par_real name="cos" value="-0.00394824" exact_value="0xBB81603B" />
-<par_real name="sin" value="0.000206109" exact_value="0x39581EF4" />
-</BF_HARMONIC>
-<BF_HARMONIC id="140">
-<par_real name="cos" value="-0.00392238" exact_value="0xBB80874D" />
-<par_real name="sin" value="0.00755998" exact_value="0x3BF7B9B1" />
-</BF_HARMONIC>
-<BF_HARMONIC id="141">
-<par_real name="cos" value="0.00245927" exact_value="0x3B212BB1" />
-<par_real name="sin" value="0.0039101" exact_value="0x3B80204A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="142">
-<par_real name="cos" value="-0.00378155" exact_value="0xBB77D3DE" />
-<par_real name="sin" value="0.000116053" exact_value="0x38F36177" />
-</BF_HARMONIC>
-<BF_HARMONIC id="143">
-<par_real name="cos" value="-0.00400083" exact_value="0xBB831963" />
-<par_real name="sin" value="0.00732212" exact_value="0x3BEFEE61" />
-</BF_HARMONIC>
-<BF_HARMONIC id="144">
-<par_real name="cos" value="0.004814" exact_value="0x3B9DBEC0" />
-<par_real name="sin" value="0.00438142" exact_value="0x3B8F9202" />
-</BF_HARMONIC>
-<BF_HARMONIC id="145">
-<par_real name="cos" value="-0.00361924" exact_value="0xBB6D30C1" />
-<par_real name="sin" value="3.3312e-05" exact_value="0x380BB87B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="146">
-<par_real name="cos" value="-0.00407396" exact_value="0xBB857ED8" />
-<par_real name="sin" value="0.00708975" exact_value="0x3BE8511E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="147">
-<par_real name="cos" value="0.0022841" exact_value="0x3B15B0D5" />
-<par_real name="sin" value="0.00400333" exact_value="0x3B832E5C" />
-</BF_HARMONIC>
-<BF_HARMONIC id="148">
-<par_real name="cos" value="-0.00346117" exact_value="0xBB62D4C8" />
-<par_real name="sin" value="-4.24771e-05" exact_value="0xB832296D" />
-</BF_HARMONIC>
-<BF_HARMONIC id="149">
-<par_real name="cos" value="-0.00414196" exact_value="0xBB87B945" />
-<par_real name="sin" value="0.00686261" exact_value="0x3BE0DFBB" />
-</BF_HARMONIC>
-<BF_HARMONIC id="150">
-<par_real name="cos" value="-0.0105176" exact_value="0xBC2C5200" />
-<par_real name="sin" value="0.0190617" exact_value="0x3C9C2746" />
-</BF_HARMONIC>
-<BF_HARMONIC id="151">
-<par_real name="cos" value="-0.00330722" exact_value="0xBB58BDEF" />
-<par_real name="sin" value="-0.000111653" exact_value="0xB8EA273B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="152">
-<par_real name="cos" value="-0.00420502" exact_value="0xBB89CA42" />
-<par_real name="sin" value="0.00664044" exact_value="0x3BD99809" />
-</BF_HARMONIC>
-<BF_HARMONIC id="153">
-<par_real name="cos" value="0.00210529" exact_value="0x3B09F8E6" />
-<par_real name="sin" value="0.00408835" exact_value="0x3B85F78F" />
-</BF_HARMONIC>
-<BF_HARMONIC id="154">
-<par_real name="cos" value="-0.00315725" exact_value="0xBB4EE9DA" />
-<par_real name="sin" value="-0.000174531" exact_value="0xB937024C" />
-</BF_HARMONIC>
-<BF_HARMONIC id="155">
-<par_real name="cos" value="-0.00426329" exact_value="0xBB8BB310" />
-<par_real name="sin" value="0.00642303" exact_value="0x3BD27845" />
-</BF_HARMONIC>
-<BF_HARMONIC id="156">
-<par_real name="cos" value="0.00908063" exact_value="0x3C14C6EA" />
-<par_real name="sin" value="0.0242646" exact_value="0x3CC6C68B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="157">
-<par_real name="cos" value="-0.00301115" exact_value="0xBB4556B4" />
-<par_real name="sin" value="-0.000231406" exact_value="0xB972A58F" />
-</BF_HARMONIC>
-<BF_HARMONIC id="158">
-<par_real name="cos" value="-0.00431694" exact_value="0xBB8D751C" />
-<par_real name="sin" value="0.00621018" exact_value="0x3BCB7EC1" />
-</BF_HARMONIC>
-<BF_HARMONIC id="159">
-<par_real name="cos" value="0.00192321" exact_value="0x3AFC1434" />
-<par_real name="sin" value="0.00416502" exact_value="0x3B887AB6" />
-</BF_HARMONIC>
-<BF_HARMONIC id="160">
-<par_real name="cos" value="-0.00286884" exact_value="0xBB3C0323" />
-<par_real name="sin" value="-0.000282556" exact_value="0xB9942404" />
-</BF_HARMONIC>
-<BF_HARMONIC id="161">
-<par_real name="cos" value="-0.00436612" exact_value="0xBB8F11A9" />
-<par_real name="sin" value="0.00600169" exact_value="0x3BC4A9D0" />
-</BF_HARMONIC>
-<BF_HARMONIC id="162">
-<par_real name="cos" value="0.00426277" exact_value="0x3B8BAEB3" />
-<par_real name="sin" value="0.00467614" exact_value="0x3B993A4C" />
-</BF_HARMONIC>
-<BF_HARMONIC id="163">
-<par_real name="cos" value="-0.0027302" exact_value="0xBB32ED25" />
-<par_real name="sin" value="-0.000328238" exact_value="0xB9AC1759" />
-</BF_HARMONIC>
-<BF_HARMONIC id="164">
-<par_real name="cos" value="-0.00441095" exact_value="0xBB9089B9" />
-<par_real name="sin" value="0.00579741" exact_value="0x3BBDF830" />
-</BF_HARMONIC>
-<BF_HARMONIC id="165">
-<par_real name="cos" value="0.00173827" exact_value="0x3AE3D6A6" />
-<par_real name="sin" value="0.00423322" exact_value="0x3B8AB6D1" />
-</BF_HARMONIC>
-<BF_HARMONIC id="166">
-<par_real name="cos" value="-0.00259517" exact_value="0xBB2A13B7" />
-<par_real name="sin" value="-0.000368698" exact_value="0xB9C14DCC" />
-</BF_HARMONIC>
-<BF_HARMONIC id="167">
-<par_real name="cos" value="-0.00445158" exact_value="0xBB91DE8D" />
-<par_real name="sin" value="0.00559719" exact_value="0x3BB7689F" />
-</BF_HARMONIC>
-<BF_HARMONIC id="168">
-<par_real name="cos" value="-0.00988985" exact_value="0xBC220907" />
-<par_real name="sin" value="0.0173089" exact_value="0x3C8DCB63" />
-</BF_HARMONIC>
-<BF_HARMONIC id="169">
-<par_real name="cos" value="-0.00246367" exact_value="0xBB217583" />
-<par_real name="sin" value="-0.000404166" exact_value="0xB9D3E63B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="170">
-<par_real name="cos" value="-0.00448813" exact_value="0xBB931128" />
-<par_real name="sin" value="0.00540088" exact_value="0x3BB0F9DA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="171">
-<par_real name="cos" value="0.00155087" exact_value="0x3ACB468D" />
-<par_real name="sin" value="0.00429284" exact_value="0x3B8CAAF2" />
-</BF_HARMONIC>
-<BF_HARMONIC id="172">
-<par_real name="cos" value="-0.00233563" exact_value="0xBB19115C" />
-<par_real name="sin" value="-0.000434861" exact_value="0xB9E3FE0A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="173">
-<par_real name="cos" value="-0.00452071" exact_value="0xBB942275" />
-<par_real name="sin" value="0.00520837" exact_value="0x3BAAAAF6" />
-</BF_HARMONIC>
-<BF_HARMONIC id="174">
-<par_real name="cos" value="0.00743572" exact_value="0x3BF3A753" />
-<par_real name="sin" value="0.0226072" exact_value="0x3CB932B9" />
-</BF_HARMONIC>
-<BF_HARMONIC id="175">
-<par_real name="cos" value="-0.002211" exact_value="0xBB10E66B" />
-<par_real name="sin" value="-0.000460988" exact_value="0xB9F1B0BF" />
-</BF_HARMONIC>
-<BF_HARMONIC id="176">
-<par_real name="cos" value="-0.00454943" exact_value="0xBB951361" />
-<par_real name="sin" value="0.00501952" exact_value="0x3BA47AC6" />
-</BF_HARMONIC>
-<BF_HARMONIC id="177">
-<par_real name="cos" value="0.00136145" exact_value="0x3AB272AB" />
-<par_real name="sin" value="0.00434377" exact_value="0x3B8E562D" />
-</BF_HARMONIC>
-<BF_HARMONIC id="178">
-<par_real name="cos" value="-0.0020897" exact_value="0xBB08F357" />
-<par_real name="sin" value="-0.000482745" exact_value="0xB9FD18EC" />
-</BF_HARMONIC>
-<BF_HARMONIC id="179">
-<par_real name="cos" value="-0.00457441" exact_value="0xBB95E4ED" />
-<par_real name="sin" value="0.00483427" exact_value="0x3B9E68CA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="180">
-<par_real name="cos" value="0.00368653" exact_value="0x3B7199B2" />
-<par_real name="sin" value="0.0048939" exact_value="0x3BA05CFF" />
-</BF_HARMONIC>
-<BF_HARMONIC id="181">
-<par_real name="cos" value="-0.00197169" exact_value="0xBB013776" />
-<par_real name="sin" value="-0.000500317" exact_value="0xBA0327B3" />
-</BF_HARMONIC>
-<BF_HARMONIC id="182">
-<par_real name="cos" value="-0.00459574" exact_value="0xBB9697DB" />
-<par_real name="sin" value="0.00465248" exact_value="0x3B9873D3" />
-</BF_HARMONIC>
-<BF_HARMONIC id="183">
-<par_real name="cos" value="0.0011704" exact_value="0x3A996819" />
-<par_real name="sin" value="0.00438595" exact_value="0x3B8FB802" />
-</BF_HARMONIC>
-<BF_HARMONIC id="184">
-<par_real name="cos" value="-0.00185694" exact_value="0xBAF3648D" />
-<par_real name="sin" value="-0.000513884" exact_value="0xBA06B62A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="185">
-<par_real name="cos" value="-0.00461352" exact_value="0xBB972D01" />
-<par_real name="sin" value="0.0044741" exact_value="0x3B929B77" />
-</BF_HARMONIC>
-<BF_HARMONIC id="186">
-<par_real name="cos" value="-0.00949969" exact_value="0xBC1BA494" />
-<par_real name="sin" value="0.0158569" exact_value="0x3C81E652" />
-</BF_HARMONIC>
-<BF_HARMONIC id="187">
-<par_real name="cos" value="-0.00174538" exact_value="0xBAE4C538" />
-<par_real name="sin" value="-0.000523615" exact_value="0xBA094333" />
-</BF_HARMONIC>
-<BF_HARMONIC id="188">
-<par_real name="cos" value="-0.00462784" exact_value="0xBB97A521" />
-<par_real name="sin" value="0.00429905" exact_value="0x3B8CDF0A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="189">
-<par_real name="cos" value="0.000978161" exact_value="0x3A8035A1" />
-<par_real name="sin" value="0.00441933" exact_value="0x3B90D005" />
-</BF_HARMONIC>
-<BF_HARMONIC id="190">
-<par_real name="cos" value="-0.00163699" exact_value="0xBAD69042" />
-<par_real name="sin" value="-0.000529672" exact_value="0xBA0AD9AE" />
-</BF_HARMONIC>
-<BF_HARMONIC id="191">
-<par_real name="cos" value="-0.00463881" exact_value="0xBB980127" />
-<par_real name="sin" value="0.00412724" exact_value="0x3B873DCA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="192">
-<par_real name="cos" value="0.00597104" exact_value="0x3BC3A8B4" />
-<par_real name="sin" value="0.0212099" exact_value="0x3CADC05F" />
-</BF_HARMONIC>
-<BF_HARMONIC id="193">
-<par_real name="cos" value="-0.00153173" exact_value="0xBAC8C452" />
-<par_real name="sin" value="-0.000532213" exact_value="0xBA0B8434" />
-</BF_HARMONIC>
-<BF_HARMONIC id="194">
-<par_real name="cos" value="-0.00464649" exact_value="0xBB984193" />
-<par_real name="sin" value="0.00395862" exact_value="0x3B81B74E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="195">
-<par_real name="cos" value="0.000785138" exact_value="0x3A4DD1B5" />
-<par_real name="sin" value="0.00444388" exact_value="0x3B919DF6" />
-</BF_HARMONIC>
-<BF_HARMONIC id="196">
-<par_real name="cos" value="-0.00142957" exact_value="0xBABB6066" />
-<par_real name="sin" value="-0.000531387" exact_value="0xBA0B4CC5" />
-</BF_HARMONIC>
-<BF_HARMONIC id="197">
-<par_real name="cos" value="-0.00465097" exact_value="0xBB986728" />
-<par_real name="sin" value="0.00379314" exact_value="0x3B789650" />
-</BF_HARMONIC>
-<BF_HARMONIC id="198">
-<par_real name="cos" value="0.00309644" exact_value="0x3B4AEDA2" />
-<par_real name="sin" value="0.0050325" exact_value="0x3BA4E7A8" />
-</BF_HARMONIC>
-<BF_HARMONIC id="199">
-<par_real name="cos" value="-0.00133047" exact_value="0xBAAE6327" />
-<par_real name="sin" value="-0.000527338" exact_value="0xBA0A3D0C" />
-</BF_HARMONIC>
-<BF_HARMONIC id="200">
-<par_real name="cos" value="-0.00465236" exact_value="0xBB9872D1" />
-<par_real name="sin" value="0.00363074" exact_value="0x3B6DF1B2" />
-</BF_HARMONIC>
-<BF_HARMONIC id="201">
-<par_real name="cos" value="0.000591756" exact_value="0x3A1B2011" />
-<par_real name="sin" value="0.00445959" exact_value="0x3B9221BF" />
-</BF_HARMONIC>
-<BF_HARMONIC id="202">
-<par_real name="cos" value="-0.0012344" exact_value="0xBAA1CB94" />
-<par_real name="sin" value="-0.000520205" exact_value="0xBA085E5C" />
-</BF_HARMONIC>
-<BF_HARMONIC id="203">
-<par_real name="cos" value="-0.00465072" exact_value="0xBB98650F" />
-<par_real name="sin" value="0.00347137" exact_value="0x3B637FE9" />
-</BF_HARMONIC>
-<BF_HARMONIC id="204">
-<par_real name="cos" value="-0.00927822" exact_value="0xBC1803AB" />
-<par_real name="sin" value="0.014604" exact_value="0x3C6F459A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="205">
-<par_real name="cos" value="-0.00114136" exact_value="0xBA9599AE" />
-<par_real name="sin" value="-0.000510123" exact_value="0xBA05B9C4" />
-</BF_HARMONIC>
-<BF_HARMONIC id="206">
-<par_real name="cos" value="-0.00464611" exact_value="0xBB983E63" />
-<par_real name="sin" value="0.00331499" exact_value="0x3B59404B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="207">
-<par_real name="cos" value="0.000398437" exact_value="0x39D0E54C" />
-<par_real name="sin" value="0.00446647" exact_value="0x3B925B75" />
-</BF_HARMONIC>
-<BF_HARMONIC id="208">
-<par_real name="cos" value="-0.00105129" exact_value="0xBA89CB6E" />
-<par_real name="sin" value="-0.000497221" exact_value="0xBA0257EE" />
-</BF_HARMONIC>
-<BF_HARMONIC id="209">
-<par_real name="cos" value="-0.00463864" exact_value="0xBB97FFBA" />
-<par_real name="sin" value="0.00316158" exact_value="0x3B4F3280" />
-</BF_HARMONIC>
-<BF_HARMONIC id="210">
-<par_real name="cos" value="0.00464758" exact_value="0x3B984AB8" />
-<par_real name="sin" value="0.0199843" exact_value="0x3CA3B61A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="211">
-<par_real name="cos" value="-0.000964181" exact_value="0xBA7CC113" />
-<par_real name="sin" value="-0.000481626" exact_value="0xB9FC82BB" />
-</BF_HARMONIC>
-<BF_HARMONIC id="212">
-<par_real name="cos" value="-0.00462837" exact_value="0xBB97A993" />
-<par_real name="sin" value="0.00301108" exact_value="0x3B455587" />
-</BF_HARMONIC>
-<BF_HARMONIC id="213">
-<par_real name="cos" value="0.000205601" exact_value="0x39579696" />
-<par_real name="sin" value="0.00446455" exact_value="0x3B924B5A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="214">
-<par_real name="cos" value="-0.000880017" exact_value="0xBA66B0ED" />
-<par_real name="sin" value="-0.000463458" exact_value="0xB9F2FC44" />
-</BF_HARMONIC>
-<BF_HARMONIC id="215">
-<par_real name="cos" value="-0.00461537" exact_value="0xBB973C86" />
-<par_real name="sin" value="0.00286348" exact_value="0x3B3BA936" />
-</BF_HARMONIC>
-<BF_HARMONIC id="216">
-<par_real name="cos" value="0.00250386" exact_value="0x3B2417CA" />
-<par_real name="sin" value="0.00509139" exact_value="0x3BA6D5AA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="217">
-<par_real name="cos" value="-0.000798768" exact_value="0xBA516467" />
-<par_real name="sin" value="-0.000442836" exact_value="0xB9E82C6D" />
-</BF_HARMONIC>
-<BF_HARMONIC id="218">
-<par_real name="cos" value="-0.00459972" exact_value="0xBB96B93D" />
-<par_real name="sin" value="0.00271875" exact_value="0x3B322D0B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="219">
-<par_real name="cos" value="1.36644e-05" exact_value="0x37654023" />
-<par_real name="sin" value="0.00445389" exact_value="0x3B91F1EE" />
-</BF_HARMONIC>
-<BF_HARMONIC id="220">
-<par_real name="cos" value="-0.000720422" exact_value="0xBA3CDAB1" />
-<par_real name="sin" value="-0.000419875" exact_value="0xB9DC22A8" />
-</BF_HARMONIC>
-<BF_HARMONIC id="221">
-<par_real name="cos" value="-0.00458149" exact_value="0xBB962051" />
-<par_real name="sin" value="0.00257684" exact_value="0x3B28E031" />
-</BF_HARMONIC>
-<BF_HARMONIC id="222">
-<par_real name="cos" value="-0.00917516" exact_value="0xBC165367" />
-<par_real name="sin" value="0.013483" exact_value="0x3C5CE7CA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="223">
-<par_real name="cos" value="-0.000644958" exact_value="0xBA291263" />
-<par_real name="sin" value="-0.000394687" exact_value="0xB9CEEDFB" />
-</BF_HARMONIC>
-<BF_HARMONIC id="224">
-<par_real name="cos" value="-0.00456075" exact_value="0xBB957256" />
-<par_real name="sin" value="0.00243777" exact_value="0x3B1FC2FC" />
-</BF_HARMONIC>
-<BF_HARMONIC id="225">
-<par_real name="cos" value="-0.00017696" exact_value="0xB9398E54" />
-<par_real name="sin" value="0.00443456" exact_value="0x3B914FC7" />
-</BF_HARMONIC>
-<BF_HARMONIC id="226">
-<par_real name="cos" value="-0.000572355" exact_value="0xBA160A16" />
-<par_real name="sin" value="-0.00036738" exact_value="0xB9C09CE6" />
-</BF_HARMONIC>
-<BF_HARMONIC id="227">
-<par_real name="cos" value="-0.00453756" exact_value="0xBB94AFCE" />
-<par_real name="sin" value="0.00230149" exact_value="0x3B16D496" />
-</BF_HARMONIC>
-<BF_HARMONIC id="228">
-<par_real name="cos" value="0.0034422" exact_value="0x3B619684" />
-<par_real name="sin" value="0.0188715" exact_value="0x3C9A9865" />
-</BF_HARMONIC>
-<BF_HARMONIC id="229">
-<par_real name="cos" value="-0.000502597" exact_value="0xBA03C0B5" />
-<par_real name="sin" value="-0.00033806" exact_value="0xB9B13DA2" />
-</BF_HARMONIC>
-<BF_HARMONIC id="230">
-<par_real name="cos" value="-0.00451199" exact_value="0xBB93D94F" />
-<par_real name="sin" value="0.00216799" exact_value="0x3B0E14D4" />
-</BF_HARMONIC>
-<BF_HARMONIC id="231">
-<par_real name="cos" value="-0.000365862" exact_value="0xB9BFD128" />
-<par_real name="sin" value="0.00440665" exact_value="0x3B9065A7" />
-</BF_HARMONIC>
-<BF_HARMONIC id="232">
-<par_real name="cos" value="-0.000435668" exact_value="0xB9E46A5A" />
-<par_real name="sin" value="-0.000306832" exact_value="0xB9A0DE48" />
-</BF_HARMONIC>
-<BF_HARMONIC id="233">
-<par_real name="cos" value="-0.00448412" exact_value="0xBB92EF84" />
-<par_real name="sin" value="0.00203726" exact_value="0x3B05838B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="234">
-<par_real name="cos" value="0.00192006" exact_value="0x3AFBAA82" />
-<par_real name="sin" value="0.00507168" exact_value="0x3BA63053" />
-</BF_HARMONIC>
-<BF_HARMONIC id="235">
-<par_real name="cos" value="-0.000371549" exact_value="0xB9C2CC73" />
-<par_real name="sin" value="-0.000273797" exact_value="0xB98F8C67" />
-</BF_HARMONIC>
-<BF_HARMONIC id="236">
-<par_real name="cos" value="-0.00445401" exact_value="0xBB91F2F0" />
-<par_real name="sin" value="0.00190928" exact_value="0x3AFA40CA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="237">
-<par_real name="cos" value="-0.00055264" exact_value="0xBA10DF09" />
-<par_real name="sin" value="0.00437028" exact_value="0x3B8F348F" />
-</BF_HARMONIC>
-<BF_HARMONIC id="238">
-<par_real name="cos" value="-0.000310224" exact_value="0xB9A2A58C" />
-<par_real name="sin" value="-0.000239053" exact_value="0xB97AAA49" />
-</BF_HARMONIC>
-<BF_HARMONIC id="239">
-<par_real name="cos" value="-0.00442172" exact_value="0xBB90E411" />
-<par_real name="sin" value="0.00178404" exact_value="0x3AE9D66F" />
-</BF_HARMONIC>
-<BF_HARMONIC id="240">
-<par_real name="cos" value="-0.00915204" exact_value="0xBC15F26E" />
-<par_real name="sin" value="0.0124483" exact_value="0x3C4BF3F1" />
-</BF_HARMONIC>
-<BF_HARMONIC id="241">
-<par_real name="cos" value="-0.000251676" exact_value="0xB983F360" />
-<par_real name="sin" value="-0.000202698" exact_value="0xB9548B51" />
-</BF_HARMONIC>
-<BF_HARMONIC id="242">
-<par_real name="cos" value="-0.00438733" exact_value="0xBB8FC395" />
-<par_real name="sin" value="0.00166153" exact_value="0x3AD9C7AF" />
-</BF_HARMONIC>
-<BF_HARMONIC id="243">
-<par_real name="cos" value="-0.000736895" exact_value="0xBA412C2D" />
-<par_real name="sin" value="0.00432557" exact_value="0x3B8DBD81" />
-</BF_HARMONIC>
-<BF_HARMONIC id="244">
-<par_real name="cos" value="-0.000195888" exact_value="0xB94D6746" />
-<par_real name="sin" value="-0.000164826" exact_value="0xB92CD521" />
-</BF_HARMONIC>
-<BF_HARMONIC id="245">
-<par_real name="cos" value="-0.00435089" exact_value="0xBB8E91E7" />
-<par_real name="sin" value="0.00154173" exact_value="0x3ACA13DD" />
-</BF_HARMONIC>
-<BF_HARMONIC id="246">
-<par_real name="cos" value="0.00234164" exact_value="0x3B197631" />
-<par_real name="sin" value="0.0178312" exact_value="0x3C9212BB" />
-</BF_HARMONIC>
-<BF_HARMONIC id="247">
-<par_real name="cos" value="-0.000142844" exact_value="0xB915C863" />
-<par_real name="sin" value="-0.000125529" exact_value="0xB903A06D" />
-</BF_HARMONIC>
-<BF_HARMONIC id="248">
-<par_real name="cos" value="-0.00431248" exact_value="0xBB8D4FB2" />
-<par_real name="sin" value="0.00142465" exact_value="0x3ABABB4F" />
-</BF_HARMONIC>
-<BF_HARMONIC id="249">
-<par_real name="cos" value="-0.00091824" exact_value="0xBA70B607" />
-<par_real name="sin" value="0.00427268" exact_value="0x3B8C01D4" />
-</BF_HARMONIC>
-<BF_HARMONIC id="250">
-<par_real name="cos" value="-9.2526e-05" exact_value="0xB8C20A82" />
-<par_real name="sin" value="-8.49005e-05" exact_value="0xB8B20C99" />
-</BF_HARMONIC>
-<BF_HARMONIC id="251">
-<par_real name="cos" value="-0.00427215" exact_value="0xBB8BFD62" />
-<par_real name="sin" value="0.00131027" exact_value="0x3AABBD5B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="252">
-<par_real name="cos" value="0.00135601" exact_value="0x3AB1BC22" />
-<par_real name="sin" value="0.00497611" exact_value="0x3BA30EA0" />
-</BF_HARMONIC>
-<BF_HARMONIC id="253">
-<par_real name="cos" value="-4.49171e-05" exact_value="0xB83C655B" />
-<par_real name="sin" value="-4.30281e-05" exact_value="0xB834790F" />
-</BF_HARMONIC>
-<BF_HARMONIC id="254">
-<par_real name="cos" value="-0.00422997" exact_value="0xBB8A9B8D" />
-<par_real name="sin" value="0.00119858" exact_value="0x3A9D19AA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="255">
-<par_real name="cos" value="-0.00109629" exact_value="0xBA8FB161" />
-<par_real name="sin" value="0.00421178" exact_value="0x3B8A02F7" />
-</BF_HARMONIC>
-<BF_HARMONIC id="257">
-<par_real name="cos" value="-0.00418602" exact_value="0xBB892AE0" />
-<par_real name="sin" value="0.00108959" exact_value="0x3A8ED091" />
-</BF_HARMONIC>
-<BF_HARMONIC id="258">
-<par_real name="cos" value="-0.0091786" exact_value="0xBC1661D5" />
-<par_real name="sin" value="0.0114691" exact_value="0x3C3BE8E1" />
-</BF_HARMONIC>
-<BF_HARMONIC id="259">
-<par_real name="cos" value="4.22432e-05" exact_value="0x38312E47" />
-<par_real name="sin" value="4.40978e-05" exact_value="0x3838F5A4" />
-</BF_HARMONIC>
-<BF_HARMONIC id="260">
-<par_real name="cos" value="-0.00414033" exact_value="0xBB87AB99" />
-<par_real name="sin" value="0.000983267" exact_value="0x3A80E0F5" />
-</BF_HARMONIC>
-<BF_HARMONIC id="261">
-<par_real name="cos" value="-0.00127068" exact_value="0xBAA68CEF" />
-<par_real name="sin" value="0.00414305" exact_value="0x3B87C26A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="262">
-<par_real name="cos" value="8.18309e-05" exact_value="0x38AB9C9E" />
-<par_real name="sin" value="8.91807e-05" exact_value="0x38BB0683" />
-</BF_HARMONIC>
-<BF_HARMONIC id="263">
-<par_real name="cos" value="-0.004093" exact_value="0xBB861E91" />
-<par_real name="sin" value="0.000879621" exact_value="0x3A66965A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="264">
-<par_real name="cos" value="0.00133878" exact_value="0x3AAF79FE" />
-<par_real name="sin" value="0.0168368" exact_value="0x3C89ED52" />
-</BF_HARMONIC>
-<BF_HARMONIC id="265">
-<par_real name="cos" value="0.000118782" exact_value="0x38F91A96" />
-<par_real name="sin" value="0.000135166" exact_value="0x390DBB57" />
-</BF_HARMONIC>
-<BF_HARMONIC id="266">
-<par_real name="cos" value="-0.00404406" exact_value="0xBB848407" />
-<par_real name="sin" value="0.000778649" exact_value="0x3A4C1E3D" />
-</BF_HARMONIC>
-<BF_HARMONIC id="267">
-<par_real name="cos" value="-0.00144103" exact_value="0xBABCE0EE" />
-<par_real name="sin" value="0.00406671" exact_value="0x3B854207" />
-</BF_HARMONIC>
-<BF_HARMONIC id="268">
-<par_real name="cos" value="0.000153115" exact_value="0x39208D7C" />
-<par_real name="sin" value="0.000181971" exact_value="0x393ECF75" />
-</BF_HARMONIC>
-<BF_HARMONIC id="269">
-<par_real name="cos" value="-0.0039936" exact_value="0xBB82DCBD" />
-<par_real name="sin" value="0.00068034" exact_value="0x3A3258D5" />
-</BF_HARMONIC>
-<BF_HARMONIC id="270">
-<par_real name="cos" value="0.000822075" exact_value="0x3A578082" />
-<par_real name="sin" value="0.00480898" exact_value="0x3B9D94A4" />
-</BF_HARMONIC>
-<BF_HARMONIC id="271">
-<par_real name="cos" value="0.00018485" exact_value="0x3941D448" />
-<par_real name="sin" value="0.000229516" exact_value="0x3970AA37" />
-</BF_HARMONIC>
-<BF_HARMONIC id="272">
-<par_real name="cos" value="-0.00394167" exact_value="0xBB81291E" />
-<par_real name="sin" value="0.000584691" exact_value="0x3A1945F1" />
-</BF_HARMONIC>
-<BF_HARMONIC id="273">
-<par_real name="cos" value="-0.00160701" exact_value="0xBAD2A24C" />
-<par_real name="sin" value="0.00398298" exact_value="0x3B8283A6" />
-</BF_HARMONIC>
-<BF_HARMONIC id="274">
-<par_real name="cos" value="0.000214008" exact_value="0x39606752" />
-<par_real name="sin" value="0.000277723" exact_value="0x39919B58" />
-</BF_HARMONIC>
-<BF_HARMONIC id="275">
-<par_real name="cos" value="-0.00388832" exact_value="0xBB7ED32B" />
-<par_real name="sin" value="0.000491695" exact_value="0x3A00E516" />
-</BF_HARMONIC>
-<BF_HARMONIC id="276">
-<par_real name="cos" value="-0.00923009" exact_value="0xBC1739CC" />
-<par_real name="sin" value="0.0105252" exact_value="0x3C2C71E0" />
-</BF_HARMONIC>
-<BF_HARMONIC id="277">
-<par_real name="cos" value="0.000240609" exact_value="0x397C4BF9" />
-<par_real name="sin" value="0.000326513" exact_value="0x39AB2FD2" />
-</BF_HARMONIC>
-<BF_HARMONIC id="278">
-<par_real name="cos" value="-0.00383365" exact_value="0xBB7B3DF5" />
-<par_real name="sin" value="0.000401347" exact_value="0x39D26BDF" />
-</BF_HARMONIC>
-<BF_HARMONIC id="279">
-<par_real name="cos" value="-0.00176828" exact_value="0xBAE7C59E" />
-<par_real name="sin" value="0.00389208" exact_value="0x3B7F1240" />
-</BF_HARMONIC>
-<BF_HARMONIC id="280">
-<par_real name="cos" value="0.000264675" exact_value="0x398AC412" />
-<par_real name="sin" value="0.00037581" exact_value="0x39C5085A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="281">
-<par_real name="cos" value="-0.00377768" exact_value="0xBB7792F0" />
-<par_real name="sin" value="0.000313642" exact_value="0x39A4704E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="282">
-<par_real name="cos" value="0.000430326" exact_value="0x39E19D5D" />
-<par_real name="sin" value="0.0158706" exact_value="0x3C82030D" />
-</BF_HARMONIC>
-<BF_HARMONIC id="283">
-<par_real name="cos" value="0.000286228" exact_value="0x399610DD" />
-<par_real name="sin" value="0.000425539" exact_value="0x39DF1ADE" />
-</BF_HARMONIC>
-<BF_HARMONIC id="284">
-<par_real name="cos" value="-0.00372051" exact_value="0xBB73D3C9" />
-<par_real name="sin" value="0.000228574" exact_value="0x396FAD5A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="285">
-<par_real name="cos" value="-0.0019245" exact_value="0xBAFC3F7D" />
-<par_real name="sin" value="0.0037943" exact_value="0x3B78A9C6" />
-</BF_HARMONIC>
-<BF_HARMONIC id="286">
-<par_real name="cos" value="0.000305292" exact_value="0x39A00F96" />
-<par_real name="sin" value="0.000475627" exact_value="0x39F95D8F" />
-</BF_HARMONIC>
-<BF_HARMONIC id="287">
-<par_real name="cos" value="-0.00366218" exact_value="0xBB70012B" />
-<par_real name="sin" value="0.000146138" exact_value="0x39193C9D" />
-</BF_HARMONIC>
-<BF_HARMONIC id="288">
-<par_real name="cos" value="0.000327888" exact_value="0x39ABE85F" />
-<par_real name="sin" value="0.00457606" exact_value="0x3B95F2C4" />
-</BF_HARMONIC>
-<BF_HARMONIC id="289">
-<par_real name="cos" value="0.000321889" exact_value="0x39A8C333" />
-<par_real name="sin" value="0.000526" exact_value="0x3A09E341" />
-</BF_HARMONIC>
-<BF_HARMONIC id="290">
-<par_real name="cos" value="-0.00360275" exact_value="0xBB6C1C19" />
-<par_real name="sin" value="6.63261e-05" exact_value="0x388B188C" />
-</BF_HARMONIC>
-<BF_HARMONIC id="291">
-<par_real name="cos" value="-0.00207537" exact_value="0xBB0802EC" />
-<par_real name="sin" value="0.00368989" exact_value="0x3B71D211" />
-</BF_HARMONIC>
-<BF_HARMONIC id="292">
-<par_real name="cos" value="0.000336044" exact_value="0x39B02F0D" />
-<par_real name="sin" value="0.000576586" exact_value="0x3A172606" />
-</BF_HARMONIC>
-<BF_HARMONIC id="293">
-<par_real name="cos" value="-0.00354229" exact_value="0xBB6825C0" />
-<par_real name="sin" value="-1.08677e-05" exact_value="0xB7365468" />
-</BF_HARMONIC>
-<BF_HARMONIC id="294">
-<par_real name="cos" value="-0.00928624" exact_value="0xBC18254E" />
-<par_real name="sin" value="0.00960369" exact_value="0x3C1D58CA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="295">
-<par_real name="cos" value="0.000347784" exact_value="0x39B656C4" />
-<par_real name="sin" value="0.000627318" exact_value="0x3A247296" />
-</BF_HARMONIC>
-<BF_HARMONIC id="296">
-<par_real name="cos" value="-0.00348086" exact_value="0xBB641F20" />
-<par_real name="sin" value="-8.54503e-05" exact_value="0xB8B333C5" />
-</BF_HARMONIC>
-<BF_HARMONIC id="297">
-<par_real name="cos" value="-0.00222059" exact_value="0xBB11874F" />
-<par_real name="sin" value="0.00357915" exact_value="0x3B6A9028" />
-</BF_HARMONIC>
-<BF_HARMONIC id="298">
-<par_real name="cos" value="0.000357132" exact_value="0x39BB3D6F" />
-<par_real name="sin" value="0.000678123" exact_value="0x3A31C40D" />
-</BF_HARMONIC>
-<BF_HARMONIC id="299">
-<par_real name="cos" value="-0.00341852" exact_value="0xBB60093C" />
-<par_real name="sin" value="-0.000157429" exact_value="0xB9251384" />
-</BF_HARMONIC>
-<BF_HARMONIC id="300">
-<par_real name="cos" value="-0.000384771" exact_value="0xB9C9BB14" />
-<par_real name="sin" value="0.0149221" exact_value="0x3C747BCF" />
-</BF_HARMONIC>
-<BF_HARMONIC id="301">
-<par_real name="cos" value="0.000364116" exact_value="0x39BEE6CF" />
-<par_real name="sin" value="0.000728935" exact_value="0x3A3F15FD" />
-</BF_HARMONIC>
-<BF_HARMONIC id="302">
-<par_real name="cos" value="-0.00335534" exact_value="0xBB5BE541" />
-<par_real name="sin" value="-0.000226813" exact_value="0xB96DD4A3" />
-</BF_HARMONIC>
-<BF_HARMONIC id="303">
-<par_real name="cos" value="-0.00235986" exact_value="0xBB1AA7E0" />
-<par_real name="sin" value="0.00346236" exact_value="0x3B62E8BF" />
-</BF_HARMONIC>
-<BF_HARMONIC id="304">
-<par_real name="cos" value="0.000368765" exact_value="0x39C156CA" />
-<par_real name="sin" value="0.000779687" exact_value="0x3A4C63E6" />
-</BF_HARMONIC>
-<BF_HARMONIC id="305">
-<par_real name="cos" value="-0.00329136" exact_value="0xBB57B3D9" />
-<par_real name="sin" value="-0.000293611" exact_value="0xB999EFCB" />
-</BF_HARMONIC>
-<BF_HARMONIC id="306">
-<par_real name="cos" value="-0.000117939" exact_value="0xB8F75601" />
-<par_real name="sin" value="0.00428444" exact_value="0x3B8C647B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="307">
-<par_real name="cos" value="0.000371104" exact_value="0x39C290B9" />
-<par_real name="sin" value="0.000830313" exact_value="0x3A59A95A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="308">
-<par_real name="cos" value="-0.00322666" exact_value="0xBB53765C" />
-<par_real name="sin" value="-0.000357831" exact_value="0xB9BB9B41" />
-</BF_HARMONIC>
-<BF_HARMONIC id="309">
-<par_real name="cos" value="-0.00249292" exact_value="0xBB23603F" />
-<par_real name="sin" value="0.00333986" exact_value="0x3B5AE18A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="310">
-<par_real name="cos" value="0.000371166" exact_value="0x39C2990C" />
-<par_real name="sin" value="0.00088075" exact_value="0x3A66E21E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="311">
-<par_real name="cos" value="-0.00316131" exact_value="0xBB4F2DF8" />
-<par_real name="sin" value="-0.000419483" exact_value="0xB9DBEE0B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="312">
-<par_real name="cos" value="-0.00933048" exact_value="0xBC18DEDD" />
-<par_real name="sin" value="0.00869763" exact_value="0x3C0E807F" />
-</BF_HARMONIC>
-<BF_HARMONIC id="313">
-<par_real name="cos" value="0.000368978" exact_value="0x39C17361" />
-<par_real name="sin" value="0.000930935" exact_value="0x3A7409FA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="314">
-<par_real name="cos" value="-0.00309534" exact_value="0xBB4ADB2D" />
-<par_real name="sin" value="-0.000478579" exact_value="0xB9FAE9C5" />
-</BF_HARMONIC>
-<BF_HARMONIC id="315">
-<par_real name="cos" value="-0.00261954" exact_value="0xBB2BAC94" />
-<par_real name="sin" value="0.00321196" exact_value="0x3B527FBC" />
-</BF_HARMONIC>
-<BF_HARMONIC id="316">
-<par_real name="cos" value="0.000364572" exact_value="0x39BF2404" />
-<par_real name="sin" value="0.0009808" exact_value="0x3A808E2E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="317">
-<par_real name="cos" value="-0.00302883" exact_value="0xBB467F53" />
-<par_real name="sin" value="-0.00053513" exact_value="0xBA0C47F5" />
-</BF_HARMONIC>
-<BF_HARMONIC id="318">
-<par_real name="cos" value="-0.00110641" exact_value="0xBA9104F4" />
-<par_real name="sin" value="0.0139857" exact_value="0x3C652443" />
-</BF_HARMONIC>
-<BF_HARMONIC id="319">
-<par_real name="cos" value="0.00035798" exact_value="0x39BBAF40" />
-<par_real name="sin" value="0.00103029" exact_value="0x3A870ACA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="320">
-<par_real name="cos" value="-0.00296184" exact_value="0xBB421B6B" />
-<par_real name="sin" value="-0.000589147" exact_value="0xBA1A70FA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="321">
-<par_real name="cos" value="-0.00273946" exact_value="0xBB338880" />
-<par_real name="sin" value="0.00307901" exact_value="0x3B49C934" />
-</BF_HARMONIC>
-<BF_HARMONIC id="322">
-<par_real name="cos" value="0.000349234" exact_value="0x39B71962" />
-<par_real name="sin" value="0.00107934" exact_value="0x3A8D78A2" />
-</BF_HARMONIC>
-<BF_HARMONIC id="323">
-<par_real name="cos" value="-0.00289442" exact_value="0xBB3DB04C" />
-<par_real name="sin" value="-0.000640643" exact_value="0xBA27F0D0" />
-</BF_HARMONIC>
-<BF_HARMONIC id="324">
-<par_real name="cos" value="-0.000507963" exact_value="0xBA0528D0" />
-<par_real name="sin" value="0.00394241" exact_value="0x3B812F53" />
-</BF_HARMONIC>
-<BF_HARMONIC id="325">
-<par_real name="cos" value="0.000338367" exact_value="0x39B166D7" />
-<par_real name="sin" value="0.0011279" exact_value="0x3A93D609" />
-</BF_HARMONIC>
-<BF_HARMONIC id="326">
-<par_real name="cos" value="-0.00282665" exact_value="0xBB393F4E" />
-<par_real name="sin" value="-0.000689633" exact_value="0xBA34C87A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="327">
-<par_real name="cos" value="-0.00285247" exact_value="0xBB3AF07E" />
-<par_real name="sin" value="0.00294135" exact_value="0x3B40C3A7" />
-</BF_HARMONIC>
-<BF_HARMONIC id="328">
-<par_real name="cos" value="0.000325413" exact_value="0x39AA9C2F" />
-<par_real name="sin" value="0.00117589" exact_value="0x3A9A2050" />
-</BF_HARMONIC>
-<BF_HARMONIC id="329">
-<par_real name="cos" value="-0.00275856" exact_value="0xBB34C8F2" />
-<par_real name="sin" value="-0.000736131" exact_value="0xBA40F8E7" />
-</BF_HARMONIC>
-<BF_HARMONIC id="330">
-<par_real name="cos" value="-0.00934919" exact_value="0xBC192D56" />
-<par_real name="sin" value="0.00780419" exact_value="0x3BFFBA46" />
-</BF_HARMONIC>
-<BF_HARMONIC id="331">
-<par_real name="cos" value="0.000310408" exact_value="0x39A2BE3F" />
-<par_real name="sin" value="0.00122329" exact_value="0x3AA056CA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="332">
-<par_real name="cos" value="-0.00269023" exact_value="0xBB304E8F" />
-<par_real name="sin" value="-0.00078015" exact_value="0xBA4C82F8" />
-</BF_HARMONIC>
-<BF_HARMONIC id="333">
-<par_real name="cos" value="-0.00295836" exact_value="0xBB41E108" />
-<par_real name="sin" value="0.00279934" exact_value="0x3B37751F" />
-</BF_HARMONIC>
-<BF_HARMONIC id="334">
-<par_real name="cos" value="0.000293387" exact_value="0x3999D1BB" />
-<par_real name="sin" value="0.00127001" exact_value="0x3AA67674" />
-</BF_HARMONIC>
-<BF_HARMONIC id="335">
-<par_real name="cos" value="-0.0026217" exact_value="0xBB2BD0D1" />
-<par_real name="sin" value="-0.00082171" exact_value="0xBA576803" />
-</BF_HARMONIC>
-<BF_HARMONIC id="336">
-<par_real name="cos" value="-0.00173413" exact_value="0xBAE34BBB" />
-<par_real name="sin" value="0.0130599" exact_value="0x3C55F92E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="337">
-<par_real name="cos" value="0.000274387" exact_value="0x398FDB98" />
-<par_real name="sin" value="0.00131602" exact_value="0x3AAC7E4B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="338">
-<par_real name="cos" value="-0.00255305" exact_value="0xBB27510F" />
-<par_real name="sin" value="-0.000860825" exact_value="0xBA61A8F9" />
-</BF_HARMONIC>
-<BF_HARMONIC id="339">
-<par_real name="cos" value="-0.00305697" exact_value="0xBB48576F" />
-<par_real name="sin" value="0.00265336" exact_value="0x3B2DE3FB" />
-</BF_HARMONIC>
-<BF_HARMONIC id="340">
-<par_real name="cos" value="0.000253445" exact_value="0x3984E0CE" />
-<par_real name="sin" value="0.00136125" exact_value="0x3AB26BF5" />
-</BF_HARMONIC>
-<BF_HARMONIC id="341">
-<par_real name="cos" value="-0.00248433" exact_value="0xBB22D021" />
-<par_real name="sin" value="-0.000897516" exact_value="0xBA6B4743" />
-</BF_HARMONIC>
-<BF_HARMONIC id="342">
-<par_real name="cos" value="-0.000836077" exact_value="0xBA5B2C2A" />
-<par_real name="sin" value="0.00355921" exact_value="0x3B69419F" />
-</BF_HARMONIC>
-<BF_HARMONIC id="343">
-<par_real name="cos" value="0.000230598" exact_value="0x3971CCAA" />
-<par_real name="sin" value="0.00140566" exact_value="0x3AB83E1C" />
-</BF_HARMONIC>
-<BF_HARMONIC id="344">
-<par_real name="cos" value="-0.00241559" exact_value="0xBB1E4EDE" />
-<par_real name="sin" value="-0.000931797" exact_value="0xBA7443D3" />
-</BF_HARMONIC>
-<BF_HARMONIC id="345">
-<par_real name="cos" value="-0.00314812" exact_value="0xBB4E50AD" />
-<par_real name="sin" value="0.00250378" exact_value="0x3B241672" />
-</BF_HARMONIC>
-<BF_HARMONIC id="346">
-<par_real name="cos" value="0.000205886" exact_value="0x3957E317" />
-<par_real name="sin" value="0.00144918" exact_value="0x3ABDF266" />
-</BF_HARMONIC>
-<BF_HARMONIC id="347">
-<par_real name="cos" value="-0.0023469" exact_value="0xBB19CE71" />
-<par_real name="sin" value="-0.00096369" exact_value="0xBA7CA020" />
-</BF_HARMONIC>
-<BF_HARMONIC id="348">
-<par_real name="cos" value="-0.00933151" exact_value="0xBC18E32F" />
-<par_real name="sin" value="0.00692387" exact_value="0x3BE2E19E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="349">
-<par_real name="cos" value="0.000179351" exact_value="0x393C1028" />
-<par_real name="sin" value="0.00149179" exact_value="0x3AC38828" />
-</BF_HARMONIC>
-<BF_HARMONIC id="350">
-<par_real name="cos" value="-0.0022783" exact_value="0xBB154F86" />
-<par_real name="sin" value="-0.000993219" exact_value="0xBA822EE4" />
-</BF_HARMONIC>
-<BF_HARMONIC id="351">
-<par_real name="cos" value="-0.00323168" exact_value="0xBB53CA95" />
-<par_real name="sin" value="0.00235098" exact_value="0x3B1A12E4" />
-</BF_HARMONIC>
-<BF_HARMONIC id="352">
-<par_real name="cos" value="0.000151029" exact_value="0x391E5D88" />
-<par_real name="sin" value="0.00153342" exact_value="0x3AC8FD07" />
-</BF_HARMONIC>
-<BF_HARMONIC id="353">
-<par_real name="cos" value="-0.00220985" exact_value="0xBB10D31F" />
-<par_real name="sin" value="-0.0010204" exact_value="0xBA85BEEF" />
-</BF_HARMONIC>
-<BF_HARMONIC id="354">
-<par_real name="cos" value="-0.00226762" exact_value="0xBB149C58" />
-<par_real name="sin" value="0.0121461" exact_value="0x3C47006D" />
-</BF_HARMONIC>
-<BF_HARMONIC id="355">
-<par_real name="cos" value="0.000120964" exact_value="0x38FDAE0A" />
-<par_real name="sin" value="0.00157404" exact_value="0x3ACE5002" />
-</BF_HARMONIC>
-<BF_HARMONIC id="356">
-<par_real name="cos" value="-0.00214161" exact_value="0xBB0C5A3F" />
-<par_real name="sin" value="-0.00104526" exact_value="0xBA890119" />
-</BF_HARMONIC>
-<BF_HARMONIC id="357">
-<par_real name="cos" value="-0.00330753" exact_value="0xBB58C322" />
-<par_real name="sin" value="0.00219537" exact_value="0x3B0FE030" />
-</BF_HARMONIC>
-<BF_HARMONIC id="358">
-<par_real name="cos" value="8.91979e-05" exact_value="0x38BB0FBF" />
-<par_real name="sin" value="0.00161359" exact_value="0x3AD37F16" />
-</BF_HARMONIC>
-<BF_HARMONIC id="359">
-<par_real name="cos" value="-0.00207365" exact_value="0xBB07E611" />
-<par_real name="sin" value="-0.00106782" exact_value="0xBA8BF616" />
-</BF_HARMONIC>
-<BF_HARMONIC id="360">
-<par_real name="cos" value="-0.00109764" exact_value="0xBA8FDEAE" />
-<par_real name="sin" value="0.00314485" exact_value="0x3B4E19D1" />
-</BF_HARMONIC>
-<BF_HARMONIC id="361">
-<par_real name="cos" value="5.57728e-05" exact_value="0x3869ED93" />
-<par_real name="sin" value="0.00165202" exact_value="0x3AD88895" />
-</BF_HARMONIC>
-<BF_HARMONIC id="362">
-<par_real name="cos" value="-0.002006" exact_value="0xBB037716" />
-<par_real name="sin" value="-0.0010881" exact_value="0xBA8E9E92" />
-</BF_HARMONIC>
-<BF_HARMONIC id="363">
-<par_real name="cos" value="-0.00337554" exact_value="0xBB5D3827" />
-<par_real name="sin" value="0.00203732" exact_value="0x3B05848D" />
-</BF_HARMONIC>
-<BF_HARMONIC id="364">
-<par_real name="cos" value="2.07318e-05" exact_value="0x37ADE931" />
-<par_real name="sin" value="0.0016893" exact_value="0x3ADD6B7E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="365">
-<par_real name="cos" value="-0.00193872" exact_value="0xBAFE1CA2" />
-<par_real name="sin" value="-0.00110614" exact_value="0xBA90FBE4" />
-</BF_HARMONIC>
-<BF_HARMONIC id="366">
-<par_real name="cos" value="-0.00926933" exact_value="0xBC17DE61" />
-<par_real name="sin" value="0.00605966" exact_value="0x3BC6901A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="367">
-<par_real name="cos" value="-1.58807e-05" exact_value="0xB7853789" />
-<par_real name="sin" value="0.00172538" exact_value="0x3AE22621" />
-</BF_HARMONIC>
-<BF_HARMONIC id="368">
-<par_real name="cos" value="-0.00187187" exact_value="0xBAF55985" />
-<par_real name="sin" value="-0.00112195" exact_value="0xBA930E63" />
-</BF_HARMONIC>
-<BF_HARMONIC id="369">
-<par_real name="cos" value="-0.00343566" exact_value="0xBB6128CB" />
-<par_real name="sin" value="0.00187726" exact_value="0x3AF60E61" />
-</BF_HARMONIC>
-<BF_HARMONIC id="370">
-<par_real name="cos" value="-5.402e-05" exact_value="0xB8629385" />
-<par_real name="sin" value="0.00176022" exact_value="0x3AE6B72B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="371">
-<par_real name="cos" value="-0.00180549" exact_value="0xBAECA62D" />
-<par_real name="sin" value="-0.00113557" exact_value="0xBA94D766" />
-</BF_HARMONIC>
-<BF_HARMONIC id="372">
-<par_real name="cos" value="-0.00270722" exact_value="0xBB316B9A" />
-<par_real name="sin" value="0.011248" exact_value="0x3C384985" />
-</BF_HARMONIC>
-<BF_HARMONIC id="373">
-<par_real name="cos" value="-9.36411e-05" exact_value="0xB8C4612C" />
-<par_real name="sin" value="0.00179379" exact_value="0x3AEB1D97" />
-</BF_HARMONIC>
-<BF_HARMONIC id="374">
-<par_real name="cos" value="-0.00173965" exact_value="0xBAE404F4" />
-<par_real name="sin" value="-0.00114702" exact_value="0xBA965799" />
-</BF_HARMONIC>
-<BF_HARMONIC id="375">
-<par_real name="cos" value="-0.0034878" exact_value="0xBB64938F" />
-<par_real name="sin" value="0.00171556" exact_value="0x3AE0DCA0" />
-</BF_HARMONIC>
-<BF_HARMONIC id="376">
-<par_real name="cos" value="-0.000134697" exact_value="0xB90D3D71" />
-<par_real name="sin" value="0.00182604" exact_value="0x3AEF57B8" />
-</BF_HARMONIC>
-<BF_HARMONIC id="377">
-<par_real name="cos" value="-0.00167439" exact_value="0xBADB7732" />
-<par_real name="sin" value="-0.00115633" exact_value="0xBA978FFD" />
-</BF_HARMONIC>
-<BF_HARMONIC id="378">
-<par_real name="cos" value="-0.0012896" exact_value="0xBAA907C9" />
-<par_real name="sin" value="0.00270994" exact_value="0x3B31993D" />
-</BF_HARMONIC>
-<BF_HARMONIC id="379">
-<par_real name="cos" value="-0.000177143" exact_value="0xB939BF73" />
-<par_real name="sin" value="0.00185695" exact_value="0x3AF364E3" />
-</BF_HARMONIC>
-<BF_HARMONIC id="380">
-<par_real name="cos" value="-0.00160976" exact_value="0xBAD2FE92" />
-<par_real name="sin" value="-0.00116353" exact_value="0xBA988195" />
-</BF_HARMONIC>
-<BF_HARMONIC id="381">
-<par_real name="cos" value="-0.00353194" exact_value="0xBB67781B" />
-<par_real name="sin" value="0.00155265" exact_value="0x3ACB8247" />
-</BF_HARMONIC>
-<BF_HARMONIC id="382">
-<par_real name="cos" value="-0.00022093" exact_value="0xB967A96E" />
-<par_real name="sin" value="0.00188646" exact_value="0x3AF74314" />
-</BF_HARMONIC>
-<BF_HARMONIC id="383">
-<par_real name="cos" value="-0.00154581" exact_value="0xBACA9CC4" />
-<par_real name="sin" value="-0.00116865" exact_value="0xBA992D61" />
-</BF_HARMONIC>
-<BF_HARMONIC id="384">
-<par_real name="cos" value="-0.00915653" exact_value="0xBC160543" />
-<par_real name="sin" value="0.00521637" exact_value="0x3BAAEE12" />
-</BF_HARMONIC>
-<BF_HARMONIC id="385">
-<par_real name="cos" value="-0.00026601" exact_value="0xB98B7740" />
-<par_real name="sin" value="0.00191454" exact_value="0x3AFAF149" />
-</BF_HARMONIC>
-<BF_HARMONIC id="386">
-<par_real name="cos" value="-0.00148259" exact_value="0xBAC25374" />
-<par_real name="sin" value="-0.00117173" exact_value="0xBA9994BA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="387">
-<par_real name="cos" value="-0.00356803" exact_value="0xBB69D598" />
-<par_real name="sin" value="0.00138893" exact_value="0x3AB60CBF" />
-</BF_HARMONIC>
-<BF_HARMONIC id="388">
-<par_real name="cos" value="-0.000312337" exact_value="0xB9A3C127" />
-<par_real name="sin" value="0.00194117" exact_value="0x3AFE6ED7" />
-</BF_HARMONIC>
-<BF_HARMONIC id="389">
-<par_real name="cos" value="-0.00142015" exact_value="0xBABA2451" />
-<par_real name="sin" value="-0.0011728" exact_value="0xBA99B8A1" />
-</BF_HARMONIC>
-<BF_HARMONIC id="390">
-<par_real name="cos" value="-0.00305412" exact_value="0xBB48279F" />
-<par_real name="sin" value="0.0103709" exact_value="0x3C29EAB2" />
-</BF_HARMONIC>
-<BF_HARMONIC id="391">
-<par_real name="cos" value="-0.000359861" exact_value="0xB9BCABB7" />
-<par_real name="sin" value="0.00196632" exact_value="0x3B00DD5E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="392">
-<par_real name="cos" value="-0.00135854" exact_value="0xBAB21107" />
-<par_real name="sin" value="-0.00117189" exact_value="0xBA999A18" />
-</BF_HARMONIC>
-<BF_HARMONIC id="393">
-<par_real name="cos" value="-0.0035961" exact_value="0xBB6BAC88" />
-<par_real name="sin" value="0.00122481" exact_value="0x3AA089CB" />
-</BF_HARMONIC>
-<BF_HARMONIC id="394">
-<par_real name="cos" value="-0.000408532" exact_value="0xB9D6303A" />
-<par_real name="sin" value="0.00198994" exact_value="0x3B0269A5" />
-</BF_HARMONIC>
-<BF_HARMONIC id="395">
-<par_real name="cos" value="-0.0012978" exact_value="0xBAAA1AEE" />
-<par_real name="sin" value="-0.00116903" exact_value="0xBA993A21" />
-</BF_HARMONIC>
-<BF_HARMONIC id="396">
-<par_real name="cos" value="-0.00141051" exact_value="0xBAB8E0DA" />
-<par_real name="sin" value="0.00226535" exact_value="0x3B147642" />
-</BF_HARMONIC>
-<BF_HARMONIC id="397">
-<par_real name="cos" value="-0.000458302" exact_value="0xB9F0483D" />
-<par_real name="sin" value="0.00201201" exact_value="0x3B03DBEB" />
-</BF_HARMONIC>
-<BF_HARMONIC id="398">
-<par_real name="cos" value="-0.00123799" exact_value="0xBAA2440A" />
-<par_real name="sin" value="-0.00116426" exact_value="0xBA989A13" />
-</BF_HARMONIC>
-<BF_HARMONIC id="399">
-<par_real name="cos" value="-0.00361615" exact_value="0xBB6CFCEA" />
-<par_real name="sin" value="0.0010607" exact_value="0x3A8B072E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="400">
-<par_real name="cos" value="-0.000509118" exact_value="0xBA057653" />
-<par_real name="sin" value="0.00203251" exact_value="0x3B0533DA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="401">
-<par_real name="cos" value="-0.00117914" exact_value="0xBA9A8D5D" />
-<par_real name="sin" value="-0.00115763" exact_value="0xBA97BB9C" />
-</BF_HARMONIC>
-<BF_HARMONIC id="402">
-<par_real name="cos" value="-0.00898965" exact_value="0xBC134951" />
-<par_real name="sin" value="0.00440014" exact_value="0x3B902F0B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="403">
-<par_real name="cos" value="-0.000560932" exact_value="0xBA130B80" />
-<par_real name="sin" value="0.0020514" exact_value="0x3B0670C6" />
-</BF_HARMONIC>
-<BF_HARMONIC id="404">
-<par_real name="cos" value="-0.0011213" exact_value="0xBA92F894" />
-<par_real name="sin" value="-0.00114916" exact_value="0xBA969F67" />
-</BF_HARMONIC>
-<BF_HARMONIC id="405">
-<par_real name="cos" value="-0.00362823" exact_value="0xBB6DC795" />
-<par_real name="sin" value="0.000897007" exact_value="0x3A6B251B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="406">
-<par_real name="cos" value="-0.000613691" exact_value="0xBA20E018" />
-<par_real name="sin" value="0.00206868" exact_value="0x3B0792AF" />
-</BF_HARMONIC>
-<BF_HARMONIC id="407">
-<par_real name="cos" value="-0.00106451" exact_value="0xBA8B8705" />
-<par_real name="sin" value="-0.00113889" exact_value="0xBA9546CD" />
-</BF_HARMONIC>
-<BF_HARMONIC id="408">
-<par_real name="cos" value="-0.00331065" exact_value="0xBB58F77A" />
-<par_real name="sin" value="0.00952125" exact_value="0x3C1BFF02" />
-</BF_HARMONIC>
-<BF_HARMONIC id="409">
-<par_real name="cos" value="-0.000667344" exact_value="0xBA2EF0B0" />
-<par_real name="sin" value="0.0020843" exact_value="0x3B0898BE" />
-</BF_HARMONIC>
-<BF_HARMONIC id="410">
-<par_real name="cos" value="-0.00100881" exact_value="0xBA843A0A" />
-<par_real name="sin" value="-0.00112687" exact_value="0xBA93B37A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="411">
-<par_real name="cos" value="-0.0036324" exact_value="0xBB6E0D8B" />
-<par_real name="sin" value="0.000734121" exact_value="0x3A407204" />
-</BF_HARMONIC>
-<BF_HARMONIC id="412">
-<par_real name="cos" value="-0.000721841" exact_value="0xBA3D39EB" />
-<par_real name="sin" value="0.00209823" exact_value="0x3B098273" />
-</BF_HARMONIC>
-<BF_HARMONIC id="413">
-<par_real name="cos" value="-0.000954255" exact_value="0xBA7A26F4" />
-<par_real name="sin" value="-0.00111313" exact_value="0xBA91E670" />
-</BF_HARMONIC>
-<BF_HARMONIC id="414">
-<par_real name="cos" value="-0.00146063" exact_value="0xBABF7299" />
-<par_real name="sin" value="0.00182207" exact_value="0x3AEED282" />
-</BF_HARMONIC>
-<BF_HARMONIC id="415">
-<par_real name="cos" value="-0.000777128" exact_value="0xBA4BB82A" />
-<par_real name="sin" value="0.00211049" exact_value="0x3B0A5024" />
-</BF_HARMONIC>
-<BF_HARMONIC id="416">
-<par_real name="cos" value="-0.000900871" exact_value="0xBA6C286A" />
-<par_real name="sin" value="-0.00109771" exact_value="0xBA8FE107" />
-</BF_HARMONIC>
-<BF_HARMONIC id="417">
-<par_real name="cos" value="-0.00362873" exact_value="0xBB6DCFF9" />
-<par_real name="sin" value="0.000572453" exact_value="0x3A1610AA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="418">
-<par_real name="cos" value="-0.000833153" exact_value="0xBA5A67F1" />
-<par_real name="sin" value="0.00212102" exact_value="0x3B0B00CE" />
-</BF_HARMONIC>
-<BF_HARMONIC id="419">
-<par_real name="cos" value="-0.000848706" exact_value="0xBA5E7BAF" />
-<par_real name="sin" value="-0.00108066" exact_value="0xBA8DA4ED" />
-</BF_HARMONIC>
-<BF_HARMONIC id="420">
-<par_real name="cos" value="-0.00876706" exact_value="0xBC0FA3B5" />
-<par_real name="sin" value="0.00361787" exact_value="0x3B6D19C5" />
-</BF_HARMONIC>
-<BF_HARMONIC id="421">
-<par_real name="cos" value="-0.000889866" exact_value="0xBA6945E1" />
-<par_real name="sin" value="0.00212982" exact_value="0x3B0B9471" />
-</BF_HARMONIC>
-<BF_HARMONIC id="422">
-<par_real name="cos" value="-0.000797797" exact_value="0xBA51233D" />
-<par_real name="sin" value="-0.00106202" exact_value="0xBA8B3378" />
-</BF_HARMONIC>
-<BF_HARMONIC id="423">
-<par_real name="cos" value="-0.00361734" exact_value="0xBB6D10E1" />
-<par_real name="sin" value="0.000412394" exact_value="0x39D83693" />
-</BF_HARMONIC>
-<BF_HARMONIC id="424">
-<par_real name="cos" value="-0.000947209" exact_value="0xBA784E1B" />
-<par_real name="sin" value="0.00213686" exact_value="0x3B0C0A8E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="425">
-<par_real name="cos" value="-0.00074818" exact_value="0xBA442180" />
-<par_real name="sin" value="-0.00104183" exact_value="0xBA888E02" />
-</BF_HARMONIC>
-<BF_HARMONIC id="426">
-<par_real name="cos" value="-0.00348033" exact_value="0xBB64163C" />
-<par_real name="sin" value="0.00870626" exact_value="0x3C0EA4B1" />
-</BF_HARMONIC>
-<BF_HARMONIC id="427">
-<par_real name="cos" value="-0.00100513" exact_value="0xBA83BE8F" />
-<par_real name="sin" value="0.00214215" exact_value="0x3B0C634E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="428">
-<par_real name="cos" value="-0.000699893" exact_value="0xBA377903" />
-<par_real name="sin" value="-0.00102014" exact_value="0xBA85B636" />
-</BF_HARMONIC>
-<BF_HARMONIC id="429">
-<par_real name="cos" value="-0.00359834" exact_value="0xBB6BD21D" />
-<par_real name="sin" value="0.000254332" exact_value="0x398557DB" />
-</BF_HARMONIC>
-<BF_HARMONIC id="430">
-<par_real name="cos" value="-0.00106358" exact_value="0xBA8B67D1" />
-<par_real name="sin" value="0.00214565" exact_value="0x3B0C9E07" />
-</BF_HARMONIC>
-<BF_HARMONIC id="431">
-<par_real name="cos" value="-0.00065297" exact_value="0xBA2B2C10" />
-<par_real name="sin" value="-0.000996979" exact_value="0xBA82AD0E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="432">
-<par_real name="cos" value="-0.00144183" exact_value="0xBABCFBC6" />
-<par_real name="sin" value="0.00139084" exact_value="0x3AB64CD6" />
-</BF_HARMONIC>
-<BF_HARMONIC id="433">
-<par_real name="cos" value="-0.00112251" exact_value="0xBA93212D" />
-<par_real name="sin" value="0.00214736" exact_value="0x3B0CBAB7" />
-</BF_HARMONIC>
-<BF_HARMONIC id="434">
-<par_real name="cos" value="-0.000607447" exact_value="0xBA1F3D12" />
-<par_real name="sin" value="-0.000972417" exact_value="0xBA7EE9C9" />
-</BF_HARMONIC>
-<BF_HARMONIC id="435">
-<par_real name="cos" value="-0.00357188" exact_value="0xBB6A1630" />
-<par_real name="sin" value="9.86501e-05" exact_value="0x38CEE25C" />
-</BF_HARMONIC>
-<BF_HARMONIC id="436">
-<par_real name="cos" value="-0.00118184" exact_value="0xBA9AE7F6" />
-<par_real name="sin" value="0.00214726" exact_value="0x3B0CB909" />
-</BF_HARMONIC>
-<BF_HARMONIC id="437">
-<par_real name="cos" value="-0.000563357" exact_value="0xBA13AE3E" />
-<par_real name="sin" value="-0.000946476" exact_value="0xBA781CEA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="438">
-<par_real name="cos" value="-0.00848936" exact_value="0xBC0B16F3" />
-<par_real name="sin" value="0.00287689" exact_value="0x3B3C8A31" />
-</BF_HARMONIC>
-<BF_HARMONIC id="439">
-<par_real name="cos" value="-0.00124155" exact_value="0xBAA2BB7E" />
-<par_real name="sin" value="0.00214536" exact_value="0x3B0C9929" />
-</BF_HARMONIC>
-<BF_HARMONIC id="440">
-<par_real name="cos" value="-0.000520731" exact_value="0xBA0881A8" />
-<par_real name="sin" value="-0.000919215" exact_value="0xBA70F775" />
-</BF_HARMONIC>
-<BF_HARMONIC id="441">
-<par_real name="cos" value="-0.00353809" exact_value="0xBB67DF49" />
-<par_real name="sin" value="-5.4278e-05" exact_value="0xB863A88B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="442">
-<par_real name="cos" value="-0.00130157" exact_value="0xBAAA996E" />
-<par_real name="sin" value="0.00214162" exact_value="0x3B0C5A6A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="443">
-<par_real name="cos" value="-0.000479601" exact_value="0xB9FB72F1" />
-<par_real name="sin" value="-0.000890686" exact_value="0xBA697CE9" />
-</BF_HARMONIC>
-<BF_HARMONIC id="444">
-<par_real name="cos" value="-0.003568" exact_value="0xBB69D517" />
-<par_real name="sin" value="0.00793323" exact_value="0x3C01FA5F" />
-</BF_HARMONIC>
-<BF_HARMONIC id="445">
-<par_real name="cos" value="-0.00136184" exact_value="0xBAB27FC2" />
-<par_real name="sin" value="0.00213606" exact_value="0x3B0BFD22" />
-</BF_HARMONIC>
-<BF_HARMONIC id="446">
-<par_real name="cos" value="-0.000439996" exact_value="0xB9E6AF3F" />
-<par_real name="sin" value="-0.000860928" exact_value="0xBA61AFE2" />
-</BF_HARMONIC>
-<BF_HARMONIC id="447">
-<par_real name="cos" value="-0.0034972" exact_value="0xBB653144" />
-<par_real name="sin" value="-0.000204087" exact_value="0xB956002D" />
-</BF_HARMONIC>
-<BF_HARMONIC id="448">
-<par_real name="cos" value="-0.00142233" exact_value="0xBABA6D77" />
-<par_real name="sin" value="0.00212866" exact_value="0x3B0B80FB" />
-</BF_HARMONIC>
-<BF_HARMONIC id="449">
-<par_real name="cos" value="-0.000401946" exact_value="0xB9D2BC44" />
-<par_real name="sin" value="-0.000829992" exact_value="0xBA5993CF" />
-</BF_HARMONIC>
-<BF_HARMONIC id="450">
-<par_real name="cos" value="-0.00135767" exact_value="0xBAB1F3D5" />
-<par_real name="sin" value="0.000982042" exact_value="0x3A80B7DB" />
-</BF_HARMONIC>
-<BF_HARMONIC id="451">
-<par_real name="cos" value="-0.00148296" exact_value="0xBAC25FDE" />
-<par_real name="sin" value="0.00211942" exact_value="0x3B0AE5F6" />
-</BF_HARMONIC>
-<BF_HARMONIC id="452">
-<par_real name="cos" value="-0.000365478" exact_value="0xB9BF9D9D" />
-<par_real name="sin" value="-0.000797928" exact_value="0xBA512C08" />
-</BF_HARMONIC>
-<BF_HARMONIC id="453">
-<par_real name="cos" value="-0.00344937" exact_value="0xBB620ECF" />
-<par_real name="sin" value="-0.000350422" exact_value="0xB9B7B8D5" />
-</BF_HARMONIC>
-<BF_HARMONIC id="454">
-<par_real name="cos" value="-0.00154369" exact_value="0xBACA55A1" />
-<par_real name="sin" value="0.00210833" exact_value="0x3B0A2BE6" />
-</BF_HARMONIC>
-<BF_HARMONIC id="455">
-<par_real name="cos" value="-0.000330619" exact_value="0xB9AD56EB" />
-<par_real name="sin" value="-0.000764787" exact_value="0xBA487BFA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="456">
-<par_real name="cos" value="-0.00815906" exact_value="0xBC05AD92" />
-<par_real name="sin" value="0.00218456" exact_value="0x3B0F2AD4" />
-</BF_HARMONIC>
-<BF_HARMONIC id="457">
-<par_real name="cos" value="-0.00160445" exact_value="0xBAD24C66" />
-<par_real name="sin" value="0.00209541" exact_value="0x3B095323" />
-</BF_HARMONIC>
-<BF_HARMONIC id="458">
-<par_real name="cos" value="-0.000297393" exact_value="0xB99BEB68" />
-<par_real name="sin" value="-0.000730619" exact_value="0xBA3F8700" />
-</BF_HARMONIC>
-<BF_HARMONIC id="459">
-<par_real name="cos" value="-0.00339483" exact_value="0xBB5E7BC9" />
-<par_real name="sin" value="-0.000492936" exact_value="0xBA01385E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="460">
-<par_real name="cos" value="-0.00166522" exact_value="0xBADA4380" />
-<par_real name="sin" value="0.00208062" exact_value="0x3B085B01" />
-</BF_HARMONIC>
-<BF_HARMONIC id="461">
-<par_real name="cos" value="-0.000265826" exact_value="0xB98B5E8E" />
-<par_real name="sin" value="-0.000695474" exact_value="0xBA365075" />
-</BF_HARMONIC>
-<BF_HARMONIC id="462">
-<par_real name="cos" value="-0.00357977" exact_value="0xBB6A9A8F" />
-<par_real name="sin" value="0.00720953" exact_value="0x3BEC3DE8" />
-</BF_HARMONIC>
-<BF_HARMONIC id="463">
-<par_real name="cos" value="-0.00172592" exact_value="0xBAE23840" />
-<par_real name="sin" value="0.002064" exact_value="0x3B07442A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="464">
-<par_real name="cos" value="-0.000235938" exact_value="0xB977661C" />
-<par_real name="sin" value="-0.000659404" exact_value="0xBA2CDBD7" />
-</BF_HARMONIC>
-<BF_HARMONIC id="465">
-<par_real name="cos" value="-0.00333381" exact_value="0xBB5A7C0A" />
-<par_real name="sin" value="-0.000631295" exact_value="0xBA257D7B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="466">
-<par_real name="cos" value="-0.00178649" exact_value="0xBAEA28A4" />
-<par_real name="sin" value="0.00204553" exact_value="0x3B060E4A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="467">
-<par_real name="cos" value="-0.000207754" exact_value="0xB959D887" />
-<par_real name="sin" value="-0.000622461" exact_value="0xBA232CA4" />
-</BF_HARMONIC>
-<BF_HARMONIC id="468">
-<par_real name="cos" value="-0.0012132" exact_value="0xBA9F043B" />
-<par_real name="sin" value="0.000605357" exact_value="0x3A1EB0D0" />
-</BF_HARMONIC>
-<BF_HARMONIC id="469">
-<par_real name="cos" value="-0.00184691" exact_value="0xBAF21400" />
-<par_real name="sin" value="0.00202523" exact_value="0x3B04B9B7" />
-</BF_HARMONIC>
-<BF_HARMONIC id="470">
-<par_real name="cos" value="-0.000181291" exact_value="0xB93E18EC" />
-<par_real name="sin" value="-0.000584698" exact_value="0xBA194669" />
-</BF_HARMONIC>
-<BF_HARMONIC id="471">
-<par_real name="cos" value="-0.00326656" exact_value="0xBB5613C5" />
-<par_real name="sin" value="-0.000765179" exact_value="0xBA489648" />
-</BF_HARMONIC>
-<BF_HARMONIC id="472">
-<par_real name="cos" value="-0.0019071" exact_value="0xBAF9F7A4" />
-<par_real name="sin" value="0.00200308" exact_value="0x3B034619" />
-</BF_HARMONIC>
-<BF_HARMONIC id="473">
-<par_real name="cos" value="-0.00015657" exact_value="0xB9242CED" />
-<par_real name="sin" value="-0.000546166" exact_value="0xBA0F2C92" />
-</BF_HARMONIC>
-<BF_HARMONIC id="474">
-<par_real name="cos" value="-0.00778035" exact_value="0xBBFEF24A" />
-<par_real name="sin" value="0.00154792" exact_value="0x3ACAE391" />
-</BF_HARMONIC>
-<BF_HARMONIC id="475">
-<par_real name="cos" value="-0.00196701" exact_value="0xBB00E8F2" />
-<par_real name="sin" value="0.00197912" exact_value="0x3B01B41E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="476">
-<par_real name="cos" value="-0.000133608" exact_value="0xB90C191E" />
-<par_real name="sin" value="-0.00050692" exact_value="0xBA04E2D1" />
-</BF_HARMONIC>
-<BF_HARMONIC id="477">
-<par_real name="cos" value="-0.00319336" exact_value="0xBB5147AE" />
-<par_real name="sin" value="-0.000894282" exact_value="0xBA6A6E3C" />
-</BF_HARMONIC>
-<BF_HARMONIC id="478">
-<par_real name="cos" value="-0.00202659" exact_value="0xBB04D088" />
-<par_real name="sin" value="0.00195333" exact_value="0x3B00036E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="479">
-<par_real name="cos" value="-0.000112423" exact_value="0xB8EBC49F" />
-<par_real name="sin" value="-0.000467013" exact_value="0xB9F4D968" />
-</BF_HARMONIC>
-<BF_HARMONIC id="480">
-<par_real name="cos" value="-0.00352301" exact_value="0xBB66E249" />
-<par_real name="sin" value="0.00654204" exact_value="0x3BD65E99" />
-</BF_HARMONIC>
-<BF_HARMONIC id="481">
-<par_real name="cos" value="-0.00208581" exact_value="0xBB08B214" />
-<par_real name="sin" value="0.00192572" exact_value="0x3AFC686D" />
-</BF_HARMONIC>
-<BF_HARMONIC id="482">
-<par_real name="cos" value="-9.30279e-05" exact_value="0xB8C317F6" />
-<par_real name="sin" value="-0.000426499" exact_value="0xB9DF9BB7" />
-</BF_HARMONIC>
-<BF_HARMONIC id="483">
-<par_real name="cos" value="-0.00311448" exact_value="0xBB4C1C4B" />
-<par_real name="sin" value="-0.0010183" exact_value="0xBA857878" />
-</BF_HARMONIC>
-<BF_HARMONIC id="484">
-<par_real name="cos" value="-0.00214458" exact_value="0xBB0C8C13" />
-<par_real name="sin" value="0.00189632" exact_value="0x3AF88DED" />
-</BF_HARMONIC>
-<BF_HARMONIC id="485">
-<par_real name="cos" value="-7.54385e-05" exact_value="0xB89E34BA" />
-<par_real name="sin" value="-0.000385431" exact_value="0xB9CA13A9" />
-</BF_HARMONIC>
-<BF_HARMONIC id="486">
-<par_real name="cos" value="-0.00101495" exact_value="0xBA850810" />
-<par_real name="sin" value="0.000269596" exact_value="0x398D588E" />
-</BF_HARMONIC>
-<BF_HARMONIC id="487">
-<par_real name="cos" value="-0.00220287" exact_value="0xBB105E05" />
-<par_real name="sin" value="0.00186513" exact_value="0x3AF4775D" />
-</BF_HARMONIC>
-<BF_HARMONIC id="488">
-<par_real name="cos" value="-5.96663e-05" exact_value="0xB87A4230" />
-<par_real name="sin" value="-0.000343865" exact_value="0xB9B448C4" />
-</BF_HARMONIC>
-<BF_HARMONIC id="489">
-<par_real name="cos" value="-0.00303022" exact_value="0xBB4696A5" />
-<par_real name="sin" value="-0.00113696" exact_value="0xBA95060A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="490">
-<par_real name="cos" value="-0.00226064" exact_value="0xBB14273D" />
-<par_real name="sin" value="0.00183216" exact_value="0x3AF02513" />
-</BF_HARMONIC>
-<BF_HARMONIC id="491">
-<par_real name="cos" value="-4.57229e-05" exact_value="0xB83FC694" />
-<par_real name="sin" value="-0.000301855" exact_value="0xB99E4249" />
-</BF_HARMONIC>
-<BF_HARMONIC id="492">
-<par_real name="cos" value="-0.00735907" exact_value="0xBBF12456" />
-<par_real name="sin" value="0.000973409" exact_value="0x3A7F2C5B" />
-</BF_HARMONIC>
-<BF_HARMONIC id="493">
-<par_real name="cos" value="-0.00231782" exact_value="0xBB17E68F" />
-<par_real name="sin" value="0.00179743" exact_value="0x3AEB97BA" />
-</BF_HARMONIC>
-<BF_HARMONIC id="494">
-<par_real name="cos" value="-3.36184e-05" exact_value="0xB80D0179" />
-<par_real name="sin" value="-0.000259457" exact_value="0xB98807B9" />
-</BF_HARMONIC>
-<BF_HARMONIC id="495">
-<par_real name="cos" value="-0.0029409" exact_value="0xBB40BC1A" />
-<par_real name="sin" value="-0.00125" exact_value="0xBAA3D707" />
-</BF_HARMONIC>
-<BF_HARMONIC id="496">
-<par_real name="cos" value="-0.00237436" exact_value="0xBB1B9B25" />
-<par_real name="sin" value="0.00176095" exact_value="0x3AE6CFA9" />
-</BF_HARMONIC>
-<BF_HARMONIC id="497">
-<par_real name="cos" value="-2.33614e-05" exact_value="0xB7C3F836" />
-<par_real name="sin" value="-0.000216725" exact_value="0xB96340A9" />
-</BF_HARMONIC>
-<BF_HARMONIC id="498">
-<par_real name="cos" value="-0.00340626" exact_value="0xBB5F3B8C" />
-<par_real name="sin" value="0.00593697" exact_value="0x3BC28AE7" />
-</BF_HARMONIC>
-<BF_HARMONIC id="499">
-<par_real name="cos" value="-0.00243022" exact_value="0xBB1F4451" />
-<par_real name="sin" value="0.00172273" exact_value="0x3AE1CD36" />
-</BF_HARMONIC>
-<BF_HARMONIC id="500">
-<par_real name="cos" value="-1.49593e-05" exact_value="0xB77AF9B0" />
-<par_real name="sin" value="-0.000173714" exact_value="0xB93626FC" />
-</BF_HARMONIC>
-<BF_HARMONIC id="501">
-<par_real name="cos" value="-0.00284684" exact_value="0xBB3A920A" />
-<par_real name="sin" value="-0.00135716" exact_value="0xBAB1E2B9" />
-</BF_HARMONIC>
-<BF_HARMONIC id="502">
-<par_real name="cos" value="-0.00248536" exact_value="0xBB22E169" />
-<par_real name="sin" value="0.00168281" exact_value="0x3ADC91B9" />
-</BF_HARMONIC>
-<BF_HARMONIC id="503">
-<par_real name="cos" value="-8.41815e-06" exact_value="0xB70D3BAC" />
-<par_real name="sin" value="-0.00013048" exact_value="0xB908D173" />
-</BF_HARMONIC>
-<BF_HARMONIC id="504">
-<par_real name="cos" value="-0.000770758" exact_value="0xBA4A0CAF" />
-<par_real name="sin" value="-1.75238e-05" exact_value="0xB7930011" />
-</BF_HARMONIC>
-<BF_HARMONIC id="505">
-<par_real name="cos" value="-0.00253971" exact_value="0xBB267140" />
-<par_real name="sin" value="0.00164119" exact_value="0x3AD71D30" />
-</BF_HARMONIC>
-<BF_HARMONIC id="506">
-<par_real name="cos" value="-3.74251e-06" exact_value="0xB67B27D1" />
-<par_real name="sin" value="-8.70798e-05" exact_value="0xB8B69E9A" />
-</BF_HARMONIC>
-<BF_HARMONIC id="507">
-<par_real name="cos" value="-0.00274839" exact_value="0xBB341E52" />
-<par_real name="sin" value="-0.00145822" exact_value="0xBABF21BB" />
-</BF_HARMONIC>
-<BF_HARMONIC id="508">
-<par_real name="cos" value="-0.00259324" exact_value="0xBB29F356" />
-<par_real name="sin" value="0.00159791" exact_value="0x3AD170F3" />
-</BF_HARMONIC>
-<BF_HARMONIC id="510">
-<par_real name="cos" value="-0.00690247" exact_value="0xBBE22E19" />
-<par_real name="sin" value="0.000466586" exact_value="0x39F4A019" />
-</BF_HARMONIC>
-<BF_HARMONIC id="511">
-<par_real name="cos" value="-0.00264589" exact_value="0xBB2D66A8" />
-<par_real name="sin" value="0.00155297" exact_value="0x3ACB8D04" />
 </BF_HARMONIC>
 </BASE_FUNCTION>
 </OSCIL>
