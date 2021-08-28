@@ -134,9 +134,8 @@ const rtosc::Ports FilterParams::ports = {
     {"type-moog::i", rProp(parameter) rShort("type")
         rOptions(HP, BP, LP)
             rDoc("Filter Type"), 0, rOptionCb(Ptype)},
-            rDoc("Comb Filter Type"), 0, rOptionCb(Ptype)},
     {"type-comb::i", rProp(parameter) rShort("type")
-        rOptions(FWD, BWD, both)
+        rOptions(BWD, FWD, both)
             rDoc("Comb Filter Type"), 0, rOptionCb(Ptype)},
     //UI reader
     {"Pvowels:", rDoc("Get Formant Vowels"), NULL,

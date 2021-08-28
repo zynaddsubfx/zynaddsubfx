@@ -14,7 +14,7 @@ namespace zyn{
 
 CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
     unsigned int srate, int bufsize)
-    :Filter(srate, bufsize), memory(*alloc), gain(1.0f), type(Ftype)
+    :Filter(srate, bufsize), gain(1.0f), type(Ftype), memory(*alloc)
 {
     //worst case: looking back from smps[0] at 25Hz using higher order interpolation
     mem_size = (int)ceilf((float)samplerate/25.0) + buffersize + 2; // 2178 at 48000Hz and 256Samples
@@ -80,13 +80,15 @@ void CombFilter::filterout(float *smp)
         smp[i] = smp[i]*gain + tanhX(
             gainfwd * sampleLerp( input, pos) - 
             gainbwd * sampleLerp(output, pos)); 
+        // copy new sample to output buffer
+        output[mem_size-buffersize+i] = smp[i];
         // apply output gain
         smp[i] *= outgain;
     }
     // shift the buffer content one buffersize to the left
     memmove(&output[0], &output[buffersize], (mem_size-buffersize)*sizeof(float));
     // copy new output samples to the right end of the buffer
-    memcpy(&output[mem_size-buffersize], smp, buffersize*sizeof(float));
+    //~ memcpy(&output[mem_size-buffersize], smp, buffersize*sizeof(float));
 }
 
 void CombFilter::setfreq_and_q(float freq, float q)
