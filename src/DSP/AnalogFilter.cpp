@@ -48,7 +48,7 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
     coeff.d[0] = 0; //this is not used
     outgain    = 1.0f;
     freq_smoothing.sample_rate(samplerate_f);
-    freq_smoothing.reset( freq * MAX_FREQ_CO );
+    beforeFirstTick=true;
 }
 
 AnalogFilter::~AnalogFilter()
@@ -443,6 +443,10 @@ void AnalogFilter::singlefilterout_freqbuf(float *smp, fstage &hist,
 
 void AnalogFilter::filterout(float *smp)
 {
+    if (beforeFirstTick) {
+        freq_smoothing.reset( freq * MAX_FREQ_CO );
+        beforeFirstTick=false;
+    }
     float freqbuf[buffersize];
 
     if ( freq_smoothing.apply( freqbuf, buffersize, freq * MAX_FREQ_CO ) )
