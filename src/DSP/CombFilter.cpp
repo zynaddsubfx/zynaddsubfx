@@ -22,9 +22,7 @@ CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float
     output = (float*)memory.alloc_mem(mem_size*sizeof(float));
     memset(input, 0, mem_size*sizeof(float));
     memset(output, 0, mem_size*sizeof(float));
-    
-    //~ delay_smoothing.sample_rate(srate);
-    //~ delay_smoothing.reset(samplerate/1000.0f);
+
     setfreq_and_q(Ffreq, Fq);
     settype(type);
 }
@@ -51,23 +49,8 @@ inline float CombFilter::sampleLerp(float *smp, float pos) {
     return smp[poshi] + poslo * (smp[poshi+1]-smp[poshi]); 
 }
 
-//~ inline float sampleLagrange3o4p(float *smp, float pos) {
-    //~ // 4-point, 3rd-order Lagrange (x-form)
-    //~ float c0 = smp[0];
-    //~ float c1 = smp[1] - 0.33333333333f*smp[-1] - 0.5f*smp[0] - 0.16666666666f*smp[2];
-    //~ float c2 = 0.5f*(smp[-1]+smp[1]) - smp[0];
-    //~ float c3 = 0.16666666666f*(smp[2]-smp[-1]) + 0.5f*(smp[0]-smp[1]);
-    //~ return 16.0f*(((c3*pos+c2)*pos+c1)*pos+c0);
-//~ }
-
 void CombFilter::filterout(float *smp)
 {
-    //~ float delaybuf[buffersize];
-
-    //~ if(delayfwd_smoothing.apply(delaybuf, buffersize, delay))
-        //~ for(int i=0; i<buffersize; ++i)
-            //~ delayfwdbuf[i] = delayfwd;
-
     // shift the buffer content to the left
     memmove(&input[0], &input[buffersize], (mem_size-buffersize)*sizeof(float));
     // copy new input samples to the right end of the buffer
@@ -87,8 +70,6 @@ void CombFilter::filterout(float *smp)
     }
     // shift the buffer content one buffersize to the left
     memmove(&output[0], &output[buffersize], (mem_size-buffersize)*sizeof(float));
-    // copy new output samples to the right end of the buffer
-    //~ memcpy(&output[mem_size-buffersize], smp, buffersize*sizeof(float));
 }
 
 void CombFilter::setfreq_and_q(float freq, float q)
