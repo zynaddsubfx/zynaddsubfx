@@ -45,7 +45,7 @@ inline float CombFilter::tanhX(const float x)
 }
 
 inline float CombFilter::sampleLerp(float *smp, float pos) {
-    int poshi = (int)floorf(pos); // integer part
+    int poshi = (int)pos; // integer part (pos >= 0)
     float poslo = pos - (float) poshi; // decimal part
     // linear interpolation between samples
     return smp[poshi] + poslo * (smp[poshi+1]-smp[poshi]); 
