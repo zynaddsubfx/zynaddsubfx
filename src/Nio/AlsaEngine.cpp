@@ -292,7 +292,7 @@ short *AlsaEngine::interleave(const Stereo<float *> &smps)
     for(int frame = 0; frame < bufferSize; ++frame) { // with a nod to libsamplerate ...
         float l = smps.l[frame];
         float r = smps.r[frame];
-        stereoCompressor(synth.samplerate, audio.peaks[0], l, r);
+        //~ stereoCompressor(synth.samplerate, audio.peaks[0], l, r);
 
         scaled = l * (8.0f * 0x10000000);
         shortInterleaved[idx++] = (short int)(lrint(scaled) >> 16);
