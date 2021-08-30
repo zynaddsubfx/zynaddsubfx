@@ -47,7 +47,8 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
     setfreq_and_q(Ffreq, Fq);
     coeff.d[0] = 0; //this is not used
     outgain    = 1.0f;
-    freq_smoothing.sample_rate(samplerate_f);
+    freq_smoothing.sample_rate(samplerate_f/8);
+    freq_smoothing.thresh(2.0f); // 2Hz
     beforeFirstTick=true;
 }
 
