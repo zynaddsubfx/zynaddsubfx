@@ -187,4 +187,14 @@ void Nio::waveEnd(void)
     out->wave->destroyFile();
 }
 
+void Nio::setAudioCompressor(bool isEnabled)
+{
+    out->setAudioCompressor(isEnabled);
+}
+
+bool Nio::getAudioCompressor(void)
+{
+    return out->getAudioCompressor();
+}
+
 }

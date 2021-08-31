@@ -239,7 +239,8 @@ OssMultiEngine :: audioThreadCb()
                 for (y = 0; y != synth.buffersize; y++) {
                     float l = part->partoutl[y];
                     float r = part->partoutr[y];
-                    stereoCompressor(synth.samplerate, peaks[x/2], l, r);
+                    if(isOutputCompressionEnabled)
+                        stereoCompressor(synth.samplerate, peaks[x/2], l, r);
                     smps.ps32[y * channels + x] = (int)(l * 2147483647.0f);
                     smps.ps32[y * channels + x + 1] = (int)(r * 2147483647.0f);
                 }
@@ -247,7 +248,8 @@ OssMultiEngine :: audioThreadCb()
                 for (y = 0; y != synth.buffersize; y++) {
                     float l = part->partoutl[y];
                     float r = part->partoutr[y];
-                    stereoCompressor(synth.samplerate, peaks[x/2], l, r);
+                    if(isOutputCompressionEnabled)
+                        stereoCompressor(synth.samplerate, peaks[x/2], l, r);
                     smps.ps16[y * channels + x] = (short int)(l * 32767.0f);
                     smps.ps16[y * channels + x + 1] = (short int)(r * 32767.0f);
                 }
