@@ -37,7 +37,7 @@ public:
         {
             g1 = g2 = 0;
             _cutoff = 10.0f;
-            t = 0.0001f
+            t = 0.0001f;
             _reset_on_next_apply = false;
         }
 
