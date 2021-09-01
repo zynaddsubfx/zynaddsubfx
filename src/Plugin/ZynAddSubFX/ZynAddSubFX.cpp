@@ -606,5 +606,7 @@ namespace Nio {
    void waveNew(WavFile*){}
    void waveStart(){}
    void waveStop(){}
+   void setAudioCompressor(bool){}
+   bool getAudioCompressor(void){return false;}
 }
 }
