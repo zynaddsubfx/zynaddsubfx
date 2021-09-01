@@ -68,6 +68,7 @@ class  Part;
 class  Filter;
 class  AnalogFilter;
 class  MoogFilter;
+class  CombFilter;
 class  SVFilter;
 class  FormantFilter;
 class  ModFilter;
