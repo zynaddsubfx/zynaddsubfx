@@ -49,7 +49,7 @@ class OutMgr
         std::string getDriver() const;
 
         bool setSink(std::string name);
-        
+
         std::string getSink() const;
         
         void setAudioCompressor(bool isEnabled);

@@ -127,7 +127,6 @@ string OutMgr::getSink() const
 
 void OutMgr::setAudioCompressor(bool isEnabled)
 {
-    printf("OutMgr - setting isOutputCompressionEnabled to: %d\n", isEnabled);
     currentOut->isOutputCompressionEnabled=isEnabled;
 }
 
