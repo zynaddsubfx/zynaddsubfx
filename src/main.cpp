@@ -609,7 +609,7 @@ int main(int argc, char *argv[])
     if(altered_master)
         middleware->updateResources(master);
 
-    master->setAudioCompressor(compr);
+    
     //Run the Nio system
     printf("[INFO] Nio::start()\n");
     bool ioGood = Nio::start();
@@ -622,7 +622,7 @@ int main(int argc, char *argv[])
     }
 
     InitWinMidi(wmidi);
-
+    master->setAudioCompressor(compr);
 
     gui = NULL;
 
