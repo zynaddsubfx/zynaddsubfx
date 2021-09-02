@@ -42,6 +42,7 @@ class Config
         struct {
             oss_devs_t oss_devs;
             int   SampleRate, SoundBufferSize, OscilSize, SwapStereo;
+            bool  AudioOutputCompressor;
             int   WindowsWaveOutId, WindowsMidiInId;
             int   BankUIAutoClose;
             int   GzipCompression;

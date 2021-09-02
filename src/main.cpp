@@ -68,6 +68,7 @@ MiddleWare *middleware;
 
 Master   *master;
 int       swaplr = 0; //1 for left-right swapping
+bool      compr = false; // enables output audio compressor
 
 // forward declarations of namespace zyn
 namespace zyn
@@ -241,6 +242,7 @@ int main(int argc, char *argv[])
     synth.buffersize = config.cfg.SoundBufferSize;
     synth.oscilsize  = config.cfg.OscilSize;
     swaplr = config.cfg.SwapStereo;
+    compr = config.cfg.AudioOutputCompressor;
 
     Nio::preferredSampleRate(synth.samplerate);
 
@@ -607,6 +609,7 @@ int main(int argc, char *argv[])
     if(altered_master)
         middleware->updateResources(master);
 
+    master->setAudioCompressor(compr);
     //Run the Nio system
     printf("[INFO] Nio::start()\n");
     bool ioGood = Nio::start();
