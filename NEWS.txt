@@ -185,7 +185,7 @@
         - Add Subnote filter smoothing
         - Add Unison derandomization options
         - Add NSM import/export
-        - Add NTK UI compatiability
+        - Add NTK UI compatibility
         - (re)Add OSX Support
         - Enhance performance of ADnote and SUBnote
         - Enhance Installer
@@ -240,7 +240,7 @@
 	- added a commandline -L which load a instrument (.xiz) - now it only loads to part 0 (you can use this option with -l to load a master file and after this the option -L to replace the part)
 
 2.2.0 (8 Apr 2005)
-	- the VST version of ZynAddSubFX is removed from the instalation until it will be more stable (hope soon :) )
+	- the VST version of ZynAddSubFX is removed from the installation until it will be more stable (hope soon :) )
 	- now, the instrument banks contains over 300 high quality instruments
 	- added "Apply" a button from OscilGen window for PADsynth
 	- added another parameter to ADsynth that controls the amount of all detunes of voices
@@ -277,7 +277,7 @@
 2.0.0_pre1 (17 Iul 2004)
 	- Added a new powerful synth engine which is called PADsynth, you can make very beautifull pads and even some strange sounds
 	- Now is used the XML format for all zynaddsubfx parameters(.XMZ for master parameters, .XIZ for instrument parameters and .XSZ for scale parameters).You can import older parameters. All parameters files are compressed with gzip algorithm.
-	- Some parameters has changed and you might ecounter different sounds that you saved in the older versions of zynaddsubfx
+	- Some parameters has changed and you might encounter different sounds that you saved in the older versions of zynaddsubfx
 	- The instrument banks are no longer single files, but directories that contains instrument .XIZ files (you can organize them even with a file manager). Also, you can use more than 1 banks easily.
 	- Added a new effect called DynamicFilter that allows you to do WahWah,AutoWah, VocalMorpher and other effects
 	- Speedups
@@ -309,7 +309,7 @@
       - bugfixes
 
 1.4.1 (8 May 2003)
-      - added single mode to the instrument kit who alows only one item to be played same time
+      - added single mode to the instrument kit who allows only one item to be played same time
       - added "Spectrum Adjust" to the ADsynth oscillator
       - added "drum mode" to the instrument, where all midi keys are mapped to 12tET
       - added a parameter to the "440Hz" which make the freq to varies a bit according to the key pressed (very usefull to toms and other drums)
@@ -375,7 +375,7 @@
       - Added keyresponse limits to Part
       - Added presets to Effects
       - The fade is smaller on high frequecy content and larger on low frequecies; so you'll don't hear starting clicks on basses and audible fadeins on higher pitched sounds
-      - Added tunnings to Reverb: you can choose Random of Freeverb
+      - Added tunings to Reverb: you can choose Random of Freeverb
 
 1.0.4 (7 Jan 2003)
       - It is possible to load Scala (.scl and .kbm) files
@@ -395,7 +395,7 @@
       - added VU-Meter
       - Change the Insertion effect modes behaves (it sounds a bit louder)
       - Added to the project an external program called Spliter that splits the
-	keyboard and alows you to play two instruments same time. You can use this
+	keyboard and allows you to play two instruments same time. You can use this
 	program with ZynAddSubFX or any other synthesizer.
       - Added a new function to OscilGen
 

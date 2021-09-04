@@ -363,7 +363,7 @@ void Part::cloneTraits(Part &p) const
     CLONE(Plegatomode);
     CLONE(Pkeylimit);
 
-    // Controller has a refence, so it can not be re-assigned
+    // Controller has a reference, so it can not be re-assigned
     // So, destroy and reconstruct it.
     p.ctl.~Controller(); new (&p.ctl) Controller(this->ctl);
 }
@@ -1149,7 +1149,7 @@ int Part::loadXMLinstrument(const char *filename)
     // store filename in member variable
     int length = sizeof(loaded_file)-1;
     strncpy(loaded_file, filename, length);
-    // set last element to \0 in case filname is too long or not terminated
+    // set last element to \0 in case filename is too long or not terminated
     loaded_file[length]='\0';
 
     getfromXMLinstrument(xml);

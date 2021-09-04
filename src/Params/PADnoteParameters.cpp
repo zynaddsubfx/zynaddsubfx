@@ -170,7 +170,7 @@ static const rtosc::Ports non_realtime_ports =
             rOptions(bandwidth,discrete,continious),
             rDefault(bandwidth),
             "Harmonic Distribution Model"),
-    rOption(Php.base.type, rOptions(Gaussian, Rectanglar, Double Exponential),
+    rOption(Php.base.type, rOptions(Gaussian, Rectangular, Double Exponential),
             rShort("shape"), rDefault(Gaussian),
             "Harmonic profile shape"),
     rParamZyn(Php.base.par1, rShort("warp"),      rDefault(80),
@@ -189,7 +189,7 @@ static const rtosc::Ports non_realtime_ports =
 
     //Harmonic Modulation
     rOption(Php.amp.type, rShort("mult"), rOptions(Off, Gauss, Sine, Flat),
-            rDefault(Off), "Type of amplitude multipler"),
+            rDefault(Off), "Type of amplitude multiplier"),
     rParamZyn(Php.amp.par1, rShort("p1"),   rDefault(80),
         "Amplitude multiplier parameter"),
     rParamZyn(Php.amp.par2, rShort("p2"),   rDefault(60),
@@ -707,7 +707,7 @@ static float Pbwscale_translate(char Pbwscale)
 //Requires
 // - bandwidth scaling power
 // - bandwidth
-// - oscilator harmonics at various frequencies (oodles of data)
+// - oscillator harmonics at various frequencies (oodles of data)
 // - sampled resonance
 void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
                                                        int size,

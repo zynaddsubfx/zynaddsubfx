@@ -1759,7 +1759,7 @@ microtonalui=new MicrotonalUI(osc, "/microtonal/");
 updatesendwindow();
 updatepanel();
 
-//the simle MasterUI
+//the simple MasterUI
 simplenpartcounter->value(1);
 simplesyseffnocounter->value(1);
 simpleinseffnocounter->value(1);
