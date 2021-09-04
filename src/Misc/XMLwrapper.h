@@ -264,7 +264,7 @@ class XMLwrapper
         /**
          * Loads specified file and returns data.
          *
-         * Will load a gziped file or an uncompressed file.
+         * Will load a gzipped file or an uncompressed file.
          * @param filename the file
          * @return The decompressed data
          */

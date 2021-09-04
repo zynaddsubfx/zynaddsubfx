@@ -326,7 +326,7 @@ struct SYNTH_T {
      * All internal transfer of sound data use buffer of this size.
      * All parameters are constant during this period of time, except
      * some parameters(like amplitudes) which are linearly interpolated.
-     * If you increase this you'll ecounter big latencies, but if you
+     * If you increase this you'll encounter big latencies, but if you
      * decrease this the CPU requirements gets high.
      */
     int buffersize;
