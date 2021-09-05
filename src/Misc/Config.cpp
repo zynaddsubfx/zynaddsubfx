@@ -322,7 +322,7 @@ void Config::readConfig(const char *filename)
                                        cfg.SwapStereo,
                                        0,
                                        1);
-        cfg.SwapStereo = xmlcfg.getpar("audio_output_compressor",
+        cfg.AudioOutputCompressor = xmlcfg.getpar("audio_output_compressor",
                                        cfg.AudioOutputCompressor,
                                        0,
                                        1);
