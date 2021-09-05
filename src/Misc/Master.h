@@ -140,6 +140,7 @@ class Master
         //Copy callback to other master
         void copyMasterCbTo(Master* dest);
         bool hasMasterCb() const;
+        void setAudioCompressor(bool enabled);
 
         /**parts \todo see if this can be made to be dynamic*/
         class Part * part[NUM_MIDI_PARTS];

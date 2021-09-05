@@ -47,6 +47,7 @@ static const rtosc::Ports ports = {
     rParamI(cfg.SoundBufferSize, "Size of processed audio buffer"),
     rParamI(cfg.OscilSize, "Size Of Oscillator Wavetable"),
     rToggle(cfg.SwapStereo, "Swap Left And Right Channels"),
+    rToggle(cfg.AudioOutputCompressor, "Apply Compressor to Audio Output"),
     rToggle(cfg.BankUIAutoClose, "Automatic Closing of BackUI After Patch Selection"),
     rParamI(cfg.GzipCompression, "Level of Gzip Compression For Save Files"),
     rParamI(cfg.Interpolation, "Level of Interpolation, Linear/Cubic"),
@@ -193,6 +194,7 @@ void Config::init()
     cfg.SoundBufferSize = 256;
     cfg.OscilSize  = 1024;
     cfg.SwapStereo = 0;
+    cfg.AudioOutputCompressor = 0;
 
     cfg.oss_devs.linux_wave_out = new char[MAX_STRING_SIZE];
     snprintf(cfg.oss_devs.linux_wave_out, MAX_STRING_SIZE, "/dev/dsp");
@@ -320,6 +322,10 @@ void Config::readConfig(const char *filename)
                                        cfg.SwapStereo,
                                        0,
                                        1);
+        cfg.AudioOutputCompressor = xmlcfg.getpar("audio_output_compressor",
+                                       cfg.AudioOutputCompressor,
+                                       0,
+                                       1);
         cfg.BankUIAutoClose = xmlcfg.getpar("bank_window_auto_close",
                                             cfg.BankUIAutoClose,
                                             0,
@@ -411,6 +417,7 @@ void Config::saveConfig(const char *filename) const
     xmlcfg->addpar("sound_buffer_size", cfg.SoundBufferSize);
     xmlcfg->addpar("oscil_size", cfg.OscilSize);
     xmlcfg->addpar("swap_stereo", cfg.SwapStereo);
+    xmlcfg->addpar("audio_output_compressor", cfg.AudioOutputCompressor);
     xmlcfg->addpar("bank_window_auto_close", cfg.BankUIAutoClose);
 
     xmlcfg->addpar("gzip_compression", cfg.GzipCompression);

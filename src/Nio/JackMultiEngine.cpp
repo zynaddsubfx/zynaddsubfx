@@ -154,12 +154,13 @@ int JackMultiEngine::processAudio(jack_nframes_t nframes)
     const int maxFrames = (synth.bufferbytes / sizeof(float));
 
     //Make sure the audio output doesn't overflow
-    for(int frame = 0; frame != maxFrames; ++frame) {
-	float &p = impl->peaks[0];
-	float &l = buffers[0][frame];
-	float &r = buffers[1][frame];
-	stereoCompressor(synth.samplerate, p, l, r);
-    }
+    if(isOutputCompressionEnabled)
+        for(int frame = 0; frame != maxFrames; ++frame) {
+            float &p = impl->peaks[0];
+            float &l = buffers[0][frame];
+            float &r = buffers[1][frame];
+            stereoCompressor(synth.samplerate, p, l, r);
+        }
 
     //Gather other samples from individual parts
     Master &master = *middleware->spawnMaster();
@@ -170,11 +171,12 @@ int JackMultiEngine::processAudio(jack_nframes_t nframes)
         memcpy(buffers[2*i + 3], master.part[i]->partoutr, synth.bufferbytes);
 
         //Make sure the audio output doesn't overflow
-        for(int frame = 0; frame != maxFrames; ++frame) {
-            float &l = buffers[2*i + 2][frame];
-            float &r = buffers[2*i + 3][frame];
-            stereoCompressor(synth.samplerate, p, l, r);
-        }
+        if(isOutputCompressionEnabled)
+            for(int frame = 0; frame != maxFrames; ++frame) {
+                float &l = buffers[2*i + 2][frame];
+                float &r = buffers[2*i + 3][frame];
+                stereoCompressor(synth.samplerate, p, l, r);
+            }
     }
 
     return false;

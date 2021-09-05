@@ -47,6 +47,8 @@ namespace Nio {
     set<string> getSinks(void){return set<string>();}
     string getSource(void){return "";}
     string getSink(void){return "";}
+    void setAudioCompressor(bool){}
+    bool getAudioCompressor(void){return false;}
 }
 } // namespace zyn
 

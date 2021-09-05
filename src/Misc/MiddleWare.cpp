@@ -513,6 +513,11 @@ namespace Nio
                     d.reply(d.loc, "s", Nio::getSink().c_str());
                 else
                     Nio::setSink(rtosc_argument(msg,0).s);}},
+        {"audio-compressor::T:F", 0, 0, [](const char *msg, rtosc::RtData &d) {
+                if(rtosc_narguments(msg) == 0)
+                    d.reply(d.loc, Nio::getAudioCompressor() ? "T" : "F");
+                else
+                    Nio::setAudioCompressor(rtosc_argument(msg,0).T);}},
     };
 }
 

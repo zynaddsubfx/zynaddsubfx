@@ -1139,6 +1139,10 @@ bool Master::hasMasterCb() const
     return !!mastercb;
 }
 
+void Master::setAudioCompressor(bool enabled)
+{
+    Nio::setAudioCompressor(enabled);
+}
 
 #if 0
 template <class T>

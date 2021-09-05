@@ -348,10 +348,13 @@ bool JackEngine::processAudio(jack_nframes_t nframes)
     memcpy(audio.portBuffs[1], smp.r, bufferSize * sizeof(float));
 
     //Make sure the audio output doesn't overflow
-    for(int frame = 0; frame != bufferSize; ++frame) {
-        float &l = audio.portBuffs[0][frame];
-        float &r = audio.portBuffs[1][frame];
-        stereoCompressor(synth.samplerate, audio.peaks[0], l, r);
+    if(isOutputCompressionEnabled)
+    {
+        for(int frame = 0; frame != bufferSize; ++frame) {
+            float &l = audio.portBuffs[0][frame];
+            float &r = audio.portBuffs[1][frame];
+            stereoCompressor(synth.samplerate, audio.peaks[0], l, r);
+        }
     }
     return true;
 }
