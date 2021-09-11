@@ -40,6 +40,8 @@ static const rtosc::Ports _ports = {
             "location of the filter"),
     rParamF(freq, rShort("freq"), rDefault(2.0f), rUnit(Hz), rLinear(0.1f,10.0f),
             "step frequency"),
+    rParamF(intensity, rShort("depth"), rLinear(0.0, 2.0), rDefault(1.0),
+              "Intensity of SEQ"),
     rParamF(cutoff, rShort("lp"), rDefault(0.0f), rUnit(Hz), rLinear(0.0f,MAX_CUTOFF),
             "cutoff of lp-filter for output\n 0.0=off"),
     rParamF(delay, rShort("delay"), rUnit(S),
