@@ -25,7 +25,7 @@ class Envelope
     public:
         /**Constructor*/
         Envelope(class EnvelopeParams &pars, float basefreq, float dt, WatchManager *m=0,
-                const char *watch_prefix=0);
+                const char *watch_prefix=0, float velocity=0.0f);
         /**Destructor*/
         ~Envelope(void);
         void releasekey(void);

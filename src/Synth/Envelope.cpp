@@ -18,15 +18,16 @@
 namespace zyn {
 
 Envelope::Envelope(EnvelopeParams &pars, float basefreq, float bufferdt,
-        WatchManager *m, const char *watch_prefix)
+        WatchManager *m, const char *watch_prefix, float velocity)
     :watchOut(m, watch_prefix, "out")
 {
     envpoints = pars.Penvpoints;
     if(envpoints > MAX_ENVELOPE_POINTS)
-        envpoints = MAX_ENVELOPE_POINTS;
+        envpoints  = MAX_ENVELOPE_POINTS;
     envsustain     = (pars.Penvsustain == 0) ? -1 : pars.Penvsustain;
-    forcedrelease   = pars.Pforcedrelease;
-    envstretch     = powf(440.0f / basefreq, pars.Penvstretch / 64.0f);
+    forcedrelease  = pars.Pforcedrelease;
+    envstretch     = powf(440.0f / basefreq, (float)pars.Penvstretch / 64.0f) *
+                        (1.0f+(3.0f*pars.vStretch*velocity));
     linearenvelope = pars.Plinearenvelope;
     repeating = pars.Prepeating;
 
