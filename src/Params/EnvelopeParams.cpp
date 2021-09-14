@@ -597,6 +597,8 @@ void EnvelopeParams::defaults()
     PS_val    = DS_val;
     PR_val    = DR_val;
     Pfreemode = 0;
+    vStretch = 0.0f;
+    vStretchFunction = 64.0f;
     converttofree();
 }
 
