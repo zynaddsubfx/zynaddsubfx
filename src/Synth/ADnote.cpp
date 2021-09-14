@@ -937,7 +937,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
             vce.FMFreqEnvelope = memory.alloc<Envelope>(*param.FMFreqEnvelope,
                     basefreq, synth.dt(), wm,
                     (pre+"VoicePar"+nvoice+"/FMFreqEnvelope/").c_str, 
-                     VelF(velocity, param.FreqEnvelope->vStretchFunction));
+                     VelF(velocity, param.FMFreqEnvelope->vStretchFunction));
 
         vce.FMnewamplitude = vce.FMVolume * ctl.fmamp.relamp;
 
@@ -946,7 +946,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
                 memory.alloc<Envelope>(*param.FMAmpEnvelope,
                         basefreq, synth.dt(), wm,
                         (pre+"VoicePar"+nvoice+"/FMAmpEnvelope/").c_str, 
-                     VelF(velocity, param.FreqEnvelope->vStretchFunction));
+                     VelF(velocity, param.FMAmpEnvelope->vStretchFunction));
             vce.FMnewamplitude *= vce.FMAmpEnvelope->envout_dB();
         }
     }
