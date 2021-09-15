@@ -382,6 +382,7 @@ const char *getStatus(int status_bits)
         case 1:  return "PLAY";
         case 2:  return "SUST";
         case 3:  return "RELA";
+        case 4:  return "LTCH";
         default: return "INVD";
     }
 }
