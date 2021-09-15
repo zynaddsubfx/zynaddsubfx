@@ -125,7 +125,7 @@ static int getMergeableDescriptor(note_t note, uint8_t sendto, bool legato,
     return desc_id;
 }
 
-NotePool::activeDescIter      NotePool::activeDesc(void)
+NotePool::activeDescIter NotePool::activeDesc(void)
 {
     cleanup();
     return activeDescIter{*this};
@@ -252,7 +252,7 @@ bool NotePool::synthFull(int sdesc_count) const
     return actually_free < sdesc_count;
 }
 
-//Note that isn't KEY_PLAYING or KEY_RELEASED_AND_SUSTAINING
+//Note that isn't KEY_PLAYING or KEY_RELEASED_AND_SUSTAINED
 bool NotePool::existsRunningNote(void) const
 {
     //printf("running note # =%d\n", getRunningNotes());
@@ -274,6 +274,7 @@ int NotePool::getRunningNotes(void) const
     }
     return running_count;
 }
+
 void NotePool::enforceKeyLimit(int limit)
 {
     int notes_to_kill = getRunningNotes() - limit;
