@@ -61,8 +61,7 @@ class AnalogFilter:public Filter
         //old coeffs are used for interpolation when parameters change quickly
 
         //Apply IIR filter to Samples, with coefficients, and past history
-    void singlefilterout(float *smp, fstage &hist);// const Coeff &coeff);
-        void singlefilterout_freqbuf(float *smp, fstage &hist, float *freqbuf);
+    void singlefilterout(float *smp, fstage &hist, float f, unsigned int bufsize);// const Coeff &coeff);
         //Update coeff and order
     void computefiltercoefs(float freq, float q);
 
@@ -74,7 +73,9 @@ class AnalogFilter:public Filter
         bool recompute; // need to recompute coeff.
         int order; //the order of the filter (number of poles)
 
+        int freqbufsize;
         Value_Smoothing_Filter freq_smoothing; /* for smoothing freq modulations to avoid zipper effect */
+        bool beforeFirstTick; // reset the smoothing at first Tick
 };
 
 }
