@@ -171,25 +171,25 @@ class AdNoteTest
 
 #endif
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], 0.1924f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], 0.25552f, 0.0001f);
             note->releasekey();
 
             TS_ASSERT(!tr->hasNext());
             w->add_watch("noteout/be4_mix");
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.4717f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], -0.46883f, 0.0001f);
             w->tick();
             TS_ASSERT(tr->hasNext());
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
             w->tick();
-            TS_ASSERT_DELTA(outL[255], 0.0646f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], 0.06695f, 0.0001f);
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], 0.1183f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], 0.11621f, 0.0001f);
             w->tick();
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
