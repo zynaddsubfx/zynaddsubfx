@@ -585,7 +585,7 @@ bool Part::NoteOnInternal(note_t note,
         const int sendto = Pkitmode ? item.sendto() : 0;
 
         // Enforce voice limit, before we trigger new note
-        limit_voices(true);
+        limit_voices(note);
 
         try {
             if(item.Padenabled)
@@ -893,7 +893,7 @@ void Part::setkeylimit(unsigned char Pkeylimit_)
 /*
  * Enforce voice limit
  */
-void Part::limit_voices(bool account_for_new_note)
+void Part::limit_voices(int new_note)
 {
     int voicelimit = Pvoicelimit;
     if(voicelimit == 0) /* voice limit disabled */
@@ -903,12 +903,12 @@ void Part::limit_voices(bool account_for_new_note)
      * one less note than the limit, so we don't go above the limit when the
      * new note is triggered.
      */
-    if (account_for_new_note)
+    if (new_note >= 0)
         voicelimit--;
 
     int running_voices = notePool.getRunningVoices();
     if(running_voices >= voicelimit)
-        notePool.enforceVoiceLimit(voicelimit);
+        notePool.enforceVoiceLimit(voicelimit, new_note);
 }
 
 /*
@@ -918,7 +918,7 @@ void Part::setvoicelimit(unsigned char Pvoicelimit_)
 {
     Pvoicelimit = Pvoicelimit_;
 
-    limit_voices(false);
+    limit_voices(-1);
 }
 
 /*

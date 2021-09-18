@@ -349,50 +349,73 @@ int NotePool::getRunningVoices(void) const
     return running_count;
 }
 
-void NotePool::enforceVoiceLimit(int limit)
+// Silence one voice, trying to the select the one that will be the least
+// intrusive, preferably preferred_note if possible..
+void NotePool::limitVoice(int preferred_note)
 {
-    int notes_to_kill = getRunningVoices() - limit;
-    if(notes_to_kill <= 0)
-        return;
-
-    // TODO: Loop the rest of the function once for each notes_to_kill.
-    // However, normally we are called once per new note played, so
-    // notes_to_kill will be at most one.
-
     NoteDescriptor *oldest_released = NULL;
+    NoteDescriptor *oldest_released_samenote = NULL;
     NoteDescriptor *oldest_sustained = NULL;
+    NoteDescriptor *oldest_sustained_samenote = NULL;
     NoteDescriptor *oldest_latched = NULL;
+    NoteDescriptor *oldest_latched_samenote = NULL;
     NoteDescriptor *oldest_playing = NULL;
+    NoteDescriptor *oldest_playing_samenote = NULL;
+
     for(auto &nd : activeDesc()) {
         // printf("Scanning %d (%s (%d), age %u)\n", nd.note, getStatus(nd.status), nd.status, nd.age);
         if (nd.released()) {
             if (!oldest_released || nd.age > oldest_released->age)
                 oldest_released = &nd;
+            if (nd.note == preferred_note &&
+                (!oldest_released_samenote || oldest_released_samenote->age))
+                oldest_released_samenote = &nd;
         } else if (nd.sustained()) {
             if (!oldest_sustained || nd.age > oldest_sustained->age)
                 oldest_sustained = &nd;
+            if (nd.note == preferred_note &&
+                (!oldest_sustained_samenote || oldest_sustained_samenote->age))
+                oldest_sustained_samenote = &nd;
         } else if (nd.latched()) {
             if (!oldest_latched || nd.age > oldest_latched->age)
                 oldest_latched = &nd;
+            if (nd.note == preferred_note &&
+                (!oldest_latched_samenote || oldest_latched_samenote->age))
+                oldest_latched_samenote = &nd;
         } else if (nd.playing()) {
             if (!oldest_playing || nd.age > oldest_playing->age)
                 oldest_playing = &nd;
+            if (nd.note == preferred_note &&
+                (!oldest_playing_samenote || oldest_playing_samenote->age))
+                oldest_playing_samenote = &nd;
         }
     }
 
     // Prioritize which note to kill: if a released note exists, take that,
     // otherwise sustained, latched or playing, in that order.
+    // Within each category, favour a voice that is already playing the
+    // same note, which minimizes stealing notes that are still playing
+    // something significant, especially when there are a lot of repeated
+    // notes being played.
     // If we don't have anything to kill, there's a logical error somewhere,
     // but we can't do anything about it here so just silently return.
 
     NoteDescriptor *to_kill = NULL;
 
-    if (oldest_released)
+    if (oldest_released_samenote)
+        to_kill = oldest_released_samenote;
+    else if (oldest_released)
         to_kill = oldest_released;
+    else if (oldest_sustained_samenote)
+        to_kill = oldest_sustained_samenote;
     else if (oldest_sustained)
         to_kill = oldest_sustained;
+    else if (oldest_latched_samenote)
+        to_kill = oldest_latched_samenote;
     else if (oldest_latched)
         to_kill = oldest_latched;
+    else if (oldest_playing_samenote)
+        to_kill = oldest_playing_samenote;
     else if (oldest_playing)
         to_kill = oldest_playing;
 
@@ -401,6 +424,15 @@ void NotePool::enforceVoiceLimit(int limit)
         entomb(*to_kill);
     }
 }
+
+void NotePool::enforceVoiceLimit(int limit, int preferred_note)
+{
+    int notes_to_kill = getRunningVoices() - limit;
+
+    while (notes_to_kill-- > 0)
+	limitVoice(preferred_note);
+}
+
 
 void NotePool::releasePlayingNotes(void)
 {

@@ -197,7 +197,7 @@ class Part
 
         NotePool notePool;
 
-        void limit_voices(bool account_for_new_note);
+        void limit_voices(int new_note);
 
         bool lastlegatomodevalid; // To keep track of previous legatomodevalid.
 

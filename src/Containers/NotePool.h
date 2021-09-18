@@ -139,7 +139,8 @@ class NotePool
         int getRunningNotes(void) const;
         void enforceKeyLimit(int limit);
         int getRunningVoices(void) const;
-        void enforceVoiceLimit(int limit);
+        void enforceVoiceLimit(int limit, int preferred_note);
+        void limitVoice(int preferred_note);
 
         void releasePlayingNotes(void);
         void releaseNote(note_t note);
