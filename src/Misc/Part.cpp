@@ -79,6 +79,10 @@ static const Ports partPorts = {
     rParamI(Pkeylimit, rShort("limit"), rProp(parameter),
     rMap(min,0), rMap(max, POLYPHONY), rDefault(15), "Key limit per part"),
 #undef rChangeCb
+#define rChangeCb obj->setvoicelimit(obj->Pvoicelimit);
+    rParamI(Pvoicelimit, rShort("vlimit"), rProp(parameter),
+    rMap(min,0), rMap(max, POLYPHONY), rDefault(0), "Voice limit per part"),
+#undef rChangeCb
 #define rChangeCb
     rParamZyn(Pminkey, rShort("min"), rDefault(0), "Min Used Key"),
     rParamZyn(Pmaxkey, rShort("max"), rDefault(127), "Max Used Key"),
@@ -363,6 +367,7 @@ void Part::cloneTraits(Part &p) const
     CLONE(Ppolymode);
     CLONE(Plegatomode);
     CLONE(Pkeylimit);
+    CLONE(Pvoicelimit);
 
     // Controller has a reference, so it can not be re-assigned
     // So, destroy and reconstruct it.
@@ -384,6 +389,7 @@ void Part::defaults()
     Pvelsns   = 64;
     Pveloffs  = 64;
     Pkeylimit = 15;
+    Pvoicelimit = 0;
     defaultsinstrument();
     ctl.defaults();
 }
@@ -577,6 +583,9 @@ bool Part::NoteOnInternal(note_t note,
         SynthParams pars{memory, ctl, synth, time, vel,
             portamento, note_log2_freq, false, prng()};
         const int sendto = Pkitmode ? item.sendto() : 0;
+
+        // Enforce voice limit, before we trigger new note
+        limit_voices(true);
 
         try {
             if(item.Padenabled)
@@ -881,6 +890,36 @@ void Part::setkeylimit(unsigned char Pkeylimit_)
         notePool.enforceKeyLimit(keylimit);
 }
 
+/*
+ * Enforce voice limit
+ */
+void Part::limit_voices(bool account_for_new_note)
+{
+    int voicelimit = Pvoicelimit;
+    if(voicelimit == 0) /* voice limit disabled */
+        return;
+
+    /* If we're called because a new note is imminent, we need to enforce
+     * one less note than the limit, so we don't go above the limit when the
+     * new note is triggered.
+     */
+    if (account_for_new_note)
+        voicelimit--;
+
+    int running_voices = notePool.getRunningVoices();
+    if(running_voices >= voicelimit)
+        notePool.enforceVoiceLimit(voicelimit);
+}
+
+/*
+ * Set Part's voice limit
+ */
+void Part::setvoicelimit(unsigned char Pvoicelimit_)
+{
+    Pvoicelimit = Pvoicelimit_;
+
+    limit_voices(false);
+}
 
 /*
  * Prepare all notes to be turned off
@@ -1115,6 +1154,7 @@ void Part::add2XML(XMLwrapper& xml)
     xml.addparbool("poly_mode", Ppolymode);
     xml.addpar("legato_mode", Plegatomode);
     xml.addpar("key_limit", Pkeylimit);
+    xml.addpar("voice_limit", Pvoicelimit);
 
     xml.beginbranch("INSTRUMENT");
     add2XMLinstrument(xml);
@@ -1338,6 +1378,7 @@ void Part::getfromXML(XMLwrapper& xml)
     if(!Plegatomode)
         Plegatomode = xml.getpar127("legato_mode", Plegatomode);
     Pkeylimit = xml.getpar127("key_limit", Pkeylimit);
+    Pvoicelimit = xml.getpar127("voice_limit", Pvoicelimit);
 
 
     if(xml.enterbranch("INSTRUMENT")) {

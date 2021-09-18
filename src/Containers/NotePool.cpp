@@ -335,6 +335,73 @@ void NotePool::enforceKeyLimit(int limit)
     }
 }
 
+int NotePool::getRunningVoices(void) const
+{
+    int running_count = 0;
+
+    for(auto &desc:activeDesc()) {
+        // We don't count entombed voices as they will soon be dropped
+        if (desc.entombed())
+            continue;
+        running_count++;
+    }
+
+    return running_count;
+}
+
+void NotePool::enforceVoiceLimit(int limit)
+{
+    int notes_to_kill = getRunningVoices() - limit;
+    if(notes_to_kill <= 0)
+        return;
+
+    // TODO: Loop the rest of the function once for each notes_to_kill.
+    // However, normally we are called once per new note played, so
+    // notes_to_kill will be at most one.
+
+    NoteDescriptor *oldest_released = NULL;
+    NoteDescriptor *oldest_sustained = NULL;
+    NoteDescriptor *oldest_latched = NULL;
+    NoteDescriptor *oldest_playing = NULL;
+    for(auto &nd : activeDesc()) {
+        // printf("Scanning %d (%s (%d), age %u)\n", nd.note, getStatus(nd.status), nd.status, nd.age);
+        if (nd.released()) {
+            if (!oldest_released || nd.age > oldest_released->age)
+                oldest_released = &nd;
+        } else if (nd.sustained()) {
+            if (!oldest_sustained || nd.age > oldest_sustained->age)
+                oldest_sustained = &nd;
+        } else if (nd.latched()) {
+            if (!oldest_latched || nd.age > oldest_latched->age)
+                oldest_latched = &nd;
+        } else if (nd.playing()) {
+            if (!oldest_playing || nd.age > oldest_playing->age)
+                oldest_playing = &nd;
+        }
+    }
+
+    // Prioritize which note to kill: if a released note exists, take that,
+    // otherwise sustained, latched or playing, in that order.
+    // If we don't have anything to kill, there's a logical error somewhere,
+    // but we can't do anything about it here so just silently return.
+
+    NoteDescriptor *to_kill = NULL;
+
+    if (oldest_released)
+        to_kill = oldest_released;
+    else if (oldest_sustained)
+        to_kill = oldest_sustained;
+    else if (oldest_latched)
+        to_kill = oldest_latched;
+    else if (oldest_playing)
+        to_kill = oldest_playing;
+
+    if (to_kill) {
+        // printf("Will kill %d (age %d)\n", to_kill->note, to_kill->age);
+        entomb(*to_kill);
+    }
+}
+
 void NotePool::releasePlayingNotes(void)
 {
     for(auto &d:activeDesc()) {

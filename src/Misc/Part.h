@@ -123,6 +123,7 @@ class Part
 
         //Part parameters
         void setkeylimit(unsigned char Pkeylimit);
+        void setvoicelimit(unsigned char Pvoicelimit);
         void setkititemstatus(unsigned kititem, bool Penabled_);
 
         unsigned char partno; /**<if it's the Master's first part*/
@@ -149,6 +150,7 @@ class Part
         bool Plegatomode; // 0=normal, 1=legato
         bool Platchmode; // 0=normal, 1=latch
         unsigned char Pkeylimit; //how many keys are allowed to be played same time (0=off), the older will be released
+        unsigned char Pvoicelimit; //how many voices are allowed to be played same time (0=off), the older will be entombed
 
         char *Pname; //name of the instrument
         struct { //instrument additional information
@@ -194,6 +196,8 @@ class Part
         bool killallnotes;
 
         NotePool notePool;
+
+        void limit_voices(bool account_for_new_note);
 
         bool lastlegatomodevalid; // To keep track of previous legatomodevalid.
 
