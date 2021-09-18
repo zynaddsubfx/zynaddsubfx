@@ -35,7 +35,8 @@ enum PrivateNoteStatus {
     KEY_OFF                    = 0x00,
     KEY_PLAYING                = 0x01,
     KEY_RELEASED_AND_SUSTAINED = 0x02,
-    KEY_RELEASED               = 0x03
+    KEY_RELEASED               = 0x03,
+    KEY_ENTOMBED               = 0x04
 };
 
 
@@ -710,6 +711,8 @@ class KitTest
             part->NoteOn(67, 127, 0);
             part->NoteOn(68, 127, 0);
 
+            printf("Keylimit 3: After noteons:\n");
+            pool.dump();
             //Verify that notes are spawned as expected with limit
             TS_ASSERT_EQUAL_INT(pool.getRunningNotes(),  3);//2 entombed
             TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),     5);
@@ -747,7 +750,7 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
             TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 65);
             TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 66);
-            TS_ASSERT_EQUAL_INT(pool.ndesc[2].status, KEY_RELEASED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].status, KEY_ENTOMBED);
             TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 67);
 
             part->NoteOn(68, 127, 0);
@@ -759,9 +762,9 @@ class KitTest
             //Check that the result is {64, 68, 67}
             TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
             TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 65);
-            TS_ASSERT_EQUAL_INT(pool.ndesc[1].status, KEY_RELEASED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].status, KEY_ENTOMBED);
             TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 66);
-            TS_ASSERT_EQUAL_INT(pool.ndesc[2].status, KEY_RELEASED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].status, KEY_ENTOMBED);
             TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 67);
             TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
         }
