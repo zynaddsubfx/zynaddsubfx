@@ -44,6 +44,8 @@ class NotePool
             bool off(void) const;
             bool sustained(void) const;
             bool released(void) const;
+            bool entombed(void) const;
+            bool dying(void) const;
             bool latched(void) const;
 
             //status transitions

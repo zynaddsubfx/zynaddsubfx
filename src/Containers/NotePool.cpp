@@ -26,7 +26,8 @@ enum NoteStatus {
     KEY_PLAYING                = 0x01,
     KEY_RELEASED_AND_SUSTAINED = 0x02,
     KEY_RELEASED               = 0x03,
-    KEY_LATCHED                = 0x04
+    KEY_ENTOMBED               = 0x04,
+    KEY_LATCHED                = 0x05
 };
 
 const char *getStatus(int status)
@@ -37,6 +38,7 @@ const char *getStatus(int status)
         case KEY_PLAYING:                 return "PLAY";
         case KEY_RELEASED_AND_SUSTAINED:  return "SUST";
         case KEY_RELEASED:                return "RELA";
+        case KEY_ENTOMBED:                return "TOMB";
         case KEY_LATCHED:                 return "LTCH";
         default:                          return "INVD";
     }
@@ -67,6 +69,18 @@ bool NotePool::NoteDescriptor::sustained(void) const
 bool NotePool::NoteDescriptor::released(void) const
 {
     return (status&NOTE_MASK) == KEY_RELEASED;
+}
+
+bool NotePool::NoteDescriptor::entombed(void) const
+{
+    return (status&NOTE_MASK) == KEY_ENTOMBED;
+}
+
+// Notes that are no longer playing, for whatever reason.
+bool NotePool::NoteDescriptor::dying(void) const
+{
+    return (status&NOTE_MASK) == KEY_ENTOMBED ||
+           (status&NOTE_MASK) == KEY_RELEASED;
 }
 
 bool NotePool::NoteDescriptor::off(void) const
@@ -300,12 +314,13 @@ void NotePool::enforceKeyLimit(int limit)
             //There must be something to kill
             oldest  = nd.age;
             to_kill = &nd;
-        } else if(to_kill->released() && nd.playing()) {
+        } else if(to_kill->dying() && nd.playing()) {
             //Prefer to kill off a running note
             oldest = nd.age;
             to_kill = &nd;
-        } else if(nd.age > oldest && !(to_kill->playing() && nd.released())) {
-            //Get an older note when it doesn't move from running to released
+        } else if(nd.age > oldest && !(to_kill->playing() && nd.dying())) {
+            //Get an older note when it doesn't move from running to
+            //released (or entombed)
             oldest = nd.age;
             to_kill = &nd;
         }
@@ -313,7 +328,7 @@ void NotePool::enforceKeyLimit(int limit)
 
     if(to_kill) {
         auto &tk = *to_kill;
-        if(tk.released() || tk.sustained())
+        if(tk.dying() || tk.sustained())
             kill(*to_kill);
         else
             entomb(*to_kill);
@@ -381,7 +396,7 @@ void NotePool::kill(SynthDescriptor &s)
 
 void NotePool::entomb(NoteDescriptor &d)
 {
-    d.setStatus(KEY_RELEASED);
+    d.setStatus(KEY_ENTOMBED);
     for(auto &s:activeNotes(d))
         s.note->entomb();
 }
