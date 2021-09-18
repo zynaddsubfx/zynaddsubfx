@@ -138,6 +138,8 @@ class NotePool
         bool existsRunningNote(void) const;
         int getRunningNotes(void) const;
         void enforceKeyLimit(int limit);
+        int getRunningVoices(void) const;
+        void enforceVoiceLimit(int limit);
 
         void releasePlayingNotes(void);
         void releaseNote(note_t note);

@@ -45,6 +45,7 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="poly_mode" value="yes" />
 <par name="legato_mode" value="0" />
 <par name="key_limit" value="15" />
+<par name="voice_limit" value="0" />
 <INSTRUMENT>
 <INFO>
 <string name="name">Dist Guitar 2</string>
@@ -1301,6 +1302,7 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="poly_mode" value="yes" />
 <par name="legato_mode" value="0" />
 <par name="key_limit" value="15" />
+<par name="voice_limit" value="0" />
 <INSTRUMENT>
 <INFO>
 <string name="name"></string>
@@ -1573,6 +1575,7 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="poly_mode" value="yes" />
 <par name="legato_mode" value="0" />
 <par name="key_limit" value="15" />
+<par name="voice_limit" value="0" />
 <INSTRUMENT>
 <INFO>
 <string name="name"></string>
