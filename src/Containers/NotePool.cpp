@@ -29,6 +29,18 @@ enum NoteStatus {
     KEY_LATCHED                = 0x04
 };
 
+const char *getStatus(int status)
+{
+    switch((enum NoteStatus)(status&NOTE_MASK))
+    {
+        case KEY_OFF:                     return "OFF ";
+        case KEY_PLAYING:                 return "PLAY";
+        case KEY_RELEASED_AND_SUSTAINED:  return "SUST";
+        case KEY_RELEASED:                return "RELA";
+        case KEY_LATCHED:                 return "LTCH";
+        default:                          return "INVD";
+    }
+}
 
 NotePool::NotePool(void)
     :needs_cleaning(0)
@@ -372,19 +384,6 @@ void NotePool::entomb(NoteDescriptor &d)
     d.setStatus(KEY_RELEASED);
     for(auto &s:activeNotes(d))
         s.note->entomb();
-}
-
-const char *getStatus(int status_bits)
-{
-    switch(status_bits)
-    {
-        case 0:  return "OFF ";
-        case 1:  return "PLAY";
-        case 2:  return "SUST";
-        case 3:  return "RELA";
-        case 4:  return "LTCH";
-        default: return "INVD";
-    }
 }
 
 void NotePool::cleanup(void)
