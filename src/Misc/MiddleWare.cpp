@@ -197,6 +197,8 @@ void deallocate(const char *str, void *v)
         delete (SclInfo*)v;
     else if(!strcmp(str, "Microtonal"))
         delete (Microtonal*)v;
+    else if(!strcmp(str, "PADsample"))
+        delete[] (float*)v;
     else
         fprintf(stderr, "Unknown type '%s', leaking pointer %p!!\n", str, v);
 }
