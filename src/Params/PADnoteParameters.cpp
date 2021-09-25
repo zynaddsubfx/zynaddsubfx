@@ -88,15 +88,17 @@ static const rtosc::Ports realtime_ports =
         [](const char *m, rtosc::RtData &d)
         {
             // MiddleWare calls this to send the generated sample buffers to us
+            assert(rtosc_argument(m,2).b.len == sizeof(void*));
             PADnoteParameters *p = (PADnoteParameters*)d.obj;
             const char *mm = m;
             while(!isdigit(*mm))++mm;
             int n = atoi(mm);
+            float *oldsmp = p->sample[n].smp;
             p->sample[n].size     = rtosc_argument(m,0).i;
             p->sample[n].basefreq = rtosc_argument(m,1).f;
             p->sample[n].smp      = *(float**)rtosc_argument(m,2).b.data;
-
-            //XXX TODO memory management (deallocation of smp buffer)
+            if (oldsmp)
+                d.reply("/free", "sb", "PADsample", sizeof(void*), &oldsmp);
         }},
     //weird stuff for PCoarseDetune
     {"detunevalue:", rMap(unit,cents) rDoc("Get detune value"), NULL,
