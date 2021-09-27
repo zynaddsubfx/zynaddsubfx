@@ -769,6 +769,260 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
         }
 
+        void testVoiceLimit(void)
+        {
+            auto &pool = part->notePool;
+            //Verify that without a voice limit, several notes can be run
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(65, 127, 0);
+            part->NoteOn(66, 127, 0);
+            part->NoteOn(67, 127, 0);
+            part->NoteOn(68, 127, 0);
+
+            //Verify that notes are spawned as expected
+            TS_ASSERT_EQUAL_INT(pool.getRunningNotes(),  5);
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  5);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 5);
+
+            //Enable voice limit
+            part->setvoicelimit(3);
+
+            //Verify that the voice limit has been immediately enforced
+            TS_ASSERT_EQUAL_INT(pool.getRunningNotes(),  3);//2 entombed
+            pool.dump();
+
+            //With equal age, the notes with the lowest desciptor numbers
+            //can be assumed to be "oldest", so verify that they are the
+            //ones that are entombed.
+            pool.cleanup();
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].status, KEY_ENTOMBED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 65);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].status, KEY_ENTOMBED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 66);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 67);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
+
+            //Reset the part
+            part->monomemClear();
+            pool.killAllNotes();
+
+            //Verify that notes are despawned
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  0);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 0);
+
+            //Now to test note stealing in real time
+
+            //Play notes
+            //Now, the voice limit should be enforced in real time
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(65, 127, 0);
+            part->NoteOn(66, 127, 0);
+            part->NoteOn(67, 127, 0);
+
+            //Verify that notes are spawned as expected with limit
+            TS_ASSERT_EQUAL_INT(pool.getRunningNotes(),  3);//1 entombed
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),     4);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(),    4);
+
+            //Verify correct one entombed
+            pool.cleanup();
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].status, KEY_ENTOMBED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 65);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 66);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 67);
+
+            //One more note
+            part->NoteOn(68, 127, 0);
+
+            //Verify that notes are spawned as expected with limit
+            TS_ASSERT_EQUAL_INT(pool.getRunningNotes(),  3);//2 entombed
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),     5);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(),    5);
+
+            //Verify correct ones entombed
+            pool.cleanup();
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].status, KEY_ENTOMBED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 65);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].status, KEY_ENTOMBED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 66);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 67);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
+
+            //Reset the part
+            part->monomemClear();
+            pool.killAllNotes();
+
+            //Verify that notes are despawned
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  0);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 0);
+
+            //Now to test that the oldest ones are stolen first
+
+            //Replay notes
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(65, 127, 0);
+            part->NoteOn(66, 127, 0);
+
+            //Verify that note pool is full
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  3);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 3);
+
+            //Age the notes
+            pool.ndesc[1].age = 50;
+            pool.ndesc[2].age = 500;
+
+            //Inject two more notes which should steal the note
+            //descriptors for #66 and #65
+            //First one, it should steal the oldest one
+            part->NoteOn(67, 127, 0);
+
+            pool.cleanup();
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 65);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 66);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].status, KEY_ENTOMBED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 67);
+
+            //And the the other, it should steal the next-to-oldest one
+            part->NoteOn(68, 127, 0);
+
+            //Verify that note pool is full and entombed
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  5);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 5);
+            TS_ASSERT_EQUAL_INT(pool.getRunningNotes(),  3);//2 entombed
+
+            //Check that the result is {64, 68, 67}
+            pool.cleanup();
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 65);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].status, KEY_ENTOMBED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 66);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].status, KEY_ENTOMBED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 67);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
+
+            //Reset the part
+            part->monomemClear();
+            pool.killAllNotes();
+
+            //Verify that notes are despawned
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  0);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 0);
+
+            //Now to test that released notes are stolen first, then
+            //sustained, regardless of age
+
+            //Replay notes
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(65, 127, 0);
+            part->NoteOn(66, 127, 0);
+
+            //Age the notes
+            pool.ndesc[0].age = 50;
+            pool.ndesc[1].age = 10;
+            pool.ndesc[2].age = 5;
+            // Adjust status so we can test priorities
+            pool.ndesc[1].status = KEY_RELEASED_AND_SUSTAINED;
+            pool.ndesc[2].status = KEY_RELEASED;
+
+            //Verify that note pool is full
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  3);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 3);
+
+            //Inject one note which should steal the note
+            //descriptor for #66 (RELEASED) rather than #64 (oldest)
+            //or #65 (RELEASED_AND_SUSTAINED)
+            part->NoteOn(67, 127, 0);
+
+            //Verify the note pool
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  4);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 4);
+            TS_ASSERT_EQUAL_INT(pool.getRunningNotes(),  3);//1 entombed
+
+            pool.cleanup();
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 65);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 66);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].status, KEY_ENTOMBED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 67);
+
+            //Inject yet one more note which should steal the note
+            //descriptor for #65 (RELEASED_AND_SUSTAINED) rather than
+            //#64 (oldest)
+            part->NoteOn(68, 127, 0);
+
+            //Verify the note pool
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  5);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 5);
+            TS_ASSERT_EQUAL_INT(pool.getRunningNotes(),  3);//2 entombed
+
+            pool.cleanup();
+            pool.dump();
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 65);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].status, KEY_ENTOMBED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 66);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].status, KEY_ENTOMBED);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 67);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[4].note, 68);
+
+            //Reset the part
+            part->monomemClear();
+            pool.killAllNotes();
+
+            //Verify that notes are despawned
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  0);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 0);
+
+            //Now to test that notes with the same number are
+            //stolen before others
+
+            //Replay notes
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(65, 127, 0);
+            part->NoteOn(66, 127, 0);
+
+            //Verify that note pool is full
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  3);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 3);
+
+            //Age the notes and change state
+            //Since the note assigner when presented with a note which is
+            //already active puts the previous one in the RELEASED state
+            //(with the SUSTAIN bit set), prior to voice limiting, we
+            //need to put all the notes in the RELEASED state so that
+            //we actually test that the voice limiting prioritization
+            //between notes in the same state.
+            pool.ndesc[0].age = 50;
+            pool.ndesc[2].age = 500;
+            pool.ndesc[0].status = KEY_RELEASED;
+            pool.ndesc[1].status = KEY_RELEASED;
+            pool.ndesc[2].status = KEY_RELEASED;
+
+            //Inject another #65 which should steal the note
+            //descriptor for the existing #65, even though
+            //#66 is older, and #64 is earlier in the list
+            part->NoteOn(65, 127, 0);
+
+            //Verify note pool
+            TS_ASSERT_EQUAL_INT(pool.usedNoteDesc(),  4);
+            TS_ASSERT_EQUAL_INT(pool.usedSynthDesc(), 4);
+            TS_ASSERT_EQUAL_INT(pool.getRunningNotes(),  1);//only one playing
+
+            pool.cleanup();
+            //The note that we're expecting to be entombed, has previously
+            //had its SUSTAIN bit set (see above, and testSustainCase1), so
+            //we're expecting that to be retained when the note is entombed.
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 65);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].status, KEY_ENTOMBED|SUSTAIN_BIT);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 66);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 65);
+        }
+
         void tearDown() {
             delete part;
             delete[] outL;
@@ -794,5 +1048,6 @@ int main()
     RUN_TEST(testSingleKitYesLegatoNoMono);
     RUN_TEST(testSingleKitNoLegatoYesMono);
     RUN_TEST(testKeyLimit);
+    RUN_TEST(testVoiceLimit);
     return test_summary();
 }
