@@ -139,7 +139,7 @@ typedef std::complex<fftwf_real> fft_t;
 /*
  * Number of "strings" in Sympathetic Resonance Effect
  */
-#define NUM_SYMPATHETIC_STRINGS 36
+#define NUM_SYMPATHETIC_STRINGS 264
 
 /*
  * How is applied the velocity sensing

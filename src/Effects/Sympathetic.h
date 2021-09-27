@@ -46,16 +46,19 @@ class Sympathetic:public Effect
         unsigned char Pq;            //0=0.95 ... 127=1.05
         unsigned char Punison_size;  //number of unison strings
         unsigned char Punison_frequency_spread;
+        unsigned char Pstrings;
+        unsigned char Pbasenote;
+        unsigned char Pcrossgain;
         
         unsigned char spread, spread_old;
         float unison_real_spread_up, unison_real_spread_down;
         
         float freqs[NUM_SYMPATHETIC_STRINGS];
-
+        float baseFreq;
         void setvolume(unsigned char _Pvolume);
         void setlpf(unsigned char _Plpf);
         void sethpf(unsigned char _Phpf);
-        void calcFreqs(unsigned char unison_size, unsigned char spread);
+        void calcFreqs();
 
         //Real Parameters
         class AnalogFilter * lpfl, *lpfr, *hpfl, *hpfr;

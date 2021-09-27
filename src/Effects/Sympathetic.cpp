@@ -42,6 +42,14 @@ rtosc::Ports Sympathetic::ports = {
     rEffPar(Phpf, 8, rShort("hpf"), rDefault(0), "High Pass Cutoff"),
     rEffPar(Punison_size, 9, rShort("unison"), rDefault(1),
             "Number of Unison Strings"),
+    rEffPar(Pstrings, 10, rShort("strings"), rDefault(12),
+            "Number of Strings"),
+    rEffPar(Pbasenote, 11, rShort("base"), rDefault(57), // basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
+            "Midi Note of Lowest String"),
+    rEffPar(Pcrossgain, 12, rShort("cross"), rDefault(0), 
+            "Crossgain between neigbouring notes"),
+    rArrayF(freqs, 88, rLinear(27.50f,4186.01f),
+           "String Frequencies"),
 };
 
 #undef rBegin
@@ -60,16 +68,16 @@ Sympathetic::Sympathetic(EffectParams pars)
       Pstereo(0),
       Pq(65),
       Punison_size(1),
-      Punison_frequency_spread(30)
+      Punison_frequency_spread(30),
+      baseFreq(220.0f)
 {
     lpfl = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
     lpfr = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
     hpfl = memory.alloc<AnalogFilter>(3, 20, 1, 0, pars.srate, pars.bufsize);
     hpfr = memory.alloc<AnalogFilter>(3, 20, 1, 0, pars.srate, pars.bufsize);
     
-    filterBank = memory.alloc<CombFilterBank>(&memory, pars.srate, pars.bufsize, NUM_SYMPATHETIC_STRINGS);
-    calcFreqs(Punison_size,Punison_frequency_spread); // sets freqs
-    setpreset(Ppreset);
+    filterBank = memory.alloc<CombFilterBank>(&memory, pars.srate, pars.bufsize);
+    calcFreqs(); // sets freqs
     cleanup();
 }
 
@@ -174,61 +182,61 @@ void Sympathetic::sethpf(unsigned char _Phpf)
     hpfr->setfreq(fr);
 }
 
-void Sympathetic::calcFreqs(unsigned char unison_size, unsigned char spread)
+void Sympathetic::calcFreqs()
 {
+    float unison_spread_semicent = powf(Punison_frequency_spread / 63.5f, 2.0f) * 25.0f;
+    unison_real_spread_up = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
+    unison_real_spread_down = 1.0f/unison_real_spread_up;
 
-    if(spread!=spread_old)
+    switch(Ppreset)
     {
-        spread_old = spread;
-        float unison_spread_semicent = powf(spread / 63.5f, 2.0f) * 25.0f;
-        unison_real_spread_up = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
-        unison_real_spread_down = 1.0f/unison_real_spread_up;
+        case 0:
+        case 1:
+            for(unsigned int i = 0; i < Punison_size*Pstrings; i+=Punison_size)
+            {
+                const float centerFreq = powf(2.0f, (float)i / 12.0f) * baseFreq;
+                filterBank->freqs[i] = centerFreq;
+                if (Punison_size > 1) filterBank->freqs[i+1] = centerFreq * unison_real_spread_up;
+                if (Punison_size > 2) filterBank->freqs[i+2] = centerFreq * unison_real_spread_down;
+            } 
+            filterBank->setStrings(Pstrings*Punison_size,baseFreq);
+            break;
+        
+        case 2:
+        case 3:
+            const float guitar_freqs[6] = {82.41, 110.00, 146.83, 196.00, 246.94, 329.63};
+            for(unsigned int i = 0; i < 6; ++i)
+            {
+                filterBank->freqs[i] = guitar_freqs[i];
+            }
+            
+            if (Punison_size > 1) 
+            {
+                for(unsigned int i = 6; i < 12; ++i)
+                {
+                    filterBank->freqs[i] = guitar_freqs[i-6] * 2.0f * unison_real_spread_up;
+                }
+            }
+            filterBank->setStrings(Pstrings*Punison_size,82.0f);
+            break;
     }
-
-    filterBank-> nrOfStrings = 12;
-    for(unsigned int i = 0; i < 12; ++i)
-    {
-        filterBank->freqs[i] = powf(2.0f, (float)i / 12.0f) * 220.0f;
-    }
-    
-    if (unison_size > 1) 
-    {
-        filterBank->nrOfStrings = 24;
-        for(unsigned int i = 12; i < 24; ++i)
-        {
-            filterBank->freqs[i] = powf(2.0f, (float)(i-12) / 12.0f) * 440.0f * unison_real_spread_up;
-        }
-    }
-    
-    if (unison_size > 2)
-    {
-        filterBank->nrOfStrings = 36;
-        for(unsigned int i = 24; i < 36; ++i)
-        {
-            filterBank->freqs[i] = powf(2.0f, (float)(i-24) / 12.0f) * 440.0f * unison_real_spread_down;
-        }
-    }
-    
 
 }
 
 unsigned char Sympathetic::getpresetpar(unsigned char npreset, unsigned int npar)
 {
 #define	PRESET_SIZE 13
-#define	NUM_PRESETS 6
+#define	NUM_PRESETS 4
     static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
-        //Overdrive 1
-        {127, 64, 35, 56, 70, 0, 0, 96,  0,   0, 0, 32, 64},
-        //Overdrive 2
-        {127, 64, 35, 29, 75, 1, 0, 127, 0,   0, 0, 32, 64},
-        //A. Exciter 1
-        {64,  64, 35, 75, 80, 5, 0, 127, 105, 1, 0, 32, 64},
-        //A. Exciter 2
-        {64,  64, 35, 85, 62, 1, 0, 127, 118, 1, 0, 32, 64},
-        //Guitar Amp
-        {127, 64, 35, 63, 75, 2, 0, 55,  0,   0, 0, 32, 64},
-        //Quantisize
-        {127, 64, 35, 88, 75, 4, 0, 127, 0,   1, 0, 32, 64}
+        //Vol Pan Q Drive Lev Spr neg lp hp sz  strings note cross
+        //Piano 12-String
+        {100, 64, 125, 5, 80, 10, 0, 127, 0, 3,   12,  57, 0},
+        //Piano 60-String
+        {80,  64, 125, 5, 90, 5,  0, 127, 0, 1,   60,  33, 0},
+        //Guitar 6-String
+        {100, 64, 110, 5, 65, 0,  0, 127, 0, 1,    6,  52, 0},
+        //Guitar 12-String
+        {90,  64, 110, 5, 77, 10, 0, 127, 0, 2,    6,  52, 0},
     };
     if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
         if(npar == 0 && insertion == 0) {
@@ -262,7 +270,7 @@ void Sympathetic::changepar(int npar, unsigned char value)
             break;
         case 2:
             Pq = value;
-            filterBank->gainbwd = 0.873f + (float)value/1000.0f;
+            filterBank->gainbwd = 0.873f + (float)Pq/1000.0f;
             break;
         case 3:
             Pdrive = value;
@@ -274,7 +282,7 @@ void Sympathetic::changepar(int npar, unsigned char value)
             break;
         case 5:
             Punison_frequency_spread = value;
-            calcFreqs(Punison_size, Punison_frequency_spread);
+            calcFreqs();
             break;
         case 6:
             if(value > 1)
@@ -290,7 +298,22 @@ void Sympathetic::changepar(int npar, unsigned char value)
             break;
         case 9:
             Punison_size = limit(value, (unsigned char) 1, (unsigned char) 3);
-            calcFreqs(Punison_size, Punison_frequency_spread);
+            calcFreqs();
+            break;
+        case 10:
+            Pstrings = limit(value, (unsigned char) 1, (unsigned char) 88);
+            calcFreqs();
+            break;
+        case 11:
+            Pbasenote = value;
+            baseFreq = powf(2.0f, ((float)Pbasenote-69.0f)/12.0f)*440.0f;
+            calcFreqs();
+            break;
+        case 12:
+            Pcrossgain = value;
+            filterBank->crossgain = (float)Pcrossgain/1000.0f;
+            break;
+        default:
             break;
     }
 }
@@ -308,6 +331,9 @@ unsigned char Sympathetic::getpar(int npar) const
         case 7:  return Plpf;
         case 8:  return Phpf;
         case 9:  return Punison_size;
+        case 10: return Pstrings;
+        case 11: return Pbasenote;
+        case 12: return Pcrossgain;
         default: return 0; //in case of bogus parameter number
     }
 }
