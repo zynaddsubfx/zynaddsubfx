@@ -43,7 +43,7 @@ namespace zyn {
             {
                 for(unsigned int i = nrOfStrings; i < nrOfStringsNew; ++i)
                 {
-                    output[i] = (float*)memory.alloc_mem(mem_size*sizeof(float));
+                    output[i] = memory.valloc<float>(mem_size);
                     memset(output[i], 0, mem_size*sizeof(float));
                 }
             }
@@ -61,7 +61,7 @@ namespace zyn {
             // allocate buffer with new size
             for(unsigned int i = 0; i < nrOfStringsNew; ++i)
             {
-                output[i] = (float*)memory.alloc_mem(mem_size*sizeof(float));
+                output[i] = memory.valloc<float>(mem_size);
                 memset(output[i], 0, mem_size*sizeof(float));
             }
             baseFreq = baseFreqNew;
