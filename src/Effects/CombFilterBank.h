@@ -16,11 +16,11 @@ class CombFilterBank
     ~CombFilterBank();
     void filterout(float *smp);
    
-    float freqs[NUM_SYMPATHETIC_STRINGS];
+    float freqs[NUM_SYMPATHETIC_STRINGS]={};
     float inputgain;
     float outgain;
-    float gainbwd;
-    float crossgain;
+    float gainbwd=0.0f;
+    float crossgain=0.0f;
     
     void setStrings(unsigned int nr, float basefreq);
   
@@ -31,15 +31,15 @@ class CombFilterBank
     
     float* output[NUM_SYMPATHETIC_STRINGS] = {};
     float baseFreq;
-    unsigned int nrOfStrings;
+    unsigned int nrOfStrings=0;
     
     /* for smoothing gain jump when using binary valued sustain pedal */
     Value_Smoothing_Filter gain_smoothing; 
     
     Allocator &memory;
-    unsigned int mem_size;
-    int samplerate;
-    unsigned int buffersize;
+    unsigned int mem_size=0;
+    int samplerate=0;
+    unsigned int buffersize=0;
     
     
 };

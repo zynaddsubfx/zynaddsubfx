@@ -49,16 +49,15 @@ namespace zyn {
             }
             else if(nrOfStringsNew<nrOfStrings) 
                 for(unsigned int i = nrOfStringsNew; i < nrOfStrings; ++i)
-                    memory.dealloc(output[i]);
+                    memory.devalloc(output[i]);
         } else
         {
             // free the old buffers (wrong size for baseFreqNew)
             for(unsigned int i = 0; i < nrOfStrings; ++i)
-                memory.dealloc(output[i]);
+                memory.devalloc(output[i]);
             // update mem_size
             mem_size = mem_size_new;
-            printf("mem_size: %d\n", mem_size);
-            // allocate buffer with new size
+            // allocate buffers with new size
             for(unsigned int i = 0; i < nrOfStringsNew; ++i)
             {
                 output[i] = memory.valloc<float>(mem_size);
