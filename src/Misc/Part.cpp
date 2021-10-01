@@ -120,16 +120,8 @@ static const Ports partPorts = {
     {"captureMax:", rDoc("Capture maximum valid note"), NULL,
         [](const char *, RtData &r)
         {Part *p = (Part*)r.obj; p->Pmaxkey = p->lastnote;}},
-    {"polyType::c:i", rProp(parameter) rOptions(Polyphonic, Monophonic, Legato, Latch)
-        rDoc("Synthesis polyphony type\n"
-                "Polyphonic - Each note is played independently\n"
-                "Monophonic - A single note is played at a time with"
-                " envelopes resetting between notes\n"
-                "Legato     - A single note is played at a time without"
-                " envelopes resetting between notes\n"
-                "Latch     - Notes are released when a new one is hit "
-                " after key release\n"
-            ), NULL,
+    {"polyType::c:i", rProp(parameter) rOptions(Poly, Mono, Legato, Latch)
+        rDoc("Synthesis polyphony type\n"), NULL,
         [](const char *msg, RtData &d)
         {
             Part *p = (Part*)d.obj;
