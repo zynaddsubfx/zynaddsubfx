@@ -9,7 +9,7 @@ set_target_properties(ZynReverb_lv2 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "lv2")
 set_target_properties(ZynReverb_lv2 PROPERTIES OUTPUT_NAME "ZynReverb")
 set_target_properties(ZynReverb_lv2 PROPERTIES PREFIX "")
 
-set_target_properties(ZynReverb_vst PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_VST")
+set_target_properties(ZynReverb_vst PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_VST2")
 set_target_properties(ZynReverb_vst PROPERTIES LIBRARY_OUTPUT_DIRECTORY "vst")
 set_target_properties(ZynReverb_vst PROPERTIES OUTPUT_NAME "ZynReverb")
 set_target_properties(ZynReverb_vst PROPERTIES PREFIX "")

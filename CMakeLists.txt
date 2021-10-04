@@ -15,7 +15,7 @@ if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/rtosc/CMakeLists.txt")
     message(STATUS "RTOSC NOT FOUND")
     message(STATUS "Attempting to checkout submodule")
     find_package(Git REQUIRED)
-    execute_process(COMMAND git submodule update --init)
+    execute_process(COMMAND git submodule update --init --recursive)
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/rtosc/CMakeLists.txt")
         message(FATAL_ERROR "FAILED TO CHECKOUT RTOSC\n"
         "please check file permissions and your network")
