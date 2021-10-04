@@ -56,12 +56,32 @@ add_library(ZynAddSubFX_lv2 SHARED
     ZynAddSubFX.cpp)
 
 add_library(ZynAddSubFX_lv2_ui SHARED
-    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Geometry.cpp
-    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Widget.cpp
-    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Window.cpp
     ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Application.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/ApplicationPrivateData.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Color.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/EventHandlers.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Geometry.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/ImageBase.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/ImageBaseWidgets.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/OpenGL.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Resources.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/SubWidget.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/SubWidgetPrivateData.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/TopLevelWidget.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/TopLevelWidgetPrivateData.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Widget.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/WidgetPrivateData.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Window.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/WindowPrivateData.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/pugl.cpp
     ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoUIMain.cpp
     ZynAddSubFX-UI-Zest.cpp)
+
+target_include_directories(
+       ZynAddSubFX_lv2_ui
+       PRIVATE
+       ${CMAKE_SOURCE_DIR}/DPF/dgl/src/pugl-upstream/include/)
+
 endif()
 
 add_library(ZynAddSubFX_vst SHARED
@@ -69,12 +89,31 @@ add_library(ZynAddSubFX_vst SHARED
     ${CMAKE_SOURCE_DIR}/src/UI/ConnectionDummy.cpp
     ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPluginMain.cpp
     ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoUIMain.cpp
-    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Geometry.cpp
-    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Widget.cpp
-    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Window.cpp
     ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Application.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/ApplicationPrivateData.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Color.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/EventHandlers.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Geometry.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/ImageBase.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/ImageBaseWidgets.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/OpenGL.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Resources.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/SubWidget.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/SubWidgetPrivateData.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/TopLevelWidget.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/TopLevelWidgetPrivateData.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Widget.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/WidgetPrivateData.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/Window.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/WindowPrivateData.cpp
+    ${CMAKE_SOURCE_DIR}/DPF/dgl/src/pugl.cpp
     ZynAddSubFX.cpp
     ZynAddSubFX-UI-Zest.cpp)
+
+target_include_directories(
+       ZynAddSubFX_vst
+       PRIVATE
+       ${CMAKE_SOURCE_DIR}/DPF/dgl/src/pugl-upstream/include/)
 
 else()
 
