@@ -275,8 +275,6 @@ int Controller::initportamento(float oldfreq_log2,
                                float newfreq_log2,
                                bool legatoflag)
 {
-    portamento.x = 0.0f;
-
     if(legatoflag) {  // Legato in progress
         if(portamento.portamento == 0)
             return 0;
@@ -311,6 +309,7 @@ int Controller::initportamento(float oldfreq_log2,
                                (64.0f - portamento.updowntimestretch) / 64.0f);
     }
 
+    portamento.x = 0.0f;
     portamento.dx = synth.buffersize_f / (portamentotime * synth.samplerate_f);
     portamento.origfreqdelta_log2 = deltafreq_log2;
 
