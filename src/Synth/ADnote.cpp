@@ -501,7 +501,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
 SynthNote *ADnote::cloneLegato(void)
 {
     SynthParams sp{memory, ctl, synth, time, velocity,
-                (bool)portamento, legato.param.note_log2_freq, true,
+                portamento, legato.param.note_log2_freq, true,
                 initial_seed };
     return memory.alloc<ADnote>(&pars, sp);
 }
@@ -1091,10 +1091,10 @@ void ADnote::computecurrentparameters()
 
     //compute the portamento, if it is used by this note
     float portamentofreqdelta_log2 = 0.0f;
-    if(portamento != 0) { //this voice use portamento
-        portamentofreqdelta_log2 = ctl.portamento.freqdelta_log2;
-        if(ctl.portamento.used == 0) //the portamento has finished
-            portamento = 0;  //this note is no longer "portamented"
+    if(portamento) { //this voice uses portamento
+        portamentofreqdelta_log2 = portamento->freqdelta_log2;
+        if(!portamento->active) //the portamento has finished
+            portamento = NULL;  //this note is no longer "portamented"
     }
 
     //compute parameters for all voices

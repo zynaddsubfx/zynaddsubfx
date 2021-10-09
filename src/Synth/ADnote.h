@@ -17,6 +17,7 @@
 #include "SynthNote.h"
 #include "Envelope.h"
 #include "LFO.h"
+#include "Portamento.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Params/Controller.h"
 #include "WatchPoint.h"
@@ -322,8 +323,8 @@ class ADnote:public SynthNote
         //interpolate the amplitudes
         float globaloldamplitude, globalnewamplitude;
 
-        //1 if the note has portamento
-        int portamento;
+        //Pointer to portamento if note has portamento
+        Portamento *portamento;
 
         //how the fine detunes are made bigger or smaller
         float bandwidthDetuneMultiplier;

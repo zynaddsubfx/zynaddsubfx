@@ -20,6 +20,7 @@
 #include "SUBnote.h"
 #include "Envelope.h"
 #include "ModFilter.h"
+#include "Portamento.h"
 #include "../Containers/ScratchString.h"
 #include "../Containers/NotePool.h"
 #include "../Params/Controller.h"
@@ -93,7 +94,7 @@ float SUBnote::setupFilters(float basefreq, int *pos, bool automation)
 }
 
 void SUBnote::setup(float velocity_,
-                    int portamento_,
+                    Portamento *portamento_,
                     float note_log2_freq_,
                     bool legato,
                     WatchManager *wm,
@@ -452,7 +453,7 @@ void SUBnote::computecurrentparameters()
     if(FreqEnvelope || BandWidthEnvelope
        || (oldpitchwheel != ctl.pitchwheel.data)
        || (oldbandwidth != ctl.bandwidth.data)
-       || portamento
+       || (portamento != NULL)
        || filterupdate) {
         float envfreq = 1.0f;
         float envbw   = 1.0f;
@@ -467,9 +468,9 @@ void SUBnote::computecurrentparameters()
 
         //Update frequency while portamento is converging
         if(portamento) {
-            envfreq *= powf(2.0f, ctl.portamento.freqdelta_log2);
-            if(!ctl.portamento.used) //the portamento has finished
-                portamento = false;
+            envfreq *= powf(2.0f, portamento->freqdelta_log2);
+            if(!portamento->active) //the portamento has finished
+                portamento = NULL;
         }
 
         if(BandWidthEnvelope) {
