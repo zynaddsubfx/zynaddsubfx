@@ -37,7 +37,7 @@ class SUBnote:public SynthNote
     private:
 
         void setup(float velocity,
-                   int portamento_,
+                   Portamento *portamento_,
                    float note_log2_freq,
                    bool legato = false, WatchManager *wm = 0, const char *prefix = 0);
         float setupFilters(float basefreq, int *pos, bool automation);
@@ -70,7 +70,8 @@ class SUBnote:public SynthNote
 
         //internal values
         bool   NoteEnabled;
-        bool   firsttick, portamento;
+        bool   firsttick;
+        Portamento *portamento;
         float  volume, oldamplitude, newamplitude;
         float  oldreduceamp;
 

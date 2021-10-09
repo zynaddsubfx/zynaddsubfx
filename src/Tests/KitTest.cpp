@@ -61,7 +61,6 @@ class KitTest
             memset(outL, 0, synth->bufferbytes);
             memset(outR, 0, synth->bufferbytes);
 
-
             part = new Part(alloc, *synth, *time, dummy, dummy, &microtonal, &fft);
         }
 
@@ -84,7 +83,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_RELEASED|SUSTAIN_BIT,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
@@ -93,7 +93,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_RELEASED_AND_SUSTAINED,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
@@ -102,7 +103,8 @@ class KitTest
                     .sendto=0,
                     .size=0,
                     .status=0,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
         }
 
         void testSustainCase2() {
@@ -123,7 +125,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_RELEASED|SUSTAIN_BIT,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
@@ -132,7 +135,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
@@ -141,7 +145,8 @@ class KitTest
                     .sendto=0,
                     .size=0,
                     .status=0,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
         }
 
         void testMonoSustain() {
@@ -165,7 +170,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_RELEASED,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
@@ -174,7 +180,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
@@ -183,7 +190,8 @@ class KitTest
                     .sendto=0,
                     .size=0,
                     .status=0,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
         }
 
         //Enumerate cases of:
@@ -204,7 +212,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
@@ -213,7 +222,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
@@ -222,7 +232,8 @@ class KitTest
                     .sendto=0,
                     .size=0,
                     .status=0,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
         }
 
         void testNoKitYesLegatoNoMono() {
@@ -238,7 +249,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
@@ -247,7 +259,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
@@ -256,7 +269,8 @@ class KitTest
                     .sendto=0,
                     .size=0,
                     .status=0,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_NON_NULL(part->notePool.sdesc[0].note);
             TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].note->legato.silent, false);
@@ -284,7 +298,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_RELEASED,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
@@ -293,7 +308,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
@@ -302,7 +318,8 @@ class KitTest
                     .sendto=0,
                     .size=0,
                     .status=0,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_NON_NULL(part->notePool.sdesc[0].note);
             TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].note->legato.silent, false);
@@ -336,7 +353,8 @@ class KitTest
                     .sendto=0,
                     .size=2,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
@@ -345,7 +363,8 @@ class KitTest
                     .sendto=0,
                     .size=2,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
@@ -354,7 +373,8 @@ class KitTest
                     .sendto=0,
                     .size=0,
                     .status=0,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_NON_NULL(part->notePool.sdesc[0].note);
             TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].note->legato.silent, false);
@@ -404,7 +424,8 @@ class KitTest
                     .sendto=0,
                     .size=2,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
@@ -413,7 +434,8 @@ class KitTest
                     .sendto=0,
                     .size=2,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
@@ -422,7 +444,8 @@ class KitTest
                     .sendto=0,
                     .size=0,
                     .status=0,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_NON_NULL(part->notePool.sdesc[0].note);
             TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].note->legato.silent, false);
@@ -472,7 +495,8 @@ class KitTest
                     .sendto=0,
                     .size=2,
                     .status=KEY_RELEASED,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
@@ -481,7 +505,8 @@ class KitTest
                     .sendto=0,
                     .size=2,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
@@ -490,7 +515,8 @@ class KitTest
                     .sendto=0,
                     .size=0,
                     .status=0,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_NON_NULL(part->notePool.sdesc[0].note);
             TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].note->legato.silent, false);
@@ -539,7 +565,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
@@ -548,7 +575,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
@@ -557,7 +585,8 @@ class KitTest
                     .sendto=0,
                     .size=0,
                     .status=0,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_NON_NULL(part->notePool.sdesc[0].note);
             TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].note->legato.silent, false);
@@ -595,7 +624,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
@@ -604,7 +634,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
@@ -613,7 +644,8 @@ class KitTest
                     .sendto=0,
                     .size=0,
                     .status=0,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_NON_NULL(part->notePool.sdesc[0].note);
             TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].note->legato.silent, false);
@@ -648,7 +680,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_RELEASED,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
                     (NotePool::NoteDescriptor{
@@ -657,7 +690,8 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_PLAYING,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
                     (NotePool::NoteDescriptor{
@@ -666,7 +700,8 @@ class KitTest
                     .sendto=0,
                     .size=0,
                     .status=0,
-                    .legatoMirror=false}));
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
 
             TS_NON_NULL(part->notePool.sdesc[0].note);
             TS_ASSERT_EQUAL_INT(part->notePool.sdesc[0].note->legato.silent, false);

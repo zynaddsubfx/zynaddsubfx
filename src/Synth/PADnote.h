@@ -39,7 +39,7 @@ class PADnote:public SynthNote
 
         void releasekey();
     private:
-        void setup(float velocity, int portamento_,
+        void setup(float velocity, Portamento *portamento,
                    float note_log2_freq, bool legato = false, WatchManager *wm=0, const char *prefix=0);
         void fadein(float *smps);
         void computecurrentparameters();
@@ -54,7 +54,8 @@ class PADnote:public SynthNote
         float OffsetHz;
         bool  firsttime;
 
-        int nsample, portamento;
+        int nsample;
+        Portamento *portamento;
 
         int Compute_Linear(float *outl,
                            float *outr,

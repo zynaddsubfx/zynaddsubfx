@@ -25,7 +25,8 @@ SynthNote::SynthNote(const SynthParams &pars)
             pars.note_log2_freq, pars.quiet, pars.seed), ctl(pars.ctl), synth(pars.synth), time(pars.time)
 {}
 
-SynthNote::Legato::Legato(const SYNTH_T &synth_, float vel, int port,
+SynthNote::Legato::Legato(const SYNTH_T &synth_, float vel,
+                          Portamento *portamento,
                           float note_log2_freq, bool quiet, prng_t seed)
     :synth(synth_)
 {
@@ -37,7 +38,7 @@ SynthNote::Legato::Legato(const SYNTH_T &synth_, float vel, int port,
     fade.step  = (1.0f / fade.length);
     decounter  = -10;
     param.vel  = vel;
-    param.portamento = port;
+    param.portamento = portamento;
     param.note_log2_freq = note_log2_freq;
     param.seed = seed;
     lastfreq_log2 = note_log2_freq;
