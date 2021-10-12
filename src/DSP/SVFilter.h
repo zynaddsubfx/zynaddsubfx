@@ -55,7 +55,7 @@ class SVFilter:public Filter
 
         struct parameters {
             float f, q, q_sqrt;
-        } par, ipar;
+        } par;
 
         float *getfilteroutfortype(SVFilter::fstage &x);
     void singlefilterout(float *smp, fstage &x, parameters &par, int buffersize );

@@ -34,8 +34,6 @@
 
 namespace zyn {
 
-static const float S2DELAY = 127.0f / 40.0f;
-
 #define rObject EffectMgr
 #define rSubtype(name) \
     {STRINGIFY(name)"/", NULL, &name::ports,\
