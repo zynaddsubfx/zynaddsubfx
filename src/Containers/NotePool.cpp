@@ -236,10 +236,17 @@ void NotePool::insertLegatoNote(note_t note, uint8_t sendto, SynthDescriptor des
     }
 };
 
-//There should only be one pair of notes which are still playing
+//There should only be one pair of notes which are still playing.
+//Note however that there can be releasing legato notes already in the
+//list when we get called, so need to handle that.
 void NotePool::applyLegato(note_t note, const LegatoParams &par)
 {
     for(auto &desc:activeDesc()) {
+        //Currently, there can actually be more than one legato pair, while a
+        //previous legato pair is releasing and a new one is started, and we
+        //don't want to change anything about notes which are releasing.
+        if (desc.dying())
+            continue;
         desc.note = note;
         for(auto &synth:activeNotes(desc))
             try {
