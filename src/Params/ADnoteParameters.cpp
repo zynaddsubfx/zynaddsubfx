@@ -465,7 +465,6 @@ ADnoteParameters::ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
     setpresettype("Padsynth");
     fft = fft_;
 
-
     for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
         VoicePar[nvoice].GlobalPDetuneType = &GlobalPar.PDetuneType;
         VoicePar[nvoice].time = time_;
@@ -740,7 +739,7 @@ void ADnoteParameters::add2XMLsection(XMLwrapper& xml, int n)
     }
 
     xml.addparbool("enabled", VoicePar[nvoice].Enabled);
-    if(((VoicePar[nvoice].Enabled == 0) && (oscilused == 0)
+    if((VoicePar[nvoice].Enabled == 0  && (oscilused == 0)
         && (fmoscilused == 0)) && (xml.minimal))
         return;
 

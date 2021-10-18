@@ -1075,7 +1075,7 @@ void Part::add2XMLinstrument(XMLwrapper& xml)
     for(int i = 0; i < NUM_KIT_ITEMS; ++i) {
         xml.beginbranch("INSTRUMENT_KIT_ITEM", i);
         xml.addparbool("enabled", kit[i].Penabled);
-        if(kit[i].Penabled != 0) {
+        if(kit[i].Penabled != 0 || xml.SaveFullXml) {
             xml.addparstr("name", (char *)kit[i].Pname);
 
             xml.addparbool("muted", kit[i].Pmuted);
@@ -1085,21 +1085,21 @@ void Part::add2XMLinstrument(XMLwrapper& xml)
             xml.addpar("send_to_instrument_effect", kit[i].Psendtoparteffect);
 
             xml.addparbool("add_enabled", kit[i].Padenabled);
-            if(kit[i].Padenabled && kit[i].adpars) {
+            if((kit[i].Padenabled  || xml.SaveFullXml) && kit[i].adpars) {
                 xml.beginbranch("ADD_SYNTH_PARAMETERS");
                 kit[i].adpars->add2XML(xml);
                 xml.endbranch();
             }
 
             xml.addparbool("sub_enabled", kit[i].Psubenabled);
-            if(kit[i].Psubenabled && kit[i].subpars) {
+            if((kit[i].Psubenabled || xml.SaveFullXml) && kit[i].subpars) {
                 xml.beginbranch("SUB_SYNTH_PARAMETERS");
                 kit[i].subpars->add2XML(xml);
                 xml.endbranch();
             }
 
             xml.addparbool("pad_enabled", kit[i].Ppadenabled);
-            if(kit[i].Ppadenabled && kit[i].padpars) {
+            if((kit[i].Ppadenabled || xml.SaveFullXml) && kit[i].padpars) {
                 xml.beginbranch("PAD_SYNTH_PARAMETERS");
                 kit[i].padpars->add2XML(xml);
                 xml.endbranch();
@@ -1128,7 +1128,7 @@ void Part::add2XML(XMLwrapper& xml)
 {
     //parameters
     xml.addparbool("enabled", Penabled);
-    if((Penabled == 0) && (xml.minimal))
+    if(Penabled == 0 && (xml.minimal))
         return;
 
     xml.addparreal("volume", Volume);
@@ -1276,7 +1276,7 @@ void Part::getfromXMLinstrument(XMLwrapper& xml)
             if(xml.enterbranch("INSTRUMENT_KIT_ITEM", i) == 0)
                 continue;
             setkititemstatus(i, xml.getparbool("enabled", kit[i].Penabled));
-            if(kit[i].Penabled == 0) {
+            if(kit[i].Penabled == 0 && xml.SaveFullXml == 0) {
                 xml.exitbranch();
                 continue;
             }

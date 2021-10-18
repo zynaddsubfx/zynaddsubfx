@@ -68,6 +68,8 @@ double toc()
 }
 
 int interp=1;
+int FullXml=0;
+
 void setup() {
     synth = new SYNTH_T;
     synth->buffersize = 256;
