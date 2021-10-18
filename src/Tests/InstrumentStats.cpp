@@ -68,6 +68,8 @@ double toc()
 }
 
 int interp=1;
+int FullXml=0;
+
 void setup() {
     synth = new SYNTH_T;
     synth->buffersize = 256;
@@ -84,7 +86,7 @@ void setup() {
     for(int i = 0; i < synth->buffersize; ++i)
         outR[i] = 0.0f;
 
-    p = new Part(alloc, *synth, *time_, compress, interp, &microtonal, &fft);
+    p = new Part(alloc, *synth, *time_, compress, interp, FullXml, &microtonal, &fft);
 }
 
 void xml(string s)
