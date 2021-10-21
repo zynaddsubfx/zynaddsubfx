@@ -21,6 +21,7 @@
 #define private public
 #define protected public
 #include "../Synth/SynthNote.h"
+#include "../Synth/Portamento.h"
 #include "../Misc/Part.h"
 #include "../globals.h"
 
@@ -1058,6 +1059,432 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 65);
         }
 
+        void testPortamentoOff(void)
+        {
+            auto &pool = part->notePool;
+
+            // Play four notes, one octave apart (> default threshold of 3)
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(76, 127, 0);
+            part->NoteOn(88, 127, 0);
+            part->NoteOn(100, 127, 0);
+
+            // Verify note pitches and that there are no portamento objects
+            // for any note
+            pool.cleanup();
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT(pool.ndesc[0].portamentoRealtime == NULL);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 76);
+            TS_ASSERT(pool.ndesc[1].portamentoRealtime == NULL);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 88);
+            TS_ASSERT(pool.ndesc[2].portamentoRealtime == NULL);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 100);
+            TS_ASSERT(pool.ndesc[3].portamentoRealtime == NULL);
+        }
+
+        void testPortamentoOnPlayingLegato(void)
+        {
+            auto &pool = part->notePool;
+
+            part->ctl.setportamento(127);
+
+            // Play four notes
+            // This implicitly tests that note deltas larger than the
+            // default threshold will trigger portamento
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(76, 127, 0);
+            part->NoteOn(88, 127, 0);
+            part->NoteOn(100, 127, 0);
+
+            // Verify note pitches and that there are separate portamento
+            // objects for all but the first note (first note should not
+            // exhibit portamento on account of being first), and
+            // that the initial portamento offsets are -1, -2 and -3 octaves,
+            // respectively.
+            pool.cleanup();
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT(pool.ndesc[0].portamentoRealtime == NULL);
+
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 76);
+            TS_NON_NULL(pool.ndesc[1].portamentoRealtime);
+            TS_ASSERT_DELTA(pool.ndesc[1].portamentoRealtime->portamento.freqdelta_log2, -1.0f, 0.001f);
+
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 88);
+            TS_NON_NULL(pool.ndesc[2].portamentoRealtime);
+            TS_ASSERT_DELTA(pool.ndesc[2].portamentoRealtime->portamento.freqdelta_log2, -2.0f, 0.001f);
+            TS_ASSERT(pool.ndesc[2].portamentoRealtime !=
+                            pool.ndesc[1].portamentoRealtime);
+
+            TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 100);
+            TS_NON_NULL(pool.ndesc[3].portamentoRealtime);
+            TS_ASSERT_DELTA(pool.ndesc[3].portamentoRealtime->portamento.freqdelta_log2, -3.0f, 0.001f);
+            TS_ASSERT(pool.ndesc[3].portamentoRealtime !=
+                      pool.ndesc[2].portamentoRealtime);
+            TS_ASSERT(pool.ndesc[3].portamentoRealtime !=
+                      pool.ndesc[1].portamentoRealtime);
+        }
+
+        void testPortamentoOnPlayingStaccato(void)
+        {
+            auto &pool = part->notePool;
+
+            part->ctl.setportamento(127);
+
+            // The point here is to verify that even when a note is released,
+            // its portamento offset is retained for subsequent notes to
+            // start at, rather than subsequent notes starting at the
+            // target pitch for the previous note.
+            // This tests that the cleanup lambda that is issued when
+            // allocating the Portamento object in Part.cpp
+            // is actually called and does its job.
+
+            // Play an initial note, then release it
+            part->NoteOn(64, 127, 0);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT(pool.ndesc[0].portamentoRealtime == NULL);
+
+            part->NoteOff(64);
+
+            // We simulate the note being killed after release phase
+            // completed, in order to trigger deallocation of portamento
+            pool.kill(pool.ndesc[0]);
+
+            // Play second note
+            part->NoteOn(76, 127, 0);
+
+            // The only note remaining should be the second one,
+            // with pitch offset -1 octave
+            pool.cleanup();
+            pool.dump();
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 76);
+            TS_NON_NULL(pool.ndesc[0].portamentoRealtime);
+            TS_ASSERT_DELTA(pool.ndesc[0].portamentoRealtime->portamento.freqdelta_log2, -1.0f, 0.001f);
+
+            // Release second note, play third
+            part->NoteOff(76);
+            pool.kill(pool.ndesc[0]);
+
+            part->NoteOn(88, 127, 0);
+
+            // The only note remaining should be the third one,
+            // with pitch offset -2 octave
+            pool.cleanup();
+            pool.dump();
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 88);
+            TS_NON_NULL(pool.ndesc[0].portamentoRealtime);
+            TS_ASSERT_DELTA(pool.ndesc[0].portamentoRealtime->portamento.freqdelta_log2, -2.0f, 0.001f);
+
+            // Release third note, play fourth
+            part->NoteOff(88);
+            pool.kill(pool.ndesc[0]);
+
+            part->NoteOn(100, 127, 0);
+
+            // The only note remaining should be the fourth one,
+            // with pitch offset -3 octave
+            pool.cleanup();
+            pool.dump();
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 100);
+            TS_NON_NULL(pool.ndesc[0].portamentoRealtime);
+            TS_ASSERT_DELTA(pool.ndesc[0].portamentoRealtime->portamento.freqdelta_log2, -3.0f, 0.001f);
+        }
+
+        void testPortamentoSmallerThanThresholdTrigIfLarger(void)
+        {
+            auto &pool = part->notePool;
+
+            part->ctl.setportamento(127);
+
+            // Test that we don't get any portamento when playing notes
+            // that are closer than the default threshold of 3, when the
+            // trigger type is set to (default) larger-than-threshold.
+
+            // Play four notes, two semitones apart (< default threshold of 3)
+            // By playing several notes, we test that it's each individual
+            // note step that counts, not the total distance from the
+            // first note.
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(66, 127, 0);
+            part->NoteOn(68, 127, 0);
+            part->NoteOn(70, 127, 0);
+
+            // Verify note pitches and that there are no portamento objects
+            // for any note
+            pool.cleanup();
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT(pool.ndesc[0].portamentoRealtime == NULL);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 66);
+            TS_ASSERT(pool.ndesc[1].portamentoRealtime == NULL);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 68);
+            TS_ASSERT(pool.ndesc[2].portamentoRealtime == NULL);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 70);
+            TS_ASSERT(pool.ndesc[3].portamentoRealtime == NULL);
+        }
+
+        void testPortamentoLargerThanThresholdTrigIfSmaller(void)
+        {
+            auto &pool = part->notePool;
+
+            part->ctl.setportamento(127);
+            part->ctl.portamento.pitchthreshtype = 0;
+
+            // Test that we don't get any portamento when playing notes
+            // that are further away than the default threshold of 3, when the
+            // trigger type is set to smaller-than-threshold.
+
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(68, 127, 0);
+            part->NoteOn(72, 127, 0);
+            part->NoteOn(76, 127, 0);
+
+            // Verify note pitches and that there are no portamento objects
+            // for any note
+            pool.cleanup();
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT(pool.ndesc[0].portamentoRealtime == NULL);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 68);
+            TS_ASSERT(pool.ndesc[1].portamentoRealtime == NULL);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 72);
+            TS_ASSERT(pool.ndesc[2].portamentoRealtime == NULL);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 76);
+            TS_ASSERT(pool.ndesc[3].portamentoRealtime == NULL);
+        }
+
+        void testPortamentoSmallerThanThresholdTrigIfSmaller(void)
+        {
+            auto &pool = part->notePool;
+
+            part->ctl.setportamento(127);
+            part->ctl.portamento.pitchthreshtype = 0;
+
+            // Test that we get portamento when playing notes
+            // that are closer than the default threshold of 3, when the
+            // trigger type is set to smaller-than-threshold.
+
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(65, 127, 0);
+            part->NoteOn(66, 127, 0);
+            part->NoteOn(68, 127, 0);
+
+            // Verify note pitches and that there are separate portamento
+            // objects for all but the first note (first note should not
+            // exhibit portamento on account of being first), and
+            // that the initial portamento offsets are -1, -2 and -3 semitones,
+            // respectively.
+            pool.cleanup();
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT(pool.ndesc[0].portamentoRealtime == NULL);
+
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 65);
+            TS_NON_NULL(pool.ndesc[1].portamentoRealtime);
+            TS_ASSERT_DELTA(pool.ndesc[1].portamentoRealtime->portamento.freqdelta_log2, -1.0f/12.0f, 0.001f);
+
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 66);
+            TS_NON_NULL(pool.ndesc[2].portamentoRealtime);
+            TS_ASSERT_DELTA(pool.ndesc[2].portamentoRealtime->portamento.freqdelta_log2, -2.0f/12.0f, 0.001f);
+
+            TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 68);
+            TS_NON_NULL(pool.ndesc[3].portamentoRealtime);
+            TS_ASSERT_DELTA(pool.ndesc[3].portamentoRealtime->portamento.freqdelta_log2, -4.0f/12.0f, 0.001f);
+        }
+
+        void testPortamentoSmallerThanThresholdTrigIfSmallerStaccato(void)
+        {
+            auto &pool = part->notePool;
+
+            part->ctl.setportamento(127);
+            part->ctl.portamento.pitchthreshtype = 0;
+
+            // Test that we get portamento when playing staccato notes
+            // that are closer than the default threshold of 3, when the
+            // trigger type is set to smaller-than-threshold.
+
+            // Play an initial note, then release it
+            part->NoteOn(64, 127, 0);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT(pool.ndesc[0].portamentoRealtime == NULL);
+
+            part->NoteOff(64);
+            // We simulate the note being killed after release phase
+            // completed, in order to trigger deallocation of portamento
+            pool.kill(pool.ndesc[0]);
+
+            // Play second note
+            part->NoteOn(65, 127, 0);
+
+            // The only note remaining should be the second one,
+            // with pitch offset -1 semitone
+            pool.cleanup();
+            pool.dump();
+
+            // Verify note pitch and portamento
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 65);
+            TS_NON_NULL(pool.ndesc[0].portamentoRealtime);
+            TS_ASSERT_DELTA(pool.ndesc[0].portamentoRealtime->portamento.freqdelta_log2, -1.0f/12.0f, 0.001f);
+
+            part->NoteOff(65);
+            // We simulate the note being killed after release phase
+            // completed, in order to trigger deallocation of portamento
+            pool.kill(pool.ndesc[0]);
+
+            // Play third note
+            part->NoteOn(66, 127, 0);
+
+            // The only note remaining should be the third one,
+            // with pitch offset -2 semitones
+            pool.cleanup();
+            pool.dump();
+
+            // Verify note pitch and portamento
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 66);
+            TS_NON_NULL(pool.ndesc[0].portamentoRealtime);
+            TS_ASSERT_DELTA(pool.ndesc[0].portamentoRealtime->portamento.freqdelta_log2, -2.0f/12.0f, 0.001f);
+
+            part->NoteOff(66);
+            // We simulate the note being killed after release phase
+            // completed, in order to trigger deallocation of portamento
+            pool.kill(pool.ndesc[0]);
+
+            // Play fourth note
+            part->NoteOn(68, 127, 0);
+
+            // The only note remaining should be the fourth one,
+            // with pitch offset -4 semitones.
+            // This tests that the decision to have the note exhibit
+            // portamento is based on the target pitch of the previous note
+            // (i.e. the actual note played), rather than the starting pitch
+            // of the portamento (which, since we have not called update()
+            // will still be the same as the pitch of the first note played),
+            // which is 4 semitones away and hence above the trigger threshold.
+            pool.cleanup();
+            pool.dump();
+
+            // Verify note pitch and portamento
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 68);
+            TS_NON_NULL(pool.ndesc[0].portamentoRealtime);
+            TS_ASSERT_DELTA(pool.ndesc[0].portamentoRealtime->portamento.freqdelta_log2, -4.0f/12.0f, 0.001f);
+        }
+
+        void testPortamentoOnLegatoOnPlayingLegato(void)
+        {
+            auto &pool = part->notePool;
+
+            part->ctl.setportamento(127);
+            part->Ppolymode   = false;
+            part->Plegatomode = true;
+
+            // Play two notes
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(76, 127, 0);
+
+            // Verify note pitch and that there is a portamento object
+            // registered for the first note in the legato pair but not
+            // the second, with the appropriate pitch offset
+            pool.cleanup();
+            // First descriptor in legato pair
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 76);
+            TS_NON_NULL(pool.ndesc[0].portamentoRealtime);
+            TS_ASSERT_DELTA(pool.ndesc[0].portamentoRealtime->portamento.freqdelta_log2, -1.0f, 0.001f);
+            // Second descriptor
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 76);
+            TS_ASSERT(pool.ndesc[1].portamentoRealtime == NULL);
+        }
+
+        void testPortamentoOnLegatoOnPlayingStaccato(void)
+        {
+            auto &pool = part->notePool;
+
+            part->ctl.setportamento(127);
+            part->Ppolymode   = false;
+            part->Plegatomode = true;
+
+            // Play an initial note, then release it
+            part->NoteOn(64, 127, 0);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT(pool.ndesc[0].portamentoRealtime == NULL);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 64);
+            TS_ASSERT(pool.ndesc[1].portamentoRealtime == NULL);
+
+            part->NoteOff(64);
+
+            // Play second note
+            part->NoteOn(76, 127, 0);
+
+            pool.cleanup();
+            pool.dump();
+
+            // First, re-verify first note, since it will remain
+            // in the release phase.
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT(pool.ndesc[0].portamentoRealtime == NULL);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 64);
+            TS_ASSERT(pool.ndesc[1].portamentoRealtime == NULL);
+
+            // Verify pitch and lack of portamento for second note, due to
+            // playing staccato.
+            // First descriptor in legato pair
+            TS_ASSERT_EQUAL_INT(pool.ndesc[2].note, 76);
+            TS_ASSERT(pool.ndesc[2].portamentoRealtime == NULL);
+            // Second descriptor
+            TS_ASSERT_EQUAL_INT(pool.ndesc[3].note, 76);
+            TS_ASSERT(pool.ndesc[3].portamentoRealtime == NULL);
+        }
+
+        void testPortamentoOnMonoPlayingLegato(void)
+        {
+            auto &pool = part->notePool;
+
+            part->ctl.setportamento(127);
+            part->Ppolymode   = false;
+
+            // Play two notes
+            part->NoteOn(64, 127, 0);
+            part->NoteOn(76, 127, 0);
+
+            // Verify note pitch and that there is a portamento object
+            // registered for the second note with the appropriate pitch offset
+            // but not for the first,
+            pool.cleanup();
+            pool.dump();
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT(pool.ndesc[0].portamentoRealtime == NULL);
+
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 76);
+            TS_NON_NULL(pool.ndesc[1].portamentoRealtime);
+            TS_ASSERT_DELTA(pool.ndesc[1].portamentoRealtime->portamento.freqdelta_log2, -1.0f, 0.001f);
+        }
+
+        void testPortamentoOnMonoPlayingStaccato(void)
+        {
+            auto &pool = part->notePool;
+
+            part->ctl.setportamento(127);
+            part->Ppolymode   = false;
+
+            // Play an initial note, then release it
+            part->NoteOn(64, 127, 0);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT(pool.ndesc[0].portamentoRealtime == NULL);
+
+            part->NoteOff(64);
+
+            // Play second note
+            part->NoteOn(76, 127, 0);
+
+            pool.cleanup();
+            pool.dump();
+
+            // First, re-verify first note, since it will remain
+            // in the release phase.
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT(pool.ndesc[0].portamentoRealtime == NULL);
+
+            // Verify pitch and lack of portamento for second note, due to
+            // playing staccato.
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 76);
+            TS_ASSERT(pool.ndesc[1].portamentoRealtime == NULL);
+        }
+
         void tearDown() {
             delete part;
             delete[] outL;
@@ -1084,5 +1511,16 @@ int main()
     RUN_TEST(testSingleKitNoLegatoYesMono);
     RUN_TEST(testKeyLimit);
     RUN_TEST(testVoiceLimit);
+    RUN_TEST(testPortamentoOff);
+    RUN_TEST(testPortamentoOnPlayingLegato);
+    RUN_TEST(testPortamentoOnPlayingStaccato);
+    RUN_TEST(testPortamentoSmallerThanThresholdTrigIfLarger);
+    RUN_TEST(testPortamentoLargerThanThresholdTrigIfSmaller);
+    RUN_TEST(testPortamentoSmallerThanThresholdTrigIfSmaller);
+    RUN_TEST(testPortamentoSmallerThanThresholdTrigIfSmallerStaccato);
+    RUN_TEST(testPortamentoOnLegatoOnPlayingLegato);
+    RUN_TEST(testPortamentoOnLegatoOnPlayingStaccato);
+    RUN_TEST(testPortamentoOnMonoPlayingLegato);
+    RUN_TEST(testPortamentoOnMonoPlayingStaccato);
     return test_summary();
 }
