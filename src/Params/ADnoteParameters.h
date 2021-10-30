@@ -313,7 +313,7 @@ class ADnoteParameters:public PresetsArray
 {
     public:
         ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
-                         const AbsTime *time_ = nullptr);
+                         const AbsTime *time_ = nullptr, int SaveFullXml=0);
         ~ADnoteParameters() override;
 
         ADnoteGlobalParam GlobalPar;
@@ -336,6 +336,7 @@ class ADnoteParameters:public PresetsArray
 
         const AbsTime *time;
         int64_t last_update_timestamp;
+        int SaveFullXml;
 
     private:
         void EnableVoice(const SYNTH_T &synth, int nvoice, const AbsTime* time);

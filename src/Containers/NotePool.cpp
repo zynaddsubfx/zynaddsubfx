@@ -430,7 +430,7 @@ void NotePool::enforceVoiceLimit(int limit, int preferred_note)
     int notes_to_kill = getRunningVoices() - limit;
 
     while (notes_to_kill-- > 0)
-	limitVoice(preferred_note);
+        limitVoice(preferred_note);
 }
 
 

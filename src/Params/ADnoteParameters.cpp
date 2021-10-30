@@ -459,11 +459,15 @@ const Ports &ADnoteVoiceParam::ports  = voicePorts;
 const Ports &ADnoteGlobalParam::ports = globalPorts;
 
 ADnoteParameters::ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
-                                   const AbsTime *time_)
+                                   const AbsTime *time_, int SaveFullXml_)
     :PresetsArray(), GlobalPar(time_), time(time_), last_update_timestamp(0)
 {
     setpresettype("Padsynth");
     fft = fft_;
+<<<<<<< HEAD
+=======
+    SaveFullXml=SaveFullXml_;
+>>>>>>> e2fd914ee275a68fdf2e0d9d1fbb59878cfe1b14
 
     for(int nvoice = 0; nvoice < NUM_VOICES; ++nvoice) {
         VoicePar[nvoice].GlobalPDetuneType = &GlobalPar.PDetuneType;
@@ -739,7 +743,11 @@ void ADnoteParameters::add2XMLsection(XMLwrapper& xml, int n)
     }
 
     xml.addparbool("enabled", VoicePar[nvoice].Enabled);
+<<<<<<< HEAD
     if((VoicePar[nvoice].Enabled == 0  && (oscilused == 0)
+=======
+    if((VoicePar[nvoice].Enabled == 0  && SaveFullXml==0 && (oscilused == 0)
+>>>>>>> e2fd914ee275a68fdf2e0d9d1fbb59878cfe1b14
         && (fmoscilused == 0)) && (xml.minimal))
         return;
 

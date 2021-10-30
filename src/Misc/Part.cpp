@@ -266,7 +266,7 @@ const Ports &Part::Kit::ports = kitPorts;
 const Ports &Part::ports = partPorts;
 
 Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
-    const int &gzip_compression, const int &interpolation,
+    const int &gzip_compression, const int &interpolation, const int &SaveFullXml,
     Microtonal *microtonal_, FFTwrapper *fft_, WatchManager *wm_, const char *prefix_)
     :Pdrummode(false),
     Ppolymode(true),
@@ -282,7 +282,8 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     synth(synth_),
     time(time_),
     gzip_compression(gzip_compression),
-    interpolation(interpolation)
+    interpolation(interpolation),
+    SaveFullXml(SaveFullXml)
 {
     loaded_file[0] = '\0';
 
@@ -301,7 +302,7 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
         kit[n].padpars = nullptr;
     }
 
-    kit[0].adpars  = new ADnoteParameters(synth, fft, &time);
+    kit[0].adpars  = new ADnoteParameters(synth, fft, &time, SaveFullXml);
 
     //Part's Insertion Effects init
     for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx) {
@@ -1052,7 +1053,7 @@ void Part::setkititemstatus(unsigned kititem, bool Penabled_)
     else {
         //All parameters must be NULL in this case
         assert(!(kkit.adpars || kkit.subpars || kkit.padpars));
-        kkit.adpars  = new ADnoteParameters(synth, fft, &time);
+        kkit.adpars  = new ADnoteParameters(synth, fft, &time, SaveFullXml);
         kkit.subpars = new SUBnoteParameters(&time);
         kkit.padpars = new PADnoteParameters(synth, fft, &time);
     }
@@ -1075,7 +1076,11 @@ void Part::add2XMLinstrument(XMLwrapper& xml)
     for(int i = 0; i < NUM_KIT_ITEMS; ++i) {
         xml.beginbranch("INSTRUMENT_KIT_ITEM", i);
         xml.addparbool("enabled", kit[i].Penabled);
+<<<<<<< HEAD
         if(kit[i].Penabled != 0 || xml.SaveFullXml) {
+=======
+        if(kit[i].Penabled != 0 || SaveFullXml) {
+>>>>>>> e2fd914ee275a68fdf2e0d9d1fbb59878cfe1b14
             xml.addparstr("name", (char *)kit[i].Pname);
 
             xml.addparbool("muted", kit[i].Pmuted);
@@ -1085,21 +1090,33 @@ void Part::add2XMLinstrument(XMLwrapper& xml)
             xml.addpar("send_to_instrument_effect", kit[i].Psendtoparteffect);
 
             xml.addparbool("add_enabled", kit[i].Padenabled);
+<<<<<<< HEAD
             if((kit[i].Padenabled  || xml.SaveFullXml) && kit[i].adpars) {
+=======
+            if((kit[i].Padenabled  || SaveFullXml) && kit[i].adpars) {
+>>>>>>> e2fd914ee275a68fdf2e0d9d1fbb59878cfe1b14
                 xml.beginbranch("ADD_SYNTH_PARAMETERS");
                 kit[i].adpars->add2XML(xml);
                 xml.endbranch();
             }
 
             xml.addparbool("sub_enabled", kit[i].Psubenabled);
+<<<<<<< HEAD
             if((kit[i].Psubenabled || xml.SaveFullXml) && kit[i].subpars) {
+=======
+            if((kit[i].Psubenabled || SaveFullXml) && kit[i].subpars) {
+>>>>>>> e2fd914ee275a68fdf2e0d9d1fbb59878cfe1b14
                 xml.beginbranch("SUB_SYNTH_PARAMETERS");
                 kit[i].subpars->add2XML(xml);
                 xml.endbranch();
             }
 
             xml.addparbool("pad_enabled", kit[i].Ppadenabled);
+<<<<<<< HEAD
             if((kit[i].Ppadenabled || xml.SaveFullXml) && kit[i].padpars) {
+=======
+            if((kit[i].Ppadenabled || SaveFullXml) && kit[i].padpars) {
+>>>>>>> e2fd914ee275a68fdf2e0d9d1fbb59878cfe1b14
                 xml.beginbranch("PAD_SYNTH_PARAMETERS");
                 kit[i].padpars->add2XML(xml);
                 xml.endbranch();
@@ -1128,7 +1145,11 @@ void Part::add2XML(XMLwrapper& xml)
 {
     //parameters
     xml.addparbool("enabled", Penabled);
+<<<<<<< HEAD
     if(Penabled == 0 && (xml.minimal))
+=======
+    if(Penabled == 0 && SaveFullXml == 0 && (xml.minimal))
+>>>>>>> e2fd914ee275a68fdf2e0d9d1fbb59878cfe1b14
         return;
 
     xml.addparreal("volume", Volume);
@@ -1276,7 +1297,11 @@ void Part::getfromXMLinstrument(XMLwrapper& xml)
             if(xml.enterbranch("INSTRUMENT_KIT_ITEM", i) == 0)
                 continue;
             setkititemstatus(i, xml.getparbool("enabled", kit[i].Penabled));
+<<<<<<< HEAD
             if(kit[i].Penabled == 0 && xml.SaveFullXml == 0) {
+=======
+            if(kit[i].Penabled == 0 && SaveFullXml ==0) {
+>>>>>>> e2fd914ee275a68fdf2e0d9d1fbb59878cfe1b14
                 xml.exitbranch();
                 continue;
             }
@@ -1295,7 +1320,7 @@ void Part::getfromXMLinstrument(XMLwrapper& xml)
                                                 kit[i].Padenabled);
             if(xml.enterbranch("ADD_SYNTH_PARAMETERS")) {
                 if(!kit[i].adpars)
-                    kit[i].adpars = new ADnoteParameters(synth, fft, &time);
+                    kit[i].adpars = new ADnoteParameters(synth, fft, &time, SaveFullXml);
                 kit[i].adpars->getfromXML(xml);
                 xml.exitbranch();
             }

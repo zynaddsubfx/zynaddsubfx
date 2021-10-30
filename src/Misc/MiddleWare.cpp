@@ -601,6 +601,7 @@ public:
                                    master->time,
                                    config->cfg.GzipCompression,
                                    config->cfg.Interpolation,
+                                   config->cfg.SaveFullXml,
                                    &master->microtonal, master->fft, &master->watcher,
                                    ("/part"+to_s(npart)+"/").c_str());
                 if(p->loadXMLinstrument(filename))
@@ -625,6 +626,7 @@ public:
         Part *p = new Part(*master->memory, synth, master->time,
                 config->cfg.GzipCompression,
                 config->cfg.Interpolation,
+                config->cfg.SaveFullXml,
                 &master->microtonal, master->fft);
 
         if(p->loadXMLinstrument(filename))
@@ -656,6 +658,7 @@ public:
                 master->time,
                 config->cfg.GzipCompression,
                 config->cfg.Interpolation,
+                config->cfg.SaveFullXml,
                 &master->microtonal, master->fft);
         p->applyparameters();
         obj_store.extractPart(p, npart);
