@@ -210,7 +210,9 @@ void Config::init()
     cfg.GzipCompression = 3;
 
     cfg.Interpolation = 0;
+
     cfg.SaveFullXml = 0;
+
     cfg.CheckPADsynth = 1;
     cfg.IgnoreProgramChange = 0;
 
