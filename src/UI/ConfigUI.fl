@@ -148,7 +148,7 @@ class ConfigUI {} {
             class Fl_Osc_Counter
           }
           Fl_Check_Button {} {
-            label {include disabled parts in saved XML file}
+            label {save disabled parts to XML}
             tooltip {Xml Full Save (save disabled parts)} xywh {20 210 65 15} down_box DOWN_BOX
             code0 {o->init("cfg.SaveFullXml");}
             class Fl_Osc_Check

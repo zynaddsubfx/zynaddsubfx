@@ -62,7 +62,7 @@ class KitTest
             memset(outR, 0, synth->bufferbytes);
 
 
-            part = new Part(alloc, *synth, *time, dummy, dummy, dummy, &microtonal, &fft);
+            part = new Part(alloc, *synth, *time, dummy, dummy, &microtonal, &fft);
         }
 
         //Standard poly mode with sustain

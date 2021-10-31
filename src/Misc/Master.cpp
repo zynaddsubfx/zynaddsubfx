@@ -804,7 +804,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
     {
         part[npart] = new Part(*memory, synth, time, config->cfg.GzipCompression,
-                               config->cfg.Interpolation, config->cfg.SaveFullXml, &microtonal, fft, &watcher,
+                               config->cfg.Interpolation, &microtonal, fft, &watcher,
                                (ss+"/part"+npart+"/").c_str);
         smoothing_part_l[npart].sample_rate( synth.samplerate );
         smoothing_part_l[npart].reset_on_next_apply( true ); /* necessary to make CI tests happy, otherwise of no practical use */

@@ -33,7 +33,7 @@ class Part
          * @param fft_ Pointer to the FFTwrapper*/
         Part(Allocator &alloc, const SYNTH_T &synth, const AbsTime &time,
              const int& gzip_compression, const int& interpolation,
-             Microtonal *microtonal_, FFTwrapper *fft_, WatchManager *wm=0, const char *prefix=0 );
+             Microtonal *microtonal_, FFTwrapper *fft_, WatchManager *wm=0, const char *prefix=0);
         /**Destructor*/
         ~Part();
 

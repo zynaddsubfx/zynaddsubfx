@@ -210,9 +210,7 @@ void Config::init()
     cfg.GzipCompression = 3;
 
     cfg.Interpolation = 0;
-
     cfg.SaveFullXml = 0;
-
     cfg.CheckPADsynth = 1;
     cfg.IgnoreProgramChange = 0;
 
@@ -346,7 +344,7 @@ void Config::readConfig(const char *filename)
                                            0,
                                            1);
 
-        cfg.SaveFullXml  = xmlcfg.getpar("SaveFullXml",
+        cfg.SaveFullXml = xmlcfg.getpar("SaveFullXml",
                                            cfg.SaveFullXml,
                                            0,
                                            1);
