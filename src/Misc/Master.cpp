@@ -768,6 +768,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     frozenState(false), pendingMemory(false),
     synth(synth_), gzip_compression(config->cfg.GzipCompression)
 {
+    SaveFullXml=(config->cfg.SaveFullXml==1);
     bToU = NULL;
     uToB = NULL;
     
@@ -1594,8 +1595,12 @@ void Master::add2XML(XMLwrapper& xml)
     microtonal.add2XML(xml);
     xml.endbranch();
 
-    saveAutomation(xml, automate);
+    if (SaveFullXml) {
+        xml.SaveFullXml=true; // save disabled parts
+        xml.minimal=false;
+    }
 
+    saveAutomation(xml, automate);
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
         xml.beginbranch("PART", npart);
         part[npart]->add2XML(xml);

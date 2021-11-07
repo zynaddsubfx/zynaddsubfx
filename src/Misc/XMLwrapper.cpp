@@ -90,6 +90,7 @@ const char *mxmlElementGetAttr(const mxml_node_t *node, const char *name)
 XMLwrapper::XMLwrapper()
 {
     minimal = true;
+    SaveFullXml=false;
 
     node = tree = mxmlNewElement(MXML_NO_PARENT,
                                  "?xml version=\"1.0f\" encoding=\"UTF-8\"?");

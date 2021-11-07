@@ -51,6 +51,7 @@ static const rtosc::Ports ports = {
     rToggle(cfg.BankUIAutoClose, "Automatic Closing of BackUI After Patch Selection"),
     rParamI(cfg.GzipCompression, "Level of Gzip Compression For Save Files"),
     rParamI(cfg.Interpolation, "Level of Interpolation, Linear/Cubic"),
+    rToggle(cfg.SaveFullXml, "Include Disabled parts in save"),
     {"cfg.presetsDirList", rDoc("list of preset search directories"), 0,
         [](const char *msg, rtosc::RtData &d)
         {
@@ -209,6 +210,7 @@ void Config::init()
     cfg.GzipCompression = 3;
 
     cfg.Interpolation = 0;
+    cfg.SaveFullXml = 0;
     cfg.CheckPADsynth = 1;
     cfg.IgnoreProgramChange = 0;
 
@@ -342,6 +344,11 @@ void Config::readConfig(const char *filename)
                                            0,
                                            1);
 
+        cfg.SaveFullXml  = xmlcfg.getpar("SaveFullXml",
+                                           cfg.SaveFullXml,
+                                           0,
+                                           1);
+
         cfg.CheckPADsynth = xmlcfg.getpar("check_pad_synth",
                                           cfg.CheckPADsynth,
                                           0,
@@ -453,6 +460,7 @@ void Config::saveConfig(const char *filename) const
         }
 
     xmlcfg->addpar("interpolation", cfg.Interpolation);
+    xmlcfg->addpar("SaveFullXml", cfg.SaveFullXml);
 
     //linux stuff
     xmlcfg->addparstr("linux_oss_wave_out_dev", cfg.oss_devs.linux_wave_out);

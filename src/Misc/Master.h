@@ -211,6 +211,7 @@ class Master
         bool pendingMemory;
         const SYNTH_T &synth;
         const int& gzip_compression; //!< value from config
+        bool SaveFullXml; // value from config
 
         //Heartbeat for identifying plugin offline modes
         //in units of 10 ms (done s.t. overflow is in 497 days)
