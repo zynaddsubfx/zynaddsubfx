@@ -230,8 +230,8 @@ class XMLwrapper
                          float min,
                          float max) const;
 
-        bool minimal; /**<false if all parameters will be stored (used only for clipboard)*/
-
+        bool minimal; /**<false if all parameters will be stored (used for clipboard, also false to SaveFullXML)*/
+        bool SaveFullXml; /**<true to ensure disabled parts also get saved. Altered by configuration parameter of the same name. */
         /**
          * Sets the current tree's PAD Synth usage
          */
