@@ -28,6 +28,7 @@
 #include "JackMultiEngine.h"
 
 extern zyn::MiddleWare *middleware;
+extern char *instance_name;
 
 namespace zyn {
 
@@ -84,7 +85,10 @@ bool JackMultiEngine::Start(void)
         clientname += "_" + os_pid_as_padded_string();
     jack_status_t jackstatus;
 
-    impl->client = jack_client_open(clientname.c_str(), JackNullOption, &jackstatus);
+    if(instance_name)
+        impl->client = jack_client_open(instance_name, JackNullOption, &jackstatus);
+    else
+        impl->client = jack_client_open(clientname.c_str(), JackNullOption, &jackstatus);
 
     if(!impl->client)
         errx(1, "failed to connect to jack...");
