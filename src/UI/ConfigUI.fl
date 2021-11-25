@@ -92,9 +92,15 @@ class ConfigUI {} {
             class Fl_Osc_Numeric_Input
           }
           Fl_Check_Button {} {
-            label {Swap Stereo }
+            label {Swap Stereo}
             xywh {15 80 95 20} box NO_BOX labelsize 11
             code0 {o->init("cfg.SwapStereo");}
+            class Fl_Osc_Check
+          }
+          Fl_Check_Button {} {
+            label {Enable audio output compressor}
+            xywh {15 105 205 20} box NO_BOX labelsize 11
+            code0 {o->init("cfg.AudioOutputCompressor");}
             class Fl_Osc_Check
           }
           Fl_Choice oscilsize_widget {
@@ -155,7 +161,7 @@ class ConfigUI {} {
           } 
           Fl_Choice {} {
             label {PADsynth Interpolation}
-            xywh {175 105 75 15} down_box BORDER_BOX labelsize 10 textsize 11
+            xywh {175 130 75 15} down_box BORDER_BOX labelsize 10 textsize 11
             code0 {o->init("cfg.Interpolation");}
             class Fl_Osc_Choice
           } {
