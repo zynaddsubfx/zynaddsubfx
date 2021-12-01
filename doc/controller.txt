@@ -23,29 +23,97 @@ General
 Portamento
 ~~~~~~~~~~
 
-* *Rcv.*: If the part receives portamento On/Off (65) controller
-* *time*: The duration of the portamento
-* *thresh*: The threshold of the portamento.
+* *Prt.Rcv*: If the part receives portamento On/Off (65) controller
+* *Enable*: If portamento is enabled for the part
+* *Time*: The duration of the portamento
+* *Up/down*: Sets ratio of portamento time between up- and down-going pitch
+steps
+* *Tr.type*: The threshold type.
+Checked means that the portamento activates when the difference of frequencies
+is above the threshold ("Thresh"); not checked is for below the threshold.
+* *Thresh*: The threshold of the portamento.
 It represents the minimum or the maximum number of halftones
 (or hundred cents) required to start the portamento. 
 The difference is computed between the last note and current note.
-* *th.type*: The threshold type.
-Checked means that the portamento activates when the difference of frequencies
-is above the threshold ("thresh"); not checked is for below the threshold.
 
 NOTE: The threshold refers to the frequencies and not to MIDI notes
       (you should consider this if you use microtonal scales).
 
-
 Proportional Portamento
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 ////
 TODO: add graphs to explain prp.rate and prp. depth
 ////
 
-* *Propt.*: If the portamento is proportional to ratio of frequencies
-* *Prp. Rate*: Ratio needed to double the time of portamento
-* *Prp. Dpth*: The divergence from 
+* *Prop.*: If the portamento time is proportional to ratio of frequencies
+* *Prp. Scale*: Ratio needed to double the time of portamento
+* *Prp. Depth*: The divergence from constant portamento time
+
+Detailed portamento description
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The basis for the portamento function is the corresponding function in a
+monophonic analog synthesizer.  In an analog synthesizer, portamento is
+implemented as a lag circuit on the CV from the keyboard to the oscillators,
+providing a smooth glide of the pitch rather than jumping to the new pitch when
+a new note is played.  Thus, a key feature of portamento is that whenever a new
+note is played, regardless of whether the target pitch of the previous note had
+been reached or not, the journey to the new pitch starts at whatever pitch
+prevailed at the time.
+
+In a polyphonic analog synthesizer, a trivial implementation of portamento is
+using separate lag circuits at the keyboard CV inputs of each voice. This does
+create a bit of a chaotic portamento behaviour however, because the glide for a
+played voice will start at whatever pitch the individual voice had previously,
+which is not necessarily the same as the previously played note, as it would be
+in the case of monophonic portamento. Nevertheless, this is the most common
+implementation of portamento on a polyphonic analog synthesizer, and the mild
+chaos that ensues when portamento is enabled is still musically useful.
+
+In a digital synthesizer, it is possible to emulate the behaviour of an analog
+polyphonic synthesizer, especially if the implementation models the behaviour
+in terms of a fixed set of voices which are allocated much in the same way as
+the analog voices would be. However, in synthesizers such as ZynAddSubFx,
+voices are allocated on an as-needed basis, and deallocated afterwards, so when
+triggering a new voice, it has no "previous pitch". Unless we purposely want to
+emulate the behaviour of a voice allocated analog synthesizer, we can explore
+other portamento models.
+
+Indeed, in a digital synthesizer, it is possible to use the monophonic
+portamento behaviour as the basis also for polyphonic portamento. This means
+that when triggering a new note, the pitch of the note should start at the
+pitch of the previously played note, which may not actually be the target pitch
+of that note if there was an ongoing portamento at the time the new note was
+triggered.
+
+For example, assume C1 is played, and then C2. C2 starts its pitch at C1 and
+glides upwards. Half way, say when the to-be-C2 voice has reached G1 during its
+glide, C3 is played. The portamento for C3 should then start at G1, i.e. the
+pitch that the second played note had reached at that time, rather than for
+instance at the target pitch of C2, which would give the impression of a C2
+suddenly being played from nowhere, before gliding up to C3. This mimics the
+smooth new-notes-start-at-the-current-pitch behaviour of a monophonic
+portamento implementation, which is both logical and consistent.
+
+Portamento operation in ZynAddSubFx
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For each note played, the portamento controller makes a decision as to whether
+the note should have portamento or not, governed by the *Enable*, *Tr.Type* and
+*Thresh* parameters. Whenever a note is played which should have portamento,
+the portamento starts at the pitch that the previously played note was at when
+the new note was played. This slightly long-winded explanation encompasses the
+case of the previous note being in the process of gliding due to portamento, in
+which case the new note should start precisely at that pitch. This behavior is
+the same in all key assignment modes (polyphonic, monophonic or legato).
+
+In poly mode, each note will have its own portamento, i.e. each note will glide
+individually from its initial pitch (see previous section) to the target pitch
+(= the note played).
+
+When portamento is enabled in poly mode, all notes have portamento, whereas in
+mono/legato mode, the player must play legato (hold one note while playing
+another) in order for the note to have portamento.
 
 Resonance
 ~~~~~~~~~
