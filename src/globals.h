@@ -73,7 +73,7 @@ class  SVFilter;
 class  FormantFilter;
 class  ModFilter;
 
-typedef double fftw_real;
+typedef float fftw_real;
 typedef std::complex<fftw_real> fft_t;
 
 /**

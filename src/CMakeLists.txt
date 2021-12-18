@@ -27,7 +27,7 @@ if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     pkg_check_modules(NTK ntk)
     pkg_check_modules(NTK_IMAGES ntk_images)
 
-    pkg_check_modules(FFTW REQUIRED fftw3)
+    pkg_check_modules(FFTW3F REQUIRED fftw3f)
     pkg_check_modules(MXML REQUIRED mxml)
 
     pkg_search_module(LASH lash-1.0)
@@ -37,7 +37,7 @@ if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     pkg_search_module(LIBLO liblo>=0.26 REQUIRED)
     mark_as_advanced(LIBLO_LIBRARIES)
 else()
-    find_package(FFTW REQUIRED)
+    find_package(FFTW3F REQUIRED)
     find_package(MXML REQUIRED)
     find_package(LIBLO REQUIRED)
     find_package(PORTAUDIO)
@@ -516,7 +516,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zyn-version.h.in
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zyn-config.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/zyn-config.h)
 
-link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS} ${NTK_LIBRARY_DIRS} ${X11_LIBRARY_DIRS})
+link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW3F_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS} ${NTK_LIBRARY_DIRS} ${X11_LIBRARY_DIRS})
 
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
@@ -573,7 +573,7 @@ endif()
 
 target_link_libraries(zynaddsubfx_core
 	${ZLIB_LIBRARIES}
-	${FFTW_LIBRARIES}
+	${FFTW3F_LIBRARIES}
 	${MXML_LIBRARIES}
 	${OS_LIBRARIES}
     ${PTHREAD_LIBRARY}
@@ -663,7 +663,7 @@ endmacro()
 package_status(PKG_CONFIG_FOUND "PkgConfig" "found"   ${Red})
 package_status(ZLIB_FOUND       "zlib     " "found"   ${Red})
 package_status(MXML_FOUND       "mxml     " "found"   ${Red})
-package_status(FFTW_FOUND       "fftw3    " "found"   ${Red})
+package_status(FFTW3F_FOUND     "fftw3f   " "found"   ${Red})
 package_status(LIBLO_FOUND      "liblo    " "found"   ${Red})
 package_status(X11_FOUND        "x11      " "found"   ${Yellow})
 package_status(X11_Xpm_FOUND    "xpm      " "found"   ${Yellow})
@@ -688,4 +688,4 @@ package_status(SndioEnable      "SNDIO    " "enabled" ${Yellow})
 package_status(HAVE_ASYNC       "c++ async" "usable"  ${Yellow})
 
 
-message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")
+message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW3F_LIBRARY} ${MXML_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")

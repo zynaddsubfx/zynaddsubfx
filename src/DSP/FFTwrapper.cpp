@@ -32,13 +32,13 @@ FFTwrapper::FFTwrapper(int fftsize_)
 
     fftsize  = fftsize_;
     time     = new fftw_real[fftsize];
-    fft      = new fftw_complex[fftsize + 1];
+    fft      = new fftwf_complex[fftsize + 1];
     pthread_mutex_lock(mutex);
-    planfftw = fftw_plan_dft_r2c_1d(fftsize,
+    planfftw = fftwf_plan_dft_r2c_1d(fftsize,
                                     time,
                                     fft,
                                     FFTW_ESTIMATE);
-    planfftw_inv = fftw_plan_dft_c2r_1d(fftsize,
+    planfftw_inv = fftwf_plan_dft_c2r_1d(fftsize,
                                         fft,
                                         time,
                                         FFTW_ESTIMATE);
@@ -48,8 +48,8 @@ FFTwrapper::FFTwrapper(int fftsize_)
 FFTwrapper::~FFTwrapper()
 {
     pthread_mutex_lock(mutex);
-    fftw_destroy_plan(planfftw);
-    fftw_destroy_plan(planfftw_inv);
+    fftwf_destroy_plan(planfftw);
+    fftwf_destroy_plan(planfftw_inv);
     pthread_mutex_unlock(mutex);
 
     delete [] time;
@@ -59,36 +59,34 @@ FFTwrapper::~FFTwrapper()
 void FFTwrapper::smps2freqs(const float *smps, fft_t *freqs)
 {
     //Load data
-    for(int i = 0; i < fftsize; ++i)
-        time[i] = static_cast<double>(smps[i]);
+    memcpy((void *)time, (const void *)smps, fftsize * sizeof(float));
 
     //DFT
-    fftw_execute(planfftw);
+    fftwf_execute(planfftw);
 
     //Grab data
-    memcpy((void *)freqs, (const void *)fft, fftsize * sizeof(double));
+    memcpy((void *)freqs, (const void *)fft, fftsize * sizeof(float));
 }
 
 void FFTwrapper::freqs2smps(const fft_t *freqs, float *smps)
 {
     //Load data
-    memcpy((void *)fft, (const void *)freqs, fftsize * sizeof(double));
+    memcpy((void *)fft, (const void *)freqs, fftsize * sizeof(float));
 
     //clear unused freq channel
     fft[fftsize / 2][0] = 0.0f;
     fft[fftsize / 2][1] = 0.0f;
 
     //IDFT
-    fftw_execute(planfftw_inv);
+    fftwf_execute(planfftw_inv);
 
     //Grab data
-    for(int i = 0; i < fftsize; ++i)
-        smps[i] = static_cast<float>(time[i]);
+    memcpy((void*)smps, (const void*)time, fftsize * sizeof(float));
 }
 
 void FFT_cleanup()
 {
-    fftw_cleanup();
+    fftwf_cleanup();
     pthread_mutex_destroy(mutex);
     delete mutex;
     mutex = NULL;

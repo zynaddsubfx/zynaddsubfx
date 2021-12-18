@@ -35,9 +35,9 @@ class FFTwrapper
         void freqs2smps(const fft_t *freqs, float *smps);
     private:
         int fftsize;
-        fftw_real    *time;
-        fftw_complex *fft;
-        fftw_plan     planfftw, planfftw_inv;
+        fftw_real     *time;
+        fftwf_complex *fft;
+        fftwf_plan    planfftw, planfftw_inv;
 };
 
 /*
