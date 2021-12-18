@@ -968,7 +968,7 @@ void OscilGen::adaptiveharmonicpostprocess(fft_t *f, int size)
     par = 1.0f - powf((1.0f - par), 1.5f);
 
     for(int i = 0; i < size; ++i) {
-        inf[i] = f[i] * double(par);
+        inf[i] = f[i] * par;
         f[i]  *= (1.0f - par);
     }
 
