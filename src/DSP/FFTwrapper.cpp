@@ -31,7 +31,7 @@ FFTwrapper::FFTwrapper(int fftsize_)
 
 
     fftsize  = fftsize_;
-    time     = new fftw_real[fftsize];
+    time     = new fftwf_real[fftsize];
     fft      = new fftwf_complex[fftsize + 1];
     pthread_mutex_lock(mutex);
     planfftw = fftwf_plan_dft_r2c_1d(fftsize,
