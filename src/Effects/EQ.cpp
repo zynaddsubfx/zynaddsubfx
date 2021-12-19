@@ -292,8 +292,8 @@ void EQ::getFilter(float *a, float *b) const
         auto &F = filter[i];
         if(F.Ptype == 0)
             continue;
-        const double Fb[3] = {F.l->coeff.c[0], F.l->coeff.c[1], F.l->coeff.c[2]};
-        const double Fa[3] = {1.0f, -F.l->coeff.d[1], -F.l->coeff.d[2]};
+        const float Fb[3] = {F.l->coeff.c[0], F.l->coeff.c[1], F.l->coeff.c[2]};
+        const float Fa[3] = {1.0f, -F.l->coeff.d[1], -F.l->coeff.d[2]};
 
         for(int j=0; j<F.Pstages+1; ++j) {
             for(int k=0; k<3; ++k) {
