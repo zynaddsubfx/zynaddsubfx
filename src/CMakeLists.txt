@@ -95,6 +95,7 @@ SET (NoNeonPlease False CACHE BOOL
 SET (PluginLibDir "lib" CACHE STRING
     "Install directory for plugin libraries PREFIX/PLUGIN_LIB_DIR/{lv2,vst}")
 SET (DemoMode FALSE CACHE BOOL "Enable 10 minute silence")
+SET (PluginEnable TRUE CACHE BOOL "Enable Plugins")
 SET (ZynFusionDir "" CACHE STRING "Developers only: zest binary's dir; useful if fusion is not system-installed.")
 mark_as_advanced(FORCE ZynFusionDir)
 
@@ -540,7 +541,9 @@ add_subdirectory(Effects)
 add_subdirectory(Params)
 add_subdirectory(DSP)
 add_subdirectory(Nio)
-add_subdirectory(Plugin)
+if (PluginEnable)
+    add_subdirectory(Plugin)
+endif()
 
 add_library(zynaddsubfx_core STATIC
     version.cpp
