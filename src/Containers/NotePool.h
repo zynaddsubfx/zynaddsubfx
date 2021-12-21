@@ -22,7 +22,7 @@ namespace zyn {
 typedef uint8_t note_t; //Global MIDI note definition
 
 struct LegatoParams;
-struct PortamentoRealtime;
+class PortamentoRealtime;
 class NotePool
 {
     public:

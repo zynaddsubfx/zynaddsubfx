@@ -20,7 +20,7 @@ namespace zyn {
 
 class Allocator;
 class Controller;
-struct Portamento;
+class Portamento;
 struct SynthParams
 {
     Allocator &memory;   //Memory Allocator for the Note to use

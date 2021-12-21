@@ -43,7 +43,7 @@ PADnote::PADnote(const PADnoteParameters *parameters,
 }
 
 void PADnote::setup(float velocity_,
-                    struct Portamento *portamento_,
+                    Portamento *portamento_,
                     float note_log2_freq_,
                     bool legato,
                     WatchManager *wm,
