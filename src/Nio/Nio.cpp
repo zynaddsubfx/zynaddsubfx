@@ -143,7 +143,7 @@ void Nio::preferredSampleRate(unsigned &rate)
     while(fgets(buffer, sizeof(buffer), ps))
         if(strstr(buffer, "jack"))
             break;
-    fclose(ps);
+    pclose(ps);
 
     if(!strstr(buffer, "jack"))
         return;
