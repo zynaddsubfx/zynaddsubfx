@@ -33,7 +33,7 @@ WatchPoint::WatchPoint(WatchManager *ref, const char *prefix, const char *id)
     if(prefix)
         fast_strcpy(identity, prefix, sizeof(identity));
     if(id)
-        strncat(identity, id, sizeof(identity));
+        strncat(identity, id, sizeof(identity)-1);
 }
 
 bool WatchPoint::is_active(void)
