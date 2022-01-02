@@ -17,6 +17,7 @@
 #include "../globals.h"
 #include <rtosc/ports.h>
 #include "../Params/Presets.h"
+#include "../DSP/FFTwrapper.h"
 
 namespace zyn {
 
@@ -29,18 +30,18 @@ class OscilGen:public Presets
         /**computes the full spectrum of oscil from harmonics,phases and basefunc*/
         void prepare();
 
-        void prepare(fft_t *data);
+        void prepare(FFTfreqBuffer data);
 
         /**do the antialiasing(cut off higher freqs.),apply randomness and do a IFFT*/
         //returns where should I start getting samples, used in block type randomness
         short get(float *smps, float freqHz, int resonance = 0);
         //if freqHz is smaller than 0, return the "un-randomized" sample for UI
 
-        void getbasefunction(float *smps);
+        void getbasefunction(FFTsampleBuffer smps);
 
         //called by UI
         void getspectrum(int n, float *spc, int what); //what=0 pt. oscil,1 pt. basefunc
-        void getcurrentbasefunction(float *smps);
+        void getcurrentbasefunction(FFTsampleBuffer smps);
         /**convert oscil to base function*/
         void useasbase();
 
@@ -113,15 +114,15 @@ class OscilGen:public Presets
 
         /* Oscillator Frequencies -
          *  this is different than the harmonics set-up by the user,
-         *  it may contains time-domain data if the antialiasing is turned off*/
-        fft_t *oscilFFTfreqs;
+         *  it may contain time-domain data if the antialiasing is turned off*/
+        FFTfreqBuffer oscilFFTfreqs;
 
         fft_t *pendingfreqs;
     private:
         //This array stores some temporary data and it has OSCIL_SIZE elements
-        float *tmpsmps;
-        fft_t *outoscilFFTfreqs;
-        float *cachedbasefunc;
+        FFTsampleBuffer tmpsmps;
+        FFTfreqBuffer outoscilFFTfreqs;
+        FFTsampleBuffer cachedbasefunc;
         bool cachedbasevalid;
 
         float hmag[MAX_AD_HARMONICS], hphase[MAX_AD_HARMONICS]; //the magnituides and the phases of the sine/nonsine harmonics
@@ -130,7 +131,7 @@ class OscilGen:public Presets
         //computes the basefunction and make the FFT; newbasefunc<0  = same basefunc
         void changebasefunction(void);
         //Waveshaping
-        void waveshape(fft_t *freqs);
+        void waveshape(FFTfreqBuffer freqs);
 
         //Filter the oscillator accotding to Pfiltertype and Pfilterpar
         void oscilfilter(fft_t *freqs);
@@ -142,7 +143,7 @@ class OscilGen:public Presets
         void shiftharmonics(fft_t *freqs);
 
         //Do the oscil modulation stuff
-        void modulation(fft_t *freqs);
+        void modulation(FFTfreqBuffer freqs);
 
         float userfunc(float x);
 
@@ -170,7 +171,9 @@ class OscilGen:public Presets
             oldmodulationpar3;
 
 
-        fft_t *basefuncFFTfreqs; //Base Function Frequencies
+		FFTfreqBuffer basefuncFFTfreqs; //Base function frequencies
+		FFTfreqBuffer scratchFreqs; //Yet another tmp buffer
+
         int    oscilprepared;   //1 if the oscil is prepared, 0 if it is not prepared and is need to call ::prepare() before ::get()
 
         Resonance *res;

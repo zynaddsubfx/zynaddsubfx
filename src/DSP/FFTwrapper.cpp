@@ -21,7 +21,7 @@ namespace zyn {
 
 static pthread_mutex_t *mutex = NULL;
 
-FFTwrapper::FFTwrapper(int fftsize_)
+FFTwrapper::FFTwrapper(int fftsize_) : m_fftsize(fftsize_)
 {
     //first one will spawn the mutex (yeah this may be a race itself)
     if(!mutex) {
@@ -29,8 +29,6 @@ FFTwrapper::FFTwrapper(int fftsize_)
         pthread_mutex_init(mutex, NULL);
     }
 
-
-    m_fftsize = fftsize_;
     time      = new fftwf_real[m_fftsize];
     fft       = new fftwf_complex[m_fftsize + 1];
     pthread_mutex_lock(mutex);
@@ -56,32 +54,49 @@ FFTwrapper::~FFTwrapper()
     delete [] fft;
 }
 
-void FFTwrapper::smps2freqs(const float *smps, fft_t *freqs)
+void FFTwrapper::smps2freqs(const FFTsampleBuffer smps, FFTfreqBuffer freqs, FFTsampleBuffer scratch) const
 {
     //Load data
-    memcpy((void *)time, (const void *)smps, m_fftsize * sizeof(float));
+    memcpy((void *)scratch.data, (const void *)smps.data, m_fftsize * sizeof(float));
 
-    //DFT
-    fftwf_execute(planfftw);
-
-    //Grab data
-    memcpy((void *)freqs, (const void *)fft, m_fftsize * sizeof(float));
+    smps2freqs_noconst_input(scratch, freqs);
 }
 
-void FFTwrapper::freqs2smps(const fft_t *freqs, float *smps)
+void FFTwrapper::smps2freqs_noconst_input(FFTsampleBuffer smps, FFTfreqBuffer freqs) const
+{
+    static_assert (sizeof(float) == sizeof(fftwf_real), "sizeof(float) mismatch");
+    assert(m_fftsize == freqs.fftsize);
+    assert(m_fftsize == smps.fftsize);
+
+    //DFT
+    fftwf_execute_dft_r2c(planfftw,
+                          static_cast<fftwf_real*>(smps.data),
+                          reinterpret_cast<fftwf_complex*>(freqs.data));
+}
+
+
+void FFTwrapper::freqs2smps(const FFTfreqBuffer freqs, FFTsampleBuffer smps, FFTfreqBuffer scratch) const
 {
     //Load data
-    memcpy((void *)fft, (const void *)freqs, m_fftsize * sizeof(float));
+    memcpy((void *)scratch.data, (const void *)freqs.data, m_fftsize * sizeof(float));
 
-    //clear unused freq channel
-    fft[m_fftsize / 2][0] = 0.0f;
-    fft[m_fftsize / 2][1] = 0.0f;
+    freqs2smps_noconst_input(scratch, smps);
+}
+
+
+void FFTwrapper::freqs2smps_noconst_input(FFTfreqBuffer freqs, FFTsampleBuffer smps) const
+{
+    static_assert (sizeof(fft_t) == sizeof(fftwf_complex), "sizeof(complex) mismatch");
+    assert(m_fftsize == freqs.fftsize);
+    assert(m_fftsize == smps.fftsize);
+    fftwf_complex* freqs_complex = reinterpret_cast<fftwf_complex*>(freqs.data);
+
+    //Clear unused freq channel
+    freqs_complex[m_fftsize / 2][0] = 0.0f;
+    freqs_complex[m_fftsize / 2][1] = 0.0f;
 
     //IDFT
-    fftwf_execute(planfftw_inv);
-
-    //Grab data
-    memcpy((void*)smps, (const void*)time, m_fftsize * sizeof(float));
+    fftwf_execute_dft_c2r(planfftw_inv, freqs_complex, smps.data);
 }
 
 void FFT_cleanup()
