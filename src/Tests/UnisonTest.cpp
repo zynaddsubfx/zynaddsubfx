@@ -36,7 +36,6 @@ class UnisonTest
 {
     public:
 
-        ADnote       *note;
         FFTwrapper   *fft;
         Controller   *controller;
         float test_freq_log2;
@@ -74,7 +73,6 @@ class UnisonTest
         }
 
         void tearDown() {
-            delete note;
             delete controller;
             delete fft;
             FFT_cleanup();
@@ -97,7 +95,7 @@ class UnisonTest
             params->VoicePar[0].Unison_invert_phase     = f;
 
             SynthParams pars{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng()};
-            note = new ADnote(params, pars);
+            ADnote* note = new ADnote(params, pars);
             note->noteout(outL, outR);
             TS_ASSERT_DELTA(values[0], outL[80], 1.9e-5);
             printf("{%f,", outL[80]);
@@ -110,6 +108,7 @@ class UnisonTest
             note->noteout(outL, outR);
             TS_ASSERT_DELTA(values[3], outR[200], 1.9e-5);
             printf("%f},\n", outR[200]);
+            delete note;
         }
 
         void testUnison() {

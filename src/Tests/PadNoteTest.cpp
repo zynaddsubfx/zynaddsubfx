@@ -118,10 +118,13 @@ class PadNoteTest
             delete note;
             delete controller;
             delete fft;
+            delete w;
+            delete tr;
             delete [] outL;
             delete [] outR;
             delete pars;
             FFT_cleanup();
+            delete time;
             delete synth;
 
             note = NULL;

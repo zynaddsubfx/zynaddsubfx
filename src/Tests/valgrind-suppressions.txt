@@ -1,0 +1,18 @@
+# dl_init and dl_open are known to have memory leaks
+# this is a glibc issue, not ours
+{
+   glibc_dl_init
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:_dl_init
+}
+{
+   glibc_dl_open
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*alloc
+   ...
+   fun:_dl_open
+}

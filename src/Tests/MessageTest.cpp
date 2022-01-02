@@ -40,6 +40,7 @@ char *instance_name=(char*)"";
 class MessageTest
 {
     public:
+        struct FFTCleaner { ~FFTCleaner() { FFT_cleanup(); } } cleaner;
         Config config;
         void setUp() {
             synth    = new SYNTH_T;

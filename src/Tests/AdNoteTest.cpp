@@ -47,7 +47,6 @@ class AdNoteTest
         WatchManager *w;
         float *outR, *outL;
 
-        LFO          *lfo;
         LFOParams    *lfop;
         int randval(int min, int max)
         {
@@ -71,7 +70,7 @@ class AdNoteTest
 
         void run_lfo_randomtest(void)
         {
-            lfo  = new LFO(*lfop, 440.0f, *time);
+            LFO* lfo  = new LFO(*lfop, 440.0f, *time);
             for(int i=0; i<100; ++i) {
                 float out = lfo->lfoout();
                 switch(lfop->fel)
@@ -88,6 +87,7 @@ class AdNoteTest
                         break;
                 }
             }
+            delete lfo;
         }
 
 
@@ -150,9 +150,12 @@ class AdNoteTest
             delete controller;
             delete defaultPreset;
             delete fft;
+            delete w;
+            delete tr;
             delete [] outL;
             delete [] outR;
             FFT_cleanup();
+            delete time;
             delete synth;
         }
 
@@ -219,7 +222,7 @@ class AdNoteTest
 
             TS_ASSERT_EQUAL_INT(sampleCount, 30208);
 
-              lfop = new LFOParams(time);
+            lfop = new LFOParams(time);
             lfop->fel  = zyn::consumer_location_type_t::amp;
             lfop->freq = 2.0f;
             lfop->delay = 0.0f;
@@ -227,6 +230,7 @@ class AdNoteTest
                 randomize_params();
                 run_lfo_randomtest();
             }
+            delete lfop;
 
 
         }

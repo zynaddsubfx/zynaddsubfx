@@ -33,9 +33,10 @@ char *instance_name=(char*)"";
 
 #define NUM_MIDDLEWARE 3
 
-class PluginTest
+class MiddleWareTest
 {
     public:
+        struct FFTCleaner { ~FFTCleaner() { FFT_cleanup(); } } cleaner;
         Config config;
         void setUp() {
             synth = new SYNTH_T;
@@ -60,16 +61,21 @@ class PluginTest
                 middleware[i] = new MiddleWare(std::move(*synth), &config);
                 master[i] = middleware[i]->spawnMaster();
                 //printf("Octave size = %d\n", master[i]->microtonal.getoctavesize());
+                if (i != NUM_MIDDLEWARE-1) {
+                    delete synth;
+                } else {
+                    // "synth" is kept to be directly accessed by the tests
+                }
             }
         }
 
         void tearDown() {
             for(int i = 0; i < NUM_MIDDLEWARE; ++i)
                 delete middleware[i];
+            delete synth;
 
             delete[] outL;
             delete[] outR;
-            delete synth;
         }
 
 
@@ -147,7 +153,7 @@ class PluginTest
 
 int main()
 {
-    PluginTest test;
+    MiddleWareTest test;
     RUN_TEST(testInit);
     RUN_TEST(testPanic);
     RUN_TEST(testLoad);

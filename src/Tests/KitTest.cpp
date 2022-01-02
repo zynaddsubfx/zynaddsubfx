@@ -44,6 +44,7 @@ enum PrivateNoteStatus {
 class KitTest
 {
     private:
+        struct FFTCleaner { ~FFTCleaner() { FFT_cleanup(); } } cleaner;
         Alloc      alloc;
         FFTwrapper fft;
         Microtonal microtonal;
@@ -59,6 +60,7 @@ class KitTest
         KitTest()
             :fft(getSynthTDefaultOscilSize()), microtonal(dummy)
         {}
+
         void setUp() {
             synth = new SYNTH_T;
             time  = new AbsTime(*synth);
