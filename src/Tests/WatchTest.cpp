@@ -53,10 +53,12 @@ class WatchTest
             w   = new WatchManager(tr);
             par = new LFOParams(at);
             l   = new LFO(*par, 440.0, *at, w);
-
         }
 
         void tearDown() {
+            delete l;
+            delete par;
+            delete w;
             delete at;
             delete s;
             delete tr;
