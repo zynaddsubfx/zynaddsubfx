@@ -30,15 +30,15 @@ FFTwrapper::FFTwrapper(int fftsize_)
     }
 
 
-    fftsize  = fftsize_;
-    time     = new fftwf_real[fftsize];
-    fft      = new fftwf_complex[fftsize + 1];
+    m_fftsize = fftsize_;
+    time      = new fftwf_real[m_fftsize];
+    fft       = new fftwf_complex[m_fftsize + 1];
     pthread_mutex_lock(mutex);
-    planfftw = fftwf_plan_dft_r2c_1d(fftsize,
+    planfftw = fftwf_plan_dft_r2c_1d(m_fftsize,
                                     time,
                                     fft,
                                     FFTW_ESTIMATE);
-    planfftw_inv = fftwf_plan_dft_c2r_1d(fftsize,
+    planfftw_inv = fftwf_plan_dft_c2r_1d(m_fftsize,
                                         fft,
                                         time,
                                         FFTW_ESTIMATE);
@@ -59,29 +59,29 @@ FFTwrapper::~FFTwrapper()
 void FFTwrapper::smps2freqs(const float *smps, fft_t *freqs)
 {
     //Load data
-    memcpy((void *)time, (const void *)smps, fftsize * sizeof(float));
+    memcpy((void *)time, (const void *)smps, m_fftsize * sizeof(float));
 
     //DFT
     fftwf_execute(planfftw);
 
     //Grab data
-    memcpy((void *)freqs, (const void *)fft, fftsize * sizeof(float));
+    memcpy((void *)freqs, (const void *)fft, m_fftsize * sizeof(float));
 }
 
 void FFTwrapper::freqs2smps(const fft_t *freqs, float *smps)
 {
     //Load data
-    memcpy((void *)fft, (const void *)freqs, fftsize * sizeof(float));
+    memcpy((void *)fft, (const void *)freqs, m_fftsize * sizeof(float));
 
     //clear unused freq channel
-    fft[fftsize / 2][0] = 0.0f;
-    fft[fftsize / 2][1] = 0.0f;
+    fft[m_fftsize / 2][0] = 0.0f;
+    fft[m_fftsize / 2][1] = 0.0f;
 
     //IDFT
     fftwf_execute(planfftw_inv);
 
     //Grab data
-    memcpy((void*)smps, (const void*)time, fftsize * sizeof(float));
+    memcpy((void*)smps, (const void*)time, m_fftsize * sizeof(float));
 }
 
 void FFT_cleanup()

@@ -33,8 +33,10 @@ class FFTwrapper
          * @param freqs Structure FFTFREQS which stores the frequencies*/
         void smps2freqs(const float *smps, fft_t *freqs);
         void freqs2smps(const fft_t *freqs, float *smps);
+
+        int fftsize() const { return m_fftsize; }
     private:
-        int fftsize;
+        int m_fftsize;
         fftwf_real     *time;
         fftwf_complex *fft;
         fftwf_plan    planfftw, planfftw_inv;

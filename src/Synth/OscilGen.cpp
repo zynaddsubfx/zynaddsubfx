@@ -343,7 +343,12 @@ void rmsNormalize(fft_t *freqs, int oscilsize)
 OscilGen::OscilGen(const SYNTH_T &synth_, FFTwrapper *fft_, Resonance *res_)
     :Presets(), synth(synth_)
 {
-    //assert(fft_);
+    if(fft_) {
+        // FFTwrapper should operate exactly on all "oscilsize" bytes
+        assert(fft_->fftsize() == synth_.oscilsize);
+    } else {
+        // this is possible if *this is a temporary paste object
+    }
 
     setpresettype("Poscilgen");
     fft = fft_;
