@@ -50,9 +50,14 @@ class KitTest
         Part *part;
         AbsTime *time;
         float *outL, *outR;
+
+        static int getSynthTDefaultOscilSize() {
+            SYNTH_T s;
+            return s.oscilsize;
+        }
     public:
         KitTest()
-            :fft(512), microtonal(dummy)
+            :fft(getSynthTDefaultOscilSize()), microtonal(dummy)
         {}
         void setUp() {
             synth = new SYNTH_T;
