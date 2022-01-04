@@ -1277,9 +1277,10 @@ bool Master::AudioOut(float *outr, float *outl)
     memset(outr, 0, synth.bufferbytes);
 
     //Compute part samples and store them part[npart]->partoutl,partoutr
+    //Note: We do this regardless if the part is enabled or not, to allow
+    //the part to graciously shut down when disabled.
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        if(part[npart]->Penabled)
-            part[npart]->ComputePartSmps();
+        part[npart]->ComputePartSmps();
 
     //Insertion effects
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)

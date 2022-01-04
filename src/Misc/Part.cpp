@@ -994,6 +994,18 @@ void Part::AllNotesOff()
  */
 void Part::ComputePartSmps()
 {
+    /* When we are in the process of being disabled (Penabled set to false),
+     * AllNotesOff will be called, setting killallnotes, which causes all
+     * playing voices to terminate and the signal level being graciously
+     * muted during the course of the current buffer. After that, all
+     * subsequent output buffers will be set to 0 until we are enabled again.
+     */
+    if (!Penabled && !killallnotes) {
+        memset(partoutl, 0, synth.bufferbytes);
+        memset(partoutr, 0, synth.bufferbytes);
+        return;
+    }
+
     assert(partefx[0]);
     for(unsigned nefx = 0; nefx < NUM_PART_EFX + 1; ++nefx) {
         memset(partfxinputl[nefx], 0, synth.bufferbytes);
