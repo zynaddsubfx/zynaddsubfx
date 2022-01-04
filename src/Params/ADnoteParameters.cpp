@@ -444,8 +444,8 @@ static const Ports globalPorts = {
 #define rChangeCb obj->last_update_timestamp = obj->time->time();
 static const Ports adPorts = {//XXX 16 should not be hard coded
     rSelf(ADnoteParameters),
-    rPaste,
-    rArrayPaste,
+    rPasteRt,
+    rArrayPasteRt,
     rRecurs(VoicePar, NUM_VOICES),
     {"VoicePar#" STRINGIFY(NUM_VOICES) "/Enabled::T:F",
      rProp(parameter) rShort("enable") rDoc("Voice Enable")
