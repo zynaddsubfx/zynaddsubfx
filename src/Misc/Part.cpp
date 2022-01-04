@@ -317,6 +317,7 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     }
 
     killallnotes = false;
+    silent = false;
     oldfreq_log2 = -1.0f;
     oldportamento = NULL;
     legatoportamento = NULL;
@@ -1001,10 +1002,16 @@ void Part::ComputePartSmps()
      * subsequent output buffers will be set to 0 until we are enabled again.
      */
     if (!Penabled && !killallnotes) {
-        memset(partoutl, 0, synth.bufferbytes);
-        memset(partoutr, 0, synth.bufferbytes);
+        /* We only need to clear the output buffer once when disabled; since
+         * it's static within the part it's wasteful to do it every time. */
+        if (!silent) {
+            memset(partoutl, 0, synth.bufferbytes);
+            memset(partoutr, 0, synth.bufferbytes);
+            silent = true;
+        }
         return;
     }
+    silent = false;
 
     assert(partefx[0]);
     for(unsigned nefx = 0; nefx < NUM_PART_EFX + 1; ++nefx) {

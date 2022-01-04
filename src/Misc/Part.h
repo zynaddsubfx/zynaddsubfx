@@ -194,6 +194,7 @@ class Part
         bool isSingleKit(void)  const {return Pkitmode == 2;}
 
         bool killallnotes;
+        bool silent; // An output buffer with zeros has been generated
 
         NotePool notePool;
 
