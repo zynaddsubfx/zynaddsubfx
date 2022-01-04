@@ -149,7 +149,9 @@ static const rtosc::Ports realtime_ports =
     [](const char *m, rtosc::RtData &d){
         rObject &paste = **(rObject **)rtosc_argument(m,0).b.data;
         rObject &o = *(rObject*)d.obj;
-        o.pasteRT(paste);}}
+        o.pasteRT(paste);
+        rObject* ptr = &paste;\
+        d.reply("/free", "sb", STRINGIFY(rObject), sizeof(rObject*), &ptr);}}
 
 };
 static const rtosc::Ports non_realtime_ports =

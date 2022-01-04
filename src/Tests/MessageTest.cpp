@@ -60,9 +60,13 @@ class MessageTest
             TS_ASSERT(ms->uToB->hasNext());
             msg = ms->uToB->read();
             TS_ASSERT_EQUAL_STR("/part0/kit0/subpars-data", msg);
+            TS_ASSERT_EQUAL_INT(rtosc_narguments(msg), 1U);
+            TS_ASSERT_EQUAL_INT(sizeof(SUBnoteParameters*), rtosc_argument(msg, 0).b.len);
+            SUBnoteParameters* ptr = *(SUBnoteParameters**)rtosc_argument(msg, 0).b.data;
             TS_ASSERT(ms->uToB->hasNext());
             msg = ms->uToB->read();
             TS_ASSERT_EQUAL_STR("/part0/kit0/Psubenabled", msg);
+            delete ptr;
         }
 
         void testBankCapture(void)
@@ -130,6 +134,8 @@ class MessageTest
             stop_realtime();
             TS_ASSERT_EQUAL_INT(osc_dst.Pbasefuncpar, 32);
             TS_ASSERT_EQUAL_INT(osc_oth.Pbasefuncpar, 32);
+
+            mw->tick(); // Let MW handle all "/free" messages
         }
 
 
@@ -244,6 +250,8 @@ class MessageTest
 
             //Verify automation table is restored
             TS_ASSERT_EQUAL_INT(ms->Pkeyshift, 28);
+
+            mw->tick(); // Let MW handle all "/free" messages
         }
 
         void testLfoPaste(void)
@@ -263,6 +271,8 @@ class MessageTest
             stop_realtime();
 
             TS_ASSERT_EQUAL_INT(ms->part[0]->kit[0].adpars->GlobalPar.FreqLfo->Pfreqrand, 32);
+
+            mw->tick(); // Let MW handle all "/free" messages
         }
 
         void testPadPaste(void)
@@ -293,6 +303,8 @@ class MessageTest
 
             TS_ASSERT_EQUAL_INT(field1, 32);
             TS_ASSERT_EQUAL_INT(field2, 35);
+
+            mw->tick(); // Let MW handle all "/free" messages
         }
 
         void testFilterDepricated(void)

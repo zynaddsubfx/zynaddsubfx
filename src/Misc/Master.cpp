@@ -365,6 +365,10 @@ static const Ports automate_ports = {
                     std::swap(aa.map.control_points[k], ab.map.control_points[k]);
             }
         }
+        {
+            rtosc::AutomationMgr* ptr = &b;
+            d.reply("/free", "sb", "rtosc::AutomationMgr", sizeof(rtosc::AutomationMgr*), &ptr);
+        }
         rEnd},
 };
 
