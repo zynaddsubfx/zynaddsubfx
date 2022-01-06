@@ -21,11 +21,33 @@
 
 namespace zyn {
 
+// all temporary stuff
+class OscilGenBuffers
+{
+    friend class OscilGen;
+    OscilGenBuffers(FFTwrapper *fft_, int oscilsize);
+
+public:
+    FFTfreqBuffer oscilFFTfreqs;
+    fft_t *pendingfreqs;
+
+    //This array stores some temporary data and it has OSCIL_SIZE elements
+    FFTsampleBuffer tmpsmps;
+    FFTfreqBuffer outoscilFFTfreqs;
+    FFTsampleBuffer cachedbasefunc;
+    bool cachedbasevalid;
+
+    FFTfreqBuffer basefuncFFTfreqs; //Base function frequencies
+    FFTfreqBuffer scratchFreqs; //Yet another tmp buffer
+};
+
 class OscilGen:public Presets
 {
     public:
         OscilGen(const SYNTH_T &synth, FFTwrapper *fft_, Resonance *res_);
         ~OscilGen() override;
+
+        OscilGenBuffers createOscilGenBuffers() const;
 
         /**computes the full spectrum of oscil from harmonics,phases and basefunc*/
         void prepare();
@@ -115,15 +137,10 @@ class OscilGen:public Presets
         /* Oscillator Frequencies -
          *  this is different than the harmonics set-up by the user,
          *  it may contain time-domain data if the antialiasing is turned off*/
-        FFTfreqBuffer oscilFFTfreqs;
 
-        fft_t *pendingfreqs;
     private:
-        //This array stores some temporary data and it has OSCIL_SIZE elements
-        FFTsampleBuffer tmpsmps;
-        FFTfreqBuffer outoscilFFTfreqs;
-        FFTsampleBuffer cachedbasefunc;
-        bool cachedbasevalid;
+
+        OscilGenBuffers myBuffers;
 
         float hmag[MAX_AD_HARMONICS], hphase[MAX_AD_HARMONICS]; //the magnituides and the phases of the sine/nonsine harmonics
 
@@ -169,10 +186,6 @@ class OscilGen:public Presets
             oldbasefuncmodulationpar3, oldharmonicshift;
         int oldmodulation, oldmodulationpar1, oldmodulationpar2,
             oldmodulationpar3;
-
-
-		FFTfreqBuffer basefuncFFTfreqs; //Base function frequencies
-		FFTfreqBuffer scratchFreqs; //Yet another tmp buffer
 
         int    oscilprepared;   //1 if the oscil is prepared, 0 if it is not prepared and is need to call ::prepare() before ::get()
 
