@@ -118,10 +118,11 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
                 strcpy(edit, "prepare");
                 OscilGen &o = *((OscilGen*)d.obj);
                 FFTfreqBuffer freqs = o.fft->allocFreqBuf();
-                o.prepare(freqs);
+                OscilGenBuffers& bfrs = o.myBuffers();
+                o.prepare(bfrs, freqs);
                 // fprintf(stderr, "sending '%p' of fft data\n", data);
                 d.chain(repath, "b", sizeof(fft_t*), &freqs.data);
-                o.myBuffers.pendingfreqs = freqs.data;
+                bfrs.pendingfreqs = freqs.data;
                 d.broadcast(d.loc, "i", phase);
             }
         }},
@@ -145,10 +146,11 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
                 strcpy(edit, "prepare");
                 OscilGen &o = *((OscilGen*)d.obj);
                 FFTfreqBuffer freqs = o.fft->allocFreqBuf();
-                o.prepare(freqs);
+                OscilGenBuffers& bfrs = o.myBuffers();
+                o.prepare(bfrs, freqs);
                 // fprintf(stderr, "sending '%p' of fft data\n", data);
                 d.chain(repath, "b", sizeof(fft_t*), &freqs.data);
-                o.myBuffers.pendingfreqs = freqs.data;
+                bfrs.pendingfreqs = freqs.data;
                 d.broadcast(d.loc, "i", mag);
             }
         }},
@@ -177,10 +179,11 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
             //fprintf(stderr, "prepare: got a message from '%s'\n", m);
             OscilGen &o = *(OscilGen*)d.obj;
             FFTfreqBuffer freqs = o.fft->allocFreqBuf();
-            o.prepare(freqs);
+            OscilGenBuffers& bfrs = o.myBuffers();
+            o.prepare(bfrs, freqs);
             // fprintf(stderr, "sending '%p' of fft data\n", data);
             d.chain(d.loc, "b", sizeof(fft_t*), &freqs.data);
-            o.myBuffers.pendingfreqs = freqs.data;
+            bfrs.pendingfreqs = freqs.data;
         }},
     {"convert2sine:", rProp(non-realtime) rDoc("Translates waveform into FS"),
         NULL, [](const char *, rtosc::RtData &d) {
@@ -232,7 +235,7 @@ const rtosc::Ports OscilGen::realtime_ports{
             float *smps = new float[n]; // XXXRT
             memset(smps, 0, 4*n);
             //printf("%d\n", o->needPrepare());
-            o.get(smps,-1.0);
+            o.get(o.myBuffers(),smps,-1.0);
             //printf("wave: %f %f %f %f\n", smps[0], smps[1], smps[2], smps[3]);
             d.reply(d.loc, "b", n*sizeof(float), smps);
             delete[] smps;
@@ -251,10 +254,11 @@ const rtosc::Ports OscilGen::realtime_ports{
         NULL, [](const char *m, rtosc::RtData &d) {
             // fprintf(stderr, "prepare:b got a message from '%s'\n", m);
             OscilGen &o = *(OscilGen*)d.obj;
+            OscilGenBuffers& bfrs = o.myBuffers();
             assert(rtosc_argument(m,0).b.len == sizeof(void*));
-            d.reply("/free", "sb", "fft_t", sizeof(void*), &o.myBuffers.oscilFFTfreqs.data);
-            assert(o.myBuffers.oscilFFTfreqs.data !=*(fft_t**)rtosc_argument(m,0).b.data);
-            o.myBuffers.oscilFFTfreqs.data = *(fft_t**)rtosc_argument(m,0).b.data;
+            d.reply("/free", "sb", "fft_t", sizeof(void*), &bfrs.oscilFFTfreqs.data);
+            assert(bfrs.oscilFFTfreqs.data !=*(fft_t**)rtosc_argument(m,0).b.data);
+            bfrs.oscilFFTfreqs.data = *(fft_t**)rtosc_argument(m,0).b.data;
         }},
 
 };
@@ -338,7 +342,7 @@ void rmsNormalize(fft_t *freqs, int oscilsize)
         freqs[i] *= gain;
 }
 
-#define DIFF(par) (old ## par != P ## par)
+#define DIFF(par) (bfrs.old ## par != P ## par)
 
 FFTfreqBuffer ctorAllocFreqs(FFTwrapper* fft, int oscilsize) {
     return fft ? fft->allocFreqBuf() : FFTwrapper::riskAllocFreqBufWithSize(oscilsize);
@@ -348,59 +352,37 @@ FFTsampleBuffer ctorAllocSamples(FFTwrapper* fft, int oscilsize) {
     return fft ? fft->allocSampleBuf() : FFTwrapper::riskAllocSampleBufWithSize(oscilsize);
 }
 
-OscilGenBuffers::OscilGenBuffers(FFTwrapper *fft_, int oscilsize) :
+OscilGenBuffers::OscilGenBuffers(zyn::OscilGenBuffersCreator c) :
+    oscilsize(c.oscilsize),
     // fft_ can be nullptr in case of pasting
-    oscilFFTfreqs(ctorAllocFreqs(fft_, oscilsize)),
-    tmpsmps(ctorAllocSamples(fft_, oscilsize)),
-    outoscilFFTfreqs(ctorAllocFreqs(fft_, oscilsize)),
-    cachedbasefunc(ctorAllocSamples(fft_, oscilsize)),
+    oscilFFTfreqs(ctorAllocFreqs(c.fft, c.oscilsize)),
+    pendingfreqs(oscilFFTfreqs.data),
+    tmpsmps(ctorAllocSamples(c.fft, c.oscilsize)),
+    outoscilFFTfreqs(ctorAllocFreqs(c.fft, c.oscilsize)),
+    cachedbasefunc(ctorAllocSamples(c.fft, c.oscilsize)),
     cachedbasevalid(false),
-    basefuncFFTfreqs(ctorAllocFreqs(fft_, oscilsize)),
-    scratchFreqs(ctorAllocFreqs(fft_, oscilsize))
+    basefuncFFTfreqs(ctorAllocFreqs(c.fft, c.oscilsize)),
+    scratchFreqs(ctorAllocFreqs(c.fft, c.oscilsize))
 {
-}
-
-OscilGenBuffers OscilGen::createOscilGenBuffers() const
-{
-    return OscilGenBuffers(fft, synth.oscilsize);
-}
-
-OscilGen::OscilGen(const SYNTH_T &synth_, FFTwrapper *fft_, Resonance *res_)
-    :Presets(),
-      myBuffers(fft_, synth_.oscilsize),
-      fft(fft_),
-      res(res_),
-      synth(synth_)
-{
-    if(fft_) {
-        // FFTwrapper should operate exactly on all "oscilsize" bytes
-        assert(fft_->fftsize() == synth_.oscilsize);
-    } else {
-        // this is possible if *this is a temporary paste object
-    }
-
-    setpresettype("Poscilgen");
-
-    myBuffers.pendingfreqs     = myBuffers.oscilFFTfreqs.data;
-
-    randseed = 1;
-    ADvsPAD  = false;
-
     defaults();
 }
 
-OscilGen::~OscilGen()
+OscilGenBuffers::~OscilGenBuffers()
 {
-    delete[] myBuffers.tmpsmps.data;
-    delete[] myBuffers.outoscilFFTfreqs.data;
-    delete[] myBuffers.basefuncFFTfreqs.data;
-    delete[] myBuffers.oscilFFTfreqs.data;
-    delete[] myBuffers.cachedbasefunc.data;
-    delete[] myBuffers.scratchFreqs.data;
+    delete[] tmpsmps.data;
+    delete[] outoscilFFTfreqs.data;
+    delete[] basefuncFFTfreqs.data;
+    delete[] oscilFFTfreqs.data;
+    delete[] cachedbasefunc.data;
+    delete[] scratchFreqs.data;
 }
 
+zyn::OscilGenBuffersCreator OscilGen::createOscilGenBuffers() const
+{
+    return OscilGenBuffersCreator(fft, synth.oscilsize);
+}
 
-void OscilGen::defaults()
+void OscilGenBuffers::defaults()
 {
     oldbasefunc = 0;
     oldbasepar  = 64;
@@ -420,6 +402,40 @@ void OscilGen::defaults()
     for(int i = 0; i < MAX_AD_HARMONICS; ++i) {
         hmag[i]    = 0.0f;
         hphase[i]  = 0.0f;
+    }
+
+    clearAll(oscilFFTfreqs.data, oscilsize);
+    clearAll(basefuncFFTfreqs.data, oscilsize);
+    oscilprepared = 0;
+    oldfilterpars = 0;
+    oldsapars     = 0;
+}
+
+OscilGen::OscilGen(const SYNTH_T &synth_, FFTwrapper *fft_, Resonance *res_)
+    :Presets(),
+      m_myBuffers(OscilGenBuffersCreator(fft_, synth_.oscilsize)),
+      fft(fft_),
+      res(res_),
+      synth(synth_)
+{
+    if(fft_) {
+        // FFTwrapper should operate exactly on all "oscilsize" bytes
+        assert(fft_->fftsize() == synth_.oscilsize);
+    } else {
+        // this is possible if *this is a temporary paste object
+    }
+
+    setpresettype("Poscilgen");
+
+    randseed = 1; // TODO: take care of random?
+    ADvsPAD  = false;
+
+    defaults();
+}
+
+void OscilGen::defaults()
+{
+    for(int i = 0; i < MAX_AD_HARMONICS; ++i) {
         Phmag[i]   = 64;
         Phphase[i] = 64;
     }
@@ -463,33 +479,29 @@ void OscilGen::defaults()
     Padaptiveharmonicsbasefreq = 128;
     Padaptiveharmonicspar      = 50;
 
-    clearAll(myBuffers.oscilFFTfreqs.data, synth.oscilsize);
-    clearAll(myBuffers.basefuncFFTfreqs.data, synth.oscilsize);
-    oscilprepared = 0;
-    oldfilterpars = 0;
-    oldsapars     = 0;
-    prepare();
+    prepare(myBuffers());
 }
 
 void OscilGen::convert2sine()
 {
+    OscilGenBuffers& bfrs = myBuffers();
     float  mag[MAX_AD_HARMONICS], phase[MAX_AD_HARMONICS];
 
     {
         FFTwrapper *fft = new FFTwrapper(synth.oscilsize);
         FFTsampleBuffer oscil = fft->allocSampleBuf();
         get(oscil.data, -1.0f);
-        fft->smps2freqs_noconst_input(oscil, myBuffers.scratchFreqs);
+        fft->smps2freqs_noconst_input(oscil, bfrs.scratchFreqs);
         delete (fft);
     }
 
-    normalize(myBuffers.scratchFreqs.data, synth.oscilsize);
+    normalize(bfrs.scratchFreqs.data, synth.oscilsize);
 
     mag[0]   = 0;
     phase[0] = 0;
     for(int i = 0; i < MAX_AD_HARMONICS; ++i) {
-        mag[i]   = abs(myBuffers.scratchFreqs.data, i + 1);
-        phase[i] = arg(myBuffers.scratchFreqs.data, i + 1);
+        mag[i]   = abs(bfrs.scratchFreqs.data, i + 1);
+        phase[i] = arg(bfrs.scratchFreqs.data, i + 1);
     }
 
     defaults();
@@ -510,15 +522,15 @@ void OscilGen::convert2sine()
     prepare();
 }
 
-float OscilGen::userfunc(float x)
+float OscilGen::userfunc(OscilGenBuffers& bfrs, float x) const
 {
     if (!fft)
         return 0;
-    if (!myBuffers.cachedbasevalid) {
-        fft->freqs2smps(myBuffers.basefuncFFTfreqs, myBuffers.cachedbasefunc, myBuffers.scratchFreqs);
-        myBuffers.cachedbasevalid = true;
+    if (!bfrs.cachedbasevalid) {
+        fft->freqs2smps(bfrs.basefuncFFTfreqs, bfrs.cachedbasefunc, bfrs.scratchFreqs);
+        bfrs.cachedbasevalid = true;
     }
-    return cinterpolate(myBuffers.cachedbasefunc.data,
+    return cinterpolate(bfrs.cachedbasefunc.data,
                         synth.oscilsize,
                         synth.oscilsize * (x + 1) - 1);
 }
@@ -526,7 +538,7 @@ float OscilGen::userfunc(float x)
 /*
  * Get the base function
  */
-void OscilGen::getbasefunction(FFTsampleBuffer smps)
+void OscilGen::getbasefunction(OscilGenBuffers& bfrs, FFTsampleBuffer smps) const
 {
     float par = (Pbasefuncpar + 0.5f) / 128.0f;
     if(Pbasefuncpar == 64)
@@ -580,7 +592,7 @@ void OscilGen::getbasefunction(FFTsampleBuffer smps)
         else if (Pcurrentbasefunc == 0)
             smps[i] = -sinf(2.0f * PI * i / synth.oscilsize);
         else
-            smps[i] = userfunc(t);
+            smps[i] = userfunc(bfrs, t);
     }
 }
 
@@ -588,7 +600,7 @@ void OscilGen::getbasefunction(FFTsampleBuffer smps)
 /*
  * Filter the oscillator
  */
-void OscilGen::oscilfilter(fft_t *freqs)
+void OscilGen::oscilfilter(fft_t *freqs) const
 {
     if(Pfiltertype == 0)
         return;
@@ -607,23 +619,23 @@ void OscilGen::oscilfilter(fft_t *freqs)
 /*
  * Change the base function
  */
-void OscilGen::changebasefunction(void)
+void OscilGen::changebasefunction(OscilGenBuffers& bfrs) const
 {
     if(Pcurrentbasefunc != 0) {
-        getbasefunction(myBuffers.tmpsmps);
+        getbasefunction(bfrs, bfrs.tmpsmps);
         if(fft)
-            fft->smps2freqs_noconst_input(myBuffers.tmpsmps, myBuffers.basefuncFFTfreqs);
-        clearDC(myBuffers.basefuncFFTfreqs.data);
+            fft->smps2freqs_noconst_input(bfrs.tmpsmps, bfrs.basefuncFFTfreqs);
+        clearDC(bfrs.basefuncFFTfreqs.data);
     }
-    else //in this case myBuffers.basefuncFFTfreqs are not used
-        clearAll(myBuffers.basefuncFFTfreqs.data, synth.oscilsize);
-    oscilprepared = 0;
-    oldbasefunc   = Pcurrentbasefunc;
-    oldbasepar    = Pbasefuncpar;
-    oldbasefuncmodulation     = Pbasefuncmodulation;
-    oldbasefuncmodulationpar1 = Pbasefuncmodulationpar1;
-    oldbasefuncmodulationpar2 = Pbasefuncmodulationpar2;
-    oldbasefuncmodulationpar3 = Pbasefuncmodulationpar3;
+    else //in this case bfrs.basefuncFFTfreqs are not used
+        clearAll(bfrs.basefuncFFTfreqs.data, synth.oscilsize);
+    bfrs.oscilprepared = 0;
+    bfrs.oldbasefunc   = Pcurrentbasefunc;
+    bfrs.oldbasepar    = Pbasefuncpar;
+    bfrs.oldbasefuncmodulation     = Pbasefuncmodulation;
+    bfrs.oldbasefuncmodulationpar1 = Pbasefuncmodulationpar1;
+    bfrs.oldbasefuncmodulationpar2 = Pbasefuncmodulationpar2;
+    bfrs.oldbasefuncmodulationpar3 = Pbasefuncmodulationpar3;
 }
 
 inline void normalize(float *smps, size_t N)
@@ -644,10 +656,10 @@ inline void normalize(float *smps, size_t N)
 /*
  * Waveshape
  */
-void OscilGen::waveshape(FFTfreqBuffer freqs)
+void OscilGen::waveshape(OscilGenBuffers& bfrs, FFTfreqBuffer freqs) const
 {
-    oldwaveshapingfunction = Pwaveshapingfunction;
-    oldwaveshaping = Pwaveshaping;
+    bfrs.oldwaveshapingfunction = Pwaveshapingfunction;
+    bfrs.oldwaveshaping = Pwaveshaping;
     if(Pwaveshapingfunction == 0)
         return;
 
@@ -657,27 +669,27 @@ void OscilGen::waveshape(FFTfreqBuffer freqs)
         float gain = i / (synth.oscilsize / 8.0f);
         freqs[synth.oscilsize / 2 - i] *= gain;
     }
-    fft->freqs2smps_noconst_input(freqs, myBuffers.tmpsmps);
+    fft->freqs2smps_noconst_input(freqs, bfrs.tmpsmps);
 
     //Normalize
-    normalize(myBuffers.tmpsmps.data, synth.oscilsize);
+    normalize(bfrs.tmpsmps.data, synth.oscilsize);
 
     //Do the waveshaping
-    waveShapeSmps(synth.oscilsize, myBuffers.tmpsmps.data, Pwaveshapingfunction, Pwaveshaping);
+    waveShapeSmps(synth.oscilsize, bfrs.tmpsmps.data, Pwaveshapingfunction, Pwaveshaping);
 
-    fft->smps2freqs_noconst_input(myBuffers.tmpsmps, freqs); //perform FFT
+    fft->smps2freqs_noconst_input(bfrs.tmpsmps, freqs); //perform FFT
 }
 
 
 /*
  * Do the Frequency Modulation of the Oscil
  */
-void OscilGen::modulation(FFTfreqBuffer freqs)
+void OscilGen::modulation(OscilGenBuffers& bfrs, FFTfreqBuffer freqs) const
 {
-    oldmodulation     = Pmodulation;
-    oldmodulationpar1 = Pmodulationpar1;
-    oldmodulationpar2 = Pmodulationpar2;
-    oldmodulationpar3 = Pmodulationpar3;
+    bfrs.oldmodulation     = Pmodulation;
+    bfrs.oldmodulationpar1 = Pmodulationpar1;
+    bfrs.oldmodulationpar2 = Pmodulationpar2;
+    bfrs.oldmodulationpar3 = Pmodulationpar3;
     if(Pmodulation == 0)
         return;
 
@@ -711,17 +723,17 @@ void OscilGen::modulation(FFTfreqBuffer freqs)
         const float tmp = i / (synth.oscilsize / 8.0f);
         freqs[synth.oscilsize / 2 - i] *= tmp;
     }
-    fft->freqs2smps_noconst_input(freqs, myBuffers.tmpsmps);
+    fft->freqs2smps_noconst_input(freqs, bfrs.tmpsmps);
     const int    extra_points = 2;
     float *in = new float[synth.oscilsize + extra_points];
 
     //Normalize
-    normalize(myBuffers.tmpsmps.data, synth.oscilsize);
+    normalize(bfrs.tmpsmps.data, synth.oscilsize);
 
     for(int i = 0; i < synth.oscilsize; ++i)
-        in[i] = myBuffers.tmpsmps[i];
+        in[i] = bfrs.tmpsmps[i];
     for(int i = 0; i < extra_points; ++i)
-        in[i + synth.oscilsize] = myBuffers.tmpsmps[i];
+        in[i + synth.oscilsize] = bfrs.tmpsmps[i];
 
     //Do the modulation
     for(int i = 0; i < synth.oscilsize; ++i) {
@@ -749,18 +761,18 @@ void OscilGen::modulation(FFTfreqBuffer freqs)
         const int   poshi = (int) t;
         const float poslo = t - floorf(t);
 
-        myBuffers.tmpsmps[i] = in[poshi] * (1.0f - poslo) + in[poshi + 1] * poslo;
+        bfrs.tmpsmps[i] = in[poshi] * (1.0f - poslo) + in[poshi + 1] * poslo;
     }
 
     delete [] in;
-    fft->smps2freqs_noconst_input(myBuffers.tmpsmps, freqs); //perform FFT
+    fft->smps2freqs_noconst_input(bfrs.tmpsmps, freqs); //perform FFT
 }
 
 
 /*
  * Adjust the spectrum
  */
-void OscilGen::spectrumadjust(fft_t *freqs)
+void OscilGen::spectrumadjust(fft_t *freqs) const
 {
     if(Psatype == 0)
         return;
@@ -805,7 +817,7 @@ void OscilGen::spectrumadjust(fft_t *freqs)
     }
 }
 
-void OscilGen::shiftharmonics(fft_t *freqs)
+void OscilGen::shiftharmonics(fft_t *freqs) const
 {
     if(Pharmonicshift == 0)
         return;
@@ -842,57 +854,57 @@ void OscilGen::shiftharmonics(fft_t *freqs)
 /*
  * Prepare the Oscillator
  */
-void OscilGen::prepare(void)
+void OscilGen::prepare(OscilGenBuffers& bfrs) const
 {
-    prepare(myBuffers.oscilFFTfreqs);
+    prepare(bfrs, bfrs.oscilFFTfreqs);
 }
 
-void OscilGen::prepare(FFTfreqBuffer freqs)
+void OscilGen::prepare(OscilGenBuffers& bfrs, FFTfreqBuffer freqs) const
 {
-    if((oldbasepar != Pbasefuncpar) || (oldbasefunc != Pcurrentbasefunc)
+    if((bfrs.oldbasepar != Pbasefuncpar) || (bfrs.oldbasefunc != Pcurrentbasefunc)
        || DIFF(basefuncmodulation) || DIFF(basefuncmodulationpar1)
        || DIFF(basefuncmodulationpar2) || DIFF(basefuncmodulationpar3))
-        changebasefunction();
+        changebasefunction(bfrs);
 
     for(int i = 0; i < MAX_AD_HARMONICS; ++i)
-        hphase[i] = (Phphase[i] - 64.0f) / 64.0f * PI / (i + 1);
+        bfrs.hphase[i] = (Phphase[i] - 64.0f) / 64.0f * PI / (i + 1);
 
     for(int i = 0; i < MAX_AD_HARMONICS; ++i) {
         const float hmagnew = 1.0f - fabsf(Phmag[i] / 64.0f - 1.0f);
         switch(Phmagtype) {
             case 1:
-                hmag[i] = expf(hmagnew * logf(0.01f));
+                bfrs.hmag[i] = expf(hmagnew * logf(0.01f));
                 break;
             case 2:
-                hmag[i] = expf(hmagnew * logf(0.001f));
+                bfrs.hmag[i] = expf(hmagnew * logf(0.001f));
                 break;
             case 3:
-                hmag[i] = expf(hmagnew * logf(0.0001f));
+                bfrs.hmag[i] = expf(hmagnew * logf(0.0001f));
                 break;
             case 4:
-                hmag[i] = expf(hmagnew * logf(0.00001f));
+                bfrs.hmag[i] = expf(hmagnew * logf(0.00001f));
                 break;
             default:
-                hmag[i] = 1.0f - hmagnew;
+                bfrs.hmag[i] = 1.0f - hmagnew;
                 break;
         }
 
         if(Phmag[i] < 64)
-            hmag[i] = -hmag[i];
+            bfrs.hmag[i] = -bfrs.hmag[i];
     }
 
     //remove the harmonics where Phmag[i]==64
     for(int i = 0; i < MAX_AD_HARMONICS; ++i)
         if(Phmag[i] == 64)
-            hmag[i] = 0.0f;
+            bfrs.hmag[i] = 0.0f;
 
 
     clearAll(freqs.data, synth.oscilsize);
     if(Pcurrentbasefunc == 0)   //the sine case
         for(int i = 0; i < MAX_AD_HARMONICS - 1; ++i) {
             freqs[i + 1] =
-                std::complex<float>(-hmag[i] * sinf(hphase[i] * (i + 1)) / 2.0f,
-                        hmag[i] * cosf(hphase[i] * (i + 1)) / 2.0f);
+                std::complex<float>(-bfrs.hmag[i] * sinf(bfrs.hphase[i] * (i + 1)) / 2.0f,
+                        bfrs.hmag[i] * cosf(bfrs.hphase[i] * (i + 1)) / 2.0f);
         }
     else
         for(int j = 0; j < MAX_AD_HARMONICS; ++j) {
@@ -902,9 +914,9 @@ void OscilGen::prepare(FFTfreqBuffer freqs)
                 int k = i * (j + 1);
                 if(k >= synth.oscilsize / 2)
                     break;
-                freqs[k] += myBuffers.basefuncFFTfreqs[i] * FFTpolar<fftwf_real>(
-                    hmag[j],
-                    hphase[j] * k);
+                freqs[k] += bfrs.basefuncFFTfreqs[i] * FFTpolar<fftwf_real>(
+                    bfrs.hmag[j],
+                    bfrs.hphase[j] * k);
             }
         }
 
@@ -913,23 +925,23 @@ void OscilGen::prepare(FFTfreqBuffer freqs)
 
     if(Pfilterbeforews) {
         oscilfilter(freqs.data);
-        waveshape(freqs);
+        waveshape(bfrs, freqs);
     } else {
-        waveshape(freqs);
+        waveshape(bfrs, freqs);
         oscilfilter(freqs.data);
     }
 
-    modulation(freqs);
+    modulation(bfrs, freqs);
     spectrumadjust(freqs.data);
     if(Pharmonicshiftfirst == 0)
         shiftharmonics(freqs.data);
 
     clearDC(freqs.data);
 
-    oldhmagtype      = Phmagtype;
-    oldharmonicshift = Pharmonicshift + Pharmonicshiftfirst * 256;
+    bfrs.oldhmagtype      = Phmagtype;
+    bfrs.oldharmonicshift = Pharmonicshift + Pharmonicshiftfirst * 256;
 
-    oscilprepared = 1;
+    bfrs.oscilprepared = 1;
 }
 
 fft_t operator*(float a, fft_t b)
@@ -937,7 +949,7 @@ fft_t operator*(float a, fft_t b)
     return std::complex<float>((float)(a*b.real()), (float)(a*b.imag()));
 }
 
-void OscilGen::adaptiveharmonic(fft_t *f, float freq)
+void OscilGen::adaptiveharmonic(fft_t *f, float freq) const
 {
     if(Padaptiveharmonics == 0 /*||(freq<1.0f)*/)
         return;
@@ -986,7 +998,7 @@ void OscilGen::adaptiveharmonic(fft_t *f, float freq)
     delete[] inf;
 }
 
-void OscilGen::adaptiveharmonicpostprocess(fft_t *f, int size)
+void OscilGen::adaptiveharmonicpostprocess(fft_t *f, int size) const
 {
     if(Padaptiveharmonics <= 1)
         return;
@@ -1026,27 +1038,27 @@ void OscilGen::newrandseed(unsigned int randseed)
     this->randseed = randseed;
 }
 
-bool OscilGen::needPrepare(void)
+bool OscilGen::needPrepare(OscilGenBuffers& bfrs) const
 {
     bool outdated = false;
 
     //Check function parameters
-    if((oldbasepar != Pbasefuncpar) || (oldbasefunc != Pcurrentbasefunc)
+    if((bfrs.oldbasepar != Pbasefuncpar) || (bfrs.oldbasefunc != Pcurrentbasefunc)
        || DIFF(hmagtype) || DIFF(waveshaping) || DIFF(waveshapingfunction))
         outdated = true;
 
     //Check filter parameters
-    if(oldfilterpars != Pfiltertype * 256 + Pfilterpar1 + Pfilterpar2 * 65536
+    if(bfrs.oldfilterpars != Pfiltertype * 256 + Pfilterpar1 + Pfilterpar2 * 65536
        + Pfilterbeforews * 16777216) {
         outdated      = true;
-        oldfilterpars = Pfiltertype * 256 + Pfilterpar1 + Pfilterpar2 * 65536
+        bfrs.oldfilterpars = Pfiltertype * 256 + Pfilterpar1 + Pfilterpar2 * 65536
                         + Pfilterbeforews * 16777216;
     }
 
     //Check spectrum adjustments
-    if(oldsapars != Psatype * 256 + Psapar) {
+    if(bfrs.oldsapars != Psatype * 256 + Psapar) {
         outdated  = true;
-        oldsapars = Psatype * 256 + Psapar;
+        bfrs.oldsapars = Psatype * 256 + Psapar;
     }
 
     //Check function modulation
@@ -1060,21 +1072,21 @@ bool OscilGen::needPrepare(void)
         outdated = true;
 
     //Check harmonic shifts
-    if(oldharmonicshift != Pharmonicshift + Pharmonicshiftfirst * 256)
+    if(bfrs.oldharmonicshift != Pharmonicshift + Pharmonicshiftfirst * 256)
         outdated = true;
 
-    return outdated == true || oscilprepared == false;
+    return outdated == true || bfrs.oscilprepared == false;
 }
 
 /*
  * Get the oscillator function
  */
-short int OscilGen::get(float* smps, float freqHz, int resonance)
+short int OscilGen::get(OscilGenBuffers& bfrs, float* smps, float freqHz, int resonance) const
 {
-    if(needPrepare())
-        prepare();
+    if(needPrepare(bfrs))
+        prepare(bfrs);
 
-    fft_t *input = freqHz > 0.0f ? myBuffers.oscilFFTfreqs.data : myBuffers.pendingfreqs;
+    fft_t *input = freqHz > 0.0f ? bfrs.oscilFFTfreqs.data : bfrs.pendingfreqs;
 
     unsigned int realrnd = prng();
     sprng(randseed);
@@ -1085,7 +1097,7 @@ short int OscilGen::get(float* smps, float freqHz, int resonance)
     outpos = (outpos + 2 * synth.oscilsize) % synth.oscilsize;
 
 
-    clearAll(myBuffers.outoscilFFTfreqs.data, synth.oscilsize);
+    clearAll(bfrs.outoscilFFTfreqs.data, synth.oscilsize);
 
     int nyquist = (int)(0.5f * synth.samplerate_f / fabsf(freqHz)) + 2;
     if(ADvsPAD)
@@ -1100,10 +1112,10 @@ short int OscilGen::get(float* smps, float freqHz, int resonance)
         if(Padaptiveharmonics != 0)
             nyquist = synth.oscilsize / 2;
         for(int i = 1; i < nyquist - 1; ++i)
-            myBuffers.outoscilFFTfreqs[i] = input[i];
+            bfrs.outoscilFFTfreqs[i] = input[i];
 
-        adaptiveharmonic(myBuffers.outoscilFFTfreqs.data, freqHz);
-        adaptiveharmonicpostprocess(&myBuffers.outoscilFFTfreqs[1],
+        adaptiveharmonic(bfrs.outoscilFFTfreqs.data, freqHz);
+        adaptiveharmonicpostprocess(&bfrs.outoscilFFTfreqs[1],
                                     synth.oscilsize / 2 - 1);
 
         nyquist = realnyquist;
@@ -1111,14 +1123,14 @@ short int OscilGen::get(float* smps, float freqHz, int resonance)
 
     if(Padaptiveharmonics)   //do the antialiasing in the case of adaptive harmonics
         for(int i = nyquist; i < synth.oscilsize / 2; ++i)
-            myBuffers.outoscilFFTfreqs[i] = fft_t(0.0f, 0.0f);
+            bfrs.outoscilFFTfreqs[i] = fft_t(0.0f, 0.0f);
 
     // Randomness (each harmonic), the block type is computed
     // in ADnote by setting start position according to this setting
     if((Prand > 64) && (freqHz >= 0.0f) && (!ADvsPAD)) {
         const float rnd = PI * powf((Prand - 64.0f) / 64.0f, 2.0f);
         for(int i = 1; i < nyquist - 1; ++i) //to Nyquist only for AntiAliasing
-            myBuffers.outoscilFFTfreqs[i] *=
+            bfrs.outoscilFFTfreqs[i] *=
                 FFTpolar<fftwf_real>(1.0f, (float)(rnd * i * RND));
     }
 
@@ -1132,31 +1144,31 @@ short int OscilGen::get(float* smps, float freqHz, int resonance)
                 power = power * 2.0f - 0.5f;
                 power = powf(15.0f, power);
                 for(int i = 1; i < nyquist - 1; ++i)
-                    myBuffers.outoscilFFTfreqs[i] *= powf(RND, power) * normalize;
+                    bfrs.outoscilFFTfreqs[i] *= powf(RND, power) * normalize;
                 break;
             case 2:
                 power = power * 2.0f - 0.5f;
                 power = powf(15.0f, power) * 2.0f;
                 float rndfreq = 2 * PI * RND;
                 for(int i = 1; i < nyquist - 1; ++i)
-                    myBuffers.outoscilFFTfreqs[i] *= powf(fabsf(sinf(i * rndfreq)), power)
+                    bfrs.outoscilFFTfreqs[i] *= powf(fabsf(sinf(i * rndfreq)), power)
                                            * normalize;
                 break;
         }
     }
 
     if((freqHz > 0.1f) && (resonance != 0))
-        res->applyres(nyquist - 1, myBuffers.outoscilFFTfreqs.data, freqHz);
+        res->applyres(nyquist - 1, bfrs.outoscilFFTfreqs.data, freqHz);
 
-    rmsNormalize(myBuffers.outoscilFFTfreqs.data, synth.oscilsize);
+    rmsNormalize(bfrs.outoscilFFTfreqs.data, synth.oscilsize);
 
     if((ADvsPAD) && (freqHz > 0.1f)) //in this case the smps will contain the freqs
         for(int i = 1; i < synth.oscilsize / 2; ++i)
-            smps[i - 1] = abs(myBuffers.outoscilFFTfreqs.data, i);
+            smps[i - 1] = abs(bfrs.outoscilFFTfreqs.data, i);
     else {
-        fft->freqs2smps(myBuffers.outoscilFFTfreqs, myBuffers.tmpsmps, myBuffers.scratchFreqs);
+        fft->freqs2smps(bfrs.outoscilFFTfreqs, bfrs.tmpsmps, bfrs.scratchFreqs);
         for(int i = 0; i < synth.oscilsize; ++i)
-            smps[i] = myBuffers.tmpsmps[i] * 0.25f;            //correct the amplitude
+            smps[i] = bfrs.tmpsmps[i] * 0.25f;            //correct the amplitude
     }
 
     sprng(realrnd + 1);
@@ -1175,21 +1187,21 @@ short int OscilGen::get(float* smps, float freqHz, int resonance)
 //    if(needPrepare())
 //        prepare();
 //
-//    clearAll(myBuffers.outoscilFFTfreqs);
+//    clearAll(bfrs.outoscilFFTfreqs);
 //
 //    const int nyquist = (synth.oscilsize / 2);
 //
 //    //Process harmonics
 //    for(int i = 1; i < nyquist - 1; ++i)
-//        myBuffers.outoscilFFTfreqs[i] = myBuffers.oscilFFTfreqs[i];
+//        bfrs.outoscilFFTfreqs[i] = bfrs.oscilFFTfreqs[i];
 //
-//    adaptiveharmonic(myBuffers.outoscilFFTfreqs, freqHz);
-//    adaptiveharmonicpostprocess(&myBuffers.outoscilFFTfreqs[1], nyquist - 1);
+//    adaptiveharmonic(bfrs.outoscilFFTfreqs, freqHz);
+//    adaptiveharmonicpostprocess(&bfrs.outoscilFFTfreqs[1], nyquist - 1);
 //
-//    rmsNormalize(myBuffers.outoscilFFTfreqs);
+//    rmsNormalize(bfrs.outoscilFFTfreqs);
 //
 //    for(int i = 1; i < nyquist; ++i)
-//        smps[i - 1] = abs(myBuffers.outoscilFFTfreqs, i);
+//        smps[i - 1] = abs(bfrs.outoscilFFTfreqs, i);
 //}
 //
 
@@ -1198,30 +1210,32 @@ short int OscilGen::get(float* smps, float freqHz, int resonance)
  */
 void OscilGen::getspectrum(int n, float *spc, int what)
 {
+    OscilGenBuffers& bfrs = myBuffers();
+
     if(n > synth.oscilsize / 2)
         n = synth.oscilsize / 2;
 
     for(int i = 1; i < n; ++i) {
         if(what == 0)
-            spc[i] = abs(myBuffers.pendingfreqs, i);
+            spc[i] = abs(bfrs.pendingfreqs, i);
         else {
             if(Pcurrentbasefunc == 0)
                 spc[i] = ((i == 1) ? (1.0f) : (0.0f));
             else
-                spc[i] = abs(myBuffers.basefuncFFTfreqs.data, i);
+                spc[i] = abs(bfrs.basefuncFFTfreqs.data, i);
         }
     }
     spc[0]=0;
 
     if(what == 0) {
         for(int i = 0; i < n; ++i)
-            myBuffers.outoscilFFTfreqs[i] = fft_t(spc[i], spc[i]);
+            bfrs.outoscilFFTfreqs[i] = fft_t(spc[i], spc[i]);
         fft_t zero = 0;
-        std::fill_n(myBuffers.outoscilFFTfreqs.data + n, synth.oscilsize / 2 - n, zero);
-        adaptiveharmonic(myBuffers.outoscilFFTfreqs.data, 0.0f);
-        adaptiveharmonicpostprocess(myBuffers.outoscilFFTfreqs.data, n - 1);
+        std::fill_n(bfrs.outoscilFFTfreqs.data + n, synth.oscilsize / 2 - n, zero);
+        adaptiveharmonic(bfrs.outoscilFFTfreqs.data, 0.0f);
+        adaptiveharmonicpostprocess(bfrs.outoscilFFTfreqs.data, n - 1);
         for(int i = 0; i < n; ++i)
-            spc[i] = (float)myBuffers.outoscilFFTfreqs[i].imag();
+            spc[i] = (float)bfrs.outoscilFFTfreqs[i].imag();
     }
 }
 
@@ -1231,12 +1245,14 @@ void OscilGen::getspectrum(int n, float *spc, int what)
  */
 void OscilGen::useasbase()
 {
-    for(int i = 0; i < synth.oscilsize / 2; ++i)
-        myBuffers.basefuncFFTfreqs[i] = myBuffers.oscilFFTfreqs[i];
+    OscilGenBuffers& bfrs = myBuffers();
 
-    oldbasefunc = Pcurrentbasefunc = 127;
-    prepare();
-    myBuffers.cachedbasevalid = false;
+    for(int i = 0; i < synth.oscilsize / 2; ++i)
+        bfrs.basefuncFFTfreqs[i] = bfrs.oscilFFTfreqs[i];
+
+    bfrs.oldbasefunc = Pcurrentbasefunc = 127;
+    prepare(bfrs);
+    bfrs.cachedbasevalid = false;
 }
 
 
@@ -1245,15 +1261,18 @@ void OscilGen::useasbase()
  */
 void OscilGen::getcurrentbasefunction(FFTsampleBuffer smps)
 {
+    OscilGenBuffers& bfrs = myBuffers();
     if(Pcurrentbasefunc != 0)
-        fft->freqs2smps(myBuffers.basefuncFFTfreqs, smps, myBuffers.scratchFreqs);
+        fft->freqs2smps(bfrs.basefuncFFTfreqs, smps, bfrs.scratchFreqs);
     else
-        getbasefunction(smps);   //the sine case
+        getbasefunction(bfrs, smps);   //the sine case
 }
 
 #define COPY(y) this->y = o.y
 void OscilGen::paste(OscilGen &o)
 {
+    OscilGenBuffers& bfrs = myBuffers();
+
     //XXX Figure out a better implementation of this sensitive to RT issues...
     for(int i=0; i<MAX_AD_HARMONICS; ++i) {
         COPY(Phmag[i]);
@@ -1296,13 +1315,15 @@ void OscilGen::paste(OscilGen &o)
 
 
     if(this->Pcurrentbasefunc)
-        changebasefunction();
-    this->prepare();
+        changebasefunction(bfrs);
+    this->prepare(bfrs);
 }
 #undef COPY
 
 void OscilGen::add2XML(XMLwrapper& xml)
 {
+    const OscilGenBuffers& bfrs = myBuffers();
+
     xml.addpar("harmonic_mag_type", Phmagtype);
 
     xml.addpar("base_function", Pcurrentbasefunc);
@@ -1352,12 +1373,12 @@ void OscilGen::add2XML(XMLwrapper& xml)
     xml.endbranch();
 
     if(Pcurrentbasefunc == 127) {
-        normalize(myBuffers.basefuncFFTfreqs.data, synth.oscilsize);
+        normalize(bfrs.basefuncFFTfreqs.data, synth.oscilsize);
 
         xml.beginbranch("BASE_FUNCTION");
         for(int i = 1; i < synth.oscilsize / 2; ++i) {
-            float xc = (float)myBuffers.basefuncFFTfreqs[i].real();
-            float xs = (float)myBuffers.basefuncFFTfreqs[i].imag();
+            float xc = (float)bfrs.basefuncFFTfreqs[i].real();
+            float xs = (float)bfrs.basefuncFFTfreqs[i].imag();
             if((fabsf(xs) > 1e-6f) || (fabsf(xc) > 1e-6f)) {
                 xml.beginbranch("BF_HARMONIC", i);
                 xml.addparreal("cos", xc);
@@ -1371,6 +1392,8 @@ void OscilGen::add2XML(XMLwrapper& xml)
 
 void OscilGen::getfromXML(XMLwrapper& xml)
 {
+    OscilGenBuffers& bfrs = myBuffers();
+
     Phmagtype = xml.getpar127("harmonic_mag_type", Phmagtype);
 
     Pcurrentbasefunc = xml.getpar127("base_function", Pcurrentbasefunc);
@@ -1450,21 +1473,21 @@ void OscilGen::getfromXML(XMLwrapper& xml)
     }
 
     if(Pcurrentbasefunc != 0)
-        changebasefunction();
+        changebasefunction(bfrs);
 
     if(xml.enterbranch("BASE_FUNCTION")) {
         for(int i = 1; i < synth.oscilsize / 2; ++i)
             if(xml.enterbranch("BF_HARMONIC", i)) {
-                myBuffers.basefuncFFTfreqs[i] =
+                bfrs.basefuncFFTfreqs[i] =
                     std::complex<float>(xml.getparreal("cos", 0.0f),
                             xml.getparreal("sin", 0.0f));
                 xml.exitbranch();
             }
         xml.exitbranch();
 
-        clearDC(myBuffers.basefuncFFTfreqs.data);
-        normalize(myBuffers.basefuncFFTfreqs.data, synth.oscilsize);
-        myBuffers.cachedbasevalid = false;
+        clearDC(bfrs.basefuncFFTfreqs.data);
+        normalize(bfrs.basefuncFFTfreqs.data, synth.oscilsize);
+        bfrs.cachedbasevalid = false;
     }}
 
 
