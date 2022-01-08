@@ -613,17 +613,18 @@ std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloa
 wavetable_types::float32* OscilGen::calculateWaveTableData(wavetable_types::float32 freq,
     wavetable_types::IntOrFloat semantic,
     wavetable_types::WtMode wtMode,
-    int Presonance)
+    int Presonance,
+    OscilGenBuffers& bufs)
 {
     wavetable_types::float32* data = new wavetable_types::float32[synth.oscilsize];
     float one = 1.f;
     std::fill_n(data, synth.oscilsize, one);
     if(wtMode == wavetable_types::WtMode::freqwave_smps) {
-        get(data, freq, Presonance, semantic.floatVal);
+        get(bufs, data, freq, Presonance, semantic.floatVal);
     }
     else {
         newrandseed(semantic.intVal);
-        get(data, freq, Presonance);
+        get(bufs, data, freq, Presonance);
     }
     return data;
 }

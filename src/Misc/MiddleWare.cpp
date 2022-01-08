@@ -1170,6 +1170,8 @@ public:
                     break;
             }
 
+            OscilGenBuffers bufs(oscilGen->createOscilGenBuffers());
+
             // calculate all freqs for all pending semantics
             if(params.wave_requests.size())
             {
@@ -1180,7 +1182,7 @@ public:
                 const waveTablesToGenerateStruct::wave_request& wave_req = params.wave_requests[job];
                 Tensor1<WaveTable::float32>* newTensor = new Tensor1<WaveTable::float32>(synth.oscilsize);
                 WaveTable::float32* data = oscilGen->calculateWaveTableData(
-                    wave_req.freq, wave_req.sem, wtMode, params.presonance);
+                    wave_req.freq, wave_req.sem, wtMode, params.presonance, bufs);
                 newTensor->take_data_and_own_it(data);
 
                 calculatedTables[job].tensor = newTensor;
@@ -1204,7 +1206,7 @@ public:
                 for(tensor_size_t s = 0; s < size_semantics; ++s)
                 {
                     WaveTable::float32* data = oscilGen->calculateWaveTableData(
-                        freqs_array[job], sem_array[s], wtMode, params.presonance);
+                        freqs_array[job], sem_array[s], wtMode, params.presonance, bufs);
                     (*newTensor)[s].take_data_and_own_it(data);
                 }
 
@@ -1220,7 +1222,7 @@ public:
     void calculateWaveTablesIfPossible()
     {
         if(!wtGenThreads.size())
-            wtGenThreads.resize(/*std::thread::hardware_concurrency()*/1);
+            wtGenThreads.resize(std::thread::hardware_concurrency());
 /*      if(wtGenThreads)
         {
             if(!calcsLeft) // atomic variable

@@ -133,7 +133,8 @@ class OscilGen:public Presets, NoCopyNoMove
         wavetable_types::float32* calculateWaveTableData(wavetable_types::float32 freq,
             wavetable_types::IntOrFloat semantic,
             wavetable_types::WtMode wtMode,
-            int Presonance);
+	    int Presonance,
+	    OscilGenBuffers& bufs);
         //! calculate wave table mode, i.e. meaning + handling of semantics
         wavetable_types::WtMode calculateWaveTableMode(bool forceWtMode) const;
         std::size_t calculateNumFreqs(bool voice_uses_reso) const;
