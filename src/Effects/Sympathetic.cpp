@@ -26,10 +26,14 @@ namespace zyn {
 #define rBegin [](const char *msg, rtosc::RtData &d) {
 #define rEnd }
 
+#define rEffParRange(name, idx, ...) \
+  {STRINGIFY(name) "::i",  rProp(parameter) rDefaultDepends(preset) \
+      DOC(__VA_ARGS__), NULL, rEffParCb(idx)}
+
 rtosc::Ports Sympathetic::ports = {
     rEffParVol(rDefault(127)),
     rEffParPan(),
-    rEffPar(Pq, 2, rShort("q"), rDefault(65), 
+    rEffPar(Pq, 2, rShort("q"), rDefault(65),
             "Resonance"),
     rEffPar(Pdrive,   3, rShort("drive"), rDefault(65),
             "Input Amplification"),
@@ -40,13 +44,13 @@ rtosc::Ports Sympathetic::ports = {
     rEffParTF(Pnegate, 6, rShort("neg"), rDefault(false), "Negate Signal"),
     rEffPar(Plpf, 7, rShort("lpf"), rDefault(127), "Low Pass Cutoff"),
     rEffPar(Phpf, 8, rShort("hpf"), rDefault(0), "High Pass Cutoff"),
-    rEffPar(Punison_size, 9, rShort("unison"), rDefault(1),
+    rEffParRange(Punison_size, 9, rShort("unison"), rLinear(1,7), rDefault(1),
             "Number of Unison Strings"),
     rEffPar(Pstrings, 10, rShort("strings"), rDefault(12),
             "Number of Strings"),
     rEffPar(Pbasenote, 11, rShort("base"), rDefault(57), // basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
             "Midi Note of Lowest String"),
-    rEffPar(Pcrossgain, 12, rShort("cross"), rDefault(0), 
+    rEffPar(Pcrossgain, 12, rShort("cross"), rDefault(0),
             "Crossgain between neigbouring notes"),
     rArrayF(freqs, 88, rLinear(27.50f,4186.01f),
            "String Frequencies"),
@@ -75,7 +79,7 @@ Sympathetic::Sympathetic(EffectParams pars)
     lpfr = memory.alloc<AnalogFilter>(2, 22000, 1, 0, pars.srate, pars.bufsize);
     hpfl = memory.alloc<AnalogFilter>(3, 20, 1, 0, pars.srate, pars.bufsize);
     hpfr = memory.alloc<AnalogFilter>(3, 20, 1, 0, pars.srate, pars.bufsize);
-    
+
     filterBank = memory.alloc<CombFilterBank>(&memory, pars.srate, pars.bufsize);
     calcFreqs(); // sets freqs
     cleanup();
@@ -198,10 +202,14 @@ void Sympathetic::calcFreqs()
                 filterBank->freqs[i] = centerFreq;
                 if (Punison_size > 1) filterBank->freqs[i+1] = centerFreq * unison_real_spread_up;
                 if (Punison_size > 2) filterBank->freqs[i+2] = centerFreq * unison_real_spread_down;
-            } 
+                if (Punison_size > 3) filterBank->freqs[i+3] = filterBank->freqs[i+1] * unison_real_spread_up;
+                if (Punison_size > 4) filterBank->freqs[i+4] = filterBank->freqs[i+2] * unison_real_spread_down;
+                if (Punison_size > 5) filterBank->freqs[i+5] = filterBank->freqs[i+3] * unison_real_spread_up;
+                if (Punison_size > 6) filterBank->freqs[i+6] = filterBank->freqs[i+4] * unison_real_spread_down;
+            }
             filterBank->setStrings(Pstrings*Punison_size,baseFreq);
             break;
-        
+
         case 2:
         case 3:
             const float guitar_freqs[6] = {82.41, 110.00, 146.83, 196.00, 246.94, 329.63};
@@ -209,8 +217,8 @@ void Sympathetic::calcFreqs()
             {
                 filterBank->freqs[i] = guitar_freqs[i];
             }
-            
-            if (Punison_size > 1) 
+
+            if (Punison_size > 1)
             {
                 for(unsigned int i = 6; i < 12; ++i)
                 {
@@ -225,8 +233,8 @@ void Sympathetic::calcFreqs()
 
 unsigned char Sympathetic::getpresetpar(unsigned char npreset, unsigned int npar)
 {
-#define	PRESET_SIZE 13
-#define	NUM_PRESETS 4
+#define PRESET_SIZE 13
+#define NUM_PRESETS 4
     static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Vol Pan Q Drive Lev Spr neg lp hp sz  strings note cross
         //Piano 12-String
@@ -297,7 +305,7 @@ void Sympathetic::changepar(int npar, unsigned char value)
             sethpf(value);
             break;
         case 9:
-            Punison_size = limit(value, (unsigned char) 1, (unsigned char) 3);
+            Punison_size = limit(value, (unsigned char) 1, (unsigned char) 7);
             calcFreqs();
             break;
         case 10:
