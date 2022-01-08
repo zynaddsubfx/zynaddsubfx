@@ -42,8 +42,8 @@ static const rtosc::Ports _ports = {
             "step frequency"),
     rParamF(intensity, rShort("depth"), rLinear(0.0, 2.0), rDefault(1.0),
               "Intensity of SEQ"),
-    rParamF(cutoff, rShort("lp"), rDefault(0.0f), rUnit(Hz), rLinear(0.0f,MAX_CUTOFF),
-            "cutoff of lp-filter for output\n 0.0=off"),
+    rParamF(cutoff, rShort("lp"), rDefault(MAX_CUTOFF), rUnit(Hz), rLinear(0.0f,MAX_CUTOFF),
+            "cutoff of lp-filter for output\n 40.0=off"),
     rParamF(delay, rShort("delay"), rUnit(S),
               rLinear(0.0, 4.0), rDefault(0.0),
               "Delay before SEQ start\n0..4 second delay"),
@@ -56,10 +56,10 @@ static const rtosc::Ports _ports = {
     rParamZyn(steps, rShort("steps"), rLinear(1,128), rDefault(8),
             "number of steps"),
     rArrayF(sequence, NUM_SEQ_STEPS, rLinear(-1.0f,1.0f), rDefaultDepends(loc),
-              rPreset(ad_global_freq, [0.0 0.0 0.0 ...]),   
+              rPreset(ad_global_freq, [0.0 0.0 0.0 ...]),
               rPreset(ad_global_filter, [0.0 0.0 0.0 ...]),
               rPreset(ad_global_amp, [1.0 1.0 1.0 ...]),
-              rPreset(ad_voice_freq, [0.0 0.0 0.0 ...]),   
+              rPreset(ad_voice_freq, [0.0 0.0 0.0 ...]),
               rPreset(ad_voice_filter, [0.0 0.0 0.0 ...]),
               rPreset(ad_voice_amp, [1.0 1.0 1.0 ...]),
            "sequence values"),
@@ -201,7 +201,7 @@ void SEQParams::getfromXML(XMLwrapper& xml)
     continous  = xml.getparbool("continous", continous);
     numerator  = xml.getpar("numerator", numerator, 0, 99);
     denominator= xml.getpar("denominator", denominator, 0, 99);
-    
+
     if(xml.enterbranch("SEQUENCE")) {
         for(int n = 0; n < NUM_SEQ_STEPS; ++n) {
             sequence[n] = 0.0f;

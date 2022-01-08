@@ -18,7 +18,7 @@
 #include <rtosc/ports.h>
 #include "Presets.h"
 
-#define MAX_CUTOFF 20.0f
+#define MAX_CUTOFF 40.0f
 
 namespace zyn {
 
