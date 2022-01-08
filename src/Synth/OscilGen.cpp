@@ -665,11 +665,17 @@ float OscilGen::userfunc(OscilGenBuffers& bfrs, float x) const
  */
 void OscilGen::getbasefunction(OscilGenBuffers& bfrs, FFTsampleBuffer smps, float differingBaseFuncPar) const
 {
+    float par;
     if(differingBaseFuncPar < 0.f)
-        differingBaseFuncPar = Pbasefuncpar;
-    float par = (differingBaseFuncPar + 0.5f) / 128.0f;
-    if(differingBaseFuncPar < 0.f && Pbasefuncpar == 64)
-        par = 0.5f;
+    {
+        par = (Pbasefuncpar + 0.5f) / 128.0f;
+        if(Pbasefuncpar == 64)
+            par = 0.5f;
+    }
+    else
+    {
+        par = (differingBaseFuncPar + 0.5f) / 128.0f;
+    }
 
     float p1 = Pbasefuncmodulationpar1 / 127.0f,
           p2 = Pbasefuncmodulationpar2 / 127.0f,
