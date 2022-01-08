@@ -168,6 +168,8 @@ class PluginTest
         struct FFTCleaner { ~FFTCleaner() { FFT_cleanup(); } } cleaner;
         Config config;
         void setUp() {
+            config.cfg.SaveFullXml = false;
+
             synth = new SYNTH_T;
             synth->buffersize = 256;
             synth->samplerate = 48000;
