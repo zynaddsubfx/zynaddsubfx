@@ -721,10 +721,13 @@ public:
             // after the savefile will have been saved, it will be loaded into this
             // dummy master, and then the two masters will be compared
             zyn::Config config;
+            config.cfg.SaveFullXml = master->SaveFullXml;
+
             zyn::SYNTH_T* synth = new zyn::SYNTH_T;
             synth->buffersize = master->synth.buffersize;
             synth->samplerate = master->synth.samplerate;
             synth->alias();
+
             zyn::Master master2(*synth, &config);
             master->copyMasterCbTo(&master2);
             master2.frozenState = true;

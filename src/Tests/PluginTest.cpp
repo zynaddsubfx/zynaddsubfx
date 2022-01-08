@@ -167,6 +167,8 @@ class PluginTest
     public:
         Config config;
         void setUp() {
+            config.cfg.SaveFullXml = false;
+
             synth = new SYNTH_T;
             synth->buffersize = 256;
             synth->samplerate = 48000;
