@@ -38,9 +38,9 @@ const rtosc::Ports OscilGen::non_realtime_ports = {
     rPaste,
     //TODO ensure min/max
     rOption(Phmagtype, rShort("scale"),
-    rOptions(linear,dB scale (-40),
-    dB scale (-60), dB scale (-80),
-    dB scale (-100)),
+            rOptions(linear,dB scale (-40),
+                     dB scale (-60), dB scale (-80),
+                     dB scale (-100)),
             rDefault(linear),
             "Type of magnitude for harmonics"),
     rOption(Pcurrentbasefunc, rShort("base"),
