@@ -73,6 +73,12 @@ static const Ports voicePorts = {
         "Voice Startup Delay"),
     rToggle(Presonance,      rShort("enable"), rDefault(true),
         "Resonance Enable"),
+    rParamZyn(Poscilphase,   rShort("phase"),  rDefault(64),
+        "Oscillator Phase"),
+    rParamZyn(PFMoscilphase, rShort("phase"),  rDefault(64),
+        "FM Oscillator Phase"),
+    rToggle(Pfilterbypass,   rShort("bypass"), rDefault(false),
+        "Filter Bypass"),
     {"Pextoscil::i",       rProp(parameter) rDefault(-1) rShort("ext.")
                            rMap(min, -1) rMap(max, 16)
                            rDoc("External Oscillator Selection"), NULL,
@@ -94,12 +100,6 @@ static const Ports voicePorts = {
             if(change)
                 obj->requestWavetable(data, true);
         rBOIL_END},
-    rParamZyn(Poscilphase,   rShort("phase"),  rDefault(64),
-        "Oscillator Phase"),
-    rParamZyn(PFMoscilphase, rShort("phase"),  rDefault(64),
-        "FM Oscillator Phase"),
-    rToggle(Pfilterbypass,   rShort("bypass"), rDefault(false),
-        "Filter Bypass"),
 
     //Freq Stuff
     rToggle(Pfixedfreq,      rShort("fixed"),  rDefault(false),
@@ -349,6 +349,9 @@ static const Ports voicePorts = {
 
     // Wavetable stuff
     // If you do any changes here, please change doc/wavetable*, too
+
+    // MW sends this to inform us that WT-revelant data changed
+    // we need to reply a WT request to MW
     {"wavetable-params-changed:Ti:Fi",
         rDoc("retrieve realtime params for wavetable computation"),
         nullptr,
@@ -383,6 +386,7 @@ static const Ports voicePorts = {
             }
         }
     },
+    // MW sends this to give us the (yet empty) Tensor3
     {"set-wavetable:Tb:Fb",
         rDoc("swap passed tensor3 with current tensor"), NULL,
         [](const char *msg, RtData &d)
@@ -412,6 +416,8 @@ static const Ports voicePorts = {
             // this will also free the contained sub-tensors
             d.reply("/free", "sb", "WaveTable", sizeof(WaveTable*), &unused);
         }},
+    // MW uses this multiple times to send us the wavetable (slice by slice)
+    // We need to fill the WT and do a pointer swap if this was the last slice
     {"set-waves:Tiib:Fiib:Tiiib:Fiiib",
         rDoc("inform voice to update oscillator table"), NULL,
         [](const char *msg, RtData &d)
@@ -462,7 +468,7 @@ static const Ports voicePorts = {
                    (sem_idx == all_semantics()) ? (void*)waves2 : (void*)waves1, (sem_idx == all_semantics()) ? "Tensor2" : "Tensor1",
                    (int)sem_idx, (int)freq_idx);
 #endif
-         // ignore outdated param changes, allow the rest:
+            // ignore outdated param changes, allow the rest:
             if(!fromParamChange || current->is_correct_timestamp(paramChangeTime))
             {
                 if(// no write position => fill all semantics at this frequency
@@ -703,7 +709,7 @@ const Ports &ADnoteGlobalParam::ports = globalPorts;
 ADnoteParameters::ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
                                    const AbsTime *time_, bool waveTables)
     :PresetsArray(), GlobalPar(time_), time(time_), last_update_timestamp(0),
-    waveTables(waveTables)
+     waveTables(waveTables)
 {
     setpresettype("Padsynth");
     fft = fft_;
@@ -1666,37 +1672,10 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
     tableMod->require_update_request();
 }
 
-void ADnoteParameters::requestWavetables(rtosc::ThreadLink* bToU, int part, int kit)
-{
-    // OscilGen::paste() does not re-request wavetables
-    // so we need to look them up
-    for (std::size_t v = 0; v < NUM_VOICES; ++v)
-    {
-        int intOrExt = (VoicePar[v].Pextoscil == -1) ? v : VoicePar[v].Pextoscil;
-        if(VoicePar[intOrExt].OscilGn->change_stamp() > VoicePar[v].table->changeStamp())
-        {
-            VoicePar[v].requestWavetable(bToU, part, kit, v, false);
-            VoicePar[v].table->setChangeStamp(VoicePar[intOrExt].OscilGn->change_stamp());
-        }
-
-        intOrExt = (VoicePar[v].PextFMoscil == -1) ? v : VoicePar[v].PextFMoscil;
-        if(VoicePar[intOrExt].FmGn->change_stamp() > VoicePar[v].tableMod->changeStamp())
-        {
-            VoicePar[v].requestWavetable(bToU, part, kit, v, true);
-            VoicePar[v].tableMod->setChangeStamp(VoicePar[intOrExt].FmGn->change_stamp());
-        }
-    }
-
-    // for AD note, all waves exist in memory, so we compute wavetables for
-    // all of them, even for user-disabled voices (common case)
-    // usually, user-disabled voices are plain sine waves, so this is fast
-    for (std::size_t v = 0; v < NUM_VOICES; ++v)
-    {
-        VoicePar[v].requestWavetables(bToU, part, kit, v);
-    }
-}
-
-
+/*
+    Send WT for one single WT request
+    (these are called by the requestWavetable*s* below (and by some ports)
+*/
 void ADnoteVoiceParam::requestWavetable(rtosc::ThreadLink* bToU, int part, int kit, int voice, bool isModOsc) const
 {
     char argStr[] = "iii??iii";
@@ -1729,6 +1708,39 @@ void ADnoteVoiceParam::requestWavetable(rtosc::RtData& data, bool isModOsc) cons
         isModOsc ? 0 : (int)Presonance);
 }
 
+/*
+    Check for WTs that must be requested
+*/
+void ADnoteParameters::requestWavetables(rtosc::ThreadLink* bToU, int part, int kit)
+{
+    // OscilGen::paste() (not ADnoteParameters!) can not re-request wavetables
+    // because it has none
+    // so we need to look them up
+    for (std::size_t v = 0; v < NUM_VOICES; ++v)
+    {
+        int intOrExt = (VoicePar[v].Pextoscil == -1) ? v : VoicePar[v].Pextoscil;
+        if(VoicePar[intOrExt].OscilGn->change_stamp() > VoicePar[v].table->changeStamp())
+        {
+            VoicePar[v].requestWavetable(bToU, part, kit, v, false);
+            VoicePar[v].table->setChangeStamp(VoicePar[intOrExt].OscilGn->change_stamp());
+        }
+
+        intOrExt = (VoicePar[v].PextFMoscil == -1) ? v : VoicePar[v].PextFMoscil;
+        if(VoicePar[intOrExt].FmGn->change_stamp() > VoicePar[v].tableMod->changeStamp())
+        {
+            VoicePar[v].requestWavetable(bToU, part, kit, v, true);
+            VoicePar[v].tableMod->setChangeStamp(VoicePar[intOrExt].FmGn->change_stamp());
+        }
+    }
+
+    // for AD note, all waves exist in memory, so we compute wavetables for
+    // all of them, even for user-disabled voices (common case)
+    // usually, user-disabled voices are plain sine waves, so this is fast
+    for (std::size_t v = 0; v < NUM_VOICES; ++v)
+    {
+        VoicePar[v].requestWavetables(bToU, part, kit, v);
+    }
+}
 
 void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int kit, int voice)
 {
@@ -1738,6 +1750,9 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
         // give MW all it needs to generate the new table
         WaveTable* const wt = isModOsc ? tableMod : table;
 
+        /*
+            Check if for this WT, seeds have been consumed and can be refilled
+         */
         if(!wt->outdated())
         {
             for(tensor_size_t freq_idx = 0; freq_idx < wt->size_freqs(); ++freq_idx)
@@ -1802,7 +1817,9 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
             } // for loop over freqs
         } // !wt->outdated()
 
-        // Handle XML load/paste
+        /*
+            Handle paste/XML load
+         */
         if(wt->update_request_required())
         {
 #ifdef DBG_WAVETABLES

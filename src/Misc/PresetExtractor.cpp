@@ -180,6 +180,7 @@ void *capture(Master *m, std::string url, void* presetsObj)
     }
 }
 
+// doCopy() for RT classes
 template<class T>
 std::string doCopy(MiddleWare &mw, string url, string name, void* presetsObj)
 {
@@ -195,6 +196,7 @@ std::string doCopy(MiddleWare &mw, string url, string name, void* presetsObj)
     return "";
 }
 
+// doCopy() specializations for non-RT classes
 template<>
 std::string doCopy<OscilGen>(MiddleWare &mw, string , string name, void* presetsObj)
 {

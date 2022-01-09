@@ -133,8 +133,8 @@ class OscilGen:public Presets, NoCopyNoMove
         wavetable_types::float32* calculateWaveTableData(wavetable_types::float32 freq,
             wavetable_types::IntOrFloat semantic,
             wavetable_types::WtMode wtMode,
-	    int Presonance,
-	    OscilGenBuffers& bufs);
+            int Presonance,
+            OscilGenBuffers& bufs);
         //! calculate wave table mode, i.e. meaning + handling of semantics
         wavetable_types::WtMode calculateWaveTableMode(bool forceWtMode) const;
         std::size_t calculateNumFreqs(bool voice_uses_reso) const;
@@ -142,8 +142,10 @@ class OscilGen:public Presets, NoCopyNoMove
         //! calculate freqs + semantics
         std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloat>*>
             calculateWaveTableScales(wavetable_types::WtMode wtMode, bool voice_uses_reso) const;
-        // wavetable related time stamp
+        //! Get wavetable related time stamp - used to compare the age of a WT
+        //! with the age of the generating OscilGen
         unsigned change_stamp() const { return myBuffers().change_stamp(); }
+        //! This is increased on every modifying port change
         void inc_change_stamp() { ++myBuffers().m_change_stamp; }
 
         //Parameters

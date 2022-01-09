@@ -1267,6 +1267,8 @@ bool Master::AudioOut(float *outr, float *outl)
 
     //request wavetables (ad synth) from MW if too many were consumed
     //large for loop, but should boil down to only few iterations in practice
+    //the reason why we do it is that ADnoteParameters have no bToU
+    //(and the callbacks do not always have an rtosc::RtData object)
     if(bToU)
     {
         int64_t nTimesPerSec = 5;

@@ -547,11 +547,16 @@ wavetable_types::WtMode OscilGen::calculateWaveTableMode(bool forceWtMode) const
 
 std::size_t OscilGen::calculateNumFreqs(bool voice_uses_reso) const
 {
+    // Calculate required size for freq scale tensor
+    // For Resonance, we need this for every key (because the Resonance can
+    // differ a lot between only two keys),
+    // otherwise use some sane default
     return (voice_uses_reso && res && res->Penabled) ? 128 : WaveTable::num_freqs;
 }
 
 std::size_t OscilGen::calculateNumSemantics(wavetable_types::WtMode wtMode) const
 {
+    // Calculate required size for semantic scale tensor
     using WtMode = wavetable_types::WtMode;
     return wtMode == WtMode::freqwave_smps
                                  ? WaveTable::num_semantics_wtmod
