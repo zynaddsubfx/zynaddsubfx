@@ -32,7 +32,7 @@ namespace zyn {
 
 rtosc::Ports Sympathetic::ports = {
     rEffParVol(rDefault(127)),
-    rEffParPan(),
+    rEffParPan(rDefault(64)),
     rEffPar(Pq, 2, rShort("q"), rDefault(65),
             "Resonance"),
     rEffPar(Pdrive,   3, rShort("drive"), rDefault(65),
@@ -46,7 +46,7 @@ rtosc::Ports Sympathetic::ports = {
     rEffPar(Phpf, 8, rShort("hpf"), rDefault(0), "High Pass Cutoff"),
     rEffParRange(Punison_size, 9, rShort("unison"), rLinear(1,7), rDefault(1),
             "Number of Unison Strings"),
-    rEffPar(Pstrings, 10, rShort("strings"), rDefault(12),
+    rEffPar(Pstrings, 10, rShort("strings"), rDefault(0),
             "Number of Strings"),
     rEffPar(Pbasenote, 11, rShort("base"), rDefault(57), // basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
             "Midi Note of Lowest String"),
@@ -189,8 +189,8 @@ void Sympathetic::sethpf(unsigned char _Phpf)
 void Sympathetic::calcFreqs()
 {
     float unison_spread_semicent = powf(Punison_frequency_spread / 63.5f, 2.0f) * 25.0f;
-    unison_real_spread_up = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
-    unison_real_spread_down = 1.0f/unison_real_spread_up;
+    const float unison_real_spread_up = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
+    const float unison_real_spread_down = 1.0f/unison_real_spread_up;
 
     switch(Ppreset)
     {
@@ -213,6 +213,7 @@ void Sympathetic::calcFreqs()
         case 2:
         case 3:
             const float guitar_freqs[6] = {82.41, 110.00, 146.83, 196.00, 246.94, 329.63};
+            Pstrings = 6;
             for(unsigned int i = 0; i < 6; ++i)
             {
                 filterBank->freqs[i] = guitar_freqs[i];

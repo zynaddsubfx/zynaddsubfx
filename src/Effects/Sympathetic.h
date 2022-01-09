@@ -20,7 +20,7 @@ namespace zyn {
 
 class Sympathetic:public Effect
 {
-    
+
     public:
     Sympathetic(EffectParams pars);
     ~Sympathetic();
@@ -35,26 +35,26 @@ class Sympathetic:public Effect
         static rtosc::Ports ports;
     private:
         //Parameters
-        unsigned char Pvolume=0;       //Volume or E/R
-        unsigned char Pdrive=0;        //the input amplification
-        unsigned char Plevel=0;        //the output amplification
-        unsigned char Ptype=0;         //Distorsion type
-        unsigned char Pnegate=0;       //if the input is negated
-        unsigned char Plpf=0;          //lowpass filter
-        unsigned char Phpf=0;          //highpass filter
-        unsigned char Pstereo=0;       //0=mono, 1=stereo
-        unsigned char Pq=0;            //0=0.95 ... 127=1.05
-        unsigned char Punison_size=0;  //number of unison strings
-        unsigned char Punison_frequency_spread=0;
-        unsigned char Pstrings=0;
-        unsigned char Pbasenote=0;
-        unsigned char Pcrossgain=0;
-        
+        unsigned char Pvolume;       //Volume or E/R
+        unsigned char Pdrive;        //the input amplification
+        unsigned char Plevel;        //the output amplification
+        unsigned char Ptype;         //Distorsion type
+        unsigned char Pnegate;       //if the input is negated
+        unsigned char Plpf;          //lowpass filter
+        unsigned char Phpf;          //highpass filter
+        unsigned char Pstereo;       //0=mono, 1=stereo
+        unsigned char Pq;            //0=0.95 ... 127=1.05
+        unsigned char Punison_size;  //number of unison strings
+        unsigned char Punison_frequency_spread;
+        unsigned char Pstrings;      //number of strings
+        unsigned char Pbasenote;     //midi note of lowest string
+        unsigned char Pcrossgain;    //amount of sound leaking to neighbouring strings
+
         unsigned char spread, spread_old;
-        float unison_real_spread_up, unison_real_spread_down;
-        
+
         float freqs[NUM_SYMPATHETIC_STRINGS];
         float baseFreq;
+
         void setvolume(unsigned char _Pvolume);
         void setlpf(unsigned char _Plpf);
         void sethpf(unsigned char _Phpf);
@@ -62,7 +62,7 @@ class Sympathetic:public Effect
 
         //Real Parameters
         class AnalogFilter * lpfl, *lpfr, *hpfl, *hpfr;
-        
+
         class CombFilterBank * filterBank;
 };
 
