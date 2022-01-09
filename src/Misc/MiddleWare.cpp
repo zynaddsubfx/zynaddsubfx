@@ -43,7 +43,7 @@
 #include "PresetExtractor.h"
 #include "../Containers/MultiPseudoStack.h"
 #include "../Params/PresetsStore.h"
-#include "../Synth/Resonance.h"
+#include "../Params/EnvelopeParams.h"
 #include "../Params/LFOParams.h"
 #include "../Params/FilterParams.h"
 #include "../Effects/EffectMgr.h"
@@ -733,13 +733,17 @@ class MiddleWareImpl
 public:
     struct waveTablesToGenerateStruct
     {
+        // WHICH OSCIL?
         std::string voicePath;
-        int part, kit, voice; // redundant to voice path
-        bool isModOsc, isWtMod;
-        int extMod;
+        int part, kit, voice; // redundant to voice path (both are always set)
+        bool isModOsc; //!< modulator or carrier OSC?
+        // WHAT PROPERTIES DOES THIS OSCIL/ADPARS HAVE?
+        bool isWtMod; //!< whether ADpars use wavetable modulation
+        int extMod; //!< external mod of those ADpars (or -1)
         bool isExtMod() const { return extMod != -1; }
-        int param_change_time;
-        int presonance;
+        int presonance; //!< whether this voice uses resonance
+        // WHAT IS BEING REQUESTED?
+        int param_change_time; //!< param change time, like in previous request
         struct wave_request
         {
             tensor_size_t sem_idx;
@@ -761,7 +765,61 @@ private:
     // must yet be handled after a previous handleMsg
     std::queue<std::vector<char>> msgsToHandle;
     // pending jobs, will be completed when MW is not very busy
-    std::queue<waveTablesToGenerateStruct> waveTablesToGenerate;
+    class
+    {
+        //requests due to parameter change
+        //invariant: this queue holds just one request per OscilGen
+        //(so in practice, usually just one request at all)
+        std::list<waveTablesToGenerateStruct> paramChangeQ;
+        //requests to generate new randomized waves (usually just 1 or a few)
+        std::queue<waveTablesToGenerateStruct> newRandomQ;
+    public:
+        void push(waveTablesToGenerateStruct&& params)
+        {
+            if(params.wave_requests.size())
+            {
+                newRandomQ.push(params);
+            }
+            else
+            {
+                auto same_oscil = [&params](const waveTablesToGenerateStruct& elemInQ)
+                { // TODO: might also handle if extMod == voice, or extMod == extMod (but not -1)
+                    return elemInQ.part     == params.part &&
+                           elemInQ.kit      == params.kit &&
+                           elemInQ.voice    == params.voice &&
+                           elemInQ.isModOsc == params.isModOsc;
+                };
+                // for each OscilGen, only keep one request
+                std::size_t before = paramChangeQ.size(), after;
+                paramChangeQ.remove_if(same_oscil);
+                after = paramChangeQ.size();
+                if(before > after)
+                    printf("WT request queue: Removed %lu duplicate requests\n", before - after);
+                paramChangeQ.push_back(params);
+            }
+        }
+
+        bool empty() const { return newRandomQ.empty() && paramChangeQ.empty(); }
+
+        const waveTablesToGenerateStruct& front() const
+        {
+            // SQF scheduling: randomQ request just have one or a few slices
+            return newRandomQ.empty() ? paramChangeQ.front() : newRandomQ.front();
+        }
+
+        void pop()
+        {
+            // SQF scheduling: randomQ request just have one or a few slices
+            if (newRandomQ.empty())
+                paramChangeQ.pop_front();
+            else
+                newRandomQ.pop();
+        }
+
+    } waveTablesToGenerate;
+
+
+    //std::queue<waveTablesToGenerateStruct> waveTablesToGenerate;
     // age of oldest message in the wavetable queue
     // only required for debugging what happens when MW replies too slow
     // (or possibly profiling in the future)
@@ -1156,6 +1214,7 @@ public:
                              const WaveTable::IntOrFloat* sem_array)
     {
         {
+#ifdef DBG_WAVETABLES_BASIC
             const char* mode_str = "unknown";
             switch(wtMode)
             {
@@ -1169,6 +1228,7 @@ public:
                     mode_str = "freq";
                     break;
             }
+#endif
 
             OscilGenBuffers bufs(oscilGen->createOscilGenBuffers());
 
@@ -1247,7 +1307,7 @@ public:
 
             while(!waveTablesToGenerate.empty())
             {
-                waveTablesToGenerateStruct& params = waveTablesToGenerate.front();
+                const waveTablesToGenerateStruct& params = waveTablesToGenerate.front();
 
                 if(waveTableRequestHandler.isParamChangeUpToDate(
                     params.part, params.kit, params.voice, params.isModOsc,
