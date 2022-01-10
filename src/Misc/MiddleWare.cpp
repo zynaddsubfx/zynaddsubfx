@@ -226,21 +226,14 @@ void deallocate(const char *str, void *v)
         delete (rtosc::AutomationMgr*)v;
     else if(!strcmp(str, "PADsample"))
         delete[] (float*)v;
-    else if(!strcmp(str, "Tensor2<WaveTable::float32>")) {
-//      printf("WT: MW free Tensor2<WaveTable::float32> %p\n", v);
+    else if(!strcmp(str, "Tensor2<WaveTable::float32>"))
         delete (Tensor2<WaveTable::float32>*)v;
-    }
-    else if(!strcmp(str, "Tensor1<WaveTable::float32>")) {
-//      printf("WT: MW free Tensor1<WaveTable::float32> %p\n", v);
+    else if(!strcmp(str, "Tensor1<WaveTable::float32>"))
         delete (Tensor1<WaveTable::float32>*)v;
-    }
-    else if(!strcmp(str, "Tensor1<WaveTable::IntOrFloat>")) {
-//      printf("WT: MW free Tensor1<WaveTable::IntOrFloat> %p\n", v);
+    else if(!strcmp(str, "Tensor1<WaveTable::IntOrFloat>"))
         delete (Tensor1<WaveTable::IntOrFloat>*)v;
-    }
-    else if(!strcmp(str, "WaveTable")) {
+    else if(!strcmp(str, "WaveTable"))
         delete (WaveTable*)v;
-    }
     else
         fprintf(stderr, "Unknown type '%s', leaking pointer %p!!\n", str, v);
 }
@@ -289,9 +282,13 @@ void preparePadSynth(string path, PADnoteParameters *p, rtosc::RtData &d)
 }
 
 /**
- * Class responsible for sending chained requests of "/wavetable-params-changed"
+ * Class responsible for sending "wavetable-params-changed", remembering
+ * where it has been sent and at what time.
+ *
+ * sending chained requests of "/wavetable-params-changed"
  * TODO WT1: This could be removed, because changes are detected in a loop in
- *           ADnoteParameters::requestWaveTables (every 0.2s).
+ *           ADnoteParameters::requestWaveTables (every 0.2s). But this has no
+ *           latency, so it's faster. So I'm for keeping this class.
  */
 class WaveTableRequestHandler
 {
@@ -300,19 +297,19 @@ public:
 private:
     struct info_t
     {
-        //! do not request ad-pars if we're already waiting for them
+        //! Do not request ad-pars if we're already waiting for them
         bool waitForAdPars = false;
-        //! do not generate waves for out-dated parameters
-        //! this marks which scale tensors are currently valid
-        //! first time will be "1"
+        //! Do not generate waves for out-dated parameters.
+        //! This marks which scale tensors are currently valid.
+        //! First time will be "1".
         param_change_time_t param_change_time = 0;
     };
 
     info_t info[NUM_MIDI_PARTS][NUM_KIT_ITEMS][NUM_VOICES][2];
 
 public:
-    //! if not already done, inform RT that params relevant for wavetable
-    //! calculation failed. if freqs or semantics could have changed, send those
+    //! If not already done, inform RT that params relevant for wavetable
+    //! calculation failed. If freqs or semantics could have changed, send those
     //! aswell.
     void chainWtParamRequest(int part, int kit, int voice, bool isModOsc, rtosc::RtData& d)
     {
@@ -731,6 +728,8 @@ public:
 class MiddleWareImpl
 {
 public:
+    //! Contains all info for 1 request about which wavetables have to be
+    //! generated an how
     struct waveTablesToGenerateStruct
     {
         // WHICH OSCIL?
@@ -764,7 +763,7 @@ private:
     // messages chained with MwDataObj::chain
     // must yet be handled after a previous handleMsg
     std::queue<std::vector<char>> msgsToHandle;
-    // pending jobs, will be completed when MW is not very busy
+    //! Queue of wave table requests
     class
     {
         //requests due to parameter change
@@ -818,8 +817,6 @@ private:
 
     } waveTablesToGenerate;
 
-
-    //std::queue<waveTablesToGenerateStruct> waveTablesToGenerate;
     // age of oldest message in the wavetable queue
     // only required for debugging what happens when MW replies too slow
     // (or possibly profiling in the future)
@@ -1186,7 +1183,7 @@ public:
     };
     std::vector<wtResult> calculatedTables;
 
-    //! Return the generating oscilGen (can be internal or external)
+    //! Return the generating oscilGen for a WT request (can be internal or external)
     OscilGen* getOscilGen(const waveTablesToGenerateStruct& params)
     {
         std::string oscilGenStr = params.voicePath;
@@ -1206,84 +1203,87 @@ public:
         return oscilGen;
     }
 
-    void calculateWavetables(const waveTablesToGenerateStruct& params, std::size_t job,
-                             OscilGen* oscilGen,
-                             wavetable_types::WtMode wtMode,
-                             std::size_t size_semantics,
-                             const WaveTable::float32* freqs_array,
-                             const WaveTable::IntOrFloat* sem_array)
+    //! Calculate one "job" of wavetables
+    //! Multiple threads can run this function simultaneously
+    //! Fill calculatedTables[job]
+    void calculateWavetableData1Thread(const waveTablesToGenerateStruct& params, std::size_t job,
+                                      OscilGen* oscilGen,
+                                      wavetable_types::WtMode wtMode,
+                                      std::size_t size_semantics,
+                                      const WaveTable::float32* freqs_array,
+                                      const WaveTable::IntOrFloat* sem_array)
     {
+#ifdef DBG_WAVETABLES_BASIC
+        const char* mode_str = "unknown";
+        switch(wtMode)
+        {
+            case wavetable_types::WtMode::freqwave_smps:
+                mode_str = "wavetable";
+                break;
+            case wavetable_types::WtMode::freqseed_smps:
+                mode_str = "freqseed";
+                break;
+            case wavetable_types::WtMode::freq_smps:
+                mode_str = "freq";
+                break;
+        }
+#endif
+
+        OscilGenBuffers bufs(oscilGen->createOscilGenBuffers());
+
+        // calculate all freqs for all pending semantics
+        if(params.wave_requests.size())
         {
 #ifdef DBG_WAVETABLES_BASIC
-            const char* mode_str = "unknown";
-            switch(wtMode)
-            {
-                case wavetable_types::WtMode::freqwave_smps:
-                    mode_str = "wavetable";
-                    break;
-                case wavetable_types::WtMode::freqseed_smps:
-                    mode_str = "freqseed";
-                    break;
-                case wavetable_types::WtMode::freq_smps:
-                    mode_str = "freq";
-                    break;
-            }
+            printf("WT: MW generating new tensor of 1 wave each (mode %s)...\n",
+                   mode_str);
 #endif
+            const waveTablesToGenerateStruct::wave_request& wave_req = params.wave_requests[job];
+            Tensor1<WaveTable::float32>* newTensor = new Tensor1<WaveTable::float32>(synth.oscilsize);
+            WaveTable::float32* data = oscilGen->calculateWaveTableData(
+                wave_req.freq, wave_req.sem, wtMode, params.presonance, bufs);
+            newTensor->take_data_and_own_it(data);
 
-            OscilGenBuffers bufs(oscilGen->createOscilGenBuffers());
-
-            // calculate all freqs for all pending semantics
-            if(params.wave_requests.size())
-            {
+            calculatedTables[job].tensor = newTensor;
+            calculatedTables[job].freq_idx = wave_req.freq_idx;
+            calculatedTables[job].sem_idx = wave_req.sem_idx;
+        }
+        else // calculate one big table
+        {
 #ifdef DBG_WAVETABLES_BASIC
-                printf("WT: MW generating new tensor of 1 wave each (mode %s)...\n",
-                       mode_str);
+            printf("WT: MW generating new tensor of %d waves each (mode %s)...\n",
+                   (int)size_semantics, mode_str);
 #endif
-                const waveTablesToGenerateStruct::wave_request& wave_req = params.wave_requests[job];
-                Tensor1<WaveTable::float32>* newTensor = new Tensor1<WaveTable::float32>(synth.oscilsize);
+            assert(freqs_array);
+            assert(sem_array);
+
+            const Shape2 tensorShape{size_semantics,
+                                     (tensor_size_t)synth.oscilsize};
+            Tensor2<WaveTable::float32>* newTensor =
+                new Tensor2<WaveTable::float32>(tensorShape);
+
+            for(tensor_size_t s = 0; s < size_semantics; ++s)
+            {
                 WaveTable::float32* data = oscilGen->calculateWaveTableData(
-                    wave_req.freq, wave_req.sem, wtMode, params.presonance, bufs);
-                newTensor->take_data_and_own_it(data);
-
-                calculatedTables[job].tensor = newTensor;
-                calculatedTables[job].freq_idx = wave_req.freq_idx;
-                calculatedTables[job].sem_idx = wave_req.sem_idx;
+                    freqs_array[job], sem_array[s], wtMode, params.presonance, bufs);
+                (*newTensor)[s].take_data_and_own_it(data);
             }
-            else // calculate one big table
-            {
-#ifdef DBG_WAVETABLES_BASIC
-                printf("WT: MW generating new tensor of %d waves each (mode %s)...\n",
-                       (int)size_semantics, mode_str);
-#endif
-                assert(freqs_array);
-                assert(sem_array);
-
-                const Shape2 tensorShape{size_semantics,
-                                         (tensor_size_t)synth.oscilsize};
-                Tensor2<WaveTable::float32>* newTensor =
-                    new Tensor2<WaveTable::float32>(tensorShape);
-
-                for(tensor_size_t s = 0; s < size_semantics; ++s)
-                {
-                    WaveTable::float32* data = oscilGen->calculateWaveTableData(
-                        freqs_array[job], sem_array[s], wtMode, params.presonance, bufs);
-                    (*newTensor)[s].take_data_and_own_it(data);
-                }
 
 #ifdef DBG_WAVETABLES
-                printf("WT: MW sending tensor at freq %d\n", (int)job);
+            printf("WT: MW sending tensor at freq %d\n", (int)job);
 #endif
-                calculatedTables[job].tensor = newTensor;
-                calculatedTables[job].freq_idx = job;
-            }
+            calculatedTables[job].tensor = newTensor;
+            calculatedTables[job].freq_idx = job;
         }
     }
 
-    void calculateWaveTablesIfPossible()
+    //! Handle all current WT requests. Can fork threads.
+    void calculateWaveTables()
     {
         if(!wtGenThreads.size())
             wtGenThreads.resize(std::thread::hardware_concurrency());
-/*      if(wtGenThreads)
+/*      // unused code, will be removed (TODO WT3)
+ *      if(wtGenThreads)
         {
             if(!calcsLeft) // atomic variable
             {
@@ -1297,6 +1297,7 @@ public:
         {
             if(wt_queue_age < wt_queue_max_age)
             {
+                // this is just for debugging (to slow down reaction time)
                 ++wt_queue_age;
                 return;
             }
@@ -1315,6 +1316,9 @@ public:
                 {
                     OscilGen* oscilGen = getOscilGen(params);
 
+                    /*
+                        Calculate WT mode, scales etc. single threaded
+                     */
                     wavetable_types::WtMode wtMode;
                     // hack:
                     const WaveTable::float32* freqs_array = nullptr;
@@ -1322,6 +1326,7 @@ public:
                     std::size_t size_freqs, size_semantics;
                     if(params.wave_requests.size())
                     {
+                        // generate just 1 (or a few) new slides
                         wtMode = wavetable_types::WtMode::freqseed_smps;
                     }
                     else
@@ -1369,6 +1374,10 @@ public:
 #endif
                     assert(!params.isModOsc || params.presonance == 0);
 
+                    /*
+                        Calculate the WTs, multi-threaded
+                     */
+
                     std::size_t calcsToBeDone = params.wave_requests.size()
                                               ? params.wave_requests.size()
                                               : size_freqs;
@@ -1382,7 +1391,7 @@ public:
                     {
                         for(std::size_t job = threadno; job < calcsToBeDone; job+=nthreads)
                         {
-                            this_ptr->calculateWavetables(params, job, oscilGen, wtMode, size_semantics, freqs_array, sem_array);
+                            this_ptr->calculateWavetableData1Thread(params, job, oscilGen, wtMode, size_semantics, freqs_array, sem_array);
                         }
                     };
 
@@ -1395,6 +1404,9 @@ public:
                         thrd.reset(nullptr);
                     }
 
+                    /*
+                        Send the results to RT
+                     */
                     for(wtResult& m_result : calculatedTables)
                     {
                         if(params.wave_requests.size())
@@ -1454,7 +1466,8 @@ public:
 
         // anything urgent to do?
         // (autoSave and offline detection are not considered urgent,
-        // runOsc has just handled all master OSC events)
+        // runOsc has just handled all master OSC events,
+        // but the following 3 seem urgent)
         if(lo_server_wait(server, 0) ||
            bToU->hasNext() ||
            multi_thread_source.canRead())
@@ -1463,7 +1476,7 @@ public:
         }
         else
         {
-            calculateWaveTablesIfPossible();
+            calculateWaveTables();
         }
     }
 
