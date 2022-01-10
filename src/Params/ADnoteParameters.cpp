@@ -348,7 +348,7 @@ static const Ports voicePorts = {
         }},
 
     // Wavetable stuff
-    // If you do any changes here, please change doc/wavetable*, too
+    // Changes here must be synced with doc/wavetable*
 
     // MW sends this to inform us that WT-revelant data changed
     // we need to reply a WT request to MW

@@ -29,6 +29,7 @@ tensor_size_t WaveTable::findBestIndex(float freq) const
     return zyn::findBestIndex(freqs, freq);
 }
 
+// find the wave which has the best frequency to play with "freq"
 tensor_size_t findBestIndex(const Tensor<1, wavetable_types::float32>& freqs, float freq)
 {
     auto not_less_than_freq = std::lower_bound(freqs.begin(), freqs.end(), freq);
@@ -45,7 +46,8 @@ tensor_size_t findBestIndex(const Tensor<1, wavetable_types::float32>& freqs, fl
     return std::distance(freqs.begin(), not_less_than_freq);
 }
 
-const Tensor1<WaveTable::float32>& WaveTable::get(float32 freq)
+// get the right wave to play with "freq" ()
+const Tensor1<WaveTable::float32>& WaveTable::getNextWaveToConsume(float32 freq)
 {
     assert(mode() != WtMode::freqwave_smps);
     tensor_size_t bestI = findBestIndex(freq);

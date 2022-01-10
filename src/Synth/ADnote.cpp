@@ -130,7 +130,7 @@ int ADnote::fillOscilSmpFromWt(int nvoice)
                                                  : (((float)bfp) / 127.0f);
             }
         } else {
-            const float* bufferInTable = wt->get(getvoicebasefreq(nvoice)).data();
+            const float* bufferInTable = wt->getNextWaveToConsume(getvoicebasefreq(nvoice)).data();
             voice.OscilSmp.smps = memory.valloc<float>(buf_alloc_size);
             std::copy(bufferInTable, bufferInTable + synth.oscilsize, voice.OscilSmp.smps);
             //Store the first elements to the last position for speedups
@@ -552,7 +552,7 @@ void ADnote::setupVoiceMod(int nvoice, bool first_run)
             if(waveTables)
             {
                 assert(pars.VoicePar[nvoice].tableMod); // did you allocate ADnoteParameters and not assign its "table" member?
-                const float* bufferInTable = pars.VoicePar[nvoice].tableMod->get(tmp).data();
+                const float* bufferInTable = pars.VoicePar[nvoice].tableMod->getNextWaveToConsume(tmp).data();
                 std::copy(bufferInTable, bufferInTable + synth.oscilsize, voice.FMSmp);
                 voice.oscposhiFM[k] = pars.VoicePar[nvoice].FmGn->getFinalOutpos() % synth.oscilsize;
             }
@@ -1031,7 +1031,7 @@ void ADnote::initparameters(WatchManager *wm, const char *prefix)
                 if(waveTables)
                 {
                     assert(pars.VoicePar[nvoice].tableMod); // did you allocate ADnoteParameters and not assign its "table" member?
-                    const float* bufferInTable = pars.VoicePar[nvoice].tableMod->get(tmp).data();
+                    const float* bufferInTable = pars.VoicePar[nvoice].tableMod->getNextWaveToConsume(tmp).data();
                     std::copy(bufferInTable, bufferInTable + synth.oscilsize, vce.FMSmp);
                     vce.oscposhiFM[k] = pars.VoicePar[nvoice].FmGn->getFinalOutpos() % synth.oscilsize;
                 }
