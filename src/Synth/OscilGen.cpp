@@ -606,10 +606,22 @@ std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloa
     }
 
     // frequency
-    (*freqs)[0] = 55.f;
-    for(tensor_size_t i = 1; i < freqs->size(); ++i)
+    if(freqs->size() == 10)
     {
-        (*freqs)[i] = 2.f * (*freqs)[i-1];
+        (*freqs)[0] = 55.f;
+        for(tensor_size_t i = 1; i < freqs->size(); ++i)
+        {
+            (*freqs)[i] = 2.f * (*freqs)[i-1];
+        }
+    } else if (freqs->size() == 128) {
+        for(tensor_size_t i = 0; i < freqs->size(); ++i)
+        {
+            (*freqs)[i] = powf(2.f, (i-69.f)/12.f) * 440.f;
+        }
+    } else {
+        // there's probably one formula that's good for all freq sizes,
+        // but I haven't
+        assert(false);
     }
 
     return std::make_pair(freqs, semantics);
