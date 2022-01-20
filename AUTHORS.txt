@@ -5,7 +5,7 @@ Active Developers:
                             SUBnote overtones, unison enhancements, ...)
         Johannes Lorenz (Effect Documentation, PID Files, parameter metadata)
         Friedolino (14 bit unison, anti-aliased oscillators, floating point
-        params, repeatable envs, ...)
+        params, repeatable envs, moog filter, new waveshapers, BPM sync...)
         Daniel Sheeler
 
 Original author (inactive):
@@ -28,7 +28,7 @@ Contributors:
         Damien Goutte-Gattat (Bank select midi support)
         Lieven Moors (Spike/Circle waveform)
         Olaf Schulz (MIDI Aftertouch support)
-        Jonathan Liles (NSM & NTK support)
+        Jonathan Liles (NSM & NTK support & Filter smoothing)
         Ilario Glasgo (Italian Doc Translation)
         Filipe Coelho (Globals Cleanup)
         Andre Sklenar (UI Pixmaps)
@@ -47,3 +47,12 @@ Contributors:
         Kinichiro Inoguchi (Added Sndio input&output engine, build/cmake fixes)
         Carlo Bramini (Fixed several cygwin build issues)
         Simon van der Veldt (fixed missing cmake dependency)
+        Philippe Gervais (Documentation Fixes)
+        Carlo Bramini (Windows config fix)
+        AnClark (Zest fixes)
+        Grahm Breed (Fix MIDI note 0 not turning on)
+        Luz Paz (Typo fixes)
+        Ricard Wanderlof/polluxsynth (Latched keymode, notepool refactor,
+                                      legato fixes, portamento upgrades)
+        Plagiat Gang of Bros (Fixed NSM JACK-MULTI client naming)
+        Julien Olivain (Fixed gcc warnings)
