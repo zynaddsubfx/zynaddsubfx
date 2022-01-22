@@ -1,4 +1,4 @@
-3.0.6 (TBD)
+3.0.6 (21 January 2022)
         - Enhances watchpoint system for waveform views (GSOC michiboo)
         - Add anti-alias mode to add synth oscillator interpolation
         - Add 14 bit NRPN support for automations
