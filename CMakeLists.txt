@@ -10,14 +10,15 @@ if(DEFINED ZYN_DATADIR)
 add_definitions(-DZYN_DATADIR="${ZYN_DATADIR}")
 endif()
 
-option(ZYN_SYSTEM_RTOSC "Use a system provided librtosc" OFF)
+option(ZYN_SYSTEM_RTOSC "Use system provided librtosc and librtosc-cpp" OFF)
 
 #Include RTOSC
 if(ZYN_SYSTEM_RTOSC)
     include(FindPkgConfig)
     pkg_check_modules(RTOSC REQUIRED librtosc)
-    include_directories($RTOSC_INCLUDE_DIR)
-    message(STATUS "Found system provided librtosc...")
+    pkg_check_modules(RTOSC_CPP REQUIRED librtosc-cpp)
+    include_directories(${RTOSC_INCLUDE_DIR})
+    message(STATUS "Found system provided librtosc and librtosc-cpp...")
 else()
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/rtosc/CMakeLists.txt")
         message(STATUS "RTOSC NOT FOUND")

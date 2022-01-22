@@ -575,13 +575,27 @@ else()
     set(PTHREAD_LIBRARY pthread)
 endif()
 
-target_link_libraries(zynaddsubfx_core
-	${ZLIB_LIBRARIES}
-	${FFTW3F_LIBRARIES}
-	${MXML_LIBRARIES}
-	${OS_LIBRARIES}
-    ${PTHREAD_LIBRARY}
-    rtosc rtosc-cpp)
+if(ZYN_SYSTEM_RTOSC)
+    target_link_libraries(zynaddsubfx_core
+        ${ZLIB_LIBRARIES}
+        ${FFTW3F_LIBRARIES}
+        ${MXML_LIBRARIES}
+        ${OS_LIBRARIES}
+        ${PTHREAD_LIBRARY}
+        ${RTOSC_LIBRARIES}
+        ${RTOSC_CPP_LIBRARIES}
+    )
+else()
+    target_link_libraries(zynaddsubfx_core
+        ${ZLIB_LIBRARIES}
+        ${FFTW3F_LIBRARIES}
+        ${MXML_LIBRARIES}
+        ${OS_LIBRARIES}
+        ${PTHREAD_LIBRARY}
+        rtosc
+        rtosc-cpp
+    )
+endif()
 
 if(IwyuErr)
     message (STATUS "Include what you use: ${IwyuErr}")
