@@ -51,6 +51,9 @@ class OutMgr
         bool setSink(std::string name);
 
         std::string getSink() const;
+        
+        void setAudioCompressor(bool isEnabled);
+        bool getAudioCompressor(void);
 
         class WavEngine * wave;     /**<The Wave Recorder*/
         friend class EngineMgr;

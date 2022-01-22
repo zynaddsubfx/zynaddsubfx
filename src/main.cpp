@@ -68,6 +68,7 @@ MiddleWare *middleware;
 
 Master   *master;
 int       swaplr = 0; //1 for left-right swapping
+bool      compr = false; // enables output audio compressor
 
 // forward declarations of namespace zyn
 namespace zyn
@@ -241,6 +242,7 @@ int main(int argc, char *argv[])
     synth.buffersize = config.cfg.SoundBufferSize;
     synth.oscilsize  = config.cfg.OscilSize;
     swaplr = config.cfg.SwapStereo;
+    compr = config.cfg.AudioOutputCompressor;
 
     Nio::preferredSampleRate(synth.samplerate);
 
@@ -607,6 +609,7 @@ int main(int argc, char *argv[])
     if(altered_master)
         middleware->updateResources(master);
 
+    
     //Run the Nio system
     printf("[INFO] Nio::start()\n");
     bool ioGood = Nio::start();
@@ -619,7 +622,7 @@ int main(int argc, char *argv[])
     }
 
     InitWinMidi(wmidi);
-
+    master->setAudioCompressor(compr);
 
     gui = NULL;
 
@@ -708,7 +711,7 @@ int main(int argc, char *argv[])
 #endif
     if(!noui) {
         printf("[INFO] Launching Zyn-Fusion...\n");
-        const char *addr = middleware->getServerAddress();
+        char *addr = middleware->getServerAddress();
 #ifndef WIN32
         gui_pid = fork();
         if(gui_pid == 0) {
@@ -759,6 +762,7 @@ int main(int argc, char *argv[])
             exit(1);
         }
 #endif
+        free(addr);
     }
 #endif
 

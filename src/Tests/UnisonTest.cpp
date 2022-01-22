@@ -13,7 +13,7 @@
 */
 
 
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include <iostream>
 #include <fstream>
 #include <ctime>
@@ -32,11 +32,10 @@ using namespace zyn;
 SYNTH_T *synth;
 
 #define BUF 256
-class AdNoteTest:public CxxTest::TestSuite
+class UnisonTest
 {
     public:
 
-        ADnote       *note;
         FFTwrapper   *fft;
         Controller   *controller;
         float test_freq_log2;
@@ -57,7 +56,7 @@ class AdNoteTest:public CxxTest::TestSuite
             memset(outL,0,sizeof(outL));
             memset(outR,0,sizeof(outR));
 
-            fft = new FFTwrapper(BUF);
+            fft = new FFTwrapper(synth->oscilsize);
             //prepare the default settings
             params = new ADnoteParameters(*synth, fft, time);
 
@@ -74,7 +73,6 @@ class AdNoteTest:public CxxTest::TestSuite
         }
 
         void tearDown() {
-            delete note;
             delete controller;
             delete fft;
             FFT_cleanup();
@@ -97,40 +95,41 @@ class AdNoteTest:public CxxTest::TestSuite
             params->VoicePar[0].Unison_invert_phase     = f;
 
             SynthParams pars{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng()};
-            note = new ADnote(params, pars);
+            ADnote* note = new ADnote(params, pars);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(outL[80], values[0], 1.9e-5);
+            TS_ASSERT_DELTA(values[0], outL[80], 1.9e-5);
             printf("{%f,", outL[80]);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(outR[90], values[1], 1.9e-5);
+            TS_ASSERT_DELTA(values[1], outR[90], 1.9e-5);
             printf("%f,", outR[90]);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(outL[20], values[2], 1.9e-5);
+            TS_ASSERT_DELTA(values[2], outL[20], 1.9e-5);
             printf("%f,", outL[20]);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(outR[200], values[3], 1.9e-5);
+            TS_ASSERT_DELTA(values[3], outR[200], 1.9e-5);
             printf("%f},\n", outR[200]);
+            delete note;
         }
 
         void testUnison() {
             sprng(0xbeef);
 
             float data[][4] = {
-                {0.125972,0.029887,0.000000,0.138013},
-                {-0.095414,-0.083965,-0.000000,0.009048},
-                {-0.077587,-0.001760,-0.021463,-0.013995},
-                {0.041240,-0.008561,-0.000000,-0.099298},
-                {-0.098969,-0.048030,-0.000052,-0.087053},
-                {0.104913,-0.081452,-0.017700,0.000978},
-                {0.041270,0.003788,0.006064,0.002436},
-                {-0.030791,-0.036072,-0.007964,-0.015141},
-                {0.009218,0.015333,-0.007500,0.083076},
-                {0.058909,0.064450,-0.002517,0.041595},
-                {-0.007731,-0.009040,-0.068033,-0.016573},
-                {-0.047286,-0.002355,-0.049196,0.016222},
-                {0.014014,-0.002635,0.006542,0.050710},
-                {-0.054877,-0.027135,0.040211,0.031927},
-                {-0.048367,0.022010,0.018224,0.032846},
+                {0.009012,-0.074734,-0.012636,-0.022757},
+                {-0.004497,-0.106839,-0.003898,-0.060385},
+                {-0.027254,-0.048478,0.019716,-0.036242},
+                {0.013156,-0.104055,-0.000360,-0.152481},
+                {0.031217,-0.125947,-0.035797,-0.083334},
+                {0.061165,0.111355,-0.044391,0.065363},
+                {-0.005528,-0.063873,0.008229,0.001122},
+                {0.070588,0.092495,-0.081852,0.104497},
+                {0.065521,0.052868,-0.066022,0.110135},
+                {0.094440,-0.028949,-0.096088,-0.002352},
+                {0.072197,0.040330,-0.102320,0.048607},
+                {-0.045416,0.106115,0.059613,0.041986},
+                {0.069641,-0.061826,-0.082194,0.005864},
+                {-0.035529,-0.145869,0.033578,-0.124722},
+                {0.075097,0.027494,-0.075664,0.046463},
             };
 
             int freq_spread[15];
@@ -178,3 +177,10 @@ class AdNoteTest:public CxxTest::TestSuite
 #endif
         }
 };
+
+int main()
+{
+    UnisonTest test;
+    RUN_TEST(testUnison);
+    return test_summary();
+}

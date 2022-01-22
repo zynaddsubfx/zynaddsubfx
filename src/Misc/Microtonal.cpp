@@ -511,7 +511,7 @@ int Microtonal::linetotunings(OctaveTuning &octave, const char *line)
 }
 
 /*
- * Convert the text to tunnings
+ * Convert the text to tunings
  */
 int Microtonal::texttotunings(const char *text)
 {
@@ -589,7 +589,7 @@ void Microtonal::texttomapping(const char *text)
 }
 
 /*
- * Convert tunning to text line
+ * Convert tuning to text line
  */
 void Microtonal::tuningtoline(int n, char *line, int maxn)
 {
@@ -616,7 +616,7 @@ int Microtonal::loadline(FILE *file, char *line)
 
 
 /*
- * Loads the tunnings from a scl file
+ * Loads the tunings from a scl file
  */
 int Microtonal::loadscl(SclInfo &scl, const char *filename)
 {
@@ -637,10 +637,10 @@ int Microtonal::loadscl(SclInfo &scl, const char *filename)
         if(tmp[i] < 32)
             tmp[i] = 0;
 
-    strncpy(scl.Pname,    tmp, MICROTONAL_MAX_NAME_LEN);
-    strncpy(scl.Pcomment, tmp, MICROTONAL_MAX_NAME_LEN);
-    scl.Pname[MICROTONAL_MAX_NAME_LEN-1] = 0;
-    scl.Pcomment[MICROTONAL_MAX_NAME_LEN-1] = 0;
+    strncpy(scl.Pname,    tmp, MICROTONAL_MAX_NAME_LEN-1);
+    scl.Pname[MICROTONAL_MAX_NAME_LEN-1] = '\0';
+    strncpy(scl.Pcomment, tmp, MICROTONAL_MAX_NAME_LEN-1);
+    scl.Pcomment[MICROTONAL_MAX_NAME_LEN-1] = '\0';
 
     //loads the number of the notes
     if(loadline(file, &tmp[0]) != 0)
@@ -650,7 +650,7 @@ int Microtonal::loadscl(SclInfo &scl, const char *filename)
     if(nnotes > MAX_OCTAVE_SIZE)
         return 2;
 
-    //load the tunnings
+    //load the tunings
     for(int nline = 0; nline < nnotes; ++nline) {
         if(loadline(file, &tmp[0]) != 0)
             return 2;
@@ -715,7 +715,7 @@ int Microtonal::loadkbm(KbmInfo &kbm, const char *filename)
     kbm.PAfreq = tmpPAfreq;
 
     //the scale degree(which is the octave) is not loaded,
-    //it is obtained by the tunnings with getoctavesize() method
+    //it is obtained by the tunings with getoctavesize() method
     if(loadline(file, &tmp[0]) != 0)
         return 2;
 

@@ -25,7 +25,7 @@ typedef float sample_t;
 
 class Value_Smoothing_Filter
 {
-    float w, g1, g2;
+    float w, g1, g2, t;
 
     float _cutoff;
 
@@ -37,12 +37,14 @@ public:
         {
             g1 = g2 = 0;
             _cutoff = 10.0f;
+            t = 0.0001f;
             _reset_on_next_apply = false;
         }
 
     void reset_on_next_apply ( bool v ) { _reset_on_next_apply = v; }
 
     void cutoff ( float v ) { _cutoff = v; }
+    void thresh ( float t_ ) { t = t_; }
 
     void reset ( float v ) { g2 = g1 = v; }
 

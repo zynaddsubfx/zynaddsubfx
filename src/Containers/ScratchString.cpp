@@ -14,7 +14,7 @@ ScratchString::ScratchString(int num)
 {
     snprintf(c_str, SCRATCH_SIZE, "%d", num);
 }
-    
+
 ScratchString::ScratchString(unsigned char num)
 {
     snprintf(c_str, SCRATCH_SIZE, "%d", num);

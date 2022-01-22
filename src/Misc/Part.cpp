@@ -20,6 +20,7 @@
 #include "../Params/ADnoteParameters.h"
 #include "../Params/SUBnoteParameters.h"
 #include "../Params/PADnoteParameters.h"
+#include "../Synth/Portamento.h"
 #include "../Synth/Resonance.h"
 #include "../Synth/SynthNote.h"
 #include "../Synth/ADnote.h"
@@ -58,7 +59,7 @@ static const Ports partPorts = {
 #define rChangeCb
 #undef rChangeCb
 #define rChangeCb obj->setVolumedB(obj->Volume);
-    rParamF(Volume, rShort("Vol"), rDefault(0.0), rUnit(dB), 
+    rParamF(Volume, rShort("Vol"), rDefault(0.0), rUnit(dB),
             rLinear(-40.0, 13.3333), "Part Volume"),
 #undef rChangeCb
     {"Pvolume::i", rShort("Vol") rProp(parameter) rLinear(0,127)
@@ -78,6 +79,10 @@ static const Ports partPorts = {
 #define rChangeCb obj->setkeylimit(obj->Pkeylimit);
     rParamI(Pkeylimit, rShort("limit"), rProp(parameter),
     rMap(min,0), rMap(max, POLYPHONY), rDefault(15), "Key limit per part"),
+#undef rChangeCb
+#define rChangeCb obj->setvoicelimit(obj->Pvoicelimit);
+    rParamI(Pvoicelimit, rShort("vlimit"), rProp(parameter),
+    rMap(min,0), rMap(max, POLYPHONY), rDefault(0), "Voice limit per part"),
 #undef rChangeCb
 #define rChangeCb
     rParamZyn(Pminkey, rShort("min"), rDefault(0), "Min Used Key"),
@@ -116,14 +121,8 @@ static const Ports partPorts = {
     {"captureMax:", rDoc("Capture maximum valid note"), NULL,
         [](const char *, RtData &r)
         {Part *p = (Part*)r.obj; p->Pmaxkey = p->lastnote;}},
-    {"polyType::c:i", rProp(parameter) rOptions(Polyphonic, Monophonic, Legato)
-        rDoc("Synthesis polyphony type\n"
-                "Polyphonic - Each note is played independently\n"
-                "Monophonic - A single note is played at a time with"
-                " envelopes resetting between notes\n"
-                "Legato     - A single note is played at a time without"
-                " envelopes resetting between notes\n"
-            ), NULL,
+    {"polyType::c:i", rProp(parameter) rOptions(Poly, Mono, Legato, Latch)
+        rDoc("Synthesis polyphony type\n"), NULL,
         [](const char *msg, RtData &d)
         {
             Part *p = (Part*)d.obj;
@@ -131,6 +130,8 @@ static const Ports partPorts = {
                 int res = 0;
                 if(!p->Ppolymode)
                     res = p->Plegatomode ? 2 : 1;
+                if(p->Platchmode)
+                    res = 3;
                 return res;
             };
 
@@ -143,12 +144,19 @@ static const Ports partPorts = {
             if(i == 0) {
                 p->Ppolymode = 1;
                 p->Plegatomode = 0;
+                p->Platchmode = 0;
             } else if(i==1) {
                 p->Ppolymode = 0;
                 p->Plegatomode = 0;
-            } else {
+                p->Platchmode = 0;
+            } else if(i==2) {
                 p->Ppolymode = 0;
                 p->Plegatomode = 1;
+                p->Platchmode = 0;
+            } else {
+                p->Ppolymode = 1;
+                p->Plegatomode = 0;
+                p->Platchmode = 1;
             }
             d.broadcast(d.loc, "i", get_polytype());
         }
@@ -176,7 +184,7 @@ static const Ports partPorts = {
                 char filename[32];
                 time (&rawtime);
                 const struct tm* timeinfo = localtime (&rawtime);
-                strftime (filename,23,"%F_%R.xiz",timeinfo); 
+                strftime (filename,23,"%F_%R.xiz",timeinfo);
                 p->saveXML(filename);
                 fprintf(stderr, "Part %d saved to %s\n", (p->partno + 1), filename);
             }
@@ -264,6 +272,7 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     :Pdrummode(false),
     Ppolymode(true),
     Plegatomode(false),
+    Platchmode(false),
     partoutl(new float[synth_.buffersize]),
     partoutr(new float[synth_.buffersize]),
     ctl(synth_, &time_),
@@ -308,7 +317,10 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     }
 
     killallnotes = false;
+    silent = false;
     oldfreq_log2 = -1.0f;
+    oldportamento = NULL;
+    legatoportamento = NULL;
 
     cleanup();
 
@@ -351,8 +363,9 @@ void Part::cloneTraits(Part &p) const
     CLONE(Ppolymode);
     CLONE(Plegatomode);
     CLONE(Pkeylimit);
+    CLONE(Pvoicelimit);
 
-    // Controller has a refence, so it can not be re-assigned
+    // Controller has a reference, so it can not be re-assigned
     // So, destroy and reconstruct it.
     p.ctl.~Controller(); new (&p.ctl) Controller(this->ctl);
 }
@@ -372,6 +385,7 @@ void Part::defaults()
     Pvelsns   = 64;
     Pveloffs  = 64;
     Pkeylimit = 15;
+    Pvoicelimit = 0;
     defaultsinstrument();
     ctl.defaults();
 }
@@ -536,20 +550,86 @@ bool Part::NoteOnInternal(note_t note,
     // notes. That means it is required that the previous note is
     // still held down or sustained for the Portamento to activate
     // (that's like Legato).
-    const bool portamento = (Ppolymode || isRunningNote) &&
-        ctl.initportamento(oldfreq_log2, note_log2_freq, doingLegato);
+    PortamentoRealtime *portamento_realtime = NULL;
+    if(Ppolymode || isRunningNote) {
+        // If there is a currently ongoing glide, shift the starting point
+        // for any new portamento to where the current glide is right now
+        if (oldportamento && oldportamento->portamento.active)
+            oldportamentofreq_log2 += oldportamento->portamento.freqdelta_log2;
+        // Non-portamento settings and conditions say the note may have
+        // portamento, but it remains for Portamento.init to make the
+        // final decision depending on the portamento enable, threshold and
+        // other parameters.
+        Portamento portamento(ctl, synth, oldfreq_log2, oldportamentofreq_log2, note_log2_freq);
+        if(portamento.active) {
+            // We're good to go! Just need to figure out how.
+            // If we're doing legato and we already have a portamento structure,
+            // reuse it.
+            if (doingLegato && legatoportamento) {
+                portamento_realtime = legatoportamento;
+                portamento_realtime->portamento = portamento;
+            } else {
+                // Create new one if we don't already have one, or for each
+                // note in poly/mono mode
+                portamento_realtime = memory.alloc<PortamentoRealtime>
+                    (this,
+                     memory,
+                     // Cleanup function: Destroy any references we might
+                     // have to the current realtime pointer so that it
+                     // can not be (re)used, with disastrous results.
+                     [](PortamentoRealtime *realtime)
+                        {
+                            assert(realtime);
+                            Part *part = static_cast<Part *>(realtime->handle);
+                            assert(part);
+                            if (realtime == part->oldportamento) {
+                                // Since the last note is going away, capture
+                                // the portamento:ed pitch offset to our saved
+                                // previous note. This will be our starting
+                                // point for the next portamento glide.
+                                if (realtime->portamento.active)
+                                    part->oldportamentofreq_log2 +=
+                                        realtime->portamento.freqdelta_log2;
+                                part->oldportamento = NULL;
+                            }
+                            if (realtime == part->legatoportamento)
+                                part->legatoportamento = NULL;
+                        },
+                     portamento
+                    );
+                if (doingLegato)
+                    legatoportamento = portamento_realtime;
+            }
+        }
+    }
 
+    // Create the portamento pointer that we distribute to the synth notes
+    Portamento *portamento = NULL;
+    if(portamento_realtime)
+        portamento = &portamento_realtime->portamento;
+
+    // Save note freq and pointer to portamento state for next note
     oldfreq_log2 = note_log2_freq;
+    oldportamentofreq_log2 = oldfreq_log2;
+    oldportamento = portamento_realtime;
 
     //Adjust Existing Notes
     if(doingLegato) {
         LegatoParams pars = {vel, portamento, note_log2_freq, true, prng()};
-        notePool.applyLegato(note, pars);
+        notePool.applyLegato(note, pars, portamento_realtime);
         return true;
     }
 
+    // We know now that we are not doing legato, so we destroy the reference
+    // to the previous legato portamento info so we don't try to reuse it
+    legatoportamento = NULL;
+
     if(Ppolymode)
         notePool.makeUnsustainable(note);
+    
+    // in latch mode release latched notes before creating the new one
+    if(Platchmode)
+        notePool.releaseLatched();
 
     //Create New Notes
     for(uint8_t i = 0; i < NUM_KIT_ITEMS; ++i) {
@@ -562,18 +642,24 @@ bool Part::NoteOnInternal(note_t note,
             portamento, note_log2_freq, false, prng()};
         const int sendto = Pkitmode ? item.sendto() : 0;
 
+        // Enforce voice limit, before we trigger new note
+        limit_voices(note);
+
         try {
             if(item.Padenabled)
                 notePool.insertNote(note, sendto,
                         {memory.alloc<ADnote>(kit[i].adpars, pars,
-                            wm, (pre+"kit"+i+"/adpars/").c_str), 0, i});
+                            wm, (pre+"kit"+i+"/adpars/").c_str), 0, i},
+                                    portamento_realtime);
             if(item.Psubenabled)
                 notePool.insertNote(note, sendto,
-                        {memory.alloc<SUBnote>(kit[i].subpars, pars, wm, (pre+"kit"+i+"/subpars/").c_str), 1, i});
+                        {memory.alloc<SUBnote>(kit[i].subpars, pars, wm, (pre+"kit"+i+"/subpars/").c_str), 1, i},
+                                    portamento_realtime);
             if(item.Ppadenabled)
                 notePool.insertNote(note, sendto,
                         {memory.alloc<PADnote>(kit[i].padpars, pars, interpolation, wm,
-                            (pre+"kit"+i+"/padpars/").c_str), 2, i});
+                            (pre+"kit"+i+"/padpars/").c_str), 2, i},
+                                    portamento_realtime);
         } catch (std::bad_alloc & ba) {
             std::cerr << "dropped new note: " << ba.what() << std::endl;
         }
@@ -603,7 +689,10 @@ void Part::NoteOff(note_t note) //release the key
     for(auto &desc:notePool.activeDesc()) {
         if(desc.note != note || !desc.playing())
             continue;
-        if(!ctl.sustain.sustain) { //the sustain pedal is not pushed
+        // if latch is on we ignore noteoff, but set the state to lateched
+        if(Platchmode) {
+            notePool.latch(desc);
+        } else if(!ctl.sustain.sustain) { //the sustain pedal is not pushed
             if((isMonoMode() || isLegatoMode()) && !monomemEmpty())
                 MonoMemRenote();//Play most recent still active note
             else
@@ -612,8 +701,9 @@ void Part::NoteOff(note_t note) //release the key
         else {   //the sustain pedal is pushed
             if(desc.canSustain())
                 desc.doSustain();
-            else
+            else {
                 notePool.release(desc);
+            }
         }
     }
 }
@@ -861,6 +951,36 @@ void Part::setkeylimit(unsigned char Pkeylimit_)
         notePool.enforceKeyLimit(keylimit);
 }
 
+/*
+ * Enforce voice limit
+ */
+void Part::limit_voices(int new_note)
+{
+    int voicelimit = Pvoicelimit;
+    if(voicelimit == 0) /* voice limit disabled */
+        return;
+
+    /* If we're called because a new note is imminent, we need to enforce
+     * one less note than the limit, so we don't go above the limit when the
+     * new note is triggered.
+     */
+    if (new_note >= 0)
+        voicelimit--;
+
+    int running_voices = notePool.getRunningVoices();
+    if(running_voices >= voicelimit)
+        notePool.enforceVoiceLimit(voicelimit, new_note);
+}
+
+/*
+ * Set Part's voice limit
+ */
+void Part::setvoicelimit(unsigned char Pvoicelimit_)
+{
+    Pvoicelimit = Pvoicelimit_;
+
+    limit_voices(-1);
+}
 
 /*
  * Prepare all notes to be turned off
@@ -875,6 +995,24 @@ void Part::AllNotesOff()
  */
 void Part::ComputePartSmps()
 {
+    /* When we are in the process of being disabled (Penabled set to false),
+     * AllNotesOff will be called, setting killallnotes, which causes all
+     * playing voices to terminate and the signal level being graciously
+     * muted during the course of the current buffer. After that, all
+     * subsequent output buffers will be set to 0 until we are enabled again.
+     */
+    if (!Penabled && !killallnotes) {
+        /* We only need to clear the output buffer once when disabled; since
+         * it's static within the part it's wasteful to do it every time. */
+        if (!silent) {
+            memset(partoutl, 0, synth.bufferbytes);
+            memset(partoutr, 0, synth.bufferbytes);
+            silent = true;
+        }
+        return;
+    }
+    silent = false;
+
     assert(partefx[0]);
     for(unsigned nefx = 0; nefx < NUM_PART_EFX + 1; ++nefx) {
         memset(partfxinputl[nefx], 0, synth.bufferbytes);
@@ -897,6 +1035,8 @@ void Part::ComputePartSmps()
             if(note.finished())
                 notePool.kill(s);
         }
+    if (d.portamentoRealtime)
+        d.portamentoRealtime->portamento.update();
     }
 
     //Apply part's effects and mix them
@@ -932,7 +1072,6 @@ void Part::ComputePartSmps()
         for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx)
             partefx[nefx]->cleanup();
     }
-    ctl.updateportamento();
 }
 
 /*
@@ -1024,7 +1163,7 @@ void Part::add2XMLinstrument(XMLwrapper& xml)
     for(int i = 0; i < NUM_KIT_ITEMS; ++i) {
         xml.beginbranch("INSTRUMENT_KIT_ITEM", i);
         xml.addparbool("enabled", kit[i].Penabled);
-        if(kit[i].Penabled != 0) {
+        if(kit[i].Penabled != 0 || xml.SaveFullXml) {
             xml.addparstr("name", (char *)kit[i].Pname);
 
             xml.addparbool("muted", kit[i].Pmuted);
@@ -1034,21 +1173,21 @@ void Part::add2XMLinstrument(XMLwrapper& xml)
             xml.addpar("send_to_instrument_effect", kit[i].Psendtoparteffect);
 
             xml.addparbool("add_enabled", kit[i].Padenabled);
-            if(kit[i].Padenabled && kit[i].adpars) {
-                xml.beginbranch("ADD_SYNTH_PARAMETERS");
+            if((kit[i].Padenabled  || xml.SaveFullXml) && kit[i].adpars) {
+               xml.beginbranch("ADD_SYNTH_PARAMETERS");
                 kit[i].adpars->add2XML(xml);
                 xml.endbranch();
             }
 
             xml.addparbool("sub_enabled", kit[i].Psubenabled);
-            if(kit[i].Psubenabled && kit[i].subpars) {
+            if((kit[i].Psubenabled || xml.SaveFullXml) && kit[i].subpars) {
                 xml.beginbranch("SUB_SYNTH_PARAMETERS");
                 kit[i].subpars->add2XML(xml);
                 xml.endbranch();
             }
 
             xml.addparbool("pad_enabled", kit[i].Ppadenabled);
-            if(kit[i].Ppadenabled && kit[i].padpars) {
+            if((kit[i].Ppadenabled || xml.SaveFullXml) && kit[i].padpars) {
                 xml.beginbranch("PAD_SYNTH_PARAMETERS");
                 kit[i].padpars->add2XML(xml);
                 xml.endbranch();
@@ -1095,6 +1234,7 @@ void Part::add2XML(XMLwrapper& xml)
     xml.addparbool("poly_mode", Ppolymode);
     xml.addpar("legato_mode", Plegatomode);
     xml.addpar("key_limit", Pkeylimit);
+    xml.addpar("voice_limit", Pvoicelimit);
 
     xml.beginbranch("INSTRUMENT");
     add2XMLinstrument(xml);
@@ -1130,7 +1270,7 @@ int Part::loadXMLinstrument(const char *filename)
     // store filename in member variable
     int length = sizeof(loaded_file)-1;
     strncpy(loaded_file, filename, length);
-    // set last element to \0 in case filname is too long or not terminated
+    // set last element to \0 in case filename is too long or not terminated
     loaded_file[length]='\0';
 
     getfromXMLinstrument(xml);
@@ -1224,10 +1364,10 @@ void Part::getfromXMLinstrument(XMLwrapper& xml)
             if(xml.enterbranch("INSTRUMENT_KIT_ITEM", i) == 0)
                 continue;
             setkititemstatus(i, xml.getparbool("enabled", kit[i].Penabled));
-            if(kit[i].Penabled == 0) {
-                xml.exitbranch();
-                continue;
-            }
+//           if(kit[i].Penabled == 0) { // Remove this as it loses data that may be in the xml file but disabled!
+//                xml.exitbranch();
+//                continue;
+//            }
 
             xml.getparstr("name", (char *)kit[i].Pname, PART_MAX_NAME_LEN);
 
@@ -1318,6 +1458,7 @@ void Part::getfromXML(XMLwrapper& xml)
     if(!Plegatomode)
         Plegatomode = xml.getpar127("legato_mode", Plegatomode);
     Pkeylimit = xml.getpar127("key_limit", Pkeylimit);
+    Pvoicelimit = xml.getpar127("voice_limit", Pvoicelimit);
 
 
     if(xml.enterbranch("INSTRUMENT")) {

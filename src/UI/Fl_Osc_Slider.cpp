@@ -233,7 +233,7 @@ int Fl_Osc_Slider::handle(int ev, int X, int Y, int W, int H)
         default:
             handled = Fl_Slider::handle(ev, X, Y, W, H);
     }
-    
+
     return handled;
 }
 

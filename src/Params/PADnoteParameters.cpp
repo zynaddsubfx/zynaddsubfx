@@ -88,15 +88,17 @@ static const rtosc::Ports realtime_ports =
         [](const char *m, rtosc::RtData &d)
         {
             // MiddleWare calls this to send the generated sample buffers to us
+            assert(rtosc_argument(m,2).b.len == sizeof(void*));
             PADnoteParameters *p = (PADnoteParameters*)d.obj;
             const char *mm = m;
             while(!isdigit(*mm))++mm;
             int n = atoi(mm);
+            float *oldsmp = p->sample[n].smp;
             p->sample[n].size     = rtosc_argument(m,0).i;
             p->sample[n].basefreq = rtosc_argument(m,1).f;
             p->sample[n].smp      = *(float**)rtosc_argument(m,2).b.data;
-
-            //XXX TODO memory management (deallocation of smp buffer)
+            if (oldsmp)
+                d.reply("/free", "sb", "PADsample", sizeof(void*), &oldsmp);
         }},
     //weird stuff for PCoarseDetune
     {"detunevalue:", rMap(unit,cents) rDoc("Get detune value"), NULL,
@@ -147,7 +149,9 @@ static const rtosc::Ports realtime_ports =
     [](const char *m, rtosc::RtData &d){
         rObject &paste = **(rObject **)rtosc_argument(m,0).b.data;
         rObject &o = *(rObject*)d.obj;
-        o.pasteRT(paste);}}
+        o.pasteRT(paste);
+        rObject* ptr = &paste;\
+        d.reply("/free", "sb", STRINGIFY(rObject), sizeof(rObject*), &ptr);}}
 
 };
 static const rtosc::Ports non_realtime_ports =
@@ -160,7 +164,10 @@ static const rtosc::Ports non_realtime_ports =
         rObject &o = *(rObject*)d.obj;
         o.paste(paste);
         //avoid the match to forward the request along
-        d.matches--;}},
+        d.matches--;
+        // "/damage" is not replied here yet - this is handled later when
+        // pasting the realtime ports
+    }},
     //Harmonic Source Distribution
     rRecurp(oscilgen, "Oscillator"),
     rRecurp(resonance, "Resonance"),
@@ -170,7 +177,7 @@ static const rtosc::Ports non_realtime_ports =
             rOptions(bandwidth,discrete,continious),
             rDefault(bandwidth),
             "Harmonic Distribution Model"),
-    rOption(Php.base.type, rOptions(Gaussian, Rectanglar, Double Exponential),
+    rOption(Php.base.type, rOptions(Gaussian, Rectangular, Double Exponential),
             rShort("shape"), rDefault(Gaussian),
             "Harmonic profile shape"),
     rParamZyn(Php.base.par1, rShort("warp"),      rDefault(80),
@@ -189,7 +196,7 @@ static const rtosc::Ports non_realtime_ports =
 
     //Harmonic Modulation
     rOption(Php.amp.type, rShort("mult"), rOptions(Off, Gauss, Sine, Flat),
-            rDefault(Off), "Type of amplitude multipler"),
+            rDefault(Off), "Type of amplitude multiplier"),
     rParamZyn(Php.amp.par1, rShort("p1"),   rDefault(80),
         "Amplitude multiplier parameter"),
     rParamZyn(Php.amp.par2, rShort("p2"),   rDefault(60),
@@ -707,7 +714,7 @@ static float Pbwscale_translate(char Pbwscale)
 //Requires
 // - bandwidth scaling power
 // - bandwidth
-// - oscilator harmonics at various frequencies (oodles of data)
+// - oscillator harmonics at various frequencies (oodles of data)
 // - sampled resonance
 void PADnoteParameters::generatespectrum_bandwidthMode(float *spectrum,
                                                        int size,
@@ -920,9 +927,9 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
                       unsigned nthreads, unsigned threadno)
     {
         //prepare a BIG IFFT
-        FFTwrapper *fft      = new FFTwrapper(samplesize);
-        fft_t      *fftfreqs = new fft_t[samplesize / 2];
-        float      *spectrum = new float[spectrumsize];
+        FFTwrapper    *fft      = new FFTwrapper(samplesize);
+        FFTfreqBuffer  fftfreqs = fft->allocFreqBuf();
+        float         *spectrum = new float[spectrumsize];
 
         for(int nsample = 0; nsample < samplemax; ++nsample)
         if(nsample % nthreads == threadno)
@@ -950,12 +957,12 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
             newsample.smp = new float[samplesize + extra_samples];
 
             newsample.smp[0] = 0.0f;
+            fftfreqs[0] = fft_t(0, 0);
             for(int i = 1; i < spectrumsize; ++i) //randomize the phases
                 fftfreqs[i] = FFTpolar(spectrum[i], (float)RND * 2 * PI);
             //that's all; here is the only ifft for the whole sample;
             //no windows are used ;-)
-            fft->freqs2smps(fftfreqs, newsample.smp);
-
+            fft->freqs2smps_noconst_input(fftfreqs, fft->allocSampleBuf(newsample.smp));
 
             //normalize(rms)
             float rms = 0.0f;
@@ -980,7 +987,7 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
 
         //Cleanup
         delete (fft);
-        delete[] fftfreqs;
+        delete[] fftfreqs.data;
         delete[] spectrum;
     };
 

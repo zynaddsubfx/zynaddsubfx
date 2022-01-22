@@ -86,7 +86,7 @@ static const Ports voicePorts = {
             rOptions(none, random, 50%, 33%, 25%), rDefault(none),
             "Subvoice Phases"),
     rOption(Type,            rShort("type"), rOptions(Sound,White,Pink,DC),
-        rDefault(Sound), "Type of Sound"),
+        rLinear(0,127), rDefault(Sound), "Type of Sound"),
     rParamZyn(PDelay,        rShort("delay"), rDefault(0),
         "Voice Startup Delay"),
     rToggle(Presonance,      rShort("enable"), rDefault(true),
@@ -134,7 +134,7 @@ static const Ports voicePorts = {
             rObject *obj = (rObject *)d.obj;
             if (!rtosc_narguments(msg))
                 d.reply(d.loc, "i", (int)roundf(127.0f * (1.0f + obj->volume/60.0f)));
-            else 
+            else
                 obj->volume = -60.0f * (1.0f - rtosc_argument(msg, 0).i / 127.0f);
         }},
     {"volume::f", rShort("volume") rProp(parameter) rUnit(dB) rDefault(-12.75) rLinear(-60.0f, 0.0f)
@@ -172,10 +172,10 @@ static const Ports voicePorts = {
     rParamZyn(PFilterVelocityScaleFunction, rShort("v.sense"), rDefault(64),
         "Filter Velocity Function Shape"),
 
- 
+
     //Modulator Stuff
     rOption(PFMEnabled, rShort("mode"), rOptions(none, mix, ring, phase,
-                frequency, pulse), rDefault(none), "Modulator mode"),
+                frequency, pulse), rLinear(0,127), rDefault(none), "Modulator mode"),
     rParamI(PFMVoice,                   rShort("voice"), rDefault(-1),
         "Modulator Oscillator Selection"),
     rParamF(FMvolume,                   rShort("vol."),  rLinear(0.0, 100.0),
@@ -364,7 +364,7 @@ static const Ports globalPorts = {
             rObject *obj = (rObject *)d.obj;
             if (!rtosc_narguments(msg))
                 d.reply(d.loc, "i", (int)roundf(96.0f * (1.0f + (obj->Volume - 12.0412f)/60.0f)));
-            else 
+            else
                 obj->Volume = 12.0412f - 60.0f * (1.0f - rtosc_argument(msg, 0).i / 96.0f);
         }},
     rParamZyn(Fadein_adjustment, rDefault(FADEIN_ADJUSTMENT_SCALE),
@@ -444,8 +444,8 @@ static const Ports globalPorts = {
 #define rChangeCb obj->last_update_timestamp = obj->time->time();
 static const Ports adPorts = {//XXX 16 should not be hard coded
     rSelf(ADnoteParameters),
-    rPaste,
-    rArrayPaste,
+    rPasteRt,
+    rArrayPasteRt,
     rRecurs(VoicePar, NUM_VOICES),
     {"VoicePar#" STRINGIFY(NUM_VOICES) "/Enabled::T:F",
      rProp(parameter) rShort("enable") rDoc("Voice Enable")

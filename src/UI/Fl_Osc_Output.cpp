@@ -44,7 +44,7 @@ void Fl_Osc_Output::OSC_value(char v)
 {
     newvalue_ = v;
     value(v);
-    
+
     //Hide the fact that this widget is async
     if(cb_data.first)
         cb_data.first(this, cb_data.second);
@@ -54,12 +54,12 @@ void Fl_Osc_Output::OSC_value(float v)
 {
     newvalue_ = v;
     value(v);
-   
+
     //Hide the fact that this widget is async
     if(cb_data.first)
         cb_data.first(this, cb_data.second);
 }
-        
+
 void Fl_Osc_Output::update(void)
 {
     oscWrite(ext);

@@ -28,6 +28,7 @@
 #include "Phaser.h"
 #include "../Misc/XMLwrapper.h"
 #include "../Misc/Util.h"
+#include "../Misc/Time.h"
 #include "../Params/FilterParams.h"
 #include "../Misc/Allocator.h"
 
@@ -117,6 +118,100 @@ static const rtosc::Ports local_ports = {
                 }
             }
         }},
+    {"numerator::i", rShort("num") rDefault(0) rLinear(0,99)
+        rProp(parameter) rDoc("Numerator of ratio to bpm"), NULL,
+        [](const char *msg, rtosc::RtData &d)
+        {
+            EffectMgr *eff = (EffectMgr*)d.obj;
+            if(rtosc_narguments(msg)) {
+                int val = rtosc_argument(msg, 0).i;
+                if (val>=0) {
+                    eff->numerator = val;
+                    int Pdelay, Pfreq;
+                    float freq;
+                    if(eff->denominator) {
+                        switch(eff->nefx) {
+                        case 2: // Echo
+                            // invert:
+                            // delay = (Pdelay / 127.0f * 1.5f); //0 .. 1.5 sec
+                            Pdelay = (int)roundf((20320.0f / (float)eff->time->tempo) * 
+                                                 ((float)eff->numerator / (float)eff->denominator));
+                            if (eff->numerator&&eff->denominator)
+                                eff->seteffectparrt(2, Pdelay);
+                            break;
+                        case 3: // Chorus
+                        case 4: // Phaser
+                        case 5: // Alienwah
+                        case 8: // DynamicFilter
+                            freq =  ((float)eff->time->tempo * 
+                                     (float)eff->denominator / 
+                                     (240.0f * (float)eff->numerator));
+                            // invert:
+                            // (powf(2.0f, Pfreq / 127.0f * 10.0f) - 1.0f) * 0.03f
+                            Pfreq = (int)roundf(logf((freq/0.03f)+1.0f)/LOG_2 * 12.7f);
+                            if (eff->numerator&&eff->denominator)
+                                eff->seteffectparrt(2, Pfreq);
+                            break;
+                        case 1: // Reverb
+                        case 6: // Distorsion
+                        case 7: // EQ
+                        default:
+                            break;
+                        }
+                    }
+                }
+                d.broadcast(d.loc, "i", val);
+            } else {
+                d.reply(d.loc, "i", eff->numerator); 
+            }
+        }},
+    {"denominator::i", rShort("dem") rDefault(4) rLinear(1,99)
+        rProp(parameter) rDoc("Denominator of ratio to bpm"), NULL,
+        [](const char *msg, rtosc::RtData &d)
+        {
+            EffectMgr *eff = (EffectMgr*)d.obj;
+            if(rtosc_narguments(msg)) {
+                int val = rtosc_argument(msg, 0).i;
+                if (val > 0) {
+                    eff->denominator = val;
+                    int Pdelay, Pfreq;
+                    float freq;
+                    if(eff->numerator) {
+                        switch(eff->nefx) {
+                        case 2: // Echo
+                            // invert:
+                            // delay = (Pdelay / 127.0f * 1.5f); //0 .. 1.5 sec
+                            Pdelay = (int)roundf((20320.0f / (float)eff->time->tempo) * 
+                                                 ((float)eff->numerator / (float)eff->denominator));
+                            if (eff->numerator&&eff->denominator)
+                                eff->seteffectparrt(2, Pdelay);
+                            break;
+                        case 3: // Chorus
+                        case 4: // Phaser
+                        case 5: // Alienwah
+                        case 8: // DynamicFilter
+                            freq =  ((float)eff->time->tempo * 
+                                     (float)eff->denominator / 
+                                     (240.0f * (float)eff->numerator));
+                            // invert:
+                            // (powf(2.0f, Pfreq / 127.0f * 10.0f) - 1.0f) * 0.03f
+                            Pfreq = (int)roundf(logf((freq/0.03f)+1.0f)/LOG_2 * 12.7f);
+                            if (eff->numerator&&eff->denominator)
+                                eff->seteffectparrt(2, Pfreq);
+                            break;
+                        case 1: // Reverb
+                        case 6: // Distorsion
+                        case 7: // EQ
+                        default:
+                            break;
+                        }
+                    }
+                }
+                d.broadcast(d.loc, "i", val);
+            } else {
+                d.reply(d.loc, "i", eff->denominator); 
+            }
+        }},
     {"eq-coeffs:", rProp(internal) rDoc("Get equalizer Coefficients"), NULL,
         [](const char *, rtosc::RtData &d)
         {
@@ -173,6 +268,8 @@ EffectMgr::EffectMgr(Allocator &alloc, const SYNTH_T &synth_,
       nefx(0),
       efx(NULL),
       time(time_),
+      numerator(0),
+      denominator(4),
       dryonly(false),
       memory(alloc),
       synth(synth_)
@@ -243,6 +340,41 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
                 efx = NULL;
                 break; //no effect (thru)
         }
+        
+        // set freq / delay params according to bpm ratio 
+        int Pdelay, Pfreq;
+        float freq;
+        if (numerator>0) {
+            switch(nefx) {
+                case 2: // Echo
+                    // invert:
+                    // delay = (Pdelay / 127.0f * 1.5f); //0 .. 1.5 sec
+                    Pdelay = (int)roundf((20320.0f / (float)time->tempo) * 
+                                         ((float)numerator / (float)denominator));
+                    if (numerator&&denominator)
+                        seteffectparrt(2, Pdelay);
+                    break;
+                case 3: // Chorus
+                case 4: // Phaser
+                case 5: // Alienwah
+                case 8: // DynamicFilter
+                    freq =  ((float)time->tempo * 
+                             (float)denominator / 
+                             (240.0f * (float)numerator));
+                    // invert:
+                    // (powf(2.0f, Pfreq / 127.0f * 10.0f) - 1.0f) * 0.03f
+                    Pfreq = (int)roundf(logf((freq/0.03f)+1.0f)/LOG_2 * 12.7f);
+                    if (numerator&&denominator)
+                        seteffectparrt(2, Pfreq);
+                    break;
+                case 1: // Reverb
+                case 6: // Distorsion
+                case 7: // EQ
+                default:
+                    break;
+            }
+        }
+        
     } catch (std::bad_alloc &ba) {
         std::cerr << "failed to change effect " << _nefx << ": " << ba.what() << std::endl;
         return;
@@ -488,6 +620,8 @@ void EffectMgr::add2XML(XMLwrapper& xml)
         xml.endbranch();
     }
     xml.endbranch();
+    xml.addpar("numerator", numerator);
+    xml.addpar("denominator", denominator);
 }
 
 void EffectMgr::getfromXML(XMLwrapper& xml)
@@ -533,6 +667,8 @@ void EffectMgr::getfromXML(XMLwrapper& xml)
         }
         xml.exitbranch();
     }
+    numerator = xml.getpar("numerator", numerator, 0, 99);
+    denominator = xml.getpar("denominator", denominator, 1, 99);
     cleanup();
 }
 

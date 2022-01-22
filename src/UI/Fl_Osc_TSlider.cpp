@@ -65,7 +65,7 @@ int Fl_Osc_TSlider::handle(int event)
                 tipwin->hide();
             return 1;
     }
-    
+
     return super;
 }
 

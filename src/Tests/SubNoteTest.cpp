@@ -1,29 +1,29 @@
 /*
   ZynAddSubFX - a software synthesizer
-  AdNoteTest.h - CxxTest for Synth/ADnote
+
+  AdNoteTest.h - CxxTest for Synth/SUBnote
   Copyright (C) 2009-2011 Mark McCurry
-  Copyright (C) 2009 Harald Hvaal
-  Authors: Mark McCurry, Harald Hvaal
+  Author: Mark McCurry
+
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
   as published by the Free Software Foundation; either version 2
   of the License, or (at your option) any later version.
 */
 
-
-#include <cxxtest/TestSuite.h>
+//Based Upon AdNoteTest.h
+#include "test-suite.h"
 #include <iostream>
 #include <fstream>
 #include <ctime>
 #include <string>
 #include "../Misc/Master.h"
-#include "../Misc/Util.h"
 #include "../Misc/Allocator.h"
-#include "../Synth/ADnote.h"
+#include "../Misc/Util.h"
+#include "../Misc/XMLwrapper.h"
+#include "../Synth/SUBnote.h"
+#include "../Params/SUBnoteParameters.h"
 #include "../Params/Presets.h"
-#include "../DSP/FFTwrapper.h"
-#include "../Synth/LFO.h"
-#include "../Params/LFOParams.h"
 #include "../globals.h"
 #include <rtosc/thread-link.h>
 
@@ -32,57 +32,27 @@ using namespace zyn;
 
 SYNTH_T *synth;
 
-
-class AdNoteTest:public CxxTest::TestSuite
+class SubNoteTest
 {
     public:
-        rtosc::ThreadLink *tr;
-        ADnote       *note;
+
+        SUBnoteParameters *pars;
+        SUBnote      *note;
+        Master       *master;
         AbsTime      *time;
-        FFTwrapper   *fft;
-        ADnoteParameters *defaultPreset;
         Controller   *controller;
-        Alloc         memory;
         float test_freq_log2;
+        Alloc         memory;
+        rtosc::ThreadLink *tr;
         WatchManager *w;
+
+
         float *outR, *outL;
-        
-        LFO          *lfo;
-        LFOParams    *lfop;
-        int randval(int min, int max)
-        {
-            int ret = rand()%(1+max-min)+min;
-            //printf("ret = %d (%d..%d)\n",ret, min,max);
-            return ret;
-        }
-        
-        void randomize_params(void) {
-            lfop->Pintensity  = randval(0,255);
-            lfop->Pstartphase = randval(0,255);
-            lfop->Pcutoff     = randval(0,255);
-            lfop->PLFOtype    = randval(0,6);
-            lfop->Prandomness = randval(0,255);
-            lfop->Pfreqrand   = randval(0,255);
-            lfop->Pcontinous  = randval(0,1);
-            lfop->Pstretch    = randval(0,255);
-        }
-        
-        void run_lfo_randomtest(void)
-        {
-            lfo  = new LFO(*lfop, 440.0f, *time);
-            for(int i=0; i<100; ++i) {
-                float out = lfo->lfoout();
-                TS_ASSERT((-2.0f < out && out < 2.0f));
-            }
-        }
-
-
 
         void setUp() {
-            //First the sensible settings and variables that have to be set:
             synth = new SYNTH_T;
+            //First the sensible settings and variables that have to be set:
             synth->buffersize = 256;
-            //synth->alias();
             time  = new AbsTime(*synth);
 
             outL = new float[synth->buffersize];
@@ -95,60 +65,51 @@ class AdNoteTest:public CxxTest::TestSuite
             tr  = new rtosc::ThreadLink(1024,3);
             w   = new WatchManager(tr);
 
-            fft = new FFTwrapper(synth->oscilsize);
             //prepare the default settings
-            defaultPreset = new ADnoteParameters(*synth, fft, time);
-
-            //Assert defaults
-            TS_ASSERT(!defaultPreset->VoicePar[1].Enabled);
-
+            SUBnoteParameters *defaultPreset = new SUBnoteParameters(time);
             XMLwrapper wrap;
-            cout << string(SOURCE_DIR) + string("/guitar-adnote.xmz")
-                 << endl;
             wrap.loadXMLfile(string(SOURCE_DIR)
                               + string("/guitar-adnote.xmz"));
             TS_ASSERT(wrap.enterbranch("MASTER"));
-            TS_ASSERT(wrap.enterbranch("PART", 0));
+            TS_ASSERT(wrap.enterbranch("PART", 1));
             TS_ASSERT(wrap.enterbranch("INSTRUMENT"));
             TS_ASSERT(wrap.enterbranch("INSTRUMENT_KIT"));
             TS_ASSERT(wrap.enterbranch("INSTRUMENT_KIT_ITEM", 0));
-            TS_ASSERT(wrap.enterbranch("ADD_SYNTH_PARAMETERS"));
+            TS_ASSERT(wrap.enterbranch("SUB_SYNTH_PARAMETERS"));
             defaultPreset->getfromXML(wrap);
-            //defaultPreset->defaults();
-
-            //verify xml was loaded
-            TS_ASSERT(defaultPreset->VoicePar[1].Enabled);
-
-
 
             controller = new Controller(*synth, time);
 
             //lets go with.... 50! as a nice note
             test_freq_log2 = log2f(440.0f) + (50.0 - 69.0f) / 12.0f;
+
             SynthParams pars{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng()};
-
-            note = new ADnote(defaultPreset, pars,w);
-
+            note = new SUBnote(defaultPreset, pars, w);
+            this->pars = defaultPreset;
         }
 
         void tearDown() {
-            delete note;
             delete controller;
-            delete defaultPreset;
-            delete fft;
+            delete note;
+            delete w;
+            delete tr;
             delete [] outL;
             delete [] outR;
-            FFT_cleanup();
+            delete time;
             delete synth;
+            delete pars;
         }
 
         void testDefaults() {
+            //Note: if these tests fail it is due to the relationship between
+            //global.h::RND and SUBnote.cpp
+
             int sampleCount = 0;
 
 //#define WRITE_OUTPUT
 
 #ifdef WRITE_OUTPUT
-            ofstream file("adnoteout", ios::out);
+            ofstream file("subnoteout", ios::out);
 #endif
             note->noteout(outL, outR);
 #ifdef WRITE_OUTPUT
@@ -157,38 +118,41 @@ class AdNoteTest:public CxxTest::TestSuite
 
 #endif
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], 0.1924f, 0.0001f);
+
+            TS_ASSERT_DELTA(outL[255], -0.0009f, 0.0001f);
+
             note->releasekey();
 
             TS_ASSERT(!tr->hasNext());
-            w->add_watch("noteout/be4_mix");
-            note->noteout(outL, outR);
-            sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.4717f, 0.0001f);
-            w->tick();
-            TS_ASSERT(tr->hasNext());
-            
-            note->noteout(outL, outR);
-            sampleCount += synth->buffersize;
-            w->tick();
-            TS_ASSERT_DELTA(outL[255], 0.0592f, 0.0001f);
+            w->add_watch("noteout/filter");
 
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], 0.0989f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], 0.0026f, 0.0001f);
             w->tick();
+
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
-            TS_ASSERT_DELTA(outL[255], -0.0901f, 0.0001f);
+            TS_ASSERT_DELTA(outL[255], -0.0011f, 0.0001f);
             w->tick();
 
             TS_ASSERT(tr->hasNext());
-            TS_ASSERT_EQUALS(string("noteout/be4_mix"), tr->read());
+            TS_ASSERT_EQUAL_STR("noteout/filter", tr->read());
             TS_ASSERT(!tr->hasNext());
 
+            w->add_watch("noteout/amp_int");
             note->noteout(outL, outR);
             sampleCount += synth->buffersize;
+            TS_ASSERT_DELTA(outL[255], -0.0023f, 0.0001f);
+            w->tick();
 
+            note->noteout(outL, outR);
+            sampleCount += synth->buffersize;
+            TS_ASSERT_DELTA(outL[255], -0.0013f, 0.0001f);
+            w->tick();
+            TS_ASSERT(tr->hasNext());
+            TS_ASSERT_EQUAL_STR("noteout/amp_int", tr->read());
+            TS_ASSERT(!tr->hasNext());
 
             while(!note->finished()) {
                 note->noteout(outL, outR);
@@ -203,18 +167,7 @@ class AdNoteTest:public CxxTest::TestSuite
             file.close();
 #endif
 
-            TS_ASSERT_EQUALS(sampleCount, 9472);
-            
-              lfop = new LFOParams();
-            lfop->fel  = zyn::consumer_location_type_t::amp;
-            lfop->freq = 2.0f;
-            lfop->delay = 0.0f;
-            for(int i=0; i<10000; ++i) {
-                randomize_params();
-                run_lfo_randomtest();
-            }
-            
-            
+            TS_ASSERT_EQUAL_INT(sampleCount, 5888);
         }
 
 #define OUTPUT_PROFILE
@@ -227,8 +180,15 @@ class AdNoteTest:public CxxTest::TestSuite
                 note->noteout(outL, outR);
             int t_off = clock(); // timer when func returns
 
-            printf("AdNoteTest: %f seconds for %d Samples to be generated.\n",
+            printf("SubNoteTest: %f seconds for %d Samples to be generated.\n",
                    (static_cast<float>(t_off - t_on)) / CLOCKS_PER_SEC, samps);
         }
 #endif
 };
+
+int main(void)
+{
+    SubNoteTest test;
+    RUN_TEST(testDefaults);
+    return test_summary();
+}

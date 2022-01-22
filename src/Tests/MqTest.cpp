@@ -10,7 +10,7 @@
   as published by the Free Software Foundation; either version 2
   of the License, or (at your option) any later version.
 */
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -25,7 +25,7 @@ using namespace zyn;
 
 char *instance_name=(char*)"";
 
-class MessageTest:public CxxTest::TestSuite
+class MessageTest
 {
     public:
         MultiQueue *s;
@@ -40,24 +40,26 @@ class MessageTest:public CxxTest::TestSuite
         void testBasic(void)
         {
             auto *mem = s->alloc();
-            TS_ASSERT(mem);
-            TS_ASSERT(mem->memory);
+            TS_NON_NULL(mem);
+            TS_NON_NULL(mem->memory);
             TS_ASSERT(!s->read());
             s->write(mem);
             auto *mem2 = s->read();
-            TS_ASSERT_EQUALS(mem, mem2);
+            assert_ptr_eq(mem, mem2,
+                    "both locations are the same", __LINE__);
             s->free(mem2);
         }
         void testMed(void)
         {
             for(int i=0; i<100; ++i) {
                 auto *mem = s->alloc();
-                TS_ASSERT(mem);
-                TS_ASSERT(mem->memory);
+                TS_NON_NULL(mem);
+                TS_NON_NULL(mem->memory);
                 TS_ASSERT(!s->read());
                 s->write(mem);
                 auto *mem2 = s->read();
-                TS_ASSERT_EQUALS(mem, mem2);
+                assert_ptr_eq(mem, mem2,
+                        "both locations are the same", __LINE__);
                 s->free(mem2);
             }
         }
@@ -122,3 +124,12 @@ class MessageTest:public CxxTest::TestSuite
             TS_ASSERT(good);
         }
 };
+
+int main()
+{
+    MessageTest test;
+    RUN_TEST(testBasic);
+    RUN_TEST(testMed);
+    RUN_TEST(testThreads);
+    return test_summary();
+}

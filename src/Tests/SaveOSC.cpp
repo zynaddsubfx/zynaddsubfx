@@ -7,8 +7,6 @@
 #include <rtosc/thread-link.h>
 #include <rtosc/rtosc-time.h>
 
-#include <cxxtest/TestSuite.h>
-
 #include "../Misc/Master.h"
 #include "../Misc/MiddleWare.h"
 #include "../UI/NSM.H"
@@ -45,6 +43,10 @@ class SaveOSCTest
         }
 
         void setUp() {
+            // this might be set to true in the future
+            // when saving will work better
+            config.cfg.SaveFullXml = false;
+
             synth = new zyn::SYNTH_T;
             synth->buffersize = 256;
             synth->samplerate = 48000;

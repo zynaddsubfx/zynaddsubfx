@@ -12,7 +12,7 @@
 */
 
 //Based Upon AdNoteTest.h
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include <iostream>
 #include <fstream>
 #include <ctime>
@@ -33,7 +33,7 @@ using namespace zyn;
 
 SYNTH_T *synth;
 
-class TriggerTest:public CxxTest::TestSuite
+class TriggerTest
 {
     public:
 
@@ -84,6 +84,8 @@ class TriggerTest:public CxxTest::TestSuite
         void tearDown() {
             delete controller;
             delete note;
+            delete w;
+            delete tr;
             delete [] outL;
             delete [] outR;
             delete time;
@@ -104,6 +106,9 @@ class TriggerTest:public CxxTest::TestSuite
             //for(int i=0; i<synth->buffersize; ++i)
             //    printf("%d->%f\n", i, w->prebuffer[1][i]);
         }
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
 
         void testSine(void) {
             //Generate a sine table
@@ -117,8 +122,8 @@ class TriggerTest:public CxxTest::TestSuite
             //- No active watch points
             //
             TS_ASSERT(!tr->hasNext());
-            TS_ASSERT_EQUALS(string(""), w->active_list[0]);
-            TS_ASSERT_EQUALS(0, w->sample_list[0]);
+            TS_ASSERT_EQUAL_STR("", w->active_list[0]);
+            TS_ASSERT_EQUAL_INT(0, w->sample_list[0]);
             TS_ASSERT(!w->trigger_active("data"));
 
 
@@ -129,8 +134,8 @@ class TriggerTest:public CxxTest::TestSuite
             }
             const char *msg1 = tr->read();
             float buf1[128] = {};
-            TS_ASSERT(msg1);
-            TS_ASSERT_EQUALS(127, rtosc_narguments(msg1));
+            assert_non_null(msg1, "valid message", __LINE__);
+            TS_ASSERT_EQUAL_INT(127, rtosc_narguments(msg1));
 
             printf("msg1 = %s\n",   msg1);
             printf("msg1 = <%s>\n", rtosc_argument_string(msg1));
@@ -144,16 +149,16 @@ class TriggerTest:public CxxTest::TestSuite
                 w->tick();
             }
             const char *msg2 = tr->read();
-            TS_ASSERT(msg2);
-            TS_ASSERT_EQUALS(127, rtosc_narguments(msg2));
+            assert_non_null(msg2, "valid message", __LINE__);
+            TS_ASSERT_EQUAL_INT(127, rtosc_narguments(msg2));
             float buf2[128] = {};
             printf("nargs = %d\n", rtosc_narguments(msg2));
             for(int i=0; i<127; ++i)
                 buf2[i] = rtosc_argument(msg2, i).f;
             for(int i=0; i<127; ++i){
-               TS_ASSERT_EQUALS(buf1[i], buf2[i]);
-                TS_ASSERT_EQUALS(buf1[i],data[450+i]);
-                TS_ASSERT_EQUALS(buf2[i],data[450+i]);
+                TS_ASSERT_EQUAL_FLT(buf1[i], buf2[i]);
+                TS_ASSERT_EQUAL_FLT(buf1[i],data[450+i]);
+                TS_ASSERT_EQUAL_FLT(buf2[i],data[450+i]);
             }
         }
 
@@ -168,10 +173,10 @@ class TriggerTest:public CxxTest::TestSuite
             //- No active watch points
             //
             TS_ASSERT(!tr->hasNext());
-            TS_ASSERT_EQUALS(string(""), w->active_list[0]);
-            TS_ASSERT_EQUALS(string(""), w->active_list[1]);
-            TS_ASSERT_EQUALS(0, w->sample_list[0]);
-            TS_ASSERT_EQUALS(0, w->sample_list[1]);
+            TS_ASSERT_EQUAL_STR("", w->active_list[0]);
+            TS_ASSERT_EQUAL_STR("", w->active_list[1]);
+            TS_ASSERT_EQUAL_INT(0, w->sample_list[0]);
+            TS_ASSERT_EQUAL_INT(0, w->sample_list[1]);
             TS_ASSERT(!w->trigger_active("noteout/filter"));
             TS_ASSERT(!w->trigger_active("noteout/amp_int"));
 
@@ -184,10 +189,10 @@ class TriggerTest:public CxxTest::TestSuite
             w->add_watch("noteout/amp_int");
             TS_ASSERT(!w->trigger_active("noteout/filter"));
             TS_ASSERT(!w->trigger_active("noteout/amp_int"));
-            TS_ASSERT_EQUALS(string("noteout/filter"),  w->active_list[0]);
-            TS_ASSERT_EQUALS(string("noteout/amp_int"), w->active_list[1]);
-            TS_ASSERT_EQUALS(0, w->sample_list[0]);
-            TS_ASSERT_EQUALS(0, w->sample_list[1]);
+            TS_ASSERT_EQUAL_STR("noteout/filter",  w->active_list[0]);
+            TS_ASSERT_EQUAL_STR("noteout/amp_int", w->active_list[1]);
+            TS_ASSERT_EQUAL_INT(0, w->sample_list[0]);
+            TS_ASSERT_EQUAL_INT(0, w->sample_list[1]);
             dump_samples("Initial pre-buffer");
 
             //Run the system
@@ -199,8 +204,8 @@ class TriggerTest:public CxxTest::TestSuite
             TS_ASSERT(!w->trigger_active("noteout/filter"));   //not active as prebuffer is not filled
             TS_ASSERT(!w->trigger_active("noteout/amp_int"));
             TS_ASSERT(!tr->hasNext());
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 0); // Is 0 as prebuffer not filled
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 0);
+            TS_ASSERT(w->sample_list[0] <= 0); // Is 0 as prebuffer not filled
+            TS_ASSERT(w->sample_list[1] <= 0);
 
 
             //Both should continue to accumulate samples
@@ -210,19 +215,19 @@ class TriggerTest:public CxxTest::TestSuite
             TS_ASSERT(!w->trigger_active("noteout/filter"));   //not active as prebuffer is not filled
             TS_ASSERT(!w->trigger_active("noteout/amp_int"));
             TS_ASSERT(!tr->hasNext());
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 0); // Is 0 as prebuffer not filled
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 0);
+            TS_ASSERT(w->sample_list[0] <= 0); // Is 0 as prebuffer not filled
+            TS_ASSERT(w->sample_list[1] <= 0);
 
             //Continue accum samples
             note->noteout(outL, outR);
             w->tick();
             dump_samples("Step 3 pre-buffer\n");
-            TS_ASSERT(!w->trigger_active("noteout/filter"));   
+            TS_ASSERT(!w->trigger_active("noteout/filter"));
             TS_ASSERT(!w->trigger_active("noteout/amp_int"));
             TS_ASSERT(!tr->hasNext());
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 0); // Is 0 as prebuffer not filled
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 0);
-            
+            TS_ASSERT(w->sample_list[0] <= 0); // Is 0 as prebuffer not filled
+            TS_ASSERT(w->sample_list[1] <= 0);
+
             //Finish accumulating samples
             note->noteout(outL, outR);
             w->tick();
@@ -230,8 +235,8 @@ class TriggerTest:public CxxTest::TestSuite
             TS_ASSERT(w->trigger_active("noteout/filter"));   // trigger activate and filling post buffer
             TS_ASSERT(w->trigger_active("noteout/amp_int"));
             TS_ASSERT(!tr->hasNext());  // post buffer not reach 128
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[1], 128);   // prebuffer + postbuffer filled in
-            TS_ASSERT_LESS_THAN_EQUALS(w->sample_list[0], 128);
+            TS_ASSERT(w->sample_list[1] <= 128);   // prebuffer + postbuffer filled in
+            TS_ASSERT(w->sample_list[0] <= 128);
             note->noteout(outL, outR);
             w->tick();
             note->noteout(outL, outR);
@@ -242,17 +247,25 @@ class TriggerTest:public CxxTest::TestSuite
             //Verify the output to the user interface
             //if 128 samples are requested, then 128 should be delivered
             const char *msg1 = tr->read();
-            TS_ASSERT_EQUALS(string("noteout/filter"), msg1);
-            TS_ASSERT_EQUALS(string(f128), rtosc_argument_string(msg1));
-            TS_ASSERT_EQUALS(128, strlen(rtosc_argument_string(msg1)));
+            TS_ASSERT_EQUAL_STR("noteout/filter", msg1);
+            TS_ASSERT_EQUAL_STR(f128, rtosc_argument_string(msg1));
+            TS_ASSERT_EQUAL_INT(128, strlen(rtosc_argument_string(msg1)));
             note->noteout(outL, outR);
             w->tick();
             TS_ASSERT(tr->hasNext());
             const char *msg2 = tr->read();
-            TS_ASSERT_EQUALS(string("noteout/amp_int"), msg2);
-            TS_ASSERT_EQUALS(128, strlen(rtosc_argument_string(msg2)));
-            TS_ASSERT_EQUALS(string(f128), rtosc_argument_string(msg2));
+            TS_ASSERT_EQUAL_STR("noteout/amp_int", msg2);
+            TS_ASSERT_EQUAL_INT(128, strlen(rtosc_argument_string(msg2)));
+            TS_ASSERT_EQUAL_STR(f128, rtosc_argument_string(msg2));
             TS_ASSERT(!tr->hasNext());
         }
 
 };
+
+int main()
+{
+    TriggerTest test;
+    RUN_TEST(testSine);
+    RUN_TEST(testCombinedTrigger);
+    return test_summary();
+}

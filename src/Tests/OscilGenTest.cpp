@@ -10,7 +10,7 @@
   as published by the Free Software Foundation; either version 2
   of the License, or (at your option) any later version.
 */
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include <string>
 #include "../Synth/OscilGen.h"
 #include "../Misc/XMLwrapper.h"
@@ -22,7 +22,7 @@ using namespace zyn;
 
 SYNTH_T *synth;
 
-class OscilGenTest:public CxxTest::TestSuite
+class OscilGenTest
 {
     public:
         float  freq;
@@ -106,6 +106,7 @@ class OscilGenTest:public CxxTest::TestSuite
         }
 
         //performance testing
+#ifdef __linux__
         void testSpeed() {
             const int samps = 15000;
 
@@ -125,4 +126,17 @@ class OscilGenTest:public CxxTest::TestSuite
             printf("OscilGenTest: %f seconds for %d gets.\n",
                    (static_cast<float>(t_off - t_on)) / CLOCKS_PER_SEC, samps);
         }
+#endif
 };
+
+int main()
+{
+    OscilGenTest test;
+    RUN_TEST(testInit);
+    RUN_TEST(testOutput);
+    RUN_TEST(testSpectrum);
+#ifdef __linux__
+    RUN_TEST(testSpeed);
+#endif
+    return test_summary();
+}

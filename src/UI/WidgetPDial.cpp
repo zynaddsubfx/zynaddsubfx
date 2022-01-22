@@ -189,7 +189,7 @@ void WidgetPDial::draw()
     box( FL_NO_BOX );
 
     Fl_Dial::draw();
-    
+
     return;
 #else
     const int cx = x(), cy = y(), sx = w(), sy = h();

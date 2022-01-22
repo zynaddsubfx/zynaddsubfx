@@ -53,17 +53,6 @@ class Controller
         void setparameternumber(unsigned int type, int value); //used for RPN and NRPN's
         int getnrpn(int *parhi, int *parlo, int *valhi, int *vallo);
 
-        /**
-         * Initialize a portamento
-         *
-         * @param oldfreq Starting frequency of the portamento (Hz)
-         * @param newfreq Ending frequency of the portamento (Hz)
-         * @param legatoflag true when legato is in progress, false otherwise
-         * @returns 1 if properly initialized, 0 otherwise*/
-        int initportamento(float oldfreq, float newfreq, bool legatoflag);
-        /**Update portamento's freqrap to next value based upon dx*/
-        void updateportamento();
-
         // Controllers values
         struct { //Pitch Wheel
             int       data;
@@ -166,25 +155,6 @@ class Controller
              * (eg: the portamento is from 300Hz to 200 Hz)
              */
             unsigned char updowntimestretch;
-            /**this value is used to compute the actual portamento
-             *
-             * This is the logarithmic power of two frequency
-             * adjustment of the newer frequency to fit the profile of
-             * the portamento.
-             * This will be linear with respect to x.*/
-            float freqdelta_log2;
-            /**if a the portamento is used by a note
-             * \todo see if this can be a bool*/
-            int used;
-
-            //Internal data
-
-            /**x is from 0.0f (start portamento) to 1.0f (finished portamento)*/
-            float x;
-            /**dx is the increment to x when updateportamento is called*/
-            float dx;
-            /** this is used for computing freqdelta_log2 value from x*/
-            float origfreqdelta_log2;
         } portamento;
 
         struct { //Resonance Center Frequency

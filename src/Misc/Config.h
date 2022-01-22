@@ -38,14 +38,16 @@ class Config
         Config();
         Config(const Config& ) = delete;
         ~Config();
-        
+
         struct {
             oss_devs_t oss_devs;
             int   SampleRate, SoundBufferSize, OscilSize, SwapStereo;
+            bool  AudioOutputCompressor;
             int   WindowsWaveOutId, WindowsMidiInId;
             int   BankUIAutoClose;
             int   GzipCompression;
             int   Interpolation;
+            int   SaveFullXml; // when saving to a file save entire tree including disabled parts (Zynmuse)
             std::string bankRootDirList[MAX_BANK_ROOT_DIRS], currentBankDir;
             std::string presetsDirList[MAX_BANK_ROOT_DIRS];
             std::string favoriteList[MAX_BANK_ROOT_DIRS];

@@ -45,8 +45,10 @@ class ModFilter
         void paramUpdate(Filter *&f);
         void svParamUpdate(SVFilter &sv);
         void anParamUpdate(AnalogFilter &an);
+        void mgParamUpdate(MoogFilter &mg);
+        void cbParamUpdate(CombFilter &cb);
 
-        
+
         const FilterParams &pars;  //Parameters to Pull Updates From
         const SYNTH_T      &synth; //Synthesizer Buffer Parameters
         const AbsTime      &time;  //Time for RT Updates

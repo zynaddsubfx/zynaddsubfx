@@ -14,6 +14,7 @@
 #include <cmath>
 #include "PADnote.h"
 #include "ModFilter.h"
+#include "Portamento.h"
 #include "../Misc/Config.h"
 #include "../Misc/Allocator.h"
 #include "../Params/PADnoteParameters.h"
@@ -42,7 +43,7 @@ PADnote::PADnote(const PADnoteParameters *parameters,
 }
 
 void PADnote::setup(float velocity_,
-                    int portamento_,
+                    Portamento *portamento_,
                     float note_log2_freq_,
                     bool legato,
                     WatchManager *wm,
@@ -203,7 +204,7 @@ void PADnote::setup(float velocity_,
 SynthNote *PADnote::cloneLegato(void)
 {
     SynthParams sp{memory, ctl, synth, time, velocity,
-                   (bool)portamento, legato.param.note_log2_freq, true, legato.param.seed};
+                   portamento, legato.param.note_log2_freq, true, legato.param.seed};
     return memory.alloc<PADnote>(&pars, sp, interpolation);
 }
 
@@ -268,9 +269,9 @@ void PADnote::computecurrentparameters()
     //compute the portamento, if it is used by this note
     float portamentofreqdelta_log2 = 0.0f;
     if(portamento) { //this voice use portamento
-        portamentofreqdelta_log2 = ctl.portamento.freqdelta_log2;
-        if(ctl.portamento.used == 0) //the portamento has finished
-            portamento = false;  //this note is no longer "portamented"
+        portamentofreqdelta_log2 = portamento->freqdelta_log2;
+        if(!portamento->active) //the portamento has finished
+            portamento = NULL;  //this note is no longer "portamented"
     }
 
     realfreq =
@@ -406,7 +407,7 @@ int PADnote::noteout(float *outl, float *outr)
                 break;
             }
         }
-    
+
     watch_punch(outl,synth.buffersize);
 
     if(ABOVE_AMPLITUDE_THRESHOLD(globaloldamplitude, globalnewamplitude))
@@ -461,6 +462,9 @@ void PADnote::releasekey()
     NoteGlobalPar.FreqEnvelope->releasekey();
     NoteGlobalPar.FilterEnvelope->releasekey();
     NoteGlobalPar.AmpEnvelope->releasekey();
+    NoteGlobalPar.FreqLfo->releasekey();
+    NoteGlobalPar.FilterLfo->releasekey();
+    NoteGlobalPar.AmpLfo->releasekey();
 }
 
 }

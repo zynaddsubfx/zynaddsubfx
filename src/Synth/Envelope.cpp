@@ -154,7 +154,7 @@ float Envelope::envout(bool doWatch)
             if (envval[i] != -40.0f) zerorelease = false;
         if (zerorelease &&                             //if sustaining at zero with zero until env ends
             (mode == ADSR_lin || mode == ADSR_dB)) {   // and its an amp envelope
-            envfinish = true;   // finish voice to free ressources
+            envfinish = true;   // finish voice to free resources
         }
         if(doWatch) {
             watch(envsustain, envoutval);
@@ -170,7 +170,7 @@ float Envelope::envout(bool doWatch)
         else
             out = envoutval + (envval[releaseindex] - envoutval) * t; // linear interpolation envoutval and envval[releaseindex]
 
-        t += envdt[releaseindex] * envstretch;
+        t += envdt[releaseindex];
 
         if(t >= 1.0f) { // move to the next segment
             currentpoint = envsustain + 2;
@@ -201,7 +201,7 @@ float Envelope::envout(bool doWatch)
         // but if reached sustain point, repeating activated and key still pressed or sustained
         else if (repeating && currentpoint == envsustain && !keyreleased) {
             // set first value to sustain value to prevent jump
-            envval[0] = envval[currentpoint]; 
+            envval[0] = envval[currentpoint];
             // reset current point
             currentpoint = 1;
         }

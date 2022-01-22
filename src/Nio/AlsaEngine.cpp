@@ -137,13 +137,11 @@ void *AlsaEngine::MidiThread(void)
             continue;
         switch(event->type) {
             case SND_SEQ_EVENT_NOTEON:
-                if(event->data.note.note) {
-                    ev.type    = M_NOTE;
-                    ev.channel = event->data.note.channel;
-                    ev.num     = event->data.note.note;
-                    ev.value   = event->data.note.velocity;
-                    InMgr::getInstance().putEvent(ev);
-                }
+                ev.type    = M_NOTE;
+                ev.channel = event->data.note.channel;
+                ev.num     = event->data.note.note;
+                ev.value   = event->data.note.velocity;
+                InMgr::getInstance().putEvent(ev);
                 break;
 
             case SND_SEQ_EVENT_NOTEOFF:
@@ -294,7 +292,8 @@ short *AlsaEngine::interleave(const Stereo<float *> &smps)
     for(int frame = 0; frame < bufferSize; ++frame) { // with a nod to libsamplerate ...
         float l = smps.l[frame];
         float r = smps.r[frame];
-        stereoCompressor(synth.samplerate, audio.peaks[0], l, r);
+        if(isOutputCompressionEnabled)
+            stereoCompressor(synth.samplerate, audio.peaks[0], l, r);
 
         scaled = l * (8.0f * 0x10000000);
         shortInterleaved[idx++] = (short int)(lrint(scaled) >> 16);

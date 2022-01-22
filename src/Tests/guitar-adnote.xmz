@@ -45,6 +45,7 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="poly_mode" value="yes" />
 <par name="legato_mode" value="0" />
 <par name="key_limit" value="15" />
+<par name="voice_limit" value="0" />
 <INSTRUMENT>
 <INFO>
 <string name="name">Dist Guitar 2</string>
@@ -100,8 +101,12 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
 <par_real name="delay" value="0" exact_value="0x00000000" />
+<par_real name="fadein" value="0" exact_value="0x00000000" />
+<par_real name="fadeout" value="10" exact_value="0x41200000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="no" />
+<par name="numerator" value="0" />
+<par name="denominator" value="0" />
 </AMPLITUDE_LFO>
 </AMPLITUDE_PARAMETERS>
 <FREQUENCY_PARAMETERS>
@@ -134,8 +139,12 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
 <par_real name="delay" value="0.598425" exact_value="0x3F193265" />
+<par_real name="fadein" value="0" exact_value="0x00000000" />
+<par_real name="fadeout" value="10" exact_value="0x41200000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="no" />
+<par name="numerator" value="0" />
+<par name="denominator" value="0" />
 </FREQUENCY_LFO>
 </FREQUENCY_PARAMETERS>
 <FILTER_PARAMETERS>
@@ -175,8 +184,12 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
 <par_real name="delay" value="0" exact_value="0x00000000" />
+<par_real name="fadein" value="0" exact_value="0x00000000" />
+<par_real name="fadeout" value="10" exact_value="0x41200000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="no" />
+<par name="numerator" value="0" />
+<par name="denominator" value="0" />
 </FILTER_LFO>
 </FILTER_PARAMETERS>
 <RESONANCE>
@@ -273,8 +286,12 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
 <par_real name="delay" value="0.944882" exact_value="0x3F71E3C8" />
+<par_real name="fadein" value="0" exact_value="0x00000000" />
+<par_real name="fadeout" value="10" exact_value="0x41200000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="no" />
+<par name="numerator" value="0" />
+<par name="denominator" value="0" />
 </AMPLITUDE_LFO>
 </AMPLITUDE_PARAMETERS>
 <FREQUENCY_PARAMETERS>
@@ -312,8 +329,12 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
 <par_real name="delay" value="0" exact_value="0x00000000" />
+<par_real name="fadein" value="0" exact_value="0x00000000" />
+<par_real name="fadeout" value="10" exact_value="0x41200000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="yes" />
+<par name="numerator" value="0" />
+<par name="denominator" value="0" />
 </FREQUENCY_LFO>
 </FREQUENCY_PARAMETERS>
 <FILTER_PARAMETERS>
@@ -355,8 +376,12 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
 <par_real name="delay" value="0" exact_value="0x00000000" />
+<par_real name="fadein" value="0" exact_value="0x00000000" />
+<par_real name="fadeout" value="10" exact_value="0x41200000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="no" />
+<par name="numerator" value="0" />
+<par name="denominator" value="0" />
 </FILTER_LFO>
 </FILTER_PARAMETERS>
 <FM_PARAMETERS>
@@ -524,8 +549,12 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
 <par_real name="delay" value="0" exact_value="0x00000000" />
+<par_real name="fadein" value="0" exact_value="0x00000000" />
+<par_real name="fadeout" value="10" exact_value="0x41200000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="yes" />
+<par name="numerator" value="0" />
+<par name="denominator" value="0" />
 </FREQUENCY_LFO>
 </FREQUENCY_PARAMETERS>
 </VOICE>
@@ -611,8 +640,12 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
 <par_real name="delay" value="0" exact_value="0x00000000" />
+<par_real name="fadein" value="0" exact_value="0x00000000" />
+<par_real name="fadeout" value="10" exact_value="0x41200000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="yes" />
+<par name="numerator" value="0" />
+<par name="denominator" value="0" />
 </FREQUENCY_LFO>
 </FREQUENCY_PARAMETERS>
 </VOICE>
@@ -817,6 +850,8 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="par" value="0" />
 </par_no>
 </EFFECT_PARAMETERS>
+<par name="numerator" value="0" />
+<par name="denominator" value="4" />
 </EFFECT>
 <par name="route" value="0" />
 <par_bool name="bypass" value="no" />
@@ -1211,6 +1246,8 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="par" value="0" />
 </par_no>
 </EFFECT_PARAMETERS>
+<par name="numerator" value="0" />
+<par name="denominator" value="4" />
 </EFFECT>
 <par name="route" value="0" />
 <par_bool name="bypass" value="no" />
@@ -1265,6 +1302,7 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="poly_mode" value="yes" />
 <par name="legato_mode" value="0" />
 <par name="key_limit" value="15" />
+<par name="voice_limit" value="0" />
 <INSTRUMENT>
 <INFO>
 <string name="name"></string>
@@ -1537,6 +1575,7 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par_bool name="poly_mode" value="yes" />
 <par name="legato_mode" value="0" />
 <par name="key_limit" value="15" />
+<par name="voice_limit" value="0" />
 <INSTRUMENT>
 <INFO>
 <string name="name"></string>
@@ -3707,8 +3746,12 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
 <par_real name="delay" value="0" exact_value="0x00000000" />
+<par_real name="fadein" value="0" exact_value="0x00000000" />
+<par_real name="fadeout" value="10" exact_value="0x41200000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="no" />
+<par name="numerator" value="0" />
+<par name="denominator" value="0" />
 </AMPLITUDE_LFO>
 </AMPLITUDE_PARAMETERS>
 <FREQUENCY_PARAMETERS>
@@ -3744,8 +3787,12 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
 <par_real name="delay" value="0" exact_value="0x00000000" />
+<par_real name="fadein" value="0" exact_value="0x00000000" />
+<par_real name="fadeout" value="10" exact_value="0x41200000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="no" />
+<par name="numerator" value="0" />
+<par name="denominator" value="0" />
 </FREQUENCY_LFO>
 </FREQUENCY_PARAMETERS>
 <FILTER_PARAMETERS>
@@ -3785,8 +3832,12 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="randomness_amplitude" value="0" />
 <par name="randomness_frequency" value="0" />
 <par_real name="delay" value="0" exact_value="0x00000000" />
+<par_real name="fadein" value="0" exact_value="0x00000000" />
+<par_real name="fadeout" value="10" exact_value="0x41200000" />
 <par name="stretch" value="64" />
 <par_bool name="continous" value="no" />
+<par name="numerator" value="0" />
+<par name="denominator" value="0" />
 </FILTER_LFO>
 </FILTER_PARAMETERS>
 </PAD_SYNTH_PARAMETERS>

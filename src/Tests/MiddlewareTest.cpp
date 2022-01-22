@@ -10,7 +10,7 @@
   as published by the Free Software Foundation; either version 2
   of the License, or (at your option) any later version.
 */
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -33,9 +33,10 @@ char *instance_name=(char*)"";
 
 #define NUM_MIDDLEWARE 3
 
-class PluginTest:public CxxTest::TestSuite
+class MiddleWareTest
 {
     public:
+        struct FFTCleaner { ~FFTCleaner() { FFT_cleanup(); } } cleaner;
         Config config;
         void setUp() {
             synth = new SYNTH_T;
@@ -60,16 +61,21 @@ class PluginTest:public CxxTest::TestSuite
                 middleware[i] = new MiddleWare(std::move(*synth), &config);
                 master[i] = middleware[i]->spawnMaster();
                 //printf("Octave size = %d\n", master[i]->microtonal.getoctavesize());
+                if (i != NUM_MIDDLEWARE-1) {
+                    delete synth;
+                } else {
+                    // "synth" is kept to be directly accessed by the tests
+                }
             }
         }
 
         void tearDown() {
             for(int i = 0; i < NUM_MIDDLEWARE; ++i)
                 delete middleware[i];
+            delete synth;
 
             delete[] outL;
             delete[] outR;
-            delete synth;
         }
 
 
@@ -94,7 +100,7 @@ class PluginTest:public CxxTest::TestSuite
             for(int i = 0; i < synth->buffersize; ++i)
                 sum += fabsf(outL[i]);
 
-            TS_ASSERT_LESS_THAN(0.1f, sum);
+            TS_ASSERT(0.1f < sum);
         }
 
         string loadfile(string fname) const
@@ -144,3 +150,13 @@ class PluginTest:public CxxTest::TestSuite
         MiddleWare *middleware[NUM_MIDDLEWARE];
         Master *master[NUM_MIDDLEWARE];
 };
+
+int main()
+{
+    MiddleWareTest test;
+    RUN_TEST(testInit);
+    RUN_TEST(testPanic);
+    RUN_TEST(testLoad);
+    RUN_TEST(testChangeToOutOfRangeProgram);
+    return test_summary();
+}

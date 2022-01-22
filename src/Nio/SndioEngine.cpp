@@ -344,7 +344,7 @@ void SndioEngine::showAudioInfo(struct sio_hdl *handle)
     for(i = 0; i < SIO_NCHAN; ++i)
         fprintf(stderr, "    [%d] pchan = %u\n", i, cap.pchan[i]);
 
-    fprintf(stderr, "  suported sample rates:\n");
+    fprintf(stderr, "  supported sample rates:\n");
     for(i = 0; i < SIO_NRATE; ++i)
         fprintf(stderr, "    [%d] rate = %u\n", i, cap.rate[i]);
 

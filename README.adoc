@@ -23,7 +23,10 @@ Features
 *   Instruments can be organized in kits, which allows you to make drum kits or layered instruments; this makes possible to use more than one instrument for a single part. It is possible to choose what items from the kit should be processed by the Part's effects.
 *   Randomness settings to create subtle differences in each sound to help create that familiar analogue warmth.
 *   Microtonal capabilities with any scale, up to 128 notes per octave, and key mapping.
-*   Extensive MIDI/Audio driver support including JACK, ALSA, OSS, and PortAudio.
+*   Extensive MIDI/Audio driver support including JACK, ALSA, OSS, and PortAudio. The following MIDI protocol extensions are provided:
+**      Floating point notes via MIDI SysEx. Allows the exact pitch of a note on event to be specified as a 28-bit value.
+**      Per-note controller events via MIDI SysEx. Allows individual active notes to receive MIDI control events.
+**      Per-note pitch bend events via MIDI SysEx. Allows individual active notes to change pitch.
 *   Session Management Support via LASH/NSM.
 *   Plugin Support via DSSI/LV2/VST.
 *   Over 1100 high quality instruments included.
@@ -34,7 +37,7 @@ For more information see:
 - The project page: http://zynaddsubfx.sf.net
 - The mailing list: https://sourceforge.net/projects/zynaddsubfx/lists/zynaddsubfx-user
 - The public forum: https://www.kvraudio.com/forum/viewforum.php?f=47
-- The IRC channel: ##zynaddsubfx on freenode
+- The IRC channel: #zynaddsubfx on irc.Libera.chat
 
 Dependencies
 ~~~~~~~~~~~~
@@ -58,7 +61,6 @@ Optional:
 - ALSA
 - LASH
 - DSSI
-- CxxTest (for unit tests)
 
 Sibling projects
 ~~~~~~~~~~~~~~~~

@@ -10,7 +10,7 @@
   as published by the Free Software Foundation; either version 2
   of the License, or (at your option) any later version.
 */
-#include <cxxtest/TestSuite.h>
+#include "test-suite.h"
 #include <iostream>
 #include "../Misc/Microtonal.h"
 #include "../Misc/XMLwrapper.h"
@@ -23,7 +23,7 @@ using namespace zyn;
 
 SYNTH_T *synth;
 
-class MicrotonalTest:public CxxTest::TestSuite
+class MicrotonalTest
 {
     public:
         int compression;
@@ -40,27 +40,26 @@ class MicrotonalTest:public CxxTest::TestSuite
 
         //Verifies that the object is initialized correctly
         void testinit() {
-            TS_ASSERT_EQUALS(testMicro->Pinvertupdown, 0);
-            TS_ASSERT_EQUALS(testMicro->Pinvertupdowncenter, 60);
-            TS_ASSERT_EQUALS(testMicro->getoctavesize(), 12);
-            TS_ASSERT_EQUALS(testMicro->Penabled, 0);
-            TS_ASSERT_EQUALS(testMicro->PAnote, 69);
-            TS_ASSERT_EQUALS(testMicro->PAfreq, 440.0f);
-            TS_ASSERT_EQUALS(testMicro->Pscaleshift, 64);
-            TS_ASSERT_EQUALS(testMicro->Pfirstkey, 0);
-            TS_ASSERT_EQUALS(testMicro->Plastkey, 127);
-            TS_ASSERT_EQUALS(testMicro->Pmiddlenote, 60);
-            TS_ASSERT_EQUALS(testMicro->Pmapsize, 12);
-            TS_ASSERT_EQUALS(testMicro->Pmappingenabled, 0);
-            TS_ASSERT_EQUALS(testMicro->Pglobalfinedetune, 64);
+            TS_ASSERT_EQUAL_INT(testMicro->Pinvertupdown, 0);
+            TS_ASSERT_EQUAL_INT(testMicro->Pinvertupdowncenter, 60);
+            TS_ASSERT_EQUAL_INT(testMicro->getoctavesize(), 12);
+            TS_ASSERT_EQUAL_INT(testMicro->Penabled, 0);
+            TS_ASSERT_EQUAL_INT(testMicro->PAnote, 69);
+            TS_ASSERT_EQUAL_INT(testMicro->PAfreq, 440.0f);
+            TS_ASSERT_EQUAL_INT(testMicro->Pscaleshift, 64);
+            TS_ASSERT_EQUAL_INT(testMicro->Pfirstkey, 0);
+            TS_ASSERT_EQUAL_INT(testMicro->Plastkey, 127);
+            TS_ASSERT_EQUAL_INT(testMicro->Pmiddlenote, 60);
+            TS_ASSERT_EQUAL_INT(testMicro->Pmapsize, 12);
+            TS_ASSERT_EQUAL_INT(testMicro->Pmappingenabled, 0);
+            TS_ASSERT_EQUAL_INT(testMicro->Pglobalfinedetune, 64);
 
-            TS_ASSERT_EQUALS(string((const char *)testMicro->Pname), "12tET");
-            TS_ASSERT_EQUALS(string(
-                                 (const char *)testMicro->Pcomment),
-                             "Equal Temperament 12 notes per octave");
+            TS_ASSERT_EQUAL_STR("12tET", (const char *)testMicro->Pname);
+            TS_ASSERT_EQUAL_STR("Equal Temperament 12 notes per octave",
+                    testMicro->Pcomment);
 
             for(int i = 0; i < 128; ++i)
-                TS_ASSERT_EQUALS(testMicro->Pmapping[i], i);
+                TS_ASSERT_EQUAL_INT(i, testMicro->Pmapping[i]);
 
             TS_ASSERT_DELTA(testMicro->getnotefreq(19 / 12.0f, 0), 24.4997f, 0.0001f);
         }
@@ -129,3 +128,11 @@ class MicrotonalTest:public CxxTest::TestSuite
     private:
         Microtonal *testMicro;
 };
+
+int main()
+{
+    MicrotonalTest test;
+    RUN_TEST(testinit);
+    RUN_TEST(testXML);
+    return test_summary();
+}

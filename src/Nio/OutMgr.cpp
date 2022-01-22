@@ -125,6 +125,16 @@ string OutMgr::getSink() const
     return "ERROR";
 }
 
+void OutMgr::setAudioCompressor(bool isEnabled)
+{
+    currentOut->isOutputCompressionEnabled=isEnabled;
+}
+
+bool OutMgr::getAudioCompressor(void)
+{
+    return currentOut->isOutputCompressionEnabled;
+}
+
 void OutMgr::setMaster(Master *master_)
 {
     master=master_;

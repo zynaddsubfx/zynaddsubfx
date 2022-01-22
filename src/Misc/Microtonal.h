@@ -48,7 +48,7 @@ struct OctaveTuning {
      */
     float tuning_log2;
 
-    //the real tunning is x1/x2
+    //the real tuning is x1/x2
     unsigned int x1, x2;
 };
 
@@ -116,9 +116,9 @@ class Microtonal
         // Functions
         /** Return the current octave size*/
         unsigned char getoctavesize() const;
-        /**Convert tunning to string*/
+        /**Convert tuning to string*/
         void tuningtoline(int n, char *line, int maxn);
-        /**load the tunnings from a .scl file*/
+        /**load the tunings from a .scl file*/
         static int loadscl(SclInfo &scl, const char *filename);
         /**load the mapping from .kbm file*/
         static int loadkbm(KbmInfo &kbm, const char *filename);

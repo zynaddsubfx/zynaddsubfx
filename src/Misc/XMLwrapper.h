@@ -230,8 +230,8 @@ class XMLwrapper
                          float min,
                          float max) const;
 
-        bool minimal; /**<false if all parameters will be stored (used only for clipboard)*/
-
+        bool minimal; /**<false if all parameters will be stored (used for clipboard, also false to SaveFullXML)*/
+        bool SaveFullXml; /**<true to ensure disabled parts also get saved. Altered by configuration parameter of the same name. */
         /**
          * Sets the current tree's PAD Synth usage
          */
@@ -264,7 +264,7 @@ class XMLwrapper
         /**
          * Loads specified file and returns data.
          *
-         * Will load a gziped file or an uncompressed file.
+         * Will load a gzipped file or an uncompressed file.
          * @param filename the file
          * @return The decompressed data
          */

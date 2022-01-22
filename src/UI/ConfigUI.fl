@@ -92,9 +92,15 @@ class ConfigUI {} {
             class Fl_Osc_Numeric_Input
           }
           Fl_Check_Button {} {
-            label {Swap Stereo }
+            label {Swap Stereo}
             xywh {15 80 95 20} box NO_BOX labelsize 11
             code0 {o->init("cfg.SwapStereo");}
+            class Fl_Osc_Check
+          }
+          Fl_Check_Button {} {
+            label {Enable audio output compressor}
+            xywh {15 105 205 20} box NO_BOX labelsize 11
+            code0 {o->init("cfg.AudioOutputCompressor");}
             class Fl_Osc_Check
           }
           Fl_Choice oscilsize_widget {
@@ -143,13 +149,19 @@ class ConfigUI {} {
           }
           Fl_Counter {} {
             label {XML compression level}
-            tooltip {gzip compression level (0 - uncompressed)} xywh {20 215 65 15} type Simple labelsize 11 align 8 minimum 0 maximum 9 step 1
+            tooltip {gzip compression level (0 - uncompressed)} xywh {20 190 65 15} type Simple labelsize 11 align 8 minimum 0 maximum 9 step 1
             code0 {o->init("cfg.GzipCompression");}
             class Fl_Osc_Counter
           }
+          Fl_Check_Button {} {
+            label {XML full save}
+            tooltip {Xml Full Save (save disabled parts)} xywh {20 210 125 15} down_box DOWN_BOX
+            code0 {o->init("cfg.SaveFullXml");}
+            class Fl_Osc_Check
+          } 
           Fl_Choice {} {
             label {PADsynth Interpolation}
-            xywh {175 105 75 15} down_box BORDER_BOX labelsize 10 textsize 11
+            xywh {175 130 75 15} down_box BORDER_BOX labelsize 10 textsize 11
             code0 {o->init("cfg.Interpolation");}
             class Fl_Osc_Choice
           } {

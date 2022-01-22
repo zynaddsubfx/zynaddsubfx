@@ -155,8 +155,9 @@ protected:
     */
     const char* getDescription() const noexcept override
     {
-        // TODO
-        return "";
+        return "Synthesizer featuring additive, subtractive, and Fourier "
+               "synthesis methods, a variety of modulators, powerful "
+               "oscillator editors, and a variety of built-in effects.";
     }
 
    /**
@@ -273,7 +274,7 @@ protected:
     */
     void initProgramName(uint32_t index, String& programName) override
     {
-        programName = "Default";
+        programName = middleware->getProgramName(index).c_str();
     }
 
    /**
@@ -282,7 +283,8 @@ protected:
     */
     void loadProgram(uint32_t index) override
     {
-        setState(nullptr, defaultState);
+        //in plugin mode, only the first part is useful
+        middleware->pendingSetProgram(0, index);
     }
 
    /* --------------------------------------------------------------------------------------------------------
@@ -514,10 +516,10 @@ private:
         middleware->setIdleCallback(__idleCallback, this);
         _masterChangedCallback(middleware->spawnMaster());
 
-        if (char* url = lo_url_get_port(middleware->getServerAddress()))
+        if (char* portStr = middleware->getServerPort())
         {
-            oscPort = std::atoi(url);
-            std::free(url);
+            oscPort = std::atoi(portStr);
+            std::free(portStr);
         }
         else
         {
@@ -604,5 +606,7 @@ namespace Nio {
    void waveNew(WavFile*){}
    void waveStart(){}
    void waveStop(){}
+   void setAudioCompressor(bool){}
+   bool getAudioCompressor(void){return false;}
 }
 }

@@ -365,6 +365,10 @@ static const Ports automate_ports = {
                     std::swap(aa.map.control_points[k], ab.map.control_points[k]);
             }
         }
+        {
+            rtosc::AutomationMgr* ptr = &b;
+            d.reply("/free", "sb", "rtosc::AutomationMgr", sizeof(rtosc::AutomationMgr*), &ptr);
+        }
         rEnd},
 };
 
@@ -477,7 +481,6 @@ static const Ports master_ports = {
             SNIP;
             sysefsendto.dispatch(msg, d);
         }},
-
     {"noteOn:iii:iiif", rDoc("Noteon Event"), 0,
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
@@ -497,11 +500,18 @@ static const Ports master_ports = {
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
             M->setController(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
-
     {"setController:iii", rDoc("MIDI CC Event"), 0,
         [](const char *m,RtData &d){
             Master *M =  (Master*)d.obj;
             M->setController(rtosc_argument(m,0).i,rtosc_argument(m,1).i,rtosc_argument(m,2).i);}},
+    {"tempo::i", rProp(parameter) rDefault(120) rShort("Tempo") rUnit(BPM) rDoc("Tempo / Beats per minute") rLinear(40, 200), 0,
+        rBegin;
+        if(!strcmp("i",rtosc_argument_string(msg))) {
+            m->time.tempo = rtosc_argument(msg, 0).i;
+            d.broadcast(d.loc, "i", m->time.tempo);
+        } else
+            d.reply(d.loc, "i", m->time.tempo);
+        rEnd},
     {"Panic:", rDoc("Stop all sound"), 0,
         [](const char *, RtData &d) {
             Master &M =  *(Master*)d.obj;
@@ -520,6 +530,13 @@ static const Ports master_ports = {
         [](const char *,RtData &d) {
             Master *M =  (Master*)d.obj;
             M->frozenState = false;}},
+    {"midi-learn/", rDoc("MIDI Learn Classic"), &rtosc::MidiMapperRT::ports,
+        [](const char *msg, RtData &d) {
+            Master *M =  (Master*)d.obj;
+            SNIP;
+            printf("residue message = <%s>\n", msg);
+            d.obj = &M->midi;
+            rtosc::MidiMapperRT::ports.dispatch(msg,d);}},
     {"automate/", rDoc("MIDI Learn/Plugin Automation support"), &automate_ports,
         [](const char *msg, RtData &d) {
             SNIP;
@@ -560,7 +577,7 @@ static const Ports master_ports = {
                 assert(!*obj->dnd_buffer);
                 const char* var = rtosc_argument(msg, 0).s;
                 printf("receiving /last_dnd %s\n",var);
-                strncpy(obj->dnd_buffer, var, Master::dnd_buffer_size);
+                strncpy(obj->dnd_buffer, var, Master::dnd_buffer_size-1);
             }
         rBOIL_END },
     {"config/", rNoDefaults
@@ -577,7 +594,7 @@ static const Ports master_ports = {
         rBOIL_END},
     {"bank/", rDoc("Controls for instrument banks"), &bankPorts,
             [](const char*,RtData&) {}},
-    {"learn:s", rProp(depricated) rDoc("MIDI Learn"), 0,
+    {"learn:s", rProp(deprecated) rDoc("MIDI Learn"), 0,
         rBegin;
         int free_slot = m->automate.free_slot();
         if(free_slot >= 0) {
@@ -701,6 +718,10 @@ void Master::saveAutomation(XMLwrapper &xml, const rtosc::AutomationMgr &midi)
 
 void Master::loadAutomation(XMLwrapper &xml, rtosc::AutomationMgr &midi)
 {
+    //Clear out old data
+    for(int i=0; i<midi.nslots; ++i)
+        midi.clearSlot(i);
+
     if(xml.enterbranch("automation")) {
         for(int i=0; i<midi.nslots; ++i) {
             auto &slot = midi.slots[i];
@@ -751,13 +772,18 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     frozenState(false), pendingMemory(false),
     synth(synth_), gzip_compression(config->cfg.GzipCompression)
 {
+    SaveFullXml=(config->cfg.SaveFullXml==1);
     bToU = NULL;
     uToB = NULL;
+    
+    // set default tempo
+    time.tempo = 120;
 
     //Setup MIDI Learn
     automate.set_ports(master_ports);
     automate.set_instance(this);
-    //midi.frontend = [this](const char *msg) {bToU->raw_write(msg);};
+    midi.frontend = [this](const char *msg) {bToU->raw_write(msg);};
+    midi.backend  = [this](const char *msg) {applyOscEvent(msg);};
     automate.backend  = [this](const char *msg) {applyOscEvent(msg);};
 
     memory = new AllocatorClass();
@@ -980,6 +1006,7 @@ void Master::setController(char chan, int type, int par)
     if(frozenState)
         return;
     automate.handleMidi(chan, type, par);
+    midi.handleCC(type, par, chan, false);
     if((type == C_dataentryhi) || (type == C_dataentrylo)
        || (type == C_nrpnhi) || (type == C_nrpnlo)) { //Process RPN and NRPN by the Master (ignore the chan)
         ctl.setparameternumber(type, par);
@@ -996,6 +1023,9 @@ void Master::setController(char chan, int type, int par)
                         insefx[parlo]->seteffectparrt(valhi, vallo);
                     else if (chan < NUM_MIDI_PARTS && parlo < NUM_PART_EFX)
                         part[chan-1]->partefx[parlo]->seteffectparrt(valhi, vallo);
+                    break;
+                default:
+                    midi.handleCC(parhi<<7&parlo,valhi<<7&vallo, chan, true);
                     break;
             }
         }
@@ -1027,7 +1057,7 @@ void Master::setController(char chan, int type, note_t note, float value)
             part[npart]->SetController(type, note, value, keyshift);
 }
 
-void Master::vuUpdate(const float *outr, const float *outl)
+void Master::vuUpdate(const float *outl, const float *outr)
 {
     //Peak computation (for vumeters)
     vu.outpeakl = 1e-12;
@@ -1060,8 +1090,8 @@ void Master::vuUpdate(const float *outr, const float *outl)
         vuoutpeakpartl[npart] = 1.0e-12f;
         vuoutpeakpartr[npart] = 1.0e-12f;
         if(part[npart]->Penabled != 0) {
-            float *outr = part[npart]->partoutl,
-            *outl = part[npart]->partoutr;
+            float *outl = part[npart]->partoutl,
+            *outr = part[npart]->partoutr;
             for(int i = 0; i < synth.buffersize; ++i) {
                 if (fabsf(outl[i]) > vuoutpeakpartl[npart])
                     vuoutpeakpartl[npart] = fabsf(outl[i]);
@@ -1114,6 +1144,10 @@ bool Master::hasMasterCb() const
     return !!mastercb;
 }
 
+void Master::setAudioCompressor(bool enabled)
+{
+    Nio::setAudioCompressor(enabled);
+}
 
 #if 0
 template <class T>
@@ -1215,7 +1249,7 @@ bool Master::runOSC(float *outl, float *outr, bool offline,
 /*
  * Master audio out (the final sound)
  */
-bool Master::AudioOut(float *outr, float *outl)
+bool Master::AudioOut(float *outl, float *outr)
 {
     //Danger Limits
     if(memory->lowMemory(2,1024*1024))
@@ -1247,9 +1281,10 @@ bool Master::AudioOut(float *outr, float *outl)
     memset(outr, 0, synth.bufferbytes);
 
     //Compute part samples and store them part[npart]->partoutl,partoutr
+    //Note: We do this regardless if the part is enabled or not, to allow
+    //the part to graciously shut down when disabled.
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        if(part[npart]->Penabled)
-            part[npart]->ComputePartSmps();
+        part[npart]->ComputePartSmps();
 
     //Insertion effects
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
@@ -1272,9 +1307,9 @@ bool Master::AudioOut(float *outr, float *outl)
 
         float pan = part[npart]->panning;
         if(pan < 0.5f)
-            newvol.l *= pan * 2.0f;
+            newvol.r *= pan * 2.0f;
         else
-            newvol.r *= (1.0f - pan) * 2.0f;
+            newvol.l *= (1.0f - pan) * 2.0f;
         //if(npart==0)
         //printf("[%d]vol = %f->%f\n", npart, oldvol.l, newvol.l);
 
@@ -1565,8 +1600,12 @@ void Master::add2XML(XMLwrapper& xml)
     microtonal.add2XML(xml);
     xml.endbranch();
 
-    saveAutomation(xml, automate);
+    if (SaveFullXml) {
+        xml.SaveFullXml=true; // save disabled parts
+        xml.minimal=false;
+    }
 
+    saveAutomation(xml, automate);
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart) {
         xml.beginbranch("PART", npart);
         part[npart]->add2XML(xml);

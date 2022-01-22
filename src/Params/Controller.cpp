@@ -112,7 +112,6 @@ void Controller::defaults()
     NRPN.receive = 1;
 
     portamento.portamento = 0;
-    portamento.used = 0;
     portamento.proportional = 0;
     portamento.propRate     = 80;
     portamento.propDepth    = 90;
@@ -124,7 +123,6 @@ void Controller::defaults()
     resonancecenter.depth    = 64;
     resonancebandwidth.depth = 64;
 
-    initportamento(log2f(440.0f), log2f(440.0f), false);
     setportamento(0);
 }
 
@@ -270,75 +268,6 @@ void Controller::setportamento(int value)
     if(portamento.receive != 0)
         portamento.portamento = ((value < 64) ? 0 : 1);
 }
-
-int Controller::initportamento(float oldfreq_log2,
-                               float newfreq_log2,
-                               bool legatoflag)
-{
-    portamento.x = 0.0f;
-
-    if(legatoflag) {  // Legato in progress
-        if(portamento.portamento == 0)
-            return 0;
-    }
-    else {  // No legato, do the original if...return
-        if((portamento.used != 0) || (portamento.portamento == 0))
-            return 0;
-    }
-
-    float portamentotime = powf(100.0f, portamento.time / 127.0f) / 50.0f; //portamento time in seconds
-    const float deltafreq_log2 = oldfreq_log2 - newfreq_log2;
-    const float absdeltaf_log2 = fabsf(deltafreq_log2);
-
-    if(portamento.proportional) {
-        const float absdeltaf = powf(2.0f, absdeltaf_log2);
-
-        portamentotime *= powf(absdeltaf
-            / (portamento.propRate / 127.0f * 3 + .05),
-              (portamento.propDepth / 127.0f * 1.6f + .2));
-    }
-
-    if((portamento.updowntimestretch >= 64) && (newfreq_log2 < oldfreq_log2)) {
-        if(portamento.updowntimestretch == 127)
-            return 0;
-        portamentotime *= powf(0.1f,
-                               (portamento.updowntimestretch - 64) / 63.0f);
-    }
-    if((portamento.updowntimestretch < 64) && (newfreq_log2 > oldfreq_log2)) {
-        if(portamento.updowntimestretch == 0)
-            return 0;
-        portamentotime *= powf(0.1f,
-                               (64.0f - portamento.updowntimestretch) / 64.0f);
-    }
-
-    portamento.dx = synth.buffersize_f / (portamentotime * synth.samplerate_f);
-    portamento.origfreqdelta_log2 = deltafreq_log2;
-
-    const float threshold_log2 = portamento.pitchthresh / 12.0f;
-    if((portamento.pitchthreshtype == 0) && (absdeltaf_log2 - 0.00001f > threshold_log2))
-        return 0;
-    if((portamento.pitchthreshtype == 1) && (absdeltaf_log2 + 0.00001f < threshold_log2))
-        return 0;
-
-    portamento.used = 1;
-    portamento.freqdelta_log2 = deltafreq_log2;
-    return 1;
-}
-
-void Controller::updateportamento()
-{
-    if(portamento.used == 0)
-        return;
-
-    portamento.x += portamento.dx;
-    if(portamento.x > 1.0f) {
-        portamento.x    = 1.0f;
-        portamento.used = 0;
-    }
-    portamento.freqdelta_log2 =
-        (1.0f - portamento.x) * portamento.origfreqdelta_log2;
-}
-
 
 void Controller::setresonancecenter(int value)
 {

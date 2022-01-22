@@ -415,7 +415,8 @@ void *OssEngine::audioThreadCb()
         for(int i = 0; i < synth.buffersize; ++i) {
             float l = smps.l[i];
             float r = smps.r[i];
-            stereoCompressor(synth.samplerate, audio.peaks[0], l, r);
+            if(isOutputCompressionEnabled)
+                stereoCompressor(synth.samplerate, audio.peaks[0], l, r);
 
             if (audio.is32bit) {
                 audio.smps.ps32[i * 2]     = (int) (l * 2147483647.0f);

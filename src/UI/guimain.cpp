@@ -192,7 +192,7 @@ ui_handle_t GUI::createUi(Fl_Osc_Interface *osc, void *exit)
     {
         if (long long winId = atoll(embedId))
         {
-            // running as plugin
+            // embedId passed means running as plugin
             isPlugin = true;
             MasterUI::menu_mastermenu[11].hide(); // file -> nio settings
             MasterUI::menu_mastermenu[26].deactivate(); // misc -> switch interface mode
@@ -202,6 +202,8 @@ ui_handle_t GUI::createUi(Fl_Osc_Interface *osc, void *exit)
                 MasterUI::menu_mastermenu[13].hide(); // file -> exit
                 fl_embed(ui->masterwindow, winId);
             }
+#else
+            (void) winId; // Silences compiler warning.
 #endif
             ui->masterwindow->show();
         }
@@ -574,9 +576,10 @@ void watch_lo(void)
 
 const char *help_message =
 "zynaddsubfx-ext-gui [options] uri - Connect to remote ZynAddSubFX\n"
-"    --help   print this help message\n"
-"    --no-uri run without a remote ZynAddSubFX\n"
-"    --embed  window ID [Internal Flag For Embedding Windows]\n"
+"    --help               print this help message\n"
+"    --no-uri             run without a remote ZynAddSubFX\n"
+"    --embed <window ID>  internal flag to let UI run in plugin mode\n"
+"                         NTK only: Embed master window into passed window\n"
 "\n"
 "    example: zynaddsubfx-ext-gui osc.udp://localhost:1234/\n"
 "      This will connect to a running zynaddsubfx instance on the same\n"

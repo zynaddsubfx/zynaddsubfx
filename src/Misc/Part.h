@@ -24,6 +24,7 @@
 
 namespace zyn {
 
+struct PortamentoParams;
 /** Part implementation*/
 class Part
 {
@@ -120,9 +121,9 @@ class Part
             const static rtosc::Ports &ports;
         } kit[NUM_KIT_ITEMS];
 
-
         //Part parameters
         void setkeylimit(unsigned char Pkeylimit);
+        void setvoicelimit(unsigned char Pvoicelimit);
         void setkititemstatus(unsigned kititem, bool Penabled_);
 
         unsigned char partno; /**<if it's the Master's first part*/
@@ -147,7 +148,9 @@ class Part
 
         bool Ppolymode; //Part mode - 0=monophonic , 1=polyphonic
         bool Plegatomode; // 0=normal, 1=legato
+        bool Platchmode; // 0=normal, 1=latch
         unsigned char Pkeylimit; //how many keys are allowed to be played same time (0=off), the older will be released
+        unsigned char Pvoicelimit; //how many voices are allowed to be played same time (0=off), the older will be entombed
 
         char *Pname; //name of the instrument
         struct { //instrument additional information
@@ -191,8 +194,11 @@ class Part
         bool isSingleKit(void)  const {return Pkitmode == 2;}
 
         bool killallnotes;
+        bool silent; // An output buffer with zeros has been generated
 
         NotePool notePool;
+
+        void limit_voices(int new_note);
 
         bool lastlegatomodevalid; // To keep track of previous legatomodevalid.
 
@@ -213,7 +219,11 @@ class Part
            store the velocity and logarithmic frequency values of a given note.
            For example 'monomem[note].velocity' would be the velocity value of the note 'note'.*/
 
-        float oldfreq_log2;    //this is used for portamento
+        float oldfreq_log2;    // previous note pitch, used for portamento
+        float oldportamentofreq_log2; // previous portamento pitch
+        PortamentoRealtime *oldportamento; // previous portamento
+        PortamentoRealtime *legatoportamento; // last used legato portamento
+
         Microtonal *microtonal;
         FFTwrapper *fft;
         WatchManager *wm;

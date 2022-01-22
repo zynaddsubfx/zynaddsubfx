@@ -18,6 +18,7 @@
 #include "Microtonal.h"
 #include <atomic>
 #include <rtosc/automations.h>
+#include <rtosc/miditable.h>
 #include <rtosc/savefile.h>
 
 #include "Time.h"
@@ -139,6 +140,7 @@ class Master
         //Copy callback to other master
         void copyMasterCbTo(Master* dest);
         bool hasMasterCb() const;
+        void setAudioCompressor(bool enabled);
 
         /**parts \todo see if this can be made to be dynamic*/
         class Part * part[NUM_MIDI_PARTS];
@@ -200,6 +202,7 @@ class Master
 
         //Midi Learn
         rtosc::AutomationMgr automate;
+        rtosc::MidiMapperRT midi;
 
         bool   frozenState;//read-only parameters for threadsafe actions
         Allocator *memory;
@@ -208,6 +211,7 @@ class Master
         bool pendingMemory;
         const SYNTH_T &synth;
         const int& gzip_compression; //!< value from config
+        bool SaveFullXml; // value from config
 
         //Heartbeat for identifying plugin offline modes
         //in units of 10 ms (done s.t. overflow is in 497 days)

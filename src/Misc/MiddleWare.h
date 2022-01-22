@@ -76,13 +76,16 @@ class MiddleWare
         //NOTE: Can only be called by realtime thread
         void pendingSetProgram(int part, int program);
 
+        std::string getProgramName(int program) const;
+
         //Get/Set the active bToU url
         std::string activeUrl(void) const;
         void activeUrl(std::string u);
         //View Synthesis Parameters
         const SYNTH_T &getSynth(void) const;
         //liblo stuff
-        const char* getServerAddress(void) const;
+        char* getServerAddress(void) const;
+        char* getServerPort(void) const;
 
         const PresetsStore& getPresetsStore() const;
         PresetsStore& getPresetsStore();

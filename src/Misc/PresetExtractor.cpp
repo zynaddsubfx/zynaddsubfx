@@ -109,7 +109,7 @@ const rtosc::Ports real_preset_ports =
 
 };
 
-
+// Documentation for real_preset_ports above.
 const rtosc::Ports preset_ports
 {
     {"scan-for-presets:", rDoc("Scan For Presets"), 0, dummy},
@@ -221,13 +221,16 @@ void doPaste(MiddleWare &mw, string url, string type, XMLwrapper &xml, Ts&&... a
 {
     //Generate a new object
     T *t = new T(std::forward<Ts>(args)...);
-    
+
     //Old workaround for LFO parameters
     if(strstr(type.c_str(), "Plfo"))
         type = "Plfo";
 
     if(xml.enterbranch(type) == 0)
+    {
+        delete t;
         return;
+    }
 
     t->getfromXML(xml);
 

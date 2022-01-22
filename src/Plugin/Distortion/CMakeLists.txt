@@ -6,11 +6,13 @@ add_library(ZynDistortion_vst SHARED ${CMAKE_SOURCE_DIR}/DPF/distrho/DistrhoPlug
 
 set_target_properties(ZynDistortion_lv2 PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_LV2")
 set_target_properties(ZynDistortion_lv2 PROPERTIES LIBRARY_OUTPUT_DIRECTORY "lv2")
+set_target_properties(ZynDistortion_lv2 PROPERTIES RUNTIME_OUTPUT_DIRECTORY "lv2")
 set_target_properties(ZynDistortion_lv2 PROPERTIES OUTPUT_NAME "ZynDistortion")
 set_target_properties(ZynDistortion_lv2 PROPERTIES PREFIX "")
 
-set_target_properties(ZynDistortion_vst PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_VST")
+set_target_properties(ZynDistortion_vst PROPERTIES COMPILE_DEFINITIONS "DISTRHO_PLUGIN_TARGET_VST2")
 set_target_properties(ZynDistortion_vst PROPERTIES LIBRARY_OUTPUT_DIRECTORY "vst")
+set_target_properties(ZynDistortion_vst PROPERTIES RUNTIME_OUTPUT_DIRECTORY "vst")
 set_target_properties(ZynDistortion_vst PROPERTIES OUTPUT_NAME "ZynDistortion")
 set_target_properties(ZynDistortion_vst PROPERTIES PREFIX "")
 
