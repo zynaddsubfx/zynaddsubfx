@@ -227,7 +227,10 @@ void doPaste(MiddleWare &mw, string url, string type, XMLwrapper &xml, Ts&&... a
         type = "Plfo";
 
     if(xml.enterbranch(type) == 0)
+    {
+        delete t;
         return;
+    }
 
     t->getfromXML(xml);
 

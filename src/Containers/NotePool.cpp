@@ -11,6 +11,7 @@
 */
 #include "NotePool.h"
 #include "../Misc/Allocator.h"
+#include "../Synth/Portamento.h"
 #include "../Synth/SynthNote.h"
 #include <cstring>
 #include <cassert>
@@ -185,7 +186,7 @@ int NotePool::usedSynthDesc(void) const
     return cnt;
 }
 
-void NotePool::insertNote(note_t note, uint8_t sendto, SynthDescriptor desc, bool legato)
+void NotePool::insertNote(note_t note, uint8_t sendto, SynthDescriptor desc, PortamentoRealtime *portamento_realtime, bool legato)
 {
     //Get first free note descriptor
     int desc_id = getMergeableDescriptor(note, sendto, legato, ndesc);
@@ -202,11 +203,12 @@ void NotePool::insertNote(note_t note, uint8_t sendto, SynthDescriptor desc, boo
         sdesc_id++;
     }
 
-    ndesc[desc_id].note         = note;
-    ndesc[desc_id].sendto       = sendto;
-    ndesc[desc_id].size        += 1;
-    ndesc[desc_id].status       = KEY_PLAYING;
-    ndesc[desc_id].legatoMirror = legato;
+    ndesc[desc_id].note                = note;
+    ndesc[desc_id].sendto              = sendto;
+    ndesc[desc_id].size               += 1;
+    ndesc[desc_id].status              = KEY_PLAYING;
+    ndesc[desc_id].legatoMirror        = legato;
+    ndesc[desc_id].portamentoRealtime  = portamento_realtime;
 
     sdesc[sdesc_id] = desc;
     return;
@@ -222,25 +224,43 @@ void NotePool::upgradeToLegato(void)
     for(auto &d:activeDesc())
         if(d.playing())
             for(auto &s:activeNotes(d))
-                insertLegatoNote(d.note, d.sendto, s);
+                insertLegatoNote(d, s);
 }
 
-void NotePool::insertLegatoNote(note_t note, uint8_t sendto, SynthDescriptor desc)
+void NotePool::insertLegatoNote(NoteDescriptor desc, SynthDescriptor sdesc)
 {
-    assert(desc.note);
+    assert(sdesc.note);
     try {
-        desc.note = desc.note->cloneLegato();
-        insertNote(note, sendto, desc, true);
+        sdesc.note = sdesc.note->cloneLegato();
+        // No portamentoRealtime for the legatoMirror descriptor
+        insertNote(desc.note, desc.sendto, sdesc, NULL, true);
     } catch (std::bad_alloc &ba) {
         std::cerr << "failed to insert legato note: " << ba.what() << std::endl;
     }
 };
 
-//There should only be one pair of notes which are still playing
-void NotePool::applyLegato(note_t note, const LegatoParams &par)
+//There should only be one pair of notes which are still playing.
+//Note however that there can be releasing legato notes already in the
+//list when we get called, so need to handle that.
+void NotePool::applyLegato(note_t note, const LegatoParams &par, PortamentoRealtime *portamento_realtime)
 {
     for(auto &desc:activeDesc()) {
+        //Currently, there can actually be more than one legato pair, while a
+        //previous legato pair is releasing and a new one is started, and we
+        //don't want to change anything about notes which are releasing.
+        if (desc.dying())
+            continue;
         desc.note = note;
+        // Only set portamentoRealtime for the primary of the two note
+        // descriptors in legato mode, or we'll get two note descriptors
+        // with the same realtime pointer, causing double updateportamento,
+        // and deallocation crashes.
+        if (!desc.legatoMirror) {
+            //If realtime is already set, we mustn't set it to NULL or we'll
+            //leak the old portamento.
+            if (portamento_realtime)
+                desc.portamentoRealtime = portamento_realtime;
+        }
         for(auto &synth:activeNotes(desc))
             try {
                 synth.note->legatonote(par);
@@ -484,6 +504,8 @@ void NotePool::kill(NoteDescriptor &d)
     d.setStatus(KEY_OFF);
     for(auto &s:activeNotes(d))
         kill(s);
+    if (d.portamentoRealtime)
+        d.portamentoRealtime->memory.dealloc(d.portamentoRealtime);
 }
 
 void NotePool::kill(SynthDescriptor &s)
@@ -537,8 +559,11 @@ void NotePool::cleanup(void)
             ndesc[i].size = new_length[i];
             if(new_length[i] != 0)
                 ndesc[cum_new++] = ndesc[i];
-            else
+            else {
                 ndesc[i].setStatus(KEY_OFF);
+                if (ndesc[i].portamentoRealtime)
+                    ndesc[i].portamentoRealtime->memory.dealloc(ndesc[i].portamentoRealtime);
+            }
         }
         memset(ndesc+cum_new, 0, sizeof(*ndesc)*(POLYPHONY-cum_new));
     }

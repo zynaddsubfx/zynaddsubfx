@@ -365,6 +365,10 @@ static const Ports automate_ports = {
                     std::swap(aa.map.control_points[k], ab.map.control_points[k]);
             }
         }
+        {
+            rtosc::AutomationMgr* ptr = &b;
+            d.reply("/free", "sb", "rtosc::AutomationMgr", sizeof(rtosc::AutomationMgr*), &ptr);
+        }
         rEnd},
 };
 
@@ -1053,7 +1057,7 @@ void Master::setController(char chan, int type, note_t note, float value)
             part[npart]->SetController(type, note, value, keyshift);
 }
 
-void Master::vuUpdate(const float *outr, const float *outl)
+void Master::vuUpdate(const float *outl, const float *outr)
 {
     //Peak computation (for vumeters)
     vu.outpeakl = 1e-12;
@@ -1086,8 +1090,8 @@ void Master::vuUpdate(const float *outr, const float *outl)
         vuoutpeakpartl[npart] = 1.0e-12f;
         vuoutpeakpartr[npart] = 1.0e-12f;
         if(part[npart]->Penabled != 0) {
-            float *outr = part[npart]->partoutl,
-            *outl = part[npart]->partoutr;
+            float *outl = part[npart]->partoutl,
+            *outr = part[npart]->partoutr;
             for(int i = 0; i < synth.buffersize; ++i) {
                 if (fabsf(outl[i]) > vuoutpeakpartl[npart])
                     vuoutpeakpartl[npart] = fabsf(outl[i]);
@@ -1245,7 +1249,7 @@ bool Master::runOSC(float *outl, float *outr, bool offline,
 /*
  * Master audio out (the final sound)
  */
-bool Master::AudioOut(float *outr, float *outl)
+bool Master::AudioOut(float *outl, float *outr)
 {
     //Danger Limits
     if(memory->lowMemory(2,1024*1024))
@@ -1277,9 +1281,10 @@ bool Master::AudioOut(float *outr, float *outl)
     memset(outr, 0, synth.bufferbytes);
 
     //Compute part samples and store them part[npart]->partoutl,partoutr
+    //Note: We do this regardless if the part is enabled or not, to allow
+    //the part to graciously shut down when disabled.
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
-        if(part[npart]->Penabled)
-            part[npart]->ComputePartSmps();
+        part[npart]->ComputePartSmps();
 
     //Insertion effects
     for(int nefx = 0; nefx < NUM_INS_EFX; ++nefx)
@@ -1302,9 +1307,9 @@ bool Master::AudioOut(float *outr, float *outl)
 
         float pan = part[npart]->panning;
         if(pan < 0.5f)
-            newvol.l *= pan * 2.0f;
+            newvol.r *= pan * 2.0f;
         else
-            newvol.r *= (1.0f - pan) * 2.0f;
+            newvol.l *= (1.0f - pan) * 2.0f;
         //if(npart==0)
         //printf("[%d]vol = %f->%f\n", npart, oldvol.l, newvol.l);
 

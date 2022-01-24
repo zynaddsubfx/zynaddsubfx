@@ -24,6 +24,7 @@
 
 namespace zyn {
 
+struct PortamentoParams;
 /** Part implementation*/
 class Part
 {
@@ -120,7 +121,6 @@ class Part
             const static rtosc::Ports &ports;
         } kit[NUM_KIT_ITEMS];
 
-
         //Part parameters
         void setkeylimit(unsigned char Pkeylimit);
         void setvoicelimit(unsigned char Pvoicelimit);
@@ -194,6 +194,7 @@ class Part
         bool isSingleKit(void)  const {return Pkitmode == 2;}
 
         bool killallnotes;
+        bool silent; // An output buffer with zeros has been generated
 
         NotePool notePool;
 
@@ -218,7 +219,11 @@ class Part
            store the velocity and logarithmic frequency values of a given note.
            For example 'monomem[note].velocity' would be the velocity value of the note 'note'.*/
 
-        float oldfreq_log2;    //this is used for portamento
+        float oldfreq_log2;    // previous note pitch, used for portamento
+        float oldportamentofreq_log2; // previous portamento pitch
+        PortamentoRealtime *oldportamento; // previous portamento
+        PortamentoRealtime *legatoportamento; // last used legato portamento
+
         Microtonal *microtonal;
         FFTwrapper *fft;
         WatchManager *wm;

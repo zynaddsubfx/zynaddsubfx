@@ -84,6 +84,8 @@ class TriggerTest
         void tearDown() {
             delete controller;
             delete note;
+            delete w;
+            delete tr;
             delete [] outL;
             delete [] outR;
             delete time;

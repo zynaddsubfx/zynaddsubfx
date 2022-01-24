@@ -36,7 +36,6 @@ class UnisonTest
 {
     public:
 
-        ADnote       *note;
         FFTwrapper   *fft;
         Controller   *controller;
         float test_freq_log2;
@@ -57,7 +56,7 @@ class UnisonTest
             memset(outL,0,sizeof(outL));
             memset(outR,0,sizeof(outR));
 
-            fft = new FFTwrapper(BUF);
+            fft = new FFTwrapper(synth->oscilsize);
             //prepare the default settings
             params = new ADnoteParameters(*synth, fft, time);
 
@@ -74,7 +73,6 @@ class UnisonTest
         }
 
         void tearDown() {
-            delete note;
             delete controller;
             delete fft;
             FFT_cleanup();
@@ -97,40 +95,41 @@ class UnisonTest
             params->VoicePar[0].Unison_invert_phase     = f;
 
             SynthParams pars{memory, *controller, *synth, *time, 120, 0, test_freq_log2, false, prng()};
-            note = new ADnote(params, pars);
+            ADnote* note = new ADnote(params, pars);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(outL[80], values[0], 1.9e-5);
+            TS_ASSERT_DELTA(values[0], outL[80], 1.9e-5);
             printf("{%f,", outL[80]);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(outR[90], values[1], 1.9e-5);
+            TS_ASSERT_DELTA(values[1], outR[90], 1.9e-5);
             printf("%f,", outR[90]);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(outL[20], values[2], 1.9e-5);
+            TS_ASSERT_DELTA(values[2], outL[20], 1.9e-5);
             printf("%f,", outL[20]);
             note->noteout(outL, outR);
-            TS_ASSERT_DELTA(outR[200], values[3], 1.9e-5);
+            TS_ASSERT_DELTA(values[3], outR[200], 1.9e-5);
             printf("%f},\n", outR[200]);
+            delete note;
         }
 
         void testUnison() {
             sprng(0xbeef);
 
             float data[][4] = {
-                {-0.034547,0.034349,-0.000000,0.138284},
-                {0.016801,-0.084991,0.000000,0.009240},
-                {0.020383,-0.002424,-0.012952,-0.014037},
-                {-0.041653,0.002287,0.000000,-0.098181},
-                {-0.009189,-0.049860,0.000268,-0.084941},
-                {0.056976,-0.084627,-0.018144,0.000666},
-                {-0.015588,0.003690,0.003994,0.002435},
-                {0.023178,-0.024961,0.004433,-0.015144},
-                {0.042007,-0.006559,-0.005887,0.083685},
-                {0.007638,0.057870,-0.014244,0.041457},
-                {-0.018006,-0.017846,-0.063624,-0.016378},
-                {0.004914,-0.001756,-0.046715,0.015975},
-                {0.004341,-0.014575,0.000560,0.050902},
-                {0.000470,-0.036961,0.038622,0.031383},
-                {-0.045796,0.000262,0.009858,0.031958},
+                {0.009012,-0.074734,-0.012636,-0.022757},
+                {-0.004497,-0.106839,-0.003898,-0.060385},
+                {-0.027254,-0.048478,0.019716,-0.036242},
+                {0.013156,-0.104055,-0.000360,-0.152481},
+                {0.031217,-0.125947,-0.035797,-0.083334},
+                {0.061165,0.111355,-0.044391,0.065363},
+                {-0.005528,-0.063873,0.008229,0.001122},
+                {0.070588,0.092495,-0.081852,0.104497},
+                {0.065521,0.052868,-0.066022,0.110135},
+                {0.094440,-0.028949,-0.096088,-0.002352},
+                {0.072197,0.040330,-0.102320,0.048607},
+                {-0.045416,0.106115,0.059613,0.041986},
+                {0.069641,-0.061826,-0.082194,0.005864},
+                {-0.035529,-0.145869,0.033578,-0.124722},
+                {0.075097,0.027494,-0.075664,0.046463},
             };
 
             int freq_spread[15];

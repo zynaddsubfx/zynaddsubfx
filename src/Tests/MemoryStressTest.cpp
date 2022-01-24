@@ -77,6 +77,7 @@ class MemoryStressTest
             delete defaultPreset;
             delete fft;
             FFT_cleanup();
+            delete time;
             delete synth;
         }
 

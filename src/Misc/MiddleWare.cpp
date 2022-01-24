@@ -42,6 +42,11 @@
 #include "PresetExtractor.h"
 #include "../Containers/MultiPseudoStack.h"
 #include "../Params/PresetsStore.h"
+#include "../Params/EnvelopeParams.h"
+#include "../Params/LFOParams.h"
+#include "../Params/FilterParams.h"
+#include "../Effects/EffectMgr.h"
+#include "../Synth/Resonance.h"
 #include "../Params/ADnoteParameters.h"
 #include "../Params/SUBnoteParameters.h"
 #include "../Params/PADnoteParameters.h"
@@ -197,6 +202,26 @@ void deallocate(const char *str, void *v)
         delete (SclInfo*)v;
     else if(!strcmp(str, "Microtonal"))
         delete (Microtonal*)v;
+    else if(!strcmp(str, "ADnoteParameters"))
+        delete (ADnoteParameters*)v;
+    else if(!strcmp(str, "SUBnoteParameters"))
+        delete (SUBnoteParameters*)v;
+    else if(!strcmp(str, "PADnoteParameters"))
+        delete (PADnoteParameters*)v;
+    else if(!strcmp(str, "EffectMgr"))
+        delete (EffectMgr*)v;
+    else if(!strcmp(str, "EnvelopeParams"))
+        delete (EnvelopeParams*)v;
+    else if(!strcmp(str, "FilterParams"))
+        delete (FilterParams*)v;
+    else if(!strcmp(str, "LFOParams"))
+        delete (LFOParams*)v;
+    else if(!strcmp(str, "OscilGen"))
+        delete (OscilGen*)v;
+    else if(!strcmp(str, "Resonance"))
+        delete (Resonance*)v;
+    else if(!strcmp(str, "rtosc::AutomationMgr"))
+        delete (rtosc::AutomationMgr*)v;
     else if(!strcmp(str, "PADsample"))
         delete[] (float*)v;
     else
@@ -721,10 +746,13 @@ public:
             // after the savefile will have been saved, it will be loaded into this
             // dummy master, and then the two masters will be compared
             zyn::Config config;
+            config.cfg.SaveFullXml = master->SaveFullXml;
+
             zyn::SYNTH_T* synth = new zyn::SYNTH_T;
             synth->buffersize = master->synth.buffersize;
             synth->samplerate = master->synth.samplerate;
             synth->alias();
+
             zyn::Master master2(*synth, &config);
             master->copyMasterCbTo(&master2);
             master2.frozenState = true;

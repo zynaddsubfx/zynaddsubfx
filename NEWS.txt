@@ -1,4 +1,4 @@
-3.0.6 (TBD)
+3.0.6 (21 January 2022)
         - Enhances watchpoint system for waveform views (GSOC michiboo)
         - Add anti-alias mode to add synth oscillator interpolation
         - Add 14 bit NRPN support for automations
@@ -7,11 +7,21 @@
         - Add filter parameter smoothing
         - Add filter optional LPF to LFO
         - Add repeatable envelopes
+        - Add LFO fade in
+        - Add moog ladder filter
+        - Add comb filter
+        - Add BPM sync
+        - Add latched key mode
+        - Re-enable classic MIDI learn
         - Increase envelope time parameter resolution
         - Fix excessively loud volume bug in Part XML loader
         - Fix crash with gcc 10.x.x within file manager
         - Fix crash in erroneous patch load
         - Fix OSS/etc detection under cygwin
+        - Fix padsynth memory leak
+        - Fix weird note-to-note portamento switches
+        - Reduce fftw resolution from 64bit to 32bit
+        - Remove Cxxtest dependency
         - Fix other bugs
 
 3.0.5 (15 April 2019)

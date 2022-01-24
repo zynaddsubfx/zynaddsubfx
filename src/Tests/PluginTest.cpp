@@ -165,8 +165,11 @@ void print_string_differences(string orig, string next)
 class PluginTest
 {
     public:
+        struct FFTCleaner { ~FFTCleaner() { FFT_cleanup(); } } cleaner;
         Config config;
         void setUp() {
+            config.cfg.SaveFullXml = false;
+
             synth = new SYNTH_T;
             synth->buffersize = 256;
             synth->samplerate = 48000;
@@ -235,6 +238,8 @@ class PluginTest
             TS_ASSERT(fdata == result);
             if(fdata != result)
                 print_string_differences(fdata, result);
+
+            free(result);
         }
 
 

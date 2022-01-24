@@ -149,7 +149,9 @@ static const rtosc::Ports realtime_ports =
     [](const char *m, rtosc::RtData &d){
         rObject &paste = **(rObject **)rtosc_argument(m,0).b.data;
         rObject &o = *(rObject*)d.obj;
-        o.pasteRT(paste);}}
+        o.pasteRT(paste);
+        rObject* ptr = &paste;\
+        d.reply("/free", "sb", STRINGIFY(rObject), sizeof(rObject*), &ptr);}}
 
 };
 static const rtosc::Ports non_realtime_ports =
@@ -162,7 +164,10 @@ static const rtosc::Ports non_realtime_ports =
         rObject &o = *(rObject*)d.obj;
         o.paste(paste);
         //avoid the match to forward the request along
-        d.matches--;}},
+        d.matches--;
+        // "/damage" is not replied here yet - this is handled later when
+        // pasting the realtime ports
+    }},
     //Harmonic Source Distribution
     rRecurp(oscilgen, "Oscillator"),
     rRecurp(resonance, "Resonance"),
@@ -922,9 +927,9 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
                       unsigned nthreads, unsigned threadno)
     {
         //prepare a BIG IFFT
-        FFTwrapper *fft      = new FFTwrapper(samplesize);
-        fft_t      *fftfreqs = new fft_t[samplesize / 2];
-        float      *spectrum = new float[spectrumsize];
+        FFTwrapper    *fft      = new FFTwrapper(samplesize);
+        FFTfreqBuffer  fftfreqs = fft->allocFreqBuf();
+        float         *spectrum = new float[spectrumsize];
 
         for(int nsample = 0; nsample < samplemax; ++nsample)
         if(nsample % nthreads == threadno)
@@ -952,12 +957,12 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
             newsample.smp = new float[samplesize + extra_samples];
 
             newsample.smp[0] = 0.0f;
+            fftfreqs[0] = fft_t(0, 0);
             for(int i = 1; i < spectrumsize; ++i) //randomize the phases
                 fftfreqs[i] = FFTpolar(spectrum[i], (float)RND * 2 * PI);
             //that's all; here is the only ifft for the whole sample;
             //no windows are used ;-)
-            fft->freqs2smps(fftfreqs, newsample.smp);
-
+            fft->freqs2smps_noconst_input(fftfreqs, fft->allocSampleBuf(newsample.smp));
 
             //normalize(rms)
             float rms = 0.0f;
@@ -982,7 +987,7 @@ int PADnoteParameters::sampleGenerator(PADnoteParameters::callback cb,
 
         //Cleanup
         delete (fft);
-        delete[] fftfreqs;
+        delete[] fftfreqs.data;
         delete[] spectrum;
     };
 

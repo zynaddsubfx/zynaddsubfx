@@ -27,7 +27,7 @@ if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     pkg_check_modules(NTK ntk)
     pkg_check_modules(NTK_IMAGES ntk_images)
 
-    pkg_check_modules(FFTW REQUIRED fftw3)
+    pkg_check_modules(FFTW3F REQUIRED fftw3f)
     pkg_check_modules(MXML REQUIRED mxml)
 
     pkg_search_module(LASH lash-1.0)
@@ -37,7 +37,7 @@ if(PKG_CONFIG_FOUND AND NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
     pkg_search_module(LIBLO liblo>=0.26 REQUIRED)
     mark_as_advanced(LIBLO_LIBRARIES)
 else()
-    find_package(FFTW REQUIRED)
+    find_package(FFTW3F REQUIRED)
     find_package(MXML REQUIRED)
     find_package(LIBLO REQUIRED)
     find_package(PORTAUDIO)
@@ -59,9 +59,10 @@ find_library(HAVE_LIBRT rt)
 set(CMAKE_REQUIRED_FLAGS "")
 
 
-execute_process(COMMAND echo fistpl 0
-                COMMAND as -
-                ERROR_VARIABLE AVOID_ASM)
+CHECK_CXX_SOURCE_COMPILES(
+    "int main(){
+    __asm__ __volatile__ (\"fistpl 0\");
+    return 0;}" HAVE_X86_FISTPL)
 
 ######### Settings ###########
 # NOTE: These cache variables should normally not be changed in this
@@ -94,6 +95,7 @@ SET (NoNeonPlease False CACHE BOOL
 SET (PluginLibDir "lib" CACHE STRING
     "Install directory for plugin libraries PREFIX/PLUGIN_LIB_DIR/{lv2,vst}")
 SET (DemoMode FALSE CACHE BOOL "Enable 10 minute silence")
+SET (PluginEnable TRUE CACHE BOOL "Enable Plugins")
 SET (ZynFusionDir "" CACHE STRING "Developers only: zest binary's dir; useful if fusion is not system-installed.")
 mark_as_advanced(FORCE ZynFusionDir)
 
@@ -384,8 +386,8 @@ if(COMPILER_SUPPORTS_SYSTEM_HDR_PREFIX)
     add_definitions(--system-header-prefix="FL/")
 endif()
 
-if(NOT AVOID_ASM)
-	message(STATUS "Compiling with x86 opcode support")
+if(HAVE_X86_FISTPL)
+    message(STATUS "Compiling with x86 opcode support")
     add_definitions(-DASM_F2I_YES)
 endif()
 
@@ -516,7 +518,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zyn-version.h.in
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/zyn-config.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/zyn-config.h)
 
-link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS} ${NTK_LIBRARY_DIRS} ${X11_LIBRARY_DIRS})
+link_directories(${AUDIO_LIBRARY_DIRS} ${ZLIB_LIBRARY_DIRS} ${FFTW3F_LIBRARY_DIRS} ${MXML_LIBRARY_DIRS} ${FLTK_LIBRARY_DIRS} ${NTK_LIBRARY_DIRS} ${X11_LIBRARY_DIRS})
 
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
@@ -539,7 +541,9 @@ add_subdirectory(Effects)
 add_subdirectory(Params)
 add_subdirectory(DSP)
 add_subdirectory(Nio)
-add_subdirectory(Plugin)
+if (PluginEnable)
+    add_subdirectory(Plugin)
+endif()
 
 add_library(zynaddsubfx_core STATIC
     version.cpp
@@ -571,13 +575,27 @@ else()
     set(PTHREAD_LIBRARY pthread)
 endif()
 
-target_link_libraries(zynaddsubfx_core
-	${ZLIB_LIBRARIES}
-	${FFTW_LIBRARIES}
-	${MXML_LIBRARIES}
-	${OS_LIBRARIES}
-    ${PTHREAD_LIBRARY}
-    rtosc rtosc-cpp)
+if(ZYN_SYSTEM_RTOSC)
+    target_link_libraries(zynaddsubfx_core
+        ${ZLIB_LIBRARIES}
+        ${FFTW3F_LIBRARIES}
+        ${MXML_LIBRARIES}
+        ${OS_LIBRARIES}
+        ${PTHREAD_LIBRARY}
+        ${RTOSC_LIBRARIES}
+        ${RTOSC_CPP_LIBRARIES}
+    )
+else()
+    target_link_libraries(zynaddsubfx_core
+        ${ZLIB_LIBRARIES}
+        ${FFTW3F_LIBRARIES}
+        ${MXML_LIBRARIES}
+        ${OS_LIBRARIES}
+        ${PTHREAD_LIBRARY}
+        rtosc
+        rtosc-cpp
+    )
+endif()
 
 if(IwyuErr)
     message (STATUS "Include what you use: ${IwyuErr}")
@@ -663,7 +681,7 @@ endmacro()
 package_status(PKG_CONFIG_FOUND "PkgConfig" "found"   ${Red})
 package_status(ZLIB_FOUND       "zlib     " "found"   ${Red})
 package_status(MXML_FOUND       "mxml     " "found"   ${Red})
-package_status(FFTW_FOUND       "fftw3    " "found"   ${Red})
+package_status(FFTW3F_FOUND     "fftw3f   " "found"   ${Red})
 package_status(LIBLO_FOUND      "liblo    " "found"   ${Red})
 package_status(X11_FOUND        "x11      " "found"   ${Yellow})
 package_status(X11_Xpm_FOUND    "xpm      " "found"   ${Yellow})
@@ -688,4 +706,4 @@ package_status(SndioEnable      "SNDIO    " "enabled" ${Yellow})
 package_status(HAVE_ASYNC       "c++ async" "usable"  ${Yellow})
 
 
-message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW_LIBRARY} ${MXML_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")
+message(STATUS "Link libraries: ${ZLIB_LIBRARY} ${FFTW3F_LIBRARY} ${MXML_LIBRARIES} ${AUDIO_LIBRARIES} ${OS_LIBRARIES}")

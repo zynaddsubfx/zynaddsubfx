@@ -20,6 +20,7 @@
 #include "../Params/ADnoteParameters.h"
 #include "../Params/SUBnoteParameters.h"
 #include "../Params/PADnoteParameters.h"
+#include "../Synth/Portamento.h"
 #include "../Synth/Resonance.h"
 #include "../Synth/SynthNote.h"
 #include "../Synth/ADnote.h"
@@ -316,7 +317,10 @@ Part::Part(Allocator &alloc, const SYNTH_T &synth_, const AbsTime &time_,
     }
 
     killallnotes = false;
+    silent = false;
     oldfreq_log2 = -1.0f;
+    oldportamento = NULL;
+    legatoportamento = NULL;
 
     cleanup();
 
@@ -546,17 +550,79 @@ bool Part::NoteOnInternal(note_t note,
     // notes. That means it is required that the previous note is
     // still held down or sustained for the Portamento to activate
     // (that's like Legato).
-    const bool portamento = (Ppolymode || isRunningNote) &&
-        ctl.initportamento(oldfreq_log2, note_log2_freq, doingLegato);
+    PortamentoRealtime *portamento_realtime = NULL;
+    if(Ppolymode || isRunningNote) {
+        // If there is a currently ongoing glide, shift the starting point
+        // for any new portamento to where the current glide is right now
+        if (oldportamento && oldportamento->portamento.active)
+            oldportamentofreq_log2 += oldportamento->portamento.freqdelta_log2;
+        // Non-portamento settings and conditions say the note may have
+        // portamento, but it remains for Portamento.init to make the
+        // final decision depending on the portamento enable, threshold and
+        // other parameters.
+        Portamento portamento(ctl, synth, oldfreq_log2, oldportamentofreq_log2, note_log2_freq);
+        if(portamento.active) {
+            // We're good to go! Just need to figure out how.
+            // If we're doing legato and we already have a portamento structure,
+            // reuse it.
+            if (doingLegato && legatoportamento) {
+                portamento_realtime = legatoportamento;
+                portamento_realtime->portamento = portamento;
+            } else {
+                // Create new one if we don't already have one, or for each
+                // note in poly/mono mode
+                portamento_realtime = memory.alloc<PortamentoRealtime>
+                    (this,
+                     memory,
+                     // Cleanup function: Destroy any references we might
+                     // have to the current realtime pointer so that it
+                     // can not be (re)used, with disastrous results.
+                     [](PortamentoRealtime *realtime)
+                        {
+                            assert(realtime);
+                            Part *part = static_cast<Part *>(realtime->handle);
+                            assert(part);
+                            if (realtime == part->oldportamento) {
+                                // Since the last note is going away, capture
+                                // the portamento:ed pitch offset to our saved
+                                // previous note. This will be our starting
+                                // point for the next portamento glide.
+                                if (realtime->portamento.active)
+                                    part->oldportamentofreq_log2 +=
+                                        realtime->portamento.freqdelta_log2;
+                                part->oldportamento = NULL;
+                            }
+                            if (realtime == part->legatoportamento)
+                                part->legatoportamento = NULL;
+                        },
+                     portamento
+                    );
+                if (doingLegato)
+                    legatoportamento = portamento_realtime;
+            }
+        }
+    }
 
+    // Create the portamento pointer that we distribute to the synth notes
+    Portamento *portamento = NULL;
+    if(portamento_realtime)
+        portamento = &portamento_realtime->portamento;
+
+    // Save note freq and pointer to portamento state for next note
     oldfreq_log2 = note_log2_freq;
+    oldportamentofreq_log2 = oldfreq_log2;
+    oldportamento = portamento_realtime;
 
     //Adjust Existing Notes
     if(doingLegato) {
         LegatoParams pars = {vel, portamento, note_log2_freq, true, prng()};
-        notePool.applyLegato(note, pars);
+        notePool.applyLegato(note, pars, portamento_realtime);
         return true;
     }
+
+    // We know now that we are not doing legato, so we destroy the reference
+    // to the previous legato portamento info so we don't try to reuse it
+    legatoportamento = NULL;
 
     if(Ppolymode)
         notePool.makeUnsustainable(note);
@@ -583,14 +649,17 @@ bool Part::NoteOnInternal(note_t note,
             if(item.Padenabled)
                 notePool.insertNote(note, sendto,
                         {memory.alloc<ADnote>(kit[i].adpars, pars,
-                            wm, (pre+"kit"+i+"/adpars/").c_str), 0, i});
+                            wm, (pre+"kit"+i+"/adpars/").c_str), 0, i},
+                                    portamento_realtime);
             if(item.Psubenabled)
                 notePool.insertNote(note, sendto,
-                        {memory.alloc<SUBnote>(kit[i].subpars, pars, wm, (pre+"kit"+i+"/subpars/").c_str), 1, i});
+                        {memory.alloc<SUBnote>(kit[i].subpars, pars, wm, (pre+"kit"+i+"/subpars/").c_str), 1, i},
+                                    portamento_realtime);
             if(item.Ppadenabled)
                 notePool.insertNote(note, sendto,
                         {memory.alloc<PADnote>(kit[i].padpars, pars, interpolation, wm,
-                            (pre+"kit"+i+"/padpars/").c_str), 2, i});
+                            (pre+"kit"+i+"/padpars/").c_str), 2, i},
+                                    portamento_realtime);
         } catch (std::bad_alloc & ba) {
             std::cerr << "dropped new note: " << ba.what() << std::endl;
         }
@@ -926,6 +995,24 @@ void Part::AllNotesOff()
  */
 void Part::ComputePartSmps()
 {
+    /* When we are in the process of being disabled (Penabled set to false),
+     * AllNotesOff will be called, setting killallnotes, which causes all
+     * playing voices to terminate and the signal level being graciously
+     * muted during the course of the current buffer. After that, all
+     * subsequent output buffers will be set to 0 until we are enabled again.
+     */
+    if (!Penabled && !killallnotes) {
+        /* We only need to clear the output buffer once when disabled; since
+         * it's static within the part it's wasteful to do it every time. */
+        if (!silent) {
+            memset(partoutl, 0, synth.bufferbytes);
+            memset(partoutr, 0, synth.bufferbytes);
+            silent = true;
+        }
+        return;
+    }
+    silent = false;
+
     assert(partefx[0]);
     for(unsigned nefx = 0; nefx < NUM_PART_EFX + 1; ++nefx) {
         memset(partfxinputl[nefx], 0, synth.bufferbytes);
@@ -948,6 +1035,8 @@ void Part::ComputePartSmps()
             if(note.finished())
                 notePool.kill(s);
         }
+    if (d.portamentoRealtime)
+        d.portamentoRealtime->portamento.update();
     }
 
     //Apply part's effects and mix them
@@ -983,7 +1072,6 @@ void Part::ComputePartSmps()
         for(int nefx = 0; nefx < NUM_PART_EFX; ++nefx)
             partefx[nefx]->cleanup();
     }
-    ctl.updateportamento();
 }
 
 /*

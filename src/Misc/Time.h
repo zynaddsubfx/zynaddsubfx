@@ -42,7 +42,7 @@ class RelTime
             :t(t_)
         {
             //Calculate time of event
-            double deltaFrames = sec*t.framesPerSec();
+            float deltaFrames = sec*t.framesPerSec();
             int64_t tmp = (int64_t)deltaFrames;
             frame = t.time() + tmp;
             sample = (int32_t)(t.samplesPerFrame()*(deltaFrames-tmp));

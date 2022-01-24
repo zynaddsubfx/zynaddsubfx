@@ -22,6 +22,7 @@ namespace zyn {
 typedef uint8_t note_t; //Global MIDI note definition
 
 struct LegatoParams;
+class PortamentoRealtime;
 class NotePool
 {
     public:
@@ -37,6 +38,7 @@ class NotePool
             uint8_t size;
             uint8_t status;
             bool    legatoMirror;
+            PortamentoRealtime *portamentoRealtime;
             bool operator==(NoteDescriptor);
 
             //status checks
@@ -121,11 +123,12 @@ class NotePool
         NotePool(void);
 
         //Operations
-        void insertNote(note_t note, uint8_t sendto, SynthDescriptor desc, bool legato=false);
-        void insertLegatoNote(note_t note, uint8_t sendto, SynthDescriptor desc);
+        void insertNote(note_t note, uint8_t sendto, SynthDescriptor desc,
+                        PortamentoRealtime *portamento_realtime=NULL, bool legato=false);
+        void insertLegatoNote(NoteDescriptor desc, SynthDescriptor sdesc);
 
         void upgradeToLegato(void);
-        void applyLegato(note_t note, const LegatoParams &par);
+        void applyLegato(note_t note, const LegatoParams &par, PortamentoRealtime *portamento_realtime=NULL);
 
         void makeUnsustainable(note_t note);
         

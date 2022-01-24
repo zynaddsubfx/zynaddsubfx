@@ -172,23 +172,40 @@ char *rtosc_splat(const char *path, std::set<std::string>);
         rObject *obj = (rObject*)d.obj; \
         d.reply(d.loc, "s", obj->type);}}
 
-#define rPaste \
+// let only realtime pastes reply,
+// because non-realtime pastes need the free on non-realtime side (same thread)
+#define rPasteInternal(isRt) \
 rPresetType, \
 {"paste:b", rProp(internal) rDoc("paste port"), 0, \
     [](const char *m, rtosc::RtData &d){ \
         printf("rPaste...\n"); \
         rObject &paste = **(rObject **)rtosc_argument(m,0).b.data; \
         rObject &o = *(rObject*)d.obj;\
-        o.paste(paste);}}
+        o.paste(paste);\
+        rObject* ptr = &paste;\
+        if(isRt)\
+            d.reply("/free", "sb", STRINGIFY(rObject), sizeof(rObject*), &ptr);\
+        else \
+            delete ptr;}}
 
-#define rArrayPaste \
+#define rArrayPasteInternal(isRt) \
 {"paste-array:bi", rProp(internal) rDoc("array paste port"), 0, \
     [](const char *m, rtosc::RtData &d){ \
         printf("rArrayPaste...\n"); \
         rObject &paste = **(rObject **)rtosc_argument(m,0).b.data; \
         int field = rtosc_argument(m,1).i; \
         rObject &o = *(rObject*)d.obj;\
-        o.pasteArray(paste,field);}}
+        o.pasteArray(paste,field);\
+        rObject* ptr = &paste;\
+        if(isRt)\
+            d.reply("/free", "sb", STRINGIFY(rObject), sizeof(rObject*), &ptr);\
+        else\
+            delete ptr;}}
+
+#define rPaste rPasteInternal(false)
+#define rPasteRt rPasteInternal(true)
+#define rArrayPaste rArrayPasteInternal(false)
+#define rArrayPasteRt rArrayPasteInternal(true)
 
 }
 
