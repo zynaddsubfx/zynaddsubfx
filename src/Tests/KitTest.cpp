@@ -1089,11 +1089,12 @@ class KitTest
             TS_ASSERT(pool.ndesc[3].portamentoRealtime == NULL);
         }
 
-        void testPortamentoOnPlayingLegato(void)
+        void testPortamentoOnPlayingLegatoAuto(void)
         {
             auto &pool = part->notePool;
 
             part->ctl.setportamento(127);
+            part->ctl.portamento.automode = 1;
 
             // Play four notes
             // This implicitly tests that note deltas larger than the
@@ -1194,6 +1195,43 @@ class KitTest
             TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 100);
             TS_NON_NULL(pool.ndesc[0].portamentoRealtime);
             TS_ASSERT_DELTA(pool.ndesc[0].portamentoRealtime->portamento.freqdelta_log2, -3.0f, 0.001f);
+        }
+
+        // Verify that two notes played staccato have no portamento
+        void verifyNoPortamento(void)
+        {
+            auto &pool = part->notePool;
+
+            // Play an initial note, then release it
+            part->NoteOn(64, 127, 0);
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT(pool.ndesc[0].portamentoRealtime == NULL);
+
+            part->NoteOff(64);
+
+            // Play second note
+            part->NoteOn(76, 127, 0);
+
+            pool.cleanup();
+            pool.dump();
+
+            // First, re-verify first note, since it will remain
+            // in the release phase.
+            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
+            TS_ASSERT(pool.ndesc[0].portamentoRealtime == NULL);
+
+            // Verify pitch and lack of portamento for second note, due to
+            // playing staccato.
+            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 76);
+            TS_ASSERT(pool.ndesc[1].portamentoRealtime == NULL);
+        }
+
+        void testPortamentoOnPlayingStaccatoAuto(void)
+        {
+            part->ctl.setportamento(127);
+            part->ctl.portamento.automode = 1;
+
+            verifyNoPortamento();
         }
 
         void testPortamentoSmallerThanThresholdTrigIfLarger(void)
@@ -1372,13 +1410,9 @@ class KitTest
             TS_ASSERT_DELTA(pool.ndesc[0].portamentoRealtime->portamento.freqdelta_log2, -4.0f/12.0f, 0.001f);
         }
 
-        void testPortamentoOnLegatoOnPlayingLegato(void)
+        void verifyLegatoPortamento(void)
         {
             auto &pool = part->notePool;
-
-            part->ctl.setportamento(127);
-            part->Ppolymode   = false;
-            part->Plegatomode = true;
 
             // Play two notes
             part->NoteOn(64, 127, 0);
@@ -1397,13 +1431,19 @@ class KitTest
             TS_ASSERT(pool.ndesc[1].portamentoRealtime == NULL);
         }
 
-        void testPortamentoOnLegatoOnPlayingStaccato(void)
+        void testPortamentoOnLegatoOnPlayingLegatoAuto(void)
         {
-            auto &pool = part->notePool;
-
             part->ctl.setportamento(127);
+            part->ctl.portamento.automode = 1;
             part->Ppolymode   = false;
             part->Plegatomode = true;
+
+            verifyLegatoPortamento();
+        }
+
+        void verifyNoLegatoPortamento(void)
+        {
+            auto &pool = part->notePool;
 
             // Play an initial note, then release it
             part->NoteOn(64, 127, 0);
@@ -1437,12 +1477,28 @@ class KitTest
             TS_ASSERT(pool.ndesc[3].portamentoRealtime == NULL);
         }
 
-        void testPortamentoOnMonoPlayingLegato(void)
+        void testPortamentoOnLegatoOnPlayingStaccatoAuto(void)
         {
-            auto &pool = part->notePool;
+            part->ctl.setportamento(127);
+            part->ctl.portamento.automode = 1;
+            part->Ppolymode   = false;
+            part->Plegatomode = true;
 
+            verifyNoLegatoPortamento();
+        }
+
+        void testPortamentoOnLegatoOnPlayingStaccato(void)
+        {
             part->ctl.setportamento(127);
             part->Ppolymode   = false;
+            part->Plegatomode = true;
+
+            verifyLegatoPortamento();
+        }
+
+        void verifyPortamento(void)
+        {
+            auto &pool = part->notePool;
 
             // Play two notes
             part->NoteOn(64, 127, 0);
@@ -1461,35 +1517,30 @@ class KitTest
             TS_ASSERT_DELTA(pool.ndesc[1].portamentoRealtime->portamento.freqdelta_log2, -1.0f, 0.001f);
         }
 
+        void testPortamentoOnMonoPlayingLegatoAuto(void)
+        {
+            part->ctl.setportamento(127);
+            part->ctl.portamento.automode = 1;
+            part->Ppolymode   = false;
+
+            verifyPortamento();
+        }
+
+        void testPortamentoOnMonoPlayingStaccatoAuto(void)
+        {
+            part->ctl.setportamento(127);
+            part->ctl.portamento.automode = 1;
+            part->Ppolymode   = false;
+
+            verifyNoPortamento();
+        }
+
         void testPortamentoOnMonoPlayingStaccato(void)
         {
-            auto &pool = part->notePool;
-
             part->ctl.setportamento(127);
             part->Ppolymode   = false;
 
-            // Play an initial note, then release it
-            part->NoteOn(64, 127, 0);
-            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
-            TS_ASSERT(pool.ndesc[0].portamentoRealtime == NULL);
-
-            part->NoteOff(64);
-
-            // Play second note
-            part->NoteOn(76, 127, 0);
-
-            pool.cleanup();
-            pool.dump();
-
-            // First, re-verify first note, since it will remain
-            // in the release phase.
-            TS_ASSERT_EQUAL_INT(pool.ndesc[0].note, 64);
-            TS_ASSERT(pool.ndesc[0].portamentoRealtime == NULL);
-
-            // Verify pitch and lack of portamento for second note, due to
-            // playing staccato.
-            TS_ASSERT_EQUAL_INT(pool.ndesc[1].note, 76);
-            TS_ASSERT(pool.ndesc[1].portamentoRealtime == NULL);
+            verifyPortamento();
         }
 
         void tearDown() {
@@ -1519,15 +1570,18 @@ int main()
     RUN_TEST(testKeyLimit);
     RUN_TEST(testVoiceLimit);
     RUN_TEST(testPortamentoOff);
-    RUN_TEST(testPortamentoOnPlayingLegato);
+    RUN_TEST(testPortamentoOnPlayingLegatoAuto);
     RUN_TEST(testPortamentoOnPlayingStaccato);
+    RUN_TEST(testPortamentoOnPlayingStaccatoAuto);
     RUN_TEST(testPortamentoSmallerThanThresholdTrigIfLarger);
     RUN_TEST(testPortamentoLargerThanThresholdTrigIfSmaller);
     RUN_TEST(testPortamentoSmallerThanThresholdTrigIfSmaller);
     RUN_TEST(testPortamentoSmallerThanThresholdTrigIfSmallerStaccato);
-    RUN_TEST(testPortamentoOnLegatoOnPlayingLegato);
+    RUN_TEST(testPortamentoOnLegatoOnPlayingLegatoAuto);
+    RUN_TEST(testPortamentoOnLegatoOnPlayingStaccatoAuto);
     RUN_TEST(testPortamentoOnLegatoOnPlayingStaccato);
-    RUN_TEST(testPortamentoOnMonoPlayingLegato);
+    RUN_TEST(testPortamentoOnMonoPlayingLegatoAuto);
+    RUN_TEST(testPortamentoOnMonoPlayingStaccatoAuto);
     RUN_TEST(testPortamentoOnMonoPlayingStaccato);
     return test_summary();
 }
