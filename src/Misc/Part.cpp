@@ -1464,7 +1464,15 @@ void Part::getfromXML(XMLwrapper& xml)
     }
 
     if(xml.enterbranch("CONTROLLER")) {
+        const bool upgrade_3_0_7 = (xml.fileversion() < version_type(3,0,7));
+
         ctl.getfromXML(xml);
+        // Before version 3.0.7, mono and legato modes always had auto
+        // portamento (and poly mode never did, but in that case
+        // portamento.automode will default to off, so no need to do anything
+        // here).
+        if (upgrade_3_0_7 && !Ppolymode)
+            ctl.portamento.automode = 1;
         xml.exitbranch();
     }
 }
