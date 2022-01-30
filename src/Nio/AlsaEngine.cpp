@@ -23,6 +23,8 @@
 #include "Compressor.h"
 #include "Nio.h"
 
+extern char *instance_name;
+
 using namespace std;
 
 namespace zyn {
@@ -242,6 +244,8 @@ bool AlsaEngine::openMidi()
         return false;
 
     string clientname = "ZynAddSubFX";
+    if(instance_name)
+      clientname = (string) instance_name;
     string postfix = Nio::getPostfix();
     if (!postfix.empty())
         clientname += "_" + postfix;

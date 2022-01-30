@@ -25,3 +25,27 @@ jobs:
       run: cd build && make
     - name: make test
       run: cd build && make test
+  build_arch_linux_system_rtosc:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    steps:
+      - name: Install dependencies
+        run: pacman --noconfirm -Syu alsa-lib base-devel cmake cxxtest dssi fftw fltk git jack ladspa liblo libxpm mxml portaudio rtosc zlib
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      # test does not seem to work in a container and reports:
+      # Process not started
+      #  /__w/zynaddsubfx/zynaddsubfx/build/src/Tests/check-ports.rb
+      # [no such file or directory]
+      - name: Disable PortChecker test
+        run: sed -e '/add_test(PortChecker/d' -i src/Tests/CMakeLists.txt
+      - name: Build zynaddsubfx
+        run: |
+          cmake -DCMAKE_INSTALL_PREFIX=/usr -DZYN_SYSTEM_RTOSC=ON -B build -S .
+          make VERBOSE=1 -C build
+      - name: Test zynaddsubfx
+        run: make VERBOSE=1 -k test ARGS='-VVd' -C build
+      - name: Install zynaddsubfx
+        run: make VERBOSE=1 install -C build
