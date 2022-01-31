@@ -2236,8 +2236,8 @@ void MiddleWareImpl::sendToRemote(const char *rtmsg, std::string dest)
 
         //Send to known url
         lo_address addr = lo_address_new_from_url(dest.c_str());
-        if(addr)
-            lo_send_message(addr, rtmsg, msg);
+        if(addr && server)
+            lo_send_message_from(addr, server, rtmsg, msg);
         lo_address_free(addr);
         lo_message_free(msg);
     }
