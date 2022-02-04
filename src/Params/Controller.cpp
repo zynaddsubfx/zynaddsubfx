@@ -95,33 +95,34 @@ Controller::Controller(const SYNTH_T &synth_, const AbsTime *time_)
 
 void Controller::defaults()
 {
-    pitchwheel.bendrange = 200; //2 halftones
-    pitchwheel.bendrange_down = 0; //Unused by default
-    pitchwheel.is_split   = false;
-    expression.receive    = 1;
-    panning.depth         = 64;
-    filtercutoff.depth    = 64;
-    filterq.depth         = 64;
-    bandwidth.depth       = 64;
-    bandwidth.exponential = 0;
-    modwheel.depth        = 80;
-    modwheel.exponential  = 0;
-    fmamp.receive         = 1;
-    volume.receive        = 1;
-    sustain.receive       = 1;
-    NRPN.receive = 1;
+    pitchwheel.bendrange         = 200; //2 halftones
+    pitchwheel.bendrange_down    = 0; //Unused by default
+    pitchwheel.is_split          = false;
+    expression.receive           = 1;
+    panning.depth                = 64;
+    filtercutoff.depth           = 64;
+    filterq.depth                = 64;
+    bandwidth.depth              = 64;
+    bandwidth.exponential        = 0;
+    modwheel.depth               = 80;
+    modwheel.exponential         = 0;
+    fmamp.receive                = 1;
+    volume.receive               = 1;
+    sustain.receive              = 1;
+    NRPN.receive                 = 1;
 
-    portamento.portamento = 0;
-    portamento.proportional = 0;
-    portamento.propRate     = 80;
-    portamento.propDepth    = 90;
-    portamento.receive      = 1;
-    portamento.time = 64;
+    portamento.portamento        = 0;
+    portamento.proportional      = 0;
+    portamento.propRate          = 80;
+    portamento.propDepth         = 90;
+    portamento.receive           = 1;
+    portamento.time              = 64;
     portamento.updowntimestretch = 64;
-    portamento.pitchthresh     = 3;
-    portamento.pitchthreshtype = 1;
-    resonancecenter.depth    = 64;
-    resonancebandwidth.depth = 64;
+    portamento.pitchthresh       = 3;
+    portamento.pitchthreshtype   = 1;
+
+    resonancecenter.depth        = 64;
+    resonancebandwidth.depth     = 64;
 
     setportamento(0);
 }
