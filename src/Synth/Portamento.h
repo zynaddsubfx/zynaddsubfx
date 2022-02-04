@@ -28,12 +28,14 @@ class Portamento {
          *
          * @param ctl The Controller which contains user patch parameters
          * @param synth The SYNTH_T from which to get sample rate and bufsize
+         * @param is_running_note True if at least one note is playing
          * @param oldfreq_log2 Pitch of previous note
          * @param oldportamentofreq_log2 Starting pitch of the portamento
          * @param newfreq_log2 Ending pitch of the portamento
          */
         Portamento(const Controller &ctl,
                    const SYNTH_T &synth,
+                   bool is_running_note,
                    float oldfreq_log2,
                    float oldportamentofreq_log2,
                    float newfreq_log2);
@@ -43,12 +45,14 @@ class Portamento {
          *
          * @param ctl The Controller which contains user patch parameters
          * @param synth The SYNTH_T from which to get sample rate and bufsize
+         * @param is_running_note True if at least one note is playing
          * @param oldfreq_log2 Pitch of previous note
          * @param oldportamentofreq_log2 Starting pitch of the portamento
          * @param newfreq_log2 Ending pitch of the portamento
          */
         void init(const Controller &ctl,
                   const SYNTH_T &synth,
+                  bool is_running_note,
                   float oldfreq_log2,
                   float oldportamentofreq_log2,
                   float newfreq_log2);

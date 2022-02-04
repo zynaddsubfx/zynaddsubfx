@@ -124,6 +124,8 @@ class Controller
             unsigned char portamento;
             /**Whether the portamento midi events are received or not*/
             unsigned char receive;
+            /**Whether legato playing is needed to get portamento*/
+            unsigned char automode;
             /** The time that it takes for the portamento to complete
              *
              * Translates in an expontal fashion to 0 Seconds to 1.93f Seconds
