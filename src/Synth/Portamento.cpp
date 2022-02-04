@@ -16,15 +16,17 @@ namespace zyn {
 
 Portamento::Portamento(const Controller &ctl,
                        const SYNTH_T &synth,
+                       bool is_running_note,
                        float oldfreq_log2,
                        float oldportamentofreq_log2,
                        float newfreq_log2)
 {
-    init(ctl, synth, oldfreq_log2, oldportamentofreq_log2, newfreq_log2);
+    init(ctl, synth, is_running_note, oldfreq_log2, oldportamentofreq_log2, newfreq_log2);
 }
 
 void Portamento::init(const Controller &ctl,
                       const SYNTH_T &synth,
+                      bool is_running_note,
                       float oldfreq_log2,
                       float oldportamentofreq_log2,
                       float newfreq_log2)
@@ -32,6 +34,9 @@ void Portamento::init(const Controller &ctl,
     active = false;
 
     if(ctl.portamento.portamento == 0)
+        return;
+
+    if(ctl.portamento.automode && !is_running_note)
         return;
 
     if(oldfreq_log2 == newfreq_log2)

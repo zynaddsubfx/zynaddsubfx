@@ -62,6 +62,8 @@ const rtosc::Ports Controller::ports = {
         "Portamento MIDI Receive"),
     rToggle(portamento.portamento, rDefault(false),
         "Portamento Enable"),
+    rToggle(portamento.automode, rDefault(false),
+        "Portamento Auto mode"),
     rParamZyn(portamento.time,          rShort("time"), rDefault(64),
         "Portamento Length"),
     rToggle(portamento.proportional,    rShort("propt."), rDefault(false),
@@ -112,6 +114,7 @@ void Controller::defaults()
     NRPN.receive                 = 1;
 
     portamento.portamento        = 0;
+    portamento.automode          = 0;
     portamento.proportional      = 0;
     portamento.propRate          = 80;
     portamento.propDepth         = 90;
@@ -349,6 +352,7 @@ void Controller::add2XML(XMLwrapper& xml)
     xml.addpar("portamento_pitchthresh", portamento.pitchthresh);
     xml.addpar("portamento_pitchthreshtype", portamento.pitchthreshtype);
     xml.addpar("portamento_portamento", portamento.portamento);
+    xml.addparbool("portamento_auto", portamento.automode);
     xml.addpar("portamento_updowntimestretch", portamento.updowntimestretch);
     xml.addpar("portamento_proportional", portamento.proportional);
     xml.addpar("portamento_proprate", portamento.propRate);
@@ -390,6 +394,8 @@ void Controller::getfromXML(XMLwrapper& xml)
 
     portamento.receive = xml.getparbool("portamento_receive",
                                          portamento.receive);
+    portamento.automode = xml.getparbool("portamento_auto",
+                                         portamento.automode);
     portamento.time = xml.getpar127("portamento_time",
                                      portamento.time);
     portamento.pitchthresh = xml.getpar127("portamento_pitchthresh",
