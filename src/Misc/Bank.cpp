@@ -200,6 +200,9 @@ int Bank::savetoslot(unsigned int ninstrument, Part *part)
         return err;
     addtobank(ninstrument, legalizeFilename(tmpfilename) + ".xiz",
               (char *) part->Pname);
+    //Since we've changed the contents of one of the banks, rescan the
+    //database to keep it updated.
+    db->scanBanks();
     return 0;
 }
 
