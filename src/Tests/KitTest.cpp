@@ -1137,6 +1137,7 @@ class KitTest
             auto &pool = part->notePool;
 
             part->ctl.setportamento(127);
+            part->ctl.portamento.automode = false;
 
             // The point here is to verify that even when a note is released,
             // its portamento offset is retained for subsequent notes to
@@ -1339,6 +1340,7 @@ class KitTest
 
             part->ctl.setportamento(127);
             part->ctl.portamento.pitchthreshtype = 0;
+            part->ctl.portamento.automode = 0;
 
             // Test that we get portamento when playing staccato notes
             // that are closer than the default threshold of 3, when the
