@@ -62,7 +62,7 @@ const rtosc::Ports Controller::ports = {
         "Portamento MIDI Receive"),
     rToggle(portamento.portamento, rDefault(false),
         "Portamento Enable"),
-    rToggle(portamento.automode, rDefault(false),
+    rToggle(portamento.automode, rDefault(true),
         "Portamento Auto mode"),
     rParamZyn(portamento.time,          rShort("time"), rDefault(64),
         "Portamento Length"),
@@ -114,7 +114,7 @@ void Controller::defaults()
     NRPN.receive                 = 1;
 
     portamento.portamento        = 0;
-    portamento.automode          = 0;
+    portamento.automode          = 1;
     portamento.proportional      = 0;
     portamento.propRate          = 80;
     portamento.propDepth         = 90;
