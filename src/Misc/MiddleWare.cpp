@@ -1540,10 +1540,8 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         impl.doReadOnlyOp([&impl,slot,part_id,&err](){
                 err = impl.master->bank.savetoslot(slot, impl.master->part[part_id]);});
         if(err) {
-            char buffer[1024];
-            rtosc_message(buffer, 1024, "/alert", "s",
+            d.reply("/alert", "s",
                     "Failed To Save To Bank Slot, please check file permissions");
-            GUI::raiseUi(impl.ui, buffer);
         }
         else d.broadcast("/damage", "s", "/bank/search_results/");
         rEnd},
