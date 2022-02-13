@@ -179,20 +179,24 @@ static const Ports partPorts = {
         [](const char *, RtData &d)
         {
             Part *p = (Part*)d.obj;
+            int err;
             if (p->loaded_file[0] == '\0') {  // if part was never loaded or saved
                 time_t rawtime;     // make a new name from date and time
                 char filename[32];
                 time (&rawtime);
                 const struct tm* timeinfo = localtime (&rawtime);
                 strftime (filename,23,"%F_%R.xiz",timeinfo);
-                p->saveXML(filename);
-                fprintf(stderr, "Part %d saved to %s\n", (p->partno + 1), filename);
+                err = p->saveXML(filename);
+                fprintf(stderr, "Part %d saved to %s: %s\n", (p->partno + 1), filename, err ? "failed" : "ok");
             }
             else
             {
-                p->saveXML(p->loaded_file);
-                fprintf(stderr, "Part %d saved to %s\n", (p->partno + 1), p->loaded_file);
+                err = p->saveXML(p->loaded_file);
+                fprintf(stderr, "Part %d saved to %s: %s\n", (p->partno + 1), p->loaded_file, err ? "failed" : "ok");
             }
+            if (err)
+                d.reply("/alert", "s",
+                        "Failed To Save File, please check file permissions");
         }},
     //{"kit#16::T:F", "::Enables or disables kit item", 0,
     //    [](const char *m, RtData &d) {
