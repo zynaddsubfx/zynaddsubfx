@@ -465,62 +465,102 @@ void ADnote::setupVoiceDetune(int nvoice)
                 pars.VoicePar[nvoice].PFMDetune);
 }
 
+/*
+    There are multiple places where the modulation mode ("FM mode") is being stored:
+    - ADnoteVoiceParam::PFMenabled (var. "param")
+    - ADnoteVoiceParam::table::mode()
+    - NoteVoicePar::FMEnabled (var. "voice")
+
+    Assume they are all in sync. Here is how they change:
+
+    User send ".../PFMenabled" -> sets PFMenabled
+       ...
+    Wavetable is regenerated
+       ...
+    New wavetable is ready : WaveTable::mode is changed
+       ...
+    ADnote takes FMEnabled to match WaveTable::mode
+*/
+// #define WT_DEBUG_TRANSITIONS
+
 void ADnote::setupVoiceMod(int nvoice, bool first_run)
 {
     auto &param = pars.VoicePar[nvoice];
     auto &voice = NoteVoicePar[nvoice];
     float FMVolume;
 
+    bool wtModeHasChanged = false;
     if (param.Type != 0)
         voice.FMEnabled = FMTYPE::NONE;
     else {
-        // switch WT->non-WT or non-WT-WT?
-        if(first_run)
+        if(waveTables)
         {
-            // make FMEnabledBeforeWtSwitch and voice.FMEnabled equal
-            // (they will be after assigning voice.FMenabled),
-            // so that no wavetable mode change will be triggered
-            voice.FMEnabledBeforeWtSwitch = param.PFMEnabled;
-        }
-        else if((param.PFMEnabled == FMTYPE::WAVE_MOD) !=
-           (voice.FMEnabled == FMTYPE::WAVE_MOD))
-        {
-            // store previous FMEnabled
-            voice.FMEnabledBeforeWtSwitch = voice.FMEnabled;
-        }
-        voice.FMEnabled = param.PFMEnabled;
-    }
-
-    // voice.FMEnabled is what the user wants to play
-    // wt_mode is what is actually available
-    const WaveTable::WtMode wt_mode = pars.VoicePar[nvoice].table->mode();
-
-    // if the table is not (yet?) updated to match the current mode,
-    // use the mode from the table
-    if(waveTables)
-    {
-        if((voice.FMEnabled == FMTYPE::WAVE_MOD)
-           == (wt_mode == wavetable_types::WtMode::freqwave_smps))
-        {
-            if(NoteVoicePar[nvoice].FMEnabledBeforeWtSwitch != voice.FMEnabled
-               && !NoteVoicePar[nvoice].FMEnabledCorrectedLastTime)
+            if((param.PFMEnabled == FMTYPE::WAVE_MOD) ==
+               (param.table->mode() == wavetable_types::WtMode::freqwave_smps))
             {
-                // re-precompute stuff depending on "WaveTable::mode()",
-                // which is equal to "fmenabled"
-                fillOscilSmpFromWt(nvoice);
-                NoteVoicePar[nvoice].FMEnabledCorrectedLastTime = true;
+                // table is up to date: make PFMEnabled = FMenabled = table->mode()
+                wtModeHasChanged = voice.FMEnabled != param.PFMEnabled;
+#ifdef WT_DEBUG_TRANSITIONS
+                printf("1: %d,%d,%d => %d , changed? %d\n",(int)param.PFMEnabled, (int)param.table->mode(), (int)voice.FMEnabled, (int)param.PFMEnabled, wtModeHasChanged);
+#endif
+                voice.FMEnabled = param.PFMEnabled;
+            }
+            else
+            {
+                // table contradicts PFMEnabled
+                // we can only play what's in the table
+                if(param.table->mode() == wavetable_types::WtMode::freqwave_smps)
+                {
+                    // so, if the table says WT mod, play WT mod
+                    wtModeHasChanged = voice.FMEnabled != FMTYPE::WAVE_MOD;
+#ifdef WT_DEBUG_TRANSITIONS
+                    printf("2: %d,%d,%d => %d , changed? %d\n",(int)param.PFMEnabled, (int)param.table->mode(), (int)voice.FMEnabled, (int)FMTYPE::WAVE_MOD, wtModeHasChanged);
+#endif
+                    voice.FMEnabled = FMTYPE::WAVE_MOD;
+                }
+                else
+                {
+                    // if the table says non-WT-mod: play non-WT mod
+                    // but what is that? FM? PM? RM? ...
+                    // well. if it's already one of those, just keep playing:
+                    if(voice.FMEnabled != FMTYPE::WAVE_MOD)
+                    {
+#ifdef WT_DEBUG_TRANSITIONS
+                        printf("3: %d,%d,%d => %d (unchanged) , changed? no\n",(int)param.PFMEnabled, (int)param.table->mode(), (int)voice.FMEnabled, (int)voice.FMEnabled);
+#endif
+                        // just keep playing
+                    }
+                    else
+                    {
+                        // we need to guess the previous modulator type
+                        // this is VERY unlikely, because this means:
+                        // - PFMEnabled            ==     WT
+                        // - WaveTable::mode()     == non-WT
+                        // - FMenabled (unitl now) ==     WT
+                        // so this means that the user requested to change into non-WT mode
+                        // and then changed again into WT mode
+                        wtModeHasChanged = true;
+#ifdef WT_DEBUG_TRANSITIONS
+                        printf("4: %d,%d,%d => %d , changed? yes\n",(int)param.PFMEnabled, (int)param.table->mode(), (int)voice.FMEnabled, (int)FMTYPE::NONE);
+#endif
+                        voice.FMEnabled  = FMTYPE::NONE;
+                    }
+                }
             }
         }
-        else
-        {
-            // re-precompute stuff depending on WaveTable::mode()
-            fillOscilSmpFromWt(nvoice);
-            // correct FM mode that will be played
-            voice.FMEnabled = (wt_mode == wavetable_types::WtMode::freqwave_smps)
-                            ? FMTYPE::WAVE_MOD
-                            : NoteVoicePar[nvoice].FMEnabledBeforeWtSwitch;
-            NoteVoicePar[nvoice].FMEnabledCorrectedLastTime = false;
+        else {
+            voice.FMEnabled = param.PFMEnabled;
         }
+    }
+
+    // we can only play what is in the table
+    assert((voice.FMEnabled == FMTYPE::WAVE_MOD)
+           == (param.table->mode() == wavetable_types::WtMode::freqwave_smps));
+    if(wtModeHasChanged)
+    {
+        // re-precompute stuff depending on "WaveTable::mode()",
+        // which is equal to "fmenabled"
+        fillOscilSmpFromWt(nvoice);
     }
 
 
@@ -1839,10 +1879,19 @@ inline void ADnote::ComputeVoiceOscillatorWaveTableModulation(int nvoice)
             // adding basefuncpar finally leads us to
             // [0, 2*basefuncpar] or [1 - 2*basefuncpar, 1]
             // The min()/max() calls are just for safety
+// #define WT_USE_ENV
+#ifndef WT_USE_ENV
             float par = std::max(0.0f, std::min(1.0f,
                 (tw[i]/NoteVoicePar[nvoice].FMSmpMax) +
                  NoteVoicePar[nvoice].basefuncpar));
-
+#else
+            float par = std::max(0.0f, std::min(1.0f,
+                (INTERPOLATE_AMPLITUDE(vce.FMoldamplitude,
+                                               vce.FMnewamplitude,
+                                               i,
+                                              synth.buffersize)) +
+                  NoteVoicePar[nvoice].basefuncpar));
+#endif
             float semantic = par * 512.f;
             if(semantic >= wt->size_semantics())
                 semantic = wt->size_semantics() - 1;
