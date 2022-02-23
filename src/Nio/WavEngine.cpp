@@ -63,6 +63,7 @@ void WavEngine::Stop()
     work.post();
     pthread_join(*tmp, NULL);
     delete pThread;
+    destroyFile();
 }
 
 void WavEngine::push(Stereo<float *> smps, size_t len)
