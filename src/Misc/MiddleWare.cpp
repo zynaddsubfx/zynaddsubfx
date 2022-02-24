@@ -1395,6 +1395,7 @@ const rtosc::Ports bankPorts = {
 #define MAX_SEARCH 300
         char res_type[MAX_SEARCH+1] = {};
         rtosc_arg_t res_dat[MAX_SEARCH] = {};
+        res_type[0] = 'N'; // Will be overwritten if there is any actual data
         for(unsigned i=0; i<res.size() && i<MAX_SEARCH; ++i) {
             res_type[i]  = 's';
             res_dat[i].s = res[i].c_str();
@@ -1408,6 +1409,7 @@ const rtosc::Ports bankPorts = {
 #define MAX_SEARCH 300
         char res_type[MAX_SEARCH+1] = {};
         rtosc_arg_t res_dat[MAX_SEARCH] = {};
+        res_type[0] = 'N'; // Will be overwritten if there is any actual data
         for(unsigned i=0; i<res.size() && i<MAX_SEARCH; ++i) {
             res_type[i]  = 's';
             res_dat[i].s = res[i].c_str();
@@ -1417,7 +1419,7 @@ const rtosc::Ports bankPorts = {
         rEnd},
     {"search_results:", 0, 0,
         rBegin;
-        d.reply("/bank/search_results", "");
+        d.reply("/bank/search_results", "N");
         rEnd},
 };
 
