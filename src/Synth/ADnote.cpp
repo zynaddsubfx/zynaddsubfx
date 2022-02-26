@@ -1892,9 +1892,13 @@ inline void ADnote::ComputeVoiceOscillatorWaveTableModulation(int nvoice)
                                               synth.buffersize)) +
                   NoteVoicePar[nvoice].basefuncpar));
 #endif
-            float semantic = par * 512.f;
-            if(semantic >= wt->size_semantics())
-                semantic = wt->size_semantics() - 1;
+            // 127 * 4 + 1 waves = 509 waves (3 waves above are padding)
+            // => use 508 to access the C array (C array syntax)
+            float semantic = par * 508.f;
+            if(semantic > 508)
+                semantic = 508;
+            // note: the center between 0 and 508 is 254, which maps to
+            // 254/512 = 63.5/128, and 63.5 is indeed the center
 
             // get the two waves where semantic is between its indices
             const Tensor1<WaveTable::float32>& waveA = wt->getWaveAt(freqIndex, semantic);

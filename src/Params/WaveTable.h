@@ -519,8 +519,12 @@ public:
     // pure guesses for what sounds good:
     constexpr const static tensor_size_t num_freqs = 10;
     constexpr const static tensor_size_t num_semantics = 128;
-    constexpr const static tensor_size_t num_semantics_wtmod = 512;
-    constexpr const static tensor_size_t max_semantics_ever = 512;
+    // number of steps on basefunc knob (the steps are integral)
+    constexpr const static float wt_127f = 127.f;
+    // in WT mod, we have steps of 0.25. This variable adds 3 unused waves padding.
+    constexpr const static tensor_size_t max_semantics_ever = 128 * 4;
+    constexpr const static tensor_size_t num_semantics_wtmod = max_semantics_ever;
+
     static_assert (num_semantics <= max_semantics_ever, "max_semantics_ever too low");
     static_assert (num_semantics_wtmod <= max_semantics_ever, "max_semantics_ever too low");
 

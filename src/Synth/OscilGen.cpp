@@ -595,11 +595,17 @@ std::pair<Tensor1<wavetable_types::float32>*, Tensor1<wavetable_types::IntOrFloa
             break;
         case WtMode::freqwave_smps:
         {
-            // TODO WT7: compare with old WT algorithm (fine tuning for 128.f)
-            float step = 128.f / semantics->size();
+            // step size is 0.25
+            // range for the baseFuncParameter is 0...127
+            // => 63.5 is the center (64 is only mapped on 63.5 for non-WT-mod)
+            // now, semantics->size() is always the "power of two" above the
+            // actual number of waves => generate 3 rubbish waves
+
+            float step = 0.25f;
             for(tensor_size_t i = 0; i < semantics->size(); ++i)
             {
-                (*semantics)[i].floatVal = step * i;
+                (*semantics)[i].floatVal = std::min(step * i, (float)WaveTable::wt_127f);
+                //printf("float: %f, step:%lu/%lu, i:%lu\n", (*semantics)[i].floatVal, (WaveTable::wt_127-1), (semantics->size() - 1), i);
             }
             break;
         }

@@ -1772,7 +1772,7 @@ void ADnoteVoiceParam::requestWavetables(rtosc::ThreadLink* bToU, int part, int 
                     // *4 because 4 params per semantic (for loop below),
                     // *2 because of ~9 preceding args:
                     char argstr[WaveTable::max_semantics_ever*4*2];
-                    rtosc_arg_t args[4096];
+                    rtosc_arg_t args[WaveTable::max_semantics_ever*4*2];
                     assert(sizeof(args)/sizeof(args[0]) == (sizeof(argstr)/sizeof(argstr[0])));
 
                     rtosc_arg_t* aptr = args; char* sptr = argstr;
