@@ -20,6 +20,65 @@ General
 * *Sustain*: enable/disable sustain pedal
 * *PWheelB.Rng (cents)*: Pitch Wheel Bend Range (cents; 100 cents = 1 halftone)
 
+Modulation wheel
+~~~~~~~~~~~~~~~~
+
+The modulation wheel (MIDI CC #1) controls the amount of modulation applied
+by the Amplitude, Frequency and Filter LFOs in all voices. The amount
+of control is governed by the Modulation Wheel depth parameter. When this
+parameter is set to 0, the modulation wheel has no control over the modulation
+amount, and it is always the value set by the *Depth* setting in the
+respective LFO. The default value for the Modulation Wheel depth parameter
+is 80.
+
+When the modulation depth parameter is advanced above 0, the modulation wheel
+starts to influence the amount of modulation. When the modulation wheel
+is it its center position (control value 64), the modulation amount will
+always be at the value set by the *Depth* setting in LFO. Smaller modulation
+wheel values than 64 will decrease the amount of modulation, and larger
+modulation values will increase it, the amount of decrease or increase being
+governed by the modulation depth parameter. The modulation amount does not
+necessarily drop to zero just because the modulation wheel is at zero,
+depending on the setting of the depth parameter. For the modulation amount
+to drop to zero, the modulation wheel depth value must be 64 (half way
+position) or more.
+
+Note that in any case, when the modulation depth is set such that modulation
+wheel does have control over the modulation amount, the maximum amount of
+modulation applied (when the modulation wheel has a value of 127), will be
+higher than the base setting in the LFO depth parameters.
+
+When the *Exp Mwh* parameter is enabled, the modulation scale becomes
+exponential. Pragmatically, this has two effects:
+
+* The amount of modulation as the modulation wheel is advanced becomes more
+  gradual, or put another way, the modulation wheel must be advanced further to
+  get the same amount of modulation when the scale is exponential compared to
+  when it is not. This gives more precise control over the onset of modulation.
+* When the modulation wheel is advanced past its center position (value 64),
+  the maximum attainable modulation amount is much higher.
+
+Note that even when modulation scale is set to exponential, a center modulation
+wheel value (64) still corresponds to the modulation depth set in the
+respective LFOs.
+
+So, to sum up:
+
+* The Modulation Wheel depth parameter must be larger 0 for the modulation
+  wheel to have any effect on the modulation amount.
+* A center modulation wheel position (value 64) corresponds to the modulation
+  depth setting in the LFOs.
+* Decreasing the modulation wheel value towards 0 will reduce the amount of
+  modulation, and advancing it towards the maximum value (127) will increase
+  the amount of modulation, as governed by the Modulation Wheel depth
+  parameter, with the amount of modulation set by the LFO depth parameters
+  as the base.
+* For a modulation wheel value of 0 to completely inhibit any modulation,
+  the Modulation Wheel depth control must be 64 (half way) or higher.
+* Enabling Exponential Modulation Wheel will provide finer control of
+  the onset of modulation, as well as higher achievable maximum modulation
+  values.
+
 Portamento
 ~~~~~~~~~~
 
