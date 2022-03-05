@@ -26,8 +26,10 @@ namespace zyn {
 
 #define rObject Controller
 
+#define rChangeCbBase if (obj->time) { obj->last_update_timestamp = obj->time->time(); }
+
 #undef rChangeCb
-#define rChangeCb if (obj->time) { obj->last_update_timestamp = obj->time->time(); }
+#define rChangeCb rChangeCbBase
 const rtosc::Ports Controller::ports = {
     rParamZyn(panning.depth,       rShort("pan.d"), rDefault(64),
         "Depth of Panning MIDI Control"),
@@ -39,10 +41,14 @@ const rtosc::Ports Controller::ports = {
         "Depth of Bandwidth MIDI Control"),
     rToggle(bandwidth.exponential, rShort("bw.exp"), rDefault(false),
         "Bandwidth Exponential Mode"),
+#undef rChangeCb
+#define rChangeCb obj->setmodwheel(); rChangeCbBase
     rParamZyn(modwheel.depth,      rShort("mdw.d"), rDefault(80),
         "Depth of Modwheel MIDI Control"),
     rToggle(modwheel.exponential,  rShort("mdw.exp"), rDefault(false),
         "Modwheel Exponential Mode"),
+#undef rChangeCb
+#define rChangeCb rChangeCbBase
     rToggle(pitchwheel.is_split,   rDefault(false),
         "If PitchWheel has unified bendrange or not"),
     rParamI(pitchwheel.bendrange,  rShort("pch.d"), rDefault(200),
@@ -216,6 +222,12 @@ void Controller::setbandwidth(int value)
 void Controller::setmodwheel(int value)
 {
     modwheel.data = value;
+    setmodwheel();
+}
+
+void Controller::setmodwheel(void)
+{
+    int value = modwheel.data;
     if(modwheel.exponential == 0) {
         float tmp =
             powf(25.0f, powf(modwheel.depth / 127.0f, 1.5f) * 2.0f) / 25.0f;

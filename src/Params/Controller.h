@@ -40,6 +40,7 @@ class Controller
         void setfilterq(int value);
         void setbandwidth(int value);
         void setmodwheel(int value);
+        void setmodwheel(void);
         void setfmamp(int value);
         void setvolume(int value);
         void setsustain(int value);
