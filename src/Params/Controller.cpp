@@ -65,15 +65,23 @@ const rtosc::Ports Controller::ports = {
     rParamI(pitchwheel.bendrange_down, rDefault(0),
         "Lower Range of MIDI Pitch Wheel"),
 #undef rChangeCb
-#define rChangeCb rChangeCbBase
+#define rChangeCb obj->setexpression(); rChangeCbBase
     rToggle(expression.receive, rShort("exp.rcv"), rDefault(true),
         "Expression MIDI Receive"),
+#undef rChangeCb
+#define rChangeCb obj->setfmamp(); rChangeCbBase
     rToggle(fmamp.receive,      rShort("fma.rcv"), rDefault(true),
         "FM amplitude MIDI Receive"),
+#undef rChangeCb
+#define rChangeCb obj->setvolume(); rChangeCbBase
     rToggle(volume.receive,     rShort("vol.rcv"), rDefault(true),
         "Volume MIDI Receive"),
+#undef rChangeCb
+#define rChangeCb obj->setsustain(); rChangeCbBase
     rToggle(sustain.receive,    rShort("sus.rcv"), rDefault(true),
         "Sustain MIDI Receive"),
+#undef rChangeCb
+#define rChangeCb rChangeCbBase
     rToggle(portamento.receive, rShort("prt.rcv"), rDefault(true),
         "Portamento MIDI Receive"),
     rToggle(portamento.portamento, rDefault(false),
@@ -195,6 +203,12 @@ void Controller::setpitchwheel()
 void Controller::setexpression(int value)
 {
     expression.data = value;
+    setexpression();
+}
+
+void Controller::setexpression(void)
+{
+    int value = expression.data;
     if(expression.receive != 0)
     {
         assert( value <= 127 ); /* to protect what's left of JML's hearing */
@@ -291,6 +305,12 @@ void Controller::setmodwheel(void)
 void Controller::setfmamp(int value)
 {
     fmamp.data = value;
+    setfmamp();
+}
+
+void Controller::setfmamp(void)
+{
+    int value = fmamp.data;
     fmamp.relamp = value / 127.0f;
     if(fmamp.receive != 0)
         fmamp.relamp = value / 127.0f;
@@ -301,6 +321,12 @@ void Controller::setfmamp(int value)
 void Controller::setvolume(int value)
 {
     volume.data = value;
+    setvolume();
+}
+
+void Controller::setvolume(void)
+{
+    int value = volume.data;
     if(volume.receive != 0)
     {
         /* volume.volume = powf(0.1f, (127 - value) / 127.0f * 2.0f); */
@@ -318,6 +344,12 @@ void Controller::setvolume(int value)
 void Controller::setsustain(int value)
 {
     sustain.data = value;
+    setsustain();
+}
+
+void Controller::setsustain(void)
+{
+    int value = sustain.data;
     if(sustain.receive != 0)
         sustain.sustain = ((value < 64) ? 0 : 1);
     else
