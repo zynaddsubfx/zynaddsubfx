@@ -36,6 +36,7 @@ class Controller
         void setpitchwheel(int value);
         void setpitchwheel(void);
         void setexpression(int value);
+        void setexpression(void);
         void setpanning(int value);
         void setpanning(void);
         void setfiltercutoff(int value);
@@ -47,8 +48,11 @@ class Controller
         void setmodwheel(int value);
         void setmodwheel(void);
         void setfmamp(int value);
+        void setfmamp(void);
         void setvolume(int value);
+        void setvolume(void);
         void setsustain(int value);
+        void setsustain(void);
         /**Enable or disable portamento
          * @param value 0-127 MIDI value (greater than 64 enables)*/
         void setportamento(int value);
