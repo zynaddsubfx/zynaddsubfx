@@ -406,7 +406,7 @@ public:
 
     size_t write_space() const
     {
-        //              (0 <= this part <= 128 by invariant  )
+        //              (0 <= this part <= num_semantics by invariant)
         return m_size - ((w - r + m_size_x2) & m_size_x2_mask);
     }
 
@@ -518,7 +518,7 @@ public:
 
     // pure guesses for what sounds good:
     constexpr const static tensor_size_t num_freqs = 10;
-    constexpr const static tensor_size_t num_semantics = 128;
+    constexpr const static tensor_size_t num_semantics = 32; // (in non-WT mode)
     // number of steps on basefunc knob (the steps are integral)
     constexpr const static float wt_127f = 127.f;
     // in WT mod, we have steps of 0.25. This variable adds 3 unused waves padding.
