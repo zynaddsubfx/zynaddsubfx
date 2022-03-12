@@ -370,7 +370,7 @@ static const Ports voicePorts = {
                 printf("WT: AD WT %p requesting (max) new 2D Tensors (reason: params changed)...\n",
                        wt);
 #endif
-                obj->requestWavetable(d, isModOsc);
+                obj->requestWavetable(d, isModOsc, param_change_time);
 
                 // don't mark the whole ringbuffer (-1) as "write requested"
                 // because the current Tensor3 will be swapped before it will
@@ -1694,7 +1694,7 @@ void ADnoteVoiceParam::requestWavetable(rtosc::ThreadLink* bToU, int part, int k
             isModOsc ? 0 : (int)Presonance);
 }
 
-void ADnoteVoiceParam::requestWavetable(rtosc::RtData& data, bool isModOsc) const
+void ADnoteVoiceParam::requestWavetable(rtosc::RtData& data, bool isModOsc, int param_change_time) const
 {
     char argStr[] = "s??iii";
     argStr[1] = isModOsc ? 'T' : 'F';
@@ -1704,7 +1704,7 @@ void ADnoteVoiceParam::requestWavetable(rtosc::RtData& data, bool isModOsc) cons
         // path to this voice (T+F give the OscilGen of this voice)
         data.loc,
         // tensor relevant parameter change time (none)
-        0,
+        param_change_time,
         // wavetable parameters
         isModOsc ? (int)PextFMoscil : (int)Pextoscil,
         isModOsc ? 0 : (int)Presonance);

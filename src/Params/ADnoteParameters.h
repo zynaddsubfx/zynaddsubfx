@@ -131,7 +131,7 @@ struct ADnoteVoiceParam {
     //! send one single wavetable request via *bToU
     void requestWavetable(rtosc::ThreadLink* bToU, int part, int kit, int voice, bool isModOsc) const;
     //! send one single wavetable as a reply (data.loc must contain the location)
-    void requestWavetable(rtosc::RtData& data, bool isModOsc) const;
+    void requestWavetable(rtosc::RtData& data, bool isModOsc, int param_change_time = 0) const;
 
 
     /** If the voice is enabled */
