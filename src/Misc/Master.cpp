@@ -1442,7 +1442,6 @@ bool Master::AudioOut(float *outl, float *outr)
     if(seconds > 10*60) {//10 minute trial
         shutup = true;
         for(int i = 0; i < synth.buffersize; ++i) {
-            float tmp = (synth.buffersize_f - i) / synth.buffersize_f;
             outl[i] *= 0.0f;
             outr[i] *= 0.0f;
         }
