@@ -368,7 +368,7 @@ public:
         next_value = curr_value = value;
     };
     operator float() {
-        const float delta = (next_value - curr_value) / 128.0f;
+        const float delta = (next_value - curr_value) / 32.0f;
         curr_value += delta;
         return (curr_value);
     };
