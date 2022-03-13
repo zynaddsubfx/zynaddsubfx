@@ -301,7 +301,10 @@ void AnalogFilter::setfreq(float frequency)
 
 void AnalogFilter::setfreq_and_q(float frequency, float q_)
 {
-    q = q_;
+    if (q != q_) { // TODO: Compare diff or ratio to some form of epsilon ?
+        q = q_;
+        recompute = true;
+    }
     setfreq(frequency);
 }
 
