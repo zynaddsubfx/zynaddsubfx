@@ -301,8 +301,12 @@ void AnalogFilter::setfreq(float frequency)
 
 void AnalogFilter::setfreq_and_q(float frequency, float q_)
 {
-    q = q_;
-    setfreq(frequency);
+    if (q == q_)
+        setfreq(frequency);
+    else {
+        q = q_;
+        computefiltercoefs(frequency,q);
+    }
 }
 
 void AnalogFilter::setq(float q_)
