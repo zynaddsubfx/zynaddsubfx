@@ -301,7 +301,13 @@ void AnalogFilter::setfreq(float frequency)
 
 void AnalogFilter::setfreq_and_q(float frequency, float q_)
 {
-    if (q != q_) { // TODO: Compare diff or ratio to some form of epsilon ?
+    /*
+     * Only recompute based on Q change if change is more than 10%
+     * from current value (or the old or new Q is 0, which normally
+     * won't occur, but better to handle it than potentially
+     * fail on division by zero or assert).
+     */
+    if (q == 0.0 || q_ == 0.0 || ((q > q_ ? q / q_ : q_ / q) > 1.1)) {
         q = q_;
         recompute = true;
     }
