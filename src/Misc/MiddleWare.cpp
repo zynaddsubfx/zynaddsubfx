@@ -2061,7 +2061,7 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         assert(res);
         impl.waveTableRequestHandler.chainWtParamRequest(part, kit, voice, false, d);
         d.forward();
-        rEnd}, // TODO WT2: might handle re-request WTs in ADnotePar...
+        rEnd}, // TODO WT1: might handle re-request WTs in ADnotePar...
     {"part#" STRINGIFY(NUM_MIDI_PARTS)
         "/kit#" STRINGIFY(NUM_KIT_ITEMS) "/adpars/GlobalPar/Reson/", 0, nullptr,
         rBegin;
