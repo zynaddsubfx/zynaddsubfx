@@ -26,23 +26,37 @@ namespace zyn {
 
 #define rObject Controller
 
+#define rChangeCbBase if (obj->time) { obj->last_update_timestamp = obj->time->time(); }
+
 #undef rChangeCb
-#define rChangeCb if (obj->time) { obj->last_update_timestamp = obj->time->time(); }
+#define rChangeCb rChangeCbBase
 const rtosc::Ports Controller::ports = {
+#undef rChangeCb
+#define rChangeCb obj->setpanning(); rChangeCbBase
     rParamZyn(panning.depth,       rShort("pan.d"), rDefault(64),
         "Depth of Panning MIDI Control"),
+#undef rChangeCb
+#define rChangeCb obj->setfiltercutoff(); rChangeCbBase
     rParamZyn(filtercutoff.depth,  rShort("fc.d"), rDefault(64),
         "Depth of Filter Cutoff MIDI Control"),
+#undef rChangeCb
+#define rChangeCb obj->setfilterq(); rChangeCbBase
     rParamZyn(filterq.depth,       rShort("fq.d"), rDefault(64),
         "Depth of Filter Q MIDI Control"),
+#undef rChangeCb
+#define rChangeCb obj->setbandwidth(); rChangeCbBase
     rParamZyn(bandwidth.depth,     rShort("bw.d"), rDefault(64),
         "Depth of Bandwidth MIDI Control"),
     rToggle(bandwidth.exponential, rShort("bw.exp"), rDefault(false),
         "Bandwidth Exponential Mode"),
+#undef rChangeCb
+#define rChangeCb obj->setmodwheel(); rChangeCbBase
     rParamZyn(modwheel.depth,      rShort("mdw.d"), rDefault(80),
         "Depth of Modwheel MIDI Control"),
     rToggle(modwheel.exponential,  rShort("mdw.exp"), rDefault(false),
         "Modwheel Exponential Mode"),
+#undef rChangeCb
+#define rChangeCb obj->setpitchwheel(); rChangeCbBase
     rToggle(pitchwheel.is_split,   rDefault(false),
         "If PitchWheel has unified bendrange or not"),
     rParamI(pitchwheel.bendrange,  rShort("pch.d"), rDefault(200),
@@ -50,18 +64,30 @@ const rtosc::Ports Controller::ports = {
         "Range of MIDI Pitch Wheel"),
     rParamI(pitchwheel.bendrange_down, rDefault(0),
         "Lower Range of MIDI Pitch Wheel"),
+#undef rChangeCb
+#define rChangeCb obj->setexpression(); rChangeCbBase
     rToggle(expression.receive, rShort("exp.rcv"), rDefault(true),
         "Expression MIDI Receive"),
+#undef rChangeCb
+#define rChangeCb obj->setfmamp(); rChangeCbBase
     rToggle(fmamp.receive,      rShort("fma.rcv"), rDefault(true),
         "FM amplitude MIDI Receive"),
+#undef rChangeCb
+#define rChangeCb obj->setvolume(); rChangeCbBase
     rToggle(volume.receive,     rShort("vol.rcv"), rDefault(true),
         "Volume MIDI Receive"),
+#undef rChangeCb
+#define rChangeCb obj->setsustain(); rChangeCbBase
     rToggle(sustain.receive,    rShort("sus.rcv"), rDefault(true),
         "Sustain MIDI Receive"),
+#undef rChangeCb
+#define rChangeCb rChangeCbBase
     rToggle(portamento.receive, rShort("prt.rcv"), rDefault(true),
         "Portamento MIDI Receive"),
     rToggle(portamento.portamento, rDefault(false),
         "Portamento Enable"),
+    rToggle(portamento.automode, rDefault(true),
+        "Portamento Auto mode"),
     rParamZyn(portamento.time,          rShort("time"), rDefault(64),
         "Portamento Length"),
     rToggle(portamento.proportional,    rShort("propt."), rDefault(false),
@@ -77,10 +103,16 @@ const rtosc::Ports Controller::ports = {
         "Type of threshold"),
     rParamZyn(portamento.updowntimestretch, rShort("up/dwn"), rDefault(64),
         "Relative length of glide up vs glide down"),
+#undef rChangeCb
+#define rChangeCb obj->setresonancecenter(); rChangeCbBase
     rParamZyn(resonancecenter.depth,    rShort("rfc.d"), rDefault(64),
         "Resonance Center MIDI Depth"),
+#undef rChangeCb
+#define rChangeCb obj->setresonancebw(); rChangeCbBase
     rParamZyn(resonancebandwidth.depth, rShort("rbw.d"), rDefault(64),
         "Resonance Bandwidth MIDI Depth"),
+#undef rChangeCb
+#define rChangeCb rChangeCbBase
     rToggle(NRPN.receive, rDefault(true), "NRPN MIDI Enable"),
     rAction(defaults),
 };
@@ -95,33 +127,35 @@ Controller::Controller(const SYNTH_T &synth_, const AbsTime *time_)
 
 void Controller::defaults()
 {
-    pitchwheel.bendrange = 200; //2 halftones
-    pitchwheel.bendrange_down = 0; //Unused by default
-    pitchwheel.is_split   = false;
-    expression.receive    = 1;
-    panning.depth         = 64;
-    filtercutoff.depth    = 64;
-    filterq.depth         = 64;
-    bandwidth.depth       = 64;
-    bandwidth.exponential = 0;
-    modwheel.depth        = 80;
-    modwheel.exponential  = 0;
-    fmamp.receive         = 1;
-    volume.receive        = 1;
-    sustain.receive       = 1;
-    NRPN.receive = 1;
+    pitchwheel.bendrange         = 200; //2 halftones
+    pitchwheel.bendrange_down    = 0; //Unused by default
+    pitchwheel.is_split          = false;
+    expression.receive           = 1;
+    panning.depth                = 64;
+    filtercutoff.depth           = 64;
+    filterq.depth                = 64;
+    bandwidth.depth              = 64;
+    bandwidth.exponential        = 0;
+    modwheel.depth               = 80;
+    modwheel.exponential         = 0;
+    fmamp.receive                = 1;
+    volume.receive               = 1;
+    sustain.receive              = 1;
+    NRPN.receive                 = 1;
 
-    portamento.portamento = 0;
-    portamento.proportional = 0;
-    portamento.propRate     = 80;
-    portamento.propDepth    = 90;
-    portamento.receive      = 1;
-    portamento.time = 64;
+    portamento.portamento        = 0;
+    portamento.automode          = 1;
+    portamento.proportional      = 0;
+    portamento.propRate          = 80;
+    portamento.propDepth         = 90;
+    portamento.receive           = 1;
+    portamento.time              = 64;
     portamento.updowntimestretch = 64;
-    portamento.pitchthresh     = 3;
-    portamento.pitchthreshtype = 1;
-    resonancecenter.depth    = 64;
-    resonancebandwidth.depth = 64;
+    portamento.pitchthresh       = 3;
+    portamento.pitchthreshtype   = 1;
+
+    resonancecenter.depth        = 64;
+    resonancebandwidth.depth     = 64;
 
     setportamento(0);
 }
@@ -151,6 +185,12 @@ void Controller::resetall()
 void Controller::setpitchwheel(int value)
 {
     pitchwheel.data = value;
+    setpitchwheel();
+}
+
+void Controller::setpitchwheel()
+{
+    int value = pitchwheel.data;
     float cents = value / 8192.0f;
     if(pitchwheel.is_split && cents < 0)
         cents *= pitchwheel.bendrange_down;
@@ -163,6 +203,12 @@ void Controller::setpitchwheel(int value)
 void Controller::setexpression(int value)
 {
     expression.data = value;
+    setexpression();
+}
+
+void Controller::setexpression(void)
+{
+    int value = expression.data;
     if(expression.receive != 0)
     {
         assert( value <= 127 ); /* to protect what's left of JML's hearing */
@@ -176,12 +222,24 @@ void Controller::setexpression(int value)
 void Controller::setpanning(int value)
 {
     panning.data = value;
+    setpanning();
+}
+
+void Controller::setpanning(void)
+{
+    int value = panning.data;
     panning.pan  = (value / 128.0f - 0.5f) * (panning.depth / 64.0f);
 }
 
 void Controller::setfiltercutoff(int value)
 {
-    filtercutoff.data    = value;
+    filtercutoff.data  = value;
+    setfiltercutoff();
+}
+
+void Controller::setfiltercutoff(void)
+{
+    int value = filtercutoff.data;
     filtercutoff.relfreq =
         (value - 64.0f) * filtercutoff.depth / 4096.0f * 3.321928f;         //3.3219f..=ln2(10)
 }
@@ -189,12 +247,24 @@ void Controller::setfiltercutoff(int value)
 void Controller::setfilterq(int value)
 {
     filterq.data = value;
+    setfilterq();
+}
+
+void Controller::setfilterq(void)
+{
+    int value = filterq.data;
     filterq.relq = powf(30.0f, (value - 64.0f) / 64.0f * (filterq.depth / 64.0f));
 }
 
 void Controller::setbandwidth(int value)
 {
     bandwidth.data = value;
+    setbandwidth();
+}
+
+void Controller::setbandwidth(void)
+{
+    int value = bandwidth.data;
     if(bandwidth.exponential == 0) {
         float tmp = powf(25.0f, powf(bandwidth.depth / 127.0f, 1.5f)) - 1.0f;
         if((value < 64) && (bandwidth.depth >= 64))
@@ -212,6 +282,12 @@ void Controller::setbandwidth(int value)
 void Controller::setmodwheel(int value)
 {
     modwheel.data = value;
+    setmodwheel();
+}
+
+void Controller::setmodwheel(void)
+{
+    int value = modwheel.data;
     if(modwheel.exponential == 0) {
         float tmp =
             powf(25.0f, powf(modwheel.depth / 127.0f, 1.5f) * 2.0f) / 25.0f;
@@ -228,7 +304,13 @@ void Controller::setmodwheel(int value)
 
 void Controller::setfmamp(int value)
 {
-    fmamp.data   = value;
+    fmamp.data = value;
+    setfmamp();
+}
+
+void Controller::setfmamp(void)
+{
+    int value = fmamp.data;
     fmamp.relamp = value / 127.0f;
     if(fmamp.receive != 0)
         fmamp.relamp = value / 127.0f;
@@ -239,6 +321,12 @@ void Controller::setfmamp(int value)
 void Controller::setvolume(int value)
 {
     volume.data = value;
+    setvolume();
+}
+
+void Controller::setvolume(void)
+{
+    int value = volume.data;
     if(volume.receive != 0)
     {
         /* volume.volume = powf(0.1f, (127 - value) / 127.0f * 2.0f); */
@@ -256,6 +344,12 @@ void Controller::setvolume(int value)
 void Controller::setsustain(int value)
 {
     sustain.data = value;
+    setsustain();
+}
+
+void Controller::setsustain(void)
+{
+    int value = sustain.data;
     if(sustain.receive != 0)
         sustain.sustain = ((value < 64) ? 0 : 1);
     else
@@ -271,13 +365,25 @@ void Controller::setportamento(int value)
 
 void Controller::setresonancecenter(int value)
 {
-    resonancecenter.data      = value;
+    resonancecenter.data = value;
+    setresonancecenter();
+}
+
+void Controller::setresonancecenter(void)
+{
+    int value = resonancecenter.data;
     resonancecenter.relcenter =
         powf(3.0f, (value - 64.0f) / 64.0f * (resonancecenter.depth / 64.0f));
 }
+
 void Controller::setresonancebw(int value)
 {
     resonancebandwidth.data  = value;
+}
+
+void Controller::setresonancebw(void)
+{
+    int value = resonancebandwidth.data;
     resonancebandwidth.relbw =
         powf(1.5f, (value - 64.0f) / 64.0f * (resonancebandwidth.depth / 127.0f));
 }
@@ -348,6 +454,7 @@ void Controller::add2XML(XMLwrapper& xml)
     xml.addpar("portamento_pitchthresh", portamento.pitchthresh);
     xml.addpar("portamento_pitchthreshtype", portamento.pitchthreshtype);
     xml.addpar("portamento_portamento", portamento.portamento);
+    xml.addparbool("portamento_auto", portamento.automode);
     xml.addpar("portamento_updowntimestretch", portamento.updowntimestretch);
     xml.addpar("portamento_proportional", portamento.proportional);
     xml.addpar("portamento_proprate", portamento.propRate);
@@ -389,6 +496,8 @@ void Controller::getfromXML(XMLwrapper& xml)
 
     portamento.receive = xml.getparbool("portamento_receive",
                                          portamento.receive);
+    portamento.automode = xml.getparbool("portamento_auto",
+                                         portamento.automode);
     portamento.time = xml.getpar127("portamento_time",
                                      portamento.time);
     portamento.pitchthresh = xml.getpar127("portamento_pitchthresh",

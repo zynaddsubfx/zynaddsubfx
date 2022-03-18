@@ -2,7 +2,7 @@
 <?xml version="1.0f" encoding="UTF-8"?>
 <!DOCTYPE ZynAddSubFX-data>
 <ZynAddSubFX-data version-major="3" version-minor="0"
-version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
+version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <INFORMATION>
 <par_bool name="PADsynth_used" value="yes" />
 </INFORMATION>
@@ -1280,6 +1280,7 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="portamento_pitchthresh" value="3" />
 <par name="portamento_pitchthreshtype" value="1" />
 <par name="portamento_portamento" value="0" />
+<par_bool name="portamento_auto" value="no" />
 <par name="portamento_updowntimestretch" value="64" />
 <par name="portamento_proportional" value="0" />
 <par name="portamento_proprate" value="80" />
@@ -1553,6 +1554,7 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="portamento_pitchthresh" value="3" />
 <par name="portamento_pitchthreshtype" value="1" />
 <par name="portamento_portamento" value="0" />
+<par_bool name="portamento_auto" value="no" />
 <par name="portamento_updowntimestretch" value="64" />
 <par name="portamento_proportional" value="0" />
 <par name="portamento_proprate" value="80" />
@@ -3931,6 +3933,7 @@ version-revision="6" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="portamento_pitchthresh" value="3" />
 <par name="portamento_pitchthreshtype" value="1" />
 <par name="portamento_portamento" value="0" />
+<par_bool name="portamento_auto" value="no" />
 <par name="portamento_updowntimestretch" value="64" />
 <par name="portamento_proportional" value="0" />
 <par name="portamento_proprate" value="80" />

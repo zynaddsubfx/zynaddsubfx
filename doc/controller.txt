@@ -20,11 +20,71 @@ General
 * *Sustain*: enable/disable sustain pedal
 * *PWheelB.Rng (cents)*: Pitch Wheel Bend Range (cents; 100 cents = 1 halftone)
 
+Modulation wheel
+~~~~~~~~~~~~~~~~
+
+The modulation wheel (MIDI CC #1) controls the amount of modulation applied
+by the Amplitude, Frequency and Filter LFOs in all voices. The amount
+of control is governed by the Modulation Wheel depth parameter. When this
+parameter is set to 0, the modulation wheel has no control over the modulation
+amount, and it is always the value set by the *Depth* setting in the
+respective LFO. The default value for the Modulation Wheel depth parameter
+is 80.
+
+When the modulation depth parameter is advanced above 0, the modulation wheel
+starts to influence the amount of modulation. When the modulation wheel
+is it its center position (control value 64), the modulation amount will
+always be at the value set by the *Depth* setting in LFO. Smaller modulation
+wheel values than 64 will decrease the amount of modulation, and larger
+modulation values will increase it, the amount of decrease or increase being
+governed by the modulation depth parameter. The modulation amount does not
+necessarily drop to zero just because the modulation wheel is at zero,
+depending on the setting of the depth parameter. For the modulation amount
+to drop to zero, the modulation wheel depth value must be 64 (half way
+position) or more.
+
+Note that in any case, when the modulation depth is set such that modulation
+wheel does have control over the modulation amount, the maximum amount of
+modulation applied (when the modulation wheel has a value of 127), will be
+higher than the base setting in the LFO depth parameters.
+
+When the *Exp Mwh* parameter is enabled, the modulation scale becomes
+exponential. Pragmatically, this has two effects:
+
+* The amount of modulation as the modulation wheel is advanced becomes more
+  gradual, or put another way, the modulation wheel must be advanced further to
+  get the same amount of modulation when the scale is exponential compared to
+  when it is not. This gives more precise control over the onset of modulation.
+* When the modulation wheel is advanced past its center position (value 64),
+  the maximum attainable modulation amount is much higher.
+
+Note that even when modulation scale is set to exponential, a center modulation
+wheel value (64) still corresponds to the modulation depth set in the
+respective LFOs.
+
+So, to sum up:
+
+* The Modulation Wheel depth parameter must be larger 0 for the modulation
+  wheel to have any effect on the modulation amount.
+* A center modulation wheel position (value 64) corresponds to the modulation
+  depth setting in the LFOs.
+* Decreasing the modulation wheel value towards 0 will reduce the amount of
+  modulation, and advancing it towards the maximum value (127) will increase
+  the amount of modulation, as governed by the Modulation Wheel depth
+  parameter, with the amount of modulation set by the LFO depth parameters
+  as the base.
+* For a modulation wheel value of 0 to completely inhibit any modulation,
+  the Modulation Wheel depth control must be 64 (half way) or higher.
+* Enabling Exponential Modulation Wheel will provide finer control of
+  the onset of modulation, as well as higher achievable maximum modulation
+  values.
+
 Portamento
 ~~~~~~~~~~
 
 * *Prt.Rcv*: If the part receives portamento On/Off (65) controller
 * *Enable*: If portamento is enabled for the part
+* *Auto*: If portamento is applied only when playing legato
 * *Time*: The duration of the portamento
 * *Up/down*: Sets ratio of portamento time between up- and down-going pitch
 steps
@@ -63,24 +123,31 @@ prevailed at the time.
 
 In a polyphonic analog synthesizer, a trivial implementation of portamento is
 using separate lag circuits at the keyboard CV inputs of each voice. This does
-create a bit of a chaotic portamento behaviour however, because the glide for a
+create a bit of a chaotic portamento behavior however, because the glide for a
 played voice will start at whatever pitch the individual voice had previously,
 which is not necessarily the same as the previously played note, as it would be
 in the case of monophonic portamento. Nevertheless, this is the most common
 implementation of portamento on a polyphonic analog synthesizer, and the mild
 chaos that ensues when portamento is enabled is still musically useful.
 
-In a digital synthesizer, it is possible to emulate the behaviour of an analog
-polyphonic synthesizer, especially if the implementation models the behaviour
+Many analog synthesizers implement an optional so-called auto mode for the
+portamento, whereby portamento is only applied when notes are played
+legato (i.e. one one key is pressed without releasing the previously played
+key). This way, the player has direct control over the application of
+portamento directly in the playing style, without having to resort to a
+separate controller (button or pedal) to enable/disable portamento.
+
+In a digital synthesizer, it is possible to emulate the behavior of an analog
+polyphonic synthesizer, especially if the implementation models the behavior
 in terms of a fixed set of voices which are allocated much in the same way as
 the analog voices would be. However, in synthesizers such as ZynAddSubFx,
 voices are allocated on an as-needed basis, and deallocated afterwards, so when
 triggering a new voice, it has no "previous pitch". Unless we purposely want to
-emulate the behaviour of a voice allocated analog synthesizer, we can explore
+emulate the behavior of a voice allocated analog synthesizer, we can explore
 other portamento models.
 
 Indeed, in a digital synthesizer, it is possible to use the monophonic
-portamento behaviour as the basis also for polyphonic portamento. This means
+portamento behavior as the basis also for polyphonic portamento. This means
 that when triggering a new note, the pitch of the note should start at the
 pitch of the previously played note, which may not actually be the target pitch
 of that note if there was an ongoing portamento at the time the new note was
@@ -92,28 +159,32 @@ glide, C3 is played. The portamento for C3 should then start at G1, i.e. the
 pitch that the second played note had reached at that time, rather than for
 instance at the target pitch of C2, which would give the impression of a C2
 suddenly being played from nowhere, before gliding up to C3. This mimics the
-smooth new-notes-start-at-the-current-pitch behaviour of a monophonic
+smooth new-notes-start-at-the-current-pitch behavior of a monophonic
 portamento implementation, which is both logical and consistent.
 
 Portamento operation in ZynAddSubFx
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For each note played, the portamento controller makes a decision as to whether
-the note should have portamento or not, governed by the *Enable*, *Tr.Type* and
-*Thresh* parameters. Whenever a note is played which should have portamento,
-the portamento starts at the pitch that the previously played note was at when
-the new note was played. This slightly long-winded explanation encompasses the
-case of the previous note being in the process of gliding due to portamento, in
-which case the new note should start precisely at that pitch. This behavior is
-the same in all key assignment modes (polyphonic, monophonic or legato).
+the note should have portamento or not, governed by the *Auto*, *Enable*,
+*Tr.Type* and *Thresh* parameters. Whenever a note is played which should have
+portamento, the portamento starts at the pitch that the previously played note
+was at when the new note was played. This slightly long-winded explanation
+encompasses the case of the previous note being in the process of gliding due
+to portamento, in which case the new note should start precisely at that pitch.
+This behavior is the same in all key assignment modes (polyphonic, monophonic
+or legato).
 
 In poly mode, each note will have its own portamento, i.e. each note will glide
 individually from its initial pitch (see previous section) to the target pitch
 (= the note played).
 
-When portamento is enabled in poly mode, all notes have portamento, whereas in
-mono/legato mode, the player must play legato (hold one note while playing
-another) in order for the note to have portamento.
+Regardless of the key assign mode, portamento can be enabled for every note, or
+only when notes are played legato. This is governed by the *Auto* parameter.
+This parameter is enabled by default. When loading patches created prior to
+Zynaddsubfx version 3.0.7, the *Auto* parameter is set according to the key
+assign mode: Auto is disabled in poly mode, and enabled in mono and legato
+modes.
 
 Resonance
 ~~~~~~~~~
