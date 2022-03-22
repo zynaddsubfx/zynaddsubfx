@@ -465,6 +465,17 @@ void NotePool::releasePlayingNotes(void)
     }
 }
 
+void NotePool::releaseSustainingNotes(void)
+{
+    for(auto &d:activeDesc()) {
+        if(d.sustained()) {
+            d.setStatus(KEY_RELEASED);
+            for(auto s:activeNotes(d))
+                s.note->releasekey();
+        }
+    }
+}
+
 void NotePool::release(NoteDescriptor &d)
 {
     d.setStatus(KEY_RELEASED);
