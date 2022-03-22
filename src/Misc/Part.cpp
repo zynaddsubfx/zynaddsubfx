@@ -873,10 +873,7 @@ void Part::ReleaseSustainedKeys()
         if(monomemBack() != lastnote) // Sustain controller manipulation would cause repeated same note respawn without this check.
             MonoMemRenote();  // To play most recent still held note.
 
-    for(auto &d:notePool.activeDesc())
-        if(d.sustained())
-            for(auto &s:notePool.activeNotes(d))
-                s.note->releasekey();
+    notePool.releaseSustainingNotes();
 }
 
 /*
@@ -885,10 +882,7 @@ void Part::ReleaseSustainedKeys()
 
 void Part::ReleaseAllKeys()
 {
-    for(auto &d:notePool.activeDesc())
-        if(!d.released())
-            for(auto &s:notePool.activeNotes(d))
-                s.note->releasekey();
+    notePool.releasePlayingNotes();
 }
 
 // Call NoteOn(...) with the most recent still held key as new note

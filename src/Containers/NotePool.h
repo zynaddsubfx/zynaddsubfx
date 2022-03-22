@@ -146,6 +146,7 @@ class NotePool
         void limitVoice(int preferred_note);
 
         void releasePlayingNotes(void);
+        void releaseSustainingNotes(void);
         void releaseNote(note_t note);
         void release(NoteDescriptor &d);
         void latch(NoteDescriptor &d);
