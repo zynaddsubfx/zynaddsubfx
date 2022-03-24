@@ -686,7 +686,7 @@ void Part::NoteOff(note_t note) //release the key
     for(auto &desc:notePool.activeDesc()) {
         if(desc.note != note || !desc.playing())
             continue;
-        // if latch is on we ignore noteoff, but set the state to lateched
+        // if latch is on we ignore noteoff, but set the state to latched
         if(Platchmode) {
             notePool.latch(desc);
         } else if(!ctl.sustain.sustain) { //the sustain pedal is not pushed
@@ -701,6 +701,33 @@ void Part::NoteOff(note_t note) //release the key
             else {
                 notePool.release(desc);
             }
+        }
+    }
+}
+
+/*
+ * This handles the MIDI All Notes Off message (the 'notes off' in 'all notes
+ * off' refers to note off events, not actually silencing all playing
+ * voices).
+ */
+void Part::ReleaseAllKeys(void)
+{
+    // Clear all notes from list.
+    monomemClear();
+
+    for(auto &desc:notePool.activeDesc()) {
+        if(!desc.playing())
+            continue;
+        // if latch is on we ignore noteoff, but set the state to latched
+        if(Platchmode) {
+            notePool.latch(desc);
+        } else if(!ctl.sustain.sustain) { //the sustain pedal is not pushed
+            notePool.release(desc);
+        } else {   //the sustain pedal is pushed
+            if(desc.canSustain())
+                desc.doSustain();
+            else
+                notePool.release(desc);
         }
     }
 }
@@ -874,15 +901,6 @@ void Part::ReleaseSustainedKeys()
             MonoMemRenote();  // To play most recent still held note.
 
     notePool.releaseSustainingNotes();
-}
-
-/*
- * Release all keys
- */
-
-void Part::ReleaseAllKeys()
-{
-    notePool.releasePlayingNotes();
 }
 
 // Call NoteOn(...) with the most recent still held key as new note
