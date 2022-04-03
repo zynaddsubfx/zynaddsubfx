@@ -60,8 +60,6 @@ rtosc::Ports Sympathetic::ports = {
             "Number of Strings"),
     rEffPar(Pbasenote, 11, rShort("base"), rDefault(57), // basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
             "Midi Note of Lowest String"),
-    rEffPar(Pcrossgain, 12, rShort("cross"), rDefault(0),
-            "Crossgain between neigbouring notes"),
     rArrayF(freqs, 88, rLinear(27.50f,4186.01f),
            "String Frequencies"),
 };
@@ -129,7 +127,7 @@ void Sympathetic::applyfilters(float *efxoutl, float *efxoutr)
 //Effect output
 void Sympathetic::out(const Stereo<float *> &smp)
 {
-    float inputvol = powf(5.0f, (Pdrive - 32.0f) / 127.0f);
+    float inputvol = powf(2.0f, (Pdrive - 65.0f) / 128.0f) / 2.0f;
     if(Pnegate)
         inputvol *= -1.0f;
 
@@ -250,13 +248,13 @@ unsigned char Sympathetic::getpresetpar(unsigned char npreset, unsigned int npar
     static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
         //Vol Pan Q Drive Lev Spr neg lp hp sz  strings note cross
         //Piano 12-String
-        {100, 64, 125, 5, 80, 10, 0, 127, 0, 3,   12,  57, 0},
+        {100, 64, 125, 5, 80, 10, 0, 127, 0, 3,   12,  57},
         //Piano 60-String
-        {80,  64, 125, 5, 90, 5,  0, 127, 0, 1,   60,  33, 0},
+        {80,  64, 125, 5, 90, 5,  0, 127, 0, 1,   60,  33},
         //Guitar 6-String
-        {100, 64, 110, 5, 65, 0,  0, 127, 0, 1,    6,  52, 0},
+        {100, 64, 110, 5, 65, 0,  0, 127, 0, 1,    6,  52},
         //Guitar 12-String
-        {90,  64, 110, 5, 77, 10, 0, 127, 0, 2,    6,  52, 0},
+        {90,  64, 110, 5, 77, 10, 0, 127, 0, 2,    6,  52},
     };
     if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
         if(npar == 0 && insertion == 0) {
@@ -329,10 +327,6 @@ void Sympathetic::changepar(int npar, unsigned char value)
             baseFreq = powf(2.0f, ((float)Pbasenote-69.0f)/12.0f)*440.0f;
             calcFreqs();
             break;
-        case 12:
-            Pcrossgain = value;
-            filterBank->crossgain = (float)Pcrossgain/1000.0f;
-            break;
         default:
             break;
     }
@@ -353,7 +347,6 @@ unsigned char Sympathetic::getpar(int npar) const
         case 9:  return Punison_size;
         case 10: return Pstrings;
         case 11: return Pbasenote;
-        case 12: return Pcrossgain;
         default: return 0; //in case of bogus parameter number
     }
 }

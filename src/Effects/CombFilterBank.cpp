@@ -104,22 +104,14 @@ namespace zyn {
                 const float sample = sampleLerp(output[j], pos);
                 output[j][mem_size-buffersize+i] = smp[i]*inputgain
                     + tanhX(sample*gainbuf[i>>4]);
-                // add crossover from left neigbouring string
-                if (crossgain>0.0f)
-                    output[j][mem_size-buffersize+i] += (j>0) ? output[j-1][mem_size-buffersize+i] * crossgain : 0;
             }
-            // add crossover of right neighbouring string
-            if (crossgain>0.0f)
-                for (int j = nrOfStrings-2; j >= 0; --j)
-                    output[j][mem_size-buffersize+i] += output[j+1][mem_size-buffersize+i] * crossgain;
-
             // mix output buffer samples to output sample
             smp[i]=0.0f;
             for (unsigned int j = 0; j < nrOfStrings; ++j)
                 smp[i] += output[j][mem_size-buffersize+i];
 
             // apply output gain but
-            smp[i] *= outgain / ((nrOfStrings!=0 ? (float)nrOfStrings : 1.0f) * (1.0f+2.0f*crossgain));
+            smp[i] *= outgain / (nrOfStrings!=0 ? (float)nrOfStrings : 1.0f);
         }
         // shift the buffer content one buffersize to the left
         for(unsigned int j = 0; j < nrOfStrings; ++j)

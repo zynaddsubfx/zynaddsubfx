@@ -20,7 +20,6 @@ class CombFilterBank
     float inputgain;
     float outgain;
     float gainbwd=0.0f;
-    float crossgain=0.0f;
 
     void setStrings(unsigned int nr, float basefreq);
 

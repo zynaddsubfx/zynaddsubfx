@@ -48,7 +48,6 @@ class Sympathetic:public Effect
         unsigned char Punison_frequency_spread;
         unsigned char Pstrings;      //number of strings
         unsigned char Pbasenote;     //midi note of lowest string
-        unsigned char Pcrossgain;    //amount of sound leaking to neighbouring strings
 
         unsigned char spread, spread_old;
 
