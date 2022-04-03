@@ -12,7 +12,7 @@ namespace zyn {
     CombFilterBank::CombFilterBank(Allocator *alloc, unsigned int samplerate_, int buffersize_):
     inputgain(1.0f),
     outgain(1.0f),
-    baseFreq(0.0f),
+    baseFreq(110.0f),
     nrOfStrings(0),
     memory(*alloc),
     samplerate(samplerate_),
@@ -31,15 +31,17 @@ namespace zyn {
 
     void CombFilterBank::setStrings(unsigned int nrOfStringsNew, float baseFreqNew)
     {
-        if(nrOfStringsNew == nrOfStrings && baseFreqNew == baseFreq) 
+
+        // limit nrOfStringsNew
+        nrOfStringsNew = min(NUM_SYMPATHETIC_STRINGS,nrOfStringsNew);
+
+        if(nrOfStringsNew == nrOfStrings && baseFreqNew == baseFreq)
             return;
 
-        const unsigned int mem_size_new = (int)ceilf(( (float)samplerate/baseFreqNew + buffersize + 2)/16) * 16;
+        const unsigned int mem_size_new = (int)ceilf(( (float)samplerate/baseFreqNew*1.03f + buffersize + 2)/16) * 16;
         if(mem_size_new == mem_size)
         {
-            //limit to 88 Strings
-            nrOfStringsNew = (nrOfStringsNew>88) ? 88 : nrOfStringsNew;
-            if(nrOfStringsNew>nrOfStrings) 
+            if(nrOfStringsNew>nrOfStrings)
             {
                 for(unsigned int i = nrOfStrings; i < nrOfStringsNew; ++i)
                 {
@@ -47,7 +49,7 @@ namespace zyn {
                     memset(output[i], 0, mem_size*sizeof(float));
                 }
             }
-            else if(nrOfStringsNew<nrOfStrings) 
+            else if(nrOfStringsNew<nrOfStrings)
                 for(unsigned int i = nrOfStringsNew; i < nrOfStrings; ++i)
                     memory.devalloc(output[i]);
         } else
@@ -55,16 +57,18 @@ namespace zyn {
             // free the old buffers (wrong size for baseFreqNew)
             for(unsigned int i = 0; i < nrOfStrings; ++i)
                 memory.devalloc(output[i]);
-            // update mem_size
-            mem_size = mem_size_new;
+
             // allocate buffers with new size
             for(unsigned int i = 0; i < nrOfStringsNew; ++i)
             {
-                output[i] = memory.valloc<float>(mem_size);
-                memset(output[i], 0, mem_size*sizeof(float));
+                output[i] = memory.valloc<float>(mem_size_new);
+                memset(output[i], 0, mem_size_new*sizeof(float));
             }
+            // update mem_size and baseFreq
+            mem_size = mem_size_new;
             baseFreq = baseFreqNew;
         }
+        // update nrOfStrings
         nrOfStrings = nrOfStringsNew;
     }
 
@@ -73,19 +77,18 @@ namespace zyn {
         // Pade approximation of tanh(x) bound to [-1 .. +1]
         // https://mathr.co.uk/blog/2017-09-06_approximating_hyperbolic_tangent.html
         const float x2 = x*x;
-        return (x*(105.0f+10.0f*x2)/(105.0f+(45.0f+x2)*x2)); //
+        return (x*(105.0f+10.0f*x2)/(105.0f+(45.0f+x2)*x2));
     }
 
     inline float CombFilterBank::sampleLerp(float *smp, float pos) {
         int poshi = (int)pos; // integer part (pos >= 0)
         float poslo = pos - (float) poshi; // decimal part
         // linear interpolation between samples
-        return smp[poshi] + poslo * (smp[poshi+1]-smp[poshi]); 
+        return smp[poshi] + poslo * (smp[poshi+1]-smp[poshi]);
     }
 
     void CombFilterBank::filterout(float *smp)
     {
-        
         float gainbuf[buffersize>>4];
         if (!gain_smoothing.apply( gainbuf, buffersize>>4, gainbwd ) )
             for (unsigned int i = 0; i < buffersize>>4; i ++) gainbuf[i] = gainbwd;
@@ -95,27 +98,28 @@ namespace zyn {
             for (unsigned int j = 0; j < nrOfStrings; ++j)
             {
                 // calculate the feedback sample positions in the buffer
-                const float delay = ((float)samplerate)/max({freqs[j], baseFreq});
-                const float pos = float(mem_size-buffersize+i) - delay;
+                const float pos = float(mem_size-buffersize+i) - delays[j];
                 // sample at that position
-                if (pos < 0.0f || pos >= mem_size) printf("pos: %f\n", pos);
+                //~ if (pos < 0.0f || pos >= mem_size) printf("pos: %f\n", pos);
                 const float sample = sampleLerp(output[j], pos);
-                output[j][mem_size-buffersize+i] = smp[i]*inputgain 
+                output[j][mem_size-buffersize+i] = smp[i]*inputgain
                     + tanhX(sample*gainbuf[i>>4]);
                 // add crossover from left neigbouring string
-                output[j][mem_size-buffersize+i] += (j>0) ? output[j-1][mem_size-buffersize+i] * crossgain : 0;
+                if (crossgain>0.0f)
+                    output[j][mem_size-buffersize+i] += (j>0) ? output[j-1][mem_size-buffersize+i] * crossgain : 0;
             }
             // add crossover of right neighbouring string
-            for (int j = nrOfStrings-2; j >= 0; --j)
-                output[j][mem_size-buffersize+i] += output[j+1][mem_size-buffersize+i] * crossgain;
-            
+            if (crossgain>0.0f)
+                for (int j = nrOfStrings-2; j >= 0; --j)
+                    output[j][mem_size-buffersize+i] += output[j+1][mem_size-buffersize+i] * crossgain;
+
             // mix output buffer samples to output sample
             smp[i]=0.0f;
             for (unsigned int j = 0; j < nrOfStrings; ++j)
                 smp[i] += output[j][mem_size-buffersize+i];
-            
-            // apply output gain but 
-            smp[i] *= outgain/(max({(float)nrOfStrings, 1.0f})*(1.0f+2.0f*crossgain));
+
+            // apply output gain but
+            smp[i] *= outgain / ((nrOfStrings!=0 ? (float)nrOfStrings : 1.0f) * (1.0f+2.0f*crossgain));
         }
         // shift the buffer content one buffersize to the left
         for(unsigned int j = 0; j < nrOfStrings; ++j)

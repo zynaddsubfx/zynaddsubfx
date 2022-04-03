@@ -31,6 +31,16 @@ namespace zyn {
       DOC(__VA_ARGS__), NULL, rEffParCb(idx)}
 
 rtosc::Ports Sympathetic::ports = {
+    {"preset::i", rProp(parameter)
+                  rOptions(Piano, Grand, Guitar, 12-String)
+                  rDoc("Instrument Presets"), 0,
+                  rBegin;
+                  rObject *o = (rObject*)d.obj;
+                  if(rtosc_narguments(msg))
+                      o->setpreset(rtosc_argument(msg, 0).i);
+                  else
+                      d.reply(d.loc, "i", o->Ppreset);
+                  rEnd},
     rEffParVol(rDefault(127)),
     rEffParPan(rDefault(64)),
     rEffPar(Pq, 2, rShort("q"), rDefault(65),
@@ -44,9 +54,9 @@ rtosc::Ports Sympathetic::ports = {
     rEffParTF(Pnegate, 6, rShort("neg"), rDefault(false), "Negate Signal"),
     rEffPar(Plpf, 7, rShort("lpf"), rDefault(127), "Low Pass Cutoff"),
     rEffPar(Phpf, 8, rShort("hpf"), rDefault(0), "High Pass Cutoff"),
-    rEffParRange(Punison_size, 9, rShort("unison"), rLinear(1,7), rDefault(1),
+    rEffParRange(Punison_size, 9, rShort("unison"), rLinear(1,3), rDefault(1),
             "Number of Unison Strings"),
-    rEffPar(Pstrings, 10, rShort("strings"), rDefault(0),
+    rEffParRange(Pstrings, 10, rShort("strings"), rLinear(0,76), rDefault(0),
             "Number of Strings"),
     rEffPar(Pbasenote, 11, rShort("base"), rDefault(57), // basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
             "Midi Note of Lowest String"),
@@ -192,43 +202,44 @@ void Sympathetic::calcFreqs()
     const float unison_real_spread_up = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
     const float unison_real_spread_down = 1.0f/unison_real_spread_up;
 
-    switch(Ppreset)
+    //~ switch(Ppreset)
+    //~ {
+        //~ case 0:
+            //~ // Punison_size = 1;
+        //~ case 1:
+        //~ default:
+    for(unsigned int i = 0; i < Punison_size*Pstrings; i+=Punison_size)
     {
-        case 0:
-        case 1:
-            for(unsigned int i = 0; i < Punison_size*Pstrings; i+=Punison_size)
-            {
-                const float centerFreq = powf(2.0f, (float)i / 12.0f) * baseFreq;
-                filterBank->freqs[i] = centerFreq;
-                if (Punison_size > 1) filterBank->freqs[i+1] = centerFreq * unison_real_spread_up;
-                if (Punison_size > 2) filterBank->freqs[i+2] = centerFreq * unison_real_spread_down;
-                if (Punison_size > 3) filterBank->freqs[i+3] = filterBank->freqs[i+1] * unison_real_spread_up;
-                if (Punison_size > 4) filterBank->freqs[i+4] = filterBank->freqs[i+2] * unison_real_spread_down;
-                if (Punison_size > 5) filterBank->freqs[i+5] = filterBank->freqs[i+3] * unison_real_spread_up;
-                if (Punison_size > 6) filterBank->freqs[i+6] = filterBank->freqs[i+4] * unison_real_spread_down;
-            }
-            filterBank->setStrings(Pstrings*Punison_size,baseFreq);
-            break;
+        //const float delay = ((float)samplerate)/freqs[j]);
 
-        case 2:
-        case 3:
-            const float guitar_freqs[6] = {82.41, 110.00, 146.83, 196.00, 246.94, 329.63};
-            Pstrings = 6;
-            for(unsigned int i = 0; i < 6; ++i)
-            {
-                filterBank->freqs[i] = guitar_freqs[i];
-            }
-
-            if (Punison_size > 1)
-            {
-                for(unsigned int i = 6; i < 12; ++i)
-                {
-                    filterBank->freqs[i] = guitar_freqs[i-6] * 2.0f * unison_real_spread_up;
-                }
-            }
-            filterBank->setStrings(Pstrings*Punison_size,82.0f);
-            break;
+        const float centerFreq = powf(2.0f, (float)i / 12.0f) * baseFreq;
+        filterBank->delays[i] = ((float)samplerate)/centerFreq;
+        if (Punison_size > 1) filterBank->delays[i+1] = ((float)samplerate)/(centerFreq * unison_real_spread_up);
+        if (Punison_size > 2) filterBank->delays[i+2] = ((float)samplerate)/(centerFreq * unison_real_spread_down);
     }
+    filterBank->setStrings(Pstrings*Punison_size,baseFreq);
+            //~ break;
+
+        //~ case 2:
+            //~ // Punison_size = 1;
+        //~ case 3:
+            //~ const float guitar_freqs[6] = {82.41, 110.00, 146.83, 196.00, 246.94, 329.63};
+            //~ Pstrings = 6;
+            //~ for(unsigned int i = 0; i < 6; ++i)
+            //~ {
+                //~ filterBank->freqs[i] = guitar_freqs[i];
+            //~ }
+
+            //~ if (Punison_size > 1)
+            //~ {
+                //~ for(unsigned int i = 6; i < 12; ++i)
+                //~ {
+                    //~ filterBank->freqs[i] = guitar_freqs[i-6] * 2.0f * unison_real_spread_up;
+                //~ }
+            //~ }
+            //~ filterBank->setStrings(Pstrings*Punison_size,82.0f);
+            //~ break;
+    //~ }
 
 }
 
@@ -306,11 +317,11 @@ void Sympathetic::changepar(int npar, unsigned char value)
             sethpf(value);
             break;
         case 9:
-            Punison_size = limit(value, (unsigned char) 1, (unsigned char) 7);
+            Punison_size = limit(value, (unsigned char) 1, (unsigned char) 3);
             calcFreqs();
             break;
         case 10:
-            Pstrings = limit(value, (unsigned char) 1, (unsigned char) 88);
+            Pstrings = limit(value, (unsigned char) 1, (unsigned char) 76);
             calcFreqs();
             break;
         case 11:
