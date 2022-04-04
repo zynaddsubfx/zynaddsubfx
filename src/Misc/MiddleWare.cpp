@@ -2280,7 +2280,7 @@ void MiddleWareImpl::bToUhandle(const char *rtmsg)
         if(forward) {
             forward = false;
             handleMsg(rtmsg, true);
-        } if(broadcast)
+        } else if(broadcast)
             broadcastToRemote(rtmsg);
         else
             sendToCurrentRemote(rtmsg);
