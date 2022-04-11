@@ -2047,20 +2047,15 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
     assert(uToB);
     uToB->write("/freeze_state","");
 
-    std::list<const char *> fico;
     int tries = 0;
     while(tries++ < 10000) {
-        if(!bToU->hasNext()) {
+        if(!bToU->hasNextLookahead()) {
             os_usleep(500);
             continue;
         }
-        const char *msg = bToU->read();
+        const char *msg = bToU->read_lookahead();
         if(!strcmp("/state_frozen", msg))
             break;
-        size_t bytes = rtosc_message_length(msg, bToU->buffer_size());
-        char *save_buf = new char[bytes];
-        memcpy(save_buf, msg, bytes);
-        fico.push_back(save_buf);
     }
 
     assert(tries < 10000);//if this happens, the backend must be dead
@@ -2072,10 +2067,6 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
 
     //Now to resume normal operations
     uToB->write("/thaw_state","");
-    for(auto x:fico) {
-        bToUhandle(x);
-        delete [] x;
-    }
 }
 
 //Offline detection code:
@@ -2160,29 +2151,20 @@ bool MiddleWareImpl::doReadOnlyOpNormal(std::function<void()> read_only_fn, bool
     assert(uToB);
     uToB->write("/freeze_state","");
 
-    std::list<const char *> fico;
     int tries = 0;
     while(tries++ < 2000) {
-        if(!bToU->hasNext()) {
+        if(!bToU->hasNextLookahead()) {
             os_usleep(500);
             continue;
         }
-        const char *msg = bToU->read();
+        const char *msg = bToU->read_lookahead();
         if(!strcmp("/state_frozen", msg))
             break;
-        size_t bytes = rtosc_message_length(msg, bToU->buffer_size());
-        char *save_buf = new char[bytes];
-        memcpy(save_buf, msg, bytes);
-        fico.push_back(save_buf);
     }
 
     if(canfail) {
         //Now to resume normal operations
         uToB->write("/thaw_state","");
-        for(auto x:fico) {
-            bToUhandle(x);
-            delete [] x;
-        }
         return false;
     }
 
@@ -2195,10 +2177,6 @@ bool MiddleWareImpl::doReadOnlyOpNormal(std::function<void()> read_only_fn, bool
 
     //Now to resume normal operations
     uToB->write("/thaw_state","");
-    for(auto x:fico) {
-        bToUhandle(x);
-        delete [] x;
-    }
     return true;
 }
 
