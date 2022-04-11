@@ -2073,7 +2073,7 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
     //Now to resume normal operations
     uToB->write("/thaw_state","");
     for(auto x:fico) {
-        uToB->raw_write(x);
+        bToUhandle(x);
         delete [] x;
     }
 }
@@ -2180,7 +2180,7 @@ bool MiddleWareImpl::doReadOnlyOpNormal(std::function<void()> read_only_fn, bool
         //Now to resume normal operations
         uToB->write("/thaw_state","");
         for(auto x:fico) {
-            uToB->raw_write(x);
+            bToUhandle(x);
             delete [] x;
         }
         return false;
@@ -2196,7 +2196,7 @@ bool MiddleWareImpl::doReadOnlyOpNormal(std::function<void()> read_only_fn, bool
     //Now to resume normal operations
     uToB->write("/thaw_state","");
     for(auto x:fico) {
-        uToB->raw_write(x);
+        bToUhandle(x);
         delete [] x;
     }
     return true;
