@@ -146,11 +146,11 @@ void InMgr::flush(unsigned frameStart, unsigned frameStop)
             case M_PRESSURE:
                 master->polyphonicAftertouch(ev.channel, ev.num, ev.value);
                 break;
-            
+
             case M_CLOCK: // needed to determine bpm
                 master->midiClock(ev.nanos);
                 break;
-            
+
             case M_TC: // suited to determine reference time for calculating phase
                 master->midiTcSync(ev.nanos, ev.value);
                 break;
@@ -158,7 +158,7 @@ void InMgr::flush(unsigned frameStart, unsigned frameStop)
             case M_START: // suited to determine reference time for calculating phase
                 printf("M_START\n");
                 if (!isPlaying) {
-                    master->midiSppSync(ev.nanos, 0);
+                    //~ master->midiSppSync(ev.nanos, 0);
                     isPlaying = true;
                 }
                 break;
@@ -171,9 +171,11 @@ void InMgr::flush(unsigned frameStart, unsigned frameStop)
                 }
                 break;
 
-            case M_STOP: 
-                isPlaying = false;
-                printf("M_STOP\n");
+            case M_STOP:
+                if (isPlaying) {
+                    isPlaying = false;
+                    printf("M_STOP\n");
+                }
                 break;
 
             case M_TIME_SIG: // suited to determine reference time for calculating phase
@@ -182,7 +184,7 @@ void InMgr::flush(unsigned frameStart, unsigned frameStop)
 
             case M_SPP: // suited to determine reference time for calculating phase
                 printf("M_SPP\n");
-                master->midiSppSync(ev.nanos, ev.value);
+                master->beatClock->sppSync(ev.value);
                 break;
         }
     }

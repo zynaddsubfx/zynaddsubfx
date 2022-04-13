@@ -778,7 +778,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
 
     // set default tempo
     time.bpm = 120;
-    
+
     // set default tempo
     time.tempo = 120;
 
@@ -838,9 +838,7 @@ Master::Master(const SYNTH_T &synth_, Config* config)
     mastercb = 0;
     mastercb_ptr = 0;
 
-    dtFiltered = 0.0f;
-    phaseFiltered = 0.0f;
-    outliersDt = 0;
+    beatClock = new BeatClock(synth, time);
 }
 
 bool Master::applyOscEvent(const char *msg, float *outl, float *outr,
@@ -1069,82 +1067,7 @@ void Master::setController(char chan, int type, note_t note, float value)
  * Midi Sync
  */
 void Master::midiClock(unsigned long nanos) {
-
-    ++midiClockCounter;
-
-    // detect down beat
-    // if last tick was before spp message, this is a down beat
-    if(nanosLastTick < nanosSppSync) {
-        time.tRef = nanos - ((float)beatsSppSync/4.0f) / ((float)bpm / 60.0f)*1000000000;
-        printf("down beat: nanos = %lu  beatsSppSync = %d   bpm = %lu\n", nanos, beatsSppSync, bpm);
-        printf("   nanosLastTick = %lu\n ", nanosLastTick);
-        printf("  nanosSppSync  = %lu\n ", nanosSppSync);
-        printf("  time.tRef = %lu\n ", time.tRef);
-        printf("time.tStamp = %lu\n", time.tStamp);
-
-    }
-
-    dTime = (double)(nanos - nanosLastTick);
-    // lp filter dTime
-    double gain = 10.0 + (14.0 * (40000.0/dTime));
-    if(fabs((dTime)-dtFiltered) < dtFiltered*0.2) {
-        dtFiltered *= (gain-1.0)/gain; //
-        dtFiltered += dTime/gain;
-        if (outliersDt>=0.1f) outliersDt -= 0.1f;
-    } else {
-        //leave out outliers but reset filter if too much (->tempo change)
-        if (++outliersDt > 2.0f)
-        {
-            dtFiltered = dTime;
-            outliersDt = 0.0f;
-        }
-    }
-    // round to integer bpm
-    bpm = (int) round(2500000000.0/dtFiltered);
-
-    // clalculate theroretical tick interval
-    float tickInterval = 60.0f  * synth.samplerate / (bpm * 24.0f);
-    // theoretical number of ticks until now
-    float ticks = (nanos - referenceTime) / tickInterval;
-    // phase = samples since theoretical last tick position
-    float phaseRaw = nanos - (floor(ticks)*tickInterval);
-
-    // lp filter phase
-    if((fabs(phaseRaw-phase) < phaseFiltered*0.1f) && !std::isnan(phaseFiltered)) {
-        phaseFiltered *= 47.0f/48.0f;
-        phaseFiltered += phaseRaw/48.0f;
-        outliersPhase -= 0.01f;
-    } else {
-        if (++outliersPhase > 2.0f)
-        {
-            phaseFiltered = phaseRaw;
-            outliersPhase = 0.0f;
-        }
-    }
-    phase = (int) roundf(phaseFiltered);
-    nanosLastTick = nanos;
-
-    if(oldbpm != bpm) {
-        if(!newCounter)
-            newbpm = bpm;
-        if(++newCounter > 24) {
-            oldbpm = bpm;
-            newCounter = 0;
-            time.bpm = bpm;
-        }
-    }
-
-    if(midiClockCounter%24==0) { // 24 clock ticks = 1 quarter note length
-        //~ printf("nanos = %lu \n", nanos);
-        //~ printf("dTime = %f \n", dTime);
-        //~ printf("gain = %f -> ", gain);
-
-        //~ printf("dtFiltered = %f   dTime-dtFiltered = %f (outliers = %f)\n", dtFiltered, fabs(((float)dTime)-dtFiltered), outliersDt);
-        //~ printf("tickInterval = %f -> ", tickInterval);
-        //~ printf("(ticks) = %f   phaseRaw = %f   phaseFiltered = %f\n", floor(ticks), phaseRaw, phaseFiltered);
-        //~ printf("bpm = %lu  phase = %lu\n", bpm, phase);
-        printf("bpmRaw = %f \n", 2506000000.0/dtFiltered);
-    }
+    beatClock->tick(nanos);
 }
 
 void Master::midiTcSync(unsigned long nanos, int seconds) {
@@ -1159,15 +1082,9 @@ void Master::midiTcSync(unsigned long nanos, int seconds) {
     printf("MidiTcSync - time.time = %lu\n", time.time());
 }
 
-void Master::midiSppSync(unsigned long nanos, int beats) {
-    // set referenceTime to sample index of Song Position 00m:00s
-    //~ float seconds = ((float)beats/4.0f) / ((float)bpm / 60.0f); // beats/4 = quarter notes, bpm/60 = qarter notes per second 60/4=15
-    // the dependency on bpm is quite bad, because bpn need time to get a lock.
-    nanosSppSync = nanos;
-    beatsSppSync = beats;
-    counterSppSync = midiClockCounter;
-    printf("MidiSppSync\n beatsSppSync = %d  nanosSppSync = %lu\n\n", beats, nanos);
-}
+//~ void Master::midiSppSync(unsigned long nanos, int beats) {
+    //~ beatClock->midiSppSync(nanos, beats);
+//~ }
 
 void Master::setSignature(int numerator, int denominator) {
 

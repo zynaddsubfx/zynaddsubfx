@@ -28,6 +28,7 @@
 #include "../Params/Controller.h"
 #include "../Synth/WatchPoint.h"
 #include "../DSP/Value_Smoothing_Filter.h"
+#include "../Misc/BeatClock.h"
 
 namespace zyn {
 
@@ -111,19 +112,10 @@ class Master
         void setController(char chan, int type, note_t note, float value);
         void midiClock(unsigned long nanos);
         void midiTcSync(unsigned long nanos, int seconds);
-        void midiSppSync(unsigned long nanos, int beats);
+        //~ void midiSppSync(unsigned long nanos, int beats);
         void setSignature(int numerator, int denominator);
-        
-        // for bpm tracking
-        int midiClockCounter, counterSppSync, newCounter, beatsSppSync; // clock tick counter
-        long nanos, nanosLastTick, nanosSppSync; // number of sample the clock tick belongs to and its history value
-        double dTime; // time between current and last clock tick
-        double dtFiltered; // lp filtered dTime
-        float outliersDt, outliersPhase; // outlier counter to speedup tempo change
-        float phaseFiltered; // lp filtered phase offset of incoming clock pulses
-        long bpm, oldbpm, newbpm, phase; // result
-        long referenceTime;
-        long tstamp;
+
+
         //void NRPN...
 
 
@@ -225,6 +217,9 @@ class Master
         rtosc::AutomationMgr automate;
         rtosc::MidiMapperRT midi;
 
+        //Midi Clock Sync
+        BeatClock* beatClock;
+
         bool   frozenState;//read-only parameters for threadsafe actions
         Allocator *memory;
         rtosc::ThreadLink *bToU;
@@ -281,6 +276,10 @@ class Master
 
         Value_Smoothing_Filter smoothing_part_l[NUM_MIDI_PARTS];
         Value_Smoothing_Filter smoothing_part_r[NUM_MIDI_PARTS];
+
+
+
+        long referenceTime;
 };
 
 class master_dispatcher_t : public rtosc::savefile_dispatcher_t
