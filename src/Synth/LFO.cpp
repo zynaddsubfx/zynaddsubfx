@@ -35,21 +35,22 @@ LFO::LFO(const LFOParams &lfopars_, float basefreq_, const AbsTime &t, WatchMana
     updatePars();
 
     if(!lfopars.Pcontinous) {
-        if(lfopars.Pstartphase == 0)
-            phase = RND;
-        else
-            phase = fmod((lfopars.Pstartphase - 64.0f) / 127.0f + 1.0f, 1.0f);
+        if (!lfopars.Psync) {
+            if(lfopars.Pstartphase == 0)
+                phase = RND;
+            else
+                phase = fmod((lfopars.Pstartphase - 64.0f) / 127.0f + 1.0f, 1.0f);
+        }
+        else {
+            const float tStampRel = float(t.tStamp - t.tRef)/1000000000.0f;
+            phase = fmod(tStampRel * lfofreq, 1.0f);
+        }
     }
     else {
-
-        if (!lfopars.Psync) {
             const float tmp = fmod(t.time() * phaseInc, 1.0f);
             phase = fmod((lfopars.Pstartphase - 64.0f) / 127.0f + 1.0f + tmp, 1.0f);
         }
-        else {
-            float tStampRel = float(t.tStamp - t.tRef)/1000000000.0f;
-            phase = fmod(t.tStamp - t.tRef, 1.0f/lfofreq);
-        }
+
     }
 
 
@@ -111,6 +112,13 @@ void LFO::updatePars()
     //Limit the Frequency(or else...)
     if(phaseInc > 0.49999999f)
         phaseInc = 0.499999999f;
+
+    if(!lfopars.Pcontinous && lfopars.Psync && t.tRef != tRefOld) {
+        const float tStampRel = float(t.tStamp - t.tRef)/1000000000.0f;
+        tRefOld = t.tRef;
+        phase = fmod(tStampRel * lfofreq, 1.0f);
+    }
+
 }
 
 float LFO::baseOut(const char waveShape, const float phase)

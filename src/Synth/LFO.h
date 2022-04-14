@@ -63,6 +63,8 @@ class LFO
         float incrnd, nextincrnd;
         //Amplitude Randomness
         float amp1, amp2;
+        //old tRef value to check for change
+        unsigned long tRefOld;
 
         // RND mode
         int first_half;
