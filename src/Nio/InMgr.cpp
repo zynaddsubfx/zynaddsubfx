@@ -157,25 +157,16 @@ void InMgr::flush(unsigned frameStart, unsigned frameStop)
 
             case M_START: // suited to determine reference time for calculating phase
                 printf("M_START\n");
-                if (!isPlaying) {
-                    //~ master->midiSppSync(ev.nanos, 0);
-                    isPlaying = true;
-                }
+                master->beatClock->sppPrepareSync(0);
+
                 break;
 
             case M_CONTINUE: // suited to determine reference time for calculating phase
                 printf("M_CONTINUE\n");
-                if (!isPlaying) {
-                    //~ master->midiSppSync(ev.nanos, 0);
-                    isPlaying = true;
-                }
                 break;
 
             case M_STOP:
-                if (isPlaying) {
-                    isPlaying = false;
-                    printf("M_STOP\n");
-                }
+                printf("M_STOP\n");
                 break;
 
             case M_TIME_SIG: // suited to determine reference time for calculating phase
@@ -184,7 +175,7 @@ void InMgr::flush(unsigned frameStart, unsigned frameStop)
 
             case M_SPP: // suited to determine reference time for calculating phase
                 printf("M_SPP\n");
-                master->beatClock->sppSync(ev.value);
+                master->beatClock->sppPrepareSync(ev.value);
                 break;
         }
     }

@@ -4,7 +4,8 @@ namespace zyn {
 
 BeatClock::BeatClock(const SYNTH_T &synth_, AbsTime &time_):
 synth(synth_),
-time(time_)
+time(time_),
+state(bc_stopped)
 {
     dtFiltered = 0.0f;
     phaseFiltered = 0.0f;
@@ -13,30 +14,50 @@ time(time_)
 
 void BeatClock::sppPrepareSync(int beats)
 {
-    oldState = state;
+    //~ oldState = state;
     state = bc_syncing;
-    songPosition = beats;
+    //~ songPosition = beats;
+    beatsSppSync = beats;
+    midiClockCounter = beats*6;
+    printf("sppPrepareSync: beatsSppSync = %d\n", beatsSppSync);
+    printf("state = %d\n", state);
+
+
 }
 
 void BeatClock::sppSync(unsigned long nanos)
 {
-    if(state==bc_syncing) {
-        time.tRef = nanos - ((float)beatsSppSync/4.0f) / ((float)bpm / 60.0f)*1000000000;
-        printf("down beat: nanos = %lu  beatsSppSync = %d   bpm = %lu\n", nanos, beatsSppSync, bpm);
-        printf("   nanosLastTick = %lu\n ", nanosLastTick);
+
+    nanosSppSync = nanos;
+    //~ referenceTime = nanosSppSync - ((long)seconds * 1000000000);
+    time.tRef = nanosSppSync - ((float)beatsSppSync/4.0f) / ((float)bpm / 60.0f)*1000000000.0f;
+
+    printf("down beat: nanos = %lu  beatsSppSync = %d   bpm = %lu\n", nanos, beatsSppSync, bpm);
+        //~ printf("   nanosLastTick = %lu\n ", nanosLastTick);
+//~ printf(" (float)beatsSppSync/4.0f = %f\n ", (float)beatsSppSync/4.0f);
+//~ printf("  ((float)bpm / 60.0f)  = %f\n ", ((float)bpm / 60.0f) );
+        //~ printf("((float)beatsSppSync/4.0f) / ((float)bpm / 60.0f)*1000000000.0f: %f\n", ((float)beatsSppSync/4.0f) / ((float)bpm / 60.0f) * 1000000000.0f);
+
         printf("  nanosSppSync  = %lu\n ", nanosSppSync);
-        printf("  time.tRef = %lu\n ", time.tRef);
-        printf("time.tStamp = %lu\n", time.tStamp);
-        state = oldState;
-    }
+        printf("      time.tRef = %lu\n ", time.tRef);
+        printf("    time.tStamp = %lu\n", time.tStamp);
+        printf("    time.timeNanos = %lu\n", time.timeNanos());
+
+        //~ printf("state = %d\n", state);
+
 
 }
 
 void BeatClock::tick(unsigned long nanos)
 {
 
-    if(bc_syncing)
+    if(state == bc_syncing) {
         sppSync(nanos);
+        nanosLastTick = nanos;
+        state = bc_running;
+        printf("state = %d\n", state);
+        return;
+    }
 
     ++midiClockCounter;
 
@@ -86,20 +107,25 @@ void BeatClock::tick(unsigned long nanos)
         if(++newCounter > 24) {
             oldbpm = bpm;
             newCounter = 0;
-            time.bpm = bpm;
+            time.tempo = bpm;
         }
     }
 
     if(midiClockCounter%24==0) { // 24 clock ticks = 1 quarter note length
-        //~ printf("nanos = %lu \n", nanos);
+        printf("nanos = %lu \n", nanos);
+        printf("referenceTime = %lu \n", referenceTime);
         //~ printf("dTime = %f \n", dTime);
         //~ printf("gain = %f -> ", gain);
 
         //~ printf("dtFiltered = %f   dTime-dtFiltered = %f (outliers = %f)\n", dtFiltered, fabs(((float)dTime)-dtFiltered), outliersDt);
-        //~ printf("tickInterval = %f -> ", tickInterval);
-        //~ printf("(ticks) = %f   phaseRaw = %f   phaseFiltered = %f\n", floor(ticks), phaseRaw, phaseFiltered);
-        //~ printf("bpm = %lu  phase = %lu\n", bpm, phase);
-        printf("bpmRaw = %f \n", 2506000000.0/dtFiltered);
+        printf("tickInterval = %f -> ", tickInterval);
+        printf("(ticks) = %f   phaseRaw = %f   phaseFiltered = %f\n", floor(ticks), phaseRaw, phaseFiltered);
+
+        printf("bpmRaw = %f \n", 2500000000.0/dtFiltered);
+        printf("bpm = %lu  phase = %lu\n", bpm, phase);
+
+        printf("     time.tRef = %lu\n", time.tRef);
+        printf("    time.tStamp = %lu\n", time.tStamp);
     }
 }
 

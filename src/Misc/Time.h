@@ -24,11 +24,11 @@ class AbsTime
         void operator++(){++frames;};
         void operator++(int){frames++;};
         int64_t time() const {return frames;};
-
+        unsigned long timeNanos() const {return frames*s.dt()*1000000000.0f;}; // time stamp of the current buffer
         unsigned int tempo;
         unsigned long tStamp; // time stamp of the current buffer
         unsigned long tRef; // time stamp midi message
-        int bpm;
+        //~ int bpm;
         int64_t time2nanos(int64_t t) {return (t-frames)*framesPerSec()*1000000000.0f;}; // referenceTime
         float dt() const { return s.dt(); }
         float framesPerSec() const {return 1.0f/s.dt();}

@@ -48,14 +48,14 @@ class BeatClock
     //~ float bpm;
     //~ float phase;
 
-    int songPosition;
+    //~ int songPosition;
 
 
     const SYNTH_T &synth;
 
     AbsTime &time;
 
-    beatclock_state_enum state, oldState;
+    beatclock_state_enum state;//, oldState;
 
     // for bpm tracking
     int midiClockCounter, counterSppSync, newCounter, beatsSppSync; // clock tick counter

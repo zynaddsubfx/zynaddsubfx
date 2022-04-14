@@ -33,24 +33,25 @@ LFO::LFO(const LFOParams &lfopars_, float basefreq_, const AbsTime &t, WatchMana
     watchOut(m, watch_prefix, "out")
 {
     updatePars();
-    //~ if (!lfopars.Psync) {
-        const float lfofreq = lfopars.freq;// * lfostretch;
 
-        if(!lfopars.Pcontinous) {
-            if(lfopars.Pstartphase == 0)
-                phase = RND;
-            else
-                phase = fmod((lfopars.Pstartphase - 64.0f) / 127.0f + 1.0f, 1.0f);
-        }
-        else {
+    if(!lfopars.Pcontinous) {
+        if(lfopars.Pstartphase == 0)
+            phase = RND;
+        else
+            phase = fmod((lfopars.Pstartphase - 64.0f) / 127.0f + 1.0f, 1.0f);
+    }
+    else {
+
+        if (!lfopars.Psync) {
             const float tmp = fmod(t.time() * phaseInc, 1.0f);
             phase = fmod((lfopars.Pstartphase - 64.0f) / 127.0f + 1.0f + tmp, 1.0f);
+        }
+        else {
+            float tStampRel = float(t.tStamp - t.tRef)/1000000000.0f;
+            phase = fmod(t.tStamp - t.tRef, 1.0f/lfofreq);
+        }
     }
-    //~ } else {
-        //~ const float lfofreq = (float(t.bpm))/60.0f;
-        //~ //(t.time() - t.tRef)
-        //~ phase = fmod(t.time() - t.tRef, 1.0f);
-    //~ }
+
 
     phaseInc = fabsf(lfofreq) * t.dt();
 
@@ -98,7 +99,7 @@ void LFO::updatePars()
     // stretch max 2x/octave
     const float lfostretch = powf(basefreq / 440.0f, (stretch - 64.0f) / 63.0f);
 
-    float lfofreq;
+
     if (!lfopars.numerator || !lfopars.denominator) {
         lfofreq = lfopars.freq * lfostretch;
     } else {
