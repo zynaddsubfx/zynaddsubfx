@@ -1063,9 +1063,6 @@ void Master::setController(char chan, int type, note_t note, float value)
 /*
  * Midi Sync
  */
-void Master::midiClock(unsigned long nanos) {
-    beatClock->tick(nanos);
-}
 
 void Master::midiTcSync(unsigned long nanos, int seconds) {
 
@@ -1083,9 +1080,9 @@ void Master::midiTcSync(unsigned long nanos, int seconds) {
     //~ beatClock->midiSppSync(nanos, beats);
 //~ }
 
-void Master::setSignature(int numerator, int denominator) {
+//~ void Master::setSignature(int numerator, int denominator) {
 
-}
+//~ }
 
 void Master::vuUpdate(const float *outl, const float *outr)
 {

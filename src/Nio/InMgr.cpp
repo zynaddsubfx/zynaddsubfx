@@ -148,7 +148,7 @@ void InMgr::flush(unsigned frameStart, unsigned frameStop)
                 break;
 
             case M_CLOCK: // needed to determine bpm
-                master->midiClock(ev.nanos);
+                master->beatClock->tick(ev.nanos);
                 break;
 
             case M_TC: // suited to determine reference time for calculating phase
@@ -170,7 +170,7 @@ void InMgr::flush(unsigned frameStart, unsigned frameStop)
                 break;
 
             case M_TIME_SIG: // suited to determine reference time for calculating phase
-                master->setSignature(ev.num, ev.value);
+                //~ master->setSignature(ev.num, ev.value);
                 break;
 
             case M_SPP: // suited to determine reference time for calculating phase

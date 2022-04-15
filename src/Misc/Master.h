@@ -110,10 +110,10 @@ class Master
         void polyphonicAftertouch(char chan, note_t note, char velocity);
         void setController(char chan, int type, int par);
         void setController(char chan, int type, note_t note, float value);
-        void midiClock(unsigned long nanos);
+        //~ void midiClock(unsigned long nanos);
         void midiTcSync(unsigned long nanos, int seconds);
         //~ void midiSppSync(unsigned long nanos, int beats);
-        void setSignature(int numerator, int denominator);
+        //~ void setSignature(int numerator, int denominator);
 
 
         //void NRPN...
