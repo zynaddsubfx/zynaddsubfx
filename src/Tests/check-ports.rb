@@ -9,7 +9,7 @@ my_path=File.dirname(__FILE__)
 # NOTE: If you add too much debug output to zyn, it will be blocked when writing into the pipe,
 #       leading to MiddleWare to not reply and to port-checker to fail.
 #       This script should be rewritten to keep reading (and printing) zyn's messages.
-Open3.popen3(my_path + "/../zynaddsubfx -O null --no-gui") do |stdin, stdout, stderr, wait_thr|
+Open3.popen3(my_path + "/../zynaddsubfx -O null -I null --no-gui") do |stdin, stdout, stderr, wait_thr|
   pid = wait_thr[:pid]
   while line=stderr.gets do 
     # print "line: " + line;

@@ -1395,6 +1395,7 @@ const rtosc::Ports bankPorts = {
 #define MAX_SEARCH 300
         char res_type[MAX_SEARCH+1] = {};
         rtosc_arg_t res_dat[MAX_SEARCH] = {};
+        res_type[0] = 'N'; // Will be overwritten if there is any actual data
         for(unsigned i=0; i<res.size() && i<MAX_SEARCH; ++i) {
             res_type[i]  = 's';
             res_dat[i].s = res[i].c_str();
@@ -1408,6 +1409,7 @@ const rtosc::Ports bankPorts = {
 #define MAX_SEARCH 300
         char res_type[MAX_SEARCH+1] = {};
         rtosc_arg_t res_dat[MAX_SEARCH] = {};
+        res_type[0] = 'N'; // Will be overwritten if there is any actual data
         for(unsigned i=0; i<res.size() && i<MAX_SEARCH; ++i) {
             res_type[i]  = 's';
             res_dat[i].s = res[i].c_str();
@@ -1417,7 +1419,7 @@ const rtosc::Ports bankPorts = {
         rEnd},
     {"search_results:", 0, 0,
         rBegin;
-        d.reply("/bank/search_results", "");
+        d.reply("/bank/search_results", "N");
         rEnd},
 };
 
@@ -1538,10 +1540,8 @@ static rtosc::Ports middwareSnoopPortsWithoutNonRtParams = {
         impl.doReadOnlyOp([&impl,slot,part_id,&err](){
                 err = impl.master->bank.savetoslot(slot, impl.master->part[part_id]);});
         if(err) {
-            char buffer[1024];
-            rtosc_message(buffer, 1024, "/alert", "s",
+            d.reply("/alert", "s",
                     "Failed To Save To Bank Slot, please check file permissions");
-            GUI::raiseUi(impl.ui, buffer);
         }
         else d.broadcast("/damage", "s", "/bank/search_results/");
         rEnd},
@@ -2073,7 +2073,7 @@ void MiddleWareImpl::doReadOnlyOp(std::function<void()> read_only_fn)
     //Now to resume normal operations
     uToB->write("/thaw_state","");
     for(auto x:fico) {
-        uToB->raw_write(x);
+        bToUhandle(x);
         delete [] x;
     }
 }
@@ -2182,7 +2182,7 @@ bool MiddleWareImpl::doReadOnlyOpNormal(std::function<void()> read_only_fn, bool
         //Now to resume normal operations
         uToB->write("/thaw_state","");
         for(auto x:fico) {
-            uToB->raw_write(x);
+            bToUhandle(x);
             delete [] x;
         }
         return false;
@@ -2198,7 +2198,7 @@ bool MiddleWareImpl::doReadOnlyOpNormal(std::function<void()> read_only_fn, bool
     //Now to resume normal operations
     uToB->write("/thaw_state","");
     for(auto x:fico) {
-        uToB->raw_write(x);
+        bToUhandle(x);
         delete [] x;
     }
     return true;
@@ -2238,8 +2238,8 @@ void MiddleWareImpl::sendToRemote(const char *rtmsg, std::string dest)
 
         //Send to known url
         lo_address addr = lo_address_new_from_url(dest.c_str());
-        if(addr)
-            lo_send_message(addr, rtmsg, msg);
+        if(addr && server)
+            lo_send_message_from(addr, server, rtmsg, msg);
         lo_address_free(addr);
         lo_message_free(msg);
     }

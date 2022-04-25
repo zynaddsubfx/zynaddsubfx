@@ -27,6 +27,7 @@
 #include "extra/ScopedPointer.hpp"
 
 #include <lo/lo.h>
+#include <rtosc/thread-link.h>
 
 /* ------------------------------------------------------------------------------------------------------------
  * MiddleWare thread class */
@@ -400,11 +401,23 @@ protected:
                 const int control = midiEvent.data[1];
                 const int value   = midiEvent.data[2];
 
+                const int C_bankselectmsb = 0;
+                const int C_bankselectlsb = 32;
+
                 // skip controls which we map to parameters
                 //if (getIndexFromZynControl(midiEvent.data[1]) != kParamCount)
                 //    continue;
 
-                master->setController(channel, control, value);
+                if(control == C_bankselectmsb) {        // Change current bank
+                    master->bToU->write("/forward", "");
+                    master->bToU->write("/bank/msb", "i", value);
+                    master->bToU->write("/bank/bank_select", "i", value);
+
+                } else if(control == C_bankselectlsb)  {// Change current bank (LSB)
+                    master->bToU->write("/forward", "");
+                    master->bToU->write("/bank/lsb", "i", value);
+                } else
+                    master->setController(channel, control, value);
             } break;
 
             case 0xC0: {

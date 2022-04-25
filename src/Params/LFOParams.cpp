@@ -100,7 +100,7 @@ static const rtosc::Ports _ports = {
              obj->delay = 4.0f * rtosc_argument(msg, 0).i / 127.0f;
          }
      }},
-     
+
     rToggle(Pcontinous, rShort("c"), rDefault(false),
             "Enable for global operation"),
     rParamZyn(Pstretch, rShort("str"), rCentered, rDefault(64),
@@ -151,7 +151,7 @@ void LFOParams::setup()
             setpresettype("Plfofilter");
             break;
         default:
-            throw std::logic_error("Invalid envelope consumer location");
+            throw std::logic_error("Invalid lfo consumer location");
     }
 
     defaults();

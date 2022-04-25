@@ -179,20 +179,24 @@ static const Ports partPorts = {
         [](const char *, RtData &d)
         {
             Part *p = (Part*)d.obj;
+            int err;
             if (p->loaded_file[0] == '\0') {  // if part was never loaded or saved
                 time_t rawtime;     // make a new name from date and time
                 char filename[32];
                 time (&rawtime);
                 const struct tm* timeinfo = localtime (&rawtime);
                 strftime (filename,23,"%F_%R.xiz",timeinfo);
-                p->saveXML(filename);
-                fprintf(stderr, "Part %d saved to %s\n", (p->partno + 1), filename);
+                err = p->saveXML(filename);
+                fprintf(stderr, "Part %d saved to %s: %s\n", (p->partno + 1), filename, err ? "failed" : "ok");
             }
             else
             {
-                p->saveXML(p->loaded_file);
-                fprintf(stderr, "Part %d saved to %s\n", (p->partno + 1), p->loaded_file);
+                err = p->saveXML(p->loaded_file);
+                fprintf(stderr, "Part %d saved to %s: %s\n", (p->partno + 1), p->loaded_file, err ? "failed" : "ok");
             }
+            if (err)
+                d.reply("/alert", "s",
+                        "Failed To Save File, please check file permissions");
         }},
     //{"kit#16::T:F", "::Enables or disables kit item", 0,
     //    [](const char *m, RtData &d) {
@@ -686,7 +690,7 @@ void Part::NoteOff(note_t note) //release the key
     for(auto &desc:notePool.activeDesc()) {
         if(desc.note != note || !desc.playing())
             continue;
-        // if latch is on we ignore noteoff, but set the state to lateched
+        // if latch is on we ignore noteoff, but set the state to latched
         if(Platchmode) {
             notePool.latch(desc);
         } else if(!ctl.sustain.sustain) { //the sustain pedal is not pushed
@@ -701,6 +705,33 @@ void Part::NoteOff(note_t note) //release the key
             else {
                 notePool.release(desc);
             }
+        }
+    }
+}
+
+/*
+ * This handles the MIDI All Notes Off message (the 'notes off' in 'all notes
+ * off' refers to note off events, not actually silencing all playing
+ * voices).
+ */
+void Part::ReleaseAllKeys(void)
+{
+    // Clear all notes from list.
+    monomemClear();
+
+    for(auto &desc:notePool.activeDesc()) {
+        if(!desc.playing())
+            continue;
+        // if latch is on we ignore noteoff, but set the state to latched
+        if(Platchmode) {
+            notePool.latch(desc);
+        } else if(!ctl.sustain.sustain) { //the sustain pedal is not pushed
+            notePool.release(desc);
+        } else {   //the sustain pedal is pushed
+            if(desc.canSustain())
+                desc.doSustain();
+            else
+                notePool.release(desc);
         }
     }
 }
@@ -873,22 +904,7 @@ void Part::ReleaseSustainedKeys()
         if(monomemBack() != lastnote) // Sustain controller manipulation would cause repeated same note respawn without this check.
             MonoMemRenote();  // To play most recent still held note.
 
-    for(auto &d:notePool.activeDesc())
-        if(d.sustained())
-            for(auto &s:notePool.activeNotes(d))
-                s.note->releasekey();
-}
-
-/*
- * Release all keys
- */
-
-void Part::ReleaseAllKeys()
-{
-    for(auto &d:notePool.activeDesc())
-        if(!d.released())
-            for(auto &s:notePool.activeNotes(d))
-                s.note->releasekey();
+    notePool.releaseSustainingNotes();
 }
 
 // Call NoteOn(...) with the most recent still held key as new note

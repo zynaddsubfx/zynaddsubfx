@@ -113,6 +113,44 @@ class KitTest
                     .status=0,
                     .legatoMirror=false,
                     .portamentoRealtime=NULL}));
+
+            //clear sustain
+            part->ctl.setsustain(0); // strictly speaking not necessary
+                                     // for the test, but it's what would
+                                     // trigger the release of sustained notes.
+            part->notePool.releaseSustainingNotes();
+
+            //both are now in the released state
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=KEY_RELEASED|SUSTAIN_BIT,
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
+
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=KEY_RELEASED,
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
+
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
+
         }
 
         void testSustainCase2() {
@@ -188,6 +226,78 @@ class KitTest
                     .sendto=0,
                     .size=1,
                     .status=KEY_PLAYING,
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
+
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
+
+            part->NoteOff(65);
+
+            //first note is still in release state
+            //second note has moved to sustaining state
+
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=KEY_RELEASED,
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
+
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=65,
+                    .sendto=0,
+                    .size=1,
+                    .status=KEY_RELEASED_AND_SUSTAINED,
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
+
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[2],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=0,
+                    .sendto=0,
+                    .size=0,
+                    .status=0,
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
+
+            //clear sustain
+            part->ctl.setsustain(0); // strictly speaking not necessary
+                                     // for the test, but it's what would
+                                     // trigger the release of sustained notes.
+            part->notePool.releaseSustainingNotes();
+
+            //now both notes are released
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[0],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=64,
+                    .sendto=0,
+                    .size=1,
+                    .status=KEY_RELEASED,
+                    .legatoMirror=false,
+                    .portamentoRealtime=NULL}));
+
+            TS_ASSERT_EQUAL_CPP(part->notePool.ndesc[1],
+                    (NotePool::NoteDescriptor{
+                    .age=0,
+                    .note=65,
+                    .sendto=0,
+                    .size=1,
+                    .status=KEY_RELEASED,
                     .legatoMirror=false,
                     .portamentoRealtime=NULL}));
 

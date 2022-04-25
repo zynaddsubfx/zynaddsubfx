@@ -35,6 +35,7 @@ AnalogFilter::AnalogFilter(unsigned char Ftype,
       stages(Fstages),
       freq(Ffreq),
       q(Fq),
+      newq(Fq),
      gain(1.0),
      recompute(true),
      freqbufsize(bufsize/8)
@@ -292,6 +293,8 @@ void AnalogFilter::setfreq(float frequency)
         freq = frequency;
         recompute = true;
     }
+    if (recompute)
+        q = newq;
     
     if (beforeFirstTick) {
         freq_smoothing.reset( freq );
@@ -301,13 +304,21 @@ void AnalogFilter::setfreq(float frequency)
 
 void AnalogFilter::setfreq_and_q(float frequency, float q_)
 {
-    q = q_;
+    newq = q_;
+    /*
+     * Only recompute based on Q change if change is more than 10%
+     * from current value (or the old or new Q is 0, which normally
+     * won't occur, but better to handle it than potentially
+     * fail on division by zero or assert).
+     */
+    if (q == 0.0 || q_ == 0.0 || ((q > q_ ? q / q_ : q_ / q) > 1.1))
+        recompute = true;
     setfreq(frequency);
 }
 
 void AnalogFilter::setq(float q_)
 {
-    q = q_;
+    newq = q = q_;
     computefiltercoefs(freq,q);
 }
 

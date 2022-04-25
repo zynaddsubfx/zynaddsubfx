@@ -69,6 +69,7 @@ class AnalogFilter:public Filter
         int   stages; //how many times the filter is applied (0->1,1->2,etc.)
         float freq;   //Frequency given in Hz
         float q;      //Q factor (resonance or Q factor)
+        float newq;   //New target Q
         float gain;   //the gain of the filter (if are shelf/peak) filters
         bool recompute; // need to recompute coeff.
         int order; //the order of the filter (number of poles)

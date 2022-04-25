@@ -151,9 +151,11 @@ void SVFilter::setstages(int stages_)
 {
     if(stages_ >= MAX_FILTER_STAGES)
         stages_ = MAX_FILTER_STAGES - 1;
-    stages = stages_;
-    cleanup();
-    computefiltercoefs();
+    if (stages != stages_) {
+        stages = stages_;
+        cleanup();
+        computefiltercoefs();
+    }
 }
 
 float *SVFilter::getfilteroutfortype(SVFilter::fstage &x) {
