@@ -353,22 +353,35 @@ spa::port_ref_base &ZynOscPlugin::port(const char *pname) {
         }
 
         if(new_ref) {
-            capture cap;
-            char loc[1024];
-            cap.obj = master;
-            cap.loc = loc;
-            cap.loc_size = sizeof(loc);
+
             char msgbuf[1024];
             std::size_t length =
                 rtosc_message(msgbuf, sizeof(msgbuf), pname, "");
             if(!length)
-                throw std::runtime_error("Could not build rtosc message");
-            zyn::Master::ports.dispatch(msgbuf, cap, true);
-            if(cap.matches < 1)
-                throw std::runtime_error("Could not find port"); // TODO...
-	    else if(cap.matches > 1)
-		throw std::runtime_error("Port name ambigous");
-            set_init init_setter(cap.val());
+            throw std::runtime_error("Could not build rtosc message");
+            int matches = 0;
+            rtosc_arg_val_t res;
+            for(int try_num = 0; try_num < 300 && matches < 1; ++try_num) // up to 30 seconds
+            {
+                capture cap;
+                char loc[1024];
+                cap.obj = master;
+                cap.loc = loc;
+                cap.loc_size = sizeof(loc);
+                cap.matches = 0;
+                zyn::Master::ports.dispatch(msgbuf, cap, true);
+                if(cap.matches > 1)
+                    throw std::runtime_error("Port name ambigous");
+                else if(cap.matches < 1)
+                    usleep(100000); // 0.1s
+                else
+                    res = cap.val();
+                matches = cap.matches;
+            }
+            if(matches < 1)
+                throw std::runtime_error("Could not find port");
+
+            set_init init_setter(res);
             new_ref->accept(init_setter);
             ports.emplace(pname, new_ref);
             return *new_ref;
