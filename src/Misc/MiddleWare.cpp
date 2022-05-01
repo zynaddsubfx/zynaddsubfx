@@ -2123,7 +2123,7 @@ void MiddleWareImpl::heartBeat(Master *master)
         }
 
         //it's pretty likely dead
-        if(last_beat-last_ack > 0 && now-last_beat > 1000/*10s*/) {
+        if(last_beat-last_ack > 0 && now-last_beat > 20) {
             //The backend has had 200 ms to acquire a new beat
             //The backend instead has an older beat
             //XXX INSERT MESSAGE HERE ABOUT TRANSITION TO OFFLINE
