@@ -332,9 +332,11 @@ static const Ports globalPorts = {
     rRecurp(FreqLfo, "Frequency LFO"),
     rRecurp(AmpLfo, "Amplitude LFO"),
     rRecurp(FilterLfo, "Filter LFO"),
+    rRecurp(GenericLfo, "Generic LFO"),
     rRecurp(FreqEnvelope, "Frequency Envelope"),
-    rRecurp(AmpEnvelope, "Frequency Envelope"),
-    rRecurp(FilterEnvelope, "Frequency Envelope"),
+    rRecurp(AmpEnvelope, "Amplitude Envelope"),
+    rRecurp(FilterEnvelope, "Filter Envelope"),
+    rRecurp(GenericEnvelope, "Generic Envelope"),
     rRecurp(GlobalFilter, "Filter"),
 
     rToggle(PStereo, rShort("stereo"), rDefault(true), "Mono/Stereo Enable"),
