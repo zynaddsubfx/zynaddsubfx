@@ -53,6 +53,8 @@ class ADnote:public SynthNote
 
 
         virtual SynthNote *cloneLegato(void) override;
+
+        void calcMod(float& envout, float& lfoout);
     private:
 
         void setupVoice(int nvoice);
@@ -113,6 +115,8 @@ class ADnote:public SynthNote
         /**Fadein in a way that removes clicks but keep sound "punchy"*/
         inline void fadein(float *smps) const;
 
+
+
         //GLOBALS
         ADnoteParameters &pars;
         unsigned char     stereo; //if the note is stereo (allows note Panning)
@@ -120,6 +124,9 @@ class ADnote:public SynthNote
         float velocity;
 
         ONOFFTYPE   NoteEnabled;
+
+
+
 
         /*****************************************************************/
         /*                    GLOBAL PARAMETERS                          */
@@ -159,12 +166,17 @@ class ADnote:public SynthNote
                 float initialvalue, dt, t;
             } Punch;
 
-            /******************************************
-            *        FILTER GLOBAL PARAMETERS        *
-            ******************************************/
+
             ModFilter *Filter;
             Envelope  *FilterEnvelope;
             LFO       *FilterLfo;
+
+            /******************************************
+            *        GENERIC MOD PARAMETERS        *
+            ******************************************/
+            Envelope  *GenericEnvelope;
+            LFO       *GenericLfo;
+
         } NoteGlobalPar;
 
 

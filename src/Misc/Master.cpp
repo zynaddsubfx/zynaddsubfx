@@ -272,7 +272,7 @@ static const Ports slot_ports = {
             d.reply(d.loc, "i", a.slots[slot].midi_nrpn);
 
         rEnd},
-    {"internal::i", rOptions(NONE, ENV, LFO) rDefault(NONE)
+    {"internal::i", rOptions(NONE, LFO, ENV) rDefault(NONE)
      rProp(parameter) rMap(default, 0) rDoc("Access assigned internal mod type \n 0=NONE 1=ENV 2=LFO") , 0,
         rBegin;
         int slot = d.idx[0];
@@ -1299,10 +1299,10 @@ bool Master::AudioOut(float *outl, float *outr)
     //the part to graciously shut down when disabled.
     for(int npart = 0; npart < NUM_MIDI_PARTS; ++npart)
     {
-        float envout=0.0f, lfoout=0.0f;
-        part[npart]->ComputePartCtrl(envout, lfoout);
-        automate.handleGenericControlers(CONTROLER_TYPE_ENV, envout);
-        automate.handleGenericControlers(CONTROLER_TYPE_LFO, lfoout);
+
+        part[npart]->ComputePartCtrl(genericEnvout, genericLfoout);
+        automate.handleGenericControlers(CONTROLER_TYPE_ENV, genericEnvout);
+        automate.handleGenericControlers(CONTROLER_TYPE_LFO, genericLfoout);
         part[npart]->ComputePartSmps();
     }
 

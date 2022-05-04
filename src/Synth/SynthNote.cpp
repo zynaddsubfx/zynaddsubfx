@@ -25,38 +25,14 @@ namespace zyn {
 SynthNote::SynthNote(const SynthParams &pars, const char *prefix)
     :memory(pars.memory),
     legato(pars.synth, pars.velocity, pars.portamento,
-            pars.note_log2_freq, pars.quiet, pars.seed), ctl(pars.ctl), synth(pars.synth), time(pars.time),
-            genericEnvelopeEnabled(false), genericLfoEnabled(false)
+            pars.note_log2_freq, pars.quiet, pars.seed), ctl(pars.ctl), synth(pars.synth), time(pars.time)
 {
-    const float basefreq = powf(2.0f, pars.note_log2_freq);
     ScratchString pre = prefix;
-    /* Generic Modulators Init */
-    GenericEnvelopeParams = new EnvelopeParams(0, 0, &time);
-    GenericEnvelopeParams->init(loc_generic);
-    GenericLfoParams = new LFOParams(loc_generic, &time);
-
-    if(genericEnvelopeEnabled)
-        GenericEnvelope = new Envelope(*GenericEnvelopeParams,
-                basefreq, synth.dt(), wm,
-                (pre+"GenericEnvelope/").c_str);
-    else
-        GenericEnvelope = NULL;
-
-    if(genericLfoEnabled)
-        GenericLfo = new LFO(*GenericLfoParams, basefreq, time, wm,
-                (pre+"GenericLfo/").c_str);
-    else
-        GenericLfo = NULL;
 
 }
 SynthNote::~SynthNote()
 {
-    if(genericEnvelopeEnabled)
-        delete GenericEnvelope;
-    if(genericLfoEnabled)
-        delete GenericLfo;
-    delete GenericEnvelopeParams;
-    delete GenericLfoParams;
+
 }
 SynthNote::Legato::Legato(const SYNTH_T &synth_, float vel,
                           Portamento *portamento,
@@ -233,20 +209,6 @@ float SynthNote::getRandomFloat() {
 prng_t SynthNote::getRandomUint() {
     current_prng_state = prng_r(current_prng_state);
     return current_prng_state;
-}
-
-void SynthNote::calcMod(float& envout, float& lfoout) {
-
-    if(GenericEnvelope)
-        envout = GenericEnvelope->envout();
-    else
-        envout = 0.0f;
-
-    if(GenericLfo)
-        lfoout = GenericLfo->lfoout();
-    else
-        lfoout = 0.0f;
-
 }
 
 //~ SynthParams::SynthParams(Allocator &memory_, const Controller &ctl_,

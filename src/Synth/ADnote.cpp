@@ -94,6 +94,20 @@ ADnote::ADnote(ADnoteParameters *pars_, const SynthParams &spars,
         tmpwave_unison[k] = memory.valloc<float>(synth.buffersize);
         memset(tmpwave_unison[k], 0, synth.bufferbytes);
     }
+    //~ const float basefreq = powf(2.0f, pars.note_log2_freq);
+
+    //~ if(genericEnvelopeEnabled)
+        //~ GenericEnvelope = new Envelope(*pars.GenericEnvelope,
+                //~ basefreq, synth.dt(), wm,
+                //~ ("GenericEnvelope/").c_str);
+    //~ else
+        //~ GenericEnvelope = NULL;
+
+    //~ if(genericLfoEnabled)
+        //~ GenericLfo = new LFO(*pars.GenericLfo, basefreq, time, wm,
+                //~ (pre+"GenericLfo/").c_str);
+    //~ else
+        //~ GenericLfo = NULL;
 
     initparameters(wm, prefix);
     memory.endTransaction();
@@ -1961,6 +1975,20 @@ void ADnote::entomb(void)
     NoteGlobalPar.AmpEnvelope->forceFinish();
 }
 
+void ADnote::calcMod(float& envout, float& lfoout) {
+
+    if(pars.GlobalPar.PGenEnvelopeEnabled)
+        envout = NoteGlobalPar.GenericEnvelope->envout();
+    else
+        envout = 0.0f;
+
+    if(pars.GlobalPar.PGenLfoEnabled) {
+        lfoout = (NoteGlobalPar.GenericLfo->lfoout()/4094.0f)+0.5f;
+    }
+    else
+        lfoout = 0.0f;
+}
+
 void ADnote::Voice::releasekey()
 {
     if(!Enabled)
@@ -2010,6 +2038,11 @@ void ADnote::Global::kill(Allocator &memory)
     memory.dealloc(Filter);
     memory.dealloc(FilterEnvelope);
     memory.dealloc(FilterLfo);
+
+    //~ if(genericEnvelopeEnabled)
+         memory.dealloc(GenericEnvelope);
+    //~ if(genericLfoEnabled)
+         memory.dealloc(GenericLfo);
 }
 
 void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
@@ -2046,6 +2079,10 @@ void ADnote::Global::initparameters(const ADnoteGlobalParam &param,
     Filter->addMod(*FilterEnvelope);
     Filter->addMod(*FilterLfo);
 
+    GenericEnvelope = memory.alloc<Envelope>(*param.GenericEnvelope, basefreq,
+            synth.dt(), wm, (pre+"GlobalPar/GenericEnvelope/").c_str);
+    GenericLfo      = memory.alloc<LFO>(*param.GenericLfo, basefreq, time, wm,
+                   (pre+"GlobalPar/GenericLfo/").c_str);
     {
         Filter->updateSense(velocity, param.PFilterVelocityScale,
                 param.PFilterVelocityScaleFunction);

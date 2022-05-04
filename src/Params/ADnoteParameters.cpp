@@ -338,9 +338,11 @@ static const Ports globalPorts = {
     rRecurp(FilterEnvelope, "Filter Envelope"),
     rRecurp(GenericEnvelope, "Generic Envelope"),
     rRecurp(GlobalFilter, "Filter"),
-
     rToggle(PStereo, rShort("stereo"), rDefault(true), "Mono/Stereo Enable"),
-
+    rToggle(PGenEnvelopeEnabled, rShort("Env enable"), rDefault(false),
+    "Generic Envelope Enable"),
+    rToggle(PGenLfoEnabled,      rShort("Lfo enable"), rDefault(false),
+    "Generic LFO Enable"),
     //Frequency
     //nominally -8192..8191
     rParamI(PDetune,              rShort("fine"),
@@ -462,6 +464,7 @@ static const Ports adPorts = {//XXX 16 should not be hard coded
 const Ports &ADnoteParameters::ports  = adPorts;
 const Ports &ADnoteVoiceParam::ports  = voicePorts;
 const Ports &ADnoteGlobalParam::ports = globalPorts;
+//~ const Ports &SynthNoteGlobalParam::ports = synthPorts;
 
 ADnoteParameters::ADnoteParameters(const SYNTH_T &synth, FFTwrapper *fft_,
                                    const AbsTime *time_)
@@ -496,6 +499,11 @@ ADnoteGlobalParam::ADnoteGlobalParam(const AbsTime *time_) :
     FilterEnvelope->init(ad_global_filter);
     FilterLfo = new LFOParams(ad_global_filter, time_);
     Reson     = new Resonance();
+
+    /* Generic Modulators Init */
+    GenericEnvelope = new EnvelopeParams(0, 0, time_);
+    GenericEnvelope->init(loc_generic);
+    GenericLfo = new LFOParams(loc_generic, time_);
 }
 
 void ADnoteParameters::defaults()
@@ -540,6 +548,11 @@ void ADnoteGlobalParam::defaults()
     FilterEnvelope->defaults();
     FilterLfo->defaults();
     Reson->defaults();
+
+    GenericEnvelope->defaults();
+    GenericLfo->defaults();
+    PGenEnvelopeEnabled       = 0;
+    PGenLfoEnabled            = 0;
 }
 
 /*
@@ -565,7 +578,7 @@ void ADnoteVoiceParam::defaults()
     Type = 0;
     Pfixedfreq    = 0;
     PfixedfreqET  = 0;
-    PBendAdjust = 88; // 64 + 24
+    PBendAdjust   = 88; // 64 + 24
     POffsetHz     = 64;
     Presonance    = 1;
     Pfilterbypass = 0;
@@ -722,6 +735,9 @@ ADnoteGlobalParam::~ADnoteGlobalParam()
     delete FilterEnvelope;
     delete FilterLfo;
     delete Reson;
+
+    delete GenericEnvelope;
+    delete GenericLfo;
 }
 
 ADnoteParameters::~ADnoteParameters()

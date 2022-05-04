@@ -62,8 +62,6 @@ class SynthNote
          * @return 0 if note is finished*/
         virtual int noteout(float *outl, float *outr) = 0;
 
-        void calcMod(float& envout, float& lfoout);
-
         //TODO fix this spelling error [noisey commit]
         /**Release the key for the note and start release portion of envelopes.*/
         virtual void releasekey() = 0;
@@ -98,13 +96,7 @@ class SynthNote
 
 
     protected:
-            // Generic Modulation Sources
-        Envelope  *GenericEnvelope;
-        LFO       *GenericLfo;
-        bool genericEnvelopeEnabled;
-        bool genericLfoEnabled;
-        EnvelopeParams *GenericEnvelopeParams;
-        LFOParams    *GenericLfoParams;
+
 
         // Legato transitions
         class Legato

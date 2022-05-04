@@ -272,6 +272,8 @@ class Master
 
         Value_Smoothing_Filter smoothing_part_l[NUM_MIDI_PARTS];
         Value_Smoothing_Filter smoothing_part_r[NUM_MIDI_PARTS];
+
+        float genericEnvout=0.0f, genericLfoout=0.0f;
 };
 
 class master_dispatcher_t : public rtosc::savefile_dispatcher_t

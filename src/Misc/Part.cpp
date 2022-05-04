@@ -1026,7 +1026,11 @@ void Part::ComputePartCtrl(float& envout, float& lfoout)
     for(auto &d:notePool.activeDesc()) {
         for(auto &s:notePool.activeNotes(d)) {
             auto &note = *s.note;
-            note.calcMod(envout, lfoout);
+            ADnote *adnote = dynamic_cast<ADnote*>(&note);
+            if (adnote) {
+                adnote->calcMod(envout, lfoout);
+                //~ printf("calcMod lfoout(): %f\n", lfoout);
+            }
         }
     }
 }
