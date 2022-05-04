@@ -121,7 +121,7 @@ AlienWah
 [orange]#09 - Left/Right Crossing (FC)#
 10 - Phase+
 
-Distorsion
+Distortion
 ~~~~~~~~~~
 
 [verse]

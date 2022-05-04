@@ -370,7 +370,7 @@
 
 1.0.7 (7 Feb 2003)
       - some settings (like samplerate) are set at runtime (by comand line)
-      - added Distorsion effect
+      - added Distortion effect
       - added controllers, and NRPNs for changing all effects parameters by midi
       - bugs removed and other improvements
 
