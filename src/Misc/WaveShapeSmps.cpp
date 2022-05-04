@@ -277,7 +277,7 @@ void waveShapeSmps(int n,
                     smps[i] = 1.5 * (smps[i] - (smps[i]*smps[i]*smps[i] / 3.0) );
                 else
                     smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
-                //subtract offset with distorsion function applied
+                //subtract offset with distortion function applied
                 smps[i] -= 1.5 * (offs - (offs*offs*offs / 3.0));
             }
             break;
@@ -292,7 +292,7 @@ void waveShapeSmps(int n,
                     smps[i] = smps[i]*(2-fabsf(smps[i]));
                 else
                     smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
-                //subtract offset with distorsion function applied
+                //subtract offset with distortion function applied
                 smps[i] -= offs*(2-fabsf(offs));
             }
             break;

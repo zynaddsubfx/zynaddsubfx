@@ -22,7 +22,7 @@
 #include "Reverb.h"
 #include "Echo.h"
 #include "Chorus.h"
-#include "Distorsion.h"
+#include "Distortion.h"
 #include "EQ.h"
 #include "DynamicFilter.h"
 #include "Phaser.h"
@@ -153,7 +153,7 @@ static const rtosc::Ports local_ports = {
                                 eff->seteffectparrt(2, Pfreq);
                             break;
                         case 1: // Reverb
-                        case 6: // Distorsion
+                        case 6: // Distortion
                         case 7: // EQ
                         default:
                             break;
@@ -200,7 +200,7 @@ static const rtosc::Ports local_ports = {
                                 eff->seteffectparrt(2, Pfreq);
                             break;
                         case 1: // Reverb
-                        case 6: // Distorsion
+                        case 6: // Distortion
                         case 7: // EQ
                         default:
                             break;
@@ -249,7 +249,7 @@ static const rtosc::Ports local_ports = {
         }},
     rSubtype(Alienwah),
     rSubtype(Chorus),
-    rSubtype(Distorsion),
+    rSubtype(Distortion),
     rSubtype(DynamicFilter),
     rSubtype(Echo),
     rSubtype(EQ),
@@ -327,7 +327,7 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
                 efx = memory.alloc<Alienwah>(pars);
                 break;
             case 6:
-                efx = memory.alloc<Distorsion>(pars);
+                efx = memory.alloc<Distortion>(pars);
                 break;
             case 7:
                 efx = memory.alloc<EQ>(pars);
@@ -368,7 +368,7 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
                         seteffectparrt(2, Pfreq);
                     break;
                 case 1: // Reverb
-                case 6: // Distorsion
+                case 6: // Distortion
                 case 7: // EQ
                 default:
                     break;
