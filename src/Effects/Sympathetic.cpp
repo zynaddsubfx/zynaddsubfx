@@ -45,18 +45,18 @@ rtosc::Ports Sympathetic::ports = {
     rEffParPan(rDefault(64)),
     rEffPar(Pq, 2, rShort("q"), rDefault(65),
             "Resonance"),
-    rEffPar(Pdrive,   3, rShort("drive"), rDefault(65),
+    rEffPar(Pdrive,   3, rShort("dr"), rDefault(65),
             "Input Amplification"),
-    rEffPar(Plevel,   4, rShort("output"), rDefault(65),
+    rEffPar(Plevel,   4, rShort("lev"), rDefault(65),
             "Output Amplification"),
     rEffPar(Punison_frequency_spread,  5, rShort("detune"), rDefault(30),
             "Unison String Detune"),
     rEffParTF(Pnegate, 6, rShort("neg"), rDefault(false), "Negate Signal"),
     rEffPar(Plpf, 7, rShort("lpf"), rDefault(127), "Low Pass Cutoff"),
     rEffPar(Phpf, 8, rShort("hpf"), rDefault(0), "High Pass Cutoff"),
-    rEffParRange(Punison_size, 9, rShort("unison"), rLinear(1,3), rDefault(1),
+    rEffParRange(Punison_size, 9, rShort("uni"), rLinear(1,3), rDefault(1),
             "Number of Unison Strings"),
-    rEffParRange(Pstrings, 10, rShort("strings"), rLinear(0,76), rDefault(0),
+    rEffParRange(Pstrings, 10, rShort("str"), rLinear(0,76), rDefault(0),
             "Number of Strings"),
     rEffPar(Pbasenote, 11, rShort("base"), rDefault(57), // basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
             "Midi Note of Lowest String"),
@@ -196,48 +196,18 @@ void Sympathetic::sethpf(unsigned char _Phpf)
 
 void Sympathetic::calcFreqs()
 {
-    float unison_spread_semicent = powf(Punison_frequency_spread / 63.5f, 2.0f) * 25.0f;
+    const float unison_spread_semicent = powf(Punison_frequency_spread / 63.5f, 2.0f) * 25.0f;
     const float unison_real_spread_up = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
     const float unison_real_spread_down = 1.0f/unison_real_spread_up;
 
-    //~ switch(Ppreset)
-    //~ {
-        //~ case 0:
-            //~ // Punison_size = 1;
-        //~ case 1:
-        //~ default:
     for(unsigned int i = 0; i < Punison_size*Pstrings; i+=Punison_size)
     {
-        //const float delay = ((float)samplerate)/freqs[j]);
-
         const float centerFreq = powf(2.0f, (float)i / 12.0f) * baseFreq;
         filterBank->delays[i] = ((float)samplerate)/centerFreq;
         if (Punison_size > 1) filterBank->delays[i+1] = ((float)samplerate)/(centerFreq * unison_real_spread_up);
         if (Punison_size > 2) filterBank->delays[i+2] = ((float)samplerate)/(centerFreq * unison_real_spread_down);
     }
     filterBank->setStrings(Pstrings*Punison_size,baseFreq);
-            //~ break;
-
-        //~ case 2:
-            //~ // Punison_size = 1;
-        //~ case 3:
-            //~ const float guitar_freqs[6] = {82.41, 110.00, 146.83, 196.00, 246.94, 329.63};
-            //~ Pstrings = 6;
-            //~ for(unsigned int i = 0; i < 6; ++i)
-            //~ {
-                //~ filterBank->freqs[i] = guitar_freqs[i];
-            //~ }
-
-            //~ if (Punison_size > 1)
-            //~ {
-                //~ for(unsigned int i = 6; i < 12; ++i)
-                //~ {
-                    //~ filterBank->freqs[i] = guitar_freqs[i-6] * 2.0f * unison_real_spread_up;
-                //~ }
-            //~ }
-            //~ filterBank->setStrings(Pstrings*Punison_size,82.0f);
-            //~ break;
-    //~ }
 
 }
 
