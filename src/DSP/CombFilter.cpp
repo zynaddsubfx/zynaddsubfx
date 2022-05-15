@@ -14,7 +14,7 @@ namespace zyn{
 
 CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float Fq,
     unsigned int srate, int bufsize)
-    :Filter(srate, bufsize), gain(1.0f), type(Ftype), memory(*alloc)
+    :Filter(srate, bufsize), gain(1.0f), q(Fq), type(Ftype), memory(*alloc)
 {
     //worst case: looking back from smps[0] at 25Hz using higher order interpolation
     mem_size = (int)ceilf((float)samplerate/25.0) + buffersize + 2; // 2178 at 48000Hz and 256Samples
@@ -23,7 +23,7 @@ CombFilter::CombFilter(Allocator *alloc, unsigned char Ftype, float Ffreq, float
     memset(input, 0, mem_size*sizeof(float));
     memset(output, 0, mem_size*sizeof(float));
 
-    setfreq_and_q(Ffreq, Fq);
+    setfreq_and_q(Ffreq, q);
     settype(type);
 }
 
