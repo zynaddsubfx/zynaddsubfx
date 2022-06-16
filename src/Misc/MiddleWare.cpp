@@ -1151,7 +1151,7 @@ static std::vector<std::string> getFiles(const char *folder, bool finddir)
 
     while((fn = readdir(dir))) {
 #ifndef WIN32
-        bool is_dir = fn->d_type & DT_DIR;
+        bool is_dir = fn->d_type == DT_DIR;
         //it could still be a symbolic link
         if(!is_dir) {
             string path = string(folder) + "/" + fn->d_name;
