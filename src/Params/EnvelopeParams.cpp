@@ -333,6 +333,7 @@ void EnvelopeParams::init(zyn::consumer_location_t _loc)
         case ad_voice_filter:  ADSRinit_filter(90, 0.970f, 40, 0.970f, 0.009f, 40); break;
         case ad_voice_fm_freq: ASRinit(20, 3.620f, 40, 1.876f); break;
         case ad_voice_fm_amp:  ADSRinit(1.876f, 3.620f, 127, 6.978f); break;
+        case ad_voice_fm_wave: ADSRinit_sym(3.0f, 2.0f, 127, 1.0f); break;
         case sub_freq:         ASRinit(30, 0.254f, 64, 0.499f); break;
         case sub_bandwidth:    ASRinit_bw(100, 0.970f, 64, 0.499f); break;
         default: throw std::logic_error("Invalid envelope consumer location");
@@ -351,6 +352,20 @@ void EnvelopeParams::ADSRinit(float a_dt, float d_dt, char s_val, float r_dt)
 {
     setpresettype("Penvamplitude");
     Envmode   = ADSR_lin;
+    A_dt      = a_dt;
+    D_dt      = d_dt;
+    PS_val    = s_val;
+    R_dt      = r_dt;
+    Pfreemode = 0;
+    converttofree();
+
+    store2defaults();
+}
+
+void EnvelopeParams::ADSRinit_sym(float a_dt, float d_dt, char s_val, float r_dt)
+{
+    setpresettype("Penvamplitude");
+    Envmode   = ADSR_sym;
     A_dt      = a_dt;
     D_dt      = d_dt;
     PS_val    = s_val;
@@ -429,6 +444,7 @@ void EnvelopeParams::converttofree()
 {
     switch(Envmode) {
         case ADSR_lin:
+        case ADSR_sym:
         case ADSR_dB:
             Penvpoints  = 4;
             Penvsustain = 2;

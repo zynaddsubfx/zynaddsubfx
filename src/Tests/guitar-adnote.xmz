@@ -406,6 +406,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="S_val" value="111" />
 <par name="R_val" value="64" />
 </AMPLITUDE_ENVELOPE>
+<par_bool name="wave_envelope_enabled" value="no" />
 <MODULATOR>
 <par name="detune" value="6444" />
 <par name="coarse_detune" value="2048" />
