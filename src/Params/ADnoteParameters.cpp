@@ -101,7 +101,8 @@ static const Ports voicePorts = {
         "FM Oscillator Phase"),
     rToggle(Pfilterbypass,   rShort("bypass"), rDefault(false),
         "Filter Bypass"),
-
+    rToggle(PfilterFcCtlBypass,   rShort("CtlBypass"), rDefault(false),
+        "Filter Fc Controll Bypass"),
     //Freq Stuff
     rToggle(Pfixedfreq,      rShort("fixed"),  rDefault(false),
         "If frequency is fixed"),
@@ -564,6 +565,7 @@ void ADnoteVoiceParam::defaults()
     POffsetHz     = 64;
     Presonance    = 1;
     Pfilterbypass = 0;
+    PfilterFcCtlBypass = 0;
     Pextoscil     = -1;
     PextFMoscil   = -1;
     Poscilphase   = 64;
@@ -771,6 +773,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
 
     xml.addparbool("filter_enabled", PFilterEnabled);
     xml.addparbool("filter_bypass", Pfilterbypass);
+    xml.addparbool("filter_fcctl_bypass", PfilterFcCtlBypass);
 
     xml.addpar("fm_enabled", (int)PFMEnabled);
 
@@ -1123,6 +1126,7 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     copy(PFMoscilphase);
     copy(PFilterEnabled);
     copy(Pfilterbypass);
+    copy(PfilterFcCtlBypass);
     copy(PFMEnabled);
     copy(PFMFixedFreq);
 
@@ -1260,6 +1264,7 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
     PFMoscilphase  = xml.getpar127("oscil_fm_phase", PFMoscilphase);
     PFilterEnabled = xml.getparbool("filter_enabled", PFilterEnabled);
     Pfilterbypass  = xml.getparbool("filter_bypass", Pfilterbypass);
+    PfilterFcCtlBypass  = xml.getparbool("filter_fcctl_bypass", PfilterFcCtlBypass);
     PFMEnabled     = (FMTYPE)xml.getpar127("fm_enabled", (int)PFMEnabled);
 
     if(xml.enterbranch("OSCIL")) {
