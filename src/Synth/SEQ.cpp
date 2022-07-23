@@ -26,28 +26,26 @@ SEQ::SEQ(const SEQParams &seqpars_, const AbsTime &t, WatchManager *m,
     :delayTime(t, seqpars_.delay), //0..4 sec
     time(t),
     dt(t.dt()),
-    seqpars(seqpars_), 
+    seqpars(seqpars_),
     watchOut(m, watch_prefix, "out")
 {
 
     //max 2x/octave
     if(seqpars.numerator==0) {
-        if (seqpars.freq < 0.001) {
-            
-            //~ printf("z38 seqpars.freq = %f\n", seqpars.freq);
+
+        if (seqpars.freq < 0.001)
             duration = 1000.0f;
-        }
         else
-            duration = 1.0/seqpars.freq; 
-        if (seqpars.continous)
-            tRef = 0;
-        else
-            tRef = time.time();
-        
+            duration = 1.0/seqpars.freq;
+
     } else {
         duration = 240.0f / limit(((float(time.tempo)) * seqpars.denominator / seqpars.numerator), 0.001f, 1000.0f);
-        tRef = 0;
     }
+
+    if (seqpars.continous)
+        tRef = 0;
+    else
+        tRef = time.time();
 
     z1 = 0.0;
     z2 = 0.0;
@@ -105,12 +103,12 @@ float SEQ::seqout()
     //update internals XXX TODO cleanup
     if ( ! seqpars.time || seqpars.last_update_timestamp == seqpars.time->time())
     {
-        if((seqpars.numerator==0)) { 
+        if((seqpars.numerator==0)) {
             if (seqpars.freq < 0.001) {
                 //~ printf("z109 seqpars.freq = %f\n", seqpars.freq);
                 duration = 1000.0f;
-            }  
-            duration = 1.0/seqpars.freq;  
+            }
+            duration = 1.0/seqpars.freq;
             //~ printf("z113 seqpars.freq = %f\n", seqpars.freq);
         } else {
             duration = 240.0f / limit(((float(time.tempo)) * seqpars.denominator / seqpars.numerator), 0.001f, 10000.0f);
@@ -118,7 +116,7 @@ float SEQ::seqout()
     }
 
     float out = baseOut();
-    
+
     switch(seqpars.fel) {
         case consumer_location_type_t::amp:
             seqintensity = seqpars.intensity;
