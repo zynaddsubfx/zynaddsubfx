@@ -182,7 +182,11 @@ void SEQParams::add2XML(XMLwrapper& xml)
     xml.addpar("denominator", denominator);
     xml.beginbranch("SEQUENCE");
     for(int n = 0; n < NUM_SEQ_STEPS; ++n) {
-        if((sequence[n] == 0.0f))
+        const bool has_default_value =
+            ( (sequence[n] == 1.0f) &&
+              (loc == ad_global_amp || loc == ad_voice_amp) ) ||
+            (sequence[n] == 0.0f);
+        if(has_default_value)
             continue;
         xml.beginbranch("STEP", n + 1);
         xml.addparreal("value", sequence[n]);
