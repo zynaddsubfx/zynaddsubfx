@@ -836,7 +836,7 @@ void ADnoteVoiceParam::add2XML(XMLwrapper& xml, bool fmoscilused)
         AmpLfo->add2XML(xml);
         xml.endbranch();
     }
-    xml.addparbool("amp_seq_enabled", PAmpLfoEnabled);
+    xml.addparbool("amp_seq_enabled", PAmpSeqEnabled);
     if((PAmpSeqEnabled != 0) || (!xml.minimal)) {
         xml.beginbranch("AMPLITUDE_SEQ");
         AmpSeq->add2XML(xml);
@@ -975,7 +975,7 @@ void ADnoteGlobalParam::add2XML(XMLwrapper& xml)
     xml.beginbranch("AMPLITUDE_SEQ");
     AmpSeq->add2XML(xml);
     xml.endbranch();
-    
+
     xml.endbranch(); // AMPLITUDE_PARAMETERS
 
     xml.beginbranch("FREQUENCY_PARAMETERS");
@@ -997,7 +997,7 @@ void ADnoteGlobalParam::add2XML(XMLwrapper& xml)
     xml.beginbranch("FREQUENCY_SEQ");
     FreqSeq->add2XML(xml);
     xml.endbranch();
-    
+
     xml.endbranch(); // FREQUENCY_PARAMETERS
 
 
@@ -1020,7 +1020,7 @@ void ADnoteGlobalParam::add2XML(XMLwrapper& xml)
     xml.beginbranch("FILTER_SEQ");
     FilterSeq->add2XML(xml);
     xml.endbranch();
-    
+
     xml.endbranch(); // FILTER_PARAMETERS
 
     xml.beginbranch("RESONANCE");
@@ -1248,7 +1248,7 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     copy(PFreqLfoEnabled);
 
     RCopy(FreqLfo);
-    
+
     copy(PFreqSeqEnabled);
 
     RCopy(FreqSeq);
@@ -1264,7 +1264,7 @@ void ADnoteVoiceParam::paste(ADnoteVoiceParam &a)
     copy(PFilterVelocityScaleFunction);
 
     RCopy(FilterLfo);
-    
+
     copy(PFilterSeqEnabled);
 
     RCopy(FilterSeq);
@@ -1432,13 +1432,13 @@ void ADnoteVoiceParam::getfromXML(XMLwrapper& xml, unsigned nvoice)
             FreqLfo->getfromXML(xml);
             xml.exitbranch();
         }
-        
+
         PFreqSeqEnabled = xml.getparbool("freq_seq_enabled", PFreqSeqEnabled);
         if(xml.enterbranch("FREQUENCY_SEQ")) {
             FreqSeq->getfromXML(xml);
             xml.exitbranch();
         }
-        
+
         xml.exitbranch(); // FREQUENCY_PARAMETERS
     }
 

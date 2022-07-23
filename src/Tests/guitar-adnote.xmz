@@ -111,7 +111,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <AMPLITUDE_SEQ>
 <par_real name="freq" value="2" exact_value="0x40000000" />
 <par_real name="cutoff" value="40" exact_value="0x42200000" />
-<par name="steps" value="4" />
+<par name="steps" value="8" />
 <par_real name="delay" value="0" exact_value="0x00000000" />
 <par_bool name="continous" value="no" />
 <par name="numerator" value="0" />
@@ -159,7 +159,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <FREQUENCY_SEQ>
 <par_real name="freq" value="2" exact_value="0x40000000" />
 <par_real name="cutoff" value="40" exact_value="0x42200000" />
-<par name="steps" value="98" />
+<par name="steps" value="0" />
 <par_real name="delay" value="0" exact_value="0x00000000" />
 <par_bool name="continous" value="no" />
 <par name="numerator" value="0" />
@@ -214,7 +214,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <FILTER_SEQ>
 <par_real name="freq" value="2" exact_value="0x40000000" />
 <par_real name="cutoff" value="40" exact_value="0x42200000" />
-<par name="steps" value="127" />
+<par name="steps" value="98" />
 <par_real name="delay" value="0" exact_value="0x00000000" />
 <par_bool name="continous" value="no" />
 <par name="numerator" value="0" />
@@ -324,17 +324,7 @@ version-revision="7" ZynAddSubFX-author="Nasca Octavian Paul">
 <par name="numerator" value="0" />
 <par name="denominator" value="0" />
 </AMPLITUDE_LFO>
-<par_bool name="amp_seq_enabled" value="yes" />
-<AMPLITUDE_SEQ>
-<par_real name="freq" value="2" exact_value="0x40000000" />
-<par_real name="cutoff" value="40" exact_value="0x42200000" />
-<par name="steps" value="127" />
-<par_real name="delay" value="0" exact_value="0x00000000" />
-<par_bool name="continous" value="no" />
-<par name="numerator" value="0" />
-<par name="denominator" value="4" />
-<SEQUENCE />
-</AMPLITUDE_SEQ>
+<par_bool name="amp_seq_enabled" value="no" />
 </AMPLITUDE_PARAMETERS>
 <FREQUENCY_PARAMETERS>
 <par_bool name="fixed_freq" value="no" />
