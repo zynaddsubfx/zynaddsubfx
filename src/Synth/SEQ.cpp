@@ -23,8 +23,8 @@ namespace zyn {
 
 SEQ::SEQ(const SEQParams &seqpars_, const AbsTime &t, WatchManager *m,
         const char *watch_prefix)
-    :delayTime(t, seqpars_.delay), //0..4 sec
-    time(t),
+    :time(t),
+    delayTime(t, seqpars_.delay), //0..4 sec
     dt(t.dt()),
     seqpars(seqpars_),
     watchOut(m, watch_prefix, "out")
