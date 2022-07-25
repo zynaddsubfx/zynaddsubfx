@@ -4,7 +4,6 @@
 
 #pragma once
 
-#define MIN_COMB_FREQ 200.0f
 
 namespace zyn {
 
@@ -21,12 +20,12 @@ class CombFilterBank
     float outgain;
     float gainbwd=0.0f;
 
-    void setStrings(unsigned int nr, float basefreq);
+    void setStrings(unsigned int nr, const float basefreq);
 
 
     private:
     float tanhX(const float x);
-    float sampleLerp(float *smp, float pos);
+    float sampleLerp(const float *smp, const float pos);
 
     float* output[NUM_SYMPATHETIC_STRINGS] = {};
     float baseFreq;

@@ -289,7 +289,7 @@ void Sympathetic::changepar(int npar, unsigned char value)
             calcFreqs();
             break;
         case 10:
-            Pstrings = limit(value, (unsigned char) 1, (unsigned char) 76);
+            Pstrings = limit(value, (unsigned char) 0, (unsigned char) 76);
             calcFreqs();
             break;
         case 11:

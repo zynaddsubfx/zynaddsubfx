@@ -1,8 +1,4 @@
-#include <cassert>
-#include <cstdio>
 #include <cmath>
-#include <stdio.h>
-
 #include "../Misc/Allocator.h"
 #include "../Misc/Util.h"
 #include "CombFilterBank.h"
@@ -29,7 +25,7 @@ namespace zyn {
         setStrings(0, baseFreq);
     }
 
-    void CombFilterBank::setStrings(unsigned int nrOfStringsNew, float baseFreqNew)
+    void CombFilterBank::setStrings(unsigned int nrOfStringsNew, const float baseFreqNew)
     {
 
         // limit nrOfStringsNew
@@ -80,7 +76,7 @@ namespace zyn {
         return (x*(105.0f+10.0f*x2)/(105.0f+(45.0f+x2)*x2));
     }
 
-    inline float CombFilterBank::sampleLerp(float *smp, float pos) {
+    inline float CombFilterBank::sampleLerp(const float *smp, const float pos) {
         int poshi = (int)pos; // integer part (pos >= 0)
         float poslo = pos - (float) poshi; // decimal part
         // linear interpolation between samples
@@ -89,29 +85,36 @@ namespace zyn {
 
     void CombFilterBank::filterout(float *smp)
     {
-        float gainbuf[buffersize>>4];
-        if (!gain_smoothing.apply( gainbuf, buffersize>>4, gainbwd ) )
+        if (nrOfStrings==0) return;
+
+        float gainbuf[buffersize>>4]; // buffer for value smoothing filter
+        if (!gain_smoothing.apply( gainbuf, buffersize>>4, gainbwd ) ) // interpolate the gain value
             for (unsigned int i = 0; i < buffersize>>4; i ++) gainbuf[i] = gainbwd;
+            // TBD: why not move this functionality into Value_Smoothing_Filter::apply
 
         for (unsigned int i = 0; i < buffersize; ++i)
         {
+            // apply input gain
+            const float input_smp = smp[i]*inputgain;
+
             for (unsigned int j = 0; j < nrOfStrings; ++j)
             {
                 // calculate the feedback sample positions in the buffer
                 const float pos = float(mem_size-buffersize+i) - delays[j];
                 // sample at that position
-                //~ if (pos < 0.0f || pos >= mem_size) printf("pos: %f\n", pos);
                 const float sample = sampleLerp(output[j], pos);
-                output[j][mem_size-buffersize+i] = smp[i]*inputgain
-                    + tanhX(sample*gainbuf[i>>4]);
+                output[j][mem_size-buffersize+i] = input_smp
+                                        + tanhX(sample*gainbuf[i>>4]);
             }
             // mix output buffer samples to output sample
             smp[i]=0.0f;
             for (unsigned int j = 0; j < nrOfStrings; ++j)
                 smp[i] += output[j][mem_size-buffersize+i];
 
-            // apply output gain but
-            smp[i] *= outgain / (nrOfStrings!=0 ? (float)nrOfStrings : 1.0f);
+            // apply output gain to sum of strings and
+            // divide by nrOfStrings to get mean value
+            // division by zero is catched at the beginning filterout()
+            smp[i] *= outgain / (float)nrOfStrings;
         }
         // shift the buffer content one buffersize to the left
         for(unsigned int j = 0; j < nrOfStrings; ++j)
