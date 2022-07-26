@@ -27,7 +27,6 @@ namespace zyn {
 
     void CombFilterBank::setStrings(unsigned int nrOfStringsNew, const float baseFreqNew)
     {
-
         // limit nrOfStringsNew
         nrOfStringsNew = min(NUM_SYMPATHETIC_STRINGS,nrOfStringsNew);
 
@@ -93,8 +92,8 @@ namespace zyn {
         const unsigned int gainbufsize = buffersize / 16;
         float gainbuf[gainbufsize]; // buffer for value smoothing filter
         if (!gain_smoothing.apply( gainbuf, gainbufsize, gainbwd ) ) // interpolate the gain value
-            for (unsigned int i = 0; i < gainbufsize; i ++) gainbuf[i] = gainbwd;
-            // TBD: why not move this functionality into Value_Smoothing_Filter::apply
+            std::fill(gainbuf, gainbuf+gainbufsize, gainbwd); // if nothing to interpolate (constant value)
+
 
         for (unsigned int i = 0; i < buffersize; ++i)
         {
