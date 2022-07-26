@@ -24,8 +24,8 @@ class CombFilterBank
 
 
     private:
-    float tanhX(const float x);
-    float sampleLerp(const float *smp, const float pos);
+    static float tanhX(const float x);
+    static float sampleLerp(const float *smp, const float pos);
 
     float* output[NUM_SYMPATHETIC_STRINGS] = {};
     float baseFreq;
