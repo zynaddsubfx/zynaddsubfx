@@ -85,11 +85,15 @@ namespace zyn {
 
     void CombFilterBank::filterout(float *smp)
     {
+        // no string -> no sound
         if (nrOfStrings==0) return;
 
-        float gainbuf[buffersize>>4]; // buffer for value smoothing filter
-        if (!gain_smoothing.apply( gainbuf, buffersize>>4, gainbwd ) ) // interpolate the gain value
-            for (unsigned int i = 0; i < buffersize>>4; i ++) gainbuf[i] = gainbwd;
+        // interpolate gainbuf values over buffer using value smoothing filter (lp)
+        // this should prevent popping noise when controlled binary with 0 / 127
+        const unsigned int gainbufsize = buffersize / 16;
+        float gainbuf[gainbufsize]; // buffer for value smoothing filter
+        if (!gain_smoothing.apply( gainbuf, gainbufsize, gainbwd ) ) // interpolate the gain value
+            for (unsigned int i = 0; i < gainbufsize; i ++) gainbuf[i] = gainbwd;
             // TBD: why not move this functionality into Value_Smoothing_Filter::apply
 
         for (unsigned int i = 0; i < buffersize; ++i)
@@ -104,7 +108,7 @@ namespace zyn {
                 // sample at that position
                 const float sample = sampleLerp(output[j], pos);
                 output[j][mem_size-buffersize+i] = input_smp
-                                        + tanhX(sample*gainbuf[i>>4]);
+                                        + tanhX(sample*gainbuf[i/16]);
             }
             // mix output buffer samples to output sample
             smp[i]=0.0f;
