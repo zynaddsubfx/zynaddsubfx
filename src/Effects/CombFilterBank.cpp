@@ -18,6 +18,7 @@ namespace zyn {
         gain_smoothing.sample_rate(samplerate>>4);
         gain_smoothing.thresh(0.02f); // TBD: 2% jump audible?
         gain_smoothing.cutoff(1.0f);
+        pos_writer = 0;
     }
 
     CombFilterBank::~CombFilterBank()
@@ -40,24 +41,24 @@ namespace zyn {
             {
                 for(unsigned int i = nrOfStrings; i < nrOfStringsNew; ++i)
                 {
-                    output[i] = memory.valloc<float>(mem_size);
-                    memset(output[i], 0, mem_size*sizeof(float));
+                    string_smps[i] = memory.valloc<float>(mem_size);
+                    memset(string_smps[i], 0, mem_size*sizeof(float));
                 }
             }
             else if(nrOfStringsNew<nrOfStrings)
                 for(unsigned int i = nrOfStringsNew; i < nrOfStrings; ++i)
-                    memory.devalloc(output[i]);
+                    memory.devalloc(string_smps[i]);
         } else
         {
             // free the old buffers (wrong size for baseFreqNew)
             for(unsigned int i = 0; i < nrOfStrings; ++i)
-                memory.devalloc(output[i]);
+                memory.devalloc(string_smps[i]);
 
             // allocate buffers with new size
             for(unsigned int i = 0; i < nrOfStringsNew; ++i)
             {
-                output[i] = memory.valloc<float>(mem_size_new);
-                memset(output[i], 0, mem_size_new*sizeof(float));
+                string_smps[i] = memory.valloc<float>(mem_size_new);
+                memset(string_smps[i], 0, mem_size_new*sizeof(float));
             }
             // update mem_size and baseFreq
             mem_size = mem_size_new;
@@ -94,7 +95,6 @@ namespace zyn {
         if (!gain_smoothing.apply( gainbuf, gainbufsize, gainbwd ) ) // interpolate the gain value
             std::fill(gainbuf, gainbuf+gainbufsize, gainbwd); // if nothing to interpolate (constant value)
 
-
         for (unsigned int i = 0; i < buffersize; ++i)
         {
             // apply input gain
@@ -103,24 +103,26 @@ namespace zyn {
             for (unsigned int j = 0; j < nrOfStrings; ++j)
             {
                 // calculate the feedback sample positions in the buffer
-                const float pos = float(mem_size-buffersize+i) - delays[j];
+                const float pos_reader = fmod(float(pos_writer) - delays[j], mem_size);
+
                 // sample at that position
-                const float sample = sampleLerp(output[j], pos);
-                output[j][mem_size-buffersize+i] = input_smp
-                                        + tanhX(sample*gainbuf[i/16]);
+                const float sample = sampleLerp(string_smps[j], pos_reader);
+                string_smps[j][pos_writer] = input_smp + tanhX(sample*gainbuf[i/16]);
             }
             // mix output buffer samples to output sample
             smp[i]=0.0f;
             for (unsigned int j = 0; j < nrOfStrings; ++j)
-                smp[i] += output[j][mem_size-buffersize+i];
+                smp[i] += string_smps[j][mem_size-buffersize+i];
 
             // apply output gain to sum of strings and
             // divide by nrOfStrings to get mean value
-            // division by zero is catched at the beginning filterout()
+            // division by zero is catched at the beginning filterOut()
             smp[i] *= outgain / (float)nrOfStrings;
+            // increment writing position
+            if (++pos_writer >= mem_size) pos_writer -= mem_size;
         }
         // shift the buffer content one buffersize to the left
-        for(unsigned int j = 0; j < nrOfStrings; ++j)
-            memmove(&output[j][0], &output[j][buffersize], (mem_size-buffersize)*sizeof(float));
+        //~ for(unsigned int j = 0; j < nrOfStrings; ++j)
+            //~ memmove(&string_smps[j][0], &string_smps[j][buffersize], (mem_size-buffersize)*sizeof(float));
     }
 }
