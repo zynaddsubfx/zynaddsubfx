@@ -15,7 +15,7 @@ namespace zyn {
     buffersize(buffersize_)
     {
         // setup the smoother for gain parameter
-        gain_smoothing.sample_rate(samplerate>>4);
+        gain_smoothing.sample_rate(samplerate/16);
         gain_smoothing.thresh(0.02f); // TBD: 2% jump audible?
         gain_smoothing.cutoff(1.0f);
         pos_writer = 0;
@@ -88,8 +88,9 @@ namespace zyn {
         // no string -> no sound
         if (nrOfStrings==0) return;
 
-        // interpolate gainbuf values over buffer using value smoothing filter (lp)
+        // interpolate gainbuf values over buffer length using value smoothing filter (lp)
         // this should prevent popping noise when controlled binary with 0 / 127
+        // new control rate = samplerate / 16
         const unsigned int gainbufsize = buffersize / 16;
         float gainbuf[gainbufsize]; // buffer for value smoothing filter
         if (!gain_smoothing.apply( gainbuf, gainbufsize, gainbwd ) ) // interpolate the gain value
@@ -102,8 +103,9 @@ namespace zyn {
 
             for (unsigned int j = 0; j < nrOfStrings; ++j)
             {
+                assert(float(mem_size)>delays[j]);
                 // calculate the feedback sample positions in the buffer
-                const float pos_reader = fmod(float(pos_writer) - delays[j], mem_size);
+                const float pos_reader = fmod(float(pos_writer+mem_size) - delays[j], float(mem_size));
 
                 // sample at that position
                 const float sample = sampleLerp(string_smps[j], pos_reader);
@@ -112,17 +114,15 @@ namespace zyn {
             // mix output buffer samples to output sample
             smp[i]=0.0f;
             for (unsigned int j = 0; j < nrOfStrings; ++j)
-                smp[i] += string_smps[j][mem_size-buffersize+i];
+                smp[i] += string_smps[j][pos_writer];
 
             // apply output gain to sum of strings and
             // divide by nrOfStrings to get mean value
             // division by zero is catched at the beginning filterOut()
             smp[i] *= outgain / (float)nrOfStrings;
+
             // increment writing position
-            if (++pos_writer >= mem_size) pos_writer -= mem_size;
+            ++pos_writer %= mem_size;
         }
-        // shift the buffer content one buffersize to the left
-        //~ for(unsigned int j = 0; j < nrOfStrings; ++j)
-            //~ memmove(&string_smps[j][0], &string_smps[j][buffersize], (mem_size-buffersize)*sizeof(float));
     }
 }

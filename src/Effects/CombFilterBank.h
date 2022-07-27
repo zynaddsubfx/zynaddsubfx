@@ -30,7 +30,6 @@ class CombFilterBank
     float* string_smps[NUM_SYMPATHETIC_STRINGS] = {};
     float baseFreq;
     unsigned int nrOfStrings=0;
-
     unsigned int pos_writer = 0;
 
     /* for smoothing gain jump when using binary valued sustain pedal */
