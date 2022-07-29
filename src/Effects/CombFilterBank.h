@@ -11,21 +11,21 @@ namespace zyn {
 class CombFilterBank
 {
     public:
-    CombFilterBank(Allocator *alloc, unsigned int samplerate_, int buffersize_);
+    CombFilterBank(Allocator *alloc, unsigned int samplerate_, int buffersize_, float initgain);
     ~CombFilterBank();
     void filterout(float *smp);
 
     float delays[NUM_SYMPATHETIC_STRINGS]={};
     float inputgain;
     float outgain;
-    float gainbwd=0.0f;
+    float gainbwd;
 
     void setStrings(unsigned int nr, const float basefreq);
 
 
     private:
     static float tanhX(const float x);
-    static float sampleLerp(const float *smp, const float pos);
+    float sampleLerp(const float *smp, const float pos) const;
 
     float* string_smps[NUM_SYMPATHETIC_STRINGS] = {};
     float baseFreq;

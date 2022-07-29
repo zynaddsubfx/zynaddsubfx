@@ -5,9 +5,10 @@
 
 namespace zyn {
 
-    CombFilterBank::CombFilterBank(Allocator *alloc, unsigned int samplerate_, int buffersize_):
+    CombFilterBank::CombFilterBank(Allocator *alloc, unsigned int samplerate_, int buffersize_, float initgain):
     inputgain(1.0f),
     outgain(1.0f),
+    gainbwd(initgain),
     baseFreq(110.0f),
     nrOfStrings(0),
     memory(*alloc),
@@ -18,6 +19,7 @@ namespace zyn {
         gain_smoothing.sample_rate(samplerate/16);
         gain_smoothing.thresh(0.02f); // TBD: 2% jump audible?
         gain_smoothing.cutoff(1.0f);
+        gain_smoothing.reset(gainbwd);
         pos_writer = 0;
     }
 
@@ -76,11 +78,11 @@ namespace zyn {
         return (x*(105.0f+10.0f*x2)/(105.0f+(45.0f+x2)*x2));
     }
 
-    inline float CombFilterBank::sampleLerp(const float *smp, const float pos) {
+    inline float CombFilterBank::sampleLerp(const float *smp, const float pos) const {
         int poshi = (int)pos; // integer part (pos >= 0)
         float poslo = pos - (float) poshi; // decimal part
         // linear interpolation between samples
-        return smp[poshi] + poslo * (smp[poshi+1]-smp[poshi]);
+        return smp[poshi] + poslo * (smp[(poshi+1)%mem_size]-smp[poshi]);
     }
 
     void CombFilterBank::filterout(float *smp)
@@ -105,7 +107,7 @@ namespace zyn {
             {
                 assert(float(mem_size)>delays[j]);
                 // calculate the feedback sample positions in the buffer
-                const float pos_reader = fmod(float(pos_writer+mem_size) - delays[j], float(mem_size));
+                const float pos_reader = fmodf(float(pos_writer+mem_size) - delays[j], float(mem_size));
 
                 // sample at that position
                 const float sample = sampleLerp(string_smps[j], pos_reader);

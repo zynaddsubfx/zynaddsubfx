@@ -88,7 +88,7 @@ Sympathetic::Sympathetic(EffectParams pars)
     hpfl = memory.alloc<AnalogFilter>(3, 20, 1, 0, pars.srate, pars.bufsize);
     hpfr = memory.alloc<AnalogFilter>(3, 20, 1, 0, pars.srate, pars.bufsize);
 
-    filterBank = memory.alloc<CombFilterBank>(&memory, pars.srate, pars.bufsize);
+    filterBank = memory.alloc<CombFilterBank>(&memory, pars.srate, pars.bufsize, 0.873f + 0.65f);
     calcFreqs(); // sets freqs
     cleanup();
 }
