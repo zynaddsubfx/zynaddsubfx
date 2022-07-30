@@ -1,45 +1,45 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0302 
-header_name {.h} 
+version 1.0302
+header_name {.h}
 code_name {.cc}
 decl {//Copyright (c) 2002-2005 Nasca Octavian Paul} {private local
-} 
+}
 
 decl {//License: GNU GPL version 2 or later} {private local
-} 
+}
 
 decl {\#include <stdlib.h>} {public local
-} 
+}
 
 decl {\#include <stdio.h>} {public local
-} 
+}
 
 decl {\#include <string.h>} {public local
-} 
+}
 
 decl {\#include "../globals.h"} {public local
-} 
+}
 
 decl {\#include "Fl_Osc_Dial.H"} {public local
-} 
+}
 
 decl {\#include "Fl_Osc_Check.H"} {public local
-} 
+}
 
 decl {\#include "Fl_EQGraph.H"} {public local
-} 
+}
 
 decl {\#include "Fl_Osc_Pane.H"} {public local
 }
 
 decl {\#include "EnvelopeUI.h"} {public local
-} 
+}
 
 decl {\#include "FilterUI.h"} {public local
-} 
+}
 
 decl {\#include "../Misc/Util.h"} {public local
-} 
+}
 
 decl {\#include "../Effects/EffectMgr.h"} {public local
 }
@@ -51,7 +51,7 @@ decl {\#include "../Effects/Alienwah.h" /* for macros only, TODO */ } {public lo
 }
 
 decl {\#include "PresetsUI.h"} {public local
-} 
+}
 
 decl {\#include "common.H"} {public local
 }
@@ -74,10 +74,11 @@ effalienwahwindow->hide();//delete (effalienwahwindow);
 effdistortionwindow->hide();//delete (effdistortionwindow);
 effeqwindow->hide();//delete (effeqwindow);
 effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);
+effsympatheticwindow->hide();//delete (effsympatheticwindow);
 
 if (filterwindow!=NULL){
-	filterwindow->hide();
-	delete(filterwindow);
+    filterwindow->hide();
+    delete(filterwindow);
 };} {}
   }
   Function {make_null_window()} {} {
@@ -155,7 +156,7 @@ if (filterwindow!=NULL){
       Fl_Choice revp10 {
         label Type
         callback {if(o->value()==2) revp12->activate();
-	else revp12->deactivate();}
+    else revp12->deactivate();}
         xywh {110 15 85 15} box UP_BOX down_box BORDER_BOX color 14 selection_color 7 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10
         code0 {o->init("parameter10");}
         class Fl_Osc_Choice
@@ -1157,6 +1158,63 @@ eqgraph->update();}
       }
     }
   }
+  Function {make_sympathetic_window()} {} {
+    Fl_Window effsympatheticwindow {
+      xywh {974 596 380 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19
+      code3 {set_module_parameters(o);}
+      class Fl_Group visible
+    } {
+      Fl_Dial symp0 {
+        label Vol
+        tooltip {Effect Volume} xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter0");}
+        class Fl_Osc_Dial
+      }
+      Fl_Dial symp2 {
+        label Q
+        tooltip {Resonance} xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter2");}
+        class Fl_Osc_Dial
+      }
+      Fl_Dial symp3 {
+        label Drive
+        tooltip {Drive} xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter3");}
+        class Fl_Osc_Dial
+      }
+      Fl_Dial symp4 {
+        label Lev
+        tooltip {Level} xywh {115 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter4");}
+        class Fl_Osc_Dial
+      }
+      Fl_Dial symp5 {
+        label Spr
+        tooltip {Spread} xywh {150 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter5");}
+        class Fl_Osc_Dial
+      }
+      Fl_Dial symp9 {
+        label Uni
+        tooltip {number of unisono strings} xywh {185 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 3
+        code0 {o->init("parameter9");}
+        class Fl_Osc_Dial
+      }
+      Fl_Dial symp10 {
+        label Str
+        tooltip {number of strings} xywh {220 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 48
+        code0 {o->init("parameter10");}
+        class Fl_Osc_Dial
+      }
+      Fl_Dial symp11 {
+        label B.note
+        tooltip {lowest midi note } xywh {255 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter11");}
+        class Fl_Osc_Dial
+      }
+
+    }
+  }
   Function {make_filter_window()} {} {
     Fl_Window filterwindow {
       label {Filter Parameters for DynFilter Eff.}
@@ -1191,6 +1249,7 @@ make_alienwah_window();
 make_distortion_window();
 make_eq_window();
 make_dynamicfilter_window();
+make_sympathetic_window();
 
 int px=this->parent()->x();
 int py=this->parent()->y();
@@ -1204,6 +1263,7 @@ effalienwahwindow->position(px,py);
 effdistortionwindow->position(px,py);
 effeqwindow->position(px,py);
 effdynamicfilterwindow->position(px,py);
+effsympatheticwindow->position(px,py);
 
 refresh();} {}
   }
@@ -1222,15 +1282,16 @@ effalienwahwindow->hide();
 effdistortionwindow->hide();
 effeqwindow->hide();
 effdynamicfilterwindow->hide();
+effsympatheticwindow->hide();
 
 eqband=0;
 
 if (filterwindow){
-	filterwindow->hide();
-	delete(filterwindow);
-	filterwindow=NULL;
+    filterwindow->hide();
+    delete(filterwindow);
+    filterwindow=NULL;
 };
-	
+
     if(insertion) {
         revp0->label("D/W");
         echop0->label("D/W");
@@ -1244,34 +1305,36 @@ if (filterwindow){
 switch(efftype){
      case 1:
         effreverbwindow->show();
-        break; 
+        break;
      case 2:
-	effechowindow->show();
-        break; 
+    effechowindow->show();
+        break;
      case 3:
-	effchoruswindow->show();
-        break; 
+    effchoruswindow->show();
+        break;
      case 4:
-	effphaserwindow->show();
-        break; 
+    effphaserwindow->show();
+        break;
      case 5:
-	effalienwahwindow->show();
-        break; 
+    effalienwahwindow->show();
+        break;
      case 6:
 	effdistortionwindow->show();
         break;
      case 7:eqband=0;
-	bandcounter->value(eqband);
-	bandcounter->do_callback();
-	eqgraph->redraw();
-	effeqwindow->show();
+    bandcounter->value(eqband);
+    bandcounter->do_callback();
+    eqgraph->redraw();
+    effeqwindow->show();
         break;
      case 8:make_filter_window();
-            
-	effdynamicfilterwindow->show();
-	break;
+    effdynamicfilterwindow->show();
+    break;
+     case 9:
+    effsympatheticwindow->show();
+    break;
     default:effnullwindow->show();
-            break; 
+            break;
 };
 
 this->show();} {selected
@@ -1283,7 +1346,7 @@ this->show();} {selected
   }
   decl {int efftype;} {public local
   }
-} 
+}
 
 class SimpleEffUI {open : {public Fl_Osc_Group,public PresetsUI_}
 } {
@@ -1299,7 +1362,8 @@ effphaserwindow->hide();//delete (effphaserwindow);
 effalienwahwindow->hide();//delete (effalienwahwindow);
 effdistortionwindow->hide();//delete (effdistortionwindow);
 effeqwindow->hide();//delete (effeqwindow);
-effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);} {}
+effdynamicfilterwindow->hide();//delete (effdynamicfilterwindow);
+effsympatheticwindow->hide();//delete (effsympatheticwindow);} {}
   }
   Function {make_null_window()} {} {
     Fl_Window effnullwindow {
@@ -2021,6 +2085,63 @@ eqgraph->redraw();}
       }
     }
   }
+  Function {make_sympathetic_window()} {} {
+    Fl_Window effsympatheticwindow {
+      xywh {974 596 380 100} type Double box UP_BOX color 51 labelfont 1 labelsize 19
+      code3 {set_module_parameters(o);}
+      class Fl_Group visible
+    } {
+      Fl_Dial symp0 {
+        label Vol
+        tooltip {Effect Volume} xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter0");}
+        class Fl_Osc_Dial
+      }
+      Fl_Dial symp2 {
+        label Q
+        tooltip {Resonance} xywh {45 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter2");}
+        class Fl_Osc_Dial
+      }
+      Fl_Dial symp3 {
+        label Drive
+        tooltip {Drive} xywh {80 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter3");}
+        class Fl_Osc_Dial
+      }
+      Fl_Dial symp4 {
+        label Level
+        tooltip {Level} xywh {115 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter4");}
+        class Fl_Osc_Dial
+      }
+      Fl_Dial symp5 {
+        label Spread
+        tooltip {Spread} xywh {150 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter5");}
+        class Fl_Osc_Dial
+      }
+      Fl_Dial symp9 {
+        label Drive
+        tooltip {Drive} xywh {185 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter9");}
+        class Fl_Osc_Dial
+      }
+      Fl_Dial symp10 {
+        label Strings
+        tooltip {number of strings} xywh {220 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter10");}
+        class Fl_Osc_Dial
+      }
+      Fl_Dial symp11 {
+        label Basenote
+        tooltip {lowest midi note } xywh {255 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        code0 {o->init("parameter11");}
+        class Fl_Osc_Dial
+      }
+
+    }
+  }
   Function {init(bool ins_)} {open
   } {
     code {efftype = 0;
@@ -2034,6 +2155,7 @@ make_alienwah_window();
 make_distortion_window();
 make_eq_window();
 make_dynamicfilter_window();
+make_sympathetic_window();
 
 int px=this->parent()->x();
 int py=this->parent()->y();
@@ -2046,7 +2168,8 @@ effphaserwindow->position(px,py);
 effalienwahwindow->position(px,py);
 effdistortionwindow->position(px,py);
 effeqwindow->position(px,py);
-effdynamicfilterwindow->position(px,py);} {}
+effdynamicfilterwindow->position(px,py);
+effsympatheticwindow->position(px,py);} {}
   }
   Function {refresh()} {open
   } {
@@ -2064,48 +2187,52 @@ effalienwahwindow->hide();
 effdistortionwindow->hide();
 effeqwindow->hide();
 effdynamicfilterwindow->hide();
+effsympatheticwindow->hide();
 
 eqband=0;
 
     if(insertion) {
-	    revp0->label("D/W");
-	    echop0->label("D/W");
-	    chorusp0->label("D/W");
-	    phaserp0->label("D/W");
-	    awp0->label("D/W");
-	    distp0->label("D/W");
-	    dfp0->label("D/W");
+        revp0->label("D/W");
+        echop0->label("D/W");
+        chorusp0->label("D/W");
+        phaserp0->label("D/W");
+        awp0->label("D/W");
+        distp0->label("D/W");
+        dfp0->label("D/W");
     }
 
 switch(efftype){
      case 1:
         effreverbwindow->show();
-        break; 
+        break;
      case 2:
-	effechowindow->show();
-        break; 
+    effechowindow->show();
+        break;
      case 3:
-	effchoruswindow->show();
-        break; 
+    effchoruswindow->show();
+        break;
      case 4:
-	effphaserwindow->show();
-        break; 
+    effphaserwindow->show();
+        break;
      case 5:
-	effalienwahwindow->show();
-        break; 
+    effalienwahwindow->show();
+        break;
      case 6:
 	effdistortionwindow->show();
         break;
      case 7:
-	bandcounter->value(eqband);
-	bandcounter->do_callback();
-	effeqwindow->show();
+    bandcounter->value(eqband);
+    bandcounter->do_callback();
+    effeqwindow->show();
         break;
      case 8:
-	effdynamicfilterwindow->show();
-	break;
+    effdynamicfilterwindow->show();
+    break;
+     case 9:
+    effsympatheticwindow->show();
+    break;
     default:effnullwindow->show();
-            break; 
+            break;
 };
 
 this->show();} {}
@@ -2116,4 +2243,4 @@ this->show();} {}
   }
   decl {int efftype;} {public local
   }
-} 
+}

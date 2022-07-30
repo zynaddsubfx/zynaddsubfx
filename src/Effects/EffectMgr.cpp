@@ -26,6 +26,7 @@
 #include "EQ.h"
 #include "DynamicFilter.h"
 #include "Phaser.h"
+#include "Sympathetic.h"
 #include "../Misc/XMLwrapper.h"
 #include "../Misc/Util.h"
 #include "../Misc/Time.h"
@@ -227,7 +228,7 @@ static const rtosc::Ports local_ports = {
             d.reply(d.loc, "bb", sizeof(a), a, sizeof(b), b);
         }},
     {"efftype::i:c:S", rOptions(Disabled, Reverb, Echo, Chorus,
-     Phaser, Alienwah, Distortion, EQ, DynFilter) rDefault(Disabled)
+     Phaser, Alienwah, Distortion, EQ, DynFilter, Sympathetic) rDefault(Disabled)
      rProp(parameter) rDoc("Get Effect Type"), NULL,
      rCOptionCb(obj->nefx, obj->changeeffectrt(var))},
     {"efftype:b", rProp(internal) rDoc("Pointer swap EffectMgr"), NULL,
@@ -255,6 +256,7 @@ static const rtosc::Ports local_ports = {
     rSubtype(EQ),
     rSubtype(Phaser),
     rSubtype(Reverb),
+    rSubtype(Sympathetic),
 };
 
 const rtosc::Ports &EffectMgr::ports = local_ports;
@@ -334,6 +336,9 @@ void EffectMgr::changeeffectrt(int _nefx, bool avoidSmash)
                 break;
             case 8:
                 efx = memory.alloc<DynamicFilter>(pars);
+                break;
+            case 9:
+                efx = memory.alloc<Sympathetic>(pars);
                 break;
             //put more effect here
             default:

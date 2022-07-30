@@ -1,86 +1,86 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0302 
-header_name {.h} 
+version 1.0302
+header_name {.h}
 code_name {.cc}
 decl {//Copyright (c) 2002-2009 Nasca Octavian Paul - (c) 2009-2021 Mark McCurry} {private local
-} 
+}
 
 decl {//License: GNU GPL version 2 or later} {private local
-} 
+}
 
 decl {\#include <stdlib.h>} {public local
-} 
+}
 
 decl {\#include <stdio.h>} {public local
-} 
+}
 
 decl {\#include <string.h>} {public local
-} 
+}
 
 decl {\#if ! defined(PLUGINVERSION) && HAS_X11
 \#include "zynaddsubfx.xpm"
 \#endif} {private local
-} 
+}
 
 decl {\#include "WidgetPDial.h"} {public local
-} 
+}
 
 decl {\#include "ADnoteUI.h"} {public local
-} 
+}
 
 decl {\#include "SUBnoteUI.h"} {public local
-} 
+}
 
 decl {\#include "EffUI.h"} {public local
-} 
+}
 
 decl {\#include "VirKeyboard.h"} {public local
-} 
+}
 
 decl {\#include "ConfigUI.h"} {public local
-} 
+}
 
 decl {\#include "BankUI.h"} {public local
-} 
+}
 
 decl {\#include "PartUI.h"} {public local
-} 
+}
 
 decl {\#include "MicrotonalUI.h"} {public local
-} 
+}
 
 decl {\#include "PresetsUI.h"} {public local
-} 
+}
 
 decl {\#include "NioUI.h"} {public global
-} 
+}
 
 decl {\#include "VuPartMeter.h"} {public local
-} 
+}
 
 decl {\#include "Fl_Osc_Dial.H"} {private local
-} 
+}
 
 decl {\#include "Osc_DataModel.h"} {private local
-} 
+}
 
 decl {\#include "Fl_Osc_TSlider.H"} {private local
-} 
+}
 
 decl {\#include "VuMasterMeter.h"} {public local
-} 
+}
 
 decl {\#include "PartNameButton.h"} {public local
-} 
+}
 
 decl {\#include "common.H"} {public local
-} 
+}
 
 decl {\#if USE_NSM
 \#include "NSM.H"
 extern NSM_Client *nsm;
 \#endif} {public local
-} 
+}
 
 decl {\#if !defined(PLUGINVERSION) && defined(NTK_GUI)
 \#include <X11/xpm.h>
@@ -90,25 +90,25 @@ decl {\#if !defined(PLUGINVERSION) && defined(NTK_GUI)
 decl {\#if !defined(PLUGINVERSION) && HAS_X11
 \#include <FL/Fl_RGB_Image.H>
 \#endif} {private local
-} 
+}
 
 decl {\#if !defined(PLUGINVERSION) && HAS_X11
 \#include <FL/Fl.H>
 \#endif} {private local
-} 
+}
 
 decl {\#if !defined(PLUGINVERSION) && HAS_X11
 \#include <FL/Enumerations.H>
 \#endif} {private local
-} 
+}
 
 decl {\#if !defined(PLUGINVERSION) && HAS_X11
 \#include <FL/Fl_Pixmap.H>
 \#endif} {private local
-} 
+}
 
 decl {\#include "../globals.h"} {public local
-} 
+}
 
 class SysEffSend {: {public Fl_Osc_Dial}
 } {
@@ -131,7 +131,7 @@ this->copy_label(tmp);} {}
   Function {~SysEffSend()} {} {
     code {hide();} {}
   }
-} 
+}
 
 class Panellistitem {open : {public Fl_Osc_Group}
 } {
@@ -233,10 +233,10 @@ end();} {}
     partpanning->update();
     partvolume->update();
     partname->update();
-    
+
     if ((int)bankui->cbwig->value()!=(npart+1))
    panellistitemgroup->color(fl_rgb_color(160,160,160));
-else 
+else
    panellistitemgroup->color(fl_rgb_color(50,190,240));
 
 panellistitemgroup->redraw();} {}
@@ -250,7 +250,7 @@ panellistitemgroup->redraw();} {}
   }
   decl {PartUI *partui;} {private local
   }
-} 
+}
 
 class MasterUI {open
 } {
@@ -377,7 +377,7 @@ result=fileexists(filename);
 if (result) {
     result=0;
    if (!fl_choice("The file exists. \\nOverwrite it?","No","Yes",NULL)) return;
-       
+
 };
 
 
@@ -453,7 +453,7 @@ int result=fileexists(filename);
 if (result) {
     result=0;
    if (!fl_choice("The file exists. \\nOverwrite it?","No","Yes",NULL)) return;
-       
+
 };
 
 osc->write("/save_xiz", "is", npart, filename);
@@ -503,9 +503,9 @@ if (fl_choice("The file *might* exist. \\nOverwrite it?","No","Yes",NULL)) {
             MenuItem {} {
               label {Switch User Interface Mode}
               callback {if (fl_choice("Switch the User Interface to Beginner mode ?","No","Yes",NULL)){
-	masterwindow->hide();
-	refresh_master_ui();
-	simplemasterwindow->show();
+    masterwindow->hide();
+    refresh_master_ui();
+    simplemasterwindow->show();
     osc->write("/config/cfg.UserInterfaceMode", "i", 2);
 };}
               xywh {15 15 100 20}
@@ -608,6 +608,10 @@ syseffectui->refresh();}
                 label DynFilter
                 xywh {95 95 100 20} labelfont 1 labelsize 10
               }
+              MenuItem {} {
+                label Sympathetic
+                xywh {105 105 100 20} labelfont 1 labelsize 10
+              }
             }
             Fl_Group syseffectuigroup {
               xywh {5 203 380 95} color 48
@@ -657,11 +661,11 @@ inseffectui->refresh();
 
 if (master->Pinsparts[ninseff]!=-1) {
         insefftype->activate();
-	inseffectui->activate();
+    inseffectui->activate();
         inseffectuigroup->activate();
 } else {
-	insefftype->deactivate();
- 	inseffectui->deactivate();
+    insefftype->deactivate();
+    inseffectui->deactivate();
         inseffectuigroup->deactivate();
 };*/}
               xywh {5 183 80 22} type Simple labelfont 1 labelsize 10 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
@@ -717,6 +721,10 @@ inseffectui->show();}
               MenuItem {} {
                 label DynFilter
                 xywh {105 105 100 20} labelfont 1 labelsize 10
+              }
+              MenuItem {} {
+                label Sympathetic
+                xywh {115 115 100 20} labelfont 1 labelsize 10
               }
             }
             Fl_Group inseffectuigroup {open
@@ -893,11 +901,11 @@ panelwindow->show();}
         xywh {15 35 335 55} labeltype EMBOSSED_LABEL labelsize 15 align 208
       }
       Fl_Box {} {
-        label {This is free software; you may redistribute it and/or modify it under the terms of the 
+        label {This is free software; you may redistribute it and/or modify it under the terms of the
 version 2 (or any later version) of the GNU General Public License as published by the Free Software Foundation.
   This program comes with
- ABSOLUTELY NO WARRANTY. 
- See the version 2 (or any later version) of the 
+ ABSOLUTELY NO WARRANTY.
+ See the version 2 (or any later version) of the
 GNU General Public License for details.}
         xywh {15 90 335 145} labelfont 1 labelsize 11 align 144
       }
@@ -977,7 +985,7 @@ updatepanel();}
       callback {
 if (isPlugin || fl_choice("Exit and leave the unsaved data?","No","Yes",NULL))
 {
-	*exitprogram=1;
+    *exitprogram=1;
 };} open
       xywh {655 378 600 335} type Double
       class Fl_Osc_Window visible
@@ -1069,9 +1077,9 @@ if (result==-10) fl_alert("Error: Could not load the file\\nbecause it is not an
           MenuItem {} {
             label {Switch User Interface Mode}
             callback {if (fl_choice("Switch the User Interface to Advanced mode ?","No","Yes",NULL)){
-	simplemasterwindow->hide();
-	refresh_master_ui();
-	masterwindow->show();
+    simplemasterwindow->hide();
+    refresh_master_ui();
+    masterwindow->show();
     osc->write("/config/cfg.UserInterfaceMode", "i", 1);
 };}
             xywh {0 0 100 20}
@@ -1271,6 +1279,10 @@ simplesyseffectui->refresh();
                 label DynFilter
                 xywh {100 100 100 20} labelfont 1 labelsize 10
               }
+              MenuItem {} {
+                label Sympathetic
+                xywh {110 110 100 20} labelfont 1 labelsize 10
+              }
             }
             Fl_Group simplesyseffectuigroup {
               xywh {350 95 235 95} color 48
@@ -1316,11 +1328,11 @@ simpleinseffectui->refresh();
 /*
 if (master->Pinsparts[ninseff]!=-1) {
         simpleinsefftype->activate();
-	simpleinseffectui->activate();
+    simpleinseffectui->activate();
         simpleinseffectuigroup->activate();
 } else {
-	simpleinsefftype->deactivate();
- 	simpleinseffectui->deactivate();
+    simpleinsefftype->deactivate();
+    simpleinseffectui->deactivate();
         simpleinseffectuigroup->deactivate();
 };*/}
               xywh {350 75 80 20} type Simple labelfont 1 labelsize 10 align 1 minimum 0 maximum 127 step 1 value 1 textfont 1
@@ -1376,6 +1388,10 @@ simpleinseffectui->show();}
               MenuItem {} {
                 label DynFilter
                 xywh {110 110 100 20} labelfont 1 labelsize 10
+              }
+              MenuItem {} {
+                label Sympathetic
+                xywh {120 120 100 20} labelfont 1 labelsize 10
               }
             }
             Fl_Group simpleinseffectuigroup {
@@ -1531,7 +1547,7 @@ osc->write("/config/cfg.UserInterfaceMode", "i", 2);}
     }
   }
   Function {updatesendwindow()} {} {
-    code {/*for (int neff1=0;neff1<NUM_SYS_EFX;neff1++) 
+    code {/*for (int neff1=0;neff1<NUM_SYS_EFX;neff1++)
   for (int neff2=neff1+1;neff2<NUM_SYS_EFX;neff2++)
     syseffsend[neff1][neff2]->value(master->Psysefxsend[neff1][neff2]);*/} {}
   }
@@ -1634,12 +1650,12 @@ delete selectuiwindow;} {}
   }
   Function {showUI(int UIMode)} {} {
     code {switch (UIMode){
-	case 0:selectuiwindow->show();
-	break;
-	case 1:masterwindow->show();
-	break;
-	case 2:simplemasterwindow->show();
-	break;
+    case 0:selectuiwindow->show();
+    break;
+    case 1:masterwindow->show();
+    break;
+    case 2:simplemasterwindow->show();
+    break;
 };} {}
   }
   Function {simplerefresh()} {} {
@@ -1692,7 +1708,7 @@ return 1;} {}
     updatepanel();
 
     setfilelabel(display_name);
-    
+
     return 1;} {}
   }
   Function {do_load_master(const char* file = NULL)} {} {
@@ -1723,7 +1739,7 @@ char *tmp;
     if (result) {
       result=0;
       if (!fl_choice("The file exists. Overwrite it?","No","Yes",NULL)) return;
-      
+
     }
   }
   else {
@@ -1733,7 +1749,7 @@ char *tmp;
 
     osc->write("/save_xmz", "s", filename);
 if (result<0) fl_alert("Error: Could not save the file.");
-	else
+    else
 {
     osc->write("/last_xmz", "s", filename);
 \#if USE_NSM
@@ -1806,4 +1822,4 @@ bankui->hide();} {}
   } {
     code {*exitprogram=1;} {}
   }
-} 
+}
