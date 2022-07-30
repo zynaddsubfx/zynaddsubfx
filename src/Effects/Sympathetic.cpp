@@ -88,7 +88,9 @@ Sympathetic::Sympathetic(EffectParams pars)
     hpfl = memory.alloc<AnalogFilter>(3, 20, 1, 0, pars.srate, pars.bufsize);
     hpfr = memory.alloc<AnalogFilter>(3, 20, 1, 0, pars.srate, pars.bufsize);
 
-    filterBank = memory.alloc<CombFilterBank>(&memory, pars.srate, pars.bufsize, 0.873f + 0.65f);
+    // precalc gainbwd_init = gainbwd_offset + gainbwd_factor * Pq
+    // 0.873f + 0.001f * 65 = 0.873f + 0.065f = 0.938f
+    filterBank = memory.alloc<CombFilterBank>(&memory, pars.srate, pars.bufsize, 0.938f);
     calcFreqs(); // sets freqs
     cleanup();
 }
@@ -258,7 +260,7 @@ void Sympathetic::changepar(int npar, unsigned char value)
             break;
         case 2:
             Pq = value;
-            filterBank->gainbwd = 0.873f + (float)Pq/1000.0f;
+            filterBank->gainbwd = gainbwd_offset + (float)Pq * gainbwd_factor;
             break;
         case 3:
             Pdrive = value;

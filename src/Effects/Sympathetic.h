@@ -18,6 +18,12 @@
 
 namespace zyn {
 
+// coefficients for calculating gainbwd from Pq
+// gainbwd = gainbwd_offset + Pq * gainbwd_factor
+// designed for gainbwd range up to 1.0 at Pq==127
+const float gainbwd_offset = 0.873f;
+const float gainbwd_factor = 0.001f;
+
 class Sympathetic:public Effect
 {
 
