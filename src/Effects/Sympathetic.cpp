@@ -91,7 +91,7 @@ Sympathetic::Sympathetic(EffectParams pars)
     // precalc gainbwd_init = gainbwd_offset + gainbwd_factor * Pq
     // 0.873f + 0.001f * 65 = 0.873f + 0.065f = 0.938f
     filterBank = memory.alloc<CombFilterBank>(&memory, pars.srate, pars.bufsize, 0.938f);
-    calcFreqs(); // sets freqs
+    calcFreqsPiano(); // sets freqs
     cleanup();
 }
 
@@ -198,6 +198,20 @@ void Sympathetic::sethpf(unsigned char _Phpf)
 
 void Sympathetic::calcFreqs()
 {
+    switch(Ppreset) {
+        case 0:
+        case 1:
+            calcFreqsPiano();
+            break;
+        case 2:
+        case 3:
+            calcFreqsGuitar();
+            break;
+    }
+}
+
+void Sympathetic::calcFreqsPiano()
+{
     const float unison_spread_semicent = powf(Punison_frequency_spread / 63.5f, 2.0f) * 25.0f;
     const float unison_real_spread_up = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
     const float unison_real_spread_down = 1.0f/unison_real_spread_up;
@@ -213,20 +227,35 @@ void Sympathetic::calcFreqs()
 
 }
 
+void Sympathetic::calcFreqsGuitar()
+{
+    const float unison_spread_semicent = powf(Punison_frequency_spread / 63.5f, 2.0f) * 25.0f;
+    const float unison_real_spread_up = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
+
+    for(auto i = 0; i < 6*Punison_size; i+=Punison_size)
+    {
+        assert(guitar_freqs[i/Punison_size]>0.0f);
+        filterBank->delays[i] = ((float)samplerate)/guitar_freqs[i/Punison_size];
+        if (Punison_size > 1) filterBank->delays[i+1] = ((float)samplerate)/(guitar_freqs[i/Punison_size] * unison_real_spread_up);
+    }
+    filterBank->setStrings(Pstrings*Punison_size,guitar_freqs[0]);
+
+}
+
 unsigned char Sympathetic::getpresetpar(unsigned char npreset, unsigned int npar)
 {
 #define PRESET_SIZE 13
 #define NUM_PRESETS 4
     static const unsigned char presets[NUM_PRESETS][PRESET_SIZE] = {
-        //Vol Pan Q Drive Lev Spr neg lp hp sz  strings note cross
+        //Vol Pan Q Drive Lev Spr neg lp hp sz  strings note
         //Piano 12-String
         {100, 64, 125, 5, 80, 10, 0, 127, 0, 3,   12,  57},
         //Piano 60-String
         {80,  64, 125, 5, 90, 5,  0, 127, 0, 1,   60,  33},
         //Guitar 6-String
-        {100, 64, 110, 5, 65, 0,  0, 127, 0, 1,    6,  52},
+        {100, 64, 110, 20, 65, 0,  0, 127, 0, 1,    6,  52},
         //Guitar 12-String
-        {90,  64, 110, 5, 77, 10, 0, 127, 0, 2,    6,  52},
+        {90,  64, 110, 20, 77, 10, 0, 127, 0, 2,    6,  52},
     };
     if(npreset < NUM_PRESETS && npar < PRESET_SIZE) {
         if(npar == 0 && insertion == 0) {
@@ -245,6 +274,17 @@ void Sympathetic::setpreset(unsigned char npreset)
     for(int n = 0; n != 128; n++)
         changepar(n, getpresetpar(npreset, n));
     Ppreset = npreset;
+
+    switch(Ppreset) {
+        case 0:
+        case 1:
+            calcFreqsPiano();
+            break;
+        case 2:
+        case 3:
+            calcFreqsGuitar();
+            break;
+    }
     cleanup();
 }
 
@@ -288,10 +328,12 @@ void Sympathetic::changepar(int npar, unsigned char value)
             break;
         case 9:
             Punison_size = limit(value, (unsigned char) 1, (unsigned char) 3);
+            if (Punison_size>2) Ppreset=0;
             calcFreqs();
             break;
         case 10:
             Pstrings = limit(value, (unsigned char) 0, (unsigned char) 76);
+            if (Pstrings>6) Ppreset=0;
             calcFreqs();
             break;
         case 11:
