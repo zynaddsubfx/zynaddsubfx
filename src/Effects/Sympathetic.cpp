@@ -275,16 +275,7 @@ void Sympathetic::setpreset(unsigned char npreset)
         changepar(n, getpresetpar(npreset, n));
     Ppreset = npreset;
 
-    switch(Ppreset) {
-        case 0:
-        case 1:
-            calcFreqsPiano();
-            break;
-        case 2:
-        case 3:
-            calcFreqsGuitar();
-            break;
-    }
+    calcFreqs();
     cleanup();
 }
 
