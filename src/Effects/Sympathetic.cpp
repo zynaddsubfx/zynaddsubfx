@@ -91,7 +91,7 @@ Sympathetic::Sympathetic(EffectParams pars)
     // precalc gainbwd_init = gainbwd_offset + gainbwd_factor * Pq
     // 0.873f + 0.001f * 65 = 0.873f + 0.065f = 0.938f
     filterBank = memory.alloc<CombFilterBank>(&memory, pars.srate, pars.bufsize, 0.938f);
-    calcFreqsPiano(); // sets freqs
+    calcFreqs(); // sets freqs
     cleanup();
 }
 
