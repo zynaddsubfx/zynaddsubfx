@@ -65,6 +65,8 @@ namespace zyn {
             // update mem_size and baseFreq
             mem_size = mem_size_new;
             baseFreq = baseFreqNew;
+            // reset writer position
+            pos_writer = 0;
         }
         // update nrOfStrings
         nrOfStrings = nrOfStringsNew;
