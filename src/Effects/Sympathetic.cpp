@@ -32,7 +32,7 @@ namespace zyn {
 
 rtosc::Ports Sympathetic::ports = {
     {"preset::i", rProp(parameter)
-                  rOptions(Piano, Grand, Guitar, 12-String)
+                  rOptions(Generic, Piano, Grand, Guitar, 12-String)
                   rDoc("Instrument Presets"), 0,
                   rBegin;
                   rObject *o = (rObject*)d.obj;
@@ -200,17 +200,20 @@ void Sympathetic::calcFreqs()
 {
     switch(Ppreset) {
         case 0:
+			calcFreqsGeneric();
+            break;
         case 1:
+        case 2:
             calcFreqsPiano();
             break;
-        case 2:
         case 3:
+        case 4:
             calcFreqsGuitar();
             break;
     }
 }
 
-void Sympathetic::calcFreqsPiano()
+void Sympathetic::calcFreqsGeneric()
 {
     const float unison_spread_semicent = powf(Punison_frequency_spread / 63.5f, 2.0f) * 25.0f;
     const float unison_real_spread_up = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
@@ -222,6 +225,27 @@ void Sympathetic::calcFreqsPiano()
         filterBank->delays[i] = ((float)samplerate)/centerFreq;
         if (Punison_size > 1) filterBank->delays[i+1] = ((float)samplerate)/(centerFreq * unison_real_spread_up);
         if (Punison_size > 2) filterBank->delays[i+2] = ((float)samplerate)/(centerFreq * unison_real_spread_down);
+    }
+    filterBank->setStrings(Pstrings*Punison_size,baseFreq);
+
+}
+
+void Sympathetic::calcFreqsPiano()
+{
+    const float unison_spread_semicent = powf(Punison_frequency_spread / 63.5f, 2.0f) * 25.0f;
+    const float unison_real_spread_up = powf(2.0f, (unison_spread_semicent * 0.5f) / 1200.0f);
+    const float unison_real_spread_down = 1.0f/unison_real_spread_up;
+
+    for(unsigned int i = 0; i < Punison_size*Pstrings; i+=Punison_size)
+    {
+        const float centerFreq = powf(2.0f, (float)i / 36.0f) * baseFreq;
+        const unsigned int stringchoir_size = 
+			i>num_single_strings ? (i>Pstrings-num_triple_strings ? 3 : 2) :1;
+        filterBank->delays[i] = ((float)samplerate)/centerFreq;
+        if (stringchoir_size > 1) filterBank->delays[i+1] = ((float)samplerate)/(centerFreq * unison_real_spread_up);
+        else filterBank->delays[i+1] = 0;
+        if (stringchoir_size > 2) filterBank->delays[i+2] = ((float)samplerate)/(centerFreq * unison_real_spread_down);
+        else filterBank->delays[i+2] = 0;
     }
     filterBank->setStrings(Pstrings*Punison_size,baseFreq);
 

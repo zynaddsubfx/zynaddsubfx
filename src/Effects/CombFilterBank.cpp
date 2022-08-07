@@ -105,6 +105,7 @@ namespace zyn {
 
             for (unsigned int j = 0; j < nrOfStrings; ++j)
             {
+                if (delays[j] == 0.0f) continue;
                 assert(float(mem_size)>delays[j]);
                 // calculate the feedback sample positions in the buffer
                 const float pos_reader = fmodf(float(pos_writer+mem_size) - delays[j], float(mem_size));
@@ -115,13 +116,17 @@ namespace zyn {
             }
             // mix output buffer samples to output sample
             smp[i]=0.0f;
+            unsigned int nrOfActualStrings = 0;
             for (unsigned int j = 0; j < nrOfStrings; ++j)
-                smp[i] += string_smps[j][pos_writer];
+                if (delays[j] != 0.0f) {
+					smp[i] += string_smps[j][pos_writer];
+					nrOfActualStrings++;
+				}
 
             // apply output gain to sum of strings and
             // divide by nrOfStrings to get mean value
             // division by zero is catched at the beginning filterOut()
-            smp[i] *= outgain / (float)nrOfStrings;
+            smp[i] *= outgain / (float)nrOfActualStrings;
 
             // increment writing position
             ++pos_writer %= mem_size;
