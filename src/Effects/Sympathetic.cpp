@@ -218,7 +218,7 @@ void Sympathetic::calcFreqsPiano()
 
     for(unsigned int i = 0; i < Punison_size*Pstrings; i+=Punison_size)
     {
-        const float centerFreq = powf(2.0f, (float)i / 12.0f) * baseFreq;
+        const float centerFreq = powf(2.0f, (float)i / 36.0f) * baseFreq;
         filterBank->delays[i] = ((float)samplerate)/centerFreq;
         if (Punison_size > 1) filterBank->delays[i+1] = ((float)samplerate)/(centerFreq * unison_real_spread_up);
         if (Punison_size > 2) filterBank->delays[i+2] = ((float)samplerate)/(centerFreq * unison_real_spread_down);
