@@ -1128,7 +1128,7 @@ void ADnote::computecurrentparameters()
         /****************/
         auto *voiceFilter = NoteVoicePar[nvoice].Filter;
         if(voiceFilter) {
-            float voicerelfreq = NoteVoicePar[nvoice].filterFcCtlBypass == 0 ? relfreq : 0.0f;
+            const float voicerelfreq = NoteVoicePar[nvoice].filterFcCtlBypass == 0 ? relfreq : 0.0f;
             voiceFilter->update(voicerelfreq, ctl.filterq.relq);
         }
 
