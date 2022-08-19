@@ -220,7 +220,7 @@ void ADnote::setupVoice(int nvoice)
     voice.FilterLfo      = NULL;
 
     voice.filterbypass = param.Pfilterbypass;
-    voice.filterFqCtlBypass = param.PfilterFcCtlBypass;
+    voice.filterFcCtlBypass = param.PfilterFcCtlBypass;
 
     setupVoiceMod(nvoice);
 
@@ -594,7 +594,7 @@ void ADnote::legatonote(const LegatoParams &lpars)
 
         voice.filterbypass =
             pars.VoicePar[nvoice].Pfilterbypass;
-        voice.filterFqCtlBypass =
+        voice.filterFcCtlBypass =
             pars.VoicePar[nvoice].PfilterFcCtlBypass;
 
 
@@ -1128,7 +1128,7 @@ void ADnote::computecurrentparameters()
         /****************/
         auto *voiceFilter = NoteVoicePar[nvoice].Filter;
         if(voiceFilter) {
-            float voicerelfreq = NoteVoicePar[nvoice].filterFqCtlBypass == 0 ? relfreq : 0.0f;
+            float voicerelfreq = NoteVoicePar[nvoice].filterFcCtlBypass == 0 ? relfreq : 0.0f;
             voiceFilter->update(voicerelfreq, ctl.filterq.relq);
         }
 
