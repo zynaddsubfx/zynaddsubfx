@@ -75,7 +75,8 @@ void waveShapeSmps(int n,
     float par = funcpar / 127.0f;
     float offs = (offset - 64.0f) / 64.0f;
     float tmpv;
-
+    float tanOffs = 0.0f;
+    float tanWsInv = 0.0f;
     switch(type) {
         case 1:
             ws = powf(10, ws * ws * 3.0f) - 1.0f + 0.001f; //Arctangent
@@ -294,6 +295,26 @@ void waveShapeSmps(int n,
                     smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
                 //subtract offset with distortion function applied
                 smps[i] -= offs*(2-fabsf(offs));
+            }
+            break;
+        case 18: //tan
+        // f(x) = tan(x)
+            ws = 0.1f + (ws * 1.4f);
+            // try to normalize the high output of tan(x) with x -> pi/2
+            const float wsComp = 0.02 + (0.25f*ws*ws);
+            tanWsInv = (1.0f/tan(wsComp))-0.4f;
+
+            tanOffs = tan(offs)*tanWsInv;
+            for(i = 0; i < n; ++i) {
+                smps[i] *= ws; // multiply signal for drive
+                smps[i] += offs; // add dc offset
+                if(fabsf(smps[i]) > 1.57f) // keep x ~< pi/2
+                    smps[i] = (smps[i] > 0 ? 1.57f : -1.57f);
+
+                smps[i] = tan(smps[i])*tanWsInv;
+
+                //subtract offset with distortion function applied
+                smps[i] -= tanOffs;
             }
             break;
     }
