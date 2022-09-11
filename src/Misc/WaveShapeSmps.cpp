@@ -63,6 +63,13 @@ float polyblampres(float smp, float ws, float dMax)
     return res*dMax/2.0f;
 }
 
+// f(x) = x / ((1+|x|^n)^(1/n)) // tanh approximation for n=2.5
+// Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
+const float YehAbelSmith(float x, float exp)
+{
+    return x / (powf((1+powf(fabsf(x),exp)),(1/exp)));
+}
+
 void waveShapeSmps(int n,
                    float *smps,
                    unsigned char type,
@@ -77,6 +84,7 @@ void waveShapeSmps(int n,
     float tmpv;
     float tanOffs = 0.0f;
     float tanWsInv = 0.0f;
+    float wsComp = 0.0f;
     switch(type) {
         case 1:
             ws = powf(10, ws * ws * 3.0f) - 1.0f + 0.001f; //Arctangent
@@ -262,8 +270,8 @@ void waveShapeSmps(int n,
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws;// multiply signal to drive it in the saturation of the function
                 smps[i] += offs; // add dc offset
-                smps[i] = smps[i] / powf(1+powf(fabsf(smps[i]), par), 1/par);
-                smps[i] -= offs / powf(1+powf(fabsf(offs), par), 1/par);
+                smps[i] = YehAbelSmith(smps[i], par);
+                smps[i] -= YehAbelSmith(offs, par);
             }
             break;
         case 16: //cubic distortion
@@ -299,17 +307,17 @@ void waveShapeSmps(int n,
             break;
         case 18: //tan
         // f(x) = tan(x)
-            ws = 0.1f + (ws * 1.4f);
+            ws = 0.1f + (ws * 1.3f);
             // try to normalize the high output of tan(x) with x -> pi/2
-            const float wsComp = 0.02 + (0.25f*ws*ws);
-            tanWsInv = (1.0f/tan(wsComp))-0.4f;
+            wsComp = 0.02 + (0.25f*ws*ws);
+            tanWsInv = (0.1f/tan(wsComp))-0.04f;
 
             tanOffs = tan(offs)*tanWsInv;
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws; // multiply signal for drive
                 smps[i] += offs; // add dc offset
-                if(fabsf(smps[i]) > 1.57f) // keep x ~< pi/2
-                    smps[i] = (smps[i] > 0 ? 1.57f : -1.57f);
+                if(fabsf(smps[i]) > 1.5f) // keep x ~< pi/2
+                    smps[i] = (smps[i] > 0 ? 1.5f : -1.5f);
 
                 smps[i] = tan(smps[i])*tanWsInv;
 
@@ -317,6 +325,24 @@ void waveShapeSmps(int n,
                 smps[i] -= tanOffs;
             }
             break;
+        case 19: //dual tanh "hysteresis" function
+        // f(x) = x / ((1+|x|^n)^(1/n)) // tanh approximation for n=2.5
+        // Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
+            par = (20.0f) * par * par + (0.1f) * par + 0.25f;
+            ws = ws * ws * 35.0f + 1.0f;
+            // precalc function value at zero crossing (independent of sample)
+            const float yOffset = YehAbelSmith(ws,par);
+
+            for(i = 0; i < n; ++i) {
+                smps[i] += offs; // add dc offset
+                smps[i] *= 2.0f * ws;// multiply signal to drive it in the saturation of the function
+                if(smps[i]>0) // upper right quadrant
+                    smps[i] = (YehAbelSmith(smps[i]-ws, par)+yOffset)*0.5f;
+                else // lower left quadrant
+                    smps[i] = (YehAbelSmith(smps[i]+ws, par)-yOffset)*0.5f;
+            }
+            break;
+
     }
 }
 

@@ -1933,6 +1933,10 @@ effsympatheticwindow->hide();//delete (effsympatheticwindow);} {}
           label Tan
           xywh {135 135 100 20} labelfont 1 labelsize 10
         }
+        MenuItem {} {
+          label Hyst
+          xywh {145 145 100 20} labelfont 1 labelsize 10
+        }
       }
     }
   }
