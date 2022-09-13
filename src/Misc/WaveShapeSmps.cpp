@@ -65,7 +65,7 @@ float polyblampres(float smp, float ws, float dMax)
 
 // f(x) = x / ((1+|x|^n)^(1/n)) // tanh approximation for n=2.5
 // Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
-const float YehAbelSmith(float x, float exp)
+static float YehAbelSmith(float x, float exp)
 {
     return x / (powf((1+powf(fabsf(x),exp)),(1/exp)));
 }
@@ -88,10 +88,12 @@ void waveShapeSmps(int n,
     switch(type) {
         case 1:
             ws = powf(10, ws * ws * 3.0f) - 1.0f + 0.001f; //Arctangent
+            offsetCompensation = atanf(offs * ws) / atanf(ws);
             for(i = 0; i < n; ++i) {
                 smps[i] += offs;
-                smps[i] = atanf(smps[i] * ws) / atanf(ws);
-                smps[i] -= offs;
+                smps[i] *= ws;
+                smps[i] = atanf(smps[i]) / atanf(ws);
+                smps[i] -= offsetCompensation;
             }
             break;
         case 2:
@@ -337,25 +339,28 @@ void waveShapeSmps(int n,
         case 19: //dual tanh "hysteresis" function
         // f(x) = x / ((1+|x|^n)^(1/n)) // tanh approximation for n=2.5
         // Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
-            par = (10.0f) * par * par + (0.1f) * par + 0.25f;
-            ws = ws * ws * 35.0f + 1.0f;
+            par = (6.0f) * par * par + (0.1f) * par + 0.25f;
+            ws = ws * 25.0f + 0.1f;
+
             // precalc function value at zero crossing (independent of sample)
             const float yOffset = YehAbelSmith(ws,par);
+
             // precalc offset with distortion function applied
             offsetCompensation = ( offs > 0 ?
-                (YehAbelSmith(offs-ws, par)+yOffset) :
-                (YehAbelSmith(offs+ws, par)-yOffset) ) * 0.5f;
+                (YehAbelSmith(2.0f*ws*offs-ws, par) + yOffset) :
+                (YehAbelSmith(2.0f*ws*offs+ws, par) - yOffset) ) * 0.5f;
 
             for(i = 0; i < n; ++i) {
                 smps[i] += offs; // add dc offset
                 smps[i] *= 2.0f * ws;// multiply signal to drive it in the saturation of the function
+
                 if(smps[i]>0) // upper right quadrant
                     smps[i] = (YehAbelSmith(smps[i]-ws, par)+yOffset)*0.5f;
                 else // lower left quadrant
                     smps[i] = (YehAbelSmith(smps[i]+ws, par)-yOffset)*0.5f;
 
                 //subtract offset with distortion function applied
-                smps[i] += offsetCompensation;
+                smps[i] -= offsetCompensation;
             }
             break;
 
