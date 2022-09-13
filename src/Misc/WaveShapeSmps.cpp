@@ -82,7 +82,7 @@ void waveShapeSmps(int n,
     float par = funcpar / 127.0f;
     float offs = (offset - 64.0f) / 64.0f;
     float tmpv;
-    float tanOffs = 0.0f;
+    float offsetCompensation = 0.0f;
     float tanWsInv = 0.0f;
     float wsComp = 0.0f;
     switch(type) {
@@ -267,11 +267,13 @@ void waveShapeSmps(int n,
             // Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
             par = (20.0f) * par * par + (0.1f) * par + 1.0f;  //Pfunpar=32 -> n=2.5
             ws = ws * ws * 35.0f + 1.0f;
+            // precalc offset with distortion function applied
+            offsetCompensation = YehAbelSmith(offs, par);
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws;// multiply signal to drive it in the saturation of the function
                 smps[i] += offs; // add dc offset
                 smps[i] = YehAbelSmith(smps[i], par);
-                smps[i] -= YehAbelSmith(offs, par);
+                smps[i] -= offsetCompensation;
             }
             break;
         case 16: //cubic distortion
@@ -279,6 +281,9 @@ void waveShapeSmps(int n,
             // Formula from: https://ccrma.stanford.edu/~jos/pasp/Soft_Clipping.html
             // modified with factor 1.5 to go through [1,1] and [-1,-1]
             ws = ws * ws * ws * 20.0f + 0.168f; // plain cubic at drive=44
+            // precalc offset with distortion function applied
+            offsetCompensation = 1.5 * (offs - (offs*offs*offs / 3.0));
+
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws; // multiply signal to drive it in the saturation of the function
                 smps[i] += offs; // add dc offset
@@ -287,13 +292,16 @@ void waveShapeSmps(int n,
                 else
                     smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
                 //subtract offset with distortion function applied
-                smps[i] -= 1.5 * (offs - (offs*offs*offs / 3.0));
+                smps[i] -= offsetCompensation;
             }
             break;
         case 17: //square distortion
         // f(x) = x*(2-abs(x))
         // Formula of cubic changed to square but still going through [1,1] and [-1,-1]
             ws = ws * ws * ws * 20.0f + 0.168f; // plain square at drive=44
+            // precalc offset with distortion function applied
+            offsetCompensation = offs*(2-fabsf(offs));
+
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws; // multiply signal to drive it in the saturation of the function
                 smps[i] += offs; // add dc offset
@@ -302,7 +310,7 @@ void waveShapeSmps(int n,
                 else
                     smps[i] = (smps[i] > 0 ? 1.0f : -1.0f);
                 //subtract offset with distortion function applied
-                smps[i] -= offs*(2-fabsf(offs));
+                smps[i] -= offsetCompensation;
             }
             break;
         case 18: //tan
@@ -311,8 +319,9 @@ void waveShapeSmps(int n,
             // try to normalize the high output of tan(x) with x -> pi/2
             wsComp = 0.02 + (0.25f*ws*ws);
             tanWsInv = (0.1f/tan(wsComp))-0.04f;
+            // precalc offset with distortion function applied
+            offsetCompensation = tan(offs)*tanWsInv;
 
-            tanOffs = tan(offs)*tanWsInv;
             for(i = 0; i < n; ++i) {
                 smps[i] *= ws; // multiply signal for drive
                 smps[i] += offs; // add dc offset
@@ -322,16 +331,20 @@ void waveShapeSmps(int n,
                 smps[i] = tan(smps[i])*tanWsInv;
 
                 //subtract offset with distortion function applied
-                smps[i] -= tanOffs;
+                smps[i] -= offsetCompensation;
             }
             break;
         case 19: //dual tanh "hysteresis" function
         // f(x) = x / ((1+|x|^n)^(1/n)) // tanh approximation for n=2.5
         // Formula from: Yeh, Abel, Smith (2007): SIMPLIFIED, PHYSICALLY-INFORMED MODELS OF DISTORTION AND OVERDRIVE GUITAR EFFECTS PEDALS
-            par = (20.0f) * par * par + (0.1f) * par + 0.25f;
+            par = (10.0f) * par * par + (0.1f) * par + 0.25f;
             ws = ws * ws * 35.0f + 1.0f;
             // precalc function value at zero crossing (independent of sample)
             const float yOffset = YehAbelSmith(ws,par);
+            // precalc offset with distortion function applied
+            offsetCompensation = ( offs > 0 ?
+                (YehAbelSmith(offs-ws, par)+yOffset) :
+                (YehAbelSmith(offs+ws, par)-yOffset) ) * 0.5f;
 
             for(i = 0; i < n; ++i) {
                 smps[i] += offs; // add dc offset
@@ -340,6 +353,9 @@ void waveShapeSmps(int n,
                     smps[i] = (YehAbelSmith(smps[i]-ws, par)+yOffset)*0.5f;
                 else // lower left quadrant
                     smps[i] = (YehAbelSmith(smps[i]+ws, par)-yOffset)*0.5f;
+
+                //subtract offset with distortion function applied
+                smps[i] += offsetCompensation;
             }
             break;
 
