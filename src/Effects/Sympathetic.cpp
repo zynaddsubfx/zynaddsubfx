@@ -41,25 +41,25 @@ rtosc::Ports Sympathetic::ports = {
                   else
                       d.reply(d.loc, "i", o->Ppreset);
                   rEnd},
-    rEffParVol(rDefault(127)),
+    rEffParVol(rDefault(127), rPresets(100, 80, 100, 90)),
     rEffParPan(rDefault(64)),
     rEffPar(Pq, 2, rShort("q"), rDefault(65),
-            "Resonance"),
+            rPresets(125, 125, 110, 110), "Resonance"),
     rEffPar(Pdrive,   3, rShort("dr"), rDefault(65),
-            "Input Amplification"),
+            rPresets(5, 5, 20, 20), "Input Amplification"),
     rEffPar(Plevel,   4, rShort("lev"), rDefault(65),
-            "Output Amplification"),
+            rPresets(80, 90, 65, 77), "Output Amplification"),
     rEffPar(Punison_frequency_spread,  5, rShort("detune"), rDefault(30),
-            "Unison String Detune"),
+            rPresets(10, 5, 0, 10), "Unison String Detune"),
     rEffParTF(Pnegate, 6, rShort("neg"), rDefault(false), "Negate Signal"),
     rEffPar(Plpf, 7, rShort("lpf"), rDefault(127), "Low Pass Cutoff"),
     rEffPar(Phpf, 8, rShort("hpf"), rDefault(0), "High Pass Cutoff"),
     rEffParRange(Punison_size, 9, rShort("uni"), rLinear(1,3), rDefault(1),
-            "Number of Unison Strings"),
+            rPresets(3, 1, 1, 2), "Number of Unison Strings"),
     rEffParRange(Pstrings, 10, rShort("str"), rLinear(0,76), rDefault(0),
-            "Number of Strings"),
+            rPresets(12, 60, 6, 6), "Number of Strings"),
     rEffPar(Pbasenote, 11, rShort("base"), rDefault(57), // basefreq = powf(2.0f, (basenote-69)/12)*440; 57->220Hz
-            "Midi Note of Lowest String"),
+            rPresets(57, 33, 52, 52), "Midi Note of Lowest String"),
     rArrayF(freqs, 88, rLinear(27.50f,4186.01f),
            "String Frequencies"),
 };
@@ -200,7 +200,7 @@ void Sympathetic::calcFreqs()
 {
     switch(Ppreset) {
         case 0:
-			calcFreqsGeneric();
+            calcFreqsGeneric();
             break;
         case 1:
         case 2:
@@ -239,8 +239,8 @@ void Sympathetic::calcFreqsPiano()
     for(unsigned int i = 0; i < Punison_size*Pstrings; i+=Punison_size)
     {
         const float centerFreq = powf(2.0f, (float)i / 36.0f) * baseFreq;
-        const unsigned int stringchoir_size = 
-			i>num_single_strings ? (i>Pstrings-num_triple_strings ? 3 : 2) :1;
+        const unsigned int stringchoir_size =
+            i>num_single_strings ? (i>Pstrings-num_triple_strings ? 3 : 2) :1;
         filterBank->delays[i] = ((float)samplerate)/centerFreq;
         if (stringchoir_size > 1) filterBank->delays[i+1] = ((float)samplerate)/(centerFreq * unison_real_spread_up);
         else filterBank->delays[i+1] = 0;
