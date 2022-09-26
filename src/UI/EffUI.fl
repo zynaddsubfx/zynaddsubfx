@@ -1164,6 +1164,33 @@ eqgraph->update();}
       code3 {set_module_parameters(o);}
       class Fl_Group visible
     } {
+    Fl_Choice sympp {
+        label Preset
+        xywh {11 15 95 15} box UP_BOX down_box BORDER_BOX color 47 selection_color 7 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10
+        code0 {o->init("preset");}
+        class Fl_Osc_Choice
+      } {
+        MenuItem {} {
+          label {Generic}
+          xywh {20 20 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label {Piano}
+          xywh {30 30 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label {Grand}
+          xywh {40 40 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label {Guitar}
+          xywh {50 50 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label {12-String}
+          xywh {50 50 100 20} labelfont 1 labelsize 10
+        }
+      }
       Fl_Dial symp0 {
         label Vol
         tooltip {Effect Volume} xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
@@ -1319,7 +1346,7 @@ switch(efftype){
     effalienwahwindow->show();
         break;
      case 6:
-	effdistortionwindow->show();
+    effdistortionwindow->show();
         break;
      case 7:eqband=0;
     bandcounter->value(eqband);
@@ -2091,6 +2118,33 @@ eqgraph->redraw();}
       code3 {set_module_parameters(o);}
       class Fl_Group visible
     } {
+    Fl_Choice sympp {
+        label Preset
+        xywh {11 15 95 15} box UP_BOX down_box BORDER_BOX color 47 selection_color 7 labelfont 1 labelsize 10 align 5 textfont 1 textsize 10
+        code0 {o->init("preset");}
+        class Fl_Osc_Choice
+      } {
+        MenuItem {} {
+          label {Generic}
+          xywh {20 20 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label {Piano}
+          xywh {30 30 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label {Grand}
+          xywh {40 40 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label {Guitar}
+          xywh {50 50 100 20} labelfont 1 labelsize 10
+        }
+        MenuItem {} {
+          label {12-String}
+          xywh {50 50 100 20} labelfont 1 labelsize 10
+        }
+      }
       Fl_Dial symp0 {
         label Vol
         tooltip {Effect Volume} xywh {10 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
@@ -2218,7 +2272,7 @@ switch(efftype){
     effalienwahwindow->show();
         break;
      case 6:
-	effdistortionwindow->show();
+    effdistortionwindow->show();
         break;
      case 7:
     bandcounter->value(eqband);
