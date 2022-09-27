@@ -1229,7 +1229,7 @@ eqgraph->update();}
       }
       Fl_Dial symp10 {
         label Str
-        tooltip {number of strings} xywh {220 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 48
+        tooltip {number of strings} xywh {220 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 76
         code0 {o->init("parameter10");}
         class Fl_Osc_Dial
       }
@@ -2183,7 +2183,7 @@ eqgraph->redraw();}
       }
       Fl_Dial symp10 {
         label Strings
-        tooltip {number of strings} xywh {220 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 127
+        tooltip {number of strings} xywh {220 40 30 30} box ROUND_UP_BOX labelfont 1 labelsize 11 maximum 76
         code0 {o->init("parameter10");}
         class Fl_Osc_Dial
       }
