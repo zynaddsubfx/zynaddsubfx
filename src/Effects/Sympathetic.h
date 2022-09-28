@@ -24,6 +24,14 @@ namespace zyn {
 const float gainbwd_offset = 0.873f;
 const float gainbwd_factor = 0.001f;
 
+// number of piano keys with single string
+const unsigned int num_single_strings = 12;
+// number of piano keys with triple strings 
+const unsigned int num_triple_strings = 48;
+ 
+// frequencies of a guitar in standard e tuning
+const float guitar_freqs[6] = {82.4f, 110.0f, 146.8f, 196.0f, 246.9f, 329.6f};
+
 class Sympathetic:public Effect
 {
 
@@ -64,6 +72,9 @@ class Sympathetic:public Effect
         void setlpf(unsigned char _Plpf);
         void sethpf(unsigned char _Phpf);
         void calcFreqs();
+        void calcFreqsGeneric();
+        void calcFreqsPiano();
+        void calcFreqsGuitar();
 
         //Real Parameters
         class AnalogFilter * lpfl, *lpfr, *hpfl, *hpfr;
