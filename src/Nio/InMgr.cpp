@@ -91,12 +91,16 @@ void InMgr::putEvent(MidiEvent ev)
         work.post();
 }
 
-void InMgr::flush(unsigned frameStart, unsigned frameStop)
+bool InMgr::flush(unsigned frameStart, unsigned frameStop)
 {
     MidiEvent ev;
+    bool endReached = true;
+
     while(!work.trywait()) {
         queue.peak(ev);
         if(ev.time < (int)frameStart || ev.time > (int)frameStop) {
+            //Check if end was reached
+            endReached = ev.time < (int)frameStart;
             //Back out of transaction
             work.post();
             //printf("%d vs [%d..%d]\n",ev.time, frameStart, frameStop);
@@ -145,6 +149,7 @@ void InMgr::flush(unsigned frameStart, unsigned frameStop)
                 break;
         }
     }
+    return endReached;
 }
 
 bool InMgr::empty(void) const

@@ -47,7 +47,7 @@ class InMgr
         void putEvent(MidiEvent ev);
 
         /**Flush the Midi Queue*/
-        void flush(unsigned frameStart, unsigned frameStop);
+        bool flush(unsigned frameStart, unsigned frameStop);
 
         bool empty() const;
 
